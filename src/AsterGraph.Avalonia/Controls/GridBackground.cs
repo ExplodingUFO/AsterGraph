@@ -22,15 +22,16 @@ public sealed class GridBackground : Control
         base.Render(context);
 
         var bounds = Bounds;
-        context.FillRectangle(BrushFactory.Solid("#08121D"), bounds);
 
         if (ViewModel is null || bounds.Width <= 0 || bounds.Height <= 0)
         {
             return;
         }
 
-        DrawGrid(context, bounds, 48 * ViewModel.Zoom, BrushFactory.Solid("#24445B", 0.38), 1);
-        DrawGrid(context, bounds, 192 * ViewModel.Zoom, BrushFactory.Solid("#3F6A89", 0.44), 1.3);
+        var style = ViewModel.StyleOptions.Canvas;
+        context.FillRectangle(BrushFactory.Solid(style.GridBackgroundHex), bounds);
+        DrawGrid(context, bounds, style.PrimaryGridSpacing * ViewModel.Zoom, BrushFactory.Solid(style.PrimaryGridHex, style.PrimaryGridOpacity), 1);
+        DrawGrid(context, bounds, style.SecondaryGridSpacing * ViewModel.Zoom, BrushFactory.Solid(style.SecondaryGridHex, style.SecondaryGridOpacity), 1.3);
     }
 
     private void DrawGrid(DrawingContext context, Rect bounds, double rawSpacing, IBrush brush, double thickness)

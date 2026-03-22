@@ -9,6 +9,7 @@ using Avalonia.Markup.Xaml;
 using Avalonia.Media;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
+using AsterGraph.Abstractions.Styling;
 using AsterGraph.Avalonia.Styling;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Geometry;
@@ -38,6 +39,7 @@ public partial class NodeCanvas : UserControl
         Focusable = true;
 
         ContextRequested += HandleCanvasContextRequested;
+        KeyDown += HandleCanvasKeyDown;
         PointerPressed += HandlePointerPressed;
         PointerMoved += HandlePointerMoved;
         PointerReleased += HandlePointerReleased;
@@ -142,12 +144,13 @@ public partial class NodeCanvas : UserControl
     private NodeVisual CreateNodeVisual(NodeViewModel node)
     {
         var portAnchors = new Dictionary<string, Border>(StringComparer.Ordinal);
+        var nodeStyle = GetNodeCardStyle(node);
         var border = new Border
         {
             Width = node.Width,
             Height = node.Height,
-            CornerRadius = new CornerRadius(22),
-            BorderThickness = new Thickness(1.5),
+            CornerRadius = new CornerRadius(nodeStyle.CornerRadius),
+            BorderThickness = new Thickness(nodeStyle.BorderThickness),
         };
         AutomationProperties.SetName(border, $"{node.Title} node");
 
@@ -168,20 +171,20 @@ public partial class NodeCanvas : UserControl
             Text = node.Category.ToUpperInvariant(),
             FontSize = 11,
             FontWeight = FontWeight.Bold,
-            Foreground = BrushFactory.Solid("#B4D6ED", 0.62),
+            Foreground = BrushFactory.Solid(nodeStyle.CategoryTextHex, nodeStyle.CategoryTextOpacity),
         });
         headerStack.Children.Add(new TextBlock
         {
             Text = node.Title,
             FontSize = 18,
             FontWeight = FontWeight.SemiBold,
-            Foreground = BrushFactory.Solid("#F6FBFF"),
+            Foreground = BrushFactory.Solid(nodeStyle.TitleTextHex),
         });
         headerStack.Children.Add(new TextBlock
         {
             Text = node.Subtitle,
             FontSize = 12,
-            Foreground = BrushFactory.Solid("#B8CFE0", 0.74),
+            Foreground = BrushFactory.Solid(nodeStyle.SubtitleTextHex, nodeStyle.SubtitleTextOpacity),
         });
         header.Child = headerStack;
         root.Children.Add(header);
@@ -201,7 +204,7 @@ public partial class NodeCanvas : UserControl
             Text = node.Description,
             FontSize = 12,
             TextWrapping = TextWrapping.Wrap,
-            Foreground = BrushFactory.Solid("#C5D7E5", 0.86),
+            Foreground = BrushFactory.Solid(nodeStyle.DescriptionTextHex, nodeStyle.DescriptionTextOpacity),
             MaxHeight = 40,
         };
         Grid.SetColumnSpan(description, 2);
@@ -257,9 +260,10 @@ public partial class NodeCanvas : UserControl
         bool isInput,
         Dictionary<string, Border> portAnchors)
     {
+        var portStyle = GetPortStyle(ports.FirstOrDefault());
         var panel = new StackPanel
         {
-            Spacing = 8,
+            Spacing = portStyle.RowSpacing,
             HorizontalAlignment = isInput ? HorizontalAlignment.Left : HorizontalAlignment.Right,
         };
 
@@ -268,14 +272,14 @@ public partial class NodeCanvas : UserControl
             var row = new StackPanel
             {
                 Orientation = Orientation.Horizontal,
-                Spacing = 8,
+                Spacing = portStyle.RowSpacing,
                 HorizontalAlignment = isInput ? HorizontalAlignment.Left : HorizontalAlignment.Right,
             };
 
             var dot = new Border
             {
-                Width = 10,
-                Height = 10,
+                Width = portStyle.DotSize,
+                Height = portStyle.DotSize,
                 CornerRadius = new CornerRadius(999),
                 Background = BrushFactory.Solid(port.AccentHex),
                 VerticalAlignment = VerticalAlignment.Center,
@@ -291,14 +295,14 @@ public partial class NodeCanvas : UserControl
                 Text = port.Label,
                 FontSize = 12,
                 FontWeight = FontWeight.Medium,
-                Foreground = BrushFactory.Solid("#EFF8FF"),
+                Foreground = BrushFactory.Solid(portStyle.LabelHex),
                 TextAlignment = isInput ? TextAlignment.Left : TextAlignment.Right,
             });
             text.Children.Add(new TextBlock
             {
                 Text = port.DataType,
                 FontSize = 10,
-                Foreground = BrushFactory.Solid("#9DB8CB", 0.72),
+                Foreground = BrushFactory.Solid(portStyle.TypeHex, portStyle.TypeOpacity),
                 TextAlignment = isInput ? TextAlignment.Left : TextAlignment.Right,
             });
 
@@ -440,6 +444,7 @@ public partial class NodeCanvas : UserControl
             return;
         }
 
+        var connectionStyle = GetConnectionStyle(connection);
         var curve = ConnectionPathBuilder.Build(start, end);
         var path = new global::Avalonia.Controls.Shapes.Path
         {
@@ -448,8 +453,8 @@ public partial class NodeCanvas : UserControl
                 $"C {curve.Control1.X:0.##},{curve.Control1.Y:0.##} " +
                 $"{curve.Control2.X:0.##},{curve.Control2.Y:0.##} " +
                 $"{curve.End.X:0.##},{curve.End.Y:0.##}"),
-            Stroke = BrushFactory.Solid(connection.AccentHex, isPreview ? 0.52 : 0.84),
-            StrokeThickness = isPreview ? 2.4 : 3.2,
+            Stroke = BrushFactory.Solid(connection.AccentHex, isPreview ? connectionStyle.PreviewStrokeOpacity : connectionStyle.StrokeOpacity),
+            StrokeThickness = isPreview ? connectionStyle.PreviewThickness : connectionStyle.Thickness,
             StrokeLineCap = PenLineCap.Round,
         };
         _connectionLayer.Children.Add(path);
@@ -463,8 +468,8 @@ public partial class NodeCanvas : UserControl
 
         var chip = new Border
         {
-            Background = BrushFactory.Solid("#0F1825", 0.95),
-            BorderBrush = BrushFactory.Solid(connection.AccentHex, 0.42),
+            Background = BrushFactory.Solid(connectionStyle.LabelBackgroundHex, connectionStyle.LabelBackgroundOpacity),
+            BorderBrush = BrushFactory.Solid(connection.AccentHex, connectionStyle.LabelBorderOpacity),
             BorderThickness = new Thickness(1),
             CornerRadius = new CornerRadius(999),
             Padding = new Thickness(10, 4),
@@ -472,7 +477,7 @@ public partial class NodeCanvas : UserControl
             {
                 Text = connection.Label,
                 FontSize = 10,
-                Foreground = BrushFactory.Solid("#EAF5FD", 0.82),
+                Foreground = BrushFactory.Solid(connectionStyle.LabelForegroundHex, connectionStyle.LabelForegroundOpacity),
             },
         };
         AutomationProperties.SetName(chip, $"{connection.Label} connection");
@@ -618,6 +623,26 @@ public partial class NodeCanvas : UserControl
         args.Handled = true;
     }
 
+    private void HandleCanvasKeyDown(object? sender, KeyEventArgs args)
+    {
+        if (ViewModel is null)
+        {
+            return;
+        }
+
+        switch (args.Key)
+        {
+            case Key.Escape:
+                if (ViewModel.CancelPendingConnectionCommand.CanExecute(null))
+                {
+                    ViewModel.CancelPendingConnectionCommand.Execute(null);
+                    args.Handled = true;
+                }
+
+                break;
+        }
+    }
+
     private void HandleCanvasContextRequested(object? sender, ContextRequestedEventArgs args)
     {
         if (ViewModel is null || args.Handled)
@@ -727,10 +752,11 @@ public partial class NodeCanvas : UserControl
             return;
         }
 
-        visual.Border.Background = BrushFactory.Solid(node.IsSelected ? "#162435" : "#0E1724");
-        visual.Border.BorderBrush = BrushFactory.Solid(node.IsSelected ? node.AccentHex : "#233547");
-        visual.Header.Background = BrushFactory.Solid(node.AccentHex, node.IsSelected ? 0.26 : 0.18);
-        visual.Border.BorderThickness = new Thickness(node.IsSelected ? 2.2 : 1.4);
+        var nodeStyle = GetNodeCardStyle(node);
+        visual.Border.Background = BrushFactory.Solid(node.IsSelected ? nodeStyle.SelectedBackgroundHex : nodeStyle.BackgroundHex);
+        visual.Border.BorderBrush = BrushFactory.Solid(node.IsSelected ? node.AccentHex : nodeStyle.BorderHex);
+        visual.Header.Background = BrushFactory.Solid(node.AccentHex, node.IsSelected ? nodeStyle.SelectedHeaderOpacity : nodeStyle.HeaderOpacity);
+        visual.Border.BorderThickness = new Thickness(node.IsSelected ? nodeStyle.SelectedBorderThickness : nodeStyle.BorderThickness);
 
         Canvas.SetLeft(visual.Border, node.X);
         Canvas.SetTop(visual.Border, node.Y);
@@ -754,6 +780,26 @@ public partial class NodeCanvas : UserControl
 
         return node.GetPortAnchor(port);
     }
+
+    private NodeCardStyleOptions GetNodeCardStyle(NodeViewModel node)
+        => ViewModel?.StyleOptions.NodeOverrides.FirstOrDefault(overrideStyle => overrideStyle.DefinitionId == node.DefinitionId)?.Style
+           ?? ViewModel?.StyleOptions.NodeCard
+           ?? GraphEditorStyleOptions.Default.NodeCard;
+
+    private PortStyleOptions GetPortStyle(PortViewModel? port)
+        => port is null
+            ? ViewModel?.StyleOptions.Port ?? GraphEditorStyleOptions.Default.Port
+            : ViewModel?.StyleOptions.PortOverrides.FirstOrDefault(overrideStyle => overrideStyle.TypeId == port.TypeId)?.Style
+              ?? ViewModel?.StyleOptions.Port
+              ?? GraphEditorStyleOptions.Default.Port;
+
+    private ConnectionStyleOptions GetConnectionStyle(ConnectionViewModel connection)
+        => connection.ConversionId is not null
+            ? ViewModel?.StyleOptions.ConnectionOverrides.FirstOrDefault(overrideStyle => overrideStyle.ConversionId == connection.ConversionId)?.Style
+              ?? ViewModel?.StyleOptions.Connection
+              ?? GraphEditorStyleOptions.Default.Connection
+            : ViewModel?.StyleOptions.Connection
+              ?? GraphEditorStyleOptions.Default.Connection;
 
     private GraphPoint ResolveWorldPosition(ContextRequestedEventArgs args, Control relativeTo)
     {

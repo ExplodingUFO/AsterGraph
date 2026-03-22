@@ -3,7 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
-using Avalonia.VisualTree;
+using AsterGraph.Avalonia.Styling;
 using AsterGraph.Editor.ViewModels;
 
 namespace AsterGraph.Avalonia.Controls;
@@ -27,20 +27,36 @@ public partial class GraphEditorView : UserControl
         set => SetValue(EditorProperty, value);
     }
 
+    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
+    {
+        base.OnPropertyChanged(change);
+
+        if (change.Property == EditorProperty)
+        {
+            ApplyStyleOptions(change.GetNewValue<GraphEditorViewModel?>());
+        }
+    }
+
     private void InitializeComponent()
     {
         AvaloniaXamlLoader.Load(this);
         _nodeCanvas = this.FindControl<NodeCanvas>("PART_NodeCanvas");
     }
 
-    private void HandleKeyDown(object? sender, KeyEventArgs args)
+    private void ApplyStyleOptions(GraphEditorViewModel? editor)
     {
-        if (Editor is null)
+        if (editor?.StyleOptions is null)
         {
             return;
         }
 
-        if (ShouldBypassGlobalKeyHandling(args.Source))
+        var adapter = new GraphEditorStyleAdapter(editor.StyleOptions);
+        adapter.ApplyResources(Resources);
+    }
+
+    private void HandleKeyDown(object? sender, KeyEventArgs args)
+    {
+        if (Editor is null)
         {
             return;
         }
@@ -67,55 +83,5 @@ public partial class GraphEditorView : UserControl
             return;
         }
 
-        switch (args.Key)
-        {
-            case Key.Delete:
-                if (Editor.DeleteSelectionCommand.CanExecute(null))
-                {
-                    Editor.DeleteSelectionCommand.Execute(null);
-                }
-
-                args.Handled = true;
-                break;
-            case Key.Escape:
-                if (Editor.CancelPendingConnectionCommand.CanExecute(null))
-                {
-                    Editor.CancelPendingConnectionCommand.Execute(null);
-                }
-
-                args.Handled = true;
-                break;
-        }
-    }
-
-    private bool ShouldBypassGlobalKeyHandling(object? eventSource)
-    {
-        if (IsWithinEditableControl(eventSource as StyledElement))
-        {
-            return true;
-        }
-
-        return IsWithinEditableControl(TopLevel.GetTopLevel(this)?.FocusManager?.GetFocusedElement() as StyledElement);
-    }
-
-    private void HandleEmbeddedEditorKeyDown(object? sender, KeyEventArgs args)
-    {
-        if (args.Key is Key.Delete or Key.Escape)
-        {
-            args.Handled = true;
-        }
-    }
-
-    private static bool IsWithinEditableControl(StyledElement? element)
-    {
-        for (StyledElement? current = element; current is not null; current = current.Parent)
-        {
-            if (current is TextBox or ComboBox)
-            {
-                return true;
-            }
-        }
-
-        return false;
     }
 }

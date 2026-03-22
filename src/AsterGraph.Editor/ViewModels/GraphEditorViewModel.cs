@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.Input;
 using AsterGraph.Abstractions.Catalog;
 using AsterGraph.Abstractions.Compatibility;
 using AsterGraph.Abstractions.Identifiers;
+using AsterGraph.Abstractions.Styling;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Menus;
 using AsterGraph.Editor.Services;
@@ -31,11 +32,13 @@ public sealed partial class GraphEditorViewModel : ObservableObject
         GraphDocument document,
         INodeCatalog nodeCatalog,
         IPortCompatibilityService compatibilityService,
-        GraphWorkspaceService? workspaceService = null)
+        GraphWorkspaceService? workspaceService = null,
+        GraphEditorStyleOptions? styleOptions = null)
     {
         _nodeCatalog = nodeCatalog ?? throw new ArgumentNullException(nameof(nodeCatalog));
         _compatibilityService = compatibilityService ?? throw new ArgumentNullException(nameof(compatibilityService));
         _workspaceService = workspaceService ?? new GraphWorkspaceService();
+        StyleOptions = styleOptions ?? GraphEditorStyleOptions.Default;
 
         SaveCommand = new RelayCommand(SaveWorkspace);
         LoadCommand = new RelayCommand(() => LoadWorkspace());
@@ -85,6 +88,8 @@ public sealed partial class GraphEditorViewModel : ObservableObject
     public ObservableCollection<NodeParameterViewModel> SelectedNodeParameters { get; }
 
     public ObservableCollection<NodeTemplateViewModel> NodeTemplates { get; }
+
+    public GraphEditorStyleOptions StyleOptions { get; }
 
     public string WorkspacePath { get; }
 

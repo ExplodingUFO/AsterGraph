@@ -323,7 +323,7 @@
                 <ItemsControl ItemsSource="{Binding SelectedNodeParameters}">
                   <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="viewModels:NodeParameterViewModel">
-                      <Border Background="#0F1825"
+                      <Border Background="{DynamicResource AsterGraph.InspectorCardBrush}"
                               BorderBrush="{DynamicResource AsterGraph.PanelBorderBrush}"
                               BorderThickness="1"
                               CornerRadius="14"
@@ -344,7 +344,8 @@
                           <TextBox Text="{Binding StringValue}"
                                    IsVisible="{Binding UsesTextInput}"
                                    IsReadOnly="{Binding IsReadOnly}"
-                                   KeyDown="HandleEmbeddedEditorKeyDown"
+                                   Background="{DynamicResource AsterGraph.InputBackgroundBrush}"
+                                   BorderBrush="{DynamicResource AsterGraph.InputBorderBrush}"
                                    Watermark="{Binding TypeId.Value}" />
 
                           <CheckBox Content="Enabled"
@@ -355,13 +356,14 @@
                           <ComboBox ItemsSource="{Binding Options}"
                                     SelectedItem="{Binding SelectedOption}"
                                     IsVisible="{Binding IsEnum}"
-                                    KeyDown="HandleEmbeddedEditorKeyDown"
+                                    Background="{DynamicResource AsterGraph.InputBackgroundBrush}"
+                                    BorderBrush="{DynamicResource AsterGraph.InputBorderBrush}"
                                     IsEnabled="{Binding CanEdit}" />
 
                           <TextBlock Text="{Binding ValidationMessage}"
                                      IsVisible="{Binding HasValidationError}"
                                      FontSize="11"
-                                     Foreground="#FF9B9B" />
+                                     Foreground="{DynamicResource AsterGraph.ValidationErrorBrush}" />
                         </StackPanel>
                       </Border>
                     </DataTemplate>
@@ -378,7 +380,7 @@
               <Border Background="{DynamicResource AsterGraph.BadgeBrush}"
                       CornerRadius="16"
                       Padding="12">
-                <TextBlock Text="Delete: remove selected node"
+                <TextBlock Text="Context menu / toolbar: remove selected node"
                            FontSize="12"
                            Foreground="{DynamicResource AsterGraph.BodyBrush}" />
               </Border>
