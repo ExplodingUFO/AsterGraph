@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using AsterGraph.Abstractions.Catalog;
@@ -14,7 +15,7 @@ using AsterGraph.Editor.Viewport;
 
 namespace AsterGraph.Editor.ViewModels;
 
-public sealed partial class GraphEditorViewModel : ObservableObject
+public sealed partial class GraphEditorViewModel : ObservableObject, IGraphContextMenuHost
 {
     private const double DefaultZoom = 0.88;
     private const double DefaultPanX = 110;
@@ -106,6 +107,20 @@ public sealed partial class GraphEditorViewModel : ObservableObject
     public IRelayCommand CancelPendingConnectionCommand { get; }
 
     public IRelayCommand<NodeTemplateViewModel> AddNodeCommand { get; }
+
+    IEnumerable<NodeTemplateViewModel> IGraphContextMenuHost.NodeTemplates => NodeTemplates;
+
+    IEnumerable<NodeViewModel> IGraphContextMenuHost.Nodes => Nodes;
+
+    ICommand IGraphContextMenuHost.FitViewCommand => FitViewCommand;
+
+    ICommand IGraphContextMenuHost.ResetViewCommand => ResetViewCommand;
+
+    ICommand IGraphContextMenuHost.SaveCommand => SaveCommand;
+
+    ICommand IGraphContextMenuHost.LoadCommand => LoadCommand;
+
+    ICommand IGraphContextMenuHost.CancelPendingConnectionCommand => CancelPendingConnectionCommand;
 
     [ObservableProperty]
     private double zoom = DefaultZoom;

@@ -5,11 +5,11 @@ using AsterGraph.Editor.ViewModels;
 
 namespace AsterGraph.Editor.Menus;
 
-public sealed class GraphContextMenuBuilder
+internal sealed class GraphContextMenuBuilder
 {
-    private readonly GraphEditorViewModel _editor;
+    private readonly IGraphContextMenuHost _editor;
 
-    public GraphContextMenuBuilder(GraphEditorViewModel editor)
+    public GraphContextMenuBuilder(IGraphContextMenuHost editor)
     {
         _editor = editor;
     }
@@ -26,7 +26,11 @@ public sealed class GraphContextMenuBuilder
 
     private IReadOnlyList<MenuItemDescriptor> BuildCanvasMenu(ContextMenuContext context)
     {
-        var addNodeGroups = _editor.NodeTemplates
+        var templates = context.AvailableNodeDefinitions.Count > 0
+            ? context.AvailableNodeDefinitions.Select(definition => new NodeTemplateViewModel(definition))
+            : _editor.NodeTemplates;
+
+        var addNodeGroups = templates
             .GroupBy(template => template.Category)
             .OrderBy(group => group.Key, StringComparer.Ordinal)
             .Select(group => new MenuItemDescriptor(
@@ -37,23 +41,24 @@ public sealed class GraphContextMenuBuilder
                     .Select(template => new MenuItemDescriptor(
                         $"add-node-{template.Key}",
                         template.Title,
-                        new RelayCommand(() => _editor.AddNode(template, context.WorldPosition))))
+                        new RelayCommand(() => _editor.AddNode(template, context.WorldPosition)),
+                        iconKey: "node"))
                     .ToList()))
             .ToList();
 
         return
         [
-            new MenuItemDescriptor("canvas-add-node", "Add Node", children: addNodeGroups),
+            new MenuItemDescriptor("canvas-add-node", "Add Node", children: addNodeGroups, iconKey: "add"),
             MenuItemDescriptor.Separator("canvas-sep-1"),
-            new MenuItemDescriptor("canvas-fit-view", "Fit View", _editor.FitViewCommand),
-            new MenuItemDescriptor("canvas-reset-view", "Reset View", _editor.ResetViewCommand),
+            new MenuItemDescriptor("canvas-fit-view", "Fit View", _editor.FitViewCommand, iconKey: "fit"),
+            new MenuItemDescriptor("canvas-reset-view", "Reset View", _editor.ResetViewCommand, iconKey: "reset"),
             MenuItemDescriptor.Separator("canvas-sep-2"),
-            new MenuItemDescriptor("canvas-save", "Save Snapshot", _editor.SaveCommand),
-            new MenuItemDescriptor("canvas-load", "Load Snapshot", _editor.LoadCommand),
-            new MenuItemDescriptor("canvas-paste", "Paste", isEnabled: false),
+            new MenuItemDescriptor("canvas-save", "Save Snapshot", _editor.SaveCommand, iconKey: "save"),
+            new MenuItemDescriptor("canvas-load", "Load Snapshot", _editor.LoadCommand, iconKey: "load"),
+            new MenuItemDescriptor("canvas-paste", "Paste", iconKey: "paste", isEnabled: false),
             _editor.HasPendingConnection
-                ? new MenuItemDescriptor("canvas-cancel-pending", "Cancel Pending Connection", _editor.CancelPendingConnectionCommand)
-                : new MenuItemDescriptor("canvas-cancel-pending", "Cancel Pending Connection", isEnabled: false),
+                ? new MenuItemDescriptor("canvas-cancel-pending", "Cancel Pending Connection", _editor.CancelPendingConnectionCommand, iconKey: "cancel")
+                : new MenuItemDescriptor("canvas-cancel-pending", "Cancel Pending Connection", iconKey: "cancel", isEnabled: false),
         ];
     }
 
@@ -79,21 +84,22 @@ public sealed class GraphContextMenuBuilder
 
         return
         [
-            new MenuItemDescriptor("node-inspect", $"Inspect {node.Title}", new RelayCommand(() => _editor.SelectNode(node))),
-            new MenuItemDescriptor("node-center", "Center View Here", new RelayCommand(() => _editor.CenterViewOnNode(node.Id))),
+            new MenuItemDescriptor("node-inspect", $"Inspect {node.Title}", new RelayCommand(() => _editor.SelectNode(node)), iconKey: "inspect"),
+            new MenuItemDescriptor("node-center", "Center View Here", new RelayCommand(() => _editor.CenterViewOnNode(node.Id)), iconKey: "center"),
             MenuItemDescriptor.Separator("node-sep-1"),
-            new MenuItemDescriptor("node-delete", "Delete Node", new RelayCommand(() => _editor.DeleteNodeById(node.Id))),
-            new MenuItemDescriptor("node-duplicate", "Duplicate Node", new RelayCommand(() => _editor.DuplicateNode(node.Id))),
+            new MenuItemDescriptor("node-delete", "Delete Node", new RelayCommand(() => _editor.DeleteNodeById(node.Id)), iconKey: "delete"),
+            new MenuItemDescriptor("node-duplicate", "Duplicate Node", new RelayCommand(() => _editor.DuplicateNode(node.Id)), iconKey: "duplicate"),
             new MenuItemDescriptor(
                 "node-disconnect",
                 "Disconnect",
+                iconKey: "disconnect",
                 children:
                 [
-                    new MenuItemDescriptor("node-disconnect-in", "Incoming", new RelayCommand(() => _editor.DisconnectIncoming(node.Id))),
-                    new MenuItemDescriptor("node-disconnect-out", "Outgoing", new RelayCommand(() => _editor.DisconnectOutgoing(node.Id))),
-                    new MenuItemDescriptor("node-disconnect-all", "All", new RelayCommand(() => _editor.DisconnectAll(node.Id))),
+                    new MenuItemDescriptor("node-disconnect-in", "Incoming", new RelayCommand(() => _editor.DisconnectIncoming(node.Id)), iconKey: "disconnect"),
+                    new MenuItemDescriptor("node-disconnect-out", "Outgoing", new RelayCommand(() => _editor.DisconnectOutgoing(node.Id)), iconKey: "disconnect"),
+                    new MenuItemDescriptor("node-disconnect-all", "All", new RelayCommand(() => _editor.DisconnectAll(node.Id)), iconKey: "disconnect"),
                 ]),
-            new MenuItemDescriptor("node-create-connection", "Create Connection From", children: connectMenus),
+            new MenuItemDescriptor("node-create-connection", "Create Connection From", children: connectMenus, iconKey: "connect"),
         ];
     }
 
@@ -115,18 +121,18 @@ public sealed class GraphContextMenuBuilder
         {
             return
             [
-                new MenuItemDescriptor("port-start", "Start Connection", new RelayCommand(() => _editor.StartConnection(node.Id, port.Id))),
-                new MenuItemDescriptor("port-compatible-targets", "Compatible Targets", children: BuildCompatibleTargetItems(node.Id, port.Id)),
+                new MenuItemDescriptor("port-start", "Start Connection", new RelayCommand(() => _editor.StartConnection(node.Id, port.Id)), iconKey: "connect"),
+                new MenuItemDescriptor("port-compatible-targets", "Compatible Targets", children: BuildCompatibleTargetItems(node.Id, port.Id), iconKey: "compatible"),
                 MenuItemDescriptor.Separator("port-sep-1"),
-                new MenuItemDescriptor("port-info", $"Type: {port.TypeId}", isEnabled: false),
+                new MenuItemDescriptor("port-info", $"Type: {port.TypeId}", iconKey: "type", isEnabled: false),
             ];
         }
 
         return
         [
-            new MenuItemDescriptor("port-break-connections", "Break Connections", new RelayCommand(() => _editor.BreakConnectionsForPort(node.Id, port.Id))),
+            new MenuItemDescriptor("port-break-connections", "Break Connections", new RelayCommand(() => _editor.BreakConnectionsForPort(node.Id, port.Id)), iconKey: "disconnect"),
             MenuItemDescriptor.Separator("port-sep-2"),
-            new MenuItemDescriptor("port-info", $"Type: {port.TypeId}", isEnabled: false),
+            new MenuItemDescriptor("port-info", $"Type: {port.TypeId}", iconKey: "type", isEnabled: false),
         ];
     }
 
@@ -149,8 +155,8 @@ public sealed class GraphContextMenuBuilder
 
         return
         [
-            new MenuItemDescriptor("connection-delete", "Delete Connection", new RelayCommand(() => _editor.DeleteConnection(connection.Id))),
-            new MenuItemDescriptor("connection-conversion", conversionLabel, isEnabled: false),
+            new MenuItemDescriptor("connection-delete", "Delete Connection", new RelayCommand(() => _editor.DeleteConnection(connection.Id)), iconKey: "delete"),
+            new MenuItemDescriptor("connection-conversion", conversionLabel, iconKey: "conversion", isEnabled: false),
         ];
     }
 
@@ -159,7 +165,7 @@ public sealed class GraphContextMenuBuilder
         var targets = _editor.GetCompatibleTargets(sourceNodeId, sourcePortId);
         if (targets.Count == 0)
         {
-            return [new MenuItemDescriptor("no-compatible-targets", "No Compatible Targets", isEnabled: false)];
+            return [new MenuItemDescriptor("no-compatible-targets", "No Compatible Targets", iconKey: "info", isEnabled: false)];
         }
 
         return targets
@@ -175,7 +181,8 @@ public sealed class GraphContextMenuBuilder
                         target.Compatibility.Kind == PortCompatibilityKind.ImplicitConversion
                             ? $"{target.Port.Label} (implicit: {target.Compatibility.ConversionId!.Value})"
                             : target.Port.Label,
-                        new RelayCommand(() => _editor.ConnectPorts(sourceNodeId, sourcePortId, target.Node.Id, target.Port.Id))))
+                        new RelayCommand(() => _editor.ConnectPorts(sourceNodeId, sourcePortId, target.Node.Id, target.Port.Id)),
+                        iconKey: target.Compatibility.Kind == PortCompatibilityKind.ImplicitConversion ? "conversion" : "connect"))
                     .ToList()))
             .ToList();
     }

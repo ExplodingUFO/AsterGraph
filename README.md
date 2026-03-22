@@ -85,9 +85,18 @@ Recommended flow:
 
 1. Create a `GraphEditorStyleOptions` value in the host
 2. Pass it into `GraphEditorViewModel`
-3. Let `AsterGraph.Avalonia` adapt those tokens into brushes, radii, spacing, and component visuals
+3. Let `AsterGraph.Avalonia` adapt those tokens into brushes, radii, spacing, menu rendering, and component visuals
 
 This keeps the public styling surface stable without leaking Avalonia-specific types into the SDK contract.
+
+The current style surface is organized by concern:
+
+- `ShellStyleOptions` for shell colors, typography, and host-panel widths
+- `InspectorStyleOptions` for inspector typography and section geometry
+- `NodeCardStyleOptions` / `PortStyleOptions` / `ConnectionStyleOptions` for graph-scene visuals
+- `ContextMenuStyleOptions` for right-click menu background, hover, foreground, separators, and item sizing
+
+`AsterGraph.Avalonia` now keeps menu rendering behind a dedicated presenter, so hosts can keep driving behavior from editor-layer menu descriptors while styling stays in the Avalonia layer.
 
 ## Roadmap
 

@@ -7,6 +7,7 @@ This project intentionally contains:
 - `GraphEditorView`
 - canvas rendering and pointer interaction
 - theme resources
+- context-menu presentation from editor descriptors
 - rendered-control-based anchor resolution for connection endpoints
 
 This project intentionally does not own:
