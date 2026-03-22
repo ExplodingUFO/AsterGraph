@@ -363,7 +363,7 @@
                          FontWeight="Bold"
                          Foreground="{DynamicResource AsterGraph.EyebrowBrush}" />
               <Border Classes="astergraph-inspector-section">
-                <TextBlock Text="Context menu / toolbar: remove selected node"
+                <TextBlock Text="Left-drag on empty canvas: marquee-select nodes"
                            FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                            Foreground="{DynamicResource AsterGraph.BodyBrush}" />
               </Border>
@@ -373,7 +373,12 @@
                            Foreground="{DynamicResource AsterGraph.BodyBrush}" />
               </Border>
               <Border Classes="astergraph-inspector-section">
-                <TextBlock Text="Escape: cancel pending connection"
+                <TextBlock Text="Ctrl+C / Ctrl+V: copy and paste the current node selection"
+                           FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
+                           Foreground="{DynamicResource AsterGraph.BodyBrush}" />
+              </Border>
+              <Border Classes="astergraph-inspector-section">
+                <TextBlock Text="Delete / Escape: remove selection or cancel pending connection"
                            FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                            Foreground="{DynamicResource AsterGraph.BodyBrush}" />
               </Border>

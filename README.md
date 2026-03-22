@@ -7,9 +7,12 @@ AsterGraph is a modular node-graph editor for .NET with an Avalonia UI shell, a 
 Current capabilities:
 
 - draggable, selectable graph nodes
+- left-drag marquee selection for multi-node editing
 - zoom and pan canvas interaction
 - connection rendering and pending connection preview
 - graph save/load
+- selection deletion with `Delete`
+- selection copy/paste with `Ctrl+C` / `Ctrl+V`
 - strict type compatibility with a small set of safe implicit conversions
 - compile-time node-definition registration through providers
 
@@ -76,6 +79,16 @@ Rejected conversions stay explicit and visible rather than guessing.
 ## Serialization
 
 Graph documents are serialized in `AsterGraph.Core` and can persist connection-level conversion metadata. The stable contract identifiers in `AsterGraph.Abstractions` are intended to survive UI and host changes.
+
+## Selection And Clipboard
+
+AsterGraph keeps selection state in the editor layer:
+
+- single selection still drives the inspector
+- marquee selection can select multiple nodes
+- `Delete` removes the full current selection
+- `Ctrl+C` copies the selected nodes plus only the internal links between them
+- `Ctrl+V` pastes a new offset fragment near the current viewport center
 
 ## Style Configuration
 
