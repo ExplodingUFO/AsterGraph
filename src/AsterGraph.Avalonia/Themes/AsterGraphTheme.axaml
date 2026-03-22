@@ -1,0 +1,19 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <LinearGradientBrush x:Key="AsterGraph.ShellBackgroundBrush"
+                       StartPoint="0,0"
+                       EndPoint="1,1">
+    <GradientStop Color="#09111A" Offset="0" />
+    <GradientStop Color="#0C1825" Offset="0.45" />
+    <GradientStop Color="#0A121C" Offset="1" />
+  </LinearGradientBrush>
+
+  <SolidColorBrush x:Key="AsterGraph.PanelBrush" Color="#111C29" />
+  <SolidColorBrush x:Key="AsterGraph.PanelBorderBrush" Color="#22354A" />
+  <SolidColorBrush x:Key="AsterGraph.CanvasFrameBrush" Color="#0D1622" />
+  <SolidColorBrush x:Key="AsterGraph.BadgeBrush" Color="#132231" />
+  <SolidColorBrush x:Key="AsterGraph.HeadlineBrush" Color="#F4FBFF" />
+  <SolidColorBrush x:Key="AsterGraph.BodyBrush" Color="#C6D7E3" />
+  <SolidColorBrush x:Key="AsterGraph.EyebrowBrush" Color="#7FA6C2" />
+  <SolidColorBrush x:Key="AsterGraph.HighlightBrush" Color="#7FE7D7" />
+</ResourceDictionary>

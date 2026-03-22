@@ -1,0 +1,17 @@
+# Build outputs
+bin/
+obj/
+
+# IDE and local tooling
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+
+# Local Codex/temp artifacts
+.codex-pack-check-*/
+
+# OS noise
+Thumbs.db
+Desktop.ini

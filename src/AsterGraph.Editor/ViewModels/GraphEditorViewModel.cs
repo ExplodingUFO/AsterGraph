@@ -1,0 +1,846 @@
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using AsterGraph.Abstractions.Catalog;
+using AsterGraph.Abstractions.Compatibility;
+using AsterGraph.Abstractions.Identifiers;
+using AsterGraph.Core.Models;
+using AsterGraph.Editor.Menus;
+using AsterGraph.Editor.Services;
+using AsterGraph.Editor.Viewport;
+
+namespace AsterGraph.Editor.ViewModels;
+
+public sealed partial class GraphEditorViewModel : ObservableObject
+{
+    private const double DefaultZoom = 0.88;
+    private const double DefaultPanX = 110;
+    private const double DefaultPanY = 96;
+
+    private readonly INodeCatalog _nodeCatalog;
+    private readonly IPortCompatibilityService _compatibilityService;
+    private readonly GraphWorkspaceService _workspaceService;
+    private readonly GraphContextMenuBuilder _contextMenuBuilder;
+    private bool _suspendDirtyTracking;
+    private double _viewportWidth;
+    private double _viewportHeight;
+
+    public GraphEditorViewModel(
+        GraphDocument document,
+        INodeCatalog nodeCatalog,
+        IPortCompatibilityService compatibilityService,
+        GraphWorkspaceService? workspaceService = null)
+    {
+        _nodeCatalog = nodeCatalog ?? throw new ArgumentNullException(nameof(nodeCatalog));
+        _compatibilityService = compatibilityService ?? throw new ArgumentNullException(nameof(compatibilityService));
+        _workspaceService = workspaceService ?? new GraphWorkspaceService();
+
+        SaveCommand = new RelayCommand(SaveWorkspace);
+        LoadCommand = new RelayCommand(() => LoadWorkspace());
+        FitViewCommand = new RelayCommand(() => FitToViewport(_viewportWidth, _viewportHeight), CanFitView);
+        ResetViewCommand = new RelayCommand(() => ResetView());
+        DeleteSelectionCommand = new RelayCommand(DeleteSelectedNode, () => CanDeleteSelection);
+        CancelPendingConnectionCommand = new RelayCommand(
+            () => CancelPendingConnection("Connection preview cancelled."),
+            () => HasPendingConnection);
+        AddNodeCommand = new RelayCommand<NodeTemplateViewModel>(template =>
+        {
+            if (template is not null)
+            {
+                AddNode(template);
+            }
+        });
+
+        _contextMenuBuilder = new GraphContextMenuBuilder(this);
+
+        Nodes = new ObservableCollection<NodeViewModel>();
+        Connections = new ObservableCollection<ConnectionViewModel>();
+        SelectedNodeParameters = new ObservableCollection<NodeParameterViewModel>();
+        NodeTemplates = new ObservableCollection<NodeTemplateViewModel>(
+            _nodeCatalog.Definitions.Select(definition => new NodeTemplateViewModel(definition)));
+
+        Nodes.CollectionChanged += HandleNodesCollectionChanged;
+        Connections.CollectionChanged += HandleConnectionsCollectionChanged;
+
+        WorkspacePath = _workspaceService.WorkspacePath;
+        Title = document.Title;
+        Description = document.Description;
+
+        LoadDocument(document, "Ready to edit.", markClean: true);
+        ResetView(updateStatus: false);
+    }
+
+    [ObservableProperty]
+    private string title = string.Empty;
+
+    [ObservableProperty]
+    private string description = string.Empty;
+
+    public ObservableCollection<NodeViewModel> Nodes { get; }
+
+    public ObservableCollection<ConnectionViewModel> Connections { get; }
+
+    public ObservableCollection<NodeParameterViewModel> SelectedNodeParameters { get; }
+
+    public ObservableCollection<NodeTemplateViewModel> NodeTemplates { get; }
+
+    public string WorkspacePath { get; }
+
+    public IRelayCommand SaveCommand { get; }
+
+    public IRelayCommand LoadCommand { get; }
+
+    public IRelayCommand FitViewCommand { get; }
+
+    public IRelayCommand ResetViewCommand { get; }
+
+    public IRelayCommand DeleteSelectionCommand { get; }
+
+    public IRelayCommand CancelPendingConnectionCommand { get; }
+
+    public IRelayCommand<NodeTemplateViewModel> AddNodeCommand { get; }
+
+    [ObservableProperty]
+    private double zoom = DefaultZoom;
+
+    [ObservableProperty]
+    private double panX = DefaultPanX;
+
+    [ObservableProperty]
+    private double panY = DefaultPanY;
+
+    [ObservableProperty]
+    private NodeViewModel? selectedNode;
+
+    [ObservableProperty]
+    private NodeViewModel? pendingSourceNode;
+
+    [ObservableProperty]
+    private PortViewModel? pendingSourcePort;
+
+    [ObservableProperty]
+    private string statusMessage = "Ready";
+
+    [ObservableProperty]
+    private bool isDirty;
+
+    public bool HasPendingConnection => PendingSourceNode is not null && PendingSourcePort is not null;
+
+    public bool CanDeleteSelection => SelectedNode is not null;
+
+    public bool HasEditableParameters => SelectedNodeParameters.Count > 0;
+
+    public string StatsCaption => $"{Nodes.Count} nodes  ·  {Connections.Count} links  ·  {Zoom * 100:0}% zoom";
+
+    public string WorkspaceCaption => $"{(IsDirty ? "Unsaved changes" : "Snapshot synced")}  ·  {WorkspacePath}";
+
+    public string ModeCaption => HasPendingConnection
+        ? $"Connecting {PendingSourceNode!.Title} / {PendingSourcePort!.Label}  ->  click an input port"
+        : "Selection mode  ·  click a template to add a node";
+
+    public string InspectorTitle => SelectedNode?.Title ?? "Select A Node";
+
+    public string InspectorCategory => SelectedNode?.Category ?? "Editor";
+
+    public string InspectorDescription => SelectedNode?.Description
+        ?? "Build the graph from the left library, connect outputs to inputs, and save snapshots from the toolbar.";
+
+    public string InspectorInputs => SelectedNode is null
+        ? "Select a node to inspect its input ports."
+        : FormatPorts(SelectedNode.Inputs);
+
+    public string InspectorOutputs => SelectedNode is null
+        ? "Select a node to inspect its output ports."
+        : FormatPorts(SelectedNode.Outputs);
+
+    public string InspectorConnections => SelectedNode is null
+        ? "Select a node to inspect its connection summary."
+        : $"{GetIncomingConnections(SelectedNode).Count} incoming  ·  {GetOutgoingConnections(SelectedNode).Count} outgoing";
+
+    public string InspectorUpstream => SelectedNode is null
+        ? "Select a node to see upstream dependencies."
+        : FormatRelatedNodes(GetIncomingConnections(SelectedNode), useSource: true);
+
+    public string InspectorDownstream => SelectedNode is null
+        ? "Select a node to see downstream consumers."
+        : FormatRelatedNodes(GetOutgoingConnections(SelectedNode), useSource: false);
+
+    public string SelectionCaption => SelectedNode is null
+        ? "No selection"
+        : $"{SelectedNode.InputCount} inputs  ·  {SelectedNode.OutputCount} outputs";
+
+    public IReadOnlyList<MenuItemDescriptor> BuildContextMenu(ContextMenuContext context)
+        => _contextMenuBuilder.Build(context);
+
+    public void UpdateViewportSize(double width, double height)
+    {
+        _viewportWidth = width;
+        _viewportHeight = height;
+        FitViewCommand.NotifyCanExecuteChanged();
+    }
+
+    public void SelectNode(NodeViewModel? node)
+    {
+        var changed = !ReferenceEquals(SelectedNode, node);
+
+        foreach (var item in Nodes)
+        {
+            item.IsSelected = ReferenceEquals(item, node);
+        }
+
+        SelectedNode = node;
+
+        if (changed && node is not null && !HasPendingConnection)
+        {
+            StatusMessage = $"Selected {node.Title}.";
+        }
+
+        RebuildSelectedNodeParameters();
+    }
+
+    public GraphPoint ScreenToWorld(GraphPoint screen)
+        => ViewportMath.ScreenToWorld(new ViewportState(Zoom, PanX, PanY), screen);
+
+    public void AddNode(NodeTemplateViewModel template, GraphPoint? preferredWorldPosition = null)
+    {
+        var position = preferredWorldPosition ?? GetViewportCenter();
+        var offset = 26 * (Nodes.Count % 4);
+
+        var node = template.CreateNode(
+            CreateNodeId(template.Key),
+            new GraphPoint(
+                position.X - (template.Size.Width / 2) + offset,
+                position.Y - (template.Size.Height / 2) + offset));
+
+        Nodes.Add(node);
+        SelectNode(node);
+        MarkDirty($"Added {template.Title}.");
+    }
+
+    public void MoveNode(NodeViewModel node, double deltaX, double deltaY)
+    {
+        node.MoveBy(deltaX, deltaY);
+    }
+
+    public void PanBy(double deltaX, double deltaY)
+    {
+        PanX += deltaX;
+        PanY += deltaY;
+    }
+
+    public void ZoomAt(double factor, GraphPoint screenAnchor)
+    {
+        var updated = ViewportMath.ZoomAround(
+            new ViewportState(Zoom, PanX, PanY),
+            factor,
+            screenAnchor,
+            minimumZoom: 0.35,
+            maximumZoom: 1.9);
+
+        Zoom = updated.Zoom;
+        PanX = updated.PanX;
+        PanY = updated.PanY;
+    }
+
+    public void ResetView(bool updateStatus = true)
+    {
+        Zoom = DefaultZoom;
+        PanX = DefaultPanX;
+        PanY = DefaultPanY;
+
+        if (updateStatus)
+        {
+            StatusMessage = "Viewport reset.";
+        }
+    }
+
+    public void FitToViewport(double viewportWidth, double viewportHeight, bool updateStatus = true)
+    {
+        if (Nodes.Count == 0 || viewportWidth <= 0 || viewportHeight <= 0)
+        {
+            if (updateStatus)
+            {
+                StatusMessage = "Nothing to fit yet.";
+            }
+
+            return;
+        }
+
+        var minX = Nodes.Min(node => node.X);
+        var minY = Nodes.Min(node => node.Y);
+        var maxX = Nodes.Max(node => node.X + node.Width);
+        var maxY = Nodes.Max(node => node.Y + node.Height);
+
+        var graphWidth = Math.Max(maxX - minX, 1);
+        var graphHeight = Math.Max(maxY - minY, 1);
+        const double padding = 120;
+
+        var zoomX = viewportWidth / (graphWidth + (padding * 2));
+        var zoomY = viewportHeight / (graphHeight + (padding * 2));
+        var nextZoom = Math.Clamp(Math.Min(zoomX, zoomY), 0.32, 1.4);
+
+        Zoom = nextZoom;
+        PanX = ((viewportWidth - (graphWidth * nextZoom)) / 2) - (minX * nextZoom);
+        PanY = ((viewportHeight - (graphHeight * nextZoom)) / 2) - (minY * nextZoom);
+
+        if (updateStatus)
+        {
+            StatusMessage = "Viewport fit to scene.";
+        }
+    }
+
+    public void ActivatePort(NodeViewModel node, PortViewModel port)
+    {
+        SelectNode(node);
+
+        if (port.Direction == PortDirection.Output)
+        {
+            StartConnection(node.Id, port.Id);
+            return;
+        }
+
+        if (!HasPendingConnection)
+        {
+            StatusMessage = "Select an output port first.";
+            return;
+        }
+
+        ConnectPorts(PendingSourceNode!.Id, PendingSourcePort!.Id, node.Id, port.Id);
+    }
+
+    public void StartConnection(string sourceNodeId, string sourcePortId)
+    {
+        var sourceNode = FindNode(sourceNodeId);
+        var sourcePort = sourceNode?.GetPort(sourcePortId);
+        if (sourceNode is null || sourcePort is null)
+        {
+            return;
+        }
+
+        if (sourcePort.Direction != PortDirection.Output)
+        {
+            StatusMessage = "Only output ports can start a connection.";
+            return;
+        }
+
+        if (HasPendingConnection
+            && PendingSourceNode?.Id == sourceNode.Id
+            && PendingSourcePort?.Id == sourcePort.Id)
+        {
+            CancelPendingConnection("Connection preview cancelled.");
+            return;
+        }
+
+        PendingSourceNode = sourceNode;
+        PendingSourcePort = sourcePort;
+        StatusMessage = $"Connecting from {sourceNode.Title}.{sourcePort.Label}.";
+    }
+
+    public void ConnectPorts(string sourceNodeId, string sourcePortId, string targetNodeId, string targetPortId)
+    {
+        var sourceNode = FindNode(sourceNodeId);
+        var sourcePort = sourceNode?.GetPort(sourcePortId);
+        var targetNode = FindNode(targetNodeId);
+        var targetPort = targetNode?.GetPort(targetPortId);
+
+        if (sourceNode is null || sourcePort is null || targetNode is null || targetPort is null)
+        {
+            return;
+        }
+
+        if (sourcePort.Direction != PortDirection.Output || targetPort.Direction != PortDirection.Input)
+        {
+            StatusMessage = "Connections must go from an output port to an input port.";
+            return;
+        }
+
+        var compatibility = _compatibilityService.Evaluate(sourcePort.TypeId, targetPort.TypeId);
+        if (!compatibility.IsCompatible)
+        {
+            StatusMessage = $"Incompatible connection: {sourcePort.TypeId} -> {targetPort.TypeId}.";
+            return;
+        }
+
+        if (Connections.Any(connection =>
+                connection.SourceNodeId == sourceNode.Id
+                && connection.SourcePortId == sourcePort.Id
+                && connection.TargetNodeId == targetNode.Id
+                && connection.TargetPortId == targetPort.Id))
+        {
+            CancelPendingConnection("That connection already exists.");
+            return;
+        }
+
+        var replaced = Connections
+            .Where(connection => connection.TargetNodeId == targetNode.Id && connection.TargetPortId == targetPort.Id)
+            .ToList();
+
+        foreach (var connection in replaced)
+        {
+            Connections.Remove(connection);
+        }
+
+        Connections.Add(new ConnectionViewModel(
+            CreateConnectionId(),
+            sourceNode.Id,
+            sourcePort.Id,
+            targetNode.Id,
+            targetPort.Id,
+            $"{sourcePort.Label} to {targetPort.Label}",
+            sourcePort.AccentHex,
+            compatibility.ConversionId));
+
+        PendingSourceNode = null;
+        PendingSourcePort = null;
+        MarkDirty(
+            compatibility.Kind == PortCompatibilityKind.ImplicitConversion
+                ? $"Connected {sourceNode.Title} to {targetNode.Title} with implicit conversion."
+                : $"Connected {sourceNode.Title} to {targetNode.Title}.");
+    }
+
+    public void CancelPendingConnection(string? status = null)
+    {
+        PendingSourceNode = null;
+        PendingSourcePort = null;
+
+        if (!string.IsNullOrWhiteSpace(status))
+        {
+            StatusMessage = status;
+        }
+    }
+
+    public void DeleteSelectedNode()
+    {
+        if (SelectedNode is null)
+        {
+            StatusMessage = "Select a node before deleting.";
+            return;
+        }
+
+        DeleteNodeById(SelectedNode.Id);
+    }
+
+    public void DeleteNodeById(string nodeId)
+    {
+        var node = FindNode(nodeId);
+        if (node is null)
+        {
+            return;
+        }
+
+        var removedConnections = Connections
+            .Where(connection => connection.SourceNodeId == node.Id || connection.TargetNodeId == node.Id)
+            .ToList();
+
+        foreach (var connection in removedConnections)
+        {
+            Connections.Remove(connection);
+        }
+
+        Nodes.Remove(node);
+        CancelPendingConnection();
+        SelectNode(null);
+        MarkDirty($"Deleted {node.Title}.");
+    }
+
+    public void DuplicateNode(string nodeId)
+    {
+        var node = FindNode(nodeId);
+        if (node is null)
+        {
+            return;
+        }
+
+        var duplicate = new NodeViewModel(node.ToModel() with
+        {
+            Id = CreateNodeId(node.Id),
+            Position = new GraphPoint(node.X + 48, node.Y + 48),
+        });
+
+        Nodes.Add(duplicate);
+        SelectNode(duplicate);
+        MarkDirty($"Duplicated {node.Title}.");
+    }
+
+    public void DisconnectIncoming(string nodeId) => RemoveConnections(connection => connection.TargetNodeId == nodeId, "Disconnected incoming links.");
+
+    public void DisconnectOutgoing(string nodeId) => RemoveConnections(connection => connection.SourceNodeId == nodeId, "Disconnected outgoing links.");
+
+    public void DisconnectAll(string nodeId) => RemoveConnections(
+        connection => connection.SourceNodeId == nodeId || connection.TargetNodeId == nodeId,
+        "Disconnected all links.");
+
+    public void BreakConnectionsForPort(string nodeId, string portId)
+        => RemoveConnections(
+            connection =>
+                (connection.SourceNodeId == nodeId && connection.SourcePortId == portId)
+                || (connection.TargetNodeId == nodeId && connection.TargetPortId == portId),
+            "Disconnected port links.");
+
+    public void DeleteConnection(string connectionId)
+    {
+        var connection = FindConnection(connectionId);
+        if (connection is null)
+        {
+            return;
+        }
+
+        Connections.Remove(connection);
+        MarkDirty($"Deleted connection {connection.Label}.");
+    }
+
+    public ConnectionViewModel? FindConnection(string connectionId)
+        => Connections.FirstOrDefault(connection => connection.Id == connectionId);
+
+    public void CenterViewOnNode(string nodeId)
+    {
+        var node = FindNode(nodeId);
+        if (node is null || _viewportWidth <= 0 || _viewportHeight <= 0)
+        {
+            return;
+        }
+
+        PanX = (_viewportWidth / 2) - ((node.X + (node.Width / 2)) * Zoom);
+        PanY = (_viewportHeight / 2) - ((node.Y + (node.Height / 2)) * Zoom);
+        StatusMessage = $"Centered on {node.Title}.";
+    }
+
+    public IReadOnlyList<CompatiblePortTarget> GetCompatibleTargets(string sourceNodeId, string sourcePortId)
+    {
+        var sourceNode = FindNode(sourceNodeId);
+        var sourcePort = sourceNode?.GetPort(sourcePortId);
+        if (sourceNode is null || sourcePort is null || sourcePort.Direction != PortDirection.Output)
+        {
+            return [];
+        }
+
+        return Nodes
+            .SelectMany(node => node.Inputs.Select(port => (node, port)))
+            .Where(target => !(target.node.Id == sourceNode.Id && target.port.Id == sourcePort.Id))
+            .Select(target => new CompatiblePortTarget(
+                target.node,
+                target.port,
+                _compatibilityService.Evaluate(sourcePort.TypeId, target.port.TypeId)))
+            .Where(target => target.Compatibility.IsCompatible)
+            .ToList();
+    }
+
+    public void SaveWorkspace()
+    {
+        try
+        {
+            _workspaceService.Save(CreateDocumentSnapshot());
+            IsDirty = false;
+            StatusMessage = $"Saved snapshot to {WorkspacePath}.";
+            RaiseComputedPropertyChanges();
+        }
+        catch (Exception exception)
+        {
+            StatusMessage = $"Save failed: {exception.Message}";
+        }
+    }
+
+    public bool LoadWorkspace()
+    {
+        try
+        {
+            if (!_workspaceService.Exists())
+            {
+                StatusMessage = "No saved snapshot yet. Save once to create one.";
+                return false;
+            }
+
+            var document = _workspaceService.Load();
+            LoadDocument(document, "Workspace loaded from disk.", markClean: true);
+            CancelPendingConnection();
+            SelectNode(null);
+            ResetView(updateStatus: false);
+            return true;
+        }
+        catch (Exception exception)
+        {
+            StatusMessage = $"Load failed: {exception.Message}";
+            return false;
+        }
+    }
+
+    public GraphDocument CreateDocumentSnapshot()
+        => new(
+            Title,
+            Description,
+            Nodes.Select(node => node.ToModel()).ToList(),
+            Connections.Select(connection => connection.ToModel()).ToList());
+
+    public NodeViewModel? FindNode(string nodeId)
+        => Nodes.FirstOrDefault(node => node.Id == nodeId);
+
+    private void LoadDocument(GraphDocument document, string status, bool markClean)
+    {
+        _suspendDirtyTracking = true;
+
+        foreach (var node in Nodes.ToList())
+        {
+            node.PropertyChanged -= HandleNodePropertyChanged;
+        }
+
+        Nodes.Clear();
+        Connections.Clear();
+
+        Title = document.Title;
+        Description = document.Description;
+
+        foreach (var node in document.Nodes)
+        {
+            Nodes.Add(new NodeViewModel(node));
+        }
+
+        foreach (var connection in document.Connections)
+        {
+            Connections.Add(new ConnectionViewModel(
+                connection.Id,
+                connection.SourceNodeId,
+                connection.SourcePortId,
+                connection.TargetNodeId,
+                connection.TargetPortId,
+                connection.Label,
+                connection.AccentHex,
+                connection.ConversionId));
+        }
+
+        IsDirty = !markClean;
+        StatusMessage = status;
+        _suspendDirtyTracking = false;
+        RaiseComputedPropertyChanges();
+    }
+
+    private void MarkDirty(string status)
+    {
+        IsDirty = true;
+        StatusMessage = status;
+        RaiseComputedPropertyChanges();
+    }
+
+    private GraphPoint GetViewportCenter()
+    {
+        if (_viewportWidth <= 0 || _viewportHeight <= 0)
+        {
+            return ScreenToWorld(new GraphPoint(820, 440));
+        }
+
+        return ScreenToWorld(new GraphPoint(_viewportWidth / 2, _viewportHeight / 2));
+    }
+
+    private string CreateNodeId(string templateKey)
+        => CreateUniqueId(Nodes.Select(node => node.Id), $"{templateKey}-");
+
+    private string CreateConnectionId()
+        => CreateUniqueId(Connections.Select(connection => connection.Id), "connection-");
+
+    private bool CanFitView()
+        => Nodes.Count > 0 && _viewportWidth > 0 && _viewportHeight > 0;
+
+    partial void OnZoomChanged(double value) => RaiseComputedPropertyChanges();
+
+    partial void OnSelectedNodeChanged(NodeViewModel? value) => RaiseComputedPropertyChanges();
+
+    partial void OnPendingSourceNodeChanged(NodeViewModel? value) => RaiseComputedPropertyChanges();
+
+    partial void OnPendingSourcePortChanged(PortViewModel? value) => RaiseComputedPropertyChanges();
+
+    partial void OnIsDirtyChanged(bool value) => RaiseComputedPropertyChanges();
+
+    private void HandleNodesCollectionChanged(object? sender, NotifyCollectionChangedEventArgs args)
+    {
+        if (args.OldItems is not null)
+        {
+            foreach (NodeViewModel node in args.OldItems)
+            {
+                node.PropertyChanged -= HandleNodePropertyChanged;
+            }
+        }
+
+        if (args.NewItems is not null)
+        {
+            foreach (NodeViewModel node in args.NewItems)
+            {
+                node.PropertyChanged += HandleNodePropertyChanged;
+            }
+        }
+
+        FitViewCommand.NotifyCanExecuteChanged();
+        RaiseComputedPropertyChanges();
+    }
+
+    private void HandleConnectionsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs args)
+        => RaiseComputedPropertyChanges();
+
+    private void HandleNodePropertyChanged(object? sender, PropertyChangedEventArgs args)
+    {
+        if (_suspendDirtyTracking || sender is not NodeViewModel)
+        {
+            return;
+        }
+
+        if (args.PropertyName is nameof(NodeViewModel.X) or nameof(NodeViewModel.Y))
+        {
+            if (!IsDirty)
+            {
+                IsDirty = true;
+                RaiseComputedPropertyChanges();
+            }
+        }
+    }
+
+    private void RaiseComputedPropertyChanges()
+    {
+        DeleteSelectionCommand.NotifyCanExecuteChanged();
+        CancelPendingConnectionCommand.NotifyCanExecuteChanged();
+        FitViewCommand.NotifyCanExecuteChanged();
+
+        OnPropertyChanged(nameof(HasPendingConnection));
+        OnPropertyChanged(nameof(CanDeleteSelection));
+        OnPropertyChanged(nameof(HasEditableParameters));
+        OnPropertyChanged(nameof(StatsCaption));
+        OnPropertyChanged(nameof(WorkspaceCaption));
+        OnPropertyChanged(nameof(ModeCaption));
+        OnPropertyChanged(nameof(InspectorTitle));
+        OnPropertyChanged(nameof(InspectorCategory));
+        OnPropertyChanged(nameof(InspectorDescription));
+        OnPropertyChanged(nameof(InspectorInputs));
+        OnPropertyChanged(nameof(InspectorOutputs));
+        OnPropertyChanged(nameof(InspectorConnections));
+        OnPropertyChanged(nameof(InspectorUpstream));
+        OnPropertyChanged(nameof(InspectorDownstream));
+        OnPropertyChanged(nameof(SelectionCaption));
+    }
+
+    private void RemoveConnections(Func<ConnectionViewModel, bool> predicate, string status)
+    {
+        var removed = Connections.Where(predicate).ToList();
+        if (removed.Count == 0)
+        {
+            StatusMessage = "No matching connections to remove.";
+            return;
+        }
+
+        foreach (var connection in removed)
+        {
+            Connections.Remove(connection);
+        }
+
+        MarkDirty(status);
+    }
+
+    private List<ConnectionViewModel> GetIncomingConnections(NodeViewModel node)
+        => Connections.Where(connection => connection.TargetNodeId == node.Id).ToList();
+
+    private List<ConnectionViewModel> GetOutgoingConnections(NodeViewModel node)
+        => Connections.Where(connection => connection.SourceNodeId == node.Id).ToList();
+
+    private string FormatRelatedNodes(IEnumerable<ConnectionViewModel> connections, bool useSource)
+    {
+        var lines = connections
+            .Select(connection =>
+            {
+                var relatedId = useSource ? connection.SourceNodeId : connection.TargetNodeId;
+                var relatedPortId = useSource ? connection.SourcePortId : connection.TargetPortId;
+                var relatedNode = FindNode(relatedId);
+                var relatedPort = relatedNode?.GetPort(relatedPortId);
+                if (relatedNode is null)
+                {
+                    return null;
+                }
+
+                return $"{relatedNode.Title}  ·  {relatedPort?.Label ?? relatedPortId}";
+            })
+            .Where(line => !string.IsNullOrWhiteSpace(line))
+            .Distinct(StringComparer.Ordinal)
+            .ToList();
+
+        if (lines.Count == 0)
+        {
+            return "None";
+        }
+
+        return string.Join(Environment.NewLine, lines);
+    }
+
+    private static string FormatPorts(IEnumerable<PortViewModel> ports)
+    {
+        var items = ports.ToList();
+        if (items.Count == 0)
+        {
+            return "None";
+        }
+
+        return string.Join(Environment.NewLine, items.Select(port => $"{port.Label}  ·  {port.DataType}"));
+    }
+
+    private static string CreateUniqueId(IEnumerable<string> existingIds, string prefix)
+    {
+        var ids = existingIds.ToHashSet(StringComparer.Ordinal);
+        var next = 1;
+
+        foreach (var id in ids)
+        {
+            if (!id.StartsWith(prefix, StringComparison.Ordinal))
+            {
+                continue;
+            }
+
+            var suffix = id[prefix.Length..];
+            if (int.TryParse(suffix, out var value))
+            {
+                next = Math.Max(next, value + 1);
+            }
+        }
+
+        string candidate;
+        do
+        {
+            candidate = $"{prefix}{next:000}";
+            next++;
+        }
+        while (ids.Contains(candidate));
+
+        return candidate;
+    }
+
+    private void RebuildSelectedNodeParameters()
+    {
+        SelectedNodeParameters.Clear();
+
+        if (SelectedNode?.DefinitionId is null)
+        {
+            OnPropertyChanged(nameof(HasEditableParameters));
+            return;
+        }
+
+        if (!_nodeCatalog.TryGetDefinition(SelectedNode.DefinitionId, out var definition) || definition is null)
+        {
+            OnPropertyChanged(nameof(HasEditableParameters));
+            return;
+        }
+
+        foreach (var parameter in definition.Parameters)
+        {
+            var currentValue = SelectedNode.GetParameterValue(parameter.Key) ?? parameter.DefaultValue;
+            SelectedNodeParameters.Add(new NodeParameterViewModel(parameter, currentValue, ApplyParameterValue));
+        }
+
+        OnPropertyChanged(nameof(HasEditableParameters));
+    }
+
+    private void ApplyParameterValue(NodeParameterViewModel parameter, object? value)
+    {
+        if (SelectedNode is null)
+        {
+            return;
+        }
+
+        SelectedNode.SetParameterValue(parameter.Key, parameter.TypeId, value);
+        MarkDirty($"Updated {SelectedNode.Title} / {parameter.DisplayName}.");
+    }
+}

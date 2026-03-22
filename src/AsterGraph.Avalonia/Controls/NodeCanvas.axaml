@@ -1,0 +1,18 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="using:AsterGraph.Avalonia.Controls"
+             x:Class="AsterGraph.Avalonia.Controls.NodeCanvas"
+             x:Name="Root"
+             x:DataType="local:NodeCanvas">
+  <Grid ClipToBounds="True"
+        DataContext="{Binding ViewModel, ElementName=Root}">
+    <local:GridBackground x:Name="BackgroundGrid"
+                          ViewModel="{Binding}" />
+    <Grid x:Name="SceneRoot"
+          RenderTransformOrigin="0,0">
+      <Canvas x:Name="ConnectionLayer"
+              IsHitTestVisible="False" />
+      <Canvas x:Name="NodeLayer" />
+    </Grid>
+  </Grid>
+</UserControl>
