@@ -23,6 +23,8 @@ internal interface IGraphContextMenuHost
 
     ICommand LoadCommand { get; }
 
+    ICommand PasteCommand { get; }
+
     ICommand CancelPendingConnectionCommand { get; }
 
     void AddNode(NodeTemplateViewModel template, GraphPoint? preferredWorldPosition = null);

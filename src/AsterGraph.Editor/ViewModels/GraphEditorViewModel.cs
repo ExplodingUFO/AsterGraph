@@ -9,6 +9,7 @@ using AsterGraph.Abstractions.Compatibility;
 using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Abstractions.Styling;
 using AsterGraph.Core.Models;
+using AsterGraph.Editor.Geometry;
 using AsterGraph.Editor.Menus;
 using AsterGraph.Editor.Services;
 using AsterGraph.Editor.Viewport;
@@ -24,6 +25,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     private readonly INodeCatalog _nodeCatalog;
     private readonly IPortCompatibilityService _compatibilityService;
     private readonly GraphWorkspaceService _workspaceService;
+    private readonly GraphSelectionClipboard _selectionClipboard;
     private readonly GraphContextMenuBuilder _contextMenuBuilder;
     private bool _suspendDirtyTracking;
     private double _viewportWidth;
@@ -39,13 +41,16 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         _nodeCatalog = nodeCatalog ?? throw new ArgumentNullException(nameof(nodeCatalog));
         _compatibilityService = compatibilityService ?? throw new ArgumentNullException(nameof(compatibilityService));
         _workspaceService = workspaceService ?? new GraphWorkspaceService();
+        _selectionClipboard = new GraphSelectionClipboard();
         StyleOptions = styleOptions ?? GraphEditorStyleOptions.Default;
 
         SaveCommand = new RelayCommand(SaveWorkspace);
         LoadCommand = new RelayCommand(() => LoadWorkspace());
         FitViewCommand = new RelayCommand(() => FitToViewport(_viewportWidth, _viewportHeight), CanFitView);
         ResetViewCommand = new RelayCommand(() => ResetView());
-        DeleteSelectionCommand = new RelayCommand(DeleteSelectedNode, () => CanDeleteSelection);
+        DeleteSelectionCommand = new RelayCommand(DeleteSelection, () => CanDeleteSelection);
+        CopySelectionCommand = new RelayCommand(CopySelection, () => CanCopySelection);
+        PasteCommand = new RelayCommand(PasteSelection, () => CanPaste);
         CancelPendingConnectionCommand = new RelayCommand(
             () => CancelPendingConnection("Connection preview cancelled."),
             () => HasPendingConnection);
@@ -61,6 +66,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
         Nodes = new ObservableCollection<NodeViewModel>();
         Connections = new ObservableCollection<ConnectionViewModel>();
+        SelectedNodes = new ObservableCollection<NodeViewModel>();
         SelectedNodeParameters = new ObservableCollection<NodeParameterViewModel>();
         NodeTemplates = new ObservableCollection<NodeTemplateViewModel>(
             _nodeCatalog.Definitions.Select(definition => new NodeTemplateViewModel(definition)));
@@ -86,6 +92,8 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     public ObservableCollection<ConnectionViewModel> Connections { get; }
 
+    public ObservableCollection<NodeViewModel> SelectedNodes { get; }
+
     public ObservableCollection<NodeParameterViewModel> SelectedNodeParameters { get; }
 
     public ObservableCollection<NodeTemplateViewModel> NodeTemplates { get; }
@@ -104,6 +112,10 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     public IRelayCommand DeleteSelectionCommand { get; }
 
+    public IRelayCommand CopySelectionCommand { get; }
+
+    public IRelayCommand PasteCommand { get; }
+
     public IRelayCommand CancelPendingConnectionCommand { get; }
 
     public IRelayCommand<NodeTemplateViewModel> AddNodeCommand { get; }
@@ -119,6 +131,8 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     ICommand IGraphContextMenuHost.SaveCommand => SaveCommand;
 
     ICommand IGraphContextMenuHost.LoadCommand => LoadCommand;
+
+    ICommand IGraphContextMenuHost.PasteCommand => PasteCommand;
 
     ICommand IGraphContextMenuHost.CancelPendingConnectionCommand => CancelPendingConnectionCommand;
 
@@ -148,9 +162,17 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     public bool HasPendingConnection => PendingSourceNode is not null && PendingSourcePort is not null;
 
-    public bool CanDeleteSelection => SelectedNode is not null;
+    public bool HasSelection => SelectedNodes.Count > 0;
 
-    public bool HasEditableParameters => SelectedNodeParameters.Count > 0;
+    public bool HasMultipleSelection => SelectedNodes.Count > 1;
+
+    public bool CanDeleteSelection => HasSelection;
+
+    public bool CanCopySelection => HasSelection;
+
+    public bool CanPaste => _selectionClipboard.HasContent;
+
+    public bool HasEditableParameters => SelectedNodes.Count == 1 && SelectedNodeParameters.Count > 0;
 
     public string StatsCaption => $"{Nodes.Count} nodes  ·  {Connections.Count} links  ·  {Zoom * 100:0}% zoom";
 
@@ -158,14 +180,30 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     public string ModeCaption => HasPendingConnection
         ? $"Connecting {PendingSourceNode!.Title} / {PendingSourcePort!.Label}  ->  click an input port"
-        : "Selection mode  ·  click a template to add a node";
+        : HasMultipleSelection
+            ? $"Selection mode  ·  {SelectedNodes.Count} nodes selected"
+            : "Selection mode  ·  click a template to add a node";
 
-    public string InspectorTitle => SelectedNode?.Title ?? "Select A Node";
+    public string InspectorTitle => SelectedNodes.Count switch
+    {
+        0 => "Select A Node",
+        1 => SelectedNode?.Title ?? "Select A Node",
+        _ => $"{SelectedNodes.Count} Nodes Selected",
+    };
 
-    public string InspectorCategory => SelectedNode?.Category ?? "Editor";
+    public string InspectorCategory => SelectedNodes.Count switch
+    {
+        0 => "Editor",
+        1 => SelectedNode?.Category ?? "Editor",
+        _ => "Multi Selection",
+    };
 
-    public string InspectorDescription => SelectedNode?.Description
-        ?? "Build the graph from the left library, connect outputs to inputs, and save snapshots from the toolbar.";
+    public string InspectorDescription => SelectedNodes.Count switch
+    {
+        0 => "Build the graph from the left library, connect outputs to inputs, and save snapshots from the toolbar.",
+        1 => SelectedNode?.Description ?? "Build the graph from the left library, connect outputs to inputs, and save snapshots from the toolbar.",
+        _ => "Delete removes the full selection. Copy and paste preserve internal links between the selected nodes.",
+    };
 
     public string InspectorInputs => SelectedNode is null
         ? "Select a node to inspect its input ports."
@@ -189,7 +227,9 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     public string SelectionCaption => SelectedNode is null
         ? "No selection"
-        : $"{SelectedNode.InputCount} inputs  ·  {SelectedNode.OutputCount} outputs";
+        : HasMultipleSelection
+            ? $"{SelectedNodes.Count} nodes selected  ·  primary {SelectedNode.Title}"
+            : $"{SelectedNode.InputCount} inputs  ·  {SelectedNode.OutputCount} outputs";
 
     public IReadOnlyList<MenuItemDescriptor> BuildContextMenu(ContextMenuContext context)
         => _contextMenuBuilder.Build(context);
@@ -203,21 +243,66 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     public void SelectNode(NodeViewModel? node)
     {
-        var changed = !ReferenceEquals(SelectedNode, node);
+        SelectSingleNode(node);
+    }
+
+    public void ClearSelection(bool updateStatus = false)
+        => SetSelection([], null, updateStatus ? "Selection cleared." : null);
+
+    public void SelectSingleNode(NodeViewModel? node, bool updateStatus = true)
+    {
+        if (node is null)
+        {
+            SetSelection([], null, updateStatus ? "Selection cleared." : null);
+            return;
+        }
+
+        SetSelection([node], node, updateStatus && !HasPendingConnection ? $"Selected {node.Title}." : null);
+    }
+
+    public void SetSelection(IReadOnlyList<NodeViewModel> nodes, NodeViewModel? primaryNode = null, string? status = null)
+    {
+        var uniqueNodes = nodes
+            .Where(node => Nodes.Contains(node))
+            .Distinct()
+            .ToList();
+
+        var nextPrimary = primaryNode is not null && uniqueNodes.Contains(primaryNode)
+            ? primaryNode
+            : uniqueNodes.LastOrDefault();
 
         foreach (var item in Nodes)
         {
-            item.IsSelected = ReferenceEquals(item, node);
+            item.IsSelected = uniqueNodes.Contains(item);
         }
 
-        SelectedNode = node;
-
-        if (changed && node is not null && !HasPendingConnection)
+        SelectedNodes.Clear();
+        foreach (var node in uniqueNodes)
         {
-            StatusMessage = $"Selected {node.Title}.";
+            SelectedNodes.Add(node);
+        }
+
+        SelectedNode = nextPrimary;
+
+        if (!string.IsNullOrWhiteSpace(status))
+        {
+            StatusMessage = status;
         }
 
         RebuildSelectedNodeParameters();
+        RaiseComputedPropertyChanges();
+    }
+
+    public IReadOnlyList<NodeViewModel> GetNodesInRectangle(GraphPoint firstCorner, GraphPoint secondCorner)
+    {
+        var left = Math.Min(firstCorner.X, secondCorner.X);
+        var top = Math.Min(firstCorner.Y, secondCorner.Y);
+        var right = Math.Max(firstCorner.X, secondCorner.X);
+        var bottom = Math.Max(firstCorner.Y, secondCorner.Y);
+
+        return Nodes
+            .Where(node => Intersects(node.Bounds, left, top, right, bottom))
+            .ToList();
     }
 
     public GraphPoint ScreenToWorld(GraphPoint screen)
@@ -235,12 +320,22 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
                 position.Y - (template.Size.Height / 2) + offset));
 
         Nodes.Add(node);
-        SelectNode(node);
+        SelectSingleNode(node);
         MarkDirty($"Added {template.Title}.");
     }
 
     public void MoveNode(NodeViewModel node, double deltaX, double deltaY)
     {
+        if (node.IsSelected && SelectedNodes.Count > 1)
+        {
+            foreach (var selectedNode in SelectedNodes)
+            {
+                selectedNode.MoveBy(deltaX, deltaY);
+            }
+
+            return;
+        }
+
         node.MoveBy(deltaX, deltaY);
     }
 
@@ -313,7 +408,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     public void ActivatePort(NodeViewModel node, PortViewModel port)
     {
-        SelectNode(node);
+        SelectSingleNode(node);
 
         if (port.Direction == PortDirection.Output)
         {
@@ -432,14 +527,39 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     }
 
     public void DeleteSelectedNode()
+        => DeleteSelection();
+
+    public void DeleteSelection()
     {
-        if (SelectedNode is null)
+        if (SelectedNodes.Count == 0)
         {
             StatusMessage = "Select a node before deleting.";
             return;
         }
 
-        DeleteNodeById(SelectedNode.Id);
+        var removedNodes = SelectedNodes.ToList();
+        var removedNodeIds = removedNodes.Select(node => node.Id).ToHashSet(StringComparer.Ordinal);
+        var removedConnections = Connections
+            .Where(connection =>
+                removedNodeIds.Contains(connection.SourceNodeId)
+                || removedNodeIds.Contains(connection.TargetNodeId))
+            .ToList();
+
+        foreach (var connection in removedConnections)
+        {
+            Connections.Remove(connection);
+        }
+
+        foreach (var node in removedNodes)
+        {
+            Nodes.Remove(node);
+        }
+
+        CancelPendingConnection();
+        SetSelection([], null);
+        MarkDirty(removedNodes.Count == 1
+            ? $"Deleted {removedNodes[0].Title}."
+            : $"Deleted {removedNodes.Count} nodes.");
     }
 
     public void DeleteNodeById(string nodeId)
@@ -450,6 +570,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             return;
         }
 
+        var remainingSelection = SelectedNodes.Where(selected => !ReferenceEquals(selected, node)).ToList();
         var removedConnections = Connections
             .Where(connection => connection.SourceNodeId == node.Id || connection.TargetNodeId == node.Id)
             .ToList();
@@ -460,8 +581,12 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         }
 
         Nodes.Remove(node);
-        CancelPendingConnection();
-        SelectNode(null);
+        if (PendingSourceNode?.Id == node.Id)
+        {
+            CancelPendingConnection();
+        }
+
+        SetSelection(remainingSelection, remainingSelection.LastOrDefault());
         MarkDirty($"Deleted {node.Title}.");
     }
 
@@ -475,12 +600,12 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
         var duplicate = new NodeViewModel(node.ToModel() with
         {
-            Id = CreateNodeId(node.Id),
+            Id = CreateNodeId(node.DefinitionId, node.Id),
             Position = new GraphPoint(node.X + 48, node.Y + 48),
         });
 
         Nodes.Add(duplicate);
-        SelectNode(duplicate);
+        SelectSingleNode(duplicate);
         MarkDirty($"Duplicated {node.Title}.");
     }
 
@@ -547,6 +672,97 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             .ToList();
     }
 
+    public void CopySelection()
+    {
+        if (SelectedNodes.Count == 0)
+        {
+            StatusMessage = "Select at least one node before copying.";
+            return;
+        }
+
+        var selectedIds = SelectedNodes.Select(node => node.Id).ToHashSet(StringComparer.Ordinal);
+        var copiedNodes = SelectedNodes
+            .Select(node => node.ToModel())
+            .ToList();
+
+        var copiedConnections = Connections
+            .Where(connection =>
+                selectedIds.Contains(connection.SourceNodeId)
+                && selectedIds.Contains(connection.TargetNodeId))
+            .Select(connection => connection.ToModel())
+            .ToList();
+
+        var origin = new GraphPoint(
+            copiedNodes.Min(node => node.Position.X),
+            copiedNodes.Min(node => node.Position.Y));
+
+        _selectionClipboard.Store(new GraphSelectionFragment(copiedNodes, copiedConnections, origin));
+        RaiseComputedPropertyChanges();
+        StatusMessage = copiedNodes.Count == 1
+            ? $"Copied {copiedNodes[0].Title}."
+            : $"Copied {copiedNodes.Count} nodes.";
+    }
+
+    public void PasteSelection()
+    {
+        var fragment = _selectionClipboard.Peek();
+        if (fragment is null || fragment.Nodes.Count == 0)
+        {
+            StatusMessage = "Nothing copied yet.";
+            return;
+        }
+
+        var targetOrigin = _selectionClipboard.GetNextPasteOrigin(GetViewportCenter());
+        var nodeIdMap = new Dictionary<string, string>(StringComparer.Ordinal);
+        var pastedNodes = new List<NodeViewModel>(fragment.Nodes.Count);
+
+        foreach (var copiedNode in fragment.Nodes)
+        {
+            var newId = CreateNodeId(copiedNode.DefinitionId, copiedNode.Id);
+            nodeIdMap[copiedNode.Id] = newId;
+
+            var relativePosition = copiedNode.Position - fragment.Origin;
+            var pastedNode = new NodeViewModel(copiedNode with
+            {
+                Id = newId,
+                Position = targetOrigin + relativePosition,
+            });
+
+            Nodes.Add(pastedNode);
+            pastedNodes.Add(pastedNode);
+        }
+
+        foreach (var copiedConnection in fragment.Connections)
+        {
+            if (!nodeIdMap.TryGetValue(copiedConnection.SourceNodeId, out var sourceNodeId)
+                || !nodeIdMap.TryGetValue(copiedConnection.TargetNodeId, out var targetNodeId))
+            {
+                continue;
+            }
+
+            Connections.Add(new ConnectionViewModel(
+                CreateConnectionId(),
+                sourceNodeId,
+                copiedConnection.SourcePortId,
+                targetNodeId,
+                copiedConnection.TargetPortId,
+                copiedConnection.Label,
+                copiedConnection.AccentHex,
+                copiedConnection.ConversionId));
+        }
+
+        if (pastedNodes.Count == 0)
+        {
+            StatusMessage = "Nothing pasted.";
+            return;
+        }
+
+        SetSelection(pastedNodes, pastedNodes[^1]);
+        MarkDirty(pastedNodes.Count == 1
+            ? $"Pasted {pastedNodes[0].Title}."
+            : $"Pasted {pastedNodes.Count} nodes.");
+    }
+
     public void SaveWorkspace()
     {
         try
@@ -575,7 +791,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             var document = _workspaceService.Load();
             LoadDocument(document, "Workspace loaded from disk.", markClean: true);
             CancelPendingConnection();
-            SelectNode(null);
+            ClearSelection();
             ResetView(updateStatus: false);
             return true;
         }
@@ -629,6 +845,9 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
                 connection.ConversionId));
         }
 
+        SelectedNodes.Clear();
+        SelectedNode = null;
+        SelectedNodeParameters.Clear();
         IsDirty = !markClean;
         StatusMessage = status;
         _suspendDirtyTracking = false;
@@ -655,11 +874,22 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     private string CreateNodeId(string templateKey)
         => CreateUniqueId(Nodes.Select(node => node.Id), $"{templateKey}-");
 
+    private string CreateNodeId(NodeDefinitionId? definitionId, string fallbackKey)
+        => CreateNodeId(
+            (definitionId?.Value ?? fallbackKey)
+            .Replace(".", "-", StringComparison.Ordinal));
+
     private string CreateConnectionId()
         => CreateUniqueId(Connections.Select(connection => connection.Id), "connection-");
 
     private bool CanFitView()
         => Nodes.Count > 0 && _viewportWidth > 0 && _viewportHeight > 0;
+
+    private static bool Intersects(NodeBounds bounds, double left, double top, double right, double bottom)
+        => bounds.X < right
+           && (bounds.X + bounds.Width) > left
+           && bounds.Y < bottom
+           && (bounds.Y + bounds.Height) > top;
 
     partial void OnZoomChanged(double value) => RaiseComputedPropertyChanges();
 
@@ -689,6 +919,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             }
         }
 
+        CoerceSelectionToExistingNodes();
         FitViewCommand.NotifyCanExecuteChanged();
         RaiseComputedPropertyChanges();
     }
@@ -716,11 +947,17 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     private void RaiseComputedPropertyChanges()
     {
         DeleteSelectionCommand.NotifyCanExecuteChanged();
+        CopySelectionCommand.NotifyCanExecuteChanged();
+        PasteCommand.NotifyCanExecuteChanged();
         CancelPendingConnectionCommand.NotifyCanExecuteChanged();
         FitViewCommand.NotifyCanExecuteChanged();
 
         OnPropertyChanged(nameof(HasPendingConnection));
+        OnPropertyChanged(nameof(HasSelection));
+        OnPropertyChanged(nameof(HasMultipleSelection));
         OnPropertyChanged(nameof(CanDeleteSelection));
+        OnPropertyChanged(nameof(CanCopySelection));
+        OnPropertyChanged(nameof(CanPaste));
         OnPropertyChanged(nameof(HasEditableParameters));
         OnPropertyChanged(nameof(StatsCaption));
         OnPropertyChanged(nameof(WorkspaceCaption));
@@ -734,6 +971,30 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         OnPropertyChanged(nameof(InspectorUpstream));
         OnPropertyChanged(nameof(InspectorDownstream));
         OnPropertyChanged(nameof(SelectionCaption));
+    }
+
+    private void CoerceSelectionToExistingNodes()
+    {
+        if (SelectedNodes.Count == 0 && SelectedNode is null)
+        {
+            return;
+        }
+
+        var nextSelection = SelectedNodes
+            .Where(Nodes.Contains)
+            .Distinct()
+            .ToList();
+
+        var nextPrimary = SelectedNode is not null && nextSelection.Contains(SelectedNode)
+            ? SelectedNode
+            : nextSelection.LastOrDefault();
+
+        if (nextSelection.SequenceEqual(SelectedNodes) && ReferenceEquals(nextPrimary, SelectedNode))
+        {
+            return;
+        }
+
+        SetSelection(nextSelection, nextPrimary);
     }
 
     private void RemoveConnections(Func<ConnectionViewModel, bool> predicate, string status)
@@ -832,7 +1093,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     {
         SelectedNodeParameters.Clear();
 
-        if (SelectedNode?.DefinitionId is null)
+        if (SelectedNodes.Count != 1 || SelectedNode?.DefinitionId is null)
         {
             OnPropertyChanged(nameof(HasEditableParameters));
             return;

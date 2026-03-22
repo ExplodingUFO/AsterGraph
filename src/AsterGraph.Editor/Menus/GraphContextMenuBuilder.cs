@@ -55,7 +55,12 @@ internal sealed class GraphContextMenuBuilder
             MenuItemDescriptor.Separator("canvas-sep-2"),
             new MenuItemDescriptor("canvas-save", "Save Snapshot", _editor.SaveCommand, iconKey: "save"),
             new MenuItemDescriptor("canvas-load", "Load Snapshot", _editor.LoadCommand, iconKey: "load"),
-            new MenuItemDescriptor("canvas-paste", "Paste", iconKey: "paste", isEnabled: false),
+            new MenuItemDescriptor(
+                "canvas-paste",
+                "Paste",
+                _editor.PasteCommand,
+                iconKey: "paste",
+                isEnabled: _editor.PasteCommand.CanExecute(null)),
             _editor.HasPendingConnection
                 ? new MenuItemDescriptor("canvas-cancel-pending", "Cancel Pending Connection", _editor.CancelPendingConnectionCommand, iconKey: "cancel")
                 : new MenuItemDescriptor("canvas-cancel-pending", "Cancel Pending Connection", iconKey: "cancel", isEnabled: false),
