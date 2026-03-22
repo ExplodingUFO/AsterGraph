@@ -15,4 +15,10 @@ public sealed record AvaloniaStylePalette(
     SolidColorBrush InspectorCardBrush,
     SolidColorBrush InputBackgroundBrush,
     SolidColorBrush InputBorderBrush,
-    SolidColorBrush ValidationErrorBrush);
+    SolidColorBrush ValidationErrorBrush,
+    SolidColorBrush ContextMenuBackgroundBrush,
+    SolidColorBrush ContextMenuBorderBrush,
+    SolidColorBrush ContextMenuForegroundBrush,
+    SolidColorBrush ContextMenuHoverBrush,
+    SolidColorBrush ContextMenuDisabledForegroundBrush,
+    SolidColorBrush ContextMenuSeparatorBrush);

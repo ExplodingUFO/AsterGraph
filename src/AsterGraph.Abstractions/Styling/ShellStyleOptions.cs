@@ -22,6 +22,16 @@ public sealed record ShellStyleOptions
 
     public string HighlightHex { get; init; } = "#7FE7D7";
 
+    public double LibraryPanelWidth { get; init; } = 280;
+
+    public double InspectorPanelWidth { get; init; } = 340;
+
+    public double EyebrowFontSize { get; init; } = 11;
+
+    public double TitleFontSize { get; init; } = 30;
+
+    public double BodyFontSize { get; init; } = 13;
+
     public double DefaultCornerRadius { get; init; } = 24;
 
     public double DefaultSpacing { get; init; } = 16;

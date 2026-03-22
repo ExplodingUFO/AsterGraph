@@ -16,4 +16,51 @@
   <SolidColorBrush x:Key="AsterGraph.BodyBrush" Color="#C6D7E3" />
   <SolidColorBrush x:Key="AsterGraph.EyebrowBrush" Color="#7FA6C2" />
   <SolidColorBrush x:Key="AsterGraph.HighlightBrush" Color="#7FE7D7" />
+  <SolidColorBrush x:Key="AsterGraph.InspectorCardBrush" Color="#0F1825" />
+  <SolidColorBrush x:Key="AsterGraph.InputBackgroundBrush" Color="#0C1520" />
+  <SolidColorBrush x:Key="AsterGraph.InputBorderBrush" Color="#2A465D" />
+  <SolidColorBrush x:Key="AsterGraph.ValidationErrorBrush" Color="#FF9B9B" />
+  <SolidColorBrush x:Key="AsterGraph.ContextMenuBackgroundBrush" Color="#111C29" />
+  <SolidColorBrush x:Key="AsterGraph.ContextMenuBorderBrush" Color="#22354A" />
+  <SolidColorBrush x:Key="AsterGraph.ContextMenuForegroundBrush" Color="#F4FBFF" />
+  <SolidColorBrush x:Key="AsterGraph.ContextMenuHoverBrush" Color="#193045" />
+  <SolidColorBrush x:Key="AsterGraph.ContextMenuDisabledForegroundBrush" Color="#6A8091" />
+  <SolidColorBrush x:Key="AsterGraph.ContextMenuSeparatorBrush" Color="#2A465D" />
+
+  <CornerRadius x:Key="AsterGraph.DefaultCornerRadius">24</CornerRadius>
+  <CornerRadius x:Key="AsterGraph.InspectorCardCornerRadius">14</CornerRadius>
+  <CornerRadius x:Key="AsterGraph.InspectorSectionCornerRadius">18</CornerRadius>
+  <CornerRadius x:Key="AsterGraph.ToolbarButtonCornerRadius">16</CornerRadius>
+  <CornerRadius x:Key="AsterGraph.PillCornerRadius">999</CornerRadius>
+  <CornerRadius x:Key="AsterGraph.TemplateCardCornerRadius">20</CornerRadius>
+  <CornerRadius x:Key="AsterGraph.ContextMenuCornerRadius">10</CornerRadius>
+  <CornerRadius x:Key="AsterGraph.ContextMenuItemCornerRadius">8</CornerRadius>
+
+  <Thickness x:Key="AsterGraph.ShellPadding">18</Thickness>
+  <Thickness x:Key="AsterGraph.HeroPanelPadding">22,18</Thickness>
+  <Thickness x:Key="AsterGraph.SidePanelPadding">18</Thickness>
+  <Thickness x:Key="AsterGraph.InspectorPanelPadding">20</Thickness>
+  <Thickness x:Key="AsterGraph.CanvasFramePadding">8</Thickness>
+  <Thickness x:Key="AsterGraph.StatusPanelPadding">18,12</Thickness>
+  <Thickness x:Key="AsterGraph.ToolbarButtonPadding">16,10</Thickness>
+  <Thickness x:Key="AsterGraph.ToolbarButtonMargin">0,0,10,0</Thickness>
+  <Thickness x:Key="AsterGraph.PillPadding">12,6</Thickness>
+  <Thickness x:Key="AsterGraph.TemplateCardPadding">16</Thickness>
+  <Thickness x:Key="AsterGraph.InspectorSectionPadding">14</Thickness>
+  <Thickness x:Key="AsterGraph.ContextMenuBorderThickness">1</Thickness>
+  <Thickness x:Key="AsterGraph.ContextMenuItemPadding">12,8</Thickness>
+
+  <x:Double x:Key="AsterGraph.DefaultSpacing">16</x:Double>
+  <x:Double x:Key="AsterGraph.LibraryPanelWidth">280</x:Double>
+  <x:Double x:Key="AsterGraph.InspectorPanelWidth">340</x:Double>
+  <x:Double x:Key="AsterGraph.ShellEyebrowFontSize">11</x:Double>
+  <x:Double x:Key="AsterGraph.ShellTitleFontSize">30</x:Double>
+  <x:Double x:Key="AsterGraph.ShellBodyFontSize">13</x:Double>
+  <x:Double x:Key="AsterGraph.InspectorTitleFontSize">24</x:Double>
+  <x:Double x:Key="AsterGraph.InspectorBodyFontSize">13</x:Double>
+  <x:Double x:Key="AsterGraph.InspectorCaptionFontSize">11</x:Double>
+  <x:Double x:Key="AsterGraph.InspectorSectionSpacing">12</x:Double>
+  <x:Double x:Key="AsterGraph.ContextMenuItemFontSize">12</x:Double>
+  <x:Double x:Key="AsterGraph.ContextMenuItemMinWidth">220</x:Double>
+  <x:Double x:Key="AsterGraph.ContextMenuIconFontSize">11</x:Double>
 </ResourceDictionary>

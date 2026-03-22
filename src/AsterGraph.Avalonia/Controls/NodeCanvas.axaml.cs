@@ -10,6 +10,7 @@ using Avalonia.Media;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using AsterGraph.Abstractions.Styling;
+using AsterGraph.Avalonia.Menus;
 using AsterGraph.Avalonia.Styling;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Geometry;
@@ -28,6 +29,7 @@ public partial class NodeCanvas : UserControl
     private Canvas? _connectionLayer;
     private Canvas? _nodeLayer;
     private GridBackground? _backgroundGrid;
+    private readonly GraphContextMenuPresenter _contextMenuPresenter = new();
     private NodeViewModel? _dragNode;
     private bool _isPanning;
     private Point _lastPointerPosition;
@@ -161,29 +163,33 @@ public partial class NodeCanvas : UserControl
 
         var header = new Border
         {
-            Padding = new Thickness(16, 14, 16, 12),
-            CornerRadius = new CornerRadius(20, 20, 0, 0),
+            Padding = new Thickness(
+                nodeStyle.HeaderHorizontalPadding,
+                nodeStyle.HeaderTopPadding,
+                nodeStyle.HeaderHorizontalPadding,
+                nodeStyle.HeaderBottomPadding),
+            CornerRadius = new CornerRadius(nodeStyle.CornerRadius, nodeStyle.CornerRadius, 0, 0),
         };
 
-        var headerStack = new StackPanel { Spacing = 4 };
+        var headerStack = new StackPanel { Spacing = nodeStyle.HeaderSpacing };
         headerStack.Children.Add(new TextBlock
         {
             Text = node.Category.ToUpperInvariant(),
-            FontSize = 11,
+            FontSize = nodeStyle.CategoryFontSize,
             FontWeight = FontWeight.Bold,
             Foreground = BrushFactory.Solid(nodeStyle.CategoryTextHex, nodeStyle.CategoryTextOpacity),
         });
         headerStack.Children.Add(new TextBlock
         {
             Text = node.Title,
-            FontSize = 18,
+            FontSize = nodeStyle.TitleFontSize,
             FontWeight = FontWeight.SemiBold,
             Foreground = BrushFactory.Solid(nodeStyle.TitleTextHex),
         });
         headerStack.Children.Add(new TextBlock
         {
             Text = node.Subtitle,
-            FontSize = 12,
+            FontSize = nodeStyle.SubtitleFontSize,
             Foreground = BrushFactory.Solid(nodeStyle.SubtitleTextHex, nodeStyle.SubtitleTextOpacity),
         });
         header.Child = headerStack;
@@ -191,21 +197,25 @@ public partial class NodeCanvas : UserControl
 
         var body = new Grid
         {
-            Margin = new Thickness(16, 12, 16, 16),
+            Margin = new Thickness(
+                nodeStyle.BodyHorizontalPadding,
+                nodeStyle.BodyTopPadding,
+                nodeStyle.BodyHorizontalPadding,
+                nodeStyle.BodyBottomPadding),
             RowDefinitions = new RowDefinitions("Auto,*"),
             ColumnDefinitions = new ColumnDefinitions("*,*"),
-            ColumnSpacing = 14,
-            RowSpacing = 12,
+            ColumnSpacing = nodeStyle.BodyColumnSpacing,
+            RowSpacing = nodeStyle.BodyRowSpacing,
         };
         Grid.SetRow(body, 1);
 
         var description = new TextBlock
         {
             Text = node.Description,
-            FontSize = 12,
+            FontSize = nodeStyle.DescriptionFontSize,
             TextWrapping = TextWrapping.Wrap,
             Foreground = BrushFactory.Solid(nodeStyle.DescriptionTextHex, nodeStyle.DescriptionTextOpacity),
-            MaxHeight = 40,
+            MaxHeight = nodeStyle.DescriptionMaxHeight,
         };
         Grid.SetColumnSpan(description, 2);
         body.Children.Add(description);
@@ -287,13 +297,13 @@ public partial class NodeCanvas : UserControl
 
             var text = new StackPanel
             {
-                Spacing = 1,
+                Spacing = portStyle.TextSpacing,
                 HorizontalAlignment = isInput ? HorizontalAlignment.Left : HorizontalAlignment.Right,
             };
             text.Children.Add(new TextBlock
             {
                 Text = port.Label,
-                FontSize = 12,
+                FontSize = portStyle.LabelFontSize,
                 FontWeight = FontWeight.Medium,
                 Foreground = BrushFactory.Solid(portStyle.LabelHex),
                 TextAlignment = isInput ? TextAlignment.Left : TextAlignment.Right,
@@ -301,7 +311,7 @@ public partial class NodeCanvas : UserControl
             text.Children.Add(new TextBlock
             {
                 Text = port.DataType,
-                FontSize = 10,
+                FontSize = portStyle.TypeFontSize,
                 Foreground = BrushFactory.Solid(portStyle.TypeHex, portStyle.TypeOpacity),
                 TextAlignment = isInput ? TextAlignment.Left : TextAlignment.Right,
             });
@@ -470,13 +480,13 @@ public partial class NodeCanvas : UserControl
         {
             Background = BrushFactory.Solid(connectionStyle.LabelBackgroundHex, connectionStyle.LabelBackgroundOpacity),
             BorderBrush = BrushFactory.Solid(connection.AccentHex, connectionStyle.LabelBorderOpacity),
-            BorderThickness = new Thickness(1),
-            CornerRadius = new CornerRadius(999),
-            Padding = new Thickness(10, 4),
+            BorderThickness = new Thickness(connectionStyle.LabelBorderThickness),
+            CornerRadius = new CornerRadius(connectionStyle.LabelCornerRadius),
+            Padding = new Thickness(connectionStyle.LabelHorizontalPadding, connectionStyle.LabelVerticalPadding),
             Child = new TextBlock
             {
                 Text = connection.Label,
-                FontSize = 10,
+                FontSize = connectionStyle.LabelFontSize,
                 Foreground = BrushFactory.Solid(connectionStyle.LabelForegroundHex, connectionStyle.LabelForegroundOpacity),
             },
         };
@@ -499,8 +509,8 @@ public partial class NodeCanvas : UserControl
             args.Handled = true;
         };
 
-        Canvas.SetLeft(chip, midpoint.X + 8);
-        Canvas.SetTop(chip, midpoint.Y - 12);
+        Canvas.SetLeft(chip, midpoint.X + connectionStyle.LabelOffsetX);
+        Canvas.SetTop(chip, midpoint.Y + connectionStyle.LabelOffsetY);
         _connectionLayer.Children.Add(chip);
     }
 
@@ -824,44 +834,7 @@ public partial class NodeCanvas : UserControl
             return;
         }
 
-        var menuStyle = ViewModel.StyleOptions.ContextMenu;
-        var menu = new ContextMenu
-        {
-            PlacementTarget = target,
-            Placement = PlacementMode.Pointer,
-            Background = BrushFactory.Solid(menuStyle.BackgroundHex),
-            BorderBrush = BrushFactory.Solid(menuStyle.BorderHex),
-            ItemsSource = descriptors.Select(BuildMenuControl).ToList(),
-        };
-
-        menu.Open(target);
-    }
-
-    private object BuildMenuControl(MenuItemDescriptor descriptor)
-    {
-        var menuStyle = ViewModel?.StyleOptions.ContextMenu ?? GraphEditorStyleOptions.Default.ContextMenu;
-
-        if (descriptor.IsSeparator)
-        {
-            return new Separator();
-        }
-
-        var menuItem = new MenuItem
-        {
-            Header = descriptor.Header,
-            Command = descriptor.Command,
-            CommandParameter = descriptor.CommandParameter,
-            IsEnabled = descriptor.IsEnabled,
-            Foreground = BrushFactory.Solid(descriptor.IsEnabled ? ViewModel?.StyleOptions.Shell.HeadlineHex ?? GraphEditorStyleOptions.Default.Shell.HeadlineHex : menuStyle.DisabledForegroundHex),
-            Background = BrushFactory.Solid(menuStyle.BackgroundHex),
-        };
-
-        if (descriptor.HasChildren)
-        {
-            menuItem.ItemsSource = descriptor.Children.Select(BuildMenuControl).ToList();
-        }
-
-        return menuItem;
+        _contextMenuPresenter.Open(target, descriptors, ViewModel.StyleOptions.ContextMenu);
     }
 
     private sealed record NodeVisual(

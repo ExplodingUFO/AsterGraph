@@ -18,10 +18,19 @@ public partial class MainWindowViewModel : ViewModelBase
             Shell = GraphEditorStyleOptions.Default.Shell with
             {
                 HighlightHex = "#9EF6C9",
+                LibraryPanelWidth = 296,
+                InspectorPanelWidth = 356,
             },
             Connection = GraphEditorStyleOptions.Default.Connection with
             {
                 Thickness = 3.4,
+            },
+            ContextMenu = GraphEditorStyleOptions.Default.ContextMenu with
+            {
+                BackgroundHex = "#0E1824",
+                HoverHex = "#21425C",
+                BorderHex = "#34536B",
+                SeparatorHex = "#42637C",
             },
         };
 

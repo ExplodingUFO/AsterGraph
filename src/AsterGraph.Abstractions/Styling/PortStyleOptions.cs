@@ -6,6 +6,12 @@ public sealed record PortStyleOptions
 
     public double RowSpacing { get; init; } = 8;
 
+    public double TextSpacing { get; init; } = 1;
+
+    public double LabelFontSize { get; init; } = 12;
+
+    public double TypeFontSize { get; init; } = 10;
+
     public string LabelHex { get; init; } = "#EFF8FF";
 
     public string TypeHex { get; init; } = "#9DB8CB";

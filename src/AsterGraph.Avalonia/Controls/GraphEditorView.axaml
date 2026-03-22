@@ -5,34 +5,79 @@
              x:Class="AsterGraph.Avalonia.Controls.GraphEditorView"
              x:Name="Root"
              Focusable="True">
+  <UserControl.Styles>
+    <Style Selector="Button.astergraph-toolbar-action">
+      <Setter Property="Margin" Value="{DynamicResource AsterGraph.ToolbarButtonMargin}" />
+      <Setter Property="Padding" Value="{DynamicResource AsterGraph.ToolbarButtonPadding}" />
+      <Setter Property="CornerRadius" Value="{DynamicResource AsterGraph.ToolbarButtonCornerRadius}" />
+      <Setter Property="Background" Value="{DynamicResource AsterGraph.BadgeBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource AsterGraph.PanelBorderBrush}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="Foreground" Value="{DynamicResource AsterGraph.HeadlineBrush}" />
+      <Setter Property="FontSize" Value="{DynamicResource AsterGraph.InspectorBodyFontSize}" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <Style Selector="Button.astergraph-template-card">
+      <Setter Property="Padding" Value="{DynamicResource AsterGraph.TemplateCardPadding}" />
+      <Setter Property="CornerRadius" Value="{DynamicResource AsterGraph.TemplateCardCornerRadius}" />
+      <Setter Property="Background" Value="{DynamicResource AsterGraph.BadgeBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource AsterGraph.PanelBorderBrush}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="Foreground" Value="{DynamicResource AsterGraph.BodyBrush}" />
+      <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    </Style>
+
+    <Style Selector="Border.astergraph-pill">
+      <Setter Property="Background" Value="{DynamicResource AsterGraph.BadgeBrush}" />
+      <Setter Property="CornerRadius" Value="{DynamicResource AsterGraph.PillCornerRadius}" />
+      <Setter Property="Padding" Value="{DynamicResource AsterGraph.PillPadding}" />
+    </Style>
+
+    <Style Selector="Border.astergraph-inspector-section">
+      <Setter Property="Background" Value="{DynamicResource AsterGraph.BadgeBrush}" />
+      <Setter Property="CornerRadius" Value="{DynamicResource AsterGraph.InspectorSectionCornerRadius}" />
+      <Setter Property="Padding" Value="{DynamicResource AsterGraph.InspectorSectionPadding}" />
+    </Style>
+
+    <Style Selector="TextBox.astergraph-input">
+      <Setter Property="Background" Value="{DynamicResource AsterGraph.InputBackgroundBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource AsterGraph.InputBorderBrush}" />
+    </Style>
+
+    <Style Selector="ComboBox.astergraph-input">
+      <Setter Property="Background" Value="{DynamicResource AsterGraph.InputBackgroundBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource AsterGraph.InputBorderBrush}" />
+    </Style>
+  </UserControl.Styles>
   <Border Background="{DynamicResource AsterGraph.ShellBackgroundBrush}"
-          Padding="18"
+          Padding="{DynamicResource AsterGraph.ShellPadding}"
           DataContext="{Binding Editor, ElementName=Root}">
     <Grid RowDefinitions="Auto,*,Auto"
-          ColumnDefinitions="280,*,340"
-          RowSpacing="16"
-          ColumnSpacing="16">
+          ColumnDefinitions="Auto,*,Auto"
+          RowSpacing="{DynamicResource AsterGraph.DefaultSpacing}"
+          ColumnSpacing="{DynamicResource AsterGraph.DefaultSpacing}">
       <Border Grid.ColumnSpan="3"
               Background="{DynamicResource AsterGraph.PanelBrush}"
               BorderBrush="{DynamicResource AsterGraph.PanelBorderBrush}"
               BorderThickness="1"
               CornerRadius="{DynamicResource AsterGraph.DefaultCornerRadius}"
-              Padding="22,18">
+              Padding="{DynamicResource AsterGraph.HeroPanelPadding}">
         <Grid RowDefinitions="Auto,Auto"
               RowSpacing="18">
           <Grid ColumnDefinitions="*,Auto"
                 ColumnSpacing="20">
             <StackPanel Spacing="6">
               <TextBlock Text="NODE GRAPH PRODUCT DEMO"
-                         FontSize="11"
+                         FontSize="{DynamicResource AsterGraph.ShellEyebrowFontSize}"
                          FontWeight="Bold"
                          Foreground="{DynamicResource AsterGraph.EyebrowBrush}" />
               <TextBlock Text="{Binding Title}"
-                         FontSize="30"
+                         FontSize="{DynamicResource AsterGraph.ShellTitleFontSize}"
                          FontWeight="SemiBold"
                          Foreground="{DynamicResource AsterGraph.HeadlineBrush}" />
               <TextBlock Text="{Binding Description}"
-                         FontSize="13"
+                         FontSize="{DynamicResource AsterGraph.ShellBodyFontSize}"
                          MaxWidth="960"
                          TextWrapping="Wrap"
                          Foreground="{DynamicResource AsterGraph.BodyBrush}" />
@@ -41,78 +86,34 @@
             <StackPanel Grid.Column="1"
                         HorizontalAlignment="Right"
                         Spacing="8">
-              <Border Background="{DynamicResource AsterGraph.BadgeBrush}"
-                      CornerRadius="999"
-                      Padding="12,6">
+              <Border Classes="astergraph-pill">
                 <TextBlock Text="{Binding StatsCaption}"
-                           FontSize="11"
+                           FontSize="{DynamicResource AsterGraph.ShellEyebrowFontSize}"
                            FontWeight="SemiBold"
                            Foreground="{DynamicResource AsterGraph.HeadlineBrush}" />
               </Border>
-              <Border Background="{DynamicResource AsterGraph.BadgeBrush}"
-                      CornerRadius="999"
-                      Padding="12,6">
+              <Border Classes="astergraph-pill">
                 <TextBlock Text="{Binding ModeCaption}"
-                           FontSize="11"
+                           FontSize="{DynamicResource AsterGraph.ShellEyebrowFontSize}"
                            Foreground="{DynamicResource AsterGraph.BodyBrush}" />
               </Border>
             </StackPanel>
           </Grid>
 
           <WrapPanel Orientation="Horizontal">
-            <Button Margin="0,0,10,0"
-                    Padding="16,10"
-                    CornerRadius="16"
-                    Background="{DynamicResource AsterGraph.BadgeBrush}"
-                    BorderBrush="{DynamicResource AsterGraph.PanelBorderBrush}"
-                    BorderThickness="1"
-                    Foreground="{DynamicResource AsterGraph.HeadlineBrush}"
-                    FontSize="12"
-                    FontWeight="SemiBold"
+            <Button Classes="astergraph-toolbar-action"
                     Command="{Binding SaveCommand}"
                     Content="Save Snapshot" />
-            <Button Margin="0,0,10,0"
-                    Padding="16,10"
-                    CornerRadius="16"
-                    Background="{DynamicResource AsterGraph.BadgeBrush}"
-                    BorderBrush="{DynamicResource AsterGraph.PanelBorderBrush}"
-                    BorderThickness="1"
-                    Foreground="{DynamicResource AsterGraph.HeadlineBrush}"
-                    FontSize="12"
-                    FontWeight="SemiBold"
+            <Button Classes="astergraph-toolbar-action"
                     Command="{Binding LoadCommand}"
                     Content="Load Snapshot" />
-            <Button Margin="0,0,10,0"
-                    Padding="16,10"
-                    CornerRadius="16"
-                    Background="{DynamicResource AsterGraph.BadgeBrush}"
-                    BorderBrush="{DynamicResource AsterGraph.PanelBorderBrush}"
-                    BorderThickness="1"
-                    Foreground="{DynamicResource AsterGraph.HeadlineBrush}"
-                    FontSize="12"
-                    FontWeight="SemiBold"
+            <Button Classes="astergraph-toolbar-action"
                     Command="{Binding FitViewCommand}"
                     Content="Fit View" />
-            <Button Margin="0,0,10,0"
-                    Padding="16,10"
-                    CornerRadius="16"
-                    Background="{DynamicResource AsterGraph.BadgeBrush}"
-                    BorderBrush="{DynamicResource AsterGraph.PanelBorderBrush}"
-                    BorderThickness="1"
-                    Foreground="{DynamicResource AsterGraph.HeadlineBrush}"
-                    FontSize="12"
-                    FontWeight="SemiBold"
+            <Button Classes="astergraph-toolbar-action"
                     Command="{Binding ResetViewCommand}"
                     Content="Reset View" />
-            <Button Margin="0,0,10,0"
-                    Padding="16,10"
-                    CornerRadius="16"
-                    Background="{DynamicResource AsterGraph.BadgeBrush}"
-                    BorderBrush="{DynamicResource AsterGraph.PanelBorderBrush}"
-                    BorderThickness="1"
-                    Foreground="{DynamicResource AsterGraph.HeadlineBrush}"
-                    FontSize="12"
-                    FontWeight="SemiBold"
+            <Button Classes="astergraph-toolbar-action"
                     Command="{Binding DeleteSelectionCommand}"
                     Content="Delete Selected" />
           </WrapPanel>
@@ -120,20 +121,21 @@
       </Border>
 
       <Border Grid.Row="1"
+              Width="{DynamicResource AsterGraph.LibraryPanelWidth}"
               Background="{DynamicResource AsterGraph.PanelBrush}"
               BorderBrush="{DynamicResource AsterGraph.PanelBorderBrush}"
               BorderThickness="1"
               CornerRadius="{DynamicResource AsterGraph.DefaultCornerRadius}"
-              Padding="18">
+              Padding="{DynamicResource AsterGraph.SidePanelPadding}">
         <Grid RowDefinitions="Auto,*"
               RowSpacing="14">
           <StackPanel Spacing="4">
             <TextBlock Text="Node Library"
-                       FontSize="12"
+                       FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                        FontWeight="Bold"
                        Foreground="{DynamicResource AsterGraph.EyebrowBrush}" />
             <TextBlock Text="Click a card to insert a node near the current viewport center."
-                       FontSize="12"
+                       FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                        TextWrapping="Wrap"
                        Foreground="{DynamicResource AsterGraph.BodyBrush}" />
           </StackPanel>
@@ -143,14 +145,8 @@
             <ItemsControl ItemsSource="{Binding NodeTemplates}">
               <ItemsControl.ItemTemplate>
                 <DataTemplate x:DataType="viewModels:NodeTemplateViewModel">
-                  <Button Margin="0,0,0,12"
-                          Padding="16"
-                          CornerRadius="20"
-                          Background="{DynamicResource AsterGraph.BadgeBrush}"
-                          BorderBrush="{DynamicResource AsterGraph.PanelBorderBrush}"
-                          BorderThickness="1"
-                          HorizontalContentAlignment="Stretch"
-                          Foreground="{DynamicResource AsterGraph.BodyBrush}"
+                  <Button Classes="astergraph-template-card"
+                          Margin="0,0,0,12"
                           Command="{Binding Editor.AddNodeCommand, ElementName=Root}"
                           CommandParameter="{Binding}">
                     <StackPanel Spacing="8">
@@ -171,9 +167,7 @@
                                  FontSize="12"
                                  TextWrapping="Wrap"
                                  Foreground="{DynamicResource AsterGraph.BodyBrush}" />
-                      <Border Background="{DynamicResource AsterGraph.BadgeBrush}"
-                              CornerRadius="999"
-                              Padding="10,4"
+                      <Border Classes="astergraph-pill"
                               HorizontalAlignment="Left">
                         <TextBlock Text="{Binding PortSummary}"
                                    FontSize="10"
@@ -195,128 +189,121 @@
               BorderBrush="{DynamicResource AsterGraph.PanelBorderBrush}"
               BorderThickness="1"
               CornerRadius="{DynamicResource AsterGraph.DefaultCornerRadius}"
-              Padding="8">
+              Padding="{DynamicResource AsterGraph.CanvasFramePadding}">
         <controls:NodeCanvas x:Name="PART_NodeCanvas"
                              ViewModel="{Binding}" />
       </Border>
 
       <Border Grid.Row="1"
               Grid.Column="2"
+              Width="{DynamicResource AsterGraph.InspectorPanelWidth}"
               Background="{DynamicResource AsterGraph.PanelBrush}"
               BorderBrush="{DynamicResource AsterGraph.PanelBorderBrush}"
               BorderThickness="1"
               CornerRadius="{DynamicResource AsterGraph.DefaultCornerRadius}"
-              Padding="20">
+              Padding="{DynamicResource AsterGraph.InspectorPanelPadding}">
         <ScrollViewer HorizontalScrollBarVisibility="Disabled">
           <StackPanel Spacing="18">
             <StackPanel Spacing="4">
               <TextBlock Text="Inspector"
-                         FontSize="12"
+                         FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                          FontWeight="Bold"
                          Foreground="{DynamicResource AsterGraph.EyebrowBrush}" />
               <TextBlock Text="{Binding InspectorTitle}"
-                         FontSize="24"
+                         FontSize="{DynamicResource AsterGraph.InspectorTitleFontSize}"
                          FontWeight="SemiBold"
                          Foreground="{DynamicResource AsterGraph.HeadlineBrush}" />
               <TextBlock Text="{Binding InspectorCategory}"
-                         FontSize="12"
+                         FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                          FontWeight="Bold"
                          Foreground="{DynamicResource AsterGraph.HighlightBrush}" />
               <TextBlock Text="{Binding SelectionCaption}"
-                         FontSize="11"
+                         FontSize="{DynamicResource AsterGraph.InspectorCaptionFontSize}"
                          Foreground="{DynamicResource AsterGraph.EyebrowBrush}" />
               <TextBlock Text="{Binding InspectorDescription}"
-                         FontSize="13"
+                         FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                          TextWrapping="Wrap"
                          Foreground="{DynamicResource AsterGraph.BodyBrush}" />
             </StackPanel>
 
-            <Border Background="{DynamicResource AsterGraph.BadgeBrush}"
-                    CornerRadius="18"
-                    Padding="14">
-              <StackPanel Spacing="12">
+            <Border Classes="astergraph-inspector-section">
+              <StackPanel Spacing="{DynamicResource AsterGraph.InspectorSectionSpacing}">
                 <StackPanel Spacing="4">
                   <TextBlock Text="Connections"
-                             FontSize="12"
+                             FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                              FontWeight="Bold"
                              Foreground="{DynamicResource AsterGraph.EyebrowBrush}" />
                   <TextBlock Text="{Binding InspectorConnections}"
-                             FontSize="12"
+                             FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                              TextWrapping="Wrap"
                              Foreground="{DynamicResource AsterGraph.BodyBrush}" />
                 </StackPanel>
                 <StackPanel Spacing="4">
                   <TextBlock Text="Inputs"
-                             FontSize="12"
+                             FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                              FontWeight="Bold"
                              Foreground="{DynamicResource AsterGraph.EyebrowBrush}" />
                   <TextBlock Text="{Binding InspectorInputs}"
-                             FontSize="12"
+                             FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                              TextWrapping="Wrap"
                              Foreground="{DynamicResource AsterGraph.BodyBrush}" />
                 </StackPanel>
                 <StackPanel Spacing="4">
                   <TextBlock Text="Outputs"
-                             FontSize="12"
+                             FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                              FontWeight="Bold"
                              Foreground="{DynamicResource AsterGraph.EyebrowBrush}" />
                   <TextBlock Text="{Binding InspectorOutputs}"
-                             FontSize="12"
+                             FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                              TextWrapping="Wrap"
                              Foreground="{DynamicResource AsterGraph.BodyBrush}" />
                 </StackPanel>
               </StackPanel>
             </Border>
 
-            <Border Background="{DynamicResource AsterGraph.BadgeBrush}"
-                    CornerRadius="18"
-                    Padding="14">
-              <StackPanel Spacing="12">
+            <Border Classes="astergraph-inspector-section">
+              <StackPanel Spacing="{DynamicResource AsterGraph.InspectorSectionSpacing}">
                 <StackPanel Spacing="4">
                   <TextBlock Text="Upstream"
-                             FontSize="12"
+                             FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                              FontWeight="Bold"
                              Foreground="{DynamicResource AsterGraph.EyebrowBrush}" />
                   <TextBlock Text="{Binding InspectorUpstream}"
-                             FontSize="12"
+                             FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                              TextWrapping="Wrap"
                              Foreground="{DynamicResource AsterGraph.BodyBrush}" />
                 </StackPanel>
                 <StackPanel Spacing="4">
                   <TextBlock Text="Downstream"
-                             FontSize="12"
+                             FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                              FontWeight="Bold"
                              Foreground="{DynamicResource AsterGraph.EyebrowBrush}" />
                   <TextBlock Text="{Binding InspectorDownstream}"
-                             FontSize="12"
+                             FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                              TextWrapping="Wrap"
                              Foreground="{DynamicResource AsterGraph.BodyBrush}" />
                 </StackPanel>
               </StackPanel>
             </Border>
 
-            <Border Background="{DynamicResource AsterGraph.BadgeBrush}"
-                    CornerRadius="18"
-                    Padding="14">
+            <Border Classes="astergraph-inspector-section">
               <StackPanel Spacing="8">
                 <TextBlock Text="Workspace"
-                           FontSize="12"
+                           FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                            FontWeight="Bold"
                            Foreground="{DynamicResource AsterGraph.EyebrowBrush}" />
                 <TextBlock Text="{Binding WorkspaceCaption}"
-                           FontSize="12"
+                           FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                            TextWrapping="Wrap"
                            Foreground="{DynamicResource AsterGraph.BodyBrush}" />
               </StackPanel>
             </Border>
 
-            <Border Background="{DynamicResource AsterGraph.BadgeBrush}"
-                    CornerRadius="18"
-                    Padding="14"
+            <Border Classes="astergraph-inspector-section"
                     IsVisible="{Binding HasEditableParameters}">
-              <StackPanel Spacing="12">
+              <StackPanel Spacing="{DynamicResource AsterGraph.InspectorSectionSpacing}">
                 <TextBlock Text="Parameters"
-                           FontSize="12"
+                           FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                            FontWeight="Bold"
                            Foreground="{DynamicResource AsterGraph.EyebrowBrush}" />
 
@@ -332,20 +319,19 @@
                         <StackPanel Spacing="8">
                           <StackPanel Spacing="2">
                             <TextBlock Text="{Binding DisplayName}"
-                                       FontSize="12"
+                                       FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                                        FontWeight="SemiBold"
                                        Foreground="{DynamicResource AsterGraph.HeadlineBrush}" />
                             <TextBlock Text="{Binding Description}"
-                                       FontSize="11"
+                                       FontSize="{DynamicResource AsterGraph.InspectorCaptionFontSize}"
                                        TextWrapping="Wrap"
                                        Foreground="{DynamicResource AsterGraph.BodyBrush}" />
                           </StackPanel>
 
                           <TextBox Text="{Binding StringValue}"
+                                   Classes="astergraph-input"
                                    IsVisible="{Binding UsesTextInput}"
                                    IsReadOnly="{Binding IsReadOnly}"
-                                   Background="{DynamicResource AsterGraph.InputBackgroundBrush}"
-                                   BorderBrush="{DynamicResource AsterGraph.InputBorderBrush}"
                                    Watermark="{Binding TypeId.Value}" />
 
                           <CheckBox Content="Enabled"
@@ -354,15 +340,14 @@
                                     IsEnabled="{Binding CanEdit}" />
 
                           <ComboBox ItemsSource="{Binding Options}"
+                                    Classes="astergraph-input"
                                     SelectedItem="{Binding SelectedOption}"
                                     IsVisible="{Binding IsEnum}"
-                                    Background="{DynamicResource AsterGraph.InputBackgroundBrush}"
-                                    BorderBrush="{DynamicResource AsterGraph.InputBorderBrush}"
                                     IsEnabled="{Binding CanEdit}" />
 
                           <TextBlock Text="{Binding ValidationMessage}"
                                      IsVisible="{Binding HasValidationError}"
-                                     FontSize="11"
+                                     FontSize="{DynamicResource AsterGraph.InspectorCaptionFontSize}"
                                      Foreground="{DynamicResource AsterGraph.ValidationErrorBrush}" />
                         </StackPanel>
                       </Border>
@@ -374,28 +359,22 @@
 
             <StackPanel Spacing="8">
               <TextBlock Text="Shortcuts"
-                         FontSize="12"
+                         FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                          FontWeight="Bold"
                          Foreground="{DynamicResource AsterGraph.EyebrowBrush}" />
-              <Border Background="{DynamicResource AsterGraph.BadgeBrush}"
-                      CornerRadius="16"
-                      Padding="12">
+              <Border Classes="astergraph-inspector-section">
                 <TextBlock Text="Context menu / toolbar: remove selected node"
-                           FontSize="12"
+                           FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                            Foreground="{DynamicResource AsterGraph.BodyBrush}" />
               </Border>
-              <Border Background="{DynamicResource AsterGraph.BadgeBrush}"
-                      CornerRadius="16"
-                      Padding="12">
+              <Border Classes="astergraph-inspector-section">
                 <TextBlock Text="Ctrl+S / Ctrl+O: save or load snapshot"
-                           FontSize="12"
+                           FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                            Foreground="{DynamicResource AsterGraph.BodyBrush}" />
               </Border>
-              <Border Background="{DynamicResource AsterGraph.BadgeBrush}"
-                      CornerRadius="16"
-                      Padding="12">
+              <Border Classes="astergraph-inspector-section">
                 <TextBlock Text="Escape: cancel pending connection"
-                           FontSize="12"
+                           FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                            Foreground="{DynamicResource AsterGraph.BodyBrush}" />
               </Border>
             </StackPanel>
@@ -409,21 +388,21 @@
               BorderBrush="{DynamicResource AsterGraph.PanelBorderBrush}"
               BorderThickness="1"
               CornerRadius="{DynamicResource AsterGraph.DefaultCornerRadius}"
-              Padding="18,12">
+              Padding="{DynamicResource AsterGraph.StatusPanelPadding}">
         <Grid ColumnDefinitions="2*,2*,3*"
               ColumnSpacing="18">
           <TextBlock Text="{Binding ModeCaption}"
-                     FontSize="12"
+                     FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                      TextWrapping="Wrap"
                      Foreground="{DynamicResource AsterGraph.BodyBrush}" />
           <TextBlock Grid.Column="1"
                      Text="{Binding StatsCaption}"
-                     FontSize="12"
+                     FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                      TextWrapping="Wrap"
                      Foreground="{DynamicResource AsterGraph.BodyBrush}" />
           <TextBlock Grid.Column="2"
                      Text="{Binding StatusMessage}"
-                     FontSize="12"
+                     FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                      TextWrapping="Wrap"
                      Foreground="{DynamicResource AsterGraph.HeadlineBrush}" />
         </Grid>
