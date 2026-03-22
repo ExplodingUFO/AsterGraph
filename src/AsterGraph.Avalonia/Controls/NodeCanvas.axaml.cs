@@ -257,11 +257,22 @@ public partial class NodeCanvas : UserControl
             }
 
             Focus();
-            ViewModel.SelectNode(node);
+            var targetKind = ContextMenuTargetKind.Node;
+            if (ViewModel.HasMultipleSelection && node.IsSelected)
+            {
+                // Keep the active multi-selection intact and surface batch tools when the user right-clicks within it.
+                ViewModel.SetSelection(ViewModel.SelectedNodes.ToList(), node);
+                targetKind = ContextMenuTargetKind.Selection;
+            }
+            else
+            {
+                ViewModel.SelectSingleNode(node);
+            }
+
             OpenContextMenu(
                 border,
                 new ContextMenuContext(
-                    ContextMenuTargetKind.Node,
+                    targetKind,
                     ResolveWorldPosition(args, this),
                     selectedNodeId: ViewModel.SelectedNode?.Id,
                     clickedNodeId: node.Id,
@@ -719,10 +730,11 @@ public partial class NodeCanvas : UserControl
             return;
         }
 
+        // Empty-canvas right-click reuses the selection menu when a multi-selection is active.
         OpenContextMenu(
             this,
             new ContextMenuContext(
-                ContextMenuTargetKind.Canvas,
+                ViewModel.HasMultipleSelection ? ContextMenuTargetKind.Selection : ContextMenuTargetKind.Canvas,
                 ResolveWorldPosition(args, this),
                 selectedNodeId: ViewModel.SelectedNode?.Id,
                 availableNodeDefinitions: ViewModel.NodeTemplates.Select(template => template.Definition).ToList()));

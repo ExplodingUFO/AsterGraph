@@ -31,4 +31,5 @@ internal sealed class GraphSelectionClipboard
 internal sealed record GraphSelectionFragment(
     IReadOnlyList<GraphNode> Nodes,
     IReadOnlyList<GraphConnection> Connections,
-    GraphPoint Origin);
+    GraphPoint Origin,
+    string? PrimaryNodeId = null);

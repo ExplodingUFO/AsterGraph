@@ -4,6 +4,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using Avalonia.VisualTree;
+using AsterGraph.Avalonia.Services;
 using AsterGraph.Avalonia.Styling;
 using AsterGraph.Editor.ViewModels;
 
@@ -34,8 +35,23 @@ public partial class GraphEditorView : UserControl
 
         if (change.Property == EditorProperty)
         {
-            ApplyStyleOptions(change.GetNewValue<GraphEditorViewModel?>());
+            change.GetOldValue<GraphEditorViewModel?>()?.SetTextClipboardBridge(null);
+            var editor = change.GetNewValue<GraphEditorViewModel?>();
+            ApplyStyleOptions(editor);
+            ApplyClipboardBridge(editor);
         }
+    }
+
+    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        base.OnAttachedToVisualTree(e);
+        ApplyClipboardBridge(Editor);
+    }
+
+    protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        Editor?.SetTextClipboardBridge(null);
+        base.OnDetachedFromVisualTree(e);
     }
 
     private void InitializeComponent()
@@ -53,6 +69,17 @@ public partial class GraphEditorView : UserControl
 
         var adapter = new GraphEditorStyleAdapter(editor.StyleOptions);
         adapter.ApplyResources(Resources);
+    }
+
+    private void ApplyClipboardBridge(GraphEditorViewModel? editor)
+    {
+        if (editor is null)
+        {
+            return;
+        }
+
+        // The editor only sees a plain-text clipboard bridge; Avalonia owns the actual platform clipboard access.
+        editor.SetTextClipboardBridge(new AvaloniaTextClipboardBridge(() => TopLevel.GetTopLevel(this)?.Clipboard));
     }
 
     private void HandleKeyDown(object? sender, KeyEventArgs args)

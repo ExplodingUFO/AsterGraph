@@ -13,6 +13,12 @@ internal interface IGraphContextMenuHost
 
     IEnumerable<NodeViewModel> Nodes { get; }
 
+    int SelectedNodeCount { get; }
+
+    ICommand DeleteSelectionCommand { get; }
+
+    ICommand CopySelectionCommand { get; }
+
     bool HasPendingConnection { get; }
 
     ICommand FitViewCommand { get; }
@@ -24,6 +30,22 @@ internal interface IGraphContextMenuHost
     ICommand LoadCommand { get; }
 
     ICommand PasteCommand { get; }
+
+    ICommand AlignLeftCommand { get; }
+
+    ICommand AlignCenterCommand { get; }
+
+    ICommand AlignRightCommand { get; }
+
+    ICommand AlignTopCommand { get; }
+
+    ICommand AlignMiddleCommand { get; }
+
+    ICommand AlignBottomCommand { get; }
+
+    ICommand DistributeHorizontallyCommand { get; }
+
+    ICommand DistributeVerticallyCommand { get; }
 
     ICommand CancelPendingConnectionCommand { get; }
 

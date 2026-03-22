@@ -373,7 +373,12 @@
                            Foreground="{DynamicResource AsterGraph.BodyBrush}" />
               </Border>
               <Border Classes="astergraph-inspector-section">
-                <TextBlock Text="Ctrl+C / Ctrl+V: copy and paste the current node selection"
+                <TextBlock Text="Right-click on a multi-selection: batch menu with align/distribute tools"
+                           FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
+                           Foreground="{DynamicResource AsterGraph.BodyBrush}" />
+              </Border>
+              <Border Classes="astergraph-inspector-section">
+                <TextBlock Text="Ctrl+C / Ctrl+V: copy and paste the current selection through the system clipboard"
                            FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                            Foreground="{DynamicResource AsterGraph.BodyBrush}" />
               </Border>

@@ -1,6 +1,8 @@
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -26,6 +28,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     private readonly IPortCompatibilityService _compatibilityService;
     private readonly GraphWorkspaceService _workspaceService;
     private readonly GraphSelectionClipboard _selectionClipboard;
+    private IGraphTextClipboardBridge? _textClipboardBridge;
     private readonly GraphContextMenuBuilder _contextMenuBuilder;
     private bool _suspendDirtyTracking;
     private double _viewportWidth;
@@ -49,8 +52,16 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         FitViewCommand = new RelayCommand(() => FitToViewport(_viewportWidth, _viewportHeight), CanFitView);
         ResetViewCommand = new RelayCommand(() => ResetView());
         DeleteSelectionCommand = new RelayCommand(DeleteSelection, () => CanDeleteSelection);
-        CopySelectionCommand = new RelayCommand(CopySelection, () => CanCopySelection);
-        PasteCommand = new RelayCommand(PasteSelection, () => CanPaste);
+        CopySelectionCommand = new AsyncRelayCommand(CopySelectionAsync, () => CanCopySelection);
+        PasteCommand = new AsyncRelayCommand(PasteSelectionAsync, () => CanPaste);
+        AlignLeftCommand = new RelayCommand(AlignSelectionLeft, () => CanAlignSelection);
+        AlignCenterCommand = new RelayCommand(AlignSelectionCenter, () => CanAlignSelection);
+        AlignRightCommand = new RelayCommand(AlignSelectionRight, () => CanAlignSelection);
+        AlignTopCommand = new RelayCommand(AlignSelectionTop, () => CanAlignSelection);
+        AlignMiddleCommand = new RelayCommand(AlignSelectionMiddle, () => CanAlignSelection);
+        AlignBottomCommand = new RelayCommand(AlignSelectionBottom, () => CanAlignSelection);
+        DistributeHorizontallyCommand = new RelayCommand(DistributeSelectionHorizontally, () => CanDistributeSelection);
+        DistributeVerticallyCommand = new RelayCommand(DistributeSelectionVertically, () => CanDistributeSelection);
         CancelPendingConnectionCommand = new RelayCommand(
             () => CancelPendingConnection("Connection preview cancelled."),
             () => HasPendingConnection);
@@ -112,9 +123,25 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     public IRelayCommand DeleteSelectionCommand { get; }
 
-    public IRelayCommand CopySelectionCommand { get; }
+    public IAsyncRelayCommand CopySelectionCommand { get; }
 
-    public IRelayCommand PasteCommand { get; }
+    public IAsyncRelayCommand PasteCommand { get; }
+
+    public IRelayCommand AlignLeftCommand { get; }
+
+    public IRelayCommand AlignCenterCommand { get; }
+
+    public IRelayCommand AlignRightCommand { get; }
+
+    public IRelayCommand AlignTopCommand { get; }
+
+    public IRelayCommand AlignMiddleCommand { get; }
+
+    public IRelayCommand AlignBottomCommand { get; }
+
+    public IRelayCommand DistributeHorizontallyCommand { get; }
+
+    public IRelayCommand DistributeVerticallyCommand { get; }
 
     public IRelayCommand CancelPendingConnectionCommand { get; }
 
@@ -123,6 +150,12 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     IEnumerable<NodeTemplateViewModel> IGraphContextMenuHost.NodeTemplates => NodeTemplates;
 
     IEnumerable<NodeViewModel> IGraphContextMenuHost.Nodes => Nodes;
+
+    int IGraphContextMenuHost.SelectedNodeCount => SelectedNodes.Count;
+
+    ICommand IGraphContextMenuHost.DeleteSelectionCommand => DeleteSelectionCommand;
+
+    ICommand IGraphContextMenuHost.CopySelectionCommand => CopySelectionCommand;
 
     ICommand IGraphContextMenuHost.FitViewCommand => FitViewCommand;
 
@@ -133,6 +166,22 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     ICommand IGraphContextMenuHost.LoadCommand => LoadCommand;
 
     ICommand IGraphContextMenuHost.PasteCommand => PasteCommand;
+
+    ICommand IGraphContextMenuHost.AlignLeftCommand => AlignLeftCommand;
+
+    ICommand IGraphContextMenuHost.AlignCenterCommand => AlignCenterCommand;
+
+    ICommand IGraphContextMenuHost.AlignRightCommand => AlignRightCommand;
+
+    ICommand IGraphContextMenuHost.AlignTopCommand => AlignTopCommand;
+
+    ICommand IGraphContextMenuHost.AlignMiddleCommand => AlignMiddleCommand;
+
+    ICommand IGraphContextMenuHost.AlignBottomCommand => AlignBottomCommand;
+
+    ICommand IGraphContextMenuHost.DistributeHorizontallyCommand => DistributeHorizontallyCommand;
+
+    ICommand IGraphContextMenuHost.DistributeVerticallyCommand => DistributeVerticallyCommand;
 
     ICommand IGraphContextMenuHost.CancelPendingConnectionCommand => CancelPendingConnectionCommand;
 
@@ -170,7 +219,11 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     public bool CanCopySelection => HasSelection;
 
-    public bool CanPaste => _selectionClipboard.HasContent;
+    public bool CanPaste => _selectionClipboard.HasContent || _textClipboardBridge is not null;
+
+    public bool CanAlignSelection => SelectedNodes.Count >= 2;
+
+    public bool CanDistributeSelection => SelectedNodes.Count >= 3;
 
     public bool HasEditableParameters => SelectedNodes.Count == 1 && SelectedNodeParameters.Count > 0;
 
@@ -239,6 +292,12 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         _viewportWidth = width;
         _viewportHeight = height;
         FitViewCommand.NotifyCanExecuteChanged();
+    }
+
+    public void SetTextClipboardBridge(IGraphTextClipboardBridge? bridge)
+    {
+        _textClipboardBridge = bridge;
+        RaiseComputedPropertyChanges();
     }
 
     public void SelectNode(NodeViewModel? node)
@@ -562,6 +621,30 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             : $"Deleted {removedNodes.Count} nodes.");
     }
 
+    public void AlignSelectionLeft()
+        => ApplySelectionLayout(NodeSelectionLayoutService.AlignLeft, minimumCount: 2, "Aligned selection left.");
+
+    public void AlignSelectionCenter()
+        => ApplySelectionLayout(NodeSelectionLayoutService.AlignCenter, minimumCount: 2, "Aligned selection center.");
+
+    public void AlignSelectionRight()
+        => ApplySelectionLayout(NodeSelectionLayoutService.AlignRight, minimumCount: 2, "Aligned selection right.");
+
+    public void AlignSelectionTop()
+        => ApplySelectionLayout(NodeSelectionLayoutService.AlignTop, minimumCount: 2, "Aligned selection top.");
+
+    public void AlignSelectionMiddle()
+        => ApplySelectionLayout(NodeSelectionLayoutService.AlignMiddle, minimumCount: 2, "Aligned selection middle.");
+
+    public void AlignSelectionBottom()
+        => ApplySelectionLayout(NodeSelectionLayoutService.AlignBottom, minimumCount: 2, "Aligned selection bottom.");
+
+    public void DistributeSelectionHorizontally()
+        => ApplySelectionLayout(NodeSelectionLayoutService.DistributeHorizontally, minimumCount: 3, "Distributed selection horizontally.");
+
+    public void DistributeSelectionVertically()
+        => ApplySelectionLayout(NodeSelectionLayoutService.DistributeVertically, minimumCount: 3, "Distributed selection vertically.");
+
     public void DeleteNodeById(string nodeId)
     {
         var node = FindNode(nodeId);
@@ -672,14 +755,32 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             .ToList();
     }
 
-    public void CopySelection()
+    private void ApplySelectionLayout(Action<IReadOnlyList<NodeViewModel>> applyLayout, int minimumCount, string status)
     {
-        if (SelectedNodes.Count == 0)
+        var selectedNodes = SelectedNodes.ToList();
+        if (selectedNodes.Count < minimumCount)
         {
-            StatusMessage = "Select at least one node before copying.";
+            StatusMessage = minimumCount switch
+            {
+                2 => "Select at least two nodes for alignment.",
+                3 => "Select at least three nodes for distribution.",
+                _ => "Selection is too small for that operation.",
+            };
             return;
         }
 
+        applyLayout(selectedNodes);
+        MarkDirty(status);
+    }
+
+    private GraphSelectionFragment? CreateSelectionFragment()
+    {
+        if (SelectedNodes.Count == 0)
+        {
+            return null;
+        }
+
+        // Copy only the induced subgraph so pasted fragments stay self-contained.
         var selectedIds = SelectedNodes.Select(node => node.Id).ToHashSet(StringComparer.Ordinal);
         var copiedNodes = SelectedNodes
             .Select(node => node.ToModel())
@@ -696,22 +797,60 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             copiedNodes.Min(node => node.Position.X),
             copiedNodes.Min(node => node.Position.Y));
 
-        _selectionClipboard.Store(new GraphSelectionFragment(copiedNodes, copiedConnections, origin));
-        RaiseComputedPropertyChanges();
-        StatusMessage = copiedNodes.Count == 1
-            ? $"Copied {copiedNodes[0].Title}."
-            : $"Copied {copiedNodes.Count} nodes.";
+        return new GraphSelectionFragment(
+            copiedNodes,
+            copiedConnections,
+            origin,
+            SelectedNode?.Id);
     }
 
-    public void PasteSelection()
+    private async Task<GraphSelectionFragment?> GetBestAvailableClipboardFragmentAsync()
     {
-        var fragment = _selectionClipboard.Peek();
+        if (_textClipboardBridge is not null)
+        {
+            var clipboardText = await _textClipboardBridge.ReadTextAsync(CancellationToken.None);
+            // Prefer system clipboard interop, but keep the in-memory fragment as a safe fallback.
+            if (GraphClipboardPayloadSerializer.TryDeserialize(clipboardText, out var systemFragment))
+            {
+                return systemFragment;
+            }
+        }
+
+        return _selectionClipboard.Peek();
+    }
+
+    public async Task CopySelectionAsync()
+    {
+        var fragment = CreateSelectionFragment();
+        if (fragment is null)
+        {
+            StatusMessage = "Select at least one node before copying.";
+            return;
+        }
+
+        _selectionClipboard.Store(fragment);
+        var clipboardJson = GraphClipboardPayloadSerializer.Serialize(fragment);
+        if (_textClipboardBridge is not null)
+        {
+            await _textClipboardBridge.WriteTextAsync(clipboardJson, CancellationToken.None);
+        }
+
+        RaiseComputedPropertyChanges();
+        StatusMessage = fragment.Nodes.Count == 1
+            ? $"Copied {fragment.Nodes[0].Title}."
+            : $"Copied {fragment.Nodes.Count} nodes.";
+    }
+
+    public async Task PasteSelectionAsync()
+    {
+        var fragment = await GetBestAvailableClipboardFragmentAsync();
         if (fragment is null || fragment.Nodes.Count == 0)
         {
             StatusMessage = "Nothing copied yet.";
             return;
         }
 
+        _selectionClipboard.Store(fragment);
         var targetOrigin = _selectionClipboard.GetNextPasteOrigin(GetViewportCenter());
         var nodeIdMap = new Dictionary<string, string>(StringComparer.Ordinal);
         var pastedNodes = new List<NodeViewModel>(fragment.Nodes.Count);
@@ -757,7 +896,14 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             return;
         }
 
-        SetSelection(pastedNodes, pastedNodes[^1]);
+        NodeViewModel? primaryNode = null;
+        if (!string.IsNullOrWhiteSpace(fragment.PrimaryNodeId)
+            && nodeIdMap.TryGetValue(fragment.PrimaryNodeId, out var remappedPrimaryNodeId))
+        {
+            primaryNode = pastedNodes.FirstOrDefault(node => node.Id == remappedPrimaryNodeId);
+        }
+
+        SetSelection(pastedNodes, primaryNode ?? pastedNodes[^1]);
         MarkDirty(pastedNodes.Count == 1
             ? $"Pasted {pastedNodes[0].Title}."
             : $"Pasted {pastedNodes.Count} nodes.");
@@ -949,6 +1095,14 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         DeleteSelectionCommand.NotifyCanExecuteChanged();
         CopySelectionCommand.NotifyCanExecuteChanged();
         PasteCommand.NotifyCanExecuteChanged();
+        AlignLeftCommand.NotifyCanExecuteChanged();
+        AlignCenterCommand.NotifyCanExecuteChanged();
+        AlignRightCommand.NotifyCanExecuteChanged();
+        AlignTopCommand.NotifyCanExecuteChanged();
+        AlignMiddleCommand.NotifyCanExecuteChanged();
+        AlignBottomCommand.NotifyCanExecuteChanged();
+        DistributeHorizontallyCommand.NotifyCanExecuteChanged();
+        DistributeVerticallyCommand.NotifyCanExecuteChanged();
         CancelPendingConnectionCommand.NotifyCanExecuteChanged();
         FitViewCommand.NotifyCanExecuteChanged();
 
@@ -958,6 +1112,8 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         OnPropertyChanged(nameof(CanDeleteSelection));
         OnPropertyChanged(nameof(CanCopySelection));
         OnPropertyChanged(nameof(CanPaste));
+        OnPropertyChanged(nameof(CanAlignSelection));
+        OnPropertyChanged(nameof(CanDistributeSelection));
         OnPropertyChanged(nameof(HasEditableParameters));
         OnPropertyChanged(nameof(StatsCaption));
         OnPropertyChanged(nameof(WorkspaceCaption));

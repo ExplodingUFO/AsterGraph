@@ -8,11 +8,13 @@ Current capabilities:
 
 - draggable, selectable graph nodes
 - left-drag marquee selection for multi-node editing
+- selection-aware right-click menu for batch actions
 - zoom and pan canvas interaction
 - connection rendering and pending connection preview
 - graph save/load
 - selection deletion with `Delete`
 - selection copy/paste with `Ctrl+C` / `Ctrl+V`
+- batch alignment and distribution for multi-selection
 - strict type compatibility with a small set of safe implicit conversions
 - compile-time node-definition registration through providers
 
@@ -36,6 +38,21 @@ Current non-goals:
 - `src/AsterGraph.Demo`
   Demo host, sample node-definition provider, and seeded graph document.
 
+## Package Boundary
+
+Recommended package-consumption boundary for external hosts:
+
+- direct host dependencies:
+  - `AsterGraph.Avalonia`
+  - `AsterGraph.Abstractions`
+- explicit optional dependencies:
+  - `AsterGraph.Core`
+  - `AsterGraph.Editor`
+- non-consumable sample host:
+  - `AsterGraph.Demo`
+
+This keeps most hosts on a small public surface while still allowing deeper integration when needed.
+
 ## Quick Start
 
 Build:
@@ -48,6 +65,21 @@ Run the demo:
 
 ```powershell
 dotnet run --project src/AsterGraph.Demo/AsterGraph.Demo.csproj
+```
+
+Pack the publishable libraries:
+
+```powershell
+dotnet pack src/AsterGraph.Abstractions/AsterGraph.Abstractions.csproj -c Release -o artifacts/packages
+dotnet pack src/AsterGraph.Core/AsterGraph.Core.csproj -c Release -o artifacts/packages
+dotnet pack src/AsterGraph.Editor/AsterGraph.Editor.csproj -c Release -o artifacts/packages
+dotnet pack src/AsterGraph.Avalonia/AsterGraph.Avalonia.csproj -c Release -o artifacts/packages
+```
+
+Sample local feed config:
+
+```powershell
+copy NuGet.config.sample NuGet.config
 ```
 
 ## Extension Model
@@ -86,9 +118,18 @@ AsterGraph keeps selection state in the editor layer:
 
 - single selection still drives the inspector
 - marquee selection can select multiple nodes
+- right-click on the current multi-selection opens batch tools
 - `Delete` removes the full current selection
 - `Ctrl+C` copies the selected nodes plus only the internal links between them
 - `Ctrl+V` pastes a new offset fragment near the current viewport center
+- copy writes a versioned AsterGraph JSON payload to the system clipboard when the host provides clipboard access
+- paste prefers the system clipboard payload and falls back to the in-memory fragment clipboard
+
+Batch selection tools currently include:
+
+- align left, center, right
+- align top, middle, bottom
+- distribute horizontally or vertically
 
 ## Style Configuration
 
@@ -120,9 +161,4 @@ The current style surface is organized by concern:
 
 ## License
 
-This repository is proprietary software.
-
-- Non-commercial private evaluation only by default
-- Commercial use requires a paid written license
-
-See [LICENSE.md](./LICENSE.md) for the full terms.
+MIT. See [LICENSE.md](./LICENSE.md).

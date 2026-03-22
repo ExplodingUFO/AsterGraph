@@ -18,6 +18,7 @@ internal sealed class GraphContextMenuBuilder
         => context.TargetKind switch
         {
             ContextMenuTargetKind.Canvas => BuildCanvasMenu(context),
+            ContextMenuTargetKind.Selection => BuildSelectionMenu(),
             ContextMenuTargetKind.Node => BuildNodeMenu(context),
             ContextMenuTargetKind.Port => BuildPortMenu(context),
             ContextMenuTargetKind.Connection => BuildConnectionMenu(context),
@@ -64,6 +65,54 @@ internal sealed class GraphContextMenuBuilder
             _editor.HasPendingConnection
                 ? new MenuItemDescriptor("canvas-cancel-pending", "Cancel Pending Connection", _editor.CancelPendingConnectionCommand, iconKey: "cancel")
                 : new MenuItemDescriptor("canvas-cancel-pending", "Cancel Pending Connection", iconKey: "cancel", isEnabled: false),
+        ];
+    }
+
+    private IReadOnlyList<MenuItemDescriptor> BuildSelectionMenu()
+    {
+        return
+        [
+            new MenuItemDescriptor(
+                "selection-delete",
+                _editor.SelectedNodeCount == 1 ? "Delete Selected Node" : $"Delete {_editor.SelectedNodeCount} Selected Nodes",
+                _editor.DeleteSelectionCommand,
+                iconKey: "delete",
+                isEnabled: _editor.DeleteSelectionCommand.CanExecute(null)),
+            new MenuItemDescriptor(
+                "selection-copy",
+                _editor.SelectedNodeCount == 1 ? "Copy Selected Node" : $"Copy {_editor.SelectedNodeCount} Selected Nodes",
+                _editor.CopySelectionCommand,
+                iconKey: "copy",
+                isEnabled: _editor.CopySelectionCommand.CanExecute(null)),
+            new MenuItemDescriptor(
+                "selection-paste",
+                "Paste",
+                _editor.PasteCommand,
+                iconKey: "paste",
+                isEnabled: _editor.PasteCommand.CanExecute(null)),
+            MenuItemDescriptor.Separator("selection-sep-1"),
+            new MenuItemDescriptor(
+                "selection-align",
+                "Align",
+                iconKey: "align",
+                children:
+                [
+                    new MenuItemDescriptor("selection-align-left", "Left", _editor.AlignLeftCommand, iconKey: "align-left", isEnabled: _editor.AlignLeftCommand.CanExecute(null)),
+                    new MenuItemDescriptor("selection-align-center", "Center", _editor.AlignCenterCommand, iconKey: "align-center", isEnabled: _editor.AlignCenterCommand.CanExecute(null)),
+                    new MenuItemDescriptor("selection-align-right", "Right", _editor.AlignRightCommand, iconKey: "align-right", isEnabled: _editor.AlignRightCommand.CanExecute(null)),
+                    new MenuItemDescriptor("selection-align-top", "Top", _editor.AlignTopCommand, iconKey: "align-top", isEnabled: _editor.AlignTopCommand.CanExecute(null)),
+                    new MenuItemDescriptor("selection-align-middle", "Middle", _editor.AlignMiddleCommand, iconKey: "align-middle", isEnabled: _editor.AlignMiddleCommand.CanExecute(null)),
+                    new MenuItemDescriptor("selection-align-bottom", "Bottom", _editor.AlignBottomCommand, iconKey: "align-bottom", isEnabled: _editor.AlignBottomCommand.CanExecute(null)),
+                ]),
+            new MenuItemDescriptor(
+                "selection-distribute",
+                "Distribute",
+                iconKey: "distribute",
+                children:
+                [
+                    new MenuItemDescriptor("selection-distribute-horizontal", "Horizontally", _editor.DistributeHorizontallyCommand, iconKey: "distribute-horizontal", isEnabled: _editor.DistributeHorizontallyCommand.CanExecute(null)),
+                    new MenuItemDescriptor("selection-distribute-vertical", "Vertically", _editor.DistributeVerticallyCommand, iconKey: "distribute-vertical", isEnabled: _editor.DistributeVerticallyCommand.CanExecute(null)),
+                ]),
         ];
     }
 
