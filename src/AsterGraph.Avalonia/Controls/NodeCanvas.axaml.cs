@@ -21,6 +21,7 @@ namespace AsterGraph.Avalonia.Controls;
 
 public partial class NodeCanvas : UserControl
 {
+    private const double SelectionDragThreshold = 6;
     public static readonly StyledProperty<GraphEditorViewModel?> ViewModelProperty =
         AvaloniaProperty.Register<NodeCanvas, GraphEditorViewModel?>(nameof(ViewModel));
 
@@ -28,12 +29,16 @@ public partial class NodeCanvas : UserControl
     private Grid? _sceneRoot;
     private Canvas? _connectionLayer;
     private Canvas? _nodeLayer;
+    private Canvas? _overlayLayer;
     private GridBackground? _backgroundGrid;
+    private Border? _selectionAdorner;
     private readonly GraphContextMenuPresenter _contextMenuPresenter = new();
     private NodeViewModel? _dragNode;
     private bool _isPanning;
+    private bool _isMarqueeSelecting;
     private Point _lastPointerPosition;
     private Point? _pointerScreenPosition;
+    private Point? _selectionStartScreenPosition;
 
     public NodeCanvas()
     {
@@ -82,7 +87,9 @@ public partial class NodeCanvas : UserControl
         _sceneRoot = this.FindControl<Grid>("SceneRoot");
         _connectionLayer = this.FindControl<Canvas>("ConnectionLayer");
         _nodeLayer = this.FindControl<Canvas>("NodeLayer");
+        _overlayLayer = this.FindControl<Canvas>("OverlayLayer");
         _backgroundGrid = this.FindControl<GridBackground>("BackgroundGrid");
+        _selectionAdorner = this.FindControl<Border>("SelectionAdorner");
     }
 
     private void AttachViewModel(GraphEditorViewModel? previous, GraphEditorViewModel? current)
@@ -111,6 +118,7 @@ public partial class NodeCanvas : UserControl
             }
         }
 
+        ApplySelectionAdornerStyle();
         RebuildScene();
     }
 
@@ -528,7 +536,14 @@ public partial class NodeCanvas : UserControl
         }
 
         Focus();
-        ViewModel.SelectNode(node);
+        if (node.IsSelected && ViewModel.HasMultipleSelection)
+        {
+            ViewModel.SetSelection(ViewModel.SelectedNodes.ToList(), node);
+        }
+        else
+        {
+            ViewModel.SelectSingleNode(node);
+        }
 
         if (_nodeLayer is not null && _nodeVisuals.TryGetValue(node, out var visual))
         {
@@ -538,6 +553,9 @@ public partial class NodeCanvas : UserControl
 
         _dragNode = node;
         _isPanning = false;
+        _selectionStartScreenPosition = null;
+        _isMarqueeSelecting = false;
+        HideSelectionAdorner();
         _lastPointerPosition = args.GetPosition(this);
         _pointerScreenPosition = _lastPointerPosition;
         args.Pointer.Capture(this);
@@ -561,6 +579,9 @@ public partial class NodeCanvas : UserControl
         {
             _isPanning = true;
             _dragNode = null;
+            _selectionStartScreenPosition = null;
+            _isMarqueeSelecting = false;
+            HideSelectionAdorner();
             args.Pointer.Capture(this);
             args.Handled = true;
             return;
@@ -574,7 +595,12 @@ public partial class NodeCanvas : UserControl
                 RenderConnections();
             }
 
-            ViewModel.SelectNode(null);
+            _dragNode = null;
+            _isPanning = false;
+            _selectionStartScreenPosition = _lastPointerPosition;
+            _isMarqueeSelecting = false;
+            HideSelectionAdorner();
+            args.Pointer.Capture(this);
             args.Handled = true;
         }
     }
@@ -588,6 +614,23 @@ public partial class NodeCanvas : UserControl
 
         var current = args.GetPosition(this);
         _pointerScreenPosition = current;
+
+        if (_selectionStartScreenPosition is not null && !_isPanning && _dragNode is null)
+        {
+            var marqueeDelta = current - _selectionStartScreenPosition.Value;
+            if (!_isMarqueeSelecting
+                && (Math.Abs(marqueeDelta.X) >= SelectionDragThreshold || Math.Abs(marqueeDelta.Y) >= SelectionDragThreshold))
+            {
+                _isMarqueeSelecting = true;
+            }
+
+            if (_isMarqueeSelecting)
+            {
+                UpdateMarqueeSelection(current, finalize: false);
+                args.Handled = true;
+                return;
+            }
+        }
 
         if (_isPanning || _dragNode is not null)
         {
@@ -614,6 +657,22 @@ public partial class NodeCanvas : UserControl
 
     private void HandlePointerReleased(object? sender, PointerReleasedEventArgs args)
     {
+        if (_selectionStartScreenPosition is not null)
+        {
+            if (_isMarqueeSelecting)
+            {
+                UpdateMarqueeSelection(args.GetPosition(this), finalize: true);
+            }
+            else
+            {
+                ViewModel?.ClearSelection();
+            }
+
+            _selectionStartScreenPosition = null;
+            _isMarqueeSelecting = false;
+            HideSelectionAdorner();
+        }
+
         _dragNode = null;
         _isPanning = false;
         args.Pointer.Capture(null);
@@ -686,6 +745,9 @@ public partial class NodeCanvas : UserControl
             case nameof(GraphEditorViewModel.SelectedNode):
                 UpdateSelectionState();
                 RenderConnections();
+                break;
+            case nameof(GraphEditorViewModel.StyleOptions):
+                ApplySelectionAdornerStyle();
                 break;
             case nameof(GraphEditorViewModel.PendingSourceNode):
             case nameof(GraphEditorViewModel.PendingSourcePort):
@@ -835,6 +897,69 @@ public partial class NodeCanvas : UserControl
         }
 
         _contextMenuPresenter.Open(target, descriptors, ViewModel.StyleOptions.ContextMenu);
+    }
+
+    private void ApplySelectionAdornerStyle()
+    {
+        if (_selectionAdorner is null)
+        {
+            return;
+        }
+
+        var style = ViewModel?.StyleOptions.Canvas ?? GraphEditorStyleOptions.Default.Canvas;
+        _selectionAdorner.BorderBrush = BrushFactory.Solid(style.SelectionBorderHex);
+        _selectionAdorner.Background = BrushFactory.Solid(style.SelectionFillHex, style.SelectionFillOpacity);
+        _selectionAdorner.BorderThickness = new Thickness(style.SelectionBorderThickness);
+        _selectionAdorner.CornerRadius = new CornerRadius(style.SelectionCornerRadius);
+    }
+
+    private void UpdateMarqueeSelection(Point currentScreenPosition, bool finalize)
+    {
+        if (ViewModel is null || _overlayLayer is null || _selectionAdorner is null || _selectionStartScreenPosition is null)
+        {
+            return;
+        }
+
+        var start = _selectionStartScreenPosition.Value;
+        var left = Math.Min(start.X, currentScreenPosition.X);
+        var top = Math.Min(start.Y, currentScreenPosition.Y);
+        var width = Math.Abs(currentScreenPosition.X - start.X);
+        var height = Math.Abs(currentScreenPosition.Y - start.Y);
+
+        _selectionAdorner.IsVisible = true;
+        _selectionAdorner.Width = width;
+        _selectionAdorner.Height = height;
+        Canvas.SetLeft(_selectionAdorner, left);
+        Canvas.SetTop(_selectionAdorner, top);
+
+        var worldStart = ViewModel.ScreenToWorld(new GraphPoint(start.X, start.Y));
+        var worldEnd = ViewModel.ScreenToWorld(new GraphPoint(currentScreenPosition.X, currentScreenPosition.Y));
+        var nodes = ViewModel.GetNodesInRectangle(worldStart, worldEnd).ToList();
+        var primaryNode = nodes.LastOrDefault();
+
+        ViewModel.SetSelection(
+            nodes,
+            primaryNode,
+            finalize
+                ? nodes.Count switch
+                {
+                    0 => "No nodes inside marquee selection.",
+                    1 => $"Selected {nodes[0].Title}.",
+                    _ => $"Selected {nodes.Count} nodes.",
+                }
+                : null);
+    }
+
+    private void HideSelectionAdorner()
+    {
+        if (_selectionAdorner is null)
+        {
+            return;
+        }
+
+        _selectionAdorner.IsVisible = false;
+        _selectionAdorner.Width = 0;
+        _selectionAdorner.Height = 0;
     }
 
     private sealed record NodeVisual(

@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
+using Avalonia.VisualTree;
 using AsterGraph.Avalonia.Styling;
 using AsterGraph.Editor.ViewModels;
 
@@ -56,7 +57,7 @@ public partial class GraphEditorView : UserControl
 
     private void HandleKeyDown(object? sender, KeyEventArgs args)
     {
-        if (Editor is null)
+        if (Editor is null || ShortcutBelongsToInputControl(args.Source))
         {
             return;
         }
@@ -83,5 +84,51 @@ public partial class GraphEditorView : UserControl
             return;
         }
 
+        if (args.KeyModifiers.HasFlag(KeyModifiers.Control) && args.Key == Key.C)
+        {
+            if (Editor.CopySelectionCommand.CanExecute(null))
+            {
+                Editor.CopySelectionCommand.Execute(null);
+            }
+
+            args.Handled = true;
+            return;
+        }
+
+        if (args.KeyModifiers.HasFlag(KeyModifiers.Control) && args.Key == Key.V)
+        {
+            if (Editor.PasteCommand.CanExecute(null))
+            {
+                Editor.PasteCommand.Execute(null);
+            }
+
+            args.Handled = true;
+            return;
+        }
+
+        if (args.Key == Key.Delete)
+        {
+            if (Editor.DeleteSelectionCommand.CanExecute(null))
+            {
+                Editor.DeleteSelectionCommand.Execute(null);
+            }
+
+            args.Handled = true;
+            return;
+        }
+
+    }
+
+    private static bool ShortcutBelongsToInputControl(object? source)
+    {
+        for (var current = source as Visual; current is not null; current = current.GetVisualParent())
+        {
+            if (current is TextBox or ComboBox)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

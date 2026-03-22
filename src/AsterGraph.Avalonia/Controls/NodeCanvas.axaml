@@ -14,5 +14,10 @@
               IsHitTestVisible="False" />
       <Canvas x:Name="NodeLayer" />
     </Grid>
+    <Canvas x:Name="OverlayLayer"
+            IsHitTestVisible="False">
+      <Border x:Name="SelectionAdorner"
+              IsVisible="False" />
+    </Canvas>
   </Grid>
 </UserControl>

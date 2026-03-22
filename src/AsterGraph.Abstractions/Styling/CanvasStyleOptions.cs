@@ -17,4 +17,14 @@ public sealed record CanvasStyleOptions
     public double PrimaryGridSpacing { get; init; } = 48;
 
     public double SecondaryGridSpacing { get; init; } = 192;
+
+    public string SelectionBorderHex { get; init; } = "#7FE7D7";
+
+    public string SelectionFillHex { get; init; } = "#7FE7D7";
+
+    public double SelectionFillOpacity { get; init; } = 0.16;
+
+    public double SelectionBorderThickness { get; init; } = 1.4;
+
+    public double SelectionCornerRadius { get; init; } = 8;
 }
