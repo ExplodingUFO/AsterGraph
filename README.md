@@ -77,6 +77,18 @@ Rejected conversions stay explicit and visible rather than guessing.
 
 Graph documents are serialized in `AsterGraph.Core` and can persist connection-level conversion metadata. The stable contract identifiers in `AsterGraph.Abstractions` are intended to survive UI and host changes.
 
+## Style Configuration
+
+Hosts can provide a framework-neutral style configuration through `GraphEditorStyleOptions` in `AsterGraph.Abstractions.Styling`.
+
+Recommended flow:
+
+1. Create a `GraphEditorStyleOptions` value in the host
+2. Pass it into `GraphEditorViewModel`
+3. Let `AsterGraph.Avalonia` adapt those tokens into brushes, radii, spacing, and component visuals
+
+This keeps the public styling surface stable without leaking Avalonia-specific types into the SDK contract.
+
 ## Roadmap
 
 - move more sample-only styling and content out of shared projects where appropriate

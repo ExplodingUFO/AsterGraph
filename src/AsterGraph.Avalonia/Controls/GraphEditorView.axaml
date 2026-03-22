@@ -16,7 +16,7 @@
               Background="{DynamicResource AsterGraph.PanelBrush}"
               BorderBrush="{DynamicResource AsterGraph.PanelBorderBrush}"
               BorderThickness="1"
-              CornerRadius="24"
+              CornerRadius="{DynamicResource AsterGraph.DefaultCornerRadius}"
               Padding="22,18">
         <Grid RowDefinitions="Auto,Auto"
               RowSpacing="18">
@@ -123,7 +123,7 @@
               Background="{DynamicResource AsterGraph.PanelBrush}"
               BorderBrush="{DynamicResource AsterGraph.PanelBorderBrush}"
               BorderThickness="1"
-              CornerRadius="28"
+              CornerRadius="{DynamicResource AsterGraph.DefaultCornerRadius}"
               Padding="18">
         <Grid RowDefinitions="Auto,*"
               RowSpacing="14">
@@ -194,7 +194,7 @@
               Background="{DynamicResource AsterGraph.CanvasFrameBrush}"
               BorderBrush="{DynamicResource AsterGraph.PanelBorderBrush}"
               BorderThickness="1"
-              CornerRadius="28"
+              CornerRadius="{DynamicResource AsterGraph.DefaultCornerRadius}"
               Padding="8">
         <controls:NodeCanvas x:Name="PART_NodeCanvas"
                              ViewModel="{Binding}" />
@@ -205,7 +205,7 @@
               Background="{DynamicResource AsterGraph.PanelBrush}"
               BorderBrush="{DynamicResource AsterGraph.PanelBorderBrush}"
               BorderThickness="1"
-              CornerRadius="28"
+              CornerRadius="{DynamicResource AsterGraph.DefaultCornerRadius}"
               Padding="20">
         <ScrollViewer HorizontalScrollBarVisibility="Disabled">
           <StackPanel Spacing="18">
@@ -323,10 +323,10 @@
                 <ItemsControl ItemsSource="{Binding SelectedNodeParameters}">
                   <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="viewModels:NodeParameterViewModel">
-                      <Border Background="{DynamicResource AsterGraph.InspectorCardBrush}"
+                    <Border Background="{DynamicResource AsterGraph.InspectorCardBrush}"
                               BorderBrush="{DynamicResource AsterGraph.PanelBorderBrush}"
                               BorderThickness="1"
-                              CornerRadius="14"
+                              CornerRadius="{DynamicResource AsterGraph.InspectorCardCornerRadius}"
                               Padding="12"
                               Margin="0,0,0,8">
                         <StackPanel Spacing="8">
@@ -408,7 +408,7 @@
               Background="{DynamicResource AsterGraph.PanelBrush}"
               BorderBrush="{DynamicResource AsterGraph.PanelBorderBrush}"
               BorderThickness="1"
-              CornerRadius="20"
+              CornerRadius="{DynamicResource AsterGraph.DefaultCornerRadius}"
               Padding="18,12">
         <Grid ColumnDefinitions="2*,2*,3*"
               ColumnSpacing="18">

@@ -824,18 +824,23 @@ public partial class NodeCanvas : UserControl
             return;
         }
 
+        var menuStyle = ViewModel.StyleOptions.ContextMenu;
         var menu = new ContextMenu
         {
             PlacementTarget = target,
             Placement = PlacementMode.Pointer,
+            Background = BrushFactory.Solid(menuStyle.BackgroundHex),
+            BorderBrush = BrushFactory.Solid(menuStyle.BorderHex),
             ItemsSource = descriptors.Select(BuildMenuControl).ToList(),
         };
 
         menu.Open(target);
     }
 
-    private static object BuildMenuControl(MenuItemDescriptor descriptor)
+    private object BuildMenuControl(MenuItemDescriptor descriptor)
     {
+        var menuStyle = ViewModel?.StyleOptions.ContextMenu ?? GraphEditorStyleOptions.Default.ContextMenu;
+
         if (descriptor.IsSeparator)
         {
             return new Separator();
@@ -847,6 +852,8 @@ public partial class NodeCanvas : UserControl
             Command = descriptor.Command,
             CommandParameter = descriptor.CommandParameter,
             IsEnabled = descriptor.IsEnabled,
+            Foreground = BrushFactory.Solid(descriptor.IsEnabled ? ViewModel?.StyleOptions.Shell.HeadlineHex ?? GraphEditorStyleOptions.Default.Shell.HeadlineHex : menuStyle.DisabledForegroundHex),
+            Background = BrushFactory.Solid(menuStyle.BackgroundHex),
         };
 
         if (descriptor.HasChildren)

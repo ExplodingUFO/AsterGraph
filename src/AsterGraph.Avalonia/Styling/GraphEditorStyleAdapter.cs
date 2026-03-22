@@ -32,6 +32,10 @@ public sealed class GraphEditorStyleAdapter
         resources["AsterGraph.InputBackgroundBrush"] = Palette.InputBackgroundBrush;
         resources["AsterGraph.InputBorderBrush"] = Palette.InputBorderBrush;
         resources["AsterGraph.ValidationErrorBrush"] = Palette.ValidationErrorBrush;
+        resources["AsterGraph.DefaultCornerRadius"] = new CornerRadius(Options.Shell.DefaultCornerRadius);
+        resources["AsterGraph.DefaultSpacing"] = Options.Shell.DefaultSpacing;
+        resources["AsterGraph.InspectorCardCornerRadius"] = new CornerRadius(Options.Inspector.CardCornerRadius);
+        resources["AsterGraph.ContextMenuCornerRadius"] = new CornerRadius(Options.ContextMenu.CornerRadius);
     }
 
     private static AvaloniaStylePalette CreatePalette(GraphEditorStyleOptions options)
