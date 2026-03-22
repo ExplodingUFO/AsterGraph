@@ -13,6 +13,7 @@ using AsterGraph.Abstractions.Styling;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Geometry;
 using AsterGraph.Editor.Menus;
+using AsterGraph.Editor.Models;
 using AsterGraph.Editor.Services;
 using AsterGraph.Editor.Viewport;
 
@@ -362,6 +363,134 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         return Nodes
             .Where(node => Intersects(node.Bounds, left, top, right, bottom))
             .ToList();
+    }
+
+    /// <summary>
+    /// Returns an immutable snapshot of the current node positions for host-side persistence.
+    /// </summary>
+    public IReadOnlyList<NodePositionSnapshot> GetNodePositions()
+        => Nodes
+            .Select(node => new NodePositionSnapshot(node.Id, new GraphPoint(node.X, node.Y)))
+            .ToList();
+
+    /// <summary>
+    /// Tries to read the current position of a specific node by instance id.
+    /// </summary>
+    public bool TryGetNodePosition(string nodeId, out NodePositionSnapshot? snapshot)
+    {
+        var node = FindNode(nodeId);
+        if (node is null)
+        {
+            snapshot = null;
+            return false;
+        }
+
+        snapshot = new NodePositionSnapshot(node.Id, new GraphPoint(node.X, node.Y));
+        return true;
+    }
+
+    /// <summary>
+    /// Tries to update the position of a single node by instance id.
+    /// </summary>
+    public bool TrySetNodePosition(string nodeId, GraphPoint position, bool updateStatus = true)
+    {
+        var node = FindNode(nodeId);
+        if (node is null)
+        {
+            if (updateStatus)
+            {
+                StatusMessage = $"Node '{nodeId}' was not found.";
+            }
+
+            return false;
+        }
+
+        _suspendDirtyTracking = true;
+        var changed = ApplyNodePosition(node, position);
+        _suspendDirtyTracking = false;
+
+        if (!changed)
+        {
+            return true;
+        }
+
+        if (updateStatus)
+        {
+            MarkDirty($"Updated {node.Title} position.");
+        }
+        else if (!IsDirty)
+        {
+            IsDirty = true;
+            RaiseComputedPropertyChanges();
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Applies a batch of node positions and returns how many nodes were updated.
+    /// </summary>
+    public int SetNodePositions(IEnumerable<NodePositionSnapshot> positions, bool updateStatus = true)
+    {
+        ArgumentNullException.ThrowIfNull(positions);
+
+        var requestedPositions = positions
+            .GroupBy(snapshot => snapshot.NodeId, StringComparer.Ordinal)
+            .Select(group => group.Last())
+            .ToList();
+
+        if (requestedPositions.Count == 0)
+        {
+            if (updateStatus)
+            {
+                StatusMessage = "No node positions were provided.";
+            }
+
+            return 0;
+        }
+
+        _suspendDirtyTracking = true;
+        var appliedCount = 0;
+
+        foreach (var snapshot in requestedPositions)
+        {
+            var node = FindNode(snapshot.NodeId);
+            if (node is null)
+            {
+                continue;
+            }
+
+            if (ApplyNodePosition(node, snapshot.Position))
+            {
+                appliedCount++;
+            }
+        }
+
+        _suspendDirtyTracking = false;
+
+        if (appliedCount == 0)
+        {
+            if (updateStatus)
+            {
+                StatusMessage = "No matching nodes were found for the provided positions.";
+            }
+
+            return 0;
+        }
+
+        if (updateStatus)
+        {
+            MarkDirty(appliedCount == 1
+                ? "Updated 1 node position."
+                : $"Updated {appliedCount} node positions.");
+        }
+        else if (!IsDirty)
+        {
+            IsDirty = true;
+            RaiseComputedPropertyChanges();
+        }
+
+        return appliedCount;
     }
 
     public GraphPoint ScreenToWorld(GraphPoint screen)
@@ -1036,6 +1165,19 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
            && (bounds.X + bounds.Width) > left
            && bounds.Y < bottom
            && (bounds.Y + bounds.Height) > top;
+
+    private static bool ApplyNodePosition(NodeViewModel node, GraphPoint position)
+    {
+        if (Math.Abs(node.X - position.X) < double.Epsilon
+            && Math.Abs(node.Y - position.Y) < double.Epsilon)
+        {
+            return false;
+        }
+
+        node.X = position.X;
+        node.Y = position.Y;
+        return true;
+    }
 
     partial void OnZoomChanged(double value) => RaiseComputedPropertyChanges();
 

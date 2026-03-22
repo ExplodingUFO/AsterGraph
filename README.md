@@ -93,6 +93,13 @@ Typical flow:
 3. Build a `GraphEditorViewModel` with the catalog and a compatibility service.
 4. Host `GraphEditorView` from `AsterGraph.Avalonia`.
 
+For host-side layout persistence without saving a full graph snapshot, `GraphEditorViewModel` also exposes:
+
+- `GetNodePositions()`
+- `TryGetNodePosition(nodeId, out snapshot)`
+- `TrySetNodePosition(nodeId, position)`
+- `SetNodePositions(snapshots)`
+
 ## Type Compatibility
 
 AsterGraph uses:
