@@ -937,17 +937,28 @@ public partial class NodeCanvas : UserControl
 
     private GraphPoint GetPortAnchor(NodeViewModel node, PortViewModel port)
     {
-        // 连线必须贴合真实渲染出来的端口圆点中心，而不是依赖静态布局公式。
-        // 这样节点字体、间距或高度变化时，连线仍能保持正确对齐。
-        if (_nodeLayer is not null
-            && _nodeVisuals.TryGetValue(node, out var visual)
+        // 吸附拖动时，节点外层 Canvas 的绝对布局可能还没完成新一轮 Arrange。
+        // 因此这里优先读取“端口圆点在节点卡内部的局部坐标”，再叠加当前节点的 X/Y，
+        // 这样连线能跟随最新的节点位置，而不会因为布局时序晚一拍出现偏移。
+        if (_nodeVisuals.TryGetValue(node, out var visual)
             && visual.PortAnchors.TryGetValue(port.Id, out var anchorDot))
         {
             var center = new Point(anchorDot.Bounds.Width / 2, anchorDot.Bounds.Height / 2);
-            var translated = anchorDot.TranslatePoint(center, _nodeLayer);
-            if (translated is not null)
+            var localToNode = anchorDot.TranslatePoint(center, visual.Border);
+            if (localToNode is not null)
             {
-                return new GraphPoint(translated.Value.X, translated.Value.Y);
+                return new GraphPoint(
+                    node.X + localToNode.Value.X,
+                    node.Y + localToNode.Value.Y);
+            }
+
+            if (_nodeLayer is not null)
+            {
+                var translated = anchorDot.TranslatePoint(center, _nodeLayer);
+                if (translated is not null)
+                {
+                    return new GraphPoint(translated.Value.X, translated.Value.Y);
+                }
             }
         }
 
