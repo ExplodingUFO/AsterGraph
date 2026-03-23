@@ -56,7 +56,17 @@ internal sealed class GraphContextMenuBuilder
             new MenuItemDescriptor("canvas-fit-view", "Fit View", _editor.FitViewCommand, iconKey: "fit"),
             new MenuItemDescriptor("canvas-reset-view", "Reset View", _editor.ResetViewCommand, iconKey: "reset"),
             MenuItemDescriptor.Separator("canvas-sep-2"),
-            new MenuItemDescriptor("canvas-save", "Save Snapshot", _editor.SaveCommand, iconKey: "save", isEnabled: permissions.Workspace.AllowSave && _editor.SaveCommand.CanExecute(null)),
+            new MenuItemDescriptor(
+                "canvas-save",
+                "Save Snapshot",
+                _editor.SaveCommand,
+                iconKey: "save",
+                disabledReason: ResolveWorkspaceDisabledReason(
+                    permissions.Workspace.AllowSave,
+                    _editor.SaveCommand.CanExecute(null),
+                    "Snapshot saving is disabled by host permissions.",
+                    "Snapshot saving is currently unavailable."),
+                isEnabled: permissions.Workspace.AllowSave && _editor.SaveCommand.CanExecute(null)),
             new MenuItemDescriptor("canvas-load", "Load Snapshot", _editor.LoadCommand, iconKey: "load", isEnabled: permissions.Workspace.AllowLoad && _editor.LoadCommand.CanExecute(null)),
             new MenuItemDescriptor("canvas-import-fragment", "Import Fragment", _editor.ImportFragmentCommand, iconKey: "import", isEnabled: _editor.ImportFragmentCommand.CanExecute(null)),
             new MenuItemDescriptor(
@@ -266,4 +276,17 @@ internal sealed class GraphContextMenuBuilder
             : node.Title;
     }
 
+    private static string? ResolveWorkspaceDisabledReason(
+        bool isAllowedByHost,
+        bool canExecute,
+        string hostDeniedReason,
+        string unavailableReason)
+    {
+        if (isAllowedByHost && canExecute)
+        {
+            return null;
+        }
+
+        return !isAllowedByHost ? hostDeniedReason : unavailableReason;
+    }
 }

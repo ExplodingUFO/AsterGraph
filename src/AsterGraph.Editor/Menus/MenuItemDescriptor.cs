@@ -14,6 +14,7 @@ public sealed record MenuItemDescriptor
         object? commandParameter = null,
         IReadOnlyList<MenuItemDescriptor>? children = null,
         string? iconKey = null,
+        string? disabledReason = null,
         bool isEnabled = true,
         bool isSeparator = false)
     {
@@ -42,6 +43,7 @@ public sealed record MenuItemDescriptor
         CommandParameter = commandParameter;
         Children = normalizedChildren;
         IconKey = string.IsNullOrWhiteSpace(iconKey) ? null : iconKey.Trim();
+        DisabledReason = string.IsNullOrWhiteSpace(disabledReason) ? null : disabledReason.Trim();
         IsEnabled = isSeparator ? false : isEnabled;
         IsSeparator = isSeparator;
     }
@@ -57,6 +59,8 @@ public sealed record MenuItemDescriptor
     public IReadOnlyList<MenuItemDescriptor> Children { get; }
 
     public string? IconKey { get; }
+
+    public string? DisabledReason { get; }
 
     public bool IsEnabled { get; }
 
