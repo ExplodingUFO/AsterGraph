@@ -329,11 +329,36 @@
                   <Button Classes="astergraph-toolbar-action"
                           Command="{Binding ClearFragmentCommand}"
                           Content="Clear Fragment" />
+                  <Button Classes="astergraph-toolbar-action"
+                          Command="{Binding ExportSelectionAsTemplateCommand}"
+                          Content="Save As Template" />
+                </WrapPanel>
+                <TextBlock Text="{Binding FragmentLibraryCaption}"
+                           FontSize="{DynamicResource AsterGraph.InspectorCaptionFontSize}"
+                           TextWrapping="Wrap"
+                           Foreground="{DynamicResource AsterGraph.EyebrowBrush}" />
+                <ComboBox ItemsSource="{Binding FragmentTemplates}"
+                          SelectedItem="{Binding SelectedFragmentTemplate}"
+                          DisplayMemberBinding="{Binding Name}"
+                          Classes="astergraph-input"
+                          IsVisible="{Binding BehaviorOptions.Fragments.EnableFragmentLibrary}" />
+                <WrapPanel Orientation="Horizontal"
+                           IsVisible="{Binding BehaviorOptions.Fragments.EnableFragmentLibrary}">
+                  <Button Classes="astergraph-toolbar-action"
+                          Command="{Binding RefreshFragmentTemplatesCommand}"
+                          Content="Refresh Templates" />
+                  <Button Classes="astergraph-toolbar-action"
+                          Command="{Binding ImportSelectedTemplateCommand}"
+                          Content="Import Template" />
+                  <Button Classes="astergraph-toolbar-action"
+                          Command="{Binding DeleteSelectedTemplateCommand}"
+                          Content="Delete Template" />
                 </WrapPanel>
               </StackPanel>
             </Border>
 
-            <Border Classes="astergraph-inspector-section">
+            <Border Classes="astergraph-inspector-section"
+                    IsVisible="{Binding BehaviorOptions.View.ShowMiniMap}">
               <StackPanel Spacing="8">
                 <TextBlock Text="Mini Map"
                            FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"

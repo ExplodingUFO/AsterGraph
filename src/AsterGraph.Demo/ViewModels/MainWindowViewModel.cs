@@ -1,5 +1,6 @@
 using AsterGraph.Core.Compatibility;
 using AsterGraph.Abstractions.Styling;
+using AsterGraph.Editor.Configuration;
 using AsterGraph.Editor.Catalog;
 using AsterGraph.Editor.Services;
 using AsterGraph.Editor.ViewModels;
@@ -39,6 +40,19 @@ public partial class MainWindowViewModel : ViewModelBase
                 SeparatorHex = "#42637C",
             },
         };
+        var behavior = GraphEditorBehaviorOptions.Default with
+        {
+            DragAssist = GraphEditorBehaviorOptions.Default.DragAssist with
+            {
+                EnableGridSnapping = true,
+                EnableAlignmentGuides = true,
+                SnapTolerance = 18,
+            },
+            View = GraphEditorBehaviorOptions.Default.View with
+            {
+                ShowMiniMap = true,
+            },
+        };
 
         Editor = new GraphEditorViewModel(
             DemoGraphFactory.CreateDefault(catalog),
@@ -46,7 +60,8 @@ public partial class MainWindowViewModel : ViewModelBase
             new DefaultPortCompatibilityService(),
             new GraphWorkspaceService(),
             null,
-            style);
+            style,
+            behavior);
     }
 
     public GraphEditorViewModel Editor { get; }

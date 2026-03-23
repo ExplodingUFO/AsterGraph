@@ -12,6 +12,7 @@ using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Abstractions.Styling;
 using AsterGraph.Core.Models;
 using AsterGraph.Core.Serialization;
+using AsterGraph.Editor.Configuration;
 using AsterGraph.Editor.Events;
 using AsterGraph.Editor.Geometry;
 using AsterGraph.Editor.Menus;
@@ -35,6 +36,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     private readonly GraphWorkspaceService _workspaceService;
     private readonly GraphSelectionClipboard _selectionClipboard;
     private readonly GraphFragmentWorkspaceService _fragmentWorkspaceService;
+    private readonly GraphFragmentLibraryService _fragmentLibraryService;
     private readonly GraphEditorHistoryService _historyService;
     private IGraphTextClipboardBridge? _textClipboardBridge;
     private readonly GraphContextMenuBuilder _contextMenuBuilder;
@@ -51,15 +53,19 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         IPortCompatibilityService compatibilityService,
         GraphWorkspaceService? workspaceService = null,
         GraphFragmentWorkspaceService? fragmentWorkspaceService = null,
-        GraphEditorStyleOptions? styleOptions = null)
+        GraphEditorStyleOptions? styleOptions = null,
+        GraphEditorBehaviorOptions? behaviorOptions = null,
+        GraphFragmentLibraryService? fragmentLibraryService = null)
     {
         _nodeCatalog = nodeCatalog ?? throw new ArgumentNullException(nameof(nodeCatalog));
         _compatibilityService = compatibilityService ?? throw new ArgumentNullException(nameof(compatibilityService));
         _workspaceService = workspaceService ?? new GraphWorkspaceService();
         _selectionClipboard = new GraphSelectionClipboard();
         _fragmentWorkspaceService = fragmentWorkspaceService ?? new GraphFragmentWorkspaceService();
+        _fragmentLibraryService = fragmentLibraryService ?? new GraphFragmentLibraryService();
         _historyService = new GraphEditorHistoryService();
         StyleOptions = styleOptions ?? GraphEditorStyleOptions.Default;
+        BehaviorOptions = ResolveBehaviorOptions(behaviorOptions, StyleOptions);
 
         SaveCommand = new RelayCommand(SaveWorkspace);
         LoadCommand = new RelayCommand(() => LoadWorkspace());
@@ -73,6 +79,10 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         ExportSelectionFragmentCommand = new RelayCommand(ExportSelectionFragment, () => CanExportSelectionFragment);
         ImportFragmentCommand = new RelayCommand(ImportFragment, () => CanImportFragment);
         ClearFragmentCommand = new RelayCommand(ClearFragment, () => CanImportFragment);
+        RefreshFragmentTemplatesCommand = new RelayCommand(RefreshFragmentTemplates);
+        ExportSelectionAsTemplateCommand = new RelayCommand(ExportSelectionAsTemplate, () => CanExportSelectionFragment && BehaviorOptions.Fragments.EnableFragmentLibrary);
+        ImportSelectedTemplateCommand = new RelayCommand(ImportSelectedTemplate, () => CanImportSelectedTemplate);
+        DeleteSelectedTemplateCommand = new RelayCommand(DeleteSelectedTemplate, () => CanDeleteSelectedTemplate);
         AlignLeftCommand = new RelayCommand(AlignSelectionLeft, () => CanAlignSelection);
         AlignCenterCommand = new RelayCommand(AlignSelectionCenter, () => CanAlignSelection);
         AlignRightCommand = new RelayCommand(AlignSelectionRight, () => CanAlignSelection);
@@ -100,6 +110,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         SelectedNodeParameters = new ObservableCollection<NodeParameterViewModel>();
         NodeTemplates = new ObservableCollection<NodeTemplateViewModel>(
             _nodeCatalog.Definitions.Select(definition => new NodeTemplateViewModel(definition)));
+        FragmentTemplates = new ObservableCollection<FragmentTemplateViewModel>();
 
         Nodes.CollectionChanged += HandleNodesCollectionChanged;
         Connections.CollectionChanged += HandleConnectionsCollectionChanged;
@@ -108,6 +119,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         Title = document.Title;
         Description = document.Description;
 
+        RefreshFragmentTemplates();
         LoadDocument(document, "Ready to edit.", markClean: true);
         ResetView(updateStatus: false);
     }
@@ -128,11 +140,17 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     public ObservableCollection<NodeTemplateViewModel> NodeTemplates { get; }
 
+    public ObservableCollection<FragmentTemplateViewModel> FragmentTemplates { get; }
+
     public GraphEditorStyleOptions StyleOptions { get; }
+
+    public GraphEditorBehaviorOptions BehaviorOptions { get; }
 
     public string WorkspacePath { get; }
 
     public string FragmentPath => _fragmentWorkspaceService.FragmentPath;
+
+    public string FragmentLibraryPath => _fragmentLibraryService.LibraryPath;
 
     public double ViewportWidth => _viewportWidth;
 
@@ -161,6 +179,14 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     public IRelayCommand ImportFragmentCommand { get; }
 
     public IRelayCommand ClearFragmentCommand { get; }
+
+    public IRelayCommand RefreshFragmentTemplatesCommand { get; }
+
+    public IRelayCommand ExportSelectionAsTemplateCommand { get; }
+
+    public IRelayCommand ImportSelectedTemplateCommand { get; }
+
+    public IRelayCommand DeleteSelectedTemplateCommand { get; }
 
     public IRelayCommand AlignLeftCommand { get; }
 
@@ -248,6 +274,9 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     [ObservableProperty]
     private bool isDirty;
 
+    [ObservableProperty]
+    private FragmentTemplateViewModel? selectedFragmentTemplate;
+
     /// <summary>
     /// 当图文档发生结构或内容变化时触发。
     /// </summary>
@@ -293,6 +322,12 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     public bool CanImportFragment => _fragmentWorkspaceService.Exists();
 
+    public bool HasFragmentTemplates => FragmentTemplates.Count > 0;
+
+    public bool CanImportSelectedTemplate => SelectedFragmentTemplate is not null;
+
+    public bool CanDeleteSelectedTemplate => SelectedFragmentTemplate is not null;
+
     public bool CanAlignSelection => SelectedNodes.Count >= 2;
 
     public bool CanDistributeSelection => SelectedNodes.Count >= 3;
@@ -301,7 +336,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     public bool HasBatchEditableParameters => SelectedNodes.Count > 1 && SelectedNodeParameters.Count > 0;
 
-    public bool HasAnyEditableParameters => SelectedNodeParameters.Count > 0;
+    public bool HasAnyEditableParameters => BehaviorOptions.Selection.EnableBatchParameterEditing && SelectedNodeParameters.Count > 0;
 
     public string StatsCaption => $"{Nodes.Count} nodes  ·  {Connections.Count} links  ·  {Zoom * 100:0}% zoom";
 
@@ -313,6 +348,8 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         => !_fragmentWorkspaceService.Exists()
             ? "No saved fragment file."
             : $"Last updated {File.GetLastWriteTime(_fragmentWorkspaceService.FragmentPath):yyyy-MM-dd HH:mm:ss}";
+
+    public string FragmentLibraryCaption => $"{(HasFragmentTemplates ? $"{FragmentTemplates.Count} templates" : "No templates")}  ·  {FragmentLibraryPath}";
 
     public string ModeCaption => HasPendingConnection
         ? $"Connecting {PendingSourceNode!.Title} / {PendingSourcePort!.Label}  ->  click an input port"
@@ -388,6 +425,18 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     public void SetTextClipboardBridge(IGraphTextClipboardBridge? bridge)
     {
         _textClipboardBridge = bridge;
+        RaiseComputedPropertyChanges();
+    }
+
+    public void RefreshFragmentTemplates()
+    {
+        FragmentTemplates.Clear();
+        foreach (var template in _fragmentLibraryService.EnumerateTemplates())
+        {
+            FragmentTemplates.Add(new FragmentTemplateViewModel(template));
+        }
+
+        SelectedFragmentTemplate = FragmentTemplates.FirstOrDefault();
         RaiseComputedPropertyChanges();
     }
 
@@ -1296,6 +1345,33 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
                 fragment.Connections.Count));
     }
 
+    public void ExportSelectionAsTemplate()
+    {
+        if (!BehaviorOptions.Fragments.EnableFragmentLibrary)
+        {
+            StatusMessage = "Fragment template library is disabled.";
+            return;
+        }
+
+        var fragment = CreateSelectionFragment();
+        if (fragment is null)
+        {
+            StatusMessage = "Select at least one node before exporting a fragment template.";
+            return;
+        }
+
+        var templateName = SelectedNode?.Title ?? $"selection-{fragment.Nodes.Count}";
+        var path = _fragmentLibraryService.SaveTemplate(fragment, templateName);
+        RefreshFragmentTemplates();
+        StatusMessage = $"Exported fragment template to {path}.";
+        FragmentExported?.Invoke(
+            this,
+            new GraphEditorFragmentEventArgs(
+                path,
+                fragment.Nodes.Count,
+                fragment.Connections.Count));
+    }
+
     /// <summary>
     /// 将当前选择导出到指定片段文件路径。
     /// </summary>
@@ -1379,6 +1455,31 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         _fragmentWorkspaceService.Delete();
         RaiseComputedPropertyChanges();
         StatusMessage = "Cleared the saved fragment file.";
+    }
+
+    public void ImportSelectedTemplate()
+    {
+        if (SelectedFragmentTemplate is null)
+        {
+            StatusMessage = "Select a fragment template first.";
+            return;
+        }
+
+        ImportFragmentFrom(SelectedFragmentTemplate.Path);
+    }
+
+    public void DeleteSelectedTemplate()
+    {
+        if (SelectedFragmentTemplate is null)
+        {
+            StatusMessage = "Select a fragment template first.";
+            return;
+        }
+
+        var deletedPath = SelectedFragmentTemplate.Path;
+        _fragmentLibraryService.DeleteTemplate(deletedPath);
+        RefreshFragmentTemplates();
+        StatusMessage = $"Deleted fragment template {System.IO.Path.GetFileNameWithoutExtension(deletedPath)}.";
     }
 
     /// <summary>
@@ -1616,6 +1717,26 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     private static string CreateDocumentSignature(GraphDocument document)
         => GraphDocumentSerializer.Serialize(document);
+
+    private static GraphEditorBehaviorOptions ResolveBehaviorOptions(
+        GraphEditorBehaviorOptions? behaviorOptions,
+        GraphEditorStyleOptions styleOptions)
+    {
+        if (behaviorOptions is not null)
+        {
+            return behaviorOptions;
+        }
+
+        return GraphEditorBehaviorOptions.Default with
+        {
+            DragAssist = GraphEditorBehaviorOptions.Default.DragAssist with
+            {
+                EnableGridSnapping = styleOptions.Canvas.EnableGridSnapping,
+                EnableAlignmentGuides = styleOptions.Canvas.EnableAlignmentGuides,
+                SnapTolerance = styleOptions.Canvas.SnapTolerance,
+            },
+        };
+    }
 
     private void UpdateDirtyState()
     {

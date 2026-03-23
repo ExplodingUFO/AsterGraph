@@ -189,6 +189,24 @@ The current style surface is organized by concern:
 
 `AsterGraph.Avalonia` now keeps menu rendering behind a dedicated presenter, so hosts can keep driving behavior from editor-layer menu descriptors while styling stays in the Avalonia layer.
 
+## Behavior Configuration
+
+Hosts can also provide explicit editor behavior settings through `GraphEditorBehaviorOptions` in `AsterGraph.Editor.Configuration`.
+
+Recommended flow:
+
+1. Create a `GraphEditorBehaviorOptions` value in the host
+2. Pass it into `GraphEditorViewModel`
+3. Keep behavior toggles separate from visual tokens
+
+Current behavior sections include:
+
+- `HistoryBehaviorOptions`
+- `SelectionBehaviorOptions`
+- `DragAssistBehaviorOptions`
+- `FragmentBehaviorOptions`
+- `ViewBehaviorOptions`
+
 ## Roadmap
 
 - move more sample-only styling and content out of shared projects where appropriate
