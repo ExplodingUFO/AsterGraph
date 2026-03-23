@@ -20,6 +20,12 @@ public sealed class SerializationCompatibilityTests
     };
 
     [Fact]
+    public void GraphDocumentCompatibility_ExposesCurrentSchemaVersion()
+    {
+        Assert.Equal(1, GraphDocumentCompatibility.CurrentSchemaVersion);
+    }
+
+    [Fact]
     public void GraphDocumentSerializer_WritesSchemaVersion()
     {
         var document = CreateDocument();
@@ -57,6 +63,12 @@ public sealed class SerializationCompatibilityTests
 
         var exception = Assert.Throws<InvalidOperationException>(() => GraphDocumentSerializer.Deserialize(json));
         Assert.Contains("Unsupported graph document schema version", exception.Message);
+    }
+
+    [Fact]
+    public void GraphClipboardPayloadCompatibility_ExposesCurrentSchemaVersion()
+    {
+        Assert.Equal(1, GraphClipboardPayloadCompatibility.CurrentSchemaVersion);
     }
 
     [Fact]
