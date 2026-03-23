@@ -1,8 +1,8 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
-using System.Globalization;
-using System.Text.Json;
+using AsterGraph.Editor.Parameters;
+using System.Linq;
 
 namespace AsterGraph.Editor.ViewModels;
 
@@ -11,6 +11,7 @@ public sealed partial class NodeParameterViewModel : ObservableObject
     private readonly Action<NodeParameterViewModel, object?> _applyValue;
     private bool _suppressChangeNotifications;
     private bool _hasMixedValues;
+    private readonly IReadOnlyList<string> _allowedOptionValues;
 
     public NodeParameterViewModel(
         NodeParameterDefinition definition,
@@ -32,6 +33,7 @@ public sealed partial class NodeParameterViewModel : ObservableObject
             .Select(option => new NodeParameterOptionViewModel(option.Value, option.Label, option.Description))
             .ToList()
             .AsReadOnly();
+        _allowedOptionValues = Options.Select(option => option.Value).ToList().AsReadOnly();
 
         InitializeValues(currentValues.Count == 0 ? [definition.DefaultValue] : currentValues);
     }
@@ -131,7 +133,7 @@ public sealed partial class NodeParameterViewModel : ObservableObject
     private void InitializeValues(IReadOnlyList<object?> currentValues)
     {
         var normalizedValues = currentValues
-            .Select(value => NormalizeIncomingValue(value))
+            .Select(NodeParameterValueAdapter.NormalizeIncomingValue)
             .ToList();
         var firstValue = normalizedValues[0];
         _hasMixedValues = normalizedValues.Skip(1).Any(value => !Equals(value, firstValue));
@@ -164,157 +166,39 @@ public sealed partial class NodeParameterViewModel : ObservableObject
         _suppressChangeNotifications = true;
 
         CurrentValue = value;
-        StringValue = FormatValueForEditor(value);
-        BoolValue = TryNormalizeBoolean(value, out var boolean) ? boolean : null;
-        SelectedOption = Options.FirstOrDefault(option => option.Value.Equals(FormatValueForEditor(value), StringComparison.Ordinal));
+        StringValue = NodeParameterValueAdapter.FormatValueForEditor(value);
+        BoolValue = NodeParameterValueAdapter.TryNormalizeBoolean(value, out var boolean) ? boolean : null;
+        SelectedOption = Options.FirstOrDefault(option => option.Value.Equals(NodeParameterValueAdapter.FormatValueForEditor(value), StringComparison.Ordinal));
 
         _suppressChangeNotifications = false;
     }
 
     private void ValidateAndApply(object? candidateValue, bool commit)
     {
-        if (!TryNormalizeValue(candidateValue, out var normalizedValue, out var validationError))
+        var result = NodeParameterValueAdapter.NormalizeValue(
+            Definition,
+            DisplayName,
+            TypeId,
+            EditorKind,
+            IsRequired,
+            _allowedOptionValues,
+            candidateValue);
+
+        IsValid = result.IsValid;
+        ValidationMessage = result.ValidationError;
+        OnPropertyChanged(nameof(HasValidationError));
+
+        if (!IsValid)
         {
-            IsValid = false;
-            ValidationMessage = validationError;
-            OnPropertyChanged(nameof(HasValidationError));
             return;
         }
 
-        IsValid = true;
-        ValidationMessage = null;
-        OnPropertyChanged(nameof(HasValidationError));
-        CurrentValue = normalizedValue;
+        CurrentValue = result.Value;
 
         if (commit)
         {
-            _applyValue(this, normalizedValue);
+            _applyValue(this, result.Value);
         }
     }
 
-    private bool TryNormalizeValue(object? candidateValue, out object? normalizedValue, out string? validationError)
-    {
-        validationError = null;
-        normalizedValue = NormalizeIncomingValue(candidateValue);
-
-        if (IsRequired && (normalizedValue is null || string.IsNullOrWhiteSpace(normalizedValue.ToString())))
-        {
-            validationError = $"{DisplayName} is required.";
-            return false;
-        }
-
-        if (EditorKind == ParameterEditorKind.Boolean)
-        {
-            if (!TryNormalizeBoolean(normalizedValue, out var parsedBool))
-            {
-                validationError = $"{DisplayName} must be true or false.";
-                return false;
-            }
-
-            normalizedValue = parsedBool;
-            return true;
-        }
-
-        if (EditorKind == ParameterEditorKind.Enum)
-        {
-            var optionValue = normalizedValue?.ToString() ?? string.Empty;
-            if (!Options.Any(option => option.Value.Equals(optionValue, StringComparison.Ordinal)))
-            {
-                validationError = $"{DisplayName} must be one of the declared options.";
-                return false;
-            }
-
-            normalizedValue = optionValue;
-            return true;
-        }
-
-        if (EditorKind == ParameterEditorKind.Number)
-        {
-            var rawText = normalizedValue?.ToString() ?? string.Empty;
-            if (!TryParseDoubleFlexible(rawText, out var parsedNumber))
-            {
-                validationError = $"{DisplayName} must be numeric.";
-                return false;
-            }
-
-            if (Definition.Constraints.Minimum is double min && parsedNumber < min)
-            {
-                validationError = $"{DisplayName} must be >= {min}.";
-                return false;
-            }
-
-            if (Definition.Constraints.Maximum is double max && parsedNumber > max)
-            {
-                validationError = $"{DisplayName} must be <= {max}.";
-                return false;
-            }
-
-            if (TypeId.Value.Equals("int", StringComparison.Ordinal))
-            {
-                if (Math.Abs(parsedNumber % 1) > double.Epsilon)
-                {
-                    validationError = $"{DisplayName} must be a whole number.";
-                    return false;
-                }
-
-                normalizedValue = Convert.ToInt32(parsedNumber, CultureInfo.InvariantCulture);
-            }
-            else
-            {
-                normalizedValue = parsedNumber;
-            }
-
-            return true;
-        }
-
-        normalizedValue = normalizedValue?.ToString();
-        return true;
-    }
-
-    private static object? NormalizeIncomingValue(object? value)
-    {
-        if (value is not JsonElement json)
-        {
-            return value;
-        }
-
-        return json.ValueKind switch
-        {
-            JsonValueKind.String => json.GetString(),
-            JsonValueKind.Number when json.TryGetInt32(out var intValue) => intValue,
-            JsonValueKind.Number when json.TryGetDouble(out var doubleValue) => doubleValue,
-            JsonValueKind.True => true,
-            JsonValueKind.False => false,
-            JsonValueKind.Null => null,
-            _ => json.ToString(),
-        };
-    }
-
-    private static bool TryNormalizeBoolean(object? value, out bool result)
-    {
-        value = NormalizeIncomingValue(value);
-        if (value is bool boolean)
-        {
-            result = boolean;
-            return true;
-        }
-
-        return bool.TryParse(value?.ToString(), out result);
-    }
-
-    private static bool TryParseDoubleFlexible(string rawText, out double result)
-        => double.TryParse(rawText, NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo.CurrentCulture, out result)
-           || double.TryParse(rawText, NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo.InvariantCulture, out result);
-
-    private static string FormatValueForEditor(object? value)
-    {
-        value = NormalizeIncomingValue(value);
-
-        return value switch
-        {
-            null => string.Empty,
-            IFormattable formattable => formattable.ToString(null, CultureInfo.InvariantCulture),
-            _ => value.ToString() ?? string.Empty,
-        };
-    }
 }
