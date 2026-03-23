@@ -215,6 +215,7 @@ Current serialized payloads are versioned:
 - graph document JSON now emits `SchemaVersion`
 - clipboard payload JSON now emits `SchemaVersion`
 - readers remain backward-compatible with the earlier unversioned document and clipboard shapes
+- schema branching is centralized inside dedicated compatibility helpers instead of being spread across serializer entry points
 
 This keeps future contract evolution explicit instead of relying on implicit JSON shape guesses.
 
