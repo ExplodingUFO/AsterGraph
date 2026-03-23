@@ -114,9 +114,9 @@ For host-side integration hooks, `GraphEditorViewModel` also exposes event subsc
 - `FragmentExported`
 - `FragmentImported`
 
-For host-side right-click menu augmentation, hosts can also pass `IGraphContextMenuContributor` instances into `GraphEditorViewModel`.
-Each contributor receives a `GraphContextMenuExtensionContext` snapshot and returns extra `MenuItemDescriptor` items that are appended after the built-in menu.
-This keeps menu customization in the editor layer and supports nested host menus such as `Results -> Preview / Publish / Create Comparison`.
+For host-side right-click menu augmentation, hosts can pass an `IGraphContextMenuAugmentor` into `GraphEditorViewModel`.
+The augmentor receives the current `GraphEditorViewModel`, the current `ContextMenuContext`, and the stock `MenuItemDescriptor` list, then returns the final menu.
+This keeps menu customization in the editor layer and supports nested host menus such as `Results -> Preview / Publish / Create Comparison` without replacing `NodeCanvas`.
 
 For host-side permission control, `GraphEditorBehaviorOptions` now also carries a grouped `GraphEditorCommandPermissions` object.
 Hosts can start from `GraphEditorCommandPermissions.Default` or `GraphEditorCommandPermissions.ReadOnly`, then selectively override workspace, node, connection, clipboard, fragment, layout, history, and host-extension permissions.
@@ -255,11 +255,11 @@ The editor applies these permissions in one place:
 
 Hosts that need business-specific node actions can use the public context-menu contributor API:
 
-1. Implement `IGraphContextMenuContributor`
-2. Check `GraphContextMenuExtensionContext.TargetKind`
-3. Use `ClickedNode`, `ClickedPort`, or `ClickedConnection` as needed
-4. Return one or more `MenuItemDescriptor` values, including nested children when required
-5. Pass the contributors into `GraphEditorViewModel`
+1. Implement `IGraphContextMenuAugmentor`
+2. Inspect `ContextMenuContext.TargetKind`
+3. Use `ContextMenuContext.ClickedNodeId`, `SelectedNodeIds`, and `SelectedConnectionIds` as needed
+4. Start from the provided stock `MenuItemDescriptor` list and append your own items
+5. Pass the augmentor into `GraphEditorViewModel`
 
 The demo host now includes a sample node contribution:
 

@@ -8,19 +8,14 @@ namespace AsterGraph.Editor.Menus;
 internal sealed class GraphContextMenuBuilder
 {
     private readonly IGraphContextMenuHost _editor;
-    private readonly IReadOnlyList<IGraphContextMenuContributor> _contributors;
 
-    public GraphContextMenuBuilder(
-        IGraphContextMenuHost editor,
-        IEnumerable<IGraphContextMenuContributor>? contributors = null)
+    public GraphContextMenuBuilder(IGraphContextMenuHost editor)
     {
         _editor = editor;
-        _contributors = (contributors ?? []).ToArray();
     }
 
     public IReadOnlyList<MenuItemDescriptor> Build(ContextMenuContext context)
-    {
-        var builtInItems = context.TargetKind switch
+        => context.TargetKind switch
         {
             ContextMenuTargetKind.Canvas => BuildCanvasMenu(context),
             ContextMenuTargetKind.Selection => BuildSelectionMenu(),
@@ -29,20 +24,6 @@ internal sealed class GraphContextMenuBuilder
             ContextMenuTargetKind.Connection => BuildConnectionMenu(context),
             _ => [],
         };
-
-        if (_contributors.Count == 0)
-        {
-            return builtInItems;
-        }
-
-        var extensionItems = BuildContributorItems(context);
-        if (extensionItems.Count == 0)
-        {
-            return builtInItems;
-        }
-
-        return MergeMenuItems(builtInItems, extensionItems);
-    }
 
     private IReadOnlyList<MenuItemDescriptor> BuildCanvasMenu(ContextMenuContext context)
     {
@@ -285,157 +266,4 @@ internal sealed class GraphContextMenuBuilder
             : node.Title;
     }
 
-    private IReadOnlyList<MenuItemDescriptor> BuildContributorItems(ContextMenuContext context)
-    {
-        if (!_editor.CommandPermissions.Host.AllowContextMenuExtensions)
-        {
-            return [];
-        }
-
-        var extensionContext = CreateExtensionContext(context);
-        var items = new List<MenuItemDescriptor>();
-
-        foreach (var contributor in _contributors)
-        {
-            try
-            {
-                items.AddRange(contributor.Contribute(extensionContext) ?? []);
-            }
-            catch (Exception exception)
-            {
-                throw new InvalidOperationException(
-                    $"Context menu contributor '{contributor.GetType().FullName}' failed for target '{context.TargetKind}'.",
-                    exception);
-            }
-        }
-
-        return NormalizeMenuItems(items);
-    }
-
-    private GraphContextMenuExtensionContext CreateExtensionContext(ContextMenuContext context)
-    {
-        var clickedNodeId = context.ClickedNodeId ?? context.ClickedPortNodeId;
-        var clickedNode = clickedNodeId is null
-            ? null
-            : TryCreateNodeInfo(clickedNodeId);
-
-        var clickedPort = context.ClickedPortNodeId is not null && context.ClickedPortId is not null
-            ? TryCreatePortInfo(context.ClickedPortNodeId, context.ClickedPortId)
-            : null;
-
-        var clickedConnection = context.ClickedConnectionId is null
-            ? null
-            : TryCreateConnectionInfo(context.ClickedConnectionId);
-
-        return new GraphContextMenuExtensionContext(
-            context.TargetKind,
-            context.WorldPosition,
-            _editor.CommandPermissions,
-            _editor.SelectedNodes.Select(node => node.Id).ToList(),
-            context.SelectedNodeId,
-            context.SelectedConnectionId,
-            clickedNode,
-            clickedPort,
-            clickedConnection);
-    }
-
-    private GraphContextMenuNodeInfo? TryCreateNodeInfo(string nodeId)
-    {
-        var node = _editor.FindNode(nodeId);
-        if (node is null)
-        {
-            return null;
-        }
-
-        return new GraphContextMenuNodeInfo(
-            node.Id,
-            node.Title,
-            node.Category,
-            node.DefinitionId,
-            new GraphPoint(node.X, node.Y),
-            new GraphSize(node.Width, node.Height),
-            node.InputCount,
-            node.OutputCount);
-    }
-
-    private GraphContextMenuPortInfo? TryCreatePortInfo(string nodeId, string portId)
-    {
-        var node = _editor.FindNode(nodeId);
-        var port = node?.GetPort(portId);
-        if (node is null || port is null)
-        {
-            return null;
-        }
-
-        return new GraphContextMenuPortInfo(
-            node.Id,
-            port.Id,
-            port.Label,
-            port.Direction,
-            port.TypeId,
-            port.DataType,
-            port.Index,
-            port.Total);
-    }
-
-    private GraphContextMenuConnectionInfo? TryCreateConnectionInfo(string connectionId)
-    {
-        var connection = _editor.FindConnection(connectionId);
-        return connection is null
-            ? null
-            : new GraphContextMenuConnectionInfo(
-                connection.Id,
-                connection.SourceNodeId,
-                connection.SourcePortId,
-                connection.TargetNodeId,
-                connection.TargetPortId,
-                connection.Label,
-                connection.ConversionId);
-    }
-
-    private static IReadOnlyList<MenuItemDescriptor> MergeMenuItems(
-        IReadOnlyList<MenuItemDescriptor> builtInItems,
-        IReadOnlyList<MenuItemDescriptor> extensionItems)
-    {
-        if (builtInItems.Count == 0)
-        {
-            return extensionItems;
-        }
-
-        var items = new List<MenuItemDescriptor>(builtInItems.Count + extensionItems.Count + 1);
-        items.AddRange(builtInItems);
-
-        if (!builtInItems[^1].IsSeparator && !extensionItems[0].IsSeparator)
-        {
-            items.Add(MenuItemDescriptor.Separator("context-menu-host-extension-separator"));
-        }
-
-        items.AddRange(extensionItems);
-        return NormalizeMenuItems(items);
-    }
-
-    private static IReadOnlyList<MenuItemDescriptor> NormalizeMenuItems(IEnumerable<MenuItemDescriptor> items)
-    {
-        var normalized = new List<MenuItemDescriptor>();
-
-        foreach (var item in items)
-        {
-            if (item.IsSeparator)
-            {
-                if (normalized.Count == 0 || normalized[^1].IsSeparator)
-                {
-                    continue;
-                }
-            }
-
-            normalized.Add(item);
-        }
-
-        while (normalized.Count > 0 && normalized[^1].IsSeparator)
-        {
-            normalized.RemoveAt(normalized.Count - 1);
-        }
-
-        return normalized;
-    }
 }
