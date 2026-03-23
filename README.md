@@ -106,6 +106,14 @@ For host-side layout persistence without saving a full graph snapshot, `GraphEdi
 - `TrySetNodePosition(nodeId, position)`
 - `SetNodePositions(snapshots)`
 
+For host-side integration hooks, `GraphEditorViewModel` also exposes event subscriptions such as:
+
+- `DocumentChanged`
+- `SelectionChanged`
+- `ViewportChanged`
+- `FragmentExported`
+- `FragmentImported`
+
 ## Type Compatibility
 
 AsterGraph uses:

@@ -12,6 +12,7 @@ using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Abstractions.Styling;
 using AsterGraph.Core.Models;
 using AsterGraph.Core.Serialization;
+using AsterGraph.Editor.Events;
 using AsterGraph.Editor.Geometry;
 using AsterGraph.Editor.Menus;
 using AsterGraph.Editor.Models;
@@ -247,6 +248,31 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     [ObservableProperty]
     private bool isDirty;
 
+    /// <summary>
+    /// 当图文档发生结构或内容变化时触发。
+    /// </summary>
+    public event EventHandler<GraphEditorDocumentChangedEventArgs>? DocumentChanged;
+
+    /// <summary>
+    /// 当当前选择集合发生变化时触发。
+    /// </summary>
+    public event EventHandler<GraphEditorSelectionChangedEventArgs>? SelectionChanged;
+
+    /// <summary>
+    /// 当视口缩放、平移或尺寸发生变化时触发。
+    /// </summary>
+    public event EventHandler<GraphEditorViewportChangedEventArgs>? ViewportChanged;
+
+    /// <summary>
+    /// 当片段导出成功后触发。
+    /// </summary>
+    public event EventHandler<GraphEditorFragmentEventArgs>? FragmentExported;
+
+    /// <summary>
+    /// 当片段导入并粘贴成功后触发。
+    /// </summary>
+    public event EventHandler<GraphEditorFragmentEventArgs>? FragmentImported;
+
     public bool HasPendingConnection => PendingSourceNode is not null && PendingSourcePort is not null;
 
     public bool CanUndo => _historyService.CanUndo;
@@ -351,6 +377,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         _viewportWidth = width;
         _viewportHeight = height;
         FitViewCommand.NotifyCanExecuteChanged();
+        NotifyViewportChanged();
         RaiseComputedPropertyChanges();
     }
 
@@ -498,6 +525,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         }
 
         RebuildSelectedNodeParameters();
+        NotifySelectionChanged();
         RaiseComputedPropertyChanges();
     }
 
@@ -660,6 +688,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         Nodes.Add(node);
         SelectSingleNode(node);
         MarkDirty($"Added {template.Title}.");
+        NotifyDocumentChanged(GraphEditorDocumentChangeKind.NodesAdded, nodeIds: [node.Id]);
     }
 
     public void MoveNode(NodeViewModel node, double deltaX, double deltaY)
@@ -681,6 +710,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     {
         PanX += deltaX;
         PanY += deltaY;
+        NotifyViewportChanged();
     }
 
     public void ZoomAt(double factor, GraphPoint screenAnchor)
@@ -695,6 +725,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         Zoom = updated.Zoom;
         PanX = updated.PanX;
         PanY = updated.PanY;
+        NotifyViewportChanged();
     }
 
     public void ResetView(bool updateStatus = true)
@@ -707,6 +738,8 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         {
             StatusMessage = "Viewport reset.";
         }
+
+        NotifyViewportChanged();
     }
 
     public void FitToViewport(double viewportWidth, double viewportHeight, bool updateStatus = true)
@@ -742,6 +775,8 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         {
             StatusMessage = "Viewport fit to scene.";
         }
+
+        NotifyViewportChanged();
     }
 
     public void ActivatePort(NodeViewModel node, PortViewModel port)
@@ -851,6 +886,10 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             compatibility.Kind == PortCompatibilityKind.ImplicitConversion
                 ? $"Connected {sourceNode.Title} to {targetNode.Title} with implicit conversion."
                 : $"Connected {sourceNode.Title} to {targetNode.Title}.");
+        NotifyDocumentChanged(
+            GraphEditorDocumentChangeKind.ConnectionsChanged,
+            nodeIds: [sourceNode.Id, targetNode.Id],
+            connectionIds: [Connections[^1].Id]);
     }
 
     public void CancelPendingConnection(string? status = null)
@@ -898,6 +937,10 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         MarkDirty(removedNodes.Count == 1
             ? $"Deleted {removedNodes[0].Title}."
             : $"Deleted {removedNodes.Count} nodes.");
+        NotifyDocumentChanged(
+            GraphEditorDocumentChangeKind.NodesRemoved,
+            nodeIds: removedNodes.Select(node => node.Id).ToList(),
+            connectionIds: removedConnections.Select(connection => connection.Id).ToList());
     }
 
     /// <summary>
@@ -974,6 +1017,10 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
         SetSelection(remainingSelection, remainingSelection.LastOrDefault());
         MarkDirty($"Deleted {node.Title}.");
+        NotifyDocumentChanged(
+            GraphEditorDocumentChangeKind.NodesRemoved,
+            nodeIds: [node.Id],
+            connectionIds: removedConnections.Select(connection => connection.Id).ToList());
     }
 
     public void DuplicateNode(string nodeId)
@@ -993,6 +1040,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         Nodes.Add(duplicate);
         SelectSingleNode(duplicate);
         MarkDirty($"Duplicated {node.Title}.");
+        NotifyDocumentChanged(GraphEditorDocumentChangeKind.NodesAdded, nodeIds: [duplicate.Id]);
     }
 
     public void DisconnectIncoming(string nodeId) => RemoveConnections(connection => connection.TargetNodeId == nodeId, "Disconnected incoming links.");
@@ -1020,6 +1068,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
         Connections.Remove(connection);
         MarkDirty($"Deleted connection {connection.Label}.");
+        NotifyDocumentChanged(GraphEditorDocumentChangeKind.ConnectionsChanged, connectionIds: [connection.Id]);
     }
 
     public ConnectionViewModel? FindConnection(string connectionId)
@@ -1052,6 +1101,8 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         {
             StatusMessage = "Viewport centered from mini map.";
         }
+
+        NotifyViewportChanged();
     }
 
     public IReadOnlyList<CompatiblePortTarget> GetCompatibleTargets(string sourceNodeId, string sourcePortId)
@@ -1090,6 +1141,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
         applyLayout(selectedNodes);
         MarkDirty(status);
+        NotifyDocumentChanged(GraphEditorDocumentChangeKind.LayoutChanged, selectedNodes.Select(node => node.Id).ToList());
     }
 
     private GraphSelectionFragment? CreateSelectionFragment()
@@ -1236,6 +1288,12 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         _fragmentWorkspaceService.Save(fragment);
         RaiseComputedPropertyChanges();
         StatusMessage = $"Exported fragment to {_fragmentWorkspaceService.FragmentPath}.";
+        FragmentExported?.Invoke(
+            this,
+            new GraphEditorFragmentEventArgs(
+                _fragmentWorkspaceService.FragmentPath,
+                fragment.Nodes.Count,
+                fragment.Connections.Count));
     }
 
     /// <summary>
@@ -1256,6 +1314,12 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
         _fragmentWorkspaceService.Save(fragment, path);
         StatusMessage = $"Exported fragment to {path}.";
+        FragmentExported?.Invoke(
+            this,
+            new GraphEditorFragmentEventArgs(
+                path,
+                fragment.Nodes.Count,
+                fragment.Connections.Count));
         return true;
     }
 
@@ -1293,6 +1357,15 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         {
             StatusMessage = "Fragment file did not contain any nodes.";
         }
+        else
+        {
+            FragmentImported?.Invoke(
+                this,
+                new GraphEditorFragmentEventArgs(
+                    _fragmentWorkspaceService.FragmentPath,
+                    fragment.Nodes.Count,
+                    fragment.Connections.Count));
+        }
     }
 
     public void ClearFragment()
@@ -1326,7 +1399,18 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         var fragment = _fragmentWorkspaceService.Load(path);
         _selectionClipboard.Store(fragment);
         RaiseComputedPropertyChanges();
-        return PasteFragment(fragment, "Imported");
+        var imported = PasteFragment(fragment, "Imported");
+        if (imported)
+        {
+            FragmentImported?.Invoke(
+                this,
+                new GraphEditorFragmentEventArgs(
+                    path,
+                    fragment.Nodes.Count,
+                    fragment.Connections.Count));
+        }
+
+        return imported;
     }
 
     public void SaveWorkspace()
@@ -1337,6 +1421,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             _lastSavedDocumentSignature = CreateDocumentSignature();
             UpdateDirtyState();
             StatusMessage = $"Saved snapshot to {WorkspacePath}.";
+            NotifyDocumentChanged(GraphEditorDocumentChangeKind.WorkspaceSaved, statusMessage: StatusMessage);
             RaiseComputedPropertyChanges();
         }
         catch (Exception exception)
@@ -1360,6 +1445,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             CancelPendingConnection();
             ClearSelection();
             ResetView(updateStatus: false);
+            NotifyDocumentChanged(GraphEditorDocumentChangeKind.WorkspaceLoaded, statusMessage: StatusMessage);
             return true;
         }
         catch (Exception exception)
@@ -1643,6 +1729,42 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         OnPropertyChanged(nameof(InspectorUpstream));
         OnPropertyChanged(nameof(InspectorDownstream));
         OnPropertyChanged(nameof(SelectionCaption));
+    }
+
+    private void NotifyDocumentChanged(
+        GraphEditorDocumentChangeKind changeKind,
+        IReadOnlyList<string>? nodeIds = null,
+        IReadOnlyList<string>? connectionIds = null,
+        string? statusMessage = null)
+    {
+        DocumentChanged?.Invoke(
+            this,
+            new GraphEditorDocumentChangedEventArgs(
+                changeKind,
+                nodeIds,
+                connectionIds,
+                statusMessage ?? StatusMessage));
+    }
+
+    private void NotifySelectionChanged()
+    {
+        SelectionChanged?.Invoke(
+            this,
+            new GraphEditorSelectionChangedEventArgs(
+                SelectedNodes.Select(node => node.Id).ToList(),
+                SelectedNode?.Id));
+    }
+
+    private void NotifyViewportChanged()
+    {
+        ViewportChanged?.Invoke(
+            this,
+            new GraphEditorViewportChangedEventArgs(
+                Zoom,
+                PanX,
+                PanY,
+                ViewportWidth,
+                ViewportHeight));
     }
 
     private void CoerceSelectionToExistingNodes()

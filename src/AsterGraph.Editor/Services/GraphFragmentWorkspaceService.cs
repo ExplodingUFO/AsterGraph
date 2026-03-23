@@ -33,7 +33,7 @@ public sealed class GraphFragmentWorkspaceService
     /// </summary>
     /// <param name="fragment">要保存的片段。</param>
     /// <param name="path">可选的目标路径。</param>
-    public void Save(GraphSelectionFragment fragment, string? path = null)
+    internal void Save(GraphSelectionFragment fragment, string? path = null)
     {
         ArgumentNullException.ThrowIfNull(fragment);
 
@@ -51,7 +51,7 @@ public sealed class GraphFragmentWorkspaceService
     /// 从默认路径或指定路径读取片段。
     /// </summary>
     /// <param name="path">可选的源路径。</param>
-    public GraphSelectionFragment Load(string? path = null)
+    internal GraphSelectionFragment Load(string? path = null)
     {
         var text = File.ReadAllText(ResolvePath(path));
         if (!GraphClipboardPayloadSerializer.TryDeserialize(text, out var fragment) || fragment is null)
@@ -73,7 +73,7 @@ public sealed class GraphFragmentWorkspaceService
     /// 删除默认路径或指定路径的片段文件。
     /// </summary>
     /// <param name="path">可选的目标路径。</param>
-    public void Delete(string? path = null)
+    internal void Delete(string? path = null)
     {
         var resolvedPath = ResolvePath(path);
         if (File.Exists(resolvedPath))
