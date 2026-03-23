@@ -11,6 +11,7 @@ Current capabilities:
 - `Shift` append selection and `Ctrl` toggle selection on node click
 - selection-aware right-click menu for batch actions
 - mini map overview with viewport recentering
+- mini map drag navigation for continuous viewport repositioning
 - zoom and pan canvas interaction
 - connection rendering and pending connection preview
 - graph save/load

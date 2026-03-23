@@ -13,21 +13,35 @@ namespace AsterGraph.Avalonia.Controls;
 /// </summary>
 public sealed class GraphMiniMap : Control
 {
+    /// <summary>
+    /// 绑定的编辑器视图模型依赖属性。
+    /// </summary>
     public static readonly StyledProperty<GraphEditorViewModel?> ViewModelProperty =
         AvaloniaProperty.Register<GraphMiniMap, GraphEditorViewModel?>(nameof(ViewModel));
 
+    private bool _isDraggingViewport;
+
+    /// <summary>
+    /// 初始化缩略图控件。
+    /// </summary>
     public GraphMiniMap()
     {
         Focusable = false;
         PointerPressed += HandlePointerPressed;
+        PointerMoved += HandlePointerMoved;
+        PointerReleased += HandlePointerReleased;
     }
 
+    /// <summary>
+    /// 当前绑定的编辑器视图模型。
+    /// </summary>
     public GraphEditorViewModel? ViewModel
     {
         get => GetValue(ViewModelProperty);
         set => SetValue(ViewModelProperty, value);
     }
 
+    /// <inheritdoc />
     public override void Render(DrawingContext context)
     {
         base.Render(context);
@@ -90,17 +104,46 @@ public sealed class GraphMiniMap : Control
             return;
         }
 
+        CenterViewportFromMiniMap(editor, args.GetPosition(this));
+        _isDraggingViewport = true;
+        args.Pointer.Capture(this);
+        args.Handled = true;
+    }
+
+    private void HandlePointerMoved(object? sender, PointerEventArgs args)
+    {
+        if (!_isDraggingViewport || ViewModel is null)
+        {
+            return;
+        }
+
+        CenterViewportFromMiniMap(ViewModel, args.GetPosition(this), updateStatus: false);
+        args.Handled = true;
+    }
+
+    private void HandlePointerReleased(object? sender, PointerReleasedEventArgs args)
+    {
+        if (!_isDraggingViewport)
+        {
+            return;
+        }
+
+        _isDraggingViewport = false;
+        args.Pointer.Capture(null);
+        args.Handled = true;
+    }
+
+    private void CenterViewportFromMiniMap(GraphEditorViewModel editor, Point point, bool updateStatus = true)
+    {
         var bounds = Bounds;
         var worldBounds = GetWorldBounds(editor);
         var scale = Math.Min(bounds.Width / worldBounds.Width, bounds.Height / worldBounds.Height);
         var offsetX = bounds.X + ((bounds.Width - (worldBounds.Width * scale)) / 2);
         var offsetY = bounds.Y + ((bounds.Height - (worldBounds.Height * scale)) / 2);
-        var point = args.GetPosition(this);
 
         var worldX = worldBounds.X + ((point.X - offsetX) / scale);
         var worldY = worldBounds.Y + ((point.Y - offsetY) / scale);
-        editor.CenterViewAt(new GraphPoint(worldX, worldY));
-        args.Handled = true;
+        editor.CenterViewAt(new GraphPoint(worldX, worldY), updateStatus);
     }
 
     private static Rect GetWorldBounds(GraphEditorViewModel editor)
