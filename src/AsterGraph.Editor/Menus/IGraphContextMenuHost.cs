@@ -19,6 +19,10 @@ internal interface IGraphContextMenuHost
 
     ICommand CopySelectionCommand { get; }
 
+    ICommand ExportSelectionFragmentCommand { get; }
+
+    ICommand ImportFragmentCommand { get; }
+
     bool HasPendingConnection { get; }
 
     ICommand FitViewCommand { get; }

@@ -108,6 +108,12 @@
                     Command="{Binding LoadCommand}"
                     Content="Load Snapshot" />
             <Button Classes="astergraph-toolbar-action"
+                    Command="{Binding UndoCommand}"
+                    Content="Undo" />
+            <Button Classes="astergraph-toolbar-action"
+                    Command="{Binding RedoCommand}"
+                    Content="Redo" />
+            <Button Classes="astergraph-toolbar-action"
                     Command="{Binding FitViewCommand}"
                     Content="Fit View" />
             <Button Classes="astergraph-toolbar-action"
@@ -299,8 +305,40 @@
               </StackPanel>
             </Border>
 
+            <Border Classes="astergraph-inspector-section">
+              <StackPanel Spacing="8">
+                <TextBlock Text="Fragments"
+                           FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
+                           FontWeight="Bold"
+                           Foreground="{DynamicResource AsterGraph.EyebrowBrush}" />
+                <TextBlock Text="{Binding FragmentCaption}"
+                           FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
+                           TextWrapping="Wrap"
+                           Foreground="{DynamicResource AsterGraph.BodyBrush}" />
+                <WrapPanel Orientation="Horizontal">
+                  <Button Classes="astergraph-toolbar-action"
+                          Command="{Binding ExportSelectionFragmentCommand}"
+                          Content="Export Fragment" />
+                  <Button Classes="astergraph-toolbar-action"
+                          Command="{Binding ImportFragmentCommand}"
+                          Content="Import Fragment" />
+                </WrapPanel>
+              </StackPanel>
+            </Border>
+
+            <Border Classes="astergraph-inspector-section">
+              <StackPanel Spacing="8">
+                <TextBlock Text="Mini Map"
+                           FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
+                           FontWeight="Bold"
+                           Foreground="{DynamicResource AsterGraph.EyebrowBrush}" />
+                <controls:GraphMiniMap Height="168"
+                                       ViewModel="{Binding}" />
+              </StackPanel>
+            </Border>
+
             <Border Classes="astergraph-inspector-section"
-                    IsVisible="{Binding HasEditableParameters}">
+                    IsVisible="{Binding HasAnyEditableParameters, Mode=OneWay}">
               <StackPanel Spacing="{DynamicResource AsterGraph.InspectorSectionSpacing}">
                 <TextBlock Text="Parameters"
                            FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
@@ -332,10 +370,11 @@
                                    Classes="astergraph-input"
                                    IsVisible="{Binding UsesTextInput}"
                                    IsReadOnly="{Binding IsReadOnly}"
-                                   Watermark="{Binding TypeId.Value}" />
+                                   Watermark="{Binding MixedValueHint}" />
 
-                          <CheckBox Content="Enabled"
+                          <CheckBox Content="{Binding BooleanCaption}"
                                     IsVisible="{Binding IsBoolean}"
+                                    IsThreeState="True"
                                     IsChecked="{Binding BoolValue}"
                                     IsEnabled="{Binding CanEdit}" />
 
@@ -344,6 +383,11 @@
                                     SelectedItem="{Binding SelectedOption}"
                                     IsVisible="{Binding IsEnum}"
                                     IsEnabled="{Binding CanEdit}" />
+
+                          <TextBlock Text="Multiple values"
+                                     IsVisible="{Binding HasMixedValues}"
+                                     FontSize="{DynamicResource AsterGraph.InspectorCaptionFontSize}"
+                                     Foreground="{DynamicResource AsterGraph.EyebrowBrush}" />
 
                           <TextBlock Text="{Binding ValidationMessage}"
                                      IsVisible="{Binding HasValidationError}"

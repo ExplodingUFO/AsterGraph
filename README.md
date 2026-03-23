@@ -10,6 +10,7 @@ Current capabilities:
 - left-drag marquee selection for multi-node editing
 - `Shift` append selection and `Ctrl` toggle selection on node click
 - selection-aware right-click menu for batch actions
+- mini map overview with viewport recentering
 - zoom and pan canvas interaction
 - connection rendering and pending connection preview
 - graph save/load
@@ -17,6 +18,8 @@ Current capabilities:
 - selection deletion with `Delete`
 - selection copy/paste with `Ctrl+C` / `Ctrl+V`
 - batch alignment and distribution for multi-selection
+- same-definition multi-selection can batch-edit shared parameters
+- selection fragments can be exported to and imported from a JSON file
 - strict type compatibility with a small set of safe implicit conversions
 - compile-time node-definition registration through providers
 
@@ -145,6 +148,14 @@ Hosts can also opt into drag-assist behavior through `CanvasStyleOptions`:
 - `EnableGridSnapping`
 - `EnableAlignmentGuides`
 - `SnapTolerance`
+
+## Fragments
+
+In addition to clipboard-based fragment copy/paste, AsterGraph now supports explicit fragment file workflows:
+
+- `Export Fragment` saves the current selection as JSON
+- `Import Fragment` loads the saved fragment file and pastes it near the current viewport center
+- the demo host uses the default fragment path exposed through the editor workspace services
 
 ## Style Configuration
 

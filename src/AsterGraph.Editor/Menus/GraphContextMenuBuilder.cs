@@ -56,6 +56,7 @@ internal sealed class GraphContextMenuBuilder
             MenuItemDescriptor.Separator("canvas-sep-2"),
             new MenuItemDescriptor("canvas-save", "Save Snapshot", _editor.SaveCommand, iconKey: "save"),
             new MenuItemDescriptor("canvas-load", "Load Snapshot", _editor.LoadCommand, iconKey: "load"),
+            new MenuItemDescriptor("canvas-import-fragment", "Import Fragment", _editor.ImportFragmentCommand, iconKey: "import", isEnabled: _editor.ImportFragmentCommand.CanExecute(null)),
             new MenuItemDescriptor(
                 "canvas-paste",
                 "Paste",
@@ -84,6 +85,12 @@ internal sealed class GraphContextMenuBuilder
                 _editor.CopySelectionCommand,
                 iconKey: "copy",
                 isEnabled: _editor.CopySelectionCommand.CanExecute(null)),
+            new MenuItemDescriptor(
+                "selection-export",
+                "Export Fragment",
+                _editor.ExportSelectionFragmentCommand,
+                iconKey: "export",
+                isEnabled: _editor.ExportSelectionFragmentCommand.CanExecute(null)),
             new MenuItemDescriptor(
                 "selection-paste",
                 "Paste",

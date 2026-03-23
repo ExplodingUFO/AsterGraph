@@ -121,6 +121,8 @@ internal sealed class GraphContextMenuPresenter
             "save" => "S",
             "load" => "L",
             "copy" => "C",
+            "import" => "I",
+            "export" => "E",
             "paste" => "P",
             "cancel" => "X",
             "inspect" => "I",

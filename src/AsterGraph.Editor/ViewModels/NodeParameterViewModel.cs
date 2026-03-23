@@ -10,10 +10,11 @@ public sealed partial class NodeParameterViewModel : ObservableObject
 {
     private readonly Action<NodeParameterViewModel, object?> _applyValue;
     private bool _suppressChangeNotifications;
+    private bool _hasMixedValues;
 
     public NodeParameterViewModel(
         NodeParameterDefinition definition,
-        object? currentValue,
+        IReadOnlyList<object?> currentValues,
         Action<NodeParameterViewModel, object?> applyValue)
     {
         Definition = definition;
@@ -31,8 +32,7 @@ public sealed partial class NodeParameterViewModel : ObservableObject
             .ToList()
             .AsReadOnly();
 
-        SetFromCurrentValue(currentValue ?? definition.DefaultValue);
-        ValidateAndApply(CurrentValue, commit: false);
+        InitializeValues(currentValues.Count == 0 ? [definition.DefaultValue] : currentValues);
     }
 
     public NodeParameterDefinition Definition { get; }
@@ -69,13 +69,19 @@ public sealed partial class NodeParameterViewModel : ObservableObject
 
     public bool HasValidationError => !IsValid;
 
+    public bool HasMixedValues => _hasMixedValues;
+
+    public string MixedValueHint => HasMixedValues ? "Multiple values" : TypeId.Value;
+
+    public string BooleanCaption => HasMixedValues ? "Multiple values" : "Enabled";
+
     public object? CurrentValue { get; private set; }
 
     [ObservableProperty]
     private string stringValue = string.Empty;
 
     [ObservableProperty]
-    private bool boolValue;
+    private bool? boolValue;
 
     [ObservableProperty]
     private NodeParameterOptionViewModel? selectedOption;
@@ -96,9 +102,14 @@ public sealed partial class NodeParameterViewModel : ObservableObject
         ValidateAndApply(value, commit: true);
     }
 
-    partial void OnBoolValueChanged(bool value)
+    partial void OnBoolValueChanged(bool? value)
     {
         if (_suppressChangeNotifications || IsReadOnly)
+        {
+            return;
+        }
+
+        if (value is null)
         {
             return;
         }
@@ -116,13 +127,44 @@ public sealed partial class NodeParameterViewModel : ObservableObject
         ValidateAndApply(value?.Value, commit: true);
     }
 
+    private void InitializeValues(IReadOnlyList<object?> currentValues)
+    {
+        var normalizedValues = currentValues
+            .Select(value => NormalizeIncomingValue(value))
+            .ToList();
+        var firstValue = normalizedValues[0];
+        _hasMixedValues = normalizedValues.Skip(1).Any(value => !Equals(value, firstValue));
+
+        if (_hasMixedValues)
+        {
+            _suppressChangeNotifications = true;
+            CurrentValue = null;
+            StringValue = string.Empty;
+            BoolValue = null;
+            SelectedOption = null;
+            IsValid = true;
+            ValidationMessage = null;
+            _suppressChangeNotifications = false;
+            OnPropertyChanged(nameof(HasMixedValues));
+            OnPropertyChanged(nameof(MixedValueHint));
+            OnPropertyChanged(nameof(BooleanCaption));
+            return;
+        }
+
+        SetFromCurrentValue(firstValue);
+        ValidateAndApply(CurrentValue, commit: false);
+        OnPropertyChanged(nameof(HasMixedValues));
+        OnPropertyChanged(nameof(MixedValueHint));
+        OnPropertyChanged(nameof(BooleanCaption));
+    }
+
     private void SetFromCurrentValue(object? value)
     {
         _suppressChangeNotifications = true;
 
         CurrentValue = value;
         StringValue = FormatValueForEditor(value);
-        BoolValue = TryNormalizeBoolean(value, out var boolean) && boolean;
+        BoolValue = TryNormalizeBoolean(value, out var boolean) ? boolean : null;
         SelectedOption = Options.FirstOrDefault(option => option.Value.Equals(FormatValueForEditor(value), StringComparison.Ordinal));
 
         _suppressChangeNotifications = false;

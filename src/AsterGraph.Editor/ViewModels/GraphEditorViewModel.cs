@@ -33,6 +33,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     private readonly IPortCompatibilityService _compatibilityService;
     private readonly GraphWorkspaceService _workspaceService;
     private readonly GraphSelectionClipboard _selectionClipboard;
+    private readonly GraphFragmentWorkspaceService _fragmentWorkspaceService;
     private readonly GraphEditorHistoryService _historyService;
     private IGraphTextClipboardBridge? _textClipboardBridge;
     private readonly GraphContextMenuBuilder _contextMenuBuilder;
@@ -54,6 +55,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         _compatibilityService = compatibilityService ?? throw new ArgumentNullException(nameof(compatibilityService));
         _workspaceService = workspaceService ?? new GraphWorkspaceService();
         _selectionClipboard = new GraphSelectionClipboard();
+        _fragmentWorkspaceService = new GraphFragmentWorkspaceService();
         _historyService = new GraphEditorHistoryService();
         StyleOptions = styleOptions ?? GraphEditorStyleOptions.Default;
 
@@ -66,6 +68,8 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         DeleteSelectionCommand = new RelayCommand(DeleteSelection, () => CanDeleteSelection);
         CopySelectionCommand = new AsyncRelayCommand(CopySelectionAsync, () => CanCopySelection);
         PasteCommand = new AsyncRelayCommand(PasteSelectionAsync, () => CanPaste);
+        ExportSelectionFragmentCommand = new RelayCommand(ExportSelectionFragment, () => CanExportSelectionFragment);
+        ImportFragmentCommand = new RelayCommand(ImportFragment, () => CanImportFragment);
         AlignLeftCommand = new RelayCommand(AlignSelectionLeft, () => CanAlignSelection);
         AlignCenterCommand = new RelayCommand(AlignSelectionCenter, () => CanAlignSelection);
         AlignRightCommand = new RelayCommand(AlignSelectionRight, () => CanAlignSelection);
@@ -125,6 +129,10 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     public string WorkspacePath { get; }
 
+    public double ViewportWidth => _viewportWidth;
+
+    public double ViewportHeight => _viewportHeight;
+
     public IRelayCommand SaveCommand { get; }
 
     public IRelayCommand LoadCommand { get; }
@@ -142,6 +150,10 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     public IAsyncRelayCommand CopySelectionCommand { get; }
 
     public IAsyncRelayCommand PasteCommand { get; }
+
+    public IRelayCommand ExportSelectionFragmentCommand { get; }
+
+    public IRelayCommand ImportFragmentCommand { get; }
 
     public IRelayCommand AlignLeftCommand { get; }
 
@@ -172,6 +184,10 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     ICommand IGraphContextMenuHost.DeleteSelectionCommand => DeleteSelectionCommand;
 
     ICommand IGraphContextMenuHost.CopySelectionCommand => CopySelectionCommand;
+
+    ICommand IGraphContextMenuHost.ExportSelectionFragmentCommand => ExportSelectionFragmentCommand;
+
+    ICommand IGraphContextMenuHost.ImportFragmentCommand => ImportFragmentCommand;
 
     ICommand IGraphContextMenuHost.FitViewCommand => FitViewCommand;
 
@@ -241,15 +257,25 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     public bool CanPaste => _selectionClipboard.HasContent || _textClipboardBridge is not null;
 
+    public bool CanExportSelectionFragment => HasSelection;
+
+    public bool CanImportFragment => _fragmentWorkspaceService.Exists();
+
     public bool CanAlignSelection => SelectedNodes.Count >= 2;
 
     public bool CanDistributeSelection => SelectedNodes.Count >= 3;
 
     public bool HasEditableParameters => SelectedNodes.Count == 1 && SelectedNodeParameters.Count > 0;
 
+    public bool HasBatchEditableParameters => SelectedNodes.Count > 1 && SelectedNodeParameters.Count > 0;
+
+    public bool HasAnyEditableParameters => SelectedNodeParameters.Count > 0;
+
     public string StatsCaption => $"{Nodes.Count} nodes  ·  {Connections.Count} links  ·  {Zoom * 100:0}% zoom";
 
     public string WorkspaceCaption => $"{(IsDirty ? "Unsaved changes" : "Snapshot synced")}  ·  {WorkspacePath}";
+
+    public string FragmentCaption => $"{(_fragmentWorkspaceService.Exists() ? "Fragment available" : "No fragment file")}  ·  {_fragmentWorkspaceService.FragmentPath}";
 
     public string ModeCaption => HasPendingConnection
         ? $"Connecting {PendingSourceNode!.Title} / {PendingSourcePort!.Label}  ->  click an input port"
@@ -275,7 +301,9 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     {
         0 => "Build the graph from the left library, connect outputs to inputs, and save snapshots from the toolbar.",
         1 => SelectedNode?.Description ?? "Build the graph from the left library, connect outputs to inputs, and save snapshots from the toolbar.",
-        _ => "Delete removes the full selection. Copy and paste preserve internal links between the selected nodes.",
+        _ => HasBatchEditableParameters
+            ? $"Editing shared parameters across {SelectedNodes.Count} nodes of the same definition."
+            : "Delete removes the full selection. Copy and paste preserve internal links between the selected nodes.",
     };
 
     public string InspectorInputs => SelectedNode is null
@@ -312,6 +340,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         _viewportWidth = width;
         _viewportHeight = height;
         FitViewCommand.NotifyCanExecuteChanged();
+        RaiseComputedPropertyChanges();
     }
 
     /// <summary>
@@ -998,6 +1027,22 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         StatusMessage = $"Centered on {node.Title}.";
     }
 
+    public void CenterViewAt(GraphPoint worldPoint, bool updateStatus = true)
+    {
+        if (_viewportWidth <= 0 || _viewportHeight <= 0)
+        {
+            return;
+        }
+
+        PanX = (_viewportWidth / 2) - (worldPoint.X * Zoom);
+        PanY = (_viewportHeight / 2) - (worldPoint.Y * Zoom);
+
+        if (updateStatus)
+        {
+            StatusMessage = "Viewport centered from mini map.";
+        }
+    }
+
     public IReadOnlyList<CompatiblePortTarget> GetCompatibleTargets(string sourceNodeId, string sourcePortId)
     {
         var sourceNode = FindNode(sourceNodeId);
@@ -1067,58 +1112,8 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             SelectedNode?.Id);
     }
 
-    private async Task<GraphSelectionFragment?> GetBestAvailableClipboardFragmentAsync()
+    private bool PasteFragment(GraphSelectionFragment fragment, string actionPrefix)
     {
-        if (_textClipboardBridge is not null)
-        {
-            var clipboardText = await _textClipboardBridge.ReadTextAsync(CancellationToken.None);
-            // 优先读取系统剪贴板 JSON，但仍保留进程内剪贴板作为可靠回退。
-            if (GraphClipboardPayloadSerializer.TryDeserialize(clipboardText, out var systemFragment))
-            {
-                return systemFragment;
-            }
-        }
-
-        return _selectionClipboard.Peek();
-    }
-
-    /// <summary>
-    /// 复制当前选择，并尽可能同步到系统剪贴板 JSON 文本。
-    /// </summary>
-    public async Task CopySelectionAsync()
-    {
-        var fragment = CreateSelectionFragment();
-        if (fragment is null)
-        {
-            StatusMessage = "Select at least one node before copying.";
-            return;
-        }
-
-        _selectionClipboard.Store(fragment);
-        var clipboardJson = GraphClipboardPayloadSerializer.Serialize(fragment);
-        if (_textClipboardBridge is not null)
-        {
-            await _textClipboardBridge.WriteTextAsync(clipboardJson, CancellationToken.None);
-        }
-
-        RaiseComputedPropertyChanges();
-        StatusMessage = fragment.Nodes.Count == 1
-            ? $"Copied {fragment.Nodes[0].Title}."
-            : $"Copied {fragment.Nodes.Count} nodes.";
-    }
-
-    /// <summary>
-    /// 从系统剪贴板或进程内剪贴板恢复选择片段并粘贴到当前视口附近。
-    /// </summary>
-    public async Task PasteSelectionAsync()
-    {
-        var fragment = await GetBestAvailableClipboardFragmentAsync();
-        if (fragment is null || fragment.Nodes.Count == 0)
-        {
-            StatusMessage = "Nothing copied yet.";
-            return;
-        }
-
         _selectionClipboard.Store(fragment);
         var targetOrigin = _selectionClipboard.GetNextPasteOrigin(GetViewportCenter());
         var nodeIdMap = new Dictionary<string, string>(StringComparer.Ordinal);
@@ -1161,8 +1156,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
         if (pastedNodes.Count == 0)
         {
-            StatusMessage = "Nothing pasted.";
-            return;
+            return false;
         }
 
         NodeViewModel? primaryNode = null;
@@ -1174,8 +1168,99 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
         SetSelection(pastedNodes, primaryNode ?? pastedNodes[^1]);
         MarkDirty(pastedNodes.Count == 1
-            ? $"Pasted {pastedNodes[0].Title}."
-            : $"Pasted {pastedNodes.Count} nodes.");
+            ? $"{actionPrefix} {pastedNodes[0].Title}."
+            : $"{actionPrefix} {pastedNodes.Count} nodes.");
+        return true;
+    }
+
+    private async Task<GraphSelectionFragment?> GetBestAvailableClipboardFragmentAsync()
+    {
+        if (_textClipboardBridge is not null)
+        {
+            var clipboardText = await _textClipboardBridge.ReadTextAsync(CancellationToken.None);
+            // 优先读取系统剪贴板 JSON，但仍保留进程内剪贴板作为可靠回退。
+            if (GraphClipboardPayloadSerializer.TryDeserialize(clipboardText, out var systemFragment))
+            {
+                return systemFragment;
+            }
+        }
+
+        return _selectionClipboard.Peek();
+    }
+
+    /// <summary>
+    /// 复制当前选择，并尽可能同步到系统剪贴板 JSON 文本。
+    /// </summary>
+    public async Task CopySelectionAsync()
+    {
+        var fragment = CreateSelectionFragment();
+        if (fragment is null)
+        {
+            StatusMessage = "Select at least one node before copying.";
+            return;
+        }
+
+        _selectionClipboard.Store(fragment);
+        var clipboardJson = GraphClipboardPayloadSerializer.Serialize(fragment);
+        if (_textClipboardBridge is not null)
+        {
+            await _textClipboardBridge.WriteTextAsync(clipboardJson, CancellationToken.None);
+        }
+
+        RaiseComputedPropertyChanges();
+        StatusMessage = fragment.Nodes.Count == 1
+            ? $"Copied {fragment.Nodes[0].Title}."
+            : $"Copied {fragment.Nodes.Count} nodes.";
+    }
+
+    public void ExportSelectionFragment()
+    {
+        var fragment = CreateSelectionFragment();
+        if (fragment is null)
+        {
+            StatusMessage = "Select at least one node before exporting a fragment.";
+            return;
+        }
+
+        _fragmentWorkspaceService.Save(fragment);
+        RaiseComputedPropertyChanges();
+        StatusMessage = $"Exported fragment to {_fragmentWorkspaceService.FragmentPath}.";
+    }
+
+    /// <summary>
+    /// 从系统剪贴板或进程内剪贴板恢复选择片段并粘贴到当前视口附近。
+    /// </summary>
+    public async Task PasteSelectionAsync()
+    {
+        var fragment = await GetBestAvailableClipboardFragmentAsync();
+        if (fragment is null || fragment.Nodes.Count == 0)
+        {
+            StatusMessage = "Nothing copied yet.";
+            return;
+        }
+
+        if (!PasteFragment(fragment, "Pasted"))
+        {
+            return;
+        }
+    }
+
+    public void ImportFragment()
+    {
+        if (!_fragmentWorkspaceService.Exists())
+        {
+            StatusMessage = "No exported fragment file is available yet.";
+            return;
+        }
+
+        var fragment = _fragmentWorkspaceService.Load();
+        _selectionClipboard.Store(fragment);
+        RaiseComputedPropertyChanges();
+
+        if (!PasteFragment(fragment, "Imported"))
+        {
+            StatusMessage = "Fragment file did not contain any nodes.";
+        }
     }
 
     public void SaveWorkspace()
@@ -1465,11 +1550,18 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         OnPropertyChanged(nameof(CanDeleteSelection));
         OnPropertyChanged(nameof(CanCopySelection));
         OnPropertyChanged(nameof(CanPaste));
+        OnPropertyChanged(nameof(CanExportSelectionFragment));
+        OnPropertyChanged(nameof(CanImportFragment));
         OnPropertyChanged(nameof(CanAlignSelection));
         OnPropertyChanged(nameof(CanDistributeSelection));
         OnPropertyChanged(nameof(HasEditableParameters));
+        OnPropertyChanged(nameof(HasBatchEditableParameters));
+        OnPropertyChanged(nameof(HasAnyEditableParameters));
+        OnPropertyChanged(nameof(ViewportWidth));
+        OnPropertyChanged(nameof(ViewportHeight));
         OnPropertyChanged(nameof(StatsCaption));
         OnPropertyChanged(nameof(WorkspaceCaption));
+        OnPropertyChanged(nameof(FragmentCaption));
         OnPropertyChanged(nameof(ModeCaption));
         OnPropertyChanged(nameof(InspectorTitle));
         OnPropertyChanged(nameof(InspectorCategory));
@@ -1602,35 +1694,55 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     {
         SelectedNodeParameters.Clear();
 
-        if (SelectedNodes.Count != 1 || SelectedNode?.DefinitionId is null)
+        if (SelectedNodes.Count == 0)
         {
             OnPropertyChanged(nameof(HasEditableParameters));
+            OnPropertyChanged(nameof(HasBatchEditableParameters));
             return;
         }
 
-        if (!_nodeCatalog.TryGetDefinition(SelectedNode.DefinitionId, out var definition) || definition is null)
+        var sharedDefinitionId = SelectedNodes[0].DefinitionId;
+        if (sharedDefinitionId is null
+            || SelectedNodes.Any(node => node.DefinitionId != sharedDefinitionId))
         {
             OnPropertyChanged(nameof(HasEditableParameters));
+            OnPropertyChanged(nameof(HasBatchEditableParameters));
+            return;
+        }
+
+        if (!_nodeCatalog.TryGetDefinition(sharedDefinitionId, out var definition) || definition is null)
+        {
+            OnPropertyChanged(nameof(HasEditableParameters));
+            OnPropertyChanged(nameof(HasBatchEditableParameters));
             return;
         }
 
         foreach (var parameter in definition.Parameters)
         {
-            var currentValue = SelectedNode.GetParameterValue(parameter.Key) ?? parameter.DefaultValue;
-            SelectedNodeParameters.Add(new NodeParameterViewModel(parameter, currentValue, ApplyParameterValue));
+            var currentValues = SelectedNodes
+                .Select(node => node.GetParameterValue(parameter.Key) ?? parameter.DefaultValue)
+                .ToList();
+            SelectedNodeParameters.Add(new NodeParameterViewModel(parameter, currentValues, ApplyParameterValue));
         }
 
         OnPropertyChanged(nameof(HasEditableParameters));
+        OnPropertyChanged(nameof(HasBatchEditableParameters));
     }
 
     private void ApplyParameterValue(NodeParameterViewModel parameter, object? value)
     {
-        if (SelectedNode is null)
+        if (SelectedNodes.Count == 0)
         {
             return;
         }
 
-        SelectedNode.SetParameterValue(parameter.Key, parameter.TypeId, value);
-        MarkDirty($"Updated {SelectedNode.Title} / {parameter.DisplayName}.");
+        foreach (var node in SelectedNodes)
+        {
+            node.SetParameterValue(parameter.Key, parameter.TypeId, value);
+        }
+
+        MarkDirty(SelectedNodes.Count == 1
+            ? $"Updated {SelectedNode!.Title} / {parameter.DisplayName}."
+            : $"Updated {SelectedNodes.Count} nodes / {parameter.DisplayName}.");
     }
 }
