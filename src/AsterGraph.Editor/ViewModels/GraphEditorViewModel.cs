@@ -129,6 +129,8 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     public string WorkspacePath { get; }
 
+    public string FragmentPath => _fragmentWorkspaceService.FragmentPath;
+
     public double ViewportWidth => _viewportWidth;
 
     public double ViewportHeight => _viewportHeight;
@@ -1228,6 +1230,27 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     }
 
     /// <summary>
+    /// 将当前选择导出到指定片段文件路径。
+    /// </summary>
+    /// <param name="path">目标文件路径。</param>
+    /// <returns>导出成功时返回 <see langword="true"/>。</returns>
+    public bool ExportSelectionFragmentTo(string path)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+
+        var fragment = CreateSelectionFragment();
+        if (fragment is null)
+        {
+            StatusMessage = "Select at least one node before exporting a fragment.";
+            return false;
+        }
+
+        _fragmentWorkspaceService.Save(fragment, path);
+        StatusMessage = $"Exported fragment to {path}.";
+        return true;
+    }
+
+    /// <summary>
     /// 从系统剪贴板或进程内剪贴板恢复选择片段并粘贴到当前视口附近。
     /// </summary>
     public async Task PasteSelectionAsync()
@@ -1261,6 +1284,27 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         {
             StatusMessage = "Fragment file did not contain any nodes.";
         }
+    }
+
+    /// <summary>
+    /// 从指定片段文件路径导入节点片段。
+    /// </summary>
+    /// <param name="path">源文件路径。</param>
+    /// <returns>导入并粘贴成功时返回 <see langword="true"/>。</returns>
+    public bool ImportFragmentFrom(string path)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+
+        if (!_fragmentWorkspaceService.Exists(path))
+        {
+            StatusMessage = $"Fragment file '{path}' was not found.";
+            return false;
+        }
+
+        var fragment = _fragmentWorkspaceService.Load(path);
+        _selectionClipboard.Store(fragment);
+        RaiseComputedPropertyChanges();
+        return PasteFragment(fragment, "Imported");
     }
 
     public void SaveWorkspace()
@@ -1561,6 +1605,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         OnPropertyChanged(nameof(ViewportHeight));
         OnPropertyChanged(nameof(StatsCaption));
         OnPropertyChanged(nameof(WorkspaceCaption));
+        OnPropertyChanged(nameof(FragmentPath));
         OnPropertyChanged(nameof(FragmentCaption));
         OnPropertyChanged(nameof(ModeCaption));
         OnPropertyChanged(nameof(InspectorTitle));

@@ -15,22 +15,23 @@ internal sealed class GraphFragmentWorkspaceService
             "AsterGraphDemo",
             "selection-fragment.json");
 
-    public void Save(GraphSelectionFragment fragment)
+    public void Save(GraphSelectionFragment fragment, string? path = null)
     {
         ArgumentNullException.ThrowIfNull(fragment);
 
-        var directory = Path.GetDirectoryName(FragmentPath);
+        var resolvedPath = ResolvePath(path);
+        var directory = Path.GetDirectoryName(resolvedPath);
         if (!string.IsNullOrWhiteSpace(directory))
         {
             Directory.CreateDirectory(directory);
         }
 
-        File.WriteAllText(FragmentPath, GraphClipboardPayloadSerializer.Serialize(fragment));
+        File.WriteAllText(resolvedPath, GraphClipboardPayloadSerializer.Serialize(fragment));
     }
 
-    public GraphSelectionFragment Load()
+    public GraphSelectionFragment Load(string? path = null)
     {
-        var text = File.ReadAllText(FragmentPath);
+        var text = File.ReadAllText(ResolvePath(path));
         if (!GraphClipboardPayloadSerializer.TryDeserialize(text, out var fragment) || fragment is null)
         {
             throw new InvalidOperationException("Failed to deserialize the saved selection fragment.");
@@ -39,6 +40,9 @@ internal sealed class GraphFragmentWorkspaceService
         return fragment;
     }
 
-    public bool Exists()
-        => File.Exists(FragmentPath);
+    public bool Exists(string? path = null)
+        => File.Exists(ResolvePath(path));
+
+    private string ResolvePath(string? path)
+        => string.IsNullOrWhiteSpace(path) ? FragmentPath : path.Trim();
 }

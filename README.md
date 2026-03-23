@@ -157,6 +157,7 @@ In addition to clipboard-based fragment copy/paste, AsterGraph now supports expl
 - `Export Fragment` saves the current selection as JSON
 - `Import Fragment` loads the saved fragment file and pastes it near the current viewport center
 - the demo host uses the default fragment path exposed through the editor workspace services
+- hosts can also call `ExportSelectionFragmentTo(path)` and `ImportFragmentFrom(path)` for custom fragment libraries
 
 ## Style Configuration
 
