@@ -903,6 +903,10 @@ public partial class NodeCanvas : UserControl
                 UpdateNodePosition(node);
                 RenderConnections();
                 break;
+            case nameof(NodeViewModel.Height):
+                UpdateNodeVisual(node);
+                RenderConnections();
+                break;
             case nameof(NodeViewModel.IsSelected):
             case nameof(NodeViewModel.Presentation):
                 UpdateNodeVisual(node);
@@ -939,6 +943,7 @@ public partial class NodeCanvas : UserControl
         visual.Border.BorderBrush = BrushFactory.Solid(node.IsSelected ? node.AccentHex : nodeStyle.BorderHex);
         visual.Header.Background = BrushFactory.Solid(node.AccentHex, node.IsSelected ? nodeStyle.SelectedHeaderOpacity : nodeStyle.HeaderOpacity);
         visual.Border.BorderThickness = new Thickness(node.IsSelected ? nodeStyle.SelectedBorderThickness : nodeStyle.BorderThickness);
+        visual.Border.Height = node.Height;
         visual.Subtitle.Text = node.DisplaySubtitle;
         visual.Description.Text = node.DisplayDescription;
 
@@ -949,8 +954,8 @@ public partial class NodeCanvas : UserControl
             {
                 CornerRadius = new CornerRadius(999),
                 BorderThickness = new Thickness(1),
-                BorderBrush = BrushFactory.Solid(badge.AccentHex, 0.8),
-                Background = BrushFactory.Solid(badge.AccentHex, 0.2),
+                BorderBrush = BrushFactory.SolidSafe(badge.AccentHex, nodeStyle.BorderHex, 0.8),
+                Background = BrushFactory.SolidSafe(badge.AccentHex, nodeStyle.BorderHex, 0.2),
                 Padding = new Thickness(7, 2),
                 Child = new TextBlock
                 {
@@ -975,8 +980,8 @@ public partial class NodeCanvas : UserControl
         if (node.Presentation.StatusBar is { } statusBar)
         {
             visual.StatusBar.IsVisible = true;
-            visual.StatusBar.Background = BrushFactory.Solid(statusBar.AccentHex, 0.24);
-            visual.StatusBar.BorderBrush = BrushFactory.Solid(statusBar.AccentHex, 0.78);
+            visual.StatusBar.Background = BrushFactory.SolidSafe(statusBar.AccentHex, nodeStyle.BorderHex, 0.24);
+            visual.StatusBar.BorderBrush = BrushFactory.SolidSafe(statusBar.AccentHex, nodeStyle.BorderHex, 0.78);
             visual.StatusBarText.Text = statusBar.Text;
             ToolTip.SetTip(visual.StatusBar, statusBar.ToolTip);
         }

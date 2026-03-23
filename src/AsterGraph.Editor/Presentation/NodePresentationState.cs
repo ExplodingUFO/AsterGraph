@@ -36,7 +36,9 @@ public sealed record NodePresentationState
     {
         this.SubtitleOverride = SubtitleOverride;
         this.DescriptionOverride = DescriptionOverride;
-        this.TopRightBadges = TopRightBadges ?? [];
+        this.TopRightBadges = TopRightBadges is null
+            ? []
+            : TopRightBadges.ToArray();
         this.StatusBar = StatusBar;
     }
 

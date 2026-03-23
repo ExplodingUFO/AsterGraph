@@ -53,6 +53,47 @@ public sealed class GraphEditorPresentationTests
         Assert.Equal("节点二", editor.Nodes[1].DisplaySubtitle);
     }
 
+    [Fact]
+    public void RefreshNodePresentation_RecalculatesHeightWhenStatusBarChanges()
+    {
+        var provider = new TestNodePresentationProvider();
+        var editor = CreateEditor(provider, nodeCount: 1);
+        var node = editor.Nodes[0];
+        var baselineHeight = node.Height;
+
+        provider.SetState(
+            node.Id,
+            new NodePresentationState(
+                StatusBar: new NodeStatusBarDescriptor("运行中", "#2F81F7")));
+
+        editor.RefreshNodePresentation(node.Id);
+
+        Assert.True(node.Height > baselineHeight);
+
+        provider.SetState(node.Id, NodePresentationState.Empty);
+        editor.RefreshNodePresentation(node.Id);
+
+        Assert.Equal(baselineHeight, node.Height);
+    }
+
+    [Fact]
+    public void RefreshNodePresentation_UsesSnapshotForBadgeList()
+    {
+        var provider = new TestNodePresentationProvider();
+        var editor = CreateEditor(provider, nodeCount: 1);
+        var node = editor.Nodes[0];
+        var badges = new List<NodeAdornmentDescriptor>
+        {
+            new("A", "#3FB950"),
+        };
+
+        provider.SetState(node.Id, new NodePresentationState(TopRightBadges: badges));
+        editor.RefreshNodePresentation(node.Id);
+        badges.Add(new NodeAdornmentDescriptor("B", "#2F81F7"));
+
+        Assert.Single(node.Presentation.TopRightBadges);
+    }
+
     private static GraphEditorViewModel CreateEditor(INodePresentationProvider provider, int nodeCount)
     {
         var definitionId = new NodeDefinitionId("tests.editor.presentation.sample");

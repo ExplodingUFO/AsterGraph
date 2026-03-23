@@ -13,7 +13,9 @@ public sealed partial class NodeViewModel : ObservableObject
     private const double DescriptionHeight = 40;
     private const double PortRowHeight = 24;
     private const double PortRowSpacing = 8;
+    private const double StatusBarHeight = 28;
     private readonly Dictionary<string, GraphParameterValue> _parameterValues;
+    private readonly double _baseHeight;
 
     public NodeViewModel(GraphNode model)
     {
@@ -41,7 +43,8 @@ public sealed partial class NodeViewModel : ObservableObject
         _parameterValues = (model.ParameterValues ?? [])
             .ToDictionary(parameter => parameter.Key, StringComparer.Ordinal);
 
-        Height = Math.Max(model.Size.Height, CalculateRequiredHeight());
+        _baseHeight = Math.Max(model.Size.Height, CalculateRequiredHeight());
+        Height = CalculateRenderedHeight();
     }
 
     public string Id { get; }
@@ -76,7 +79,8 @@ public sealed partial class NodeViewModel : ObservableObject
 
     public double Width { get; }
 
-    public double Height { get; }
+    [ObservableProperty]
+    private double height;
 
     public int InputCount => Inputs.Count;
 
@@ -113,7 +117,7 @@ public sealed partial class NodeViewModel : ObservableObject
             Subtitle,
             Description,
             new GraphPoint(X, Y),
-            new GraphSize(Width, Height),
+            new GraphSize(Width, _baseHeight),
             Inputs.Select(port => port.ToModel()).ToList(),
             Outputs.Select(port => port.ToModel()).ToList(),
             AccentHex,
@@ -144,6 +148,7 @@ public sealed partial class NodeViewModel : ObservableObject
 
     partial void OnPresentationChanged(NodePresentationState value)
     {
+        Height = CalculateRenderedHeight();
         OnPropertyChanged(nameof(DisplaySubtitle));
         OnPropertyChanged(nameof(DisplayDescription));
     }
@@ -158,4 +163,7 @@ public sealed partial class NodeViewModel : ObservableObject
             MinimumBodyHeight,
             BaseChromeHeight + DescriptionHeight + portsHeight);
     }
+
+    private double CalculateRenderedHeight()
+        => _baseHeight + (Presentation.StatusBar is null ? 0 : StatusBarHeight);
 }

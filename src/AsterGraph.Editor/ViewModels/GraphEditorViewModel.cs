@@ -2280,7 +2280,8 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             return;
         }
 
-        var state = _nodePresentationProvider.GetNodePresentation(node) ?? NodePresentationState.Empty;
+        var state = _nodePresentationProvider.GetNodePresentation(node);
+        ArgumentNullException.ThrowIfNull(state);
         node.UpdatePresentation(state);
     }
 
