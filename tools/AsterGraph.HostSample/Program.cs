@@ -105,6 +105,7 @@ var menuContext = new ContextMenuContext(
     clickedNodeId: "sample-source-001",
     hostContext: hostContext);
 var menu = editor.BuildContextMenu(menuContext);
+var hostPreviewItem = menu.SingleOrDefault(item => item.Id == "host-sample-preview");
 
 var node = editor.Nodes[0];
 var ownerMatched = menuContext.TryGetOwner<HostSampleOwner>(out var typedOwner);
@@ -114,8 +115,8 @@ Console.WriteLine($"Host sample view type: {typeof(GraphEditorView).FullName}");
 Console.WriteLine($"Node count: {editor.Nodes.Count}");
 Console.WriteLine($"Position count: {positions.Count}");
 Console.WriteLine($"Selected snapshot found: {snapshot is not null}");
-Console.WriteLine($"Menu item count: {menu.Count}");
-Console.WriteLine($"Last menu item: {menu[^1].Header}");
+Console.WriteLine($"Host preview menu item exists: {hostPreviewItem is not null}");
+Console.WriteLine($"Host preview menu item header: {hostPreviewItem?.Header ?? "<missing>"}");
 Console.WriteLine($"ReadOnly host extension allowed: {editor.CommandPermissions.Host.AllowContextMenuExtensions}");
 Console.WriteLine($"Host context flowed into menu request: {ReferenceEquals(hostContext, menuContext.HostContext)}");
 Console.WriteLine($"Localized inspector title: {editor.InspectorTitle}");
