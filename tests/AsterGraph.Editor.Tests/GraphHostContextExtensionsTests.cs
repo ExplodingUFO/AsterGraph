@@ -82,6 +82,20 @@ public sealed class GraphHostContextExtensionsTests
         Assert.Null(contextTopLevel);
     }
 
+    [Fact]
+    public void NullContextMenuContextPaths_FailSafely()
+    {
+        ContextMenuContext? context = null;
+
+        var ownerMatched = context.TryGetOwner<SampleOwner>(out var owner);
+        var topLevelMatched = context.TryGetTopLevel<SampleTopLevel>(out var topLevel);
+
+        Assert.False(ownerMatched);
+        Assert.False(topLevelMatched);
+        Assert.Null(owner);
+        Assert.Null(topLevel);
+    }
+
     private sealed record SampleOwner(string Id);
 
     private sealed record SampleTopLevel(string Id);

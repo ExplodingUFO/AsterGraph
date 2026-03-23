@@ -49,25 +49,25 @@ public static class GraphHostContextExtensions
     /// 尝试从菜单上下文中按指定类型提取宿主拥有者对象。
     /// </summary>
     /// <typeparam name="T">目标拥有者类型。</typeparam>
-    /// <param name="context">菜单上下文。</param>
+    /// <param name="context">菜单上下文；为 <see langword="null"/> 时安全返回失败。</param>
     /// <param name="owner">成功时返回匹配的拥有者对象；失败时返回默认值。</param>
     /// <returns>提取成功时返回 <see langword="true"/>。</returns>
-    public static bool TryGetOwner<T>(this ContextMenuContext context, out T? owner)
-    {
-        ArgumentNullException.ThrowIfNull(context);
-        return context.HostContext.TryGetOwner(out owner);
-    }
+    public static bool TryGetOwner<T>(this ContextMenuContext? context, out T? owner)
+        => context?.HostContext.TryGetOwner(out owner) ?? ReturnDefault(out owner);
 
     /// <summary>
     /// 尝试从菜单上下文中按指定类型提取宿主顶层对象。
     /// </summary>
     /// <typeparam name="T">目标顶层对象类型。</typeparam>
-    /// <param name="context">菜单上下文。</param>
+    /// <param name="context">菜单上下文；为 <see langword="null"/> 时安全返回失败。</param>
     /// <param name="topLevel">成功时返回匹配的顶层对象；失败时返回默认值。</param>
     /// <returns>提取成功时返回 <see langword="true"/>。</returns>
-    public static bool TryGetTopLevel<T>(this ContextMenuContext context, out T? topLevel)
+    public static bool TryGetTopLevel<T>(this ContextMenuContext? context, out T? topLevel)
+        => context?.HostContext.TryGetTopLevel(out topLevel) ?? ReturnDefault(out topLevel);
+
+    private static bool ReturnDefault<T>(out T? value)
     {
-        ArgumentNullException.ThrowIfNull(context);
-        return context.HostContext.TryGetTopLevel(out topLevel);
+        value = default;
+        return false;
     }
 }
