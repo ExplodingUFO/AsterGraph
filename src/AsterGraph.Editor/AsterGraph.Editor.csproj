@@ -1,6 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <RootNamespace>AsterGraph.Editor</RootNamespace>
+    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+    <PackageId>AsterGraph.Editor</PackageId>
+    <Description>Editor state, catalogs, commands, menus, and workspace services for AsterGraph.</Description>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <IsPackable>true</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
@@ -10,5 +15,9 @@
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 </Project>

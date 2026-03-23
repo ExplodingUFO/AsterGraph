@@ -2,6 +2,10 @@
 
 `AsterGraph.Abstractions` is the stable contract layer for extension and integration.
 
+Direct package reference:
+
+- Yes, for hosts that declare custom node definitions or depend on stable port/compatibility contracts.
+
 It intentionally contains only:
 
 - identifier value types (`NodeDefinitionId`, `PortTypeId`, `ConversionId`)

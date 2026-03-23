@@ -2,6 +2,11 @@
 
 Avalonia UI shell for the AsterGraph editor.
 
+Direct package reference:
+
+- Yes, this is the default UI package for hosts embedding the editor.
+- Pair it with `AsterGraph.Abstractions` by default.
+
 This project intentionally contains:
 
 - `GraphEditorView`

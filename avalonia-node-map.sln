@@ -15,6 +15,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsterGraph.Demo", "src\Aste
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsterGraph.Avalonia", "src\AsterGraph.Avalonia\AsterGraph.Avalonia.csproj", "{6FE247CE-865A-44AC-BA3C-06C97231B005}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{07C2787E-EAC7-C090-1BA3-A61EC2A24D84}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsterGraph.PackageSmoke", "tools\AsterGraph.PackageSmoke\AsterGraph.PackageSmoke.csproj", "{00DD77A5-AE44-4613-A28E-4DDF9FB6DEE1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -85,6 +89,18 @@ Global
 		{6FE247CE-865A-44AC-BA3C-06C97231B005}.Release|x64.Build.0 = Release|Any CPU
 		{6FE247CE-865A-44AC-BA3C-06C97231B005}.Release|x86.ActiveCfg = Release|Any CPU
 		{6FE247CE-865A-44AC-BA3C-06C97231B005}.Release|x86.Build.0 = Release|Any CPU
+		{00DD77A5-AE44-4613-A28E-4DDF9FB6DEE1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{00DD77A5-AE44-4613-A28E-4DDF9FB6DEE1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{00DD77A5-AE44-4613-A28E-4DDF9FB6DEE1}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{00DD77A5-AE44-4613-A28E-4DDF9FB6DEE1}.Debug|x64.Build.0 = Debug|Any CPU
+		{00DD77A5-AE44-4613-A28E-4DDF9FB6DEE1}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{00DD77A5-AE44-4613-A28E-4DDF9FB6DEE1}.Debug|x86.Build.0 = Debug|Any CPU
+		{00DD77A5-AE44-4613-A28E-4DDF9FB6DEE1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{00DD77A5-AE44-4613-A28E-4DDF9FB6DEE1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{00DD77A5-AE44-4613-A28E-4DDF9FB6DEE1}.Release|x64.ActiveCfg = Release|Any CPU
+		{00DD77A5-AE44-4613-A28E-4DDF9FB6DEE1}.Release|x64.Build.0 = Release|Any CPU
+		{00DD77A5-AE44-4613-A28E-4DDF9FB6DEE1}.Release|x86.ActiveCfg = Release|Any CPU
+		{00DD77A5-AE44-4613-A28E-4DDF9FB6DEE1}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -95,5 +111,6 @@ Global
 		{696DD206-1824-4C55-9A42-4FC9A74F2946} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{3955342B-A4DB-4172-81E5-24BD1925F874} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{6FE247CE-865A-44AC-BA3C-06C97231B005} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+		{00DD77A5-AE44-4613-A28E-4DDF9FB6DEE1} = {07C2787E-EAC7-C090-1BA3-A61EC2A24D84}
 	EndGlobalSection
 EndGlobal

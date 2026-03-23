@@ -1,44 +1,21 @@
-# AsterGraph Proprietary Commercial License
+MIT License
 
-Copyright (c) 2026 ExplodingUFO. All rights reserved.
+Copyright (c) 2026 ExplodingUFO
 
-This repository and all source code, documentation, assets, and related materials are proprietary software.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-## Default Rule
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-No right to use, copy, modify, distribute, sublicense, embed, integrate, publish, or deploy this software is granted except as expressly permitted below or by a separate written commercial license agreement.
-
-## Permitted Without Separate Commercial License
-
-You may:
-
-- view the source code privately
-- evaluate the software privately for non-commercial purposes
-- make internal non-production test modifications for evaluation only
-
-## Prohibited Without Paid Written Commercial License
-
-You may not, without a paid written commercial license from the copyright holder:
-
-- use this software in any commercial product or commercial service
-- embed or integrate this software into commercial software
-- distribute source or binary forms to any third party
-- use this software in paid internal business systems or production environments
-- sublicense, resell, lease, or offer this software as part of a commercial offering
-- remove or alter copyright, license, or attribution notices
-
-## Commercial Licensing
-
-Commercial use requires a separate paid written agreement with the copyright holder.
-
-For commercial licensing, contact the repository owner before any commercial or production use.
-
-## No Open Source Grant
-
-This is not an open source license. No patent, trademark, or other intellectual property rights are granted except as expressly stated in a separate written agreement.
-
-## Warranty And Liability
-
-This software is provided "as is", without warranties or conditions of any kind, express or implied, to the maximum extent permitted by law.
-
-In no event shall the copyright holder be liable for any claim, damages, or other liability arising from or in connection with this software or its use.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

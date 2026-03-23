@@ -1,9 +1,18 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <RootNamespace>AsterGraph.Core</RootNamespace>
+    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+    <PackageId>AsterGraph.Core</PackageId>
+    <Description>Pure graph models, serialization, and default compatibility rules for AsterGraph.</Description>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <IsPackable>true</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\AsterGraph.Abstractions\AsterGraph.Abstractions.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 </Project>
