@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\AsterGraph.Abstractions\AsterGraph.Abstractions.csproj" />
+    <ProjectReference Include="..\..\src\AsterGraph.Core\AsterGraph.Core.csproj" />
+    <ProjectReference Include="..\..\src\AsterGraph.Editor\AsterGraph.Editor.csproj" />
+    <ProjectReference Include="..\..\src\AsterGraph.Avalonia\AsterGraph.Avalonia.csproj" />
+  </ItemGroup>
+</Project>

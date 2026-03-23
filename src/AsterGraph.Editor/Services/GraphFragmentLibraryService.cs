@@ -7,19 +7,33 @@ namespace AsterGraph.Editor.Services;
 /// </summary>
 public sealed class GraphFragmentLibraryService
 {
+    /// <summary>
+    /// 初始化片段模板库服务。
+    /// </summary>
+    /// <param name="libraryPath">可选的模板库目录路径。</param>
     public GraphFragmentLibraryService(string? libraryPath = null)
     {
         LibraryPath = libraryPath ?? GetDefaultLibraryPath();
     }
 
+    /// <summary>
+    /// 片段模板库目录路径。
+    /// </summary>
     public string LibraryPath { get; }
 
+    /// <summary>
+    /// 获取系统默认片段模板库目录。
+    /// </summary>
     public static string GetDefaultLibraryPath()
         => Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "AsterGraphDemo",
             "fragments");
 
+    /// <summary>
+    /// 枚举模板库中的全部片段模板元数据。
+    /// </summary>
+    /// <returns>模板元数据集合。</returns>
     public IReadOnlyList<FragmentTemplateInfo> EnumerateTemplates()
     {
         if (!Directory.Exists(LibraryPath))

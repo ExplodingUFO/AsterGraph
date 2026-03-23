@@ -16,6 +16,12 @@ public sealed class DefaultPortCompatibilityService : IPortCompatibilityService
         new(new PortTypeId("float"), new PortTypeId("double"), new ConversionId("core.float-to-double")),
     ];
 
+    /// <summary>
+    /// 评估两个端口类型之间是否可以直接连接，或是否可通过安全隐式转换连接。
+    /// </summary>
+    /// <param name="sourceType">源端口类型。</param>
+    /// <param name="targetType">目标端口类型。</param>
+    /// <returns>兼容性评估结果。</returns>
     public PortCompatibilityResult Evaluate(PortTypeId sourceType, PortTypeId targetType)
     {
         if (sourceType.Value.Equals(targetType.Value, StringComparison.Ordinal))

@@ -200,14 +200,29 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         set => SetProperty(ref _contextMenuAugmentor, value);
     }
 
+    /// <summary>
+    /// 当前工作区快照文件路径。
+    /// </summary>
     public string WorkspacePath { get; }
 
+    /// <summary>
+    /// 当前默认片段文件路径。
+    /// </summary>
     public string FragmentPath => _fragmentWorkspaceService.FragmentPath;
 
+    /// <summary>
+    /// 当前片段模板库目录路径。
+    /// </summary>
     public string FragmentLibraryPath => _fragmentLibraryService.LibraryPath;
 
+    /// <summary>
+    /// 当前视口宽度。
+    /// </summary>
     public double ViewportWidth => _viewportWidth;
 
+    /// <summary>
+    /// 当前视口高度。
+    /// </summary>
     public double ViewportHeight => _viewportHeight;
 
     public IRelayCommand SaveCommand { get; }
@@ -360,6 +375,9 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// </summary>
     public event EventHandler<GraphEditorFragmentEventArgs>? FragmentImported;
 
+    /// <summary>
+    /// 当前是否存在等待完成的连线预览。
+    /// </summary>
     public bool HasPendingConnection => PendingSourceNode is not null && PendingSourcePort is not null;
 
     public bool CanSaveWorkspace => CommandPermissions.Workspace.AllowSave;
@@ -410,19 +428,37 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     public bool CanEditNodeParameters => CommandPermissions.Nodes.AllowEditParameters;
 
+    /// <summary>
+    /// 面向宿主和状态栏的图统计文本。
+    /// </summary>
     public string StatsCaption => $"{Nodes.Count} nodes  ·  {Connections.Count} links  ·  {Zoom * 100:0}% zoom";
 
+    /// <summary>
+    /// 工作区状态摘要文本。
+    /// </summary>
     public string WorkspaceCaption => $"{(IsDirty ? "Unsaved changes" : "Snapshot synced")}  ·  {WorkspacePath}";
 
+    /// <summary>
+    /// 片段工作区状态摘要文本。
+    /// </summary>
     public string FragmentCaption => $"{(_fragmentWorkspaceService.Exists() ? "Fragment available" : "No fragment file")}  ·  {_fragmentWorkspaceService.FragmentPath}";
 
+    /// <summary>
+    /// 片段文件更新时间摘要文本。
+    /// </summary>
     public string FragmentStatusCaption
         => !_fragmentWorkspaceService.Exists()
             ? "No saved fragment file."
             : $"Last updated {File.GetLastWriteTime(_fragmentWorkspaceService.FragmentPath):yyyy-MM-dd HH:mm:ss}";
 
+    /// <summary>
+    /// 片段模板库状态摘要文本。
+    /// </summary>
     public string FragmentLibraryCaption => $"{(HasFragmentTemplates ? $"{FragmentTemplates.Count} templates" : "No templates")}  ·  {FragmentLibraryPath}";
 
+    /// <summary>
+    /// 当前编辑模式摘要文本。
+    /// </summary>
     public string ModeCaption => HasPendingConnection
         ? $"Connecting {PendingSourceNode!.Title} / {PendingSourcePort!.Label}  ->  click an input port"
         : HasMultipleSelection
@@ -502,6 +538,11 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         }
     }
 
+    /// <summary>
+    /// 更新当前视口尺寸。
+    /// </summary>
+    /// <param name="width">视口宽度。</param>
+    /// <param name="height">视口高度。</param>
     public void UpdateViewportSize(double width, double height)
     {
         _viewportWidth = width;
@@ -521,6 +562,9 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         RaiseComputedPropertyChanges();
     }
 
+    /// <summary>
+    /// 重新扫描片段模板库并刷新当前模板列表。
+    /// </summary>
     public void RefreshFragmentTemplates()
     {
         FragmentTemplates.Clear();
@@ -649,14 +693,27 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         RestoreHistoryState(state, "Redo applied.");
     }
 
+    /// <summary>
+    /// 选中指定节点，等价于单选该节点。
+    /// </summary>
+    /// <param name="node">要选中的节点；为 <see langword="null"/> 时清空选择。</param>
     public void SelectNode(NodeViewModel? node)
     {
         SelectSingleNode(node);
     }
 
+    /// <summary>
+    /// 清空当前选择。
+    /// </summary>
+    /// <param name="updateStatus">是否同步更新状态文本。</param>
     public void ClearSelection(bool updateStatus = false)
         => SetSelection([], null, updateStatus ? "Selection cleared." : null);
 
+    /// <summary>
+    /// 将选择切换为单个节点。
+    /// </summary>
+    /// <param name="node">目标节点；为 <see langword="null"/> 时清空选择。</param>
+    /// <param name="updateStatus">是否更新状态文本。</param>
     public void SelectSingleNode(NodeViewModel? node, bool updateStatus = true)
     {
         if (node is null)
@@ -668,6 +725,11 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         SetSelection([node], node, updateStatus && !HasPendingConnection ? $"Selected {node.Title}." : null);
     }
 
+    /// <summary>
+    /// 将节点追加到当前选择集合。
+    /// </summary>
+    /// <param name="node">要追加的节点。</param>
+    /// <param name="updateStatus">是否更新状态文本。</param>
     public void AddNodeToSelection(NodeViewModel node, bool updateStatus = true)
     {
         if (SelectedNodes.Contains(node))
@@ -680,6 +742,11 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         SetSelection(nextSelection, node, updateStatus ? $"Added {node.Title} to the selection." : null);
     }
 
+    /// <summary>
+    /// 切换节点在当前选择集合中的状态。
+    /// </summary>
+    /// <param name="node">目标节点。</param>
+    /// <param name="updateStatus">是否更新状态文本。</param>
     public void ToggleNodeSelection(NodeViewModel node, bool updateStatus = true)
     {
         var nextSelection = SelectedNodes.ToList();
@@ -693,6 +760,12 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         SetSelection(nextSelection, node, updateStatus ? $"Added {node.Title} to the selection." : null);
     }
 
+    /// <summary>
+    /// 直接设置当前选择集合及主选中节点。
+    /// </summary>
+    /// <param name="nodes">新的选择集合。</param>
+    /// <param name="primaryNode">新的主选中节点。</param>
+    /// <param name="status">可选状态文本。</param>
     public void SetSelection(IReadOnlyList<NodeViewModel> nodes, NodeViewModel? primaryNode = null, string? status = null)
     {
         var uniqueNodes = nodes
@@ -727,6 +800,12 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         RaiseComputedPropertyChanges();
     }
 
+    /// <summary>
+    /// 获取与指定矩形相交的节点集合。
+    /// </summary>
+    /// <param name="firstCorner">矩形第一个角点。</param>
+    /// <param name="secondCorner">矩形第二个角点。</param>
+    /// <returns>命中的节点集合。</returns>
     public IReadOnlyList<NodeViewModel> GetNodesInRectangle(GraphPoint firstCorner, GraphPoint secondCorner)
     {
         var left = Math.Min(firstCorner.X, secondCorner.X);
@@ -892,6 +971,11 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     public GraphPoint ScreenToWorld(GraphPoint screen)
         => ViewportMath.ScreenToWorld(new ViewportState(Zoom, PanX, PanY), screen);
 
+    /// <summary>
+    /// 从节点模板创建一个新节点。
+    /// </summary>
+    /// <param name="template">节点模板。</param>
+    /// <param name="preferredWorldPosition">可选的首选世界坐标。</param>
     public void AddNode(NodeTemplateViewModel template, GraphPoint? preferredWorldPosition = null)
     {
         if (!CommandPermissions.Nodes.AllowCreate)
@@ -915,6 +999,12 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         NotifyDocumentChanged(GraphEditorDocumentChangeKind.NodesAdded, nodeIds: [node.Id]);
     }
 
+    /// <summary>
+    /// 按指定偏移移动节点；如果节点属于当前多选，则移动整个选择集。
+    /// </summary>
+    /// <param name="node">拖动源节点。</param>
+    /// <param name="deltaX">水平偏移。</param>
+    /// <param name="deltaY">垂直偏移。</param>
     public void MoveNode(NodeViewModel node, double deltaX, double deltaY)
     {
         if (!CommandPermissions.Nodes.AllowMove)
@@ -935,6 +1025,9 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         node.MoveBy(deltaX, deltaY);
     }
 
+    /// <summary>
+    /// 按屏幕偏移平移当前视口。
+    /// </summary>
     public void PanBy(double deltaX, double deltaY)
     {
         PanX += deltaX;
@@ -942,6 +1035,11 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         NotifyViewportChanged();
     }
 
+    /// <summary>
+    /// 围绕指定屏幕锚点缩放当前视口。
+    /// </summary>
+    /// <param name="factor">缩放系数。</param>
+    /// <param name="screenAnchor">屏幕锚点。</param>
     public void ZoomAt(double factor, GraphPoint screenAnchor)
     {
         var updated = ViewportMath.ZoomAround(
@@ -957,6 +1055,9 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         NotifyViewportChanged();
     }
 
+    /// <summary>
+    /// 重置缩放和平移到默认视口。
+    /// </summary>
     public void ResetView(bool updateStatus = true)
     {
         Zoom = DefaultZoom;
@@ -971,6 +1072,9 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         NotifyViewportChanged();
     }
 
+    /// <summary>
+    /// 将当前图内容适配到指定视口范围。
+    /// </summary>
     public void FitToViewport(double viewportWidth, double viewportHeight, bool updateStatus = true)
     {
         if (Nodes.Count == 0 || viewportWidth <= 0 || viewportHeight <= 0)
@@ -1008,6 +1112,9 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         NotifyViewportChanged();
     }
 
+    /// <summary>
+    /// 激活指定端口，按方向决定是开始连线还是完成连线。
+    /// </summary>
     public void ActivatePort(NodeViewModel node, PortViewModel port)
     {
         SelectSingleNode(node);
@@ -1027,6 +1134,9 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         ConnectPorts(PendingSourceNode!.Id, PendingSourcePort!.Id, node.Id, port.Id);
     }
 
+    /// <summary>
+    /// 以指定输出端口作为连线起点。
+    /// </summary>
     public void StartConnection(string sourceNodeId, string sourcePortId)
     {
         if (!CommandPermissions.Connections.AllowCreate)
@@ -1061,6 +1171,9 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         StatusMessage = $"Connecting from {sourceNode.Title}.{sourcePort.Label}.";
     }
 
+    /// <summary>
+    /// 连接源输出端口与目标输入端口。
+    /// </summary>
     public void ConnectPorts(string sourceNodeId, string sourcePortId, string targetNodeId, string targetPortId)
     {
         if (!CommandPermissions.Connections.AllowCreate)
@@ -1139,6 +1252,9 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             connectionIds: [Connections[^1].Id]);
     }
 
+    /// <summary>
+    /// 取消当前待完成的连线预览。
+    /// </summary>
     public void CancelPendingConnection(string? status = null)
     {
         PendingSourceNode = null;
@@ -1150,9 +1266,15 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         }
     }
 
+    /// <summary>
+    /// 删除当前选择，保留旧的单节点删除入口以兼容宿主调用。
+    /// </summary>
     public void DeleteSelectedNode()
         => DeleteSelection();
 
+    /// <summary>
+    /// 删除当前选择集及其相关连线。
+    /// </summary>
     public void DeleteSelection()
     {
         if (!CommandPermissions.Nodes.AllowDelete)
@@ -1250,6 +1372,9 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     public void DistributeSelectionVertically()
         => ApplySelectionLayout(NodeSelectionLayoutService.DistributeVertically, minimumCount: 3, "Distributed selection vertically.");
 
+    /// <summary>
+    /// 按实例标识删除单个节点。
+    /// </summary>
     public void DeleteNodeById(string nodeId)
     {
         if (!CommandPermissions.Nodes.AllowDelete)
@@ -1294,6 +1419,9 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             connectionIds: removedConnections.Select(connection => connection.Id).ToList());
     }
 
+    /// <summary>
+    /// 复制单个节点并自动偏移生成副本。
+    /// </summary>
     public void DuplicateNode(string nodeId)
     {
         if (!CommandPermissions.Nodes.AllowDuplicate)
@@ -1320,6 +1448,9 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         NotifyDocumentChanged(GraphEditorDocumentChangeKind.NodesAdded, nodeIds: [duplicate.Id]);
     }
 
+    /// <summary>
+    /// 断开指定节点的所有入边。
+    /// </summary>
     public void DisconnectIncoming(string nodeId)
     {
         if (!CommandPermissions.Connections.AllowDisconnect)
@@ -1331,6 +1462,9 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         RemoveConnections(connection => connection.TargetNodeId == nodeId, "Disconnected incoming links.");
     }
 
+    /// <summary>
+    /// 断开指定节点的所有出边。
+    /// </summary>
     public void DisconnectOutgoing(string nodeId)
     {
         if (!CommandPermissions.Connections.AllowDisconnect)
@@ -1342,6 +1476,9 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         RemoveConnections(connection => connection.SourceNodeId == nodeId, "Disconnected outgoing links.");
     }
 
+    /// <summary>
+    /// 断开指定节点的全部连线。
+    /// </summary>
     public void DisconnectAll(string nodeId)
     {
         if (!CommandPermissions.Connections.AllowDisconnect)
@@ -1355,6 +1492,9 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             "Disconnected all links.");
     }
 
+    /// <summary>
+    /// 断开指定端口上的全部连线。
+    /// </summary>
     public void BreakConnectionsForPort(string nodeId, string portId)
     {
         if (!CommandPermissions.Connections.AllowDisconnect)
@@ -1370,6 +1510,9 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             "Disconnected port links.");
     }
 
+    /// <summary>
+    /// 删除指定连线。
+    /// </summary>
     public void DeleteConnection(string connectionId)
     {
         if (!CommandPermissions.Connections.AllowDelete)
@@ -1389,9 +1532,15 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         NotifyDocumentChanged(GraphEditorDocumentChangeKind.ConnectionsChanged, connectionIds: [connection.Id]);
     }
 
+    /// <summary>
+    /// 按实例标识查找连线视图模型。
+    /// </summary>
     public ConnectionViewModel? FindConnection(string connectionId)
         => Connections.FirstOrDefault(connection => connection.Id == connectionId);
 
+    /// <summary>
+    /// 将视口中心移动到指定节点。
+    /// </summary>
     public void CenterViewOnNode(string nodeId)
     {
         var node = FindNode(nodeId);
@@ -1405,6 +1554,9 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         StatusMessage = $"Centered on {node.Title}.";
     }
 
+    /// <summary>
+    /// 将视口中心移动到指定世界坐标。
+    /// </summary>
     public void CenterViewAt(GraphPoint worldPoint, bool updateStatus = true)
     {
         if (_viewportWidth <= 0 || _viewportHeight <= 0)
@@ -1423,6 +1575,9 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         NotifyViewportChanged();
     }
 
+    /// <summary>
+    /// 查询指定输出端口可连接的兼容输入端口。
+    /// </summary>
     public IReadOnlyList<CompatiblePortTarget> GetCompatibleTargets(string sourceNodeId, string sourcePortId)
     {
         var sourceNode = FindNode(sourceNodeId);
@@ -1619,6 +1774,9 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             : $"Copied {fragment.Nodes.Count} nodes.";
     }
 
+    /// <summary>
+    /// 将当前选择导出到默认片段文件。
+    /// </summary>
     public void ExportSelectionFragment()
     {
         if (!CommandPermissions.Fragments.AllowExport)
@@ -1645,6 +1803,9 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
                 fragment.Connections.Count));
     }
 
+    /// <summary>
+    /// 将当前选择导出为片段模板。
+    /// </summary>
     public void ExportSelectionAsTemplate()
     {
         if (!CommandPermissions.Fragments.AllowTemplateManagement || !CommandPermissions.Fragments.AllowExport)
@@ -1714,6 +1875,9 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// <summary>
     /// 从系统剪贴板或进程内剪贴板恢复选择片段并粘贴到当前视口附近。
     /// </summary>
+    /// <summary>
+    /// 从系统剪贴板或进程内剪贴板粘贴当前片段。
+    /// </summary>
     public async Task PasteSelectionAsync()
     {
         if (!CommandPermissions.Clipboard.AllowPaste)
@@ -1735,6 +1899,9 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         }
     }
 
+    /// <summary>
+    /// 从默认片段文件导入片段。
+    /// </summary>
     public void ImportFragment()
     {
         if (!CommandPermissions.Fragments.AllowImport)
@@ -1768,6 +1935,9 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         }
     }
 
+    /// <summary>
+    /// 清理默认片段文件。
+    /// </summary>
     public void ClearFragment()
     {
         if (!CommandPermissions.Fragments.AllowClearWorkspaceFragment)
@@ -1787,6 +1957,9 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         StatusMessage = "Cleared the saved fragment file.";
     }
 
+    /// <summary>
+    /// 导入当前选中的片段模板。
+    /// </summary>
     public void ImportSelectedTemplate()
     {
         if (!CommandPermissions.Fragments.AllowTemplateManagement || !CommandPermissions.Fragments.AllowImport)
@@ -1804,6 +1977,9 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         ImportFragmentFrom(SelectedFragmentTemplate.Path);
     }
 
+    /// <summary>
+    /// 删除当前选中的片段模板。
+    /// </summary>
     public void DeleteSelectedTemplate()
     {
         if (!CommandPermissions.Fragments.AllowTemplateManagement)
@@ -1862,6 +2038,9 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         return imported;
     }
 
+    /// <summary>
+    /// 将当前图保存到默认工作区文件。
+    /// </summary>
     public void SaveWorkspace()
     {
         if (!CommandPermissions.Workspace.AllowSave)
@@ -1885,6 +2064,10 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         }
     }
 
+    /// <summary>
+    /// 从默认工作区文件加载图。
+    /// </summary>
+    /// <returns>加载成功时返回 <see langword="true"/>。</returns>
     public bool LoadWorkspace()
     {
         if (!CommandPermissions.Workspace.AllowLoad)
@@ -1916,6 +2099,9 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         }
     }
 
+    /// <summary>
+    /// 生成当前图文档的不可变快照。
+    /// </summary>
     public GraphDocument CreateDocumentSnapshot()
         => new(
             Title,
@@ -1923,6 +2109,9 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             Nodes.Select(node => node.ToModel()).ToList(),
             Connections.Select(connection => connection.ToModel()).ToList());
 
+    /// <summary>
+    /// 按实例标识查找节点视图模型。
+    /// </summary>
     public NodeViewModel? FindNode(string nodeId)
         => Nodes.FirstOrDefault(node => node.Id == nodeId);
 

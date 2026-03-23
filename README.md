@@ -185,6 +185,12 @@ editor.TrySetNodePosition("node-001", new GraphPoint(120, 240));
 editor.SetNodePositions(positions);
 ```
 
+Reference host sample:
+
+- `tools/AsterGraph.HostSample`
+- Run with:
+  - `dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj`
+
 ## Type Compatibility
 
 AsterGraph uses:
