@@ -10,25 +10,38 @@ using AsterGraph.Editor.ViewModels;
 
 namespace AsterGraph.Avalonia.Controls;
 
+/// <summary>
+/// AsterGraph 的 Avalonia 宿主视图，负责样式资源接入和全局快捷键路由。
+/// </summary>
 public partial class GraphEditorView : UserControl
 {
+    /// <summary>
+    /// 编辑器视图模型依赖属性。
+    /// </summary>
     public static readonly StyledProperty<GraphEditorViewModel?> EditorProperty =
         AvaloniaProperty.Register<GraphEditorView, GraphEditorViewModel?>(nameof(Editor));
 
     private NodeCanvas? _nodeCanvas;
 
+    /// <summary>
+    /// 初始化图编辑器宿主视图。
+    /// </summary>
     public GraphEditorView()
     {
         InitializeComponent();
         AddHandler(KeyDownEvent, HandleKeyDown, RoutingStrategies.Bubble);
     }
 
+    /// <summary>
+    /// 当前绑定的编辑器视图模型。
+    /// </summary>
     public GraphEditorViewModel? Editor
     {
         get => GetValue(EditorProperty);
         set => SetValue(EditorProperty, value);
     }
 
+    /// <inheritdoc />
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
         base.OnPropertyChanged(change);
@@ -42,12 +55,14 @@ public partial class GraphEditorView : UserControl
         }
     }
 
+    /// <inheritdoc />
     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
     {
         base.OnAttachedToVisualTree(e);
         ApplyClipboardBridge(Editor);
     }
 
+    /// <inheritdoc />
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
     {
         Editor?.SetTextClipboardBridge(null);
@@ -78,7 +93,7 @@ public partial class GraphEditorView : UserControl
             return;
         }
 
-        // The editor only sees a plain-text clipboard bridge; Avalonia owns the actual platform clipboard access.
+        // 编辑器只看到纯文本桥接口，真正的平台剪贴板访问仍由 Avalonia 层负责。
         editor.SetTextClipboardBridge(new AvaloniaTextClipboardBridge(() => TopLevel.GetTopLevel(this)?.Clipboard));
     }
 

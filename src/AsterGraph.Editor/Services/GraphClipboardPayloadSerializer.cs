@@ -41,7 +41,7 @@ internal static class GraphClipboardPayloadSerializer
 
         try
         {
-            // Clipboard text can contain arbitrary host content, so parsing must fail closed.
+            // 剪贴板里可能是任意宿主内容，因此这里必须采用失败即拒绝的解析策略。
             var payload = JsonSerializer.Deserialize<GraphClipboardPayload>(text, JsonOptions);
             if (payload is null
                 || !string.Equals(payload.Format, ClipboardFormat, StringComparison.Ordinal)

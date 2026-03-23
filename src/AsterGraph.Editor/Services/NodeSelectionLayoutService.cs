@@ -4,7 +4,7 @@ namespace AsterGraph.Editor.Services;
 
 internal static class NodeSelectionLayoutService
 {
-    // Batch layout math lives outside the view-model so menus, shortcuts, and future APIs share one implementation.
+    // 批量布局计算放在独立服务中，避免菜单、快捷键和外部 API 各自维护一份实现。
     public static void AlignLeft(IReadOnlyList<NodeViewModel> nodes)
     {
         var left = nodes.Min(node => node.X);
@@ -61,7 +61,7 @@ internal static class NodeSelectionLayoutService
 
     public static void DistributeHorizontally(IReadOnlyList<NodeViewModel> nodes)
     {
-        // Preserve the current ordering and only reposition interior nodes across the existing span.
+        // 保留当前顺序，只在既有跨度内重新安置内部节点。
         var orderedNodes = nodes
             .OrderBy(node => node.X + (node.Width / 2))
             .ToList();
@@ -80,7 +80,7 @@ internal static class NodeSelectionLayoutService
 
     public static void DistributeVertically(IReadOnlyList<NodeViewModel> nodes)
     {
-        // Preserve the current ordering and only reposition interior nodes across the existing span.
+        // 保留当前顺序，只在既有跨度内重新安置内部节点。
         var orderedNodes = nodes
             .OrderBy(node => node.Y + (node.Height / 2))
             .ToList();

@@ -3,7 +3,7 @@ using System.Windows.Input;
 namespace AsterGraph.Editor.Menus;
 
 /// <summary>
-/// UI-independent menu item contract. UI layers render these descriptors as concrete controls.
+/// 与 UI 框架无关的菜单项描述，具体控件由视图层自行渲染。
 /// </summary>
 public sealed record MenuItemDescriptor
 {

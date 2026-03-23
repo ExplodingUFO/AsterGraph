@@ -5,18 +5,35 @@ using AsterGraph.Abstractions.Styling;
 
 namespace AsterGraph.Avalonia.Styling;
 
+/// <summary>
+/// 将框架无关的样式选项转换成 Avalonia 资源和画刷。
+/// </summary>
 public sealed class GraphEditorStyleAdapter
 {
+    /// <summary>
+    /// 初始化样式适配器。
+    /// </summary>
+    /// <param name="options">宿主提供的编辑器样式选项。</param>
     public GraphEditorStyleAdapter(GraphEditorStyleOptions options)
     {
         Options = options;
         Palette = CreatePalette(options);
     }
 
+    /// <summary>
+    /// 原始样式选项。
+    /// </summary>
     public GraphEditorStyleOptions Options { get; }
 
+    /// <summary>
+    /// 解析后的 Avalonia 调色板。
+    /// </summary>
     public AvaloniaStylePalette Palette { get; }
 
+    /// <summary>
+    /// 将样式资源写入指定资源字典。
+    /// </summary>
+    /// <param name="resources">目标资源字典。</param>
     public void ApplyResources(IResourceDictionary resources)
     {
         var spacing = Options.Shell.DefaultSpacing;

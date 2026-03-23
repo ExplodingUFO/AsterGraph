@@ -3,6 +3,9 @@ using AsterGraph.Editor.Services;
 
 namespace AsterGraph.Avalonia.Services;
 
+/// <summary>
+/// Avalonia 平台的纯文本剪贴板桥实现。
+/// </summary>
 internal sealed class AvaloniaTextClipboardBridge : IGraphTextClipboardBridge
 {
     private readonly Func<IClipboard?> _clipboardAccessor;

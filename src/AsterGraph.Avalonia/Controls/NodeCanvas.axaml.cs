@@ -19,9 +19,15 @@ using AsterGraph.Editor.ViewModels;
 
 namespace AsterGraph.Avalonia.Controls;
 
+/// <summary>
+/// 图编辑器画布控件，负责节点渲染、连线渲染和画布级交互。
+/// </summary>
 public partial class NodeCanvas : UserControl
 {
     private const double SelectionDragThreshold = 6;
+    /// <summary>
+    /// 编辑器视图模型依赖属性。
+    /// </summary>
     public static readonly StyledProperty<GraphEditorViewModel?> ViewModelProperty =
         AvaloniaProperty.Register<NodeCanvas, GraphEditorViewModel?>(nameof(ViewModel));
 
@@ -40,6 +46,9 @@ public partial class NodeCanvas : UserControl
     private Point? _pointerScreenPosition;
     private Point? _selectionStartScreenPosition;
 
+    /// <summary>
+    /// 初始化节点画布。
+    /// </summary>
     public NodeCanvas()
     {
         InitializeComponent();
@@ -53,24 +62,35 @@ public partial class NodeCanvas : UserControl
         PointerWheelChanged += HandlePointerWheelChanged;
     }
 
+    /// <inheritdoc />
     protected override Size ArrangeOverride(Size finalSize)
     {
         ViewModel?.UpdateViewportSize(finalSize.Width, finalSize.Height);
         return base.ArrangeOverride(finalSize);
     }
 
+    /// <summary>
+    /// 当前绑定的编辑器视图模型。
+    /// </summary>
     public GraphEditorViewModel? ViewModel
     {
         get => GetValue(ViewModelProperty);
         set => SetValue(ViewModelProperty, value);
     }
 
+    /// <summary>
+    /// 将当前图内容缩放到可视区域。
+    /// </summary>
     public void FitToScene(bool updateStatus = true)
         => ViewModel?.FitToViewport(Bounds.Width, Bounds.Height, updateStatus);
 
+    /// <summary>
+    /// 重置当前视口缩放与平移。
+    /// </summary>
     public void ResetViewport()
         => ViewModel?.ResetView();
 
+    /// <inheritdoc />
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
         base.OnPropertyChanged(change);
@@ -260,7 +280,7 @@ public partial class NodeCanvas : UserControl
             var targetKind = ContextMenuTargetKind.Node;
             if (ViewModel.HasMultipleSelection && node.IsSelected)
             {
-                // Keep the active multi-selection intact and surface batch tools when the user right-clicks within it.
+                // 在多选集合内部右击时保留当前选择，并切换到批量工具菜单。
                 ViewModel.SetSelection(ViewModel.SelectedNodes.ToList(), node);
                 targetKind = ContextMenuTargetKind.Selection;
             }
@@ -730,7 +750,7 @@ public partial class NodeCanvas : UserControl
             return;
         }
 
-        // Empty-canvas right-click reuses the selection menu when a multi-selection is active.
+        // 多选激活时，空白画布右击同样复用批量选择菜单。
         OpenContextMenu(
             this,
             new ContextMenuContext(
@@ -848,8 +868,8 @@ public partial class NodeCanvas : UserControl
 
     private GraphPoint GetPortAnchor(NodeViewModel node, PortViewModel port)
     {
-        // Connection lines must attach to the actual rendered port-dot center, not a guessed layout formula.
-        // This avoids visual drift when card content, fonts, spacing, or dynamic node height changes.
+        // 连线必须贴合真实渲染出来的端口圆点中心，而不是依赖静态布局公式。
+        // 这样节点字体、间距或高度变化时，连线仍能保持正确对齐。
         if (_nodeLayer is not null
             && _nodeVisuals.TryGetValue(node, out var visual)
             && visual.PortAnchors.TryGetValue(port.Id, out var anchorDot))

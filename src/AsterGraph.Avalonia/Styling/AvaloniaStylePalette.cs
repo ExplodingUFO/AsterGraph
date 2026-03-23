@@ -2,6 +2,9 @@ using Avalonia.Media;
 
 namespace AsterGraph.Avalonia.Styling;
 
+/// <summary>
+/// Avalonia 视图层使用的已解析调色板，承载宿主样式选项转换后的画刷集合。
+/// </summary>
 public sealed record AvaloniaStylePalette(
     IBrush ShellBackgroundBrush,
     SolidColorBrush PanelBrush,

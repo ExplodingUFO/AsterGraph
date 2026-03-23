@@ -19,6 +19,9 @@ using AsterGraph.Editor.Viewport;
 
 namespace AsterGraph.Editor.ViewModels;
 
+/// <summary>
+/// 图编辑器的主视图模型，承载选择、布局、连线、剪贴板和持久化状态。
+/// </summary>
 public sealed partial class GraphEditorViewModel : ObservableObject, IGraphContextMenuHost
 {
     private const double DefaultZoom = 0.88;
@@ -295,6 +298,10 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         FitViewCommand.NotifyCanExecuteChanged();
     }
 
+    /// <summary>
+    /// 配置宿主提供的纯文本剪贴板桥。
+    /// </summary>
+    /// <param name="bridge">宿主桥实现；为 <see langword="null"/> 时仅保留进程内剪贴板回退。</param>
     public void SetTextClipboardBridge(IGraphTextClipboardBridge? bridge)
     {
         _textClipboardBridge = bridge;
@@ -366,7 +373,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     }
 
     /// <summary>
-    /// Returns an immutable snapshot of the current node positions for host-side persistence.
+    /// 获取当前所有节点位置的不可变快照，供宿主持久化使用。
     /// </summary>
     public IReadOnlyList<NodePositionSnapshot> GetNodePositions()
         => Nodes
@@ -374,7 +381,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             .ToList();
 
     /// <summary>
-    /// Tries to read the current position of a specific node by instance id.
+    /// 按节点实例标识读取当前位置。
     /// </summary>
     public bool TryGetNodePosition(string nodeId, out NodePositionSnapshot? snapshot)
     {
@@ -390,7 +397,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     }
 
     /// <summary>
-    /// Tries to update the position of a single node by instance id.
+    /// 按节点实例标识更新单个节点的位置。
     /// </summary>
     public bool TrySetNodePosition(string nodeId, GraphPoint position, bool updateStatus = true)
     {
@@ -428,7 +435,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     }
 
     /// <summary>
-    /// Applies a batch of node positions and returns how many nodes were updated.
+    /// 批量应用节点位置并返回实际更新的节点数量。
     /// </summary>
     public int SetNodePositions(IEnumerable<NodePositionSnapshot> positions, bool updateStatus = true)
     {
@@ -750,27 +757,51 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             : $"Deleted {removedNodes.Count} nodes.");
     }
 
+    /// <summary>
+    /// 将当前选择按左边缘对齐。
+    /// </summary>
     public void AlignSelectionLeft()
         => ApplySelectionLayout(NodeSelectionLayoutService.AlignLeft, minimumCount: 2, "Aligned selection left.");
 
+    /// <summary>
+    /// 将当前选择按水平中心对齐。
+    /// </summary>
     public void AlignSelectionCenter()
         => ApplySelectionLayout(NodeSelectionLayoutService.AlignCenter, minimumCount: 2, "Aligned selection center.");
 
+    /// <summary>
+    /// 将当前选择按右边缘对齐。
+    /// </summary>
     public void AlignSelectionRight()
         => ApplySelectionLayout(NodeSelectionLayoutService.AlignRight, minimumCount: 2, "Aligned selection right.");
 
+    /// <summary>
+    /// 将当前选择按上边缘对齐。
+    /// </summary>
     public void AlignSelectionTop()
         => ApplySelectionLayout(NodeSelectionLayoutService.AlignTop, minimumCount: 2, "Aligned selection top.");
 
+    /// <summary>
+    /// 将当前选择按垂直中心对齐。
+    /// </summary>
     public void AlignSelectionMiddle()
         => ApplySelectionLayout(NodeSelectionLayoutService.AlignMiddle, minimumCount: 2, "Aligned selection middle.");
 
+    /// <summary>
+    /// 将当前选择按下边缘对齐。
+    /// </summary>
     public void AlignSelectionBottom()
         => ApplySelectionLayout(NodeSelectionLayoutService.AlignBottom, minimumCount: 2, "Aligned selection bottom.");
 
+    /// <summary>
+    /// 将当前选择按水平方向均匀分布。
+    /// </summary>
     public void DistributeSelectionHorizontally()
         => ApplySelectionLayout(NodeSelectionLayoutService.DistributeHorizontally, minimumCount: 3, "Distributed selection horizontally.");
 
+    /// <summary>
+    /// 将当前选择按垂直方向均匀分布。
+    /// </summary>
     public void DistributeSelectionVertically()
         => ApplySelectionLayout(NodeSelectionLayoutService.DistributeVertically, minimumCount: 3, "Distributed selection vertically.");
 
@@ -909,7 +940,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             return null;
         }
 
-        // Copy only the induced subgraph so pasted fragments stay self-contained.
+        // 复制时只保留当前选择诱导出的子图，避免粘贴结果依赖外部未复制节点。
         var selectedIds = SelectedNodes.Select(node => node.Id).ToHashSet(StringComparer.Ordinal);
         var copiedNodes = SelectedNodes
             .Select(node => node.ToModel())
@@ -938,7 +969,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         if (_textClipboardBridge is not null)
         {
             var clipboardText = await _textClipboardBridge.ReadTextAsync(CancellationToken.None);
-            // Prefer system clipboard interop, but keep the in-memory fragment as a safe fallback.
+            // 优先读取系统剪贴板 JSON，但仍保留进程内剪贴板作为可靠回退。
             if (GraphClipboardPayloadSerializer.TryDeserialize(clipboardText, out var systemFragment))
             {
                 return systemFragment;
@@ -948,6 +979,9 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         return _selectionClipboard.Peek();
     }
 
+    /// <summary>
+    /// 复制当前选择，并尽可能同步到系统剪贴板 JSON 文本。
+    /// </summary>
     public async Task CopySelectionAsync()
     {
         var fragment = CreateSelectionFragment();
@@ -970,6 +1004,9 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             : $"Copied {fragment.Nodes.Count} nodes.";
     }
 
+    /// <summary>
+    /// 从系统剪贴板或进程内剪贴板恢复选择片段并粘贴到当前视口附近。
+    /// </summary>
     public async Task PasteSelectionAsync()
     {
         var fragment = await GetBestAvailableClipboardFragmentAsync();

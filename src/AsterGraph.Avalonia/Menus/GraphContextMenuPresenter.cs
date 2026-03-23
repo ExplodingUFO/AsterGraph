@@ -10,7 +10,7 @@ using AsterGraph.Editor.Menus;
 namespace AsterGraph.Avalonia.Menus;
 
 /// <summary>
-/// Builds Avalonia context menus from editor-layer descriptors so canvas code only handles hit-testing and context capture.
+/// 将编辑器层的菜单描述转换成 Avalonia 右键菜单控件。
 /// </summary>
 internal sealed class GraphContextMenuPresenter
 {

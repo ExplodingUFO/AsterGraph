@@ -5,7 +5,7 @@ using AsterGraph.Editor.ViewModels;
 namespace AsterGraph.Editor.Menus;
 
 /// <summary>
-/// Internal editor seam for menu generation so the builder does not depend on the full editor view-model type.
+/// 编辑器内部的菜单宿主接口，用于避免菜单生成器直接依赖完整的视图模型实现。
 /// </summary>
 internal interface IGraphContextMenuHost
 {
