@@ -45,6 +45,7 @@ public partial class MainWindowViewModel : ViewModelBase
             catalog,
             new DefaultPortCompatibilityService(),
             new GraphWorkspaceService(),
+            null,
             style);
     }
 
