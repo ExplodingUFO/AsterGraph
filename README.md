@@ -118,6 +118,9 @@ For host-side right-click menu augmentation, hosts can also pass `IGraphContextM
 Each contributor receives a `GraphContextMenuExtensionContext` snapshot and returns extra `MenuItemDescriptor` items that are appended after the built-in menu.
 This keeps menu customization in the editor layer and supports nested host menus such as `Results -> Preview / Publish / Create Comparison`.
 
+For host-side permission control, `GraphEditorBehaviorOptions` now also carries a grouped `GraphEditorCommandPermissions` object.
+Hosts can start from `GraphEditorCommandPermissions.Default` or `GraphEditorCommandPermissions.ReadOnly`, then selectively override workspace, node, connection, clipboard, fragment, layout, history, and host-extension permissions.
+
 ## Type Compatibility
 
 AsterGraph uses:
@@ -213,11 +216,40 @@ Current behavior sections include:
 - `DragAssistBehaviorOptions`
 - `FragmentBehaviorOptions`
 - `ViewBehaviorOptions`
+- `GraphEditorCommandPermissions`
 
 The demo host also exposes live toggles for:
 
 - grid snapping
 - alignment guides
+- read-only mode
+- workspace commands
+- fragment commands
+- host menu extensions
+
+## Command Permissions
+
+Hosts can centrally govern editability through `GraphEditorCommandPermissions`:
+
+- `WorkspaceCommandPermissions`
+- `HistoryCommandPermissions`
+- `NodeCommandPermissions`
+- `ConnectionCommandPermissions`
+- `ClipboardCommandPermissions`
+- `LayoutCommandPermissions`
+- `FragmentCommandPermissions`
+- `HostCommandPermissions`
+
+The editor applies these permissions in one place:
+
+- command `CanExecute`
+- toolbar enabled state
+- keyboard shortcuts
+- parameter editor read-only state
+- built-in right-click menus
+- host context-menu contribution visibility
+
+`ReadOnly` is not a second implementation path. It is a grouped permission preset that keeps navigation and inspection available while denying graph mutations.
 
 ## Context Menu Extension
 

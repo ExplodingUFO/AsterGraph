@@ -28,24 +28,55 @@
             BorderBrush="#2E4B5E"
             BorderThickness="1"
             CornerRadius="12">
-      <WrapPanel Orientation="Horizontal"
-                 VerticalAlignment="Center">
-        <TextBlock Margin="0,0,18,0"
-                   VerticalAlignment="Center"
-                   FontSize="13"
-                   FontWeight="SemiBold"
-                   Foreground="#D9F7F1"
-                   Text="Demo Drag Assist" />
-        <CheckBox Margin="0,0,18,0"
-                  VerticalAlignment="Center"
-                  Foreground="#D9F7F1"
-                  Content="Grid Snapping"
-                  IsChecked="{Binding IsGridSnappingEnabled}" />
-        <CheckBox VerticalAlignment="Center"
-                  Foreground="#D9F7F1"
-                  Content="Alignment Guides"
-                  IsChecked="{Binding IsAlignmentGuidesEnabled}" />
-      </WrapPanel>
+      <StackPanel Spacing="10">
+        <WrapPanel Orientation="Horizontal"
+                   VerticalAlignment="Center">
+          <TextBlock Margin="0,0,18,0"
+                     VerticalAlignment="Center"
+                     FontSize="13"
+                     FontWeight="SemiBold"
+                     Foreground="#D9F7F1"
+                     Text="Demo Drag Assist" />
+          <CheckBox Margin="0,0,18,0"
+                    VerticalAlignment="Center"
+                    Foreground="#D9F7F1"
+                    Content="Grid Snapping"
+                    IsChecked="{Binding IsGridSnappingEnabled}" />
+          <CheckBox VerticalAlignment="Center"
+                    Foreground="#D9F7F1"
+                    Content="Alignment Guides"
+                    IsChecked="{Binding IsAlignmentGuidesEnabled}" />
+        </WrapPanel>
+
+        <WrapPanel Orientation="Horizontal"
+                   VerticalAlignment="Center">
+          <TextBlock Margin="0,0,18,0"
+                     VerticalAlignment="Center"
+                     FontSize="13"
+                     FontWeight="SemiBold"
+                     Foreground="#D9F7F1"
+                     Text="Demo Host Permissions" />
+          <CheckBox Margin="0,0,18,0"
+                    VerticalAlignment="Center"
+                    Foreground="#D9F7F1"
+                    Content="Read Only"
+                    IsChecked="{Binding IsReadOnlyEnabled}" />
+          <CheckBox Margin="0,0,18,0"
+                    VerticalAlignment="Center"
+                    Foreground="#D9F7F1"
+                    Content="Workspace Commands"
+                    IsChecked="{Binding AreWorkspaceCommandsEnabled}" />
+          <CheckBox Margin="0,0,18,0"
+                    VerticalAlignment="Center"
+                    Foreground="#D9F7F1"
+                    Content="Fragment Commands"
+                    IsChecked="{Binding AreFragmentCommandsEnabled}" />
+          <CheckBox VerticalAlignment="Center"
+                    Foreground="#D9F7F1"
+                    Content="Host Menu Extensions"
+                    IsChecked="{Binding AreHostMenuExtensionsEnabled}" />
+        </WrapPanel>
+      </StackPanel>
     </Border>
 
     <controls:GraphEditorView Editor="{Binding Editor}" />

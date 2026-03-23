@@ -34,4 +34,9 @@ public sealed record GraphEditorBehaviorOptions
     /// 视图层辅助功能配置。
     /// </summary>
     public ViewBehaviorOptions View { get; init; } = new();
+
+    /// <summary>
+    /// 命令权限配置。
+    /// </summary>
+    public GraphEditorCommandPermissions Commands { get; init; } = GraphEditorCommandPermissions.Default;
 }

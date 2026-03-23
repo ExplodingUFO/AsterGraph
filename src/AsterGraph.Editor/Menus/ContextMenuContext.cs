@@ -14,7 +14,9 @@ public sealed record ContextMenuContext
     /// <param name="targetKind">当前菜单命中的目标类型。</param>
     /// <param name="worldPosition">当前命中的世界坐标。</param>
     /// <param name="selectedNodeId">当前主选中节点标识。</param>
+    /// <param name="selectedNodeIds">当前完整选中节点标识集合。</param>
     /// <param name="selectedConnectionId">当前选中连线标识。</param>
+    /// <param name="selectedConnectionIds">当前完整选中连线标识集合。</param>
     /// <param name="clickedNodeId">当前点击节点标识。</param>
     /// <param name="clickedPortNodeId">当前点击端口所属节点标识。</param>
     /// <param name="clickedPortId">当前点击端口标识。</param>
@@ -24,7 +26,9 @@ public sealed record ContextMenuContext
         ContextMenuTargetKind targetKind,
         GraphPoint worldPosition,
         string? selectedNodeId = null,
+        IReadOnlyList<string>? selectedNodeIds = null,
         string? selectedConnectionId = null,
+        IReadOnlyList<string>? selectedConnectionIds = null,
         string? clickedNodeId = null,
         string? clickedPortNodeId = null,
         string? clickedPortId = null,
@@ -39,7 +43,9 @@ public sealed record ContextMenuContext
         TargetKind = targetKind;
         WorldPosition = worldPosition;
         SelectedNodeId = selectedNodeId;
+        SelectedNodeIds = NormalizeIdentifiers(selectedNodeIds, selectedNodeId);
         SelectedConnectionId = selectedConnectionId;
+        SelectedConnectionIds = NormalizeIdentifiers(selectedConnectionIds, selectedConnectionId);
         ClickedNodeId = clickedNodeId;
         ClickedPortNodeId = clickedPortNodeId;
         ClickedPortId = clickedPortId;
@@ -63,9 +69,19 @@ public sealed record ContextMenuContext
     public string? SelectedNodeId { get; }
 
     /// <summary>
+    /// 获取当前完整选中节点标识集合。
+    /// </summary>
+    public IReadOnlyList<string> SelectedNodeIds { get; }
+
+    /// <summary>
     /// 获取当前选中连线标识。
     /// </summary>
     public string? SelectedConnectionId { get; }
+
+    /// <summary>
+    /// 获取当前完整选中连线标识集合。
+    /// </summary>
+    public IReadOnlyList<string> SelectedConnectionIds { get; }
 
     /// <summary>
     /// 获取当前点击节点标识。
@@ -91,4 +107,19 @@ public sealed record ContextMenuContext
     /// 获取当前可用节点定义集合。
     /// </summary>
     public IReadOnlyList<INodeDefinition> AvailableNodeDefinitions { get; }
+
+    private static IReadOnlyList<string> NormalizeIdentifiers(IReadOnlyList<string>? identifiers, string? singleIdentifier)
+    {
+        var normalized = (identifiers ?? [])
+            .Where(identifier => !string.IsNullOrWhiteSpace(identifier))
+            .Distinct(StringComparer.Ordinal)
+            .ToList();
+
+        if (!string.IsNullOrWhiteSpace(singleIdentifier) && !normalized.Contains(singleIdentifier, StringComparer.Ordinal))
+        {
+            normalized.Add(singleIdentifier);
+        }
+
+        return normalized;
+    }
 }

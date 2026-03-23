@@ -1,12 +1,13 @@
 using CommunityToolkit.Mvvm.Input;
 using AsterGraph.Editor.Menus;
+using AsterGraph.Editor.ViewModels;
 
 namespace AsterGraph.Demo.Menus;
 
 /// <summary>
 /// 演示宿主如何向节点右键菜单追加业务结果项。
 /// </summary>
-public sealed class DemoNodeResultsMenuContributor : IGraphContextMenuContributor
+public sealed class DemoNodeResultsMenuContributor : IGraphContextMenuAugmentor
 {
     private readonly Action<string> _reportStatus;
 
@@ -20,16 +21,33 @@ public sealed class DemoNodeResultsMenuContributor : IGraphContextMenuContributo
     }
 
     /// <inheritdoc />
-    public IReadOnlyList<MenuItemDescriptor> Contribute(GraphContextMenuExtensionContext context)
+    public IReadOnlyList<MenuItemDescriptor> Augment(
+        GraphEditorViewModel editor,
+        ContextMenuContext context,
+        IReadOnlyList<MenuItemDescriptor> stockItems)
     {
-        if (context.TargetKind != ContextMenuTargetKind.Node || context.ClickedNode is null)
+        ArgumentNullException.ThrowIfNull(editor);
+        ArgumentNullException.ThrowIfNull(context);
+        ArgumentNullException.ThrowIfNull(stockItems);
+
+        if (context.TargetKind != ContextMenuTargetKind.Node || string.IsNullOrWhiteSpace(context.ClickedNodeId))
         {
-            return [];
+            return stockItems;
         }
 
-        var node = context.ClickedNode;
-        return
-        [
+        var node = editor.FindNode(context.ClickedNodeId);
+        if (node is null)
+        {
+            return stockItems;
+        }
+
+        var resultItems = new List<MenuItemDescriptor>(stockItems);
+        if (resultItems.Count > 0 && !resultItems[^1].IsSeparator)
+        {
+            resultItems.Add(MenuItemDescriptor.Separator($"demo-results-sep-{node.Id}"));
+        }
+
+        resultItems.Add(
             new MenuItemDescriptor(
                 $"demo-results-{node.Id}",
                 "Results",
@@ -51,7 +69,7 @@ public sealed class DemoNodeResultsMenuContributor : IGraphContextMenuContributo
                         new RelayCommand(() => _reportStatus($"Comparison draft created for {node.Title} [{node.Id}].")),
                         iconKey: "copy"),
                 ],
-                iconKey: "node"),
-        ];
+                iconKey: "node"));
+        return resultItems;
     }
 }

@@ -1,3 +1,4 @@
+using AsterGraph.Editor.Configuration;
 using AsterGraph.Core.Models;
 
 namespace AsterGraph.Editor.Menus;
@@ -12,6 +13,7 @@ public sealed record GraphContextMenuExtensionContext
     /// </summary>
     /// <param name="targetKind">当前菜单命中的目标类型。</param>
     /// <param name="worldPosition">菜单打开时对应的世界坐标。</param>
+    /// <param name="commandPermissions">当前命令权限快照。</param>
     /// <param name="selectedNodeIds">当前选中节点标识集合。</param>
     /// <param name="primarySelectedNodeId">当前主选中节点标识。</param>
     /// <param name="selectedConnectionId">当前选中连线标识。</param>
@@ -21,6 +23,7 @@ public sealed record GraphContextMenuExtensionContext
     public GraphContextMenuExtensionContext(
         ContextMenuTargetKind targetKind,
         GraphPoint worldPosition,
+        GraphEditorCommandPermissions commandPermissions,
         IReadOnlyList<string>? selectedNodeIds = null,
         string? primarySelectedNodeId = null,
         string? selectedConnectionId = null,
@@ -30,6 +33,7 @@ public sealed record GraphContextMenuExtensionContext
     {
         TargetKind = targetKind;
         WorldPosition = worldPosition;
+        CommandPermissions = commandPermissions;
         SelectedNodeIds = selectedNodeIds ?? [];
         PrimarySelectedNodeId = primarySelectedNodeId;
         SelectedConnectionId = selectedConnectionId;
@@ -47,6 +51,11 @@ public sealed record GraphContextMenuExtensionContext
     /// 获取菜单打开位置对应的世界坐标。
     /// </summary>
     public GraphPoint WorldPosition { get; }
+
+    /// <summary>
+    /// 获取当前命令权限快照。
+    /// </summary>
+    public GraphEditorCommandPermissions CommandPermissions { get; }
 
     /// <summary>
     /// 获取当前选中的节点标识集合。

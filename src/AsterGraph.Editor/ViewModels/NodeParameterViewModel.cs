@@ -15,7 +15,8 @@ public sealed partial class NodeParameterViewModel : ObservableObject
     public NodeParameterViewModel(
         NodeParameterDefinition definition,
         IReadOnlyList<object?> currentValues,
-        Action<NodeParameterViewModel, object?> applyValue)
+        Action<NodeParameterViewModel, object?> applyValue,
+        bool isHostReadOnly = false)
     {
         Definition = definition;
         _applyValue = applyValue;
@@ -26,7 +27,7 @@ public sealed partial class NodeParameterViewModel : ObservableObject
         EditorKind = definition.EditorKind;
         TypeId = definition.ValueType;
         IsRequired = definition.IsRequired;
-        IsReadOnly = definition.Constraints.IsReadOnly;
+        IsReadOnly = definition.Constraints.IsReadOnly || isHostReadOnly;
         Options = definition.Constraints.AllowedOptions
             .Select(option => new NodeParameterOptionViewModel(option.Value, option.Label, option.Description))
             .ToList()

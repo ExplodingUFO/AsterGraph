@@ -3,7 +3,6 @@ using AsterGraph.Core.Compatibility;
 using AsterGraph.Abstractions.Styling;
 using AsterGraph.Editor.Configuration;
 using AsterGraph.Editor.Catalog;
-using AsterGraph.Editor.Menus;
 using AsterGraph.Editor.Services;
 using AsterGraph.Editor.ViewModels;
 using AsterGraph.Demo.Definitions;
@@ -60,16 +59,13 @@ public partial class MainWindowViewModel : ViewModelBase
         };
 
         GraphEditorViewModel? editor = null;
-        var contextMenuContributors = new IGraphContextMenuContributor[]
+        var contextMenuAugmentor = new DemoNodeResultsMenuContributor(message =>
         {
-            new DemoNodeResultsMenuContributor(message =>
+            if (editor is not null)
             {
-                if (editor is not null)
-                {
-                    editor.StatusMessage = message;
-                }
-            }),
-        };
+                editor.StatusMessage = message;
+            }
+        });
 
         editor = new GraphEditorViewModel(
             DemoGraphFactory.CreateDefault(catalog),
@@ -79,9 +75,10 @@ public partial class MainWindowViewModel : ViewModelBase
             null,
             style,
             behavior,
-            contextMenuContributors: contextMenuContributors);
+            contextMenuAugmentor: contextMenuAugmentor);
 
         Editor = editor;
+        ApplyHostOptions(status: null);
     }
 
     public GraphEditorViewModel Editor { get; }
@@ -92,13 +89,37 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty]
     private bool isAlignmentGuidesEnabled = true;
 
+    [ObservableProperty]
+    private bool isReadOnlyEnabled;
+
+    [ObservableProperty]
+    private bool areWorkspaceCommandsEnabled = true;
+
+    [ObservableProperty]
+    private bool areFragmentCommandsEnabled = true;
+
+    [ObservableProperty]
+    private bool areHostMenuExtensionsEnabled = true;
+
     partial void OnIsGridSnappingEnabledChanged(bool value)
-        => ApplyDragAssistOptions();
+        => ApplyHostOptions();
 
     partial void OnIsAlignmentGuidesEnabledChanged(bool value)
-        => ApplyDragAssistOptions();
+        => ApplyHostOptions();
 
-    private void ApplyDragAssistOptions()
+    partial void OnIsReadOnlyEnabledChanged(bool value)
+        => ApplyHostOptions();
+
+    partial void OnAreWorkspaceCommandsEnabledChanged(bool value)
+        => ApplyHostOptions();
+
+    partial void OnAreFragmentCommandsEnabledChanged(bool value)
+        => ApplyHostOptions();
+
+    partial void OnAreHostMenuExtensionsEnabledChanged(bool value)
+        => ApplyHostOptions();
+
+    private void ApplyHostOptions(string? status = "Host behavior updated.")
     {
         Editor.UpdateBehaviorOptions(
             Editor.BehaviorOptions with
@@ -109,7 +130,60 @@ public partial class MainWindowViewModel : ViewModelBase
                     EnableAlignmentGuides = IsAlignmentGuidesEnabled,
                     SnapTolerance = DemoSnapTolerance,
                 },
+                Commands = BuildCommandPermissions(),
             },
-            $"Drag assist updated. Grid snap {(IsGridSnappingEnabled ? "on" : "off")}, alignment guides {(IsAlignmentGuidesEnabled ? "on" : "off")}.");
+            status);
+    }
+
+    private GraphEditorCommandPermissions BuildCommandPermissions()
+    {
+        return GraphEditorCommandPermissions.Default with
+        {
+            Workspace = new WorkspaceCommandPermissions
+            {
+                AllowSave = AreWorkspaceCommandsEnabled && !IsReadOnlyEnabled,
+                AllowLoad = AreWorkspaceCommandsEnabled && !IsReadOnlyEnabled,
+            },
+            History = new HistoryCommandPermissions
+            {
+                AllowUndo = !IsReadOnlyEnabled,
+                AllowRedo = !IsReadOnlyEnabled,
+            },
+            Nodes = new NodeCommandPermissions
+            {
+                AllowCreate = !IsReadOnlyEnabled,
+                AllowDelete = !IsReadOnlyEnabled,
+                AllowMove = !IsReadOnlyEnabled,
+                AllowDuplicate = !IsReadOnlyEnabled,
+                AllowEditParameters = !IsReadOnlyEnabled,
+            },
+            Connections = new ConnectionCommandPermissions
+            {
+                AllowCreate = !IsReadOnlyEnabled,
+                AllowDelete = !IsReadOnlyEnabled,
+                AllowDisconnect = !IsReadOnlyEnabled,
+            },
+            Clipboard = new ClipboardCommandPermissions
+            {
+                AllowCopy = !IsReadOnlyEnabled,
+                AllowPaste = !IsReadOnlyEnabled,
+            },
+            Layout = new LayoutCommandPermissions
+            {
+                AllowAlign = !IsReadOnlyEnabled,
+                AllowDistribute = !IsReadOnlyEnabled,
+            },
+            Fragments = new FragmentCommandPermissions
+            {
+                AllowImport = AreFragmentCommandsEnabled && !IsReadOnlyEnabled,
+                AllowExport = AreFragmentCommandsEnabled,
+                AllowClearWorkspaceFragment = AreFragmentCommandsEnabled && !IsReadOnlyEnabled,
+                AllowTemplateManagement = AreFragmentCommandsEnabled && !IsReadOnlyEnabled,
+            },
+            Host = new HostCommandPermissions
+            {
+                AllowContextMenuExtensions = AreHostMenuExtensionsEnabled,
+            },
+        };
     }
 }

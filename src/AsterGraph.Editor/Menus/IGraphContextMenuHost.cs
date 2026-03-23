@@ -1,5 +1,6 @@
 using System.Windows.Input;
 using AsterGraph.Core.Models;
+using AsterGraph.Editor.Configuration;
 using AsterGraph.Editor.ViewModels;
 
 namespace AsterGraph.Editor.Menus;
@@ -14,6 +15,8 @@ internal interface IGraphContextMenuHost
     IEnumerable<NodeViewModel> Nodes { get; }
 
     IEnumerable<NodeViewModel> SelectedNodes { get; }
+
+    GraphEditorCommandPermissions CommandPermissions { get; }
 
     int SelectedNodeCount { get; }
 

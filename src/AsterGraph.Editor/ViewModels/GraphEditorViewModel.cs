@@ -39,6 +39,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     private readonly GraphFragmentLibraryService _fragmentLibraryService;
     private readonly GraphEditorHistoryService _historyService;
     private readonly IReadOnlyList<IGraphContextMenuContributor> _contextMenuContributors;
+    private IGraphContextMenuAugmentor? _contextMenuAugmentor;
     private GraphEditorBehaviorOptions _behaviorOptions = GraphEditorBehaviorOptions.Default;
     private IGraphTextClipboardBridge? _textClipboardBridge;
     private readonly GraphContextMenuBuilder _contextMenuBuilder;
@@ -61,6 +62,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// <param name="styleOptions">样式配置。</param>
     /// <param name="behaviorOptions">行为配置。</param>
     /// <param name="fragmentLibraryService">片段模板库服务。</param>
+    /// <param name="contextMenuAugmentor">宿主右键菜单增强器。</param>
     /// <param name="contextMenuContributors">宿主右键菜单扩展器集合。</param>
     public GraphEditorViewModel(
         GraphDocument document,
@@ -71,6 +73,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         GraphEditorStyleOptions? styleOptions = null,
         GraphEditorBehaviorOptions? behaviorOptions = null,
         GraphFragmentLibraryService? fragmentLibraryService = null,
+        IGraphContextMenuAugmentor? contextMenuAugmentor = null,
         IEnumerable<IGraphContextMenuContributor>? contextMenuContributors = null)
     {
         _nodeCatalog = nodeCatalog ?? throw new ArgumentNullException(nameof(nodeCatalog));
@@ -81,11 +84,12 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         _fragmentLibraryService = fragmentLibraryService ?? new GraphFragmentLibraryService();
         _historyService = new GraphEditorHistoryService();
         _contextMenuContributors = (contextMenuContributors ?? []).ToArray();
+        _contextMenuAugmentor = contextMenuAugmentor;
         StyleOptions = styleOptions ?? GraphEditorStyleOptions.Default;
         BehaviorOptions = ResolveBehaviorOptions(behaviorOptions, StyleOptions);
 
-        SaveCommand = new RelayCommand(SaveWorkspace);
-        LoadCommand = new RelayCommand(() => LoadWorkspace());
+        SaveCommand = new RelayCommand(SaveWorkspace, () => CanSaveWorkspace);
+        LoadCommand = new RelayCommand(() => LoadWorkspace(), () => CanLoadWorkspace);
         FitViewCommand = new RelayCommand(() => FitToViewport(_viewportWidth, _viewportHeight), CanFitView);
         ResetViewCommand = new RelayCommand(() => ResetView());
         UndoCommand = new RelayCommand(Undo, () => CanUndo);
@@ -95,9 +99,9 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         PasteCommand = new AsyncRelayCommand(PasteSelectionAsync, () => CanPaste);
         ExportSelectionFragmentCommand = new RelayCommand(ExportSelectionFragment, () => CanExportSelectionFragment);
         ImportFragmentCommand = new RelayCommand(ImportFragment, () => CanImportFragment);
-        ClearFragmentCommand = new RelayCommand(ClearFragment, () => CanImportFragment);
+        ClearFragmentCommand = new RelayCommand(ClearFragment, () => CanClearFragment);
         RefreshFragmentTemplatesCommand = new RelayCommand(RefreshFragmentTemplates);
-        ExportSelectionAsTemplateCommand = new RelayCommand(ExportSelectionAsTemplate, () => CanExportSelectionFragment && BehaviorOptions.Fragments.EnableFragmentLibrary);
+        ExportSelectionAsTemplateCommand = new RelayCommand(ExportSelectionAsTemplate, () => CanExportSelectionAsTemplate);
         ImportSelectedTemplateCommand = new RelayCommand(ImportSelectedTemplate, () => CanImportSelectedTemplate);
         DeleteSelectedTemplateCommand = new RelayCommand(DeleteSelectedTemplate, () => CanDeleteSelectedTemplate);
         AlignLeftCommand = new RelayCommand(AlignSelectionLeft, () => CanAlignSelection);
@@ -111,13 +115,15 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         CancelPendingConnectionCommand = new RelayCommand(
             () => CancelPendingConnection("Connection preview cancelled."),
             () => HasPendingConnection);
-        AddNodeCommand = new RelayCommand<NodeTemplateViewModel>(template =>
-        {
-            if (template is not null)
+        AddNodeCommand = new RelayCommand<NodeTemplateViewModel>(
+            template =>
             {
-                AddNode(template);
-            }
-        });
+                if (template is not null)
+                {
+                    AddNode(template);
+                }
+            },
+            template => CanCreateNodes && template is not null);
 
         _contextMenuBuilder = new GraphContextMenuBuilder(this, _contextMenuContributors);
 
@@ -163,6 +169,11 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     public GraphEditorStyleOptions StyleOptions { get; }
 
     /// <summary>
+    /// 获取当前命令权限配置。
+    /// </summary>
+    public GraphEditorCommandPermissions CommandPermissions => BehaviorOptions.Commands;
+
+    /// <summary>
     /// 获取当前编辑器行为配置。
     /// </summary>
     public GraphEditorBehaviorOptions BehaviorOptions
@@ -177,6 +188,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
                     return;
                 }
 
+                OnPropertyChanged(nameof(CommandPermissions));
                 ExportSelectionAsTemplateCommand.NotifyCanExecuteChanged();
                 RaiseComputedPropertyChanges();
             }
@@ -187,6 +199,15 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// 获取当前编辑器启用的公开右键菜单扩展器集合。
     /// </summary>
     public IReadOnlyList<IGraphContextMenuContributor> ContextMenuContributors => _contextMenuContributors;
+
+    /// <summary>
+    /// 获取或设置宿主右键菜单增强器。
+    /// </summary>
+    public IGraphContextMenuAugmentor? ContextMenuAugmentor
+    {
+        get => _contextMenuAugmentor;
+        set => SetProperty(ref _contextMenuAugmentor, value);
+    }
 
     public string WorkspacePath { get; }
 
@@ -255,6 +276,8 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     IEnumerable<NodeViewModel> IGraphContextMenuHost.Nodes => Nodes;
 
     IEnumerable<NodeViewModel> IGraphContextMenuHost.SelectedNodes => SelectedNodes;
+
+    GraphEditorCommandPermissions IGraphContextMenuHost.CommandPermissions => CommandPermissions;
 
     int IGraphContextMenuHost.SelectedNodeCount => SelectedNodes.Count;
 
@@ -348,39 +371,53 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     public bool HasPendingConnection => PendingSourceNode is not null && PendingSourcePort is not null;
 
-    public bool CanUndo => _historyService.CanUndo;
+    public bool CanSaveWorkspace => CommandPermissions.Workspace.AllowSave;
 
-    public bool CanRedo => _historyService.CanRedo;
+    public bool CanLoadWorkspace => CommandPermissions.Workspace.AllowLoad;
+
+    public bool CanUndo => BehaviorOptions.History.EnableUndoRedo && CommandPermissions.History.AllowUndo && _historyService.CanUndo;
+
+    public bool CanRedo => BehaviorOptions.History.EnableUndoRedo && CommandPermissions.History.AllowRedo && _historyService.CanRedo;
 
     public bool HasSelection => SelectedNodes.Count > 0;
 
     public bool HasMultipleSelection => SelectedNodes.Count > 1;
 
-    public bool CanDeleteSelection => HasSelection;
+    public bool CanCreateNodes => CommandPermissions.Nodes.AllowCreate;
 
-    public bool CanCopySelection => HasSelection;
+    public bool CanDeleteSelection => HasSelection && CommandPermissions.Nodes.AllowDelete;
 
-    public bool CanPaste => _selectionClipboard.HasContent || _textClipboardBridge is not null;
+    public bool CanCopySelection => HasSelection && CommandPermissions.Clipboard.AllowCopy;
 
-    public bool CanExportSelectionFragment => HasSelection;
+    public bool CanInsertFragmentContent => CommandPermissions.Nodes.AllowCreate;
 
-    public bool CanImportFragment => _fragmentWorkspaceService.Exists();
+    public bool CanPaste => CommandPermissions.Clipboard.AllowPaste && CanInsertFragmentContent && (_selectionClipboard.HasContent || _textClipboardBridge is not null);
+
+    public bool CanExportSelectionFragment => HasSelection && CommandPermissions.Fragments.AllowExport;
+
+    public bool CanImportFragment => CommandPermissions.Fragments.AllowImport && CanInsertFragmentContent && _fragmentWorkspaceService.Exists();
+
+    public bool CanClearFragment => CommandPermissions.Fragments.AllowClearWorkspaceFragment && _fragmentWorkspaceService.Exists();
 
     public bool HasFragmentTemplates => FragmentTemplates.Count > 0;
 
-    public bool CanImportSelectedTemplate => SelectedFragmentTemplate is not null;
+    public bool CanExportSelectionAsTemplate => CanExportSelectionFragment && CommandPermissions.Fragments.AllowTemplateManagement && BehaviorOptions.Fragments.EnableFragmentLibrary;
 
-    public bool CanDeleteSelectedTemplate => SelectedFragmentTemplate is not null;
+    public bool CanImportSelectedTemplate => SelectedFragmentTemplate is not null && CommandPermissions.Fragments.AllowImport && CommandPermissions.Fragments.AllowTemplateManagement && CanInsertFragmentContent && BehaviorOptions.Fragments.EnableFragmentLibrary;
 
-    public bool CanAlignSelection => SelectedNodes.Count >= 2;
+    public bool CanDeleteSelectedTemplate => SelectedFragmentTemplate is not null && CommandPermissions.Fragments.AllowTemplateManagement && BehaviorOptions.Fragments.EnableFragmentLibrary;
 
-    public bool CanDistributeSelection => SelectedNodes.Count >= 3;
+    public bool CanAlignSelection => SelectedNodes.Count >= 2 && CommandPermissions.Layout.AllowAlign;
+
+    public bool CanDistributeSelection => SelectedNodes.Count >= 3 && CommandPermissions.Layout.AllowDistribute;
 
     public bool HasEditableParameters => SelectedNodes.Count == 1 && SelectedNodeParameters.Count > 0;
 
-    public bool HasBatchEditableParameters => SelectedNodes.Count > 1 && SelectedNodeParameters.Count > 0;
+    public bool HasBatchEditableParameters => SelectedNodes.Count > 1 && SelectedNodeParameters.Count > 0 && CanEditNodeParameters;
 
-    public bool HasAnyEditableParameters => BehaviorOptions.Selection.EnableBatchParameterEditing && SelectedNodeParameters.Count > 0;
+    public bool HasAnyEditableParameters => SelectedNodeParameters.Count > 0;
+
+    public bool CanEditNodeParameters => CommandPermissions.Nodes.AllowEditParameters;
 
     public string StatsCaption => $"{Nodes.Count} nodes  ·  {Connections.Count} links  ·  {Zoom * 100:0}% zoom";
 
@@ -456,7 +493,12 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// <param name="context">当前菜单上下文。</param>
     /// <returns>供视图层渲染的菜单项集合。</returns>
     public IReadOnlyList<MenuItemDescriptor> BuildContextMenu(ContextMenuContext context)
-        => _contextMenuBuilder.Build(context);
+    {
+        var stockItems = _contextMenuBuilder.Build(context);
+        return ContextMenuAugmentor is null
+            ? stockItems
+            : ContextMenuAugmentor.Augment(this, context, stockItems);
+    }
 
     public void UpdateViewportSize(double width, double height)
     {
@@ -515,6 +557,11 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     {
         ArgumentNullException.ThrowIfNull(originPositions);
 
+        if (!CommandPermissions.Nodes.AllowMove)
+        {
+            return;
+        }
+
         foreach (var entry in originPositions)
         {
             var node = FindNode(entry.Key);
@@ -565,6 +612,12 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// </summary>
     public void Undo()
     {
+        if (!BehaviorOptions.History.EnableUndoRedo || !CommandPermissions.History.AllowUndo)
+        {
+            StatusMessage = "Undo is disabled by host permissions.";
+            return;
+        }
+
         if (!_historyService.TryUndo(out var state) || state is null)
         {
             StatusMessage = "No more undo steps.";
@@ -579,6 +632,12 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// </summary>
     public void Redo()
     {
+        if (!BehaviorOptions.History.EnableUndoRedo || !CommandPermissions.History.AllowRedo)
+        {
+            StatusMessage = "Redo is disabled by host permissions.";
+            return;
+        }
+
         if (!_historyService.TryRedo(out var state) || state is null)
         {
             StatusMessage = "No more redo steps.";
@@ -707,6 +766,16 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// </summary>
     public bool TrySetNodePosition(string nodeId, GraphPoint position, bool updateStatus = true)
     {
+        if (!CommandPermissions.Nodes.AllowMove)
+        {
+            if (updateStatus)
+            {
+                StatusMessage = "Node movement is disabled by host permissions.";
+            }
+
+            return false;
+        }
+
         var node = FindNode(nodeId);
         if (node is null)
         {
@@ -747,6 +816,16 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     public int SetNodePositions(IEnumerable<NodePositionSnapshot> positions, bool updateStatus = true)
     {
         ArgumentNullException.ThrowIfNull(positions);
+
+        if (!CommandPermissions.Nodes.AllowMove)
+        {
+            if (updateStatus)
+            {
+                StatusMessage = "Node movement is disabled by host permissions.";
+            }
+
+            return 0;
+        }
 
         var requestedPositions = positions
             .GroupBy(snapshot => snapshot.NodeId, StringComparer.Ordinal)
@@ -813,6 +892,12 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     public void AddNode(NodeTemplateViewModel template, GraphPoint? preferredWorldPosition = null)
     {
+        if (!CommandPermissions.Nodes.AllowCreate)
+        {
+            StatusMessage = "Node creation is disabled by host permissions.";
+            return;
+        }
+
         var position = preferredWorldPosition ?? GetViewportCenter();
         var offset = 26 * (Nodes.Count % 4);
 
@@ -830,6 +915,11 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     public void MoveNode(NodeViewModel node, double deltaX, double deltaY)
     {
+        if (!CommandPermissions.Nodes.AllowMove)
+        {
+            return;
+        }
+
         if (node.IsSelected && SelectedNodes.Count > 1)
         {
             foreach (var selectedNode in SelectedNodes)
@@ -937,6 +1027,12 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     public void StartConnection(string sourceNodeId, string sourcePortId)
     {
+        if (!CommandPermissions.Connections.AllowCreate)
+        {
+            StatusMessage = "Connection creation is disabled by host permissions.";
+            return;
+        }
+
         var sourceNode = FindNode(sourceNodeId);
         var sourcePort = sourceNode?.GetPort(sourcePortId);
         if (sourceNode is null || sourcePort is null)
@@ -965,6 +1061,12 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     public void ConnectPorts(string sourceNodeId, string sourcePortId, string targetNodeId, string targetPortId)
     {
+        if (!CommandPermissions.Connections.AllowCreate)
+        {
+            StatusMessage = "Connection creation is disabled by host permissions.";
+            return;
+        }
+
         var sourceNode = FindNode(sourceNodeId);
         var sourcePort = sourceNode?.GetPort(sourcePortId);
         var targetNode = FindNode(targetNodeId);
@@ -1001,6 +1103,12 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         var replaced = Connections
             .Where(connection => connection.TargetNodeId == targetNode.Id && connection.TargetPortId == targetPort.Id)
             .ToList();
+
+        if (replaced.Count > 0 && !CanReplaceIncomingConnection())
+        {
+            StatusMessage = "Replacing an incoming connection requires delete or disconnect permission.";
+            return;
+        }
 
         foreach (var connection in replaced)
         {
@@ -1045,6 +1153,12 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     public void DeleteSelection()
     {
+        if (!CommandPermissions.Nodes.AllowDelete)
+        {
+            StatusMessage = "Node deletion is disabled by host permissions.";
+            return;
+        }
+
         if (SelectedNodes.Count == 0)
         {
             StatusMessage = "Select a node before deleting.";
@@ -1058,6 +1172,12 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
                 removedNodeIds.Contains(connection.SourceNodeId)
                 || removedNodeIds.Contains(connection.TargetNodeId))
             .ToList();
+
+        if (removedConnections.Count > 0 && !CanRemoveConnectionsAsSideEffect())
+        {
+            StatusMessage = "Deleting connected nodes requires delete or disconnect permission for the affected links.";
+            return;
+        }
 
         foreach (var connection in removedConnections)
         {
@@ -1130,6 +1250,12 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     public void DeleteNodeById(string nodeId)
     {
+        if (!CommandPermissions.Nodes.AllowDelete)
+        {
+            StatusMessage = "Node deletion is disabled by host permissions.";
+            return;
+        }
+
         var node = FindNode(nodeId);
         if (node is null)
         {
@@ -1140,6 +1266,12 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         var removedConnections = Connections
             .Where(connection => connection.SourceNodeId == node.Id || connection.TargetNodeId == node.Id)
             .ToList();
+
+        if (removedConnections.Count > 0 && !CanRemoveConnectionsAsSideEffect())
+        {
+            StatusMessage = "Deleting a connected node requires delete or disconnect permission for the affected links.";
+            return;
+        }
 
         foreach (var connection in removedConnections)
         {
@@ -1162,6 +1294,12 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     public void DuplicateNode(string nodeId)
     {
+        if (!CommandPermissions.Nodes.AllowDuplicate)
+        {
+            StatusMessage = "Node duplication is disabled by host permissions.";
+            return;
+        }
+
         var node = FindNode(nodeId);
         if (node is null)
         {
@@ -1180,23 +1318,64 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         NotifyDocumentChanged(GraphEditorDocumentChangeKind.NodesAdded, nodeIds: [duplicate.Id]);
     }
 
-    public void DisconnectIncoming(string nodeId) => RemoveConnections(connection => connection.TargetNodeId == nodeId, "Disconnected incoming links.");
+    public void DisconnectIncoming(string nodeId)
+    {
+        if (!CommandPermissions.Connections.AllowDisconnect)
+        {
+            StatusMessage = "Disconnect is disabled by host permissions.";
+            return;
+        }
 
-    public void DisconnectOutgoing(string nodeId) => RemoveConnections(connection => connection.SourceNodeId == nodeId, "Disconnected outgoing links.");
+        RemoveConnections(connection => connection.TargetNodeId == nodeId, "Disconnected incoming links.");
+    }
 
-    public void DisconnectAll(string nodeId) => RemoveConnections(
-        connection => connection.SourceNodeId == nodeId || connection.TargetNodeId == nodeId,
-        "Disconnected all links.");
+    public void DisconnectOutgoing(string nodeId)
+    {
+        if (!CommandPermissions.Connections.AllowDisconnect)
+        {
+            StatusMessage = "Disconnect is disabled by host permissions.";
+            return;
+        }
+
+        RemoveConnections(connection => connection.SourceNodeId == nodeId, "Disconnected outgoing links.");
+    }
+
+    public void DisconnectAll(string nodeId)
+    {
+        if (!CommandPermissions.Connections.AllowDisconnect)
+        {
+            StatusMessage = "Disconnect is disabled by host permissions.";
+            return;
+        }
+
+        RemoveConnections(
+            connection => connection.SourceNodeId == nodeId || connection.TargetNodeId == nodeId,
+            "Disconnected all links.");
+    }
 
     public void BreakConnectionsForPort(string nodeId, string portId)
-        => RemoveConnections(
+    {
+        if (!CommandPermissions.Connections.AllowDisconnect)
+        {
+            StatusMessage = "Disconnect is disabled by host permissions.";
+            return;
+        }
+
+        RemoveConnections(
             connection =>
                 (connection.SourceNodeId == nodeId && connection.SourcePortId == portId)
                 || (connection.TargetNodeId == nodeId && connection.TargetPortId == portId),
             "Disconnected port links.");
+    }
 
     public void DeleteConnection(string connectionId)
     {
+        if (!CommandPermissions.Connections.AllowDelete)
+        {
+            StatusMessage = "Connection deletion is disabled by host permissions.";
+            return;
+        }
+
         var connection = FindConnection(connectionId);
         if (connection is null)
         {
@@ -1264,6 +1443,13 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     private void ApplySelectionLayout(Action<IReadOnlyList<NodeViewModel>> applyLayout, int minimumCount, string status)
     {
+        if ((minimumCount >= 3 && !CommandPermissions.Layout.AllowDistribute)
+            || (minimumCount < 3 && !CommandPermissions.Layout.AllowAlign))
+        {
+            StatusMessage = "Layout tools are disabled by host permissions.";
+            return;
+        }
+
         var selectedNodes = SelectedNodes.ToList();
         if (selectedNodes.Count < minimumCount)
         {
@@ -1314,6 +1500,18 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     private bool PasteFragment(GraphSelectionFragment fragment, string actionPrefix)
     {
+        if (!CommandPermissions.Nodes.AllowCreate)
+        {
+            StatusMessage = "Fragment insertion is disabled by host permissions.";
+            return false;
+        }
+
+        if (fragment.Connections.Count > 0 && !CommandPermissions.Connections.AllowCreate)
+        {
+            StatusMessage = "This fragment contains connections, but connection creation is disabled by host permissions.";
+            return false;
+        }
+
         _selectionClipboard.Store(fragment);
         var targetOrigin = _selectionClipboard.GetNextPasteOrigin(GetViewportCenter());
         var nodeIdMap = new Dictionary<string, string>(StringComparer.Ordinal);
@@ -1393,6 +1591,12 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// </summary>
     public async Task CopySelectionAsync()
     {
+        if (!CommandPermissions.Clipboard.AllowCopy)
+        {
+            StatusMessage = "Copy is disabled by host permissions.";
+            return;
+        }
+
         var fragment = CreateSelectionFragment();
         if (fragment is null)
         {
@@ -1415,6 +1619,12 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     public void ExportSelectionFragment()
     {
+        if (!CommandPermissions.Fragments.AllowExport)
+        {
+            StatusMessage = "Fragment export is disabled by host permissions.";
+            return;
+        }
+
         var fragment = CreateSelectionFragment();
         if (fragment is null)
         {
@@ -1435,6 +1645,12 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     public void ExportSelectionAsTemplate()
     {
+        if (!CommandPermissions.Fragments.AllowTemplateManagement || !CommandPermissions.Fragments.AllowExport)
+        {
+            StatusMessage = "Template export is disabled by host permissions.";
+            return;
+        }
+
         if (!BehaviorOptions.Fragments.EnableFragmentLibrary)
         {
             StatusMessage = "Fragment template library is disabled.";
@@ -1469,6 +1685,12 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
 
+        if (!CommandPermissions.Fragments.AllowExport)
+        {
+            StatusMessage = "Fragment export is disabled by host permissions.";
+            return false;
+        }
+
         var fragment = CreateSelectionFragment();
         if (fragment is null)
         {
@@ -1492,6 +1714,12 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// </summary>
     public async Task PasteSelectionAsync()
     {
+        if (!CommandPermissions.Clipboard.AllowPaste)
+        {
+            StatusMessage = "Paste is disabled by host permissions.";
+            return;
+        }
+
         var fragment = await GetBestAvailableClipboardFragmentAsync();
         if (fragment is null || fragment.Nodes.Count == 0)
         {
@@ -1507,6 +1735,12 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     public void ImportFragment()
     {
+        if (!CommandPermissions.Fragments.AllowImport)
+        {
+            StatusMessage = "Fragment import is disabled by host permissions.";
+            return;
+        }
+
         if (!_fragmentWorkspaceService.Exists())
         {
             StatusMessage = "No exported fragment file is available yet.";
@@ -1534,6 +1768,12 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     public void ClearFragment()
     {
+        if (!CommandPermissions.Fragments.AllowClearWorkspaceFragment)
+        {
+            StatusMessage = "Fragment clearing is disabled by host permissions.";
+            return;
+        }
+
         if (!_fragmentWorkspaceService.Exists())
         {
             StatusMessage = "No exported fragment file is available yet.";
@@ -1547,6 +1787,12 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     public void ImportSelectedTemplate()
     {
+        if (!CommandPermissions.Fragments.AllowTemplateManagement || !CommandPermissions.Fragments.AllowImport)
+        {
+            StatusMessage = "Template import is disabled by host permissions.";
+            return;
+        }
+
         if (SelectedFragmentTemplate is null)
         {
             StatusMessage = "Select a fragment template first.";
@@ -1558,6 +1804,12 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     public void DeleteSelectedTemplate()
     {
+        if (!CommandPermissions.Fragments.AllowTemplateManagement)
+        {
+            StatusMessage = "Template deletion is disabled by host permissions.";
+            return;
+        }
+
         if (SelectedFragmentTemplate is null)
         {
             StatusMessage = "Select a fragment template first.";
@@ -1578,6 +1830,12 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     public bool ImportFragmentFrom(string path)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
+
+        if (!CommandPermissions.Fragments.AllowImport)
+        {
+            StatusMessage = "Fragment import is disabled by host permissions.";
+            return false;
+        }
 
         if (!_fragmentWorkspaceService.Exists(path))
         {
@@ -1604,6 +1862,12 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     public void SaveWorkspace()
     {
+        if (!CommandPermissions.Workspace.AllowSave)
+        {
+            StatusMessage = "Saving is disabled by host permissions.";
+            return;
+        }
+
         try
         {
             _workspaceService.Save(CreateDocumentSnapshot());
@@ -1621,6 +1885,12 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     public bool LoadWorkspace()
     {
+        if (!CommandPermissions.Workspace.AllowLoad)
+        {
+            StatusMessage = "Loading is disabled by host permissions.";
+            return false;
+        }
+
         try
         {
             if (!_workspaceService.Exists())
@@ -1760,6 +2030,12 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         return true;
     }
 
+    private bool CanReplaceIncomingConnection()
+        => CommandPermissions.Connections.AllowDelete || CommandPermissions.Connections.AllowDisconnect;
+
+    private bool CanRemoveConnectionsAsSideEffect()
+        => CommandPermissions.Connections.AllowDelete || CommandPermissions.Connections.AllowDisconnect;
+
     private GraphEditorHistoryState CaptureHistoryState()
     {
         var document = CreateDocumentSnapshot();
@@ -1838,6 +2114,8 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     partial void OnZoomChanged(double value) => RaiseComputedPropertyChanges();
 
+    partial void OnSelectedFragmentTemplateChanged(FragmentTemplateViewModel? value) => RaiseComputedPropertyChanges();
+
     partial void OnSelectedNodeChanged(NodeViewModel? value) => RaiseComputedPropertyChanges();
 
     partial void OnPendingSourceNodeChanged(NodeViewModel? value) => RaiseComputedPropertyChanges();
@@ -1891,12 +2169,19 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     private void RaiseComputedPropertyChanges()
     {
+        SaveCommand.NotifyCanExecuteChanged();
+        LoadCommand.NotifyCanExecuteChanged();
+        UndoCommand.NotifyCanExecuteChanged();
+        RedoCommand.NotifyCanExecuteChanged();
         DeleteSelectionCommand.NotifyCanExecuteChanged();
         CopySelectionCommand.NotifyCanExecuteChanged();
         PasteCommand.NotifyCanExecuteChanged();
         ExportSelectionFragmentCommand.NotifyCanExecuteChanged();
         ImportFragmentCommand.NotifyCanExecuteChanged();
         ClearFragmentCommand.NotifyCanExecuteChanged();
+        ExportSelectionAsTemplateCommand.NotifyCanExecuteChanged();
+        ImportSelectedTemplateCommand.NotifyCanExecuteChanged();
+        DeleteSelectedTemplateCommand.NotifyCanExecuteChanged();
         AlignLeftCommand.NotifyCanExecuteChanged();
         AlignCenterCommand.NotifyCanExecuteChanged();
         AlignRightCommand.NotifyCanExecuteChanged();
@@ -1907,20 +2192,30 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         DistributeVerticallyCommand.NotifyCanExecuteChanged();
         CancelPendingConnectionCommand.NotifyCanExecuteChanged();
         FitViewCommand.NotifyCanExecuteChanged();
+        AddNodeCommand.NotifyCanExecuteChanged();
 
         OnPropertyChanged(nameof(HasPendingConnection));
+        OnPropertyChanged(nameof(CanSaveWorkspace));
+        OnPropertyChanged(nameof(CanLoadWorkspace));
         OnPropertyChanged(nameof(HasSelection));
         OnPropertyChanged(nameof(HasMultipleSelection));
+        OnPropertyChanged(nameof(CanCreateNodes));
         OnPropertyChanged(nameof(CanDeleteSelection));
         OnPropertyChanged(nameof(CanCopySelection));
+        OnPropertyChanged(nameof(CanInsertFragmentContent));
         OnPropertyChanged(nameof(CanPaste));
         OnPropertyChanged(nameof(CanExportSelectionFragment));
         OnPropertyChanged(nameof(CanImportFragment));
+        OnPropertyChanged(nameof(CanClearFragment));
+        OnPropertyChanged(nameof(CanExportSelectionAsTemplate));
+        OnPropertyChanged(nameof(CanImportSelectedTemplate));
+        OnPropertyChanged(nameof(CanDeleteSelectedTemplate));
         OnPropertyChanged(nameof(CanAlignSelection));
         OnPropertyChanged(nameof(CanDistributeSelection));
         OnPropertyChanged(nameof(HasEditableParameters));
         OnPropertyChanged(nameof(HasBatchEditableParameters));
         OnPropertyChanged(nameof(HasAnyEditableParameters));
+        OnPropertyChanged(nameof(CanEditNodeParameters));
         OnPropertyChanged(nameof(ViewportWidth));
         OnPropertyChanged(nameof(ViewportHeight));
         OnPropertyChanged(nameof(StatsCaption));
@@ -2103,6 +2398,13 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             return;
         }
 
+        if (SelectedNodes.Count > 1 && !BehaviorOptions.Selection.EnableBatchParameterEditing)
+        {
+            OnPropertyChanged(nameof(HasEditableParameters));
+            OnPropertyChanged(nameof(HasBatchEditableParameters));
+            return;
+        }
+
         var sharedDefinitionId = SelectedNodes[0].DefinitionId;
         if (sharedDefinitionId is null
             || SelectedNodes.Any(node => node.DefinitionId != sharedDefinitionId))
@@ -2124,7 +2426,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             var currentValues = SelectedNodes
                 .Select(node => node.GetParameterValue(parameter.Key) ?? parameter.DefaultValue)
                 .ToList();
-            SelectedNodeParameters.Add(new NodeParameterViewModel(parameter, currentValues, ApplyParameterValue));
+            SelectedNodeParameters.Add(new NodeParameterViewModel(parameter, currentValues, ApplyParameterValue, isHostReadOnly: !CanEditNodeParameters));
         }
 
         OnPropertyChanged(nameof(HasEditableParameters));
@@ -2135,6 +2437,12 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     {
         if (SelectedNodes.Count == 0)
         {
+            return;
+        }
+
+        if (!CanEditNodeParameters)
+        {
+            StatusMessage = "Parameter editing is disabled by host permissions.";
             return;
         }
 

@@ -306,6 +306,7 @@ public partial class NodeCanvas : UserControl
                     targetKind,
                     ResolveWorldPosition(args, this),
                     selectedNodeId: ViewModel.SelectedNode?.Id,
+                    selectedNodeIds: ViewModel.SelectedNodes.Select(selected => selected.Id).ToList(),
                     clickedNodeId: node.Id,
                     availableNodeDefinitions: ViewModel.NodeTemplates.Select(template => template.Definition).ToList()));
             args.Handled = true;
@@ -419,6 +420,7 @@ public partial class NodeCanvas : UserControl
                         ContextMenuTargetKind.Port,
                         ResolveWorldPosition(args, this),
                         selectedNodeId: ViewModel.SelectedNode?.Id,
+                        selectedNodeIds: ViewModel.SelectedNodes.Select(selected => selected.Id).ToList(),
                         clickedNodeId: node.Id,
                         clickedPortNodeId: node.Id,
                         clickedPortId: port.Id,
@@ -554,6 +556,9 @@ public partial class NodeCanvas : UserControl
                     ContextMenuTargetKind.Connection,
                     ResolveWorldPosition(args, this),
                     selectedNodeId: ViewModel.SelectedNode?.Id,
+                    selectedNodeIds: ViewModel.SelectedNodes.Select(selected => selected.Id).ToList(),
+                    selectedConnectionId: connection.Id,
+                    selectedConnectionIds: [connection.Id],
                     clickedConnectionId: connection.Id,
                     availableNodeDefinitions: ViewModel.NodeTemplates.Select(template => template.Definition).ToList()));
             args.Handled = true;
@@ -813,6 +818,7 @@ public partial class NodeCanvas : UserControl
                 ViewModel.HasMultipleSelection ? ContextMenuTargetKind.Selection : ContextMenuTargetKind.Canvas,
                 ResolveWorldPosition(args, this),
                 selectedNodeId: ViewModel.SelectedNode?.Id,
+                selectedNodeIds: ViewModel.SelectedNodes.Select(selected => selected.Id).ToList(),
                 availableNodeDefinitions: ViewModel.NodeTemplates.Select(template => template.Definition).ToList()));
         args.Handled = true;
     }
