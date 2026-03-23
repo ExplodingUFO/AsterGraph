@@ -30,6 +30,6 @@ Start here when a host needs deeper editor integration beyond the default Avalon
 
 Reference material:
 
-- [`../../docs/host-integration.md`](../../docs/host-integration.md)
-- `tools/AsterGraph.HostSample`
+- [Host Integration Guide](https://github.com/ExplodingUFO/AsterGraph/blob/master/docs/host-integration.md)
+- [Host Sample](https://github.com/ExplodingUFO/AsterGraph/tree/master/tools/AsterGraph.HostSample)
 

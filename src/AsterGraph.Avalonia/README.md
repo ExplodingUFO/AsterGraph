@@ -27,5 +27,5 @@ Those responsibilities live in `AsterGraph.Abstractions`, `AsterGraph.Core`, `As
 
 Integration entry points:
 
-- [`../../docs/host-integration.md`](../../docs/host-integration.md)
-- `tools/AsterGraph.HostSample`
+- [Host Integration Guide](https://github.com/ExplodingUFO/AsterGraph/blob/master/docs/host-integration.md)
+- [Host Sample](https://github.com/ExplodingUFO/AsterGraph/tree/master/tools/AsterGraph.HostSample)
