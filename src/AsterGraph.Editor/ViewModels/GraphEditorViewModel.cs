@@ -30,6 +30,48 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     private const double DefaultZoom = 0.88;
     private const double DefaultPanX = 110;
     private const double DefaultPanY = 96;
+    private static readonly string[] ComputedPropertyNames =
+    [
+        nameof(HasPendingConnection),
+        nameof(CanSaveWorkspace),
+        nameof(CanLoadWorkspace),
+        nameof(HasSelection),
+        nameof(HasMultipleSelection),
+        nameof(CanCreateNodes),
+        nameof(CanDeleteSelection),
+        nameof(CanCopySelection),
+        nameof(CanInsertFragmentContent),
+        nameof(CanPaste),
+        nameof(CanExportSelectionFragment),
+        nameof(CanImportFragment),
+        nameof(CanClearFragment),
+        nameof(CanExportSelectionAsTemplate),
+        nameof(CanImportSelectedTemplate),
+        nameof(CanDeleteSelectedTemplate),
+        nameof(CanAlignSelection),
+        nameof(CanDistributeSelection),
+        nameof(HasEditableParameters),
+        nameof(HasBatchEditableParameters),
+        nameof(HasAnyEditableParameters),
+        nameof(CanEditNodeParameters),
+        nameof(ViewportWidth),
+        nameof(ViewportHeight),
+        nameof(StatsCaption),
+        nameof(WorkspaceCaption),
+        nameof(FragmentPath),
+        nameof(FragmentCaption),
+        nameof(FragmentStatusCaption),
+        nameof(ModeCaption),
+        nameof(InspectorTitle),
+        nameof(InspectorCategory),
+        nameof(InspectorDescription),
+        nameof(InspectorInputs),
+        nameof(InspectorOutputs),
+        nameof(InspectorConnections),
+        nameof(InspectorUpstream),
+        nameof(InspectorDownstream),
+        nameof(SelectionCaption),
+    ];
 
     private readonly INodeCatalog _nodeCatalog;
     private readonly IPortCompatibilityService _compatibilityService;
@@ -38,6 +80,9 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     private readonly GraphFragmentWorkspaceService _fragmentWorkspaceService;
     private readonly GraphFragmentLibraryService _fragmentLibraryService;
     private readonly GraphEditorHistoryService _historyService;
+    private readonly GraphEditorInspectorProjection _inspectorProjection = new();
+    private readonly GraphEditorCommandStateNotifier _commandStateNotifier = new();
+    private readonly IRelayCommand[] _computedStateCommands;
     private IGraphContextMenuAugmentor? _contextMenuAugmentor;
     private GraphEditorBehaviorOptions _behaviorOptions = GraphEditorBehaviorOptions.Default;
     private IGraphTextClipboardBridge? _textClipboardBridge;
@@ -120,6 +165,33 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
                 }
             },
             template => CanCreateNodes && template is not null);
+        _computedStateCommands =
+        [
+            SaveCommand,
+            LoadCommand,
+            UndoCommand,
+            RedoCommand,
+            DeleteSelectionCommand,
+            CopySelectionCommand,
+            PasteCommand,
+            ExportSelectionFragmentCommand,
+            ImportFragmentCommand,
+            ClearFragmentCommand,
+            ExportSelectionAsTemplateCommand,
+            ImportSelectedTemplateCommand,
+            DeleteSelectedTemplateCommand,
+            AlignLeftCommand,
+            AlignCenterCommand,
+            AlignRightCommand,
+            AlignTopCommand,
+            AlignMiddleCommand,
+            AlignBottomCommand,
+            DistributeHorizontallyCommand,
+            DistributeVerticallyCommand,
+            CancelPendingConnectionCommand,
+            FitViewCommand,
+            AddNodeCommand,
+        ];
 
         _contextMenuBuilder = new GraphContextMenuBuilder(this);
 
@@ -490,11 +562,11 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     public string InspectorInputs => SelectedNode is null
         ? "Select a node to inspect its input ports."
-        : FormatPorts(SelectedNode.Inputs);
+        : _inspectorProjection.FormatPorts(SelectedNode.Inputs);
 
     public string InspectorOutputs => SelectedNode is null
         ? "Select a node to inspect its output ports."
-        : FormatPorts(SelectedNode.Outputs);
+        : _inspectorProjection.FormatPorts(SelectedNode.Outputs);
 
     public string InspectorConnections => SelectedNode is null
         ? "Select a node to inspect its connection summary."
@@ -502,17 +574,22 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     public string InspectorUpstream => SelectedNode is null
         ? "Select a node to see upstream dependencies."
-        : FormatRelatedNodes(GetIncomingConnections(SelectedNode), useSource: true);
+        : _inspectorProjection.FormatRelatedNodes(
+            GetIncomingConnections(SelectedNode),
+            useSource: true,
+            FindNode);
 
     public string InspectorDownstream => SelectedNode is null
         ? "Select a node to see downstream consumers."
-        : FormatRelatedNodes(GetOutgoingConnections(SelectedNode), useSource: false);
+        : _inspectorProjection.FormatRelatedNodes(
+            GetOutgoingConnections(SelectedNode),
+            useSource: false,
+            FindNode);
 
-    public string SelectionCaption => SelectedNode is null
-        ? "No selection"
-        : HasMultipleSelection
-            ? $"{SelectedNodes.Count} nodes selected  ·  primary {SelectedNode.Title}"
-            : $"{SelectedNode.InputCount} inputs  ·  {SelectedNode.OutputCount} outputs";
+    public string SelectionCaption => _inspectorProjection.FormatSelectionCaption(
+        SelectedNode,
+        HasMultipleSelection,
+        SelectedNodes.Count);
 
     /// <summary>
     /// 为给定上下文构建右键菜单描述。
@@ -2360,70 +2437,9 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     private void RaiseComputedPropertyChanges()
     {
-        SaveCommand.NotifyCanExecuteChanged();
-        LoadCommand.NotifyCanExecuteChanged();
-        UndoCommand.NotifyCanExecuteChanged();
-        RedoCommand.NotifyCanExecuteChanged();
-        DeleteSelectionCommand.NotifyCanExecuteChanged();
-        CopySelectionCommand.NotifyCanExecuteChanged();
-        PasteCommand.NotifyCanExecuteChanged();
-        ExportSelectionFragmentCommand.NotifyCanExecuteChanged();
-        ImportFragmentCommand.NotifyCanExecuteChanged();
-        ClearFragmentCommand.NotifyCanExecuteChanged();
-        ExportSelectionAsTemplateCommand.NotifyCanExecuteChanged();
-        ImportSelectedTemplateCommand.NotifyCanExecuteChanged();
-        DeleteSelectedTemplateCommand.NotifyCanExecuteChanged();
-        AlignLeftCommand.NotifyCanExecuteChanged();
-        AlignCenterCommand.NotifyCanExecuteChanged();
-        AlignRightCommand.NotifyCanExecuteChanged();
-        AlignTopCommand.NotifyCanExecuteChanged();
-        AlignMiddleCommand.NotifyCanExecuteChanged();
-        AlignBottomCommand.NotifyCanExecuteChanged();
-        DistributeHorizontallyCommand.NotifyCanExecuteChanged();
-        DistributeVerticallyCommand.NotifyCanExecuteChanged();
-        CancelPendingConnectionCommand.NotifyCanExecuteChanged();
-        FitViewCommand.NotifyCanExecuteChanged();
-        AddNodeCommand.NotifyCanExecuteChanged();
+        _commandStateNotifier.NotifyCanExecuteChanged(_computedStateCommands);
 
-        OnPropertyChanged(nameof(HasPendingConnection));
-        OnPropertyChanged(nameof(CanSaveWorkspace));
-        OnPropertyChanged(nameof(CanLoadWorkspace));
-        OnPropertyChanged(nameof(HasSelection));
-        OnPropertyChanged(nameof(HasMultipleSelection));
-        OnPropertyChanged(nameof(CanCreateNodes));
-        OnPropertyChanged(nameof(CanDeleteSelection));
-        OnPropertyChanged(nameof(CanCopySelection));
-        OnPropertyChanged(nameof(CanInsertFragmentContent));
-        OnPropertyChanged(nameof(CanPaste));
-        OnPropertyChanged(nameof(CanExportSelectionFragment));
-        OnPropertyChanged(nameof(CanImportFragment));
-        OnPropertyChanged(nameof(CanClearFragment));
-        OnPropertyChanged(nameof(CanExportSelectionAsTemplate));
-        OnPropertyChanged(nameof(CanImportSelectedTemplate));
-        OnPropertyChanged(nameof(CanDeleteSelectedTemplate));
-        OnPropertyChanged(nameof(CanAlignSelection));
-        OnPropertyChanged(nameof(CanDistributeSelection));
-        OnPropertyChanged(nameof(HasEditableParameters));
-        OnPropertyChanged(nameof(HasBatchEditableParameters));
-        OnPropertyChanged(nameof(HasAnyEditableParameters));
-        OnPropertyChanged(nameof(CanEditNodeParameters));
-        OnPropertyChanged(nameof(ViewportWidth));
-        OnPropertyChanged(nameof(ViewportHeight));
-        OnPropertyChanged(nameof(StatsCaption));
-        OnPropertyChanged(nameof(WorkspaceCaption));
-        OnPropertyChanged(nameof(FragmentPath));
-        OnPropertyChanged(nameof(FragmentCaption));
-        OnPropertyChanged(nameof(FragmentStatusCaption));
-        OnPropertyChanged(nameof(ModeCaption));
-        OnPropertyChanged(nameof(InspectorTitle));
-        OnPropertyChanged(nameof(InspectorCategory));
-        OnPropertyChanged(nameof(InspectorDescription));
-        OnPropertyChanged(nameof(InspectorInputs));
-        OnPropertyChanged(nameof(InspectorOutputs));
-        OnPropertyChanged(nameof(InspectorConnections));
-        OnPropertyChanged(nameof(InspectorUpstream));
-        OnPropertyChanged(nameof(InspectorDownstream));
-        OnPropertyChanged(nameof(SelectionCaption));
+        _commandStateNotifier.NotifyPropertyChanged(OnPropertyChanged, ComputedPropertyNames);
     }
 
     private void NotifyDocumentChanged(
@@ -2509,45 +2525,6 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     private List<ConnectionViewModel> GetOutgoingConnections(NodeViewModel node)
         => Connections.Where(connection => connection.SourceNodeId == node.Id).ToList();
 
-    private string FormatRelatedNodes(IEnumerable<ConnectionViewModel> connections, bool useSource)
-    {
-        var lines = connections
-            .Select(connection =>
-            {
-                var relatedId = useSource ? connection.SourceNodeId : connection.TargetNodeId;
-                var relatedPortId = useSource ? connection.SourcePortId : connection.TargetPortId;
-                var relatedNode = FindNode(relatedId);
-                var relatedPort = relatedNode?.GetPort(relatedPortId);
-                if (relatedNode is null)
-                {
-                    return null;
-                }
-
-                return $"{relatedNode.Title}  ·  {relatedPort?.Label ?? relatedPortId}";
-            })
-            .Where(line => !string.IsNullOrWhiteSpace(line))
-            .Distinct(StringComparer.Ordinal)
-            .ToList();
-
-        if (lines.Count == 0)
-        {
-            return "None";
-        }
-
-        return string.Join(Environment.NewLine, lines);
-    }
-
-    private static string FormatPorts(IEnumerable<PortViewModel> ports)
-    {
-        var items = ports.ToList();
-        if (items.Count == 0)
-        {
-            return "None";
-        }
-
-        return string.Join(Environment.NewLine, items.Select(port => $"{port.Label}  ·  {port.DataType}"));
-    }
-
     private static string CreateUniqueId(IEnumerable<string> existingIds, string prefix)
     {
         var ids = existingIds.ToHashSet(StringComparer.Ordinal);
@@ -2582,42 +2559,16 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     {
         SelectedNodeParameters.Clear();
 
-        if (SelectedNodes.Count == 0)
-        {
-            OnPropertyChanged(nameof(HasEditableParameters));
-            OnPropertyChanged(nameof(HasBatchEditableParameters));
-            return;
-        }
+        var projectedParameters = _inspectorProjection.BuildSelectedNodeParameters(
+            SelectedNodes,
+            _nodeCatalog,
+            BehaviorOptions.Selection.EnableBatchParameterEditing,
+            CanEditNodeParameters,
+            ApplyParameterValue);
 
-        if (SelectedNodes.Count > 1 && !BehaviorOptions.Selection.EnableBatchParameterEditing)
+        foreach (var parameter in projectedParameters)
         {
-            OnPropertyChanged(nameof(HasEditableParameters));
-            OnPropertyChanged(nameof(HasBatchEditableParameters));
-            return;
-        }
-
-        var sharedDefinitionId = SelectedNodes[0].DefinitionId;
-        if (sharedDefinitionId is null
-            || SelectedNodes.Any(node => node.DefinitionId != sharedDefinitionId))
-        {
-            OnPropertyChanged(nameof(HasEditableParameters));
-            OnPropertyChanged(nameof(HasBatchEditableParameters));
-            return;
-        }
-
-        if (!_nodeCatalog.TryGetDefinition(sharedDefinitionId, out var definition) || definition is null)
-        {
-            OnPropertyChanged(nameof(HasEditableParameters));
-            OnPropertyChanged(nameof(HasBatchEditableParameters));
-            return;
-        }
-
-        foreach (var parameter in definition.Parameters)
-        {
-            var currentValues = SelectedNodes
-                .Select(node => node.GetParameterValue(parameter.Key) ?? parameter.DefaultValue)
-                .ToList();
-            SelectedNodeParameters.Add(new NodeParameterViewModel(parameter, currentValues, ApplyParameterValue, isHostReadOnly: !CanEditNodeParameters));
+            SelectedNodeParameters.Add(parameter);
         }
 
         OnPropertyChanged(nameof(HasEditableParameters));
