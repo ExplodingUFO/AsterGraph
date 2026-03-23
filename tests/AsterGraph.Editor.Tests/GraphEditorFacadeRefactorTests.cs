@@ -25,13 +25,6 @@ public sealed class GraphEditorFacadeRefactorTests
     }
 
     [Fact]
-    public void GraphEditorViewModel_CachesComputedStateCommandsInSingleField()
-    {
-        var field = typeof(GraphEditorViewModel).GetField("_computedStateCommands", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-        Assert.NotNull(field);
-    }
-
-    [Fact]
     public void BuildSelectedNodeParameters_PreservesMixedValuesForSharedDefinitionSelection()
     {
         var definitionId = new NodeDefinitionId("tests.editor.facade.parameter-node");

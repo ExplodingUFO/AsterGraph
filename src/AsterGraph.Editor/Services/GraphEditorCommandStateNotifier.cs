@@ -16,6 +16,11 @@ internal sealed class GraphEditorCommandStateNotifier
 
         foreach (var command in commands)
         {
+            if (command is null)
+            {
+                continue;
+            }
+
             command.NotifyCanExecuteChanged();
         }
     }
@@ -30,6 +35,11 @@ internal sealed class GraphEditorCommandStateNotifier
 
         foreach (var propertyName in propertyNames)
         {
+            if (string.IsNullOrWhiteSpace(propertyName))
+            {
+                continue;
+            }
+
             notifyPropertyChanged(propertyName);
         }
     }
