@@ -21,3 +21,15 @@ Typical consumers:
 - advanced hosts that need direct access to editor-state orchestration
 - integration layers that extend menus, commands, or inspector behavior
 
+Start here when a host needs deeper editor integration beyond the default Avalonia shell:
+
+- localization via `IGraphLocalizationProvider`
+- runtime node display state via `INodePresentationProvider`
+- host-owned menu actions via `IGraphContextMenuAugmentor`
+- typed host context access through `GraphHostContextExtensions`
+
+Reference material:
+
+- [`../../docs/host-integration.md`](../../docs/host-integration.md)
+- `tools/AsterGraph.HostSample`
+

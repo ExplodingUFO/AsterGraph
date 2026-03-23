@@ -123,6 +123,17 @@ Hosts can start from `GraphEditorCommandPermissions.Default` or `GraphEditorComm
 
 ## Host Integration
 
+For a deeper host-composition walkthrough, see:
+
+- [`docs/host-integration.md`](./docs/host-integration.md)
+
+That guide covers:
+
+- when `AsterGraph.Avalonia` alone is enough
+- when to also reference `AsterGraph.Editor`
+- how to wire localization, node presentation, style options, and host menu context together
+- how to use the typed host-context helper extensions safely
+
 Minimal host wiring example:
 
 ```csharp
@@ -190,6 +201,11 @@ Reference host sample:
 - `tools/AsterGraph.HostSample`
 - Run with:
   - `dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj`
+- The sample now explicitly demonstrates:
+  - `IGraphLocalizationProvider`
+  - `INodePresentationProvider`
+  - typed `ContextMenuContext` host access
+  - `GraphEditorStyleOptions`
 
 ## Type Compatibility
 

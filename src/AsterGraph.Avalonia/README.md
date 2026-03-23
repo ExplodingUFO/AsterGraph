@@ -6,6 +6,7 @@ Direct package reference:
 
 - Yes, this is the default UI package for hosts embedding the editor.
 - Pair it with `AsterGraph.Abstractions` by default.
+- Add `AsterGraph.Editor` only when the host needs direct control over localization, node presentation, menu augmentation, or editor behavior/state seams.
 
 This project intentionally contains:
 
@@ -23,3 +24,8 @@ This project intentionally does not own:
 - demo node content
 
 Those responsibilities live in `AsterGraph.Abstractions`, `AsterGraph.Core`, `AsterGraph.Editor`, and `AsterGraph.Demo`.
+
+Integration entry points:
+
+- [`../../docs/host-integration.md`](../../docs/host-integration.md)
+- `tools/AsterGraph.HostSample`
