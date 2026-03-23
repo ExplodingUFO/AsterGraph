@@ -1,3 +1,4 @@
+using System.Globalization;
 using AsterGraph.Abstractions.Catalog;
 using AsterGraph.Editor.ViewModels;
 
@@ -5,15 +6,31 @@ namespace AsterGraph.Editor.Services;
 
 internal sealed class GraphEditorInspectorProjection
 {
+    private readonly Func<string, string, string> _localizeText;
+    private readonly Func<string, string, object?[], string> _localizeFormat;
+
+    public GraphEditorInspectorProjection(
+        Func<string, string, string>? localizeText = null,
+        Func<string, string, object?[], string>? localizeFormat = null)
+    {
+        _localizeText = localizeText ?? LocalizeTextFallback;
+        _localizeFormat = localizeFormat ?? LocalizeFormatFallback;
+    }
+
     public string FormatPorts(IEnumerable<PortViewModel> ports)
     {
         var items = ports.ToList();
         if (items.Count == 0)
         {
-            return "None";
+            return _localizeText("editor.inspector.common.none", "None");
         }
 
-        return string.Join(Environment.NewLine, items.Select(port => $"{port.Label}  ·  {port.DataType}"));
+        return string.Join(
+            Environment.NewLine,
+            items.Select(port => _localizeFormat(
+                "editor.inspector.ports.item",
+                "{0}  ·  {1}",
+                [port.Label, port.DataType])));
     }
 
     public string FormatRelatedNodes(
@@ -36,14 +53,17 @@ internal sealed class GraphEditorInspectorProjection
                     return null;
                 }
 
-                return $"{relatedNode.Title}  ·  {relatedPort?.Label ?? relatedPortId}";
+                return _localizeFormat(
+                    "editor.inspector.relatedNodes.item",
+                    "{0}  ·  {1}",
+                    [relatedNode.Title, relatedPort?.Label ?? relatedPortId]);
             })
             .Where(line => !string.IsNullOrWhiteSpace(line))
             .Distinct(StringComparer.Ordinal)
             .ToList();
 
         return lines.Count == 0
-            ? "None"
+            ? _localizeText("editor.inspector.common.none", "None")
             : string.Join(Environment.NewLine, lines);
     }
 
@@ -51,12 +71,18 @@ internal sealed class GraphEditorInspectorProjection
     {
         if (selectedNode is null)
         {
-            return "No selection";
+            return _localizeText("editor.selection.none", "No selection");
         }
 
         return hasMultipleSelection
-            ? $"{selectedNodeCount} nodes selected  ·  primary {selectedNode.Title}"
-            : $"{selectedNode.InputCount} inputs  ·  {selectedNode.OutputCount} outputs";
+            ? _localizeFormat(
+                "editor.selection.multiple",
+                "{0} nodes selected  ·  primary {1}",
+                [selectedNodeCount, selectedNode.Title])
+            : _localizeFormat(
+                "editor.selection.single",
+                "{0} inputs  ·  {1} outputs",
+                [selectedNode.InputCount, selectedNode.OutputCount]);
     }
 
     public IReadOnlyList<NodeParameterViewModel> BuildSelectedNodeParameters(
@@ -106,4 +132,10 @@ internal sealed class GraphEditorInspectorProjection
 
         return parameters;
     }
+
+    private static string LocalizeTextFallback(string _, string fallback)
+        => fallback;
+
+    private static string LocalizeFormatFallback(string _, string fallback, object?[] arguments)
+        => string.Format(CultureInfo.InvariantCulture, fallback, arguments);
 }

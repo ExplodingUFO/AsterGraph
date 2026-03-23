@@ -85,7 +85,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     private readonly GraphFragmentWorkspaceService _fragmentWorkspaceService;
     private readonly GraphFragmentLibraryService _fragmentLibraryService;
     private readonly GraphEditorHistoryService _historyService;
-    private readonly GraphEditorInspectorProjection _inspectorProjection = new();
+    private readonly GraphEditorInspectorProjection _inspectorProjection;
     private readonly GraphEditorCommandStateNotifier _commandStateNotifier = new();
     private readonly IRelayCommand[] _computedStateCommands;
     private IGraphContextMenuAugmentor? _contextMenuAugmentor;
@@ -140,6 +140,9 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         _contextMenuAugmentor = contextMenuAugmentor;
         _nodePresentationProvider = nodePresentationProvider;
         _localizationProvider = localizationProvider;
+        _inspectorProjection = new GraphEditorInspectorProjection(
+            LocalizeText,
+            (key, fallback, arguments) => LocalizeFormat(key, fallback, arguments));
         StyleOptions = styleOptions ?? GraphEditorStyleOptions.Default;
         BehaviorOptions = ResolveBehaviorOptions(behaviorOptions, StyleOptions);
 
@@ -168,7 +171,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         DistributeHorizontallyCommand = new RelayCommand(DistributeSelectionHorizontally, () => CanDistributeSelection);
         DistributeVerticallyCommand = new RelayCommand(DistributeSelectionVertically, () => CanDistributeSelection);
         CancelPendingConnectionCommand = new RelayCommand(
-            () => CancelPendingConnection("Connection preview cancelled."),
+            () => CancelPendingConnection(StatusText("editor.status.connection.previewCancelled", "Connection preview cancelled.")),
             () => HasPendingConnection);
         AddNodeCommand = new RelayCommand<NodeTemplateViewModel>(
             template =>
@@ -443,7 +446,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     private PortViewModel? pendingSourcePort;
 
     [ObservableProperty]
-    private string statusMessage = "Ready";
+    private string statusMessage = string.Empty;
 
     [ObservableProperty]
     private bool isDirty;
@@ -708,7 +711,10 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         }
         catch (Exception exception)
         {
-            StatusMessage = $"Context menu augmentor failed: {exception.GetType().Name}. Using stock menu.";
+            SetStatus(
+                "editor.status.menu.augmentorFailed",
+                "Context menu augmentor failed: {0}. Using stock menu.",
+                exception.GetType().Name);
             return stockItems;
         }
     }
@@ -910,17 +916,17 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     {
         if (!BehaviorOptions.History.EnableUndoRedo || !CommandPermissions.History.AllowUndo)
         {
-            StatusMessage = "Undo is disabled by host permissions.";
+            SetStatus("editor.status.undo.disabledByPermissions", "Undo is disabled by host permissions.");
             return;
         }
 
         if (!_historyService.TryUndo(out var state) || state is null)
         {
-            StatusMessage = "No more undo steps.";
+            SetStatus("editor.status.undo.noMoreSteps", "No more undo steps.");
             return;
         }
 
-        RestoreHistoryState(state, "Undo applied.");
+        RestoreHistoryState(state, StatusText("editor.status.undo.applied", "Undo applied."));
     }
 
     /// <summary>
@@ -930,17 +936,17 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     {
         if (!BehaviorOptions.History.EnableUndoRedo || !CommandPermissions.History.AllowRedo)
         {
-            StatusMessage = "Redo is disabled by host permissions.";
+            SetStatus("editor.status.redo.disabledByPermissions", "Redo is disabled by host permissions.");
             return;
         }
 
         if (!_historyService.TryRedo(out var state) || state is null)
         {
-            StatusMessage = "No more redo steps.";
+            SetStatus("editor.status.redo.noMoreSteps", "No more redo steps.");
             return;
         }
 
-        RestoreHistoryState(state, "Redo applied.");
+        RestoreHistoryState(state, StatusText("editor.status.redo.applied", "Redo applied."));
     }
 
     /// <summary>
@@ -957,7 +963,10 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// </summary>
     /// <param name="updateStatus">是否同步更新状态文本。</param>
     public void ClearSelection(bool updateStatus = false)
-        => SetSelection([], null, updateStatus ? "Selection cleared." : null);
+        => SetSelection(
+            [],
+            null,
+            updateStatus ? StatusText("editor.status.selection.cleared", "Selection cleared.") : null);
 
     /// <summary>
     /// 将选择切换为单个节点。
@@ -968,11 +977,19 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     {
         if (node is null)
         {
-            SetSelection([], null, updateStatus ? "Selection cleared." : null);
+            SetSelection(
+                [],
+                null,
+                updateStatus ? StatusText("editor.status.selection.cleared", "Selection cleared.") : null);
             return;
         }
 
-        SetSelection([node], node, updateStatus && !HasPendingConnection ? $"Selected {node.Title}." : null);
+        SetSelection(
+            [node],
+            node,
+            updateStatus && !HasPendingConnection
+                ? StatusText("editor.status.selection.selectedNode", "Selected {0}.", node.Title)
+                : null);
     }
 
     /// <summary>
@@ -989,7 +1006,12 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
         var nextSelection = SelectedNodes.ToList();
         nextSelection.Add(node);
-        SetSelection(nextSelection, node, updateStatus ? $"Added {node.Title} to the selection." : null);
+        SetSelection(
+            nextSelection,
+            node,
+            updateStatus
+                ? StatusText("editor.status.selection.addedNode", "Added {0} to the selection.", node.Title)
+                : null);
     }
 
     /// <summary>
@@ -1002,12 +1024,22 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         var nextSelection = SelectedNodes.ToList();
         if (nextSelection.Remove(node))
         {
-            SetSelection(nextSelection, nextSelection.LastOrDefault(), updateStatus ? $"Removed {node.Title} from the selection." : null);
+            SetSelection(
+                nextSelection,
+                nextSelection.LastOrDefault(),
+                updateStatus
+                    ? StatusText("editor.status.selection.removedNode", "Removed {0} from the selection.", node.Title)
+                    : null);
             return;
         }
 
         nextSelection.Add(node);
-        SetSelection(nextSelection, node, updateStatus ? $"Added {node.Title} to the selection." : null);
+        SetSelection(
+            nextSelection,
+            node,
+            updateStatus
+                ? StatusText("editor.status.selection.addedNode", "Added {0} to the selection.", node.Title)
+                : null);
     }
 
     /// <summary>
@@ -1101,7 +1133,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         {
             if (updateStatus)
             {
-                StatusMessage = "Node movement is disabled by host permissions.";
+                SetStatus("editor.status.node.move.disabledByPermissions", "Node movement is disabled by host permissions.");
             }
 
             return false;
@@ -1112,7 +1144,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         {
             if (updateStatus)
             {
-                StatusMessage = $"Node '{nodeId}' was not found.";
+                SetStatus("editor.status.node.notFoundById", "Node '{0}' was not found.", nodeId);
             }
 
             return false;
@@ -1129,7 +1161,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
         if (updateStatus)
         {
-            MarkDirty($"Updated {node.Title} position.");
+            MarkDirty(StatusText("editor.status.node.position.updatedSingle", "Updated {0} position.", node.Title));
         }
         else
         {
@@ -1152,7 +1184,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         {
             if (updateStatus)
             {
-                StatusMessage = "Node movement is disabled by host permissions.";
+                SetStatus("editor.status.node.move.disabledByPermissions", "Node movement is disabled by host permissions.");
             }
 
             return 0;
@@ -1167,7 +1199,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         {
             if (updateStatus)
             {
-                StatusMessage = "No node positions were provided.";
+                SetStatus("editor.status.node.position.noneProvided", "No node positions were provided.");
             }
 
             return 0;
@@ -1196,7 +1228,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         {
             if (updateStatus)
             {
-                StatusMessage = "No matching nodes were found for the provided positions.";
+                SetStatus("editor.status.node.position.noMatches", "No matching nodes were found for the provided positions.");
             }
 
             return 0;
@@ -1205,8 +1237,8 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         if (updateStatus)
         {
             MarkDirty(appliedCount == 1
-                ? "Updated 1 node position."
-                : $"Updated {appliedCount} node positions.");
+                ? StatusText("editor.status.node.position.updatedOne", "Updated 1 node position.")
+                : StatusText("editor.status.node.position.updatedMany", "Updated {0} node positions.", appliedCount));
         }
         else
         {
@@ -1230,7 +1262,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     {
         if (!CommandPermissions.Nodes.AllowCreate)
         {
-            StatusMessage = "Node creation is disabled by host permissions.";
+            SetStatus("editor.status.node.create.disabledByPermissions", "Node creation is disabled by host permissions.");
             return;
         }
 
@@ -1246,7 +1278,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         ApplyNodePresentation(node);
         Nodes.Add(node);
         SelectSingleNode(node);
-        MarkDirty($"Added {template.Title}.");
+        MarkDirty(StatusText("editor.status.node.added", "Added {0}.", template.Title));
         NotifyDocumentChanged(GraphEditorDocumentChangeKind.NodesAdded, nodeIds: [node.Id]);
     }
 
@@ -1317,7 +1349,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
         if (updateStatus)
         {
-            StatusMessage = "Viewport reset.";
+            SetStatus("editor.status.viewport.reset", "Viewport reset.");
         }
 
         NotifyViewportChanged();
@@ -1332,7 +1364,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         {
             if (updateStatus)
             {
-                StatusMessage = "Nothing to fit yet.";
+                SetStatus("editor.status.viewport.fit.nothingToFit", "Nothing to fit yet.");
             }
 
             return;
@@ -1357,7 +1389,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
         if (updateStatus)
         {
-            StatusMessage = "Viewport fit to scene.";
+            SetStatus("editor.status.viewport.fit.applied", "Viewport fit to scene.");
         }
 
         NotifyViewportChanged();
@@ -1378,7 +1410,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
         if (!HasPendingConnection)
         {
-            StatusMessage = "Select an output port first.";
+            SetStatus("editor.status.connection.selectOutputPortFirst", "Select an output port first.");
             return;
         }
 
@@ -1392,7 +1424,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     {
         if (!CommandPermissions.Connections.AllowCreate)
         {
-            StatusMessage = "Connection creation is disabled by host permissions.";
+            SetStatus("editor.status.connection.create.disabledByPermissions", "Connection creation is disabled by host permissions.");
             return;
         }
 
@@ -1405,7 +1437,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
         if (sourcePort.Direction != PortDirection.Output)
         {
-            StatusMessage = "Only output ports can start a connection.";
+            SetStatus("editor.status.connection.onlyOutputCanStart", "Only output ports can start a connection.");
             return;
         }
 
@@ -1413,13 +1445,13 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             && PendingSourceNode?.Id == sourceNode.Id
             && PendingSourcePort?.Id == sourcePort.Id)
         {
-            CancelPendingConnection("Connection preview cancelled.");
+            CancelPendingConnection(StatusText("editor.status.connection.previewCancelled", "Connection preview cancelled."));
             return;
         }
 
         PendingSourceNode = sourceNode;
         PendingSourcePort = sourcePort;
-        StatusMessage = $"Connecting from {sourceNode.Title}.{sourcePort.Label}.";
+        SetStatus("editor.status.connection.connectingFrom", "Connecting from {0}.{1}.", sourceNode.Title, sourcePort.Label);
     }
 
     /// <summary>
@@ -1429,7 +1461,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     {
         if (!CommandPermissions.Connections.AllowCreate)
         {
-            StatusMessage = "Connection creation is disabled by host permissions.";
+            SetStatus("editor.status.connection.create.disabledByPermissions", "Connection creation is disabled by host permissions.");
             return;
         }
 
@@ -1445,14 +1477,14 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
         if (sourcePort.Direction != PortDirection.Output || targetPort.Direction != PortDirection.Input)
         {
-            StatusMessage = "Connections must go from an output port to an input port.";
+            SetStatus("editor.status.connection.directionMismatch", "Connections must go from an output port to an input port.");
             return;
         }
 
         var compatibility = _compatibilityService.Evaluate(sourcePort.TypeId, targetPort.TypeId);
         if (!compatibility.IsCompatible)
         {
-            StatusMessage = $"Incompatible connection: {sourcePort.TypeId} -> {targetPort.TypeId}.";
+            SetStatus("editor.status.connection.incompatible", "Incompatible connection: {0} -> {1}.", sourcePort.TypeId, targetPort.TypeId);
             return;
         }
 
@@ -1462,7 +1494,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
                 && connection.TargetNodeId == targetNode.Id
                 && connection.TargetPortId == targetPort.Id))
         {
-            CancelPendingConnection("That connection already exists.");
+            CancelPendingConnection(StatusText("editor.status.connection.alreadyExists", "That connection already exists."));
             return;
         }
 
@@ -1472,7 +1504,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
         if (replaced.Count > 0 && !CanReplaceIncomingConnection())
         {
-            StatusMessage = "Replacing an incoming connection requires delete or disconnect permission.";
+            SetStatus("editor.status.connection.replaceIncomingRequiresPermission", "Replacing an incoming connection requires delete or disconnect permission.");
             return;
         }
 
@@ -1495,8 +1527,8 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         PendingSourcePort = null;
         MarkDirty(
             compatibility.Kind == PortCompatibilityKind.ImplicitConversion
-                ? $"Connected {sourceNode.Title} to {targetNode.Title} with implicit conversion."
-                : $"Connected {sourceNode.Title} to {targetNode.Title}.");
+                ? StatusText("editor.status.connection.connectedWithImplicitConversion", "Connected {0} to {1} with implicit conversion.", sourceNode.Title, targetNode.Title)
+                : StatusText("editor.status.connection.connected", "Connected {0} to {1}.", sourceNode.Title, targetNode.Title));
         NotifyDocumentChanged(
             GraphEditorDocumentChangeKind.ConnectionsChanged,
             nodeIds: [sourceNode.Id, targetNode.Id],
@@ -1530,13 +1562,13 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     {
         if (!CommandPermissions.Nodes.AllowDelete)
         {
-            StatusMessage = "Node deletion is disabled by host permissions.";
+            SetStatus("editor.status.node.delete.disabledByPermissions", "Node deletion is disabled by host permissions.");
             return;
         }
 
         if (SelectedNodes.Count == 0)
         {
-            StatusMessage = "Select a node before deleting.";
+            SetStatus("editor.status.node.delete.selectNodeFirst", "Select a node before deleting.");
             return;
         }
 
@@ -1550,7 +1582,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
         if (removedConnections.Count > 0 && !CanRemoveConnectionsAsSideEffect())
         {
-            StatusMessage = "Deleting connected nodes requires delete or disconnect permission for the affected links.";
+            SetStatus("editor.status.node.delete.connectedRequiresPermission", "Deleting connected nodes requires delete or disconnect permission for the affected links.");
             return;
         }
 
@@ -1567,8 +1599,8 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         CancelPendingConnection();
         SetSelection([], null);
         MarkDirty(removedNodes.Count == 1
-            ? $"Deleted {removedNodes[0].Title}."
-            : $"Deleted {removedNodes.Count} nodes.");
+            ? StatusText("editor.status.node.deletedSingle", "Deleted {0}.", removedNodes[0].Title)
+            : StatusText("editor.status.node.deletedMultiple", "Deleted {0} nodes.", removedNodes.Count));
         NotifyDocumentChanged(
             GraphEditorDocumentChangeKind.NodesRemoved,
             nodeIds: removedNodes.Select(node => node.Id).ToList(),
@@ -1579,49 +1611,73 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// 将当前选择按左边缘对齐。
     /// </summary>
     public void AlignSelectionLeft()
-        => ApplySelectionLayout(NodeSelectionLayoutService.AlignLeft, minimumCount: 2, "Aligned selection left.");
+        => ApplySelectionLayout(
+            NodeSelectionLayoutService.AlignLeft,
+            minimumCount: 2,
+            StatusText("editor.status.layout.alignLeft", "Aligned selection left."));
 
     /// <summary>
     /// 将当前选择按水平中心对齐。
     /// </summary>
     public void AlignSelectionCenter()
-        => ApplySelectionLayout(NodeSelectionLayoutService.AlignCenter, minimumCount: 2, "Aligned selection center.");
+        => ApplySelectionLayout(
+            NodeSelectionLayoutService.AlignCenter,
+            minimumCount: 2,
+            StatusText("editor.status.layout.alignCenter", "Aligned selection center."));
 
     /// <summary>
     /// 将当前选择按右边缘对齐。
     /// </summary>
     public void AlignSelectionRight()
-        => ApplySelectionLayout(NodeSelectionLayoutService.AlignRight, minimumCount: 2, "Aligned selection right.");
+        => ApplySelectionLayout(
+            NodeSelectionLayoutService.AlignRight,
+            minimumCount: 2,
+            StatusText("editor.status.layout.alignRight", "Aligned selection right."));
 
     /// <summary>
     /// 将当前选择按上边缘对齐。
     /// </summary>
     public void AlignSelectionTop()
-        => ApplySelectionLayout(NodeSelectionLayoutService.AlignTop, minimumCount: 2, "Aligned selection top.");
+        => ApplySelectionLayout(
+            NodeSelectionLayoutService.AlignTop,
+            minimumCount: 2,
+            StatusText("editor.status.layout.alignTop", "Aligned selection top."));
 
     /// <summary>
     /// 将当前选择按垂直中心对齐。
     /// </summary>
     public void AlignSelectionMiddle()
-        => ApplySelectionLayout(NodeSelectionLayoutService.AlignMiddle, minimumCount: 2, "Aligned selection middle.");
+        => ApplySelectionLayout(
+            NodeSelectionLayoutService.AlignMiddle,
+            minimumCount: 2,
+            StatusText("editor.status.layout.alignMiddle", "Aligned selection middle."));
 
     /// <summary>
     /// 将当前选择按下边缘对齐。
     /// </summary>
     public void AlignSelectionBottom()
-        => ApplySelectionLayout(NodeSelectionLayoutService.AlignBottom, minimumCount: 2, "Aligned selection bottom.");
+        => ApplySelectionLayout(
+            NodeSelectionLayoutService.AlignBottom,
+            minimumCount: 2,
+            StatusText("editor.status.layout.alignBottom", "Aligned selection bottom."));
 
     /// <summary>
     /// 将当前选择按水平方向均匀分布。
     /// </summary>
     public void DistributeSelectionHorizontally()
-        => ApplySelectionLayout(NodeSelectionLayoutService.DistributeHorizontally, minimumCount: 3, "Distributed selection horizontally.");
+        => ApplySelectionLayout(
+            NodeSelectionLayoutService.DistributeHorizontally,
+            minimumCount: 3,
+            StatusText("editor.status.layout.distributeHorizontally", "Distributed selection horizontally."));
 
     /// <summary>
     /// 将当前选择按垂直方向均匀分布。
     /// </summary>
     public void DistributeSelectionVertically()
-        => ApplySelectionLayout(NodeSelectionLayoutService.DistributeVertically, minimumCount: 3, "Distributed selection vertically.");
+        => ApplySelectionLayout(
+            NodeSelectionLayoutService.DistributeVertically,
+            minimumCount: 3,
+            StatusText("editor.status.layout.distributeVertically", "Distributed selection vertically."));
 
     /// <summary>
     /// 按实例标识删除单个节点。
@@ -1630,7 +1686,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     {
         if (!CommandPermissions.Nodes.AllowDelete)
         {
-            StatusMessage = "Node deletion is disabled by host permissions.";
+            SetStatus("editor.status.node.delete.disabledByPermissions", "Node deletion is disabled by host permissions.");
             return;
         }
 
@@ -1647,7 +1703,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
         if (removedConnections.Count > 0 && !CanRemoveConnectionsAsSideEffect())
         {
-            StatusMessage = "Deleting a connected node requires delete or disconnect permission for the affected links.";
+            SetStatus("editor.status.node.delete.singleConnectedRequiresPermission", "Deleting a connected node requires delete or disconnect permission for the affected links.");
             return;
         }
 
@@ -1663,7 +1719,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         }
 
         SetSelection(remainingSelection, remainingSelection.LastOrDefault());
-        MarkDirty($"Deleted {node.Title}.");
+        MarkDirty(StatusText("editor.status.node.deletedSingle", "Deleted {0}.", node.Title));
         NotifyDocumentChanged(
             GraphEditorDocumentChangeKind.NodesRemoved,
             nodeIds: [node.Id],
@@ -1677,7 +1733,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     {
         if (!CommandPermissions.Nodes.AllowDuplicate)
         {
-            StatusMessage = "Node duplication is disabled by host permissions.";
+            SetStatus("editor.status.node.duplicate.disabledByPermissions", "Node duplication is disabled by host permissions.");
             return;
         }
 
@@ -1696,7 +1752,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         ApplyNodePresentation(duplicate);
         Nodes.Add(duplicate);
         SelectSingleNode(duplicate);
-        MarkDirty($"Duplicated {node.Title}.");
+        MarkDirty(StatusText("editor.status.node.duplicated", "Duplicated {0}.", node.Title));
         NotifyDocumentChanged(GraphEditorDocumentChangeKind.NodesAdded, nodeIds: [duplicate.Id]);
     }
 
@@ -1707,11 +1763,13 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     {
         if (!CommandPermissions.Connections.AllowDisconnect)
         {
-            StatusMessage = "Disconnect is disabled by host permissions.";
+            SetStatus("editor.status.connection.disconnect.disabledByPermissions", "Disconnect is disabled by host permissions.");
             return;
         }
 
-        RemoveConnections(connection => connection.TargetNodeId == nodeId, "Disconnected incoming links.");
+        RemoveConnections(
+            connection => connection.TargetNodeId == nodeId,
+            StatusText("editor.status.connection.disconnect.incoming", "Disconnected incoming links."));
     }
 
     /// <summary>
@@ -1721,11 +1779,13 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     {
         if (!CommandPermissions.Connections.AllowDisconnect)
         {
-            StatusMessage = "Disconnect is disabled by host permissions.";
+            SetStatus("editor.status.connection.disconnect.disabledByPermissions", "Disconnect is disabled by host permissions.");
             return;
         }
 
-        RemoveConnections(connection => connection.SourceNodeId == nodeId, "Disconnected outgoing links.");
+        RemoveConnections(
+            connection => connection.SourceNodeId == nodeId,
+            StatusText("editor.status.connection.disconnect.outgoing", "Disconnected outgoing links."));
     }
 
     /// <summary>
@@ -1735,13 +1795,13 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     {
         if (!CommandPermissions.Connections.AllowDisconnect)
         {
-            StatusMessage = "Disconnect is disabled by host permissions.";
+            SetStatus("editor.status.connection.disconnect.disabledByPermissions", "Disconnect is disabled by host permissions.");
             return;
         }
 
         RemoveConnections(
             connection => connection.SourceNodeId == nodeId || connection.TargetNodeId == nodeId,
-            "Disconnected all links.");
+            StatusText("editor.status.connection.disconnect.all", "Disconnected all links."));
     }
 
     /// <summary>
@@ -1751,7 +1811,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     {
         if (!CommandPermissions.Connections.AllowDisconnect)
         {
-            StatusMessage = "Disconnect is disabled by host permissions.";
+            SetStatus("editor.status.connection.disconnect.disabledByPermissions", "Disconnect is disabled by host permissions.");
             return;
         }
 
@@ -1759,7 +1819,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             connection =>
                 (connection.SourceNodeId == nodeId && connection.SourcePortId == portId)
                 || (connection.TargetNodeId == nodeId && connection.TargetPortId == portId),
-            "Disconnected port links.");
+            StatusText("editor.status.connection.disconnect.port", "Disconnected port links."));
     }
 
     /// <summary>
@@ -1769,7 +1829,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     {
         if (!CommandPermissions.Connections.AllowDelete)
         {
-            StatusMessage = "Connection deletion is disabled by host permissions.";
+            SetStatus("editor.status.connection.delete.disabledByPermissions", "Connection deletion is disabled by host permissions.");
             return;
         }
 
@@ -1780,7 +1840,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         }
 
         Connections.Remove(connection);
-        MarkDirty($"Deleted connection {connection.Label}.");
+        MarkDirty(StatusText("editor.status.connection.deleted", "Deleted connection {0}.", connection.Label));
         NotifyDocumentChanged(GraphEditorDocumentChangeKind.ConnectionsChanged, connectionIds: [connection.Id]);
     }
 
@@ -1803,7 +1863,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
         PanX = (_viewportWidth / 2) - ((node.X + (node.Width / 2)) * Zoom);
         PanY = (_viewportHeight / 2) - ((node.Y + (node.Height / 2)) * Zoom);
-        StatusMessage = $"Centered on {node.Title}.";
+        SetStatus("editor.status.viewport.centeredOnNode", "Centered on {0}.", node.Title);
     }
 
     /// <summary>
@@ -1821,7 +1881,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
         if (updateStatus)
         {
-            StatusMessage = "Viewport centered from mini map.";
+            SetStatus("editor.status.viewport.centeredFromMiniMap", "Viewport centered from mini map.");
         }
 
         NotifyViewportChanged();
@@ -1855,19 +1915,19 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         if ((minimumCount >= 3 && !CommandPermissions.Layout.AllowDistribute)
             || (minimumCount < 3 && !CommandPermissions.Layout.AllowAlign))
         {
-            StatusMessage = "Layout tools are disabled by host permissions.";
+            SetStatus("editor.status.layout.disabledByPermissions", "Layout tools are disabled by host permissions.");
             return;
         }
 
         var selectedNodes = SelectedNodes.ToList();
         if (selectedNodes.Count < minimumCount)
         {
-            StatusMessage = minimumCount switch
+            SetStatus(minimumCount switch
             {
-                2 => "Select at least two nodes for alignment.",
-                3 => "Select at least three nodes for distribution.",
-                _ => "Selection is too small for that operation.",
-            };
+                2 => ("editor.status.layout.selectAtLeastTwo", "Select at least two nodes for alignment."),
+                3 => ("editor.status.layout.selectAtLeastThree", "Select at least three nodes for distribution."),
+                _ => ("editor.status.layout.selectionTooSmall", "Selection is too small for that operation."),
+            });
             return;
         }
 
@@ -1911,13 +1971,13 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     {
         if (!CommandPermissions.Nodes.AllowCreate)
         {
-            StatusMessage = "Fragment insertion is disabled by host permissions.";
+            SetStatus("editor.status.fragment.insert.disabledByPermissions", "Fragment insertion is disabled by host permissions.");
             return false;
         }
 
         if (fragment.Connections.Count > 0 && !CommandPermissions.Connections.AllowCreate)
         {
-            StatusMessage = "This fragment contains connections, but connection creation is disabled by host permissions.";
+            SetStatus("editor.status.fragment.insert.connectionCreateDisabled", "This fragment contains connections, but connection creation is disabled by host permissions.");
             return false;
         }
 
@@ -1976,8 +2036,8 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
         SetSelection(pastedNodes, primaryNode ?? pastedNodes[^1]);
         MarkDirty(pastedNodes.Count == 1
-            ? $"{actionPrefix} {pastedNodes[0].Title}."
-            : $"{actionPrefix} {pastedNodes.Count} nodes.");
+            ? StatusText("editor.status.fragment.action.single", "{0} {1}.", actionPrefix, pastedNodes[0].Title)
+            : StatusText("editor.status.fragment.action.multiple", "{0} {1} nodes.", actionPrefix, pastedNodes.Count));
         return true;
     }
 
@@ -2003,14 +2063,14 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     {
         if (!CommandPermissions.Clipboard.AllowCopy)
         {
-            StatusMessage = "Copy is disabled by host permissions.";
+            SetStatus("editor.status.clipboard.copy.disabledByPermissions", "Copy is disabled by host permissions.");
             return;
         }
 
         var fragment = CreateSelectionFragment();
         if (fragment is null)
         {
-            StatusMessage = "Select at least one node before copying.";
+            SetStatus("editor.status.clipboard.copy.selectNodeFirst", "Select at least one node before copying.");
             return;
         }
 
@@ -2022,9 +2082,10 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         }
 
         RaiseComputedPropertyChanges();
-        StatusMessage = fragment.Nodes.Count == 1
-            ? $"Copied {fragment.Nodes[0].Title}."
-            : $"Copied {fragment.Nodes.Count} nodes.";
+        SetStatus(
+            fragment.Nodes.Count == 1
+                ? ("editor.status.clipboard.copy.single", "Copied {0}.", new object?[] { fragment.Nodes[0].Title })
+                : ("editor.status.clipboard.copy.multiple", "Copied {0} nodes.", new object?[] { fragment.Nodes.Count }));
     }
 
     /// <summary>
@@ -2034,20 +2095,20 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     {
         if (!CommandPermissions.Fragments.AllowExport)
         {
-            StatusMessage = "Fragment export is disabled by host permissions.";
+            SetStatus("editor.status.fragment.export.disabledByPermissions", "Fragment export is disabled by host permissions.");
             return;
         }
 
         var fragment = CreateSelectionFragment();
         if (fragment is null)
         {
-            StatusMessage = "Select at least one node before exporting a fragment.";
+            SetStatus("editor.status.fragment.export.selectNodeFirst", "Select at least one node before exporting a fragment.");
             return;
         }
 
         _fragmentWorkspaceService.Save(fragment);
         RaiseComputedPropertyChanges();
-        StatusMessage = $"Exported fragment to {_fragmentWorkspaceService.FragmentPath}.";
+        SetStatus("editor.status.fragment.export.savedToPath", "Exported fragment to {0}.", _fragmentWorkspaceService.FragmentPath);
         FragmentExported?.Invoke(
             this,
             new GraphEditorFragmentEventArgs(
@@ -2063,27 +2124,27 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     {
         if (!CommandPermissions.Fragments.AllowTemplateManagement || !CommandPermissions.Fragments.AllowExport)
         {
-            StatusMessage = "Template export is disabled by host permissions.";
+            SetStatus("editor.status.fragmentTemplate.export.disabledByPermissions", "Template export is disabled by host permissions.");
             return;
         }
 
         if (!BehaviorOptions.Fragments.EnableFragmentLibrary)
         {
-            StatusMessage = "Fragment template library is disabled.";
+            SetStatus("editor.status.fragmentTemplate.library.disabled", "Fragment template library is disabled.");
             return;
         }
 
         var fragment = CreateSelectionFragment();
         if (fragment is null)
         {
-            StatusMessage = "Select at least one node before exporting a fragment template.";
+            SetStatus("editor.status.fragmentTemplate.export.selectNodeFirst", "Select at least one node before exporting a fragment template.");
             return;
         }
 
         var templateName = SelectedNode?.Title ?? $"selection-{fragment.Nodes.Count}";
         var path = _fragmentLibraryService.SaveTemplate(fragment, templateName);
         RefreshFragmentTemplates();
-        StatusMessage = $"Exported fragment template to {path}.";
+        SetStatus("editor.status.fragmentTemplate.export.savedToPath", "Exported fragment template to {0}.", path);
         FragmentExported?.Invoke(
             this,
             new GraphEditorFragmentEventArgs(
@@ -2103,19 +2164,19 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
         if (!CommandPermissions.Fragments.AllowExport)
         {
-            StatusMessage = "Fragment export is disabled by host permissions.";
+            SetStatus("editor.status.fragment.export.disabledByPermissions", "Fragment export is disabled by host permissions.");
             return false;
         }
 
         var fragment = CreateSelectionFragment();
         if (fragment is null)
         {
-            StatusMessage = "Select at least one node before exporting a fragment.";
+            SetStatus("editor.status.fragment.export.selectNodeFirst", "Select at least one node before exporting a fragment.");
             return false;
         }
 
         _fragmentWorkspaceService.Save(fragment, path);
-        StatusMessage = $"Exported fragment to {path}.";
+        SetStatus("editor.status.fragment.export.savedToPath", "Exported fragment to {0}.", path);
         FragmentExported?.Invoke(
             this,
             new GraphEditorFragmentEventArgs(
@@ -2135,14 +2196,14 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     {
         if (!CommandPermissions.Clipboard.AllowPaste)
         {
-            StatusMessage = "Paste is disabled by host permissions.";
+            SetStatus("editor.status.clipboard.paste.disabledByPermissions", "Paste is disabled by host permissions.");
             return;
         }
 
         var fragment = await GetBestAvailableClipboardFragmentAsync();
         if (fragment is null || fragment.Nodes.Count == 0)
         {
-            StatusMessage = "Nothing copied yet.";
+            SetStatus("editor.status.clipboard.paste.nothingCopied", "Nothing copied yet.");
             return;
         }
 
@@ -2159,13 +2220,13 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     {
         if (!CommandPermissions.Fragments.AllowImport)
         {
-            StatusMessage = "Fragment import is disabled by host permissions.";
+            SetStatus("editor.status.fragment.import.disabledByPermissions", "Fragment import is disabled by host permissions.");
             return;
         }
 
         if (!_fragmentWorkspaceService.Exists())
         {
-            StatusMessage = "No exported fragment file is available yet.";
+            SetStatus("editor.status.fragment.import.noExportedFile", "No exported fragment file is available yet.");
             return;
         }
 
@@ -2175,7 +2236,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
         if (!PasteFragment(fragment, "Imported"))
         {
-            StatusMessage = "Fragment file did not contain any nodes.";
+            SetStatus("editor.status.fragment.import.noNodesInFile", "Fragment file did not contain any nodes.");
         }
         else
         {
@@ -2195,19 +2256,19 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     {
         if (!CommandPermissions.Fragments.AllowClearWorkspaceFragment)
         {
-            StatusMessage = "Fragment clearing is disabled by host permissions.";
+            SetStatus("editor.status.fragment.clear.disabledByPermissions", "Fragment clearing is disabled by host permissions.");
             return;
         }
 
         if (!_fragmentWorkspaceService.Exists())
         {
-            StatusMessage = "No exported fragment file is available yet.";
+            SetStatus("editor.status.fragment.import.noExportedFile", "No exported fragment file is available yet.");
             return;
         }
 
         _fragmentWorkspaceService.Delete();
         RaiseComputedPropertyChanges();
-        StatusMessage = "Cleared the saved fragment file.";
+        SetStatus("editor.status.fragment.clear.cleared", "Cleared the saved fragment file.");
     }
 
     /// <summary>
@@ -2217,13 +2278,13 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     {
         if (!CommandPermissions.Fragments.AllowTemplateManagement || !CommandPermissions.Fragments.AllowImport)
         {
-            StatusMessage = "Template import is disabled by host permissions.";
+            SetStatus("editor.status.fragmentTemplate.import.disabledByPermissions", "Template import is disabled by host permissions.");
             return;
         }
 
         if (SelectedFragmentTemplate is null)
         {
-            StatusMessage = "Select a fragment template first.";
+            SetStatus("editor.status.fragmentTemplate.selectTemplateFirst", "Select a fragment template first.");
             return;
         }
 
@@ -2237,20 +2298,23 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     {
         if (!CommandPermissions.Fragments.AllowTemplateManagement)
         {
-            StatusMessage = "Template deletion is disabled by host permissions.";
+            SetStatus("editor.status.fragmentTemplate.delete.disabledByPermissions", "Template deletion is disabled by host permissions.");
             return;
         }
 
         if (SelectedFragmentTemplate is null)
         {
-            StatusMessage = "Select a fragment template first.";
+            SetStatus("editor.status.fragmentTemplate.selectTemplateFirst", "Select a fragment template first.");
             return;
         }
 
         var deletedPath = SelectedFragmentTemplate.Path;
         _fragmentLibraryService.DeleteTemplate(deletedPath);
         RefreshFragmentTemplates();
-        StatusMessage = $"Deleted fragment template {System.IO.Path.GetFileNameWithoutExtension(deletedPath)}.";
+        SetStatus(
+            "editor.status.fragmentTemplate.deleted",
+            "Deleted fragment template {0}.",
+            Path.GetFileNameWithoutExtension(deletedPath));
     }
 
     /// <summary>
@@ -2264,13 +2328,13 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
         if (!CommandPermissions.Fragments.AllowImport)
         {
-            StatusMessage = "Fragment import is disabled by host permissions.";
+            SetStatus("editor.status.fragment.import.disabledByPermissions", "Fragment import is disabled by host permissions.");
             return false;
         }
 
         if (!_fragmentWorkspaceService.Exists(path))
         {
-            StatusMessage = $"Fragment file '{path}' was not found.";
+            SetStatus("editor.status.fragment.import.fileNotFound", "Fragment file '{0}' was not found.", path);
             return false;
         }
 
@@ -2298,7 +2362,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     {
         if (!CommandPermissions.Workspace.AllowSave)
         {
-            StatusMessage = "Saving is disabled by host permissions.";
+            SetStatus("editor.status.workspace.save.disabledByPermissions", "Saving is disabled by host permissions.");
             return;
         }
 
@@ -2307,13 +2371,13 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             _workspaceService.Save(CreateDocumentSnapshot());
             _lastSavedDocumentSignature = CreateDocumentSignature();
             UpdateDirtyState();
-            StatusMessage = $"Saved snapshot to {WorkspacePath}.";
+            SetStatus("editor.status.workspace.save.savedToPath", "Saved snapshot to {0}.", WorkspacePath);
             NotifyDocumentChanged(GraphEditorDocumentChangeKind.WorkspaceSaved, statusMessage: StatusMessage);
             RaiseComputedPropertyChanges();
         }
         catch (Exception exception)
         {
-            StatusMessage = $"Save failed: {exception.Message}";
+            SetStatus("editor.status.workspace.save.failed", "Save failed: {0}", exception.Message);
         }
     }
 
@@ -2325,7 +2389,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     {
         if (!CommandPermissions.Workspace.AllowLoad)
         {
-            StatusMessage = "Loading is disabled by host permissions.";
+            SetStatus("editor.status.workspace.load.disabledByPermissions", "Loading is disabled by host permissions.");
             return false;
         }
 
@@ -2333,12 +2397,12 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         {
             if (!_workspaceService.Exists())
             {
-                StatusMessage = "No saved snapshot yet. Save once to create one.";
+                SetStatus("editor.status.workspace.load.noSnapshot", "No saved snapshot yet. Save once to create one.");
                 return false;
             }
 
             var document = _workspaceService.Load();
-            LoadDocument(document, "Workspace loaded from disk.", markClean: true);
+            LoadDocument(document, StatusText("editor.status.workspace.load.loadedFromDisk", "Workspace loaded from disk."), markClean: true);
             CancelPendingConnection();
             ClearSelection();
             ResetView(updateStatus: false);
@@ -2347,7 +2411,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         }
         catch (Exception exception)
         {
-            StatusMessage = $"Load failed: {exception.Message}";
+            SetStatus("editor.status.workspace.load.failed", "Load failed: {0}", exception.Message);
             return false;
         }
     }
@@ -2469,6 +2533,24 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     private string LocalizeFormat(string key, string fallback, params object?[] arguments)
         => string.Format(CultureInfo.InvariantCulture, LocalizeText(key, fallback), arguments);
+
+    private string StatusText(string key, string fallback)
+        => LocalizeText(key, fallback);
+
+    private string StatusText(string key, string fallback, params object?[] arguments)
+        => LocalizeFormat(key, fallback, arguments);
+
+    private void SetStatus(string key, string fallback)
+        => StatusMessage = StatusText(key, fallback);
+
+    private void SetStatus(string key, string fallback, params object?[] arguments)
+        => StatusMessage = StatusText(key, fallback, arguments);
+
+    private void SetStatus((string Key, string Fallback) status)
+        => SetStatus(status.Key, status.Fallback);
+
+    private void SetStatus((string Key, string Fallback, object?[] Arguments) status)
+        => SetStatus(status.Key, status.Fallback, status.Arguments);
 
     private string CreateNodeId(string templateKey)
         => CreateUniqueId(Nodes.Select(node => node.Id), $"{templateKey}-");
@@ -2712,7 +2794,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         var removed = Connections.Where(predicate).ToList();
         if (removed.Count == 0)
         {
-            StatusMessage = "No matching connections to remove.";
+            SetStatus("editor.status.connection.remove.noMatches", "No matching connections to remove.");
             return;
         }
 
@@ -2789,7 +2871,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
         if (!CanEditNodeParameters)
         {
-            StatusMessage = "Parameter editing is disabled by host permissions.";
+            SetStatus("editor.status.parameter.edit.disabledByPermissions", "Parameter editing is disabled by host permissions.");
             return;
         }
 
@@ -2799,7 +2881,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         }
 
         MarkDirty(SelectedNodes.Count == 1
-            ? $"Updated {SelectedNode!.Title} / {parameter.DisplayName}."
-            : $"Updated {SelectedNodes.Count} nodes / {parameter.DisplayName}.");
+            ? StatusText("editor.status.parameter.updatedSingle", "Updated {0} / {1}.", SelectedNode!.Title, parameter.DisplayName)
+            : StatusText("editor.status.parameter.updatedMultiple", "Updated {0} nodes / {1}.", SelectedNodes.Count, parameter.DisplayName));
     }
 }
