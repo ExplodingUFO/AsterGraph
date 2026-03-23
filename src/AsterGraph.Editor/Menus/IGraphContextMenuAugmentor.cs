@@ -13,7 +13,7 @@ public interface IGraphContextMenuAugmentor
     /// <param name="editor">当前编辑器视图模型。</param>
     /// <param name="context">当前右键菜单上下文。</param>
     /// <param name="stockItems">编辑器默认生成的菜单项。</param>
-    /// <returns>最终菜单项集合。</returns>
+    /// <returns>最终菜单项集合；宿主通常应以 <paramref name="stockItems"/> 为基础追加自身业务项。</returns>
     IReadOnlyList<MenuItemDescriptor> Augment(
         GraphEditorViewModel editor,
         ContextMenuContext context,

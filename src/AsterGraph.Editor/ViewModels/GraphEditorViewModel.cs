@@ -486,9 +486,20 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     public IReadOnlyList<MenuItemDescriptor> BuildContextMenu(ContextMenuContext context)
     {
         var stockItems = _contextMenuBuilder.Build(context);
-        return ContextMenuAugmentor is null
-            ? stockItems
-            : ContextMenuAugmentor.Augment(this, context, stockItems);
+        if (ContextMenuAugmentor is null)
+        {
+            return stockItems;
+        }
+
+        try
+        {
+            return ContextMenuAugmentor.Augment(this, context, stockItems);
+        }
+        catch (Exception exception)
+        {
+            StatusMessage = $"Context menu augmentor failed: {exception.GetType().Name}. Using stock menu.";
+            return stockItems;
+        }
     }
 
     public void UpdateViewportSize(double width, double height)

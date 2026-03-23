@@ -10,12 +10,14 @@
   </PropertyGroup>
 
   <ItemGroup Condition="'$(UsePackedAsterGraphPackages)' == 'true'">
-    <PackageReference Include="AsterGraph.Abstractions" Version="0.1.0-preview.1" />
-    <PackageReference Include="AsterGraph.Avalonia" Version="0.1.0-preview.1" />
+    <PackageReference Include="AsterGraph.Abstractions" Version="$(Version)" />
+    <PackageReference Include="AsterGraph.Avalonia" Version="$(Version)" />
+    <PackageReference Include="AsterGraph.Editor" Version="$(Version)" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(UsePackedAsterGraphPackages)' != 'true'">
     <ProjectReference Include="..\..\src\AsterGraph.Abstractions\AsterGraph.Abstractions.csproj" />
     <ProjectReference Include="..\..\src\AsterGraph.Avalonia\AsterGraph.Avalonia.csproj" />
+    <ProjectReference Include="..\..\src\AsterGraph.Editor\AsterGraph.Editor.csproj" />
   </ItemGroup>
 </Project>

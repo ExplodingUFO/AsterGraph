@@ -121,6 +121,70 @@ This keeps menu customization in the editor layer and supports nested host menus
 For host-side permission control, `GraphEditorBehaviorOptions` now also carries a grouped `GraphEditorCommandPermissions` object.
 Hosts can start from `GraphEditorCommandPermissions.Default` or `GraphEditorCommandPermissions.ReadOnly`, then selectively override workspace, node, connection, clipboard, fragment, layout, history, and host-extension permissions.
 
+## Host Integration
+
+Minimal host wiring example:
+
+```csharp
+using AsterGraph.Core.Compatibility;
+using AsterGraph.Editor.Configuration;
+using AsterGraph.Editor.ViewModels;
+using AsterGraph.Editor.Menus;
+
+var permissions = GraphEditorCommandPermissions.ReadOnly with
+{
+    Host = new HostCommandPermissions
+    {
+        AllowContextMenuExtensions = true,
+    },
+};
+
+var behavior = GraphEditorBehaviorOptions.Default with
+{
+    Commands = permissions,
+};
+
+var editor = new GraphEditorViewModel(
+    document,
+    catalog,
+    new DefaultPortCompatibilityService(),
+    behaviorOptions: behavior,
+    contextMenuAugmentor: new MyMenuAugmentor());
+```
+
+Minimal menu augmentor example:
+
+```csharp
+public sealed class MyMenuAugmentor : IGraphContextMenuAugmentor
+{
+    public IReadOnlyList<MenuItemDescriptor> Augment(
+        GraphEditorViewModel editor,
+        ContextMenuContext context,
+        IReadOnlyList<MenuItemDescriptor> stockItems)
+    {
+        if (context.TargetKind != ContextMenuTargetKind.Node
+            || string.IsNullOrWhiteSpace(context.ClickedNodeId))
+        {
+            return stockItems;
+        }
+
+        var items = stockItems.ToList();
+        items.Add(MenuItemDescriptor.Separator("host-sep"));
+        items.Add(new MenuItemDescriptor("host-preview", "Preview"));
+        return items;
+    }
+}
+```
+
+Minimal layout persistence example:
+
+```csharp
+var positions = editor.GetNodePositions();
+editor.TryGetNodePosition("node-001", out var snapshot);
+editor.TrySetNodePosition("node-001", new GraphPoint(120, 240));
+editor.SetNodePositions(positions);
+```
+
 ## Type Compatibility
 
 AsterGraph uses:
