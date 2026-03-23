@@ -11,6 +11,7 @@ using AsterGraph.Abstractions.Compatibility;
 using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Abstractions.Styling;
 using AsterGraph.Core.Models;
+using AsterGraph.Core.Serialization;
 using AsterGraph.Editor.Geometry;
 using AsterGraph.Editor.Menus;
 using AsterGraph.Editor.Models;
@@ -32,9 +33,13 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     private readonly IPortCompatibilityService _compatibilityService;
     private readonly GraphWorkspaceService _workspaceService;
     private readonly GraphSelectionClipboard _selectionClipboard;
+    private readonly GraphEditorHistoryService _historyService;
     private IGraphTextClipboardBridge? _textClipboardBridge;
     private readonly GraphContextMenuBuilder _contextMenuBuilder;
     private bool _suspendDirtyTracking;
+    private bool _suspendHistoryTracking;
+    private string? _lastSavedDocumentSignature;
+    private GraphEditorHistoryState? _pendingInteractionState;
     private double _viewportWidth;
     private double _viewportHeight;
 
@@ -49,12 +54,15 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         _compatibilityService = compatibilityService ?? throw new ArgumentNullException(nameof(compatibilityService));
         _workspaceService = workspaceService ?? new GraphWorkspaceService();
         _selectionClipboard = new GraphSelectionClipboard();
+        _historyService = new GraphEditorHistoryService();
         StyleOptions = styleOptions ?? GraphEditorStyleOptions.Default;
 
         SaveCommand = new RelayCommand(SaveWorkspace);
         LoadCommand = new RelayCommand(() => LoadWorkspace());
         FitViewCommand = new RelayCommand(() => FitToViewport(_viewportWidth, _viewportHeight), CanFitView);
         ResetViewCommand = new RelayCommand(() => ResetView());
+        UndoCommand = new RelayCommand(Undo, () => CanUndo);
+        RedoCommand = new RelayCommand(Redo, () => CanRedo);
         DeleteSelectionCommand = new RelayCommand(DeleteSelection, () => CanDeleteSelection);
         CopySelectionCommand = new AsyncRelayCommand(CopySelectionAsync, () => CanCopySelection);
         PasteCommand = new AsyncRelayCommand(PasteSelectionAsync, () => CanPaste);
@@ -124,6 +132,10 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     public IRelayCommand FitViewCommand { get; }
 
     public IRelayCommand ResetViewCommand { get; }
+
+    public IRelayCommand UndoCommand { get; }
+
+    public IRelayCommand RedoCommand { get; }
 
     public IRelayCommand DeleteSelectionCommand { get; }
 
@@ -214,6 +226,10 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     private bool isDirty;
 
     public bool HasPendingConnection => PendingSourceNode is not null && PendingSourcePort is not null;
+
+    public bool CanUndo => _historyService.CanUndo;
+
+    public bool CanRedo => _historyService.CanRedo;
 
     public bool HasSelection => SelectedNodes.Count > 0;
 
@@ -308,6 +324,66 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         RaiseComputedPropertyChanges();
     }
 
+    /// <summary>
+    /// 开始记录一次连续交互的历史基线，通常用于节点拖动这类高频操作。
+    /// </summary>
+    public void BeginHistoryInteraction()
+    {
+        _pendingInteractionState ??= CaptureHistoryState();
+    }
+
+    /// <summary>
+    /// 结束一次连续交互，并在状态发生变化时写入撤销栈。
+    /// </summary>
+    /// <param name="status">交互完成后显示的状态文本。</param>
+    public void CompleteHistoryInteraction(string status)
+    {
+        if (_pendingInteractionState is null)
+        {
+            return;
+        }
+
+        var previousState = _pendingInteractionState;
+        _pendingInteractionState = null;
+        if (string.Equals(previousState.Signature, CreateDocumentSignature(), StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        StatusMessage = status;
+        UpdateDirtyState();
+        PushCurrentHistoryState();
+        RaiseComputedPropertyChanges();
+    }
+
+    /// <summary>
+    /// 撤销到上一个已记录的图编辑状态。
+    /// </summary>
+    public void Undo()
+    {
+        if (!_historyService.TryUndo(out var state) || state is null)
+        {
+            StatusMessage = "No more undo steps.";
+            return;
+        }
+
+        RestoreHistoryState(state, "Undo applied.");
+    }
+
+    /// <summary>
+    /// 重做到下一个已记录的图编辑状态。
+    /// </summary>
+    public void Redo()
+    {
+        if (!_historyService.TryRedo(out var state) || state is null)
+        {
+            StatusMessage = "No more redo steps.";
+            return;
+        }
+
+        RestoreHistoryState(state, "Redo applied.");
+    }
+
     public void SelectNode(NodeViewModel? node)
     {
         SelectSingleNode(node);
@@ -325,6 +401,31 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         }
 
         SetSelection([node], node, updateStatus && !HasPendingConnection ? $"Selected {node.Title}." : null);
+    }
+
+    public void AddNodeToSelection(NodeViewModel node, bool updateStatus = true)
+    {
+        if (SelectedNodes.Contains(node))
+        {
+            return;
+        }
+
+        var nextSelection = SelectedNodes.ToList();
+        nextSelection.Add(node);
+        SetSelection(nextSelection, node, updateStatus ? $"Added {node.Title} to the selection." : null);
+    }
+
+    public void ToggleNodeSelection(NodeViewModel node, bool updateStatus = true)
+    {
+        var nextSelection = SelectedNodes.ToList();
+        if (nextSelection.Remove(node))
+        {
+            SetSelection(nextSelection, nextSelection.LastOrDefault(), updateStatus ? $"Removed {node.Title} from the selection." : null);
+            return;
+        }
+
+        nextSelection.Add(node);
+        SetSelection(nextSelection, node, updateStatus ? $"Added {node.Title} to the selection." : null);
     }
 
     public void SetSelection(IReadOnlyList<NodeViewModel> nodes, NodeViewModel? primaryNode = null, string? status = null)
@@ -425,9 +526,10 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         {
             MarkDirty($"Updated {node.Title} position.");
         }
-        else if (!IsDirty)
+        else
         {
-            IsDirty = true;
+            UpdateDirtyState();
+            PushCurrentHistoryState();
             RaiseComputedPropertyChanges();
         }
 
@@ -491,9 +593,10 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
                 ? "Updated 1 node position."
                 : $"Updated {appliedCount} node positions.");
         }
-        else if (!IsDirty)
+        else
         {
-            IsDirty = true;
+            UpdateDirtyState();
+            PushCurrentHistoryState();
             RaiseComputedPropertyChanges();
         }
 
@@ -1080,7 +1183,8 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         try
         {
             _workspaceService.Save(CreateDocumentSnapshot());
-            IsDirty = false;
+            _lastSavedDocumentSignature = CreateDocumentSignature();
+            UpdateDirtyState();
             StatusMessage = $"Saved snapshot to {WorkspacePath}.";
             RaiseComputedPropertyChanges();
         }
@@ -1127,6 +1231,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     private void LoadDocument(GraphDocument document, string status, bool markClean)
     {
         _suspendDirtyTracking = true;
+        _suspendHistoryTracking = true;
 
         foreach (var node in Nodes.ToList())
         {
@@ -1160,16 +1265,29 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         SelectedNodes.Clear();
         SelectedNode = null;
         SelectedNodeParameters.Clear();
+        _pendingInteractionState = null;
         IsDirty = !markClean;
         StatusMessage = status;
+        _suspendHistoryTracking = false;
         _suspendDirtyTracking = false;
+
+        var historyState = CaptureHistoryState();
+        if (!_suspendHistoryTracking)
+        {
+            _historyService.Reset(historyState);
+        }
+
+        _lastSavedDocumentSignature = markClean
+            ? historyState.Signature
+            : _lastSavedDocumentSignature;
         RaiseComputedPropertyChanges();
     }
 
     private void MarkDirty(string status)
     {
-        IsDirty = true;
         StatusMessage = status;
+        UpdateDirtyState();
+        PushCurrentHistoryState();
         RaiseComputedPropertyChanges();
     }
 
@@ -1214,6 +1332,62 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         node.X = position.X;
         node.Y = position.Y;
         return true;
+    }
+
+    private GraphEditorHistoryState CaptureHistoryState()
+    {
+        var document = CreateDocumentSnapshot();
+        return new GraphEditorHistoryState(
+            document,
+            SelectedNodes.Select(node => node.Id).ToList(),
+            SelectedNode?.Id,
+            CreateDocumentSignature(document));
+    }
+
+    private void RestoreHistoryState(GraphEditorHistoryState state, string status)
+    {
+        _suspendHistoryTracking = true;
+        LoadDocument(state.Document, status, markClean: false);
+
+        var restoredSelection = state.SelectedNodeIds
+            .Select(FindNode)
+            .Where(node => node is not null)
+            .Cast<NodeViewModel>()
+            .ToList();
+        var primaryNode = !string.IsNullOrWhiteSpace(state.PrimarySelectedNodeId)
+            ? restoredSelection.FirstOrDefault(node => node.Id == state.PrimarySelectedNodeId)
+            : restoredSelection.LastOrDefault();
+
+        SetSelection(restoredSelection, primaryNode, status);
+        _suspendHistoryTracking = false;
+        UpdateDirtyState();
+        RaiseComputedPropertyChanges();
+    }
+
+    private void PushCurrentHistoryState()
+    {
+        if (_suspendHistoryTracking)
+        {
+            return;
+        }
+
+        _historyService.Push(CaptureHistoryState());
+    }
+
+    private string CreateDocumentSignature()
+        => CreateDocumentSignature(CreateDocumentSnapshot());
+
+    private static string CreateDocumentSignature(GraphDocument document)
+        => GraphDocumentSerializer.Serialize(document);
+
+    private void UpdateDirtyState()
+    {
+        if (_suspendDirtyTracking)
+        {
+            return;
+        }
+
+        IsDirty = !string.Equals(CreateDocumentSignature(), _lastSavedDocumentSignature, StringComparison.Ordinal);
     }
 
     partial void OnZoomChanged(double value) => RaiseComputedPropertyChanges();

@@ -8,10 +8,12 @@ Current capabilities:
 
 - draggable, selectable graph nodes
 - left-drag marquee selection for multi-node editing
+- `Shift` append selection and `Ctrl` toggle selection on node click
 - selection-aware right-click menu for batch actions
 - zoom and pan canvas interaction
 - connection rendering and pending connection preview
 - graph save/load
+- `Ctrl+Z` / `Ctrl+Y` undo and redo graph edits
 - selection deletion with `Delete`
 - selection copy/paste with `Ctrl+C` / `Ctrl+V`
 - batch alignment and distribution for multi-selection
@@ -137,6 +139,12 @@ Batch selection tools currently include:
 - align left, center, right
 - align top, middle, bottom
 - distribute horizontally or vertically
+
+Hosts can also opt into drag-assist behavior through `CanvasStyleOptions`:
+
+- `EnableGridSnapping`
+- `EnableAlignmentGuides`
+- `SnapTolerance`
 
 ## Style Configuration
 

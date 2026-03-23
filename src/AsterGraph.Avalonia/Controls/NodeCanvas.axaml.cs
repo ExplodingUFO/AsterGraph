@@ -1,5 +1,6 @@
 using System.Collections.Specialized;
 using System.ComponentModel;
+using Avalonia.Controls.Shapes;
 using Avalonia;
 using Avalonia.Automation;
 using Avalonia.Controls;
@@ -16,6 +17,7 @@ using AsterGraph.Core.Models;
 using AsterGraph.Editor.Geometry;
 using AsterGraph.Editor.Menus;
 using AsterGraph.Editor.ViewModels;
+using AsterGraph.Editor.Viewport;
 
 namespace AsterGraph.Avalonia.Controls;
 
@@ -38,10 +40,14 @@ public partial class NodeCanvas : UserControl
     private Canvas? _overlayLayer;
     private GridBackground? _backgroundGrid;
     private Border? _selectionAdorner;
+    private Border? _verticalGuideAdorner;
+    private Border? _horizontalGuideAdorner;
     private readonly GraphContextMenuPresenter _contextMenuPresenter = new();
     private NodeViewModel? _dragNode;
     private bool _isPanning;
     private bool _isMarqueeSelecting;
+    private KeyModifiers _selectionModifiers;
+    private List<NodeViewModel> _selectionBaselineNodes = [];
     private Point _lastPointerPosition;
     private Point? _pointerScreenPosition;
     private Point? _selectionStartScreenPosition;
@@ -109,6 +115,8 @@ public partial class NodeCanvas : UserControl
         _nodeLayer = this.FindControl<Canvas>("NodeLayer");
         _overlayLayer = this.FindControl<Canvas>("OverlayLayer");
         _backgroundGrid = this.FindControl<GridBackground>("BackgroundGrid");
+        _verticalGuideAdorner = this.FindControl<Border>("VerticalGuideAdorner");
+        _horizontalGuideAdorner = this.FindControl<Border>("HorizontalGuideAdorner");
         _selectionAdorner = this.FindControl<Border>("SelectionAdorner");
     }
 
@@ -139,6 +147,7 @@ public partial class NodeCanvas : UserControl
         }
 
         ApplySelectionAdornerStyle();
+        ApplyGuideAdornerStyle();
         RebuildScene();
     }
 
@@ -566,6 +575,22 @@ public partial class NodeCanvas : UserControl
             return;
         }
 
+        if (args.KeyModifiers.HasFlag(KeyModifiers.Control))
+        {
+            Focus();
+            ViewModel.ToggleNodeSelection(node);
+            args.Handled = true;
+            return;
+        }
+
+        if (args.KeyModifiers.HasFlag(KeyModifiers.Shift))
+        {
+            Focus();
+            ViewModel.AddNodeToSelection(node);
+            args.Handled = true;
+            return;
+        }
+
         Focus();
         if (node.IsSelected && ViewModel.HasMultipleSelection)
         {
@@ -587,8 +612,10 @@ public partial class NodeCanvas : UserControl
         _selectionStartScreenPosition = null;
         _isMarqueeSelecting = false;
         HideSelectionAdorner();
+        HideGuideAdorners();
         _lastPointerPosition = args.GetPosition(this);
         _pointerScreenPosition = _lastPointerPosition;
+        ViewModel.BeginHistoryInteraction();
         args.Pointer.Capture(this);
         args.Handled = true;
     }
@@ -613,6 +640,7 @@ public partial class NodeCanvas : UserControl
             _selectionStartScreenPosition = null;
             _isMarqueeSelecting = false;
             HideSelectionAdorner();
+            HideGuideAdorners();
             args.Pointer.Capture(this);
             args.Handled = true;
             return;
@@ -630,7 +658,10 @@ public partial class NodeCanvas : UserControl
             _isPanning = false;
             _selectionStartScreenPosition = _lastPointerPosition;
             _isMarqueeSelecting = false;
+            _selectionModifiers = args.KeyModifiers;
+            _selectionBaselineNodes = ViewModel.SelectedNodes.ToList();
             HideSelectionAdorner();
+            HideGuideAdorners();
             args.Pointer.Capture(this);
             args.Handled = true;
         }
@@ -670,7 +701,8 @@ public partial class NodeCanvas : UserControl
 
             if (_dragNode is not null)
             {
-                ViewModel.MoveNode(_dragNode, delta.X / ViewModel.Zoom, delta.Y / ViewModel.Zoom);
+                var adjustedDelta = ApplyDragAssist(_dragNode, delta.X / ViewModel.Zoom, delta.Y / ViewModel.Zoom);
+                ViewModel.MoveNode(_dragNode, adjustedDelta.X, adjustedDelta.Y);
             }
             else if (_isPanning)
             {
@@ -701,11 +733,18 @@ public partial class NodeCanvas : UserControl
 
             _selectionStartScreenPosition = null;
             _isMarqueeSelecting = false;
+            _selectionBaselineNodes = [];
             HideSelectionAdorner();
+        }
+
+        if (_dragNode is not null)
+        {
+            ViewModel?.CompleteHistoryInteraction(ViewModel.HasMultipleSelection ? "Moved selection." : $"Moved {_dragNode.Title}.");
         }
 
         _dragNode = null;
         _isPanning = false;
+        HideGuideAdorners();
         args.Pointer.Capture(null);
     }
 
@@ -780,6 +819,7 @@ public partial class NodeCanvas : UserControl
                 break;
             case nameof(GraphEditorViewModel.StyleOptions):
                 ApplySelectionAdornerStyle();
+                ApplyGuideAdornerStyle();
                 break;
             case nameof(GraphEditorViewModel.PendingSourceNode):
             case nameof(GraphEditorViewModel.PendingSourcePort):
@@ -945,6 +985,22 @@ public partial class NodeCanvas : UserControl
         _selectionAdorner.CornerRadius = new CornerRadius(style.SelectionCornerRadius);
     }
 
+    private void ApplyGuideAdornerStyle()
+    {
+        var style = ViewModel?.StyleOptions.Canvas ?? GraphEditorStyleOptions.Default.Canvas;
+        if (_verticalGuideAdorner is not null)
+        {
+            _verticalGuideAdorner.Background = BrushFactory.Solid(style.GuideHex, style.GuideOpacity);
+            _verticalGuideAdorner.Width = style.GuideThickness;
+        }
+
+        if (_horizontalGuideAdorner is not null)
+        {
+            _horizontalGuideAdorner.Background = BrushFactory.Solid(style.GuideHex, style.GuideOpacity);
+            _horizontalGuideAdorner.Height = style.GuideThickness;
+        }
+    }
+
     private void UpdateMarqueeSelection(Point currentScreenPosition, bool finalize)
     {
         if (ViewModel is null || _overlayLayer is null || _selectionAdorner is null || _selectionStartScreenPosition is null)
@@ -966,7 +1022,8 @@ public partial class NodeCanvas : UserControl
 
         var worldStart = ViewModel.ScreenToWorld(new GraphPoint(start.X, start.Y));
         var worldEnd = ViewModel.ScreenToWorld(new GraphPoint(currentScreenPosition.X, currentScreenPosition.Y));
-        var nodes = ViewModel.GetNodesInRectangle(worldStart, worldEnd).ToList();
+        var hitNodes = ViewModel.GetNodesInRectangle(worldStart, worldEnd).ToList();
+        var nodes = ApplySelectionModifiers(hitNodes);
         var primaryNode = nodes.LastOrDefault();
 
         ViewModel.SetSelection(
@@ -992,6 +1049,227 @@ public partial class NodeCanvas : UserControl
         _selectionAdorner.IsVisible = false;
         _selectionAdorner.Width = 0;
         _selectionAdorner.Height = 0;
+    }
+
+    private IReadOnlyList<NodeViewModel> ApplySelectionModifiers(IReadOnlyList<NodeViewModel> hitNodes)
+    {
+        if (ViewModel is null)
+        {
+            return hitNodes;
+        }
+
+        if (_selectionModifiers.HasFlag(KeyModifiers.Control))
+        {
+            var toggled = _selectionBaselineNodes.ToList();
+            foreach (var node in hitNodes)
+            {
+                if (!toggled.Remove(node))
+                {
+                    toggled.Add(node);
+                }
+            }
+
+            return toggled;
+        }
+
+        if (_selectionModifiers.HasFlag(KeyModifiers.Shift))
+        {
+            return _selectionBaselineNodes
+                .Concat(hitNodes)
+                .Distinct()
+                .ToList();
+        }
+
+        return hitNodes;
+    }
+
+    private GraphPoint ApplyDragAssist(NodeViewModel dragNode, double deltaX, double deltaY)
+    {
+        if (ViewModel is null)
+        {
+            return new GraphPoint(deltaX, deltaY);
+        }
+
+        var style = ViewModel.StyleOptions.Canvas;
+        HideGuideAdorners();
+
+        if (!style.EnableGridSnapping && !style.EnableAlignmentGuides)
+        {
+            return new GraphPoint(deltaX, deltaY);
+        }
+
+        var movingNodes = dragNode.IsSelected && ViewModel.HasMultipleSelection
+            ? ViewModel.SelectedNodes.ToList()
+            : [dragNode];
+        var movingBounds = GetSelectionBounds(movingNodes);
+        var proposedBounds = new NodeBounds(
+            movingBounds.X + deltaX,
+            movingBounds.Y + deltaY,
+            movingBounds.Width,
+            movingBounds.Height);
+
+        var tolerance = style.SnapTolerance / Math.Max(ViewModel.Zoom, 0.001);
+        var snapDeltaX = 0d;
+        var snapDeltaY = 0d;
+        double? guideWorldX = null;
+        double? guideWorldY = null;
+        var bestXDelta = double.PositiveInfinity;
+        var bestYDelta = double.PositiveInfinity;
+
+        if (style.EnableGridSnapping)
+        {
+            var snappedX = Math.Round(proposedBounds.X / style.PrimaryGridSpacing) * style.PrimaryGridSpacing;
+            var snappedY = Math.Round(proposedBounds.Y / style.PrimaryGridSpacing) * style.PrimaryGridSpacing;
+            var gridDeltaX = snappedX - proposedBounds.X;
+            var gridDeltaY = snappedY - proposedBounds.Y;
+
+            if (Math.Abs(gridDeltaX) <= tolerance)
+            {
+                snapDeltaX = gridDeltaX;
+                bestXDelta = Math.Abs(gridDeltaX);
+            }
+
+            if (Math.Abs(gridDeltaY) <= tolerance)
+            {
+                snapDeltaY = gridDeltaY;
+                bestYDelta = Math.Abs(gridDeltaY);
+            }
+        }
+
+        if (style.EnableAlignmentGuides)
+        {
+            var movingNodeIds = movingNodes.Select(node => node.Id).ToHashSet(StringComparer.Ordinal);
+            foreach (var candidate in ViewModel.Nodes.Where(node => !movingNodeIds.Contains(node.Id)))
+            {
+                EvaluateGuideAxis(
+                    proposedBounds.X,
+                    proposedBounds.X + (proposedBounds.Width / 2),
+                    proposedBounds.X + proposedBounds.Width,
+                    candidate.X,
+                    candidate.X + (candidate.Width / 2),
+                    candidate.X + candidate.Width,
+                    tolerance,
+                    ref snapDeltaX,
+                    ref bestXDelta,
+                    ref guideWorldX);
+
+                EvaluateGuideAxis(
+                    proposedBounds.Y,
+                    proposedBounds.Y + (proposedBounds.Height / 2),
+                    proposedBounds.Y + proposedBounds.Height,
+                    candidate.Y,
+                    candidate.Y + (candidate.Height / 2),
+                    candidate.Y + candidate.Height,
+                    tolerance,
+                    ref snapDeltaY,
+                    ref bestYDelta,
+                    ref guideWorldY);
+            }
+        }
+
+        ShowGuideAdorners(guideWorldX, guideWorldY);
+        return new GraphPoint(deltaX + snapDeltaX, deltaY + snapDeltaY);
+    }
+
+    private NodeBounds GetSelectionBounds(IReadOnlyList<NodeViewModel> nodes)
+    {
+        var left = nodes.Min(node => node.X);
+        var top = nodes.Min(node => node.Y);
+        var right = nodes.Max(node => node.X + node.Width);
+        var bottom = nodes.Max(node => node.Y + node.Height);
+        return new NodeBounds(left, top, right - left, bottom - top);
+    }
+
+    private void ShowGuideAdorners(double? worldX, double? worldY)
+    {
+        if (ViewModel is null || _overlayLayer is null)
+        {
+            return;
+        }
+
+        if (_verticalGuideAdorner is not null)
+        {
+            if (worldX is double x)
+            {
+                var screenX = WorldToScreen(x, 0).X;
+                _verticalGuideAdorner.IsVisible = true;
+                _verticalGuideAdorner.Height = Bounds.Height;
+                Canvas.SetLeft(_verticalGuideAdorner, screenX - (_verticalGuideAdorner.Width / 2));
+                Canvas.SetTop(_verticalGuideAdorner, 0);
+            }
+            else
+            {
+                _verticalGuideAdorner.IsVisible = false;
+            }
+        }
+
+        if (_horizontalGuideAdorner is not null)
+        {
+            if (worldY is double y)
+            {
+                var screenY = WorldToScreen(0, y).Y;
+                _horizontalGuideAdorner.IsVisible = true;
+                _horizontalGuideAdorner.Width = Bounds.Width;
+                Canvas.SetLeft(_horizontalGuideAdorner, 0);
+                Canvas.SetTop(_horizontalGuideAdorner, screenY - (_horizontalGuideAdorner.Height / 2));
+            }
+            else
+            {
+                _horizontalGuideAdorner.IsVisible = false;
+            }
+        }
+    }
+
+    private void HideGuideAdorners()
+    {
+        if (_verticalGuideAdorner is not null)
+        {
+            _verticalGuideAdorner.IsVisible = false;
+        }
+
+        if (_horizontalGuideAdorner is not null)
+        {
+            _horizontalGuideAdorner.IsVisible = false;
+        }
+    }
+
+    private GraphPoint WorldToScreen(double x, double y)
+        => ViewportMath.WorldToScreen(
+            new ViewportState(ViewModel?.Zoom ?? 1, ViewModel?.PanX ?? 0, ViewModel?.PanY ?? 0),
+            new GraphPoint(x, y));
+
+    private static void EvaluateGuideAxis(
+        double movingStart,
+        double movingCenter,
+        double movingEnd,
+        double candidateStart,
+        double candidateCenter,
+        double candidateEnd,
+        double tolerance,
+        ref double snapDelta,
+        ref double bestDeltaMagnitude,
+        ref double? guideWorld)
+    {
+        var pairs = new (double moving, double candidate)[]
+        {
+            (movingStart, candidateStart),
+            (movingCenter, candidateCenter),
+            (movingEnd, candidateEnd),
+        };
+
+        foreach (var pair in pairs)
+        {
+            var delta = pair.candidate - pair.moving;
+            var magnitude = Math.Abs(delta);
+            if (magnitude > tolerance || magnitude >= bestDeltaMagnitude)
+            {
+                continue;
+            }
+
+            snapDelta = delta;
+            bestDeltaMagnitude = magnitude;
+            guideWorld = pair.candidate;
+        }
     }
 
     private sealed record NodeVisual(

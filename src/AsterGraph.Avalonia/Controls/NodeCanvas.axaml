@@ -16,6 +16,10 @@
     </Grid>
     <Canvas x:Name="OverlayLayer"
             IsHitTestVisible="False">
+      <Border x:Name="VerticalGuideAdorner"
+              IsVisible="False" />
+      <Border x:Name="HorizontalGuideAdorner"
+              IsVisible="False" />
       <Border x:Name="SelectionAdorner"
               IsVisible="False" />
     </Canvas>

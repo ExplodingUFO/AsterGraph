@@ -18,6 +18,18 @@ public sealed record CanvasStyleOptions
 
     public double SecondaryGridSpacing { get; init; } = 192;
 
+    public bool EnableGridSnapping { get; init; }
+
+    public bool EnableAlignmentGuides { get; init; }
+
+    public double SnapTolerance { get; init; } = 14;
+
+    public string GuideHex { get; init; } = "#9EF6C9";
+
+    public double GuideOpacity { get; init; } = 0.9;
+
+    public double GuideThickness { get; init; } = 1.2;
+
     public string SelectionBorderHex { get; init; } = "#7FE7D7";
 
     public string SelectionFillHex { get; init; } = "#7FE7D7";

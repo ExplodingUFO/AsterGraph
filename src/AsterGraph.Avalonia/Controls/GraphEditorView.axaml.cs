@@ -126,6 +126,29 @@ public partial class GraphEditorView : UserControl
             return;
         }
 
+        if (args.KeyModifiers.HasFlag(KeyModifiers.Control)
+            && (args.Key == Key.Y || (args.Key == Key.Z && args.KeyModifiers.HasFlag(KeyModifiers.Shift))))
+        {
+            if (Editor.RedoCommand.CanExecute(null))
+            {
+                Editor.RedoCommand.Execute(null);
+            }
+
+            args.Handled = true;
+            return;
+        }
+
+        if (args.KeyModifiers.HasFlag(KeyModifiers.Control) && args.Key == Key.Z)
+        {
+            if (Editor.UndoCommand.CanExecute(null))
+            {
+                Editor.UndoCommand.Execute(null);
+            }
+
+            args.Handled = true;
+            return;
+        }
+
         if (args.KeyModifiers.HasFlag(KeyModifiers.Control) && args.Key == Key.C)
         {
             if (Editor.CopySelectionCommand.CanExecute(null))

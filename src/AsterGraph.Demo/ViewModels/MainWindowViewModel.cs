@@ -25,6 +25,12 @@ public partial class MainWindowViewModel : ViewModelBase
             {
                 Thickness = 3.4,
             },
+            Canvas = GraphEditorStyleOptions.Default.Canvas with
+            {
+                EnableGridSnapping = true,
+                EnableAlignmentGuides = true,
+                SnapTolerance = 18,
+            },
             ContextMenu = GraphEditorStyleOptions.Default.ContextMenu with
             {
                 BackgroundHex = "#0E1824",
