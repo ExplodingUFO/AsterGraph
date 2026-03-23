@@ -44,16 +44,7 @@ public partial class NodeCanvas : UserControl
     private Border? _verticalGuideAdorner;
     private Border? _horizontalGuideAdorner;
     private readonly GraphContextMenuPresenter _contextMenuPresenter = new();
-    private NodeViewModel? _dragNode;
-    private bool _isPanning;
-    private bool _isMarqueeSelecting;
-    private KeyModifiers _selectionModifiers;
-    private List<NodeViewModel> _selectionBaselineNodes = [];
-    private Point? _dragStartScreenPosition;
-    private DragSession? _dragSession;
-    private Point _lastPointerPosition;
-    private Point? _pointerScreenPosition;
-    private Point? _selectionStartScreenPosition;
+    private readonly NodeCanvasInteractionSession _interactionSession = new();
 
     /// <summary>
     /// 初始化节点画布。
@@ -484,10 +475,13 @@ public partial class NodeCanvas : UserControl
         if (ViewModel.HasPendingConnection
             && ViewModel.PendingSourceNode is not null
             && ViewModel.PendingSourcePort is not null
-            && _pointerScreenPosition is not null)
+            && _interactionSession.PointerScreenPosition is not null)
         {
             var source = GetPortAnchor(ViewModel.PendingSourceNode, ViewModel.PendingSourcePort);
-            var end = ViewModel.ScreenToWorld(new GraphPoint(_pointerScreenPosition.Value.X, _pointerScreenPosition.Value.Y));
+            var end = ViewModel.ScreenToWorld(
+                new GraphPoint(
+                    _interactionSession.PointerScreenPosition.Value.X,
+                    _interactionSession.PointerScreenPosition.Value.Y));
 
             DrawConnection(source, end, new ConnectionViewModel(
                 "pending",
@@ -615,19 +609,13 @@ public partial class NodeCanvas : UserControl
             _nodeLayer.Children.Add(visual.Border);
         }
 
-        _dragNode = node;
-        _isPanning = false;
-        _selectionStartScreenPosition = null;
-        _isMarqueeSelecting = false;
         HideSelectionAdorner();
         HideGuideAdorners();
-        _dragStartScreenPosition = args.GetPosition(this);
-        _lastPointerPosition = _dragStartScreenPosition.Value;
-        _pointerScreenPosition = _dragStartScreenPosition;
+        var dragStart = args.GetPosition(this);
         var dragNodes = node.IsSelected && ViewModel.HasMultipleSelection
             ? ViewModel.SelectedNodes.ToList()
             : [node];
-        _dragSession = CreateDragSession(dragNodes);
+        _interactionSession.BeginNodeDrag(node, dragStart, CreateDragSession(dragNodes));
         ViewModel.BeginHistoryInteraction();
         args.Pointer.Capture(this);
         args.Handled = true;
@@ -643,17 +631,13 @@ public partial class NodeCanvas : UserControl
         Focus();
 
         var props = args.GetCurrentPoint(this).Properties;
-        _lastPointerPosition = args.GetPosition(this);
-        _pointerScreenPosition = _lastPointerPosition;
+        var current = args.GetPosition(this);
+        _interactionSession.UpdateLastPointerPosition(current);
+        _interactionSession.UpdatePointerPosition(current);
 
         if (props.IsMiddleButtonPressed)
         {
-            _isPanning = true;
-            _dragNode = null;
-            _dragStartScreenPosition = null;
-            _dragSession = null;
-            _selectionStartScreenPosition = null;
-            _isMarqueeSelecting = false;
+            _interactionSession.BeginPanning(current);
             HideSelectionAdorner();
             HideGuideAdorners();
             args.Pointer.Capture(this);
@@ -669,12 +653,7 @@ public partial class NodeCanvas : UserControl
                 RenderConnections();
             }
 
-            _dragNode = null;
-            _isPanning = false;
-            _selectionStartScreenPosition = _lastPointerPosition;
-            _isMarqueeSelecting = false;
-            _selectionModifiers = args.KeyModifiers;
-            _selectionBaselineNodes = ViewModel.SelectedNodes.ToList();
+            _interactionSession.BeginCanvasSelection(current, args.KeyModifiers, ViewModel.SelectedNodes.ToList());
             HideSelectionAdorner();
             HideGuideAdorners();
             args.Pointer.Capture(this);
@@ -690,18 +669,13 @@ public partial class NodeCanvas : UserControl
         }
 
         var current = args.GetPosition(this);
-        _pointerScreenPosition = current;
+        _interactionSession.UpdatePointerPosition(current);
 
-        if (_selectionStartScreenPosition is not null && !_isPanning && _dragNode is null)
+        if (_interactionSession.SelectionStartScreenPosition is not null
+            && !_interactionSession.IsPanning
+            && _interactionSession.DragNode is null)
         {
-            var marqueeDelta = current - _selectionStartScreenPosition.Value;
-            if (!_isMarqueeSelecting
-                && (Math.Abs(marqueeDelta.X) >= SelectionDragThreshold || Math.Abs(marqueeDelta.Y) >= SelectionDragThreshold))
-            {
-                _isMarqueeSelecting = true;
-            }
-
-            if (_isMarqueeSelecting)
+            if (_interactionSession.TryBeginMarqueeSelection(current, SelectionDragThreshold))
             {
                 UpdateMarqueeSelection(current, finalize: false);
                 args.Handled = true;
@@ -709,24 +683,24 @@ public partial class NodeCanvas : UserControl
             }
         }
 
-        if (_isPanning || _dragNode is not null)
+        if (_interactionSession.IsPanning || _interactionSession.DragNode is not null)
         {
-            if (_dragNode is not null)
+            if (_interactionSession.DragNode is not null)
             {
-                if (_dragSession is not null && _dragStartScreenPosition is not null)
+                if (_interactionSession.DragSession is not null && _interactionSession.DragStartScreenPosition is not null)
                 {
-                    var rawDelta = current - _dragStartScreenPosition.Value;
+                    var rawDelta = current - _interactionSession.DragStartScreenPosition.Value;
                     var adjustedDelta = ApplyDragAssist(
-                        _dragSession,
+                        _interactionSession.DragSession.Value,
                         rawDelta.X / ViewModel.Zoom,
                         rawDelta.Y / ViewModel.Zoom);
-                    ViewModel.ApplyDragOffset(_dragSession.OriginPositions, adjustedDelta.X, adjustedDelta.Y);
+                    ViewModel.ApplyDragOffset(_interactionSession.DragSession.Value.OriginPositions, adjustedDelta.X, adjustedDelta.Y);
                 }
             }
-            else if (_isPanning)
+            else if (_interactionSession.IsPanning)
             {
-                var delta = current - _lastPointerPosition;
-                _lastPointerPosition = current;
+                var delta = current - _interactionSession.LastPointerPosition;
+                _interactionSession.UpdateLastPointerPosition(current);
                 ViewModel.PanBy(delta.X, delta.Y);
             }
 
@@ -741,9 +715,9 @@ public partial class NodeCanvas : UserControl
 
     private void HandlePointerReleased(object? sender, PointerReleasedEventArgs args)
     {
-        if (_selectionStartScreenPosition is not null)
+        if (_interactionSession.SelectionStartScreenPosition is not null)
         {
-            if (_isMarqueeSelecting)
+            if (_interactionSession.IsMarqueeSelecting)
             {
                 UpdateMarqueeSelection(args.GetPosition(this), finalize: true);
             }
@@ -752,21 +726,18 @@ public partial class NodeCanvas : UserControl
                 ViewModel?.ClearSelection();
             }
 
-            _selectionStartScreenPosition = null;
-            _isMarqueeSelecting = false;
-            _selectionBaselineNodes = [];
             HideSelectionAdorner();
         }
 
-        if (_dragNode is not null)
+        if (_interactionSession.DragNode is not null)
         {
-            ViewModel?.CompleteHistoryInteraction(ViewModel.HasMultipleSelection ? "Moved selection." : $"Moved {_dragNode.Title}.");
+            ViewModel?.CompleteHistoryInteraction(
+                ViewModel.HasMultipleSelection
+                    ? "Moved selection."
+                    : $"Moved {_interactionSession.DragNode.Title}.");
         }
 
-        _dragNode = null;
-        _dragStartScreenPosition = null;
-        _dragSession = null;
-        _isPanning = false;
+        _interactionSession.ResetAfterPointerRelease();
         HideGuideAdorners();
         args.Pointer.Capture(null);
     }
@@ -780,7 +751,7 @@ public partial class NodeCanvas : UserControl
 
         var factor = args.Delta.Y >= 0 ? 1.12 : 1 / 1.12;
         var point = args.GetPosition(this);
-        _pointerScreenPosition = point;
+        _interactionSession.UpdatePointerPosition(point);
         ViewModel.ZoomAt(factor, new GraphPoint(point.X, point.Y));
         args.Handled = true;
     }
@@ -1044,12 +1015,15 @@ public partial class NodeCanvas : UserControl
 
     private void UpdateMarqueeSelection(Point currentScreenPosition, bool finalize)
     {
-        if (ViewModel is null || _overlayLayer is null || _selectionAdorner is null || _selectionStartScreenPosition is null)
+        if (ViewModel is null
+            || _overlayLayer is null
+            || _selectionAdorner is null
+            || _interactionSession.SelectionStartScreenPosition is null)
         {
             return;
         }
 
-        var start = _selectionStartScreenPosition.Value;
+        var start = _interactionSession.SelectionStartScreenPosition.Value;
         var left = Math.Min(start.X, currentScreenPosition.X);
         var top = Math.Min(start.Y, currentScreenPosition.Y);
         var width = Math.Abs(currentScreenPosition.X - start.X);
@@ -1099,9 +1073,9 @@ public partial class NodeCanvas : UserControl
             return hitNodes;
         }
 
-        if (_selectionModifiers.HasFlag(KeyModifiers.Control))
+        if (_interactionSession.SelectionModifiers.HasFlag(KeyModifiers.Control))
         {
-            var toggled = _selectionBaselineNodes.ToList();
+            var toggled = _interactionSession.SelectionBaselineNodes.ToList();
             foreach (var node in hitNodes)
             {
                 if (!toggled.Remove(node))
@@ -1113,9 +1087,9 @@ public partial class NodeCanvas : UserControl
             return toggled;
         }
 
-        if (_selectionModifiers.HasFlag(KeyModifiers.Shift))
+        if (_interactionSession.SelectionModifiers.HasFlag(KeyModifiers.Shift))
         {
-            return _selectionBaselineNodes
+            return _interactionSession.SelectionBaselineNodes
                 .Concat(hitNodes)
                 .Distinct()
                 .ToList();
@@ -1124,7 +1098,7 @@ public partial class NodeCanvas : UserControl
         return hitNodes;
     }
 
-    private GraphPoint ApplyDragAssist(DragSession dragSession, double deltaX, double deltaY)
+    private GraphPoint ApplyDragAssist(NodeCanvasDragSession dragSession, double deltaX, double deltaY)
     {
         if (ViewModel is null)
         {
@@ -1173,14 +1147,14 @@ public partial class NodeCanvas : UserControl
         return new NodeBounds(left, top, right - left, bottom - top);
     }
 
-    private DragSession CreateDragSession(IReadOnlyList<NodeViewModel> nodes)
+    private NodeCanvasDragSession CreateDragSession(IReadOnlyList<NodeViewModel> nodes)
     {
         var originPositions = nodes.ToDictionary(
             node => node.Id,
             node => new GraphPoint(node.X, node.Y),
             StringComparer.Ordinal);
 
-        return new DragSession(nodes, originPositions, GetSelectionBounds(nodes));
+        return new NodeCanvasDragSession(nodes, originPositions, GetSelectionBounds(nodes));
     }
 
     private void ShowGuideAdorners(double? worldX, double? worldY)
@@ -1246,8 +1220,4 @@ public partial class NodeCanvas : UserControl
         Border Header,
         IReadOnlyDictionary<string, Border> PortAnchors);
 
-    private sealed record DragSession(
-        IReadOnlyList<NodeViewModel> Nodes,
-        IReadOnlyDictionary<string, GraphPoint> OriginPositions,
-        NodeBounds OriginBounds);
 }
