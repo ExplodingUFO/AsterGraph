@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Linq;
 using System.Text.Json;
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
@@ -14,19 +15,18 @@ internal static class NodeParameterValueAdapter
 {
     public static NodeParameterValueNormalizationResult NormalizeValue(
         NodeParameterDefinition definition,
-        string displayName,
-        PortTypeId typeId,
-        ParameterEditorKind editorKind,
-        bool isRequired,
-        IReadOnlyList<string> allowedOptionValues,
         object? candidateValue)
     {
         ArgumentNullException.ThrowIfNull(definition);
-        ArgumentException.ThrowIfNullOrWhiteSpace(displayName);
-        ArgumentNullException.ThrowIfNull(typeId);
-        ArgumentNullException.ThrowIfNull(allowedOptionValues);
 
         var normalizedValue = NormalizeIncomingValue(candidateValue);
+        var displayName = definition.DisplayName;
+        var editorKind = definition.EditorKind;
+        var typeId = definition.ValueType;
+        var isRequired = definition.IsRequired;
+        var allowedOptionValues = definition.Constraints.AllowedOptions is null
+            ? []
+            : definition.Constraints.AllowedOptions.Select(option => option.Value).ToList();
 
         if (isRequired && (normalizedValue is null || string.IsNullOrWhiteSpace(normalizedValue.ToString())))
         {

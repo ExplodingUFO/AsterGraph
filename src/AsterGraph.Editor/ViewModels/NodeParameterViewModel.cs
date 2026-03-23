@@ -11,7 +11,6 @@ public sealed partial class NodeParameterViewModel : ObservableObject
     private readonly Action<NodeParameterViewModel, object?> _applyValue;
     private bool _suppressChangeNotifications;
     private bool _hasMixedValues;
-    private readonly IReadOnlyList<string> _allowedOptionValues;
 
     public NodeParameterViewModel(
         NodeParameterDefinition definition,
@@ -33,7 +32,6 @@ public sealed partial class NodeParameterViewModel : ObservableObject
             .Select(option => new NodeParameterOptionViewModel(option.Value, option.Label, option.Description))
             .ToList()
             .AsReadOnly();
-        _allowedOptionValues = Options.Select(option => option.Value).ToList().AsReadOnly();
 
         InitializeValues(currentValues.Count == 0 ? [definition.DefaultValue] : currentValues);
     }
@@ -175,14 +173,7 @@ public sealed partial class NodeParameterViewModel : ObservableObject
 
     private void ValidateAndApply(object? candidateValue, bool commit)
     {
-        var result = NodeParameterValueAdapter.NormalizeValue(
-            Definition,
-            DisplayName,
-            TypeId,
-            EditorKind,
-            IsRequired,
-            _allowedOptionValues,
-            candidateValue);
+        var result = NodeParameterValueAdapter.NormalizeValue(Definition, candidateValue);
 
         IsValid = result.IsValid;
         ValidationMessage = result.ValidationError;

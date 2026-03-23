@@ -1,5 +1,4 @@
 using System.Globalization;
-using System.Threading;
 using System.Text.Json;
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
@@ -19,23 +18,8 @@ public sealed class NodeParameterValueAdapterTests
         {
             CultureInfo.CurrentCulture = new CultureInfo("de-DE");
 
-            var commaResult = NodeParameterValueAdapter.NormalizeValue(
-                definition,
-                "Threshold",
-                new PortTypeId("double"),
-                ParameterEditorKind.Number,
-                isRequired: false,
-                allowedOptionValues: [],
-                candidateValue: "1,5");
-
-            var pointResult = NodeParameterValueAdapter.NormalizeValue(
-                definition,
-                "Threshold",
-                new PortTypeId("double"),
-                ParameterEditorKind.Number,
-                isRequired: false,
-                allowedOptionValues: [],
-                candidateValue: "1.5");
+            var commaResult = NodeParameterValueAdapter.NormalizeValue(definition, "1,5");
+            var pointResult = NodeParameterValueAdapter.NormalizeValue(definition, "1.5");
 
             Assert.True(commaResult.IsValid);
             Assert.Equal(1.5d, Assert.IsType<double>(commaResult.Value));
@@ -57,14 +41,7 @@ public sealed class NodeParameterValueAdapterTests
             CultureInfo.CurrentCulture = new CultureInfo("en-US");
             var definition = CreateNumberDefinition(isInt: false);
 
-            var result = NodeParameterValueAdapter.NormalizeValue(
-                definition,
-                "Amount",
-                new PortTypeId("double"),
-                ParameterEditorKind.Number,
-                isRequired: false,
-                allowedOptionValues: [],
-                candidateValue: "1,000");
+            var result = NodeParameterValueAdapter.NormalizeValue(definition, "1,000");
 
             Assert.True(result.IsValid);
             Assert.Equal(1000d, Assert.IsType<double>(result.Value));
@@ -78,15 +55,16 @@ public sealed class NodeParameterValueAdapterTests
     [Fact]
     public void NormalizeValue_EnumValidatesAgainstAllowedOptions()
     {
-        var definition = CreateDefinition(ParameterEditorKind.Enum, "string");
-        var result = NodeParameterValueAdapter.NormalizeValue(
-            definition,
-            "Mode",
-            new PortTypeId("string"),
+        var definition = CreateDefinition(
             ParameterEditorKind.Enum,
-            isRequired: false,
-            allowedOptionValues: ["fast", "precise"],
-            candidateValue: "draft");
+            "string",
+            displayName: "Mode",
+            allowedOptions:
+            [
+                new ParameterOptionDefinition("fast", "Fast"),
+                new ParameterOptionDefinition("precise", "Precise"),
+            ]);
+        var result = NodeParameterValueAdapter.NormalizeValue(definition, "draft");
 
         Assert.False(result.IsValid);
         Assert.Equal("Mode must be one of the declared options.", result.ValidationError);
@@ -95,15 +73,8 @@ public sealed class NodeParameterValueAdapterTests
     [Fact]
     public void NormalizeValue_BooleanParsesText()
     {
-        var definition = CreateDefinition(ParameterEditorKind.Boolean, "bool");
-        var result = NodeParameterValueAdapter.NormalizeValue(
-            definition,
-            "Enabled",
-            new PortTypeId("bool"),
-            ParameterEditorKind.Boolean,
-            isRequired: false,
-            allowedOptionValues: [],
-            candidateValue: "true");
+        var definition = CreateDefinition(ParameterEditorKind.Boolean, "bool", displayName: "Enabled");
+        var result = NodeParameterValueAdapter.NormalizeValue(definition, "true");
 
         Assert.True(result.IsValid);
         Assert.True(Assert.IsType<bool>(result.Value));
@@ -112,15 +83,8 @@ public sealed class NodeParameterValueAdapterTests
     [Fact]
     public void NormalizeValue_RequiredRejectsWhitespace()
     {
-        var definition = CreateDefinition(ParameterEditorKind.Text, "string");
-        var result = NodeParameterValueAdapter.NormalizeValue(
-            definition,
-            "Title",
-            new PortTypeId("string"),
-            ParameterEditorKind.Text,
-            isRequired: true,
-            allowedOptionValues: [],
-            candidateValue: "   ");
+        var definition = CreateDefinition(ParameterEditorKind.Text, "string", displayName: "Title", isRequired: true);
+        var result = NodeParameterValueAdapter.NormalizeValue(definition, "   ");
 
         Assert.False(result.IsValid);
         Assert.Equal("Title is required.", result.ValidationError);
@@ -129,34 +93,11 @@ public sealed class NodeParameterValueAdapterTests
     [Fact]
     public void NormalizeValue_NumberEnforcesBoundsAndWholeNumbers()
     {
-        var definition = CreateNumberDefinition(isInt: true, minimum: 1, maximum: 5);
+        var definition = CreateNumberDefinition(isInt: true, minimum: 1, maximum: 5, displayName: "Count");
 
-        var notWhole = NodeParameterValueAdapter.NormalizeValue(
-            definition,
-            "Count",
-            new PortTypeId("int"),
-            ParameterEditorKind.Number,
-            isRequired: false,
-            allowedOptionValues: [],
-            candidateValue: "2.5");
-
-        var outOfRange = NodeParameterValueAdapter.NormalizeValue(
-            definition,
-            "Count",
-            new PortTypeId("int"),
-            ParameterEditorKind.Number,
-            isRequired: false,
-            allowedOptionValues: [],
-            candidateValue: "10");
-
-        var success = NodeParameterValueAdapter.NormalizeValue(
-            definition,
-            "Count",
-            new PortTypeId("int"),
-            ParameterEditorKind.Number,
-            isRequired: false,
-            allowedOptionValues: [],
-            candidateValue: "3");
+        var notWhole = NodeParameterValueAdapter.NormalizeValue(definition, "2.5");
+        var outOfRange = NodeParameterValueAdapter.NormalizeValue(definition, "10");
+        var success = NodeParameterValueAdapter.NormalizeValue(definition, "3");
 
         Assert.False(notWhole.IsValid);
         Assert.Equal("Count must be a whole number.", notWhole.ValidationError);
@@ -177,17 +118,68 @@ public sealed class NodeParameterValueAdapterTests
         Assert.Equal("1.5", formatted);
     }
 
-    private static NodeParameterDefinition CreateDefinition(ParameterEditorKind kind, string valueType)
-        => new(
-            key: "value",
-            displayName: "Value",
-            valueType: new PortTypeId(valueType),
-            editorKind: kind);
+    [Fact]
+    public void NormalizeValue_GroupingInputRespectsCurrentCulture()
+    {
+        var previousCulture = CultureInfo.CurrentCulture;
+        try
+        {
+            CultureInfo.CurrentCulture = new CultureInfo("de-DE");
+            var definition = CreateNumberDefinition(isInt: false, displayName: "Amount");
 
-    private static NodeParameterDefinition CreateNumberDefinition(bool isInt, double? minimum = null, double? maximum = null)
+            var result = NodeParameterValueAdapter.NormalizeValue(definition, "1.000");
+
+            Assert.True(result.IsValid);
+            Assert.Equal(1000d, Assert.IsType<double>(result.Value));
+        }
+        finally
+        {
+            CultureInfo.CurrentCulture = previousCulture;
+        }
+    }
+
+    [Fact]
+    public void NormalizeValue_MixedSeparatorsUseCurrentCulture()
+    {
+        var previousCulture = CultureInfo.CurrentCulture;
+        try
+        {
+            CultureInfo.CurrentCulture = new CultureInfo("de-DE");
+            var definition = CreateNumberDefinition(isInt: false, displayName: "Amount");
+
+            var result = NodeParameterValueAdapter.NormalizeValue(definition, "1.234,5");
+
+            Assert.True(result.IsValid);
+            Assert.Equal(1234.5d, Assert.IsType<double>(result.Value));
+        }
+        finally
+        {
+            CultureInfo.CurrentCulture = previousCulture;
+        }
+    }
+
+    private static NodeParameterDefinition CreateDefinition(
+        ParameterEditorKind kind,
+        string valueType,
+        string displayName = "Value",
+        bool isRequired = false,
+        IReadOnlyList<ParameterOptionDefinition>? allowedOptions = null)
         => new(
             key: "value",
-            displayName: "Value",
+            displayName: displayName,
+            valueType: new PortTypeId(valueType),
+            editorKind: kind,
+            isRequired: isRequired,
+            constraints: new ParameterConstraints(AllowedOptions: allowedOptions));
+
+    private static NodeParameterDefinition CreateNumberDefinition(
+        bool isInt,
+        double? minimum = null,
+        double? maximum = null,
+        string displayName = "Value")
+        => new(
+            key: "value",
+            displayName: displayName,
             valueType: new PortTypeId(isInt ? "int" : "double"),
             editorKind: ParameterEditorKind.Number,
             constraints: new ParameterConstraints(Minimum: minimum, Maximum: maximum));
