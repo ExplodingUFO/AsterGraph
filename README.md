@@ -162,6 +162,9 @@ Hosts can also opt into drag-assist behavior through `CanvasStyleOptions`:
 - `EnableAlignmentGuides`
 - `SnapTolerance`
 
+For runtime behavior switching, hosts should prefer `GraphEditorBehaviorOptions` plus `GraphEditorViewModel.UpdateBehaviorOptions(...)`.
+The drag assistant now evaluates snapping from the drag start position instead of accumulating per-frame snap deltas, which avoids pointer drift during grid snapping.
+
 ## Fragments
 
 In addition to clipboard-based fragment copy/paste, AsterGraph now supports explicit fragment file workflows:
@@ -210,6 +213,11 @@ Current behavior sections include:
 - `DragAssistBehaviorOptions`
 - `FragmentBehaviorOptions`
 - `ViewBehaviorOptions`
+
+The demo host also exposes live toggles for:
+
+- grid snapping
+- alignment guides
 
 ## Context Menu Extension
 

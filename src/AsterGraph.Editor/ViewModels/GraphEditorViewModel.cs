@@ -39,6 +39,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     private readonly GraphFragmentLibraryService _fragmentLibraryService;
     private readonly GraphEditorHistoryService _historyService;
     private readonly IReadOnlyList<IGraphContextMenuContributor> _contextMenuContributors;
+    private GraphEditorBehaviorOptions _behaviorOptions = GraphEditorBehaviorOptions.Default;
     private IGraphTextClipboardBridge? _textClipboardBridge;
     private readonly GraphContextMenuBuilder _contextMenuBuilder;
     private bool _suspendDirtyTracking;
@@ -47,6 +48,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     private GraphEditorHistoryState? _pendingInteractionState;
     private double _viewportWidth;
     private double _viewportHeight;
+    private bool _isInitialized;
 
     /// <summary>
     /// 初始化图编辑器视图模型。
@@ -137,6 +139,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         RefreshFragmentTemplates();
         LoadDocument(document, "Ready to edit.", markClean: true);
         ResetView(updateStatus: false);
+        _isInitialized = true;
     }
 
     [ObservableProperty]
@@ -159,7 +162,26 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     public GraphEditorStyleOptions StyleOptions { get; }
 
-    public GraphEditorBehaviorOptions BehaviorOptions { get; }
+    /// <summary>
+    /// 获取当前编辑器行为配置。
+    /// </summary>
+    public GraphEditorBehaviorOptions BehaviorOptions
+    {
+        get => _behaviorOptions;
+        private set
+        {
+            if (SetProperty(ref _behaviorOptions, value))
+            {
+                if (!_isInitialized)
+                {
+                    return;
+                }
+
+                ExportSelectionAsTemplateCommand.NotifyCanExecuteChanged();
+                RaiseComputedPropertyChanges();
+            }
+        }
+    }
 
     /// <summary>
     /// 获取当前编辑器启用的公开右键菜单扩展器集合。
@@ -465,6 +487,45 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
         SelectedFragmentTemplate = FragmentTemplates.FirstOrDefault();
         RaiseComputedPropertyChanges();
+    }
+
+    /// <summary>
+    /// 在运行时替换编辑器行为配置。
+    /// </summary>
+    /// <param name="behaviorOptions">新的行为配置。</param>
+    /// <param name="status">可选状态文本。</param>
+    public void UpdateBehaviorOptions(GraphEditorBehaviorOptions behaviorOptions, string? status = null)
+    {
+        ArgumentNullException.ThrowIfNull(behaviorOptions);
+
+        BehaviorOptions = behaviorOptions;
+        if (!string.IsNullOrWhiteSpace(status))
+        {
+            StatusMessage = status;
+        }
+    }
+
+    /// <summary>
+    /// 将一组节点重定位到拖拽起点加偏移后的绝对位置。
+    /// </summary>
+    /// <param name="originPositions">拖拽开始时记录的节点起始位置。</param>
+    /// <param name="deltaX">相对起始位置的水平偏移。</param>
+    /// <param name="deltaY">相对起始位置的垂直偏移。</param>
+    public void ApplyDragOffset(IReadOnlyDictionary<string, GraphPoint> originPositions, double deltaX, double deltaY)
+    {
+        ArgumentNullException.ThrowIfNull(originPositions);
+
+        foreach (var entry in originPositions)
+        {
+            var node = FindNode(entry.Key);
+            if (node is null)
+            {
+                continue;
+            }
+
+            node.X = entry.Value.X + deltaX;
+            node.Y = entry.Value.Y + deltaY;
+        }
     }
 
     /// <summary>

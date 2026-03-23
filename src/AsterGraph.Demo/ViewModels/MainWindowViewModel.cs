@@ -1,3 +1,4 @@
+using CommunityToolkit.Mvvm.ComponentModel;
 using AsterGraph.Core.Compatibility;
 using AsterGraph.Abstractions.Styling;
 using AsterGraph.Editor.Configuration;
@@ -12,6 +13,8 @@ namespace AsterGraph.Demo.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {
+    private const double DemoSnapTolerance = 18;
+
     public MainWindowViewModel()
     {
         var catalog = new NodeCatalog();
@@ -32,7 +35,7 @@ public partial class MainWindowViewModel : ViewModelBase
             {
                 EnableGridSnapping = true,
                 EnableAlignmentGuides = true,
-                SnapTolerance = 18,
+                SnapTolerance = DemoSnapTolerance,
             },
             ContextMenu = GraphEditorStyleOptions.Default.ContextMenu with
             {
@@ -48,7 +51,7 @@ public partial class MainWindowViewModel : ViewModelBase
             {
                 EnableGridSnapping = true,
                 EnableAlignmentGuides = true,
-                SnapTolerance = 18,
+                SnapTolerance = DemoSnapTolerance,
             },
             View = GraphEditorBehaviorOptions.Default.View with
             {
@@ -82,4 +85,31 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     public GraphEditorViewModel Editor { get; }
+
+    [ObservableProperty]
+    private bool isGridSnappingEnabled = true;
+
+    [ObservableProperty]
+    private bool isAlignmentGuidesEnabled = true;
+
+    partial void OnIsGridSnappingEnabledChanged(bool value)
+        => ApplyDragAssistOptions();
+
+    partial void OnIsAlignmentGuidesEnabledChanged(bool value)
+        => ApplyDragAssistOptions();
+
+    private void ApplyDragAssistOptions()
+    {
+        Editor.UpdateBehaviorOptions(
+            Editor.BehaviorOptions with
+            {
+                DragAssist = Editor.BehaviorOptions.DragAssist with
+                {
+                    EnableGridSnapping = IsGridSnappingEnabled,
+                    EnableAlignmentGuides = IsAlignmentGuidesEnabled,
+                    SnapTolerance = DemoSnapTolerance,
+                },
+            },
+            $"Drag assist updated. Grid snap {(IsGridSnappingEnabled ? "on" : "off")}, alignment guides {(IsAlignmentGuidesEnabled ? "on" : "off")}.");
+    }
 }
