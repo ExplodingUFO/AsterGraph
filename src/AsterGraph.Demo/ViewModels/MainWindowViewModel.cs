@@ -3,6 +3,7 @@ using AsterGraph.Core.Compatibility;
 using AsterGraph.Abstractions.Styling;
 using AsterGraph.Editor.Configuration;
 using AsterGraph.Editor.Catalog;
+using AsterGraph.Editor.Localization;
 using AsterGraph.Editor.Services;
 using AsterGraph.Editor.ViewModels;
 using AsterGraph.Demo.Definitions;
@@ -75,7 +76,8 @@ public partial class MainWindowViewModel : ViewModelBase
             null,
             style,
             behavior,
-            contextMenuAugmentor: contextMenuAugmentor);
+            contextMenuAugmentor: contextMenuAugmentor,
+            localizationProvider: new DemoGraphLocalizationProvider());
 
         Editor = editor;
         ApplyHostOptions(status: null);
@@ -185,5 +187,17 @@ public partial class MainWindowViewModel : ViewModelBase
                 AllowContextMenuExtensions = AreHostMenuExtensionsEnabled,
             },
         };
+    }
+
+    private sealed class DemoGraphLocalizationProvider : IGraphLocalizationProvider
+    {
+        private static readonly IReadOnlyDictionary<string, string> Values = new Dictionary<string, string>(StringComparer.Ordinal)
+        {
+            ["editor.menu.canvas.addNode"] = "添加节点",
+            ["editor.inspector.title.none"] = "请选择一个节点",
+        };
+
+        public string GetString(string key, string fallback)
+            => Values.TryGetValue(key, out var localized) ? localized : fallback;
     }
 }

@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -16,6 +17,7 @@ using AsterGraph.Editor.Configuration;
 using AsterGraph.Editor.Events;
 using AsterGraph.Editor.Geometry;
 using AsterGraph.Editor.Hosting;
+using AsterGraph.Editor.Localization;
 using AsterGraph.Editor.Menus;
 using AsterGraph.Editor.Models;
 using AsterGraph.Editor.Presentation;
@@ -63,6 +65,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         nameof(FragmentPath),
         nameof(FragmentCaption),
         nameof(FragmentStatusCaption),
+        nameof(FragmentLibraryCaption),
         nameof(ModeCaption),
         nameof(InspectorTitle),
         nameof(InspectorCategory),
@@ -90,6 +93,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     private IGraphTextClipboardBridge? _textClipboardBridge;
     private IGraphHostContext? _hostContext;
     private INodePresentationProvider? _nodePresentationProvider;
+    private IGraphLocalizationProvider? _localizationProvider;
     private readonly GraphContextMenuBuilder _contextMenuBuilder;
     private bool _suspendDirtyTracking;
     private bool _suspendHistoryTracking;
@@ -112,6 +116,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// <param name="fragmentLibraryService">片段模板库服务。</param>
     /// <param name="contextMenuAugmentor">宿主右键菜单增强器。</param>
     /// <param name="nodePresentationProvider">节点展示状态提供器。</param>
+    /// <param name="localizationProvider">编辑器内置文案本地化提供器。</param>
     public GraphEditorViewModel(
         GraphDocument document,
         INodeCatalog nodeCatalog,
@@ -122,7 +127,8 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         GraphEditorBehaviorOptions? behaviorOptions = null,
         GraphFragmentLibraryService? fragmentLibraryService = null,
         IGraphContextMenuAugmentor? contextMenuAugmentor = null,
-        INodePresentationProvider? nodePresentationProvider = null)
+        INodePresentationProvider? nodePresentationProvider = null,
+        IGraphLocalizationProvider? localizationProvider = null)
     {
         _nodeCatalog = nodeCatalog ?? throw new ArgumentNullException(nameof(nodeCatalog));
         _compatibilityService = compatibilityService ?? throw new ArgumentNullException(nameof(compatibilityService));
@@ -133,6 +139,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         _historyService = new GraphEditorHistoryService();
         _contextMenuAugmentor = contextMenuAugmentor;
         _nodePresentationProvider = nodePresentationProvider;
+        _localizationProvider = localizationProvider;
         StyleOptions = styleOptions ?? GraphEditorStyleOptions.Default;
         BehaviorOptions = ResolveBehaviorOptions(behaviorOptions, StyleOptions);
 
@@ -200,7 +207,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             AddNodeCommand,
         ];
 
-        _contextMenuBuilder = new GraphContextMenuBuilder(this);
+        _contextMenuBuilder = new GraphContextMenuBuilder(this, LocalizeText);
 
         Nodes = new ObservableCollection<NodeViewModel>();
         Connections = new ObservableCollection<ConnectionViewModel>();
@@ -218,7 +225,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         Description = document.Description;
 
         RefreshFragmentTemplates();
-        LoadDocument(document, "Ready to edit.", markClean: true);
+        LoadDocument(document, LocalizeText("editor.status.readyToEdit", "Ready to edit."), markClean: true);
         ResetView(updateStatus: false);
         _isInitialized = true;
     }
@@ -288,6 +295,11 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// 获取当前节点展示状态提供器。
     /// </summary>
     public INodePresentationProvider? NodePresentationProvider => _nodePresentationProvider;
+
+    /// <summary>
+    /// 获取当前图编辑器内置文案本地化提供器。
+    /// </summary>
+    public IGraphLocalizationProvider? LocalizationProvider => _localizationProvider;
 
     /// <summary>
     /// 当前工作区快照文件路径。
@@ -520,84 +532,153 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// <summary>
     /// 面向宿主和状态栏的图统计文本。
     /// </summary>
-    public string StatsCaption => $"{Nodes.Count} nodes  ·  {Connections.Count} links  ·  {Zoom * 100:0}% zoom";
+    public string StatsCaption => LocalizeFormat(
+        "editor.stats.caption",
+        "{0} nodes  ·  {1} links  ·  {2:0}% zoom",
+        Nodes.Count,
+        Connections.Count,
+        Zoom * 100);
 
     /// <summary>
     /// 工作区状态摘要文本。
     /// </summary>
-    public string WorkspaceCaption => $"{(IsDirty ? "Unsaved changes" : "Snapshot synced")}  ·  {WorkspacePath}";
+    public string WorkspaceCaption
+    {
+        get
+        {
+            var workspaceState = IsDirty
+                ? LocalizeText("editor.workspace.state.unsaved", "Unsaved changes")
+                : LocalizeText("editor.workspace.state.synced", "Snapshot synced");
+            return LocalizeFormat(
+                "editor.workspace.caption",
+                "{0}  ·  {1}",
+                workspaceState,
+                WorkspacePath);
+        }
+    }
 
     /// <summary>
     /// 片段工作区状态摘要文本。
     /// </summary>
-    public string FragmentCaption => $"{(_fragmentWorkspaceService.Exists() ? "Fragment available" : "No fragment file")}  ·  {_fragmentWorkspaceService.FragmentPath}";
+    public string FragmentCaption
+    {
+        get
+        {
+            var availability = _fragmentWorkspaceService.Exists()
+                ? LocalizeText("editor.fragment.state.available", "Fragment available")
+                : LocalizeText("editor.fragment.state.missing", "No fragment file");
+            return LocalizeFormat(
+                "editor.fragment.caption",
+                "{0}  ·  {1}",
+                availability,
+                _fragmentWorkspaceService.FragmentPath);
+        }
+    }
 
     /// <summary>
     /// 片段文件更新时间摘要文本。
     /// </summary>
     public string FragmentStatusCaption
         => !_fragmentWorkspaceService.Exists()
-            ? "No saved fragment file."
-            : $"Last updated {File.GetLastWriteTime(_fragmentWorkspaceService.FragmentPath):yyyy-MM-dd HH:mm:ss}";
+            ? LocalizeText("editor.fragment.status.missing", "No saved fragment file.")
+            : LocalizeFormat(
+                "editor.fragment.status.updated",
+                "Last updated {0:yyyy-MM-dd HH:mm:ss}",
+                File.GetLastWriteTime(_fragmentWorkspaceService.FragmentPath));
 
     /// <summary>
     /// 片段模板库状态摘要文本。
     /// </summary>
-    public string FragmentLibraryCaption => $"{(HasFragmentTemplates ? $"{FragmentTemplates.Count} templates" : "No templates")}  ·  {FragmentLibraryPath}";
+    public string FragmentLibraryCaption
+    {
+        get
+        {
+            var templateState = HasFragmentTemplates
+                ? LocalizeFormat("editor.fragmentLibrary.state.hasTemplates", "{0} templates", FragmentTemplates.Count)
+                : LocalizeText("editor.fragmentLibrary.state.noTemplates", "No templates");
+            return LocalizeFormat(
+                "editor.fragmentLibrary.caption",
+                "{0}  ·  {1}",
+                templateState,
+                FragmentLibraryPath);
+        }
+    }
 
     /// <summary>
     /// 当前编辑模式摘要文本。
     /// </summary>
     public string ModeCaption => HasPendingConnection
-        ? $"Connecting {PendingSourceNode!.Title} / {PendingSourcePort!.Label}  ->  click an input port"
+        ? LocalizeFormat(
+            "editor.mode.connecting",
+            "Connecting {0} / {1}  ->  click an input port",
+            PendingSourceNode!.Title,
+            PendingSourcePort!.Label)
         : HasMultipleSelection
-            ? $"Selection mode  ·  {SelectedNodes.Count} nodes selected"
-            : "Selection mode  ·  click a template to add a node";
+            ? LocalizeFormat(
+                "editor.mode.selection.multiple",
+                "Selection mode  ·  {0} nodes selected",
+                SelectedNodes.Count)
+            : LocalizeText(
+                "editor.mode.selection.default",
+                "Selection mode  ·  click a template to add a node");
 
     public string InspectorTitle => SelectedNodes.Count switch
     {
-        0 => "Select A Node",
-        1 => SelectedNode?.Title ?? "Select A Node",
-        _ => $"{SelectedNodes.Count} Nodes Selected",
+        0 => LocalizeText("editor.inspector.title.none", "Select A Node"),
+        1 => SelectedNode?.Title ?? LocalizeText("editor.inspector.title.none", "Select A Node"),
+        _ => LocalizeFormat("editor.inspector.title.multiple", "{0} Nodes Selected", SelectedNodes.Count),
     };
 
     public string InspectorCategory => SelectedNodes.Count switch
     {
-        0 => "Editor",
-        1 => SelectedNode?.Category ?? "Editor",
-        _ => "Multi Selection",
+        0 => LocalizeText("editor.inspector.category.none", "Editor"),
+        1 => SelectedNode?.Category ?? LocalizeText("editor.inspector.category.none", "Editor"),
+        _ => LocalizeText("editor.inspector.category.multiple", "Multi Selection"),
     };
 
     public string InspectorDescription => SelectedNodes.Count switch
     {
-        0 => "Build the graph from the left library, connect outputs to inputs, and save snapshots from the toolbar.",
-        1 => SelectedNode?.Description ?? "Build the graph from the left library, connect outputs to inputs, and save snapshots from the toolbar.",
+        0 => LocalizeText(
+            "editor.inspector.description.none",
+            "Build the graph from the left library, connect outputs to inputs, and save snapshots from the toolbar."),
+        1 => SelectedNode?.Description ?? LocalizeText(
+            "editor.inspector.description.none",
+            "Build the graph from the left library, connect outputs to inputs, and save snapshots from the toolbar."),
         _ => HasBatchEditableParameters
-            ? $"Editing shared parameters across {SelectedNodes.Count} nodes of the same definition."
-            : "Delete removes the full selection. Copy and paste preserve internal links between the selected nodes.",
+            ? LocalizeFormat(
+                "editor.inspector.description.multiple.batch",
+                "Editing shared parameters across {0} nodes of the same definition.",
+                SelectedNodes.Count)
+            : LocalizeText(
+                "editor.inspector.description.multiple.default",
+                "Delete removes the full selection. Copy and paste preserve internal links between the selected nodes."),
     };
 
     public string InspectorInputs => SelectedNode is null
-        ? "Select a node to inspect its input ports."
+        ? LocalizeText("editor.inspector.inputs.none", "Select a node to inspect its input ports.")
         : _inspectorProjection.FormatPorts(SelectedNode.Inputs);
 
     public string InspectorOutputs => SelectedNode is null
-        ? "Select a node to inspect its output ports."
+        ? LocalizeText("editor.inspector.outputs.none", "Select a node to inspect its output ports.")
         : _inspectorProjection.FormatPorts(SelectedNode.Outputs);
 
     public string InspectorConnections => SelectedNode is null
-        ? "Select a node to inspect its connection summary."
-        : $"{GetIncomingConnections(SelectedNode).Count} incoming  ·  {GetOutgoingConnections(SelectedNode).Count} outgoing";
+        ? LocalizeText("editor.inspector.connections.none", "Select a node to inspect its connection summary.")
+        : LocalizeFormat(
+            "editor.inspector.connections.summary",
+            "{0} incoming  ·  {1} outgoing",
+            GetIncomingConnections(SelectedNode).Count,
+            GetOutgoingConnections(SelectedNode).Count);
 
     public string InspectorUpstream => SelectedNode is null
-        ? "Select a node to see upstream dependencies."
+        ? LocalizeText("editor.inspector.upstream.none", "Select a node to see upstream dependencies.")
         : _inspectorProjection.FormatRelatedNodes(
             GetIncomingConnections(SelectedNode),
             useSource: true,
             FindNode);
 
     public string InspectorDownstream => SelectedNode is null
-        ? "Select a node to see downstream consumers."
+        ? LocalizeText("editor.inspector.downstream.none", "Select a node to see downstream consumers.")
         : _inspectorProjection.FormatRelatedNodes(
             GetOutgoingConnections(SelectedNode),
             useSource: false,
@@ -663,6 +744,21 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     public void SetHostContext(IGraphHostContext? hostContext)
     {
         SetProperty(ref _hostContext, hostContext, nameof(HostContext));
+    }
+
+    /// <summary>
+    /// 设置图编辑器内置文案本地化提供器。
+    /// </summary>
+    /// <param name="provider">本地化提供器；为 <see langword="null"/> 时回退到默认文案。</param>
+    public void SetLocalizationProvider(IGraphLocalizationProvider? provider)
+    {
+        if (!SetProperty(ref _localizationProvider, provider, nameof(LocalizationProvider)))
+        {
+            return;
+        }
+
+        RaiseComputedPropertyChanges();
+        OnPropertyChanged(nameof(FragmentLibraryCaption));
     }
 
     /// <summary>
@@ -2359,6 +2455,20 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
         return ScreenToWorld(new GraphPoint(_viewportWidth / 2, _viewportHeight / 2));
     }
+
+    private string LocalizeText(string key, string fallback)
+    {
+        if (_localizationProvider is null)
+        {
+            return fallback;
+        }
+
+        var localized = _localizationProvider.GetString(key, fallback);
+        return string.IsNullOrWhiteSpace(localized) ? fallback : localized;
+    }
+
+    private string LocalizeFormat(string key, string fallback, params object?[] arguments)
+        => string.Format(CultureInfo.InvariantCulture, LocalizeText(key, fallback), arguments);
 
     private string CreateNodeId(string templateKey)
         => CreateUniqueId(Nodes.Select(node => node.Id), $"{templateKey}-");

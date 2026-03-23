@@ -1,3 +1,4 @@
+using System.Globalization;
 using CommunityToolkit.Mvvm.Input;
 using AsterGraph.Abstractions.Compatibility;
 using AsterGraph.Core.Models;
@@ -8,10 +9,14 @@ namespace AsterGraph.Editor.Menus;
 internal sealed class GraphContextMenuBuilder
 {
     private readonly IGraphContextMenuHost _editor;
+    private readonly Func<string, string, string> _localize;
 
-    public GraphContextMenuBuilder(IGraphContextMenuHost editor)
+    public GraphContextMenuBuilder(
+        IGraphContextMenuHost editor,
+        Func<string, string, string>? localize = null)
     {
         _editor = editor;
+        _localize = localize ?? ((_, fallback) => fallback);
     }
 
     public IReadOnlyList<MenuItemDescriptor> Build(ContextMenuContext context)
@@ -51,33 +56,33 @@ internal sealed class GraphContextMenuBuilder
 
         return
         [
-            new MenuItemDescriptor("canvas-add-node", "Add Node", children: addNodeGroups, iconKey: "add", isEnabled: permissions.Nodes.AllowCreate),
+            new MenuItemDescriptor("canvas-add-node", L("editor.menu.canvas.addNode", "Add Node"), children: addNodeGroups, iconKey: "add", isEnabled: permissions.Nodes.AllowCreate),
             MenuItemDescriptor.Separator("canvas-sep-1"),
-            new MenuItemDescriptor("canvas-fit-view", "Fit View", _editor.FitViewCommand, iconKey: "fit"),
-            new MenuItemDescriptor("canvas-reset-view", "Reset View", _editor.ResetViewCommand, iconKey: "reset"),
+            new MenuItemDescriptor("canvas-fit-view", L("editor.menu.canvas.fitView", "Fit View"), _editor.FitViewCommand, iconKey: "fit"),
+            new MenuItemDescriptor("canvas-reset-view", L("editor.menu.canvas.resetView", "Reset View"), _editor.ResetViewCommand, iconKey: "reset"),
             MenuItemDescriptor.Separator("canvas-sep-2"),
             new MenuItemDescriptor(
                 "canvas-save",
-                "Save Snapshot",
+                L("editor.menu.canvas.saveSnapshot", "Save Snapshot"),
                 _editor.SaveCommand,
                 iconKey: "save",
                 disabledReason: ResolveWorkspaceDisabledReason(
                     permissions.Workspace.AllowSave,
                     _editor.SaveCommand.CanExecute(null),
-                    "Snapshot saving is disabled by host permissions.",
-                    "Snapshot saving is currently unavailable."),
+                    L("editor.menu.canvas.saveSnapshot.disabled.hostDenied", "Snapshot saving is disabled by host permissions."),
+                    L("editor.menu.canvas.saveSnapshot.disabled.unavailable", "Snapshot saving is currently unavailable.")),
                 isEnabled: permissions.Workspace.AllowSave && _editor.SaveCommand.CanExecute(null)),
-            new MenuItemDescriptor("canvas-load", "Load Snapshot", _editor.LoadCommand, iconKey: "load", isEnabled: permissions.Workspace.AllowLoad && _editor.LoadCommand.CanExecute(null)),
-            new MenuItemDescriptor("canvas-import-fragment", "Import Fragment", _editor.ImportFragmentCommand, iconKey: "import", isEnabled: _editor.ImportFragmentCommand.CanExecute(null)),
+            new MenuItemDescriptor("canvas-load", L("editor.menu.canvas.loadSnapshot", "Load Snapshot"), _editor.LoadCommand, iconKey: "load", isEnabled: permissions.Workspace.AllowLoad && _editor.LoadCommand.CanExecute(null)),
+            new MenuItemDescriptor("canvas-import-fragment", L("editor.menu.canvas.importFragment", "Import Fragment"), _editor.ImportFragmentCommand, iconKey: "import", isEnabled: _editor.ImportFragmentCommand.CanExecute(null)),
             new MenuItemDescriptor(
                 "canvas-paste",
-                "Paste",
+                L("editor.menu.canvas.paste", "Paste"),
                 _editor.PasteCommand,
                 iconKey: "paste",
                 isEnabled: _editor.PasteCommand.CanExecute(null)),
             _editor.HasPendingConnection
-                ? new MenuItemDescriptor("canvas-cancel-pending", "Cancel Pending Connection", _editor.CancelPendingConnectionCommand, iconKey: "cancel")
-                : new MenuItemDescriptor("canvas-cancel-pending", "Cancel Pending Connection", iconKey: "cancel", isEnabled: false),
+                ? new MenuItemDescriptor("canvas-cancel-pending", L("editor.menu.canvas.cancelPendingConnection", "Cancel Pending Connection"), _editor.CancelPendingConnectionCommand, iconKey: "cancel")
+                : new MenuItemDescriptor("canvas-cancel-pending", L("editor.menu.canvas.cancelPendingConnection", "Cancel Pending Connection"), iconKey: "cancel", isEnabled: false),
         ];
     }
 
@@ -87,50 +92,54 @@ internal sealed class GraphContextMenuBuilder
         [
             new MenuItemDescriptor(
                 "selection-delete",
-                _editor.SelectedNodeCount == 1 ? "Delete Selected Node" : $"Delete {_editor.SelectedNodeCount} Selected Nodes",
+                _editor.SelectedNodeCount == 1
+                    ? L("editor.menu.selection.delete.single", "Delete Selected Node")
+                    : LF("editor.menu.selection.delete.multiple", "Delete {0} Selected Nodes", _editor.SelectedNodeCount),
                 _editor.DeleteSelectionCommand,
                 iconKey: "delete",
                 isEnabled: _editor.DeleteSelectionCommand.CanExecute(null)),
             new MenuItemDescriptor(
                 "selection-copy",
-                _editor.SelectedNodeCount == 1 ? "Copy Selected Node" : $"Copy {_editor.SelectedNodeCount} Selected Nodes",
+                _editor.SelectedNodeCount == 1
+                    ? L("editor.menu.selection.copy.single", "Copy Selected Node")
+                    : LF("editor.menu.selection.copy.multiple", "Copy {0} Selected Nodes", _editor.SelectedNodeCount),
                 _editor.CopySelectionCommand,
                 iconKey: "copy",
                 isEnabled: _editor.CopySelectionCommand.CanExecute(null)),
             new MenuItemDescriptor(
                 "selection-export",
-                "Export Fragment",
+                L("editor.menu.selection.exportFragment", "Export Fragment"),
                 _editor.ExportSelectionFragmentCommand,
                 iconKey: "export",
                 isEnabled: _editor.ExportSelectionFragmentCommand.CanExecute(null)),
             new MenuItemDescriptor(
                 "selection-paste",
-                "Paste",
+                L("editor.menu.selection.paste", "Paste"),
                 _editor.PasteCommand,
                 iconKey: "paste",
                 isEnabled: _editor.PasteCommand.CanExecute(null)),
             MenuItemDescriptor.Separator("selection-sep-1"),
             new MenuItemDescriptor(
                 "selection-align",
-                "Align",
+                L("editor.menu.selection.align", "Align"),
                 iconKey: "align",
                 children:
                 [
-                    new MenuItemDescriptor("selection-align-left", "Left", _editor.AlignLeftCommand, iconKey: "align-left", isEnabled: _editor.AlignLeftCommand.CanExecute(null)),
-                    new MenuItemDescriptor("selection-align-center", "Center", _editor.AlignCenterCommand, iconKey: "align-center", isEnabled: _editor.AlignCenterCommand.CanExecute(null)),
-                    new MenuItemDescriptor("selection-align-right", "Right", _editor.AlignRightCommand, iconKey: "align-right", isEnabled: _editor.AlignRightCommand.CanExecute(null)),
-                    new MenuItemDescriptor("selection-align-top", "Top", _editor.AlignTopCommand, iconKey: "align-top", isEnabled: _editor.AlignTopCommand.CanExecute(null)),
-                    new MenuItemDescriptor("selection-align-middle", "Middle", _editor.AlignMiddleCommand, iconKey: "align-middle", isEnabled: _editor.AlignMiddleCommand.CanExecute(null)),
-                    new MenuItemDescriptor("selection-align-bottom", "Bottom", _editor.AlignBottomCommand, iconKey: "align-bottom", isEnabled: _editor.AlignBottomCommand.CanExecute(null)),
+                    new MenuItemDescriptor("selection-align-left", L("editor.menu.selection.align.left", "Left"), _editor.AlignLeftCommand, iconKey: "align-left", isEnabled: _editor.AlignLeftCommand.CanExecute(null)),
+                    new MenuItemDescriptor("selection-align-center", L("editor.menu.selection.align.center", "Center"), _editor.AlignCenterCommand, iconKey: "align-center", isEnabled: _editor.AlignCenterCommand.CanExecute(null)),
+                    new MenuItemDescriptor("selection-align-right", L("editor.menu.selection.align.right", "Right"), _editor.AlignRightCommand, iconKey: "align-right", isEnabled: _editor.AlignRightCommand.CanExecute(null)),
+                    new MenuItemDescriptor("selection-align-top", L("editor.menu.selection.align.top", "Top"), _editor.AlignTopCommand, iconKey: "align-top", isEnabled: _editor.AlignTopCommand.CanExecute(null)),
+                    new MenuItemDescriptor("selection-align-middle", L("editor.menu.selection.align.middle", "Middle"), _editor.AlignMiddleCommand, iconKey: "align-middle", isEnabled: _editor.AlignMiddleCommand.CanExecute(null)),
+                    new MenuItemDescriptor("selection-align-bottom", L("editor.menu.selection.align.bottom", "Bottom"), _editor.AlignBottomCommand, iconKey: "align-bottom", isEnabled: _editor.AlignBottomCommand.CanExecute(null)),
                 ]),
             new MenuItemDescriptor(
                 "selection-distribute",
-                "Distribute",
+                L("editor.menu.selection.distribute", "Distribute"),
                 iconKey: "distribute",
                 children:
                 [
-                    new MenuItemDescriptor("selection-distribute-horizontal", "Horizontally", _editor.DistributeHorizontallyCommand, iconKey: "distribute-horizontal", isEnabled: _editor.DistributeHorizontallyCommand.CanExecute(null)),
-                    new MenuItemDescriptor("selection-distribute-vertical", "Vertically", _editor.DistributeVerticallyCommand, iconKey: "distribute-vertical", isEnabled: _editor.DistributeVerticallyCommand.CanExecute(null)),
+                    new MenuItemDescriptor("selection-distribute-horizontal", L("editor.menu.selection.distribute.horizontal", "Horizontally"), _editor.DistributeHorizontallyCommand, iconKey: "distribute-horizontal", isEnabled: _editor.DistributeHorizontallyCommand.CanExecute(null)),
+                    new MenuItemDescriptor("selection-distribute-vertical", L("editor.menu.selection.distribute.vertical", "Vertically"), _editor.DistributeVerticallyCommand, iconKey: "distribute-vertical", isEnabled: _editor.DistributeVerticallyCommand.CanExecute(null)),
                 ]),
         ];
     }
@@ -159,23 +168,23 @@ internal sealed class GraphContextMenuBuilder
 
         return
         [
-            new MenuItemDescriptor("node-inspect", $"Inspect {node.Title}", new RelayCommand(() => _editor.SelectNode(node)), iconKey: "inspect"),
-            new MenuItemDescriptor("node-center", "Center View Here", new RelayCommand(() => _editor.CenterViewOnNode(node.Id)), iconKey: "center"),
+            new MenuItemDescriptor("node-inspect", LF("editor.menu.node.inspect", "Inspect {0}", node.Title), new RelayCommand(() => _editor.SelectNode(node)), iconKey: "inspect"),
+            new MenuItemDescriptor("node-center", L("editor.menu.node.centerViewHere", "Center View Here"), new RelayCommand(() => _editor.CenterViewOnNode(node.Id)), iconKey: "center"),
             MenuItemDescriptor.Separator("node-sep-1"),
-            new MenuItemDescriptor("node-delete", "Delete Node", new RelayCommand(() => _editor.DeleteNodeById(node.Id)), iconKey: "delete", isEnabled: permissions.Nodes.AllowDelete),
-            new MenuItemDescriptor("node-duplicate", "Duplicate Node", new RelayCommand(() => _editor.DuplicateNode(node.Id)), iconKey: "duplicate", isEnabled: permissions.Nodes.AllowDuplicate),
+            new MenuItemDescriptor("node-delete", L("editor.menu.node.deleteNode", "Delete Node"), new RelayCommand(() => _editor.DeleteNodeById(node.Id)), iconKey: "delete", isEnabled: permissions.Nodes.AllowDelete),
+            new MenuItemDescriptor("node-duplicate", L("editor.menu.node.duplicateNode", "Duplicate Node"), new RelayCommand(() => _editor.DuplicateNode(node.Id)), iconKey: "duplicate", isEnabled: permissions.Nodes.AllowDuplicate),
             new MenuItemDescriptor(
                 "node-disconnect",
-                "Disconnect",
+                L("editor.menu.node.disconnect", "Disconnect"),
                 iconKey: "disconnect",
                 isEnabled: permissions.Connections.AllowDisconnect,
                 children:
                 [
-                    new MenuItemDescriptor("node-disconnect-in", "Incoming", new RelayCommand(() => _editor.DisconnectIncoming(node.Id)), iconKey: "disconnect", isEnabled: permissions.Connections.AllowDisconnect),
-                    new MenuItemDescriptor("node-disconnect-out", "Outgoing", new RelayCommand(() => _editor.DisconnectOutgoing(node.Id)), iconKey: "disconnect", isEnabled: permissions.Connections.AllowDisconnect),
-                    new MenuItemDescriptor("node-disconnect-all", "All", new RelayCommand(() => _editor.DisconnectAll(node.Id)), iconKey: "disconnect", isEnabled: permissions.Connections.AllowDisconnect),
+                    new MenuItemDescriptor("node-disconnect-in", L("editor.menu.node.disconnect.incoming", "Incoming"), new RelayCommand(() => _editor.DisconnectIncoming(node.Id)), iconKey: "disconnect", isEnabled: permissions.Connections.AllowDisconnect),
+                    new MenuItemDescriptor("node-disconnect-out", L("editor.menu.node.disconnect.outgoing", "Outgoing"), new RelayCommand(() => _editor.DisconnectOutgoing(node.Id)), iconKey: "disconnect", isEnabled: permissions.Connections.AllowDisconnect),
+                    new MenuItemDescriptor("node-disconnect-all", L("editor.menu.node.disconnect.all", "All"), new RelayCommand(() => _editor.DisconnectAll(node.Id)), iconKey: "disconnect", isEnabled: permissions.Connections.AllowDisconnect),
                 ]),
-            new MenuItemDescriptor("node-create-connection", "Create Connection From", children: connectMenus, iconKey: "connect", isEnabled: permissions.Connections.AllowCreate),
+            new MenuItemDescriptor("node-create-connection", L("editor.menu.node.createConnectionFrom", "Create Connection From"), children: connectMenus, iconKey: "connect", isEnabled: permissions.Connections.AllowCreate),
         ];
     }
 
@@ -199,18 +208,18 @@ internal sealed class GraphContextMenuBuilder
             var compatibleTargets = BuildCompatibleTargetItems(node.Id, port.Id);
             return
             [
-                new MenuItemDescriptor("port-start", "Start Connection", new RelayCommand(() => _editor.StartConnection(node.Id, port.Id)), iconKey: "connect", isEnabled: canCreateConnection),
-                new MenuItemDescriptor("port-compatible-targets", "Compatible Targets", children: compatibleTargets, iconKey: "compatible", isEnabled: compatibleTargets.Count > 0),
+                new MenuItemDescriptor("port-start", L("editor.menu.port.startConnection", "Start Connection"), new RelayCommand(() => _editor.StartConnection(node.Id, port.Id)), iconKey: "connect", isEnabled: canCreateConnection),
+                new MenuItemDescriptor("port-compatible-targets", L("editor.menu.port.compatibleTargets", "Compatible Targets"), children: compatibleTargets, iconKey: "compatible", isEnabled: compatibleTargets.Count > 0),
                 MenuItemDescriptor.Separator("port-sep-1"),
-                new MenuItemDescriptor("port-info", $"Type: {port.TypeId}", iconKey: "type", isEnabled: false),
+                new MenuItemDescriptor("port-info", LF("editor.menu.port.typeInfo", "Type: {0}", port.TypeId), iconKey: "type", isEnabled: false),
             ];
         }
 
         return
         [
-            new MenuItemDescriptor("port-break-connections", "Break Connections", new RelayCommand(() => _editor.BreakConnectionsForPort(node.Id, port.Id)), iconKey: "disconnect", isEnabled: _editor.CommandPermissions.Connections.AllowDisconnect),
+            new MenuItemDescriptor("port-break-connections", L("editor.menu.port.breakConnections", "Break Connections"), new RelayCommand(() => _editor.BreakConnectionsForPort(node.Id, port.Id)), iconKey: "disconnect", isEnabled: _editor.CommandPermissions.Connections.AllowDisconnect),
             MenuItemDescriptor.Separator("port-sep-2"),
-            new MenuItemDescriptor("port-info", $"Type: {port.TypeId}", iconKey: "type", isEnabled: false),
+            new MenuItemDescriptor("port-info", LF("editor.menu.port.typeInfo", "Type: {0}", port.TypeId), iconKey: "type", isEnabled: false),
         ];
     }
 
@@ -228,12 +237,12 @@ internal sealed class GraphContextMenuBuilder
         }
 
         var conversionLabel = connection.ConversionId is null
-            ? "No implicit conversion"
-            : $"Conversion: {connection.ConversionId.Value}";
+            ? L("editor.menu.connection.noImplicitConversion", "No implicit conversion")
+            : LF("editor.menu.connection.conversion", "Conversion: {0}", connection.ConversionId.Value);
 
         return
         [
-            new MenuItemDescriptor("connection-delete", "Delete Connection", new RelayCommand(() => _editor.DeleteConnection(connection.Id)), iconKey: "delete", isEnabled: _editor.CommandPermissions.Connections.AllowDelete),
+            new MenuItemDescriptor("connection-delete", L("editor.menu.connection.deleteConnection", "Delete Connection"), new RelayCommand(() => _editor.DeleteConnection(connection.Id)), iconKey: "delete", isEnabled: _editor.CommandPermissions.Connections.AllowDelete),
             new MenuItemDescriptor("connection-conversion", conversionLabel, iconKey: "conversion", isEnabled: false),
         ];
     }
@@ -243,7 +252,7 @@ internal sealed class GraphContextMenuBuilder
         var targets = _editor.GetCompatibleTargets(sourceNodeId, sourcePortId);
         if (targets.Count == 0)
         {
-            return [new MenuItemDescriptor("no-compatible-targets", "No Compatible Targets", iconKey: "info", isEnabled: false)];
+            return [new MenuItemDescriptor("no-compatible-targets", L("editor.menu.compatibility.noTargets", "No Compatible Targets"), iconKey: "info", isEnabled: false)];
         }
 
         return targets
@@ -257,7 +266,7 @@ internal sealed class GraphContextMenuBuilder
                     .Select(target => new MenuItemDescriptor(
                         $"compatible-port-{target.Node.Id}-{target.Port.Id}",
                         target.Compatibility.Kind == PortCompatibilityKind.ImplicitConversion
-                            ? $"{target.Port.Label} (implicit: {target.Compatibility.ConversionId!.Value})"
+                            ? LF("editor.menu.compatibility.implicitTarget", "{0} (implicit: {1})", target.Port.Label, target.Compatibility.ConversionId!.Value)
                             : target.Port.Label,
                         new RelayCommand(() => _editor.ConnectPorts(sourceNodeId, sourcePortId, target.Node.Id, target.Port.Id)),
                         iconKey: target.Compatibility.Kind == PortCompatibilityKind.ImplicitConversion ? "conversion" : "connect",
@@ -275,6 +284,12 @@ internal sealed class GraphContextMenuBuilder
             ? $"{node.Title} [{node.Id}]"
             : node.Title;
     }
+
+    private string L(string key, string fallback)
+        => _localize(key, fallback);
+
+    private string LF(string key, string fallback, params object?[] arguments)
+        => string.Format(CultureInfo.InvariantCulture, L(key, fallback), arguments);
 
     private static string? ResolveWorkspaceDisabledReason(
         bool isAllowedByHost,
