@@ -1,5 +1,6 @@
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Core.Models;
+using AsterGraph.Editor.Hosting;
 
 namespace AsterGraph.Editor.Menus;
 
@@ -22,6 +23,7 @@ public sealed record ContextMenuContext
     /// <param name="clickedPortId">当前点击端口标识。</param>
     /// <param name="clickedConnectionId">当前点击连线标识。</param>
     /// <param name="availableNodeDefinitions">当前可用节点定义集合。</param>
+    /// <param name="hostContext">当前可选宿主上下文。</param>
     public ContextMenuContext(
         ContextMenuTargetKind targetKind,
         GraphPoint worldPosition,
@@ -33,7 +35,8 @@ public sealed record ContextMenuContext
         string? clickedPortNodeId = null,
         string? clickedPortId = null,
         string? clickedConnectionId = null,
-        IReadOnlyList<INodeDefinition>? availableNodeDefinitions = null)
+        IReadOnlyList<INodeDefinition>? availableNodeDefinitions = null,
+        IGraphHostContext? hostContext = null)
     {
         if ((clickedPortNodeId is null) != (clickedPortId is null))
         {
@@ -51,6 +54,7 @@ public sealed record ContextMenuContext
         ClickedPortId = clickedPortId;
         ClickedConnectionId = clickedConnectionId;
         AvailableNodeDefinitions = availableNodeDefinitions ?? [];
+        HostContext = hostContext;
     }
 
     /// <summary>
@@ -107,6 +111,11 @@ public sealed record ContextMenuContext
     /// 获取当前可用节点定义集合。
     /// </summary>
     public IReadOnlyList<INodeDefinition> AvailableNodeDefinitions { get; }
+
+    /// <summary>
+    /// 获取当前宿主上下文。
+    /// </summary>
+    public IGraphHostContext? HostContext { get; }
 
     private static IReadOnlyList<string> NormalizeIdentifiers(IReadOnlyList<string>? identifiers, string? singleIdentifier)
     {

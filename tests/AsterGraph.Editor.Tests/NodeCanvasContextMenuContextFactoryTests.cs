@@ -2,6 +2,7 @@ using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Avalonia.Controls.Internal;
 using AsterGraph.Core.Models;
+using AsterGraph.Editor.Hosting;
 using AsterGraph.Editor.Menus;
 using Xunit;
 
@@ -74,6 +75,41 @@ public sealed class NodeCanvasContextMenuContextFactoryTests
         Assert.Equal("connection-001", context.ClickedConnectionId);
     }
 
+    [Fact]
+    public void CreateAllContexts_PreserveHostContext()
+    {
+        var snapshot = CreateSnapshot();
+        var hostContext = new TestGraphHostContext();
+
+        var canvasContext = NodeCanvasContextMenuContextFactory.CreateCanvasContext(
+            snapshot,
+            new GraphPoint(10, 20),
+            useSelectionTools: false,
+            hostContext: hostContext);
+        var nodeContext = NodeCanvasContextMenuContextFactory.CreateNodeContext(
+            snapshot,
+            new GraphPoint(20, 30),
+            "node-002",
+            useSelectionTools: false,
+            hostContext: hostContext);
+        var portContext = NodeCanvasContextMenuContextFactory.CreatePortContext(
+            snapshot,
+            new GraphPoint(30, 40),
+            "node-002",
+            "out-color",
+            hostContext: hostContext);
+        var connectionContext = NodeCanvasContextMenuContextFactory.CreateConnectionContext(
+            snapshot,
+            new GraphPoint(40, 50),
+            "connection-001",
+            hostContext: hostContext);
+
+        Assert.Same(hostContext, canvasContext.HostContext);
+        Assert.Same(hostContext, nodeContext.HostContext);
+        Assert.Same(hostContext, portContext.HostContext);
+        Assert.Same(hostContext, connectionContext.HostContext);
+    }
+
     private static NodeCanvasContextMenuSnapshot CreateSnapshot()
         => new(
             SelectedNodeId: "node-001",
@@ -88,4 +124,13 @@ public sealed class NodeCanvasContextMenuContextFactoryTests
                     [],
                     []),
             ]);
+
+    private sealed class TestGraphHostContext : IGraphHostContext
+    {
+        public object Owner { get; } = new();
+
+        public object TopLevel { get; } = new();
+
+        public IServiceProvider? Services => null;
+    }
 }

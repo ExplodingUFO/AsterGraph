@@ -15,6 +15,7 @@ using AsterGraph.Core.Serialization;
 using AsterGraph.Editor.Configuration;
 using AsterGraph.Editor.Events;
 using AsterGraph.Editor.Geometry;
+using AsterGraph.Editor.Hosting;
 using AsterGraph.Editor.Menus;
 using AsterGraph.Editor.Models;
 using AsterGraph.Editor.Services;
@@ -86,6 +87,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     private IGraphContextMenuAugmentor? _contextMenuAugmentor;
     private GraphEditorBehaviorOptions _behaviorOptions = GraphEditorBehaviorOptions.Default;
     private IGraphTextClipboardBridge? _textClipboardBridge;
+    private IGraphHostContext? _hostContext;
     private readonly GraphContextMenuBuilder _contextMenuBuilder;
     private bool _suspendDirtyTracking;
     private bool _suspendHistoryTracking;
@@ -271,6 +273,11 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         get => _contextMenuAugmentor;
         set => SetProperty(ref _contextMenuAugmentor, value);
     }
+
+    /// <summary>
+    /// 获取当前宿主上下文信息。
+    /// </summary>
+    public IGraphHostContext? HostContext => _hostContext;
 
     /// <summary>
     /// 当前工作区快照文件路径。
@@ -637,6 +644,15 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     {
         _textClipboardBridge = bridge;
         RaiseComputedPropertyChanges();
+    }
+
+    /// <summary>
+    /// 设置宿主上下文信息。
+    /// </summary>
+    /// <param name="hostContext">宿主上下文；为 <see langword="null"/> 时清空当前宿主上下文。</param>
+    public void SetHostContext(IGraphHostContext? hostContext)
+    {
+        _hostContext = hostContext;
     }
 
     /// <summary>

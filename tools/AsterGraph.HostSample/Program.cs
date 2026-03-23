@@ -7,6 +7,7 @@ using AsterGraph.Core.Compatibility;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Catalog;
 using AsterGraph.Editor.Configuration;
+using AsterGraph.Editor.Hosting;
 using AsterGraph.Editor.Menus;
 using AsterGraph.Editor.ViewModels;
 
@@ -74,13 +75,15 @@ editor.FragmentImported += (_, args) =>
 var positions = editor.GetNodePositions();
 editor.TryGetNodePosition("sample-source-001", out var snapshot);
 
-var menu = editor.BuildContextMenu(
-    new ContextMenuContext(
+var hostContext = new HostSampleGraphHostContext();
+var menuContext = new ContextMenuContext(
         ContextMenuTargetKind.Node,
         new GraphPoint(120, 160),
         selectedNodeId: "sample-source-001",
         selectedNodeIds: ["sample-source-001"],
-        clickedNodeId: "sample-source-001"));
+        clickedNodeId: "sample-source-001",
+        hostContext: hostContext);
+var menu = editor.BuildContextMenu(menuContext);
 
 Console.WriteLine($"Host sample view type: {typeof(GraphEditorView).FullName}");
 Console.WriteLine($"Node count: {editor.Nodes.Count}");
@@ -89,6 +92,7 @@ Console.WriteLine($"Selected snapshot found: {snapshot is not null}");
 Console.WriteLine($"Menu item count: {menu.Count}");
 Console.WriteLine($"Last menu item: {menu[^1].Header}");
 Console.WriteLine($"ReadOnly host extension allowed: {editor.CommandPermissions.Host.AllowContextMenuExtensions}");
+Console.WriteLine($"Host context flowed into menu request: {ReferenceEquals(hostContext, menuContext.HostContext)}");
 
 internal sealed class HostSampleNodeDefinitionProvider : INodeDefinitionProvider
 {
@@ -135,8 +139,17 @@ internal sealed class HostSampleAugmentor : IGraphContextMenuAugmentor
             new MenuItemDescriptor(
                 "host-sample-preview",
                 "Host Preview",
-                new RelayCommand(() => editor.StatusMessage = $"Host preview for {context.ClickedNodeId}"),
+                new RelayCommand(() => editor.StatusMessage = $"Host preview for {context.ClickedNodeId} ({context.HostContext?.Owner.GetType().Name ?? "no-host"})"),
                 iconKey: "inspect"));
         return items;
     }
+}
+
+internal sealed class HostSampleGraphHostContext : IGraphHostContext
+{
+    public object Owner { get; } = "HostSampleOwner";
+
+    public object? TopLevel { get; } = "HostSampleTopLevel";
+
+    public IServiceProvider? Services => null;
 }

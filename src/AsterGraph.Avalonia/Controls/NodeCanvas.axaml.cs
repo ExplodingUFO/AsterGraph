@@ -298,7 +298,8 @@ public partial class NodeCanvas : UserControl
                     CreateContextMenuSnapshot(),
                     ResolveWorldPosition(args, this),
                     node.Id,
-                    useSelectionTools: targetKind == ContextMenuTargetKind.Selection));
+                    useSelectionTools: targetKind == ContextMenuTargetKind.Selection,
+                    hostContext: ViewModel.HostContext));
             args.Handled = true;
         };
 
@@ -410,7 +411,8 @@ public partial class NodeCanvas : UserControl
                         CreateContextMenuSnapshot(),
                         ResolveWorldPosition(args, this),
                         node.Id,
-                        port.Id));
+                        port.Id,
+                        ViewModel.HostContext));
                 args.Handled = true;
             };
 
@@ -544,7 +546,8 @@ public partial class NodeCanvas : UserControl
                 NodeCanvasContextMenuContextFactory.CreateConnectionContext(
                     CreateContextMenuSnapshot(),
                     ResolveWorldPosition(args, this),
-                    connection.Id));
+                    connection.Id,
+                    ViewModel.HostContext));
             args.Handled = true;
         };
 
@@ -778,7 +781,8 @@ public partial class NodeCanvas : UserControl
             NodeCanvasContextMenuContextFactory.CreateCanvasContext(
                 CreateContextMenuSnapshot(),
                 ResolveWorldPosition(args, this),
-                useSelectionTools: ViewModel.HasMultipleSelection));
+                useSelectionTools: ViewModel.HasMultipleSelection,
+                hostContext: ViewModel.HostContext));
         args.Handled = true;
     }
 

@@ -6,6 +6,7 @@ using Avalonia.Markup.Xaml;
 using Avalonia.VisualTree;
 using AsterGraph.Avalonia.Services;
 using AsterGraph.Avalonia.Styling;
+using AsterGraph.Editor.Hosting;
 using AsterGraph.Editor.ViewModels;
 
 namespace AsterGraph.Avalonia.Controls;
@@ -49,9 +50,11 @@ public partial class GraphEditorView : UserControl
         if (change.Property == EditorProperty)
         {
             change.GetOldValue<GraphEditorViewModel?>()?.SetTextClipboardBridge(null);
+            change.GetOldValue<GraphEditorViewModel?>()?.SetHostContext(null);
             var editor = change.GetNewValue<GraphEditorViewModel?>();
             ApplyStyleOptions(editor);
             ApplyClipboardBridge(editor);
+            ApplyHostContext(editor);
         }
     }
 
@@ -60,12 +63,14 @@ public partial class GraphEditorView : UserControl
     {
         base.OnAttachedToVisualTree(e);
         ApplyClipboardBridge(Editor);
+        ApplyHostContext(Editor);
     }
 
     /// <inheritdoc />
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
     {
         Editor?.SetTextClipboardBridge(null);
+        Editor?.SetHostContext(null);
         base.OnDetachedFromVisualTree(e);
     }
 
@@ -95,6 +100,18 @@ public partial class GraphEditorView : UserControl
 
         // 编辑器只看到纯文本桥接口，真正的平台剪贴板访问仍由 Avalonia 层负责。
         editor.SetTextClipboardBridge(new AvaloniaTextClipboardBridge(() => TopLevel.GetTopLevel(this)?.Clipboard));
+    }
+
+    private void ApplyHostContext(GraphEditorViewModel? editor)
+    {
+        if (editor is null)
+        {
+            return;
+        }
+
+        var resolvedTopLevel = TopLevel.GetTopLevel(this);
+        object topLevel = resolvedTopLevel is null ? this : resolvedTopLevel;
+        editor.SetHostContext(new AvaloniaGraphHostContext(this, topLevel));
     }
 
     private void HandleKeyDown(object? sender, KeyEventArgs args)
@@ -195,5 +212,10 @@ public partial class GraphEditorView : UserControl
         }
 
         return false;
+    }
+
+    private sealed record AvaloniaGraphHostContext(object Owner, object TopLevel) : IGraphHostContext
+    {
+        public IServiceProvider? Services => TopLevel as IServiceProvider;
     }
 }
