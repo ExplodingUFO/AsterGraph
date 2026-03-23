@@ -25,14 +25,17 @@ internal sealed class GraphContextMenuPresenter
             BorderThickness = new Thickness(style.BorderThickness),
             CornerRadius = new CornerRadius(style.CornerRadius),
             MinWidth = style.ItemMinWidth,
-            ItemsSource = descriptors.Select(descriptor => BuildMenuControl(descriptor, style)).ToList(),
+            ItemsSource = descriptors.Select(descriptor => BuildMenuControlCore(descriptor, style)).ToList(),
         };
 
         menu.Classes.Add("astergraph-context-menu");
         menu.Open(target);
     }
 
-    private static object BuildMenuControl(MenuItemDescriptor descriptor, ContextMenuStyleOptions style)
+    internal static object BuildMenuControlForTest(MenuItemDescriptor descriptor, ContextMenuStyleOptions style)
+        => BuildMenuControlCore(descriptor, style);
+
+    private static object BuildMenuControlCore(MenuItemDescriptor descriptor, ContextMenuStyleOptions style)
     {
         if (descriptor.IsSeparator)
         {
@@ -69,7 +72,7 @@ internal sealed class GraphContextMenuPresenter
 
         if (descriptor.HasChildren)
         {
-            menuItem.ItemsSource = descriptor.Children.Select(child => BuildMenuControl(child, style)).ToList();
+            menuItem.ItemsSource = descriptor.Children.Select(child => BuildMenuControlCore(child, style)).ToList();
         }
 
         if (descriptor.IsEnabled)
@@ -79,6 +82,10 @@ internal sealed class GraphContextMenuPresenter
 
             menuItem.PointerEntered += (_, _) => menuItem.Background = hoverBackground;
             menuItem.PointerExited += (_, _) => menuItem.Background = defaultBackground;
+        }
+        else if (!string.IsNullOrWhiteSpace(descriptor.DisabledReason))
+        {
+            ToolTip.SetTip(menuItem, descriptor.DisabledReason);
         }
 
         return menuItem;
