@@ -2,13 +2,16 @@ using CommunityToolkit.Mvvm.Input;
 using AsterGraph.Abstractions.Catalog;
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
+using AsterGraph.Abstractions.Styling;
 using AsterGraph.Avalonia.Controls;
 using AsterGraph.Core.Compatibility;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Catalog;
 using AsterGraph.Editor.Configuration;
 using AsterGraph.Editor.Hosting;
+using AsterGraph.Editor.Localization;
 using AsterGraph.Editor.Menus;
+using AsterGraph.Editor.Presentation;
 using AsterGraph.Editor.ViewModels;
 
 var catalog = new NodeCatalog();
@@ -37,9 +40,22 @@ var document = new GraphDocument(
                     new PortTypeId("float")),
             ],
             "#6AD5C4",
-            new NodeDefinitionId("host.sample.source"))
+            new NodeDefinitionId("host.sample.source")),
     ],
     []);
+
+var style = GraphEditorStyleOptions.Default with
+{
+    Shell = GraphEditorStyleOptions.Default.Shell with
+    {
+        HighlightHex = "#F3B36B",
+        LibraryPanelWidth = 312,
+    },
+    ContextMenu = GraphEditorStyleOptions.Default.ContextMenu with
+    {
+        BackgroundHex = "#102332",
+    },
+};
 
 var permissions = GraphEditorCommandPermissions.ReadOnly with
 {
@@ -58,8 +74,11 @@ var editor = new GraphEditorViewModel(
     document,
     catalog,
     new DefaultPortCompatibilityService(),
+    styleOptions: style,
     behaviorOptions: behavior,
-    contextMenuAugmentor: new HostSampleAugmentor());
+    contextMenuAugmentor: new HostSampleAugmentor(),
+    nodePresentationProvider: new HostSamplePresentationProvider(),
+    localizationProvider: new HostSampleLocalizationProvider());
 
 editor.DocumentChanged += (_, args) =>
     Console.WriteLine($"DocumentChanged subscribed: {args.ChangeKind}");
@@ -75,15 +94,21 @@ editor.FragmentImported += (_, args) =>
 var positions = editor.GetNodePositions();
 editor.TryGetNodePosition("sample-source-001", out var snapshot);
 
-var hostContext = new HostSampleGraphHostContext();
+var hostContext = new HostSampleGraphHostContext(
+    new HostSampleOwner("owner-001", "Host Shell"),
+    new HostSampleTopLevel("shell-001", "Primary Tool Window"));
 var menuContext = new ContextMenuContext(
-        ContextMenuTargetKind.Node,
-        new GraphPoint(120, 160),
-        selectedNodeId: "sample-source-001",
-        selectedNodeIds: ["sample-source-001"],
-        clickedNodeId: "sample-source-001",
-        hostContext: hostContext);
+    ContextMenuTargetKind.Node,
+    new GraphPoint(120, 160),
+    selectedNodeId: "sample-source-001",
+    selectedNodeIds: ["sample-source-001"],
+    clickedNodeId: "sample-source-001",
+    hostContext: hostContext);
 var menu = editor.BuildContextMenu(menuContext);
+
+var node = editor.Nodes[0];
+var ownerMatched = menuContext.TryGetOwner<HostSampleOwner>(out var typedOwner);
+var topLevelMatched = menuContext.TryGetTopLevel<HostSampleTopLevel>(out var typedTopLevel);
 
 Console.WriteLine($"Host sample view type: {typeof(GraphEditorView).FullName}");
 Console.WriteLine($"Node count: {editor.Nodes.Count}");
@@ -93,6 +118,14 @@ Console.WriteLine($"Menu item count: {menu.Count}");
 Console.WriteLine($"Last menu item: {menu[^1].Header}");
 Console.WriteLine($"ReadOnly host extension allowed: {editor.CommandPermissions.Host.AllowContextMenuExtensions}");
 Console.WriteLine($"Host context flowed into menu request: {ReferenceEquals(hostContext, menuContext.HostContext)}");
+Console.WriteLine($"Localized inspector title: {editor.InspectorTitle}");
+Console.WriteLine($"Presentation subtitle: {node.DisplaySubtitle}");
+Console.WriteLine($"Presentation badge count: {node.Presentation.TopRightBadges.Count}");
+Console.WriteLine($"Presentation status bar: {node.Presentation.StatusBar?.Text ?? "<none>"}");
+Console.WriteLine($"Typed host owner found: {ownerMatched} ({typedOwner?.DisplayName ?? "<none>"})");
+Console.WriteLine($"Typed host top level found: {topLevelMatched} ({typedTopLevel?.WindowTitle ?? "<none>"})");
+Console.WriteLine($"Style highlight hex: {editor.StyleOptions.Shell.HighlightHex}");
+Console.WriteLine($"Style context menu background: {editor.StyleOptions.ContextMenu.BackgroundHex}");
 
 internal sealed class HostSampleNodeDefinitionProvider : INodeDefinitionProvider
 {
@@ -133,23 +166,63 @@ internal sealed class HostSampleAugmentor : IGraphContextMenuAugmentor
             return stockItems;
         }
 
+        var header = "Host Preview";
+        if (context.TryGetTopLevel<HostSampleTopLevel>(out var topLevel)
+            && topLevel is not null)
+        {
+            header = $"Host Preview ({topLevel.WindowTitle})";
+        }
+
         var items = stockItems.ToList();
         items.Add(MenuItemDescriptor.Separator("host-sample-separator"));
         items.Add(
             new MenuItemDescriptor(
                 "host-sample-preview",
-                "Host Preview",
-                new RelayCommand(() => editor.StatusMessage = $"Host preview for {context.ClickedNodeId} ({context.HostContext?.Owner.GetType().Name ?? "no-host"})"),
+                header,
+                new RelayCommand(() => editor.StatusMessage = $"Host preview for {context.ClickedNodeId}"),
                 iconKey: "inspect"));
         return items;
     }
 }
 
-internal sealed class HostSampleGraphHostContext : IGraphHostContext
+internal sealed class HostSamplePresentationProvider : INodePresentationProvider
 {
-    public object Owner { get; } = "HostSampleOwner";
+    public NodePresentationState GetNodePresentation(NodeViewModel node)
+        => new(
+            SubtitleOverride: "Runtime annotated",
+            DescriptionOverride: node.Description,
+            TopRightBadges:
+            [
+                new NodeAdornmentDescriptor("Ready", "#6AD5C4", "Host reports the node is ready."),
+                new NodeAdornmentDescriptor("Host", "#F3B36B", "State comes from the embedding host."),
+            ],
+            StatusBar: new NodeStatusBarDescriptor(
+                "Preview available",
+                "#6AD5C4",
+                "Host sample marks this node as preview-ready."));
+}
 
-    public object? TopLevel { get; } = "HostSampleTopLevel";
+internal sealed class HostSampleLocalizationProvider : IGraphLocalizationProvider
+{
+    private static readonly IReadOnlyDictionary<string, string> Values =
+        new Dictionary<string, string>(StringComparer.Ordinal)
+        {
+            ["editor.inspector.title.none"] = "请选择宿主节点",
+        };
+
+    public string GetString(string key, string fallback)
+        => Values.TryGetValue(key, out var value) ? value : fallback;
+}
+
+internal sealed record HostSampleGraphHostContext(HostSampleOwner Owner, HostSampleTopLevel? TopLevel) : IGraphHostContext
+{
+    object IGraphHostContext.Owner => Owner;
+
+    object? IGraphHostContext.TopLevel => TopLevel;
 
     public IServiceProvider? Services => null;
 }
+
+internal sealed record HostSampleOwner(string Id, string DisplayName);
+
+internal sealed record HostSampleTopLevel(string Id, string WindowTitle);
