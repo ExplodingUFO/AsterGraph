@@ -20,5 +20,6 @@
     <ProjectReference Include="..\..\src\AsterGraph.Abstractions\AsterGraph.Abstractions.csproj" />
     <ProjectReference Include="..\..\src\AsterGraph.Core\AsterGraph.Core.csproj" />
     <ProjectReference Include="..\..\src\AsterGraph.Editor\AsterGraph.Editor.csproj" />
+    <ProjectReference Include="..\..\src\AsterGraph.Avalonia\AsterGraph.Avalonia.csproj" />
   </ItemGroup>
 </Project>

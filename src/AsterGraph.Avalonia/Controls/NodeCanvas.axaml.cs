@@ -11,6 +11,7 @@ using Avalonia.Media;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using AsterGraph.Abstractions.Styling;
+using AsterGraph.Avalonia.Controls.Internal;
 using AsterGraph.Avalonia.Menus;
 using AsterGraph.Avalonia.Styling;
 using AsterGraph.Core.Models;
@@ -1139,74 +1140,23 @@ public partial class NodeCanvas : UserControl
             return new GraphPoint(deltaX, deltaY);
         }
 
-        var movingBounds = dragSession.OriginBounds;
-        var proposedBounds = new NodeBounds(
-            movingBounds.X + deltaX,
-            movingBounds.Y + deltaY,
-            movingBounds.Width,
-            movingBounds.Height);
-
         var tolerance = behavior.SnapTolerance / Math.Max(ViewModel.Zoom, 0.001);
-        var snapDeltaX = 0d;
-        var snapDeltaY = 0d;
-        double? guideWorldX = null;
-        double? guideWorldY = null;
-        var bestXDelta = double.PositiveInfinity;
-        var bestYDelta = double.PositiveInfinity;
+        var movingNodeIds = dragSession.Nodes.Select(node => node.Id).ToHashSet(StringComparer.Ordinal);
+        var candidateBounds = ViewModel.Nodes
+            .Where(node => !movingNodeIds.Contains(node.Id))
+            .Select(node => new NodeBounds(node.X, node.Y, node.Width, node.Height));
+        var result = NodeCanvasDragAssistCalculator.Calculate(
+            dragSession.OriginBounds,
+            deltaX,
+            deltaY,
+            candidateBounds,
+            behavior.EnableGridSnapping,
+            behavior.EnableAlignmentGuides,
+            style.PrimaryGridSpacing,
+            tolerance);
 
-        if (behavior.EnableGridSnapping)
-        {
-            var snappedX = Math.Round(proposedBounds.X / style.PrimaryGridSpacing) * style.PrimaryGridSpacing;
-            var snappedY = Math.Round(proposedBounds.Y / style.PrimaryGridSpacing) * style.PrimaryGridSpacing;
-            var gridDeltaX = snappedX - proposedBounds.X;
-            var gridDeltaY = snappedY - proposedBounds.Y;
-
-            if (Math.Abs(gridDeltaX) <= tolerance)
-            {
-                snapDeltaX = gridDeltaX;
-                bestXDelta = Math.Abs(gridDeltaX);
-            }
-
-            if (Math.Abs(gridDeltaY) <= tolerance)
-            {
-                snapDeltaY = gridDeltaY;
-                bestYDelta = Math.Abs(gridDeltaY);
-            }
-        }
-
-        if (behavior.EnableAlignmentGuides)
-        {
-            var movingNodeIds = dragSession.Nodes.Select(node => node.Id).ToHashSet(StringComparer.Ordinal);
-            foreach (var candidate in ViewModel.Nodes.Where(node => !movingNodeIds.Contains(node.Id)))
-            {
-                EvaluateGuideAxis(
-                    proposedBounds.X,
-                    proposedBounds.X + (proposedBounds.Width / 2),
-                    proposedBounds.X + proposedBounds.Width,
-                    candidate.X,
-                    candidate.X + (candidate.Width / 2),
-                    candidate.X + candidate.Width,
-                    tolerance,
-                    ref snapDeltaX,
-                    ref bestXDelta,
-                    ref guideWorldX);
-
-                EvaluateGuideAxis(
-                    proposedBounds.Y,
-                    proposedBounds.Y + (proposedBounds.Height / 2),
-                    proposedBounds.Y + proposedBounds.Height,
-                    candidate.Y,
-                    candidate.Y + (candidate.Height / 2),
-                    candidate.Y + candidate.Height,
-                    tolerance,
-                    ref snapDeltaY,
-                    ref bestYDelta,
-                    ref guideWorldY);
-            }
-        }
-
-        ShowGuideAdorners(guideWorldX, guideWorldY);
-        return new GraphPoint(deltaX + snapDeltaX, deltaY + snapDeltaY);
+        ShowGuideAdorners(result.GuideWorldX, result.GuideWorldY);
+        return result.AdjustedDelta;
     }
 
     private NodeBounds GetSelectionBounds(IReadOnlyList<NodeViewModel> nodes)
@@ -1285,40 +1235,6 @@ public partial class NodeCanvas : UserControl
         => ViewportMath.WorldToScreen(
             new ViewportState(ViewModel?.Zoom ?? 1, ViewModel?.PanX ?? 0, ViewModel?.PanY ?? 0),
             new GraphPoint(x, y));
-
-    private static void EvaluateGuideAxis(
-        double movingStart,
-        double movingCenter,
-        double movingEnd,
-        double candidateStart,
-        double candidateCenter,
-        double candidateEnd,
-        double tolerance,
-        ref double snapDelta,
-        ref double bestDeltaMagnitude,
-        ref double? guideWorld)
-    {
-        var pairs = new (double moving, double candidate)[]
-        {
-            (movingStart, candidateStart),
-            (movingCenter, candidateCenter),
-            (movingEnd, candidateEnd),
-        };
-
-        foreach (var pair in pairs)
-        {
-            var delta = pair.candidate - pair.moving;
-            var magnitude = Math.Abs(delta);
-            if (magnitude > tolerance || magnitude >= bestDeltaMagnitude)
-            {
-                continue;
-            }
-
-            snapDelta = delta;
-            bestDeltaMagnitude = magnitude;
-            guideWorld = pair.candidate;
-        }
-    }
 
     private sealed record NodeVisual(
         Border Border,
