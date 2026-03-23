@@ -202,6 +202,12 @@ public partial class NodeCanvas : UserControl
             CornerRadius = new CornerRadius(nodeStyle.CornerRadius, nodeStyle.CornerRadius, 0, 0),
         };
 
+        var headerGrid = new Grid
+        {
+            ColumnDefinitions = new ColumnDefinitions("*,Auto"),
+            ColumnSpacing = 10,
+        };
+
         var headerStack = new StackPanel { Spacing = nodeStyle.HeaderSpacing };
         headerStack.Children.Add(new TextBlock
         {
@@ -217,13 +223,25 @@ public partial class NodeCanvas : UserControl
             FontWeight = FontWeight.SemiBold,
             Foreground = BrushFactory.Solid(nodeStyle.TitleTextHex),
         });
-        headerStack.Children.Add(new TextBlock
+        var subtitle = new TextBlock
         {
-            Text = node.Subtitle,
             FontSize = nodeStyle.SubtitleFontSize,
             Foreground = BrushFactory.Solid(nodeStyle.SubtitleTextHex, nodeStyle.SubtitleTextOpacity),
-        });
-        header.Child = headerStack;
+        };
+        headerStack.Children.Add(subtitle);
+        headerGrid.Children.Add(headerStack);
+
+        var badgePanel = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Spacing = 6,
+            HorizontalAlignment = HorizontalAlignment.Right,
+            VerticalAlignment = VerticalAlignment.Top,
+            IsVisible = false,
+        };
+        Grid.SetColumn(badgePanel, 1);
+        headerGrid.Children.Add(badgePanel);
+        header.Child = headerGrid;
         root.Children.Add(header);
 
         var body = new Grid
@@ -233,7 +251,7 @@ public partial class NodeCanvas : UserControl
                 nodeStyle.BodyTopPadding,
                 nodeStyle.BodyHorizontalPadding,
                 nodeStyle.BodyBottomPadding),
-            RowDefinitions = new RowDefinitions("Auto,*"),
+            RowDefinitions = new RowDefinitions("Auto,*,Auto"),
             ColumnDefinitions = new ColumnDefinitions("*,*"),
             ColumnSpacing = nodeStyle.BodyColumnSpacing,
             RowSpacing = nodeStyle.BodyRowSpacing,
@@ -242,7 +260,6 @@ public partial class NodeCanvas : UserControl
 
         var description = new TextBlock
         {
-            Text = node.Description,
             FontSize = nodeStyle.DescriptionFontSize,
             TextWrapping = TextWrapping.Wrap,
             Foreground = BrushFactory.Solid(nodeStyle.DescriptionTextHex, nodeStyle.DescriptionTextOpacity),
@@ -259,6 +276,26 @@ public partial class NodeCanvas : UserControl
         Grid.SetRow(outputs, 1);
         Grid.SetColumn(outputs, 1);
         body.Children.Add(outputs);
+
+        var statusBarText = new TextBlock
+        {
+            FontSize = 11,
+            FontWeight = FontWeight.SemiBold,
+            Foreground = Brushes.White,
+            TextWrapping = TextWrapping.NoWrap,
+            TextTrimming = TextTrimming.CharacterEllipsis,
+        };
+        var statusBar = new Border
+        {
+            IsVisible = false,
+            BorderThickness = new Thickness(1),
+            CornerRadius = new CornerRadius(Math.Max(6, nodeStyle.CornerRadius - 12)),
+            Padding = new Thickness(10, 4),
+            Child = statusBarText,
+        };
+        Grid.SetRow(statusBar, 2);
+        Grid.SetColumnSpan(statusBar, 2);
+        body.Children.Add(statusBar);
 
         root.Children.Add(body);
         border.Child = root;
@@ -303,7 +340,15 @@ public partial class NodeCanvas : UserControl
             args.Handled = true;
         };
 
-        return new NodeVisual(border, header, portAnchors);
+        return new NodeVisual(
+            border,
+            header,
+            subtitle,
+            description,
+            badgePanel,
+            statusBar,
+            statusBarText,
+            portAnchors);
     }
 
     private StackPanel BuildPortPanel(
@@ -859,6 +904,7 @@ public partial class NodeCanvas : UserControl
                 RenderConnections();
                 break;
             case nameof(NodeViewModel.IsSelected):
+            case nameof(NodeViewModel.Presentation):
                 UpdateNodeVisual(node);
                 break;
         }
@@ -893,6 +939,53 @@ public partial class NodeCanvas : UserControl
         visual.Border.BorderBrush = BrushFactory.Solid(node.IsSelected ? node.AccentHex : nodeStyle.BorderHex);
         visual.Header.Background = BrushFactory.Solid(node.AccentHex, node.IsSelected ? nodeStyle.SelectedHeaderOpacity : nodeStyle.HeaderOpacity);
         visual.Border.BorderThickness = new Thickness(node.IsSelected ? nodeStyle.SelectedBorderThickness : nodeStyle.BorderThickness);
+        visual.Subtitle.Text = node.DisplaySubtitle;
+        visual.Description.Text = node.DisplayDescription;
+
+        visual.BadgePanel.Children.Clear();
+        foreach (var badge in node.Presentation.TopRightBadges)
+        {
+            var badgeBorder = new Border
+            {
+                CornerRadius = new CornerRadius(999),
+                BorderThickness = new Thickness(1),
+                BorderBrush = BrushFactory.Solid(badge.AccentHex, 0.8),
+                Background = BrushFactory.Solid(badge.AccentHex, 0.2),
+                Padding = new Thickness(7, 2),
+                Child = new TextBlock
+                {
+                    Text = badge.Text,
+                    FontSize = 10,
+                    FontWeight = FontWeight.SemiBold,
+                    Foreground = BrushFactory.Solid("#FFFFFF", 0.95),
+                    TextWrapping = TextWrapping.NoWrap,
+                },
+            };
+
+            if (!string.IsNullOrWhiteSpace(badge.ToolTip))
+            {
+                ToolTip.SetTip(badgeBorder, badge.ToolTip);
+            }
+
+            visual.BadgePanel.Children.Add(badgeBorder);
+        }
+
+        visual.BadgePanel.IsVisible = visual.BadgePanel.Children.Count > 0;
+
+        if (node.Presentation.StatusBar is { } statusBar)
+        {
+            visual.StatusBar.IsVisible = true;
+            visual.StatusBar.Background = BrushFactory.Solid(statusBar.AccentHex, 0.24);
+            visual.StatusBar.BorderBrush = BrushFactory.Solid(statusBar.AccentHex, 0.78);
+            visual.StatusBarText.Text = statusBar.Text;
+            ToolTip.SetTip(visual.StatusBar, statusBar.ToolTip);
+        }
+        else
+        {
+            visual.StatusBar.IsVisible = false;
+            visual.StatusBarText.Text = string.Empty;
+            ToolTip.SetTip(visual.StatusBar, null);
+        }
 
         Canvas.SetLeft(visual.Border, node.X);
         Canvas.SetTop(visual.Border, node.Y);
@@ -1217,6 +1310,11 @@ public partial class NodeCanvas : UserControl
     private sealed record NodeVisual(
         Border Border,
         Border Header,
+        TextBlock Subtitle,
+        TextBlock Description,
+        StackPanel BadgePanel,
+        Border StatusBar,
+        TextBlock StatusBarText,
         IReadOnlyDictionary<string, Border> PortAnchors);
 
 }

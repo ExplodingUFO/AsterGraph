@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Geometry;
+using AsterGraph.Editor.Presentation;
 
 namespace AsterGraph.Editor.ViewModels;
 
@@ -54,6 +55,22 @@ public sealed partial class NodeViewModel : ObservableObject
     public string Subtitle { get; }
 
     public string Description { get; }
+
+    /// <summary>
+    /// 节点当前展示状态快照。
+    /// </summary>
+    [ObservableProperty]
+    private NodePresentationState presentation = NodePresentationState.Empty;
+
+    /// <summary>
+    /// 当前用于渲染的副标题文本。
+    /// </summary>
+    public string DisplaySubtitle => Presentation.SubtitleOverride ?? Subtitle;
+
+    /// <summary>
+    /// 当前用于渲染的描述文本。
+    /// </summary>
+    public string DisplayDescription => Presentation.DescriptionOverride ?? Description;
 
     public string AccentHex { get; }
 
@@ -116,6 +133,19 @@ public sealed partial class NodeViewModel : ObservableObject
     {
         _parameterValues[key] = new GraphParameterValue(key, typeId, value);
         OnPropertyChanged(nameof(ParameterValues));
+    }
+
+    /// <summary>
+    /// 更新节点展示状态快照。
+    /// </summary>
+    /// <param name="state">新的展示状态；为空时回退到默认展示。</param>
+    public void UpdatePresentation(NodePresentationState? state)
+        => Presentation = state ?? NodePresentationState.Empty;
+
+    partial void OnPresentationChanged(NodePresentationState value)
+    {
+        OnPropertyChanged(nameof(DisplaySubtitle));
+        OnPropertyChanged(nameof(DisplayDescription));
     }
 
     private double CalculateRequiredHeight()

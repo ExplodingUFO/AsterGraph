@@ -18,6 +18,7 @@ using AsterGraph.Editor.Geometry;
 using AsterGraph.Editor.Hosting;
 using AsterGraph.Editor.Menus;
 using AsterGraph.Editor.Models;
+using AsterGraph.Editor.Presentation;
 using AsterGraph.Editor.Services;
 using AsterGraph.Editor.Viewport;
 
@@ -88,6 +89,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     private GraphEditorBehaviorOptions _behaviorOptions = GraphEditorBehaviorOptions.Default;
     private IGraphTextClipboardBridge? _textClipboardBridge;
     private IGraphHostContext? _hostContext;
+    private INodePresentationProvider? _nodePresentationProvider;
     private readonly GraphContextMenuBuilder _contextMenuBuilder;
     private bool _suspendDirtyTracking;
     private bool _suspendHistoryTracking;
@@ -109,6 +111,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// <param name="behaviorOptions">行为配置。</param>
     /// <param name="fragmentLibraryService">片段模板库服务。</param>
     /// <param name="contextMenuAugmentor">宿主右键菜单增强器。</param>
+    /// <param name="nodePresentationProvider">节点展示状态提供器。</param>
     public GraphEditorViewModel(
         GraphDocument document,
         INodeCatalog nodeCatalog,
@@ -118,7 +121,8 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         GraphEditorStyleOptions? styleOptions = null,
         GraphEditorBehaviorOptions? behaviorOptions = null,
         GraphFragmentLibraryService? fragmentLibraryService = null,
-        IGraphContextMenuAugmentor? contextMenuAugmentor = null)
+        IGraphContextMenuAugmentor? contextMenuAugmentor = null,
+        INodePresentationProvider? nodePresentationProvider = null)
     {
         _nodeCatalog = nodeCatalog ?? throw new ArgumentNullException(nameof(nodeCatalog));
         _compatibilityService = compatibilityService ?? throw new ArgumentNullException(nameof(compatibilityService));
@@ -128,6 +132,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         _fragmentLibraryService = fragmentLibraryService ?? new GraphFragmentLibraryService();
         _historyService = new GraphEditorHistoryService();
         _contextMenuAugmentor = contextMenuAugmentor;
+        _nodePresentationProvider = nodePresentationProvider;
         StyleOptions = styleOptions ?? GraphEditorStyleOptions.Default;
         BehaviorOptions = ResolveBehaviorOptions(behaviorOptions, StyleOptions);
 
@@ -278,6 +283,11 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// 获取当前宿主上下文信息。
     /// </summary>
     public IGraphHostContext? HostContext => _hostContext;
+
+    /// <summary>
+    /// 获取当前节点展示状态提供器。
+    /// </summary>
+    public INodePresentationProvider? NodePresentationProvider => _nodePresentationProvider;
 
     /// <summary>
     /// 当前工作区快照文件路径。
@@ -653,6 +663,57 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     public void SetHostContext(IGraphHostContext? hostContext)
     {
         SetProperty(ref _hostContext, hostContext, nameof(HostContext));
+    }
+
+    /// <summary>
+    /// 设置节点展示状态提供器。
+    /// </summary>
+    /// <param name="provider">新的展示状态提供器。</param>
+    /// <param name="refreshImmediately">是否立即刷新当前全部节点展示状态。</param>
+    public void SetNodePresentationProvider(INodePresentationProvider? provider, bool refreshImmediately = true)
+    {
+        if (!SetProperty(ref _nodePresentationProvider, provider, nameof(NodePresentationProvider)))
+        {
+            return;
+        }
+
+        if (refreshImmediately)
+        {
+            RefreshNodePresentations();
+        }
+    }
+
+    /// <summary>
+    /// 刷新单个节点的展示状态。
+    /// </summary>
+    /// <param name="nodeId">目标节点标识。</param>
+    /// <returns>找到节点并完成刷新时返回 <see langword="true"/>。</returns>
+    public bool RefreshNodePresentation(string nodeId)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(nodeId);
+
+        var node = FindNode(nodeId);
+        if (node is null)
+        {
+            return false;
+        }
+
+        ApplyNodePresentation(node);
+        return true;
+    }
+
+    /// <summary>
+    /// 刷新当前图中全部节点的展示状态。
+    /// </summary>
+    /// <returns>刷新节点数量。</returns>
+    public int RefreshNodePresentations()
+    {
+        foreach (var node in Nodes)
+        {
+            ApplyNodePresentation(node);
+        }
+
+        return Nodes.Count;
     }
 
     /// <summary>
@@ -1086,6 +1147,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
                 position.X - (template.Size.Width / 2) + offset,
                 position.Y - (template.Size.Height / 2) + offset));
 
+        ApplyNodePresentation(node);
         Nodes.Add(node);
         SelectSingleNode(node);
         MarkDirty($"Added {template.Title}.");
@@ -1535,6 +1597,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             Position = new GraphPoint(node.X + 48, node.Y + 48),
         });
 
+        ApplyNodePresentation(duplicate);
         Nodes.Add(duplicate);
         SelectSingleNode(duplicate);
         MarkDirty($"Duplicated {node.Title}.");
@@ -1779,6 +1842,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
                 Position = targetOrigin + relativePosition,
             });
 
+            ApplyNodePresentation(pastedNode);
             Nodes.Add(pastedNode);
             pastedNodes.Add(pastedNode);
         }
@@ -2208,6 +2272,18 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     public NodeViewModel? FindNode(string nodeId)
         => Nodes.FirstOrDefault(node => node.Id == nodeId);
 
+    private void ApplyNodePresentation(NodeViewModel node)
+    {
+        if (_nodePresentationProvider is null)
+        {
+            node.UpdatePresentation(NodePresentationState.Empty);
+            return;
+        }
+
+        var state = _nodePresentationProvider.GetNodePresentation(node) ?? NodePresentationState.Empty;
+        node.UpdatePresentation(state);
+    }
+
     private void LoadDocument(GraphDocument document, string status, bool markClean)
     {
         _suspendDirtyTracking = true;
@@ -2226,7 +2302,9 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
         foreach (var node in document.Nodes)
         {
-            Nodes.Add(new NodeViewModel(node));
+            var viewModel = new NodeViewModel(node);
+            ApplyNodePresentation(viewModel);
+            Nodes.Add(viewModel);
         }
 
         foreach (var connection in document.Connections)
