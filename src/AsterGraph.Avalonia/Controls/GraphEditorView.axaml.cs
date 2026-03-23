@@ -4,9 +4,9 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using Avalonia.VisualTree;
+using AsterGraph.Avalonia.Hosting;
 using AsterGraph.Avalonia.Services;
 using AsterGraph.Avalonia.Styling;
-using AsterGraph.Editor.Hosting;
 using AsterGraph.Editor.ViewModels;
 
 namespace AsterGraph.Avalonia.Controls;
@@ -109,9 +109,7 @@ public partial class GraphEditorView : UserControl
             return;
         }
 
-        var resolvedTopLevel = TopLevel.GetTopLevel(this);
-        object topLevel = resolvedTopLevel is null ? this : resolvedTopLevel;
-        editor.SetHostContext(new AvaloniaGraphHostContext(this, topLevel));
+        editor.SetHostContext(new AvaloniaGraphHostContext(this, TopLevel.GetTopLevel(this)));
     }
 
     private void HandleKeyDown(object? sender, KeyEventArgs args)
@@ -214,8 +212,4 @@ public partial class GraphEditorView : UserControl
         return false;
     }
 
-    private sealed record AvaloniaGraphHostContext(object Owner, object TopLevel) : IGraphHostContext
-    {
-        public IServiceProvider? Services => TopLevel as IServiceProvider;
-    }
 }

@@ -652,7 +652,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// <param name="hostContext">宿主上下文；为 <see langword="null"/> 时清空当前宿主上下文。</param>
     public void SetHostContext(IGraphHostContext? hostContext)
     {
-        _hostContext = hostContext;
+        SetProperty(ref _hostContext, hostContext, nameof(HostContext));
     }
 
     /// <summary>

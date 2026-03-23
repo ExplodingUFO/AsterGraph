@@ -412,7 +412,7 @@ public partial class NodeCanvas : UserControl
                         ResolveWorldPosition(args, this),
                         node.Id,
                         port.Id,
-                        ViewModel.HostContext));
+                        hostContext: ViewModel.HostContext));
                 args.Handled = true;
             };
 
@@ -547,7 +547,7 @@ public partial class NodeCanvas : UserControl
                     CreateContextMenuSnapshot(),
                     ResolveWorldPosition(args, this),
                     connection.Id,
-                    ViewModel.HostContext));
+                    hostContext: ViewModel.HostContext));
             args.Handled = true;
         };
 

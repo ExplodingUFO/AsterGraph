@@ -3,6 +3,7 @@ using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Core.Compatibility;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Catalog;
+using AsterGraph.Editor.Hosting;
 using AsterGraph.Editor.Services;
 using AsterGraph.Editor.ViewModels;
 using Xunit;
@@ -97,6 +98,26 @@ public sealed class GraphEditorFacadeRefactorTests
         Assert.Equal("None", none);
     }
 
+    [Fact]
+    public void SetHostContext_RaisesHostContextPropertyChangedOnlyWhenValueChanges()
+    {
+        var definitionId = new NodeDefinitionId("tests.editor.facade.host-context");
+        var editor = CreateEditorWithSharedDefinitionNodes(definitionId);
+        var changedProperties = new List<string?>();
+        editor.PropertyChanged += (_, args) => changedProperties.Add(args.PropertyName);
+
+        var hostContextA = new TestGraphHostContext(new object(), null);
+        var hostContextB = new TestGraphHostContext(new object(), null);
+
+        editor.SetHostContext(hostContextA);
+        editor.SetHostContext(hostContextA);
+        editor.SetHostContext(hostContextB);
+
+        Assert.Equal(
+            2,
+            changedProperties.Count(propertyName => propertyName == nameof(GraphEditorViewModel.HostContext)));
+    }
+
     private static NodeViewModel CreateNode(
         string nodeId,
         NodeDefinitionId definitionId,
@@ -163,5 +184,10 @@ public sealed class GraphEditorFacadeRefactorTests
             []);
 
         return new GraphEditorViewModel(document, catalog, new DefaultPortCompatibilityService());
+    }
+
+    private sealed record TestGraphHostContext(object Owner, object? TopLevel) : IGraphHostContext
+    {
+        public IServiceProvider? Services => null;
     }
 }
