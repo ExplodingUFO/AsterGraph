@@ -38,6 +38,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     private readonly GraphFragmentWorkspaceService _fragmentWorkspaceService;
     private readonly GraphFragmentLibraryService _fragmentLibraryService;
     private readonly GraphEditorHistoryService _historyService;
+    private readonly IReadOnlyList<IGraphContextMenuContributor> _contextMenuContributors;
     private IGraphTextClipboardBridge? _textClipboardBridge;
     private readonly GraphContextMenuBuilder _contextMenuBuilder;
     private bool _suspendDirtyTracking;
@@ -47,6 +48,18 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     private double _viewportWidth;
     private double _viewportHeight;
 
+    /// <summary>
+    /// 初始化图编辑器视图模型。
+    /// </summary>
+    /// <param name="document">初始图文档。</param>
+    /// <param name="nodeCatalog">节点目录。</param>
+    /// <param name="compatibilityService">端口兼容性服务。</param>
+    /// <param name="workspaceService">工作区持久化服务。</param>
+    /// <param name="fragmentWorkspaceService">单文件片段工作区服务。</param>
+    /// <param name="styleOptions">样式配置。</param>
+    /// <param name="behaviorOptions">行为配置。</param>
+    /// <param name="fragmentLibraryService">片段模板库服务。</param>
+    /// <param name="contextMenuContributors">宿主右键菜单扩展器集合。</param>
     public GraphEditorViewModel(
         GraphDocument document,
         INodeCatalog nodeCatalog,
@@ -55,7 +68,8 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         GraphFragmentWorkspaceService? fragmentWorkspaceService = null,
         GraphEditorStyleOptions? styleOptions = null,
         GraphEditorBehaviorOptions? behaviorOptions = null,
-        GraphFragmentLibraryService? fragmentLibraryService = null)
+        GraphFragmentLibraryService? fragmentLibraryService = null,
+        IEnumerable<IGraphContextMenuContributor>? contextMenuContributors = null)
     {
         _nodeCatalog = nodeCatalog ?? throw new ArgumentNullException(nameof(nodeCatalog));
         _compatibilityService = compatibilityService ?? throw new ArgumentNullException(nameof(compatibilityService));
@@ -64,6 +78,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         _fragmentWorkspaceService = fragmentWorkspaceService ?? new GraphFragmentWorkspaceService();
         _fragmentLibraryService = fragmentLibraryService ?? new GraphFragmentLibraryService();
         _historyService = new GraphEditorHistoryService();
+        _contextMenuContributors = (contextMenuContributors ?? []).ToArray();
         StyleOptions = styleOptions ?? GraphEditorStyleOptions.Default;
         BehaviorOptions = ResolveBehaviorOptions(behaviorOptions, StyleOptions);
 
@@ -102,7 +117,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             }
         });
 
-        _contextMenuBuilder = new GraphContextMenuBuilder(this);
+        _contextMenuBuilder = new GraphContextMenuBuilder(this, _contextMenuContributors);
 
         Nodes = new ObservableCollection<NodeViewModel>();
         Connections = new ObservableCollection<ConnectionViewModel>();
@@ -145,6 +160,11 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     public GraphEditorStyleOptions StyleOptions { get; }
 
     public GraphEditorBehaviorOptions BehaviorOptions { get; }
+
+    /// <summary>
+    /// 获取当前编辑器启用的公开右键菜单扩展器集合。
+    /// </summary>
+    public IReadOnlyList<IGraphContextMenuContributor> ContextMenuContributors => _contextMenuContributors;
 
     public string WorkspacePath { get; }
 
@@ -211,6 +231,8 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     IEnumerable<NodeTemplateViewModel> IGraphContextMenuHost.NodeTemplates => NodeTemplates;
 
     IEnumerable<NodeViewModel> IGraphContextMenuHost.Nodes => Nodes;
+
+    IEnumerable<NodeViewModel> IGraphContextMenuHost.SelectedNodes => SelectedNodes;
 
     int IGraphContextMenuHost.SelectedNodeCount => SelectedNodes.Count;
 
@@ -406,6 +428,11 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             ? $"{SelectedNodes.Count} nodes selected  ·  primary {SelectedNode.Title}"
             : $"{SelectedNode.InputCount} inputs  ·  {SelectedNode.OutputCount} outputs";
 
+    /// <summary>
+    /// 为给定上下文构建右键菜单描述。
+    /// </summary>
+    /// <param name="context">当前菜单上下文。</param>
+    /// <returns>供视图层渲染的菜单项集合。</returns>
     public IReadOnlyList<MenuItemDescriptor> BuildContextMenu(ContextMenuContext context)
         => _contextMenuBuilder.Build(context);
 

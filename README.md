@@ -114,6 +114,10 @@ For host-side integration hooks, `GraphEditorViewModel` also exposes event subsc
 - `FragmentExported`
 - `FragmentImported`
 
+For host-side right-click menu augmentation, hosts can also pass `IGraphContextMenuContributor` instances into `GraphEditorViewModel`.
+Each contributor receives a `GraphContextMenuExtensionContext` snapshot and returns extra `MenuItemDescriptor` items that are appended after the built-in menu.
+This keeps menu customization in the editor layer and supports nested host menus such as `Results -> Preview / Publish / Create Comparison`.
+
 ## Type Compatibility
 
 AsterGraph uses:
@@ -206,6 +210,25 @@ Current behavior sections include:
 - `DragAssistBehaviorOptions`
 - `FragmentBehaviorOptions`
 - `ViewBehaviorOptions`
+
+## Context Menu Extension
+
+Hosts that need business-specific node actions can use the public context-menu contributor API:
+
+1. Implement `IGraphContextMenuContributor`
+2. Check `GraphContextMenuExtensionContext.TargetKind`
+3. Use `ClickedNode`, `ClickedPort`, or `ClickedConnection` as needed
+4. Return one or more `MenuItemDescriptor` values, including nested children when required
+5. Pass the contributors into `GraphEditorViewModel`
+
+The demo host now includes a sample node contribution:
+
+- `Results`
+- `Preview`
+- `Publish`
+- `Create Comparison`
+
+This is appended legally through the public editor API rather than by replacing the Avalonia menu renderer.
 
 ## Roadmap
 

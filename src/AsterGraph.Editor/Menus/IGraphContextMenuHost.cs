@@ -13,6 +13,8 @@ internal interface IGraphContextMenuHost
 
     IEnumerable<NodeViewModel> Nodes { get; }
 
+    IEnumerable<NodeViewModel> SelectedNodes { get; }
+
     int SelectedNodeCount { get; }
 
     ICommand DeleteSelectionCommand { get; }

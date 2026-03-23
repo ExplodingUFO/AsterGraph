@@ -2,9 +2,11 @@ using AsterGraph.Core.Compatibility;
 using AsterGraph.Abstractions.Styling;
 using AsterGraph.Editor.Configuration;
 using AsterGraph.Editor.Catalog;
+using AsterGraph.Editor.Menus;
 using AsterGraph.Editor.Services;
 using AsterGraph.Editor.ViewModels;
 using AsterGraph.Demo.Definitions;
+using AsterGraph.Demo.Menus;
 
 namespace AsterGraph.Demo.ViewModels;
 
@@ -54,14 +56,29 @@ public partial class MainWindowViewModel : ViewModelBase
             },
         };
 
-        Editor = new GraphEditorViewModel(
+        GraphEditorViewModel? editor = null;
+        var contextMenuContributors = new IGraphContextMenuContributor[]
+        {
+            new DemoNodeResultsMenuContributor(message =>
+            {
+                if (editor is not null)
+                {
+                    editor.StatusMessage = message;
+                }
+            }),
+        };
+
+        editor = new GraphEditorViewModel(
             DemoGraphFactory.CreateDefault(catalog),
             catalog,
             new DefaultPortCompatibilityService(),
             new GraphWorkspaceService(),
             null,
             style,
-            behavior);
+            behavior,
+            contextMenuContributors: contextMenuContributors);
+
+        Editor = editor;
     }
 
     public GraphEditorViewModel Editor { get; }
