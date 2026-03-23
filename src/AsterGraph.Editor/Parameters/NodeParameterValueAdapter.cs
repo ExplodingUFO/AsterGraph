@@ -1,5 +1,4 @@
 using System.Globalization;
-using System.Linq;
 using System.Text.Json;
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
@@ -24,9 +23,7 @@ internal static class NodeParameterValueAdapter
         var editorKind = definition.EditorKind;
         var typeId = definition.ValueType;
         var isRequired = definition.IsRequired;
-        var allowedOptionValues = definition.Constraints.AllowedOptions is null
-            ? []
-            : definition.Constraints.AllowedOptions.Select(option => option.Value).ToList();
+        var allowedOptions = definition.Constraints.AllowedOptions;
 
         if (isRequired && (normalizedValue is null || string.IsNullOrWhiteSpace(normalizedValue.ToString())))
         {
@@ -46,12 +43,18 @@ internal static class NodeParameterValueAdapter
         if (editorKind == ParameterEditorKind.Enum)
         {
             var optionValue = normalizedValue?.ToString() ?? string.Empty;
-            if (!allowedOptionValues.Any(option => option.Equals(optionValue, StringComparison.Ordinal)))
+            if (allowedOptions is not null)
             {
-                return Invalid($"{displayName} must be one of the declared options.");
+                foreach (var option in allowedOptions)
+                {
+                    if (option.Value.Equals(optionValue, StringComparison.Ordinal))
+                    {
+                        return Valid(optionValue);
+                    }
+                }
             }
 
-            return Valid(optionValue);
+            return Invalid($"{displayName} must be one of the declared options.");
         }
 
         if (editorKind == ParameterEditorKind.Number)
