@@ -49,13 +49,14 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         INodeCatalog nodeCatalog,
         IPortCompatibilityService compatibilityService,
         GraphWorkspaceService? workspaceService = null,
+        GraphFragmentWorkspaceService? fragmentWorkspaceService = null,
         GraphEditorStyleOptions? styleOptions = null)
     {
         _nodeCatalog = nodeCatalog ?? throw new ArgumentNullException(nameof(nodeCatalog));
         _compatibilityService = compatibilityService ?? throw new ArgumentNullException(nameof(compatibilityService));
         _workspaceService = workspaceService ?? new GraphWorkspaceService();
         _selectionClipboard = new GraphSelectionClipboard();
-        _fragmentWorkspaceService = new GraphFragmentWorkspaceService();
+        _fragmentWorkspaceService = fragmentWorkspaceService ?? new GraphFragmentWorkspaceService();
         _historyService = new GraphEditorHistoryService();
         StyleOptions = styleOptions ?? GraphEditorStyleOptions.Default;
 
@@ -70,6 +71,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         PasteCommand = new AsyncRelayCommand(PasteSelectionAsync, () => CanPaste);
         ExportSelectionFragmentCommand = new RelayCommand(ExportSelectionFragment, () => CanExportSelectionFragment);
         ImportFragmentCommand = new RelayCommand(ImportFragment, () => CanImportFragment);
+        ClearFragmentCommand = new RelayCommand(ClearFragment, () => CanImportFragment);
         AlignLeftCommand = new RelayCommand(AlignSelectionLeft, () => CanAlignSelection);
         AlignCenterCommand = new RelayCommand(AlignSelectionCenter, () => CanAlignSelection);
         AlignRightCommand = new RelayCommand(AlignSelectionRight, () => CanAlignSelection);
@@ -156,6 +158,8 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     public IRelayCommand ExportSelectionFragmentCommand { get; }
 
     public IRelayCommand ImportFragmentCommand { get; }
+
+    public IRelayCommand ClearFragmentCommand { get; }
 
     public IRelayCommand AlignLeftCommand { get; }
 
@@ -278,6 +282,11 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     public string WorkspaceCaption => $"{(IsDirty ? "Unsaved changes" : "Snapshot synced")}  ·  {WorkspacePath}";
 
     public string FragmentCaption => $"{(_fragmentWorkspaceService.Exists() ? "Fragment available" : "No fragment file")}  ·  {_fragmentWorkspaceService.FragmentPath}";
+
+    public string FragmentStatusCaption
+        => !_fragmentWorkspaceService.Exists()
+            ? "No saved fragment file."
+            : $"Last updated {File.GetLastWriteTime(_fragmentWorkspaceService.FragmentPath):yyyy-MM-dd HH:mm:ss}";
 
     public string ModeCaption => HasPendingConnection
         ? $"Connecting {PendingSourceNode!.Title} / {PendingSourcePort!.Label}  ->  click an input port"
@@ -1286,6 +1295,19 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         }
     }
 
+    public void ClearFragment()
+    {
+        if (!_fragmentWorkspaceService.Exists())
+        {
+            StatusMessage = "No exported fragment file is available yet.";
+            return;
+        }
+
+        _fragmentWorkspaceService.Delete();
+        RaiseComputedPropertyChanges();
+        StatusMessage = "Cleared the saved fragment file.";
+    }
+
     /// <summary>
     /// 从指定片段文件路径导入节点片段。
     /// </summary>
@@ -1577,6 +1599,9 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         DeleteSelectionCommand.NotifyCanExecuteChanged();
         CopySelectionCommand.NotifyCanExecuteChanged();
         PasteCommand.NotifyCanExecuteChanged();
+        ExportSelectionFragmentCommand.NotifyCanExecuteChanged();
+        ImportFragmentCommand.NotifyCanExecuteChanged();
+        ClearFragmentCommand.NotifyCanExecuteChanged();
         AlignLeftCommand.NotifyCanExecuteChanged();
         AlignCenterCommand.NotifyCanExecuteChanged();
         AlignRightCommand.NotifyCanExecuteChanged();
@@ -1607,6 +1632,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         OnPropertyChanged(nameof(WorkspaceCaption));
         OnPropertyChanged(nameof(FragmentPath));
         OnPropertyChanged(nameof(FragmentCaption));
+        OnPropertyChanged(nameof(FragmentStatusCaption));
         OnPropertyChanged(nameof(ModeCaption));
         OnPropertyChanged(nameof(InspectorTitle));
         OnPropertyChanged(nameof(InspectorCategory));

@@ -315,6 +315,10 @@
                            FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                            TextWrapping="Wrap"
                            Foreground="{DynamicResource AsterGraph.BodyBrush}" />
+                <TextBlock Text="{Binding FragmentStatusCaption}"
+                           FontSize="{DynamicResource AsterGraph.InspectorCaptionFontSize}"
+                           TextWrapping="Wrap"
+                           Foreground="{DynamicResource AsterGraph.EyebrowBrush}" />
                 <WrapPanel Orientation="Horizontal">
                   <Button Classes="astergraph-toolbar-action"
                           Command="{Binding ExportSelectionFragmentCommand}"
@@ -322,6 +326,9 @@
                   <Button Classes="astergraph-toolbar-action"
                           Command="{Binding ImportFragmentCommand}"
                           Content="Import Fragment" />
+                  <Button Classes="astergraph-toolbar-action"
+                          Command="{Binding ClearFragmentCommand}"
+                          Content="Clear Fragment" />
                 </WrapPanel>
               </StackPanel>
             </Border>
