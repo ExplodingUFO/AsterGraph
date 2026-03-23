@@ -21,6 +21,7 @@ internal static class NodeCanvasDragAssistCalculator
         double tolerance)
     {
         ArgumentNullException.ThrowIfNull(candidateBounds);
+        tolerance = Math.Max(0d, tolerance);
 
         if (!enableGridSnapping && !enableAlignmentGuides)
         {

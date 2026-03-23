@@ -1141,10 +1141,15 @@ public partial class NodeCanvas : UserControl
         }
 
         var tolerance = behavior.SnapTolerance / Math.Max(ViewModel.Zoom, 0.001);
-        var movingNodeIds = dragSession.Nodes.Select(node => node.Id).ToHashSet(StringComparer.Ordinal);
-        var candidateBounds = ViewModel.Nodes
-            .Where(node => !movingNodeIds.Contains(node.Id))
-            .Select(node => new NodeBounds(node.X, node.Y, node.Width, node.Height));
+        IEnumerable<NodeBounds> candidateBounds = [];
+        if (behavior.EnableAlignmentGuides)
+        {
+            var movingNodeIds = dragSession.Nodes.Select(node => node.Id).ToHashSet(StringComparer.Ordinal);
+            candidateBounds = ViewModel.Nodes
+                .Where(node => !movingNodeIds.Contains(node.Id))
+                .Select(node => new NodeBounds(node.X, node.Y, node.Width, node.Height));
+        }
+
         var result = NodeCanvasDragAssistCalculator.Calculate(
             dragSession.OriginBounds,
             deltaX,

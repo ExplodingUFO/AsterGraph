@@ -44,7 +44,8 @@ public sealed class NodeCanvasDragAssistCalculatorTests
 
         Assert.Equal(10d, result.AdjustedDelta.X, 6);
         Assert.Equal(0d, result.AdjustedDelta.Y, 6);
-        Assert.Equal(20, result.GuideWorldX);
+        Assert.NotNull(result.GuideWorldX);
+        Assert.Equal(20d, result.GuideWorldX.Value, 6);
         Assert.Null(result.GuideWorldY);
     }
 
@@ -66,7 +67,49 @@ public sealed class NodeCanvasDragAssistCalculatorTests
 
         Assert.Equal(8.1d, result.AdjustedDelta.X, 6);
         Assert.Equal(8d, result.AdjustedDelta.Y, 6);
-        Assert.Equal(20.1, result.GuideWorldX);
+        Assert.NotNull(result.GuideWorldX);
+        Assert.Equal(20.1d, result.GuideWorldX.Value, 6);
+        Assert.Null(result.GuideWorldY);
+    }
+
+    [Fact]
+    public void Calculate_BothFeaturesDisabled_ReturnsOriginalDelta()
+    {
+        var result = NodeCanvasDragAssistCalculator.Calculate(
+            new NodeBounds(12, 12, 100, 80),
+            deltaX: 8.2,
+            deltaY: 8.2,
+            candidateBounds:
+            [
+                new NodeBounds(20, 20, 100, 80),
+            ],
+            enableGridSnapping: false,
+            enableAlignmentGuides: false,
+            primaryGridSpacing: 10,
+            tolerance: 1);
+
+        Assert.Equal(8.2d, result.AdjustedDelta.X, 6);
+        Assert.Equal(8.2d, result.AdjustedDelta.Y, 6);
+        Assert.Null(result.GuideWorldX);
+        Assert.Null(result.GuideWorldY);
+    }
+
+    [Fact]
+    public void Calculate_InvalidGridSpacing_DisablesGridSnap()
+    {
+        var result = NodeCanvasDragAssistCalculator.Calculate(
+            new NodeBounds(12, 12, 100, 80),
+            deltaX: 8.2,
+            deltaY: 8.2,
+            candidateBounds: [],
+            enableGridSnapping: true,
+            enableAlignmentGuides: false,
+            primaryGridSpacing: 0,
+            tolerance: 1);
+
+        Assert.Equal(8.2d, result.AdjustedDelta.X, 6);
+        Assert.Equal(8.2d, result.AdjustedDelta.Y, 6);
+        Assert.Null(result.GuideWorldX);
         Assert.Null(result.GuideWorldY);
     }
 }
