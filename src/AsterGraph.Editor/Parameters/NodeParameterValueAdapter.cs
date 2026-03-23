@@ -133,19 +133,25 @@ internal static class NodeParameterValueAdapter
 
     private static bool TryParseDoubleFlexible(string rawText, out double result)
     {
-        var canonical = rawText.Replace(',', '.');
-        if (double.TryParse(canonical, NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo.CurrentCulture, out result))
+        var currentCulture = CultureInfo.CurrentCulture;
+        var currentDecimal = currentCulture.NumberFormat.NumberDecimalSeparator;
+        if (currentDecimal == "," && rawText.Contains('.') && !rawText.Contains(','))
+        {
+            var lastDot = rawText.LastIndexOf('.');
+            var digitsAfter = rawText.Length - lastDot - 1;
+            if (digitsAfter != 3
+                && double.TryParse(rawText, NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo.InvariantCulture, out result))
+            {
+                return true;
+            }
+        }
+
+        if (double.TryParse(rawText, NumberStyles.Float | NumberStyles.AllowThousands, currentCulture, out result))
         {
             return true;
         }
 
-        if (double.TryParse(canonical, NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo.InvariantCulture, out result))
-        {
-            return true;
-        }
-
-        result = default;
-        return false;
+        return double.TryParse(rawText, NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo.InvariantCulture, out result);
     }
 
     private static NodeParameterValueNormalizationResult Valid(object? value)

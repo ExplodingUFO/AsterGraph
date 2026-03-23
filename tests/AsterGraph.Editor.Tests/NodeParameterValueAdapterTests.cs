@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Threading;
 using System.Text.Json;
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
@@ -13,29 +14,65 @@ public sealed class NodeParameterValueAdapterTests
     public void NormalizeValue_NumberAcceptsCommaAndDotFormats()
     {
         var definition = CreateNumberDefinition(isInt: false);
+        var previous = CultureInfo.CurrentCulture;
+        try
+        {
+            CultureInfo.CurrentCulture = new CultureInfo("de-DE");
 
-        var commaResult = NodeParameterValueAdapter.NormalizeValue(
-            definition,
-            "Threshold",
-            new PortTypeId("double"),
-            ParameterEditorKind.Number,
-            isRequired: false,
-            allowedOptionValues: [],
-            candidateValue: "1,5");
+            var commaResult = NodeParameterValueAdapter.NormalizeValue(
+                definition,
+                "Threshold",
+                new PortTypeId("double"),
+                ParameterEditorKind.Number,
+                isRequired: false,
+                allowedOptionValues: [],
+                candidateValue: "1,5");
 
-        var pointResult = NodeParameterValueAdapter.NormalizeValue(
-            definition,
-            "Threshold",
-            new PortTypeId("double"),
-            ParameterEditorKind.Number,
-            isRequired: false,
-            allowedOptionValues: [],
-            candidateValue: "1.5");
+            var pointResult = NodeParameterValueAdapter.NormalizeValue(
+                definition,
+                "Threshold",
+                new PortTypeId("double"),
+                ParameterEditorKind.Number,
+                isRequired: false,
+                allowedOptionValues: [],
+                candidateValue: "1.5");
 
-        Assert.True(commaResult.IsValid);
-        Assert.Equal(1.5d, Assert.IsType<double>(commaResult.Value));
-        Assert.True(pointResult.IsValid);
-        Assert.Equal(1.5d, Assert.IsType<double>(pointResult.Value));
+            Assert.True(commaResult.IsValid);
+            Assert.Equal(1.5d, Assert.IsType<double>(commaResult.Value));
+            Assert.True(pointResult.IsValid);
+            Assert.Equal(1.5d, Assert.IsType<double>(pointResult.Value));
+        }
+        finally
+        {
+            CultureInfo.CurrentCulture = previous;
+        }
+    }
+
+    [Fact]
+    public void NormalizeValue_ThousandSeparatorRespectsCurrentCulture()
+    {
+        var previousCulture = CultureInfo.CurrentCulture;
+        try
+        {
+            CultureInfo.CurrentCulture = new CultureInfo("en-US");
+            var definition = CreateNumberDefinition(isInt: false);
+
+            var result = NodeParameterValueAdapter.NormalizeValue(
+                definition,
+                "Amount",
+                new PortTypeId("double"),
+                ParameterEditorKind.Number,
+                isRequired: false,
+                allowedOptionValues: [],
+                candidateValue: "1,000");
+
+            Assert.True(result.IsValid);
+            Assert.Equal(1000d, Assert.IsType<double>(result.Value));
+        }
+        finally
+        {
+            CultureInfo.CurrentCulture = previousCulture;
+        }
     }
 
     [Fact]
