@@ -8,7 +8,7 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <PackageTags>Avalonia;AvaloniaUI;NodeGraph;GraphEditor;MVVM;SDK</PackageTags>
-    <Version>0.1.0-preview.6</Version>
+    <Version>0.1.0-preview.7</Version>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>

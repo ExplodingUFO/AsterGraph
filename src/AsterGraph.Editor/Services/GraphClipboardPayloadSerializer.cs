@@ -7,6 +7,7 @@ namespace AsterGraph.Editor.Services;
 internal static class GraphClipboardPayloadSerializer
 {
     private const string ClipboardFormat = "astergraph.clipboard/v1";
+    private const int CurrentSchemaVersion = 1;
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         WriteIndented = true,
@@ -23,6 +24,7 @@ internal static class GraphClipboardPayloadSerializer
         return JsonSerializer.Serialize(
             new GraphClipboardPayload(
                 ClipboardFormat,
+                CurrentSchemaVersion,
                 fragment.Origin,
                 fragment.PrimaryNodeId,
                 fragment.Nodes,
@@ -41,11 +43,39 @@ internal static class GraphClipboardPayloadSerializer
 
         try
         {
+            using var document = JsonDocument.Parse(text);
+            var root = document.RootElement;
+            if (!root.TryGetProperty(nameof(GraphClipboardPayload.Format), out var formatElement)
+                || !string.Equals(formatElement.GetString(), ClipboardFormat, StringComparison.Ordinal))
+            {
+                return false;
+            }
+
+            if (!root.TryGetProperty(nameof(GraphClipboardPayload.SchemaVersion), out var versionElement))
+            {
+                var legacyPayload = JsonSerializer.Deserialize<GraphClipboardPayloadLegacy>(text, JsonOptions);
+                if (legacyPayload is null || legacyPayload.Nodes.Count == 0)
+                {
+                    return false;
+                }
+
+                fragment = new GraphSelectionFragment(
+                    legacyPayload.Nodes,
+                    legacyPayload.Connections,
+                    legacyPayload.Origin,
+                    legacyPayload.PrimaryNodeId);
+                return true;
+            }
+
+            var schemaVersion = versionElement.GetInt32();
+            if (schemaVersion != CurrentSchemaVersion)
+            {
+                return false;
+            }
+
             // 剪贴板里可能是任意宿主内容，因此这里必须采用失败即拒绝的解析策略。
             var payload = JsonSerializer.Deserialize<GraphClipboardPayload>(text, JsonOptions);
-            if (payload is null
-                || !string.Equals(payload.Format, ClipboardFormat, StringComparison.Ordinal)
-                || payload.Nodes.Count == 0)
+            if (payload is null || payload.Nodes.Count == 0)
             {
                 return false;
             }

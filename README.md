@@ -210,6 +210,14 @@ Rejected conversions stay explicit and visible rather than guessing.
 
 Graph documents are serialized in `AsterGraph.Core` and can persist connection-level conversion metadata. The stable contract identifiers in `AsterGraph.Abstractions` are intended to survive UI and host changes.
 
+Current serialized payloads are versioned:
+
+- graph document JSON now emits `SchemaVersion`
+- clipboard payload JSON now emits `SchemaVersion`
+- readers remain backward-compatible with the earlier unversioned document and clipboard shapes
+
+This keeps future contract evolution explicit instead of relying on implicit JSON shape guesses.
+
 ## Selection And Clipboard
 
 AsterGraph keeps selection state in the editor layer:

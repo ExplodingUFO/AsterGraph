@@ -4,6 +4,14 @@ namespace AsterGraph.Editor.Services;
 
 internal sealed record GraphClipboardPayload(
     string Format,
+    int SchemaVersion,
+    GraphPoint Origin,
+    string? PrimaryNodeId,
+    IReadOnlyList<GraphNode> Nodes,
+    IReadOnlyList<GraphConnection> Connections);
+
+internal sealed record GraphClipboardPayloadLegacy(
+    string Format,
     GraphPoint Origin,
     string? PrimaryNodeId,
     IReadOnlyList<GraphNode> Nodes,
