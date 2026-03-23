@@ -294,13 +294,11 @@ public partial class NodeCanvas : UserControl
 
             OpenContextMenu(
                 border,
-                new ContextMenuContext(
-                    targetKind,
+                NodeCanvasContextMenuContextFactory.CreateNodeContext(
+                    CreateContextMenuSnapshot(),
                     ResolveWorldPosition(args, this),
-                    selectedNodeId: ViewModel.SelectedNode?.Id,
-                    selectedNodeIds: ViewModel.SelectedNodes.Select(selected => selected.Id).ToList(),
-                    clickedNodeId: node.Id,
-                    availableNodeDefinitions: ViewModel.NodeTemplates.Select(template => template.Definition).ToList()));
+                    node.Id,
+                    useSelectionTools: targetKind == ContextMenuTargetKind.Selection));
             args.Handled = true;
         };
 
@@ -408,15 +406,11 @@ public partial class NodeCanvas : UserControl
                 ViewModel.SelectNode(node);
                 OpenContextMenu(
                     button,
-                    new ContextMenuContext(
-                        ContextMenuTargetKind.Port,
+                    NodeCanvasContextMenuContextFactory.CreatePortContext(
+                        CreateContextMenuSnapshot(),
                         ResolveWorldPosition(args, this),
-                        selectedNodeId: ViewModel.SelectedNode?.Id,
-                        selectedNodeIds: ViewModel.SelectedNodes.Select(selected => selected.Id).ToList(),
-                        clickedNodeId: node.Id,
-                        clickedPortNodeId: node.Id,
-                        clickedPortId: port.Id,
-                        availableNodeDefinitions: ViewModel.NodeTemplates.Select(template => template.Definition).ToList()));
+                        node.Id,
+                        port.Id));
                 args.Handled = true;
             };
 
@@ -547,15 +541,10 @@ public partial class NodeCanvas : UserControl
 
             OpenContextMenu(
                 chip,
-                new ContextMenuContext(
-                    ContextMenuTargetKind.Connection,
+                NodeCanvasContextMenuContextFactory.CreateConnectionContext(
+                    CreateContextMenuSnapshot(),
                     ResolveWorldPosition(args, this),
-                    selectedNodeId: ViewModel.SelectedNode?.Id,
-                    selectedNodeIds: ViewModel.SelectedNodes.Select(selected => selected.Id).ToList(),
-                    selectedConnectionId: connection.Id,
-                    selectedConnectionIds: [connection.Id],
-                    clickedConnectionId: connection.Id,
-                    availableNodeDefinitions: ViewModel.NodeTemplates.Select(template => template.Definition).ToList()));
+                    connection.Id));
             args.Handled = true;
         };
 
@@ -786,12 +775,10 @@ public partial class NodeCanvas : UserControl
         // 多选激活时，空白画布右击同样复用批量选择菜单。
         OpenContextMenu(
             this,
-            new ContextMenuContext(
-                ViewModel.HasMultipleSelection ? ContextMenuTargetKind.Selection : ContextMenuTargetKind.Canvas,
+            NodeCanvasContextMenuContextFactory.CreateCanvasContext(
+                CreateContextMenuSnapshot(),
                 ResolveWorldPosition(args, this),
-                selectedNodeId: ViewModel.SelectedNode?.Id,
-                selectedNodeIds: ViewModel.SelectedNodes.Select(selected => selected.Id).ToList(),
-                availableNodeDefinitions: ViewModel.NodeTemplates.Select(template => template.Definition).ToList()));
+                useSelectionTools: ViewModel.HasMultipleSelection));
         args.Handled = true;
     }
 
@@ -982,6 +969,14 @@ public partial class NodeCanvas : UserControl
 
         _contextMenuPresenter.Open(target, descriptors, ViewModel.StyleOptions.ContextMenu);
     }
+
+    private NodeCanvasContextMenuSnapshot CreateContextMenuSnapshot()
+        => ViewModel is null
+            ? new NodeCanvasContextMenuSnapshot(null, [], [])
+            : new NodeCanvasContextMenuSnapshot(
+                ViewModel.SelectedNode?.Id,
+                ViewModel.SelectedNodes.Select(selected => selected.Id).ToList(),
+                ViewModel.NodeTemplates.Select(template => template.Definition).ToList());
 
     private void ApplySelectionAdornerStyle()
     {
