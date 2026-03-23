@@ -4,7 +4,7 @@
     <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
     <PackageId>AsterGraph.Avalonia</PackageId>
-    <Description>Avalonia controls and theme resources for hosting the AsterGraph editor.</Description>
+    <Description>Avalonia host controls and theme resources for embedding the AsterGraph editor.</Description>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <IsPackable>true</IsPackable>
   </PropertyGroup>

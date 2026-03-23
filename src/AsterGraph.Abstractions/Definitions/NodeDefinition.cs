@@ -7,31 +7,70 @@ namespace AsterGraph.Abstractions.Definitions;
 /// </summary>
 public interface INodeDefinition
 {
+    /// <summary>
+    /// 节点定义的稳定标识。
+    /// </summary>
     NodeDefinitionId Id { get; }
 
+    /// <summary>
+    /// 节点显示名称。
+    /// </summary>
     string DisplayName { get; }
 
+    /// <summary>
+    /// 节点分类。
+    /// </summary>
     string Category { get; }
 
+    /// <summary>
+    /// 节点副标题。
+    /// </summary>
     string Subtitle { get; }
 
+    /// <summary>
+    /// 节点描述。
+    /// </summary>
     string? Description { get; }
 
+    /// <summary>
+    /// 节点强调色。
+    /// </summary>
     string AccentHex { get; }
 
+    /// <summary>
+    /// 默认宽度。
+    /// </summary>
     double DefaultWidth { get; }
 
+    /// <summary>
+    /// 默认高度。
+    /// </summary>
     double DefaultHeight { get; }
 
+    /// <summary>
+    /// 输入端口定义集合。
+    /// </summary>
     IReadOnlyList<PortDefinition> InputPorts { get; }
 
+    /// <summary>
+    /// 输出端口定义集合。
+    /// </summary>
     IReadOnlyList<PortDefinition> OutputPorts { get; }
 
+    /// <summary>
+    /// 参数定义集合。
+    /// </summary>
     IReadOnlyList<NodeParameterDefinition> Parameters { get; }
 }
 
+/// <summary>
+/// 默认的不可变节点定义实现。
+/// </summary>
 public sealed record NodeDefinition : INodeDefinition
 {
+    /// <summary>
+    /// 初始化节点定义。
+    /// </summary>
     public NodeDefinition(
         NodeDefinitionId id,
         string displayName,
@@ -80,26 +119,37 @@ public sealed record NodeDefinition : INodeDefinition
         EnsureUniqueKeys(Parameters.Select(parameter => parameter.Key), "parameter");
     }
 
+    /// <inheritdoc />
     public NodeDefinitionId Id { get; }
 
+    /// <inheritdoc />
     public string DisplayName { get; }
 
+    /// <inheritdoc />
     public string Category { get; }
 
+    /// <inheritdoc />
     public string Subtitle { get; }
 
+    /// <inheritdoc />
     public string? Description { get; }
 
+    /// <inheritdoc />
     public string AccentHex { get; }
 
+    /// <inheritdoc />
     public double DefaultWidth { get; }
 
+    /// <inheritdoc />
     public double DefaultHeight { get; }
 
+    /// <inheritdoc />
     public IReadOnlyList<PortDefinition> InputPorts { get; }
 
+    /// <inheritdoc />
     public IReadOnlyList<PortDefinition> OutputPorts { get; }
 
+    /// <inheritdoc />
     public IReadOnlyList<NodeParameterDefinition> Parameters { get; }
 
     private static void EnsureUniqueKeys(IEnumerable<string> keys, string scope)

@@ -7,6 +7,9 @@ namespace AsterGraph.Abstractions.Definitions;
 /// </summary>
 public sealed record NodeParameterDefinition
 {
+    /// <summary>
+    /// 初始化节点参数定义。
+    /// </summary>
     public NodeParameterDefinition(
         string key,
         string displayName,
@@ -30,19 +33,43 @@ public sealed record NodeParameterDefinition
         Constraints = constraints ?? new ParameterConstraints();
     }
 
+    /// <summary>
+    /// 参数键。
+    /// </summary>
     public string Key { get; }
 
+    /// <summary>
+    /// 参数显示名称。
+    /// </summary>
     public string DisplayName { get; }
 
+    /// <summary>
+    /// 参数值类型。
+    /// </summary>
     public PortTypeId ValueType { get; }
 
+    /// <summary>
+    /// 建议的参数编辑器类型。
+    /// </summary>
     public ParameterEditorKind EditorKind { get; }
 
+    /// <summary>
+    /// 是否必填。
+    /// </summary>
     public bool IsRequired { get; }
 
+    /// <summary>
+    /// 参数描述。
+    /// </summary>
     public string? Description { get; }
 
+    /// <summary>
+    /// 默认值。
+    /// </summary>
     public object? DefaultValue { get; }
 
+    /// <summary>
+    /// 参数约束。
+    /// </summary>
     public ParameterConstraints Constraints { get; }
 }

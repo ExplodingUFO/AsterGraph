@@ -7,8 +7,8 @@
     <PackageProjectUrl>https://github.com/ExplodingUFO/AsterGraph.git</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <PackageTags>Avalonia;NodeGraph;GraphEditor;MVVM</PackageTags>
-    <Version>0.1.0-preview.5</Version>
+    <PackageTags>Avalonia;AvaloniaUI;NodeGraph;GraphEditor;MVVM;SDK</PackageTags>
+    <Version>0.1.0-preview.6</Version>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>

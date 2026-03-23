@@ -3,7 +3,7 @@
     <RootNamespace>AsterGraph.Abstractions</RootNamespace>
     <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
     <PackageId>AsterGraph.Abstractions</PackageId>
-    <Description>Stable contracts and identifiers for AsterGraph node definitions, catalogs, and compatibility policies.</Description>
+    <Description>Host-facing contracts and stable identifiers for AsterGraph node definitions, catalogs, styling, and compatibility policies.</Description>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <IsPackable>true</IsPackable>
   </PropertyGroup>

@@ -3,7 +3,7 @@
     <RootNamespace>AsterGraph.Core</RootNamespace>
     <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
     <PackageId>AsterGraph.Core</PackageId>
-    <Description>Pure graph models, serialization, and default compatibility rules for AsterGraph.</Description>
+    <Description>Framework-neutral graph models, serialization, and default compatibility rules for AsterGraph.</Description>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <IsPackable>true</IsPackable>
   </PropertyGroup>

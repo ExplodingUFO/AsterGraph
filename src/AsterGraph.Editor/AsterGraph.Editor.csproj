@@ -3,7 +3,7 @@
     <RootNamespace>AsterGraph.Editor</RootNamespace>
     <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
     <PackageId>AsterGraph.Editor</PackageId>
-    <Description>Editor state, catalogs, commands, menus, and workspace services for AsterGraph.</Description>
+    <Description>Host-facing editor state, commands, menus, events, and workspace services for AsterGraph.</Description>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <IsPackable>true</IsPackable>
   </PropertyGroup>

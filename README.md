@@ -323,7 +323,7 @@ The editor applies these permissions in one place:
 
 ## Context Menu Extension
 
-Hosts that need business-specific node actions can use the public context-menu contributor API:
+Hosts that need business-specific node actions can use the public context-menu augmentor API:
 
 1. Implement `IGraphContextMenuAugmentor`
 2. Inspect `ContextMenuContext.TargetKind`

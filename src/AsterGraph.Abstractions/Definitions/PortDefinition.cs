@@ -7,6 +7,9 @@ namespace AsterGraph.Abstractions.Definitions;
 /// </summary>
 public sealed record PortDefinition
 {
+    /// <summary>
+    /// 初始化端口定义。
+    /// </summary>
     public PortDefinition(
         string key,
         string displayName,
@@ -24,13 +27,28 @@ public sealed record PortDefinition
         Description = string.IsNullOrWhiteSpace(description) ? null : description.Trim();
     }
 
+    /// <summary>
+    /// 端口键。
+    /// </summary>
     public string Key { get; }
 
+    /// <summary>
+    /// 端口显示名称。
+    /// </summary>
     public string DisplayName { get; }
 
+    /// <summary>
+    /// 端口类型标识。
+    /// </summary>
     public PortTypeId TypeId { get; }
 
+    /// <summary>
+    /// 端口强调色。
+    /// </summary>
     public string AccentHex { get; }
 
+    /// <summary>
+    /// 端口描述。
+    /// </summary>
     public string? Description { get; }
 }
