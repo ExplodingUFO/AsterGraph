@@ -44,7 +44,7 @@ created: 2026-03-26
 | 02-02-01 | 02 | 1 | API-01, API-02, API-03 | unit | `dotnet test tests/AsterGraph.Editor.Tests/AsterGraph.Editor.Tests.csproj --filter "FullyQualifiedName~GraphEditorSessionTests" -v minimal` | ✅ | ⬜ pending |
 | 02-02-02 | 02 | 1 | API-04 | unit | `dotnet test tests/AsterGraph.Editor.Tests/AsterGraph.Editor.Tests.csproj --filter "FullyQualifiedName~GraphEditorTransactionTests" -v minimal` | ✅ | ⬜ pending |
 | 02-04-02 | 04 | 2 | SERV-01, SERV-02 | unit | `dotnet test tests/AsterGraph.Editor.Tests/AsterGraph.Editor.Tests.csproj --filter "FullyQualifiedName~GraphEditorServiceSeamsTests" -v minimal` | ✅ | ⬜ pending |
-| 02-05-01 | 05 | 3 | API-01, API-02, API-03, API-04, SERV-01 | unit + migration | `dotnet test tests/AsterGraph.Editor.Tests/AsterGraph.Editor.Tests.csproj --filter "FullyQualifiedName~GraphEditorInitializationTests|FullyQualifiedName~GraphEditorMigrationCompatibilityTests" -v minimal` | ✅ | ⬜ pending |
+| 02-05-01 | 05 | 3 | API-01, API-02, API-03, API-04, SERV-01 | unit + consumer | `dotnet test tests/AsterGraph.Editor.Tests/AsterGraph.Editor.Tests.csproj --filter "FullyQualifiedName~GraphEditorInitializationTests|FullyQualifiedName~GraphEditorMigrationCompatibilityTests" -v minimal && dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj && dotnet run --project tools/AsterGraph.PackageSmoke/AsterGraph.PackageSmoke.csproj` | ✅ | ⬜ pending |
 | 02-05-02 | 05 | 3 | SERV-01, SERV-02 | smoke | `dotnet run --project tools/AsterGraph.PackageSmoke/AsterGraph.PackageSmoke.csproj` | ✅ | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
