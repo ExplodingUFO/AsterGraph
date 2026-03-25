@@ -7,9 +7,9 @@
 
 ### Package Consumption
 
-- [ ] **PKG-01**: Host can consume published AsterGraph packages on supported target frameworks with a documented package boundary and version/support story
-- [ ] **PKG-02**: Host can initialize editor runtime and Avalonia components through documented registration or construction APIs instead of demo-only wiring patterns
-- [ ] **PKG-03**: Existing hosts can migrate to the reorganized API surface through a staged compatibility path rather than a single breaking rewrite
+- [x] **PKG-01**: Host can consume published AsterGraph packages on supported target frameworks with a documented package boundary and version/support story
+- [x] **PKG-02**: Host can initialize editor runtime and Avalonia components through documented registration or construction APIs instead of demo-only wiring patterns
+- [x] **PKG-03**: Existing hosts can migrate to the reorganized API surface through a staged compatibility path rather than a single breaking rewrite
 
 ### Embeddable Surfaces
 
@@ -72,9 +72,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PKG-01 | Phase 1 | Pending |
-| PKG-02 | Phase 1 | Pending |
-| PKG-03 | Phase 1 | Pending |
+| PKG-01 | Phase 1 | Complete |
+| PKG-02 | Phase 1 | Complete |
+| PKG-03 | Phase 1 | Complete |
 | EMBD-01 | Phase 3 | Pending |
 | EMBD-02 | Phase 3 | Pending |
 | EMBD-03 | Phase 3 | Pending |
@@ -101,4 +101,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-03-25*
-*Last updated: 2026-03-25 after roadmap creation*
+*Last updated: 2026-03-26 after phase 1 completion*

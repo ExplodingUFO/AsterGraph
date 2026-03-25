@@ -12,6 +12,9 @@ Hosts can integrate only the graph-editor pieces they need, replace default UI a
 
 ### Validated
 
+- ✓ Host can consume the four publishable AsterGraph packages through a documented SDK boundary and supported `net8.0` / `net9.0` target story — Phase 1
+- ✓ Host can initialize the editor runtime and default Avalonia view through public factory/options APIs while the constructor-based path remains supported — Phase 1
+- ✓ Host can migrate through a staged compatibility path backed by parity tests and smoke coverage across legacy and factory entry routes — Phase 1
 - ✓ Host can embed a working Avalonia graph editor with node rendering, connection editing, zoom/pan, and viewport navigation — existing
 - ✓ Host can save and load graph documents plus clipboard and fragment payloads through the current editor services — existing
 - ✓ Host can customize context menus, node presentation, localization, style tokens, and command permissions through current host-facing seams — existing
@@ -42,6 +45,8 @@ The user wants the package line to evolve from an internally useful editor into 
 
 The current codebase map highlights concrete pressure points that align with this goal: `src/AsterGraph.Editor/ViewModels/GraphEditorViewModel.cs` centralizes too many behaviors, `src/AsterGraph.Avalonia/Controls/NodeCanvas.axaml.cs` mixes rendering and interaction concerns, and some reusable services still carry demo-oriented defaults. The refactor therefore needs to preserve working capabilities while creating smaller seams, clearer package responsibilities, and a more intentional public API surface.
 
+Phase 1 is now complete. The repository has a documented four-package SDK boundary, public factory/options initialization APIs for both the editor runtime and default Avalonia view, and an explicit compatibility story that keeps `GraphEditorViewModel` plus `GraphEditorView` valid during migration.
+
 ## Constraints
 
 - **Tech stack**: Keep the solution centered on .NET, C#, and Avalonia — the existing packages and host story already depend on that stack
@@ -60,6 +65,7 @@ The current codebase map highlights concrete pressure points that align with thi
 | Position AsterGraph as a general-purpose SDK for external hosts | The target audience is broader than one internal host, so public surface design and replaceability are first-class concerns | ✓ Good |
 | Accept a phased API reorganization | A clean extensibility model is more important than preserving every current shape, but migration still needs to be controlled | ✓ Good |
 | Include diagnostics and debugging as part of the planned public API | Integration and secondary development are central goals, so observability cannot stay internal-only | — Pending |
+| Use factory/options APIs as the canonical host initialization path while preserving constructor-based compatibility facades | Phase 1 needed a formal public entry surface without forcing a breaking rewrite on existing hosts | ✓ Good |
 
 ## Evolution
 
@@ -79,4 +85,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-25 after initialization*
+*Last updated: 2026-03-26 after Phase 1 completion*
