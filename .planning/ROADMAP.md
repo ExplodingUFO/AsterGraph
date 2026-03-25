@@ -26,7 +26,13 @@ AsterGraph v1 moves from a working internal editor into a publishable SDK that e
   1. Host can install supported AsterGraph packages on the documented target frameworks and understand which packages form the supported SDK boundary.
   2. Host can initialize the editor runtime and default Avalonia composition through documented public registration or construction APIs instead of sample-only wiring.
   3. Existing host can move onto the reorganized package/API surface through a staged migration path instead of a one-shot rewrite.
-**Plans**: TBD
+**Plans**: 4 plans
+
+Plans:
+- [ ] 01-01-PLAN.md — Remove the known build blocker and create explicit initialization/migration test entry points.
+- [ ] 01-02-PLAN.md — Add the public editor/Avalonia initialization factories and prove them through tests plus the host sample.
+- [ ] 01-03-PLAN.md — Preserve the constructor/view compatibility facade and add migration parity regression plus package smoke coverage.
+- [ ] 01-04-PLAN.md — Align all consumer docs with the new package boundary and close the phase with packed-package verification.
 
 ### Phase 2: Runtime Contracts & Service Seams
 **Goal**: Hosts can drive editor behavior through stable runtime contracts in `AsterGraph.Editor` and replace core services without depending on Avalonia control internals.
@@ -77,7 +83,7 @@ AsterGraph v1 moves from a working internal editor into a publishable SDK that e
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Consumption & Compatibility Guardrails | 0/TBD | Not started | - |
+| 1. Consumption & Compatibility Guardrails | 0/4 | Not started | - |
 | 2. Runtime Contracts & Service Seams | 0/TBD | Not started | - |
 | 3. Embeddable Avalonia Surfaces | 0/TBD | Not started | - |
 | 4. Replaceable Presentation Kit | 0/TBD | Not started | - |
