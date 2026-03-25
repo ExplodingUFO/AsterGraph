@@ -4,38 +4,66 @@ This guide shows how to host AsterGraph without over-coupling your application t
 
 ## Package Choice
 
-Use only `AsterGraph.Avalonia` plus `AsterGraph.Abstractions` when your host:
+The supported Phase 1 package boundary is:
 
-- embeds the default Avalonia editor surface
-- only needs to register node definitions
-- only needs graph view hosting and basic editor composition
+- `AsterGraph.Abstractions` for node definitions, identifiers, and shared style contracts
+- `AsterGraph.Core` for `GraphDocument`, serialization, and compatibility services
+- `AsterGraph.Editor` for editor runtime composition, factories, behavior options, and host extension seams
+- `AsterGraph.Avalonia` for the default Avalonia view shell
 
-Add `AsterGraph.Editor` when your host also needs direct access to editor-state extension seams such as:
+For a default hosted UI, the canonical direct-reference set is:
 
-- `IGraphLocalizationProvider`
-- `INodePresentationProvider`
-- `IGraphContextMenuAugmentor`
-- `GraphEditorBehaviorOptions`
-- `GraphEditorCommandPermissions`
-- host-side selection, document, fragment, or viewport subscriptions
+- `AsterGraph.Abstractions`
+- `AsterGraph.Editor`
+- `AsterGraph.Avalonia`
 
-`AsterGraph.Core` is optional unless your host needs direct access to graph models or serialization contracts.
+Add a direct `AsterGraph.Core` reference when the host also needs direct access to graph models, serialization, or compatibility services outside the editor factories.
 
-## Recommended Host Composition
+`AsterGraph.Demo` is not a consumable package. Treat it as a reference application only.
+
+## Canonical Host Composition
+
+Use the factory/options path for new host integration. It is the canonical Phase 1 initialization surface because it keeps defaults, extension seams, and migration guidance in one place.
 
 Typical host composition flow:
 
-1. Build or register your `INodeCatalog`
-2. Create the initial `GraphDocument`
-3. Create `GraphEditorStyleOptions` for host-owned visual tokens
+1. Build or register your `INodeCatalog`.
+2. Create the initial `GraphDocument`.
+3. Create `GraphEditorStyleOptions` and `GraphEditorBehaviorOptions` for host-owned configuration.
 4. Create optional host providers:
    - `IGraphLocalizationProvider`
    - `INodePresentationProvider`
    - `IGraphContextMenuAugmentor`
-5. Construct `GraphEditorViewModel`
-6. Host `GraphEditorView` from `AsterGraph.Avalonia`
+5. Create the editor runtime with `AsterGraphEditorFactory`.
+6. Create the default Avalonia view with `AsterGraphAvaloniaViewFactory`.
 
-Minimal shape:
+Minimal canonical shape:
+
+```csharp
+var editor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
+{
+    Document = document,
+    NodeCatalog = catalog,
+    CompatibilityService = new DefaultPortCompatibilityService(),
+    StyleOptions = style,
+    BehaviorOptions = behavior,
+    ContextMenuAugmentor = menuAugmentor,
+    NodePresentationProvider = presentationProvider,
+    LocalizationProvider = localizationProvider,
+});
+
+var view = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOptions
+{
+    Editor = editor,
+    ChromeMode = GraphEditorViewChromeMode.Default,
+});
+```
+
+## Staged Migration Compatibility Path
+
+Existing hosts do not need to rewrite immediately. Phase 1 keeps the previous constructor-based setup supported as a compatibility facade while you migrate toward the factory/options path.
+
+Retained compatibility path:
 
 ```csharp
 var editor = new GraphEditorViewModel(
@@ -47,7 +75,36 @@ var editor = new GraphEditorViewModel(
     contextMenuAugmentor: menuAugmentor,
     nodePresentationProvider: presentationProvider,
     localizationProvider: localizationProvider);
+
+var view = new GraphEditorView
+{
+    Editor = editor,
+};
 ```
+
+Recommended migration stages:
+
+1. Keep `GraphEditorViewModel` and `GraphEditorView` if the host already uses them directly.
+2. Move runtime creation to `AsterGraphEditorFactory.Create(...)` once you want a single documented composition point.
+3. Move Avalonia view creation to `AsterGraphAvaloniaViewFactory.Create(...)` once the host is ready to standardize the UI entry path too.
+
+The constructor path is supported for compatibility, but new host documentation and samples now assume the factory path first.
+
+## View Chrome Mode
+
+`GraphEditorView.ChromeMode` is a formal view-layer API. It does not belong to `GraphEditorBehaviorOptions`, and changing it does not mutate `GraphEditorViewModel` state.
+
+- `GraphEditorViewChromeMode.Default` keeps the full shell.
+- `GraphEditorViewChromeMode.CanvasOnly` hides the header, library, inspector, and status chrome.
+- You can switch it at runtime without rebuilding the current `GraphEditorView` or `GraphEditorViewModel`.
+
+Minimal usage:
+
+```csharp
+view.ChromeMode = GraphEditorViewChromeMode.CanvasOnly;
+```
+
+This keeps the central `NodeCanvas`, context menus, host-context flow, shortcuts, and node presentation data while removing the surrounding shell panels.
 
 Reference sample:
 
@@ -180,7 +237,7 @@ The recommended layering is:
 - `AsterGraph.Core`
   graph models and compatibility
 - `AsterGraph.Editor`
-  state orchestration and host extension seams
+  state orchestration, factories, and host extension seams
 - `AsterGraph.Avalonia`
   default Avalonia UI shell
 

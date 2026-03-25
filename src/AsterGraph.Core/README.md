@@ -1,6 +1,15 @@
 # AsterGraph.Core
 
-`AsterGraph.Core` contains the pure graph-domain layer for AsterGraph.
+`AsterGraph.Core` contains the pure graph-domain and persistence layer inside the supported AsterGraph package set.
+
+Supported package set:
+
+- `AsterGraph.Abstractions`
+- `AsterGraph.Core`
+- `AsterGraph.Editor`
+- `AsterGraph.Avalonia`
+
+All four publishable packages target `net8.0` and `net9.0`.
 
 It intentionally contains:
 
@@ -20,4 +29,4 @@ Typical consumers:
 
 - hosts that need explicit model mapping
 - adapters that project editor documents into business-specific graph models
-
+- hosts that need direct serialization or compatibility-service access alongside `AsterGraph.Editor`

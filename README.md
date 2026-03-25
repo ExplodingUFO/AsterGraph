@@ -38,26 +38,47 @@ Current non-goals:
 - `src/AsterGraph.Core`
   Pure graph models, serialization, and default compatibility rules.
 - `src/AsterGraph.Editor`
-  Editor state, catalogs, workspace services, and geometry/viewport helpers.
+  Host-facing editor runtime, factories, behavior options, and extension seams.
 - `src/AsterGraph.Avalonia`
-  Avalonia controls, theme, and input handling.
+  Default Avalonia controls, theme, and input handling.
 - `src/AsterGraph.Demo`
-  Demo host, sample node-definition provider, and seeded graph document.
+  Demo host and sample content. This project is not part of the supported SDK boundary.
 
-## Package Boundary
+## Supported Package Boundary
 
-Recommended package-consumption boundary for external hosts:
+Phase 1 publishes four host-consumable packages. External hosts should treat this as the supported SDK surface:
 
-- direct host dependencies:
-  - `AsterGraph.Avalonia`
-  - `AsterGraph.Abstractions`
-- explicit optional dependencies:
-  - `AsterGraph.Core`
-  - `AsterGraph.Editor`
-- non-consumable sample host:
-  - `AsterGraph.Demo`
+| Package | Directly reference when | Notes |
+| --- | --- | --- |
+| `AsterGraph.Abstractions` | defining nodes, identifiers, catalogs, or style tokens | Stable contract layer with no UI dependency |
+| `AsterGraph.Core` | working directly with `GraphDocument`, serialization, or compatibility services | Model and persistence layer |
+| `AsterGraph.Editor` | building or extending an editor session | Standard host-facing runtime package; contains the canonical factory/options API and compatibility facade |
+| `AsterGraph.Avalonia` | embedding the shipped Avalonia UI | Default UI shell; pairs with `AsterGraph.Editor` for the canonical hosted-view path |
 
-This keeps most hosts on a small public surface while still allowing deeper integration when needed.
+`AsterGraph.Demo` remains a sample application only. Do not consume it as a package dependency.
+
+## Supported Target Frameworks
+
+All four publishable packages currently target `net8.0` and `net9.0`.
+
+- `net8.0` is the safest baseline for downstream hosts because the test projects run there.
+- `net9.0` is also supported for hosts already targeting the newer runtime.
+- `src/AsterGraph.Demo` targets `net9.0` only because it is a sample app, not a supported package.
+
+## Initialization And Migration Story
+
+The canonical Phase 1 initialization path is factory-based:
+
+- build the editor runtime with `AsterGraphEditorFactory`
+- build the default Avalonia view with `AsterGraphAvaloniaViewFactory`
+- keep host-owned configuration in `AsterGraphEditorOptions` and `AsterGraphAvaloniaViewOptions`
+
+The previous constructor-based path remains supported as a staged migration route:
+
+- `new GraphEditorViewModel(...)`
+- `new GraphEditorView { Editor = editor }`
+
+Use the factory path for new host composition. Keep the constructor path only while migrating an existing host incrementally.
 
 ## Quick Start
 
@@ -88,6 +109,8 @@ Sample local feed config:
 copy NuGet.config.sample NuGet.config
 ```
 
+For the detailed host setup and migration guidance, see [`docs/host-integration.md`](./docs/host-integration.md).
+
 ## Extension Model
 
 Custom nodes are added at compile time by implementing `INodeDefinitionProvider` from `AsterGraph.Abstractions`.
@@ -96,8 +119,13 @@ Typical flow:
 
 1. Create a provider that returns one or more `NodeDefinition` values.
 2. Register that provider into an `INodeCatalog`.
-3. Build a `GraphEditorViewModel` with the catalog and a compatibility service.
-4. Host `GraphEditorView` from `AsterGraph.Avalonia`.
+3. Build the editor runtime through `AsterGraphEditorFactory` or the retained `GraphEditorViewModel` constructor.
+4. Host the default UI through `AsterGraphAvaloniaViewFactory` or the retained `GraphEditorView` entry path.
+
+`GraphEditorView` also exposes a formal view-layer API through `GraphEditorView.ChromeMode`:
+
+- `Default`: keep the full shell
+- `CanvasOnly`: keep only the central canvas without rebuilding the current `GraphEditorViewModel`
 
 For host-side layout persistence without saving a full graph snapshot, `GraphEditorViewModel` also exposes:
 
@@ -130,10 +158,12 @@ For a deeper host-composition walkthrough, see:
 
 That guide covers:
 
-- when `AsterGraph.Avalonia` alone is enough
-- when to also reference `AsterGraph.Editor`
+- the supported four-package boundary and target-framework story
+- the canonical factory/options initialization path
+- the retained constructor-based migration path for existing hosts
 - how to wire localization, node presentation, style options, and host menu context together
 - how to use the typed host-context helper extensions safely
+- how to switch `GraphEditorView.ChromeMode` at runtime without rebuilding editor state
 
 Reference host sample:
 
