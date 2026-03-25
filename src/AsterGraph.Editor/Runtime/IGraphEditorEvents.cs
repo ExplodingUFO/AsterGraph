@@ -31,4 +31,14 @@ public interface IGraphEditorEvents
     /// 片段导入事件。
     /// </summary>
     event EventHandler<GraphEditorFragmentEventArgs>? FragmentImported;
+
+    /// <summary>
+    /// 命令执行事件。
+    /// </summary>
+    event EventHandler<GraphEditorCommandExecutedEventArgs>? CommandExecuted;
+
+    /// <summary>
+    /// 可恢复失败事件。
+    /// </summary>
+    event EventHandler<GraphEditorRecoverableFailureEventArgs>? RecoverableFailure;
 }

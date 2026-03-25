@@ -16,6 +16,24 @@ public interface IGraphEditorQueries
     GraphDocument CreateDocumentSnapshot();
 
     /// <summary>
+    /// 获取当前选择快照。
+    /// </summary>
+    /// <returns>当前选择状态。</returns>
+    GraphEditorSelectionSnapshot GetSelectionSnapshot();
+
+    /// <summary>
+    /// 获取当前视口快照。
+    /// </summary>
+    /// <returns>当前视口状态。</returns>
+    GraphEditorViewportSnapshot GetViewportSnapshot();
+
+    /// <summary>
+    /// 获取当前能力快照。
+    /// </summary>
+    /// <returns>当前能力状态。</returns>
+    GraphEditorCapabilitySnapshot GetCapabilitySnapshot();
+
+    /// <summary>
     /// 获取全部节点位置快照。
     /// </summary>
     /// <returns>节点位置集合。</returns>

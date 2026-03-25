@@ -734,6 +734,11 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
                 "editor.status.menu.augmentorFailed",
                 "Context menu augmentor failed: {0}. Using stock menu.",
                 exception.GetType().Name);
+            PublishRecoverableFailure(
+                "contextmenu.augment.failed",
+                "contextmenu.augment",
+                StatusMessage ?? exception.Message,
+                exception);
             return stockItems;
         }
     }
@@ -2397,6 +2402,11 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         catch (Exception exception)
         {
             SetStatus("editor.status.workspace.save.failed", "Save failed: {0}", exception.Message);
+            PublishRecoverableFailure(
+                "workspace.save.failed",
+                "workspace.save",
+                StatusMessage ?? exception.Message,
+                exception);
         }
     }
 
@@ -2431,6 +2441,11 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         catch (Exception exception)
         {
             SetStatus("editor.status.workspace.load.failed", "Load failed: {0}", exception.Message);
+            PublishRecoverableFailure(
+                "workspace.load.failed",
+                "workspace.load",
+                StatusMessage ?? exception.Message,
+                exception);
             return false;
         }
     }
@@ -2570,6 +2585,15 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     private void SetStatus((string Key, string Fallback, object?[] Arguments) status)
         => SetStatus(status.Key, status.Fallback, status.Arguments);
+
+    private void PublishRecoverableFailure(string code, string operation, string message, Exception? exception = null)
+    {
+        if (Session is GraphEditorSession runtimeSession)
+        {
+            runtimeSession.PublishRecoverableFailure(
+                new GraphEditorRecoverableFailureEventArgs(code, operation, message, exception));
+        }
+    }
 
     private string CreateNodeId(string templateKey)
         => CreateUniqueId(Nodes.Select(node => node.Id), $"{templateKey}-");

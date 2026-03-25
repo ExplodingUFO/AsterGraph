@@ -1,6 +1,13 @@
-using System.Reflection;
+using AsterGraph.Abstractions.Definitions;
+using AsterGraph.Abstractions.Identifiers;
+using AsterGraph.Core.Compatibility;
+using AsterGraph.Core.Models;
+using AsterGraph.Editor.Catalog;
 using AsterGraph.Editor.Events;
+using AsterGraph.Editor.Hosting;
+using AsterGraph.Editor.Menus;
 using AsterGraph.Editor.Runtime;
+using AsterGraph.Editor.ViewModels;
 using Xunit;
 
 namespace AsterGraph.Editor.Tests;
@@ -8,77 +15,131 @@ namespace AsterGraph.Editor.Tests;
 public sealed class GraphEditorTransactionTests
 {
     [Fact]
-    public void IGraphEditorSession_ExposesLightweightBeginMutationEntryPoint()
+    public void RuntimeSession_BeginMutation_DefersRuntimeNotificationsUntilDisposed()
     {
-        var method = typeof(IGraphEditorSession).GetMethod(
-            nameof(IGraphEditorSession.BeginMutation),
-            BindingFlags.Public | BindingFlags.Instance,
-            [typeof(string)]);
+        var definitionId = new NodeDefinitionId("tests.transaction.node");
+        var session = AsterGraphEditorFactory.CreateSession(CreateOptions(definitionId));
+        var documentChanges = 0;
+        var viewportChanges = 0;
+        var commandIds = new List<string>();
 
-        Assert.NotNull(method);
-        Assert.Equal(typeof(IGraphEditorMutationScope), method!.ReturnType);
+        session.Events.DocumentChanged += (_, _) => documentChanges++;
+        session.Events.ViewportChanged += (_, _) => viewportChanges++;
+        session.Events.CommandExecuted += (_, args) => commandIds.Add(args.CommandId);
 
-        var label = Assert.Single(method.GetParameters());
-        Assert.True(label.IsOptional);
-        Assert.Equal(typeof(string), label.ParameterType);
+        using (session.BeginMutation("batch-add"))
+        {
+            session.Commands.AddNode(definitionId, new GraphPoint(320, 180));
+            session.Commands.PanBy(10, 15);
+
+            Assert.Equal(0, documentChanges);
+            Assert.Equal(0, viewportChanges);
+            Assert.Empty(commandIds);
+        }
+
+        Assert.Equal(1, documentChanges);
+        Assert.Equal(1, viewportChanges);
+        Assert.Equal(new[] { "nodes.add", "viewport.pan" }, commandIds);
+        Assert.Equal(2, session.Queries.CreateDocumentSnapshot().Nodes.Count);
     }
 
     [Fact]
-    public void RuntimeSnapshots_CaptureSelectionViewportAndCapabilities()
+    public void RuntimeSession_QueriesExposeSelectionViewportAndCapabilities()
     {
-        var selection = new GraphEditorSelectionSnapshot(["node-001", "node-002"], "node-002");
-        Assert.Equal(new[] { "node-001", "node-002" }, selection.SelectedNodeIds);
-        Assert.Equal("node-002", selection.PrimarySelectedNodeId);
+        var definitionId = new NodeDefinitionId("tests.transaction.queries");
+        var editor = AsterGraphEditorFactory.Create(CreateOptions(definitionId));
+        var session = editor.Session;
 
-        var viewport = new GraphEditorViewportSnapshot(0.88, 110, 96, 1280, 720);
+        editor.UpdateViewportSize(1280, 720);
+        editor.SelectSingleNode(editor.Nodes[0], updateStatus: false);
+
+        var selection = session.Queries.GetSelectionSnapshot();
+        Assert.Single(selection.SelectedNodeIds);
+        Assert.Equal(editor.Nodes[0].Id, selection.PrimarySelectedNodeId);
+
+        var viewport = session.Queries.GetViewportSnapshot();
         Assert.Equal(0.88, viewport.Zoom);
         Assert.Equal(110, viewport.PanX);
         Assert.Equal(96, viewport.PanY);
         Assert.Equal(1280, viewport.ViewportWidth);
         Assert.Equal(720, viewport.ViewportHeight);
 
-        var capabilities = new GraphEditorCapabilitySnapshot(
-            CanUndo: true,
-            CanRedo: false,
-            CanCopySelection: true,
-            CanPaste: true,
-            CanSaveWorkspace: true,
-            CanLoadWorkspace: true);
-        Assert.True(capabilities.CanUndo);
+        var capabilities = session.Queries.GetCapabilitySnapshot();
+        Assert.False(capabilities.CanUndo);
         Assert.False(capabilities.CanRedo);
         Assert.True(capabilities.CanCopySelection);
-        Assert.True(capabilities.CanPaste);
+        Assert.False(capabilities.CanPaste);
         Assert.True(capabilities.CanSaveWorkspace);
         Assert.True(capabilities.CanLoadWorkspace);
     }
 
     [Fact]
-    public void RuntimeEventPayloads_CarryStableCommandAndFailureMetadata()
+    public void RuntimeSession_PublishesRecoverableFailuresThroughSharedFacade()
     {
-        var command = new GraphEditorCommandExecutedEventArgs(
-            "nodes.add",
-            "batch-add",
-            isInMutationScope: true,
-            statusMessage: "Added node.");
-        Assert.Equal("nodes.add", command.CommandId);
-        Assert.Equal("batch-add", command.MutationLabel);
-        Assert.True(command.IsInMutationScope);
-        Assert.Equal("Added node.", command.StatusMessage);
+        var definitionId = new NodeDefinitionId("tests.transaction.failure");
+        var editor = AsterGraphEditorFactory.Create(CreateOptions(definitionId, new ThrowingAugmentor()));
+        var session = editor.Session;
+        GraphEditorRecoverableFailureEventArgs? failure = null;
 
-        var exception = new InvalidOperationException("Load failed.");
-        var failure = new GraphEditorRecoverableFailureEventArgs(
-            "workspace.load.failed",
-            "workspace.load",
-            "Load failed: disk offline.",
-            exception);
-        Assert.Equal("workspace.load.failed", failure.Code);
-        Assert.Equal("workspace.load", failure.Operation);
-        Assert.Equal("Load failed: disk offline.", failure.Message);
-        Assert.Same(exception, failure.Exception);
+        session.Events.RecoverableFailure += (_, args) => failure = args;
+
+        var menu = editor.BuildContextMenu(new ContextMenuContext(ContextMenuTargetKind.Canvas, new GraphPoint(160, 90)));
+
+        Assert.NotEmpty(menu);
+        Assert.NotNull(failure);
+        Assert.Equal("contextmenu.augment.failed", failure!.Code);
+        Assert.Equal("contextmenu.augment", failure.Operation);
+        Assert.Contains("augmentor", failure.Message, StringComparison.OrdinalIgnoreCase);
     }
 
-    [Fact(Skip = "Phase 2 Plan 02-02 implements mutation batching behavior.")]
-    public void RuntimeSession_MutationScope_WillCoalesceNotificationsUntilDisposed()
+    private static AsterGraphEditorOptions CreateOptions(NodeDefinitionId definitionId, IGraphContextMenuAugmentor? augmentor = null)
+        => new()
+        {
+            Document = CreateDocument(definitionId),
+            NodeCatalog = CreateCatalog(definitionId),
+            CompatibilityService = new DefaultPortCompatibilityService(),
+            ContextMenuAugmentor = augmentor,
+        };
+
+    private static GraphDocument CreateDocument(NodeDefinitionId definitionId)
+        => new(
+            "Transaction Graph",
+            "Runtime batching regression coverage.",
+            [
+                new GraphNode(
+                    "tests.transaction.node-001",
+                    "Transaction Node",
+                    "Tests",
+                    "Runtime",
+                    "Transaction test node.",
+                    new GraphPoint(120, 160),
+                    new GraphSize(240, 160),
+                    [],
+                    [],
+                    "#6AD5C4",
+                    definitionId),
+            ],
+            []);
+
+    private static NodeCatalog CreateCatalog(NodeDefinitionId definitionId)
     {
+        var catalog = new NodeCatalog();
+        catalog.RegisterDefinition(new NodeDefinition(
+            definitionId,
+            "Transaction Node",
+            "Tests",
+            "Runtime",
+            [],
+            []));
+        return catalog;
+    }
+
+    private sealed class ThrowingAugmentor : IGraphContextMenuAugmentor
+    {
+        public IReadOnlyList<MenuItemDescriptor> Augment(
+            GraphEditorViewModel editor,
+            ContextMenuContext context,
+            IReadOnlyList<MenuItemDescriptor> stockItems)
+            => throw new InvalidOperationException("augmentor exploded");
     }
 }
