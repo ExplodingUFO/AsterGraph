@@ -4,7 +4,7 @@ using AsterGraph.Core.Models;
 
 namespace AsterGraph.Editor.Services;
 
-internal static class GraphClipboardPayloadSerializer
+public sealed class GraphClipboardPayloadSerializer : IGraphClipboardPayloadSerializer
 {
     private const string ClipboardFormat = "astergraph.clipboard/v1";
     private static readonly JsonSerializerOptions JsonOptions = new()
@@ -16,7 +16,7 @@ internal static class GraphClipboardPayloadSerializer
         },
     };
 
-    public static string Serialize(GraphSelectionFragment fragment)
+    public string Serialize(GraphSelectionFragment fragment)
     {
         ArgumentNullException.ThrowIfNull(fragment);
 
@@ -25,6 +25,6 @@ internal static class GraphClipboardPayloadSerializer
             JsonOptions);
     }
 
-    public static bool TryDeserialize(string? text, out GraphSelectionFragment? fragment)
+    public bool TryDeserialize(string? text, out GraphSelectionFragment? fragment)
         => GraphClipboardPayloadCompatibility.TryDeserialize(text, ClipboardFormat, JsonOptions, out fragment);
 }

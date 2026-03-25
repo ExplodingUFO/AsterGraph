@@ -1,4 +1,5 @@
 using AsterGraph.Editor.Runtime;
+using AsterGraph.Editor.Services;
 using AsterGraph.Editor.ViewModels;
 
 namespace AsterGraph.Editor.Hosting;
@@ -24,18 +25,29 @@ public static class AsterGraphEditorFactory
         ArgumentNullException.ThrowIfNull(options.NodeCatalog);
         ArgumentNullException.ThrowIfNull(options.CompatibilityService);
 
+        var clipboardPayloadSerializer = options.ClipboardPayloadSerializer ?? new GraphClipboardPayloadSerializer();
+        var workspaceService = options.WorkspaceService ?? new GraphWorkspaceService(GraphEditorStorageDefaults.GetWorkspacePath(options.StorageRootPath));
+        var fragmentWorkspaceService = options.FragmentWorkspaceService ?? new GraphFragmentWorkspaceService(
+            GraphEditorStorageDefaults.GetFragmentPath(options.StorageRootPath),
+            clipboardPayloadSerializer);
+        var fragmentLibraryService = options.FragmentLibraryService ?? new GraphFragmentLibraryService(
+            GraphEditorStorageDefaults.GetFragmentLibraryPath(options.StorageRootPath),
+            clipboardPayloadSerializer);
+
         return new GraphEditorViewModel(
             options.Document,
             options.NodeCatalog,
             options.CompatibilityService,
-            options.WorkspaceService,
-            options.FragmentWorkspaceService,
+            workspaceService,
+            fragmentWorkspaceService,
             options.StyleOptions,
             options.BehaviorOptions,
-            options.FragmentLibraryService,
+            fragmentLibraryService,
             options.ContextMenuAugmentor,
             options.NodePresentationProvider,
-            options.LocalizationProvider);
+            options.LocalizationProvider,
+            clipboardPayloadSerializer,
+            options.DiagnosticsSink);
     }
 
     /// <summary>

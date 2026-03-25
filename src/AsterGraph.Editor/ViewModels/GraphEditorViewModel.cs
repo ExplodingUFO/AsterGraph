@@ -14,6 +14,7 @@ using AsterGraph.Abstractions.Styling;
 using AsterGraph.Core.Models;
 using AsterGraph.Core.Serialization;
 using AsterGraph.Editor.Configuration;
+using AsterGraph.Editor.Diagnostics;
 using AsterGraph.Editor.Events;
 using AsterGraph.Editor.Geometry;
 using AsterGraph.Editor.Hosting;
@@ -87,10 +88,11 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     private readonly INodeCatalog _nodeCatalog;
     private readonly IPortCompatibilityService _compatibilityService;
-    private readonly GraphWorkspaceService _workspaceService;
+    private readonly IGraphWorkspaceService _workspaceService;
     private readonly GraphSelectionClipboard _selectionClipboard;
-    private readonly GraphFragmentWorkspaceService _fragmentWorkspaceService;
-    private readonly GraphFragmentLibraryService _fragmentLibraryService;
+    private readonly IGraphFragmentWorkspaceService _fragmentWorkspaceService;
+    private readonly IGraphFragmentLibraryService _fragmentLibraryService;
+    private readonly IGraphClipboardPayloadSerializer _clipboardPayloadSerializer;
     private readonly GraphEditorHistoryService _historyService;
     private readonly GraphEditorInspectorProjection _inspectorProjection;
     private readonly GraphEditorCommandStateNotifier _commandStateNotifier = new();
@@ -134,21 +136,24 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         GraphDocument document,
         INodeCatalog nodeCatalog,
         IPortCompatibilityService compatibilityService,
-        GraphWorkspaceService? workspaceService = null,
-        GraphFragmentWorkspaceService? fragmentWorkspaceService = null,
+        IGraphWorkspaceService? workspaceService = null,
+        IGraphFragmentWorkspaceService? fragmentWorkspaceService = null,
         GraphEditorStyleOptions? styleOptions = null,
         GraphEditorBehaviorOptions? behaviorOptions = null,
-        GraphFragmentLibraryService? fragmentLibraryService = null,
+        IGraphFragmentLibraryService? fragmentLibraryService = null,
         IGraphContextMenuAugmentor? contextMenuAugmentor = null,
         INodePresentationProvider? nodePresentationProvider = null,
-        IGraphLocalizationProvider? localizationProvider = null)
+        IGraphLocalizationProvider? localizationProvider = null,
+        IGraphClipboardPayloadSerializer? clipboardPayloadSerializer = null,
+        IGraphEditorDiagnosticsSink? diagnosticsSink = null)
     {
         _nodeCatalog = nodeCatalog ?? throw new ArgumentNullException(nameof(nodeCatalog));
         _compatibilityService = compatibilityService ?? throw new ArgumentNullException(nameof(compatibilityService));
         _workspaceService = workspaceService ?? new GraphWorkspaceService();
         _selectionClipboard = new GraphSelectionClipboard();
-        _fragmentWorkspaceService = fragmentWorkspaceService ?? new GraphFragmentWorkspaceService();
-        _fragmentLibraryService = fragmentLibraryService ?? new GraphFragmentLibraryService();
+        _clipboardPayloadSerializer = clipboardPayloadSerializer ?? new GraphClipboardPayloadSerializer();
+        _fragmentWorkspaceService = fragmentWorkspaceService ?? new GraphFragmentWorkspaceService(clipboardPayloadSerializer: _clipboardPayloadSerializer);
+        _fragmentLibraryService = fragmentLibraryService ?? new GraphFragmentLibraryService(clipboardPayloadSerializer: _clipboardPayloadSerializer);
         _historyService = new GraphEditorHistoryService();
         _contextMenuAugmentor = contextMenuAugmentor;
         _nodePresentationProvider = nodePresentationProvider;
@@ -232,7 +237,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         NodeTemplates = new ObservableCollection<NodeTemplateViewModel>(
             _nodeCatalog.Definitions.Select(definition => new NodeTemplateViewModel(definition)));
         FragmentTemplates = new ObservableCollection<FragmentTemplateViewModel>();
-        Session = new GraphEditorSession(this);
+        Session = new GraphEditorSession(this, diagnosticsSink);
 
         Nodes.CollectionChanged += HandleNodesCollectionChanged;
         Connections.CollectionChanged += HandleConnectionsCollectionChanged;
@@ -2071,7 +2076,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         {
             var clipboardText = await _textClipboardBridge.ReadTextAsync(CancellationToken.None);
             // 优先读取系统剪贴板 JSON，但仍保留进程内剪贴板作为可靠回退。
-            if (GraphClipboardPayloadSerializer.TryDeserialize(clipboardText, out var systemFragment))
+            if (_clipboardPayloadSerializer.TryDeserialize(clipboardText, out var systemFragment))
             {
                 return systemFragment;
             }
@@ -2099,7 +2104,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         }
 
         _selectionClipboard.Store(fragment);
-        var clipboardJson = GraphClipboardPayloadSerializer.Serialize(fragment);
+        var clipboardJson = _clipboardPayloadSerializer.Serialize(fragment);
         if (_textClipboardBridge is not null)
         {
             await _textClipboardBridge.WriteTextAsync(clipboardJson, CancellationToken.None);

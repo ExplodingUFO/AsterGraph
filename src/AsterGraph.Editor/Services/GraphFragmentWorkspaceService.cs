@@ -3,15 +3,20 @@ namespace AsterGraph.Editor.Services;
 /// <summary>
 /// 管理图片段 JSON 文件的默认存储位置与读写操作。
 /// </summary>
-public sealed class GraphFragmentWorkspaceService
+public sealed class GraphFragmentWorkspaceService : IGraphFragmentWorkspaceService
 {
+    private readonly IGraphClipboardPayloadSerializer _clipboardPayloadSerializer;
+
     /// <summary>
     /// 初始化片段工作区服务。
     /// </summary>
     /// <param name="fragmentPath">可选的默认片段文件路径。</param>
-    public GraphFragmentWorkspaceService(string? fragmentPath = null)
+    public GraphFragmentWorkspaceService(
+        string? fragmentPath = null,
+        IGraphClipboardPayloadSerializer? clipboardPayloadSerializer = null)
     {
         FragmentPath = fragmentPath ?? GetDefaultFragmentPath();
+        _clipboardPayloadSerializer = clipboardPayloadSerializer ?? new GraphClipboardPayloadSerializer();
     }
 
     /// <summary>
@@ -23,17 +28,14 @@ public sealed class GraphFragmentWorkspaceService
     /// 获取系统默认片段文件路径。
     /// </summary>
     public static string GetDefaultFragmentPath()
-        => Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "AsterGraphDemo",
-            "selection-fragment.json");
+        => GraphEditorStorageDefaults.GetFragmentPath();
 
     /// <summary>
     /// 将片段保存到默认路径或指定路径。
     /// </summary>
     /// <param name="fragment">要保存的片段。</param>
     /// <param name="path">可选的目标路径。</param>
-    internal void Save(GraphSelectionFragment fragment, string? path = null)
+    public void Save(GraphSelectionFragment fragment, string? path = null)
     {
         ArgumentNullException.ThrowIfNull(fragment);
 
@@ -44,17 +46,17 @@ public sealed class GraphFragmentWorkspaceService
             Directory.CreateDirectory(directory);
         }
 
-        File.WriteAllText(resolvedPath, GraphClipboardPayloadSerializer.Serialize(fragment));
+        File.WriteAllText(resolvedPath, _clipboardPayloadSerializer.Serialize(fragment));
     }
 
     /// <summary>
     /// 从默认路径或指定路径读取片段。
     /// </summary>
     /// <param name="path">可选的源路径。</param>
-    internal GraphSelectionFragment Load(string? path = null)
+    public GraphSelectionFragment Load(string? path = null)
     {
         var text = File.ReadAllText(ResolvePath(path));
-        if (!GraphClipboardPayloadSerializer.TryDeserialize(text, out var fragment) || fragment is null)
+        if (!_clipboardPayloadSerializer.TryDeserialize(text, out var fragment) || fragment is null)
         {
             throw new InvalidOperationException("Failed to deserialize the saved selection fragment.");
         }
@@ -73,7 +75,7 @@ public sealed class GraphFragmentWorkspaceService
     /// 删除默认路径或指定路径的片段文件。
     /// </summary>
     /// <param name="path">可选的目标路径。</param>
-    internal void Delete(string? path = null)
+    public void Delete(string? path = null)
     {
         var resolvedPath = ResolvePath(path);
         if (File.Exists(resolvedPath))

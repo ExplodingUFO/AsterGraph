@@ -1,5 +1,6 @@
 using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Core.Models;
+using AsterGraph.Editor.Diagnostics;
 using AsterGraph.Editor.Events;
 using AsterGraph.Editor.Menus;
 using AsterGraph.Editor.Models;
@@ -13,6 +14,7 @@ namespace AsterGraph.Editor.Runtime;
 public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorCommands, IGraphEditorQueries, IGraphEditorEvents
 {
     private readonly GraphEditorViewModel _editor;
+    private readonly IGraphEditorDiagnosticsSink? _diagnosticsSink;
     private int _mutationDepth;
     private string? _currentMutationLabel;
     private GraphEditorDocumentChangedEventArgs? _pendingDocumentChanged;
@@ -27,9 +29,10 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorComman
     /// 初始化运行时会话。
     /// </summary>
     /// <param name="editor">底层兼容立面。</param>
-    public GraphEditorSession(GraphEditorViewModel editor)
+    public GraphEditorSession(GraphEditorViewModel editor, IGraphEditorDiagnosticsSink? diagnosticsSink = null)
     {
         _editor = editor ?? throw new ArgumentNullException(nameof(editor));
+        _diagnosticsSink = diagnosticsSink;
         _editor.DocumentChanged += HandleDocumentChanged;
         _editor.SelectionChanged += HandleSelectionChanged;
         _editor.ViewportChanged += HandleViewportChanged;
@@ -161,12 +164,21 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorComman
 
     internal void PublishRecoverableFailure(GraphEditorRecoverableFailureEventArgs failure)
     {
+        var diagnostic = new GraphEditorDiagnostic(
+            failure.Code,
+            failure.Operation,
+            failure.Message,
+            GraphEditorDiagnosticSeverity.Error,
+            failure.Exception);
+
         if (IsBatching)
         {
             _pendingRecoverableFailures.Add(failure);
+            _diagnosticsSink?.Publish(diagnostic);
             return;
         }
 
+        _diagnosticsSink?.Publish(diagnostic);
         RecoverableFailure?.Invoke(this, failure);
     }
 
