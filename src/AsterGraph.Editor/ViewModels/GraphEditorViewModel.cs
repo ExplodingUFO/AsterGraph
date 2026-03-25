@@ -29,6 +29,12 @@ namespace AsterGraph.Editor.ViewModels;
 /// <summary>
 /// 图编辑器的主视图模型，承载选择、布局、连线、剪贴板和持久化状态。
 /// </summary>
+/// <remarks>
+/// Phase 1 会继续支持直接构造 <see cref="GraphEditorViewModel"/> 作为兼容立面，
+/// 以满足现有宿主基于 <c>new GraphEditorViewModel(...)</c> 的集成路径。
+/// 新宿主应优先考虑 <see cref="AsterGraphEditorFactory"/> 和 <see cref="AsterGraphEditorOptions"/>，
+/// 但本类型在当前迁移窗口内不会因为新增工厂入口而被移除或标记为过时。
+/// </remarks>
 public sealed partial class GraphEditorViewModel : ObservableObject, IGraphContextMenuHost
 {
     private const double DefaultZoom = 0.88;
@@ -117,6 +123,12 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// <param name="contextMenuAugmentor">宿主右键菜单增强器。</param>
     /// <param name="nodePresentationProvider">节点展示状态提供器。</param>
     /// <param name="localizationProvider">编辑器内置文案本地化提供器。</param>
+    /// <remarks>
+    /// 该构造函数在 Phase 1 中保留为受支持的兼容入口，供现有宿主继续沿用
+    /// <c>new GraphEditorViewModel(...)</c> 的组合方式。对于新的宿主组合代码，
+    /// 请优先使用 <see cref="AsterGraphEditorFactory.Create(AsterGraphEditorOptions)"/>，
+    /// 以便后续阶段通过统一的选项契约扩展初始化能力。
+    /// </remarks>
     public GraphEditorViewModel(
         GraphDocument document,
         INodeCatalog nodeCatalog,
