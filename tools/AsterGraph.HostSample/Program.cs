@@ -1,9 +1,11 @@
 using CommunityToolkit.Mvvm.Input;
+using Avalonia.Controls;
 using AsterGraph.Abstractions.Catalog;
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Abstractions.Styling;
 using AsterGraph.Avalonia.Controls;
+using AsterGraph.Avalonia.Hosting;
 using AsterGraph.Core.Compatibility;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Catalog;
@@ -70,15 +72,18 @@ var behavior = GraphEditorBehaviorOptions.Default with
     Commands = permissions,
 };
 
-var editor = new GraphEditorViewModel(
-    document,
-    catalog,
-    new DefaultPortCompatibilityService(),
-    styleOptions: style,
-    behaviorOptions: behavior,
-    contextMenuAugmentor: new HostSampleAugmentor(),
-    nodePresentationProvider: new HostSamplePresentationProvider(),
-    localizationProvider: new HostSampleLocalizationProvider());
+// Direct GraphEditorViewModel/GraphEditorView construction remains supported for staged migration.
+var editor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
+{
+    Document = document,
+    NodeCatalog = catalog,
+    CompatibilityService = new DefaultPortCompatibilityService(),
+    StyleOptions = style,
+    BehaviorOptions = behavior,
+    ContextMenuAugmentor = new HostSampleAugmentor(),
+    NodePresentationProvider = new HostSamplePresentationProvider(),
+    LocalizationProvider = new HostSampleLocalizationProvider(),
+});
 
 editor.DocumentChanged += (_, args) =>
     Console.WriteLine($"DocumentChanged subscribed: {args.ChangeKind}");
@@ -110,6 +115,21 @@ var hostPreviewItem = menu.SingleOrDefault(item => item.Id == "host-sample-previ
 var node = editor.Nodes[0];
 var ownerMatched = menuContext.TryGetOwner<HostSampleOwner>(out var typedOwner);
 var topLevelMatched = menuContext.TryGetTopLevel<HostSampleTopLevel>(out var typedTopLevel);
+var view = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOptions
+{
+    Editor = editor,
+    ChromeMode = GraphEditorViewChromeMode.Default,
+});
+var defaultHeaderVisible = FindRequiredControl<Border>(view, "PART_HeaderChrome").IsVisible;
+var defaultLibraryVisible = FindRequiredControl<Border>(view, "PART_LibraryChrome").IsVisible;
+var defaultInspectorVisible = FindRequiredControl<Border>(view, "PART_InspectorChrome").IsVisible;
+var defaultStatusVisible = FindRequiredControl<Border>(view, "PART_StatusChrome").IsVisible;
+view.ChromeMode = GraphEditorViewChromeMode.CanvasOnly;
+var canvasOnlyHeaderHidden = !FindRequiredControl<Border>(view, "PART_HeaderChrome").IsVisible;
+var canvasOnlyLibraryHidden = !FindRequiredControl<Border>(view, "PART_LibraryChrome").IsVisible;
+var canvasOnlyInspectorHidden = !FindRequiredControl<Border>(view, "PART_InspectorChrome").IsVisible;
+var canvasOnlyStatusHidden = !FindRequiredControl<Border>(view, "PART_StatusChrome").IsVisible;
+var canvasStillExists = FindRequiredControl<NodeCanvas>(view, "PART_NodeCanvas") is not null;
 
 Console.WriteLine($"Host sample view type: {typeof(GraphEditorView).FullName}");
 Console.WriteLine($"Node count: {editor.Nodes.Count}");
@@ -127,6 +147,14 @@ Console.WriteLine($"Typed host owner found: {ownerMatched} ({typedOwner?.Display
 Console.WriteLine($"Typed host top level found: {topLevelMatched} ({typedTopLevel?.WindowTitle ?? "<none>"})");
 Console.WriteLine($"Style highlight hex: {editor.StyleOptions.Shell.HighlightHex}");
 Console.WriteLine($"Style context menu background: {editor.StyleOptions.ContextMenu.BackgroundHex}");
+Console.WriteLine($"ChromeMode default sections visible: header={defaultHeaderVisible}, library={defaultLibraryVisible}, inspector={defaultInspectorVisible}, status={defaultStatusVisible}");
+Console.WriteLine($"ChromeMode switched to: {view.ChromeMode}");
+Console.WriteLine($"ChromeMode canvas-only sections hidden: header={canvasOnlyHeaderHidden}, library={canvasOnlyLibraryHidden}, inspector={canvasOnlyInspectorHidden}, status={canvasOnlyStatusHidden}");
+Console.WriteLine($"ChromeMode canvas-only keeps canvas: {canvasStillExists}");
+
+static T FindRequiredControl<T>(Control root, string name)
+    where T : Control
+    => root.FindControl<T>(name) ?? throw new InvalidOperationException($"Could not find control '{name}'.");
 
 internal sealed class HostSampleNodeDefinitionProvider : INodeDefinitionProvider
 {
