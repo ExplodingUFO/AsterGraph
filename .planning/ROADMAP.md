@@ -10,7 +10,7 @@ AsterGraph v1 moves from a working internal editor into a publishable SDK that e
 - Integer phases (1, 2, 3): Planned milestone work
 - Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
 
-- [ ] **Phase 1: Consumption & Compatibility Guardrails** - Make package adoption, runtime initialization, and migration safe for external hosts.
+- [x] **Phase 1: Consumption & Compatibility Guardrails** - Make package adoption, runtime initialization, and migration safe for external hosts.
 - [ ] **Phase 2: Runtime Contracts & Service Seams** - Expose framework-neutral editor commands, queries, events, batching, and replaceable services.
 - [ ] **Phase 3: Embeddable Avalonia Surfaces** - Split the default Avalonia shell into independently hostable editor surfaces.
 - [ ] **Phase 4: Replaceable Presentation Kit** - Let hosts swap visual presenters while reusing editor behavior and data contracts.
@@ -32,7 +32,7 @@ Plans:
 - [x] 01-01-PLAN.md — Remove the known build blocker and create explicit initialization/migration test entry points.
 - [x] 01-02-PLAN.md — Add the public editor/Avalonia initialization factories and prove them through tests plus the host sample.
 - [x] 01-03-PLAN.md — Preserve the constructor/view compatibility facade and add migration parity regression plus package smoke coverage.
-- [ ] 01-04-PLAN.md — Align all consumer docs with the new package boundary and close the phase with packed-package verification.
+- [x] 01-04-PLAN.md — Align all consumer docs with the new package boundary and close the phase with packed-package verification.
 
 ### Phase 2: Runtime Contracts & Service Seams
 **Goal**: Hosts can drive editor behavior through stable runtime contracts in `AsterGraph.Editor` and replace core services without depending on Avalonia control internals.
@@ -83,7 +83,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Consumption & Compatibility Guardrails | 3/4 | In Progress | 01-01, 01-02, 01-03 |
+| 1. Consumption & Compatibility Guardrails | 4/4 | Complete | 01-01, 01-02, 01-03, 01-04 |
 | 2. Runtime Contracts & Service Seams | 0/TBD | Not started | - |
 | 3. Embeddable Avalonia Surfaces | 0/TBD | Not started | - |
 | 4. Replaceable Presentation Kit | 0/TBD | Not started | - |
