@@ -1,6 +1,9 @@
 using System.Reflection;
+using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
+using AsterGraph.Core.Compatibility;
 using AsterGraph.Core.Models;
+using AsterGraph.Editor.Catalog;
 using AsterGraph.Editor.Events;
 using AsterGraph.Editor.Hosting;
 using AsterGraph.Editor.Menus;
@@ -79,26 +82,53 @@ public sealed class GraphEditorSessionTests
         AssertEvent(eventsType, nameof(IGraphEditorEvents.FragmentImported), typeof(GraphEditorFragmentEventArgs));
     }
 
-    [Fact(Skip = "Phase 2 Plan 02-02 implements the concrete runtime session factory entry point.")]
-    public void AsterGraphEditorFactory_CreateSession_WillProvidePublicRuntimeEntryPoint()
+    [Fact]
+    public void AsterGraphEditorFactory_CreateSession_ExecutesCommandsQueriesAndEvents()
     {
-        var method = typeof(AsterGraphEditorFactory)
-            .GetMethods(BindingFlags.Public | BindingFlags.Static)
-            .SingleOrDefault(candidate =>
-                candidate.Name == "CreateSession"
-                && candidate.GetParameters() is [{ ParameterType: var parameterType }] && parameterType == typeof(AsterGraphEditorOptions));
+        var definitionId = new NodeDefinitionId("tests.session.node");
+        var session = AsterGraphEditorFactory.CreateSession(CreateOptions(definitionId));
+        GraphEditorDocumentChangedEventArgs? documentChanged = null;
+        GraphEditorViewportChangedEventArgs? viewportChanged = null;
 
-        Assert.NotNull(method);
-        Assert.Equal(typeof(IGraphEditorSession), method!.ReturnType);
+        session.Events.DocumentChanged += (_, args) => documentChanged = args;
+        session.Events.ViewportChanged += (_, args) => viewportChanged = args;
+
+        var before = session.Queries.CreateDocumentSnapshot();
+
+        session.Commands.AddNode(definitionId, new GraphPoint(420, 220));
+        session.Commands.PanBy(12, 18);
+
+        var after = session.Queries.CreateDocumentSnapshot();
+
+        Assert.Equal(before.Nodes.Count + 1, after.Nodes.Count);
+        Assert.NotNull(documentChanged);
+        Assert.Equal(GraphEditorDocumentChangeKind.NodesAdded, documentChanged!.ChangeKind);
+        Assert.NotNull(viewportChanged);
+        Assert.Equal(122, viewportChanged!.PanX);
+        Assert.Equal(114, viewportChanged.PanY);
     }
 
-    [Fact(Skip = "Phase 2 Plan 02-02 implements the compatibility session bridge.")]
-    public void GraphEditorViewModel_Session_WillExposeSharedRuntimeSession()
+    [Fact]
+    public void GraphEditorViewModel_Session_ExposesSharedRuntimeSurface()
     {
-        var property = typeof(GraphEditorViewModel).GetProperty("Session", BindingFlags.Public | BindingFlags.Instance);
+        var definitionId = new NodeDefinitionId("tests.session.compat");
+        var editor = AsterGraphEditorFactory.Create(CreateOptions(definitionId));
+        var session = editor.Session;
 
-        Assert.NotNull(property);
-        Assert.Equal(typeof(IGraphEditorSession), property!.PropertyType);
+        Assert.Same(session, editor.Session);
+
+        editor.SelectSingleNode(editor.Nodes[0], updateStatus: false);
+        Assert.Single(editor.SelectedNodes);
+
+        session.Commands.ClearSelection();
+
+        Assert.Empty(editor.SelectedNodes);
+        var editorSnapshot = editor.CreateDocumentSnapshot();
+        var sessionSnapshot = session.Queries.CreateDocumentSnapshot();
+        Assert.Equal(editorSnapshot.Title, sessionSnapshot.Title);
+        Assert.Equal(editorSnapshot.Description, sessionSnapshot.Description);
+        Assert.Equal(editorSnapshot.Nodes.Count, sessionSnapshot.Nodes.Count);
+        Assert.Equal(editorSnapshot.Connections.Count, sessionSnapshot.Connections.Count);
     }
 
     private static void AssertProperty(Type declaringType, string propertyName, Type propertyType)
@@ -127,5 +157,46 @@ public sealed class GraphEditorSessionTests
         Assert.True(handlerType.IsGenericType);
         Assert.Equal(typeof(EventHandler<>), handlerType.GetGenericTypeDefinition());
         Assert.Equal(eventArgsType, handlerType.GetGenericArguments()[0]);
+    }
+
+    private static AsterGraphEditorOptions CreateOptions(NodeDefinitionId definitionId)
+        => new()
+        {
+            Document = CreateDocument(definitionId),
+            NodeCatalog = CreateCatalog(definitionId),
+            CompatibilityService = new DefaultPortCompatibilityService(),
+        };
+
+    private static GraphDocument CreateDocument(NodeDefinitionId definitionId)
+        => new(
+            "Session Graph",
+            "Runtime session regression coverage.",
+            [
+                new GraphNode(
+                    "tests.session.node-001",
+                    "Session Node",
+                    "Tests",
+                    "Runtime",
+                    "Session test node.",
+                    new GraphPoint(120, 160),
+                    new GraphSize(240, 160),
+                    [],
+                    [],
+                    "#6AD5C4",
+                    definitionId),
+            ],
+            []);
+
+    private static NodeCatalog CreateCatalog(NodeDefinitionId definitionId)
+    {
+        var catalog = new NodeCatalog();
+        catalog.RegisterDefinition(new NodeDefinition(
+            definitionId,
+            "Session Node",
+            "Tests",
+            "Runtime",
+            [],
+            []));
+        return catalog;
     }
 }

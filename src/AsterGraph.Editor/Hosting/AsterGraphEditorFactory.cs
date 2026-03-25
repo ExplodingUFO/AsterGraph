@@ -1,3 +1,4 @@
+using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.ViewModels;
 
 namespace AsterGraph.Editor.Hosting;
@@ -36,4 +37,12 @@ public static class AsterGraphEditorFactory
             options.NodePresentationProvider,
             options.LocalizationProvider);
     }
+
+    /// <summary>
+    /// 使用宿主提供的选项创建一个 <see cref="IGraphEditorSession"/>。
+    /// </summary>
+    /// <param name="options">宿主组合选项。</param>
+    /// <returns>新的图编辑器运行时会话。</returns>
+    public static IGraphEditorSession CreateSession(AsterGraphEditorOptions options)
+        => Create(options).Session;
 }

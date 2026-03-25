@@ -21,6 +21,7 @@ using AsterGraph.Editor.Localization;
 using AsterGraph.Editor.Menus;
 using AsterGraph.Editor.Models;
 using AsterGraph.Editor.Presentation;
+using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.Services;
 using AsterGraph.Editor.Viewport;
 
@@ -231,6 +232,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         NodeTemplates = new ObservableCollection<NodeTemplateViewModel>(
             _nodeCatalog.Definitions.Select(definition => new NodeTemplateViewModel(definition)));
         FragmentTemplates = new ObservableCollection<FragmentTemplateViewModel>();
+        Session = new GraphEditorSession(this);
 
         Nodes.CollectionChanged += HandleNodesCollectionChanged;
         Connections.CollectionChanged += HandleConnectionsCollectionChanged;
@@ -264,6 +266,11 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     public ObservableCollection<FragmentTemplateViewModel> FragmentTemplates { get; }
 
     public GraphEditorStyleOptions StyleOptions { get; }
+
+    /// <summary>
+    /// 获取与当前兼容立面共享的运行时会话。
+    /// </summary>
+    public IGraphEditorSession Session { get; }
 
     /// <summary>
     /// 获取当前命令权限配置。
