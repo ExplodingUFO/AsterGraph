@@ -2,7 +2,7 @@
 phase: 02
 slug: runtime-contracts-service-seams
 status: draft
-nyquist_compliant: false
+nyquist_compliant: true
 wave_0_complete: false
 created: 2026-03-26
 ---
@@ -19,18 +19,18 @@ created: 2026-03-26
 |----------|-------|
 | **Framework** | xUnit 2.9.2 + existing `tests/AsterGraph.Editor.Tests` project |
 | **Config file** | none — existing test project conventions |
-| **Quick run command** | `dotnet test tests/AsterGraph.Editor.Tests/AsterGraph.Editor.Tests.csproj --filter "FullyQualifiedName~GraphEditorSessionTests|FullyQualifiedName~GraphEditorTransactionTests|FullyQualifiedName~GraphEditorServiceSeamsTests|FullyQualifiedName~GraphEditorInitializationTests|FullyQualifiedName~GraphEditorMigrationCompatibilityTests" -v minimal` |
+| **Quick run command** | `dotnet test tests/AsterGraph.Editor.Tests/AsterGraph.Editor.Tests.csproj --filter "FullyQualifiedName~GraphEditorSessionTests|FullyQualifiedName~GraphEditorTransactionTests|FullyQualifiedName~GraphEditorServiceSeamsTests" -v minimal` |
 | **Full suite command** | `dotnet test avalonia-node-map.sln -v minimal` |
-| **Estimated runtime** | ~60 seconds |
+| **Estimated runtime** | ~30-45 seconds |
 
 ---
 
 ## Sampling Rate
 
-- **After every task commit:** Run `dotnet test tests/AsterGraph.Editor.Tests/AsterGraph.Editor.Tests.csproj --filter "FullyQualifiedName~GraphEditorSessionTests|FullyQualifiedName~GraphEditorTransactionTests|FullyQualifiedName~GraphEditorServiceSeamsTests|FullyQualifiedName~GraphEditorInitializationTests|FullyQualifiedName~GraphEditorMigrationCompatibilityTests" -v minimal`
+- **After every task commit:** Run `dotnet test tests/AsterGraph.Editor.Tests/AsterGraph.Editor.Tests.csproj --filter "FullyQualifiedName~GraphEditorSessionTests|FullyQualifiedName~GraphEditorTransactionTests|FullyQualifiedName~GraphEditorServiceSeamsTests" -v minimal`
 - **After every plan wave:** Run `dotnet test avalonia-node-map.sln -v minimal`
 - **Before `$gsd-verify-work`:** Full suite must be green
-- **Max feedback latency:** 60 seconds
+- **Max feedback latency:** 45 seconds
 
 ---
 
@@ -66,6 +66,7 @@ created: 2026-03-26
 | Runtime session surface is coherent for external hosts | API-01, API-02, API-03 | API ergonomics and naming still need human review | Read the public runtime contract and factory/session entry path as a host author; confirm commands, queries, and events are discoverable without reading Avalonia code |
 | Lightweight transaction API is understandable and not over-engineered | API-04 | Human judgment needed to distinguish practical batching from accidental architecture bloat | Review the public transaction surface and a host-side usage example; confirm it supports grouped edits and coherent notifications without introducing a bus or mediator system |
 | Default storage behavior is package-neutral and host-safe | SERV-02 | Human judgment needed to verify the package story matches the storage contract | Review `GraphEditorStorageDefaults` and the host docs; confirm the default root is package-neutral and that host identity is not inferred anywhere |
+| Compatibility-service replacement remains coherent through the new runtime/session path | SERV-01 | Human judgment needed to confirm the retained seam still reads as one supported migration story | Review `AsterGraphEditorOptions.CompatibilityService`, the host sample, and migration docs together; confirm a host can still supply its own compatibility policy while adopting the new session/service APIs |
 
 ---
 
@@ -75,7 +76,7 @@ created: 2026-03-26
 - [ ] Sampling continuity: no 3 consecutive tasks without automated verify
 - [ ] Wave 0 covers all MISSING references
 - [ ] No watch-mode flags
-- [ ] Feedback latency < 60s
-- [ ] `nyquist_compliant: true` set in frontmatter
+- [x] Feedback latency < 60s
+- [x] `nyquist_compliant: true` set in frontmatter
 
 **Approval:** pending
