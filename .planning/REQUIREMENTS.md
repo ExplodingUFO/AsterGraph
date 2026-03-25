@@ -72,33 +72,33 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PKG-01 | TBD | Pending |
-| PKG-02 | TBD | Pending |
-| PKG-03 | TBD | Pending |
-| EMBD-01 | TBD | Pending |
-| EMBD-02 | TBD | Pending |
-| EMBD-03 | TBD | Pending |
-| EMBD-04 | TBD | Pending |
-| EMBD-05 | TBD | Pending |
-| API-01 | TBD | Pending |
-| API-02 | TBD | Pending |
-| API-03 | TBD | Pending |
-| API-04 | TBD | Pending |
-| PRES-01 | TBD | Pending |
-| PRES-02 | TBD | Pending |
-| PRES-03 | TBD | Pending |
-| PRES-04 | TBD | Pending |
-| SERV-01 | TBD | Pending |
-| SERV-02 | TBD | Pending |
-| DIAG-01 | TBD | Pending |
-| DIAG-02 | TBD | Pending |
-| DIAG-03 | TBD | Pending |
+| PKG-01 | Phase 1 | Pending |
+| PKG-02 | Phase 1 | Pending |
+| PKG-03 | Phase 1 | Pending |
+| EMBD-01 | Phase 3 | Pending |
+| EMBD-02 | Phase 3 | Pending |
+| EMBD-03 | Phase 3 | Pending |
+| EMBD-04 | Phase 3 | Pending |
+| EMBD-05 | Phase 3 | Pending |
+| API-01 | Phase 2 | Pending |
+| API-02 | Phase 2 | Pending |
+| API-03 | Phase 2 | Pending |
+| API-04 | Phase 2 | Pending |
+| PRES-01 | Phase 4 | Pending |
+| PRES-02 | Phase 4 | Pending |
+| PRES-03 | Phase 4 | Pending |
+| PRES-04 | Phase 4 | Pending |
+| SERV-01 | Phase 2 | Pending |
+| SERV-02 | Phase 2 | Pending |
+| DIAG-01 | Phase 5 | Pending |
+| DIAG-02 | Phase 5 | Pending |
+| DIAG-03 | Phase 5 | Pending |
 
 **Coverage:**
 - v1 requirements: 21 total
-- Mapped to phases: 0
-- Unmapped: 21
+- Mapped to phases: 21
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-25*
-*Last updated: 2026-03-25 after initial definition*
+*Last updated: 2026-03-25 after roadmap creation*

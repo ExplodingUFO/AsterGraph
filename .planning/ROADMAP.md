@@ -1,0 +1,84 @@
+# Roadmap: AsterGraph
+
+## Overview
+
+AsterGraph v1 moves from a working internal editor into a publishable SDK that external hosts can adopt safely. The roadmap starts with package and compatibility guardrails, then establishes framework-neutral editor contracts, then decomposes the Avalonia shell into embeddable surfaces, and finally hardens host replacement and diagnostics on top of those stable seams.
+
+## Phases
+
+**Phase Numbering:**
+- Integer phases (1, 2, 3): Planned milestone work
+- Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
+
+- [ ] **Phase 1: Consumption & Compatibility Guardrails** - Make package adoption, runtime initialization, and migration safe for external hosts.
+- [ ] **Phase 2: Runtime Contracts & Service Seams** - Expose framework-neutral editor commands, queries, events, batching, and replaceable services.
+- [ ] **Phase 3: Embeddable Avalonia Surfaces** - Split the default Avalonia shell into independently hostable editor surfaces.
+- [ ] **Phase 4: Replaceable Presentation Kit** - Let hosts swap visual presenters while reusing editor behavior and data contracts.
+- [ ] **Phase 5: Diagnostics & Integration Inspection** - Give hosts explicit inspection, logging, and troubleshooting contracts.
+
+## Phase Details
+
+### Phase 1: Consumption & Compatibility Guardrails
+**Goal**: Hosts can adopt published AsterGraph packages through a clear package boundary, initialize the editor through public entry points, and migrate through a staged compatibility path.
+**Depends on**: Nothing (first phase)
+**Requirements**: PKG-01, PKG-02, PKG-03
+**Success Criteria** (what must be TRUE):
+  1. Host can install supported AsterGraph packages on the documented target frameworks and understand which packages form the supported SDK boundary.
+  2. Host can initialize the editor runtime and default Avalonia composition through documented public registration or construction APIs instead of sample-only wiring.
+  3. Existing host can move onto the reorganized package/API surface through a staged migration path instead of a one-shot rewrite.
+**Plans**: TBD
+
+### Phase 2: Runtime Contracts & Service Seams
+**Goal**: Hosts can drive editor behavior through stable runtime contracts in `AsterGraph.Editor` and replace core services without depending on Avalonia control internals.
+**Depends on**: Phase 1
+**Requirements**: API-01, API-02, API-03, API-04, SERV-01, SERV-02
+**Success Criteria** (what must be TRUE):
+  1. Host can execute editor commands and batch related mutations through public runtime APIs without calling Avalonia control internals.
+  2. Host can query selection, viewport, document snapshot, and active capabilities from stable editor-session contracts.
+  3. Host can subscribe to typed runtime events for document, selection, viewport, command, and recoverable-failure changes.
+  4. Host can replace documented storage, clipboard, serialization, compatibility, localization, presentation, and diagnostics services, and the defaults work without demo-specific storage roots or host identity assumptions.
+**Plans**: TBD
+
+### Phase 3: Embeddable Avalonia Surfaces
+**Goal**: Hosts can compose only the Avalonia editor surfaces they need while keeping the full default shell available as a convenience composition.
+**Depends on**: Phase 2
+**Requirements**: EMBD-01, EMBD-02, EMBD-03, EMBD-04, EMBD-05
+**Success Criteria** (what must be TRUE):
+  1. Host can embed the full default editor shell as a ready-made composition.
+  2. Host can embed a standalone graph viewport or canvas surface without also taking inspector, menu, or other shell chrome.
+  3. Host can embed the mini map and inspector independently and connect them to the same editor session.
+  4. Host can include, replace, or omit default menu and chrome presenters without rebuilding editor state.
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 4: Replaceable Presentation Kit
+**Goal**: Hosts can replace default visual presenters in `AsterGraph.Avalonia` while preserving editor-owned behavior, interaction rules, and data contracts.
+**Depends on**: Phase 3
+**Requirements**: PRES-01, PRES-02, PRES-03, PRES-04
+**Success Criteria** (what must be TRUE):
+  1. Host can replace node visuals without reimplementing selection, drag, or connection behavior.
+  2. Host can replace context-menu presentation while reusing editor intent and command models.
+  3. Host can replace inspector presentation while reusing editor-provided data contracts.
+  4. Host can replace mini-map rendering or presentation without forking the editor runtime.
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 5: Diagnostics & Integration Inspection
+**Goal**: Hosts can inspect editor behavior, capture failures, and troubleshoot integrations through stable diagnostics contracts rather than UI-only signals.
+**Depends on**: Phase 4
+**Requirements**: DIAG-01, DIAG-02, DIAG-03
+**Success Criteria** (what must be TRUE):
+  1. Host can receive machine-readable warnings, errors, and operation diagnostics without parsing UI status text.
+  2. Host can request inspection snapshots or equivalent debug-state output to troubleshoot the current editor/session state.
+  3. Host can attach public logging or tracing sinks and observe editor diagnostics through host-standard tooling.
+**Plans**: TBD
+
+## Progress
+
+| Phase | Plans Complete | Status | Completed |
+|-------|----------------|--------|-----------|
+| 1. Consumption & Compatibility Guardrails | 0/TBD | Not started | - |
+| 2. Runtime Contracts & Service Seams | 0/TBD | Not started | - |
+| 3. Embeddable Avalonia Surfaces | 0/TBD | Not started | - |
+| 4. Replaceable Presentation Kit | 0/TBD | Not started | - |
+| 5. Diagnostics & Integration Inspection | 0/TBD | Not started | - |
