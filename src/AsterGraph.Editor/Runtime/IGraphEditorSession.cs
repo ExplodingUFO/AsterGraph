@@ -19,4 +19,11 @@ public interface IGraphEditorSession
     /// 获取运行时事件入口。
     /// </summary>
     IGraphEditorEvents Events { get; }
+
+    /// <summary>
+    /// 开始一个轻量级的批量变更作用域。
+    /// </summary>
+    /// <param name="label">可选的批次标签。</param>
+    /// <returns>批量变更作用域。</returns>
+    IGraphEditorMutationScope BeginMutation(string? label = null);
 }
