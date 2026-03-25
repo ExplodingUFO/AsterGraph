@@ -43,12 +43,14 @@ Plans:
   2. Host can query selection, viewport, document snapshot, and active capabilities from stable editor-session contracts.
   3. Host can subscribe to typed runtime events for document, selection, viewport, command, and recoverable-failure changes.
   4. Host can replace documented storage, clipboard, serialization, compatibility, localization, presentation, and diagnostics services, and the defaults work without demo-specific storage roots or host identity assumptions.
-**Plans**: 3 plans
+**Plans**: 5 plans
 
 Plans:
-- [ ] 02-01-PLAN.md — Add the framework-neutral runtime session surface with explicit commands, queries, events, and batching.
-- [ ] 02-02-PLAN.md — Extract replaceable persistence, clipboard payload, and diagnostics services with non-demo defaults.
-- [ ] 02-03-PLAN.md — Prove the new runtime/session and service seams through host sample, smoke coverage, and consumer docs.
+- [ ] 02-01-PLAN.md — Define the runtime session contracts and create Wave 0 session/transaction regression entry points.
+- [ ] 02-02-PLAN.md — Implement the concrete runtime session, factory session entry, and compatibility-facade bridge.
+- [ ] 02-03-PLAN.md — Publish replaceable service/diagnostics contracts and the corrected package-neutral storage-default policy.
+- [ ] 02-04-PLAN.md — Wire the service seams through the runtime stack and prove diagnostics plus host replacement behavior.
+- [ ] 02-05-PLAN.md — Prove the full Phase 2 host story through samples, smoke coverage, migration regressions, and docs.
 
 ### Phase 3: Embeddable Avalonia Surfaces
 **Goal**: Hosts can compose only the Avalonia editor surfaces they need while keeping the full default shell available as a convenience composition.
@@ -89,7 +91,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Consumption & Compatibility Guardrails | 4/4 | Complete | 01-01, 01-02, 01-03, 01-04 |
-| 2. Runtime Contracts & Service Seams | 0/3 | Not started | - |
+| 2. Runtime Contracts & Service Seams | 0/5 | Not started | - |
 | 3. Embeddable Avalonia Surfaces | 0/TBD | Not started | - |
 | 4. Replaceable Presentation Kit | 0/TBD | Not started | - |
 | 5. Diagnostics & Integration Inspection | 0/TBD | Not started | - |
