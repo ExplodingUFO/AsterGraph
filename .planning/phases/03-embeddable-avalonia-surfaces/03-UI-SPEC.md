@@ -1,10 +1,11 @@
 ---
 phase: "03"
 slug: embeddable-avalonia-surfaces
-status: draft
+status: approved
 shadcn_initialized: false
 preset: none
 created: 2026-03-26
+reviewed_at: 2026-03-26T14:17:37.0800103+08:00
 ---
 
 # Phase 03 — UI Design Contract
@@ -25,6 +26,17 @@ created: 2026-03-26
 
 ---
 
+## Visual Hierarchy
+
+| Surface | Primary Focal Point | Secondary Focal Point | Accessibility Rule |
+|---------|---------------------|-----------------------|--------------------|
+| Full shell | The graph canvas viewport and current node scene | Inspector title plus current selection summary | Menu glyph chips and compact badges always appear next to text labels, never as unlabeled icon-only actions |
+| Standalone canvas | The node graph scene itself | Selection rectangle, selected node border, and pending connection emphasis | Built-in context-menu items must keep text labels even when glyph chips are shown |
+| Standalone inspector | Current node title and selection caption | Section headings such as `Connections` and `Parameters` | Field editors keep visible labels; no icon-only controls |
+| Standalone mini map | The viewport rectangle inside the map | Node extents and graph bounds | No icon-only affordances; viewport navigation remains pointer-driven |
+
+---
+
 ## Spacing Scale
 
 Declared values (must be multiples of 4):
@@ -39,7 +51,7 @@ Declared values (must be multiples of 4):
 | 2xl | 48px | Large empty-state breathing room and major shell section breaks |
 | 3xl | 64px | Outer host padding around full-shell compositions |
 
-Exceptions: `12px` is allowed for caption chips, parameter cards, and current context-menu padding carried forward from the existing theme. Legacy `18px` and `22px` shell paddings may remain inside compatibility `GraphEditorView`, but newly extracted standalone Phase 3 surfaces must round to `16px` or `24px`.
+Exceptions: none
 
 ---
 
@@ -89,7 +101,7 @@ Accent reserved for: selected node outlines, pending or compatible connection em
 | Standalone canvas | The canvas surface is public and open-box usable. Default behaviors stay on: node drag, port activation, connection creation and cancellation, selection, marquee selection, wheel zoom, pan, right-click menu, and pointer-driven focus. Host-facing flags must expose `EnableDefaultContextMenu=true` and `EnableDefaultCommandShortcuts=true` by default. Command shortcuts covered by the default canvas contract are `Ctrl+S`, `Ctrl+O`, `Ctrl+Z`, `Ctrl+Shift+Z`, `Ctrl+Y`, `Ctrl+C`, `Ctrl+V`, and `Delete`. `Escape` must always cancel a pending connection as core graph interaction, even when command shortcuts are otherwise disabled. |
 | Standalone inspector | The standalone inspector binds to the same session and stays pure-inspector only. It shows title, category, selection caption, description, `Connections`, `Inputs`, `Outputs`, `Upstream`, `Downstream`, `Parameters`, and inline validation. It must exclude workspace controls, fragment or template controls, shortcut-help blocks, and the mini map. |
 | Standalone mini map | The mini map remains a narrow overview-and-viewport-navigation surface. It renders node extents plus the current viewport rectangle, supports click or drag recentering, stays non-focusable, and omits menus, status text, toolbar actions, or shell badges. |
-| Default menu surface | The stock Avalonia context-menu presenter becomes a public default surface. Preserve the current stock menu treatment: background `#111C29`, border `#22354A`, hover `#193045`, foreground `#F4FBFF`, `220px` minimum width, `12x8` item padding, `10px` menu corner radius, `8px` item corner radius, and `18px` icon chip. Phase 3 stops here; do not introduce alternative presenter interfaces. |
+| Default menu surface | The stock Avalonia context-menu presenter becomes a public default surface. Preserve the current stock menu treatment: background `#111C29`, border `#22354A`, hover `#193045`, foreground `#F4FBFF`, `220px` minimum width, `16x8` item padding, `10px` menu corner radius, `8px` item corner radius, and `16px` icon chip. Phase 3 stops here; do not introduce alternative presenter interfaces. |
 | Focus and input ownership | Canvas shortcuts only fire while the canvas is focused. `TextBox` and `ComboBox` editors inside the inspector suppress graph shortcuts. The mini map never takes keyboard focus. Shortcut-help copy remains full-shell only and must not ship inside the standalone inspector. |
 
 ---
