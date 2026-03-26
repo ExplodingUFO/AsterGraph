@@ -12,8 +12,11 @@ namespace AsterGraph.Avalonia.Menus;
 /// <summary>
 /// 将编辑器层的菜单描述转换成 Avalonia 右键菜单控件。
 /// </summary>
-internal sealed class GraphContextMenuPresenter
+public sealed class GraphContextMenuPresenter
 {
+    /// <summary>
+    /// 在指定目标控件上打开由描述符构建的默认上下文菜单。
+    /// </summary>
     public void Open(Control target, IReadOnlyList<MenuItemDescriptor> descriptors, ContextMenuStyleOptions style)
     {
         var menu = new ContextMenu

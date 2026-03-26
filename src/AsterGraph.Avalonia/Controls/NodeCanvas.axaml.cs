@@ -34,6 +34,18 @@ public partial class NodeCanvas : UserControl
     public static readonly StyledProperty<GraphEditorViewModel?> ViewModelProperty =
         AvaloniaProperty.Register<NodeCanvas, GraphEditorViewModel?>(nameof(ViewModel));
 
+    /// <summary>
+    /// 控制是否启用默认内置上下文菜单。
+    /// </summary>
+    public static readonly StyledProperty<bool> EnableDefaultContextMenuProperty =
+        AvaloniaProperty.Register<NodeCanvas, bool>(nameof(EnableDefaultContextMenu), true);
+
+    /// <summary>
+    /// 控制是否启用默认内置命令快捷键。
+    /// </summary>
+    public static readonly StyledProperty<bool> EnableDefaultCommandShortcutsProperty =
+        AvaloniaProperty.Register<NodeCanvas, bool>(nameof(EnableDefaultCommandShortcuts), true);
+
     private readonly Dictionary<NodeViewModel, NodeVisual> _nodeVisuals = new();
     private Grid? _sceneRoot;
     private Canvas? _connectionLayer;
@@ -76,6 +88,24 @@ public partial class NodeCanvas : UserControl
     {
         get => GetValue(ViewModelProperty);
         set => SetValue(ViewModelProperty, value);
+    }
+
+    /// <summary>
+    /// 是否启用默认内置上下文菜单。
+    /// </summary>
+    public bool EnableDefaultContextMenu
+    {
+        get => GetValue(EnableDefaultContextMenuProperty);
+        set => SetValue(EnableDefaultContextMenuProperty, value);
+    }
+
+    /// <summary>
+    /// 是否启用默认内置命令快捷键。
+    /// </summary>
+    public bool EnableDefaultCommandShortcuts
+    {
+        get => GetValue(EnableDefaultCommandShortcutsProperty);
+        set => SetValue(EnableDefaultCommandShortcutsProperty, value);
     }
 
     /// <summary>
@@ -329,7 +359,7 @@ public partial class NodeCanvas : UserControl
                 ViewModel.SelectSingleNode(node);
             }
 
-            OpenContextMenu(
+            args.Handled = OpenContextMenu(
                 border,
                 NodeCanvasContextMenuContextFactory.CreateNodeContext(
                     CreateContextMenuSnapshot(),
@@ -337,7 +367,6 @@ public partial class NodeCanvas : UserControl
                     node.Id,
                     useSelectionTools: targetKind == ContextMenuTargetKind.Selection,
                     hostContext: ViewModel.HostContext));
-            args.Handled = true;
         };
 
         return new NodeVisual(
@@ -450,7 +479,7 @@ public partial class NodeCanvas : UserControl
 
                 Focus();
                 ViewModel.SelectNode(node);
-                OpenContextMenu(
+                args.Handled = OpenContextMenu(
                     button,
                     NodeCanvasContextMenuContextFactory.CreatePortContext(
                         CreateContextMenuSnapshot(),
@@ -458,7 +487,6 @@ public partial class NodeCanvas : UserControl
                         node.Id,
                         port.Id,
                         hostContext: ViewModel.HostContext));
-                args.Handled = true;
             };
 
             portAnchors[port.Id] = dot;
@@ -586,14 +614,13 @@ public partial class NodeCanvas : UserControl
                 return;
             }
 
-            OpenContextMenu(
+            args.Handled = OpenContextMenu(
                 chip,
                 NodeCanvasContextMenuContextFactory.CreateConnectionContext(
                     CreateContextMenuSnapshot(),
                     ResolveWorldPosition(args, this),
                     connection.Id,
                     hostContext: ViewModel.HostContext));
-            args.Handled = true;
         };
 
         Canvas.SetLeft(chip, midpoint.X + connectionStyle.LabelOffsetX);
@@ -795,8 +822,86 @@ public partial class NodeCanvas : UserControl
 
     private void HandleCanvasKeyDown(object? sender, KeyEventArgs args)
     {
-        if (ViewModel is null)
+        if (ViewModel is null || !EnableDefaultCommandShortcuts || ShortcutBelongsToInputControl(args.Source))
         {
+            return;
+        }
+
+        if (args.KeyModifiers.HasFlag(KeyModifiers.Control) && args.Key == Key.S)
+        {
+            if (ViewModel.SaveCommand.CanExecute(null))
+            {
+                ViewModel.SaveCommand.Execute(null);
+            }
+
+            args.Handled = true;
+            return;
+        }
+
+        if (args.KeyModifiers.HasFlag(KeyModifiers.Control) && args.Key == Key.O)
+        {
+            if (ViewModel.LoadCommand.CanExecute(null))
+            {
+                ViewModel.LoadCommand.Execute(null);
+            }
+
+            args.Handled = true;
+            return;
+        }
+
+        if (args.KeyModifiers.HasFlag(KeyModifiers.Control)
+            && (args.Key == Key.Y || (args.Key == Key.Z && args.KeyModifiers.HasFlag(KeyModifiers.Shift))))
+        {
+            if (ViewModel.RedoCommand.CanExecute(null))
+            {
+                ViewModel.RedoCommand.Execute(null);
+            }
+
+            args.Handled = true;
+            return;
+        }
+
+        if (args.KeyModifiers.HasFlag(KeyModifiers.Control) && args.Key == Key.Z)
+        {
+            if (ViewModel.UndoCommand.CanExecute(null))
+            {
+                ViewModel.UndoCommand.Execute(null);
+            }
+
+            args.Handled = true;
+            return;
+        }
+
+        if (args.KeyModifiers.HasFlag(KeyModifiers.Control) && args.Key == Key.C)
+        {
+            if (ViewModel.CopySelectionCommand.CanExecute(null))
+            {
+                ViewModel.CopySelectionCommand.Execute(null);
+            }
+
+            args.Handled = true;
+            return;
+        }
+
+        if (args.KeyModifiers.HasFlag(KeyModifiers.Control) && args.Key == Key.V)
+        {
+            if (ViewModel.PasteCommand.CanExecute(null))
+            {
+                ViewModel.PasteCommand.Execute(null);
+            }
+
+            args.Handled = true;
+            return;
+        }
+
+        if (args.Key == Key.Delete)
+        {
+            if (ViewModel.DeleteSelectionCommand.CanExecute(null))
+            {
+                ViewModel.DeleteSelectionCommand.Execute(null);
+            }
+
+            args.Handled = true;
             return;
         }
 
@@ -815,20 +920,19 @@ public partial class NodeCanvas : UserControl
 
     private void HandleCanvasContextRequested(object? sender, ContextRequestedEventArgs args)
     {
-        if (ViewModel is null || args.Handled)
+        if (ViewModel is null || args.Handled || !EnableDefaultContextMenu)
         {
             return;
         }
 
         // 多选激活时，空白画布右击同样复用批量选择菜单。
-        OpenContextMenu(
+        args.Handled = OpenContextMenu(
             this,
             NodeCanvasContextMenuContextFactory.CreateCanvasContext(
                 CreateContextMenuSnapshot(),
                 ResolveWorldPosition(args, this),
                 useSelectionTools: ViewModel.HasMultipleSelection,
                 hostContext: ViewModel.HostContext));
-        args.Handled = true;
     }
 
     private void HandleViewModelPropertyChanged(object? sender, PropertyChangedEventArgs args)
@@ -1056,20 +1160,34 @@ public partial class NodeCanvas : UserControl
         return ViewModel is null ? new GraphPoint(0, 0) : ViewModel.ScreenToWorld(new GraphPoint(0, 0));
     }
 
-    private void OpenContextMenu(Control target, ContextMenuContext context)
+    private bool OpenContextMenu(Control target, ContextMenuContext context)
     {
-        if (ViewModel is null)
+        if (ViewModel is null || !EnableDefaultContextMenu)
         {
-            return;
+            return false;
         }
 
         var descriptors = ViewModel.BuildContextMenu(context);
         if (descriptors.Count == 0)
         {
-            return;
+            return false;
         }
 
         _contextMenuPresenter.Open(target, descriptors, ViewModel.StyleOptions.ContextMenu);
+        return true;
+    }
+
+    private static bool ShortcutBelongsToInputControl(object? source)
+    {
+        for (var current = source as Visual; current is not null; current = current.GetVisualParent())
+        {
+            if (current is TextBox or ComboBox)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private NodeCanvasContextMenuSnapshot CreateContextMenuSnapshot()
