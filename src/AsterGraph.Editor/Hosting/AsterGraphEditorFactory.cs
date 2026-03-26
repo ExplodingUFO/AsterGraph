@@ -34,7 +34,7 @@ public static class AsterGraphEditorFactory
             GraphEditorStorageDefaults.GetFragmentLibraryPath(options.StorageRootPath),
             clipboardPayloadSerializer);
 
-        return new GraphEditorViewModel(
+        var editor = new GraphEditorViewModel(
             options.Document,
             options.NodeCatalog,
             options.CompatibilityService,
@@ -48,6 +48,13 @@ public static class AsterGraphEditorFactory
             options.LocalizationProvider,
             clipboardPayloadSerializer,
             options.DiagnosticsSink);
+
+        if (editor.Session is GraphEditorSession runtimeSession)
+        {
+            runtimeSession.ConfigureInstrumentation(options.Instrumentation);
+        }
+
+        return editor;
     }
 
     /// <summary>
