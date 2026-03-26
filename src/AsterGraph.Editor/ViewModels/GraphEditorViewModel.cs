@@ -2138,6 +2138,11 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         _fragmentWorkspaceService.Save(fragment);
         RaiseComputedPropertyChanges();
         SetStatus("editor.status.fragment.export.savedToPath", "Exported fragment to {0}.", _fragmentWorkspaceService.FragmentPath);
+        PublishRuntimeDiagnostic(
+            "fragment.export.succeeded",
+            "fragment.export",
+            StatusMessage ?? _fragmentWorkspaceService.FragmentPath,
+            GraphEditorDiagnosticSeverity.Info);
         FragmentExported?.Invoke(
             this,
             new GraphEditorFragmentEventArgs(
@@ -2256,6 +2261,11 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         if (!_fragmentWorkspaceService.Exists())
         {
             SetStatus("editor.status.fragment.import.noExportedFile", "No exported fragment file is available yet.");
+            PublishRuntimeDiagnostic(
+                "fragment.import.missing",
+                "fragment.import",
+                StatusMessage ?? "No exported fragment file is available yet.",
+                GraphEditorDiagnosticSeverity.Warning);
             return;
         }
 
@@ -2266,9 +2276,19 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         if (!PasteFragment(fragment, "Imported"))
         {
             SetStatus("editor.status.fragment.import.noNodesInFile", "Fragment file did not contain any nodes.");
+            PublishRuntimeDiagnostic(
+                "fragment.import.empty",
+                "fragment.import",
+                StatusMessage ?? "Fragment file did not contain any nodes.",
+                GraphEditorDiagnosticSeverity.Warning);
         }
         else
         {
+            PublishRuntimeDiagnostic(
+                "fragment.import.succeeded",
+                "fragment.import",
+                StatusMessage ?? _fragmentWorkspaceService.FragmentPath,
+                GraphEditorDiagnosticSeverity.Info);
             FragmentImported?.Invoke(
                 this,
                 new GraphEditorFragmentEventArgs(
@@ -2364,6 +2384,11 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         if (!_fragmentWorkspaceService.Exists(path))
         {
             SetStatus("editor.status.fragment.import.fileNotFound", "Fragment file '{0}' was not found.", path);
+            PublishRuntimeDiagnostic(
+                "fragment.import.fileMissing",
+                "fragment.import",
+                StatusMessage ?? path,
+                GraphEditorDiagnosticSeverity.Warning);
             return false;
         }
 
@@ -2373,6 +2398,11 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         var imported = PasteFragment(fragment, "Imported");
         if (imported)
         {
+            PublishRuntimeDiagnostic(
+                "fragment.import.succeeded",
+                "fragment.import",
+                StatusMessage ?? path,
+                GraphEditorDiagnosticSeverity.Info);
             FragmentImported?.Invoke(
                 this,
                 new GraphEditorFragmentEventArgs(
@@ -2401,6 +2431,11 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             _lastSavedDocumentSignature = CreateDocumentSignature();
             UpdateDirtyState();
             SetStatus("editor.status.workspace.save.savedToPath", "Saved snapshot to {0}.", WorkspacePath);
+            PublishRuntimeDiagnostic(
+                "workspace.save.succeeded",
+                "workspace.save",
+                StatusMessage ?? WorkspacePath,
+                GraphEditorDiagnosticSeverity.Info);
             NotifyDocumentChanged(GraphEditorDocumentChangeKind.WorkspaceSaved, statusMessage: StatusMessage);
             RaiseComputedPropertyChanges();
         }
@@ -2432,6 +2467,11 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             if (!_workspaceService.Exists())
             {
                 SetStatus("editor.status.workspace.load.noSnapshot", "No saved snapshot yet. Save once to create one.");
+                PublishRuntimeDiagnostic(
+                    "workspace.load.missing",
+                    "workspace.load",
+                    StatusMessage ?? "No saved snapshot yet.",
+                    GraphEditorDiagnosticSeverity.Warning);
                 return false;
             }
 
@@ -2440,6 +2480,11 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             CancelPendingConnection();
             ClearSelection();
             ResetView(updateStatus: false);
+            PublishRuntimeDiagnostic(
+                "workspace.load.succeeded",
+                "workspace.load",
+                StatusMessage ?? WorkspacePath,
+                GraphEditorDiagnosticSeverity.Info);
             NotifyDocumentChanged(GraphEditorDocumentChangeKind.WorkspaceLoaded, statusMessage: StatusMessage);
             return true;
         }
@@ -2597,6 +2642,19 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         {
             runtimeSession.PublishRecoverableFailure(
                 new GraphEditorRecoverableFailureEventArgs(code, operation, message, exception));
+        }
+    }
+
+    private void PublishRuntimeDiagnostic(
+        string code,
+        string operation,
+        string message,
+        GraphEditorDiagnosticSeverity severity,
+        Exception? exception = null)
+    {
+        if (Session is GraphEditorSession runtimeSession)
+        {
+            runtimeSession.PublishDiagnostic(new GraphEditorDiagnostic(code, operation, message, severity, exception));
         }
     }
 

@@ -13,8 +13,10 @@ namespace AsterGraph.Editor.Runtime;
 /// </summary>
 public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorCommands, IGraphEditorQueries, IGraphEditorEvents, IGraphEditorDiagnostics
 {
+    private const int RecentDiagnosticsCapacity = 32;
     private readonly GraphEditorViewModel _editor;
     private readonly IGraphEditorDiagnosticsSink? _diagnosticsSink;
+    private readonly List<GraphEditorDiagnostic> _recentDiagnostics = [];
     private int _mutationDepth;
     private string? _currentMutationLabel;
     private GraphEditorDocumentChangedEventArgs? _pendingDocumentChanged;
@@ -184,7 +186,13 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorComman
     public IReadOnlyList<GraphEditorDiagnostic> GetRecentDiagnostics(int maxCount = 20)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(maxCount);
-        return [];
+        if (maxCount == 0 || _recentDiagnostics.Count == 0)
+        {
+            return [];
+        }
+
+        var skip = Math.Max(0, _recentDiagnostics.Count - maxCount);
+        return _recentDiagnostics.Skip(skip).ToList();
     }
 
     internal void PublishRecoverableFailure(GraphEditorRecoverableFailureEventArgs failure)
@@ -199,12 +207,25 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorComman
         if (IsBatching)
         {
             _pendingRecoverableFailures.Add(failure);
-            _diagnosticsSink?.Publish(diagnostic);
+            PublishDiagnostic(diagnostic);
             return;
         }
 
-        _diagnosticsSink?.Publish(diagnostic);
+        PublishDiagnostic(diagnostic);
         RecoverableFailure?.Invoke(this, failure);
+    }
+
+    internal void PublishDiagnostic(GraphEditorDiagnostic diagnostic)
+    {
+        ArgumentNullException.ThrowIfNull(diagnostic);
+
+        if (_recentDiagnostics.Count == RecentDiagnosticsCapacity)
+        {
+            _recentDiagnostics.RemoveAt(0);
+        }
+
+        _recentDiagnostics.Add(diagnostic);
+        _diagnosticsSink?.Publish(diagnostic);
     }
 
     private bool IsBatching => _mutationDepth > 0;
