@@ -6,6 +6,7 @@ using AsterGraph.Abstractions.Styling;
 using AsterGraph.Avalonia.Controls;
 using AsterGraph.Avalonia.Hosting;
 using AsterGraph.Avalonia.Menus;
+using AsterGraph.Avalonia.Presentation;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Catalog;
 using AsterGraph.Editor.Configuration;
@@ -185,11 +186,55 @@ var standaloneMiniMap = AsterGraphMiniMapViewFactory.Create(new AsterGraphMiniMa
 {
     Editor = factoryEditor,
 });
+var customNodePresenter = new SmokeNodeVisualPresenter();
+var customMenuPresenter = new SmokeContextMenuPresenterAdapter();
+var customInspectorPresenter = new SmokeInspectorPresenter();
+var customMiniMapPresenter = new SmokeMiniMapPresenter();
+var customPresentation = new AsterGraphPresentationOptions
+{
+    NodeVisualPresenter = customNodePresenter,
+    ContextMenuPresenter = customMenuPresenter,
+    InspectorPresenter = customInspectorPresenter,
+    MiniMapPresenter = customMiniMapPresenter,
+};
+var customView = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOptions
+{
+    Editor = factoryEditor,
+    ChromeMode = GraphEditorViewChromeMode.CanvasOnly,
+    Presentation = customPresentation,
+});
+var customFullShellCanvas = customView.FindControl<NodeCanvas>("PART_NodeCanvas")
+    ?? throw new InvalidOperationException("Missing PART_NodeCanvas on custom full shell.");
+var customFullShellInspector = customView.FindControl<GraphInspectorView>("PART_InspectorSurface")
+    ?? throw new InvalidOperationException("Missing PART_InspectorSurface on custom full shell.");
+var customFullShellMiniMap = customView.FindControl<GraphMiniMap>("PART_MiniMapSurface")
+    ?? throw new InvalidOperationException("Missing PART_MiniMapSurface on custom full shell.");
+var customStandaloneCanvas = AsterGraphCanvasViewFactory.Create(new AsterGraphCanvasViewOptions
+{
+    Editor = factoryEditor,
+    Presentation = customPresentation,
+});
+var customStandaloneInspector = AsterGraphInspectorViewFactory.Create(new AsterGraphInspectorViewOptions
+{
+    Editor = factoryEditor,
+    Presentation = customPresentation,
+});
+var customStandaloneMiniMap = AsterGraphMiniMapViewFactory.Create(new AsterGraphMiniMapViewOptions
+{
+    Editor = factoryEditor,
+    Presentation = customPresentation,
+});
 
 Console.WriteLine($"SURFACE_CANVAS_OK:{ReferenceEquals(factoryEditor, standaloneCanvas.ViewModel)}:{standaloneCanvas.EnableDefaultContextMenu}:{standaloneCanvas.EnableDefaultCommandShortcuts}:{standaloneCanvasOptOut.EnableDefaultContextMenu}:{standaloneCanvasOptOut.EnableDefaultCommandShortcuts}");
 Console.WriteLine($"SURFACE_INSPECTOR_OK:{ReferenceEquals(factoryEditor, standaloneInspector.Editor)}");
 Console.WriteLine($"SURFACE_MINIMAP_OK:{ReferenceEquals(factoryEditor, standaloneMiniMap.ViewModel)}:{standaloneMiniMap.Focusable}");
 Console.WriteLine($"MENU_STOCK_PRESENTER_OK:{typeof(GraphContextMenuPresenter).IsPublic}");
+Console.WriteLine($"PRESENTER_STOCK_DEFAULT_OK:{factoryView.Presentation is null}:{standaloneCanvas.NodeVisualPresenter is null}:{standaloneCanvas.ContextMenuPresenter is null}:{standaloneInspector.InspectorPresenter is null}:{standaloneMiniMap.MiniMapPresenter is null}");
+Console.WriteLine($"PRESENTER_FULLSHELL_OK:{ReferenceEquals(customPresentation, customView.Presentation)}:{ReferenceEquals(customNodePresenter, customFullShellCanvas.NodeVisualPresenter)}:{ReferenceEquals(customMenuPresenter, customFullShellCanvas.ContextMenuPresenter)}:{ReferenceEquals(customInspectorPresenter, customFullShellInspector.InspectorPresenter)}:{ReferenceEquals(customMiniMapPresenter, customFullShellMiniMap.MiniMapPresenter)}");
+Console.WriteLine($"PRESENTER_NODE_OK:{ReferenceEquals(customNodePresenter, customStandaloneCanvas.NodeVisualPresenter)}");
+Console.WriteLine($"PRESENTER_MENU_OK:{ReferenceEquals(customMenuPresenter, customStandaloneCanvas.ContextMenuPresenter)}");
+Console.WriteLine($"PRESENTER_INSPECTOR_OK:{ReferenceEquals(customInspectorPresenter, customStandaloneInspector.InspectorPresenter)}");
+Console.WriteLine($"PRESENTER_MINIMAP_OK:{ReferenceEquals(customMiniMapPresenter, customStandaloneMiniMap.MiniMapPresenter)}");
 
 factoryEditor.SelectSingleNode(factoryEditor.Nodes.Single(node => node.Id == sourceNodeId), updateStatus: false);
 await factoryEditor.CopySelectionAsync();
@@ -287,6 +332,43 @@ sealed class SmokeLocalizationProvider : IGraphLocalizationProvider
         => key == "editor.stats.caption"
             ? "Smoke stats {0}/{1}/{2:0}"
             : fallback;
+}
+
+sealed class SmokeNodeVisualPresenter : IGraphNodeVisualPresenter
+{
+    private readonly DefaultGraphNodeVisualPresenter _stockPresenter = new();
+
+    public GraphNodeVisual Create(GraphNodeVisualContext context)
+        => _stockPresenter.Create(context);
+
+    public void Update(GraphNodeVisual visual, GraphNodeVisualContext context)
+        => _stockPresenter.Update(visual, context);
+}
+
+sealed class SmokeContextMenuPresenterAdapter : IGraphContextMenuPresenter
+{
+    private readonly GraphContextMenuPresenter _stockPresenter = new();
+
+    public void Open(Control target, IReadOnlyList<MenuItemDescriptor> descriptors, ContextMenuStyleOptions style)
+        => _stockPresenter.Open(target, descriptors, style);
+}
+
+sealed class SmokeInspectorPresenter : IGraphInspectorPresenter
+{
+    public Control Create(GraphEditorViewModel? editor)
+        => new TextBlock
+        {
+            Text = $"SMOKE INSPECTOR:{editor?.InspectorTitle ?? "<none>"}",
+        };
+}
+
+sealed class SmokeMiniMapPresenter : IGraphMiniMapPresenter
+{
+    public Control Create(GraphEditorViewModel? editor)
+        => new TextBlock
+        {
+            Text = $"SMOKE MINIMAP:{editor?.Title ?? "<none>"}",
+        };
 }
 
 sealed class RecordingWorkspaceService(string workspacePath, bool throwOnSave) : IGraphWorkspaceService

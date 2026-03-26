@@ -375,6 +375,57 @@ public sealed class GraphEditorInitializationTests
         Assert.Equal(GraphEditorViewChromeMode.CanvasOnly, view.ChromeMode);
     }
 
+    [AvaloniaFact]
+    public void DirectGraphEditorViewConstruction_ForwardsPresentationIntoEmbeddedSurfaces()
+    {
+        var editor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
+        {
+            Document = CreateDocument(),
+            NodeCatalog = CreateCatalog(),
+            CompatibilityService = new RecordingCompatibilityService(),
+        });
+        var presentation = new AsterGraphPresentationOptions
+        {
+            NodeVisualPresenter = new RecordingNodeVisualPresenter(),
+            ContextMenuPresenter = new RecordingContextMenuPresenter(),
+            InspectorPresenter = new RecordingInspectorPresenter(),
+            MiniMapPresenter = new RecordingMiniMapPresenter(),
+        };
+        var view = new GraphEditorView
+        {
+            Editor = editor,
+            ChromeMode = GraphEditorViewChromeMode.CanvasOnly,
+            Presentation = presentation,
+        };
+        var window = new Window
+        {
+            Width = 1440,
+            Height = 900,
+            Content = view,
+        };
+        window.Show();
+
+        try
+        {
+            var canvas = view.FindControl<NodeCanvas>("PART_NodeCanvas");
+            var inspector = view.FindControl<GraphInspectorView>("PART_InspectorSurface");
+            var miniMap = view.FindControl<GraphMiniMap>("PART_MiniMapSurface");
+
+            Assert.NotNull(canvas);
+            Assert.NotNull(inspector);
+            Assert.NotNull(miniMap);
+            Assert.Same(presentation, view.Presentation);
+            Assert.Same(presentation.NodeVisualPresenter, canvas.NodeVisualPresenter);
+            Assert.Same(presentation.ContextMenuPresenter, canvas.ContextMenuPresenter);
+            Assert.Same(presentation.InspectorPresenter, inspector.InspectorPresenter);
+            Assert.Same(presentation.MiniMapPresenter, miniMap.MiniMapPresenter);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
     private static GraphDocument CreateDocument()
         => new(
             "Initialization Test Graph",
@@ -480,11 +531,13 @@ public sealed class GraphEditorInitializationTests
 
     private sealed class RecordingNodeVisualPresenter : IGraphNodeVisualPresenter
     {
+        private readonly DefaultGraphNodeVisualPresenter _stockPresenter = new();
+
         public GraphNodeVisual Create(GraphNodeVisualContext context)
-            => throw new NotSupportedException();
+            => _stockPresenter.Create(context);
 
         public void Update(GraphNodeVisual visual, GraphNodeVisualContext context)
-            => throw new NotSupportedException();
+            => _stockPresenter.Update(visual, context);
     }
 
     private sealed class RecordingContextMenuPresenter : IGraphContextMenuPresenter
@@ -496,13 +549,19 @@ public sealed class GraphEditorInitializationTests
     private sealed class RecordingInspectorPresenter : IGraphInspectorPresenter
     {
         public Control Create(GraphEditorViewModel? editor)
-            => throw new NotSupportedException();
+            => new TextBlock
+            {
+                Text = $"INIT INSPECTOR:{editor?.InspectorTitle ?? "<none>"}",
+            };
     }
 
     private sealed class RecordingMiniMapPresenter : IGraphMiniMapPresenter
     {
         public Control Create(GraphEditorViewModel? editor)
-            => throw new NotSupportedException();
+            => new TextBlock
+            {
+                Text = $"INIT MINIMAP:{editor?.Title ?? "<none>"}",
+            };
     }
 
     private sealed class RecordingWorkspaceService(string workspacePath) : IGraphWorkspaceService

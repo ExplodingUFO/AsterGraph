@@ -7,6 +7,8 @@ using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Abstractions.Styling;
 using AsterGraph.Avalonia.Controls;
 using AsterGraph.Avalonia.Hosting;
+using AsterGraph.Avalonia.Menus;
+using AsterGraph.Avalonia.Presentation;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Catalog;
 using AsterGraph.Editor.Configuration;
@@ -140,6 +142,7 @@ var menu = editor.BuildContextMenu(menuContext);
 var hostPreviewItem = menu.SingleOrDefault(item => item.Id == "host-sample-preview");
 
 var node = AssertNode(editor, "sample-source-001");
+editor.SelectSingleNode(node, updateStatus: false);
 var ownerMatched = menuContext.TryGetOwner<HostSampleOwner>(out var typedOwner);
 var topLevelMatched = menuContext.TryGetTopLevel<HostSampleTopLevel>(out var typedTopLevel);
 var view = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOptions
@@ -159,6 +162,26 @@ var canvasOnlyStatusHidden = !FindRequiredControl<Border>(view, "PART_StatusChro
 var canvasStillExists = FindRequiredControl<NodeCanvas>(view, "PART_NodeCanvas") is not null;
 var shellInspectorSurface = FindRequiredControl<GraphInspectorView>(view, "PART_InspectorSurface");
 var shellMiniMapSurface = FindRequiredControl<GraphMiniMap>(view, "PART_MiniMapSurface");
+var customNodePresenter = new HostSampleNodeVisualPresenter();
+var customMenuPresenter = new HostSampleContextMenuPresenter();
+var customInspectorPresenter = new HostSampleInspectorPresenter();
+var customMiniMapPresenter = new HostSampleMiniMapPresenter();
+var customPresentation = new AsterGraphPresentationOptions
+{
+    NodeVisualPresenter = customNodePresenter,
+    ContextMenuPresenter = customMenuPresenter,
+    InspectorPresenter = customInspectorPresenter,
+    MiniMapPresenter = customMiniMapPresenter,
+};
+var customView = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOptions
+{
+    Editor = editor,
+    ChromeMode = GraphEditorViewChromeMode.CanvasOnly,
+    Presentation = customPresentation,
+});
+var customShellCanvas = FindRequiredControl<NodeCanvas>(customView, "PART_NodeCanvas");
+var customShellInspectorSurface = FindRequiredControl<GraphInspectorView>(customView, "PART_InspectorSurface");
+var customShellMiniMapSurface = FindRequiredControl<GraphMiniMap>(customView, "PART_MiniMapSurface");
 var standaloneCanvas = AsterGraphCanvasViewFactory.Create(new AsterGraphCanvasViewOptions
 {
     Editor = editor,
@@ -176,6 +199,21 @@ var standaloneInspector = AsterGraphInspectorViewFactory.Create(new AsterGraphIn
 var standaloneMiniMap = AsterGraphMiniMapViewFactory.Create(new AsterGraphMiniMapViewOptions
 {
     Editor = editor,
+});
+var customStandaloneCanvas = AsterGraphCanvasViewFactory.Create(new AsterGraphCanvasViewOptions
+{
+    Editor = editor,
+    Presentation = customPresentation,
+});
+var customStandaloneInspector = AsterGraphInspectorViewFactory.Create(new AsterGraphInspectorViewOptions
+{
+    Editor = editor,
+    Presentation = customPresentation,
+});
+var customStandaloneMiniMap = AsterGraphMiniMapViewFactory.Create(new AsterGraphMiniMapViewOptions
+{
+    Editor = editor,
+    Presentation = customPresentation,
 });
 
 Console.WriteLine($"Host sample view type: {typeof(GraphEditorView).FullName}");
@@ -203,6 +241,12 @@ Console.WriteLine($"Full shell embeds standalone surfaces: inspector={ReferenceE
 Console.WriteLine($"Standalone surfaces share editor: canvas={ReferenceEquals(editor, standaloneCanvas.ViewModel)}, inspector={ReferenceEquals(editor, standaloneInspector.Editor)}, minimap={ReferenceEquals(editor, standaloneMiniMap.ViewModel)}");
 Console.WriteLine($"Standalone canvas defaults: menu={standaloneCanvas.EnableDefaultContextMenu}, shortcuts={standaloneCanvas.EnableDefaultCommandShortcuts}");
 Console.WriteLine($"Standalone canvas opt-out: menu={standaloneCanvasOptOut.EnableDefaultContextMenu}, shortcuts={standaloneCanvasOptOut.EnableDefaultCommandShortcuts}");
+Console.WriteLine($"Stock presenter fallback stays opt-in: shellPresentationNull={view.Presentation is null}, canvasNodePresenterNull={standaloneCanvas.NodeVisualPresenter is null}, canvasMenuPresenterNull={standaloneCanvas.ContextMenuPresenter is null}, inspectorPresenterNull={standaloneInspector.InspectorPresenter is null}, miniMapPresenterNull={standaloneMiniMap.MiniMapPresenter is null}");
+Console.WriteLine($"Custom full shell presenters: node={ReferenceEquals(customNodePresenter, customShellCanvas.NodeVisualPresenter)}, menu={ReferenceEquals(customMenuPresenter, customShellCanvas.ContextMenuPresenter)}, inspector={ReferenceEquals(customInspectorPresenter, customShellInspectorSurface.InspectorPresenter)}, minimap={ReferenceEquals(customMiniMapPresenter, customShellMiniMapSurface.MiniMapPresenter)}");
+Console.WriteLine($"Custom full shell content: inspector={DescribeContent(customShellInspectorSurface.Content)}, minimap={DescribeContent(customShellMiniMapSurface.Content)}");
+Console.WriteLine($"Custom standalone presenters: node={ReferenceEquals(customNodePresenter, customStandaloneCanvas.NodeVisualPresenter)}, menu={ReferenceEquals(customMenuPresenter, customStandaloneCanvas.ContextMenuPresenter)}, inspector={ReferenceEquals(customInspectorPresenter, customStandaloneInspector.InspectorPresenter)}, minimap={ReferenceEquals(customMiniMapPresenter, customStandaloneMiniMap.MiniMapPresenter)}");
+Console.WriteLine($"Custom standalone content: inspector={DescribeContent(customStandaloneInspector.Content)}, minimap={DescribeContent(customStandaloneMiniMap.Content)}");
+Console.WriteLine($"Presenter types: node={customNodePresenter.GetType().Name}, menu={customMenuPresenter.GetType().Name}, inspector={customInspectorPresenter.GetType().Name}, minimap={customMiniMapPresenter.GetType().Name}");
 
 static GraphDocument CreateDocument()
     => new(
@@ -258,6 +302,15 @@ static NodeViewModel AssertNode(GraphEditorViewModel editor, string nodeId)
 static T FindRequiredControl<T>(Control root, string name)
     where T : Control
     => root.FindControl<T>(name) ?? throw new InvalidOperationException($"Could not find control '{name}'.");
+
+static string DescribeContent(object? content)
+    => content switch
+    {
+        TextBlock text => text.Text ?? "<empty>",
+        Control control => control.GetType().Name,
+        null => "<null>",
+        _ => content.GetType().Name,
+    };
 
 internal sealed class HostSampleNodeDefinitionProvider : INodeDefinitionProvider
 {
@@ -362,6 +415,48 @@ internal sealed class HostSampleLocalizationProvider : IGraphLocalizationProvide
 
     public string GetString(string key, string fallback)
         => Values.TryGetValue(key, out var value) ? value : fallback;
+}
+
+internal sealed class HostSampleNodeVisualPresenter : IGraphNodeVisualPresenter
+{
+    private readonly DefaultGraphNodeVisualPresenter _stockPresenter = new();
+
+    public GraphNodeVisual Create(GraphNodeVisualContext context)
+        => _stockPresenter.Create(context);
+
+    public void Update(GraphNodeVisual visual, GraphNodeVisualContext context)
+        => _stockPresenter.Update(visual, context);
+}
+
+internal sealed class HostSampleContextMenuPresenter : IGraphContextMenuPresenter
+{
+    private readonly GraphContextMenuPresenter _stockPresenter = new();
+
+    public int OpenCalls { get; private set; }
+
+    public void Open(Control target, IReadOnlyList<MenuItemDescriptor> descriptors, ContextMenuStyleOptions style)
+    {
+        OpenCalls++;
+        _stockPresenter.Open(target, descriptors, style);
+    }
+}
+
+internal sealed class HostSampleInspectorPresenter : IGraphInspectorPresenter
+{
+    public Control Create(GraphEditorViewModel? editor)
+        => new TextBlock
+        {
+            Text = $"CUSTOM INSPECTOR:{editor?.InspectorTitle ?? "<none>"}",
+        };
+}
+
+internal sealed class HostSampleMiniMapPresenter : IGraphMiniMapPresenter
+{
+    public Control Create(GraphEditorViewModel? editor)
+        => new TextBlock
+        {
+            Text = $"CUSTOM MINIMAP:{editor?.Title ?? "<none>"}",
+        };
 }
 
 internal sealed class RecordingCompatibilityService : IPortCompatibilityService

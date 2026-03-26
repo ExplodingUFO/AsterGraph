@@ -239,7 +239,76 @@ Phase 3 makes three standalone Avalonia surfaces part of the supported host stor
   - canonical entry: `AsterGraphMiniMapViewFactory.Create(...)`
   - stays a narrow overview-plus-navigation control
 
-`GraphContextMenuPresenter` is now a public stock Avalonia presenter for hosts that want to reuse the shipped menu rendering path. Full presenter replacement is still deferred to Phase 4.
+`GraphContextMenuPresenter` is now a public stock Avalonia presenter for hosts that want to reuse the shipped menu rendering path.
+
+## Replaceable Presentation Kit
+
+Phase 4 keeps the Phase 3 surface boundary but adds opt-in presenter replacement in `AsterGraph.Avalonia`.
+
+Shared configuration surface:
+
+```csharp
+var presentation = new AsterGraphPresentationOptions
+{
+    NodeVisualPresenter = customNodePresenter,
+    ContextMenuPresenter = customMenuPresenter,
+    InspectorPresenter = customInspectorPresenter,
+    MiniMapPresenter = customMiniMapPresenter,
+};
+```
+
+Full-shell usage:
+
+```csharp
+var view = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOptions
+{
+    Editor = editor,
+    ChromeMode = GraphEditorViewChromeMode.Default,
+    Presentation = presentation,
+});
+```
+
+Standalone usage:
+
+```csharp
+var canvas = AsterGraphCanvasViewFactory.Create(new AsterGraphCanvasViewOptions
+{
+    Editor = editor,
+    Presentation = new AsterGraphPresentationOptions
+    {
+        NodeVisualPresenter = customNodePresenter,
+        ContextMenuPresenter = customMenuPresenter,
+    },
+});
+
+var inspector = AsterGraphInspectorViewFactory.Create(new AsterGraphInspectorViewOptions
+{
+    Editor = editor,
+    Presentation = new AsterGraphPresentationOptions
+    {
+        InspectorPresenter = customInspectorPresenter,
+    },
+});
+
+var miniMap = AsterGraphMiniMapViewFactory.Create(new AsterGraphMiniMapViewOptions
+{
+    Editor = editor,
+    Presentation = new AsterGraphPresentationOptions
+    {
+        MiniMapPresenter = customMiniMapPresenter,
+    },
+});
+```
+
+Important contract boundaries:
+
+- `AsterGraph.Editor` still owns state, commands, queries, diagnostics, menu intent, and node presentation data.
+- `NodeCanvas` still owns selection, drag, marquee selection, pending connection preview, connection creation, viewport interaction, and port-anchor resolution.
+- `GraphEditorViewModel.BuildContextMenu(...)` and `MenuItemDescriptor` remain the only source of menu intent.
+- `GraphInspectorView` custom presenters still bind to the existing editor-owned inspector projections and `NodeParameterViewModel` editing flow.
+- `GraphMiniMap` custom presenters still use editor-owned overview and `CenterViewAt(...)` navigation rather than introducing shell-only responsibilities.
+
+Stock defaults remain active when `Presentation` is omitted. Replacement is per surface, not all-or-nothing.
 
 Header, library, and status chrome remain shell-only in Phase 3. If a host wants to omit them, the supported approach is direct standalone-surface composition, not a larger `GraphEditorViewChromeMode` matrix.
 
@@ -383,7 +452,7 @@ The recommended layering is:
 - `AsterGraph.Editor`
   runtime session contracts, state orchestration, factories, service seams, diagnostics, and host extension seams
 - `AsterGraph.Avalonia`
-  default Avalonia UI shell
+  default Avalonia UI shell plus opt-in presenter replacement seams for node visuals, menus, inspector, and mini map
 
 The host should own:
 

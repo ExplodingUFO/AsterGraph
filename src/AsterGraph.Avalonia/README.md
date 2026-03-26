@@ -19,6 +19,7 @@ This project intentionally contains:
 - `GraphInspectorView` as a supported standalone inspector surface
 - `GraphMiniMap` as a supported standalone mini map surface
 - `GraphContextMenuPresenter` as the stock Avalonia menu presenter
+- `AsterGraphPresentationOptions` plus node/menu/inspector/mini-map presenter contracts for opt-in visual replacement
 - canvas rendering and pointer interaction
 - theme resources
 - context-menu presentation from editor descriptors
@@ -46,9 +47,29 @@ Canonical and compatibility UI entry paths:
 - Canonical standalone mini map: `AsterGraphMiniMapViewFactory.Create(new AsterGraphMiniMapViewOptions { ... })`
 - Compatibility: `new GraphEditorView { Editor = editor }`
 
+Per-surface presentation replacement is opt-in through `AsterGraphPresentationOptions`.
+
+Example full-shell configuration:
+
+```csharp
+var view = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOptions
+{
+    Editor = editor,
+    Presentation = new AsterGraphPresentationOptions
+    {
+        NodeVisualPresenter = customNodePresenter,
+        ContextMenuPresenter = customMenuPresenter,
+        InspectorPresenter = customInspectorPresenter,
+        MiniMapPresenter = customMiniMapPresenter,
+    },
+});
+```
+
+If `Presentation` is omitted, the shipped stock presenters remain active.
+
 Standalone canvas keeps the stock context menu and stock command shortcuts enabled by default. Hosts can explicitly opt out through:
 
 - `EnableDefaultContextMenu`
 - `EnableDefaultCommandShortcuts`
 
-Header/library/status chrome remain shell-only in Phase 3. Full presenter replacement is deferred to Phase 4.
+Header/library/status chrome remain shell-only. Phase 4 adds presenter replacement for node visuals, menus, inspector, and mini map without moving editor behavior into the host.

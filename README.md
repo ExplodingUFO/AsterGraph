@@ -167,7 +167,64 @@ Standalone Avalonia surfaces are now supported in `AsterGraph.Avalonia`:
 - `GraphMiniMap`
   - narrow overview-plus-navigation surface
 
-The stock Avalonia `GraphContextMenuPresenter` is also public for hosts that want to reuse the shipped menu presenter without forking the canvas implementation. Full presenter replacement remains deferred to Phase 4.
+The stock Avalonia `GraphContextMenuPresenter` is also public for hosts that want to reuse the shipped menu presenter without forking the canvas implementation.
+
+Phase 4 now adds opt-in presenter replacement in `AsterGraph.Avalonia`:
+
+- `AsterGraphPresentationOptions`
+  - shared per-surface presenter configuration for full-shell and standalone composition
+- `IGraphNodeVisualPresenter`
+  - replace node visuals while `NodeCanvas` keeps selection, drag, connection, marquee, viewport, and anchor resolution behavior
+- `IGraphContextMenuPresenter`
+  - replace Avalonia menu presentation while `GraphEditorViewModel.BuildContextMenu(...)` and `MenuItemDescriptor` stay the source of truth
+- `IGraphInspectorPresenter`
+  - replace inspector UI while reusing the existing editor-owned selection, connection, and parameter projections
+- `IGraphMiniMapPresenter`
+  - replace mini-map UI while reusing editor-owned overview and viewport navigation APIs
+
+Stock presenters remain the zero-configuration default. Hosts only provide a presenter when they want to replace that surface.
+
+Minimal full-shell replacement shape:
+
+```csharp
+var presentation = new AsterGraphPresentationOptions
+{
+    NodeVisualPresenter = customNodePresenter,
+    ContextMenuPresenter = customMenuPresenter,
+    InspectorPresenter = customInspectorPresenter,
+    MiniMapPresenter = customMiniMapPresenter,
+};
+
+var view = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOptions
+{
+    Editor = editor,
+    ChromeMode = GraphEditorViewChromeMode.Default,
+    Presentation = presentation,
+});
+```
+
+Minimal standalone replacement shape:
+
+```csharp
+var canvas = AsterGraphCanvasViewFactory.Create(new AsterGraphCanvasViewOptions
+{
+    Editor = editor,
+    Presentation = new AsterGraphPresentationOptions
+    {
+        NodeVisualPresenter = customNodePresenter,
+        ContextMenuPresenter = customMenuPresenter,
+    },
+});
+
+var inspector = AsterGraphInspectorViewFactory.Create(new AsterGraphInspectorViewOptions
+{
+    Editor = editor,
+    Presentation = new AsterGraphPresentationOptions
+    {
+        InspectorPresenter = customInspectorPresenter,
+    },
+});
+```
 
 For host-side layout persistence without saving a full graph snapshot, `GraphEditorViewModel` also exposes:
 
@@ -209,6 +266,7 @@ That guide covers:
 - how to switch `GraphEditorView.ChromeMode` at runtime without rebuilding editor state
 - how to compose standalone canvas, inspector, and mini map surfaces against the same editor state
 - how to opt out of stock standalone-canvas menu and shortcut behavior
+- how to replace node/menu/inspector/mini-map presenters per surface without moving behavior into the host
 
 Reference host sample:
 

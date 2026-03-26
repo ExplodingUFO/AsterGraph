@@ -3,8 +3,10 @@ using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Abstractions.Styling;
 using Avalonia.Headless.XUnit;
+using Avalonia.Controls;
 using AsterGraph.Avalonia.Controls;
 using AsterGraph.Avalonia.Hosting;
+using AsterGraph.Avalonia.Presentation;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Catalog;
 using AsterGraph.Editor.Configuration;
@@ -124,6 +126,37 @@ public sealed class GraphEditorMigrationCompatibilityTests
         AssertViewBindings(factoryEverywhere, factoryEditor);
     }
 
+    [AvaloniaFact]
+    public void StagedMigrationPath_PreservesPresentationReplacementAcrossLegacyAndFactoryViews()
+    {
+        var harness = CreateHarness();
+        var legacyEditor = CreateLegacyEditor(harness);
+        var factoryEditor = CreateFactoryEditor(harness);
+        var presentation = new AsterGraphPresentationOptions
+        {
+            NodeVisualPresenter = new RecordingNodeVisualPresenter(),
+            ContextMenuPresenter = new RecordingContextMenuPresenter(),
+            InspectorPresenter = new RecordingInspectorPresenter(),
+            MiniMapPresenter = new RecordingMiniMapPresenter(),
+        };
+
+        var legacyView = new GraphEditorView
+        {
+            Editor = legacyEditor,
+            ChromeMode = GraphEditorViewChromeMode.CanvasOnly,
+            Presentation = presentation,
+        };
+        var factoryView = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOptions
+        {
+            Editor = factoryEditor,
+            ChromeMode = GraphEditorViewChromeMode.CanvasOnly,
+            Presentation = presentation,
+        });
+
+        AssertPresentationBindings(legacyView, presentation);
+        AssertPresentationBindings(factoryView, presentation);
+    }
+
     [Fact]
     public async Task RuntimeSession_ServiceSeamsAndCompatibilityService_RemainAvailableAcrossMigrationPaths()
     {
@@ -175,6 +208,22 @@ public sealed class GraphEditorMigrationCompatibilityTests
     {
         Assert.Same(expectedEditor, view.Editor);
         Assert.Equal(GraphEditorViewChromeMode.CanvasOnly, view.ChromeMode);
+    }
+
+    private static void AssertPresentationBindings(GraphEditorView view, AsterGraphPresentationOptions presentation)
+    {
+        var canvas = view.FindControl<NodeCanvas>("PART_NodeCanvas");
+        var inspector = view.FindControl<GraphInspectorView>("PART_InspectorSurface");
+        var miniMap = view.FindControl<GraphMiniMap>("PART_MiniMapSurface");
+
+        Assert.NotNull(canvas);
+        Assert.NotNull(inspector);
+        Assert.NotNull(miniMap);
+        Assert.Same(presentation, view.Presentation);
+        Assert.Same(presentation.NodeVisualPresenter, canvas.NodeVisualPresenter);
+        Assert.Same(presentation.ContextMenuPresenter, canvas.ContextMenuPresenter);
+        Assert.Same(presentation.InspectorPresenter, inspector.InspectorPresenter);
+        Assert.Same(presentation.MiniMapPresenter, miniMap.MiniMapPresenter);
     }
 
     private static void SelectSourceNode(GraphEditorViewModel editor)
@@ -515,5 +564,40 @@ public sealed class GraphEditorMigrationCompatibilityTests
                 ? PortCompatibilityResult.Exact()
                 : PortCompatibilityResult.Rejected();
         }
+    }
+
+    private sealed class RecordingNodeVisualPresenter : IGraphNodeVisualPresenter
+    {
+        private readonly DefaultGraphNodeVisualPresenter _stockPresenter = new();
+
+        public GraphNodeVisual Create(GraphNodeVisualContext context)
+            => _stockPresenter.Create(context);
+
+        public void Update(GraphNodeVisual visual, GraphNodeVisualContext context)
+            => _stockPresenter.Update(visual, context);
+    }
+
+    private sealed class RecordingContextMenuPresenter : IGraphContextMenuPresenter
+    {
+        public void Open(Control target, IReadOnlyList<MenuItemDescriptor> descriptors, ContextMenuStyleOptions style)
+            => throw new NotSupportedException();
+    }
+
+    private sealed class RecordingInspectorPresenter : IGraphInspectorPresenter
+    {
+        public Control Create(GraphEditorViewModel? editor)
+            => new TextBlock
+            {
+                Text = $"MIGRATION INSPECTOR:{editor?.InspectorTitle ?? "<none>"}",
+            };
+    }
+
+    private sealed class RecordingMiniMapPresenter : IGraphMiniMapPresenter
+    {
+        public Control Create(GraphEditorViewModel? editor)
+            => new TextBlock
+            {
+                Text = $"MIGRATION MINIMAP:{editor?.Title ?? "<none>"}",
+            };
     }
 }
