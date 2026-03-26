@@ -5,15 +5,20 @@ namespace AsterGraph.Editor.Services;
 /// <summary>
 /// 管理片段模板目录的扫描、读取与保存。
 /// </summary>
-public sealed class GraphFragmentLibraryService
+public sealed class GraphFragmentLibraryService : IGraphFragmentLibraryService
 {
+    private readonly IGraphClipboardPayloadSerializer _clipboardPayloadSerializer;
+
     /// <summary>
     /// 初始化片段模板库服务。
     /// </summary>
     /// <param name="libraryPath">可选的模板库目录路径。</param>
-    public GraphFragmentLibraryService(string? libraryPath = null)
+    public GraphFragmentLibraryService(
+        string? libraryPath = null,
+        IGraphClipboardPayloadSerializer? clipboardPayloadSerializer = null)
     {
         LibraryPath = libraryPath ?? GetDefaultLibraryPath();
+        _clipboardPayloadSerializer = clipboardPayloadSerializer ?? new GraphClipboardPayloadSerializer();
     }
 
     /// <summary>
@@ -25,10 +30,7 @@ public sealed class GraphFragmentLibraryService
     /// 获取系统默认片段模板库目录。
     /// </summary>
     public static string GetDefaultLibraryPath()
-        => Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "AsterGraphDemo",
-            "fragments");
+        => GraphEditorStorageDefaults.GetFragmentLibraryPath();
 
     /// <summary>
     /// 枚举模板库中的全部片段模板元数据。
@@ -48,7 +50,7 @@ public sealed class GraphFragmentLibraryService
             .ToList();
     }
 
-    internal string SaveTemplate(GraphSelectionFragment fragment, string? name = null)
+    public string SaveTemplate(GraphSelectionFragment fragment, string? name = null)
     {
         ArgumentNullException.ThrowIfNull(fragment);
 
@@ -56,16 +58,16 @@ public sealed class GraphFragmentLibraryService
         var safeName = SanitizeName(name);
         var fileName = $"{safeName}-{DateTime.Now:yyyyMMdd-HHmmss}.json";
         var fullPath = Path.Combine(LibraryPath, fileName);
-        File.WriteAllText(fullPath, GraphClipboardPayloadSerializer.Serialize(fragment));
+        File.WriteAllText(fullPath, _clipboardPayloadSerializer.Serialize(fragment));
         return fullPath;
     }
 
-    internal GraphSelectionFragment LoadTemplate(string path)
+    public GraphSelectionFragment LoadTemplate(string path)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
 
         var text = File.ReadAllText(path);
-        if (!GraphClipboardPayloadSerializer.TryDeserialize(text, out var fragment) || fragment is null)
+        if (!_clipboardPayloadSerializer.TryDeserialize(text, out var fragment) || fragment is null)
         {
             throw new InvalidOperationException("Failed to deserialize the fragment template.");
         }
@@ -86,7 +88,7 @@ public sealed class GraphFragmentLibraryService
     private FragmentTemplateInfo CreateTemplateInfo(string path)
     {
         var text = File.ReadAllText(path);
-        var fragment = GraphClipboardPayloadSerializer.TryDeserialize(text, out var parsedFragment)
+        var fragment = _clipboardPayloadSerializer.TryDeserialize(text, out var parsedFragment)
             ? parsedFragment
             : null;
         return new FragmentTemplateInfo(

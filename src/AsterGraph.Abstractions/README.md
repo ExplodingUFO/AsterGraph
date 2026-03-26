@@ -1,10 +1,21 @@
 # AsterGraph.Abstractions
 
-`AsterGraph.Abstractions` is the stable contract layer for extension and integration.
+`AsterGraph.Abstractions` is the stable contract layer inside the supported AsterGraph package set.
+
+Supported package set:
+
+- `AsterGraph.Abstractions`
+- `AsterGraph.Core`
+- `AsterGraph.Editor`
+- `AsterGraph.Avalonia`
+
+All four publishable packages target `net8.0` and `net9.0`.
 
 Direct package reference:
 
-- Yes, for hosts that declare custom node definitions or depend on stable port/compatibility contracts.
+- Yes, for hosts that declare custom node definitions, stable identifiers, or shared style tokens.
+- Pair it with `AsterGraph.Editor` for editor runtime composition.
+- Pair it with `AsterGraph.Avalonia` when the host embeds the shipped Avalonia UI.
 
 It intentionally contains only:
 

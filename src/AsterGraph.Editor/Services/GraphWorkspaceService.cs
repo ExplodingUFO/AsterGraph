@@ -6,7 +6,7 @@ namespace AsterGraph.Editor.Services;
 /// <summary>
 /// 管理整张图快照的默认存储位置与读写操作。
 /// </summary>
-public sealed class GraphWorkspaceService
+public sealed class GraphWorkspaceService : IGraphWorkspaceService
 {
     /// <summary>
     /// 初始化工作区服务。
@@ -26,10 +26,7 @@ public sealed class GraphWorkspaceService
     /// 获取系统默认工作区文件路径。
     /// </summary>
     public static string GetDefaultWorkspacePath()
-        => Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "AsterGraphDemo",
-            "demo-graph.json");
+        => GraphEditorStorageDefaults.GetWorkspacePath();
 
     /// <summary>
     /// 将整张图快照保存到默认工作区路径。

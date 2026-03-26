@@ -1,0 +1,67 @@
+using AsterGraph.Editor.Runtime;
+using AsterGraph.Editor.Services;
+using AsterGraph.Editor.ViewModels;
+
+namespace AsterGraph.Editor.Hosting;
+
+/// <summary>
+/// 提供 AsterGraph 编辑器运行时的规范宿主组合入口。
+/// </summary>
+/// <remarks>
+/// 该工厂只负责校验输入并委托到现有 <see cref="GraphEditorViewModel"/> 兼容立面；
+/// 直接构造 <see cref="GraphEditorViewModel"/> 仍然受支持，便于宿主分阶段迁移。
+/// </remarks>
+public static class AsterGraphEditorFactory
+{
+    /// <summary>
+    /// 使用宿主提供的选项创建一个 <see cref="GraphEditorViewModel"/>。
+    /// </summary>
+    /// <param name="options">宿主组合选项。</param>
+    /// <returns>新的图编辑器视图模型。</returns>
+    public static GraphEditorViewModel Create(AsterGraphEditorOptions options)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+        ArgumentNullException.ThrowIfNull(options.Document);
+        ArgumentNullException.ThrowIfNull(options.NodeCatalog);
+        ArgumentNullException.ThrowIfNull(options.CompatibilityService);
+
+        var clipboardPayloadSerializer = options.ClipboardPayloadSerializer ?? new GraphClipboardPayloadSerializer();
+        var workspaceService = options.WorkspaceService ?? new GraphWorkspaceService(GraphEditorStorageDefaults.GetWorkspacePath(options.StorageRootPath));
+        var fragmentWorkspaceService = options.FragmentWorkspaceService ?? new GraphFragmentWorkspaceService(
+            GraphEditorStorageDefaults.GetFragmentPath(options.StorageRootPath),
+            clipboardPayloadSerializer);
+        var fragmentLibraryService = options.FragmentLibraryService ?? new GraphFragmentLibraryService(
+            GraphEditorStorageDefaults.GetFragmentLibraryPath(options.StorageRootPath),
+            clipboardPayloadSerializer);
+
+        var editor = new GraphEditorViewModel(
+            options.Document,
+            options.NodeCatalog,
+            options.CompatibilityService,
+            workspaceService,
+            fragmentWorkspaceService,
+            options.StyleOptions,
+            options.BehaviorOptions,
+            fragmentLibraryService,
+            options.ContextMenuAugmentor,
+            options.NodePresentationProvider,
+            options.LocalizationProvider,
+            clipboardPayloadSerializer,
+            options.DiagnosticsSink);
+
+        if (editor.Session is GraphEditorSession runtimeSession)
+        {
+            runtimeSession.ConfigureInstrumentation(options.Instrumentation);
+        }
+
+        return editor;
+    }
+
+    /// <summary>
+    /// 使用宿主提供的选项创建一个 <see cref="IGraphEditorSession"/>。
+    /// </summary>
+    /// <param name="options">宿主组合选项。</param>
+    /// <returns>新的图编辑器运行时会话。</returns>
+    public static IGraphEditorSession CreateSession(AsterGraphEditorOptions options)
+        => Create(options).Session;
+}

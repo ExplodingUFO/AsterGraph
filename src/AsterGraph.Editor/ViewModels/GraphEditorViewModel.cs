@@ -14,6 +14,7 @@ using AsterGraph.Abstractions.Styling;
 using AsterGraph.Core.Models;
 using AsterGraph.Core.Serialization;
 using AsterGraph.Editor.Configuration;
+using AsterGraph.Editor.Diagnostics;
 using AsterGraph.Editor.Events;
 using AsterGraph.Editor.Geometry;
 using AsterGraph.Editor.Hosting;
@@ -21,6 +22,7 @@ using AsterGraph.Editor.Localization;
 using AsterGraph.Editor.Menus;
 using AsterGraph.Editor.Models;
 using AsterGraph.Editor.Presentation;
+using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.Services;
 using AsterGraph.Editor.Viewport;
 
@@ -29,6 +31,12 @@ namespace AsterGraph.Editor.ViewModels;
 /// <summary>
 /// 图编辑器的主视图模型，承载选择、布局、连线、剪贴板和持久化状态。
 /// </summary>
+/// <remarks>
+/// Phase 1 会继续支持直接构造 <see cref="GraphEditorViewModel"/> 作为兼容立面，
+/// 以满足现有宿主基于 <c>new GraphEditorViewModel(...)</c> 的集成路径。
+/// 新宿主应优先考虑 <see cref="AsterGraphEditorFactory"/> 和 <see cref="AsterGraphEditorOptions"/>，
+/// 但本类型在当前迁移窗口内不会因为新增工厂入口而被移除或标记为过时。
+/// </remarks>
 public sealed partial class GraphEditorViewModel : ObservableObject, IGraphContextMenuHost
 {
     private const double DefaultZoom = 0.88;
@@ -80,10 +88,11 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     private readonly INodeCatalog _nodeCatalog;
     private readonly IPortCompatibilityService _compatibilityService;
-    private readonly GraphWorkspaceService _workspaceService;
+    private readonly IGraphWorkspaceService _workspaceService;
     private readonly GraphSelectionClipboard _selectionClipboard;
-    private readonly GraphFragmentWorkspaceService _fragmentWorkspaceService;
-    private readonly GraphFragmentLibraryService _fragmentLibraryService;
+    private readonly IGraphFragmentWorkspaceService _fragmentWorkspaceService;
+    private readonly IGraphFragmentLibraryService _fragmentLibraryService;
+    private readonly IGraphClipboardPayloadSerializer _clipboardPayloadSerializer;
     private readonly GraphEditorHistoryService _historyService;
     private readonly GraphEditorInspectorProjection _inspectorProjection;
     private readonly GraphEditorCommandStateNotifier _commandStateNotifier = new();
@@ -117,25 +126,34 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// <param name="contextMenuAugmentor">宿主右键菜单增强器。</param>
     /// <param name="nodePresentationProvider">节点展示状态提供器。</param>
     /// <param name="localizationProvider">编辑器内置文案本地化提供器。</param>
+    /// <remarks>
+    /// 该构造函数在 Phase 1 中保留为受支持的兼容入口，供现有宿主继续沿用
+    /// <c>new GraphEditorViewModel(...)</c> 的组合方式。对于新的宿主组合代码，
+    /// 请优先使用 <see cref="AsterGraphEditorFactory.Create(AsterGraphEditorOptions)"/>，
+    /// 以便后续阶段通过统一的选项契约扩展初始化能力。
+    /// </remarks>
     public GraphEditorViewModel(
         GraphDocument document,
         INodeCatalog nodeCatalog,
         IPortCompatibilityService compatibilityService,
-        GraphWorkspaceService? workspaceService = null,
-        GraphFragmentWorkspaceService? fragmentWorkspaceService = null,
+        IGraphWorkspaceService? workspaceService = null,
+        IGraphFragmentWorkspaceService? fragmentWorkspaceService = null,
         GraphEditorStyleOptions? styleOptions = null,
         GraphEditorBehaviorOptions? behaviorOptions = null,
-        GraphFragmentLibraryService? fragmentLibraryService = null,
+        IGraphFragmentLibraryService? fragmentLibraryService = null,
         IGraphContextMenuAugmentor? contextMenuAugmentor = null,
         INodePresentationProvider? nodePresentationProvider = null,
-        IGraphLocalizationProvider? localizationProvider = null)
+        IGraphLocalizationProvider? localizationProvider = null,
+        IGraphClipboardPayloadSerializer? clipboardPayloadSerializer = null,
+        IGraphEditorDiagnosticsSink? diagnosticsSink = null)
     {
         _nodeCatalog = nodeCatalog ?? throw new ArgumentNullException(nameof(nodeCatalog));
         _compatibilityService = compatibilityService ?? throw new ArgumentNullException(nameof(compatibilityService));
         _workspaceService = workspaceService ?? new GraphWorkspaceService();
         _selectionClipboard = new GraphSelectionClipboard();
-        _fragmentWorkspaceService = fragmentWorkspaceService ?? new GraphFragmentWorkspaceService();
-        _fragmentLibraryService = fragmentLibraryService ?? new GraphFragmentLibraryService();
+        _clipboardPayloadSerializer = clipboardPayloadSerializer ?? new GraphClipboardPayloadSerializer();
+        _fragmentWorkspaceService = fragmentWorkspaceService ?? new GraphFragmentWorkspaceService(clipboardPayloadSerializer: _clipboardPayloadSerializer);
+        _fragmentLibraryService = fragmentLibraryService ?? new GraphFragmentLibraryService(clipboardPayloadSerializer: _clipboardPayloadSerializer);
         _historyService = new GraphEditorHistoryService();
         _contextMenuAugmentor = contextMenuAugmentor;
         _nodePresentationProvider = nodePresentationProvider;
@@ -219,6 +237,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         NodeTemplates = new ObservableCollection<NodeTemplateViewModel>(
             _nodeCatalog.Definitions.Select(definition => new NodeTemplateViewModel(definition)));
         FragmentTemplates = new ObservableCollection<FragmentTemplateViewModel>();
+        Session = new GraphEditorSession(this, diagnosticsSink);
 
         Nodes.CollectionChanged += HandleNodesCollectionChanged;
         Connections.CollectionChanged += HandleConnectionsCollectionChanged;
@@ -252,6 +271,11 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     public ObservableCollection<FragmentTemplateViewModel> FragmentTemplates { get; }
 
     public GraphEditorStyleOptions StyleOptions { get; }
+
+    /// <summary>
+    /// 获取与当前兼容立面共享的运行时会话。
+    /// </summary>
+    public IGraphEditorSession Session { get; }
 
     /// <summary>
     /// 获取当前命令权限配置。
@@ -715,6 +739,11 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
                 "editor.status.menu.augmentorFailed",
                 "Context menu augmentor failed: {0}. Using stock menu.",
                 exception.GetType().Name);
+            PublishRecoverableFailure(
+                "contextmenu.augment.failed",
+                "contextmenu.augment",
+                StatusMessage ?? exception.Message,
+                exception);
             return stockItems;
         }
     }
@@ -2047,7 +2076,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         {
             var clipboardText = await _textClipboardBridge.ReadTextAsync(CancellationToken.None);
             // 优先读取系统剪贴板 JSON，但仍保留进程内剪贴板作为可靠回退。
-            if (GraphClipboardPayloadSerializer.TryDeserialize(clipboardText, out var systemFragment))
+            if (_clipboardPayloadSerializer.TryDeserialize(clipboardText, out var systemFragment))
             {
                 return systemFragment;
             }
@@ -2075,7 +2104,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         }
 
         _selectionClipboard.Store(fragment);
-        var clipboardJson = GraphClipboardPayloadSerializer.Serialize(fragment);
+        var clipboardJson = _clipboardPayloadSerializer.Serialize(fragment);
         if (_textClipboardBridge is not null)
         {
             await _textClipboardBridge.WriteTextAsync(clipboardJson, CancellationToken.None);
@@ -2109,6 +2138,11 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         _fragmentWorkspaceService.Save(fragment);
         RaiseComputedPropertyChanges();
         SetStatus("editor.status.fragment.export.savedToPath", "Exported fragment to {0}.", _fragmentWorkspaceService.FragmentPath);
+        PublishRuntimeDiagnostic(
+            "fragment.export.succeeded",
+            "fragment.export",
+            StatusMessage ?? _fragmentWorkspaceService.FragmentPath,
+            GraphEditorDiagnosticSeverity.Info);
         FragmentExported?.Invoke(
             this,
             new GraphEditorFragmentEventArgs(
@@ -2227,6 +2261,11 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         if (!_fragmentWorkspaceService.Exists())
         {
             SetStatus("editor.status.fragment.import.noExportedFile", "No exported fragment file is available yet.");
+            PublishRuntimeDiagnostic(
+                "fragment.import.missing",
+                "fragment.import",
+                StatusMessage ?? "No exported fragment file is available yet.",
+                GraphEditorDiagnosticSeverity.Warning);
             return;
         }
 
@@ -2237,9 +2276,19 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         if (!PasteFragment(fragment, "Imported"))
         {
             SetStatus("editor.status.fragment.import.noNodesInFile", "Fragment file did not contain any nodes.");
+            PublishRuntimeDiagnostic(
+                "fragment.import.empty",
+                "fragment.import",
+                StatusMessage ?? "Fragment file did not contain any nodes.",
+                GraphEditorDiagnosticSeverity.Warning);
         }
         else
         {
+            PublishRuntimeDiagnostic(
+                "fragment.import.succeeded",
+                "fragment.import",
+                StatusMessage ?? _fragmentWorkspaceService.FragmentPath,
+                GraphEditorDiagnosticSeverity.Info);
             FragmentImported?.Invoke(
                 this,
                 new GraphEditorFragmentEventArgs(
@@ -2335,6 +2384,11 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         if (!_fragmentWorkspaceService.Exists(path))
         {
             SetStatus("editor.status.fragment.import.fileNotFound", "Fragment file '{0}' was not found.", path);
+            PublishRuntimeDiagnostic(
+                "fragment.import.fileMissing",
+                "fragment.import",
+                StatusMessage ?? path,
+                GraphEditorDiagnosticSeverity.Warning);
             return false;
         }
 
@@ -2344,6 +2398,11 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         var imported = PasteFragment(fragment, "Imported");
         if (imported)
         {
+            PublishRuntimeDiagnostic(
+                "fragment.import.succeeded",
+                "fragment.import",
+                StatusMessage ?? path,
+                GraphEditorDiagnosticSeverity.Info);
             FragmentImported?.Invoke(
                 this,
                 new GraphEditorFragmentEventArgs(
@@ -2372,12 +2431,22 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             _lastSavedDocumentSignature = CreateDocumentSignature();
             UpdateDirtyState();
             SetStatus("editor.status.workspace.save.savedToPath", "Saved snapshot to {0}.", WorkspacePath);
+            PublishRuntimeDiagnostic(
+                "workspace.save.succeeded",
+                "workspace.save",
+                StatusMessage ?? WorkspacePath,
+                GraphEditorDiagnosticSeverity.Info);
             NotifyDocumentChanged(GraphEditorDocumentChangeKind.WorkspaceSaved, statusMessage: StatusMessage);
             RaiseComputedPropertyChanges();
         }
         catch (Exception exception)
         {
             SetStatus("editor.status.workspace.save.failed", "Save failed: {0}", exception.Message);
+            PublishRecoverableFailure(
+                "workspace.save.failed",
+                "workspace.save",
+                StatusMessage ?? exception.Message,
+                exception);
         }
     }
 
@@ -2398,6 +2467,11 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             if (!_workspaceService.Exists())
             {
                 SetStatus("editor.status.workspace.load.noSnapshot", "No saved snapshot yet. Save once to create one.");
+                PublishRuntimeDiagnostic(
+                    "workspace.load.missing",
+                    "workspace.load",
+                    StatusMessage ?? "No saved snapshot yet.",
+                    GraphEditorDiagnosticSeverity.Warning);
                 return false;
             }
 
@@ -2406,12 +2480,22 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             CancelPendingConnection();
             ClearSelection();
             ResetView(updateStatus: false);
+            PublishRuntimeDiagnostic(
+                "workspace.load.succeeded",
+                "workspace.load",
+                StatusMessage ?? WorkspacePath,
+                GraphEditorDiagnosticSeverity.Info);
             NotifyDocumentChanged(GraphEditorDocumentChangeKind.WorkspaceLoaded, statusMessage: StatusMessage);
             return true;
         }
         catch (Exception exception)
         {
             SetStatus("editor.status.workspace.load.failed", "Load failed: {0}", exception.Message);
+            PublishRecoverableFailure(
+                "workspace.load.failed",
+                "workspace.load",
+                StatusMessage ?? exception.Message,
+                exception);
             return false;
         }
     }
@@ -2551,6 +2635,28 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     private void SetStatus((string Key, string Fallback, object?[] Arguments) status)
         => SetStatus(status.Key, status.Fallback, status.Arguments);
+
+    private void PublishRecoverableFailure(string code, string operation, string message, Exception? exception = null)
+    {
+        if (Session is GraphEditorSession runtimeSession)
+        {
+            runtimeSession.PublishRecoverableFailure(
+                new GraphEditorRecoverableFailureEventArgs(code, operation, message, exception));
+        }
+    }
+
+    private void PublishRuntimeDiagnostic(
+        string code,
+        string operation,
+        string message,
+        GraphEditorDiagnosticSeverity severity,
+        Exception? exception = null)
+    {
+        if (Session is GraphEditorSession runtimeSession)
+        {
+            runtimeSession.PublishDiagnostic(new GraphEditorDiagnostic(code, operation, message, severity, exception));
+        }
+    }
 
     private string CreateNodeId(string templateKey)
         => CreateUniqueId(Nodes.Select(node => node.Id), $"{templateKey}-");

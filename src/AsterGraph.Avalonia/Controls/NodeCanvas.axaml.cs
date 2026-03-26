@@ -13,6 +13,7 @@ using Avalonia.VisualTree;
 using AsterGraph.Abstractions.Styling;
 using AsterGraph.Avalonia.Controls.Internal;
 using AsterGraph.Avalonia.Menus;
+using AsterGraph.Avalonia.Presentation;
 using AsterGraph.Avalonia.Styling;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Geometry;
@@ -34,7 +35,31 @@ public partial class NodeCanvas : UserControl
     public static readonly StyledProperty<GraphEditorViewModel?> ViewModelProperty =
         AvaloniaProperty.Register<NodeCanvas, GraphEditorViewModel?>(nameof(ViewModel));
 
-    private readonly Dictionary<NodeViewModel, NodeVisual> _nodeVisuals = new();
+    /// <summary>
+    /// 控制是否启用默认内置上下文菜单。
+    /// </summary>
+    public static readonly StyledProperty<bool> EnableDefaultContextMenuProperty =
+        AvaloniaProperty.Register<NodeCanvas, bool>(nameof(EnableDefaultContextMenu), true);
+
+    /// <summary>
+    /// 控制是否启用默认内置命令快捷键。
+    /// </summary>
+    public static readonly StyledProperty<bool> EnableDefaultCommandShortcutsProperty =
+        AvaloniaProperty.Register<NodeCanvas, bool>(nameof(EnableDefaultCommandShortcuts), true);
+
+    /// <summary>
+    /// 控制节点可视树替换的展示器。
+    /// </summary>
+    public static readonly StyledProperty<IGraphNodeVisualPresenter?> NodeVisualPresenterProperty =
+        AvaloniaProperty.Register<NodeCanvas, IGraphNodeVisualPresenter?>(nameof(NodeVisualPresenter));
+
+    /// <summary>
+    /// 控制上下文菜单展示层替换的展示器。
+    /// </summary>
+    public static readonly StyledProperty<IGraphContextMenuPresenter?> ContextMenuPresenterProperty =
+        AvaloniaProperty.Register<NodeCanvas, IGraphContextMenuPresenter?>(nameof(ContextMenuPresenter));
+
+    private readonly Dictionary<NodeViewModel, RenderedNodeVisual> _nodeVisuals = new();
     private Grid? _sceneRoot;
     private Canvas? _connectionLayer;
     private Canvas? _nodeLayer;
@@ -43,7 +68,8 @@ public partial class NodeCanvas : UserControl
     private Border? _selectionAdorner;
     private Border? _verticalGuideAdorner;
     private Border? _horizontalGuideAdorner;
-    private readonly GraphContextMenuPresenter _contextMenuPresenter = new();
+    private readonly GraphContextMenuPresenter _stockContextMenuPresenter = new();
+    private readonly IGraphNodeVisualPresenter _stockNodeVisualPresenter = new DefaultGraphNodeVisualPresenter();
     private readonly NodeCanvasInteractionSession _interactionSession = new();
 
     /// <summary>
@@ -79,6 +105,42 @@ public partial class NodeCanvas : UserControl
     }
 
     /// <summary>
+    /// 是否启用默认内置上下文菜单。
+    /// </summary>
+    public bool EnableDefaultContextMenu
+    {
+        get => GetValue(EnableDefaultContextMenuProperty);
+        set => SetValue(EnableDefaultContextMenuProperty, value);
+    }
+
+    /// <summary>
+    /// 是否启用默认内置命令快捷键。
+    /// </summary>
+    public bool EnableDefaultCommandShortcuts
+    {
+        get => GetValue(EnableDefaultCommandShortcutsProperty);
+        set => SetValue(EnableDefaultCommandShortcutsProperty, value);
+    }
+
+    /// <summary>
+    /// 当前节点可视树展示器。
+    /// </summary>
+    public IGraphNodeVisualPresenter? NodeVisualPresenter
+    {
+        get => GetValue(NodeVisualPresenterProperty);
+        set => SetValue(NodeVisualPresenterProperty, value);
+    }
+
+    /// <summary>
+    /// 当前上下文菜单展示器。
+    /// </summary>
+    public IGraphContextMenuPresenter? ContextMenuPresenter
+    {
+        get => GetValue(ContextMenuPresenterProperty);
+        set => SetValue(ContextMenuPresenterProperty, value);
+    }
+
+    /// <summary>
     /// 将当前图内容缩放到可视区域。
     /// </summary>
     public void FitToScene(bool updateStatus = true)
@@ -98,6 +160,10 @@ public partial class NodeCanvas : UserControl
         if (change.Property == ViewModelProperty)
         {
             AttachViewModel(change.GetOldValue<GraphEditorViewModel?>(), change.GetNewValue<GraphEditorViewModel?>());
+        }
+        else if (change.Property == NodeVisualPresenterProperty)
+        {
+            RebuildScene();
         }
     }
 
@@ -165,7 +231,7 @@ public partial class NodeCanvas : UserControl
         {
             var visual = CreateNodeVisual(node);
             _nodeVisuals[node] = visual;
-            _nodeLayer.Children.Add(visual.Border);
+            _nodeLayer.Children.Add(visual.Root);
             UpdateNodeVisual(node);
         }
 
@@ -174,181 +240,80 @@ public partial class NodeCanvas : UserControl
         Dispatcher.UIThread.Post(RenderConnections, DispatcherPriority.Loaded);
     }
 
-    private NodeVisual CreateNodeVisual(NodeViewModel node)
+    private RenderedNodeVisual CreateNodeVisual(NodeViewModel node)
     {
-        var portAnchors = new Dictionary<string, Border>(StringComparer.Ordinal);
-        var nodeStyle = GetNodeCardStyle(node);
-        var border = new Border
+        var presenter = NodeVisualPresenter ?? _stockNodeVisualPresenter;
+        var visual = presenter.Create(CreateNodeVisualContext(node));
+        return new RenderedNodeVisual(visual.Root, presenter, visual);
+    }
+
+    private GraphNodeVisualContext CreateNodeVisualContext(NodeViewModel node)
+    {
+        var editor = ViewModel ?? throw new InvalidOperationException("Node visuals require a bound editor view model.");
+        return new GraphNodeVisualContext(
+            editor,
+            node,
+            editor.StyleOptions,
+            () => Focus(),
+            BeginNodeDrag,
+            ActivatePortFromVisual,
+            OpenNodeContextMenu,
+            OpenPortContextMenu);
+    }
+
+    private void ActivatePortFromVisual(NodeViewModel node, PortViewModel port)
+    {
+        Focus();
+        ViewModel?.ActivatePort(node, port);
+        RenderConnections();
+    }
+
+    private bool OpenNodeContextMenu(Control target, NodeViewModel node, ContextRequestedEventArgs args)
+    {
+        if (ViewModel is null)
         {
-            Width = node.Width,
-            Height = node.Height,
-            CornerRadius = new CornerRadius(nodeStyle.CornerRadius),
-            BorderThickness = new Thickness(nodeStyle.BorderThickness),
-        };
-        AutomationProperties.SetName(border, $"{node.Title} node");
+            return false;
+        }
 
-        var root = new Grid
+        Focus();
+        var targetKind = ContextMenuTargetKind.Node;
+        if (ViewModel.HasMultipleSelection && node.IsSelected)
         {
-            RowDefinitions = new RowDefinitions("Auto,*"),
-        };
-
-        var header = new Border
+            ViewModel.SetSelection(ViewModel.SelectedNodes.ToList(), node);
+            targetKind = ContextMenuTargetKind.Selection;
+        }
+        else
         {
-            Padding = new Thickness(
-                nodeStyle.HeaderHorizontalPadding,
-                nodeStyle.HeaderTopPadding,
-                nodeStyle.HeaderHorizontalPadding,
-                nodeStyle.HeaderBottomPadding),
-            CornerRadius = new CornerRadius(nodeStyle.CornerRadius, nodeStyle.CornerRadius, 0, 0),
-        };
+            ViewModel.SelectSingleNode(node);
+        }
 
-        var headerGrid = new Grid
+        return OpenContextMenu(
+            target,
+            NodeCanvasContextMenuContextFactory.CreateNodeContext(
+                CreateContextMenuSnapshot(),
+                ResolveWorldPosition(args, this),
+                node.Id,
+                useSelectionTools: targetKind == ContextMenuTargetKind.Selection,
+                hostContext: ViewModel.HostContext));
+    }
+
+    private bool OpenPortContextMenu(Control target, NodeViewModel node, PortViewModel port, ContextRequestedEventArgs args)
+    {
+        if (ViewModel is null)
         {
-            ColumnDefinitions = new ColumnDefinitions("*,Auto"),
-            ColumnSpacing = 10,
-        };
+            return false;
+        }
 
-        var headerStack = new StackPanel { Spacing = nodeStyle.HeaderSpacing };
-        headerStack.Children.Add(new TextBlock
-        {
-            Text = node.Category.ToUpperInvariant(),
-            FontSize = nodeStyle.CategoryFontSize,
-            FontWeight = FontWeight.Bold,
-            Foreground = BrushFactory.Solid(nodeStyle.CategoryTextHex, nodeStyle.CategoryTextOpacity),
-        });
-        headerStack.Children.Add(new TextBlock
-        {
-            Text = node.Title,
-            FontSize = nodeStyle.TitleFontSize,
-            FontWeight = FontWeight.SemiBold,
-            Foreground = BrushFactory.Solid(nodeStyle.TitleTextHex),
-        });
-        var subtitle = new TextBlock
-        {
-            FontSize = nodeStyle.SubtitleFontSize,
-            Foreground = BrushFactory.Solid(nodeStyle.SubtitleTextHex, nodeStyle.SubtitleTextOpacity),
-        };
-        headerStack.Children.Add(subtitle);
-        headerGrid.Children.Add(headerStack);
-
-        var badgePanel = new StackPanel
-        {
-            Orientation = Orientation.Horizontal,
-            Spacing = 6,
-            HorizontalAlignment = HorizontalAlignment.Right,
-            VerticalAlignment = VerticalAlignment.Top,
-            IsVisible = false,
-        };
-        Grid.SetColumn(badgePanel, 1);
-        headerGrid.Children.Add(badgePanel);
-        header.Child = headerGrid;
-        root.Children.Add(header);
-
-        var body = new Grid
-        {
-            Margin = new Thickness(
-                nodeStyle.BodyHorizontalPadding,
-                nodeStyle.BodyTopPadding,
-                nodeStyle.BodyHorizontalPadding,
-                nodeStyle.BodyBottomPadding),
-            RowDefinitions = new RowDefinitions("Auto,*,Auto"),
-            ColumnDefinitions = new ColumnDefinitions("*,*"),
-            ColumnSpacing = nodeStyle.BodyColumnSpacing,
-            RowSpacing = nodeStyle.BodyRowSpacing,
-        };
-        Grid.SetRow(body, 1);
-
-        var description = new TextBlock
-        {
-            FontSize = nodeStyle.DescriptionFontSize,
-            TextWrapping = TextWrapping.Wrap,
-            Foreground = BrushFactory.Solid(nodeStyle.DescriptionTextHex, nodeStyle.DescriptionTextOpacity),
-            MaxHeight = nodeStyle.DescriptionMaxHeight,
-        };
-        Grid.SetColumnSpan(description, 2);
-        body.Children.Add(description);
-
-        var inputs = BuildPortPanel(node, node.Inputs, isInput: true, portAnchors);
-        Grid.SetRow(inputs, 1);
-        body.Children.Add(inputs);
-
-        var outputs = BuildPortPanel(node, node.Outputs, isInput: false, portAnchors);
-        Grid.SetRow(outputs, 1);
-        Grid.SetColumn(outputs, 1);
-        body.Children.Add(outputs);
-
-        var statusBarText = new TextBlock
-        {
-            FontSize = 11,
-            FontWeight = FontWeight.SemiBold,
-            Foreground = Brushes.White,
-            TextWrapping = TextWrapping.NoWrap,
-            TextTrimming = TextTrimming.CharacterEllipsis,
-        };
-        var statusBar = new Border
-        {
-            IsVisible = false,
-            BorderThickness = new Thickness(1),
-            CornerRadius = new CornerRadius(Math.Max(6, nodeStyle.CornerRadius - 12)),
-            Padding = new Thickness(10, 4),
-            Child = statusBarText,
-        };
-        Grid.SetRow(statusBar, 2);
-        Grid.SetColumnSpan(statusBar, 2);
-        body.Children.Add(statusBar);
-
-        root.Children.Add(body);
-        border.Child = root;
-
-        border.PointerPressed += (_, args) =>
-        {
-            if (args.Source is StyledElement { DataContext: PortViewModel })
-            {
-                return;
-            }
-
-            BeginNodeDrag(node, args);
-        };
-        border.ContextRequested += (_, args) =>
-        {
-            if (ViewModel is null)
-            {
-                return;
-            }
-
-            Focus();
-            var targetKind = ContextMenuTargetKind.Node;
-            if (ViewModel.HasMultipleSelection && node.IsSelected)
-            {
-                // 在多选集合内部右击时保留当前选择，并切换到批量工具菜单。
-                ViewModel.SetSelection(ViewModel.SelectedNodes.ToList(), node);
-                targetKind = ContextMenuTargetKind.Selection;
-            }
-            else
-            {
-                ViewModel.SelectSingleNode(node);
-            }
-
-            OpenContextMenu(
-                border,
-                NodeCanvasContextMenuContextFactory.CreateNodeContext(
-                    CreateContextMenuSnapshot(),
-                    ResolveWorldPosition(args, this),
-                    node.Id,
-                    useSelectionTools: targetKind == ContextMenuTargetKind.Selection,
-                    hostContext: ViewModel.HostContext));
-            args.Handled = true;
-        };
-
-        return new NodeVisual(
-            border,
-            header,
-            subtitle,
-            description,
-            badgePanel,
-            statusBar,
-            statusBarText,
-            portAnchors);
+        Focus();
+        ViewModel.SelectNode(node);
+        return OpenContextMenu(
+            target,
+            NodeCanvasContextMenuContextFactory.CreatePortContext(
+                CreateContextMenuSnapshot(),
+                ResolveWorldPosition(args, this),
+                node.Id,
+                port.Id,
+                hostContext: ViewModel.HostContext));
     }
 
     private StackPanel BuildPortPanel(
@@ -450,7 +415,7 @@ public partial class NodeCanvas : UserControl
 
                 Focus();
                 ViewModel.SelectNode(node);
-                OpenContextMenu(
+                args.Handled = OpenContextMenu(
                     button,
                     NodeCanvasContextMenuContextFactory.CreatePortContext(
                         CreateContextMenuSnapshot(),
@@ -458,7 +423,6 @@ public partial class NodeCanvas : UserControl
                         node.Id,
                         port.Id,
                         hostContext: ViewModel.HostContext));
-                args.Handled = true;
             };
 
             portAnchors[port.Id] = dot;
@@ -586,14 +550,13 @@ public partial class NodeCanvas : UserControl
                 return;
             }
 
-            OpenContextMenu(
+            args.Handled = OpenContextMenu(
                 chip,
                 NodeCanvasContextMenuContextFactory.CreateConnectionContext(
                     CreateContextMenuSnapshot(),
                     ResolveWorldPosition(args, this),
                     connection.Id,
                     hostContext: ViewModel.HostContext));
-            args.Handled = true;
         };
 
         Canvas.SetLeft(chip, midpoint.X + connectionStyle.LabelOffsetX);
@@ -642,8 +605,8 @@ public partial class NodeCanvas : UserControl
 
         if (_nodeLayer is not null && _nodeVisuals.TryGetValue(node, out var visual))
         {
-            _nodeLayer.Children.Remove(visual.Border);
-            _nodeLayer.Children.Add(visual.Border);
+            _nodeLayer.Children.Remove(visual.Root);
+            _nodeLayer.Children.Add(visual.Root);
         }
 
         HideSelectionAdorner();
@@ -795,8 +758,86 @@ public partial class NodeCanvas : UserControl
 
     private void HandleCanvasKeyDown(object? sender, KeyEventArgs args)
     {
-        if (ViewModel is null)
+        if (ViewModel is null || !EnableDefaultCommandShortcuts || ShortcutBelongsToInputControl(args.Source))
         {
+            return;
+        }
+
+        if (args.KeyModifiers.HasFlag(KeyModifiers.Control) && args.Key == Key.S)
+        {
+            if (ViewModel.SaveCommand.CanExecute(null))
+            {
+                ViewModel.SaveCommand.Execute(null);
+            }
+
+            args.Handled = true;
+            return;
+        }
+
+        if (args.KeyModifiers.HasFlag(KeyModifiers.Control) && args.Key == Key.O)
+        {
+            if (ViewModel.LoadCommand.CanExecute(null))
+            {
+                ViewModel.LoadCommand.Execute(null);
+            }
+
+            args.Handled = true;
+            return;
+        }
+
+        if (args.KeyModifiers.HasFlag(KeyModifiers.Control)
+            && (args.Key == Key.Y || (args.Key == Key.Z && args.KeyModifiers.HasFlag(KeyModifiers.Shift))))
+        {
+            if (ViewModel.RedoCommand.CanExecute(null))
+            {
+                ViewModel.RedoCommand.Execute(null);
+            }
+
+            args.Handled = true;
+            return;
+        }
+
+        if (args.KeyModifiers.HasFlag(KeyModifiers.Control) && args.Key == Key.Z)
+        {
+            if (ViewModel.UndoCommand.CanExecute(null))
+            {
+                ViewModel.UndoCommand.Execute(null);
+            }
+
+            args.Handled = true;
+            return;
+        }
+
+        if (args.KeyModifiers.HasFlag(KeyModifiers.Control) && args.Key == Key.C)
+        {
+            if (ViewModel.CopySelectionCommand.CanExecute(null))
+            {
+                ViewModel.CopySelectionCommand.Execute(null);
+            }
+
+            args.Handled = true;
+            return;
+        }
+
+        if (args.KeyModifiers.HasFlag(KeyModifiers.Control) && args.Key == Key.V)
+        {
+            if (ViewModel.PasteCommand.CanExecute(null))
+            {
+                ViewModel.PasteCommand.Execute(null);
+            }
+
+            args.Handled = true;
+            return;
+        }
+
+        if (args.Key == Key.Delete)
+        {
+            if (ViewModel.DeleteSelectionCommand.CanExecute(null))
+            {
+                ViewModel.DeleteSelectionCommand.Execute(null);
+            }
+
+            args.Handled = true;
             return;
         }
 
@@ -815,20 +856,19 @@ public partial class NodeCanvas : UserControl
 
     private void HandleCanvasContextRequested(object? sender, ContextRequestedEventArgs args)
     {
-        if (ViewModel is null || args.Handled)
+        if (ViewModel is null || args.Handled || !EnableDefaultContextMenu)
         {
             return;
         }
 
         // 多选激活时，空白画布右击同样复用批量选择菜单。
-        OpenContextMenu(
+        args.Handled = OpenContextMenu(
             this,
             NodeCanvasContextMenuContextFactory.CreateCanvasContext(
                 CreateContextMenuSnapshot(),
                 ResolveWorldPosition(args, this),
                 useSelectionTools: ViewModel.HasMultipleSelection,
                 hostContext: ViewModel.HostContext));
-        args.Handled = true;
     }
 
     private void HandleViewModelPropertyChanged(object? sender, PropertyChangedEventArgs args)
@@ -926,8 +966,8 @@ public partial class NodeCanvas : UserControl
     {
         if (_nodeVisuals.TryGetValue(node, out var visual))
         {
-            Canvas.SetLeft(visual.Border, node.X);
-            Canvas.SetTop(visual.Border, node.Y);
+            Canvas.SetLeft(visual.Root, node.X);
+            Canvas.SetTop(visual.Root, node.Y);
         }
     }
 
@@ -938,62 +978,9 @@ public partial class NodeCanvas : UserControl
             return;
         }
 
-        var nodeStyle = GetNodeCardStyle(node);
-        visual.Border.Background = BrushFactory.Solid(node.IsSelected ? nodeStyle.SelectedBackgroundHex : nodeStyle.BackgroundHex);
-        visual.Border.BorderBrush = BrushFactory.Solid(node.IsSelected ? node.AccentHex : nodeStyle.BorderHex);
-        visual.Header.Background = BrushFactory.Solid(node.AccentHex, node.IsSelected ? nodeStyle.SelectedHeaderOpacity : nodeStyle.HeaderOpacity);
-        visual.Border.BorderThickness = new Thickness(node.IsSelected ? nodeStyle.SelectedBorderThickness : nodeStyle.BorderThickness);
-        visual.Border.Height = node.Height;
-        visual.Subtitle.Text = node.DisplaySubtitle;
-        visual.Description.Text = node.DisplayDescription;
-
-        visual.BadgePanel.Children.Clear();
-        foreach (var badge in node.Presentation.TopRightBadges)
-        {
-            var badgeBorder = new Border
-            {
-                CornerRadius = new CornerRadius(999),
-                BorderThickness = new Thickness(1),
-                BorderBrush = BrushFactory.SolidSafe(badge.AccentHex, nodeStyle.BorderHex, 0.8),
-                Background = BrushFactory.SolidSafe(badge.AccentHex, nodeStyle.BorderHex, 0.2),
-                Padding = new Thickness(7, 2),
-                Child = new TextBlock
-                {
-                    Text = badge.Text,
-                    FontSize = 10,
-                    FontWeight = FontWeight.SemiBold,
-                    Foreground = BrushFactory.Solid("#FFFFFF", 0.95),
-                    TextWrapping = TextWrapping.NoWrap,
-                },
-            };
-
-            if (!string.IsNullOrWhiteSpace(badge.ToolTip))
-            {
-                ToolTip.SetTip(badgeBorder, badge.ToolTip);
-            }
-
-            visual.BadgePanel.Children.Add(badgeBorder);
-        }
-
-        visual.BadgePanel.IsVisible = visual.BadgePanel.Children.Count > 0;
-
-        if (node.Presentation.StatusBar is { } statusBar)
-        {
-            visual.StatusBar.IsVisible = true;
-            visual.StatusBar.Background = BrushFactory.SolidSafe(statusBar.AccentHex, nodeStyle.BorderHex, 0.24);
-            visual.StatusBar.BorderBrush = BrushFactory.SolidSafe(statusBar.AccentHex, nodeStyle.BorderHex, 0.78);
-            visual.StatusBarText.Text = statusBar.Text;
-            ToolTip.SetTip(visual.StatusBar, statusBar.ToolTip);
-        }
-        else
-        {
-            visual.StatusBar.IsVisible = false;
-            visual.StatusBarText.Text = string.Empty;
-            ToolTip.SetTip(visual.StatusBar, null);
-        }
-
-        Canvas.SetLeft(visual.Border, node.X);
-        Canvas.SetTop(visual.Border, node.Y);
+        visual.Presenter.Update(visual.Visual, CreateNodeVisualContext(node));
+        Canvas.SetLeft(visual.Root, node.X);
+        Canvas.SetTop(visual.Root, node.Y);
     }
 
     private GraphPoint GetPortAnchor(NodeViewModel node, PortViewModel port)
@@ -1002,10 +989,10 @@ public partial class NodeCanvas : UserControl
         // 因此这里优先读取“端口圆点在节点卡内部的局部坐标”，再叠加当前节点的 X/Y，
         // 这样连线能跟随最新的节点位置，而不会因为布局时序晚一拍出现偏移。
         if (_nodeVisuals.TryGetValue(node, out var visual)
-            && visual.PortAnchors.TryGetValue(port.Id, out var anchorDot))
+            && visual.Visual.PortAnchors.TryGetValue(port.Id, out var anchorDot))
         {
             var center = new Point(anchorDot.Bounds.Width / 2, anchorDot.Bounds.Height / 2);
-            var localToNode = anchorDot.TranslatePoint(center, visual.Border);
+            var localToNode = anchorDot.TranslatePoint(center, visual.Root);
             if (localToNode is not null)
             {
                 return new GraphPoint(
@@ -1056,20 +1043,34 @@ public partial class NodeCanvas : UserControl
         return ViewModel is null ? new GraphPoint(0, 0) : ViewModel.ScreenToWorld(new GraphPoint(0, 0));
     }
 
-    private void OpenContextMenu(Control target, ContextMenuContext context)
+    private bool OpenContextMenu(Control target, ContextMenuContext context)
     {
-        if (ViewModel is null)
+        if (ViewModel is null || !EnableDefaultContextMenu)
         {
-            return;
+            return false;
         }
 
         var descriptors = ViewModel.BuildContextMenu(context);
         if (descriptors.Count == 0)
         {
-            return;
+            return false;
         }
 
-        _contextMenuPresenter.Open(target, descriptors, ViewModel.StyleOptions.ContextMenu);
+        (ContextMenuPresenter ?? _stockContextMenuPresenter).Open(target, descriptors, ViewModel.StyleOptions.ContextMenu);
+        return true;
+    }
+
+    private static bool ShortcutBelongsToInputControl(object? source)
+    {
+        for (var current = source as Visual; current is not null; current = current.GetVisualParent())
+        {
+            if (current is TextBox or ComboBox)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private NodeCanvasContextMenuSnapshot CreateContextMenuSnapshot()
@@ -1312,14 +1313,9 @@ public partial class NodeCanvas : UserControl
             new ViewportState(ViewModel?.Zoom ?? 1, ViewModel?.PanX ?? 0, ViewModel?.PanY ?? 0),
             new GraphPoint(x, y));
 
-    private sealed record NodeVisual(
-        Border Border,
-        Border Header,
-        TextBlock Subtitle,
-        TextBlock Description,
-        StackPanel BadgePanel,
-        Border StatusBar,
-        TextBlock StatusBarText,
-        IReadOnlyDictionary<string, Border> PortAnchors);
+    private sealed record RenderedNodeVisual(
+        Control Root,
+        IGraphNodeVisualPresenter Presenter,
+        GraphNodeVisual Visual);
 
 }

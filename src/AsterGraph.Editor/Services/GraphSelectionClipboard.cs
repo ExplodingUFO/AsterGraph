@@ -27,9 +27,3 @@ internal sealed class GraphSelectionClipboard
         return new GraphPoint(baseOrigin.X + offset, baseOrigin.Y + offset);
     }
 }
-
-internal sealed record GraphSelectionFragment(
-    IReadOnlyList<GraphNode> Nodes,
-    IReadOnlyList<GraphConnection> Connections,
-    GraphPoint Origin,
-    string? PrimaryNodeId = null);

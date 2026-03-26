@@ -1,6 +1,8 @@
 using Avalonia.Controls;
+using Avalonia.Headless.XUnit;
 using AsterGraph.Abstractions.Styling;
 using AsterGraph.Avalonia.Menus;
+using AsterGraph.Avalonia.Presentation;
 using AsterGraph.Editor.ViewModels;
 using AsterGraph.Editor.Menus;
 using Xunit;
@@ -10,6 +12,14 @@ namespace AsterGraph.Editor.Tests;
 public sealed class GraphContextMenuPresenterTests
 {
     [Fact]
+    public void PresenterType_IsPublicForHostReuse()
+        => Assert.True(typeof(GraphContextMenuPresenter).IsPublic);
+
+    [Fact]
+    public void PresenterType_ImplementsReplacementContract()
+        => Assert.True(typeof(IGraphContextMenuPresenter).IsAssignableFrom(typeof(GraphContextMenuPresenter)));
+
+    [AvaloniaFact]
     public void BuildMenuControl_DisabledItem_UsesDisabledReasonAsToolTip()
     {
         var descriptor = new MenuItemDescriptor(
