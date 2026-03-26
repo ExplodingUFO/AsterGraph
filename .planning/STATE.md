@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Ready to execute
-stopped_at: Phase 5 plans created
-last_updated: "2026-03-26T10:57:45.6359836Z"
+stopped_at: Phase 5 plan 01 completed
+last_updated: "2026-03-26T11:23:29.8194130Z"
 progress:
   total_phases: 5
   completed_phases: 4
   total_plans: 21
-  completed_plans: 17
+  completed_plans: 18
 ---
 
 # Project State
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-03-26)
 ## Current Position
 
 Phase: 5 of 5 (Diagnostics & Integration Inspection)
-Plan: 05-01 ready
+Plan: 05-02 ready
 
 ## Performance Metrics
 
@@ -67,6 +67,8 @@ Recent decisions affecting current work:
 - [Phase 05-diagnostics-integration-inspection]: Keep diagnostics and inspection rooted in `AsterGraph.Editor` and expose them through the canonical runtime/session path plus the retained compatibility facade.
 - [Phase 05-diagnostics-integration-inspection]: Model inspection as immutable medium-grain snapshots built from current query/read-model assets instead of exposing live editor internals.
 - [Phase 05-diagnostics-integration-inspection]: Make logging and tracing opt-in through standard .NET host tooling at runtime boundaries, not through Avalonia control instrumentation.
+- [Phase 05-diagnostics-integration-inspection]: Put the canonical diagnostics discovery point on `IGraphEditorSession.Diagnostics` rather than creating a second factory-only diagnostics service root.
+- [Phase 05-diagnostics-integration-inspection]: Keep Phase 5 contract tests reflection-based and isolated in a `%TEMP%` harness so missing APIs fail as assertions instead of being masked by workspace-local test noise.
 - [Phase 01-consumption-compatibility-guardrails]: Use DefaultItemExcludes in Directory.Build.props so project-local artifacts trees stay out of SDK default compile globs.
 - [Phase 01-consumption-compatibility-guardrails]: Represent Phase 1 initialization and migration contracts as explicit skipped xUnit cases with stable method names for later implementation plans.
 - [Phase 01-consumption-compatibility-guardrails]: Keep the new host entry surface factory-first and place it under the existing Hosting namespaces in AsterGraph.Editor and AsterGraph.Avalonia.
@@ -84,11 +86,11 @@ None yet.
 ### Blockers/Concerns
 
 - Focused temp harnesses remain the safe primary gate while workspace-local test noise in `tests/AsterGraph.Editor.Tests/GraphEditorViewTests.cs` and the local test project edits remain unresolved.
-- Diagnostics taxonomy and inspection record naming still need to be locked in `05-01` before runtime wiring begins.
+- Recent diagnostics history, richer machine-readable publication, and actual logger/tracer wiring still remain for `05-02` and `05-03`.
 - `src/AsterGraph.Editor/README.md` has local modifications, so Phase 5 closeout docs should stay in root docs/sample proof unless that noise is resolved first.
 
 ## Session Continuity
 
 Last session: 2026-03-26T10:42:41.0582331Z
-Stopped at: Phase 5 plans created
-Resume file: .planning/phases/05-diagnostics-integration-inspection/05-01-PLAN.md
+Stopped at: Phase 5 plan 01 completed
+Resume file: .planning/phases/05-diagnostics-integration-inspection/05-02-PLAN.md
