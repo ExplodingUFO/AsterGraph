@@ -106,8 +106,43 @@ Hosts can replace the default editor services through `AsterGraphEditorOptions`:
 - `IGraphFragmentLibraryService`
 - `IGraphClipboardPayloadSerializer`
 - `IGraphEditorDiagnosticsSink`
+- `Instrumentation`
+  - optional `GraphEditorInstrumentationOptions` for host-standard `ILoggerFactory` and `ActivitySource` wiring
 
 If you do not provide explicit storage services, `AsterGraph.Editor` uses package-neutral defaults resolved through `GraphEditorStorageDefaults`. You can redirect those defaults without replacing every service by setting `StorageRootPath` in `AsterGraphEditorOptions`.
+
+## Diagnostics And Inspection
+
+Phase 5 keeps diagnostics in `AsterGraph.Editor`, not in Avalonia controls.
+
+Use `IGraphEditorSession.Diagnostics` when the host needs machine-readable troubleshooting data:
+
+- `CaptureInspectionSnapshot()`
+  - returns a medium-grain immutable snapshot of the current document, selection, viewport, capabilities, pending connection, status, node positions, and recent diagnostics
+- `GetRecentDiagnostics(...)`
+  - returns bounded recent `GraphEditorDiagnostic` history for support tooling, logs, and host debug panels
+- `IGraphEditorDiagnosticsSink`
+  - receives the same machine-readable diagnostics stream without requiring hosts to parse `StatusMessage`
+- `GraphEditorInstrumentationOptions`
+  - opt-in logger/tracing bridge for standard .NET `ILoggerFactory` and `ActivitySource`
+
+`StatusMessage` remains a compatibility UX surface for existing UI hosts. New troubleshooting integrations should prefer `IGraphEditorSession.Diagnostics` and the diagnostics sink.
+
+Minimal runtime-first diagnostics shape:
+
+```csharp
+var session = AsterGraphEditorFactory.CreateSession(new AsterGraphEditorOptions
+{
+    Document = document,
+    NodeCatalog = catalog,
+    CompatibilityService = compatibilityService,
+    DiagnosticsSink = diagnosticsSink,
+    Instrumentation = new GraphEditorInstrumentationOptions(loggerFactory, activitySource),
+});
+
+var inspection = session.Diagnostics.CaptureInspectionSnapshot();
+var recent = session.Diagnostics.GetRecentDiagnostics(20);
+```
 
 ## Quick Start
 
@@ -261,7 +296,7 @@ That guide covers:
 - the runtime-session path in `AsterGraph.Editor`
 - the canonical `Create(...)` plus `AsterGraphAvaloniaViewFactory` composition path for the default UI
 - the retained constructor-based migration path for existing hosts
-- how to wire localization, node presentation, style options, host menu context, replaceable services, and diagnostics together
+- how to wire localization, node presentation, style options, host menu context, replaceable services, diagnostics, inspection, and optional instrumentation together
 - how to use the typed host-context helper extensions safely
 - how to switch `GraphEditorView.ChromeMode` at runtime without rebuilding editor state
 - how to compose standalone canvas, inspector, and mini map surfaces against the same editor state
@@ -277,6 +312,8 @@ Reference host sample:
   - `IGraphEditorSession`
   - runtime command/query/event access
   - recoverable-failure diagnostics through `IGraphEditorDiagnosticsSink`
+  - inspection snapshots and bounded recent diagnostics through `IGraphEditorSession.Diagnostics`
+  - opt-in `ILoggerFactory` / `ActivitySource` instrumentation through `GraphEditorInstrumentationOptions`
   - host-supplied `CompatibilityService`
   - `IGraphLocalizationProvider`
   - `INodePresentationProvider`

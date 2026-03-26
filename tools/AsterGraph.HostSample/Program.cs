@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Avalonia.Controls;
 using CommunityToolkit.Mvvm.Input;
 using AsterGraph.Abstractions.Catalog;
@@ -22,9 +23,14 @@ using AsterGraph.Editor.Presentation;
 using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.Services;
 using AsterGraph.Editor.ViewModels;
+using Microsoft.Extensions.Logging;
 
 var runtimeCompatibility = new RecordingCompatibilityService();
 var runtimeDiagnostics = new RecordingDiagnosticsSink();
+using var runtimeLoggerFactory = new HostSampleSupport.RecordingLoggerFactory();
+using var runtimeActivitySource = new ActivitySource("AsterGraph.HostSample.Runtime");
+var runtimeActivities = new List<string>();
+using var runtimeListener = HostSampleSupport.CreateListener(runtimeActivitySource.Name, runtimeActivities);
 var runtimeWorkspace = new ThrowingWorkspaceService("workspace://host-sample/runtime");
 var catalog = new NodeCatalog();
 catalog.RegisterProvider(new HostSampleNodeDefinitionProvider());
@@ -41,7 +47,7 @@ var style = GraphEditorStyleOptions.Default with
         BackgroundHex = "#102332",
     },
 };
-var permissions = GraphEditorCommandPermissions.ReadOnly with
+var permissions = GraphEditorCommandPermissions.Default with
 {
     Host = new HostCommandPermissions
     {
@@ -61,6 +67,7 @@ var runtimeSession = AsterGraphEditorFactory.CreateSession(new AsterGraphEditorO
     CompatibilityService = runtimeCompatibility,
     WorkspaceService = runtimeWorkspace,
     DiagnosticsSink = runtimeDiagnostics,
+    Instrumentation = new GraphEditorInstrumentationOptions(runtimeLoggerFactory, runtimeActivitySource),
     StyleOptions = style,
     BehaviorOptions = runtimeBehavior,
 });
@@ -87,6 +94,8 @@ runtimeSession.Commands.SaveWorkspace();
 var runtimeSnapshot = runtimeSession.Queries.CreateDocumentSnapshot();
 var runtimeViewport = runtimeSession.Queries.GetViewportSnapshot();
 var runtimeCapabilities = runtimeSession.Queries.GetCapabilitySnapshot();
+var runtimeInspection = runtimeSession.Diagnostics.CaptureInspectionSnapshot();
+var runtimeRecentDiagnostics = runtimeSession.Diagnostics.GetRecentDiagnostics(10);
 
 Console.WriteLine($"Session title: {runtimeSnapshot.Title}");
 Console.WriteLine($"Session node count after commands: {runtimeSnapshot.Nodes.Count}");
@@ -100,13 +109,19 @@ Console.WriteLine($"Session recoverable failure: {runtimeFailure?.Code ?? "<none
 Console.WriteLine($"Diagnostics sink codes: {string.Join(", ", runtimeDiagnostics.Diagnostics.Select(diagnostic => diagnostic.Code))}");
 Console.WriteLine($"Runtime compatibility evaluations: {runtimeCompatibility.EvaluateCalls}");
 Console.WriteLine($"Runtime workspace override path: {runtimeWorkspace.WorkspacePath}");
+Console.WriteLine($"Diagnostics inspection snapshot: nodes={runtimeInspection.Document.Nodes.Count}, selected={runtimeInspection.Selection.SelectedNodeIds.Count}, pending={runtimeInspection.PendingConnection.HasPendingConnection}, status={runtimeInspection.Status.Message}");
+Console.WriteLine($"Diagnostics recent history: {string.Join(" | ", runtimeRecentDiagnostics.Select(diagnostic => $"{diagnostic.Code}:{diagnostic.Severity}"))}");
+Console.WriteLine($"Diagnostics logger entries: {string.Join(" | ", runtimeLoggerFactory.Entries.Select(entry => $"{entry.Level}:{entry.Message}"))}");
+Console.WriteLine($"Diagnostics Activity operations: {string.Join(", ", runtimeActivities)}");
 
 var viewCompatibility = new RecordingCompatibilityService();
+var viewDiagnostics = new RecordingDiagnosticsSink();
 var editor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
 {
     Document = document,
     NodeCatalog = catalog,
     CompatibilityService = viewCompatibility,
+    DiagnosticsSink = viewDiagnostics,
     StyleOptions = style,
     BehaviorOptions = viewBehavior,
     ContextMenuAugmentor = new HostSampleAugmentor(),
@@ -127,6 +142,7 @@ editor.FragmentImported += (_, args) =>
 
 var positions = editor.GetNodePositions();
 editor.TryGetNodePosition("sample-source-001", out var snapshot);
+var retainedSession = editor.Session;
 
 var hostContext = new HostSampleGraphHostContext(
     new HostSampleOwner("owner-001", "Host Shell"),
@@ -143,6 +159,10 @@ var hostPreviewItem = menu.SingleOrDefault(item => item.Id == "host-sample-previ
 
 var node = AssertNode(editor, "sample-source-001");
 editor.SelectSingleNode(node, updateStatus: false);
+retainedSession.Commands.SaveWorkspace();
+editor.ExportSelectionFragment();
+var retainedInspection = retainedSession.Diagnostics.CaptureInspectionSnapshot();
+var retainedRecentDiagnostics = retainedSession.Diagnostics.GetRecentDiagnostics(10);
 var ownerMatched = menuContext.TryGetOwner<HostSampleOwner>(out var typedOwner);
 var topLevelMatched = menuContext.TryGetTopLevel<HostSampleTopLevel>(out var typedTopLevel);
 var view = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOptions
@@ -223,6 +243,12 @@ Console.WriteLine($"Selected snapshot found: {snapshot is not null}");
 Console.WriteLine($"Host preview menu item exists: {hostPreviewItem is not null}");
 Console.WriteLine($"Host preview menu item header: {hostPreviewItem?.Header ?? "<missing>"}");
 Console.WriteLine($"ReadOnly host extension allowed: {editor.CommandPermissions.Host.AllowContextMenuExtensions}");
+Console.WriteLine($"Retained session diagnostics reachable: {ReferenceEquals(retainedSession, editor.Session)}");
+Console.WriteLine($"Retained path: GraphEditorViewModel.Session compatibility surface");
+Console.WriteLine($"Retained inspection snapshot: nodes={retainedInspection.Document.Nodes.Count}, selected={retainedInspection.Selection.SelectedNodeIds.Count}, pending={retainedInspection.PendingConnection.HasPendingConnection}");
+Console.WriteLine($"Retained recent diagnostics count: {retainedRecentDiagnostics.Count}");
+Console.WriteLine($"Retained diagnostics sink count: {viewDiagnostics.Diagnostics.Count}");
+Console.WriteLine($"StatusMessage compatibility surface (not canonical diagnostics API): {editor.StatusMessage}");
 Console.WriteLine($"Host context flowed into menu request: {ReferenceEquals(hostContext, menuContext.HostContext)}");
 Console.WriteLine($"Localized inspector title: {editor.InspectorTitle}");
 Console.WriteLine($"Presentation subtitle: {node.DisplaySubtitle}");
@@ -500,6 +526,68 @@ internal sealed class RecordingDiagnosticsSink : IGraphEditorDiagnosticsSink
 
     public void Publish(GraphEditorDiagnostic diagnostic)
         => Diagnostics.Add(diagnostic);
+}
+
+internal static class HostSampleSupport
+{
+    internal static ActivityListener CreateListener(string sourceName, List<string> activities)
+    {
+        var listener = new ActivityListener
+        {
+            ShouldListenTo = source => source.Name == sourceName,
+            Sample = static (ref ActivityCreationOptions<ActivityContext> _) => ActivitySamplingResult.AllDataAndRecorded,
+            SampleUsingParentId = static (ref ActivityCreationOptions<string> _) => ActivitySamplingResult.AllDataAndRecorded,
+            ActivityStarted = activity => activities.Add(activity.OperationName),
+        };
+
+        ActivitySource.AddActivityListener(listener);
+        return listener;
+    }
+
+    internal sealed class RecordingLoggerFactory : ILoggerFactory
+    {
+        public List<LogEntry> Entries { get; } = [];
+
+        public ILogger CreateLogger(string categoryName)
+            => new RecordingLogger(categoryName, Entries);
+
+        public void AddProvider(ILoggerProvider provider)
+            => throw new NotSupportedException();
+
+        public void Dispose()
+        {
+        }
+    }
+
+    internal sealed class RecordingLogger(string categoryName, List<LogEntry> entries) : ILogger
+    {
+        public IDisposable BeginScope<TState>(TState state)
+            where TState : notnull
+            => NullScope.Instance;
+
+        public bool IsEnabled(LogLevel logLevel) => true;
+
+        public void Log<TState>(
+            LogLevel logLevel,
+            EventId eventId,
+            TState state,
+            Exception? exception,
+            Func<TState, Exception?, string> formatter)
+        {
+            entries.Add(new LogEntry(categoryName, logLevel, formatter(state, exception), exception));
+        }
+    }
+
+    internal sealed record LogEntry(string Category, LogLevel Level, string Message, Exception? Exception);
+
+    internal sealed class NullScope : IDisposable
+    {
+        public static NullScope Instance { get; } = new();
+
+        public void Dispose()
+        {
+        }
+    }
 }
 
 internal sealed record HostSampleGraphHostContext(HostSampleOwner Owner, HostSampleTopLevel? TopLevel) : IGraphHostContext

@@ -159,6 +159,8 @@ The default services are now explicit public seams. Hosts can replace any of the
 - `IGraphFragmentLibraryService`
 - `IGraphClipboardPayloadSerializer`
 - `IGraphEditorDiagnosticsSink`
+- `GraphEditorInstrumentationOptions`
+  - opt-in `ILoggerFactory` and `ActivitySource` wiring for host-standard logging/tracing
 
 If you want default behavior but under a host-owned storage root, set `StorageRootPath` and let `AsterGraph.Editor` create package-neutral defaults through `GraphEditorStorageDefaults`.
 
@@ -174,6 +176,33 @@ under a root chosen by either:
 - the built-in local application data fallback when `StorageRootPath` is not supplied
 
 `IGraphEditorDiagnosticsSink` receives recoverable runtime failures such as workspace save/load errors or host augmentor failures. Hosts should treat this as the stable place to forward AsterGraph runtime issues into their own logging, telemetry, or debug panels.
+
+`IGraphEditorSession.Diagnostics` is the canonical inspection surface for both the factory/session path and the retained `GraphEditorViewModel.Session` compatibility path.
+
+It exposes:
+
+- `CaptureInspectionSnapshot()`
+  - immutable inspection output for the current document, selection, viewport, capabilities, pending connection, status, node positions, and recent diagnostics
+- `GetRecentDiagnostics(...)`
+  - bounded recent `GraphEditorDiagnostic` history suitable for host support tooling and machine-readable regression checks
+
+Minimal diagnostics-first runtime usage:
+
+```csharp
+var session = AsterGraphEditorFactory.CreateSession(new AsterGraphEditorOptions
+{
+    Document = document,
+    NodeCatalog = catalog,
+    CompatibilityService = compatibilityService,
+    DiagnosticsSink = diagnosticsSink,
+    Instrumentation = new GraphEditorInstrumentationOptions(loggerFactory, activitySource),
+});
+
+var inspection = session.Diagnostics.CaptureInspectionSnapshot();
+var recent = session.Diagnostics.GetRecentDiagnostics(20);
+```
+
+Use `StatusMessage` as a compatibility-facing UI convenience only. New host diagnostics and support flows should consume `session.Diagnostics` or the sink instead of parsing view text.
 
 ## Staged Migration Compatibility Path
 
@@ -201,7 +230,7 @@ var view = new GraphEditorView
 Recommended migration stages:
 
 1. Keep `GraphEditorViewModel` and `GraphEditorView` if the host already uses them directly.
-2. Start consuming `GraphEditorViewModel.Session` if you want to move host-side commands, queries, batching, and diagnostics onto the new runtime contract first.
+2. Start consuming `GraphEditorViewModel.Session` if you want to move host-side commands, queries, batching, diagnostics, and inspection onto the new runtime contract first.
 3. Move runtime creation to `AsterGraphEditorFactory.CreateSession(...)` or `AsterGraphEditorFactory.Create(...)` once you want a single documented composition point.
 4. Move Avalonia view creation to `AsterGraphAvaloniaViewFactory.Create(...)` once the host is ready to standardize the UI entry path too.
 
@@ -318,6 +347,7 @@ Reference sample:
 - Run with:
   - `dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj`
 - The sample demonstrates both the convenience full shell and standalone canvas/inspector/mini map composition against the same editor state.
+- It also prints human-readable diagnostics/inspection evidence plus opt-in logger/activity instrumentation markers for Phase 5 validation.
 
 ## Localization
 

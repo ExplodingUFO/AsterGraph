@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using AsterGraph.Abstractions.Compatibility;
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
@@ -19,6 +20,7 @@ using AsterGraph.Editor.Presentation;
 using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.Services;
 using AsterGraph.Editor.ViewModels;
+using Microsoft.Extensions.Logging;
 using Xunit;
 
 namespace AsterGraph.Editor.Tests;
@@ -204,6 +206,79 @@ public sealed class GraphEditorMigrationCompatibilityTests
         Assert.Equal(3, factorySession.Queries.CreateDocumentSnapshot().Nodes.Count);
     }
 
+    [Fact]
+    public void DiagnosticsSurface_RemainsReachableAcrossLegacyFactoryAndSessionMigrationPaths()
+    {
+        using var harness = CreateHarness();
+        var legacyEditor = CreateLegacyEditor(harness);
+        var factoryEditor = CreateFactoryEditor(harness);
+        var factorySession = CreateFactorySession(harness);
+
+        SelectSourceNode(legacyEditor);
+        SelectSourceNode(factoryEditor);
+        legacyEditor.StartConnection(SourceNodeId, SourcePortId);
+        factoryEditor.StartConnection(SourceNodeId, SourcePortId);
+        legacyEditor.ExportSelectionFragment();
+        factoryEditor.ExportSelectionFragment();
+        legacyEditor.Session.Commands.SaveWorkspace();
+        factoryEditor.Session.Commands.SaveWorkspace();
+        factorySession.Commands.SaveWorkspace();
+
+        var legacyInspection = legacyEditor.Session.Diagnostics.CaptureInspectionSnapshot();
+        var factoryInspection = factoryEditor.Session.Diagnostics.CaptureInspectionSnapshot();
+        var sessionInspection = factorySession.Diagnostics.CaptureInspectionSnapshot();
+        var legacyRecent = legacyEditor.Session.Diagnostics.GetRecentDiagnostics(10);
+        var factoryRecent = factoryEditor.Session.Diagnostics.GetRecentDiagnostics(10);
+        var sessionRecent = factorySession.Diagnostics.GetRecentDiagnostics(10);
+
+        Assert.Equal(SourceNodeId, legacyInspection.Selection.PrimarySelectedNodeId);
+        Assert.Equal(SourceNodeId, factoryInspection.Selection.PrimarySelectedNodeId);
+        Assert.Null(sessionInspection.Selection.PrimarySelectedNodeId);
+        Assert.True(legacyInspection.PendingConnection.HasPendingConnection);
+        Assert.True(factoryInspection.PendingConnection.HasPendingConnection);
+        Assert.False(sessionInspection.PendingConnection.HasPendingConnection);
+        Assert.Equal("workspace.save.succeeded", legacyInspection.RecentDiagnostics[^1].Code);
+        Assert.Equal("workspace.save.succeeded", factoryInspection.RecentDiagnostics[^1].Code);
+        Assert.Equal("workspace.save.succeeded", sessionInspection.RecentDiagnostics[^1].Code);
+        Assert.Equal("Saved snapshot to workspace://migration.", legacyInspection.Status.Message);
+        Assert.Collection(
+            legacyRecent,
+            diagnostic => Assert.Equal("fragment.export.succeeded", diagnostic.Code),
+            diagnostic => Assert.Equal("workspace.save.succeeded", diagnostic.Code));
+        Assert.Collection(
+            factoryRecent,
+            diagnostic => Assert.Equal("fragment.export.succeeded", diagnostic.Code),
+            diagnostic => Assert.Equal("workspace.save.succeeded", diagnostic.Code));
+        Assert.Collection(
+            sessionRecent,
+            diagnostic => Assert.Equal("workspace.save.succeeded", diagnostic.Code));
+        Assert.Equal(5, harness.DiagnosticsSink.Diagnostics.Count);
+        Assert.All(
+            harness.DiagnosticsSink.Diagnostics,
+            diagnostic => Assert.Equal(GraphEditorDiagnosticSeverity.Info, diagnostic.Severity));
+    }
+
+    [Fact]
+    public void DiagnosticsInstrumentation_RemainsOptInForCanonicalFactoryAndSessionPaths_WhileLegacyPathsKeepDiagnosticsAccess()
+    {
+        using var harness = CreateHarness(enableInstrumentation: true);
+        var legacyEditor = CreateLegacyEditor(harness);
+        var factoryEditor = CreateFactoryEditor(harness);
+        var factorySession = CreateFactorySession(harness);
+
+        _ = legacyEditor.Session.Diagnostics.CaptureInspectionSnapshot();
+        _ = factoryEditor.BuildContextMenu(new ContextMenuContext(ContextMenuTargetKind.Canvas, new GraphPoint(120, 80)));
+        factorySession.Commands.SaveWorkspace();
+
+        Assert.Contains(harness.LoggerFactory!.Entries, entry => entry.Level == LogLevel.Error && entry.Message.Contains("contextmenu.augment.failed", StringComparison.Ordinal));
+        Assert.Contains(harness.LoggerFactory.Entries, entry => entry.Level == LogLevel.Information && entry.Message.Contains("workspace.save.succeeded", StringComparison.Ordinal));
+        Assert.Contains("contextmenu.augment", harness.ActivityOperations ?? []);
+        Assert.Contains("workspace.save", harness.ActivityOperations ?? []);
+        Assert.Equal(2, harness.DiagnosticsSink.Diagnostics.Count);
+        Assert.Equal("workspace.save.succeeded", harness.DiagnosticsSink.Diagnostics[^1].Code);
+        Assert.Empty(legacyEditor.Session.Diagnostics.GetRecentDiagnostics());
+    }
+
     private static void AssertViewBindings(GraphEditorView view, GraphEditorViewModel expectedEditor)
     {
         Assert.Same(expectedEditor, view.Editor);
@@ -288,6 +363,7 @@ public sealed class GraphEditorMigrationCompatibilityTests
             NodePresentationProvider = harness.PresentationProvider,
             LocalizationProvider = harness.LocalizationProvider,
             DiagnosticsSink = harness.DiagnosticsSink,
+            Instrumentation = harness.Instrumentation,
         });
 
     private static IGraphEditorSession CreateFactorySession(MigrationHarness harness)
@@ -306,11 +382,28 @@ public sealed class GraphEditorMigrationCompatibilityTests
             NodePresentationProvider = harness.PresentationProvider,
             LocalizationProvider = harness.LocalizationProvider,
             DiagnosticsSink = harness.DiagnosticsSink,
+            Instrumentation = harness.Instrumentation,
         });
 
-    private static MigrationHarness CreateHarness()
+    private static MigrationHarness CreateHarness(bool enableInstrumentation = false)
     {
         var compatibility = new RecordingCompatibilityService();
+        var diagnosticsSink = new RecordingDiagnosticsSink();
+        RecordingLoggerFactory? loggerFactory = null;
+        ActivitySource? activitySource = null;
+        List<string>? activityOperations = null;
+        ActivityListener? activityListener = null;
+        GraphEditorInstrumentationOptions? instrumentation = null;
+
+        if (enableInstrumentation)
+        {
+            loggerFactory = new RecordingLoggerFactory();
+            activitySource = new ActivitySource("AsterGraph.Tests.MigrationCompatibility");
+            activityOperations = [];
+            activityListener = CreateListener(activitySource.Name, activityOperations);
+            instrumentation = new GraphEditorInstrumentationOptions(loggerFactory, activitySource);
+        }
+
         return new MigrationHarness(
             CreateDocument(),
             CreateCatalog(),
@@ -333,10 +426,15 @@ public sealed class GraphEditorMigrationCompatibilityTests
             },
             new RecordingFragmentLibraryService("library://migration"),
             new RecordingClipboardPayloadSerializer(),
-            new RecordingDiagnosticsSink(),
-            new MigrationContextMenuAugmentor(),
+            diagnosticsSink,
+            new MigrationContextMenuAugmentor(enableThrow: enableInstrumentation),
             new MigrationNodePresentationProvider(),
-            new MigrationLocalizationProvider());
+            new MigrationLocalizationProvider(),
+            instrumentation,
+            loggerFactory,
+            activitySource,
+            activityOperations,
+            activityListener);
     }
 
     private static GraphDocument CreateDocument()
@@ -424,7 +522,22 @@ public sealed class GraphEditorMigrationCompatibilityTests
         RecordingDiagnosticsSink DiagnosticsSink,
         MigrationContextMenuAugmentor MenuAugmentor,
         MigrationNodePresentationProvider PresentationProvider,
-        MigrationLocalizationProvider LocalizationProvider);
+        MigrationLocalizationProvider LocalizationProvider,
+        GraphEditorInstrumentationOptions? Instrumentation,
+        RecordingLoggerFactory? LoggerFactory,
+        ActivitySource? ActivitySource,
+        List<string>? ActivityOperations,
+        ActivityListener? ActivityListener)
+        : IDisposable
+    {
+        public void Dispose()
+        {
+            ActivityListener?.Dispose();
+            ActivitySource?.Dispose();
+            LoggerFactory?.Dispose();
+        }
+    }
+
 
     private sealed record EditorParitySnapshot(
         string Title,
@@ -440,13 +553,20 @@ public sealed class GraphEditorMigrationCompatibilityTests
         string FragmentLibraryPath,
         int CompatibleTargetCount);
 
-    private sealed class MigrationContextMenuAugmentor : IGraphContextMenuAugmentor
+    private sealed class MigrationContextMenuAugmentor(bool enableThrow = false) : IGraphContextMenuAugmentor
     {
         public IReadOnlyList<MenuItemDescriptor> Augment(
             GraphEditorViewModel editor,
             ContextMenuContext context,
             IReadOnlyList<MenuItemDescriptor> stockItems)
-            => [.. stockItems, new MenuItemDescriptor("tests.migration.host-action", "Host Action")];
+        {
+            if (enableThrow)
+            {
+                throw new InvalidOperationException("migration augmentor exploded");
+            }
+
+            return [.. stockItems, new MenuItemDescriptor("tests.migration.host-action", "Host Action")];
+        }
     }
 
     private sealed class MigrationNodePresentationProvider : INodePresentationProvider
@@ -581,6 +701,65 @@ public sealed class GraphEditorMigrationCompatibilityTests
     {
         public void Open(Control target, IReadOnlyList<MenuItemDescriptor> descriptors, ContextMenuStyleOptions style)
             => throw new NotSupportedException();
+    }
+
+    private static ActivityListener CreateListener(string sourceName, List<string> activities)
+    {
+        var listener = new ActivityListener
+        {
+            ShouldListenTo = source => source.Name == sourceName,
+            Sample = static (ref ActivityCreationOptions<ActivityContext> _) => ActivitySamplingResult.AllDataAndRecorded,
+            SampleUsingParentId = static (ref ActivityCreationOptions<string> _) => ActivitySamplingResult.AllDataAndRecorded,
+            ActivityStarted = activity => activities.Add(activity.OperationName),
+        };
+
+        ActivitySource.AddActivityListener(listener);
+        return listener;
+    }
+
+    private sealed class RecordingLoggerFactory : ILoggerFactory
+    {
+        public List<LogEntry> Entries { get; } = [];
+
+        public ILogger CreateLogger(string categoryName)
+            => new RecordingLogger(categoryName, Entries);
+
+        public void AddProvider(ILoggerProvider provider)
+            => throw new NotSupportedException();
+
+        public void Dispose()
+        {
+        }
+    }
+
+    private sealed class RecordingLogger(string categoryName, List<LogEntry> entries) : ILogger
+    {
+        public IDisposable BeginScope<TState>(TState state)
+            where TState : notnull
+            => NullScope.Instance;
+
+        public bool IsEnabled(LogLevel logLevel) => true;
+
+        public void Log<TState>(
+            LogLevel logLevel,
+            EventId eventId,
+            TState state,
+            Exception? exception,
+            Func<TState, Exception?, string> formatter)
+        {
+            entries.Add(new LogEntry(categoryName, logLevel, formatter(state, exception), exception));
+        }
+    }
+
+    private sealed record LogEntry(string Category, LogLevel Level, string Message, Exception? Exception);
+
+    private sealed class NullScope : IDisposable
+    {
+        public static NullScope Instance { get; } = new();
+
+        public void Dispose()
+        {
+        }
     }
 
     private sealed class RecordingInspectorPresenter : IGraphInspectorPresenter

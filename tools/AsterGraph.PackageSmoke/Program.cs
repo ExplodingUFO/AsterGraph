@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Avalonia.Controls;
 using AsterGraph.Abstractions.Compatibility;
 using AsterGraph.Abstractions.Definitions;
@@ -18,6 +19,7 @@ using AsterGraph.Editor.Models;
 using AsterGraph.Editor.Presentation;
 using AsterGraph.Editor.Services;
 using AsterGraph.Editor.ViewModels;
+using Microsoft.Extensions.Logging;
 
 var sourceDefinitionId = new NodeDefinitionId("smoke.source");
 var targetDefinitionId = new NodeDefinitionId("smoke.target");
@@ -110,6 +112,10 @@ var menuAugmentor = new SmokeContextMenuAugmentor();
 var presentationProvider = new SmokeNodePresentationProvider();
 var localizationProvider = new SmokeLocalizationProvider();
 var compatibilityService = new RecordingCompatibilityService();
+using var loggerFactory = new SmokeSupport.RecordingLoggerFactory();
+using var activitySource = new ActivitySource("AsterGraph.PackageSmoke");
+var activityOperations = new List<string>();
+using var activityListener = SmokeSupport.CreateListener(activitySource.Name, activityOperations);
 var workspaceService = new RecordingWorkspaceService("workspace://package-smoke", throwOnSave: true);
 var fragmentWorkspaceService = new RecordingFragmentWorkspaceService("fragment://package-smoke");
 var fragmentLibraryService = new RecordingFragmentLibraryService("library://package-smoke");
@@ -148,6 +154,7 @@ var factoryEditor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
     FragmentLibraryService = fragmentLibraryService,
     ClipboardPayloadSerializer = serializer,
     DiagnosticsSink = diagnostics,
+    Instrumentation = new GraphEditorInstrumentationOptions(loggerFactory, activitySource),
     ContextMenuAugmentor = menuAugmentor,
     NodePresentationProvider = presentationProvider,
     LocalizationProvider = localizationProvider,
@@ -160,6 +167,8 @@ var factoryView = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaVie
 
 PrintEditorMarker("LEGACY_EDITOR_OK", legacyEditor, sourceNodeId);
 PrintViewMarker("LEGACY_VIEW_OK", legacyView);
+legacyEditor.SelectSingleNode(legacyEditor.Nodes.Single(node => node.Id == sourceNodeId), updateStatus: false);
+legacyEditor.ExportSelectionFragment();
 PrintEditorMarker("FACTORY_EDITOR_OK", factoryEditor, sourceNodeId);
 PrintViewMarker("FACTORY_VIEW_OK", factoryView);
 var fullShellInspector = factoryView.FindControl<GraphInspectorView>("PART_InspectorSurface")
@@ -237,8 +246,15 @@ Console.WriteLine($"PRESENTER_INSPECTOR_OK:{ReferenceEquals(customInspectorPrese
 Console.WriteLine($"PRESENTER_MINIMAP_OK:{ReferenceEquals(customMiniMapPresenter, customStandaloneMiniMap.MiniMapPresenter)}");
 
 factoryEditor.SelectSingleNode(factoryEditor.Nodes.Single(node => node.Id == sourceNodeId), updateStatus: false);
+factoryEditor.StartConnection(sourceNodeId, sourcePortId);
 await factoryEditor.CopySelectionAsync();
 factoryEditor.ExportSelectionFragment();
+legacyEditor.Session.Commands.SaveWorkspace();
+
+var legacyInspection = legacyEditor.Session.Diagnostics.CaptureInspectionSnapshot();
+var legacyRecentDiagnostics = legacyEditor.Session.Diagnostics.GetRecentDiagnostics(10);
+var factoryInspection = factoryEditor.Session.Diagnostics.CaptureInspectionSnapshot();
+var factoryRecentDiagnostics = factoryEditor.Session.Diagnostics.GetRecentDiagnostics(10);
 
 var session = AsterGraphEditorFactory.CreateSession(new AsterGraphEditorOptions
 {
@@ -252,6 +268,7 @@ var session = AsterGraphEditorFactory.CreateSession(new AsterGraphEditorOptions
     FragmentLibraryService = fragmentLibraryService,
     ClipboardPayloadSerializer = serializer,
     DiagnosticsSink = diagnostics,
+    Instrumentation = new GraphEditorInstrumentationOptions(loggerFactory, activitySource),
     ContextMenuAugmentor = menuAugmentor,
     NodePresentationProvider = presentationProvider,
     LocalizationProvider = localizationProvider,
@@ -275,11 +292,20 @@ using (session.BeginMutation("smoke-batch"))
 }
 session.Commands.SaveWorkspace();
 
+var sessionInspection = session.Diagnostics.CaptureInspectionSnapshot();
+var sessionRecentDiagnostics = session.Diagnostics.GetRecentDiagnostics(10);
 Console.WriteLine($"SESSION_FACTORY_OK:{session.Queries.CreateDocumentSnapshot().Nodes.Count}:{string.Join(",", commandIds)}");
 Console.WriteLine($"SESSION_EVENTS_OK:{documentChanges}:{viewportChanges}:{failureCode ?? "<none>"}");
 Console.WriteLine($"SERVICE_OVERRIDE_OK:{workspaceService.WorkspacePath}:{fragmentWorkspaceService.FragmentPath}:{workspaceService.SaveCalls}:{fragmentWorkspaceService.SaveCalls}:{serializer.SerializeCalls}");
 Console.WriteLine($"COMPATIBILITY_SERVICE_OK:{compatibleTargets.Count}:{compatibilityService.EvaluateCalls}");
-Console.WriteLine($"DIAGNOSTICS_SINK_OK:{diagnostics.Diagnostics.Count}:{diagnostics.Diagnostics.LastOrDefault()?.Code ?? "<none>"}");
+Console.WriteLine($"DIAG_DIAGNOSTICS_SINK_OK:{diagnostics.Diagnostics.Count}:{diagnostics.Diagnostics.LastOrDefault()?.Code ?? "<none>"}");
+Console.WriteLine($"DIAG_LEGACY_INSPECTION_OK:{legacyInspection.Document.Nodes.Count}:{legacyInspection.Selection.SelectedNodeIds.Count}:{legacyInspection.PendingConnection.HasPendingConnection}:{legacyInspection.Status.Message}");
+Console.WriteLine($"DIAG_FACTORY_INSPECTION_OK:{factoryInspection.Document.Nodes.Count}:{factoryInspection.Selection.SelectedNodeIds.Count}:{factoryInspection.PendingConnection.HasPendingConnection}:{factoryInspection.Status.Message}");
+Console.WriteLine($"DIAG_SESSION_INSPECTION_OK:{sessionInspection.Document.Nodes.Count}:{sessionInspection.Selection.SelectedNodeIds.Count}:{sessionInspection.PendingConnection.HasPendingConnection}:{sessionInspection.Status.Message}");
+Console.WriteLine($"DIAG_LEGACY_RECENT_OK:{(!legacyRecentDiagnostics.Any() ? "<none>" : string.Join(",", legacyRecentDiagnostics.Select(diagnostic => diagnostic.Code)))}");
+Console.WriteLine($"DIAG_FACTORY_RECENT_OK:{(!factoryRecentDiagnostics.Any() ? "<none>" : string.Join(",", factoryRecentDiagnostics.Select(diagnostic => diagnostic.Code)))}");
+Console.WriteLine($"DIAG_SESSION_RECENT_OK:{(!sessionRecentDiagnostics.Any() ? "<none>" : string.Join(",", sessionRecentDiagnostics.Select(diagnostic => diagnostic.Code)))}");
+Console.WriteLine($"DIAG_INSTRUMENTATION_OK:{(loggerFactory.Entries.Count > 0 && activityOperations.Count > 0)}:{loggerFactory.Entries.Count}:{string.Join(",", activityOperations)}");
 
 static void PrintEditorMarker(string marker, GraphEditorViewModel editor, string targetNodeId)
 {
@@ -461,6 +487,68 @@ sealed class RecordingDiagnosticsSink : IGraphEditorDiagnosticsSink
 
     public void Publish(GraphEditorDiagnostic diagnostic)
         => Diagnostics.Add(diagnostic);
+}
+
+static class SmokeSupport
+{
+    internal static ActivityListener CreateListener(string sourceName, List<string> activities)
+    {
+        var listener = new ActivityListener
+        {
+            ShouldListenTo = source => source.Name == sourceName,
+            Sample = static (ref ActivityCreationOptions<ActivityContext> _) => ActivitySamplingResult.AllDataAndRecorded,
+            SampleUsingParentId = static (ref ActivityCreationOptions<string> _) => ActivitySamplingResult.AllDataAndRecorded,
+            ActivityStarted = activity => activities.Add(activity.OperationName),
+        };
+
+        ActivitySource.AddActivityListener(listener);
+        return listener;
+    }
+
+    internal sealed class RecordingLoggerFactory : ILoggerFactory
+    {
+        public List<LogEntry> Entries { get; } = [];
+
+        public ILogger CreateLogger(string categoryName)
+            => new RecordingLogger(categoryName, Entries);
+
+        public void AddProvider(ILoggerProvider provider)
+            => throw new NotSupportedException();
+
+        public void Dispose()
+        {
+        }
+    }
+
+    internal sealed class RecordingLogger(string categoryName, List<LogEntry> entries) : ILogger
+    {
+        public IDisposable BeginScope<TState>(TState state)
+            where TState : notnull
+            => NullScope.Instance;
+
+        public bool IsEnabled(LogLevel logLevel) => true;
+
+        public void Log<TState>(
+            LogLevel logLevel,
+            EventId eventId,
+            TState state,
+            Exception? exception,
+            Func<TState, Exception?, string> formatter)
+        {
+            entries.Add(new LogEntry(categoryName, logLevel, formatter(state, exception), exception));
+        }
+    }
+
+    internal sealed record LogEntry(string Category, LogLevel Level, string Message, Exception? Exception);
+
+    internal sealed class NullScope : IDisposable
+    {
+        public static NullScope Instance { get; } = new();
+
+        public void Dispose()
+        {
+        }
+    }
 }
 
 sealed class RecordingCompatibilityService : IPortCompatibilityService
