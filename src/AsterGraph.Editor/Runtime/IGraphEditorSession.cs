@@ -1,3 +1,5 @@
+using AsterGraph.Editor.Diagnostics;
+
 namespace AsterGraph.Editor.Runtime;
 
 /// <summary>
@@ -19,6 +21,11 @@ public interface IGraphEditorSession
     /// 获取运行时事件入口。
     /// </summary>
     IGraphEditorEvents Events { get; }
+
+    /// <summary>
+    /// 获取诊断与集成检查入口。
+    /// </summary>
+    IGraphEditorDiagnostics Diagnostics { get; }
 
     /// <summary>
     /// 开始一个轻量级的批量变更作用域。

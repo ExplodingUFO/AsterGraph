@@ -89,4 +89,9 @@ public sealed record AsterGraphEditorOptions
     /// 可选的运行时诊断发布器。
     /// </summary>
     public IGraphEditorDiagnosticsSink? DiagnosticsSink { get; init; }
+
+    /// <summary>
+    /// 可选的运行时日志与跟踪配置。
+    /// </summary>
+    public GraphEditorInstrumentationOptions? Instrumentation { get; init; }
 }

@@ -11,7 +11,7 @@ namespace AsterGraph.Editor.Runtime;
 /// <summary>
 /// 默认的图编辑器运行时会话实现。
 /// </summary>
-public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorCommands, IGraphEditorQueries, IGraphEditorEvents
+public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorCommands, IGraphEditorQueries, IGraphEditorEvents, IGraphEditorDiagnostics
 {
     private readonly GraphEditorViewModel _editor;
     private readonly IGraphEditorDiagnosticsSink? _diagnosticsSink;
@@ -48,6 +48,9 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorComman
 
     /// <inheritdoc />
     public IGraphEditorEvents Events => this;
+
+    /// <inheritdoc />
+    public IGraphEditorDiagnostics Diagnostics => this;
 
     /// <inheritdoc />
     public IGraphEditorMutationScope BeginMutation(string? label = null)
@@ -161,6 +164,28 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorComman
     /// <inheritdoc />
     public IReadOnlyList<CompatiblePortTarget> GetCompatibleTargets(string sourceNodeId, string sourcePortId)
         => _editor.GetCompatibleTargets(sourceNodeId, sourcePortId);
+
+    /// <inheritdoc />
+    public GraphEditorInspectionSnapshot CaptureInspectionSnapshot()
+        => new(
+            CreateDocumentSnapshot(),
+            GetSelectionSnapshot(),
+            GetViewportSnapshot(),
+            GetCapabilitySnapshot(),
+            new GraphEditorPendingConnectionSnapshot(
+                _editor.HasPendingConnection,
+                _editor.PendingSourceNode?.Id,
+                _editor.PendingSourcePort?.Id),
+            new GraphEditorStatusSnapshot(_editor.StatusMessage),
+            GetNodePositions().ToList(),
+            GetRecentDiagnostics().ToList());
+
+    /// <inheritdoc />
+    public IReadOnlyList<GraphEditorDiagnostic> GetRecentDiagnostics(int maxCount = 20)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(maxCount);
+        return [];
+    }
 
     internal void PublishRecoverableFailure(GraphEditorRecoverableFailureEventArgs failure)
     {
