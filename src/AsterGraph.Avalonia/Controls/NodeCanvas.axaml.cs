@@ -13,6 +13,7 @@ using Avalonia.VisualTree;
 using AsterGraph.Abstractions.Styling;
 using AsterGraph.Avalonia.Controls.Internal;
 using AsterGraph.Avalonia.Menus;
+using AsterGraph.Avalonia.Presentation;
 using AsterGraph.Avalonia.Styling;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Geometry;
@@ -45,6 +46,18 @@ public partial class NodeCanvas : UserControl
     /// </summary>
     public static readonly StyledProperty<bool> EnableDefaultCommandShortcutsProperty =
         AvaloniaProperty.Register<NodeCanvas, bool>(nameof(EnableDefaultCommandShortcuts), true);
+
+    /// <summary>
+    /// 控制节点可视树替换的展示器。
+    /// </summary>
+    public static readonly StyledProperty<IGraphNodeVisualPresenter?> NodeVisualPresenterProperty =
+        AvaloniaProperty.Register<NodeCanvas, IGraphNodeVisualPresenter?>(nameof(NodeVisualPresenter));
+
+    /// <summary>
+    /// 控制上下文菜单展示层替换的展示器。
+    /// </summary>
+    public static readonly StyledProperty<IGraphContextMenuPresenter?> ContextMenuPresenterProperty =
+        AvaloniaProperty.Register<NodeCanvas, IGraphContextMenuPresenter?>(nameof(ContextMenuPresenter));
 
     private readonly Dictionary<NodeViewModel, NodeVisual> _nodeVisuals = new();
     private Grid? _sceneRoot;
@@ -106,6 +119,24 @@ public partial class NodeCanvas : UserControl
     {
         get => GetValue(EnableDefaultCommandShortcutsProperty);
         set => SetValue(EnableDefaultCommandShortcutsProperty, value);
+    }
+
+    /// <summary>
+    /// 当前节点可视树展示器。
+    /// </summary>
+    public IGraphNodeVisualPresenter? NodeVisualPresenter
+    {
+        get => GetValue(NodeVisualPresenterProperty);
+        set => SetValue(NodeVisualPresenterProperty, value);
+    }
+
+    /// <summary>
+    /// 当前上下文菜单展示器。
+    /// </summary>
+    public IGraphContextMenuPresenter? ContextMenuPresenter
+    {
+        get => GetValue(ContextMenuPresenterProperty);
+        set => SetValue(ContextMenuPresenterProperty, value);
     }
 
     /// <summary>

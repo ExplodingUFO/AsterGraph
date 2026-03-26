@@ -1,4 +1,5 @@
 using AsterGraph.Avalonia.Controls;
+using AsterGraph.Avalonia.Presentation;
 using AsterGraph.Editor.ViewModels;
 
 namespace AsterGraph.Avalonia.Hosting;
@@ -26,4 +27,9 @@ public sealed record AsterGraphCanvasViewOptions
     /// 是否启用默认内置命令快捷键。
     /// </summary>
     public bool EnableDefaultCommandShortcuts { get; init; } = true;
+
+    /// <summary>
+    /// 可选的 Avalonia 展示器替换配置。
+    /// </summary>
+    public AsterGraphPresentationOptions? Presentation { get; init; }
 }

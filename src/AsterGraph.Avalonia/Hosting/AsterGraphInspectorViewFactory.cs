@@ -20,6 +20,7 @@ public static class AsterGraphInspectorViewFactory
         return new GraphInspectorView
         {
             Editor = options.Editor,
+            InspectorPresenter = options.Presentation?.InspectorPresenter,
         };
     }
 }

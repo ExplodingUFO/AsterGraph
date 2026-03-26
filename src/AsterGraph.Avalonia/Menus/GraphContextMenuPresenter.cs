@@ -4,6 +4,7 @@ using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
 using AsterGraph.Abstractions.Styling;
+using AsterGraph.Avalonia.Presentation;
 using AsterGraph.Avalonia.Styling;
 using AsterGraph.Editor.Menus;
 
@@ -12,7 +13,7 @@ namespace AsterGraph.Avalonia.Menus;
 /// <summary>
 /// 将编辑器层的菜单描述转换成 Avalonia 右键菜单控件。
 /// </summary>
-public sealed class GraphContextMenuPresenter
+public sealed class GraphContextMenuPresenter : IGraphContextMenuPresenter
 {
     /// <summary>
     /// 在指定目标控件上打开由描述符构建的默认上下文菜单。

@@ -1,4 +1,5 @@
 using AsterGraph.Avalonia.Controls;
+using AsterGraph.Avalonia.Presentation;
 using AsterGraph.Editor.ViewModels;
 
 namespace AsterGraph.Avalonia.Hosting;
@@ -12,4 +13,9 @@ public sealed record AsterGraphInspectorViewOptions
     /// 要绑定到检查器上的编辑器视图模型。
     /// </summary>
     public GraphEditorViewModel? Editor { get; init; }
+
+    /// <summary>
+    /// 可选的 Avalonia 展示器替换配置。
+    /// </summary>
+    public AsterGraphPresentationOptions? Presentation { get; init; }
 }

@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
+using AsterGraph.Avalonia.Presentation;
 using AsterGraph.Editor.ViewModels;
 
 namespace AsterGraph.Avalonia.Controls;
@@ -17,6 +18,12 @@ public partial class GraphInspectorView : UserControl
         AvaloniaProperty.Register<GraphInspectorView, GraphEditorViewModel?>(nameof(Editor));
 
     /// <summary>
+    /// 可选的检查器展示器依赖属性。
+    /// </summary>
+    public static readonly StyledProperty<IGraphInspectorPresenter?> InspectorPresenterProperty =
+        AvaloniaProperty.Register<GraphInspectorView, IGraphInspectorPresenter?>(nameof(InspectorPresenter));
+
+    /// <summary>
     /// 初始化独立检查器视图。
     /// </summary>
     public GraphInspectorView()
@@ -31,6 +38,15 @@ public partial class GraphInspectorView : UserControl
     {
         get => GetValue(EditorProperty);
         set => SetValue(EditorProperty, value);
+    }
+
+    /// <summary>
+    /// 当前检查器展示器。
+    /// </summary>
+    public IGraphInspectorPresenter? InspectorPresenter
+    {
+        get => GetValue(InspectorPresenterProperty);
+        set => SetValue(InspectorPresenterProperty, value);
     }
 
     private void InitializeComponent()

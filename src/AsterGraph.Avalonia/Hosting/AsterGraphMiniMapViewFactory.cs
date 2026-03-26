@@ -20,6 +20,7 @@ public static class AsterGraphMiniMapViewFactory
         return new GraphMiniMap
         {
             ViewModel = options.Editor,
+            MiniMapPresenter = options.Presentation?.MiniMapPresenter,
         };
     }
 }

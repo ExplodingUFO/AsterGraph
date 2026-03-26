@@ -5,6 +5,7 @@ using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using Avalonia.VisualTree;
 using AsterGraph.Avalonia.Hosting;
+using AsterGraph.Avalonia.Presentation;
 using AsterGraph.Avalonia.Services;
 using AsterGraph.Avalonia.Styling;
 using AsterGraph.Editor.ViewModels;
@@ -36,7 +37,15 @@ public partial class GraphEditorView : UserControl
             nameof(ChromeMode),
             GraphEditorViewChromeMode.Default);
 
+    /// <summary>
+    /// 可选的 Avalonia 展示器替换配置依赖属性。
+    /// </summary>
+    public static readonly StyledProperty<AsterGraphPresentationOptions?> PresentationProperty =
+        AvaloniaProperty.Register<GraphEditorView, AsterGraphPresentationOptions?>(nameof(Presentation));
+
     private NodeCanvas? _nodeCanvas;
+    private GraphInspectorView? _inspectorSurface;
+    private GraphMiniMap? _miniMapSurface;
     private Grid? _shellGrid;
     private Border? _headerChrome;
     private Border? _libraryChrome;
@@ -86,6 +95,15 @@ public partial class GraphEditorView : UserControl
         set => SetValue(ChromeModeProperty, value);
     }
 
+    /// <summary>
+    /// 当前宿主提供的 Avalonia 展示器替换配置。
+    /// </summary>
+    public AsterGraphPresentationOptions? Presentation
+    {
+        get => GetValue(PresentationProperty);
+        set => SetValue(PresentationProperty, value);
+    }
+
     /// <inheritdoc />
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
@@ -99,10 +117,15 @@ public partial class GraphEditorView : UserControl
             ApplyStyleOptions(editor);
             ApplyClipboardBridge(editor);
             ApplyHostContext(editor);
+            ApplyPresentationOptions(Presentation);
         }
         else if (change.Property == ChromeModeProperty)
         {
             ApplyChromeMode(change.GetNewValue<GraphEditorViewChromeMode>());
+        }
+        else if (change.Property == PresentationProperty)
+        {
+            ApplyPresentationOptions(change.GetNewValue<AsterGraphPresentationOptions?>());
         }
     }
 
@@ -131,9 +154,12 @@ public partial class GraphEditorView : UserControl
         _inspectorChrome = this.FindControl<Border>("PART_InspectorChrome");
         _statusChrome = this.FindControl<Border>("PART_StatusChrome");
         _nodeCanvas = this.FindControl<NodeCanvas>("PART_NodeCanvas");
+        _inspectorSurface = this.FindControl<GraphInspectorView>("PART_InspectorSurface");
+        _miniMapSurface = this.FindControl<GraphMiniMap>("PART_MiniMapSurface");
         _defaultShellRowSpacing = _shellGrid?.RowSpacing ?? 0;
         _defaultShellColumnSpacing = _shellGrid?.ColumnSpacing ?? 0;
         ApplyChromeMode(ChromeMode);
+        ApplyPresentationOptions(Presentation);
     }
 
     private void ApplyStyleOptions(GraphEditorViewModel? editor)
@@ -196,6 +222,25 @@ public partial class GraphEditorView : UserControl
         {
             _shellGrid.RowSpacing = showChrome ? _defaultShellRowSpacing : 0;
             _shellGrid.ColumnSpacing = showChrome ? _defaultShellColumnSpacing : 0;
+        }
+    }
+
+    private void ApplyPresentationOptions(AsterGraphPresentationOptions? presentation)
+    {
+        if (_nodeCanvas is not null)
+        {
+            _nodeCanvas.NodeVisualPresenter = presentation?.NodeVisualPresenter;
+            _nodeCanvas.ContextMenuPresenter = presentation?.ContextMenuPresenter;
+        }
+
+        if (_inspectorSurface is not null)
+        {
+            _inspectorSurface.InspectorPresenter = presentation?.InspectorPresenter;
+        }
+
+        if (_miniMapSurface is not null)
+        {
+            _miniMapSurface.MiniMapPresenter = presentation?.MiniMapPresenter;
         }
     }
 

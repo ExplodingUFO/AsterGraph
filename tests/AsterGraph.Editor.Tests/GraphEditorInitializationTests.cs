@@ -3,8 +3,10 @@ using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Abstractions.Styling;
 using Avalonia.Headless.XUnit;
+using Avalonia.Controls;
 using AsterGraph.Avalonia.Controls;
 using AsterGraph.Avalonia.Hosting;
+using AsterGraph.Avalonia.Presentation;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Catalog;
 using AsterGraph.Editor.Configuration;
@@ -257,6 +259,103 @@ public sealed class GraphEditorInitializationTests
     }
 
     [AvaloniaFact]
+    public void CreateAvaloniaViewFactory_ForwardsPresentationOptionsIntoEmbeddedSurfaces()
+    {
+        var editor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
+        {
+            Document = CreateDocument(),
+            NodeCatalog = CreateCatalog(),
+            CompatibilityService = new RecordingCompatibilityService(),
+        });
+        var presentation = new AsterGraphPresentationOptions
+        {
+            NodeVisualPresenter = new RecordingNodeVisualPresenter(),
+            ContextMenuPresenter = new RecordingContextMenuPresenter(),
+            InspectorPresenter = new RecordingInspectorPresenter(),
+            MiniMapPresenter = new RecordingMiniMapPresenter(),
+        };
+        var view = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOptions
+        {
+            Editor = editor,
+            ChromeMode = GraphEditorViewChromeMode.CanvasOnly,
+            Presentation = presentation,
+        });
+        var window = new Window
+        {
+            Width = 1440,
+            Height = 900,
+            Content = view,
+        };
+        window.Show();
+
+        try
+        {
+            var canvas = view.FindControl<NodeCanvas>("PART_NodeCanvas");
+            var inspector = view.FindControl<GraphInspectorView>("PART_InspectorSurface");
+            var miniMap = view.FindControl<GraphMiniMap>("PART_MiniMapSurface");
+
+            Assert.NotNull(canvas);
+            Assert.NotNull(inspector);
+            Assert.NotNull(miniMap);
+            Assert.Same(presentation, view.Presentation);
+            Assert.Same(presentation.NodeVisualPresenter, canvas.NodeVisualPresenter);
+            Assert.Same(presentation.ContextMenuPresenter, canvas.ContextMenuPresenter);
+            Assert.Same(presentation.InspectorPresenter, inspector.InspectorPresenter);
+            Assert.Same(presentation.MiniMapPresenter, miniMap.MiniMapPresenter);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
+    public void StandaloneSurfaceFactories_ForwardPerSurfacePresentationOptions()
+    {
+        var editor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
+        {
+            Document = CreateDocument(),
+            NodeCatalog = CreateCatalog(),
+            CompatibilityService = new RecordingCompatibilityService(),
+        });
+        var presentation = new AsterGraphPresentationOptions
+        {
+            NodeVisualPresenter = new RecordingNodeVisualPresenter(),
+            ContextMenuPresenter = new RecordingContextMenuPresenter(),
+            InspectorPresenter = new RecordingInspectorPresenter(),
+            MiniMapPresenter = new RecordingMiniMapPresenter(),
+        };
+
+        var canvas = AsterGraphCanvasViewFactory.Create(new AsterGraphCanvasViewOptions
+        {
+            Editor = editor,
+            EnableDefaultContextMenu = false,
+            EnableDefaultCommandShortcuts = false,
+            Presentation = presentation,
+        });
+        var inspector = AsterGraphInspectorViewFactory.Create(new AsterGraphInspectorViewOptions
+        {
+            Editor = editor,
+            Presentation = presentation,
+        });
+        var miniMap = AsterGraphMiniMapViewFactory.Create(new AsterGraphMiniMapViewOptions
+        {
+            Editor = editor,
+            Presentation = presentation,
+        });
+
+        Assert.Same(editor, canvas.ViewModel);
+        Assert.Same(editor, inspector.Editor);
+        Assert.Same(editor, miniMap.ViewModel);
+        Assert.False(canvas.EnableDefaultContextMenu);
+        Assert.False(canvas.EnableDefaultCommandShortcuts);
+        Assert.Same(presentation.NodeVisualPresenter, canvas.NodeVisualPresenter);
+        Assert.Same(presentation.ContextMenuPresenter, canvas.ContextMenuPresenter);
+        Assert.Same(presentation.InspectorPresenter, inspector.InspectorPresenter);
+        Assert.Same(presentation.MiniMapPresenter, miniMap.MiniMapPresenter);
+    }
+
+    [AvaloniaFact]
     public void DefaultGraphEditorViewComposition_PreservesExpectedChromeBehavior()
     {
         var editor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
@@ -377,6 +476,33 @@ public sealed class GraphEditorInitializationTests
     {
         public string GetString(string key, string fallback)
             => fallback;
+    }
+
+    private sealed class RecordingNodeVisualPresenter : IGraphNodeVisualPresenter
+    {
+        public GraphNodeVisual Create(GraphNodeVisualContext context)
+            => throw new NotSupportedException();
+
+        public void Update(GraphNodeVisual visual, GraphNodeVisualContext context)
+            => throw new NotSupportedException();
+    }
+
+    private sealed class RecordingContextMenuPresenter : IGraphContextMenuPresenter
+    {
+        public void Open(Control target, IReadOnlyList<MenuItemDescriptor> descriptors, ContextMenuStyleOptions style)
+            => throw new NotSupportedException();
+    }
+
+    private sealed class RecordingInspectorPresenter : IGraphInspectorPresenter
+    {
+        public Control Create(GraphEditorViewModel? editor)
+            => throw new NotSupportedException();
+    }
+
+    private sealed class RecordingMiniMapPresenter : IGraphMiniMapPresenter
+    {
+        public Control Create(GraphEditorViewModel? editor)
+            => throw new NotSupportedException();
     }
 
     private sealed class RecordingWorkspaceService(string workspacePath) : IGraphWorkspaceService

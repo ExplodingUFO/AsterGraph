@@ -26,6 +26,7 @@ public static class AsterGraphAvaloniaViewFactory
         {
             Editor = options.Editor,
             ChromeMode = options.ChromeMode,
+            Presentation = options.Presentation,
         };
     }
 }

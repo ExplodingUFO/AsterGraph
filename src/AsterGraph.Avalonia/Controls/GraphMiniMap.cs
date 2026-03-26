@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media;
+using AsterGraph.Avalonia.Presentation;
 using AsterGraph.Avalonia.Styling;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.ViewModels;
@@ -18,6 +19,12 @@ public sealed class GraphMiniMap : Control
     /// </summary>
     public static readonly StyledProperty<GraphEditorViewModel?> ViewModelProperty =
         AvaloniaProperty.Register<GraphMiniMap, GraphEditorViewModel?>(nameof(ViewModel));
+
+    /// <summary>
+    /// 可选的缩略图展示器依赖属性。
+    /// </summary>
+    public static readonly StyledProperty<IGraphMiniMapPresenter?> MiniMapPresenterProperty =
+        AvaloniaProperty.Register<GraphMiniMap, IGraphMiniMapPresenter?>(nameof(MiniMapPresenter));
 
     private bool _isDraggingViewport;
 
@@ -39,6 +46,15 @@ public sealed class GraphMiniMap : Control
     {
         get => GetValue(ViewModelProperty);
         set => SetValue(ViewModelProperty, value);
+    }
+
+    /// <summary>
+    /// 当前缩略图展示器。
+    /// </summary>
+    public IGraphMiniMapPresenter? MiniMapPresenter
+    {
+        get => GetValue(MiniMapPresenterProperty);
+        set => SetValue(MiniMapPresenterProperty, value);
     }
 
     /// <inheritdoc />

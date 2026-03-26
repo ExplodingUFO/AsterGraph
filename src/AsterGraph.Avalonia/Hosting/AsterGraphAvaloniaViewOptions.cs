@@ -1,4 +1,5 @@
 using AsterGraph.Avalonia.Controls;
+using AsterGraph.Avalonia.Presentation;
 using AsterGraph.Editor.ViewModels;
 
 namespace AsterGraph.Avalonia.Hosting;
@@ -21,4 +22,9 @@ public sealed record AsterGraphAvaloniaViewOptions
     /// 视图外壳显示模式。
     /// </summary>
     public GraphEditorViewChromeMode ChromeMode { get; init; } = GraphEditorViewChromeMode.Default;
+
+    /// <summary>
+    /// 可选的 Avalonia 展示器替换配置。
+    /// </summary>
+    public AsterGraphPresentationOptions? Presentation { get; init; }
 }
