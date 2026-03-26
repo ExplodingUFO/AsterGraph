@@ -96,7 +96,13 @@ Plans:
   1. Host can receive machine-readable warnings, errors, and operation diagnostics without parsing UI status text.
   2. Host can request inspection snapshots or equivalent debug-state output to troubleshoot the current editor/session state.
   3. Host can attach public logging or tracing sinks and observe editor diagnostics through host-standard tooling.
-**Plans**: TBD
+**Plans**: 4 plans
+
+Plans:
+- [ ] 05-01-PLAN.md — Define the public diagnostics/inspection contracts, session-root entry point, and focused contract harness.
+- [ ] 05-02-PLAN.md — Implement aggregate inspection snapshots and bounded recent-diagnostics publication over the existing runtime/session baseline.
+- [ ] 05-03-PLAN.md — Wire opt-in `ILogger`/`ActivitySource` instrumentation through editor options, factory/session composition, and runtime operations.
+- [ ] 05-04-PLAN.md — Prove diagnostics and inspection through compatibility regressions, host sample output, smoke markers, focused validation, and docs.
 
 ## Progress
 
@@ -106,4 +112,4 @@ Plans:
 | 2. Runtime Contracts & Service Seams | 5/5 | Complete | 02-01, 02-02, 02-03, 02-04, 02-05 |
 | 3. Embeddable Avalonia Surfaces | 4/4 | Complete | 03-01, 03-02, 03-03, 03-04 |
 | 4. Replaceable Presentation Kit | 4/4 | Complete | 04-01, 04-02, 04-03, 04-04 |
-| 5. Diagnostics & Integration Inspection | 0/TBD | Not started | - |
+| 5. Diagnostics & Integration Inspection | 0/4 | Planned | - |
