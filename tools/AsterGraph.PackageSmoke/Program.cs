@@ -1,27 +1,47 @@
+using Avalonia.Controls;
+using AsterGraph.Abstractions.Compatibility;
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Abstractions.Styling;
 using AsterGraph.Avalonia.Controls;
 using AsterGraph.Avalonia.Hosting;
-using AsterGraph.Core.Compatibility;
+using AsterGraph.Avalonia.Menus;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Catalog;
 using AsterGraph.Editor.Configuration;
+using AsterGraph.Editor.Diagnostics;
 using AsterGraph.Editor.Hosting;
 using AsterGraph.Editor.Localization;
 using AsterGraph.Editor.Menus;
+using AsterGraph.Editor.Models;
 using AsterGraph.Editor.Presentation;
 using AsterGraph.Editor.Services;
 using AsterGraph.Editor.ViewModels;
 
-var definitionId = new NodeDefinitionId("smoke.node");
+var sourceDefinitionId = new NodeDefinitionId("smoke.source");
+var targetDefinitionId = new NodeDefinitionId("smoke.target");
+const string sourceNodeId = "smoke-source-001";
+const string targetNodeId = "smoke-target-001";
+const string sourcePortId = "out";
+
 var catalog = new NodeCatalog();
 catalog.RegisterDefinition(new NodeDefinition(
-    definitionId,
-    "Smoke Node",
+    sourceDefinitionId,
+    "Smoke Source",
     "Smoke",
     "Migration",
     [],
+    [
+        new PortDefinition(sourcePortId, "Output", new PortTypeId("float"), "#6AD5C4"),
+    ]));
+catalog.RegisterDefinition(new NodeDefinition(
+    targetDefinitionId,
+    "Smoke Target",
+    "Smoke",
+    "Migration",
+    [
+        new PortDefinition("in", "Input", new PortTypeId("float"), "#F3B36B"),
+    ],
     []));
 
 var document = new GraphDocument(
@@ -29,27 +49,48 @@ var document = new GraphDocument(
     "Migration-stage smoke validation.",
     [
         new GraphNode(
-            "smoke-node-001",
-            "Smoke Node",
+            sourceNodeId,
+            "Smoke Source",
             "Smoke",
             "Migration",
             "Verifies both legacy and factory host paths.",
             new GraphPoint(64, 96),
             new GraphSize(220, 160),
             [],
-            [],
+            [
+                new GraphPort(
+                    sourcePortId,
+                    "Output",
+                    PortDirection.Output,
+                    "float",
+                    "#6AD5C4",
+                    new PortTypeId("float")),
+            ],
             "#6AD5C4",
-            definitionId),
+            sourceDefinitionId),
+        new GraphNode(
+            targetNodeId,
+            "Smoke Target",
+            "Smoke",
+            "Migration",
+            "Verifies runtime compatibility queries.",
+            new GraphPoint(360, 96),
+            new GraphSize(220, 160),
+            [
+                new GraphPort(
+                    "in",
+                    "Input",
+                    PortDirection.Input,
+                    "float",
+                    "#F3B36B",
+                    new PortTypeId("float")),
+            ],
+            [],
+            "#F3B36B",
+            targetDefinitionId),
     ],
     []);
 
-var root = Path.Combine(
-    Path.GetTempPath(),
-    "astergraph-package-smoke",
-    Guid.NewGuid().ToString("N"));
-var workspaceService = new GraphWorkspaceService(Path.Combine(root, "workspace.json"));
-var fragmentWorkspaceService = new GraphFragmentWorkspaceService(Path.Combine(root, "fragment.json"));
-var fragmentLibraryService = new GraphFragmentLibraryService(Path.Combine(root, "fragments"));
 var styleOptions = GraphEditorStyleOptions.Default with
 {
     Shell = GraphEditorStyleOptions.Default.Shell with
@@ -67,7 +108,12 @@ var behaviorOptions = GraphEditorBehaviorOptions.Default with
 var menuAugmentor = new SmokeContextMenuAugmentor();
 var presentationProvider = new SmokeNodePresentationProvider();
 var localizationProvider = new SmokeLocalizationProvider();
-var compatibilityService = new DefaultPortCompatibilityService();
+var compatibilityService = new RecordingCompatibilityService();
+var workspaceService = new RecordingWorkspaceService("workspace://package-smoke", throwOnSave: true);
+var fragmentWorkspaceService = new RecordingFragmentWorkspaceService("fragment://package-smoke");
+var fragmentLibraryService = new RecordingFragmentLibraryService("library://package-smoke");
+var serializer = new RecordingClipboardPayloadSerializer();
+var diagnostics = new RecordingDiagnosticsSink();
 
 var legacyEditor = new GraphEditorViewModel(
     document,
@@ -80,7 +126,9 @@ var legacyEditor = new GraphEditorViewModel(
     fragmentLibraryService,
     menuAugmentor,
     presentationProvider,
-    localizationProvider);
+    localizationProvider,
+    serializer,
+    diagnostics);
 var legacyView = new GraphEditorView
 {
     Editor = legacyEditor,
@@ -97,6 +145,8 @@ var factoryEditor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
     StyleOptions = styleOptions,
     BehaviorOptions = behaviorOptions,
     FragmentLibraryService = fragmentLibraryService,
+    ClipboardPayloadSerializer = serializer,
+    DiagnosticsSink = diagnostics,
     ContextMenuAugmentor = menuAugmentor,
     NodePresentationProvider = presentationProvider,
     LocalizationProvider = localizationProvider,
@@ -107,17 +157,91 @@ var factoryView = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaVie
     ChromeMode = GraphEditorViewChromeMode.CanvasOnly,
 });
 
-PrintEditorMarker("LEGACY_EDITOR_OK", legacyEditor);
+PrintEditorMarker("LEGACY_EDITOR_OK", legacyEditor, sourceNodeId);
 PrintViewMarker("LEGACY_VIEW_OK", legacyView);
-PrintEditorMarker("FACTORY_EDITOR_OK", factoryEditor);
+PrintEditorMarker("FACTORY_EDITOR_OK", factoryEditor, sourceNodeId);
 PrintViewMarker("FACTORY_VIEW_OK", factoryView);
+var fullShellInspector = factoryView.FindControl<GraphInspectorView>("PART_InspectorSurface")
+    ?? throw new InvalidOperationException("Missing PART_InspectorSurface.");
+var fullShellMiniMap = factoryView.FindControl<GraphMiniMap>("PART_MiniMapSurface")
+    ?? throw new InvalidOperationException("Missing PART_MiniMapSurface.");
+Console.WriteLine($"SURFACE_FULLSHELL_OK:{ReferenceEquals(factoryEditor, fullShellInspector.Editor)}:{ReferenceEquals(factoryEditor, fullShellMiniMap.ViewModel)}");
 
-static void PrintEditorMarker(string marker, GraphEditorViewModel editor)
+var standaloneCanvas = AsterGraphCanvasViewFactory.Create(new AsterGraphCanvasViewOptions
+{
+    Editor = factoryEditor,
+});
+var standaloneCanvasOptOut = AsterGraphCanvasViewFactory.Create(new AsterGraphCanvasViewOptions
+{
+    Editor = factoryEditor,
+    EnableDefaultContextMenu = false,
+    EnableDefaultCommandShortcuts = false,
+});
+var standaloneInspector = AsterGraphInspectorViewFactory.Create(new AsterGraphInspectorViewOptions
+{
+    Editor = factoryEditor,
+});
+var standaloneMiniMap = AsterGraphMiniMapViewFactory.Create(new AsterGraphMiniMapViewOptions
+{
+    Editor = factoryEditor,
+});
+
+Console.WriteLine($"SURFACE_CANVAS_OK:{ReferenceEquals(factoryEditor, standaloneCanvas.ViewModel)}:{standaloneCanvas.EnableDefaultContextMenu}:{standaloneCanvas.EnableDefaultCommandShortcuts}:{standaloneCanvasOptOut.EnableDefaultContextMenu}:{standaloneCanvasOptOut.EnableDefaultCommandShortcuts}");
+Console.WriteLine($"SURFACE_INSPECTOR_OK:{ReferenceEquals(factoryEditor, standaloneInspector.Editor)}");
+Console.WriteLine($"SURFACE_MINIMAP_OK:{ReferenceEquals(factoryEditor, standaloneMiniMap.ViewModel)}:{standaloneMiniMap.Focusable}");
+Console.WriteLine($"MENU_STOCK_PRESENTER_OK:{typeof(GraphContextMenuPresenter).IsPublic}");
+
+factoryEditor.SelectSingleNode(factoryEditor.Nodes.Single(node => node.Id == sourceNodeId), updateStatus: false);
+await factoryEditor.CopySelectionAsync();
+factoryEditor.ExportSelectionFragment();
+
+var session = AsterGraphEditorFactory.CreateSession(new AsterGraphEditorOptions
+{
+    Document = document,
+    NodeCatalog = catalog,
+    CompatibilityService = compatibilityService,
+    WorkspaceService = workspaceService,
+    FragmentWorkspaceService = fragmentWorkspaceService,
+    StyleOptions = styleOptions,
+    BehaviorOptions = behaviorOptions,
+    FragmentLibraryService = fragmentLibraryService,
+    ClipboardPayloadSerializer = serializer,
+    DiagnosticsSink = diagnostics,
+    ContextMenuAugmentor = menuAugmentor,
+    NodePresentationProvider = presentationProvider,
+    LocalizationProvider = localizationProvider,
+});
+
+var commandIds = new List<string>();
+var documentChanges = 0;
+var viewportChanges = 0;
+string? failureCode = null;
+
+session.Events.CommandExecuted += (_, args) => commandIds.Add(args.CommandId);
+session.Events.DocumentChanged += (_, _) => documentChanges++;
+session.Events.ViewportChanged += (_, _) => viewportChanges++;
+session.Events.RecoverableFailure += (_, args) => failureCode = args.Code;
+
+var compatibleTargets = session.Queries.GetCompatibleTargets(sourceNodeId, sourcePortId);
+using (session.BeginMutation("smoke-batch"))
+{
+    session.Commands.AddNode(targetDefinitionId, new GraphPoint(620, 160));
+    session.Commands.PanBy(12, 18);
+}
+session.Commands.SaveWorkspace();
+
+Console.WriteLine($"SESSION_FACTORY_OK:{session.Queries.CreateDocumentSnapshot().Nodes.Count}:{string.Join(",", commandIds)}");
+Console.WriteLine($"SESSION_EVENTS_OK:{documentChanges}:{viewportChanges}:{failureCode ?? "<none>"}");
+Console.WriteLine($"SERVICE_OVERRIDE_OK:{workspaceService.WorkspacePath}:{fragmentWorkspaceService.FragmentPath}:{workspaceService.SaveCalls}:{fragmentWorkspaceService.SaveCalls}:{serializer.SerializeCalls}");
+Console.WriteLine($"COMPATIBILITY_SERVICE_OK:{compatibleTargets.Count}:{compatibilityService.EvaluateCalls}");
+Console.WriteLine($"DIAGNOSTICS_SINK_OK:{diagnostics.Diagnostics.Count}:{diagnostics.Diagnostics.LastOrDefault()?.Code ?? "<none>"}");
+
+static void PrintEditorMarker(string marker, GraphEditorViewModel editor, string targetNodeId)
 {
     var menu = editor.BuildContextMenu(new ContextMenuContext(
         ContextMenuTargetKind.Canvas,
         new GraphPoint(32, 48)));
-    var node = editor.Nodes.Single();
+    var node = editor.Nodes.Single(candidate => candidate.Id == targetNodeId);
 
     if (node.DisplaySubtitle != "Smoke subtitle")
     {
@@ -163,4 +287,109 @@ sealed class SmokeLocalizationProvider : IGraphLocalizationProvider
         => key == "editor.stats.caption"
             ? "Smoke stats {0}/{1}/{2:0}"
             : fallback;
+}
+
+sealed class RecordingWorkspaceService(string workspacePath, bool throwOnSave) : IGraphWorkspaceService
+{
+    public string WorkspacePath { get; } = workspacePath;
+
+    public int SaveCalls { get; private set; }
+
+    public GraphDocument? LastSaved { get; private set; }
+
+    public void Save(GraphDocument document)
+    {
+        SaveCalls++;
+        LastSaved = document;
+        if (throwOnSave)
+        {
+            throw new InvalidOperationException("package smoke forced workspace failure");
+        }
+    }
+
+    public GraphDocument Load()
+        => LastSaved ?? throw new InvalidOperationException("No saved workspace.");
+
+    public bool Exists()
+        => LastSaved is not null;
+}
+
+sealed class RecordingFragmentWorkspaceService(string fragmentPath) : IGraphFragmentWorkspaceService
+{
+    public string FragmentPath { get; } = fragmentPath;
+
+    public int SaveCalls { get; private set; }
+
+    public GraphSelectionFragment? LastSaved { get; private set; }
+
+    public void Save(GraphSelectionFragment fragment, string? path = null)
+    {
+        SaveCalls++;
+        LastSaved = fragment;
+    }
+
+    public GraphSelectionFragment Load(string? path = null)
+        => LastSaved ?? throw new InvalidOperationException("No saved fragment.");
+
+    public bool Exists(string? path = null)
+        => LastSaved is not null;
+
+    public void Delete(string? path = null)
+        => LastSaved = null;
+}
+
+sealed class RecordingFragmentLibraryService(string libraryPath) : IGraphFragmentLibraryService
+{
+    public string LibraryPath { get; } = libraryPath;
+
+    public IReadOnlyList<FragmentTemplateInfo> EnumerateTemplates()
+        => [];
+
+    public string SaveTemplate(GraphSelectionFragment fragment, string? name = null)
+        => Path.Combine(LibraryPath, $"{name ?? "fragment"}.json");
+
+    public GraphSelectionFragment LoadTemplate(string path)
+        => throw new NotSupportedException();
+
+    public void DeleteTemplate(string path)
+    {
+    }
+}
+
+sealed class RecordingClipboardPayloadSerializer : IGraphClipboardPayloadSerializer
+{
+    public int SerializeCalls { get; private set; }
+
+    public string Serialize(GraphSelectionFragment fragment)
+    {
+        SerializeCalls++;
+        return "serialized-fragment";
+    }
+
+    public bool TryDeserialize(string? text, out GraphSelectionFragment? fragment)
+    {
+        fragment = null;
+        return false;
+    }
+}
+
+sealed class RecordingDiagnosticsSink : IGraphEditorDiagnosticsSink
+{
+    public List<GraphEditorDiagnostic> Diagnostics { get; } = [];
+
+    public void Publish(GraphEditorDiagnostic diagnostic)
+        => Diagnostics.Add(diagnostic);
+}
+
+sealed class RecordingCompatibilityService : IPortCompatibilityService
+{
+    public int EvaluateCalls { get; private set; }
+
+    public PortCompatibilityResult Evaluate(PortTypeId sourceType, PortTypeId targetType)
+    {
+        EvaluateCalls++;
+        return sourceType == targetType
+            ? PortCompatibilityResult.Exact()
+            : PortCompatibilityResult.Rejected();
+    }
 }

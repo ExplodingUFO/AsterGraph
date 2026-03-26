@@ -9,7 +9,7 @@ The supported Phase 1 package boundary is:
 - `AsterGraph.Abstractions` for node definitions, identifiers, and shared style contracts
 - `AsterGraph.Core` for `GraphDocument`, serialization, and compatibility services
 - `AsterGraph.Editor` for editor runtime composition, factories, behavior options, and host extension seams
-- `AsterGraph.Avalonia` for the default Avalonia view shell
+- `AsterGraph.Avalonia` for the default Avalonia view shell and standalone Avalonia surfaces
 
 For a default hosted UI, the canonical direct-reference set is:
 
@@ -23,9 +23,44 @@ Add a direct `AsterGraph.Core` reference when the host also needs direct access 
 
 ## Canonical Host Composition
 
-Use the factory/options path for new host integration. It is the canonical Phase 1 initialization surface because it keeps defaults, extension seams, and migration guidance in one place.
+Phase 2 gives hosts two canonical entry paths. Pick the narrowest surface that matches what you want to own.
 
-Typical host composition flow:
+Runtime-only or custom-UI host:
+
+1. Build or register your `INodeCatalog`.
+2. Create the initial `GraphDocument`.
+3. Choose a host-owned `CompatibilityService`.
+4. Optionally provide storage overrides, diagnostics, localization, node presentation, or context-menu augmentation.
+5. Create the session through `AsterGraphEditorFactory.CreateSession(...)`.
+
+Minimal runtime-first shape:
+
+```csharp
+var session = AsterGraphEditorFactory.CreateSession(new AsterGraphEditorOptions
+{
+    Document = document,
+    NodeCatalog = catalog,
+    CompatibilityService = compatibilityService,
+    StorageRootPath = Path.Combine(appDataRoot, "MyHost", "Graph"),
+    DiagnosticsSink = diagnosticsSink,
+});
+
+session.Events.CommandExecuted += (_, args) =>
+    Console.WriteLine(args.CommandId);
+
+session.Events.RecoverableFailure += (_, args) =>
+    Console.WriteLine($"{args.Code}: {args.Message}");
+
+using (session.BeginMutation("host-bootstrap"))
+{
+    session.Commands.AddNode(new NodeDefinitionId("host.sample.node"), new GraphPoint(320, 180));
+    session.Commands.PanBy(12, 18);
+}
+
+var snapshot = session.Queries.CreateDocumentSnapshot();
+```
+
+Default full-shell Avalonia host:
 
 1. Build or register your `INodeCatalog`.
 2. Create the initial `GraphDocument`.
@@ -34,17 +69,17 @@ Typical host composition flow:
    - `IGraphLocalizationProvider`
    - `INodePresentationProvider`
    - `IGraphContextMenuAugmentor`
-5. Create the editor runtime with `AsterGraphEditorFactory`.
-6. Create the default Avalonia view with `AsterGraphAvaloniaViewFactory`.
+5. Create the editor compatibility facade with `AsterGraphEditorFactory.Create(...)`.
+6. Create the default Avalonia view with `AsterGraphAvaloniaViewFactory.Create(...)`.
 
-Minimal canonical shape:
+Minimal default-view shape:
 
 ```csharp
 var editor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
 {
     Document = document,
     NodeCatalog = catalog,
-    CompatibilityService = new DefaultPortCompatibilityService(),
+    CompatibilityService = compatibilityService,
     StyleOptions = style,
     BehaviorOptions = behavior,
     ContextMenuAugmentor = menuAugmentor,
@@ -59,9 +94,90 @@ var view = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOption
 });
 ```
 
+If the host is embedding the shipped Avalonia controls, `Create(...)` plus `AsterGraphAvaloniaViewFactory` remains the cleanest setup. If the host wants to own UI composition entirely, `CreateSession(...)` is now the narrower public boundary.
+
+Host-managed Avalonia surface composition:
+
+1. Build the editor compatibility facade through `AsterGraphEditorFactory.Create(...)`.
+2. Compose the stock Avalonia surfaces you want to keep:
+   - `AsterGraphCanvasViewFactory.Create(...)`
+   - `AsterGraphInspectorViewFactory.Create(...)`
+   - `AsterGraphMiniMapViewFactory.Create(...)`
+3. Bind all of them to the same `GraphEditorViewModel`.
+
+Minimal standalone-surface shape:
+
+```csharp
+var editor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
+{
+    Document = document,
+    NodeCatalog = catalog,
+    CompatibilityService = compatibilityService,
+});
+
+var canvas = AsterGraphCanvasViewFactory.Create(new AsterGraphCanvasViewOptions
+{
+    Editor = editor,
+    EnableDefaultContextMenu = false,
+    EnableDefaultCommandShortcuts = false,
+});
+
+var inspector = AsterGraphInspectorViewFactory.Create(new AsterGraphInspectorViewOptions
+{
+    Editor = editor,
+});
+
+var miniMap = AsterGraphMiniMapViewFactory.Create(new AsterGraphMiniMapViewOptions
+{
+    Editor = editor,
+});
+```
+
+Use this path when the host wants to keep the stock graph canvas, inspector, or mini map but does not want the shipped header/library/status shell.
+
+## Runtime Session Surface
+
+`IGraphEditorSession` is the public Phase 2 runtime root in `AsterGraph.Editor`.
+
+- `Commands`
+  - host-triggered mutations such as `AddNode`, `DeleteSelection`, `PanBy`, `ZoomAt`, `SaveWorkspace`, and `LoadWorkspace`
+- `Queries`
+  - `CreateDocumentSnapshot`, selection/viewport/capability snapshots, node positions, and compatibility-target discovery
+- `Events`
+  - document, selection, viewport, fragment, command, and recoverable-failure notifications
+- `BeginMutation(...)`
+  - coalesces runtime notifications until the mutation scope closes, which is useful when the host wants one planned batch instead of a stream of intermediate events
+
+`GraphEditorViewModel.Session` exposes the same runtime contract from the retained compatibility facade, so migrating hosts can adopt the new runtime API without discarding existing `GraphEditorViewModel` integrations first.
+
+## Replaceable Services And Diagnostics
+
+The default services are now explicit public seams. Hosts can replace any of these through `AsterGraphEditorOptions`:
+
+- `IGraphWorkspaceService`
+- `IGraphFragmentWorkspaceService`
+- `IGraphFragmentLibraryService`
+- `IGraphClipboardPayloadSerializer`
+- `IGraphEditorDiagnosticsSink`
+
+If you want default behavior but under a host-owned storage root, set `StorageRootPath` and let `AsterGraph.Editor` create package-neutral defaults through `GraphEditorStorageDefaults`.
+
+The package-neutral defaults resolve to:
+
+- `workspace.json`
+- `selection-fragment.json`
+- `fragments/`
+
+under a root chosen by either:
+
+- the host-supplied `StorageRootPath`, or
+- the built-in local application data fallback when `StorageRootPath` is not supplied
+
+`IGraphEditorDiagnosticsSink` receives recoverable runtime failures such as workspace save/load errors or host augmentor failures. Hosts should treat this as the stable place to forward AsterGraph runtime issues into their own logging, telemetry, or debug panels.
+
 ## Staged Migration Compatibility Path
 
-Existing hosts do not need to rewrite immediately. Phase 1 keeps the previous constructor-based setup supported as a compatibility facade while you migrate toward the factory/options path.
+Existing hosts do not need to rewrite immediately. The constructor-based setup remains supported as a compatibility facade while you migrate toward either the new runtime-session path or the factory/options UI path.
 
 Retained compatibility path:
 
@@ -85,10 +201,11 @@ var view = new GraphEditorView
 Recommended migration stages:
 
 1. Keep `GraphEditorViewModel` and `GraphEditorView` if the host already uses them directly.
-2. Move runtime creation to `AsterGraphEditorFactory.Create(...)` once you want a single documented composition point.
-3. Move Avalonia view creation to `AsterGraphAvaloniaViewFactory.Create(...)` once the host is ready to standardize the UI entry path too.
+2. Start consuming `GraphEditorViewModel.Session` if you want to move host-side commands, queries, batching, and diagnostics onto the new runtime contract first.
+3. Move runtime creation to `AsterGraphEditorFactory.CreateSession(...)` or `AsterGraphEditorFactory.Create(...)` once you want a single documented composition point.
+4. Move Avalonia view creation to `AsterGraphAvaloniaViewFactory.Create(...)` once the host is ready to standardize the UI entry path too.
 
-The constructor path is supported for compatibility, but new host documentation and samples now assume the factory path first.
+The constructor path is supported for compatibility, but new host documentation and samples now assume the runtime-session or factory path first.
 
 ## View Chrome Mode
 
@@ -106,11 +223,32 @@ view.ChromeMode = GraphEditorViewChromeMode.CanvasOnly;
 
 This keeps the central `NodeCanvas`, context menus, host-context flow, shortcuts, and node presentation data while removing the surrounding shell panels.
 
+## Embeddable Avalonia Surfaces
+
+Phase 3 makes three standalone Avalonia surfaces part of the supported host story:
+
+- `NodeCanvas`
+  - canonical entry: `AsterGraphCanvasViewFactory.Create(...)`
+  - defaults to stock context menu and stock command shortcuts
+  - hosts can explicitly disable those defaults through `EnableDefaultContextMenu` and `EnableDefaultCommandShortcuts`
+- `GraphInspectorView`
+  - canonical entry: `AsterGraphInspectorViewFactory.Create(...)`
+  - pure inspector surface only: selection summary, connections, and parameters
+  - does not include workspace, fragment, shortcut-help, or mini-map shell blocks
+- `GraphMiniMap`
+  - canonical entry: `AsterGraphMiniMapViewFactory.Create(...)`
+  - stays a narrow overview-plus-navigation control
+
+`GraphContextMenuPresenter` is now a public stock Avalonia presenter for hosts that want to reuse the shipped menu rendering path. Full presenter replacement is still deferred to Phase 4.
+
+Header, library, and status chrome remain shell-only in Phase 3. If a host wants to omit them, the supported approach is direct standalone-surface composition, not a larger `GraphEditorViewChromeMode` matrix.
+
 Reference sample:
 
 - `tools/AsterGraph.HostSample`
 - Run with:
   - `dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj`
+- The sample demonstrates both the convenience full shell and standalone canvas/inspector/mini map composition against the same editor state.
 
 ## Localization
 
@@ -140,6 +278,8 @@ Use localization for:
 - stock status messages
 
 Do not use it for host-only business copy that never belongs to the shared editor.
+
+Localization continues to work unchanged whether the host consumes the runtime through `GraphEditorViewModel`, `AsterGraphEditorFactory.Create(...)`, or `AsterGraphEditorFactory.CreateSession(...)`.
 
 ## Node Presentation
 
@@ -171,6 +311,8 @@ Use presentation state for:
 - bottom status bars
 
 Do not encode host business behavior into the editor layer itself. Keep the semantics in the host and only pass the display snapshot into AsterGraph.
+
+This seam stays additive in Phase 2. The runtime-session additions do not replace or narrow the presentation-provider path.
 
 For visual usage guidance, see:
 
@@ -228,6 +370,8 @@ These helpers:
 - return `false` safely when the requested type does not match
 - stay portable across Avalonia and future non-Avalonia hosts
 
+The context-menu augmentation seam and the typed host-context helpers continue to work unchanged in Phase 2. The new runtime-session APIs are additive and do not require hosts to replace their existing menu augmentors.
+
 ## Putting It Together
 
 The recommended layering is:
@@ -237,7 +381,7 @@ The recommended layering is:
 - `AsterGraph.Core`
   graph models and compatibility
 - `AsterGraph.Editor`
-  state orchestration, factories, and host extension seams
+  runtime session contracts, state orchestration, factories, service seams, diagnostics, and host extension seams
 - `AsterGraph.Avalonia`
   default Avalonia UI shell
 

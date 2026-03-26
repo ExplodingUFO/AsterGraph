@@ -15,6 +15,10 @@ This project intentionally contains:
 
 - `GraphEditorView`
 - `GraphEditorView.ChromeMode` for switching between the default shell and `CanvasOnly`
+- `NodeCanvas` as a supported standalone graph surface
+- `GraphInspectorView` as a supported standalone inspector surface
+- `GraphMiniMap` as a supported standalone mini map surface
+- `GraphContextMenuPresenter` as the stock Avalonia menu presenter
 - canvas rendering and pointer interaction
 - theme resources
 - context-menu presentation from editor descriptors
@@ -36,5 +40,15 @@ Integration entry points:
 
 Canonical and compatibility UI entry paths:
 
-- Canonical: `AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOptions { ... })`
+- Canonical full shell: `AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOptions { ... })`
+- Canonical standalone canvas: `AsterGraphCanvasViewFactory.Create(new AsterGraphCanvasViewOptions { ... })`
+- Canonical standalone inspector: `AsterGraphInspectorViewFactory.Create(new AsterGraphInspectorViewOptions { ... })`
+- Canonical standalone mini map: `AsterGraphMiniMapViewFactory.Create(new AsterGraphMiniMapViewOptions { ... })`
 - Compatibility: `new GraphEditorView { Editor = editor }`
+
+Standalone canvas keeps the stock context menu and stock command shortcuts enabled by default. Hosts can explicitly opt out through:
+
+- `EnableDefaultContextMenu`
+- `EnableDefaultCommandShortcuts`
+
+Header/library/status chrome remain shell-only in Phase 3. Full presenter replacement is deferred to Phase 4.

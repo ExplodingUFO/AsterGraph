@@ -1,51 +1,32 @@
-using CommunityToolkit.Mvvm.Input;
 using Avalonia.Controls;
+using CommunityToolkit.Mvvm.Input;
 using AsterGraph.Abstractions.Catalog;
+using AsterGraph.Abstractions.Compatibility;
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Abstractions.Styling;
 using AsterGraph.Avalonia.Controls;
 using AsterGraph.Avalonia.Hosting;
-using AsterGraph.Core.Compatibility;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Catalog;
 using AsterGraph.Editor.Configuration;
+using AsterGraph.Editor.Diagnostics;
+using AsterGraph.Editor.Events;
 using AsterGraph.Editor.Hosting;
 using AsterGraph.Editor.Localization;
 using AsterGraph.Editor.Menus;
+using AsterGraph.Editor.Models;
 using AsterGraph.Editor.Presentation;
+using AsterGraph.Editor.Runtime;
+using AsterGraph.Editor.Services;
 using AsterGraph.Editor.ViewModels;
 
+var runtimeCompatibility = new RecordingCompatibilityService();
+var runtimeDiagnostics = new RecordingDiagnosticsSink();
+var runtimeWorkspace = new ThrowingWorkspaceService("workspace://host-sample/runtime");
 var catalog = new NodeCatalog();
 catalog.RegisterProvider(new HostSampleNodeDefinitionProvider());
-
-var document = new GraphDocument(
-    "Host Sample Graph",
-    "Minimal host composition sample for AsterGraph.",
-    [
-        new GraphNode(
-            "sample-source-001",
-            "Sample Source",
-            "Host Sample",
-            "Produces a float output",
-            "Used to demonstrate host integration.",
-            new GraphPoint(120, 160),
-            new GraphSize(240, 160),
-            [],
-            [
-                new GraphPort(
-                    "result",
-                    "Result",
-                    PortDirection.Output,
-                    "float",
-                    "#6AD5C4",
-                    new PortTypeId("float")),
-            ],
-            "#6AD5C4",
-            new NodeDefinitionId("host.sample.source")),
-    ],
-    []);
-
+var document = CreateDocument();
 var style = GraphEditorStyleOptions.Default with
 {
     Shell = GraphEditorStyleOptions.Default.Shell with
@@ -58,7 +39,6 @@ var style = GraphEditorStyleOptions.Default with
         BackgroundHex = "#102332",
     },
 };
-
 var permissions = GraphEditorCommandPermissions.ReadOnly with
 {
     Host = new HostCommandPermissions
@@ -66,20 +46,67 @@ var permissions = GraphEditorCommandPermissions.ReadOnly with
         AllowContextMenuExtensions = true,
     },
 };
-
-var behavior = GraphEditorBehaviorOptions.Default with
+var viewBehavior = GraphEditorBehaviorOptions.Default with
 {
     Commands = permissions,
 };
+var runtimeBehavior = GraphEditorBehaviorOptions.Default;
 
-// Direct GraphEditorViewModel/GraphEditorView construction remains supported for staged migration.
+var runtimeSession = AsterGraphEditorFactory.CreateSession(new AsterGraphEditorOptions
+{
+    Document = document,
+    NodeCatalog = catalog,
+    CompatibilityService = runtimeCompatibility,
+    WorkspaceService = runtimeWorkspace,
+    DiagnosticsSink = runtimeDiagnostics,
+    StyleOptions = style,
+    BehaviorOptions = runtimeBehavior,
+});
+
+var commandMarkers = new List<string>();
+var documentChangeKinds = new List<string>();
+var viewportChanges = 0;
+GraphEditorRecoverableFailureEventArgs? runtimeFailure = null;
+
+runtimeSession.Events.CommandExecuted += (_, args) =>
+    commandMarkers.Add($"{args.CommandId}:{args.MutationLabel ?? "<none>"}:{args.IsInMutationScope}");
+runtimeSession.Events.DocumentChanged += (_, args) => documentChangeKinds.Add(args.ChangeKind.ToString());
+runtimeSession.Events.ViewportChanged += (_, _) => viewportChanges++;
+runtimeSession.Events.RecoverableFailure += (_, args) => runtimeFailure = args;
+
+var compatibleTargets = runtimeSession.Queries.GetCompatibleTargets("sample-source-001", "result");
+using (runtimeSession.BeginMutation("host-sample-batch"))
+{
+    runtimeSession.Commands.AddNode(new NodeDefinitionId("host.sample.sink"), new GraphPoint(680, 200));
+    runtimeSession.Commands.PanBy(12, 18);
+}
+runtimeSession.Commands.SaveWorkspace();
+
+var runtimeSnapshot = runtimeSession.Queries.CreateDocumentSnapshot();
+var runtimeViewport = runtimeSession.Queries.GetViewportSnapshot();
+var runtimeCapabilities = runtimeSession.Queries.GetCapabilitySnapshot();
+
+Console.WriteLine($"Session title: {runtimeSnapshot.Title}");
+Console.WriteLine($"Session node count after commands: {runtimeSnapshot.Nodes.Count}");
+Console.WriteLine($"Session compatible targets: {compatibleTargets.Count}");
+Console.WriteLine($"Session command markers: {string.Join(", ", commandMarkers)}");
+Console.WriteLine($"Session document changes: {string.Join(", ", documentChangeKinds)}");
+Console.WriteLine($"Session viewport events: {viewportChanges}");
+Console.WriteLine($"Session viewport snapshot: zoom={runtimeViewport.Zoom:0.00}, pan={runtimeViewport.PanX:0},{runtimeViewport.PanY:0}");
+Console.WriteLine($"Session capabilities: save={runtimeCapabilities.CanSaveWorkspace}, load={runtimeCapabilities.CanLoadWorkspace}");
+Console.WriteLine($"Session recoverable failure: {runtimeFailure?.Code ?? "<none>"}");
+Console.WriteLine($"Diagnostics sink codes: {string.Join(", ", runtimeDiagnostics.Diagnostics.Select(diagnostic => diagnostic.Code))}");
+Console.WriteLine($"Runtime compatibility evaluations: {runtimeCompatibility.EvaluateCalls}");
+Console.WriteLine($"Runtime workspace override path: {runtimeWorkspace.WorkspacePath}");
+
+var viewCompatibility = new RecordingCompatibilityService();
 var editor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
 {
     Document = document,
     NodeCatalog = catalog,
-    CompatibilityService = new DefaultPortCompatibilityService(),
+    CompatibilityService = viewCompatibility,
     StyleOptions = style,
-    BehaviorOptions = behavior,
+    BehaviorOptions = viewBehavior,
     ContextMenuAugmentor = new HostSampleAugmentor(),
     NodePresentationProvider = new HostSamplePresentationProvider(),
     LocalizationProvider = new HostSampleLocalizationProvider(),
@@ -112,7 +139,7 @@ var menuContext = new ContextMenuContext(
 var menu = editor.BuildContextMenu(menuContext);
 var hostPreviewItem = menu.SingleOrDefault(item => item.Id == "host-sample-preview");
 
-var node = editor.Nodes[0];
+var node = AssertNode(editor, "sample-source-001");
 var ownerMatched = menuContext.TryGetOwner<HostSampleOwner>(out var typedOwner);
 var topLevelMatched = menuContext.TryGetTopLevel<HostSampleTopLevel>(out var typedTopLevel);
 var view = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOptions
@@ -130,6 +157,26 @@ var canvasOnlyLibraryHidden = !FindRequiredControl<Border>(view, "PART_LibraryCh
 var canvasOnlyInspectorHidden = !FindRequiredControl<Border>(view, "PART_InspectorChrome").IsVisible;
 var canvasOnlyStatusHidden = !FindRequiredControl<Border>(view, "PART_StatusChrome").IsVisible;
 var canvasStillExists = FindRequiredControl<NodeCanvas>(view, "PART_NodeCanvas") is not null;
+var shellInspectorSurface = FindRequiredControl<GraphInspectorView>(view, "PART_InspectorSurface");
+var shellMiniMapSurface = FindRequiredControl<GraphMiniMap>(view, "PART_MiniMapSurface");
+var standaloneCanvas = AsterGraphCanvasViewFactory.Create(new AsterGraphCanvasViewOptions
+{
+    Editor = editor,
+});
+var standaloneCanvasOptOut = AsterGraphCanvasViewFactory.Create(new AsterGraphCanvasViewOptions
+{
+    Editor = editor,
+    EnableDefaultContextMenu = false,
+    EnableDefaultCommandShortcuts = false,
+});
+var standaloneInspector = AsterGraphInspectorViewFactory.Create(new AsterGraphInspectorViewOptions
+{
+    Editor = editor,
+});
+var standaloneMiniMap = AsterGraphMiniMapViewFactory.Create(new AsterGraphMiniMapViewOptions
+{
+    Editor = editor,
+});
 
 Console.WriteLine($"Host sample view type: {typeof(GraphEditorView).FullName}");
 Console.WriteLine($"Node count: {editor.Nodes.Count}");
@@ -147,10 +194,66 @@ Console.WriteLine($"Typed host owner found: {ownerMatched} ({typedOwner?.Display
 Console.WriteLine($"Typed host top level found: {topLevelMatched} ({typedTopLevel?.WindowTitle ?? "<none>"})");
 Console.WriteLine($"Style highlight hex: {editor.StyleOptions.Shell.HighlightHex}");
 Console.WriteLine($"Style context menu background: {editor.StyleOptions.ContextMenu.BackgroundHex}");
+Console.WriteLine($"View compatibility evaluations: {viewCompatibility.EvaluateCalls}");
 Console.WriteLine($"ChromeMode default sections visible: header={defaultHeaderVisible}, library={defaultLibraryVisible}, inspector={defaultInspectorVisible}, status={defaultStatusVisible}");
 Console.WriteLine($"ChromeMode switched to: {view.ChromeMode}");
 Console.WriteLine($"ChromeMode canvas-only sections hidden: header={canvasOnlyHeaderHidden}, library={canvasOnlyLibraryHidden}, inspector={canvasOnlyInspectorHidden}, status={canvasOnlyStatusHidden}");
 Console.WriteLine($"ChromeMode canvas-only keeps canvas: {canvasStillExists}");
+Console.WriteLine($"Full shell embeds standalone surfaces: inspector={ReferenceEquals(editor, shellInspectorSurface.Editor)}, minimap={ReferenceEquals(editor, shellMiniMapSurface.ViewModel)}");
+Console.WriteLine($"Standalone surfaces share editor: canvas={ReferenceEquals(editor, standaloneCanvas.ViewModel)}, inspector={ReferenceEquals(editor, standaloneInspector.Editor)}, minimap={ReferenceEquals(editor, standaloneMiniMap.ViewModel)}");
+Console.WriteLine($"Standalone canvas defaults: menu={standaloneCanvas.EnableDefaultContextMenu}, shortcuts={standaloneCanvas.EnableDefaultCommandShortcuts}");
+Console.WriteLine($"Standalone canvas opt-out: menu={standaloneCanvasOptOut.EnableDefaultContextMenu}, shortcuts={standaloneCanvasOptOut.EnableDefaultCommandShortcuts}");
+
+static GraphDocument CreateDocument()
+    => new(
+        "Host Sample Graph",
+        "Reference host composition sample for AsterGraph.",
+        [
+            new GraphNode(
+                "sample-source-001",
+                "Sample Source",
+                "Host Sample",
+                "Produces a float output",
+                "Used to demonstrate host integration.",
+                new GraphPoint(120, 160),
+                new GraphSize(240, 160),
+                [],
+                [
+                    new GraphPort(
+                        "result",
+                        "Result",
+                        PortDirection.Output,
+                        "float",
+                        "#6AD5C4",
+                        new PortTypeId("float")),
+                ],
+                "#6AD5C4",
+                new NodeDefinitionId("host.sample.source")),
+            new GraphNode(
+                "sample-sink-001",
+                "Sample Sink",
+                "Host Sample",
+                "Consumes a float input",
+                "Used to demonstrate compatibility queries.",
+                new GraphPoint(420, 160),
+                new GraphSize(240, 160),
+                [
+                    new GraphPort(
+                        "input",
+                        "Input",
+                        PortDirection.Input,
+                        "float",
+                        "#F3B36B",
+                        new PortTypeId("float")),
+                ],
+                [],
+                "#F3B36B",
+                new NodeDefinitionId("host.sample.sink")),
+        ],
+        []);
+
+static NodeViewModel AssertNode(GraphEditorViewModel editor, string nodeId)
+    => editor.Nodes.Single(node => node.Id == nodeId);
 
 static T FindRequiredControl<T>(Control root, string name)
     where T : Control
@@ -175,8 +278,26 @@ internal sealed class HostSampleNodeDefinitionProvider : INodeDefinitionProvider
                         "#6AD5C4",
                         "Sample output for host integration."),
                 ],
-                description: "Minimal sample node definition used by the host sample.",
+                description: "Minimal sample source definition used by the host sample.",
                 accentHex: "#6AD5C4",
+                defaultWidth: 240,
+                defaultHeight: 160),
+            new NodeDefinition(
+                new NodeDefinitionId("host.sample.sink"),
+                "Sample Sink",
+                "Host Sample",
+                "Consumes a float input",
+                [
+                    new PortDefinition(
+                        "input",
+                        "Input",
+                        new PortTypeId("float"),
+                        "#F3B36B",
+                        "Sample input for compatibility queries."),
+                ],
+                [],
+                description: "Minimal sample sink definition used by the host sample.",
+                accentHex: "#F3B36B",
                 defaultWidth: 240,
                 defaultHeight: 160),
         ];
@@ -241,6 +362,49 @@ internal sealed class HostSampleLocalizationProvider : IGraphLocalizationProvide
 
     public string GetString(string key, string fallback)
         => Values.TryGetValue(key, out var value) ? value : fallback;
+}
+
+internal sealed class RecordingCompatibilityService : IPortCompatibilityService
+{
+    public int EvaluateCalls { get; private set; }
+
+    public PortCompatibilityResult Evaluate(PortTypeId sourceType, PortTypeId targetType)
+    {
+        EvaluateCalls++;
+        return sourceType == targetType
+            ? PortCompatibilityResult.Exact()
+            : PortCompatibilityResult.Rejected();
+    }
+}
+
+internal sealed class ThrowingWorkspaceService(string workspacePath) : IGraphWorkspaceService
+{
+    public string WorkspacePath { get; } = workspacePath;
+
+    public int SaveCalls { get; private set; }
+
+    public GraphDocument? LastSaved { get; private set; }
+
+    public void Save(GraphDocument document)
+    {
+        SaveCalls++;
+        LastSaved = document;
+        throw new InvalidOperationException("host sample workspace save failed on purpose");
+    }
+
+    public GraphDocument Load()
+        => LastSaved ?? throw new InvalidOperationException("No workspace snapshot.");
+
+    public bool Exists()
+        => LastSaved is not null;
+}
+
+internal sealed class RecordingDiagnosticsSink : IGraphEditorDiagnosticsSink
+{
+    public List<GraphEditorDiagnostic> Diagnostics { get; } = [];
+
+    public void Publish(GraphEditorDiagnostic diagnostic)
+        => Diagnostics.Add(diagnostic);
 }
 
 internal sealed record HostSampleGraphHostContext(HostSampleOwner Owner, HostSampleTopLevel? TopLevel) : IGraphHostContext
