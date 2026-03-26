@@ -7,8 +7,8 @@ namespace AsterGraph.Avalonia.Hosting;
 /// 定义通过 <see cref="AsterGraphAvaloniaViewFactory"/> 组合默认 Avalonia 视图的宿主输入。
 /// </summary>
 /// <remarks>
-/// 该选项契约提供 Phase 1 的规范 Avalonia 宿主入口；直接使用
-/// <c>new GraphEditorView { Editor = ... }</c> 仍然是受支持的兼容路径。
+/// 该选项契约提供默认完整外壳的规范 Avalonia 宿主入口；
+/// 直接使用 <c>new GraphEditorView { Editor = ... }</c> 仍然是受支持的兼容路径。
 /// </remarks>
 public sealed record AsterGraphAvaloniaViewOptions
 {

@@ -6,7 +6,8 @@ namespace AsterGraph.Avalonia.Hosting;
 /// 提供默认 <see cref="GraphEditorView"/> 的规范宿主组合入口。
 /// </summary>
 /// <remarks>
-/// 该工厂只负责应用宿主提供的编辑器实例与视图选项；
+/// 该工厂只负责应用宿主提供的编辑器实例与视图选项，
+/// 并返回由独立画布、检查器与缩略图表面组合而成的默认完整外壳；
 /// 直接构造 <see cref="GraphEditorView"/> 仍然受支持，便于宿主渐进迁移。
 /// </remarks>
 public static class AsterGraphAvaloniaViewFactory

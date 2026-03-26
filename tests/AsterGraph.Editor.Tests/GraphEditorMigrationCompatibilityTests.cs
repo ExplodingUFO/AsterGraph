@@ -1,24 +1,36 @@
+using AsterGraph.Abstractions.Compatibility;
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Abstractions.Styling;
+using Avalonia.Headless.XUnit;
 using AsterGraph.Avalonia.Controls;
 using AsterGraph.Avalonia.Hosting;
-using AsterGraph.Core.Compatibility;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Catalog;
 using AsterGraph.Editor.Configuration;
+using AsterGraph.Editor.Diagnostics;
 using AsterGraph.Editor.Hosting;
 using AsterGraph.Editor.Localization;
 using AsterGraph.Editor.Menus;
+using AsterGraph.Editor.Models;
 using AsterGraph.Editor.Presentation;
+using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.Services;
 using AsterGraph.Editor.ViewModels;
 using Xunit;
 
 namespace AsterGraph.Editor.Tests;
 
+[Collection("Avalonia UI")]
 public sealed class GraphEditorMigrationCompatibilityTests
 {
+    private static readonly NodeDefinitionId SourceDefinitionId = new("tests.migration.source");
+    private static readonly NodeDefinitionId TargetDefinitionId = new("tests.migration.target");
+    private const string SourceNodeId = "tests.migration.source-001";
+    private const string TargetNodeId = "tests.migration.target-001";
+    private const string SourcePortId = "out";
+    private const string TargetPortId = "in";
+
     [Fact]
     public void LegacyGraphEditorViewModelConstructor_RemainsSupportedAlongsideNewInitializationApis()
     {
@@ -33,12 +45,14 @@ public sealed class GraphEditorMigrationCompatibilityTests
         Assert.Equal(harness.WorkspaceService.WorkspacePath, legacyEditor.WorkspacePath);
         Assert.Equal(harness.FragmentWorkspaceService.FragmentPath, legacyEditor.FragmentPath);
         Assert.Equal(harness.FragmentLibraryService.LibraryPath, legacyEditor.FragmentLibraryPath);
+        Assert.IsAssignableFrom<IGraphEditorSession>(legacyEditor.Session);
 
         var snapshot = CaptureSnapshot(legacyEditor);
         Assert.Equal("Migration subtitle", snapshot.NodeSubtitle);
         Assert.Equal("Migration description", snapshot.NodeDescription);
-        Assert.Equal("Localized stats 1/0/88", snapshot.StatsCaption);
-        Assert.Contains("tests.migration.host-action", snapshot.MenuIds);
+        Assert.Equal("Localized stats 2/0/88", snapshot.StatsCaption);
+        Assert.Contains("tests.migration.host-action", snapshot.MenuSignature);
+        Assert.Equal(1, snapshot.CompatibleTargetCount);
     }
 
     [Fact]
@@ -51,7 +65,7 @@ public sealed class GraphEditorMigrationCompatibilityTests
         Assert.Equal(CaptureSnapshot(legacyEditor), CaptureSnapshot(factoryEditor));
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void GraphEditorView_RemainsCompatibilityFacadeDuringStagedMigration()
     {
         var harness = CreateHarness();
@@ -76,7 +90,7 @@ public sealed class GraphEditorMigrationCompatibilityTests
         Assert.Equal(GraphEditorViewChromeMode.CanvasOnly, factoryView.ChromeMode);
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void StagedMigrationPath_AllowsHostsToAdoptNewApisWithoutImmediateRewrite()
     {
         var harness = CreateHarness();
@@ -110,16 +124,68 @@ public sealed class GraphEditorMigrationCompatibilityTests
         AssertViewBindings(factoryEverywhere, factoryEditor);
     }
 
+    [Fact]
+    public async Task RuntimeSession_ServiceSeamsAndCompatibilityService_RemainAvailableAcrossMigrationPaths()
+    {
+        var harness = CreateHarness();
+        var legacyEditor = CreateLegacyEditor(harness);
+        var factoryEditor = CreateFactoryEditor(harness);
+        var factorySession = CreateFactorySession(harness);
+        var commandIds = new List<string>();
+
+        factorySession.Events.CommandExecuted += (_, args) => commandIds.Add(args.CommandId);
+
+        SelectSourceNode(legacyEditor);
+        SelectSourceNode(factoryEditor);
+
+        await legacyEditor.CopySelectionAsync();
+        await factoryEditor.CopySelectionAsync();
+        legacyEditor.ExportSelectionFragment();
+        factoryEditor.ExportSelectionFragment();
+        factorySession.Commands.SaveWorkspace();
+
+        var legacySelection = legacyEditor.Session.Queries.GetSelectionSnapshot();
+        var factorySelection = factoryEditor.Session.Queries.GetSelectionSnapshot();
+        var legacyCompatible = legacyEditor.Session.Queries.GetCompatibleTargets(SourceNodeId, SourcePortId);
+        var factoryCompatible = factoryEditor.Session.Queries.GetCompatibleTargets(SourceNodeId, SourcePortId);
+        var sessionCompatible = factorySession.Queries.GetCompatibleTargets(SourceNodeId, SourcePortId);
+
+        Assert.IsAssignableFrom<IGraphEditorSession>(legacyEditor.Session);
+        Assert.IsAssignableFrom<IGraphEditorSession>(factoryEditor.Session);
+        Assert.Equal(legacySelection.SelectedNodeIds, factorySelection.SelectedNodeIds);
+        Assert.Single(legacyCompatible);
+        Assert.Single(factoryCompatible);
+        Assert.Single(sessionCompatible);
+        Assert.Equal(TargetNodeId, legacyCompatible[0].Node.Id);
+        Assert.Equal(TargetNodeId, factoryCompatible[0].Node.Id);
+        Assert.Equal(TargetNodeId, sessionCompatible[0].Node.Id);
+        Assert.Equal(1, harness.WorkspaceService.SaveCalls);
+        Assert.Equal(2, harness.FragmentWorkspaceService.SaveCalls);
+        Assert.Equal(2, harness.ClipboardPayloadSerializer.SerializeCalls);
+        Assert.Contains("workspace.save", commandIds);
+        Assert.True(harness.CompatibilityService.EvaluateCalls > 0);
+
+        factorySession.Commands.AddNode(TargetDefinitionId, new GraphPoint(640, 220));
+
+        Assert.Contains("nodes.add", commandIds);
+        Assert.Equal(3, factorySession.Queries.CreateDocumentSnapshot().Nodes.Count);
+    }
+
     private static void AssertViewBindings(GraphEditorView view, GraphEditorViewModel expectedEditor)
     {
         Assert.Same(expectedEditor, view.Editor);
         Assert.Equal(GraphEditorViewChromeMode.CanvasOnly, view.ChromeMode);
     }
 
+    private static void SelectSourceNode(GraphEditorViewModel editor)
+        => editor.SelectSingleNode(Assert.Single(editor.Nodes, node => node.Id == SourceNodeId), updateStatus: false);
+
     private static EditorParitySnapshot CaptureSnapshot(GraphEditorViewModel editor)
     {
-        var menuIds = editor.BuildContextMenu(CreateMenuContext()).Select(item => item.Id).ToArray();
-        var firstNode = Assert.Single(editor.Nodes);
+        var menuSignature = string.Join(
+            "|",
+            editor.BuildContextMenu(CreateMenuContext()).Select(item => item.Id));
+        var sourceNode = Assert.Single(editor.Nodes, node => node.Id == SourceNodeId);
 
         return new EditorParitySnapshot(
             editor.Title,
@@ -127,12 +193,13 @@ public sealed class GraphEditorMigrationCompatibilityTests
             editor.StyleOptions.Shell.HighlightHex,
             editor.BehaviorOptions.View.ShowMiniMap,
             editor.StatsCaption,
-            firstNode.DisplaySubtitle,
-            firstNode.DisplayDescription,
-            menuIds,
+            sourceNode.DisplaySubtitle,
+            sourceNode.DisplayDescription,
+            menuSignature,
             editor.WorkspacePath,
             editor.FragmentPath,
-            editor.FragmentLibraryPath);
+            editor.FragmentLibraryPath,
+            editor.Session.Queries.GetCompatibleTargets(SourceNodeId, SourcePortId).Count);
     }
 
     private static ContextMenuContext CreateMenuContext()
@@ -152,7 +219,9 @@ public sealed class GraphEditorMigrationCompatibilityTests
             harness.FragmentLibraryService,
             harness.MenuAugmentor,
             harness.PresentationProvider,
-            harness.LocalizationProvider);
+            harness.LocalizationProvider,
+            harness.ClipboardPayloadSerializer,
+            harness.DiagnosticsSink);
 
     private static GraphEditorViewModel CreateFactoryEditor(MigrationHarness harness)
         => AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
@@ -165,33 +234,40 @@ public sealed class GraphEditorMigrationCompatibilityTests
             StyleOptions = harness.StyleOptions,
             BehaviorOptions = harness.BehaviorOptions,
             FragmentLibraryService = harness.FragmentLibraryService,
+            ClipboardPayloadSerializer = harness.ClipboardPayloadSerializer,
             ContextMenuAugmentor = harness.MenuAugmentor,
             NodePresentationProvider = harness.PresentationProvider,
             LocalizationProvider = harness.LocalizationProvider,
+            DiagnosticsSink = harness.DiagnosticsSink,
+        });
+
+    private static IGraphEditorSession CreateFactorySession(MigrationHarness harness)
+        => AsterGraphEditorFactory.CreateSession(new AsterGraphEditorOptions
+        {
+            Document = harness.Document,
+            NodeCatalog = harness.Catalog,
+            CompatibilityService = harness.CompatibilityService,
+            WorkspaceService = harness.WorkspaceService,
+            FragmentWorkspaceService = harness.FragmentWorkspaceService,
+            StyleOptions = harness.StyleOptions,
+            BehaviorOptions = harness.BehaviorOptions,
+            FragmentLibraryService = harness.FragmentLibraryService,
+            ClipboardPayloadSerializer = harness.ClipboardPayloadSerializer,
+            ContextMenuAugmentor = harness.MenuAugmentor,
+            NodePresentationProvider = harness.PresentationProvider,
+            LocalizationProvider = harness.LocalizationProvider,
+            DiagnosticsSink = harness.DiagnosticsSink,
         });
 
     private static MigrationHarness CreateHarness()
     {
-        var root = Path.Combine(
-            Path.GetTempPath(),
-            "astergraph-migration-tests",
-            Guid.NewGuid().ToString("N"));
-        var definitionId = new NodeDefinitionId("tests.migration.node");
-        var catalog = new NodeCatalog();
-        catalog.RegisterDefinition(new NodeDefinition(
-            definitionId,
-            "Migration Node",
-            "Tests",
-            "Compatibility",
-            [],
-            []));
-
+        var compatibility = new RecordingCompatibilityService();
         return new MigrationHarness(
-            CreateDocument(definitionId),
-            catalog,
-            new DefaultPortCompatibilityService(),
-            new GraphWorkspaceService(Path.Combine(root, "workspace.json")),
-            new GraphFragmentWorkspaceService(Path.Combine(root, "fragment.json")),
+            CreateDocument(),
+            CreateCatalog(),
+            compatibility,
+            new RecordingWorkspaceService("workspace://migration"),
+            new RecordingFragmentWorkspaceService("fragment://migration"),
             GraphEditorStyleOptions.Default with
             {
                 Shell = GraphEditorStyleOptions.Default.Shell with
@@ -206,41 +282,97 @@ public sealed class GraphEditorMigrationCompatibilityTests
                     ShowMiniMap = false,
                 },
             },
-            new GraphFragmentLibraryService(Path.Combine(root, "fragments")),
+            new RecordingFragmentLibraryService("library://migration"),
+            new RecordingClipboardPayloadSerializer(),
+            new RecordingDiagnosticsSink(),
             new MigrationContextMenuAugmentor(),
             new MigrationNodePresentationProvider(),
             new MigrationLocalizationProvider());
     }
 
-    private static GraphDocument CreateDocument(NodeDefinitionId definitionId)
+    private static GraphDocument CreateDocument()
         => new(
             "Migration Graph",
             "Compatibility regression coverage.",
             [
                 new GraphNode(
-                    "tests.migration.node-001",
-                    "Migration Node",
+                    SourceNodeId,
+                    "Migration Source",
                     "Tests",
                     "Compatibility",
-                    "Migration parity node.",
+                    "Migration parity source node.",
                     new GraphPoint(120, 160),
                     new GraphSize(240, 160),
                     [],
-                    [],
+                    [
+                        new GraphPort(
+                            SourcePortId,
+                            "Output",
+                            PortDirection.Output,
+                            "float",
+                            "#6AD5C4",
+                            new PortTypeId("float")),
+                    ],
                     "#6AD5C4",
-                    definitionId),
+                    SourceDefinitionId),
+                new GraphNode(
+                    TargetNodeId,
+                    "Migration Target",
+                    "Tests",
+                    "Compatibility",
+                    "Migration parity target node.",
+                    new GraphPoint(420, 160),
+                    new GraphSize(240, 160),
+                    [
+                        new GraphPort(
+                            TargetPortId,
+                            "Input",
+                            PortDirection.Input,
+                            "float",
+                            "#F3B36B",
+                            new PortTypeId("float")),
+                    ],
+                    [],
+                    "#F3B36B",
+                    TargetDefinitionId),
             ],
             []);
+
+    private static NodeCatalog CreateCatalog()
+    {
+        var catalog = new NodeCatalog();
+        catalog.RegisterDefinition(new NodeDefinition(
+            SourceDefinitionId,
+            "Migration Source",
+            "Tests",
+            "Compatibility",
+            [],
+            [
+                new PortDefinition(SourcePortId, "Output", new PortTypeId("float"), "#6AD5C4"),
+            ]));
+        catalog.RegisterDefinition(new NodeDefinition(
+            TargetDefinitionId,
+            "Migration Target",
+            "Tests",
+            "Compatibility",
+            [
+                new PortDefinition(TargetPortId, "Input", new PortTypeId("float"), "#F3B36B"),
+            ],
+            []));
+        return catalog;
+    }
 
     private sealed record MigrationHarness(
         GraphDocument Document,
         NodeCatalog Catalog,
-        DefaultPortCompatibilityService CompatibilityService,
-        GraphWorkspaceService WorkspaceService,
-        GraphFragmentWorkspaceService FragmentWorkspaceService,
+        RecordingCompatibilityService CompatibilityService,
+        RecordingWorkspaceService WorkspaceService,
+        RecordingFragmentWorkspaceService FragmentWorkspaceService,
         GraphEditorStyleOptions StyleOptions,
         GraphEditorBehaviorOptions BehaviorOptions,
-        GraphFragmentLibraryService FragmentLibraryService,
+        RecordingFragmentLibraryService FragmentLibraryService,
+        RecordingClipboardPayloadSerializer ClipboardPayloadSerializer,
+        RecordingDiagnosticsSink DiagnosticsSink,
         MigrationContextMenuAugmentor MenuAugmentor,
         MigrationNodePresentationProvider PresentationProvider,
         MigrationLocalizationProvider LocalizationProvider);
@@ -253,10 +385,11 @@ public sealed class GraphEditorMigrationCompatibilityTests
         string StatsCaption,
         string NodeSubtitle,
         string NodeDescription,
-        IReadOnlyList<string> MenuIds,
+        string MenuSignature,
         string WorkspacePath,
         string FragmentPath,
-        string FragmentLibraryPath);
+        string FragmentLibraryPath,
+        int CompatibleTargetCount);
 
     private sealed class MigrationContextMenuAugmentor : IGraphContextMenuAugmentor
     {
@@ -281,5 +414,106 @@ public sealed class GraphEditorMigrationCompatibilityTests
             => key == "editor.stats.caption"
                 ? "Localized stats {0}/{1}/{2:0}"
                 : fallback;
+    }
+
+    private sealed class RecordingWorkspaceService(string workspacePath) : IGraphWorkspaceService
+    {
+        public string WorkspacePath { get; } = workspacePath;
+
+        public int SaveCalls { get; private set; }
+
+        public GraphDocument? LastSaved { get; private set; }
+
+        public void Save(GraphDocument document)
+        {
+            SaveCalls++;
+            LastSaved = document;
+        }
+
+        public GraphDocument Load()
+            => LastSaved ?? throw new InvalidOperationException("No saved workspace.");
+
+        public bool Exists()
+            => LastSaved is not null;
+    }
+
+    private sealed class RecordingFragmentWorkspaceService(string fragmentPath) : IGraphFragmentWorkspaceService
+    {
+        public string FragmentPath { get; } = fragmentPath;
+
+        public int SaveCalls { get; private set; }
+
+        public GraphSelectionFragment? LastSaved { get; private set; }
+
+        public void Save(GraphSelectionFragment fragment, string? path = null)
+        {
+            SaveCalls++;
+            LastSaved = fragment;
+        }
+
+        public GraphSelectionFragment Load(string? path = null)
+            => LastSaved ?? throw new InvalidOperationException("No saved fragment.");
+
+        public bool Exists(string? path = null)
+            => LastSaved is not null;
+
+        public void Delete(string? path = null)
+            => LastSaved = null;
+    }
+
+    private sealed class RecordingFragmentLibraryService(string libraryPath) : IGraphFragmentLibraryService
+    {
+        public string LibraryPath { get; } = libraryPath;
+
+        public IReadOnlyList<FragmentTemplateInfo> EnumerateTemplates()
+            => [];
+
+        public string SaveTemplate(GraphSelectionFragment fragment, string? name = null)
+            => Path.Combine(LibraryPath, $"{name ?? "fragment"}.json");
+
+        public GraphSelectionFragment LoadTemplate(string path)
+            => throw new NotSupportedException();
+
+        public void DeleteTemplate(string path)
+        {
+        }
+    }
+
+    private sealed class RecordingClipboardPayloadSerializer : IGraphClipboardPayloadSerializer
+    {
+        public int SerializeCalls { get; private set; }
+
+        public string Serialize(GraphSelectionFragment fragment)
+        {
+            SerializeCalls++;
+            return "serialized-fragment";
+        }
+
+        public bool TryDeserialize(string? text, out GraphSelectionFragment? fragment)
+        {
+            fragment = null;
+            return false;
+        }
+    }
+
+    private sealed class RecordingDiagnosticsSink : IGraphEditorDiagnosticsSink
+    {
+        public List<GraphEditorDiagnostic> Diagnostics { get; } = [];
+
+        public void Publish(GraphEditorDiagnostic diagnostic)
+            => Diagnostics.Add(diagnostic);
+    }
+
+    private sealed class RecordingCompatibilityService : IPortCompatibilityService
+    {
+        public int EvaluateCalls { get; private set; }
+
+        public PortCompatibilityResult Evaluate(PortTypeId sourceType, PortTypeId targetType)
+        {
+            EvaluateCalls++;
+            return sourceType == targetType
+                ? PortCompatibilityResult.Exact()
+                : PortCompatibilityResult.Rejected();
+        }
     }
 }
