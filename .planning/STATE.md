@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Executing
-stopped_at: Phase 4 plan 02 completed
-last_updated: "2026-03-26T10:19:13.4129966Z"
+stopped_at: Phase 4 plan 03 completed
+last_updated: "2026-03-26T10:29:38.8807756Z"
 progress:
   total_phases: 5
   completed_phases: 3
   total_plans: 17
-  completed_plans: 15
+  completed_plans: 16
 ---
 
 # Project State
@@ -24,13 +24,13 @@ See: .planning/PROJECT.md (updated 2026-03-26)
 ## Current Position
 
 Phase: 4 of 5 (Replaceable Presentation Kit)
-Plan: 04-03 next
+Plan: 04-04 next
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 15
+- Total plans completed: 16
 - Average duration: 17 min
 - Total execution time: 4.0 hours
 
@@ -41,11 +41,11 @@ Plan: 04-03 next
 | 01-consumption-compatibility-guardrails | 4 | 69 min | 17 min |
 | 02-runtime-contracts-service-seams | 5 | 84 min | 17 min |
 | 03-embeddable-avalonia-surfaces | 4 | 65 min | 16 min |
-| 04-replaceable-presentation-kit | 2 | 49 min | 25 min |
+| 04-replaceable-presentation-kit | 3 | 80 min | 27 min |
 
 **Recent Trend:**
 
-- Last 5 plans: 03-02 (13 min), 03-03 (16 min), 03-04 (15 min), 04-01 (28 min), 04-02 (21 min)
+- Last 5 plans: 03-03 (16 min), 03-04 (15 min), 04-01 (28 min), 04-02 (21 min), 04-03 (31 min)
 - Trend: Stable
 
 ## Accumulated Context
@@ -61,6 +61,7 @@ Recent decisions affecting current work:
 - [Phase 4]: Keep presenter replacement opt-in per surface and route it through canonical full-shell plus standalone factory options.
 - [Phase 04-replaceable-presentation-kit]: Lock the presenter contract surface in `AsterGraph.Avalonia` before implementing stock-vs-custom behavior replacement.
 - [Phase 04-replaceable-presentation-kit]: Keep NodeCanvas as the interaction owner and treat node/menu presenters as visual-only replacement seams over existing editor intent.
+- [Phase 04-replaceable-presentation-kit]: Let stock standalone inspector/minimap surfaces act as presenter hosts instead of introducing a second mandatory shell abstraction.
 - [Phase 01-consumption-compatibility-guardrails]: Use DefaultItemExcludes in Directory.Build.props so project-local artifacts trees stay out of SDK default compile globs.
 - [Phase 01-consumption-compatibility-guardrails]: Represent Phase 1 initialization and migration contracts as explicit skipped xUnit cases with stable method names for later implementation plans.
 - [Phase 01-consumption-compatibility-guardrails]: Keep the new host entry surface factory-first and place it under the existing Hosting namespaces in AsterGraph.Editor and AsterGraph.Avalonia.
@@ -83,6 +84,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-26T10:19:13.4129966Z
-Stopped at: Phase 4 04-02 completed
-Resume file: .planning/phases/04-replaceable-presentation-kit/04-03-PLAN.md
+Last session: 2026-03-26T10:29:38.8807756Z
+Stopped at: Phase 4 04-03 completed
+Resume file: .planning/phases/04-replaceable-presentation-kit/04-04-PLAN.md
