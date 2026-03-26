@@ -1,10 +1,14 @@
 using System.Reflection;
 using Avalonia;
 using Avalonia.Headless.XUnit;
+using Avalonia.Controls;
+using Avalonia.Interactivity;
+using Avalonia.VisualTree;
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Avalonia.Controls;
 using AsterGraph.Avalonia.Hosting;
+using AsterGraph.Avalonia.Presentation;
 using AsterGraph.Core.Compatibility;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Catalog;
@@ -51,6 +55,53 @@ public sealed class GraphMiniMapStandaloneTests
 
         Assert.NotEqual((0d, 0d), panAfterFirstRecenter);
         Assert.NotEqual(panAfterFirstRecenter, (editor.PanX, editor.PanY));
+    }
+
+    [AvaloniaFact]
+    public void StandaloneMiniMap_CustomPresenter_RecenterViewportThroughEditorApi()
+    {
+        var editor = CreateEditor();
+        editor.UpdateViewportSize(480, 320);
+        var customPresenter = new RecordingMiniMapPresenter();
+        var miniMap = AsterGraphMiniMapViewFactory.Create(new AsterGraphMiniMapViewOptions
+        {
+            Editor = editor,
+            Presentation = new AsterGraphPresentationOptions
+            {
+                MiniMapPresenter = customPresenter,
+            },
+        });
+        var window = new Window
+        {
+            Width = 320,
+            Height = 220,
+            Content = miniMap,
+        };
+        window.Show();
+
+        try
+        {
+            var button = miniMap.GetVisualDescendants()
+                .OfType<Button>()
+                .Single(control => Equals(control.Tag, "custom-minimap-center"));
+            var allText = string.Join(
+                "\n",
+                miniMap.GetVisualDescendants()
+                    .OfType<TextBlock>()
+                    .Select(block => block.Text)
+                    .Where(text => !string.IsNullOrWhiteSpace(text)));
+
+            button.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+
+            Assert.Same(editor, customPresenter.LastEditor);
+            Assert.Same(customPresenter, miniMap.MiniMapPresenter);
+            Assert.Contains("CUSTOM MINIMAP SURFACE", allText);
+            Assert.NotEqual((0d, 0d), (editor.PanX, editor.PanY));
+        }
+        finally
+        {
+            window.Close();
+        }
     }
 
     private static void InvokeMiniMapMethod(string methodName, GraphMiniMap miniMap, params object[] args)
@@ -141,6 +192,32 @@ public sealed class GraphMiniMapStandaloneTests
                 []),
             catalog,
             new DefaultPortCompatibilityService());
+    }
+
+    private sealed class RecordingMiniMapPresenter : IGraphMiniMapPresenter
+    {
+        public GraphEditorViewModel? LastEditor { get; private set; }
+
+        public Control Create(GraphEditorViewModel? editor)
+        {
+            LastEditor = editor;
+            var button = new Button
+            {
+                Tag = "custom-minimap-center",
+                Content = "Center Custom MiniMap",
+            };
+            button.Click += (_, _) => editor?.CenterViewAt(new GraphPoint(520, 360), updateStatus: false);
+
+            return new StackPanel
+            {
+                Spacing = 8,
+                Children =
+                {
+                    new TextBlock { Text = "CUSTOM MINIMAP SURFACE" },
+                    button,
+                },
+            };
+        }
     }
 
 }

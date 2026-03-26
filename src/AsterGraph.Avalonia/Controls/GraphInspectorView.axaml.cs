@@ -11,6 +11,8 @@ namespace AsterGraph.Avalonia.Controls;
 /// </summary>
 public partial class GraphInspectorView : UserControl
 {
+    private object? _stockContent;
+
     /// <summary>
     /// 编辑器视图模型依赖属性。
     /// </summary>
@@ -29,6 +31,7 @@ public partial class GraphInspectorView : UserControl
     public GraphInspectorView()
     {
         InitializeComponent();
+        _stockContent = Content;
     }
 
     /// <summary>
@@ -49,6 +52,32 @@ public partial class GraphInspectorView : UserControl
         set => SetValue(InspectorPresenterProperty, value);
     }
 
+    /// <inheritdoc />
+    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
+    {
+        base.OnPropertyChanged(change);
+
+        if (change.Property == EditorProperty || change.Property == InspectorPresenterProperty)
+        {
+            ApplyInspectorPresenter();
+        }
+    }
+
     private void InitializeComponent()
         => AvaloniaXamlLoader.Load(this);
+
+    private void ApplyInspectorPresenter()
+    {
+        if (InspectorPresenter is null)
+        {
+            if (_stockContent is not null && !ReferenceEquals(Content, _stockContent))
+            {
+                Content = _stockContent;
+            }
+
+            return;
+        }
+
+        Content = InspectorPresenter.Create(Editor);
+    }
 }

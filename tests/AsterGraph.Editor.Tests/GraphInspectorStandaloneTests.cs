@@ -1,11 +1,13 @@
 using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
+using Avalonia.Interactivity;
 using Avalonia.VisualTree;
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Avalonia.Controls;
 using AsterGraph.Avalonia.Hosting;
+using AsterGraph.Avalonia.Presentation;
 using AsterGraph.Core.Compatibility;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Catalog;
@@ -42,8 +44,8 @@ public sealed class GraphInspectorStandaloneTests
             Assert.Contains("Outputs", allText);
             Assert.Contains("Upstream", allText);
             Assert.Contains("Downstream", allText);
-            Assert.Contains("Parameters", allText);
-            Assert.Contains("Threshold", allText);
+            Assert.Single(editor.SelectedNodeParameters);
+            Assert.Equal("Threshold", editor.SelectedNodeParameters[0].DisplayName);
 
             Assert.DoesNotContain("Workspace", allText);
             Assert.DoesNotContain("Fragments", allText);
@@ -57,11 +59,52 @@ public sealed class GraphInspectorStandaloneTests
         }
     }
 
-    private static (Window Window, GraphInspectorView Inspector) CreateInspectorWindow(GraphEditorViewModel editor)
+    [AvaloniaFact]
+    public void StandaloneInspector_CustomPresenter_UsesSameEditorAndCanEditParameters()
+    {
+        var editor = CreateEditor();
+        editor.SelectSingleNode(editor.Nodes[0], updateStatus: false);
+        var customPresenter = new RecordingInspectorPresenter();
+        var (window, inspector) = CreateInspectorWindow(
+            editor,
+            new AsterGraphPresentationOptions
+            {
+                InspectorPresenter = customPresenter,
+            });
+
+        try
+        {
+            var allText = string.Join(
+                "\n",
+                inspector.GetVisualDescendants()
+                    .OfType<TextBlock>()
+                    .Select(block => block.Text)
+                    .Where(text => !string.IsNullOrWhiteSpace(text)));
+            var applyButton = inspector.GetVisualDescendants()
+                .OfType<Button>()
+                .Single(button => Equals(button.Tag, "custom-inspector-apply"));
+
+            applyButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+
+            Assert.Same(editor, customPresenter.LastEditor);
+            Assert.Same(customPresenter, inspector.InspectorPresenter);
+            Assert.Contains("CUSTOM INSPECTOR:Inspector Node", allText);
+            Assert.Equal("0.90", editor.SelectedNodeParameters[0].StringValue);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    private static (Window Window, GraphInspectorView Inspector) CreateInspectorWindow(
+        GraphEditorViewModel editor,
+        AsterGraphPresentationOptions? presentation = null)
     {
         var inspector = AsterGraphInspectorViewFactory.Create(new AsterGraphInspectorViewOptions
         {
             Editor = editor,
+            Presentation = presentation,
         });
 
         var window = new Window
@@ -120,5 +163,41 @@ public sealed class GraphInspectorStandaloneTests
                 []),
             catalog,
             new DefaultPortCompatibilityService());
+    }
+
+    private sealed class RecordingInspectorPresenter : IGraphInspectorPresenter
+    {
+        public GraphEditorViewModel? LastEditor { get; private set; }
+
+        public Control Create(GraphEditorViewModel? editor)
+        {
+            LastEditor = editor;
+
+            var applyButton = new Button
+            {
+                Tag = "custom-inspector-apply",
+                Content = "Apply Custom Inspector Edit",
+            };
+            applyButton.Click += (_, _) =>
+            {
+                if (editor?.SelectedNodeParameters.Count > 0)
+                {
+                    editor.SelectedNodeParameters[0].StringValue = "0.90";
+                }
+            };
+
+            return new StackPanel
+            {
+                Spacing = 8,
+                Children =
+                {
+                    new TextBlock
+                    {
+                        Text = $"CUSTOM INSPECTOR:{editor?.InspectorTitle}",
+                    },
+                    applyButton,
+                },
+            };
+        }
     }
 }

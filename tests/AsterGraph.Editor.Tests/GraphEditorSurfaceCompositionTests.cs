@@ -1,12 +1,14 @@
 using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
+using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.VisualTree;
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Avalonia.Controls;
 using AsterGraph.Avalonia.Hosting;
+using AsterGraph.Avalonia.Presentation;
 using AsterGraph.Core.Compatibility;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Catalog;
@@ -102,6 +104,39 @@ public sealed class GraphEditorSurfaceCompositionTests
         Assert.NotEmpty(menu);
     }
 
+    [AvaloniaFact]
+    public void FullShell_ForwardsCustomInspectorAndMiniMapPresenters()
+    {
+        var editor = CreateEditor();
+        var customInspector = new RecordingInspectorPresenter();
+        var customMiniMap = new RecordingMiniMapPresenter();
+
+        using var scope = CreateWindowScope(
+            AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOptions
+            {
+                Editor = editor,
+                Presentation = new AsterGraphPresentationOptions
+                {
+                    InspectorPresenter = customInspector,
+                    MiniMapPresenter = customMiniMap,
+                },
+            }));
+        var view = Assert.IsType<GraphEditorView>(scope.Window.Content);
+        var canvas = FindRequiredControl<NodeCanvas>(view, "PART_NodeCanvas");
+        var allText = string.Join(
+            "\n",
+            view.GetVisualDescendants()
+                .OfType<TextBlock>()
+                .Select(block => block.Text)
+                .Where(text => !string.IsNullOrWhiteSpace(text)));
+
+        Assert.Same(editor, canvas.ViewModel);
+        Assert.Contains("CUSTOM SHELL INSPECTOR", allText);
+        Assert.Contains("CUSTOM SHELL MINIMAP", allText);
+        Assert.Same(editor, customInspector.LastEditor);
+        Assert.Same(editor, customMiniMap.LastEditor);
+    }
+
     private static WindowScope CreateWindowScope(Control content)
     {
         var window = new Window
@@ -166,5 +201,33 @@ public sealed class GraphEditorSurfaceCompositionTests
 
         public void Dispose()
             => Window.Close();
+    }
+
+    private sealed class RecordingInspectorPresenter : IGraphInspectorPresenter
+    {
+        public GraphEditorViewModel? LastEditor { get; private set; }
+
+        public Control Create(GraphEditorViewModel? editor)
+        {
+            LastEditor = editor;
+            return new TextBlock
+            {
+                Text = "CUSTOM SHELL INSPECTOR",
+            };
+        }
+    }
+
+    private sealed class RecordingMiniMapPresenter : IGraphMiniMapPresenter
+    {
+        public GraphEditorViewModel? LastEditor { get; private set; }
+
+        public Control Create(GraphEditorViewModel? editor)
+        {
+            LastEditor = editor;
+            return new TextBlock
+            {
+                Text = "CUSTOM SHELL MINIMAP",
+            };
+        }
     }
 }
