@@ -13,7 +13,7 @@ AsterGraph v1 moves from a working internal editor into a publishable SDK that e
 - [x] **Phase 1: Consumption & Compatibility Guardrails** - Make package adoption, runtime initialization, and migration safe for external hosts.
 - [x] **Phase 2: Runtime Contracts & Service Seams** - Expose framework-neutral editor commands, queries, events, batching, and replaceable services.
 - [x] **Phase 3: Embeddable Avalonia Surfaces** - Split the default Avalonia shell into independently hostable editor surfaces.
-- [ ] **Phase 4: Replaceable Presentation Kit** - Let hosts swap visual presenters while reusing editor behavior and data contracts.
+- [x] **Phase 4: Replaceable Presentation Kit** - Let hosts swap visual presenters while reusing editor behavior and data contracts.
 - [ ] **Phase 5: Diagnostics & Integration Inspection** - Give hosts explicit inspection, logging, and troubleshooting contracts.
 
 ## Phase Details
@@ -86,7 +86,7 @@ Plans:
 - [x] 04-01-PLAN.md — Define the Avalonia presenter contracts and canonical host option plumbing for stock-default, opt-in replacement.
 - [x] 04-02-PLAN.md — Make node visuals and context-menu presentation replaceable while keeping `NodeCanvas` behavior and editor menu intent intact.
 - [x] 04-03-PLAN.md — Make inspector and mini-map presentation replaceable while preserving editor-owned inspector projections and viewport navigation.
-- [ ] 04-04-PLAN.md — Prove the full presenter replacement kit through focused harnesses, sample/smoke markers, migration regressions, and docs.
+- [x] 04-04-PLAN.md — Prove the full presenter replacement kit through focused harnesses, sample/smoke markers, migration regressions, and docs.
 
 ### Phase 5: Diagnostics & Integration Inspection
 **Goal**: Hosts can inspect editor behavior, capture failures, and troubleshoot integrations through stable diagnostics contracts rather than UI-only signals.
@@ -105,5 +105,5 @@ Plans:
 | 1. Consumption & Compatibility Guardrails | 4/4 | Complete | 01-01, 01-02, 01-03, 01-04 |
 | 2. Runtime Contracts & Service Seams | 5/5 | Complete | 02-01, 02-02, 02-03, 02-04, 02-05 |
 | 3. Embeddable Avalonia Surfaces | 4/4 | Complete | 03-01, 03-02, 03-03, 03-04 |
-| 4. Replaceable Presentation Kit | 3/4 | In progress | 04-01, 04-02, 04-03 |
+| 4. Replaceable Presentation Kit | 4/4 | Complete | 04-01, 04-02, 04-03, 04-04 |
 | 5. Diagnostics & Integration Inspection | 0/TBD | Not started | - |
