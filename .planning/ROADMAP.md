@@ -11,8 +11,8 @@ AsterGraph v1 moves from a working internal editor into a publishable SDK that e
 - Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
 
 - [x] **Phase 1: Consumption & Compatibility Guardrails** - Make package adoption, runtime initialization, and migration safe for external hosts.
-- [ ] **Phase 2: Runtime Contracts & Service Seams** - Expose framework-neutral editor commands, queries, events, batching, and replaceable services.
-- [ ] **Phase 3: Embeddable Avalonia Surfaces** - Split the default Avalonia shell into independently hostable editor surfaces.
+- [x] **Phase 2: Runtime Contracts & Service Seams** - Expose framework-neutral editor commands, queries, events, batching, and replaceable services.
+- [x] **Phase 3: Embeddable Avalonia Surfaces** - Split the default Avalonia shell into independently hostable editor surfaces.
 - [ ] **Phase 4: Replaceable Presentation Kit** - Let hosts swap visual presenters while reusing editor behavior and data contracts.
 - [ ] **Phase 5: Diagnostics & Integration Inspection** - Give hosts explicit inspection, logging, and troubleshooting contracts.
 
@@ -46,11 +46,11 @@ Plans:
 **Plans**: 5 plans
 
 Plans:
-- [ ] 02-01-PLAN.md — Define the runtime session contracts and create Wave 0 session/transaction regression entry points.
-- [ ] 02-02-PLAN.md — Implement the concrete runtime session, factory session entry, and compatibility-facade bridge.
-- [ ] 02-03-PLAN.md — Publish replaceable service/diagnostics contracts and the corrected package-neutral storage-default policy.
-- [ ] 02-04-PLAN.md — Wire the service seams through the runtime stack and prove diagnostics plus host replacement behavior.
-- [ ] 02-05-PLAN.md — Prove the full Phase 2 host story through samples, smoke coverage, migration regressions, and docs.
+- [x] 02-01-PLAN.md — Define the runtime session contracts and create Wave 0 session/transaction regression entry points.
+- [x] 02-02-PLAN.md — Implement the concrete runtime session, factory session entry, and compatibility-facade bridge.
+- [x] 02-03-PLAN.md — Publish replaceable service/diagnostics contracts and the corrected package-neutral storage-default policy.
+- [x] 02-04-PLAN.md — Wire the service seams through the runtime stack and prove diagnostics plus host replacement behavior.
+- [x] 02-05-PLAN.md — Prove the full Phase 2 host story through samples, smoke coverage, migration regressions, and docs.
 
 ### Phase 3: Embeddable Avalonia Surfaces
 **Goal**: Hosts can compose only the Avalonia editor surfaces they need while keeping the full default shell available as a convenience composition.
@@ -61,8 +61,14 @@ Plans:
   2. Host can embed a standalone graph viewport or canvas surface without also taking inspector, menu, or other shell chrome.
   3. Host can embed the mini map and inspector independently and connect them to the same editor session.
   4. Host can include, replace, or omit default menu and chrome presenters without rebuilding editor state.
-**Plans**: TBD
+**Plans**: 4 plans
 **UI hint**: yes
+
+Plans:
+- [x] 03-01-PLAN.md — Publish standalone canvas composition, stock menu presenter reuse, and focused surface verification.
+- [x] 03-02-PLAN.md — Extract standalone inspector and standalone mini map surfaces with factory-first host entry points.
+- [x] 03-03-PLAN.md — Recompose the default full shell over the standalone surfaces while preserving the retained host path.
+- [x] 03-04-PLAN.md — Prove and document the full surface matrix through host sample, smoke markers, and consumer docs.
 
 ### Phase 4: Replaceable Presentation Kit
 **Goal**: Hosts can replace default visual presenters in `AsterGraph.Avalonia` while preserving editor-owned behavior, interaction rules, and data contracts.
@@ -91,7 +97,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Consumption & Compatibility Guardrails | 4/4 | Complete | 01-01, 01-02, 01-03, 01-04 |
-| 2. Runtime Contracts & Service Seams | 0/5 | Not started | - |
-| 3. Embeddable Avalonia Surfaces | 0/TBD | Not started | - |
+| 2. Runtime Contracts & Service Seams | 5/5 | Complete | 02-01, 02-02, 02-03, 02-04, 02-05 |
+| 3. Embeddable Avalonia Surfaces | 4/4 | Complete | 03-01, 03-02, 03-03, 03-04 |
 | 4. Replaceable Presentation Kit | 0/TBD | Not started | - |
 | 5. Diagnostics & Integration Inspection | 0/TBD | Not started | - |

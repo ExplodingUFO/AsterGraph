@@ -13,18 +13,18 @@
 
 ### Embeddable Surfaces
 
-- [ ] **EMBD-01**: Host can embed the full default editor shell as a convenience composition
-- [ ] **EMBD-02**: Host can embed a standalone graph viewport or canvas surface without the full shell
-- [ ] **EMBD-03**: Host can embed the mini map independently of the full shell
-- [ ] **EMBD-04**: Host can embed the inspector independently of the full shell
-- [ ] **EMBD-05**: Host can embed or omit default menu and chrome presenters without rebuilding editor state
+- [x] **EMBD-01**: Host can embed the full default editor shell as a convenience composition
+- [x] **EMBD-02**: Host can embed a standalone graph viewport or canvas surface without the full shell
+- [x] **EMBD-03**: Host can embed the mini map independently of the full shell
+- [x] **EMBD-04**: Host can embed the inspector independently of the full shell
+- [x] **EMBD-05**: Host can embed or omit default menu and chrome presenters without rebuilding editor state
 
 ### Public Runtime API
 
-- [ ] **API-01**: Host can execute editor commands through stable public APIs instead of invoking Avalonia control internals
-- [ ] **API-02**: Host can query current selection, viewport, document snapshot, and active capabilities through stable public APIs
-- [ ] **API-03**: Host can subscribe to typed events for document changes, selection changes, viewport changes, command execution, and recoverable failures
-- [ ] **API-04**: Host can group related editor mutations into a transaction or equivalent batched operation surface
+- [x] **API-01**: Host can execute editor commands through stable public APIs instead of invoking Avalonia control internals
+- [x] **API-02**: Host can query current selection, viewport, document snapshot, and active capabilities through stable public APIs
+- [x] **API-03**: Host can subscribe to typed events for document changes, selection changes, viewport changes, command execution, and recoverable failures
+- [x] **API-04**: Host can group related editor mutations into a transaction or equivalent batched operation surface
 
 ### Replaceable Presentation
 
@@ -35,8 +35,8 @@
 
 ### Replaceable Services
 
-- [ ] **SERV-01**: Host can replace storage, clipboard, serialization, compatibility, localization, presentation, and diagnostics services through documented interfaces or options
-- [ ] **SERV-02**: Default service implementations do not rely on demo-branded storage roots or host identity assumptions
+- [x] **SERV-01**: Host can replace storage, clipboard, serialization, compatibility, localization, presentation, and diagnostics services through documented interfaces or options
+- [x] **SERV-02**: Default service implementations do not rely on demo-branded storage roots or host identity assumptions
 
 ### Diagnostics
 
@@ -75,21 +75,21 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PKG-01 | Phase 1 | Complete |
 | PKG-02 | Phase 1 | Complete |
 | PKG-03 | Phase 1 | Complete |
-| EMBD-01 | Phase 3 | Pending |
-| EMBD-02 | Phase 3 | Pending |
-| EMBD-03 | Phase 3 | Pending |
-| EMBD-04 | Phase 3 | Pending |
-| EMBD-05 | Phase 3 | Pending |
-| API-01 | Phase 2 | Pending |
-| API-02 | Phase 2 | Pending |
-| API-03 | Phase 2 | Pending |
-| API-04 | Phase 2 | Pending |
+| EMBD-01 | Phase 3 | Complete |
+| EMBD-02 | Phase 3 | Complete |
+| EMBD-03 | Phase 3 | Complete |
+| EMBD-04 | Phase 3 | Complete |
+| EMBD-05 | Phase 3 | Complete |
+| API-01 | Phase 2 | Complete |
+| API-02 | Phase 2 | Complete |
+| API-03 | Phase 2 | Complete |
+| API-04 | Phase 2 | Complete |
 | PRES-01 | Phase 4 | Pending |
 | PRES-02 | Phase 4 | Pending |
 | PRES-03 | Phase 4 | Pending |
 | PRES-04 | Phase 4 | Pending |
-| SERV-01 | Phase 2 | Pending |
-| SERV-02 | Phase 2 | Pending |
+| SERV-01 | Phase 2 | Complete |
+| SERV-02 | Phase 2 | Complete |
 | DIAG-01 | Phase 5 | Pending |
 | DIAG-02 | Phase 5 | Pending |
 | DIAG-03 | Phase 5 | Pending |
@@ -101,4 +101,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-03-25*
-*Last updated: 2026-03-26 after phase 1 completion*
+*Last updated: 2026-03-26 after phase 3 completion*

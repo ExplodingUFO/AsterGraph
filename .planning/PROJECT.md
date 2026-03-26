@@ -15,6 +15,8 @@ Hosts can integrate only the graph-editor pieces they need, replace default UI a
 - ✓ Host can consume the four publishable AsterGraph packages through a documented SDK boundary and supported `net8.0` / `net9.0` target story — Phase 1
 - ✓ Host can initialize the editor runtime and default Avalonia view through public factory/options APIs while the constructor-based path remains supported — Phase 1
 - ✓ Host can migrate through a staged compatibility path backed by parity tests and smoke coverage across legacy and factory entry routes — Phase 1
+- ✓ Host can drive the editor through public runtime-session contracts, typed events, batching, and replaceable services without depending on Avalonia control internals — Phase 2
+- ✓ Host can embed the full shell, standalone canvas, standalone inspector, and standalone mini map against the same editor state, with explicit standalone canvas stock-behavior opt-outs — Phase 3
 - ✓ Host can embed a working Avalonia graph editor with node rendering, connection editing, zoom/pan, and viewport navigation — existing
 - ✓ Host can save and load graph documents plus clipboard and fragment payloads through the current editor services — existing
 - ✓ Host can customize context menus, node presentation, localization, style tokens, and command permissions through current host-facing seams — existing
@@ -23,9 +25,6 @@ Hosts can integrate only the graph-editor pieces they need, replace default UI a
 
 ### Active
 
-- [ ] Split the monolithic Avalonia shell into smaller reusable controls so hosts can embed only canvas, mini map, inspector, context menu, or other subcomponents as needed
-- [ ] Expose richer public APIs and interfaces for host-driven commands, state queries, events, service replacement, and secondary development scenarios
-- [ ] Refactor responsibilities so core editing behavior is less entangled with Avalonia control code and easier to reuse, test, and evolve
 - [ ] Allow hosts to replace default visual pieces such as node views, menus, inspector panels, and other UI surfaces without reimplementing the full editor
 - [ ] Provide explicit diagnostics and debugging interfaces so hosts can inspect editor state, subscribe to meaningful lifecycle signals, and troubleshoot integrations
 - [ ] Deliver the above through a planned, incremental API reorganization suitable for publishing as a general-purpose component library
@@ -45,7 +44,7 @@ The user wants the package line to evolve from an internally useful editor into 
 
 The current codebase map highlights concrete pressure points that align with this goal: `src/AsterGraph.Editor/ViewModels/GraphEditorViewModel.cs` centralizes too many behaviors, `src/AsterGraph.Avalonia/Controls/NodeCanvas.axaml.cs` mixes rendering and interaction concerns, and some reusable services still carry demo-oriented defaults. The refactor therefore needs to preserve working capabilities while creating smaller seams, clearer package responsibilities, and a more intentional public API surface.
 
-Phase 1 is now complete. The repository has a documented four-package SDK boundary, public factory/options initialization APIs for both the editor runtime and default Avalonia view, and an explicit compatibility story that keeps `GraphEditorViewModel` plus `GraphEditorView` valid during migration.
+Phase 3 is now complete. The repository has a documented four-package SDK boundary, public runtime-session and service seams in `AsterGraph.Editor`, and both full-shell and standalone Avalonia surface entry points in `AsterGraph.Avalonia`. Hosts can now compose the shipped shell or bind standalone canvas, inspector, and mini map surfaces to the same editor state while keeping the retained compatibility facade alive during migration.
 
 ## Constraints
 
@@ -66,6 +65,8 @@ Phase 1 is now complete. The repository has a documented four-package SDK bounda
 | Accept a phased API reorganization | A clean extensibility model is more important than preserving every current shape, but migration still needs to be controlled | ✓ Good |
 | Include diagnostics and debugging as part of the planned public API | Integration and secondary development are central goals, so observability cannot stay internal-only | — Pending |
 | Use factory/options APIs as the canonical host initialization path while preserving constructor-based compatibility facades | Phase 1 needed a formal public entry surface without forcing a breaking rewrite on existing hosts | ✓ Good |
+| Root the new host runtime API in `IGraphEditorSession` with commands, queries, events, and mutation scopes | Hosts needed a framework-neutral control plane that survives both Avalonia embedding and staged migration | ✓ Good |
+| Keep `GraphEditorView` as the convenience full shell while shipping standalone canvas, inspector, and mini map factories | Phase 3 had to support both embed-only hosts and hosts that still want the stock full shell | ✓ Good |
 
 ## Evolution
 
@@ -85,4 +86,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-26 after Phase 1 completion*
+*Last updated: 2026-03-26 after Phase 3 completion*
