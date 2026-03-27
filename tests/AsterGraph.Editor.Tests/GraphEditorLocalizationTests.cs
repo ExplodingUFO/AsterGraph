@@ -89,6 +89,7 @@ public sealed class GraphEditorLocalizationTests
         Assert.NotNull(provider);
 
         Assert.Equal("请选择一个节点", provider!.GetString("editor.inspector.title.none", "fallback"));
+        Assert.Equal("添加节点", provider.GetString("editor.menu.canvas.addNode", "fallback"));
         Assert.Equal("fallback", provider.GetString("editor.stats.caption", "fallback"));
     }
 
