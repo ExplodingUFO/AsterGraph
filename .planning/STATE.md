@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Ready to execute
-stopped_at: Completed quick 260327-oqi
-last_updated: "2026-03-27T10:04:53.538Z"
+stopped_at: Completed quick 260327-pas
+last_updated: "2026-03-27T10:35:34.216Z"
 progress:
   total_phases: 6
   completed_phases: 6
@@ -50,6 +50,7 @@ Plan: 3 of 3
 
 | Phase 06 P01 | 20min | 3 tasks | 5 files |
 | Phase 06 P02 | 14min | 3 tasks | 2 files |
+| Phase 260327-pas-phase-6-demo P1 | 14min | 3 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -88,6 +89,8 @@ Recent decisions affecting current work:
 - [Phase 06]: Use a dedicated DemoMainWindowTests entry point for Phase 6 shell regression coverage while leaving GraphEditorView coverage isolated.
 - [Phase 06]: Translate only user-facing GraphEditorView shell copy to Chinese while preserving English host API/type identifiers.
 - [Phase 06]: Validate Demo runtime captions through the existing IGraphLocalizationProvider path without editing MainWindowViewModel in plan 06-02.
+- [Phase 260327-pas-phase-6-demo]: Expose GraphEditorView per-region chrome booleans and compose with ChromeMode for independent host visibility control.
+- [Phase 260327-pas-phase-6-demo]: Use star-row full-height center editor composition in Demo instead of fixed editor frame height.
 
 ### Pending Todos
 
@@ -101,6 +104,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-27T10:04:53.534Z
-Stopped at: Completed quick 260327-oqi
+Last session: 2026-03-27T10:35:34.212Z
+Stopped at: Completed quick 260327-pas
 Resume file: None
