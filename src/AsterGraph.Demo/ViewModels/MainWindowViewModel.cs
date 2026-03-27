@@ -22,6 +22,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private const string StandaloneSurfaceHelper = "这些预览与主编辑器共享同一运行时会话。";
     private const string PresentationHelper = "可替换的是视觉呈现，不是编辑行为。";
     private const string ChromeModeHelper = "关闭后可体验完整编辑流程；开启后仅保留只读浏览。";
+    private const string ChromeControlsHelper = "这些开关只控制壳层显示，不会重建当前 Editor 会话。";
 
     public MainWindowViewModel()
     {
@@ -192,6 +193,18 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty]
     private bool areHostMenuExtensionsEnabled = true;
 
+    [ObservableProperty]
+    private bool isHeaderChromeVisible = true;
+
+    [ObservableProperty]
+    private bool isLibraryChromeVisible = true;
+
+    [ObservableProperty]
+    private bool isInspectorChromeVisible = true;
+
+    [ObservableProperty]
+    private bool isStatusChromeVisible = true;
+
     public string SelectedCapabilityTitle => SelectedCapability.Title;
 
     public string SelectedCapabilitySummary => SelectedCapability.Summary;
@@ -207,7 +220,7 @@ public partial class MainWindowViewModel : ViewModelBase
         $"{nameof(GraphEditorViewChromeMode)}.{nameof(GraphEditorViewChromeMode.Default)}：保留头部、节点库、检查器与状态栏。",
         $"{nameof(GraphEditorViewChromeMode)}.{nameof(GraphEditorViewChromeMode.CanvasOnly)}：收敛为只读浏览导向的画布视图。",
         ChromeModeHelper,
-        "切换 chrome 只影响壳层可见性，不会重建底层运行时。",
+        ChromeControlsHelper,
     ];
 
     public IReadOnlyList<string> StandaloneSurfaceLines =>
@@ -373,6 +386,18 @@ public partial class MainWindowViewModel : ViewModelBase
 
     partial void OnAreHostMenuExtensionsEnabledChanged(bool value)
         => ApplyHostOptions();
+
+    partial void OnIsHeaderChromeVisibleChanged(bool value)
+        => RefreshRuntimeProjection();
+
+    partial void OnIsLibraryChromeVisibleChanged(bool value)
+        => RefreshRuntimeProjection();
+
+    partial void OnIsInspectorChromeVisibleChanged(bool value)
+        => RefreshRuntimeProjection();
+
+    partial void OnIsStatusChromeVisibleChanged(bool value)
+        => RefreshRuntimeProjection();
 
     [RelayCommand]
     public void SelectCapability(CapabilityShowcaseItem capability)

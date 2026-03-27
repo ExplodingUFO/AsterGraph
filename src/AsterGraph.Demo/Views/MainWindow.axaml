@@ -30,10 +30,11 @@
                   HorizontalScrollBarVisibility="Disabled">
       <StackPanel Spacing="16">
         <Border Padding="20"
-                Background="#111C29"
-                BorderBrush="#244053"
+                Background="#101923"
+                BorderBrush="#314859"
                 BorderThickness="1"
-                CornerRadius="16">
+                CornerRadius="10"
+                BoxShadow="0 12 28 0 #18000000">
           <StackPanel Spacing="8">
             <TextBlock FontSize="28"
                        FontWeight="SemiBold"
@@ -46,10 +47,10 @@
         </Border>
 
         <Border Padding="16"
-                Background="#111C29"
-                BorderBrush="#244053"
+                Background="#101923"
+                BorderBrush="#314859"
                 BorderThickness="1"
-                CornerRadius="16">
+                CornerRadius="8">
           <StackPanel Spacing="12">
             <TextBlock FontSize="24"
                        FontWeight="SemiBold"
@@ -61,10 +62,10 @@
                   <Button Margin="0,0,0,8"
                           Padding="14,12"
                           HorizontalContentAlignment="Stretch"
-                          Background="#162433"
-                          BorderBrush="#2C495D"
+                          Background="#14202B"
+                          BorderBrush="#365063"
                           BorderThickness="1"
-                          CornerRadius="12"
+                          CornerRadius="8"
                           Command="{Binding $parent[Window].DataContext.SelectCapabilityCommand}"
                           CommandParameter="{Binding}">
                     <StackPanel Spacing="4">
@@ -83,10 +84,10 @@
         </Border>
 
         <Border Padding="16"
-                Background="#111C29"
-                BorderBrush="#244053"
+                Background="#101923"
+                BorderBrush="#314859"
                 BorderThickness="1"
-                CornerRadius="16">
+                CornerRadius="8">
           <StackPanel Spacing="12">
             <TextBlock FontSize="24"
                        FontWeight="SemiBold"
@@ -114,10 +115,38 @@
         </Border>
 
         <Border Padding="16"
-                Background="#111C29"
-                BorderBrush="#244053"
+                Background="#101923"
+                BorderBrush="#314859"
                 BorderThickness="1"
-                CornerRadius="16">
+                CornerRadius="8">
+          <StackPanel Spacing="12">
+            <TextBlock FontSize="24"
+                       FontWeight="SemiBold"
+                       Foreground="#F4FFFC"
+                       Text="壳层显示" />
+            <TextBlock TextWrapping="Wrap"
+                       Foreground="#B6CBD8"
+                       Text="隐藏不同区块，演示宿主如何按需保留默认壳层。" />
+            <CheckBox Foreground="#E2F3F7"
+                      Content="显示顶栏"
+                      IsChecked="{Binding IsHeaderChromeVisible}" />
+            <CheckBox Foreground="#E2F3F7"
+                      Content="显示节点库"
+                      IsChecked="{Binding IsLibraryChromeVisible}" />
+            <CheckBox Foreground="#E2F3F7"
+                      Content="显示右侧检查器"
+                      IsChecked="{Binding IsInspectorChromeVisible}" />
+            <CheckBox Foreground="#E2F3F7"
+                      Content="显示底部状态栏"
+                      IsChecked="{Binding IsStatusChromeVisible}" />
+          </StackPanel>
+        </Border>
+
+        <Border Padding="16"
+                Background="#101923"
+                BorderBrush="#314859"
+                BorderThickness="1"
+                CornerRadius="8">
           <StackPanel Spacing="10">
             <TextBlock FontSize="24"
                        FontWeight="SemiBold"
@@ -128,10 +157,10 @@
                 <DataTemplate>
                   <Border Margin="0,0,0,8"
                           Padding="12"
-                          Background="#162433"
-                          BorderBrush="#2C495D"
+                          Background="#14202B"
+                          BorderBrush="#365063"
                           BorderThickness="1"
-                          CornerRadius="12">
+                          CornerRadius="8">
                     <TextBlock TextWrapping="Wrap"
                                Foreground="#B6CBD8"
                                Text="{Binding}" />
@@ -148,10 +177,10 @@
           RowDefinitions="Auto,*,Auto"
           RowSpacing="16">
       <Border Padding="20"
-              Background="#111C29"
-              BorderBrush="#244053"
+              Background="#101923"
+              BorderBrush="#314859"
               BorderThickness="1"
-              CornerRadius="16">
+              CornerRadius="10">
         <Grid ColumnDefinitions="*,Auto"
               ColumnSpacing="16">
           <StackPanel Spacing="6">
@@ -165,8 +194,8 @@
           </StackPanel>
           <Border Grid.Column="1"
                   Padding="10,6"
-                  Background="#162433"
-                  BorderBrush="#2C495D"
+                  Background="#14202B"
+                  BorderBrush="#365063"
                   BorderThickness="1"
                   CornerRadius="999">
             <TextBlock Foreground="#7FE7D7"
@@ -176,13 +205,15 @@
         </Grid>
       </Border>
 
-      <Border Grid.Row="1"
+      <Border x:Name="MainEditorCard"
+              Grid.Row="1"
               Padding="16"
-              Background="#111C29"
-              BorderBrush="#244053"
+              Background="#101923"
+              BorderBrush="#314859"
               BorderThickness="1"
-              CornerRadius="16">
-        <StackPanel Spacing="12">
+              CornerRadius="10">
+        <Grid RowDefinitions="Auto,*"
+              RowSpacing="12">
           <Grid ColumnDefinitions="*,Auto"
                 ColumnSpacing="12">
             <StackPanel Spacing="4">
@@ -196,8 +227,8 @@
             </StackPanel>
             <Border Grid.Column="1"
                     Padding="10,6"
-                    Background="#162433"
-                    BorderBrush="#2C495D"
+                    Background="#14202B"
+                    BorderBrush="#365063"
                     BorderThickness="1"
                     CornerRadius="999"
                     VerticalAlignment="Top">
@@ -205,23 +236,33 @@
                          Text="单一实时会话" />
             </Border>
           </Grid>
-          <Border Height="500"
+
+          <Border x:Name="MainEditorFrame"
+                  Grid.Row="1"
+                  MinHeight="0"
                   ClipToBounds="True"
                   Background="#08111A"
-                  BorderBrush="#29475A"
+                  BorderBrush="#365063"
                   BorderThickness="1"
-                  CornerRadius="16">
-            <controls:GraphEditorView Editor="{Binding Editor}" />
+                  CornerRadius="8">
+            <controls:GraphEditorView x:Name="MainGraphEditorView"
+                                      Editor="{Binding Editor}"
+                                      VerticalAlignment="Stretch"
+                                      HorizontalAlignment="Stretch"
+                                      IsHeaderChromeVisible="{Binding IsHeaderChromeVisible}"
+                                      IsLibraryChromeVisible="{Binding IsLibraryChromeVisible}"
+                                      IsInspectorChromeVisible="{Binding IsInspectorChromeVisible}"
+                                      IsStatusChromeVisible="{Binding IsStatusChromeVisible}" />
           </Border>
-        </StackPanel>
+        </Grid>
       </Border>
 
       <Border Grid.Row="2"
               Padding="16"
-              Background="#111C29"
-              BorderBrush="#244053"
+              Background="#101923"
+              BorderBrush="#314859"
               BorderThickness="1"
-              CornerRadius="16">
+              CornerRadius="8">
         <StackPanel Spacing="10">
           <TextBlock FontSize="24"
                      FontWeight="SemiBold"
@@ -232,10 +273,10 @@
               <DataTemplate>
                 <Border Margin="0,0,0,8"
                         Padding="12"
-                        Background="#162433"
-                        BorderBrush="#2C495D"
+                        Background="#14202B"
+                        BorderBrush="#365063"
                         BorderThickness="1"
-                        CornerRadius="12">
+                        CornerRadius="8">
                   <TextBlock TextWrapping="Wrap"
                              Foreground="#C2D7E4"
                              Text="{Binding}" />
@@ -252,10 +293,10 @@
                   HorizontalScrollBarVisibility="Disabled">
       <StackPanel Spacing="16">
         <Border Padding="20"
-                Background="#111C29"
-                BorderBrush="#244053"
+                Background="#101923"
+                BorderBrush="#314859"
                 BorderThickness="1"
-                CornerRadius="16">
+                CornerRadius="10">
           <StackPanel Spacing="8">
             <TextBlock FontSize="24"
                        FontWeight="SemiBold"
@@ -282,10 +323,10 @@
                 <DataTemplate>
                   <Border Margin="0,0,0,8"
                           Padding="12"
-                          Background="#162433"
-                          BorderBrush="#2C495D"
+                          Background="#14202B"
+                          BorderBrush="#365063"
                           BorderThickness="1"
-                          CornerRadius="12">
+                          CornerRadius="8">
                     <TextBlock TextWrapping="Wrap"
                                Foreground="#D8EEF3"
                                Text="{Binding}" />
@@ -297,10 +338,10 @@
         </Border>
 
         <Border Padding="16"
-                Background="#111C29"
-                BorderBrush="#244053"
+                Background="#101923"
+                BorderBrush="#314859"
                 BorderThickness="1"
-                CornerRadius="16">
+                CornerRadius="8">
           <StackPanel Spacing="12">
             <TextBlock FontSize="24"
                        FontWeight="SemiBold"
@@ -312,10 +353,10 @@
                        Text="{Binding RuntimeDiagnosticsSummary}" />
 
             <Border Padding="12"
-                    Background="#162433"
-                    BorderBrush="#2C495D"
+                    Background="#14202B"
+                    BorderBrush="#365063"
                     BorderThickness="1"
-                    CornerRadius="12">
+                    CornerRadius="8">
               <StackPanel Spacing="8">
                 <TextBlock FontWeight="SemiBold"
                            Foreground="#F4FFFC"
@@ -344,10 +385,10 @@
             </Border>
 
             <Border Padding="12"
-                    Background="#162433"
-                    BorderBrush="#2C495D"
+                    Background="#14202B"
+                    BorderBrush="#365063"
                     BorderThickness="1"
-                    CornerRadius="12">
+                    CornerRadius="8">
               <StackPanel Spacing="8">
                 <TextBlock FontWeight="SemiBold"
                            Foreground="#F4FFFC"
@@ -360,7 +401,7 @@
                               Background="#0E1824"
                               BorderBrush="#34536B"
                               BorderThickness="1"
-                              CornerRadius="12">
+                              CornerRadius="8">
                         <StackPanel Spacing="4">
                           <TextBlock Foreground="{Binding SeverityHex}"
                                      Text="{Binding SeverityLabel, StringFormat=Severity：{0}}" />
@@ -384,10 +425,10 @@
         </Border>
 
         <Border Padding="16"
-                Background="#111C29"
-                BorderBrush="#244053"
+                Background="#101923"
+                BorderBrush="#314859"
                 BorderThickness="1"
-                CornerRadius="16">
+                CornerRadius="8">
           <StackPanel Spacing="10">
             <TextBlock FontSize="24"
                        FontWeight="SemiBold"
@@ -398,10 +439,10 @@
                 <DataTemplate>
                   <Border Margin="0,0,0,8"
                           Padding="12"
-                          Background="#162433"
-                          BorderBrush="#2C495D"
+                          Background="#14202B"
+                          BorderBrush="#365063"
                           BorderThickness="1"
-                          CornerRadius="12">
+                          CornerRadius="8">
                     <TextBlock TextWrapping="Wrap"
                                Foreground="#C2D7E4"
                                Text="{Binding}" />
@@ -413,10 +454,10 @@
         </Border>
 
         <Border Padding="16"
-                Background="#111C29"
-                BorderBrush="#244053"
+                Background="#101923"
+                BorderBrush="#314859"
                 BorderThickness="1"
-                CornerRadius="16">
+                CornerRadius="8">
           <StackPanel Spacing="10">
             <TextBlock FontSize="24"
                        FontWeight="SemiBold"
@@ -427,10 +468,10 @@
                 <DataTemplate>
                   <Border Margin="0,0,0,8"
                           Padding="12"
-                          Background="#162433"
-                          BorderBrush="#2C495D"
+                          Background="#14202B"
+                          BorderBrush="#365063"
                           BorderThickness="1"
-                          CornerRadius="12">
+                          CornerRadius="8">
                     <TextBlock TextWrapping="Wrap"
                                Foreground="#C2D7E4"
                                Text="{Binding}" />
