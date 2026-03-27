@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
+using Avalonia.Layout;
 using Avalonia.Themes.Fluent;
 using Avalonia.VisualTree;
 using AsterGraph.Abstractions.Definitions;
@@ -38,6 +39,27 @@ public sealed class GraphEditorViewTests
         Assert.True(FindRequiredControl<Border>(view, "PART_StatusChrome").IsVisible);
         Assert.True(FindRequiredControl<Grid>(view, "PART_ShellGrid").ColumnSpacing > 0);
         Assert.True(FindRequiredControl<Grid>(view, "PART_ShellGrid").RowSpacing > 0);
+    }
+
+    [AvaloniaFact]
+    public void DefaultChromeMode_UsesSeparatedHeaderBadgesAndWrappingToolbar()
+    {
+        var editor = CreateEditor();
+        var window = CreateWindow(new GraphEditorView
+        {
+            Editor = editor,
+        });
+        var view = (GraphEditorView)window.Content!;
+        var header = FindRequiredControl<Border>(view, "PART_HeaderChrome");
+        var badgeStack = FindRequiredControl<StackPanel>(view, "PART_HeaderBadges");
+        var toolbar = FindRequiredControl<WrapPanel>(view, "PART_HeaderToolbar");
+
+        Assert.Equal(new Thickness(20), header.Padding);
+        Assert.Equal(Orientation.Vertical, badgeStack.Orientation);
+        Assert.Equal(Orientation.Horizontal, toolbar.Orientation);
+        Assert.Equal(40, toolbar.ItemHeight);
+        Assert.Equal(120, toolbar.ItemWidth);
+        Assert.True(toolbar.Children.Count >= 7);
     }
 
     [AvaloniaFact]

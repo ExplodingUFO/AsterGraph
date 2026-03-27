@@ -43,6 +43,38 @@ public sealed class DemoMainWindowTests
         Assert.Equal(new GridLength(360, GridUnitType.Pixel), layoutGrid.ColumnDefinitions[2].Width);
     }
 
+    [AvaloniaFact]
+    public void MainWindow_UsesCompactCardDensityForQuickFix()
+    {
+        var window = CreateWindow();
+
+        var leftScrollViewer = window.GetVisualDescendants()
+            .OfType<ScrollViewer>()
+            .First(scrollViewer => Grid.GetColumn(scrollViewer) == 0);
+        var leftStack = Assert.IsType<StackPanel>(leftScrollViewer.Content);
+        var titleCard = Assert.IsType<Border>(leftStack.Children[0]);
+        var entryCard = Assert.IsType<Border>(leftStack.Children[3]);
+
+        Assert.Equal(new Thickness(20), titleCard.Padding);
+        Assert.Equal(new Thickness(16), entryCard.Padding);
+
+        var centerGrid = window.GetVisualDescendants()
+            .OfType<Grid>()
+            .First(grid => Grid.GetColumn(grid) == 1 && grid.RowDefinitions.Count == 3);
+        var heroCard = Assert.IsType<Border>(centerGrid.Children[0]);
+        var editorCard = Assert.IsType<Border>(centerGrid.Children[1]);
+        var proofCard = Assert.IsType<Border>(centerGrid.Children[2]);
+
+        Assert.Equal(new Thickness(20), heroCard.Padding);
+        Assert.Equal(new Thickness(16), editorCard.Padding);
+        Assert.Equal(new Thickness(16), proofCard.Padding);
+
+        var editorFrame = editorCard.GetVisualDescendants()
+            .OfType<Border>()
+            .First(border => border.Child is GraphEditorView);
+        Assert.Equal(500, editorFrame.Height);
+    }
+
     private static MainWindow CreateWindow()
     {
         var window = new MainWindow
