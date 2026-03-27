@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Ready for milestone completion
-stopped_at: Phase 6 context gathered
-last_updated: "2026-03-27T06:38:31.143Z"
+status: Ready to execute
+stopped_at: Completed 06-01-PLAN.md
+last_updated: "2026-03-27T09:08:32.686Z"
 progress:
   total_phases: 6
   completed_phases: 5
-  total_plans: 21
-  completed_plans: 21
+  total_plans: 24
+  completed_plans: 22
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-26)
 
 **Core value:** Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
-**Current focus:** Phase 5 complete - ready for milestone completion
+**Current focus:** Phase 06 — demo
 
 ## Current Position
 
-Phase: 5 of 5 (Diagnostics & Integration Inspection)
-Plan: complete
+Phase: 06 (demo) — EXECUTING
+Plan: 2 of 3
 
 ## Performance Metrics
 
@@ -47,6 +47,8 @@ Plan: complete
 
 - Last 5 plans: 04-01 (28 min), 04-02 (21 min), 04-03 (31 min), 04-04 (13 min), 05-04 (final closeout)
 - Trend: Stable
+
+| Phase 06 P01 | 20min | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -80,6 +82,9 @@ Recent decisions affecting current work:
 - [Phase 01-consumption-compatibility-guardrails]: Document the supported SDK boundary around the four publishable packages and treat AsterGraph.Editor as a standard host-facing runtime package.
 - [Phase 01-consumption-compatibility-guardrails]: Make the factory/options path canonical in docs while keeping GraphEditorViewModel and GraphEditorView documented as supported migration facades.
 - [Phase 01-consumption-compatibility-guardrails]: Treat packed-package failures in this workspace as restore/cache environment blockers only after confirming the freshly packed nupkgs still expose the new public APIs.
+- [Phase 06]: Keep the Demo on one retained GraphEditorViewModel and project architecture proof from runtime/session APIs instead of creating subordinate runtime objects.
+- [Phase 06]: Bind capability metadata from the ViewModel into navigation and the right rail so the shell teaches actual API seams without duplicated copy islands.
+- [Phase 06]: Use a dedicated DemoMainWindowTests entry point for Phase 6 shell regression coverage while leaving GraphEditorView coverage isolated.
 
 ### Pending Todos
 
@@ -93,6 +98,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-27T06:38:31.139Z
-Stopped at: Phase 6 context gathered
-Resume file: .planning/phases/06-demo/06-CONTEXT.md
+Last session: 2026-03-27T09:08:32.682Z
+Stopped at: Completed 06-01-PLAN.md
+Resume file: None

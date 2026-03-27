@@ -28,10 +28,10 @@
 
 ### Replaceable Presentation
 
-- [ ] **PRES-01**: Host can replace node visuals without reimplementing selection, drag, or connection behavior
-- [ ] **PRES-02**: Host can replace context-menu presentation while reusing menu intent and command models
-- [ ] **PRES-03**: Host can replace inspector presentation while reusing editor-provided data contracts
-- [ ] **PRES-04**: Host can replace mini-map rendering or presentation without forking the editor runtime
+- [x] **PRES-01**: Host can replace node visuals without reimplementing selection, drag, or connection behavior
+- [x] **PRES-02**: Host can replace context-menu presentation while reusing menu intent and command models
+- [x] **PRES-03**: Host can replace inspector presentation while reusing editor-provided data contracts
+- [x] **PRES-04**: Host can replace mini-map rendering or presentation without forking the editor runtime
 
 ### Replaceable Services
 
@@ -84,10 +84,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | API-02 | Phase 2 | Complete |
 | API-03 | Phase 2 | Complete |
 | API-04 | Phase 2 | Complete |
-| PRES-01 | Phase 4 | Pending |
-| PRES-02 | Phase 4 | Pending |
-| PRES-03 | Phase 4 | Pending |
-| PRES-04 | Phase 4 | Pending |
+| PRES-01 | Phase 4 | Complete |
+| PRES-02 | Phase 4 | Complete |
+| PRES-03 | Phase 4 | Complete |
+| PRES-04 | Phase 4 | Complete |
 | SERV-01 | Phase 2 | Complete |
 | SERV-02 | Phase 2 | Complete |
 | DIAG-01 | Phase 5 | Pending |
