@@ -70,7 +70,7 @@
           <Grid ColumnDefinitions="*,Auto"
                 ColumnSpacing="20">
             <StackPanel Spacing="6">
-              <TextBlock Text="NODE GRAPH PRODUCT DEMO"
+              <TextBlock Text="节点图 SDK 演示台"
                          FontSize="{DynamicResource AsterGraph.ShellEyebrowFontSize}"
                          FontWeight="Bold"
                          Foreground="{DynamicResource AsterGraph.EyebrowBrush}" />
@@ -105,25 +105,25 @@
           <WrapPanel Orientation="Horizontal">
             <Button Classes="astergraph-toolbar-action"
                     Command="{Binding SaveCommand}"
-                    Content="Save Snapshot" />
+                    Content="保存快照" />
             <Button Classes="astergraph-toolbar-action"
                     Command="{Binding LoadCommand}"
-                    Content="Load Snapshot" />
+                    Content="加载快照" />
             <Button Classes="astergraph-toolbar-action"
                     Command="{Binding UndoCommand}"
-                    Content="Undo" />
+                    Content="撤销" />
             <Button Classes="astergraph-toolbar-action"
                     Command="{Binding RedoCommand}"
-                    Content="Redo" />
+                    Content="重做" />
             <Button Classes="astergraph-toolbar-action"
                     Command="{Binding FitViewCommand}"
-                    Content="Fit View" />
+                    Content="适配视图" />
             <Button Classes="astergraph-toolbar-action"
                     Command="{Binding ResetViewCommand}"
-                    Content="Reset View" />
+                    Content="重置视图" />
             <Button Classes="astergraph-toolbar-action"
                     Command="{Binding DeleteSelectionCommand}"
-                    Content="Delete Selected" />
+                    Content="删除所选节点" />
           </WrapPanel>
         </Grid>
       </Border>
@@ -139,11 +139,11 @@
         <Grid RowDefinitions="Auto,*"
               RowSpacing="14">
           <StackPanel Spacing="4">
-            <TextBlock Text="Node Library"
+            <TextBlock Text="节点库"
                        FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                        FontWeight="Bold"
                        Foreground="{DynamicResource AsterGraph.EyebrowBrush}" />
-            <TextBlock Text="Click a card to insert a node near the current viewport center."
+            <TextBlock Text="单击卡片可在当前视口中心附近插入节点。"
                        FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                        TextWrapping="Wrap"
                        Foreground="{DynamicResource AsterGraph.BodyBrush}" />
@@ -219,7 +219,7 @@
 
             <Border Classes="astergraph-inspector-section">
               <StackPanel Spacing="8">
-                <TextBlock Text="Workspace"
+                <TextBlock Text="工作区"
                            FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                            FontWeight="Bold"
                            Foreground="{DynamicResource AsterGraph.EyebrowBrush}" />
@@ -232,7 +232,7 @@
 
             <Border Classes="astergraph-inspector-section">
               <StackPanel Spacing="8">
-                <TextBlock Text="Fragments"
+                <TextBlock Text="片段"
                            FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                            FontWeight="Bold"
                            Foreground="{DynamicResource AsterGraph.EyebrowBrush}" />
@@ -247,16 +247,16 @@
                 <WrapPanel Orientation="Horizontal">
                   <Button Classes="astergraph-toolbar-action"
                           Command="{Binding ExportSelectionFragmentCommand}"
-                          Content="Export Fragment" />
+                          Content="导出片段" />
                   <Button Classes="astergraph-toolbar-action"
                           Command="{Binding ImportFragmentCommand}"
-                          Content="Import Fragment" />
+                          Content="导入片段" />
                   <Button Classes="astergraph-toolbar-action"
                           Command="{Binding ClearFragmentCommand}"
-                          Content="Clear Fragment" />
+                          Content="清空片段" />
                   <Button Classes="astergraph-toolbar-action"
                           Command="{Binding ExportSelectionAsTemplateCommand}"
-                          Content="Save As Template" />
+                          Content="另存为模板" />
                 </WrapPanel>
                 <TextBlock Text="{Binding FragmentLibraryCaption}"
                            FontSize="{DynamicResource AsterGraph.InspectorCaptionFontSize}"
@@ -271,13 +271,13 @@
                            IsVisible="{Binding BehaviorOptions.Fragments.EnableFragmentLibrary}">
                   <Button Classes="astergraph-toolbar-action"
                           Command="{Binding RefreshFragmentTemplatesCommand}"
-                          Content="Refresh Templates" />
+                          Content="刷新模板" />
                   <Button Classes="astergraph-toolbar-action"
                           Command="{Binding ImportSelectedTemplateCommand}"
-                          Content="Import Template" />
+                          Content="导入模板" />
                   <Button Classes="astergraph-toolbar-action"
                           Command="{Binding DeleteSelectedTemplateCommand}"
-                          Content="Delete Template" />
+                          Content="删除模板" />
                 </WrapPanel>
               </StackPanel>
             </Border>
@@ -285,7 +285,7 @@
             <Border Classes="astergraph-inspector-section"
                     IsVisible="{Binding BehaviorOptions.View.ShowMiniMap}">
               <StackPanel Spacing="8">
-                <TextBlock Text="Mini Map"
+                <TextBlock Text="迷你地图"
                            FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                            FontWeight="Bold"
                            Foreground="{DynamicResource AsterGraph.EyebrowBrush}" />
@@ -296,42 +296,42 @@
             </Border>
 
             <StackPanel Spacing="8">
-              <TextBlock Text="Shortcuts"
+              <TextBlock Text="快捷键"
                          FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                          FontWeight="Bold"
                          Foreground="{DynamicResource AsterGraph.EyebrowBrush}" />
               <Border Classes="astergraph-inspector-section">
-                <TextBlock Text="Left-drag on empty canvas: marquee-select nodes"
+                <TextBlock Text="在空白画布上按住左键拖拽：框选多个节点"
                            FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                            Foreground="{DynamicResource AsterGraph.BodyBrush}" />
               </Border>
               <Border Classes="astergraph-inspector-section">
-                <TextBlock Text="Ctrl+S / Ctrl+O: save or load snapshot"
+                <TextBlock Text="Ctrl+S / Ctrl+O：保存或加载快照"
                            FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                            Foreground="{DynamicResource AsterGraph.BodyBrush}" />
               </Border>
               <Border Classes="astergraph-inspector-section">
-                <TextBlock Text="Ctrl+Z / Ctrl+Y: undo or redo graph edits"
+                <TextBlock Text="Ctrl+Z / Ctrl+Y：撤销或重做图编辑操作"
                            FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                            Foreground="{DynamicResource AsterGraph.BodyBrush}" />
               </Border>
               <Border Classes="astergraph-inspector-section">
-                <TextBlock Text="Right-click on a multi-selection: batch menu with align/distribute tools"
+                <TextBlock Text="右键单击多选结果：打开包含对齐与分布工具的批量菜单"
                            FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                            Foreground="{DynamicResource AsterGraph.BodyBrush}" />
               </Border>
               <Border Classes="astergraph-inspector-section">
-                <TextBlock Text="Ctrl+C / Ctrl+V: copy and paste the current selection through the system clipboard"
+                <TextBlock Text="Ctrl+C / Ctrl+V：通过系统剪贴板复制并粘贴当前选择"
                            FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                            Foreground="{DynamicResource AsterGraph.BodyBrush}" />
               </Border>
               <Border Classes="astergraph-inspector-section">
-                <TextBlock Text="Demo host enables optional grid snap and alignment guides while dragging"
+                <TextBlock Text="Demo 宿主在拖拽期间可选启用网格吸附与对齐辅助线"
                            FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                            Foreground="{DynamicResource AsterGraph.BodyBrush}" />
               </Border>
               <Border Classes="astergraph-inspector-section">
-                <TextBlock Text="Delete / Escape: remove selection or cancel pending connection"
+                <TextBlock Text="Delete / Escape：删除当前选择或取消待连接状态"
                            FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                            Foreground="{DynamicResource AsterGraph.BodyBrush}" />
               </Border>
