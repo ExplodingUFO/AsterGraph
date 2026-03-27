@@ -44,6 +44,9 @@ public sealed class GraphInspectorStandaloneTests
             Assert.Contains("Outputs", allText);
             Assert.Contains("Upstream", allText);
             Assert.Contains("Downstream", allText);
+            Assert.Contains("参数编辑", allText);
+            Assert.Contains("可编辑", allText);
+            Assert.Contains("编辑值", allText);
             Assert.Single(editor.SelectedNodeParameters);
             Assert.Equal("Threshold", editor.SelectedNodeParameters[0].DisplayName);
 
@@ -52,6 +55,44 @@ public sealed class GraphInspectorStandaloneTests
             Assert.DoesNotContain("Shortcuts", allText);
             Assert.DoesNotContain("Mini Map", allText);
             Assert.Empty(inspector.GetVisualDescendants().OfType<GraphMiniMap>());
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
+    public void StandaloneInspectorFactory_ShowsExplicitParameterEditingControlsAndCues()
+    {
+        var editor = CreateEditor();
+        editor.SelectSingleNode(editor.Nodes[0], updateStatus: false);
+        var (window, inspector) = CreateInspectorWindow(editor);
+
+        try
+        {
+            var allText = string.Join(
+                "\n",
+                inspector.GetVisualDescendants()
+                    .OfType<TextBlock>()
+                    .Select(block => block.Text)
+                    .Where(text => !string.IsNullOrWhiteSpace(text)));
+            var textInputs = inspector.GetVisualDescendants()
+                .OfType<TextBox>()
+                .Where(textBox => textBox.Classes.Contains("astergraph-input"))
+                .ToList();
+            var statePills = inspector.GetVisualDescendants()
+                .OfType<Border>()
+                .Where(border => border.Classes.Contains("astergraph-parameter-state-pill"))
+                .ToList();
+
+            Assert.NotEmpty(textInputs);
+            Assert.All(textInputs, input => Assert.True(input.MinHeight >= 36));
+            Assert.NotEmpty(statePills);
+            Assert.Contains("参数编辑", allText);
+            Assert.Contains("以下控件直接编辑当前节点参数。", allText);
+            Assert.Contains("可编辑", allText);
+            Assert.Contains("编辑值", allText);
         }
         finally
         {

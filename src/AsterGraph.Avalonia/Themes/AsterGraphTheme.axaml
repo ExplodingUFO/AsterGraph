@@ -16,9 +16,15 @@
   <SolidColorBrush x:Key="AsterGraph.BodyBrush" Color="#C6D7E3" />
   <SolidColorBrush x:Key="AsterGraph.EyebrowBrush" Color="#7FA6C2" />
   <SolidColorBrush x:Key="AsterGraph.HighlightBrush" Color="#7FE7D7" />
-  <SolidColorBrush x:Key="AsterGraph.InspectorCardBrush" Color="#0F1825" />
-  <SolidColorBrush x:Key="AsterGraph.InputBackgroundBrush" Color="#0C1520" />
-  <SolidColorBrush x:Key="AsterGraph.InputBorderBrush" Color="#2A465D" />
+  <SolidColorBrush x:Key="AsterGraph.InspectorCardBrush" Color="#0E1723" />
+  <SolidColorBrush x:Key="AsterGraph.ParameterCardBorderBrush" Color="#3A5E7C" />
+  <SolidColorBrush x:Key="AsterGraph.InputBackgroundBrush" Color="#0B141F" />
+  <SolidColorBrush x:Key="AsterGraph.InputBorderBrush" Color="#4C7598" />
+  <SolidColorBrush x:Key="AsterGraph.InputFocusBorderBrush" Color="#7FE7D7" />
+  <SolidColorBrush x:Key="AsterGraph.ParameterStateBadgeBrush" Color="#1A2A3B" />
+  <SolidColorBrush x:Key="AsterGraph.ParameterEditableBadgeBrush" Color="#225869" />
+  <SolidColorBrush x:Key="AsterGraph.ParameterReadOnlyBadgeBrush" Color="#334354" />
+  <SolidColorBrush x:Key="AsterGraph.ValidationErrorBadgeBrush" Color="#4A2025" />
   <SolidColorBrush x:Key="AsterGraph.ValidationErrorBrush" Color="#FF9B9B" />
   <SolidColorBrush x:Key="AsterGraph.ContextMenuBackgroundBrush" Color="#111C29" />
   <SolidColorBrush x:Key="AsterGraph.ContextMenuBorderBrush" Color="#22354A" />
@@ -28,8 +34,8 @@
   <SolidColorBrush x:Key="AsterGraph.ContextMenuSeparatorBrush" Color="#2A465D" />
 
   <CornerRadius x:Key="AsterGraph.DefaultCornerRadius">24</CornerRadius>
-  <CornerRadius x:Key="AsterGraph.InspectorCardCornerRadius">14</CornerRadius>
-  <CornerRadius x:Key="AsterGraph.InspectorSectionCornerRadius">18</CornerRadius>
+  <CornerRadius x:Key="AsterGraph.InspectorCardCornerRadius">10</CornerRadius>
+  <CornerRadius x:Key="AsterGraph.InspectorSectionCornerRadius">14</CornerRadius>
   <CornerRadius x:Key="AsterGraph.ToolbarButtonCornerRadius">16</CornerRadius>
   <CornerRadius x:Key="AsterGraph.PillCornerRadius">999</CornerRadius>
   <CornerRadius x:Key="AsterGraph.TemplateCardCornerRadius">20</CornerRadius>
