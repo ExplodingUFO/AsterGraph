@@ -9,6 +9,7 @@ using AsterGraph.Editor.Catalog;
 using AsterGraph.Editor.Configuration;
 using AsterGraph.Editor.Diagnostics;
 using AsterGraph.Editor.Localization;
+using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.Services;
 using AsterGraph.Editor.ViewModels;
 
@@ -228,35 +229,68 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public IReadOnlyList<string> RuntimeMetricLines =>
     [
-        $"文档标题：{CurrentInspection.Document.Title}",
-        $"节点数量：{CurrentInspection.Document.Nodes.Count}",
-        $"当前选择：{CurrentInspection.Selection.SelectedNodeIds.Count}",
-        $"视口缩放：{CurrentInspection.Viewport.Zoom:0.00}",
+        $"文档标题：{RuntimeDocumentTitle}",
+        $"节点数量：{RuntimeNodeCount}",
+        $"当前选择：{RuntimeSelectedNodeCount}",
+        $"视口缩放：{RuntimeViewportZoom:0.00}",
         $"可保存工作区：{BoolText(CurrentInspection.Capabilities.CanSaveWorkspace)}",
         $"可加载工作区：{BoolText(CurrentInspection.Capabilities.CanLoadWorkspace)}",
     ];
+
+    public IReadOnlyList<RuntimeDiagnosticEntry> RecentDiagnostics =>
+        Editor.Session.Diagnostics
+            .GetRecentDiagnostics(10)
+            .Select(diagnostic => new RuntimeDiagnosticEntry(
+                diagnostic.Code,
+                diagnostic.Operation,
+                diagnostic.Message,
+                diagnostic.Severity))
+            .ToArray();
 
     public IReadOnlyList<string> RecentDiagnosticLines
     {
         get
         {
-            var diagnostics = CurrentInspection.RecentDiagnostics;
-            if (diagnostics.Count == 0)
+            if (RecentDiagnostics.Count == 0)
             {
                 return
                 [
                     "最近诊断：0 条",
-                    $"当前状态消息：{CurrentInspection.Status.Message}",
+                    $"当前状态消息：{CompatibilityStatusMessage}",
                 ];
             }
 
-            return diagnostics
+            return RecentDiagnostics
                 .Select(diagnostic => $"{SeverityText(diagnostic.Severity)} · {diagnostic.Code} · {diagnostic.Message}")
                 .ToArray();
         }
     }
 
     public string RuntimeDiagnosticsSummary => RuntimeDiagnosticsHelper;
+
+    public string RuntimeSessionInterfaceName => nameof(IGraphEditorSession);
+
+    public string RuntimeDiagnosticsSourceName => "Editor.Session.Diagnostics";
+
+    public string RuntimeDocumentTitle => CurrentInspection.Document.Title;
+
+    public int RuntimeNodeCount => CurrentInspection.Document.Nodes.Count;
+
+    public int RuntimeConnectionCount => CurrentInspection.Document.Connections.Count;
+
+    public int RuntimeSelectedNodeCount => CurrentInspection.Selection.SelectedNodeIds.Count;
+
+    public IReadOnlyList<string> RuntimeSelectedNodeIds => CurrentInspection.Selection.SelectedNodeIds;
+
+    public double RuntimeViewportZoom => CurrentInspection.Viewport.Zoom;
+
+    public double RuntimeViewportPanX => CurrentInspection.Viewport.PanX;
+
+    public double RuntimeViewportPanY => CurrentInspection.Viewport.PanY;
+
+    public bool RuntimeHasPendingConnection => CurrentInspection.PendingConnection.HasPendingConnection;
+
+    public string CompatibilityStatusMessage => CurrentInspection.Status.Message;
 
     public string MainEditorSummary => $"当前中心主编辑器绑定文档“{Editor.Title}”，并保留完整运行时会话。";
 
@@ -372,8 +406,21 @@ public partial class MainWindowViewModel : ViewModelBase
         OnPropertyChanged(nameof(StandaloneSurfaceLines));
         OnPropertyChanged(nameof(PresentationLines));
         OnPropertyChanged(nameof(RuntimeMetricLines));
+        OnPropertyChanged(nameof(RecentDiagnostics));
         OnPropertyChanged(nameof(RecentDiagnosticLines));
         OnPropertyChanged(nameof(RuntimeDiagnosticsSummary));
+        OnPropertyChanged(nameof(RuntimeSessionInterfaceName));
+        OnPropertyChanged(nameof(RuntimeDiagnosticsSourceName));
+        OnPropertyChanged(nameof(RuntimeDocumentTitle));
+        OnPropertyChanged(nameof(RuntimeNodeCount));
+        OnPropertyChanged(nameof(RuntimeConnectionCount));
+        OnPropertyChanged(nameof(RuntimeSelectedNodeCount));
+        OnPropertyChanged(nameof(RuntimeSelectedNodeIds));
+        OnPropertyChanged(nameof(RuntimeViewportZoom));
+        OnPropertyChanged(nameof(RuntimeViewportPanX));
+        OnPropertyChanged(nameof(RuntimeViewportPanY));
+        OnPropertyChanged(nameof(RuntimeHasPendingConnection));
+        OnPropertyChanged(nameof(CompatibilityStatusMessage));
         OnPropertyChanged(nameof(MainEditorSummary));
     }
 
@@ -388,6 +435,12 @@ public partial class MainWindowViewModel : ViewModelBase
             GraphEditorDiagnosticSeverity.Error => "错误",
             _ => severity.ToString(),
         };
+
+    public sealed record RuntimeDiagnosticEntry(
+        string Code,
+        string Operation,
+        string Message,
+        GraphEditorDiagnosticSeverity Severity);
 
     public sealed record CapabilityShowcaseItem(
         string Key,

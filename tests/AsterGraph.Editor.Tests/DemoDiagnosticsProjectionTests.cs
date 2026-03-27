@@ -1,0 +1,78 @@
+using Avalonia.Controls;
+using Avalonia.Headless.XUnit;
+using AsterGraph.Demo.ViewModels;
+using AsterGraph.Demo.Views;
+using Xunit;
+
+namespace AsterGraph.Editor.Tests;
+
+public sealed class DemoDiagnosticsProjectionTests
+{
+    [Fact]
+    public void MainWindowViewModel_ProjectsInspectionSnapshotAndRecentDiagnosticsFromEditorSession()
+    {
+        var viewModel = new MainWindowViewModel();
+
+        var inspection = viewModel.Editor.Session.Diagnostics.CaptureInspectionSnapshot();
+        var diagnostics = viewModel.Editor.Session.Diagnostics.GetRecentDiagnostics(10);
+
+        Assert.Equal("IGraphEditorSession", viewModel.RuntimeSessionInterfaceName);
+        Assert.Equal("Editor.Session.Diagnostics", viewModel.RuntimeDiagnosticsSourceName);
+        Assert.Equal("CaptureInspectionSnapshot", nameof(viewModel.Editor.Session.Diagnostics.CaptureInspectionSnapshot));
+        Assert.Equal("GetRecentDiagnostics", nameof(viewModel.Editor.Session.Diagnostics.GetRecentDiagnostics));
+
+        Assert.Equal(inspection.Document.Title, viewModel.RuntimeDocumentTitle);
+        Assert.Equal(inspection.Document.Nodes.Count, viewModel.RuntimeNodeCount);
+        Assert.Equal(inspection.Selection.SelectedNodeIds.Count, viewModel.RuntimeSelectedNodeCount);
+        Assert.Equal(inspection.Viewport.Zoom, viewModel.RuntimeViewportZoom);
+        Assert.Equal(inspection.PendingConnection.HasPendingConnection, viewModel.RuntimeHasPendingConnection);
+        Assert.Equal(diagnostics.Count, viewModel.RecentDiagnostics.Count);
+
+        if (diagnostics.Count > 0)
+        {
+            var projected = viewModel.RecentDiagnostics[0];
+            var actual = diagnostics[0];
+
+            Assert.Equal(actual.Code, projected.Code);
+            Assert.Equal(actual.Operation, projected.Operation);
+            Assert.Equal(actual.Message, projected.Message);
+            Assert.Equal(actual.Severity, projected.Severity);
+        }
+    }
+
+    [Fact]
+    public void MainWindowViewModel_KeepsStatusMessageSeparateFromMachineReadableDiagnostics()
+    {
+        var viewModel = new MainWindowViewModel();
+
+        viewModel.Editor.Session.Commands.SaveWorkspace();
+
+        var diagnostics = viewModel.Editor.Session.Diagnostics.GetRecentDiagnostics(10);
+        var latestDiagnostic = Assert.Single(diagnostics);
+
+        Assert.Equal("以下信息直接来自 Editor.Session.Diagnostics，而不是状态栏文案。", viewModel.RuntimeDiagnosticsSummary);
+        Assert.Equal(viewModel.Editor.StatusMessage, viewModel.CompatibilityStatusMessage);
+        Assert.Equal(latestDiagnostic.Message, viewModel.RecentDiagnostics[0].Message);
+        Assert.Equal(latestDiagnostic.Code, viewModel.RecentDiagnostics[0].Code);
+        Assert.Equal(latestDiagnostic.Operation, viewModel.RecentDiagnostics[0].Operation);
+        Assert.NotEqual(viewModel.CompatibilityStatusMessage, viewModel.RecentDiagnostics[0].Code);
+        Assert.NotEqual(viewModel.CompatibilityStatusMessage, viewModel.RecentDiagnostics[0].Operation);
+    }
+
+    [AvaloniaFact]
+    public void MainWindow_RendersRuntimeDiagnosticsHelperFromCanonicalPath()
+    {
+        var viewModel = new MainWindowViewModel();
+        var window = new MainWindow
+        {
+            DataContext = viewModel,
+        };
+
+        window.Show();
+
+        var helper = window.FindControl<TextBlock>("RuntimeDiagnosticsHelperText");
+
+        Assert.NotNull(helper);
+        Assert.Equal("以下信息直接来自 Editor.Session.Diagnostics，而不是状态栏文案。", helper!.Text);
+    }
+}
