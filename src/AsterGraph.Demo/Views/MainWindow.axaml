@@ -13,72 +13,315 @@
         Title="AsterGraph Demo"
         Width="1520"
         Height="940"
-        MinWidth="1100"
-        MinHeight="760"
-        Background="#08111A">
+        MinWidth="1360"
+        MinHeight="820"
+        Background="#09111A">
   <Design.DataContext>
     <vm:MainWindowViewModel/>
   </Design.DataContext>
 
-  <DockPanel>
-    <Border DockPanel.Dock="Top"
-            Margin="18,18,18,0"
-            Padding="14,10"
-            Background="#122130"
-            BorderBrush="#2E4B5E"
-            BorderThickness="1"
-            CornerRadius="12">
-      <StackPanel Spacing="10">
-        <WrapPanel Orientation="Horizontal"
-                   VerticalAlignment="Center">
-          <TextBlock Margin="0,0,18,0"
-                     VerticalAlignment="Center"
-                     FontSize="13"
-                     FontWeight="SemiBold"
-                     Foreground="#D9F7F1"
-                     Text="Demo Drag Assist" />
-          <CheckBox Margin="0,0,18,0"
-                    VerticalAlignment="Center"
-                    Foreground="#D9F7F1"
-                    Content="Grid Snapping"
-                    IsChecked="{Binding IsGridSnappingEnabled}" />
-          <CheckBox VerticalAlignment="Center"
-                    Foreground="#D9F7F1"
-                    Content="Alignment Guides"
-                    IsChecked="{Binding IsAlignmentGuidesEnabled}" />
-        </WrapPanel>
+  <Grid x:Name="MainShellGrid"
+        Margin="24"
+        ColumnSpacing="24"
+        RowDefinitions="*"
+        ColumnDefinitions="280,*,360">
+    <ScrollViewer Grid.Column="0"
+                  VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Disabled">
+      <StackPanel Spacing="16">
+        <Border Padding="24"
+                Background="#111C29"
+                BorderBrush="#244053"
+                BorderThickness="1"
+                CornerRadius="16">
+          <StackPanel Spacing="8">
+            <TextBlock FontSize="30"
+                       FontWeight="SemiBold"
+                       Foreground="#F4FFFC"
+                       Text="AsterGraph SDK 展示台" />
+            <TextBlock TextWrapping="Wrap"
+                       Foreground="#C2D7E4"
+                       Text="用一个保留的编辑器会话同时展示完整壳层、独立表面、可替换呈现与运行时诊断能力。" />
+          </StackPanel>
+        </Border>
 
-        <WrapPanel Orientation="Horizontal"
-                   VerticalAlignment="Center">
-          <TextBlock Margin="0,0,18,0"
-                     VerticalAlignment="Center"
-                     FontSize="13"
-                     FontWeight="SemiBold"
-                     Foreground="#D9F7F1"
-                     Text="Demo Host Permissions" />
-          <CheckBox Margin="0,0,18,0"
-                    VerticalAlignment="Center"
-                    Foreground="#D9F7F1"
-                    Content="Read Only"
-                    IsChecked="{Binding IsReadOnlyEnabled}" />
-          <CheckBox Margin="0,0,18,0"
-                    VerticalAlignment="Center"
-                    Foreground="#D9F7F1"
-                    Content="Workspace Commands"
-                    IsChecked="{Binding AreWorkspaceCommandsEnabled}" />
-          <CheckBox Margin="0,0,18,0"
-                    VerticalAlignment="Center"
-                    Foreground="#D9F7F1"
-                    Content="Fragment Commands"
-                    IsChecked="{Binding AreFragmentCommandsEnabled}" />
-          <CheckBox VerticalAlignment="Center"
-                    Foreground="#D9F7F1"
-                    Content="Host Menu Extensions"
-                    IsChecked="{Binding AreHostMenuExtensionsEnabled}" />
-        </WrapPanel>
+        <Border Padding="16"
+                Background="#111C29"
+                BorderBrush="#244053"
+                BorderThickness="1"
+                CornerRadius="16">
+          <StackPanel Spacing="12">
+            <TextBlock FontSize="24"
+                       FontWeight="SemiBold"
+                       Foreground="#F4FFFC"
+                       Text="能力导航" />
+            <ItemsControl ItemsSource="{Binding Capabilities}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:MainWindowViewModel+CapabilityShowcaseItem">
+                  <Button Margin="0,0,0,8"
+                          Padding="16"
+                          HorizontalContentAlignment="Stretch"
+                          Background="#162433"
+                          BorderBrush="#2C495D"
+                          BorderThickness="1"
+                          CornerRadius="14"
+                          Command="{Binding $parent[Window].DataContext.SelectCapabilityCommand}"
+                          CommandParameter="{Binding}">
+                    <StackPanel Spacing="6">
+                      <TextBlock FontWeight="SemiBold"
+                                 Foreground="#F4FFFC"
+                                 Text="{Binding Title}" />
+                      <TextBlock TextWrapping="Wrap"
+                                 Foreground="#B6CBD8"
+                                 Text="{Binding Summary}" />
+                    </StackPanel>
+                  </Button>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </Border>
+
+        <Border Padding="16"
+                Background="#111C29"
+                BorderBrush="#244053"
+                BorderThickness="1"
+                CornerRadius="16">
+          <StackPanel Spacing="12">
+            <TextBlock FontSize="24"
+                       FontWeight="SemiBold"
+                       Foreground="#F4FFFC"
+                       Text="宿主开关" />
+            <CheckBox Foreground="#E2F3F7"
+                      Content="网格吸附"
+                      IsChecked="{Binding IsGridSnappingEnabled}" />
+            <CheckBox Foreground="#E2F3F7"
+                      Content="对齐辅助线"
+                      IsChecked="{Binding IsAlignmentGuidesEnabled}" />
+            <CheckBox Foreground="#E2F3F7"
+                      Content="只读模式"
+                      IsChecked="{Binding IsReadOnlyEnabled}" />
+            <CheckBox Foreground="#E2F3F7"
+                      Content="工作区命令"
+                      IsChecked="{Binding AreWorkspaceCommandsEnabled}" />
+            <CheckBox Foreground="#E2F3F7"
+                      Content="片段命令"
+                      IsChecked="{Binding AreFragmentCommandsEnabled}" />
+            <CheckBox Foreground="#E2F3F7"
+                      Content="宿主菜单扩展"
+                      IsChecked="{Binding AreHostMenuExtensionsEnabled}" />
+          </StackPanel>
+        </Border>
+
+        <Border Padding="16"
+                Background="#111C29"
+                BorderBrush="#244053"
+                BorderThickness="1"
+                CornerRadius="16">
+          <StackPanel Spacing="12">
+            <TextBlock FontSize="24"
+                       FontWeight="SemiBold"
+                       Foreground="#F4FFFC"
+                       Text="演示入口" />
+            <ItemsControl ItemsSource="{Binding DemoEntries}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <TextBlock Margin="0,0,0,8"
+                             TextWrapping="Wrap"
+                             Foreground="#B6CBD8"
+                             Text="{Binding}" />
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </Border>
       </StackPanel>
-    </Border>
+    </ScrollViewer>
 
-    <controls:GraphEditorView Editor="{Binding Editor}" />
-  </DockPanel>
+    <Grid Grid.Column="1"
+          RowDefinitions="Auto,Auto,*"
+          RowSpacing="16">
+      <Border Padding="24"
+              Background="#111C29"
+              BorderBrush="#244053"
+              BorderThickness="1"
+              CornerRadius="16">
+        <StackPanel Spacing="8">
+          <TextBlock FontSize="24"
+                     FontWeight="SemiBold"
+                     Foreground="#F4FFFC"
+                     Text="完整壳层演示" />
+          <TextBlock TextWrapping="Wrap"
+                     Foreground="#C2D7E4"
+                     Text="{Binding SelectedCapabilitySummary}" />
+        </StackPanel>
+      </Border>
+
+      <Border Grid.Row="1"
+              Padding="24"
+              Background="#111C29"
+              BorderBrush="#244053"
+              BorderThickness="1"
+              CornerRadius="16">
+        <StackPanel Spacing="12">
+          <TextBlock FontSize="24"
+                     FontWeight="SemiBold"
+                     Foreground="#F4FFFC"
+                     Text="主编辑器" />
+          <TextBlock TextWrapping="Wrap"
+                     Foreground="#C2D7E4"
+                     Text="{Binding MainEditorSummary}" />
+          <Border Height="520"
+                  ClipToBounds="True"
+                  Background="#08111A"
+                  BorderBrush="#29475A"
+                  BorderThickness="1"
+                  CornerRadius="16">
+            <controls:GraphEditorView Editor="{Binding Editor}" />
+          </Border>
+        </StackPanel>
+      </Border>
+
+      <Border Grid.Row="2"
+              Padding="16"
+              Background="#111C29"
+              BorderBrush="#244053"
+              BorderThickness="1"
+              CornerRadius="16">
+        <StackPanel Spacing="12">
+          <TextBlock FontSize="24"
+                     FontWeight="SemiBold"
+                     Foreground="#F4FFFC"
+                     Text="能力证明" />
+          <ItemsControl ItemsSource="{Binding ChromeModeProofLines}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <TextBlock Margin="0,0,0,8"
+                           TextWrapping="Wrap"
+                           Foreground="#C2D7E4"
+                           Text="{Binding}" />
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </Border>
+    </Grid>
+
+    <ScrollViewer Grid.Column="2"
+                  VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Disabled">
+      <StackPanel Spacing="16">
+        <Border Padding="24"
+                Background="#111C29"
+                BorderBrush="#244053"
+                BorderThickness="1"
+                CornerRadius="16">
+          <StackPanel Spacing="8">
+            <TextBlock FontSize="24"
+                       FontWeight="SemiBold"
+                       Foreground="#F4FFFC"
+                       Text="架构说明" />
+            <TextBlock FontWeight="SemiBold"
+                       Foreground="#7FE7D7"
+                       Text="{Binding SelectedCapabilityTitle}" />
+            <TextBlock TextWrapping="Wrap"
+                       Foreground="#C2D7E4"
+                       Text="{Binding SelectedCapabilityArchitecture}" />
+            <ItemsControl ItemsSource="{Binding SelectedCapabilityBullets}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <TextBlock Margin="0,0,0,8"
+                             TextWrapping="Wrap"
+                             Foreground="#B6CBD8"
+                             Text="{Binding}" />
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </Border>
+
+        <Border Padding="16"
+                Background="#111C29"
+                BorderBrush="#244053"
+                BorderThickness="1"
+                CornerRadius="16">
+          <StackPanel Spacing="12">
+            <TextBlock FontSize="24"
+                       FontWeight="SemiBold"
+                       Foreground="#F4FFFC"
+                       Text="运行时与诊断" />
+            <TextBlock TextWrapping="Wrap"
+                       Foreground="#7FE7D7"
+                       Text="{Binding RuntimeDiagnosticsSummary}" />
+            <ItemsControl ItemsSource="{Binding RuntimeMetricLines}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <TextBlock Margin="0,0,0,8"
+                             TextWrapping="Wrap"
+                             Foreground="#C2D7E4"
+                             Text="{Binding}" />
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <ItemsControl ItemsSource="{Binding RecentDiagnosticLines}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <TextBlock Margin="0,0,0,8"
+                             TextWrapping="Wrap"
+                             Foreground="#B6CBD8"
+                             Text="{Binding}" />
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </Border>
+
+        <Border Padding="16"
+                Background="#111C29"
+                BorderBrush="#244053"
+                BorderThickness="1"
+                CornerRadius="16">
+          <StackPanel Spacing="12">
+            <TextBlock FontSize="24"
+                       FontWeight="SemiBold"
+                       Foreground="#F4FFFC"
+                       Text="独立表面" />
+            <ItemsControl ItemsSource="{Binding StandaloneSurfaceLines}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <TextBlock Margin="0,0,0,8"
+                             TextWrapping="Wrap"
+                             Foreground="#C2D7E4"
+                             Text="{Binding}" />
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </Border>
+
+        <Border Padding="16"
+                Background="#111C29"
+                BorderBrush="#244053"
+                BorderThickness="1"
+                CornerRadius="16">
+          <StackPanel Spacing="12">
+            <TextBlock FontSize="24"
+                       FontWeight="SemiBold"
+                       Foreground="#F4FFFC"
+                       Text="可替换呈现" />
+            <ItemsControl ItemsSource="{Binding PresentationLines}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <TextBlock Margin="0,0,0,8"
+                             TextWrapping="Wrap"
+                             Foreground="#C2D7E4"
+                             Text="{Binding}" />
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </Border>
+      </StackPanel>
+    </ScrollViewer>
+  </Grid>
 </Window>
