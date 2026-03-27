@@ -27,6 +27,61 @@ Add a direct `AsterGraph.Core` reference when the host also needs direct access 
 
 `AsterGraph.Demo` is not a consumable package and is not part of the publish set.
 
+## GitHub Packages Feed Setup
+
+Use GitHub Packages for private restore and publish of the four supported SDK packages (`AsterGraph.Abstractions`, `AsterGraph.Core`, `AsterGraph.Editor`, `AsterGraph.Avalonia`).
+
+Add source via CLI:
+
+```powershell
+# replace OWNER with your GitHub org/user
+dotnet nuget add source "https://nuget.pkg.github.com/OWNER/index.json" `
+  --name github-astergraph `
+  --username GITHUB_USERNAME `
+  --password GITHUB_PAT `
+  --store-password-in-clear-text
+```
+
+Credential expectations:
+
+- restore requires a token with `read:packages`
+- publish requires a token with `write:packages`
+- private repo package access may also require repository scopes depending on organization policy
+
+Prefer storing credentials in local user config or CI secrets, not in tracked repository files.
+
+`NuGet.config` source shape (credential-free template):
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <packageSources>
+    <clear />
+    <add key="local-astergraph" value="artifacts/packages" />
+    <add key="nuget.org" value="https://api.nuget.org/v3/index.json" />
+    <add key="github-astergraph" value="https://nuget.pkg.github.com/OWNER/index.json" />
+  </packageSources>
+</configuration>
+```
+
+Publish sequence (Demo excluded):
+
+```powershell
+# pack
+dotnet pack src/AsterGraph.Abstractions/AsterGraph.Abstractions.csproj -c Release -o artifacts/packages
+dotnet pack src/AsterGraph.Core/AsterGraph.Core.csproj -c Release -o artifacts/packages
+dotnet pack src/AsterGraph.Editor/AsterGraph.Editor.csproj -c Release -o artifacts/packages
+dotnet pack src/AsterGraph.Avalonia/AsterGraph.Avalonia.csproj -c Release -o artifacts/packages
+
+# push only .nupkg files
+dotnet nuget push "artifacts/packages/AsterGraph.Abstractions.*.nupkg" --source github-astergraph --skip-duplicate
+dotnet nuget push "artifacts/packages/AsterGraph.Core.*.nupkg" --source github-astergraph --skip-duplicate
+dotnet nuget push "artifacts/packages/AsterGraph.Editor.*.nupkg" --source github-astergraph --skip-duplicate
+dotnet nuget push "artifacts/packages/AsterGraph.Avalonia.*.nupkg" --source github-astergraph --skip-duplicate
+```
+
+If push fails with authentication or permission errors (401/403), refresh source credentials (token with `write:packages`) and retry publish.
+
 ## Canonical Host Composition
 
 Phase 2 gives hosts two canonical entry paths. Pick the narrowest surface that matches what you want to own.

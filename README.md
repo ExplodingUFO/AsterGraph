@@ -180,6 +180,8 @@ Sample local feed config:
 copy NuGet.config.sample NuGet.config
 ```
 
+GitHub Packages setup and publish details are documented in [`docs/host-integration.md`](./docs/host-integration.md#github-packages-feed-setup).
+
 For the detailed host setup and migration guidance, see [`docs/host-integration.md`](./docs/host-integration.md).
 
 ## Extension Model

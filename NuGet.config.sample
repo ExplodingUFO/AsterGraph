@@ -4,5 +4,6 @@
     <clear />
     <add key="local-astergraph" value="artifacts/packages" />
     <add key="nuget.org" value="https://api.nuget.org/v3/index.json" />
+    <add key="github-astergraph" value="https://nuget.pkg.github.com/OWNER/index.json" />
   </packageSources>
 </configuration>
