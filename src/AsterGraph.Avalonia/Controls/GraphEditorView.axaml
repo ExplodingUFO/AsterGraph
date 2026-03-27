@@ -198,12 +198,15 @@
 
       <Border Grid.Row="1"
               Grid.Column="1"
+              MinHeight="0"
               Background="{DynamicResource AsterGraph.CanvasFrameBrush}"
               BorderBrush="{DynamicResource AsterGraph.PanelBorderBrush}"
               BorderThickness="1"
               CornerRadius="{DynamicResource AsterGraph.DefaultCornerRadius}"
               Padding="{DynamicResource AsterGraph.CanvasFramePadding}">
         <controls:NodeCanvas x:Name="PART_NodeCanvas"
+                             VerticalAlignment="Stretch"
+                             HorizontalAlignment="Stretch"
                              ViewModel="{Binding}" />
       </Border>
 

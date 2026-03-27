@@ -38,6 +38,30 @@ public partial class GraphEditorView : UserControl
             GraphEditorViewChromeMode.Default);
 
     /// <summary>
+    /// 顶部头部区是否可见。
+    /// </summary>
+    public static readonly StyledProperty<bool> IsHeaderChromeVisibleProperty =
+        AvaloniaProperty.Register<GraphEditorView, bool>(nameof(IsHeaderChromeVisible), true);
+
+    /// <summary>
+    /// 节点库区是否可见。
+    /// </summary>
+    public static readonly StyledProperty<bool> IsLibraryChromeVisibleProperty =
+        AvaloniaProperty.Register<GraphEditorView, bool>(nameof(IsLibraryChromeVisible), true);
+
+    /// <summary>
+    /// 检查器区是否可见。
+    /// </summary>
+    public static readonly StyledProperty<bool> IsInspectorChromeVisibleProperty =
+        AvaloniaProperty.Register<GraphEditorView, bool>(nameof(IsInspectorChromeVisible), true);
+
+    /// <summary>
+    /// 底部状态区是否可见。
+    /// </summary>
+    public static readonly StyledProperty<bool> IsStatusChromeVisibleProperty =
+        AvaloniaProperty.Register<GraphEditorView, bool>(nameof(IsStatusChromeVisible), true);
+
+    /// <summary>
     /// 可选的 Avalonia 展示器替换配置依赖属性。
     /// </summary>
     public static readonly StyledProperty<AsterGraphPresentationOptions?> PresentationProperty =
@@ -96,6 +120,42 @@ public partial class GraphEditorView : UserControl
     }
 
     /// <summary>
+    /// 顶部头部区是否可见。
+    /// </summary>
+    public bool IsHeaderChromeVisible
+    {
+        get => GetValue(IsHeaderChromeVisibleProperty);
+        set => SetValue(IsHeaderChromeVisibleProperty, value);
+    }
+
+    /// <summary>
+    /// 节点库区是否可见。
+    /// </summary>
+    public bool IsLibraryChromeVisible
+    {
+        get => GetValue(IsLibraryChromeVisibleProperty);
+        set => SetValue(IsLibraryChromeVisibleProperty, value);
+    }
+
+    /// <summary>
+    /// 检查器区是否可见。
+    /// </summary>
+    public bool IsInspectorChromeVisible
+    {
+        get => GetValue(IsInspectorChromeVisibleProperty);
+        set => SetValue(IsInspectorChromeVisibleProperty, value);
+    }
+
+    /// <summary>
+    /// 底部状态区是否可见。
+    /// </summary>
+    public bool IsStatusChromeVisible
+    {
+        get => GetValue(IsStatusChromeVisibleProperty);
+        set => SetValue(IsStatusChromeVisibleProperty, value);
+    }
+
+    /// <summary>
     /// 当前宿主提供的 Avalonia 展示器替换配置。
     /// </summary>
     public AsterGraphPresentationOptions? Presentation
@@ -119,9 +179,13 @@ public partial class GraphEditorView : UserControl
             ApplyHostContext(editor);
             ApplyPresentationOptions(Presentation);
         }
-        else if (change.Property == ChromeModeProperty)
+        else if (change.Property == ChromeModeProperty
+            || change.Property == IsHeaderChromeVisibleProperty
+            || change.Property == IsLibraryChromeVisibleProperty
+            || change.Property == IsInspectorChromeVisibleProperty
+            || change.Property == IsStatusChromeVisibleProperty)
         {
-            ApplyChromeMode(change.GetNewValue<GraphEditorViewChromeMode>());
+            ApplyChromeMode(ChromeMode);
         }
         else if (change.Property == PresentationProperty)
         {
@@ -197,31 +261,35 @@ public partial class GraphEditorView : UserControl
     private void ApplyChromeMode(GraphEditorViewChromeMode chromeMode)
     {
         var showChrome = chromeMode == GraphEditorViewChromeMode.Default;
+        var showHeader = showChrome && IsHeaderChromeVisible;
+        var showLibrary = showChrome && IsLibraryChromeVisible;
+        var showInspector = showChrome && IsInspectorChromeVisible;
+        var showStatus = showChrome && IsStatusChromeVisible;
 
         if (_headerChrome is not null)
         {
-            _headerChrome.IsVisible = showChrome;
+            _headerChrome.IsVisible = showHeader;
         }
 
         if (_libraryChrome is not null)
         {
-            _libraryChrome.IsVisible = showChrome;
+            _libraryChrome.IsVisible = showLibrary;
         }
 
         if (_inspectorChrome is not null)
         {
-            _inspectorChrome.IsVisible = showChrome;
+            _inspectorChrome.IsVisible = showInspector;
         }
 
         if (_statusChrome is not null)
         {
-            _statusChrome.IsVisible = showChrome;
+            _statusChrome.IsVisible = showStatus;
         }
 
         if (_shellGrid is not null)
         {
-            _shellGrid.RowSpacing = showChrome ? _defaultShellRowSpacing : 0;
-            _shellGrid.ColumnSpacing = showChrome ? _defaultShellColumnSpacing : 0;
+            _shellGrid.RowSpacing = showHeader || showStatus ? _defaultShellRowSpacing : 0;
+            _shellGrid.ColumnSpacing = showLibrary || showInspector ? _defaultShellColumnSpacing : 0;
         }
     }
 
