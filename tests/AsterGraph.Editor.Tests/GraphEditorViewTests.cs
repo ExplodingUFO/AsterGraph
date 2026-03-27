@@ -33,6 +33,10 @@ public sealed class GraphEditorViewTests
         var view = (GraphEditorView)window.Content!;
 
         Assert.Equal(GraphEditorViewChromeMode.Default, view.ChromeMode);
+        Assert.True(view.IsHeaderChromeVisible);
+        Assert.True(view.IsLibraryChromeVisible);
+        Assert.True(view.IsInspectorChromeVisible);
+        Assert.True(view.IsStatusChromeVisible);
         Assert.True(FindRequiredControl<Border>(view, "PART_HeaderChrome").IsVisible);
         Assert.True(FindRequiredControl<Border>(view, "PART_LibraryChrome").IsVisible);
         Assert.True(FindRequiredControl<Border>(view, "PART_InspectorChrome").IsVisible);
@@ -60,6 +64,32 @@ public sealed class GraphEditorViewTests
         Assert.Equal(40, toolbar.ItemHeight);
         Assert.Equal(120, toolbar.ItemWidth);
         Assert.True(toolbar.Children.Count >= 7);
+    }
+
+    [AvaloniaFact]
+    public void IndividualChromeVisibility_TogglesEachRegionIndependently()
+    {
+        var editor = CreateEditor();
+        var window = CreateWindow(new GraphEditorView
+        {
+            Editor = editor,
+            IsHeaderChromeVisible = false,
+            IsLibraryChromeVisible = true,
+            IsInspectorChromeVisible = false,
+            IsStatusChromeVisible = true,
+        });
+        var view = (GraphEditorView)window.Content!;
+
+        Assert.False(view.IsHeaderChromeVisible);
+        Assert.True(view.IsLibraryChromeVisible);
+        Assert.False(view.IsInspectorChromeVisible);
+        Assert.True(view.IsStatusChromeVisible);
+
+        Assert.False(FindRequiredControl<Border>(view, "PART_HeaderChrome").IsVisible);
+        Assert.True(FindRequiredControl<Border>(view, "PART_LibraryChrome").IsVisible);
+        Assert.False(FindRequiredControl<Border>(view, "PART_InspectorChrome").IsVisible);
+        Assert.True(FindRequiredControl<Border>(view, "PART_StatusChrome").IsVisible);
+        Assert.NotNull(FindRequiredControl<NodeCanvas>(view, "PART_NodeCanvas"));
     }
 
     [AvaloniaFact]

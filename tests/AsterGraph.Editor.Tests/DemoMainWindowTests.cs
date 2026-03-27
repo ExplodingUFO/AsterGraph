@@ -44,7 +44,7 @@ public sealed class DemoMainWindowTests
     }
 
     [AvaloniaFact]
-    public void MainWindow_UsesCompactCardDensityForQuickFix()
+    public void MainWindow_UsesSquaredLowRadiusShellCards()
     {
         var window = CreateWindow();
 
@@ -53,26 +53,35 @@ public sealed class DemoMainWindowTests
             .First(scrollViewer => Grid.GetColumn(scrollViewer) == 0);
         var leftStack = Assert.IsType<StackPanel>(leftScrollViewer.Content);
         var titleCard = Assert.IsType<Border>(leftStack.Children[0]);
-        var entryCard = Assert.IsType<Border>(leftStack.Children[3]);
+        var toggleCard = Assert.IsType<Border>(leftStack.Children[2]);
 
-        Assert.Equal(new Thickness(20), titleCard.Padding);
-        Assert.Equal(new Thickness(16), entryCard.Padding);
+        Assert.Equal(new CornerRadius(10), titleCard.CornerRadius);
+        Assert.Equal(new CornerRadius(8), toggleCard.CornerRadius);
+
+        var centerCard = window.FindControl<Border>("MainEditorCard");
+        Assert.NotNull(centerCard);
+        Assert.Equal(new CornerRadius(10), centerCard!.CornerRadius);
+    }
+
+    [AvaloniaFact]
+    public void MainWindow_UsesFullHeightCenterEditorComposition()
+    {
+        var window = CreateWindow();
 
         var centerGrid = window.GetVisualDescendants()
             .OfType<Grid>()
             .First(grid => Grid.GetColumn(grid) == 1 && grid.RowDefinitions.Count == 3);
-        var heroCard = Assert.IsType<Border>(centerGrid.Children[0]);
-        var editorCard = Assert.IsType<Border>(centerGrid.Children[1]);
-        var proofCard = Assert.IsType<Border>(centerGrid.Children[2]);
 
-        Assert.Equal(new Thickness(20), heroCard.Padding);
-        Assert.Equal(new Thickness(16), editorCard.Padding);
-        Assert.Equal(new Thickness(16), proofCard.Padding);
+        Assert.Equal(new GridLength(1, GridUnitType.Star), centerGrid.RowDefinitions[1].Height);
 
-        var editorFrame = editorCard.GetVisualDescendants()
-            .OfType<Border>()
-            .First(border => border.Child is GraphEditorView);
-        Assert.Equal(500, editorFrame.Height);
+        var editorFrame = window.FindControl<Border>("MainEditorFrame");
+        Assert.NotNull(editorFrame);
+        Assert.True(double.IsNaN(editorFrame!.Height));
+        Assert.Equal(0, editorFrame.MinHeight);
+
+        var graphEditorView = window.FindControl<GraphEditorView>("MainGraphEditorView");
+        Assert.NotNull(graphEditorView);
+        Assert.Equal(VerticalAlignment.Stretch, graphEditorView!.VerticalAlignment);
     }
 
     private static MainWindow CreateWindow()
