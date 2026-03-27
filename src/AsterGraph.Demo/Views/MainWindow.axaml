@@ -322,8 +322,8 @@
                               BorderThickness="1"
                               CornerRadius="12">
                         <StackPanel Spacing="4">
-                          <TextBlock Foreground="#7FE7D7"
-                                     Text="{Binding Severity, StringFormat=Severity：{0}}" />
+                          <TextBlock Foreground="{Binding SeverityHex}"
+                                     Text="{Binding SeverityLabel, StringFormat=Severity：{0}}" />
                           <TextBlock Foreground="#D8EEF3"
                                      Text="{Binding Code, StringFormat=Code：{0}}" />
                           <TextBlock Foreground="#D8EEF3"
