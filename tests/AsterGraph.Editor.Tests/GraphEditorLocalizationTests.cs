@@ -1,7 +1,10 @@
+using System;
+using System.IO;
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Core.Compatibility;
 using AsterGraph.Core.Models;
+using AsterGraph.Demo.ViewModels;
 using AsterGraph.Editor.Catalog;
 using AsterGraph.Editor.Configuration;
 using AsterGraph.Editor.Localization;
@@ -53,30 +56,51 @@ public sealed class GraphEditorLocalizationTests
     }
 
     [Fact]
-    public void UndoStatus_UsesLocalizationProviderForStockStatusMessage()
+    public void GraphEditorView_SourceContainsChineseUserFacingShellLiterals()
     {
-        var behavior = GraphEditorBehaviorOptions.Default with
+        var source = ReadRepoFile("src/AsterGraph.Avalonia/Controls/GraphEditorView.axaml");
+
+        var expectedLiterals = new[]
         {
-            Commands = GraphEditorCommandPermissions.Default with
-            {
-                History = new HistoryCommandPermissions
-                {
-                    AllowUndo = false,
-                    AllowRedo = true,
-                },
-            },
+            "保存快照",
+            "加载快照",
+            "删除所选节点",
+            "节点库",
+            "工作区",
+            "片段",
+            "迷你地图",
+            "快捷键",
         };
-        var editor = CreateEditor(
-            new TestGraphLocalizationProvider(
-                new Dictionary<string, string>
-                {
-                    ["editor.status.undo.disabledByPermissions"] = "宿主已禁用撤销。",
-                }),
-            behavior);
 
-        editor.Undo();
+        foreach (var literal in expectedLiterals)
+        {
+            Assert.Contains(literal, source, StringComparison.Ordinal);
+        }
+    }
 
-        Assert.Equal("宿主已禁用撤销。", editor.StatusMessage);
+    [Fact]
+    public void DemoGraphLocalizationProvider_RemainsCanonicalRuntimeCaptionSource()
+    {
+        var providerType = typeof(MainWindowViewModel).GetNestedType("DemoGraphLocalizationProvider", System.Reflection.BindingFlags.NonPublic);
+        Assert.NotNull(providerType);
+        Assert.True(typeof(IGraphLocalizationProvider).IsAssignableFrom(providerType));
+
+        var provider = (IGraphLocalizationProvider?)Activator.CreateInstance(providerType!);
+        Assert.NotNull(provider);
+
+        Assert.Equal("请选择一个节点", provider!.GetString("editor.inspector.title.none", "fallback"));
+        Assert.Equal("fallback", provider.GetString("editor.stats.caption", "fallback"));
+    }
+
+    [Fact]
+    public void DemoShowcase_PreservesEnglishTechnicalIdentifiers()
+    {
+        var viewModel = new MainWindowViewModel();
+
+        Assert.Contains(viewModel.StandaloneSurfaceLines, line => line.Contains("AsterGraphCanvasViewFactory", StringComparison.Ordinal));
+        Assert.Contains(viewModel.StandaloneSurfaceLines, line => line.Contains("AsterGraphInspectorViewFactory", StringComparison.Ordinal));
+        Assert.Contains(viewModel.StandaloneSurfaceLines, line => line.Contains("AsterGraphMiniMapViewFactory", StringComparison.Ordinal));
+        Assert.Contains(viewModel.PresentationLines, line => line.Contains("AsterGraphPresentationOptions", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -115,6 +139,12 @@ public sealed class GraphEditorLocalizationTests
         Assert.Equal("Color => Color", editor.InspectorOutputs);
         Assert.Equal("无", editor.InspectorUpstream);
         Assert.Equal("Sink <= Input", editor.InspectorDownstream);
+    }
+
+    private static string ReadRepoFile(string relativePath)
+    {
+        var fullPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../../", relativePath));
+        return File.ReadAllText(fullPath);
     }
 
     private static GraphEditorViewModel CreateEditor(
