@@ -237,6 +237,22 @@
                 </DataTemplate>
               </ItemsControl.ItemTemplate>
             </ItemsControl>
+            <ItemsControl ItemsSource="{Binding SelectedCapabilityProofLines}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <Border Margin="0,0,0,8"
+                          Padding="12"
+                          Background="#162433"
+                          BorderBrush="#2C495D"
+                          BorderThickness="1"
+                          CornerRadius="12">
+                    <TextBlock TextWrapping="Wrap"
+                               Foreground="#D8EEF3"
+                               Text="{Binding}" />
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
           </StackPanel>
         </Border>
 
