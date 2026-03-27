@@ -153,6 +153,8 @@ var recent = session.Diagnostics.GetRecentDiagnostics(20);
 
 ## Quick Start
 
+For first-time onboarding (package choice, private feed setup, install commands, and the minimum Avalonia host path), start with the [Quick Start guide](./docs/quick-start.md).
+
 Build:
 
 ```powershell

@@ -2,6 +2,8 @@
 
 This guide shows how to host AsterGraph without over-coupling your application to internal editor details.
 
+Quick Start: see the [minimal onboarding guide](./quick-start.md) for the shortest package/setup/integration path.
+
 ## Package Choice
 
 The supported package publish boundary is exactly these four packages:

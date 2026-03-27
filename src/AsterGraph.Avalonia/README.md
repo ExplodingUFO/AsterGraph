@@ -2,6 +2,8 @@
 
 Avalonia UI shell for the AsterGraph editor.
 
+Quick Start: [main UI entry quick start](../../docs/quick-start.md).
+
 This package belongs to the supported AsterGraph package set with `AsterGraph.Abstractions`, `AsterGraph.Core`, and `AsterGraph.Editor`, and it targets `net8.0` and `net9.0`.
 
 Direct package reference:
