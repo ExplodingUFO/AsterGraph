@@ -18,7 +18,7 @@ namespace AsterGraph.Demo.ViewModels;
 public partial class MainWindowViewModel : ViewModelBase
 {
     private const double DemoSnapTolerance = 18;
-    private const string RuntimeDiagnosticsHelper = "以下信息直接来自 Editor.Session.Diagnostics，而不是状态栏文案。";
+    private const string RuntimeDiagnosticsHelper = "以下信息直接来自 Editor.Session.Diagnostics。";
     private const string StandaloneSurfaceHelper = "这些预览与主编辑器共享同一运行时会话。";
     private const string PresentationHelper = "可替换的是视觉呈现，不是编辑行为。";
     private const string ChromeModeHelper = "关闭后可体验完整编辑流程；开启后仅保留只读浏览。";

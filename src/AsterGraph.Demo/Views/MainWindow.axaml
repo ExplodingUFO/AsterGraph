@@ -5,14 +5,14 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        d:DesignWidth="1520"
-        d:DesignHeight="940"
+        d:DesignWidth="1480"
+        d:DesignHeight="900"
         x:Class="AsterGraph.Demo.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
         Title="AsterGraph Demo"
-        Width="1520"
-        Height="940"
+        Width="1480"
+        Height="900"
         MinWidth="1360"
         MinHeight="820"
         Background="#09111A">
@@ -29,19 +29,19 @@
                   VerticalScrollBarVisibility="Auto"
                   HorizontalScrollBarVisibility="Disabled">
       <StackPanel Spacing="16">
-        <Border Padding="24"
+        <Border Padding="20"
                 Background="#111C29"
                 BorderBrush="#244053"
                 BorderThickness="1"
                 CornerRadius="16">
           <StackPanel Spacing="8">
-            <TextBlock FontSize="30"
+            <TextBlock FontSize="28"
                        FontWeight="SemiBold"
                        Foreground="#F4FFFC"
                        Text="AsterGraph SDK 展示台" />
             <TextBlock TextWrapping="Wrap"
                        Foreground="#C2D7E4"
-                       Text="用一个保留的编辑器会话同时展示完整壳层、独立表面、可替换呈现与运行时诊断能力。" />
+                       Text="用一个保留的编辑器会话集中展示默认壳层、独立表面、可替换呈现与运行时诊断。" />
           </StackPanel>
         </Border>
 
@@ -59,15 +59,15 @@
               <ItemsControl.ItemTemplate>
                 <DataTemplate x:DataType="vm:MainWindowViewModel+CapabilityShowcaseItem">
                   <Button Margin="0,0,0,8"
-                          Padding="16"
+                          Padding="14,12"
                           HorizontalContentAlignment="Stretch"
                           Background="#162433"
                           BorderBrush="#2C495D"
                           BorderThickness="1"
-                          CornerRadius="14"
+                          CornerRadius="12"
                           Command="{Binding $parent[Window].DataContext.SelectCapabilityCommand}"
                           CommandParameter="{Binding}">
-                    <StackPanel Spacing="6">
+                    <StackPanel Spacing="4">
                       <TextBlock FontWeight="SemiBold"
                                  Foreground="#F4FFFC"
                                  Text="{Binding Title}" />
@@ -118,7 +118,7 @@
                 BorderBrush="#244053"
                 BorderThickness="1"
                 CornerRadius="16">
-          <StackPanel Spacing="12">
+          <StackPanel Spacing="10">
             <TextBlock FontSize="24"
                        FontWeight="SemiBold"
                        Foreground="#F4FFFC"
@@ -126,10 +126,16 @@
             <ItemsControl ItemsSource="{Binding DemoEntries}">
               <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                  <TextBlock Margin="0,0,0,8"
-                             TextWrapping="Wrap"
-                             Foreground="#B6CBD8"
-                             Text="{Binding}" />
+                  <Border Margin="0,0,0,8"
+                          Padding="12"
+                          Background="#162433"
+                          BorderBrush="#2C495D"
+                          BorderThickness="1"
+                          CornerRadius="12">
+                    <TextBlock TextWrapping="Wrap"
+                               Foreground="#B6CBD8"
+                               Text="{Binding}" />
+                  </Border>
                 </DataTemplate>
               </ItemsControl.ItemTemplate>
             </ItemsControl>
@@ -139,39 +145,67 @@
     </ScrollViewer>
 
     <Grid Grid.Column="1"
-          RowDefinitions="Auto,Auto,*"
+          RowDefinitions="Auto,*,Auto"
           RowSpacing="16">
-      <Border Padding="24"
+      <Border Padding="20"
               Background="#111C29"
               BorderBrush="#244053"
               BorderThickness="1"
               CornerRadius="16">
-        <StackPanel Spacing="8">
-          <TextBlock FontSize="24"
-                     FontWeight="SemiBold"
-                     Foreground="#F4FFFC"
-                     Text="完整壳层演示" />
-          <TextBlock TextWrapping="Wrap"
-                     Foreground="#C2D7E4"
-                     Text="{Binding SelectedCapabilitySummary}" />
-        </StackPanel>
+        <Grid ColumnDefinitions="*,Auto"
+              ColumnSpacing="16">
+          <StackPanel Spacing="6">
+            <TextBlock FontSize="24"
+                       FontWeight="SemiBold"
+                       Foreground="#F4FFFC"
+                       Text="完整壳层演示" />
+            <TextBlock TextWrapping="Wrap"
+                       Foreground="#C2D7E4"
+                       Text="{Binding SelectedCapabilitySummary}" />
+          </StackPanel>
+          <Border Grid.Column="1"
+                  Padding="10,6"
+                  Background="#162433"
+                  BorderBrush="#2C495D"
+                  BorderThickness="1"
+                  CornerRadius="999">
+            <TextBlock Foreground="#7FE7D7"
+                       FontWeight="SemiBold"
+                       Text="{Binding SelectedCapabilityTitle}" />
+          </Border>
+        </Grid>
       </Border>
 
       <Border Grid.Row="1"
-              Padding="24"
+              Padding="16"
               Background="#111C29"
               BorderBrush="#244053"
               BorderThickness="1"
               CornerRadius="16">
         <StackPanel Spacing="12">
-          <TextBlock FontSize="24"
-                     FontWeight="SemiBold"
-                     Foreground="#F4FFFC"
-                     Text="主编辑器" />
-          <TextBlock TextWrapping="Wrap"
-                     Foreground="#C2D7E4"
-                     Text="{Binding MainEditorSummary}" />
-          <Border Height="520"
+          <Grid ColumnDefinitions="*,Auto"
+                ColumnSpacing="12">
+            <StackPanel Spacing="4">
+              <TextBlock FontSize="24"
+                         FontWeight="SemiBold"
+                         Foreground="#F4FFFC"
+                         Text="主编辑器" />
+              <TextBlock TextWrapping="Wrap"
+                         Foreground="#C2D7E4"
+                         Text="{Binding MainEditorSummary}" />
+            </StackPanel>
+            <Border Grid.Column="1"
+                    Padding="10,6"
+                    Background="#162433"
+                    BorderBrush="#2C495D"
+                    BorderThickness="1"
+                    CornerRadius="999"
+                    VerticalAlignment="Top">
+              <TextBlock Foreground="#B6CBD8"
+                         Text="单一实时会话" />
+            </Border>
+          </Grid>
+          <Border Height="500"
                   ClipToBounds="True"
                   Background="#08111A"
                   BorderBrush="#29475A"
@@ -188,7 +222,7 @@
               BorderBrush="#244053"
               BorderThickness="1"
               CornerRadius="16">
-        <StackPanel Spacing="12">
+        <StackPanel Spacing="10">
           <TextBlock FontSize="24"
                      FontWeight="SemiBold"
                      Foreground="#F4FFFC"
@@ -196,10 +230,16 @@
           <ItemsControl ItemsSource="{Binding ChromeModeProofLines}">
             <ItemsControl.ItemTemplate>
               <DataTemplate>
-                <TextBlock Margin="0,0,0,8"
-                           TextWrapping="Wrap"
-                           Foreground="#C2D7E4"
-                           Text="{Binding}" />
+                <Border Margin="0,0,0,8"
+                        Padding="12"
+                        Background="#162433"
+                        BorderBrush="#2C495D"
+                        BorderThickness="1"
+                        CornerRadius="12">
+                  <TextBlock TextWrapping="Wrap"
+                             Foreground="#C2D7E4"
+                             Text="{Binding}" />
+                </Border>
               </DataTemplate>
             </ItemsControl.ItemTemplate>
           </ItemsControl>
@@ -211,7 +251,7 @@
                   VerticalScrollBarVisibility="Auto"
                   HorizontalScrollBarVisibility="Disabled">
       <StackPanel Spacing="16">
-        <Border Padding="24"
+        <Border Padding="20"
                 Background="#111C29"
                 BorderBrush="#244053"
                 BorderThickness="1"
@@ -348,7 +388,7 @@
                 BorderBrush="#244053"
                 BorderThickness="1"
                 CornerRadius="16">
-          <StackPanel Spacing="12">
+          <StackPanel Spacing="10">
             <TextBlock FontSize="24"
                        FontWeight="SemiBold"
                        Foreground="#F4FFFC"
@@ -356,10 +396,16 @@
             <ItemsControl ItemsSource="{Binding StandaloneSurfaceLines}">
               <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                  <TextBlock Margin="0,0,0,8"
-                             TextWrapping="Wrap"
-                             Foreground="#C2D7E4"
-                             Text="{Binding}" />
+                  <Border Margin="0,0,0,8"
+                          Padding="12"
+                          Background="#162433"
+                          BorderBrush="#2C495D"
+                          BorderThickness="1"
+                          CornerRadius="12">
+                    <TextBlock TextWrapping="Wrap"
+                               Foreground="#C2D7E4"
+                               Text="{Binding}" />
+                  </Border>
                 </DataTemplate>
               </ItemsControl.ItemTemplate>
             </ItemsControl>
@@ -371,7 +417,7 @@
                 BorderBrush="#244053"
                 BorderThickness="1"
                 CornerRadius="16">
-          <StackPanel Spacing="12">
+          <StackPanel Spacing="10">
             <TextBlock FontSize="24"
                        FontWeight="SemiBold"
                        Foreground="#F4FFFC"
@@ -379,10 +425,16 @@
             <ItemsControl ItemsSource="{Binding PresentationLines}">
               <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                  <TextBlock Margin="0,0,0,8"
-                             TextWrapping="Wrap"
-                             Foreground="#C2D7E4"
-                             Text="{Binding}" />
+                  <Border Margin="0,0,0,8"
+                          Padding="12"
+                          Background="#162433"
+                          BorderBrush="#2C495D"
+                          BorderThickness="1"
+                          CornerRadius="12">
+                    <TextBlock TextWrapping="Wrap"
+                               Foreground="#C2D7E4"
+                               Text="{Binding}" />
+                  </Border>
                 </DataTemplate>
               </ItemsControl.ItemTemplate>
             </ItemsControl>
