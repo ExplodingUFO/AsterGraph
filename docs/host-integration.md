@@ -4,12 +4,18 @@ This guide shows how to host AsterGraph without over-coupling your application t
 
 ## Package Choice
 
-The supported Phase 1 package boundary is:
+The supported package publish boundary is exactly these four packages:
 
 - `AsterGraph.Abstractions` for node definitions, identifiers, and shared style contracts
 - `AsterGraph.Core` for `GraphDocument`, serialization, and compatibility services
 - `AsterGraph.Editor` for editor runtime composition, factories, behavior options, and host extension seams
 - `AsterGraph.Avalonia` for the default Avalonia view shell and standalone Avalonia surfaces
+
+Recommended entry strategy:
+
+1. Default host integration starts from `AsterGraph.Avalonia` (main component entry).
+2. Protocol/contract-first integration starts from `AsterGraph.Abstractions`.
+3. Add direct `AsterGraph.Editor` and/or `AsterGraph.Core` references only when host code needs those APIs directly.
 
 For a default hosted UI, the canonical direct-reference set is:
 
@@ -19,7 +25,7 @@ For a default hosted UI, the canonical direct-reference set is:
 
 Add a direct `AsterGraph.Core` reference when the host also needs direct access to graph models, serialization, or compatibility services outside the editor factories.
 
-`AsterGraph.Demo` is not a consumable package. Treat it as a reference application only.
+`AsterGraph.Demo` is not a consumable package and is not part of the publish set.
 
 ## Canonical Host Composition
 

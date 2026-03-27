@@ -46,16 +46,23 @@ Current non-goals:
 
 ## Supported Package Boundary
 
-Phase 1 publishes four host-consumable packages. External hosts should treat this as the supported SDK surface:
+Only these four libraries are published as host-consumable SDK packages:
 
 | Package | Directly reference when | Notes |
 | --- | --- | --- |
 | `AsterGraph.Abstractions` | defining nodes, identifiers, catalogs, or style tokens | Stable contract layer with no UI dependency |
 | `AsterGraph.Core` | working directly with `GraphDocument`, serialization, or compatibility services | Model and persistence layer |
 | `AsterGraph.Editor` | building or extending an editor runtime or runtime session | Standard host-facing runtime package; contains the public session contracts, factory/options API, replaceable services, diagnostics seam, and compatibility facade |
-| `AsterGraph.Avalonia` | embedding the shipped Avalonia UI | Default UI shell; pairs with `AsterGraph.Editor` for the canonical hosted-view path |
+| `AsterGraph.Avalonia` | embedding the shipped Avalonia UI | Recommended main integration entry package for UI hosts; depends on `AsterGraph.Editor` and `AsterGraph.Core` |
 
 `AsterGraph.Demo` remains a sample application only. Do not consume it as a package dependency.
+
+Recommended package entry order:
+
+1. UI host integration starts from `AsterGraph.Avalonia`.
+2. Protocol/contract integration starts from `AsterGraph.Abstractions`.
+3. Add direct `AsterGraph.Editor` and/or `AsterGraph.Core` references only when the host needs their APIs directly (runtime-only composition, direct `GraphDocument`/serialization work, custom compatibility tooling).
+
 
 ## Supported Target Frameworks
 
