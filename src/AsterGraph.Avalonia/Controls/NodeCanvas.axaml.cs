@@ -635,7 +635,9 @@ public partial class NodeCanvas : UserControl
         _interactionSession.UpdateLastPointerPosition(current);
         _interactionSession.UpdatePointerPosition(current);
 
-        if (props.IsMiddleButtonPressed)
+        // 如果按下鼠标中键，或者按住 Alt 键的同时点击鼠标左键，触发平移交互。
+        // 此改动允许触控板用户通过按住键盘 Alt 键 + 单指拖拽的方式平移视图。
+        if (props.IsMiddleButtonPressed || (props.IsLeftButtonPressed && args.KeyModifiers.HasFlag(KeyModifiers.Alt)))
         {
             _interactionSession.BeginPanning(current);
             HideSelectionAdorner();
@@ -749,10 +751,24 @@ public partial class NodeCanvas : UserControl
             return;
         }
 
-        var factor = args.Delta.Y >= 0 ? 1.12 : 1 / 1.12;
         var point = args.GetPosition(this);
         _interactionSession.UpdatePointerPosition(point);
-        ViewModel.ZoomAt(factor, new GraphPoint(point.X, point.Y));
+
+        // 判断是否按住了 Control 键。多数精度触控板的"捏合"手势，会被转化为带 Control 修饰符的滚轮事件。
+        if (args.KeyModifiers.HasFlag(KeyModifiers.Control))
+        {
+            // 执行缩放：向上滚动（Delta.Y > 0）或展开双指为放大，向下滚动或捏合双指为缩小。
+            var factor = args.Delta.Y >= 0 ? 1.12 : 1 / 1.12;
+            ViewModel.ZoomAt(factor, new GraphPoint(point.X, point.Y));
+        }
+        else
+        {
+            // 执行平移：常规滚轮或触控板双指平行滑动，将移动画布的视口。
+            // 滚轮事件的 Delta 单位常常是行距，通过乘以平移常量转化为视口的像素偏移。
+            const double scrollSpeedMultiplier = 40.0;
+            ViewModel.PanBy(args.Delta.X * scrollSpeedMultiplier, args.Delta.Y * scrollSpeedMultiplier);
+        }
+
         args.Handled = true;
     }
 

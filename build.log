@@ -1,0 +1,27 @@
+  正在确定要还原的项目…
+  所有项目均是最新的，无法还原。
+  AsterGraph.Abstractions -> F:\CodeProjects\DotnetCore\avalonia-node-map\src\AsterGraph.Abstractions\bin\Debug\net8.0\AsterGraph.Abstractions.dll
+  AsterGraph.Abstractions -> F:\CodeProjects\DotnetCore\avalonia-node-map\src\AsterGraph.Abstractions\bin\Debug\net9.0\AsterGraph.Abstractions.dll
+  AsterGraph.Core -> F:\CodeProjects\DotnetCore\avalonia-node-map\src\AsterGraph.Core\bin\Debug\net9.0\AsterGraph.Core.dll
+  AsterGraph.Core -> F:\CodeProjects\DotnetCore\avalonia-node-map\src\AsterGraph.Core\bin\Debug\net8.0\AsterGraph.Core.dll
+  AsterGraph.Editor -> F:\CodeProjects\DotnetCore\avalonia-node-map\src\AsterGraph.Editor\bin\Debug\net9.0\AsterGraph.Editor.dll
+  AsterGraph.Editor -> F:\CodeProjects\DotnetCore\avalonia-node-map\src\AsterGraph.Editor\bin\Debug\net8.0\AsterGraph.Editor.dll
+  AsterGraph.Avalonia -> F:\CodeProjects\DotnetCore\avalonia-node-map\src\AsterGraph.Avalonia\bin\Debug\net8.0\AsterGraph.Avalonia.dll
+  AsterGraph.Avalonia -> F:\CodeProjects\DotnetCore\avalonia-node-map\src\AsterGraph.Avalonia\bin\Debug\net9.0\AsterGraph.Avalonia.dll
+  AsterGraph.HostSample -> F:\CodeProjects\DotnetCore\avalonia-node-map\tools\AsterGraph.HostSample\bin\Debug\net8.0\AsterGraph.HostSample.dll
+  AsterGraph.PackageSmoke -> F:\CodeProjects\DotnetCore\avalonia-node-map\tools\AsterGraph.PackageSmoke\bin\Debug\net8.0\AsterGraph.PackageSmoke.dll
+  AsterGraph.Demo -> F:\CodeProjects\DotnetCore\avalonia-node-map\src\AsterGraph.Demo\bin\Debug\net9.0\AsterGraph.Demo.dll
+F:\CodeProjects\DotnetCore\avalonia-node-map\tests\AsterGraph.Serialization.Tests\SerializationCompatibilityTests.cs(79,20): error CS0120: 对象引用对于非静态的字段、方法或属性“GraphClipboardPayloadSerializer.Serialize(GraphSelectionFragment)”是必需的 [F:\CodeProjects\DotnetCore\avalonia-node-map\tests\AsterGraph.Serialization.Tests\AsterGraph.Serialization.Tests.csproj]
+F:\CodeProjects\DotnetCore\avalonia-node-map\tests\AsterGraph.Serialization.Tests\SerializationCompatibilityTests.cs(99,24): error CS0120: 对象引用对于非静态的字段、方法或属性“GraphClipboardPayloadSerializer.TryDeserialize(string?, out GraphSelectionFragment?)”是必需的 [F:\CodeProjects\DotnetCore\avalonia-node-map\tests\AsterGraph.Serialization.Tests\AsterGraph.Serialization.Tests.csproj]
+F:\CodeProjects\DotnetCore\avalonia-node-map\tests\AsterGraph.Serialization.Tests\SerializationCompatibilityTests.cs(122,24): error CS0120: 对象引用对于非静态的字段、方法或属性“GraphClipboardPayloadSerializer.TryDeserialize(string?, out GraphSelectionFragment?)”是必需的 [F:\CodeProjects\DotnetCore\avalonia-node-map\tests\AsterGraph.Serialization.Tests\AsterGraph.Serialization.Tests.csproj]
+  AsterGraph.Editor.Tests -> F:\CodeProjects\DotnetCore\avalonia-node-map\tests\AsterGraph.Editor.Tests\bin\Debug\net9.0\AsterGraph.Editor.Tests.dll
+
+生成失败。
+
+F:\CodeProjects\DotnetCore\avalonia-node-map\tests\AsterGraph.Serialization.Tests\SerializationCompatibilityTests.cs(79,20): error CS0120: 对象引用对于非静态的字段、方法或属性“GraphClipboardPayloadSerializer.Serialize(GraphSelectionFragment)”是必需的 [F:\CodeProjects\DotnetCore\avalonia-node-map\tests\AsterGraph.Serialization.Tests\AsterGraph.Serialization.Tests.csproj]
+F:\CodeProjects\DotnetCore\avalonia-node-map\tests\AsterGraph.Serialization.Tests\SerializationCompatibilityTests.cs(99,24): error CS0120: 对象引用对于非静态的字段、方法或属性“GraphClipboardPayloadSerializer.TryDeserialize(string?, out GraphSelectionFragment?)”是必需的 [F:\CodeProjects\DotnetCore\avalonia-node-map\tests\AsterGraph.Serialization.Tests\AsterGraph.Serialization.Tests.csproj]
+F:\CodeProjects\DotnetCore\avalonia-node-map\tests\AsterGraph.Serialization.Tests\SerializationCompatibilityTests.cs(122,24): error CS0120: 对象引用对于非静态的字段、方法或属性“GraphClipboardPayloadSerializer.TryDeserialize(string?, out GraphSelectionFragment?)”是必需的 [F:\CodeProjects\DotnetCore\avalonia-node-map\tests\AsterGraph.Serialization.Tests\AsterGraph.Serialization.Tests.csproj]
+    0 个警告
+    3 个错误
+
+已用时间 00:00:01.29

@@ -75,8 +75,9 @@ public sealed class SerializationCompatibilityTests
     public void GraphClipboardPayloadSerializer_WritesSchemaVersion()
     {
         var fragment = CreateFragment();
+        var serializer = new GraphClipboardPayloadSerializer();
 
-        var json = GraphClipboardPayloadSerializer.Serialize(fragment);
+        var json = serializer.Serialize(fragment);
 
         Assert.Contains("\"SchemaVersion\": 1", json);
     }
@@ -95,8 +96,9 @@ public sealed class SerializationCompatibilityTests
         };
 
         var legacyJson = JsonSerializer.Serialize(legacyPayload, JsonOptions);
+        var serializer = new GraphClipboardPayloadSerializer();
 
-        var restored = GraphClipboardPayloadSerializer.TryDeserialize(legacyJson, out var deserialized);
+        var restored = serializer.TryDeserialize(legacyJson, out var deserialized);
 
         Assert.True(restored);
         Assert.NotNull(deserialized);
@@ -118,8 +120,9 @@ public sealed class SerializationCompatibilityTests
         };
 
         var json = JsonSerializer.Serialize(payload, JsonOptions);
+        var serializer = new GraphClipboardPayloadSerializer();
 
-        var restored = GraphClipboardPayloadSerializer.TryDeserialize(json, out var fragment);
+        var restored = serializer.TryDeserialize(json, out var fragment);
 
         Assert.False(restored);
         Assert.Null(fragment);

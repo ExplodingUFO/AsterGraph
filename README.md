@@ -12,7 +12,7 @@ Current capabilities:
 - selection-aware right-click menu for batch actions
 - mini map overview with viewport recentering
 - mini map drag navigation for continuous viewport repositioning
-- zoom and pan canvas interaction
+- zoom and pan canvas interaction (optimized for mouse and precision trackpads)
 - connection rendering and pending connection preview
 - graph save/load
 - `Ctrl+Z` / `Ctrl+Y` undo and redo graph edits
@@ -300,6 +300,7 @@ For a deeper host-composition walkthrough, see:
 
 - [`docs/host-integration.md`](./docs/host-integration.md)
 - [`docs/node-presentation-guidelines.md`](./docs/node-presentation-guidelines.md)
+- [`docs/interactions-and-shortcuts.md`](./docs/interactions-and-shortcuts.md)
 
 That guide covers:
 

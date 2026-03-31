@@ -6,8 +6,10 @@ It belongs to the supported package set with `AsterGraph.Abstractions`, `AsterGr
 
 It intentionally contains:
 
+- `IGraphEditorSession` plus `Commands`, `Queries`, `Events`, and mutation batching
 - `AsterGraphEditorFactory` and `AsterGraphEditorOptions`
 - `GraphEditorViewModel`
+- replaceable storage/clipboard/diagnostics seams
 - node/template catalogs
 - context-menu intent and command wiring
 - selection, pending connection, and workspace state
@@ -26,14 +28,18 @@ Typical consumers:
 
 Start here when a host needs the canonical runtime entry point:
 
+- runtime-first session creation via `AsterGraphEditorFactory.CreateSession(...)`
 - factory/options-based editor creation via `AsterGraphEditorFactory`
 - staged migration support through the retained `GraphEditorViewModel` constructor
+- package-neutral default storage redirection through `StorageRootPath`
+- replaceable services via `IGraphWorkspaceService`, `IGraphFragmentWorkspaceService`, `IGraphFragmentLibraryService`, and `IGraphClipboardPayloadSerializer`
+- recoverable-failure publication through `IGraphEditorDiagnosticsSink`
 - localization via `IGraphLocalizationProvider`
 - runtime node display state via `INodePresentationProvider`
 - host-owned menu actions via `IGraphContextMenuAugmentor`
 - typed host context access through `GraphHostContextExtensions`
 
-Use this package together with `AsterGraph.Avalonia` when the host embeds the default `GraphEditorView`.
+Use this package together with `AsterGraph.Avalonia` when the host embeds the default `GraphEditorView`. Hosts that provide their own UI can stop at the `IGraphEditorSession` boundary and avoid taking an Avalonia dependency in their composition root.
 
 Reference material:
 

@@ -4,6 +4,11 @@ slug: demo
 status: draft
 nyquist_compliant: false
 wave_0_complete: false
+last_revised: 2026-03-27
+notes:
+  - "2026-03-27 revision: 06-02 now depends on 06-01 because both previously touched MainWindowViewModel.cs in Wave 1."
+  - "2026-03-27 revision: requirement mapping aligned to checker traceability expectations."
+  - "2026-03-27 revision: embeddable and presenter requirement IDs moved onto 06-01 Task 3 because 06-02 is localization-only."
 created: 2026-03-27
 ---
 
@@ -39,10 +44,11 @@ created: 2026-03-27
 | Task ID | Plan | Wave | Requirement | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|-----------|-------------------|-------------|--------|
 | 6-01-01 | 01 | 1 | DEMO-LAYOUT-01 | headless UI | `dotnet test "F:/CodeProjects/DotnetCore/avalonia-node-map/tests/AsterGraph.Editor.Tests/AsterGraph.Editor.Tests.csproj" --filter DemoMainWindowTests` | ❌ W0 | ⬜ pending |
-| 6-01-02 | 01 | 1 | DEMO-I18N-01 | headless UI / view-model | `dotnet test "F:/CodeProjects/DotnetCore/avalonia-node-map/tests/AsterGraph.Editor.Tests/AsterGraph.Editor.Tests.csproj" --filter GraphEditorLocalizationTests` | ❌ W0 | ⬜ pending |
-| 6-02-01 | 02 | 2 | DEMO-SURFACES-01 | headless UI | `dotnet test "F:/CodeProjects/DotnetCore/avalonia-node-map/tests/AsterGraph.Editor.Tests/AsterGraph.Editor.Tests.csproj" --filter GraphEditorViewTests` | ✅ | ⬜ pending |
-| 6-02-02 | 02 | 2 | DEMO-PRESENTATION-01 | host sample / focused test | `dotnet run --project "F:/CodeProjects/DotnetCore/avalonia-node-map/tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj"` | ✅ | ⬜ pending |
-| 6-03-01 | 03 | 3 | DEMO-DIAG-01 | focused VM test / host sample | `dotnet test "F:/CodeProjects/DotnetCore/avalonia-node-map/tests/AsterGraph.Editor.Tests/AsterGraph.Editor.Tests.csproj" --filter DemoDiagnosticsProjectionTests` | ❌ W0 | ⬜ pending |
+| 6-01-02 | 01 | 1 | EMBD-01 / EMBD-05 | headless UI | `dotnet test "F:/CodeProjects/DotnetCore/avalonia-node-map/tests/AsterGraph.Editor.Tests/AsterGraph.Editor.Tests.csproj" --filter DemoMainWindowTests` | ❌ W0 | ⬜ pending |
+| 6-01-03 | 01 | 1 | EMBD-02 / EMBD-03 / EMBD-04 / PRES-01 / PRES-02 / PRES-03 / PRES-04 | headless UI | `dotnet test "F:/CodeProjects/DotnetCore/avalonia-node-map/tests/AsterGraph.Editor.Tests/AsterGraph.Editor.Tests.csproj" --filter DemoMainWindowTests` | ❌ W0 | ⬜ pending |
+| 6-02-01 | 02 | 2 | DEMO-I18N-01 | headless UI / view-model | `dotnet test "F:/CodeProjects/DotnetCore/avalonia-node-map/tests/AsterGraph.Editor.Tests/AsterGraph.Editor.Tests.csproj" --filter GraphEditorLocalizationTests` | ❌ W0 | ⬜ pending |
+| 6-02-02 | 02 | 2 | DEMO-I18N-01 | headless UI | `dotnet test "F:/CodeProjects/DotnetCore/avalonia-node-map/tests/AsterGraph.Editor.Tests/AsterGraph.Editor.Tests.csproj" --filter GraphEditorLocalizationTests` | ❌ W0 | ⬜ pending |
+| 6-03-01 | 03 | 3 | DIAG-01 / DIAG-02 / DIAG-03 | focused VM test / host sample | `dotnet test "F:/CodeProjects/DotnetCore/avalonia-node-map/tests/AsterGraph.Editor.Tests/AsterGraph.Editor.Tests.csproj" --filter DemoDiagnosticsProjectionTests` | ❌ W0 | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
