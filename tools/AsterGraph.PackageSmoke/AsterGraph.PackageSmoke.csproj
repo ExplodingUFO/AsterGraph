@@ -4,6 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
     <UsePackedAsterGraphPackages Condition="'$(UsePackedAsterGraphPackages)' == ''">false</UsePackedAsterGraphPackages>
     <LocalPackageFeed>$(MSBuildThisFileDirectory)..\..\artifacts\packages</LocalPackageFeed>
     <RestoreSources Condition="'$(UsePackedAsterGraphPackages)' == 'true'">$(LocalPackageFeed);$(RestoreSources)</RestoreSources>
