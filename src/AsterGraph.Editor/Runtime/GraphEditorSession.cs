@@ -35,6 +35,7 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorComman
     /// 初始化运行时会话。
     /// </summary>
     /// <param name="editor">底层兼容立面。</param>
+    /// <param name="diagnosticsSink">可选的宿主诊断发布器。</param>
     public GraphEditorSession(GraphEditorViewModel editor, IGraphEditorDiagnosticsSink? diagnosticsSink = null)
     {
         _editor = editor ?? throw new ArgumentNullException(nameof(editor));

@@ -11,6 +11,7 @@ public sealed class GraphFragmentWorkspaceService : IGraphFragmentWorkspaceServi
     /// 初始化片段工作区服务。
     /// </summary>
     /// <param name="fragmentPath">可选的默认片段文件路径。</param>
+    /// <param name="clipboardPayloadSerializer">用于读写片段 JSON 的剪贴板载荷序列化器。</param>
     public GraphFragmentWorkspaceService(
         string? fragmentPath = null,
         IGraphClipboardPayloadSerializer? clipboardPayloadSerializer = null)

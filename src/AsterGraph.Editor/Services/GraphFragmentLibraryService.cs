@@ -13,6 +13,7 @@ public sealed class GraphFragmentLibraryService : IGraphFragmentLibraryService
     /// 初始化片段模板库服务。
     /// </summary>
     /// <param name="libraryPath">可选的模板库目录路径。</param>
+    /// <param name="clipboardPayloadSerializer">用于序列化模板内容的剪贴板载荷序列化器。</param>
     public GraphFragmentLibraryService(
         string? libraryPath = null,
         IGraphClipboardPayloadSerializer? clipboardPayloadSerializer = null)

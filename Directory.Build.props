@@ -12,6 +12,8 @@
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!-- Public XML docs are still emitted, but missing-comment warnings are too noisy to act as a solution-wide gate yet. -->
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
     <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
     <!-- Keep generated audit snapshots out of SDK compile globs so verification builds stay deterministic. -->
     <DefaultItemExcludes>$(DefaultItemExcludes);$(MSBuildProjectDirectory)\artifacts\**</DefaultItemExcludes>

@@ -126,6 +126,8 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// <param name="contextMenuAugmentor">宿主右键菜单增强器。</param>
     /// <param name="nodePresentationProvider">节点展示状态提供器。</param>
     /// <param name="localizationProvider">编辑器内置文案本地化提供器。</param>
+    /// <param name="clipboardPayloadSerializer">片段和剪贴板载荷的序列化器。</param>
+    /// <param name="diagnosticsSink">可选的宿主诊断发布器。</param>
     /// <remarks>
     /// 该构造函数在 Phase 1 中保留为受支持的兼容入口，供现有宿主继续沿用
     /// <c>new GraphEditorViewModel(...)</c> 的组合方式。对于新的宿主组合代码，
