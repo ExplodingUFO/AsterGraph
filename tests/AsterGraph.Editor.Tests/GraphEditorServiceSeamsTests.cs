@@ -79,8 +79,26 @@ public sealed class GraphEditorServiceSeamsTests
         Assert.Single(compatibleTargets);
         Assert.True(compatibility.EvaluateCalls > 0);
         Assert.NotEmpty(menu);
-        Assert.Single(diagnostics.Diagnostics);
-        Assert.Equal("contextmenu.augment.failed", diagnostics.Diagnostics[0].Code);
+        Assert.Collection(
+            diagnostics.Diagnostics,
+            diagnostic =>
+            {
+                Assert.Equal("fragment.export.succeeded", diagnostic.Code);
+                Assert.Equal("fragment.export", diagnostic.Operation);
+                Assert.Equal(GraphEditorDiagnosticSeverity.Info, diagnostic.Severity);
+            },
+            diagnostic =>
+            {
+                Assert.Equal("workspace.save.succeeded", diagnostic.Code);
+                Assert.Equal("workspace.save", diagnostic.Operation);
+                Assert.Equal(GraphEditorDiagnosticSeverity.Info, diagnostic.Severity);
+            },
+            diagnostic =>
+            {
+                Assert.Equal("contextmenu.augment.failed", diagnostic.Code);
+                Assert.Equal("contextmenu.augment", diagnostic.Operation);
+                Assert.Equal(GraphEditorDiagnosticSeverity.Error, diagnostic.Severity);
+            });
         Assert.NotNull(failure);
         Assert.Equal("contextmenu.augment.failed", failure!.Code);
     }
