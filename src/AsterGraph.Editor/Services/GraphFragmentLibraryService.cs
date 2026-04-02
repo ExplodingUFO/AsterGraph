@@ -30,6 +30,7 @@ public sealed class GraphFragmentLibraryService : IGraphFragmentLibraryService
     /// <summary>
     /// 获取系统默认片段模板库目录。
     /// </summary>
+    /// <returns>默认片段模板库目录的绝对路径。</returns>
     public static string GetDefaultLibraryPath()
         => GraphEditorStorageDefaults.GetFragmentLibraryPath();
 
@@ -51,6 +52,12 @@ public sealed class GraphFragmentLibraryService : IGraphFragmentLibraryService
             .ToList();
     }
 
+    /// <summary>
+    /// 将片段保存为模板文件。
+    /// </summary>
+    /// <param name="fragment">要持久化的片段内容。</param>
+    /// <param name="name">可选的模板名称；为空时使用默认名称。</param>
+    /// <returns>新保存模板文件的完整路径。</returns>
     public string SaveTemplate(GraphSelectionFragment fragment, string? name = null)
     {
         ArgumentNullException.ThrowIfNull(fragment);
@@ -63,6 +70,11 @@ public sealed class GraphFragmentLibraryService : IGraphFragmentLibraryService
         return fullPath;
     }
 
+    /// <summary>
+    /// 从指定模板文件加载片段内容。
+    /// </summary>
+    /// <param name="path">要读取的模板文件路径。</param>
+    /// <returns>反序列化后的片段内容。</returns>
     public GraphSelectionFragment LoadTemplate(string path)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
@@ -76,6 +88,10 @@ public sealed class GraphFragmentLibraryService : IGraphFragmentLibraryService
         return fragment;
     }
 
+    /// <summary>
+    /// 删除指定路径的模板文件。
+    /// </summary>
+    /// <param name="path">要删除的模板文件路径。</param>
     public void DeleteTemplate(string path)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
