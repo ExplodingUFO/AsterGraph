@@ -3,8 +3,22 @@ using AsterGraph.Core.Models;
 
 namespace AsterGraph.Editor.ViewModels;
 
+/// <summary>
+/// Mutable runtime projection of one graph connection.
+/// </summary>
 public sealed class ConnectionViewModel
 {
+    /// <summary>
+    /// 初始化连线视图模型。
+    /// </summary>
+    /// <param name="id">连线标识。</param>
+    /// <param name="sourceNodeId">源节点标识。</param>
+    /// <param name="sourcePortId">源端口标识。</param>
+    /// <param name="targetNodeId">目标节点标识。</param>
+    /// <param name="targetPortId">目标端口标识。</param>
+    /// <param name="label">连线标签。</param>
+    /// <param name="accentHex">连线强调色。</param>
+    /// <param name="conversionId">可选的隐式转换标识。</param>
     public ConnectionViewModel(
         string id,
         string sourceNodeId,
@@ -25,22 +39,50 @@ public sealed class ConnectionViewModel
         ConversionId = conversionId;
     }
 
+    /// <summary>
+    /// 连线标识。
+    /// </summary>
     public string Id { get; }
 
+    /// <summary>
+    /// 源节点标识。
+    /// </summary>
     public string SourceNodeId { get; }
 
+    /// <summary>
+    /// 源端口标识。
+    /// </summary>
     public string SourcePortId { get; }
 
+    /// <summary>
+    /// 目标节点标识。
+    /// </summary>
     public string TargetNodeId { get; }
 
+    /// <summary>
+    /// 目标端口标识。
+    /// </summary>
     public string TargetPortId { get; }
 
+    /// <summary>
+    /// 连线标签。
+    /// </summary>
     public string Label { get; }
 
+    /// <summary>
+    /// 连线强调色。
+    /// </summary>
     public string AccentHex { get; }
 
+    /// <summary>
+    /// 可选的隐式转换标识。
+    /// </summary>
     public ConversionId? ConversionId { get; }
 
+    /// <summary>
+    /// 转回不可变模型快照。
+    /// </summary>
+    /// <returns>对应的不可变连线模型。</returns>
     public GraphConnection ToModel()
         => new(Id, SourceNodeId, SourcePortId, TargetNodeId, TargetPortId, Label, AccentHex, ConversionId);
 }

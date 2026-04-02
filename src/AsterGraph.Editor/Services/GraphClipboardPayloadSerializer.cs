@@ -4,6 +4,9 @@ using AsterGraph.Core.Models;
 
 namespace AsterGraph.Editor.Services;
 
+/// <summary>
+/// Serializes graph selection fragments to and from the editor clipboard payload format.
+/// </summary>
 public sealed class GraphClipboardPayloadSerializer : IGraphClipboardPayloadSerializer
 {
     private const string ClipboardFormat = "astergraph.clipboard/v1";
@@ -16,6 +19,11 @@ public sealed class GraphClipboardPayloadSerializer : IGraphClipboardPayloadSeri
         },
     };
 
+    /// <summary>
+    /// Serializes a graph selection fragment into the shipped clipboard payload format.
+    /// </summary>
+    /// <param name="fragment">Fragment to serialize.</param>
+    /// <returns>Serialized clipboard text.</returns>
     public string Serialize(GraphSelectionFragment fragment)
     {
         ArgumentNullException.ThrowIfNull(fragment);
@@ -25,6 +33,12 @@ public sealed class GraphClipboardPayloadSerializer : IGraphClipboardPayloadSeri
             JsonOptions);
     }
 
+    /// <summary>
+    /// Attempts to deserialize clipboard text into a graph selection fragment.
+    /// </summary>
+    /// <param name="text">Clipboard text.</param>
+    /// <param name="fragment">Deserialized fragment when successful.</param>
+    /// <returns><see langword="true"/> when deserialization succeeds.</returns>
     public bool TryDeserialize(string? text, out GraphSelectionFragment? fragment)
         => GraphClipboardPayloadCompatibility.TryDeserialize(text, ClipboardFormat, JsonOptions, out fragment);
 }
