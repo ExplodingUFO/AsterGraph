@@ -11,6 +11,7 @@ obj/
 
 # Local Codex/temp artifacts
 .codex-pack-check-*/
+.worktrees/
 
 # OS noise
 Thumbs.db
