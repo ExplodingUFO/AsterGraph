@@ -59,6 +59,14 @@ public interface IGraphEditorCommands
     /// </summary>
     /// <param name="sourceNodeId">源节点标识。</param>
     /// <param name="sourcePortId">源端口标识。</param>
+    void BeginConnection(string sourceNodeId, string sourcePortId)
+        => StartConnection(sourceNodeId, sourcePortId);
+
+    /// <summary>
+    /// 开始一条待完成连线。
+    /// </summary>
+    /// <param name="sourceNodeId">源节点标识。</param>
+    /// <param name="sourcePortId">源端口标识。</param>
     void StartConnection(string sourceNodeId, string sourcePortId)
         => throw new NotSupportedException();
 

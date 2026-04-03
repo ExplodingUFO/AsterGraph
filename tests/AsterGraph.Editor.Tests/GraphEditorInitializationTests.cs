@@ -223,7 +223,7 @@ public sealed class GraphEditorInitializationTests
         session.Events.ViewportChanged += (_, args) => viewportChanged = args;
 
         var before = session.Queries.CreateDocumentSnapshot();
-        var compatibleTargets = session.Queries.GetCompatibleTargets(SourceNodeId, SourcePortId);
+        var compatibleTargets = session.Queries.GetCompatiblePortTargets(SourceNodeId, SourcePortId);
 
         using (session.BeginMutation("initialization-batch"))
         {
@@ -236,7 +236,7 @@ public sealed class GraphEditorInitializationTests
         Assert.IsAssignableFrom<IGraphEditorSession>(session);
         Assert.Equal("Initialization Test Graph", before.Title);
         Assert.Single(compatibleTargets);
-        Assert.Equal(TargetNodeId, compatibleTargets[0].Node.Id);
+        Assert.Equal(TargetNodeId, compatibleTargets[0].NodeId);
         Assert.Equal(before.Nodes.Count + 1, after.Nodes.Count);
         Assert.Equal(new[] { "nodes.add", "viewport.pan" }, commandIds);
         Assert.NotNull(viewportChanged);
