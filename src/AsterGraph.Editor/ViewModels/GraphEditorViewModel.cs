@@ -126,6 +126,8 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// <param name="contextMenuAugmentor">宿主右键菜单增强器。</param>
     /// <param name="nodePresentationProvider">节点展示状态提供器。</param>
     /// <param name="localizationProvider">编辑器内置文案本地化提供器。</param>
+    /// <param name="clipboardPayloadSerializer">片段和剪贴板载荷的序列化器。</param>
+    /// <param name="diagnosticsSink">可选的宿主诊断发布器。</param>
     /// <remarks>
     /// 该构造函数在 Phase 1 中保留为受支持的兼容入口，供现有宿主继续沿用
     /// <c>new GraphEditorViewModel(...)</c> 的组合方式。对于新的宿主组合代码，
@@ -258,18 +260,39 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     [ObservableProperty]
     private string description = string.Empty;
 
+    /// <summary>
+    /// 获取当前图中的节点集合。
+    /// </summary>
     public ObservableCollection<NodeViewModel> Nodes { get; }
 
+    /// <summary>
+    /// 获取当前图中的连线集合。
+    /// </summary>
     public ObservableCollection<ConnectionViewModel> Connections { get; }
 
+    /// <summary>
+    /// 获取当前选中的节点集合。
+    /// </summary>
     public ObservableCollection<NodeViewModel> SelectedNodes { get; }
 
+    /// <summary>
+    /// 获取基于当前选择投影出的可编辑参数集合。
+    /// </summary>
     public ObservableCollection<NodeParameterViewModel> SelectedNodeParameters { get; }
 
+    /// <summary>
+    /// 获取由节点目录生成的可插入节点模板集合。
+    /// </summary>
     public ObservableCollection<NodeTemplateViewModel> NodeTemplates { get; }
 
+    /// <summary>
+    /// 获取从片段模板库加载的模板集合。
+    /// </summary>
     public ObservableCollection<FragmentTemplateViewModel> FragmentTemplates { get; }
 
+    /// <summary>
+    /// 获取初始化时绑定到编辑器的样式选项。
+    /// </summary>
     public GraphEditorStyleOptions StyleOptions { get; }
 
     /// <summary>
@@ -353,56 +376,134 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// </summary>
     public double ViewportHeight => _viewportHeight;
 
+    /// <summary>
+    /// 获取将当前图保存到默认工作区文件的命令。
+    /// </summary>
     public IRelayCommand SaveCommand { get; }
 
+    /// <summary>
+    /// 获取从默认工作区文件加载图快照的命令。
+    /// </summary>
     public IRelayCommand LoadCommand { get; }
 
+    /// <summary>
+    /// 获取根据当前节点边界调整视口的命令。
+    /// </summary>
     public IRelayCommand FitViewCommand { get; }
 
+    /// <summary>
+    /// 获取将缩放和平移恢复为默认视图状态的命令。
+    /// </summary>
     public IRelayCommand ResetViewCommand { get; }
 
+    /// <summary>
+    /// 获取回退到上一条历史快照的命令。
+    /// </summary>
     public IRelayCommand UndoCommand { get; }
 
+    /// <summary>
+    /// 获取重新应用下一条历史快照的命令。
+    /// </summary>
     public IRelayCommand RedoCommand { get; }
 
+    /// <summary>
+    /// 获取删除当前选择内容的命令。
+    /// </summary>
     public IRelayCommand DeleteSelectionCommand { get; }
 
+    /// <summary>
+    /// 获取将当前选择复制到编辑器剪贴板及宿主文本剪贴板的命令。
+    /// </summary>
     public IAsyncRelayCommand CopySelectionCommand { get; }
 
+    /// <summary>
+    /// 获取从编辑器剪贴板或宿主文本剪贴板粘贴内容的命令。
+    /// </summary>
     public IAsyncRelayCommand PasteCommand { get; }
 
+    /// <summary>
+    /// 获取将当前选择导出到默认片段文件的命令。
+    /// </summary>
     public IRelayCommand ExportSelectionFragmentCommand { get; }
 
+    /// <summary>
+    /// 获取从默认片段文件导入并粘贴内容的命令。
+    /// </summary>
     public IRelayCommand ImportFragmentCommand { get; }
 
+    /// <summary>
+    /// 获取删除默认片段文件的命令。
+    /// </summary>
     public IRelayCommand ClearFragmentCommand { get; }
 
+    /// <summary>
+    /// 获取重新加载片段模板库内容的命令。
+    /// </summary>
     public IRelayCommand RefreshFragmentTemplatesCommand { get; }
 
+    /// <summary>
+    /// 获取将当前选择保存为片段模板的命令。
+    /// </summary>
     public IRelayCommand ExportSelectionAsTemplateCommand { get; }
 
+    /// <summary>
+    /// 获取导入当前选中片段模板的命令。
+    /// </summary>
     public IRelayCommand ImportSelectedTemplateCommand { get; }
 
+    /// <summary>
+    /// 获取删除当前选中片段模板的命令。
+    /// </summary>
     public IRelayCommand DeleteSelectedTemplateCommand { get; }
 
+    /// <summary>
+    /// 获取按左边缘对齐当前选择的命令。
+    /// </summary>
     public IRelayCommand AlignLeftCommand { get; }
 
+    /// <summary>
+    /// 获取按水平中心对齐当前选择的命令。
+    /// </summary>
     public IRelayCommand AlignCenterCommand { get; }
 
+    /// <summary>
+    /// 获取按右边缘对齐当前选择的命令。
+    /// </summary>
     public IRelayCommand AlignRightCommand { get; }
 
+    /// <summary>
+    /// 获取按上边缘对齐当前选择的命令。
+    /// </summary>
     public IRelayCommand AlignTopCommand { get; }
 
+    /// <summary>
+    /// 获取按垂直中心对齐当前选择的命令。
+    /// </summary>
     public IRelayCommand AlignMiddleCommand { get; }
 
+    /// <summary>
+    /// 获取按下边缘对齐当前选择的命令。
+    /// </summary>
     public IRelayCommand AlignBottomCommand { get; }
 
+    /// <summary>
+    /// 获取按水平方向均匀分布当前选择的命令。
+    /// </summary>
     public IRelayCommand DistributeHorizontallyCommand { get; }
 
+    /// <summary>
+    /// 获取按垂直方向均匀分布当前选择的命令。
+    /// </summary>
     public IRelayCommand DistributeVerticallyCommand { get; }
 
+    /// <summary>
+    /// 获取取消当前连线预览的命令。
+    /// </summary>
     public IRelayCommand CancelPendingConnectionCommand { get; }
 
+    /// <summary>
+    /// 获取基于给定模板创建节点的命令。
+    /// </summary>
     public IRelayCommand<NodeTemplateViewModel> AddNodeCommand { get; }
 
     IEnumerable<NodeTemplateViewModel> IGraphContextMenuHost.NodeTemplates => NodeTemplates;
@@ -508,52 +609,124 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// </summary>
     public bool HasPendingConnection => PendingSourceNode is not null && PendingSourcePort is not null;
 
+    /// <summary>
+    /// 指示宿主权限当前是否允许保存工作区快照。
+    /// </summary>
     public bool CanSaveWorkspace => CommandPermissions.Workspace.AllowSave;
 
+    /// <summary>
+    /// 指示宿主权限当前是否允许加载工作区快照。
+    /// </summary>
     public bool CanLoadWorkspace => CommandPermissions.Workspace.AllowLoad;
 
+    /// <summary>
+    /// 指示撤销命令当前是否可用。
+    /// </summary>
     public bool CanUndo => BehaviorOptions.History.EnableUndoRedo && CommandPermissions.History.AllowUndo && _historyService.CanUndo;
 
+    /// <summary>
+    /// 指示重做命令当前是否可用。
+    /// </summary>
     public bool CanRedo => BehaviorOptions.History.EnableUndoRedo && CommandPermissions.History.AllowRedo && _historyService.CanRedo;
 
+    /// <summary>
+    /// 指示当前是否至少选中了一个节点。
+    /// </summary>
     public bool HasSelection => SelectedNodes.Count > 0;
 
+    /// <summary>
+    /// 指示当前是否同时选中了多个节点。
+    /// </summary>
     public bool HasMultipleSelection => SelectedNodes.Count > 1;
 
+    /// <summary>
+    /// 指示宿主权限当前是否允许创建节点。
+    /// </summary>
     public bool CanCreateNodes => CommandPermissions.Nodes.AllowCreate;
 
+    /// <summary>
+    /// 指示当前选择是否满足删除条件且宿主允许删除。
+    /// </summary>
     public bool CanDeleteSelection => HasSelection && CommandPermissions.Nodes.AllowDelete;
 
+    /// <summary>
+    /// 指示当前选择是否满足复制条件且宿主允许复制。
+    /// </summary>
     public bool CanCopySelection => HasSelection && CommandPermissions.Clipboard.AllowCopy;
 
+    /// <summary>
+    /// 指示当前是否允许将片段内容插入图中。
+    /// </summary>
     public bool CanInsertFragmentContent => CommandPermissions.Nodes.AllowCreate;
 
+    /// <summary>
+    /// 指示当前是否允许执行粘贴。
+    /// </summary>
     public bool CanPaste => CommandPermissions.Clipboard.AllowPaste && CanInsertFragmentContent && (_selectionClipboard.HasContent || _textClipboardBridge is not null);
 
+    /// <summary>
+    /// 指示当前选择是否可导出为默认片段文件。
+    /// </summary>
     public bool CanExportSelectionFragment => HasSelection && CommandPermissions.Fragments.AllowExport;
 
+    /// <summary>
+    /// 指示默认片段文件当前是否存在且允许被导入。
+    /// </summary>
     public bool CanImportFragment => CommandPermissions.Fragments.AllowImport && CanInsertFragmentContent && _fragmentWorkspaceService.Exists();
 
+    /// <summary>
+    /// 指示默认片段文件当前是否存在且允许被清理。
+    /// </summary>
     public bool CanClearFragment => CommandPermissions.Fragments.AllowClearWorkspaceFragment && _fragmentWorkspaceService.Exists();
 
+    /// <summary>
+    /// 指示片段模板库当前是否包含任何模板。
+    /// </summary>
     public bool HasFragmentTemplates => FragmentTemplates.Count > 0;
 
+    /// <summary>
+    /// 指示当前选择是否可导出为片段模板。
+    /// </summary>
     public bool CanExportSelectionAsTemplate => CanExportSelectionFragment && CommandPermissions.Fragments.AllowTemplateManagement && BehaviorOptions.Fragments.EnableFragmentLibrary;
 
+    /// <summary>
+    /// 指示当前选中的片段模板是否可导入。
+    /// </summary>
     public bool CanImportSelectedTemplate => SelectedFragmentTemplate is not null && CommandPermissions.Fragments.AllowImport && CommandPermissions.Fragments.AllowTemplateManagement && CanInsertFragmentContent && BehaviorOptions.Fragments.EnableFragmentLibrary;
 
+    /// <summary>
+    /// 指示当前选中的片段模板是否可删除。
+    /// </summary>
     public bool CanDeleteSelectedTemplate => SelectedFragmentTemplate is not null && CommandPermissions.Fragments.AllowTemplateManagement && BehaviorOptions.Fragments.EnableFragmentLibrary;
 
+    /// <summary>
+    /// 指示当前选择是否满足对齐操作条件。
+    /// </summary>
     public bool CanAlignSelection => SelectedNodes.Count >= 2 && CommandPermissions.Layout.AllowAlign;
 
+    /// <summary>
+    /// 指示当前选择是否满足分布操作条件。
+    /// </summary>
     public bool CanDistributeSelection => SelectedNodes.Count >= 3 && CommandPermissions.Layout.AllowDistribute;
 
+    /// <summary>
+    /// 指示当前单选节点是否暴露了可编辑参数。
+    /// </summary>
     public bool HasEditableParameters => SelectedNodes.Count == 1 && SelectedNodeParameters.Count > 0;
 
+    /// <summary>
+    /// 指示当前多选节点是否存在可批量编辑的共享参数。
+    /// </summary>
     public bool HasBatchEditableParameters => SelectedNodes.Count > 1 && SelectedNodeParameters.Count > 0 && CanEditNodeParameters;
 
+    /// <summary>
+    /// 指示当前选择投影是否产生了任何参数项。
+    /// </summary>
     public bool HasAnyEditableParameters => SelectedNodeParameters.Count > 0;
 
+    /// <summary>
+    /// 指示宿主权限当前是否允许编辑节点参数。
+    /// </summary>
     public bool CanEditNodeParameters => CommandPermissions.Nodes.AllowEditParameters;
 
     /// <summary>
@@ -649,6 +822,9 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
                 "editor.mode.selection.default",
                 "Selection mode  ·  click a template to add a node");
 
+    /// <summary>
+    /// 获取基于当前选择生成的检查器标题文本。
+    /// </summary>
     public string InspectorTitle => SelectedNodes.Count switch
     {
         0 => LocalizeText("editor.inspector.title.none", "Select A Node"),
@@ -656,6 +832,9 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         _ => LocalizeFormat("editor.inspector.title.multiple", "{0} Nodes Selected", SelectedNodes.Count),
     };
 
+    /// <summary>
+    /// 获取基于当前选择生成的检查器分类文本。
+    /// </summary>
     public string InspectorCategory => SelectedNodes.Count switch
     {
         0 => LocalizeText("editor.inspector.category.none", "Editor"),
@@ -663,6 +842,9 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         _ => LocalizeText("editor.inspector.category.multiple", "Multi Selection"),
     };
 
+    /// <summary>
+    /// 获取基于当前选择生成的检查器描述文本。
+    /// </summary>
     public string InspectorDescription => SelectedNodes.Count switch
     {
         0 => LocalizeText(
@@ -681,14 +863,23 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
                 "Delete removes the full selection. Copy and paste preserve internal links between the selected nodes."),
     };
 
+    /// <summary>
+    /// 获取当前主选节点的输入端口摘要文本。
+    /// </summary>
     public string InspectorInputs => SelectedNode is null
         ? LocalizeText("editor.inspector.inputs.none", "Select a node to inspect its input ports.")
         : _inspectorProjection.FormatPorts(SelectedNode.Inputs);
 
+    /// <summary>
+    /// 获取当前主选节点的输出端口摘要文本。
+    /// </summary>
     public string InspectorOutputs => SelectedNode is null
         ? LocalizeText("editor.inspector.outputs.none", "Select a node to inspect its output ports.")
         : _inspectorProjection.FormatPorts(SelectedNode.Outputs);
 
+    /// <summary>
+    /// 获取当前主选节点的连线统计摘要文本。
+    /// </summary>
     public string InspectorConnections => SelectedNode is null
         ? LocalizeText("editor.inspector.connections.none", "Select a node to inspect its connection summary.")
         : LocalizeFormat(
@@ -697,6 +888,9 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             GetIncomingConnections(SelectedNode).Count,
             GetOutgoingConnections(SelectedNode).Count);
 
+    /// <summary>
+    /// 获取当前主选节点的上游依赖摘要文本。
+    /// </summary>
     public string InspectorUpstream => SelectedNode is null
         ? LocalizeText("editor.inspector.upstream.none", "Select a node to see upstream dependencies.")
         : _inspectorProjection.FormatRelatedNodes(
@@ -704,6 +898,9 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             useSource: true,
             FindNode);
 
+    /// <summary>
+    /// 获取当前主选节点的下游消费者摘要文本。
+    /// </summary>
     public string InspectorDownstream => SelectedNode is null
         ? LocalizeText("editor.inspector.downstream.none", "Select a node to see downstream consumers.")
         : _inspectorProjection.FormatRelatedNodes(
@@ -711,6 +908,9 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             useSource: false,
             FindNode);
 
+    /// <summary>
+    /// 获取面向状态栏和检查器的当前选择摘要文本。
+    /// </summary>
     public string SelectionCaption => _inspectorProjection.FormatSelectionCaption(
         SelectedNode,
         HasMultipleSelection,
@@ -1279,6 +1479,11 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         return appliedCount;
     }
 
+    /// <summary>
+    /// 将屏幕坐标转换为当前视口下的世界坐标。
+    /// </summary>
+    /// <param name="screen">待转换的屏幕坐标。</param>
+    /// <returns>应用当前缩放和平移后的世界坐标。</returns>
     public GraphPoint ScreenToWorld(GraphPoint screen)
         => ViewportMath.ScreenToWorld(new ViewportState(Zoom, PanX, PanY), screen);
 

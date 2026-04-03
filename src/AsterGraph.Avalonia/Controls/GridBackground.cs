@@ -6,17 +6,30 @@ using AsterGraph.Editor.ViewModels;
 
 namespace AsterGraph.Avalonia.Controls;
 
+/// <summary>
+/// Renders the graph canvas background grid from editor style and viewport state.
+/// </summary>
 public sealed class GridBackground : Control
 {
+    /// <summary>
+    /// Styled property that supplies the bound editor view model.
+    /// </summary>
     public static readonly StyledProperty<GraphEditorViewModel?> ViewModelProperty =
         AvaloniaProperty.Register<GridBackground, GraphEditorViewModel?>(nameof(ViewModel));
 
+    /// <summary>
+    /// Bound editor view model used to resolve grid styling and viewport state.
+    /// </summary>
     public GraphEditorViewModel? ViewModel
     {
         get => GetValue(ViewModelProperty);
         set => SetValue(ViewModelProperty, value);
     }
 
+    /// <summary>
+    /// Renders the grid background.
+    /// </summary>
+    /// <param name="context">Drawing context.</param>
     public override void Render(DrawingContext context)
     {
         base.Render(context);

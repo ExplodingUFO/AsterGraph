@@ -2,6 +2,15 @@ using AsterGraph.Abstractions.Identifiers;
 
 namespace AsterGraph.Core.Models;
 
+/// <summary>
+/// Immutable persisted port definition attached to a graph node snapshot.
+/// </summary>
+/// <param name="Id">Stable port identifier within the node.</param>
+/// <param name="Label">Display label shown for the port.</param>
+/// <param name="Direction">Whether the port is an input or output.</param>
+/// <param name="DataType">Human-readable data type caption.</param>
+/// <param name="AccentHex">Accent color used for the port dot and related visuals.</param>
+/// <param name="TypeId">Optional stable type identifier used by compatibility services.</param>
 public sealed record GraphPort(
     string Id,
     string Label,

@@ -12,6 +12,8 @@
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!-- XML docs are generated for publishable packages while remaining CS1591 debt is retired in batches. -->
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
     <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
     <!-- Keep generated audit snapshots out of SDK compile globs so verification builds stay deterministic. -->
     <DefaultItemExcludes>$(DefaultItemExcludes);$(MSBuildProjectDirectory)\artifacts\**</DefaultItemExcludes>

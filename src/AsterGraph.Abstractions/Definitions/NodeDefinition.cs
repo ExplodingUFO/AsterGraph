@@ -71,6 +71,17 @@ public sealed record NodeDefinition : INodeDefinition
     /// <summary>
     /// 初始化节点定义。
     /// </summary>
+    /// <param name="id">节点定义的稳定标识。</param>
+    /// <param name="displayName">节点显示名称。</param>
+    /// <param name="category">节点分类。</param>
+    /// <param name="subtitle">节点副标题。</param>
+    /// <param name="inputPorts">输入端口定义集合。</param>
+    /// <param name="outputPorts">输出端口定义集合。</param>
+    /// <param name="parameters">参数定义集合。</param>
+    /// <param name="description">可选的节点描述。</param>
+    /// <param name="accentHex">节点强调色。</param>
+    /// <param name="defaultWidth">默认节点宽度。</param>
+    /// <param name="defaultHeight">默认节点高度。</param>
     public NodeDefinition(
         NodeDefinitionId id,
         string displayName,
