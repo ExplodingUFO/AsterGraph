@@ -26,6 +26,7 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorComman
     private GraphEditorDocumentChangedEventArgs? _pendingDocumentChanged;
     private GraphEditorSelectionChangedEventArgs? _pendingSelectionChanged;
     private GraphEditorViewportChangedEventArgs? _pendingViewportChanged;
+    private GraphEditorPendingConnectionChangedEventArgs? _pendingPendingConnectionChanged;
     private readonly List<GraphEditorFragmentEventArgs> _pendingFragmentExported = [];
     private readonly List<GraphEditorFragmentEventArgs> _pendingFragmentImported = [];
     private readonly List<GraphEditorCommandExecutedEventArgs> _pendingCommandExecuted = [];
@@ -84,6 +85,9 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorComman
 
     /// <inheritdoc />
     public event EventHandler<GraphEditorCommandExecutedEventArgs>? CommandExecuted;
+
+    /// <inheritdoc />
+    public event EventHandler<GraphEditorPendingConnectionChangedEventArgs>? PendingConnectionChanged;
 
     /// <inheritdoc />
     public event EventHandler<GraphEditorRecoverableFailureEventArgs>? RecoverableFailure;
@@ -147,12 +151,12 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorComman
     }
 
     /// <inheritdoc />
-    public void BeginConnection(string sourceNodeId, string sourcePortId)
+    public void StartConnection(string sourceNodeId, string sourcePortId)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(sourceNodeId);
         ArgumentException.ThrowIfNullOrWhiteSpace(sourcePortId);
 
-        Execute("connections.begin", () => _editor.StartConnection(sourceNodeId, sourcePortId));
+        Execute("connections.start", () => _editor.StartConnection(sourceNodeId, sourcePortId));
     }
 
     /// <inheritdoc />
@@ -218,6 +222,13 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorComman
         => Execute("viewport.fit", () => _editor.FitToViewport(_editor.ViewportWidth, _editor.ViewportHeight, updateStatus));
 
     /// <inheritdoc />
+    public void CenterViewOnNode(string nodeId)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(nodeId);
+        Execute("viewport.center-node", () => _editor.CenterViewOnNode(nodeId));
+    }
+
+    /// <inheritdoc />
     public void CenterViewAt(GraphPoint worldPoint, bool updateStatus = true)
         => Execute("viewport.center", () => _editor.CenterViewAt(worldPoint, updateStatus));
 
@@ -256,15 +267,17 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorComman
             _editor.CanCopySelection,
             _editor.CanPaste,
             _editor.CanSaveWorkspace,
-            _editor.CanLoadWorkspace,
-            true,
-            _editor.CommandPermissions.Nodes.AllowMove,
-            _editor.CommandPermissions.Connections.AllowCreate,
-            _editor.CommandPermissions.Connections.AllowDelete,
-            _editor.CommandPermissions.Connections.AllowDisconnect,
-            true,
-            true,
-            true);
+            _editor.CanLoadWorkspace)
+        {
+            CanSetSelection = true,
+            CanMoveNodes = _editor.CommandPermissions.Nodes.AllowMove,
+            CanCreateConnections = _editor.CommandPermissions.Connections.AllowCreate,
+            CanDeleteConnections = _editor.CommandPermissions.Connections.AllowDelete,
+            CanBreakConnections = _editor.CommandPermissions.Connections.AllowDisconnect,
+            CanUpdateViewport = true,
+            CanFitToViewport = _editor.Nodes.Count > 0 && _editor.ViewportWidth > 0 && _editor.ViewportHeight > 0,
+            CanCenterViewport = _editor.ViewportWidth > 0 && _editor.ViewportHeight > 0,
+        };
 
     /// <inheritdoc />
     public IReadOnlyList<NodePositionSnapshot> GetNodePositions()
@@ -456,15 +469,37 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorComman
 
     private void Execute(string commandId, Action action)
     {
+        var beforePending = GetPendingConnectionSnapshot();
         action();
+        PublishPendingConnectionChanged(beforePending);
         PublishCommandExecuted(commandId);
     }
 
     private T Execute<T>(string commandId, Func<T> action)
     {
+        var beforePending = GetPendingConnectionSnapshot();
         var result = action();
+        PublishPendingConnectionChanged(beforePending);
         PublishCommandExecuted(commandId);
         return result;
+    }
+
+    private void PublishPendingConnectionChanged(GraphEditorPendingConnectionSnapshot before)
+    {
+        var after = GetPendingConnectionSnapshot();
+        if (before == after)
+        {
+            return;
+        }
+
+        var args = new GraphEditorPendingConnectionChangedEventArgs(after);
+        if (IsBatching)
+        {
+            _pendingPendingConnectionChanged = args;
+            return;
+        }
+
+        PendingConnectionChanged?.Invoke(this, args);
     }
 
     private void PublishCommandExecuted(string commandId)
@@ -514,6 +549,12 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorComman
         {
             ViewportChanged?.Invoke(this, _pendingViewportChanged);
             _pendingViewportChanged = null;
+        }
+
+        if (_pendingPendingConnectionChanged is not null)
+        {
+            PendingConnectionChanged?.Invoke(this, _pendingPendingConnectionChanged);
+            _pendingPendingConnectionChanged = null;
         }
 
         foreach (var args in _pendingCommandExecuted)

@@ -50,7 +50,7 @@ public sealed class GraphEditorSessionTests
         AssertMethod(commandsType, nameof(IGraphEditorCommands.AddNode), typeof(NodeDefinitionId), typeof(GraphPoint?));
         AssertMethod(commandsType, nameof(IGraphEditorCommands.DeleteSelection));
         AssertMethod(commandsType, nameof(IGraphEditorCommands.SetNodePositions), typeof(IReadOnlyList<NodePositionSnapshot>), typeof(bool));
-        AssertMethod(commandsType, nameof(IGraphEditorCommands.BeginConnection), typeof(string), typeof(string));
+        AssertMethod(commandsType, nameof(IGraphEditorCommands.StartConnection), typeof(string), typeof(string));
         AssertMethod(commandsType, nameof(IGraphEditorCommands.CompleteConnection), typeof(string), typeof(string));
         AssertMethod(commandsType, nameof(IGraphEditorCommands.CancelPendingConnection));
         AssertMethod(commandsType, nameof(IGraphEditorCommands.DeleteConnection), typeof(string));
@@ -60,6 +60,7 @@ public sealed class GraphEditorSessionTests
         AssertMethod(commandsType, nameof(IGraphEditorCommands.UpdateViewportSize), typeof(double), typeof(double));
         AssertMethod(commandsType, nameof(IGraphEditorCommands.ResetView), typeof(bool));
         AssertMethod(commandsType, nameof(IGraphEditorCommands.FitToViewport), typeof(bool));
+        AssertMethod(commandsType, nameof(IGraphEditorCommands.CenterViewOnNode), typeof(string));
         AssertMethod(commandsType, nameof(IGraphEditorCommands.CenterViewAt), typeof(GraphPoint), typeof(bool));
         AssertMethod(commandsType, nameof(IGraphEditorCommands.SaveWorkspace));
         AssertMethod(commandsType, nameof(IGraphEditorCommands.LoadWorkspace));
@@ -114,6 +115,7 @@ public sealed class GraphEditorSessionTests
         AssertEvent(eventsType, nameof(IGraphEditorEvents.FragmentExported), typeof(GraphEditorFragmentEventArgs));
         AssertEvent(eventsType, nameof(IGraphEditorEvents.FragmentImported), typeof(GraphEditorFragmentEventArgs));
         AssertEvent(eventsType, nameof(IGraphEditorEvents.CommandExecuted), typeof(GraphEditorCommandExecutedEventArgs));
+        AssertEvent(eventsType, nameof(IGraphEditorEvents.PendingConnectionChanged), typeof(GraphEditorPendingConnectionChangedEventArgs));
         AssertEvent(eventsType, nameof(IGraphEditorEvents.RecoverableFailure), typeof(GraphEditorRecoverableFailureEventArgs));
     }
 
@@ -192,7 +194,7 @@ public sealed class GraphEditorSessionTests
         Assert.Equal(TargetNodeId, target.NodeId);
         Assert.Equal(TargetPortId, target.PortId);
 
-        session.Commands.BeginConnection(SourceNodeId, SourcePortId);
+        session.Commands.StartConnection(SourceNodeId, SourcePortId);
 
         var pending = session.Queries.GetPendingConnectionSnapshot();
         Assert.True(pending.HasPendingConnection);
@@ -201,6 +203,7 @@ public sealed class GraphEditorSessionTests
 
         session.Commands.CompleteConnection(TargetNodeId, TargetPortId);
         session.Commands.FitToViewport(updateStatus: false);
+        session.Commands.CenterViewOnNode(TargetNodeId);
         session.Commands.CenterViewAt(new GraphPoint(430, 260), updateStatus: false);
 
         var after = session.Queries.CreateDocumentSnapshot();

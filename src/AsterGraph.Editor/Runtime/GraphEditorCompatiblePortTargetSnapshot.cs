@@ -28,17 +28,15 @@ public sealed record GraphEditorCompatiblePortTargetSnapshot
         PortCompatibilityResult compatibility)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(nodeId);
-        ArgumentException.ThrowIfNullOrWhiteSpace(nodeTitle);
         ArgumentException.ThrowIfNullOrWhiteSpace(portId);
-        ArgumentException.ThrowIfNullOrWhiteSpace(portLabel);
         ArgumentNullException.ThrowIfNull(portTypeId);
 
         NodeId = nodeId;
-        NodeTitle = nodeTitle;
+        NodeTitle = string.IsNullOrWhiteSpace(nodeTitle) ? nodeId : nodeTitle;
         PortId = portId;
-        PortLabel = portLabel;
+        PortLabel = string.IsNullOrWhiteSpace(portLabel) ? portId : portLabel;
         PortTypeId = portTypeId;
-        PortAccentHex = portAccentHex;
+        PortAccentHex = portAccentHex ?? string.Empty;
         Compatibility = compatibility;
     }
 

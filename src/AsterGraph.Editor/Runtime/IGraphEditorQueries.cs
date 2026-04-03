@@ -44,7 +44,8 @@ public interface IGraphEditorQueries
     /// 获取当前待完成连线快照。
     /// </summary>
     /// <returns>当前待完成连线状态。</returns>
-    GraphEditorPendingConnectionSnapshot GetPendingConnectionSnapshot();
+    GraphEditorPendingConnectionSnapshot GetPendingConnectionSnapshot()
+        => throw new NotSupportedException();
 
     /// <summary>
     /// 获取指定源端口的运行时兼容连接目标。
@@ -52,7 +53,8 @@ public interface IGraphEditorQueries
     /// <param name="sourceNodeId">源节点实例标识。</param>
     /// <param name="sourcePortId">源端口实例标识。</param>
     /// <returns>兼容目标 DTO 集合。</returns>
-    IReadOnlyList<GraphEditorCompatiblePortTargetSnapshot> GetCompatiblePortTargets(string sourceNodeId, string sourcePortId);
+    IReadOnlyList<GraphEditorCompatiblePortTargetSnapshot> GetCompatiblePortTargets(string sourceNodeId, string sourcePortId)
+        => throw new NotSupportedException();
 
     /// <summary>
     /// 获取指定源端口的兼容连接目标。

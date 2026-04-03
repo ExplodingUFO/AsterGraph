@@ -55,15 +55,17 @@ public sealed class GraphEditorTransactionTests
         var session = AsterGraphEditorFactory.CreateSession(CreateOptions(definitionId));
         var documentChanges = 0;
         var selectionChanges = 0;
+        var pendingConnectionChanges = 0;
         var commandEvents = new List<GraphEditorCommandExecutedEventArgs>();
 
         session.Events.DocumentChanged += (_, _) => documentChanges++;
         session.Events.SelectionChanged += (_, _) => selectionChanges++;
+        session.Events.PendingConnectionChanged += (_, _) => pendingConnectionChanges++;
         session.Events.CommandExecuted += (_, args) => commandEvents.Add(args);
 
         using (session.BeginMutation("connect-and-select"))
         {
-            session.Commands.BeginConnection(SourceNodeId, SourcePortId);
+            session.Commands.StartConnection(SourceNodeId, SourcePortId);
             Assert.True(session.Queries.GetPendingConnectionSnapshot().HasPendingConnection);
 
             session.Commands.CompleteConnection(TargetNodeId, TargetPortId);
@@ -71,13 +73,15 @@ public sealed class GraphEditorTransactionTests
 
             Assert.Equal(0, documentChanges);
             Assert.Equal(0, selectionChanges);
+            Assert.Equal(0, pendingConnectionChanges);
             Assert.Empty(commandEvents);
         }
 
         Assert.Equal(1, documentChanges);
         Assert.Equal(1, selectionChanges);
+        Assert.Equal(1, pendingConnectionChanges);
         Assert.Equal(
-            ["connections.begin", "connections.complete", "selection.set"],
+            ["connections.start", "connections.complete", "selection.set"],
             commandEvents.Select(args => args.CommandId).ToArray());
         Assert.All(commandEvents, args =>
         {

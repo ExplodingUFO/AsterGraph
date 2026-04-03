@@ -38,6 +38,15 @@ public interface IGraphEditorEvents
     event EventHandler<GraphEditorCommandExecutedEventArgs>? CommandExecuted;
 
     /// <summary>
+    /// 待完成连线状态变化事件。
+    /// </summary>
+    event EventHandler<GraphEditorPendingConnectionChangedEventArgs>? PendingConnectionChanged
+    {
+        add => throw new NotSupportedException();
+        remove => throw new NotSupportedException();
+    }
+
+    /// <summary>
     /// 可恢复失败事件。
     /// </summary>
     event EventHandler<GraphEditorRecoverableFailureEventArgs>? RecoverableFailure;
