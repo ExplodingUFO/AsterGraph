@@ -23,7 +23,7 @@ public sealed class GraphContextMenuPresenter : IGraphContextMenuPresenter
         var menu = new ContextMenu
         {
             PlacementTarget = target,
-            Placement = PlacementMode.Pointer,
+            Placement = ResolvePlacement(target),
             Background = BrushFactory.Solid(style.BackgroundHex),
             BorderBrush = BrushFactory.Solid(style.BorderHex),
             BorderThickness = new Thickness(style.BorderThickness),
@@ -38,6 +38,9 @@ public sealed class GraphContextMenuPresenter : IGraphContextMenuPresenter
 
     internal static object BuildMenuControlForTest(MenuItemDescriptor descriptor, ContextMenuStyleOptions style)
         => BuildMenuControlCore(descriptor, style);
+
+    internal static PlacementMode ResolvePlacementForTest(Control target)
+        => ResolvePlacement(target);
 
     private static object BuildMenuControlCore(MenuItemDescriptor descriptor, ContextMenuStyleOptions style)
     {
@@ -94,6 +97,11 @@ public sealed class GraphContextMenuPresenter : IGraphContextMenuPresenter
 
         return menuItem;
     }
+
+    private static PlacementMode ResolvePlacement(Control target)
+        => target.IsFocused || target.IsKeyboardFocusWithin
+            ? PlacementMode.Bottom
+            : PlacementMode.Pointer;
 
     private static Control? CreateIcon(string? iconKey, bool isEnabled, ContextMenuStyleOptions style)
     {

@@ -20,6 +20,32 @@ public sealed class GraphContextMenuPresenterTests
         => Assert.True(typeof(IGraphContextMenuPresenter).IsAssignableFrom(typeof(GraphContextMenuPresenter)));
 
     [AvaloniaFact]
+    public void FocusedTarget_UsesAnchoredPlacementForKeyboardStyleMenuInvocation()
+    {
+        var target = new Button
+        {
+            Focusable = true,
+        };
+        var window = new Window
+        {
+            Width = 400,
+            Height = 300,
+            Content = target,
+        };
+        window.Show();
+
+        try
+        {
+            target.Focus();
+            Assert.Equal(PlacementMode.Bottom, GraphContextMenuPresenter.ResolvePlacementForTest(target));
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
     public void BuildMenuControl_DisabledItem_UsesDisabledReasonAsToolTip()
     {
         var descriptor = new MenuItemDescriptor(

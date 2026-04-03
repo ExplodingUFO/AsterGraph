@@ -565,6 +565,7 @@ public partial class NodeCanvas : UserControl
             BorderThickness = new Thickness(connectionStyle.LabelBorderThickness),
             CornerRadius = new CornerRadius(connectionStyle.LabelCornerRadius),
             Padding = new Thickness(connectionStyle.LabelHorizontalPadding, connectionStyle.LabelVerticalPadding),
+            Focusable = true,
             Child = new TextBlock
             {
                 Text = connection.Label,
@@ -573,6 +574,24 @@ public partial class NodeCanvas : UserControl
             },
         };
         AutomationProperties.SetName(chip, $"{connection.Label} connection");
+        chip.KeyDown += (_, args) =>
+        {
+            if (ViewModel is null || string.IsNullOrWhiteSpace(connection.TargetNodeId))
+            {
+                return;
+            }
+
+            if (args.Key == Key.Apps || (args.Key == Key.F10 && args.KeyModifiers.HasFlag(KeyModifiers.Shift)))
+            {
+                args.Handled = OpenContextMenu(
+                    chip,
+                    NodeCanvasContextMenuContextFactory.CreateConnectionContext(
+                        CreateContextMenuSnapshot(),
+                        new GraphPoint(0, 0),
+                        connection.Id,
+                        hostContext: ViewModel.HostContext));
+            }
+        };
         chip.ContextRequested += (_, args) =>
         {
             if (ViewModel is null || string.IsNullOrWhiteSpace(connection.TargetNodeId))
