@@ -3,6 +3,7 @@ using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Core.Compatibility;
 using AsterGraph.Core.Models;
+using AsterGraph.Editor.Diagnostics;
 using AsterGraph.Editor.Catalog;
 using AsterGraph.Editor.Events;
 using AsterGraph.Editor.Hosting;
@@ -16,6 +17,11 @@ namespace AsterGraph.Editor.Tests;
 
 public sealed class GraphEditorSessionTests
 {
+    private const string SourceNodeId = "tests.session.source-001";
+    private const string TargetNodeId = "tests.session.target-001";
+    private const string SourcePortId = "out";
+    private const string TargetPortId = "in";
+
     [Fact]
     public void IGraphEditorSession_ExposesCommandsQueriesAndEventsProperties()
     {
@@ -40,11 +46,21 @@ public sealed class GraphEditorSessionTests
         AssertMethod(commandsType, nameof(IGraphEditorCommands.Undo));
         AssertMethod(commandsType, nameof(IGraphEditorCommands.Redo));
         AssertMethod(commandsType, nameof(IGraphEditorCommands.ClearSelection), typeof(bool));
+        AssertMethod(commandsType, nameof(IGraphEditorCommands.SetSelection), typeof(IReadOnlyList<string>), typeof(string), typeof(bool));
         AssertMethod(commandsType, nameof(IGraphEditorCommands.AddNode), typeof(NodeDefinitionId), typeof(GraphPoint?));
         AssertMethod(commandsType, nameof(IGraphEditorCommands.DeleteSelection));
+        AssertMethod(commandsType, nameof(IGraphEditorCommands.SetNodePositions), typeof(IReadOnlyList<NodePositionSnapshot>), typeof(bool));
+        AssertMethod(commandsType, nameof(IGraphEditorCommands.BeginConnection), typeof(string), typeof(string));
+        AssertMethod(commandsType, nameof(IGraphEditorCommands.CompleteConnection), typeof(string), typeof(string));
+        AssertMethod(commandsType, nameof(IGraphEditorCommands.CancelPendingConnection));
+        AssertMethod(commandsType, nameof(IGraphEditorCommands.DeleteConnection), typeof(string));
+        AssertMethod(commandsType, nameof(IGraphEditorCommands.BreakConnectionsForPort), typeof(string), typeof(string));
         AssertMethod(commandsType, nameof(IGraphEditorCommands.PanBy), typeof(double), typeof(double));
         AssertMethod(commandsType, nameof(IGraphEditorCommands.ZoomAt), typeof(double), typeof(GraphPoint));
+        AssertMethod(commandsType, nameof(IGraphEditorCommands.UpdateViewportSize), typeof(double), typeof(double));
         AssertMethod(commandsType, nameof(IGraphEditorCommands.ResetView), typeof(bool));
+        AssertMethod(commandsType, nameof(IGraphEditorCommands.FitToViewport), typeof(bool));
+        AssertMethod(commandsType, nameof(IGraphEditorCommands.CenterViewAt), typeof(GraphPoint), typeof(bool));
         AssertMethod(commandsType, nameof(IGraphEditorCommands.SaveWorkspace));
         AssertMethod(commandsType, nameof(IGraphEditorCommands.LoadWorkspace));
     }
@@ -60,8 +76,25 @@ public sealed class GraphEditorSessionTests
         AssertMethod(queriesType, nameof(IGraphEditorQueries.CreateDocumentSnapshot));
         Assert.Equal(typeof(GraphDocument), queriesType.GetMethod(nameof(IGraphEditorQueries.CreateDocumentSnapshot))!.ReturnType);
 
+        AssertMethod(queriesType, nameof(IGraphEditorQueries.GetSelectionSnapshot));
+        Assert.Equal(typeof(GraphEditorSelectionSnapshot), queriesType.GetMethod(nameof(IGraphEditorQueries.GetSelectionSnapshot))!.ReturnType);
+
+        AssertMethod(queriesType, nameof(IGraphEditorQueries.GetViewportSnapshot));
+        Assert.Equal(typeof(GraphEditorViewportSnapshot), queriesType.GetMethod(nameof(IGraphEditorQueries.GetViewportSnapshot))!.ReturnType);
+
+        AssertMethod(queriesType, nameof(IGraphEditorQueries.GetCapabilitySnapshot));
+        Assert.Equal(typeof(GraphEditorCapabilitySnapshot), queriesType.GetMethod(nameof(IGraphEditorQueries.GetCapabilitySnapshot))!.ReturnType);
+
         AssertMethod(queriesType, nameof(IGraphEditorQueries.GetNodePositions));
         Assert.Equal(typeof(IReadOnlyList<NodePositionSnapshot>), queriesType.GetMethod(nameof(IGraphEditorQueries.GetNodePositions))!.ReturnType);
+
+        AssertMethod(queriesType, nameof(IGraphEditorQueries.GetPendingConnectionSnapshot));
+        Assert.Equal(typeof(GraphEditorPendingConnectionSnapshot), queriesType.GetMethod(nameof(IGraphEditorQueries.GetPendingConnectionSnapshot))!.ReturnType);
+
+        AssertMethod(queriesType, nameof(IGraphEditorQueries.GetCompatiblePortTargets), typeof(string), typeof(string));
+        Assert.Equal(
+            typeof(IReadOnlyList<GraphEditorCompatiblePortTargetSnapshot>),
+            queriesType.GetMethod(nameof(IGraphEditorQueries.GetCompatiblePortTargets))!.ReturnType);
 
         AssertMethod(queriesType, nameof(IGraphEditorQueries.GetCompatibleTargets), typeof(string), typeof(string));
         Assert.Equal(typeof(IReadOnlyList<CompatiblePortTarget>), queriesType.GetMethod(nameof(IGraphEditorQueries.GetCompatibleTargets))!.ReturnType);
@@ -80,6 +113,19 @@ public sealed class GraphEditorSessionTests
         AssertEvent(eventsType, nameof(IGraphEditorEvents.ViewportChanged), typeof(GraphEditorViewportChangedEventArgs));
         AssertEvent(eventsType, nameof(IGraphEditorEvents.FragmentExported), typeof(GraphEditorFragmentEventArgs));
         AssertEvent(eventsType, nameof(IGraphEditorEvents.FragmentImported), typeof(GraphEditorFragmentEventArgs));
+        AssertEvent(eventsType, nameof(IGraphEditorEvents.CommandExecuted), typeof(GraphEditorCommandExecutedEventArgs));
+        AssertEvent(eventsType, nameof(IGraphEditorEvents.RecoverableFailure), typeof(GraphEditorRecoverableFailureEventArgs));
+    }
+
+    [Fact]
+    public void GraphEditorCompatiblePortTargetSnapshot_IsRuntimeSafeAndMvvmFree()
+    {
+        var snapshotType = typeof(GraphEditorCompatiblePortTargetSnapshot);
+
+        Assert.True(snapshotType.IsPublic);
+        Assert.DoesNotContain(
+            snapshotType.GetProperties(BindingFlags.Public | BindingFlags.Instance),
+            property => property.PropertyType == typeof(NodeViewModel) || property.PropertyType == typeof(PortViewModel));
     }
 
     [Fact]
@@ -106,6 +152,60 @@ public sealed class GraphEditorSessionTests
         Assert.NotNull(viewportChanged);
         Assert.Equal(122, viewportChanged!.PanX);
         Assert.Equal(114, viewportChanged.PanY);
+    }
+
+    [Fact]
+    public void AsterGraphEditorFactory_CreateSession_SupportsRuntimeOnlySelectionConnectionAndViewportCommands()
+    {
+        var definitionId = new NodeDefinitionId("tests.session.runtime");
+        var session = AsterGraphEditorFactory.CreateSession(CreateOptions(definitionId));
+
+        session.Commands.UpdateViewportSize(1280, 720);
+        session.Commands.SetSelection([SourceNodeId], SourceNodeId, updateStatus: false);
+        session.Commands.SetNodePositions(
+            [
+                new NodePositionSnapshot(SourceNodeId, new GraphPoint(240, 180)),
+                new NodePositionSnapshot(TargetNodeId, new GraphPoint(620, 220)),
+            ],
+            updateStatus: false);
+
+        var selection = session.Queries.GetSelectionSnapshot();
+        Assert.Equal([SourceNodeId], selection.SelectedNodeIds);
+        Assert.Equal(SourceNodeId, selection.PrimarySelectedNodeId);
+
+        var positions = session.Queries.GetNodePositions().ToDictionary(snapshot => snapshot.NodeId, StringComparer.Ordinal);
+        Assert.Equal(new GraphPoint(240, 180), positions[SourceNodeId].Position);
+        Assert.Equal(new GraphPoint(620, 220), positions[TargetNodeId].Position);
+
+        var capabilities = session.Queries.GetCapabilitySnapshot();
+        Assert.True(capabilities.CanSetSelection);
+        Assert.True(capabilities.CanMoveNodes);
+        Assert.True(capabilities.CanCreateConnections);
+        Assert.True(capabilities.CanDeleteConnections);
+        Assert.True(capabilities.CanBreakConnections);
+        Assert.True(capabilities.CanUpdateViewport);
+        Assert.True(capabilities.CanFitToViewport);
+        Assert.True(capabilities.CanCenterViewport);
+
+        var compatibleTargets = session.Queries.GetCompatiblePortTargets(SourceNodeId, SourcePortId);
+        var target = Assert.Single(compatibleTargets);
+        Assert.Equal(TargetNodeId, target.NodeId);
+        Assert.Equal(TargetPortId, target.PortId);
+
+        session.Commands.BeginConnection(SourceNodeId, SourcePortId);
+
+        var pending = session.Queries.GetPendingConnectionSnapshot();
+        Assert.True(pending.HasPendingConnection);
+        Assert.Equal(SourceNodeId, pending.SourceNodeId);
+        Assert.Equal(SourcePortId, pending.SourcePortId);
+
+        session.Commands.CompleteConnection(TargetNodeId, TargetPortId);
+        session.Commands.FitToViewport(updateStatus: false);
+        session.Commands.CenterViewAt(new GraphPoint(430, 260), updateStatus: false);
+
+        var after = session.Queries.CreateDocumentSnapshot();
+        Assert.Single(after.Connections);
+        Assert.False(session.Queries.GetPendingConnectionSnapshot().HasPendingConnection);
     }
 
     [Fact]
@@ -173,14 +273,26 @@ public sealed class GraphEditorSessionTests
             "Runtime session regression coverage.",
             [
                 new GraphNode(
-                    "tests.session.node-001",
-                    "Session Node",
+                    SourceNodeId,
+                    "Source Node",
                     "Tests",
                     "Runtime",
-                    "Session test node.",
+                    "Session source node.",
                     new GraphPoint(120, 160),
                     new GraphSize(240, 160),
                     [],
+                    [new GraphPort(SourcePortId, "Output", PortDirection.Output, "float", "#6AD5C4", new PortTypeId("float"))],
+                    "#6AD5C4",
+                    definitionId),
+                new GraphNode(
+                    TargetNodeId,
+                    "Target Node",
+                    "Tests",
+                    "Runtime",
+                    "Session target node.",
+                    new GraphPoint(520, 180),
+                    new GraphSize(240, 160),
+                    [new GraphPort(TargetPortId, "Input", PortDirection.Input, "float", "#F3B36B", new PortTypeId("float"))],
                     [],
                     "#6AD5C4",
                     definitionId),
@@ -195,8 +307,8 @@ public sealed class GraphEditorSessionTests
             "Session Node",
             "Tests",
             "Runtime",
-            [],
-            []));
+            [new PortDefinition(TargetPortId, "Input", new PortTypeId("float"), "#F3B36B")],
+            [new PortDefinition(SourcePortId, "Output", new PortTypeId("float"), "#6AD5C4")]));
         return catalog;
     }
 }

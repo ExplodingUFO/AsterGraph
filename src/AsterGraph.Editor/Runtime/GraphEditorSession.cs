@@ -101,6 +101,30 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorComman
         => Execute("selection.clear", () => _editor.ClearSelection(updateStatus));
 
     /// <inheritdoc />
+    public void SetSelection(IReadOnlyList<string> nodeIds, string? primaryNodeId = null, bool updateStatus = true)
+    {
+        ArgumentNullException.ThrowIfNull(nodeIds);
+
+        var selectedNodes = nodeIds
+            .Distinct(StringComparer.Ordinal)
+            .Select(_editor.FindNode)
+            .OfType<NodeViewModel>()
+            .ToList();
+        var primaryNode = !string.IsNullOrWhiteSpace(primaryNodeId)
+            ? selectedNodes.FirstOrDefault(node => string.Equals(node.Id, primaryNodeId, StringComparison.Ordinal))
+            : null;
+
+        Execute(
+            "selection.set",
+            () => _editor.SetSelection(
+                selectedNodes,
+                primaryNode,
+                updateStatus
+                    ? $"Selected {selectedNodes.Count} node{(selectedNodes.Count == 1 ? string.Empty : "s")}."
+                    : null));
+    }
+
+    /// <inheritdoc />
     public void AddNode(NodeDefinitionId definitionId, GraphPoint? preferredWorldPosition = null)
     {
         ArgumentNullException.ThrowIfNull(definitionId);
@@ -116,6 +140,64 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorComman
         => Execute("selection.delete", _editor.DeleteSelection);
 
     /// <inheritdoc />
+    public void SetNodePositions(IReadOnlyList<NodePositionSnapshot> positions, bool updateStatus = true)
+    {
+        ArgumentNullException.ThrowIfNull(positions);
+        Execute("nodes.move", () => _editor.SetNodePositions(positions, updateStatus));
+    }
+
+    /// <inheritdoc />
+    public void BeginConnection(string sourceNodeId, string sourcePortId)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(sourceNodeId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(sourcePortId);
+
+        Execute("connections.begin", () => _editor.StartConnection(sourceNodeId, sourcePortId));
+    }
+
+    /// <inheritdoc />
+    public void CompleteConnection(string targetNodeId, string targetPortId)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(targetNodeId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(targetPortId);
+
+        Execute(
+            "connections.complete",
+            () =>
+            {
+                if (_editor.PendingSourceNode is null || _editor.PendingSourcePort is null)
+                {
+                    return;
+                }
+
+                _editor.ConnectPorts(
+                    _editor.PendingSourceNode.Id,
+                    _editor.PendingSourcePort.Id,
+                    targetNodeId,
+                    targetPortId);
+            });
+    }
+
+    /// <inheritdoc />
+    public void CancelPendingConnection()
+        => Execute("connections.cancel", () => _editor.CancelPendingConnection());
+
+    /// <inheritdoc />
+    public void DeleteConnection(string connectionId)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(connectionId);
+        Execute("connections.delete", () => _editor.DeleteConnection(connectionId));
+    }
+
+    /// <inheritdoc />
+    public void BreakConnectionsForPort(string nodeId, string portId)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(nodeId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(portId);
+        Execute("connections.break", () => _editor.BreakConnectionsForPort(nodeId, portId));
+    }
+
+    /// <inheritdoc />
     public void PanBy(double deltaX, double deltaY)
         => Execute("viewport.pan", () => _editor.PanBy(deltaX, deltaY));
 
@@ -124,8 +206,20 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorComman
         => Execute("viewport.zoom", () => _editor.ZoomAt(factor, screenAnchor));
 
     /// <inheritdoc />
+    public void UpdateViewportSize(double width, double height)
+        => Execute("viewport.resize", () => _editor.UpdateViewportSize(width, height));
+
+    /// <inheritdoc />
     public void ResetView(bool updateStatus = true)
         => Execute("viewport.reset", () => _editor.ResetView(updateStatus));
+
+    /// <inheritdoc />
+    public void FitToViewport(bool updateStatus = true)
+        => Execute("viewport.fit", () => _editor.FitToViewport(_editor.ViewportWidth, _editor.ViewportHeight, updateStatus));
+
+    /// <inheritdoc />
+    public void CenterViewAt(GraphPoint worldPoint, bool updateStatus = true)
+        => Execute("viewport.center", () => _editor.CenterViewAt(worldPoint, updateStatus));
 
     /// <inheritdoc />
     public void SaveWorkspace()
@@ -162,11 +256,40 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorComman
             _editor.CanCopySelection,
             _editor.CanPaste,
             _editor.CanSaveWorkspace,
-            _editor.CanLoadWorkspace);
+            _editor.CanLoadWorkspace,
+            true,
+            _editor.CommandPermissions.Nodes.AllowMove,
+            _editor.CommandPermissions.Connections.AllowCreate,
+            _editor.CommandPermissions.Connections.AllowDelete,
+            _editor.CommandPermissions.Connections.AllowDisconnect,
+            true,
+            true,
+            true);
 
     /// <inheritdoc />
     public IReadOnlyList<NodePositionSnapshot> GetNodePositions()
         => _editor.GetNodePositions();
+
+    /// <inheritdoc />
+    public GraphEditorPendingConnectionSnapshot GetPendingConnectionSnapshot()
+        => new(
+            _editor.HasPendingConnection,
+            _editor.PendingSourceNode?.Id,
+            _editor.PendingSourcePort?.Id);
+
+    /// <inheritdoc />
+    public IReadOnlyList<GraphEditorCompatiblePortTargetSnapshot> GetCompatiblePortTargets(string sourceNodeId, string sourcePortId)
+        => _editor
+            .GetCompatibleTargets(sourceNodeId, sourcePortId)
+            .Select(target => new GraphEditorCompatiblePortTargetSnapshot(
+                target.Node.Id,
+                target.Node.Title,
+                target.Port.Id,
+                target.Port.Label,
+                target.Port.TypeId,
+                target.Port.AccentHex,
+                target.Compatibility))
+            .ToList();
 
     /// <inheritdoc />
     public IReadOnlyList<CompatiblePortTarget> GetCompatibleTargets(string sourceNodeId, string sourcePortId)

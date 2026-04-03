@@ -14,6 +14,11 @@ namespace AsterGraph.Editor.Tests;
 
 public sealed class GraphEditorTransactionTests
 {
+    private const string SourceNodeId = "tests.transaction.source-001";
+    private const string TargetNodeId = "tests.transaction.target-001";
+    private const string SourcePortId = "out";
+    private const string TargetPortId = "in";
+
     [Fact]
     public void RuntimeSession_BeginMutation_DefersRuntimeNotificationsUntilDisposed()
     {
@@ -40,7 +45,47 @@ public sealed class GraphEditorTransactionTests
         Assert.Equal(1, documentChanges);
         Assert.Equal(1, viewportChanges);
         Assert.Equal(new[] { "nodes.add", "viewport.pan" }, commandIds);
-        Assert.Equal(2, session.Queries.CreateDocumentSnapshot().Nodes.Count);
+        Assert.Equal(3, session.Queries.CreateDocumentSnapshot().Nodes.Count);
+    }
+
+    [Fact]
+    public void RuntimeSession_BeginMutation_BatchesSelectionAndConnectionCommandsUntilDisposed()
+    {
+        var definitionId = new NodeDefinitionId("tests.transaction.connection-batch");
+        var session = AsterGraphEditorFactory.CreateSession(CreateOptions(definitionId));
+        var documentChanges = 0;
+        var selectionChanges = 0;
+        var commandEvents = new List<GraphEditorCommandExecutedEventArgs>();
+
+        session.Events.DocumentChanged += (_, _) => documentChanges++;
+        session.Events.SelectionChanged += (_, _) => selectionChanges++;
+        session.Events.CommandExecuted += (_, args) => commandEvents.Add(args);
+
+        using (session.BeginMutation("connect-and-select"))
+        {
+            session.Commands.BeginConnection(SourceNodeId, SourcePortId);
+            Assert.True(session.Queries.GetPendingConnectionSnapshot().HasPendingConnection);
+
+            session.Commands.CompleteConnection(TargetNodeId, TargetPortId);
+            session.Commands.SetSelection([TargetNodeId], TargetNodeId, updateStatus: false);
+
+            Assert.Equal(0, documentChanges);
+            Assert.Equal(0, selectionChanges);
+            Assert.Empty(commandEvents);
+        }
+
+        Assert.Equal(1, documentChanges);
+        Assert.Equal(1, selectionChanges);
+        Assert.Equal(
+            ["connections.begin", "connections.complete", "selection.set"],
+            commandEvents.Select(args => args.CommandId).ToArray());
+        Assert.All(commandEvents, args =>
+        {
+            Assert.True(args.IsInMutationScope);
+            Assert.Equal("connect-and-select", args.MutationLabel);
+        });
+        Assert.False(session.Queries.GetPendingConnectionSnapshot().HasPendingConnection);
+        Assert.Single(session.Queries.CreateDocumentSnapshot().Connections);
     }
 
     [Fact]
@@ -71,6 +116,14 @@ public sealed class GraphEditorTransactionTests
         Assert.False(capabilities.CanPaste);
         Assert.True(capabilities.CanSaveWorkspace);
         Assert.True(capabilities.CanLoadWorkspace);
+        Assert.True(capabilities.CanSetSelection);
+        Assert.True(capabilities.CanMoveNodes);
+        Assert.True(capabilities.CanCreateConnections);
+        Assert.True(capabilities.CanDeleteConnections);
+        Assert.True(capabilities.CanBreakConnections);
+        Assert.True(capabilities.CanUpdateViewport);
+        Assert.True(capabilities.CanFitToViewport);
+        Assert.True(capabilities.CanCenterViewport);
     }
 
     [Fact]
@@ -107,14 +160,26 @@ public sealed class GraphEditorTransactionTests
             "Runtime batching regression coverage.",
             [
                 new GraphNode(
-                    "tests.transaction.node-001",
-                    "Transaction Node",
+                    SourceNodeId,
+                    "Transaction Source",
                     "Tests",
                     "Runtime",
-                    "Transaction test node.",
+                    "Transaction source node.",
                     new GraphPoint(120, 160),
                     new GraphSize(240, 160),
                     [],
+                    [new GraphPort(SourcePortId, "Output", PortDirection.Output, "float", "#6AD5C4", new PortTypeId("float"))],
+                    "#6AD5C4",
+                    definitionId),
+                new GraphNode(
+                    TargetNodeId,
+                    "Transaction Target",
+                    "Tests",
+                    "Runtime",
+                    "Transaction target node.",
+                    new GraphPoint(520, 180),
+                    new GraphSize(240, 160),
+                    [new GraphPort(TargetPortId, "Input", PortDirection.Input, "float", "#F3B36B", new PortTypeId("float"))],
                     [],
                     "#6AD5C4",
                     definitionId),
@@ -129,8 +194,8 @@ public sealed class GraphEditorTransactionTests
             "Transaction Node",
             "Tests",
             "Runtime",
-            [],
-            []));
+            [new PortDefinition(TargetPortId, "Input", new PortTypeId("float"), "#F3B36B")],
+            [new PortDefinition(SourcePortId, "Output", new PortTypeId("float"), "#6AD5C4")]));
         return catalog;
     }
 

@@ -1,5 +1,6 @@
 using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Core.Models;
+using AsterGraph.Editor.Models;
 
 namespace AsterGraph.Editor.Runtime;
 
@@ -25,6 +26,14 @@ public interface IGraphEditorCommands
     void ClearSelection(bool updateStatus = false);
 
     /// <summary>
+    /// 直接设置当前选择集合及主选中节点。
+    /// </summary>
+    /// <param name="nodeIds">新的选择节点标识集合。</param>
+    /// <param name="primaryNodeId">新的主选中节点标识。</param>
+    /// <param name="updateStatus">是否更新状态文本。</param>
+    void SetSelection(IReadOnlyList<string> nodeIds, string? primaryNodeId = null, bool updateStatus = true);
+
+    /// <summary>
     /// 基于节点定义标识添加一个节点实例。
     /// </summary>
     /// <param name="definitionId">节点定义标识。</param>
@@ -35,6 +44,45 @@ public interface IGraphEditorCommands
     /// 删除当前选择。
     /// </summary>
     void DeleteSelection();
+
+    /// <summary>
+    /// 批量设置节点位置。
+    /// </summary>
+    /// <param name="positions">目标节点位置集合。</param>
+    /// <param name="updateStatus">是否更新状态文本。</param>
+    void SetNodePositions(IReadOnlyList<NodePositionSnapshot> positions, bool updateStatus = true);
+
+    /// <summary>
+    /// 开始一条待完成连线。
+    /// </summary>
+    /// <param name="sourceNodeId">源节点标识。</param>
+    /// <param name="sourcePortId">源端口标识。</param>
+    void BeginConnection(string sourceNodeId, string sourcePortId);
+
+    /// <summary>
+    /// 完成当前待完成连线。
+    /// </summary>
+    /// <param name="targetNodeId">目标节点标识。</param>
+    /// <param name="targetPortId">目标端口标识。</param>
+    void CompleteConnection(string targetNodeId, string targetPortId);
+
+    /// <summary>
+    /// 取消当前待完成连线。
+    /// </summary>
+    void CancelPendingConnection();
+
+    /// <summary>
+    /// 删除指定连线。
+    /// </summary>
+    /// <param name="connectionId">连线标识。</param>
+    void DeleteConnection(string connectionId);
+
+    /// <summary>
+    /// 断开指定端口上的全部连线。
+    /// </summary>
+    /// <param name="nodeId">节点标识。</param>
+    /// <param name="portId">端口标识。</param>
+    void BreakConnectionsForPort(string nodeId, string portId);
 
     /// <summary>
     /// 平移视口。
@@ -51,10 +99,30 @@ public interface IGraphEditorCommands
     void ZoomAt(double factor, GraphPoint screenAnchor);
 
     /// <summary>
+    /// 更新当前视口尺寸。
+    /// </summary>
+    /// <param name="width">视口宽度。</param>
+    /// <param name="height">视口高度。</param>
+    void UpdateViewportSize(double width, double height);
+
+    /// <summary>
     /// 重置视口。
     /// </summary>
     /// <param name="updateStatus">是否更新状态文本。</param>
     void ResetView(bool updateStatus = true);
+
+    /// <summary>
+    /// 将当前图内容适配到已知视口范围。
+    /// </summary>
+    /// <param name="updateStatus">是否更新状态文本。</param>
+    void FitToViewport(bool updateStatus = true);
+
+    /// <summary>
+    /// 将视口中心移动到指定世界坐标。
+    /// </summary>
+    /// <param name="worldPoint">目标世界坐标。</param>
+    /// <param name="updateStatus">是否更新状态文本。</param>
+    void CenterViewAt(GraphPoint worldPoint, bool updateStatus = true);
 
     /// <summary>
     /// 保存当前工作区。
