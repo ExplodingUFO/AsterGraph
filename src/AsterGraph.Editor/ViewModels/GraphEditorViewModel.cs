@@ -936,7 +936,13 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
         try
         {
-            return ContextMenuAugmentor.Augment(this, context, stockItems);
+            return ContextMenuAugmentor.Augment(
+                new GraphContextMenuAugmentationContext(
+                    Session,
+                    context,
+                    stockItems,
+                    CommandPermissions,
+                    this));
         }
         catch (Exception exception)
         {
@@ -2735,7 +2741,21 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             return;
         }
 
-        var state = _nodePresentationProvider.GetNodePresentation(node);
+        var state = _nodePresentationProvider.GetNodePresentation(
+            new NodePresentationContext(
+                Session,
+                node.Id,
+                node.DefinitionId,
+                node.Title,
+                node.Category,
+                node.Subtitle,
+                node.Description,
+                node.AccentHex,
+                node.IsSelected,
+                node.InputCount,
+                node.OutputCount,
+                node.ParameterValues,
+                node));
         ArgumentNullException.ThrowIfNull(state);
         node.UpdatePresentation(state);
     }
