@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.ComponentModel;
 using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Diagnostics;
@@ -27,6 +28,8 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorComman
     private GraphEditorSelectionChangedEventArgs? _pendingSelectionChanged;
     private GraphEditorViewportChangedEventArgs? _pendingViewportChanged;
     private GraphEditorPendingConnectionChangedEventArgs? _pendingPendingConnectionChanged;
+    private GraphEditorPendingConnectionSnapshot _lastPendingConnectionSnapshot;
+    private GraphEditorPendingConnectionSnapshot? _batchEntryPendingConnectionSnapshot;
     private readonly List<GraphEditorFragmentEventArgs> _pendingFragmentExported = [];
     private readonly List<GraphEditorFragmentEventArgs> _pendingFragmentImported = [];
     private readonly List<GraphEditorCommandExecutedEventArgs> _pendingCommandExecuted = [];
@@ -41,11 +44,13 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorComman
     {
         _editor = editor ?? throw new ArgumentNullException(nameof(editor));
         _diagnosticsSink = diagnosticsSink;
+        _lastPendingConnectionSnapshot = CreatePendingConnectionSnapshot();
         _editor.DocumentChanged += HandleDocumentChanged;
         _editor.SelectionChanged += HandleSelectionChanged;
         _editor.ViewportChanged += HandleViewportChanged;
         _editor.FragmentExported += HandleFragmentExported;
         _editor.FragmentImported += HandleFragmentImported;
+        _editor.PropertyChanged += HandleEditorPropertyChanged;
     }
 
     /// <inheritdoc />
@@ -63,6 +68,11 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorComman
     /// <inheritdoc />
     public IGraphEditorMutationScope BeginMutation(string? label = null)
     {
+        if (_mutationDepth == 0)
+        {
+            _batchEntryPendingConnectionSnapshot = _lastPendingConnectionSnapshot;
+        }
+
         _mutationDepth++;
         _currentMutationLabel ??= label;
         return new GraphEditorMutationScope(this, label);
@@ -285,10 +295,7 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorComman
 
     /// <inheritdoc />
     public GraphEditorPendingConnectionSnapshot GetPendingConnectionSnapshot()
-        => new(
-            _editor.HasPendingConnection,
-            _editor.PendingSourceNode?.Id,
-            _editor.PendingSourcePort?.Id);
+        => CreatePendingConnectionSnapshot();
 
     /// <inheritdoc />
     public IReadOnlyList<GraphEditorCompatiblePortTargetSnapshot> GetCompatiblePortTargets(string sourceNodeId, string sourcePortId)
@@ -467,39 +474,49 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorComman
         _pendingFragmentImported.Add(args);
     }
 
+    private void HandleEditorPropertyChanged(object? sender, PropertyChangedEventArgs args)
+    {
+        if (args.PropertyName is not nameof(GraphEditorViewModel.PendingSourceNode)
+            and not nameof(GraphEditorViewModel.PendingSourcePort))
+        {
+            return;
+        }
+
+        var current = CreatePendingConnectionSnapshot();
+        if (_lastPendingConnectionSnapshot == current)
+        {
+            return;
+        }
+
+        if (!_lastPendingConnectionSnapshot.HasPendingConnection && !current.HasPendingConnection)
+        {
+            _lastPendingConnectionSnapshot = current;
+            return;
+        }
+
+        _lastPendingConnectionSnapshot = current;
+        var eventArgs = new GraphEditorPendingConnectionChangedEventArgs(current);
+
+        if (IsBatching)
+        {
+            _pendingPendingConnectionChanged = eventArgs;
+            return;
+        }
+
+        PendingConnectionChanged?.Invoke(this, eventArgs);
+    }
+
     private void Execute(string commandId, Action action)
     {
-        var beforePending = GetPendingConnectionSnapshot();
         action();
-        PublishPendingConnectionChanged(beforePending);
         PublishCommandExecuted(commandId);
     }
 
     private T Execute<T>(string commandId, Func<T> action)
     {
-        var beforePending = GetPendingConnectionSnapshot();
         var result = action();
-        PublishPendingConnectionChanged(beforePending);
         PublishCommandExecuted(commandId);
         return result;
-    }
-
-    private void PublishPendingConnectionChanged(GraphEditorPendingConnectionSnapshot before)
-    {
-        var after = GetPendingConnectionSnapshot();
-        if (before == after)
-        {
-            return;
-        }
-
-        var args = new GraphEditorPendingConnectionChangedEventArgs(after);
-        if (IsBatching)
-        {
-            _pendingPendingConnectionChanged = args;
-            return;
-        }
-
-        PendingConnectionChanged?.Invoke(this, args);
     }
 
     private void PublishCommandExecuted(string commandId)
@@ -553,9 +570,15 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorComman
 
         if (_pendingPendingConnectionChanged is not null)
         {
-            PendingConnectionChanged?.Invoke(this, _pendingPendingConnectionChanged);
+            if (_batchEntryPendingConnectionSnapshot != _pendingPendingConnectionChanged.PendingConnection)
+            {
+                PendingConnectionChanged?.Invoke(this, _pendingPendingConnectionChanged);
+            }
+
             _pendingPendingConnectionChanged = null;
         }
+
+        _batchEntryPendingConnectionSnapshot = null;
 
         foreach (var args in _pendingCommandExecuted)
         {
@@ -594,6 +617,15 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorComman
             GraphEditorDiagnosticSeverity.Error => LogLevel.Error,
             _ => LogLevel.None,
         };
+
+    private GraphEditorPendingConnectionSnapshot CreatePendingConnectionSnapshot()
+    {
+        var hasPendingConnection = _editor.HasPendingConnection;
+        return new(
+            hasPendingConnection,
+            hasPendingConnection ? _editor.PendingSourceNode?.Id : null,
+            hasPendingConnection ? _editor.PendingSourcePort?.Id : null);
+    }
 
     private sealed class GraphEditorMutationScope : IGraphEditorMutationScope
     {

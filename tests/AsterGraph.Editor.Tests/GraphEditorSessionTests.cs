@@ -234,6 +234,25 @@ public sealed class GraphEditorSessionTests
         Assert.Equal(editorSnapshot.Connections.Count, sessionSnapshot.Connections.Count);
     }
 
+    [Fact]
+    public void GraphEditorViewModel_Session_PublishesPendingConnectionChangesForDirectEditorOperations()
+    {
+        var definitionId = new NodeDefinitionId("tests.session.pending-event");
+        var editor = AsterGraphEditorFactory.Create(CreateOptions(definitionId));
+        var pendingSnapshots = new List<GraphEditorPendingConnectionSnapshot>();
+
+        editor.Session.Events.PendingConnectionChanged += (_, args) => pendingSnapshots.Add(args.PendingConnection);
+
+        editor.StartConnection(SourceNodeId, SourcePortId);
+        editor.CancelPendingConnection();
+
+        Assert.Equal(2, pendingSnapshots.Count);
+        Assert.True(pendingSnapshots[0].HasPendingConnection);
+        Assert.Equal(SourceNodeId, pendingSnapshots[0].SourceNodeId);
+        Assert.Equal(SourcePortId, pendingSnapshots[0].SourcePortId);
+        Assert.False(pendingSnapshots[1].HasPendingConnection);
+    }
+
     private static void AssertProperty(Type declaringType, string propertyName, Type propertyType)
     {
         var property = declaringType.GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance);
