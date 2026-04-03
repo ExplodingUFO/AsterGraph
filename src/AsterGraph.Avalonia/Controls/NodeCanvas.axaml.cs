@@ -48,6 +48,18 @@ public partial class NodeCanvas : UserControl
         AvaloniaProperty.Register<NodeCanvas, bool>(nameof(EnableDefaultCommandShortcuts), true);
 
     /// <summary>
+    /// 控制是否启用默认滚轮缩放/平移手势。
+    /// </summary>
+    public static readonly StyledProperty<bool> EnableDefaultWheelViewportGesturesProperty =
+        AvaloniaProperty.Register<NodeCanvas, bool>(nameof(EnableDefaultWheelViewportGestures), true);
+
+    /// <summary>
+    /// 控制是否启用 Alt+左键拖拽平移。
+    /// </summary>
+    public static readonly StyledProperty<bool> EnableAltLeftDragPanningProperty =
+        AvaloniaProperty.Register<NodeCanvas, bool>(nameof(EnableAltLeftDragPanning), true);
+
+    /// <summary>
     /// 控制节点可视树替换的展示器。
     /// </summary>
     public static readonly StyledProperty<IGraphNodeVisualPresenter?> NodeVisualPresenterProperty =
@@ -120,6 +132,24 @@ public partial class NodeCanvas : UserControl
     {
         get => GetValue(EnableDefaultCommandShortcutsProperty);
         set => SetValue(EnableDefaultCommandShortcutsProperty, value);
+    }
+
+    /// <summary>
+    /// 是否启用默认滚轮缩放/平移手势。
+    /// </summary>
+    public bool EnableDefaultWheelViewportGestures
+    {
+        get => GetValue(EnableDefaultWheelViewportGesturesProperty);
+        set => SetValue(EnableDefaultWheelViewportGesturesProperty, value);
+    }
+
+    /// <summary>
+    /// 是否启用 Alt+左键拖拽平移。
+    /// </summary>
+    public bool EnableAltLeftDragPanning
+    {
+        get => GetValue(EnableAltLeftDragPanningProperty);
+        set => SetValue(EnableAltLeftDragPanningProperty, value);
     }
 
     /// <summary>
@@ -535,6 +565,7 @@ public partial class NodeCanvas : UserControl
             BorderThickness = new Thickness(connectionStyle.LabelBorderThickness),
             CornerRadius = new CornerRadius(connectionStyle.LabelCornerRadius),
             Padding = new Thickness(connectionStyle.LabelHorizontalPadding, connectionStyle.LabelVerticalPadding),
+            Focusable = true,
             Child = new TextBlock
             {
                 Text = connection.Label,
@@ -543,6 +574,24 @@ public partial class NodeCanvas : UserControl
             },
         };
         AutomationProperties.SetName(chip, $"{connection.Label} connection");
+        chip.KeyDown += (_, args) =>
+        {
+            if (ViewModel is null || string.IsNullOrWhiteSpace(connection.TargetNodeId))
+            {
+                return;
+            }
+
+            if (args.Key == Key.Apps || (args.Key == Key.F10 && args.KeyModifiers.HasFlag(KeyModifiers.Shift)))
+            {
+                args.Handled = OpenContextMenu(
+                    chip,
+                    NodeCanvasContextMenuContextFactory.CreateConnectionContext(
+                        CreateContextMenuSnapshot(),
+                        new GraphPoint(0, 0),
+                        connection.Id,
+                        hostContext: ViewModel.HostContext));
+            }
+        };
         chip.ContextRequested += (_, args) =>
         {
             if (ViewModel is null || string.IsNullOrWhiteSpace(connection.TargetNodeId))
@@ -637,7 +686,8 @@ public partial class NodeCanvas : UserControl
 
         // 如果按下鼠标中键，或者按住 Alt 键的同时点击鼠标左键，触发平移交互。
         // 此改动允许触控板用户通过按住键盘 Alt 键 + 单指拖拽的方式平移视图。
-        if (props.IsMiddleButtonPressed || (props.IsLeftButtonPressed && args.KeyModifiers.HasFlag(KeyModifiers.Alt)))
+        if (props.IsMiddleButtonPressed
+            || (EnableAltLeftDragPanning && props.IsLeftButtonPressed && args.KeyModifiers.HasFlag(KeyModifiers.Alt)))
         {
             _interactionSession.BeginPanning(current);
             HideSelectionAdorner();
@@ -746,7 +796,7 @@ public partial class NodeCanvas : UserControl
 
     private void HandlePointerWheelChanged(object? sender, PointerWheelEventArgs args)
     {
-        if (ViewModel is null)
+        if (ViewModel is null || !EnableDefaultWheelViewportGestures)
         {
             return;
         }
@@ -1155,6 +1205,11 @@ public partial class NodeCanvas : UserControl
         var nodes = ApplySelectionModifiers(hitNodes);
         var primaryNode = nodes.LastOrDefault();
 
+        if (SelectionsMatchCurrentState(nodes, primaryNode))
+        {
+            return;
+        }
+
         ViewModel.SetSelection(
             nodes,
             primaryNode,
@@ -1166,6 +1221,34 @@ public partial class NodeCanvas : UserControl
                     _ => $"Selected {nodes.Count} nodes.",
                 }
                 : null);
+    }
+
+    private bool SelectionsMatchCurrentState(IReadOnlyList<NodeViewModel> nodes, NodeViewModel? primaryNode)
+    {
+        if (ViewModel is null)
+        {
+            return false;
+        }
+
+        if (!ReferenceEquals(ViewModel.SelectedNode, primaryNode))
+        {
+            return false;
+        }
+
+        if (ViewModel.SelectedNodes.Count != nodes.Count)
+        {
+            return false;
+        }
+
+        for (var index = 0; index < nodes.Count; index++)
+        {
+            if (!ReferenceEquals(ViewModel.SelectedNodes[index], nodes[index]))
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private void HideSelectionAdorner()

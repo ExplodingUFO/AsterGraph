@@ -136,11 +136,11 @@ var legacyEditor = new GraphEditorViewModel(
     localizationProvider,
     serializer,
     diagnostics);
-var legacyView = new GraphEditorView
+var legacyView = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOptions
 {
     Editor = legacyEditor,
     ChromeMode = GraphEditorViewChromeMode.CanvasOnly,
-};
+});
 
 var factoryEditor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
 {
@@ -164,6 +164,48 @@ var factoryView = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaVie
     Editor = factoryEditor,
     ChromeMode = GraphEditorViewChromeMode.CanvasOnly,
 });
+var inspectorProofEditor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
+{
+    Document = document,
+    NodeCatalog = catalog,
+    CompatibilityService = new RecordingCompatibilityService(),
+    StyleOptions = styleOptions,
+    BehaviorOptions = behaviorOptions,
+});
+inspectorProofEditor.SelectSingleNode(inspectorProofEditor.Nodes.Single(node => node.Id == sourceNodeId), updateStatus: false);
+inspectorProofEditor.ConnectPorts(sourceNodeId, sourcePortId, targetNodeId, "in");
+var historyProofEditor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
+{
+    Document = document,
+    NodeCatalog = catalog,
+    CompatibilityService = new RecordingCompatibilityService(),
+    StyleOptions = styleOptions,
+    BehaviorOptions = behaviorOptions,
+});
+var historyProofNode = historyProofEditor.Nodes.Single(node => node.Id == sourceNodeId);
+var historyProofOrigin = new GraphPoint(historyProofNode.X, historyProofNode.Y);
+historyProofEditor.BeginHistoryInteraction();
+historyProofEditor.ApplyDragOffset(
+    new Dictionary<string, GraphPoint>(StringComparer.Ordinal)
+    {
+        [sourceNodeId] = historyProofOrigin,
+    },
+    32,
+    16);
+historyProofEditor.CompleteHistoryInteraction("Package smoke state scaling proof.");
+var historyDirtyAfterMove = historyProofEditor.IsDirty;
+var historyCanUndoAfterMove = historyProofEditor.CanUndo;
+historyProofEditor.Undo();
+var historyRestoredNode = historyProofEditor.Nodes.Single(node => node.Id == sourceNodeId);
+var inspectorSummaryOk = inspectorProofEditor.InspectorConnections == "0 incoming  ·  1 outgoing";
+var inspectorDownstreamOk = inspectorProofEditor.InspectorDownstream.Contains("Smoke Target", StringComparison.Ordinal);
+var optOutFullShell = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOptions
+{
+    Editor = factoryEditor,
+    ChromeMode = GraphEditorViewChromeMode.Default,
+    EnableDefaultContextMenu = false,
+    EnableDefaultCommandShortcuts = false,
+});
 
 PrintEditorMarker("LEGACY_EDITOR_OK", legacyEditor, sourceNodeId);
 PrintViewMarker("LEGACY_VIEW_OK", legacyView);
@@ -175,7 +217,10 @@ var fullShellInspector = factoryView.FindControl<GraphInspectorView>("PART_Inspe
     ?? throw new InvalidOperationException("Missing PART_InspectorSurface.");
 var fullShellMiniMap = factoryView.FindControl<GraphMiniMap>("PART_MiniMapSurface")
     ?? throw new InvalidOperationException("Missing PART_MiniMapSurface.");
+var optOutFullShellCanvas = optOutFullShell.FindControl<NodeCanvas>("PART_NodeCanvas")
+    ?? throw new InvalidOperationException("Missing PART_NodeCanvas on opt-out full shell.");
 Console.WriteLine($"SURFACE_FULLSHELL_OK:{ReferenceEquals(factoryEditor, fullShellInspector.Editor)}:{ReferenceEquals(factoryEditor, fullShellMiniMap.ViewModel)}");
+Console.WriteLine($"SURFACE_FULLSHELL_OPTOUT_OK:{optOutFullShell.EnableDefaultContextMenu}:{optOutFullShell.EnableDefaultCommandShortcuts}:{optOutFullShellCanvas.EnableDefaultContextMenu}:{optOutFullShellCanvas.EnableDefaultCommandShortcuts}");
 
 var standaloneCanvas = AsterGraphCanvasViewFactory.Create(new AsterGraphCanvasViewOptions
 {
@@ -277,27 +322,50 @@ var session = AsterGraphEditorFactory.CreateSession(new AsterGraphEditorOptions
 var commandIds = new List<string>();
 var documentChanges = 0;
 var viewportChanges = 0;
+var pendingConnectionChanges = 0;
 string? failureCode = null;
 
 session.Events.CommandExecuted += (_, args) => commandIds.Add(args.CommandId);
 session.Events.DocumentChanged += (_, _) => documentChanges++;
 session.Events.ViewportChanged += (_, _) => viewportChanges++;
+session.Events.PendingConnectionChanged += (_, _) => pendingConnectionChanges++;
 session.Events.RecoverableFailure += (_, args) => failureCode = args.Code;
 
-var compatibleTargets = session.Queries.GetCompatibleTargets(sourceNodeId, sourcePortId);
+session.Commands.UpdateViewportSize(1280, 720);
+session.Commands.SetSelection([sourceNodeId], sourceNodeId, updateStatus: false);
+session.Commands.SetNodePositions(
+    [
+        new NodePositionSnapshot(sourceNodeId, new GraphPoint(96, 120)),
+        new NodePositionSnapshot(targetNodeId, new GraphPoint(392, 120)),
+    ],
+    updateStatus: false);
+var compatibleTargets = session.Queries.GetCompatiblePortTargets(sourceNodeId, sourcePortId);
+session.Commands.StartConnection(sourceNodeId, sourcePortId);
+session.Commands.CancelPendingConnection();
 using (session.BeginMutation("smoke-batch"))
 {
     session.Commands.AddNode(targetDefinitionId, new GraphPoint(620, 160));
+    session.Commands.StartConnection(sourceNodeId, sourcePortId);
+    session.Commands.CompleteConnection(targetNodeId, "in");
+    session.Commands.CenterViewOnNode(targetNodeId);
     session.Commands.PanBy(12, 18);
 }
+session.Commands.SetSelection([targetNodeId], targetNodeId, updateStatus: false);
 session.Commands.SaveWorkspace();
 
 var sessionInspection = session.Diagnostics.CaptureInspectionSnapshot();
 var sessionRecentDiagnostics = session.Diagnostics.GetRecentDiagnostics(10);
 Console.WriteLine($"SESSION_FACTORY_OK:{session.Queries.CreateDocumentSnapshot().Nodes.Count}:{string.Join(",", commandIds)}");
 Console.WriteLine($"SESSION_EVENTS_OK:{documentChanges}:{viewportChanges}:{failureCode ?? "<none>"}");
+Console.WriteLine($"RUNTIME_SELECTION_OK:{session.Queries.GetSelectionSnapshot().PrimarySelectedNodeId == targetNodeId}");
+Console.WriteLine($"RUNTIME_CONNECTION_OK:{sessionInspection.Document.Connections.Count}");
+Console.WriteLine($"RUNTIME_PENDING_EVENT_OK:{pendingConnectionChanges > 0}");
+Console.WriteLine($"RUNTIME_DTO_QUERY_OK:{compatibleTargets.Count}:{compatibleTargets[0].NodeId}:{compatibleTargets[0].PortId}");
+Console.WriteLine($"RUNTIME_VIEWPORT_OK:{sessionInspection.Viewport.ViewportWidth}:{sessionInspection.Viewport.ViewportHeight}");
 Console.WriteLine($"SERVICE_OVERRIDE_OK:{workspaceService.WorkspacePath}:{fragmentWorkspaceService.FragmentPath}:{workspaceService.SaveCalls}:{fragmentWorkspaceService.SaveCalls}:{serializer.SerializeCalls}");
 Console.WriteLine($"COMPATIBILITY_SERVICE_OK:{compatibleTargets.Count}:{compatibilityService.EvaluateCalls}");
+Console.WriteLine($"STATE_INSPECTOR_OK:{inspectorSummaryOk}:{inspectorDownstreamOk}");
+Console.WriteLine($"STATE_HISTORY_OK:{historyDirtyAfterMove}:{historyCanUndoAfterMove}:{!historyProofEditor.IsDirty}:{historyRestoredNode.X == historyProofOrigin.X}:{historyRestoredNode.Y == historyProofOrigin.Y}");
 Console.WriteLine($"DIAG_DIAGNOSTICS_SINK_OK:{diagnostics.Diagnostics.Count}:{diagnostics.Diagnostics.LastOrDefault()?.Code ?? "<none>"}");
 Console.WriteLine($"DIAG_LEGACY_INSPECTION_OK:{legacyInspection.Document.Nodes.Count}:{legacyInspection.Selection.SelectedNodeIds.Count}:{legacyInspection.PendingConnection.HasPendingConnection}:{legacyInspection.Status.Message}");
 Console.WriteLine($"DIAG_FACTORY_INSPECTION_OK:{factoryInspection.Document.Nodes.Count}:{factoryInspection.Selection.SelectedNodeIds.Count}:{factoryInspection.PendingConnection.HasPendingConnection}:{factoryInspection.Status.Message}");

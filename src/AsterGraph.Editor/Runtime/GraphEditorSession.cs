@@ -26,6 +26,9 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorComman
     private GraphEditorDocumentChangedEventArgs? _pendingDocumentChanged;
     private GraphEditorSelectionChangedEventArgs? _pendingSelectionChanged;
     private GraphEditorViewportChangedEventArgs? _pendingViewportChanged;
+    private GraphEditorPendingConnectionChangedEventArgs? _pendingPendingConnectionChanged;
+    private GraphEditorPendingConnectionSnapshot _lastPendingConnectionSnapshot;
+    private GraphEditorPendingConnectionSnapshot? _batchEntryPendingConnectionSnapshot;
     private readonly List<GraphEditorFragmentEventArgs> _pendingFragmentExported = [];
     private readonly List<GraphEditorFragmentEventArgs> _pendingFragmentImported = [];
     private readonly List<GraphEditorCommandExecutedEventArgs> _pendingCommandExecuted = [];
@@ -40,11 +43,13 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorComman
     {
         _editor = editor ?? throw new ArgumentNullException(nameof(editor));
         _diagnosticsSink = diagnosticsSink;
+        _lastPendingConnectionSnapshot = CreatePendingConnectionSnapshot();
         _editor.DocumentChanged += HandleDocumentChanged;
         _editor.SelectionChanged += HandleSelectionChanged;
         _editor.ViewportChanged += HandleViewportChanged;
         _editor.FragmentExported += HandleFragmentExported;
         _editor.FragmentImported += HandleFragmentImported;
+        _editor.PendingConnectionChanged += HandlePendingConnectionChanged;
     }
 
     /// <inheritdoc />
@@ -62,6 +67,11 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorComman
     /// <inheritdoc />
     public IGraphEditorMutationScope BeginMutation(string? label = null)
     {
+        if (_mutationDepth == 0)
+        {
+            _batchEntryPendingConnectionSnapshot = _lastPendingConnectionSnapshot;
+        }
+
         _mutationDepth++;
         _currentMutationLabel ??= label;
         return new GraphEditorMutationScope(this, label);
@@ -86,6 +96,9 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorComman
     public event EventHandler<GraphEditorCommandExecutedEventArgs>? CommandExecuted;
 
     /// <inheritdoc />
+    public event EventHandler<GraphEditorPendingConnectionChangedEventArgs>? PendingConnectionChanged;
+
+    /// <inheritdoc />
     public event EventHandler<GraphEditorRecoverableFailureEventArgs>? RecoverableFailure;
 
     /// <inheritdoc />
@@ -99,6 +112,30 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorComman
     /// <inheritdoc />
     public void ClearSelection(bool updateStatus = false)
         => Execute("selection.clear", () => _editor.ClearSelection(updateStatus));
+
+    /// <inheritdoc />
+    public void SetSelection(IReadOnlyList<string> nodeIds, string? primaryNodeId = null, bool updateStatus = true)
+    {
+        ArgumentNullException.ThrowIfNull(nodeIds);
+
+        var selectedNodes = nodeIds
+            .Distinct(StringComparer.Ordinal)
+            .Select(_editor.FindNode)
+            .OfType<NodeViewModel>()
+            .ToList();
+        var primaryNode = !string.IsNullOrWhiteSpace(primaryNodeId)
+            ? selectedNodes.FirstOrDefault(node => string.Equals(node.Id, primaryNodeId, StringComparison.Ordinal))
+            : null;
+
+        Execute(
+            "selection.set",
+            () => _editor.SetSelection(
+                selectedNodes,
+                primaryNode,
+                updateStatus
+                    ? $"Selected {selectedNodes.Count} node{(selectedNodes.Count == 1 ? string.Empty : "s")}."
+                    : null));
+    }
 
     /// <inheritdoc />
     public void AddNode(NodeDefinitionId definitionId, GraphPoint? preferredWorldPosition = null)
@@ -116,6 +153,69 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorComman
         => Execute("selection.delete", _editor.DeleteSelection);
 
     /// <inheritdoc />
+    public void SetNodePositions(IReadOnlyList<NodePositionSnapshot> positions, bool updateStatus = true)
+    {
+        ArgumentNullException.ThrowIfNull(positions);
+        Execute("nodes.move", () => _editor.SetNodePositions(positions, updateStatus));
+    }
+
+    /// <inheritdoc />
+    [Obsolete("Use StartConnection instead.")]
+    public void BeginConnection(string sourceNodeId, string sourcePortId)
+        => StartConnection(sourceNodeId, sourcePortId);
+
+    /// <inheritdoc />
+    public void StartConnection(string sourceNodeId, string sourcePortId)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(sourceNodeId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(sourcePortId);
+
+        Execute("connections.begin", () => _editor.StartConnection(sourceNodeId, sourcePortId));
+    }
+
+    /// <inheritdoc />
+    public void CompleteConnection(string targetNodeId, string targetPortId)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(targetNodeId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(targetPortId);
+
+        Execute(
+            "connections.complete",
+            () =>
+            {
+                if (_editor.PendingSourceNode is null || _editor.PendingSourcePort is null)
+                {
+                    return;
+                }
+
+                _editor.ConnectPorts(
+                    _editor.PendingSourceNode.Id,
+                    _editor.PendingSourcePort.Id,
+                    targetNodeId,
+                    targetPortId);
+            });
+    }
+
+    /// <inheritdoc />
+    public void CancelPendingConnection()
+        => Execute("connections.cancel", () => _editor.CancelPendingConnection());
+
+    /// <inheritdoc />
+    public void DeleteConnection(string connectionId)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(connectionId);
+        Execute("connections.delete", () => _editor.DeleteConnection(connectionId));
+    }
+
+    /// <inheritdoc />
+    public void BreakConnectionsForPort(string nodeId, string portId)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(nodeId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(portId);
+        Execute("connections.break", () => _editor.BreakConnectionsForPort(nodeId, portId));
+    }
+
+    /// <inheritdoc />
     public void PanBy(double deltaX, double deltaY)
         => Execute("viewport.pan", () => _editor.PanBy(deltaX, deltaY));
 
@@ -124,8 +224,27 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorComman
         => Execute("viewport.zoom", () => _editor.ZoomAt(factor, screenAnchor));
 
     /// <inheritdoc />
+    public void UpdateViewportSize(double width, double height)
+        => Execute("viewport.resize", () => _editor.UpdateViewportSize(width, height));
+
+    /// <inheritdoc />
     public void ResetView(bool updateStatus = true)
         => Execute("viewport.reset", () => _editor.ResetView(updateStatus));
+
+    /// <inheritdoc />
+    public void FitToViewport(bool updateStatus = true)
+        => Execute("viewport.fit", () => _editor.FitToViewport(_editor.ViewportWidth, _editor.ViewportHeight, updateStatus));
+
+    /// <inheritdoc />
+    public void CenterViewOnNode(string nodeId)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(nodeId);
+        Execute("viewport.center-node", () => _editor.CenterViewOnNode(nodeId));
+    }
+
+    /// <inheritdoc />
+    public void CenterViewAt(GraphPoint worldPoint, bool updateStatus = true)
+        => Execute("viewport.center", () => _editor.CenterViewAt(worldPoint, updateStatus));
 
     /// <inheritdoc />
     public void SaveWorkspace()
@@ -162,11 +281,39 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorComman
             _editor.CanCopySelection,
             _editor.CanPaste,
             _editor.CanSaveWorkspace,
-            _editor.CanLoadWorkspace);
+            _editor.CanLoadWorkspace)
+        {
+            CanSetSelection = true,
+            CanMoveNodes = _editor.CommandPermissions.Nodes.AllowMove,
+            CanCreateConnections = _editor.CommandPermissions.Connections.AllowCreate,
+            CanDeleteConnections = _editor.CommandPermissions.Connections.AllowDelete,
+            CanBreakConnections = _editor.CommandPermissions.Connections.AllowDisconnect,
+            CanUpdateViewport = true,
+            CanFitToViewport = _editor.Nodes.Count > 0 && _editor.ViewportWidth > 0 && _editor.ViewportHeight > 0,
+            CanCenterViewport = _editor.ViewportWidth > 0 && _editor.ViewportHeight > 0,
+        };
 
     /// <inheritdoc />
     public IReadOnlyList<NodePositionSnapshot> GetNodePositions()
         => _editor.GetNodePositions();
+
+    /// <inheritdoc />
+    public GraphEditorPendingConnectionSnapshot GetPendingConnectionSnapshot()
+        => CreatePendingConnectionSnapshot();
+
+    /// <inheritdoc />
+    public IReadOnlyList<GraphEditorCompatiblePortTargetSnapshot> GetCompatiblePortTargets(string sourceNodeId, string sourcePortId)
+        => _editor
+            .GetCompatibleTargets(sourceNodeId, sourcePortId)
+            .Select(target => new GraphEditorCompatiblePortTargetSnapshot(
+                target.Node.Id,
+                target.Node.Title,
+                target.Port.Id,
+                target.Port.Label,
+                target.Port.TypeId,
+                target.Port.AccentHex,
+                target.Compatibility))
+            .ToList();
 
     /// <inheritdoc />
     public IReadOnlyList<CompatiblePortTarget> GetCompatibleTargets(string sourceNodeId, string sourcePortId)
@@ -174,18 +321,18 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorComman
 
     /// <inheritdoc />
     public GraphEditorInspectionSnapshot CaptureInspectionSnapshot()
-        => new(
+    {
+        var pendingConnection = CreatePendingConnectionSnapshot();
+        return new(
             CreateDocumentSnapshot(),
             GetSelectionSnapshot(),
             GetViewportSnapshot(),
             GetCapabilitySnapshot(),
-            new GraphEditorPendingConnectionSnapshot(
-                _editor.HasPendingConnection,
-                _editor.PendingSourceNode?.Id,
-                _editor.PendingSourcePort?.Id),
+            pendingConnection,
             new GraphEditorStatusSnapshot(_editor.StatusMessage),
             GetNodePositions().ToList(),
             GetRecentDiagnostics().ToList());
+    }
 
     /// <inheritdoc />
     public IReadOnlyList<GraphEditorDiagnostic> GetRecentDiagnostics(int maxCount = 20)
@@ -331,6 +478,31 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorComman
         _pendingFragmentImported.Add(args);
     }
 
+    private void HandlePendingConnectionChanged(object? sender, GraphEditorPendingConnectionChangedEventArgs args)
+    {
+        var current = args.PendingConnection;
+        if (_lastPendingConnectionSnapshot == current)
+        {
+            return;
+        }
+
+        if (!_lastPendingConnectionSnapshot.HasPendingConnection && !current.HasPendingConnection)
+        {
+            _lastPendingConnectionSnapshot = current;
+            return;
+        }
+
+        _lastPendingConnectionSnapshot = current;
+
+        if (IsBatching)
+        {
+            _pendingPendingConnectionChanged = args;
+            return;
+        }
+
+        PendingConnectionChanged?.Invoke(this, args);
+    }
+
     private void Execute(string commandId, Action action)
     {
         action();
@@ -393,6 +565,18 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorComman
             _pendingViewportChanged = null;
         }
 
+        if (_pendingPendingConnectionChanged is not null)
+        {
+            if (_batchEntryPendingConnectionSnapshot != _pendingPendingConnectionChanged.PendingConnection)
+            {
+                PendingConnectionChanged?.Invoke(this, _pendingPendingConnectionChanged);
+            }
+
+            _pendingPendingConnectionChanged = null;
+        }
+
+        _batchEntryPendingConnectionSnapshot = null;
+
         foreach (var args in _pendingCommandExecuted)
         {
             CommandExecuted?.Invoke(this, args);
@@ -430,6 +614,12 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorComman
             GraphEditorDiagnosticSeverity.Error => LogLevel.Error,
             _ => LogLevel.None,
         };
+
+    private GraphEditorPendingConnectionSnapshot CreatePendingConnectionSnapshot()
+        => GraphEditorPendingConnectionSnapshot.Create(
+            _editor.HasPendingConnection,
+            _editor.PendingSourceNode?.Id,
+            _editor.PendingSourcePort?.Id);
 
     private sealed class GraphEditorMutationScope : IGraphEditorMutationScope
     {

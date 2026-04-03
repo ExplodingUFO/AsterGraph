@@ -1,4 +1,5 @@
 using AsterGraph.Core.Models;
+using AsterGraph.Editor.Diagnostics;
 using AsterGraph.Editor.Menus;
 using AsterGraph.Editor.Models;
 
@@ -40,10 +41,30 @@ public interface IGraphEditorQueries
     IReadOnlyList<NodePositionSnapshot> GetNodePositions();
 
     /// <summary>
+    /// 获取当前待完成连线快照。
+    /// </summary>
+    /// <returns>当前待完成连线状态。</returns>
+    GraphEditorPendingConnectionSnapshot GetPendingConnectionSnapshot()
+        => throw new NotSupportedException();
+
+    /// <summary>
+    /// 获取指定源端口的运行时兼容连接目标。
+    /// </summary>
+    /// <param name="sourceNodeId">源节点实例标识。</param>
+    /// <param name="sourcePortId">源端口实例标识。</param>
+    /// <returns>兼容目标 DTO 集合。</returns>
+    IReadOnlyList<GraphEditorCompatiblePortTargetSnapshot> GetCompatiblePortTargets(string sourceNodeId, string sourcePortId)
+        => throw new NotSupportedException();
+
+    /// <summary>
     /// 获取指定源端口的兼容连接目标。
     /// </summary>
     /// <param name="sourceNodeId">源节点实例标识。</param>
     /// <param name="sourcePortId">源端口实例标识。</param>
+    /// <remarks>
+    /// 此成员保留用于兼容依赖 MVVM 运行时对象的旧宿主代码。
+    /// 新的运行时查询应优先使用 <see cref="GetCompatiblePortTargets(string, string)"/>。
+    /// </remarks>
     /// <returns>兼容目标集合。</returns>
     IReadOnlyList<CompatiblePortTarget> GetCompatibleTargets(string sourceNodeId, string sourcePortId);
 }

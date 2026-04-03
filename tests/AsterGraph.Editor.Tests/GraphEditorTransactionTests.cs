@@ -3,10 +3,12 @@ using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Core.Compatibility;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Catalog;
+using AsterGraph.Editor.Diagnostics;
 using AsterGraph.Editor.Events;
 using AsterGraph.Editor.Hosting;
 using AsterGraph.Editor.Menus;
 using AsterGraph.Editor.Runtime;
+using AsterGraph.Editor.Services;
 using AsterGraph.Editor.ViewModels;
 using Xunit;
 
@@ -14,6 +16,11 @@ namespace AsterGraph.Editor.Tests;
 
 public sealed class GraphEditorTransactionTests
 {
+    private const string SourceNodeId = "tests.transaction.source-001";
+    private const string TargetNodeId = "tests.transaction.target-001";
+    private const string SourcePortId = "out";
+    private const string TargetPortId = "in";
+
     [Fact]
     public void RuntimeSession_BeginMutation_DefersRuntimeNotificationsUntilDisposed()
     {
@@ -40,7 +47,72 @@ public sealed class GraphEditorTransactionTests
         Assert.Equal(1, documentChanges);
         Assert.Equal(1, viewportChanges);
         Assert.Equal(new[] { "nodes.add", "viewport.pan" }, commandIds);
-        Assert.Equal(2, session.Queries.CreateDocumentSnapshot().Nodes.Count);
+        Assert.Equal(3, session.Queries.CreateDocumentSnapshot().Nodes.Count);
+    }
+
+    [Fact]
+    public void RuntimeSession_BeginMutation_BatchesSelectionAndConnectionCommandsUntilDisposed()
+    {
+        var definitionId = new NodeDefinitionId("tests.transaction.connection-batch");
+        var session = AsterGraphEditorFactory.CreateSession(CreateOptions(definitionId));
+        var documentChanges = 0;
+        var selectionChanges = 0;
+        var pendingConnectionChanges = 0;
+        var commandEvents = new List<GraphEditorCommandExecutedEventArgs>();
+
+        session.Events.DocumentChanged += (_, _) => documentChanges++;
+        session.Events.SelectionChanged += (_, _) => selectionChanges++;
+        session.Events.PendingConnectionChanged += (_, _) => pendingConnectionChanges++;
+        session.Events.CommandExecuted += (_, args) => commandEvents.Add(args);
+
+        using (session.BeginMutation("connect-and-select"))
+        {
+            session.Commands.StartConnection(SourceNodeId, SourcePortId);
+            Assert.True(session.Queries.GetPendingConnectionSnapshot().HasPendingConnection);
+
+            session.Commands.CompleteConnection(TargetNodeId, TargetPortId);
+            session.Commands.SetSelection([TargetNodeId], TargetNodeId, updateStatus: false);
+
+            Assert.Equal(0, documentChanges);
+            Assert.Equal(0, selectionChanges);
+            Assert.Equal(0, pendingConnectionChanges);
+            Assert.Empty(commandEvents);
+        }
+
+        Assert.Equal(1, documentChanges);
+        Assert.Equal(1, selectionChanges);
+        Assert.Equal(0, pendingConnectionChanges);
+        Assert.Equal(
+            ["connections.begin", "connections.complete", "selection.set"],
+            commandEvents.Select(args => args.CommandId).ToArray());
+        Assert.All(commandEvents, args =>
+        {
+            Assert.True(args.IsInMutationScope);
+            Assert.Equal("connect-and-select", args.MutationLabel);
+        });
+        Assert.False(session.Queries.GetPendingConnectionSnapshot().HasPendingConnection);
+        Assert.Single(session.Queries.CreateDocumentSnapshot().Connections);
+    }
+
+    [Fact]
+    public void RuntimeSession_BeginMutation_PublishesPendingConnectionChangeWhenBatchEndsWithActivePendingConnection()
+    {
+        var definitionId = new NodeDefinitionId("tests.transaction.pending-batch");
+        var session = AsterGraphEditorFactory.CreateSession(CreateOptions(definitionId));
+        var pendingSnapshots = new List<GraphEditorPendingConnectionSnapshot>();
+
+        session.Events.PendingConnectionChanged += (_, args) => pendingSnapshots.Add(args.PendingConnection);
+
+        using (session.BeginMutation("start-only"))
+        {
+            session.Commands.StartConnection(SourceNodeId, SourcePortId);
+            Assert.True(session.Queries.GetPendingConnectionSnapshot().HasPendingConnection);
+        }
+
+        var pending = Assert.Single(pendingSnapshots);
+        Assert.True(pending.HasPendingConnection);
+        Assert.Equal(SourceNodeId, pending.SourceNodeId);
+        Assert.Equal(SourcePortId, pending.SourcePortId);
     }
 
     [Fact]
@@ -71,6 +143,29 @@ public sealed class GraphEditorTransactionTests
         Assert.False(capabilities.CanPaste);
         Assert.True(capabilities.CanSaveWorkspace);
         Assert.True(capabilities.CanLoadWorkspace);
+        Assert.True(capabilities.CanSetSelection);
+        Assert.True(capabilities.CanMoveNodes);
+        Assert.True(capabilities.CanCreateConnections);
+        Assert.True(capabilities.CanDeleteConnections);
+        Assert.True(capabilities.CanBreakConnections);
+        Assert.True(capabilities.CanUpdateViewport);
+        Assert.True(capabilities.CanFitToViewport);
+        Assert.True(capabilities.CanCenterViewport);
+    }
+
+    [Fact]
+    public void RuntimeSession_CenterViewOnNode_PublishesViewportChanged()
+    {
+        var definitionId = new NodeDefinitionId("tests.transaction.center-node");
+        var session = AsterGraphEditorFactory.CreateSession(CreateOptions(definitionId));
+        GraphEditorViewportChangedEventArgs? viewportChanged = null;
+
+        session.Commands.UpdateViewportSize(1280, 720);
+        session.Events.ViewportChanged += (_, args) => viewportChanged = args;
+
+        session.Commands.CenterViewOnNode(SourceNodeId);
+
+        Assert.NotNull(viewportChanged);
     }
 
     [Fact]
@@ -92,6 +187,117 @@ public sealed class GraphEditorTransactionTests
         Assert.Contains("augmentor", failure.Message, StringComparison.OrdinalIgnoreCase);
     }
 
+    [Fact]
+    public void GraphEditorViewModel_HistoryInteraction_PreservesUndoAndDirtySemantics()
+    {
+        var definitionId = new NodeDefinitionId("tests.transaction.history-interaction");
+        var workspace = new RecordingWorkspaceService();
+        var editor = AsterGraphEditorFactory.Create(CreateOptions(definitionId) with
+        {
+            WorkspaceService = workspace,
+        });
+        var sourceNode = Assert.Single(editor.Nodes, node => node.Id == SourceNodeId);
+        var origin = new GraphPoint(sourceNode.X, sourceNode.Y);
+
+        editor.SaveWorkspace();
+        Assert.False(editor.IsDirty);
+
+        editor.BeginHistoryInteraction();
+        editor.ApplyDragOffset(
+            new Dictionary<string, GraphPoint>(StringComparer.Ordinal)
+            {
+                [SourceNodeId] = origin,
+            },
+            80,
+            40);
+        editor.CompleteHistoryInteraction("Drag complete.");
+
+        Assert.True(editor.IsDirty);
+        Assert.True(editor.CanUndo);
+        Assert.Equal(origin.X + 80, sourceNode.X);
+        Assert.Equal(origin.Y + 40, sourceNode.Y);
+
+        editor.Undo();
+        var restoredNode = Assert.Single(editor.Nodes, node => node.Id == SourceNodeId);
+
+        Assert.False(editor.IsDirty);
+        Assert.Equal(origin.X, restoredNode.X);
+        Assert.Equal(origin.Y, restoredNode.Y);
+        Assert.False(editor.CanUndo);
+        Assert.True(workspace.Exists());
+    }
+
+    [Fact]
+    public void GraphEditorViewModel_HistoryInteraction_NoOpDrag_DoesNotLeaveDirtyStateLatched()
+    {
+        var definitionId = new NodeDefinitionId("tests.transaction.history-noop");
+        var editor = AsterGraphEditorFactory.Create(CreateOptions(definitionId));
+        var sourceNode = Assert.Single(editor.Nodes, node => node.Id == SourceNodeId);
+        var origin = new GraphPoint(sourceNode.X, sourceNode.Y);
+
+        editor.BeginHistoryInteraction();
+        editor.ApplyDragOffset(
+            new Dictionary<string, GraphPoint>(StringComparer.Ordinal)
+            {
+                [SourceNodeId] = origin,
+            },
+            40,
+            20);
+        editor.ApplyDragOffset(
+            new Dictionary<string, GraphPoint>(StringComparer.Ordinal)
+            {
+                [SourceNodeId] = origin,
+            },
+            0,
+            0);
+        editor.CompleteHistoryInteraction("No-op drag.");
+
+        var currentNode = Assert.Single(editor.Nodes, node => node.Id == SourceNodeId);
+        Assert.False(editor.IsDirty);
+        Assert.False(editor.CanUndo);
+        Assert.Equal(origin.X, currentNode.X);
+        Assert.Equal(origin.Y, currentNode.Y);
+    }
+
+    [Fact]
+    public void GraphEditorViewModel_SaveBoundary_PreservesUndoRedoDirtySemantics()
+    {
+        var definitionId = new NodeDefinitionId("tests.transaction.save-boundary");
+        var workspace = new RecordingWorkspaceService();
+        var editor = AsterGraphEditorFactory.Create(CreateOptions(definitionId) with
+        {
+            WorkspaceService = workspace,
+        });
+        var sourceNode = Assert.Single(editor.Nodes, node => node.Id == SourceNodeId);
+        var origin = new GraphPoint(sourceNode.X, sourceNode.Y);
+
+        editor.BeginHistoryInteraction();
+        editor.ApplyDragOffset(
+            new Dictionary<string, GraphPoint>(StringComparer.Ordinal)
+            {
+                [SourceNodeId] = origin,
+            },
+            64,
+            24);
+        editor.CompleteHistoryInteraction("Moved before save.");
+
+        editor.SaveWorkspace();
+        Assert.False(editor.IsDirty);
+
+        editor.Undo();
+        var undoneNode = Assert.Single(editor.Nodes, node => node.Id == SourceNodeId);
+        Assert.True(editor.IsDirty);
+        Assert.Equal(origin.X, undoneNode.X);
+        Assert.Equal(origin.Y, undoneNode.Y);
+
+        editor.Redo();
+        var redoneNode = Assert.Single(editor.Nodes, node => node.Id == SourceNodeId);
+        Assert.False(editor.IsDirty);
+        Assert.Equal(origin.X + 64, redoneNode.X);
+        Assert.Equal(origin.Y + 24, redoneNode.Y);
+        Assert.True(workspace.Exists());
+    }
+
     private static AsterGraphEditorOptions CreateOptions(NodeDefinitionId definitionId, IGraphContextMenuAugmentor? augmentor = null)
         => new()
         {
@@ -107,14 +313,26 @@ public sealed class GraphEditorTransactionTests
             "Runtime batching regression coverage.",
             [
                 new GraphNode(
-                    "tests.transaction.node-001",
-                    "Transaction Node",
+                    SourceNodeId,
+                    "Transaction Source",
                     "Tests",
                     "Runtime",
-                    "Transaction test node.",
+                    "Transaction source node.",
                     new GraphPoint(120, 160),
                     new GraphSize(240, 160),
                     [],
+                    [new GraphPort(SourcePortId, "Output", PortDirection.Output, "float", "#6AD5C4", new PortTypeId("float"))],
+                    "#6AD5C4",
+                    definitionId),
+                new GraphNode(
+                    TargetNodeId,
+                    "Transaction Target",
+                    "Tests",
+                    "Runtime",
+                    "Transaction target node.",
+                    new GraphPoint(520, 180),
+                    new GraphSize(240, 160),
+                    [new GraphPort(TargetPortId, "Input", PortDirection.Input, "float", "#F3B36B", new PortTypeId("float"))],
                     [],
                     "#6AD5C4",
                     definitionId),
@@ -129,8 +347,8 @@ public sealed class GraphEditorTransactionTests
             "Transaction Node",
             "Tests",
             "Runtime",
-            [],
-            []));
+            [new PortDefinition(TargetPortId, "Input", new PortTypeId("float"), "#F3B36B")],
+            [new PortDefinition(SourcePortId, "Output", new PortTypeId("float"), "#6AD5C4")]));
         return catalog;
     }
 
@@ -141,5 +359,21 @@ public sealed class GraphEditorTransactionTests
             ContextMenuContext context,
             IReadOnlyList<MenuItemDescriptor> stockItems)
             => throw new InvalidOperationException("augmentor exploded");
+    }
+
+    private sealed class RecordingWorkspaceService : IGraphWorkspaceService
+    {
+        public string WorkspacePath => "workspace://transactions";
+
+        public GraphDocument? SavedDocument { get; private set; }
+
+        public void Save(GraphDocument document)
+            => SavedDocument = document;
+
+        public GraphDocument Load()
+            => SavedDocument ?? throw new InvalidOperationException("No saved workspace.");
+
+        public bool Exists()
+            => SavedDocument is not null;
     }
 }

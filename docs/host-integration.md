@@ -149,12 +149,26 @@ session.Events.RecoverableFailure += (_, args) =>
 
 using (session.BeginMutation("host-bootstrap"))
 {
+    session.Commands.SetSelection(["source-node"], "source-node", updateStatus: false);
+    session.Commands.SetNodePositions(
+        [new NodePositionSnapshot("source-node", new GraphPoint(320, 180))],
+        updateStatus: false);
+    session.Commands.StartConnection("source-node", "result");
+    session.Commands.CompleteConnection("sink-node", "input");
+    session.Commands.CenterViewOnNode("sink-node");
     session.Commands.AddNode(new NodeDefinitionId("host.sample.node"), new GraphPoint(320, 180));
     session.Commands.PanBy(12, 18);
 }
 
 var snapshot = session.Queries.CreateDocumentSnapshot();
+var pending = session.Queries.GetPendingConnectionSnapshot();
+var targets = session.Queries.GetCompatiblePortTargets("source-node", "result");
 ```
+
+New host code should also prefer the newer stable extension contexts where available:
+
+- `GraphContextMenuAugmentationContext` for menu augmentation
+- `NodePresentationContext` for node presentation
 
 Default full-shell Avalonia host:
 
@@ -236,15 +250,22 @@ Use this path when the host wants to keep the stock graph canvas, inspector, or 
 `IGraphEditorSession` is the public Phase 2 runtime root in `AsterGraph.Editor`.
 
 - `Commands`
-  - host-triggered mutations such as `AddNode`, `DeleteSelection`, `PanBy`, `ZoomAt`, `SaveWorkspace`, and `LoadWorkspace`
+  - host-triggered mutations such as `SetSelection`, `SetNodePositions`, `StartConnection`, `CompleteConnection`, `CancelPendingConnection`, `DeleteConnection`, `BreakConnectionsForPort`, `CenterViewOnNode`, `CenterViewAt`, `AddNode`, `DeleteSelection`, `PanBy`, `ZoomAt`, `SaveWorkspace`, and `LoadWorkspace`
 - `Queries`
-  - `CreateDocumentSnapshot`, selection/viewport/capability snapshots, node positions, and compatibility-target discovery
+  - `CreateDocumentSnapshot`, selection/viewport/capability snapshots, node positions, pending-connection state, DTO-based compatible-target discovery, and the retained compatibility query
 - `Events`
-  - document, selection, viewport, fragment, command, and recoverable-failure notifications
+  - document, selection, viewport, pending connection, fragment, command, and recoverable-failure notifications
 - `BeginMutation(...)`
   - coalesces runtime notifications until the mutation scope closes, which is useful when the host wants one planned batch instead of a stream of intermediate events
 
 `GraphEditorViewModel.Session` exposes the same runtime contract from the retained compatibility facade, so migrating hosts can adopt the new runtime API without discarding existing `GraphEditorViewModel` integrations first.
+
+Compatibility note:
+
+- `GraphEditorViewModel.Session` remains the staged migration bridge for existing hosts.
+- `GetCompatibleTargets(...)` remains available only for legacy MVVM-oriented callers.
+- New custom UI hosts should prefer `CreateSession(...)` plus ID/DTO-based commands and queries.
+- The same migration rule applies to extension seams: prefer stable context objects over raw `GraphEditorViewModel` / `NodeViewModel` access where the new overloads exist.
 
 ## Replaceable Services And Diagnostics
 

@@ -29,6 +29,7 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
             Height = node.Height,
             CornerRadius = new CornerRadius(nodeStyle.CornerRadius),
             BorderThickness = new Thickness(nodeStyle.BorderThickness),
+            Focusable = true,
         };
         AutomationProperties.SetName(border, $"{node.Title} node");
 
@@ -152,7 +153,16 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
                 return;
             }
 
+            border.Focus();
             context.BeginNodeDrag(context.Node, args);
+        };
+        border.KeyDown += (_, args) =>
+        {
+            if (args.Key == Key.Apps || (args.Key == Key.F10 && args.KeyModifiers.HasFlag(KeyModifiers.Shift)))
+            {
+                var menuArgs = new ContextRequestedEventArgs();
+                args.Handled = context.OpenNodeContextMenu(border, context.Node, menuArgs);
+            }
         };
         border.ContextRequested += (_, args) =>
         {

@@ -223,7 +223,7 @@ public sealed class GraphEditorInitializationTests
         session.Events.ViewportChanged += (_, args) => viewportChanged = args;
 
         var before = session.Queries.CreateDocumentSnapshot();
-        var compatibleTargets = session.Queries.GetCompatibleTargets(SourceNodeId, SourcePortId);
+        var compatibleTargets = session.Queries.GetCompatiblePortTargets(SourceNodeId, SourcePortId);
 
         using (session.BeginMutation("initialization-batch"))
         {
@@ -236,7 +236,7 @@ public sealed class GraphEditorInitializationTests
         Assert.IsAssignableFrom<IGraphEditorSession>(session);
         Assert.Equal("Initialization Test Graph", before.Title);
         Assert.Single(compatibleTargets);
-        Assert.Equal(TargetNodeId, compatibleTargets[0].Node.Id);
+        Assert.Equal(TargetNodeId, compatibleTargets[0].NodeId);
         Assert.Equal(before.Nodes.Count + 1, after.Nodes.Count);
         Assert.Equal(new[] { "nodes.add", "viewport.pan" }, commandIds);
         Assert.NotNull(viewportChanged);
@@ -373,6 +373,46 @@ public sealed class GraphEditorInitializationTests
 
         Assert.Same(editor, view.Editor);
         Assert.Equal(GraphEditorViewChromeMode.CanvasOnly, view.ChromeMode);
+    }
+
+    [AvaloniaFact]
+    public void CreateAvaloniaViewFactory_ForwardsDefaultBehaviorOptOutIntoFullShellCanvas()
+    {
+        var editor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
+        {
+            Document = CreateDocument(),
+            NodeCatalog = CreateCatalog(),
+            CompatibilityService = new RecordingCompatibilityService(),
+        });
+
+        var view = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOptions
+        {
+            Editor = editor,
+            EnableDefaultContextMenu = false,
+            EnableDefaultCommandShortcuts = false,
+        });
+        var window = new Window
+        {
+            Width = 1440,
+            Height = 900,
+            Content = view,
+        };
+        window.Show();
+
+        try
+        {
+            var canvas = view.FindControl<NodeCanvas>("PART_NodeCanvas");
+
+            Assert.NotNull(canvas);
+            Assert.False(view.EnableDefaultContextMenu);
+            Assert.False(view.EnableDefaultCommandShortcuts);
+            Assert.False(canvas.EnableDefaultContextMenu);
+            Assert.False(canvas.EnableDefaultCommandShortcuts);
+        }
+        finally
+        {
+            window.Close();
+        }
     }
 
     [AvaloniaFact]

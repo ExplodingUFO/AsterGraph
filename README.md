@@ -98,11 +98,11 @@ New hosts should start from `CreateSession(...)` when they only need the editor 
 `AsterGraph.Editor` now exposes one public runtime contract rooted at `IGraphEditorSession`:
 
 - `Commands`
-  - host-triggered mutations such as `AddNode`, `PanBy`, `SaveWorkspace`, and `LoadWorkspace`
+  - host-triggered mutations such as `SetSelection`, `SetNodePositions`, connection lifecycle commands, viewport centering, `AddNode`, `PanBy`, `SaveWorkspace`, and `LoadWorkspace`
 - `Queries`
-  - document snapshots, selection/viewport/capability snapshots, node positions, and compatibility queries
+  - document snapshots, selection/viewport/capability snapshots, node positions, pending connection state, and DTO-based compatibility queries
 - `Events`
-  - document, selection, viewport, fragment, command, and recoverable-failure notifications
+  - document, selection, viewport, pending-connection, fragment, command, and recoverable-failure notifications
 - `BeginMutation(...)`
   - lightweight batching so hosts can coalesce event delivery around planned mutation groups
 
@@ -151,6 +151,17 @@ var inspection = session.Diagnostics.CaptureInspectionSnapshot();
 var recent = session.Diagnostics.GetRecentDiagnostics(20);
 ```
 
+Core runtime-first host interactions now include:
+
+- selection ownership through `Commands.SetSelection(...)`
+- node movement through `Commands.SetNodePositions(...)`
+- connection lifecycle through `Commands.StartConnection(...)`, `CompleteConnection(...)`, and `CancelPendingConnection()`
+- viewport ownership through `Commands.UpdateViewportSize(...)`, `CenterViewOnNode(...)`, and `CenterViewAt(...)`
+- pending connection observation through `Queries.GetPendingConnectionSnapshot()` and `Events.PendingConnectionChanged`
+- MVVM-free compatibility discovery through `Queries.GetCompatiblePortTargets(...)`
+
+`Queries.GetCompatibleTargets(...)` remains available only as a compatibility-oriented bridge for existing host code that still depends on view-model objects.
+
 ## Quick Start
 
 For first-time onboarding (package choice, private feed setup, install commands, and the minimum Avalonia host path), start with the [Quick Start guide](./docs/quick-start.md).
@@ -186,6 +197,7 @@ dotnet build avalonia-node-map.sln -t:Rebuild --no-restore -p:NoWarn= --nologo -
 # verify the packed package path and the project-reference host sample
 dotnet run --project tools/AsterGraph.PackageSmoke/AsterGraph.PackageSmoke.csproj -p:UsePackedAsterGraphPackages=true --nologo
 dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj --nologo
+dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj --nologo
 
 # keep the normal solution test gate green
 dotnet test avalonia-node-map.sln --no-restore --nologo -v minimal
@@ -246,6 +258,13 @@ Phase 4 now adds opt-in presenter replacement in `AsterGraph.Avalonia`:
   - replace mini-map UI while reusing editor-owned overview and viewport navigation APIs
 
 Stock presenters remain the zero-configuration default. Hosts only provide a presenter when they want to replace that surface.
+
+For host extension seams, prefer the newer stable context shapes over the raw MVVM graph when available:
+
+- menu augmentation should prefer `GraphContextMenuAugmentationContext`
+- node presentation should prefer `NodePresentationContext`
+
+The older `GraphEditorViewModel` / `NodeViewModel` seam roots remain only as compatibility bridges during migration.
 
 Minimal full-shell replacement shape:
 
@@ -351,6 +370,19 @@ Reference host sample:
   - `GraphEditorView.ChromeMode`
   - standalone `NodeCanvas`, `GraphInspectorView`, and `GraphMiniMap` composition
   - `EnableDefaultContextMenu` and `EnableDefaultCommandShortcuts`
+
+Repeatable scale validation:
+
+- `tools/AsterGraph.ScaleSmoke`
+- Run with:
+  - `dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj --nologo`
+- The tool emits stable `SCALE_*` markers for:
+  - large-graph setup size
+  - bulk selection
+  - connection delete/recreate flow
+  - drag/history/save/undo/redo dirty-state continuity
+  - viewport fitting
+  - inspection snapshot continuity
 
 ## Type Compatibility
 

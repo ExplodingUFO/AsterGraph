@@ -8,12 +8,23 @@ namespace AsterGraph.Editor.Menus;
 public interface IGraphContextMenuAugmentor
 {
     /// <summary>
+    /// 基于稳定宿主上下文构建最终菜单。
+    /// </summary>
+    /// <param name="context">菜单增强上下文。</param>
+    /// <returns>最终菜单项集合。</returns>
+#pragma warning disable CS0618
+    IReadOnlyList<MenuItemDescriptor> Augment(GraphContextMenuAugmentationContext context)
+        => Augment(context.CompatibilityEditor, context.Context, context.StockItems);
+#pragma warning restore CS0618
+
+    /// <summary>
     /// 基于默认菜单和当前上下文构建最终菜单。
     /// </summary>
     /// <param name="editor">当前编辑器视图模型。</param>
     /// <param name="context">当前右键菜单上下文。</param>
     /// <param name="stockItems">编辑器默认生成的菜单项。</param>
     /// <returns>最终菜单项集合；宿主通常应以 <paramref name="stockItems"/> 为基础追加自身业务项。</returns>
+    [Obsolete("Implement Augment(GraphContextMenuAugmentationContext) instead.")]
     IReadOnlyList<MenuItemDescriptor> Augment(
         GraphEditorViewModel editor,
         ContextMenuContext context,

@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: host-boundary-native-integration-and-scaling
-status: Ready to execute
-stopped_at: Milestone v1.1 initialized
-last_updated: "2026-04-03T00:00:00Z"
+status: Milestone complete
+stopped_at: Milestone v1.1 completed
+last_updated: "2026-04-03T12:00:00Z"
 progress:
   total_phases: 6
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  completed_phases: 6
+  total_plans: 18
+  completed_plans: 18
 ---
 
 # Project State
@@ -23,10 +23,10 @@ See: `.planning/PROJECT.md` (updated 2026-04-03)
 
 ## Current Position
 
-Phase: 07 (runtime host boundary completion) — NOT STARTED  
-Plan: —  
-Status: Roadmap created, ready for phase discussion/planning  
-Last activity: 2026-04-03 — Milestone v1.1 initialized and roadmap reset around host boundary, native integration, and scaling
+Phase: 12 (proof ring for hosts and large graphs) — COMPLETED  
+Plan: 03  
+Status: Milestone v1.1 implementation and proof ring completed  
+Last activity: 2026-04-03 — Completed phases 07-12, added final proof tooling, and closed the milestone validation loop
 
 ## Accumulated Context
 
@@ -45,6 +45,7 @@ New milestone decisions:
 - Treat full-shell shortcut routing, wheel behavior, focus, and keyboard menu behavior as host-integration requirements, not polish.
 - Prioritize graph interaction hot paths and state recomputation hot spots before speculative broader optimization.
 - Require proof-ring validation through tests, HostSample, PackageSmoke, and large-graph scenarios for this milestone.
+- Keep large-graph validation in a dedicated smoke-style harness so proof remains repeatable without making the unit test suite timing-fragile.
 
 ### Pending Todos
 
@@ -52,9 +53,9 @@ None captured yet.
 
 ### Blockers/Concerns
 
-- No current blocker in the main workspace.
-- The next milestone touches core runtime and Avalonia integration seams, so maintaining compatibility facades while shrinking concrete leakage is the main design constraint.
-- Large-graph performance work should be validated with repeatable scenarios rather than ad hoc manual feel checks.
+- No current blocker in the active worktree.
+- Phase 12 uncovered a `net8.0` runtime-XAML loading gap for sample/smoke tools; this was closed by adding `Avalonia.Markup.Xaml.Loader` to `AsterGraph.Avalonia`.
+- Future milestone work should preserve the new proof ring instead of replacing it with ad hoc spot checks.
 
 ### Quick Tasks Completed
 
@@ -65,5 +66,5 @@ None captured yet.
 ## Session Continuity
 
 Last session: 2026-04-03
-Stopped at: Milestone v1.1 initialized
+Stopped at: Milestone v1.1 completed
 Resume file: None

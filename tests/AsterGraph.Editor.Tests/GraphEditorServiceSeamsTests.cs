@@ -67,7 +67,7 @@ public sealed class GraphEditorServiceSeamsTests
         await editor.CopySelectionAsync();
         editor.ExportSelectionFragment();
         editor.Session.Commands.SaveWorkspace();
-        var compatibleTargets = editor.Session.Queries.GetCompatibleTargets("source-node", "out");
+        var compatibleTargets = editor.Session.Queries.GetCompatiblePortTargets("source-node", "out");
         var menu = editor.BuildContextMenu(new ContextMenuContext(ContextMenuTargetKind.Canvas, new GraphPoint(200, 120)));
 
         Assert.Equal("workspace://custom", editor.WorkspacePath);
@@ -77,6 +77,7 @@ public sealed class GraphEditorServiceSeamsTests
         Assert.Equal(1, fragmentWorkspace.SaveCalls);
         Assert.Equal(1, workspace.SaveCalls);
         Assert.Single(compatibleTargets);
+        Assert.Equal("target-node", compatibleTargets[0].NodeId);
         Assert.True(compatibility.EvaluateCalls > 0);
         Assert.NotEmpty(menu);
         Assert.Collection(

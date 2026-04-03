@@ -24,6 +24,16 @@ public sealed record AsterGraphAvaloniaViewOptions
     public GraphEditorViewChromeMode ChromeMode { get; init; } = GraphEditorViewChromeMode.Default;
 
     /// <summary>
+    /// 是否启用默认内置上下文菜单。
+    /// </summary>
+    public bool EnableDefaultContextMenu { get; init; } = true;
+
+    /// <summary>
+    /// 是否启用默认内置命令快捷键。
+    /// </summary>
+    public bool EnableDefaultCommandShortcuts { get; init; } = true;
+
+    /// <summary>
     /// 可选的 Avalonia 展示器替换配置。
     /// </summary>
     public AsterGraphPresentationOptions? Presentation { get; init; }

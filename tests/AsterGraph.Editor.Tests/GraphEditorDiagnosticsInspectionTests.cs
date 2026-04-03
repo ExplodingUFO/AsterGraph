@@ -102,6 +102,58 @@ public sealed class GraphEditorDiagnosticsInspectionTests
         Assert.DoesNotContain(recent, diagnostic => diagnostic.Code == "workspace.save.failed");
     }
 
+    [Fact]
+    public void AsterGraphEditorFactory_CreateSession_PendingConnectionFlowsIntoInspectionSnapshot()
+    {
+        var harness = CreateHarness();
+        var session = CreateSession(harness);
+        var pendingSnapshots = new List<GraphEditorPendingConnectionSnapshot>();
+
+        session.Events.PendingConnectionChanged += (_, args) => pendingSnapshots.Add(args.PendingConnection);
+        session.Commands.StartConnection(SourceNodeId, SourcePortId);
+
+        var inspection = session.Diagnostics.CaptureInspectionSnapshot();
+
+        Assert.Single(pendingSnapshots);
+        Assert.True(pendingSnapshots[0].HasPendingConnection);
+        Assert.Equal(SourceNodeId, pendingSnapshots[0].SourceNodeId);
+        Assert.Equal(SourcePortId, pendingSnapshots[0].SourcePortId);
+        Assert.True(inspection.PendingConnection.HasPendingConnection);
+        Assert.Equal(SourceNodeId, inspection.PendingConnection.SourceNodeId);
+        Assert.Equal(SourcePortId, inspection.PendingConnection.SourcePortId);
+    }
+
+    [Fact]
+    public void AsterGraphEditorFactory_CreateSession_PendingConnectionParity_HoldsAcrossCancelAndBatchedComplete()
+    {
+        var harness = CreateHarness();
+        var session = CreateSession(harness);
+        var pendingSnapshots = new List<GraphEditorPendingConnectionSnapshot>();
+
+        session.Events.PendingConnectionChanged += (_, args) => pendingSnapshots.Add(args.PendingConnection);
+
+        session.Commands.StartConnection(SourceNodeId, SourcePortId);
+        session.Commands.CancelPendingConnection();
+
+        var afterCancel = session.Diagnostics.CaptureInspectionSnapshot();
+        Assert.Equal(2, pendingSnapshots.Count);
+        Assert.True(pendingSnapshots[0].HasPendingConnection);
+        Assert.False(pendingSnapshots[1].HasPendingConnection);
+        Assert.False(afterCancel.PendingConnection.HasPendingConnection);
+
+        pendingSnapshots.Clear();
+
+        using (session.BeginMutation("pending-batch"))
+        {
+            session.Commands.StartConnection(SourceNodeId, SourcePortId);
+            session.Commands.CompleteConnection(TargetNodeId, TargetPortId);
+        }
+
+        var afterBatch = session.Diagnostics.CaptureInspectionSnapshot();
+        Assert.Empty(pendingSnapshots);
+        Assert.False(afterBatch.PendingConnection.HasPendingConnection);
+    }
+
     private static void SelectSourceNode(GraphEditorViewModel editor)
         => editor.SelectSingleNode(Assert.Single(editor.Nodes, node => node.Id == SourceNodeId), updateStatus: false);
 
