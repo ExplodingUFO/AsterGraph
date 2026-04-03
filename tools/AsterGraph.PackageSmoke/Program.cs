@@ -164,6 +164,13 @@ var factoryView = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaVie
     Editor = factoryEditor,
     ChromeMode = GraphEditorViewChromeMode.CanvasOnly,
 });
+var optOutFullShell = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOptions
+{
+    Editor = factoryEditor,
+    ChromeMode = GraphEditorViewChromeMode.Default,
+    EnableDefaultContextMenu = false,
+    EnableDefaultCommandShortcuts = false,
+});
 
 PrintEditorMarker("LEGACY_EDITOR_OK", legacyEditor, sourceNodeId);
 PrintViewMarker("LEGACY_VIEW_OK", legacyView);
@@ -175,7 +182,10 @@ var fullShellInspector = factoryView.FindControl<GraphInspectorView>("PART_Inspe
     ?? throw new InvalidOperationException("Missing PART_InspectorSurface.");
 var fullShellMiniMap = factoryView.FindControl<GraphMiniMap>("PART_MiniMapSurface")
     ?? throw new InvalidOperationException("Missing PART_MiniMapSurface.");
+var optOutFullShellCanvas = optOutFullShell.FindControl<NodeCanvas>("PART_NodeCanvas")
+    ?? throw new InvalidOperationException("Missing PART_NodeCanvas on opt-out full shell.");
 Console.WriteLine($"SURFACE_FULLSHELL_OK:{ReferenceEquals(factoryEditor, fullShellInspector.Editor)}:{ReferenceEquals(factoryEditor, fullShellMiniMap.ViewModel)}");
+Console.WriteLine($"SURFACE_FULLSHELL_OPTOUT_OK:{optOutFullShell.EnableDefaultContextMenu}:{optOutFullShell.EnableDefaultCommandShortcuts}:{optOutFullShellCanvas.EnableDefaultContextMenu}:{optOutFullShellCanvas.EnableDefaultCommandShortcuts}");
 
 var standaloneCanvas = AsterGraphCanvasViewFactory.Create(new AsterGraphCanvasViewOptions
 {

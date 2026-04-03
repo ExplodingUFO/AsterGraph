@@ -258,6 +258,13 @@ Phase 4 now adds opt-in presenter replacement in `AsterGraph.Avalonia`:
 
 Stock presenters remain the zero-configuration default. Hosts only provide a presenter when they want to replace that surface.
 
+For host extension seams, prefer the newer stable context shapes over the raw MVVM graph when available:
+
+- menu augmentation should prefer `GraphContextMenuAugmentationContext`
+- node presentation should prefer `NodePresentationContext`
+
+The older `GraphEditorViewModel` / `NodeViewModel` seam roots remain only as compatibility bridges during migration.
+
 Minimal full-shell replacement shape:
 
 ```csharp

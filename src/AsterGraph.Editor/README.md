@@ -46,6 +46,13 @@ Use this package together with `AsterGraph.Avalonia` when the host embeds the de
 
 The MVVM-typed compatibility query path remains available for legacy integrations, but new host code should treat it as compatibility-only rather than the canonical runtime surface.
 
+The same guidance now applies to host extension seams:
+
+- prefer `GraphContextMenuAugmentationContext` over taking `GraphEditorViewModel` directly
+- prefer `NodePresentationContext` over taking `NodeViewModel` directly
+
+The older MVVM-rooted extension methods remain available only as migration shims.
+
 Reference material:
 
 - [Host Integration Guide](https://github.com/ExplodingUFO/AsterGraph/blob/master/docs/host-integration.md)

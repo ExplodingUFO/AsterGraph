@@ -165,6 +165,11 @@ var pending = session.Queries.GetPendingConnectionSnapshot();
 var targets = session.Queries.GetCompatiblePortTargets("source-node", "result");
 ```
 
+New host code should also prefer the newer stable extension contexts where available:
+
+- `GraphContextMenuAugmentationContext` for menu augmentation
+- `NodePresentationContext` for node presentation
+
 Default full-shell Avalonia host:
 
 1. Build or register your `INodeCatalog`.
@@ -260,6 +265,7 @@ Compatibility note:
 - `GraphEditorViewModel.Session` remains the staged migration bridge for existing hosts.
 - `GetCompatibleTargets(...)` remains available only for legacy MVVM-oriented callers.
 - New custom UI hosts should prefer `CreateSession(...)` plus ID/DTO-based commands and queries.
+- The same migration rule applies to extension seams: prefer stable context objects over raw `GraphEditorViewModel` / `NodeViewModel` access where the new overloads exist.
 
 ## Replaceable Services And Diagnostics
 

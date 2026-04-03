@@ -189,6 +189,13 @@ var view = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOption
     Editor = editor,
     ChromeMode = GraphEditorViewChromeMode.Default,
 });
+var optOutView = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOptions
+{
+    Editor = editor,
+    ChromeMode = GraphEditorViewChromeMode.Default,
+    EnableDefaultContextMenu = false,
+    EnableDefaultCommandShortcuts = false,
+});
 var defaultHeaderVisible = FindRequiredControl<Border>(view, "PART_HeaderChrome").IsVisible;
 var defaultLibraryVisible = FindRequiredControl<Border>(view, "PART_LibraryChrome").IsVisible;
 var defaultInspectorVisible = FindRequiredControl<Border>(view, "PART_InspectorChrome").IsVisible;
@@ -199,6 +206,7 @@ var canvasOnlyLibraryHidden = !FindRequiredControl<Border>(view, "PART_LibraryCh
 var canvasOnlyInspectorHidden = !FindRequiredControl<Border>(view, "PART_InspectorChrome").IsVisible;
 var canvasOnlyStatusHidden = !FindRequiredControl<Border>(view, "PART_StatusChrome").IsVisible;
 var canvasStillExists = FindRequiredControl<NodeCanvas>(view, "PART_NodeCanvas") is not null;
+var optOutCanvas = FindRequiredControl<NodeCanvas>(optOutView, "PART_NodeCanvas");
 var shellInspectorSurface = FindRequiredControl<GraphInspectorView>(view, "PART_InspectorSurface");
 var shellMiniMapSurface = FindRequiredControl<GraphMiniMap>(view, "PART_MiniMapSurface");
 var customNodePresenter = new HostSampleNodeVisualPresenter();
@@ -282,6 +290,7 @@ Console.WriteLine($"ChromeMode default sections visible: header={defaultHeaderVi
 Console.WriteLine($"ChromeMode switched to: {view.ChromeMode}");
 Console.WriteLine($"ChromeMode canvas-only sections hidden: header={canvasOnlyHeaderHidden}, library={canvasOnlyLibraryHidden}, inspector={canvasOnlyInspectorHidden}, status={canvasOnlyStatusHidden}");
 Console.WriteLine($"ChromeMode canvas-only keeps canvas: {canvasStillExists}");
+Console.WriteLine($"Full shell opt-out: menu={optOutView.EnableDefaultContextMenu}, shortcuts={optOutView.EnableDefaultCommandShortcuts}, canvasMenu={optOutCanvas.EnableDefaultContextMenu}, canvasShortcuts={optOutCanvas.EnableDefaultCommandShortcuts}");
 Console.WriteLine($"Full shell embeds standalone surfaces: inspector={ReferenceEquals(editor, shellInspectorSurface.Editor)}, minimap={ReferenceEquals(editor, shellMiniMapSurface.ViewModel)}");
 Console.WriteLine($"Standalone surfaces share editor: canvas={ReferenceEquals(editor, standaloneCanvas.ViewModel)}, inspector={ReferenceEquals(editor, standaloneInspector.Editor)}, minimap={ReferenceEquals(editor, standaloneMiniMap.ViewModel)}");
 Console.WriteLine($"Standalone canvas defaults: menu={standaloneCanvas.EnableDefaultContextMenu}, shortcuts={standaloneCanvas.EnableDefaultCommandShortcuts}");

@@ -376,6 +376,46 @@ public sealed class GraphEditorInitializationTests
     }
 
     [AvaloniaFact]
+    public void CreateAvaloniaViewFactory_ForwardsDefaultBehaviorOptOutIntoFullShellCanvas()
+    {
+        var editor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
+        {
+            Document = CreateDocument(),
+            NodeCatalog = CreateCatalog(),
+            CompatibilityService = new RecordingCompatibilityService(),
+        });
+
+        var view = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOptions
+        {
+            Editor = editor,
+            EnableDefaultContextMenu = false,
+            EnableDefaultCommandShortcuts = false,
+        });
+        var window = new Window
+        {
+            Width = 1440,
+            Height = 900,
+            Content = view,
+        };
+        window.Show();
+
+        try
+        {
+            var canvas = view.FindControl<NodeCanvas>("PART_NodeCanvas");
+
+            Assert.NotNull(canvas);
+            Assert.False(view.EnableDefaultContextMenu);
+            Assert.False(view.EnableDefaultCommandShortcuts);
+            Assert.False(canvas.EnableDefaultContextMenu);
+            Assert.False(canvas.EnableDefaultCommandShortcuts);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
     public void DirectGraphEditorViewConstruction_ForwardsPresentationIntoEmbeddedSurfaces()
     {
         var editor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions

@@ -62,6 +62,18 @@ public partial class GraphEditorView : UserControl
         AvaloniaProperty.Register<GraphEditorView, bool>(nameof(IsStatusChromeVisible), true);
 
     /// <summary>
+    /// 是否启用完整外壳的默认内置上下文菜单。
+    /// </summary>
+    public static readonly StyledProperty<bool> EnableDefaultContextMenuProperty =
+        AvaloniaProperty.Register<GraphEditorView, bool>(nameof(EnableDefaultContextMenu), true);
+
+    /// <summary>
+    /// 是否启用完整外壳的默认内置命令快捷键。
+    /// </summary>
+    public static readonly StyledProperty<bool> EnableDefaultCommandShortcutsProperty =
+        AvaloniaProperty.Register<GraphEditorView, bool>(nameof(EnableDefaultCommandShortcuts), true);
+
+    /// <summary>
     /// 可选的 Avalonia 展示器替换配置依赖属性。
     /// </summary>
     public static readonly StyledProperty<AsterGraphPresentationOptions?> PresentationProperty =
@@ -156,6 +168,24 @@ public partial class GraphEditorView : UserControl
     }
 
     /// <summary>
+    /// 是否启用完整外壳的默认内置上下文菜单。
+    /// </summary>
+    public bool EnableDefaultContextMenu
+    {
+        get => GetValue(EnableDefaultContextMenuProperty);
+        set => SetValue(EnableDefaultContextMenuProperty, value);
+    }
+
+    /// <summary>
+    /// 是否启用完整外壳的默认内置命令快捷键。
+    /// </summary>
+    public bool EnableDefaultCommandShortcuts
+    {
+        get => GetValue(EnableDefaultCommandShortcutsProperty);
+        set => SetValue(EnableDefaultCommandShortcutsProperty, value);
+    }
+
+    /// <summary>
     /// 当前宿主提供的 Avalonia 展示器替换配置。
     /// </summary>
     public AsterGraphPresentationOptions? Presentation
@@ -186,6 +216,11 @@ public partial class GraphEditorView : UserControl
             || change.Property == IsStatusChromeVisibleProperty)
         {
             ApplyChromeMode(ChromeMode);
+        }
+        else if (change.Property == EnableDefaultContextMenuProperty
+            || change.Property == EnableDefaultCommandShortcutsProperty)
+        {
+            ApplyCanvasBehaviorOptions();
         }
         else if (change.Property == PresentationProperty)
         {
@@ -223,6 +258,7 @@ public partial class GraphEditorView : UserControl
         _defaultShellRowSpacing = _shellGrid?.RowSpacing ?? 0;
         _defaultShellColumnSpacing = _shellGrid?.ColumnSpacing ?? 0;
         ApplyChromeMode(ChromeMode);
+        ApplyCanvasBehaviorOptions();
         ApplyPresentationOptions(Presentation);
     }
 
@@ -293,6 +329,17 @@ public partial class GraphEditorView : UserControl
         }
     }
 
+    private void ApplyCanvasBehaviorOptions()
+    {
+        if (_nodeCanvas is null)
+        {
+            return;
+        }
+
+        _nodeCanvas.EnableDefaultContextMenu = EnableDefaultContextMenu;
+        _nodeCanvas.EnableDefaultCommandShortcuts = EnableDefaultCommandShortcuts;
+    }
+
     private void ApplyPresentationOptions(AsterGraphPresentationOptions? presentation)
     {
         if (_nodeCanvas is not null)
@@ -314,7 +361,7 @@ public partial class GraphEditorView : UserControl
 
     private void HandleKeyDown(object? sender, KeyEventArgs args)
     {
-        if (Editor is null || ShortcutBelongsToInputControl(args.Source))
+        if (Editor is null || !EnableDefaultCommandShortcuts || ShortcutBelongsToInputControl(args.Source))
         {
             return;
         }
