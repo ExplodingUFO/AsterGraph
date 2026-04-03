@@ -232,11 +232,65 @@ public sealed class NodeCanvasStandaloneTests
         }
     }
 
+    [AvaloniaFact]
+    public void WheelViewportGestures_CanBeDisabledForHostCooperativeScrolling()
+    {
+        var editor = CreateEditor();
+        var (window, canvas) = CreateStandaloneCanvasWindow(editor);
+        var args = new PointerWheelEventArgs(
+            canvas,
+            null!,
+            canvas,
+            new Point(24, 24),
+            0UL,
+            new PointerPointProperties(),
+            KeyModifiers.None,
+            new Vector(0, 1));
+
+        try
+        {
+            canvas.EnableDefaultWheelViewportGestures = false;
+            InvokeCanvasWheelChanged(canvas, args);
+
+            Assert.False(args.Handled);
+            Assert.Equal(110, editor.PanX);
+            Assert.Equal(96, editor.PanY);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
+    public void AltLeftDragPanning_Property_CanBeDisabled()
+    {
+        var editor = CreateEditor();
+        var (window, canvas) = CreateStandaloneCanvasWindow(editor);
+
+        try
+        {
+            Assert.True(canvas.EnableAltLeftDragPanning);
+            canvas.EnableAltLeftDragPanning = false;
+            Assert.False(canvas.EnableAltLeftDragPanning);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
     private static void InvokeCanvasContextRequested(NodeCanvas canvas, ContextRequestedEventArgs args)
         => InvokeCanvasHandler("HandleCanvasContextRequested", canvas, args);
 
     private static void InvokeCanvasKeyDown(NodeCanvas canvas, KeyEventArgs args)
         => InvokeCanvasHandler("HandleCanvasKeyDown", canvas, args);
+
+    private static void InvokeCanvasPointerPressed(NodeCanvas canvas, PointerPressedEventArgs args)
+        => InvokeCanvasHandler("HandlePointerPressed", canvas, args);
+
+    private static void InvokeCanvasWheelChanged(NodeCanvas canvas, PointerWheelEventArgs args)
+        => InvokeCanvasHandler("HandlePointerWheelChanged", canvas, args);
 
     private static void InvokeCanvasHandler(string methodName, NodeCanvas canvas, object args)
     {

@@ -74,6 +74,18 @@ public partial class GraphEditorView : UserControl
         AvaloniaProperty.Register<GraphEditorView, bool>(nameof(EnableDefaultCommandShortcuts), true);
 
     /// <summary>
+    /// 是否启用完整外壳的默认滚轮缩放/平移手势。
+    /// </summary>
+    public static readonly StyledProperty<bool> EnableDefaultWheelViewportGesturesProperty =
+        AvaloniaProperty.Register<GraphEditorView, bool>(nameof(EnableDefaultWheelViewportGestures), true);
+
+    /// <summary>
+    /// 是否启用完整外壳的 Alt+左键拖拽平移。
+    /// </summary>
+    public static readonly StyledProperty<bool> EnableAltLeftDragPanningProperty =
+        AvaloniaProperty.Register<GraphEditorView, bool>(nameof(EnableAltLeftDragPanning), true);
+
+    /// <summary>
     /// 可选的 Avalonia 展示器替换配置依赖属性。
     /// </summary>
     public static readonly StyledProperty<AsterGraphPresentationOptions?> PresentationProperty =
@@ -186,6 +198,24 @@ public partial class GraphEditorView : UserControl
     }
 
     /// <summary>
+    /// 是否启用完整外壳的默认滚轮缩放/平移手势。
+    /// </summary>
+    public bool EnableDefaultWheelViewportGestures
+    {
+        get => GetValue(EnableDefaultWheelViewportGesturesProperty);
+        set => SetValue(EnableDefaultWheelViewportGesturesProperty, value);
+    }
+
+    /// <summary>
+    /// 是否启用完整外壳的 Alt+左键拖拽平移。
+    /// </summary>
+    public bool EnableAltLeftDragPanning
+    {
+        get => GetValue(EnableAltLeftDragPanningProperty);
+        set => SetValue(EnableAltLeftDragPanningProperty, value);
+    }
+
+    /// <summary>
     /// 当前宿主提供的 Avalonia 展示器替换配置。
     /// </summary>
     public AsterGraphPresentationOptions? Presentation
@@ -218,7 +248,9 @@ public partial class GraphEditorView : UserControl
             ApplyChromeMode(ChromeMode);
         }
         else if (change.Property == EnableDefaultContextMenuProperty
-            || change.Property == EnableDefaultCommandShortcutsProperty)
+            || change.Property == EnableDefaultCommandShortcutsProperty
+            || change.Property == EnableDefaultWheelViewportGesturesProperty
+            || change.Property == EnableAltLeftDragPanningProperty)
         {
             ApplyCanvasBehaviorOptions();
         }
@@ -338,6 +370,8 @@ public partial class GraphEditorView : UserControl
 
         _nodeCanvas.EnableDefaultContextMenu = EnableDefaultContextMenu;
         _nodeCanvas.EnableDefaultCommandShortcuts = EnableDefaultCommandShortcuts;
+        _nodeCanvas.EnableDefaultWheelViewportGestures = EnableDefaultWheelViewportGestures;
+        _nodeCanvas.EnableAltLeftDragPanning = EnableAltLeftDragPanning;
     }
 
     private void ApplyPresentationOptions(AsterGraphPresentationOptions? presentation)
