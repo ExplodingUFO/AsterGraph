@@ -37,7 +37,7 @@ namespace AsterGraph.Editor.ViewModels;
 /// 新宿主应优先考虑 <see cref="AsterGraphEditorFactory"/> 和 <see cref="AsterGraphEditorOptions"/>，
 /// 但本类型在当前迁移窗口内不会因为新增工厂入口而被移除或标记为过时。
 /// </remarks>
-public sealed partial class GraphEditorViewModel : ObservableObject, IGraphContextMenuHost
+public sealed partial class GraphEditorViewModel : ObservableObject, IGraphContextMenuHost, IGraphEditorSessionHost
 {
     private const double DefaultZoom = 0.88;
     private const double DefaultPanX = 110;
@@ -613,6 +613,10 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// 当片段导入并粘贴成功后触发。
     /// </summary>
     public event EventHandler<GraphEditorFragmentEventArgs>? FragmentImported;
+
+    internal event EventHandler<GraphEditorRecoverableFailureEventArgs>? RecoverableFailureRaised;
+
+    internal event Action<GraphEditorDiagnostic>? DiagnosticPublished;
 
     /// <summary>
     /// 当待完成连线状态发生变化时触发。
@@ -2892,13 +2896,9 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         => SetStatus(status.Key, status.Fallback, status.Arguments);
 
     private void PublishRecoverableFailure(string code, string operation, string message, Exception? exception = null)
-    {
-        if (Session is GraphEditorSession runtimeSession)
-        {
-            runtimeSession.PublishRecoverableFailure(
-                new GraphEditorRecoverableFailureEventArgs(code, operation, message, exception));
-        }
-    }
+        => RecoverableFailureRaised?.Invoke(
+            this,
+            new GraphEditorRecoverableFailureEventArgs(code, operation, message, exception));
 
     private void PublishRuntimeDiagnostic(
         string code,
@@ -2906,12 +2906,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         string message,
         GraphEditorDiagnosticSeverity severity,
         Exception? exception = null)
-    {
-        if (Session is GraphEditorSession runtimeSession)
-        {
-            runtimeSession.PublishDiagnostic(new GraphEditorDiagnostic(code, operation, message, severity, exception));
-        }
-    }
+        => DiagnosticPublished?.Invoke(new GraphEditorDiagnostic(code, operation, message, severity, exception));
 
     private string CreateNodeId(string templateKey)
         => CreateUniqueId(Nodes.Select(node => node.Id), $"{templateKey}-");
@@ -3422,4 +3417,142 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             ? StatusText("editor.status.parameter.updatedSingle", "Updated {0} / {1}.", SelectedNode!.Title, parameter.DisplayName)
             : StatusText("editor.status.parameter.updatedMultiple", "Updated {0} nodes / {1}.", SelectedNodes.Count, parameter.DisplayName));
     }
+
+    string IGraphEditorSessionHost.CurrentStatusMessage => StatusMessage;
+
+    event EventHandler<GraphEditorDocumentChangedEventArgs>? IGraphEditorSessionHost.DocumentChanged
+    {
+        add => DocumentChanged += value;
+        remove => DocumentChanged -= value;
+    }
+
+    event EventHandler<GraphEditorSelectionChangedEventArgs>? IGraphEditorSessionHost.SelectionChanged
+    {
+        add => SelectionChanged += value;
+        remove => SelectionChanged -= value;
+    }
+
+    event EventHandler<GraphEditorViewportChangedEventArgs>? IGraphEditorSessionHost.ViewportChanged
+    {
+        add => ViewportChanged += value;
+        remove => ViewportChanged -= value;
+    }
+
+    event EventHandler<GraphEditorFragmentEventArgs>? IGraphEditorSessionHost.FragmentExported
+    {
+        add => FragmentExported += value;
+        remove => FragmentExported -= value;
+    }
+
+    event EventHandler<GraphEditorFragmentEventArgs>? IGraphEditorSessionHost.FragmentImported
+    {
+        add => FragmentImported += value;
+        remove => FragmentImported -= value;
+    }
+
+    event EventHandler<GraphEditorPendingConnectionChangedEventArgs>? IGraphEditorSessionHost.PendingConnectionChanged
+    {
+        add => PendingConnectionChanged += value;
+        remove => PendingConnectionChanged -= value;
+    }
+
+    event EventHandler<GraphEditorRecoverableFailureEventArgs>? IGraphEditorSessionHost.RecoverableFailureRaised
+    {
+        add => RecoverableFailureRaised += value;
+        remove => RecoverableFailureRaised -= value;
+    }
+
+    event Action<GraphEditorDiagnostic>? IGraphEditorSessionHost.DiagnosticPublished
+    {
+        add => DiagnosticPublished += value;
+        remove => DiagnosticPublished -= value;
+    }
+
+    void IGraphEditorSessionHost.SetSelection(IReadOnlyList<string> nodeIds, string? primaryNodeId, bool updateStatus)
+    {
+        var selectedNodes = nodeIds
+            .Distinct(StringComparer.Ordinal)
+            .Select(FindNode)
+            .OfType<NodeViewModel>()
+            .ToList();
+        var primaryNode = !string.IsNullOrWhiteSpace(primaryNodeId)
+            ? selectedNodes.FirstOrDefault(node => string.Equals(node.Id, primaryNodeId, StringComparison.Ordinal))
+            : null;
+
+        SetSelection(
+            selectedNodes,
+            primaryNode,
+            updateStatus
+                ? $"Selected {selectedNodes.Count} node{(selectedNodes.Count == 1 ? string.Empty : "s")}."
+                : null);
+    }
+
+    void IGraphEditorSessionHost.AddNode(NodeDefinitionId definitionId, GraphPoint? preferredWorldPosition)
+    {
+        var template = NodeTemplates.FirstOrDefault(candidate => candidate.Definition.Id == definitionId)
+            ?? throw new InvalidOperationException($"Node definition '{definitionId}' is not registered in the current editor catalog.");
+        AddNode(template, preferredWorldPosition);
+    }
+
+    void IGraphEditorSessionHost.CompleteConnection(string targetNodeId, string targetPortId)
+    {
+        if (PendingSourceNode is null || PendingSourcePort is null)
+        {
+            return;
+        }
+
+        ConnectPorts(PendingSourceNode.Id, PendingSourcePort.Id, targetNodeId, targetPortId);
+    }
+
+    void IGraphEditorSessionHost.CancelPendingConnection()
+        => CancelPendingConnection();
+
+    void IGraphEditorSessionHost.SetNodePositions(IReadOnlyList<NodePositionSnapshot> positions, bool updateStatus)
+        => SetNodePositions(positions, updateStatus);
+
+    void IGraphEditorSessionHost.FitToViewport(bool updateStatus)
+        => FitToViewport(ViewportWidth, ViewportHeight, updateStatus);
+
+    GraphEditorSelectionSnapshot IGraphEditorSessionHost.GetSelectionSnapshot()
+        => new(SelectedNodes.Select(node => node.Id).ToList(), SelectedNode?.Id);
+
+    GraphEditorViewportSnapshot IGraphEditorSessionHost.GetViewportSnapshot()
+        => new(Zoom, PanX, PanY, ViewportWidth, ViewportHeight);
+
+    GraphEditorCapabilitySnapshot IGraphEditorSessionHost.GetCapabilitySnapshot()
+        => new(
+            CanUndo,
+            CanRedo,
+            CanCopySelection,
+            CanPaste,
+            CanSaveWorkspace,
+            CanLoadWorkspace)
+        {
+            CanSetSelection = true,
+            CanMoveNodes = CommandPermissions.Nodes.AllowMove,
+            CanCreateConnections = CommandPermissions.Connections.AllowCreate,
+            CanDeleteConnections = CommandPermissions.Connections.AllowDelete,
+            CanBreakConnections = CommandPermissions.Connections.AllowDisconnect,
+            CanUpdateViewport = true,
+            CanFitToViewport = Nodes.Count > 0 && ViewportWidth > 0 && ViewportHeight > 0,
+            CanCenterViewport = ViewportWidth > 0 && ViewportHeight > 0,
+        };
+
+    GraphEditorPendingConnectionSnapshot IGraphEditorSessionHost.GetPendingConnectionSnapshot()
+        => GraphEditorPendingConnectionSnapshot.Create(
+            HasPendingConnection,
+            PendingSourceNode?.Id,
+            PendingSourcePort?.Id);
+
+    IReadOnlyList<GraphEditorCompatiblePortTargetSnapshot> IGraphEditorSessionHost.GetCompatiblePortTargets(string sourceNodeId, string sourcePortId)
+        => GetCompatibleTargets(sourceNodeId, sourcePortId)
+            .Select(target => new GraphEditorCompatiblePortTargetSnapshot(
+                target.Node.Id,
+                target.Node.Title,
+                target.Port.Id,
+                target.Port.Label,
+                target.Port.TypeId,
+                target.Port.AccentHex,
+                target.Compatibility))
+            .ToList();
 }

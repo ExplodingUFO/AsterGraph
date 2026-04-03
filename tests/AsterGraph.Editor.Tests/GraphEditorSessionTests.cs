@@ -48,6 +48,16 @@ public sealed class GraphEditorSessionTests
     }
 
     [Fact]
+    public void AsterGraphEditorFactory_CreateSession_NoLongerStoresGraphEditorViewModelAsItsRuntimeStateOwner()
+    {
+        var session = AsterGraphEditorFactory.CreateSession(CreateOptions(new NodeDefinitionId("tests.session.kernel-owner")));
+
+        Assert.DoesNotContain(
+            session.GetType().GetFields(BindingFlags.Instance | BindingFlags.NonPublic),
+            field => field.FieldType == typeof(GraphEditorViewModel));
+    }
+
+    [Fact]
     public void IGraphEditorCommands_BeginConnection_DefaultShimMatchesStartConnectionBehavior()
     {
         var definitionId = new NodeDefinitionId("tests.session.begin-shim");

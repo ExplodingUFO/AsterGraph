@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Reflection;
 using Avalonia.Controls;
 using AsterGraph.Abstractions.Compatibility;
 using AsterGraph.Abstractions.Definitions;
@@ -355,8 +356,13 @@ session.Commands.SaveWorkspace();
 
 var sessionInspection = session.Diagnostics.CaptureInspectionSnapshot();
 var sessionRecentDiagnostics = session.Diagnostics.GetRecentDiagnostics(10);
+var runtimeSessionIsKernelFirst = !session
+    .GetType()
+    .GetFields(BindingFlags.Instance | BindingFlags.NonPublic)
+    .Any(field => field.FieldType == typeof(GraphEditorViewModel));
 Console.WriteLine($"SESSION_FACTORY_OK:{session.Queries.CreateDocumentSnapshot().Nodes.Count}:{string.Join(",", commandIds)}");
 Console.WriteLine($"SESSION_EVENTS_OK:{documentChanges}:{viewportChanges}:{failureCode ?? "<none>"}");
+Console.WriteLine($"KERNEL_SESSION_OK:{runtimeSessionIsKernelFirst}");
 Console.WriteLine($"RUNTIME_SELECTION_OK:{session.Queries.GetSelectionSnapshot().PrimarySelectedNodeId == targetNodeId}");
 Console.WriteLine($"RUNTIME_CONNECTION_OK:{sessionInspection.Document.Connections.Count}");
 Console.WriteLine($"RUNTIME_PENDING_EVENT_OK:{pendingConnectionChanges > 0}");

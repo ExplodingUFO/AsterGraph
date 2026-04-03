@@ -1,3 +1,6 @@
+using AsterGraph.Abstractions.Styling;
+using AsterGraph.Editor.Configuration;
+using AsterGraph.Editor.Kernel;
 using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.Services;
 using AsterGraph.Editor.ViewModels;
@@ -20,6 +23,53 @@ public static class AsterGraphEditorFactory
     /// <returns>新的图编辑器视图模型。</returns>
     public static GraphEditorViewModel Create(AsterGraphEditorOptions options)
     {
+        var resolved = Resolve(options);
+
+        var editor = new GraphEditorViewModel(
+            resolved.Options.Document!,
+            resolved.Options.NodeCatalog!,
+            resolved.Options.CompatibilityService!,
+            resolved.WorkspaceService,
+            resolved.FragmentWorkspaceService,
+            resolved.StyleOptions,
+            resolved.BehaviorOptions,
+            resolved.FragmentLibraryService,
+            resolved.Options.ContextMenuAugmentor,
+            resolved.Options.NodePresentationProvider,
+            resolved.Options.LocalizationProvider,
+            resolved.ClipboardPayloadSerializer,
+            resolved.Options.DiagnosticsSink);
+
+        if (editor.Session is GraphEditorSession runtimeSession)
+        {
+            runtimeSession.ConfigureInstrumentation(resolved.Options.Instrumentation);
+        }
+
+        return editor;
+    }
+
+    /// <summary>
+    /// 使用宿主提供的选项创建一个 <see cref="IGraphEditorSession"/>。
+    /// </summary>
+    /// <param name="options">宿主组合选项。</param>
+    /// <returns>新的图编辑器运行时会话。</returns>
+    public static IGraphEditorSession CreateSession(AsterGraphEditorOptions options)
+    {
+        var resolved = Resolve(options);
+        var kernel = new GraphEditorKernel(
+            resolved.Options.Document!,
+            resolved.Options.NodeCatalog!,
+            resolved.Options.CompatibilityService!,
+            resolved.WorkspaceService,
+            resolved.StyleOptions,
+            resolved.BehaviorOptions);
+        var session = new GraphEditorSession(kernel, resolved.Options.DiagnosticsSink);
+        session.ConfigureInstrumentation(resolved.Options.Instrumentation);
+        return session;
+    }
+
+    private static ResolvedEditorOptions Resolve(AsterGraphEditorOptions options)
+    {
         ArgumentNullException.ThrowIfNull(options);
         ArgumentNullException.ThrowIfNull(options.Document);
         ArgumentNullException.ThrowIfNull(options.NodeCatalog);
@@ -33,35 +83,45 @@ public static class AsterGraphEditorFactory
         var fragmentLibraryService = options.FragmentLibraryService ?? new GraphFragmentLibraryService(
             GraphEditorStorageDefaults.GetFragmentLibraryPath(options.StorageRootPath),
             clipboardPayloadSerializer);
+        var styleOptions = options.StyleOptions ?? GraphEditorStyleOptions.Default;
+        var behaviorOptions = ResolveBehaviorOptions(options.BehaviorOptions, styleOptions);
 
-        var editor = new GraphEditorViewModel(
-            options.Document,
-            options.NodeCatalog,
-            options.CompatibilityService,
+        return new ResolvedEditorOptions(
+            options,
+            clipboardPayloadSerializer,
             workspaceService,
             fragmentWorkspaceService,
-            options.StyleOptions,
-            options.BehaviorOptions,
             fragmentLibraryService,
-            options.ContextMenuAugmentor,
-            options.NodePresentationProvider,
-            options.LocalizationProvider,
-            clipboardPayloadSerializer,
-            options.DiagnosticsSink);
-
-        if (editor.Session is GraphEditorSession runtimeSession)
-        {
-            runtimeSession.ConfigureInstrumentation(options.Instrumentation);
-        }
-
-        return editor;
+            styleOptions,
+            behaviorOptions);
     }
 
-    /// <summary>
-    /// 使用宿主提供的选项创建一个 <see cref="IGraphEditorSession"/>。
-    /// </summary>
-    /// <param name="options">宿主组合选项。</param>
-    /// <returns>新的图编辑器运行时会话。</returns>
-    public static IGraphEditorSession CreateSession(AsterGraphEditorOptions options)
-        => Create(options).Session;
+    private static GraphEditorBehaviorOptions ResolveBehaviorOptions(
+        GraphEditorBehaviorOptions? behaviorOptions,
+        GraphEditorStyleOptions styleOptions)
+    {
+        if (behaviorOptions is not null)
+        {
+            return behaviorOptions;
+        }
+
+        return GraphEditorBehaviorOptions.Default with
+        {
+            DragAssist = GraphEditorBehaviorOptions.Default.DragAssist with
+            {
+                EnableGridSnapping = styleOptions.Canvas.EnableGridSnapping,
+                EnableAlignmentGuides = styleOptions.Canvas.EnableAlignmentGuides,
+                SnapTolerance = styleOptions.Canvas.SnapTolerance,
+            },
+        };
+    }
+
+    private sealed record ResolvedEditorOptions(
+        AsterGraphEditorOptions Options,
+        IGraphClipboardPayloadSerializer ClipboardPayloadSerializer,
+        IGraphWorkspaceService WorkspaceService,
+        IGraphFragmentWorkspaceService FragmentWorkspaceService,
+        IGraphFragmentLibraryService FragmentLibraryService,
+        GraphEditorStyleOptions StyleOptions,
+        GraphEditorBehaviorOptions BehaviorOptions);
 }

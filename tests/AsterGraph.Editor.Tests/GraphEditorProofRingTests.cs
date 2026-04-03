@@ -19,6 +19,7 @@ using AsterGraph.Editor.Presentation;
 using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.Services;
 using AsterGraph.Editor.ViewModels;
+using System.Reflection;
 using Xunit;
 
 namespace AsterGraph.Editor.Tests;
@@ -151,6 +152,7 @@ public sealed class GraphEditorProofRingTests
         var capabilities = session.Queries.GetCapabilitySnapshot();
         var inspection = session.Diagnostics.CaptureInspectionSnapshot();
         var recentDiagnostics = session.Diagnostics.GetRecentDiagnostics(10);
+        var runtimeFields = session.GetType().GetFields(BindingFlags.Instance | BindingFlags.NonPublic);
 
         Assert.Equal(2, snapshot.Nodes.Count);
         Assert.Single(snapshot.Connections);
@@ -164,6 +166,7 @@ public sealed class GraphEditorProofRingTests
         Assert.Equal(TargetNodeId, inspection.Selection.PrimarySelectedNodeId);
         Assert.Contains(recentDiagnostics, diagnostic => diagnostic.Code == "workspace.save.succeeded");
         Assert.Contains(diagnostics.Diagnostics, diagnostic => diagnostic.Code == "workspace.save.succeeded");
+        Assert.DoesNotContain(runtimeFields, field => field.FieldType == typeof(GraphEditorViewModel));
     }
 
     private static GraphDocument CreateDocument()
