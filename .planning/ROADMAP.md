@@ -1,104 +1,101 @@
-# Roadmap: AsterGraph v1.1
+# Roadmap: AsterGraph v1.2
 
 ## Overview
 
-The v1.0 foundation work is complete. AsterGraph now has a publishable package boundary, runtime/session contracts, embeddable Avalonia surfaces, replaceable presentation, diagnostics hooks, and validated sample/smoke coverage. The next milestone focuses on hardening what shipped so hosts can treat AsterGraph as a more production-grade embedded component line.
+The v1.1 hardening milestone is complete. AsterGraph now has a substantially stronger host boundary, more native Avalonia embedding behavior, better scaling under larger graphs, and an explicit proof ring.
 
-This roadmap targets four gaps surfaced by the latest review:
+The next architectural risk is different: the product still behaves like a `GraphEditorViewModel`-centered system with a session facade, rather than a true editor kernel with adapters on top. That limits automation, capability evolution, plugin loading, and future non-shell hosting because too much public behavior still flows through mutable MVVM state and Avalonia-oriented assumptions.
 
-- the runtime/session host boundary is still incomplete for serious custom UI hosts
-- several host extension seams still expose concrete MVVM implementation types
-- the Avalonia full-shell experience still fights host-native command, focus, and input conventions
-- large-graph interaction hot paths still rely on graph-wide rebuild/requery behavior
+This roadmap therefore focuses on extracting the real editor kernel, normalizing capability/command/menu contracts, and turning the current compatibility façade into an adapter rather than the architectural center of gravity.
 
 ## Milestone
 
-**Milestone:** v1.1 Host Boundary, Native Integration, and Scaling  
-**Goal:** Make the shipped SDK foundation easier to extend, more native to embed in desktop hosts, and more scalable under larger graph workloads without rewriting the existing architecture.
+**Milestone:** v1.2 Kernel Extraction, Capability Contracts, and Plugin Readiness  
+**Goal:** Make the editor runtime truly kernel-first, reduce MVVM and Avalonia assumptions in the public control plane, and leave the SDK ready for future plugin and automation work without another deep boundary refactor.
 
 ## Phases
 
-- [x] **Phase 7: Runtime Host Boundary Completion** - Finish the runtime/session host story so custom UI hosts no longer need the concrete editor facade for core graph interaction.
-- [x] **Phase 8: Stable Host Extension Contracts** - Decouple the main host extension seams from MVVM implementation types and stabilize the contract surface.
-- [x] **Phase 9: Native Avalonia Host Integration** - Make the full-shell and standalone Avalonia surfaces cooperate with host-native shortcuts, wheel input, focus, and keyboard menu behavior.
-- [x] **Phase 10: Canvas And Interaction Hot-Path Scaling** - Remove graph-wide rebuild/requery patterns from drag, connection preview, marquee selection, and small scene deltas.
-- [x] **Phase 11: State And History Scaling** - Reduce whole-document and whole-graph recomputation in inspector/status/history/dirty-tracking paths.
-- [x] **Phase 12: Proof Ring For Hosts And Large Graphs** - Prove the hardening work through focused regressions, sample output, package smoke, and large-graph validation scenarios.
+- [ ] **Phase 13: Editor Kernel State Owner Extraction** - Extract the canonical mutable editor state owner out of `GraphEditorViewModel` so session/runtime composition no longer depends on the VM façade.
+- [ ] **Phase 14: Session And Compatibility Facade Decoupling** - Rebuild `IGraphEditorSession` and `GraphEditorViewModel` around the extracted kernel so hosts get a kernel-first path and legacy hosts keep a staged adapter path.
+- [ ] **Phase 15: Capability And Descriptor Contract Normalization** - Replace MVVM-oriented command/menu/state exposure with explicit capability, descriptor, and read-only query contracts.
+- [ ] **Phase 16: Avalonia Adapter Boundary Cleanup** - Thin the Avalonia layer so shell/canvas/input/clipboard/host-context behavior consumes shared kernel contracts instead of duplicating policy against the VM.
+- [ ] **Phase 17: Compatibility Lock And Migration Proof** - Prove that the retained `GraphEditorViewModel` / `GraphEditorView` path stays behaviorally aligned while the kernel path becomes canonical.
+- [ ] **Phase 18: Plugin And Automation Readiness Proof Ring** - Validate the resulting architecture with focused regressions, sample/smoke coverage, and explicit readiness checks for later plugin/automation milestones.
 
 ## Phase Details
 
-### Phase 7: Runtime Host Boundary Completion
-**Goal**: Make `IGraphEditorSession` and related runtime contracts self-sufficient for custom UI hosts that do not want to depend on `GraphEditorViewModel`.
-**Depends on**: v1.0 foundation
-**Requirements**: HOST-01, HOST-02
+### Phase 13: Editor Kernel State Owner Extraction
+**Goal**: Extract the editor's canonical mutable state owner out of `GraphEditorViewModel`.
+**Depends on**: v1.1 completed baseline
+**Requirements**: KERN-01, KERN-02
 **Success Criteria**:
-1. Custom hosts can perform selection, node placement/movement, connection authoring, and viewport operations through stable runtime/session contracts.
-2. Runtime-side compatibility and inspection queries no longer require hosts to consume `NodeViewModel` or `PortViewModel`.
-3. The retained `GraphEditorViewModel` path remains available as a compatibility facade rather than the only complete host entry.
+1. A host can compose the core editor runtime without first constructing `GraphEditorViewModel`.
+2. Session/runtime state reads and writes have a kernel-owned source of truth.
+3. Kernel extraction does not require an Avalonia dependency.
 **Plans**: 3 plans
 
-### Phase 8: Stable Host Extension Contracts
-**Goal**: Move menu and presentation extension seams toward stable host/runtime contracts instead of concrete MVVM implementation types.
-**Depends on**: Phase 7
-**Requirements**: HOST-03, UX-01
+### Phase 14: Session And Compatibility Facade Decoupling
+**Goal**: Turn `IGraphEditorSession` into a kernel-facing API and reduce `GraphEditorViewModel` to an adapter/compatibility façade.
+**Depends on**: Phase 13
+**Requirements**: KERN-03, CAP-03
 **Success Criteria**:
-1. Host menu augmentation does not require `GraphEditorViewModel` as the primary public extension root.
-2. Host node/presentation extension does not require `NodeViewModel` as the only public context shape.
-3. Full-shell Avalonia hosts can disable or replace stock shortcut/menu behavior through public options instead of forking the control.
+1. `GraphEditorSession` no longer treats `GraphEditorViewModel` as its primary implementation dependency.
+2. Public state exposed to hosts is read-only or snapshot-based by default.
+3. The compatibility façade still supports staged migration for existing hosts.
 **Plans**: 3 plans
 
-### Phase 9: Native Avalonia Host Integration
-**Goal**: Make embedded Avalonia surfaces behave more like cooperative native desktop controls.
-**Depends on**: Phase 8
-**Requirements**: UX-02, UX-03
+### Phase 15: Capability And Descriptor Contract Normalization
+**Goal**: Replace MVVM-shaped public control-plane seams with explicit capability, command, and menu descriptors.
+**Depends on**: Phase 14
+**Requirements**: CAP-01, CAP-02
 **Success Criteria**:
-1. Wheel and panning behavior can be configured to cooperate with host scroll/input conventions.
-2. Keyboard-invoked menus anchor and behave like desktop menus instead of pointer-only popups.
-3. Focus behavior across graph items, menus, and command routing is more host-native and keyboard-usable.
+1. Capability discovery is explicit rather than inferred from object shape.
+2. Editor-layer menu/command contracts no longer require MVVM command objects as the canonical model.
+3. Optional surface/service support is versionable through explicit descriptors.
+**Plans**: 3 plans
+
+### Phase 16: Avalonia Adapter Boundary Cleanup
+**Goal**: Make the Avalonia layer a thinner adapter over shared kernel/facade contracts.
+**Depends on**: Phase 15
+**Requirements**: ADAPT-01, ADAPT-02
+**Success Criteria**:
+1. Shell and canvas controls no longer duplicate command/input policy unnecessarily.
+2. Clipboard and host-context adaptation stays UI-owned but is no longer coupled to VM internals more than necessary.
+3. Avalonia controls consume thinner contracts and are easier to evolve without runtime-boundary churn.
 **Plans**: 3 plans
 **UI hint**: yes
 
-### Phase 10: Canvas And Interaction Hot-Path Scaling
-**Goal**: Remove the most obvious graph-wide work from node drag, connection preview, marquee selection, and scene delta handling.
-**Depends on**: Phase 9
-**Requirements**: PERF-01, PERF-02, PERF-03
+### Phase 17: Compatibility Lock And Migration Proof
+**Goal**: Prove that the new kernel-first path and the retained façade path stay aligned during migration.
+**Depends on**: Phase 16
+**Requirements**: MIG-01, MIG-02
 **Success Criteria**:
-1. Connection rendering no longer fully rebuilds the connection layer on routine drag/preview updates.
-2. Marquee selection avoids full-graph selection rewrites on every pointer sample.
-3. Node/control-tree updates are incremental enough that small graph deltas do not trigger whole-scene rebuilds.
-**Plans**: 4 plans
-
-### Phase 11: State And History Scaling
-**Goal**: Reduce non-visual whole-graph and whole-document recomputation in inspector/status/history paths.
-**Depends on**: Phase 10
-**Requirements**: PERF-04, PERF-05
-**Success Criteria**:
-1. Inspector/status/computed-state refresh paths avoid repeated global connection/node rescans on unrelated state changes.
-2. Dirty tracking and history entry creation avoid expensive whole-document serialization in routine edit flows.
-3. The resulting state model still preserves current correctness and compatibility behavior.
+1. Legacy hosts using `GraphEditorViewModel` / `GraphEditorView` still work through the migration window.
+2. The kernel-first path is clearly the canonical composition route in tests, samples, and docs.
+3. Focused regressions catch drift between canonical and compatibility paths.
 **Plans**: 3 plans
 
-### Phase 12: Proof Ring For Hosts And Large Graphs
-**Goal**: Validate the hardening work through focused host and scale-oriented proof instead of relying on local reasoning alone.
-**Depends on**: Phase 11
-**Requirements**: VALID-01, VALID-02
+### Phase 18: Plugin And Automation Readiness Proof Ring
+**Goal**: Validate that the extracted kernel and capability contracts are strong enough to support later plugin and automation work.
+**Depends on**: Phase 17
+**Requirements**: PLUG-READY-01
 **Success Criteria**:
-1. HostSample and PackageSmoke visibly prove the updated host boundary and Avalonia host-integration story.
-2. Focused regressions cover the main host-command, input, menu, and presentation behaviors.
-3. Repeatable large-graph validation scenarios or targeted harnesses catch regressions in drag, selection, connection, and state-refresh hot paths.
+1. Samples, smoke tools, and focused regressions prove the final kernel-first architecture.
+2. Readiness checks explicitly cover extension/capability seams needed by later plugin and automation milestones.
+3. The milestone closes with a clear next-step runway rather than another hidden façade dependency.
 **Plans**: 3 plans
 
 ## Progress
 
 | Phase | Requirements | Status |
 |-------|--------------|--------|
-| 7. Runtime Host Boundary Completion | HOST-01, HOST-02 | Completed |
-| 8. Stable Host Extension Contracts | HOST-03, UX-01 | Completed |
-| 9. Native Avalonia Host Integration | UX-02, UX-03 | Completed |
-| 10. Canvas And Interaction Hot-Path Scaling | PERF-01, PERF-02, PERF-03 | Completed |
-| 11. State And History Scaling | PERF-04, PERF-05 | Completed |
-| 12. Proof Ring For Hosts And Large Graphs | VALID-01, VALID-02 | Completed |
+| 13. Editor Kernel State Owner Extraction | KERN-01, KERN-02 | Planned |
+| 14. Session And Compatibility Facade Decoupling | KERN-03, CAP-03 | Planned |
+| 15. Capability And Descriptor Contract Normalization | CAP-01, CAP-02 | Planned |
+| 16. Avalonia Adapter Boundary Cleanup | ADAPT-01, ADAPT-02 | Planned |
+| 17. Compatibility Lock And Migration Proof | MIG-01, MIG-02 | Planned |
+| 18. Plugin And Automation Readiness Proof Ring | PLUG-READY-01 | Planned |
 
 ## Next Action
 
-Milestone v1.1 is complete. The next action is milestone audit / merge preparation rather than more v1.1 phase execution.
+**Phase 13** is the correct first step. Until the editor state owner is extracted from `GraphEditorViewModel`, every later capability/menu/plugin/automation improvement will keep paying façade-coupling costs.

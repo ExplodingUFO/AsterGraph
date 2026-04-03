@@ -1,51 +1,50 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.1
-milestone_name: host-boundary-native-integration-and-scaling
-status: Milestone complete
-stopped_at: Milestone v1.1 completed
-last_updated: "2026-04-03T12:00:00Z"
+milestone: v1.2
+milestone_name: kernel-extraction-capability-contracts-and-plugin-readiness
+status: Defining requirements and roadmap
+stopped_at: Milestone v1.2 initialized
+last_updated: "2026-04-04T00:00:00Z"
 progress:
   total_phases: 6
-  completed_phases: 6
-  total_plans: 18
-  completed_plans: 18
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-04-03)
+See: `.planning/PROJECT.md` (updated 2026-04-04)
 
 **Core value:** Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
-**Current focus:** Milestone v1.1 hardening roadmap
+**Current focus:** Milestone v1.2 kernel extraction roadmap
 
 ## Current Position
 
-Phase: 12 (proof ring for hosts and large graphs) — COMPLETED  
-Plan: 03  
-Status: Milestone v1.1 implementation and proof ring completed  
-Last activity: 2026-04-03 — Completed phases 07-12, added final proof tooling, and closed the milestone validation loop
+Phase: Not started (defining requirements)  
+Plan: —  
+Status: Defining requirements and roadmap  
+Last activity: 2026-04-04 — Milestone v1.2 started around kernel extraction, capability contracts, and plugin readiness
 
 ## Accumulated Context
 
 ### Decisions
 
-Carry-forward decisions from the v1.0 foundation milestone:
+Carry-forward decisions from completed milestones:
 
 - Keep the four-package SDK boundary (`AsterGraph.Abstractions`, `AsterGraph.Core`, `AsterGraph.Editor`, `AsterGraph.Avalonia`) as the supported publish surface.
 - Preserve `GraphEditorViewModel` and `GraphEditorView` as compatibility facades during phased migration.
-- Keep embeddable surfaces, presenter replacement, and diagnostics in place as validated foundation work rather than reopening those goals from scratch.
+- Keep embeddable surfaces, presenter replacement, diagnostics, host proof tools, and large-graph smoke validation as retained foundation assets rather than reopening them from scratch.
 
 New milestone decisions:
 
-- Treat runtime/session self-sufficiency as the next highest SDK risk to retire.
-- Reduce MVVM leakage in public seams before attempting more ambitious host/platform expansion.
-- Treat full-shell shortcut routing, wheel behavior, focus, and keyboard menu behavior as host-integration requirements, not polish.
-- Prioritize graph interaction hot paths and state recomputation hot spots before speculative broader optimization.
-- Require proof-ring validation through tests, HostSample, PackageSmoke, and large-graph scenarios for this milestone.
-- Keep large-graph validation in a dedicated smoke-style harness so proof remains repeatable without making the unit test suite timing-fragile.
+- Treat the remaining architectural center-of-gravity problem, not raw feature absence, as the next product risk.
+- Extract the canonical editor state owner from `GraphEditorViewModel` before attempting plugin loading or richer automation.
+- Normalize capability, menu, and command contracts around explicit descriptors rather than MVVM object shape.
+- Keep the Avalonia layer as an adapter over kernel contracts, not the implicit owner of command-routing policy.
+- Preserve the new proof ring while shifting the canonical composition path toward a kernel-first runtime.
 
 ### Pending Todos
 
@@ -53,9 +52,9 @@ None captured yet.
 
 ### Blockers/Concerns
 
-- No current blocker in the active worktree.
-- Phase 12 uncovered a `net8.0` runtime-XAML loading gap for sample/smoke tools; this was closed by adding `Avalonia.Markup.Xaml.Loader` to `AsterGraph.Avalonia`.
-- Future milestone work should preserve the new proof ring instead of replacing it with ad hoc spot checks.
+- No current blocker in the main workspace.
+- The main design constraint is preserving staged migration while changing the runtime center of gravity.
+- Public mutable collections and VM-shaped contracts are now the highest-leverage architecture debt.
 
 ### Quick Tasks Completed
 
@@ -65,6 +64,6 @@ None captured yet.
 
 ## Session Continuity
 
-Last session: 2026-04-03
-Stopped at: Milestone v1.1 completed
+Last session: 2026-04-04
+Stopped at: Milestone v1.2 initialized
 Resume file: None

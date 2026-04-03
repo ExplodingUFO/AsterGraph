@@ -2,24 +2,24 @@
 
 ## What This Is
 
-AsterGraph is a modular node-graph editor toolkit for .NET with a reusable editor state layer and an Avalonia UI shell. The foundation milestone is now complete: the project already ships a publishable four-package boundary, runtime/session contracts, embeddable Avalonia surfaces, replaceable presentation seams, diagnostics hooks, and sample hosts.
+AsterGraph is a modular node-graph editor toolkit for .NET with a reusable editor state layer and an Avalonia UI shell. The foundation and first hardening milestones are complete: the project now ships a publishable four-package boundary, runtime/session contracts, embeddable Avalonia surfaces, replaceable presentation seams, diagnostics hooks, host proof tools, and repeatable scale validation.
 
-The next milestone shifts from capability creation to hardening. The main remaining product risk is no longer “can hosts do this at all?”, but whether the public runtime boundary is self-sufficient, whether the Avalonia layer behaves like a cooperative embedded desktop control, and whether the graph/editor hot paths still hold up as graph size grows.
+The next milestone shifts from hardening shipped surfaces to fixing the architectural center of gravity. The remaining risk is that the SDK still behaves like a `GraphEditorViewModel`-centered system with a session facade, rather than a true kernel-first runtime with adapters on top.
 
 ## Core Value
 
 Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
 
-## Current Milestone: v1.1 Host Boundary, Native Integration, and Scaling
+## Current Milestone: v1.2 Kernel Extraction, Capability Contracts, and Plugin Readiness
 
-**Goal:** Turn the completed SDK foundation into a more production-grade host component line by hardening runtime boundaries, reducing MVVM leakage in public seams, improving native desktop host behavior, and addressing the most obvious large-graph performance risks.
+**Goal:** Extract the real editor kernel out of the current façade-centered architecture, normalize capability/descriptor contracts, and leave the SDK ready for later plugin and automation work without another deep boundary rewrite.
 
 **Target features:**
-- Make the runtime/session host story self-sufficient for serious custom-UI hosts instead of forcing fallback to `GraphEditorViewModel`.
-- Decouple the main extension seams from concrete MVVM types so hosts can extend menus and presentation against more stable contracts.
-- Make the Avalonia full shell and standalone canvas cooperate better with host command routing, focus, context menu, and scrolling conventions.
-- Reduce graph-wide rebuild and recomputation on drag, marquee selection, inspector refresh, and history/dirty-tracking paths.
-- Prove the hardening work through focused regression tests, HostSample output, PackageSmoke output, and repeatable large-graph validation.
+- Extract the canonical mutable editor state owner so runtime/session composition no longer depends on constructing `GraphEditorViewModel`.
+- Rebuild the session/facade relationship so `GraphEditorViewModel` becomes a compatibility adapter rather than the architectural core.
+- Replace public MVVM-shaped command/menu/state exposure with explicit capability, descriptor, and read-only query contracts.
+- Thin the Avalonia layer so shell/canvas/input/clipboard behavior consumes shared kernel contracts instead of duplicating policy.
+- Prove the migration path through focused regressions, HostSample, PackageSmoke, and the retained scale/proof tooling.
 
 ## Requirements
 
@@ -32,16 +32,16 @@ Hosts can integrate only the graph-editor pieces they need, replace default UI a
 - ✓ Host can embed the full shell, standalone canvas, standalone inspector, and standalone mini map against the same editor state, with explicit standalone canvas stock-behavior opt-outs — v1.0
 - ✓ Host can replace stock visual presenters for nodes, menus, inspector, and mini map while reusing the existing editor-owned behavior and data projections — v1.0
 - ✓ Host can inspect diagnostics and receive machine-readable recoverable failures through the shipped diagnostics/session surface — v1.0
+- ✓ Host/runtime boundaries, native Avalonia behavior, hot-path scaling, and proof-ring validation are materially hardened through phases 07-12 — v1.1
 
 ### Active Milestone Requirements
 
-- [ ] Hosts with custom UI stacks can perform graph selection, node placement/movement, connection authoring, and viewport navigation through stable runtime contracts without depending on `GraphEditorViewModel`.
-- [ ] Host-facing compatibility and extension contracts avoid leaking `NodeViewModel`, `PortViewModel`, or the concrete editor facade where a stable runtime abstraction or DTO is sufficient.
-- [ ] Avalonia hosts can opt out of stock shell-level shortcuts and stock menu behavior in the full-shell entry path, not just the standalone canvas path.
-- [ ] Embedded Avalonia surfaces cooperate with host-native wheel, pan, focus, keyboard menu, and command routing conventions instead of always taking input ownership.
-- [ ] Dragging, connection preview, marquee selection, and canvas updates avoid graph-wide rebuild/requery patterns that scale directly with total node/edge count.
-- [ ] Inspector, status, dirty tracking, and history paths avoid repeated whole-graph or whole-document recomputation on routine interactions.
-- [ ] Host hardening and performance changes are covered by focused regressions, HostSample, PackageSmoke, and repeatable large-graph proof scenarios.
+- [ ] The canonical runtime/editor state owner can be composed without constructing `GraphEditorViewModel`.
+- [ ] `IGraphEditorSession` and related runtime contracts operate over kernel-owned state/contracts rather than a VM-owned façade.
+- [ ] Public command, capability, menu, and state-query contracts avoid depending on MVVM implementation types and mutable public collections where stable descriptors or snapshots are sufficient.
+- [ ] `AsterGraph.Avalonia` consumes thinner kernel/facade contracts and stops duplicating command-routing policy between shell and canvas controls.
+- [ ] Existing `GraphEditorViewModel` / `GraphEditorView` hosts keep a staged migration path while the kernel-first path becomes canonical.
+- [ ] The resulting architecture is explicitly ready for later plugin loading and richer automation without another boundary rewrite.
 
 ### Out of Scope
 
@@ -63,28 +63,27 @@ A fresh cross-cutting review of the current mainline surfaced the next real bott
 - the canvas hot paths still do whole-layer connection rebuilds, repeated linear node lookups, and full-graph marquee selection recomputation
 - state, inspector, history, and dirty tracking still lean on whole-graph or whole-document work in places where scaling pressure will show up first
 
-This milestone therefore treats “secondary development quality”, “native host cooperation”, and “large-graph responsiveness” as the primary product risks to retire next.
+This milestone therefore treats “kernel extraction”, “explicit capability contracts”, and “adapter thinning” as the primary product risks to retire next.
 
 ## Constraints
 
 - **Tech stack**: Keep the solution centered on .NET, C#, and Avalonia
-- **Compatibility strategy**: Keep `GraphEditorViewModel` available as a compatibility facade while making new host/runtime contracts thinner and more stable
+- **Compatibility strategy**: Keep `GraphEditorViewModel` available as a compatibility facade while making the kernel-first path canonical
 - **Product positioning**: Preserve publishable package quality for the four supported SDK packages
 - **Architecture**: Harden the existing system incrementally; do not rewrite the editor/runtime stack from scratch
-- **Extensibility**: Prefer stable DTOs/contracts over leaking mutable MVVM types through new or revised public seams
-- **Host integration**: Treat command routing, focus, wheel behavior, and context menu behavior as first-class embedding concerns
-- **Performance**: Prioritize the graph interaction hot paths and state recomputation hot spots before broader speculative optimization
+- **Extensibility**: Prefer stable DTOs/contracts and explicit capability descriptors over leaking mutable MVVM types through public seams
+- **Host integration**: Keep Avalonia-specific adapters out of the kernel control plane where possible
+- **Architecture**: Extract, then normalize; do not combine kernel extraction with unrelated feature growth
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Treat v1.0 as the shipped baseline and start a new hardening milestone instead of continuing the old roadmap in place | The original roadmap is effectively complete and the next work is qualitatively different | ✓ Good |
-| Prioritize runtime host-boundary completion before more UI decomposition | A custom host story that still depends on `GraphEditorViewModel` is not a stable SDK story | ✓ Good |
-| Reduce MVVM leakage in public seams even if compatibility facades remain | Host extension APIs should stabilize around contracts and DTOs, not internal state holders | ✓ Good |
-| Treat native desktop host cooperation as a product requirement, not polish | Full-shell shortcut capture and forceful wheel/menu behavior directly hurt embedding quality | ✓ Good |
-| Prioritize hot-path scaling fixes over broad micro-optimization | Drag, connection preview, marquee selection, and inspector recomputation are the most user-visible bottlenecks | ✓ Good |
-| Require proof-ring validation for hardening work | HostSample, PackageSmoke, regressions, and large-graph validation should prove the changes, not just local reasoning | ✓ Good |
+| Treat v1.1 as the shipped hardening baseline and start a new kernel-focused milestone | The next risk is no longer missing behavior, but the façade-centered architecture itself | ✓ Good |
+| Extract the state owner before building plugin or automation features | Plugin and automation work on top of a VM-centered runtime would compound the wrong boundary | ✓ Good |
+| Normalize capability/menu/command contracts after kernel extraction, not before | Descriptor cleanup is safer once state ownership and session boundaries are stable | ✓ Good |
+| Keep Avalonia as an adapter layer, not the policy source | Input/clipboard/host-context duplication should not remain spread across controls | ✓ Good |
+| Preserve the existing proof ring during architecture changes | Kernel extraction without migration proof would create silent regressions for existing hosts | ✓ Good |
 
 ## Evolution
 
@@ -102,4 +101,4 @@ This document evolves at phase transitions and milestone boundaries.
 3. Reset `STATE.md` so the next roadmap starts from a clean position rather than stale execution state.
 
 ---
-*Last updated: 2026-04-03 for milestone v1.1 planning*
+*Last updated: 2026-04-04 for milestone v1.2 planning*

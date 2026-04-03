@@ -17,14 +17,28 @@
 
 ## v1.1 Host Boundary, Native Integration, and Scaling
 
-**Status:** Active  
+**Status:** Completed  
 **Goal:** Harden the shipped SDK boundary so custom hosts depend less on concrete MVVM types, the Avalonia layer cooperates better with native desktop host behavior, and larger graphs remain responsive under common interaction paths.
 
-**Planned phase span:** 07-12
+**Phase span:** 07-12
+
+**Delivered:**
+- Runtime/session host boundary completion with retained compatibility shims
+- Stable host extension contexts for menus and node presentation
+- More native/cooperative Avalonia shell and canvas integration behavior
+- Canvas, inspector, history, and dirty-tracking hot-path reductions
+- HostSample, PackageSmoke, proof-ring regressions, and repeatable large-graph smoke validation
+
+## v1.2 Kernel Extraction, Capability Contracts, and Plugin Readiness
+
+**Status:** Active  
+**Goal:** Move AsterGraph from a `GraphEditorViewModel`-centered architecture toward a true editor kernel with thinner adapters, explicit capability contracts, and a cleaner runway for plugin loading and automation.
+
+**Planned phase span:** 13-18
 
 **Roadmap focus:**
-- runtime host boundary completion
-- stable host extension contracts
-- native Avalonia host integration
-- canvas and state scaling
-- proof-ring validation for host behavior and larger graphs
+- editor kernel state-owner extraction
+- session/facade decoupling
+- capability and descriptor contract normalization
+- Avalonia adapter boundary cleanup
+- migration proof and plugin-readiness validation

@@ -1,74 +1,69 @@
-# Requirements: AsterGraph v1.1
+# Requirements: AsterGraph v1.2
 
-**Defined:** 2026-04-03
-**Milestone:** v1.1 Host Boundary, Native Integration, and Scaling
+**Defined:** 2026-04-04
+**Milestone:** v1.2 Kernel Extraction, Capability Contracts, and Plugin Readiness
 **Core Value:** Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
 
 ## Milestone Requirements
 
-### Runtime Host Boundary
+### Kernel Extraction
 
-- [ ] **HOST-01**: Custom UI hosts can perform graph selection, node placement/movement, connection authoring, and viewport navigation through stable runtime/session contracts without directly depending on `GraphEditorViewModel`
-- [ ] **HOST-02**: Runtime compatibility and graph-inspection queries return stable contracts or DTOs instead of `NodeViewModel` / `PortViewModel`
-- [ ] **HOST-03**: Host extension seams for menus and node presentation bind to stable host/runtime abstractions rather than concrete MVVM types
+- [ ] **KERN-01**: The canonical runtime/editor state owner can be composed without constructing `GraphEditorViewModel`
+- [ ] **KERN-02**: `IGraphEditorSession` commands, queries, events, diagnostics, and batching operate over kernel-owned state/contracts rather than delegating through mutable MVVM projections
+- [ ] **KERN-03**: `GraphEditorViewModel` becomes a compatibility-oriented adapter/facade over the kernel instead of the primary state owner
 
-### Avalonia Host Integration
+### Capability And Contract Normalization
 
-- [ ] **UX-01**: The full-shell Avalonia host path can disable or replace stock shortcut routing and stock context-menu behavior just as the standalone canvas path can
-- [ ] **UX-02**: Wheel, panning, and related pointer gestures can cooperate with host scroll/input conventions instead of always consuming input
-- [ ] **UX-03**: Keyboard-invoked menus, focus behavior, and graph-item interaction feel like native desktop control behavior instead of pointer-only custom canvas behavior
+- [ ] **CAP-01**: Public capability descriptors make optional surfaces, services, and host features explicit instead of forcing hosts to infer support from object shape
+- [ ] **CAP-02**: Editor-layer command and menu contracts avoid depending on `RelayCommand`, `ObservableCollection`, `NodeTemplateViewModel`, or other MVVM implementation details where stable descriptors/IDs are sufficient
+- [ ] **CAP-03**: Public graph/selection state exposed to hosts is read-only or snapshot-based by default, so external code cannot mutate core editor state by editing live collections
 
-### Performance And Scale
+### Avalonia Adapter Cleanup
 
-- [ ] **PERF-01**: Connection rendering and connection preview updates avoid whole-layer rebuilds plus repeated linear node lookups on drag/preview hot paths
-- [ ] **PERF-02**: Marquee selection avoids graph-wide selection recomputation and full projection rebuilds on every pointer sample
-- [ ] **PERF-03**: Canvas scene updates avoid whole-scene node/control-tree rebuilds for small graph deltas and scale better with larger node/port counts
-- [ ] **PERF-04**: Inspector/status/computed-state refresh avoids unrelated graph-wide rescans when viewport or selection changes
-- [ ] **PERF-05**: History, dirty tracking, and snapshot validation avoid full-document serialization costs on routine edit flows
+- [ ] **ADAPT-01**: `AsterGraph.Avalonia` consumes thinner kernel/facade contracts and stops duplicating command-routing policy between shell and canvas controls
+- [ ] **ADAPT-02**: Clipboard, host context, and input-routing seams remain Avalonia-owned adapters, but their editor-facing contract no longer requires direct dependence on `GraphEditorViewModel` internals
 
-### Proof And Validation
+### Migration And Readiness
 
-- [ ] **VALID-01**: Host-boundary and Avalonia host-integration changes are covered by focused regressions plus HostSample and PackageSmoke validation
-- [ ] **VALID-02**: Large-graph performance/scaling behavior is checked by repeatable validation scenarios or targeted harnesses so regressions are caught before release
+- [ ] **MIG-01**: Existing `GraphEditorViewModel` / `GraphEditorView` hosts keep a staged migration path while the kernel path becomes the canonical composition root
+- [ ] **MIG-02**: HostSample, PackageSmoke, and focused regressions prove that the new kernel path and the retained compatibility path stay behaviorally aligned
+- [ ] **PLUG-READY-01**: The resulting architecture leaves runtime plugin loading and richer automation on top of explicit kernel/capability seams rather than another round of façade-bound refactors
 
 ## Deferred / Later
 
-- **PLUG-01**: Runtime plugin loading over the stabilized public SDK boundary
-- **AUTO-01**: Rich automation/macro workflows over a broader runtime control plane
-- **WB-01**: Dedicated diagnostics workbench UI on top of the public diagnostics contracts
+- **PLUG-01**: Actual runtime plugin loading, discovery, and trust model
+- **AUTO-01**: Rich automation/macro APIs over the extracted kernel
+- **WB-01**: Dedicated diagnostics workbench UI on top of the public diagnostics/probe surface
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| New end-user editing features unrelated to host boundary, native integration, or scaling | This milestone is about hardening what already exists |
-| Replacing Avalonia with another UI stack | The goal is to improve the current Avalonia host story, not start a second presentation stack |
-| Wholesale visual redesign of the shipped shell | Native-feeling interaction and host cooperation matter more than visual novelty here |
-| Runtime plugin loading in v1.1 | Depends on a thinner and more stable host/runtime boundary first |
-| Algorithm execution engine | Separate product direction from current SDK hardening work |
+| New graph-editing end-user features unrelated to kernel extraction or contract cleanup | This milestone is architectural hardening, not feature expansion |
+| Replacing Avalonia with another UI stack | The goal is to make the existing Avalonia layer thinner and better-behaved, not to start a second presentation stack |
+| Immediate runtime plugin loading in v1.2 | This milestone only creates the kernel and capability seams that plugin loading will depend on |
+| Major visual redesign of the shipped shell | The priority is adapter separation and contract cleanup, not visual restyling |
 
 ## Traceability
 
 | Requirement | Planned Phase | Status |
 |-------------|---------------|--------|
-| HOST-01 | Phase 7 | Planned |
-| HOST-02 | Phase 7 | Planned |
-| HOST-03 | Phase 8 | Planned |
-| UX-01 | Phase 8 | Planned |
-| UX-02 | Phase 9 | Planned |
-| UX-03 | Phase 9 | Planned |
-| PERF-01 | Phase 10 | Planned |
-| PERF-02 | Phase 10 | Planned |
-| PERF-03 | Phase 10 | Planned |
-| PERF-04 | Phase 11 | Planned |
-| PERF-05 | Phase 11 | Planned |
-| VALID-01 | Phase 12 | Completed |
-| VALID-02 | Phase 12 | Completed |
+| KERN-01 | Phase 13 | Planned |
+| KERN-02 | Phase 13 | Planned |
+| KERN-03 | Phase 14 | Planned |
+| CAP-01 | Phase 15 | Planned |
+| CAP-02 | Phase 15 | Planned |
+| CAP-03 | Phase 14 | Planned |
+| ADAPT-01 | Phase 16 | Planned |
+| ADAPT-02 | Phase 16 | Planned |
+| MIG-01 | Phase 17 | Planned |
+| MIG-02 | Phase 17 | Planned |
+| PLUG-READY-01 | Phase 18 | Planned |
 
 **Coverage:**
-- milestone requirements: 13 total
-- mapped to phases: 13
+- milestone requirements: 11 total
+- mapped to phases: 11
 - unmapped: 0
 
 ---
-*Requirements defined: 2026-04-03*
+*Requirements defined: 2026-04-04*
