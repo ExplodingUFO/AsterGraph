@@ -3058,10 +3058,10 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         => PendingConnectionChanged?.Invoke(
             this,
             new GraphEditorPendingConnectionChangedEventArgs(
-                new GraphEditorPendingConnectionSnapshot(
+                GraphEditorPendingConnectionSnapshot.Create(
                     HasPendingConnection,
-                    HasPendingConnection ? PendingSourceNode?.Id : null,
-                    HasPendingConnection ? PendingSourcePort?.Id : null)));
+                    PendingSourceNode?.Id,
+                    PendingSourcePort?.Id)));
 
     private void NotifyDocumentChanged(
         GraphEditorDocumentChangeKind changeKind,

@@ -6,6 +6,18 @@ namespace AsterGraph.Editor.Diagnostics;
 public sealed record GraphEditorPendingConnectionSnapshot
 {
     /// <summary>
+    /// 基于原始待完成连线状态创建一个经过归一化的快照。
+    /// </summary>
+    public static GraphEditorPendingConnectionSnapshot Create(
+        bool hasPendingConnection,
+        string? sourceNodeId,
+        string? sourcePortId)
+        => new(
+            hasPendingConnection,
+            hasPendingConnection ? sourceNodeId : null,
+            hasPendingConnection ? sourcePortId : null);
+
+    /// <summary>
     /// 初始化待完成连线快照。
     /// </summary>
     /// <param name="hasPendingConnection">是否存在待完成连线。</param>

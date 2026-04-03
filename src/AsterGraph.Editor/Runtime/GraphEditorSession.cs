@@ -616,13 +616,10 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorComman
         };
 
     private GraphEditorPendingConnectionSnapshot CreatePendingConnectionSnapshot()
-    {
-        var hasPendingConnection = _editor.HasPendingConnection;
-        return new(
-            hasPendingConnection,
-            hasPendingConnection ? _editor.PendingSourceNode?.Id : null,
-            hasPendingConnection ? _editor.PendingSourcePort?.Id : null);
-    }
+        => GraphEditorPendingConnectionSnapshot.Create(
+            _editor.HasPendingConnection,
+            _editor.PendingSourceNode?.Id,
+            _editor.PendingSourcePort?.Id);
 
     private sealed class GraphEditorMutationScope : IGraphEditorMutationScope
     {
