@@ -98,11 +98,11 @@ New hosts should start from `CreateSession(...)` when they only need the editor 
 `AsterGraph.Editor` now exposes one public runtime contract rooted at `IGraphEditorSession`:
 
 - `Commands`
-  - host-triggered mutations such as `AddNode`, `PanBy`, `SaveWorkspace`, and `LoadWorkspace`
+  - host-triggered mutations such as `SetSelection`, `SetNodePositions`, connection lifecycle commands, viewport centering, `AddNode`, `PanBy`, `SaveWorkspace`, and `LoadWorkspace`
 - `Queries`
-  - document snapshots, selection/viewport/capability snapshots, node positions, and compatibility queries
+  - document snapshots, selection/viewport/capability snapshots, node positions, pending connection state, and DTO-based compatibility queries
 - `Events`
-  - document, selection, viewport, fragment, command, and recoverable-failure notifications
+  - document, selection, viewport, pending-connection, fragment, command, and recoverable-failure notifications
 - `BeginMutation(...)`
   - lightweight batching so hosts can coalesce event delivery around planned mutation groups
 
@@ -150,6 +150,17 @@ var session = AsterGraphEditorFactory.CreateSession(new AsterGraphEditorOptions
 var inspection = session.Diagnostics.CaptureInspectionSnapshot();
 var recent = session.Diagnostics.GetRecentDiagnostics(20);
 ```
+
+Core runtime-first host interactions now include:
+
+- selection ownership through `Commands.SetSelection(...)`
+- node movement through `Commands.SetNodePositions(...)`
+- connection lifecycle through `Commands.StartConnection(...)`, `CompleteConnection(...)`, and `CancelPendingConnection()`
+- viewport ownership through `Commands.UpdateViewportSize(...)`, `CenterViewOnNode(...)`, and `CenterViewAt(...)`
+- pending connection observation through `Queries.GetPendingConnectionSnapshot()` and `Events.PendingConnectionChanged`
+- MVVM-free compatibility discovery through `Queries.GetCompatiblePortTargets(...)`
+
+`Queries.GetCompatibleTargets(...)` remains available only as a compatibility-oriented bridge for existing host code that still depends on view-model objects.
 
 ## Quick Start
 

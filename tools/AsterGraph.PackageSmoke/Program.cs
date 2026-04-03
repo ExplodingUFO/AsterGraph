@@ -277,25 +277,46 @@ var session = AsterGraphEditorFactory.CreateSession(new AsterGraphEditorOptions
 var commandIds = new List<string>();
 var documentChanges = 0;
 var viewportChanges = 0;
+var pendingConnectionChanges = 0;
 string? failureCode = null;
 
 session.Events.CommandExecuted += (_, args) => commandIds.Add(args.CommandId);
 session.Events.DocumentChanged += (_, _) => documentChanges++;
 session.Events.ViewportChanged += (_, _) => viewportChanges++;
+session.Events.PendingConnectionChanged += (_, _) => pendingConnectionChanges++;
 session.Events.RecoverableFailure += (_, args) => failureCode = args.Code;
 
-var compatibleTargets = session.Queries.GetCompatibleTargets(sourceNodeId, sourcePortId);
+session.Commands.UpdateViewportSize(1280, 720);
+session.Commands.SetSelection([sourceNodeId], sourceNodeId, updateStatus: false);
+session.Commands.SetNodePositions(
+    [
+        new NodePositionSnapshot(sourceNodeId, new GraphPoint(96, 120)),
+        new NodePositionSnapshot(targetNodeId, new GraphPoint(392, 120)),
+    ],
+    updateStatus: false);
+var compatibleTargets = session.Queries.GetCompatiblePortTargets(sourceNodeId, sourcePortId);
+session.Commands.StartConnection(sourceNodeId, sourcePortId);
+session.Commands.CancelPendingConnection();
 using (session.BeginMutation("smoke-batch"))
 {
     session.Commands.AddNode(targetDefinitionId, new GraphPoint(620, 160));
+    session.Commands.StartConnection(sourceNodeId, sourcePortId);
+    session.Commands.CompleteConnection(targetNodeId, "in");
+    session.Commands.CenterViewOnNode(targetNodeId);
     session.Commands.PanBy(12, 18);
 }
+session.Commands.SetSelection([targetNodeId], targetNodeId, updateStatus: false);
 session.Commands.SaveWorkspace();
 
 var sessionInspection = session.Diagnostics.CaptureInspectionSnapshot();
 var sessionRecentDiagnostics = session.Diagnostics.GetRecentDiagnostics(10);
 Console.WriteLine($"SESSION_FACTORY_OK:{session.Queries.CreateDocumentSnapshot().Nodes.Count}:{string.Join(",", commandIds)}");
 Console.WriteLine($"SESSION_EVENTS_OK:{documentChanges}:{viewportChanges}:{failureCode ?? "<none>"}");
+Console.WriteLine($"RUNTIME_SELECTION_OK:{session.Queries.GetSelectionSnapshot().PrimarySelectedNodeId == targetNodeId}");
+Console.WriteLine($"RUNTIME_CONNECTION_OK:{sessionInspection.Document.Connections.Count}");
+Console.WriteLine($"RUNTIME_PENDING_EVENT_OK:{pendingConnectionChanges > 0}");
+Console.WriteLine($"RUNTIME_DTO_QUERY_OK:{compatibleTargets.Count}:{compatibleTargets[0].NodeId}:{compatibleTargets[0].PortId}");
+Console.WriteLine($"RUNTIME_VIEWPORT_OK:{sessionInspection.Viewport.ViewportWidth}:{sessionInspection.Viewport.ViewportHeight}");
 Console.WriteLine($"SERVICE_OVERRIDE_OK:{workspaceService.WorkspacePath}:{fragmentWorkspaceService.FragmentPath}:{workspaceService.SaveCalls}:{fragmentWorkspaceService.SaveCalls}:{serializer.SerializeCalls}");
 Console.WriteLine($"COMPATIBILITY_SERVICE_OK:{compatibleTargets.Count}:{compatibilityService.EvaluateCalls}");
 Console.WriteLine($"DIAG_DIAGNOSTICS_SINK_OK:{diagnostics.Diagnostics.Count}:{diagnostics.Diagnostics.LastOrDefault()?.Code ?? "<none>"}");

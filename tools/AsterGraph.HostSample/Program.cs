@@ -75,20 +75,36 @@ var runtimeSession = AsterGraphEditorFactory.CreateSession(new AsterGraphEditorO
 var commandMarkers = new List<string>();
 var documentChangeKinds = new List<string>();
 var viewportChanges = 0;
+var pendingConnectionChanges = 0;
 GraphEditorRecoverableFailureEventArgs? runtimeFailure = null;
 
 runtimeSession.Events.CommandExecuted += (_, args) =>
     commandMarkers.Add($"{args.CommandId}:{args.MutationLabel ?? "<none>"}:{args.IsInMutationScope}");
 runtimeSession.Events.DocumentChanged += (_, args) => documentChangeKinds.Add(args.ChangeKind.ToString());
 runtimeSession.Events.ViewportChanged += (_, _) => viewportChanges++;
+runtimeSession.Events.PendingConnectionChanged += (_, _) => pendingConnectionChanges++;
 runtimeSession.Events.RecoverableFailure += (_, args) => runtimeFailure = args;
 
-var compatibleTargets = runtimeSession.Queries.GetCompatibleTargets("sample-source-001", "result");
+runtimeSession.Commands.UpdateViewportSize(1280, 720);
+runtimeSession.Commands.SetSelection(["sample-source-001"], "sample-source-001", updateStatus: false);
+runtimeSession.Commands.SetNodePositions(
+    [
+        new NodePositionSnapshot("sample-source-001", new GraphPoint(144, 180)),
+        new NodePositionSnapshot("sample-sink-001", new GraphPoint(456, 180)),
+    ],
+    updateStatus: false);
+var compatibleTargets = runtimeSession.Queries.GetCompatiblePortTargets("sample-source-001", "result");
+runtimeSession.Commands.StartConnection("sample-source-001", "result");
+runtimeSession.Commands.CancelPendingConnection();
 using (runtimeSession.BeginMutation("host-sample-batch"))
 {
     runtimeSession.Commands.AddNode(new NodeDefinitionId("host.sample.sink"), new GraphPoint(680, 200));
+    runtimeSession.Commands.StartConnection("sample-source-001", "result");
+    runtimeSession.Commands.CompleteConnection("sample-sink-001", "input");
+    runtimeSession.Commands.CenterViewOnNode("sample-sink-001");
     runtimeSession.Commands.PanBy(12, 18);
 }
+runtimeSession.Commands.SetSelection(["sample-sink-001"], "sample-sink-001", updateStatus: false);
 runtimeSession.Commands.SaveWorkspace();
 
 var runtimeSnapshot = runtimeSession.Queries.CreateDocumentSnapshot();
@@ -100,9 +116,11 @@ var runtimeRecentDiagnostics = runtimeSession.Diagnostics.GetRecentDiagnostics(1
 Console.WriteLine($"Session title: {runtimeSnapshot.Title}");
 Console.WriteLine($"Session node count after commands: {runtimeSnapshot.Nodes.Count}");
 Console.WriteLine($"Session compatible targets: {compatibleTargets.Count}");
+Console.WriteLine($"Session DTO compatible target node: {compatibleTargets[0].NodeId}");
 Console.WriteLine($"Session command markers: {string.Join(", ", commandMarkers)}");
 Console.WriteLine($"Session document changes: {string.Join(", ", documentChangeKinds)}");
 Console.WriteLine($"Session viewport events: {viewportChanges}");
+Console.WriteLine($"Session pending events: {pendingConnectionChanges}");
 Console.WriteLine($"Session viewport snapshot: zoom={runtimeViewport.Zoom:0.00}, pan={runtimeViewport.PanX:0},{runtimeViewport.PanY:0}");
 Console.WriteLine($"Session capabilities: save={runtimeCapabilities.CanSaveWorkspace}, load={runtimeCapabilities.CanLoadWorkspace}");
 Console.WriteLine($"Session recoverable failure: {runtimeFailure?.Code ?? "<none>"}");
@@ -113,6 +131,7 @@ Console.WriteLine($"Diagnostics inspection snapshot: nodes={runtimeInspection.Do
 Console.WriteLine($"Diagnostics recent history: {string.Join(" | ", runtimeRecentDiagnostics.Select(diagnostic => $"{diagnostic.Code}:{diagnostic.Severity}"))}");
 Console.WriteLine($"Diagnostics logger entries: {string.Join(" | ", runtimeLoggerFactory.Entries.Select(entry => $"{entry.Level}:{entry.Message}"))}");
 Console.WriteLine($"Diagnostics Activity operations: {string.Join(", ", runtimeActivities)}");
+Console.WriteLine($"Session runtime workflow: selection={runtimeSession.Queries.GetSelectionSnapshot().PrimarySelectedNodeId}, connections={runtimeSnapshot.Connections.Count}");
 
 var viewCompatibility = new RecordingCompatibilityService();
 var viewDiagnostics = new RecordingDiagnosticsSink();

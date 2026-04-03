@@ -29,6 +29,9 @@ Typical consumers:
 Start here when a host needs the canonical runtime entry point:
 
 - runtime-first session creation via `AsterGraphEditorFactory.CreateSession(...)`
+- core runtime interaction ownership via session commands for selection, node positioning, connection lifecycle, and viewport control
+- pending connection observation via `GetPendingConnectionSnapshot()` and `PendingConnectionChanged`
+- DTO-based compatible-target discovery via `GetCompatiblePortTargets(...)`
 - factory/options-based editor creation via `AsterGraphEditorFactory`
 - staged migration support through the retained `GraphEditorViewModel` constructor
 - package-neutral default storage redirection through `StorageRootPath`
@@ -40,6 +43,8 @@ Start here when a host needs the canonical runtime entry point:
 - typed host context access through `GraphHostContextExtensions`
 
 Use this package together with `AsterGraph.Avalonia` when the host embeds the default `GraphEditorView`. Hosts that provide their own UI can stop at the `IGraphEditorSession` boundary and avoid taking an Avalonia dependency in their composition root.
+
+The MVVM-typed compatibility query path remains available for legacy integrations, but new host code should treat it as compatibility-only rather than the canonical runtime surface.
 
 Reference material:
 

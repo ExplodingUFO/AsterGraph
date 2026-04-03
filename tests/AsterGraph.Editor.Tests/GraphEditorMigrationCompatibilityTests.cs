@@ -177,13 +177,24 @@ public sealed class GraphEditorMigrationCompatibilityTests
         await factoryEditor.CopySelectionAsync();
         legacyEditor.ExportSelectionFragment();
         factoryEditor.ExportSelectionFragment();
+        factorySession.Commands.SetSelection([SourceNodeId], SourceNodeId, updateStatus: false);
+        factorySession.Commands.SetNodePositions(
+            [
+                new NodePositionSnapshot(SourceNodeId, new GraphPoint(180, 180)),
+                new NodePositionSnapshot(TargetNodeId, new GraphPoint(480, 180)),
+            ],
+            updateStatus: false);
+        factorySession.Commands.StartConnection(SourceNodeId, SourcePortId);
+        factorySession.Commands.CompleteConnection(TargetNodeId, TargetPortId);
+        factorySession.Commands.CenterViewOnNode(TargetNodeId);
         factorySession.Commands.SaveWorkspace();
 
         var legacySelection = legacyEditor.Session.Queries.GetSelectionSnapshot();
         var factorySelection = factoryEditor.Session.Queries.GetSelectionSnapshot();
-        var legacyCompatible = legacyEditor.Session.Queries.GetCompatibleTargets(SourceNodeId, SourcePortId);
-        var factoryCompatible = factoryEditor.Session.Queries.GetCompatibleTargets(SourceNodeId, SourcePortId);
-        var sessionCompatible = factorySession.Queries.GetCompatibleTargets(SourceNodeId, SourcePortId);
+        var legacyCompatible = legacyEditor.Session.Queries.GetCompatiblePortTargets(SourceNodeId, SourcePortId);
+        var factoryCompatible = factoryEditor.Session.Queries.GetCompatiblePortTargets(SourceNodeId, SourcePortId);
+        var sessionCompatible = factorySession.Queries.GetCompatiblePortTargets(SourceNodeId, SourcePortId);
+        var sessionSelection = factorySession.Queries.GetSelectionSnapshot();
 
         Assert.IsAssignableFrom<IGraphEditorSession>(legacyEditor.Session);
         Assert.IsAssignableFrom<IGraphEditorSession>(factoryEditor.Session);
@@ -191,18 +202,25 @@ public sealed class GraphEditorMigrationCompatibilityTests
         Assert.Single(legacyCompatible);
         Assert.Single(factoryCompatible);
         Assert.Single(sessionCompatible);
-        Assert.Equal(TargetNodeId, legacyCompatible[0].Node.Id);
-        Assert.Equal(TargetNodeId, factoryCompatible[0].Node.Id);
-        Assert.Equal(TargetNodeId, sessionCompatible[0].Node.Id);
+        Assert.Equal(TargetNodeId, legacyCompatible[0].NodeId);
+        Assert.Equal(TargetNodeId, factoryCompatible[0].NodeId);
+        Assert.Equal(TargetNodeId, sessionCompatible[0].NodeId);
+        Assert.Equal([SourceNodeId], sessionSelection.SelectedNodeIds);
         Assert.Equal(1, harness.WorkspaceService.SaveCalls);
         Assert.Equal(2, harness.FragmentWorkspaceService.SaveCalls);
         Assert.Equal(2, harness.ClipboardPayloadSerializer.SerializeCalls);
+        Assert.Contains("selection.set", commandIds);
+        Assert.Contains("nodes.move", commandIds);
+        Assert.Contains("connections.begin", commandIds);
+        Assert.Contains("connections.complete", commandIds);
+        Assert.Contains("viewport.center-node", commandIds);
         Assert.Contains("workspace.save", commandIds);
         Assert.True(harness.CompatibilityService.EvaluateCalls > 0);
 
         factorySession.Commands.AddNode(TargetDefinitionId, new GraphPoint(640, 220));
 
         Assert.Contains("nodes.add", commandIds);
+        Assert.Single(factorySession.Queries.CreateDocumentSnapshot().Connections);
         Assert.Equal(3, factorySession.Queries.CreateDocumentSnapshot().Nodes.Count);
     }
 
@@ -323,7 +341,7 @@ public sealed class GraphEditorMigrationCompatibilityTests
             editor.WorkspacePath,
             editor.FragmentPath,
             editor.FragmentLibraryPath,
-            editor.Session.Queries.GetCompatibleTargets(SourceNodeId, SourcePortId).Count);
+            editor.Session.Queries.GetCompatiblePortTargets(SourceNodeId, SourcePortId).Count);
     }
 
     private static ContextMenuContext CreateMenuContext()
