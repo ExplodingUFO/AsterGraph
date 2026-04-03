@@ -102,6 +102,27 @@ public sealed class GraphEditorDiagnosticsInspectionTests
         Assert.DoesNotContain(recent, diagnostic => diagnostic.Code == "workspace.save.failed");
     }
 
+    [Fact]
+    public void AsterGraphEditorFactory_CreateSession_PendingConnectionFlowsIntoInspectionSnapshot()
+    {
+        var harness = CreateHarness();
+        var session = CreateSession(harness);
+        var pendingSnapshots = new List<GraphEditorPendingConnectionSnapshot>();
+
+        session.Events.PendingConnectionChanged += (_, args) => pendingSnapshots.Add(args.PendingConnection);
+        session.Commands.StartConnection(SourceNodeId, SourcePortId);
+
+        var inspection = session.Diagnostics.CaptureInspectionSnapshot();
+
+        Assert.Single(pendingSnapshots);
+        Assert.True(pendingSnapshots[0].HasPendingConnection);
+        Assert.Equal(SourceNodeId, pendingSnapshots[0].SourceNodeId);
+        Assert.Equal(SourcePortId, pendingSnapshots[0].SourcePortId);
+        Assert.True(inspection.PendingConnection.HasPendingConnection);
+        Assert.Equal(SourceNodeId, inspection.PendingConnection.SourceNodeId);
+        Assert.Equal(SourcePortId, inspection.PendingConnection.SourcePortId);
+    }
+
     private static void SelectSourceNode(GraphEditorViewModel editor)
         => editor.SelectSingleNode(Assert.Single(editor.Nodes, node => node.Id == SourceNodeId), updateStatus: false);
 

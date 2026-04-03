@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.ComponentModel;
 using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Diagnostics;
@@ -50,7 +49,7 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorComman
         _editor.ViewportChanged += HandleViewportChanged;
         _editor.FragmentExported += HandleFragmentExported;
         _editor.FragmentImported += HandleFragmentImported;
-        _editor.PropertyChanged += HandleEditorPropertyChanged;
+        _editor.PendingConnectionChanged += HandlePendingConnectionChanged;
     }
 
     /// <inheritdoc />
@@ -479,15 +478,9 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorComman
         _pendingFragmentImported.Add(args);
     }
 
-    private void HandleEditorPropertyChanged(object? sender, PropertyChangedEventArgs args)
+    private void HandlePendingConnectionChanged(object? sender, GraphEditorPendingConnectionChangedEventArgs args)
     {
-        if (args.PropertyName is not nameof(GraphEditorViewModel.PendingSourceNode)
-            and not nameof(GraphEditorViewModel.PendingSourcePort))
-        {
-            return;
-        }
-
-        var current = CreatePendingConnectionSnapshot();
+        var current = args.PendingConnection;
         if (_lastPendingConnectionSnapshot == current)
         {
             return;
@@ -500,15 +493,14 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorComman
         }
 
         _lastPendingConnectionSnapshot = current;
-        var eventArgs = new GraphEditorPendingConnectionChangedEventArgs(current);
 
         if (IsBatching)
         {
-            _pendingPendingConnectionChanged = eventArgs;
+            _pendingPendingConnectionChanged = args;
             return;
         }
 
-        PendingConnectionChanged?.Invoke(this, eventArgs);
+        PendingConnectionChanged?.Invoke(this, args);
     }
 
     private void Execute(string commandId, Action action)
