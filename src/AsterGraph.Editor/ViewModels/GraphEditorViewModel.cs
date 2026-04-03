@@ -97,6 +97,8 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     private readonly GraphEditorInspectorProjection _inspectorProjection;
     private readonly GraphEditorCommandStateNotifier _commandStateNotifier = new();
     private readonly IRelayCommand[] _computedStateCommands;
+    private readonly Dictionary<string, NodeViewModel> _nodesById = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, ConnectionViewModel> _connectionsById = new(StringComparer.Ordinal);
     private IGraphContextMenuAugmentor? _contextMenuAugmentor;
     private GraphEditorBehaviorOptions _behaviorOptions = GraphEditorBehaviorOptions.Default;
     private IGraphTextClipboardBridge? _textClipboardBridge;
@@ -2093,7 +2095,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// 按实例标识查找连线视图模型。
     /// </summary>
     public ConnectionViewModel? FindConnection(string connectionId)
-        => Connections.FirstOrDefault(connection => connection.Id == connectionId);
+        => _connectionsById.GetValueOrDefault(connectionId);
 
     /// <summary>
     /// 将视口中心移动到指定节点。
@@ -2731,7 +2733,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// 按实例标识查找节点视图模型。
     /// </summary>
     public NodeViewModel? FindNode(string nodeId)
-        => Nodes.FirstOrDefault(node => node.Id == nodeId);
+        => _nodesById.GetValueOrDefault(nodeId);
 
     private void ApplyNodePresentation(NodeViewModel node)
     {
@@ -2770,6 +2772,8 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             node.PropertyChanged -= HandleNodePropertyChanged;
         }
 
+        _nodesById.Clear();
+        _connectionsById.Clear();
         Nodes.Clear();
         Connections.Clear();
 
@@ -2781,11 +2785,12 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             var viewModel = new NodeViewModel(node);
             ApplyNodePresentation(viewModel);
             Nodes.Add(viewModel);
+            _nodesById[viewModel.Id] = viewModel;
         }
 
         foreach (var connection in document.Connections)
         {
-            Connections.Add(new ConnectionViewModel(
+            var viewModel = new ConnectionViewModel(
                 connection.Id,
                 connection.SourceNodeId,
                 connection.SourcePortId,
@@ -2793,7 +2798,9 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
                 connection.TargetPortId,
                 connection.Label,
                 connection.AccentHex,
-                connection.ConversionId));
+                connection.ConversionId);
+            Connections.Add(viewModel);
+            _connectionsById[viewModel.Id] = viewModel;
         }
 
         SelectedNodes.Clear();
@@ -3031,6 +3038,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             foreach (NodeViewModel node in args.OldItems)
             {
                 node.PropertyChanged -= HandleNodePropertyChanged;
+                _nodesById.Remove(node.Id);
             }
         }
 
@@ -3039,6 +3047,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             foreach (NodeViewModel node in args.NewItems)
             {
                 node.PropertyChanged += HandleNodePropertyChanged;
+                _nodesById[node.Id] = node;
             }
         }
 
@@ -3048,7 +3057,25 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     }
 
     private void HandleConnectionsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs args)
-        => RaiseComputedPropertyChanges();
+    {
+        if (args.OldItems is not null)
+        {
+            foreach (ConnectionViewModel connection in args.OldItems)
+            {
+                _connectionsById.Remove(connection.Id);
+            }
+        }
+
+        if (args.NewItems is not null)
+        {
+            foreach (ConnectionViewModel connection in args.NewItems)
+            {
+                _connectionsById[connection.Id] = connection;
+            }
+        }
+
+        RaiseComputedPropertyChanges();
+    }
 
     private void HandleNodePropertyChanged(object? sender, PropertyChangedEventArgs args)
     {
