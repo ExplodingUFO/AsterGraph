@@ -605,6 +605,11 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     public event EventHandler<GraphEditorFragmentEventArgs>? FragmentImported;
 
     /// <summary>
+    /// 当待完成连线状态发生变化时触发。
+    /// </summary>
+    public event EventHandler<GraphEditorPendingConnectionChangedEventArgs>? PendingConnectionChanged;
+
+    /// <summary>
     /// 当前是否存在等待完成的连线预览。
     /// </summary>
     public bool HasPendingConnection => PendingSourceNode is not null && PendingSourcePort is not null;
@@ -2098,6 +2103,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         PanX = (_viewportWidth / 2) - ((node.X + (node.Width / 2)) * Zoom);
         PanY = (_viewportHeight / 2) - ((node.Y + (node.Height / 2)) * Zoom);
         SetStatus("editor.status.viewport.centeredOnNode", "Centered on {0}.", node.Title);
+        NotifyViewportChanged();
     }
 
     /// <summary>
@@ -2984,9 +2990,17 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     partial void OnSelectedNodeChanged(NodeViewModel? value) => RaiseComputedPropertyChanges();
 
-    partial void OnPendingSourceNodeChanged(NodeViewModel? value) => RaiseComputedPropertyChanges();
+    partial void OnPendingSourceNodeChanged(NodeViewModel? value)
+    {
+        RaiseComputedPropertyChanges();
+        NotifyPendingConnectionChanged();
+    }
 
-    partial void OnPendingSourcePortChanged(PortViewModel? value) => RaiseComputedPropertyChanges();
+    partial void OnPendingSourcePortChanged(PortViewModel? value)
+    {
+        RaiseComputedPropertyChanges();
+        NotifyPendingConnectionChanged();
+    }
 
     partial void OnIsDirtyChanged(bool value) => RaiseComputedPropertyChanges();
 
@@ -3039,6 +3053,15 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
         _commandStateNotifier.NotifyPropertyChanged(OnPropertyChanged, ComputedPropertyNames);
     }
+
+    private void NotifyPendingConnectionChanged()
+        => PendingConnectionChanged?.Invoke(
+            this,
+            new GraphEditorPendingConnectionChangedEventArgs(
+                new GraphEditorPendingConnectionSnapshot(
+                    HasPendingConnection,
+                    HasPendingConnection ? PendingSourceNode?.Id : null,
+                    HasPendingConnection ? PendingSourcePort?.Id : null)));
 
     private void NotifyDocumentChanged(
         GraphEditorDocumentChangeKind changeKind,

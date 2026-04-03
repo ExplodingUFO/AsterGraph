@@ -153,6 +153,21 @@ public sealed class GraphEditorTransactionTests
     }
 
     [Fact]
+    public void RuntimeSession_CenterViewOnNode_PublishesViewportChanged()
+    {
+        var definitionId = new NodeDefinitionId("tests.transaction.center-node");
+        var session = AsterGraphEditorFactory.CreateSession(CreateOptions(definitionId));
+        GraphEditorViewportChangedEventArgs? viewportChanged = null;
+
+        session.Commands.UpdateViewportSize(1280, 720);
+        session.Events.ViewportChanged += (_, args) => viewportChanged = args;
+
+        session.Commands.CenterViewOnNode(SourceNodeId);
+
+        Assert.NotNull(viewportChanged);
+    }
+
+    [Fact]
     public void RuntimeSession_PublishesRecoverableFailuresThroughSharedFacade()
     {
         var definitionId = new NodeDefinitionId("tests.transaction.failure");

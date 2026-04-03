@@ -1,4 +1,5 @@
 using System.Reflection;
+using AsterGraph.Abstractions.Compatibility;
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Core.Compatibility;
@@ -44,6 +45,21 @@ public sealed class GraphEditorSessionTests
         Assert.Contains(
             method!.GetCustomAttributes(typeof(ObsoleteAttribute), inherit: false),
             attribute => attribute is ObsoleteAttribute);
+    }
+
+    [Fact]
+    public void IGraphEditorCommands_BeginConnection_DefaultShimMatchesStartConnectionBehavior()
+    {
+        var definitionId = new NodeDefinitionId("tests.session.begin-shim");
+        IGraphEditorCommands commands = AsterGraphEditorFactory.CreateSession(CreateOptions(definitionId)).Commands;
+
+        commands.BeginConnection(SourceNodeId, SourcePortId);
+
+        var session = Assert.IsAssignableFrom<IGraphEditorSession>(commands);
+        var pending = session.Queries.GetPendingConnectionSnapshot();
+        Assert.True(pending.HasPendingConnection);
+        Assert.Equal(SourceNodeId, pending.SourceNodeId);
+        Assert.Equal(SourcePortId, pending.SourcePortId);
     }
 
     [Fact]
@@ -139,6 +155,23 @@ public sealed class GraphEditorSessionTests
         Assert.DoesNotContain(
             snapshotType.GetProperties(BindingFlags.Public | BindingFlags.Instance),
             property => property.PropertyType == typeof(NodeViewModel) || property.PropertyType == typeof(PortViewModel));
+    }
+
+    [Fact]
+    public void GraphEditorCompatiblePortTargetSnapshot_NormalizesBlankDisplayMetadata()
+    {
+        var snapshot = new GraphEditorCompatiblePortTargetSnapshot(
+            "node-1",
+            "",
+            "port-1",
+            " ",
+            new PortTypeId("float"),
+            null!,
+            PortCompatibilityResult.Exact());
+
+        Assert.Equal("node-1", snapshot.NodeTitle);
+        Assert.Equal("port-1", snapshot.PortLabel);
+        Assert.Equal(string.Empty, snapshot.PortAccentHex);
     }
 
     [Fact]
