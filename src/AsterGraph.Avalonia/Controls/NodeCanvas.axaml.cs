@@ -1205,6 +1205,11 @@ public partial class NodeCanvas : UserControl
         var nodes = ApplySelectionModifiers(hitNodes);
         var primaryNode = nodes.LastOrDefault();
 
+        if (SelectionsMatchCurrentState(nodes, primaryNode))
+        {
+            return;
+        }
+
         ViewModel.SetSelection(
             nodes,
             primaryNode,
@@ -1216,6 +1221,34 @@ public partial class NodeCanvas : UserControl
                     _ => $"Selected {nodes.Count} nodes.",
                 }
                 : null);
+    }
+
+    private bool SelectionsMatchCurrentState(IReadOnlyList<NodeViewModel> nodes, NodeViewModel? primaryNode)
+    {
+        if (ViewModel is null)
+        {
+            return false;
+        }
+
+        if (!ReferenceEquals(ViewModel.SelectedNode, primaryNode))
+        {
+            return false;
+        }
+
+        if (ViewModel.SelectedNodes.Count != nodes.Count)
+        {
+            return false;
+        }
+
+        for (var index = 0; index < nodes.Count; index++)
+        {
+            if (!ReferenceEquals(ViewModel.SelectedNodes[index], nodes[index]))
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private void HideSelectionAdorner()
