@@ -99,6 +99,12 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     private readonly IRelayCommand[] _computedStateCommands;
     private readonly Dictionary<string, NodeViewModel> _nodesById = new(StringComparer.Ordinal);
     private readonly Dictionary<string, ConnectionViewModel> _connectionsById = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, List<ConnectionViewModel>> _incomingConnectionsByNodeId = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, List<ConnectionViewModel>> _outgoingConnectionsByNodeId = new(StringComparer.Ordinal);
+    private string _inspectorConnectionsText = string.Empty;
+    private string _inspectorUpstreamText = string.Empty;
+    private string _inspectorDownstreamText = string.Empty;
+    private string _selectionCaptionText = string.Empty;
     private IGraphContextMenuAugmentor? _contextMenuAugmentor;
     private GraphEditorBehaviorOptions _behaviorOptions = GraphEditorBehaviorOptions.Default;
     private IGraphTextClipboardBridge? _textClipboardBridge;
@@ -106,6 +112,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     private INodePresentationProvider? _nodePresentationProvider;
     private IGraphLocalizationProvider? _localizationProvider;
     private readonly GraphContextMenuBuilder _contextMenuBuilder;
+    private bool _suspendSelectionTracking;
     private bool _suspendDirtyTracking;
     private bool _suspendHistoryTracking;
     private string? _lastSavedDocumentSignature;
@@ -245,6 +252,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
         Nodes.CollectionChanged += HandleNodesCollectionChanged;
         Connections.CollectionChanged += HandleConnectionsCollectionChanged;
+        SelectedNodes.CollectionChanged += HandleSelectedNodesCollectionChanged;
 
         WorkspacePath = _workspaceService.WorkspacePath;
         Title = document.Title;
@@ -889,39 +897,26 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// </summary>
     public string InspectorConnections => SelectedNode is null
         ? LocalizeText("editor.inspector.connections.none", "Select a node to inspect its connection summary.")
-        : LocalizeFormat(
-            "editor.inspector.connections.summary",
-            "{0} incoming  ·  {1} outgoing",
-            GetIncomingConnections(SelectedNode).Count,
-            GetOutgoingConnections(SelectedNode).Count);
+        : _inspectorConnectionsText;
 
     /// <summary>
     /// 获取当前主选节点的上游依赖摘要文本。
     /// </summary>
     public string InspectorUpstream => SelectedNode is null
         ? LocalizeText("editor.inspector.upstream.none", "Select a node to see upstream dependencies.")
-        : _inspectorProjection.FormatRelatedNodes(
-            GetIncomingConnections(SelectedNode),
-            useSource: true,
-            FindNode);
+        : _inspectorUpstreamText;
 
     /// <summary>
     /// 获取当前主选节点的下游消费者摘要文本。
     /// </summary>
     public string InspectorDownstream => SelectedNode is null
         ? LocalizeText("editor.inspector.downstream.none", "Select a node to see downstream consumers.")
-        : _inspectorProjection.FormatRelatedNodes(
-            GetOutgoingConnections(SelectedNode),
-            useSource: false,
-            FindNode);
+        : _inspectorDownstreamText;
 
     /// <summary>
     /// 获取面向状态栏和检查器的当前选择摘要文本。
     /// </summary>
-    public string SelectionCaption => _inspectorProjection.FormatSelectionCaption(
-        SelectedNode,
-        HasMultipleSelection,
-        SelectedNodes.Count);
+    public string SelectionCaption => _selectionCaptionText;
 
     /// <summary>
     /// 为给定上下文构建右键菜单描述。
@@ -1005,6 +1000,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             return;
         }
 
+        UpdateSelectionDerivedState();
         RaiseComputedPropertyChanges();
         OnPropertyChanged(nameof(FragmentLibraryCaption));
     }
@@ -1140,14 +1136,17 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
         var previousState = _pendingInteractionState;
         _pendingInteractionState = null;
-        if (string.Equals(previousState.Signature, CreateDocumentSignature(), StringComparison.Ordinal))
+        var currentState = CaptureHistoryState();
+        if (string.Equals(previousState.Signature, currentState.Signature, StringComparison.Ordinal))
         {
+            UpdateDirtyState(currentState.Signature);
+            RaiseComputedPropertyChanges();
             return;
         }
 
         StatusMessage = status;
-        UpdateDirtyState();
-        PushCurrentHistoryState();
+        UpdateDirtyState(currentState.Signature);
+        PushHistoryState(currentState);
         RaiseComputedPropertyChanges();
     }
 
@@ -1306,6 +1305,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             item.IsSelected = uniqueNodes.Contains(item);
         }
 
+        _suspendSelectionTracking = true;
         SelectedNodes.Clear();
         foreach (var node in uniqueNodes)
         {
@@ -1313,6 +1313,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         }
 
         SelectedNode = nextPrimary;
+        _suspendSelectionTracking = false;
 
         if (!string.IsNullOrWhiteSpace(status))
         {
@@ -1320,6 +1321,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         }
 
         RebuildSelectedNodeParameters();
+        UpdateSelectionDerivedState();
         NotifySelectionChanged();
         RaiseComputedPropertyChanges();
     }
@@ -2646,9 +2648,11 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
         try
         {
-            _workspaceService.Save(CreateDocumentSnapshot());
-            _lastSavedDocumentSignature = CreateDocumentSignature();
-            UpdateDirtyState();
+            var document = CreateDocumentSnapshot();
+            var signature = CreateDocumentSignature(document);
+            _workspaceService.Save(document);
+            _lastSavedDocumentSignature = signature;
+            UpdateDirtyState(signature);
             SetStatus("editor.status.workspace.save.savedToPath", "Saved snapshot to {0}.", WorkspacePath);
             PublishRuntimeDiagnostic(
                 "workspace.save.succeeded",
@@ -2762,7 +2766,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         node.UpdatePresentation(state);
     }
 
-    private void LoadDocument(GraphDocument document, string status, bool markClean)
+    private void LoadDocument(GraphDocument document, string status, bool markClean, bool resetHistory = true)
     {
         _suspendDirtyTracking = true;
         _suspendHistoryTracking = true;
@@ -2774,6 +2778,8 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
         _nodesById.Clear();
         _connectionsById.Clear();
+        _incomingConnectionsByNodeId.Clear();
+        _outgoingConnectionsByNodeId.Clear();
         Nodes.Clear();
         Connections.Clear();
 
@@ -2803,8 +2809,10 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             _connectionsById[viewModel.Id] = viewModel;
         }
 
+        _suspendSelectionTracking = true;
         SelectedNodes.Clear();
         SelectedNode = null;
+        _suspendSelectionTracking = false;
         SelectedNodeParameters.Clear();
         _pendingInteractionState = null;
         IsDirty = !markClean;
@@ -2812,23 +2820,32 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         _suspendHistoryTracking = false;
         _suspendDirtyTracking = false;
 
-        var historyState = CaptureHistoryState();
-        if (!_suspendHistoryTracking)
+        GraphEditorHistoryState? historyState = null;
+        if (resetHistory || markClean)
+        {
+            historyState = CaptureHistoryState();
+        }
+
+        if (resetHistory && historyState is not null)
         {
             _historyService.Reset(historyState);
         }
 
-        _lastSavedDocumentSignature = markClean
-            ? historyState.Signature
-            : _lastSavedDocumentSignature;
+        if (markClean && historyState is not null)
+        {
+            _lastSavedDocumentSignature = historyState.Signature;
+        }
+
+        UpdateSelectionDerivedState();
         RaiseComputedPropertyChanges();
     }
 
     private void MarkDirty(string status)
     {
         StatusMessage = status;
-        UpdateDirtyState();
-        PushCurrentHistoryState();
+        var currentState = CaptureHistoryState();
+        UpdateDirtyState(currentState.Signature);
+        PushHistoryState(currentState);
         RaiseComputedPropertyChanges();
     }
 
@@ -2938,17 +2955,20 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     private GraphEditorHistoryState CaptureHistoryState()
     {
         var document = CreateDocumentSnapshot();
-        return new GraphEditorHistoryState(
+        return CreateHistoryState(document);
+    }
+
+    private GraphEditorHistoryState CreateHistoryState(GraphDocument document)
+        => new(
             document,
             SelectedNodes.Select(node => node.Id).ToList(),
             SelectedNode?.Id,
             CreateDocumentSignature(document));
-    }
 
     private void RestoreHistoryState(GraphEditorHistoryState state, string status)
     {
         _suspendHistoryTracking = true;
-        LoadDocument(state.Document, status, markClean: false);
+        LoadDocument(state.Document, status, markClean: false, resetHistory: false);
 
         var restoredSelection = state.SelectedNodeIds
             .Select(FindNode)
@@ -2961,7 +2981,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
         SetSelection(restoredSelection, primaryNode, status);
         _suspendHistoryTracking = false;
-        UpdateDirtyState();
+        UpdateDirtyState(CaptureHistoryState().Signature);
         RaiseComputedPropertyChanges();
     }
 
@@ -2972,7 +2992,17 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             return;
         }
 
-        _historyService.Push(CaptureHistoryState());
+        PushHistoryState(CaptureHistoryState());
+    }
+
+    private void PushHistoryState(GraphEditorHistoryState state)
+    {
+        if (_suspendHistoryTracking)
+        {
+            return;
+        }
+
+        _historyService.Push(state);
     }
 
     private string CreateDocumentSignature()
@@ -3008,14 +3038,32 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             return;
         }
 
-        IsDirty = !string.Equals(CreateDocumentSignature(), _lastSavedDocumentSignature, StringComparison.Ordinal);
+        UpdateDirtyState(CreateDocumentSignature());
+    }
+
+    private void UpdateDirtyState(string currentSignature)
+    {
+        if (_suspendDirtyTracking)
+        {
+            return;
+        }
+
+        IsDirty = !string.Equals(currentSignature, _lastSavedDocumentSignature, StringComparison.Ordinal);
     }
 
     partial void OnZoomChanged(double value) => RaiseComputedPropertyChanges();
 
     partial void OnSelectedFragmentTemplateChanged(FragmentTemplateViewModel? value) => RaiseComputedPropertyChanges();
 
-    partial void OnSelectedNodeChanged(NodeViewModel? value) => RaiseComputedPropertyChanges();
+    partial void OnSelectedNodeChanged(NodeViewModel? value)
+    {
+        if (_suspendSelectionTracking)
+        {
+            return;
+        }
+
+        UpdateSelectionDerivedState();
+    }
 
     partial void OnPendingSourceNodeChanged(NodeViewModel? value)
     {
@@ -3053,6 +3101,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
         CoerceSelectionToExistingNodes();
         FitViewCommand.NotifyCanExecuteChanged();
+        UpdateSelectionDerivedState();
         RaiseComputedPropertyChanges();
     }
 
@@ -3063,6 +3112,8 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             foreach (ConnectionViewModel connection in args.OldItems)
             {
                 _connectionsById.Remove(connection.Id);
+                RemoveIndexedConnection(_outgoingConnectionsByNodeId, connection.SourceNodeId, connection);
+                RemoveIndexedConnection(_incomingConnectionsByNodeId, connection.TargetNodeId, connection);
             }
         }
 
@@ -3071,9 +3122,37 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             foreach (ConnectionViewModel connection in args.NewItems)
             {
                 _connectionsById[connection.Id] = connection;
+                IndexConnection(connection);
             }
         }
 
+        UpdateSelectionDerivedState();
+        RaiseComputedPropertyChanges();
+    }
+
+    private void HandleSelectedNodesCollectionChanged(object? sender, NotifyCollectionChangedEventArgs args)
+    {
+        if (_suspendSelectionTracking)
+        {
+            return;
+        }
+
+        foreach (var node in Nodes)
+        {
+            node.IsSelected = SelectedNodes.Contains(node);
+        }
+
+        var nextPrimary = SelectedNode is not null && SelectedNodes.Contains(SelectedNode)
+            ? SelectedNode
+            : SelectedNodes.LastOrDefault();
+        if (!ReferenceEquals(nextPrimary, SelectedNode))
+        {
+            SelectedNode = nextPrimary;
+        }
+
+        RebuildSelectedNodeParameters();
+        UpdateSelectionDerivedState();
+        NotifySelectionChanged();
         RaiseComputedPropertyChanges();
     }
 
@@ -3099,6 +3178,40 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         _commandStateNotifier.NotifyCanExecuteChanged(_computedStateCommands);
 
         _commandStateNotifier.NotifyPropertyChanged(OnPropertyChanged, ComputedPropertyNames);
+    }
+
+    private void UpdateSelectionDerivedState()
+    {
+        var selectedNode = SelectedNode;
+        if (selectedNode is null)
+        {
+            _inspectorConnectionsText = LocalizeText("editor.inspector.connections.none", "Select a node to inspect its connection summary.");
+            _inspectorUpstreamText = LocalizeText("editor.inspector.upstream.none", "Select a node to see upstream dependencies.");
+            _inspectorDownstreamText = LocalizeText("editor.inspector.downstream.none", "Select a node to see downstream consumers.");
+        }
+        else
+        {
+            var incomingConnections = GetIncomingConnections(selectedNode);
+            var outgoingConnections = GetOutgoingConnections(selectedNode);
+            _inspectorConnectionsText = LocalizeFormat(
+                "editor.inspector.connections.summary",
+                "{0} incoming  ·  {1} outgoing",
+                incomingConnections.Count,
+                outgoingConnections.Count);
+            _inspectorUpstreamText = _inspectorProjection.FormatRelatedNodes(
+                incomingConnections,
+                useSource: true,
+                FindNode);
+            _inspectorDownstreamText = _inspectorProjection.FormatRelatedNodes(
+                outgoingConnections,
+                useSource: false,
+                FindNode);
+        }
+
+        _selectionCaptionText = _inspectorProjection.FormatSelectionCaption(
+            SelectedNode,
+            HasMultipleSelection,
+            SelectedNodes.Count);
     }
 
     private void NotifyPendingConnectionChanged()
@@ -3187,11 +3300,55 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         MarkDirty(status);
     }
 
-    private List<ConnectionViewModel> GetIncomingConnections(NodeViewModel node)
-        => Connections.Where(connection => connection.TargetNodeId == node.Id).ToList();
+    private IReadOnlyList<ConnectionViewModel> GetIncomingConnections(NodeViewModel node)
+        => GetIndexedConnections(_incomingConnectionsByNodeId, node.Id);
 
-    private List<ConnectionViewModel> GetOutgoingConnections(NodeViewModel node)
-        => Connections.Where(connection => connection.SourceNodeId == node.Id).ToList();
+    private IReadOnlyList<ConnectionViewModel> GetOutgoingConnections(NodeViewModel node)
+        => GetIndexedConnections(_outgoingConnectionsByNodeId, node.Id);
+
+    private static IReadOnlyList<ConnectionViewModel> GetIndexedConnections(
+        Dictionary<string, List<ConnectionViewModel>> lookup,
+        string nodeId)
+        => lookup.TryGetValue(nodeId, out var connections)
+            ? connections
+            : Array.Empty<ConnectionViewModel>();
+
+    private void IndexConnection(ConnectionViewModel connection)
+    {
+        AddIndexedConnection(_outgoingConnectionsByNodeId, connection.SourceNodeId, connection);
+        AddIndexedConnection(_incomingConnectionsByNodeId, connection.TargetNodeId, connection);
+    }
+
+    private static void AddIndexedConnection(
+        Dictionary<string, List<ConnectionViewModel>> lookup,
+        string nodeId,
+        ConnectionViewModel connection)
+    {
+        if (!lookup.TryGetValue(nodeId, out var connections))
+        {
+            connections = [];
+            lookup[nodeId] = connections;
+        }
+
+        connections.Add(connection);
+    }
+
+    private static void RemoveIndexedConnection(
+        Dictionary<string, List<ConnectionViewModel>> lookup,
+        string nodeId,
+        ConnectionViewModel connection)
+    {
+        if (!lookup.TryGetValue(nodeId, out var connections))
+        {
+            return;
+        }
+
+        connections.Remove(connection);
+        if (connections.Count == 0)
+        {
+            lookup.Remove(nodeId);
+        }
+    }
 
     private static string CreateUniqueId(IEnumerable<string> existingIds, string prefix)
     {

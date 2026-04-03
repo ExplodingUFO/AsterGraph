@@ -136,11 +136,11 @@ var legacyEditor = new GraphEditorViewModel(
     localizationProvider,
     serializer,
     diagnostics);
-var legacyView = new GraphEditorView
+var legacyView = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOptions
 {
     Editor = legacyEditor,
     ChromeMode = GraphEditorViewChromeMode.CanvasOnly,
-};
+});
 
 var factoryEditor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
 {
@@ -164,6 +164,41 @@ var factoryView = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaVie
     Editor = factoryEditor,
     ChromeMode = GraphEditorViewChromeMode.CanvasOnly,
 });
+var inspectorProofEditor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
+{
+    Document = document,
+    NodeCatalog = catalog,
+    CompatibilityService = new RecordingCompatibilityService(),
+    StyleOptions = styleOptions,
+    BehaviorOptions = behaviorOptions,
+});
+inspectorProofEditor.SelectSingleNode(inspectorProofEditor.Nodes.Single(node => node.Id == sourceNodeId), updateStatus: false);
+inspectorProofEditor.ConnectPorts(sourceNodeId, sourcePortId, targetNodeId, "in");
+var historyProofEditor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
+{
+    Document = document,
+    NodeCatalog = catalog,
+    CompatibilityService = new RecordingCompatibilityService(),
+    StyleOptions = styleOptions,
+    BehaviorOptions = behaviorOptions,
+});
+var historyProofNode = historyProofEditor.Nodes.Single(node => node.Id == sourceNodeId);
+var historyProofOrigin = new GraphPoint(historyProofNode.X, historyProofNode.Y);
+historyProofEditor.BeginHistoryInteraction();
+historyProofEditor.ApplyDragOffset(
+    new Dictionary<string, GraphPoint>(StringComparer.Ordinal)
+    {
+        [sourceNodeId] = historyProofOrigin,
+    },
+    32,
+    16);
+historyProofEditor.CompleteHistoryInteraction("Package smoke state scaling proof.");
+var historyDirtyAfterMove = historyProofEditor.IsDirty;
+var historyCanUndoAfterMove = historyProofEditor.CanUndo;
+historyProofEditor.Undo();
+var historyRestoredNode = historyProofEditor.Nodes.Single(node => node.Id == sourceNodeId);
+var inspectorSummaryOk = inspectorProofEditor.InspectorConnections == "0 incoming  ·  1 outgoing";
+var inspectorDownstreamOk = inspectorProofEditor.InspectorDownstream.Contains("Smoke Target", StringComparison.Ordinal);
 var optOutFullShell = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOptions
 {
     Editor = factoryEditor,
@@ -329,6 +364,8 @@ Console.WriteLine($"RUNTIME_DTO_QUERY_OK:{compatibleTargets.Count}:{compatibleTa
 Console.WriteLine($"RUNTIME_VIEWPORT_OK:{sessionInspection.Viewport.ViewportWidth}:{sessionInspection.Viewport.ViewportHeight}");
 Console.WriteLine($"SERVICE_OVERRIDE_OK:{workspaceService.WorkspacePath}:{fragmentWorkspaceService.FragmentPath}:{workspaceService.SaveCalls}:{fragmentWorkspaceService.SaveCalls}:{serializer.SerializeCalls}");
 Console.WriteLine($"COMPATIBILITY_SERVICE_OK:{compatibleTargets.Count}:{compatibilityService.EvaluateCalls}");
+Console.WriteLine($"STATE_INSPECTOR_OK:{inspectorSummaryOk}:{inspectorDownstreamOk}");
+Console.WriteLine($"STATE_HISTORY_OK:{historyDirtyAfterMove}:{historyCanUndoAfterMove}:{!historyProofEditor.IsDirty}:{historyRestoredNode.X == historyProofOrigin.X}:{historyRestoredNode.Y == historyProofOrigin.Y}");
 Console.WriteLine($"DIAG_DIAGNOSTICS_SINK_OK:{diagnostics.Diagnostics.Count}:{diagnostics.Diagnostics.LastOrDefault()?.Code ?? "<none>"}");
 Console.WriteLine($"DIAG_LEGACY_INSPECTION_OK:{legacyInspection.Document.Nodes.Count}:{legacyInspection.Selection.SelectedNodeIds.Count}:{legacyInspection.PendingConnection.HasPendingConnection}:{legacyInspection.Status.Message}");
 Console.WriteLine($"DIAG_FACTORY_INSPECTION_OK:{factoryInspection.Document.Nodes.Count}:{factoryInspection.Selection.SelectedNodeIds.Count}:{factoryInspection.PendingConnection.HasPendingConnection}:{factoryInspection.Status.Message}");

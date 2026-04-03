@@ -197,6 +197,7 @@ dotnet build avalonia-node-map.sln -t:Rebuild --no-restore -p:NoWarn= --nologo -
 # verify the packed package path and the project-reference host sample
 dotnet run --project tools/AsterGraph.PackageSmoke/AsterGraph.PackageSmoke.csproj -p:UsePackedAsterGraphPackages=true --nologo
 dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj --nologo
+dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj --nologo
 
 # keep the normal solution test gate green
 dotnet test avalonia-node-map.sln --no-restore --nologo -v minimal
@@ -369,6 +370,19 @@ Reference host sample:
   - `GraphEditorView.ChromeMode`
   - standalone `NodeCanvas`, `GraphInspectorView`, and `GraphMiniMap` composition
   - `EnableDefaultContextMenu` and `EnableDefaultCommandShortcuts`
+
+Repeatable scale validation:
+
+- `tools/AsterGraph.ScaleSmoke`
+- Run with:
+  - `dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj --nologo`
+- The tool emits stable `SCALE_*` markers for:
+  - large-graph setup size
+  - bulk selection
+  - connection delete/recreate flow
+  - drag/history/save/undo/redo dirty-state continuity
+  - viewport fitting
+  - inspection snapshot continuity
 
 ## Type Compatibility
 

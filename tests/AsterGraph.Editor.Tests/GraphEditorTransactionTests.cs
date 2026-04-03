@@ -8,6 +8,7 @@ using AsterGraph.Editor.Events;
 using AsterGraph.Editor.Hosting;
 using AsterGraph.Editor.Menus;
 using AsterGraph.Editor.Runtime;
+using AsterGraph.Editor.Services;
 using AsterGraph.Editor.ViewModels;
 using Xunit;
 
@@ -186,6 +187,117 @@ public sealed class GraphEditorTransactionTests
         Assert.Contains("augmentor", failure.Message, StringComparison.OrdinalIgnoreCase);
     }
 
+    [Fact]
+    public void GraphEditorViewModel_HistoryInteraction_PreservesUndoAndDirtySemantics()
+    {
+        var definitionId = new NodeDefinitionId("tests.transaction.history-interaction");
+        var workspace = new RecordingWorkspaceService();
+        var editor = AsterGraphEditorFactory.Create(CreateOptions(definitionId) with
+        {
+            WorkspaceService = workspace,
+        });
+        var sourceNode = Assert.Single(editor.Nodes, node => node.Id == SourceNodeId);
+        var origin = new GraphPoint(sourceNode.X, sourceNode.Y);
+
+        editor.SaveWorkspace();
+        Assert.False(editor.IsDirty);
+
+        editor.BeginHistoryInteraction();
+        editor.ApplyDragOffset(
+            new Dictionary<string, GraphPoint>(StringComparer.Ordinal)
+            {
+                [SourceNodeId] = origin,
+            },
+            80,
+            40);
+        editor.CompleteHistoryInteraction("Drag complete.");
+
+        Assert.True(editor.IsDirty);
+        Assert.True(editor.CanUndo);
+        Assert.Equal(origin.X + 80, sourceNode.X);
+        Assert.Equal(origin.Y + 40, sourceNode.Y);
+
+        editor.Undo();
+        var restoredNode = Assert.Single(editor.Nodes, node => node.Id == SourceNodeId);
+
+        Assert.False(editor.IsDirty);
+        Assert.Equal(origin.X, restoredNode.X);
+        Assert.Equal(origin.Y, restoredNode.Y);
+        Assert.False(editor.CanUndo);
+        Assert.True(workspace.Exists());
+    }
+
+    [Fact]
+    public void GraphEditorViewModel_HistoryInteraction_NoOpDrag_DoesNotLeaveDirtyStateLatched()
+    {
+        var definitionId = new NodeDefinitionId("tests.transaction.history-noop");
+        var editor = AsterGraphEditorFactory.Create(CreateOptions(definitionId));
+        var sourceNode = Assert.Single(editor.Nodes, node => node.Id == SourceNodeId);
+        var origin = new GraphPoint(sourceNode.X, sourceNode.Y);
+
+        editor.BeginHistoryInteraction();
+        editor.ApplyDragOffset(
+            new Dictionary<string, GraphPoint>(StringComparer.Ordinal)
+            {
+                [SourceNodeId] = origin,
+            },
+            40,
+            20);
+        editor.ApplyDragOffset(
+            new Dictionary<string, GraphPoint>(StringComparer.Ordinal)
+            {
+                [SourceNodeId] = origin,
+            },
+            0,
+            0);
+        editor.CompleteHistoryInteraction("No-op drag.");
+
+        var currentNode = Assert.Single(editor.Nodes, node => node.Id == SourceNodeId);
+        Assert.False(editor.IsDirty);
+        Assert.False(editor.CanUndo);
+        Assert.Equal(origin.X, currentNode.X);
+        Assert.Equal(origin.Y, currentNode.Y);
+    }
+
+    [Fact]
+    public void GraphEditorViewModel_SaveBoundary_PreservesUndoRedoDirtySemantics()
+    {
+        var definitionId = new NodeDefinitionId("tests.transaction.save-boundary");
+        var workspace = new RecordingWorkspaceService();
+        var editor = AsterGraphEditorFactory.Create(CreateOptions(definitionId) with
+        {
+            WorkspaceService = workspace,
+        });
+        var sourceNode = Assert.Single(editor.Nodes, node => node.Id == SourceNodeId);
+        var origin = new GraphPoint(sourceNode.X, sourceNode.Y);
+
+        editor.BeginHistoryInteraction();
+        editor.ApplyDragOffset(
+            new Dictionary<string, GraphPoint>(StringComparer.Ordinal)
+            {
+                [SourceNodeId] = origin,
+            },
+            64,
+            24);
+        editor.CompleteHistoryInteraction("Moved before save.");
+
+        editor.SaveWorkspace();
+        Assert.False(editor.IsDirty);
+
+        editor.Undo();
+        var undoneNode = Assert.Single(editor.Nodes, node => node.Id == SourceNodeId);
+        Assert.True(editor.IsDirty);
+        Assert.Equal(origin.X, undoneNode.X);
+        Assert.Equal(origin.Y, undoneNode.Y);
+
+        editor.Redo();
+        var redoneNode = Assert.Single(editor.Nodes, node => node.Id == SourceNodeId);
+        Assert.False(editor.IsDirty);
+        Assert.Equal(origin.X + 64, redoneNode.X);
+        Assert.Equal(origin.Y + 24, redoneNode.Y);
+        Assert.True(workspace.Exists());
+    }
+
     private static AsterGraphEditorOptions CreateOptions(NodeDefinitionId definitionId, IGraphContextMenuAugmentor? augmentor = null)
         => new()
         {
@@ -247,5 +359,21 @@ public sealed class GraphEditorTransactionTests
             ContextMenuContext context,
             IReadOnlyList<MenuItemDescriptor> stockItems)
             => throw new InvalidOperationException("augmentor exploded");
+    }
+
+    private sealed class RecordingWorkspaceService : IGraphWorkspaceService
+    {
+        public string WorkspacePath => "workspace://transactions";
+
+        public GraphDocument? SavedDocument { get; private set; }
+
+        public void Save(GraphDocument document)
+            => SavedDocument = document;
+
+        public GraphDocument Load()
+            => SavedDocument ?? throw new InvalidOperationException("No saved workspace.");
+
+        public bool Exists()
+            => SavedDocument is not null;
     }
 }

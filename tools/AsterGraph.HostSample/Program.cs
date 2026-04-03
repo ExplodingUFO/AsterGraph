@@ -112,6 +112,35 @@ var runtimeViewport = runtimeSession.Queries.GetViewportSnapshot();
 var runtimeCapabilities = runtimeSession.Queries.GetCapabilitySnapshot();
 var runtimeInspection = runtimeSession.Diagnostics.CaptureInspectionSnapshot();
 var runtimeRecentDiagnostics = runtimeSession.Diagnostics.GetRecentDiagnostics(10);
+var inspectorProofEditor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
+{
+    Document = document,
+    NodeCatalog = catalog,
+    CompatibilityService = new RecordingCompatibilityService(),
+});
+inspectorProofEditor.SelectSingleNode(AssertNode(inspectorProofEditor, "sample-source-001"), updateStatus: false);
+inspectorProofEditor.ConnectPorts("sample-source-001", "result", "sample-sink-001", "input");
+var historyProofEditor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
+{
+    Document = document,
+    NodeCatalog = catalog,
+    CompatibilityService = new RecordingCompatibilityService(),
+});
+var historyProofNode = AssertNode(historyProofEditor, "sample-source-001");
+var historyProofOrigin = new GraphPoint(historyProofNode.X, historyProofNode.Y);
+historyProofEditor.BeginHistoryInteraction();
+historyProofEditor.ApplyDragOffset(
+    new Dictionary<string, GraphPoint>(StringComparer.Ordinal)
+    {
+        ["sample-source-001"] = historyProofOrigin,
+    },
+    36,
+    18);
+historyProofEditor.CompleteHistoryInteraction("Host sample state scaling proof.");
+var historyDirtyAfterMove = historyProofEditor.IsDirty;
+var historyCanUndoAfterMove = historyProofEditor.CanUndo;
+historyProofEditor.Undo();
+var historyRestoredNode = AssertNode(historyProofEditor, "sample-source-001");
 
 Console.WriteLine($"Session title: {runtimeSnapshot.Title}");
 Console.WriteLine($"Session node count after commands: {runtimeSnapshot.Nodes.Count}");
@@ -132,6 +161,7 @@ Console.WriteLine($"Diagnostics recent history: {string.Join(" | ", runtimeRecen
 Console.WriteLine($"Diagnostics logger entries: {string.Join(" | ", runtimeLoggerFactory.Entries.Select(entry => $"{entry.Level}:{entry.Message}"))}");
 Console.WriteLine($"Diagnostics Activity operations: {string.Join(", ", runtimeActivities)}");
 Console.WriteLine($"Session runtime workflow: selection={runtimeSession.Queries.GetSelectionSnapshot().PrimarySelectedNodeId}, connections={runtimeSnapshot.Connections.Count}");
+Console.WriteLine($"State scaling proof: inspector={inspectorProofEditor.InspectorConnections}, downstream={inspectorProofEditor.InspectorDownstream}, dirtyAfterMove={historyDirtyAfterMove}, canUndoAfterMove={historyCanUndoAfterMove}, dirtyAfterUndo={historyProofEditor.IsDirty}, restored=({historyRestoredNode.X:0},{historyRestoredNode.Y:0})");
 
 var viewCompatibility = new RecordingCompatibilityService();
 var viewDiagnostics = new RecordingDiagnosticsSink();

@@ -18,12 +18,12 @@ This roadmap targets four gaps surfaced by the latest review:
 
 ## Phases
 
-- [ ] **Phase 7: Runtime Host Boundary Completion** - Finish the runtime/session host story so custom UI hosts no longer need the concrete editor facade for core graph interaction.
-- [ ] **Phase 8: Stable Host Extension Contracts** - Decouple the main host extension seams from MVVM implementation types and stabilize the contract surface.
-- [ ] **Phase 9: Native Avalonia Host Integration** - Make the full-shell and standalone Avalonia surfaces cooperate with host-native shortcuts, wheel input, focus, and keyboard menu behavior.
-- [ ] **Phase 10: Canvas And Interaction Hot-Path Scaling** - Remove graph-wide rebuild/requery patterns from drag, connection preview, marquee selection, and small scene deltas.
-- [ ] **Phase 11: State And History Scaling** - Reduce whole-document and whole-graph recomputation in inspector/status/history/dirty-tracking paths.
-- [ ] **Phase 12: Proof Ring For Hosts And Large Graphs** - Prove the hardening work through focused regressions, sample output, package smoke, and large-graph validation scenarios.
+- [x] **Phase 7: Runtime Host Boundary Completion** - Finish the runtime/session host story so custom UI hosts no longer need the concrete editor facade for core graph interaction.
+- [x] **Phase 8: Stable Host Extension Contracts** - Decouple the main host extension seams from MVVM implementation types and stabilize the contract surface.
+- [x] **Phase 9: Native Avalonia Host Integration** - Make the full-shell and standalone Avalonia surfaces cooperate with host-native shortcuts, wheel input, focus, and keyboard menu behavior.
+- [x] **Phase 10: Canvas And Interaction Hot-Path Scaling** - Remove graph-wide rebuild/requery patterns from drag, connection preview, marquee selection, and small scene deltas.
+- [x] **Phase 11: State And History Scaling** - Reduce whole-document and whole-graph recomputation in inspector/status/history/dirty-tracking paths.
+- [x] **Phase 12: Proof Ring For Hosts And Large Graphs** - Prove the hardening work through focused regressions, sample output, package smoke, and large-graph validation scenarios.
 
 ## Phase Details
 
@@ -92,13 +92,13 @@ This roadmap targets four gaps surfaced by the latest review:
 
 | Phase | Requirements | Status |
 |-------|--------------|--------|
-| 7. Runtime Host Boundary Completion | HOST-01, HOST-02 | Planned |
-| 8. Stable Host Extension Contracts | HOST-03, UX-01 | Planned |
-| 9. Native Avalonia Host Integration | UX-02, UX-03 | Planned |
-| 10. Canvas And Interaction Hot-Path Scaling | PERF-01, PERF-02, PERF-03 | Planned |
-| 11. State And History Scaling | PERF-04, PERF-05 | Planned |
-| 12. Proof Ring For Hosts And Large Graphs | VALID-01, VALID-02 | Planned |
+| 7. Runtime Host Boundary Completion | HOST-01, HOST-02 | Completed |
+| 8. Stable Host Extension Contracts | HOST-03, UX-01 | Completed |
+| 9. Native Avalonia Host Integration | UX-02, UX-03 | Completed |
+| 10. Canvas And Interaction Hot-Path Scaling | PERF-01, PERF-02, PERF-03 | Completed |
+| 11. State And History Scaling | PERF-04, PERF-05 | Completed |
+| 12. Proof Ring For Hosts And Large Graphs | VALID-01, VALID-02 | Completed |
 
 ## Next Action
 
-**Phase 7** is the correct first step. The runtime/session host story must become self-sufficient before the UI integration and performance work can settle on stable contracts.
+Milestone v1.1 is complete. The next action is milestone audit / merge preparation rather than more v1.1 phase execution.

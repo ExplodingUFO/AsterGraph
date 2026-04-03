@@ -62,8 +62,8 @@
 | PERF-03 | Phase 10 | Planned |
 | PERF-04 | Phase 11 | Planned |
 | PERF-05 | Phase 11 | Planned |
-| VALID-01 | Phase 12 | Planned |
-| VALID-02 | Phase 12 | Planned |
+| VALID-01 | Phase 12 | Completed |
+| VALID-02 | Phase 12 | Completed |
 
 **Coverage:**
 - milestone requirements: 13 total

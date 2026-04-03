@@ -313,6 +313,57 @@ public sealed class GraphEditorSessionTests
         Assert.Equal(pending.SourcePortId, snapshot.PendingConnection.SourcePortId);
     }
 
+    [Fact]
+    public void GraphEditorViewModel_InspectorConnectionSummaries_StayAlignedWithSelectionAndConnectionChanges()
+    {
+        var definitionId = new NodeDefinitionId("tests.session.inspector-cache");
+        var editor = AsterGraphEditorFactory.Create(CreateOptions(definitionId));
+        var session = editor.Session;
+
+        editor.SelectSingleNode(editor.FindNode(SourceNodeId), updateStatus: false);
+        Assert.Equal("0 incoming  ·  0 outgoing", editor.InspectorConnections);
+        Assert.Equal("None", editor.InspectorDownstream);
+
+        session.Commands.StartConnection(SourceNodeId, SourcePortId);
+        session.Commands.CompleteConnection(TargetNodeId, TargetPortId);
+
+        Assert.Equal("0 incoming  ·  1 outgoing", editor.InspectorConnections);
+        Assert.Contains("Target Node", editor.InspectorDownstream, StringComparison.Ordinal);
+        Assert.Contains("Input", editor.InspectorDownstream, StringComparison.Ordinal);
+
+        editor.SelectSingleNode(editor.FindNode(TargetNodeId), updateStatus: false);
+        Assert.Equal("1 incoming  ·  0 outgoing", editor.InspectorConnections);
+        Assert.Contains("Source Node", editor.InspectorUpstream, StringComparison.Ordinal);
+        Assert.Contains("Output", editor.InspectorUpstream, StringComparison.Ordinal);
+
+        var connectionId = Assert.Single(session.Queries.CreateDocumentSnapshot().Connections).Id;
+        session.Commands.DeleteConnection(connectionId);
+
+        Assert.Equal("0 incoming  ·  0 outgoing", editor.InspectorConnections);
+        Assert.Equal("None", editor.InspectorUpstream);
+    }
+
+    [Fact]
+    public void GraphEditorViewModel_InspectorConnectionSummaries_RemainAccurateAfterUndoRedoRestore()
+    {
+        var definitionId = new NodeDefinitionId("tests.session.inspector-restore");
+        var editor = AsterGraphEditorFactory.Create(CreateOptions(definitionId));
+
+        editor.ConnectPorts(SourceNodeId, SourcePortId, TargetNodeId, TargetPortId);
+        editor.SelectSingleNode(editor.FindNode(TargetNodeId), updateStatus: false);
+
+        Assert.Equal("1 incoming  ·  0 outgoing", editor.InspectorConnections);
+        Assert.Contains("Source Node", editor.InspectorUpstream, StringComparison.Ordinal);
+
+        editor.Undo();
+        editor.Redo();
+        editor.SelectSingleNode(editor.FindNode(TargetNodeId), updateStatus: false);
+
+        Assert.Equal("1 incoming  ·  0 outgoing", editor.InspectorConnections);
+        Assert.Contains("Source Node", editor.InspectorUpstream, StringComparison.Ordinal);
+        Assert.Single(editor.Connections);
+    }
+
     private static void AssertProperty(Type declaringType, string propertyName, Type propertyType)
     {
         var property = declaringType.GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance);
