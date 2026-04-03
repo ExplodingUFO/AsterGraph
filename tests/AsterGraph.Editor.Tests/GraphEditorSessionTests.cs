@@ -36,6 +36,17 @@ public sealed class GraphEditorSessionTests
     }
 
     [Fact]
+    public void GraphEditorSession_PreservesConcreteBeginConnectionCompatibilityShim()
+    {
+        var method = typeof(GraphEditorSession).GetMethod(nameof(GraphEditorSession.BeginConnection), [typeof(string), typeof(string)]);
+
+        Assert.NotNull(method);
+        Assert.Contains(
+            method!.GetCustomAttributes(typeof(ObsoleteAttribute), inherit: false),
+            attribute => attribute is ObsoleteAttribute);
+    }
+
+    [Fact]
     public void IGraphEditorCommands_DefinesHostFacingEditAndViewportActions()
     {
         var commandsType = typeof(IGraphEditorCommands);

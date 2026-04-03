@@ -161,12 +161,17 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorComman
     }
 
     /// <inheritdoc />
+    [Obsolete("Use StartConnection instead.")]
+    public void BeginConnection(string sourceNodeId, string sourcePortId)
+        => StartConnection(sourceNodeId, sourcePortId);
+
+    /// <inheritdoc />
     public void StartConnection(string sourceNodeId, string sourcePortId)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(sourceNodeId);
         ArgumentException.ThrowIfNullOrWhiteSpace(sourcePortId);
 
-        Execute("connections.start", () => _editor.StartConnection(sourceNodeId, sourcePortId));
+        Execute("connections.begin", () => _editor.StartConnection(sourceNodeId, sourcePortId));
     }
 
     /// <inheritdoc />
