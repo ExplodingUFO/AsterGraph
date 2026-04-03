@@ -84,6 +84,39 @@ dotnet nuget push "artifacts/packages/AsterGraph.Avalonia.*.nupkg" --source gith
 
 If push fails with authentication or permission errors (401/403), refresh source credentials (token with `write:packages`) and retry publish.
 
+## Release Verification
+
+Before pushing packages, verify both the packed-consumer path and the normal host/project path.
+
+Recommended local verification sequence:
+
+```powershell
+# 1. rebuild the package-producing solution outputs
+dotnet build src/AsterGraph.Editor/AsterGraph.Editor.csproj -t:Rebuild --no-restore -p:NoWarn= --nologo -v minimal
+dotnet build avalonia-node-map.sln -t:Rebuild --no-restore -p:NoWarn= --nologo -v minimal
+
+# 2. produce fresh local packages
+dotnet pack src/AsterGraph.Abstractions/AsterGraph.Abstractions.csproj -c Release -o artifacts/packages --nologo
+dotnet pack src/AsterGraph.Core/AsterGraph.Core.csproj -c Release -o artifacts/packages --nologo
+dotnet pack src/AsterGraph.Editor/AsterGraph.Editor.csproj -c Release -o artifacts/packages --nologo
+dotnet pack src/AsterGraph.Avalonia/AsterGraph.Avalonia.csproj -c Release -o artifacts/packages --nologo
+
+# 3. verify NuGet consumption against the packed artifacts
+dotnet run --project tools/AsterGraph.PackageSmoke/AsterGraph.PackageSmoke.csproj -p:UsePackedAsterGraphPackages=true --nologo
+
+# 4. verify the project-reference host sample still behaves correctly
+dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj --nologo
+
+# 5. keep the standard regression suite green
+dotnet test avalonia-node-map.sln --no-restore --nologo -v minimal
+```
+
+Notes:
+
+- Use `-t:Rebuild` when checking XML documentation warning retirement. Incremental `dotnet build` can reuse existing outputs and hide `CS1591` regressions.
+- `tools/AsterGraph.PackageSmoke` should be run with `UsePackedAsterGraphPackages=true` so it restores from `artifacts/packages` instead of falling back to project references.
+- `tools/AsterGraph.HostSample` stays valuable even after package smoke passes because it validates the supported host-composition path, diagnostics flow, and stock Avalonia integration surface under normal project references.
+
 ## Canonical Host Composition
 
 Phase 2 gives hosts two canonical entry paths. Pick the narrowest surface that matches what you want to own.

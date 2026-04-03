@@ -176,6 +176,23 @@ dotnet pack src/AsterGraph.Editor/AsterGraph.Editor.csproj -c Release -o artifac
 dotnet pack src/AsterGraph.Avalonia/AsterGraph.Avalonia.csproj -c Release -o artifacts/packages
 ```
 
+Release verification before publish:
+
+```powershell
+# force a full rebuild when checking XML warning debt
+dotnet build src/AsterGraph.Editor/AsterGraph.Editor.csproj -t:Rebuild --no-restore -p:NoWarn= --nologo -v minimal
+dotnet build avalonia-node-map.sln -t:Rebuild --no-restore -p:NoWarn= --nologo -v minimal
+
+# verify the packed package path and the project-reference host sample
+dotnet run --project tools/AsterGraph.PackageSmoke/AsterGraph.PackageSmoke.csproj -p:UsePackedAsterGraphPackages=true --nologo
+dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj --nologo
+
+# keep the normal solution test gate green
+dotnet test avalonia-node-map.sln --no-restore --nologo -v minimal
+```
+
+Use `-t:Rebuild` rather than a plain incremental `dotnet build` when validating XML documentation warning cleanup. Incremental builds can reuse prior outputs and falsely appear warning-free.
+
 Sample local feed config:
 
 ```powershell
