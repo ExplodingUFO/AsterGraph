@@ -18,6 +18,43 @@ public sealed record GraphEditorCapabilitySnapshot(
     bool CanLoadWorkspace)
 {
     /// <summary>
+    /// 初始化包含扩展能力字段的兼容快照。
+    /// </summary>
+    [Obsolete("Use the six-parameter constructor plus init properties instead.")]
+    public GraphEditorCapabilitySnapshot(
+        bool canUndo,
+        bool canRedo,
+        bool canCopySelection,
+        bool canPaste,
+        bool canSaveWorkspace,
+        bool canLoadWorkspace,
+        bool canSetSelection,
+        bool canMoveNodes,
+        bool canCreateConnections,
+        bool canDeleteConnections,
+        bool canBreakConnections,
+        bool canUpdateViewport,
+        bool canFitToViewport,
+        bool canCenterViewport)
+        : this(
+            canUndo,
+            canRedo,
+            canCopySelection,
+            canPaste,
+            canSaveWorkspace,
+            canLoadWorkspace)
+    {
+        CanSetSelection = canSetSelection;
+        CanMoveNodes = canMoveNodes;
+        CanCreateConnections = canCreateConnections;
+        CanDeleteConnections = canDeleteConnections;
+        CanBreakConnections = canBreakConnections;
+        CanUpdateViewport = canUpdateViewport;
+        CanFitToViewport = canFitToViewport;
+        CanCenterViewport = canCenterViewport;
+    }
+
+    /// <summary>
     /// 当前是否允许设置选择。
     /// </summary>
     public bool CanSetSelection { get; init; }
@@ -56,4 +93,40 @@ public sealed record GraphEditorCapabilitySnapshot(
     /// 当前是否允许居中视口。
     /// </summary>
     public bool CanCenterViewport { get; init; }
+
+    /// <summary>
+    /// 兼容旧的 14 字段解构形式。
+    /// </summary>
+    [Obsolete("Use direct property access instead.")]
+    public void Deconstruct(
+        out bool canUndo,
+        out bool canRedo,
+        out bool canCopySelection,
+        out bool canPaste,
+        out bool canSaveWorkspace,
+        out bool canLoadWorkspace,
+        out bool canSetSelection,
+        out bool canMoveNodes,
+        out bool canCreateConnections,
+        out bool canDeleteConnections,
+        out bool canBreakConnections,
+        out bool canUpdateViewport,
+        out bool canFitToViewport,
+        out bool canCenterViewport)
+    {
+        canUndo = CanUndo;
+        canRedo = CanRedo;
+        canCopySelection = CanCopySelection;
+        canPaste = CanPaste;
+        canSaveWorkspace = CanSaveWorkspace;
+        canLoadWorkspace = CanLoadWorkspace;
+        canSetSelection = CanSetSelection;
+        canMoveNodes = CanMoveNodes;
+        canCreateConnections = CanCreateConnections;
+        canDeleteConnections = CanDeleteConnections;
+        canBreakConnections = CanBreakConnections;
+        canUpdateViewport = CanUpdateViewport;
+        canFitToViewport = CanFitToViewport;
+        canCenterViewport = CanCenterViewport;
+    }
 }

@@ -3,6 +3,7 @@ using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Core.Compatibility;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Catalog;
+using AsterGraph.Editor.Diagnostics;
 using AsterGraph.Editor.Events;
 using AsterGraph.Editor.Hosting;
 using AsterGraph.Editor.Menus;
@@ -90,6 +91,27 @@ public sealed class GraphEditorTransactionTests
         });
         Assert.False(session.Queries.GetPendingConnectionSnapshot().HasPendingConnection);
         Assert.Single(session.Queries.CreateDocumentSnapshot().Connections);
+    }
+
+    [Fact]
+    public void RuntimeSession_BeginMutation_PublishesPendingConnectionChangeWhenBatchEndsWithActivePendingConnection()
+    {
+        var definitionId = new NodeDefinitionId("tests.transaction.pending-batch");
+        var session = AsterGraphEditorFactory.CreateSession(CreateOptions(definitionId));
+        var pendingSnapshots = new List<GraphEditorPendingConnectionSnapshot>();
+
+        session.Events.PendingConnectionChanged += (_, args) => pendingSnapshots.Add(args.PendingConnection);
+
+        using (session.BeginMutation("start-only"))
+        {
+            session.Commands.StartConnection(SourceNodeId, SourcePortId);
+            Assert.True(session.Queries.GetPendingConnectionSnapshot().HasPendingConnection);
+        }
+
+        var pending = Assert.Single(pendingSnapshots);
+        Assert.True(pending.HasPendingConnection);
+        Assert.Equal(SourceNodeId, pending.SourceNodeId);
+        Assert.Equal(SourcePortId, pending.SourcePortId);
     }
 
     [Fact]

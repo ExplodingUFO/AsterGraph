@@ -322,18 +322,18 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorComman
 
     /// <inheritdoc />
     public GraphEditorInspectionSnapshot CaptureInspectionSnapshot()
-        => new(
+    {
+        var pendingConnection = CreatePendingConnectionSnapshot();
+        return new(
             CreateDocumentSnapshot(),
             GetSelectionSnapshot(),
             GetViewportSnapshot(),
             GetCapabilitySnapshot(),
-            new GraphEditorPendingConnectionSnapshot(
-                _editor.HasPendingConnection,
-                _editor.PendingSourceNode?.Id,
-                _editor.PendingSourcePort?.Id),
+            pendingConnection,
             new GraphEditorStatusSnapshot(_editor.StatusMessage),
             GetNodePositions().ToList(),
             GetRecentDiagnostics().ToList());
+    }
 
     /// <inheritdoc />
     public IReadOnlyList<GraphEditorDiagnostic> GetRecentDiagnostics(int maxCount = 20)

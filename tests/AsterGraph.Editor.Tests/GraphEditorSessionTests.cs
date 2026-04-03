@@ -264,6 +264,22 @@ public sealed class GraphEditorSessionTests
         Assert.False(pendingSnapshots[1].HasPendingConnection);
     }
 
+    [Fact]
+    public void RuntimeSession_CaptureInspectionSnapshot_UsesNormalizedPendingConnectionState()
+    {
+        var definitionId = new NodeDefinitionId("tests.session.inspection-pending");
+        var session = AsterGraphEditorFactory.CreateSession(CreateOptions(definitionId));
+
+        session.Commands.StartConnection(SourceNodeId, SourcePortId);
+
+        var snapshot = session.Diagnostics.CaptureInspectionSnapshot();
+        var pending = session.Queries.GetPendingConnectionSnapshot();
+
+        Assert.Equal(pending.HasPendingConnection, snapshot.PendingConnection.HasPendingConnection);
+        Assert.Equal(pending.SourceNodeId, snapshot.PendingConnection.SourceNodeId);
+        Assert.Equal(pending.SourcePortId, snapshot.PendingConnection.SourcePortId);
+    }
+
     private static void AssertProperty(Type declaringType, string propertyName, Type propertyType)
     {
         var property = declaringType.GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance);
