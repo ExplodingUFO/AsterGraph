@@ -58,6 +58,72 @@ public sealed class GraphEditorSessionTests
     }
 
     [Fact]
+    public void AsterGraphEditorFactory_CreateSession_CreateDocumentSnapshot_ReturnsDetachedSnapshot()
+    {
+        var definitionId = new NodeDefinitionId("tests.session.detached-snapshot");
+        var session = AsterGraphEditorFactory.CreateSession(new AsterGraphEditorOptions
+        {
+            Document = CreateMutableDocument(definitionId),
+            NodeCatalog = CreateCatalog(definitionId),
+            CompatibilityService = new DefaultPortCompatibilityService(),
+        });
+
+        var snapshot = session.Queries.CreateDocumentSnapshot();
+        var leakedNodes = Assert.IsType<List<GraphNode>>(snapshot.Nodes);
+        leakedNodes.Add(
+            new GraphNode(
+                "external-node-001",
+                "External Node",
+                "Tests",
+                string.Empty,
+                string.Empty,
+                new GraphPoint(0, 0),
+                new GraphSize(120, 80),
+                [],
+                [],
+                "#FFFFFF",
+                definitionId,
+                []));
+
+        var after = session.Queries.CreateDocumentSnapshot();
+
+        Assert.DoesNotContain(after.Nodes, node => node.Id == "external-node-001");
+    }
+
+    [Fact]
+    public void AsterGraphEditorFactory_CreateSession_DoesNotTrackExternalMutationsFromTheOriginalDocument()
+    {
+        var definitionId = new NodeDefinitionId("tests.session.external-mutation");
+        var document = CreateMutableDocument(definitionId);
+        var session = AsterGraphEditorFactory.CreateSession(new AsterGraphEditorOptions
+        {
+            Document = document,
+            NodeCatalog = CreateCatalog(definitionId),
+            CompatibilityService = new DefaultPortCompatibilityService(),
+        });
+
+        var sourceNodes = Assert.IsType<List<GraphNode>>(document.Nodes);
+        sourceNodes.Add(
+            new GraphNode(
+                "source-owned-node-001",
+                "Source Owned Node",
+                "Tests",
+                string.Empty,
+                string.Empty,
+                new GraphPoint(32, 48),
+                new GraphSize(120, 80),
+                [],
+                [],
+                "#FFFFFF",
+                definitionId,
+                []));
+
+        var snapshot = session.Queries.CreateDocumentSnapshot();
+
+        Assert.DoesNotContain(snapshot.Nodes, node => node.Id == "source-owned-node-001");
+    }
+
+    [Fact]
     public void IGraphEditorCommands_BeginConnection_DefaultShimMatchesStartConnectionBehavior()
     {
         var definitionId = new NodeDefinitionId("tests.session.begin-shim");
@@ -441,6 +507,39 @@ public sealed class GraphEditorSessionTests
                     definitionId),
             ],
             []);
+
+    private static GraphDocument CreateMutableDocument(NodeDefinitionId definitionId)
+        => new(
+            "Session Graph",
+            "Runtime session regression coverage.",
+            new List<GraphNode>
+            {
+                new(
+                    SourceNodeId,
+                    "Source Node",
+                    "Tests",
+                    "Runtime",
+                    "Session source node.",
+                    new GraphPoint(120, 160),
+                    new GraphSize(240, 160),
+                    new List<GraphPort>(),
+                    new List<GraphPort> { new(SourcePortId, "Output", PortDirection.Output, "float", "#6AD5C4", new PortTypeId("float")) },
+                    "#6AD5C4",
+                    definitionId),
+                new(
+                    TargetNodeId,
+                    "Target Node",
+                    "Tests",
+                    "Runtime",
+                    "Session target node.",
+                    new GraphPoint(520, 180),
+                    new GraphSize(240, 160),
+                    new List<GraphPort> { new(TargetPortId, "Input", PortDirection.Input, "float", "#F3B36B", new PortTypeId("float")) },
+                    new List<GraphPort>(),
+                    "#6AD5C4",
+                    definitionId),
+            },
+            new List<GraphConnection>());
 
     private static NodeCatalog CreateCatalog(NodeDefinitionId definitionId)
     {

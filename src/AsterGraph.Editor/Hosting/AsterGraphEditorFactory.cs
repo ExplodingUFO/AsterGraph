@@ -11,8 +11,9 @@ namespace AsterGraph.Editor.Hosting;
 /// 提供 AsterGraph 编辑器运行时的规范宿主组合入口。
 /// </summary>
 /// <remarks>
-/// 该工厂只负责校验输入并委托到现有 <see cref="GraphEditorViewModel"/> 兼容立面；
-/// 直接构造 <see cref="GraphEditorViewModel"/> 仍然受支持，便于宿主分阶段迁移。
+/// <see cref="CreateSession(AsterGraphEditorOptions)"/> 现在采用 kernel-first 运行时组合，
+/// 而 <see cref="Create(AsterGraphEditorOptions)"/> 仍保留 <see cref="GraphEditorViewModel"/> 兼容立面，
+/// 便于宿主分阶段迁移。
 /// </remarks>
 public static class AsterGraphEditorFactory
 {

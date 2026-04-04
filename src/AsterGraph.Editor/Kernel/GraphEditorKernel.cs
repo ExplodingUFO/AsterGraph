@@ -53,7 +53,7 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost
         ArgumentNullException.ThrowIfNull(compatibilityService);
         ArgumentNullException.ThrowIfNull(workspaceService);
 
-        _document = document;
+        _document = CloneDocument(document);
         _nodeCatalog = nodeCatalog;
         _compatibilityService = compatibilityService;
         _workspaceService = workspaceService;
@@ -582,7 +582,7 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost
     }
 
     public GraphDocument CreateDocumentSnapshot()
-        => _document;
+        => CloneDocument(_document);
 
     public GraphEditorSelectionSnapshot GetSelectionSnapshot()
         => new(_selectedNodeIds.ToList(), _primarySelectedNodeId);
@@ -772,7 +772,7 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost
 
     private void LoadDocument(GraphDocument document, string status, bool markClean, bool resetHistory)
     {
-        _document = document;
+        _document = CloneDocument(document);
         _selectedNodeIds = [];
         _primarySelectedNodeId = null;
         _pendingConnection = GraphEditorPendingConnectionSnapshot.Create(false, null, null);
@@ -804,7 +804,7 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost
 
     private GraphEditorHistoryState CaptureHistoryState()
         => new(
-            _document,
+            CloneDocument(_document),
             _selectedNodeIds.ToList(),
             _primarySelectedNodeId,
             CreateDocumentSignature(_document));
@@ -855,6 +855,51 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost
 
     private static string CreateDocumentSignature(GraphDocument document)
         => GraphDocumentSerializer.Serialize(document);
+
+    private static GraphDocument CloneDocument(GraphDocument document)
+        => new(
+            document.Title,
+            document.Description,
+            document.Nodes.Select(CloneNode).ToList(),
+            document.Connections.Select(CloneConnection).ToList());
+
+    private static GraphNode CloneNode(GraphNode node)
+        => new(
+            node.Id,
+            node.Title,
+            node.Category,
+            node.Subtitle,
+            node.Description,
+            node.Position,
+            node.Size,
+            node.Inputs.Select(ClonePort).ToList(),
+            node.Outputs.Select(ClonePort).ToList(),
+            node.AccentHex,
+            node.DefinitionId,
+            node.ParameterValues?.Select(CloneParameterValue).ToList());
+
+    private static GraphPort ClonePort(GraphPort port)
+        => new(
+            port.Id,
+            port.Label,
+            port.Direction,
+            port.DataType,
+            port.AccentHex,
+            port.TypeId);
+
+    private static GraphConnection CloneConnection(GraphConnection connection)
+        => new(
+            connection.Id,
+            connection.SourceNodeId,
+            connection.SourcePortId,
+            connection.TargetNodeId,
+            connection.TargetPortId,
+            connection.Label,
+            connection.AccentHex,
+            connection.ConversionId);
+
+    private static GraphParameterValue CloneParameterValue(GraphParameterValue parameter)
+        => new(parameter.Key, parameter.TypeId, parameter.Value);
 
     private sealed record CompatibleTargetState(
         GraphNode Node,
