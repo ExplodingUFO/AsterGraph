@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Reflection;
 using Avalonia.Controls;
 using CommunityToolkit.Mvvm.Input;
 using AsterGraph.Abstractions.Catalog;
@@ -112,6 +113,10 @@ var runtimeViewport = runtimeSession.Queries.GetViewportSnapshot();
 var runtimeCapabilities = runtimeSession.Queries.GetCapabilitySnapshot();
 var runtimeInspection = runtimeSession.Diagnostics.CaptureInspectionSnapshot();
 var runtimeRecentDiagnostics = runtimeSession.Diagnostics.GetRecentDiagnostics(10);
+var runtimeSessionIsKernelFirst = !runtimeSession
+    .GetType()
+    .GetFields(BindingFlags.Instance | BindingFlags.NonPublic)
+    .Any(field => field.FieldType == typeof(GraphEditorViewModel));
 var inspectorProofEditor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
 {
     Document = document,
@@ -161,6 +166,7 @@ Console.WriteLine($"Diagnostics recent history: {string.Join(" | ", runtimeRecen
 Console.WriteLine($"Diagnostics logger entries: {string.Join(" | ", runtimeLoggerFactory.Entries.Select(entry => $"{entry.Level}:{entry.Message}"))}");
 Console.WriteLine($"Diagnostics Activity operations: {string.Join(", ", runtimeActivities)}");
 Console.WriteLine($"Session runtime workflow: selection={runtimeSession.Queries.GetSelectionSnapshot().PrimarySelectedNodeId}, connections={runtimeSnapshot.Connections.Count}");
+Console.WriteLine($"Session backend: kernel-first={runtimeSessionIsKernelFirst}");
 Console.WriteLine($"State scaling proof: inspector={inspectorProofEditor.InspectorConnections}, downstream={inspectorProofEditor.InspectorDownstream}, dirtyAfterMove={historyDirtyAfterMove}, canUndoAfterMove={historyCanUndoAfterMove}, dirtyAfterUndo={historyProofEditor.IsDirty}, restored=({historyRestoredNode.X:0},{historyRestoredNode.Y:0})");
 
 var viewCompatibility = new RecordingCompatibilityService();
