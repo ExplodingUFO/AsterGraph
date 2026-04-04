@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: kernel-extraction-capability-contracts-and-plugin-readiness
-status: Defining requirements and roadmap
-stopped_at: Milestone v1.2 initialized
-last_updated: "2026-04-04T00:00:00Z"
+status: Planning Phase 14
+stopped_at: Phase 14 planning prepared after Phase 13 integration
+last_updated: "2026-04-04T12:00:00Z"
 progress:
   total_phases: 6
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  completed_phases: 1
+  total_plans: 6
+  completed_plans: 3
 ---
 
 # Project State
@@ -19,14 +19,14 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-04-04)
 
 **Core value:** Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
-**Current focus:** Milestone v1.2 kernel extraction roadmap
+**Current focus:** Phase 14 planning after Phase 13 kernel extraction landed on `master`
 
 ## Current Position
 
-Phase: Not started (defining requirements)  
-Plan: —  
-Status: Defining requirements and roadmap  
-Last activity: 2026-04-04 — Milestone v1.2 started around kernel extraction, capability contracts, and plugin readiness
+Phase: 14. Session And Compatibility Facade Decoupling  
+Plan: 14-01 through 14-03 drafted  
+Status: Planning Phase 14  
+Last activity: 2026-04-04 — Phase 13 merged to `master`, snapshot hardening added, and Phase 14 planning artifacts created
 
 ## Accumulated Context
 
@@ -45,6 +45,8 @@ New milestone decisions:
 - Normalize capability, menu, and command contracts around explicit descriptors rather than MVVM object shape.
 - Keep the Avalonia layer as an adapter over kernel contracts, not the implicit owner of command-routing policy.
 - Preserve the new proof ring while shifting the canonical composition path toward a kernel-first runtime.
+- Treat `GraphEditorViewModel` as a retained compatibility façade that now needs adapter conversion, not further runtime ownership expansion.
+- Prioritize detached/read-only host state on canonical runtime APIs whenever a choice must be made between convenience and boundary safety.
 
 ### Pending Todos
 
@@ -54,7 +56,7 @@ None captured yet.
 
 - No current blocker in the main workspace.
 - The main design constraint is preserving staged migration while changing the runtime center of gravity.
-- Public mutable collections and VM-shaped contracts are now the highest-leverage architecture debt.
+- Dual-path runtime drift between kernel-first session composition and the retained façade path is now the highest-leverage architecture debt.
 
 ### Quick Tasks Completed
 
@@ -65,5 +67,5 @@ None captured yet.
 ## Session Continuity
 
 Last session: 2026-04-04
-Stopped at: Milestone v1.2 initialized
+Stopped at: Phase 14 planning prepared after Phase 13 integration
 Resume file: None

@@ -15,7 +15,7 @@ This roadmap therefore focuses on extracting the real editor kernel, normalizing
 
 ## Phases
 
-- [ ] **Phase 13: Editor Kernel State Owner Extraction** - Extract the canonical mutable editor state owner out of `GraphEditorViewModel` so session/runtime composition no longer depends on the VM façade.
+- [x] **Phase 13: Editor Kernel State Owner Extraction** - Extract the canonical mutable editor state owner out of `GraphEditorViewModel` so session/runtime composition no longer depends on the VM façade.
 - [ ] **Phase 14: Session And Compatibility Facade Decoupling** - Rebuild `IGraphEditorSession` and `GraphEditorViewModel` around the extracted kernel so hosts get a kernel-first path and legacy hosts keep a staged adapter path.
 - [ ] **Phase 15: Capability And Descriptor Contract Normalization** - Replace MVVM-oriented command/menu/state exposure with explicit capability, descriptor, and read-only query contracts.
 - [ ] **Phase 16: Avalonia Adapter Boundary Cleanup** - Thin the Avalonia layer so shell/canvas/input/clipboard/host-context behavior consumes shared kernel contracts instead of duplicating policy against the VM.
@@ -89,7 +89,7 @@ This roadmap therefore focuses on extracting the real editor kernel, normalizing
 
 | Phase | Requirements | Status |
 |-------|--------------|--------|
-| 13. Editor Kernel State Owner Extraction | KERN-01, KERN-02 | Planned |
+| 13. Editor Kernel State Owner Extraction | KERN-01, KERN-02 | Complete |
 | 14. Session And Compatibility Facade Decoupling | KERN-03, CAP-03 | Planned |
 | 15. Capability And Descriptor Contract Normalization | CAP-01, CAP-02 | Planned |
 | 16. Avalonia Adapter Boundary Cleanup | ADAPT-01, ADAPT-02 | Planned |
@@ -98,4 +98,4 @@ This roadmap therefore focuses on extracting the real editor kernel, normalizing
 
 ## Next Action
 
-**Phase 13** is the correct first step. Until the editor state owner is extracted from `GraphEditorViewModel`, every later capability/menu/plugin/automation improvement will keep paying façade-coupling costs.
+**Phase 14** is the correct next step. Phase 13 made the canonical session path kernel-first, but the retained `GraphEditorViewModel` path still carries adapter debt and mutable-state exposure that will keep leaking into later capability and Avalonia cleanup work until it is decoupled.
