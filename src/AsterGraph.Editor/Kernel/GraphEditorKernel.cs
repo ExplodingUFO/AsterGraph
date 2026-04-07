@@ -632,6 +632,7 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost
                 target.Compatibility))
             .ToList();
 
+#pragma warning disable CS0618
     public IReadOnlyList<CompatiblePortTarget> GetCompatibleTargets(string sourceNodeId, string sourcePortId)
         => GetCompatiblePortTargetsCore(sourceNodeId, sourcePortId)
             .Select(target =>
@@ -642,6 +643,7 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost
                 return new CompatiblePortTarget(node, port, target.Compatibility);
             })
             .ToList();
+#pragma warning restore CS0618
 
     private void ConnectPorts(string sourceNodeId, string sourcePortId, string targetNodeId, string targetPortId)
     {

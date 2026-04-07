@@ -50,5 +50,7 @@ internal interface IGraphEditorSessionHost
     IReadOnlyList<NodePositionSnapshot> GetNodePositions();
     GraphEditorPendingConnectionSnapshot GetPendingConnectionSnapshot();
     IReadOnlyList<GraphEditorCompatiblePortTargetSnapshot> GetCompatiblePortTargets(string sourceNodeId, string sourcePortId);
+#pragma warning disable CS0618
     IReadOnlyList<CompatiblePortTarget> GetCompatibleTargets(string sourceNodeId, string sourcePortId);
+#pragma warning restore CS0618
 }

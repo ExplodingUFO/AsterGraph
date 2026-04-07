@@ -62,9 +62,10 @@ public interface IGraphEditorQueries
     /// <param name="sourceNodeId">源节点实例标识。</param>
     /// <param name="sourcePortId">源端口实例标识。</param>
     /// <remarks>
-    /// 此成员保留用于兼容依赖 MVVM 运行时对象的旧宿主代码。
+    /// 此成员保留为兼容 shim，用于依赖 MVVM 运行时对象的旧宿主代码。
     /// 新的运行时查询应优先使用 <see cref="GetCompatiblePortTargets(string, string)"/>。
     /// </remarks>
     /// <returns>兼容目标集合。</returns>
+    [Obsolete("Compatibility-only shim. Use GetCompatiblePortTargets(string, string) for canonical runtime queries.")]
     IReadOnlyList<CompatiblePortTarget> GetCompatibleTargets(string sourceNodeId, string sourcePortId);
 }

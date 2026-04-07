@@ -214,7 +214,9 @@ public sealed class GraphEditorSessionTests
             queriesType.GetMethod(nameof(IGraphEditorQueries.GetCompatiblePortTargets))!.ReturnType);
 
         AssertMethod(queriesType, nameof(IGraphEditorQueries.GetCompatibleTargets), typeof(string), typeof(string));
+#pragma warning disable CS0618
         Assert.Equal(typeof(IReadOnlyList<CompatiblePortTarget>), queriesType.GetMethod(nameof(IGraphEditorQueries.GetCompatibleTargets))!.ReturnType);
+#pragma warning restore CS0618
     }
 
     [Fact]
@@ -244,6 +246,27 @@ public sealed class GraphEditorSessionTests
         Assert.DoesNotContain(
             snapshotType.GetProperties(BindingFlags.Public | BindingFlags.Instance),
             property => property.PropertyType == typeof(NodeViewModel) || property.PropertyType == typeof(PortViewModel));
+    }
+
+    [Fact]
+    public void IGraphEditorQueries_GetCompatibleTargets_IsMarkedAsCompatibilityOnlyShim()
+    {
+        var method = typeof(IGraphEditorQueries).GetMethod(nameof(IGraphEditorQueries.GetCompatibleTargets), [typeof(string), typeof(string)]);
+
+        Assert.NotNull(method);
+        Assert.Contains(
+            method!.GetCustomAttributes(typeof(ObsoleteAttribute), inherit: false),
+            attribute => attribute is ObsoleteAttribute);
+    }
+
+    [Fact]
+    public void CompatiblePortTarget_IsMarkedAsCompatibilityOnlyShim()
+    {
+#pragma warning disable CS0618
+        Assert.Contains(
+            typeof(CompatiblePortTarget).GetCustomAttributes(typeof(ObsoleteAttribute), inherit: false),
+            attribute => attribute is ObsoleteAttribute);
+#pragma warning restore CS0618
     }
 
     [Fact]

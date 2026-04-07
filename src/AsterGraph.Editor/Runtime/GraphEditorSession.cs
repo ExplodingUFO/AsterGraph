@@ -253,8 +253,10 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorComman
         => _host.GetCompatiblePortTargets(sourceNodeId, sourcePortId);
 
     /// <inheritdoc />
+#pragma warning disable CS0618
     public IReadOnlyList<CompatiblePortTarget> GetCompatibleTargets(string sourceNodeId, string sourcePortId)
         => _host.GetCompatibleTargets(sourceNodeId, sourcePortId);
+#pragma warning restore CS0618
 
     /// <inheritdoc />
     public GraphEditorInspectionSnapshot CaptureInspectionSnapshot()

@@ -1956,6 +1956,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// <summary>
     /// 查询指定输出端口可连接的兼容输入端口。
     /// </summary>
+#pragma warning disable CS0618
     public IReadOnlyList<CompatiblePortTarget> GetCompatibleTargets(string sourceNodeId, string sourcePortId)
     {
         var sourceNode = FindNode(sourceNodeId);
@@ -1975,6 +1976,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             .Where(target => target.Compatibility.IsCompatible)
             .ToList();
     }
+#pragma warning restore CS0618
 
     private void ApplySelectionLayout(Action<IReadOnlyList<NodeViewModel>> applyLayout, int minimumCount, string status)
     {
