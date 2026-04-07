@@ -5,6 +5,12 @@ namespace AsterGraph.Editor.Menus;
 /// <summary>
 /// 与 UI 框架无关的菜单项描述，具体控件由视图层自行渲染。
 /// </summary>
+/// <remarks>
+/// This type remains the retained compatibility surface for hosts and presenters that still
+/// expect <see cref="System.Windows.Input.ICommand"/>. New canonical menu generation flows
+/// should prefer <see cref="GraphEditorMenuItemDescriptorSnapshot"/> and adapt into this type
+/// only at compatibility boundaries.
+/// </remarks>
 public sealed record MenuItemDescriptor
 {
     /// <summary>
@@ -73,6 +79,10 @@ public sealed record MenuItemDescriptor
     /// <summary>
     /// 菜单命令。
     /// </summary>
+    /// <remarks>
+    /// Compatibility-only command bridge. Canonical editor-layer menu descriptors now flow
+    /// through stable command IDs on <see cref="GraphEditorMenuItemDescriptorSnapshot"/>.
+    /// </remarks>
     public ICommand? Command { get; }
 
     /// <summary>

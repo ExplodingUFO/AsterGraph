@@ -14,8 +14,8 @@
 
 ### Capability And Contract Normalization
 
-- [ ] **CAP-01**: Public capability descriptors make optional surfaces, services, and host features explicit instead of forcing hosts to infer support from object shape
-- [ ] **CAP-02**: Editor-layer command and menu contracts avoid depending on `RelayCommand`, `ObservableCollection`, `NodeTemplateViewModel`, or other MVVM implementation details where stable descriptors/IDs are sufficient
+- [x] **CAP-01**: Public capability descriptors make optional surfaces, services, and host features explicit instead of forcing hosts to infer support from object shape
+- [x] **CAP-02**: Editor-layer command and menu contracts avoid depending on `RelayCommand`, `ObservableCollection`, `NodeTemplateViewModel`, or other MVVM implementation details where stable descriptors/IDs are sufficient
 - [x] **CAP-03**: Public graph/selection state exposed to hosts is read-only or snapshot-based by default, so external code cannot mutate core editor state by editing live collections
 
 ### Avalonia Adapter Cleanup
@@ -51,8 +51,8 @@
 | KERN-01 | Phase 13 | Complete |
 | KERN-02 | Phase 13 | Complete |
 | KERN-03 | Phase 14 | Complete |
-| CAP-01 | Phase 15 | Planned |
-| CAP-02 | Phase 15 | Planned |
+| CAP-01 | Phase 15 | Complete |
+| CAP-02 | Phase 15 | Complete |
 | CAP-03 | Phase 14 | Complete |
 | ADAPT-01 | Phase 16 | Planned |
 | ADAPT-02 | Phase 16 | Planned |

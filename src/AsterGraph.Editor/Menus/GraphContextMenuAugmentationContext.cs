@@ -41,6 +41,11 @@ public sealed record GraphContextMenuAugmentationContext
     /// <summary>
     /// 编辑器默认生成的菜单项集合。
     /// </summary>
+    /// <remarks>
+    /// Compatibility-only adapted menu items for augmentors that still consume
+    /// <see cref="MenuItemDescriptor"/>. New augmentors should prefer
+    /// <see cref="StockItemDescriptors"/> plus <see cref="Session"/>.
+    /// </remarks>
     public IReadOnlyList<MenuItemDescriptor> StockItems { get; }
 
     /// <summary>
@@ -58,7 +63,7 @@ public sealed record GraphContextMenuAugmentationContext
     /// </summary>
     /// <remarks>
     /// New implementations should prefer <see cref="Session"/>, <see cref="Context"/>, and
-    /// <see cref="StockItems"/>. This property only exists to adapt legacy augmentors during
+    /// <see cref="StockItemDescriptors"/>. This property only exists to adapt legacy augmentors during
     /// the migration window.
     /// </remarks>
     public GraphEditorViewModel CompatibilityEditor { get; }

@@ -17,7 +17,7 @@ This roadmap therefore focuses on extracting the real editor kernel, normalizing
 
 - [x] **Phase 13: Editor Kernel State Owner Extraction** - Extract the canonical mutable editor state owner out of `GraphEditorViewModel` so session/runtime composition no longer depends on the VM façade.
 - [x] **Phase 14: Session And Compatibility Facade Decoupling** - Rebuild `IGraphEditorSession` and `GraphEditorViewModel` around the extracted kernel so hosts get a kernel-first path and legacy hosts keep a staged adapter path.
-- [ ] **Phase 15: Capability And Descriptor Contract Normalization** - Replace MVVM-oriented command/menu/state exposure with explicit capability, descriptor, and read-only query contracts.
+- [x] **Phase 15: Capability And Descriptor Contract Normalization** - Replace MVVM-oriented command/menu/state exposure with explicit capability, descriptor, and read-only query contracts.
 - [ ] **Phase 16: Avalonia Adapter Boundary Cleanup** - Thin the Avalonia layer so shell/canvas/input/clipboard/host-context behavior consumes shared kernel contracts instead of duplicating policy against the VM.
 - [ ] **Phase 17: Compatibility Lock And Migration Proof** - Prove that the retained `GraphEditorViewModel` / `GraphEditorView` path stays behaviorally aligned while the kernel path becomes canonical.
 - [ ] **Phase 18: Plugin And Automation Readiness Proof Ring** - Validate the resulting architecture with focused regressions, sample/smoke coverage, and explicit readiness checks for later plugin/automation milestones.
@@ -91,11 +91,11 @@ This roadmap therefore focuses on extracting the real editor kernel, normalizing
 |-------|--------------|--------|
 | 13. Editor Kernel State Owner Extraction | KERN-01, KERN-02 | Complete |
 | 14. Session And Compatibility Facade Decoupling | KERN-03, CAP-03 | Completed |
-| 15. Capability And Descriptor Contract Normalization | CAP-01, CAP-02 | Planned |
+| 15. Capability And Descriptor Contract Normalization | CAP-01, CAP-02 | Completed |
 | 16. Avalonia Adapter Boundary Cleanup | ADAPT-01, ADAPT-02 | Planned |
 | 17. Compatibility Lock And Migration Proof | MIG-01, MIG-02 | Planned |
 | 18. Plugin And Automation Readiness Proof Ring | PLUG-READY-01 | Planned |
 
 ## Next Action
 
-**Phase 15** is the correct next step. Phase 14 closed the retained-session adapter gap and locked the read-only/snapshot runtime story, so the next milestone risk is still MVVM-shaped capability, command, and menu exposure that Phase 15 is meant to normalize.
+**Phase 16** is the correct next step. Phase 15 normalized runtime discovery plus command/menu contracts, so the next milestone risk is the Avalonia layer still duplicating policy and depending on retained facade details more than the new descriptor/runtime boundary should allow.

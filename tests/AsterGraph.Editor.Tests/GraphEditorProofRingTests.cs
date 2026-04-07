@@ -150,6 +150,8 @@ public sealed class GraphEditorProofRingTests
         var selection = session.Queries.GetSelectionSnapshot();
         var viewport = session.Queries.GetViewportSnapshot();
         var capabilities = session.Queries.GetCapabilitySnapshot();
+        var commandDescriptors = session.Queries.GetCommandDescriptors();
+        var canvasMenuDescriptors = session.Queries.BuildContextMenuDescriptors(new ContextMenuContext(ContextMenuTargetKind.Canvas, new GraphPoint(240, 180)));
         var inspection = session.Diagnostics.CaptureInspectionSnapshot();
         var recentDiagnostics = session.Diagnostics.GetRecentDiagnostics(10);
         var runtimeFields = session.GetType().GetFields(BindingFlags.Instance | BindingFlags.NonPublic);
@@ -162,8 +164,11 @@ public sealed class GraphEditorProofRingTests
         Assert.True(capabilities.CanSaveWorkspace);
         Assert.True(workspace.Exists());
         Assert.Equal(1, workspace.SaveCalls);
+        Assert.Contains(commandDescriptors, descriptor => descriptor.Id == "nodes.add" && descriptor.IsEnabled);
+        Assert.Contains(canvasMenuDescriptors, descriptor => descriptor.Id == "canvas-add-node");
         Assert.False(inspection.PendingConnection.HasPendingConnection);
         Assert.Equal(TargetNodeId, inspection.Selection.PrimarySelectedNodeId);
+        Assert.Contains(inspection.FeatureDescriptors, descriptor => descriptor.Id == "query.feature-descriptors" && descriptor.IsAvailable);
         Assert.Contains(recentDiagnostics, diagnostic => diagnostic.Code == "workspace.save.succeeded");
         Assert.Contains(diagnostics.Diagnostics, diagnostic => diagnostic.Code == "workspace.save.succeeded");
         Assert.DoesNotContain(runtimeFields, field => field.FieldType == typeof(GraphEditorViewModel));

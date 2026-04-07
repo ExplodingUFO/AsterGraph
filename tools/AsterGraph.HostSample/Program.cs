@@ -111,6 +111,8 @@ runtimeSession.Commands.SaveWorkspace();
 var runtimeSnapshot = runtimeSession.Queries.CreateDocumentSnapshot();
 var runtimeViewport = runtimeSession.Queries.GetViewportSnapshot();
 var runtimeCapabilities = runtimeSession.Queries.GetCapabilitySnapshot();
+var runtimeCommandDescriptors = runtimeSession.Queries.GetCommandDescriptors();
+var runtimeCanvasDescriptors = runtimeSession.Queries.BuildContextMenuDescriptors(new ContextMenuContext(ContextMenuTargetKind.Canvas, new GraphPoint(200, 120)));
 var runtimeInspection = runtimeSession.Diagnostics.CaptureInspectionSnapshot();
 var runtimeRecentDiagnostics = runtimeSession.Diagnostics.GetRecentDiagnostics(10);
 var runtimeSessionIsKernelFirst = !runtimeSession
@@ -167,6 +169,7 @@ Console.WriteLine($"Diagnostics logger entries: {string.Join(" | ", runtimeLogge
 Console.WriteLine($"Diagnostics Activity operations: {string.Join(", ", runtimeActivities)}");
 Console.WriteLine($"Session runtime workflow: selection={runtimeSession.Queries.GetSelectionSnapshot().PrimarySelectedNodeId}, connections={runtimeSnapshot.Connections.Count}");
 Console.WriteLine($"Session backend: kernel-first={runtimeSessionIsKernelFirst}");
+Console.WriteLine($"Descriptor runtime: nodes.add={runtimeCommandDescriptors.Any(descriptor => descriptor.Id == "nodes.add" && descriptor.IsEnabled)}, canvas={string.Join(",", runtimeCanvasDescriptors.Select(descriptor => descriptor.Id))}");
 Console.WriteLine($"State scaling proof: inspector={inspectorProofEditor.InspectorConnections}, downstream={inspectorProofEditor.InspectorDownstream}, dirtyAfterMove={historyDirtyAfterMove}, canUndoAfterMove={historyCanUndoAfterMove}, dirtyAfterUndo={historyProofEditor.IsDirty}, restored=({historyRestoredNode.X:0},{historyRestoredNode.Y:0})");
 
 var viewCompatibility = new RecordingCompatibilityService();
@@ -183,6 +186,10 @@ var editor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
     NodePresentationProvider = new HostSamplePresentationProvider(),
     LocalizationProvider = new HostSampleLocalizationProvider(),
 });
+var retainedCanvasDescriptorMenu = editor.Session.Queries.BuildContextMenuDescriptors(new ContextMenuContext(ContextMenuTargetKind.Canvas, new GraphPoint(32, 48)));
+var retainedCanvasMenu = editor.BuildContextMenu(new ContextMenuContext(ContextMenuTargetKind.Canvas, new GraphPoint(32, 48)));
+var retainedDescriptorMenuBacked = retainedCanvasDescriptorMenu.All(
+    descriptor => retainedCanvasMenu.Any(item => item.Id == descriptor.Id));
 
 editor.DocumentChanged += (_, args) =>
     Console.WriteLine($"DocumentChanged subscribed: {args.ChangeKind}");
@@ -313,6 +320,7 @@ Console.WriteLine($"ReadOnly host extension allowed: {editor.CommandPermissions.
 Console.WriteLine($"Retained session diagnostics reachable: {ReferenceEquals(retainedSession, editor.Session)}");
 Console.WriteLine($"Retained backend: adapter-backed={retainedSessionIsAdapterBacked}");
 Console.WriteLine($"Retained path: GraphEditorViewModel.Session compatibility surface over the shared runtime boundary");
+Console.WriteLine($"Descriptor retained: commands={editor.Session.Queries.GetCommandDescriptors().Count}, menu-adapter={retainedDescriptorMenuBacked}");
 Console.WriteLine($"Retained inspection snapshot: nodes={retainedInspection.Document.Nodes.Count}, selected={retainedInspection.Selection.SelectedNodeIds.Count}, pending={retainedInspection.PendingConnection.HasPendingConnection}");
 Console.WriteLine($"Retained recent diagnostics count: {retainedRecentDiagnostics.Count}");
 Console.WriteLine($"Retained diagnostics sink count: {viewDiagnostics.Diagnostics.Count}");

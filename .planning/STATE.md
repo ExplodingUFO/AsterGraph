@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: kernel-extraction-capability-contracts-and-plugin-readiness
-status: Executing Phase 15
-stopped_at: Phase 15 plan 15-02 completed; descriptor proof and compatibility lock-up is next
-last_updated: "2026-04-07T18:14:26Z"
+status: Ready To Plan Phase 16
+stopped_at: Phase 15 completed; Phase 16 Avalonia adapter boundary cleanup planning is next
+last_updated: "2026-04-08T03:00:00Z"
 progress:
   total_phases: 6
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 9
-  completed_plans: 8
+  completed_plans: 9
 ---
 
 # Project State
@@ -19,14 +19,14 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-04-04)
 
 **Core value:** Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
-**Current focus:** Phase 15 execution after canonical command/menu descriptors landed in plan 15-02
+**Current focus:** Phase 16 Avalonia adapter boundary cleanup planning after Phase 15 descriptor normalization completed
 
 ## Current Position
 
 Phase: 15. Capability And Descriptor Contract Normalization  
-Plan: 15-01 and 15-02 complete; 15-03 planned  
-Status: Executing Phase 15  
-Last activity: 2026-04-08 — Completed 15-02 command/menu descriptor normalization and verified retained menu compatibility over the descriptor adapter path
+Plan: 03  
+Status: Phase 15 completed; ready to plan Phase 16  
+Last activity: 2026-04-08 — Completed plans 15-01 through 15-03, locked descriptor-first proof/sample outputs, and closed Phase 15
 
 ## Accumulated Context
 
@@ -51,6 +51,7 @@ New milestone decisions:
 - Prefer additive canonical descriptor contracts with compatibility shims over one-shot public breaks while Phase 15 normalizes capability, command, and menu discovery.
 - Keep explicit runtime feature discovery and inspection descriptor reuse as the locked Phase 15 baseline while command/menu normalization proceeds.
 - Keep retained `BuildContextMenu(...)` on a compatibility adapter over canonical descriptor generation instead of letting MVVM `ICommand` objects remain the stock source of truth.
+- Treat Phase 16 Avalonia adapter cleanup as the next leverage point now that runtime discovery and menu/command contracts are descriptor-first.
 
 ### Pending Todos
 
@@ -63,7 +64,8 @@ None captured yet.
 - Capability discovery and descriptor normalization are now the highest-leverage architecture debt left in the milestone.
 - The main execution risk for Phase 15 is splitting canonical descriptor contracts from existing `ICommand` / menu presenter compatibility without letting the two models drift.
 - The next concrete risk is Phase 15-02 over-reaching into Avalonia cleanup instead of keeping command/menu normalization editor-layer and descriptor-first.
-- The remaining Phase 15 risk is making sure proof/sample/smoke outputs clearly show the descriptor-first path without misclassifying known pre-existing transaction-test failures as new regressions.
+- Known transaction-history test failures remain present even on the pre-15-02 baseline; they should not be misclassified as Phase 15 regressions when Phase 16 starts.
+- The next design constraint is making Avalonia consume the thinner descriptor/runtime contracts without recreating editor policy in the UI layer.
 
 ### Quick Tasks Completed
 
@@ -74,5 +76,5 @@ None captured yet.
 ## Session Continuity
 
 Last session: 2026-04-08
-Stopped at: Phase 15 plan 15-02 completed; descriptor proof and compatibility lock-up is next
+Stopped at: Phase 15 completed; Phase 16 Avalonia adapter boundary cleanup planning is next
 Resume file: None

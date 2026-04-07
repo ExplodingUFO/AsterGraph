@@ -354,6 +354,12 @@ using (session.BeginMutation("smoke-batch"))
 session.Commands.SetSelection([targetNodeId], targetNodeId, updateStatus: false);
 session.Commands.SaveWorkspace();
 
+var runtimeCommandDescriptors = session.Queries.GetCommandDescriptors();
+var runtimeCanvasMenuDescriptors = session.Queries.BuildContextMenuDescriptors(new ContextMenuContext(ContextMenuTargetKind.Canvas, new GraphPoint(32, 48)));
+var legacyCanvasMenuDescriptors = legacyEditor.Session.Queries.BuildContextMenuDescriptors(new ContextMenuContext(ContextMenuTargetKind.Canvas, new GraphPoint(32, 48)));
+var factoryCanvasMenuDescriptors = factoryEditor.Session.Queries.BuildContextMenuDescriptors(new ContextMenuContext(ContextMenuTargetKind.Canvas, new GraphPoint(32, 48)));
+var legacyCanvasMenu = legacyEditor.BuildContextMenu(new ContextMenuContext(ContextMenuTargetKind.Canvas, new GraphPoint(32, 48)));
+var factoryCanvasMenu = factoryEditor.BuildContextMenu(new ContextMenuContext(ContextMenuTargetKind.Canvas, new GraphPoint(32, 48)));
 var sessionInspection = session.Diagnostics.CaptureInspectionSnapshot();
 var sessionRecentDiagnostics = session.Diagnostics.GetRecentDiagnostics(10);
 var runtimeSessionIsKernelFirst = !session
@@ -386,11 +392,16 @@ var factorySessionHost = factoryEditor.Session.GetType()
     .GetValue(factoryEditor.Session);
 var legacyRetainedSessionIsAdapterBacked = legacySessionHost is not null && legacySessionHost is not GraphEditorViewModel;
 var factoryRetainedSessionIsAdapterBacked = factorySessionHost is not null && factorySessionHost is not GraphEditorViewModel;
+var legacyRetainedMenuIsDescriptorBacked = legacyCanvasMenuDescriptors.All(descriptor => legacyCanvasMenu.Any(item => item.Id == descriptor.Id));
+var factoryRetainedMenuIsDescriptorBacked = factoryCanvasMenuDescriptors.All(descriptor => factoryCanvasMenu.Any(item => item.Id == descriptor.Id));
 Console.WriteLine($"SESSION_FACTORY_OK:{session.Queries.CreateDocumentSnapshot().Nodes.Count}:{string.Join(",", commandIds)}");
 Console.WriteLine($"SESSION_EVENTS_OK:{documentChanges}:{viewportChanges}:{failureCode ?? "<none>"}");
 Console.WriteLine($"KERNEL_SESSION_OK:{runtimeSessionIsKernelFirst}");
 Console.WriteLine($"RETAINED_ADAPTER_OK:{legacyRetainedSessionIsAdapterBacked}:{factoryRetainedSessionIsAdapterBacked}");
 Console.WriteLine($"RUNTIME_READONLY_OK:{runtimeSnapshotDetached}");
+Console.WriteLine($"COMMAND_DESCRIPTOR_OK:{runtimeCommandDescriptors.Any(descriptor => descriptor.Id == "nodes.add" && descriptor.IsEnabled)}:{legacyEditor.Session.Queries.GetCommandDescriptors().Any(descriptor => descriptor.Id == "nodes.add")}:{factoryEditor.Session.Queries.GetCommandDescriptors().Any(descriptor => descriptor.Id == "nodes.add")}");
+Console.WriteLine($"MENU_DESCRIPTOR_OK:{runtimeCanvasMenuDescriptors.Any(descriptor => descriptor.Id == "canvas-add-node")}:{legacyCanvasMenuDescriptors.Any(descriptor => descriptor.Id == "canvas-add-node")}:{factoryCanvasMenuDescriptors.Any(descriptor => descriptor.Id == "canvas-add-node")}");
+Console.WriteLine($"RETAINED_MENU_ADAPTER_OK:{legacyRetainedMenuIsDescriptorBacked}:{factoryRetainedMenuIsDescriptorBacked}");
 Console.WriteLine($"RUNTIME_SELECTION_OK:{session.Queries.GetSelectionSnapshot().PrimarySelectedNodeId == targetNodeId}");
 Console.WriteLine($"RUNTIME_CONNECTION_OK:{sessionInspection.Document.Connections.Count}");
 Console.WriteLine($"RUNTIME_PENDING_EVENT_OK:{pendingConnectionChanges > 0}");
