@@ -47,6 +47,7 @@ internal interface IGraphEditorSessionHost
     GraphEditorSelectionSnapshot GetSelectionSnapshot();
     GraphEditorViewportSnapshot GetViewportSnapshot();
     GraphEditorCapabilitySnapshot GetCapabilitySnapshot();
+    IReadOnlyList<GraphEditorFeatureDescriptorSnapshot> GetFeatureDescriptors();
     IReadOnlyList<NodePositionSnapshot> GetNodePositions();
     GraphEditorPendingConnectionSnapshot GetPendingConnectionSnapshot();
     IReadOnlyList<GraphEditorCompatiblePortTargetSnapshot> GetCompatiblePortTargets(string sourceNodeId, string sourcePortId);

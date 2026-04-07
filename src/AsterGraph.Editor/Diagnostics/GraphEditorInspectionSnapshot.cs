@@ -19,6 +19,7 @@ public sealed record GraphEditorInspectionSnapshot
     /// <param name="pendingConnection">当前待完成连线快照。</param>
     /// <param name="status">当前状态快照。</param>
     /// <param name="nodePositions">当前节点位置快照集合。</param>
+    /// <param name="featureDescriptors">当前显式特性描述集合。</param>
     /// <param name="recentDiagnostics">最近诊断集合。</param>
     public GraphEditorInspectionSnapshot(
         GraphDocument document,
@@ -28,6 +29,7 @@ public sealed record GraphEditorInspectionSnapshot
         GraphEditorPendingConnectionSnapshot pendingConnection,
         GraphEditorStatusSnapshot status,
         IReadOnlyList<NodePositionSnapshot> nodePositions,
+        IReadOnlyList<GraphEditorFeatureDescriptorSnapshot> featureDescriptors,
         IReadOnlyList<GraphEditorDiagnostic> recentDiagnostics)
     {
         ArgumentNullException.ThrowIfNull(document);
@@ -37,6 +39,7 @@ public sealed record GraphEditorInspectionSnapshot
         ArgumentNullException.ThrowIfNull(pendingConnection);
         ArgumentNullException.ThrowIfNull(status);
         ArgumentNullException.ThrowIfNull(nodePositions);
+        ArgumentNullException.ThrowIfNull(featureDescriptors);
         ArgumentNullException.ThrowIfNull(recentDiagnostics);
 
         Document = document;
@@ -46,6 +49,7 @@ public sealed record GraphEditorInspectionSnapshot
         PendingConnection = pendingConnection;
         Status = status;
         NodePositions = nodePositions.ToList();
+        FeatureDescriptors = featureDescriptors.ToList();
         RecentDiagnostics = recentDiagnostics.ToList();
     }
 
@@ -83,6 +87,11 @@ public sealed record GraphEditorInspectionSnapshot
     /// 当前节点位置快照集合。
     /// </summary>
     public IReadOnlyList<NodePositionSnapshot> NodePositions { get; }
+
+    /// <summary>
+    /// 当前显式特性描述集合。
+    /// </summary>
+    public IReadOnlyList<GraphEditorFeatureDescriptorSnapshot> FeatureDescriptors { get; }
 
     /// <summary>
     /// 最近诊断集合。

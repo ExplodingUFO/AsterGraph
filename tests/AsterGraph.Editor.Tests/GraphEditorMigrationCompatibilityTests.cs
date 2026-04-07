@@ -97,6 +97,23 @@ public sealed class GraphEditorMigrationCompatibilityTests
         Assert.Equal(legacyEditor.SelectedNode?.Id, factoryEditor.SelectedNode?.Id);
     }
 
+    [Fact]
+    public void LegacyAndFactoryEditorSessions_ExposeEquivalentFeatureDescriptors()
+    {
+        var harness = CreateHarness();
+        var legacyEditor = CreateLegacyEditor(harness);
+        var factoryEditor = CreateFactoryEditor(harness);
+
+        var legacyDescriptors = legacyEditor.Session.Queries.GetFeatureDescriptors()
+            .OrderBy(descriptor => descriptor.Id, StringComparer.Ordinal)
+            .ToList();
+        var factoryDescriptors = factoryEditor.Session.Queries.GetFeatureDescriptors()
+            .OrderBy(descriptor => descriptor.Id, StringComparer.Ordinal)
+            .ToList();
+
+        Assert.Equal(factoryDescriptors, legacyDescriptors);
+    }
+
     [AvaloniaFact]
     public void GraphEditorView_RemainsCompatibilityFacadeDuringStagedMigration()
     {

@@ -50,6 +50,7 @@ public sealed class GraphEditorDiagnosticsContractsTests
         var selectionSnapshotType = GetRequiredType("AsterGraph.Editor.Runtime.GraphEditorSelectionSnapshot");
         var viewportSnapshotType = GetRequiredType("AsterGraph.Editor.Runtime.GraphEditorViewportSnapshot");
         var capabilitySnapshotType = GetRequiredType("AsterGraph.Editor.Runtime.GraphEditorCapabilitySnapshot");
+        var featureDescriptorType = GetRequiredType("AsterGraph.Editor.Runtime.GraphEditorFeatureDescriptorSnapshot");
         var nodePositionSnapshotType = GetRequiredType("AsterGraph.Editor.Models.NodePositionSnapshot");
         var documentType = GetRequiredType("AsterGraph.Core.Models.GraphDocument");
         var diagnosticType = GetRequiredType("AsterGraph.Editor.Diagnostics.GraphEditorDiagnostic");
@@ -63,7 +64,19 @@ public sealed class GraphEditorDiagnosticsContractsTests
         AssertProperty(inspectionSnapshotType, "PendingConnection", pendingConnectionType);
         AssertProperty(inspectionSnapshotType, "Status", statusSnapshotType);
         AssertProperty(inspectionSnapshotType, "NodePositions", typeof(IReadOnlyList<>).MakeGenericType(nodePositionSnapshotType));
+        AssertProperty(inspectionSnapshotType, "FeatureDescriptors", typeof(IReadOnlyList<>).MakeGenericType(featureDescriptorType));
         AssertProperty(inspectionSnapshotType, "RecentDiagnostics", typeof(IReadOnlyList<>).MakeGenericType(diagnosticType));
+    }
+
+    [Fact]
+    public void GraphEditorFeatureDescriptorSnapshot_IsPublicAndImmutable()
+    {
+        var descriptorType = GetRequiredType("AsterGraph.Editor.Runtime.GraphEditorFeatureDescriptorSnapshot");
+
+        Assert.True(descriptorType.IsPublic);
+        AssertProperty(descriptorType, "Id", typeof(string));
+        AssertProperty(descriptorType, "Category", typeof(string));
+        AssertProperty(descriptorType, "IsAvailable", typeof(bool));
     }
 
     [Fact]

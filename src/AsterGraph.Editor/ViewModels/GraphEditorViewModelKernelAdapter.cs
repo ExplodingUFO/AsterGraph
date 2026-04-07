@@ -109,6 +109,8 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
 
     public GraphEditorCapabilitySnapshot GetCapabilitySnapshot() => _kernel.GetCapabilitySnapshot();
 
+    public IReadOnlyList<GraphEditorFeatureDescriptorSnapshot> GetFeatureDescriptors() => _kernel.GetFeatureDescriptors();
+
     public IReadOnlyList<NodePositionSnapshot> GetNodePositions() => _kernel.GetNodePositions();
 
     public GraphEditorPendingConnectionSnapshot GetPendingConnectionSnapshot() => _kernel.GetPendingConnectionSnapshot();

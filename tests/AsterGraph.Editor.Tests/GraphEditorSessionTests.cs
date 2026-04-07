@@ -12,6 +12,7 @@ using AsterGraph.Editor.Menus;
 using AsterGraph.Editor.Models;
 using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.ViewModels;
+using Microsoft.Extensions.Logging;
 using Xunit;
 
 namespace AsterGraph.Editor.Tests;
@@ -201,6 +202,11 @@ public sealed class GraphEditorSessionTests
 
         AssertMethod(queriesType, nameof(IGraphEditorQueries.GetCapabilitySnapshot));
         Assert.Equal(typeof(GraphEditorCapabilitySnapshot), queriesType.GetMethod(nameof(IGraphEditorQueries.GetCapabilitySnapshot))!.ReturnType);
+
+        AssertMethod(queriesType, nameof(IGraphEditorQueries.GetFeatureDescriptors));
+        Assert.Equal(
+            typeof(IReadOnlyList<GraphEditorFeatureDescriptorSnapshot>),
+            queriesType.GetMethod(nameof(IGraphEditorQueries.GetFeatureDescriptors))!.ReturnType);
 
         AssertMethod(queriesType, nameof(IGraphEditorQueries.GetNodePositions));
         Assert.Equal(typeof(IReadOnlyList<NodePositionSnapshot>), queriesType.GetMethod(nameof(IGraphEditorQueries.GetNodePositions))!.ReturnType);
@@ -426,6 +432,52 @@ public sealed class GraphEditorSessionTests
     }
 
     [Fact]
+    public void RuntimeSession_FeatureDescriptors_ExposeExplicitDiscoveryWithoutFacadeInspection()
+    {
+        using var activitySource = new System.Diagnostics.ActivitySource("tests.session.features");
+        using var loggerFactory = new NoOpLoggerFactory();
+        var diagnosticsSink = new RecordingDiagnosticsSink();
+        var definitionId = new NodeDefinitionId("tests.session.features");
+        var session = AsterGraphEditorFactory.CreateSession(new AsterGraphEditorOptions
+        {
+            Document = CreateDocument(definitionId),
+            NodeCatalog = CreateCatalog(definitionId),
+            CompatibilityService = new DefaultPortCompatibilityService(),
+            DiagnosticsSink = diagnosticsSink,
+            Instrumentation = new GraphEditorInstrumentationOptions(loggerFactory, activitySource),
+        });
+
+        var descriptors = session.Queries.GetFeatureDescriptors().ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
+
+        Assert.True(descriptors["capability.selection.set"].IsAvailable);
+        Assert.True(descriptors["capability.nodes.move"].IsAvailable);
+        Assert.True(descriptors["service.workspace"].IsAvailable);
+        Assert.True(descriptors["service.diagnostics"].IsAvailable);
+        Assert.True(descriptors["query.compatible-port-target-snapshot"].IsAvailable);
+        Assert.True(descriptors["query.compatible-target-mvvm-shim"].IsAvailable);
+        Assert.True(descriptors["integration.diagnostics-sink"].IsAvailable);
+        Assert.True(descriptors["integration.instrumentation.logger"].IsAvailable);
+        Assert.True(descriptors["integration.instrumentation.activity-source"].IsAvailable);
+    }
+
+    [Fact]
+    public void RuntimeSession_CaptureInspectionSnapshot_IncludesFeatureDescriptors()
+    {
+        var definitionId = new NodeDefinitionId("tests.session.inspection-features");
+        var session = AsterGraphEditorFactory.CreateSession(CreateOptions(definitionId));
+
+        var inspection = session.Diagnostics.CaptureInspectionSnapshot();
+        var queryDescriptors = session.Queries.GetFeatureDescriptors()
+            .OrderBy(descriptor => descriptor.Id, StringComparer.Ordinal)
+            .ToList();
+        var inspectionDescriptors = inspection.FeatureDescriptors
+            .OrderBy(descriptor => descriptor.Id, StringComparer.Ordinal)
+            .ToList();
+
+        Assert.Equal(queryDescriptors, inspectionDescriptors);
+    }
+
+    [Fact]
     public void GraphEditorViewModel_InspectorConnectionSummaries_StayAlignedWithSelectionAndConnectionChanges()
     {
         var definitionId = new NodeDefinitionId("tests.session.inspector-cache");
@@ -588,5 +640,46 @@ public sealed class GraphEditorSessionTests
             [new PortDefinition(TargetPortId, "Input", new PortTypeId("float"), "#F3B36B")],
             [new PortDefinition(SourcePortId, "Output", new PortTypeId("float"), "#6AD5C4")]));
         return catalog;
+    }
+
+    private sealed class RecordingDiagnosticsSink : IGraphEditorDiagnosticsSink
+    {
+        public List<GraphEditorDiagnostic> Diagnostics { get; } = [];
+
+        public void Publish(GraphEditorDiagnostic diagnostic)
+            => Diagnostics.Add(diagnostic);
+    }
+
+    private sealed class NoOpLoggerFactory : ILoggerFactory
+    {
+        public void AddProvider(ILoggerProvider provider)
+        {
+        }
+
+        public ILogger CreateLogger(string categoryName)
+            => new NoOpLogger();
+
+        public void Dispose()
+        {
+        }
+    }
+
+    private sealed class NoOpLogger : ILogger
+    {
+        public IDisposable? BeginScope<TState>(TState state)
+            where TState : notnull
+            => null;
+
+        public bool IsEnabled(LogLevel logLevel)
+            => true;
+
+        public void Log<TState>(
+            LogLevel logLevel,
+            EventId eventId,
+            TState state,
+            Exception? exception,
+            Func<TState, Exception?, string> formatter)
+        {
+        }
     }
 }

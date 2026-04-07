@@ -612,6 +612,22 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost
             CanCenterViewport = _viewportWidth > 0 && _viewportHeight > 0,
         };
 
+    public IReadOnlyList<GraphEditorFeatureDescriptorSnapshot> GetFeatureDescriptors()
+        =>
+        [
+            new GraphEditorFeatureDescriptorSnapshot("query.feature-descriptors", "query", true),
+            new GraphEditorFeatureDescriptorSnapshot("query.document-snapshot", "query", true),
+            new GraphEditorFeatureDescriptorSnapshot("query.selection-snapshot", "query", true),
+            new GraphEditorFeatureDescriptorSnapshot("query.viewport-snapshot", "query", true),
+            new GraphEditorFeatureDescriptorSnapshot("query.node-positions", "query", true),
+            new GraphEditorFeatureDescriptorSnapshot("query.pending-connection-snapshot", "query", true),
+            new GraphEditorFeatureDescriptorSnapshot("query.compatible-port-target-snapshot", "query", true),
+            new GraphEditorFeatureDescriptorSnapshot("query.compatible-target-mvvm-shim", "query", true),
+            new GraphEditorFeatureDescriptorSnapshot("service.workspace", "service", true),
+            new GraphEditorFeatureDescriptorSnapshot("service.diagnostics", "service", true),
+            new GraphEditorFeatureDescriptorSnapshot("surface.mutation.batch", "surface", true),
+        ];
+
     public IReadOnlyList<NodePositionSnapshot> GetNodePositions()
         => _document.Nodes
             .Select(node => new NodePositionSnapshot(node.Id, node.Position))

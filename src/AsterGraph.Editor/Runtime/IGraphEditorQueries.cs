@@ -35,6 +35,13 @@ public interface IGraphEditorQueries
     GraphEditorCapabilitySnapshot GetCapabilitySnapshot();
 
     /// <summary>
+    /// 获取当前运行时能力、服务和集成特性的显式描述集合。
+    /// </summary>
+    /// <returns>稳定的特性描述集合。</returns>
+    IReadOnlyList<GraphEditorFeatureDescriptorSnapshot> GetFeatureDescriptors()
+        => throw new NotSupportedException();
+
+    /// <summary>
     /// 获取全部节点位置快照。
     /// </summary>
     /// <returns>节点位置集合。</returns>
