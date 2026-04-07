@@ -84,6 +84,9 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost
 
     public string CurrentStatusMessage { get; private set; } = string.Empty;
 
+    internal bool IsDirty
+        => !string.Equals(CreateDocumentSignature(_document), _lastSavedDocumentSignature, StringComparison.Ordinal);
+
     public void Undo()
     {
         if (!_behaviorOptions.History.EnableUndoRedo || !_behaviorOptions.Commands.History.AllowUndo)

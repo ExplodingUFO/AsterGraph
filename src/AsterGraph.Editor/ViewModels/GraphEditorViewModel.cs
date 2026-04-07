@@ -18,6 +18,7 @@ using AsterGraph.Editor.Diagnostics;
 using AsterGraph.Editor.Events;
 using AsterGraph.Editor.Geometry;
 using AsterGraph.Editor.Hosting;
+using AsterGraph.Editor.Kernel;
 using AsterGraph.Editor.Localization;
 using AsterGraph.Editor.Menus;
 using AsterGraph.Editor.Models;
@@ -37,7 +38,7 @@ namespace AsterGraph.Editor.ViewModels;
 /// 新宿主应优先考虑 <see cref="AsterGraphEditorFactory"/> 和 <see cref="AsterGraphEditorOptions"/>，
 /// 但本类型在当前迁移窗口内不会因为新增工厂入口而被移除或标记为过时。
 /// </remarks>
-public sealed partial class GraphEditorViewModel : ObservableObject, IGraphContextMenuHost, IGraphEditorSessionHost
+public sealed partial class GraphEditorViewModel : ObservableObject, IGraphContextMenuHost
 {
     private const double DefaultZoom = 0.88;
     private const double DefaultPanX = 110;
@@ -95,6 +96,8 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     private readonly IGraphClipboardPayloadSerializer _clipboardPayloadSerializer;
     private readonly GraphEditorHistoryService _historyService;
     private readonly GraphEditorInspectorProjection _inspectorProjection;
+    private readonly GraphEditorKernel _kernel;
+    private readonly GraphEditorViewModelKernelAdapter _sessionHost;
     private readonly GraphEditorCommandStateNotifier _commandStateNotifier = new();
     private readonly IRelayCommand[] _computedStateCommands;
     private readonly Dictionary<string, NodeViewModel> _nodesById = new(StringComparer.Ordinal);
@@ -115,6 +118,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     private bool _suspendSelectionTracking;
     private bool _suspendDirtyTracking;
     private bool _suspendHistoryTracking;
+    private bool _isApplyingKernelProjection;
     private string? _lastSavedDocumentSignature;
     private GraphEditorHistoryState? _pendingInteractionState;
     private double _viewportWidth;
@@ -248,19 +252,24 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         NodeTemplates = new ObservableCollection<NodeTemplateViewModel>(
             _nodeCatalog.Definitions.Select(definition => new NodeTemplateViewModel(definition)));
         FragmentTemplates = new ObservableCollection<FragmentTemplateViewModel>();
-        Session = new GraphEditorSession(this, diagnosticsSink);
+        _kernel = new GraphEditorKernel(
+            document,
+            _nodeCatalog,
+            _compatibilityService,
+            _workspaceService,
+            StyleOptions,
+            BehaviorOptions);
+        _sessionHost = new GraphEditorViewModelKernelAdapter(_kernel, this);
+        Session = new GraphEditorSession(_sessionHost, diagnosticsSink);
 
         Nodes.CollectionChanged += HandleNodesCollectionChanged;
         Connections.CollectionChanged += HandleConnectionsCollectionChanged;
         SelectedNodes.CollectionChanged += HandleSelectedNodesCollectionChanged;
 
         WorkspacePath = _workspaceService.WorkspacePath;
-        Title = document.Title;
-        Description = document.Description;
 
         RefreshFragmentTemplates();
-        LoadDocument(document, LocalizeText("editor.status.readyToEdit", "Ready to edit."), markClean: true);
-        ResetView(updateStatus: false);
+        _sessionHost.Initialize();
         _isInitialized = true;
     }
 
@@ -309,6 +318,8 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// 获取与当前兼容立面共享的运行时会话。
     /// </summary>
     public IGraphEditorSession Session { get; }
+
+    internal IGraphEditorSessionHost SessionHost => _sessionHost;
 
     /// <summary>
     /// 获取当前命令权限配置。
@@ -966,13 +977,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// <param name="width">视口宽度。</param>
     /// <param name="height">视口高度。</param>
     public void UpdateViewportSize(double width, double height)
-    {
-        _viewportWidth = width;
-        _viewportHeight = height;
-        FitViewCommand.NotifyCanExecuteChanged();
-        NotifyViewportChanged();
-        RaiseComputedPropertyChanges();
-    }
+        => _kernel.UpdateViewportSize(width, height);
 
     /// <summary>
     /// 配置宿主提供的纯文本剪贴板桥。
@@ -1158,41 +1163,13 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// 撤销到上一个已记录的图编辑状态。
     /// </summary>
     public void Undo()
-    {
-        if (!BehaviorOptions.History.EnableUndoRedo || !CommandPermissions.History.AllowUndo)
-        {
-            SetStatus("editor.status.undo.disabledByPermissions", "Undo is disabled by host permissions.");
-            return;
-        }
-
-        if (!_historyService.TryUndo(out var state) || state is null)
-        {
-            SetStatus("editor.status.undo.noMoreSteps", "No more undo steps.");
-            return;
-        }
-
-        RestoreHistoryState(state, StatusText("editor.status.undo.applied", "Undo applied."));
-    }
+        => _kernel.Undo();
 
     /// <summary>
     /// 重做到下一个已记录的图编辑状态。
     /// </summary>
     public void Redo()
-    {
-        if (!BehaviorOptions.History.EnableUndoRedo || !CommandPermissions.History.AllowRedo)
-        {
-            SetStatus("editor.status.redo.disabledByPermissions", "Redo is disabled by host permissions.");
-            return;
-        }
-
-        if (!_historyService.TryRedo(out var state) || state is null)
-        {
-            SetStatus("editor.status.redo.noMoreSteps", "No more redo steps.");
-            return;
-        }
-
-        RestoreHistoryState(state, StatusText("editor.status.redo.applied", "Redo applied."));
-    }
+        => _kernel.Redo();
 
     /// <summary>
     /// 选中指定节点，等价于单选该节点。
@@ -1299,7 +1276,30 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             .Where(node => Nodes.Contains(node))
             .Distinct()
             .ToList();
+        var nextPrimary = primaryNode is not null && uniqueNodes.Contains(primaryNode)
+            ? primaryNode
+            : uniqueNodes.LastOrDefault();
 
+        if (_isApplyingKernelProjection)
+        {
+            SetSelectionCore(uniqueNodes, nextPrimary, status);
+            return;
+        }
+
+        _kernel.SetSelection(uniqueNodes.Select(node => node.Id).ToList(), nextPrimary?.Id, !string.IsNullOrWhiteSpace(status));
+
+        if (!string.IsNullOrWhiteSpace(status))
+        {
+            StatusMessage = status;
+        }
+    }
+
+    private void SetSelectionCore(IReadOnlyList<NodeViewModel> nodes, NodeViewModel? primaryNode = null, string? status = null)
+    {
+        var uniqueNodes = nodes
+            .Where(node => Nodes.Contains(node))
+            .Distinct()
+            .ToList();
         var nextPrimary = primaryNode is not null && uniqueNodes.Contains(primaryNode)
             ? primaryNode
             : uniqueNodes.LastOrDefault();
@@ -1565,11 +1565,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// 按屏幕偏移平移当前视口。
     /// </summary>
     public void PanBy(double deltaX, double deltaY)
-    {
-        PanX += deltaX;
-        PanY += deltaY;
-        NotifyViewportChanged();
-    }
+        => _kernel.PanBy(deltaX, deltaY);
 
     /// <summary>
     /// 围绕指定屏幕锚点缩放当前视口。
@@ -1577,75 +1573,21 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// <param name="factor">缩放系数。</param>
     /// <param name="screenAnchor">屏幕锚点。</param>
     public void ZoomAt(double factor, GraphPoint screenAnchor)
-    {
-        var updated = ViewportMath.ZoomAround(
-            new ViewportState(Zoom, PanX, PanY),
-            factor,
-            screenAnchor,
-            minimumZoom: 0.35,
-            maximumZoom: 1.9);
-
-        Zoom = updated.Zoom;
-        PanX = updated.PanX;
-        PanY = updated.PanY;
-        NotifyViewportChanged();
-    }
+        => _kernel.ZoomAt(factor, screenAnchor);
 
     /// <summary>
     /// 重置缩放和平移到默认视口。
     /// </summary>
     public void ResetView(bool updateStatus = true)
-    {
-        Zoom = DefaultZoom;
-        PanX = DefaultPanX;
-        PanY = DefaultPanY;
-
-        if (updateStatus)
-        {
-            SetStatus("editor.status.viewport.reset", "Viewport reset.");
-        }
-
-        NotifyViewportChanged();
-    }
+        => _kernel.ResetView(updateStatus);
 
     /// <summary>
     /// 将当前图内容适配到指定视口范围。
     /// </summary>
     public void FitToViewport(double viewportWidth, double viewportHeight, bool updateStatus = true)
     {
-        if (Nodes.Count == 0 || viewportWidth <= 0 || viewportHeight <= 0)
-        {
-            if (updateStatus)
-            {
-                SetStatus("editor.status.viewport.fit.nothingToFit", "Nothing to fit yet.");
-            }
-
-            return;
-        }
-
-        var minX = Nodes.Min(node => node.X);
-        var minY = Nodes.Min(node => node.Y);
-        var maxX = Nodes.Max(node => node.X + node.Width);
-        var maxY = Nodes.Max(node => node.Y + node.Height);
-
-        var graphWidth = Math.Max(maxX - minX, 1);
-        var graphHeight = Math.Max(maxY - minY, 1);
-        const double padding = 120;
-
-        var zoomX = viewportWidth / (graphWidth + (padding * 2));
-        var zoomY = viewportHeight / (graphHeight + (padding * 2));
-        var nextZoom = Math.Clamp(Math.Min(zoomX, zoomY), 0.32, 1.4);
-
-        Zoom = nextZoom;
-        PanX = ((viewportWidth - (graphWidth * nextZoom)) / 2) - (minX * nextZoom);
-        PanY = ((viewportHeight - (graphHeight * nextZoom)) / 2) - (minY * nextZoom);
-
-        if (updateStatus)
-        {
-            SetStatus("editor.status.viewport.fit.applied", "Viewport fit to scene.");
-        }
-
-        NotifyViewportChanged();
+        _kernel.UpdateViewportSize(viewportWidth, viewportHeight);
+        _kernel.FitToViewport(updateStatus);
     }
 
     /// <summary>
@@ -1674,118 +1616,15 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// 以指定输出端口作为连线起点。
     /// </summary>
     public void StartConnection(string sourceNodeId, string sourcePortId)
-    {
-        if (!CommandPermissions.Connections.AllowCreate)
-        {
-            SetStatus("editor.status.connection.create.disabledByPermissions", "Connection creation is disabled by host permissions.");
-            return;
-        }
-
-        var sourceNode = FindNode(sourceNodeId);
-        var sourcePort = sourceNode?.GetPort(sourcePortId);
-        if (sourceNode is null || sourcePort is null)
-        {
-            return;
-        }
-
-        if (sourcePort.Direction != PortDirection.Output)
-        {
-            SetStatus("editor.status.connection.onlyOutputCanStart", "Only output ports can start a connection.");
-            return;
-        }
-
-        if (HasPendingConnection
-            && PendingSourceNode?.Id == sourceNode.Id
-            && PendingSourcePort?.Id == sourcePort.Id)
-        {
-            CancelPendingConnection(StatusText("editor.status.connection.previewCancelled", "Connection preview cancelled."));
-            return;
-        }
-
-        PendingSourceNode = sourceNode;
-        PendingSourcePort = sourcePort;
-        SetStatus("editor.status.connection.connectingFrom", "Connecting from {0}.{1}.", sourceNode.Title, sourcePort.Label);
-    }
+        => _kernel.StartConnection(sourceNodeId, sourcePortId);
 
     /// <summary>
     /// 连接源输出端口与目标输入端口。
     /// </summary>
     public void ConnectPorts(string sourceNodeId, string sourcePortId, string targetNodeId, string targetPortId)
     {
-        if (!CommandPermissions.Connections.AllowCreate)
-        {
-            SetStatus("editor.status.connection.create.disabledByPermissions", "Connection creation is disabled by host permissions.");
-            return;
-        }
-
-        var sourceNode = FindNode(sourceNodeId);
-        var sourcePort = sourceNode?.GetPort(sourcePortId);
-        var targetNode = FindNode(targetNodeId);
-        var targetPort = targetNode?.GetPort(targetPortId);
-
-        if (sourceNode is null || sourcePort is null || targetNode is null || targetPort is null)
-        {
-            return;
-        }
-
-        if (sourcePort.Direction != PortDirection.Output || targetPort.Direction != PortDirection.Input)
-        {
-            SetStatus("editor.status.connection.directionMismatch", "Connections must go from an output port to an input port.");
-            return;
-        }
-
-        var compatibility = _compatibilityService.Evaluate(sourcePort.TypeId, targetPort.TypeId);
-        if (!compatibility.IsCompatible)
-        {
-            SetStatus("editor.status.connection.incompatible", "Incompatible connection: {0} -> {1}.", sourcePort.TypeId, targetPort.TypeId);
-            return;
-        }
-
-        if (Connections.Any(connection =>
-                connection.SourceNodeId == sourceNode.Id
-                && connection.SourcePortId == sourcePort.Id
-                && connection.TargetNodeId == targetNode.Id
-                && connection.TargetPortId == targetPort.Id))
-        {
-            CancelPendingConnection(StatusText("editor.status.connection.alreadyExists", "That connection already exists."));
-            return;
-        }
-
-        var replaced = Connections
-            .Where(connection => connection.TargetNodeId == targetNode.Id && connection.TargetPortId == targetPort.Id)
-            .ToList();
-
-        if (replaced.Count > 0 && !CanReplaceIncomingConnection())
-        {
-            SetStatus("editor.status.connection.replaceIncomingRequiresPermission", "Replacing an incoming connection requires delete or disconnect permission.");
-            return;
-        }
-
-        foreach (var connection in replaced)
-        {
-            Connections.Remove(connection);
-        }
-
-        Connections.Add(new ConnectionViewModel(
-            CreateConnectionId(),
-            sourceNode.Id,
-            sourcePort.Id,
-            targetNode.Id,
-            targetPort.Id,
-            $"{sourcePort.Label} to {targetPort.Label}",
-            sourcePort.AccentHex,
-            compatibility.ConversionId));
-
-        PendingSourceNode = null;
-        PendingSourcePort = null;
-        MarkDirty(
-            compatibility.Kind == PortCompatibilityKind.ImplicitConversion
-                ? StatusText("editor.status.connection.connectedWithImplicitConversion", "Connected {0} to {1} with implicit conversion.", sourceNode.Title, targetNode.Title)
-                : StatusText("editor.status.connection.connected", "Connected {0} to {1}.", sourceNode.Title, targetNode.Title));
-        NotifyDocumentChanged(
-            GraphEditorDocumentChangeKind.ConnectionsChanged,
-            nodeIds: [sourceNode.Id, targetNode.Id],
-            connectionIds: [Connections[^1].Id]);
+        _kernel.StartConnection(sourceNodeId, sourcePortId);
+        _kernel.CompleteConnection(targetNodeId, targetPortId);
     }
 
     /// <summary>
@@ -1793,8 +1632,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// </summary>
     public void CancelPendingConnection(string? status = null)
     {
-        PendingSourceNode = null;
-        PendingSourcePort = null;
+        _kernel.CancelPendingConnection();
 
         if (!string.IsNullOrWhiteSpace(status))
         {
@@ -2107,39 +1945,13 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// 将视口中心移动到指定节点。
     /// </summary>
     public void CenterViewOnNode(string nodeId)
-    {
-        var node = FindNode(nodeId);
-        if (node is null || _viewportWidth <= 0 || _viewportHeight <= 0)
-        {
-            return;
-        }
-
-        PanX = (_viewportWidth / 2) - ((node.X + (node.Width / 2)) * Zoom);
-        PanY = (_viewportHeight / 2) - ((node.Y + (node.Height / 2)) * Zoom);
-        SetStatus("editor.status.viewport.centeredOnNode", "Centered on {0}.", node.Title);
-        NotifyViewportChanged();
-    }
+        => _kernel.CenterViewOnNode(nodeId);
 
     /// <summary>
     /// 将视口中心移动到指定世界坐标。
     /// </summary>
     public void CenterViewAt(GraphPoint worldPoint, bool updateStatus = true)
-    {
-        if (_viewportWidth <= 0 || _viewportHeight <= 0)
-        {
-            return;
-        }
-
-        PanX = (_viewportWidth / 2) - (worldPoint.X * Zoom);
-        PanY = (_viewportHeight / 2) - (worldPoint.Y * Zoom);
-
-        if (updateStatus)
-        {
-            SetStatus("editor.status.viewport.centeredFromMiniMap", "Viewport centered from mini map.");
-        }
-
-        NotifyViewportChanged();
-    }
+        => _kernel.CenterViewAt(worldPoint, updateStatus);
 
     /// <summary>
     /// 查询指定输出端口可连接的兼容输入端口。
@@ -2643,99 +2455,103 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// 将当前图保存到默认工作区文件。
     /// </summary>
     public void SaveWorkspace()
-    {
-        if (!CommandPermissions.Workspace.AllowSave)
-        {
-            SetStatus("editor.status.workspace.save.disabledByPermissions", "Saving is disabled by host permissions.");
-            return;
-        }
-
-        try
-        {
-            var document = CreateDocumentSnapshot();
-            var signature = CreateDocumentSignature(document);
-            _workspaceService.Save(document);
-            _lastSavedDocumentSignature = signature;
-            UpdateDirtyState(signature);
-            SetStatus("editor.status.workspace.save.savedToPath", "Saved snapshot to {0}.", WorkspacePath);
-            PublishRuntimeDiagnostic(
-                "workspace.save.succeeded",
-                "workspace.save",
-                StatusMessage ?? WorkspacePath,
-                GraphEditorDiagnosticSeverity.Info);
-            NotifyDocumentChanged(GraphEditorDocumentChangeKind.WorkspaceSaved, statusMessage: StatusMessage);
-            RaiseComputedPropertyChanges();
-        }
-        catch (Exception exception)
-        {
-            SetStatus("editor.status.workspace.save.failed", "Save failed: {0}", exception.Message);
-            PublishRecoverableFailure(
-                "workspace.save.failed",
-                "workspace.save",
-                StatusMessage ?? exception.Message,
-                exception);
-        }
-    }
+        => _kernel.SaveWorkspace();
 
     /// <summary>
     /// 从默认工作区文件加载图。
     /// </summary>
     /// <returns>加载成功时返回 <see langword="true"/>。</returns>
     public bool LoadWorkspace()
-    {
-        if (!CommandPermissions.Workspace.AllowLoad)
-        {
-            SetStatus("editor.status.workspace.load.disabledByPermissions", "Loading is disabled by host permissions.");
-            return false;
-        }
-
-        try
-        {
-            if (!_workspaceService.Exists())
-            {
-                SetStatus("editor.status.workspace.load.noSnapshot", "No saved snapshot yet. Save once to create one.");
-                PublishRuntimeDiagnostic(
-                    "workspace.load.missing",
-                    "workspace.load",
-                    StatusMessage ?? "No saved snapshot yet.",
-                    GraphEditorDiagnosticSeverity.Warning);
-                return false;
-            }
-
-            var document = _workspaceService.Load();
-            LoadDocument(document, StatusText("editor.status.workspace.load.loadedFromDisk", "Workspace loaded from disk."), markClean: true);
-            CancelPendingConnection();
-            ClearSelection();
-            ResetView(updateStatus: false);
-            PublishRuntimeDiagnostic(
-                "workspace.load.succeeded",
-                "workspace.load",
-                StatusMessage ?? WorkspacePath,
-                GraphEditorDiagnosticSeverity.Info);
-            NotifyDocumentChanged(GraphEditorDocumentChangeKind.WorkspaceLoaded, statusMessage: StatusMessage);
-            return true;
-        }
-        catch (Exception exception)
-        {
-            SetStatus("editor.status.workspace.load.failed", "Load failed: {0}", exception.Message);
-            PublishRecoverableFailure(
-                "workspace.load.failed",
-                "workspace.load",
-                StatusMessage ?? exception.Message,
-                exception);
-            return false;
-        }
-    }
+        => _kernel.LoadWorkspace();
 
     /// <summary>
     /// 生成当前图文档的不可变快照。
     /// </summary>
     public GraphDocument CreateDocumentSnapshot()
-        => new(
-            Title,
-            Description,
-            Nodes.Select(node => node.ToModel()).ToList(),
-            Connections.Select(connection => connection.ToModel()).ToList());
+        => _kernel.CreateDocumentSnapshot();
+
+    internal void ApplyKernelDocument(GraphDocument document, string status, bool markClean)
+    {
+        _isApplyingKernelProjection = true;
+        try
+        {
+            LoadDocument(document, status, markClean);
+        }
+        finally
+        {
+            _isApplyingKernelProjection = false;
+        }
+    }
+
+    internal void ApplyKernelSelection(GraphEditorSelectionSnapshot snapshot)
+        => ApplyKernelSelection(snapshot.SelectedNodeIds, snapshot.PrimarySelectedNodeId);
+
+    internal void ApplyKernelSelection(IReadOnlyList<string> nodeIds, string? primaryNodeId)
+    {
+        _isApplyingKernelProjection = true;
+        try
+        {
+            var selectedNodes = nodeIds
+                .Select(FindNode)
+                .Where(node => node is not null)
+                .Cast<NodeViewModel>()
+                .ToList();
+            var primaryNode = !string.IsNullOrWhiteSpace(primaryNodeId)
+                ? selectedNodes.FirstOrDefault(node => node.Id == primaryNodeId)
+                : selectedNodes.LastOrDefault();
+
+            SetSelectionCore(selectedNodes, primaryNode);
+        }
+        finally
+        {
+            _isApplyingKernelProjection = false;
+        }
+    }
+
+    internal void ApplyKernelViewport(GraphEditorViewportSnapshot snapshot)
+    {
+        _viewportWidth = snapshot.ViewportWidth;
+        _viewportHeight = snapshot.ViewportHeight;
+        Zoom = snapshot.Zoom;
+        PanX = snapshot.PanX;
+        PanY = snapshot.PanY;
+        FitViewCommand.NotifyCanExecuteChanged();
+        RaiseComputedPropertyChanges();
+    }
+
+    internal void ApplyKernelPendingConnection(GraphEditorPendingConnectionSnapshot snapshot)
+    {
+        _isApplyingKernelProjection = true;
+        try
+        {
+            var pendingNode = !string.IsNullOrWhiteSpace(snapshot.SourceNodeId)
+                ? FindNode(snapshot.SourceNodeId)
+                : null;
+            var pendingPort = pendingNode is not null && !string.IsNullOrWhiteSpace(snapshot.SourcePortId)
+                ? pendingNode.GetPort(snapshot.SourcePortId)
+                : null;
+
+            PendingSourceNode = pendingNode;
+            PendingSourcePort = pendingPort;
+        }
+        finally
+        {
+            _isApplyingKernelProjection = false;
+        }
+    }
+
+    internal void ApplyKernelStatus(string statusMessage)
+    {
+        if (string.IsNullOrWhiteSpace(statusMessage))
+        {
+            return;
+        }
+
+        StatusMessage = statusMessage;
+    }
+
+    internal void ApplyKernelDirtyState(bool isDirty)
+        => IsDirty = isDirty;
 
     /// <summary>
     /// 按实例标识查找节点视图模型。
@@ -3418,141 +3234,4 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             : StatusText("editor.status.parameter.updatedMultiple", "Updated {0} nodes / {1}.", SelectedNodes.Count, parameter.DisplayName));
     }
 
-    string IGraphEditorSessionHost.CurrentStatusMessage => StatusMessage;
-
-    event EventHandler<GraphEditorDocumentChangedEventArgs>? IGraphEditorSessionHost.DocumentChanged
-    {
-        add => DocumentChanged += value;
-        remove => DocumentChanged -= value;
-    }
-
-    event EventHandler<GraphEditorSelectionChangedEventArgs>? IGraphEditorSessionHost.SelectionChanged
-    {
-        add => SelectionChanged += value;
-        remove => SelectionChanged -= value;
-    }
-
-    event EventHandler<GraphEditorViewportChangedEventArgs>? IGraphEditorSessionHost.ViewportChanged
-    {
-        add => ViewportChanged += value;
-        remove => ViewportChanged -= value;
-    }
-
-    event EventHandler<GraphEditorFragmentEventArgs>? IGraphEditorSessionHost.FragmentExported
-    {
-        add => FragmentExported += value;
-        remove => FragmentExported -= value;
-    }
-
-    event EventHandler<GraphEditorFragmentEventArgs>? IGraphEditorSessionHost.FragmentImported
-    {
-        add => FragmentImported += value;
-        remove => FragmentImported -= value;
-    }
-
-    event EventHandler<GraphEditorPendingConnectionChangedEventArgs>? IGraphEditorSessionHost.PendingConnectionChanged
-    {
-        add => PendingConnectionChanged += value;
-        remove => PendingConnectionChanged -= value;
-    }
-
-    event EventHandler<GraphEditorRecoverableFailureEventArgs>? IGraphEditorSessionHost.RecoverableFailureRaised
-    {
-        add => RecoverableFailureRaised += value;
-        remove => RecoverableFailureRaised -= value;
-    }
-
-    event Action<GraphEditorDiagnostic>? IGraphEditorSessionHost.DiagnosticPublished
-    {
-        add => DiagnosticPublished += value;
-        remove => DiagnosticPublished -= value;
-    }
-
-    void IGraphEditorSessionHost.SetSelection(IReadOnlyList<string> nodeIds, string? primaryNodeId, bool updateStatus)
-    {
-        var selectedNodes = nodeIds
-            .Distinct(StringComparer.Ordinal)
-            .Select(FindNode)
-            .OfType<NodeViewModel>()
-            .ToList();
-        var primaryNode = !string.IsNullOrWhiteSpace(primaryNodeId)
-            ? selectedNodes.FirstOrDefault(node => string.Equals(node.Id, primaryNodeId, StringComparison.Ordinal))
-            : null;
-
-        SetSelection(
-            selectedNodes,
-            primaryNode,
-            updateStatus
-                ? $"Selected {selectedNodes.Count} node{(selectedNodes.Count == 1 ? string.Empty : "s")}."
-                : null);
-    }
-
-    void IGraphEditorSessionHost.AddNode(NodeDefinitionId definitionId, GraphPoint? preferredWorldPosition)
-    {
-        var template = NodeTemplates.FirstOrDefault(candidate => candidate.Definition.Id == definitionId)
-            ?? throw new InvalidOperationException($"Node definition '{definitionId}' is not registered in the current editor catalog.");
-        AddNode(template, preferredWorldPosition);
-    }
-
-    void IGraphEditorSessionHost.CompleteConnection(string targetNodeId, string targetPortId)
-    {
-        if (PendingSourceNode is null || PendingSourcePort is null)
-        {
-            return;
-        }
-
-        ConnectPorts(PendingSourceNode.Id, PendingSourcePort.Id, targetNodeId, targetPortId);
-    }
-
-    void IGraphEditorSessionHost.CancelPendingConnection()
-        => CancelPendingConnection();
-
-    void IGraphEditorSessionHost.SetNodePositions(IReadOnlyList<NodePositionSnapshot> positions, bool updateStatus)
-        => SetNodePositions(positions, updateStatus);
-
-    void IGraphEditorSessionHost.FitToViewport(bool updateStatus)
-        => FitToViewport(ViewportWidth, ViewportHeight, updateStatus);
-
-    GraphEditorSelectionSnapshot IGraphEditorSessionHost.GetSelectionSnapshot()
-        => new(SelectedNodes.Select(node => node.Id).ToList(), SelectedNode?.Id);
-
-    GraphEditorViewportSnapshot IGraphEditorSessionHost.GetViewportSnapshot()
-        => new(Zoom, PanX, PanY, ViewportWidth, ViewportHeight);
-
-    GraphEditorCapabilitySnapshot IGraphEditorSessionHost.GetCapabilitySnapshot()
-        => new(
-            CanUndo,
-            CanRedo,
-            CanCopySelection,
-            CanPaste,
-            CanSaveWorkspace,
-            CanLoadWorkspace)
-        {
-            CanSetSelection = true,
-            CanMoveNodes = CommandPermissions.Nodes.AllowMove,
-            CanCreateConnections = CommandPermissions.Connections.AllowCreate,
-            CanDeleteConnections = CommandPermissions.Connections.AllowDelete,
-            CanBreakConnections = CommandPermissions.Connections.AllowDisconnect,
-            CanUpdateViewport = true,
-            CanFitToViewport = Nodes.Count > 0 && ViewportWidth > 0 && ViewportHeight > 0,
-            CanCenterViewport = ViewportWidth > 0 && ViewportHeight > 0,
-        };
-
-    GraphEditorPendingConnectionSnapshot IGraphEditorSessionHost.GetPendingConnectionSnapshot()
-        => GraphEditorPendingConnectionSnapshot.Create(
-            HasPendingConnection,
-            PendingSourceNode?.Id,
-            PendingSourcePort?.Id);
-
-    IReadOnlyList<GraphEditorCompatiblePortTargetSnapshot> IGraphEditorSessionHost.GetCompatiblePortTargets(string sourceNodeId, string sourcePortId)
-        => GetCompatibleTargets(sourceNodeId, sourcePortId)
-            .Select(target => new GraphEditorCompatiblePortTargetSnapshot(
-                target.Node.Id,
-                target.Node.Title,
-                target.Port.Id,
-                target.Port.Label,
-                target.Port.TypeId,
-                target.Port.AccentHex,
-                target.Compatibility))
-            .ToList();
 }

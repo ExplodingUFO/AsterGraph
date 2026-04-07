@@ -39,7 +39,7 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorComman
     /// <param name="editor">底层兼容宿主。</param>
     /// <param name="diagnosticsSink">可选的宿主诊断发布器。</param>
     public GraphEditorSession(ViewModels.GraphEditorViewModel editor, IGraphEditorDiagnosticsSink? diagnosticsSink = null)
-        : this((IGraphEditorSessionHost)editor, diagnosticsSink)
+        : this(editor.SessionHost, diagnosticsSink)
     {
     }
 

@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Reflection;
 using AsterGraph.Abstractions.Compatibility;
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
@@ -67,6 +68,33 @@ public sealed class GraphEditorMigrationCompatibilityTests
         var factoryEditor = CreateFactoryEditor(harness);
 
         Assert.Equal(CaptureSnapshot(legacyEditor), CaptureSnapshot(factoryEditor));
+    }
+
+    [Fact]
+    public void LegacyAndFactoryEditorSessions_RemainBehaviorallyAlignedAfterAdapterBackedSessionCommands()
+    {
+        var harness = CreateHarness();
+        var legacyEditor = CreateLegacyEditor(harness);
+        var factoryEditor = CreateFactoryEditor(harness);
+        var legacyHost = legacyEditor.Session.GetType()
+            .GetField("_host", BindingFlags.Instance | BindingFlags.NonPublic)!
+            .GetValue(legacyEditor.Session);
+        var factoryHost = factoryEditor.Session.GetType()
+            .GetField("_host", BindingFlags.Instance | BindingFlags.NonPublic)!
+            .GetValue(factoryEditor.Session);
+
+        legacyEditor.Session.Commands.SetSelection([SourceNodeId], SourceNodeId, updateStatus: false);
+        factoryEditor.Session.Commands.SetSelection([SourceNodeId], SourceNodeId, updateStatus: false);
+
+        Assert.NotNull(legacyHost);
+        Assert.NotNull(factoryHost);
+        Assert.IsNotType<GraphEditorViewModel>(legacyHost);
+        Assert.IsNotType<GraphEditorViewModel>(factoryHost);
+        Assert.Equal(
+            legacyEditor.Session.Queries.GetSelectionSnapshot().SelectedNodeIds,
+            factoryEditor.Session.Queries.GetSelectionSnapshot().SelectedNodeIds);
+        Assert.Equal(legacyEditor.SelectedNodes.Count, factoryEditor.SelectedNodes.Count);
+        Assert.Equal(legacyEditor.SelectedNode?.Id, factoryEditor.SelectedNode?.Id);
     }
 
     [AvaloniaFact]

@@ -58,6 +58,19 @@ public sealed class GraphEditorSessionTests
     }
 
     [Fact]
+    public void AsterGraphEditorFactory_Create_EditorSession_NoLongerStoresGraphEditorViewModelAsItsRuntimeStateOwner()
+    {
+        var editor = AsterGraphEditorFactory.Create(CreateOptions(new NodeDefinitionId("tests.session.editor-kernel-owner")));
+        var session = editor.Session;
+        var host = session.GetType()
+            .GetField("_host", BindingFlags.Instance | BindingFlags.NonPublic)!
+            .GetValue(session);
+
+        Assert.NotNull(host);
+        Assert.IsNotType<GraphEditorViewModel>(host);
+    }
+
+    [Fact]
     public void AsterGraphEditorFactory_CreateSession_CreateDocumentSnapshot_ReturnsDetachedSnapshot()
     {
         var definitionId = new NodeDefinitionId("tests.session.detached-snapshot");
