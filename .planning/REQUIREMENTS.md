@@ -10,13 +10,13 @@
 
 - [x] **KERN-01**: The canonical runtime/editor state owner can be composed without constructing `GraphEditorViewModel`
 - [x] **KERN-02**: `IGraphEditorSession` commands, queries, events, diagnostics, and batching operate over kernel-owned state/contracts rather than delegating through mutable MVVM projections
-- [ ] **KERN-03**: `GraphEditorViewModel` becomes a compatibility-oriented adapter/facade over the kernel instead of the primary state owner
+- [x] **KERN-03**: `GraphEditorViewModel` becomes a compatibility-oriented adapter/facade over the kernel instead of the primary state owner
 
 ### Capability And Contract Normalization
 
 - [ ] **CAP-01**: Public capability descriptors make optional surfaces, services, and host features explicit instead of forcing hosts to infer support from object shape
 - [ ] **CAP-02**: Editor-layer command and menu contracts avoid depending on `RelayCommand`, `ObservableCollection`, `NodeTemplateViewModel`, or other MVVM implementation details where stable descriptors/IDs are sufficient
-- [ ] **CAP-03**: Public graph/selection state exposed to hosts is read-only or snapshot-based by default, so external code cannot mutate core editor state by editing live collections
+- [x] **CAP-03**: Public graph/selection state exposed to hosts is read-only or snapshot-based by default, so external code cannot mutate core editor state by editing live collections
 
 ### Avalonia Adapter Cleanup
 
@@ -50,10 +50,10 @@
 |-------------|---------------|--------|
 | KERN-01 | Phase 13 | Complete |
 | KERN-02 | Phase 13 | Complete |
-| KERN-03 | Phase 14 | Planned |
+| KERN-03 | Phase 14 | Complete |
 | CAP-01 | Phase 15 | Planned |
 | CAP-02 | Phase 15 | Planned |
-| CAP-03 | Phase 14 | Planned |
+| CAP-03 | Phase 14 | Complete |
 | ADAPT-01 | Phase 16 | Planned |
 | ADAPT-02 | Phase 16 | Planned |
 | MIG-01 | Phase 17 | Planned |
