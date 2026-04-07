@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: kernel-extraction-capability-contracts-and-plugin-readiness
-status: Ready To Plan Phase 16
-stopped_at: Phase 15 completed; Phase 16 Avalonia adapter boundary cleanup planning is next
-last_updated: "2026-04-08T03:00:00Z"
+status: Planning Phase 16
+stopped_at: Phase 16 planning completed; execute 16-01 next
+last_updated: "2026-04-07T18:28:34Z"
 progress:
   total_phases: 6
   completed_phases: 3
-  total_plans: 9
+  total_plans: 12
   completed_plans: 9
 ---
 
@@ -19,14 +19,14 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-04-04)
 
 **Core value:** Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
-**Current focus:** Phase 16 Avalonia adapter boundary cleanup planning after Phase 15 descriptor normalization completed
+**Current focus:** Phase 16 Avalonia adapter boundary cleanup planning, with 16-01 routing consolidation queued as the first execution step
 
 ## Current Position
 
-Phase: 15. Capability And Descriptor Contract Normalization  
-Plan: 03  
-Status: Phase 15 completed; ready to plan Phase 16  
-Last activity: 2026-04-08 — Completed plans 15-01 through 15-03, locked descriptor-first proof/sample outputs, and closed Phase 15
+Phase: 16. Avalonia Adapter Boundary Cleanup
+Plan: 16-01 through 16-03 planned
+Status: Planning Phase 16
+Last activity: 2026-04-08 — Captured Phase 16 context/research and created plans 16-01 through 16-03
 
 ## Accumulated Context
 
@@ -52,6 +52,8 @@ New milestone decisions:
 - Keep explicit runtime feature discovery and inspection descriptor reuse as the locked Phase 15 baseline while command/menu normalization proceeds.
 - Keep retained `BuildContextMenu(...)` on a compatibility adapter over canonical descriptor generation instead of letting MVVM `ICommand` objects remain the stock source of truth.
 - Treat Phase 16 Avalonia adapter cleanup as the next leverage point now that runtime discovery and menu/command contracts are descriptor-first.
+- Make shared Avalonia shortcut and stock context-menu routing over session descriptors the first Phase 16 execution target.
+- Keep clipboard and host-context seams Avalonia-owned, but consolidate them behind thinner adapter touchpoints during Phase 16.
 
 ### Pending Todos
 
@@ -61,11 +63,11 @@ None captured yet.
 
 - No current blocker in the main workspace.
 - The main design constraint is preserving staged migration while continuing to move public control-plane seams away from MVVM object shape.
-- Capability discovery and descriptor normalization are now the highest-leverage architecture debt left in the milestone.
-- The main execution risk for Phase 15 is splitting canonical descriptor contracts from existing `ICommand` / menu presenter compatibility without letting the two models drift.
-- The next concrete risk is Phase 15-02 over-reaching into Avalonia cleanup instead of keeping command/menu normalization editor-layer and descriptor-first.
+- Avalonia adapter thinning is now the highest-leverage architecture debt left in the milestone.
 - Known transaction-history test failures remain present even on the pre-15-02 baseline; they should not be misclassified as Phase 15 regressions when Phase 16 starts.
 - The next design constraint is making Avalonia consume the thinner descriptor/runtime contracts without recreating editor policy in the UI layer.
+- The main Phase 16 risk is mixing input/menu policy cleanup with broader presenter-surface redesign instead of first collapsing duplicated shell/canvas routing.
+- `GraphEditorView.axaml.cs` and `NodeCanvas.axaml.cs` remain the main Avalonia coordination hotspots and should be changed with proof coverage, not opportunistically.
 
 ### Quick Tasks Completed
 
@@ -76,5 +78,5 @@ None captured yet.
 ## Session Continuity
 
 Last session: 2026-04-08
-Stopped at: Phase 15 completed; Phase 16 Avalonia adapter boundary cleanup planning is next
-Resume file: None
+Stopped at: Phase 16 planning completed; execute 16-01 next
+Resume file: .planning/phases/16-avalonia-adapter-boundary-cleanup/16-01-PLAN.md
