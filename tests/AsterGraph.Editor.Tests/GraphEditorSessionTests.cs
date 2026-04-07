@@ -11,6 +11,7 @@ using AsterGraph.Editor.Hosting;
 using AsterGraph.Editor.Menus;
 using AsterGraph.Editor.Models;
 using AsterGraph.Editor.Runtime;
+using AsterGraph.Editor.Services;
 using AsterGraph.Editor.ViewModels;
 using Microsoft.Extensions.Logging;
 using Xunit;
@@ -181,6 +182,8 @@ public sealed class GraphEditorSessionTests
         AssertMethod(commandsType, nameof(IGraphEditorCommands.CenterViewAt), typeof(GraphPoint), typeof(bool));
         AssertMethod(commandsType, nameof(IGraphEditorCommands.SaveWorkspace));
         AssertMethod(commandsType, nameof(IGraphEditorCommands.LoadWorkspace));
+        AssertMethod(commandsType, nameof(IGraphEditorCommands.TryExecuteCommand), typeof(GraphEditorCommandInvocationSnapshot));
+        Assert.Equal(typeof(bool), commandsType.GetMethod(nameof(IGraphEditorCommands.TryExecuteCommand), [typeof(GraphEditorCommandInvocationSnapshot)])!.ReturnType);
     }
 
     [Fact]
@@ -207,6 +210,16 @@ public sealed class GraphEditorSessionTests
         Assert.Equal(
             typeof(IReadOnlyList<GraphEditorFeatureDescriptorSnapshot>),
             queriesType.GetMethod(nameof(IGraphEditorQueries.GetFeatureDescriptors))!.ReturnType);
+
+        AssertMethod(queriesType, nameof(IGraphEditorQueries.GetCommandDescriptors));
+        Assert.Equal(
+            typeof(IReadOnlyList<GraphEditorCommandDescriptorSnapshot>),
+            queriesType.GetMethod(nameof(IGraphEditorQueries.GetCommandDescriptors))!.ReturnType);
+
+        AssertMethod(queriesType, nameof(IGraphEditorQueries.BuildContextMenuDescriptors), typeof(ContextMenuContext));
+        Assert.Equal(
+            typeof(IReadOnlyList<GraphEditorMenuItemDescriptorSnapshot>),
+            queriesType.GetMethod(nameof(IGraphEditorQueries.BuildContextMenuDescriptors), [typeof(ContextMenuContext)])!.ReturnType);
 
         AssertMethod(queriesType, nameof(IGraphEditorQueries.GetNodePositions));
         Assert.Equal(typeof(IReadOnlyList<NodePositionSnapshot>), queriesType.GetMethod(nameof(IGraphEditorQueries.GetNodePositions))!.ReturnType);
@@ -478,6 +491,55 @@ public sealed class GraphEditorSessionTests
     }
 
     [Fact]
+    public void RuntimeSession_CommandAndMenuDescriptors_UseStableDataOnlyContracts()
+    {
+        var definitionId = new NodeDefinitionId("tests.session.menu-descriptors");
+        var session = AsterGraphEditorFactory.CreateSession(CreateOptions(definitionId) with
+        {
+            WorkspaceService = new EmptyWorkspaceService(),
+        });
+        session.Commands.UpdateViewportSize(1280, 720);
+
+        var commandDescriptors = session.Queries.GetCommandDescriptors().ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
+        var canvasMenu = session.Queries.BuildContextMenuDescriptors(new ContextMenuContext(ContextMenuTargetKind.Canvas, new GraphPoint(160, 90)));
+        var addNode = Assert.Single(canvasMenu, item => item.Id == "canvas-add-node");
+        var addNodeGroup = Assert.Single(addNode.Children);
+        var addNodeItem = Assert.Single(addNodeGroup.Children);
+        var fitView = Assert.Single(canvasMenu, item => item.Id == "canvas-fit-view");
+        var loadItem = Assert.Single(canvasMenu, item => item.Id == "canvas-load");
+
+        Assert.True(commandDescriptors["nodes.add"].IsEnabled);
+        Assert.True(commandDescriptors["viewport.fit"].IsEnabled);
+        Assert.False(commandDescriptors["workspace.load"].IsEnabled);
+
+        Assert.NotNull(addNodeItem.Command);
+        Assert.Equal("nodes.add", addNodeItem.Command!.CommandId);
+        Assert.Contains(addNodeItem.Command.Arguments, argument => argument.Name == "definitionId");
+        Assert.Equal("viewport.fit", fitView.Command!.CommandId);
+        Assert.Equal("workspace.load", loadItem.Command!.CommandId);
+        Assert.False(loadItem.IsEnabled);
+    }
+
+    [Fact]
+    public void RuntimeSession_TryExecuteCommand_AcceptsCanonicalInvocationSnapshot()
+    {
+        var definitionId = new NodeDefinitionId("tests.session.execute-descriptor");
+        var session = AsterGraphEditorFactory.CreateSession(CreateOptions(definitionId));
+
+        var executed = session.Commands.TryExecuteCommand(
+            new GraphEditorCommandInvocationSnapshot(
+                "nodes.add",
+                [
+                    new GraphEditorCommandArgumentSnapshot("definitionId", definitionId.Value),
+                    new GraphEditorCommandArgumentSnapshot("worldX", "640"),
+                    new GraphEditorCommandArgumentSnapshot("worldY", "220"),
+                ]));
+
+        Assert.True(executed);
+        Assert.Equal(3, session.Queries.CreateDocumentSnapshot().Nodes.Count);
+    }
+
+    [Fact]
     public void GraphEditorViewModel_InspectorConnectionSummaries_StayAlignedWithSelectionAndConnectionChanges()
     {
         var definitionId = new NodeDefinitionId("tests.session.inspector-cache");
@@ -681,5 +743,20 @@ public sealed class GraphEditorSessionTests
             Func<TState, Exception?, string> formatter)
         {
         }
+    }
+
+    private sealed class EmptyWorkspaceService : IGraphWorkspaceService
+    {
+        public string WorkspacePath => "workspace://empty";
+
+        public void Save(GraphDocument document)
+        {
+        }
+
+        public GraphDocument Load()
+            => throw new InvalidOperationException("No saved snapshot.");
+
+        public bool Exists()
+            => false;
     }
 }

@@ -260,7 +260,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             StyleOptions,
             BehaviorOptions);
         _sessionHost = new GraphEditorViewModelKernelAdapter(_kernel, this);
-        Session = new GraphEditorSession(_sessionHost, diagnosticsSink);
+        Session = new GraphEditorSession(_sessionHost, diagnosticsSink, CreateSessionDescriptorSupport());
 
         Nodes.CollectionChanged += HandleNodesCollectionChanged;
         Connections.CollectionChanged += HandleConnectionsCollectionChanged;
@@ -320,6 +320,12 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     public IGraphEditorSession Session { get; }
 
     internal IGraphEditorSessionHost SessionHost => _sessionHost;
+
+    internal GraphEditorSessionDescriptorSupport CreateSessionDescriptorSupport()
+        => new(
+            _nodeCatalog,
+            LocalizeText,
+            this);
 
     /// <summary>
     /// 获取当前命令权限配置。
@@ -940,7 +946,8 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// <returns>供视图层渲染的菜单项集合。</returns>
     public IReadOnlyList<MenuItemDescriptor> BuildContextMenu(ContextMenuContext context)
     {
-        var stockItems = _contextMenuBuilder.Build(context);
+        var stockItemDescriptors = Session.Queries.BuildContextMenuDescriptors(context);
+        var stockItems = GraphContextMenuCompatibilityAdapter.Adapt(stockItemDescriptors, Session.Commands);
         if (ContextMenuAugmentor is null)
         {
             return stockItems;
@@ -953,6 +960,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
                     Session,
                     context,
                     stockItems,
+                    stockItemDescriptors,
                     CommandPermissions,
                     this));
         }

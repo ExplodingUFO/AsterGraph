@@ -80,6 +80,30 @@ public sealed class GraphEditorDiagnosticsContractsTests
     }
 
     [Fact]
+    public void CommandAndMenuDescriptorSnapshots_ArePublicAndDataOnly()
+    {
+        var commandArgumentType = GetRequiredType("AsterGraph.Editor.Runtime.GraphEditorCommandArgumentSnapshot");
+        var commandInvocationType = GetRequiredType("AsterGraph.Editor.Runtime.GraphEditorCommandInvocationSnapshot");
+        var commandDescriptorType = GetRequiredType("AsterGraph.Editor.Runtime.GraphEditorCommandDescriptorSnapshot");
+        var menuDescriptorType = GetRequiredType("AsterGraph.Editor.Menus.GraphEditorMenuItemDescriptorSnapshot");
+
+        Assert.True(commandArgumentType.IsPublic);
+        Assert.True(commandInvocationType.IsPublic);
+        Assert.True(commandDescriptorType.IsPublic);
+        Assert.True(menuDescriptorType.IsPublic);
+
+        AssertProperty(commandArgumentType, "Name", typeof(string));
+        AssertProperty(commandArgumentType, "Value", typeof(string));
+        AssertProperty(commandInvocationType, "CommandId", typeof(string));
+        AssertProperty(commandInvocationType, "Arguments", typeof(IReadOnlyList<>).MakeGenericType(commandArgumentType));
+        AssertProperty(commandDescriptorType, "Id", typeof(string));
+        AssertProperty(commandDescriptorType, "IsEnabled", typeof(bool));
+        AssertProperty(menuDescriptorType, "Command", commandInvocationType);
+        AssertProperty(menuDescriptorType, "Children", typeof(IReadOnlyList<>).MakeGenericType(menuDescriptorType));
+        Assert.Null(menuDescriptorType.GetProperty("Command")!.PropertyType.GetProperty("Execute"));
+    }
+
+    [Fact]
     public void PendingConnectionAndStatusSnapshots_ArePublicAndImmutable()
     {
         var pendingConnectionType = GetRequiredType("AsterGraph.Editor.Diagnostics.GraphEditorPendingConnectionSnapshot");

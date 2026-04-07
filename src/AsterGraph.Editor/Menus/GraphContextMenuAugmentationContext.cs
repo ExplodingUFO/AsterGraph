@@ -16,12 +16,14 @@ public sealed record GraphContextMenuAugmentationContext
         IGraphEditorSession session,
         ContextMenuContext context,
         IReadOnlyList<MenuItemDescriptor> stockItems,
+        IReadOnlyList<GraphEditorMenuItemDescriptorSnapshot> stockItemDescriptors,
         GraphEditorCommandPermissions commandPermissions,
         GraphEditorViewModel compatibilityEditor)
     {
         Session = session ?? throw new ArgumentNullException(nameof(session));
         Context = context ?? throw new ArgumentNullException(nameof(context));
         StockItems = stockItems ?? throw new ArgumentNullException(nameof(stockItems));
+        StockItemDescriptors = stockItemDescriptors ?? throw new ArgumentNullException(nameof(stockItemDescriptors));
         CommandPermissions = commandPermissions ?? throw new ArgumentNullException(nameof(commandPermissions));
         CompatibilityEditor = compatibilityEditor ?? throw new ArgumentNullException(nameof(compatibilityEditor));
     }
@@ -40,6 +42,11 @@ public sealed record GraphContextMenuAugmentationContext
     /// 编辑器默认生成的菜单项集合。
     /// </summary>
     public IReadOnlyList<MenuItemDescriptor> StockItems { get; }
+
+    /// <summary>
+    /// 编辑器默认生成的稳定菜单描述集合。
+    /// </summary>
+    public IReadOnlyList<GraphEditorMenuItemDescriptorSnapshot> StockItemDescriptors { get; }
 
     /// <summary>
     /// 当前命令权限快照。

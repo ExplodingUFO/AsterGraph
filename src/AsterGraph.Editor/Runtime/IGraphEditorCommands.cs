@@ -159,4 +159,12 @@ public interface IGraphEditorCommands
     /// </summary>
     /// <returns>加载成功时返回 <see langword="true"/>。</returns>
     bool LoadWorkspace();
+
+    /// <summary>
+    /// 使用稳定命令标识和参数执行命令。
+    /// </summary>
+    /// <param name="command">命令调用描述。</param>
+    /// <returns>命令被识别并已分派时返回 <see langword="true"/>。</returns>
+    bool TryExecuteCommand(GraphEditorCommandInvocationSnapshot command)
+        => throw new NotSupportedException();
 }

@@ -111,6 +111,141 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
 
     public IReadOnlyList<GraphEditorFeatureDescriptorSnapshot> GetFeatureDescriptors() => _kernel.GetFeatureDescriptors();
 
+    public IReadOnlyList<GraphEditorCommandDescriptorSnapshot> GetCommandDescriptors()
+    {
+        var descriptors = _kernel.GetCommandDescriptors()
+            .Concat(
+            [
+                new GraphEditorCommandDescriptorSnapshot("fragments.export-selection", _owner.CanExportSelectionFragment),
+                new GraphEditorCommandDescriptorSnapshot("fragments.import", _owner.CanImportFragment),
+                new GraphEditorCommandDescriptorSnapshot("layout.align-left", _owner.CanAlignSelection),
+                new GraphEditorCommandDescriptorSnapshot("layout.align-center", _owner.CanAlignSelection),
+                new GraphEditorCommandDescriptorSnapshot("layout.align-right", _owner.CanAlignSelection),
+                new GraphEditorCommandDescriptorSnapshot("layout.align-top", _owner.CanAlignSelection),
+                new GraphEditorCommandDescriptorSnapshot("layout.align-middle", _owner.CanAlignSelection),
+                new GraphEditorCommandDescriptorSnapshot("layout.align-bottom", _owner.CanAlignSelection),
+                new GraphEditorCommandDescriptorSnapshot("layout.distribute-horizontal", _owner.CanDistributeSelection),
+                new GraphEditorCommandDescriptorSnapshot("layout.distribute-vertical", _owner.CanDistributeSelection),
+                new GraphEditorCommandDescriptorSnapshot("nodes.inspect", true),
+                new GraphEditorCommandDescriptorSnapshot("nodes.delete-by-id", _owner.CommandPermissions.Nodes.AllowDelete),
+                new GraphEditorCommandDescriptorSnapshot("nodes.duplicate", _owner.CommandPermissions.Nodes.AllowDuplicate),
+                new GraphEditorCommandDescriptorSnapshot("connections.disconnect-incoming", _owner.CommandPermissions.Connections.AllowDisconnect),
+                new GraphEditorCommandDescriptorSnapshot("connections.disconnect-outgoing", _owner.CommandPermissions.Connections.AllowDisconnect),
+                new GraphEditorCommandDescriptorSnapshot("connections.disconnect-all", _owner.CommandPermissions.Connections.AllowDisconnect),
+            ])
+            .GroupBy(descriptor => descriptor.Id, StringComparer.Ordinal)
+            .Select(group => group.Last())
+            .OrderBy(descriptor => descriptor.Id, StringComparer.Ordinal)
+            .ToList();
+
+        return descriptors;
+    }
+
+    public bool TryExecuteCommand(GraphEditorCommandInvocationSnapshot command)
+    {
+        ArgumentNullException.ThrowIfNull(command);
+
+        switch (command.CommandId)
+        {
+            case "fragments.export-selection":
+                _owner.ExportSelectionFragment();
+                return true;
+
+            case "fragments.import":
+                _owner.ImportFragment();
+                return true;
+
+            case "layout.align-left":
+                _owner.AlignSelectionLeft();
+                return true;
+
+            case "layout.align-center":
+                _owner.AlignSelectionCenter();
+                return true;
+
+            case "layout.align-right":
+                _owner.AlignSelectionRight();
+                return true;
+
+            case "layout.align-top":
+                _owner.AlignSelectionTop();
+                return true;
+
+            case "layout.align-middle":
+                _owner.AlignSelectionMiddle();
+                return true;
+
+            case "layout.align-bottom":
+                _owner.AlignSelectionBottom();
+                return true;
+
+            case "layout.distribute-horizontal":
+                _owner.DistributeSelectionHorizontally();
+                return true;
+
+            case "layout.distribute-vertical":
+                _owner.DistributeSelectionVertically();
+                return true;
+
+            case "nodes.inspect":
+                if (!command.TryGetArgument("nodeId", out var inspectNodeId))
+                {
+                    return false;
+                }
+
+                _owner.SelectSingleNode(_owner.FindNode(inspectNodeId));
+                return true;
+
+            case "nodes.delete-by-id":
+                if (!command.TryGetArgument("nodeId", out var deleteNodeId))
+                {
+                    return false;
+                }
+
+                _owner.DeleteNodeById(deleteNodeId);
+                return true;
+
+            case "nodes.duplicate":
+                if (!command.TryGetArgument("nodeId", out var duplicateNodeId))
+                {
+                    return false;
+                }
+
+                _owner.DuplicateNode(duplicateNodeId);
+                return true;
+
+            case "connections.disconnect-incoming":
+                if (!command.TryGetArgument("nodeId", out var incomingNodeId))
+                {
+                    return false;
+                }
+
+                _owner.DisconnectIncoming(incomingNodeId);
+                return true;
+
+            case "connections.disconnect-outgoing":
+                if (!command.TryGetArgument("nodeId", out var outgoingNodeId))
+                {
+                    return false;
+                }
+
+                _owner.DisconnectOutgoing(outgoingNodeId);
+                return true;
+
+            case "connections.disconnect-all":
+                if (!command.TryGetArgument("nodeId", out var disconnectNodeId))
+                {
+                    return false;
+                }
+
+                _owner.DisconnectAll(disconnectNodeId);
+                return true;
+
+            default:
+                return _kernel.TryExecuteCommand(command);
+        }
+    }
+
     public IReadOnlyList<NodePositionSnapshot> GetNodePositions() => _kernel.GetNodePositions();
 
     public GraphEditorPendingConnectionSnapshot GetPendingConnectionSnapshot() => _kernel.GetPendingConnectionSnapshot();

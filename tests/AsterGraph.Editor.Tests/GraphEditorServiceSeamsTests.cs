@@ -68,6 +68,8 @@ public sealed class GraphEditorServiceSeamsTests
         editor.ExportSelectionFragment();
         editor.Session.Commands.SaveWorkspace();
         var compatibleTargets = editor.Session.Queries.GetCompatiblePortTargets("source-node", "out");
+        var commandDescriptors = editor.Session.Queries.GetCommandDescriptors();
+        var descriptorMenu = editor.Session.Queries.BuildContextMenuDescriptors(new ContextMenuContext(ContextMenuTargetKind.Canvas, new GraphPoint(200, 120)));
         var menu = editor.BuildContextMenu(new ContextMenuContext(ContextMenuTargetKind.Canvas, new GraphPoint(200, 120)));
 
         Assert.Equal("workspace://custom", editor.WorkspacePath);
@@ -79,6 +81,8 @@ public sealed class GraphEditorServiceSeamsTests
         Assert.Single(compatibleTargets);
         Assert.Equal("target-node", compatibleTargets[0].NodeId);
         Assert.True(compatibility.EvaluateCalls > 0);
+        Assert.Contains(commandDescriptors, descriptor => descriptor.Id == "workspace.save" && descriptor.IsEnabled);
+        Assert.Contains(descriptorMenu, item => item.Id == "canvas-save");
         Assert.NotEmpty(menu);
         Assert.Collection(
             diagnostics.Diagnostics,

@@ -628,6 +628,158 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost
             new GraphEditorFeatureDescriptorSnapshot("surface.mutation.batch", "surface", true),
         ];
 
+    public IReadOnlyList<GraphEditorCommandDescriptorSnapshot> GetCommandDescriptors()
+        =>
+        [
+            new GraphEditorCommandDescriptorSnapshot(
+                "nodes.add",
+                _behaviorOptions.Commands.Nodes.AllowCreate),
+            new GraphEditorCommandDescriptorSnapshot(
+                "selection.delete",
+                _selectedNodeIds.Count > 0 && _behaviorOptions.Commands.Nodes.AllowDelete),
+            new GraphEditorCommandDescriptorSnapshot(
+                "connections.start",
+                _behaviorOptions.Commands.Connections.AllowCreate),
+            new GraphEditorCommandDescriptorSnapshot(
+                "connections.connect",
+                _behaviorOptions.Commands.Connections.AllowCreate),
+            new GraphEditorCommandDescriptorSnapshot(
+                "connections.cancel",
+                _pendingConnection.HasPendingConnection),
+            new GraphEditorCommandDescriptorSnapshot(
+                "connections.delete",
+                _behaviorOptions.Commands.Connections.AllowDelete),
+            new GraphEditorCommandDescriptorSnapshot(
+                "connections.break-port",
+                _behaviorOptions.Commands.Connections.AllowDisconnect),
+            new GraphEditorCommandDescriptorSnapshot(
+                "viewport.fit",
+                _document.Nodes.Count > 0 && _viewportWidth > 0 && _viewportHeight > 0),
+            new GraphEditorCommandDescriptorSnapshot(
+                "viewport.reset",
+                true),
+            new GraphEditorCommandDescriptorSnapshot(
+                "viewport.center-node",
+                _viewportWidth > 0 && _viewportHeight > 0),
+            new GraphEditorCommandDescriptorSnapshot(
+                "workspace.save",
+                _behaviorOptions.Commands.Workspace.AllowSave,
+                _behaviorOptions.Commands.Workspace.AllowSave ? null : "Snapshot saving is disabled by host permissions."),
+            new GraphEditorCommandDescriptorSnapshot(
+                "workspace.load",
+                _behaviorOptions.Commands.Workspace.AllowLoad && _workspaceService.Exists(),
+                !_behaviorOptions.Commands.Workspace.AllowLoad
+                    ? "Snapshot loading is disabled by host permissions."
+                    : _workspaceService.Exists()
+                        ? null
+                        : "No saved snapshot yet. Save once to create one."),
+        ];
+
+    public bool TryExecuteCommand(GraphEditorCommandInvocationSnapshot command)
+    {
+        ArgumentNullException.ThrowIfNull(command);
+
+        switch (command.CommandId)
+        {
+            case "nodes.add":
+                if (!command.TryGetArgument("definitionId", out var definitionValue))
+                {
+                    return false;
+                }
+
+                var definitionId = new NodeDefinitionId(definitionValue);
+                GraphPoint? worldPosition = null;
+                if (command.TryGetArgument("worldX", out var worldX)
+                    && command.TryGetArgument("worldY", out var worldY)
+                    && double.TryParse(worldX, out var parsedX)
+                    && double.TryParse(worldY, out var parsedY))
+                {
+                    worldPosition = new GraphPoint(parsedX, parsedY);
+                }
+
+                AddNode(definitionId, worldPosition);
+                return true;
+
+            case "selection.delete":
+                DeleteSelection();
+                return true;
+
+            case "connections.start":
+                if (!command.TryGetArgument("sourceNodeId", out var sourceNodeId)
+                    || !command.TryGetArgument("sourcePortId", out var sourcePortId))
+                {
+                    return false;
+                }
+
+                StartConnection(sourceNodeId, sourcePortId);
+                return true;
+
+            case "connections.connect":
+                if (!command.TryGetArgument("sourceNodeId", out var connectSourceNodeId)
+                    || !command.TryGetArgument("sourcePortId", out var connectSourcePortId)
+                    || !command.TryGetArgument("targetNodeId", out var targetNodeId)
+                    || !command.TryGetArgument("targetPortId", out var targetPortId))
+                {
+                    return false;
+                }
+
+                StartConnection(connectSourceNodeId, connectSourcePortId);
+                CompleteConnection(targetNodeId, targetPortId);
+                return true;
+
+            case "connections.cancel":
+                CancelPendingConnection();
+                return true;
+
+            case "connections.delete":
+                if (!command.TryGetArgument("connectionId", out var connectionId))
+                {
+                    return false;
+                }
+
+                DeleteConnection(connectionId);
+                return true;
+
+            case "connections.break-port":
+                if (!command.TryGetArgument("nodeId", out var nodeId)
+                    || !command.TryGetArgument("portId", out var portId))
+                {
+                    return false;
+                }
+
+                BreakConnectionsForPort(nodeId, portId);
+                return true;
+
+            case "viewport.fit":
+                FitToViewport(updateStatus: true);
+                return true;
+
+            case "viewport.reset":
+                ResetView(updateStatus: true);
+                return true;
+
+            case "viewport.center-node":
+                if (!command.TryGetArgument("nodeId", out var centerNodeId))
+                {
+                    return false;
+                }
+
+                CenterViewOnNode(centerNodeId);
+                return true;
+
+            case "workspace.save":
+                SaveWorkspace();
+                return true;
+
+            case "workspace.load":
+                LoadWorkspace();
+                return true;
+
+            default:
+                return false;
+        }
+    }
+
     public IReadOnlyList<NodePositionSnapshot> GetNodePositions()
         => _document.Nodes
             .Select(node => new NodePositionSnapshot(node.Id, node.Position))

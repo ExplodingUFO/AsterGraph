@@ -42,6 +42,21 @@ public interface IGraphEditorQueries
         => throw new NotSupportedException();
 
     /// <summary>
+    /// 获取当前稳定命令描述集合。
+    /// </summary>
+    /// <returns>命令描述集合。</returns>
+    IReadOnlyList<GraphEditorCommandDescriptorSnapshot> GetCommandDescriptors()
+        => throw new NotSupportedException();
+
+    /// <summary>
+    /// 基于命中上下文生成框架无关的菜单描述集合。
+    /// </summary>
+    /// <param name="context">当前菜单上下文。</param>
+    /// <returns>菜单描述集合。</returns>
+    IReadOnlyList<GraphEditorMenuItemDescriptorSnapshot> BuildContextMenuDescriptors(ContextMenuContext context)
+        => throw new NotSupportedException();
+
+    /// <summary>
     /// 获取全部节点位置快照。
     /// </summary>
     /// <returns>节点位置集合。</returns>

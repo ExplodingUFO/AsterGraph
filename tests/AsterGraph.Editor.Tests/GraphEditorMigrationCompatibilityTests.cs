@@ -114,6 +114,23 @@ public sealed class GraphEditorMigrationCompatibilityTests
         Assert.Equal(factoryDescriptors, legacyDescriptors);
     }
 
+    [Fact]
+    public void LegacyAndFactoryEditorSessions_ExposeEquivalentCommandDescriptors()
+    {
+        var harness = CreateHarness();
+        var legacyEditor = CreateLegacyEditor(harness);
+        var factoryEditor = CreateFactoryEditor(harness);
+
+        var legacyDescriptors = legacyEditor.Session.Queries.GetCommandDescriptors()
+            .OrderBy(descriptor => descriptor.Id, StringComparer.Ordinal)
+            .ToList();
+        var factoryDescriptors = factoryEditor.Session.Queries.GetCommandDescriptors()
+            .OrderBy(descriptor => descriptor.Id, StringComparer.Ordinal)
+            .ToList();
+
+        Assert.Equal(factoryDescriptors, legacyDescriptors);
+    }
+
     [AvaloniaFact]
     public void GraphEditorView_RemainsCompatibilityFacadeDuringStagedMigration()
     {

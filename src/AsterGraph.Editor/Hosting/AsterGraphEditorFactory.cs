@@ -64,7 +64,12 @@ public static class AsterGraphEditorFactory
             resolved.WorkspaceService,
             resolved.StyleOptions,
             resolved.BehaviorOptions);
-        var session = new GraphEditorSession(kernel, resolved.Options.DiagnosticsSink);
+        var session = new GraphEditorSession(
+            kernel,
+            resolved.Options.DiagnosticsSink,
+            new GraphEditorSessionDescriptorSupport(
+                resolved.Options.NodeCatalog!,
+                (key, fallback) => resolved.Options.LocalizationProvider?.GetString(key, fallback) ?? fallback));
         session.ConfigureInstrumentation(resolved.Options.Instrumentation);
         return session;
     }
