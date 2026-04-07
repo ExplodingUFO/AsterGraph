@@ -17,6 +17,7 @@ using AsterGraph.Core.Compatibility;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Catalog;
 using AsterGraph.Editor.Menus;
+using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.ViewModels;
 using Xunit;
 
@@ -108,6 +109,37 @@ public sealed class NodeCanvasStandaloneTests
         finally
         {
             enabledWindow.Close();
+        }
+    }
+
+    [AvaloniaFact]
+    public void CanvasContextRequest_UsesCanonicalDescriptorPresenterOverload_WhenAvailable()
+    {
+        var editor = CreateEditor();
+        var presenter = new CanonicalRecordingContextMenuPresenter();
+        var (window, canvas) = CreateStandaloneCanvasWindow(
+            editor,
+            enableDefaultContextMenu: true,
+            presentation: new AsterGraphPresentationOptions
+            {
+                ContextMenuPresenter = presenter,
+            });
+        var args = new ContextRequestedEventArgs();
+
+        try
+        {
+            InvokeCanvasContextRequested(canvas, args);
+
+            Assert.True(args.Handled);
+            Assert.Equal(1, presenter.CanonicalOpenCalls);
+            Assert.Equal(0, presenter.CompatibilityOpenCalls);
+            Assert.NotNull(presenter.LastCanonicalDescriptors);
+            Assert.Contains(presenter.LastCanonicalDescriptors!, descriptor => descriptor.Id == "canvas-add-node");
+            Assert.NotNull(presenter.LastCommands);
+        }
+        finally
+        {
+            window.Close();
         }
     }
 
@@ -432,6 +464,31 @@ public sealed class NodeCanvasStandaloneTests
             OpenCalls++;
             LastTarget = target;
             LastDescriptors = descriptors;
+        }
+    }
+
+    private sealed class CanonicalRecordingContextMenuPresenter : IGraphContextMenuPresenter
+    {
+        public int CompatibilityOpenCalls { get; private set; }
+
+        public int CanonicalOpenCalls { get; private set; }
+
+        public IReadOnlyList<GraphEditorMenuItemDescriptorSnapshot>? LastCanonicalDescriptors { get; private set; }
+
+        public IGraphEditorCommands? LastCommands { get; private set; }
+
+        public void Open(Control target, IReadOnlyList<MenuItemDescriptor> descriptors, ContextMenuStyleOptions style)
+            => CompatibilityOpenCalls++;
+
+        public void Open(
+            Control target,
+            IReadOnlyList<GraphEditorMenuItemDescriptorSnapshot> descriptors,
+            IGraphEditorCommands commands,
+            ContextMenuStyleOptions style)
+        {
+            CanonicalOpenCalls++;
+            LastCanonicalDescriptors = descriptors;
+            LastCommands = commands;
         }
     }
 

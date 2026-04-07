@@ -824,99 +824,18 @@ public partial class NodeCanvas : UserControl
 
     private void HandleCanvasKeyDown(object? sender, KeyEventArgs args)
     {
-        if (ViewModel is null || !EnableDefaultCommandShortcuts || ShortcutBelongsToInputControl(args.Source))
+        if (!EnableDefaultCommandShortcuts)
         {
             return;
         }
 
-        if (args.KeyModifiers.HasFlag(KeyModifiers.Control) && args.Key == Key.S)
+        if (GraphEditorDefaultCommandShortcutRouter.TryHandle(
+            ViewModel,
+            args.Source,
+            args,
+            includePendingConnectionCancel: true))
         {
-            if (ViewModel.SaveCommand.CanExecute(null))
-            {
-                ViewModel.SaveCommand.Execute(null);
-            }
-
             args.Handled = true;
-            return;
-        }
-
-        if (args.KeyModifiers.HasFlag(KeyModifiers.Control) && args.Key == Key.O)
-        {
-            if (ViewModel.LoadCommand.CanExecute(null))
-            {
-                ViewModel.LoadCommand.Execute(null);
-            }
-
-            args.Handled = true;
-            return;
-        }
-
-        if (args.KeyModifiers.HasFlag(KeyModifiers.Control)
-            && (args.Key == Key.Y || (args.Key == Key.Z && args.KeyModifiers.HasFlag(KeyModifiers.Shift))))
-        {
-            if (ViewModel.RedoCommand.CanExecute(null))
-            {
-                ViewModel.RedoCommand.Execute(null);
-            }
-
-            args.Handled = true;
-            return;
-        }
-
-        if (args.KeyModifiers.HasFlag(KeyModifiers.Control) && args.Key == Key.Z)
-        {
-            if (ViewModel.UndoCommand.CanExecute(null))
-            {
-                ViewModel.UndoCommand.Execute(null);
-            }
-
-            args.Handled = true;
-            return;
-        }
-
-        if (args.KeyModifiers.HasFlag(KeyModifiers.Control) && args.Key == Key.C)
-        {
-            if (ViewModel.CopySelectionCommand.CanExecute(null))
-            {
-                ViewModel.CopySelectionCommand.Execute(null);
-            }
-
-            args.Handled = true;
-            return;
-        }
-
-        if (args.KeyModifiers.HasFlag(KeyModifiers.Control) && args.Key == Key.V)
-        {
-            if (ViewModel.PasteCommand.CanExecute(null))
-            {
-                ViewModel.PasteCommand.Execute(null);
-            }
-
-            args.Handled = true;
-            return;
-        }
-
-        if (args.Key == Key.Delete)
-        {
-            if (ViewModel.DeleteSelectionCommand.CanExecute(null))
-            {
-                ViewModel.DeleteSelectionCommand.Execute(null);
-            }
-
-            args.Handled = true;
-            return;
-        }
-
-        switch (args.Key)
-        {
-            case Key.Escape:
-                if (ViewModel.CancelPendingConnectionCommand.CanExecute(null))
-                {
-                    ViewModel.CancelPendingConnectionCommand.Execute(null);
-                    args.Handled = true;
-                }
-
-                break;
         }
     }
 
@@ -1116,27 +1035,18 @@ public partial class NodeCanvas : UserControl
             return false;
         }
 
-        var descriptors = ViewModel.BuildContextMenu(context);
+        var descriptors = ViewModel.Session.Queries.BuildContextMenuDescriptors(context);
         if (descriptors.Count == 0)
         {
             return false;
         }
 
-        (ContextMenuPresenter ?? _stockContextMenuPresenter).Open(target, descriptors, ViewModel.StyleOptions.ContextMenu);
+        (ContextMenuPresenter ?? _stockContextMenuPresenter).Open(
+            target,
+            descriptors,
+            ViewModel.Session.Commands,
+            ViewModel.StyleOptions.ContextMenu);
         return true;
-    }
-
-    private static bool ShortcutBelongsToInputControl(object? source)
-    {
-        for (var current = source as Visual; current is not null; current = current.GetVisualParent())
-        {
-            if (current is TextBox or ComboBox)
-            {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     private NodeCanvasContextMenuSnapshot CreateContextMenuSnapshot()

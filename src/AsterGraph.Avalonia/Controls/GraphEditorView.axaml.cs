@@ -4,6 +4,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using Avalonia.VisualTree;
+using AsterGraph.Avalonia.Controls.Internal;
 using AsterGraph.Avalonia.Hosting;
 using AsterGraph.Avalonia.Presentation;
 using AsterGraph.Avalonia.Services;
@@ -395,102 +396,19 @@ public partial class GraphEditorView : UserControl
 
     private void HandleKeyDown(object? sender, KeyEventArgs args)
     {
-        if (Editor is null || !EnableDefaultCommandShortcuts || ShortcutBelongsToInputControl(args.Source))
+        if (!EnableDefaultCommandShortcuts)
         {
             return;
         }
 
-        if (args.KeyModifiers.HasFlag(KeyModifiers.Control) && args.Key == Key.S)
+        if (GraphEditorDefaultCommandShortcutRouter.TryHandle(
+            Editor,
+            args.Source,
+            args,
+            includePendingConnectionCancel: false))
         {
-            if (Editor.SaveCommand.CanExecute(null))
-            {
-                Editor.SaveCommand.Execute(null);
-            }
-
             args.Handled = true;
-            return;
         }
-
-        if (args.KeyModifiers.HasFlag(KeyModifiers.Control) && args.Key == Key.O)
-        {
-            if (Editor.LoadCommand.CanExecute(null))
-            {
-                Editor.LoadCommand.Execute(null);
-            }
-
-            args.Handled = true;
-            return;
-        }
-
-        if (args.KeyModifiers.HasFlag(KeyModifiers.Control)
-            && (args.Key == Key.Y || (args.Key == Key.Z && args.KeyModifiers.HasFlag(KeyModifiers.Shift))))
-        {
-            if (Editor.RedoCommand.CanExecute(null))
-            {
-                Editor.RedoCommand.Execute(null);
-            }
-
-            args.Handled = true;
-            return;
-        }
-
-        if (args.KeyModifiers.HasFlag(KeyModifiers.Control) && args.Key == Key.Z)
-        {
-            if (Editor.UndoCommand.CanExecute(null))
-            {
-                Editor.UndoCommand.Execute(null);
-            }
-
-            args.Handled = true;
-            return;
-        }
-
-        if (args.KeyModifiers.HasFlag(KeyModifiers.Control) && args.Key == Key.C)
-        {
-            if (Editor.CopySelectionCommand.CanExecute(null))
-            {
-                Editor.CopySelectionCommand.Execute(null);
-            }
-
-            args.Handled = true;
-            return;
-        }
-
-        if (args.KeyModifiers.HasFlag(KeyModifiers.Control) && args.Key == Key.V)
-        {
-            if (Editor.PasteCommand.CanExecute(null))
-            {
-                Editor.PasteCommand.Execute(null);
-            }
-
-            args.Handled = true;
-            return;
-        }
-
-        if (args.Key == Key.Delete)
-        {
-            if (Editor.DeleteSelectionCommand.CanExecute(null))
-            {
-                Editor.DeleteSelectionCommand.Execute(null);
-            }
-
-            args.Handled = true;
-            return;
-        }
-
-    }
-
-    private static bool ShortcutBelongsToInputControl(object? source)
-    {
-        for (var current = source as Visual; current is not null; current = current.GetVisualParent())
-        {
-            if (current is TextBox or ComboBox)
-            {
-                return true;
-            }
-        }
-
-        return false;
     }
 
 }

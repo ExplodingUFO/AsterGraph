@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: kernel-extraction-capability-contracts-and-plugin-readiness
-status: Planning Phase 16
-stopped_at: Phase 16 planning completed; execute 16-01 next
-last_updated: "2026-04-07T18:28:34Z"
+status: Executing Phase 16
+stopped_at: Phase 16 plan 16-01 completed; 16-02 platform seam narrowing is next
+last_updated: "2026-04-07T18:52:29Z"
 progress:
   total_phases: 6
   completed_phases: 3
   total_plans: 12
-  completed_plans: 9
+  completed_plans: 10
 ---
 
 # Project State
@@ -19,14 +19,14 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-04-04)
 
 **Core value:** Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
-**Current focus:** Phase 16 Avalonia adapter boundary cleanup planning, with 16-01 routing consolidation queued as the first execution step
+**Current focus:** Phase 16 execution after 16-01 routed stock Avalonia shortcuts and menus through shared descriptor/session adapters
 
 ## Current Position
 
 Phase: 16. Avalonia Adapter Boundary Cleanup
-Plan: 16-01 through 16-03 planned
-Status: Planning Phase 16
-Last activity: 2026-04-08 — Captured Phase 16 context/research and created plans 16-01 through 16-03
+Plan: 16-01 completed; 16-02 and 16-03 pending
+Status: Executing Phase 16
+Last activity: 2026-04-08 — Completed 16-01 shared Avalonia routing consolidation and verified presenter/view/canvas/init regressions
 
 ## Accumulated Context
 
@@ -54,6 +54,8 @@ New milestone decisions:
 - Treat Phase 16 Avalonia adapter cleanup as the next leverage point now that runtime discovery and menu/command contracts are descriptor-first.
 - Make shared Avalonia shortcut and stock context-menu routing over session descriptors the first Phase 16 execution target.
 - Keep clipboard and host-context seams Avalonia-owned, but consolidate them behind thinner adapter touchpoints during Phase 16.
+- Keep the stock Avalonia context-menu presenter canonical-descriptor-driven while allowing custom presenters to migrate through an additive overload plus compatibility fallback.
+- Keep shared shortcut routing centralized in Avalonia, with copy/paste still compatibility-executed until the runtime surface grows canonical clipboard command IDs.
 
 ### Pending Todos
 
@@ -68,6 +70,7 @@ None captured yet.
 - The next design constraint is making Avalonia consume the thinner descriptor/runtime contracts without recreating editor policy in the UI layer.
 - The main Phase 16 risk is mixing input/menu policy cleanup with broader presenter-surface redesign instead of first collapsing duplicated shell/canvas routing.
 - `GraphEditorView.axaml.cs` and `NodeCanvas.axaml.cs` remain the main Avalonia coordination hotspots and should be changed with proof coverage, not opportunistically.
+- The next concrete risk is `16-02` overreaching into presenter redesign instead of focusing on clipboard/host-context/platform seam narrowing.
 
 ### Quick Tasks Completed
 
@@ -78,5 +81,5 @@ None captured yet.
 ## Session Continuity
 
 Last session: 2026-04-08
-Stopped at: Phase 16 planning completed; execute 16-01 next
-Resume file: .planning/phases/16-avalonia-adapter-boundary-cleanup/16-01-PLAN.md
+Stopped at: Phase 16 plan 16-01 completed; 16-02 platform seam narrowing is next
+Resume file: .planning/phases/16-avalonia-adapter-boundary-cleanup/16-02-PLAN.md

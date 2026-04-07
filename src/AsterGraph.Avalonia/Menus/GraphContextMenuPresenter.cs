@@ -1,3 +1,4 @@
+using CommunityToolkit.Mvvm.Input;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -7,6 +8,7 @@ using AsterGraph.Abstractions.Styling;
 using AsterGraph.Avalonia.Presentation;
 using AsterGraph.Avalonia.Styling;
 using AsterGraph.Editor.Menus;
+using AsterGraph.Editor.Runtime;
 
 namespace AsterGraph.Avalonia.Menus;
 
@@ -36,8 +38,39 @@ public sealed class GraphContextMenuPresenter : IGraphContextMenuPresenter
         menu.Open(target);
     }
 
+    /// <summary>
+    /// 在指定目标控件上打开由 canonical 描述符构建的默认上下文菜单。
+    /// </summary>
+    public void Open(
+        Control target,
+        IReadOnlyList<GraphEditorMenuItemDescriptorSnapshot> descriptors,
+        IGraphEditorCommands commands,
+        ContextMenuStyleOptions style)
+    {
+        var menu = new ContextMenu
+        {
+            PlacementTarget = target,
+            Placement = ResolvePlacement(target),
+            Background = BrushFactory.Solid(style.BackgroundHex),
+            BorderBrush = BrushFactory.Solid(style.BorderHex),
+            BorderThickness = new Thickness(style.BorderThickness),
+            CornerRadius = new CornerRadius(style.CornerRadius),
+            MinWidth = style.ItemMinWidth,
+            ItemsSource = descriptors.Select(descriptor => BuildMenuControlCore(descriptor, commands, style)).ToList(),
+        };
+
+        menu.Classes.Add("astergraph-context-menu");
+        menu.Open(target);
+    }
+
     internal static object BuildMenuControlForTest(MenuItemDescriptor descriptor, ContextMenuStyleOptions style)
         => BuildMenuControlCore(descriptor, style);
+
+    internal static object BuildMenuControlForTest(
+        GraphEditorMenuItemDescriptorSnapshot descriptor,
+        IGraphEditorCommands commands,
+        ContextMenuStyleOptions style)
+        => BuildMenuControlCore(descriptor, commands, style);
 
     internal static PlacementMode ResolvePlacementForTest(Control target)
         => ResolvePlacement(target);
@@ -80,6 +113,74 @@ public sealed class GraphContextMenuPresenter : IGraphContextMenuPresenter
         if (descriptor.HasChildren)
         {
             menuItem.ItemsSource = descriptor.Children.Select(child => BuildMenuControlCore(child, style)).ToList();
+        }
+
+        if (descriptor.IsEnabled)
+        {
+            var defaultBackground = BrushFactory.Solid(style.BackgroundHex);
+            var hoverBackground = BrushFactory.Solid(style.HoverHex);
+
+            menuItem.PointerEntered += (_, _) => menuItem.Background = hoverBackground;
+            menuItem.PointerExited += (_, _) => menuItem.Background = defaultBackground;
+        }
+        else if (!string.IsNullOrWhiteSpace(descriptor.DisabledReason))
+        {
+            ToolTip.SetTip(menuItem, descriptor.DisabledReason);
+        }
+
+        return menuItem;
+    }
+
+    private static object BuildMenuControlCore(
+        GraphEditorMenuItemDescriptorSnapshot descriptor,
+        IGraphEditorCommands commands,
+        ContextMenuStyleOptions style)
+    {
+        if (descriptor.IsSeparator)
+        {
+            return new Border
+            {
+                Height = 1,
+                Margin = new Thickness(style.ItemHorizontalPadding, style.ItemVerticalPadding / 2),
+                Background = BrushFactory.Solid(style.SeparatorHex),
+                IsHitTestVisible = false,
+            };
+        }
+
+        IRelayCommand? command = null;
+        if (descriptor.Command is not null)
+        {
+            command = new RelayCommand(
+                () => commands.TryExecuteCommand(descriptor.Command),
+                () => descriptor.IsEnabled);
+        }
+
+        var menuItem = new MenuItem
+        {
+            Header = descriptor.Header,
+            Command = command,
+            IsEnabled = descriptor.IsEnabled,
+            Background = BrushFactory.Solid(style.BackgroundHex),
+            Foreground = BrushFactory.Solid(descriptor.IsEnabled ? style.ForegroundHex : style.DisabledForegroundHex),
+            CornerRadius = new CornerRadius(style.ItemCornerRadius),
+            Padding = new Thickness(style.ItemHorizontalPadding, style.ItemVerticalPadding),
+            FontSize = style.ItemFontSize,
+            MinWidth = style.ItemMinWidth,
+        };
+
+        menuItem.Classes.Add("astergraph-context-menu-item");
+
+        var icon = CreateIcon(descriptor.IconKey, descriptor.IsEnabled, style);
+        if (icon is not null)
+        {
+            menuItem.Icon = icon;
+        }
+
+        if (descriptor.HasChildren)
+        {
+            menuItem.ItemsSource = descriptor.Children
+                .Select(child => BuildMenuControlCore(child, commands, style))
+                .ToList();
         }
 
         if (descriptor.IsEnabled)
