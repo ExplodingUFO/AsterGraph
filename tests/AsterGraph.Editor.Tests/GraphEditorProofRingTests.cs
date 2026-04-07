@@ -169,6 +169,33 @@ public sealed class GraphEditorProofRingTests
         Assert.DoesNotContain(runtimeFields, field => field.FieldType == typeof(GraphEditorViewModel));
     }
 
+    [Fact]
+    public void RetainedCompatibilityProof_UsesAdapterBackedSessionHost()
+    {
+        var legacyEditor = new GraphEditorViewModel(
+            CreateDocument(),
+            CreateCatalog(),
+            new ExactCompatibilityService());
+        var factoryEditor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
+        {
+            Document = CreateDocument(),
+            NodeCatalog = CreateCatalog(),
+            CompatibilityService = new ExactCompatibilityService(),
+        });
+
+        var legacyHost = legacyEditor.Session.GetType()
+            .GetField("_host", BindingFlags.Instance | BindingFlags.NonPublic)!
+            .GetValue(legacyEditor.Session);
+        var factoryHost = factoryEditor.Session.GetType()
+            .GetField("_host", BindingFlags.Instance | BindingFlags.NonPublic)!
+            .GetValue(factoryEditor.Session);
+
+        Assert.NotNull(legacyHost);
+        Assert.NotNull(factoryHost);
+        Assert.IsNotType<GraphEditorViewModel>(legacyHost);
+        Assert.IsNotType<GraphEditorViewModel>(factoryHost);
+    }
+
     private static GraphDocument CreateDocument()
         => new(
             "Proof Ring Graph",

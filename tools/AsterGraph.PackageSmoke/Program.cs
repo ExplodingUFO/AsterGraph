@@ -360,9 +360,37 @@ var runtimeSessionIsKernelFirst = !session
     .GetType()
     .GetFields(BindingFlags.Instance | BindingFlags.NonPublic)
     .Any(field => field.FieldType == typeof(GraphEditorViewModel));
+var detachedSnapshot = session.Queries.CreateDocumentSnapshot();
+if (detachedSnapshot.Nodes is List<GraphNode> detachedNodes)
+{
+    detachedNodes.Add(
+        new GraphNode(
+            "smoke-detached-001",
+            "Detached",
+            "Smoke",
+            "Safety",
+            "Detached snapshot mutation probe.",
+            new GraphPoint(0, 0),
+            new GraphSize(100, 80),
+            [],
+            [],
+            "#FFFFFF",
+            sourceDefinitionId));
+}
+var runtimeSnapshotDetached = !session.Queries.CreateDocumentSnapshot().Nodes.Any(node => node.Id == "smoke-detached-001");
+var legacySessionHost = legacyEditor.Session.GetType()
+    .GetField("_host", BindingFlags.Instance | BindingFlags.NonPublic)!
+    .GetValue(legacyEditor.Session);
+var factorySessionHost = factoryEditor.Session.GetType()
+    .GetField("_host", BindingFlags.Instance | BindingFlags.NonPublic)!
+    .GetValue(factoryEditor.Session);
+var legacyRetainedSessionIsAdapterBacked = legacySessionHost is not null && legacySessionHost is not GraphEditorViewModel;
+var factoryRetainedSessionIsAdapterBacked = factorySessionHost is not null && factorySessionHost is not GraphEditorViewModel;
 Console.WriteLine($"SESSION_FACTORY_OK:{session.Queries.CreateDocumentSnapshot().Nodes.Count}:{string.Join(",", commandIds)}");
 Console.WriteLine($"SESSION_EVENTS_OK:{documentChanges}:{viewportChanges}:{failureCode ?? "<none>"}");
 Console.WriteLine($"KERNEL_SESSION_OK:{runtimeSessionIsKernelFirst}");
+Console.WriteLine($"RETAINED_ADAPTER_OK:{legacyRetainedSessionIsAdapterBacked}:{factoryRetainedSessionIsAdapterBacked}");
+Console.WriteLine($"RUNTIME_READONLY_OK:{runtimeSnapshotDetached}");
 Console.WriteLine($"RUNTIME_SELECTION_OK:{session.Queries.GetSelectionSnapshot().PrimarySelectedNodeId == targetNodeId}");
 Console.WriteLine($"RUNTIME_CONNECTION_OK:{sessionInspection.Document.Connections.Count}");
 Console.WriteLine($"RUNTIME_PENDING_EVENT_OK:{pendingConnectionChanges > 0}");

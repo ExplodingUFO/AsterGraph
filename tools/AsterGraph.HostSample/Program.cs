@@ -218,6 +218,10 @@ retainedSession.Commands.SaveWorkspace();
 editor.ExportSelectionFragment();
 var retainedInspection = retainedSession.Diagnostics.CaptureInspectionSnapshot();
 var retainedRecentDiagnostics = retainedSession.Diagnostics.GetRecentDiagnostics(10);
+var retainedSessionHost = retainedSession.GetType()
+    .GetField("_host", BindingFlags.Instance | BindingFlags.NonPublic)!
+    .GetValue(retainedSession);
+var retainedSessionIsAdapterBacked = retainedSessionHost is not null && retainedSessionHost is not GraphEditorViewModel;
 var ownerMatched = menuContext.TryGetOwner<HostSampleOwner>(out var typedOwner);
 var topLevelMatched = menuContext.TryGetTopLevel<HostSampleTopLevel>(out var typedTopLevel);
 var view = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOptions
@@ -307,7 +311,8 @@ Console.WriteLine($"Host preview menu item exists: {hostPreviewItem is not null}
 Console.WriteLine($"Host preview menu item header: {hostPreviewItem?.Header ?? "<missing>"}");
 Console.WriteLine($"ReadOnly host extension allowed: {editor.CommandPermissions.Host.AllowContextMenuExtensions}");
 Console.WriteLine($"Retained session diagnostics reachable: {ReferenceEquals(retainedSession, editor.Session)}");
-Console.WriteLine($"Retained path: GraphEditorViewModel.Session compatibility surface");
+Console.WriteLine($"Retained backend: adapter-backed={retainedSessionIsAdapterBacked}");
+Console.WriteLine($"Retained path: GraphEditorViewModel.Session compatibility surface over the shared runtime boundary");
 Console.WriteLine($"Retained inspection snapshot: nodes={retainedInspection.Document.Nodes.Count}, selected={retainedInspection.Selection.SelectedNodeIds.Count}, pending={retainedInspection.PendingConnection.HasPendingConnection}");
 Console.WriteLine($"Retained recent diagnostics count: {retainedRecentDiagnostics.Count}");
 Console.WriteLine($"Retained diagnostics sink count: {viewDiagnostics.Diagnostics.Count}");
