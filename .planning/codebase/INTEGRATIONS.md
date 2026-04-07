@@ -1,91 +1,71 @@
-# External Integrations
+# Integrations
 
-**Analysis Date:** 2026-03-25
+**Analysis Date:** 2026-04-08
 
-## APIs & External Services
+## External Services
 
-**Package Distribution:**
-- NuGet.org - External package source referenced by the sample restore configuration in `NuGet.config.sample`.
-  - SDK/Client: NuGet restore through `dotnet`/MSBuild project restore from the `*.csproj` files.
-  - Auth: Not configured in the repository. `NuGet.config.sample` contains only public feed definitions.
-- Local package feed (`artifacts/packages`) - Local restore target used for package smoke testing and local package validation in `NuGet.config.sample`, `README.md`, and `tools/AsterGraph.PackageSmoke/AsterGraph.PackageSmoke.csproj`.
-  - SDK/Client: `dotnet pack` output plus NuGet restore sources.
-  - Auth: None.
+- No HTTP API client, database client, auth provider SDK, webhook receiver, or message broker integration is present in tracked source under `src/`, `tests/`, or `tools/`.
+- Package restore can talk to public NuGet feeds through `NuGet.config.sample`, but the repository does not embed credentials or private-feed logic.
+- The product is currently a desktop/library SDK, not a networked service.
 
-**Desktop Platform Services:**
-- Avalonia system clipboard - Clipboard interop for selection copy/paste is implemented in `src/AsterGraph.Avalonia/Services/AvaloniaTextClipboardBridge.cs` and wired from `src/AsterGraph.Avalonia/Controls/GraphEditorView.axaml.cs`.
-  - SDK/Client: `Avalonia.Input.Platform.IClipboard`.
-  - Auth: None.
+## Host Composition Seams
 
-**Host Application Extension Surface:**
-- Host-owned localization, presentation, and context-menu augmentation are injected through `src/AsterGraph.Editor/Localization/IGraphLocalizationProvider.cs`, `src/AsterGraph.Editor/Presentation/INodePresentationProvider.cs`, `src/AsterGraph.Editor/Menus/IGraphContextMenuAugmentor.cs`, and are demonstrated in `tools/AsterGraph.HostSample/Program.cs`.
-  - SDK/Client: Public AsterGraph editor abstractions consumed by host applications.
-  - Auth: Host-defined; no built-in authentication layer exists.
-- Host service-provider propagation is exposed through `src/AsterGraph.Editor/Hosting/IGraphHostContext.cs` and adapted for Avalonia in `src/AsterGraph.Avalonia/Hosting/AvaloniaGraphHostContext.cs`.
-  - SDK/Client: `IServiceProvider`.
-  - Auth: Host-defined; none in repo code.
+- `src/AsterGraph.Editor/Hosting/AsterGraphEditorOptions.cs` is the main host integration contract.
+- Hosts can inject `INodeCatalog`, `IPortCompatibilityService`, `IGraphWorkspaceService`, `IGraphFragmentWorkspaceService`, `IGraphFragmentLibraryService`, `IGraphClipboardPayloadSerializer`, `IGraphContextMenuAugmentor`, `INodePresentationProvider`, `IGraphLocalizationProvider`, `IGraphEditorDiagnosticsSink`, and `GraphEditorInstrumentationOptions`.
+- `src/AsterGraph.Editor/Hosting/AsterGraphEditorFactory.cs` exposes both `CreateSession(...)` for runtime-first composition and `Create(...)` for the retained `GraphEditorViewModel` path.
+- `tools/AsterGraph.HostSample/Program.cs` is the reference integration sample for these seams.
 
-## Data Storage
+## Filesystem And Workspace Integration
 
-**Databases:**
-- None detected.
-  - Connection: Not applicable.
-  - Client: Not applicable.
+- Whole-document persistence is abstracted by `src/AsterGraph.Editor/Services/IGraphWorkspaceService.cs` and implemented by `src/AsterGraph.Editor/Services/GraphWorkspaceService.cs`.
+- Fragment persistence is abstracted by `src/AsterGraph.Editor/Services/IGraphFragmentWorkspaceService.cs` and implemented by `src/AsterGraph.Editor/Services/GraphFragmentWorkspaceService.cs`.
+- Fragment template/library storage is abstracted by `src/AsterGraph.Editor/Services/IGraphFragmentLibraryService.cs` and implemented by `src/AsterGraph.Editor/Services/GraphFragmentLibraryService.cs`.
+- Default storage-root logic lives in `src/AsterGraph.Editor/Services/GraphEditorStorageDefaults.cs`.
+- Serialization for these flows is centered on `src/AsterGraph.Core/Serialization/GraphDocumentSerializer.cs` and `src/AsterGraph.Editor/Services/GraphClipboardPayloadSerializer.cs`.
 
-**File Storage:**
-- Local filesystem only.
-- Graph document persistence uses JSON files through `src/AsterGraph.Core/Serialization/GraphDocumentSerializer.cs`.
-- Default graph workspace path resolves under `%LocalAppData%\\AsterGraphDemo\\demo-graph.json` in `src/AsterGraph.Editor/Services/GraphWorkspaceService.cs`.
-- Default fragment workspace path resolves under `%LocalAppData%\\AsterGraphDemo\\selection-fragment.json` in `src/AsterGraph.Editor/Services/GraphFragmentWorkspaceService.cs`.
-- Fragment template library files are stored under `%LocalAppData%\\AsterGraphDemo\\fragments` in `src/AsterGraph.Editor/Services/GraphFragmentLibraryService.cs`.
-- The repository-local package output directory is `artifacts/packages`, referenced by `README.md`, `NuGet.config.sample`, and `tools/AsterGraph.PackageSmoke/AsterGraph.PackageSmoke.csproj`.
+## Clipboard And Desktop Integration
 
-**Caching:**
-- None detected. The codebase uses direct in-memory state and file reads/writes instead of a cache service.
+- The editor-side clipboard seam is `src/AsterGraph.Editor/Services/IGraphTextClipboardBridge.cs`.
+- Avalonia adapts the platform clipboard through `src/AsterGraph.Avalonia/Services/AvaloniaTextClipboardBridge.cs`.
+- Selection-copy behavior is coordinated by `src/AsterGraph.Editor/Services/GraphSelectionClipboard.cs`.
+- The shipped UI controls route clipboard and host-context concerns through `src/AsterGraph.Avalonia/Controls/GraphEditorView.axaml.cs` and `src/AsterGraph.Avalonia/Controls/NodeCanvas.axaml.cs`.
+- Host object propagation is normalized through `src/AsterGraph.Editor/Hosting/IGraphHostContext.cs`, `src/AsterGraph.Editor/Hosting/GraphHostContextExtensions.cs`, and `src/AsterGraph.Avalonia/Hosting/AvaloniaGraphHostContext.cs`.
 
-## Authentication & Identity
+## Diagnostics And Instrumentation
 
-**Auth Provider:**
-- None.
-  - Implementation: The repository contains no login flow, token handling, OAuth client, API key config, or identity provider integration.
+- Runtime diagnostics are exposed through `src/AsterGraph.Editor/Diagnostics/IGraphEditorDiagnostics.cs`, `src/AsterGraph.Editor/Diagnostics/IGraphEditorDiagnosticsSink.cs`, and `src/AsterGraph.Editor/Diagnostics/GraphEditorInspectionSnapshot.cs`.
+- Optional host logging and tracing are wired through `src/AsterGraph.Editor/Diagnostics/GraphEditorInstrumentationOptions.cs`, which expects host-supplied `ILoggerFactory` and `ActivitySource`.
+- `tools/AsterGraph.HostSample/Program.cs` and `tools/AsterGraph.PackageSmoke/Program.cs` both exercise diagnostics sink and instrumentation integration using custom recording implementations.
+- The diagnostics surface is intentionally editor-owned rather than Avalonia-owned.
 
-## Monitoring & Observability
+## Avalonia Surface Integration
 
-**Error Tracking:**
-- None detected. No Sentry, App Insights, Seq, or similar SDK references are present in `src/`, `tests/`, or `tools/`.
+- Full-shell composition is exposed through `src/AsterGraph.Avalonia/Hosting/AsterGraphAvaloniaViewFactory.cs`.
+- Standalone surface composition is exposed through `src/AsterGraph.Avalonia/Hosting/AsterGraphCanvasViewFactory.cs`, `src/AsterGraph.Avalonia/Hosting/AsterGraphInspectorViewFactory.cs`, and `src/AsterGraph.Avalonia/Hosting/AsterGraphMiniMapViewFactory.cs`.
+- Presentation replacement seams exist for nodes, menus, inspector, and minimap under `src/AsterGraph.Avalonia/Presentation/`.
+- These adapters keep Avalonia types out of `src/AsterGraph.Abstractions` and `src/AsterGraph.Core`.
 
-**Logs:**
-- Basic console output only in sample and smoke tools, via `Console.WriteLine` in `tools/AsterGraph.HostSample/Program.cs` and `tools/AsterGraph.PackageSmoke/Program.cs`.
-- No structured logging framework is configured in project files.
+## Packaging And Release Integration
 
-## CI/CD & Deployment
+- Shared package metadata and repository URLs are defined in `Directory.Build.props`.
+- `README.md` documents `dotnet pack` output to `artifacts/packages`.
+- `tools/AsterGraph.PackageSmoke/Program.cs` is the main integration proof for packed-package consumption.
+- `tools/AsterGraph.ScaleSmoke/Program.cs` is a runtime proof tool for selection, compatibility, history, viewport, diagnostics, and workspace continuity under larger graph sizes.
 
-**Hosting:**
-- Desktop application hosting via Avalonia in `src/AsterGraph.Demo/AsterGraph.Demo.csproj`.
-- Library distribution via NuGet packages from `src/AsterGraph.Abstractions`, `src/AsterGraph.Core`, `src/AsterGraph.Editor`, and `src/AsterGraph.Avalonia`.
+## Environment, Secrets, And Identity
 
-**CI Pipeline:**
-- None detected. No `.github/workflows/`, Azure Pipelines, GitLab CI, or Docker build files are present.
-- `Directory.Build.props` contains an optional `ContinuousIntegrationBuild` toggle keyed off `CI=true`, but no pipeline definition is tracked in the repository.
+- No required environment variables are defined in tracked files.
+- The only optional build flag observed is `CI=true` in `Directory.Build.props`.
+- No OAuth config, API key handling, secret store, or local `.env` strategy is present in the repo.
+- No identity or permission system exists beyond host-provided command-permission options such as `src/AsterGraph.Editor/Configuration/GraphEditorCommandPermissions.cs`.
 
-## Environment Configuration
+## Notable Non-Integrations
 
-**Required env vars:**
-- None required for local build or runtime based on tracked files.
-- Optional: `CI=true` enables `ContinuousIntegrationBuild` in `Directory.Build.props`.
-
-**Secrets location:**
-- Not applicable. No tracked secret store, `.env` file, credential file, or key file is detected in the repository root.
-
-## Webhooks & Callbacks
-
-**Incoming:**
-- None. The codebase defines no HTTP endpoints, webhook receivers, or background listeners.
-
-**Outgoing:**
-- None in application code.
-- Package restore may contact `https://api.nuget.org/v3/index.json` when using the sample NuGet configuration in `NuGet.config.sample`.
+- No web server or HTTP endpoint exists.
+- No database schema or migration tool exists.
+- No queue, cron, or background worker exists.
+- No cloud SDKs, containers, or deployment manifests are tracked.
 
 ---
 
-*Integration audit: 2026-03-25*
+*Integration analysis refreshed: 2026-04-08*
