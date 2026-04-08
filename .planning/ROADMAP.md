@@ -79,4 +79,4 @@ This milestone turns the deferred `PLUG-01` and `AUTO-01` style follow-on work i
 
 ## Next Action
 
-**Phase 22** is next. The milestone is initialized and ready for discussion/planning around the first public plugin composition path.
+**Phase 22** is planned. The next workflow step is to execute the first public plugin composition path.

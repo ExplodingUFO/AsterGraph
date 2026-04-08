@@ -1,15 +1,15 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.4
-milestone_name: plugin-loading-and-automation-execution
-status: Planning Phase 22
-stopped_at: Milestone v1.4 initialized; next step is to discuss or plan Phase 22
-last_updated: "2026-04-08T08:52:44.0758689Z"
+milestone_name: Plugin Loading and Automation Execution
+status: Phase 22 Planned
+stopped_at: Phase 22 planned; next step is to execute plugin composition contracts
+last_updated: "2026-04-08T09:04:16.9792732Z"
 last_activity: 2026-04-08
 progress:
   total_phases: 4
   completed_phases: 0
-  total_plans: 0
+  total_plans: 12
   completed_plans: 0
 ---
 
@@ -20,14 +20,14 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-04-08)
 
 **Core value:** Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
-**Current focus:** Phase 22 plugin composition contract planning for the new v1.4 plugin and automation milestone
+**Current focus:** Phase 22 plugin composition contracts execution
 
 ## Current Position
 
 Phase: 22
-Plan: Not started
-Status: Planning Phase 22
-Last activity: 2026-04-08 — Created the v1.4 roadmap for plugin loading and automation execution
+Plan: Planned
+Status: Phase 22 Planned
+Last activity: 2026-04-08 — Planned Phase 22 plugin composition contracts
 
 ## Accumulated Context
 
@@ -54,6 +54,9 @@ Carry-forward decisions from shipped milestones:
 - Keep the demo showcase positioned as a host-facing SDK proof surface rather than a productized workflow shell or scene-switching gallery.
 - Return to plugin and automation implementation after the showcase milestone instead of extending presentation-only work indefinitely.
 - Keep plugin loading and automation execution rooted in `IGraphEditorSession`, descriptors, and command IDs rather than retained MVVM compatibility APIs.
+- Keep the first public plugin surface inside `AsterGraph.Editor` and rooted in `AsterGraphEditorOptions` / `AsterGraphEditorFactory`, not `AsterGraph.Avalonia`.
+- Use a custom `AssemblyLoadContext` plus `AssemblyDependencyResolver` for assembly-path plugins while keeping shared `AsterGraph.*` runtime contracts in the default load context.
+- Keep Phase 22 limited to public plugin composition/loading contracts and loader discoverability; actual plugin-contributed seam integration remains Phase 23.
 
 ### Pending Todos
 
@@ -65,6 +68,7 @@ None captured yet.
 - The known `STATE_HISTORY_OK` mismatch remains a pre-existing baseline issue if the next milestone touches history/save semantics.
 - The next milestone should avoid reopening kernel/facade ownership drift unless new evidence requires it.
 - The first plugin-loading baseline should stay in-process and descriptor-first rather than balloon into marketplace, signing, or isolation design.
+- The first assembly-path plugin loader must preserve shared `AsterGraph.*` type identity across the load boundary; otherwise plugin contracts will fail at runtime despite compiling.
 - The first automation baseline should stay command/query/batch driven rather than expand into a full scripting language or workflow-designer product.
 - Proof work must stay aligned across focused tests, `HostSample`, `PackageSmoke`, and `ScaleSmoke` so extension claims remain machine-checkable.
 
@@ -77,5 +81,5 @@ None captured yet.
 ## Session Continuity
 
 Last session: 2026-04-08
-Stopped at: Milestone v1.4 initialized; next step is to discuss or plan Phase 22
-Resume file: .planning/ROADMAP.md
+Stopped at: Phase 22 planned; next step is to execute plugin composition contracts
+Resume file: .planning/phases/22-plugin-composition-contracts/22-01-PLAN.md
