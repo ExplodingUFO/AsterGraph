@@ -79,4 +79,4 @@ This milestone turns the deferred `PLUG-01` and `AUTO-01` style follow-on work i
 
 ## Next Action
 
-**Phase 23** is now complete. The next workflow step is to plan **Phase 24: Automation Execution Runner**.
+**Phase 24** is now planned. The next workflow step is to execute **Phase 24: Automation Execution Runner**.
