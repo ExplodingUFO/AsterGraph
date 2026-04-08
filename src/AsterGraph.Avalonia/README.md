@@ -51,6 +51,14 @@ Canonical and compatibility UI entry paths:
 
 Per-surface presentation replacement is opt-in through `AsterGraphPresentationOptions`.
 
+Phase 16 adapter boundary:
+
+- Stock full-shell and standalone-canvas context menus are built from `editor.Session.Queries.BuildContextMenuDescriptors(...)`.
+- `IGraphContextMenuPresenter` implementations can opt into the canonical descriptor overload and receive `IGraphEditorCommands` directly. The older `MenuItemDescriptor` overload remains as a compatibility path.
+- Stock default keyboard shortcuts in `GraphEditorView` and `NodeCanvas` now route through a shared Avalonia shortcut adapter over `editor.Session.Commands`.
+- `GraphEditorView` owns Avalonia clipboard and host-context seam binding for the full shell. Its embedded `NodeCanvas` keeps platform-seam ownership disabled.
+- A standalone `NodeCanvas` owns those Avalonia clipboard and host-context seams when it is attached to the visual tree.
+
 Example full-shell configuration:
 
 ```csharp
@@ -73,5 +81,7 @@ Standalone canvas keeps the stock context menu and stock command shortcuts enabl
 
 - `EnableDefaultContextMenu`
 - `EnableDefaultCommandShortcuts`
+
+If a host replaces only the presenter, not the editor state, the recommended path is to keep consuming canonical session descriptors/commands and treat `GraphEditorViewModel.BuildContextMenu(...)` as retained compatibility surface.
 
 Header/library/status chrome remain shell-only. Phase 4 adds presenter replacement for node visuals, menus, inspector, and mini map without moving editor behavior into the host.

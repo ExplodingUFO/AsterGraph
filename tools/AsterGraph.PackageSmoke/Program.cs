@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Reflection;
 using Avalonia.Controls;
+using Avalonia.Input;
 using AsterGraph.Abstractions.Compatibility;
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
@@ -18,6 +19,7 @@ using AsterGraph.Editor.Localization;
 using AsterGraph.Editor.Menus;
 using AsterGraph.Editor.Models;
 using AsterGraph.Editor.Presentation;
+using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.Services;
 using AsterGraph.Editor.ViewModels;
 using Microsoft.Extensions.Logging;
@@ -279,6 +281,70 @@ var customStandaloneMiniMap = AsterGraphMiniMapViewFactory.Create(new AsterGraph
     Editor = factoryEditor,
     Presentation = customPresentation,
 });
+var phase16ShellPresenter = new Phase16RecordingContextMenuPresenter();
+var phase16ShellEditor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
+{
+    Document = document,
+    NodeCatalog = catalog,
+    CompatibilityService = new RecordingCompatibilityService(),
+    StyleOptions = styleOptions,
+    BehaviorOptions = behaviorOptions,
+});
+var phase16ShellView = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOptions
+{
+    Editor = phase16ShellEditor,
+    ChromeMode = GraphEditorViewChromeMode.CanvasOnly,
+    Presentation = new AsterGraphPresentationOptions
+    {
+        ContextMenuPresenter = phase16ShellPresenter,
+    },
+});
+var phase16ShellCanvas = phase16ShellView.FindControl<NodeCanvas>("PART_NodeCanvas")
+    ?? throw new InvalidOperationException("Missing PART_NodeCanvas on Phase 16 full shell.");
+phase16ShellEditor.SelectSingleNode(phase16ShellEditor.Nodes.Single(node => node.Id == sourceNodeId), updateStatus: false);
+var phase16ShellDeleteArgs = new KeyEventArgs
+{
+    Key = Key.Delete,
+};
+InvokeNonPublicHandler(phase16ShellView, "HandleKeyDown", phase16ShellView, phase16ShellDeleteArgs);
+var phase16ShellShortcutOk = phase16ShellDeleteArgs.Handled && phase16ShellEditor.Nodes.Count == 1;
+var phase16ShellMenuArgs = new ContextRequestedEventArgs();
+InvokeNonPublicHandler(phase16ShellCanvas, "HandleCanvasContextRequested", phase16ShellCanvas, phase16ShellMenuArgs);
+var phase16ShellMenuOk = phase16ShellMenuArgs.Handled
+    && phase16ShellPresenter.CanonicalOpenCalls == 1
+    && phase16ShellPresenter.CompatibilityOpenCalls == 0;
+var phase16ShellPlatformBoundaryOk = !GetAttachPlatformSeams(phase16ShellCanvas);
+var phase16CanvasPresenter = new Phase16RecordingContextMenuPresenter();
+var phase16CanvasEditor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
+{
+    Document = document,
+    NodeCatalog = catalog,
+    CompatibilityService = new RecordingCompatibilityService(),
+    StyleOptions = styleOptions,
+    BehaviorOptions = behaviorOptions,
+});
+var phase16CanvasProof = AsterGraphCanvasViewFactory.Create(new AsterGraphCanvasViewOptions
+{
+    Editor = phase16CanvasEditor,
+    Presentation = new AsterGraphPresentationOptions
+    {
+        ContextMenuPresenter = phase16CanvasPresenter,
+    },
+});
+phase16CanvasEditor.StartConnection(sourceNodeId, sourcePortId);
+var phase16CanvasEscapeArgs = new KeyEventArgs
+{
+    Key = Key.Escape,
+};
+InvokeNonPublicHandler(phase16CanvasProof, "HandleCanvasKeyDown", phase16CanvasProof, phase16CanvasEscapeArgs);
+var phase16CanvasShortcutOk = phase16CanvasEscapeArgs.Handled
+    && !phase16CanvasEditor.Session.Queries.GetPendingConnectionSnapshot().HasPendingConnection;
+var phase16CanvasMenuArgs = new ContextRequestedEventArgs();
+InvokeNonPublicHandler(phase16CanvasProof, "HandleCanvasContextRequested", phase16CanvasProof, phase16CanvasMenuArgs);
+var phase16CanvasMenuOk = phase16CanvasMenuArgs.Handled
+    && phase16CanvasPresenter.CanonicalOpenCalls == 1
+    && phase16CanvasPresenter.CompatibilityOpenCalls == 0;
+var phase16CanvasPlatformBoundaryOk = GetAttachPlatformSeams(phase16CanvasProof);
 
 Console.WriteLine($"SURFACE_CANVAS_OK:{ReferenceEquals(factoryEditor, standaloneCanvas.ViewModel)}:{standaloneCanvas.EnableDefaultContextMenu}:{standaloneCanvas.EnableDefaultCommandShortcuts}:{standaloneCanvasOptOut.EnableDefaultContextMenu}:{standaloneCanvasOptOut.EnableDefaultCommandShortcuts}");
 Console.WriteLine($"SURFACE_INSPECTOR_OK:{ReferenceEquals(factoryEditor, standaloneInspector.Editor)}");
@@ -290,6 +356,10 @@ Console.WriteLine($"PRESENTER_NODE_OK:{ReferenceEquals(customNodePresenter, cust
 Console.WriteLine($"PRESENTER_MENU_OK:{ReferenceEquals(customMenuPresenter, customStandaloneCanvas.ContextMenuPresenter)}");
 Console.WriteLine($"PRESENTER_INSPECTOR_OK:{ReferenceEquals(customInspectorPresenter, customStandaloneInspector.InspectorPresenter)}");
 Console.WriteLine($"PRESENTER_MINIMAP_OK:{ReferenceEquals(customMiniMapPresenter, customStandaloneMiniMap.MiniMapPresenter)}");
+Console.WriteLine("PHASE16_ADAPTER_BOUNDARY_NOTE:full shell and standalone surfaces now share canonical menu and shortcut routing while keeping shell-owned and standalone-owned platform seams distinct.");
+Console.WriteLine($"PHASE16_MENU_ROUTE_OK:{phase16ShellMenuOk}:{phase16CanvasMenuOk}:{phase16ShellPresenter.CanonicalOpenCalls}:{phase16CanvasPresenter.CanonicalOpenCalls}:{phase16ShellPresenter.CompatibilityOpenCalls}:{phase16CanvasPresenter.CompatibilityOpenCalls}");
+Console.WriteLine($"PHASE16_SHORTCUT_ROUTE_OK:{phase16ShellShortcutOk}:{phase16CanvasShortcutOk}");
+Console.WriteLine($"PHASE16_PLATFORM_BOUNDARY_OK:{phase16ShellPlatformBoundaryOk}:{phase16CanvasPlatformBoundaryOk}");
 
 factoryEditor.SelectSingleNode(factoryEditor.Nodes.Single(node => node.Id == sourceNodeId), updateStatus: false);
 factoryEditor.StartConnection(sourceNodeId, sourcePortId);
@@ -450,6 +520,20 @@ static void PrintViewMarker(string marker, GraphEditorView view)
     Console.WriteLine($"{marker}:{view.ChromeMode}:{view.Editor.Title}");
 }
 
+static void InvokeNonPublicHandler(object target, string methodName, params object[] args)
+{
+    var method = target.GetType().GetMethod(methodName, BindingFlags.Instance | BindingFlags.NonPublic)
+        ?? throw new InvalidOperationException($"Could not find non-public handler '{methodName}' on {target.GetType().Name}.");
+    method.Invoke(target, args);
+}
+
+static bool GetAttachPlatformSeams(NodeCanvas canvas)
+{
+    var property = typeof(NodeCanvas).GetProperty("AttachPlatformSeams", BindingFlags.Instance | BindingFlags.NonPublic)
+        ?? throw new InvalidOperationException("Could not find NodeCanvas.AttachPlatformSeams.");
+    return property.GetValue(canvas) as bool? ?? throw new InvalidOperationException("NodeCanvas.AttachPlatformSeams did not return a bool.");
+}
+
 sealed class SmokeContextMenuAugmentor : IGraphContextMenuAugmentor
 {
     public IReadOnlyList<MenuItemDescriptor> Augment(
@@ -490,6 +574,23 @@ sealed class SmokeContextMenuPresenterAdapter : IGraphContextMenuPresenter
 
     public void Open(Control target, IReadOnlyList<MenuItemDescriptor> descriptors, ContextMenuStyleOptions style)
         => _stockPresenter.Open(target, descriptors, style);
+}
+
+sealed class Phase16RecordingContextMenuPresenter : IGraphContextMenuPresenter
+{
+    public int CompatibilityOpenCalls { get; private set; }
+
+    public int CanonicalOpenCalls { get; private set; }
+
+    public void Open(Control target, IReadOnlyList<MenuItemDescriptor> descriptors, ContextMenuStyleOptions style)
+        => CompatibilityOpenCalls++;
+
+    public void Open(
+        Control target,
+        IReadOnlyList<GraphEditorMenuItemDescriptorSnapshot> descriptors,
+        IGraphEditorCommands commands,
+        ContextMenuStyleOptions style)
+        => CanonicalOpenCalls++;
 }
 
 sealed class SmokeInspectorPresenter : IGraphInspectorPresenter

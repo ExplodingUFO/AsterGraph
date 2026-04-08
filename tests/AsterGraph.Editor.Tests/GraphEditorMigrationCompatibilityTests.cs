@@ -293,6 +293,66 @@ public sealed class GraphEditorMigrationCompatibilityTests
         }
     }
 
+    [AvaloniaFact]
+    public void LegacyAndFactoryFullShellPaths_AttachEquivalentPlatformSeams()
+    {
+        var harness = CreateHarness();
+        var legacyEditor = CreateLegacyEditor(harness);
+        var factoryEditor = CreateFactoryEditor(harness);
+        var legacyView = new GraphEditorView
+        {
+            Editor = legacyEditor,
+            ChromeMode = GraphEditorViewChromeMode.CanvasOnly,
+        };
+        var factoryView = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOptions
+        {
+            Editor = factoryEditor,
+            ChromeMode = GraphEditorViewChromeMode.CanvasOnly,
+        });
+        var legacyWindow = new Window
+        {
+            Width = 1440,
+            Height = 900,
+            Content = legacyView,
+        };
+        var factoryWindow = new Window
+        {
+            Width = 1440,
+            Height = 900,
+            Content = factoryView,
+        };
+        legacyWindow.Show();
+        factoryWindow.Show();
+
+        try
+        {
+            var legacyCanvas = legacyView.FindControl<NodeCanvas>("PART_NodeCanvas");
+            var factoryCanvas = factoryView.FindControl<NodeCanvas>("PART_NodeCanvas");
+
+            Assert.NotNull(legacyCanvas);
+            Assert.NotNull(factoryCanvas);
+            Assert.False(legacyCanvas.AttachPlatformSeams);
+            Assert.False(factoryCanvas.AttachPlatformSeams);
+            Assert.True(legacyEditor.CanPaste);
+            Assert.True(factoryEditor.CanPaste);
+            Assert.NotNull(legacyEditor.HostContext);
+            Assert.NotNull(factoryEditor.HostContext);
+            Assert.True(legacyEditor.HostContext!.TryGetOwner<GraphEditorView>(out var legacyOwner));
+            Assert.True(factoryEditor.HostContext!.TryGetOwner<GraphEditorView>(out var factoryOwner));
+            Assert.Same(legacyView, legacyOwner);
+            Assert.Same(factoryView, factoryOwner);
+            Assert.True(legacyEditor.HostContext.TryGetTopLevel<Window>(out var legacyTopLevel));
+            Assert.True(factoryEditor.HostContext.TryGetTopLevel<Window>(out var factoryTopLevel));
+            Assert.Same(legacyWindow, legacyTopLevel);
+            Assert.Same(factoryWindow, factoryTopLevel);
+        }
+        finally
+        {
+            legacyWindow.Close();
+            factoryWindow.Close();
+        }
+    }
+
     [Fact]
     public async Task RuntimeSession_ServiceSeamsAndCompatibilityService_RemainAvailableAcrossMigrationPaths()
     {

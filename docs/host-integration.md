@@ -206,6 +206,13 @@ var view = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOption
 
 If the host is embedding the shipped Avalonia controls, `Create(...)` plus `AsterGraphAvaloniaViewFactory` remains the cleanest setup. If the host wants to own UI composition entirely, `CreateSession(...)` is now the narrower public boundary.
 
+Phase 16 adapter-boundary notes for the default shell:
+
+- Stock context menus now come from `editor.Session.Queries.BuildContextMenuDescriptors(...)`, then flow through the Avalonia presenter layer.
+- Stock keyboard shortcuts in both `GraphEditorView` and `NodeCanvas` now go through one shared Avalonia shortcut router over `editor.Session.Commands`.
+- `GraphEditorView` owns clipboard and host-context binding for the full shell. Its embedded `NodeCanvas` does not take over those platform seams.
+- If the host uses `AsterGraphCanvasViewFactory.Create(...)` directly, that standalone `NodeCanvas` becomes the Avalonia owner for those clipboard and host-context seams when attached.
+
 Host-managed Avalonia surface composition:
 
 1. Build the editor compatibility facade through `AsterGraphEditorFactory.Create(...)`.
@@ -450,7 +457,11 @@ Important contract boundaries:
 
 - `AsterGraph.Editor` still owns state, commands, queries, diagnostics, menu intent, and node presentation data.
 - `NodeCanvas` still owns selection, drag, marquee selection, pending connection preview, connection creation, viewport interaction, and port-anchor resolution.
-- `GraphEditorViewModel.BuildContextMenu(...)` and `MenuItemDescriptor` remain the only source of menu intent.
+- `editor.Session.Queries.BuildContextMenuDescriptors(...)` is the canonical menu-intent surface for stock Avalonia UI.
+- `GraphEditorViewModel.BuildContextMenu(...)` plus `MenuItemDescriptor` remain the retained compatibility path for hosts that still consume the older facade-shaped contract.
+- `IGraphContextMenuPresenter` can consume canonical descriptors plus `IGraphEditorCommands` directly, or rely on the compatibility overload when migrating incrementally.
+- Stock Avalonia shortcut handling is descriptor/session-backed and shared between `GraphEditorView` and `NodeCanvas`; hosts opting out can replace it per surface.
+- Full-shell Avalonia host-context and clipboard ownership stay on `GraphEditorView`, while standalone `NodeCanvas` owns those platform seams in standalone composition.
 - `GraphInspectorView` custom presenters still bind to the existing editor-owned inspector projections and `NodeParameterViewModel` editing flow.
 - `GraphMiniMap` custom presenters still use editor-owned overview and `CenterViewAt(...)` navigation rather than introducing shell-only responsibilities.
 
@@ -464,7 +475,7 @@ Reference sample:
 - Run with:
   - `dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj`
 - The sample demonstrates both the convenience full shell and standalone canvas/inspector/mini map composition against the same editor state.
-- It also prints human-readable diagnostics/inspection evidence plus opt-in logger/activity instrumentation markers for Phase 5 validation.
+- It also prints human-readable diagnostics/inspection evidence, machine-checkable descriptor/runtime markers from earlier phases, and Phase 16 adapter-boundary markers for menu routing, shortcut routing, and platform-seam ownership.
 
 ## Localization
 

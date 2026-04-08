@@ -201,6 +201,95 @@ public sealed class GraphEditorProofRingTests
         Assert.IsNotType<GraphEditorViewModel>(factoryHost);
     }
 
+    [AvaloniaFact]
+    public void FullShellAndStandaloneProof_UseCanonicalMenuRoutingAcrossSharedAdapters()
+    {
+        var fullShellPresenter = new RecordingCanonicalContextMenuPresenter();
+        var standalonePresenter = new RecordingCanonicalContextMenuPresenter();
+        var fullShellEditor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
+        {
+            Document = CreateDocument(),
+            NodeCatalog = CreateCatalog(),
+            CompatibilityService = new ExactCompatibilityService(),
+        });
+        var standaloneEditor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
+        {
+            Document = CreateDocument(),
+            NodeCatalog = CreateCatalog(),
+            CompatibilityService = new ExactCompatibilityService(),
+        });
+        var fullShellView = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOptions
+        {
+            Editor = fullShellEditor,
+            ChromeMode = GraphEditorViewChromeMode.CanvasOnly,
+            Presentation = new AsterGraphPresentationOptions
+            {
+                ContextMenuPresenter = fullShellPresenter,
+            },
+        });
+        var standaloneCanvas = AsterGraphCanvasViewFactory.Create(new AsterGraphCanvasViewOptions
+        {
+            Editor = standaloneEditor,
+            Presentation = new AsterGraphPresentationOptions
+            {
+                ContextMenuPresenter = standalonePresenter,
+            },
+        });
+        var fullShellWindow = new Window
+        {
+            Width = 1440,
+            Height = 900,
+            Content = fullShellView,
+        };
+        var standaloneWindow = new Window
+        {
+            Width = 1440,
+            Height = 900,
+            Content = standaloneCanvas,
+        };
+        fullShellWindow.Show();
+        standaloneWindow.Show();
+
+        try
+        {
+            var fullShellCanvas = fullShellView.FindControl<NodeCanvas>("PART_NodeCanvas");
+            var fullShellArgs = new ContextRequestedEventArgs();
+            var standaloneArgs = new ContextRequestedEventArgs();
+
+            Assert.NotNull(fullShellCanvas);
+            Assert.False(fullShellCanvas.AttachPlatformSeams);
+            Assert.True(standaloneCanvas.AttachPlatformSeams);
+
+            InvokeCanvasContextRequested(fullShellCanvas, fullShellArgs);
+            InvokeCanvasContextRequested(standaloneCanvas, standaloneArgs);
+
+            Assert.True(fullShellArgs.Handled);
+            Assert.True(standaloneArgs.Handled);
+            Assert.Equal(1, fullShellPresenter.CanonicalOpenCalls);
+            Assert.Equal(1, standalonePresenter.CanonicalOpenCalls);
+            Assert.Equal(0, fullShellPresenter.CompatibilityOpenCalls);
+            Assert.Equal(0, standalonePresenter.CompatibilityOpenCalls);
+            Assert.NotNull(fullShellPresenter.LastDescriptors);
+            Assert.NotNull(standalonePresenter.LastDescriptors);
+            Assert.Contains(fullShellPresenter.LastDescriptors!, descriptor => descriptor.Id == "canvas-add-node");
+            Assert.Contains(standalonePresenter.LastDescriptors!, descriptor => descriptor.Id == "canvas-add-node");
+            Assert.Same(fullShellEditor.Session.Commands, fullShellPresenter.LastCommands);
+            Assert.Same(standaloneEditor.Session.Commands, standalonePresenter.LastCommands);
+        }
+        finally
+        {
+            fullShellWindow.Close();
+            standaloneWindow.Close();
+        }
+    }
+
+    private static void InvokeCanvasContextRequested(NodeCanvas canvas, ContextRequestedEventArgs args)
+    {
+        var method = typeof(NodeCanvas).GetMethod("HandleCanvasContextRequested", BindingFlags.Instance | BindingFlags.NonPublic)
+            ?? throw new Xunit.Sdk.XunitException("Could not find NodeCanvas.HandleCanvasContextRequested.");
+        method.Invoke(canvas, [canvas, args]);
+    }
+
     private static GraphDocument CreateDocument()
         => new(
             "Proof Ring Graph",
@@ -313,6 +402,31 @@ public sealed class GraphEditorProofRingTests
     {
         public void Open(Control target, IReadOnlyList<MenuItemDescriptor> descriptors, ContextMenuStyleOptions style)
         {
+        }
+    }
+
+    private sealed class RecordingCanonicalContextMenuPresenter : IGraphContextMenuPresenter
+    {
+        public int CompatibilityOpenCalls { get; private set; }
+
+        public int CanonicalOpenCalls { get; private set; }
+
+        public IReadOnlyList<GraphEditorMenuItemDescriptorSnapshot>? LastDescriptors { get; private set; }
+
+        public IGraphEditorCommands? LastCommands { get; private set; }
+
+        public void Open(Control target, IReadOnlyList<MenuItemDescriptor> descriptors, ContextMenuStyleOptions style)
+            => CompatibilityOpenCalls++;
+
+        public void Open(
+            Control target,
+            IReadOnlyList<GraphEditorMenuItemDescriptorSnapshot> descriptors,
+            IGraphEditorCommands commands,
+            ContextMenuStyleOptions style)
+        {
+            CanonicalOpenCalls++;
+            LastDescriptors = descriptors;
+            LastCommands = commands;
         }
     }
 
