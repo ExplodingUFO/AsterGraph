@@ -47,12 +47,20 @@
 
 ## Traceability
 
-Roadmap mapping will be filled during milestone roadmapping.
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| PLUG-01 | Phase 22 | Planned |
+| PLUG-02 | Phase 23 | Planned |
+| PLUG-03 | Phase 23 | Planned |
+| AUTO-01 | Phase 24 | Planned |
+| AUTO-02 | Phase 24 | Planned |
+| PROOF-01 | Phase 25 | Planned |
+| PROOF-02 | Phase 25 | Planned |
 
 **Coverage:**
 - milestone requirements: 7 total
-- mapped to phases: 0
-- unmapped: 7
+- mapped to phases: 7
+- unmapped: 0
 
 ---
 *Requirements defined: 2026-04-08*

@@ -2,12 +2,12 @@
 gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: plugin-loading-and-automation-execution
-status: Defining requirements
-stopped_at: Milestone v1.4 started; defining requirements for plugin loading and automation execution
-last_updated: "2026-04-08T08:49:21.3488793Z"
+status: Planning Phase 22
+stopped_at: Milestone v1.4 initialized; next step is to discuss or plan Phase 22
+last_updated: "2026-04-08T08:52:44.0758689Z"
 last_activity: 2026-04-08
 progress:
-  total_phases: 0
+  total_phases: 4
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -20,14 +20,14 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-04-08)
 
 **Core value:** Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
-**Current focus:** define milestone v1.4 around plugin loading and automation execution on top of the canonical session boundary
+**Current focus:** Phase 22 plugin composition contract planning for the new v1.4 plugin and automation milestone
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: -
-Status: Defining requirements
-Last activity: 2026-04-08 — Started milestone v1.4 Plugin Loading and Automation Execution
+Phase: 22
+Plan: Not started
+Status: Planning Phase 22
+Last activity: 2026-04-08 — Created the v1.4 roadmap for plugin loading and automation execution
 
 ## Accumulated Context
 
@@ -77,5 +77,5 @@ None captured yet.
 ## Session Continuity
 
 Last session: 2026-04-08
-Stopped at: Milestone v1.4 started; next step is to define requirements and roadmap
-Resume file: .planning/PROJECT.md
+Stopped at: Milestone v1.4 initialized; next step is to discuss or plan Phase 22
+Resume file: .planning/ROADMAP.md
