@@ -20,8 +20,8 @@
 
 ### Avalonia Adapter Cleanup
 
-- [ ] **ADAPT-01**: `AsterGraph.Avalonia` consumes thinner kernel/facade contracts and stops duplicating command-routing policy between shell and canvas controls
-- [ ] **ADAPT-02**: Clipboard, host context, and input-routing seams remain Avalonia-owned adapters, but their editor-facing contract no longer requires direct dependence on `GraphEditorViewModel` internals
+- [x] **ADAPT-01**: `AsterGraph.Avalonia` consumes thinner kernel/facade contracts and stops duplicating command-routing policy between shell and canvas controls
+- [x] **ADAPT-02**: Clipboard, host context, and input-routing seams remain Avalonia-owned adapters, but their editor-facing contract no longer requires direct dependence on `GraphEditorViewModel` internals
 
 ### Migration And Readiness
 
@@ -54,8 +54,8 @@
 | CAP-01 | Phase 15 | Complete |
 | CAP-02 | Phase 15 | Complete |
 | CAP-03 | Phase 14 | Complete |
-| ADAPT-01 | Phase 16 | Planned |
-| ADAPT-02 | Phase 16 | Planned |
+| ADAPT-01 | Phase 16 | Complete |
+| ADAPT-02 | Phase 16 | Complete |
 | MIG-01 | Phase 17 | Planned |
 | MIG-02 | Phase 17 | Planned |
 | PLUG-READY-01 | Phase 18 | Planned |

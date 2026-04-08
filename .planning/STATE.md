@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: kernel-extraction-capability-contracts-and-plugin-readiness
-status: Executing Phase 16
-stopped_at: Phase 16 plan 16-02 completed; 16-03 proof and docs lock-up is next
-last_updated: "2026-04-08T05:10:27Z"
+status: Ready To Plan Phase 17
+stopped_at: Phase 16 completed; Phase 17 planning is next
+last_updated: "2026-04-08T05:22:45Z"
 progress:
   total_phases: 6
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 12
-  completed_plans: 11
+  completed_plans: 12
 ---
 
 # Project State
@@ -19,14 +19,14 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-04-04)
 
 **Core value:** Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
-**Current focus:** Phase 16 execution after 16-02 narrowed Avalonia clipboard and host-context seam attachment through a shared platform binder
+**Current focus:** Phase 17 planning after Phase 16 closed the Avalonia adapter-boundary cleanup with proof/sample/docs lock-up
 
 ## Current Position
 
-Phase: 16. Avalonia Adapter Boundary Cleanup
-Plan: 16-01 and 16-02 completed; 16-03 pending
-Status: Executing Phase 16
-Last activity: 2026-04-08 — Completed 16-02 platform seam narrowing and verified initialization/migration/host-context/standalone regressions
+Phase: 17. Compatibility Lock And Migration Proof
+Plan: Not started
+Status: Ready To Plan Phase 17
+Last activity: 2026-04-08 — Completed 16-03 proof/sample/docs lock-up and closed Phase 16
 
 ## Accumulated Context
 
@@ -58,6 +58,7 @@ New milestone decisions:
 - Keep shared shortcut routing centralized in Avalonia, with copy/paste still compatibility-executed until the runtime surface grows canonical clipboard command IDs.
 - Keep full-shell platform seam ownership on `GraphEditorView`, while allowing supported standalone `NodeCanvas` composition to attach the same Avalonia seams through a shared binder.
 - Treat inspector/minimap/node-visual presenter contracts as compatibility-oriented seams for now; Phase 16 narrows their surrounding platform wiring without redesigning those contracts.
+- Keep the new `PHASE16_*` HostSample and PackageSmoke markers as the proof baseline for Avalonia adapter-boundary behavior until Phase 17 extends migration coverage further.
 
 ### Pending Todos
 
@@ -67,12 +68,9 @@ None captured yet.
 
 - No current blocker in the main workspace.
 - The main design constraint is preserving staged migration while continuing to move public control-plane seams away from MVVM object shape.
-- Avalonia adapter thinning is now the highest-leverage architecture debt left in the milestone.
 - Known transaction-history test failures remain present even on the pre-15-02 baseline; they should not be misclassified as Phase 15 regressions when Phase 16 starts.
-- The next design constraint is making Avalonia consume the thinner descriptor/runtime contracts without recreating editor policy in the UI layer.
-- The main Phase 16 risk is mixing input/menu policy cleanup with broader presenter-surface redesign instead of first collapsing duplicated shell/canvas routing.
 - `GraphEditorView.axaml.cs` and `NodeCanvas.axaml.cs` remain the main Avalonia coordination hotspots and should be changed with proof coverage, not opportunistically.
-- The next concrete risk is `16-03` under-proving the new platform seam story in sample/smoke/docs, leaving hosts to infer more than the artifacts actually show.
+- The next leverage point is migration proof: Phase 17 needs to keep the retained `GraphEditorViewModel` / `GraphEditorView` path behaviorally aligned while the kernel-first/runtime-descriptor path becomes the clearer canonical route.
 
 ### Quick Tasks Completed
 
@@ -83,5 +81,5 @@ None captured yet.
 ## Session Continuity
 
 Last session: 2026-04-08
-Stopped at: Phase 16 plan 16-02 completed; 16-03 proof and docs lock-up is next
-Resume file: .planning/phases/16-avalonia-adapter-boundary-cleanup/16-03-PLAN.md
+Stopped at: Phase 16 completed; Phase 17 planning is next
+Resume file: .planning/ROADMAP.md
