@@ -2,7 +2,7 @@
 
 ## Milestones
 
-- 🚧 **v1.3 Demo Showcase** — Phases 19-21 (planned)
+- ✅ **v1.3 Demo Showcase** — Phases 19-21, completed 2026-04-08
 - ✅ **[v1.2 Kernel Extraction, Capability Contracts, and Plugin Readiness](./milestones/v1.2-ROADMAP.md)** — Phases 13-18, shipped 2026-04-08
 - ✅ **v1.1 Host Boundary, Native Integration, and Scaling** — Phases 07-12, shipped before milestone archive split
 - ✅ **v1.0 Foundation Milestone** — Phases 01-06, shipped before milestone archive split
@@ -22,7 +22,7 @@ This milestone turns the demo into a graph-first SDK showcase: the user should f
 
 - [x] **Phase 19: Graph-First Demo Shell** - Replace the current explanation-heavy layout with a graph-first shell whose first read is the live graph plus a host-level menu.
 - [x] **Phase 20: Host Menu Control Consolidation** - Move shell, behavior, and runtime-facing demo controls into a compact host-level menu or drawer flow over the same editor session. (completed 2026-04-08)
-- [ ] **Phase 21: In-Context Proof And Narrative Polish** - Replace long explanation panels with compact proof cues, live configuration summaries, and updated demo/docs messaging.
+- [x] **Phase 21: In-Context Proof And Narrative Polish** - Replace long explanation panels with compact proof cues, live configuration summaries, and updated demo/docs messaging. (completed 2026-04-08)
 
 ## Phase Details
 
@@ -65,8 +65,8 @@ This milestone turns the demo into a graph-first SDK showcase: the user should f
 |-------|--------------|--------|
 | 19. Graph-First Demo Shell | SHOW-01, SHOW-02 | Completed |
 | 20. Host Menu Control Consolidation | CTRL-01, CTRL-02, CTRL-03 | Completed |
-| 21. In-Context Proof And Narrative Polish | PROOF-01, PROOF-02 | Planned |
+| 21. In-Context Proof And Narrative Polish | PROOF-01, PROOF-02 | Completed |
 
 ## Next Action
 
-**Phase 21** is planned. The graph-first shell and host-menu control baseline are now in place, and the next workflow step is to execute in-context proof and narrative polish.
+**v1.3 Demo Showcase** phase work is complete. The next workflow step is to complete/archive the milestone and choose the next roadmap target.

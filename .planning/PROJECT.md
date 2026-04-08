@@ -26,7 +26,8 @@ Hosts can integrate only the graph-editor pieces they need, replace default UI a
 - Avalonia shell and canvas routing/platform seams now flow through shared adapters instead of duplicating policy independently.
 - Migration posture and plugin/automation readiness are locked by focused regressions plus runnable `HostSample`, `PackageSmoke`, and `ScaleSmoke` proof markers.
 - `AsterGraph.Demo` now exposes live view, behavior, and runtime host controls from the top menu and compact right-side pane over one retained editor/session path.
-- The next remaining milestone risk is no longer control discoverability; it is replacing heavy explanatory copy with tighter in-context proof and narrative polish in Phase 21.
+- `AsterGraph.Demo` now also exposes compact in-context proof cues, live configuration summaries, and aligned README narrative over the same graph-first host shell.
+- The v1.3 phase sequence is complete; the next workflow step is to complete/archive the milestone and decide the next roadmap target.
 - The known `STATE_HISTORY_OK` mismatch remains an unresolved pre-v1.2 baseline if the next milestone touches history/save semantics.
 
 ## Requirements
@@ -49,11 +50,12 @@ Hosts can integrate only the graph-editor pieces they need, replace default UI a
 - ✓ The shipped architecture is explicitly ready for later plugin loading and richer automation without another deep boundary rewrite — v1.2
 - ✓ The demo opens into a graph-first shell where the node graph and a host-level menu are the first things users see — v1.3 Phase 19
 - ✓ Users can adjust shell/view, editing behavior, and runtime-facing demo controls from compact host-level menu groups while staying on the same live graph — v1.3 Phase 20
+- ✓ The demo now distinguishes host-owned seams from shared runtime state through compact proof cues, live configuration sections, and aligned demo-facing documentation — v1.3 Phase 21
 
 ### Active
 
-- [ ] The demo explains replaceable seams and current runtime configuration with compact in-context proof instead of large static explanation panels.
-- [ ] The redesigned showcase remains a proof of SDK capabilities rather than a fake product shell or a scene-switching sample gallery.
+- [ ] Complete and archive the v1.3 Demo Showcase milestone now that phases 19-21 are all shipped.
+- [ ] Decide whether the next roadmap should deepen the showcase experience (presets/tours) or return to plugin/automation execution work on top of the shipped host/runtime seams.
 
 ### Out of Scope
 
@@ -119,4 +121,4 @@ This document evolves at milestone boundaries.
 4. Reset active requirements so the next roadmap starts from the highest remaining product risk instead of stale execution context.
 
 ---
-*Last updated: 2026-04-08 after completing Phase 20 host menu control consolidation*
+*Last updated: 2026-04-08 after completing Phase 21 in-context proof and narrative polish*

@@ -231,6 +231,50 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public bool IsProofHostGroupSelected => SelectedHostMenuGroupTitle == "证明";
 
+    public string HostDrawerCaption => "宿主控制抽屉";
+
+    public string LiveSessionTitle => "实时 SDK 会话";
+
+    public string HostOwnershipBadgeText => "宿主控制";
+
+    public string RuntimeOwnershipBadgeText => "共享运行时";
+
+    public string ActiveHostGroupBadgeText => $"当前分组 · {SelectedHostMenuGroupTitle}";
+
+    public IReadOnlyList<string> CurrentConfigurationLines =>
+    [
+        $"当前分组：{SelectedHostMenuGroupTitle}",
+        $"显示顶栏：{BoolText(IsHeaderChromeVisible)}",
+        $"显示节点库：{BoolText(IsLibraryChromeVisible)}",
+        $"显示检查器：{BoolText(IsInspectorChromeVisible)}",
+        $"显示状态栏：{BoolText(IsStatusChromeVisible)}",
+        $"只读模式：{BoolText(IsReadOnlyEnabled)}",
+        $"网格吸附：{BoolText(IsGridSnappingEnabled)}",
+        $"对齐辅助线：{BoolText(IsAlignmentGuidesEnabled)}",
+        $"工作区命令：{BoolText(AreWorkspaceCommandsEnabled)}",
+        $"片段命令：{BoolText(AreFragmentCommandsEnabled)}",
+        $"宿主菜单扩展：{BoolText(AreHostMenuExtensionsEnabled)}",
+    ];
+
+    public IReadOnlyList<string> RuntimeSignalLines =>
+    [
+        $"文档标题：{RuntimeDocumentTitle}",
+        $"节点数量：{RuntimeNodeCount}",
+        $"连线数量：{RuntimeConnectionCount}",
+        $"当前选择：{RuntimeSelectedNodeCount}",
+        $"视口缩放：{RuntimeViewportZoom:0.00}",
+        $"待完成连线：{BoolText(RuntimeHasPendingConnection)}",
+        $"当前状态：{CompatibilityStatusMessage}",
+    ];
+
+    public IReadOnlyList<string> OwnershipProofLines =>
+    [
+        "宿主切换直接来自 MainWindowViewModel 的壳层与行为布尔值。",
+        $"共享运行时入口：{RuntimeDiagnosticsSourceName}",
+        $"会话连续性：{HostSessionContinuityCaption}",
+        $"当前展示能力：{SelectedCapabilityTitle}",
+    ];
+
     public IReadOnlyList<string> ChromeModeProofLines =>
     [
         $"{nameof(GraphEditorViewChromeMode)}.{nameof(GraphEditorViewChromeMode.Default)}：保留头部、节点库、检查器与状态栏。",
@@ -323,11 +367,7 @@ public partial class MainWindowViewModel : ViewModelBase
     /// </summary>
     public IReadOnlyList<string> RuntimeMetricLines =>
     [
-        $"文档标题：{RuntimeDocumentTitle}",
-        $"节点数量：{RuntimeNodeCount}",
-        $"连线数量：{RuntimeConnectionCount}",
-        $"当前选择：{RuntimeSelectedNodeCount}",
-        $"视口缩放：{RuntimeViewportZoom:0.00}",
+        .. RuntimeSignalLines.Take(5),
         $"可保存工作区：{BoolText(CurrentInspection.Capabilities.CanSaveWorkspace)}",
         $"可加载工作区：{BoolText(CurrentInspection.Capabilities.CanLoadWorkspace)}",
     ];
@@ -591,8 +631,12 @@ public partial class MainWindowViewModel : ViewModelBase
         OnPropertyChanged(nameof(IsBehaviorHostGroupSelected));
         OnPropertyChanged(nameof(IsRuntimeHostGroupSelected));
         OnPropertyChanged(nameof(IsProofHostGroupSelected));
+        OnPropertyChanged(nameof(ActiveHostGroupBadgeText));
         OnPropertyChanged(nameof(HostPaneStateCaption));
         OnPropertyChanged(nameof(HostSessionContinuityCaption));
+        OnPropertyChanged(nameof(CurrentConfigurationLines));
+        OnPropertyChanged(nameof(RuntimeSignalLines));
+        OnPropertyChanged(nameof(OwnershipProofLines));
         OnPropertyChanged(nameof(RuntimeMetricLines));
         OnPropertyChanged(nameof(RecentDiagnostics));
         OnPropertyChanged(nameof(RecentDiagnosticLines));

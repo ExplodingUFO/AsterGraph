@@ -44,6 +44,17 @@ Current non-goals:
 - `src/AsterGraph.Demo`
   Demo host and sample content. This project is not part of the supported SDK boundary.
 
+## Demo Showcase
+
+`src/AsterGraph.Demo` is the graph-first showcase for the SDK. The window keeps one live session on screen while the in-window host menu groups (`展示`, `视图`, `行为`, `运行时`, `证明`) adjust shell chrome, behavior toggles, runtime readouts, and proof cues around the same graph.
+
+Use the demo to verify two things quickly:
+
+- which adjustments are host-owned seams that come from the demo shell and `MainWindowViewModel`
+- which readouts come from shared runtime state such as `Editor.Session.Diagnostics`
+
+The demo is intentionally a sample host, not a fifth supported package. Its job is to make the package boundary, host menu story, and live session proof easy to inspect before you wire the SDK into your own application.
+
 ## Supported Package Boundary
 
 Only these four libraries are published as host-consumable SDK packages:

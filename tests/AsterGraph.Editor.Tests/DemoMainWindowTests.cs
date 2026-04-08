@@ -72,6 +72,38 @@ public sealed class DemoMainWindowTests
     }
 
     [AvaloniaFact]
+    public void MainWindow_RendersPhase21ProofFocusedShellCopy()
+    {
+        var window = CreateWindow();
+
+        var showcaseMenu = Assert.IsType<MenuItem>(window.FindControl<MenuItem>("PART_ShowcaseMenu"));
+        var proofMenu = Assert.IsType<MenuItem>(window.FindControl<MenuItem>("PART_ProofMenu"));
+
+        Assert.Equal("打开展示摘要", GetMenuItem(showcaseMenu, "打开展示摘要").Header);
+        Assert.Equal("查看证明要点", GetMenuItem(proofMenu, "查看证明要点").Header);
+        Assert.Null(FindMenuItem(showcaseMenu, "打开展示面板"));
+        Assert.Null(FindMenuItem(proofMenu, "打开证明面板"));
+
+        Assert.Equal("宿主控制抽屉", window.FindControl<TextBlock>("PART_HostDrawerCaptionText")?.Text);
+        Assert.Equal("实时 SDK 会话", window.FindControl<TextBlock>("PART_GraphIntroTitleText")?.Text);
+        Assert.Equal("宿主控制", window.FindControl<TextBlock>("PART_HostOwnershipBadgeText")?.Text);
+        Assert.Equal("共享运行时", window.FindControl<TextBlock>("PART_RuntimeOwnershipBadgeText")?.Text);
+        Assert.Equal("当前分组 · 展示", window.FindControl<TextBlock>("PART_ActiveHostGroupBadgeText")?.Text);
+    }
+
+    [AvaloniaFact]
+    public void MainWindow_RendersDedicatedPhase21RuntimeAndProofSections()
+    {
+        var window = CreateWindow();
+
+        Assert.NotNull(window.FindControl<Control>("PART_RuntimeConfigurationSection"));
+        Assert.NotNull(window.FindControl<Control>("PART_RuntimeSignalsSection"));
+        Assert.NotNull(window.FindControl<Control>("PART_ProofConfigurationSection"));
+        Assert.NotNull(window.FindControl<Control>("PART_ProofOwnershipSection"));
+        Assert.NotNull(window.FindControl<Control>("PART_ProofRuntimeSignalsSection"));
+    }
+
+    [AvaloniaFact]
     public void MainWindow_UsesRightSideCompactHostPaneThatStartsClosed()
     {
         var window = CreateWindow();
@@ -116,6 +148,10 @@ public sealed class DemoMainWindowTests
 
         return Assert.Single(matches);
     }
+
+    private static MenuItem? FindMenuItem(MenuItem parent, string header)
+        => GetMenuItems(parent)
+            .SingleOrDefault(item => string.Equals(item.Header?.ToString(), header, StringComparison.Ordinal));
 
     private static MenuItem[] GetMenuItems(MenuItem parent)
         => parent.Items is IEnumerable items

@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Demo Showcase
-status: Phase 21 Planned
-stopped_at: Phase 21 planned; next step is to execute in-context proof and narrative polish
-last_updated: "2026-04-08T08:21:48.2092999Z"
+status: Ready to complete milestone
+stopped_at: Phase 21 completed; next step is to complete/archive milestone v1.3 Demo Showcase
+last_updated: "2026-04-08T08:36:35.2441945Z"
 last_activity: 2026-04-08
 progress:
   total_phases: 3
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 9
-  completed_plans: 6
+  completed_plans: 9
 ---
 
 # Project State
@@ -20,14 +20,14 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-04-08)
 
 **Core value:** Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
-**Current focus:** Phase 21 in-context proof and narrative polish execution
+**Current focus:** v1.3 milestone completion and archive preparation
 
 ## Current Position
 
 Phase: 21
-Plan: Planned
-Status: Phase 21 Planned
-Last activity: 2026-04-08 — Planned Phase 21 in-context proof and narrative polish
+Plan: Completed
+Status: Ready to complete milestone
+Last activity: 2026-04-08 — Completed Phase 21 in-context proof and narrative polish
 
 ## Accumulated Context
 
@@ -51,6 +51,7 @@ Carry-forward decisions from shipped milestones:
 - Keep Phase 21 proof cues embedded near the active graph and drawer sections instead of reintroducing a permanent explanation rail.
 - Keep host-owned seams and shared runtime/session state explicit through short labels plus live values rather than paragraph-heavy summary cards.
 - Keep README aligned with the graph-first showcase story so the demo window and repo narrative describe the same proof.
+- Keep the demo showcase positioned as a host-facing SDK proof surface rather than a productized workflow shell or scene-switching gallery.
 
 ### Pending Todos
 
@@ -67,6 +68,7 @@ None captured yet.
 - Phase 21 should avoid turning proof polish into a new onboarding flow, preset system, or scene-switching model.
 - Copy changes should stay compact and testable; do not reintroduce paragraph-heavy explanation cards under a new name.
 - Live configuration and runtime proof rows must remain projections of the current booleans and `Editor.Session` diagnostics path, not a second summary cache.
+- The next step should be milestone completion/archival, not more ad-hoc demo changes without a new roadmap decision.
 
 ### Quick Tasks Completed
 
@@ -77,5 +79,5 @@ None captured yet.
 ## Session Continuity
 
 Last session: 2026-04-08
-Stopped at: Phase 21 planned; next step is to execute in-context proof and narrative polish
-Resume file: .planning/phases/21-in-context-proof-and-narrative-polish/21-01-PLAN.md
+Stopped at: Phase 21 completed; next step is to complete/archive milestone v1.3 Demo Showcase
+Resume file: .planning/phases/21-in-context-proof-and-narrative-polish/21-VERIFICATION.md

@@ -36,7 +36,7 @@
               Foreground="#F4FFFC">
           <MenuItem x:Name="PART_ShowcaseMenu"
                     Header="展示">
-            <MenuItem Header="打开展示面板"
+            <MenuItem Header="打开展示摘要"
                       Command="{Binding OpenHostMenuGroupCommand}"
                       CommandParameter="展示" />
             <MenuItem Header="收起面板"
@@ -97,7 +97,7 @@
           </MenuItem>
           <MenuItem x:Name="PART_ProofMenu"
                     Header="证明">
-            <MenuItem Header="打开证明面板"
+            <MenuItem Header="查看证明要点"
                       Command="{Binding OpenHostMenuGroupCommand}"
                       CommandParameter="证明" />
           </MenuItem>
@@ -144,10 +144,11 @@
           <Grid RowDefinitions="Auto,*,Auto"
                 RowSpacing="16">
             <StackPanel Spacing="6">
-              <TextBlock FontSize="12"
+              <TextBlock x:Name="PART_HostDrawerCaptionText"
+                         FontSize="12"
                          FontWeight="Bold"
                          Foreground="#7FE7D7"
-                         Text="宿主展示面板" />
+                         Text="{Binding HostDrawerCaption}" />
               <TextBlock FontSize="22"
                          FontWeight="SemiBold"
                          Foreground="#F4FFFC"
@@ -259,37 +260,62 @@
                 <StackPanel x:Name="PART_RuntimeSummarySection"
                             Spacing="8"
                             IsVisible="{Binding IsRuntimeHostGroupSelected}">
-                  <Border Padding="12"
-                          Background="#14202B"
-                          BorderBrush="#365063"
-                          BorderThickness="1"
-                          CornerRadius="8">
-                    <TextBlock TextWrapping="Wrap"
+                  <StackPanel x:Name="PART_RuntimeConfigurationSection"
+                              Spacing="8">
+                    <TextBlock FontSize="12"
+                               FontWeight="Bold"
                                Foreground="#7FE7D7"
-                               Text="{Binding SelectedHostMenuGroupSummary}" />
-                  </Border>
+                               Text="当前配置" />
+                    <ItemsControl ItemsSource="{Binding CurrentConfigurationLines}">
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                          <Border Margin="0,0,0,8"
+                                  Padding="12"
+                                  Background="#14202B"
+                                  BorderBrush="#365063"
+                                  BorderThickness="1"
+                                  CornerRadius="8">
+                            <TextBlock TextWrapping="Wrap"
+                                       Foreground="#D8EEF3"
+                                       Text="{Binding}" />
+                          </Border>
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                  </StackPanel>
 
-                  <ItemsControl ItemsSource="{Binding RuntimeMetricLines}">
-                    <ItemsControl.ItemTemplate>
-                      <DataTemplate>
-                        <Border Margin="0,0,0,8"
-                                Padding="12"
-                                Background="#14202B"
-                                BorderBrush="#365063"
-                                BorderThickness="1"
-                                CornerRadius="8">
-                          <TextBlock TextWrapping="Wrap"
-                                     Foreground="#D8EEF3"
-                                     Text="{Binding}" />
-                        </Border>
-                      </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                  </ItemsControl>
+                  <StackPanel x:Name="PART_RuntimeSignalsSection"
+                              Spacing="8">
+                    <TextBlock FontSize="12"
+                               FontWeight="Bold"
+                               Foreground="#7FE7D7"
+                               Text="实时信号" />
+                    <ItemsControl ItemsSource="{Binding RuntimeSignalLines}">
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                          <Border Margin="0,0,0,8"
+                                  Padding="12"
+                                  Background="#14202B"
+                                  BorderBrush="#365063"
+                                  BorderThickness="1"
+                                  CornerRadius="8">
+                            <TextBlock TextWrapping="Wrap"
+                                       Foreground="#D8EEF3"
+                                       Text="{Binding}" />
+                          </Border>
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                  </StackPanel>
                 </StackPanel>
 
                 <StackPanel x:Name="PART_RuntimeDiagnosticsSection"
                             Spacing="8"
                             IsVisible="{Binding IsRuntimeHostGroupSelected}">
+                  <TextBlock FontSize="12"
+                             FontWeight="Bold"
+                             Foreground="#7FE7D7"
+                             Text="最近诊断" />
                   <Border Padding="12"
                           Background="#14202B"
                           BorderBrush="#365063"
@@ -322,22 +348,77 @@
                 <StackPanel x:Name="PART_ProofDrawerSection"
                             Spacing="8"
                             IsVisible="{Binding IsProofHostGroupSelected}">
-                  <ItemsControl ItemsSource="{Binding SelectedHostMenuGroupLines}">
-                    <ItemsControl.ItemTemplate>
-                      <DataTemplate>
-                        <Border Margin="0,0,0,8"
-                                Padding="12"
-                                Background="#14202B"
-                                BorderBrush="#365063"
-                                BorderThickness="1"
-                                CornerRadius="8">
-                          <TextBlock TextWrapping="Wrap"
-                                     Foreground="#D8EEF3"
-                                     Text="{Binding}" />
-                        </Border>
-                      </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                  </ItemsControl>
+                  <StackPanel x:Name="PART_ProofConfigurationSection"
+                              Spacing="8">
+                    <TextBlock FontSize="12"
+                               FontWeight="Bold"
+                               Foreground="#7FE7D7"
+                               Text="当前配置" />
+                    <ItemsControl ItemsSource="{Binding CurrentConfigurationLines}">
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                          <Border Margin="0,0,0,8"
+                                  Padding="12"
+                                  Background="#14202B"
+                                  BorderBrush="#365063"
+                                  BorderThickness="1"
+                                  CornerRadius="8">
+                            <TextBlock TextWrapping="Wrap"
+                                       Foreground="#D8EEF3"
+                                       Text="{Binding}" />
+                          </Border>
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                  </StackPanel>
+
+                  <StackPanel x:Name="PART_ProofOwnershipSection"
+                              Spacing="8">
+                    <TextBlock FontSize="12"
+                               FontWeight="Bold"
+                               Foreground="#7FE7D7"
+                               Text="证明要点" />
+                    <ItemsControl ItemsSource="{Binding OwnershipProofLines}">
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                          <Border Margin="0,0,0,8"
+                                  Padding="12"
+                                  Background="#14202B"
+                                  BorderBrush="#365063"
+                                  BorderThickness="1"
+                                  CornerRadius="8">
+                            <TextBlock TextWrapping="Wrap"
+                                       Foreground="#D8EEF3"
+                                       Text="{Binding}" />
+                          </Border>
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                  </StackPanel>
+
+                  <StackPanel x:Name="PART_ProofRuntimeSignalsSection"
+                              Spacing="8">
+                    <TextBlock FontSize="12"
+                               FontWeight="Bold"
+                               Foreground="#7FE7D7"
+                               Text="实时信号" />
+                    <ItemsControl ItemsSource="{Binding RuntimeSignalLines}">
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                          <Border Margin="0,0,0,8"
+                                  Padding="12"
+                                  Background="#14202B"
+                                  BorderBrush="#365063"
+                                  BorderThickness="1"
+                                  CornerRadius="8">
+                            <TextBlock TextWrapping="Wrap"
+                                       Foreground="#D8EEF3"
+                                       Text="{Binding}" />
+                          </Border>
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                  </StackPanel>
                 </StackPanel>
               </StackPanel>
             </ScrollViewer>
@@ -376,10 +457,11 @@
                            FontWeight="Bold"
                            Foreground="#7FE7D7"
                            Text="宿主级展示台" />
-                <TextBlock FontSize="22"
+                <TextBlock x:Name="PART_GraphIntroTitleText"
+                           FontSize="22"
                            FontWeight="SemiBold"
                            Foreground="#F4FFFC"
-                           Text="实时节点图" />
+                           Text="{Binding LiveSessionTitle}" />
                 <TextBlock TextWrapping="Wrap"
                            Foreground="#C2D7E4"
                            Text="{Binding MainEditorSummary}" />
@@ -393,19 +475,32 @@
                         BorderBrush="#365063"
                         BorderThickness="1"
                         CornerRadius="999">
-                  <TextBlock Foreground="#F4FFFC"
+                  <TextBlock x:Name="PART_HostOwnershipBadgeText"
+                             Foreground="#F4FFFC"
                              FontSize="12"
                              FontWeight="SemiBold"
-                             Text="宿主菜单" />
+                             Text="{Binding HostOwnershipBadgeText}" />
                 </Border>
                 <Border Padding="10,6"
                         Background="#101923"
                         BorderBrush="#365063"
                         BorderThickness="1"
                         CornerRadius="999">
-                  <TextBlock Foreground="#B6CBD8"
+                  <TextBlock x:Name="PART_RuntimeOwnershipBadgeText"
+                             Foreground="#B6CBD8"
                              FontSize="12"
-                             Text="单一实时会话" />
+                             Text="{Binding RuntimeOwnershipBadgeText}" />
+                </Border>
+                <Border Padding="10,6"
+                        Background="#101923"
+                        BorderBrush="#365063"
+                        BorderThickness="1"
+                        CornerRadius="999">
+                  <TextBlock x:Name="PART_ActiveHostGroupBadgeText"
+                             Foreground="#7FE7D7"
+                             FontSize="12"
+                             FontWeight="SemiBold"
+                             Text="{Binding ActiveHostGroupBadgeText}" />
                 </Border>
               </StackPanel>
             </Grid>

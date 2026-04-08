@@ -73,4 +73,32 @@ public sealed class GraphEditorDemoShellTests
         Assert.False(string.IsNullOrWhiteSpace(paneState));
         Assert.Contains("会话", sessionCaption);
     }
+
+    [Fact]
+    public void MainWindowViewModel_ExposesPhase21ProofCueProperties()
+    {
+        var viewModel = new MainWindowViewModel();
+
+        Assert.Equal(
+            "宿主控制抽屉",
+            Assert.IsType<string>(viewModel.GetType().GetProperty("HostDrawerCaption")?.GetValue(viewModel)));
+        Assert.Equal(
+            "实时 SDK 会话",
+            Assert.IsType<string>(viewModel.GetType().GetProperty("LiveSessionTitle")?.GetValue(viewModel)));
+        Assert.Equal(
+            "宿主控制",
+            Assert.IsType<string>(viewModel.GetType().GetProperty("HostOwnershipBadgeText")?.GetValue(viewModel)));
+        Assert.Equal(
+            "共享运行时",
+            Assert.IsType<string>(viewModel.GetType().GetProperty("RuntimeOwnershipBadgeText")?.GetValue(viewModel)));
+        Assert.Equal(
+            "当前分组 · 展示",
+            Assert.IsType<string>(viewModel.GetType().GetProperty("ActiveHostGroupBadgeText")?.GetValue(viewModel)));
+
+        viewModel.OpenHostMenuGroup("证明");
+
+        Assert.Equal(
+            "当前分组 · 证明",
+            Assert.IsType<string>(viewModel.GetType().GetProperty("ActiveHostGroupBadgeText")?.GetValue(viewModel)));
+    }
 }

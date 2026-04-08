@@ -59,6 +59,20 @@ public sealed class DemoDiagnosticsProjectionTests
         Assert.NotEqual(viewModel.CompatibilityStatusMessage, viewModel.RecentDiagnostics[0].Operation);
     }
 
+    [Fact]
+    public void MainWindowViewModel_RuntimeSignalLinesStayAlignedWithInspectionSnapshot()
+    {
+        var viewModel = new MainWindowViewModel();
+        var inspection = viewModel.Editor.Session.Diagnostics.CaptureInspectionSnapshot();
+        var runtimeSignalLines = Assert.IsAssignableFrom<IReadOnlyList<string>>(
+            viewModel.GetType().GetProperty("RuntimeSignalLines")?.GetValue(viewModel));
+
+        Assert.Contains(runtimeSignalLines, line => line == $"文档标题：{inspection.Document.Title}");
+        Assert.Contains(runtimeSignalLines, line => line == $"节点数量：{inspection.Document.Nodes.Count}");
+        Assert.Contains(runtimeSignalLines, line => line == $"连线数量：{inspection.Document.Connections.Count}");
+        Assert.Contains(runtimeSignalLines, line => line == $"当前选择：{inspection.Selection.SelectedNodeIds.Count}");
+    }
+
     [AvaloniaFact]
     public void MainWindow_RendersRuntimeDiagnosticsHelperFromCanonicalPath()
     {

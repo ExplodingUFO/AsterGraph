@@ -19,8 +19,8 @@
 
 ### In-Context Proof
 
-- [ ] **PROOF-01**: User can tell which showcase adjustments are host-owned seams versus shared editor/runtime state through compact in-context cues rather than long static explanation cards
-- [ ] **PROOF-02**: User can inspect the current live showcase configuration and key runtime signals without depending on a diagnostics-heavy side layout or external documentation
+- [x] **PROOF-01**: User can tell which showcase adjustments are host-owned seams versus shared editor/runtime state through compact in-context cues rather than long static explanation cards
+- [x] **PROOF-02**: User can inspect the current live showcase configuration and key runtime signals without depending on a diagnostics-heavy side layout or external documentation
 
 ## Future Requirements
 
@@ -52,8 +52,8 @@
 | CTRL-01 | Phase 20 | Complete |
 | CTRL-02 | Phase 20 | Complete |
 | CTRL-03 | Phase 20 | Complete |
-| PROOF-01 | Phase 21 | Pending |
-| PROOF-02 | Phase 21 | Pending |
+| PROOF-01 | Phase 21 | Complete |
+| PROOF-02 | Phase 21 | Complete |
 
 **Coverage:**
 - milestone requirements: 7 total
@@ -62,4 +62,4 @@
 
 ---
 *Requirements defined: 2026-04-08*
-*Last updated: 2026-04-08 after completing Phase 20 host menu control consolidation*
+*Last updated: 2026-04-08 after completing Phase 21 in-context proof and narrative polish*

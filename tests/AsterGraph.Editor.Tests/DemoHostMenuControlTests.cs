@@ -39,6 +39,34 @@ public sealed class DemoHostMenuControlTests
     }
 
     [Fact]
+    public void MainWindowViewModel_ExposesDedicatedPhase21ConfigurationAndRuntimeSignalRows()
+    {
+        var viewModel = new MainWindowViewModel();
+
+        viewModel.OpenHostMenuGroup("证明");
+
+        var currentConfigurationLines = Assert.IsAssignableFrom<IReadOnlyList<string>>(
+            viewModel.GetType().GetProperty("CurrentConfigurationLines")?.GetValue(viewModel));
+        var ownershipProofLines = Assert.IsAssignableFrom<IReadOnlyList<string>>(
+            viewModel.GetType().GetProperty("OwnershipProofLines")?.GetValue(viewModel));
+
+        Assert.Contains(currentConfigurationLines, line => line.StartsWith("显示顶栏：", StringComparison.Ordinal));
+        Assert.Contains(currentConfigurationLines, line => line.StartsWith("只读模式：", StringComparison.Ordinal));
+        Assert.Contains(currentConfigurationLines, line => line.StartsWith("当前分组：", StringComparison.Ordinal));
+        Assert.Contains(ownershipProofLines, line => line.Contains("Editor.Session", StringComparison.Ordinal));
+
+        viewModel.OpenHostMenuGroup("运行时");
+
+        var runtimeSignalLines = Assert.IsAssignableFrom<IReadOnlyList<string>>(
+            viewModel.GetType().GetProperty("RuntimeSignalLines")?.GetValue(viewModel));
+
+        Assert.Contains(runtimeSignalLines, line => line.StartsWith("文档标题：", StringComparison.Ordinal));
+        Assert.Contains(runtimeSignalLines, line => line.StartsWith("节点数量：", StringComparison.Ordinal));
+        Assert.Contains(runtimeSignalLines, line => line.StartsWith("连线数量：", StringComparison.Ordinal));
+        Assert.Contains(runtimeSignalLines, line => line.StartsWith("当前状态：", StringComparison.Ordinal));
+    }
+
+    [Fact]
     public void MainWindowViewModel_BehaviorTogglesStillDriveEditorBehaviorAndPermissions()
     {
         var viewModel = new MainWindowViewModel();
