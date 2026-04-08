@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: kernel-extraction-capability-contracts-and-plugin-readiness
-status: Ready To Plan Phase 17
-stopped_at: Phase 16 completed; Phase 17 planning is next
-last_updated: "2026-04-08T05:22:45Z"
+status: Planning Phase 17
+stopped_at: Phase 17 planning completed; execute 17-01 next
+last_updated: "2026-04-08T05:34:04Z"
 progress:
   total_phases: 6
   completed_phases: 4
-  total_plans: 12
+  total_plans: 15
   completed_plans: 12
 ---
 
@@ -24,9 +24,9 @@ See: `.planning/PROJECT.md` (updated 2026-04-04)
 ## Current Position
 
 Phase: 17. Compatibility Lock And Migration Proof
-Plan: Not started
-Status: Ready To Plan Phase 17
-Last activity: 2026-04-08 — Completed 16-03 proof/sample/docs lock-up and closed Phase 16
+Plan: 17-01, 17-02, and 17-03 planned
+Status: Planning Phase 17
+Last activity: 2026-04-08 — Created Phase 17 context, research, and execution plans
 
 ## Accumulated Context
 
@@ -59,6 +59,7 @@ New milestone decisions:
 - Keep full-shell platform seam ownership on `GraphEditorView`, while allowing supported standalone `NodeCanvas` composition to attach the same Avalonia seams through a shared binder.
 - Treat inspector/minimap/node-visual presenter contracts as compatibility-oriented seams for now; Phase 16 narrows their surrounding platform wiring without redesigning those contracts.
 - Keep the new `PHASE16_*` HostSample and PackageSmoke markers as the proof baseline for Avalonia adapter-boundary behavior until Phase 17 extends migration coverage further.
+- Prefer explicit canonical-vs-compatibility signaling through focused tests, sample/smoke markers, and API remarks before any harder deprecation posture is considered.
 
 ### Pending Todos
 
@@ -71,6 +72,7 @@ None captured yet.
 - Known transaction-history test failures remain present even on the pre-15-02 baseline; they should not be misclassified as Phase 15 regressions when Phase 16 starts.
 - `GraphEditorView.axaml.cs` and `NodeCanvas.axaml.cs` remain the main Avalonia coordination hotspots and should be changed with proof coverage, not opportunistically.
 - The next leverage point is migration proof: Phase 17 needs to keep the retained `GraphEditorViewModel` / `GraphEditorView` path behaviorally aligned while the kernel-first/runtime-descriptor path becomes the clearer canonical route.
+- The main planning risk for Phase 17 is overreaching into removal/deprecation work instead of first locking parity and migration guidance.
 
 ### Quick Tasks Completed
 
@@ -81,5 +83,5 @@ None captured yet.
 ## Session Continuity
 
 Last session: 2026-04-08
-Stopped at: Phase 16 completed; Phase 17 planning is next
-Resume file: .planning/ROADMAP.md
+Stopped at: Phase 17 planning completed; execute 17-01 next
+Resume file: .planning/phases/17-compatibility-lock-and-migration-proof/17-01-PLAN.md
