@@ -80,7 +80,6 @@ None captured yet.
 - `GraphEditorView.axaml.cs` and `NodeCanvas.axaml.cs` remain the main Avalonia coordination hotspots and should be changed with proof coverage, not opportunistically.
 - Phase 17 closed with migration proof, but the next phase should avoid reopening compatibility-route churn unless it is required by plugin/automation readiness evidence.
 - The known `STATE_HISTORY_OK` mismatch in `tools/AsterGraph.PackageSmoke` is still a pre-existing baseline item, not a Phase 17 regression.
-- Current runtime feature descriptors likely under-report some optional services/providers relative to `AsterGraphEditorOptions`; Phase 18 should close that gap explicitly instead of relying on docs alone.
 - The known `STATE_HISTORY_OK` mismatch remains a baseline issue even after Phase 18; it did not block readiness proof, but it also was not resolved by this milestone.
 - No current blocker remains for closing the milestone.
 
