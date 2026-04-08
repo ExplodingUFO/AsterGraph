@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: Plugin Loading and Automation Execution
-status: Phase 22 Complete
-stopped_at: Phase 22 complete; next step is to plan and execute runtime plugin integration and inspection
-last_updated: "2026-04-08T09:22:31.7476255Z"
+status: Phase 23 Planned
+stopped_at: Phase 23 planned; next step is to execute runtime plugin integration and inspection
+last_updated: "2026-04-08T09:50:17.8918241Z"
 last_activity: 2026-04-08
 progress:
   total_phases: 4
@@ -20,14 +20,14 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-04-08)
 
 **Core value:** Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
-**Current focus:** Phase 23 runtime plugin integration and inspection planning
+**Current focus:** Phase 23 runtime plugin integration and inspection execution
 
 ## Current Position
 
-Phase: 22
-Plan: Complete
-Status: Phase 22 Complete
-Last activity: 2026-04-08 — Completed Phase 22 plugin composition contracts
+Phase: 23
+Plan: Planning Complete
+Status: Phase 23 Planned
+Last activity: 2026-04-08 — Planned Phase 23 runtime plugin integration and inspection
 
 ## Accumulated Context
 
@@ -58,6 +58,9 @@ Carry-forward decisions from shipped milestones:
 - Use a custom `AssemblyLoadContext` plus `AssemblyDependencyResolver` for assembly-path plugins while keeping shared `AsterGraph.*` runtime contracts in the default load context.
 - Keep Phase 22 limited to public plugin composition/loading contracts and loader discoverability; actual plugin-contributed seam integration remains Phase 23.
 - Keep plugin-load failures recoverable and descriptor-first through canonical session diagnostics instead of factory-thrown ordinary host failures.
+- Keep Phase 23 focused on live integration of the explicit Phase 22 plugin contribution contracts plus canonical plugin inspection, rather than widening into arbitrary plugin-owned service injection.
+- Keep plugin inspection readable through canonical query/inspection DTOs, with diagnostics history as supporting evidence rather than the only source of truth.
+- Keep host-supplied context-menu, localization, and node-presentation seams as the final override layer when plugin contributions are composed.
 
 ### Pending Todos
 
@@ -68,8 +71,8 @@ None captured yet.
 - No active blocker in the main workspace.
 - The known `STATE_HISTORY_OK` mismatch remains a pre-existing baseline issue if the next milestone touches history/save semantics.
 - The next milestone should avoid reopening kernel/facade ownership drift unless new evidence requires it.
-- Phase 23 must compose loaded plugin contributions into the canonical runtime without bypassing the factory/options path that Phase 22 established.
-- Plugin inspection should build on canonical session diagnostics and descriptors rather than ad-hoc loader introspection.
+- Phase 23 execution still needs to prove menu integration, composed catalogs/providers, and parity between runtime and retained routes without reopening loader design.
+- Plugin inspection should build on canonical session queries, inspection snapshots, diagnostics, and descriptors rather than ad-hoc loader introspection.
 - The first automation baseline should stay command/query/batch driven rather than expand into a full scripting language or workflow-designer product.
 - Proof work must stay aligned across focused tests, `HostSample`, `PackageSmoke`, and `ScaleSmoke` so extension claims remain machine-checkable.
 
@@ -82,5 +85,5 @@ None captured yet.
 ## Session Continuity
 
 Last session: 2026-04-08
-Stopped at: Phase 22 complete; next step is to plan and execute runtime plugin integration and inspection
-Resume file: .planning/ROADMAP.md
+Stopped at: Phase 23 planned; next step is to execute runtime plugin integration and inspection
+Resume file: .planning/phases/23-runtime-plugin-integration-and-inspection/23-01-PLAN.md

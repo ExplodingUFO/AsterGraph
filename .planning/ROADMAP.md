@@ -79,4 +79,4 @@ This milestone turns the deferred `PLUG-01` and `AUTO-01` style follow-on work i
 
 ## Next Action
 
-**Phase 22** is complete. The next workflow step is to plan and execute **Phase 23: Runtime Plugin Integration And Inspection**.
+**Phase 23** is now planned. The next workflow step is to execute **Phase 23: Runtime Plugin Integration And Inspection**.
