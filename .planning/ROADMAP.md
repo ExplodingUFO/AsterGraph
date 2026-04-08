@@ -79,4 +79,4 @@ This milestone turns the deferred `PLUG-01` and `AUTO-01` style follow-on work i
 
 ## Next Action
 
-**Phase 24** is complete. The next workflow step is to plan **Phase 25: Plugin And Automation Proof Ring**.
+**Phase 25** is planned. The next workflow step is to execute **Phase 25: Plugin And Automation Proof Ring**.
