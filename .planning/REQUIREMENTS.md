@@ -14,8 +14,8 @@
 
 ### Automation Execution
 
-- [ ] **AUTO-01**: Host can execute automation or macro steps against canonical command IDs, query snapshots, and batched mutation paths without depending on `GraphEditorViewModel` methods
-- [ ] **AUTO-02**: Host can observe automation progress, failures, and results through typed runtime diagnostics/events suitable for non-Avalonia or headless consumers
+- [x] **AUTO-01**: Host can execute automation or macro steps against canonical command IDs, query snapshots, and batched mutation paths without depending on `GraphEditorViewModel` methods
+- [x] **AUTO-02**: Host can observe automation progress, failures, and results through typed runtime diagnostics/events suitable for non-Avalonia or headless consumers
 
 ### Proof And Samples
 
@@ -52,8 +52,8 @@
 | PLUG-01 | Phase 22 | Complete |
 | PLUG-02 | Phase 23 | Complete |
 | PLUG-03 | Phase 23 | Complete |
-| AUTO-01 | Phase 24 | Planned |
-| AUTO-02 | Phase 24 | Planned |
+| AUTO-01 | Phase 24 | Complete |
+| AUTO-02 | Phase 24 | Complete |
 | PROOF-01 | Phase 25 | Planned |
 | PROOF-02 | Phase 25 | Planned |
 

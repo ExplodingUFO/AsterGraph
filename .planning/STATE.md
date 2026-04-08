@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: Plugin Loading and Automation Execution
-status: Phase 24 Planned
-stopped_at: Phase 24 planned; next step is to execute automation execution runner
-last_updated: "2026-04-08T10:29:06.4554491Z"
+status: Phase 24 Complete
+stopped_at: Phase 24 complete; next step is to plan plugin and automation proof ring
+last_updated: "2026-04-08T10:55:43.3035672Z"
 last_activity: 2026-04-08
 progress:
   total_phases: 4
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 12
-  completed_plans: 6
+  completed_plans: 9
 ---
 
 # Project State
@@ -20,14 +20,14 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-04-08)
 
 **Core value:** Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
-**Current focus:** Phase 24 automation execution runner execution
+**Current focus:** Phase 25 plugin and automation proof ring planning
 
 ## Current Position
 
 Phase: 24
-Plan: Planning Complete
-Status: Phase 24 Planned
-Last activity: 2026-04-08 — Planned Phase 24 automation execution runner
+Plan: Execution Complete
+Status: Phase 24 Complete
+Last activity: 2026-04-08 — Completed Phase 24 automation execution runner
 
 ## Accumulated Context
 
@@ -65,6 +65,8 @@ Carry-forward decisions from shipped milestones:
 - Keep plugin node definitions, menu augmentation, localization, and presentation composed through one factory/session path rather than retained-only compatibility hooks.
 - Keep the first automation baseline rooted in `IGraphEditorSession`, stable command IDs, query snapshots, and mutation batching rather than `GraphEditorViewModel` methods.
 - Keep automation progress/failure visibility on typed runtime events plus machine-readable diagnostics instead of status-text scraping or UI-bound progress surfaces.
+- Keep the first automation runner synchronous, in-process, and descriptor-first rather than expanding into a workflow engine or script host in the same phase.
+- Reuse the existing mutation scope as the automation batching primitive instead of introducing a parallel transaction model.
 
 ### Pending Todos
 
@@ -74,10 +76,9 @@ None captured yet.
 
 - No active blocker in the main workspace.
 - The known `STATE_HISTORY_OK` mismatch remains a pre-existing baseline issue if the next milestone touches history/save semantics.
+- `GraphEditorTransactionTests.GraphEditorViewModel_HistoryInteraction_PreservesUndoAndDirtySemantics` and `GraphEditorViewModel_SaveBoundary_PreservesUndoRedoDirtySemantics` still fail on the detached clean `d7939a5` baseline; they remain a carry-forward proof concern rather than a Phase 24 regression.
 - The next milestone should avoid reopening kernel/facade ownership drift unless new evidence requires it.
 - The first automation baseline should stay command/query/batch driven rather than expand into a full scripting language or workflow-designer product.
-- Phase 24 execution still needs to widen generic command coverage enough for credible scripted session workflows without turning the runner into a second command language.
-- Automation telemetry should stay additive to the existing command/diagnostic streams; changing generic batching semantics would be a regression.
 - Proof work must stay aligned across focused tests, `HostSample`, `PackageSmoke`, and `ScaleSmoke` so extension claims remain machine-checkable.
 
 ### Quick Tasks Completed
@@ -89,5 +90,5 @@ None captured yet.
 ## Session Continuity
 
 Last session: 2026-04-08
-Stopped at: Phase 24 planned; next step is to execute automation execution runner
-Resume file: .planning/phases/24-automation-execution-runner/24-01-PLAN.md
+Stopped at: Phase 24 complete; next step is to plan plugin and automation proof ring
+Resume file: .planning/phases/24-automation-execution-runner/24-VERIFICATION.md

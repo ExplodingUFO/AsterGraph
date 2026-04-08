@@ -1,3 +1,4 @@
+using AsterGraph.Editor.Automation;
 using AsterGraph.Editor.Diagnostics;
 
 namespace AsterGraph.Editor.Runtime;
@@ -7,6 +8,11 @@ namespace AsterGraph.Editor.Runtime;
 /// </summary>
 public interface IGraphEditorSession
 {
+    /// <summary>
+    /// 获取自动化执行入口。
+    /// </summary>
+    IGraphEditorAutomationRunner Automation { get; }
+
     /// <summary>
     /// 获取命令与变更入口。
     /// </summary>

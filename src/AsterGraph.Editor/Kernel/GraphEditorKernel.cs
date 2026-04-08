@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using AsterGraph.Abstractions.Catalog;
 using AsterGraph.Abstractions.Compatibility;
 using AsterGraph.Abstractions.Definitions;
@@ -635,11 +637,20 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost
                 "nodes.add",
                 _behaviorOptions.Commands.Nodes.AllowCreate),
             new GraphEditorCommandDescriptorSnapshot(
+                "selection.set",
+                true),
+            new GraphEditorCommandDescriptorSnapshot(
                 "selection.delete",
                 _selectedNodeIds.Count > 0 && _behaviorOptions.Commands.Nodes.AllowDelete),
             new GraphEditorCommandDescriptorSnapshot(
+                "nodes.move",
+                _behaviorOptions.Commands.Nodes.AllowMove),
+            new GraphEditorCommandDescriptorSnapshot(
                 "connections.start",
                 _behaviorOptions.Commands.Connections.AllowCreate),
+            new GraphEditorCommandDescriptorSnapshot(
+                "connections.complete",
+                _pendingConnection.HasPendingConnection && _behaviorOptions.Commands.Connections.AllowCreate),
             new GraphEditorCommandDescriptorSnapshot(
                 "connections.connect",
                 _behaviorOptions.Commands.Connections.AllowCreate),
@@ -656,10 +667,19 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost
                 "viewport.fit",
                 _document.Nodes.Count > 0 && _viewportWidth > 0 && _viewportHeight > 0),
             new GraphEditorCommandDescriptorSnapshot(
+                "viewport.pan",
+                true),
+            new GraphEditorCommandDescriptorSnapshot(
+                "viewport.resize",
+                true),
+            new GraphEditorCommandDescriptorSnapshot(
                 "viewport.reset",
                 true),
             new GraphEditorCommandDescriptorSnapshot(
                 "viewport.center-node",
+                _viewportWidth > 0 && _viewportHeight > 0),
+            new GraphEditorCommandDescriptorSnapshot(
+                "viewport.center",
                 _viewportWidth > 0 && _viewportHeight > 0),
             new GraphEditorCommandDescriptorSnapshot(
                 "workspace.save",
@@ -682,7 +702,7 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost
         switch (command.CommandId)
         {
             case "nodes.add":
-                if (!command.TryGetArgument("definitionId", out var definitionValue))
+                if (!TryGetRequiredArgument(command, "definitionId", out var definitionValue))
                 {
                     return false;
                 }
@@ -691,8 +711,8 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost
                 GraphPoint? worldPosition = null;
                 if (command.TryGetArgument("worldX", out var worldX)
                     && command.TryGetArgument("worldY", out var worldY)
-                    && double.TryParse(worldX, out var parsedX)
-                    && double.TryParse(worldY, out var parsedY))
+                    && double.TryParse(worldX, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsedX)
+                    && double.TryParse(worldY, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsedY))
                 {
                     worldPosition = new GraphPoint(parsedX, parsedY);
                 }
@@ -700,13 +720,46 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost
                 AddNode(definitionId, worldPosition);
                 return true;
 
+            case "selection.set":
+                var nodeIds = command.GetArguments("nodeId")
+                    .Where(value => !string.IsNullOrWhiteSpace(value))
+                    .ToList();
+                if (nodeIds.Count == 0)
+                {
+                    return false;
+                }
+
+                command.TryGetArgument("primaryNodeId", out var primaryNodeId);
+                var updateSelectionStatus = !command.TryGetArgument("updateStatus", out var selectionUpdateStatusValue)
+                    || !bool.TryParse(selectionUpdateStatusValue, out var parsedSelectionUpdateStatus)
+                    || parsedSelectionUpdateStatus;
+
+                SetSelection(nodeIds, primaryNodeId, updateSelectionStatus);
+                return true;
+
             case "selection.delete":
                 DeleteSelection();
                 return true;
 
+            case "nodes.move":
+                var positions = command.GetArguments("position")
+                    .Select(ParseNodePosition)
+                    .ToList();
+                if (positions.Count == 0 || positions.Any(position => position is null))
+                {
+                    return false;
+                }
+
+                var updateMoveStatus = !command.TryGetArgument("updateStatus", out var moveUpdateStatusValue)
+                    || !bool.TryParse(moveUpdateStatusValue, out var parsedMoveUpdateStatus)
+                    || parsedMoveUpdateStatus;
+
+                SetNodePositions(positions.Select(position => position!).ToList(), updateMoveStatus);
+                return true;
+
             case "connections.start":
-                if (!command.TryGetArgument("sourceNodeId", out var sourceNodeId)
-                    || !command.TryGetArgument("sourcePortId", out var sourcePortId))
+                if (!TryGetRequiredArgument(command, "sourceNodeId", out var sourceNodeId)
+                    || !TryGetRequiredArgument(command, "sourcePortId", out var sourcePortId))
                 {
                     return false;
                 }
@@ -714,11 +767,21 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost
                 StartConnection(sourceNodeId, sourcePortId);
                 return true;
 
+            case "connections.complete":
+                if (!TryGetRequiredArgument(command, "targetNodeId", out var completeTargetNodeId)
+                    || !TryGetRequiredArgument(command, "targetPortId", out var completeTargetPortId))
+                {
+                    return false;
+                }
+
+                CompleteConnection(completeTargetNodeId, completeTargetPortId);
+                return true;
+
             case "connections.connect":
-                if (!command.TryGetArgument("sourceNodeId", out var connectSourceNodeId)
-                    || !command.TryGetArgument("sourcePortId", out var connectSourcePortId)
-                    || !command.TryGetArgument("targetNodeId", out var targetNodeId)
-                    || !command.TryGetArgument("targetPortId", out var targetPortId))
+                if (!TryGetRequiredArgument(command, "sourceNodeId", out var connectSourceNodeId)
+                    || !TryGetRequiredArgument(command, "sourcePortId", out var connectSourcePortId)
+                    || !TryGetRequiredArgument(command, "targetNodeId", out var targetNodeId)
+                    || !TryGetRequiredArgument(command, "targetPortId", out var targetPortId))
                 {
                     return false;
                 }
@@ -732,7 +795,7 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost
                 return true;
 
             case "connections.delete":
-                if (!command.TryGetArgument("connectionId", out var connectionId))
+                if (!TryGetRequiredArgument(command, "connectionId", out var connectionId))
                 {
                     return false;
                 }
@@ -741,8 +804,8 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost
                 return true;
 
             case "connections.break-port":
-                if (!command.TryGetArgument("nodeId", out var nodeId)
-                    || !command.TryGetArgument("portId", out var portId))
+                if (!TryGetRequiredArgument(command, "nodeId", out var nodeId)
+                    || !TryGetRequiredArgument(command, "portId", out var portId))
                 {
                     return false;
                 }
@@ -754,17 +817,57 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost
                 FitToViewport(updateStatus: true);
                 return true;
 
+            case "viewport.pan":
+                if (!command.TryGetArgument("deltaX", out var deltaXValue)
+                    || !command.TryGetArgument("deltaY", out var deltaYValue)
+                    || !double.TryParse(deltaXValue, NumberStyles.Float, CultureInfo.InvariantCulture, out var deltaX)
+                    || !double.TryParse(deltaYValue, NumberStyles.Float, CultureInfo.InvariantCulture, out var deltaY))
+                {
+                    return false;
+                }
+
+                PanBy(deltaX, deltaY);
+                return true;
+
+            case "viewport.resize":
+                if (!command.TryGetArgument("width", out var widthValue)
+                    || !command.TryGetArgument("height", out var heightValue)
+                    || !double.TryParse(widthValue, NumberStyles.Float, CultureInfo.InvariantCulture, out var width)
+                    || !double.TryParse(heightValue, NumberStyles.Float, CultureInfo.InvariantCulture, out var height))
+                {
+                    return false;
+                }
+
+                UpdateViewportSize(width, height);
+                return true;
+
             case "viewport.reset":
                 ResetView(updateStatus: true);
                 return true;
 
             case "viewport.center-node":
-                if (!command.TryGetArgument("nodeId", out var centerNodeId))
+                if (!TryGetRequiredArgument(command, "nodeId", out var centerNodeId))
                 {
                     return false;
                 }
 
                 CenterViewOnNode(centerNodeId);
+                return true;
+
+            case "viewport.center":
+                if (!command.TryGetArgument("worldX", out var centerXValue)
+                    || !command.TryGetArgument("worldY", out var centerYValue)
+                    || !double.TryParse(centerXValue, NumberStyles.Float, CultureInfo.InvariantCulture, out var centerX)
+                    || !double.TryParse(centerYValue, NumberStyles.Float, CultureInfo.InvariantCulture, out var centerY))
+                {
+                    return false;
+                }
+
+                var updateCenterStatus = !command.TryGetArgument("updateStatus", out var centerUpdateStatusValue)
+                    || !bool.TryParse(centerUpdateStatusValue, out var parsedCenterUpdateStatus)
+                    || parsedCenterUpdateStatus;
+
+                CenterViewAt(new GraphPoint(centerX, centerY), updateCenterStatus);
                 return true;
 
             case "workspace.save":
@@ -799,6 +902,39 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost
                 target.Port.AccentHex,
                 target.Compatibility))
             .ToList();
+
+    private static NodePositionSnapshot? ParseNodePosition(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return null;
+        }
+
+        var parts = value.Split('|', StringSplitOptions.TrimEntries);
+        if (parts.Length != 3
+            || string.IsNullOrWhiteSpace(parts[0])
+            || !double.TryParse(parts[1], NumberStyles.Float, CultureInfo.InvariantCulture, out var x)
+            || !double.TryParse(parts[2], NumberStyles.Float, CultureInfo.InvariantCulture, out var y))
+        {
+            return null;
+        }
+
+        return new NodePositionSnapshot(parts[0], new GraphPoint(x, y));
+    }
+
+    private static bool TryGetRequiredArgument(
+        GraphEditorCommandInvocationSnapshot command,
+        string name,
+        [NotNullWhen(true)] out string? value)
+    {
+        if (!command.TryGetArgument(name, out value) || string.IsNullOrWhiteSpace(value))
+        {
+            value = null;
+            return false;
+        }
+
+        return true;
+    }
 
 #pragma warning disable CS0618
     public IReadOnlyList<CompatiblePortTarget> GetCompatibleTargets(string sourceNodeId, string sourcePortId)

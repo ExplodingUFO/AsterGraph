@@ -162,6 +162,7 @@ public interface IGraphEditorCommands
 
     /// <summary>
     /// 使用稳定命令标识和参数执行命令。
+    /// 该入口适用于宿主自动化、批处理和 descriptor-first 会话驱动。
     /// </summary>
     /// <param name="command">命令调用描述。</param>
     /// <returns>命令被识别并已分派时返回 <see langword="true"/>。</returns>

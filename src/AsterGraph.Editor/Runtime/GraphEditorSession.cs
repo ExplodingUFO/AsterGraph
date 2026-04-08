@@ -3,6 +3,7 @@ using System.Globalization;
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Core.Models;
+using AsterGraph.Editor.Automation;
 using AsterGraph.Editor.Diagnostics;
 using AsterGraph.Editor.Events;
 using AsterGraph.Editor.Menus;
@@ -15,7 +16,7 @@ namespace AsterGraph.Editor.Runtime;
 /// <summary>
 /// 默认的图编辑器运行时会话实现。
 /// </summary>
-public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorCommands, IGraphEditorQueries, IGraphEditorEvents, IGraphEditorDiagnostics
+public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorAutomationRunner, IGraphEditorCommands, IGraphEditorQueries, IGraphEditorEvents, IGraphEditorDiagnostics
 {
     private const int RecentDiagnosticsCapacity = 32;
     private readonly IGraphEditorSessionHost _host;
@@ -69,6 +70,9 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorComman
     }
 
     /// <inheritdoc />
+    public IGraphEditorAutomationRunner Automation => this;
+
+    /// <inheritdoc />
     public IGraphEditorCommands Commands => this;
 
     /// <inheritdoc />
@@ -97,6 +101,15 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorComman
     public event EventHandler<GraphEditorDocumentChangedEventArgs>? DocumentChanged;
 
     /// <inheritdoc />
+    public event EventHandler<GraphEditorAutomationStartedEventArgs>? AutomationStarted;
+
+    /// <inheritdoc />
+    public event EventHandler<GraphEditorAutomationProgressEventArgs>? AutomationProgress;
+
+    /// <inheritdoc />
+    public event EventHandler<GraphEditorAutomationCompletedEventArgs>? AutomationCompleted;
+
+    /// <inheritdoc />
     public event EventHandler<GraphEditorSelectionChangedEventArgs>? SelectionChanged;
 
     /// <inheritdoc />
@@ -116,6 +129,99 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorComman
 
     /// <inheritdoc />
     public event EventHandler<GraphEditorRecoverableFailureEventArgs>? RecoverableFailure;
+
+    /// <inheritdoc />
+    public GraphEditorAutomationExecutionSnapshot Execute(GraphEditorAutomationRunRequest request)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        var startedArgs = new GraphEditorAutomationStartedEventArgs(
+            request.RunId,
+            request.Steps.Count,
+            request.RunInMutationScope,
+            request.MutationLabel);
+
+        PublishDiagnostic(new GraphEditorDiagnostic(
+            "automation.run.started",
+            "automation.run",
+            $"Automation run '{request.RunId}' started with {request.Steps.Count} step(s).",
+            GraphEditorDiagnosticSeverity.Info));
+        AutomationStarted?.Invoke(this, startedArgs);
+
+        var stepResults = new List<GraphEditorAutomationStepExecutionSnapshot>(request.Steps.Count);
+        string? failureCode = null;
+        string? failureMessage = null;
+
+        IGraphEditorMutationScope? mutationScope = null;
+        try
+        {
+            if (request.RunInMutationScope)
+            {
+                mutationScope = BeginMutation(request.MutationLabel);
+            }
+
+            for (var stepIndex = 0; stepIndex < request.Steps.Count; stepIndex++)
+            {
+                var step = request.Steps[stepIndex];
+                var stepResult = ExecuteAutomationStep(step, stepIndex);
+                stepResults.Add(stepResult);
+
+                if (!stepResult.Succeeded)
+                {
+                    failureCode ??= stepResult.FailureCode;
+                    failureMessage ??= stepResult.FailureMessage;
+
+                    PublishDiagnostic(new GraphEditorDiagnostic(
+                        "automation.step.failed",
+                        "automation.run",
+                        stepResult.FailureMessage
+                            ?? $"Automation step '{step.StepId}' ({step.Command.CommandId}) failed.",
+                        GraphEditorDiagnosticSeverity.Error));
+                }
+
+                AutomationProgress?.Invoke(this, new GraphEditorAutomationProgressEventArgs(
+                    request.RunId,
+                    stepResults.Count,
+                    request.Steps.Count,
+                    request.RunInMutationScope,
+                    request.MutationLabel,
+                    stepResult));
+
+                if (!stepResult.Succeeded && request.StopOnFailure)
+                {
+                    break;
+                }
+            }
+        }
+        finally
+        {
+            mutationScope?.Dispose();
+        }
+
+        var succeeded = failureCode is null;
+        PublishDiagnostic(new GraphEditorDiagnostic(
+            "automation.run.completed",
+            "automation.run",
+            succeeded
+                ? $"Automation run '{request.RunId}' completed successfully ({stepResults.Count}/{request.Steps.Count} steps)."
+                : $"Automation run '{request.RunId}' completed with failure after {stepResults.Count}/{request.Steps.Count} steps: {failureMessage ?? failureCode ?? "Unknown failure."}",
+            succeeded ? GraphEditorDiagnosticSeverity.Info : GraphEditorDiagnosticSeverity.Warning));
+
+        var result = new GraphEditorAutomationExecutionSnapshot(
+            request.RunId,
+            succeeded,
+            request.RunInMutationScope,
+            request.MutationLabel,
+            stepResults.Count,
+            request.Steps.Count,
+            stepResults,
+            CaptureInspectionSnapshot(),
+            failureCode,
+            failureMessage);
+
+        AutomationCompleted?.Invoke(this, new GraphEditorAutomationCompletedEventArgs(result));
+        return result;
+    }
 
     /// <inheritdoc />
     public void Undo()
@@ -287,9 +393,13 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorComman
                 new GraphEditorFeatureDescriptorSnapshot("capability.viewport.fit", "capability", capabilities.CanFitToViewport),
                 new GraphEditorFeatureDescriptorSnapshot("capability.viewport.center", "capability", capabilities.CanCenterViewport),
                 new GraphEditorFeatureDescriptorSnapshot("query.plugin-load-snapshots", "query", _descriptorSupport?.HasPluginLoader ?? false),
+                new GraphEditorFeatureDescriptorSnapshot("surface.automation.runner", "surface", true),
                 new GraphEditorFeatureDescriptorSnapshot("service.fragment-workspace", "service", _descriptorSupport?.HasFragmentWorkspaceService ?? false),
                 new GraphEditorFeatureDescriptorSnapshot("service.fragment-library", "service", _descriptorSupport?.HasFragmentLibraryService ?? false),
                 new GraphEditorFeatureDescriptorSnapshot("service.clipboard-payload-serializer", "service", _descriptorSupport?.HasClipboardPayloadSerializer ?? false),
+                new GraphEditorFeatureDescriptorSnapshot("event.automation.started", "event", true),
+                new GraphEditorFeatureDescriptorSnapshot("event.automation.progress", "event", true),
+                new GraphEditorFeatureDescriptorSnapshot("event.automation.completed", "event", true),
                 new GraphEditorFeatureDescriptorSnapshot("integration.diagnostics-sink", "integration", _diagnosticsSink is not null),
                 new GraphEditorFeatureDescriptorSnapshot("integration.plugin-loader", "integration", _descriptorSupport?.HasPluginLoader ?? false),
                 new GraphEditorFeatureDescriptorSnapshot("integration.context-menu-augmentor", "integration", (_descriptorSupport?.HasContextMenuAugmentor ?? false) || _pluginContextMenuAugmentors.Count > 0),
@@ -585,6 +695,59 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorComman
         PublishCommandExecuted(commandId);
         return result;
     }
+
+    private GraphEditorAutomationStepExecutionSnapshot ExecuteAutomationStep(GraphEditorAutomationStep step, int stepIndex)
+    {
+        var descriptors = GetCommandDescriptors()
+            .ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
+        if (!descriptors.TryGetValue(step.Command.CommandId, out var descriptor))
+        {
+            return CreateAutomationStepFailure(
+                step,
+                stepIndex,
+                "automation.step.command-unknown",
+                $"Automation command '{step.Command.CommandId}' is not discoverable in the current session.");
+        }
+
+        if (!descriptor.IsEnabled)
+        {
+            return CreateAutomationStepFailure(
+                step,
+                stepIndex,
+                "automation.step.command-disabled",
+                descriptor.DisabledReason
+                    ?? $"Automation command '{step.Command.CommandId}' is disabled in the current session.");
+        }
+
+        try
+        {
+            if (!Commands.TryExecuteCommand(step.Command))
+            {
+                return CreateAutomationStepFailure(
+                    step,
+                    stepIndex,
+                    "automation.step.dispatch-failed",
+                    $"Automation command '{step.Command.CommandId}' could not be executed.");
+            }
+        }
+        catch (Exception exception)
+        {
+            return CreateAutomationStepFailure(
+                step,
+                stepIndex,
+                "automation.step.exception",
+                $"Automation command '{step.Command.CommandId}' threw an exception: {exception.Message}");
+        }
+
+        return new GraphEditorAutomationStepExecutionSnapshot(stepIndex, step.StepId, step.Command.CommandId, true);
+    }
+
+    private static GraphEditorAutomationStepExecutionSnapshot CreateAutomationStepFailure(
+        GraphEditorAutomationStep step,
+        int stepIndex,
+        string failureCode,
+        string failureMessage)
+        => new(stepIndex, step.StepId, step.Command.CommandId, false, failureCode, failureMessage);
 
     private void PublishCommandExecuted(string commandId)
     {

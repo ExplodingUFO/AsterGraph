@@ -8,6 +8,7 @@ using AsterGraph.Avalonia.Controls;
 using AsterGraph.Avalonia.Hosting;
 using AsterGraph.Avalonia.Presentation;
 using AsterGraph.Core.Models;
+using AsterGraph.Editor.Automation;
 using AsterGraph.Editor.Catalog;
 using AsterGraph.Editor.Configuration;
 using AsterGraph.Editor.Diagnostics;
@@ -265,6 +266,33 @@ public sealed class GraphEditorProofRingTests
         Assert.All(runtimeDescriptors, descriptor => Assert.True(descriptor.IsAvailable));
     }
 
+    [Fact]
+    public void RuntimeAndRetainedProof_ExposeEquivalentAutomationExecutionSemantics()
+    {
+        var retainedEditor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
+        {
+            Document = CreateDocument(),
+            NodeCatalog = CreateCatalog(),
+            CompatibilityService = new ExactCompatibilityService(),
+        });
+        var runtimeSession = AsterGraphEditorFactory.CreateSession(new AsterGraphEditorOptions
+        {
+            Document = CreateDocument(),
+            NodeCatalog = CreateCatalog(),
+            CompatibilityService = new ExactCompatibilityService(),
+        });
+
+        var retainedEvidence = ExecuteAutomationProof(retainedEditor.Session, "proof-automation");
+        var runtimeEvidence = ExecuteAutomationProof(runtimeSession, "proof-automation");
+
+        AssertAutomationEvidence(retainedEvidence);
+        AssertAutomationEvidence(runtimeEvidence);
+        Assert.Equal(retainedEvidence.ProgressCommandIds, runtimeEvidence.ProgressCommandIds);
+        Assert.Equal(retainedEvidence.GenericCommandIds, runtimeEvidence.GenericCommandIds);
+        Assert.Equal(retainedEvidence.DiagnosticCodes, runtimeEvidence.DiagnosticCodes);
+        Assert.Equal(CaptureAutomationResultSignature(retainedEvidence.Result), CaptureAutomationResultSignature(runtimeEvidence.Result));
+    }
+
     [AvaloniaFact]
     public void MigrationProof_RouteSignalsMatchCanonicalAndCompatibilityStory()
     {
@@ -447,6 +475,89 @@ public sealed class GraphEditorProofRingTests
             .Where(descriptor => ReadinessFeatureIds.Contains(descriptor.Id, StringComparer.Ordinal))
             .OrderBy(descriptor => descriptor.Id, StringComparer.Ordinal)
             .ToList();
+
+    private static AutomationExecutionEvidence ExecuteAutomationProof(IGraphEditorSession session, string runId)
+    {
+        var progressCommandIds = new List<string>();
+        var genericCommandIds = new List<string>();
+        var startedCount = 0;
+        var completedCount = 0;
+
+        session.Events.AutomationStarted += (_, _) => startedCount++;
+        session.Events.AutomationProgress += (_, args) => progressCommandIds.Add(args.Step.CommandId);
+        session.Events.AutomationCompleted += (_, _) => completedCount++;
+        session.Events.CommandExecuted += (_, args) => genericCommandIds.Add(args.CommandId);
+
+        var result = session.Automation.Execute(CreateAutomationRunRequest(runId));
+        var diagnosticCodes = session.Diagnostics.GetRecentDiagnostics(16)
+            .Select(diagnostic => diagnostic.Code)
+            .Where(code => code.StartsWith("automation.", StringComparison.Ordinal))
+            .ToArray();
+
+        return new AutomationExecutionEvidence(
+            result,
+            progressCommandIds.ToArray(),
+            genericCommandIds.ToArray(),
+            diagnosticCodes,
+            startedCount,
+            completedCount);
+    }
+
+    private static void AssertAutomationEvidence(AutomationExecutionEvidence evidence)
+    {
+        Assert.Equal(1, evidence.StartedCount);
+        Assert.Equal(1, evidence.CompletedCount);
+        Assert.Equal(
+            ["selection.set", "nodes.move", "viewport.resize", "viewport.pan", "connections.start", "connections.complete"],
+            evidence.ProgressCommandIds);
+        Assert.Equal(evidence.ProgressCommandIds, evidence.GenericCommandIds);
+        Assert.Contains("automation.run.started", evidence.DiagnosticCodes);
+        Assert.Contains("automation.run.completed", evidence.DiagnosticCodes);
+        Assert.True(evidence.Result.Succeeded);
+        Assert.True(evidence.Result.UsedMutationScope);
+        Assert.Equal("proof-automation", evidence.Result.MutationLabel);
+        Assert.Equal(6, evidence.Result.ExecutedStepCount);
+        Assert.Equal(6, evidence.Result.TotalStepCount);
+        Assert.Single(evidence.Result.Inspection.Document.Connections);
+        Assert.Equal(SourceNodeId, evidence.Result.Inspection.Selection.PrimarySelectedNodeId);
+    }
+
+    private static AutomationResultSignature CaptureAutomationResultSignature(GraphEditorAutomationExecutionSnapshot result)
+        => new(
+            result.Succeeded,
+            result.UsedMutationScope,
+            result.MutationLabel,
+            result.ExecutedStepCount,
+            result.TotalStepCount,
+            string.Join("|", result.Steps.Select(step => $"{step.CommandId}:{step.Succeeded}:{step.FailureCode ?? string.Empty}")),
+            string.Join(
+                "|",
+                result.Inspection.NodePositions
+                    .OrderBy(position => position.NodeId, StringComparer.Ordinal)
+                    .Select(position => $"{position.NodeId}:{position.Position.X.ToString(System.Globalization.CultureInfo.InvariantCulture)}:{position.Position.Y.ToString(System.Globalization.CultureInfo.InvariantCulture)}")),
+            result.Inspection.Document.Connections.Count,
+            result.Inspection.Selection.PrimarySelectedNodeId,
+            result.Inspection.Viewport.ViewportWidth,
+            result.Inspection.Viewport.ViewportHeight);
+
+    private static GraphEditorAutomationRunRequest CreateAutomationRunRequest(string runId)
+        => new(
+            runId,
+            [
+                new GraphEditorAutomationStep("select-source", CreateAutomationCommand("selection.set", ("nodeId", SourceNodeId), ("primaryNodeId", SourceNodeId), ("updateStatus", "false"))),
+                new GraphEditorAutomationStep("move-source", CreateAutomationCommand("nodes.move", ("position", $"{SourceNodeId}|300|210"), ("updateStatus", "false"))),
+                new GraphEditorAutomationStep("resize", CreateAutomationCommand("viewport.resize", ("width", "1280"), ("height", "720"))),
+                new GraphEditorAutomationStep("pan", CreateAutomationCommand("viewport.pan", ("deltaX", "12"), ("deltaY", "18"))),
+                new GraphEditorAutomationStep("start-connection", CreateAutomationCommand("connections.start", ("sourceNodeId", SourceNodeId), ("sourcePortId", SourcePortId))),
+                new GraphEditorAutomationStep("complete-connection", CreateAutomationCommand("connections.complete", ("targetNodeId", TargetNodeId), ("targetPortId", TargetPortId))),
+            ]);
+
+    private static GraphEditorCommandInvocationSnapshot CreateAutomationCommand(
+        string commandId,
+        params (string Name, string Value)[] arguments)
+        => new(
+            commandId,
+            arguments.Select(argument => new GraphEditorCommandArgumentSnapshot(argument.Name, argument.Value)).ToList());
 
     private static MigrationViewRouteSnapshot CaptureMigrationViewRouteSnapshot(GraphEditorView view)
     {
@@ -732,6 +843,27 @@ public sealed class GraphEditorProofRingTests
         string CommandDescriptorSignature,
         string CanvasMenuSignature);
 
+    private sealed record AutomationExecutionEvidence(
+        GraphEditorAutomationExecutionSnapshot Result,
+        string[] ProgressCommandIds,
+        string[] GenericCommandIds,
+        string[] DiagnosticCodes,
+        int StartedCount,
+        int CompletedCount);
+
+    private sealed record AutomationResultSignature(
+        bool Succeeded,
+        bool UsedMutationScope,
+        string? MutationLabel,
+        int ExecutedStepCount,
+        int TotalStepCount,
+        string StepSignature,
+        string NodePositionSignature,
+        int ConnectionCount,
+        string? PrimarySelectedNodeId,
+        double ViewportWidth,
+        double ViewportHeight);
+
     private sealed record MigrationViewRouteSnapshot(
         GraphEditorViewChromeMode ChromeMode,
         bool EditorAssigned,
@@ -742,12 +874,18 @@ public sealed class GraphEditorProofRingTests
     private static readonly string[] SharedCanonicalCommandIds =
     [
         "nodes.add",
+        "selection.set",
         "selection.delete",
         "connections.start",
+        "connections.complete",
         "connections.connect",
         "connections.cancel",
         "connections.delete",
         "connections.break-port",
+        "nodes.move",
+        "viewport.pan",
+        "viewport.resize",
+        "viewport.center",
         "viewport.fit",
         "viewport.reset",
         "viewport.center-node",
@@ -757,6 +895,10 @@ public sealed class GraphEditorProofRingTests
 
     private static readonly string[] ReadinessFeatureIds =
     [
+        "surface.automation.runner",
+        "event.automation.started",
+        "event.automation.progress",
+        "event.automation.completed",
         "service.workspace",
         "service.fragment-workspace",
         "service.fragment-library",

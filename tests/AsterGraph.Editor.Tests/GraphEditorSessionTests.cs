@@ -38,6 +38,7 @@ public sealed class GraphEditorSessionTests
         AssertProperty(sessionType, nameof(IGraphEditorSession.Commands), typeof(IGraphEditorCommands));
         AssertProperty(sessionType, nameof(IGraphEditorSession.Queries), typeof(IGraphEditorQueries));
         AssertProperty(sessionType, nameof(IGraphEditorSession.Events), typeof(IGraphEditorEvents));
+        AssertProperty(sessionType, nameof(IGraphEditorSession.Automation), typeof(AsterGraph.Editor.Automation.IGraphEditorAutomationRunner));
     }
 
     [Fact]
@@ -248,6 +249,9 @@ public sealed class GraphEditorSessionTests
         Assert.True(eventsType.IsPublic);
         Assert.True(eventsType.IsInterface);
 
+        AssertEvent(eventsType, nameof(IGraphEditorEvents.AutomationStarted), typeof(GraphEditorAutomationStartedEventArgs));
+        AssertEvent(eventsType, nameof(IGraphEditorEvents.AutomationProgress), typeof(GraphEditorAutomationProgressEventArgs));
+        AssertEvent(eventsType, nameof(IGraphEditorEvents.AutomationCompleted), typeof(GraphEditorAutomationCompletedEventArgs));
         AssertEvent(eventsType, nameof(IGraphEditorEvents.DocumentChanged), typeof(GraphEditorDocumentChangedEventArgs));
         AssertEvent(eventsType, nameof(IGraphEditorEvents.SelectionChanged), typeof(GraphEditorSelectionChangedEventArgs));
         AssertEvent(eventsType, nameof(IGraphEditorEvents.ViewportChanged), typeof(GraphEditorViewportChangedEventArgs));
@@ -475,6 +479,10 @@ public sealed class GraphEditorSessionTests
 
         Assert.True(descriptors["capability.selection.set"].IsAvailable);
         Assert.True(descriptors["capability.nodes.move"].IsAvailable);
+        Assert.True(descriptors["surface.automation.runner"].IsAvailable);
+        Assert.True(descriptors["event.automation.started"].IsAvailable);
+        Assert.True(descriptors["event.automation.progress"].IsAvailable);
+        Assert.True(descriptors["event.automation.completed"].IsAvailable);
         Assert.True(descriptors["service.workspace"].IsAvailable);
         Assert.True(descriptors["service.diagnostics"].IsAvailable);
         Assert.True(descriptors["service.fragment-workspace"].IsAvailable);
@@ -688,12 +696,18 @@ public sealed class GraphEditorSessionTests
     private static readonly string[] SharedCanonicalCommandIds =
     [
         "nodes.add",
+        "selection.set",
         "selection.delete",
         "connections.start",
+        "connections.complete",
         "connections.connect",
         "connections.cancel",
         "connections.delete",
         "connections.break-port",
+        "nodes.move",
+        "viewport.pan",
+        "viewport.resize",
+        "viewport.center",
         "viewport.fit",
         "viewport.reset",
         "viewport.center-node",

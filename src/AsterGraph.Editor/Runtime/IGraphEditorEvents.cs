@@ -8,6 +8,21 @@ namespace AsterGraph.Editor.Runtime;
 public interface IGraphEditorEvents
 {
     /// <summary>
+    /// 自动化开始事件。
+    /// </summary>
+    event EventHandler<GraphEditorAutomationStartedEventArgs>? AutomationStarted;
+
+    /// <summary>
+    /// 自动化进度事件。
+    /// </summary>
+    event EventHandler<GraphEditorAutomationProgressEventArgs>? AutomationProgress;
+
+    /// <summary>
+    /// 自动化完成事件。
+    /// </summary>
+    event EventHandler<GraphEditorAutomationCompletedEventArgs>? AutomationCompleted;
+
+    /// <summary>
     /// 图文档变化事件。
     /// </summary>
     event EventHandler<GraphEditorDocumentChangedEventArgs>? DocumentChanged;

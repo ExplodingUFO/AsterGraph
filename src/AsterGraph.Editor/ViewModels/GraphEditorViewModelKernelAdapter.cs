@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Diagnostics;
@@ -188,7 +189,7 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
                 return true;
 
             case "nodes.inspect":
-                if (!command.TryGetArgument("nodeId", out var inspectNodeId))
+                if (!TryGetRequiredArgument(command, "nodeId", out var inspectNodeId))
                 {
                     return false;
                 }
@@ -197,7 +198,7 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
                 return true;
 
             case "nodes.delete-by-id":
-                if (!command.TryGetArgument("nodeId", out var deleteNodeId))
+                if (!TryGetRequiredArgument(command, "nodeId", out var deleteNodeId))
                 {
                     return false;
                 }
@@ -206,7 +207,7 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
                 return true;
 
             case "nodes.duplicate":
-                if (!command.TryGetArgument("nodeId", out var duplicateNodeId))
+                if (!TryGetRequiredArgument(command, "nodeId", out var duplicateNodeId))
                 {
                     return false;
                 }
@@ -215,7 +216,7 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
                 return true;
 
             case "connections.disconnect-incoming":
-                if (!command.TryGetArgument("nodeId", out var incomingNodeId))
+                if (!TryGetRequiredArgument(command, "nodeId", out var incomingNodeId))
                 {
                     return false;
                 }
@@ -224,7 +225,7 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
                 return true;
 
             case "connections.disconnect-outgoing":
-                if (!command.TryGetArgument("nodeId", out var outgoingNodeId))
+                if (!TryGetRequiredArgument(command, "nodeId", out var outgoingNodeId))
                 {
                     return false;
                 }
@@ -233,7 +234,7 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
                 return true;
 
             case "connections.disconnect-all":
-                if (!command.TryGetArgument("nodeId", out var disconnectNodeId))
+                if (!TryGetRequiredArgument(command, "nodeId", out var disconnectNodeId))
                 {
                     return false;
                 }
@@ -249,6 +250,20 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
     public IReadOnlyList<NodePositionSnapshot> GetNodePositions() => _kernel.GetNodePositions();
 
     public GraphEditorPendingConnectionSnapshot GetPendingConnectionSnapshot() => _kernel.GetPendingConnectionSnapshot();
+
+    private static bool TryGetRequiredArgument(
+        GraphEditorCommandInvocationSnapshot command,
+        string name,
+        [NotNullWhen(true)] out string? value)
+    {
+        if (!command.TryGetArgument(name, out value) || string.IsNullOrWhiteSpace(value))
+        {
+            value = null;
+            return false;
+        }
+
+        return true;
+    }
 
     public IReadOnlyList<GraphEditorCompatiblePortTargetSnapshot> GetCompatiblePortTargets(string sourceNodeId, string sourcePortId)
         => _kernel.GetCompatiblePortTargets(sourceNodeId, sourcePortId);
