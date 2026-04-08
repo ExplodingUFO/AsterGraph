@@ -2,7 +2,9 @@ using AsterGraph.Abstractions.Styling;
 using AsterGraph.Editor.Diagnostics;
 using AsterGraph.Editor.Configuration;
 using AsterGraph.Editor.Kernel;
+using AsterGraph.Editor.Localization;
 using AsterGraph.Editor.Plugins.Internal;
+using AsterGraph.Editor.Presentation;
 using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.Services;
 using AsterGraph.Editor.ViewModels;
@@ -37,7 +39,7 @@ public static class AsterGraphEditorFactory
 
         var editor = new GraphEditorViewModel(
             resolved.Options.Document!,
-            resolved.Options.NodeCatalog!,
+            resolved.NodeCatalog,
             resolved.Options.CompatibilityService!,
             resolved.WorkspaceService,
             resolved.FragmentWorkspaceService,
@@ -45,14 +47,16 @@ public static class AsterGraphEditorFactory
             resolved.BehaviorOptions,
             resolved.FragmentLibraryService,
             resolved.Options.ContextMenuAugmentor,
-            resolved.Options.NodePresentationProvider,
-            resolved.Options.LocalizationProvider,
+            resolved.NodePresentationProvider,
+            resolved.LocalizationProvider,
             resolved.ClipboardPayloadSerializer,
             resolved.Options.DiagnosticsSink);
 
         if (editor.Session is GraphEditorSession runtimeSession)
         {
             runtimeSession.ConfigureInstrumentation(resolved.Options.Instrumentation);
+            runtimeSession.SetPluginContextMenuAugmentors(resolved.PluginContextMenuAugmentors);
+            runtimeSession.SetPluginLoadSnapshots(resolved.PluginLoadResult.Snapshots);
             PublishDiagnostics(runtimeSession, resolved.PluginLoadResult.Diagnostics);
         }
 
@@ -74,7 +78,7 @@ public static class AsterGraphEditorFactory
         var resolved = Resolve(options);
         var kernel = new GraphEditorKernel(
             resolved.Options.Document!,
-            resolved.Options.NodeCatalog!,
+            resolved.NodeCatalog,
             resolved.Options.CompatibilityService!,
             resolved.WorkspaceService,
             resolved.StyleOptions,
@@ -83,16 +87,18 @@ public static class AsterGraphEditorFactory
             kernel,
             resolved.Options.DiagnosticsSink,
             new GraphEditorSessionDescriptorSupport(
-                resolved.Options.NodeCatalog!,
-                (key, fallback) => resolved.Options.LocalizationProvider?.GetString(key, fallback) ?? fallback,
+                resolved.NodeCatalog,
+                (key, fallback) => resolved.LocalizationProvider?.GetString(key, fallback) ?? fallback,
                 hasFragmentWorkspaceService: true,
                 hasFragmentLibraryService: true,
                 hasClipboardPayloadSerializer: true,
                 hasPluginLoader: true,
-                hasContextMenuAugmentor: resolved.Options.ContextMenuAugmentor is not null,
-                hasNodePresentationProvider: resolved.Options.NodePresentationProvider is not null,
-                hasLocalizationProvider: resolved.Options.LocalizationProvider is not null));
+                hasContextMenuAugmentor: resolved.Options.ContextMenuAugmentor is not null || resolved.PluginContextMenuAugmentors.Count > 0,
+                hasNodePresentationProvider: resolved.NodePresentationProvider is not null,
+                hasLocalizationProvider: resolved.LocalizationProvider is not null));
         session.ConfigureInstrumentation(resolved.Options.Instrumentation);
+        session.SetPluginContextMenuAugmentors(resolved.PluginContextMenuAugmentors);
+        session.SetPluginLoadSnapshots(resolved.PluginLoadResult.Snapshots);
         PublishDiagnostics(session, resolved.PluginLoadResult.Diagnostics);
         return session;
     }
@@ -115,6 +121,9 @@ public static class AsterGraphEditorFactory
         var styleOptions = options.StyleOptions ?? GraphEditorStyleOptions.Default;
         var behaviorOptions = ResolveBehaviorOptions(options.BehaviorOptions, styleOptions);
         var pluginLoadResult = AsterGraphPluginLoader.Load(options.PluginRegistrations);
+        var nodeCatalog = ComposeNodeCatalog(options.NodeCatalog, pluginLoadResult);
+        var localizationProvider = ComposeLocalizationProvider(options.LocalizationProvider, pluginLoadResult);
+        var nodePresentationProvider = ComposeNodePresentationProvider(options.NodePresentationProvider, pluginLoadResult);
 
         return new ResolvedEditorOptions(
             options,
@@ -124,7 +133,11 @@ public static class AsterGraphEditorFactory
             fragmentLibraryService,
             styleOptions,
             behaviorOptions,
-            pluginLoadResult);
+            pluginLoadResult,
+            nodeCatalog,
+            nodePresentationProvider,
+            localizationProvider,
+            pluginLoadResult.Contributions.ContextMenuAugmentors.ToList());
     }
 
     private static GraphEditorBehaviorOptions ResolveBehaviorOptions(
@@ -158,6 +171,34 @@ public static class AsterGraphEditorFactory
         }
     }
 
+    private static AsterGraph.Abstractions.Catalog.INodeCatalog ComposeNodeCatalog(
+        AsterGraph.Abstractions.Catalog.INodeCatalog baseCatalog,
+        GraphEditorPluginLoadResult pluginLoadResult)
+    {
+        ArgumentNullException.ThrowIfNull(baseCatalog);
+        ArgumentNullException.ThrowIfNull(pluginLoadResult);
+
+        return pluginLoadResult.Contributions.NodeDefinitionProviders.Count == 0
+            ? baseCatalog
+            : new PluginComposedNodeCatalog(baseCatalog, pluginLoadResult.Contributions.NodeDefinitionProviders);
+    }
+
+    private static IGraphLocalizationProvider? ComposeLocalizationProvider(
+        IGraphLocalizationProvider? hostProvider,
+        GraphEditorPluginLoadResult pluginLoadResult)
+    {
+        ArgumentNullException.ThrowIfNull(pluginLoadResult);
+        return CompositePluginLocalizationProvider.Compose(pluginLoadResult.Contributions.LocalizationProviders, hostProvider);
+    }
+
+    private static INodePresentationProvider? ComposeNodePresentationProvider(
+        INodePresentationProvider? hostProvider,
+        GraphEditorPluginLoadResult pluginLoadResult)
+    {
+        ArgumentNullException.ThrowIfNull(pluginLoadResult);
+        return CompositePluginNodePresentationProvider.Compose(pluginLoadResult.Contributions.NodePresentationProviders, hostProvider);
+    }
+
     private sealed record ResolvedEditorOptions(
         AsterGraphEditorOptions Options,
         IGraphClipboardPayloadSerializer ClipboardPayloadSerializer,
@@ -166,5 +207,9 @@ public static class AsterGraphEditorFactory
         IGraphFragmentLibraryService FragmentLibraryService,
         GraphEditorStyleOptions StyleOptions,
         GraphEditorBehaviorOptions BehaviorOptions,
-        GraphEditorPluginLoadResult PluginLoadResult);
+        GraphEditorPluginLoadResult PluginLoadResult,
+        AsterGraph.Abstractions.Catalog.INodeCatalog NodeCatalog,
+        INodePresentationProvider? NodePresentationProvider,
+        IGraphLocalizationProvider? LocalizationProvider,
+        IReadOnlyList<AsterGraph.Editor.Plugins.IGraphEditorPluginContextMenuAugmentor> PluginContextMenuAugmentors);
 }

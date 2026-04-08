@@ -2,6 +2,7 @@ using AsterGraph.Core.Models;
 using AsterGraph.Editor.Diagnostics;
 using AsterGraph.Editor.Menus;
 using AsterGraph.Editor.Models;
+using AsterGraph.Editor.Plugins;
 
 namespace AsterGraph.Editor.Runtime;
 
@@ -46,6 +47,13 @@ public interface IGraphEditorQueries
     /// </summary>
     /// <returns>命令描述集合。</returns>
     IReadOnlyList<GraphEditorCommandDescriptorSnapshot> GetCommandDescriptors()
+        => throw new NotSupportedException();
+
+    /// <summary>
+    /// 获取当前插件加载检查快照集合。
+    /// </summary>
+    /// <returns>插件加载快照集合。</returns>
+    IReadOnlyList<GraphEditorPluginLoadSnapshot> GetPluginLoadSnapshots()
         => throw new NotSupportedException();
 
     /// <summary>

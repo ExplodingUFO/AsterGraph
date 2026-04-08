@@ -6,8 +6,11 @@ using AsterGraph.Core.Models;
 using AsterGraph.Editor.Catalog;
 using AsterGraph.Editor.Diagnostics;
 using AsterGraph.Editor.Hosting;
+using AsterGraph.Editor.Localization;
 using AsterGraph.Editor.Menus;
 using AsterGraph.Editor.Plugins;
+using AsterGraph.Editor.Presentation;
+using AsterGraph.Editor.ViewModels;
 using Xunit;
 
 namespace AsterGraph.Editor.Tests;
@@ -15,7 +18,7 @@ namespace AsterGraph.Editor.Tests;
 public sealed class GraphEditorPluginLoadingTests
 {
     [Fact]
-    public void CreateSession_WithAssemblyPluginRegistration_PublishesSuccessDiagnosticAndDoesNotApplyPluginContributionsYet()
+    public void CreateSession_WithAssemblyPluginRegistration_PublishesSuccessDiagnosticAndAppliesRuntimeContributions()
     {
         var diagnostics = new RecordingDiagnosticsSink();
         var session = AsterGraphEditorFactory.CreateSession(CreateOptions(diagnostics, GraphEditorPluginRegistration.FromAssemblyPath(GetSamplePluginAssemblyPath())));
@@ -24,12 +27,16 @@ public sealed class GraphEditorPluginLoadingTests
         var addNode = Assert.Single(canvasMenu, item => item.Id == "canvas-add-node");
         var pluginLoadDiagnostic = Assert.Single(diagnostics.Diagnostics, diagnostic => diagnostic.Code == "plugin.load.succeeded");
 
+        session.Commands.AddNode(new NodeDefinitionId("tests.sample-plugin.node"));
+        var document = session.Queries.CreateDocumentSnapshot();
+
         Assert.True(descriptors["integration.plugin-loader"].IsAvailable);
+        Assert.True(descriptors["query.plugin-load-snapshots"].IsAvailable);
         Assert.Contains(session.Diagnostics.GetRecentDiagnostics(), diagnostic => diagnostic.Code == "plugin.load.succeeded");
         Assert.Equal(GraphEditorDiagnosticSeverity.Info, pluginLoadDiagnostic.Severity);
-        Assert.DoesNotContain(
-            addNode.Children.SelectMany(group => group.Children),
-            item => item.Header.Contains("Sample Plugin Node", StringComparison.Ordinal));
+        Assert.Equal("Plugin Add Node", addNode.Header);
+        Assert.Contains(canvasMenu, item => item.Id == "plugin-sample-menu");
+        Assert.Contains(document.Nodes, node => node.DefinitionId is { Value: "tests.sample-plugin.node" });
     }
 
     [Fact]
@@ -104,9 +111,39 @@ public sealed class GraphEditorPluginLoadingTests
         Assert.Equal(2, diagnostics.Diagnostics.Count(diagnostic => diagnostic.Code == "plugin.load.succeeded"));
     }
 
+    [Fact]
+    public void Create_WithAssemblyPluginRegistration_AppliesPluginPresentationAndHostOverridesWin()
+    {
+        var diagnostics = new RecordingDiagnosticsSink();
+        var registration = GraphEditorPluginRegistration.FromAssemblyPath(GetSamplePluginAssemblyPath());
+        var editor = AsterGraphEditorFactory.Create(CreateOptions(
+            diagnostics,
+            [registration],
+            localizationProvider: new HostOverrideLocalizationProvider(),
+            nodePresentationProvider: new HostOverridePresentationProvider()));
+
+        editor.RefreshNodePresentations();
+        var canvasMenu = editor.Session.Queries.BuildContextMenuDescriptors(new ContextMenuContext(ContextMenuTargetKind.Canvas, new GraphPoint(240, 180)));
+        var addNode = Assert.Single(canvasMenu, item => item.Id == "canvas-add-node");
+        var sourceNode = Assert.Single(editor.Nodes, node => node.Id == "source-node");
+
+        Assert.Equal("Host Add Node", addNode.Header);
+        Assert.Equal("Host Subtitle", sourceNode.DisplaySubtitle);
+        Assert.Contains(sourceNode.Presentation.TopRightBadges, badge => badge.Text == "Plugin");
+        Assert.Contains(sourceNode.Presentation.TopRightBadges, badge => badge.Text == "Host");
+        Assert.Contains(editor.BuildContextMenu(new ContextMenuContext(ContextMenuTargetKind.Canvas, new GraphPoint(240, 180))), item => item.Id == "plugin-sample-menu");
+    }
+
     private static AsterGraphEditorOptions CreateOptions(
         IGraphEditorDiagnosticsSink diagnosticsSink,
         params GraphEditorPluginRegistration[] pluginRegistrations)
+        => CreateOptions(diagnosticsSink, pluginRegistrations, null, null);
+
+    private static AsterGraphEditorOptions CreateOptions(
+        IGraphEditorDiagnosticsSink diagnosticsSink,
+        IReadOnlyList<GraphEditorPluginRegistration> pluginRegistrations,
+        IGraphLocalizationProvider? localizationProvider,
+        INodePresentationProvider? nodePresentationProvider)
         => new()
         {
             Document = CreateDocument(),
@@ -114,6 +151,8 @@ public sealed class GraphEditorPluginLoadingTests
             CompatibilityService = new DefaultPortCompatibilityService(),
             DiagnosticsSink = diagnosticsSink,
             PluginRegistrations = pluginRegistrations,
+            LocalizationProvider = localizationProvider,
+            NodePresentationProvider = nodePresentationProvider,
         };
 
     private static string GetSamplePluginAssemblyPath()
@@ -185,5 +224,32 @@ public sealed class GraphEditorPluginLoadingTests
     {
         public string GetString(string key, string fallback)
             => fallback;
+    }
+
+    private sealed class HostOverrideLocalizationProvider : IGraphLocalizationProvider
+    {
+        public string GetString(string key, string fallback)
+            => key == "editor.menu.canvas.addNode"
+                ? "Host Add Node"
+                : fallback;
+    }
+
+    private sealed class HostOverridePresentationProvider : INodePresentationProvider
+    {
+        public NodePresentationState GetNodePresentation(NodePresentationContext context)
+            => new(
+                SubtitleOverride: "Host Subtitle",
+                TopRightBadges:
+                [
+                    new NodeAdornmentDescriptor("Host", "#F3B36B"),
+                ]);
+
+        public NodePresentationState GetNodePresentation(NodeViewModel node)
+            => new(
+                SubtitleOverride: "Host Subtitle",
+                TopRightBadges:
+                [
+                    new NodeAdornmentDescriptor("Host", "#F3B36B"),
+                ]);
     }
 }

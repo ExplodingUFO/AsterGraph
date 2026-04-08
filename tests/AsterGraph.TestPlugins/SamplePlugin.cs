@@ -35,17 +35,33 @@ internal sealed class SampleNodeDefinitionProvider : INodeDefinitionProvider
 internal sealed class SampleContextMenuAugmentor : IGraphEditorPluginContextMenuAugmentor
 {
     public IReadOnlyList<GraphEditorMenuItemDescriptorSnapshot> Augment(GraphEditorPluginMenuAugmentationContext context)
-        => context.StockItems;
+        => context.StockItems
+            .Concat(
+            [
+                new GraphEditorMenuItemDescriptorSnapshot(
+                    "plugin-sample-menu",
+                    "Plugin Menu Evidence",
+                    iconKey: "plugin",
+                    isEnabled: false),
+            ])
+            .ToList();
 }
 
 internal sealed class SampleNodePresentationProvider : IGraphEditorPluginNodePresentationProvider
 {
     public NodePresentationState GetNodePresentation(GraphEditorPluginNodePresentationContext context)
-        => NodePresentationState.Empty;
+        => new(
+            SubtitleOverride: "Plugin Subtitle",
+            TopRightBadges:
+            [
+                new NodeAdornmentDescriptor("Plugin", "#6AD5C4"),
+            ]);
 }
 
 internal sealed class SampleLocalizationProvider : IGraphEditorPluginLocalizationProvider
 {
     public string GetString(string key, string fallback)
-        => fallback;
+        => key == "editor.menu.canvas.addNode"
+            ? "Plugin Add Node"
+            : fallback;
 }

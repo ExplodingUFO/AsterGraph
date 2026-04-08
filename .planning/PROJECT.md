@@ -27,7 +27,9 @@ Hosts can integrate only the graph-editor pieces they need, replace default UI a
 - Migration posture and plugin/automation readiness are locked by focused regressions plus runnable `HostSample`, `PackageSmoke`, and `ScaleSmoke` proof markers.
 - `AsterGraph.Demo` now exposes live view, behavior, and runtime host controls from the top menu and compact right-side pane over one retained editor/session path.
 - `AsterGraph.Demo` now also exposes compact in-context proof cues, live configuration summaries, and aligned README narrative over the same graph-first host shell.
-- The v1.3 showcase work is shipped and archived; the next product risk is whether the same canonical session boundary can now host real plugin loading and automation execution.
+- The v1.3 showcase work is shipped and archived, and Phase 23 now proves that the same canonical session boundary can host real plugin loading plus canonical plugin inspection.
+- Loaded plugins now compose node definitions, context-menu augmentation, localization, and node presentation through the shared factory/session path while host-owned overrides keep final authority.
+- Hosts can now inspect structured plugin load snapshots, descriptors, contribution shape, and recoverable failures through canonical runtime queries and inspection snapshots.
 - The known `STATE_HISTORY_OK` mismatch remains an unresolved pre-v1.2 baseline if the next milestone touches history/save semantics.
 
 ## Requirements
@@ -52,11 +54,11 @@ Hosts can integrate only the graph-editor pieces they need, replace default UI a
 - ✓ Users can adjust shell/view, editing behavior, and runtime-facing demo controls from compact host-level menu groups while staying on the same live graph — v1.3 Phase 20
 - ✓ The demo now distinguishes host-owned seams from shared runtime state through compact proof cues, live configuration sections, and aligned demo-facing documentation — v1.3 Phase 21
 - ✓ Host can now load one or more runtime plugins through a public composition path rooted in `AsterGraphEditorFactory` / `AsterGraphEditorOptions`, with canonical loader readiness and recoverable diagnostics — v1.4 Phase 22
+- ✓ Loaded plugins now contribute node definitions, context-menu augmentation, localization, and node presentation through the canonical factory/session boundary while host-supplied providers keep final override authority — v1.4 Phase 23
+- ✓ Host can now inspect loaded plugin descriptors, contribution shape, and recoverable failures through canonical runtime queries and inspection snapshots rather than diagnostics scraping alone — v1.4 Phase 23
 
 ### Active
 
-- [ ] Loaded plugins can contribute additive behavior or surfaces through explicit contracts that remain inspectable from the canonical session boundary.
-- [ ] Host can inspect loaded plugin descriptors, availability, and failures through canonical runtime inspection or diagnostics without private loader knowledge.
 - [ ] Host can execute richer automation or macro workflows against canonical command IDs, query snapshots, batching, and diagnostics without relying on `GraphEditorViewModel` methods.
 - [ ] Plugin and automation delivery stays backed by focused tests plus `HostSample`, `PackageSmoke`, and `ScaleSmoke` proof rather than doc-only claims.
 
@@ -70,9 +72,9 @@ Hosts can integrate only the graph-editor pieces they need, replace default UI a
 
 ## Context
 
-Milestone `v1.2` shipped on 2026-04-08 after phases 13-18 extracted the kernel, normalized descriptor contracts, thinned Avalonia adapters, and closed with migration/readiness proof. Milestone `v1.3` then shipped the graph-first demo showcase, so the host-level integration story is now legible on first read instead of being buried behind explanation-heavy panels.
+Milestone `v1.2` shipped on 2026-04-08 after phases 13-18 extracted the kernel, normalized descriptor contracts, thinned Avalonia adapters, and closed with migration/readiness proof. Milestone `v1.3` then shipped the graph-first demo showcase, so the host-level integration story is now legible on first read instead of being buried behind explanation-heavy panels. Phase 22 and Phase 23 of `v1.4` have now turned that readiness posture into a real plugin-loading baseline with live additive composition and canonical inspection.
 
-The next product risk is no longer seam discoverability. The next product risk is whether those explicit descriptors, command IDs, query snapshots, batching hooks, and replaceable services can now support real plugin loading and automation execution without reintroducing facade-shaped or Avalonia-shaped dependencies.
+The next product risk is no longer whether plugin seams can be discovered or applied. The next product risk is whether those explicit descriptors, command IDs, query snapshots, batching hooks, and replaceable services can now support automation execution and a broader proof ring without reintroducing facade-shaped or Avalonia-shaped dependencies.
 
 ## Constraints
 
@@ -100,6 +102,8 @@ The next product risk is no longer seam discoverability. The next product risk i
 | Return to plugin/automation execution immediately after the showcase milestone | The integration story is now clear enough that the highest remaining product risk is real extension delivery, not more presentation polish | ✓ Good |
 | Keep new plugin and automation surfaces rooted in `IGraphEditorSession`, descriptors, and command IDs | Extension work should build on the canonical runtime boundary rather than retained MVVM or Avalonia compatibility shims | ✓ Good |
 | Use `AssemblyLoadContext` + `AssemblyDependencyResolver` while keeping shared `AsterGraph.*` contracts in the default context | Assembly-path plugins need intentional dependency isolation without breaking host/plugin type identity | ✓ Good |
+| Keep plugin inspection rooted in canonical query and inspection DTOs rather than diagnostics scraping | Hosts need stable current-state reads, not only append-only event history | ✓ Good |
+| Compose plugin contributions beneath explicit host-owned overrides on one shared factory/session path | Live plugin value should not fork retained/runtime behavior or regress host precedence | ✓ Good |
 
 ## Next Milestone Goals
 
@@ -127,4 +131,4 @@ This document evolves at milestone boundaries.
 4. Reset active requirements so the next roadmap starts from the highest remaining product risk instead of stale execution context.
 
 ---
-*Last updated: 2026-04-08 after starting milestone v1.4*
+*Last updated: 2026-04-08 after completing Phase 23*

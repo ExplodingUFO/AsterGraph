@@ -15,17 +15,19 @@ internal static class AsterGraphPluginLoader
 
         var aggregateBuilder = new GraphEditorPluginBuilder();
         var descriptors = new List<GraphEditorPluginDescriptor>();
+        var snapshots = new List<GraphEditorPluginLoadSnapshot>();
         var diagnostics = new List<GraphEditorDiagnostic>();
         var loadContexts = new List<AssemblyLoadContext>();
 
         foreach (var registration in registrations)
         {
-            TryLoadRegistration(registration, aggregateBuilder, descriptors, diagnostics, loadContexts);
+            TryLoadRegistration(registration, aggregateBuilder, descriptors, snapshots, diagnostics, loadContexts);
         }
 
         return new GraphEditorPluginLoadResult(
             descriptors,
             aggregateBuilder.Build(),
+            snapshots,
             diagnostics,
             loadContexts);
     }
@@ -34,29 +36,42 @@ internal static class AsterGraphPluginLoader
         GraphEditorPluginRegistration registration,
         GraphEditorPluginBuilder aggregateBuilder,
         ICollection<GraphEditorPluginDescriptor> descriptors,
+        ICollection<GraphEditorPluginLoadSnapshot> snapshots,
         ICollection<GraphEditorDiagnostic> diagnostics,
         ICollection<AssemblyLoadContext> loadContexts)
     {
         ArgumentNullException.ThrowIfNull(registration);
         ArgumentNullException.ThrowIfNull(aggregateBuilder);
         ArgumentNullException.ThrowIfNull(descriptors);
+        ArgumentNullException.ThrowIfNull(snapshots);
         ArgumentNullException.ThrowIfNull(diagnostics);
         ArgumentNullException.ThrowIfNull(loadContexts);
 
-        var source = registration.IsAssemblyRegistration
-            ? $"assembly '{registration.AssemblyPath}'"
-            : registration.Plugin?.GetType().FullName ?? "direct plugin registration";
+        var sourceKind = registration.IsAssemblyRegistration
+            ? GraphEditorPluginLoadSourceKind.Assembly
+            : GraphEditorPluginLoadSourceKind.Direct;
+        var source = registration.AssemblyPath
+            ?? registration.Plugin?.GetType().FullName
+            ?? "direct plugin registration";
+        var diagnosticSource = sourceKind == GraphEditorPluginLoadSourceKind.Assembly
+            ? $"assembly '{source}'"
+            : $"plugin '{source}'";
 
         try
         {
             if (registration.IsDirectRegistration)
             {
+                var plugin = registration.Plugin!;
                 LoadPlugin(
-                    registration.Plugin!,
+                    plugin,
                     aggregateBuilder,
                     descriptors,
+                    snapshots,
                     diagnostics,
-                    source);
+                    sourceKind,
+                    source,
+                    plugin.GetType().FullName,
+                    diagnosticSource);
                 return;
             }
 
@@ -76,13 +91,25 @@ internal static class AsterGraphPluginLoader
                     CreatePlugin(pluginType),
                     aggregateBuilder,
                     descriptors,
+                    snapshots,
                     diagnostics,
-                    source);
+                    sourceKind,
+                    source,
+                    pluginType.FullName,
+                    diagnosticSource,
+                    registration.PluginTypeName);
             }
         }
         catch (Exception exception)
         {
-            diagnostics.Add(CreateFailureDiagnostic(source, exception));
+            diagnostics.Add(CreateFailureDiagnostic(diagnosticSource, exception));
+            snapshots.Add(new GraphEditorPluginLoadSnapshot(
+                sourceKind,
+                source,
+                GraphEditorPluginLoadStatus.Failed,
+                GraphEditorPluginContributionSummarySnapshot.Empty,
+                requestedPluginTypeName: registration.PluginTypeName,
+                failureMessage: exception.Message));
         }
     }
 
@@ -158,26 +185,53 @@ internal static class AsterGraphPluginLoader
         IGraphEditorPlugin plugin,
         GraphEditorPluginBuilder aggregateBuilder,
         ICollection<GraphEditorPluginDescriptor> descriptors,
+        ICollection<GraphEditorPluginLoadSnapshot> snapshots,
         ICollection<GraphEditorDiagnostic> diagnostics,
-        string source)
+        GraphEditorPluginLoadSourceKind sourceKind,
+        string source,
+        string? resolvedPluginTypeName,
+        string diagnosticSource,
+        string? requestedPluginTypeName = null)
     {
         ArgumentNullException.ThrowIfNull(plugin);
         ArgumentNullException.ThrowIfNull(aggregateBuilder);
         ArgumentNullException.ThrowIfNull(descriptors);
+        ArgumentNullException.ThrowIfNull(snapshots);
         ArgumentNullException.ThrowIfNull(diagnostics);
         ArgumentException.ThrowIfNullOrWhiteSpace(source);
+        ArgumentException.ThrowIfNullOrWhiteSpace(diagnosticSource);
 
         var descriptor = plugin.Descriptor
-            ?? throw new InvalidOperationException($"Plugin from {source} returned a null descriptor.");
+            ?? throw new InvalidOperationException($"Plugin from {diagnosticSource} returned a null descriptor.");
         var builder = new GraphEditorPluginBuilder();
         plugin.Register(builder);
-        aggregateBuilder.Merge(builder.Build());
+        var contributions = builder.Build();
+        aggregateBuilder.Merge(contributions);
         descriptors.Add(descriptor);
+        snapshots.Add(new GraphEditorPluginLoadSnapshot(
+            sourceKind,
+            source,
+            GraphEditorPluginLoadStatus.Loaded,
+            CreateContributionSummary(contributions),
+            descriptor,
+            requestedPluginTypeName,
+            resolvedPluginTypeName));
         diagnostics.Add(new GraphEditorDiagnostic(
             "plugin.load.succeeded",
             "plugin.load",
-            $"Loaded plugin '{descriptor.Id}' from {source}.",
+            $"Loaded plugin '{descriptor.Id}' from {diagnosticSource}.",
             GraphEditorDiagnosticSeverity.Info));
+    }
+
+    private static GraphEditorPluginContributionSummarySnapshot CreateContributionSummary(GraphEditorPluginContributionSet contributions)
+    {
+        ArgumentNullException.ThrowIfNull(contributions);
+
+        return new GraphEditorPluginContributionSummarySnapshot(
+            contributions.NodeDefinitionProviders.Count,
+            contributions.ContextMenuAugmentors.Count,
+            contributions.NodePresentationProviders.Count,
+            contributions.LocalizationProviders.Count);
     }
 
     private static GraphEditorDiagnostic CreateFailureDiagnostic(string source, Exception exception)
@@ -192,8 +246,9 @@ internal static class AsterGraphPluginLoader
 internal sealed record GraphEditorPluginLoadResult(
     IReadOnlyList<GraphEditorPluginDescriptor> Descriptors,
     GraphEditorPluginContributionSet Contributions,
+    IReadOnlyList<GraphEditorPluginLoadSnapshot> Snapshots,
     IReadOnlyList<GraphEditorDiagnostic> Diagnostics,
     IReadOnlyList<AssemblyLoadContext> LoadContexts)
 {
-    public static GraphEditorPluginLoadResult Empty { get; } = new([], GraphEditorPluginContributionSet.Empty, [], []);
+    public static GraphEditorPluginLoadResult Empty { get; } = new([], GraphEditorPluginContributionSet.Empty, [], [], []);
 }

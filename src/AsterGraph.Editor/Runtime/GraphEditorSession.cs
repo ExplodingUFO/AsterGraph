@@ -7,6 +7,7 @@ using AsterGraph.Editor.Diagnostics;
 using AsterGraph.Editor.Events;
 using AsterGraph.Editor.Menus;
 using AsterGraph.Editor.Models;
+using AsterGraph.Editor.Plugins;
 using Microsoft.Extensions.Logging;
 
 namespace AsterGraph.Editor.Runtime;
@@ -21,6 +22,8 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorComman
     private readonly IGraphEditorDiagnosticsSink? _diagnosticsSink;
     private readonly GraphEditorSessionDescriptorSupport? _descriptorSupport;
     private readonly List<GraphEditorDiagnostic> _recentDiagnostics = [];
+    private IReadOnlyList<IGraphEditorPluginContextMenuAugmentor> _pluginContextMenuAugmentors = [];
+    private IReadOnlyList<GraphEditorPluginLoadSnapshot> _pluginLoadSnapshots = [];
     private ILogger? _logger;
     private ActivitySource? _activitySource;
     private int _mutationDepth;
@@ -283,14 +286,15 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorComman
                 new GraphEditorFeatureDescriptorSnapshot("capability.viewport.update", "capability", capabilities.CanUpdateViewport),
                 new GraphEditorFeatureDescriptorSnapshot("capability.viewport.fit", "capability", capabilities.CanFitToViewport),
                 new GraphEditorFeatureDescriptorSnapshot("capability.viewport.center", "capability", capabilities.CanCenterViewport),
-                  new GraphEditorFeatureDescriptorSnapshot("service.fragment-workspace", "service", _descriptorSupport?.HasFragmentWorkspaceService ?? false),
-                  new GraphEditorFeatureDescriptorSnapshot("service.fragment-library", "service", _descriptorSupport?.HasFragmentLibraryService ?? false),
-                  new GraphEditorFeatureDescriptorSnapshot("service.clipboard-payload-serializer", "service", _descriptorSupport?.HasClipboardPayloadSerializer ?? false),
-                  new GraphEditorFeatureDescriptorSnapshot("integration.diagnostics-sink", "integration", _diagnosticsSink is not null),
-                  new GraphEditorFeatureDescriptorSnapshot("integration.plugin-loader", "integration", _descriptorSupport?.HasPluginLoader ?? false),
-                  new GraphEditorFeatureDescriptorSnapshot("integration.context-menu-augmentor", "integration", _descriptorSupport?.HasContextMenuAugmentor ?? false),
-                  new GraphEditorFeatureDescriptorSnapshot("integration.node-presentation-provider", "integration", _descriptorSupport?.HasNodePresentationProvider ?? false),
-                  new GraphEditorFeatureDescriptorSnapshot("integration.localization-provider", "integration", _descriptorSupport?.HasLocalizationProvider ?? false),
+                new GraphEditorFeatureDescriptorSnapshot("query.plugin-load-snapshots", "query", _descriptorSupport?.HasPluginLoader ?? false),
+                new GraphEditorFeatureDescriptorSnapshot("service.fragment-workspace", "service", _descriptorSupport?.HasFragmentWorkspaceService ?? false),
+                new GraphEditorFeatureDescriptorSnapshot("service.fragment-library", "service", _descriptorSupport?.HasFragmentLibraryService ?? false),
+                new GraphEditorFeatureDescriptorSnapshot("service.clipboard-payload-serializer", "service", _descriptorSupport?.HasClipboardPayloadSerializer ?? false),
+                new GraphEditorFeatureDescriptorSnapshot("integration.diagnostics-sink", "integration", _diagnosticsSink is not null),
+                new GraphEditorFeatureDescriptorSnapshot("integration.plugin-loader", "integration", _descriptorSupport?.HasPluginLoader ?? false),
+                new GraphEditorFeatureDescriptorSnapshot("integration.context-menu-augmentor", "integration", (_descriptorSupport?.HasContextMenuAugmentor ?? false) || _pluginContextMenuAugmentors.Count > 0),
+                new GraphEditorFeatureDescriptorSnapshot("integration.node-presentation-provider", "integration", _descriptorSupport?.HasNodePresentationProvider ?? false),
+                new GraphEditorFeatureDescriptorSnapshot("integration.localization-provider", "integration", _descriptorSupport?.HasLocalizationProvider ?? false),
                 new GraphEditorFeatureDescriptorSnapshot("integration.instrumentation.logger", "integration", _logger is not null),
                 new GraphEditorFeatureDescriptorSnapshot("integration.instrumentation.activity-source", "integration", _activitySource is not null),
             ])
@@ -308,12 +312,16 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorComman
         => _host.GetCommandDescriptors();
 
     /// <inheritdoc />
+    public IReadOnlyList<GraphEditorPluginLoadSnapshot> GetPluginLoadSnapshots()
+        => _pluginLoadSnapshots.ToList();
+
+    /// <inheritdoc />
     public IReadOnlyList<GraphEditorMenuItemDescriptorSnapshot> BuildContextMenuDescriptors(ContextMenuContext context)
     {
         ArgumentNullException.ThrowIfNull(context);
 
         var commands = GetCommandDescriptors().ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
-        return context.TargetKind switch
+        var stockItems = context.TargetKind switch
         {
             ContextMenuTargetKind.Canvas => BuildCanvasMenuDescriptors(context, commands),
             ContextMenuTargetKind.Selection => BuildSelectionMenuDescriptors(context, commands),
@@ -322,6 +330,31 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorComman
             ContextMenuTargetKind.Connection => BuildConnectionMenuDescriptors(context, commands),
             _ => [],
         };
+
+        if (_pluginContextMenuAugmentors.Count == 0)
+        {
+            return stockItems;
+        }
+
+        var currentItems = stockItems;
+        foreach (var augmentor in _pluginContextMenuAugmentors)
+        {
+            try
+            {
+                currentItems = augmentor.Augment(new GraphEditorPluginMenuAugmentationContext(this, context, currentItems))
+                    ?? throw new InvalidOperationException($"Plugin context menu augmentor '{augmentor.GetType().FullName}' returned null.");
+            }
+            catch (Exception exception)
+            {
+                PublishRecoverableFailure(new GraphEditorRecoverableFailureEventArgs(
+                    "plugin.contextmenu.augment.failed",
+                    "plugin.contextmenu.augment",
+                    $"Plugin context menu augmentor failed: {augmentor.GetType().Name}. Using current menu.",
+                    exception));
+            }
+        }
+
+        return currentItems;
     }
 
     /// <inheritdoc />
@@ -355,7 +388,8 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorComman
             new GraphEditorStatusSnapshot(_host.CurrentStatusMessage),
             GetNodePositions().ToList(),
             GetFeatureDescriptors().ToList(),
-            GetRecentDiagnostics().ToList());
+            GetRecentDiagnostics().ToList(),
+            GetPluginLoadSnapshots().ToList());
     }
 
     /// <inheritdoc />
@@ -409,6 +443,18 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorComman
         _recentDiagnostics.Add(diagnostic);
         _diagnosticsSink?.Publish(diagnostic);
         EmitInstrumentation(diagnostic);
+    }
+
+    internal void SetPluginLoadSnapshots(IReadOnlyList<GraphEditorPluginLoadSnapshot> snapshots)
+    {
+        ArgumentNullException.ThrowIfNull(snapshots);
+        _pluginLoadSnapshots = snapshots.ToList();
+    }
+
+    internal void SetPluginContextMenuAugmentors(IReadOnlyList<IGraphEditorPluginContextMenuAugmentor> augmentors)
+    {
+        ArgumentNullException.ThrowIfNull(augmentors);
+        _pluginContextMenuAugmentors = augmentors.ToList();
     }
 
     private bool IsBatching => _mutationDepth > 0;

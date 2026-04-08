@@ -9,8 +9,8 @@
 ### Plugin Loading
 
 - [x] **PLUG-01**: Host can load one or more runtime plugins through a public composition path rooted in `AsterGraphEditorFactory` / `AsterGraphEditorOptions` instead of internal editor or Avalonia object access
-- [ ] **PLUG-02**: Loaded plugins can contribute additive services, menus, presentation, diagnostics, or related host seams through explicit contracts that stay compatible with the canonical session/runtime boundary
-- [ ] **PLUG-03**: Host can inspect loaded plugin descriptors, availability, and failures through canonical runtime inspection or diagnostics surfaces
+- [x] **PLUG-02**: Loaded plugins can contribute additive services, menus, presentation, diagnostics, or related host seams through explicit contracts that stay compatible with the canonical session/runtime boundary
+- [x] **PLUG-03**: Host can inspect loaded plugin descriptors, availability, and failures through canonical runtime inspection or diagnostics surfaces
 
 ### Automation Execution
 
@@ -50,8 +50,8 @@
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | PLUG-01 | Phase 22 | Complete |
-| PLUG-02 | Phase 23 | Planned |
-| PLUG-03 | Phase 23 | Planned |
+| PLUG-02 | Phase 23 | Complete |
+| PLUG-03 | Phase 23 | Complete |
 | AUTO-01 | Phase 24 | Planned |
 | AUTO-02 | Phase 24 | Planned |
 | PROOF-01 | Phase 25 | Planned |

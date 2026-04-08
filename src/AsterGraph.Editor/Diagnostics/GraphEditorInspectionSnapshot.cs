@@ -1,5 +1,6 @@
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Models;
+using AsterGraph.Editor.Plugins;
 using AsterGraph.Editor.Runtime;
 
 namespace AsterGraph.Editor.Diagnostics;
@@ -21,6 +22,7 @@ public sealed record GraphEditorInspectionSnapshot
     /// <param name="nodePositions">当前节点位置快照集合。</param>
     /// <param name="featureDescriptors">当前显式特性描述集合。</param>
     /// <param name="recentDiagnostics">最近诊断集合。</param>
+    /// <param name="pluginLoadSnapshots">当前插件加载快照集合。</param>
     public GraphEditorInspectionSnapshot(
         GraphDocument document,
         GraphEditorSelectionSnapshot selection,
@@ -30,7 +32,8 @@ public sealed record GraphEditorInspectionSnapshot
         GraphEditorStatusSnapshot status,
         IReadOnlyList<NodePositionSnapshot> nodePositions,
         IReadOnlyList<GraphEditorFeatureDescriptorSnapshot> featureDescriptors,
-        IReadOnlyList<GraphEditorDiagnostic> recentDiagnostics)
+        IReadOnlyList<GraphEditorDiagnostic> recentDiagnostics,
+        IReadOnlyList<GraphEditorPluginLoadSnapshot>? pluginLoadSnapshots = null)
     {
         ArgumentNullException.ThrowIfNull(document);
         ArgumentNullException.ThrowIfNull(selection);
@@ -51,6 +54,7 @@ public sealed record GraphEditorInspectionSnapshot
         NodePositions = nodePositions.ToList();
         FeatureDescriptors = featureDescriptors.ToList();
         RecentDiagnostics = recentDiagnostics.ToList();
+        PluginLoadSnapshots = pluginLoadSnapshots?.ToList() ?? [];
     }
 
     /// <summary>
@@ -97,4 +101,9 @@ public sealed record GraphEditorInspectionSnapshot
     /// 最近诊断集合。
     /// </summary>
     public IReadOnlyList<GraphEditorDiagnostic> RecentDiagnostics { get; }
+
+    /// <summary>
+    /// 当前插件加载快照集合。
+    /// </summary>
+    public IReadOnlyList<GraphEditorPluginLoadSnapshot> PluginLoadSnapshots { get; }
 }

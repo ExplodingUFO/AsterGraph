@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: Plugin Loading and Automation Execution
-status: Phase 23 Planned
-stopped_at: Phase 23 planned; next step is to execute runtime plugin integration and inspection
-last_updated: "2026-04-08T09:50:17.8918241Z"
+status: Phase 23 Complete
+stopped_at: Phase 23 complete; next step is to plan automation execution runner
+last_updated: "2026-04-08T10:09:02.8952502Z"
 last_activity: 2026-04-08
 progress:
   total_phases: 4
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 12
-  completed_plans: 3
+  completed_plans: 6
 ---
 
 # Project State
@@ -20,14 +20,14 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-04-08)
 
 **Core value:** Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
-**Current focus:** Phase 23 runtime plugin integration and inspection execution
+**Current focus:** Phase 24 automation execution runner planning
 
 ## Current Position
 
 Phase: 23
-Plan: Planning Complete
-Status: Phase 23 Planned
-Last activity: 2026-04-08 — Planned Phase 23 runtime plugin integration and inspection
+Plan: Complete
+Status: Phase 23 Complete
+Last activity: 2026-04-08 — Completed Phase 23 runtime plugin integration and inspection
 
 ## Accumulated Context
 
@@ -61,6 +61,8 @@ Carry-forward decisions from shipped milestones:
 - Keep Phase 23 focused on live integration of the explicit Phase 22 plugin contribution contracts plus canonical plugin inspection, rather than widening into arbitrary plugin-owned service injection.
 - Keep plugin inspection readable through canonical query/inspection DTOs, with diagnostics history as supporting evidence rather than the only source of truth.
 - Keep host-supplied context-menu, localization, and node-presentation seams as the final override layer when plugin contributions are composed.
+- Keep plugin load inspection parity across `CreateSession(...)` and `Create(...)` so retained compatibility hosts do not lose canonical runtime visibility.
+- Keep plugin node definitions, menu augmentation, localization, and presentation composed through one factory/session path rather than retained-only compatibility hooks.
 
 ### Pending Todos
 
@@ -71,8 +73,6 @@ None captured yet.
 - No active blocker in the main workspace.
 - The known `STATE_HISTORY_OK` mismatch remains a pre-existing baseline issue if the next milestone touches history/save semantics.
 - The next milestone should avoid reopening kernel/facade ownership drift unless new evidence requires it.
-- Phase 23 execution still needs to prove menu integration, composed catalogs/providers, and parity between runtime and retained routes without reopening loader design.
-- Plugin inspection should build on canonical session queries, inspection snapshots, diagnostics, and descriptors rather than ad-hoc loader introspection.
 - The first automation baseline should stay command/query/batch driven rather than expand into a full scripting language or workflow-designer product.
 - Proof work must stay aligned across focused tests, `HostSample`, `PackageSmoke`, and `ScaleSmoke` so extension claims remain machine-checkable.
 
@@ -85,5 +85,5 @@ None captured yet.
 ## Session Continuity
 
 Last session: 2026-04-08
-Stopped at: Phase 23 planned; next step is to execute runtime plugin integration and inspection
-Resume file: .planning/phases/23-runtime-plugin-integration-and-inspection/23-01-PLAN.md
+Stopped at: Phase 23 complete; next step is to plan automation execution runner
+Resume file: .planning/ROADMAP.md
