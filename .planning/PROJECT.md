@@ -8,6 +8,16 @@ AsterGraph is a modular node-graph editor toolkit for .NET with a kernel-first e
 
 Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
 
+## Current Milestone: v1.3 Demo Showcase
+
+**Goal:** Rebuild `AsterGraph.Demo` into a graph-first, host-menu-first SDK showcase so users immediately see the live node graph and can adjust view, behavior, and runtime capabilities through compact host-level controls on the same session.
+
+**Target features:**
+- Replace the current explanation-heavy three-column demo shell with a graph-first layout led by a host-level menu.
+- Consolidate view/chrome, editing behavior, and runtime-facing demo controls into compact grouped menu or drawer surfaces.
+- Keep all showcase adjustments bound to the same live `Editor` / `Session` instead of switching scenes or rebuilding the runtime.
+- Replace long explanatory cards with compact in-context proof that shows seam ownership and current live configuration.
+
 ## Current State
 
 - Shipped packages remain `AsterGraph.Abstractions`, `AsterGraph.Core`, `AsterGraph.Editor`, and `AsterGraph.Avalonia`.
@@ -38,10 +48,10 @@ Hosts can integrate only the graph-editor pieces they need, replace default UI a
 
 ### Active
 
-- [ ] Runtime plugin loading, discovery, isolation, and trust model on top of the shipped readiness descriptors
-- [ ] Automation/macro APIs over canonical session descriptors, batching primitives, and runtime command IDs
-- [ ] Diagnostics workbench or operator tooling on top of the public diagnostics/probe surface
-- [ ] Resolve retained history/save semantic mismatches if the next milestone touches transaction or persistence behavior
+- [ ] The demo opens into a graph-first shell where the node graph and a host-level menu are the first things users see.
+- [ ] Users can adjust shell/view, editing behavior, and runtime-facing demo controls from compact host-level menu groups while staying on the same live graph.
+- [ ] The demo explains replaceable seams and current runtime configuration with compact in-context proof instead of large static explanation panels.
+- [ ] The redesigned showcase remains a proof of SDK capabilities rather than a fake product shell or a scene-switching sample gallery.
 
 ### Out of Scope
 
@@ -49,10 +59,13 @@ Hosts can integrate only the graph-editor pieces they need, replace default UI a
 - Replacing Avalonia with another UI stack before plugin/automation value is realized on the current stack
 - Algorithm execution engine work unrelated to SDK hardening
 - Large-scale visual redesign of the shipped shell
+- Runtime plugin loading and automation APIs in this milestone; this cycle focuses on presenting the already-shipped extensibility seams more clearly
 
 ## Context
 
 Milestone `v1.2` shipped on 2026-04-08 after phases 13-18 extracted the kernel, normalized descriptor contracts, thinned Avalonia adapters, and closed with migration/readiness proof. The next product risk is no longer architectural center-of-gravity drift inside the current runtime. It is how to use the newly explicit seams for real plugin loading, automation APIs, and higher-level tooling without reintroducing facade-shaped dependencies.
+
+The immediate adoption problem, however, is more basic inside the demo host: the current `AsterGraph.Demo` UI behaves like a capability console with large explanatory side panels. It proves many seams, but it does not make the graph or the host-level integration story legible at first glance. The next milestone therefore focuses on presentation of the shipped SDK story before it adds the next layer of runtime features.
 
 ## Constraints
 
@@ -73,12 +86,14 @@ Milestone `v1.2` shipped on 2026-04-08 after phases 13-18 extracted the kernel, 
 | Treat Avalonia as an adapter layer over shared runtime routing and seam binders | Shell/canvas duplication should not remain the policy source | ✓ Good |
 | Keep `GraphEditorViewModel` and `GraphEditorView` as retained compatibility facades with explicit proof | Staged migration remained possible while the canonical route moved to the kernel | ✓ Good |
 | Use `HostSample`, `PackageSmoke`, and `ScaleSmoke` as the proof ring for migration and readiness claims | Architectural claims stay machine-checkable and host-visible | ✓ Good |
+| Lead the next milestone with demo showcase UX rather than plugin/automation implementation | The shipped architecture is ready, but the demo still undersells the host integration story | — Pending |
+| Keep the demo on one live graph session with host-level menu controls instead of scene switching | A single-session showcase better demonstrates seam replacement without hiding runtime continuity | — Pending |
 
 ## Next Milestone Goals
 
-- Turn readiness descriptors into actual plugin-loading and automation APIs.
-- Decide whether the next milestone leads with plugin loading, automation, or diagnostics tooling.
-- Preserve the proof-ring discipline so future work extends the shipped vocabulary instead of redefining it.
+- Turn `AsterGraph.Demo` into a graph-first showcase that makes host-controlled seams obvious on first read.
+- Replace the current side-panel-heavy capability console with a compact host-level menu and on-demand control surfaces.
+- Preserve the proof-ring discipline so future plugin/automation work extends a clearer and more persuasive demo baseline.
 
 ## Archived Milestone Framing
 
@@ -100,4 +115,4 @@ This document evolves at milestone boundaries.
 4. Reset active requirements so the next roadmap starts from the highest remaining product risk instead of stale execution context.
 
 ---
-*Last updated: 2026-04-08 after v1.2 milestone*
+*Last updated: 2026-04-08 after starting milestone v1.3*
