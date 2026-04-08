@@ -37,6 +37,7 @@ Route guidance:
 - package-neutral default storage redirection through `StorageRootPath`
 - replaceable services via `IGraphWorkspaceService`, `IGraphFragmentWorkspaceService`, `IGraphFragmentLibraryService`, and `IGraphClipboardPayloadSerializer`
 - recoverable-failure publication through `IGraphEditorDiagnosticsSink`
+- readiness discovery through `GetFeatureDescriptors()` for capability, service, and integration seams
 - localization via `IGraphLocalizationProvider`
 - runtime node display state via `INodePresentationProvider`
 - host-owned menu actions via `IGraphContextMenuAugmentor`
@@ -58,6 +59,12 @@ The same guidance now applies to host extension seams:
 - prefer `NodePresentationContext` over taking `NodeViewModel` directly
 
 The older MVVM-rooted extension methods remain available only as migration shims.
+
+Phase 18 readiness proof is anchored on the session boundary, not on the retained constructor path:
+
+- `tools/AsterGraph.HostSample` prints the human-readable readiness seam summary
+- `tools/AsterGraph.PackageSmoke` emits machine-checkable `PHASE18_*` markers
+- `tools/AsterGraph.ScaleSmoke` proves the same session/inspection-driven readiness story on a larger graph
 
 Reference material:
 

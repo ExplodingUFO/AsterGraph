@@ -51,6 +51,11 @@ Canonical and compatibility UI entry paths:
 
 Per-surface presentation replacement is opt-in through `AsterGraphPresentationOptions`.
 
+Phase 18 readiness note:
+
+- future plugin/automation work should anchor on `editor.Session` / `CreateSession(...)`, not on Avalonia controls themselves
+- `tools/AsterGraph.HostSample`, `tools/AsterGraph.PackageSmoke`, and `tools/AsterGraph.ScaleSmoke` now carry the readiness proof markers for that runtime boundary
+
 Phase 16 adapter boundary:
 
 - Stock full-shell and standalone-canvas context menus are built from `editor.Session.Queries.BuildContextMenuDescriptors(...)`.

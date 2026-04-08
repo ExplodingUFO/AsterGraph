@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: kernel-extraction-capability-contracts-and-plugin-readiness
-status: Planning Phase 18
-stopped_at: Phase 18 planned; 18-01 readiness descriptors and contract proof is next
-last_updated: "2026-04-08T06:07:50Z"
+status: Ready To Complete Milestone
+stopped_at: Phase 18 completed; milestone v1.2 ready for completion
+last_updated: "2026-04-08T06:26:13Z"
 progress:
   total_phases: 6
-  completed_phases: 5
+  completed_phases: 6
   total_plans: 18
-  completed_plans: 15
+  completed_plans: 18
 ---
 
 # Project State
@@ -19,14 +19,14 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-04-04)
 
 **Core value:** Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
-**Current focus:** Phase 18 execution after planning locked the plugin-and-automation readiness proof ring into descriptor, sample/smoke/scale, and closeout waves
+**Current focus:** Milestone completion after Phase 18 closed plugin-and-automation readiness with descriptor proof, sample/smoke markers, and large-graph validation
 
 ## Current Position
 
-Phase: 18. Plugin And Automation Readiness Proof Ring
-Plan: 18-01, 18-02, and 18-03 drafted
-Status: Planning Phase 18
-Last activity: 2026-04-08 — Planned Phase 18 around explicit readiness descriptors, runnable readiness markers, and milestone-close proof
+Phase: Milestone Closeout
+Plan: Phase 18 completed
+Status: Ready To Complete Milestone
+Last activity: 2026-04-08 — Completed Phase 18 readiness descriptors, runnable proof markers, large-graph readiness proof, and docs/closeout updates
 
 ## Accumulated Context
 
@@ -65,6 +65,8 @@ New milestone decisions:
 - Keep the new `PHASE17_*` HostSample and PackageSmoke markers as the migration-proof baseline while Phase 18 expands the proof ring toward plugin and automation readiness.
 - Treat explicit seam discoverability as the first Phase 18 risk; `AsterGraphEditorOptions` already exposes the host seams, but the proof ring still needs to advertise them as readiness signals.
 - Use `HostSample`, `PackageSmoke`, and `ScaleSmoke` together in Phase 18 so human-readable proof, machine-checkable package proof, and large-graph automation proof do not drift apart.
+- Keep the new `PHASE18_*` markers as the milestone-completion readiness baseline; later plugin/automation phases should extend them rather than redefining the proof vocabulary.
+- Treat direct legacy-constructor integrations as a compatibility window, not the canonical plugin/automation readiness base; the canonical readiness parity guarantee now sits on `CreateSession(...)` and `Create(...)`.
 
 ### Pending Todos
 
@@ -79,7 +81,8 @@ None captured yet.
 - Phase 17 closed with migration proof, but the next phase should avoid reopening compatibility-route churn unless it is required by plugin/automation readiness evidence.
 - The known `STATE_HISTORY_OK` mismatch in `tools/AsterGraph.PackageSmoke` is still a pre-existing baseline item, not a Phase 17 regression.
 - Current runtime feature descriptors likely under-report some optional services/providers relative to `AsterGraphEditorOptions`; Phase 18 should close that gap explicitly instead of relying on docs alone.
-- The main scope risk for Phase 18 is accidentally drifting into actual plugin loader or automation API work instead of keeping the phase centered on readiness proof.
+- The known `STATE_HISTORY_OK` mismatch remains a baseline issue even after Phase 18; it did not block readiness proof, but it also was not resolved by this milestone.
+- No current blocker remains for closing the milestone.
 
 ### Quick Tasks Completed
 
@@ -90,5 +93,5 @@ None captured yet.
 ## Session Continuity
 
 Last session: 2026-04-08
-Stopped at: Phase 18 planned; 18-01 readiness descriptors and contract proof is next
-Resume file: .planning/phases/18-plugin-and-automation-readiness-proof-ring/18-01-PLAN.md
+Stopped at: Phase 18 completed; milestone v1.2 ready for completion
+Resume file: .planning/ROADMAP.md

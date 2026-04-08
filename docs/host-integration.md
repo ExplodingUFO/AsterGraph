@@ -117,6 +117,7 @@ Notes:
 - `tools/AsterGraph.PackageSmoke` should be run with `UsePackedAsterGraphPackages=true` so it restores from `artifacts/packages` instead of falling back to project references.
 - `tools/AsterGraph.HostSample` stays valuable even after package smoke passes because it validates the supported host-composition path, diagnostics flow, and stock Avalonia integration surface under normal project references.
 - Phase 17 migration proof adds human-readable route guidance in `tools/AsterGraph.HostSample` and machine-checkable `PHASE17_ROUTE_SIGNAL_OK` / `PHASE17_SHARED_CANONICAL_OK` markers in `tools/AsterGraph.PackageSmoke`.
+- Phase 18 readiness proof adds human-readable seam/readiness reporting in `tools/AsterGraph.HostSample`, machine-checkable `PHASE18_*` markers in `tools/AsterGraph.PackageSmoke`, and `PHASE18_SCALE_READINESS_OK` in `tools/AsterGraph.ScaleSmoke`.
 
 ## Canonical Host Composition
 
@@ -260,7 +261,7 @@ Use this path when the host wants to keep the stock graph canvas, inspector, or 
 - `Commands`
   - host-triggered mutations such as `SetSelection`, `SetNodePositions`, `StartConnection`, `CompleteConnection`, `CancelPendingConnection`, `DeleteConnection`, `BreakConnectionsForPort`, `CenterViewOnNode`, `CenterViewAt`, `AddNode`, `DeleteSelection`, `PanBy`, `ZoomAt`, `SaveWorkspace`, and `LoadWorkspace`
 - `Queries`
-  - `CreateDocumentSnapshot`, selection/viewport/capability snapshots, node positions, pending-connection state, DTO-based compatible-target discovery, and the retained compatibility query
+  - `CreateDocumentSnapshot`, selection/viewport/capability snapshots, node positions, pending-connection state, `GetFeatureDescriptors()`, DTO-based compatible-target discovery, and the retained compatibility query
 - `Events`
   - document, selection, viewport, pending connection, fragment, command, and recoverable-failure notifications
 - `BeginMutation(...)`
@@ -273,6 +274,7 @@ Compatibility note:
 - `GraphEditorViewModel.Session` remains the staged migration bridge for existing hosts.
 - `GetCompatibleTargets(...)` remains available only for legacy MVVM-oriented callers.
 - New custom UI hosts should prefer `CreateSession(...)` plus ID/DTO-based commands and queries.
+- `GetFeatureDescriptors()` is now the explicit readiness-discovery point for later plugin/automation work: it advertises the stable runtime capabilities plus optional service/integration seams already wired through `AsterGraphEditorOptions`.
 - The same migration rule applies to extension seams: prefer stable context objects over raw `GraphEditorViewModel` / `NodeViewModel` access where the new overloads exist.
 
 ## Replaceable Services And Diagnostics
@@ -476,7 +478,13 @@ Reference sample:
 - Run with:
   - `dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj`
 - The sample demonstrates both the convenience full shell and standalone canvas/inspector/mini map composition against the same editor state.
-- It also prints human-readable diagnostics/inspection evidence, machine-checkable descriptor/runtime markers from earlier phases, Phase 16 adapter-boundary markers for menu routing, shortcut routing, and platform-seam ownership, plus Phase 17 migration-proof guidance for canonical runtime, canonical hosted-UI, and retained compatibility routes.
+- It also prints human-readable diagnostics/inspection evidence, machine-checkable descriptor/runtime markers from earlier phases, Phase 16 adapter-boundary markers, Phase 17 migration guidance, and Phase 18 readiness seam output for the canonical runtime boundary.
+- `tools/AsterGraph.PackageSmoke`
+  - `dotnet run --project tools/AsterGraph.PackageSmoke/AsterGraph.PackageSmoke.csproj --nologo`
+  - emits machine-checkable `PHASE17_*` and `PHASE18_*` markers, including canonical readiness parity and the legacy direct-constructor readiness window boundary
+- `tools/AsterGraph.ScaleSmoke`
+  - `dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj --nologo`
+  - emits `PHASE18_SCALE_READINESS_OK` to prove session-driven automation/inspection primitives still hold on a larger graph
 
 ## Localization
 
