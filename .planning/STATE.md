@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: demo-showcase
-status: Ready To Plan Phase 20
-stopped_at: Phase 19 complete; next step is to plan host menu control consolidation
-last_updated: "2026-04-08T07:25:00Z"
+status: Phase 20 Planned
+stopped_at: Phase 20 planned; next step is to execute host menu control consolidation
+last_updated: "2026-04-08T07:42:44Z"
 last_activity: 2026-04-08
 progress:
   total_phases: 3
   completed_phases: 1
-  total_plans: 3
+  total_plans: 6
   completed_plans: 3
 ---
 
@@ -20,14 +20,14 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-04-08)
 
 **Core value:** Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
-**Current focus:** Phase 20 host menu control consolidation planning on top of the new graph-first demo shell
+**Current focus:** Phase 20 host menu control consolidation execution on top of the new graph-first demo shell
 
 ## Current Position
 
 Phase: 20
-Plan: Not started
-Status: Ready To Plan Phase 20
-Last activity: 2026-04-08 — Completed Phase 19 graph-first demo shell work
+Plan: Planned
+Status: Phase 20 Planned
+Last activity: 2026-04-08 — Planned Phase 20 host menu control consolidation
 
 ## Accumulated Context
 
@@ -44,6 +44,9 @@ Carry-forward decisions from shipped milestones:
 - Keep the next demo experience on one live graph session controlled by host-level menus rather than switching between canned scenes.
 - Keep the new in-window host menu as the first visible shell control plane in the demo.
 - Keep secondary showcase detail behind a compact on-demand pane so the graph remains the dominant surface.
+- Keep the top host menu as the first control plane and use direct checkable menu items for the highest-signal view/behavior toggles.
+- Keep the right-side `SplitView` pane as the compact dense control/readout surface for the currently active menu group.
+- Keep all Phase 20 control state bound to the existing `MainWindowViewModel` booleans and `Editor.Session` projections rather than duplicating editor or runtime state.
 
 ### Pending Todos
 
@@ -55,6 +58,8 @@ None captured yet.
 - The known `STATE_HISTORY_OK` mismatch remains a pre-existing baseline issue if the next milestone touches history/save semantics.
 - The next milestone should avoid reopening kernel/facade ownership drift unless new evidence requires it.
 - The demo redesign should stay focused on showcase clarity, not expand into unrelated end-user feature work.
+- Phase 20 should keep the host menu shallow and compact; over-nesting or ribbon-like growth would undercut the graph-first shell.
+- Runtime readouts should stay compact in this phase; broader proof/narrative cleanup remains Phase 21 work.
 
 ### Quick Tasks Completed
 
@@ -65,5 +70,5 @@ None captured yet.
 ## Session Continuity
 
 Last session: 2026-04-08
-Stopped at: Phase 19 complete; next step is to plan host menu control consolidation
-Resume file: .planning/ROADMAP.md
+Stopped at: Phase 20 planned; next step is to execute host menu control consolidation
+Resume file: .planning/phases/20-host-menu-control-consolidation/20-01-PLAN.md
