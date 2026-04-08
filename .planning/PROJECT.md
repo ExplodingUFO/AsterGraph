@@ -2,103 +2,102 @@
 
 ## What This Is
 
-AsterGraph is a modular node-graph editor toolkit for .NET with a reusable editor state layer and an Avalonia UI shell. The foundation and first hardening milestones are complete: the project now ships a publishable four-package boundary, runtime/session contracts, embeddable Avalonia surfaces, replaceable presentation seams, diagnostics hooks, host proof tools, and repeatable scale validation.
-
-The next milestone shifts from hardening shipped surfaces to fixing the architectural center of gravity. The remaining risk is that the SDK still behaves like a `GraphEditorViewModel`-centered system with a session facade, rather than a true kernel-first runtime with adapters on top.
+AsterGraph is a modular node-graph editor toolkit for .NET with a kernel-first editor runtime, explicit descriptor-based host contracts, and an Avalonia UI shell. The shipped baseline now covers a publishable four-package SDK boundary, runtime/session contracts, embeddable Avalonia surfaces, replaceable presentation seams, diagnostics hooks, scaling hardening, migration proof, and plugin/automation readiness proof.
 
 ## Core Value
 
 Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
 
-## Current Milestone: v1.2 Kernel Extraction, Capability Contracts, and Plugin Readiness
+## Current State
 
-**Goal:** Extract the real editor kernel out of the current façade-centered architecture, normalize capability/descriptor contracts, and leave the SDK ready for later plugin and automation work without another deep boundary rewrite.
-
-**Target features:**
-- Extract the canonical mutable editor state owner so runtime/session composition no longer depends on constructing `GraphEditorViewModel`.
-- Rebuild the session/facade relationship so `GraphEditorViewModel` becomes a compatibility adapter rather than the architectural core.
-- Replace public MVVM-shaped command/menu/state exposure with explicit capability, descriptor, and read-only query contracts.
-- Thin the Avalonia layer so shell/canvas/input/clipboard behavior consumes shared kernel contracts instead of duplicating policy.
-- Prove the migration path through focused regressions, HostSample, PackageSmoke, and the retained scale/proof tooling.
+- Shipped packages remain `AsterGraph.Abstractions`, `AsterGraph.Core`, `AsterGraph.Editor`, and `AsterGraph.Avalonia`.
+- Canonical composition is now kernel-first through `AsterGraphEditorFactory.CreateSession(...)` and `AsterGraphEditorFactory.Create(...)`, without `GraphEditorViewModel` as the runtime state owner.
+- Public host-facing capability, command, menu, and graph-state reads now prefer descriptor and snapshot contracts over MVVM object shape.
+- Avalonia shell and canvas routing/platform seams now flow through shared adapters instead of duplicating policy independently.
+- Migration posture and plugin/automation readiness are locked by focused regressions plus runnable `HostSample`, `PackageSmoke`, and `ScaleSmoke` proof markers.
+- The known `STATE_HISTORY_OK` mismatch remains an unresolved pre-v1.2 baseline if the next milestone touches history/save semantics.
 
 ## Requirements
 
-### Validated Foundation
+### Validated
 
 - ✓ Host can consume the four publishable AsterGraph packages through a documented SDK boundary and supported `net8.0` / `net9.0` target story — v1.0
 - ✓ Host can initialize the editor runtime and default Avalonia view through public factory/options APIs while the constructor-based path remains supported — v1.0
-- ✓ Host can migrate through a staged compatibility path backed by parity tests and smoke coverage across legacy and factory entry routes — v1.0
-- ✓ Host can drive the editor through public runtime-session contracts, typed events, batching, and replaceable services without depending on Avalonia control internals for the already-shipped baseline flows — v1.0
+- ✓ Host can migrate through a staged compatibility path backed by parity tests and smoke coverage across legacy and factory entry routes — v1.0 to v1.2
+- ✓ Host can drive the editor through public runtime-session contracts, typed events, batching, and replaceable services without depending on Avalonia control internals for shipped baseline flows — v1.0
 - ✓ Host can embed the full shell, standalone canvas, standalone inspector, and standalone mini map against the same editor state, with explicit standalone canvas stock-behavior opt-outs — v1.0
 - ✓ Host can replace stock visual presenters for nodes, menus, inspector, and mini map while reusing the existing editor-owned behavior and data projections — v1.0
 - ✓ Host can inspect diagnostics and receive machine-readable recoverable failures through the shipped diagnostics/session surface — v1.0
 - ✓ Host/runtime boundaries, native Avalonia behavior, hot-path scaling, and proof-ring validation are materially hardened through phases 07-12 — v1.1
+- ✓ The canonical runtime/editor state owner can be composed without constructing `GraphEditorViewModel` — v1.2
+- ✓ `IGraphEditorSession` and related runtime contracts now operate over kernel-owned state/contracts rather than a VM-owned facade — v1.2
+- ✓ Public command, capability, menu, and state-query contracts now use explicit descriptors and snapshots as the canonical host surface — v1.2
+- ✓ `AsterGraph.Avalonia` now consumes thinner kernel/facade contracts with shared command/menu/platform adapters — v1.2
+- ✓ Existing `GraphEditorViewModel` / `GraphEditorView` hosts keep a staged migration path while the kernel-first route is canonical and explicitly proven — v1.2
+- ✓ The shipped architecture is explicitly ready for later plugin loading and richer automation without another deep boundary rewrite — v1.2
 
-### Active Milestone Requirements
+### Active
 
-- [ ] The canonical runtime/editor state owner can be composed without constructing `GraphEditorViewModel`.
-- [ ] `IGraphEditorSession` and related runtime contracts operate over kernel-owned state/contracts rather than a VM-owned façade.
-- [ ] Public command, capability, menu, and state-query contracts avoid depending on MVVM implementation types and mutable public collections where stable descriptors or snapshots are sufficient.
-- [ ] `AsterGraph.Avalonia` consumes thinner kernel/facade contracts and stops duplicating command-routing policy between shell and canvas controls.
-- [ ] Existing `GraphEditorViewModel` / `GraphEditorView` hosts keep a staged migration path while the kernel-first path becomes canonical.
-- [ ] The resulting architecture is explicitly ready for later plugin loading and richer automation without another boundary rewrite.
+- [ ] Runtime plugin loading, discovery, isolation, and trust model on top of the shipped readiness descriptors
+- [ ] Automation/macro APIs over canonical session descriptors, batching primitives, and runtime command IDs
+- [ ] Diagnostics workbench or operator tooling on top of the public diagnostics/probe surface
+- [ ] Resolve retained history/save semantic mismatches if the next milestone touches transaction or persistence behavior
 
 ### Out of Scope
 
-- New end-user graph-editing features unrelated to extensibility, host integration, or scaling — this milestone is hardening-oriented
-- A non-Avalonia presentation stack — the goal is to make the current Avalonia offering more reusable, not replace it
-- Runtime plugin loading — still deferred until the public runtime and extension seams are more stable
-- Algorithm execution engine — still a separate direction from SDK hardening
-- Deep aesthetic redesign of the shipped UI — native-feeling interaction and host cooperation matter here, not wholesale visual restyling
+- New graph-editing end-user features unrelated to extensibility, host integration, or scaling
+- Replacing Avalonia with another UI stack before plugin/automation value is realized on the current stack
+- Algorithm execution engine work unrelated to SDK hardening
+- Large-scale visual redesign of the shipped shell
 
 ## Context
 
-The original v1.0 milestone delivered the intended foundations: package boundary, runtime contracts, embeddable Avalonia surfaces, replaceable presentation, diagnostics, documentation, package smoke, and host sample validation. Since then, the repository has been cleaned up, package validation has been re-run, and the remaining XML warning debt has been retired.
-
-A fresh cross-cutting review of the current mainline surfaced the next real bottlenecks:
-
-- the runtime/session host story is still incomplete for serious custom UI hosts because important interaction primitives remain on `GraphEditorViewModel`
-- several public host seams still bind directly to MVVM implementation types rather than stable runtime abstractions
-- the full-shell Avalonia host path hard-captures desktop shortcuts and stock behavior in ways that make embedding less native
-- the canvas hot paths still do whole-layer connection rebuilds, repeated linear node lookups, and full-graph marquee selection recomputation
-- state, inspector, history, and dirty tracking still lean on whole-graph or whole-document work in places where scaling pressure will show up first
-
-This milestone therefore treats “kernel extraction”, “explicit capability contracts”, and “adapter thinning” as the primary product risks to retire next.
+Milestone `v1.2` shipped on 2026-04-08 after phases 13-18 extracted the kernel, normalized descriptor contracts, thinned Avalonia adapters, and closed with migration/readiness proof. The next product risk is no longer architectural center-of-gravity drift inside the current runtime. It is how to use the newly explicit seams for real plugin loading, automation APIs, and higher-level tooling without reintroducing facade-shaped dependencies.
 
 ## Constraints
 
 - **Tech stack**: Keep the solution centered on .NET, C#, and Avalonia
-- **Compatibility strategy**: Keep `GraphEditorViewModel` available as a compatibility facade while making the kernel-first path canonical
+- **Compatibility strategy**: Keep the migration window deliberate and additive rather than forcing a one-shot public break
 - **Product positioning**: Preserve publishable package quality for the four supported SDK packages
-- **Architecture**: Harden the existing system incrementally; do not rewrite the editor/runtime stack from scratch
-- **Extensibility**: Prefer stable DTOs/contracts and explicit capability descriptors over leaking mutable MVVM types through public seams
-- **Host integration**: Keep Avalonia-specific adapters out of the kernel control plane where possible
-- **Architecture**: Extract, then normalize; do not combine kernel extraction with unrelated feature growth
+- **Architecture**: Extend the shipped kernel-first baseline incrementally; do not rewrite the runtime or shell from scratch
+- **Extensibility**: Prefer stable descriptors, snapshots, and explicit service seams over leaking mutable MVVM implementation types
+- **Observability**: Diagnostics, proof outputs, and smoke markers remain part of the product surface, not local developer conveniences
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Treat v1.1 as the shipped hardening baseline and start a new kernel-focused milestone | The next risk is no longer missing behavior, but the façade-centered architecture itself | ✓ Good |
-| Extract the state owner before building plugin or automation features | Plugin and automation work on top of a VM-centered runtime would compound the wrong boundary | ✓ Good |
-| Normalize capability/menu/command contracts after kernel extraction, not before | Descriptor cleanup is safer once state ownership and session boundaries are stable | ✓ Good |
-| Keep Avalonia as an adapter layer, not the policy source | Input/clipboard/host-context duplication should not remain spread across controls | ✓ Good |
-| Preserve the existing proof ring during architecture changes | Kernel extraction without migration proof would create silent regressions for existing hosts | ✓ Good |
+| Keep the four-package SDK boundary as the supported publish surface | Hosts and packages already depend on that contract | ✓ Good |
+| Extract the canonical state owner before plugin or automation work | Extensibility on a facade-owned runtime would compound the wrong boundary | ✓ Good |
+| Normalize capability, command, and menu discovery around descriptors and snapshots | Stable host contracts are easier to version than MVVM object shape | ✓ Good |
+| Treat Avalonia as an adapter layer over shared runtime routing and seam binders | Shell/canvas duplication should not remain the policy source | ✓ Good |
+| Keep `GraphEditorViewModel` and `GraphEditorView` as retained compatibility facades with explicit proof | Staged migration remained possible while the canonical route moved to the kernel | ✓ Good |
+| Use `HostSample`, `PackageSmoke`, and `ScaleSmoke` as the proof ring for migration and readiness claims | Architectural claims stay machine-checkable and host-visible | ✓ Good |
+
+## Next Milestone Goals
+
+- Turn readiness descriptors into actual plugin-loading and automation APIs.
+- Decide whether the next milestone leads with plugin loading, automation, or diagnostics tooling.
+- Preserve the proof-ring discipline so future work extends the shipped vocabulary instead of redefining it.
+
+## Archived Milestone Framing
+
+<details>
+<summary>v1.2 planning snapshot</summary>
+
+Kernel Extraction, Capability Contracts, and Plugin Readiness focused on extracting the real editor kernel, rebuilding the session/facade relationship around that kernel, normalizing host contracts around descriptors, thinning the Avalonia adapter boundary, and proving migration/readiness with focused regressions plus runnable samples and smoke tools.
+
+</details>
 
 ## Evolution
 
-This document evolves at phase transitions and milestone boundaries.
-
-**After each phase transition**:
-1. Move validated requirements into the foundation/validated section with phase references.
-2. Update active requirements if the newly learned constraints change milestone scope.
-3. Log any new SDK-boundary or host-integration decisions.
-4. Re-check whether the current milestone goal still reflects the highest remaining product risk.
+This document evolves at milestone boundaries.
 
 **After each milestone**:
-1. Summarize what was actually shipped in `MILESTONES.md`.
-2. Audit which “active” requirements are now validated, deferred, or superseded.
-3. Reset `STATE.md` so the next roadmap starts from a clean position rather than stale execution state.
+1. Move newly shipped requirements into the validated section.
+2. Re-check whether the current core value and product description still match what the codebase actually delivers.
+3. Log the architectural decisions that proved durable during the milestone.
+4. Reset active requirements so the next roadmap starts from the highest remaining product risk instead of stale execution context.
 
 ---
-*Last updated: 2026-04-04 for milestone v1.2 planning*
+*Last updated: 2026-04-08 after v1.2 milestone*
