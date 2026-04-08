@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: demo-showcase
-status: Planning Phase 19
-stopped_at: Milestone v1.3 initialized; next step is to discuss or plan Phase 19
-last_updated: "2026-04-08T07:10:00Z"
+status: Phase 19 Planned
+stopped_at: Phase 19 planned; next step is to execute the graph-first demo shell work
+last_updated: "2026-04-08T07:13:10.5395315Z"
 last_activity: 2026-04-08
 progress:
   total_phases: 3
   completed_phases: 0
-  total_plans: 0
+  total_plans: 3
   completed_plans: 0
 ---
 
@@ -20,14 +20,14 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-04-08)
 
 **Core value:** Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
-**Current focus:** Phase 19 graph-first demo shell planning for the new v1.3 showcase milestone
+**Current focus:** Execute Phase 19 to establish the graph-first demo shell and host-level menu baseline
 
 ## Current Position
 
 Phase: 19
-Plan: Not started
-Status: Planning Phase 19
-Last activity: 2026-04-08 — Created the v1.3 roadmap for the demo showcase milestone
+Plan: 01-03 planned
+Status: Phase 19 Planned
+Last activity: 2026-04-08 — Planned Phase 19 graph-first demo shell work
 
 ## Accumulated Context
 
@@ -63,5 +63,5 @@ None captured yet.
 ## Session Continuity
 
 Last session: 2026-04-08
-Stopped at: Milestone v1.3 initialized; next step is to discuss or plan Phase 19
-Resume file: .planning/ROADMAP.md
+Stopped at: Phase 19 planned; next step is to execute the graph-first demo shell work
+Resume file: .planning/phases/19-graph-first-demo-shell/19-01-PLAN.md
