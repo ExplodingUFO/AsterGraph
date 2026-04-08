@@ -169,6 +169,60 @@ public sealed class GraphEditorViewTests
         Assert.True(augmentor.ReceivedHostOwner);
     }
 
+    [AvaloniaFact]
+    public void DirectGraphEditorView_WithFactoryCreatedEditor_PreservesCompatibilitySurfaceBehavior()
+    {
+        var catalog = new NodeCatalog();
+        catalog.RegisterDefinition(
+            new NodeDefinition(
+                new NodeDefinitionId("tests.view.factory"),
+                "Factory View Node",
+                "Tests",
+                "Exercises direct GraphEditorView with a factory-created editor.",
+                [],
+                []));
+        var editor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
+        {
+            Document = new GraphDocument(
+                "Factory View Graph",
+                "Exercises direct GraphEditorView behavior with a factory-created editor.",
+                [
+                    new GraphNode(
+                        "tests.view.factory-001",
+                        "Factory View Node",
+                        "Tests",
+                        "GraphEditorView",
+                        "Used by GraphEditorView factory-created editor tests.",
+                        new GraphPoint(120, 160),
+                        new GraphSize(240, 160),
+                        [],
+                        [],
+                        "#6AD5C4",
+                        new NodeDefinitionId("tests.view.factory")),
+                ],
+                []),
+            NodeCatalog = catalog,
+            CompatibilityService = new DefaultPortCompatibilityService(),
+        });
+        var window = CreateWindow(new GraphEditorView
+        {
+            Editor = editor,
+            ChromeMode = GraphEditorViewChromeMode.CanvasOnly,
+        });
+        var view = (GraphEditorView)window.Content!;
+        var canvas = FindRequiredControl<NodeCanvas>(view, "PART_NodeCanvas");
+
+        Assert.Same(editor, view.Editor);
+        Assert.False(canvas.AttachPlatformSeams);
+        Assert.True(canvas.EnableDefaultContextMenu);
+        Assert.True(canvas.EnableDefaultCommandShortcuts);
+        Assert.NotNull(editor.HostContext);
+        Assert.True(editor.HostContext!.TryGetOwner<GraphEditorView>(out var owner));
+        Assert.Same(view, owner);
+        Assert.True(editor.HostContext.TryGetTopLevel<Window>(out var topLevel));
+        Assert.Same(window, topLevel);
+    }
+
     private static Window CreateWindow(GraphEditorView view)
     {
         var window = new Window

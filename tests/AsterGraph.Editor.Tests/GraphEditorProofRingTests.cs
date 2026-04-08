@@ -201,6 +201,39 @@ public sealed class GraphEditorProofRingTests
         Assert.IsNotType<GraphEditorViewModel>(factoryHost);
     }
 
+    [Fact]
+    public void RuntimeAndRetainedProof_StayAlignedOnSharedDescriptorSignatures()
+    {
+        var legacyEditor = new GraphEditorViewModel(
+            CreateDocument(),
+            CreateCatalog(),
+            new ExactCompatibilityService());
+        var factoryEditor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
+        {
+            Document = CreateDocument(),
+            NodeCatalog = CreateCatalog(),
+            CompatibilityService = new ExactCompatibilityService(),
+        });
+        var runtimeSession = AsterGraphEditorFactory.CreateSession(new AsterGraphEditorOptions
+        {
+            Document = CreateDocument(),
+            NodeCatalog = CreateCatalog(),
+            CompatibilityService = new ExactCompatibilityService(),
+        });
+
+        var legacySignature = CaptureSharedSessionSignature(legacyEditor.Session);
+        var factorySignature = CaptureSharedSessionSignature(factoryEditor.Session);
+        var runtimeSignature = CaptureSharedSessionSignature(runtimeSession);
+        var legacyCommandIds = legacyEditor.Session.Queries.GetCommandDescriptors().Select(descriptor => descriptor.Id).ToHashSet(StringComparer.Ordinal);
+        var runtimeCommandIds = runtimeSession.Queries.GetCommandDescriptors().Select(descriptor => descriptor.Id).ToHashSet(StringComparer.Ordinal);
+
+        Assert.Equal(legacySignature, factorySignature);
+        Assert.Equal(legacySignature, runtimeSignature);
+        Assert.True(runtimeCommandIds.IsSubsetOf(legacyCommandIds));
+        Assert.Contains("nodes.duplicate", legacyCommandIds);
+        Assert.DoesNotContain("nodes.duplicate", runtimeCommandIds);
+    }
+
     [AvaloniaFact]
     public void FullShellAndStandaloneProof_UseCanonicalMenuRoutingAcrossSharedAdapters()
     {
@@ -289,6 +322,15 @@ public sealed class GraphEditorProofRingTests
             ?? throw new Xunit.Sdk.XunitException("Could not find NodeCanvas.HandleCanvasContextRequested.");
         method.Invoke(canvas, [canvas, args]);
     }
+
+    private static SessionSharedSignature CaptureSharedSessionSignature(IGraphEditorSession session)
+        => new(
+            string.Join("|", session.Queries.GetFeatureDescriptors().Select(descriptor => $"{descriptor.Category}:{descriptor.Id}:{descriptor.IsAvailable}")),
+            string.Join("|", session.Queries.GetCommandDescriptors()
+                .Where(descriptor => SharedCanonicalCommandIds.Contains(descriptor.Id, StringComparer.Ordinal))
+                .OrderBy(descriptor => descriptor.Id, StringComparer.Ordinal)
+                .Select(descriptor => $"{descriptor.Id}:{descriptor.IsEnabled}")),
+            string.Join("|", session.Queries.BuildContextMenuDescriptors(new ContextMenuContext(ContextMenuTargetKind.Canvas, new GraphPoint(240, 180))).Select(descriptor => descriptor.Id)));
 
     private static GraphDocument CreateDocument()
         => new(
@@ -466,4 +508,25 @@ public sealed class GraphEditorProofRingTests
         public void Publish(GraphEditorDiagnostic diagnostic)
             => Diagnostics.Add(diagnostic);
     }
+
+    private sealed record SessionSharedSignature(
+        string FeatureDescriptorSignature,
+        string CommandDescriptorSignature,
+        string CanvasMenuSignature);
+
+    private static readonly string[] SharedCanonicalCommandIds =
+    [
+        "nodes.add",
+        "selection.delete",
+        "connections.start",
+        "connections.connect",
+        "connections.cancel",
+        "connections.delete",
+        "connections.break-port",
+        "viewport.fit",
+        "viewport.reset",
+        "viewport.center-node",
+        "workspace.save",
+        "workspace.load",
+    ];
 }

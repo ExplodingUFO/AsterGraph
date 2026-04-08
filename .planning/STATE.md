@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: kernel-extraction-capability-contracts-and-plugin-readiness
-status: Planning Phase 17
-stopped_at: Phase 17 planning completed; execute 17-01 next
-last_updated: "2026-04-08T05:34:04Z"
+status: Executing Phase 17
+stopped_at: Phase 17 plan 17-01 completed; 17-02 API/docs alignment is next
+last_updated: "2026-04-08T05:43:06Z"
 progress:
   total_phases: 6
   completed_phases: 4
   total_plans: 15
-  completed_plans: 12
+  completed_plans: 13
 ---
 
 # Project State
@@ -24,9 +24,9 @@ See: `.planning/PROJECT.md` (updated 2026-04-04)
 ## Current Position
 
 Phase: 17. Compatibility Lock And Migration Proof
-Plan: 17-01, 17-02, and 17-03 planned
-Status: Planning Phase 17
-Last activity: 2026-04-08 — Created Phase 17 context, research, and execution plans
+Plan: 17-01 completed; 17-02 and 17-03 pending
+Status: Executing Phase 17
+Last activity: 2026-04-08 — Completed 17-01 migration parity regression matrix and verified focused migration/proof suites
 
 ## Accumulated Context
 
@@ -60,6 +60,7 @@ New milestone decisions:
 - Treat inspector/minimap/node-visual presenter contracts as compatibility-oriented seams for now; Phase 16 narrows their surrounding platform wiring without redesigning those contracts.
 - Keep the new `PHASE16_*` HostSample and PackageSmoke markers as the proof baseline for Avalonia adapter-boundary behavior until Phase 17 extends migration coverage further.
 - Prefer explicit canonical-vs-compatibility signaling through focused tests, sample/smoke markers, and API remarks before any harder deprecation posture is considered.
+- Treat retained-path extra commands as compatibility-only surface area, while expecting the shared canonical command/menu subset to stay aligned with `CreateSession(...)`.
 
 ### Pending Todos
 
@@ -83,5 +84,5 @@ None captured yet.
 ## Session Continuity
 
 Last session: 2026-04-08
-Stopped at: Phase 17 planning completed; execute 17-01 next
-Resume file: .planning/phases/17-compatibility-lock-and-migration-proof/17-01-PLAN.md
+Stopped at: Phase 17 plan 17-01 completed; 17-02 API/docs alignment is next
+Resume file: .planning/phases/17-compatibility-lock-and-migration-proof/17-02-PLAN.md

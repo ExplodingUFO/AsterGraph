@@ -590,6 +590,31 @@ public sealed class GraphEditorSessionTests
         Assert.Single(editor.Connections);
     }
 
+    [Fact]
+    public void FactoryEditorSession_And_CreateSession_ExposeEquivalentSharedCanonicalSignatures()
+    {
+        var definitionId = new NodeDefinitionId("tests.session.migration-signature");
+        var editor = AsterGraphEditorFactory.Create(CreateOptions(definitionId));
+        var runtimeSession = AsterGraphEditorFactory.CreateSession(CreateOptions(definitionId));
+        var retainedHost = editor.Session.GetType()
+            .GetField("_host", BindingFlags.Instance | BindingFlags.NonPublic)!
+            .GetValue(editor.Session);
+        var runtimeFields = runtimeSession.GetType().GetFields(BindingFlags.Instance | BindingFlags.NonPublic);
+
+        var retainedSignature = CaptureSessionSignature(editor.Session);
+        var runtimeSignature = CaptureSessionSignature(runtimeSession);
+        var retainedCommandIds = editor.Session.Queries.GetCommandDescriptors().Select(descriptor => descriptor.Id).ToHashSet(StringComparer.Ordinal);
+        var runtimeCommandIds = runtimeSession.Queries.GetCommandDescriptors().Select(descriptor => descriptor.Id).ToHashSet(StringComparer.Ordinal);
+
+        Assert.NotNull(retainedHost);
+        Assert.IsNotType<GraphEditorViewModel>(retainedHost);
+        Assert.DoesNotContain(runtimeFields, field => field.FieldType == typeof(GraphEditorViewModel));
+        Assert.Equal(retainedSignature, runtimeSignature);
+        Assert.True(runtimeCommandIds.IsSubsetOf(retainedCommandIds));
+        Assert.Contains("nodes.duplicate", retainedCommandIds);
+        Assert.DoesNotContain("nodes.duplicate", runtimeCommandIds);
+    }
+
     private static void AssertProperty(Type declaringType, string propertyName, Type propertyType)
     {
         var property = declaringType.GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance);
@@ -618,6 +643,16 @@ public sealed class GraphEditorSessionTests
         Assert.Equal(eventArgsType, handlerType.GetGenericArguments()[0]);
     }
 
+    private static SessionSignature CaptureSessionSignature(IGraphEditorSession session)
+        => new(
+            string.Join("|", session.Queries.GetFeatureDescriptors().Select(descriptor => $"{descriptor.Category}:{descriptor.Id}:{descriptor.IsAvailable}")),
+            string.Join("|", session.Queries.GetCommandDescriptors()
+                .Where(descriptor => SharedCanonicalCommandIds.Contains(descriptor.Id, StringComparer.Ordinal))
+                .OrderBy(descriptor => descriptor.Id, StringComparer.Ordinal)
+                .Select(descriptor => $"{descriptor.Id}:{descriptor.IsEnabled}")),
+            string.Join("|", session.Queries.BuildContextMenuDescriptors(new ContextMenuContext(ContextMenuTargetKind.Canvas, new GraphPoint(160, 90))).Select(descriptor => descriptor.Id)),
+            session.Queries.GetCapabilitySnapshot());
+
     private static AsterGraphEditorOptions CreateOptions(NodeDefinitionId definitionId)
         => new()
         {
@@ -625,6 +660,28 @@ public sealed class GraphEditorSessionTests
             NodeCatalog = CreateCatalog(definitionId),
             CompatibilityService = new DefaultPortCompatibilityService(),
         };
+
+    private sealed record SessionSignature(
+        string FeatureDescriptorSignature,
+        string CommandDescriptorSignature,
+        string CanvasMenuSignature,
+        GraphEditorCapabilitySnapshot CapabilitySnapshot);
+
+    private static readonly string[] SharedCanonicalCommandIds =
+    [
+        "nodes.add",
+        "selection.delete",
+        "connections.start",
+        "connections.connect",
+        "connections.cancel",
+        "connections.delete",
+        "connections.break-port",
+        "viewport.fit",
+        "viewport.reset",
+        "viewport.center-node",
+        "workspace.save",
+        "workspace.load",
+    ];
 
     private static GraphDocument CreateDocument(NodeDefinitionId definitionId)
         => new(

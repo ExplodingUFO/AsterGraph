@@ -353,6 +353,52 @@ public sealed class GraphEditorMigrationCompatibilityTests
         }
     }
 
+    [AvaloniaFact]
+    public void DirectAndFactoryFullShellRoutes_ExposeEquivalentMigrationViewSnapshots()
+    {
+        var harness = CreateHarness();
+        var legacyDirectSnapshot = CaptureViewRouteSnapshot(new GraphEditorView
+        {
+            Editor = CreateLegacyEditor(harness),
+            ChromeMode = GraphEditorViewChromeMode.CanvasOnly,
+        });
+        var factoryDirectSnapshot = CaptureViewRouteSnapshot(new GraphEditorView
+        {
+            Editor = CreateFactoryEditor(harness),
+            ChromeMode = GraphEditorViewChromeMode.CanvasOnly,
+        });
+        var legacyFactorySnapshot = CaptureViewRouteSnapshot(AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOptions
+        {
+            Editor = CreateLegacyEditor(harness),
+            ChromeMode = GraphEditorViewChromeMode.CanvasOnly,
+        }));
+        var factoryFactorySnapshot = CaptureViewRouteSnapshot(AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOptions
+        {
+            Editor = CreateFactoryEditor(harness),
+            ChromeMode = GraphEditorViewChromeMode.CanvasOnly,
+        }));
+
+        Assert.Equal(legacyDirectSnapshot, factoryDirectSnapshot);
+        Assert.Equal(legacyDirectSnapshot, legacyFactorySnapshot);
+        Assert.Equal(legacyDirectSnapshot, factoryFactorySnapshot);
+    }
+
+    [AvaloniaFact]
+    public void LegacyAndFactoryStandaloneCanvasRoutes_ExposeEquivalentMigrationSurfaceSnapshots()
+    {
+        var harness = CreateHarness();
+        var legacySnapshot = CaptureStandaloneCanvasSnapshot(AsterGraphCanvasViewFactory.Create(new AsterGraphCanvasViewOptions
+        {
+            Editor = CreateLegacyEditor(harness),
+        }));
+        var factorySnapshot = CaptureStandaloneCanvasSnapshot(AsterGraphCanvasViewFactory.Create(new AsterGraphCanvasViewOptions
+        {
+            Editor = CreateFactoryEditor(harness),
+        }));
+
+        Assert.Equal(legacySnapshot, factorySnapshot);
+    }
+
     [Fact]
     public async Task RuntimeSession_ServiceSeamsAndCompatibilityService_RemainAvailableAcrossMigrationPaths()
     {
@@ -511,6 +557,80 @@ public sealed class GraphEditorMigrationCompatibilityTests
         Assert.Same(presentation.ContextMenuPresenter, canvas.ContextMenuPresenter);
         Assert.Same(presentation.InspectorPresenter, inspector.InspectorPresenter);
         Assert.Same(presentation.MiniMapPresenter, miniMap.MiniMapPresenter);
+    }
+
+    private static ViewRouteSnapshot CaptureViewRouteSnapshot(GraphEditorView view)
+    {
+        var window = new Window
+        {
+            Width = 1440,
+            Height = 900,
+            Content = view,
+        };
+        window.Show();
+
+        try
+        {
+            var canvas = view.FindControl<NodeCanvas>("PART_NodeCanvas");
+            var inspector = view.FindControl<GraphInspectorView>("PART_InspectorSurface");
+            var miniMap = view.FindControl<GraphMiniMap>("PART_MiniMapSurface");
+            var editor = Assert.IsType<GraphEditorViewModel>(view.Editor);
+
+            Assert.NotNull(canvas);
+            Assert.NotNull(inspector);
+            Assert.NotNull(miniMap);
+            Assert.NotNull(editor.HostContext);
+            Assert.True(editor.HostContext!.TryGetOwner<GraphEditorView>(out var owner));
+            Assert.True(editor.HostContext.TryGetTopLevel<Window>(out var topLevel));
+
+            return new ViewRouteSnapshot(
+                view.ChromeMode,
+                view.EnableDefaultContextMenu,
+                view.EnableDefaultCommandShortcuts,
+                canvas.EnableDefaultContextMenu,
+                canvas.EnableDefaultCommandShortcuts,
+                canvas.AttachPlatformSeams,
+                ReferenceEquals(editor, inspector.Editor),
+                ReferenceEquals(editor, miniMap.ViewModel),
+                owner?.GetType().Name ?? "<none>",
+                topLevel?.GetType().Name ?? "<none>");
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    private static StandaloneCanvasRouteSnapshot CaptureStandaloneCanvasSnapshot(NodeCanvas canvas)
+    {
+        var window = new Window
+        {
+            Width = 1440,
+            Height = 900,
+            Content = canvas,
+        };
+        window.Show();
+
+        try
+        {
+            var editor = Assert.IsType<GraphEditorViewModel>(canvas.ViewModel);
+
+            Assert.NotNull(editor.HostContext);
+            Assert.True(editor.HostContext!.TryGetOwner<NodeCanvas>(out var owner));
+            Assert.True(editor.HostContext.TryGetTopLevel<Window>(out var topLevel));
+
+            return new StandaloneCanvasRouteSnapshot(
+                canvas.EnableDefaultContextMenu,
+                canvas.EnableDefaultCommandShortcuts,
+                canvas.AttachPlatformSeams,
+                ReferenceEquals(editor, canvas.ViewModel),
+                owner?.GetType().Name ?? "<none>",
+                topLevel?.GetType().Name ?? "<none>");
+        }
+        finally
+        {
+            window.Close();
+        }
     }
 
     private static void SelectSourceNode(GraphEditorViewModel editor)
@@ -764,6 +884,26 @@ public sealed class GraphEditorMigrationCompatibilityTests
         string FragmentPath,
         string FragmentLibraryPath,
         int CompatibleTargetCount);
+
+    private sealed record ViewRouteSnapshot(
+        GraphEditorViewChromeMode ChromeMode,
+        bool ViewDefaultContextMenu,
+        bool ViewDefaultCommandShortcuts,
+        bool CanvasDefaultContextMenu,
+        bool CanvasDefaultCommandShortcuts,
+        bool CanvasAttachPlatformSeams,
+        bool InspectorBound,
+        bool MiniMapBound,
+        string HostOwnerType,
+        string TopLevelType);
+
+    private sealed record StandaloneCanvasRouteSnapshot(
+        bool CanvasDefaultContextMenu,
+        bool CanvasDefaultCommandShortcuts,
+        bool CanvasAttachPlatformSeams,
+        bool ViewModelBound,
+        string HostOwnerType,
+        string TopLevelType);
 
     private sealed class MigrationContextMenuAugmentor(bool enableThrow = false) : IGraphContextMenuAugmentor
     {
