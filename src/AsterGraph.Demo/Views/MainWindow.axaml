@@ -44,19 +44,54 @@
           </MenuItem>
           <MenuItem x:Name="PART_ViewMenu"
                     Header="视图">
-            <MenuItem Header="打开视图面板"
+            <MenuItem Header="显示顶栏"
+                      ToggleType="CheckBox"
+                      IsChecked="{Binding IsHeaderChromeVisible}" />
+            <MenuItem Header="显示节点库"
+                      ToggleType="CheckBox"
+                      IsChecked="{Binding IsLibraryChromeVisible}" />
+            <MenuItem Header="显示检查器"
+                      ToggleType="CheckBox"
+                      IsChecked="{Binding IsInspectorChromeVisible}" />
+            <MenuItem Header="显示状态栏"
+                      ToggleType="CheckBox"
+                      IsChecked="{Binding IsStatusChromeVisible}" />
+            <Separator />
+            <MenuItem Header="打开视图控制"
                       Command="{Binding OpenHostMenuGroupCommand}"
                       CommandParameter="视图" />
           </MenuItem>
           <MenuItem x:Name="PART_BehaviorMenu"
                     Header="行为">
-            <MenuItem Header="打开行为面板"
+            <MenuItem Header="只读模式"
+                      ToggleType="CheckBox"
+                      IsChecked="{Binding IsReadOnlyEnabled}" />
+            <MenuItem Header="网格吸附"
+                      ToggleType="CheckBox"
+                      IsChecked="{Binding IsGridSnappingEnabled}" />
+            <MenuItem Header="对齐辅助线"
+                      ToggleType="CheckBox"
+                      IsChecked="{Binding IsAlignmentGuidesEnabled}" />
+            <MenuItem Header="工作区命令"
+                      ToggleType="CheckBox"
+                      IsChecked="{Binding AreWorkspaceCommandsEnabled}" />
+            <MenuItem Header="片段命令"
+                      ToggleType="CheckBox"
+                      IsChecked="{Binding AreFragmentCommandsEnabled}" />
+            <MenuItem Header="宿主菜单扩展"
+                      ToggleType="CheckBox"
+                      IsChecked="{Binding AreHostMenuExtensionsEnabled}" />
+            <Separator />
+            <MenuItem Header="打开行为控制"
                       Command="{Binding OpenHostMenuGroupCommand}"
                       CommandParameter="行为" />
           </MenuItem>
           <MenuItem x:Name="PART_RuntimeMenu"
                     Header="运行时">
-            <MenuItem Header="打开运行时面板"
+            <MenuItem Header="打开运行时摘要"
+                      Command="{Binding OpenHostMenuGroupCommand}"
+                      CommandParameter="运行时" />
+            <MenuItem Header="查看最近诊断"
                       Command="{Binding OpenHostMenuGroupCommand}"
                       CommandParameter="运行时" />
           </MenuItem>
@@ -134,33 +169,176 @@
                              Text="{Binding HostPaneStateCaption}" />
                 </Border>
 
-                <Border Padding="12"
-                        Background="#14202B"
-                        BorderBrush="#365063"
-                        BorderThickness="1"
-                        CornerRadius="8">
-                  <TextBlock x:Name="RuntimeDiagnosticsHelperText"
-                             TextWrapping="Wrap"
-                             Foreground="#7FE7D7"
-                             Text="{Binding RuntimeDiagnosticsSummary}" />
-                </Border>
+                <StackPanel x:Name="PART_ShowcaseDrawerSection"
+                            Spacing="8"
+                            IsVisible="{Binding IsShowcaseHostGroupSelected}">
+                  <ItemsControl ItemsSource="{Binding SelectedHostMenuGroupLines}">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate>
+                        <Border Margin="0,0,0,8"
+                                Padding="12"
+                                Background="#14202B"
+                                BorderBrush="#365063"
+                                BorderThickness="1"
+                                CornerRadius="8">
+                          <TextBlock TextWrapping="Wrap"
+                                     Foreground="#D8EEF3"
+                                     Text="{Binding}" />
+                        </Border>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </StackPanel>
 
-                <ItemsControl ItemsSource="{Binding SelectedHostMenuGroupLines}">
-                  <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                      <Border Margin="0,0,0,8"
-                              Padding="12"
-                              Background="#14202B"
-                              BorderBrush="#365063"
-                              BorderThickness="1"
-                              CornerRadius="8">
-                        <TextBlock TextWrapping="Wrap"
-                                   Foreground="#D8EEF3"
-                                   Text="{Binding}" />
-                      </Border>
-                    </DataTemplate>
-                  </ItemsControl.ItemTemplate>
-                </ItemsControl>
+                <StackPanel x:Name="PART_ViewDrawerControls"
+                            Spacing="8"
+                            IsVisible="{Binding IsViewHostGroupSelected}">
+                  <Border Padding="12"
+                          Background="#14202B"
+                          BorderBrush="#365063"
+                          BorderThickness="1"
+                          CornerRadius="8">
+                    <TextBlock TextWrapping="Wrap"
+                               Foreground="#7FE7D7"
+                               Text="{Binding SelectedHostMenuGroupSummary}" />
+                  </Border>
+
+                  <Border Padding="12"
+                          Background="#14202B"
+                          BorderBrush="#365063"
+                          BorderThickness="1"
+                          CornerRadius="8">
+                    <StackPanel Spacing="8">
+                      <CheckBox Content="显示顶栏"
+                                IsChecked="{Binding IsHeaderChromeVisible}" />
+                      <CheckBox Content="显示节点库"
+                                IsChecked="{Binding IsLibraryChromeVisible}" />
+                      <CheckBox Content="显示检查器"
+                                IsChecked="{Binding IsInspectorChromeVisible}" />
+                      <CheckBox Content="显示状态栏"
+                                IsChecked="{Binding IsStatusChromeVisible}" />
+                    </StackPanel>
+                  </Border>
+                </StackPanel>
+
+                <StackPanel x:Name="PART_BehaviorDrawerControls"
+                            Spacing="8"
+                            IsVisible="{Binding IsBehaviorHostGroupSelected}">
+                  <Border Padding="12"
+                          Background="#14202B"
+                          BorderBrush="#365063"
+                          BorderThickness="1"
+                          CornerRadius="8">
+                    <TextBlock TextWrapping="Wrap"
+                               Foreground="#7FE7D7"
+                               Text="{Binding SelectedHostMenuGroupSummary}" />
+                  </Border>
+
+                  <Border Padding="12"
+                          Background="#14202B"
+                          BorderBrush="#365063"
+                          BorderThickness="1"
+                          CornerRadius="8">
+                    <StackPanel Spacing="8">
+                      <CheckBox Content="只读模式"
+                                IsChecked="{Binding IsReadOnlyEnabled}" />
+                      <CheckBox Content="网格吸附"
+                                IsChecked="{Binding IsGridSnappingEnabled}" />
+                      <CheckBox Content="对齐辅助线"
+                                IsChecked="{Binding IsAlignmentGuidesEnabled}" />
+                      <CheckBox Content="工作区命令"
+                                IsChecked="{Binding AreWorkspaceCommandsEnabled}" />
+                      <CheckBox Content="片段命令"
+                                IsChecked="{Binding AreFragmentCommandsEnabled}" />
+                      <CheckBox Content="宿主菜单扩展"
+                                IsChecked="{Binding AreHostMenuExtensionsEnabled}" />
+                    </StackPanel>
+                  </Border>
+                </StackPanel>
+
+                <StackPanel x:Name="PART_RuntimeSummarySection"
+                            Spacing="8"
+                            IsVisible="{Binding IsRuntimeHostGroupSelected}">
+                  <Border Padding="12"
+                          Background="#14202B"
+                          BorderBrush="#365063"
+                          BorderThickness="1"
+                          CornerRadius="8">
+                    <TextBlock TextWrapping="Wrap"
+                               Foreground="#7FE7D7"
+                               Text="{Binding SelectedHostMenuGroupSummary}" />
+                  </Border>
+
+                  <ItemsControl ItemsSource="{Binding RuntimeMetricLines}">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate>
+                        <Border Margin="0,0,0,8"
+                                Padding="12"
+                                Background="#14202B"
+                                BorderBrush="#365063"
+                                BorderThickness="1"
+                                CornerRadius="8">
+                          <TextBlock TextWrapping="Wrap"
+                                     Foreground="#D8EEF3"
+                                     Text="{Binding}" />
+                        </Border>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </StackPanel>
+
+                <StackPanel x:Name="PART_RuntimeDiagnosticsSection"
+                            Spacing="8"
+                            IsVisible="{Binding IsRuntimeHostGroupSelected}">
+                  <Border Padding="12"
+                          Background="#14202B"
+                          BorderBrush="#365063"
+                          BorderThickness="1"
+                          CornerRadius="8">
+                    <TextBlock x:Name="RuntimeDiagnosticsHelperText"
+                               TextWrapping="Wrap"
+                               Foreground="#7FE7D7"
+                               Text="{Binding RuntimeDiagnosticsSummary}" />
+                  </Border>
+
+                  <ItemsControl ItemsSource="{Binding RecentDiagnosticLines}">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate>
+                        <Border Margin="0,0,0,8"
+                                Padding="12"
+                                Background="#14202B"
+                                BorderBrush="#365063"
+                                BorderThickness="1"
+                                CornerRadius="8">
+                          <TextBlock TextWrapping="Wrap"
+                                     Foreground="#D8EEF3"
+                                     Text="{Binding}" />
+                        </Border>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </StackPanel>
+
+                <StackPanel x:Name="PART_ProofDrawerSection"
+                            Spacing="8"
+                            IsVisible="{Binding IsProofHostGroupSelected}">
+                  <ItemsControl ItemsSource="{Binding SelectedHostMenuGroupLines}">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate>
+                        <Border Margin="0,0,0,8"
+                                Padding="12"
+                                Background="#14202B"
+                                BorderBrush="#365063"
+                                BorderThickness="1"
+                                CornerRadius="8">
+                          <TextBlock TextWrapping="Wrap"
+                                     Foreground="#D8EEF3"
+                                     Text="{Binding}" />
+                        </Border>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </StackPanel>
               </StackPanel>
             </ScrollViewer>
 

@@ -1,16 +1,15 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.3
-milestone_name: demo-showcase
-status: Phase 20 Planned
-stopped_at: Phase 20 planned; next step is to execute host menu control consolidation
-last_updated: "2026-04-08T07:42:44Z"
-last_activity: 2026-04-08
+milestone_name: Demo Showcase
+status: Ready to plan
+stopped_at: Phase 20 completed; next step is to plan Phase 21 in-context proof and narrative polish
+last_updated: "2026-04-08T08:02:58.152Z"
 progress:
   total_phases: 3
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 6
-  completed_plans: 3
+  completed_plans: 6
 ---
 
 # Project State
@@ -20,14 +19,12 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-04-08)
 
 **Core value:** Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
-**Current focus:** Phase 20 host menu control consolidation execution on top of the new graph-first demo shell
+**Current focus:** Phase 21 in-context proof and narrative polish planning
 
 ## Current Position
 
-Phase: 20
-Plan: Planned
-Status: Phase 20 Planned
-Last activity: 2026-04-08 — Planned Phase 20 host menu control consolidation
+Phase: 21
+Plan: Not started
 
 ## Accumulated Context
 
@@ -47,6 +44,7 @@ Carry-forward decisions from shipped milestones:
 - Keep the top host menu as the first control plane and use direct checkable menu items for the highest-signal view/behavior toggles.
 - Keep the right-side `SplitView` pane as the compact dense control/readout surface for the currently active menu group.
 - Keep all Phase 20 control state bound to the existing `MainWindowViewModel` booleans and `Editor.Session` projections rather than duplicating editor or runtime state.
+- Keep runtime summary metrics and recent diagnostics as separate sections inside the existing right-side pane instead of introducing a second runtime dashboard.
 
 ### Pending Todos
 
@@ -70,5 +68,5 @@ None captured yet.
 ## Session Continuity
 
 Last session: 2026-04-08
-Stopped at: Phase 20 planned; next step is to execute host menu control consolidation
-Resume file: .planning/phases/20-host-menu-control-consolidation/20-01-PLAN.md
+Stopped at: Phase 20 completed; next step is to plan Phase 21 in-context proof and narrative polish
+Resume file: .planning/phases/20-host-menu-control-consolidation/20-VERIFICATION.md

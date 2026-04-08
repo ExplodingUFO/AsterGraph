@@ -21,7 +21,7 @@ This milestone turns the demo into a graph-first SDK showcase: the user should f
 ## Phases
 
 - [x] **Phase 19: Graph-First Demo Shell** - Replace the current explanation-heavy layout with a graph-first shell whose first read is the live graph plus a host-level menu.
-- [ ] **Phase 20: Host Menu Control Consolidation** - Move shell, behavior, and runtime-facing demo controls into a compact host-level menu or drawer flow over the same editor session.
+- [x] **Phase 20: Host Menu Control Consolidation** - Move shell, behavior, and runtime-facing demo controls into a compact host-level menu or drawer flow over the same editor session. (completed 2026-04-08)
 - [ ] **Phase 21: In-Context Proof And Narrative Polish** - Replace long explanation panels with compact proof cues, live configuration summaries, and updated demo/docs messaging.
 
 ## Phase Details
@@ -64,9 +64,9 @@ This milestone turns the demo into a graph-first SDK showcase: the user should f
 | Phase | Requirements | Status |
 |-------|--------------|--------|
 | 19. Graph-First Demo Shell | SHOW-01, SHOW-02 | Completed |
-| 20. Host Menu Control Consolidation | CTRL-01, CTRL-02, CTRL-03 | Planned |
+| 20. Host Menu Control Consolidation | CTRL-01, CTRL-02, CTRL-03 | Completed |
 | 21. In-Context Proof And Narrative Polish | PROOF-01, PROOF-02 | Planned |
 
 ## Next Action
 
-**Phase 20** is next. The graph-first shell baseline is now in place, and the next workflow step is to plan or execute host menu control consolidation.
+**Phase 21** is next. The graph-first shell and host-menu control baseline are now in place, and the next workflow step is to plan or execute in-context proof and narrative polish.

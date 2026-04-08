@@ -221,6 +221,16 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public IReadOnlyList<string> SelectedCapabilityProofLines => SelectedCapability.ProofLines;
 
+    public bool IsShowcaseHostGroupSelected => SelectedHostMenuGroupTitle == "展示";
+
+    public bool IsViewHostGroupSelected => SelectedHostMenuGroupTitle == "视图";
+
+    public bool IsBehaviorHostGroupSelected => SelectedHostMenuGroupTitle == "行为";
+
+    public bool IsRuntimeHostGroupSelected => SelectedHostMenuGroupTitle == "运行时";
+
+    public bool IsProofHostGroupSelected => SelectedHostMenuGroupTitle == "证明";
+
     public IReadOnlyList<string> ChromeModeProofLines =>
     [
         $"{nameof(GraphEditorViewChromeMode)}.{nameof(GraphEditorViewChromeMode.Default)}：保留头部、节点库、检查器与状态栏。",
@@ -315,6 +325,7 @@ public partial class MainWindowViewModel : ViewModelBase
     [
         $"文档标题：{RuntimeDocumentTitle}",
         $"节点数量：{RuntimeNodeCount}",
+        $"连线数量：{RuntimeConnectionCount}",
         $"当前选择：{RuntimeSelectedNodeCount}",
         $"视口缩放：{RuntimeViewportZoom:0.00}",
         $"可保存工作区：{BoolText(CurrentInspection.Capabilities.CanSaveWorkspace)}",
@@ -575,6 +586,11 @@ public partial class MainWindowViewModel : ViewModelBase
         OnPropertyChanged(nameof(PresentationLines));
         OnPropertyChanged(nameof(SelectedHostMenuGroupSummary));
         OnPropertyChanged(nameof(SelectedHostMenuGroupLines));
+        OnPropertyChanged(nameof(IsShowcaseHostGroupSelected));
+        OnPropertyChanged(nameof(IsViewHostGroupSelected));
+        OnPropertyChanged(nameof(IsBehaviorHostGroupSelected));
+        OnPropertyChanged(nameof(IsRuntimeHostGroupSelected));
+        OnPropertyChanged(nameof(IsProofHostGroupSelected));
         OnPropertyChanged(nameof(HostPaneStateCaption));
         OnPropertyChanged(nameof(HostSessionContinuityCaption));
         OnPropertyChanged(nameof(RuntimeMetricLines));

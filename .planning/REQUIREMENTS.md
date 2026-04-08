@@ -13,9 +13,9 @@
 
 ### Host Controls
 
-- [ ] **CTRL-01**: User can adjust shell and chrome visibility from a host-level menu while staying on the same live editor session
-- [ ] **CTRL-02**: User can adjust editing-behavior toggles such as read-only, snapping, guides, and host menu extensions from a host-level menu and see the effect immediately on the current graph
-- [ ] **CTRL-03**: User can access runtime-facing demo controls or readouts from the same host-level menu structure without switching to another showcase scene or rebuilding the editor session
+- [x] **CTRL-01**: User can adjust shell and chrome visibility from a host-level menu while staying on the same live editor session
+- [x] **CTRL-02**: User can adjust editing-behavior toggles such as read-only, snapping, guides, and host menu extensions from a host-level menu and see the effect immediately on the current graph
+- [x] **CTRL-03**: User can access runtime-facing demo controls or readouts from the same host-level menu structure without switching to another showcase scene or rebuilding the editor session
 
 ### In-Context Proof
 
@@ -49,9 +49,9 @@
 |-------------|-------|--------|
 | SHOW-01 | Phase 19 | Complete |
 | SHOW-02 | Phase 19 | Complete |
-| CTRL-01 | Phase 20 | Pending |
-| CTRL-02 | Phase 20 | Pending |
-| CTRL-03 | Phase 20 | Pending |
+| CTRL-01 | Phase 20 | Complete |
+| CTRL-02 | Phase 20 | Complete |
+| CTRL-03 | Phase 20 | Complete |
 | PROOF-01 | Phase 21 | Pending |
 | PROOF-02 | Phase 21 | Pending |
 
@@ -62,4 +62,4 @@
 
 ---
 *Requirements defined: 2026-04-08*
-*Last updated: 2026-04-08 after milestone v1.3 roadmap creation*
+*Last updated: 2026-04-08 after completing Phase 20 host menu control consolidation*

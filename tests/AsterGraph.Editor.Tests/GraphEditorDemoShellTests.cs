@@ -29,6 +29,27 @@ public sealed class GraphEditorDemoShellTests
     }
 
     [Fact]
+    public void MainWindowViewModel_KeepsSameEditorAcrossOperationalHostGroups()
+    {
+        var viewModel = new MainWindowViewModel();
+        var originalEditor = viewModel.Editor;
+
+        var command = Assert.IsAssignableFrom<ICommand>(
+            viewModel.GetType().GetProperty("OpenHostMenuGroupCommand")?.GetValue(viewModel));
+
+        foreach (var group in new[] { "视图", "行为", "运行时" })
+        {
+            command.Execute(group);
+
+            var selectedTitle = Assert.IsType<string>(
+                viewModel.GetType().GetProperty("SelectedHostMenuGroupTitle")?.GetValue(viewModel));
+
+            Assert.Equal(group, selectedTitle);
+            Assert.Same(originalEditor, viewModel.Editor);
+        }
+    }
+
+    [Fact]
     public void MainWindowViewModel_StartsWithHostPaneClosed()
     {
         var viewModel = new MainWindowViewModel();

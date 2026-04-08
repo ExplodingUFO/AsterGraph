@@ -25,6 +25,8 @@ Hosts can integrate only the graph-editor pieces they need, replace default UI a
 - Public host-facing capability, command, menu, and graph-state reads now prefer descriptor and snapshot contracts over MVVM object shape.
 - Avalonia shell and canvas routing/platform seams now flow through shared adapters instead of duplicating policy independently.
 - Migration posture and plugin/automation readiness are locked by focused regressions plus runnable `HostSample`, `PackageSmoke`, and `ScaleSmoke` proof markers.
+- `AsterGraph.Demo` now exposes live view, behavior, and runtime host controls from the top menu and compact right-side pane over one retained editor/session path.
+- The next remaining milestone risk is no longer control discoverability; it is replacing heavy explanatory copy with tighter in-context proof and narrative polish in Phase 21.
 - The known `STATE_HISTORY_OK` mismatch remains an unresolved pre-v1.2 baseline if the next milestone touches history/save semantics.
 
 ## Requirements
@@ -45,11 +47,11 @@ Hosts can integrate only the graph-editor pieces they need, replace default UI a
 - ✓ `AsterGraph.Avalonia` now consumes thinner kernel/facade contracts with shared command/menu/platform adapters — v1.2
 - ✓ Existing `GraphEditorViewModel` / `GraphEditorView` hosts keep a staged migration path while the kernel-first route is canonical and explicitly proven — v1.2
 - ✓ The shipped architecture is explicitly ready for later plugin loading and richer automation without another deep boundary rewrite — v1.2
+- ✓ The demo opens into a graph-first shell where the node graph and a host-level menu are the first things users see — v1.3 Phase 19
+- ✓ Users can adjust shell/view, editing behavior, and runtime-facing demo controls from compact host-level menu groups while staying on the same live graph — v1.3 Phase 20
 
 ### Active
 
-- [ ] The demo opens into a graph-first shell where the node graph and a host-level menu are the first things users see.
-- [ ] Users can adjust shell/view, editing behavior, and runtime-facing demo controls from compact host-level menu groups while staying on the same live graph.
 - [ ] The demo explains replaceable seams and current runtime configuration with compact in-context proof instead of large static explanation panels.
 - [ ] The redesigned showcase remains a proof of SDK capabilities rather than a fake product shell or a scene-switching sample gallery.
 
@@ -117,4 +119,4 @@ This document evolves at milestone boundaries.
 4. Reset active requirements so the next roadmap starts from the highest remaining product risk instead of stale execution context.
 
 ---
-*Last updated: 2026-04-08 after starting milestone v1.3*
+*Last updated: 2026-04-08 after completing Phase 20 host menu control consolidation*
