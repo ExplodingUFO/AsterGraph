@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Reflection;
 using AsterGraph.Abstractions.Compatibility;
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
@@ -6,6 +7,7 @@ using AsterGraph.Core.Models;
 using AsterGraph.Editor.Catalog;
 using AsterGraph.Editor.Hosting;
 using AsterGraph.Editor.Models;
+using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.Services;
 
 const int NodeCount = 180;
@@ -87,6 +89,43 @@ editor.SelectSingleNode(editor.Nodes[NodeCount / 2], updateStatus: false);
 var inspection = session.Diagnostics.CaptureInspectionSnapshot();
 Console.WriteLine($"SCALE_INSPECTION_OK:{inspection.Document.Nodes.Count}:{inspection.Document.Connections.Count}:{inspection.Selection.SelectedNodeIds.Count}:{inspection.PendingConnection.HasPendingConnection}");
 Console.WriteLine($"SCALE_WORKSPACE_OK:{workspace.Exists()}:{workspace.SaveCalls}");
+var readinessWorkspace = new RecordingWorkspaceService("workspace://scale-smoke-readiness");
+var readinessSession = AsterGraphEditorFactory.CreateSession(new AsterGraphEditorOptions
+{
+    Document = CreateDocument(),
+    NodeCatalog = catalog,
+    CompatibilityService = new ExactCompatibilityService(),
+    WorkspaceService = readinessWorkspace,
+});
+var readinessSelectionIds = Enumerable.Range(0, SelectionCount)
+    .Select(index => $"scale-node-{index:000}")
+    .ToArray();
+readinessSession.Commands.UpdateViewportSize(1600, 900);
+using (readinessSession.BeginMutation("scale-readiness"))
+{
+    readinessSession.Commands.SetSelection(readinessSelectionIds, readinessSelectionIds[^1], updateStatus: false);
+    readinessSession.Commands.SetNodePositions(
+        [
+            new NodePositionSnapshot("scale-node-000", new GraphPoint(140, 140)),
+            new NodePositionSnapshot("scale-node-001", new GraphPoint(420, 140)),
+        ],
+        updateStatus: false);
+    readinessSession.Commands.PanBy(18, 12);
+}
+readinessSession.Commands.SaveWorkspace();
+var readinessInspection = readinessSession.Diagnostics.CaptureInspectionSnapshot();
+var readinessRecentDiagnostics = readinessSession.Diagnostics.GetRecentDiagnostics(10);
+var readinessDescriptors = readinessSession.Queries.GetFeatureDescriptors().ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
+var readinessSessionIsKernelFirst = !readinessSession
+    .GetType()
+    .GetFields(BindingFlags.Instance | BindingFlags.NonPublic)
+    .Any(field => field.FieldType.FullName == "AsterGraph.Editor.ViewModels.GraphEditorViewModel");
+var phase18ScaleReadinessOk = readinessDescriptors["query.feature-descriptors"].IsAvailable
+    && readinessDescriptors["surface.mutation.batch"].IsAvailable
+    && readinessDescriptors["service.workspace"].IsAvailable
+    && readinessInspection.Document.Nodes.Count == NodeCount
+    && readinessWorkspace.Exists();
+Console.WriteLine($"PHASE18_SCALE_READINESS_OK:{readinessSessionIsKernelFirst}:{phase18ScaleReadinessOk}:{readinessInspection.FeatureDescriptors.Count}:{readinessRecentDiagnostics.Count}:{readinessWorkspace.SaveCalls}");
 
 GraphDocument CreateDocument()
 {
@@ -143,9 +182,9 @@ file sealed class ExactCompatibilityService : IPortCompatibilityService
             : PortCompatibilityResult.Rejected();
 }
 
-file sealed class RecordingWorkspaceService : IGraphWorkspaceService
+file sealed class RecordingWorkspaceService(string? workspacePath = null) : IGraphWorkspaceService
 {
-    public string WorkspacePath => "workspace://scale-smoke";
+    public string WorkspacePath { get; } = workspacePath ?? "workspace://scale-smoke";
 
     public int SaveCalls { get; private set; }
 

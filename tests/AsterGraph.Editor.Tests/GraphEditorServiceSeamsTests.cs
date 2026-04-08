@@ -6,10 +6,14 @@ using AsterGraph.Editor.Catalog;
 using AsterGraph.Editor.Diagnostics;
 using AsterGraph.Editor.Events;
 using AsterGraph.Editor.Hosting;
+using AsterGraph.Editor.Localization;
 using AsterGraph.Editor.Menus;
 using AsterGraph.Editor.Models;
+using AsterGraph.Editor.Presentation;
+using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.Services;
 using AsterGraph.Editor.ViewModels;
+using Microsoft.Extensions.Logging;
 using Xunit;
 
 namespace AsterGraph.Editor.Tests;
@@ -106,6 +110,55 @@ public sealed class GraphEditorServiceSeamsTests
             });
         Assert.NotNull(failure);
         Assert.Equal("contextmenu.augment.failed", failure!.Code);
+    }
+
+    [Fact]
+    public void AsterGraphEditorFactory_CreateAndCreateSession_ExposeEquivalentReadinessFeatureDescriptorsForConfiguredSeams()
+    {
+        using var activitySource = new System.Diagnostics.ActivitySource("tests.services.readiness");
+        using var loggerFactory = new NoOpLoggerFactory();
+        var definitionId = new NodeDefinitionId("tests.services.readiness");
+        var workspace = new RecordingWorkspaceService("workspace://readiness");
+        var fragmentWorkspace = new RecordingFragmentWorkspaceService("fragment://readiness");
+        var fragmentLibrary = new RecordingFragmentLibraryService("library://readiness");
+        var serializer = new RecordingClipboardPayloadSerializer();
+        var diagnostics = new RecordingDiagnosticsSink();
+        var options = new AsterGraphEditorOptions
+        {
+            Document = CreateDocument(definitionId),
+            NodeCatalog = CreateCatalog(definitionId),
+            CompatibilityService = new ExactCompatibilityService(),
+            WorkspaceService = workspace,
+            FragmentWorkspaceService = fragmentWorkspace,
+            FragmentLibraryService = fragmentLibrary,
+            ClipboardPayloadSerializer = serializer,
+            ContextMenuAugmentor = new PassiveAugmentor(),
+            NodePresentationProvider = new PassivePresentationProvider(),
+            LocalizationProvider = new PassiveLocalizationProvider(),
+            DiagnosticsSink = diagnostics,
+            Instrumentation = new GraphEditorInstrumentationOptions(loggerFactory, activitySource),
+        };
+
+        var editor = AsterGraphEditorFactory.Create(options);
+        var session = AsterGraphEditorFactory.CreateSession(options);
+        var retainedDescriptors = editor.Session.Queries.GetFeatureDescriptors()
+            .OrderBy(descriptor => descriptor.Id, StringComparer.Ordinal)
+            .ToList();
+        var runtimeDescriptors = session.Queries.GetFeatureDescriptors()
+            .OrderBy(descriptor => descriptor.Id, StringComparer.Ordinal)
+            .ToList();
+        var runtimeById = runtimeDescriptors.ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
+
+        Assert.Equal(runtimeDescriptors, retainedDescriptors);
+        Assert.True(runtimeById["service.fragment-workspace"].IsAvailable);
+        Assert.True(runtimeById["service.fragment-library"].IsAvailable);
+        Assert.True(runtimeById["service.clipboard-payload-serializer"].IsAvailable);
+        Assert.True(runtimeById["integration.context-menu-augmentor"].IsAvailable);
+        Assert.True(runtimeById["integration.node-presentation-provider"].IsAvailable);
+        Assert.True(runtimeById["integration.localization-provider"].IsAvailable);
+        Assert.True(runtimeById["integration.diagnostics-sink"].IsAvailable);
+        Assert.True(runtimeById["integration.instrumentation.logger"].IsAvailable);
+        Assert.True(runtimeById["integration.instrumentation.activity-source"].IsAvailable);
     }
 
     private static GraphDocument CreateDocument(NodeDefinitionId definitionId)
@@ -265,5 +318,62 @@ public sealed class GraphEditorServiceSeamsTests
             ContextMenuContext context,
             IReadOnlyList<MenuItemDescriptor> stockItems)
             => throw new InvalidOperationException("augmentor exploded");
+    }
+
+    private sealed class PassiveAugmentor : IGraphContextMenuAugmentor
+    {
+        public IReadOnlyList<MenuItemDescriptor> Augment(
+            GraphEditorViewModel editor,
+            ContextMenuContext context,
+            IReadOnlyList<MenuItemDescriptor> stockItems)
+            => stockItems;
+    }
+
+    private sealed class PassivePresentationProvider : INodePresentationProvider
+    {
+        public NodePresentationState GetNodePresentation(NodePresentationContext context)
+            => NodePresentationState.Empty;
+
+        public NodePresentationState GetNodePresentation(NodeViewModel node)
+            => NodePresentationState.Empty;
+    }
+
+    private sealed class PassiveLocalizationProvider : IGraphLocalizationProvider
+    {
+        public string GetString(string key, string fallback)
+            => fallback;
+    }
+
+    private sealed class NoOpLoggerFactory : ILoggerFactory
+    {
+        public void AddProvider(ILoggerProvider provider)
+        {
+        }
+
+        public ILogger CreateLogger(string categoryName)
+            => new NoOpLogger();
+
+        public void Dispose()
+        {
+        }
+    }
+
+    private sealed class NoOpLogger : ILogger
+    {
+        public IDisposable? BeginScope<TState>(TState state)
+            where TState : notnull
+            => null;
+
+        public bool IsEnabled(LogLevel logLevel)
+            => true;
+
+        public void Log<TState>(
+            LogLevel logLevel,
+            EventId eventId,
+            TState state,
+            Exception? exception,
+            Func<TState, Exception?, string> formatter)
+        {
+        }
     }
 }

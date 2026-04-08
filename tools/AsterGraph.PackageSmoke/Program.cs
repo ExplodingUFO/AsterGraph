@@ -124,6 +124,7 @@ var fragmentWorkspaceService = new RecordingFragmentWorkspaceService("fragment:/
 var fragmentLibraryService = new RecordingFragmentLibraryService("library://package-smoke");
 var serializer = new RecordingClipboardPayloadSerializer();
 var diagnostics = new RecordingDiagnosticsSink();
+const int ReadinessFeatureCount = 11;
 
 var legacyEditor = new GraphEditorViewModel(
     document,
@@ -490,6 +491,30 @@ var phase17SharedCanonicalOk = runtimeSharedCanonicalCommandIds.SequenceEqual(le
     && runtimeSharedCanonicalCommandIds.SequenceEqual(factorySharedCanonicalCommandIds, StringComparer.Ordinal);
 var phase17LegacyCompatibilityWindowOk = legacyCompatibilityOnlyCommands.Contains("nodes.duplicate", StringComparer.Ordinal);
 var phase17FactoryCompatibilityWindowOk = factoryCompatibilityOnlyCommands.Contains("nodes.duplicate", StringComparer.Ordinal);
+var runtimeReadinessDescriptors = CaptureReadinessDescriptors(session);
+var legacyReadinessDescriptors = CaptureReadinessDescriptors(legacyEditor.Session);
+var factoryReadinessDescriptors = CaptureReadinessDescriptors(factoryEditor.Session);
+var phase18ReadinessDescriptorOk = runtimeReadinessDescriptors.Count == ReadinessFeatureCount
+    && runtimeReadinessDescriptors.All(descriptor => descriptor.IsAvailable);
+var phase18CanonicalReadinessParityOk = runtimeReadinessDescriptors.SequenceEqual(factoryReadinessDescriptors);
+var legacyReadinessById = legacyReadinessDescriptors.ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
+var phase18LegacyReadinessWindowOk =
+    legacyReadinessDescriptors.Count == ReadinessFeatureCount
+    && legacyReadinessById["service.workspace"].IsAvailable
+    && legacyReadinessById["service.fragment-workspace"].IsAvailable
+    && legacyReadinessById["service.fragment-library"].IsAvailable
+    && legacyReadinessById["service.clipboard-payload-serializer"].IsAvailable
+    && legacyReadinessById["service.diagnostics"].IsAvailable
+    && legacyReadinessById["integration.context-menu-augmentor"].IsAvailable
+    && legacyReadinessById["integration.node-presentation-provider"].IsAvailable
+    && legacyReadinessById["integration.localization-provider"].IsAvailable
+    && legacyReadinessById["integration.diagnostics-sink"].IsAvailable
+    && !legacyReadinessById["integration.instrumentation.logger"].IsAvailable
+    && !legacyReadinessById["integration.instrumentation.activity-source"].IsAvailable;
+var phase18AutomationRuntimeOk = sessionInspection.FeatureDescriptors.Any(descriptor => descriptor.Id == "query.feature-descriptors" && descriptor.IsAvailable)
+    && sessionInspection.FeatureDescriptors.Any(descriptor => descriptor.Id == "surface.mutation.batch" && descriptor.IsAvailable)
+    && sessionRecentDiagnostics.Count > 0
+    && runtimeSessionIsKernelFirst;
 Console.WriteLine($"SESSION_FACTORY_OK:{session.Queries.CreateDocumentSnapshot().Nodes.Count}:{string.Join(",", commandIds)}");
 Console.WriteLine($"SESSION_EVENTS_OK:{documentChanges}:{viewportChanges}:{failureCode ?? "<none>"}");
 Console.WriteLine($"KERNEL_SESSION_OK:{runtimeSessionIsKernelFirst}");
@@ -518,6 +543,9 @@ Console.WriteLine($"DIAG_INSTRUMENTATION_OK:{(loggerFactory.Entries.Count > 0 &&
 Console.WriteLine("PHASE17_MIGRATION_NOTE:CreateSession=canonical-runtime;Create+AsterGraphAvaloniaViewFactory=canonical-hosted-ui;GraphEditorViewModel+GraphEditorView=retained-compatibility");
 Console.WriteLine($"PHASE17_ROUTE_SIGNAL_OK:{runtimeSessionIsKernelFirst}:{legacyRetainedSessionIsAdapterBacked}:{factoryRetainedSessionIsAdapterBacked}:{phase17RouteSignalOk}");
 Console.WriteLine($"PHASE17_SHARED_CANONICAL_OK:{phase17SharedCanonicalOk}:{phase17LegacyCompatibilityWindowOk}:{phase17FactoryCompatibilityWindowOk}:{runtimeSharedCanonicalCommandIds.Count}:{legacyCompatibilityOnlyCommands.Count}:{factoryCompatibilityOnlyCommands.Count}");
+Console.WriteLine($"PHASE18_READINESS_DESCRIPTOR_OK:{phase18ReadinessDescriptorOk}:{phase18CanonicalReadinessParityOk}:{factoryReadinessDescriptors.Count}:{runtimeReadinessDescriptors.Count}");
+Console.WriteLine($"PHASE18_LEGACY_WINDOW_OK:{phase18LegacyReadinessWindowOk}:{legacyReadinessDescriptors.Count}:{legacyReadinessDescriptors.Count(descriptor => descriptor.IsAvailable)}");
+Console.WriteLine($"PHASE18_AUTOMATION_RUNTIME_OK:{phase18AutomationRuntimeOk}:{sessionInspection.FeatureDescriptors.Count}:{sessionRecentDiagnostics.Count}:{commandIds.Count}");
 
 static void PrintEditorMarker(string marker, GraphEditorViewModel editor, string targetNodeId)
 {
@@ -609,6 +637,26 @@ static bool IsSharedCanonicalCommandId(string id)
         "viewport.center-node" or
         "workspace.save" or
         "workspace.load";
+
+static IReadOnlyList<GraphEditorFeatureDescriptorSnapshot> CaptureReadinessDescriptors(IGraphEditorSession session)
+    => session.Queries.GetFeatureDescriptors()
+        .Where(descriptor => IsReadinessFeatureId(descriptor.Id))
+        .OrderBy(descriptor => descriptor.Id, StringComparer.Ordinal)
+        .ToArray();
+
+static bool IsReadinessFeatureId(string id)
+    => id is
+        "service.workspace" or
+        "service.fragment-workspace" or
+        "service.fragment-library" or
+        "service.clipboard-payload-serializer" or
+        "service.diagnostics" or
+        "integration.context-menu-augmentor" or
+        "integration.node-presentation-provider" or
+        "integration.localization-provider" or
+        "integration.diagnostics-sink" or
+        "integration.instrumentation.logger" or
+        "integration.instrumentation.activity-source";
 
 readonly record struct ViewRouteSnapshot(
     GraphEditorViewChromeMode ChromeMode,

@@ -19,6 +19,7 @@ using AsterGraph.Editor.Presentation;
 using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.Services;
 using AsterGraph.Editor.ViewModels;
+using Microsoft.Extensions.Logging;
 using System.Reflection;
 using Xunit;
 
@@ -234,6 +235,36 @@ public sealed class GraphEditorProofRingTests
         Assert.DoesNotContain("nodes.duplicate", runtimeCommandIds);
     }
 
+    [Fact]
+    public void RuntimeAndRetainedProof_ExposeEquivalentReadinessSeamDescriptors()
+    {
+        using var activitySource = new System.Diagnostics.ActivitySource("tests.proof.readiness");
+        using var loggerFactory = new NoOpLoggerFactory();
+        var options = new AsterGraphEditorOptions
+        {
+            Document = CreateDocument(),
+            NodeCatalog = CreateCatalog(),
+            CompatibilityService = new ExactCompatibilityService(),
+            WorkspaceService = new RecordingWorkspaceService(),
+            FragmentWorkspaceService = new RecordingFragmentWorkspaceService("fragment://proof-ring"),
+            FragmentLibraryService = new RecordingFragmentLibraryService("library://proof-ring"),
+            ClipboardPayloadSerializer = new RecordingClipboardPayloadSerializer(),
+            ContextMenuAugmentor = new ProofContextMenuAugmentor(),
+            NodePresentationProvider = new ProofPresentationProvider(),
+            LocalizationProvider = new ProofLocalizationProvider(),
+            DiagnosticsSink = new RecordingDiagnosticsSink(),
+            Instrumentation = new GraphEditorInstrumentationOptions(loggerFactory, activitySource),
+        };
+        var retainedEditor = AsterGraphEditorFactory.Create(options);
+        var runtimeSession = AsterGraphEditorFactory.CreateSession(options);
+        var retainedDescriptors = CaptureReadinessDescriptors(retainedEditor.Session);
+        var runtimeDescriptors = CaptureReadinessDescriptors(runtimeSession);
+
+        Assert.Equal(runtimeDescriptors, retainedDescriptors);
+        Assert.Equal(ReadinessFeatureIds.Length, runtimeDescriptors.Count);
+        Assert.All(runtimeDescriptors, descriptor => Assert.True(descriptor.IsAvailable));
+    }
+
     [AvaloniaFact]
     public void MigrationProof_RouteSignalsMatchCanonicalAndCompatibilityStory()
     {
@@ -410,6 +441,12 @@ public sealed class GraphEditorProofRingTests
             .OrderBy(id => id, StringComparer.Ordinal)
             .ToArray();
     }
+
+    private static IReadOnlyList<GraphEditorFeatureDescriptorSnapshot> CaptureReadinessDescriptors(IGraphEditorSession session)
+        => session.Queries.GetFeatureDescriptors()
+            .Where(descriptor => ReadinessFeatureIds.Contains(descriptor.Id, StringComparer.Ordinal))
+            .OrderBy(descriptor => descriptor.Id, StringComparer.Ordinal)
+            .ToList();
 
     private static MigrationViewRouteSnapshot CaptureMigrationViewRouteSnapshot(GraphEditorView view)
     {
@@ -608,6 +645,88 @@ public sealed class GraphEditorProofRingTests
             => Diagnostics.Add(diagnostic);
     }
 
+    private sealed class RecordingFragmentWorkspaceService(string fragmentPath) : IGraphFragmentWorkspaceService
+    {
+        public string FragmentPath { get; } = fragmentPath;
+
+        public void Save(GraphSelectionFragment fragment, string? path = null)
+        {
+        }
+
+        public GraphSelectionFragment Load(string? path = null)
+            => throw new InvalidOperationException("No fragment snapshot.");
+
+        public bool Exists(string? path = null)
+            => false;
+
+        public void Delete(string? path = null)
+        {
+        }
+    }
+
+    private sealed class RecordingFragmentLibraryService(string libraryPath) : IGraphFragmentLibraryService
+    {
+        public string LibraryPath { get; } = libraryPath;
+
+        public IReadOnlyList<FragmentTemplateInfo> EnumerateTemplates()
+            => [];
+
+        public string SaveTemplate(GraphSelectionFragment fragment, string? name = null)
+            => Path.Combine(LibraryPath, $"{name ?? "fragment"}.json");
+
+        public GraphSelectionFragment LoadTemplate(string path)
+            => throw new InvalidOperationException("No fragment template.");
+
+        public void DeleteTemplate(string path)
+        {
+        }
+    }
+
+    private sealed class RecordingClipboardPayloadSerializer : IGraphClipboardPayloadSerializer
+    {
+        public string Serialize(GraphSelectionFragment fragment)
+            => "serialized-fragment";
+
+        public bool TryDeserialize(string? text, out GraphSelectionFragment? fragment)
+        {
+            fragment = null;
+            return false;
+        }
+    }
+
+    private sealed class NoOpLoggerFactory : ILoggerFactory
+    {
+        public void AddProvider(ILoggerProvider provider)
+        {
+        }
+
+        public ILogger CreateLogger(string categoryName)
+            => new NoOpLogger();
+
+        public void Dispose()
+        {
+        }
+    }
+
+    private sealed class NoOpLogger : ILogger
+    {
+        public IDisposable? BeginScope<TState>(TState state)
+            where TState : notnull
+            => null;
+
+        public bool IsEnabled(LogLevel logLevel)
+            => true;
+
+        public void Log<TState>(
+            LogLevel logLevel,
+            EventId eventId,
+            TState state,
+            Exception? exception,
+            Func<TState, Exception?, string> formatter)
+        {
+        }
+    }
+
     private sealed record SessionSharedSignature(
         string FeatureDescriptorSignature,
         string CommandDescriptorSignature,
@@ -634,5 +753,20 @@ public sealed class GraphEditorProofRingTests
         "viewport.center-node",
         "workspace.save",
         "workspace.load",
+    ];
+
+    private static readonly string[] ReadinessFeatureIds =
+    [
+        "service.workspace",
+        "service.fragment-workspace",
+        "service.fragment-library",
+        "service.clipboard-payload-serializer",
+        "service.diagnostics",
+        "integration.context-menu-augmentor",
+        "integration.node-presentation-provider",
+        "integration.localization-provider",
+        "integration.diagnostics-sink",
+        "integration.instrumentation.logger",
+        "integration.instrumentation.activity-source",
     ];
 }

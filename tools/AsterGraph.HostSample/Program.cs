@@ -61,6 +61,7 @@ var viewBehavior = GraphEditorBehaviorOptions.Default with
     Commands = permissions,
 };
 var runtimeBehavior = GraphEditorBehaviorOptions.Default;
+const int ReadinessFeatureCount = 11;
 
 var runtimeSession = AsterGraphEditorFactory.CreateSession(new AsterGraphEditorOptions
 {
@@ -68,6 +69,9 @@ var runtimeSession = AsterGraphEditorFactory.CreateSession(new AsterGraphEditorO
     NodeCatalog = catalog,
     CompatibilityService = runtimeCompatibility,
     WorkspaceService = runtimeWorkspace,
+    ContextMenuAugmentor = new HostSampleAugmentor(),
+    NodePresentationProvider = new HostSamplePresentationProvider(),
+    LocalizationProvider = new HostSampleLocalizationProvider(),
     DiagnosticsSink = runtimeDiagnostics,
     Instrumentation = new GraphEditorInstrumentationOptions(runtimeLoggerFactory, runtimeActivitySource),
     StyleOptions = style,
@@ -116,6 +120,11 @@ var runtimeCommandDescriptors = runtimeSession.Queries.GetCommandDescriptors();
 var runtimeCanvasDescriptors = runtimeSession.Queries.BuildContextMenuDescriptors(new ContextMenuContext(ContextMenuTargetKind.Canvas, new GraphPoint(200, 120)));
 var runtimeInspection = runtimeSession.Diagnostics.CaptureInspectionSnapshot();
 var runtimeRecentDiagnostics = runtimeSession.Diagnostics.GetRecentDiagnostics(10);
+var runtimeReadinessDescriptors = CaptureReadinessDescriptors(runtimeSession);
+var runtimeAutomationDescriptorsOk = runtimeInspection.FeatureDescriptors.Any(descriptor => descriptor.Id == "query.feature-descriptors" && descriptor.IsAvailable)
+    && runtimeInspection.FeatureDescriptors.Any(descriptor => descriptor.Id == "surface.mutation.batch" && descriptor.IsAvailable);
+var phase18ReadinessOk = runtimeReadinessDescriptors.Count == ReadinessFeatureCount
+    && runtimeReadinessDescriptors.All(descriptor => descriptor.IsAvailable);
 var runtimeSessionIsKernelFirst = !runtimeSession
     .GetType()
     .GetFields(BindingFlags.Instance | BindingFlags.NonPublic)
@@ -171,6 +180,8 @@ Console.WriteLine($"Diagnostics Activity operations: {string.Join(", ", runtimeA
 Console.WriteLine($"Session runtime workflow: selection={runtimeSession.Queries.GetSelectionSnapshot().PrimarySelectedNodeId}, connections={runtimeSnapshot.Connections.Count}");
 Console.WriteLine($"Session backend: kernel-first={runtimeSessionIsKernelFirst}");
 Console.WriteLine($"Descriptor runtime: nodes.add={runtimeCommandDescriptors.Any(descriptor => descriptor.Id == "nodes.add" && descriptor.IsEnabled)}, canvas={string.Join(",", runtimeCanvasDescriptors.Select(descriptor => descriptor.Id))}");
+Console.WriteLine($"Readiness seam descriptors: {string.Join(",", runtimeReadinessDescriptors.Where(descriptor => descriptor.IsAvailable).Select(descriptor => descriptor.Id))}");
+Console.WriteLine($"Readiness automation boundary: featureDescriptors={runtimeAutomationDescriptorsOk}, diagnostics={runtimeRecentDiagnostics.Count}, inspectionFeatures={runtimeInspection.FeatureDescriptors.Count}");
 Console.WriteLine($"State scaling proof: inspector={inspectorProofEditor.InspectorConnections}, downstream={inspectorProofEditor.InspectorDownstream}, dirtyAfterMove={historyDirtyAfterMove}, canUndoAfterMove={historyCanUndoAfterMove}, dirtyAfterUndo={historyProofEditor.IsDirty}, restored=({historyRestoredNode.X:0},{historyRestoredNode.Y:0})");
 
 var viewCompatibility = new RecordingCompatibilityService();
@@ -434,6 +445,7 @@ Console.WriteLine($"Presenter types: node={customNodePresenter.GetType().Name}, 
 Console.WriteLine($"Phase 16 adapter boundary: shell menu=canonical({phase16ShellPresenter.CanonicalOpenCalls}), shell shortcut shared={phase16ShellShortcutOk}, shell platform owner=view({phase16ShellPlatformBoundaryOk}); standalone menu=canonical({phase16CanvasPresenter.CanonicalOpenCalls}), standalone shortcut shared={phase16CanvasShortcutOk}, standalone platform owner=canvas({phase16CanvasPlatformBoundaryOk})");
 Console.WriteLine($"PHASE16_ADAPTER_BOUNDARY_OK:{phase16ShellMenuOk}:{phase16CanvasMenuOk}:{phase16ShellShortcutOk}:{phase16CanvasShortcutOk}:{phase16ShellPlatformBoundaryOk}:{phase16CanvasPlatformBoundaryOk}");
 Console.WriteLine($"PHASE17_MIGRATION_ROUTE_OK:{runtimeSessionIsKernelFirst}:{retainedSessionIsAdapterBacked}:{phase17SharedCanonicalSubsetOk}:{phase17HostedUiParityOk}:{phase17RetainedCompatibilityWindowOk}");
+Console.WriteLine($"PHASE18_READINESS_OK:{runtimeSessionIsKernelFirst}:{phase18ReadinessOk}:{runtimeAutomationDescriptorsOk}:{runtimeReadinessDescriptors.Count}");
 
 static GraphDocument CreateDocument()
     => new(
@@ -558,6 +570,26 @@ static bool IsSharedCanonicalCommandId(string id)
         "viewport.center-node" or
         "workspace.save" or
         "workspace.load";
+
+static IReadOnlyList<GraphEditorFeatureDescriptorSnapshot> CaptureReadinessDescriptors(IGraphEditorSession session)
+    => session.Queries.GetFeatureDescriptors()
+        .Where(descriptor => IsReadinessFeatureId(descriptor.Id))
+        .OrderBy(descriptor => descriptor.Id, StringComparer.Ordinal)
+        .ToArray();
+
+static bool IsReadinessFeatureId(string id)
+    => id is
+        "service.workspace" or
+        "service.fragment-workspace" or
+        "service.fragment-library" or
+        "service.clipboard-payload-serializer" or
+        "service.diagnostics" or
+        "integration.context-menu-augmentor" or
+        "integration.node-presentation-provider" or
+        "integration.localization-provider" or
+        "integration.diagnostics-sink" or
+        "integration.instrumentation.logger" or
+        "integration.instrumentation.activity-source";
 
 readonly record struct ViewRouteSnapshot(
     GraphEditorViewChromeMode ChromeMode,

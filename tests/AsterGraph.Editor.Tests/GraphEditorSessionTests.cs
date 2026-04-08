@@ -8,8 +8,10 @@ using AsterGraph.Editor.Diagnostics;
 using AsterGraph.Editor.Catalog;
 using AsterGraph.Editor.Events;
 using AsterGraph.Editor.Hosting;
+using AsterGraph.Editor.Localization;
 using AsterGraph.Editor.Menus;
 using AsterGraph.Editor.Models;
+using AsterGraph.Editor.Presentation;
 using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.Services;
 using AsterGraph.Editor.ViewModels;
@@ -450,12 +452,21 @@ public sealed class GraphEditorSessionTests
         using var activitySource = new System.Diagnostics.ActivitySource("tests.session.features");
         using var loggerFactory = new NoOpLoggerFactory();
         var diagnosticsSink = new RecordingDiagnosticsSink();
+        var fragmentWorkspace = new RecordingFragmentWorkspaceService("fragment://tests.session.features");
+        var fragmentLibrary = new RecordingFragmentLibraryService("library://tests.session.features");
+        var serializer = new RecordingClipboardPayloadSerializer();
         var definitionId = new NodeDefinitionId("tests.session.features");
         var session = AsterGraphEditorFactory.CreateSession(new AsterGraphEditorOptions
         {
             Document = CreateDocument(definitionId),
             NodeCatalog = CreateCatalog(definitionId),
             CompatibilityService = new DefaultPortCompatibilityService(),
+            FragmentWorkspaceService = fragmentWorkspace,
+            FragmentLibraryService = fragmentLibrary,
+            ClipboardPayloadSerializer = serializer,
+            ContextMenuAugmentor = new SessionFeatureAugmentor(),
+            NodePresentationProvider = new SessionFeaturePresentationProvider(),
+            LocalizationProvider = new SessionFeatureLocalizationProvider(),
             DiagnosticsSink = diagnosticsSink,
             Instrumentation = new GraphEditorInstrumentationOptions(loggerFactory, activitySource),
         });
@@ -466,8 +477,14 @@ public sealed class GraphEditorSessionTests
         Assert.True(descriptors["capability.nodes.move"].IsAvailable);
         Assert.True(descriptors["service.workspace"].IsAvailable);
         Assert.True(descriptors["service.diagnostics"].IsAvailable);
+        Assert.True(descriptors["service.fragment-workspace"].IsAvailable);
+        Assert.True(descriptors["service.fragment-library"].IsAvailable);
+        Assert.True(descriptors["service.clipboard-payload-serializer"].IsAvailable);
         Assert.True(descriptors["query.compatible-port-target-snapshot"].IsAvailable);
         Assert.True(descriptors["query.compatible-target-mvvm-shim"].IsAvailable);
+        Assert.True(descriptors["integration.context-menu-augmentor"].IsAvailable);
+        Assert.True(descriptors["integration.node-presentation-provider"].IsAvailable);
+        Assert.True(descriptors["integration.localization-provider"].IsAvailable);
         Assert.True(descriptors["integration.diagnostics-sink"].IsAvailable);
         Assert.True(descriptors["integration.instrumentation.logger"].IsAvailable);
         Assert.True(descriptors["integration.instrumentation.activity-source"].IsAvailable);
@@ -815,5 +832,78 @@ public sealed class GraphEditorSessionTests
 
         public bool Exists()
             => false;
+    }
+
+    private sealed class RecordingFragmentWorkspaceService(string fragmentPath) : IGraphFragmentWorkspaceService
+    {
+        public string FragmentPath { get; } = fragmentPath;
+
+        public void Save(GraphSelectionFragment fragment, string? path = null)
+        {
+        }
+
+        public GraphSelectionFragment Load(string? path = null)
+            => throw new InvalidOperationException("No fragment snapshot.");
+
+        public bool Exists(string? path = null)
+            => false;
+
+        public void Delete(string? path = null)
+        {
+        }
+    }
+
+    private sealed class RecordingFragmentLibraryService(string libraryPath) : IGraphFragmentLibraryService
+    {
+        public string LibraryPath { get; } = libraryPath;
+
+        public IReadOnlyList<FragmentTemplateInfo> EnumerateTemplates()
+            => [];
+
+        public string SaveTemplate(GraphSelectionFragment fragment, string? name = null)
+            => Path.Combine(LibraryPath, $"{name ?? "fragment"}.json");
+
+        public GraphSelectionFragment LoadTemplate(string path)
+            => throw new InvalidOperationException("No fragment template.");
+
+        public void DeleteTemplate(string path)
+        {
+        }
+    }
+
+    private sealed class RecordingClipboardPayloadSerializer : IGraphClipboardPayloadSerializer
+    {
+        public string Serialize(GraphSelectionFragment fragment)
+            => "serialized-fragment";
+
+        public bool TryDeserialize(string? text, out GraphSelectionFragment? fragment)
+        {
+            fragment = null;
+            return false;
+        }
+    }
+
+    private sealed class SessionFeatureAugmentor : IGraphContextMenuAugmentor
+    {
+        public IReadOnlyList<MenuItemDescriptor> Augment(
+            GraphEditorViewModel editor,
+            ContextMenuContext context,
+            IReadOnlyList<MenuItemDescriptor> stockItems)
+            => stockItems;
+    }
+
+    private sealed class SessionFeaturePresentationProvider : INodePresentationProvider
+    {
+        public NodePresentationState GetNodePresentation(NodePresentationContext context)
+            => NodePresentationState.Empty;
+
+        public NodePresentationState GetNodePresentation(NodeViewModel node)
+            => NodePresentationState.Empty;
+    }
+
+    private sealed class SessionFeatureLocalizationProvider : IGraphLocalizationProvider
+    {
+        public string GetString(string key, string fallback)
+            => fallback;
     }
 }

@@ -81,7 +81,13 @@ public static class AsterGraphEditorFactory
             resolved.Options.DiagnosticsSink,
             new GraphEditorSessionDescriptorSupport(
                 resolved.Options.NodeCatalog!,
-                (key, fallback) => resolved.Options.LocalizationProvider?.GetString(key, fallback) ?? fallback));
+                (key, fallback) => resolved.Options.LocalizationProvider?.GetString(key, fallback) ?? fallback,
+                hasFragmentWorkspaceService: true,
+                hasFragmentLibraryService: true,
+                hasClipboardPayloadSerializer: true,
+                hasContextMenuAugmentor: resolved.Options.ContextMenuAugmentor is not null,
+                hasNodePresentationProvider: resolved.Options.NodePresentationProvider is not null,
+                hasLocalizationProvider: resolved.Options.LocalizationProvider is not null));
         session.ConfigureInstrumentation(resolved.Options.Instrumentation);
         return session;
     }

@@ -11,16 +11,40 @@ internal sealed class GraphEditorSessionDescriptorSupport
     public GraphEditorSessionDescriptorSupport(
         INodeCatalog nodeCatalog,
         Func<string, string, string>? localize = null,
-        GraphEditorViewModel? compatibilityEditor = null)
+        GraphEditorViewModel? compatibilityEditor = null,
+        bool hasFragmentWorkspaceService = false,
+        bool hasFragmentLibraryService = false,
+        bool hasClipboardPayloadSerializer = false,
+        bool hasContextMenuAugmentor = false,
+        bool hasNodePresentationProvider = false,
+        bool hasLocalizationProvider = false)
     {
         NodeCatalog = nodeCatalog ?? throw new ArgumentNullException(nameof(nodeCatalog));
         _localize = localize ?? ((_, fallback) => fallback);
         CompatibilityEditor = compatibilityEditor;
+        HasFragmentWorkspaceService = hasFragmentWorkspaceService;
+        HasFragmentLibraryService = hasFragmentLibraryService;
+        HasClipboardPayloadSerializer = hasClipboardPayloadSerializer;
+        HasContextMenuAugmentor = hasContextMenuAugmentor;
+        HasNodePresentationProvider = hasNodePresentationProvider;
+        HasLocalizationProvider = hasLocalizationProvider;
     }
 
     public INodeCatalog NodeCatalog { get; }
 
     public GraphEditorViewModel? CompatibilityEditor { get; }
+
+    public bool HasFragmentWorkspaceService { get; }
+
+    public bool HasFragmentLibraryService { get; }
+
+    public bool HasClipboardPayloadSerializer { get; }
+
+    public bool HasContextMenuAugmentor { get; }
+
+    public bool HasNodePresentationProvider { get; }
+
+    public bool HasLocalizationProvider { get; }
 
     public IReadOnlyCollection<INodeDefinition> Definitions => NodeCatalog.Definitions;
 

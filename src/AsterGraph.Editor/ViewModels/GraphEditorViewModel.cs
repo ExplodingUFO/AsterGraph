@@ -328,7 +328,13 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         => new(
             _nodeCatalog,
             LocalizeText,
-            this);
+            this,
+            hasFragmentWorkspaceService: _fragmentWorkspaceService is not null,
+            hasFragmentLibraryService: _fragmentLibraryService is not null,
+            hasClipboardPayloadSerializer: _clipboardPayloadSerializer is not null,
+            hasContextMenuAugmentor: _contextMenuAugmentor is not null,
+            hasNodePresentationProvider: _nodePresentationProvider is not null,
+            hasLocalizationProvider: _localizationProvider is not null);
 
     /// <summary>
     /// 获取当前命令权限配置。
