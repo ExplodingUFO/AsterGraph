@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
+using AsterGraph.Abstractions.Catalog;
 using AsterGraph.Abstractions.Compatibility;
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
@@ -16,6 +17,7 @@ using AsterGraph.Editor.Hosting;
 using AsterGraph.Editor.Localization;
 using AsterGraph.Editor.Menus;
 using AsterGraph.Editor.Models;
+using AsterGraph.Editor.Plugins;
 using AsterGraph.Editor.Presentation;
 using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.Services;
@@ -293,6 +295,52 @@ public sealed class GraphEditorProofRingTests
         Assert.Equal(CaptureAutomationResultSignature(retainedEvidence.Result), CaptureAutomationResultSignature(runtimeEvidence.Result));
     }
 
+    [Fact]
+    public void RuntimeAndRetainedProof_ExposeEquivalentDirectPluginCompositionAndAutomationProof()
+    {
+        var options = new AsterGraphEditorOptions
+        {
+            Document = CreateDocument(),
+            NodeCatalog = CreateCatalog(),
+            CompatibilityService = new ExactCompatibilityService(),
+            ContextMenuAugmentor = new ProofContextMenuAugmentor(),
+            NodePresentationProvider = new ProofPresentationProvider(),
+            LocalizationProvider = new ProofLocalizationProvider(),
+            PluginRegistrations =
+            [
+                GraphEditorPluginRegistration.FromPlugin(new ProofPlugin()),
+            ],
+        };
+        var retainedEditor = AsterGraphEditorFactory.Create(options);
+        var runtimeSession = AsterGraphEditorFactory.CreateSession(options);
+        retainedEditor.RefreshNodePresentations();
+
+        var retainedSnapshots = retainedEditor.Session.Queries.GetPluginLoadSnapshots();
+        var runtimeSnapshots = runtimeSession.Queries.GetPluginLoadSnapshots();
+        var retainedCanvasDescriptors = retainedEditor.Session.Queries.BuildContextMenuDescriptors(new ContextMenuContext(ContextMenuTargetKind.Canvas, new GraphPoint(240, 180)));
+        var runtimeCanvasDescriptors = runtimeSession.Queries.BuildContextMenuDescriptors(new ContextMenuContext(ContextMenuTargetKind.Canvas, new GraphPoint(240, 180)));
+        var retainedSourceNode = Assert.Single(retainedEditor.Nodes, node => node.Id == SourceNodeId);
+        var automationResult = runtimeSession.Automation.Execute(CreatePluginAutomationRunRequest("proof-plugin-automation"));
+
+        Assert.Equal(runtimeSnapshots, retainedSnapshots);
+        var pluginSnapshot = Assert.Single(runtimeSnapshots);
+        Assert.Equal(GraphEditorPluginLoadSourceKind.Direct, pluginSnapshot.SourceKind);
+        Assert.Equal(GraphEditorPluginLoadStatus.Loaded, pluginSnapshot.Status);
+        Assert.Equal("tests.proof.plugin", pluginSnapshot.Descriptor?.Id);
+        Assert.Equal(1, pluginSnapshot.Contributions.NodeDefinitionProviderCount);
+        Assert.Equal(1, pluginSnapshot.Contributions.ContextMenuAugmentorCount);
+        Assert.Equal(1, pluginSnapshot.Contributions.NodePresentationProviderCount);
+        Assert.Equal(1, pluginSnapshot.Contributions.LocalizationProviderCount);
+        Assert.Equal("Proof Plugin Add Node", Assert.Single(runtimeCanvasDescriptors, descriptor => descriptor.Id == "canvas-add-node").Header);
+        Assert.Equal("Proof Plugin Add Node", Assert.Single(retainedCanvasDescriptors, descriptor => descriptor.Id == "canvas-add-node").Header);
+        Assert.Contains(runtimeCanvasDescriptors, descriptor => descriptor.Id == "proof-plugin-menu");
+        Assert.Contains(retainedCanvasDescriptors, descriptor => descriptor.Id == "proof-plugin-menu");
+        Assert.Contains(retainedSourceNode.Presentation.TopRightBadges, badge => badge.Text == "Plugin");
+        Assert.Contains(automationResult.Inspection.Document.Nodes, node => node.DefinitionId is { Value: "tests.proof.plugin" });
+        Assert.True(automationResult.Succeeded);
+        Assert.Equal(3, automationResult.ExecutedStepCount);
+    }
+
     [AvaloniaFact]
     public void MigrationProof_RouteSignalsMatchCanonicalAndCompatibilityStory()
     {
@@ -550,6 +598,15 @@ public sealed class GraphEditorProofRingTests
                 new GraphEditorAutomationStep("pan", CreateAutomationCommand("viewport.pan", ("deltaX", "12"), ("deltaY", "18"))),
                 new GraphEditorAutomationStep("start-connection", CreateAutomationCommand("connections.start", ("sourceNodeId", SourceNodeId), ("sourcePortId", SourcePortId))),
                 new GraphEditorAutomationStep("complete-connection", CreateAutomationCommand("connections.complete", ("targetNodeId", TargetNodeId), ("targetPortId", TargetPortId))),
+            ]);
+
+    private static GraphEditorAutomationRunRequest CreatePluginAutomationRunRequest(string runId)
+        => new(
+            runId,
+            [
+                new GraphEditorAutomationStep("select-source", CreateAutomationCommand("selection.set", ("nodeId", SourceNodeId), ("primaryNodeId", SourceNodeId), ("updateStatus", "false"))),
+                new GraphEditorAutomationStep("add-plugin-node", CreateAutomationCommand("nodes.add", ("definitionId", "tests.proof.plugin"), ("worldX", "640"), ("worldY", "240"))),
+                new GraphEditorAutomationStep("move-plugin-node", CreateAutomationCommand("nodes.move", ("position", "tests-proof-plugin-001|684|264"), ("updateStatus", "false"))),
             ]);
 
     private static GraphEditorCommandInvocationSnapshot CreateAutomationCommand(
@@ -895,6 +952,7 @@ public sealed class GraphEditorProofRingTests
 
     private static readonly string[] ReadinessFeatureIds =
     [
+        "query.plugin-load-snapshots",
         "surface.automation.runner",
         "event.automation.started",
         "event.automation.progress",
@@ -912,4 +970,69 @@ public sealed class GraphEditorProofRingTests
         "integration.instrumentation.logger",
         "integration.instrumentation.activity-source",
     ];
+
+    private sealed class ProofPlugin : IGraphEditorPlugin
+    {
+        public GraphEditorPluginDescriptor Descriptor { get; } = new(
+            "tests.proof.plugin",
+            "Proof Plugin",
+            "Direct plugin used by proof-ring tests.");
+
+        public void Register(GraphEditorPluginBuilder builder)
+        {
+            ArgumentNullException.ThrowIfNull(builder);
+            builder.AddNodeDefinitionProvider(new ProofPluginNodeDefinitionProvider());
+            builder.AddContextMenuAugmentor(new ProofPluginContextMenuAugmentor());
+            builder.AddNodePresentationProvider(new ProofPluginPresentationProvider());
+            builder.AddLocalizationProvider(new ProofPluginLocalizationProvider());
+        }
+    }
+
+    private sealed class ProofPluginNodeDefinitionProvider : INodeDefinitionProvider
+    {
+        public IReadOnlyList<INodeDefinition> GetNodeDefinitions()
+            =>
+            [
+                new NodeDefinition(
+                    new NodeDefinitionId("tests.proof.plugin"),
+                    "Proof Plugin Node",
+                    "Tests",
+                    "Proof",
+                    [new PortDefinition("input", "Input", new PortTypeId("float"), "#F3B36B")],
+                    []),
+            ];
+    }
+
+    private sealed class ProofPluginContextMenuAugmentor : IGraphEditorPluginContextMenuAugmentor
+    {
+        public IReadOnlyList<GraphEditorMenuItemDescriptorSnapshot> Augment(GraphEditorPluginMenuAugmentationContext context)
+            => context.StockItems
+                .Concat(
+                [
+                    new GraphEditorMenuItemDescriptorSnapshot(
+                        "proof-plugin-menu",
+                        "Proof Plugin Menu",
+                        iconKey: "plugin",
+                        isEnabled: false),
+                ])
+                .ToList();
+    }
+
+    private sealed class ProofPluginPresentationProvider : IGraphEditorPluginNodePresentationProvider
+    {
+        public NodePresentationState GetNodePresentation(GraphEditorPluginNodePresentationContext context)
+            => new(
+                TopRightBadges:
+                [
+                    new NodeAdornmentDescriptor("Plugin", "#6AD5C4"),
+                ]);
+    }
+
+    private sealed class ProofPluginLocalizationProvider : IGraphEditorPluginLocalizationProvider
+    {
+        public string GetString(string key, string fallback)
+            => key == "editor.menu.canvas.addNode"
+                ? "Proof Plugin Add Node"
+                : fallback;
+    }
 }

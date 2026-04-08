@@ -4,6 +4,7 @@ using AsterGraph.Abstractions.Compatibility;
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Core.Models;
+using AsterGraph.Editor.Automation;
 using AsterGraph.Editor.Catalog;
 using AsterGraph.Editor.Hosting;
 using AsterGraph.Editor.Models;
@@ -15,6 +16,7 @@ const int SelectionCount = 48;
 const int MoveCount = 24;
 const string InputPortId = "in";
 const string OutputPortId = "out";
+const string ScaleAutomationRunId = "scale-proof-automation";
 var definitionId = new NodeDefinitionId("scale.node");
 
 var catalog = new NodeCatalog();
@@ -89,6 +91,58 @@ editor.SelectSingleNode(editor.Nodes[NodeCount / 2], updateStatus: false);
 var inspection = session.Diagnostics.CaptureInspectionSnapshot();
 Console.WriteLine($"SCALE_INSPECTION_OK:{inspection.Document.Nodes.Count}:{inspection.Document.Connections.Count}:{inspection.Selection.SelectedNodeIds.Count}:{inspection.PendingConnection.HasPendingConnection}");
 Console.WriteLine($"SCALE_WORKSPACE_OK:{workspace.Exists()}:{workspace.SaveCalls}");
+
+var automationStartedCount = 0;
+var automationCompletedCount = 0;
+var automationProgressCommandIds = new List<string>();
+var automationGenericCommandIds = new List<string>();
+session.Events.AutomationStarted += (_, args) =>
+{
+    if (string.Equals(args.RunId, ScaleAutomationRunId, StringComparison.Ordinal))
+    {
+        automationStartedCount++;
+    }
+};
+session.Events.AutomationProgress += (_, args) =>
+{
+    if (string.Equals(args.RunId, ScaleAutomationRunId, StringComparison.Ordinal))
+    {
+        automationProgressCommandIds.Add(args.Step.CommandId);
+    }
+};
+session.Events.AutomationCompleted += (_, args) =>
+{
+    if (string.Equals(args.Result.RunId, ScaleAutomationRunId, StringComparison.Ordinal))
+    {
+        automationCompletedCount++;
+    }
+};
+session.Events.CommandExecuted += (_, args) =>
+{
+    if (string.Equals(args.MutationLabel, ScaleAutomationRunId, StringComparison.Ordinal))
+    {
+        automationGenericCommandIds.Add(args.CommandId);
+    }
+};
+
+var scaleAutomationResult = session.Automation.Execute(CreateAutomationRunRequest());
+var scaleAutomationDiagnostics = session.Diagnostics.GetRecentDiagnostics(16)
+    .Where(diagnostic => diagnostic.Code.StartsWith("automation.", StringComparison.Ordinal))
+    .Select(diagnostic => diagnostic.Code)
+    .ToArray();
+var phase25ScaleAutomationOk = scaleAutomationResult.Succeeded
+    && automationStartedCount == 1
+    && automationCompletedCount == 1
+    && automationProgressCommandIds.SequenceEqual(
+        ["selection.set", "nodes.add", "nodes.move", "viewport.resize", "connections.start", "connections.complete"],
+        StringComparer.Ordinal)
+    && automationGenericCommandIds.SequenceEqual(automationProgressCommandIds, StringComparer.Ordinal)
+    && scaleAutomationDiagnostics.Contains("automation.run.started", StringComparer.Ordinal)
+    && scaleAutomationDiagnostics.Contains("automation.run.completed", StringComparer.Ordinal)
+    && scaleAutomationResult.Inspection.Document.Nodes.Count == NodeCount + 1
+    && scaleAutomationResult.Inspection.Document.Connections.Count == NodeCount;
+Console.WriteLine($"PHASE25_SCALE_AUTOMATION_OK:{phase25ScaleAutomationOk}:{scaleAutomationResult.ExecutedStepCount}:{scaleAutomationResult.Inspection.Document.Nodes.Count}:{scaleAutomationResult.Inspection.Document.Connections.Count}:{scaleAutomationDiagnostics.Length}");
+
 var readinessWorkspace = new RecordingWorkspaceService("workspace://scale-smoke-readiness");
 var readinessSession = AsterGraphEditorFactory.CreateSession(new AsterGraphEditorOptions
 {
@@ -126,6 +180,25 @@ var phase18ScaleReadinessOk = readinessDescriptors["query.feature-descriptors"].
     && readinessInspection.Document.Nodes.Count == NodeCount
     && readinessWorkspace.Exists();
 Console.WriteLine($"PHASE18_SCALE_READINESS_OK:{readinessSessionIsKernelFirst}:{phase18ScaleReadinessOk}:{readinessInspection.FeatureDescriptors.Count}:{readinessRecentDiagnostics.Count}:{readinessWorkspace.SaveCalls}");
+
+static GraphEditorAutomationRunRequest CreateAutomationRunRequest()
+    => new(
+        "scale-proof-automation",
+        [
+            new GraphEditorAutomationStep("select-tail", CreateAutomationCommand("selection.set", ("nodeId", "scale-node-179"), ("primaryNodeId", "scale-node-179"), ("updateStatus", "false"))),
+            new GraphEditorAutomationStep("add-node", CreateAutomationCommand("nodes.add", ("definitionId", "scale.node"), ("worldX", "3600"), ("worldY", "3000"))),
+            new GraphEditorAutomationStep("move-node", CreateAutomationCommand("nodes.move", ("position", "scale-node-180|3640|3020"), ("updateStatus", "false"))),
+            new GraphEditorAutomationStep("resize-viewport", CreateAutomationCommand("viewport.resize", ("width", "1600"), ("height", "900"))),
+            new GraphEditorAutomationStep("start-connection", CreateAutomationCommand("connections.start", ("sourceNodeId", "scale-node-179"), ("sourcePortId", "out"))),
+            new GraphEditorAutomationStep("complete-connection", CreateAutomationCommand("connections.complete", ("targetNodeId", "scale-node-180"), ("targetPortId", "in"))),
+        ]);
+
+static GraphEditorCommandInvocationSnapshot CreateAutomationCommand(
+    string commandId,
+    params (string Name, string Value)[] arguments)
+    => new(
+        commandId,
+        arguments.Select(argument => new GraphEditorCommandArgumentSnapshot(argument.Name, argument.Value)).ToArray());
 
 GraphDocument CreateDocument()
 {

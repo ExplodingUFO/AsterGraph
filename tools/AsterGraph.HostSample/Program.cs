@@ -13,6 +13,7 @@ using AsterGraph.Avalonia.Hosting;
 using AsterGraph.Avalonia.Menus;
 using AsterGraph.Avalonia.Presentation;
 using AsterGraph.Core.Models;
+using AsterGraph.Editor.Automation;
 using AsterGraph.Editor.Catalog;
 using AsterGraph.Editor.Configuration;
 using AsterGraph.Editor.Diagnostics;
@@ -21,6 +22,7 @@ using AsterGraph.Editor.Hosting;
 using AsterGraph.Editor.Localization;
 using AsterGraph.Editor.Menus;
 using AsterGraph.Editor.Models;
+using AsterGraph.Editor.Plugins;
 using AsterGraph.Editor.Presentation;
 using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.Services;
@@ -61,7 +63,15 @@ var viewBehavior = GraphEditorBehaviorOptions.Default with
     Commands = permissions,
 };
 var runtimeBehavior = GraphEditorBehaviorOptions.Default;
-const int ReadinessFeatureCount = 11;
+const int ReadinessFeatureCount = 17;
+const string HostSamplePluginDefinitionIdValue = "host.sample.plugin";
+const string HostSamplePluginMenuId = "host-sample-plugin-menu";
+const string HostSampleAutomationRunId = "host-sample-automation";
+var pluginRegistrations =
+    new[]
+    {
+        GraphEditorPluginRegistration.FromPlugin(new HostSampleProofPlugin()),
+    };
 
 var runtimeSession = AsterGraphEditorFactory.CreateSession(new AsterGraphEditorOptions
 {
@@ -76,20 +86,52 @@ var runtimeSession = AsterGraphEditorFactory.CreateSession(new AsterGraphEditorO
     Instrumentation = new GraphEditorInstrumentationOptions(runtimeLoggerFactory, runtimeActivitySource),
     StyleOptions = style,
     BehaviorOptions = runtimeBehavior,
+    PluginRegistrations = pluginRegistrations,
 });
 
 var commandMarkers = new List<string>();
 var documentChangeKinds = new List<string>();
 var viewportChanges = 0;
 var pendingConnectionChanges = 0;
+var automationStartedCount = 0;
+var automationCompletedCount = 0;
+var automationProgressCommandIds = new List<string>();
+var automationGenericCommandIds = new List<string>();
 GraphEditorRecoverableFailureEventArgs? runtimeFailure = null;
 
 runtimeSession.Events.CommandExecuted += (_, args) =>
+{
     commandMarkers.Add($"{args.CommandId}:{args.MutationLabel ?? "<none>"}:{args.IsInMutationScope}");
+    if (string.Equals(args.MutationLabel, HostSampleAutomationRunId, StringComparison.Ordinal))
+    {
+        automationGenericCommandIds.Add(args.CommandId);
+    }
+};
 runtimeSession.Events.DocumentChanged += (_, args) => documentChangeKinds.Add(args.ChangeKind.ToString());
 runtimeSession.Events.ViewportChanged += (_, _) => viewportChanges++;
 runtimeSession.Events.PendingConnectionChanged += (_, _) => pendingConnectionChanges++;
 runtimeSession.Events.RecoverableFailure += (_, args) => runtimeFailure = args;
+runtimeSession.Events.AutomationStarted += (_, args) =>
+{
+    if (string.Equals(args.RunId, HostSampleAutomationRunId, StringComparison.Ordinal))
+    {
+        automationStartedCount++;
+    }
+};
+runtimeSession.Events.AutomationProgress += (_, args) =>
+{
+    if (string.Equals(args.RunId, HostSampleAutomationRunId, StringComparison.Ordinal))
+    {
+        automationProgressCommandIds.Add(args.Step.CommandId);
+    }
+};
+runtimeSession.Events.AutomationCompleted += (_, args) =>
+{
+    if (string.Equals(args.Result.RunId, HostSampleAutomationRunId, StringComparison.Ordinal))
+    {
+        automationCompletedCount++;
+    }
+};
 
 runtimeSession.Commands.UpdateViewportSize(1280, 720);
 runtimeSession.Commands.SetSelection(["sample-source-001"], "sample-source-001", updateStatus: false);
@@ -110,6 +152,7 @@ using (runtimeSession.BeginMutation("host-sample-batch"))
     runtimeSession.Commands.CenterViewOnNode("sample-sink-001");
     runtimeSession.Commands.PanBy(12, 18);
 }
+var runtimeAutomationResult = runtimeSession.Automation.Execute(CreateAutomationRunRequest(HostSampleAutomationRunId, HostSamplePluginDefinitionIdValue));
 runtimeSession.Commands.SetSelection(["sample-sink-001"], "sample-sink-001", updateStatus: false);
 runtimeSession.Commands.SaveWorkspace();
 
@@ -118,6 +161,7 @@ var runtimeViewport = runtimeSession.Queries.GetViewportSnapshot();
 var runtimeCapabilities = runtimeSession.Queries.GetCapabilitySnapshot();
 var runtimeCommandDescriptors = runtimeSession.Queries.GetCommandDescriptors();
 var runtimeCanvasDescriptors = runtimeSession.Queries.BuildContextMenuDescriptors(new ContextMenuContext(ContextMenuTargetKind.Canvas, new GraphPoint(200, 120)));
+var runtimePluginLoadSnapshots = runtimeSession.Queries.GetPluginLoadSnapshots();
 var runtimeInspection = runtimeSession.Diagnostics.CaptureInspectionSnapshot();
 var runtimeRecentDiagnostics = runtimeSession.Diagnostics.GetRecentDiagnostics(10);
 var runtimeReadinessDescriptors = CaptureReadinessDescriptors(runtimeSession);
@@ -125,6 +169,41 @@ var runtimeAutomationDescriptorsOk = runtimeInspection.FeatureDescriptors.Any(de
     && runtimeInspection.FeatureDescriptors.Any(descriptor => descriptor.Id == "surface.mutation.batch" && descriptor.IsAvailable);
 var phase18ReadinessOk = runtimeReadinessDescriptors.Count == ReadinessFeatureCount
     && runtimeReadinessDescriptors.All(descriptor => descriptor.IsAvailable);
+var expectedAutomationCommandIds = new[]
+{
+    "selection.set",
+    "nodes.add",
+    "nodes.move",
+    "viewport.resize",
+    "viewport.pan",
+    "connections.start",
+    "connections.complete",
+};
+var runtimeAutomationDiagnosticCodes = runtimeRecentDiagnostics
+    .Where(diagnostic => diagnostic.Code.StartsWith("automation.", StringComparison.Ordinal))
+    .Select(diagnostic => diagnostic.Code)
+    .ToArray();
+var runtimePluginMenuOk = runtimeCanvasDescriptors.Any(descriptor => descriptor.Id == HostSamplePluginMenuId);
+var runtimePluginLocalizationOk = runtimeCanvasDescriptors.Any(descriptor => descriptor.Id == "canvas-add-node" && descriptor.Header == "Plugin Add Node");
+var runtimePluginSnapshot = runtimePluginLoadSnapshots.SingleOrDefault();
+var phase25PluginHostOk = runtimePluginSnapshot is not null
+    && runtimePluginSnapshot.SourceKind == GraphEditorPluginLoadSourceKind.Direct
+    && runtimePluginSnapshot.Status == GraphEditorPluginLoadStatus.Loaded
+    && runtimePluginSnapshot.Descriptor?.Id == "host.sample.plugin"
+    && runtimePluginSnapshot.Contributions.NodeDefinitionProviderCount == 1
+    && runtimePluginSnapshot.Contributions.ContextMenuAugmentorCount == 1
+    && runtimePluginSnapshot.Contributions.NodePresentationProviderCount == 1
+    && runtimePluginSnapshot.Contributions.LocalizationProviderCount == 1
+    && runtimePluginMenuOk
+    && runtimePluginLocalizationOk;
+var phase25AutomationHostOk = runtimeAutomationResult.Succeeded
+    && automationStartedCount == 1
+    && automationCompletedCount == 1
+    && automationProgressCommandIds.SequenceEqual(expectedAutomationCommandIds, StringComparer.Ordinal)
+    && automationGenericCommandIds.SequenceEqual(expectedAutomationCommandIds, StringComparer.Ordinal)
+    && runtimeAutomationDiagnosticCodes.Contains("automation.run.started", StringComparer.Ordinal)
+    && runtimeAutomationDiagnosticCodes.Contains("automation.run.completed", StringComparer.Ordinal)
+    && runtimeAutomationResult.Inspection.Document.Nodes.Any(node => node.DefinitionId is { Value: HostSamplePluginDefinitionIdValue });
 var runtimeSessionIsKernelFirst = !runtimeSession
     .GetType()
     .GetFields(BindingFlags.Instance | BindingFlags.NonPublic)
@@ -182,6 +261,8 @@ Console.WriteLine($"Session backend: kernel-first={runtimeSessionIsKernelFirst}"
 Console.WriteLine($"Descriptor runtime: nodes.add={runtimeCommandDescriptors.Any(descriptor => descriptor.Id == "nodes.add" && descriptor.IsEnabled)}, canvas={string.Join(",", runtimeCanvasDescriptors.Select(descriptor => descriptor.Id))}");
 Console.WriteLine($"Readiness seam descriptors: {string.Join(",", runtimeReadinessDescriptors.Where(descriptor => descriptor.IsAvailable).Select(descriptor => descriptor.Id))}");
 Console.WriteLine($"Readiness automation boundary: featureDescriptors={runtimeAutomationDescriptorsOk}, diagnostics={runtimeRecentDiagnostics.Count}, inspectionFeatures={runtimeInspection.FeatureDescriptors.Count}");
+Console.WriteLine($"Plugin load snapshots: {string.Join(" | ", runtimePluginLoadSnapshots.Select(snapshot => $"{snapshot.Descriptor?.Id ?? "<none>"}:{snapshot.Status}:{snapshot.SourceKind}:{snapshot.Contributions.NodeDefinitionProviderCount}/{snapshot.Contributions.ContextMenuAugmentorCount}/{snapshot.Contributions.NodePresentationProviderCount}/{snapshot.Contributions.LocalizationProviderCount}"))}");
+Console.WriteLine($"Automation proof commands: {string.Join(",", automationProgressCommandIds)}");
 Console.WriteLine($"State scaling proof: inspector={inspectorProofEditor.InspectorConnections}, downstream={inspectorProofEditor.InspectorDownstream}, dirtyAfterMove={historyDirtyAfterMove}, canUndoAfterMove={historyCanUndoAfterMove}, dirtyAfterUndo={historyProofEditor.IsDirty}, restored=({historyRestoredNode.X:0},{historyRestoredNode.Y:0})");
 
 var viewCompatibility = new RecordingCompatibilityService();
@@ -197,6 +278,7 @@ var editor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
     ContextMenuAugmentor = new HostSampleAugmentor(),
     NodePresentationProvider = new HostSamplePresentationProvider(),
     LocalizationProvider = new HostSampleLocalizationProvider(),
+    PluginRegistrations = pluginRegistrations,
 });
 var retainedCanvasDescriptorMenu = editor.Session.Queries.BuildContextMenuDescriptors(new ContextMenuContext(ContextMenuTargetKind.Canvas, new GraphPoint(32, 48)));
 var retainedCanvasMenu = editor.BuildContextMenu(new ContextMenuContext(ContextMenuTargetKind.Canvas, new GraphPoint(32, 48)));
@@ -235,6 +317,10 @@ var node = AssertNode(editor, "sample-source-001");
 editor.SelectSingleNode(node, updateStatus: false);
 retainedSession.Commands.SaveWorkspace();
 editor.ExportSelectionFragment();
+var retainedPluginLoadSnapshots = retainedSession.Queries.GetPluginLoadSnapshots();
+var retainedPluginMenuOk = retainedCanvasDescriptorMenu.Any(descriptor => descriptor.Id == HostSamplePluginMenuId);
+var retainedPluginLocalizationOk = retainedCanvasDescriptorMenu.Any(descriptor => descriptor.Id == "canvas-add-node" && descriptor.Header == "Plugin Add Node");
+var retainedPluginBadgeOk = node.Presentation.TopRightBadges.Any(badge => badge.Text == "Plugin");
 var retainedInspection = retainedSession.Diagnostics.CaptureInspectionSnapshot();
 var retainedRecentDiagnostics = retainedSession.Diagnostics.GetRecentDiagnostics(10);
 var retainedSessionHost = retainedSession.GetType()
@@ -397,6 +483,15 @@ var retainedCompatibilityOnlyCommands = CaptureCompatibilityOnlyCommandIds(runti
 var phase17HostedUiParityOk = hostedUiRouteSnapshot == directCompatibilityRouteSnapshot;
 var phase17SharedCanonicalSubsetOk = runtimeSharedCanonicalCommandIds.SequenceEqual(retainedSharedCanonicalCommandIds, StringComparer.Ordinal);
 var phase17RetainedCompatibilityWindowOk = retainedCompatibilityOnlyCommands.Contains("nodes.duplicate", StringComparer.Ordinal);
+var phase25RetainedHostProofOk = retainedPluginLoadSnapshots.Count == 1
+    && retainedPluginMenuOk
+    && retainedPluginLocalizationOk
+    && retainedPluginBadgeOk;
+var phase25HostBoundaryOk = phase25PluginHostOk
+    && phase25AutomationHostOk
+    && phase25RetainedHostProofOk
+    && runtimeSessionIsKernelFirst
+    && retainedSessionIsAdapterBacked;
 
 Console.WriteLine($"Host sample view type: {typeof(GraphEditorView).FullName}");
 Console.WriteLine($"Node count: {editor.Nodes.Count}");
@@ -446,6 +541,9 @@ Console.WriteLine($"Phase 16 adapter boundary: shell menu=canonical({phase16Shel
 Console.WriteLine($"PHASE16_ADAPTER_BOUNDARY_OK:{phase16ShellMenuOk}:{phase16CanvasMenuOk}:{phase16ShellShortcutOk}:{phase16CanvasShortcutOk}:{phase16ShellPlatformBoundaryOk}:{phase16CanvasPlatformBoundaryOk}");
 Console.WriteLine($"PHASE17_MIGRATION_ROUTE_OK:{runtimeSessionIsKernelFirst}:{retainedSessionIsAdapterBacked}:{phase17SharedCanonicalSubsetOk}:{phase17HostedUiParityOk}:{phase17RetainedCompatibilityWindowOk}");
 Console.WriteLine($"PHASE18_READINESS_OK:{runtimeSessionIsKernelFirst}:{phase18ReadinessOk}:{runtimeAutomationDescriptorsOk}:{runtimeReadinessDescriptors.Count}");
+Console.WriteLine($"PHASE25_PLUGIN_HOST_OK:{phase25PluginHostOk}:{runtimePluginLoadSnapshots.Count}:{runtimePluginMenuOk}:{runtimePluginLocalizationOk}:{runtimeReadinessDescriptors.Count}");
+Console.WriteLine($"PHASE25_AUTOMATION_HOST_OK:{phase25AutomationHostOk}:{runtimeAutomationResult.ExecutedStepCount}:{automationStartedCount}:{automationCompletedCount}:{runtimeAutomationResult.Inspection.Document.Nodes.Count}:{runtimeAutomationDiagnosticCodes.Length}");
+Console.WriteLine($"PHASE25_HOST_BOUNDARY_OK:{phase25HostBoundaryOk}:{phase25RetainedHostProofOk}:{runtimeSharedCanonicalCommandIds.Count}:{retainedSharedCanonicalCommandIds.Count}:{retainedPluginLoadSnapshots.Count}");
 
 static GraphDocument CreateDocument()
     => new(
@@ -559,12 +657,18 @@ static IReadOnlyList<string> CaptureCompatibilityOnlyCommandIds(IGraphEditorSess
 static bool IsSharedCanonicalCommandId(string id)
     => id is
         "nodes.add" or
+        "selection.set" or
         "selection.delete" or
         "connections.start" or
+        "connections.complete" or
         "connections.connect" or
         "connections.cancel" or
         "connections.delete" or
         "connections.break-port" or
+        "nodes.move" or
+        "viewport.pan" or
+        "viewport.resize" or
+        "viewport.center" or
         "viewport.fit" or
         "viewport.reset" or
         "viewport.center-node" or
@@ -579,17 +683,43 @@ static IReadOnlyList<GraphEditorFeatureDescriptorSnapshot> CaptureReadinessDescr
 
 static bool IsReadinessFeatureId(string id)
     => id is
+        "query.plugin-load-snapshots" or
+        "surface.automation.runner" or
+        "event.automation.started" or
+        "event.automation.progress" or
+        "event.automation.completed" or
         "service.workspace" or
         "service.fragment-workspace" or
         "service.fragment-library" or
         "service.clipboard-payload-serializer" or
         "service.diagnostics" or
+        "integration.plugin-loader" or
         "integration.context-menu-augmentor" or
         "integration.node-presentation-provider" or
         "integration.localization-provider" or
         "integration.diagnostics-sink" or
         "integration.instrumentation.logger" or
         "integration.instrumentation.activity-source";
+
+static GraphEditorAutomationRunRequest CreateAutomationRunRequest(string runId, string pluginDefinitionId)
+    => new(
+        runId,
+        [
+            new GraphEditorAutomationStep("select-source", CreateAutomationCommand("selection.set", ("nodeId", "sample-source-001"), ("primaryNodeId", "sample-source-001"), ("updateStatus", "false"))),
+            new GraphEditorAutomationStep("add-plugin-node", CreateAutomationCommand("nodes.add", ("definitionId", pluginDefinitionId), ("worldX", "720"), ("worldY", "260"))),
+            new GraphEditorAutomationStep("move-plugin-node", CreateAutomationCommand("nodes.move", ("position", "host-sample-plugin-001|744|284"), ("updateStatus", "false"))),
+            new GraphEditorAutomationStep("resize-viewport", CreateAutomationCommand("viewport.resize", ("width", "1280"), ("height", "720"))),
+            new GraphEditorAutomationStep("pan-viewport", CreateAutomationCommand("viewport.pan", ("deltaX", "8"), ("deltaY", "12"))),
+            new GraphEditorAutomationStep("start-connection", CreateAutomationCommand("connections.start", ("sourceNodeId", "sample-source-001"), ("sourcePortId", "result"))),
+            new GraphEditorAutomationStep("complete-connection", CreateAutomationCommand("connections.complete", ("targetNodeId", "host-sample-plugin-001"), ("targetPortId", "input"))),
+        ]);
+
+static GraphEditorCommandInvocationSnapshot CreateAutomationCommand(
+    string commandId,
+    params (string Name, string Value)[] arguments)
+    => new(
+        commandId,
+        arguments.Select(argument => new GraphEditorCommandArgumentSnapshot(argument.Name, argument.Value)).ToArray());
 
 readonly record struct ViewRouteSnapshot(
     GraphEditorViewChromeMode ChromeMode,
@@ -640,6 +770,82 @@ internal sealed class HostSampleNodeDefinitionProvider : INodeDefinitionProvider
                 defaultWidth: 240,
                 defaultHeight: 160),
         ];
+}
+
+internal sealed class HostSampleProofPlugin : IGraphEditorPlugin
+{
+    public GraphEditorPluginDescriptor Descriptor { get; } = new(
+        "host.sample.plugin",
+        "Host Sample Plugin",
+        "Direct-registration proof plugin for the host sample.");
+
+    public void Register(GraphEditorPluginBuilder builder)
+    {
+        ArgumentNullException.ThrowIfNull(builder);
+        builder.AddNodeDefinitionProvider(new HostSamplePluginNodeDefinitionProvider());
+        builder.AddContextMenuAugmentor(new HostSamplePluginContextMenuAugmentor());
+        builder.AddNodePresentationProvider(new HostSamplePluginPresentationProvider());
+        builder.AddLocalizationProvider(new HostSamplePluginLocalizationProvider());
+    }
+}
+
+internal sealed class HostSamplePluginNodeDefinitionProvider : INodeDefinitionProvider
+{
+    public IReadOnlyList<INodeDefinition> GetNodeDefinitions()
+        =>
+        [
+            new NodeDefinition(
+                new NodeDefinitionId("host.sample.plugin"),
+                "Host Sample Plugin Node",
+                "Host Sample",
+                "Plugin proof node",
+                [
+                    new PortDefinition(
+                        "input",
+                        "Input",
+                        new PortTypeId("float"),
+                        "#F3B36B",
+                        "Plugin proof input."),
+                ],
+                [],
+                description: "Plugin-contributed node definition used by the host proof ring.",
+                accentHex: "#8DDCBF",
+                defaultWidth: 240,
+                defaultHeight: 160),
+        ];
+}
+
+internal sealed class HostSamplePluginContextMenuAugmentor : IGraphEditorPluginContextMenuAugmentor
+{
+    public IReadOnlyList<GraphEditorMenuItemDescriptorSnapshot> Augment(GraphEditorPluginMenuAugmentationContext context)
+        => context.StockItems
+            .Concat(
+            [
+                new GraphEditorMenuItemDescriptorSnapshot(
+                    "host-sample-plugin-menu",
+                    "Plugin Proof Menu",
+                    iconKey: "plugin",
+                    isEnabled: false),
+            ])
+            .ToArray();
+}
+
+internal sealed class HostSamplePluginPresentationProvider : IGraphEditorPluginNodePresentationProvider
+{
+    public NodePresentationState GetNodePresentation(GraphEditorPluginNodePresentationContext context)
+        => new(
+            TopRightBadges:
+            [
+                new NodeAdornmentDescriptor("Plugin", "#8DDCBF", "State comes from a plugin contribution."),
+            ]);
+}
+
+internal sealed class HostSamplePluginLocalizationProvider : IGraphEditorPluginLocalizationProvider
+{
+    public string GetString(string key, string fallback)
+        => key == "editor.menu.canvas.addNode"
+            ? "Plugin Add Node"
+            : fallback;
 }
 
 internal sealed class HostSampleAugmentor : IGraphContextMenuAugmentor

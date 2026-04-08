@@ -1,3 +1,4 @@
+using AsterGraph.Abstractions.Catalog;
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Core.Compatibility;
@@ -8,6 +9,7 @@ using AsterGraph.Editor.Configuration;
 using AsterGraph.Editor.Diagnostics;
 using AsterGraph.Editor.Events;
 using AsterGraph.Editor.Hosting;
+using AsterGraph.Editor.Plugins;
 using AsterGraph.Editor.Runtime;
 using Xunit;
 
@@ -141,12 +143,47 @@ public sealed class GraphEditorAutomationExecutionTests
         Assert.Contains(recentDiagnostics, diagnostic => diagnostic.Code == "automation.run.completed");
     }
 
+    [Fact]
+    public void AutomationRunner_CanAddPluginContributedNodeDefinitionThroughCanonicalCommandIds()
+    {
+        var definitionId = new NodeDefinitionId("tests.automation.plugin-host");
+        var session = AsterGraphEditorFactory.CreateSession(new AsterGraphEditorOptions
+        {
+            Document = CreateDocument(definitionId),
+            NodeCatalog = CreateCatalog(definitionId),
+            CompatibilityService = new DefaultPortCompatibilityService(),
+            PluginRegistrations =
+            [
+                GraphEditorPluginRegistration.FromPlugin(new AutomationPlugin()),
+            ],
+        });
+
+        var result = session.Automation.Execute(new GraphEditorAutomationRunRequest(
+            "plugin-automation-run",
+            [
+                CreateStep("select-source", "selection.set", ("nodeId", SourceNodeId), ("primaryNodeId", SourceNodeId), ("updateStatus", "false")),
+                CreateStep("add-plugin-node", "nodes.add", ("definitionId", "tests.automation.plugin"), ("worldX", "620"), ("worldY", "220")),
+                CreateStep("move-plugin-node", "nodes.move", ("position", "tests-automation-plugin-001|648|244"), ("updateStatus", "false")),
+            ]));
+
+        Assert.True(result.Succeeded);
+        Assert.Equal(3, result.ExecutedStepCount);
+        Assert.Contains(result.Inspection.Document.Nodes, node => node.DefinitionId is { Value: "tests.automation.plugin" });
+        Assert.Contains(session.Queries.GetPluginLoadSnapshots(), snapshot => snapshot.Descriptor?.Id == "tests.automation.plugin");
+    }
+
     private static GraphEditorCommandInvocationSnapshot CreateCommand(
         string commandId,
         params (string Name, string Value)[] arguments)
         => new(
             commandId,
             arguments.Select(argument => new GraphEditorCommandArgumentSnapshot(argument.Name, argument.Value)).ToList());
+
+    private static GraphEditorAutomationStep CreateStep(
+        string stepId,
+        string commandId,
+        params (string Name, string Value)[] arguments)
+        => new(stepId, CreateCommand(commandId, arguments));
 
     private static AsterGraphEditorOptions CreateOptions(
         NodeDefinitionId definitionId,
@@ -202,5 +239,24 @@ public sealed class GraphEditorAutomationExecutionTests
             [new PortDefinition(TargetPortId, "Input", new PortTypeId("float"), "#F3B36B")],
             [new PortDefinition(SourcePortId, "Output", new PortTypeId("float"), "#6AD5C4")]));
         return catalog;
+    }
+
+    private sealed class AutomationPlugin : IGraphEditorPlugin
+    {
+        public GraphEditorPluginDescriptor Descriptor { get; } = new(
+            "tests.automation.plugin",
+            "Automation Plugin");
+
+        public void Register(GraphEditorPluginBuilder builder)
+        {
+            ArgumentNullException.ThrowIfNull(builder);
+            builder.AddNodeDefinitionProvider(new AutomationPluginNodeDefinitionProvider());
+        }
+    }
+
+    private sealed class AutomationPluginNodeDefinitionProvider : INodeDefinitionProvider
+    {
+        public IReadOnlyList<INodeDefinition> GetNodeDefinitions()
+            => [new NodeDefinition(new NodeDefinitionId("tests.automation.plugin"), "Automation Plugin Node", "Tests", "Automation", [new PortDefinition(TargetPortId, "Input", new PortTypeId("float"), "#F3B36B")], [])];
     }
 }

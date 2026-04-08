@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: Plugin Loading and Automation Execution
-status: Phase 25 Planned
-stopped_at: Phase 25 planned; next step is to execute plugin and automation proof ring
-last_updated: "2026-04-08T11:04:03.5708113Z"
+status: Phase 25 Complete
+stopped_at: Phase 25 complete; next step is to archive the v1.4 milestone
+last_updated: "2026-04-08T11:52:12.5045046Z"
 last_activity: 2026-04-08
 progress:
   total_phases: 4
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 12
-  completed_plans: 9
+  completed_plans: 12
 ---
 
 # Project State
@@ -20,14 +20,14 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-04-08)
 
 **Core value:** Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
-**Current focus:** Phase 25 plugin and automation proof ring execution planning
+**Current focus:** v1.4 milestone closeout after Phase 25 proof ring completion
 
 ## Current Position
 
 Phase: 25
-Plan: Planning Complete
-Status: Phase 25 Planned
-Last activity: 2026-04-08 — Planned Phase 25 plugin and automation proof ring
+Plan: Execution Complete
+Status: Phase 25 Complete
+Last activity: 2026-04-08 — Completed Phase 25 plugin and automation proof ring
 
 ## Accumulated Context
 
@@ -67,6 +67,8 @@ Carry-forward decisions from shipped milestones:
 - Keep automation progress/failure visibility on typed runtime events plus machine-readable diagnostics instead of status-text scraping or UI-bound progress surfaces.
 - Keep the first automation runner synchronous, in-process, and descriptor-first rather than expanding into a workflow engine or script host in the same phase.
 - Reuse the existing mutation scope as the automation batching primitive instead of introducing a parallel transaction model.
+- Keep the plugin and automation proof ring aligned across focused regressions, `HostSample`, `PackageSmoke`, `ScaleSmoke`, and README commands instead of relying on docs-only claims.
+- Keep Phase 25 proof rooted in public `AsterGraphEditorFactory`, `IGraphEditorSession`, plugin registration, query, diagnostics, and automation APIs.
 
 ### Pending Todos
 
@@ -79,7 +81,7 @@ None captured yet.
 - `GraphEditorTransactionTests.GraphEditorViewModel_HistoryInteraction_PreservesUndoAndDirtySemantics` and `GraphEditorViewModel_SaveBoundary_PreservesUndoRedoDirtySemantics` still fail on the detached clean `d7939a5` baseline; they remain a carry-forward proof concern rather than a Phase 24 regression.
 - The next milestone should avoid reopening kernel/facade ownership drift unless new evidence requires it.
 - The first automation baseline should stay command/query/batch driven rather than expand into a full scripting language or workflow-designer product.
-- Proof work must stay aligned across focused tests, `HostSample`, `PackageSmoke`, and `ScaleSmoke` so extension claims remain machine-checkable.
+- Phase 25 resolved the proof-ring alignment gap, but future milestone work should preserve the same focused-test/sample/smoke parity so extension claims stay machine-checkable.
 
 ### Quick Tasks Completed
 
@@ -90,5 +92,5 @@ None captured yet.
 ## Session Continuity
 
 Last session: 2026-04-08
-Stopped at: Phase 25 planned; next step is to execute plugin and automation proof ring
-Resume file: .planning/phases/25-plugin-and-automation-proof-ring/25-01-PLAN.md
+Stopped at: Phase 25 complete; next step is to archive the v1.4 milestone
+Resume file: .planning/phases/25-plugin-and-automation-proof-ring/25-VERIFICATION.md

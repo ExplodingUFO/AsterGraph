@@ -19,8 +19,8 @@
 
 ### Proof And Samples
 
-- [ ] **PROOF-01**: `HostSample`, `PackageSmoke`, and focused regression coverage prove the plugin composition and automation execution story from the canonical host boundary
-- [ ] **PROOF-02**: `ScaleSmoke` or equivalent large-graph proof shows the automation path remains credible on larger sessions, and docs point hosts to the canonical plugin/automation path
+- [x] **PROOF-01**: `HostSample`, `PackageSmoke`, and focused regression coverage prove the plugin composition and automation execution story from the canonical host boundary
+- [x] **PROOF-02**: `ScaleSmoke` or equivalent large-graph proof shows the automation path remains credible on larger sessions, and docs point hosts to the canonical plugin/automation path
 
 ## Future Requirements
 
@@ -54,8 +54,8 @@
 | PLUG-03 | Phase 23 | Complete |
 | AUTO-01 | Phase 24 | Complete |
 | AUTO-02 | Phase 24 | Complete |
-| PROOF-01 | Phase 25 | Planned |
-| PROOF-02 | Phase 25 | Planned |
+| PROOF-01 | Phase 25 | Complete |
+| PROOF-02 | Phase 25 | Complete |
 
 **Coverage:**
 - milestone requirements: 7 total

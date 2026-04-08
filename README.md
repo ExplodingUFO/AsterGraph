@@ -23,13 +23,17 @@ Current capabilities:
 - selection fragments can be exported to and imported from a JSON file
 - strict type compatibility with a small set of safe implicit conversions
 - compile-time node-definition registration through providers
+- runtime plugin composition through `AsterGraphEditorOptions.PluginRegistrations`
+- canonical plugin inspection through `IGraphEditorSession.Queries.GetPluginLoadSnapshots()`
+- descriptor-first automation execution through `IGraphEditorSession.Automation`
 
 Current non-goals:
 
-- runtime plugin loading
 - algorithm execution engine
 - undo/redo stack
 - property editor framework
+- plugin marketplace, trust, or unload policy
+- dedicated scripting language or workflow-designer UI for automation authoring
 
 ## Solution Structure
 
@@ -172,6 +176,55 @@ Core runtime-first host interactions now include:
 - MVVM-free compatibility discovery through `Queries.GetCompatiblePortTargets(...)`
 
 `Queries.GetCompatibleTargets(...)` remains available only as a compatibility-oriented bridge for existing host code that still depends on view-model objects.
+
+## Plugin Loading And Automation
+
+v1.4 ships the first public plugin-loading and automation-execution baseline in `AsterGraph.Editor`.
+
+Canonical host flow:
+
+- declare plugins through `AsterGraphEditorOptions.PluginRegistrations`
+- create the runtime through `AsterGraphEditorFactory.CreateSession(...)` or the hosted UI through `AsterGraphEditorFactory.Create(...)`
+- inspect current plugin load state through `Queries.GetPluginLoadSnapshots()` plus `Diagnostics`
+- execute automation through `IGraphEditorSession.Automation.Execute(...)`
+
+Minimal runtime-first shape:
+
+```csharp
+var session = AsterGraphEditorFactory.CreateSession(new AsterGraphEditorOptions
+{
+    Document = document,
+    NodeCatalog = catalog,
+    CompatibilityService = compatibilityService,
+    PluginRegistrations =
+    [
+        GraphEditorPluginRegistration.FromPlugin(new MyPlugin()),
+        GraphEditorPluginRegistration.FromAssemblyPath(pluginAssemblyPath),
+    ],
+});
+
+var pluginLoads = session.Queries.GetPluginLoadSnapshots();
+var run = session.Automation.Execute(new GraphEditorAutomationRunRequest(
+    "host-proof",
+    [
+        new GraphEditorAutomationStep(
+            "select-source",
+            new GraphEditorCommandInvocationSnapshot(
+                "selection.set",
+                [new GraphEditorCommandArgumentSnapshot("nodeId", "source-001")])),
+    ]));
+```
+
+The proof ring for this extension story lives in the same public surfaces:
+
+- focused regressions:
+  - `tests/AsterGraph.Editor.Tests/GraphEditorPluginLoadingTests.cs`
+  - `tests/AsterGraph.Editor.Tests/GraphEditorAutomationExecutionTests.cs`
+  - `tests/AsterGraph.Editor.Tests/GraphEditorProofRingTests.cs`
+- runnable host/package proof:
+  - `dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj --nologo`
+  - `dotnet run --project tools/AsterGraph.PackageSmoke/AsterGraph.PackageSmoke.csproj --nologo`
+  - `dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj --nologo`
 
 ## Quick Start
 
@@ -557,7 +610,8 @@ This is appended legally through the public editor API rather than by replacing 
 
 - move more sample-only styling and content out of shared projects where appropriate
 - add richer graph definition metadata and parameter editing
-- support runtime plugin loading on top of the existing provider contracts
+- extend the plugin and automation proof ring across samples, package smoke, and docs
+- explore richer automation authoring only after the shipped session-first runner proves sufficient
 - improve automated UI coverage for pointer-based graph gestures
 
 ## License

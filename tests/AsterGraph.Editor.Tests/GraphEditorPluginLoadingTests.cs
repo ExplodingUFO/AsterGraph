@@ -1,3 +1,4 @@
+using AsterGraph.Abstractions.Catalog;
 using AsterGraph.Abstractions.Compatibility;
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
@@ -74,6 +75,38 @@ public sealed class GraphEditorPluginLoadingTests
         Assert.Contains(session.Diagnostics.GetRecentDiagnostics(), diagnostic => diagnostic.Code == "plugin.load.failed");
         Assert.Equal(GraphEditorDiagnosticSeverity.Error, failure.Severity);
         Assert.Contains("missing-plugin.dll", failure.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void Create_And_CreateSession_WithDirectPluginRegistration_SurfaceEquivalentSnapshotsAndContributions()
+    {
+        var editorDiagnostics = new RecordingDiagnosticsSink();
+        var runtimeDiagnostics = new RecordingDiagnosticsSink();
+        var registration = GraphEditorPluginRegistration.FromPlugin(new DirectPlugin());
+        var editor = AsterGraphEditorFactory.Create(CreateOptions(editorDiagnostics, registration));
+        var session = AsterGraphEditorFactory.CreateSession(CreateOptions(runtimeDiagnostics, registration));
+        editor.RefreshNodePresentations();
+
+        var retainedSnapshots = editor.Session.Queries.GetPluginLoadSnapshots();
+        var runtimeSnapshots = session.Queries.GetPluginLoadSnapshots();
+        var retainedCanvasMenu = editor.Session.Queries.BuildContextMenuDescriptors(new ContextMenuContext(ContextMenuTargetKind.Canvas, new GraphPoint(240, 180)));
+        var runtimeCanvasMenu = session.Queries.BuildContextMenuDescriptors(new ContextMenuContext(ContextMenuTargetKind.Canvas, new GraphPoint(240, 180)));
+        var sourceNode = Assert.Single(editor.Nodes, node => node.Id == "source-node");
+
+        Assert.Equal(runtimeSnapshots, retainedSnapshots);
+        var snapshot = Assert.Single(runtimeSnapshots);
+        Assert.Equal(GraphEditorPluginLoadSourceKind.Direct, snapshot.SourceKind);
+        Assert.Equal(GraphEditorPluginLoadStatus.Loaded, snapshot.Status);
+        Assert.Equal("tests.direct-plugin", snapshot.Descriptor?.Id);
+        Assert.Equal(1, snapshot.Contributions.NodeDefinitionProviderCount);
+        Assert.Equal(1, snapshot.Contributions.ContextMenuAugmentorCount);
+        Assert.Equal(1, snapshot.Contributions.NodePresentationProviderCount);
+        Assert.Equal(1, snapshot.Contributions.LocalizationProviderCount);
+        Assert.Equal("Direct Add Node", Assert.Single(runtimeCanvasMenu, item => item.Id == "canvas-add-node").Header);
+        Assert.Equal("Direct Add Node", Assert.Single(retainedCanvasMenu, item => item.Id == "canvas-add-node").Header);
+        Assert.Contains(runtimeCanvasMenu, item => item.Id == "direct-plugin-menu");
+        Assert.Contains(retainedCanvasMenu, item => item.Id == "direct-plugin-menu");
+        Assert.Contains(sourceNode.Presentation.TopRightBadges, badge => badge.Text == "Direct");
     }
 
     [Fact]
@@ -216,14 +249,50 @@ public sealed class GraphEditorPluginLoadingTests
         public void Register(GraphEditorPluginBuilder builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
+            builder.AddNodeDefinitionProvider(new DirectNodeDefinitionProvider());
+            builder.AddContextMenuAugmentor(new DirectContextMenuAugmentor());
+            builder.AddNodePresentationProvider(new DirectPresentationProvider());
             builder.AddLocalizationProvider(new DirectLocalizationProvider());
         }
+    }
+
+    private sealed class DirectNodeDefinitionProvider : INodeDefinitionProvider
+    {
+        public IReadOnlyList<INodeDefinition> GetNodeDefinitions()
+            => [new NodeDefinition(new NodeDefinitionId("tests.direct-plugin.node"), "Direct Plugin Node", "Tests", "Plugins", [], [])];
+    }
+
+    private sealed class DirectContextMenuAugmentor : IGraphEditorPluginContextMenuAugmentor
+    {
+        public IReadOnlyList<GraphEditorMenuItemDescriptorSnapshot> Augment(GraphEditorPluginMenuAugmentationContext context)
+            => context.StockItems
+                .Concat(
+                [
+                    new GraphEditorMenuItemDescriptorSnapshot(
+                        "direct-plugin-menu",
+                        "Direct Plugin Menu",
+                        iconKey: "plugin",
+                        isEnabled: false),
+                ])
+                .ToList();
+    }
+
+    private sealed class DirectPresentationProvider : IGraphEditorPluginNodePresentationProvider
+    {
+        public NodePresentationState GetNodePresentation(GraphEditorPluginNodePresentationContext context)
+            => new(
+                TopRightBadges:
+                [
+                    new NodeAdornmentDescriptor("Direct", "#6AD5C4"),
+                ]);
     }
 
     private sealed class DirectLocalizationProvider : IGraphEditorPluginLocalizationProvider
     {
         public string GetString(string key, string fallback)
-            => fallback;
+            => key == "editor.menu.canvas.addNode"
+                ? "Direct Add Node"
+                : fallback;
     }
 
     private sealed class HostOverrideLocalizationProvider : IGraphLocalizationProvider

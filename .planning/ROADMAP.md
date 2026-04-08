@@ -2,7 +2,7 @@
 
 ## Milestones
 
-- 🚧 **v1.4 Plugin Loading and Automation Execution** — Phases 22-25 (planned)
+- 🚧 **v1.4 Plugin Loading and Automation Execution** — Phases 22-25 complete, ready to archive
 - ✅ **[v1.3 Demo Showcase](./milestones/v1.3-ROADMAP.md)** — Phases 19-21, shipped 2026-04-08
 - ✅ **[v1.2 Kernel Extraction, Capability Contracts, and Plugin Readiness](./milestones/v1.2-ROADMAP.md)** — Phases 13-18, shipped 2026-04-08
 - ✅ **v1.1 Host Boundary, Native Integration, and Scaling** — Phases 07-12, shipped before milestone archive split
@@ -10,9 +10,9 @@
 
 ## Overview
 
-The kernel-first runtime, descriptor contracts, readiness proof, graph-first demo showcase, and first live plugin integration baseline have all shipped. The next problem is no longer whether hosts can see or load plugin seams. The next problem is whether the same canonical session, descriptor, command, and diagnostics surfaces can now support automation execution and a broader proof ring without falling back to facade-coupled or Avalonia-coupled APIs.
+The kernel-first runtime, descriptor contracts, readiness proof, graph-first demo showcase, live plugin integration baseline, and descriptor-first automation runner have all shipped. Phase 25 now closes the remaining v1.4 gap by extending that baseline across focused regressions, `HostSample`, `PackageSmoke`, `ScaleSmoke`, and README guidance.
 
-This milestone turns the deferred `PLUG-01` and `AUTO-01` style follow-on work into the next concrete product increment: a first in-process plugin-loading path, a descriptor-first automation runner, and a proof ring that keeps those claims machine-checkable for package consumers.
+This milestone has now delivered a first in-process plugin-loading path, a descriptor-first automation runner, and a proof ring that keeps those claims machine-checkable for package consumers.
 
 ## Milestone
 
@@ -24,7 +24,7 @@ This milestone turns the deferred `PLUG-01` and `AUTO-01` style follow-on work i
 - [x] **Phase 22: Plugin Composition Contracts** - Publish the first public plugin composition/loading path over `AsterGraphEditorFactory`, options, and canonical runtime descriptors.
 - [x] **Phase 23: Runtime Plugin Integration And Inspection** - Let loaded plugins contribute additive seams and make their loaded state inspectable from the canonical runtime boundary.
 - [x] **Phase 24: Automation Execution Runner** - Add the first descriptor-first automation runner over command IDs, query snapshots, batching, and typed runtime diagnostics/events.
-- [ ] **Phase 25: Plugin And Automation Proof Ring** - Lock the new extension story into focused tests, sample hosts, smoke tools, scale proof, and docs.
+- [x] **Phase 25: Plugin And Automation Proof Ring** - Lock the new extension story into focused tests, sample hosts, smoke tools, scale proof, and docs.
 
 ## Phase Details
 
@@ -75,8 +75,8 @@ This milestone turns the deferred `PLUG-01` and `AUTO-01` style follow-on work i
 | 22. Plugin Composition Contracts | PLUG-01 | Complete |
 | 23. Runtime Plugin Integration And Inspection | PLUG-02, PLUG-03 | Complete |
 | 24. Automation Execution Runner | AUTO-01, AUTO-02 | Complete |
-| 25. Plugin And Automation Proof Ring | PROOF-01, PROOF-02 | Planned |
+| 25. Plugin And Automation Proof Ring | PROOF-01, PROOF-02 | Complete |
 
 ## Next Action
 
-**Phase 25** is planned. The next workflow step is to execute **Phase 25: Plugin And Automation Proof Ring**.
+All v1.4 phases are complete. The next workflow step is to archive the milestone and start the next milestone framing.

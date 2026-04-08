@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Reflection;
 using Avalonia.Controls;
 using Avalonia.Input;
+using AsterGraph.Abstractions.Catalog;
 using AsterGraph.Abstractions.Compatibility;
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
@@ -11,6 +12,7 @@ using AsterGraph.Avalonia.Hosting;
 using AsterGraph.Avalonia.Menus;
 using AsterGraph.Avalonia.Presentation;
 using AsterGraph.Core.Models;
+using AsterGraph.Editor.Automation;
 using AsterGraph.Editor.Catalog;
 using AsterGraph.Editor.Configuration;
 using AsterGraph.Editor.Diagnostics;
@@ -18,6 +20,7 @@ using AsterGraph.Editor.Hosting;
 using AsterGraph.Editor.Localization;
 using AsterGraph.Editor.Menus;
 using AsterGraph.Editor.Models;
+using AsterGraph.Editor.Plugins;
 using AsterGraph.Editor.Presentation;
 using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.Services;
@@ -124,7 +127,15 @@ var fragmentWorkspaceService = new RecordingFragmentWorkspaceService("fragment:/
 var fragmentLibraryService = new RecordingFragmentLibraryService("library://package-smoke");
 var serializer = new RecordingClipboardPayloadSerializer();
 var diagnostics = new RecordingDiagnosticsSink();
-const int ReadinessFeatureCount = 11;
+const int ReadinessFeatureCount = 17;
+const string SmokePluginDefinitionIdValue = "smoke.plugin";
+const string SmokePluginMenuId = "smoke-plugin-menu";
+const string SmokeAutomationRunId = "smoke-proof-automation";
+var pluginRegistrations =
+    new[]
+    {
+        GraphEditorPluginRegistration.FromPlugin(new SmokeProofPlugin()),
+    };
 
 var legacyEditor = new GraphEditorViewModel(
     document,
@@ -167,6 +178,7 @@ var factoryEditor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
     ContextMenuAugmentor = menuAugmentor,
     NodePresentationProvider = presentationProvider,
     LocalizationProvider = localizationProvider,
+    PluginRegistrations = pluginRegistrations,
 });
 var factoryView = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOptions
 {
@@ -399,19 +411,52 @@ var session = AsterGraphEditorFactory.CreateSession(new AsterGraphEditorOptions
     ContextMenuAugmentor = menuAugmentor,
     NodePresentationProvider = presentationProvider,
     LocalizationProvider = localizationProvider,
+    PluginRegistrations = pluginRegistrations,
 });
 
 var commandIds = new List<string>();
 var documentChanges = 0;
 var viewportChanges = 0;
 var pendingConnectionChanges = 0;
+var automationStartedCount = 0;
+var automationCompletedCount = 0;
+var automationProgressCommandIds = new List<string>();
+var automationGenericCommandIds = new List<string>();
 string? failureCode = null;
 
-session.Events.CommandExecuted += (_, args) => commandIds.Add(args.CommandId);
+session.Events.CommandExecuted += (_, args) =>
+{
+    commandIds.Add(args.CommandId);
+    if (string.Equals(args.MutationLabel, SmokeAutomationRunId, StringComparison.Ordinal))
+    {
+        automationGenericCommandIds.Add(args.CommandId);
+    }
+};
 session.Events.DocumentChanged += (_, _) => documentChanges++;
 session.Events.ViewportChanged += (_, _) => viewportChanges++;
 session.Events.PendingConnectionChanged += (_, _) => pendingConnectionChanges++;
 session.Events.RecoverableFailure += (_, args) => failureCode = args.Code;
+session.Events.AutomationStarted += (_, args) =>
+{
+    if (string.Equals(args.RunId, SmokeAutomationRunId, StringComparison.Ordinal))
+    {
+        automationStartedCount++;
+    }
+};
+session.Events.AutomationProgress += (_, args) =>
+{
+    if (string.Equals(args.RunId, SmokeAutomationRunId, StringComparison.Ordinal))
+    {
+        automationProgressCommandIds.Add(args.Step.CommandId);
+    }
+};
+session.Events.AutomationCompleted += (_, args) =>
+{
+    if (string.Equals(args.Result.RunId, SmokeAutomationRunId, StringComparison.Ordinal))
+    {
+        automationCompletedCount++;
+    }
+};
 
 session.Commands.UpdateViewportSize(1280, 720);
 session.Commands.SetSelection([sourceNodeId], sourceNodeId, updateStatus: false);
@@ -432,6 +477,7 @@ using (session.BeginMutation("smoke-batch"))
     session.Commands.CenterViewOnNode(targetNodeId);
     session.Commands.PanBy(12, 18);
 }
+var runtimeAutomationResult = session.Automation.Execute(CreateAutomationRunRequest(SmokeAutomationRunId, SmokePluginDefinitionIdValue));
 session.Commands.SetSelection([targetNodeId], targetNodeId, updateStatus: false);
 session.Commands.SaveWorkspace();
 
@@ -441,6 +487,8 @@ var legacyCanvasMenuDescriptors = legacyEditor.Session.Queries.BuildContextMenuD
 var factoryCanvasMenuDescriptors = factoryEditor.Session.Queries.BuildContextMenuDescriptors(new ContextMenuContext(ContextMenuTargetKind.Canvas, new GraphPoint(32, 48)));
 var legacyCanvasMenu = legacyEditor.BuildContextMenu(new ContextMenuContext(ContextMenuTargetKind.Canvas, new GraphPoint(32, 48)));
 var factoryCanvasMenu = factoryEditor.BuildContextMenu(new ContextMenuContext(ContextMenuTargetKind.Canvas, new GraphPoint(32, 48)));
+var sessionPluginLoadSnapshots = session.Queries.GetPluginLoadSnapshots();
+var factoryPluginLoadSnapshots = factoryEditor.Session.Queries.GetPluginLoadSnapshots();
 var sessionInspection = session.Diagnostics.CaptureInspectionSnapshot();
 var sessionRecentDiagnostics = session.Diagnostics.GetRecentDiagnostics(10);
 var runtimeSessionIsKernelFirst = !session
@@ -515,6 +563,43 @@ var phase18AutomationRuntimeOk = sessionInspection.FeatureDescriptors.Any(descri
     && sessionInspection.FeatureDescriptors.Any(descriptor => descriptor.Id == "surface.mutation.batch" && descriptor.IsAvailable)
     && sessionRecentDiagnostics.Count > 0
     && runtimeSessionIsKernelFirst;
+var expectedAutomationCommandIds = new[]
+{
+    "selection.set",
+    "nodes.add",
+    "nodes.move",
+    "viewport.resize",
+    "viewport.pan",
+    "connections.start",
+    "connections.complete",
+};
+var automationDiagnosticCodes = sessionRecentDiagnostics
+    .Where(diagnostic => diagnostic.Code.StartsWith("automation.", StringComparison.Ordinal))
+    .Select(diagnostic => diagnostic.Code)
+    .ToArray();
+var runtimePluginMenuOk = runtimeCanvasMenuDescriptors.Any(descriptor => descriptor.Id == SmokePluginMenuId);
+var factoryPluginMenuOk = factoryCanvasMenuDescriptors.Any(descriptor => descriptor.Id == SmokePluginMenuId);
+var runtimePluginLocalizationOk = runtimeCanvasMenuDescriptors.Any(descriptor => descriptor.Id == "canvas-add-node" && descriptor.Header == "Smoke Plugin Add Node");
+var factoryPluginLocalizationOk = factoryCanvasMenuDescriptors.Any(descriptor => descriptor.Id == "canvas-add-node" && descriptor.Header == "Smoke Plugin Add Node");
+var factoryPluginBadgeOk = factoryEditor.Nodes.Single(node => node.Id == sourceNodeId).Presentation.TopRightBadges.Any(badge => badge.Text == "Plugin");
+var phase25PackagePluginOk = sessionPluginLoadSnapshots.SequenceEqual(factoryPluginLoadSnapshots)
+    && sessionPluginLoadSnapshots.Count == 1
+    && sessionPluginLoadSnapshots[0].SourceKind == GraphEditorPluginLoadSourceKind.Direct
+    && sessionPluginLoadSnapshots[0].Status == GraphEditorPluginLoadStatus.Loaded
+    && sessionPluginLoadSnapshots[0].Descriptor?.Id == "smoke.proof.plugin"
+    && runtimePluginMenuOk
+    && factoryPluginMenuOk
+    && runtimePluginLocalizationOk
+    && factoryPluginLocalizationOk
+    && factoryPluginBadgeOk;
+var phase25PackageAutomationOk = runtimeAutomationResult.Succeeded
+    && automationStartedCount == 1
+    && automationCompletedCount == 1
+    && automationProgressCommandIds.SequenceEqual(expectedAutomationCommandIds, StringComparer.Ordinal)
+    && automationGenericCommandIds.SequenceEqual(expectedAutomationCommandIds, StringComparer.Ordinal)
+    && automationDiagnosticCodes.Contains("automation.run.started", StringComparer.Ordinal)
+    && automationDiagnosticCodes.Contains("automation.run.completed", StringComparer.Ordinal)
+    && runtimeAutomationResult.Inspection.Document.Nodes.Any(node => node.DefinitionId is { Value: SmokePluginDefinitionIdValue });
 Console.WriteLine($"SESSION_FACTORY_OK:{session.Queries.CreateDocumentSnapshot().Nodes.Count}:{string.Join(",", commandIds)}");
 Console.WriteLine($"SESSION_EVENTS_OK:{documentChanges}:{viewportChanges}:{failureCode ?? "<none>"}");
 Console.WriteLine($"KERNEL_SESSION_OK:{runtimeSessionIsKernelFirst}");
@@ -546,6 +631,9 @@ Console.WriteLine($"PHASE17_SHARED_CANONICAL_OK:{phase17SharedCanonicalOk}:{phas
 Console.WriteLine($"PHASE18_READINESS_DESCRIPTOR_OK:{phase18ReadinessDescriptorOk}:{phase18CanonicalReadinessParityOk}:{factoryReadinessDescriptors.Count}:{runtimeReadinessDescriptors.Count}");
 Console.WriteLine($"PHASE18_LEGACY_WINDOW_OK:{phase18LegacyReadinessWindowOk}:{legacyReadinessDescriptors.Count}:{legacyReadinessDescriptors.Count(descriptor => descriptor.IsAvailable)}");
 Console.WriteLine($"PHASE18_AUTOMATION_RUNTIME_OK:{phase18AutomationRuntimeOk}:{sessionInspection.FeatureDescriptors.Count}:{sessionRecentDiagnostics.Count}:{commandIds.Count}");
+Console.WriteLine($"PHASE25_PACKAGE_PLUGIN_OK:{phase25PackagePluginOk}:{sessionPluginLoadSnapshots.Count}:{runtimePluginMenuOk}:{runtimePluginLocalizationOk}:{factoryPluginBadgeOk}");
+Console.WriteLine($"PHASE25_PACKAGE_AUTOMATION_OK:{phase25PackageAutomationOk}:{runtimeAutomationResult.ExecutedStepCount}:{automationStartedCount}:{automationCompletedCount}:{runtimeAutomationResult.Inspection.Document.Nodes.Count}:{automationDiagnosticCodes.Length}");
+Console.WriteLine($"PHASE25_PACKAGE_PROOF_OK:{(phase25PackagePluginOk && phase25PackageAutomationOk)}:{factoryPluginLoadSnapshots.Count}:{runtimeSharedCanonicalCommandIds.Count}:{runtimeReadinessDescriptors.Count}:{factoryReadinessDescriptors.Count}");
 
 static void PrintEditorMarker(string marker, GraphEditorViewModel editor, string targetNodeId)
 {
@@ -626,12 +714,18 @@ static IReadOnlyList<string> CaptureCompatibilityOnlyCommandIds(IGraphEditorSess
 static bool IsSharedCanonicalCommandId(string id)
     => id is
         "nodes.add" or
+        "selection.set" or
         "selection.delete" or
         "connections.start" or
+        "connections.complete" or
         "connections.connect" or
         "connections.cancel" or
         "connections.delete" or
         "connections.break-port" or
+        "nodes.move" or
+        "viewport.pan" or
+        "viewport.resize" or
+        "viewport.center" or
         "viewport.fit" or
         "viewport.reset" or
         "viewport.center-node" or
@@ -646,17 +740,43 @@ static IReadOnlyList<GraphEditorFeatureDescriptorSnapshot> CaptureReadinessDescr
 
 static bool IsReadinessFeatureId(string id)
     => id is
+        "query.plugin-load-snapshots" or
+        "surface.automation.runner" or
+        "event.automation.started" or
+        "event.automation.progress" or
+        "event.automation.completed" or
         "service.workspace" or
         "service.fragment-workspace" or
         "service.fragment-library" or
         "service.clipboard-payload-serializer" or
         "service.diagnostics" or
+        "integration.plugin-loader" or
         "integration.context-menu-augmentor" or
         "integration.node-presentation-provider" or
         "integration.localization-provider" or
         "integration.diagnostics-sink" or
         "integration.instrumentation.logger" or
         "integration.instrumentation.activity-source";
+
+static GraphEditorAutomationRunRequest CreateAutomationRunRequest(string runId, string pluginDefinitionId)
+    => new(
+        runId,
+        [
+            new GraphEditorAutomationStep("select-source", CreateAutomationCommand("selection.set", ("nodeId", "smoke-source-001"), ("primaryNodeId", "smoke-source-001"), ("updateStatus", "false"))),
+            new GraphEditorAutomationStep("add-plugin-node", CreateAutomationCommand("nodes.add", ("definitionId", pluginDefinitionId), ("worldX", "700"), ("worldY", "220"))),
+            new GraphEditorAutomationStep("move-plugin-node", CreateAutomationCommand("nodes.move", ("position", "smoke-plugin-001|732|244"), ("updateStatus", "false"))),
+            new GraphEditorAutomationStep("resize-viewport", CreateAutomationCommand("viewport.resize", ("width", "1280"), ("height", "720"))),
+            new GraphEditorAutomationStep("pan-viewport", CreateAutomationCommand("viewport.pan", ("deltaX", "10"), ("deltaY", "14"))),
+            new GraphEditorAutomationStep("start-connection", CreateAutomationCommand("connections.start", ("sourceNodeId", "smoke-source-001"), ("sourcePortId", "out"))),
+            new GraphEditorAutomationStep("complete-connection", CreateAutomationCommand("connections.complete", ("targetNodeId", "smoke-plugin-001"), ("targetPortId", "input"))),
+        ]);
+
+static GraphEditorCommandInvocationSnapshot CreateAutomationCommand(
+    string commandId,
+    params (string Name, string Value)[] arguments)
+    => new(
+        commandId,
+        arguments.Select(argument => new GraphEditorCommandArgumentSnapshot(argument.Name, argument.Value)).ToArray());
 
 readonly record struct ViewRouteSnapshot(
     GraphEditorViewChromeMode ChromeMode,
@@ -672,6 +792,75 @@ sealed class SmokeContextMenuAugmentor : IGraphContextMenuAugmentor
         ContextMenuContext context,
         IReadOnlyList<MenuItemDescriptor> stockItems)
         => [.. stockItems, new MenuItemDescriptor("smoke.host-action", "Smoke Host Action")];
+}
+
+sealed class SmokeProofPlugin : IGraphEditorPlugin
+{
+    public GraphEditorPluginDescriptor Descriptor { get; } = new(
+        "smoke.proof.plugin",
+        "Smoke Proof Plugin",
+        "Direct-registration proof plugin for package smoke.");
+
+    public void Register(GraphEditorPluginBuilder builder)
+    {
+        ArgumentNullException.ThrowIfNull(builder);
+        builder.AddNodeDefinitionProvider(new SmokePluginNodeDefinitionProvider());
+        builder.AddContextMenuAugmentor(new SmokePluginContextMenuAugmentor());
+        builder.AddNodePresentationProvider(new SmokePluginPresentationProvider());
+        builder.AddLocalizationProvider(new SmokePluginLocalizationProvider());
+    }
+}
+
+sealed class SmokePluginNodeDefinitionProvider : INodeDefinitionProvider
+{
+    public IReadOnlyList<INodeDefinition> GetNodeDefinitions()
+        =>
+        [
+            new NodeDefinition(
+                new NodeDefinitionId("smoke.plugin"),
+                "Smoke Plugin Node",
+                "Smoke",
+                "Plugin proof node",
+                [
+                    new PortDefinition("input", "Input", new PortTypeId("float"), "#F3B36B"),
+                ],
+                [],
+                description: "Plugin-contributed node definition used by package smoke proof.",
+                accentHex: "#8DDCBF"),
+        ];
+}
+
+sealed class SmokePluginContextMenuAugmentor : IGraphEditorPluginContextMenuAugmentor
+{
+    public IReadOnlyList<GraphEditorMenuItemDescriptorSnapshot> Augment(GraphEditorPluginMenuAugmentationContext context)
+        => context.StockItems
+            .Concat(
+            [
+                new GraphEditorMenuItemDescriptorSnapshot(
+                    "smoke-plugin-menu",
+                    "Smoke Plugin Proof",
+                    iconKey: "plugin",
+                    isEnabled: false),
+            ])
+            .ToArray();
+}
+
+sealed class SmokePluginPresentationProvider : IGraphEditorPluginNodePresentationProvider
+{
+    public NodePresentationState GetNodePresentation(GraphEditorPluginNodePresentationContext context)
+        => new(
+            TopRightBadges:
+            [
+                new NodeAdornmentDescriptor("Plugin", "#8DDCBF"),
+            ]);
+}
+
+sealed class SmokePluginLocalizationProvider : IGraphEditorPluginLocalizationProvider
+{
+    public string GetString(string key, string fallback)
+        => key == "editor.menu.canvas.addNode"
+            ? "Smoke Plugin Add Node"
+            : fallback;
 }
 
 sealed class SmokeNodePresentationProvider : INodePresentationProvider

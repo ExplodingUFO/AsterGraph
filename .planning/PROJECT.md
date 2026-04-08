@@ -2,7 +2,7 @@
 
 ## What This Is
 
-AsterGraph is a modular node-graph editor toolkit for .NET with a kernel-first editor runtime, explicit descriptor-based host contracts, and an Avalonia UI shell. The shipped baseline now covers a publishable four-package SDK boundary, runtime/session contracts, embeddable Avalonia surfaces, replaceable presentation seams, diagnostics hooks, scaling hardening, migration proof, and plugin/automation readiness proof.
+AsterGraph is a modular node-graph editor toolkit for .NET with a kernel-first editor runtime, explicit descriptor-based host contracts, and an Avalonia UI shell. The shipped baseline now covers a publishable four-package SDK boundary, runtime/session contracts, embeddable Avalonia surfaces, replaceable presentation seams, diagnostics hooks, scaling hardening, migration proof, and machine-checkable plugin-loading and automation proof.
 
 ## Core Value
 
@@ -32,6 +32,8 @@ Hosts can integrate only the graph-editor pieces they need, replace default UI a
 - Hosts can now inspect structured plugin load snapshots, descriptors, contribution shape, and recoverable failures through canonical runtime queries and inspection snapshots.
 - Hosts can now execute synchronous descriptor-first automation runs through `IGraphEditorSession.Automation`, stable command IDs, mutation batching, and canonical inspection snapshots.
 - Automation lifecycle/progress/completion telemetry is now explicit on typed runtime events and machine-readable diagnostics instead of UI-bound status text.
+- `HostSample`, `PackageSmoke`, and focused regressions now prove the shipped plugin composition and automation execution story from the canonical host boundary.
+- `ScaleSmoke` now proves the automation path on a larger graph/session, and `README.md` points hosts to the same canonical plugin/automation proof commands used in milestone verification.
 - The known `STATE_HISTORY_OK` mismatch remains an unresolved pre-v1.2 baseline if the next milestone touches history/save semantics.
 
 ## Requirements
@@ -60,10 +62,12 @@ Hosts can integrate only the graph-editor pieces they need, replace default UI a
 - ✓ Host can now inspect loaded plugin descriptors, contribution shape, and recoverable failures through canonical runtime queries and inspection snapshots rather than diagnostics scraping alone — v1.4 Phase 23
 - ✓ Host can now execute multi-step automation runs against canonical command IDs, batching, and query snapshots through `IGraphEditorSession` instead of retained `GraphEditorViewModel` methods — v1.4 Phase 24
 - ✓ Host can now observe automation started/progress/completed signals through typed runtime events and machine-readable diagnostics suitable for non-Avalonia consumers — v1.4 Phase 24
+- ✓ `HostSample`, `PackageSmoke`, and focused regressions now prove plugin composition and automation execution from the canonical host boundary — v1.4 Phase 25
+- ✓ `ScaleSmoke` and README-backed proof commands now show the automation path remains credible on larger sessions and route hosts to the canonical plugin/automation story — v1.4 Phase 25
 
 ### Active
 
-- [ ] Plugin and automation delivery stays backed by focused tests plus `HostSample`, `PackageSmoke`, and `ScaleSmoke` proof rather than doc-only claims.
+- [ ] Archive v1.4 and frame the next milestone around the highest remaining product risk after plugin-loading and automation execution have shipped cleanly.
 
 ### Out of Scope
 
@@ -75,9 +79,9 @@ Hosts can integrate only the graph-editor pieces they need, replace default UI a
 
 ## Context
 
-Milestone `v1.2` shipped on 2026-04-08 after phases 13-18 extracted the kernel, normalized descriptor contracts, thinned Avalonia adapters, and closed with migration/readiness proof. Milestone `v1.3` then shipped the graph-first demo showcase, so the host-level integration story is now legible on first read instead of being buried behind explanation-heavy panels. Phase 22 and Phase 23 of `v1.4` have now turned that readiness posture into a real plugin-loading baseline with live additive composition and canonical inspection.
+Milestone `v1.2` shipped on 2026-04-08 after phases 13-18 extracted the kernel, normalized descriptor contracts, thinned Avalonia adapters, and closed with migration/readiness proof. Milestone `v1.3` then shipped the graph-first demo showcase, so the host-level integration story is now legible on first read instead of being buried behind explanation-heavy panels. Phase 22 and Phase 23 of `v1.4` then turned that readiness posture into a real plugin-loading baseline with live additive composition and canonical inspection.
 
-Phase 24 now extends that same canonical session boundary into a shipped automation-execution baseline. The next product risk is no longer whether automation can run at all. The next product risk is whether the plugin and automation claims stay machine-checkable across focused regressions, sample hosts, smoke tools, and scale proof without reintroducing facade-shaped or Avalonia-shaped dependencies.
+Phase 24 extended that same canonical session boundary into a shipped automation-execution baseline. Phase 25 then closed the proof gap across focused regressions, sample hosts, smoke tools, scale proof, and README guidance without reintroducing facade-shaped or Avalonia-shaped dependencies. v1.4 is now execution-complete and ready for milestone archive.
 
 ## Constraints
 
@@ -109,12 +113,13 @@ Phase 24 now extends that same canonical session boundary into a shipped automat
 | Compose plugin contributions beneath explicit host-owned overrides on one shared factory/session path | Live plugin value should not fork retained/runtime behavior or regress host precedence | ✓ Good |
 | Keep the first automation runner synchronous, in-process, and rooted in `IGraphEditorSession` command/query/mutation contracts | The first shipped automation value should validate the canonical runtime boundary before richer authoring/product layers are considered | ✓ Good |
 | Publish automation lifecycle on typed runtime events plus diagnostics instead of changing generic command batching semantics | Hosts need explicit automation telemetry without regressing the existing control plane | ✓ Good |
+| Keep plugin/automation proof aligned across focused tests, samples, smoke tools, and README commands | Public claims should stay machine-checkable from the same canonical host boundary everywhere | ✓ Good |
 
 ## Next Milestone Goals
 
-- Deliver the first real public plugin-loading baseline over the shipped kernel-first host seams.
-- Deliver the first descriptor-first automation execution baseline over canonical command IDs, query snapshots, and batch mutation paths.
-- Preserve the proof-ring discipline so plugin and automation claims close with machine-checkable tests, samples, smoke runs, and milestone artifacts.
+- Archive v1.4 cleanly and use the shipped proof ring as the baseline for the next milestone.
+- Decide which deferred platform risk comes next: plugin trust/isolation policy, marketplace/distribution work, richer automation authoring, or another host-facing gap surfaced by v1.4 validation.
+- Preserve the proof-ring discipline so future extension claims continue to close with machine-checkable tests, samples, smoke runs, and milestone artifacts.
 
 ## Archived Milestone Framing
 
@@ -136,4 +141,4 @@ This document evolves at milestone boundaries.
 4. Reset active requirements so the next roadmap starts from the highest remaining product risk instead of stale execution context.
 
 ---
-*Last updated: 2026-04-08 after completing Phase 24*
+*Last updated: 2026-04-08 after completing Phase 25*
