@@ -8,7 +8,7 @@ AsterGraph is a modular node-graph editor toolkit for .NET with a kernel-first e
 
 Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
 
-## Current Milestone: v1.3 Demo Showcase
+## Latest Shipped Milestone: v1.3 Demo Showcase
 
 **Goal:** Rebuild `AsterGraph.Demo` into a graph-first, host-menu-first SDK showcase so users immediately see the live node graph and can adjust view, behavior, and runtime capabilities through compact host-level controls on the same session.
 
@@ -27,7 +27,7 @@ Hosts can integrate only the graph-editor pieces they need, replace default UI a
 - Migration posture and plugin/automation readiness are locked by focused regressions plus runnable `HostSample`, `PackageSmoke`, and `ScaleSmoke` proof markers.
 - `AsterGraph.Demo` now exposes live view, behavior, and runtime host controls from the top menu and compact right-side pane over one retained editor/session path.
 - `AsterGraph.Demo` now also exposes compact in-context proof cues, live configuration summaries, and aligned README narrative over the same graph-first host shell.
-- The v1.3 phase sequence is complete; the next workflow step is to complete/archive the milestone and decide the next roadmap target.
+- The v1.3 milestone is now archived; the next workflow step is to define the next milestone instead of extending the old roadmap ad hoc.
 - The known `STATE_HISTORY_OK` mismatch remains an unresolved pre-v1.2 baseline if the next milestone touches history/save semantics.
 
 ## Requirements
@@ -54,7 +54,7 @@ Hosts can integrate only the graph-editor pieces they need, replace default UI a
 
 ### Active
 
-- [ ] Complete and archive the v1.3 Demo Showcase milestone now that phases 19-21 are all shipped.
+- [ ] No active milestone requirements yet. Start the next planning cycle with `$gsd-new-milestone`.
 - [ ] Decide whether the next roadmap should deepen the showcase experience (presets/tours) or return to plugin/automation execution work on top of the shipped host/runtime seams.
 
 ### Out of Scope
@@ -67,9 +67,9 @@ Hosts can integrate only the graph-editor pieces they need, replace default UI a
 
 ## Context
 
-Milestone `v1.2` shipped on 2026-04-08 after phases 13-18 extracted the kernel, normalized descriptor contracts, thinned Avalonia adapters, and closed with migration/readiness proof. The next product risk is no longer architectural center-of-gravity drift inside the current runtime. It is how to use the newly explicit seams for real plugin loading, automation APIs, and higher-level tooling without reintroducing facade-shaped dependencies.
+Milestone `v1.2` shipped on 2026-04-08 after phases 13-18 extracted the kernel, normalized descriptor contracts, thinned Avalonia adapters, and closed with migration/readiness proof. Milestone `v1.3` then shipped the graph-first demo showcase: the demo no longer behaves like a capability console with large explanatory side panels, and the host-level integration story is now legible on first read.
 
-The immediate adoption problem, however, is more basic inside the demo host: the current `AsterGraph.Demo` UI behaves like a capability console with large explanatory side panels. It proves many seams, but it does not make the graph or the host-level integration story legible at first glance. The next milestone therefore focuses on presentation of the shipped SDK story before it adds the next layer of runtime features.
+The next product decision is no longer whether the demo should become graph-first. That work shipped. The next decision is whether to deepen the showcase experience with presets/tours or return to plugin and automation execution on top of the now-clearer host/runtime seams.
 
 ## Constraints
 
@@ -97,9 +97,9 @@ The immediate adoption problem, however, is more basic inside the demo host: the
 
 ## Next Milestone Goals
 
-- Turn `AsterGraph.Demo` into a graph-first showcase that makes host-controlled seams obvious on first read.
-- Replace the current side-panel-heavy capability console with a compact host-level menu and on-demand control surfaces.
-- Preserve the proof-ring discipline so future plugin/automation work extends a clearer and more persuasive demo baseline.
+- Define the next milestone with fresh requirements rather than carrying v1.3 assumptions forward.
+- Choose whether the next cycle deepens the showcase experience or returns to plugin/automation implementation.
+- Preserve the proof-ring discipline so future work continues to close with machine-checkable tests, samples, and milestone artifacts.
 
 ## Archived Milestone Framing
 
@@ -121,4 +121,4 @@ This document evolves at milestone boundaries.
 4. Reset active requirements so the next roadmap starts from the highest remaining product risk instead of stale execution context.
 
 ---
-*Last updated: 2026-04-08 after completing Phase 21 in-context proof and narrative polish*
+*Last updated: 2026-04-08 after archiving v1.3 Demo Showcase*

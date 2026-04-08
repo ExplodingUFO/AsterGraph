@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.3
-milestone_name: Demo Showcase
-status: Ready to complete milestone
-stopped_at: Phase 21 completed; next step is to complete/archive milestone v1.3 Demo Showcase
-last_updated: "2026-04-08T08:36:35.2441945Z"
+milestone: none
+milestone_name: none
+status: Awaiting next milestone
+stopped_at: v1.3 Demo Showcase archived; next step is to start a new milestone
+last_updated: "2026-04-08T08:43:03.6095886Z"
 last_activity: 2026-04-08
 progress:
-  total_phases: 3
-  completed_phases: 3
-  total_plans: 9
-  completed_plans: 9
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # Project State
@@ -20,14 +20,14 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-04-08)
 
 **Core value:** Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
-**Current focus:** v1.3 milestone completion and archive preparation
+**Current focus:** waiting for the next milestone definition
 
 ## Current Position
 
-Phase: 21
-Plan: Completed
-Status: Ready to complete milestone
-Last activity: 2026-04-08 — Completed Phase 21 in-context proof and narrative polish
+Phase: None
+Plan: None
+Status: Awaiting next milestone
+Last activity: 2026-04-08 — Archived v1.3 Demo Showcase
 
 ## Accumulated Context
 
@@ -64,11 +64,8 @@ None captured yet.
 - The next milestone should avoid reopening kernel/facade ownership drift unless new evidence requires it.
 - The demo redesign should stay focused on showcase clarity, not expand into unrelated end-user feature work.
 - Phase 20 should keep the host menu shallow and compact; over-nesting or ribbon-like growth would undercut the graph-first shell.
-- Runtime readouts should stay compact in this phase; broader proof/narrative cleanup remains Phase 21 work.
-- Phase 21 should avoid turning proof polish into a new onboarding flow, preset system, or scene-switching model.
-- Copy changes should stay compact and testable; do not reintroduce paragraph-heavy explanation cards under a new name.
-- Live configuration and runtime proof rows must remain projections of the current booleans and `Editor.Session` diagnostics path, not a second summary cache.
-- The next step should be milestone completion/archival, not more ad-hoc demo changes without a new roadmap decision.
+- The demo showcase should remain a host-facing SDK proof surface rather than drift toward a productized workflow shell.
+- Future work should start from a fresh milestone definition instead of extending archived v1.3 scope ad hoc.
 
 ### Quick Tasks Completed
 
@@ -79,5 +76,5 @@ None captured yet.
 ## Session Continuity
 
 Last session: 2026-04-08
-Stopped at: Phase 21 completed; next step is to complete/archive milestone v1.3 Demo Showcase
-Resume file: .planning/phases/21-in-context-proof-and-narrative-polish/21-VERIFICATION.md
+Stopped at: v1.3 Demo Showcase archived; next step is to start a new milestone
+Resume file: .planning/milestones/v1.3-ROADMAP.md
