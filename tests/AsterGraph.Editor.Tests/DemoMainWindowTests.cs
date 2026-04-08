@@ -3,7 +3,6 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
-using Avalonia.Layout;
 using Avalonia.Themes.Fluent;
 using Avalonia.VisualTree;
 using AsterGraph.Avalonia.Controls;
@@ -16,72 +15,46 @@ namespace AsterGraph.Editor.Tests;
 public sealed class DemoMainWindowTests
 {
     [AvaloniaFact]
-    public void MainWindow_RendersLockedThreeColumnShellContract()
+    public void MainWindow_RendersGraphFirstHostMenuShell()
     {
         var window = CreateWindow();
 
-        Assert.Equal("能力导航", FindText(window, "能力导航").Text);
-        Assert.Equal("完整壳层演示", FindText(window, "完整壳层演示").Text);
-        Assert.Equal("架构说明", FindText(window, "架构说明").Text);
-        Assert.Equal("运行时与诊断", FindText(window, "运行时与诊断").Text);
-
-        var capabilityNames = new[] { "完整壳层", "独立表面", "可替换呈现", "运行时与诊断" };
-        foreach (var capabilityName in capabilityNames)
-        {
-            Assert.Contains(GetAllText(window), value => value == capabilityName);
-        }
+        Assert.NotNull(window.FindControl<Menu>("PART_HostMenu"));
+        Assert.Equal("展示", Assert.IsType<MenuItem>(window.FindControl<MenuItem>("PART_ShowcaseMenu")).Header);
+        Assert.Equal("视图", Assert.IsType<MenuItem>(window.FindControl<MenuItem>("PART_ViewMenu")).Header);
+        Assert.Equal("行为", Assert.IsType<MenuItem>(window.FindControl<MenuItem>("PART_BehaviorMenu")).Header);
+        Assert.Equal("运行时", Assert.IsType<MenuItem>(window.FindControl<MenuItem>("PART_RuntimeMenu")).Header);
+        Assert.Equal("证明", Assert.IsType<MenuItem>(window.FindControl<MenuItem>("PART_ProofMenu")).Header);
 
         Assert.Single(window.GetVisualDescendants().OfType<GraphEditorView>());
-
-        var layoutGrid = window.FindControl<Grid>("MainShellGrid");
-        Assert.NotNull(layoutGrid);
-        Assert.Equal(new Thickness(24), layoutGrid!.Margin);
-        Assert.Equal(24, layoutGrid.ColumnSpacing);
-        Assert.Equal(3, layoutGrid.ColumnDefinitions.Count);
-        Assert.Equal(new GridLength(280, GridUnitType.Pixel), layoutGrid.ColumnDefinitions[0].Width);
-        Assert.Equal(GridLength.Star, layoutGrid.ColumnDefinitions[1].Width);
-        Assert.Equal(new GridLength(360, GridUnitType.Pixel), layoutGrid.ColumnDefinitions[2].Width);
+        Assert.NotNull(window.FindControl<Control>("MainGraphEditorView"));
+        Assert.Null(window.FindControl<Grid>("MainShellGrid"));
     }
 
     [AvaloniaFact]
-    public void MainWindow_UsesSquaredLowRadiusShellCards()
+    public void MainWindow_UsesRightSideCompactHostPaneThatStartsClosed()
     {
         var window = CreateWindow();
+        var splitView = window.FindControl<SplitView>("PART_HostShellSplitView");
 
-        var leftScrollViewer = window.GetVisualDescendants()
-            .OfType<ScrollViewer>()
-            .First(scrollViewer => Grid.GetColumn(scrollViewer) == 0);
-        var leftStack = Assert.IsType<StackPanel>(leftScrollViewer.Content);
-        var titleCard = Assert.IsType<Border>(leftStack.Children[0]);
-        var toggleCard = Assert.IsType<Border>(leftStack.Children[2]);
-
-        Assert.Equal(new CornerRadius(10), titleCard.CornerRadius);
-        Assert.Equal(new CornerRadius(8), toggleCard.CornerRadius);
-
-        var centerCard = window.FindControl<Border>("MainEditorCard");
-        Assert.NotNull(centerCard);
-        Assert.Equal(new CornerRadius(10), centerCard!.CornerRadius);
+        Assert.NotNull(splitView);
+        Assert.Equal(SplitViewDisplayMode.Overlay, splitView!.DisplayMode);
+        Assert.Equal(SplitViewPanePlacement.Right, splitView.PanePlacement);
+        Assert.False(splitView.IsPaneOpen);
     }
 
     [AvaloniaFact]
-    public void MainWindow_UsesFullHeightCenterEditorComposition()
+    public void MainWindow_KeepsSingleCanvasFirstEditorComposition()
     {
         var window = CreateWindow();
-
-        var centerGrid = window.GetVisualDescendants()
-            .OfType<Grid>()
-            .First(grid => Grid.GetColumn(grid) == 1 && grid.RowDefinitions.Count == 3);
-
-        Assert.Equal(new GridLength(1, GridUnitType.Star), centerGrid.RowDefinitions[1].Height);
-
-        var editorFrame = window.FindControl<Border>("MainEditorFrame");
-        Assert.NotNull(editorFrame);
-        Assert.True(double.IsNaN(editorFrame!.Height));
-        Assert.Equal(0, editorFrame.MinHeight);
-
         var graphEditorView = window.FindControl<GraphEditorView>("MainGraphEditorView");
+
         Assert.NotNull(graphEditorView);
-        Assert.Equal(VerticalAlignment.Stretch, graphEditorView!.VerticalAlignment);
+        Assert.Single(window.GetVisualDescendants().OfType<GraphEditorView>());
+        Assert.False(graphEditorView!.IsHeaderChromeVisible);
+        Assert.False(graphEditorView.IsLibraryChromeVisible);
+        Assert.False(graphEditorView.IsInspectorChromeVisible);
+        Assert.False(graphEditorView.IsStatusChromeVisible);
     }
 
     private static MainWindow CreateWindow()
@@ -94,18 +67,19 @@ public sealed class DemoMainWindowTests
         window.Show();
         return window;
     }
+}
 
-    private static TextBlock FindText(Control root, string text)
-        => root.GetVisualDescendants()
-            .OfType<TextBlock>()
-            .FirstOrDefault(textBlock => textBlock.Text == text)
-           ?? throw new Xunit.Sdk.XunitException($"Could not find text '{text}'.");
+public sealed class DemoMainWindowTestsAppBuilder
+{
+    public static AppBuilder BuildAvaloniaApp()
+        => AppBuilder.Configure<DemoMainWindowTestsApp>()
+            .UseHeadless(new AvaloniaHeadlessPlatformOptions());
+}
 
-    private static string[] GetAllText(Control root)
-        => root.GetVisualDescendants()
-            .OfType<TextBlock>()
-            .Select(textBlock => textBlock.Text)
-            .Where(text => !string.IsNullOrWhiteSpace(text))
-            .Cast<string>()
-            .ToArray();
+public sealed class DemoMainWindowTestsApp : Application
+{
+    public override void Initialize()
+    {
+        Styles.Add(new FluentTheme());
+    }
 }

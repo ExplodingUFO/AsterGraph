@@ -194,16 +194,22 @@ public partial class MainWindowViewModel : ViewModelBase
     private bool areHostMenuExtensionsEnabled = true;
 
     [ObservableProperty]
-    private bool isHeaderChromeVisible = true;
+    private bool isHeaderChromeVisible;
 
     [ObservableProperty]
-    private bool isLibraryChromeVisible = true;
+    private bool isLibraryChromeVisible;
 
     [ObservableProperty]
-    private bool isInspectorChromeVisible = true;
+    private bool isInspectorChromeVisible;
 
     [ObservableProperty]
-    private bool isStatusChromeVisible = true;
+    private bool isStatusChromeVisible;
+
+    [ObservableProperty]
+    private bool isHostPaneOpen;
+
+    [ObservableProperty]
+    private string selectedHostMenuGroupTitle = "展示";
 
     public string SelectedCapabilityTitle => SelectedCapability.Title;
 
@@ -239,6 +245,68 @@ public partial class MainWindowViewModel : ViewModelBase
         PresentationHelper,
         $"当前选择仍由 Editor 维护：{CurrentInspection.Selection.SelectedNodeIds.Count} 个节点。",
     ];
+
+    public string SelectedHostMenuGroupSummary => SelectedHostMenuGroupTitle switch
+    {
+        "展示" => "当前壳层把宿主菜单放在第一层，让用户先看到菜单和节点图，再按需展开展示信息。",
+        "视图" => "壳层与视图开关仍作用于同一个 GraphEditorView，只是默认不再把大块说明区常驻在首屏。",
+        "行为" => "编辑行为仍由同一个 Editor 负责；宿主菜单只是集中暴露能力入口，不替代运行时本身。",
+        "运行时" => "运行时摘要来自同一 Editor.Session，可在紧凑面板里查看当前文档、选择和视口状态。",
+        "证明" => "证明区用于说明哪些变化属于宿主壳层，哪些状态来自共享运行时，而不是第二个编辑器实例。",
+        _ => "通过宿主级菜单控制同一张实时节点图。"
+    };
+
+    public IReadOnlyList<string> SelectedHostMenuGroupLines => SelectedHostMenuGroupTitle switch
+    {
+        "展示" =>
+        [
+            "第一眼先看到宿主菜单和实时节点图，而不是三栏说明墙。",
+            "主区只有一个 GraphEditorView，宿主面板只补充解释和控制入口。",
+            .. DemoEntries,
+        ],
+        "视图" =>
+        [
+            $"显示顶栏：{BoolText(IsHeaderChromeVisible)}",
+            $"显示节点库：{BoolText(IsLibraryChromeVisible)}",
+            $"显示检查器：{BoolText(IsInspectorChromeVisible)}",
+            $"显示状态栏：{BoolText(IsStatusChromeVisible)}",
+            ChromeControlsHelper,
+        ],
+        "行为" =>
+        [
+            $"只读模式：{BoolText(IsReadOnlyEnabled)}",
+            $"网格吸附：{BoolText(IsGridSnappingEnabled)}",
+            $"对齐辅助线：{BoolText(IsAlignmentGuidesEnabled)}",
+            $"工作区命令：{BoolText(AreWorkspaceCommandsEnabled)}",
+            $"片段命令：{BoolText(AreFragmentCommandsEnabled)}",
+            $"宿主菜单扩展：{BoolText(AreHostMenuExtensionsEnabled)}",
+        ],
+        "运行时" =>
+        [
+            .. RuntimeMetricLines,
+            $"最近诊断：{RecentDiagnostics.Count} 条",
+            RuntimeDiagnosticsHelper,
+        ],
+        "证明" =>
+        [
+            HostSessionContinuityCaption,
+            HostPaneStateCaption,
+            "宿主壳层现在先讲控制入口，再按需展开说明内容。",
+            $"当前激活展示能力：{SelectedCapabilityTitle}",
+        ],
+        _ =>
+        [
+            HostSessionContinuityCaption,
+        ]
+    };
+
+    public string HostPaneStateCaption
+        => IsHostPaneOpen
+            ? $"面板已展开 · {SelectedHostMenuGroupTitle}"
+            : "面板已收起";
+
+    public string HostSessionContinuityCaption
+        => "宿主菜单和抽屉始终作用于同一实时会话";
 
     /// <summary>
     /// 运行时指标摘要行。
@@ -358,7 +426,7 @@ public partial class MainWindowViewModel : ViewModelBase
     /// <summary>
     /// 主编辑器摘要文案。
     /// </summary>
-    public string MainEditorSummary => $"当前中心主编辑器绑定文档“{Editor.Title}”，并保留完整运行时会话。";
+    public string MainEditorSummary => $"当前中心主编辑器绑定文档“{Editor.Title}”，宿主菜单与抽屉都作用于同一个 Editor.Session。";
 
     partial void OnSelectedCapabilityChanged(CapabilityShowcaseItem value)
     {
@@ -399,12 +467,34 @@ public partial class MainWindowViewModel : ViewModelBase
     partial void OnIsStatusChromeVisibleChanged(bool value)
         => RefreshRuntimeProjection();
 
+    partial void OnIsHostPaneOpenChanged(bool value)
+        => RefreshRuntimeProjection();
+
+    partial void OnSelectedHostMenuGroupTitleChanged(string value)
+        => RefreshRuntimeProjection();
+
     [RelayCommand]
     public void SelectCapability(CapabilityShowcaseItem capability)
     {
         ArgumentNullException.ThrowIfNull(capability);
         SelectedCapability = capability;
     }
+
+    [RelayCommand]
+    public void OpenHostMenuGroup(string groupTitle)
+    {
+        if (string.IsNullOrWhiteSpace(groupTitle))
+        {
+            return;
+        }
+
+        SelectedHostMenuGroupTitle = groupTitle;
+        IsHostPaneOpen = true;
+    }
+
+    [RelayCommand]
+    public void CloseHostPane()
+        => IsHostPaneOpen = false;
 
     private GraphEditorInspectionSnapshot CurrentInspection
         => Editor.Session.Diagnostics.CaptureInspectionSnapshot();
@@ -483,6 +573,10 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         OnPropertyChanged(nameof(StandaloneSurfaceLines));
         OnPropertyChanged(nameof(PresentationLines));
+        OnPropertyChanged(nameof(SelectedHostMenuGroupSummary));
+        OnPropertyChanged(nameof(SelectedHostMenuGroupLines));
+        OnPropertyChanged(nameof(HostPaneStateCaption));
+        OnPropertyChanged(nameof(HostSessionContinuityCaption));
         OnPropertyChanged(nameof(RuntimeMetricLines));
         OnPropertyChanged(nameof(RecentDiagnostics));
         OnPropertyChanged(nameof(RecentDiagnosticLines));
