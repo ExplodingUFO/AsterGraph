@@ -19,7 +19,7 @@ This roadmap therefore focuses on extracting the real editor kernel, normalizing
 - [x] **Phase 14: Session And Compatibility Facade Decoupling** - Rebuild `IGraphEditorSession` and `GraphEditorViewModel` around the extracted kernel so hosts get a kernel-first path and legacy hosts keep a staged adapter path.
 - [x] **Phase 15: Capability And Descriptor Contract Normalization** - Replace MVVM-oriented command/menu/state exposure with explicit capability, descriptor, and read-only query contracts.
 - [x] **Phase 16: Avalonia Adapter Boundary Cleanup** - Thin the Avalonia layer so shell/canvas/input/clipboard/host-context behavior consumes shared kernel contracts instead of duplicating policy against the VM.
-- [ ] **Phase 17: Compatibility Lock And Migration Proof** - Prove that the retained `GraphEditorViewModel` / `GraphEditorView` path stays behaviorally aligned while the kernel path becomes canonical.
+- [x] **Phase 17: Compatibility Lock And Migration Proof** - Prove that the retained `GraphEditorViewModel` / `GraphEditorView` path stays behaviorally aligned while the kernel path becomes canonical.
 - [ ] **Phase 18: Plugin And Automation Readiness Proof Ring** - Validate the resulting architecture with focused regressions, sample/smoke coverage, and explicit readiness checks for later plugin/automation milestones.
 
 ## Phase Details
@@ -93,9 +93,9 @@ This roadmap therefore focuses on extracting the real editor kernel, normalizing
 | 14. Session And Compatibility Facade Decoupling | KERN-03, CAP-03 | Completed |
 | 15. Capability And Descriptor Contract Normalization | CAP-01, CAP-02 | Completed |
 | 16. Avalonia Adapter Boundary Cleanup | ADAPT-01, ADAPT-02 | Completed |
-| 17. Compatibility Lock And Migration Proof | MIG-01, MIG-02 | Planned |
+| 17. Compatibility Lock And Migration Proof | MIG-01, MIG-02 | Completed |
 | 18. Plugin And Automation Readiness Proof Ring | PLUG-READY-01 | Planned |
 
 ## Next Action
 
-**Phase 17** is the correct next step. Phase 16 thinned the Avalonia adapter boundary and locked the new shell/canvas routing story into tests, sample/smoke markers, and docs, so the next milestone risk is drift between the retained compatibility path and the now-clearer kernel-first canonical route.
+**Phase 18** is the correct next step. Phase 17 locked the migration story into focused regressions, HostSample, PackageSmoke, and host-facing docs, so the next milestone risk is whether the resulting kernel-first boundary is strong enough for plugin and automation readiness without reopening compatibility-bound coupling.

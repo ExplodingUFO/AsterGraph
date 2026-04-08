@@ -25,8 +25,8 @@
 
 ### Migration And Readiness
 
-- [ ] **MIG-01**: Existing `GraphEditorViewModel` / `GraphEditorView` hosts keep a staged migration path while the kernel path becomes the canonical composition root
-- [ ] **MIG-02**: HostSample, PackageSmoke, and focused regressions prove that the new kernel path and the retained compatibility path stay behaviorally aligned
+- [x] **MIG-01**: Existing `GraphEditorViewModel` / `GraphEditorView` hosts keep a staged migration path while the kernel path becomes the canonical composition root
+- [x] **MIG-02**: HostSample, PackageSmoke, and focused regressions prove that the new kernel path and the retained compatibility path stay behaviorally aligned
 - [ ] **PLUG-READY-01**: The resulting architecture leaves runtime plugin loading and richer automation on top of explicit kernel/capability seams rather than another round of façade-bound refactors
 
 ## Deferred / Later
@@ -56,8 +56,8 @@
 | CAP-03 | Phase 14 | Complete |
 | ADAPT-01 | Phase 16 | Complete |
 | ADAPT-02 | Phase 16 | Complete |
-| MIG-01 | Phase 17 | Planned |
-| MIG-02 | Phase 17 | Planned |
+| MIG-01 | Phase 17 | Complete |
+| MIG-02 | Phase 17 | Complete |
 | PLUG-READY-01 | Phase 18 | Planned |
 
 **Coverage:**
