@@ -8,8 +8,8 @@
 
 ### Showcase Shell
 
-- [ ] **SHOW-01**: User can open the demo and immediately see a live node graph plus a host-level menu without large explanation panels taking first-screen priority
-- [ ] **SHOW-02**: User can keep the graph as the primary visual surface while secondary controls open in compact on-demand UI instead of permanent three-column chrome
+- [x] **SHOW-01**: User can open the demo and immediately see a live node graph plus a host-level menu without large explanation panels taking first-screen priority
+- [x] **SHOW-02**: User can keep the graph as the primary visual surface while secondary controls open in compact on-demand UI instead of permanent three-column chrome
 
 ### Host Controls
 
@@ -47,8 +47,8 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SHOW-01 | Phase 19 | Pending |
-| SHOW-02 | Phase 19 | Pending |
+| SHOW-01 | Phase 19 | Complete |
+| SHOW-02 | Phase 19 | Complete |
 | CTRL-01 | Phase 20 | Pending |
 | CTRL-02 | Phase 20 | Pending |
 | CTRL-03 | Phase 20 | Pending |

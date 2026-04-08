@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: demo-showcase
-status: Phase 19 Planned
-stopped_at: Phase 19 planned; next step is to execute the graph-first demo shell work
-last_updated: "2026-04-08T07:13:10.5395315Z"
+status: Ready To Plan Phase 20
+stopped_at: Phase 19 complete; next step is to plan host menu control consolidation
+last_updated: "2026-04-08T07:25:00Z"
 last_activity: 2026-04-08
 progress:
   total_phases: 3
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 3
-  completed_plans: 0
+  completed_plans: 3
 ---
 
 # Project State
@@ -20,14 +20,14 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-04-08)
 
 **Core value:** Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
-**Current focus:** Execute Phase 19 to establish the graph-first demo shell and host-level menu baseline
+**Current focus:** Phase 20 host menu control consolidation planning on top of the new graph-first demo shell
 
 ## Current Position
 
-Phase: 19
-Plan: 01-03 planned
-Status: Phase 19 Planned
-Last activity: 2026-04-08 — Planned Phase 19 graph-first demo shell work
+Phase: 20
+Plan: Not started
+Status: Ready To Plan Phase 20
+Last activity: 2026-04-08 — Completed Phase 19 graph-first demo shell work
 
 ## Accumulated Context
 
@@ -42,6 +42,8 @@ Carry-forward decisions from shipped milestones:
 - Preserve `HostSample`, `PackageSmoke`, and `ScaleSmoke` as the runnable proof ring for migration, readiness, and future extension work.
 - Lead v1.3 with a demo showcase refresh so the shipped SDK story is easier to understand before adding another layer of runtime features.
 - Keep the next demo experience on one live graph session controlled by host-level menus rather than switching between canned scenes.
+- Keep the new in-window host menu as the first visible shell control plane in the demo.
+- Keep secondary showcase detail behind a compact on-demand pane so the graph remains the dominant surface.
 
 ### Pending Todos
 
@@ -63,5 +65,5 @@ None captured yet.
 ## Session Continuity
 
 Last session: 2026-04-08
-Stopped at: Phase 19 planned; next step is to execute the graph-first demo shell work
-Resume file: .planning/phases/19-graph-first-demo-shell/19-01-PLAN.md
+Stopped at: Phase 19 complete; next step is to plan host menu control consolidation
+Resume file: .planning/ROADMAP.md

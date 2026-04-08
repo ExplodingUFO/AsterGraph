@@ -86,8 +86,10 @@ The immediate adoption problem, however, is more basic inside the demo host: the
 | Treat Avalonia as an adapter layer over shared runtime routing and seam binders | Shell/canvas duplication should not remain the policy source | ✓ Good |
 | Keep `GraphEditorViewModel` and `GraphEditorView` as retained compatibility facades with explicit proof | Staged migration remained possible while the canonical route moved to the kernel | ✓ Good |
 | Use `HostSample`, `PackageSmoke`, and `ScaleSmoke` as the proof ring for migration and readiness claims | Architectural claims stay machine-checkable and host-visible | ✓ Good |
-| Lead the next milestone with demo showcase UX rather than plugin/automation implementation | The shipped architecture is ready, but the demo still undersells the host integration story | — Pending |
-| Keep the demo on one live graph session with host-level menu controls instead of scene switching | A single-session showcase better demonstrates seam replacement without hiding runtime continuity | — Pending |
+| Lead the next milestone with demo showcase UX rather than plugin/automation implementation | The shipped architecture is ready, but the demo still undersells the host integration story | ✓ Good |
+| Keep the demo on one live graph session with host-level menu controls instead of scene switching | A single-session showcase better demonstrates seam replacement without hiding runtime continuity | ✓ Good |
+| Use an in-window host menu as the first control plane in the demo shell | Makes the host integration story visible before explanatory content | ✓ Good |
+| Move secondary showcase content behind a compact on-demand pane | Preserves graph-first reading while keeping live proof available | ✓ Good |
 
 ## Next Milestone Goals
 
