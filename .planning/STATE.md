@@ -1,10 +1,10 @@
 ---
 gsd_state_version: 1.0
-milestone: none
-milestone_name: none
-status: Awaiting next milestone
-stopped_at: v1.3 Demo Showcase archived; next step is to start a new milestone
-last_updated: "2026-04-08T08:43:03.6095886Z"
+milestone: v1.4
+milestone_name: plugin-loading-and-automation-execution
+status: Defining requirements
+stopped_at: Milestone v1.4 started; defining requirements for plugin loading and automation execution
+last_updated: "2026-04-08T08:49:21.3488793Z"
 last_activity: 2026-04-08
 progress:
   total_phases: 0
@@ -20,14 +20,14 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-04-08)
 
 **Core value:** Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
-**Current focus:** waiting for the next milestone definition
+**Current focus:** define milestone v1.4 around plugin loading and automation execution on top of the canonical session boundary
 
 ## Current Position
 
-Phase: None
-Plan: None
-Status: Awaiting next milestone
-Last activity: 2026-04-08 — Archived v1.3 Demo Showcase
+Phase: Not started (defining requirements)
+Plan: -
+Status: Defining requirements
+Last activity: 2026-04-08 — Started milestone v1.4 Plugin Loading and Automation Execution
 
 ## Accumulated Context
 
@@ -52,6 +52,8 @@ Carry-forward decisions from shipped milestones:
 - Keep host-owned seams and shared runtime/session state explicit through short labels plus live values rather than paragraph-heavy summary cards.
 - Keep README aligned with the graph-first showcase story so the demo window and repo narrative describe the same proof.
 - Keep the demo showcase positioned as a host-facing SDK proof surface rather than a productized workflow shell or scene-switching gallery.
+- Return to plugin and automation implementation after the showcase milestone instead of extending presentation-only work indefinitely.
+- Keep plugin loading and automation execution rooted in `IGraphEditorSession`, descriptors, and command IDs rather than retained MVVM compatibility APIs.
 
 ### Pending Todos
 
@@ -62,10 +64,9 @@ None captured yet.
 - No active blocker in the main workspace.
 - The known `STATE_HISTORY_OK` mismatch remains a pre-existing baseline issue if the next milestone touches history/save semantics.
 - The next milestone should avoid reopening kernel/facade ownership drift unless new evidence requires it.
-- The demo redesign should stay focused on showcase clarity, not expand into unrelated end-user feature work.
-- Phase 20 should keep the host menu shallow and compact; over-nesting or ribbon-like growth would undercut the graph-first shell.
-- The demo showcase should remain a host-facing SDK proof surface rather than drift toward a productized workflow shell.
-- Future work should start from a fresh milestone definition instead of extending archived v1.3 scope ad hoc.
+- The first plugin-loading baseline should stay in-process and descriptor-first rather than balloon into marketplace, signing, or isolation design.
+- The first automation baseline should stay command/query/batch driven rather than expand into a full scripting language or workflow-designer product.
+- Proof work must stay aligned across focused tests, `HostSample`, `PackageSmoke`, and `ScaleSmoke` so extension claims remain machine-checkable.
 
 ### Quick Tasks Completed
 
@@ -76,5 +77,5 @@ None captured yet.
 ## Session Continuity
 
 Last session: 2026-04-08
-Stopped at: v1.3 Demo Showcase archived; next step is to start a new milestone
-Resume file: .planning/milestones/v1.3-ROADMAP.md
+Stopped at: Milestone v1.4 started; next step is to define requirements and roadmap
+Resume file: .planning/PROJECT.md

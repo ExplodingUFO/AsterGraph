@@ -8,15 +8,15 @@ AsterGraph is a modular node-graph editor toolkit for .NET with a kernel-first e
 
 Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
 
-## Latest Shipped Milestone: v1.3 Demo Showcase
+## Current Milestone: v1.4 Plugin Loading and Automation Execution
 
-**Goal:** Rebuild `AsterGraph.Demo` into a graph-first, host-menu-first SDK showcase so users immediately see the live node graph and can adjust view, behavior, and runtime capabilities through compact host-level controls on the same session.
+**Goal:** Turn the shipped readiness descriptors and graph-first showcase proof into real plugin-loading and automation-execution surfaces that hosts can compose from the canonical session boundary.
 
 **Target features:**
-- Replace the current explanation-heavy three-column demo shell with a graph-first layout led by a host-level menu.
-- Consolidate view/chrome, editing behavior, and runtime-facing demo controls into compact grouped menu or drawer surfaces.
-- Keep all showcase adjustments bound to the same live `Editor` / `Session` instead of switching scenes or rebuilding the runtime.
-- Replace long explanatory cards with compact in-context proof that shows seam ownership and current live configuration.
+- Add a public plugin composition/loading path rooted in `AsterGraphEditorFactory` and the kernel-first session contracts instead of internal editor or Avalonia object access.
+- Let loaded plugins contribute additive services, menus, presentation, diagnostics, or other host-facing seams through explicit contracts that remain inspectable from the canonical runtime boundary.
+- Add a descriptor-first automation runner that drives canonical command IDs, query snapshots, batching, and diagnostics without depending on `GraphEditorViewModel` methods.
+- Extend `HostSample`, `PackageSmoke`, `ScaleSmoke`, focused tests, and docs so plugin and automation claims remain machine-checkable.
 
 ## Current State
 
@@ -27,7 +27,7 @@ Hosts can integrate only the graph-editor pieces they need, replace default UI a
 - Migration posture and plugin/automation readiness are locked by focused regressions plus runnable `HostSample`, `PackageSmoke`, and `ScaleSmoke` proof markers.
 - `AsterGraph.Demo` now exposes live view, behavior, and runtime host controls from the top menu and compact right-side pane over one retained editor/session path.
 - `AsterGraph.Demo` now also exposes compact in-context proof cues, live configuration summaries, and aligned README narrative over the same graph-first host shell.
-- The v1.3 milestone is now archived; the next workflow step is to define the next milestone instead of extending the old roadmap ad hoc.
+- The v1.3 showcase work is shipped and archived; the next product risk is whether the same canonical session boundary can now host real plugin loading and automation execution.
 - The known `STATE_HISTORY_OK` mismatch remains an unresolved pre-v1.2 baseline if the next milestone touches history/save semantics.
 
 ## Requirements
@@ -54,22 +54,24 @@ Hosts can integrate only the graph-editor pieces they need, replace default UI a
 
 ### Active
 
-- [ ] No active milestone requirements yet. Start the next planning cycle with `$gsd-new-milestone`.
-- [ ] Decide whether the next roadmap should deepen the showcase experience (presets/tours) or return to plugin/automation execution work on top of the shipped host/runtime seams.
+- [ ] Host can load runtime plugins through a public composition path that builds on the shipped readiness descriptors instead of internal editor or Avalonia object knowledge.
+- [ ] Loaded plugins can contribute additive behavior or surfaces through explicit contracts that remain inspectable from the canonical session boundary.
+- [ ] Host can execute richer automation or macro workflows against canonical command IDs, query snapshots, batching, and diagnostics without relying on `GraphEditorViewModel` methods.
+- [ ] Plugin and automation delivery stays backed by focused tests plus `HostSample`, `PackageSmoke`, and `ScaleSmoke` proof rather than doc-only claims.
 
 ### Out of Scope
 
-- New graph-editing end-user features unrelated to extensibility, host integration, or scaling
+- New graph-editing end-user features unrelated to extensibility, host integration, or automation on top of the shipped SDK seams
+- Deep demo-showcase follow-on work such as named presets or guided tours in this milestone; that value is deferred until the platform work lands
+- Plugin marketplace/discovery UX, remote installation flows, signing, or isolation policy work beyond the first in-process loader baseline
+- Dedicated scripting language or workflow-designer product surface beyond descriptor-first automation execution
 - Replacing Avalonia with another UI stack before plugin/automation value is realized on the current stack
-- Algorithm execution engine work unrelated to SDK hardening
-- Large-scale visual redesign of the shipped shell
-- Runtime plugin loading and automation APIs in this milestone; this cycle focuses on presenting the already-shipped extensibility seams more clearly
 
 ## Context
 
-Milestone `v1.2` shipped on 2026-04-08 after phases 13-18 extracted the kernel, normalized descriptor contracts, thinned Avalonia adapters, and closed with migration/readiness proof. Milestone `v1.3` then shipped the graph-first demo showcase: the demo no longer behaves like a capability console with large explanatory side panels, and the host-level integration story is now legible on first read.
+Milestone `v1.2` shipped on 2026-04-08 after phases 13-18 extracted the kernel, normalized descriptor contracts, thinned Avalonia adapters, and closed with migration/readiness proof. Milestone `v1.3` then shipped the graph-first demo showcase, so the host-level integration story is now legible on first read instead of being buried behind explanation-heavy panels.
 
-The next product decision is no longer whether the demo should become graph-first. That work shipped. The next decision is whether to deepen the showcase experience with presets/tours or return to plugin and automation execution on top of the now-clearer host/runtime seams.
+The next product risk is no longer seam discoverability. The next product risk is whether those explicit descriptors, command IDs, query snapshots, batching hooks, and replaceable services can now support real plugin loading and automation execution without reintroducing facade-shaped or Avalonia-shaped dependencies.
 
 ## Constraints
 
@@ -94,19 +96,21 @@ The next product decision is no longer whether the demo should become graph-firs
 | Keep the demo on one live graph session with host-level menu controls instead of scene switching | A single-session showcase better demonstrates seam replacement without hiding runtime continuity | ✓ Good |
 | Use an in-window host menu as the first control plane in the demo shell | Makes the host integration story visible before explanatory content | ✓ Good |
 | Move secondary showcase content behind a compact on-demand pane | Preserves graph-first reading while keeping live proof available | ✓ Good |
+| Return to plugin/automation execution immediately after the showcase milestone | The integration story is now clear enough that the highest remaining product risk is real extension delivery, not more presentation polish | — Pending |
+| Keep new plugin and automation surfaces rooted in `IGraphEditorSession`, descriptors, and command IDs | Extension work should build on the canonical runtime boundary rather than retained MVVM or Avalonia compatibility shims | — Pending |
 
 ## Next Milestone Goals
 
-- Define the next milestone with fresh requirements rather than carrying v1.3 assumptions forward.
-- Choose whether the next cycle deepens the showcase experience or returns to plugin/automation implementation.
-- Preserve the proof-ring discipline so future work continues to close with machine-checkable tests, samples, and milestone artifacts.
+- Deliver the first real public plugin-loading baseline over the shipped kernel-first host seams.
+- Deliver the first descriptor-first automation execution baseline over canonical command IDs, query snapshots, and batch mutation paths.
+- Preserve the proof-ring discipline so plugin and automation claims close with machine-checkable tests, samples, smoke runs, and milestone artifacts.
 
 ## Archived Milestone Framing
 
 <details>
-<summary>v1.2 planning snapshot</summary>
+<summary>v1.3 planning snapshot</summary>
 
-Kernel Extraction, Capability Contracts, and Plugin Readiness focused on extracting the real editor kernel, rebuilding the session/facade relationship around that kernel, normalizing host contracts around descriptors, thinning the Avalonia adapter boundary, and proving migration/readiness with focused regressions plus runnable samples and smoke tools.
+Demo Showcase focused on turning `AsterGraph.Demo` into a graph-first, host-menu-first SDK proof surface so hosts can see seam ownership, live configuration, and shared runtime state without reading through a capability-console layout.
 
 </details>
 
@@ -121,4 +125,4 @@ This document evolves at milestone boundaries.
 4. Reset active requirements so the next roadmap starts from the highest remaining product risk instead of stale execution context.
 
 ---
-*Last updated: 2026-04-08 after archiving v1.3 Demo Showcase*
+*Last updated: 2026-04-08 after starting milestone v1.4*

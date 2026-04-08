@@ -1,5 +1,29 @@
 # Milestones
 
+## v1.3 Demo Showcase (Shipped: 2026-04-08)
+
+**Delivered:** AsterGraph now ships a graph-first, host-menu-first demo showcase that keeps one live session on screen while proving host-owned seams, shared runtime state, and live configuration through compact in-context controls and proof cues.
+
+**Phases completed:** 19-21 (9 plans total)
+
+**Archive:** [ROADMAP](./milestones/v1.3-ROADMAP.md) | [REQUIREMENTS](./milestones/v1.3-REQUIREMENTS.md)
+
+**Key accomplishments:**
+- Rebuilt `AsterGraph.Demo` around a graph-first shell led by a host-level menu instead of the old explanation-heavy capability console.
+- Consolidated view, behavior, and runtime controls into compact host-menu and drawer sections that all act on one retained `Editor` / `Session`.
+- Added proof-focused labels, runtime/proof sections, and README alignment so seam ownership and live configuration are obvious on first read.
+- Locked the new story with focused demo-shell tests plus milestone summaries and verification artifacts.
+
+**Stats:**
+- 41 files modified
+- 3,521 insertions and 507 deletions across code, docs, tests, and planning artifacts
+- 3 phases and 9 plans
+- Timeline: 2026-04-08 to 2026-04-08
+
+**Git range:** `docs: define milestone v1.3 requirements` → `chore: archive v1.3 milestone`
+
+**What's next:** Turn the deferred plugin-loading and automation-execution requirements into real host-facing features now that the showcase story is clear.
+
 ## v1.2 Kernel Extraction, Capability Contracts, and Plugin Readiness (Shipped: 2026-04-08)
 
 **Delivered:** AsterGraph now ships a kernel-first editor runtime with descriptor-driven host contracts, thinner Avalonia adapters, and explicit migration/readiness proof for later plugin and automation work.
