@@ -332,6 +332,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             hasFragmentWorkspaceService: _fragmentWorkspaceService is not null,
             hasFragmentLibraryService: _fragmentLibraryService is not null,
             hasClipboardPayloadSerializer: _clipboardPayloadSerializer is not null,
+            hasPluginLoader: true,
             hasContextMenuAugmentor: _contextMenuAugmentor is not null,
             hasNodePresentationProvider: _nodePresentationProvider is not null,
             hasLocalizationProvider: _localizationProvider is not null);

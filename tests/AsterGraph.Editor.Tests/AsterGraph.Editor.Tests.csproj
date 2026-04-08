@@ -24,5 +24,6 @@
     <ProjectReference Include="..\..\src\AsterGraph.Editor\AsterGraph.Editor.csproj" />
     <ProjectReference Include="..\..\src\AsterGraph.Avalonia\AsterGraph.Avalonia.csproj" />
     <ProjectReference Include="..\..\src\AsterGraph.Demo\AsterGraph.Demo.csproj" />
+    <ProjectReference Include="..\AsterGraph.TestPlugins\AsterGraph.TestPlugins.csproj" ReferenceOutputAssembly="false" />
   </ItemGroup>
 </Project>

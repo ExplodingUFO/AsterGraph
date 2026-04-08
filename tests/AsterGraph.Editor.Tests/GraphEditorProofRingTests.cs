@@ -762,6 +762,7 @@ public sealed class GraphEditorProofRingTests
         "service.fragment-library",
         "service.clipboard-payload-serializer",
         "service.diagnostics",
+        "integration.plugin-loader",
         "integration.context-menu-augmentor",
         "integration.node-presentation-provider",
         "integration.localization-provider",

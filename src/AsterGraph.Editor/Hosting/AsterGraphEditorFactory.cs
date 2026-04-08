@@ -1,6 +1,8 @@
 using AsterGraph.Abstractions.Styling;
+using AsterGraph.Editor.Diagnostics;
 using AsterGraph.Editor.Configuration;
 using AsterGraph.Editor.Kernel;
+using AsterGraph.Editor.Plugins.Internal;
 using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.Services;
 using AsterGraph.Editor.ViewModels;
@@ -51,6 +53,7 @@ public static class AsterGraphEditorFactory
         if (editor.Session is GraphEditorSession runtimeSession)
         {
             runtimeSession.ConfigureInstrumentation(resolved.Options.Instrumentation);
+            PublishDiagnostics(runtimeSession, resolved.PluginLoadResult.Diagnostics);
         }
 
         return editor;
@@ -85,10 +88,12 @@ public static class AsterGraphEditorFactory
                 hasFragmentWorkspaceService: true,
                 hasFragmentLibraryService: true,
                 hasClipboardPayloadSerializer: true,
+                hasPluginLoader: true,
                 hasContextMenuAugmentor: resolved.Options.ContextMenuAugmentor is not null,
                 hasNodePresentationProvider: resolved.Options.NodePresentationProvider is not null,
                 hasLocalizationProvider: resolved.Options.LocalizationProvider is not null));
         session.ConfigureInstrumentation(resolved.Options.Instrumentation);
+        PublishDiagnostics(session, resolved.PluginLoadResult.Diagnostics);
         return session;
     }
 
@@ -109,6 +114,7 @@ public static class AsterGraphEditorFactory
             clipboardPayloadSerializer);
         var styleOptions = options.StyleOptions ?? GraphEditorStyleOptions.Default;
         var behaviorOptions = ResolveBehaviorOptions(options.BehaviorOptions, styleOptions);
+        var pluginLoadResult = AsterGraphPluginLoader.Load(options.PluginRegistrations);
 
         return new ResolvedEditorOptions(
             options,
@@ -117,7 +123,8 @@ public static class AsterGraphEditorFactory
             fragmentWorkspaceService,
             fragmentLibraryService,
             styleOptions,
-            behaviorOptions);
+            behaviorOptions,
+            pluginLoadResult);
     }
 
     private static GraphEditorBehaviorOptions ResolveBehaviorOptions(
@@ -140,6 +147,17 @@ public static class AsterGraphEditorFactory
         };
     }
 
+    private static void PublishDiagnostics(GraphEditorSession session, IReadOnlyList<GraphEditorDiagnostic> diagnostics)
+    {
+        ArgumentNullException.ThrowIfNull(session);
+        ArgumentNullException.ThrowIfNull(diagnostics);
+
+        foreach (var diagnostic in diagnostics)
+        {
+            session.PublishDiagnostic(diagnostic);
+        }
+    }
+
     private sealed record ResolvedEditorOptions(
         AsterGraphEditorOptions Options,
         IGraphClipboardPayloadSerializer ClipboardPayloadSerializer,
@@ -147,5 +165,6 @@ public static class AsterGraphEditorFactory
         IGraphFragmentWorkspaceService FragmentWorkspaceService,
         IGraphFragmentLibraryService FragmentLibraryService,
         GraphEditorStyleOptions StyleOptions,
-        GraphEditorBehaviorOptions BehaviorOptions);
+        GraphEditorBehaviorOptions BehaviorOptions,
+        GraphEditorPluginLoadResult PluginLoadResult);
 }

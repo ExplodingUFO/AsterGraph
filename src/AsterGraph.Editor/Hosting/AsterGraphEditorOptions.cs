@@ -6,6 +6,7 @@ using AsterGraph.Editor.Configuration;
 using AsterGraph.Editor.Diagnostics;
 using AsterGraph.Editor.Localization;
 using AsterGraph.Editor.Menus;
+using AsterGraph.Editor.Plugins;
 using AsterGraph.Editor.Presentation;
 using AsterGraph.Editor.Services;
 
@@ -70,6 +71,11 @@ public sealed record AsterGraphEditorOptions
     /// 可选的片段剪贴板负载序列化器。
     /// </summary>
     public IGraphClipboardPayloadSerializer? ClipboardPayloadSerializer { get; init; }
+
+    /// <summary>
+    /// 可选的插件注册集合；用于通过规范工厂入口声明直接实例或程序集路径插件。
+    /// </summary>
+    public IReadOnlyList<GraphEditorPluginRegistration> PluginRegistrations { get; init; } = [];
 
     /// <summary>
     /// 可选的宿主右键菜单增强器。

@@ -153,6 +153,7 @@ public sealed class GraphEditorServiceSeamsTests
         Assert.True(runtimeById["service.fragment-workspace"].IsAvailable);
         Assert.True(runtimeById["service.fragment-library"].IsAvailable);
         Assert.True(runtimeById["service.clipboard-payload-serializer"].IsAvailable);
+        Assert.True(runtimeById["integration.plugin-loader"].IsAvailable);
         Assert.True(runtimeById["integration.context-menu-augmentor"].IsAvailable);
         Assert.True(runtimeById["integration.node-presentation-provider"].IsAvailable);
         Assert.True(runtimeById["integration.localization-provider"].IsAvailable);

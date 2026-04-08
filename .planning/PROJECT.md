@@ -51,11 +51,12 @@ Hosts can integrate only the graph-editor pieces they need, replace default UI a
 - ✓ The demo opens into a graph-first shell where the node graph and a host-level menu are the first things users see — v1.3 Phase 19
 - ✓ Users can adjust shell/view, editing behavior, and runtime-facing demo controls from compact host-level menu groups while staying on the same live graph — v1.3 Phase 20
 - ✓ The demo now distinguishes host-owned seams from shared runtime state through compact proof cues, live configuration sections, and aligned demo-facing documentation — v1.3 Phase 21
+- ✓ Host can now load one or more runtime plugins through a public composition path rooted in `AsterGraphEditorFactory` / `AsterGraphEditorOptions`, with canonical loader readiness and recoverable diagnostics — v1.4 Phase 22
 
 ### Active
 
-- [ ] Host can load runtime plugins through a public composition path that builds on the shipped readiness descriptors instead of internal editor or Avalonia object knowledge.
 - [ ] Loaded plugins can contribute additive behavior or surfaces through explicit contracts that remain inspectable from the canonical session boundary.
+- [ ] Host can inspect loaded plugin descriptors, availability, and failures through canonical runtime inspection or diagnostics without private loader knowledge.
 - [ ] Host can execute richer automation or macro workflows against canonical command IDs, query snapshots, batching, and diagnostics without relying on `GraphEditorViewModel` methods.
 - [ ] Plugin and automation delivery stays backed by focused tests plus `HostSample`, `PackageSmoke`, and `ScaleSmoke` proof rather than doc-only claims.
 
@@ -96,8 +97,9 @@ The next product risk is no longer seam discoverability. The next product risk i
 | Keep the demo on one live graph session with host-level menu controls instead of scene switching | A single-session showcase better demonstrates seam replacement without hiding runtime continuity | ✓ Good |
 | Use an in-window host menu as the first control plane in the demo shell | Makes the host integration story visible before explanatory content | ✓ Good |
 | Move secondary showcase content behind a compact on-demand pane | Preserves graph-first reading while keeping live proof available | ✓ Good |
-| Return to plugin/automation execution immediately after the showcase milestone | The integration story is now clear enough that the highest remaining product risk is real extension delivery, not more presentation polish | — Pending |
-| Keep new plugin and automation surfaces rooted in `IGraphEditorSession`, descriptors, and command IDs | Extension work should build on the canonical runtime boundary rather than retained MVVM or Avalonia compatibility shims | — Pending |
+| Return to plugin/automation execution immediately after the showcase milestone | The integration story is now clear enough that the highest remaining product risk is real extension delivery, not more presentation polish | ✓ Good |
+| Keep new plugin and automation surfaces rooted in `IGraphEditorSession`, descriptors, and command IDs | Extension work should build on the canonical runtime boundary rather than retained MVVM or Avalonia compatibility shims | ✓ Good |
+| Use `AssemblyLoadContext` + `AssemblyDependencyResolver` while keeping shared `AsterGraph.*` contracts in the default context | Assembly-path plugins need intentional dependency isolation without breaking host/plugin type identity | ✓ Good |
 
 ## Next Milestone Goals
 

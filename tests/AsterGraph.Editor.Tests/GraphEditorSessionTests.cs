@@ -482,6 +482,7 @@ public sealed class GraphEditorSessionTests
         Assert.True(descriptors["service.clipboard-payload-serializer"].IsAvailable);
         Assert.True(descriptors["query.compatible-port-target-snapshot"].IsAvailable);
         Assert.True(descriptors["query.compatible-target-mvvm-shim"].IsAvailable);
+        Assert.True(descriptors["integration.plugin-loader"].IsAvailable);
         Assert.True(descriptors["integration.context-menu-augmentor"].IsAvailable);
         Assert.True(descriptors["integration.node-presentation-provider"].IsAvailable);
         Assert.True(descriptors["integration.localization-provider"].IsAvailable);

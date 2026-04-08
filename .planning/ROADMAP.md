@@ -21,7 +21,7 @@ This milestone turns the deferred `PLUG-01` and `AUTO-01` style follow-on work i
 
 ## Phases
 
-- [ ] **Phase 22: Plugin Composition Contracts** - Publish the first public plugin composition/loading path over `AsterGraphEditorFactory`, options, and canonical runtime descriptors.
+- [x] **Phase 22: Plugin Composition Contracts** - Publish the first public plugin composition/loading path over `AsterGraphEditorFactory`, options, and canonical runtime descriptors.
 - [ ] **Phase 23: Runtime Plugin Integration And Inspection** - Let loaded plugins contribute additive seams and make their loaded state inspectable from the canonical runtime boundary.
 - [ ] **Phase 24: Automation Execution Runner** - Add the first descriptor-first automation runner over command IDs, query snapshots, batching, and typed runtime diagnostics/events.
 - [ ] **Phase 25: Plugin And Automation Proof Ring** - Lock the new extension story into focused tests, sample hosts, smoke tools, scale proof, and docs.
@@ -72,11 +72,11 @@ This milestone turns the deferred `PLUG-01` and `AUTO-01` style follow-on work i
 
 | Phase | Requirements | Status |
 |-------|--------------|--------|
-| 22. Plugin Composition Contracts | PLUG-01 | Planned |
+| 22. Plugin Composition Contracts | PLUG-01 | Complete |
 | 23. Runtime Plugin Integration And Inspection | PLUG-02, PLUG-03 | Planned |
 | 24. Automation Execution Runner | AUTO-01, AUTO-02 | Planned |
 | 25. Plugin And Automation Proof Ring | PROOF-01, PROOF-02 | Planned |
 
 ## Next Action
 
-**Phase 22** is planned. The next workflow step is to execute the first public plugin composition path.
+**Phase 22** is complete. The next workflow step is to plan and execute **Phase 23: Runtime Plugin Integration And Inspection**.

@@ -27,6 +27,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsterGraph.Serialization.Te
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsterGraph.Editor.Tests", "tests\AsterGraph.Editor.Tests\AsterGraph.Editor.Tests.csproj", "{B3EC8B7E-8FBC-4935-9A2E-A8F3A7EA5CBC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsterGraph.TestPlugins", "tests\AsterGraph.TestPlugins\AsterGraph.TestPlugins.csproj", "{E31DAF15-13FB-451F-9B1C-4253FF4FEA8B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -145,6 +147,18 @@ Global
 		{B3EC8B7E-8FBC-4935-9A2E-A8F3A7EA5CBC}.Release|x64.Build.0 = Release|Any CPU
 		{B3EC8B7E-8FBC-4935-9A2E-A8F3A7EA5CBC}.Release|x86.ActiveCfg = Release|Any CPU
 		{B3EC8B7E-8FBC-4935-9A2E-A8F3A7EA5CBC}.Release|x86.Build.0 = Release|Any CPU
+		{E31DAF15-13FB-451F-9B1C-4253FF4FEA8B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E31DAF15-13FB-451F-9B1C-4253FF4FEA8B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E31DAF15-13FB-451F-9B1C-4253FF4FEA8B}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{E31DAF15-13FB-451F-9B1C-4253FF4FEA8B}.Debug|x64.Build.0 = Debug|Any CPU
+		{E31DAF15-13FB-451F-9B1C-4253FF4FEA8B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{E31DAF15-13FB-451F-9B1C-4253FF4FEA8B}.Debug|x86.Build.0 = Debug|Any CPU
+		{E31DAF15-13FB-451F-9B1C-4253FF4FEA8B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E31DAF15-13FB-451F-9B1C-4253FF4FEA8B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E31DAF15-13FB-451F-9B1C-4253FF4FEA8B}.Release|x64.ActiveCfg = Release|Any CPU
+		{E31DAF15-13FB-451F-9B1C-4253FF4FEA8B}.Release|x64.Build.0 = Release|Any CPU
+		{E31DAF15-13FB-451F-9B1C-4253FF4FEA8B}.Release|x86.ActiveCfg = Release|Any CPU
+		{E31DAF15-13FB-451F-9B1C-4253FF4FEA8B}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -159,5 +173,6 @@ Global
 		{70C3D994-198A-413F-8566-766C432E5948} = {07C2787E-EAC7-C090-1BA3-A61EC2A24D84}
 		{60F083E2-4DE7-4753-A374-6BD65EA91B40} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 		{B3EC8B7E-8FBC-4935-9A2E-A8F3A7EA5CBC} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
+		{E31DAF15-13FB-451F-9B1C-4253FF4FEA8B} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 	EndGlobalSection
 EndGlobal
