@@ -69,4 +69,4 @@ This milestone turns the demo into a graph-first SDK showcase: the user should f
 
 ## Next Action
 
-**Phase 21** is next. The graph-first shell and host-menu control baseline are now in place, and the next workflow step is to plan or execute in-context proof and narrative polish.
+**Phase 21** is planned. The graph-first shell and host-menu control baseline are now in place, and the next workflow step is to execute in-context proof and narrative polish.

@@ -2,13 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Demo Showcase
-status: Ready to plan
-stopped_at: Phase 20 completed; next step is to plan Phase 21 in-context proof and narrative polish
-last_updated: "2026-04-08T08:02:58.152Z"
+status: Phase 21 Planned
+stopped_at: Phase 21 planned; next step is to execute in-context proof and narrative polish
+last_updated: "2026-04-08T08:21:48.2092999Z"
+last_activity: 2026-04-08
 progress:
   total_phases: 3
   completed_phases: 2
-  total_plans: 6
+  total_plans: 9
   completed_plans: 6
 ---
 
@@ -19,12 +20,14 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-04-08)
 
 **Core value:** Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
-**Current focus:** Phase 21 in-context proof and narrative polish planning
+**Current focus:** Phase 21 in-context proof and narrative polish execution
 
 ## Current Position
 
 Phase: 21
-Plan: Not started
+Plan: Planned
+Status: Phase 21 Planned
+Last activity: 2026-04-08 — Planned Phase 21 in-context proof and narrative polish
 
 ## Accumulated Context
 
@@ -45,6 +48,9 @@ Carry-forward decisions from shipped milestones:
 - Keep the right-side `SplitView` pane as the compact dense control/readout surface for the currently active menu group.
 - Keep all Phase 20 control state bound to the existing `MainWindowViewModel` booleans and `Editor.Session` projections rather than duplicating editor or runtime state.
 - Keep runtime summary metrics and recent diagnostics as separate sections inside the existing right-side pane instead of introducing a second runtime dashboard.
+- Keep Phase 21 proof cues embedded near the active graph and drawer sections instead of reintroducing a permanent explanation rail.
+- Keep host-owned seams and shared runtime/session state explicit through short labels plus live values rather than paragraph-heavy summary cards.
+- Keep README aligned with the graph-first showcase story so the demo window and repo narrative describe the same proof.
 
 ### Pending Todos
 
@@ -58,6 +64,9 @@ None captured yet.
 - The demo redesign should stay focused on showcase clarity, not expand into unrelated end-user feature work.
 - Phase 20 should keep the host menu shallow and compact; over-nesting or ribbon-like growth would undercut the graph-first shell.
 - Runtime readouts should stay compact in this phase; broader proof/narrative cleanup remains Phase 21 work.
+- Phase 21 should avoid turning proof polish into a new onboarding flow, preset system, or scene-switching model.
+- Copy changes should stay compact and testable; do not reintroduce paragraph-heavy explanation cards under a new name.
+- Live configuration and runtime proof rows must remain projections of the current booleans and `Editor.Session` diagnostics path, not a second summary cache.
 
 ### Quick Tasks Completed
 
@@ -68,5 +77,5 @@ None captured yet.
 ## Session Continuity
 
 Last session: 2026-04-08
-Stopped at: Phase 20 completed; next step is to plan Phase 21 in-context proof and narrative polish
-Resume file: .planning/phases/20-host-menu-control-consolidation/20-VERIFICATION.md
+Stopped at: Phase 21 planned; next step is to execute in-context proof and narrative polish
+Resume file: .planning/phases/21-in-context-proof-and-narrative-polish/21-01-PLAN.md
