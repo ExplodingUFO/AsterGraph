@@ -45,12 +45,21 @@
 
 ## Traceability
 
-Roadmap mapping will be filled during milestone roadmapping.
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| SHOW-01 | Phase 19 | Pending |
+| SHOW-02 | Phase 19 | Pending |
+| CTRL-01 | Phase 20 | Pending |
+| CTRL-02 | Phase 20 | Pending |
+| CTRL-03 | Phase 20 | Pending |
+| PROOF-01 | Phase 21 | Pending |
+| PROOF-02 | Phase 21 | Pending |
 
 **Coverage:**
 - milestone requirements: 7 total
-- mapped to phases: 0
-- unmapped: 7
+- mapped to phases: 7
+- unmapped: 0
 
 ---
 *Requirements defined: 2026-04-08*
+*Last updated: 2026-04-08 after milestone v1.3 roadmap creation*
