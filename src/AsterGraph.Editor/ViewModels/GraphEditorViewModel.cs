@@ -33,10 +33,11 @@ namespace AsterGraph.Editor.ViewModels;
 /// 图编辑器的主视图模型，承载选择、布局、连线、剪贴板和持久化状态。
 /// </summary>
 /// <remarks>
-/// Phase 1 会继续支持直接构造 <see cref="GraphEditorViewModel"/> 作为兼容立面，
-/// 以满足现有宿主基于 <c>new GraphEditorViewModel(...)</c> 的集成路径。
-/// 新宿主应优先考虑 <see cref="AsterGraphEditorFactory"/> 和 <see cref="AsterGraphEditorOptions"/>，
-/// 但本类型在当前迁移窗口内不会因为新增工厂入口而被移除或标记为过时。
+/// 本类型是当前迁移窗口内保留的兼容立面，
+/// 用于支持现有宿主基于 <c>new GraphEditorViewModel(...)</c> 的直接集成路径。
+/// 新的默认 hosted-UI 组合代码应优先考虑 <see cref="AsterGraphEditorFactory.Create(AsterGraphEditorOptions)"/>，
+/// 而自定义 UI 宿主应优先考虑 <see cref="AsterGraphEditorFactory.CreateSession(AsterGraphEditorOptions)"/>。
+/// 本类型在当前迁移窗口内仍然受支持，但不应再被视为新的首选组合根。
 /// </remarks>
 public sealed partial class GraphEditorViewModel : ObservableObject, IGraphContextMenuHost
 {
@@ -142,10 +143,12 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// <param name="clipboardPayloadSerializer">片段和剪贴板载荷的序列化器。</param>
     /// <param name="diagnosticsSink">可选的宿主诊断发布器。</param>
     /// <remarks>
-    /// 该构造函数在 Phase 1 中保留为受支持的兼容入口，供现有宿主继续沿用
-    /// <c>new GraphEditorViewModel(...)</c> 的组合方式。对于新的宿主组合代码，
-    /// 请优先使用 <see cref="AsterGraphEditorFactory.Create(AsterGraphEditorOptions)"/>，
-    /// 以便后续阶段通过统一的选项契约扩展初始化能力。
+    /// 该构造函数保留为受支持的兼容入口，供现有宿主继续沿用
+    /// <c>new GraphEditorViewModel(...)</c> 的组合方式。
+    /// 对于新的默认 hosted-UI 组合代码，请优先使用
+    /// <see cref="AsterGraphEditorFactory.Create(AsterGraphEditorOptions)"/>；
+    /// 对于新的自定义 UI 宿主，请优先使用
+    /// <see cref="AsterGraphEditorFactory.CreateSession(AsterGraphEditorOptions)"/>。
     /// </remarks>
     public GraphEditorViewModel(
         GraphDocument document,

@@ -26,13 +26,13 @@ Typical consumers:
 - hosts that build or extend an editor session, even when they also ship the default Avalonia UI
 - integration layers that extend menus, commands, inspector behavior, localization, or presentation
 
-Start here when a host needs the canonical runtime entry point:
+Route guidance:
 
 - runtime-first session creation via `AsterGraphEditorFactory.CreateSession(...)`
+- canonical hosted-UI creation via `AsterGraphEditorFactory.Create(...)`, then the Avalonia factories from `AsterGraph.Avalonia`
 - core runtime interaction ownership via session commands for selection, node positioning, connection lifecycle, and viewport control
 - pending connection observation via `GetPendingConnectionSnapshot()` and `PendingConnectionChanged`
 - DTO-based compatible-target discovery via `GetCompatiblePortTargets(...)`
-- factory/options-based editor creation via `AsterGraphEditorFactory`
 - staged migration support through the retained `GraphEditorViewModel` constructor
 - package-neutral default storage redirection through `StorageRootPath`
 - replaceable services via `IGraphWorkspaceService`, `IGraphFragmentWorkspaceService`, `IGraphFragmentLibraryService`, and `IGraphClipboardPayloadSerializer`
@@ -42,7 +42,13 @@ Start here when a host needs the canonical runtime entry point:
 - host-owned menu actions via `IGraphContextMenuAugmentor`
 - typed host context access through `GraphHostContextExtensions`
 
-Use this package together with `AsterGraph.Avalonia` when the host embeds the default `GraphEditorView`. Hosts that provide their own UI can stop at the `IGraphEditorSession` boundary and avoid taking an Avalonia dependency in their composition root.
+Recommended split:
+
+- use `CreateSession(...)` when the host owns the UI and wants the canonical runtime boundary
+- use `Create(...)` when the host wants the shipped UI/factory story but still needs the retained editor facade
+- use the direct `GraphEditorViewModel` constructor only when the host is intentionally staying on the retained compatibility path during migration
+
+Use this package together with `AsterGraph.Avalonia` when the host embeds the default shell or standalone Avalonia surfaces. Hosts that provide their own UI can stop at the `IGraphEditorSession` boundary and avoid taking an Avalonia dependency in their composition root.
 
 The MVVM-typed compatibility query path remains available for legacy integrations, but new host code should treat it as compatibility-only rather than the canonical runtime surface.
 

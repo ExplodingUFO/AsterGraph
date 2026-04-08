@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: kernel-extraction-capability-contracts-and-plugin-readiness
 status: Executing Phase 17
-stopped_at: Phase 17 plan 17-01 completed; 17-02 API/docs alignment is next
-last_updated: "2026-04-08T05:43:06Z"
+stopped_at: Phase 17 plan 17-02 completed; 17-03 sample/smoke proof lock is next
+last_updated: "2026-04-08T05:47:09Z"
 progress:
   total_phases: 6
   completed_phases: 4
   total_plans: 15
-  completed_plans: 13
+  completed_plans: 14
 ---
 
 # Project State
@@ -24,9 +24,9 @@ See: `.planning/PROJECT.md` (updated 2026-04-04)
 ## Current Position
 
 Phase: 17. Compatibility Lock And Migration Proof
-Plan: 17-01 completed; 17-02 and 17-03 pending
+Plan: 17-01 and 17-02 completed; 17-03 pending
 Status: Executing Phase 17
-Last activity: 2026-04-08 — Completed 17-01 migration parity regression matrix and verified focused migration/proof suites
+Last activity: 2026-04-08 — Completed 17-02 API/docs alignment and verified editor/Avalonia builds plus canonical-vs-compatibility wording scan
 
 ## Accumulated Context
 
@@ -61,6 +61,7 @@ New milestone decisions:
 - Keep the new `PHASE16_*` HostSample and PackageSmoke markers as the proof baseline for Avalonia adapter-boundary behavior until Phase 17 extends migration coverage further.
 - Prefer explicit canonical-vs-compatibility signaling through focused tests, sample/smoke markers, and API remarks before any harder deprecation posture is considered.
 - Treat retained-path extra commands as compatibility-only surface area, while expecting the shared canonical command/menu subset to stay aligned with `CreateSession(...)`.
+- Keep host-facing route guidance stable across XML comments, README files, quick start, and host integration docs so canonical-path messaging cannot drift independently of proof artifacts.
 
 ### Pending Todos
 
@@ -84,5 +85,5 @@ None captured yet.
 ## Session Continuity
 
 Last session: 2026-04-08
-Stopped at: Phase 17 plan 17-01 completed; 17-02 API/docs alignment is next
-Resume file: .planning/phases/17-compatibility-lock-and-migration-proof/17-02-PLAN.md
+Stopped at: Phase 17 plan 17-02 completed; 17-03 sample/smoke proof lock is next
+Resume file: .planning/phases/17-compatibility-lock-and-migration-proof/17-03-PLAN.md

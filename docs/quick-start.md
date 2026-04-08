@@ -95,6 +95,14 @@ var view = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOption
 // Set `view` as content in your Avalonia window.
 ```
 
+This is the canonical hosted-UI path for new Avalonia hosts.
+
+Route guide:
+
+- use `AsterGraphEditorFactory.CreateSession(...)` if your host owns the UI and only wants the canonical runtime boundary
+- use `AsterGraphEditorFactory.Create(...)` plus `AsterGraphAvaloniaViewFactory.Create(...)` for the canonical shipped-UI path
+- keep `new GraphEditorViewModel(...)` or `new GraphEditorView { Editor = ... }` only when you are intentionally staying on the retained compatibility path during migration
+
 ## 5) Where Abstractions fits
 
 Use `AsterGraph.Abstractions` to define and distribute node contracts (`INodeDefinitionProvider`, `NodeDefinitionId`, related definition/identifier types) so host-side providers and libraries remain stable and UI-independent.

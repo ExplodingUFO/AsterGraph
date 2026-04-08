@@ -9,7 +9,7 @@ This package belongs to the supported AsterGraph package set with `AsterGraph.Ab
 Direct package reference:
 
 - Yes, this is the default UI package for hosts embedding the editor.
-- Pair it with `AsterGraph.Editor` for the canonical Phase 1 host-composition path.
+- Pair it with `AsterGraph.Editor` for the canonical hosted-UI composition path.
 - Pair it with `AsterGraph.Abstractions` for node definitions and shared style contracts.
 - Add `AsterGraph.Core` when the host also needs direct model or serialization access.
 

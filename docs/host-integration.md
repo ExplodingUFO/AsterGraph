@@ -119,7 +119,7 @@ Notes:
 
 ## Canonical Host Composition
 
-Phase 2 gives hosts two canonical entry paths. Pick the narrowest surface that matches what you want to own.
+AsterGraph currently gives hosts two canonical entry paths. Pick the narrowest surface that matches what you want to own.
 
 Runtime-only or custom-UI host:
 
@@ -254,7 +254,7 @@ Use this path when the host wants to keep the stock graph canvas, inspector, or 
 
 ## Runtime Session Surface
 
-`IGraphEditorSession` is the public Phase 2 runtime root in `AsterGraph.Editor`.
+`IGraphEditorSession` is the public canonical runtime root in `AsterGraph.Editor`.
 
 - `Commands`
   - host-triggered mutations such as `SetSelection`, `SetNodePositions`, `StartConnection`, `CompleteConnection`, `CancelPendingConnection`, `DeleteConnection`, `BreakConnectionsForPort`, `CenterViewOnNode`, `CenterViewAt`, `AddNode`, `DeleteSelection`, `PanBy`, `ZoomAt`, `SaveWorkspace`, and `LoadWorkspace`
@@ -539,7 +539,7 @@ Use presentation state for:
 
 Do not encode host business behavior into the editor layer itself. Keep the semantics in the host and only pass the display snapshot into AsterGraph.
 
-This seam stays additive in Phase 2. The runtime-session additions do not replace or narrow the presentation-provider path.
+This seam stays additive during the current migration window. The runtime-session additions do not replace or narrow the presentation-provider path.
 
 For visual usage guidance, see:
 
@@ -597,7 +597,7 @@ These helpers:
 - return `false` safely when the requested type does not match
 - stay portable across Avalonia and future non-Avalonia hosts
 
-The context-menu augmentation seam and the typed host-context helpers continue to work unchanged in Phase 2. The new runtime-session APIs are additive and do not require hosts to replace their existing menu augmentors.
+The context-menu augmentation seam and the typed host-context helpers continue to work unchanged in the current migration window. The new runtime-session APIs are additive and do not require hosts to replace their existing menu augmentors.
 
 ## Putting It Together
 

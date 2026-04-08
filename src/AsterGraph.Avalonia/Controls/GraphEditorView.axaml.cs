@@ -16,10 +16,11 @@ namespace AsterGraph.Avalonia.Controls;
 /// AsterGraph 的 Avalonia 宿主视图，负责样式资源接入和全局快捷键路由。
 /// </summary>
 /// <remarks>
-/// Phase 1 会继续支持直接构造 <see cref="GraphEditorView"/> 并通过 <see cref="Editor"/>
-/// 绑定编辑器实例，作为现有宿主的兼容立面。新的宿主组合代码应优先考虑
-/// <see cref="AsterGraphAvaloniaViewFactory"/> 与 <see cref="AsterGraphAvaloniaViewOptions"/>，
-/// 但当前迁移窗口不会强制要求宿主立即放弃 <c>new GraphEditorView { Editor = ... }</c>。
+/// 直接构造 <see cref="GraphEditorView"/> 并通过 <see cref="Editor"/>
+/// 绑定编辑器实例，仍然是当前迁移窗口内受支持的兼容路径。
+/// 新的默认 Avalonia 宿主组合代码应优先考虑
+/// <see cref="AsterGraphAvaloniaViewFactory"/> 与 <see cref="AsterGraphAvaloniaViewOptions"/>；
+/// 该保留视图路径不再是新的首选组合方式。
 /// </remarks>
 public partial class GraphEditorView : UserControl
 {
@@ -106,8 +107,9 @@ public partial class GraphEditorView : UserControl
     /// 初始化图编辑器宿主视图。
     /// </summary>
     /// <remarks>
-    /// 直接构造视图并设置 <see cref="Editor"/> 在 Phase 1 中仍然受支持；
-    /// 工厂入口只是新增的规范组合路径，而不是替代现有宿主的强制重写。
+    /// 直接构造视图并设置 <see cref="Editor"/> 仍然受支持；
+    /// 但新的默认 Avalonia 宿主代码应优先通过
+    /// <see cref="AsterGraphAvaloniaViewFactory.Create(AsterGraphAvaloniaViewOptions)"/> 进行组合。
     /// </remarks>
     public GraphEditorView()
     {
@@ -121,7 +123,7 @@ public partial class GraphEditorView : UserControl
     /// <remarks>
     /// 现有宿主可以继续通过对象初始化器为 <see cref="Editor"/> 赋值，
     /// 例如 <c>new GraphEditorView { Editor = editor }</c>。
-    /// 新宿主若希望集中组合逻辑，应优先使用
+    /// 新宿主若希望采用规范 hosted-UI 组合路径，应优先使用
     /// <see cref="AsterGraphAvaloniaViewFactory.Create(AsterGraphAvaloniaViewOptions)"/>。
     /// </remarks>
     public GraphEditorViewModel? Editor

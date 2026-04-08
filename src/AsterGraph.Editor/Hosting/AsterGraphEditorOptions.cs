@@ -15,8 +15,9 @@ namespace AsterGraph.Editor.Hosting;
 /// 定义通过 <see cref="AsterGraphEditorFactory"/> 组合图编辑器运行时所需的宿主输入。
 /// </summary>
 /// <remarks>
-/// 该选项契约提供 Phase 1 的规范宿主入口；直接使用 <c>new GraphEditorViewModel(...)</c>
-/// 仍然是受支持的兼容路径，便于现有宿主逐步迁移。
+/// 该选项契约是当前规范宿主入口；
+/// 直接使用 <c>new GraphEditorViewModel(...)</c> 仍然是受支持的兼容路径，
+/// 便于现有宿主逐步迁移。
 /// </remarks>
 public sealed record AsterGraphEditorOptions
 {
