@@ -235,6 +235,65 @@ public sealed class GraphEditorProofRingTests
     }
 
     [AvaloniaFact]
+    public void MigrationProof_RouteSignalsMatchCanonicalAndCompatibilityStory()
+    {
+        var legacyEditor = new GraphEditorViewModel(
+            CreateDocument(),
+            CreateCatalog(),
+            new ExactCompatibilityService());
+        var factoryEditor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
+        {
+            Document = CreateDocument(),
+            NodeCatalog = CreateCatalog(),
+            CompatibilityService = new ExactCompatibilityService(),
+        });
+        var runtimeSession = AsterGraphEditorFactory.CreateSession(new AsterGraphEditorOptions
+        {
+            Document = CreateDocument(),
+            NodeCatalog = CreateCatalog(),
+            CompatibilityService = new ExactCompatibilityService(),
+        });
+        var legacyDirectView = new GraphEditorView
+        {
+            Editor = legacyEditor,
+            ChromeMode = GraphEditorViewChromeMode.CanvasOnly,
+        };
+        var factoryDirectView = new GraphEditorView
+        {
+            Editor = factoryEditor,
+            ChromeMode = GraphEditorViewChromeMode.CanvasOnly,
+        };
+        var legacyFactoryView = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOptions
+        {
+            Editor = legacyEditor,
+            ChromeMode = GraphEditorViewChromeMode.CanvasOnly,
+        });
+        var factoryFactoryView = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOptions
+        {
+            Editor = factoryEditor,
+            ChromeMode = GraphEditorViewChromeMode.CanvasOnly,
+        });
+
+        var legacyDirectSnapshot = CaptureMigrationViewRouteSnapshot(legacyDirectView);
+        var factoryDirectSnapshot = CaptureMigrationViewRouteSnapshot(factoryDirectView);
+        var legacyFactorySnapshot = CaptureMigrationViewRouteSnapshot(legacyFactoryView);
+        var factoryFactorySnapshot = CaptureMigrationViewRouteSnapshot(factoryFactoryView);
+        var runtimeSharedCommandIds = CaptureSharedCanonicalCommandIds(runtimeSession);
+        var legacySharedCommandIds = CaptureSharedCanonicalCommandIds(legacyEditor.Session);
+        var factorySharedCommandIds = CaptureSharedCanonicalCommandIds(factoryEditor.Session);
+        var legacyCompatibilityOnlyCommands = CaptureCompatibilityOnlyCommandIds(runtimeSession, legacyEditor.Session);
+        var factoryCompatibilityOnlyCommands = CaptureCompatibilityOnlyCommandIds(runtimeSession, factoryEditor.Session);
+
+        Assert.Equal(legacyDirectSnapshot, factoryDirectSnapshot);
+        Assert.Equal(legacyDirectSnapshot, legacyFactorySnapshot);
+        Assert.Equal(legacyDirectSnapshot, factoryFactorySnapshot);
+        Assert.Equal(runtimeSharedCommandIds, legacySharedCommandIds);
+        Assert.Equal(runtimeSharedCommandIds, factorySharedCommandIds);
+        Assert.Contains("nodes.duplicate", legacyCompatibilityOnlyCommands);
+        Assert.Contains("nodes.duplicate", factoryCompatibilityOnlyCommands);
+    }
+
+    [AvaloniaFact]
     public void FullShellAndStandaloneProof_UseCanonicalMenuRoutingAcrossSharedAdapters()
     {
         var fullShellPresenter = new RecordingCanonicalContextMenuPresenter();
@@ -331,6 +390,46 @@ public sealed class GraphEditorProofRingTests
                 .OrderBy(descriptor => descriptor.Id, StringComparer.Ordinal)
                 .Select(descriptor => $"{descriptor.Id}:{descriptor.IsEnabled}")),
             string.Join("|", session.Queries.BuildContextMenuDescriptors(new ContextMenuContext(ContextMenuTargetKind.Canvas, new GraphPoint(240, 180))).Select(descriptor => descriptor.Id)));
+
+    private static string[] CaptureSharedCanonicalCommandIds(IGraphEditorSession session)
+        => session.Queries.GetCommandDescriptors()
+            .Where(descriptor => SharedCanonicalCommandIds.Contains(descriptor.Id, StringComparer.Ordinal))
+            .OrderBy(descriptor => descriptor.Id, StringComparer.Ordinal)
+            .Select(descriptor => descriptor.Id)
+            .ToArray();
+
+    private static string[] CaptureCompatibilityOnlyCommandIds(IGraphEditorSession canonicalSession, IGraphEditorSession retainedSession)
+    {
+        var canonicalCommandIds = canonicalSession.Queries.GetCommandDescriptors()
+            .Select(descriptor => descriptor.Id)
+            .ToHashSet(StringComparer.Ordinal);
+
+        return retainedSession.Queries.GetCommandDescriptors()
+            .Select(descriptor => descriptor.Id)
+            .Where(id => !canonicalCommandIds.Contains(id))
+            .OrderBy(id => id, StringComparer.Ordinal)
+            .ToArray();
+    }
+
+    private static MigrationViewRouteSnapshot CaptureMigrationViewRouteSnapshot(GraphEditorView view)
+    {
+        var canvas = view.FindControl<NodeCanvas>("PART_NodeCanvas");
+        Assert.NotNull(canvas);
+
+        return new(
+            view.ChromeMode,
+            view.Editor is not null,
+            GetAttachPlatformSeams(canvas),
+            canvas.EnableDefaultContextMenu,
+            canvas.EnableDefaultCommandShortcuts);
+    }
+
+    private static bool GetAttachPlatformSeams(NodeCanvas canvas)
+    {
+        var property = typeof(NodeCanvas).GetProperty("AttachPlatformSeams", BindingFlags.Instance | BindingFlags.NonPublic)
+            ?? throw new Xunit.Sdk.XunitException("Could not find NodeCanvas.AttachPlatformSeams.");
+        return property.GetValue(canvas) as bool? ?? throw new Xunit.Sdk.XunitException("NodeCanvas.AttachPlatformSeams did not return a bool.");
+    }
 
     private static GraphDocument CreateDocument()
         => new(
@@ -513,6 +612,13 @@ public sealed class GraphEditorProofRingTests
         string FeatureDescriptorSignature,
         string CommandDescriptorSignature,
         string CanvasMenuSignature);
+
+    private sealed record MigrationViewRouteSnapshot(
+        GraphEditorViewChromeMode ChromeMode,
+        bool EditorAssigned,
+        bool CanvasAttachPlatformSeams,
+        bool EnableDefaultContextMenu,
+        bool EnableDefaultCommandShortcuts);
 
     private static readonly string[] SharedCanonicalCommandIds =
     [

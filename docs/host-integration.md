@@ -116,6 +116,7 @@ Notes:
 - Use `-t:Rebuild` when checking XML documentation warning retirement. Incremental `dotnet build` can reuse existing outputs and hide `CS1591` regressions.
 - `tools/AsterGraph.PackageSmoke` should be run with `UsePackedAsterGraphPackages=true` so it restores from `artifacts/packages` instead of falling back to project references.
 - `tools/AsterGraph.HostSample` stays valuable even after package smoke passes because it validates the supported host-composition path, diagnostics flow, and stock Avalonia integration surface under normal project references.
+- Phase 17 migration proof adds human-readable route guidance in `tools/AsterGraph.HostSample` and machine-checkable `PHASE17_ROUTE_SIGNAL_OK` / `PHASE17_SHARED_CANONICAL_OK` markers in `tools/AsterGraph.PackageSmoke`.
 
 ## Canonical Host Composition
 
@@ -475,7 +476,7 @@ Reference sample:
 - Run with:
   - `dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj`
 - The sample demonstrates both the convenience full shell and standalone canvas/inspector/mini map composition against the same editor state.
-- It also prints human-readable diagnostics/inspection evidence, machine-checkable descriptor/runtime markers from earlier phases, and Phase 16 adapter-boundary markers for menu routing, shortcut routing, and platform-seam ownership.
+- It also prints human-readable diagnostics/inspection evidence, machine-checkable descriptor/runtime markers from earlier phases, Phase 16 adapter-boundary markers for menu routing, shortcut routing, and platform-seam ownership, plus Phase 17 migration-proof guidance for canonical runtime, canonical hosted-UI, and retained compatibility routes.
 
 ## Localization
 

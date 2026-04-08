@@ -244,6 +244,11 @@ var optOutView = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaView
     EnableDefaultContextMenu = false,
     EnableDefaultCommandShortcuts = false,
 });
+var directCompatibilityView = new GraphEditorView
+{
+    Editor = editor,
+    ChromeMode = GraphEditorViewChromeMode.CanvasOnly,
+};
 var defaultHeaderVisible = FindRequiredControl<Border>(view, "PART_HeaderChrome").IsVisible;
 var defaultLibraryVisible = FindRequiredControl<Border>(view, "PART_LibraryChrome").IsVisible;
 var defaultInspectorVisible = FindRequiredControl<Border>(view, "PART_InspectorChrome").IsVisible;
@@ -373,6 +378,14 @@ var phase16CanvasMenuOk = phase16CanvasMenuArgs.Handled
     && phase16CanvasPresenter.CanonicalOpenCalls == 1
     && phase16CanvasPresenter.CompatibilityOpenCalls == 0;
 var phase16CanvasPlatformBoundaryOk = GetAttachPlatformSeams(phase16Canvas);
+var hostedUiRouteSnapshot = CaptureViewRouteSnapshot(view);
+var directCompatibilityRouteSnapshot = CaptureViewRouteSnapshot(directCompatibilityView);
+var runtimeSharedCanonicalCommandIds = CaptureSharedCanonicalCommandIds(runtimeSession);
+var retainedSharedCanonicalCommandIds = CaptureSharedCanonicalCommandIds(retainedSession);
+var retainedCompatibilityOnlyCommands = CaptureCompatibilityOnlyCommandIds(runtimeSession, retainedSession);
+var phase17HostedUiParityOk = hostedUiRouteSnapshot == directCompatibilityRouteSnapshot;
+var phase17SharedCanonicalSubsetOk = runtimeSharedCanonicalCommandIds.SequenceEqual(retainedSharedCanonicalCommandIds, StringComparer.Ordinal);
+var phase17RetainedCompatibilityWindowOk = retainedCompatibilityOnlyCommands.Contains("nodes.duplicate", StringComparer.Ordinal);
 
 Console.WriteLine($"Host sample view type: {typeof(GraphEditorView).FullName}");
 Console.WriteLine($"Node count: {editor.Nodes.Count}");
@@ -385,6 +398,10 @@ Console.WriteLine($"Retained session diagnostics reachable: {ReferenceEquals(ret
 Console.WriteLine($"Retained backend: adapter-backed={retainedSessionIsAdapterBacked}");
 Console.WriteLine($"Retained path: GraphEditorViewModel.Session compatibility surface over the shared runtime boundary");
 Console.WriteLine($"Descriptor retained: commands={editor.Session.Queries.GetCommandDescriptors().Count}, menu-adapter={retainedDescriptorMenuBacked}");
+Console.WriteLine("Migration proof routes: canonical runtime=AsterGraphEditorFactory.CreateSession(...); canonical hosted-ui=AsterGraphEditorFactory.Create(...) + AsterGraphAvaloniaViewFactory.Create(...); retained compatibility=new GraphEditorView { Editor = editor } plus GraphEditorViewModel.Session.");
+Console.WriteLine($"Migration proof shared canonical commands: {string.Join(",", runtimeSharedCanonicalCommandIds)}");
+Console.WriteLine($"Migration proof retained-only commands: {(retainedCompatibilityOnlyCommands.Count == 0 ? "<none>" : string.Join(",", retainedCompatibilityOnlyCommands))}");
+Console.WriteLine($"Migration proof hosted-ui parity: {phase17HostedUiParityOk}");
 Console.WriteLine($"Retained inspection snapshot: nodes={retainedInspection.Document.Nodes.Count}, selected={retainedInspection.Selection.SelectedNodeIds.Count}, pending={retainedInspection.PendingConnection.HasPendingConnection}");
 Console.WriteLine($"Retained recent diagnostics count: {retainedRecentDiagnostics.Count}");
 Console.WriteLine($"Retained diagnostics sink count: {viewDiagnostics.Diagnostics.Count}");
@@ -416,6 +433,7 @@ Console.WriteLine($"Custom standalone content: inspector={DescribeContent(custom
 Console.WriteLine($"Presenter types: node={customNodePresenter.GetType().Name}, menu={customMenuPresenter.GetType().Name}, inspector={customInspectorPresenter.GetType().Name}, minimap={customMiniMapPresenter.GetType().Name}");
 Console.WriteLine($"Phase 16 adapter boundary: shell menu=canonical({phase16ShellPresenter.CanonicalOpenCalls}), shell shortcut shared={phase16ShellShortcutOk}, shell platform owner=view({phase16ShellPlatformBoundaryOk}); standalone menu=canonical({phase16CanvasPresenter.CanonicalOpenCalls}), standalone shortcut shared={phase16CanvasShortcutOk}, standalone platform owner=canvas({phase16CanvasPlatformBoundaryOk})");
 Console.WriteLine($"PHASE16_ADAPTER_BOUNDARY_OK:{phase16ShellMenuOk}:{phase16CanvasMenuOk}:{phase16ShellShortcutOk}:{phase16CanvasShortcutOk}:{phase16ShellPlatformBoundaryOk}:{phase16CanvasPlatformBoundaryOk}");
+Console.WriteLine($"PHASE17_MIGRATION_ROUTE_OK:{runtimeSessionIsKernelFirst}:{retainedSessionIsAdapterBacked}:{phase17SharedCanonicalSubsetOk}:{phase17HostedUiParityOk}:{phase17RetainedCompatibilityWindowOk}");
 
 static GraphDocument CreateDocument()
     => new(
@@ -494,6 +512,59 @@ static bool GetAttachPlatformSeams(NodeCanvas canvas)
         ?? throw new InvalidOperationException("Could not find NodeCanvas.AttachPlatformSeams.");
     return property.GetValue(canvas) as bool? ?? throw new InvalidOperationException("NodeCanvas.AttachPlatformSeams did not return a bool.");
 }
+
+static ViewRouteSnapshot CaptureViewRouteSnapshot(GraphEditorView view)
+{
+    var canvas = FindRequiredControl<NodeCanvas>(view, "PART_NodeCanvas");
+    return new(
+        view.ChromeMode,
+        view.Editor is not null,
+        GetAttachPlatformSeams(canvas),
+        canvas.EnableDefaultContextMenu,
+        canvas.EnableDefaultCommandShortcuts);
+}
+
+static IReadOnlyList<string> CaptureSharedCanonicalCommandIds(IGraphEditorSession session)
+    => session.Queries.GetCommandDescriptors()
+        .Where(descriptor => IsSharedCanonicalCommandId(descriptor.Id))
+        .OrderBy(descriptor => descriptor.Id, StringComparer.Ordinal)
+        .Select(descriptor => descriptor.Id)
+        .ToArray();
+
+static IReadOnlyList<string> CaptureCompatibilityOnlyCommandIds(IGraphEditorSession canonicalSession, IGraphEditorSession retainedSession)
+{
+    var canonicalCommandIds = canonicalSession.Queries.GetCommandDescriptors()
+        .Select(descriptor => descriptor.Id)
+        .ToHashSet(StringComparer.Ordinal);
+
+    return retainedSession.Queries.GetCommandDescriptors()
+        .Select(descriptor => descriptor.Id)
+        .Where(id => !canonicalCommandIds.Contains(id))
+        .OrderBy(id => id, StringComparer.Ordinal)
+        .ToArray();
+}
+
+static bool IsSharedCanonicalCommandId(string id)
+    => id is
+        "nodes.add" or
+        "selection.delete" or
+        "connections.start" or
+        "connections.connect" or
+        "connections.cancel" or
+        "connections.delete" or
+        "connections.break-port" or
+        "viewport.fit" or
+        "viewport.reset" or
+        "viewport.center-node" or
+        "workspace.save" or
+        "workspace.load";
+
+readonly record struct ViewRouteSnapshot(
+    GraphEditorViewChromeMode ChromeMode,
+    bool EditorAssigned,
+    bool CanvasAttachPlatformSeams,
+    bool EnableDefaultContextMenu,
+    bool EnableDefaultCommandShortcuts);
 
 internal sealed class HostSampleNodeDefinitionProvider : INodeDefinitionProvider
 {

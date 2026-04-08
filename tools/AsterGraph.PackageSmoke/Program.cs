@@ -144,6 +144,11 @@ var legacyView = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaView
     Editor = legacyEditor,
     ChromeMode = GraphEditorViewChromeMode.CanvasOnly,
 });
+var legacyDirectView = new GraphEditorView
+{
+    Editor = legacyEditor,
+    ChromeMode = GraphEditorViewChromeMode.CanvasOnly,
+};
 
 var factoryEditor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
 {
@@ -167,6 +172,11 @@ var factoryView = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaVie
     Editor = factoryEditor,
     ChromeMode = GraphEditorViewChromeMode.CanvasOnly,
 });
+var factoryDirectView = new GraphEditorView
+{
+    Editor = factoryEditor,
+    ChromeMode = GraphEditorViewChromeMode.CanvasOnly,
+};
 var inspectorProofEditor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
 {
     Document = document,
@@ -464,6 +474,22 @@ var legacyRetainedSessionIsAdapterBacked = legacySessionHost is not null && lega
 var factoryRetainedSessionIsAdapterBacked = factorySessionHost is not null && factorySessionHost is not GraphEditorViewModel;
 var legacyRetainedMenuIsDescriptorBacked = legacyCanvasMenuDescriptors.All(descriptor => legacyCanvasMenu.Any(item => item.Id == descriptor.Id));
 var factoryRetainedMenuIsDescriptorBacked = factoryCanvasMenuDescriptors.All(descriptor => factoryCanvasMenu.Any(item => item.Id == descriptor.Id));
+var legacyDirectViewSnapshot = CaptureViewRouteSnapshot(legacyDirectView);
+var legacyFactoryViewSnapshot = CaptureViewRouteSnapshot(legacyView);
+var factoryDirectViewSnapshot = CaptureViewRouteSnapshot(factoryDirectView);
+var factoryFactoryViewSnapshot = CaptureViewRouteSnapshot(factoryView);
+var runtimeSharedCanonicalCommandIds = CaptureSharedCanonicalCommandIds(session);
+var legacySharedCanonicalCommandIds = CaptureSharedCanonicalCommandIds(legacyEditor.Session);
+var factorySharedCanonicalCommandIds = CaptureSharedCanonicalCommandIds(factoryEditor.Session);
+var legacyCompatibilityOnlyCommands = CaptureCompatibilityOnlyCommandIds(session, legacyEditor.Session);
+var factoryCompatibilityOnlyCommands = CaptureCompatibilityOnlyCommandIds(session, factoryEditor.Session);
+var phase17RouteSignalOk = legacyDirectViewSnapshot == legacyFactoryViewSnapshot
+    && legacyDirectViewSnapshot == factoryDirectViewSnapshot
+    && legacyDirectViewSnapshot == factoryFactoryViewSnapshot;
+var phase17SharedCanonicalOk = runtimeSharedCanonicalCommandIds.SequenceEqual(legacySharedCanonicalCommandIds, StringComparer.Ordinal)
+    && runtimeSharedCanonicalCommandIds.SequenceEqual(factorySharedCanonicalCommandIds, StringComparer.Ordinal);
+var phase17LegacyCompatibilityWindowOk = legacyCompatibilityOnlyCommands.Contains("nodes.duplicate", StringComparer.Ordinal);
+var phase17FactoryCompatibilityWindowOk = factoryCompatibilityOnlyCommands.Contains("nodes.duplicate", StringComparer.Ordinal);
 Console.WriteLine($"SESSION_FACTORY_OK:{session.Queries.CreateDocumentSnapshot().Nodes.Count}:{string.Join(",", commandIds)}");
 Console.WriteLine($"SESSION_EVENTS_OK:{documentChanges}:{viewportChanges}:{failureCode ?? "<none>"}");
 Console.WriteLine($"KERNEL_SESSION_OK:{runtimeSessionIsKernelFirst}");
@@ -489,6 +515,9 @@ Console.WriteLine($"DIAG_LEGACY_RECENT_OK:{(!legacyRecentDiagnostics.Any() ? "<n
 Console.WriteLine($"DIAG_FACTORY_RECENT_OK:{(!factoryRecentDiagnostics.Any() ? "<none>" : string.Join(",", factoryRecentDiagnostics.Select(diagnostic => diagnostic.Code)))}");
 Console.WriteLine($"DIAG_SESSION_RECENT_OK:{(!sessionRecentDiagnostics.Any() ? "<none>" : string.Join(",", sessionRecentDiagnostics.Select(diagnostic => diagnostic.Code)))}");
 Console.WriteLine($"DIAG_INSTRUMENTATION_OK:{(loggerFactory.Entries.Count > 0 && activityOperations.Count > 0)}:{loggerFactory.Entries.Count}:{string.Join(",", activityOperations)}");
+Console.WriteLine("PHASE17_MIGRATION_NOTE:CreateSession=canonical-runtime;Create+AsterGraphAvaloniaViewFactory=canonical-hosted-ui;GraphEditorViewModel+GraphEditorView=retained-compatibility");
+Console.WriteLine($"PHASE17_ROUTE_SIGNAL_OK:{runtimeSessionIsKernelFirst}:{legacyRetainedSessionIsAdapterBacked}:{factoryRetainedSessionIsAdapterBacked}:{phase17RouteSignalOk}");
+Console.WriteLine($"PHASE17_SHARED_CANONICAL_OK:{phase17SharedCanonicalOk}:{phase17LegacyCompatibilityWindowOk}:{phase17FactoryCompatibilityWindowOk}:{runtimeSharedCanonicalCommandIds.Count}:{legacyCompatibilityOnlyCommands.Count}:{factoryCompatibilityOnlyCommands.Count}");
 
 static void PrintEditorMarker(string marker, GraphEditorViewModel editor, string targetNodeId)
 {
@@ -533,6 +562,60 @@ static bool GetAttachPlatformSeams(NodeCanvas canvas)
         ?? throw new InvalidOperationException("Could not find NodeCanvas.AttachPlatformSeams.");
     return property.GetValue(canvas) as bool? ?? throw new InvalidOperationException("NodeCanvas.AttachPlatformSeams did not return a bool.");
 }
+
+static ViewRouteSnapshot CaptureViewRouteSnapshot(GraphEditorView view)
+{
+    var canvas = view.FindControl<NodeCanvas>("PART_NodeCanvas")
+        ?? throw new InvalidOperationException("Missing PART_NodeCanvas on migration proof view.");
+    return new(
+        view.ChromeMode,
+        view.Editor is not null,
+        GetAttachPlatformSeams(canvas),
+        canvas.EnableDefaultContextMenu,
+        canvas.EnableDefaultCommandShortcuts);
+}
+
+static IReadOnlyList<string> CaptureSharedCanonicalCommandIds(IGraphEditorSession session)
+    => session.Queries.GetCommandDescriptors()
+        .Where(descriptor => IsSharedCanonicalCommandId(descriptor.Id))
+        .OrderBy(descriptor => descriptor.Id, StringComparer.Ordinal)
+        .Select(descriptor => descriptor.Id)
+        .ToArray();
+
+static IReadOnlyList<string> CaptureCompatibilityOnlyCommandIds(IGraphEditorSession canonicalSession, IGraphEditorSession retainedSession)
+{
+    var canonicalCommandIds = canonicalSession.Queries.GetCommandDescriptors()
+        .Select(descriptor => descriptor.Id)
+        .ToHashSet(StringComparer.Ordinal);
+
+    return retainedSession.Queries.GetCommandDescriptors()
+        .Select(descriptor => descriptor.Id)
+        .Where(id => !canonicalCommandIds.Contains(id))
+        .OrderBy(id => id, StringComparer.Ordinal)
+        .ToArray();
+}
+
+static bool IsSharedCanonicalCommandId(string id)
+    => id is
+        "nodes.add" or
+        "selection.delete" or
+        "connections.start" or
+        "connections.connect" or
+        "connections.cancel" or
+        "connections.delete" or
+        "connections.break-port" or
+        "viewport.fit" or
+        "viewport.reset" or
+        "viewport.center-node" or
+        "workspace.save" or
+        "workspace.load";
+
+readonly record struct ViewRouteSnapshot(
+    GraphEditorViewChromeMode ChromeMode,
+    bool EditorAssigned,
+    bool CanvasAttachPlatformSeams,
+    bool EnableDefaultContextMenu,
+    bool EnableDefaultCommandShortcuts);
 
 sealed class SmokeContextMenuAugmentor : IGraphContextMenuAugmentor
 {
