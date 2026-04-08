@@ -239,6 +239,60 @@ public sealed class GraphEditorMigrationCompatibilityTests
         AssertPresentationBindings(factoryView, presentation);
     }
 
+    [AvaloniaFact]
+    public void LegacyAndFactoryStandaloneCanvasPaths_AttachEquivalentPlatformSeams()
+    {
+        var harness = CreateHarness();
+        var legacyEditor = CreateLegacyEditor(harness);
+        var factoryEditor = CreateFactoryEditor(harness);
+        var legacyCanvas = AsterGraphCanvasViewFactory.Create(new AsterGraphCanvasViewOptions
+        {
+            Editor = legacyEditor,
+        });
+        var factoryCanvas = AsterGraphCanvasViewFactory.Create(new AsterGraphCanvasViewOptions
+        {
+            Editor = factoryEditor,
+        });
+        var legacyWindow = new Window
+        {
+            Width = 1440,
+            Height = 900,
+            Content = legacyCanvas,
+        };
+        var factoryWindow = new Window
+        {
+            Width = 1440,
+            Height = 900,
+            Content = factoryCanvas,
+        };
+        legacyWindow.Show();
+        factoryWindow.Show();
+
+        try
+        {
+            Assert.True(legacyEditor.CanPaste);
+            Assert.True(factoryEditor.CanPaste);
+
+            Assert.NotNull(legacyEditor.HostContext);
+            Assert.NotNull(factoryEditor.HostContext);
+
+            Assert.True(legacyEditor.HostContext!.TryGetOwner<NodeCanvas>(out var legacyOwner));
+            Assert.True(factoryEditor.HostContext!.TryGetOwner<NodeCanvas>(out var factoryOwner));
+            Assert.Same(legacyCanvas, legacyOwner);
+            Assert.Same(factoryCanvas, factoryOwner);
+
+            Assert.True(legacyEditor.HostContext.TryGetTopLevel<Window>(out var legacyTopLevel));
+            Assert.True(factoryEditor.HostContext.TryGetTopLevel<Window>(out var factoryTopLevel));
+            Assert.Same(legacyWindow, legacyTopLevel);
+            Assert.Same(factoryWindow, factoryTopLevel);
+        }
+        finally
+        {
+            legacyWindow.Close();
+            factoryWindow.Close();
+        }
+    }
+
     [Fact]
     public async Task RuntimeSession_ServiceSeamsAndCompatibilityService_RemainAvailableAcrossMigrationPaths()
     {

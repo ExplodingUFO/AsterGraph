@@ -8,6 +8,11 @@ namespace AsterGraph.Avalonia.Presentation;
 /// <summary>
 /// 提供节点展示器创建或更新可视树时所需的编辑器状态与交互回调。
 /// </summary>
+/// <remarks>
+/// This context remains a compatibility-shaped presenter seam built on top of the retained
+/// facade. Phase 16 narrows how Avalonia attaches platform seams around it, but does not yet
+/// replace the presenter model with a pure runtime/session contract.
+/// </remarks>
 public sealed class GraphNodeVisualContext
 {
     /// <summary>
@@ -45,6 +50,10 @@ public sealed class GraphNodeVisualContext
     /// <summary>
     /// 当前编辑器实例。
     /// </summary>
+    /// <remarks>
+    /// Compatibility-oriented retained facade reference. Prefer session/query/runtime data for
+    /// new non-presenter integration work when possible.
+    /// </remarks>
     public GraphEditorViewModel Editor { get; }
 
     /// <summary>

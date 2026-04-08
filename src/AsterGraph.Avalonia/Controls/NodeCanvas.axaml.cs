@@ -83,6 +83,7 @@ public partial class NodeCanvas : UserControl
     private readonly GraphContextMenuPresenter _stockContextMenuPresenter = new();
     private readonly IGraphNodeVisualPresenter _stockNodeVisualPresenter = new DefaultGraphNodeVisualPresenter();
     private readonly NodeCanvasInteractionSession _interactionSession = new();
+    private bool _isAttachedToVisualTree;
 
     /// <summary>
     /// 初始化节点画布。
@@ -152,6 +153,8 @@ public partial class NodeCanvas : UserControl
         set => SetValue(EnableAltLeftDragPanningProperty, value);
     }
 
+    internal bool AttachPlatformSeams { get; set; } = true;
+
     /// <summary>
     /// 当前节点可视树展示器。
     /// </summary>
@@ -189,12 +192,43 @@ public partial class NodeCanvas : UserControl
 
         if (change.Property == ViewModelProperty)
         {
-            AttachViewModel(change.GetOldValue<GraphEditorViewModel?>(), change.GetNewValue<GraphEditorViewModel?>());
+            var previous = change.GetOldValue<GraphEditorViewModel?>();
+            var current = change.GetNewValue<GraphEditorViewModel?>();
+            if (AttachPlatformSeams && _isAttachedToVisualTree)
+            {
+                GraphEditorPlatformSeamBinder.Replace(previous, current, this);
+            }
+
+            AttachViewModel(previous, current);
         }
         else if (change.Property == NodeVisualPresenterProperty)
         {
             RebuildScene();
         }
+    }
+
+    /// <inheritdoc />
+    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        base.OnAttachedToVisualTree(e);
+        _isAttachedToVisualTree = true;
+
+        if (AttachPlatformSeams)
+        {
+            GraphEditorPlatformSeamBinder.Apply(ViewModel, this);
+        }
+    }
+
+    /// <inheritdoc />
+    protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        if (AttachPlatformSeams)
+        {
+            GraphEditorPlatformSeamBinder.Clear(ViewModel);
+        }
+
+        _isAttachedToVisualTree = false;
+        base.OnDetachedFromVisualTree(e);
     }
 
     private void InitializeComponent()

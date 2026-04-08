@@ -356,6 +356,42 @@ public sealed class GraphEditorInitializationTests
     }
 
     [AvaloniaFact]
+    public void StandaloneCanvasFactory_AttachesPlatformSeamsWhenShown()
+    {
+        var editor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
+        {
+            Document = CreateDocument(),
+            NodeCatalog = CreateCatalog(),
+            CompatibilityService = new RecordingCompatibilityService(),
+        });
+        var canvas = AsterGraphCanvasViewFactory.Create(new AsterGraphCanvasViewOptions
+        {
+            Editor = editor,
+        });
+        var window = new Window
+        {
+            Width = 1440,
+            Height = 900,
+            Content = canvas,
+        };
+        window.Show();
+
+        try
+        {
+            Assert.True(editor.CanPaste);
+            Assert.NotNull(editor.HostContext);
+            Assert.True(editor.HostContext!.TryGetOwner<NodeCanvas>(out var owner));
+            Assert.Same(canvas, owner);
+            Assert.True(editor.HostContext.TryGetTopLevel<Window>(out var topLevel));
+            Assert.Same(window, topLevel);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
     public void DefaultGraphEditorViewComposition_PreservesExpectedChromeBehavior()
     {
         var editor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions

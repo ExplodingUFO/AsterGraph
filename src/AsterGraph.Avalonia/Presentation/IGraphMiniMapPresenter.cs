@@ -6,6 +6,11 @@ namespace AsterGraph.Avalonia.Presentation;
 /// <summary>
 /// 定义独立缩略图表面的展示层替换契约。
 /// </summary>
+/// <remarks>
+/// This presenter still receives the retained <see cref="GraphEditorViewModel"/> facade
+/// during the migration window. Phase 16 keeps the surface supported, but it should be
+/// treated as a compatibility-oriented UI seam rather than the canonical runtime boundary.
+/// </remarks>
 public interface IGraphMiniMapPresenter
 {
     /// <summary>

@@ -7,7 +7,6 @@ using Avalonia.VisualTree;
 using AsterGraph.Avalonia.Controls.Internal;
 using AsterGraph.Avalonia.Hosting;
 using AsterGraph.Avalonia.Presentation;
-using AsterGraph.Avalonia.Services;
 using AsterGraph.Avalonia.Styling;
 using AsterGraph.Editor.ViewModels;
 
@@ -232,12 +231,12 @@ public partial class GraphEditorView : UserControl
 
         if (change.Property == EditorProperty)
         {
-            change.GetOldValue<GraphEditorViewModel?>()?.SetTextClipboardBridge(null);
-            change.GetOldValue<GraphEditorViewModel?>()?.SetHostContext(null);
+            GraphEditorPlatformSeamBinder.Replace(
+                change.GetOldValue<GraphEditorViewModel?>(),
+                change.GetNewValue<GraphEditorViewModel?>(),
+                this);
             var editor = change.GetNewValue<GraphEditorViewModel?>();
             ApplyStyleOptions(editor);
-            ApplyClipboardBridge(editor);
-            ApplyHostContext(editor);
             ApplyPresentationOptions(Presentation);
         }
         else if (change.Property == ChromeModeProperty
@@ -265,15 +264,13 @@ public partial class GraphEditorView : UserControl
     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
     {
         base.OnAttachedToVisualTree(e);
-        ApplyClipboardBridge(Editor);
-        ApplyHostContext(Editor);
+        GraphEditorPlatformSeamBinder.Apply(Editor, this);
     }
 
     /// <inheritdoc />
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
     {
-        Editor?.SetTextClipboardBridge(null);
-        Editor?.SetHostContext(null);
+        GraphEditorPlatformSeamBinder.Clear(Editor);
         base.OnDetachedFromVisualTree(e);
     }
 
@@ -288,6 +285,10 @@ public partial class GraphEditorView : UserControl
         _nodeCanvas = this.FindControl<NodeCanvas>("PART_NodeCanvas");
         _inspectorSurface = this.FindControl<GraphInspectorView>("PART_InspectorSurface");
         _miniMapSurface = this.FindControl<GraphMiniMap>("PART_MiniMapSurface");
+        if (_nodeCanvas is not null)
+        {
+            _nodeCanvas.AttachPlatformSeams = false;
+        }
         _defaultShellRowSpacing = _shellGrid?.RowSpacing ?? 0;
         _defaultShellColumnSpacing = _shellGrid?.ColumnSpacing ?? 0;
         ApplyChromeMode(ChromeMode);
@@ -304,27 +305,6 @@ public partial class GraphEditorView : UserControl
 
         var adapter = new GraphEditorStyleAdapter(editor.StyleOptions);
         adapter.ApplyResources(Resources);
-    }
-
-    private void ApplyClipboardBridge(GraphEditorViewModel? editor)
-    {
-        if (editor is null)
-        {
-            return;
-        }
-
-        // 编辑器只看到纯文本桥接口，真正的平台剪贴板访问仍由 Avalonia 层负责。
-        editor.SetTextClipboardBridge(new AvaloniaTextClipboardBridge(() => TopLevel.GetTopLevel(this)?.Clipboard));
-    }
-
-    private void ApplyHostContext(GraphEditorViewModel? editor)
-    {
-        if (editor is null)
-        {
-            return;
-        }
-
-        editor.SetHostContext(new AvaloniaGraphHostContext(this, TopLevel.GetTopLevel(this)));
     }
 
     private void ApplyChromeMode(GraphEditorViewChromeMode chromeMode)
