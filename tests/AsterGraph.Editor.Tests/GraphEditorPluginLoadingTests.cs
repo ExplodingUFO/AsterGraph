@@ -284,6 +284,56 @@ public sealed class GraphEditorPluginLoadingTests
         Assert.Equal(GraphEditorPluginLoadStatus.Loaded, snapshot.Status);
     }
 
+    [Fact]
+    public void DiscoverPluginCandidates_And_CreateSession_StayAlignedOnHostProvidedManifestTrustFacts_ForManifestSources()
+    {
+        var manifest = new GraphEditorPluginManifest(
+            "tests.loading.manifest-source",
+            "Loading Manifest Source",
+            new GraphEditorPluginManifestProvenance(
+                GraphEditorPluginManifestSourceKind.Manifest,
+                "tests.loading.manifest-source"),
+            version: "1.0.0",
+            compatibility: new GraphEditorPluginCompatibilityManifest(
+                minimumAsterGraphVersion: "0.0.0",
+                targetFramework: "net9.0",
+                runtimeSurface: "session-first"),
+            capabilitySummary: "menus");
+        var trustPolicy = new BlockManifestIdTrustPolicy("tests.loading.some-other-plugin");
+
+        var candidate = Assert.Single(AsterGraphEditorFactory.DiscoverPluginCandidates(new GraphEditorPluginDiscoveryOptions
+        {
+            ManifestSources =
+            [
+                new TestManifestSource(
+                    new GraphEditorPluginManifestSourceCandidate(
+                        "tests.loading.manifest-source",
+                        GetSamplePluginAssemblyPath(),
+                        manifest,
+                        "AsterGraph.TestPlugins.SamplePlugin")),
+            ],
+            TrustPolicy = trustPolicy,
+        }));
+        var session = AsterGraphEditorFactory.CreateSession(CreateOptions(
+            new RecordingDiagnosticsSink(),
+            [
+                GraphEditorPluginRegistration.FromAssemblyPath(
+                    GetSamplePluginAssemblyPath(),
+                    "AsterGraph.TestPlugins.SamplePlugin",
+                    manifest),
+            ],
+            null,
+            null,
+            trustPolicy));
+        var snapshot = Assert.Single(session.Queries.GetPluginLoadSnapshots());
+
+        Assert.Equal(candidate.Manifest, snapshot.Manifest);
+        Assert.Equal(candidate.TrustEvaluation, snapshot.TrustEvaluation);
+        Assert.Equal(candidate.Compatibility, GetCompatibility(snapshot));
+        Assert.Equal(GraphEditorPluginLoadStatus.Loaded, snapshot.Status);
+        Assert.Equal(GraphEditorPluginLoadSourceKind.Assembly, snapshot.SourceKind);
+    }
+
     private static GraphEditorPluginCompatibilityEvaluation? GetCompatibility(GraphEditorPluginLoadSnapshot snapshot)
     {
         ArgumentNullException.ThrowIfNull(snapshot);
@@ -496,5 +546,11 @@ public sealed class GraphEditorPluginLoadingTests
                     "trust.allowed.loading-tests",
                     $"Allowed manifest '{context.Manifest.Id}'.");
         }
+    }
+
+    private sealed class TestManifestSource(params GraphEditorPluginManifestSourceCandidate[] candidates) : IGraphEditorPluginManifestSource
+    {
+        public IReadOnlyList<GraphEditorPluginManifestSourceCandidate> GetCandidates()
+            => candidates;
     }
 }

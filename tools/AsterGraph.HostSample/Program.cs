@@ -67,10 +67,27 @@ const int ReadinessFeatureCount = 17;
 const string HostSamplePluginDefinitionIdValue = "host.sample.plugin";
 const string HostSamplePluginMenuId = "host-sample-plugin-menu";
 const string HostSampleAutomationRunId = "host-sample-automation";
+const string HostSampleTrustedManifestId = "host.sample.trusted-plugin";
+const string HostSampleBlockedManifestId = "host.sample.blocked-plugin";
+var blockedPlugin = new HostSampleBlockedPlugin();
+var pluginTrustPolicy = new HostSampleManifestTrustPolicy(HostSampleBlockedManifestId);
 var pluginRegistrations =
     new[]
     {
-        GraphEditorPluginRegistration.FromPlugin(new HostSampleProofPlugin()),
+        GraphEditorPluginRegistration.FromPlugin(
+            new HostSampleProofPlugin(),
+            CreateHostSampleManifest(
+                HostSampleTrustedManifestId,
+                "Host Sample Trusted Plugin",
+                typeof(HostSampleProofPlugin),
+                "menus, automation")),
+        GraphEditorPluginRegistration.FromPlugin(
+            blockedPlugin,
+            CreateHostSampleManifest(
+                HostSampleBlockedManifestId,
+                "Host Sample Blocked Plugin",
+                typeof(HostSampleBlockedPlugin),
+                "menus")),
     };
 
 var runtimeSession = AsterGraphEditorFactory.CreateSession(new AsterGraphEditorOptions
@@ -87,6 +104,7 @@ var runtimeSession = AsterGraphEditorFactory.CreateSession(new AsterGraphEditorO
     StyleOptions = style,
     BehaviorOptions = runtimeBehavior,
     PluginRegistrations = pluginRegistrations,
+    PluginTrustPolicy = pluginTrustPolicy,
 });
 
 var commandMarkers = new List<string>();
@@ -185,17 +203,8 @@ var runtimeAutomationDiagnosticCodes = runtimeRecentDiagnostics
     .ToArray();
 var runtimePluginMenuOk = runtimeCanvasDescriptors.Any(descriptor => descriptor.Id == HostSamplePluginMenuId);
 var runtimePluginLocalizationOk = runtimeCanvasDescriptors.Any(descriptor => descriptor.Id == "canvas-add-node" && descriptor.Header == "Plugin Add Node");
-var runtimePluginSnapshot = runtimePluginLoadSnapshots.SingleOrDefault();
-var phase25PluginHostOk = runtimePluginSnapshot is not null
-    && runtimePluginSnapshot.SourceKind == GraphEditorPluginLoadSourceKind.Direct
-    && runtimePluginSnapshot.Status == GraphEditorPluginLoadStatus.Loaded
-    && runtimePluginSnapshot.Descriptor?.Id == "host.sample.plugin"
-    && runtimePluginSnapshot.Contributions.NodeDefinitionProviderCount == 1
-    && runtimePluginSnapshot.Contributions.ContextMenuAugmentorCount == 1
-    && runtimePluginSnapshot.Contributions.NodePresentationProviderCount == 1
-    && runtimePluginSnapshot.Contributions.LocalizationProviderCount == 1
-    && runtimePluginMenuOk
-    && runtimePluginLocalizationOk;
+var runtimeTrustedPluginSnapshot = FindPluginLoadSnapshot(runtimePluginLoadSnapshots, HostSampleTrustedManifestId);
+var runtimeBlockedPluginSnapshot = FindPluginLoadSnapshot(runtimePluginLoadSnapshots, HostSampleBlockedManifestId);
 var phase25AutomationHostOk = runtimeAutomationResult.Succeeded
     && automationStartedCount == 1
     && automationCompletedCount == 1
@@ -204,6 +213,28 @@ var phase25AutomationHostOk = runtimeAutomationResult.Succeeded
     && runtimeAutomationDiagnosticCodes.Contains("automation.run.started", StringComparer.Ordinal)
     && runtimeAutomationDiagnosticCodes.Contains("automation.run.completed", StringComparer.Ordinal)
     && runtimeAutomationResult.Inspection.Document.Nodes.Any(node => node.DefinitionId is { Value: HostSamplePluginDefinitionIdValue });
+var phase29TrustHostOk = runtimePluginLoadSnapshots.Count == 2
+    && runtimeTrustedPluginSnapshot.SourceKind == GraphEditorPluginLoadSourceKind.Direct
+    && runtimeTrustedPluginSnapshot.Status == GraphEditorPluginLoadStatus.Loaded
+    && runtimeTrustedPluginSnapshot.Compatibility.Status == GraphEditorPluginCompatibilityStatus.Compatible
+    && runtimeTrustedPluginSnapshot.TrustEvaluation.Decision == GraphEditorPluginTrustDecision.Allowed
+    && runtimeTrustedPluginSnapshot.Descriptor?.Id == "host.sample.plugin"
+    && runtimeTrustedPluginSnapshot.Contributions.NodeDefinitionProviderCount == 1
+    && runtimeTrustedPluginSnapshot.Contributions.ContextMenuAugmentorCount == 1
+    && runtimeTrustedPluginSnapshot.Contributions.NodePresentationProviderCount == 1
+    && runtimeTrustedPluginSnapshot.Contributions.LocalizationProviderCount == 1
+    && runtimePluginMenuOk
+    && runtimePluginLocalizationOk
+    && runtimeBlockedPluginSnapshot.SourceKind == GraphEditorPluginLoadSourceKind.Direct
+    && runtimeBlockedPluginSnapshot.Status == GraphEditorPluginLoadStatus.Blocked
+    && runtimeBlockedPluginSnapshot.Compatibility.Status == GraphEditorPluginCompatibilityStatus.Compatible
+    && runtimeBlockedPluginSnapshot.TrustEvaluation.Decision == GraphEditorPluginTrustDecision.Blocked
+    && runtimeBlockedPluginSnapshot.TrustEvaluation.Source == GraphEditorPluginTrustEvaluationSource.HostPolicy
+    && runtimeBlockedPluginSnapshot.TrustEvaluation.ReasonCode == "trust.blocked.host-sample"
+    && !runtimeBlockedPluginSnapshot.ActivationAttempted
+    && runtimeBlockedPluginSnapshot.Descriptor is null
+    && blockedPlugin.RegisterCallCount == 0
+    && runtimeDiagnostics.Diagnostics.Any(diagnostic => diagnostic.Code == "plugin.load.blocked");
 var runtimeSessionIsKernelFirst = !runtimeSession
     .GetType()
     .GetFields(BindingFlags.Instance | BindingFlags.NonPublic)
@@ -261,7 +292,7 @@ Console.WriteLine($"Session backend: kernel-first={runtimeSessionIsKernelFirst}"
 Console.WriteLine($"Descriptor runtime: nodes.add={runtimeCommandDescriptors.Any(descriptor => descriptor.Id == "nodes.add" && descriptor.IsEnabled)}, canvas={string.Join(",", runtimeCanvasDescriptors.Select(descriptor => descriptor.Id))}");
 Console.WriteLine($"Readiness seam descriptors: {string.Join(",", runtimeReadinessDescriptors.Where(descriptor => descriptor.IsAvailable).Select(descriptor => descriptor.Id))}");
 Console.WriteLine($"Readiness automation boundary: featureDescriptors={runtimeAutomationDescriptorsOk}, diagnostics={runtimeRecentDiagnostics.Count}, inspectionFeatures={runtimeInspection.FeatureDescriptors.Count}");
-Console.WriteLine($"Plugin load snapshots: {string.Join(" | ", runtimePluginLoadSnapshots.Select(snapshot => $"{snapshot.Descriptor?.Id ?? "<none>"}:{snapshot.Status}:{snapshot.SourceKind}:{snapshot.Contributions.NodeDefinitionProviderCount}/{snapshot.Contributions.ContextMenuAugmentorCount}/{snapshot.Contributions.NodePresentationProviderCount}/{snapshot.Contributions.LocalizationProviderCount}"))}");
+Console.WriteLine($"Plugin load snapshots: {string.Join(" | ", runtimePluginLoadSnapshots.Select(snapshot => $"{snapshot.Manifest.Id}:{snapshot.Status}:{snapshot.TrustEvaluation.Decision}:{snapshot.Compatibility.Status}:{snapshot.ActivationAttempted}"))}");
 Console.WriteLine($"Automation proof commands: {string.Join(",", automationProgressCommandIds)}");
 Console.WriteLine($"State scaling proof: inspector={inspectorProofEditor.InspectorConnections}, downstream={inspectorProofEditor.InspectorDownstream}, dirtyAfterMove={historyDirtyAfterMove}, canUndoAfterMove={historyCanUndoAfterMove}, dirtyAfterUndo={historyProofEditor.IsDirty}, restored=({historyRestoredNode.X:0},{historyRestoredNode.Y:0})");
 
@@ -279,6 +310,7 @@ var editor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
     NodePresentationProvider = new HostSamplePresentationProvider(),
     LocalizationProvider = new HostSampleLocalizationProvider(),
     PluginRegistrations = pluginRegistrations,
+    PluginTrustPolicy = pluginTrustPolicy,
 });
 var retainedCanvasDescriptorMenu = editor.Session.Queries.BuildContextMenuDescriptors(new ContextMenuContext(ContextMenuTargetKind.Canvas, new GraphPoint(32, 48)));
 var retainedCanvasMenu = editor.BuildContextMenu(new ContextMenuContext(ContextMenuTargetKind.Canvas, new GraphPoint(32, 48)));
@@ -321,6 +353,8 @@ var retainedPluginLoadSnapshots = retainedSession.Queries.GetPluginLoadSnapshots
 var retainedPluginMenuOk = retainedCanvasDescriptorMenu.Any(descriptor => descriptor.Id == HostSamplePluginMenuId);
 var retainedPluginLocalizationOk = retainedCanvasDescriptorMenu.Any(descriptor => descriptor.Id == "canvas-add-node" && descriptor.Header == "Plugin Add Node");
 var retainedPluginBadgeOk = node.Presentation.TopRightBadges.Any(badge => badge.Text == "Plugin");
+var retainedTrustedPluginSnapshot = FindPluginLoadSnapshot(retainedPluginLoadSnapshots, HostSampleTrustedManifestId);
+var retainedBlockedPluginSnapshot = FindPluginLoadSnapshot(retainedPluginLoadSnapshots, HostSampleBlockedManifestId);
 var retainedInspection = retainedSession.Diagnostics.CaptureInspectionSnapshot();
 var retainedRecentDiagnostics = retainedSession.Diagnostics.GetRecentDiagnostics(10);
 var retainedSessionHost = retainedSession.GetType()
@@ -483,13 +517,19 @@ var retainedCompatibilityOnlyCommands = CaptureCompatibilityOnlyCommandIds(runti
 var phase17HostedUiParityOk = hostedUiRouteSnapshot == directCompatibilityRouteSnapshot;
 var phase17SharedCanonicalSubsetOk = runtimeSharedCanonicalCommandIds.SequenceEqual(retainedSharedCanonicalCommandIds, StringComparer.Ordinal);
 var phase17RetainedCompatibilityWindowOk = retainedCompatibilityOnlyCommands.Contains("nodes.duplicate", StringComparer.Ordinal);
-var phase25RetainedHostProofOk = retainedPluginLoadSnapshots.Count == 1
+var phase29RetainedHostProofOk = retainedPluginLoadSnapshots.Count == 2
+    && runtimePluginLoadSnapshots.SequenceEqual(retainedPluginLoadSnapshots)
+    && retainedTrustedPluginSnapshot.Status == GraphEditorPluginLoadStatus.Loaded
+    && retainedTrustedPluginSnapshot.TrustEvaluation.Decision == GraphEditorPluginTrustDecision.Allowed
+    && retainedBlockedPluginSnapshot.Status == GraphEditorPluginLoadStatus.Blocked
+    && retainedBlockedPluginSnapshot.TrustEvaluation.Decision == GraphEditorPluginTrustDecision.Blocked
+    && !retainedBlockedPluginSnapshot.ActivationAttempted
     && retainedPluginMenuOk
     && retainedPluginLocalizationOk
-    && retainedPluginBadgeOk;
-var phase25HostBoundaryOk = phase25PluginHostOk
-    && phase25AutomationHostOk
-    && phase25RetainedHostProofOk
+    && retainedPluginBadgeOk
+    && viewDiagnostics.Diagnostics.Any(diagnostic => diagnostic.Code == "plugin.load.blocked");
+var phase29HostBoundaryOk = phase29TrustHostOk
+    && phase29RetainedHostProofOk
     && runtimeSessionIsKernelFirst
     && retainedSessionIsAdapterBacked;
 
@@ -541,9 +581,10 @@ Console.WriteLine($"Phase 16 adapter boundary: shell menu=canonical({phase16Shel
 Console.WriteLine($"PHASE16_ADAPTER_BOUNDARY_OK:{phase16ShellMenuOk}:{phase16CanvasMenuOk}:{phase16ShellShortcutOk}:{phase16CanvasShortcutOk}:{phase16ShellPlatformBoundaryOk}:{phase16CanvasPlatformBoundaryOk}");
 Console.WriteLine($"PHASE17_MIGRATION_ROUTE_OK:{runtimeSessionIsKernelFirst}:{retainedSessionIsAdapterBacked}:{phase17SharedCanonicalSubsetOk}:{phase17HostedUiParityOk}:{phase17RetainedCompatibilityWindowOk}");
 Console.WriteLine($"PHASE18_READINESS_OK:{runtimeSessionIsKernelFirst}:{phase18ReadinessOk}:{runtimeAutomationDescriptorsOk}:{runtimeReadinessDescriptors.Count}");
-Console.WriteLine($"PHASE25_PLUGIN_HOST_OK:{phase25PluginHostOk}:{runtimePluginLoadSnapshots.Count}:{runtimePluginMenuOk}:{runtimePluginLocalizationOk}:{runtimeReadinessDescriptors.Count}");
 Console.WriteLine($"PHASE25_AUTOMATION_HOST_OK:{phase25AutomationHostOk}:{runtimeAutomationResult.ExecutedStepCount}:{automationStartedCount}:{automationCompletedCount}:{runtimeAutomationResult.Inspection.Document.Nodes.Count}:{runtimeAutomationDiagnosticCodes.Length}");
-Console.WriteLine($"PHASE25_HOST_BOUNDARY_OK:{phase25HostBoundaryOk}:{phase25RetainedHostProofOk}:{runtimeSharedCanonicalCommandIds.Count}:{retainedSharedCanonicalCommandIds.Count}:{retainedPluginLoadSnapshots.Count}");
+Console.WriteLine($"PHASE29_TRUST_HOST_OK:{phase29TrustHostOk}:{runtimeTrustedPluginSnapshot.Status}:{runtimeBlockedPluginSnapshot.Status}:{runtimePluginLoadSnapshots.Count}:{runtimeDiagnostics.Diagnostics.Count(diagnostic => diagnostic.Code == "plugin.load.blocked")}");
+Console.WriteLine($"PHASE29_RETAINED_TRUST_OK:{phase29RetainedHostProofOk}:{retainedTrustedPluginSnapshot.Status}:{retainedBlockedPluginSnapshot.Status}:{retainedPluginLoadSnapshots.Count}:{viewDiagnostics.Diagnostics.Count(diagnostic => diagnostic.Code == "plugin.load.blocked")}");
+Console.WriteLine($"PHASE29_HOST_BOUNDARY_OK:{phase29HostBoundaryOk}:{runtimeSharedCanonicalCommandIds.Count}:{retainedSharedCanonicalCommandIds.Count}:{blockedPlugin.RegisterCallCount}:{runtimeInspection.PluginLoadSnapshots.Count}");
 
 static GraphDocument CreateDocument()
     => new(
@@ -701,6 +742,29 @@ static bool IsReadinessFeatureId(string id)
         "integration.instrumentation.logger" or
         "integration.instrumentation.activity-source";
 
+static GraphEditorPluginManifest CreateHostSampleManifest(
+    string manifestId,
+    string displayName,
+    Type pluginType,
+    string capabilitySummary)
+    => new(
+        manifestId,
+        displayName,
+        new GraphEditorPluginManifestProvenance(
+            GraphEditorPluginManifestSourceKind.DirectRegistration,
+            pluginType.FullName ?? pluginType.Name),
+        version: "1.0.0",
+        compatibility: new GraphEditorPluginCompatibilityManifest(
+            minimumAsterGraphVersion: "0.0.0",
+            targetFramework: "net9.0",
+            runtimeSurface: "session-first"),
+        capabilitySummary: capabilitySummary);
+
+static GraphEditorPluginLoadSnapshot FindPluginLoadSnapshot(
+    IReadOnlyList<GraphEditorPluginLoadSnapshot> snapshots,
+    string manifestId)
+    => snapshots.Single(snapshot => string.Equals(snapshot.Manifest.Id, manifestId, StringComparison.Ordinal));
+
 static GraphEditorAutomationRunRequest CreateAutomationRunRequest(string runId, string pluginDefinitionId)
     => new(
         runId,
@@ -786,6 +850,43 @@ internal sealed class HostSampleProofPlugin : IGraphEditorPlugin
         builder.AddContextMenuAugmentor(new HostSamplePluginContextMenuAugmentor());
         builder.AddNodePresentationProvider(new HostSamplePluginPresentationProvider());
         builder.AddLocalizationProvider(new HostSamplePluginLocalizationProvider());
+    }
+}
+
+internal sealed class HostSampleBlockedPlugin : IGraphEditorPlugin
+{
+    public int RegisterCallCount { get; private set; }
+
+    public GraphEditorPluginDescriptor Descriptor { get; } = new(
+        "host.sample.blocked-plugin",
+        "Host Sample Blocked Plugin",
+        "Blocked direct-registration proof plugin for host trust coverage.");
+
+    public void Register(GraphEditorPluginBuilder builder)
+    {
+        ArgumentNullException.ThrowIfNull(builder);
+        RegisterCallCount++;
+        builder.AddContextMenuAugmentor(new HostSamplePluginContextMenuAugmentor());
+    }
+}
+
+internal sealed class HostSampleManifestTrustPolicy(string blockedManifestId) : IGraphEditorPluginTrustPolicy
+{
+    public GraphEditorPluginTrustEvaluation Evaluate(GraphEditorPluginTrustPolicyContext context)
+    {
+        ArgumentNullException.ThrowIfNull(context);
+
+        return StringComparer.Ordinal.Equals(context.Manifest.Id, blockedManifestId)
+            ? new GraphEditorPluginTrustEvaluation(
+                GraphEditorPluginTrustDecision.Blocked,
+                GraphEditorPluginTrustEvaluationSource.HostPolicy,
+                "trust.blocked.host-sample",
+                $"Blocked manifest '{context.Manifest.Id}' for host proof coverage.")
+            : new GraphEditorPluginTrustEvaluation(
+                GraphEditorPluginTrustDecision.Allowed,
+                GraphEditorPluginTrustEvaluationSource.HostPolicy,
+                "trust.allowed.host-sample",
+                $"Allowed manifest '{context.Manifest.Id}' for host proof coverage.");
     }
 }
 

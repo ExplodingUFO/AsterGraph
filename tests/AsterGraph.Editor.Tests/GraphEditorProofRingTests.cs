@@ -417,6 +417,61 @@ public sealed class GraphEditorProofRingTests
         Assert.Equal(0, plugin.RegisterCallCount);
     }
 
+    [Fact]
+    public void RuntimeAndRetainedProof_ExposeEquivalentTrustPolicyRefusalSnapshots()
+    {
+        var diagnostics = new RecordingDiagnosticsSink();
+        var plugin = new ProofTrackingPlugin();
+        var options = new AsterGraphEditorOptions
+        {
+            Document = CreateDocument(),
+            NodeCatalog = CreateCatalog(),
+            CompatibilityService = new ExactCompatibilityService(),
+            DiagnosticsSink = diagnostics,
+            PluginRegistrations =
+            [
+                GraphEditorPluginRegistration.FromPlugin(
+                    plugin,
+                    new GraphEditorPluginManifest(
+                        "tests.proof.blocked-plugin",
+                        "Proof Blocked Plugin",
+                        new GraphEditorPluginManifestProvenance(
+                            GraphEditorPluginManifestSourceKind.DirectRegistration,
+                            typeof(ProofTrackingPlugin).FullName ?? nameof(ProofTrackingPlugin)),
+                        description: "Proof-ring blocked trust coverage.",
+                        version: "1.0.0",
+                        compatibility: new GraphEditorPluginCompatibilityManifest(
+                            minimumAsterGraphVersion: "0.0.0",
+                            targetFramework: "net9.0",
+                            runtimeSurface: "session-first"),
+                        capabilitySummary: "menus")),
+            ],
+            PluginTrustPolicy = new ProofBlockTrustPolicy("tests.proof.blocked-plugin"),
+        };
+        var retainedEditor = AsterGraphEditorFactory.Create(options);
+        var runtimeSession = AsterGraphEditorFactory.CreateSession(options);
+
+        var retainedSnapshots = retainedEditor.Session.Queries.GetPluginLoadSnapshots();
+        var runtimeSnapshots = runtimeSession.Queries.GetPluginLoadSnapshots();
+        var retainedInspection = retainedEditor.Session.Diagnostics.CaptureInspectionSnapshot();
+        var runtimeInspection = runtimeSession.Diagnostics.CaptureInspectionSnapshot();
+
+        Assert.Equal(runtimeSnapshots, retainedSnapshots);
+        Assert.Equal(runtimeInspection.PluginLoadSnapshots, retainedInspection.PluginLoadSnapshots);
+        var snapshot = Assert.Single(runtimeSnapshots);
+        var compatibility = GetCompatibility(snapshot);
+        Assert.Equal(GraphEditorPluginLoadStatus.Blocked, snapshot.Status);
+        Assert.NotNull(compatibility);
+        Assert.Equal(GraphEditorPluginCompatibilityStatus.Compatible, compatibility!.Status);
+        Assert.Equal(GraphEditorPluginTrustDecision.Blocked, snapshot.TrustEvaluation!.Decision);
+        Assert.Equal(GraphEditorPluginTrustEvaluationSource.HostPolicy, snapshot.TrustEvaluation.Source);
+        Assert.Equal("trust.blocked.proof", snapshot.TrustEvaluation.ReasonCode);
+        Assert.False(snapshot.ActivationAttempted);
+        Assert.Contains(retainedInspection.RecentDiagnostics, diagnostic => diagnostic.Code == "plugin.load.blocked");
+        Assert.Contains(runtimeInspection.RecentDiagnostics, diagnostic => diagnostic.Code == "plugin.load.blocked");
+        Assert.Equal(0, plugin.RegisterCallCount);
+    }
+
     [AvaloniaFact]
     public void MigrationProof_RouteSignalsMatchCanonicalAndCompatibilityStory()
     {
@@ -1100,6 +1155,26 @@ public sealed class GraphEditorProofRingTests
                 GraphEditorPluginTrustEvaluationSource.HostPolicy,
                 "proof.policy.allow",
                 $"Allowed manifest '{context.Manifest.Id}' for proof coverage.");
+        }
+    }
+
+    private sealed class ProofBlockTrustPolicy(string blockedId) : IGraphEditorPluginTrustPolicy
+    {
+        public GraphEditorPluginTrustEvaluation Evaluate(GraphEditorPluginTrustPolicyContext context)
+        {
+            ArgumentNullException.ThrowIfNull(context);
+
+            return StringComparer.Ordinal.Equals(context.Manifest.Id, blockedId)
+                ? new GraphEditorPluginTrustEvaluation(
+                    GraphEditorPluginTrustDecision.Blocked,
+                    GraphEditorPluginTrustEvaluationSource.HostPolicy,
+                    "trust.blocked.proof",
+                    $"Blocked manifest '{context.Manifest.Id}' for proof coverage.")
+                : new GraphEditorPluginTrustEvaluation(
+                    GraphEditorPluginTrustDecision.Allowed,
+                    GraphEditorPluginTrustEvaluationSource.HostPolicy,
+                    "trust.allowed.proof",
+                    $"Allowed manifest '{context.Manifest.Id}' for proof coverage.");
         }
     }
 
