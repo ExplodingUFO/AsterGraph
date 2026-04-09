@@ -13,7 +13,8 @@ public sealed record GraphEditorPluginRegistration
         string? packagePath,
         string? pluginTypeName,
         GraphEditorPluginManifest? manifest,
-        GraphEditorPluginProvenanceEvidence? provenanceEvidence)
+        GraphEditorPluginProvenanceEvidence? provenanceEvidence,
+        GraphEditorPluginStageSnapshot? stage)
     {
         Plugin = plugin;
         AssemblyPath = assemblyPath;
@@ -21,6 +22,7 @@ public sealed record GraphEditorPluginRegistration
         PluginTypeName = pluginTypeName;
         Manifest = manifest;
         ProvenanceEvidence = provenanceEvidence ?? GraphEditorPluginProvenanceEvidence.NotProvided;
+        Stage = stage;
     }
 
     /// <summary>
@@ -54,6 +56,11 @@ public sealed record GraphEditorPluginRegistration
     public GraphEditorPluginProvenanceEvidence ProvenanceEvidence { get; }
 
     /// <summary>
+    /// 可选的包暂存结果元数据。
+    /// </summary>
+    public GraphEditorPluginStageSnapshot? Stage { get; }
+
+    /// <summary>
     /// 是否为直接实例注册。
     /// </summary>
     public bool IsDirectRegistration => Plugin is not null;
@@ -77,7 +84,7 @@ public sealed record GraphEditorPluginRegistration
         GraphEditorPluginProvenanceEvidence? provenanceEvidence = null)
     {
         ArgumentNullException.ThrowIfNull(plugin);
-        return new GraphEditorPluginRegistration(plugin, null, null, null, manifest, provenanceEvidence);
+        return new GraphEditorPluginRegistration(plugin, null, null, null, manifest, provenanceEvidence, null);
     }
 
     /// <summary>
@@ -102,7 +109,8 @@ public sealed record GraphEditorPluginRegistration
             packagePath: null,
             pluginTypeName: pluginTypeName,
             manifest: manifest,
-            provenanceEvidence: provenanceEvidence);
+            provenanceEvidence: provenanceEvidence,
+            stage: null);
     }
 
     /// <summary>
@@ -121,6 +129,65 @@ public sealed record GraphEditorPluginRegistration
             packagePath: Path.GetFullPath(packagePath),
             pluginTypeName: null,
             manifest: manifest,
-            provenanceEvidence: provenanceEvidence);
+            provenanceEvidence: provenanceEvidence,
+            stage: null);
+    }
+
+    /// <summary>
+    /// 基于已验证暂存的包和主程序集路径创建注册项。
+    /// </summary>
+    public static GraphEditorPluginRegistration FromStagedPackage(
+        string packagePath,
+        string assemblyPath,
+        string? pluginTypeName,
+        GraphEditorPluginManifest manifest,
+        GraphEditorPluginProvenanceEvidence provenanceEvidence,
+        GraphEditorPluginStageSnapshot stage)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(packagePath);
+        ArgumentException.ThrowIfNullOrWhiteSpace(assemblyPath);
+        ArgumentNullException.ThrowIfNull(manifest);
+        ArgumentNullException.ThrowIfNull(provenanceEvidence);
+        ArgumentNullException.ThrowIfNull(stage);
+
+        if (pluginTypeName is not null)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(pluginTypeName);
+            pluginTypeName = pluginTypeName.Trim();
+        }
+
+        var fullPackagePath = Path.GetFullPath(packagePath);
+        var fullAssemblyPath = Path.GetFullPath(assemblyPath);
+
+        if (string.IsNullOrWhiteSpace(stage.MainAssemblyPath))
+        {
+            throw new ArgumentException("Stage snapshot must expose a main assembly path for staged package registrations.", nameof(stage));
+        }
+
+        if (!string.Equals(Path.GetFullPath(stage.PackagePath), fullPackagePath, StringComparison.OrdinalIgnoreCase))
+        {
+            throw new ArgumentException("Stage snapshot package path must match the staged package registration path.", nameof(stage));
+        }
+
+        if (!string.Equals(Path.GetFullPath(stage.MainAssemblyPath), fullAssemblyPath, StringComparison.OrdinalIgnoreCase))
+        {
+            throw new ArgumentException("Stage snapshot main assembly path must match the staged package registration assembly path.", nameof(stage));
+        }
+
+        if (pluginTypeName is not null
+            && stage.PluginTypeName is not null
+            && !string.Equals(stage.PluginTypeName, pluginTypeName, StringComparison.Ordinal))
+        {
+            throw new ArgumentException("Stage snapshot plugin type name must match the staged package registration plugin type name.", nameof(stage));
+        }
+
+        return new GraphEditorPluginRegistration(
+            plugin: null,
+            assemblyPath: fullAssemblyPath,
+            packagePath: fullPackagePath,
+            pluginTypeName: pluginTypeName,
+            manifest: manifest,
+            provenanceEvidence: provenanceEvidence,
+            stage: stage);
     }
 }

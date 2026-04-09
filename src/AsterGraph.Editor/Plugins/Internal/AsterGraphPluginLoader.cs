@@ -56,16 +56,18 @@ internal static class AsterGraphPluginLoader
             : registration.IsAssemblyRegistration
                 ? GraphEditorPluginLoadSourceKind.Assembly
                 : GraphEditorPluginLoadSourceKind.Direct;
-        var source = registration.AssemblyPath
-            ?? registration.PackagePath
+        var source = registration.PackagePath
+            ?? registration.AssemblyPath
             ?? registration.Plugin?.GetType().FullName
             ?? "direct plugin registration";
-        var diagnosticSource = sourceKind switch
-        {
-            GraphEditorPluginLoadSourceKind.Package => $"package '{source}'",
-            GraphEditorPluginLoadSourceKind.Assembly => $"assembly '{source}'",
-            _ => $"plugin '{source}'",
-        };
+        var diagnosticSource = registration.Stage is not null
+            ? $"staged package '{source}'"
+            : sourceKind switch
+            {
+                GraphEditorPluginLoadSourceKind.Package => $"package '{source}'",
+                GraphEditorPluginLoadSourceKind.Assembly => $"assembly '{source}'",
+                _ => $"plugin '{source}'",
+            };
         var preload = AsterGraphPluginPreloadEvaluator.EvaluateRegistration(registration, trustPolicy);
         var manifest = preload.Manifest;
         var compatibility = preload.Compatibility;
@@ -89,7 +91,8 @@ internal static class AsterGraphPluginLoader
                     provenanceEvidence,
                     activationAttempted: false,
                     requestedPluginTypeName: registration.PluginTypeName,
-                    packagePath: registration.PackagePath));
+                    packagePath: registration.PackagePath,
+                    stage: registration.Stage));
                 return;
             }
 
@@ -107,7 +110,8 @@ internal static class AsterGraphPluginLoader
                     provenanceEvidence,
                     activationAttempted: false,
                     requestedPluginTypeName: registration.PluginTypeName,
-                    packagePath: registration.PackagePath));
+                    packagePath: registration.PackagePath,
+                    stage: registration.Stage));
                 return;
             }
 
@@ -128,11 +132,14 @@ internal static class AsterGraphPluginLoader
                     sourceKind,
                     source,
                     plugin.GetType().FullName,
-                    diagnosticSource);
+                    diagnosticSource,
+                    requestedPluginTypeName: null,
+                    packagePath: registration.PackagePath,
+                    stage: registration.Stage);
                 return;
             }
 
-            if (registration.IsPackageRegistration)
+            if (registration.IsPackageRegistration && !registration.IsAssemblyRegistration)
             {
                 const string message = "Package registrations are not supported until verified staging is implemented.";
                 diagnostics.Add(CreatePackageRegistrationNotSupportedDiagnostic(source));
@@ -148,7 +155,8 @@ internal static class AsterGraphPluginLoader
                     activationAttempted: false,
                     requestedPluginTypeName: registration.PluginTypeName,
                     failureMessage: message,
-                    packagePath: registration.PackagePath));
+                    packagePath: registration.PackagePath,
+                    stage: registration.Stage));
                 return;
             }
 
@@ -179,7 +187,9 @@ internal static class AsterGraphPluginLoader
                     source,
                     pluginType.FullName,
                     diagnosticSource,
-                    registration.PluginTypeName);
+                    registration.PluginTypeName,
+                    registration.PackagePath,
+                    registration.Stage);
             }
         }
         catch (Exception exception)
@@ -197,7 +207,8 @@ internal static class AsterGraphPluginLoader
                 activationAttempted,
                 requestedPluginTypeName: registration.PluginTypeName,
                 failureMessage: exception.Message,
-                packagePath: registration.PackagePath));
+                packagePath: registration.PackagePath,
+                stage: registration.Stage));
         }
     }
 
@@ -283,7 +294,9 @@ internal static class AsterGraphPluginLoader
         string source,
         string? resolvedPluginTypeName,
         string diagnosticSource,
-        string? requestedPluginTypeName = null)
+        string? requestedPluginTypeName = null,
+        string? packagePath = null,
+        GraphEditorPluginStageSnapshot? stage = null)
     {
         ArgumentNullException.ThrowIfNull(plugin);
         ArgumentNullException.ThrowIfNull(aggregateBuilder);
@@ -316,7 +329,10 @@ internal static class AsterGraphPluginLoader
             activationAttempted: true,
             descriptor,
             requestedPluginTypeName,
-            resolvedPluginTypeName));
+            resolvedPluginTypeName,
+            failureMessage: null,
+            packagePath: packagePath,
+            stage: stage));
         diagnostics.Add(new GraphEditorDiagnostic(
             "plugin.load.succeeded",
             "plugin.load",

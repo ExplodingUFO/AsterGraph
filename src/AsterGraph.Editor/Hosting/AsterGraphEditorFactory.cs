@@ -36,6 +36,36 @@ public static class AsterGraphEditorFactory
     }
 
     /// <summary>
+    /// 使用宿主提供的候选项快照显式发起一次插件包暂存请求。
+    /// </summary>
+    /// <param name="request">包暂存请求。</param>
+    /// <returns>当前阶段可见的机器可读暂存结果。</returns>
+    public static GraphEditorPluginPackageStageResult StagePluginPackage(GraphEditorPluginPackageStageRequest request)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        if (string.IsNullOrWhiteSpace(request.Candidate.PackagePath))
+        {
+            throw new ArgumentException("Plugin candidate must expose a package path before it can be staged.", nameof(request));
+        }
+
+        var stage = new GraphEditorPluginStageSnapshot(
+            GraphEditorPluginStageOutcome.Refused,
+            request.Candidate.PackagePath,
+            request.Candidate.ProvenanceEvidence.PackageIdentity,
+            pluginTypeName: request.Candidate.PluginTypeName,
+            usedCache: false,
+            reasonCode: "plugin.stage.not-implemented",
+            reasonMessage: "Verified package staging is not implemented yet.");
+
+        return new GraphEditorPluginPackageStageResult(
+            stage,
+            request.Candidate.Manifest,
+            request.Candidate.ProvenanceEvidence,
+            request.Candidate.TrustEvaluation);
+    }
+
+    /// <summary>
     /// 使用宿主提供的选项创建一个 <see cref="GraphEditorViewModel"/>。
     /// </summary>
     /// <param name="options">宿主组合选项。</param>

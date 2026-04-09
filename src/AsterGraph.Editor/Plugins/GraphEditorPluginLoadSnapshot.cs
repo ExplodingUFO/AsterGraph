@@ -115,7 +115,8 @@ public sealed record GraphEditorPluginLoadSnapshot
         string? requestedPluginTypeName = null,
         string? resolvedPluginTypeName = null,
         string? failureMessage = null,
-        string? packagePath = null)
+        string? packagePath = null,
+        GraphEditorPluginStageSnapshot? stage = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(source);
         ArgumentNullException.ThrowIfNull(contributions);
@@ -134,7 +135,10 @@ public sealed record GraphEditorPluginLoadSnapshot
         ProvenanceEvidence = provenanceEvidence;
         ActivationAttempted = activationAttempted;
         Descriptor = descriptor;
-        PackagePath = string.IsNullOrWhiteSpace(packagePath) ? null : Path.GetFullPath(packagePath);
+        Stage = stage;
+        PackagePath = string.IsNullOrWhiteSpace(packagePath)
+            ? stage?.PackagePath
+            : Path.GetFullPath(packagePath);
         RequestedPluginTypeName = string.IsNullOrWhiteSpace(requestedPluginTypeName) ? null : requestedPluginTypeName.Trim();
         ResolvedPluginTypeName = string.IsNullOrWhiteSpace(resolvedPluginTypeName) ? null : resolvedPluginTypeName.Trim();
         FailureMessage = string.IsNullOrWhiteSpace(failureMessage) ? null : failureMessage.Trim();
@@ -159,6 +163,11 @@ public sealed record GraphEditorPluginLoadSnapshot
     /// 当前注册关联的本地包归档绝对路径。
     /// </summary>
     public string? PackagePath { get; }
+
+    /// <summary>
+    /// 当前可见的包暂存结果元数据。
+    /// </summary>
+    public GraphEditorPluginStageSnapshot? Stage { get; }
 
     /// <summary>
     /// 插件贡献摘要。
