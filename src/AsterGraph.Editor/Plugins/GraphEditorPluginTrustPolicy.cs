@@ -42,13 +42,16 @@ public sealed record GraphEditorPluginTrustPolicyContext
     /// </summary>
     public GraphEditorPluginTrustPolicyContext(
         GraphEditorPluginRegistration registration,
-        GraphEditorPluginManifest manifest)
+        GraphEditorPluginManifest manifest,
+        GraphEditorPluginProvenanceEvidence provenanceEvidence)
     {
         ArgumentNullException.ThrowIfNull(registration);
         ArgumentNullException.ThrowIfNull(manifest);
+        ArgumentNullException.ThrowIfNull(provenanceEvidence);
 
         Registration = registration;
         Manifest = manifest;
+        ProvenanceEvidence = provenanceEvidence;
     }
 
     /// <summary>
@@ -60,6 +63,11 @@ public sealed record GraphEditorPluginTrustPolicyContext
     /// 当前可见的插件清单。
     /// </summary>
     public GraphEditorPluginManifest Manifest { get; }
+
+    /// <summary>
+    /// 当前可见的来源和签名证据。
+    /// </summary>
+    public GraphEditorPluginProvenanceEvidence ProvenanceEvidence { get; }
 }
 
 /// <summary>

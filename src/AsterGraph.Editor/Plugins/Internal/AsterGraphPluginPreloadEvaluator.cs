@@ -12,13 +12,15 @@ internal static class AsterGraphPluginPreloadEvaluator
         ArgumentNullException.ThrowIfNull(registration);
 
         var manifest = ResolveManifest(registration);
+        var provenanceEvidence = ResolveProvenanceEvidence(registration, manifest);
         var compatibility = EvaluateCompatibility(manifest);
-        var trustEvaluation = EvaluateTrustPolicy(trustPolicy, registration, manifest);
+        var trustEvaluation = EvaluateTrustPolicy(trustPolicy, registration, manifest, provenanceEvidence);
 
         return new AsterGraphPluginPreloadEvaluation(
             manifest,
             compatibility,
-            trustEvaluation);
+            trustEvaluation,
+            provenanceEvidence);
     }
 
     public static GraphEditorPluginManifest ResolveManifest(GraphEditorPluginRegistration registration)
@@ -56,18 +58,41 @@ internal static class AsterGraphPluginPreloadEvaluator
     public static GraphEditorPluginTrustEvaluation EvaluateTrustPolicy(
         IGraphEditorPluginTrustPolicy? trustPolicy,
         GraphEditorPluginRegistration registration,
-        GraphEditorPluginManifest manifest)
+        GraphEditorPluginManifest manifest,
+        GraphEditorPluginProvenanceEvidence provenanceEvidence)
     {
         ArgumentNullException.ThrowIfNull(registration);
         ArgumentNullException.ThrowIfNull(manifest);
+        ArgumentNullException.ThrowIfNull(provenanceEvidence);
 
         if (trustPolicy is null)
         {
             return GraphEditorPluginTrustEvaluation.ImplicitAllow();
         }
 
-        return trustPolicy.Evaluate(new GraphEditorPluginTrustPolicyContext(registration, manifest))
+        return trustPolicy.Evaluate(new GraphEditorPluginTrustPolicyContext(registration, manifest, provenanceEvidence))
             ?? throw new InvalidOperationException("Plugin trust policy returned a null evaluation.");
+    }
+
+    public static GraphEditorPluginProvenanceEvidence ResolveProvenanceEvidence(
+        GraphEditorPluginRegistration registration,
+        GraphEditorPluginManifest manifest)
+    {
+        ArgumentNullException.ThrowIfNull(registration);
+        ArgumentNullException.ThrowIfNull(manifest);
+
+        var packageIdentity = registration.ProvenanceEvidence.PackageIdentity
+            ?? CreatePackageIdentity(manifest.Provenance);
+
+        if (packageIdentity is null
+            && registration.ProvenanceEvidence == GraphEditorPluginProvenanceEvidence.NotProvided)
+        {
+            return GraphEditorPluginProvenanceEvidence.NotProvided;
+        }
+
+        return new GraphEditorPluginProvenanceEvidence(
+            packageIdentity,
+            registration.ProvenanceEvidence.Signature);
     }
 
     public static GraphEditorPluginCompatibilityEvaluation EvaluateCompatibility(GraphEditorPluginManifest manifest)
@@ -175,5 +200,14 @@ internal static class AsterGraphPluginPreloadEvaluator
                 GraphEditorPluginManifestSourceKind.AssemblyPath,
                 fullPath),
             version: version);
+    }
+
+    private static GraphEditorPluginPackageIdentity? CreatePackageIdentity(GraphEditorPluginManifestProvenance provenance)
+    {
+        ArgumentNullException.ThrowIfNull(provenance);
+
+        return string.IsNullOrWhiteSpace(provenance.PackageId)
+            ? null
+            : new GraphEditorPluginPackageIdentity(provenance.PackageId, provenance.PackageVersion);
     }
 }

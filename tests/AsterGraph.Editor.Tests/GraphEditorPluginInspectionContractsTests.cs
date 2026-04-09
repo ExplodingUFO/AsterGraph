@@ -37,6 +37,12 @@ public sealed class GraphEditorPluginInspectionContractsTests
             typeof(GraphEditorPluginManifest),
             typeof(GraphEditorPluginManifestProvenance),
             typeof(GraphEditorPluginCompatibilityManifest),
+            typeof(GraphEditorPluginPackageIdentity),
+            typeof(GraphEditorPluginSignerIdentity),
+            typeof(GraphEditorPluginSignatureKind),
+            typeof(GraphEditorPluginSignatureStatus),
+            typeof(GraphEditorPluginSignatureEvidence),
+            typeof(GraphEditorPluginProvenanceEvidence),
             typeof(GraphEditorPluginTrustEvaluation),
             typeof(GraphEditorPluginTrustDecision),
             typeof(GraphEditorPluginTrustEvaluationSource),
@@ -66,6 +72,8 @@ public sealed class GraphEditorPluginInspectionContractsTests
         Assert.Equal(GraphEditorPluginCompatibilityStatus.Unknown, compatibility!.Status);
         Assert.NotNull(snapshot.TrustEvaluation);
         Assert.Equal(GraphEditorPluginTrustDecision.Allowed, snapshot.TrustEvaluation!.Decision);
+        Assert.Equal(GraphEditorPluginProvenanceEvidence.NotProvided, snapshot.ProvenanceEvidence);
+        Assert.Equal(GraphEditorPluginSignatureStatus.NotProvided, snapshot.ProvenanceEvidence.Signature.Status);
         Assert.True(snapshot.ActivationAttempted);
         Assert.Null(snapshot.RequestedPluginTypeName);
         Assert.Equal("AsterGraph.TestPlugins.SamplePlugin", snapshot.ResolvedPluginTypeName);
@@ -96,6 +104,7 @@ public sealed class GraphEditorPluginInspectionContractsTests
         Assert.Equal(GraphEditorPluginCompatibilityStatus.Unknown, compatibility!.Status);
         Assert.NotNull(snapshot.TrustEvaluation);
         Assert.Equal(GraphEditorPluginTrustDecision.Allowed, snapshot.TrustEvaluation!.Decision);
+        Assert.Equal(GraphEditorPluginProvenanceEvidence.NotProvided, snapshot.ProvenanceEvidence);
         Assert.True(snapshot.ActivationAttempted);
         Assert.Null(snapshot.Descriptor);
         Assert.Null(snapshot.ResolvedPluginTypeName);
@@ -159,6 +168,7 @@ public sealed class GraphEditorPluginInspectionContractsTests
         Assert.Equal(GraphEditorPluginTrustDecision.Blocked, snapshot.TrustEvaluation!.Decision);
         Assert.Equal(GraphEditorPluginTrustEvaluationSource.HostPolicy, snapshot.TrustEvaluation.Source);
         Assert.Equal("trust.blocked.by-manifest-id", snapshot.TrustEvaluation.ReasonCode);
+        Assert.Equal(GraphEditorPluginProvenanceEvidence.NotProvided, snapshot.ProvenanceEvidence);
         Assert.False(snapshot.ActivationAttempted);
         Assert.Null(snapshot.Descriptor);
         Assert.Null(snapshot.ResolvedPluginTypeName);
@@ -196,6 +206,7 @@ public sealed class GraphEditorPluginInspectionContractsTests
         Assert.Equal("compatibility.astergraph.minimum-version", compatibility.ReasonCode);
         Assert.NotNull(snapshot.TrustEvaluation);
         Assert.Equal(GraphEditorPluginTrustDecision.Allowed, snapshot.TrustEvaluation!.Decision);
+        Assert.Equal(GraphEditorPluginProvenanceEvidence.NotProvided, snapshot.ProvenanceEvidence);
         Assert.False(snapshot.ActivationAttempted);
         Assert.Null(snapshot.Descriptor);
         Assert.Null(snapshot.ResolvedPluginTypeName);

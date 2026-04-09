@@ -104,6 +104,7 @@ public sealed record GraphEditorPluginLoadSnapshot
         GraphEditorPluginManifest manifest,
         GraphEditorPluginCompatibilityEvaluation compatibility,
         GraphEditorPluginTrustEvaluation trustEvaluation,
+        GraphEditorPluginProvenanceEvidence provenanceEvidence,
         bool activationAttempted,
         GraphEditorPluginDescriptor? descriptor = null,
         string? requestedPluginTypeName = null,
@@ -115,6 +116,7 @@ public sealed record GraphEditorPluginLoadSnapshot
         ArgumentNullException.ThrowIfNull(manifest);
         ArgumentNullException.ThrowIfNull(compatibility);
         ArgumentNullException.ThrowIfNull(trustEvaluation);
+        ArgumentNullException.ThrowIfNull(provenanceEvidence);
 
         SourceKind = sourceKind;
         Source = source.Trim();
@@ -123,6 +125,7 @@ public sealed record GraphEditorPluginLoadSnapshot
         Manifest = manifest;
         Compatibility = compatibility;
         TrustEvaluation = trustEvaluation;
+        ProvenanceEvidence = provenanceEvidence;
         ActivationAttempted = activationAttempted;
         Descriptor = descriptor;
         RequestedPluginTypeName = string.IsNullOrWhiteSpace(requestedPluginTypeName) ? null : requestedPluginTypeName.Trim();
@@ -164,6 +167,11 @@ public sealed record GraphEditorPluginLoadSnapshot
     /// 当前加载前信任评估结果。
     /// </summary>
     public GraphEditorPluginTrustEvaluation TrustEvaluation { get; }
+
+    /// <summary>
+    /// 当前加载前来源和签名证据。
+    /// </summary>
+    public GraphEditorPluginProvenanceEvidence ProvenanceEvidence { get; }
 
     /// <summary>
     /// 是否已经尝试进入实际激活阶段。

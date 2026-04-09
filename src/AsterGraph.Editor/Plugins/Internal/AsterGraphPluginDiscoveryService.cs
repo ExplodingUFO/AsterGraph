@@ -69,7 +69,8 @@ internal static class AsterGraphPluginDiscoveryService
             var registration = GraphEditorPluginRegistration.FromAssemblyPath(
                 candidate.AssemblyPath,
                 candidate.PluginTypeName,
-                candidate.Manifest);
+                candidate.Manifest,
+                candidate.ProvenanceEvidence);
             candidates.Add(CreateCandidateSnapshot(
                 GraphEditorPluginCandidateSourceKind.ManifestSource,
                 candidate.Source,
@@ -88,8 +89,9 @@ internal static class AsterGraphPluginDiscoveryService
         ArgumentNullException.ThrowIfNull(registration);
 
         var manifest = AsterGraphPluginPreloadEvaluator.ResolveManifest(registration);
+        var provenanceEvidence = AsterGraphPluginPreloadEvaluator.ResolveProvenanceEvidence(registration, manifest);
         var compatibility = AsterGraphPluginPreloadEvaluator.EvaluateCompatibility(manifest);
-        var trustEvaluation = AsterGraphPluginPreloadEvaluator.EvaluateTrustPolicy(trustPolicy, registration, manifest);
+        var trustEvaluation = AsterGraphPluginPreloadEvaluator.EvaluateTrustPolicy(trustPolicy, registration, manifest, provenanceEvidence);
 
         return new GraphEditorPluginCandidateSnapshot(
             sourceKind,
@@ -97,6 +99,7 @@ internal static class AsterGraphPluginDiscoveryService
             manifest,
             compatibility,
             trustEvaluation,
+            provenanceEvidence,
             registration.AssemblyPath,
             registration.PluginTypeName);
     }

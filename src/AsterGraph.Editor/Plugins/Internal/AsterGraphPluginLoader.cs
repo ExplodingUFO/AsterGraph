@@ -64,6 +64,7 @@ internal static class AsterGraphPluginLoader
         var manifest = preload.Manifest;
         var compatibility = preload.Compatibility;
         var trustEvaluation = preload.TrustEvaluation;
+        var provenanceEvidence = preload.ProvenanceEvidence;
         var activationAttempted = false;
 
         try
@@ -79,6 +80,7 @@ internal static class AsterGraphPluginLoader
                     manifest,
                     compatibility,
                     trustEvaluation,
+                    provenanceEvidence,
                     activationAttempted: false,
                     requestedPluginTypeName: registration.PluginTypeName));
                 return;
@@ -95,6 +97,7 @@ internal static class AsterGraphPluginLoader
                     manifest,
                     compatibility,
                     trustEvaluation,
+                    provenanceEvidence,
                     activationAttempted: false,
                     requestedPluginTypeName: registration.PluginTypeName));
                 return;
@@ -113,6 +116,7 @@ internal static class AsterGraphPluginLoader
                     manifest,
                     compatibility,
                     trustEvaluation,
+                    provenanceEvidence,
                     sourceKind,
                     source,
                     plugin.GetType().FullName,
@@ -142,6 +146,7 @@ internal static class AsterGraphPluginLoader
                     manifest,
                     compatibility,
                     trustEvaluation,
+                    provenanceEvidence,
                     sourceKind,
                     source,
                     pluginType.FullName,
@@ -160,6 +165,7 @@ internal static class AsterGraphPluginLoader
                 manifest,
                 compatibility,
                 trustEvaluation,
+                provenanceEvidence,
                 activationAttempted,
                 requestedPluginTypeName: registration.PluginTypeName,
                 failureMessage: exception.Message));
@@ -243,6 +249,7 @@ internal static class AsterGraphPluginLoader
         GraphEditorPluginManifest manifest,
         GraphEditorPluginCompatibilityEvaluation compatibility,
         GraphEditorPluginTrustEvaluation trustEvaluation,
+        GraphEditorPluginProvenanceEvidence provenanceEvidence,
         GraphEditorPluginLoadSourceKind sourceKind,
         string source,
         string? resolvedPluginTypeName,
@@ -257,6 +264,7 @@ internal static class AsterGraphPluginLoader
         ArgumentNullException.ThrowIfNull(manifest);
         ArgumentNullException.ThrowIfNull(compatibility);
         ArgumentNullException.ThrowIfNull(trustEvaluation);
+        ArgumentNullException.ThrowIfNull(provenanceEvidence);
         ArgumentException.ThrowIfNullOrWhiteSpace(source);
         ArgumentException.ThrowIfNullOrWhiteSpace(diagnosticSource);
 
@@ -275,6 +283,7 @@ internal static class AsterGraphPluginLoader
             manifest,
             compatibility,
             trustEvaluation,
+            provenanceEvidence,
             activationAttempted: true,
             descriptor,
             requestedPluginTypeName,

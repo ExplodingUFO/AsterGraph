@@ -51,6 +51,14 @@ public sealed class GraphEditorPluginDiscoveryTests
                 targetFramework: "net9.0",
                 runtimeSurface: "session-first"),
             capabilitySummary: "menus");
+        var provenanceEvidence = new GraphEditorPluginProvenanceEvidence(
+            new GraphEditorPluginPackageIdentity("AsterGraph.ManifestDiscovery", "1.2.3"),
+            new GraphEditorPluginSignatureEvidence(
+                GraphEditorPluginSignatureStatus.Valid,
+                GraphEditorPluginSignatureKind.Repository,
+                new GraphEditorPluginSignerIdentity("AsterGraph Repository", "DISC1234"),
+                timestampUtc: new DateTimeOffset(2026, 04, 09, 0, 0, 0, TimeSpan.Zero),
+                timestampAuthority: "tests.timestamp"));
 
         var candidates = AsterGraphEditorFactory.DiscoverPluginCandidates(new GraphEditorPluginDiscoveryOptions
         {
@@ -61,7 +69,8 @@ public sealed class GraphEditorPluginDiscoveryTests
                         "tests.manifest-source",
                         pluginAssemblyPath,
                         manifest,
-                        "AsterGraph.TestPlugins.SamplePlugin")),
+                        "AsterGraph.TestPlugins.SamplePlugin",
+                        provenanceEvidence)),
             ],
             TrustPolicy = new BlockManifestIdTrustPolicy("tests.discovery.manifest-source"),
         });
@@ -74,6 +83,7 @@ public sealed class GraphEditorPluginDiscoveryTests
         Assert.Equal(manifest, candidate.Manifest);
         Assert.Equal(GraphEditorPluginCompatibilityStatus.Compatible, candidate.Compatibility.Status);
         Assert.Equal(GraphEditorPluginTrustDecision.Blocked, candidate.TrustEvaluation.Decision);
+        Assert.Equal(provenanceEvidence, candidate.ProvenanceEvidence);
         Assert.DoesNotContain(
             AppDomain.CurrentDomain.GetAssemblies(),
             assembly => string.Equals(GetAssemblyLocation(assembly), pluginAssemblyPath, StringComparison.OrdinalIgnoreCase));

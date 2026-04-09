@@ -11,12 +11,14 @@ public sealed record GraphEditorPluginRegistration
         IGraphEditorPlugin? plugin,
         string? assemblyPath,
         string? pluginTypeName,
-        GraphEditorPluginManifest? manifest)
+        GraphEditorPluginManifest? manifest,
+        GraphEditorPluginProvenanceEvidence? provenanceEvidence)
     {
         Plugin = plugin;
         AssemblyPath = assemblyPath;
         PluginTypeName = pluginTypeName;
         Manifest = manifest;
+        ProvenanceEvidence = provenanceEvidence ?? GraphEditorPluginProvenanceEvidence.NotProvided;
     }
 
     /// <summary>
@@ -40,6 +42,11 @@ public sealed record GraphEditorPluginRegistration
     public GraphEditorPluginManifest? Manifest { get; }
 
     /// <summary>
+    /// 可选的来源和签名证据。
+    /// </summary>
+    public GraphEditorPluginProvenanceEvidence ProvenanceEvidence { get; }
+
+    /// <summary>
     /// 是否为直接实例注册。
     /// </summary>
     public bool IsDirectRegistration => Plugin is not null;
@@ -52,10 +59,13 @@ public sealed record GraphEditorPluginRegistration
     /// <summary>
     /// 基于直接插件实例创建注册项。
     /// </summary>
-    public static GraphEditorPluginRegistration FromPlugin(IGraphEditorPlugin plugin, GraphEditorPluginManifest? manifest = null)
+    public static GraphEditorPluginRegistration FromPlugin(
+        IGraphEditorPlugin plugin,
+        GraphEditorPluginManifest? manifest = null,
+        GraphEditorPluginProvenanceEvidence? provenanceEvidence = null)
     {
         ArgumentNullException.ThrowIfNull(plugin);
-        return new GraphEditorPluginRegistration(plugin, null, null, manifest);
+        return new GraphEditorPluginRegistration(plugin, null, null, manifest, provenanceEvidence);
     }
 
     /// <summary>
@@ -64,7 +74,8 @@ public sealed record GraphEditorPluginRegistration
     public static GraphEditorPluginRegistration FromAssemblyPath(
         string assemblyPath,
         string? pluginTypeName = null,
-        GraphEditorPluginManifest? manifest = null)
+        GraphEditorPluginManifest? manifest = null,
+        GraphEditorPluginProvenanceEvidence? provenanceEvidence = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(assemblyPath);
         if (pluginTypeName is not null)
@@ -77,6 +88,7 @@ public sealed record GraphEditorPluginRegistration
             plugin: null,
             assemblyPath: Path.GetFullPath(assemblyPath),
             pluginTypeName: pluginTypeName,
-            manifest: manifest);
+            manifest: manifest,
+            provenanceEvidence: provenanceEvidence);
     }
 }

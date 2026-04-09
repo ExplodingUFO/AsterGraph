@@ -26,7 +26,8 @@ public sealed record GraphEditorPluginManifestSourceCandidate
         string source,
         string assemblyPath,
         GraphEditorPluginManifest manifest,
-        string? pluginTypeName = null)
+        string? pluginTypeName = null,
+        GraphEditorPluginProvenanceEvidence? provenanceEvidence = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(source);
         ArgumentException.ThrowIfNullOrWhiteSpace(assemblyPath);
@@ -36,6 +37,7 @@ public sealed record GraphEditorPluginManifestSourceCandidate
         AssemblyPath = Path.GetFullPath(assemblyPath);
         Manifest = manifest;
         PluginTypeName = string.IsNullOrWhiteSpace(pluginTypeName) ? null : pluginTypeName.Trim();
+        ProvenanceEvidence = provenanceEvidence ?? GraphEditorPluginProvenanceEvidence.NotProvided;
     }
 
     /// <summary>
@@ -57,4 +59,9 @@ public sealed record GraphEditorPluginManifestSourceCandidate
     /// 可选的显式插件类型名。
     /// </summary>
     public string? PluginTypeName { get; }
+
+    /// <summary>
+    /// 可选的来源和签名证据。
+    /// </summary>
+    public GraphEditorPluginProvenanceEvidence ProvenanceEvidence { get; }
 }

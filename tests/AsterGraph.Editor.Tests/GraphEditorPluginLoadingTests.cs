@@ -287,6 +287,14 @@ public sealed class GraphEditorPluginLoadingTests
     [Fact]
     public void DiscoverPluginCandidates_And_CreateSession_StayAlignedOnHostProvidedManifestTrustFacts_ForManifestSources()
     {
+        var provenanceEvidence = new GraphEditorPluginProvenanceEvidence(
+            new GraphEditorPluginPackageIdentity("AsterGraph.LoadingManifestSource", "1.0.0"),
+            new GraphEditorPluginSignatureEvidence(
+                GraphEditorPluginSignatureStatus.Valid,
+                GraphEditorPluginSignatureKind.Repository,
+                new GraphEditorPluginSignerIdentity("AsterGraph Repository", "LOAD1234"),
+                timestampUtc: new DateTimeOffset(2026, 04, 09, 0, 0, 0, TimeSpan.Zero),
+                timestampAuthority: "tests.timestamp"));
         var manifest = new GraphEditorPluginManifest(
             "tests.loading.manifest-source",
             "Loading Manifest Source",
@@ -310,7 +318,8 @@ public sealed class GraphEditorPluginLoadingTests
                         "tests.loading.manifest-source",
                         GetSamplePluginAssemblyPath(),
                         manifest,
-                        "AsterGraph.TestPlugins.SamplePlugin")),
+                        "AsterGraph.TestPlugins.SamplePlugin",
+                        provenanceEvidence)),
             ],
             TrustPolicy = trustPolicy,
         }));
@@ -320,7 +329,8 @@ public sealed class GraphEditorPluginLoadingTests
                 GraphEditorPluginRegistration.FromAssemblyPath(
                     GetSamplePluginAssemblyPath(),
                     "AsterGraph.TestPlugins.SamplePlugin",
-                    manifest),
+                    manifest,
+                    provenanceEvidence),
             ],
             null,
             null,
@@ -330,6 +340,7 @@ public sealed class GraphEditorPluginLoadingTests
         Assert.Equal(candidate.Manifest, snapshot.Manifest);
         Assert.Equal(candidate.TrustEvaluation, snapshot.TrustEvaluation);
         Assert.Equal(candidate.Compatibility, GetCompatibility(snapshot));
+        Assert.Equal(candidate.ProvenanceEvidence, snapshot.ProvenanceEvidence);
         Assert.Equal(GraphEditorPluginLoadStatus.Loaded, snapshot.Status);
         Assert.Equal(GraphEditorPluginLoadSourceKind.Assembly, snapshot.SourceKind);
     }

@@ -68,6 +68,14 @@ public sealed class GraphEditorPluginContractsTests
     public void GraphEditorPluginRegistration_SupportsDirectAndAssemblyBasedInputs_WithOptionalManifestMetadata()
     {
         var plugin = new TestPlugin();
+        var provenanceEvidence = new GraphEditorPluginProvenanceEvidence(
+            new GraphEditorPluginPackageIdentity("AsterGraph.SamplePlugin", "1.2.3"),
+            new GraphEditorPluginSignatureEvidence(
+                GraphEditorPluginSignatureStatus.Valid,
+                GraphEditorPluginSignatureKind.Repository,
+                new GraphEditorPluginSignerIdentity("AsterGraph Tests", "ABCD1234"),
+                timestampUtc: new DateTimeOffset(2026, 04, 09, 0, 0, 0, TimeSpan.Zero),
+                timestampAuthority: "tests.timestamp"));
         var manifest = new GraphEditorPluginManifest(
             "tests.plugin.manifest",
             "Tests Plugin Manifest",
@@ -79,13 +87,14 @@ public sealed class GraphEditorPluginContractsTests
                 runtimeSurface: "session-first"),
             capabilitySummary: "node-definitions, menus, localization");
 
-        var direct = GraphEditorPluginRegistration.FromPlugin(plugin, manifest);
-        var assembly = GraphEditorPluginRegistration.FromAssemblyPath(@"C:\plugins\sample\SamplePlugin.dll", "Sample.Plugin", manifest);
+        var direct = GraphEditorPluginRegistration.FromPlugin(plugin, manifest, provenanceEvidence);
+        var assembly = GraphEditorPluginRegistration.FromAssemblyPath(@"C:\plugins\sample\SamplePlugin.dll", "Sample.Plugin", manifest, provenanceEvidence);
 
         Assert.Same(plugin, direct.Plugin);
         Assert.Null(direct.AssemblyPath);
         Assert.Null(direct.PluginTypeName);
         Assert.Equal(manifest, direct.Manifest);
+        Assert.Equal(provenanceEvidence, direct.ProvenanceEvidence);
         Assert.True(direct.IsDirectRegistration);
         Assert.False(direct.IsAssemblyRegistration);
 
@@ -93,6 +102,7 @@ public sealed class GraphEditorPluginContractsTests
         Assert.Equal(@"C:\plugins\sample\SamplePlugin.dll", assembly.AssemblyPath);
         Assert.Equal("Sample.Plugin", assembly.PluginTypeName);
         Assert.Equal(manifest, assembly.Manifest);
+        Assert.Equal(provenanceEvidence, assembly.ProvenanceEvidence);
         Assert.False(assembly.IsDirectRegistration);
         Assert.True(assembly.IsAssemblyRegistration);
     }
@@ -150,12 +160,21 @@ public sealed class GraphEditorPluginContractsTests
             GraphEditorPluginTrustEvaluationSource.HostPolicy,
             "trust.allowed.contract-tests",
             "Allowed for contract coverage.");
+        var provenanceEvidence = new GraphEditorPluginProvenanceEvidence(
+            new GraphEditorPluginPackageIdentity("AsterGraph.DiscoveryCandidate", "1.2.3"),
+            new GraphEditorPluginSignatureEvidence(
+                GraphEditorPluginSignatureStatus.Valid,
+                GraphEditorPluginSignatureKind.Author,
+                new GraphEditorPluginSignerIdentity("Tests Author", "1234ABCD"),
+                timestampUtc: new DateTimeOffset(2026, 04, 09, 0, 0, 0, TimeSpan.Zero),
+                timestampAuthority: "tests.timestamp"));
         var snapshot = new GraphEditorPluginCandidateSnapshot(
             GraphEditorPluginCandidateSourceKind.Directory,
             @"C:\plugins\candidate",
             manifest,
             compatibility,
             trust,
+            provenanceEvidence,
             assemblyPath: @"C:\plugins\candidate\DiscoveryCandidate.dll",
             pluginTypeName: "Tests.Plugin.DiscoveryCandidate");
 
@@ -166,6 +185,66 @@ public sealed class GraphEditorPluginContractsTests
         Assert.Equal(manifest, snapshot.Manifest);
         Assert.Equal(compatibility, snapshot.Compatibility);
         Assert.Equal(trust, snapshot.TrustEvaluation);
+        Assert.Equal(provenanceEvidence, snapshot.ProvenanceEvidence);
+    }
+
+    [Fact]
+    public void GraphEditorPluginTrustPolicyContext_ExposesAdditiveProvenanceEvidence()
+    {
+        var plugin = new TestPlugin();
+        var manifest = new GraphEditorPluginManifest(
+            "tests.trust.context",
+            "Trust Context Plugin",
+            new GraphEditorPluginManifestProvenance(
+                GraphEditorPluginManifestSourceKind.DirectRegistration,
+                "tests.trust.context"));
+        var provenanceEvidence = new GraphEditorPluginProvenanceEvidence(
+            new GraphEditorPluginPackageIdentity("AsterGraph.TrustContext", "1.0.0"),
+            new GraphEditorPluginSignatureEvidence(
+                GraphEditorPluginSignatureStatus.Valid,
+                GraphEditorPluginSignatureKind.Repository,
+                new GraphEditorPluginSignerIdentity("AsterGraph Repository", "FACE1234"),
+                timestampUtc: new DateTimeOffset(2026, 04, 09, 0, 0, 0, TimeSpan.Zero),
+                timestampAuthority: "tests.timestamp"));
+        var registration = GraphEditorPluginRegistration.FromPlugin(plugin, manifest, provenanceEvidence);
+        var context = new GraphEditorPluginTrustPolicyContext(registration, manifest, provenanceEvidence);
+
+        Assert.Equal(registration, context.Registration);
+        Assert.Equal(manifest, context.Manifest);
+        Assert.Equal(provenanceEvidence, context.ProvenanceEvidence);
+    }
+
+    [Fact]
+    public void GraphEditorPluginManifestSourceCandidate_SupportsOptionalProvenanceEvidence()
+    {
+        var manifest = new GraphEditorPluginManifest(
+            "tests.manifest-source.candidate",
+            "Manifest Source Candidate",
+            new GraphEditorPluginManifestProvenance(
+                GraphEditorPluginManifestSourceKind.Manifest,
+                "tests.manifest-source",
+                packageId: "AsterGraph.ManifestSource",
+                packageVersion: "1.0.0"));
+        var provenanceEvidence = new GraphEditorPluginProvenanceEvidence(
+            new GraphEditorPluginPackageIdentity("AsterGraph.ManifestSource", "1.0.0"),
+            new GraphEditorPluginSignatureEvidence(
+                GraphEditorPluginSignatureStatus.Valid,
+                GraphEditorPluginSignatureKind.Repository,
+                new GraphEditorPluginSignerIdentity("AsterGraph Repository", "FEED1234"),
+                timestampUtc: new DateTimeOffset(2026, 04, 09, 0, 0, 0, TimeSpan.Zero),
+                timestampAuthority: "tests.timestamp"));
+        var candidate = new GraphEditorPluginManifestSourceCandidate(
+            "tests.manifest-source",
+            @"C:\plugins\manifest\ManifestSource.dll",
+            manifest,
+            "Tests.Plugin.ManifestSource",
+            provenanceEvidence);
+
+        Assert.Equal("tests.manifest-source", candidate.Source);
+        Assert.Equal(@"C:\plugins\manifest\ManifestSource.dll", candidate.AssemblyPath);
+        Assert.Equal(manifest, candidate.Manifest);
+        Assert.Equal("Tests.Plugin.ManifestSource", candidate.PluginTypeName);
+        Assert.Equal(provenanceEvidence, candidate.ProvenanceEvidence);
     }
 
     [Fact]
@@ -179,6 +258,12 @@ public sealed class GraphEditorPluginContractsTests
             typeof(GraphEditorPluginManifestProvenance),
             typeof(GraphEditorPluginManifestSourceKind),
             typeof(GraphEditorPluginCompatibilityManifest),
+            typeof(GraphEditorPluginPackageIdentity),
+            typeof(GraphEditorPluginSignerIdentity),
+            typeof(GraphEditorPluginSignatureKind),
+            typeof(GraphEditorPluginSignatureStatus),
+            typeof(GraphEditorPluginSignatureEvidence),
+            typeof(GraphEditorPluginProvenanceEvidence),
             typeof(GraphEditorPluginCompatibilityEvaluation),
             typeof(GraphEditorPluginCompatibilityStatus),
             typeof(GraphEditorPluginCandidateSnapshot),

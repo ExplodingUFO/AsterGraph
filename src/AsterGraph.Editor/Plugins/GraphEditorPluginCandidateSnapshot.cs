@@ -30,6 +30,7 @@ public sealed record GraphEditorPluginCandidateSnapshot
         GraphEditorPluginManifest manifest,
         GraphEditorPluginCompatibilityEvaluation compatibility,
         GraphEditorPluginTrustEvaluation trustEvaluation,
+        GraphEditorPluginProvenanceEvidence provenanceEvidence,
         string? assemblyPath = null,
         string? pluginTypeName = null)
     {
@@ -37,12 +38,14 @@ public sealed record GraphEditorPluginCandidateSnapshot
         ArgumentNullException.ThrowIfNull(manifest);
         ArgumentNullException.ThrowIfNull(compatibility);
         ArgumentNullException.ThrowIfNull(trustEvaluation);
+        ArgumentNullException.ThrowIfNull(provenanceEvidence);
 
         SourceKind = sourceKind;
         Source = source.Trim();
         Manifest = manifest;
         Compatibility = compatibility;
         TrustEvaluation = trustEvaluation;
+        ProvenanceEvidence = provenanceEvidence;
         AssemblyPath = string.IsNullOrWhiteSpace(assemblyPath) ? null : Path.GetFullPath(assemblyPath);
         PluginTypeName = string.IsNullOrWhiteSpace(pluginTypeName) ? null : pluginTypeName.Trim();
     }
@@ -81,4 +84,9 @@ public sealed record GraphEditorPluginCandidateSnapshot
     /// 当前信任评估结果。
     /// </summary>
     public GraphEditorPluginTrustEvaluation TrustEvaluation { get; }
+
+    /// <summary>
+    /// 当前来源和签名证据。
+    /// </summary>
+    public GraphEditorPluginProvenanceEvidence ProvenanceEvidence { get; }
 }

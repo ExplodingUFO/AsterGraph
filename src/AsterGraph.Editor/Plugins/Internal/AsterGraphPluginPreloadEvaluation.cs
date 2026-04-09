@@ -3,7 +3,8 @@ namespace AsterGraph.Editor.Plugins.Internal;
 internal sealed record AsterGraphPluginPreloadEvaluation(
     GraphEditorPluginManifest Manifest,
     GraphEditorPluginCompatibilityEvaluation Compatibility,
-    GraphEditorPluginTrustEvaluation TrustEvaluation)
+    GraphEditorPluginTrustEvaluation TrustEvaluation,
+    GraphEditorPluginProvenanceEvidence ProvenanceEvidence)
 {
     public bool IsTrustBlocked
         => TrustEvaluation.Decision == GraphEditorPluginTrustDecision.Blocked;
