@@ -14,6 +14,11 @@ public enum GraphEditorPluginLoadSourceKind
     /// 由程序集路径注册产生。
     /// </summary>
     Assembly,
+
+    /// <summary>
+    /// 由包归档路径注册产生。
+    /// </summary>
+    Package,
 }
 
 /// <summary>
@@ -109,7 +114,8 @@ public sealed record GraphEditorPluginLoadSnapshot
         GraphEditorPluginDescriptor? descriptor = null,
         string? requestedPluginTypeName = null,
         string? resolvedPluginTypeName = null,
-        string? failureMessage = null)
+        string? failureMessage = null,
+        string? packagePath = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(source);
         ArgumentNullException.ThrowIfNull(contributions);
@@ -128,6 +134,7 @@ public sealed record GraphEditorPluginLoadSnapshot
         ProvenanceEvidence = provenanceEvidence;
         ActivationAttempted = activationAttempted;
         Descriptor = descriptor;
+        PackagePath = string.IsNullOrWhiteSpace(packagePath) ? null : Path.GetFullPath(packagePath);
         RequestedPluginTypeName = string.IsNullOrWhiteSpace(requestedPluginTypeName) ? null : requestedPluginTypeName.Trim();
         ResolvedPluginTypeName = string.IsNullOrWhiteSpace(resolvedPluginTypeName) ? null : resolvedPluginTypeName.Trim();
         FailureMessage = string.IsNullOrWhiteSpace(failureMessage) ? null : failureMessage.Trim();
@@ -147,6 +154,11 @@ public sealed record GraphEditorPluginLoadSnapshot
     /// 当前加载状态。
     /// </summary>
     public GraphEditorPluginLoadStatus Status { get; }
+
+    /// <summary>
+    /// 当前注册关联的本地包归档绝对路径。
+    /// </summary>
+    public string? PackagePath { get; }
 
     /// <summary>
     /// 插件贡献摘要。

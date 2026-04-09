@@ -16,6 +16,11 @@ public enum GraphEditorPluginManifestSourceKind
     AssemblyPath,
 
     /// <summary>
+    /// 来自包归档。
+    /// </summary>
+    PackageArchive,
+
+    /// <summary>
     /// 来自独立清单或未来的候选发现源。
     /// </summary>
     Manifest,

@@ -11,6 +11,11 @@ public enum GraphEditorPluginCandidateSourceKind
     Directory,
 
     /// <summary>
+    /// 来自本地包目录扫描。
+    /// </summary>
+    PackageDirectory,
+
+    /// <summary>
     /// 来自宿主提供的清单源。
     /// </summary>
     ManifestSource,
@@ -32,7 +37,8 @@ public sealed record GraphEditorPluginCandidateSnapshot
         GraphEditorPluginTrustEvaluation trustEvaluation,
         GraphEditorPluginProvenanceEvidence provenanceEvidence,
         string? assemblyPath = null,
-        string? pluginTypeName = null)
+        string? pluginTypeName = null,
+        string? packagePath = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(source);
         ArgumentNullException.ThrowIfNull(manifest);
@@ -47,6 +53,7 @@ public sealed record GraphEditorPluginCandidateSnapshot
         TrustEvaluation = trustEvaluation;
         ProvenanceEvidence = provenanceEvidence;
         AssemblyPath = string.IsNullOrWhiteSpace(assemblyPath) ? null : Path.GetFullPath(assemblyPath);
+        PackagePath = string.IsNullOrWhiteSpace(packagePath) ? null : Path.GetFullPath(packagePath);
         PluginTypeName = string.IsNullOrWhiteSpace(pluginTypeName) ? null : pluginTypeName.Trim();
     }
 
@@ -64,6 +71,11 @@ public sealed record GraphEditorPluginCandidateSnapshot
     /// 候选项对应的本地程序集绝对路径。
     /// </summary>
     public string? AssemblyPath { get; }
+
+    /// <summary>
+    /// 候选项对应的本地包归档绝对路径。
+    /// </summary>
+    public string? PackagePath { get; }
 
     /// <summary>
     /// 可选的显式插件类型名。

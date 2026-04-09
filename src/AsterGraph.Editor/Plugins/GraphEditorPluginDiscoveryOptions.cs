@@ -11,6 +11,11 @@ public sealed record GraphEditorPluginDiscoveryOptions
     public IReadOnlyList<GraphEditorPluginDirectoryDiscoverySource> DirectorySources { get; init; } = [];
 
     /// <summary>
+    /// 本地包目录发现源集合。
+    /// </summary>
+    public IReadOnlyList<GraphEditorPluginPackageDiscoverySource> PackageDirectorySources { get; init; } = [];
+
+    /// <summary>
     /// 宿主提供的清单发现源集合。
     /// </summary>
     public IReadOnlyList<IGraphEditorPluginManifestSource> ManifestSources { get; init; } = [];

@@ -10,12 +10,14 @@ public sealed record GraphEditorPluginRegistration
     private GraphEditorPluginRegistration(
         IGraphEditorPlugin? plugin,
         string? assemblyPath,
+        string? packagePath,
         string? pluginTypeName,
         GraphEditorPluginManifest? manifest,
         GraphEditorPluginProvenanceEvidence? provenanceEvidence)
     {
         Plugin = plugin;
         AssemblyPath = assemblyPath;
+        PackagePath = packagePath;
         PluginTypeName = pluginTypeName;
         Manifest = manifest;
         ProvenanceEvidence = provenanceEvidence ?? GraphEditorPluginProvenanceEvidence.NotProvided;
@@ -30,6 +32,11 @@ public sealed record GraphEditorPluginRegistration
     /// 程序集路径注册时的插件程序集绝对路径。
     /// </summary>
     public string? AssemblyPath { get; }
+
+    /// <summary>
+    /// 包路径注册时的插件包归档绝对路径。
+    /// </summary>
+    public string? PackagePath { get; }
 
     /// <summary>
     /// 可选的显式插件类型名。
@@ -57,6 +64,11 @@ public sealed record GraphEditorPluginRegistration
     public bool IsAssemblyRegistration => AssemblyPath is not null;
 
     /// <summary>
+    /// 是否为包路径注册。
+    /// </summary>
+    public bool IsPackageRegistration => PackagePath is not null;
+
+    /// <summary>
     /// 基于直接插件实例创建注册项。
     /// </summary>
     public static GraphEditorPluginRegistration FromPlugin(
@@ -65,7 +77,7 @@ public sealed record GraphEditorPluginRegistration
         GraphEditorPluginProvenanceEvidence? provenanceEvidence = null)
     {
         ArgumentNullException.ThrowIfNull(plugin);
-        return new GraphEditorPluginRegistration(plugin, null, null, manifest, provenanceEvidence);
+        return new GraphEditorPluginRegistration(plugin, null, null, null, manifest, provenanceEvidence);
     }
 
     /// <summary>
@@ -87,7 +99,27 @@ public sealed record GraphEditorPluginRegistration
         return new GraphEditorPluginRegistration(
             plugin: null,
             assemblyPath: Path.GetFullPath(assemblyPath),
+            packagePath: null,
             pluginTypeName: pluginTypeName,
+            manifest: manifest,
+            provenanceEvidence: provenanceEvidence);
+    }
+
+    /// <summary>
+    /// 基于包路径创建注册项。
+    /// </summary>
+    public static GraphEditorPluginRegistration FromPackagePath(
+        string packagePath,
+        GraphEditorPluginManifest? manifest = null,
+        GraphEditorPluginProvenanceEvidence? provenanceEvidence = null)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(packagePath);
+
+        return new GraphEditorPluginRegistration(
+            plugin: null,
+            assemblyPath: null,
+            packagePath: Path.GetFullPath(packagePath),
+            pluginTypeName: null,
             manifest: manifest,
             provenanceEvidence: provenanceEvidence);
     }

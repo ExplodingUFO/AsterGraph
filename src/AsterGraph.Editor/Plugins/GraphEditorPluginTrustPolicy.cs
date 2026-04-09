@@ -68,6 +68,11 @@ public sealed record GraphEditorPluginTrustPolicyContext
     /// 当前可见的来源和签名证据。
     /// </summary>
     public GraphEditorPluginProvenanceEvidence ProvenanceEvidence { get; }
+
+    /// <summary>
+    /// 当前注册关联的本地包归档绝对路径。
+    /// </summary>
+    public string? PackagePath => Registration.PackagePath;
 }
 
 /// <summary>
