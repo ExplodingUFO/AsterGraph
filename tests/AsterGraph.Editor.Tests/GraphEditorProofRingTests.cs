@@ -18,6 +18,7 @@ using AsterGraph.Editor.Localization;
 using AsterGraph.Editor.Menus;
 using AsterGraph.Editor.Models;
 using AsterGraph.Editor.Plugins;
+using AsterGraph.Editor.Plugins.Internal;
 using AsterGraph.Editor.Presentation;
 using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.Services;
@@ -362,6 +363,83 @@ public sealed class GraphEditorProofRingTests
         Assert.Contains(automationResult.Inspection.Document.Nodes, node => node.DefinitionId is { Value: "tests.proof.plugin" });
         Assert.True(automationResult.Succeeded);
         Assert.Equal(3, automationResult.ExecutedStepCount);
+    }
+
+    [Fact]
+    public void RuntimeAndRetainedProof_ExposeEquivalentStagedPackageSnapshotsAndInspectionParity()
+    {
+        var packageDirectory = Path.Combine(Path.GetTempPath(), "astergraph-proof-package-tests", Guid.NewGuid().ToString("N"));
+        var packagePath = PluginPackageTestHelper.CreateUnsignedPackageWithPluginPayload(
+            packageDirectory,
+            "AsterGraph.Proof.Stage",
+            "1.0.0",
+            title: "Proof Stage Package",
+            description: "Proof-ring staged package parity coverage.",
+            pluginAssemblyPath: GetSamplePluginAssemblyPath(),
+            pluginTypeName: "AsterGraph.TestPlugins.SamplePlugin");
+        var stageResult = AsterGraphEditorFactory.StagePluginPackage(new GraphEditorPluginPackageStageRequest(
+            CreateTrustedPackageCandidate(packagePath),
+            Path.Combine(packageDirectory, "staging-root")));
+        var registration = Assert.IsType<GraphEditorPluginRegistration>(stageResult.Registration);
+        var options = CreatePackageProofOptions(registration);
+        var retainedEditor = AsterGraphEditorFactory.Create(options);
+        var runtimeSession = AsterGraphEditorFactory.CreateSession(options);
+
+        var retainedSnapshots = retainedEditor.Session.Queries.GetPluginLoadSnapshots();
+        var runtimeSnapshots = runtimeSession.Queries.GetPluginLoadSnapshots();
+        var retainedInspection = retainedEditor.Session.Diagnostics.CaptureInspectionSnapshot();
+        var runtimeInspection = runtimeSession.Diagnostics.CaptureInspectionSnapshot();
+
+        Assert.Equal(runtimeSnapshots, retainedSnapshots);
+        Assert.Equal(runtimeInspection.PluginLoadSnapshots, retainedInspection.PluginLoadSnapshots);
+        var snapshot = Assert.Single(runtimeSnapshots);
+        Assert.Equal(GraphEditorPluginLoadSourceKind.Package, snapshot.SourceKind);
+        Assert.Equal(GraphEditorPluginLoadStatus.Loaded, snapshot.Status);
+        Assert.Equal(packagePath, snapshot.Source);
+        Assert.Equal(packagePath, snapshot.PackagePath);
+        Assert.NotNull(snapshot.Stage);
+        Assert.Equal(stageResult.Stage, snapshot.Stage);
+        Assert.Equal(GraphEditorPluginTrustDecision.Allowed, snapshot.TrustEvaluation!.Decision);
+        Assert.Equal(GraphEditorPluginSignatureStatus.Valid, snapshot.ProvenanceEvidence.Signature.Status);
+        Assert.True(snapshot.ActivationAttempted);
+        Assert.Equal("tests.sample-plugin", snapshot.Descriptor?.Id);
+        Assert.Contains(retainedInspection.RecentDiagnostics, diagnostic => diagnostic.Code == "plugin.load.succeeded");
+        Assert.Contains(runtimeInspection.RecentDiagnostics, diagnostic => diagnostic.Code == "plugin.load.succeeded");
+    }
+
+    [Fact]
+    public void RuntimeAndRetainedProof_ExposeEquivalentUnsignedPackageRefusalSnapshots()
+    {
+        var packageDirectory = Path.Combine(Path.GetTempPath(), "astergraph-proof-package-tests", Guid.NewGuid().ToString("N"));
+        var packagePath = PluginPackageTestHelper.CreateUnsignedPackage(
+            packageDirectory,
+            "AsterGraph.Proof.Unsigned",
+            "1.0.0",
+            title: "Proof Unsigned Package",
+            description: "Proof-ring unsigned package refusal coverage.");
+        var registration = CreateUnsignedPackageRegistration(packagePath);
+        var options = CreatePackageProofOptions(registration);
+        var retainedEditor = AsterGraphEditorFactory.Create(options);
+        var runtimeSession = AsterGraphEditorFactory.CreateSession(options);
+
+        var retainedSnapshots = retainedEditor.Session.Queries.GetPluginLoadSnapshots();
+        var runtimeSnapshots = runtimeSession.Queries.GetPluginLoadSnapshots();
+        var retainedInspection = retainedEditor.Session.Diagnostics.CaptureInspectionSnapshot();
+        var runtimeInspection = runtimeSession.Diagnostics.CaptureInspectionSnapshot();
+
+        Assert.Equal(runtimeSnapshots, retainedSnapshots);
+        Assert.Equal(runtimeInspection.PluginLoadSnapshots, retainedInspection.PluginLoadSnapshots);
+        var snapshot = Assert.Single(runtimeSnapshots);
+        Assert.Equal(GraphEditorPluginLoadSourceKind.Package, snapshot.SourceKind);
+        Assert.Equal(GraphEditorPluginLoadStatus.Failed, snapshot.Status);
+        Assert.Equal(packagePath, snapshot.Source);
+        Assert.Equal(packagePath, snapshot.PackagePath);
+        Assert.Equal(GraphEditorPluginSignatureStatus.Unsigned, snapshot.ProvenanceEvidence.Signature.Status);
+        Assert.False(snapshot.ActivationAttempted);
+        Assert.NotNull(snapshot.FailureMessage);
+        Assert.Contains("StagePluginPackage", snapshot.FailureMessage, StringComparison.Ordinal);
+        Assert.Contains(retainedInspection.RecentDiagnostics, diagnostic => diagnostic.Code == "plugin.load.package-staging-required");
+        Assert.Contains(runtimeInspection.RecentDiagnostics, diagnostic => diagnostic.Code == "plugin.load.package-staging-required");
     }
 
     [Fact]
@@ -775,6 +853,61 @@ public sealed class GraphEditorProofRingTests
         Assert.NotNull(property);
         return Assert.IsType<GraphEditorPluginCompatibilityEvaluation>(property!.GetValue(snapshot));
     }
+
+    private static AsterGraphEditorOptions CreatePackageProofOptions(GraphEditorPluginRegistration registration)
+        => new()
+        {
+            Document = CreateDocument(),
+            NodeCatalog = CreateCatalog(),
+            CompatibilityService = new ExactCompatibilityService(),
+            DiagnosticsSink = new RecordingDiagnosticsSink(),
+            PluginRegistrations = [registration],
+        };
+
+    private static GraphEditorPluginRegistration CreateUnsignedPackageRegistration(string packagePath)
+    {
+        var inspection = AsterGraphPluginPackageArchiveInspector.Inspect(packagePath);
+        return GraphEditorPluginRegistration.FromPackagePath(packagePath, inspection.Manifest, inspection.ProvenanceEvidence);
+    }
+
+    private static GraphEditorPluginCandidateSnapshot CreateTrustedPackageCandidate(string packagePath)
+    {
+        var inspection = AsterGraphPluginPackageArchiveInspector.Inspect(packagePath);
+        return new GraphEditorPluginCandidateSnapshot(
+            GraphEditorPluginCandidateSourceKind.PackageDirectory,
+            Path.GetDirectoryName(packagePath) ?? packagePath,
+            inspection.Manifest,
+            AsterGraphPluginPreloadEvaluator.EvaluateCompatibility(inspection.Manifest),
+            new GraphEditorPluginTrustEvaluation(
+                GraphEditorPluginTrustDecision.Allowed,
+                GraphEditorPluginTrustEvaluationSource.HostPolicy,
+                "trust.allowed.proof.package",
+                $"Allowed manifest '{inspection.Manifest.Id}' for package proof coverage."),
+            new GraphEditorPluginProvenanceEvidence(
+                inspection.ProvenanceEvidence.PackageIdentity,
+                new GraphEditorPluginSignatureEvidence(
+                    GraphEditorPluginSignatureStatus.Valid,
+                    GraphEditorPluginSignatureKind.Repository,
+                    new GraphEditorPluginSignerIdentity("AsterGraph Proof", "PROOF1234"),
+                    timestampUtc: new DateTimeOffset(2026, 04, 09, 0, 0, 0, TimeSpan.Zero),
+                    timestampAuthority: "tests.timestamp",
+                    reasonCode: "signature.valid.proof-package",
+                    reasonMessage: "Valid signature fixture for proof package coverage.")),
+            packagePath: packagePath);
+    }
+
+    private static string GetSamplePluginAssemblyPath()
+        => Path.GetFullPath(Path.Combine(
+            AppContext.BaseDirectory,
+            "..",
+            "..",
+            "..",
+            "..",
+            "AsterGraph.TestPlugins",
+            "bin",
+            "Debug",
+            "net9.0",
+            "AsterGraph.TestPlugins.dll"));
 
     private static GraphDocument CreateDocument()
         => new(
