@@ -349,13 +349,13 @@ public sealed class GraphEditorPluginLoadingTests
     public void CreateSession_WithPackageRegistration_ExposesStructuredPackageFailureWithoutActivation()
     {
         var diagnostics = new RecordingDiagnosticsSink();
-        var packagePath = Path.GetFullPath(Path.Combine(
-            Path.GetTempPath(),
-            "astergraph-plugin-loading-tests",
-            Guid.NewGuid().ToString("N"),
-            "sample-package.1.0.0.nupkg"));
-        Directory.CreateDirectory(Path.GetDirectoryName(packagePath)!);
-        File.WriteAllText(packagePath, "package placeholder");
+        var tempDirectory = Path.Combine(Path.GetTempPath(), "astergraph-plugin-loading-tests", Guid.NewGuid().ToString("N"));
+        var packagePath = PluginPackageTestHelper.CreateUnsignedPackage(
+            tempDirectory,
+            "AsterGraph.PackageLoading",
+            "1.0.0",
+            title: "Package Loading Candidate",
+            description: "Package loading refusal coverage.");
 
         var session = AsterGraphEditorFactory.CreateSession(CreateOptions(
             diagnostics,
@@ -368,6 +368,7 @@ public sealed class GraphEditorPluginLoadingTests
         Assert.Equal(packagePath, snapshot.PackagePath);
         Assert.False(snapshot.ActivationAttempted);
         Assert.Equal(GraphEditorPluginManifestSourceKind.PackageArchive, snapshot.Manifest.Provenance.SourceKind);
+        Assert.Equal(GraphEditorPluginSignatureStatus.NotProvided, snapshot.ProvenanceEvidence.Signature.Status);
         Assert.NotNull(snapshot.FailureMessage);
         Assert.Contains("Package registrations are not supported until verified staging is implemented.", snapshot.FailureMessage, StringComparison.Ordinal);
         Assert.Contains(diagnostics.Diagnostics, diagnostic => diagnostic.Code == "plugin.load.package-registration-not-supported");

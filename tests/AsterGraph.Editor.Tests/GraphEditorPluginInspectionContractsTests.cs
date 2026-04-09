@@ -215,6 +215,38 @@ public sealed class GraphEditorPluginInspectionContractsTests
         Assert.Contains(diagnostics, diagnostic => diagnostic.Code == "plugin.load.incompatible");
     }
 
+    [Fact]
+    public void CreateSession_WithPackageRegistration_ExposesStructuredPackageFailureSnapshot()
+    {
+        var packageDirectory = Path.Combine(Path.GetTempPath(), "astergraph-plugin-inspection-tests", Guid.NewGuid().ToString("N"));
+        var packagePath = PluginPackageTestHelper.CreateUnsignedPackage(
+            packageDirectory,
+            "AsterGraph.PackageInspection",
+            "1.0.0",
+            title: "Package Inspection Candidate",
+            description: "Inspection package failure coverage.");
+        var session = AsterGraphEditorFactory.CreateSession(CreateOptions(GraphEditorPluginRegistration.FromPackagePath(packagePath)));
+        var snapshot = Assert.Single(session.Queries.GetPluginLoadSnapshots());
+        var compatibility = GetCompatibility(snapshot);
+
+        Assert.Equal(GraphEditorPluginLoadSourceKind.Package, snapshot.SourceKind);
+        Assert.Equal(GraphEditorPluginLoadStatus.Failed, snapshot.Status);
+        Assert.Equal(packagePath, snapshot.Source);
+        Assert.Equal(packagePath, snapshot.PackagePath);
+        Assert.NotNull(snapshot.Manifest);
+        Assert.Equal(GraphEditorPluginManifestSourceKind.PackageArchive, snapshot.Manifest!.Provenance.SourceKind);
+        Assert.NotNull(compatibility);
+        Assert.Equal(GraphEditorPluginCompatibilityStatus.Unknown, compatibility!.Status);
+        Assert.NotNull(snapshot.TrustEvaluation);
+        Assert.Equal(GraphEditorPluginTrustDecision.Allowed, snapshot.TrustEvaluation!.Decision);
+        Assert.Equal(GraphEditorPluginProvenanceEvidence.NotProvided, snapshot.ProvenanceEvidence);
+        Assert.False(snapshot.ActivationAttempted);
+        Assert.Null(snapshot.Descriptor);
+        Assert.Null(snapshot.ResolvedPluginTypeName);
+        Assert.NotNull(snapshot.FailureMessage);
+        Assert.Contains("Package registrations are not supported until verified staging is implemented.", snapshot.FailureMessage!, StringComparison.Ordinal);
+    }
+
     private static AsterGraphEditorOptions CreateOptions(params GraphEditorPluginRegistration[] pluginRegistrations)
         => CreateOptions(null, pluginRegistrations);
 
