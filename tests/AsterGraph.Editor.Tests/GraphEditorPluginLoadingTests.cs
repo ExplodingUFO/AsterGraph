@@ -345,6 +345,34 @@ public sealed class GraphEditorPluginLoadingTests
         Assert.Equal(GraphEditorPluginLoadSourceKind.Assembly, snapshot.SourceKind);
     }
 
+    [Fact]
+    public void CreateSession_WithPackageRegistration_ExposesStructuredPackageFailureWithoutActivation()
+    {
+        var diagnostics = new RecordingDiagnosticsSink();
+        var packagePath = Path.GetFullPath(Path.Combine(
+            Path.GetTempPath(),
+            "astergraph-plugin-loading-tests",
+            Guid.NewGuid().ToString("N"),
+            "sample-package.1.0.0.nupkg"));
+        Directory.CreateDirectory(Path.GetDirectoryName(packagePath)!);
+        File.WriteAllText(packagePath, "package placeholder");
+
+        var session = AsterGraphEditorFactory.CreateSession(CreateOptions(
+            diagnostics,
+            GraphEditorPluginRegistration.FromPackagePath(packagePath)));
+        var snapshot = Assert.Single(session.Queries.GetPluginLoadSnapshots());
+
+        Assert.Equal(GraphEditorPluginLoadSourceKind.Package, snapshot.SourceKind);
+        Assert.Equal(GraphEditorPluginLoadStatus.Failed, snapshot.Status);
+        Assert.Equal(packagePath, snapshot.Source);
+        Assert.Equal(packagePath, snapshot.PackagePath);
+        Assert.False(snapshot.ActivationAttempted);
+        Assert.Equal(GraphEditorPluginManifestSourceKind.PackageArchive, snapshot.Manifest.Provenance.SourceKind);
+        Assert.NotNull(snapshot.FailureMessage);
+        Assert.Contains("Package registrations are not supported until verified staging is implemented.", snapshot.FailureMessage, StringComparison.Ordinal);
+        Assert.Contains(diagnostics.Diagnostics, diagnostic => diagnostic.Code == "plugin.load.package-registration-not-supported");
+    }
+
     private static GraphEditorPluginCompatibilityEvaluation? GetCompatibility(GraphEditorPluginLoadSnapshot snapshot)
     {
         ArgumentNullException.ThrowIfNull(snapshot);

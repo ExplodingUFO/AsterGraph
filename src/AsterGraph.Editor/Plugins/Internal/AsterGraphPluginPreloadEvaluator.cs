@@ -47,6 +47,11 @@ internal static class AsterGraphPluginPreloadEvaluator
             return CreateAssemblyFallbackManifest(registration.AssemblyPath, registration.PluginTypeName);
         }
 
+        if (registration.IsPackageRegistration && registration.PackagePath is not null)
+        {
+            return CreatePackageFallbackManifest(registration.PackagePath);
+        }
+
         return new GraphEditorPluginManifest(
             "unknown-plugin",
             "unknown-plugin",
@@ -200,6 +205,22 @@ internal static class AsterGraphPluginPreloadEvaluator
                 GraphEditorPluginManifestSourceKind.AssemblyPath,
                 fullPath),
             version: version);
+    }
+
+    private static GraphEditorPluginManifest CreatePackageFallbackManifest(string packagePath)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(packagePath);
+
+        var fullPath = Path.GetFullPath(packagePath);
+        var fileName = Path.GetFileNameWithoutExtension(fullPath);
+
+        return new GraphEditorPluginManifest(
+            fileName,
+            fileName,
+            new GraphEditorPluginManifestProvenance(
+                GraphEditorPluginManifestSourceKind.PackageArchive,
+                fullPath),
+            version: null);
     }
 
     private static GraphEditorPluginPackageIdentity? CreatePackageIdentity(GraphEditorPluginManifestProvenance provenance)

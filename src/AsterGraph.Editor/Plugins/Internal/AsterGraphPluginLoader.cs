@@ -51,15 +51,21 @@ internal static class AsterGraphPluginLoader
         ArgumentNullException.ThrowIfNull(diagnostics);
         ArgumentNullException.ThrowIfNull(loadContexts);
 
-        var sourceKind = registration.IsAssemblyRegistration
-            ? GraphEditorPluginLoadSourceKind.Assembly
-            : GraphEditorPluginLoadSourceKind.Direct;
+        var sourceKind = registration.IsPackageRegistration
+            ? GraphEditorPluginLoadSourceKind.Package
+            : registration.IsAssemblyRegistration
+                ? GraphEditorPluginLoadSourceKind.Assembly
+                : GraphEditorPluginLoadSourceKind.Direct;
         var source = registration.AssemblyPath
+            ?? registration.PackagePath
             ?? registration.Plugin?.GetType().FullName
             ?? "direct plugin registration";
-        var diagnosticSource = sourceKind == GraphEditorPluginLoadSourceKind.Assembly
-            ? $"assembly '{source}'"
-            : $"plugin '{source}'";
+        var diagnosticSource = sourceKind switch
+        {
+            GraphEditorPluginLoadSourceKind.Package => $"package '{source}'",
+            GraphEditorPluginLoadSourceKind.Assembly => $"assembly '{source}'",
+            _ => $"plugin '{source}'",
+        };
         var preload = AsterGraphPluginPreloadEvaluator.EvaluateRegistration(registration, trustPolicy);
         var manifest = preload.Manifest;
         var compatibility = preload.Compatibility;
@@ -82,7 +88,8 @@ internal static class AsterGraphPluginLoader
                     trustEvaluation,
                     provenanceEvidence,
                     activationAttempted: false,
-                    requestedPluginTypeName: registration.PluginTypeName));
+                    requestedPluginTypeName: registration.PluginTypeName,
+                    packagePath: registration.PackagePath));
                 return;
             }
 
@@ -99,7 +106,8 @@ internal static class AsterGraphPluginLoader
                     trustEvaluation,
                     provenanceEvidence,
                     activationAttempted: false,
-                    requestedPluginTypeName: registration.PluginTypeName));
+                    requestedPluginTypeName: registration.PluginTypeName,
+                    packagePath: registration.PackagePath));
                 return;
             }
 
@@ -121,6 +129,26 @@ internal static class AsterGraphPluginLoader
                     source,
                     plugin.GetType().FullName,
                     diagnosticSource);
+                return;
+            }
+
+            if (registration.IsPackageRegistration)
+            {
+                const string message = "Package registrations are not supported until verified staging is implemented.";
+                diagnostics.Add(CreatePackageRegistrationNotSupportedDiagnostic(source));
+                snapshots.Add(new GraphEditorPluginLoadSnapshot(
+                    sourceKind,
+                    source,
+                    GraphEditorPluginLoadStatus.Failed,
+                    GraphEditorPluginContributionSummarySnapshot.Empty,
+                    manifest,
+                    compatibility,
+                    trustEvaluation,
+                    provenanceEvidence,
+                    activationAttempted: false,
+                    requestedPluginTypeName: registration.PluginTypeName,
+                    failureMessage: message,
+                    packagePath: registration.PackagePath));
                 return;
             }
 
@@ -168,7 +196,8 @@ internal static class AsterGraphPluginLoader
                 provenanceEvidence,
                 activationAttempted,
                 requestedPluginTypeName: registration.PluginTypeName,
-                failureMessage: exception.Message));
+                failureMessage: exception.Message,
+                packagePath: registration.PackagePath));
         }
     }
 
@@ -313,6 +342,13 @@ internal static class AsterGraphPluginLoader
             $"Failed to load plugin from {source}: {exception.Message}",
             GraphEditorDiagnosticSeverity.Error,
             exception);
+
+    private static GraphEditorDiagnostic CreatePackageRegistrationNotSupportedDiagnostic(string source)
+        => new(
+            "plugin.load.package-registration-not-supported",
+            "plugin.load",
+            $"Refused plugin package registration from package '{source}': Package registrations are not supported until verified staging is implemented.",
+            GraphEditorDiagnosticSeverity.Warning);
 
     private static GraphEditorDiagnostic CreateBlockedDiagnostic(
         string source,
