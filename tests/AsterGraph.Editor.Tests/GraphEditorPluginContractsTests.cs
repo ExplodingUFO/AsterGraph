@@ -14,6 +14,18 @@ namespace AsterGraph.Editor.Tests;
 public sealed class GraphEditorPluginContractsTests
 {
     [Fact]
+    public void AsterGraphEditorFactory_ExposesCanonicalPluginCandidateDiscoveryApi()
+    {
+        var method = typeof(AsterGraphEditorFactory).GetMethod(nameof(AsterGraphEditorFactory.DiscoverPluginCandidates));
+
+        Assert.NotNull(method);
+        Assert.Equal(typeof(IReadOnlyList<GraphEditorPluginCandidateSnapshot>), method!.ReturnType);
+
+        var parameter = Assert.Single(method.GetParameters());
+        Assert.Equal(typeof(GraphEditorPluginDiscoveryOptions), parameter.ParameterType);
+    }
+
+    [Fact]
     public void AsterGraphEditorOptions_ExposesExplicitPluginRegistrations()
     {
         var property = typeof(AsterGraphEditorOptions).GetProperty(nameof(AsterGraphEditorOptions.PluginRegistrations));
@@ -38,6 +50,18 @@ public sealed class GraphEditorPluginContractsTests
         var options = new AsterGraphEditorOptions();
 
         Assert.Null(options.PluginTrustPolicy);
+    }
+
+    [Fact]
+    public void GraphEditorPluginDiscoveryOptions_ExposesCanonicalDirectoryAndManifestSources()
+    {
+        var options = new GraphEditorPluginDiscoveryOptions();
+
+        Assert.NotNull(options.DirectorySources);
+        Assert.Empty(options.DirectorySources);
+        Assert.NotNull(options.ManifestSources);
+        Assert.Empty(options.ManifestSources);
+        Assert.Null(options.TrustPolicy);
     }
 
     [Fact]
@@ -108,6 +132,43 @@ public sealed class GraphEditorPluginContractsTests
     }
 
     [Fact]
+    public void GraphEditorPluginCandidateSnapshot_ExposesCanonicalDiscoveryMetadataAndPreLoadEvaluationState()
+    {
+        var manifest = new GraphEditorPluginManifest(
+            "tests.discovery.candidate",
+            "Discovery Candidate",
+            new GraphEditorPluginManifestProvenance(
+                GraphEditorPluginManifestSourceKind.AssemblyPath,
+                @"C:\plugins\candidate\DiscoveryCandidate.dll"),
+            version: "1.2.3");
+        var compatibility = new GraphEditorPluginCompatibilityEvaluation(
+            GraphEditorPluginCompatibilityStatus.Compatible,
+            "compatibility.ok",
+            "Manifest compatibility accepted for the current host.");
+        var trust = new GraphEditorPluginTrustEvaluation(
+            GraphEditorPluginTrustDecision.Allowed,
+            GraphEditorPluginTrustEvaluationSource.HostPolicy,
+            "trust.allowed.contract-tests",
+            "Allowed for contract coverage.");
+        var snapshot = new GraphEditorPluginCandidateSnapshot(
+            GraphEditorPluginCandidateSourceKind.Directory,
+            @"C:\plugins\candidate",
+            manifest,
+            compatibility,
+            trust,
+            assemblyPath: @"C:\plugins\candidate\DiscoveryCandidate.dll",
+            pluginTypeName: "Tests.Plugin.DiscoveryCandidate");
+
+        Assert.Equal(GraphEditorPluginCandidateSourceKind.Directory, snapshot.SourceKind);
+        Assert.Equal(@"C:\plugins\candidate", snapshot.Source);
+        Assert.Equal(@"C:\plugins\candidate\DiscoveryCandidate.dll", snapshot.AssemblyPath);
+        Assert.Equal("Tests.Plugin.DiscoveryCandidate", snapshot.PluginTypeName);
+        Assert.Equal(manifest, snapshot.Manifest);
+        Assert.Equal(compatibility, snapshot.Compatibility);
+        Assert.Equal(trust, snapshot.TrustEvaluation);
+    }
+
+    [Fact]
     public void GraphEditorPluginContractSurface_IsRuntimeFirstAndFreeOfAvaloniaAndGraphEditorViewModel()
     {
         var publicTypes = new Type[]
@@ -118,6 +179,14 @@ public sealed class GraphEditorPluginContractsTests
             typeof(GraphEditorPluginManifestProvenance),
             typeof(GraphEditorPluginManifestSourceKind),
             typeof(GraphEditorPluginCompatibilityManifest),
+            typeof(GraphEditorPluginCompatibilityEvaluation),
+            typeof(GraphEditorPluginCompatibilityStatus),
+            typeof(GraphEditorPluginCandidateSnapshot),
+            typeof(GraphEditorPluginCandidateSourceKind),
+            typeof(GraphEditorPluginDiscoveryOptions),
+            typeof(GraphEditorPluginDirectoryDiscoverySource),
+            typeof(IGraphEditorPluginManifestSource),
+            typeof(GraphEditorPluginManifestSourceCandidate),
             typeof(GraphEditorPluginRegistration),
             typeof(GraphEditorPluginBuilder),
             typeof(GraphEditorPluginMenuAugmentationContext),

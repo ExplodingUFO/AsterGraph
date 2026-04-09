@@ -3,6 +3,7 @@ using AsterGraph.Editor.Diagnostics;
 using AsterGraph.Editor.Configuration;
 using AsterGraph.Editor.Kernel;
 using AsterGraph.Editor.Localization;
+using AsterGraph.Editor.Plugins;
 using AsterGraph.Editor.Plugins.Internal;
 using AsterGraph.Editor.Presentation;
 using AsterGraph.Editor.Runtime;
@@ -23,6 +24,17 @@ namespace AsterGraph.Editor.Hosting;
 /// </remarks>
 public static class AsterGraphEditorFactory
 {
+    /// <summary>
+    /// 使用宿主提供的发现选项读取本地插件候选项集合。
+    /// </summary>
+    /// <param name="options">插件候选项发现选项。</param>
+    /// <returns>候选项快照集合。</returns>
+    public static IReadOnlyList<GraphEditorPluginCandidateSnapshot> DiscoverPluginCandidates(GraphEditorPluginDiscoveryOptions options)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+        return [];
+    }
+
     /// <summary>
     /// 使用宿主提供的选项创建一个 <see cref="GraphEditorViewModel"/>。
     /// </summary>
