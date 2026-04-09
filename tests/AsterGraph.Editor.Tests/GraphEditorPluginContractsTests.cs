@@ -59,13 +59,25 @@ public sealed class GraphEditorPluginContractsTests
 
         Assert.NotNull(options.DirectorySources);
         Assert.Empty(options.DirectorySources);
+        Assert.NotNull(options.PackageDirectorySources);
+        Assert.Empty(options.PackageDirectorySources);
         Assert.NotNull(options.ManifestSources);
         Assert.Empty(options.ManifestSources);
         Assert.Null(options.TrustPolicy);
     }
 
     [Fact]
-    public void GraphEditorPluginRegistration_SupportsDirectAndAssemblyBasedInputs_WithOptionalManifestMetadata()
+    public void GraphEditorPluginPackageDiscoverySource_UsesStableDirectoryAndArchiveDefaults()
+    {
+        var source = new GraphEditorPluginPackageDiscoverySource(@"C:\packages\plugins");
+
+        Assert.Equal(@"C:\packages\plugins", source.DirectoryPath);
+        Assert.Equal("*.nupkg", source.SearchPattern);
+        Assert.False(source.IncludeSubdirectories);
+    }
+
+    [Fact]
+    public void GraphEditorPluginRegistration_SupportsDirectAssemblyAndPackageInputs_WithOptionalManifestMetadata()
     {
         var plugin = new TestPlugin();
         var provenanceEvidence = new GraphEditorPluginProvenanceEvidence(
@@ -89,22 +101,37 @@ public sealed class GraphEditorPluginContractsTests
 
         var direct = GraphEditorPluginRegistration.FromPlugin(plugin, manifest, provenanceEvidence);
         var assembly = GraphEditorPluginRegistration.FromAssemblyPath(@"C:\plugins\sample\SamplePlugin.dll", "Sample.Plugin", manifest, provenanceEvidence);
+        var package = GraphEditorPluginRegistration.FromPackagePath(@"C:\packages\sample\SamplePlugin.1.2.3.nupkg", manifest, provenanceEvidence);
 
         Assert.Same(plugin, direct.Plugin);
         Assert.Null(direct.AssemblyPath);
+        Assert.Null(direct.PackagePath);
         Assert.Null(direct.PluginTypeName);
         Assert.Equal(manifest, direct.Manifest);
         Assert.Equal(provenanceEvidence, direct.ProvenanceEvidence);
         Assert.True(direct.IsDirectRegistration);
         Assert.False(direct.IsAssemblyRegistration);
+        Assert.False(direct.IsPackageRegistration);
 
         Assert.Null(assembly.Plugin);
         Assert.Equal(@"C:\plugins\sample\SamplePlugin.dll", assembly.AssemblyPath);
+        Assert.Null(assembly.PackagePath);
         Assert.Equal("Sample.Plugin", assembly.PluginTypeName);
         Assert.Equal(manifest, assembly.Manifest);
         Assert.Equal(provenanceEvidence, assembly.ProvenanceEvidence);
         Assert.False(assembly.IsDirectRegistration);
         Assert.True(assembly.IsAssemblyRegistration);
+        Assert.False(assembly.IsPackageRegistration);
+
+        Assert.Null(package.Plugin);
+        Assert.Null(package.AssemblyPath);
+        Assert.Equal(@"C:\packages\sample\SamplePlugin.1.2.3.nupkg", package.PackagePath);
+        Assert.Null(package.PluginTypeName);
+        Assert.Equal(manifest, package.Manifest);
+        Assert.Equal(provenanceEvidence, package.ProvenanceEvidence);
+        Assert.False(package.IsDirectRegistration);
+        Assert.False(package.IsAssemblyRegistration);
+        Assert.True(package.IsPackageRegistration);
     }
 
     [Fact]
@@ -139,6 +166,7 @@ public sealed class GraphEditorPluginContractsTests
         Assert.Equal(provenance, manifest.Provenance);
         Assert.Equal(GraphEditorPluginManifestSourceKind.AssemblyPath, manifest.Provenance.SourceKind);
         Assert.Equal("session-first", manifest.Compatibility.RuntimeSurface);
+        Assert.True(Enum.IsDefined(GraphEditorPluginManifestSourceKind.PackageArchive));
     }
 
     [Fact]
@@ -169,23 +197,63 @@ public sealed class GraphEditorPluginContractsTests
                 timestampUtc: new DateTimeOffset(2026, 04, 09, 0, 0, 0, TimeSpan.Zero),
                 timestampAuthority: "tests.timestamp"));
         var snapshot = new GraphEditorPluginCandidateSnapshot(
-            GraphEditorPluginCandidateSourceKind.Directory,
+            GraphEditorPluginCandidateSourceKind.PackageDirectory,
             @"C:\plugins\candidate",
             manifest,
             compatibility,
             trust,
             provenanceEvidence,
             assemblyPath: @"C:\plugins\candidate\DiscoveryCandidate.dll",
-            pluginTypeName: "Tests.Plugin.DiscoveryCandidate");
+            pluginTypeName: "Tests.Plugin.DiscoveryCandidate",
+            packagePath: @"C:\packages\candidate\DiscoveryCandidate.1.2.3.nupkg");
 
-        Assert.Equal(GraphEditorPluginCandidateSourceKind.Directory, snapshot.SourceKind);
+        Assert.Equal(GraphEditorPluginCandidateSourceKind.PackageDirectory, snapshot.SourceKind);
         Assert.Equal(@"C:\plugins\candidate", snapshot.Source);
         Assert.Equal(@"C:\plugins\candidate\DiscoveryCandidate.dll", snapshot.AssemblyPath);
+        Assert.Equal(@"C:\packages\candidate\DiscoveryCandidate.1.2.3.nupkg", snapshot.PackagePath);
         Assert.Equal("Tests.Plugin.DiscoveryCandidate", snapshot.PluginTypeName);
         Assert.Equal(manifest, snapshot.Manifest);
         Assert.Equal(compatibility, snapshot.Compatibility);
         Assert.Equal(trust, snapshot.TrustEvaluation);
         Assert.Equal(provenanceEvidence, snapshot.ProvenanceEvidence);
+    }
+
+    [Fact]
+    public void GraphEditorPluginLoadSnapshot_ExposesCanonicalPackageAwareInspectionMetadata()
+    {
+        var manifest = new GraphEditorPluginManifest(
+            "tests.load.package",
+            "Package Load Snapshot",
+            new GraphEditorPluginManifestProvenance(
+                GraphEditorPluginManifestSourceKind.PackageArchive,
+                @"C:\packages\candidate\LoadCandidate.1.2.3.nupkg"),
+            version: "1.2.3");
+        var compatibility = new GraphEditorPluginCompatibilityEvaluation(
+            GraphEditorPluginCompatibilityStatus.Unknown,
+            "compatibility.not-declared",
+            "Compatibility is not declared yet.");
+        var trust = GraphEditorPluginTrustEvaluation.ImplicitAllow();
+        var snapshot = new GraphEditorPluginLoadSnapshot(
+            GraphEditorPluginLoadSourceKind.Package,
+            @"C:\packages\candidate\LoadCandidate.1.2.3.nupkg",
+            GraphEditorPluginLoadStatus.Failed,
+            GraphEditorPluginContributionSummarySnapshot.Empty,
+            manifest,
+            compatibility,
+            trust,
+            GraphEditorPluginProvenanceEvidence.NotProvided,
+            activationAttempted: false,
+            failureMessage: "Package registrations are not supported yet.",
+            packagePath: @"C:\packages\candidate\LoadCandidate.1.2.3.nupkg");
+
+        Assert.Equal(GraphEditorPluginLoadSourceKind.Package, snapshot.SourceKind);
+        Assert.Equal(@"C:\packages\candidate\LoadCandidate.1.2.3.nupkg", snapshot.Source);
+        Assert.Equal(@"C:\packages\candidate\LoadCandidate.1.2.3.nupkg", snapshot.PackagePath);
+        Assert.False(snapshot.ActivationAttempted);
+        Assert.Equal(GraphEditorPluginLoadStatus.Failed, snapshot.Status);
+        Assert.Equal(manifest, snapshot.Manifest);
+        Assert.Equal(compatibility, snapshot.Compatibility);
+        Assert.Equal(trust, snapshot.TrustEvaluation);
     }
 
     [Fact]
@@ -270,6 +338,7 @@ public sealed class GraphEditorPluginContractsTests
             typeof(GraphEditorPluginCandidateSourceKind),
             typeof(GraphEditorPluginDiscoveryOptions),
             typeof(GraphEditorPluginDirectoryDiscoverySource),
+            typeof(GraphEditorPluginPackageDiscoverySource),
             typeof(IGraphEditorPluginManifestSource),
             typeof(GraphEditorPluginManifestSourceCandidate),
             typeof(GraphEditorPluginRegistration),
