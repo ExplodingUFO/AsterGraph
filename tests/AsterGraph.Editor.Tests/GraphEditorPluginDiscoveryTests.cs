@@ -1,5 +1,4 @@
 using System.Reflection;
-using System.IO.Compression;
 using AsterGraph.Editor.Hosting;
 using AsterGraph.Editor.Plugins;
 using Xunit;
@@ -127,7 +126,7 @@ public sealed class GraphEditorPluginDiscoveryTests
     {
         var tempDirectory = CreateTempDirectory();
         Directory.CreateDirectory(tempDirectory);
-        var packagePath = CreateTestPackage(
+        var packagePath = PluginPackageTestHelper.CreateUnsignedPackage(
             tempDirectory,
             "AsterGraph.PackageDiscovery",
             "1.2.3",
@@ -162,7 +161,7 @@ public sealed class GraphEditorPluginDiscoveryTests
     {
         var tempDirectory = CreateTempDirectory();
         Directory.CreateDirectory(tempDirectory);
-        var packagePath = CreateTestPackage(
+        var packagePath = PluginPackageTestHelper.CreateUnsignedPackage(
             tempDirectory,
             "AsterGraph.PackageTrust",
             "2.0.0",
@@ -185,6 +184,32 @@ public sealed class GraphEditorPluginDiscoveryTests
         Assert.Equal(packagePath, trustPolicy.SeenPackagePath);
     }
 
+    [Fact]
+    public void DiscoverPluginCandidates_WithSignedPackageMarker_ReportsUnknownSignatureState()
+    {
+        var tempDirectory = CreateTempDirectory();
+        Directory.CreateDirectory(tempDirectory);
+        var packagePath = PluginPackageTestHelper.CreateSignedMarkerPackage(
+            tempDirectory,
+            "AsterGraph.PackageSigned",
+            "3.0.0",
+            title: "Signed Package Candidate",
+            description: "Package signature marker coverage.");
+
+        var candidates = AsterGraphEditorFactory.DiscoverPluginCandidates(new GraphEditorPluginDiscoveryOptions
+        {
+            PackageDirectorySources =
+            [
+                new GraphEditorPluginPackageDiscoverySource(tempDirectory),
+            ],
+        });
+
+        var candidate = Assert.Single(candidates);
+        Assert.Equal(packagePath, candidate.PackagePath);
+        Assert.Equal(GraphEditorPluginSignatureStatus.Unknown, candidate.ProvenanceEvidence.Signature.Status);
+        Assert.Equal("signature.validation.unavailable", candidate.ProvenanceEvidence.Signature.ReasonCode);
+    }
+
     private static string CopySamplePluginAssembly(string targetDirectory, string fileName)
     {
         Directory.CreateDirectory(targetDirectory);
@@ -195,36 +220,6 @@ public sealed class GraphEditorPluginDiscoveryTests
 
     private static string CreateTempDirectory()
         => Path.Combine(Path.GetTempPath(), "astergraph-plugin-discovery-tests", Guid.NewGuid().ToString("N"));
-
-    private static string CreateTestPackage(
-        string directory,
-        string packageId,
-        string version,
-        string title,
-        string description)
-    {
-        Directory.CreateDirectory(directory);
-        var packagePath = Path.Combine(directory, $"{packageId}.{version}.nupkg");
-
-        using var stream = File.Create(packagePath);
-        using var archive = new ZipArchive(stream, ZipArchiveMode.Create);
-        var nuspecEntry = archive.CreateEntry($"{packageId}.nuspec");
-        using var writer = new StreamWriter(nuspecEntry.Open());
-        writer.Write($$"""
-            <?xml version="1.0" encoding="utf-8"?>
-            <package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
-              <metadata>
-                <id>{{packageId}}</id>
-                <version>{{version}}</version>
-                <title>{{title}}</title>
-                <authors>AsterGraph Tests</authors>
-                <description>{{description}}</description>
-              </metadata>
-            </package>
-            """);
-
-        return Path.GetFullPath(packagePath);
-    }
 
     private static string GetSamplePluginAssemblyPath()
         => Path.GetFullPath(Path.Combine(
