@@ -182,7 +182,7 @@ public sealed class GraphEditorPluginLoadingTests
                 typeof(TrackingDirectPlugin).FullName ?? nameof(TrackingDirectPlugin)),
             version: "1.0.0",
             compatibility: new GraphEditorPluginCompatibilityManifest(
-                minimumAsterGraphVersion: "1.0.0",
+                minimumAsterGraphVersion: "0.0.0",
                 targetFramework: "net9.0",
                 runtimeSurface: "session-first"),
             capabilitySummary: "menus");
@@ -198,13 +198,59 @@ public sealed class GraphEditorPluginLoadingTests
 
         Assert.Equal(runtimeSnapshots, retainedSnapshots);
         var snapshot = Assert.Single(runtimeSnapshots);
+        var compatibility = GetCompatibility(snapshot);
         Assert.Equal(GraphEditorPluginLoadStatus.Blocked, snapshot.Status);
+        Assert.NotNull(compatibility);
+        Assert.Equal(GraphEditorPluginCompatibilityStatus.Compatible, compatibility!.Status);
         Assert.Equal(GraphEditorPluginTrustDecision.Blocked, snapshot.TrustEvaluation!.Decision);
         Assert.False(snapshot.ActivationAttempted);
         Assert.True(retainedFeatures["integration.plugin-trust-policy"].IsAvailable);
         Assert.True(runtimeFeatures["integration.plugin-trust-policy"].IsAvailable);
         Assert.Single(editorDiagnostics.Diagnostics, diagnostic => diagnostic.Code == "plugin.load.blocked");
         Assert.Single(runtimeDiagnostics.Diagnostics, diagnostic => diagnostic.Code == "plugin.load.blocked");
+        Assert.Equal(0, plugin.RegisterCallCount);
+    }
+
+    [Fact]
+    public void Create_And_CreateSession_WithIncompatibleManifest_SurfaceEquivalentBlockedSnapshotsAndDiagnostics()
+    {
+        var editorDiagnostics = new RecordingDiagnosticsSink();
+        var runtimeDiagnostics = new RecordingDiagnosticsSink();
+        var plugin = new IncompatibleTrackingDirectPlugin();
+        var manifest = new GraphEditorPluginManifest(
+            "tests.loading.incompatible-plugin",
+            "Incompatible Loading Plugin",
+            new GraphEditorPluginManifestProvenance(
+                GraphEditorPluginManifestSourceKind.DirectRegistration,
+                typeof(IncompatibleTrackingDirectPlugin).FullName ?? nameof(IncompatibleTrackingDirectPlugin)),
+            version: "1.0.0",
+            compatibility: new GraphEditorPluginCompatibilityManifest(
+                minimumAsterGraphVersion: "9999.0.0",
+                targetFramework: "net9.0",
+                runtimeSurface: "session-first"),
+            capabilitySummary: "menus");
+        var registration = GraphEditorPluginRegistration.FromPlugin(plugin, manifest);
+        var editor = AsterGraphEditorFactory.Create(CreateOptions(editorDiagnostics, [registration], null, null, null));
+        var session = AsterGraphEditorFactory.CreateSession(CreateOptions(runtimeDiagnostics, [registration], null, null, null));
+
+        var retainedSnapshots = editor.Session.Queries.GetPluginLoadSnapshots();
+        var runtimeSnapshots = session.Queries.GetPluginLoadSnapshots();
+        var retainedFeatures = editor.Session.Queries.GetFeatureDescriptors().ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
+        var runtimeFeatures = session.Queries.GetFeatureDescriptors().ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
+
+        Assert.Equal(runtimeSnapshots, retainedSnapshots);
+        var snapshot = Assert.Single(runtimeSnapshots);
+        var compatibility = GetCompatibility(snapshot);
+        Assert.Equal(GraphEditorPluginLoadStatus.Blocked, snapshot.Status);
+        Assert.NotNull(compatibility);
+        Assert.Equal(GraphEditorPluginCompatibilityStatus.Incompatible, compatibility!.Status);
+        Assert.Equal("compatibility.astergraph.minimum-version", compatibility.ReasonCode);
+        Assert.Equal(GraphEditorPluginTrustDecision.Allowed, snapshot.TrustEvaluation!.Decision);
+        Assert.False(snapshot.ActivationAttempted);
+        Assert.True(retainedFeatures["integration.plugin-loader"].IsAvailable);
+        Assert.True(runtimeFeatures["integration.plugin-loader"].IsAvailable);
+        Assert.Single(editorDiagnostics.Diagnostics, diagnostic => diagnostic.Code == "plugin.load.incompatible");
+        Assert.Single(runtimeDiagnostics.Diagnostics, diagnostic => diagnostic.Code == "plugin.load.incompatible");
         Assert.Equal(0, plugin.RegisterCallCount);
     }
 
@@ -233,8 +279,18 @@ public sealed class GraphEditorPluginLoadingTests
         Assert.Equal(pluginAssemblyPath, snapshot.Source);
         Assert.Equal(candidate.Manifest, snapshot.Manifest);
         Assert.Equal(candidate.TrustEvaluation, snapshot.TrustEvaluation);
+        Assert.Equal(candidate.Compatibility, GetCompatibility(snapshot));
         Assert.Equal(GraphEditorPluginCompatibilityStatus.Unknown, candidate.Compatibility.Status);
         Assert.Equal(GraphEditorPluginLoadStatus.Loaded, snapshot.Status);
+    }
+
+    private static GraphEditorPluginCompatibilityEvaluation? GetCompatibility(GraphEditorPluginLoadSnapshot snapshot)
+    {
+        ArgumentNullException.ThrowIfNull(snapshot);
+
+        var property = typeof(GraphEditorPluginLoadSnapshot).GetProperty("Compatibility");
+        Assert.NotNull(property);
+        return Assert.IsType<GraphEditorPluginCompatibilityEvaluation>(property!.GetValue(snapshot));
     }
 
     private static AsterGraphEditorOptions CreateOptions(
@@ -399,6 +455,20 @@ public sealed class GraphEditorPluginLoadingTests
         public int RegisterCallCount { get; private set; }
 
         public GraphEditorPluginDescriptor Descriptor { get; } = new("tests.loading.blocked-plugin", "Blocked Loading Plugin");
+
+        public void Register(GraphEditorPluginBuilder builder)
+        {
+            ArgumentNullException.ThrowIfNull(builder);
+            RegisterCallCount++;
+            builder.AddContextMenuAugmentor(new DirectContextMenuAugmentor());
+        }
+    }
+
+    private sealed class IncompatibleTrackingDirectPlugin : IGraphEditorPlugin
+    {
+        public int RegisterCallCount { get; private set; }
+
+        public GraphEditorPluginDescriptor Descriptor { get; } = new("tests.loading.incompatible-plugin", "Incompatible Loading Plugin");
 
         public void Register(GraphEditorPluginBuilder builder)
         {

@@ -102,6 +102,7 @@ public sealed record GraphEditorPluginLoadSnapshot
         GraphEditorPluginLoadStatus status,
         GraphEditorPluginContributionSummarySnapshot contributions,
         GraphEditorPluginManifest manifest,
+        GraphEditorPluginCompatibilityEvaluation compatibility,
         GraphEditorPluginTrustEvaluation trustEvaluation,
         bool activationAttempted,
         GraphEditorPluginDescriptor? descriptor = null,
@@ -112,6 +113,7 @@ public sealed record GraphEditorPluginLoadSnapshot
         ArgumentException.ThrowIfNullOrWhiteSpace(source);
         ArgumentNullException.ThrowIfNull(contributions);
         ArgumentNullException.ThrowIfNull(manifest);
+        ArgumentNullException.ThrowIfNull(compatibility);
         ArgumentNullException.ThrowIfNull(trustEvaluation);
 
         SourceKind = sourceKind;
@@ -119,6 +121,7 @@ public sealed record GraphEditorPluginLoadSnapshot
         Status = status;
         Contributions = contributions;
         Manifest = manifest;
+        Compatibility = compatibility;
         TrustEvaluation = trustEvaluation;
         ActivationAttempted = activationAttempted;
         Descriptor = descriptor;
@@ -151,6 +154,11 @@ public sealed record GraphEditorPluginLoadSnapshot
     /// 当前可见的加载前插件清单。
     /// </summary>
     public GraphEditorPluginManifest Manifest { get; }
+
+    /// <summary>
+    /// 当前加载前兼容性评估结果。
+    /// </summary>
+    public GraphEditorPluginCompatibilityEvaluation Compatibility { get; }
 
     /// <summary>
     /// 当前加载前信任评估结果。

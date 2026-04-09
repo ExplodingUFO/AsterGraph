@@ -5,6 +5,22 @@ namespace AsterGraph.Editor.Plugins.Internal;
 
 internal static class AsterGraphPluginPreloadEvaluator
 {
+    public static AsterGraphPluginPreloadEvaluation EvaluateRegistration(
+        GraphEditorPluginRegistration registration,
+        IGraphEditorPluginTrustPolicy? trustPolicy)
+    {
+        ArgumentNullException.ThrowIfNull(registration);
+
+        var manifest = ResolveManifest(registration);
+        var compatibility = EvaluateCompatibility(manifest);
+        var trustEvaluation = EvaluateTrustPolicy(trustPolicy, registration, manifest);
+
+        return new AsterGraphPluginPreloadEvaluation(
+            manifest,
+            compatibility,
+            trustEvaluation);
+    }
+
     public static GraphEditorPluginManifest ResolveManifest(GraphEditorPluginRegistration registration)
     {
         ArgumentNullException.ThrowIfNull(registration);

@@ -320,7 +320,7 @@ public sealed class GraphEditorProofRingTests
                         description: "Proof-ring manifest coverage.",
                         version: "1.0.0",
                         compatibility: new GraphEditorPluginCompatibilityManifest(
-                            minimumAsterGraphVersion: "1.0.0",
+                            minimumAsterGraphVersion: "0.0.0",
                             targetFramework: "net9.0",
                             runtimeSurface: "session-first"),
                         capabilitySummary: "menus, automation")),
@@ -340,9 +340,12 @@ public sealed class GraphEditorProofRingTests
 
         Assert.Equal(runtimeSnapshots, retainedSnapshots);
         var pluginSnapshot = Assert.Single(runtimeSnapshots);
+        var compatibility = GetCompatibility(pluginSnapshot);
         Assert.Equal(GraphEditorPluginLoadSourceKind.Direct, pluginSnapshot.SourceKind);
         Assert.Equal(GraphEditorPluginLoadStatus.Loaded, pluginSnapshot.Status);
         Assert.Equal("tests.proof.plugin", pluginSnapshot.Manifest!.Id);
+        Assert.NotNull(compatibility);
+        Assert.Equal(GraphEditorPluginCompatibilityStatus.Compatible, compatibility!.Status);
         Assert.Equal(GraphEditorPluginTrustDecision.Allowed, pluginSnapshot.TrustEvaluation!.Decision);
         Assert.Equal(GraphEditorPluginTrustEvaluationSource.HostPolicy, pluginSnapshot.TrustEvaluation.Source);
         Assert.True(pluginSnapshot.ActivationAttempted);
@@ -359,6 +362,59 @@ public sealed class GraphEditorProofRingTests
         Assert.Contains(automationResult.Inspection.Document.Nodes, node => node.DefinitionId is { Value: "tests.proof.plugin" });
         Assert.True(automationResult.Succeeded);
         Assert.Equal(3, automationResult.ExecutedStepCount);
+    }
+
+    [Fact]
+    public void RuntimeAndRetainedProof_ExposeEquivalentCompatibilityRefusalSnapshots()
+    {
+        var diagnostics = new RecordingDiagnosticsSink();
+        var plugin = new ProofTrackingPlugin();
+        var options = new AsterGraphEditorOptions
+        {
+            Document = CreateDocument(),
+            NodeCatalog = CreateCatalog(),
+            CompatibilityService = new ExactCompatibilityService(),
+            DiagnosticsSink = diagnostics,
+            PluginRegistrations =
+            [
+                GraphEditorPluginRegistration.FromPlugin(
+                    plugin,
+                    new GraphEditorPluginManifest(
+                        "tests.proof.incompatible-plugin",
+                        "Proof Incompatible Plugin",
+                        new GraphEditorPluginManifestProvenance(
+                            GraphEditorPluginManifestSourceKind.DirectRegistration,
+                            typeof(ProofTrackingPlugin).FullName ?? nameof(ProofTrackingPlugin)),
+                        description: "Proof-ring incompatibility coverage.",
+                        version: "1.0.0",
+                        compatibility: new GraphEditorPluginCompatibilityManifest(
+                            minimumAsterGraphVersion: "9999.0.0",
+                            targetFramework: "net9.0",
+                            runtimeSurface: "session-first"),
+                        capabilitySummary: "menus")),
+            ],
+            PluginTrustPolicy = new ProofAllowTrustPolicy(),
+        };
+        var retainedEditor = AsterGraphEditorFactory.Create(options);
+        var runtimeSession = AsterGraphEditorFactory.CreateSession(options);
+
+        var retainedSnapshots = retainedEditor.Session.Queries.GetPluginLoadSnapshots();
+        var runtimeSnapshots = runtimeSession.Queries.GetPluginLoadSnapshots();
+        var retainedInspection = retainedEditor.Session.Diagnostics.CaptureInspectionSnapshot();
+        var runtimeInspection = runtimeSession.Diagnostics.CaptureInspectionSnapshot();
+
+        Assert.Equal(runtimeSnapshots, retainedSnapshots);
+        Assert.Equal(runtimeInspection.PluginLoadSnapshots, retainedInspection.PluginLoadSnapshots);
+        var snapshot = Assert.Single(runtimeSnapshots);
+        var compatibility = GetCompatibility(snapshot);
+        Assert.Equal(GraphEditorPluginLoadStatus.Blocked, snapshot.Status);
+        Assert.NotNull(compatibility);
+        Assert.Equal(GraphEditorPluginCompatibilityStatus.Incompatible, compatibility!.Status);
+        Assert.Equal(GraphEditorPluginTrustDecision.Allowed, snapshot.TrustEvaluation!.Decision);
+        Assert.False(snapshot.ActivationAttempted);
+        Assert.Contains(retainedInspection.RecentDiagnostics, diagnostic => diagnostic.Code == "plugin.load.incompatible");
+        Assert.Contains(runtimeInspection.RecentDiagnostics, diagnostic => diagnostic.Code == "plugin.load.incompatible");
+        Assert.Equal(0, plugin.RegisterCallCount);
     }
 
     [AvaloniaFact]
@@ -654,6 +710,15 @@ public sealed class GraphEditorProofRingTests
         var property = typeof(NodeCanvas).GetProperty("AttachPlatformSeams", BindingFlags.Instance | BindingFlags.NonPublic)
             ?? throw new Xunit.Sdk.XunitException("Could not find NodeCanvas.AttachPlatformSeams.");
         return property.GetValue(canvas) as bool? ?? throw new Xunit.Sdk.XunitException("NodeCanvas.AttachPlatformSeams did not return a bool.");
+    }
+
+    private static GraphEditorPluginCompatibilityEvaluation? GetCompatibility(GraphEditorPluginLoadSnapshot snapshot)
+    {
+        ArgumentNullException.ThrowIfNull(snapshot);
+
+        var property = typeof(GraphEditorPluginLoadSnapshot).GetProperty("Compatibility");
+        Assert.NotNull(property);
+        return Assert.IsType<GraphEditorPluginCompatibilityEvaluation>(property!.GetValue(snapshot));
     }
 
     private static GraphDocument CreateDocument()
@@ -1006,6 +1071,22 @@ public sealed class GraphEditorProofRingTests
             builder.AddContextMenuAugmentor(new ProofPluginContextMenuAugmentor());
             builder.AddNodePresentationProvider(new ProofPluginPresentationProvider());
             builder.AddLocalizationProvider(new ProofPluginLocalizationProvider());
+        }
+    }
+
+    private sealed class ProofTrackingPlugin : IGraphEditorPlugin
+    {
+        public int RegisterCallCount { get; private set; }
+
+        public GraphEditorPluginDescriptor Descriptor { get; } = new(
+            "tests.proof.incompatible-plugin",
+            "Proof Incompatible Plugin",
+            "Direct plugin used by incompatibility proof-ring tests.");
+
+        public void Register(GraphEditorPluginBuilder builder)
+        {
+            ArgumentNullException.ThrowIfNull(builder);
+            RegisterCallCount++;
         }
     }
 

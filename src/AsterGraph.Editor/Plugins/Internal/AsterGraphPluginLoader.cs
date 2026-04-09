@@ -60,14 +60,15 @@ internal static class AsterGraphPluginLoader
         var diagnosticSource = sourceKind == GraphEditorPluginLoadSourceKind.Assembly
             ? $"assembly '{source}'"
             : $"plugin '{source}'";
-        var manifest = AsterGraphPluginPreloadEvaluator.ResolveManifest(registration);
-        var trustEvaluation = GraphEditorPluginTrustEvaluation.ImplicitAllow();
+        var preload = AsterGraphPluginPreloadEvaluator.EvaluateRegistration(registration, trustPolicy);
+        var manifest = preload.Manifest;
+        var compatibility = preload.Compatibility;
+        var trustEvaluation = preload.TrustEvaluation;
         var activationAttempted = false;
 
         try
         {
-            trustEvaluation = AsterGraphPluginPreloadEvaluator.EvaluateTrustPolicy(trustPolicy, registration, manifest);
-            if (trustEvaluation.Decision == GraphEditorPluginTrustDecision.Blocked)
+            if (preload.IsTrustBlocked)
             {
                 diagnostics.Add(CreateBlockedDiagnostic(diagnosticSource, manifest, trustEvaluation));
                 snapshots.Add(new GraphEditorPluginLoadSnapshot(
@@ -76,6 +77,23 @@ internal static class AsterGraphPluginLoader
                     GraphEditorPluginLoadStatus.Blocked,
                     GraphEditorPluginContributionSummarySnapshot.Empty,
                     manifest,
+                    compatibility,
+                    trustEvaluation,
+                    activationAttempted: false,
+                    requestedPluginTypeName: registration.PluginTypeName));
+                return;
+            }
+
+            if (preload.IsCompatibilityBlocked)
+            {
+                diagnostics.Add(CreateIncompatibleDiagnostic(diagnosticSource, manifest, compatibility));
+                snapshots.Add(new GraphEditorPluginLoadSnapshot(
+                    sourceKind,
+                    source,
+                    GraphEditorPluginLoadStatus.Blocked,
+                    GraphEditorPluginContributionSummarySnapshot.Empty,
+                    manifest,
+                    compatibility,
                     trustEvaluation,
                     activationAttempted: false,
                     requestedPluginTypeName: registration.PluginTypeName));
@@ -93,6 +111,7 @@ internal static class AsterGraphPluginLoader
                     snapshots,
                     diagnostics,
                     manifest,
+                    compatibility,
                     trustEvaluation,
                     sourceKind,
                     source,
@@ -121,6 +140,7 @@ internal static class AsterGraphPluginLoader
                     snapshots,
                     diagnostics,
                     manifest,
+                    compatibility,
                     trustEvaluation,
                     sourceKind,
                     source,
@@ -138,6 +158,7 @@ internal static class AsterGraphPluginLoader
                 GraphEditorPluginLoadStatus.Failed,
                 GraphEditorPluginContributionSummarySnapshot.Empty,
                 manifest,
+                compatibility,
                 trustEvaluation,
                 activationAttempted,
                 requestedPluginTypeName: registration.PluginTypeName,
@@ -220,6 +241,7 @@ internal static class AsterGraphPluginLoader
         ICollection<GraphEditorPluginLoadSnapshot> snapshots,
         ICollection<GraphEditorDiagnostic> diagnostics,
         GraphEditorPluginManifest manifest,
+        GraphEditorPluginCompatibilityEvaluation compatibility,
         GraphEditorPluginTrustEvaluation trustEvaluation,
         GraphEditorPluginLoadSourceKind sourceKind,
         string source,
@@ -233,6 +255,7 @@ internal static class AsterGraphPluginLoader
         ArgumentNullException.ThrowIfNull(snapshots);
         ArgumentNullException.ThrowIfNull(diagnostics);
         ArgumentNullException.ThrowIfNull(manifest);
+        ArgumentNullException.ThrowIfNull(compatibility);
         ArgumentNullException.ThrowIfNull(trustEvaluation);
         ArgumentException.ThrowIfNullOrWhiteSpace(source);
         ArgumentException.ThrowIfNullOrWhiteSpace(diagnosticSource);
@@ -250,6 +273,7 @@ internal static class AsterGraphPluginLoader
             GraphEditorPluginLoadStatus.Loaded,
             CreateContributionSummary(contributions),
             manifest,
+            compatibility,
             trustEvaluation,
             activationAttempted: true,
             descriptor,
@@ -289,6 +313,16 @@ internal static class AsterGraphPluginLoader
             "plugin.load.blocked",
             "plugin.trust",
             $"Blocked plugin '{manifest.Id}' from {source}: {trustEvaluation.ReasonMessage ?? trustEvaluation.ReasonCode ?? "Policy blocked the load."}",
+            GraphEditorDiagnosticSeverity.Warning);
+
+    private static GraphEditorDiagnostic CreateIncompatibleDiagnostic(
+        string source,
+        GraphEditorPluginManifest manifest,
+        GraphEditorPluginCompatibilityEvaluation compatibility)
+        => new(
+            "plugin.load.incompatible",
+            "plugin.compatibility",
+            $"Refused plugin '{manifest.Id}' from {source}: {compatibility.ReasonMessage ?? compatibility.ReasonCode ?? "Manifest compatibility was rejected for the current host."}",
             GraphEditorDiagnosticSeverity.Warning);
 }
 
