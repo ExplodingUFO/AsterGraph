@@ -32,7 +32,7 @@ public static class AsterGraphEditorFactory
     public static IReadOnlyList<GraphEditorPluginCandidateSnapshot> DiscoverPluginCandidates(GraphEditorPluginDiscoveryOptions options)
     {
         ArgumentNullException.ThrowIfNull(options);
-        return [];
+        return AsterGraphPluginDiscoveryService.Discover(options);
     }
 
     /// <summary>

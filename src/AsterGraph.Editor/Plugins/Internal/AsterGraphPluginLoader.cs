@@ -60,13 +60,13 @@ internal static class AsterGraphPluginLoader
         var diagnosticSource = sourceKind == GraphEditorPluginLoadSourceKind.Assembly
             ? $"assembly '{source}'"
             : $"plugin '{source}'";
-        var manifest = CreateFallbackManifest(registration, sourceKind, source);
+        var manifest = AsterGraphPluginPreloadEvaluator.ResolveManifest(registration);
         var trustEvaluation = GraphEditorPluginTrustEvaluation.ImplicitAllow();
         var activationAttempted = false;
 
         try
         {
-            trustEvaluation = EvaluateTrustPolicy(trustPolicy, registration, manifest);
+            trustEvaluation = AsterGraphPluginPreloadEvaluator.EvaluateTrustPolicy(trustPolicy, registration, manifest);
             if (trustEvaluation.Decision == GraphEditorPluginTrustDecision.Blocked)
             {
                 diagnostics.Add(CreateBlockedDiagnostic(diagnosticSource, manifest, trustEvaluation));
@@ -271,92 +271,6 @@ internal static class AsterGraphPluginLoader
             contributions.ContextMenuAugmentors.Count,
             contributions.NodePresentationProviders.Count,
             contributions.LocalizationProviders.Count);
-    }
-
-    private static GraphEditorPluginManifest CreateFallbackManifest(
-        GraphEditorPluginRegistration registration,
-        GraphEditorPluginLoadSourceKind sourceKind,
-        string source)
-    {
-        ArgumentNullException.ThrowIfNull(registration);
-        ArgumentException.ThrowIfNullOrWhiteSpace(source);
-
-        if (registration.Manifest is not null)
-        {
-            return registration.Manifest;
-        }
-
-        if (registration.IsDirectRegistration)
-        {
-            var descriptor = registration.Plugin?.Descriptor
-                ?? throw new InvalidOperationException("Direct plugin registration did not expose a descriptor.");
-            return descriptor.ToManifest(new GraphEditorPluginManifestProvenance(
-                GraphEditorPluginManifestSourceKind.DirectRegistration,
-                source));
-        }
-
-        if (sourceKind == GraphEditorPluginLoadSourceKind.Assembly && registration.AssemblyPath is not null)
-        {
-            return CreateAssemblyFallbackManifest(registration.AssemblyPath, registration.PluginTypeName);
-        }
-
-        return new GraphEditorPluginManifest(
-            source,
-            source,
-            new GraphEditorPluginManifestProvenance(GraphEditorPluginManifestSourceKind.Manifest, source));
-    }
-
-    private static GraphEditorPluginManifest CreateAssemblyFallbackManifest(string assemblyPath, string? pluginTypeName)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(assemblyPath);
-
-        var fullPath = Path.GetFullPath(assemblyPath);
-        var fileName = Path.GetFileNameWithoutExtension(fullPath);
-        var id = string.IsNullOrWhiteSpace(pluginTypeName) ? fileName : pluginTypeName.Trim();
-        var displayName = string.IsNullOrWhiteSpace(pluginTypeName)
-            ? fileName
-            : pluginTypeName.Split('.').Last();
-        string? version = null;
-
-        try
-        {
-            var assemblyName = AssemblyName.GetAssemblyName(fullPath);
-            version = assemblyName.Version?.ToString();
-            if (string.IsNullOrWhiteSpace(pluginTypeName) && !string.IsNullOrWhiteSpace(assemblyName.Name))
-            {
-                id = assemblyName.Name!;
-                displayName = assemblyName.Name!;
-            }
-        }
-        catch
-        {
-            // Missing or unreadable files still need a stable manifest shell for pre-load inspection.
-        }
-
-        return new GraphEditorPluginManifest(
-            id,
-            displayName,
-            new GraphEditorPluginManifestProvenance(
-                GraphEditorPluginManifestSourceKind.AssemblyPath,
-                fullPath),
-            version: version);
-    }
-
-    private static GraphEditorPluginTrustEvaluation EvaluateTrustPolicy(
-        IGraphEditorPluginTrustPolicy? trustPolicy,
-        GraphEditorPluginRegistration registration,
-        GraphEditorPluginManifest manifest)
-    {
-        ArgumentNullException.ThrowIfNull(registration);
-        ArgumentNullException.ThrowIfNull(manifest);
-
-        if (trustPolicy is null)
-        {
-            return GraphEditorPluginTrustEvaluation.ImplicitAllow();
-        }
-
-        return trustPolicy.Evaluate(new GraphEditorPluginTrustPolicyContext(registration, manifest))
-            ?? throw new InvalidOperationException("Plugin trust policy returned a null evaluation.");
     }
 
     private static GraphEditorDiagnostic CreateFailureDiagnostic(string source, Exception exception)
