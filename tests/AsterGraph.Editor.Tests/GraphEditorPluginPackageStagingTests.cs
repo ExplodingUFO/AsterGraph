@@ -69,15 +69,14 @@ public sealed class GraphEditorPluginPackageStagingTests
     public void Stage_WithoutDeclaredPayloadMetadata_RefusesPackageBeforeExtraction()
     {
         var tempDirectory = CreateTempDirectory();
-        var packagePath = PluginPackageTestHelper.CreateUnsignedPackageWithPluginPayload(
+        var packagePath = PluginPackageTestHelper.CreateUnsignedPackageWithMissingPluginPayloadMetadata(
             tempDirectory,
             "AsterGraph.PackageStage.MissingMetadata",
             "1.0.0",
             title: "Missing Metadata Candidate",
             description: "Refuses packages that do not declare a payload entry.",
             pluginAssemblyPath: GetSamplePluginAssemblyPath(),
-            pluginTypeName: "AsterGraph.TestPlugins.SamplePlugin",
-            includePluginMetadata: false);
+            pluginTypeName: "AsterGraph.TestPlugins.SamplePlugin");
         var candidate = CreateCandidate(packagePath);
 
         var stage = AsterGraphPluginPackageStagingService.Stage(new GraphEditorPluginPackageStageRequest(candidate, Path.Combine(tempDirectory, "staging-root")));
@@ -91,7 +90,67 @@ public sealed class GraphEditorPluginPackageStagingTests
         Assert.NotNull(stage.ReasonMessage);
     }
 
-    private static GraphEditorPluginCandidateSnapshot CreateCandidate(string packagePath)
+    [Fact]
+    public void Stage_WithInvalidPayloadMetadata_RefusesPackageBeforeExtraction()
+    {
+        var tempDirectory = CreateTempDirectory();
+        var packagePath = PluginPackageTestHelper.CreateUnsignedPackageWithInvalidPluginPayloadMetadata(
+            tempDirectory,
+            "AsterGraph.PackageStage.InvalidMetadata",
+            "1.0.0",
+            title: "Invalid Metadata Candidate",
+            description: "Refuses packages whose payload metadata is invalid.",
+            pluginAssemblyPath: GetSamplePluginAssemblyPath(),
+            invalidPluginMetadataJson: """
+                {
+                  "pluginAssembly": 42
+                }
+                """);
+        var candidate = CreateCandidate(packagePath);
+
+        var stage = AsterGraphPluginPackageStagingService.Stage(new GraphEditorPluginPackageStageRequest(candidate, Path.Combine(tempDirectory, "staging-root")));
+
+        Assert.Equal(GraphEditorPluginStageOutcome.Refused, stage.Outcome);
+        Assert.False(stage.UsedCache);
+        Assert.Null(stage.StagingDirectory);
+        Assert.Null(stage.MainAssemblyPath);
+        Assert.Equal("stage.payload.invalid", stage.ReasonCode);
+        Assert.NotNull(stage.ReasonMessage);
+    }
+
+    [Fact]
+    public void Stage_WhenTrustEvaluationBlocksCandidate_RefusesBeforeExtraction()
+    {
+        var tempDirectory = CreateTempDirectory();
+        var packagePath = PluginPackageTestHelper.CreateUnsignedPackageWithPluginPayload(
+            tempDirectory,
+            "AsterGraph.PackageStage.Blocked",
+            "1.0.0",
+            title: "Blocked Stage Candidate",
+            description: "Refuses candidates that are blocked by trust policy before extraction.",
+            pluginAssemblyPath: GetSamplePluginAssemblyPath(),
+            pluginTypeName: "AsterGraph.TestPlugins.SamplePlugin");
+        var candidate = CreateCandidate(
+            packagePath,
+            new GraphEditorPluginTrustEvaluation(
+                GraphEditorPluginTrustDecision.Blocked,
+                GraphEditorPluginTrustEvaluationSource.HostPolicy,
+                "trust.blocked.package-staging-tests",
+                "Blocked by package staging trust test."));
+
+        var stage = AsterGraphPluginPackageStagingService.Stage(new GraphEditorPluginPackageStageRequest(candidate, Path.Combine(tempDirectory, "staging-root")));
+
+        Assert.Equal(GraphEditorPluginStageOutcome.Refused, stage.Outcome);
+        Assert.False(stage.UsedCache);
+        Assert.Null(stage.StagingDirectory);
+        Assert.Null(stage.MainAssemblyPath);
+        Assert.Equal("trust.blocked.package-staging-tests", stage.ReasonCode);
+        Assert.Equal("Blocked by package staging trust test.", stage.ReasonMessage);
+    }
+
+    private static GraphEditorPluginCandidateSnapshot CreateCandidate(
+        string packagePath,
+        GraphEditorPluginTrustEvaluation? trustEvaluation = null)
     {
         var inspection = AsterGraphPluginPackageArchiveInspector.Inspect(packagePath);
         return new GraphEditorPluginCandidateSnapshot(
@@ -99,11 +158,12 @@ public sealed class GraphEditorPluginPackageStagingTests
             Path.GetDirectoryName(packagePath) ?? packagePath,
             inspection.Manifest,
             AsterGraphPluginPreloadEvaluator.EvaluateCompatibility(inspection.Manifest),
-            new GraphEditorPluginTrustEvaluation(
-                GraphEditorPluginTrustDecision.Allowed,
-                GraphEditorPluginTrustEvaluationSource.HostPolicy,
-                "trust.allowed.package-staging-tests",
-                "Allowed for package staging tests."),
+            trustEvaluation
+                ?? new GraphEditorPluginTrustEvaluation(
+                    GraphEditorPluginTrustDecision.Allowed,
+                    GraphEditorPluginTrustEvaluationSource.HostPolicy,
+                    "trust.allowed.package-staging-tests",
+                    "Allowed for package staging tests."),
             new GraphEditorPluginProvenanceEvidence(
                 inspection.ProvenanceEvidence.PackageIdentity,
                 new GraphEditorPluginSignatureEvidence(

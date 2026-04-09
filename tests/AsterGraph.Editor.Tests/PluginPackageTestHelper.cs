@@ -33,7 +33,8 @@ internal static class PluginPackageTestHelper
         string? pluginTypeName = null,
         string packagePayloadDirectory = "plugin",
         bool includePluginMetadata = true,
-        string? pluginAssemblyMetadataOverride = null)
+        string? pluginAssemblyMetadataOverride = null,
+        string? pluginMetadataContentOverride = null)
         => CreatePackageWithPluginPayload(
             directory,
             packageId,
@@ -45,7 +46,8 @@ internal static class PluginPackageTestHelper
             packagePayloadDirectory,
             includeSignatureMarker: false,
             includePluginMetadata,
-            pluginAssemblyMetadataOverride);
+            pluginAssemblyMetadataOverride,
+            pluginMetadataContentOverride);
 
     public static string CreateSignedMarkerPackageWithPluginPayload(
         string directory,
@@ -57,7 +59,8 @@ internal static class PluginPackageTestHelper
         string? pluginTypeName = null,
         string packagePayloadDirectory = "plugin",
         bool includePluginMetadata = true,
-        string? pluginAssemblyMetadataOverride = null)
+        string? pluginAssemblyMetadataOverride = null,
+        string? pluginMetadataContentOverride = null)
         => CreatePackageWithPluginPayload(
             directory,
             packageId,
@@ -69,7 +72,51 @@ internal static class PluginPackageTestHelper
             packagePayloadDirectory,
             includeSignatureMarker: true,
             includePluginMetadata,
-            pluginAssemblyMetadataOverride);
+            pluginAssemblyMetadataOverride,
+            pluginMetadataContentOverride);
+
+    public static string CreateUnsignedPackageWithMissingPluginPayloadMetadata(
+        string directory,
+        string packageId,
+        string version,
+        string title,
+        string description,
+        string pluginAssemblyPath,
+        string? pluginTypeName = null,
+        string packagePayloadDirectory = "plugin")
+        => CreateUnsignedPackageWithPluginPayload(
+            directory,
+            packageId,
+            version,
+            title,
+            description,
+            pluginAssemblyPath,
+            pluginTypeName,
+            packagePayloadDirectory,
+            includePluginMetadata: false);
+
+    public static string CreateUnsignedPackageWithInvalidPluginPayloadMetadata(
+        string directory,
+        string packageId,
+        string version,
+        string title,
+        string description,
+        string pluginAssemblyPath,
+        string invalidPluginMetadataJson,
+        string packagePayloadDirectory = "plugin")
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(invalidPluginMetadataJson);
+
+        return CreateUnsignedPackageWithPluginPayload(
+            directory,
+            packageId,
+            version,
+            title,
+            description,
+            pluginAssemblyPath,
+            packagePayloadDirectory: packagePayloadDirectory,
+            pluginMetadataContentOverride: invalidPluginMetadataJson);
+    }
 
     private static string CreatePackage(
         string directory,
@@ -99,7 +146,8 @@ internal static class PluginPackageTestHelper
         string packagePayloadDirectory,
         bool includeSignatureMarker,
         bool includePluginMetadata,
-        string? pluginAssemblyMetadataOverride)
+        string? pluginAssemblyMetadataOverride,
+        string? pluginMetadataContentOverride)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(directory);
         ArgumentException.ThrowIfNullOrWhiteSpace(packageId);
@@ -115,7 +163,8 @@ internal static class PluginPackageTestHelper
         {
             var metadataPluginAssembly = pluginAssemblyMetadataOverride
                 ?? JoinEntryPath(packagePayloadDirectory, Path.GetFileName(pluginAssemblyPath));
-            textEntries["astergraph.plugin.json"] = BuildPluginMetadata(metadataPluginAssembly, pluginTypeName);
+            textEntries["astergraph.plugin.json"] = pluginMetadataContentOverride
+                ?? BuildPluginMetadata(metadataPluginAssembly, pluginTypeName);
         }
 
         return CreatePackage(
