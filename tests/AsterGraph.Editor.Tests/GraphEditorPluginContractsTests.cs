@@ -26,6 +26,18 @@ public sealed class GraphEditorPluginContractsTests
     }
 
     [Fact]
+    public void AsterGraphEditorFactory_ExposesCanonicalPluginPackageStagingApi()
+    {
+        var method = typeof(AsterGraphEditorFactory).GetMethod(nameof(AsterGraphEditorFactory.StagePluginPackage));
+
+        Assert.NotNull(method);
+        Assert.Equal(typeof(GraphEditorPluginPackageStageResult), method!.ReturnType);
+
+        var parameter = Assert.Single(method.GetParameters());
+        Assert.Equal(typeof(GraphEditorPluginPackageStageRequest), parameter.ParameterType);
+    }
+
+    [Fact]
     public void AsterGraphEditorOptions_ExposesExplicitPluginRegistrations()
     {
         var property = typeof(AsterGraphEditorOptions).GetProperty(nameof(AsterGraphEditorOptions.PluginRegistrations));
@@ -135,6 +147,49 @@ public sealed class GraphEditorPluginContractsTests
     }
 
     [Fact]
+    public void GraphEditorPluginRegistration_FromStagedPackage_PreservesPackageOriginAndAssemblyLoadInputs()
+    {
+        var provenanceEvidence = new GraphEditorPluginProvenanceEvidence(
+            new GraphEditorPluginPackageIdentity("AsterGraph.StagedPlugin", "2.0.0"),
+            new GraphEditorPluginSignatureEvidence(GraphEditorPluginSignatureStatus.Valid));
+        var manifest = new GraphEditorPluginManifest(
+            "tests.plugin.staged",
+            "Staged Tests Plugin",
+            new GraphEditorPluginManifestProvenance(
+                GraphEditorPluginManifestSourceKind.PackageArchive,
+                @"C:\packages\staged\AsterGraph.StagedPlugin.2.0.0.nupkg",
+                packageId: "AsterGraph.StagedPlugin",
+                packageVersion: "2.0.0"),
+            version: "2.0.0");
+        var stage = new GraphEditorPluginStageSnapshot(
+            GraphEditorPluginStageOutcome.Staged,
+            @"C:\packages\staged\AsterGraph.StagedPlugin.2.0.0.nupkg",
+            provenanceEvidence.PackageIdentity,
+            stagingDirectory: @"C:\staging\AsterGraph.StagedPlugin\2.0.0",
+            mainAssemblyPath: @"C:\staging\AsterGraph.StagedPlugin\2.0.0\AsterGraph.StagedPlugin.dll",
+            pluginTypeName: "Tests.Plugin.Staged");
+
+        var registration = GraphEditorPluginRegistration.FromStagedPackage(
+            @"C:\packages\staged\AsterGraph.StagedPlugin.2.0.0.nupkg",
+            @"C:\staging\AsterGraph.StagedPlugin\2.0.0\AsterGraph.StagedPlugin.dll",
+            "Tests.Plugin.Staged",
+            manifest,
+            provenanceEvidence,
+            stage);
+
+        Assert.Null(registration.Plugin);
+        Assert.Equal(@"C:\packages\staged\AsterGraph.StagedPlugin.2.0.0.nupkg", registration.PackagePath);
+        Assert.Equal(@"C:\staging\AsterGraph.StagedPlugin\2.0.0\AsterGraph.StagedPlugin.dll", registration.AssemblyPath);
+        Assert.Equal("Tests.Plugin.Staged", registration.PluginTypeName);
+        Assert.Equal(manifest, registration.Manifest);
+        Assert.Equal(provenanceEvidence, registration.ProvenanceEvidence);
+        Assert.Equal(stage, registration.Stage);
+        Assert.False(registration.IsDirectRegistration);
+        Assert.True(registration.IsAssemblyRegistration);
+        Assert.True(registration.IsPackageRegistration);
+    }
+
+    [Fact]
     public void GraphEditorPluginManifest_ExposesCanonicalIdentityCompatibilityCapabilityAndProvenanceMetadata()
     {
         var provenance = new GraphEditorPluginManifestProvenance(
@@ -233,6 +288,14 @@ public sealed class GraphEditorPluginContractsTests
             "compatibility.not-declared",
             "Compatibility is not declared yet.");
         var trust = GraphEditorPluginTrustEvaluation.ImplicitAllow();
+        var stage = new GraphEditorPluginStageSnapshot(
+            GraphEditorPluginStageOutcome.CacheHit,
+            @"C:\packages\candidate\LoadCandidate.1.2.3.nupkg",
+            new GraphEditorPluginPackageIdentity("AsterGraph.LoadCandidate", "1.2.3"),
+            stagingDirectory: @"C:\staging\LoadCandidate\1.2.3",
+            mainAssemblyPath: @"C:\staging\LoadCandidate\1.2.3\LoadCandidate.dll",
+            pluginTypeName: "Tests.Plugin.LoadCandidate",
+            usedCache: true);
         var snapshot = new GraphEditorPluginLoadSnapshot(
             GraphEditorPluginLoadSourceKind.Package,
             @"C:\packages\candidate\LoadCandidate.1.2.3.nupkg",
@@ -244,16 +307,29 @@ public sealed class GraphEditorPluginContractsTests
             GraphEditorPluginProvenanceEvidence.NotProvided,
             activationAttempted: false,
             failureMessage: "Package registrations are not supported yet.",
-            packagePath: @"C:\packages\candidate\LoadCandidate.1.2.3.nupkg");
+            packagePath: @"C:\packages\candidate\LoadCandidate.1.2.3.nupkg",
+            stage: stage);
 
         Assert.Equal(GraphEditorPluginLoadSourceKind.Package, snapshot.SourceKind);
         Assert.Equal(@"C:\packages\candidate\LoadCandidate.1.2.3.nupkg", snapshot.Source);
         Assert.Equal(@"C:\packages\candidate\LoadCandidate.1.2.3.nupkg", snapshot.PackagePath);
+        Assert.Equal(stage, snapshot.Stage);
         Assert.False(snapshot.ActivationAttempted);
         Assert.Equal(GraphEditorPluginLoadStatus.Failed, snapshot.Status);
         Assert.Equal(manifest, snapshot.Manifest);
         Assert.Equal(compatibility, snapshot.Compatibility);
         Assert.Equal(trust, snapshot.TrustEvaluation);
+    }
+
+    [Fact]
+    public void GraphEditorPluginStageOutcome_ExposesStableResultValues()
+    {
+        var names = Enum.GetNames(typeof(GraphEditorPluginStageOutcome));
+
+        Assert.Contains(nameof(GraphEditorPluginStageOutcome.Staged), names);
+        Assert.Contains(nameof(GraphEditorPluginStageOutcome.CacheHit), names);
+        Assert.Contains(nameof(GraphEditorPluginStageOutcome.Refused), names);
+        Assert.Contains(nameof(GraphEditorPluginStageOutcome.Failed), names);
     }
 
     [Fact]
@@ -316,7 +392,7 @@ public sealed class GraphEditorPluginContractsTests
     }
 
     [Fact]
-    public void GraphEditorPluginContractSurface_IsRuntimeFirstAndFreeOfAvaloniaAndGraphEditorViewModel()
+    public void GraphEditorPluginContractSurface_IsRuntimeFirstAndFreeOfAvaloniaNuGetAndGraphEditorViewModel()
     {
         var publicTypes = new Type[]
         {
@@ -339,6 +415,10 @@ public sealed class GraphEditorPluginContractsTests
             typeof(GraphEditorPluginDiscoveryOptions),
             typeof(GraphEditorPluginDirectoryDiscoverySource),
             typeof(GraphEditorPluginPackageDiscoverySource),
+            typeof(GraphEditorPluginStageOutcome),
+            typeof(GraphEditorPluginStageSnapshot),
+            typeof(GraphEditorPluginPackageStageRequest),
+            typeof(GraphEditorPluginPackageStageResult),
             typeof(IGraphEditorPluginManifestSource),
             typeof(GraphEditorPluginManifestSourceCandidate),
             typeof(GraphEditorPluginRegistration),
@@ -447,6 +527,7 @@ public sealed class GraphEditorPluginContractsTests
     {
         var fullName = type.FullName ?? string.Empty;
         return fullName.StartsWith("Avalonia.", StringComparison.Ordinal)
+            || fullName.StartsWith("NuGet.", StringComparison.Ordinal)
             || fullName.Contains("GraphEditorViewModel", StringComparison.Ordinal)
             || fullName.Contains("NodeViewModel", StringComparison.Ordinal);
     }
