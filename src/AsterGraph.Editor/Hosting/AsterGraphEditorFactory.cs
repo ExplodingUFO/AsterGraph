@@ -57,6 +57,7 @@ public static class AsterGraphEditorFactory
             runtimeSession.ConfigureInstrumentation(resolved.Options.Instrumentation);
             runtimeSession.SetPluginContextMenuAugmentors(resolved.PluginContextMenuAugmentors);
             runtimeSession.SetPluginLoadSnapshots(resolved.PluginLoadResult.Snapshots);
+            runtimeSession.SetPluginTrustPolicyConfigured(resolved.Options.PluginTrustPolicy is not null);
             PublishDiagnostics(runtimeSession, resolved.PluginLoadResult.Diagnostics);
         }
 
@@ -93,12 +94,14 @@ public static class AsterGraphEditorFactory
                 hasFragmentLibraryService: true,
                 hasClipboardPayloadSerializer: true,
                 hasPluginLoader: true,
+                hasPluginTrustPolicy: resolved.Options.PluginTrustPolicy is not null,
                 hasContextMenuAugmentor: resolved.Options.ContextMenuAugmentor is not null || resolved.PluginContextMenuAugmentors.Count > 0,
                 hasNodePresentationProvider: resolved.NodePresentationProvider is not null,
                 hasLocalizationProvider: resolved.LocalizationProvider is not null));
         session.ConfigureInstrumentation(resolved.Options.Instrumentation);
         session.SetPluginContextMenuAugmentors(resolved.PluginContextMenuAugmentors);
         session.SetPluginLoadSnapshots(resolved.PluginLoadResult.Snapshots);
+        session.SetPluginTrustPolicyConfigured(resolved.Options.PluginTrustPolicy is not null);
         PublishDiagnostics(session, resolved.PluginLoadResult.Diagnostics);
         return session;
     }
@@ -120,7 +123,7 @@ public static class AsterGraphEditorFactory
             clipboardPayloadSerializer);
         var styleOptions = options.StyleOptions ?? GraphEditorStyleOptions.Default;
         var behaviorOptions = ResolveBehaviorOptions(options.BehaviorOptions, styleOptions);
-        var pluginLoadResult = AsterGraphPluginLoader.Load(options.PluginRegistrations);
+        var pluginLoadResult = AsterGraphPluginLoader.Load(options.PluginRegistrations, options.PluginTrustPolicy);
         var nodeCatalog = ComposeNodeCatalog(options.NodeCatalog, pluginLoadResult);
         var localizationProvider = ComposeLocalizationProvider(options.LocalizationProvider, pluginLoadResult);
         var nodePresentationProvider = ComposeNodePresentationProvider(options.NodePresentationProvider, pluginLoadResult);

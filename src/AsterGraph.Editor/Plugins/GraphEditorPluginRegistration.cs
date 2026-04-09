@@ -10,11 +10,13 @@ public sealed record GraphEditorPluginRegistration
     private GraphEditorPluginRegistration(
         IGraphEditorPlugin? plugin,
         string? assemblyPath,
-        string? pluginTypeName)
+        string? pluginTypeName,
+        GraphEditorPluginManifest? manifest)
     {
         Plugin = plugin;
         AssemblyPath = assemblyPath;
         PluginTypeName = pluginTypeName;
+        Manifest = manifest;
     }
 
     /// <summary>
@@ -33,6 +35,11 @@ public sealed record GraphEditorPluginRegistration
     public string? PluginTypeName { get; }
 
     /// <summary>
+    /// 可选的插件清单元数据。
+    /// </summary>
+    public GraphEditorPluginManifest? Manifest { get; }
+
+    /// <summary>
     /// 是否为直接实例注册。
     /// </summary>
     public bool IsDirectRegistration => Plugin is not null;
@@ -45,16 +52,19 @@ public sealed record GraphEditorPluginRegistration
     /// <summary>
     /// 基于直接插件实例创建注册项。
     /// </summary>
-    public static GraphEditorPluginRegistration FromPlugin(IGraphEditorPlugin plugin)
+    public static GraphEditorPluginRegistration FromPlugin(IGraphEditorPlugin plugin, GraphEditorPluginManifest? manifest = null)
     {
         ArgumentNullException.ThrowIfNull(plugin);
-        return new GraphEditorPluginRegistration(plugin, null, null);
+        return new GraphEditorPluginRegistration(plugin, null, null, manifest);
     }
 
     /// <summary>
     /// 基于程序集路径创建注册项。
     /// </summary>
-    public static GraphEditorPluginRegistration FromAssemblyPath(string assemblyPath, string? pluginTypeName = null)
+    public static GraphEditorPluginRegistration FromAssemblyPath(
+        string assemblyPath,
+        string? pluginTypeName = null,
+        GraphEditorPluginManifest? manifest = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(assemblyPath);
         if (pluginTypeName is not null)
@@ -66,6 +76,7 @@ public sealed record GraphEditorPluginRegistration
         return new GraphEditorPluginRegistration(
             plugin: null,
             assemblyPath: Path.GetFullPath(assemblyPath),
-            pluginTypeName: pluginTypeName);
+            pluginTypeName: pluginTypeName,
+            manifest: manifest);
     }
 }

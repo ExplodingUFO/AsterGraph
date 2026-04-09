@@ -1,3 +1,4 @@
+using System.IO;
 using System.Reflection;
 using System.Runtime.Loader;
 using AsterGraph.Editor.Diagnostics;
@@ -6,7 +7,9 @@ namespace AsterGraph.Editor.Plugins.Internal;
 
 internal static class AsterGraphPluginLoader
 {
-    public static GraphEditorPluginLoadResult Load(IReadOnlyList<GraphEditorPluginRegistration>? registrations)
+    public static GraphEditorPluginLoadResult Load(
+        IReadOnlyList<GraphEditorPluginRegistration>? registrations,
+        IGraphEditorPluginTrustPolicy? trustPolicy = null)
     {
         if (registrations is null || registrations.Count == 0)
         {
@@ -21,7 +24,7 @@ internal static class AsterGraphPluginLoader
 
         foreach (var registration in registrations)
         {
-            TryLoadRegistration(registration, aggregateBuilder, descriptors, snapshots, diagnostics, loadContexts);
+            TryLoadRegistration(registration, trustPolicy, aggregateBuilder, descriptors, snapshots, diagnostics, loadContexts);
         }
 
         return new GraphEditorPluginLoadResult(
@@ -34,6 +37,7 @@ internal static class AsterGraphPluginLoader
 
     private static void TryLoadRegistration(
         GraphEditorPluginRegistration registration,
+        IGraphEditorPluginTrustPolicy? trustPolicy,
         GraphEditorPluginBuilder aggregateBuilder,
         ICollection<GraphEditorPluginDescriptor> descriptors,
         ICollection<GraphEditorPluginLoadSnapshot> snapshots,
@@ -56,18 +60,40 @@ internal static class AsterGraphPluginLoader
         var diagnosticSource = sourceKind == GraphEditorPluginLoadSourceKind.Assembly
             ? $"assembly '{source}'"
             : $"plugin '{source}'";
+        var manifest = CreateFallbackManifest(registration, sourceKind, source);
+        var trustEvaluation = GraphEditorPluginTrustEvaluation.ImplicitAllow();
+        var activationAttempted = false;
 
         try
         {
+            trustEvaluation = EvaluateTrustPolicy(trustPolicy, registration, manifest);
+            if (trustEvaluation.Decision == GraphEditorPluginTrustDecision.Blocked)
+            {
+                diagnostics.Add(CreateBlockedDiagnostic(diagnosticSource, manifest, trustEvaluation));
+                snapshots.Add(new GraphEditorPluginLoadSnapshot(
+                    sourceKind,
+                    source,
+                    GraphEditorPluginLoadStatus.Blocked,
+                    GraphEditorPluginContributionSummarySnapshot.Empty,
+                    manifest,
+                    trustEvaluation,
+                    activationAttempted: false,
+                    requestedPluginTypeName: registration.PluginTypeName));
+                return;
+            }
+
             if (registration.IsDirectRegistration)
             {
                 var plugin = registration.Plugin!;
+                activationAttempted = true;
                 LoadPlugin(
                     plugin,
                     aggregateBuilder,
                     descriptors,
                     snapshots,
                     diagnostics,
+                    manifest,
+                    trustEvaluation,
                     sourceKind,
                     source,
                     plugin.GetType().FullName,
@@ -80,6 +106,7 @@ internal static class AsterGraphPluginLoader
                 throw new InvalidOperationException("Plugin registration did not specify a plugin instance or assembly path.");
             }
 
+            activationAttempted = true;
             var loadContext = new AsterGraphPluginAssemblyLoadContext(registration.AssemblyPath!);
             loadContexts.Add(loadContext);
             var assembly = loadContext.LoadFromAssemblyPath(registration.AssemblyPath!);
@@ -93,6 +120,8 @@ internal static class AsterGraphPluginLoader
                     descriptors,
                     snapshots,
                     diagnostics,
+                    manifest,
+                    trustEvaluation,
                     sourceKind,
                     source,
                     pluginType.FullName,
@@ -108,6 +137,9 @@ internal static class AsterGraphPluginLoader
                 source,
                 GraphEditorPluginLoadStatus.Failed,
                 GraphEditorPluginContributionSummarySnapshot.Empty,
+                manifest,
+                trustEvaluation,
+                activationAttempted,
                 requestedPluginTypeName: registration.PluginTypeName,
                 failureMessage: exception.Message));
         }
@@ -187,6 +219,8 @@ internal static class AsterGraphPluginLoader
         ICollection<GraphEditorPluginDescriptor> descriptors,
         ICollection<GraphEditorPluginLoadSnapshot> snapshots,
         ICollection<GraphEditorDiagnostic> diagnostics,
+        GraphEditorPluginManifest manifest,
+        GraphEditorPluginTrustEvaluation trustEvaluation,
         GraphEditorPluginLoadSourceKind sourceKind,
         string source,
         string? resolvedPluginTypeName,
@@ -198,6 +232,8 @@ internal static class AsterGraphPluginLoader
         ArgumentNullException.ThrowIfNull(descriptors);
         ArgumentNullException.ThrowIfNull(snapshots);
         ArgumentNullException.ThrowIfNull(diagnostics);
+        ArgumentNullException.ThrowIfNull(manifest);
+        ArgumentNullException.ThrowIfNull(trustEvaluation);
         ArgumentException.ThrowIfNullOrWhiteSpace(source);
         ArgumentException.ThrowIfNullOrWhiteSpace(diagnosticSource);
 
@@ -213,6 +249,9 @@ internal static class AsterGraphPluginLoader
             source,
             GraphEditorPluginLoadStatus.Loaded,
             CreateContributionSummary(contributions),
+            manifest,
+            trustEvaluation,
+            activationAttempted: true,
             descriptor,
             requestedPluginTypeName,
             resolvedPluginTypeName));
@@ -234,6 +273,92 @@ internal static class AsterGraphPluginLoader
             contributions.LocalizationProviders.Count);
     }
 
+    private static GraphEditorPluginManifest CreateFallbackManifest(
+        GraphEditorPluginRegistration registration,
+        GraphEditorPluginLoadSourceKind sourceKind,
+        string source)
+    {
+        ArgumentNullException.ThrowIfNull(registration);
+        ArgumentException.ThrowIfNullOrWhiteSpace(source);
+
+        if (registration.Manifest is not null)
+        {
+            return registration.Manifest;
+        }
+
+        if (registration.IsDirectRegistration)
+        {
+            var descriptor = registration.Plugin?.Descriptor
+                ?? throw new InvalidOperationException("Direct plugin registration did not expose a descriptor.");
+            return descriptor.ToManifest(new GraphEditorPluginManifestProvenance(
+                GraphEditorPluginManifestSourceKind.DirectRegistration,
+                source));
+        }
+
+        if (sourceKind == GraphEditorPluginLoadSourceKind.Assembly && registration.AssemblyPath is not null)
+        {
+            return CreateAssemblyFallbackManifest(registration.AssemblyPath, registration.PluginTypeName);
+        }
+
+        return new GraphEditorPluginManifest(
+            source,
+            source,
+            new GraphEditorPluginManifestProvenance(GraphEditorPluginManifestSourceKind.Manifest, source));
+    }
+
+    private static GraphEditorPluginManifest CreateAssemblyFallbackManifest(string assemblyPath, string? pluginTypeName)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(assemblyPath);
+
+        var fullPath = Path.GetFullPath(assemblyPath);
+        var fileName = Path.GetFileNameWithoutExtension(fullPath);
+        var id = string.IsNullOrWhiteSpace(pluginTypeName) ? fileName : pluginTypeName.Trim();
+        var displayName = string.IsNullOrWhiteSpace(pluginTypeName)
+            ? fileName
+            : pluginTypeName.Split('.').Last();
+        string? version = null;
+
+        try
+        {
+            var assemblyName = AssemblyName.GetAssemblyName(fullPath);
+            version = assemblyName.Version?.ToString();
+            if (string.IsNullOrWhiteSpace(pluginTypeName) && !string.IsNullOrWhiteSpace(assemblyName.Name))
+            {
+                id = assemblyName.Name!;
+                displayName = assemblyName.Name!;
+            }
+        }
+        catch
+        {
+            // Missing or unreadable files still need a stable manifest shell for pre-load inspection.
+        }
+
+        return new GraphEditorPluginManifest(
+            id,
+            displayName,
+            new GraphEditorPluginManifestProvenance(
+                GraphEditorPluginManifestSourceKind.AssemblyPath,
+                fullPath),
+            version: version);
+    }
+
+    private static GraphEditorPluginTrustEvaluation EvaluateTrustPolicy(
+        IGraphEditorPluginTrustPolicy? trustPolicy,
+        GraphEditorPluginRegistration registration,
+        GraphEditorPluginManifest manifest)
+    {
+        ArgumentNullException.ThrowIfNull(registration);
+        ArgumentNullException.ThrowIfNull(manifest);
+
+        if (trustPolicy is null)
+        {
+            return GraphEditorPluginTrustEvaluation.ImplicitAllow();
+        }
+
+        return trustPolicy.Evaluate(new GraphEditorPluginTrustPolicyContext(registration, manifest))
+            ?? throw new InvalidOperationException("Plugin trust policy returned a null evaluation.");
+    }
+
     private static GraphEditorDiagnostic CreateFailureDiagnostic(string source, Exception exception)
         => new(
             "plugin.load.failed",
@@ -241,6 +366,16 @@ internal static class AsterGraphPluginLoader
             $"Failed to load plugin from {source}: {exception.Message}",
             GraphEditorDiagnosticSeverity.Error,
             exception);
+
+    private static GraphEditorDiagnostic CreateBlockedDiagnostic(
+        string source,
+        GraphEditorPluginManifest manifest,
+        GraphEditorPluginTrustEvaluation trustEvaluation)
+        => new(
+            "plugin.load.blocked",
+            "plugin.trust",
+            $"Blocked plugin '{manifest.Id}' from {source}: {trustEvaluation.ReasonMessage ?? trustEvaluation.ReasonCode ?? "Policy blocked the load."}",
+            GraphEditorDiagnosticSeverity.Warning);
 }
 
 internal sealed record GraphEditorPluginLoadResult(

@@ -257,6 +257,7 @@ public sealed class GraphEditorProofRingTests
             LocalizationProvider = new ProofLocalizationProvider(),
             DiagnosticsSink = new RecordingDiagnosticsSink(),
             Instrumentation = new GraphEditorInstrumentationOptions(loggerFactory, activitySource),
+            PluginTrustPolicy = new ProofAllowTrustPolicy(),
         };
         var retainedEditor = AsterGraphEditorFactory.Create(options);
         var runtimeSession = AsterGraphEditorFactory.CreateSession(options);
@@ -308,8 +309,23 @@ public sealed class GraphEditorProofRingTests
             LocalizationProvider = new ProofLocalizationProvider(),
             PluginRegistrations =
             [
-                GraphEditorPluginRegistration.FromPlugin(new ProofPlugin()),
+                GraphEditorPluginRegistration.FromPlugin(
+                    new ProofPlugin(),
+                    new GraphEditorPluginManifest(
+                        "tests.proof.plugin",
+                        "Proof Plugin",
+                        new GraphEditorPluginManifestProvenance(
+                            GraphEditorPluginManifestSourceKind.DirectRegistration,
+                            typeof(ProofPlugin).FullName ?? nameof(ProofPlugin)),
+                        description: "Proof-ring manifest coverage.",
+                        version: "1.0.0",
+                        compatibility: new GraphEditorPluginCompatibilityManifest(
+                            minimumAsterGraphVersion: "1.0.0",
+                            targetFramework: "net9.0",
+                            runtimeSurface: "session-first"),
+                        capabilitySummary: "menus, automation")),
             ],
+            PluginTrustPolicy = new ProofAllowTrustPolicy(),
         };
         var retainedEditor = AsterGraphEditorFactory.Create(options);
         var runtimeSession = AsterGraphEditorFactory.CreateSession(options);
@@ -326,6 +342,10 @@ public sealed class GraphEditorProofRingTests
         var pluginSnapshot = Assert.Single(runtimeSnapshots);
         Assert.Equal(GraphEditorPluginLoadSourceKind.Direct, pluginSnapshot.SourceKind);
         Assert.Equal(GraphEditorPluginLoadStatus.Loaded, pluginSnapshot.Status);
+        Assert.Equal("tests.proof.plugin", pluginSnapshot.Manifest!.Id);
+        Assert.Equal(GraphEditorPluginTrustDecision.Allowed, pluginSnapshot.TrustEvaluation!.Decision);
+        Assert.Equal(GraphEditorPluginTrustEvaluationSource.HostPolicy, pluginSnapshot.TrustEvaluation.Source);
+        Assert.True(pluginSnapshot.ActivationAttempted);
         Assert.Equal("tests.proof.plugin", pluginSnapshot.Descriptor?.Id);
         Assert.Equal(1, pluginSnapshot.Contributions.NodeDefinitionProviderCount);
         Assert.Equal(1, pluginSnapshot.Contributions.ContextMenuAugmentorCount);
@@ -963,6 +983,7 @@ public sealed class GraphEditorProofRingTests
         "service.clipboard-payload-serializer",
         "service.diagnostics",
         "integration.plugin-loader",
+        "integration.plugin-trust-policy",
         "integration.context-menu-augmentor",
         "integration.node-presentation-provider",
         "integration.localization-provider",
@@ -985,6 +1006,19 @@ public sealed class GraphEditorProofRingTests
             builder.AddContextMenuAugmentor(new ProofPluginContextMenuAugmentor());
             builder.AddNodePresentationProvider(new ProofPluginPresentationProvider());
             builder.AddLocalizationProvider(new ProofPluginLocalizationProvider());
+        }
+    }
+
+    private sealed class ProofAllowTrustPolicy : IGraphEditorPluginTrustPolicy
+    {
+        public GraphEditorPluginTrustEvaluation Evaluate(GraphEditorPluginTrustPolicyContext context)
+        {
+            ArgumentNullException.ThrowIfNull(context);
+            return new GraphEditorPluginTrustEvaluation(
+                GraphEditorPluginTrustDecision.Allowed,
+                GraphEditorPluginTrustEvaluationSource.HostPolicy,
+                "proof.policy.allow",
+                $"Allowed manifest '{context.Manifest.Id}' for proof coverage.");
         }
     }
 

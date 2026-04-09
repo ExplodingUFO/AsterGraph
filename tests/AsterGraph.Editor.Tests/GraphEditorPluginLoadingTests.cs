@@ -153,7 +153,8 @@ public sealed class GraphEditorPluginLoadingTests
             diagnostics,
             [registration],
             localizationProvider: new HostOverrideLocalizationProvider(),
-            nodePresentationProvider: new HostOverridePresentationProvider()));
+            nodePresentationProvider: new HostOverridePresentationProvider(),
+            trustPolicy: null));
 
         editor.RefreshNodePresentations();
         var canvasMenu = editor.Session.Queries.BuildContextMenuDescriptors(new ContextMenuContext(ContextMenuTargetKind.Canvas, new GraphPoint(240, 180)));
@@ -167,16 +168,57 @@ public sealed class GraphEditorPluginLoadingTests
         Assert.Contains(editor.BuildContextMenu(new ContextMenuContext(ContextMenuTargetKind.Canvas, new GraphPoint(240, 180))), item => item.Id == "plugin-sample-menu");
     }
 
+    [Fact]
+    public void Create_And_CreateSession_WithBlockingTrustPolicy_SurfaceEquivalentBlockedSnapshotsAndDiscoverability()
+    {
+        var editorDiagnostics = new RecordingDiagnosticsSink();
+        var runtimeDiagnostics = new RecordingDiagnosticsSink();
+        var plugin = new TrackingDirectPlugin();
+        var manifest = new GraphEditorPluginManifest(
+            "tests.loading.blocked-plugin",
+            "Blocked Loading Plugin",
+            new GraphEditorPluginManifestProvenance(
+                GraphEditorPluginManifestSourceKind.DirectRegistration,
+                typeof(TrackingDirectPlugin).FullName ?? nameof(TrackingDirectPlugin)),
+            version: "1.0.0",
+            compatibility: new GraphEditorPluginCompatibilityManifest(
+                minimumAsterGraphVersion: "1.0.0",
+                targetFramework: "net9.0",
+                runtimeSurface: "session-first"),
+            capabilitySummary: "menus");
+        var registration = GraphEditorPluginRegistration.FromPlugin(plugin, manifest);
+        var trustPolicy = new BlockManifestIdTrustPolicy("tests.loading.blocked-plugin");
+        var editor = AsterGraphEditorFactory.Create(CreateOptions(editorDiagnostics, [registration], null, null, trustPolicy));
+        var session = AsterGraphEditorFactory.CreateSession(CreateOptions(runtimeDiagnostics, [registration], null, null, trustPolicy));
+
+        var retainedSnapshots = editor.Session.Queries.GetPluginLoadSnapshots();
+        var runtimeSnapshots = session.Queries.GetPluginLoadSnapshots();
+        var retainedFeatures = editor.Session.Queries.GetFeatureDescriptors().ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
+        var runtimeFeatures = session.Queries.GetFeatureDescriptors().ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
+
+        Assert.Equal(runtimeSnapshots, retainedSnapshots);
+        var snapshot = Assert.Single(runtimeSnapshots);
+        Assert.Equal(GraphEditorPluginLoadStatus.Blocked, snapshot.Status);
+        Assert.Equal(GraphEditorPluginTrustDecision.Blocked, snapshot.TrustEvaluation!.Decision);
+        Assert.False(snapshot.ActivationAttempted);
+        Assert.True(retainedFeatures["integration.plugin-trust-policy"].IsAvailable);
+        Assert.True(runtimeFeatures["integration.plugin-trust-policy"].IsAvailable);
+        Assert.Single(editorDiagnostics.Diagnostics, diagnostic => diagnostic.Code == "plugin.load.blocked");
+        Assert.Single(runtimeDiagnostics.Diagnostics, diagnostic => diagnostic.Code == "plugin.load.blocked");
+        Assert.Equal(0, plugin.RegisterCallCount);
+    }
+
     private static AsterGraphEditorOptions CreateOptions(
         IGraphEditorDiagnosticsSink diagnosticsSink,
         params GraphEditorPluginRegistration[] pluginRegistrations)
-        => CreateOptions(diagnosticsSink, pluginRegistrations, null, null);
+        => CreateOptions(diagnosticsSink, pluginRegistrations, null, null, null);
 
     private static AsterGraphEditorOptions CreateOptions(
         IGraphEditorDiagnosticsSink diagnosticsSink,
         IReadOnlyList<GraphEditorPluginRegistration> pluginRegistrations,
         IGraphLocalizationProvider? localizationProvider,
-        INodePresentationProvider? nodePresentationProvider)
+        INodePresentationProvider? nodePresentationProvider,
+        IGraphEditorPluginTrustPolicy? trustPolicy)
         => new()
         {
             Document = CreateDocument(),
@@ -186,6 +228,7 @@ public sealed class GraphEditorPluginLoadingTests
             PluginRegistrations = pluginRegistrations,
             LocalizationProvider = localizationProvider,
             NodePresentationProvider = nodePresentationProvider,
+            PluginTrustPolicy = trustPolicy,
         };
 
     private static string GetSamplePluginAssemblyPath()
@@ -320,5 +363,39 @@ public sealed class GraphEditorPluginLoadingTests
                 [
                     new NodeAdornmentDescriptor("Host", "#F3B36B"),
                 ]);
+    }
+
+    private sealed class TrackingDirectPlugin : IGraphEditorPlugin
+    {
+        public int RegisterCallCount { get; private set; }
+
+        public GraphEditorPluginDescriptor Descriptor { get; } = new("tests.loading.blocked-plugin", "Blocked Loading Plugin");
+
+        public void Register(GraphEditorPluginBuilder builder)
+        {
+            ArgumentNullException.ThrowIfNull(builder);
+            RegisterCallCount++;
+            builder.AddContextMenuAugmentor(new DirectContextMenuAugmentor());
+        }
+    }
+
+    private sealed class BlockManifestIdTrustPolicy(string blockedId) : IGraphEditorPluginTrustPolicy
+    {
+        public GraphEditorPluginTrustEvaluation Evaluate(GraphEditorPluginTrustPolicyContext context)
+        {
+            ArgumentNullException.ThrowIfNull(context);
+
+            return StringComparer.Ordinal.Equals(context.Manifest.Id, blockedId)
+                ? new GraphEditorPluginTrustEvaluation(
+                    GraphEditorPluginTrustDecision.Blocked,
+                    GraphEditorPluginTrustEvaluationSource.HostPolicy,
+                    "trust.blocked.loading-tests",
+                    $"Blocked manifest '{context.Manifest.Id}' for loading coverage.")
+                : new GraphEditorPluginTrustEvaluation(
+                    GraphEditorPluginTrustDecision.Allowed,
+                    GraphEditorPluginTrustEvaluationSource.HostPolicy,
+                    "trust.allowed.loading-tests",
+                    $"Allowed manifest '{context.Manifest.Id}'.");
+        }
     }
 }

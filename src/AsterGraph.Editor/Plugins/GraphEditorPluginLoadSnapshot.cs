@@ -27,6 +27,11 @@ public enum GraphEditorPluginLoadStatus
     Loaded,
 
     /// <summary>
+    /// 插件在执行贡献代码前被策略阻止。
+    /// </summary>
+    Blocked,
+
+    /// <summary>
     /// 插件加载失败。
     /// </summary>
     Failed,
@@ -96,6 +101,9 @@ public sealed record GraphEditorPluginLoadSnapshot
         string source,
         GraphEditorPluginLoadStatus status,
         GraphEditorPluginContributionSummarySnapshot contributions,
+        GraphEditorPluginManifest manifest,
+        GraphEditorPluginTrustEvaluation trustEvaluation,
+        bool activationAttempted,
         GraphEditorPluginDescriptor? descriptor = null,
         string? requestedPluginTypeName = null,
         string? resolvedPluginTypeName = null,
@@ -103,11 +111,16 @@ public sealed record GraphEditorPluginLoadSnapshot
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(source);
         ArgumentNullException.ThrowIfNull(contributions);
+        ArgumentNullException.ThrowIfNull(manifest);
+        ArgumentNullException.ThrowIfNull(trustEvaluation);
 
         SourceKind = sourceKind;
         Source = source.Trim();
         Status = status;
         Contributions = contributions;
+        Manifest = manifest;
+        TrustEvaluation = trustEvaluation;
+        ActivationAttempted = activationAttempted;
         Descriptor = descriptor;
         RequestedPluginTypeName = string.IsNullOrWhiteSpace(requestedPluginTypeName) ? null : requestedPluginTypeName.Trim();
         ResolvedPluginTypeName = string.IsNullOrWhiteSpace(resolvedPluginTypeName) ? null : resolvedPluginTypeName.Trim();
@@ -133,6 +146,21 @@ public sealed record GraphEditorPluginLoadSnapshot
     /// 插件贡献摘要。
     /// </summary>
     public GraphEditorPluginContributionSummarySnapshot Contributions { get; }
+
+    /// <summary>
+    /// 当前可见的加载前插件清单。
+    /// </summary>
+    public GraphEditorPluginManifest Manifest { get; }
+
+    /// <summary>
+    /// 当前加载前信任评估结果。
+    /// </summary>
+    public GraphEditorPluginTrustEvaluation TrustEvaluation { get; }
+
+    /// <summary>
+    /// 是否已经尝试进入实际激活阶段。
+    /// </summary>
+    public bool ActivationAttempted { get; }
 
     /// <summary>
     /// 成功加载时的插件描述信息。

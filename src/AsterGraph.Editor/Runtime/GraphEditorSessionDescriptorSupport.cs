@@ -16,6 +16,7 @@ internal sealed class GraphEditorSessionDescriptorSupport
         bool hasFragmentLibraryService = false,
         bool hasClipboardPayloadSerializer = false,
         bool hasPluginLoader = false,
+        bool hasPluginTrustPolicy = false,
         bool hasContextMenuAugmentor = false,
         bool hasNodePresentationProvider = false,
         bool hasLocalizationProvider = false)
@@ -27,6 +28,7 @@ internal sealed class GraphEditorSessionDescriptorSupport
         HasFragmentLibraryService = hasFragmentLibraryService;
         HasClipboardPayloadSerializer = hasClipboardPayloadSerializer;
         HasPluginLoader = hasPluginLoader;
+        HasPluginTrustPolicy = hasPluginTrustPolicy;
         HasContextMenuAugmentor = hasContextMenuAugmentor;
         HasNodePresentationProvider = hasNodePresentationProvider;
         HasLocalizationProvider = hasLocalizationProvider;
@@ -43,6 +45,8 @@ internal sealed class GraphEditorSessionDescriptorSupport
     public bool HasClipboardPayloadSerializer { get; }
 
     public bool HasPluginLoader { get; }
+
+    public bool HasPluginTrustPolicy { get; }
 
     public bool HasContextMenuAugmentor { get; }
 
