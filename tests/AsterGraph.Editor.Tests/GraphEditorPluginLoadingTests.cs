@@ -208,6 +208,35 @@ public sealed class GraphEditorPluginLoadingTests
         Assert.Equal(0, plugin.RegisterCallCount);
     }
 
+    [Fact]
+    public void DiscoverPluginCandidates_And_CreateSession_StayAlignedOnFallbackManifestAndTrustFacts_ForAssemblyCandidates()
+    {
+        var tempDirectory = Path.Combine(Path.GetTempPath(), "astergraph-plugin-loading-tests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(tempDirectory);
+        var pluginAssemblyPath = Path.Combine(tempDirectory, "DiscoveryParityPlugin.dll");
+        File.Copy(GetSamplePluginAssemblyPath(), pluginAssemblyPath, overwrite: true);
+        pluginAssemblyPath = Path.GetFullPath(pluginAssemblyPath);
+
+        var candidate = Assert.Single(AsterGraphEditorFactory.DiscoverPluginCandidates(new GraphEditorPluginDiscoveryOptions
+        {
+            DirectorySources =
+            [
+                new GraphEditorPluginDirectoryDiscoverySource(tempDirectory),
+            ],
+        }));
+        var session = AsterGraphEditorFactory.CreateSession(CreateOptions(
+            new RecordingDiagnosticsSink(),
+            GraphEditorPluginRegistration.FromAssemblyPath(pluginAssemblyPath)));
+        var snapshot = Assert.Single(session.Queries.GetPluginLoadSnapshots());
+
+        Assert.Equal(pluginAssemblyPath, candidate.AssemblyPath);
+        Assert.Equal(pluginAssemblyPath, snapshot.Source);
+        Assert.Equal(candidate.Manifest, snapshot.Manifest);
+        Assert.Equal(candidate.TrustEvaluation, snapshot.TrustEvaluation);
+        Assert.Equal(GraphEditorPluginCompatibilityStatus.Unknown, candidate.Compatibility.Status);
+        Assert.Equal(GraphEditorPluginLoadStatus.Loaded, snapshot.Status);
+    }
+
     private static AsterGraphEditorOptions CreateOptions(
         IGraphEditorDiagnosticsSink diagnosticsSink,
         params GraphEditorPluginRegistration[] pluginRegistrations)
