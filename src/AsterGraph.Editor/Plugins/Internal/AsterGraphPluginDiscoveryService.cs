@@ -15,6 +15,11 @@ internal static class AsterGraphPluginDiscoveryService
             DiscoverDirectorySource(directorySource, options.TrustPolicy, candidates);
         }
 
+        foreach (var packageDirectorySource in options.PackageDirectorySources ?? [])
+        {
+            DiscoverPackageDirectorySource(packageDirectorySource, options.TrustPolicy, candidates);
+        }
+
         foreach (var manifestSource in options.ManifestSources ?? [])
         {
             DiscoverManifestSource(manifestSource, options.TrustPolicy, candidates);
@@ -24,6 +29,7 @@ internal static class AsterGraphPluginDiscoveryService
             .OrderBy(candidate => candidate.SourceKind)
             .ThenBy(candidate => candidate.Source, StringComparer.Ordinal)
             .ThenBy(candidate => candidate.AssemblyPath, StringComparer.Ordinal)
+            .ThenBy(candidate => candidate.PackagePath, StringComparer.Ordinal)
             .ThenBy(candidate => candidate.Manifest.Id, StringComparer.Ordinal)
             .ToList();
     }
@@ -51,6 +57,38 @@ internal static class AsterGraphPluginDiscoveryService
             candidates.Add(CreateCandidateSnapshot(
                 GraphEditorPluginCandidateSourceKind.Directory,
                 directorySource.DirectoryPath,
+                registration,
+                trustPolicy));
+        }
+    }
+
+    private static void DiscoverPackageDirectorySource(
+        GraphEditorPluginPackageDiscoverySource packageDirectorySource,
+        IGraphEditorPluginTrustPolicy? trustPolicy,
+        ICollection<GraphEditorPluginCandidateSnapshot> candidates)
+    {
+        ArgumentNullException.ThrowIfNull(packageDirectorySource);
+        ArgumentNullException.ThrowIfNull(candidates);
+
+        if (!Directory.Exists(packageDirectorySource.DirectoryPath))
+        {
+            return;
+        }
+
+        var searchOption = packageDirectorySource.IncludeSubdirectories
+            ? SearchOption.AllDirectories
+            : SearchOption.TopDirectoryOnly;
+
+        foreach (var packagePath in Directory.EnumerateFiles(packageDirectorySource.DirectoryPath, packageDirectorySource.SearchPattern, searchOption))
+        {
+            var inspection = AsterGraphPluginPackageArchiveInspector.Inspect(packagePath);
+            var registration = GraphEditorPluginRegistration.FromPackagePath(
+                inspection.PackagePath,
+                inspection.Manifest,
+                inspection.ProvenanceEvidence);
+            candidates.Add(CreateCandidateSnapshot(
+                GraphEditorPluginCandidateSourceKind.PackageDirectory,
+                packageDirectorySource.DirectoryPath,
                 registration,
                 trustPolicy));
         }
@@ -101,6 +139,7 @@ internal static class AsterGraphPluginDiscoveryService
             trustEvaluation,
             provenanceEvidence,
             registration.AssemblyPath,
-            registration.PluginTypeName);
+            registration.PluginTypeName,
+            registration.PackagePath);
     }
 }

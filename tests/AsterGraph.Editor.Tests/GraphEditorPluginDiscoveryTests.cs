@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.IO.Compression;
 using AsterGraph.Editor.Hosting;
 using AsterGraph.Editor.Plugins;
 using Xunit;
@@ -121,6 +122,69 @@ public sealed class GraphEditorPluginDiscoveryTests
         Assert.Equal(GraphEditorPluginTrustDecision.Allowed, candidate.TrustEvaluation.Decision);
     }
 
+    [Fact]
+    public void DiscoverPluginCandidates_WithPackageDirectorySource_ProjectsPackageMetadataWithoutExtraction()
+    {
+        var tempDirectory = CreateTempDirectory();
+        Directory.CreateDirectory(tempDirectory);
+        var packagePath = CreateTestPackage(
+            tempDirectory,
+            "AsterGraph.PackageDiscovery",
+            "1.2.3",
+            title: "Package Discovery Candidate",
+            description: "Package discovery regression coverage.");
+
+        var candidates = AsterGraphEditorFactory.DiscoverPluginCandidates(new GraphEditorPluginDiscoveryOptions
+        {
+            PackageDirectorySources =
+            [
+                new GraphEditorPluginPackageDiscoverySource(tempDirectory),
+            ],
+        });
+
+        var candidate = Assert.Single(candidates);
+        Assert.Equal(GraphEditorPluginCandidateSourceKind.PackageDirectory, candidate.SourceKind);
+        Assert.Equal(Path.GetFullPath(tempDirectory), candidate.Source);
+        Assert.Null(candidate.AssemblyPath);
+        Assert.Equal(packagePath, candidate.PackagePath);
+        Assert.Equal(GraphEditorPluginManifestSourceKind.PackageArchive, candidate.Manifest.Provenance.SourceKind);
+        Assert.Equal("AsterGraph.PackageDiscovery", candidate.Manifest.Id);
+        Assert.Equal("1.2.3", candidate.Manifest.Version);
+        Assert.Equal("AsterGraph.PackageDiscovery", candidate.ProvenanceEvidence.PackageIdentity?.Id);
+        Assert.Equal("1.2.3", candidate.ProvenanceEvidence.PackageIdentity?.Version);
+        Assert.Equal(GraphEditorPluginSignatureStatus.Unsigned, candidate.ProvenanceEvidence.Signature.Status);
+        Assert.Equal(GraphEditorPluginTrustDecision.Allowed, candidate.TrustEvaluation.Decision);
+        Assert.Equal([packagePath], Directory.GetFiles(tempDirectory));
+    }
+
+    [Fact]
+    public void DiscoverPluginCandidates_WithPackageDirectorySource_PassesPackagePathIntoTrustPolicyContext()
+    {
+        var tempDirectory = CreateTempDirectory();
+        Directory.CreateDirectory(tempDirectory);
+        var packagePath = CreateTestPackage(
+            tempDirectory,
+            "AsterGraph.PackageTrust",
+            "2.0.0",
+            title: "Package Trust Candidate",
+            description: "Trust policy package-path coverage.");
+
+        var trustPolicy = new BlockPackagePathTrustPolicy(packagePath);
+
+        var candidates = AsterGraphEditorFactory.DiscoverPluginCandidates(new GraphEditorPluginDiscoveryOptions
+        {
+            PackageDirectorySources =
+            [
+                new GraphEditorPluginPackageDiscoverySource(tempDirectory),
+            ],
+            TrustPolicy = trustPolicy,
+        });
+
+        var candidate = Assert.Single(candidates);
+        Assert.Equal(GraphEditorPluginTrustDecision.Blocked, candidate.TrustEvaluation.Decision);
+        Assert.Equal(packagePath, trustPolicy.SeenPackagePath);
+    }
+
     private static string CopySamplePluginAssembly(string targetDirectory, string fileName)
     {
         Directory.CreateDirectory(targetDirectory);
@@ -131,6 +195,36 @@ public sealed class GraphEditorPluginDiscoveryTests
 
     private static string CreateTempDirectory()
         => Path.Combine(Path.GetTempPath(), "astergraph-plugin-discovery-tests", Guid.NewGuid().ToString("N"));
+
+    private static string CreateTestPackage(
+        string directory,
+        string packageId,
+        string version,
+        string title,
+        string description)
+    {
+        Directory.CreateDirectory(directory);
+        var packagePath = Path.Combine(directory, $"{packageId}.{version}.nupkg");
+
+        using var stream = File.Create(packagePath);
+        using var archive = new ZipArchive(stream, ZipArchiveMode.Create);
+        var nuspecEntry = archive.CreateEntry($"{packageId}.nuspec");
+        using var writer = new StreamWriter(nuspecEntry.Open());
+        writer.Write($$"""
+            <?xml version="1.0" encoding="utf-8"?>
+            <package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+              <metadata>
+                <id>{{packageId}}</id>
+                <version>{{version}}</version>
+                <title>{{title}}</title>
+                <authors>AsterGraph Tests</authors>
+                <description>{{description}}</description>
+              </metadata>
+            </package>
+            """);
+
+        return Path.GetFullPath(packagePath);
+    }
 
     private static string GetSamplePluginAssemblyPath()
         => Path.GetFullPath(Path.Combine(
@@ -182,6 +276,25 @@ public sealed class GraphEditorPluginDiscoveryTests
                     GraphEditorPluginTrustEvaluationSource.HostPolicy,
                     "trust.allowed.discovery-tests",
                     $"Allowed manifest '{context.Manifest.Id}'.");
+        }
+    }
+
+    private sealed class BlockPackagePathTrustPolicy(string blockedPackagePath) : IGraphEditorPluginTrustPolicy
+    {
+        public string? SeenPackagePath { get; private set; }
+
+        public GraphEditorPluginTrustEvaluation Evaluate(GraphEditorPluginTrustPolicyContext context)
+        {
+            ArgumentNullException.ThrowIfNull(context);
+
+            SeenPackagePath = context.PackagePath;
+            return StringComparer.OrdinalIgnoreCase.Equals(context.PackagePath, blockedPackagePath)
+                ? new GraphEditorPluginTrustEvaluation(
+                    GraphEditorPluginTrustDecision.Blocked,
+                    GraphEditorPluginTrustEvaluationSource.HostPolicy,
+                    "trust.blocked.package-path",
+                    $"Blocked package '{context.PackagePath}'.")
+                : GraphEditorPluginTrustEvaluation.ImplicitAllow();
         }
     }
 }
