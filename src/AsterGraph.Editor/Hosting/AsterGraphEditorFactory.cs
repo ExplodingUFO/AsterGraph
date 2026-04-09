@@ -49,20 +49,26 @@ public static class AsterGraphEditorFactory
             throw new ArgumentException("Plugin candidate must expose a package path before it can be staged.", nameof(request));
         }
 
-        var stage = new GraphEditorPluginStageSnapshot(
-            GraphEditorPluginStageOutcome.Refused,
-            request.Candidate.PackagePath,
-            request.Candidate.ProvenanceEvidence.PackageIdentity,
-            pluginTypeName: request.Candidate.PluginTypeName,
-            usedCache: false,
-            reasonCode: "plugin.stage.not-implemented",
-            reasonMessage: "Verified package staging is not implemented yet.");
+        var stage = AsterGraphPluginPackageStagingService.Stage(request);
+        GraphEditorPluginRegistration? registration = null;
+        if ((stage.Outcome == GraphEditorPluginStageOutcome.Staged || stage.Outcome == GraphEditorPluginStageOutcome.CacheHit)
+            && !string.IsNullOrWhiteSpace(stage.MainAssemblyPath))
+        {
+            registration = GraphEditorPluginRegistration.FromStagedPackage(
+                request.Candidate.PackagePath,
+                stage.MainAssemblyPath,
+                stage.PluginTypeName,
+                request.Candidate.Manifest,
+                request.Candidate.ProvenanceEvidence,
+                stage);
+        }
 
         return new GraphEditorPluginPackageStageResult(
             stage,
             request.Candidate.Manifest,
             request.Candidate.ProvenanceEvidence,
-            request.Candidate.TrustEvaluation);
+            request.Candidate.TrustEvaluation,
+            registration);
     }
 
     /// <summary>

@@ -7,6 +7,8 @@ namespace AsterGraph.Editor.Plugins.Internal;
 
 internal static class AsterGraphPluginLoader
 {
+    private const string PackageStagingRequiredMessage = "Package registrations must be staged through AsterGraphEditorFactory.StagePluginPackage(...) before loading.";
+
     public static GraphEditorPluginLoadResult Load(
         IReadOnlyList<GraphEditorPluginRegistration>? registrations,
         IGraphEditorPluginTrustPolicy? trustPolicy = null)
@@ -141,8 +143,7 @@ internal static class AsterGraphPluginLoader
 
             if (registration.IsPackageRegistration && !registration.IsAssemblyRegistration)
             {
-                const string message = "Package registrations are not supported until verified staging is implemented.";
-                diagnostics.Add(CreatePackageRegistrationNotSupportedDiagnostic(source));
+                diagnostics.Add(CreatePackageStagingRequiredDiagnostic(source));
                 snapshots.Add(new GraphEditorPluginLoadSnapshot(
                     sourceKind,
                     source,
@@ -154,7 +155,7 @@ internal static class AsterGraphPluginLoader
                     provenanceEvidence,
                     activationAttempted: false,
                     requestedPluginTypeName: registration.PluginTypeName,
-                    failureMessage: message,
+                    failureMessage: PackageStagingRequiredMessage,
                     packagePath: registration.PackagePath,
                     stage: registration.Stage));
                 return;
@@ -359,11 +360,11 @@ internal static class AsterGraphPluginLoader
             GraphEditorDiagnosticSeverity.Error,
             exception);
 
-    private static GraphEditorDiagnostic CreatePackageRegistrationNotSupportedDiagnostic(string source)
+    private static GraphEditorDiagnostic CreatePackageStagingRequiredDiagnostic(string source)
         => new(
-            "plugin.load.package-registration-not-supported",
+            "plugin.load.package-staging-required",
             "plugin.load",
-            $"Refused plugin package registration from package '{source}': Package registrations are not supported until verified staging is implemented.",
+            $"Refused plugin package registration from package '{source}': {PackageStagingRequiredMessage}",
             GraphEditorDiagnosticSeverity.Warning);
 
     private static GraphEditorDiagnostic CreateBlockedDiagnostic(
