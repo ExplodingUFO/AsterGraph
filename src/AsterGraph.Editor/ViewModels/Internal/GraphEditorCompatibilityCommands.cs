@@ -1,48 +1,89 @@
+using AsterGraph.Editor.Configuration;
 using AsterGraph.Editor.Menus;
+using AsterGraph.Editor.Runtime;
 
 namespace AsterGraph.Editor.ViewModels;
 
 public sealed partial class GraphEditorViewModel
 {
+    internal interface IGraphEditorCompatibilityCommandHost
+    {
+        IGraphEditorSession Session { get; }
+
+        GraphEditorViewModel CompatibilityEditor { get; }
+
+        IGraphContextMenuAugmentor? ContextMenuAugmentor { get; }
+
+        GraphEditorCommandPermissions CommandPermissions { get; }
+
+        string? StatusMessage { get; }
+
+        void SetStatus(string key, string fallback, params object?[] arguments);
+
+        void PublishRecoverableFailure(string code, string operation, string message, Exception? exception = null);
+
+        NodeViewModel? FindNode(string nodeId);
+
+        ConnectionViewModel? FindConnection(string connectionId);
+
+        int CountConnectionsForNode(string nodeId);
+
+        bool CanRemoveConnectionsAsSideEffect();
+
+        void DeleteNodeByIdCore(string nodeId);
+
+        void DuplicateNodeCore(string nodeId);
+
+        void DisconnectIncomingCore(string nodeId);
+
+        void DisconnectOutgoingCore(string nodeId);
+
+        void DisconnectAllCore(string nodeId);
+
+        void BreakConnectionsForPortCore(string nodeId, string portId);
+
+        void DeleteConnectionCore(string connectionId);
+    }
+
     internal sealed class GraphEditorCompatibilityCommands
     {
-        private readonly GraphEditorViewModel _owner;
+        private readonly IGraphEditorCompatibilityCommandHost _host;
 
-        internal GraphEditorCompatibilityCommands(GraphEditorViewModel owner)
+        internal GraphEditorCompatibilityCommands(IGraphEditorCompatibilityCommandHost host)
         {
-            _owner = owner ?? throw new ArgumentNullException(nameof(owner));
+            _host = host ?? throw new ArgumentNullException(nameof(host));
         }
 
         internal IReadOnlyList<MenuItemDescriptor> BuildContextMenu(ContextMenuContext context)
         {
-            var stockItemDescriptors = _owner.Session.Queries.BuildContextMenuDescriptors(context);
-            var stockItems = GraphContextMenuCompatibilityAdapter.Adapt(stockItemDescriptors, _owner.Session.Commands);
-            if (_owner.ContextMenuAugmentor is null)
+            var stockItemDescriptors = _host.Session.Queries.BuildContextMenuDescriptors(context);
+            var stockItems = GraphContextMenuCompatibilityAdapter.Adapt(stockItemDescriptors, _host.Session.Commands);
+            if (_host.ContextMenuAugmentor is null)
             {
                 return stockItems;
             }
 
             try
             {
-                return _owner.ContextMenuAugmentor.Augment(
+                return _host.ContextMenuAugmentor.Augment(
                     new GraphContextMenuAugmentationContext(
-                        _owner.Session,
+                        _host.Session,
                         context,
                         stockItems,
                         stockItemDescriptors,
-                        _owner.CommandPermissions,
-                        _owner));
+                        _host.CommandPermissions,
+                        _host.CompatibilityEditor));
             }
             catch (Exception exception)
             {
-                _owner.SetStatus(
+                _host.SetStatus(
                     "editor.status.menu.augmentorFailed",
                     "Context menu augmentor failed: {0}. Using stock menu.",
                     exception.GetType().Name);
-                _owner.PublishRecoverableFailure(
+                _host.PublishRecoverableFailure(
                     "contextmenu.augment.failed",
                     "contextmenu.augment",
-                    _owner.StatusMessage ?? exception.Message,
+                    _host.StatusMessage ?? exception.Message,
                     exception);
                 return stockItems;
             }
@@ -50,109 +91,105 @@ public sealed partial class GraphEditorViewModel
 
         internal void DeleteNodeById(string nodeId)
         {
-            if (!_owner.CommandPermissions.Nodes.AllowDelete)
+            if (!_host.CommandPermissions.Nodes.AllowDelete)
             {
-                _owner.SetStatus("editor.status.node.delete.disabledByPermissions", "Node deletion is disabled by host permissions.");
+                _host.SetStatus("editor.status.node.delete.disabledByPermissions", "Node deletion is disabled by host permissions.");
                 return;
             }
 
-            var node = _owner.FindNode(nodeId);
+            var node = _host.FindNode(nodeId);
             if (node is null)
             {
                 return;
             }
 
-            var removedConnections = _owner.Connections
-                .Where(connection => connection.SourceNodeId == node.Id || connection.TargetNodeId == node.Id)
-                .ToList();
-
-            if (removedConnections.Count > 0 && !_owner.CanRemoveConnectionsAsSideEffect())
+            if (_host.CountConnectionsForNode(node.Id) > 0 && !_host.CanRemoveConnectionsAsSideEffect())
             {
-                _owner.SetStatus("editor.status.node.delete.singleConnectedRequiresPermission", "Deleting a connected node requires delete or disconnect permission for the affected links.");
+                _host.SetStatus("editor.status.node.delete.singleConnectedRequiresPermission", "Deleting a connected node requires delete or disconnect permission for the affected links.");
                 return;
             }
 
-            _owner._kernel.DeleteNodeById(nodeId);
-            _owner.SetStatus("editor.status.node.deletedSingle", "Deleted {0}.", node.Title);
+            _host.DeleteNodeByIdCore(nodeId);
+            _host.SetStatus("editor.status.node.deletedSingle", "Deleted {0}.", node.Title);
         }
 
         internal void DuplicateNode(string nodeId)
         {
-            if (!_owner.CommandPermissions.Nodes.AllowDuplicate)
+            if (!_host.CommandPermissions.Nodes.AllowDuplicate)
             {
-                _owner.SetStatus("editor.status.node.duplicate.disabledByPermissions", "Node duplication is disabled by host permissions.");
+                _host.SetStatus("editor.status.node.duplicate.disabledByPermissions", "Node duplication is disabled by host permissions.");
                 return;
             }
 
-            var node = _owner.FindNode(nodeId);
+            var node = _host.FindNode(nodeId);
             if (node is null)
             {
                 return;
             }
 
-            _owner._kernel.DuplicateNode(nodeId);
-            _owner.SetStatus("editor.status.node.duplicated", "Duplicated {0}.", node.Title);
+            _host.DuplicateNodeCore(nodeId);
+            _host.SetStatus("editor.status.node.duplicated", "Duplicated {0}.", node.Title);
         }
 
         internal void DisconnectIncoming(string nodeId)
         {
-            if (!_owner.CommandPermissions.Connections.AllowDisconnect)
+            if (!_host.CommandPermissions.Connections.AllowDisconnect)
             {
-                _owner.SetStatus("editor.status.connection.disconnect.disabledByPermissions", "Disconnect is disabled by host permissions.");
+                _host.SetStatus("editor.status.connection.disconnect.disabledByPermissions", "Disconnect is disabled by host permissions.");
                 return;
             }
 
-            _owner._kernel.DisconnectIncoming(nodeId);
+            _host.DisconnectIncomingCore(nodeId);
         }
 
         internal void DisconnectOutgoing(string nodeId)
         {
-            if (!_owner.CommandPermissions.Connections.AllowDisconnect)
+            if (!_host.CommandPermissions.Connections.AllowDisconnect)
             {
-                _owner.SetStatus("editor.status.connection.disconnect.disabledByPermissions", "Disconnect is disabled by host permissions.");
+                _host.SetStatus("editor.status.connection.disconnect.disabledByPermissions", "Disconnect is disabled by host permissions.");
                 return;
             }
 
-            _owner._kernel.DisconnectOutgoing(nodeId);
+            _host.DisconnectOutgoingCore(nodeId);
         }
 
         internal void DisconnectAll(string nodeId)
         {
-            if (!_owner.CommandPermissions.Connections.AllowDisconnect)
+            if (!_host.CommandPermissions.Connections.AllowDisconnect)
             {
-                _owner.SetStatus("editor.status.connection.disconnect.disabledByPermissions", "Disconnect is disabled by host permissions.");
+                _host.SetStatus("editor.status.connection.disconnect.disabledByPermissions", "Disconnect is disabled by host permissions.");
                 return;
             }
 
-            _owner._kernel.DisconnectAll(nodeId);
+            _host.DisconnectAllCore(nodeId);
         }
 
         internal void BreakConnectionsForPort(string nodeId, string portId)
         {
-            if (!_owner.CommandPermissions.Connections.AllowDisconnect)
+            if (!_host.CommandPermissions.Connections.AllowDisconnect)
             {
-                _owner.SetStatus("editor.status.connection.disconnect.disabledByPermissions", "Disconnect is disabled by host permissions.");
+                _host.SetStatus("editor.status.connection.disconnect.disabledByPermissions", "Disconnect is disabled by host permissions.");
                 return;
             }
 
-            _owner._kernel.BreakConnectionsForPort(nodeId, portId);
+            _host.BreakConnectionsForPortCore(nodeId, portId);
         }
 
         internal void DeleteConnection(string connectionId)
         {
-            if (!_owner.CommandPermissions.Connections.AllowDelete)
+            if (!_host.CommandPermissions.Connections.AllowDelete)
             {
-                _owner.SetStatus("editor.status.connection.delete.disabledByPermissions", "Connection deletion is disabled by host permissions.");
+                _host.SetStatus("editor.status.connection.delete.disabledByPermissions", "Connection deletion is disabled by host permissions.");
                 return;
             }
 
-            var connection = _owner.FindConnection(connectionId);
+            var connection = _host.FindConnection(connectionId);
             if (connection is null)
             {
                 return;
             }
 
-            _owner._kernel.DeleteConnection(connectionId);
+            _host.DeleteConnectionCore(connectionId);
         }
     }
 }

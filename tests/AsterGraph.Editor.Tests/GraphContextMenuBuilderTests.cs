@@ -4,7 +4,9 @@ using AsterGraph.Core.Compatibility;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Catalog;
 using AsterGraph.Editor.Configuration;
+using AsterGraph.Editor.Events;
 using AsterGraph.Editor.Menus;
+using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.ViewModels;
 using Xunit;
 
@@ -28,7 +30,7 @@ public sealed class GraphContextMenuBuilderTests
     public void CompatibilityCommands_BuildCanvasMenu_DisabledSaveItem_ExposesDisabledReason()
     {
         var editor = CreateEditor(GraphEditorCommandPermissions.ReadOnly);
-        var commands = new GraphEditorViewModel.GraphEditorCompatibilityCommands(editor);
+        var commands = new GraphEditorViewModel.GraphEditorCompatibilityCommands(new CompatibilityCommandHostAdapter(editor));
 
         var menu = commands.BuildContextMenu(new ContextMenuContext(ContextMenuTargetKind.Canvas, new GraphPoint(0, 0)));
         var saveItem = Assert.Single(menu, item => item.Id == "canvas-save");
@@ -41,7 +43,7 @@ public sealed class GraphContextMenuBuilderTests
     public void CompatibilityCommands_DuplicateNode_CreatesShiftedCopy()
     {
         var editor = CreateConnectedEditor();
-        var commands = new GraphEditorViewModel.GraphEditorCompatibilityCommands(editor);
+        var commands = new GraphEditorViewModel.GraphEditorCompatibilityCommands(new CompatibilityCommandHostAdapter(editor));
         var original = Assert.Single(editor.Nodes, node => node.Id == "source-node");
 
         commands.DuplicateNode(original.Id);
@@ -150,5 +152,65 @@ public sealed class GraphContextMenuBuilderTests
                 ]),
             catalog,
             new DefaultPortCompatibilityService());
+    }
+
+    internal sealed class CompatibilityCommandHostAdapter : GraphEditorViewModel.IGraphEditorCompatibilityCommandHost
+    {
+        private readonly GraphEditorViewModel.IGraphEditorCompatibilityCommandHost _inner;
+
+        public CompatibilityCommandHostAdapter(GraphEditorViewModel editor)
+        {
+            ArgumentNullException.ThrowIfNull(editor);
+            _inner = editor;
+        }
+
+        public IGraphEditorSession Session => _inner.Session;
+
+        public GraphEditorViewModel CompatibilityEditor => _inner.CompatibilityEditor;
+
+        public IGraphContextMenuAugmentor? ContextMenuAugmentor => _inner.ContextMenuAugmentor;
+
+        public GraphEditorCommandPermissions CommandPermissions => _inner.CommandPermissions;
+
+        public string? StatusMessage => _inner.StatusMessage;
+
+        public void SetStatus(string key, string fallback, params object?[] arguments)
+            => _inner.SetStatus(key, fallback, arguments);
+
+        public void PublishRecoverableFailure(string code, string operation, string message, Exception? exception = null)
+            => _inner.PublishRecoverableFailure(code, operation, message, exception);
+
+        public NodeViewModel? FindNode(string nodeId)
+            => _inner.FindNode(nodeId);
+
+        public ConnectionViewModel? FindConnection(string connectionId)
+            => _inner.FindConnection(connectionId);
+
+        public int CountConnectionsForNode(string nodeId)
+            => _inner.CountConnectionsForNode(nodeId);
+
+        public bool CanRemoveConnectionsAsSideEffect()
+            => _inner.CanRemoveConnectionsAsSideEffect();
+
+        public void DeleteNodeByIdCore(string nodeId)
+            => _inner.DeleteNodeByIdCore(nodeId);
+
+        public void DuplicateNodeCore(string nodeId)
+            => _inner.DuplicateNodeCore(nodeId);
+
+        public void DisconnectIncomingCore(string nodeId)
+            => _inner.DisconnectIncomingCore(nodeId);
+
+        public void DisconnectOutgoingCore(string nodeId)
+            => _inner.DisconnectOutgoingCore(nodeId);
+
+        public void DisconnectAllCore(string nodeId)
+            => _inner.DisconnectAllCore(nodeId);
+
+        public void BreakConnectionsForPortCore(string nodeId, string portId)
+            => _inner.BreakConnectionsForPortCore(nodeId, portId);
+
+        public void DeleteConnectionCore(string connectionId)
+            => _inner.DeleteConnectionCore(connectionId);
     }
 }

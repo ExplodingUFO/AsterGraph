@@ -6,6 +6,9 @@ using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Core.Compatibility;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Catalog;
+using AsterGraph.Editor.Configuration;
+using AsterGraph.Editor.Diagnostics;
+using AsterGraph.Editor.Events;
 using AsterGraph.Editor.Services;
 using AsterGraph.Editor.ViewModels;
 using Xunit;
@@ -41,7 +44,7 @@ public sealed class EditorClipboardAndFragmentCompatibilityTests
     {
         var bridge = new TestClipboardBridge();
         var editor = CreateEditor(bridge);
-        var commands = new GraphEditorViewModel.GraphEditorFragmentCommands(editor);
+        var commands = new GraphEditorViewModel.GraphEditorFragmentCommands(new FragmentCommandHostAdapter(editor));
         editor.SelectSingleNode(editor.Nodes[0]);
 
         await commands.CopySelectionAsync();
@@ -114,7 +117,7 @@ public sealed class EditorClipboardAndFragmentCompatibilityTests
     public void FragmentCommands_ImportFragmentFrom_ReadsLegacyFragmentPayload()
     {
         var editor = CreateEditor(nodes: []);
-        var commands = new GraphEditorViewModel.GraphEditorFragmentCommands(editor);
+        var commands = new GraphEditorViewModel.GraphEditorFragmentCommands(new FragmentCommandHostAdapter(editor));
         var path = Path.Combine(Path.GetTempPath(), $"astergraph-fragment-{Guid.NewGuid():N}.json");
         File.WriteAllText(path, CreateLegacyClipboardJson());
 
@@ -226,5 +229,91 @@ public sealed class EditorClipboardAndFragmentCompatibilityTests
                     defaultWidth: 240,
                     defaultHeight: 160),
             ];
+    }
+
+    private sealed class FragmentCommandHostAdapter : GraphEditorViewModel.IGraphEditorFragmentCommandHost
+    {
+        private readonly GraphEditorViewModel.IGraphEditorFragmentCommandHost _inner;
+
+        public FragmentCommandHostAdapter(GraphEditorViewModel editor)
+        {
+            ArgumentNullException.ThrowIfNull(editor);
+            _inner = editor;
+        }
+
+        public GraphEditorCommandPermissions CommandPermissions => _inner.CommandPermissions;
+
+        public GraphEditorBehaviorOptions BehaviorOptions => _inner.BehaviorOptions;
+
+        public IEnumerable<NodeViewModel> SelectedNodes => _inner.SelectedNodes;
+
+        public string? SelectedNodeId => _inner.SelectedNodeId;
+
+        public string? SelectedNodeTitle => _inner.SelectedNodeTitle;
+
+        public IEnumerable<ConnectionViewModel> Connections => _inner.Connections;
+
+        public string? SelectedFragmentTemplatePath => _inner.SelectedFragmentTemplatePath;
+
+        public string? StatusMessage => _inner.StatusMessage;
+
+        public IGraphTextClipboardBridge? TextClipboardBridge => _inner.TextClipboardBridge;
+
+        public IGraphClipboardPayloadSerializer ClipboardPayloadSerializer => _inner.ClipboardPayloadSerializer;
+
+        public IGraphFragmentWorkspaceService FragmentWorkspaceService => _inner.FragmentWorkspaceService;
+
+        public IGraphFragmentLibraryService FragmentLibraryService => _inner.FragmentLibraryService;
+
+        public void StoreSelectionClipboard(GraphSelectionFragment fragment)
+            => _inner.StoreSelectionClipboard(fragment);
+
+        public GraphSelectionFragment? PeekSelectionClipboard()
+            => _inner.PeekSelectionClipboard();
+
+        public GraphPoint GetNextPasteOrigin()
+            => _inner.GetNextPasteOrigin();
+
+        public string CreateNodeId(NodeDefinitionId? definitionId, string fallbackKey)
+            => _inner.CreateNodeId(definitionId, fallbackKey);
+
+        public string CreateConnectionId()
+            => _inner.CreateConnectionId();
+
+        public void ApplyNodePresentation(NodeViewModel node)
+            => _inner.ApplyNodePresentation(node);
+
+        public void AddNode(NodeViewModel node)
+            => _inner.AddNode(node);
+
+        public void AddConnection(ConnectionViewModel connection)
+            => _inner.AddConnection(connection);
+
+        public void SetSelection(IReadOnlyList<NodeViewModel> nodes, NodeViewModel? primaryNode)
+            => _inner.SetSelection(nodes, primaryNode);
+
+        public void RefreshFragmentTemplates()
+            => _inner.RefreshFragmentTemplates();
+
+        public void RaiseComputedPropertyChanges()
+            => _inner.RaiseComputedPropertyChanges();
+
+        public string StatusText(string key, string fallback, params object?[] arguments)
+            => _inner.StatusText(key, fallback, arguments);
+
+        public void SetStatus(string key, string fallback, params object?[] arguments)
+            => _inner.SetStatus(key, fallback, arguments);
+
+        public void MarkDirty(string status)
+            => _inner.MarkDirty(status);
+
+        public void PublishRuntimeDiagnostic(string code, string operation, string message, GraphEditorDiagnosticSeverity severity, Exception? exception = null)
+            => _inner.PublishRuntimeDiagnostic(code, operation, message, severity, exception);
+
+        public void RaiseFragmentExported(string path, GraphSelectionFragment fragment)
+            => _inner.RaiseFragmentExported(path, fragment);
+
+        public void RaiseFragmentImported(string path, GraphSelectionFragment fragment)
+            => _inner.RaiseFragmentImported(path, fragment);
     }
 }

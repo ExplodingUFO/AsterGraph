@@ -39,7 +39,7 @@ namespace AsterGraph.Editor.ViewModels;
 /// 而自定义 UI 宿主应优先考虑 <see cref="AsterGraphEditorFactory.CreateSession(AsterGraphEditorOptions)"/>。
 /// 本类型在当前迁移窗口内仍然受支持，但不应再被视为新的首选组合根。
 /// </remarks>
-public sealed partial class GraphEditorViewModel : ObservableObject, IGraphContextMenuHost
+public sealed partial class GraphEditorViewModel : ObservableObject, IGraphContextMenuHost, GraphEditorViewModel.IGraphEditorCompatibilityCommandHost, GraphEditorViewModel.IGraphEditorFragmentCommandHost
 {
     private const double DefaultZoom = 0.88;
     private const double DefaultPanX = 110;
@@ -591,6 +591,140 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     ICommand IGraphContextMenuHost.DistributeVerticallyCommand => DistributeVerticallyCommand;
 
     ICommand IGraphContextMenuHost.CancelPendingConnectionCommand => CancelPendingConnectionCommand;
+
+    IGraphEditorSession IGraphEditorCompatibilityCommandHost.Session => Session;
+
+    GraphEditorViewModel IGraphEditorCompatibilityCommandHost.CompatibilityEditor => this;
+
+    IGraphContextMenuAugmentor? IGraphEditorCompatibilityCommandHost.ContextMenuAugmentor => ContextMenuAugmentor;
+
+    GraphEditorCommandPermissions IGraphEditorCompatibilityCommandHost.CommandPermissions => CommandPermissions;
+
+    string? IGraphEditorCompatibilityCommandHost.StatusMessage => StatusMessage;
+
+    void IGraphEditorCompatibilityCommandHost.SetStatus(string key, string fallback, params object?[] arguments)
+        => SetStatus(key, fallback, arguments);
+
+    void IGraphEditorCompatibilityCommandHost.PublishRecoverableFailure(string code, string operation, string message, Exception? exception)
+        => PublishRecoverableFailure(code, operation, message, exception);
+
+    NodeViewModel? IGraphEditorCompatibilityCommandHost.FindNode(string nodeId)
+        => FindNode(nodeId);
+
+    ConnectionViewModel? IGraphEditorCompatibilityCommandHost.FindConnection(string connectionId)
+        => FindConnection(connectionId);
+
+    int IGraphEditorCompatibilityCommandHost.CountConnectionsForNode(string nodeId)
+        => Connections.Count(connection => connection.SourceNodeId == nodeId || connection.TargetNodeId == nodeId);
+
+    bool IGraphEditorCompatibilityCommandHost.CanRemoveConnectionsAsSideEffect()
+        => CanRemoveConnectionsAsSideEffect();
+
+    void IGraphEditorCompatibilityCommandHost.DeleteNodeByIdCore(string nodeId)
+        => _kernel.DeleteNodeById(nodeId);
+
+    void IGraphEditorCompatibilityCommandHost.DuplicateNodeCore(string nodeId)
+        => _kernel.DuplicateNode(nodeId);
+
+    void IGraphEditorCompatibilityCommandHost.DisconnectIncomingCore(string nodeId)
+        => _kernel.DisconnectIncoming(nodeId);
+
+    void IGraphEditorCompatibilityCommandHost.DisconnectOutgoingCore(string nodeId)
+        => _kernel.DisconnectOutgoing(nodeId);
+
+    void IGraphEditorCompatibilityCommandHost.DisconnectAllCore(string nodeId)
+        => _kernel.DisconnectAll(nodeId);
+
+    void IGraphEditorCompatibilityCommandHost.BreakConnectionsForPortCore(string nodeId, string portId)
+        => _kernel.BreakConnectionsForPort(nodeId, portId);
+
+    void IGraphEditorCompatibilityCommandHost.DeleteConnectionCore(string connectionId)
+        => _kernel.DeleteConnection(connectionId);
+
+    GraphEditorCommandPermissions IGraphEditorFragmentCommandHost.CommandPermissions => CommandPermissions;
+
+    GraphEditorBehaviorOptions IGraphEditorFragmentCommandHost.BehaviorOptions => BehaviorOptions;
+
+    IEnumerable<NodeViewModel> IGraphEditorFragmentCommandHost.SelectedNodes => SelectedNodes;
+
+    string? IGraphEditorFragmentCommandHost.SelectedNodeId => SelectedNode?.Id;
+
+    string? IGraphEditorFragmentCommandHost.SelectedNodeTitle => SelectedNode?.Title;
+
+    IEnumerable<ConnectionViewModel> IGraphEditorFragmentCommandHost.Connections => Connections;
+
+    string? IGraphEditorFragmentCommandHost.SelectedFragmentTemplatePath => SelectedFragmentTemplate?.Path;
+
+    string? IGraphEditorFragmentCommandHost.StatusMessage => StatusMessage;
+
+    IGraphTextClipboardBridge? IGraphEditorFragmentCommandHost.TextClipboardBridge => _textClipboardBridge;
+
+    IGraphClipboardPayloadSerializer IGraphEditorFragmentCommandHost.ClipboardPayloadSerializer => _clipboardPayloadSerializer;
+
+    IGraphFragmentWorkspaceService IGraphEditorFragmentCommandHost.FragmentWorkspaceService => _fragmentWorkspaceService;
+
+    IGraphFragmentLibraryService IGraphEditorFragmentCommandHost.FragmentLibraryService => _fragmentLibraryService;
+
+    void IGraphEditorFragmentCommandHost.StoreSelectionClipboard(GraphSelectionFragment fragment)
+        => _selectionClipboard.Store(fragment);
+
+    GraphSelectionFragment? IGraphEditorFragmentCommandHost.PeekSelectionClipboard()
+        => _selectionClipboard.Peek();
+
+    GraphPoint IGraphEditorFragmentCommandHost.GetNextPasteOrigin()
+        => _selectionClipboard.GetNextPasteOrigin(GetViewportCenter());
+
+    string IGraphEditorFragmentCommandHost.CreateNodeId(NodeDefinitionId? definitionId, string fallbackKey)
+        => CreateNodeId(definitionId, fallbackKey);
+
+    string IGraphEditorFragmentCommandHost.CreateConnectionId()
+        => CreateConnectionId();
+
+    void IGraphEditorFragmentCommandHost.ApplyNodePresentation(NodeViewModel node)
+        => ApplyNodePresentation(node);
+
+    void IGraphEditorFragmentCommandHost.AddNode(NodeViewModel node)
+        => Nodes.Add(node);
+
+    void IGraphEditorFragmentCommandHost.AddConnection(ConnectionViewModel connection)
+        => Connections.Add(connection);
+
+    void IGraphEditorFragmentCommandHost.SetSelection(IReadOnlyList<NodeViewModel> nodes, NodeViewModel? primaryNode)
+        => SetSelection(nodes, primaryNode);
+
+    void IGraphEditorFragmentCommandHost.RefreshFragmentTemplates()
+        => RefreshFragmentTemplates();
+
+    void IGraphEditorFragmentCommandHost.RaiseComputedPropertyChanges()
+        => RaiseComputedPropertyChanges();
+
+    string IGraphEditorFragmentCommandHost.StatusText(string key, string fallback, params object?[] arguments)
+        => StatusText(key, fallback, arguments);
+
+    void IGraphEditorFragmentCommandHost.SetStatus(string key, string fallback, params object?[] arguments)
+        => SetStatus(key, fallback, arguments);
+
+    void IGraphEditorFragmentCommandHost.MarkDirty(string status)
+        => MarkDirty(status);
+
+    void IGraphEditorFragmentCommandHost.PublishRuntimeDiagnostic(string code, string operation, string message, GraphEditorDiagnosticSeverity severity, Exception? exception)
+        => PublishRuntimeDiagnostic(code, operation, message, severity, exception);
+
+    void IGraphEditorFragmentCommandHost.RaiseFragmentExported(string path, GraphSelectionFragment fragment)
+        => FragmentExported?.Invoke(
+            this,
+            new GraphEditorFragmentEventArgs(
+                path,
+                fragment.Nodes.Count,
+                fragment.Connections.Count));
+
+    void IGraphEditorFragmentCommandHost.RaiseFragmentImported(string path, GraphSelectionFragment fragment)
+        => FragmentImported?.Invoke(
+            this,
+            new GraphEditorFragmentEventArgs(
+                path,
+                fragment.Nodes.Count,
+                fragment.Connections.Count));
 
     [ObservableProperty]
     private double zoom = DefaultZoom;

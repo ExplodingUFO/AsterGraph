@@ -52,7 +52,7 @@ public sealed class GraphEditorLocalizationTests
             {
                 ["editor.menu.canvas.addNode"] = "添加节点",
             }));
-        var commands = new GraphEditorViewModel.GraphEditorCompatibilityCommands(editor);
+        var commands = new GraphEditorViewModel.GraphEditorCompatibilityCommands(new GraphContextMenuBuilderTests.CompatibilityCommandHostAdapter(editor));
 
         var menu = commands.BuildContextMenu(new ContextMenuContext(ContextMenuTargetKind.Canvas, new GraphPoint(0, 0)));
         var addNodeItem = Assert.Single(menu, item => item.Id == "canvas-add-node");
