@@ -1,11 +1,8 @@
 using System.Collections.Specialized;
 using System.ComponentModel;
-using Avalonia.Controls.Shapes;
 using Avalonia;
-using Avalonia.Automation;
 using Avalonia.Controls;
 using Avalonia.Input;
-using Avalonia.Layout;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media;
 using Avalonia.Threading;
@@ -71,7 +68,7 @@ public partial class NodeCanvas : UserControl
     public static readonly StyledProperty<IGraphContextMenuPresenter?> ContextMenuPresenterProperty =
         AvaloniaProperty.Register<NodeCanvas, IGraphContextMenuPresenter?>(nameof(ContextMenuPresenter));
 
-    private readonly Dictionary<NodeViewModel, RenderedNodeVisual> _nodeVisuals = new();
+    private readonly Dictionary<NodeViewModel, NodeCanvasRenderedNodeVisual> _nodeVisuals = new();
     private Grid? _sceneRoot;
     private Canvas? _connectionLayer;
     private Canvas? _nodeLayer;
@@ -83,6 +80,7 @@ public partial class NodeCanvas : UserControl
     private readonly GraphContextMenuPresenter _stockContextMenuPresenter = new();
     private readonly IGraphNodeVisualPresenter _stockNodeVisualPresenter = new DefaultGraphNodeVisualPresenter();
     private readonly NodeCanvasInteractionSession _interactionSession = new();
+    private readonly NodeCanvasConnectionSceneRenderer _connectionSceneRenderer = new();
     private bool _isAttachedToVisualTree;
 
     /// <summary>
@@ -304,11 +302,11 @@ public partial class NodeCanvas : UserControl
         Dispatcher.UIThread.Post(RenderConnections, DispatcherPriority.Loaded);
     }
 
-    private RenderedNodeVisual CreateNodeVisual(NodeViewModel node)
+    private NodeCanvasRenderedNodeVisual CreateNodeVisual(NodeViewModel node)
     {
         var presenter = NodeVisualPresenter ?? _stockNodeVisualPresenter;
         var visual = presenter.Create(CreateNodeVisualContext(node));
-        return new RenderedNodeVisual(visual.Root, presenter, visual);
+        return new NodeCanvasRenderedNodeVisual(visual.Root, presenter, visual);
     }
 
     private GraphNodeVisualContext CreateNodeVisualContext(NodeViewModel node)
@@ -380,122 +378,6 @@ public partial class NodeCanvas : UserControl
                 hostContext: ViewModel.HostContext));
     }
 
-    private StackPanel BuildPortPanel(
-        NodeViewModel node,
-        IEnumerable<PortViewModel> ports,
-        bool isInput,
-        Dictionary<string, Border> portAnchors)
-    {
-        var portStyle = GetPortStyle(ports.FirstOrDefault());
-        var panel = new StackPanel
-        {
-            Spacing = portStyle.RowSpacing,
-            HorizontalAlignment = isInput ? HorizontalAlignment.Left : HorizontalAlignment.Right,
-        };
-
-        foreach (var port in ports)
-        {
-            var row = new StackPanel
-            {
-                Orientation = Orientation.Horizontal,
-                Spacing = portStyle.RowSpacing,
-                HorizontalAlignment = isInput ? HorizontalAlignment.Left : HorizontalAlignment.Right,
-            };
-
-            var dot = new Border
-            {
-                Width = portStyle.DotSize,
-                Height = portStyle.DotSize,
-                CornerRadius = new CornerRadius(999),
-                Background = BrushFactory.Solid(port.AccentHex),
-                VerticalAlignment = VerticalAlignment.Center,
-            };
-
-            var text = new StackPanel
-            {
-                Spacing = portStyle.TextSpacing,
-                HorizontalAlignment = isInput ? HorizontalAlignment.Left : HorizontalAlignment.Right,
-            };
-            text.Children.Add(new TextBlock
-            {
-                Text = port.Label,
-                FontSize = portStyle.LabelFontSize,
-                FontWeight = FontWeight.Medium,
-                Foreground = BrushFactory.Solid(portStyle.LabelHex),
-                TextAlignment = isInput ? TextAlignment.Left : TextAlignment.Right,
-            });
-            text.Children.Add(new TextBlock
-            {
-                Text = port.DataType,
-                FontSize = portStyle.TypeFontSize,
-                Foreground = BrushFactory.Solid(portStyle.TypeHex, portStyle.TypeOpacity),
-                TextAlignment = isInput ? TextAlignment.Left : TextAlignment.Right,
-            });
-
-            if (isInput)
-            {
-                row.Children.Add(dot);
-                row.Children.Add(text);
-            }
-            else
-            {
-                row.Children.Add(text);
-                row.Children.Add(dot);
-            }
-
-            var button = new Button
-            {
-                DataContext = port,
-                Background = Brushes.Transparent,
-                BorderThickness = new Thickness(0),
-                Padding = new Thickness(0),
-                HorizontalAlignment = isInput ? HorizontalAlignment.Left : HorizontalAlignment.Right,
-                HorizontalContentAlignment = isInput ? HorizontalAlignment.Left : HorizontalAlignment.Right,
-                Content = row,
-            };
-            AutomationProperties.SetName(
-                button,
-                $"{node.Title} {(isInput ? "input" : "output")} {port.Label}");
-
-            button.PointerPressed += (_, args) =>
-            {
-                if (args.GetCurrentPoint(button).Properties.IsLeftButtonPressed)
-                {
-                    args.Handled = true;
-                }
-            };
-            button.Click += (_, _) =>
-            {
-                Focus();
-                ViewModel?.ActivatePort(node, port);
-                RenderConnections();
-            };
-            button.ContextRequested += (_, args) =>
-            {
-                if (ViewModel is null)
-                {
-                    return;
-                }
-
-                Focus();
-                ViewModel.SelectNode(node);
-                args.Handled = OpenContextMenu(
-                    button,
-                    NodeCanvasContextMenuContextFactory.CreatePortContext(
-                        CreateContextMenuSnapshot(),
-                        ResolveWorldPosition(args, this),
-                        node.Id,
-                        port.Id,
-                        hostContext: ViewModel.HostContext));
-            };
-
-            portAnchors[port.Id] = dot;
-            panel.Children.Add(button);
-        }
-
-        return panel;
-    }
-
     private void UpdateViewportTransform()
     {
         if (_sceneRoot is null || ViewModel is null)
@@ -511,141 +393,7 @@ public partial class NodeCanvas : UserControl
     }
 
     private void RenderConnections()
-    {
-        if (_connectionLayer is null || ViewModel is null)
-        {
-            return;
-        }
-
-        _connectionLayer.Children.Clear();
-
-        foreach (var connection in ViewModel.Connections)
-        {
-            var sourceNode = ViewModel.FindNode(connection.SourceNodeId);
-            var targetNode = ViewModel.FindNode(connection.TargetNodeId);
-            if (sourceNode is null || targetNode is null)
-            {
-                continue;
-            }
-
-            var sourcePort = sourceNode.GetPort(connection.SourcePortId);
-            var targetPort = targetNode.GetPort(connection.TargetPortId);
-            if (sourcePort is null || targetPort is null)
-            {
-                continue;
-            }
-
-            DrawConnection(
-                GetPortAnchor(sourceNode, sourcePort),
-                GetPortAnchor(targetNode, targetPort),
-                connection);
-        }
-
-        if (ViewModel.HasPendingConnection
-            && ViewModel.PendingSourceNode is not null
-            && ViewModel.PendingSourcePort is not null
-            && _interactionSession.PointerScreenPosition is not null)
-        {
-            var source = GetPortAnchor(ViewModel.PendingSourceNode, ViewModel.PendingSourcePort);
-            var end = ViewModel.ScreenToWorld(
-                new GraphPoint(
-                    _interactionSession.PointerScreenPosition.Value.X,
-                    _interactionSession.PointerScreenPosition.Value.Y));
-
-            DrawConnection(source, end, new ConnectionViewModel(
-                "pending",
-                ViewModel.PendingSourceNode.Id,
-                ViewModel.PendingSourcePort.Id,
-                string.Empty,
-                string.Empty,
-                "pending",
-                ViewModel.PendingSourcePort.AccentHex), isPreview: true);
-        }
-    }
-
-    private void DrawConnection(GraphPoint start, GraphPoint end, ConnectionViewModel connection, bool isPreview = false)
-    {
-        if (_connectionLayer is null)
-        {
-            return;
-        }
-
-        var connectionStyle = GetConnectionStyle(connection);
-        var curve = ConnectionPathBuilder.Build(start, end);
-        var path = new global::Avalonia.Controls.Shapes.Path
-        {
-            Data = Geometry.Parse(
-                $"M {curve.Start.X:0.##},{curve.Start.Y:0.##} " +
-                $"C {curve.Control1.X:0.##},{curve.Control1.Y:0.##} " +
-                $"{curve.Control2.X:0.##},{curve.Control2.Y:0.##} " +
-                $"{curve.End.X:0.##},{curve.End.Y:0.##}"),
-            Stroke = BrushFactory.Solid(connection.AccentHex, isPreview ? connectionStyle.PreviewStrokeOpacity : connectionStyle.StrokeOpacity),
-            StrokeThickness = isPreview ? connectionStyle.PreviewThickness : connectionStyle.Thickness,
-            StrokeLineCap = PenLineCap.Round,
-        };
-        _connectionLayer.Children.Add(path);
-
-        if (isPreview)
-        {
-            return;
-        }
-
-        var midpoint = new Point((curve.Start.X + curve.End.X) / 2, (curve.Start.Y + curve.End.Y) / 2);
-
-        var chip = new Border
-        {
-            Background = BrushFactory.Solid(connectionStyle.LabelBackgroundHex, connectionStyle.LabelBackgroundOpacity),
-            BorderBrush = BrushFactory.Solid(connection.AccentHex, connectionStyle.LabelBorderOpacity),
-            BorderThickness = new Thickness(connectionStyle.LabelBorderThickness),
-            CornerRadius = new CornerRadius(connectionStyle.LabelCornerRadius),
-            Padding = new Thickness(connectionStyle.LabelHorizontalPadding, connectionStyle.LabelVerticalPadding),
-            Focusable = true,
-            Child = new TextBlock
-            {
-                Text = connection.Label,
-                FontSize = connectionStyle.LabelFontSize,
-                Foreground = BrushFactory.Solid(connectionStyle.LabelForegroundHex, connectionStyle.LabelForegroundOpacity),
-            },
-        };
-        AutomationProperties.SetName(chip, $"{connection.Label} connection");
-        chip.KeyDown += (_, args) =>
-        {
-            if (ViewModel is null || string.IsNullOrWhiteSpace(connection.TargetNodeId))
-            {
-                return;
-            }
-
-            if (args.Key == Key.Apps || (args.Key == Key.F10 && args.KeyModifiers.HasFlag(KeyModifiers.Shift)))
-            {
-                args.Handled = OpenContextMenu(
-                    chip,
-                    NodeCanvasContextMenuContextFactory.CreateConnectionContext(
-                        CreateContextMenuSnapshot(),
-                        new GraphPoint(0, 0),
-                        connection.Id,
-                        hostContext: ViewModel.HostContext));
-            }
-        };
-        chip.ContextRequested += (_, args) =>
-        {
-            if (ViewModel is null || string.IsNullOrWhiteSpace(connection.TargetNodeId))
-            {
-                return;
-            }
-
-            args.Handled = OpenContextMenu(
-                chip,
-                NodeCanvasContextMenuContextFactory.CreateConnectionContext(
-                    CreateContextMenuSnapshot(),
-                    ResolveWorldPosition(args, this),
-                    connection.Id,
-                    hostContext: ViewModel.HostContext));
-        };
-
-        Canvas.SetLeft(chip, midpoint.X + connectionStyle.LabelOffsetX);
-        Canvas.SetTop(chip, midpoint.Y + connectionStyle.LabelOffsetY);
-        _connectionLayer.Children.Add(chip);
-    }
+        => _connectionSceneRenderer.RenderConnections(CreateConnectionSceneContext());
 
     private void BeginNodeDrag(NodeViewModel node, PointerPressedEventArgs args)
     {
@@ -1003,46 +751,20 @@ public partial class NodeCanvas : UserControl
     }
 
     private GraphPoint GetPortAnchor(NodeViewModel node, PortViewModel port)
-    {
-        // 吸附拖动时，节点外层 Canvas 的绝对布局可能还没完成新一轮 Arrange。
-        // 因此这里优先读取“端口圆点在节点卡内部的局部坐标”，再叠加当前节点的 X/Y，
-        // 这样连线能跟随最新的节点位置，而不会因为布局时序晚一拍出现偏移。
-        if (_nodeVisuals.TryGetValue(node, out var visual)
-            && visual.Visual.PortAnchors.TryGetValue(port.Id, out var anchorDot))
-        {
-            var center = new Point(anchorDot.Bounds.Width / 2, anchorDot.Bounds.Height / 2);
-            var localToNode = anchorDot.TranslatePoint(center, visual.Root);
-            if (localToNode is not null)
-            {
-                return new GraphPoint(
-                    node.X + localToNode.Value.X,
-                    node.Y + localToNode.Value.Y);
-            }
+        => _connectionSceneRenderer.GetPortAnchor(CreateConnectionSceneContext(), node, port);
 
-            if (_nodeLayer is not null)
-            {
-                var translated = anchorDot.TranslatePoint(center, _nodeLayer);
-                if (translated is not null)
-                {
-                    return new GraphPoint(translated.Value.X, translated.Value.Y);
-                }
-            }
-        }
-
-        return node.GetPortAnchor(port);
-    }
-
-    private NodeCardStyleOptions GetNodeCardStyle(NodeViewModel node)
-        => ViewModel?.StyleOptions.NodeOverrides.FirstOrDefault(overrideStyle => overrideStyle.DefinitionId == node.DefinitionId)?.Style
-           ?? ViewModel?.StyleOptions.NodeCard
-           ?? GraphEditorStyleOptions.Default.NodeCard;
-
-    private PortStyleOptions GetPortStyle(PortViewModel? port)
-        => port is null
-            ? ViewModel?.StyleOptions.Port ?? GraphEditorStyleOptions.Default.Port
-            : ViewModel?.StyleOptions.PortOverrides.FirstOrDefault(overrideStyle => overrideStyle.TypeId == port.TypeId)?.Style
-              ?? ViewModel?.StyleOptions.Port
-              ?? GraphEditorStyleOptions.Default.Port;
+    private NodeCanvasConnectionSceneContext CreateConnectionSceneContext()
+        => new(
+            ViewModel,
+            _connectionLayer,
+            _nodeLayer,
+            this,
+            _nodeVisuals,
+            _interactionSession.PointerScreenPosition,
+            GetConnectionStyle,
+            CreateContextMenuSnapshot,
+            ResolveWorldPosition,
+            OpenContextMenu);
 
     private ConnectionStyleOptions GetConnectionStyle(ConnectionViewModel connection)
         => connection.ConversionId is not null
@@ -1355,10 +1077,5 @@ public partial class NodeCanvas : UserControl
         => ViewportMath.WorldToScreen(
             new ViewportState(ViewModel?.Zoom ?? 1, ViewModel?.PanX ?? 0, ViewModel?.PanY ?? 0),
             new GraphPoint(x, y));
-
-    private sealed record RenderedNodeVisual(
-        Control Root,
-        IGraphNodeVisualPresenter Presenter,
-        GraphNodeVisual Visual);
 
 }
