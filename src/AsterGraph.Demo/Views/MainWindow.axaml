@@ -88,16 +88,16 @@
           </MenuItem>
           <MenuItem x:Name="PART_RuntimeMenu"
                     Header="运行时">
-            <MenuItem Header="打开运行时摘要"
+            <MenuItem Header="查看运行时状态"
                       Command="{Binding OpenHostMenuGroupCommand}"
                       CommandParameter="运行时" />
-            <MenuItem Header="查看最近诊断"
+            <MenuItem Header="查看运行时诊断"
                       Command="{Binding OpenHostMenuGroupCommand}"
                       CommandParameter="运行时" />
           </MenuItem>
           <MenuItem x:Name="PART_ProofMenu"
                     Header="证明">
-            <MenuItem Header="查看证明要点"
+            <MenuItem Header="查看宿主边界"
                       Command="{Binding OpenHostMenuGroupCommand}"
                       CommandParameter="证明" />
           </MenuItem>
@@ -262,10 +262,11 @@
                             IsVisible="{Binding IsRuntimeHostGroupSelected}">
                   <StackPanel x:Name="PART_RuntimeConfigurationSection"
                               Spacing="8">
-                    <TextBlock FontSize="12"
+                    <TextBlock x:Name="PART_RuntimeConfigurationHeading"
+                               FontSize="12"
                                FontWeight="Bold"
                                Foreground="#7FE7D7"
-                               Text="当前配置" />
+                               Text="宿主开关快照" />
                     <ItemsControl ItemsSource="{Binding CurrentConfigurationLines}">
                       <ItemsControl.ItemTemplate>
                         <DataTemplate>
@@ -286,10 +287,11 @@
 
                   <StackPanel x:Name="PART_RuntimeSignalsSection"
                               Spacing="8">
-                    <TextBlock FontSize="12"
+                    <TextBlock x:Name="PART_RuntimeSignalsHeading"
+                               FontSize="12"
                                FontWeight="Bold"
                                Foreground="#7FE7D7"
-                               Text="实时信号" />
+                               Text="共享运行时状态" />
                     <ItemsControl ItemsSource="{Binding RuntimeSignalLines}">
                       <ItemsControl.ItemTemplate>
                         <DataTemplate>
@@ -312,7 +314,8 @@
                 <StackPanel x:Name="PART_RuntimeDiagnosticsSection"
                             Spacing="8"
                             IsVisible="{Binding IsRuntimeHostGroupSelected}">
-                  <TextBlock FontSize="12"
+                  <TextBlock x:Name="PART_RuntimeDiagnosticsHeading"
+                             FontSize="12"
                              FontWeight="Bold"
                              Foreground="#7FE7D7"
                              Text="最近诊断" />
@@ -350,10 +353,11 @@
                             IsVisible="{Binding IsProofHostGroupSelected}">
                   <StackPanel x:Name="PART_ProofConfigurationSection"
                               Spacing="8">
-                    <TextBlock FontSize="12"
+                    <TextBlock x:Name="PART_ProofConfigurationHeading"
+                               FontSize="12"
                                FontWeight="Bold"
                                Foreground="#7FE7D7"
-                               Text="当前配置" />
+                               Text="宿主控制快照" />
                     <ItemsControl ItemsSource="{Binding CurrentConfigurationLines}">
                       <ItemsControl.ItemTemplate>
                         <DataTemplate>
@@ -374,10 +378,11 @@
 
                   <StackPanel x:Name="PART_ProofOwnershipSection"
                               Spacing="8">
-                    <TextBlock FontSize="12"
+                    <TextBlock x:Name="PART_ProofOwnershipHeading"
+                               FontSize="12"
                                FontWeight="Bold"
                                Foreground="#7FE7D7"
-                               Text="证明要点" />
+                               Text="边界证据" />
                     <ItemsControl ItemsSource="{Binding OwnershipProofLines}">
                       <ItemsControl.ItemTemplate>
                         <DataTemplate>
@@ -398,10 +403,11 @@
 
                   <StackPanel x:Name="PART_ProofRuntimeSignalsSection"
                               Spacing="8">
-                    <TextBlock FontSize="12"
+                    <TextBlock x:Name="PART_ProofRuntimeSignalsHeading"
+                               FontSize="12"
                                FontWeight="Bold"
                                Foreground="#7FE7D7"
-                               Text="实时信号" />
+                               Text="共享运行时证据" />
                     <ItemsControl ItemsSource="{Binding RuntimeSignalLines}">
                       <ItemsControl.ItemTemplate>
                         <DataTemplate>
