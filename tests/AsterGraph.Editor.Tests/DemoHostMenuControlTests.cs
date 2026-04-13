@@ -211,6 +211,38 @@ public sealed class DemoHostMenuControlTests
         Assert.True(splitView.IsPaneOpen);
     }
 
+    [AvaloniaFact]
+    public void MainWindow_ReadOnlyMenuToggle_DisablesCanonicalDeleteSelection()
+    {
+        var viewModel = new MainWindowViewModel();
+        var window = new MainWindow
+        {
+            DataContext = viewModel,
+        };
+
+        window.Show();
+
+        var behaviorMenu = Assert.IsType<MenuItem>(window.FindControl<MenuItem>("PART_BehaviorMenu"));
+        var readOnlyMenuItem = GetMenuItem(behaviorMenu, "只读模式");
+        var initialNodeCount = viewModel.Editor.Nodes.Count;
+        var selectedNode = viewModel.Editor.Nodes[0];
+
+        viewModel.Editor.SelectSingleNode(selectedNode, updateStatus: false);
+        readOnlyMenuItem.IsChecked = true;
+
+        var deleteSelection = Assert.Single(
+            viewModel.Editor.Session.Queries.GetCommandDescriptors(),
+            descriptor => descriptor.Id == "selection.delete");
+
+        Assert.True(viewModel.IsReadOnlyEnabled);
+        Assert.False(deleteSelection.IsEnabled);
+
+        viewModel.Editor.Session.Commands.DeleteSelection();
+
+        Assert.Equal(initialNodeCount, viewModel.Editor.Nodes.Count);
+        Assert.Equal(selectedNode.Id, viewModel.Editor.SelectedNode?.Id);
+    }
+
     private static MenuItem GetMenuItem(MenuItem parent, string header)
     {
         var matches = parent.Items?

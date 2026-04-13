@@ -221,7 +221,7 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
                     return false;
                 }
 
-                _owner.DisconnectIncoming(incomingNodeId);
+                _kernel.DisconnectIncoming(incomingNodeId);
                 return true;
 
             case "connections.disconnect-outgoing":
@@ -230,7 +230,7 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
                     return false;
                 }
 
-                _owner.DisconnectOutgoing(outgoingNodeId);
+                _kernel.DisconnectOutgoing(outgoingNodeId);
                 return true;
 
             case "connections.disconnect-all":
@@ -239,7 +239,7 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
                     return false;
                 }
 
-                _owner.DisconnectAll(disconnectNodeId);
+                _kernel.DisconnectAll(disconnectNodeId);
                 return true;
 
             default:

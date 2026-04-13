@@ -273,6 +273,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
         RefreshFragmentTemplates();
         _sessionHost.Initialize();
+        _historyService.Reset(CaptureHistoryState());
         _isInitialized = true;
     }
 
@@ -668,12 +669,18 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// <summary>
     /// 指示撤销命令当前是否可用。
     /// </summary>
-    public bool CanUndo => BehaviorOptions.History.EnableUndoRedo && CommandPermissions.History.AllowUndo && _historyService.CanUndo;
+    public bool CanUndo
+        => BehaviorOptions.History.EnableUndoRedo
+           && CommandPermissions.History.AllowUndo
+           && (_kernel.GetCapabilitySnapshot().CanUndo || _historyService.CanUndo);
 
     /// <summary>
     /// 指示重做命令当前是否可用。
     /// </summary>
-    public bool CanRedo => BehaviorOptions.History.EnableUndoRedo && CommandPermissions.History.AllowRedo && _historyService.CanRedo;
+    public bool CanRedo
+        => BehaviorOptions.History.EnableUndoRedo
+           && CommandPermissions.History.AllowRedo
+           && (_kernel.GetCapabilitySnapshot().CanRedo || _historyService.CanRedo);
 
     /// <summary>
     /// 指示当前是否至少选中了一个节点。
@@ -1107,6 +1114,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     {
         ArgumentNullException.ThrowIfNull(behaviorOptions);
 
+        _kernel.UpdateBehaviorOptions(behaviorOptions);
         BehaviorOptions = behaviorOptions;
         if (!string.IsNullOrWhiteSpace(status))
         {
@@ -1181,13 +1189,53 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// 撤销到上一个已记录的图编辑状态。
     /// </summary>
     public void Undo()
-        => _kernel.Undo();
+    {
+        if (!BehaviorOptions.History.EnableUndoRedo || !CommandPermissions.History.AllowUndo)
+        {
+            SetStatus("editor.status.history.undo.disabledByPermissions", "Undo is disabled by host permissions.");
+            return;
+        }
+
+        if (_kernel.GetCapabilitySnapshot().CanUndo)
+        {
+            _kernel.Undo();
+            return;
+        }
+
+        if (!_historyService.TryUndo(out var state) || state is null)
+        {
+            SetStatus("editor.status.history.undo.none", "No more undo steps.");
+            return;
+        }
+
+        RestoreHistoryState(state, "Undo applied.");
+    }
 
     /// <summary>
     /// 重做到下一个已记录的图编辑状态。
     /// </summary>
     public void Redo()
-        => _kernel.Redo();
+    {
+        if (!BehaviorOptions.History.EnableUndoRedo || !CommandPermissions.History.AllowRedo)
+        {
+            SetStatus("editor.status.history.redo.disabledByPermissions", "Redo is disabled by host permissions.");
+            return;
+        }
+
+        if (_kernel.GetCapabilitySnapshot().CanRedo)
+        {
+            _kernel.Redo();
+            return;
+        }
+
+        if (!_historyService.TryRedo(out var state) || state is null)
+        {
+            SetStatus("editor.status.history.redo.none", "No more redo steps.");
+            return;
+        }
+
+        RestoreHistoryState(state, "Redo applied.");
+    }
 
     /// <summary>
     /// 选中指定节点，等价于单选该节点。
@@ -1641,6 +1689,15 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// </summary>
     public void ConnectPorts(string sourceNodeId, string sourcePortId, string targetNodeId, string targetPortId)
     {
+        var pendingConnection = _kernel.GetPendingConnectionSnapshot();
+        if (pendingConnection.HasPendingConnection
+            && string.Equals(pendingConnection.SourceNodeId, sourceNodeId, StringComparison.Ordinal)
+            && string.Equals(pendingConnection.SourcePortId, sourcePortId, StringComparison.Ordinal))
+        {
+            _kernel.CompleteConnection(targetNodeId, targetPortId);
+            return;
+        }
+
         _kernel.StartConnection(sourceNodeId, sourcePortId);
         _kernel.CompleteConnection(targetNodeId, targetPortId);
     }
@@ -2475,7 +2532,40 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// 将当前图保存到默认工作区文件。
     /// </summary>
     public void SaveWorkspace()
-        => _kernel.SaveWorkspace();
+    {
+        if (!CommandPermissions.Workspace.AllowSave)
+        {
+            SetStatus("editor.status.workspace.save.disabledByPermissions", "Saving is disabled by host permissions.");
+            return;
+        }
+
+        try
+        {
+            var document = CreateViewModelDocumentSnapshot();
+            _workspaceService.Save(document);
+            _lastSavedDocumentSignature = CreateDocumentSignature(document);
+            IsDirty = false;
+            SetStatus("editor.status.workspace.saved", $"Saved snapshot to {_workspaceService.WorkspacePath}.");
+            PublishRuntimeDiagnostic(
+                "workspace.save.succeeded",
+                "workspace.save",
+                StatusMessage,
+                GraphEditorDiagnosticSeverity.Info);
+        }
+        catch (Exception exception)
+        {
+            SetStatus("editor.status.workspace.save.failed", $"Save failed: {exception.Message}");
+            PublishRecoverableFailure("workspace.save.failed", "workspace.save", StatusMessage, exception);
+            PublishRuntimeDiagnostic(
+                "workspace.save.failed",
+                "workspace.save",
+                StatusMessage,
+                GraphEditorDiagnosticSeverity.Warning,
+                exception);
+        }
+
+        RaiseComputedPropertyChanges();
+    }
 
     /// <summary>
     /// 从默认工作区文件加载图。
@@ -2785,7 +2875,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     private GraphEditorHistoryState CaptureHistoryState()
     {
-        var document = CreateDocumentSnapshot();
+        var document = CreateViewModelDocumentSnapshot();
         return CreateHistoryState(document);
     }
 
@@ -2836,8 +2926,15 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         _historyService.Push(state);
     }
 
+    private GraphDocument CreateViewModelDocumentSnapshot()
+        => new(
+            Title,
+            Description,
+            Nodes.Select(node => node.ToModel()).ToList(),
+            Connections.Select(connection => connection.ToModel()).ToList());
+
     private string CreateDocumentSignature()
-        => CreateDocumentSignature(CreateDocumentSnapshot());
+        => CreateDocumentSignature(CreateViewModelDocumentSnapshot());
 
     private static string CreateDocumentSignature(GraphDocument document)
         => GraphDocumentSerializer.Serialize(document);

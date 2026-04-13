@@ -29,7 +29,7 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost
     private readonly IPortCompatibilityService _compatibilityService;
     private readonly IGraphWorkspaceService _workspaceService;
     private readonly GraphEditorHistoryService _historyService = new();
-    private readonly GraphEditorBehaviorOptions _behaviorOptions;
+    private GraphEditorBehaviorOptions _behaviorOptions;
     private readonly GraphEditorStyleOptions _styleOptions;
     private GraphDocument _document;
     private List<string> _selectedNodeIds = [];
@@ -64,6 +64,17 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost
         _lastSavedDocumentSignature = CreateDocumentSignature(_document);
         _historyService.Reset(CaptureHistoryState());
         CurrentStatusMessage = "Ready to edit.";
+    }
+
+    public void UpdateBehaviorOptions(GraphEditorBehaviorOptions behaviorOptions)
+    {
+        ArgumentNullException.ThrowIfNull(behaviorOptions);
+
+        _behaviorOptions = behaviorOptions;
+        if (_pendingConnection.HasPendingConnection && !_behaviorOptions.Commands.Connections.AllowCreate)
+        {
+            CancelPendingConnection();
+        }
     }
 
     public event EventHandler<GraphEditorDocumentChangedEventArgs>? DocumentChanged;
@@ -380,23 +391,46 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost
             return;
         }
 
-        var removedConnections = _document.Connections
-            .Where(connection =>
+        RemoveConnections(
+            connection =>
                 (connection.SourceNodeId == nodeId && connection.SourcePortId == portId)
-                || (connection.TargetNodeId == nodeId && connection.TargetPortId == portId))
-            .ToList();
+                || (connection.TargetNodeId == nodeId && connection.TargetPortId == portId),
+            "Disconnected port links.");
+    }
 
-        if (removedConnections.Count == 0)
+    public void DisconnectIncoming(string nodeId)
+    {
+        if (!_behaviorOptions.Commands.Connections.AllowDisconnect)
         {
-            CurrentStatusMessage = "No matching connections to remove.";
+            CurrentStatusMessage = "Disconnect is disabled by host permissions.";
             return;
         }
 
-        _document = _document with
+        RemoveConnections(connection => connection.TargetNodeId == nodeId, "Disconnected incoming links.");
+    }
+
+    public void DisconnectOutgoing(string nodeId)
+    {
+        if (!_behaviorOptions.Commands.Connections.AllowDisconnect)
         {
-            Connections = _document.Connections.Where(connection => !removedConnections.Contains(connection)).ToList(),
-        };
-        MarkDirty("Disconnected port links.", GraphEditorDocumentChangeKind.ConnectionsChanged, null, removedConnections.Select(connection => connection.Id).ToList());
+            CurrentStatusMessage = "Disconnect is disabled by host permissions.";
+            return;
+        }
+
+        RemoveConnections(connection => connection.SourceNodeId == nodeId, "Disconnected outgoing links.");
+    }
+
+    public void DisconnectAll(string nodeId)
+    {
+        if (!_behaviorOptions.Commands.Connections.AllowDisconnect)
+        {
+            CurrentStatusMessage = "Disconnect is disabled by host permissions.";
+            return;
+        }
+
+        RemoveConnections(
+            connection => connection.SourceNodeId == nodeId || connection.TargetNodeId == nodeId,
+            "Disconnected all links.");
     }
 
     public void PanBy(double deltaX, double deltaY)
@@ -664,6 +698,15 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost
                 "connections.break-port",
                 _behaviorOptions.Commands.Connections.AllowDisconnect),
             new GraphEditorCommandDescriptorSnapshot(
+                "connections.disconnect-incoming",
+                _behaviorOptions.Commands.Connections.AllowDisconnect),
+            new GraphEditorCommandDescriptorSnapshot(
+                "connections.disconnect-outgoing",
+                _behaviorOptions.Commands.Connections.AllowDisconnect),
+            new GraphEditorCommandDescriptorSnapshot(
+                "connections.disconnect-all",
+                _behaviorOptions.Commands.Connections.AllowDisconnect),
+            new GraphEditorCommandDescriptorSnapshot(
                 "viewport.fit",
                 _document.Nodes.Count > 0 && _viewportWidth > 0 && _viewportHeight > 0),
             new GraphEditorCommandDescriptorSnapshot(
@@ -811,6 +854,33 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost
                 }
 
                 BreakConnectionsForPort(nodeId, portId);
+                return true;
+
+            case "connections.disconnect-incoming":
+                if (!TryGetRequiredArgument(command, "nodeId", out var disconnectIncomingNodeId))
+                {
+                    return false;
+                }
+
+                DisconnectIncoming(disconnectIncomingNodeId);
+                return true;
+
+            case "connections.disconnect-outgoing":
+                if (!TryGetRequiredArgument(command, "nodeId", out var disconnectOutgoingNodeId))
+                {
+                    return false;
+                }
+
+                DisconnectOutgoing(disconnectOutgoingNodeId);
+                return true;
+
+            case "connections.disconnect-all":
+                if (!TryGetRequiredArgument(command, "nodeId", out var disconnectAllNodeId))
+                {
+                    return false;
+                }
+
+                DisconnectAll(disconnectAllNodeId);
                 return true;
 
             case "viewport.fit":
@@ -1123,6 +1193,25 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost
 
     private bool CanRemoveConnectionsAsSideEffect()
         => _behaviorOptions.Commands.Connections.AllowDelete || _behaviorOptions.Commands.Connections.AllowDisconnect;
+
+    private void RemoveConnections(Func<GraphConnection, bool> predicate, string status)
+    {
+        var removedConnections = _document.Connections
+            .Where(predicate)
+            .ToList();
+
+        if (removedConnections.Count == 0)
+        {
+            CurrentStatusMessage = "No matching connections to remove.";
+            return;
+        }
+
+        _document = _document with
+        {
+            Connections = _document.Connections.Where(connection => !removedConnections.Contains(connection)).ToList(),
+        };
+        MarkDirty(status, GraphEditorDocumentChangeKind.ConnectionsChanged, null, removedConnections.Select(connection => connection.Id).ToList());
+    }
 
     private GraphNode? FindNode(string nodeId)
         => _document.Nodes.FirstOrDefault(node => string.Equals(node.Id, nodeId, StringComparison.Ordinal));

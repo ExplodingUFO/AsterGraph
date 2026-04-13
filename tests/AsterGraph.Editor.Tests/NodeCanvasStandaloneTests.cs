@@ -5,6 +5,7 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.VisualTree;
 using AsterGraph.Abstractions.Definitions;
@@ -230,6 +231,48 @@ public sealed class NodeCanvasStandaloneTests
     }
 
     [AvaloniaFact]
+    public void ManualPortClick_CanReconnectSameEndpointsAfterDeletingConnection()
+    {
+        var editor = CreateEditor();
+        var (window, canvas) = CreateStandaloneCanvasWindow(editor);
+
+        try
+        {
+            ClickPortButton(canvas, SourcePortId, PortDirection.Output);
+            Assert.True(editor.HasPendingConnection);
+
+            ClickPortButton(canvas, TargetPortId, PortDirection.Input);
+            var initialConnection = Assert.Single(editor.Connections);
+            Assert.False(editor.HasPendingConnection);
+
+            var deleted = editor.Session.Commands.TryExecuteCommand(
+                new GraphEditorCommandInvocationSnapshot(
+                    "connections.delete",
+                    [
+                        new GraphEditorCommandArgumentSnapshot("connectionId", initialConnection.Id),
+                    ]));
+
+            Assert.True(deleted);
+            Assert.Empty(editor.Connections);
+
+            ClickPortButton(canvas, SourcePortId, PortDirection.Output);
+            Assert.True(editor.HasPendingConnection);
+
+            ClickPortButton(canvas, TargetPortId, PortDirection.Input);
+            var reconnected = Assert.Single(editor.Connections);
+            Assert.False(editor.HasPendingConnection);
+            Assert.Equal(SourceNodeId, reconnected.SourceNodeId);
+            Assert.Equal(SourcePortId, reconnected.SourcePortId);
+            Assert.Equal(TargetNodeId, reconnected.TargetNodeId);
+            Assert.Equal(TargetPortId, reconnected.TargetPortId);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
     public void StandaloneCanvas_CustomNodeVisualPresenter_ChangesVisualTreeAndPublishesPortAnchors()
     {
         var editor = CreateEditor();
@@ -323,6 +366,17 @@ public sealed class NodeCanvasStandaloneTests
 
     private static void InvokeCanvasWheelChanged(NodeCanvas canvas, PointerWheelEventArgs args)
         => InvokeCanvasHandler("HandlePointerWheelChanged", canvas, args);
+
+    private static void ClickPortButton(NodeCanvas canvas, string portId, PortDirection direction)
+    {
+        var button = canvas.GetVisualDescendants()
+            .OfType<Button>()
+            .Single(control => control.DataContext is PortViewModel port
+                               && string.Equals(port.Id, portId, StringComparison.Ordinal)
+                               && port.Direction == direction);
+
+        button.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+    }
 
     private static void InvokeCanvasHandler(string methodName, NodeCanvas canvas, object args)
     {

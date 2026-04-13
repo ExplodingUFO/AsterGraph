@@ -1,10 +1,13 @@
 using CommunityToolkit.Mvvm.Input;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
+using Avalonia.Styling;
 using AsterGraph.Abstractions.Styling;
+using AsterGraph.Avalonia.Controls;
 using AsterGraph.Avalonia.Presentation;
 using AsterGraph.Avalonia.Styling;
 using AsterGraph.Editor.Menus;
@@ -22,19 +25,10 @@ public sealed class GraphContextMenuPresenter : IGraphContextMenuPresenter
     /// </summary>
     public void Open(Control target, IReadOnlyList<MenuItemDescriptor> descriptors, ContextMenuStyleOptions style)
     {
-        var menu = new ContextMenu
-        {
-            PlacementTarget = target,
-            Placement = ResolvePlacement(target),
-            Background = BrushFactory.Solid(style.BackgroundHex),
-            BorderBrush = BrushFactory.Solid(style.BorderHex),
-            BorderThickness = new Thickness(style.BorderThickness),
-            CornerRadius = new CornerRadius(style.CornerRadius),
-            MinWidth = style.ItemMinWidth,
-            ItemsSource = descriptors.Select(descriptor => BuildMenuControlCore(descriptor, style)).ToList(),
-        };
-
-        menu.Classes.Add("astergraph-context-menu");
+        var menu = CreateContextMenuCore(
+            descriptors.Select(descriptor => BuildMenuControlCore(descriptor, style)).ToList(),
+            style);
+        ApplyPlacement(menu, target);
         menu.Open(target);
     }
 
@@ -47,24 +41,22 @@ public sealed class GraphContextMenuPresenter : IGraphContextMenuPresenter
         IGraphEditorCommands commands,
         ContextMenuStyleOptions style)
     {
-        var menu = new ContextMenu
-        {
-            PlacementTarget = target,
-            Placement = ResolvePlacement(target),
-            Background = BrushFactory.Solid(style.BackgroundHex),
-            BorderBrush = BrushFactory.Solid(style.BorderHex),
-            BorderThickness = new Thickness(style.BorderThickness),
-            CornerRadius = new CornerRadius(style.CornerRadius),
-            MinWidth = style.ItemMinWidth,
-            ItemsSource = descriptors.Select(descriptor => BuildMenuControlCore(descriptor, commands, style)).ToList(),
-        };
-
-        menu.Classes.Add("astergraph-context-menu");
+        var menu = CreateContextMenuCore(
+            descriptors.Select(descriptor => BuildMenuControlCore(descriptor, commands, style)).ToList(),
+            style);
+        ApplyPlacement(menu, target);
         menu.Open(target);
     }
 
     internal static object BuildMenuControlForTest(MenuItemDescriptor descriptor, ContextMenuStyleOptions style)
         => BuildMenuControlCore(descriptor, style);
+
+    internal static ContextMenu CreateContextMenuForTest(
+        IReadOnlyList<MenuItemDescriptor> descriptors,
+        ContextMenuStyleOptions style)
+        => CreateContextMenuCore(
+            descriptors.Select(descriptor => BuildMenuControlCore(descriptor, style)).ToList(),
+            style);
 
     internal static object BuildMenuControlForTest(
         GraphEditorMenuItemDescriptorSnapshot descriptor,
@@ -74,6 +66,75 @@ public sealed class GraphContextMenuPresenter : IGraphContextMenuPresenter
 
     internal static PlacementMode ResolvePlacementForTest(Control target)
         => ResolvePlacement(target);
+
+    private static void ApplyPlacement(ContextMenu menu, Control target)
+    {
+        menu.PlacementTarget = target;
+        menu.Placement = ResolvePlacement(target);
+    }
+
+    private static ContextMenu CreateContextMenuCore(IReadOnlyList<object> items, ContextMenuStyleOptions style)
+    {
+        var menu = new ContextMenu
+        {
+            Background = BrushFactory.Solid(style.BackgroundHex),
+            BorderBrush = BrushFactory.Solid(style.BorderHex),
+            BorderThickness = new Thickness(style.BorderThickness),
+            CornerRadius = new CornerRadius(style.CornerRadius),
+            MinWidth = style.ItemMinWidth,
+            ItemsSource = items,
+        };
+
+        menu.Classes.Add("astergraph-context-menu");
+        ApplyFluentMenuOverrides(menu, style);
+        menu.Styles.Add(CreateFlyoutPresenterStyle());
+        return menu;
+    }
+
+    private static void ApplyFluentMenuOverrides(ContextMenu menu, ContextMenuStyleOptions style)
+    {
+        var backgroundBrush = BrushFactory.Solid(style.BackgroundHex);
+        var hoverBrush = BrushFactory.Solid(style.HoverHex);
+        var foregroundBrush = BrushFactory.Solid(style.ForegroundHex);
+        var disabledForegroundBrush = BrushFactory.Solid(style.DisabledForegroundHex);
+
+        menu.Resources["MenuFlyoutPresenterBackground"] = Brushes.Transparent;
+        menu.Resources["MenuFlyoutPresenterBorderBrush"] = Brushes.Transparent;
+        menu.Resources["MenuFlyoutPresenterBorderThemeThickness"] = new Thickness(0);
+        menu.Resources["MenuFlyoutPresenterThemePadding"] = new Thickness(0);
+        menu.Resources["MenuFlyoutItemBackground"] = backgroundBrush;
+        menu.Resources["MenuFlyoutItemBackgroundPointerOver"] = hoverBrush;
+        menu.Resources["MenuFlyoutItemBackgroundPressed"] = hoverBrush;
+        menu.Resources["MenuFlyoutItemBackgroundDisabled"] = backgroundBrush;
+        menu.Resources["MenuFlyoutItemForeground"] = foregroundBrush;
+        menu.Resources["MenuFlyoutItemForegroundPointerOver"] = foregroundBrush;
+        menu.Resources["MenuFlyoutItemForegroundPressed"] = foregroundBrush;
+        menu.Resources["MenuFlyoutItemForegroundDisabled"] = disabledForegroundBrush;
+        menu.Resources["MenuFlyoutItemKeyboardAcceleratorTextForeground"] = foregroundBrush;
+        menu.Resources["MenuFlyoutItemKeyboardAcceleratorTextForegroundPointerOver"] = foregroundBrush;
+        menu.Resources["MenuFlyoutItemKeyboardAcceleratorTextForegroundPressed"] = foregroundBrush;
+        menu.Resources["MenuFlyoutItemKeyboardAcceleratorTextForegroundDisabled"] = disabledForegroundBrush;
+        menu.Resources["MenuFlyoutSubItemChevron"] = foregroundBrush;
+        menu.Resources["MenuFlyoutSubItemChevronPointerOver"] = foregroundBrush;
+        menu.Resources["MenuFlyoutSubItemChevronPressed"] = foregroundBrush;
+        menu.Resources["MenuFlyoutSubItemChevronDisabled"] = disabledForegroundBrush;
+        menu.Resources["MenuFlyoutSubItemChevronSubMenuOpened"] = foregroundBrush;
+    }
+
+    private static Style CreateFlyoutPresenterStyle()
+    {
+        var transparentBrush = Brushes.Transparent;
+        return new Style(selector => selector.OfType<MenuFlyoutPresenter>())
+        {
+            Setters =
+            {
+                new Setter(TemplatedControl.BackgroundProperty, transparentBrush),
+                new Setter(TemplatedControl.BorderBrushProperty, transparentBrush),
+                new Setter(TemplatedControl.BorderThicknessProperty, new Thickness(0)),
+                new Setter(TemplatedControl.PaddingProperty, new Thickness(0)),
+            },
+        };
+    }
 
     private static object BuildMenuControlCore(MenuItemDescriptor descriptor, ContextMenuStyleOptions style)
     {
@@ -200,7 +261,9 @@ public sealed class GraphContextMenuPresenter : IGraphContextMenuPresenter
     }
 
     private static PlacementMode ResolvePlacement(Control target)
-        => target.IsFocused || target.IsKeyboardFocusWithin
+        => target is NodeCanvas
+            ? PlacementMode.Pointer
+            : target.IsFocused || target.IsKeyboardFocusWithin
             ? PlacementMode.Bottom
             : PlacementMode.Pointer;
 

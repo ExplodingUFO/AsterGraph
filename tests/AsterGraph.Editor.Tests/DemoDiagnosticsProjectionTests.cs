@@ -50,7 +50,7 @@ public sealed class DemoDiagnosticsProjectionTests
         var diagnostics = viewModel.Editor.Session.Diagnostics.GetRecentDiagnostics(10);
         var latestDiagnostic = Assert.Single(diagnostics);
 
-        Assert.Equal("以下信息直接来自 Editor.Session.Diagnostics。", viewModel.RuntimeDiagnosticsSummary);
+        Assert.Equal("以下诊断直接来自 Editor.Session.Diagnostics，用于确认共享运行时状态。", viewModel.RuntimeDiagnosticsSummary);
         Assert.Equal(viewModel.Editor.StatusMessage, viewModel.CompatibilityStatusMessage);
         Assert.Equal(latestDiagnostic.Message, viewModel.RecentDiagnostics[0].Message);
         Assert.Equal(latestDiagnostic.Code, viewModel.RecentDiagnostics[0].Code);
@@ -87,6 +87,6 @@ public sealed class DemoDiagnosticsProjectionTests
         var helper = window.FindControl<TextBlock>("RuntimeDiagnosticsHelperText");
 
         Assert.NotNull(helper);
-        Assert.Equal("以下信息直接来自 Editor.Session.Diagnostics。", helper!.Text);
+        Assert.Equal("以下诊断直接来自 Editor.Session.Diagnostics，用于确认共享运行时状态。", helper!.Text);
     }
 }

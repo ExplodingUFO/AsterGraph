@@ -205,6 +205,37 @@ public sealed class GraphEditorInitializationTests
     }
 
     [Fact]
+    public void CreateEditorFactory_DisconnectCommands_ClearCanonicalConnectionStateBeforeReconnect()
+    {
+        var editor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
+        {
+            Document = CreateDocument(),
+            NodeCatalog = CreateCatalog(),
+            CompatibilityService = new RecordingCompatibilityService(),
+        });
+
+        editor.Session.Commands.StartConnection(SourceNodeId, SourcePortId);
+        editor.Session.Commands.CompleteConnection(TargetNodeId, TargetPortId);
+
+        Assert.Single(editor.Session.Queries.CreateDocumentSnapshot().Connections);
+
+        var disconnected = editor.Session.Commands.TryExecuteCommand(
+            new GraphEditorCommandInvocationSnapshot(
+                "connections.disconnect-all",
+                [
+                    new GraphEditorCommandArgumentSnapshot("nodeId", TargetNodeId),
+                ]));
+
+        Assert.True(disconnected);
+        Assert.Empty(editor.Session.Queries.CreateDocumentSnapshot().Connections);
+
+        editor.Session.Commands.StartConnection(SourceNodeId, SourcePortId);
+        editor.Session.Commands.CompleteConnection(TargetNodeId, TargetPortId);
+
+        Assert.Single(editor.Session.Queries.CreateDocumentSnapshot().Connections);
+    }
+
+    [Fact]
     public void CreateSessionFactory_ProvidesRuntimeSurfaceWithoutViewConstruction()
     {
         var storageRoot = Path.Combine(Path.GetTempPath(), "graph-editor-session-init-tests", Guid.NewGuid().ToString("N"));
