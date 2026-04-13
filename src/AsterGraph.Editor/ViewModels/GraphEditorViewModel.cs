@@ -600,10 +600,12 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     GraphEditorCommandPermissions IGraphEditorCompatibilityCommandHost.CommandPermissions => CommandPermissions;
 
-    string? IGraphEditorCompatibilityCommandHost.StatusMessage => StatusMessage;
-
-    void IGraphEditorCompatibilityCommandHost.SetStatus(string key, string fallback, params object?[] arguments)
-        => SetStatus(key, fallback, arguments);
+    string IGraphEditorCompatibilityCommandHost.SetStatus(string key, string fallback, params object?[] arguments)
+    {
+        var status = StatusText(key, fallback, arguments);
+        StatusMessage = status;
+        return status;
+    }
 
     void IGraphEditorCompatibilityCommandHost.PublishRecoverableFailure(string code, string operation, string message, Exception? exception)
         => PublishRecoverableFailure(code, operation, message, exception);
@@ -655,8 +657,6 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     string? IGraphEditorFragmentCommandHost.SelectedFragmentTemplatePath => SelectedFragmentTemplate?.Path;
 
-    string? IGraphEditorFragmentCommandHost.StatusMessage => StatusMessage;
-
     IGraphTextClipboardBridge? IGraphEditorFragmentCommandHost.TextClipboardBridge => _textClipboardBridge;
 
     IGraphClipboardPayloadSerializer IGraphEditorFragmentCommandHost.ClipboardPayloadSerializer => _clipboardPayloadSerializer;
@@ -701,11 +701,18 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     string IGraphEditorFragmentCommandHost.StatusText(string key, string fallback, params object?[] arguments)
         => StatusText(key, fallback, arguments);
 
-    void IGraphEditorFragmentCommandHost.SetStatus(string key, string fallback, params object?[] arguments)
-        => SetStatus(key, fallback, arguments);
+    string IGraphEditorFragmentCommandHost.SetStatus(string key, string fallback, params object?[] arguments)
+    {
+        var status = StatusText(key, fallback, arguments);
+        StatusMessage = status;
+        return status;
+    }
 
-    void IGraphEditorFragmentCommandHost.MarkDirty(string status)
-        => MarkDirty(status);
+    string IGraphEditorFragmentCommandHost.MarkDirty(string status)
+    {
+        MarkDirty(status);
+        return status;
+    }
 
     void IGraphEditorFragmentCommandHost.PublishRuntimeDiagnostic(string code, string operation, string message, GraphEditorDiagnosticSeverity severity, Exception? exception)
         => PublishRuntimeDiagnostic(code, operation, message, severity, exception);
@@ -1978,7 +1985,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     private GraphSelectionFragment? CreateSelectionFragment()
         => _fragmentCommands.CreateSelectionFragment();
 
-    private bool PasteFragment(GraphSelectionFragment fragment, string actionPrefix)
+    private string? PasteFragment(GraphSelectionFragment fragment, string actionPrefix)
         => _fragmentCommands.PasteFragment(fragment, actionPrefix);
 
     private Task<GraphSelectionFragment?> GetBestAvailableClipboardFragmentAsync()

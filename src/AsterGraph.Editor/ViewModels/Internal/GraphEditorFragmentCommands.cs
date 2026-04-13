@@ -25,8 +25,6 @@ public sealed partial class GraphEditorViewModel
 
         string? SelectedFragmentTemplatePath { get; }
 
-        string? StatusMessage { get; }
-
         IGraphTextClipboardBridge? TextClipboardBridge { get; }
 
         IGraphClipboardPayloadSerializer ClipboardPayloadSerializer { get; }
@@ -59,9 +57,9 @@ public sealed partial class GraphEditorViewModel
 
         string StatusText(string key, string fallback, params object?[] arguments);
 
-        void SetStatus(string key, string fallback, params object?[] arguments);
+        string SetStatus(string key, string fallback, params object?[] arguments);
 
-        void MarkDirty(string status);
+        string MarkDirty(string status);
 
         void PublishRuntimeDiagnostic(string code, string operation, string message, GraphEditorDiagnosticSeverity severity, Exception? exception = null);
 
@@ -111,18 +109,18 @@ public sealed partial class GraphEditorViewModel
                 _host.SelectedNodeId);
         }
 
-        internal bool PasteFragment(GraphSelectionFragment fragment, string actionPrefix)
+        internal string? PasteFragment(GraphSelectionFragment fragment, string actionPrefix)
         {
             if (!_host.CommandPermissions.Nodes.AllowCreate)
             {
                 _host.SetStatus("editor.status.fragment.insert.disabledByPermissions", "Fragment insertion is disabled by host permissions.");
-                return false;
+                return null;
             }
 
             if (fragment.Connections.Count > 0 && !_host.CommandPermissions.Connections.AllowCreate)
             {
                 _host.SetStatus("editor.status.fragment.insert.connectionCreateDisabled", "This fragment contains connections, but connection creation is disabled by host permissions.");
-                return false;
+                return null;
             }
 
             _host.StoreSelectionClipboard(fragment);
@@ -168,7 +166,7 @@ public sealed partial class GraphEditorViewModel
 
             if (pastedNodes.Count == 0)
             {
-                return false;
+                return null;
             }
 
             NodeViewModel? primaryNode = null;
@@ -179,10 +177,10 @@ public sealed partial class GraphEditorViewModel
             }
 
             _host.SetSelection(pastedNodes, primaryNode ?? pastedNodes[^1]);
-            _host.MarkDirty(pastedNodes.Count == 1
+            var status = pastedNodes.Count == 1
                 ? _host.StatusText("editor.status.fragment.action.single", "{0} {1}.", actionPrefix, pastedNodes[0].Title)
-                : _host.StatusText("editor.status.fragment.action.multiple", "{0} {1} nodes.", actionPrefix, pastedNodes.Count));
-            return true;
+                : _host.StatusText("editor.status.fragment.action.multiple", "{0} {1} nodes.", actionPrefix, pastedNodes.Count);
+            return _host.MarkDirty(status);
         }
 
         internal async Task<GraphSelectionFragment?> GetBestAvailableClipboardFragmentAsync()
@@ -250,11 +248,11 @@ public sealed partial class GraphEditorViewModel
 
             _host.FragmentWorkspaceService.Save(fragment);
             _host.RaiseComputedPropertyChanges();
-            _host.SetStatus("editor.status.fragment.export.savedToPath", "Exported fragment to {0}.", _host.FragmentWorkspaceService.FragmentPath);
+            var status = _host.SetStatus("editor.status.fragment.export.savedToPath", "Exported fragment to {0}.", _host.FragmentWorkspaceService.FragmentPath);
             _host.PublishRuntimeDiagnostic(
                 "fragment.export.succeeded",
                 "fragment.export",
-                _host.StatusMessage ?? _host.FragmentWorkspaceService.FragmentPath,
+                status,
                 GraphEditorDiagnosticSeverity.Info);
             _host.RaiseFragmentExported(_host.FragmentWorkspaceService.FragmentPath, fragment);
         }
@@ -325,7 +323,7 @@ public sealed partial class GraphEditorViewModel
                 return;
             }
 
-            PasteFragment(fragment, "Pasted");
+            _ = PasteFragment(fragment, "Pasted");
         }
 
         internal void ImportFragment()
@@ -338,11 +336,11 @@ public sealed partial class GraphEditorViewModel
 
             if (!_host.FragmentWorkspaceService.Exists())
             {
-                _host.SetStatus("editor.status.fragment.import.noExportedFile", "No exported fragment file is available yet.");
+                var status = _host.SetStatus("editor.status.fragment.import.noExportedFile", "No exported fragment file is available yet.");
                 _host.PublishRuntimeDiagnostic(
                     "fragment.import.missing",
                     "fragment.import",
-                    _host.StatusMessage ?? "No exported fragment file is available yet.",
+                    status,
                     GraphEditorDiagnosticSeverity.Warning);
                 return;
             }
@@ -351,13 +349,14 @@ public sealed partial class GraphEditorViewModel
             _host.StoreSelectionClipboard(fragment);
             _host.RaiseComputedPropertyChanges();
 
-            if (!PasteFragment(fragment, "Imported"))
+            var importedStatus = PasteFragment(fragment, "Imported");
+            if (importedStatus is null)
             {
-                _host.SetStatus("editor.status.fragment.import.noNodesInFile", "Fragment file did not contain any nodes.");
+                var status = _host.SetStatus("editor.status.fragment.import.noNodesInFile", "Fragment file did not contain any nodes.");
                 _host.PublishRuntimeDiagnostic(
                     "fragment.import.empty",
                     "fragment.import",
-                    _host.StatusMessage ?? "Fragment file did not contain any nodes.",
+                    status,
                     GraphEditorDiagnosticSeverity.Warning);
             }
             else
@@ -365,7 +364,7 @@ public sealed partial class GraphEditorViewModel
                 _host.PublishRuntimeDiagnostic(
                     "fragment.import.succeeded",
                     "fragment.import",
-                    _host.StatusMessage ?? _host.FragmentWorkspaceService.FragmentPath,
+                    importedStatus,
                     GraphEditorDiagnosticSeverity.Info);
                 _host.RaiseFragmentImported(_host.FragmentWorkspaceService.FragmentPath, fragment);
             }
@@ -442,11 +441,11 @@ public sealed partial class GraphEditorViewModel
 
             if (!_host.FragmentWorkspaceService.Exists(path))
             {
-                _host.SetStatus("editor.status.fragment.import.fileNotFound", "Fragment file '{0}' was not found.", path);
+                var status = _host.SetStatus("editor.status.fragment.import.fileNotFound", "Fragment file '{0}' was not found.", path);
                 _host.PublishRuntimeDiagnostic(
                     "fragment.import.fileMissing",
                     "fragment.import",
-                    _host.StatusMessage ?? path,
+                    status,
                     GraphEditorDiagnosticSeverity.Warning);
                 return false;
             }
@@ -454,18 +453,18 @@ public sealed partial class GraphEditorViewModel
             var fragment = _host.FragmentWorkspaceService.Load(path);
             _host.StoreSelectionClipboard(fragment);
             _host.RaiseComputedPropertyChanges();
-            var imported = PasteFragment(fragment, "Imported");
-            if (imported)
+            var importedStatus = PasteFragment(fragment, "Imported");
+            if (importedStatus is not null)
             {
                 _host.PublishRuntimeDiagnostic(
                     "fragment.import.succeeded",
                     "fragment.import",
-                    _host.StatusMessage ?? path,
+                    importedStatus,
                     GraphEditorDiagnosticSeverity.Info);
                 _host.RaiseFragmentImported(path, fragment);
             }
 
-            return imported;
+            return importedStatus is not null;
         }
     }
 }

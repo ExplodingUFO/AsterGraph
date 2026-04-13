@@ -255,8 +255,6 @@ public sealed class EditorClipboardAndFragmentCompatibilityTests
 
         public string? SelectedFragmentTemplatePath => _inner.SelectedFragmentTemplatePath;
 
-        public string? StatusMessage => _inner.StatusMessage;
-
         public IGraphTextClipboardBridge? TextClipboardBridge => _inner.TextClipboardBridge;
 
         public IGraphClipboardPayloadSerializer ClipboardPayloadSerializer => _inner.ClipboardPayloadSerializer;
@@ -301,10 +299,10 @@ public sealed class EditorClipboardAndFragmentCompatibilityTests
         public string StatusText(string key, string fallback, params object?[] arguments)
             => _inner.StatusText(key, fallback, arguments);
 
-        public void SetStatus(string key, string fallback, params object?[] arguments)
+        public string SetStatus(string key, string fallback, params object?[] arguments)
             => _inner.SetStatus(key, fallback, arguments);
 
-        public void MarkDirty(string status)
+        public string MarkDirty(string status)
             => _inner.MarkDirty(status);
 
         public void PublishRuntimeDiagnostic(string code, string operation, string message, GraphEditorDiagnosticSeverity severity, Exception? exception = null)

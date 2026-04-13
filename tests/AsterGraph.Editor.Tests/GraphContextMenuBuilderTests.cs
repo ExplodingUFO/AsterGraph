@@ -172,9 +172,7 @@ public sealed class GraphContextMenuBuilderTests
 
         public GraphEditorCommandPermissions CommandPermissions => _inner.CommandPermissions;
 
-        public string? StatusMessage => _inner.StatusMessage;
-
-        public void SetStatus(string key, string fallback, params object?[] arguments)
+        public string SetStatus(string key, string fallback, params object?[] arguments)
             => _inner.SetStatus(key, fallback, arguments);
 
         public void PublishRecoverableFailure(string code, string operation, string message, Exception? exception = null)

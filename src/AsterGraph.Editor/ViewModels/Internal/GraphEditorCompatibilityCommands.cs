@@ -16,9 +16,7 @@ public sealed partial class GraphEditorViewModel
 
         GraphEditorCommandPermissions CommandPermissions { get; }
 
-        string? StatusMessage { get; }
-
-        void SetStatus(string key, string fallback, params object?[] arguments);
+        string SetStatus(string key, string fallback, params object?[] arguments);
 
         void PublishRecoverableFailure(string code, string operation, string message, Exception? exception = null);
 
@@ -76,14 +74,14 @@ public sealed partial class GraphEditorViewModel
             }
             catch (Exception exception)
             {
-                _host.SetStatus(
+                var status = _host.SetStatus(
                     "editor.status.menu.augmentorFailed",
                     "Context menu augmentor failed: {0}. Using stock menu.",
                     exception.GetType().Name);
                 _host.PublishRecoverableFailure(
                     "contextmenu.augment.failed",
                     "contextmenu.augment",
-                    _host.StatusMessage ?? exception.Message,
+                    status,
                     exception);
                 return stockItems;
             }
