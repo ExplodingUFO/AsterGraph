@@ -113,6 +113,8 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     private INodePresentationProvider? _nodePresentationProvider;
     private IGraphLocalizationProvider? _localizationProvider;
     private readonly GraphContextMenuBuilder _contextMenuBuilder;
+    private readonly GraphEditorCompatibilityCommands _compatibilityCommands;
+    private readonly GraphEditorFragmentCommands _fragmentCommands;
     private bool _suspendSelectionTracking;
     private bool _suspendDirtyTracking;
     private bool _suspendHistoryTracking;
@@ -245,6 +247,8 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         ];
 
         _contextMenuBuilder = new GraphContextMenuBuilder(this, LocalizeText);
+        _compatibilityCommands = new GraphEditorCompatibilityCommands(this);
+        _fragmentCommands = new GraphEditorFragmentCommands(this);
 
         Nodes = new ObservableCollection<NodeViewModel>();
         Connections = new ObservableCollection<ConnectionViewModel>();
@@ -960,39 +964,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// <param name="context">当前菜单上下文。</param>
     /// <returns>供视图层渲染的菜单项集合。</returns>
     public IReadOnlyList<MenuItemDescriptor> BuildContextMenu(ContextMenuContext context)
-    {
-        var stockItemDescriptors = Session.Queries.BuildContextMenuDescriptors(context);
-        var stockItems = GraphContextMenuCompatibilityAdapter.Adapt(stockItemDescriptors, Session.Commands);
-        if (ContextMenuAugmentor is null)
-        {
-            return stockItems;
-        }
-
-        try
-        {
-            return ContextMenuAugmentor.Augment(
-                new GraphContextMenuAugmentationContext(
-                    Session,
-                    context,
-                    stockItems,
-                    stockItemDescriptors,
-                    CommandPermissions,
-                    this));
-        }
-        catch (Exception exception)
-        {
-            SetStatus(
-                "editor.status.menu.augmentorFailed",
-                "Context menu augmentor failed: {0}. Using stock menu.",
-                exception.GetType().Name);
-            PublishRecoverableFailure(
-                "contextmenu.augment.failed",
-                "contextmenu.augment",
-                StatusMessage ?? exception.Message,
-                exception);
-            return stockItems;
-        }
-    }
+        => _compatibilityCommands.BuildContextMenu(context);
 
     /// <summary>
     /// 更新当前视口尺寸。
@@ -1762,154 +1734,43 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// 按实例标识删除单个节点。
     /// </summary>
     public void DeleteNodeById(string nodeId)
-    {
-        if (!CommandPermissions.Nodes.AllowDelete)
-        {
-            SetStatus("editor.status.node.delete.disabledByPermissions", "Node deletion is disabled by host permissions.");
-            return;
-        }
-
-        var node = FindNode(nodeId);
-        if (node is null)
-        {
-            return;
-        }
-
-        var remainingSelection = SelectedNodes.Where(selected => !ReferenceEquals(selected, node)).ToList();
-        var removedConnections = Connections
-            .Where(connection => connection.SourceNodeId == node.Id || connection.TargetNodeId == node.Id)
-            .ToList();
-
-        if (removedConnections.Count > 0 && !CanRemoveConnectionsAsSideEffect())
-        {
-            SetStatus("editor.status.node.delete.singleConnectedRequiresPermission", "Deleting a connected node requires delete or disconnect permission for the affected links.");
-            return;
-        }
-
-        foreach (var connection in removedConnections)
-        {
-            Connections.Remove(connection);
-        }
-
-        Nodes.Remove(node);
-        if (PendingSourceNode?.Id == node.Id)
-        {
-            CancelPendingConnection();
-        }
-
-        SetSelection(remainingSelection, remainingSelection.LastOrDefault());
-        MarkDirty(StatusText("editor.status.node.deletedSingle", "Deleted {0}.", node.Title));
-        NotifyDocumentChanged(
-            GraphEditorDocumentChangeKind.NodesRemoved,
-            nodeIds: [node.Id],
-            connectionIds: removedConnections.Select(connection => connection.Id).ToList());
-    }
+        => _compatibilityCommands.DeleteNodeById(nodeId);
 
     /// <summary>
     /// 复制单个节点并自动偏移生成副本。
     /// </summary>
     public void DuplicateNode(string nodeId)
-    {
-        if (!CommandPermissions.Nodes.AllowDuplicate)
-        {
-            SetStatus("editor.status.node.duplicate.disabledByPermissions", "Node duplication is disabled by host permissions.");
-            return;
-        }
-
-        var node = FindNode(nodeId);
-        if (node is null)
-        {
-            return;
-        }
-
-        var duplicate = new NodeViewModel(node.ToModel() with
-        {
-            Id = CreateNodeId(node.DefinitionId, node.Id),
-            Position = new GraphPoint(node.X + 48, node.Y + 48),
-        });
-
-        ApplyNodePresentation(duplicate);
-        Nodes.Add(duplicate);
-        SelectSingleNode(duplicate);
-        MarkDirty(StatusText("editor.status.node.duplicated", "Duplicated {0}.", node.Title));
-        NotifyDocumentChanged(GraphEditorDocumentChangeKind.NodesAdded, nodeIds: [duplicate.Id]);
-    }
+        => _compatibilityCommands.DuplicateNode(nodeId);
 
     /// <summary>
     /// 断开指定节点的所有入边。
     /// </summary>
     public void DisconnectIncoming(string nodeId)
-    {
-        if (!CommandPermissions.Connections.AllowDisconnect)
-        {
-            SetStatus("editor.status.connection.disconnect.disabledByPermissions", "Disconnect is disabled by host permissions.");
-            return;
-        }
-
-        _kernel.DisconnectIncoming(nodeId);
-    }
+        => _compatibilityCommands.DisconnectIncoming(nodeId);
 
     /// <summary>
     /// 断开指定节点的所有出边。
     /// </summary>
     public void DisconnectOutgoing(string nodeId)
-    {
-        if (!CommandPermissions.Connections.AllowDisconnect)
-        {
-            SetStatus("editor.status.connection.disconnect.disabledByPermissions", "Disconnect is disabled by host permissions.");
-            return;
-        }
-
-        _kernel.DisconnectOutgoing(nodeId);
-    }
+        => _compatibilityCommands.DisconnectOutgoing(nodeId);
 
     /// <summary>
     /// 断开指定节点的全部连线。
     /// </summary>
     public void DisconnectAll(string nodeId)
-    {
-        if (!CommandPermissions.Connections.AllowDisconnect)
-        {
-            SetStatus("editor.status.connection.disconnect.disabledByPermissions", "Disconnect is disabled by host permissions.");
-            return;
-        }
-
-        _kernel.DisconnectAll(nodeId);
-    }
+        => _compatibilityCommands.DisconnectAll(nodeId);
 
     /// <summary>
     /// 断开指定端口上的全部连线。
     /// </summary>
     public void BreakConnectionsForPort(string nodeId, string portId)
-    {
-        if (!CommandPermissions.Connections.AllowDisconnect)
-        {
-            SetStatus("editor.status.connection.disconnect.disabledByPermissions", "Disconnect is disabled by host permissions.");
-            return;
-        }
-
-        _kernel.BreakConnectionsForPort(nodeId, portId);
-    }
+        => _compatibilityCommands.BreakConnectionsForPort(nodeId, portId);
 
     /// <summary>
     /// 删除指定连线。
     /// </summary>
     public void DeleteConnection(string connectionId)
-    {
-        if (!CommandPermissions.Connections.AllowDelete)
-        {
-            SetStatus("editor.status.connection.delete.disabledByPermissions", "Connection deletion is disabled by host permissions.");
-            return;
-        }
-
-        var connection = FindConnection(connectionId);
-        if (connection is null)
-        {
-            return;
-        }
-
-        _kernel.DeleteConnection(connectionId);
-    }
+        => _compatibilityCommands.DeleteConnection(connectionId);
 
     /// <summary>
     /// 按实例标识查找连线视图模型。
@@ -1981,226 +1842,31 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     }
 
     private GraphSelectionFragment? CreateSelectionFragment()
-    {
-        if (SelectedNodes.Count == 0)
-        {
-            return null;
-        }
-
-        // 复制时只保留当前选择诱导出的子图，避免粘贴结果依赖外部未复制节点。
-        var selectedIds = SelectedNodes.Select(node => node.Id).ToHashSet(StringComparer.Ordinal);
-        var copiedNodes = SelectedNodes
-            .Select(node => node.ToModel())
-            .ToList();
-
-        var copiedConnections = Connections
-            .Where(connection =>
-                selectedIds.Contains(connection.SourceNodeId)
-                && selectedIds.Contains(connection.TargetNodeId))
-            .Select(connection => connection.ToModel())
-            .ToList();
-
-        var origin = new GraphPoint(
-            copiedNodes.Min(node => node.Position.X),
-            copiedNodes.Min(node => node.Position.Y));
-
-        return new GraphSelectionFragment(
-            copiedNodes,
-            copiedConnections,
-            origin,
-            SelectedNode?.Id);
-    }
+        => _fragmentCommands.CreateSelectionFragment();
 
     private bool PasteFragment(GraphSelectionFragment fragment, string actionPrefix)
-    {
-        if (!CommandPermissions.Nodes.AllowCreate)
-        {
-            SetStatus("editor.status.fragment.insert.disabledByPermissions", "Fragment insertion is disabled by host permissions.");
-            return false;
-        }
+        => _fragmentCommands.PasteFragment(fragment, actionPrefix);
 
-        if (fragment.Connections.Count > 0 && !CommandPermissions.Connections.AllowCreate)
-        {
-            SetStatus("editor.status.fragment.insert.connectionCreateDisabled", "This fragment contains connections, but connection creation is disabled by host permissions.");
-            return false;
-        }
-
-        _selectionClipboard.Store(fragment);
-        var targetOrigin = _selectionClipboard.GetNextPasteOrigin(GetViewportCenter());
-        var nodeIdMap = new Dictionary<string, string>(StringComparer.Ordinal);
-        var pastedNodes = new List<NodeViewModel>(fragment.Nodes.Count);
-
-        foreach (var copiedNode in fragment.Nodes)
-        {
-            var newId = CreateNodeId(copiedNode.DefinitionId, copiedNode.Id);
-            nodeIdMap[copiedNode.Id] = newId;
-
-            var relativePosition = copiedNode.Position - fragment.Origin;
-            var pastedNode = new NodeViewModel(copiedNode with
-            {
-                Id = newId,
-                Position = targetOrigin + relativePosition,
-            });
-
-            ApplyNodePresentation(pastedNode);
-            Nodes.Add(pastedNode);
-            pastedNodes.Add(pastedNode);
-        }
-
-        foreach (var copiedConnection in fragment.Connections)
-        {
-            if (!nodeIdMap.TryGetValue(copiedConnection.SourceNodeId, out var sourceNodeId)
-                || !nodeIdMap.TryGetValue(copiedConnection.TargetNodeId, out var targetNodeId))
-            {
-                continue;
-            }
-
-            Connections.Add(new ConnectionViewModel(
-                CreateConnectionId(),
-                sourceNodeId,
-                copiedConnection.SourcePortId,
-                targetNodeId,
-                copiedConnection.TargetPortId,
-                copiedConnection.Label,
-                copiedConnection.AccentHex,
-                copiedConnection.ConversionId));
-        }
-
-        if (pastedNodes.Count == 0)
-        {
-            return false;
-        }
-
-        NodeViewModel? primaryNode = null;
-        if (!string.IsNullOrWhiteSpace(fragment.PrimaryNodeId)
-            && nodeIdMap.TryGetValue(fragment.PrimaryNodeId, out var remappedPrimaryNodeId))
-        {
-            primaryNode = pastedNodes.FirstOrDefault(node => node.Id == remappedPrimaryNodeId);
-        }
-
-        SetSelection(pastedNodes, primaryNode ?? pastedNodes[^1]);
-        MarkDirty(pastedNodes.Count == 1
-            ? StatusText("editor.status.fragment.action.single", "{0} {1}.", actionPrefix, pastedNodes[0].Title)
-            : StatusText("editor.status.fragment.action.multiple", "{0} {1} nodes.", actionPrefix, pastedNodes.Count));
-        return true;
-    }
-
-    private async Task<GraphSelectionFragment?> GetBestAvailableClipboardFragmentAsync()
-    {
-        if (_textClipboardBridge is not null)
-        {
-            var clipboardText = await _textClipboardBridge.ReadTextAsync(CancellationToken.None);
-            // 优先读取系统剪贴板 JSON，但仍保留进程内剪贴板作为可靠回退。
-            if (_clipboardPayloadSerializer.TryDeserialize(clipboardText, out var systemFragment))
-            {
-                return systemFragment;
-            }
-        }
-
-        return _selectionClipboard.Peek();
-    }
+    private Task<GraphSelectionFragment?> GetBestAvailableClipboardFragmentAsync()
+        => _fragmentCommands.GetBestAvailableClipboardFragmentAsync();
 
     /// <summary>
     /// 复制当前选择，并尽可能同步到系统剪贴板 JSON 文本。
     /// </summary>
-    public async Task CopySelectionAsync()
-    {
-        if (!CommandPermissions.Clipboard.AllowCopy)
-        {
-            SetStatus("editor.status.clipboard.copy.disabledByPermissions", "Copy is disabled by host permissions.");
-            return;
-        }
-
-        var fragment = CreateSelectionFragment();
-        if (fragment is null)
-        {
-            SetStatus("editor.status.clipboard.copy.selectNodeFirst", "Select at least one node before copying.");
-            return;
-        }
-
-        _selectionClipboard.Store(fragment);
-        var clipboardJson = _clipboardPayloadSerializer.Serialize(fragment);
-        if (_textClipboardBridge is not null)
-        {
-            await _textClipboardBridge.WriteTextAsync(clipboardJson, CancellationToken.None);
-        }
-
-        RaiseComputedPropertyChanges();
-        SetStatus(
-            fragment.Nodes.Count == 1
-                ? ("editor.status.clipboard.copy.single", "Copied {0}.", new object?[] { fragment.Nodes[0].Title })
-                : ("editor.status.clipboard.copy.multiple", "Copied {0} nodes.", new object?[] { fragment.Nodes.Count }));
-    }
+    public Task CopySelectionAsync()
+        => _fragmentCommands.CopySelectionAsync();
 
     /// <summary>
     /// 将当前选择导出到默认片段文件。
     /// </summary>
     public void ExportSelectionFragment()
-    {
-        if (!CommandPermissions.Fragments.AllowExport)
-        {
-            SetStatus("editor.status.fragment.export.disabledByPermissions", "Fragment export is disabled by host permissions.");
-            return;
-        }
-
-        var fragment = CreateSelectionFragment();
-        if (fragment is null)
-        {
-            SetStatus("editor.status.fragment.export.selectNodeFirst", "Select at least one node before exporting a fragment.");
-            return;
-        }
-
-        _fragmentWorkspaceService.Save(fragment);
-        RaiseComputedPropertyChanges();
-        SetStatus("editor.status.fragment.export.savedToPath", "Exported fragment to {0}.", _fragmentWorkspaceService.FragmentPath);
-        PublishRuntimeDiagnostic(
-            "fragment.export.succeeded",
-            "fragment.export",
-            StatusMessage ?? _fragmentWorkspaceService.FragmentPath,
-            GraphEditorDiagnosticSeverity.Info);
-        FragmentExported?.Invoke(
-            this,
-            new GraphEditorFragmentEventArgs(
-                _fragmentWorkspaceService.FragmentPath,
-                fragment.Nodes.Count,
-                fragment.Connections.Count));
-    }
+        => _fragmentCommands.ExportSelectionFragment();
 
     /// <summary>
     /// 将当前选择导出为片段模板。
     /// </summary>
     public void ExportSelectionAsTemplate()
-    {
-        if (!CommandPermissions.Fragments.AllowTemplateManagement || !CommandPermissions.Fragments.AllowExport)
-        {
-            SetStatus("editor.status.fragmentTemplate.export.disabledByPermissions", "Template export is disabled by host permissions.");
-            return;
-        }
-
-        if (!BehaviorOptions.Fragments.EnableFragmentLibrary)
-        {
-            SetStatus("editor.status.fragmentTemplate.library.disabled", "Fragment template library is disabled.");
-            return;
-        }
-
-        var fragment = CreateSelectionFragment();
-        if (fragment is null)
-        {
-            SetStatus("editor.status.fragmentTemplate.export.selectNodeFirst", "Select at least one node before exporting a fragment template.");
-            return;
-        }
-
-        var templateName = SelectedNode?.Title ?? $"selection-{fragment.Nodes.Count}";
-        var path = _fragmentLibraryService.SaveTemplate(fragment, templateName);
-        RefreshFragmentTemplates();
-        SetStatus("editor.status.fragmentTemplate.export.savedToPath", "Exported fragment template to {0}.", path);
-        FragmentExported?.Invoke(
-            this,
-            new GraphEditorFragmentEventArgs(
-                path,
-                fragment.Nodes.Count,
-                fragment.Connections.Count));
-    }
+        => _fragmentCommands.ExportSelectionAsTemplate();
 
     /// <summary>
     /// 将当前选择导出到指定片段文件路径。
@@ -2208,32 +1874,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// <param name="path">目标文件路径。</param>
     /// <returns>导出成功时返回 <see langword="true"/>。</returns>
     public bool ExportSelectionFragmentTo(string path)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(path);
-
-        if (!CommandPermissions.Fragments.AllowExport)
-        {
-            SetStatus("editor.status.fragment.export.disabledByPermissions", "Fragment export is disabled by host permissions.");
-            return false;
-        }
-
-        var fragment = CreateSelectionFragment();
-        if (fragment is null)
-        {
-            SetStatus("editor.status.fragment.export.selectNodeFirst", "Select at least one node before exporting a fragment.");
-            return false;
-        }
-
-        _fragmentWorkspaceService.Save(fragment, path);
-        SetStatus("editor.status.fragment.export.savedToPath", "Exported fragment to {0}.", path);
-        FragmentExported?.Invoke(
-            this,
-            new GraphEditorFragmentEventArgs(
-                path,
-                fragment.Nodes.Count,
-                fragment.Connections.Count));
-        return true;
-    }
+        => _fragmentCommands.ExportSelectionFragmentTo(path);
 
     /// <summary>
     /// 从系统剪贴板或进程内剪贴板恢复选择片段并粘贴到当前视口附近。
@@ -2241,145 +1882,32 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// <summary>
     /// 从系统剪贴板或进程内剪贴板粘贴当前片段。
     /// </summary>
-    public async Task PasteSelectionAsync()
-    {
-        if (!CommandPermissions.Clipboard.AllowPaste)
-        {
-            SetStatus("editor.status.clipboard.paste.disabledByPermissions", "Paste is disabled by host permissions.");
-            return;
-        }
-
-        var fragment = await GetBestAvailableClipboardFragmentAsync();
-        if (fragment is null || fragment.Nodes.Count == 0)
-        {
-            SetStatus("editor.status.clipboard.paste.nothingCopied", "Nothing copied yet.");
-            return;
-        }
-
-        if (!PasteFragment(fragment, "Pasted"))
-        {
-            return;
-        }
-    }
+    public Task PasteSelectionAsync()
+        => _fragmentCommands.PasteSelectionAsync();
 
     /// <summary>
     /// 从默认片段文件导入片段。
     /// </summary>
     public void ImportFragment()
-    {
-        if (!CommandPermissions.Fragments.AllowImport)
-        {
-            SetStatus("editor.status.fragment.import.disabledByPermissions", "Fragment import is disabled by host permissions.");
-            return;
-        }
-
-        if (!_fragmentWorkspaceService.Exists())
-        {
-            SetStatus("editor.status.fragment.import.noExportedFile", "No exported fragment file is available yet.");
-            PublishRuntimeDiagnostic(
-                "fragment.import.missing",
-                "fragment.import",
-                StatusMessage ?? "No exported fragment file is available yet.",
-                GraphEditorDiagnosticSeverity.Warning);
-            return;
-        }
-
-        var fragment = _fragmentWorkspaceService.Load();
-        _selectionClipboard.Store(fragment);
-        RaiseComputedPropertyChanges();
-
-        if (!PasteFragment(fragment, "Imported"))
-        {
-            SetStatus("editor.status.fragment.import.noNodesInFile", "Fragment file did not contain any nodes.");
-            PublishRuntimeDiagnostic(
-                "fragment.import.empty",
-                "fragment.import",
-                StatusMessage ?? "Fragment file did not contain any nodes.",
-                GraphEditorDiagnosticSeverity.Warning);
-        }
-        else
-        {
-            PublishRuntimeDiagnostic(
-                "fragment.import.succeeded",
-                "fragment.import",
-                StatusMessage ?? _fragmentWorkspaceService.FragmentPath,
-                GraphEditorDiagnosticSeverity.Info);
-            FragmentImported?.Invoke(
-                this,
-                new GraphEditorFragmentEventArgs(
-                    _fragmentWorkspaceService.FragmentPath,
-                    fragment.Nodes.Count,
-                    fragment.Connections.Count));
-        }
-    }
+        => _fragmentCommands.ImportFragment();
 
     /// <summary>
     /// 清理默认片段文件。
     /// </summary>
     public void ClearFragment()
-    {
-        if (!CommandPermissions.Fragments.AllowClearWorkspaceFragment)
-        {
-            SetStatus("editor.status.fragment.clear.disabledByPermissions", "Fragment clearing is disabled by host permissions.");
-            return;
-        }
-
-        if (!_fragmentWorkspaceService.Exists())
-        {
-            SetStatus("editor.status.fragment.import.noExportedFile", "No exported fragment file is available yet.");
-            return;
-        }
-
-        _fragmentWorkspaceService.Delete();
-        RaiseComputedPropertyChanges();
-        SetStatus("editor.status.fragment.clear.cleared", "Cleared the saved fragment file.");
-    }
+        => _fragmentCommands.ClearFragment();
 
     /// <summary>
     /// 导入当前选中的片段模板。
     /// </summary>
     public void ImportSelectedTemplate()
-    {
-        if (!CommandPermissions.Fragments.AllowTemplateManagement || !CommandPermissions.Fragments.AllowImport)
-        {
-            SetStatus("editor.status.fragmentTemplate.import.disabledByPermissions", "Template import is disabled by host permissions.");
-            return;
-        }
-
-        if (SelectedFragmentTemplate is null)
-        {
-            SetStatus("editor.status.fragmentTemplate.selectTemplateFirst", "Select a fragment template first.");
-            return;
-        }
-
-        ImportFragmentFrom(SelectedFragmentTemplate.Path);
-    }
+        => _fragmentCommands.ImportSelectedTemplate();
 
     /// <summary>
     /// 删除当前选中的片段模板。
     /// </summary>
     public void DeleteSelectedTemplate()
-    {
-        if (!CommandPermissions.Fragments.AllowTemplateManagement)
-        {
-            SetStatus("editor.status.fragmentTemplate.delete.disabledByPermissions", "Template deletion is disabled by host permissions.");
-            return;
-        }
-
-        if (SelectedFragmentTemplate is null)
-        {
-            SetStatus("editor.status.fragmentTemplate.selectTemplateFirst", "Select a fragment template first.");
-            return;
-        }
-
-        var deletedPath = SelectedFragmentTemplate.Path;
-        _fragmentLibraryService.DeleteTemplate(deletedPath);
-        RefreshFragmentTemplates();
-        SetStatus(
-            "editor.status.fragmentTemplate.deleted",
-            "Deleted fragment template {0}.",
-            Path.GetFileNameWithoutExtension(deletedPath));
-    }
+        => _fragmentCommands.DeleteSelectedTemplate();
 
     /// <summary>
     /// 从指定片段文件路径导入节点片段。
@@ -2387,47 +1915,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// <param name="path">源文件路径。</param>
     /// <returns>导入并粘贴成功时返回 <see langword="true"/>。</returns>
     public bool ImportFragmentFrom(string path)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(path);
-
-        if (!CommandPermissions.Fragments.AllowImport)
-        {
-            SetStatus("editor.status.fragment.import.disabledByPermissions", "Fragment import is disabled by host permissions.");
-            return false;
-        }
-
-        if (!_fragmentWorkspaceService.Exists(path))
-        {
-            SetStatus("editor.status.fragment.import.fileNotFound", "Fragment file '{0}' was not found.", path);
-            PublishRuntimeDiagnostic(
-                "fragment.import.fileMissing",
-                "fragment.import",
-                StatusMessage ?? path,
-                GraphEditorDiagnosticSeverity.Warning);
-            return false;
-        }
-
-        var fragment = _fragmentWorkspaceService.Load(path);
-        _selectionClipboard.Store(fragment);
-        RaiseComputedPropertyChanges();
-        var imported = PasteFragment(fragment, "Imported");
-        if (imported)
-        {
-            PublishRuntimeDiagnostic(
-                "fragment.import.succeeded",
-                "fragment.import",
-                StatusMessage ?? path,
-                GraphEditorDiagnosticSeverity.Info);
-            FragmentImported?.Invoke(
-                this,
-                new GraphEditorFragmentEventArgs(
-                    path,
-                    fragment.Nodes.Count,
-                    fragment.Connections.Count));
-        }
-
-        return imported;
-    }
+        => _fragmentCommands.ImportFragmentFrom(path);
 
     /// <summary>
     /// 将当前图保存到默认工作区文件。

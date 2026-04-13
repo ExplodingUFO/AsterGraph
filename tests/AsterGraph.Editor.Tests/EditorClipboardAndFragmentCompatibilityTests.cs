@@ -37,6 +37,20 @@ public sealed class EditorClipboardAndFragmentCompatibilityTests
     }
 
     [Fact]
+    public async Task FragmentCommands_CopySelectionAsync_WritesVersionedClipboardPayload()
+    {
+        var bridge = new TestClipboardBridge();
+        var editor = CreateEditor(bridge);
+        var commands = new GraphEditorViewModel.GraphEditorFragmentCommands(editor);
+        editor.SelectSingleNode(editor.Nodes[0]);
+
+        await commands.CopySelectionAsync();
+
+        Assert.NotNull(bridge.Text);
+        Assert.Contains("\"SchemaVersion\": 1", bridge.Text);
+    }
+
+    [Fact]
     public async Task PasteSelectionAsync_ReadsLegacyClipboardPayload()
     {
         var bridge = new TestClipboardBridge
@@ -83,6 +97,30 @@ public sealed class EditorClipboardAndFragmentCompatibilityTests
         try
         {
             var imported = editor.ImportFragmentFrom(path);
+
+            Assert.True(imported);
+            Assert.Single(editor.Nodes);
+        }
+        finally
+        {
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+            }
+        }
+    }
+
+    [Fact]
+    public void FragmentCommands_ImportFragmentFrom_ReadsLegacyFragmentPayload()
+    {
+        var editor = CreateEditor(nodes: []);
+        var commands = new GraphEditorViewModel.GraphEditorFragmentCommands(editor);
+        var path = Path.Combine(Path.GetTempPath(), $"astergraph-fragment-{Guid.NewGuid():N}.json");
+        File.WriteAllText(path, CreateLegacyClipboardJson());
+
+        try
+        {
+            var imported = commands.ImportFragmentFrom(path);
 
             Assert.True(imported);
             Assert.Single(editor.Nodes);
