@@ -345,6 +345,11 @@ public sealed class GraphEditorTransactionTests
 
         Assert.Equal([SourceNodeId, TargetNodeId], editor.SelectedNodes.Select(node => node.Id).OrderBy(id => id, StringComparer.Ordinal));
         Assert.Equal(TargetNodeId, editor.SelectedNode?.Id);
+        Assert.True(editor.FindNode(SourceNodeId)!.IsSelected);
+        Assert.True(editor.FindNode(TargetNodeId)!.IsSelected);
+        var undoneSelection = editor.Session.Queries.GetSelectionSnapshot();
+        Assert.Equal([SourceNodeId, TargetNodeId], undoneSelection.SelectedNodeIds.OrderBy(id => id, StringComparer.Ordinal));
+        Assert.Equal(TargetNodeId, undoneSelection.PrimarySelectedNodeId);
         Assert.True(editor.IsDirty);
         Assert.True(editor.CanRedo);
 
@@ -352,6 +357,11 @@ public sealed class GraphEditorTransactionTests
 
         Assert.Equal([SourceNodeId], editor.SelectedNodes.Select(node => node.Id));
         Assert.Equal(SourceNodeId, editor.SelectedNode?.Id);
+        Assert.True(editor.FindNode(SourceNodeId)!.IsSelected);
+        Assert.False(editor.FindNode(TargetNodeId)!.IsSelected);
+        var redoneSelection = editor.Session.Queries.GetSelectionSnapshot();
+        Assert.Equal([SourceNodeId], redoneSelection.SelectedNodeIds);
+        Assert.Equal(SourceNodeId, redoneSelection.PrimarySelectedNodeId);
         Assert.True(editor.IsDirty);
         Assert.False(editor.CanRedo);
         Assert.True(workspace.Exists());

@@ -21,6 +21,14 @@ public sealed class GraphEditorFacadeRefactorTests
     }
 
     [Fact]
+    public void EditorAssembly_ContainsDedicatedSelectionStateSynchronizer()
+    {
+        var synchronizerType = typeof(GraphEditorViewModel).Assembly.GetType("AsterGraph.Editor.Services.GraphEditorSelectionStateSynchronizer");
+
+        Assert.NotNull(synchronizerType);
+    }
+
+    [Fact]
     public void GraphEditorViewModel_RebuildsMixedParametersThroughPublicSelectionPath()
     {
         var definitionId = new NodeDefinitionId("tests.editor.facade.public-path");
@@ -124,6 +132,44 @@ public sealed class GraphEditorFacadeRefactorTests
         Assert.Equal(
             2,
             changedProperties.Count(propertyName => propertyName == nameof(GraphEditorViewModel.HostContext)));
+    }
+
+    [Fact]
+    public void SelectedNodesCollectionChange_ReconcilesPrimarySelectionAndNodeFlags()
+    {
+        var definitionId = new NodeDefinitionId("tests.editor.facade.selection-collection");
+        var editor = CreateEditorWithSharedDefinitionNodes(definitionId);
+        var first = editor.Nodes[0];
+        var second = editor.Nodes[1];
+
+        editor.SelectedNodes.Add(first);
+        editor.SelectedNodes.Add(second);
+
+        Assert.True(first.IsSelected);
+        Assert.True(second.IsSelected);
+        Assert.Same(first, editor.SelectedNode);
+
+        editor.SelectedNodes.Remove(second);
+
+        Assert.True(first.IsSelected);
+        Assert.False(second.IsSelected);
+        Assert.Same(first, editor.SelectedNode);
+    }
+
+    [Fact]
+    public void NodesCollectionChange_CoercesSelectionToExistingNodes()
+    {
+        var definitionId = new NodeDefinitionId("tests.editor.facade.selection-coerce");
+        var editor = CreateEditorWithSharedDefinitionNodes(definitionId);
+        var first = editor.Nodes[0];
+        var second = editor.Nodes[1];
+
+        editor.SetSelection([first, second], second, status: null);
+        editor.Nodes.Remove(second);
+
+        Assert.Equal([first], editor.SelectedNodes);
+        Assert.Same(first, editor.SelectedNode);
+        Assert.True(first.IsSelected);
     }
 
     private static NodeViewModel CreateNode(

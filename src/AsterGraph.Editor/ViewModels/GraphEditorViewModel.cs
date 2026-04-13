@@ -38,7 +38,7 @@ namespace AsterGraph.Editor.ViewModels;
 /// 而自定义 UI 宿主应优先考虑 <see cref="AsterGraphEditorFactory.CreateSession(AsterGraphEditorOptions)"/>。
 /// 本类型在当前迁移窗口内仍然受支持，但不应再被视为新的首选组合根。
 /// </remarks>
-public sealed partial class GraphEditorViewModel : ObservableObject, IGraphContextMenuHost, GraphEditorViewModel.IGraphEditorCompatibilityCommandHost, GraphEditorViewModel.IGraphEditorFragmentCommandHost, IGraphEditorKernelProjectionHost, IGraphEditorHistoryStateHost, IGraphEditorSelectionCoordinatorHost
+public sealed partial class GraphEditorViewModel : ObservableObject, IGraphContextMenuHost, GraphEditorViewModel.IGraphEditorCompatibilityCommandHost, GraphEditorViewModel.IGraphEditorFragmentCommandHost, IGraphEditorKernelProjectionHost, IGraphEditorHistoryStateHost, IGraphEditorSelectionCoordinatorHost, IGraphEditorSelectionStateSynchronizerHost
 {
     private const double DefaultZoom = 0.88;
     private const double DefaultPanX = 110;
@@ -100,6 +100,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     private readonly GraphEditorKernelProjectionApplier _kernelProjectionApplier;
     private readonly GraphEditorHistoryStateCoordinator _historyStateCoordinator;
     private readonly GraphEditorSelectionCoordinator _selectionCoordinator;
+    private readonly GraphEditorSelectionStateSynchronizer _selectionStateSynchronizer;
     private readonly GraphEditorKernel _kernel;
     private readonly GraphEditorViewModelKernelAdapter _sessionHost;
     private readonly GraphEditorCommandStateNotifier _commandStateNotifier = new();
@@ -184,6 +185,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         _kernelProjectionApplier = new GraphEditorKernelProjectionApplier(this);
         _historyStateCoordinator = new GraphEditorHistoryStateCoordinator(this, _historyService);
         _selectionCoordinator = new GraphEditorSelectionCoordinator(this);
+        _selectionStateSynchronizer = new GraphEditorSelectionStateSynchronizer(this);
         StyleOptions = styleOptions ?? GraphEditorStyleOptions.Default;
         BehaviorOptions = ResolveBehaviorOptions(behaviorOptions, StyleOptions);
 
@@ -850,6 +852,30 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         => NotifySelectionChanged();
 
     void IGraphEditorSelectionCoordinatorHost.RaiseComputedPropertyChanges()
+        => RaiseComputedPropertyChanges();
+
+    IReadOnlyList<NodeViewModel> IGraphEditorSelectionStateSynchronizerHost.AllNodes => Nodes;
+
+    ObservableCollection<NodeViewModel> IGraphEditorSelectionStateSynchronizerHost.SelectionNodes => SelectedNodes;
+
+    NodeViewModel? IGraphEditorSelectionStateSynchronizerHost.PrimarySelectedNode
+    {
+        get => SelectedNode;
+        set => SelectedNode = value;
+    }
+
+    bool IGraphEditorSelectionStateSynchronizerHost.IsSelectionTrackingSuspended => _suspendSelectionTracking;
+
+    void IGraphEditorSelectionStateSynchronizerHost.SetSelection(IReadOnlyList<NodeViewModel> nodes, NodeViewModel? primaryNode)
+        => SetSelection(nodes, primaryNode);
+
+    void IGraphEditorSelectionStateSynchronizerHost.RefreshSelectionProjection()
+        => RefreshSelectionProjection();
+
+    void IGraphEditorSelectionStateSynchronizerHost.NotifySelectionChanged()
+        => NotifySelectionChanged();
+
+    void IGraphEditorSelectionStateSynchronizerHost.RaiseComputedPropertyChanges()
         => RaiseComputedPropertyChanges();
 
     [ObservableProperty]
@@ -2400,7 +2426,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     private void HandleNodesCollectionChanged(object? sender, NotifyCollectionChangedEventArgs args)
     {
         _documentProjectionApplier.HandleNodesCollectionChanged(args, HandleNodePropertyChanged);
-        CoerceSelectionToExistingNodes();
+        _selectionStateSynchronizer.CoerceSelectionToExistingNodes();
         FitViewCommand.NotifyCanExecuteChanged();
         RefreshSelectionProjection();
         RaiseComputedPropertyChanges();
@@ -2414,29 +2440,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     }
 
     private void HandleSelectedNodesCollectionChanged(object? sender, NotifyCollectionChangedEventArgs args)
-    {
-        if (_suspendSelectionTracking)
-        {
-            return;
-        }
-
-        foreach (var node in Nodes)
-        {
-            node.IsSelected = SelectedNodes.Contains(node);
-        }
-
-        var nextPrimary = SelectedNode is not null && SelectedNodes.Contains(SelectedNode)
-            ? SelectedNode
-            : SelectedNodes.LastOrDefault();
-        if (!ReferenceEquals(nextPrimary, SelectedNode))
-        {
-            SelectedNode = nextPrimary;
-        }
-
-        RefreshSelectionProjection();
-        NotifySelectionChanged();
-        RaiseComputedPropertyChanges();
-    }
+        => _selectionStateSynchronizer.HandleSelectedNodesCollectionChanged();
 
     private void HandleNodePropertyChanged(object? sender, PropertyChangedEventArgs args)
     {
@@ -2536,28 +2540,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     }
 
     private void CoerceSelectionToExistingNodes()
-    {
-        if (SelectedNodes.Count == 0 && SelectedNode is null)
-        {
-            return;
-        }
-
-        var nextSelection = SelectedNodes
-            .Where(Nodes.Contains)
-            .Distinct()
-            .ToList();
-
-        var nextPrimary = SelectedNode is not null && nextSelection.Contains(SelectedNode)
-            ? SelectedNode
-            : nextSelection.LastOrDefault();
-
-        if (nextSelection.SequenceEqual(SelectedNodes) && ReferenceEquals(nextPrimary, SelectedNode))
-        {
-            return;
-        }
-
-        SetSelection(nextSelection, nextPrimary);
-    }
+        => _selectionStateSynchronizer.CoerceSelectionToExistingNodes();
 
     private void RemoveConnections(Func<ConnectionViewModel, bool> predicate, string status)
     {
