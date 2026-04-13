@@ -1,5 +1,3 @@
-using AsterGraph.Core.Models;
-using AsterGraph.Editor.Events;
 using AsterGraph.Editor.Menus;
 
 namespace AsterGraph.Editor.ViewModels;
@@ -51,10 +49,50 @@ public sealed partial class GraphEditorViewModel
         }
 
         internal void DeleteNodeById(string nodeId)
-            => _owner._sessionHost.DeleteNodeById(nodeId);
+        {
+            if (!_owner.CommandPermissions.Nodes.AllowDelete)
+            {
+                _owner.SetStatus("editor.status.node.delete.disabledByPermissions", "Node deletion is disabled by host permissions.");
+                return;
+            }
+
+            var node = _owner.FindNode(nodeId);
+            if (node is null)
+            {
+                return;
+            }
+
+            var removedConnections = _owner.Connections
+                .Where(connection => connection.SourceNodeId == node.Id || connection.TargetNodeId == node.Id)
+                .ToList();
+
+            if (removedConnections.Count > 0 && !_owner.CanRemoveConnectionsAsSideEffect())
+            {
+                _owner.SetStatus("editor.status.node.delete.singleConnectedRequiresPermission", "Deleting a connected node requires delete or disconnect permission for the affected links.");
+                return;
+            }
+
+            _owner._kernel.DeleteNodeById(nodeId);
+            _owner.SetStatus("editor.status.node.deletedSingle", "Deleted {0}.", node.Title);
+        }
 
         internal void DuplicateNode(string nodeId)
-            => _owner._sessionHost.DuplicateNode(nodeId);
+        {
+            if (!_owner.CommandPermissions.Nodes.AllowDuplicate)
+            {
+                _owner.SetStatus("editor.status.node.duplicate.disabledByPermissions", "Node duplication is disabled by host permissions.");
+                return;
+            }
+
+            var node = _owner.FindNode(nodeId);
+            if (node is null)
+            {
+                return;
+            }
+
+            _owner._kernel.DuplicateNode(nodeId);
+            _owner.SetStatus("editor.status.node.duplicated", "Duplicated {0}.", node.Title);
+        }
 
         internal void DisconnectIncoming(string nodeId)
         {
