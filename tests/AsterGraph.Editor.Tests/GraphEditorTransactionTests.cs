@@ -22,6 +22,14 @@ public sealed class GraphEditorTransactionTests
     private const string TargetPortId = "in";
 
     [Fact]
+    public void EditorAssembly_ContainsDedicatedHistoryStateCoordinator()
+    {
+        var coordinatorType = typeof(GraphEditorViewModel).Assembly.GetType("AsterGraph.Editor.Services.GraphEditorHistoryStateCoordinator");
+
+        Assert.NotNull(coordinatorType);
+    }
+
+    [Fact]
     public void RuntimeSession_BeginMutation_DefersRuntimeNotificationsUntilDisposed()
     {
         var definitionId = new NodeDefinitionId("tests.transaction.node");

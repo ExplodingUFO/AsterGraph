@@ -12,7 +12,6 @@ using AsterGraph.Abstractions.Compatibility;
 using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Abstractions.Styling;
 using AsterGraph.Core.Models;
-using AsterGraph.Core.Serialization;
 using AsterGraph.Editor.Configuration;
 using AsterGraph.Editor.Diagnostics;
 using AsterGraph.Editor.Events;
@@ -39,7 +38,7 @@ namespace AsterGraph.Editor.ViewModels;
 /// 而自定义 UI 宿主应优先考虑 <see cref="AsterGraphEditorFactory.CreateSession(AsterGraphEditorOptions)"/>。
 /// 本类型在当前迁移窗口内仍然受支持，但不应再被视为新的首选组合根。
 /// </remarks>
-public sealed partial class GraphEditorViewModel : ObservableObject, IGraphContextMenuHost, GraphEditorViewModel.IGraphEditorCompatibilityCommandHost, GraphEditorViewModel.IGraphEditorFragmentCommandHost, IGraphEditorKernelProjectionHost
+public sealed partial class GraphEditorViewModel : ObservableObject, IGraphContextMenuHost, GraphEditorViewModel.IGraphEditorCompatibilityCommandHost, GraphEditorViewModel.IGraphEditorFragmentCommandHost, IGraphEditorKernelProjectionHost, IGraphEditorHistoryStateHost
 {
     private const double DefaultZoom = 0.88;
     private const double DefaultPanX = 110;
@@ -99,6 +98,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     private readonly GraphEditorDocumentProjectionApplier _documentProjectionApplier;
     private readonly GraphEditorSelectionProjection _selectionProjection;
     private readonly GraphEditorKernelProjectionApplier _kernelProjectionApplier;
+    private readonly GraphEditorHistoryStateCoordinator _historyStateCoordinator;
     private readonly GraphEditorKernel _kernel;
     private readonly GraphEditorViewModelKernelAdapter _sessionHost;
     private readonly GraphEditorCommandStateNotifier _commandStateNotifier = new();
@@ -181,6 +181,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             LocalizeText,
             (key, fallback, arguments) => LocalizeFormat(key, fallback, arguments));
         _kernelProjectionApplier = new GraphEditorKernelProjectionApplier(this);
+        _historyStateCoordinator = new GraphEditorHistoryStateCoordinator(this, _historyService);
         StyleOptions = styleOptions ?? GraphEditorStyleOptions.Default;
         BehaviorOptions = ResolveBehaviorOptions(behaviorOptions, StyleOptions);
 
@@ -775,6 +776,38 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     NodeViewModel? IGraphEditorKernelProjectionHost.FindNode(string nodeId)
         => FindNode(nodeId);
+
+    IReadOnlyList<NodeViewModel> IGraphEditorHistoryStateHost.SelectedNodes => SelectedNodes;
+
+    NodeViewModel? IGraphEditorHistoryStateHost.SelectedNode => SelectedNode;
+
+    string? IGraphEditorHistoryStateHost.LastSavedDocumentSignature => _lastSavedDocumentSignature;
+
+    bool IGraphEditorHistoryStateHost.IsHistoryTrackingSuspended
+    {
+        get => _suspendHistoryTracking;
+        set => _suspendHistoryTracking = value;
+    }
+
+    bool IGraphEditorHistoryStateHost.IsDirtyTrackingSuspended => _suspendDirtyTracking;
+
+    GraphDocument IGraphEditorHistoryStateHost.CreateViewModelDocumentSnapshot()
+        => CreateViewModelDocumentSnapshot();
+
+    void IGraphEditorHistoryStateHost.LoadDocumentCore(GraphDocument document, string status, bool markClean, bool resetHistory)
+        => LoadDocument(document, status, markClean, resetHistory);
+
+    void IGraphEditorHistoryStateHost.SetSelection(IReadOnlyList<NodeViewModel> nodes, NodeViewModel? primaryNode, string? status)
+        => SetSelection(nodes, primaryNode, status);
+
+    void IGraphEditorHistoryStateHost.SetStatusMessage(string status)
+        => StatusMessage = status;
+
+    void IGraphEditorHistoryStateHost.SetDirtyState(bool isDirty)
+        => IsDirty = isDirty;
+
+    void IGraphEditorHistoryStateHost.RaiseComputedPropertyChanges()
+        => RaiseComputedPropertyChanges();
 
     [ObservableProperty]
     private double zoom = DefaultZoom;
@@ -2255,13 +2288,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     }
 
     private void MarkDirty(string status)
-    {
-        StatusMessage = status;
-        var currentState = CaptureHistoryState();
-        UpdateDirtyState(currentState.Signature);
-        PushHistoryState(currentState);
-        RaiseComputedPropertyChanges();
-    }
+        => _historyStateCoordinator.MarkDirty(status);
 
     private GraphPoint GetViewportCenter()
     {
@@ -2358,57 +2385,16 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         => CommandPermissions.Connections.AllowDelete || CommandPermissions.Connections.AllowDisconnect;
 
     private GraphEditorHistoryState CaptureHistoryState()
-    {
-        var document = CreateViewModelDocumentSnapshot();
-        return CreateHistoryState(document);
-    }
-
-    private GraphEditorHistoryState CreateHistoryState(GraphDocument document)
-        => new(
-            document,
-            SelectedNodes.Select(node => node.Id).ToList(),
-            SelectedNode?.Id,
-            CreateDocumentSignature(document));
+        => _historyStateCoordinator.CaptureHistoryState();
 
     private void RestoreHistoryState(GraphEditorHistoryState state, string status)
-    {
-        _suspendHistoryTracking = true;
-        LoadDocument(state.Document, status, markClean: false, resetHistory: false);
-
-        var restoredSelection = state.SelectedNodeIds
-            .Select(FindNode)
-            .Where(node => node is not null)
-            .Cast<NodeViewModel>()
-            .ToList();
-        var primaryNode = !string.IsNullOrWhiteSpace(state.PrimarySelectedNodeId)
-            ? restoredSelection.FirstOrDefault(node => node.Id == state.PrimarySelectedNodeId)
-            : restoredSelection.LastOrDefault();
-
-        SetSelection(restoredSelection, primaryNode, status);
-        _suspendHistoryTracking = false;
-        UpdateDirtyState(CaptureHistoryState().Signature);
-        RaiseComputedPropertyChanges();
-    }
+        => _historyStateCoordinator.RestoreHistoryState(state, status);
 
     private void PushCurrentHistoryState()
-    {
-        if (_suspendHistoryTracking)
-        {
-            return;
-        }
-
-        PushHistoryState(CaptureHistoryState());
-    }
+        => _historyStateCoordinator.PushCurrentHistoryState();
 
     private void PushHistoryState(GraphEditorHistoryState state)
-    {
-        if (_suspendHistoryTracking)
-        {
-            return;
-        }
-
-        _historyService.Push(state);
-    }
+        => _historyStateCoordinator.PushHistoryState(state);
 
     private GraphDocument CreateViewModelDocumentSnapshot()
         => new(
@@ -2421,7 +2407,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         => CreateDocumentSignature(CreateViewModelDocumentSnapshot());
 
     private static string CreateDocumentSignature(GraphDocument document)
-        => GraphDocumentSerializer.Serialize(document);
+        => GraphEditorHistoryStateCoordinator.CreateDocumentSignature(document);
 
     private static GraphEditorBehaviorOptions ResolveBehaviorOptions(
         GraphEditorBehaviorOptions? behaviorOptions,
@@ -2444,24 +2430,10 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     }
 
     private void UpdateDirtyState()
-    {
-        if (_suspendDirtyTracking)
-        {
-            return;
-        }
-
-        UpdateDirtyState(CreateDocumentSignature());
-    }
+        => _historyStateCoordinator.UpdateDirtyState();
 
     private void UpdateDirtyState(string currentSignature)
-    {
-        if (_suspendDirtyTracking)
-        {
-            return;
-        }
-
-        IsDirty = !string.Equals(currentSignature, _lastSavedDocumentSignature, StringComparison.Ordinal);
-    }
+        => _historyStateCoordinator.UpdateDirtyState(currentSignature);
 
     partial void OnZoomChanged(double value) => RaiseComputedPropertyChanges();
 
