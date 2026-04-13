@@ -642,6 +642,43 @@ public sealed class GraphEditorSessionTests
     }
 
     [Fact]
+    public void RuntimeSession_CanvasMenuDescriptors_UseLiveNodeCatalogDefinitionsAfterSessionCreation()
+    {
+        var initialDefinitionId = new NodeDefinitionId("tests.session.live-catalog.initial");
+        var lateDefinitionId = new NodeDefinitionId("tests.session.live-catalog.late");
+        var catalog = CreateCatalog(initialDefinitionId);
+        var session = AsterGraphEditorFactory.CreateSession(new AsterGraphEditorOptions
+        {
+            Document = CreateDocument(initialDefinitionId),
+            NodeCatalog = catalog,
+            CompatibilityService = new DefaultPortCompatibilityService(),
+            WorkspaceService = new EmptyWorkspaceService(),
+        });
+
+        session.Commands.UpdateViewportSize(1280, 720);
+        var initialMenu = session.Queries.BuildContextMenuDescriptors(new ContextMenuContext(ContextMenuTargetKind.Canvas, new GraphPoint(160, 90)));
+        var initialAddNodeGroup = Assert.Single(Assert.Single(initialMenu, item => item.Id == "canvas-add-node").Children);
+        Assert.Single(initialAddNodeGroup.Children);
+
+        catalog.RegisterDefinition(new NodeDefinition(
+            lateDefinitionId,
+            "Late Session Node",
+            "Tests",
+            "Runtime",
+            [new PortDefinition(TargetPortId, "Input", new PortTypeId("float"), "#F3B36B")],
+            [new PortDefinition(SourcePortId, "Output", new PortTypeId("float"), "#6AD5C4")]));
+
+        var updatedMenu = session.Queries.BuildContextMenuDescriptors(new ContextMenuContext(ContextMenuTargetKind.Canvas, new GraphPoint(160, 90)));
+        var updatedAddNodeGroup = Assert.Single(Assert.Single(updatedMenu, item => item.Id == "canvas-add-node").Children);
+        var lateItem = Assert.Single(updatedAddNodeGroup.Children, item => item.Id == "add-node-tests-session-live-catalog-late");
+
+        Assert.Equal(2, updatedAddNodeGroup.Children.Count);
+        Assert.Equal("Late Session Node", lateItem.Header);
+        Assert.Equal("nodes.add", lateItem.Command!.CommandId);
+        Assert.Contains(lateItem.Command.Arguments, argument => argument.Name == "definitionId" && argument.Value == lateDefinitionId.Value);
+    }
+
+    [Fact]
     public void RuntimeSession_TryExecuteCommand_AcceptsCanonicalInvocationSnapshot()
     {
         var definitionId = new NodeDefinitionId("tests.session.execute-descriptor");

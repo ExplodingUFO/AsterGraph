@@ -8,7 +8,7 @@ namespace AsterGraph.Editor.Runtime.Internal;
 
 internal sealed class GraphEditorSessionStockMenuDescriptorBuilder
 {
-    private readonly IReadOnlyList<INodeDefinition> _defaultDefinitions;
+    private readonly Func<IReadOnlyCollection<INodeDefinition>> _defaultDefinitionsProvider;
     private readonly Func<GraphDocument> _documentSnapshotFactory;
     private readonly Func<GraphEditorSelectionSnapshot> _selectionSnapshotFactory;
     private readonly Func<string, string, IReadOnlyList<GraphEditorCompatiblePortTargetSnapshot>> _compatibleTargetsFactory;
@@ -19,13 +19,13 @@ internal sealed class GraphEditorSessionStockMenuDescriptorBuilder
         Func<GraphEditorSelectionSnapshot> selectionSnapshotFactory,
         Func<string, string, IReadOnlyList<GraphEditorCompatiblePortTargetSnapshot>> compatibleTargetsFactory,
         Func<string, string, string> localize,
-        IReadOnlyList<INodeDefinition>? defaultDefinitions = null)
+        Func<IReadOnlyCollection<INodeDefinition>>? defaultDefinitionsProvider = null)
     {
         _documentSnapshotFactory = documentSnapshotFactory ?? throw new ArgumentNullException(nameof(documentSnapshotFactory));
         _selectionSnapshotFactory = selectionSnapshotFactory ?? throw new ArgumentNullException(nameof(selectionSnapshotFactory));
         _compatibleTargetsFactory = compatibleTargetsFactory ?? throw new ArgumentNullException(nameof(compatibleTargetsFactory));
         _localize = localize ?? throw new ArgumentNullException(nameof(localize));
-        _defaultDefinitions = defaultDefinitions ?? [];
+        _defaultDefinitionsProvider = defaultDefinitionsProvider ?? (() => Array.Empty<INodeDefinition>());
     }
 
     public IReadOnlyList<GraphEditorMenuItemDescriptorSnapshot> Build(
@@ -52,7 +52,7 @@ internal sealed class GraphEditorSessionStockMenuDescriptorBuilder
     {
         var definitions = context.AvailableNodeDefinitions.Count > 0
             ? context.AvailableNodeDefinitions
-            : _defaultDefinitions;
+            : _defaultDefinitionsProvider();
         var addNode = GetCommandDescriptor(commands, "nodes.add");
         var fitView = GetCommandDescriptor(commands, "viewport.fit");
         var resetView = GetCommandDescriptor(commands, "viewport.reset");

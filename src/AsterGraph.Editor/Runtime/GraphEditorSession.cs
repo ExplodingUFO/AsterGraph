@@ -65,7 +65,7 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorAutoma
             _host.GetSelectionSnapshot,
             _host.GetCompatiblePortTargets,
             Localize,
-            _descriptorSupport?.Definitions.ToList() ?? []);
+            () => _descriptorSupport?.Definitions ?? Array.Empty<INodeDefinition>());
         _lastPendingConnectionSnapshot = CreatePendingConnectionSnapshot();
         _host.DocumentChanged += HandleDocumentChanged;
         _host.SelectionChanged += HandleSelectionChanged;
