@@ -69,6 +69,25 @@ public sealed class DemoHostMenuControlTests
     }
 
     [Fact]
+    public void MainWindowViewModel_RuntimeAndProofSummariesExplainTheOperatorSurface()
+    {
+        var viewModel = new MainWindowViewModel();
+
+        viewModel.OpenHostMenuGroup("运行时");
+
+        Assert.Contains("共享运行时", viewModel.SelectedHostMenuGroupSummary, StringComparison.Ordinal);
+        Assert.Contains("诊断", viewModel.SelectedHostMenuGroupSummary, StringComparison.Ordinal);
+        Assert.Equal(
+            "以下诊断直接来自 Editor.Session.Diagnostics，用于确认共享运行时状态。",
+            viewModel.RuntimeDiagnosticsSummary);
+
+        viewModel.OpenHostMenuGroup("证明");
+
+        Assert.Contains("宿主壳层", viewModel.SelectedHostMenuGroupSummary, StringComparison.Ordinal);
+        Assert.Contains("共享运行时", viewModel.SelectedHostMenuGroupSummary, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void MainWindowViewModel_BehaviorTogglesStillDriveEditorBehaviorAndPermissions()
     {
         var viewModel = new MainWindowViewModel();

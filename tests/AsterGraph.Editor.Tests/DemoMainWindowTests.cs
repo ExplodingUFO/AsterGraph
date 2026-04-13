@@ -56,8 +56,8 @@ public sealed class DemoMainWindowTests
         Assert.Equal(MenuItemToggleType.CheckBox, GetMenuItem(behaviorMenu, "宿主菜单扩展").ToggleType);
         Assert.Equal("打开行为控制", GetMenuItem(behaviorMenu, "打开行为控制").Header);
 
-        Assert.Equal("打开运行时摘要", GetMenuItem(runtimeMenu, "打开运行时摘要").Header);
-        Assert.Equal("查看最近诊断", GetMenuItem(runtimeMenu, "查看最近诊断").Header);
+        Assert.Equal("查看运行时状态", GetMenuItem(runtimeMenu, "查看运行时状态").Header);
+        Assert.Equal("查看运行时诊断", GetMenuItem(runtimeMenu, "查看运行时诊断").Header);
     }
 
     [AvaloniaFact]
@@ -80,9 +80,9 @@ public sealed class DemoMainWindowTests
         var proofMenu = Assert.IsType<MenuItem>(window.FindControl<MenuItem>("PART_ProofMenu"));
 
         Assert.Equal("打开展示摘要", GetMenuItem(showcaseMenu, "打开展示摘要").Header);
-        Assert.Equal("查看证明要点", GetMenuItem(proofMenu, "查看证明要点").Header);
+        Assert.Equal("查看宿主边界", GetMenuItem(proofMenu, "查看宿主边界").Header);
         Assert.Null(FindMenuItem(showcaseMenu, "打开展示面板"));
-        Assert.Null(FindMenuItem(proofMenu, "打开证明面板"));
+        Assert.Null(FindMenuItem(proofMenu, "查看证明要点"));
 
         Assert.Equal("宿主控制抽屉", window.FindControl<TextBlock>("PART_HostDrawerCaptionText")?.Text);
         Assert.Equal("实时 SDK 会话", window.FindControl<TextBlock>("PART_GraphIntroTitleText")?.Text);
@@ -101,6 +101,26 @@ public sealed class DemoMainWindowTests
         Assert.NotNull(window.FindControl<Control>("PART_ProofConfigurationSection"));
         Assert.NotNull(window.FindControl<Control>("PART_ProofOwnershipSection"));
         Assert.NotNull(window.FindControl<Control>("PART_ProofRuntimeSignalsSection"));
+    }
+
+    [AvaloniaFact]
+    public void MainWindow_RendersOperatorFacingRuntimeAndProofCopy()
+    {
+        var window = CreateWindow();
+
+        var runtimeMenu = Assert.IsType<MenuItem>(window.FindControl<MenuItem>("PART_RuntimeMenu"));
+        var proofMenu = Assert.IsType<MenuItem>(window.FindControl<MenuItem>("PART_ProofMenu"));
+
+        Assert.Equal("查看运行时状态", GetMenuItem(runtimeMenu, "查看运行时状态").Header);
+        Assert.Equal("查看运行时诊断", GetMenuItem(runtimeMenu, "查看运行时诊断").Header);
+        Assert.Equal("查看宿主边界", GetMenuItem(proofMenu, "查看宿主边界").Header);
+
+        Assert.Equal("宿主开关快照", GetTextBlockText(window, "PART_RuntimeConfigurationHeading"));
+        Assert.Equal("共享运行时状态", GetTextBlockText(window, "PART_RuntimeSignalsHeading"));
+        Assert.Equal("最近诊断", GetTextBlockText(window, "PART_RuntimeDiagnosticsHeading"));
+        Assert.Equal("宿主控制快照", GetTextBlockText(window, "PART_ProofConfigurationHeading"));
+        Assert.Equal("边界证据", GetTextBlockText(window, "PART_ProofOwnershipHeading"));
+        Assert.Equal("共享运行时证据", GetTextBlockText(window, "PART_ProofRuntimeSignalsHeading"));
     }
 
     [AvaloniaFact]
@@ -152,6 +172,9 @@ public sealed class DemoMainWindowTests
     private static MenuItem? FindMenuItem(MenuItem parent, string header)
         => GetMenuItems(parent)
             .SingleOrDefault(item => string.Equals(item.Header?.ToString(), header, StringComparison.Ordinal));
+
+    private static string? GetTextBlockText(MainWindow window, string name)
+        => window.FindControl<TextBlock>(name)?.Text;
 
     private static MenuItem[] GetMenuItems(MenuItem parent)
         => parent.Items is IEnumerable items
