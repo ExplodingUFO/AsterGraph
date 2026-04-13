@@ -1,3 +1,5 @@
+using System;
+using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
 using AsterGraph.Avalonia.Controls;
@@ -111,5 +113,93 @@ public sealed class DemoHostMenuControlTests
         Assert.True(graphEditorView.IsLibraryChromeVisible);
         Assert.True(graphEditorView.IsInspectorChromeVisible);
         Assert.True(graphEditorView.IsStatusChromeVisible);
+    }
+
+    [AvaloniaFact]
+    public void MainWindow_MenuCheckItemsWriteThroughToHostState()
+    {
+        var viewModel = new MainWindowViewModel();
+        var window = new MainWindow
+        {
+            DataContext = viewModel,
+        };
+
+        window.Show();
+
+        var viewMenu = Assert.IsType<MenuItem>(window.FindControl<MenuItem>("PART_ViewMenu"));
+        var behaviorMenu = Assert.IsType<MenuItem>(window.FindControl<MenuItem>("PART_BehaviorMenu"));
+        var graphEditorView = Assert.IsType<GraphEditorView>(window.FindControl<GraphEditorView>("MainGraphEditorView"));
+
+        var headerChromeMenuItem = GetMenuItem(viewMenu, "显示顶栏");
+        var gridSnappingMenuItem = GetMenuItem(behaviorMenu, "网格吸附");
+
+        Assert.False(viewModel.IsHeaderChromeVisible);
+        Assert.True(viewModel.IsGridSnappingEnabled);
+
+        headerChromeMenuItem.IsChecked = true;
+        gridSnappingMenuItem.IsChecked = false;
+
+        Assert.True(viewModel.IsHeaderChromeVisible);
+        Assert.True(graphEditorView.IsHeaderChromeVisible);
+        Assert.False(viewModel.IsGridSnappingEnabled);
+        Assert.False(viewModel.Editor.BehaviorOptions.DragAssist.EnableGridSnapping);
+
+        headerChromeMenuItem.IsChecked = false;
+        gridSnappingMenuItem.IsChecked = true;
+
+        Assert.False(viewModel.IsHeaderChromeVisible);
+        Assert.False(graphEditorView.IsHeaderChromeVisible);
+        Assert.True(viewModel.IsGridSnappingEnabled);
+        Assert.True(viewModel.Editor.BehaviorOptions.DragAssist.EnableGridSnapping);
+    }
+
+    [AvaloniaFact]
+    public void MainWindow_SameGroupCanReopenAfterPaneCloses()
+    {
+        var viewModel = new MainWindowViewModel();
+        var window = new MainWindow
+        {
+            DataContext = viewModel,
+        };
+
+        window.Show();
+
+        var splitView = Assert.IsType<SplitView>(window.FindControl<SplitView>("PART_HostShellSplitView"));
+
+        viewModel.OpenHostMenuGroup("视图");
+
+        Assert.True(viewModel.IsHostPaneOpen);
+        Assert.True(splitView.IsPaneOpen);
+
+        viewModel.CloseHostPane();
+
+        Assert.False(viewModel.IsHostPaneOpen);
+        Assert.False(splitView.IsPaneOpen);
+
+        viewModel.OpenHostMenuGroup("视图");
+
+        Assert.True(viewModel.IsHostPaneOpen);
+        Assert.True(splitView.IsPaneOpen);
+
+        splitView.IsPaneOpen = false;
+
+        Assert.False(splitView.IsPaneOpen);
+        Assert.False(viewModel.IsHostPaneOpen);
+
+        viewModel.OpenHostMenuGroup("视图");
+
+        Assert.True(viewModel.IsHostPaneOpen);
+        Assert.True(splitView.IsPaneOpen);
+    }
+
+    private static MenuItem GetMenuItem(MenuItem parent, string header)
+    {
+        var matches = parent.Items?
+            .OfType<MenuItem>()
+            .Where(item => string.Equals(item.Header?.ToString(), header, StringComparison.Ordinal))
+            .ToArray();
+
+        Assert.NotNull(matches);
+        return Assert.Single(matches);
     }
 }
