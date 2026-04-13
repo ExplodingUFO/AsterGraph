@@ -39,7 +39,7 @@ namespace AsterGraph.Editor.ViewModels;
 /// 而自定义 UI 宿主应优先考虑 <see cref="AsterGraphEditorFactory.CreateSession(AsterGraphEditorOptions)"/>。
 /// 本类型在当前迁移窗口内仍然受支持，但不应再被视为新的首选组合根。
 /// </remarks>
-public sealed partial class GraphEditorViewModel : ObservableObject, IGraphContextMenuHost, GraphEditorViewModel.IGraphEditorCompatibilityCommandHost, GraphEditorViewModel.IGraphEditorFragmentCommandHost
+public sealed partial class GraphEditorViewModel : ObservableObject, IGraphContextMenuHost, GraphEditorViewModel.IGraphEditorCompatibilityCommandHost, GraphEditorViewModel.IGraphEditorFragmentCommandHost, IGraphEditorKernelProjectionHost
 {
     private const double DefaultZoom = 0.88;
     private const double DefaultPanX = 110;
@@ -98,6 +98,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     private readonly GraphEditorHistoryService _historyService;
     private readonly GraphEditorDocumentProjectionApplier _documentProjectionApplier;
     private readonly GraphEditorSelectionProjection _selectionProjection;
+    private readonly GraphEditorKernelProjectionApplier _kernelProjectionApplier;
     private readonly GraphEditorKernel _kernel;
     private readonly GraphEditorViewModelKernelAdapter _sessionHost;
     private readonly GraphEditorCommandStateNotifier _commandStateNotifier = new();
@@ -179,6 +180,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         _selectionProjection = new GraphEditorSelectionProjection(
             LocalizeText,
             (key, fallback, arguments) => LocalizeFormat(key, fallback, arguments));
+        _kernelProjectionApplier = new GraphEditorKernelProjectionApplier(this);
         StyleOptions = styleOptions ?? GraphEditorStyleOptions.Default;
         BehaviorOptions = ResolveBehaviorOptions(behaviorOptions, StyleOptions);
 
@@ -732,6 +734,47 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
                 path,
                 fragment.Nodes.Count,
                 fragment.Connections.Count));
+
+    void IGraphEditorKernelProjectionHost.RunInKernelProjectionScope(Action action)
+    {
+        ArgumentNullException.ThrowIfNull(action);
+
+        _isApplyingKernelProjection = true;
+        try
+        {
+            action();
+        }
+        finally
+        {
+            _isApplyingKernelProjection = false;
+        }
+    }
+
+    void IGraphEditorKernelProjectionHost.ApplyKernelDocumentCore(GraphDocument document, string status, bool markClean)
+        => LoadDocument(document, status, markClean);
+
+    void IGraphEditorKernelProjectionHost.ApplyKernelSelectionCore(IReadOnlyList<NodeViewModel> nodes, NodeViewModel? primaryNode)
+        => SetSelectionCore(nodes, primaryNode);
+
+    void IGraphEditorKernelProjectionHost.ApplyKernelViewportCore(GraphEditorViewportSnapshot snapshot)
+    {
+        _viewportWidth = snapshot.ViewportWidth;
+        _viewportHeight = snapshot.ViewportHeight;
+        Zoom = snapshot.Zoom;
+        PanX = snapshot.PanX;
+        PanY = snapshot.PanY;
+        FitViewCommand.NotifyCanExecuteChanged();
+        RaiseComputedPropertyChanges();
+    }
+
+    void IGraphEditorKernelProjectionHost.ApplyKernelPendingConnectionCore(NodeViewModel? pendingNode, PortViewModel? pendingPort)
+    {
+        PendingSourceNode = pendingNode;
+        PendingSourcePort = pendingPort;
+    }
+
+    NodeViewModel? IGraphEditorKernelProjectionHost.FindNode(string nodeId)
+        => FindNode(nodeId);
 
     [ObservableProperty]
     private double zoom = DefaultZoom;
@@ -2111,74 +2154,19 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         => _kernel.CreateDocumentSnapshot();
 
     internal void ApplyKernelDocument(GraphDocument document, string status, bool markClean)
-    {
-        _isApplyingKernelProjection = true;
-        try
-        {
-            LoadDocument(document, status, markClean);
-        }
-        finally
-        {
-            _isApplyingKernelProjection = false;
-        }
-    }
+        => _kernelProjectionApplier.ApplyDocument(document, status, markClean);
 
     internal void ApplyKernelSelection(GraphEditorSelectionSnapshot snapshot)
         => ApplyKernelSelection(snapshot.SelectedNodeIds, snapshot.PrimarySelectedNodeId);
 
     internal void ApplyKernelSelection(IReadOnlyList<string> nodeIds, string? primaryNodeId)
-    {
-        _isApplyingKernelProjection = true;
-        try
-        {
-            var selectedNodes = nodeIds
-                .Select(FindNode)
-                .Where(node => node is not null)
-                .Cast<NodeViewModel>()
-                .ToList();
-            var primaryNode = !string.IsNullOrWhiteSpace(primaryNodeId)
-                ? selectedNodes.FirstOrDefault(node => node.Id == primaryNodeId)
-                : selectedNodes.LastOrDefault();
-
-            SetSelectionCore(selectedNodes, primaryNode);
-        }
-        finally
-        {
-            _isApplyingKernelProjection = false;
-        }
-    }
+        => _kernelProjectionApplier.ApplySelection(nodeIds, primaryNodeId);
 
     internal void ApplyKernelViewport(GraphEditorViewportSnapshot snapshot)
-    {
-        _viewportWidth = snapshot.ViewportWidth;
-        _viewportHeight = snapshot.ViewportHeight;
-        Zoom = snapshot.Zoom;
-        PanX = snapshot.PanX;
-        PanY = snapshot.PanY;
-        FitViewCommand.NotifyCanExecuteChanged();
-        RaiseComputedPropertyChanges();
-    }
+        => _kernelProjectionApplier.ApplyViewport(snapshot);
 
     internal void ApplyKernelPendingConnection(GraphEditorPendingConnectionSnapshot snapshot)
-    {
-        _isApplyingKernelProjection = true;
-        try
-        {
-            var pendingNode = !string.IsNullOrWhiteSpace(snapshot.SourceNodeId)
-                ? FindNode(snapshot.SourceNodeId)
-                : null;
-            var pendingPort = pendingNode is not null && !string.IsNullOrWhiteSpace(snapshot.SourcePortId)
-                ? pendingNode.GetPort(snapshot.SourcePortId)
-                : null;
-
-            PendingSourceNode = pendingNode;
-            PendingSourcePort = pendingPort;
-        }
-        finally
-        {
-            _isApplyingKernelProjection = false;
-        }
-    }
+        => _kernelProjectionApplier.ApplyPendingConnection(snapshot);
 
     internal void ApplyKernelStatus(string statusMessage)
     {

@@ -5,6 +5,8 @@ using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Core.Compatibility;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Catalog;
+using AsterGraph.Editor.Diagnostics;
+using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.Services;
 using AsterGraph.Editor.ViewModels;
 using Xunit;
@@ -13,6 +15,14 @@ namespace AsterGraph.Editor.Tests;
 
 public sealed class GraphEditorViewModelProjectionTests
 {
+    [Fact]
+    public void EditorAssembly_ContainsDedicatedKernelProjectionApplier()
+    {
+        var projectionType = typeof(GraphEditorViewModel).Assembly.GetType("AsterGraph.Editor.Services.GraphEditorKernelProjectionApplier");
+
+        Assert.NotNull(projectionType);
+    }
+
     [Fact]
     public void SelectionProjection_ProjectInspectorState_UsesConnectionSummariesAndSelectionCaption()
     {
@@ -103,6 +113,46 @@ public sealed class GraphEditorViewModelProjectionTests
         Assert.Equal("None", editor.InspectorDownstream);
         Assert.Single(editor.SelectedNodes);
         Assert.Equal("target-node", editor.SelectedNode!.Id);
+    }
+
+    [Fact]
+    public void GraphEditorViewModel_ApplyKernelViewport_UpdatesViewportProjection()
+    {
+        var definitionId = new NodeDefinitionId("tests.editor.projection.viewport");
+        var editor = CreateEditor(CreateDocument(
+            "Viewport Graph",
+            "Viewport document.",
+            definitionId,
+            sourceNodeId: "source-node",
+            targetNodeId: "target-node",
+            includeConnection: false));
+
+        editor.ApplyKernelViewport(new GraphEditorViewportSnapshot(1.35, 240, -80, 1280, 720));
+
+        Assert.Equal(1.35, editor.Zoom);
+        Assert.Equal(240, editor.PanX);
+        Assert.Equal(-80, editor.PanY);
+        Assert.Equal(1280, editor.ViewportWidth);
+        Assert.Equal(720, editor.ViewportHeight);
+    }
+
+    [Fact]
+    public void GraphEditorViewModel_ApplyKernelPendingConnection_UsesRebuiltNodeProjection()
+    {
+        var definitionId = new NodeDefinitionId("tests.editor.projection.pending");
+        var editor = CreateEditor(CreateDocument(
+            "Pending Graph",
+            "Pending document.",
+            definitionId,
+            sourceNodeId: "source-node",
+            targetNodeId: "target-node",
+            includeConnection: false));
+
+        editor.ApplyKernelPendingConnection(GraphEditorPendingConnectionSnapshot.Create(true, "source-node", "out"));
+
+        Assert.True(editor.HasPendingConnection);
+        Assert.Equal("source-node", editor.PendingSourceNode!.Id);
+        Assert.Equal("out", editor.PendingSourcePort!.Id);
     }
 
     [Fact]
