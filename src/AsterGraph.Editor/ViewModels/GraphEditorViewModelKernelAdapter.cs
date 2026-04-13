@@ -63,6 +63,10 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
     public void AddNode(NodeDefinitionId definitionId, GraphPoint? preferredWorldPosition)
         => _kernel.AddNode(definitionId, preferredWorldPosition);
 
+    public void DeleteNodeById(string nodeId) => _kernel.DeleteNodeById(nodeId);
+
+    public void DuplicateNode(string nodeId) => _kernel.DuplicateNode(nodeId);
+
     public void DeleteSelection() => _kernel.DeleteSelection();
 
     public void SetNodePositions(IReadOnlyList<NodePositionSnapshot> positions, bool updateStatus)
@@ -200,7 +204,7 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
                     return false;
                 }
 
-                _owner.DeleteNodeById(deleteNodeId);
+                DeleteNodeById(deleteNodeId);
                 return true;
 
             case "nodes.duplicate":
@@ -209,7 +213,7 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
                     return false;
                 }
 
-                _owner.DuplicateNode(duplicateNodeId);
+                DuplicateNode(duplicateNodeId);
                 return true;
 
             case "connections.disconnect-incoming":

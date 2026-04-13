@@ -212,6 +212,80 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost
         MarkDirty($"Added {node.Title}.", GraphEditorDocumentChangeKind.NodesAdded, [node.Id], null);
     }
 
+    public void DeleteNodeById(string nodeId)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(nodeId);
+
+        if (!_behaviorOptions.Commands.Nodes.AllowDelete)
+        {
+            CurrentStatusMessage = "Node deletion is disabled by host permissions.";
+            return;
+        }
+
+        var mutation = _documentMutator.DeleteNode(_document, nodeId);
+        if (mutation.Node is null)
+        {
+            return;
+        }
+
+        if (mutation.RemovedConnections.Count > 0 && !CanRemoveConnectionsAsSideEffect())
+        {
+            CurrentStatusMessage = "Deleting a connected node requires delete or disconnect permission for the affected links.";
+            return;
+        }
+
+        _document = mutation.Document;
+        if (string.Equals(_pendingConnection.SourceNodeId, mutation.Node.Id, StringComparison.Ordinal))
+        {
+            CancelPendingConnection();
+        }
+
+        var remainingSelection = _selectedNodeIds
+            .Where(selectedNodeId => !string.Equals(selectedNodeId, mutation.Node.Id, StringComparison.Ordinal))
+            .ToList();
+        SetSelection(remainingSelection, remainingSelection.LastOrDefault(), updateStatus: false);
+        MarkDirty(
+            $"Deleted {mutation.Node.Title}.",
+            GraphEditorDocumentChangeKind.NodesRemoved,
+            [mutation.Node.Id],
+            mutation.RemovedConnections.Select(connection => connection.Id).ToList());
+    }
+
+    public void DuplicateNode(string nodeId)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(nodeId);
+
+        if (!_behaviorOptions.Commands.Nodes.AllowDuplicate)
+        {
+            CurrentStatusMessage = "Node duplication is disabled by host permissions.";
+            return;
+        }
+
+        var node = FindNode(nodeId);
+        if (node is null)
+        {
+            return;
+        }
+
+        var mutation = _documentMutator.DuplicateNode(
+            _document,
+            nodeId,
+            CreateNodeId(node.DefinitionId, node.Id),
+            new GraphPoint(node.Position.X + 48, node.Position.Y + 48));
+        if (mutation.Node is null)
+        {
+            return;
+        }
+
+        _document = mutation.Document;
+        SetSelection([mutation.Node.Id], mutation.Node.Id, updateStatus: false);
+        MarkDirty(
+            $"Duplicated {mutation.Node.Title}.",
+            GraphEditorDocumentChangeKind.NodesAdded,
+            [mutation.Node.Id],
+            null);
+    }
+
     public void DeleteSelection()
     {
         if (!_behaviorOptions.Commands.Nodes.AllowDelete)
@@ -1107,7 +1181,15 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost
         => _document.Nodes.FirstOrDefault(node => string.Equals(node.Id, nodeId, StringComparison.Ordinal));
 
     private string CreateNodeId(NodeDefinitionId definitionId)
-        => CreateUniqueId(_document.Nodes.Select(node => node.Id), $"{definitionId.Value.Replace(".", "-", StringComparison.Ordinal)}-");
+        => CreateNodeId(definitionId, definitionId.Value);
+
+    private string CreateNodeId(NodeDefinitionId? definitionId, string fallbackKey)
+        => CreateNodeId(
+            (definitionId?.Value ?? fallbackKey)
+            .Replace(".", "-", StringComparison.Ordinal));
+
+    private string CreateNodeId(string templateKey)
+        => CreateUniqueId(_document.Nodes.Select(node => node.Id), $"{templateKey}-");
 
     private string CreateConnectionId()
         => CreateUniqueId(_document.Connections.Select(connection => connection.Id), "connection-");

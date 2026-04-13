@@ -5,6 +5,31 @@ namespace AsterGraph.Editor.Kernel.Internal;
 
 internal sealed class GraphEditorKernelDocumentMutator
 {
+    public GraphEditorKernelDeleteNodeResult DeleteNode(GraphDocument document, string nodeId)
+    {
+        ArgumentNullException.ThrowIfNull(document);
+        ArgumentException.ThrowIfNullOrWhiteSpace(nodeId);
+
+        var node = document.Nodes.FirstOrDefault(candidate => string.Equals(candidate.Id, nodeId, StringComparison.Ordinal));
+        if (node is null)
+        {
+            return GraphEditorKernelDeleteNodeResult.NotFound(document);
+        }
+
+        var removedConnections = document.Connections
+            .Where(connection => connection.SourceNodeId == nodeId || connection.TargetNodeId == nodeId)
+            .ToList();
+
+        return new GraphEditorKernelDeleteNodeResult(
+            document with
+            {
+                Nodes = document.Nodes.Where(candidate => !ReferenceEquals(candidate, node)).ToList(),
+                Connections = document.Connections.Where(connection => !removedConnections.Contains(connection)).ToList(),
+            },
+            node,
+            removedConnections);
+    }
+
     public GraphEditorKernelDeleteSelectionResult DeleteSelection(
         GraphDocument document,
         IReadOnlyCollection<string> selectedNodeIds)
@@ -26,6 +51,36 @@ internal sealed class GraphEditorKernelDocumentMutator
             },
             removedNodes,
             removedConnections);
+    }
+
+    public GraphEditorKernelDuplicateNodeResult DuplicateNode(
+        GraphDocument document,
+        string nodeId,
+        string duplicateNodeId,
+        GraphPoint duplicatePosition)
+    {
+        ArgumentNullException.ThrowIfNull(document);
+        ArgumentException.ThrowIfNullOrWhiteSpace(nodeId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(duplicateNodeId);
+
+        var node = document.Nodes.FirstOrDefault(candidate => string.Equals(candidate.Id, nodeId, StringComparison.Ordinal));
+        if (node is null)
+        {
+            return GraphEditorKernelDuplicateNodeResult.NotFound(document);
+        }
+
+        var duplicate = node with
+        {
+            Id = duplicateNodeId,
+            Position = duplicatePosition,
+        };
+
+        return new GraphEditorKernelDuplicateNodeResult(
+            document with
+            {
+                Nodes = document.Nodes.Concat([duplicate]).ToList(),
+            },
+            duplicate);
     }
 
     public GraphEditorKernelNodePositionMutationResult SetNodePositions(
@@ -107,10 +162,27 @@ internal sealed class GraphEditorKernelDocumentMutator
     }
 }
 
+internal sealed record GraphEditorKernelDeleteNodeResult(
+    GraphDocument Document,
+    GraphNode? Node,
+    IReadOnlyList<GraphConnection> RemovedConnections)
+{
+    public static GraphEditorKernelDeleteNodeResult NotFound(GraphDocument document)
+        => new(document, null, []);
+}
+
 internal sealed record GraphEditorKernelDeleteSelectionResult(
     GraphDocument Document,
     IReadOnlyList<GraphNode> RemovedNodes,
     IReadOnlyList<GraphConnection> RemovedConnections);
+
+internal sealed record GraphEditorKernelDuplicateNodeResult(
+    GraphDocument Document,
+    GraphNode? Node)
+{
+    public static GraphEditorKernelDuplicateNodeResult NotFound(GraphDocument document)
+        => new(document, null);
+}
 
 internal sealed record GraphEditorKernelNodePositionMutationResult(
     GraphDocument Document,

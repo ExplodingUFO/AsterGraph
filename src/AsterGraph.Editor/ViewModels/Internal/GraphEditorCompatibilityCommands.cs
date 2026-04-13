@@ -51,75 +51,10 @@ public sealed partial class GraphEditorViewModel
         }
 
         internal void DeleteNodeById(string nodeId)
-        {
-            if (!_owner.CommandPermissions.Nodes.AllowDelete)
-            {
-                _owner.SetStatus("editor.status.node.delete.disabledByPermissions", "Node deletion is disabled by host permissions.");
-                return;
-            }
-
-            var node = _owner.FindNode(nodeId);
-            if (node is null)
-            {
-                return;
-            }
-
-            var remainingSelection = _owner.SelectedNodes.Where(selected => !ReferenceEquals(selected, node)).ToList();
-            var removedConnections = _owner.Connections
-                .Where(connection => connection.SourceNodeId == node.Id || connection.TargetNodeId == node.Id)
-                .ToList();
-
-            if (removedConnections.Count > 0 && !_owner.CanRemoveConnectionsAsSideEffect())
-            {
-                _owner.SetStatus("editor.status.node.delete.singleConnectedRequiresPermission", "Deleting a connected node requires delete or disconnect permission for the affected links.");
-                return;
-            }
-
-            foreach (var connection in removedConnections)
-            {
-                _owner.Connections.Remove(connection);
-            }
-
-            _owner.Nodes.Remove(node);
-            if (_owner.PendingSourceNode?.Id == node.Id)
-            {
-                _owner.CancelPendingConnection();
-            }
-
-            _owner.SetSelection(remainingSelection, remainingSelection.LastOrDefault());
-            _owner.MarkDirty(_owner.StatusText("editor.status.node.deletedSingle", "Deleted {0}.", node.Title));
-            _owner.NotifyDocumentChanged(
-                GraphEditorDocumentChangeKind.NodesRemoved,
-                nodeIds: [node.Id],
-                connectionIds: removedConnections.Select(connection => connection.Id).ToList());
-        }
+            => _owner._sessionHost.DeleteNodeById(nodeId);
 
         internal void DuplicateNode(string nodeId)
-        {
-            if (!_owner.CommandPermissions.Nodes.AllowDuplicate)
-            {
-                _owner.SetStatus("editor.status.node.duplicate.disabledByPermissions", "Node duplication is disabled by host permissions.");
-                return;
-            }
-
-            var node = _owner.FindNode(nodeId);
-            if (node is null)
-            {
-                return;
-            }
-
-            var duplicate = new NodeViewModel(node.ToModel() with
-            {
-                Id = _owner.CreateNodeId(node.DefinitionId, node.Id),
-                Position = new GraphPoint(node.X + 48, node.Y + 48),
-            });
-
-            _owner.ApplyNodePresentation(duplicate);
-            _owner.Nodes.Add(duplicate);
-            _owner.SelectSingleNode(duplicate);
-            _owner.MarkDirty(_owner.StatusText("editor.status.node.duplicated", "Duplicated {0}.", node.Title));
-            _owner.NotifyDocumentChanged(GraphEditorDocumentChangeKind.NodesAdded, nodeIds: [duplicate.Id]);
-        }
+            => _owner._sessionHost.DuplicateNode(nodeId);
 
         internal void DisconnectIncoming(string nodeId)
         {
