@@ -96,17 +96,12 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     private readonly IGraphFragmentLibraryService _fragmentLibraryService;
     private readonly IGraphClipboardPayloadSerializer _clipboardPayloadSerializer;
     private readonly GraphEditorHistoryService _historyService;
-    private readonly GraphEditorInspectorProjection _inspectorProjection;
     private readonly GraphEditorDocumentProjectionApplier _documentProjectionApplier;
     private readonly GraphEditorSelectionProjection _selectionProjection;
     private readonly GraphEditorKernel _kernel;
     private readonly GraphEditorViewModelKernelAdapter _sessionHost;
     private readonly GraphEditorCommandStateNotifier _commandStateNotifier = new();
     private readonly IRelayCommand[] _computedStateCommands;
-    private readonly Dictionary<string, NodeViewModel> _nodesById = new(StringComparer.Ordinal);
-    private readonly Dictionary<string, ConnectionViewModel> _connectionsById = new(StringComparer.Ordinal);
-    private readonly Dictionary<string, List<ConnectionViewModel>> _incomingConnectionsByNodeId = new(StringComparer.Ordinal);
-    private readonly Dictionary<string, List<ConnectionViewModel>> _outgoingConnectionsByNodeId = new(StringComparer.Ordinal);
     private string _inspectorConnectionsText = string.Empty;
     private string _inspectorUpstreamText = string.Empty;
     private string _inspectorDownstreamText = string.Empty;
@@ -178,12 +173,8 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         _contextMenuAugmentor = contextMenuAugmentor;
         _nodePresentationProvider = nodePresentationProvider;
         _localizationProvider = localizationProvider;
-        _inspectorProjection = new GraphEditorInspectorProjection(
-            LocalizeText,
-            (key, fallback, arguments) => LocalizeFormat(key, fallback, arguments));
-        _documentProjectionApplier = new GraphEditorDocumentProjectionApplier(ApplyNodePresentation);
+        _documentProjectionApplier = new GraphEditorDocumentProjectionApplier();
         _selectionProjection = new GraphEditorSelectionProjection(
-            _inspectorProjection,
             LocalizeText,
             (key, fallback, arguments) => LocalizeFormat(key, fallback, arguments));
         StyleOptions = styleOptions ?? GraphEditorStyleOptions.Default;
@@ -928,14 +919,14 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// </summary>
     public string InspectorInputs => SelectedNode is null
         ? LocalizeText("editor.inspector.inputs.none", "Select a node to inspect its input ports.")
-        : _inspectorProjection.FormatPorts(SelectedNode.Inputs);
+        : _selectionProjection.FormatPorts(SelectedNode.Inputs);
 
     /// <summary>
     /// 获取当前主选节点的输出端口摘要文本。
     /// </summary>
     public string InspectorOutputs => SelectedNode is null
         ? LocalizeText("editor.inspector.outputs.none", "Select a node to inspect its output ports.")
-        : _inspectorProjection.FormatPorts(SelectedNode.Outputs);
+        : _selectionProjection.FormatPorts(SelectedNode.Outputs);
 
     /// <summary>
     /// 获取当前主选节点的连线统计摘要文本。
@@ -1924,7 +1915,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// 按实例标识查找连线视图模型。
     /// </summary>
     public ConnectionViewModel? FindConnection(string connectionId)
-        => _connectionsById.GetValueOrDefault(connectionId);
+        => _documentProjectionApplier.FindConnection(connectionId);
 
     /// <summary>
     /// 将视口中心移动到指定节点。
@@ -2577,7 +2568,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// 按实例标识查找节点视图模型。
     /// </summary>
     public NodeViewModel? FindNode(string nodeId)
-        => _nodesById.GetValueOrDefault(nodeId);
+        => _documentProjectionApplier.FindNode(nodeId);
 
     private void ApplyNodePresentation(NodeViewModel node)
     {
@@ -2611,33 +2602,9 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         _suspendDirtyTracking = true;
         _suspendHistoryTracking = true;
 
-        foreach (var node in Nodes.ToList())
-        {
-            node.PropertyChanged -= HandleNodePropertyChanged;
-        }
-
-        _nodesById.Clear();
-        _connectionsById.Clear();
-        _incomingConnectionsByNodeId.Clear();
-        _outgoingConnectionsByNodeId.Clear();
-        Nodes.Clear();
-        Connections.Clear();
-
         Title = document.Title;
         Description = document.Description;
-
-        var projection = _documentProjectionApplier.Project(document);
-        foreach (var node in projection.Nodes)
-        {
-            Nodes.Add(node);
-            _nodesById[node.Id] = node;
-        }
-
-        foreach (var connection in projection.Connections)
-        {
-            Connections.Add(connection);
-            _connectionsById[connection.Id] = connection;
-        }
+        _documentProjectionApplier.ApplyDocument(document, Nodes, Connections, ApplyNodePresentation, HandleNodePropertyChanged);
 
         _suspendSelectionTracking = true;
         SelectedNodes.Clear();
@@ -2909,24 +2876,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     private void HandleNodesCollectionChanged(object? sender, NotifyCollectionChangedEventArgs args)
     {
-        if (args.OldItems is not null)
-        {
-            foreach (NodeViewModel node in args.OldItems)
-            {
-                node.PropertyChanged -= HandleNodePropertyChanged;
-                _nodesById.Remove(node.Id);
-            }
-        }
-
-        if (args.NewItems is not null)
-        {
-            foreach (NodeViewModel node in args.NewItems)
-            {
-                node.PropertyChanged += HandleNodePropertyChanged;
-                _nodesById[node.Id] = node;
-            }
-        }
-
+        _documentProjectionApplier.HandleNodesCollectionChanged(args, HandleNodePropertyChanged);
         CoerceSelectionToExistingNodes();
         FitViewCommand.NotifyCanExecuteChanged();
         RefreshSelectionProjection();
@@ -2935,25 +2885,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     private void HandleConnectionsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs args)
     {
-        if (args.OldItems is not null)
-        {
-            foreach (ConnectionViewModel connection in args.OldItems)
-            {
-                _connectionsById.Remove(connection.Id);
-                RemoveIndexedConnection(_outgoingConnectionsByNodeId, connection.SourceNodeId, connection);
-                RemoveIndexedConnection(_incomingConnectionsByNodeId, connection.TargetNodeId, connection);
-            }
-        }
-
-        if (args.NewItems is not null)
-        {
-            foreach (ConnectionViewModel connection in args.NewItems)
-            {
-                _connectionsById[connection.Id] = connection;
-                IndexConnection(connection);
-            }
-        }
-
+        _documentProjectionApplier.HandleConnectionsCollectionChanged(args);
         RefreshSelectionProjection();
         RaiseComputedPropertyChanges();
     }
@@ -3016,8 +2948,8 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             BehaviorOptions.Selection.EnableBatchParameterEditing,
             CanEditNodeParameters,
             ApplyParameterValue,
-            GetIncomingConnections,
-            GetOutgoingConnections,
+            _documentProjectionApplier.GetIncomingConnections,
+            _documentProjectionApplier.GetOutgoingConnections,
             FindNode);
 
         _inspectorConnectionsText = projection.InspectorConnectionsText;
@@ -3119,56 +3051,6 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         }
 
         MarkDirty(status);
-    }
-
-    private IReadOnlyList<ConnectionViewModel> GetIncomingConnections(NodeViewModel node)
-        => GetIndexedConnections(_incomingConnectionsByNodeId, node.Id);
-
-    private IReadOnlyList<ConnectionViewModel> GetOutgoingConnections(NodeViewModel node)
-        => GetIndexedConnections(_outgoingConnectionsByNodeId, node.Id);
-
-    private static IReadOnlyList<ConnectionViewModel> GetIndexedConnections(
-        Dictionary<string, List<ConnectionViewModel>> lookup,
-        string nodeId)
-        => lookup.TryGetValue(nodeId, out var connections)
-            ? connections
-            : Array.Empty<ConnectionViewModel>();
-
-    private void IndexConnection(ConnectionViewModel connection)
-    {
-        AddIndexedConnection(_outgoingConnectionsByNodeId, connection.SourceNodeId, connection);
-        AddIndexedConnection(_incomingConnectionsByNodeId, connection.TargetNodeId, connection);
-    }
-
-    private static void AddIndexedConnection(
-        Dictionary<string, List<ConnectionViewModel>> lookup,
-        string nodeId,
-        ConnectionViewModel connection)
-    {
-        if (!lookup.TryGetValue(nodeId, out var connections))
-        {
-            connections = [];
-            lookup[nodeId] = connections;
-        }
-
-        connections.Add(connection);
-    }
-
-    private static void RemoveIndexedConnection(
-        Dictionary<string, List<ConnectionViewModel>> lookup,
-        string nodeId,
-        ConnectionViewModel connection)
-    {
-        if (!lookup.TryGetValue(nodeId, out var connections))
-        {
-            return;
-        }
-
-        connections.Remove(connection);
-        if (connections.Count == 0)
-        {
-            lookup.Remove(nodeId);
-        }
     }
 
     private static string CreateUniqueId(IEnumerable<string> existingIds, string prefix)

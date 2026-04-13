@@ -32,6 +32,7 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost
     private readonly GraphEditorHistoryService _historyService = new();
     private readonly GraphEditorKernelViewportCoordinator _viewportCoordinator = new(DefaultZoom, DefaultPanX, DefaultPanY);
     private readonly GraphEditorKernelCompatibilityQueries _compatibilityQueries;
+    private readonly GraphEditorKernelDocumentMutator _documentMutator = new();
     private GraphEditorBehaviorOptions _behaviorOptions;
     private readonly GraphEditorStyleOptions _styleOptions;
     private GraphDocument _document;
@@ -225,11 +226,9 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost
             return;
         }
 
-        var removedNodeIds = _selectedNodeIds.ToHashSet(StringComparer.Ordinal);
-        var removedNodes = _document.Nodes.Where(node => removedNodeIds.Contains(node.Id)).ToList();
-        var removedConnections = _document.Connections
-            .Where(connection => removedNodeIds.Contains(connection.SourceNodeId) || removedNodeIds.Contains(connection.TargetNodeId))
-            .ToList();
+        var mutation = _documentMutator.DeleteSelection(_document, _selectedNodeIds);
+        var removedNodes = mutation.RemovedNodes;
+        var removedConnections = mutation.RemovedConnections;
 
         if (removedConnections.Count > 0 && !CanRemoveConnectionsAsSideEffect())
         {
@@ -237,11 +236,7 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost
             return;
         }
 
-        _document = _document with
-        {
-            Nodes = _document.Nodes.Where(node => !removedNodeIds.Contains(node.Id)).ToList(),
-            Connections = _document.Connections.Where(connection => !removedConnections.Contains(connection)).ToList(),
-        };
+        _document = mutation.Document;
         CancelPendingConnection();
         SetSelection([], null, updateStatus: false);
         var status = removedNodes.Count == 1
@@ -250,7 +245,7 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost
         MarkDirty(
             status,
             GraphEditorDocumentChangeKind.NodesRemoved,
-            removedNodeIds.ToList(),
+            removedNodes.Select(node => node.Id).ToList(),
             removedConnections.Select(connection => connection.Id).ToList());
     }
 
@@ -268,54 +263,28 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost
             return;
         }
 
-        var requested = positions
-            .GroupBy(snapshot => snapshot.NodeId, StringComparer.Ordinal)
-            .Select(group => group.Last())
-            .ToDictionary(snapshot => snapshot.NodeId, snapshot => snapshot.Position, StringComparer.Ordinal);
-
-        if (requested.Count == 0)
+        var mutation = _documentMutator.SetNodePositions(_document, positions);
+        if (mutation.ChangedNodeIds.Count == 0)
         {
             if (updateStatus)
             {
-                CurrentStatusMessage = "No node positions were provided.";
+                CurrentStatusMessage = positions.Count == 0
+                    ? "No node positions were provided."
+                    : "No matching nodes were found for the provided positions.";
             }
 
             return;
         }
 
-        var changedNodeIds = new List<string>();
-        var updatedNodes = _document.Nodes
-            .Select(node =>
-            {
-                if (!requested.TryGetValue(node.Id, out var position) || node.Position == position)
-                {
-                    return node;
-                }
-
-                changedNodeIds.Add(node.Id);
-                return node with { Position = position };
-            })
-            .ToList();
-
-        if (changedNodeIds.Count == 0)
-        {
-            if (updateStatus)
-            {
-                CurrentStatusMessage = "No matching nodes were found for the provided positions.";
-            }
-
-            return;
-        }
-
-        _document = _document with { Nodes = updatedNodes };
+        _document = mutation.Document;
         if (updateStatus)
         {
-            CurrentStatusMessage = changedNodeIds.Count == 1
+            CurrentStatusMessage = mutation.ChangedNodeIds.Count == 1
                 ? "Updated 1 node position."
-                : $"Updated {changedNodeIds.Count} node positions.";
+                : $"Updated {mutation.ChangedNodeIds.Count} node positions.";
         }
 
-        MarkDirty(CurrentStatusMessage, GraphEditorDocumentChangeKind.LayoutChanged, changedNodeIds, null, preserveStatus: true);
+        MarkDirty(CurrentStatusMessage, GraphEditorDocumentChangeKind.LayoutChanged, mutation.ChangedNodeIds, null, preserveStatus: true);
     }
 
     public void StartConnection(string sourceNodeId, string sourcePortId)
@@ -374,17 +343,14 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost
             return;
         }
 
-        var connection = _document.Connections.FirstOrDefault(candidate => string.Equals(candidate.Id, connectionId, StringComparison.Ordinal));
-        if (connection is null)
+        var mutation = _documentMutator.DeleteConnection(_document, connectionId);
+        if (mutation.Connection is null)
         {
             return;
         }
 
-        _document = _document with
-        {
-            Connections = _document.Connections.Where(candidate => !ReferenceEquals(candidate, connection)).ToList(),
-        };
-        MarkDirty($"Deleted connection {connection.Label}.", GraphEditorDocumentChangeKind.ConnectionsChanged, null, [connection.Id]);
+        _document = mutation.Document;
+        MarkDirty($"Deleted connection {mutation.Connection.Label}.", GraphEditorDocumentChangeKind.ConnectionsChanged, null, [mutation.Connection.Id]);
     }
 
     public void BreakConnectionsForPort(string nodeId, string portId)
@@ -1126,21 +1092,15 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost
 
     private void RemoveConnections(Func<GraphConnection, bool> predicate, string status)
     {
-        var removedConnections = _document.Connections
-            .Where(predicate)
-            .ToList();
-
-        if (removedConnections.Count == 0)
+        var mutation = _documentMutator.RemoveConnections(_document, predicate);
+        if (mutation.RemovedConnections.Count == 0)
         {
             CurrentStatusMessage = "No matching connections to remove.";
             return;
         }
 
-        _document = _document with
-        {
-            Connections = _document.Connections.Where(connection => !removedConnections.Contains(connection)).ToList(),
-        };
-        MarkDirty(status, GraphEditorDocumentChangeKind.ConnectionsChanged, null, removedConnections.Select(connection => connection.Id).ToList());
+        _document = mutation.Document;
+        MarkDirty(status, GraphEditorDocumentChangeKind.ConnectionsChanged, null, mutation.RemovedConnections.Select(connection => connection.Id).ToList());
     }
 
     private GraphNode? FindNode(string nodeId)

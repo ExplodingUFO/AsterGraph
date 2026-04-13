@@ -59,7 +59,7 @@ public sealed class GraphEditorFacadeRefactorTests
             CreateNode("node-002", definitionId, threshold: 0.75, enabled: true),
         };
 
-        var projection = new GraphEditorInspectorProjection();
+        var projection = new GraphEditorSelectionProjection();
         var parameters = projection.BuildSelectedNodeParameters(
             selectedNodes,
             catalog,
@@ -83,7 +83,7 @@ public sealed class GraphEditorFacadeRefactorTests
             [inputNode.Id] = inputNode,
         };
 
-        var projection = new GraphEditorInspectorProjection();
+        var projection = new GraphEditorSelectionProjection();
         var related = projection.FormatRelatedNodes(
             [
                 new ConnectionViewModel("c-001", "node-out", "out", "node-in", "in", "link", "#55D8C1"),
