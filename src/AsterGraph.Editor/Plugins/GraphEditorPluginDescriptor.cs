@@ -42,4 +42,27 @@ public sealed record GraphEditorPluginDescriptor
     /// 可选版本文本。
     /// </summary>
     public string? Version { get; }
+
+    /// <summary>
+    /// 基于当前描述生成一个最小插件清单。
+    /// </summary>
+    /// <param name="provenance">来源信息。</param>
+    /// <param name="compatibility">可选兼容性摘要。</param>
+    /// <param name="capabilitySummary">可选能力摘要。</param>
+    /// <returns>新的插件清单。</returns>
+    public GraphEditorPluginManifest ToManifest(
+        GraphEditorPluginManifestProvenance provenance,
+        GraphEditorPluginCompatibilityManifest? compatibility = null,
+        string? capabilitySummary = null)
+    {
+        ArgumentNullException.ThrowIfNull(provenance);
+        return new GraphEditorPluginManifest(
+            Id,
+            DisplayName,
+            provenance,
+            Description,
+            Version,
+            compatibility,
+            capabilitySummary);
+    }
 }

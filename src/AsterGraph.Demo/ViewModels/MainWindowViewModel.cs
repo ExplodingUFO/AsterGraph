@@ -18,7 +18,7 @@ namespace AsterGraph.Demo.ViewModels;
 public partial class MainWindowViewModel : ViewModelBase
 {
     private const double DemoSnapTolerance = 18;
-    private const string RuntimeDiagnosticsHelper = "以下信息直接来自 Editor.Session.Diagnostics。";
+    private const string RuntimeDiagnosticsHelper = "以下诊断直接来自 Editor.Session.Diagnostics，用于确认共享运行时状态。";
     private const string StandaloneSurfaceHelper = "这些预览与主编辑器共享同一运行时会话。";
     private const string PresentationHelper = "可替换的是视觉呈现，不是编辑行为。";
     private const string ChromeModeHelper = "关闭后可体验完整编辑流程；开启后仅保留只读浏览。";
@@ -269,9 +269,9 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public IReadOnlyList<string> OwnershipProofLines =>
     [
-        "宿主切换直接来自 MainWindowViewModel 的壳层与行为布尔值。",
-        $"共享运行时入口：{RuntimeDiagnosticsSourceName}",
-        $"会话连续性：{HostSessionContinuityCaption}",
+        "宿主壳层开关由 MainWindowViewModel 持有，只控制菜单与抽屉，不会生成第二个编辑器。",
+        $"共享运行时证据来自 {RuntimeDiagnosticsSourceName} 的检查快照与最近诊断。",
+        "中心画布、宿主菜单和抽屉始终指向同一个 Editor.Session。",
         $"当前展示能力：{SelectedCapabilityTitle}",
     ];
 
@@ -305,8 +305,8 @@ public partial class MainWindowViewModel : ViewModelBase
         "展示" => "当前壳层把宿主菜单放在第一层，让用户先看到菜单和节点图，再按需展开展示信息。",
         "视图" => "壳层与视图开关仍作用于同一个 GraphEditorView，只是默认不再把大块说明区常驻在首屏。",
         "行为" => "编辑行为仍由同一个 Editor 负责；宿主菜单只是集中暴露能力入口，不替代运行时本身。",
-        "运行时" => "运行时摘要来自同一 Editor.Session，可在紧凑面板里查看当前文档、选择和视口状态。",
-        "证明" => "证明区用于说明哪些变化属于宿主壳层，哪些状态来自共享运行时，而不是第二个编辑器实例。",
+        "运行时" => "运行时面板直接读取共享运行时的文档、选择、视口和诊断，方便操作时核对同一个 Editor.Session 的当前状态。",
+        "证明" => "证明面板把宿主壳层控制与共享运行时证据并排展示，用来确认当前窗口没有第二个编辑器实例，只有同一个 Editor.Session。",
         _ => "通过宿主级菜单控制同一张实时节点图。"
     };
 
@@ -338,15 +338,16 @@ public partial class MainWindowViewModel : ViewModelBase
         "运行时" =>
         [
             .. RuntimeMetricLines,
+            $"共享运行时入口：{RuntimeDiagnosticsSourceName}",
             $"最近诊断：{RecentDiagnostics.Count} 条",
             RuntimeDiagnosticsHelper,
         ],
         "证明" =>
         [
-            HostSessionContinuityCaption,
+            "宿主壳层控制来自 MainWindowViewModel，负责菜单、抽屉与壳层开关。",
+            $"共享运行时证据：{RuntimeDiagnosticsSourceName} 提供当前文档、选择、视口和最近诊断。",
+            "当前窗口没有第二个编辑器实例；中心画布与宿主控制都作用于同一个 Editor.Session。",
             HostPaneStateCaption,
-            "宿主壳层现在先讲控制入口，再按需展开说明内容。",
-            $"当前激活展示能力：{SelectedCapabilityTitle}",
         ],
         _ =>
         [

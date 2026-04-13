@@ -25,6 +25,7 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorAutoma
     private readonly List<GraphEditorDiagnostic> _recentDiagnostics = [];
     private IReadOnlyList<IGraphEditorPluginContextMenuAugmentor> _pluginContextMenuAugmentors = [];
     private IReadOnlyList<GraphEditorPluginLoadSnapshot> _pluginLoadSnapshots = [];
+    private bool _hasPluginTrustPolicy;
     private ILogger? _logger;
     private ActivitySource? _activitySource;
     private int _mutationDepth;
@@ -402,6 +403,7 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorAutoma
                 new GraphEditorFeatureDescriptorSnapshot("event.automation.completed", "event", true),
                 new GraphEditorFeatureDescriptorSnapshot("integration.diagnostics-sink", "integration", _diagnosticsSink is not null),
                 new GraphEditorFeatureDescriptorSnapshot("integration.plugin-loader", "integration", _descriptorSupport?.HasPluginLoader ?? false),
+                new GraphEditorFeatureDescriptorSnapshot("integration.plugin-trust-policy", "integration", (_descriptorSupport?.HasPluginTrustPolicy ?? false) || _hasPluginTrustPolicy),
                 new GraphEditorFeatureDescriptorSnapshot("integration.context-menu-augmentor", "integration", (_descriptorSupport?.HasContextMenuAugmentor ?? false) || _pluginContextMenuAugmentors.Count > 0),
                 new GraphEditorFeatureDescriptorSnapshot("integration.node-presentation-provider", "integration", _descriptorSupport?.HasNodePresentationProvider ?? false),
                 new GraphEditorFeatureDescriptorSnapshot("integration.localization-provider", "integration", _descriptorSupport?.HasLocalizationProvider ?? false),
@@ -566,6 +568,9 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorAutoma
         ArgumentNullException.ThrowIfNull(augmentors);
         _pluginContextMenuAugmentors = augmentors.ToList();
     }
+
+    internal void SetPluginTrustPolicyConfigured(bool isConfigured)
+        => _hasPluginTrustPolicy = isConfigured;
 
     private bool IsBatching => _mutationDepth > 0;
 

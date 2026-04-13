@@ -78,6 +78,11 @@ public sealed record AsterGraphEditorOptions
     public IReadOnlyList<GraphEditorPluginRegistration> PluginRegistrations { get; init; } = [];
 
     /// <summary>
+    /// 可选的插件信任策略；用于在执行插件贡献代码前执行宿主治理决策。
+    /// </summary>
+    public IGraphEditorPluginTrustPolicy? PluginTrustPolicy { get; init; }
+
+    /// <summary>
     /// 可选的宿主右键菜单增强器。
     /// </summary>
     public IGraphContextMenuAugmentor? ContextMenuAugmentor { get; init; }

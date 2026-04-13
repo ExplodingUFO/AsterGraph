@@ -14,6 +14,11 @@ public enum GraphEditorPluginLoadSourceKind
     /// 由程序集路径注册产生。
     /// </summary>
     Assembly,
+
+    /// <summary>
+    /// 由包归档路径注册产生。
+    /// </summary>
+    Package,
 }
 
 /// <summary>
@@ -25,6 +30,11 @@ public enum GraphEditorPluginLoadStatus
     /// 插件已成功加载。
     /// </summary>
     Loaded,
+
+    /// <summary>
+    /// 插件在执行贡献代码前被策略阻止。
+    /// </summary>
+    Blocked,
 
     /// <summary>
     /// 插件加载失败。
@@ -96,19 +106,39 @@ public sealed record GraphEditorPluginLoadSnapshot
         string source,
         GraphEditorPluginLoadStatus status,
         GraphEditorPluginContributionSummarySnapshot contributions,
+        GraphEditorPluginManifest manifest,
+        GraphEditorPluginCompatibilityEvaluation compatibility,
+        GraphEditorPluginTrustEvaluation trustEvaluation,
+        GraphEditorPluginProvenanceEvidence provenanceEvidence,
+        bool activationAttempted,
         GraphEditorPluginDescriptor? descriptor = null,
         string? requestedPluginTypeName = null,
         string? resolvedPluginTypeName = null,
-        string? failureMessage = null)
+        string? failureMessage = null,
+        string? packagePath = null,
+        GraphEditorPluginStageSnapshot? stage = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(source);
         ArgumentNullException.ThrowIfNull(contributions);
+        ArgumentNullException.ThrowIfNull(manifest);
+        ArgumentNullException.ThrowIfNull(compatibility);
+        ArgumentNullException.ThrowIfNull(trustEvaluation);
+        ArgumentNullException.ThrowIfNull(provenanceEvidence);
 
         SourceKind = sourceKind;
         Source = source.Trim();
         Status = status;
         Contributions = contributions;
+        Manifest = manifest;
+        Compatibility = compatibility;
+        TrustEvaluation = trustEvaluation;
+        ProvenanceEvidence = provenanceEvidence;
+        ActivationAttempted = activationAttempted;
         Descriptor = descriptor;
+        Stage = stage;
+        PackagePath = string.IsNullOrWhiteSpace(packagePath)
+            ? stage?.PackagePath
+            : Path.GetFullPath(packagePath);
         RequestedPluginTypeName = string.IsNullOrWhiteSpace(requestedPluginTypeName) ? null : requestedPluginTypeName.Trim();
         ResolvedPluginTypeName = string.IsNullOrWhiteSpace(resolvedPluginTypeName) ? null : resolvedPluginTypeName.Trim();
         FailureMessage = string.IsNullOrWhiteSpace(failureMessage) ? null : failureMessage.Trim();
@@ -130,9 +160,44 @@ public sealed record GraphEditorPluginLoadSnapshot
     public GraphEditorPluginLoadStatus Status { get; }
 
     /// <summary>
+    /// 当前注册关联的本地包归档绝对路径。
+    /// </summary>
+    public string? PackagePath { get; }
+
+    /// <summary>
+    /// 当前可见的包暂存结果元数据。
+    /// </summary>
+    public GraphEditorPluginStageSnapshot? Stage { get; }
+
+    /// <summary>
     /// 插件贡献摘要。
     /// </summary>
     public GraphEditorPluginContributionSummarySnapshot Contributions { get; }
+
+    /// <summary>
+    /// 当前可见的加载前插件清单。
+    /// </summary>
+    public GraphEditorPluginManifest Manifest { get; }
+
+    /// <summary>
+    /// 当前加载前兼容性评估结果。
+    /// </summary>
+    public GraphEditorPluginCompatibilityEvaluation Compatibility { get; }
+
+    /// <summary>
+    /// 当前加载前信任评估结果。
+    /// </summary>
+    public GraphEditorPluginTrustEvaluation TrustEvaluation { get; }
+
+    /// <summary>
+    /// 当前加载前来源和签名证据。
+    /// </summary>
+    public GraphEditorPluginProvenanceEvidence ProvenanceEvidence { get; }
+
+    /// <summary>
+    /// 是否已经尝试进入实际激活阶段。
+    /// </summary>
+    public bool ActivationAttempted { get; }
 
     /// <summary>
     /// 成功加载时的插件描述信息。

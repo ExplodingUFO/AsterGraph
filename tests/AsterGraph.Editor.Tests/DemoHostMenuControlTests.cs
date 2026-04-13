@@ -1,3 +1,5 @@
+using System;
+using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
 using AsterGraph.Avalonia.Controls;
@@ -67,6 +69,25 @@ public sealed class DemoHostMenuControlTests
     }
 
     [Fact]
+    public void MainWindowViewModel_RuntimeAndProofSummariesExplainTheOperatorSurface()
+    {
+        var viewModel = new MainWindowViewModel();
+
+        viewModel.OpenHostMenuGroup("运行时");
+
+        Assert.Contains("共享运行时", viewModel.SelectedHostMenuGroupSummary, StringComparison.Ordinal);
+        Assert.Contains("诊断", viewModel.SelectedHostMenuGroupSummary, StringComparison.Ordinal);
+        Assert.Equal(
+            "以下诊断直接来自 Editor.Session.Diagnostics，用于确认共享运行时状态。",
+            viewModel.RuntimeDiagnosticsSummary);
+
+        viewModel.OpenHostMenuGroup("证明");
+
+        Assert.Contains("宿主壳层", viewModel.SelectedHostMenuGroupSummary, StringComparison.Ordinal);
+        Assert.Contains("共享运行时", viewModel.SelectedHostMenuGroupSummary, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void MainWindowViewModel_BehaviorTogglesStillDriveEditorBehaviorAndPermissions()
     {
         var viewModel = new MainWindowViewModel();
@@ -111,5 +132,125 @@ public sealed class DemoHostMenuControlTests
         Assert.True(graphEditorView.IsLibraryChromeVisible);
         Assert.True(graphEditorView.IsInspectorChromeVisible);
         Assert.True(graphEditorView.IsStatusChromeVisible);
+    }
+
+    [AvaloniaFact]
+    public void MainWindow_MenuCheckItemsWriteThroughToHostState()
+    {
+        var viewModel = new MainWindowViewModel();
+        var window = new MainWindow
+        {
+            DataContext = viewModel,
+        };
+
+        window.Show();
+
+        var viewMenu = Assert.IsType<MenuItem>(window.FindControl<MenuItem>("PART_ViewMenu"));
+        var behaviorMenu = Assert.IsType<MenuItem>(window.FindControl<MenuItem>("PART_BehaviorMenu"));
+        var graphEditorView = Assert.IsType<GraphEditorView>(window.FindControl<GraphEditorView>("MainGraphEditorView"));
+
+        var headerChromeMenuItem = GetMenuItem(viewMenu, "显示顶栏");
+        var gridSnappingMenuItem = GetMenuItem(behaviorMenu, "网格吸附");
+
+        Assert.False(viewModel.IsHeaderChromeVisible);
+        Assert.True(viewModel.IsGridSnappingEnabled);
+
+        headerChromeMenuItem.IsChecked = true;
+        gridSnappingMenuItem.IsChecked = false;
+
+        Assert.True(viewModel.IsHeaderChromeVisible);
+        Assert.True(graphEditorView.IsHeaderChromeVisible);
+        Assert.False(viewModel.IsGridSnappingEnabled);
+        Assert.False(viewModel.Editor.BehaviorOptions.DragAssist.EnableGridSnapping);
+
+        headerChromeMenuItem.IsChecked = false;
+        gridSnappingMenuItem.IsChecked = true;
+
+        Assert.False(viewModel.IsHeaderChromeVisible);
+        Assert.False(graphEditorView.IsHeaderChromeVisible);
+        Assert.True(viewModel.IsGridSnappingEnabled);
+        Assert.True(viewModel.Editor.BehaviorOptions.DragAssist.EnableGridSnapping);
+    }
+
+    [AvaloniaFact]
+    public void MainWindow_SameGroupCanReopenAfterPaneCloses()
+    {
+        var viewModel = new MainWindowViewModel();
+        var window = new MainWindow
+        {
+            DataContext = viewModel,
+        };
+
+        window.Show();
+
+        var splitView = Assert.IsType<SplitView>(window.FindControl<SplitView>("PART_HostShellSplitView"));
+
+        viewModel.OpenHostMenuGroup("视图");
+
+        Assert.True(viewModel.IsHostPaneOpen);
+        Assert.True(splitView.IsPaneOpen);
+
+        viewModel.CloseHostPane();
+
+        Assert.False(viewModel.IsHostPaneOpen);
+        Assert.False(splitView.IsPaneOpen);
+
+        viewModel.OpenHostMenuGroup("视图");
+
+        Assert.True(viewModel.IsHostPaneOpen);
+        Assert.True(splitView.IsPaneOpen);
+
+        splitView.IsPaneOpen = false;
+
+        Assert.False(splitView.IsPaneOpen);
+        Assert.False(viewModel.IsHostPaneOpen);
+
+        viewModel.OpenHostMenuGroup("视图");
+
+        Assert.True(viewModel.IsHostPaneOpen);
+        Assert.True(splitView.IsPaneOpen);
+    }
+
+    [AvaloniaFact]
+    public void MainWindow_ReadOnlyMenuToggle_DisablesCanonicalDeleteSelection()
+    {
+        var viewModel = new MainWindowViewModel();
+        var window = new MainWindow
+        {
+            DataContext = viewModel,
+        };
+
+        window.Show();
+
+        var behaviorMenu = Assert.IsType<MenuItem>(window.FindControl<MenuItem>("PART_BehaviorMenu"));
+        var readOnlyMenuItem = GetMenuItem(behaviorMenu, "只读模式");
+        var initialNodeCount = viewModel.Editor.Nodes.Count;
+        var selectedNode = viewModel.Editor.Nodes[0];
+
+        viewModel.Editor.SelectSingleNode(selectedNode, updateStatus: false);
+        readOnlyMenuItem.IsChecked = true;
+
+        var deleteSelection = Assert.Single(
+            viewModel.Editor.Session.Queries.GetCommandDescriptors(),
+            descriptor => descriptor.Id == "selection.delete");
+
+        Assert.True(viewModel.IsReadOnlyEnabled);
+        Assert.False(deleteSelection.IsEnabled);
+
+        viewModel.Editor.Session.Commands.DeleteSelection();
+
+        Assert.Equal(initialNodeCount, viewModel.Editor.Nodes.Count);
+        Assert.Equal(selectedNode.Id, viewModel.Editor.SelectedNode?.Id);
+    }
+
+    private static MenuItem GetMenuItem(MenuItem parent, string header)
+    {
+        var matches = parent.Items?
+            .OfType<MenuItem>()
+            .Where(item => string.Equals(item.Header?.ToString(), header, StringComparison.Ordinal))
+            .ToArray();
+
+        Assert.NotNull(matches);
+        return Assert.Single(matches);
     }
 }

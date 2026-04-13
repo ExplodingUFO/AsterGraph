@@ -7,6 +7,7 @@ using AsterGraph.Editor.Diagnostics;
 using AsterGraph.Editor.Hosting;
 using AsterGraph.Editor.Menus;
 using AsterGraph.Editor.Models;
+using AsterGraph.Editor.Plugins;
 using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.Services;
 using AsterGraph.Editor.ViewModels;
@@ -154,6 +155,47 @@ public sealed class GraphEditorDiagnosticsInspectionTests
         Assert.False(afterBatch.PendingConnection.HasPendingConnection);
     }
 
+    [Fact]
+    public void AsterGraphEditorFactory_CreateSession_InspectionSnapshot_ExposesPluginCompatibilityRefusalAndDiagnostic()
+    {
+        var diagnostics = new RecordingDiagnosticsSink();
+        var plugin = new IncompatibleTrackingPlugin();
+        var manifest = new GraphEditorPluginManifest(
+            "tests.diagnostics.incompatible-plugin",
+            "Diagnostics Incompatible Plugin",
+            new GraphEditorPluginManifestProvenance(
+                GraphEditorPluginManifestSourceKind.DirectRegistration,
+                typeof(IncompatibleTrackingPlugin).FullName ?? nameof(IncompatibleTrackingPlugin)),
+            version: "1.0.0",
+            compatibility: new GraphEditorPluginCompatibilityManifest(
+                minimumAsterGraphVersion: "9999.0.0",
+                targetFramework: "net9.0",
+                runtimeSurface: "session-first"),
+            capabilitySummary: "menus");
+        var session = AsterGraphEditorFactory.CreateSession(new AsterGraphEditorOptions
+        {
+            Document = CreateDocument(),
+            NodeCatalog = CreateCatalog(),
+            CompatibilityService = new ExactCompatibilityService(),
+            DiagnosticsSink = diagnostics,
+            PluginRegistrations =
+            [
+                GraphEditorPluginRegistration.FromPlugin(plugin, manifest),
+            ],
+        });
+
+        var inspection = session.Diagnostics.CaptureInspectionSnapshot();
+        var snapshot = Assert.Single(inspection.PluginLoadSnapshots);
+        var compatibility = GetCompatibility(snapshot);
+
+        Assert.Equal(GraphEditorPluginLoadStatus.Blocked, snapshot.Status);
+        Assert.NotNull(compatibility);
+        Assert.Equal(GraphEditorPluginCompatibilityStatus.Incompatible, compatibility!.Status);
+        Assert.Contains(inspection.RecentDiagnostics, diagnostic => diagnostic.Code == "plugin.load.incompatible");
+        Assert.Contains(diagnostics.Diagnostics, diagnostic => diagnostic.Code == "plugin.load.incompatible");
+        Assert.Equal(0, plugin.RegisterCallCount);
+    }
+
     private static void SelectSourceNode(GraphEditorViewModel editor)
         => editor.SelectSingleNode(Assert.Single(editor.Nodes, node => node.Id == SourceNodeId), updateStatus: false);
 
@@ -197,6 +239,15 @@ public sealed class GraphEditorDiagnosticsInspectionTests
             new RecordingClipboardPayloadSerializer(),
             new RecordingDiagnosticsSink(),
             contextMenuAugmentor);
+
+    private static GraphEditorPluginCompatibilityEvaluation? GetCompatibility(GraphEditorPluginLoadSnapshot snapshot)
+    {
+        ArgumentNullException.ThrowIfNull(snapshot);
+
+        var property = typeof(GraphEditorPluginLoadSnapshot).GetProperty("Compatibility");
+        Assert.NotNull(property);
+        return Assert.IsType<GraphEditorPluginCompatibilityEvaluation>(property!.GetValue(snapshot));
+    }
 
     private static GraphDocument CreateDocument()
         => new(
@@ -368,5 +419,18 @@ public sealed class GraphEditorDiagnosticsInspectionTests
             ContextMenuContext context,
             IReadOnlyList<MenuItemDescriptor> stockItems)
             => throw new InvalidOperationException("augmentor exploded");
+    }
+
+    private sealed class IncompatibleTrackingPlugin : IGraphEditorPlugin
+    {
+        public int RegisterCallCount { get; private set; }
+
+        public GraphEditorPluginDescriptor Descriptor { get; } = new("tests.diagnostics.incompatible-plugin", "Diagnostics Incompatible Plugin");
+
+        public void Register(GraphEditorPluginBuilder builder)
+        {
+            ArgumentNullException.ThrowIfNull(builder);
+            RegisterCallCount++;
+        }
     }
 }

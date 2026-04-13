@@ -24,6 +24,8 @@ Current capabilities:
 - strict type compatibility with a small set of safe implicit conversions
 - compile-time node-definition registration through providers
 - runtime plugin composition through `AsterGraphEditorOptions.PluginRegistrations`
+- host-governed plugin trust policy through `AsterGraphEditorOptions.PluginTrustPolicy`
+- local candidate discovery and pre-load evaluation through `AsterGraphEditorFactory.DiscoverPluginCandidates(...)`
 - canonical plugin inspection through `IGraphEditorSession.Queries.GetPluginLoadSnapshots()`
 - descriptor-first automation execution through `IGraphEditorSession.Automation`
 
@@ -32,7 +34,9 @@ Current non-goals:
 - algorithm execution engine
 - undo/redo stack
 - property editor framework
-- plugin marketplace, trust, or unload policy
+- plugin marketplace or remote install/update workflows
+- plugin unload lifecycle
+- process sandboxing or untrusted-code isolation guarantees
 - dedicated scripting language or workflow-designer UI for automation authoring
 
 ## Solution Structure
@@ -177,25 +181,44 @@ Core runtime-first host interactions now include:
 
 `Queries.GetCompatibleTargets(...)` remains available only as a compatibility-oriented bridge for existing host code that still depends on view-model objects.
 
-## Plugin Loading And Automation
+## Plugin Loading, Trust, And Automation
 
-v1.4 ships the first public plugin-loading and automation-execution baseline in `AsterGraph.Editor`.
+v1.5 ships the first public host-governed plugin trust and distribution-policy baseline on top of the existing plugin-loading and automation surface in `AsterGraph.Editor`.
+
+Current boundary:
+
+- hosts can provide manifest metadata, discover local candidates, evaluate trust before activation, and inspect trusted vs blocked outcomes through public runtime DTOs
+- plugin loading still runs in-process
+- the trust policy is host-governed allow/block logic, not a sandbox
+- marketplace or remote distribution UX is still out of scope
 
 Canonical host flow:
 
-- declare plugins through `AsterGraphEditorOptions.PluginRegistrations`
+- optionally discover local candidates through `AsterGraphEditorFactory.DiscoverPluginCandidates(...)`
+- declare plugin registrations through `AsterGraphEditorOptions.PluginRegistrations`
+- optionally provide `AsterGraphEditorOptions.PluginTrustPolicy`
 - create the runtime through `AsterGraphEditorFactory.CreateSession(...)` or the hosted UI through `AsterGraphEditorFactory.Create(...)`
-- inspect current plugin load state through `Queries.GetPluginLoadSnapshots()` plus `Diagnostics`
+- inspect candidate trust/compatibility before load and inspect current plugin load state after creation through `Queries.GetPluginLoadSnapshots()` plus `Diagnostics`
 - execute automation through `IGraphEditorSession.Automation.Execute(...)`
 
 Minimal runtime-first shape:
 
 ```csharp
+var candidates = AsterGraphEditorFactory.DiscoverPluginCandidates(new GraphEditorPluginDiscoveryOptions
+{
+    DirectorySources =
+    [
+        new GraphEditorPluginDirectoryDiscoverySource(pluginDirectory),
+    ],
+    TrustPolicy = trustPolicy,
+});
+
 var session = AsterGraphEditorFactory.CreateSession(new AsterGraphEditorOptions
 {
     Document = document,
     NodeCatalog = catalog,
     CompatibilityService = compatibilityService,
+    PluginTrustPolicy = trustPolicy,
     PluginRegistrations =
     [
         GraphEditorPluginRegistration.FromPlugin(new MyPlugin()),
@@ -218,13 +241,18 @@ var run = session.Automation.Execute(new GraphEditorAutomationRunRequest(
 The proof ring for this extension story lives in the same public surfaces:
 
 - focused regressions:
+  - `tests/AsterGraph.Editor.Tests/GraphEditorPluginDiscoveryTests.cs`
   - `tests/AsterGraph.Editor.Tests/GraphEditorPluginLoadingTests.cs`
+  - `tests/AsterGraph.Editor.Tests/GraphEditorPluginInspectionContractsTests.cs`
   - `tests/AsterGraph.Editor.Tests/GraphEditorAutomationExecutionTests.cs`
   - `tests/AsterGraph.Editor.Tests/GraphEditorProofRingTests.cs`
 - runnable host/package proof:
   - `dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj --nologo`
+    - proves trusted-load continuity and blocked-load behavior from the canonical host boundary
   - `dotnet run --project tools/AsterGraph.PackageSmoke/AsterGraph.PackageSmoke.csproj --nologo`
+    - proves local candidate discovery, pre-load evaluation, and package-consumption trust continuity
   - `dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj --nologo`
+    - keeps the larger-session automation proof path credible; it is not the trust/distribution proof surface
 
 ## Quick Start
 
@@ -610,7 +638,7 @@ This is appended legally through the public editor API rather than by replacing 
 
 - move more sample-only styling and content out of shared projects where appropriate
 - add richer graph definition metadata and parameter editing
-- extend the plugin and automation proof ring across samples, package smoke, and docs
+- explore richer provenance and remote distribution workflows only after the current local manifest/trust proof ring proves sufficient
 - explore richer automation authoring only after the shipped session-first runner proves sufficient
 - improve automated UI coverage for pointer-based graph gestures
 

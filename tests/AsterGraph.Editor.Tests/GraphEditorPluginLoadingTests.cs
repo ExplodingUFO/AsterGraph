@@ -10,6 +10,7 @@ using AsterGraph.Editor.Hosting;
 using AsterGraph.Editor.Localization;
 using AsterGraph.Editor.Menus;
 using AsterGraph.Editor.Plugins;
+using AsterGraph.Editor.Plugins.Internal;
 using AsterGraph.Editor.Presentation;
 using AsterGraph.Editor.ViewModels;
 using Xunit;
@@ -153,7 +154,8 @@ public sealed class GraphEditorPluginLoadingTests
             diagnostics,
             [registration],
             localizationProvider: new HostOverrideLocalizationProvider(),
-            nodePresentationProvider: new HostOverridePresentationProvider()));
+            nodePresentationProvider: new HostOverridePresentationProvider(),
+            trustPolicy: null));
 
         editor.RefreshNodePresentations();
         var canvasMenu = editor.Session.Queries.BuildContextMenuDescriptors(new ContextMenuContext(ContextMenuTargetKind.Canvas, new GraphPoint(240, 180)));
@@ -167,16 +169,382 @@ public sealed class GraphEditorPluginLoadingTests
         Assert.Contains(editor.BuildContextMenu(new ContextMenuContext(ContextMenuTargetKind.Canvas, new GraphPoint(240, 180))), item => item.Id == "plugin-sample-menu");
     }
 
+    [Fact]
+    public void Create_And_CreateSession_WithBlockingTrustPolicy_SurfaceEquivalentBlockedSnapshotsAndDiscoverability()
+    {
+        var editorDiagnostics = new RecordingDiagnosticsSink();
+        var runtimeDiagnostics = new RecordingDiagnosticsSink();
+        var plugin = new TrackingDirectPlugin();
+        var manifest = new GraphEditorPluginManifest(
+            "tests.loading.blocked-plugin",
+            "Blocked Loading Plugin",
+            new GraphEditorPluginManifestProvenance(
+                GraphEditorPluginManifestSourceKind.DirectRegistration,
+                typeof(TrackingDirectPlugin).FullName ?? nameof(TrackingDirectPlugin)),
+            version: "1.0.0",
+            compatibility: new GraphEditorPluginCompatibilityManifest(
+                minimumAsterGraphVersion: "0.0.0",
+                targetFramework: "net9.0",
+                runtimeSurface: "session-first"),
+            capabilitySummary: "menus");
+        var registration = GraphEditorPluginRegistration.FromPlugin(plugin, manifest);
+        var trustPolicy = new BlockManifestIdTrustPolicy("tests.loading.blocked-plugin");
+        var editor = AsterGraphEditorFactory.Create(CreateOptions(editorDiagnostics, [registration], null, null, trustPolicy));
+        var session = AsterGraphEditorFactory.CreateSession(CreateOptions(runtimeDiagnostics, [registration], null, null, trustPolicy));
+
+        var retainedSnapshots = editor.Session.Queries.GetPluginLoadSnapshots();
+        var runtimeSnapshots = session.Queries.GetPluginLoadSnapshots();
+        var retainedFeatures = editor.Session.Queries.GetFeatureDescriptors().ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
+        var runtimeFeatures = session.Queries.GetFeatureDescriptors().ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
+
+        Assert.Equal(runtimeSnapshots, retainedSnapshots);
+        var snapshot = Assert.Single(runtimeSnapshots);
+        var compatibility = GetCompatibility(snapshot);
+        Assert.Equal(GraphEditorPluginLoadStatus.Blocked, snapshot.Status);
+        Assert.NotNull(compatibility);
+        Assert.Equal(GraphEditorPluginCompatibilityStatus.Compatible, compatibility!.Status);
+        Assert.Equal(GraphEditorPluginTrustDecision.Blocked, snapshot.TrustEvaluation!.Decision);
+        Assert.False(snapshot.ActivationAttempted);
+        Assert.True(retainedFeatures["integration.plugin-trust-policy"].IsAvailable);
+        Assert.True(runtimeFeatures["integration.plugin-trust-policy"].IsAvailable);
+        Assert.Single(editorDiagnostics.Diagnostics, diagnostic => diagnostic.Code == "plugin.load.blocked");
+        Assert.Single(runtimeDiagnostics.Diagnostics, diagnostic => diagnostic.Code == "plugin.load.blocked");
+        Assert.Equal(0, plugin.RegisterCallCount);
+    }
+
+    [Fact]
+    public void Create_And_CreateSession_WithIncompatibleManifest_SurfaceEquivalentBlockedSnapshotsAndDiagnostics()
+    {
+        var editorDiagnostics = new RecordingDiagnosticsSink();
+        var runtimeDiagnostics = new RecordingDiagnosticsSink();
+        var plugin = new IncompatibleTrackingDirectPlugin();
+        var manifest = new GraphEditorPluginManifest(
+            "tests.loading.incompatible-plugin",
+            "Incompatible Loading Plugin",
+            new GraphEditorPluginManifestProvenance(
+                GraphEditorPluginManifestSourceKind.DirectRegistration,
+                typeof(IncompatibleTrackingDirectPlugin).FullName ?? nameof(IncompatibleTrackingDirectPlugin)),
+            version: "1.0.0",
+            compatibility: new GraphEditorPluginCompatibilityManifest(
+                minimumAsterGraphVersion: "9999.0.0",
+                targetFramework: "net9.0",
+                runtimeSurface: "session-first"),
+            capabilitySummary: "menus");
+        var registration = GraphEditorPluginRegistration.FromPlugin(plugin, manifest);
+        var editor = AsterGraphEditorFactory.Create(CreateOptions(editorDiagnostics, [registration], null, null, null));
+        var session = AsterGraphEditorFactory.CreateSession(CreateOptions(runtimeDiagnostics, [registration], null, null, null));
+
+        var retainedSnapshots = editor.Session.Queries.GetPluginLoadSnapshots();
+        var runtimeSnapshots = session.Queries.GetPluginLoadSnapshots();
+        var retainedFeatures = editor.Session.Queries.GetFeatureDescriptors().ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
+        var runtimeFeatures = session.Queries.GetFeatureDescriptors().ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
+
+        Assert.Equal(runtimeSnapshots, retainedSnapshots);
+        var snapshot = Assert.Single(runtimeSnapshots);
+        var compatibility = GetCompatibility(snapshot);
+        Assert.Equal(GraphEditorPluginLoadStatus.Blocked, snapshot.Status);
+        Assert.NotNull(compatibility);
+        Assert.Equal(GraphEditorPluginCompatibilityStatus.Incompatible, compatibility!.Status);
+        Assert.Equal("compatibility.astergraph.minimum-version", compatibility.ReasonCode);
+        Assert.Equal(GraphEditorPluginTrustDecision.Allowed, snapshot.TrustEvaluation!.Decision);
+        Assert.False(snapshot.ActivationAttempted);
+        Assert.True(retainedFeatures["integration.plugin-loader"].IsAvailable);
+        Assert.True(runtimeFeatures["integration.plugin-loader"].IsAvailable);
+        Assert.Single(editorDiagnostics.Diagnostics, diagnostic => diagnostic.Code == "plugin.load.incompatible");
+        Assert.Single(runtimeDiagnostics.Diagnostics, diagnostic => diagnostic.Code == "plugin.load.incompatible");
+        Assert.Equal(0, plugin.RegisterCallCount);
+    }
+
+    [Fact]
+    public void DiscoverPluginCandidates_And_CreateSession_StayAlignedOnFallbackManifestAndTrustFacts_ForAssemblyCandidates()
+    {
+        var tempDirectory = Path.Combine(Path.GetTempPath(), "astergraph-plugin-loading-tests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(tempDirectory);
+        var pluginAssemblyPath = Path.Combine(tempDirectory, "DiscoveryParityPlugin.dll");
+        File.Copy(GetSamplePluginAssemblyPath(), pluginAssemblyPath, overwrite: true);
+        pluginAssemblyPath = Path.GetFullPath(pluginAssemblyPath);
+
+        var candidate = Assert.Single(AsterGraphEditorFactory.DiscoverPluginCandidates(new GraphEditorPluginDiscoveryOptions
+        {
+            DirectorySources =
+            [
+                new GraphEditorPluginDirectoryDiscoverySource(tempDirectory),
+            ],
+        }));
+        var session = AsterGraphEditorFactory.CreateSession(CreateOptions(
+            new RecordingDiagnosticsSink(),
+            GraphEditorPluginRegistration.FromAssemblyPath(pluginAssemblyPath)));
+        var snapshot = Assert.Single(session.Queries.GetPluginLoadSnapshots());
+
+        Assert.Equal(pluginAssemblyPath, candidate.AssemblyPath);
+        Assert.Equal(pluginAssemblyPath, snapshot.Source);
+        Assert.Equal(candidate.Manifest, snapshot.Manifest);
+        Assert.Equal(candidate.TrustEvaluation, snapshot.TrustEvaluation);
+        Assert.Equal(candidate.Compatibility, GetCompatibility(snapshot));
+        Assert.Equal(GraphEditorPluginCompatibilityStatus.Unknown, candidate.Compatibility.Status);
+        Assert.Equal(GraphEditorPluginLoadStatus.Loaded, snapshot.Status);
+    }
+
+    [Fact]
+    public void DiscoverPluginCandidates_And_CreateSession_StayAlignedOnHostProvidedManifestTrustFacts_ForManifestSources()
+    {
+        var provenanceEvidence = new GraphEditorPluginProvenanceEvidence(
+            new GraphEditorPluginPackageIdentity("AsterGraph.LoadingManifestSource", "1.0.0"),
+            new GraphEditorPluginSignatureEvidence(
+                GraphEditorPluginSignatureStatus.Valid,
+                GraphEditorPluginSignatureKind.Repository,
+                new GraphEditorPluginSignerIdentity("AsterGraph Repository", "LOAD1234"),
+                timestampUtc: new DateTimeOffset(2026, 04, 09, 0, 0, 0, TimeSpan.Zero),
+                timestampAuthority: "tests.timestamp"));
+        var manifest = new GraphEditorPluginManifest(
+            "tests.loading.manifest-source",
+            "Loading Manifest Source",
+            new GraphEditorPluginManifestProvenance(
+                GraphEditorPluginManifestSourceKind.Manifest,
+                "tests.loading.manifest-source"),
+            version: "1.0.0",
+            compatibility: new GraphEditorPluginCompatibilityManifest(
+                minimumAsterGraphVersion: "0.0.0",
+                targetFramework: "net9.0",
+                runtimeSurface: "session-first"),
+            capabilitySummary: "menus");
+        var trustPolicy = new BlockManifestIdTrustPolicy("tests.loading.some-other-plugin");
+
+        var candidate = Assert.Single(AsterGraphEditorFactory.DiscoverPluginCandidates(new GraphEditorPluginDiscoveryOptions
+        {
+            ManifestSources =
+            [
+                new TestManifestSource(
+                    new GraphEditorPluginManifestSourceCandidate(
+                        "tests.loading.manifest-source",
+                        GetSamplePluginAssemblyPath(),
+                        manifest,
+                        "AsterGraph.TestPlugins.SamplePlugin",
+                        provenanceEvidence)),
+            ],
+            TrustPolicy = trustPolicy,
+        }));
+        var session = AsterGraphEditorFactory.CreateSession(CreateOptions(
+            new RecordingDiagnosticsSink(),
+            [
+                GraphEditorPluginRegistration.FromAssemblyPath(
+                    GetSamplePluginAssemblyPath(),
+                    "AsterGraph.TestPlugins.SamplePlugin",
+                    manifest,
+                    provenanceEvidence),
+            ],
+            null,
+            null,
+            trustPolicy));
+        var snapshot = Assert.Single(session.Queries.GetPluginLoadSnapshots());
+
+        Assert.Equal(candidate.Manifest, snapshot.Manifest);
+        Assert.Equal(candidate.TrustEvaluation, snapshot.TrustEvaluation);
+        Assert.Equal(candidate.Compatibility, GetCompatibility(snapshot));
+        Assert.Equal(candidate.ProvenanceEvidence, snapshot.ProvenanceEvidence);
+        Assert.Equal(GraphEditorPluginLoadStatus.Loaded, snapshot.Status);
+        Assert.Equal(GraphEditorPluginLoadSourceKind.Assembly, snapshot.SourceKind);
+    }
+
+    [Fact]
+    public void CreateSession_WithPackageRegistration_ExposesStructuredPackageFailureWithoutActivation()
+    {
+        var diagnostics = new RecordingDiagnosticsSink();
+        var tempDirectory = Path.Combine(Path.GetTempPath(), "astergraph-plugin-loading-tests", Guid.NewGuid().ToString("N"));
+        var packagePath = PluginPackageTestHelper.CreateUnsignedPackage(
+            tempDirectory,
+            "AsterGraph.PackageLoading",
+            "1.0.0",
+            title: "Package Loading Candidate",
+            description: "Package loading refusal coverage.");
+
+        var registration = CreateUnsignedPackageRegistration(packagePath);
+        var session = AsterGraphEditorFactory.CreateSession(CreateOptions(
+            diagnostics,
+            registration));
+        var snapshot = Assert.Single(session.Queries.GetPluginLoadSnapshots());
+
+        Assert.Equal(GraphEditorPluginLoadSourceKind.Package, snapshot.SourceKind);
+        Assert.Equal(GraphEditorPluginLoadStatus.Failed, snapshot.Status);
+        Assert.Equal(packagePath, snapshot.Source);
+        Assert.Equal(packagePath, snapshot.PackagePath);
+        Assert.False(snapshot.ActivationAttempted);
+        Assert.Equal(GraphEditorPluginManifestSourceKind.PackageArchive, snapshot.Manifest.Provenance.SourceKind);
+        Assert.Equal(GraphEditorPluginSignatureStatus.Unsigned, snapshot.ProvenanceEvidence.Signature.Status);
+        Assert.NotNull(snapshot.FailureMessage);
+        Assert.Contains("StagePluginPackage", snapshot.FailureMessage, StringComparison.Ordinal);
+        Assert.Contains(diagnostics.Diagnostics, diagnostic => diagnostic.Code == "plugin.load.package-staging-required");
+    }
+
+    [Fact]
+    public void StagePluginPackage_WithTrustedCandidate_ReturnsStagedRegistration()
+    {
+        var tempDirectory = Path.Combine(Path.GetTempPath(), "astergraph-plugin-loading-tests", Guid.NewGuid().ToString("N"));
+        var packagePath = PluginPackageTestHelper.CreateUnsignedPackageWithPluginPayload(
+            tempDirectory,
+            "AsterGraph.PackageLoading.Stage",
+            "1.0.0",
+            title: "Package Loading Stage",
+            description: "Stage result coverage.",
+            pluginAssemblyPath: GetSamplePluginAssemblyPath(),
+            pluginTypeName: "AsterGraph.TestPlugins.SamplePlugin");
+        var candidate = CreateTrustedPackageCandidate(packagePath);
+
+        var result = AsterGraphEditorFactory.StagePluginPackage(new GraphEditorPluginPackageStageRequest(candidate, Path.Combine(tempDirectory, "staging-root")));
+
+        Assert.Equal(GraphEditorPluginStageOutcome.Staged, result.Stage.Outcome);
+        Assert.NotNull(result.Registration);
+        Assert.Equal(candidate.PackagePath, result.Registration!.PackagePath);
+        Assert.Equal(result.Stage.MainAssemblyPath, result.Registration.AssemblyPath);
+        Assert.Equal(result.Stage.PluginTypeName, result.Registration.PluginTypeName);
+        Assert.Equal(result.Stage, result.Registration.Stage);
+    }
+
+    [Fact]
+    public void Create_And_CreateSession_WithStagedTrustedPackageRegistration_LoadEquivalentPackageSnapshotsAndContributions()
+    {
+        var tempDirectory = Path.Combine(Path.GetTempPath(), "astergraph-plugin-loading-tests", Guid.NewGuid().ToString("N"));
+        var packagePath = PluginPackageTestHelper.CreateUnsignedPackageWithPluginPayload(
+            tempDirectory,
+            "AsterGraph.PackageLoading.Trusted",
+            "1.0.0",
+            title: "Trusted Package Loading",
+            description: "Trusted packages should stage and load through the canonical path.",
+            pluginAssemblyPath: GetSamplePluginAssemblyPath(),
+            pluginTypeName: "AsterGraph.TestPlugins.SamplePlugin");
+        var stageResult = AsterGraphEditorFactory.StagePluginPackage(new GraphEditorPluginPackageStageRequest(
+            CreateTrustedPackageCandidate(packagePath),
+            Path.Combine(tempDirectory, "staging-root")));
+        var registration = Assert.IsType<GraphEditorPluginRegistration>(stageResult.Registration);
+        var editorDiagnostics = new RecordingDiagnosticsSink();
+        var runtimeDiagnostics = new RecordingDiagnosticsSink();
+
+        var editor = AsterGraphEditorFactory.Create(CreateOptions(editorDiagnostics, registration));
+        var session = AsterGraphEditorFactory.CreateSession(CreateOptions(runtimeDiagnostics, registration));
+
+        var retainedSnapshots = editor.Session.Queries.GetPluginLoadSnapshots();
+        var runtimeSnapshots = session.Queries.GetPluginLoadSnapshots();
+        var runtimeCanvasMenu = session.Queries.BuildContextMenuDescriptors(new ContextMenuContext(ContextMenuTargetKind.Canvas, new GraphPoint(240, 180)));
+        var retainedCanvasMenu = editor.Session.Queries.BuildContextMenuDescriptors(new ContextMenuContext(ContextMenuTargetKind.Canvas, new GraphPoint(240, 180)));
+
+        Assert.Equal(runtimeSnapshots, retainedSnapshots);
+        var snapshot = Assert.Single(runtimeSnapshots);
+        Assert.Equal(GraphEditorPluginLoadSourceKind.Package, snapshot.SourceKind);
+        Assert.Equal(GraphEditorPluginLoadStatus.Loaded, snapshot.Status);
+        Assert.Equal(packagePath, snapshot.Source);
+        Assert.Equal(packagePath, snapshot.PackagePath);
+        Assert.NotNull(snapshot.Stage);
+        Assert.Equal(stageResult.Stage, snapshot.Stage);
+        Assert.Equal("AsterGraph.TestPlugins.SamplePlugin", snapshot.RequestedPluginTypeName);
+        Assert.Equal("AsterGraph.TestPlugins.SamplePlugin", snapshot.ResolvedPluginTypeName);
+        Assert.Equal("tests.sample-plugin", snapshot.Descriptor?.Id);
+        Assert.Equal("Plugin Add Node", Assert.Single(runtimeCanvasMenu, item => item.Id == "canvas-add-node").Header);
+        Assert.Equal("Plugin Add Node", Assert.Single(retainedCanvasMenu, item => item.Id == "canvas-add-node").Header);
+        Assert.Contains(runtimeCanvasMenu, item => item.Id == "plugin-sample-menu");
+        Assert.Contains(retainedCanvasMenu, item => item.Id == "plugin-sample-menu");
+        Assert.Contains(editorDiagnostics.Diagnostics, diagnostic => diagnostic.Code == "plugin.load.succeeded");
+        Assert.Contains(runtimeDiagnostics.Diagnostics, diagnostic => diagnostic.Code == "plugin.load.succeeded");
+    }
+
+    [Fact]
+    public void Create_And_CreateSession_WithUntrustedPackageRegistration_SurfaceEquivalentBlockedSnapshots()
+    {
+        var tempDirectory = Path.Combine(Path.GetTempPath(), "astergraph-plugin-loading-tests", Guid.NewGuid().ToString("N"));
+        var packagePath = PluginPackageTestHelper.CreateUnsignedPackage(
+            tempDirectory,
+            "AsterGraph.PackageLoading.Untrusted",
+            "1.0.0",
+            title: "Untrusted Package Loading",
+            description: "Untrusted package registrations should block before activation.");
+        var registration = CreatePackageRegistration(packagePath, CreateValidPackageProvenance(new GraphEditorPluginPackageIdentity("AsterGraph.PackageLoading.Untrusted", "1.0.0")));
+        var trustPolicy = new BlockManifestIdTrustPolicy("AsterGraph.PackageLoading.Untrusted");
+        var editorDiagnostics = new RecordingDiagnosticsSink();
+        var runtimeDiagnostics = new RecordingDiagnosticsSink();
+
+        var editor = AsterGraphEditorFactory.Create(CreateOptions(editorDiagnostics, [registration], null, null, trustPolicy));
+        var session = AsterGraphEditorFactory.CreateSession(CreateOptions(runtimeDiagnostics, [registration], null, null, trustPolicy));
+
+        var retainedSnapshots = editor.Session.Queries.GetPluginLoadSnapshots();
+        var runtimeSnapshots = session.Queries.GetPluginLoadSnapshots();
+
+        Assert.Equal(runtimeSnapshots, retainedSnapshots);
+        var snapshot = Assert.Single(runtimeSnapshots);
+        Assert.Equal(GraphEditorPluginLoadSourceKind.Package, snapshot.SourceKind);
+        Assert.Equal(GraphEditorPluginLoadStatus.Blocked, snapshot.Status);
+        Assert.Equal(packagePath, snapshot.Source);
+        Assert.Equal(packagePath, snapshot.PackagePath);
+        Assert.False(snapshot.ActivationAttempted);
+        Assert.Equal(GraphEditorPluginTrustDecision.Blocked, snapshot.TrustEvaluation!.Decision);
+        Assert.Equal(GraphEditorPluginSignatureStatus.Valid, snapshot.ProvenanceEvidence.Signature.Status);
+        Assert.Null(snapshot.Stage);
+        Assert.Contains(editorDiagnostics.Diagnostics, diagnostic => diagnostic.Code == "plugin.load.blocked");
+        Assert.Contains(runtimeDiagnostics.Diagnostics, diagnostic => diagnostic.Code == "plugin.load.blocked");
+    }
+
+    private static GraphEditorPluginRegistration CreateUnsignedPackageRegistration(string packagePath)
+        => CreatePackageRegistration(packagePath, AsterGraphPluginPackageArchiveInspector.Inspect(packagePath).ProvenanceEvidence);
+
+    private static GraphEditorPluginRegistration CreatePackageRegistration(
+        string packagePath,
+        GraphEditorPluginProvenanceEvidence provenanceEvidence)
+    {
+        var inspection = AsterGraphPluginPackageArchiveInspector.Inspect(packagePath);
+        return GraphEditorPluginRegistration.FromPackagePath(packagePath, inspection.Manifest, provenanceEvidence);
+    }
+
+    private static GraphEditorPluginCandidateSnapshot CreateTrustedPackageCandidate(string packagePath)
+    {
+        var inspection = AsterGraphPluginPackageArchiveInspector.Inspect(packagePath);
+        return new GraphEditorPluginCandidateSnapshot(
+            GraphEditorPluginCandidateSourceKind.PackageDirectory,
+            Path.GetDirectoryName(packagePath) ?? packagePath,
+            inspection.Manifest,
+            AsterGraphPluginPreloadEvaluator.EvaluateCompatibility(inspection.Manifest),
+            new GraphEditorPluginTrustEvaluation(
+                GraphEditorPluginTrustDecision.Allowed,
+                GraphEditorPluginTrustEvaluationSource.HostPolicy,
+                "trust.allowed.loading-tests",
+                $"Allowed manifest '{inspection.Manifest.Id}'."),
+            CreateValidPackageProvenance(inspection.ProvenanceEvidence.PackageIdentity ?? new GraphEditorPluginPackageIdentity(inspection.Manifest.Id, inspection.Manifest.Version)),
+            packagePath: packagePath);
+    }
+
+    private static GraphEditorPluginProvenanceEvidence CreateValidPackageProvenance(GraphEditorPluginPackageIdentity packageIdentity)
+    {
+        ArgumentNullException.ThrowIfNull(packageIdentity);
+
+        return new GraphEditorPluginProvenanceEvidence(
+            packageIdentity,
+            new GraphEditorPluginSignatureEvidence(
+                GraphEditorPluginSignatureStatus.Valid,
+                GraphEditorPluginSignatureKind.Repository,
+                new GraphEditorPluginSignerIdentity("AsterGraph Repository", "LOAD1234"),
+                timestampUtc: new DateTimeOffset(2026, 04, 09, 0, 0, 0, TimeSpan.Zero),
+                timestampAuthority: "tests.timestamp",
+                reasonCode: "signature.valid.loading-tests",
+                reasonMessage: "Valid signature fixture for loading tests."));
+    }
+
+    private static GraphEditorPluginCompatibilityEvaluation? GetCompatibility(GraphEditorPluginLoadSnapshot snapshot)
+    {
+        ArgumentNullException.ThrowIfNull(snapshot);
+
+        var property = typeof(GraphEditorPluginLoadSnapshot).GetProperty("Compatibility");
+        Assert.NotNull(property);
+        return Assert.IsType<GraphEditorPluginCompatibilityEvaluation>(property!.GetValue(snapshot));
+    }
+
     private static AsterGraphEditorOptions CreateOptions(
         IGraphEditorDiagnosticsSink diagnosticsSink,
         params GraphEditorPluginRegistration[] pluginRegistrations)
-        => CreateOptions(diagnosticsSink, pluginRegistrations, null, null);
+        => CreateOptions(diagnosticsSink, pluginRegistrations, null, null, null);
 
     private static AsterGraphEditorOptions CreateOptions(
         IGraphEditorDiagnosticsSink diagnosticsSink,
         IReadOnlyList<GraphEditorPluginRegistration> pluginRegistrations,
         IGraphLocalizationProvider? localizationProvider,
-        INodePresentationProvider? nodePresentationProvider)
+        INodePresentationProvider? nodePresentationProvider,
+        IGraphEditorPluginTrustPolicy? trustPolicy)
         => new()
         {
             Document = CreateDocument(),
@@ -186,6 +554,7 @@ public sealed class GraphEditorPluginLoadingTests
             PluginRegistrations = pluginRegistrations,
             LocalizationProvider = localizationProvider,
             NodePresentationProvider = nodePresentationProvider,
+            PluginTrustPolicy = trustPolicy,
         };
 
     private static string GetSamplePluginAssemblyPath()
@@ -320,5 +689,59 @@ public sealed class GraphEditorPluginLoadingTests
                 [
                     new NodeAdornmentDescriptor("Host", "#F3B36B"),
                 ]);
+    }
+
+    private sealed class TrackingDirectPlugin : IGraphEditorPlugin
+    {
+        public int RegisterCallCount { get; private set; }
+
+        public GraphEditorPluginDescriptor Descriptor { get; } = new("tests.loading.blocked-plugin", "Blocked Loading Plugin");
+
+        public void Register(GraphEditorPluginBuilder builder)
+        {
+            ArgumentNullException.ThrowIfNull(builder);
+            RegisterCallCount++;
+            builder.AddContextMenuAugmentor(new DirectContextMenuAugmentor());
+        }
+    }
+
+    private sealed class IncompatibleTrackingDirectPlugin : IGraphEditorPlugin
+    {
+        public int RegisterCallCount { get; private set; }
+
+        public GraphEditorPluginDescriptor Descriptor { get; } = new("tests.loading.incompatible-plugin", "Incompatible Loading Plugin");
+
+        public void Register(GraphEditorPluginBuilder builder)
+        {
+            ArgumentNullException.ThrowIfNull(builder);
+            RegisterCallCount++;
+            builder.AddContextMenuAugmentor(new DirectContextMenuAugmentor());
+        }
+    }
+
+    private sealed class BlockManifestIdTrustPolicy(string blockedId) : IGraphEditorPluginTrustPolicy
+    {
+        public GraphEditorPluginTrustEvaluation Evaluate(GraphEditorPluginTrustPolicyContext context)
+        {
+            ArgumentNullException.ThrowIfNull(context);
+
+            return StringComparer.Ordinal.Equals(context.Manifest.Id, blockedId)
+                ? new GraphEditorPluginTrustEvaluation(
+                    GraphEditorPluginTrustDecision.Blocked,
+                    GraphEditorPluginTrustEvaluationSource.HostPolicy,
+                    "trust.blocked.loading-tests",
+                    $"Blocked manifest '{context.Manifest.Id}' for loading coverage.")
+                : new GraphEditorPluginTrustEvaluation(
+                    GraphEditorPluginTrustDecision.Allowed,
+                    GraphEditorPluginTrustEvaluationSource.HostPolicy,
+                    "trust.allowed.loading-tests",
+                    $"Allowed manifest '{context.Manifest.Id}'.");
+        }
+    }
+
+    private sealed class TestManifestSource(params GraphEditorPluginManifestSourceCandidate[] candidates) : IGraphEditorPluginManifestSource
+    {
+        public IReadOnlyList<GraphEditorPluginManifestSourceCandidate> GetCandidates()
+            => candidates;
     }
 }

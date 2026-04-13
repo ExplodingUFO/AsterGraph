@@ -131,10 +131,47 @@ const int ReadinessFeatureCount = 17;
 const string SmokePluginDefinitionIdValue = "smoke.plugin";
 const string SmokePluginMenuId = "smoke-plugin-menu";
 const string SmokeAutomationRunId = "smoke-proof-automation";
+const string SmokeTrustedManifestId = "smoke.trusted-plugin";
+const string SmokeBlockedManifestId = "smoke.blocked-plugin";
+const string SmokeManifestTrustedSourceId = "package-smoke.trusted-manifest";
+const string SmokeManifestBlockedSourceId = "package-smoke.blocked-manifest";
+var blockedPlugin = new SmokeBlockedPlugin();
+var pluginTrustPolicy = new SmokeManifestTrustPolicy(SmokeBlockedManifestId);
+var trustedPluginManifest = CreateSmokeManifest(
+    SmokeTrustedManifestId,
+    "Smoke Trusted Plugin",
+    SmokeManifestTrustedSourceId,
+    "menus, automation");
+var blockedPluginManifest = CreateSmokeManifest(
+    SmokeBlockedManifestId,
+    "Smoke Blocked Plugin",
+    SmokeManifestBlockedSourceId,
+    "menus");
+var discoveryCandidates = AsterGraphEditorFactory.DiscoverPluginCandidates(new GraphEditorPluginDiscoveryOptions
+{
+    ManifestSources =
+    [
+        new SmokeManifestSource(
+            new GraphEditorPluginManifestSourceCandidate(
+                SmokeManifestTrustedSourceId,
+                typeof(SmokeProofPlugin).Assembly.Location,
+                trustedPluginManifest,
+                typeof(SmokeProofPlugin).FullName),
+            new GraphEditorPluginManifestSourceCandidate(
+                SmokeManifestBlockedSourceId,
+                typeof(SmokeBlockedPlugin).Assembly.Location,
+                blockedPluginManifest,
+                typeof(SmokeBlockedPlugin).FullName)),
+    ],
+    TrustPolicy = pluginTrustPolicy,
+});
+var trustedDiscoveryCandidate = FindPluginCandidate(discoveryCandidates, SmokeTrustedManifestId);
+var blockedDiscoveryCandidate = FindPluginCandidate(discoveryCandidates, SmokeBlockedManifestId);
 var pluginRegistrations =
     new[]
     {
-        GraphEditorPluginRegistration.FromPlugin(new SmokeProofPlugin()),
+        GraphEditorPluginRegistration.FromPlugin(new SmokeProofPlugin(), trustedPluginManifest),
+        GraphEditorPluginRegistration.FromPlugin(blockedPlugin, blockedPluginManifest),
     };
 
 var legacyEditor = new GraphEditorViewModel(
@@ -179,6 +216,7 @@ var factoryEditor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
     NodePresentationProvider = presentationProvider,
     LocalizationProvider = localizationProvider,
     PluginRegistrations = pluginRegistrations,
+    PluginTrustPolicy = pluginTrustPolicy,
 });
 var factoryView = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOptions
 {
@@ -412,6 +450,7 @@ var session = AsterGraphEditorFactory.CreateSession(new AsterGraphEditorOptions
     NodePresentationProvider = presentationProvider,
     LocalizationProvider = localizationProvider,
     PluginRegistrations = pluginRegistrations,
+    PluginTrustPolicy = pluginTrustPolicy,
 });
 
 var commandIds = new List<string>();
@@ -582,16 +621,10 @@ var factoryPluginMenuOk = factoryCanvasMenuDescriptors.Any(descriptor => descrip
 var runtimePluginLocalizationOk = runtimeCanvasMenuDescriptors.Any(descriptor => descriptor.Id == "canvas-add-node" && descriptor.Header == "Smoke Plugin Add Node");
 var factoryPluginLocalizationOk = factoryCanvasMenuDescriptors.Any(descriptor => descriptor.Id == "canvas-add-node" && descriptor.Header == "Smoke Plugin Add Node");
 var factoryPluginBadgeOk = factoryEditor.Nodes.Single(node => node.Id == sourceNodeId).Presentation.TopRightBadges.Any(badge => badge.Text == "Plugin");
-var phase25PackagePluginOk = sessionPluginLoadSnapshots.SequenceEqual(factoryPluginLoadSnapshots)
-    && sessionPluginLoadSnapshots.Count == 1
-    && sessionPluginLoadSnapshots[0].SourceKind == GraphEditorPluginLoadSourceKind.Direct
-    && sessionPluginLoadSnapshots[0].Status == GraphEditorPluginLoadStatus.Loaded
-    && sessionPluginLoadSnapshots[0].Descriptor?.Id == "smoke.proof.plugin"
-    && runtimePluginMenuOk
-    && factoryPluginMenuOk
-    && runtimePluginLocalizationOk
-    && factoryPluginLocalizationOk
-    && factoryPluginBadgeOk;
+var runtimeTrustedPluginSnapshot = FindPluginLoadSnapshot(sessionPluginLoadSnapshots, SmokeTrustedManifestId);
+var runtimeBlockedPluginSnapshot = FindPluginLoadSnapshot(sessionPluginLoadSnapshots, SmokeBlockedManifestId);
+var factoryTrustedPluginSnapshot = FindPluginLoadSnapshot(factoryPluginLoadSnapshots, SmokeTrustedManifestId);
+var factoryBlockedPluginSnapshot = FindPluginLoadSnapshot(factoryPluginLoadSnapshots, SmokeBlockedManifestId);
 var phase25PackageAutomationOk = runtimeAutomationResult.Succeeded
     && automationStartedCount == 1
     && automationCompletedCount == 1
@@ -600,6 +633,42 @@ var phase25PackageAutomationOk = runtimeAutomationResult.Succeeded
     && automationDiagnosticCodes.Contains("automation.run.started", StringComparer.Ordinal)
     && automationDiagnosticCodes.Contains("automation.run.completed", StringComparer.Ordinal)
     && runtimeAutomationResult.Inspection.Document.Nodes.Any(node => node.DefinitionId is { Value: SmokePluginDefinitionIdValue });
+var phase29PackageDiscoveryOk = discoveryCandidates.Count == 2
+    && trustedDiscoveryCandidate.SourceKind == GraphEditorPluginCandidateSourceKind.ManifestSource
+    && blockedDiscoveryCandidate.SourceKind == GraphEditorPluginCandidateSourceKind.ManifestSource
+    && trustedDiscoveryCandidate.TrustEvaluation.Decision == GraphEditorPluginTrustDecision.Allowed
+    && blockedDiscoveryCandidate.TrustEvaluation.Decision == GraphEditorPluginTrustDecision.Blocked
+    && trustedDiscoveryCandidate.Compatibility.Status == GraphEditorPluginCompatibilityStatus.Compatible
+    && blockedDiscoveryCandidate.Compatibility.Status == GraphEditorPluginCompatibilityStatus.Compatible
+    && trustedDiscoveryCandidate.PluginTypeName == typeof(SmokeProofPlugin).FullName
+    && blockedDiscoveryCandidate.PluginTypeName == typeof(SmokeBlockedPlugin).FullName;
+var phase29PackageTrustOk = sessionPluginLoadSnapshots.SequenceEqual(factoryPluginLoadSnapshots)
+    && sessionPluginLoadSnapshots.Count == 2
+    && runtimeTrustedPluginSnapshot.SourceKind == GraphEditorPluginLoadSourceKind.Direct
+    && runtimeTrustedPluginSnapshot.Status == GraphEditorPluginLoadStatus.Loaded
+    && runtimeTrustedPluginSnapshot.Manifest == trustedDiscoveryCandidate.Manifest
+    && runtimeTrustedPluginSnapshot.TrustEvaluation == trustedDiscoveryCandidate.TrustEvaluation
+    && runtimeTrustedPluginSnapshot.Compatibility == trustedDiscoveryCandidate.Compatibility
+    && runtimeTrustedPluginSnapshot.Descriptor?.Id == "smoke.proof.plugin"
+    && runtimeBlockedPluginSnapshot.SourceKind == GraphEditorPluginLoadSourceKind.Direct
+    && runtimeBlockedPluginSnapshot.Status == GraphEditorPluginLoadStatus.Blocked
+    && runtimeBlockedPluginSnapshot.Manifest == blockedDiscoveryCandidate.Manifest
+    && runtimeBlockedPluginSnapshot.TrustEvaluation == blockedDiscoveryCandidate.TrustEvaluation
+    && runtimeBlockedPluginSnapshot.Compatibility == blockedDiscoveryCandidate.Compatibility
+    && !runtimeBlockedPluginSnapshot.ActivationAttempted
+    && factoryTrustedPluginSnapshot.Status == GraphEditorPluginLoadStatus.Loaded
+    && factoryBlockedPluginSnapshot.Status == GraphEditorPluginLoadStatus.Blocked
+    && runtimePluginMenuOk
+    && factoryPluginMenuOk
+    && runtimePluginLocalizationOk
+    && factoryPluginLocalizationOk
+    && factoryPluginBadgeOk
+    && blockedPlugin.RegisterCallCount == 0
+    && factoryRecentDiagnostics.Any(diagnostic => diagnostic.Code == "plugin.load.blocked")
+    && sessionRecentDiagnostics.Any(diagnostic => diagnostic.Code == "plugin.load.blocked");
+var phase29PackageProofOk = phase29PackageDiscoveryOk
+    && phase29PackageTrustOk
+    && phase25PackageAutomationOk;
 Console.WriteLine($"SESSION_FACTORY_OK:{session.Queries.CreateDocumentSnapshot().Nodes.Count}:{string.Join(",", commandIds)}");
 Console.WriteLine($"SESSION_EVENTS_OK:{documentChanges}:{viewportChanges}:{failureCode ?? "<none>"}");
 Console.WriteLine($"KERNEL_SESSION_OK:{runtimeSessionIsKernelFirst}");
@@ -625,15 +694,17 @@ Console.WriteLine($"DIAG_LEGACY_RECENT_OK:{(!legacyRecentDiagnostics.Any() ? "<n
 Console.WriteLine($"DIAG_FACTORY_RECENT_OK:{(!factoryRecentDiagnostics.Any() ? "<none>" : string.Join(",", factoryRecentDiagnostics.Select(diagnostic => diagnostic.Code)))}");
 Console.WriteLine($"DIAG_SESSION_RECENT_OK:{(!sessionRecentDiagnostics.Any() ? "<none>" : string.Join(",", sessionRecentDiagnostics.Select(diagnostic => diagnostic.Code)))}");
 Console.WriteLine($"DIAG_INSTRUMENTATION_OK:{(loggerFactory.Entries.Count > 0 && activityOperations.Count > 0)}:{loggerFactory.Entries.Count}:{string.Join(",", activityOperations)}");
+Console.WriteLine($"PLUGIN_DISCOVERY_CANDIDATES:{string.Join(" | ", discoveryCandidates.Select(candidate => $"{candidate.Manifest.Id}:{candidate.TrustEvaluation.Decision}:{candidate.Compatibility.Status}:{candidate.PluginTypeName ?? "<none>"}"))}");
 Console.WriteLine("PHASE17_MIGRATION_NOTE:CreateSession=canonical-runtime;Create+AsterGraphAvaloniaViewFactory=canonical-hosted-ui;GraphEditorViewModel+GraphEditorView=retained-compatibility");
 Console.WriteLine($"PHASE17_ROUTE_SIGNAL_OK:{runtimeSessionIsKernelFirst}:{legacyRetainedSessionIsAdapterBacked}:{factoryRetainedSessionIsAdapterBacked}:{phase17RouteSignalOk}");
 Console.WriteLine($"PHASE17_SHARED_CANONICAL_OK:{phase17SharedCanonicalOk}:{phase17LegacyCompatibilityWindowOk}:{phase17FactoryCompatibilityWindowOk}:{runtimeSharedCanonicalCommandIds.Count}:{legacyCompatibilityOnlyCommands.Count}:{factoryCompatibilityOnlyCommands.Count}");
 Console.WriteLine($"PHASE18_READINESS_DESCRIPTOR_OK:{phase18ReadinessDescriptorOk}:{phase18CanonicalReadinessParityOk}:{factoryReadinessDescriptors.Count}:{runtimeReadinessDescriptors.Count}");
 Console.WriteLine($"PHASE18_LEGACY_WINDOW_OK:{phase18LegacyReadinessWindowOk}:{legacyReadinessDescriptors.Count}:{legacyReadinessDescriptors.Count(descriptor => descriptor.IsAvailable)}");
 Console.WriteLine($"PHASE18_AUTOMATION_RUNTIME_OK:{phase18AutomationRuntimeOk}:{sessionInspection.FeatureDescriptors.Count}:{sessionRecentDiagnostics.Count}:{commandIds.Count}");
-Console.WriteLine($"PHASE25_PACKAGE_PLUGIN_OK:{phase25PackagePluginOk}:{sessionPluginLoadSnapshots.Count}:{runtimePluginMenuOk}:{runtimePluginLocalizationOk}:{factoryPluginBadgeOk}");
 Console.WriteLine($"PHASE25_PACKAGE_AUTOMATION_OK:{phase25PackageAutomationOk}:{runtimeAutomationResult.ExecutedStepCount}:{automationStartedCount}:{automationCompletedCount}:{runtimeAutomationResult.Inspection.Document.Nodes.Count}:{automationDiagnosticCodes.Length}");
-Console.WriteLine($"PHASE25_PACKAGE_PROOF_OK:{(phase25PackagePluginOk && phase25PackageAutomationOk)}:{factoryPluginLoadSnapshots.Count}:{runtimeSharedCanonicalCommandIds.Count}:{runtimeReadinessDescriptors.Count}:{factoryReadinessDescriptors.Count}");
+Console.WriteLine($"PHASE29_PACKAGE_DISCOVERY_OK:{phase29PackageDiscoveryOk}:{discoveryCandidates.Count}:{trustedDiscoveryCandidate.TrustEvaluation.Decision}:{blockedDiscoveryCandidate.TrustEvaluation.Decision}:{blockedPlugin.RegisterCallCount}");
+Console.WriteLine($"PHASE29_PACKAGE_TRUST_OK:{phase29PackageTrustOk}:{runtimeTrustedPluginSnapshot.Status}:{runtimeBlockedPluginSnapshot.Status}:{sessionPluginLoadSnapshots.Count}:{factoryPluginLoadSnapshots.Count}");
+Console.WriteLine($"PHASE29_PACKAGE_PROOF_OK:{phase29PackageProofOk}:{factoryPluginLoadSnapshots.Count}:{runtimeSharedCanonicalCommandIds.Count}:{runtimeReadinessDescriptors.Count}:{factoryReadinessDescriptors.Count}");
 
 static void PrintEditorMarker(string marker, GraphEditorViewModel editor, string targetNodeId)
 {
@@ -758,6 +829,34 @@ static bool IsReadinessFeatureId(string id)
         "integration.instrumentation.logger" or
         "integration.instrumentation.activity-source";
 
+static GraphEditorPluginManifest CreateSmokeManifest(
+    string manifestId,
+    string displayName,
+    string source,
+    string capabilitySummary)
+    => new(
+        manifestId,
+        displayName,
+        new GraphEditorPluginManifestProvenance(
+            GraphEditorPluginManifestSourceKind.Manifest,
+            source),
+        version: "1.0.0",
+        compatibility: new GraphEditorPluginCompatibilityManifest(
+            minimumAsterGraphVersion: "0.0.0",
+            targetFramework: "net8.0",
+            runtimeSurface: "session-first"),
+        capabilitySummary: capabilitySummary);
+
+static GraphEditorPluginCandidateSnapshot FindPluginCandidate(
+    IReadOnlyList<GraphEditorPluginCandidateSnapshot> candidates,
+    string manifestId)
+    => candidates.Single(candidate => string.Equals(candidate.Manifest.Id, manifestId, StringComparison.Ordinal));
+
+static GraphEditorPluginLoadSnapshot FindPluginLoadSnapshot(
+    IReadOnlyList<GraphEditorPluginLoadSnapshot> snapshots,
+    string manifestId)
+    => snapshots.Single(snapshot => string.Equals(snapshot.Manifest.Id, manifestId, StringComparison.Ordinal));
+
 static GraphEditorAutomationRunRequest CreateAutomationRunRequest(string runId, string pluginDefinitionId)
     => new(
         runId,
@@ -808,6 +907,49 @@ sealed class SmokeProofPlugin : IGraphEditorPlugin
         builder.AddContextMenuAugmentor(new SmokePluginContextMenuAugmentor());
         builder.AddNodePresentationProvider(new SmokePluginPresentationProvider());
         builder.AddLocalizationProvider(new SmokePluginLocalizationProvider());
+    }
+}
+
+sealed class SmokeBlockedPlugin : IGraphEditorPlugin
+{
+    public int RegisterCallCount { get; private set; }
+
+    public GraphEditorPluginDescriptor Descriptor { get; } = new(
+        "smoke.blocked.plugin",
+        "Smoke Blocked Plugin",
+        "Blocked direct-registration proof plugin for package smoke.");
+
+    public void Register(GraphEditorPluginBuilder builder)
+    {
+        ArgumentNullException.ThrowIfNull(builder);
+        RegisterCallCount++;
+        builder.AddContextMenuAugmentor(new SmokePluginContextMenuAugmentor());
+    }
+}
+
+sealed class SmokeManifestSource(params GraphEditorPluginManifestSourceCandidate[] candidates) : IGraphEditorPluginManifestSource
+{
+    public IReadOnlyList<GraphEditorPluginManifestSourceCandidate> GetCandidates()
+        => candidates;
+}
+
+sealed class SmokeManifestTrustPolicy(string blockedManifestId) : IGraphEditorPluginTrustPolicy
+{
+    public GraphEditorPluginTrustEvaluation Evaluate(GraphEditorPluginTrustPolicyContext context)
+    {
+        ArgumentNullException.ThrowIfNull(context);
+
+        return StringComparer.Ordinal.Equals(context.Manifest.Id, blockedManifestId)
+            ? new GraphEditorPluginTrustEvaluation(
+                GraphEditorPluginTrustDecision.Blocked,
+                GraphEditorPluginTrustEvaluationSource.HostPolicy,
+                "trust.blocked.package-smoke",
+                $"Blocked manifest '{context.Manifest.Id}' for package smoke proof.")
+            : new GraphEditorPluginTrustEvaluation(
+                GraphEditorPluginTrustDecision.Allowed,
+                GraphEditorPluginTrustEvaluationSource.HostPolicy,
+                "trust.allowed.package-smoke",
+                $"Allowed manifest '{context.Manifest.Id}' for package smoke proof.");
     }
 }
 
