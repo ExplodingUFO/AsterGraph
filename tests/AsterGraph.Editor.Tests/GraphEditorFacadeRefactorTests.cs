@@ -13,6 +13,14 @@ namespace AsterGraph.Editor.Tests;
 public sealed class GraphEditorFacadeRefactorTests
 {
     [Fact]
+    public void EditorAssembly_ContainsDedicatedSelectionCoordinator()
+    {
+        var coordinatorType = typeof(GraphEditorViewModel).Assembly.GetType("AsterGraph.Editor.Services.GraphEditorSelectionCoordinator");
+
+        Assert.NotNull(coordinatorType);
+    }
+
+    [Fact]
     public void GraphEditorViewModel_RebuildsMixedParametersThroughPublicSelectionPath()
     {
         var definitionId = new NodeDefinitionId("tests.editor.facade.public-path");

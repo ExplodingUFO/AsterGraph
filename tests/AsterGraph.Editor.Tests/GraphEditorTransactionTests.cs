@@ -306,6 +306,57 @@ public sealed class GraphEditorTransactionTests
         Assert.True(workspace.Exists());
     }
 
+    [Fact]
+    public void GraphEditorViewModel_HistoryInteraction_RestoresSelectionMembershipAndPrimaryNodeAcrossUndoRedo()
+    {
+        var definitionId = new NodeDefinitionId("tests.transaction.selection-roundtrip");
+        var workspace = new RecordingWorkspaceService();
+        var editor = AsterGraphEditorFactory.Create(CreateOptions(definitionId) with
+        {
+            WorkspaceService = workspace,
+        });
+        var sourceNode = Assert.Single(editor.Nodes, node => node.Id == SourceNodeId);
+        var targetNode = Assert.Single(editor.Nodes, node => node.Id == TargetNodeId);
+        var initialPositions = new Dictionary<string, GraphPoint>(StringComparer.Ordinal)
+        {
+            [SourceNodeId] = new GraphPoint(sourceNode.X, sourceNode.Y),
+            [TargetNodeId] = new GraphPoint(targetNode.X, targetNode.Y),
+        };
+
+        editor.SaveWorkspace();
+        editor.SetSelection([sourceNode, targetNode], targetNode, status: null);
+
+        editor.BeginHistoryInteraction();
+        editor.ApplyDragOffset(initialPositions, 48, 18);
+        editor.CompleteHistoryInteraction("Moved with multi-selection.");
+
+        editor.SelectSingleNode(sourceNode, updateStatus: false);
+        var intermediatePositions = new Dictionary<string, GraphPoint>(StringComparer.Ordinal)
+        {
+            [SourceNodeId] = new GraphPoint(sourceNode.X, sourceNode.Y),
+            [TargetNodeId] = new GraphPoint(targetNode.X, targetNode.Y),
+        };
+
+        editor.BeginHistoryInteraction();
+        editor.ApplyDragOffset(intermediatePositions, -12, 30);
+        editor.CompleteHistoryInteraction("Moved with single selection.");
+
+        editor.Undo();
+
+        Assert.Equal([SourceNodeId, TargetNodeId], editor.SelectedNodes.Select(node => node.Id).OrderBy(id => id, StringComparer.Ordinal));
+        Assert.Equal(TargetNodeId, editor.SelectedNode?.Id);
+        Assert.True(editor.IsDirty);
+        Assert.True(editor.CanRedo);
+
+        editor.Redo();
+
+        Assert.Equal([SourceNodeId], editor.SelectedNodes.Select(node => node.Id));
+        Assert.Equal(SourceNodeId, editor.SelectedNode?.Id);
+        Assert.True(editor.IsDirty);
+        Assert.False(editor.CanRedo);
+        Assert.True(workspace.Exists());
+    }
+
     private static AsterGraphEditorOptions CreateOptions(NodeDefinitionId definitionId, IGraphContextMenuAugmentor? augmentor = null)
         => new()
         {

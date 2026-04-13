@@ -38,7 +38,7 @@ namespace AsterGraph.Editor.ViewModels;
 /// 而自定义 UI 宿主应优先考虑 <see cref="AsterGraphEditorFactory.CreateSession(AsterGraphEditorOptions)"/>。
 /// 本类型在当前迁移窗口内仍然受支持，但不应再被视为新的首选组合根。
 /// </remarks>
-public sealed partial class GraphEditorViewModel : ObservableObject, IGraphContextMenuHost, GraphEditorViewModel.IGraphEditorCompatibilityCommandHost, GraphEditorViewModel.IGraphEditorFragmentCommandHost, IGraphEditorKernelProjectionHost, IGraphEditorHistoryStateHost
+public sealed partial class GraphEditorViewModel : ObservableObject, IGraphContextMenuHost, GraphEditorViewModel.IGraphEditorCompatibilityCommandHost, GraphEditorViewModel.IGraphEditorFragmentCommandHost, IGraphEditorKernelProjectionHost, IGraphEditorHistoryStateHost, IGraphEditorSelectionCoordinatorHost
 {
     private const double DefaultZoom = 0.88;
     private const double DefaultPanX = 110;
@@ -99,6 +99,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     private readonly GraphEditorSelectionProjection _selectionProjection;
     private readonly GraphEditorKernelProjectionApplier _kernelProjectionApplier;
     private readonly GraphEditorHistoryStateCoordinator _historyStateCoordinator;
+    private readonly GraphEditorSelectionCoordinator _selectionCoordinator;
     private readonly GraphEditorKernel _kernel;
     private readonly GraphEditorViewModelKernelAdapter _sessionHost;
     private readonly GraphEditorCommandStateNotifier _commandStateNotifier = new();
@@ -182,6 +183,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             (key, fallback, arguments) => LocalizeFormat(key, fallback, arguments));
         _kernelProjectionApplier = new GraphEditorKernelProjectionApplier(this);
         _historyStateCoordinator = new GraphEditorHistoryStateCoordinator(this, _historyService);
+        _selectionCoordinator = new GraphEditorSelectionCoordinator(this);
         StyleOptions = styleOptions ?? GraphEditorStyleOptions.Default;
         BehaviorOptions = ResolveBehaviorOptions(behaviorOptions, StyleOptions);
 
@@ -809,6 +811,47 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     void IGraphEditorHistoryStateHost.RaiseComputedPropertyChanges()
         => RaiseComputedPropertyChanges();
 
+    IReadOnlyList<NodeViewModel> IGraphEditorSelectionCoordinatorHost.AllNodes => Nodes;
+
+    ObservableCollection<NodeViewModel> IGraphEditorSelectionCoordinatorHost.SelectionNodes => SelectedNodes;
+
+    NodeViewModel? IGraphEditorSelectionCoordinatorHost.PrimarySelectedNode
+    {
+        get => SelectedNode;
+        set => SelectedNode = value;
+    }
+
+    bool IGraphEditorSelectionCoordinatorHost.HasPendingConnection => HasPendingConnection;
+
+    bool IGraphEditorSelectionCoordinatorHost.IsApplyingKernelProjection => _isApplyingKernelProjection;
+
+    bool IGraphEditorSelectionCoordinatorHost.IsSelectionTrackingSuspended
+    {
+        get => _suspendSelectionTracking;
+        set => _suspendSelectionTracking = value;
+    }
+
+    string IGraphEditorSelectionCoordinatorHost.StatusText(string key, string fallback)
+        => StatusText(key, fallback);
+
+    string IGraphEditorSelectionCoordinatorHost.StatusText(string key, string fallback, params object?[] arguments)
+        => StatusText(key, fallback, arguments);
+
+    void IGraphEditorSelectionCoordinatorHost.SetStatusMessage(string status)
+        => StatusMessage = status;
+
+    void IGraphEditorSelectionCoordinatorHost.SetKernelSelection(IReadOnlyList<string> nodeIds, string? primaryNodeId, bool updateStatus)
+        => _kernel.SetSelection(nodeIds, primaryNodeId, updateStatus);
+
+    void IGraphEditorSelectionCoordinatorHost.RefreshSelectionProjection()
+        => RefreshSelectionProjection();
+
+    void IGraphEditorSelectionCoordinatorHost.NotifySelectionChanged()
+        => NotifySelectionChanged();
+
+    void IGraphEditorSelectionCoordinatorHost.RaiseComputedPropertyChanges()
+        => RaiseComputedPropertyChanges();
+
     [ObservableProperty]
     private double zoom = DefaultZoom;
 
@@ -1428,20 +1471,14 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// 选中指定节点，等价于单选该节点。
     /// </summary>
     /// <param name="node">要选中的节点；为 <see langword="null"/> 时清空选择。</param>
-    public void SelectNode(NodeViewModel? node)
-    {
-        SelectSingleNode(node);
-    }
+    public void SelectNode(NodeViewModel? node) => _selectionCoordinator.SelectSingleNode(node);
 
     /// <summary>
     /// 清空当前选择。
     /// </summary>
     /// <param name="updateStatus">是否同步更新状态文本。</param>
     public void ClearSelection(bool updateStatus = false)
-        => SetSelection(
-            [],
-            null,
-            updateStatus ? StatusText("editor.status.selection.cleared", "Selection cleared.") : null);
+        => _selectionCoordinator.ClearSelection(updateStatus);
 
     /// <summary>
     /// 将选择切换为单个节点。
@@ -1449,23 +1486,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// <param name="node">目标节点；为 <see langword="null"/> 时清空选择。</param>
     /// <param name="updateStatus">是否更新状态文本。</param>
     public void SelectSingleNode(NodeViewModel? node, bool updateStatus = true)
-    {
-        if (node is null)
-        {
-            SetSelection(
-                [],
-                null,
-                updateStatus ? StatusText("editor.status.selection.cleared", "Selection cleared.") : null);
-            return;
-        }
-
-        SetSelection(
-            [node],
-            node,
-            updateStatus && !HasPendingConnection
-                ? StatusText("editor.status.selection.selectedNode", "Selected {0}.", node.Title)
-                : null);
-    }
+        => _selectionCoordinator.SelectSingleNode(node, updateStatus);
 
     /// <summary>
     /// 将节点追加到当前选择集合。
@@ -1473,21 +1494,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// <param name="node">要追加的节点。</param>
     /// <param name="updateStatus">是否更新状态文本。</param>
     public void AddNodeToSelection(NodeViewModel node, bool updateStatus = true)
-    {
-        if (SelectedNodes.Contains(node))
-        {
-            return;
-        }
-
-        var nextSelection = SelectedNodes.ToList();
-        nextSelection.Add(node);
-        SetSelection(
-            nextSelection,
-            node,
-            updateStatus
-                ? StatusText("editor.status.selection.addedNode", "Added {0} to the selection.", node.Title)
-                : null);
-    }
+        => _selectionCoordinator.AddNodeToSelection(node, updateStatus);
 
     /// <summary>
     /// 切换节点在当前选择集合中的状态。
@@ -1495,27 +1502,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// <param name="node">目标节点。</param>
     /// <param name="updateStatus">是否更新状态文本。</param>
     public void ToggleNodeSelection(NodeViewModel node, bool updateStatus = true)
-    {
-        var nextSelection = SelectedNodes.ToList();
-        if (nextSelection.Remove(node))
-        {
-            SetSelection(
-                nextSelection,
-                nextSelection.LastOrDefault(),
-                updateStatus
-                    ? StatusText("editor.status.selection.removedNode", "Removed {0} from the selection.", node.Title)
-                    : null);
-            return;
-        }
-
-        nextSelection.Add(node);
-        SetSelection(
-            nextSelection,
-            node,
-            updateStatus
-                ? StatusText("editor.status.selection.addedNode", "Added {0} to the selection.", node.Title)
-                : null);
-    }
+        => _selectionCoordinator.ToggleNodeSelection(node, updateStatus);
 
     /// <summary>
     /// 直接设置当前选择集合及主选中节点。
@@ -1524,63 +1511,10 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// <param name="primaryNode">新的主选中节点。</param>
     /// <param name="status">可选状态文本。</param>
     public void SetSelection(IReadOnlyList<NodeViewModel> nodes, NodeViewModel? primaryNode = null, string? status = null)
-    {
-        var uniqueNodes = nodes
-            .Where(node => Nodes.Contains(node))
-            .Distinct()
-            .ToList();
-        var nextPrimary = primaryNode is not null && uniqueNodes.Contains(primaryNode)
-            ? primaryNode
-            : uniqueNodes.LastOrDefault();
-
-        if (_isApplyingKernelProjection)
-        {
-            SetSelectionCore(uniqueNodes, nextPrimary, status);
-            return;
-        }
-
-        _kernel.SetSelection(uniqueNodes.Select(node => node.Id).ToList(), nextPrimary?.Id, !string.IsNullOrWhiteSpace(status));
-
-        if (!string.IsNullOrWhiteSpace(status))
-        {
-            StatusMessage = status;
-        }
-    }
+        => _selectionCoordinator.SetSelection(nodes, primaryNode, status);
 
     private void SetSelectionCore(IReadOnlyList<NodeViewModel> nodes, NodeViewModel? primaryNode = null, string? status = null)
-    {
-        var uniqueNodes = nodes
-            .Where(node => Nodes.Contains(node))
-            .Distinct()
-            .ToList();
-        var nextPrimary = primaryNode is not null && uniqueNodes.Contains(primaryNode)
-            ? primaryNode
-            : uniqueNodes.LastOrDefault();
-
-        foreach (var item in Nodes)
-        {
-            item.IsSelected = uniqueNodes.Contains(item);
-        }
-
-        _suspendSelectionTracking = true;
-        SelectedNodes.Clear();
-        foreach (var node in uniqueNodes)
-        {
-            SelectedNodes.Add(node);
-        }
-
-        SelectedNode = nextPrimary;
-        _suspendSelectionTracking = false;
-
-        if (!string.IsNullOrWhiteSpace(status))
-        {
-            StatusMessage = status;
-        }
-
-        RefreshSelectionProjection();
-        NotifySelectionChanged();
-        RaiseComputedPropertyChanges();
-    }
+        => _selectionCoordinator.SetSelectionCore(nodes, primaryNode, status);
 
     /// <summary>
     /// 获取与指定矩形相交的节点集合。
