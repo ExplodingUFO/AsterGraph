@@ -53,6 +53,22 @@ public sealed class GraphEditorSessionTests
     }
 
     [Fact]
+    public void GraphEditorSession_DelegatesStockContextMenuDescriptorBuildingToDedicatedCollaborator()
+    {
+        var methodNames = typeof(GraphEditorSession)
+            .GetMethods(BindingFlags.Instance | BindingFlags.NonPublic)
+            .Select(method => method.Name)
+            .ToHashSet(StringComparer.Ordinal);
+
+        Assert.DoesNotContain("BuildCanvasMenuDescriptors", methodNames);
+        Assert.DoesNotContain("BuildSelectionMenuDescriptors", methodNames);
+        Assert.DoesNotContain("BuildNodeMenuDescriptors", methodNames);
+        Assert.DoesNotContain("BuildPortMenuDescriptors", methodNames);
+        Assert.DoesNotContain("BuildConnectionMenuDescriptors", methodNames);
+        Assert.DoesNotContain("BuildCompatibleTargetItems", methodNames);
+    }
+
+    [Fact]
     public void AsterGraphEditorFactory_CreateSession_NoLongerStoresGraphEditorViewModelAsItsRuntimeStateOwner()
     {
         var session = AsterGraphEditorFactory.CreateSession(CreateOptions(new NodeDefinitionId("tests.session.kernel-owner")));
@@ -547,6 +563,85 @@ public sealed class GraphEditorSessionTests
     }
 
     [Fact]
+    public void RuntimeSession_StockContextMenuDescriptorSignatures_RemainStableAcrossTargets()
+    {
+        var definitionId = new NodeDefinitionId("tests.session.stock-menu-signatures");
+        var session = AsterGraphEditorFactory.CreateSession(CreateOptions(definitionId) with
+        {
+            WorkspaceService = new EmptyWorkspaceService(),
+            FragmentWorkspaceService = new RecordingFragmentWorkspaceService("fragment://tests.session.stock-menu"),
+        });
+
+        session.Commands.UpdateViewportSize(1280, 720);
+        session.Commands.SetSelection([SourceNodeId, TargetNodeId], SourceNodeId, updateStatus: false);
+
+        var selectionContext = new ContextMenuContext(
+            ContextMenuTargetKind.Selection,
+            new GraphPoint(160, 90),
+            selectedNodeId: SourceNodeId,
+            selectedNodeIds: [SourceNodeId, TargetNodeId]);
+        var nodeContext = new ContextMenuContext(
+            ContextMenuTargetKind.Node,
+            new GraphPoint(160, 90),
+            selectedNodeId: SourceNodeId,
+            selectedNodeIds: [SourceNodeId, TargetNodeId],
+            clickedNodeId: SourceNodeId);
+        var outputPortContext = new ContextMenuContext(
+            ContextMenuTargetKind.Port,
+            new GraphPoint(160, 90),
+            selectedNodeId: SourceNodeId,
+            selectedNodeIds: [SourceNodeId, TargetNodeId],
+            clickedPortNodeId: SourceNodeId,
+            clickedPortId: SourcePortId);
+
+        var signature = string.Join(
+            Environment.NewLine,
+            [
+                $"canvas:{RenderMenuSignature(session.Queries.BuildContextMenuDescriptors(new ContextMenuContext(ContextMenuTargetKind.Canvas, new GraphPoint(160, 90))))}",
+                $"selection:{RenderMenuSignature(session.Queries.BuildContextMenuDescriptors(selectionContext))}",
+                $"node:{RenderMenuSignature(session.Queries.BuildContextMenuDescriptors(nodeContext))}",
+                $"port-output:{RenderMenuSignature(session.Queries.BuildContextMenuDescriptors(outputPortContext))}",
+            ]);
+
+        session.Commands.StartConnection(SourceNodeId, SourcePortId);
+        session.Commands.CompleteConnection(TargetNodeId, TargetPortId);
+
+        var connectionId = Assert.Single(session.Queries.CreateDocumentSnapshot().Connections).Id;
+        var inputPortContext = new ContextMenuContext(
+            ContextMenuTargetKind.Port,
+            new GraphPoint(160, 90),
+            selectedNodeId: TargetNodeId,
+            selectedNodeIds: [TargetNodeId],
+            clickedPortNodeId: TargetNodeId,
+            clickedPortId: TargetPortId);
+        var connectionContext = new ContextMenuContext(
+            ContextMenuTargetKind.Connection,
+            new GraphPoint(160, 90),
+            selectedConnectionId: connectionId,
+            selectedConnectionIds: [connectionId],
+            clickedConnectionId: connectionId);
+
+        signature = string.Join(
+            Environment.NewLine,
+            [
+                signature,
+                $"port-input:{RenderMenuSignature(session.Queries.BuildContextMenuDescriptors(inputPortContext))}",
+                $"connection:{RenderMenuSignature(session.Queries.BuildContextMenuDescriptors(connectionContext))}",
+            ]);
+
+        var expected = """
+            canvas:canvas-add-node~Add Node~add~True~-~False~-~[add-category-Tests~Tests~-~True~-~False~-~[add-node-tests-session-stock-menu-signatures~Session Node~node~True~-~False~nodes.add(definitionId=tests.session.stock-menu-signatures,worldX=160,worldY=90)~[-]]]||canvas-sep-1~~-~False~-~True~-~[-]||canvas-fit-view~Fit View~fit~True~-~False~viewport.fit()~[-]||canvas-reset-view~Reset View~reset~True~-~False~viewport.reset()~[-]||canvas-sep-2~~-~False~-~True~-~[-]||canvas-save~Save Snapshot~save~True~-~False~workspace.save()~[-]||canvas-load~Load Snapshot~load~False~No saved snapshot yet. Save once to create one.~False~workspace.load()~[-]||canvas-import-fragment~Import Fragment~import~False~-~False~fragments.import()~[-]||canvas-cancel-pending~Cancel Pending Connection~cancel~False~-~False~connections.cancel()~[-]
+            selection:selection-delete~Delete 2 Selected Nodes~delete~True~-~False~selection.delete()~[-]||selection-export~Export Fragment~export~False~-~False~fragments.export-selection()~[-]||selection-sep-1~~-~False~-~True~-~[-]||selection-align~Align~align~True~-~False~-~[selection-align-left~Left~align-left~False~-~False~layout.align-left()~[-]>>selection-align-center~Center~align-center~False~-~False~layout.align-center()~[-]>>selection-align-right~Right~align-right~False~-~False~layout.align-right()~[-]>>selection-align-top~Top~align-top~False~-~False~layout.align-top()~[-]>>selection-align-middle~Middle~align-middle~False~-~False~layout.align-middle()~[-]>>selection-align-bottom~Bottom~align-bottom~False~-~False~layout.align-bottom()~[-]]||selection-distribute~Distribute~distribute~True~-~False~-~[selection-distribute-horizontal~Horizontally~distribute-horizontal~False~-~False~layout.distribute-horizontal()~[-]>>selection-distribute-vertical~Vertically~distribute-vertical~False~-~False~layout.distribute-vertical()~[-]]
+            node:node-inspect~Inspect Source Node~inspect~False~-~False~nodes.inspect(nodeId=tests.session.source-001)~[-]||node-center~Center View Here~center~True~-~False~viewport.center-node(nodeId=tests.session.source-001)~[-]||node-sep-1~~-~False~-~True~-~[-]||node-delete~Delete Node~delete~False~-~False~nodes.delete-by-id(nodeId=tests.session.source-001)~[-]||node-duplicate~Duplicate Node~duplicate~False~-~False~nodes.duplicate(nodeId=tests.session.source-001)~[-]||node-disconnect~Disconnect~disconnect~True~-~False~-~[node-disconnect-in~Incoming~disconnect~True~-~False~connections.disconnect-incoming(nodeId=tests.session.source-001)~[-]>>node-disconnect-out~Outgoing~disconnect~True~-~False~connections.disconnect-outgoing(nodeId=tests.session.source-001)~[-]>>node-disconnect-all~All~disconnect~True~-~False~connections.disconnect-all(nodeId=tests.session.source-001)~[-]]||node-create-connection~Create Connection From~connect~True~-~False~-~[node-connect-tests.session.source-001-out~Output~-~True~-~False~-~[compatible-node-tests.session.target-001~Target Node~-~True~-~False~-~[compatible-port-tests.session.target-001-in~Input~connect~True~-~False~connections.connect(sourceNodeId=tests.session.source-001,sourcePortId=out,targetNodeId=tests.session.target-001,targetPortId=in)~[-]]]]
+            port-output:port-start~Start Connection~connect~True~-~False~connections.start(sourceNodeId=tests.session.source-001,sourcePortId=out)~[-]||port-compatible-targets~Compatible Targets~compatible~True~-~False~-~[compatible-node-tests.session.target-001~Target Node~-~True~-~False~-~[compatible-port-tests.session.target-001-in~Input~connect~True~-~False~connections.connect(sourceNodeId=tests.session.source-001,sourcePortId=out,targetNodeId=tests.session.target-001,targetPortId=in)~[-]]]||port-sep-1~~-~False~-~True~-~[-]||port-info~Type: float~type~False~-~False~-~[-]
+            port-input:port-break-connections~Break Connections~disconnect~True~-~False~connections.break-port(nodeId=tests.session.target-001,portId=in)~[-]||port-sep-2~~-~False~-~True~-~[-]||port-info~Type: float~type~False~-~False~-~[-]
+            connection:connection-delete~Delete Connection~delete~True~-~False~connections.delete(connectionId=connection-001)~[-]||connection-conversion~No implicit conversion~conversion~False~-~False~-~[-]
+            """;
+
+        Assert.Equal(expected.ReplaceLineEndings("\n"), signature.ReplaceLineEndings("\n"));
+    }
+
+    [Fact]
     public void RuntimeSession_TryExecuteCommand_AcceptsCanonicalInvocationSnapshot()
     {
         var definitionId = new NodeDefinitionId("tests.session.execute-descriptor");
@@ -667,6 +762,21 @@ public sealed class GraphEditorSessionTests
         Assert.True(handlerType.IsGenericType);
         Assert.Equal(typeof(EventHandler<>), handlerType.GetGenericTypeDefinition());
         Assert.Equal(eventArgsType, handlerType.GetGenericArguments()[0]);
+    }
+
+    private static string RenderMenuSignature(IReadOnlyList<GraphEditorMenuItemDescriptorSnapshot> items)
+        => string.Join("||", items.Select(RenderMenuItemSignature));
+
+    private static string RenderMenuItemSignature(GraphEditorMenuItemDescriptorSnapshot item)
+    {
+        var command = item.Command is null
+            ? "-"
+            : $"{item.Command.CommandId}({string.Join(",", item.Command.Arguments.Select(argument => $"{argument.Name}={argument.Value}"))})";
+        var children = item.Children.Count == 0
+            ? "-"
+            : string.Join(">>", item.Children.Select(RenderMenuItemSignature));
+
+        return $"{item.Id}~{item.Header}~{item.IconKey ?? "-"}~{item.IsEnabled}~{item.DisabledReason ?? "-"}~{item.IsSeparator}~{command}~[{children}]";
     }
 
     private static SessionSignature CaptureSessionSignature(IGraphEditorSession session)
