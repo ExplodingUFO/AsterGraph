@@ -46,16 +46,16 @@
                     Header="视图">
             <MenuItem Header="显示顶栏"
                       ToggleType="CheckBox"
-                      IsChecked="{Binding IsHeaderChromeVisible}" />
+                      IsChecked="{Binding IsHeaderChromeVisible, Mode=TwoWay}" />
             <MenuItem Header="显示节点库"
                       ToggleType="CheckBox"
-                      IsChecked="{Binding IsLibraryChromeVisible}" />
+                      IsChecked="{Binding IsLibraryChromeVisible, Mode=TwoWay}" />
             <MenuItem Header="显示检查器"
                       ToggleType="CheckBox"
-                      IsChecked="{Binding IsInspectorChromeVisible}" />
+                      IsChecked="{Binding IsInspectorChromeVisible, Mode=TwoWay}" />
             <MenuItem Header="显示状态栏"
                       ToggleType="CheckBox"
-                      IsChecked="{Binding IsStatusChromeVisible}" />
+                      IsChecked="{Binding IsStatusChromeVisible, Mode=TwoWay}" />
             <Separator />
             <MenuItem Header="打开视图控制"
                       Command="{Binding OpenHostMenuGroupCommand}"
@@ -65,22 +65,22 @@
                     Header="行为">
             <MenuItem Header="只读模式"
                       ToggleType="CheckBox"
-                      IsChecked="{Binding IsReadOnlyEnabled}" />
+                      IsChecked="{Binding IsReadOnlyEnabled, Mode=TwoWay}" />
             <MenuItem Header="网格吸附"
                       ToggleType="CheckBox"
-                      IsChecked="{Binding IsGridSnappingEnabled}" />
+                      IsChecked="{Binding IsGridSnappingEnabled, Mode=TwoWay}" />
             <MenuItem Header="对齐辅助线"
                       ToggleType="CheckBox"
-                      IsChecked="{Binding IsAlignmentGuidesEnabled}" />
+                      IsChecked="{Binding IsAlignmentGuidesEnabled, Mode=TwoWay}" />
             <MenuItem Header="工作区命令"
                       ToggleType="CheckBox"
-                      IsChecked="{Binding AreWorkspaceCommandsEnabled}" />
+                      IsChecked="{Binding AreWorkspaceCommandsEnabled, Mode=TwoWay}" />
             <MenuItem Header="片段命令"
                       ToggleType="CheckBox"
-                      IsChecked="{Binding AreFragmentCommandsEnabled}" />
+                      IsChecked="{Binding AreFragmentCommandsEnabled, Mode=TwoWay}" />
             <MenuItem Header="宿主菜单扩展"
                       ToggleType="CheckBox"
-                      IsChecked="{Binding AreHostMenuExtensionsEnabled}" />
+                      IsChecked="{Binding AreHostMenuExtensionsEnabled, Mode=TwoWay}" />
             <Separator />
             <MenuItem Header="打开行为控制"
                       Command="{Binding OpenHostMenuGroupCommand}"
@@ -135,7 +135,7 @@
                PanePlacement="Right"
                CompactPaneLength="0"
                OpenPaneLength="344"
-               IsPaneOpen="{Binding IsHostPaneOpen}">
+               IsPaneOpen="{Binding IsHostPaneOpen, Mode=TwoWay}">
       <SplitView.Pane>
         <Border Padding="16"
                 Background="#101923"
