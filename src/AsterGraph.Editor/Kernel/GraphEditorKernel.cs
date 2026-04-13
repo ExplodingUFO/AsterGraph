@@ -10,6 +10,7 @@ using AsterGraph.Core.Serialization;
 using AsterGraph.Editor.Configuration;
 using AsterGraph.Editor.Diagnostics;
 using AsterGraph.Editor.Events;
+using AsterGraph.Editor.Kernel.Internal;
 using AsterGraph.Editor.Menus;
 using AsterGraph.Editor.Models;
 using AsterGraph.Editor.Runtime;
@@ -29,6 +30,8 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost
     private readonly IPortCompatibilityService _compatibilityService;
     private readonly IGraphWorkspaceService _workspaceService;
     private readonly GraphEditorHistoryService _historyService = new();
+    private readonly GraphEditorKernelViewportCoordinator _viewportCoordinator = new(DefaultZoom, DefaultPanX, DefaultPanY);
+    private readonly GraphEditorKernelCompatibilityQueries _compatibilityQueries;
     private GraphEditorBehaviorOptions _behaviorOptions;
     private readonly GraphEditorStyleOptions _styleOptions;
     private GraphDocument _document;
@@ -59,6 +62,7 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost
         _nodeCatalog = nodeCatalog;
         _compatibilityService = compatibilityService;
         _workspaceService = workspaceService;
+        _compatibilityQueries = new GraphEditorKernelCompatibilityQueries(compatibilityService);
         _styleOptions = styleOptions;
         _behaviorOptions = behaviorOptions;
         _lastSavedDocumentSignature = CreateDocumentSignature(_document);
@@ -435,48 +439,31 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost
 
     public void PanBy(double deltaX, double deltaY)
     {
-        _panX += deltaX;
-        _panY += deltaY;
-        ViewportChanged?.Invoke(this, new GraphEditorViewportChangedEventArgs(_zoom, _panX, _panY, _viewportWidth, _viewportHeight));
+        ApplyViewportSnapshot(_viewportCoordinator.PanBy(GetViewportSnapshot(), deltaX, deltaY));
     }
 
     public void ZoomAt(double factor, GraphPoint screenAnchor)
     {
-        var updated = ViewportMath.ZoomAround(
-            new ViewportState(_zoom, _panX, _panY),
-            factor,
-            screenAnchor,
-            minimumZoom: 0.35,
-            maximumZoom: 1.9);
-        _zoom = updated.Zoom;
-        _panX = updated.PanX;
-        _panY = updated.PanY;
-        ViewportChanged?.Invoke(this, new GraphEditorViewportChangedEventArgs(_zoom, _panX, _panY, _viewportWidth, _viewportHeight));
+        ApplyViewportSnapshot(_viewportCoordinator.ZoomAt(GetViewportSnapshot(), factor, screenAnchor));
     }
 
     public void UpdateViewportSize(double width, double height)
     {
-        _viewportWidth = width;
-        _viewportHeight = height;
-        ViewportChanged?.Invoke(this, new GraphEditorViewportChangedEventArgs(_zoom, _panX, _panY, _viewportWidth, _viewportHeight));
+        ApplyViewportSnapshot(_viewportCoordinator.UpdateViewportSize(GetViewportSnapshot(), width, height));
     }
 
     public void ResetView(bool updateStatus)
     {
-        _zoom = DefaultZoom;
-        _panX = DefaultPanX;
-        _panY = DefaultPanY;
+        ApplyViewportSnapshot(_viewportCoordinator.ResetView(GetViewportSnapshot()));
         if (updateStatus)
         {
             CurrentStatusMessage = "Viewport reset.";
         }
-
-        ViewportChanged?.Invoke(this, new GraphEditorViewportChangedEventArgs(_zoom, _panX, _panY, _viewportWidth, _viewportHeight));
     }
 
     public void FitToViewport(bool updateStatus)
     {
-        if (_document.Nodes.Count == 0 || _viewportWidth <= 0 || _viewportHeight <= 0)
+        if (!_viewportCoordinator.TryFitToViewport(GetViewportSnapshot(), _document.Nodes, out var updatedViewport))
         {
             if (updateStatus)
             {
@@ -486,57 +473,37 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost
             return;
         }
 
-        var minX = _document.Nodes.Min(node => node.Position.X);
-        var minY = _document.Nodes.Min(node => node.Position.Y);
-        var maxX = _document.Nodes.Max(node => node.Position.X + node.Size.Width);
-        var maxY = _document.Nodes.Max(node => node.Position.Y + node.Size.Height);
-        var graphWidth = Math.Max(maxX - minX, 1);
-        var graphHeight = Math.Max(maxY - minY, 1);
-        const double padding = 120;
-
-        var zoomX = _viewportWidth / (graphWidth + (padding * 2));
-        var zoomY = _viewportHeight / (graphHeight + (padding * 2));
-        _zoom = Math.Clamp(Math.Min(zoomX, zoomY), 0.32, 1.4);
-        _panX = ((_viewportWidth - (graphWidth * _zoom)) / 2) - (minX * _zoom);
-        _panY = ((_viewportHeight - (graphHeight * _zoom)) / 2) - (minY * _zoom);
-
+        ApplyViewportSnapshot(updatedViewport);
         if (updateStatus)
         {
             CurrentStatusMessage = "Viewport fit to scene.";
         }
-
-        ViewportChanged?.Invoke(this, new GraphEditorViewportChangedEventArgs(_zoom, _panX, _panY, _viewportWidth, _viewportHeight));
     }
 
     public void CenterViewOnNode(string nodeId)
     {
         var node = FindNode(nodeId);
-        if (node is null || _viewportWidth <= 0 || _viewportHeight <= 0)
+        if (!_viewportCoordinator.TryCenterViewOnNode(GetViewportSnapshot(), node, out var updatedViewport))
         {
             return;
         }
 
-        _panX = (_viewportWidth / 2) - ((node.Position.X + (node.Size.Width / 2)) * _zoom);
-        _panY = (_viewportHeight / 2) - ((node.Position.Y + (node.Size.Height / 2)) * _zoom);
-        CurrentStatusMessage = $"Centered on {node.Title}.";
-        ViewportChanged?.Invoke(this, new GraphEditorViewportChangedEventArgs(_zoom, _panX, _panY, _viewportWidth, _viewportHeight));
+        ApplyViewportSnapshot(updatedViewport);
+        CurrentStatusMessage = $"Centered on {node!.Title}.";
     }
 
     public void CenterViewAt(GraphPoint worldPoint, bool updateStatus)
     {
-        if (_viewportWidth <= 0 || _viewportHeight <= 0)
+        if (!_viewportCoordinator.TryCenterViewAt(GetViewportSnapshot(), worldPoint, out var updatedViewport))
         {
             return;
         }
 
-        _panX = (_viewportWidth / 2) - (worldPoint.X * _zoom);
-        _panY = (_viewportHeight / 2) - (worldPoint.Y * _zoom);
+        ApplyViewportSnapshot(updatedViewport);
         if (updateStatus)
         {
             CurrentStatusMessage = "Viewport centered from mini map.";
         }
-
-        ViewportChanged?.Invoke(this, new GraphEditorViewportChangedEventArgs(_zoom, _panX, _panY, _viewportWidth, _viewportHeight));
     }
 
     public void SaveWorkspace()
@@ -962,16 +929,7 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost
         => _pendingConnection;
 
     public IReadOnlyList<GraphEditorCompatiblePortTargetSnapshot> GetCompatiblePortTargets(string sourceNodeId, string sourcePortId)
-        => GetCompatiblePortTargetsCore(sourceNodeId, sourcePortId)
-            .Select(target => new GraphEditorCompatiblePortTargetSnapshot(
-                target.Node.Id,
-                target.Node.Title,
-                target.Port.Id,
-                target.Port.Label,
-                target.Port.TypeId!,
-                target.Port.AccentHex,
-                target.Compatibility))
-            .ToList();
+        => _compatibilityQueries.GetCompatiblePortTargets(_document, sourceNodeId, sourcePortId);
 
     private static NodePositionSnapshot? ParseNodePosition(string value)
     {
@@ -1008,15 +966,7 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost
 
 #pragma warning disable CS0618
     public IReadOnlyList<CompatiblePortTarget> GetCompatibleTargets(string sourceNodeId, string sourcePortId)
-        => GetCompatiblePortTargetsCore(sourceNodeId, sourcePortId)
-            .Select(target =>
-            {
-                var node = new NodeViewModel(target.Node);
-                var port = node.GetPort(target.Port.Id)
-                    ?? throw new InvalidOperationException($"Port '{target.Port.Id}' was not found on compatibility bridge node '{target.Node.Id}'.");
-                return new CompatiblePortTarget(node, port, target.Compatibility);
-            })
-            .ToList();
+        => _compatibilityQueries.GetCompatibleTargets(_document, sourceNodeId, sourcePortId);
 #pragma warning restore CS0618
 
     private void ConnectPorts(string sourceNodeId, string sourcePortId, string targetNodeId, string targetPortId)
@@ -1099,37 +1049,17 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost
             preserveStatus: true);
     }
 
-    private IReadOnlyList<CompatibleTargetState> GetCompatiblePortTargetsCore(string sourceNodeId, string sourcePortId)
-    {
-        var sourceNode = FindNode(sourceNodeId);
-        var sourcePort = sourceNode?.Outputs.FirstOrDefault(port => string.Equals(port.Id, sourcePortId, StringComparison.Ordinal));
-        if (sourceNode is null || sourcePort is null)
-        {
-            return [];
-        }
-
-        return _document.Nodes
-            .SelectMany(node => node.Inputs.Select(port => (node, port)))
-            .Where(target => !(target.node.Id == sourceNodeId && target.port.Id == sourcePortId))
-            .Where(target => sourcePort.TypeId is not null && target.port.TypeId is not null)
-            .Select(target => new CompatibleTargetState(
-                target.node,
-                target.port,
-                _compatibilityService.Evaluate(sourcePort.TypeId!, target.port.TypeId!)))
-            .Where(target => target.Compatibility.IsCompatible)
-            .ToList();
-    }
-
     private GraphPoint GetViewportCenter()
-    {
-        if (_viewportWidth <= 0 || _viewportHeight <= 0)
-        {
-            return ViewportMath.ScreenToWorld(new ViewportState(_zoom, _panX, _panY), new GraphPoint(820, 440));
-        }
+        => _viewportCoordinator.GetViewportCenter(GetViewportSnapshot());
 
-        return ViewportMath.ScreenToWorld(
-            new ViewportState(_zoom, _panX, _panY),
-            new GraphPoint(_viewportWidth / 2, _viewportHeight / 2));
+    private void ApplyViewportSnapshot(GraphEditorViewportSnapshot snapshot)
+    {
+        _zoom = snapshot.Zoom;
+        _panX = snapshot.PanX;
+        _panY = snapshot.PanY;
+        _viewportWidth = snapshot.ViewportWidth;
+        _viewportHeight = snapshot.ViewportHeight;
+        ViewportChanged?.Invoke(this, new GraphEditorViewportChangedEventArgs(_zoom, _panX, _panY, _viewportWidth, _viewportHeight));
     }
 
     private void MarkDirty(
@@ -1298,9 +1228,4 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost
 
     private static GraphParameterValue CloneParameterValue(GraphParameterValue parameter)
         => new(parameter.Key, parameter.TypeId, parameter.Value);
-
-    private sealed record CompatibleTargetState(
-        GraphNode Node,
-        GraphPort Port,
-        PortCompatibilityResult Compatibility);
 }
