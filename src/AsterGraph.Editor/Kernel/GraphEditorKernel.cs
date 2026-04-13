@@ -1,5 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using AsterGraph.Abstractions.Catalog;
 using AsterGraph.Abstractions.Compatibility;
 using AsterGraph.Abstractions.Definitions;
@@ -20,7 +18,7 @@ using AsterGraph.Editor.Viewport;
 
 namespace AsterGraph.Editor.Kernel;
 
-internal sealed class GraphEditorKernel : IGraphEditorSessionHost
+internal sealed class GraphEditorKernel : IGraphEditorSessionHost, IGraphEditorKernelCommandRouterHost
 {
     private const double DefaultZoom = 0.88;
     private const double DefaultPanX = 110;
@@ -33,6 +31,7 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost
     private readonly GraphEditorKernelViewportCoordinator _viewportCoordinator = new(DefaultZoom, DefaultPanX, DefaultPanY);
     private readonly GraphEditorKernelCompatibilityQueries _compatibilityQueries;
     private readonly GraphEditorKernelDocumentMutator _documentMutator = new();
+    private readonly GraphEditorKernelCommandRouter _commandRouter;
     private GraphEditorBehaviorOptions _behaviorOptions;
     private readonly GraphEditorStyleOptions _styleOptions;
     private GraphDocument _document;
@@ -66,6 +65,7 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost
         _compatibilityQueries = new GraphEditorKernelCompatibilityQueries(compatibilityService);
         _styleOptions = styleOptions;
         _behaviorOptions = behaviorOptions;
+        _commandRouter = new GraphEditorKernelCommandRouter(this);
         _lastSavedDocumentSignature = CreateDocumentSignature(_document);
         _historyService.Reset(CaptureHistoryState());
         CurrentStatusMessage = "Ready to edit.";
@@ -101,6 +101,20 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost
     public event Action<GraphEditorDiagnostic>? DiagnosticPublished;
 
     public string CurrentStatusMessage { get; private set; } = string.Empty;
+
+    GraphEditorBehaviorOptions IGraphEditorKernelCommandRouterHost.BehaviorOptions => _behaviorOptions;
+
+    GraphDocument IGraphEditorKernelCommandRouterHost.Document => _document;
+
+    int IGraphEditorKernelCommandRouterHost.SelectedNodeCount => _selectedNodeIds.Count;
+
+    GraphEditorPendingConnectionSnapshot IGraphEditorKernelCommandRouterHost.PendingConnection => _pendingConnection;
+
+    double IGraphEditorKernelCommandRouterHost.ViewportWidth => _viewportWidth;
+
+    double IGraphEditorKernelCommandRouterHost.ViewportHeight => _viewportHeight;
+
+    bool IGraphEditorKernelCommandRouterHost.WorkspaceExists => _workspaceService.Exists();
 
     internal bool IsDirty
         => !string.Equals(CreateDocumentSignature(_document), _lastSavedDocumentSignature, StringComparison.Ordinal);
@@ -672,293 +686,10 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost
         ];
 
     public IReadOnlyList<GraphEditorCommandDescriptorSnapshot> GetCommandDescriptors()
-        =>
-        [
-            new GraphEditorCommandDescriptorSnapshot(
-                "nodes.add",
-                _behaviorOptions.Commands.Nodes.AllowCreate),
-            new GraphEditorCommandDescriptorSnapshot(
-                "selection.set",
-                true),
-            new GraphEditorCommandDescriptorSnapshot(
-                "selection.delete",
-                _selectedNodeIds.Count > 0 && _behaviorOptions.Commands.Nodes.AllowDelete),
-            new GraphEditorCommandDescriptorSnapshot(
-                "nodes.move",
-                _behaviorOptions.Commands.Nodes.AllowMove),
-            new GraphEditorCommandDescriptorSnapshot(
-                "connections.start",
-                _behaviorOptions.Commands.Connections.AllowCreate),
-            new GraphEditorCommandDescriptorSnapshot(
-                "connections.complete",
-                _pendingConnection.HasPendingConnection && _behaviorOptions.Commands.Connections.AllowCreate),
-            new GraphEditorCommandDescriptorSnapshot(
-                "connections.connect",
-                _behaviorOptions.Commands.Connections.AllowCreate),
-            new GraphEditorCommandDescriptorSnapshot(
-                "connections.cancel",
-                _pendingConnection.HasPendingConnection),
-            new GraphEditorCommandDescriptorSnapshot(
-                "connections.delete",
-                _behaviorOptions.Commands.Connections.AllowDelete),
-            new GraphEditorCommandDescriptorSnapshot(
-                "connections.break-port",
-                _behaviorOptions.Commands.Connections.AllowDisconnect),
-            new GraphEditorCommandDescriptorSnapshot(
-                "connections.disconnect-incoming",
-                _behaviorOptions.Commands.Connections.AllowDisconnect),
-            new GraphEditorCommandDescriptorSnapshot(
-                "connections.disconnect-outgoing",
-                _behaviorOptions.Commands.Connections.AllowDisconnect),
-            new GraphEditorCommandDescriptorSnapshot(
-                "connections.disconnect-all",
-                _behaviorOptions.Commands.Connections.AllowDisconnect),
-            new GraphEditorCommandDescriptorSnapshot(
-                "viewport.fit",
-                _document.Nodes.Count > 0 && _viewportWidth > 0 && _viewportHeight > 0),
-            new GraphEditorCommandDescriptorSnapshot(
-                "viewport.pan",
-                true),
-            new GraphEditorCommandDescriptorSnapshot(
-                "viewport.resize",
-                true),
-            new GraphEditorCommandDescriptorSnapshot(
-                "viewport.reset",
-                true),
-            new GraphEditorCommandDescriptorSnapshot(
-                "viewport.center-node",
-                _viewportWidth > 0 && _viewportHeight > 0),
-            new GraphEditorCommandDescriptorSnapshot(
-                "viewport.center",
-                _viewportWidth > 0 && _viewportHeight > 0),
-            new GraphEditorCommandDescriptorSnapshot(
-                "workspace.save",
-                _behaviorOptions.Commands.Workspace.AllowSave,
-                _behaviorOptions.Commands.Workspace.AllowSave ? null : "Snapshot saving is disabled by host permissions."),
-            new GraphEditorCommandDescriptorSnapshot(
-                "workspace.load",
-                _behaviorOptions.Commands.Workspace.AllowLoad && _workspaceService.Exists(),
-                !_behaviorOptions.Commands.Workspace.AllowLoad
-                    ? "Snapshot loading is disabled by host permissions."
-                    : _workspaceService.Exists()
-                        ? null
-                        : "No saved snapshot yet. Save once to create one."),
-        ];
+        => _commandRouter.GetCommandDescriptors();
 
     public bool TryExecuteCommand(GraphEditorCommandInvocationSnapshot command)
-    {
-        ArgumentNullException.ThrowIfNull(command);
-
-        switch (command.CommandId)
-        {
-            case "nodes.add":
-                if (!TryGetRequiredArgument(command, "definitionId", out var definitionValue))
-                {
-                    return false;
-                }
-
-                var definitionId = new NodeDefinitionId(definitionValue);
-                GraphPoint? worldPosition = null;
-                if (command.TryGetArgument("worldX", out var worldX)
-                    && command.TryGetArgument("worldY", out var worldY)
-                    && double.TryParse(worldX, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsedX)
-                    && double.TryParse(worldY, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsedY))
-                {
-                    worldPosition = new GraphPoint(parsedX, parsedY);
-                }
-
-                AddNode(definitionId, worldPosition);
-                return true;
-
-            case "selection.set":
-                var nodeIds = command.GetArguments("nodeId")
-                    .Where(value => !string.IsNullOrWhiteSpace(value))
-                    .ToList();
-                if (nodeIds.Count == 0)
-                {
-                    return false;
-                }
-
-                command.TryGetArgument("primaryNodeId", out var primaryNodeId);
-                var updateSelectionStatus = !command.TryGetArgument("updateStatus", out var selectionUpdateStatusValue)
-                    || !bool.TryParse(selectionUpdateStatusValue, out var parsedSelectionUpdateStatus)
-                    || parsedSelectionUpdateStatus;
-
-                SetSelection(nodeIds, primaryNodeId, updateSelectionStatus);
-                return true;
-
-            case "selection.delete":
-                DeleteSelection();
-                return true;
-
-            case "nodes.move":
-                var positions = command.GetArguments("position")
-                    .Select(ParseNodePosition)
-                    .ToList();
-                if (positions.Count == 0 || positions.Any(position => position is null))
-                {
-                    return false;
-                }
-
-                var updateMoveStatus = !command.TryGetArgument("updateStatus", out var moveUpdateStatusValue)
-                    || !bool.TryParse(moveUpdateStatusValue, out var parsedMoveUpdateStatus)
-                    || parsedMoveUpdateStatus;
-
-                SetNodePositions(positions.Select(position => position!).ToList(), updateMoveStatus);
-                return true;
-
-            case "connections.start":
-                if (!TryGetRequiredArgument(command, "sourceNodeId", out var sourceNodeId)
-                    || !TryGetRequiredArgument(command, "sourcePortId", out var sourcePortId))
-                {
-                    return false;
-                }
-
-                StartConnection(sourceNodeId, sourcePortId);
-                return true;
-
-            case "connections.complete":
-                if (!TryGetRequiredArgument(command, "targetNodeId", out var completeTargetNodeId)
-                    || !TryGetRequiredArgument(command, "targetPortId", out var completeTargetPortId))
-                {
-                    return false;
-                }
-
-                CompleteConnection(completeTargetNodeId, completeTargetPortId);
-                return true;
-
-            case "connections.connect":
-                if (!TryGetRequiredArgument(command, "sourceNodeId", out var connectSourceNodeId)
-                    || !TryGetRequiredArgument(command, "sourcePortId", out var connectSourcePortId)
-                    || !TryGetRequiredArgument(command, "targetNodeId", out var targetNodeId)
-                    || !TryGetRequiredArgument(command, "targetPortId", out var targetPortId))
-                {
-                    return false;
-                }
-
-                StartConnection(connectSourceNodeId, connectSourcePortId);
-                CompleteConnection(targetNodeId, targetPortId);
-                return true;
-
-            case "connections.cancel":
-                CancelPendingConnection();
-                return true;
-
-            case "connections.delete":
-                if (!TryGetRequiredArgument(command, "connectionId", out var connectionId))
-                {
-                    return false;
-                }
-
-                DeleteConnection(connectionId);
-                return true;
-
-            case "connections.break-port":
-                if (!TryGetRequiredArgument(command, "nodeId", out var nodeId)
-                    || !TryGetRequiredArgument(command, "portId", out var portId))
-                {
-                    return false;
-                }
-
-                BreakConnectionsForPort(nodeId, portId);
-                return true;
-
-            case "connections.disconnect-incoming":
-                if (!TryGetRequiredArgument(command, "nodeId", out var disconnectIncomingNodeId))
-                {
-                    return false;
-                }
-
-                DisconnectIncoming(disconnectIncomingNodeId);
-                return true;
-
-            case "connections.disconnect-outgoing":
-                if (!TryGetRequiredArgument(command, "nodeId", out var disconnectOutgoingNodeId))
-                {
-                    return false;
-                }
-
-                DisconnectOutgoing(disconnectOutgoingNodeId);
-                return true;
-
-            case "connections.disconnect-all":
-                if (!TryGetRequiredArgument(command, "nodeId", out var disconnectAllNodeId))
-                {
-                    return false;
-                }
-
-                DisconnectAll(disconnectAllNodeId);
-                return true;
-
-            case "viewport.fit":
-                FitToViewport(updateStatus: true);
-                return true;
-
-            case "viewport.pan":
-                if (!command.TryGetArgument("deltaX", out var deltaXValue)
-                    || !command.TryGetArgument("deltaY", out var deltaYValue)
-                    || !double.TryParse(deltaXValue, NumberStyles.Float, CultureInfo.InvariantCulture, out var deltaX)
-                    || !double.TryParse(deltaYValue, NumberStyles.Float, CultureInfo.InvariantCulture, out var deltaY))
-                {
-                    return false;
-                }
-
-                PanBy(deltaX, deltaY);
-                return true;
-
-            case "viewport.resize":
-                if (!command.TryGetArgument("width", out var widthValue)
-                    || !command.TryGetArgument("height", out var heightValue)
-                    || !double.TryParse(widthValue, NumberStyles.Float, CultureInfo.InvariantCulture, out var width)
-                    || !double.TryParse(heightValue, NumberStyles.Float, CultureInfo.InvariantCulture, out var height))
-                {
-                    return false;
-                }
-
-                UpdateViewportSize(width, height);
-                return true;
-
-            case "viewport.reset":
-                ResetView(updateStatus: true);
-                return true;
-
-            case "viewport.center-node":
-                if (!TryGetRequiredArgument(command, "nodeId", out var centerNodeId))
-                {
-                    return false;
-                }
-
-                CenterViewOnNode(centerNodeId);
-                return true;
-
-            case "viewport.center":
-                if (!command.TryGetArgument("worldX", out var centerXValue)
-                    || !command.TryGetArgument("worldY", out var centerYValue)
-                    || !double.TryParse(centerXValue, NumberStyles.Float, CultureInfo.InvariantCulture, out var centerX)
-                    || !double.TryParse(centerYValue, NumberStyles.Float, CultureInfo.InvariantCulture, out var centerY))
-                {
-                    return false;
-                }
-
-                var updateCenterStatus = !command.TryGetArgument("updateStatus", out var centerUpdateStatusValue)
-                    || !bool.TryParse(centerUpdateStatusValue, out var parsedCenterUpdateStatus)
-                    || parsedCenterUpdateStatus;
-
-                CenterViewAt(new GraphPoint(centerX, centerY), updateCenterStatus);
-                return true;
-
-            case "workspace.save":
-                SaveWorkspace();
-                return true;
-
-            case "workspace.load":
-                LoadWorkspace();
-                return true;
-
-            default:
-                return false;
-        }
-    }
+        => _commandRouter.TryExecuteCommand(command);
 
     public IReadOnlyList<NodePositionSnapshot> GetNodePositions()
         => _document.Nodes
@@ -970,39 +701,6 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost
 
     public IReadOnlyList<GraphEditorCompatiblePortTargetSnapshot> GetCompatiblePortTargets(string sourceNodeId, string sourcePortId)
         => _compatibilityQueries.GetCompatiblePortTargets(_document, sourceNodeId, sourcePortId);
-
-    private static NodePositionSnapshot? ParseNodePosition(string value)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            return null;
-        }
-
-        var parts = value.Split('|', StringSplitOptions.TrimEntries);
-        if (parts.Length != 3
-            || string.IsNullOrWhiteSpace(parts[0])
-            || !double.TryParse(parts[1], NumberStyles.Float, CultureInfo.InvariantCulture, out var x)
-            || !double.TryParse(parts[2], NumberStyles.Float, CultureInfo.InvariantCulture, out var y))
-        {
-            return null;
-        }
-
-        return new NodePositionSnapshot(parts[0], new GraphPoint(x, y));
-    }
-
-    private static bool TryGetRequiredArgument(
-        GraphEditorCommandInvocationSnapshot command,
-        string name,
-        [NotNullWhen(true)] out string? value)
-    {
-        if (!command.TryGetArgument(name, out value) || string.IsNullOrWhiteSpace(value))
-        {
-            value = null;
-            return false;
-        }
-
-        return true;
-    }
 
 #pragma warning disable CS0618
     public IReadOnlyList<CompatiblePortTarget> GetCompatibleTargets(string sourceNodeId, string sourcePortId)
