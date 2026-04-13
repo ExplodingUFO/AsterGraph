@@ -2426,7 +2426,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     private void HandleNodesCollectionChanged(object? sender, NotifyCollectionChangedEventArgs args)
     {
         _documentProjectionApplier.HandleNodesCollectionChanged(args, HandleNodePropertyChanged);
-        _selectionStateSynchronizer.CoerceSelectionToExistingNodes();
+        CoerceSelectionToExistingNodes();
         FitViewCommand.NotifyCanExecuteChanged();
         RefreshSelectionProjection();
         RaiseComputedPropertyChanges();
