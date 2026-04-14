@@ -2,17 +2,17 @@
 
 ## What This Is
 
-AsterGraph is a modular node-graph editor toolkit for .NET with a kernel-first editor runtime, explicit descriptor-based host contracts, and an Avalonia UI shell. The shipped baseline now covers a publishable four-package SDK boundary, runtime/session contracts, embeddable Avalonia surfaces, replaceable presentation seams, diagnostics hooks, plugin loading, automation execution, and proof-backed host integration. The current milestone is about hardening that SDK boundary so hosts can keep depending on the canonical runtime path without inheriting retained-facade debt or release-process drift.
+AsterGraph is a modular node-graph editor toolkit for .NET with a kernel-first editor runtime, explicit descriptor-based host contracts, and an Avalonia UI shell. The shipped baseline now covers a publishable four-package SDK boundary, runtime/session contracts, embeddable Avalonia surfaces, replaceable presentation seams, diagnostics hooks, plugin loading, automation execution, and proof-backed host integration. v1.5 hardened that SDK boundary so hosts can keep depending on the canonical runtime path without inheriting retained-facade debt or release-process drift.
 
 ## Core Value
 
 Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
 
-## Current Milestone: v1.5 Runtime Boundary Cleanup and Quality Gates
+## Latest Shipped Milestone: v1.5 Runtime Boundary Cleanup and Quality Gates
 
-**Goal:** Reduce the remaining gap between the canonical runtime boundary and retained compatibility facades, then automate the validation and documentation surface that protects the SDK boundary.
+**Shipped goal:** Reduce the remaining gap between the canonical runtime boundary and retained compatibility facades, then automate the validation and documentation surface that protects the SDK boundary.
 
-**Target features:**
+**Delivered in v1.5:**
 - Consolidate retained `GraphEditorViewModel` behavior around the kernel/session-owned runtime path and continue retiring MVVM-shaped runtime compatibility shims.
 - Add tracked repo-level quality gates for style, package/version management, target-matrix validation, coverage, and package/public API checks.
 - Realign documentation, solution membership, proof tools, and regression lanes around one trustworthy SDK verification surface.
@@ -66,7 +66,7 @@ Hosts can integrate only the graph-editor pieces they need, replace default UI a
 
 ### Active
 
-- None. Phase 29 closed the remaining v1.5 product gaps; the next step is milestone archive and next-milestone selection.
+- None. v1.5 is archived; the next step is to archive v1.4 history cleanly or open a fresh post-v1.5 milestone.
 
 ### Out of Scope
 
@@ -115,9 +115,9 @@ v1.5 therefore focuses on hardening the SDK's actual contract boundary and the v
 
 ## Next Milestone Goals
 
-- Archive v1.4 cleanly once milestone history is recorded alongside the v1.5 planning artifacts.
-- Use v1.5 to make boundary cleanup and release validation part of the normal repo baseline rather than one-off milestone cleanup.
-- After v1.5, decide whether the next investment should target plugin trust/distribution, richer automation authoring, or another host-facing gap surfaced by the hardened proof ring.
+- Archive v1.4 cleanly so the older milestone history matches the newer archive format.
+- Start the next milestone from a fresh requirements pass once archive history is consistent.
+- Decide whether the next investment should target plugin trust/distribution, richer automation authoring, or another host-facing gap surfaced by the hardened proof ring.
 
 ## Archived Milestone Framing
 
@@ -146,4 +146,4 @@ This document evolves at milestone boundaries.
 4. Reset active requirements so the next roadmap starts from the highest remaining product risk instead of stale execution context.
 
 ---
-*Last updated: 2026-04-14 after completing Phase 29*
+*Last updated: 2026-04-14 after the v1.5 milestone archive*

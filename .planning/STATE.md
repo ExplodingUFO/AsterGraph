@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.5
 milestone_name: Runtime Boundary Cleanup and Quality Gates
-status: Milestone complete
-stopped_at: Phase 29 complete
-last_updated: "2026-04-14T13:05:30.608Z"
+status: v1.5 milestone archived
+stopped_at: v1.5 archive recorded
+last_updated: "2026-04-14T21:23:51.6311355+08:00"
 progress:
   total_phases: 4
   completed_phases: 4
@@ -19,12 +19,13 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-04-14)
 
 **Core value:** Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
-**Current focus:** Milestone archive and next-milestone framing
+**Current focus:** v1.4 archive cleanup and next-milestone framing
 
 ## Current Position
 
-Phase: 29 (release-validation-and-canonical-adoption-path) — COMPLETE
-Plan: 3 of 3 complete
+Milestone: v1.5 archived
+Latest shipped phase: 29 (release-validation-and-canonical-adoption-path)
+Plans: 12 of 12 complete
 
 ## Accumulated Context
 
@@ -52,7 +53,7 @@ None captured yet.
 
 ### Blockers/Concerns
 
-- `MILESTONES.md` still stops at v1.3 even though v1.4 and v1.5 execution are complete; archive/history cleanup is the remaining milestone-maintenance task.
+- v1.4 still has no archived milestone files in `.planning/milestones/`, so milestone history is only partially normalized to the newer archive format.
 - The known `STATE_HISTORY_OK` mismatch remains a pre-existing baseline issue if future work touches history/save semantics.
 
 ### Quick Tasks Completed
@@ -66,5 +67,5 @@ None captured yet.
 ## Session Continuity
 
 Last session: 2026-04-14T20:20:09.9120467+08:00
-Stopped at: Phase 29 complete
-Resume file: .planning/ROADMAP.md
+Stopped at: v1.5 archive recorded
+Resume file: .planning/MILESTONES.md

@@ -1,5 +1,38 @@
 # Milestones
 
+## v1.5 Runtime Boundary Cleanup and Quality Gates (Shipped: 2026-04-14)
+
+**Delivered:** AsterGraph now ships a release-grade validation lane and one short canonical host-adoption path on top of the already-shipped kernel-first SDK boundary, so package proof, coverage, package validation, CI, and public host guidance all point at the same runtime-first contract story.
+
+**Phases completed:** 26-29 (12 plans total)
+
+**Archive:** [ROADMAP](./milestones/v1.5-ROADMAP.md) | [REQUIREMENTS](./milestones/v1.5-REQUIREMENTS.md)
+
+**Key accomplishments:**
+
+- Canonicalized the remaining compatible-target runtime boundary so retained MVVM shims are explicitly compatibility-only and no longer leak into the internal session/kernel contract.
+- Added the repo-quality baseline for v1.5 with tracked `.editorconfig`, centralized package versions, deterministic restore sources, one shared `eng/ci.ps1`, and matrix CI over `net8.0` and `net9.0`.
+- Aligned the live proof surface around `PackageSmoke`, `ScaleSmoke`, and split core-vs-demo regression lanes so docs, solution membership, and automation describe the same verification surface.
+- Shipped `eng/ci.ps1 -Lane release` to pack the four publishable packages, run `PackageSmoke`, run `ScaleSmoke`, collect checked-in coverage, and enforce SDK package validation from the same repo-local command path used by CI.
+- Made `docs/quick-start.md` the canonical three-way adoption guide for runtime-only, shipped-UI, and retained-migration hosts, then synchronized README and Host Integration to the same route.
+
+**Stats:**
+
+- 91 files modified
+- 4,165 insertions and 342 deletions across code, docs, tests, CI, and planning artifacts
+- 4 phases and 12 plans
+- Timeline: 2026-04-14 to 2026-04-14
+
+**Git range:** `docs: define milestone v1.5 requirements` → `docs(29): sync release lane and milestone state`
+
+**Notes:**
+
+- No separate `v1.5-MILESTONE-AUDIT.md` was present at archive time; the milestone was archived from green phase verification plus complete requirements traceability.
+
+**What's next:** Archive the older v1.4 milestone history cleanly, then start the next milestone from a fresh requirements pass.
+
+---
+
 ## v1.3 Demo Showcase (Shipped: 2026-04-08)
 
 **Delivered:** AsterGraph now ships a graph-first, host-menu-first demo showcase that keeps one live session on screen while proving host-owned seams, shared runtime state, and live configuration through compact in-context controls and proof cues.
@@ -9,12 +42,14 @@
 **Archive:** [ROADMAP](./milestones/v1.3-ROADMAP.md) | [REQUIREMENTS](./milestones/v1.3-REQUIREMENTS.md)
 
 **Key accomplishments:**
+
 - Rebuilt `AsterGraph.Demo` around a graph-first shell led by a host-level menu instead of the old explanation-heavy capability console.
 - Consolidated view, behavior, and runtime controls into compact host-menu and drawer sections that all act on one retained `Editor` / `Session`.
 - Added proof-focused labels, runtime/proof sections, and README alignment so seam ownership and live configuration are obvious on first read.
 - Locked the new story with focused demo-shell tests plus milestone summaries and verification artifacts.
 
 **Stats:**
+
 - 41 files modified
 - 3,521 insertions and 507 deletions across code, docs, tests, and planning artifacts
 - 3 phases and 9 plans
@@ -33,6 +68,7 @@
 **Archive:** [ROADMAP](./milestones/v1.2-ROADMAP.md) | [REQUIREMENTS](./milestones/v1.2-REQUIREMENTS.md)
 
 **Key accomplishments:**
+
 - Extracted `GraphEditorKernel` and made `CreateSession(...)` kernel-first instead of `GraphEditorViewModel`-owned.
 - Converted retained `GraphEditorViewModel.Session` into an adapter-backed compatibility path over the same shared runtime boundary.
 - Normalized capability, command, and menu discovery around stable descriptors and snapshot reads rather than MVVM object shape.
@@ -40,6 +76,7 @@
 - Locked migration posture and plugin/automation readiness into focused tests plus `HostSample`, `PackageSmoke`, and `ScaleSmoke` markers.
 
 **Stats:**
+
 - 104 files modified
 - 8,970 insertions and 1,505 deletions across code, docs, and planning artifacts
 - 6 phases and 18 plans; milestone work was tracked at plan-summary granularity rather than separate task ledgers
