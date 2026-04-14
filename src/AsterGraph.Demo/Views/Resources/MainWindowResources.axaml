@@ -1,0 +1,15 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <DataTemplate x:Key="HostDrawerLineTemplate">
+    <Border Margin="0,0,0,8"
+            Padding="12"
+            Background="#14202B"
+            BorderBrush="#365063"
+            BorderThickness="1"
+            CornerRadius="8">
+      <TextBlock TextWrapping="Wrap"
+                 Foreground="#D8EEF3"
+                 Text="{Binding}" />
+    </Border>
+  </DataTemplate>
+</ResourceDictionary>

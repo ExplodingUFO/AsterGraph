@@ -149,6 +149,23 @@ public sealed class GraphEditorMigrationCompatibilityTests
         Assert.Equal(factoryDescriptors, legacyDescriptors);
     }
 
+    [Fact]
+#pragma warning disable CS0618
+    public void LegacyCompatibleTargets_ReturnRetainedNodeAndPortInstances()
+    {
+        var harness = CreateHarness();
+        var legacyEditor = CreateLegacyEditor(harness);
+
+        var compatibleTargets = legacyEditor.GetCompatibleTargets(SourceNodeId, SourcePortId);
+
+        var target = Assert.Single(compatibleTargets);
+        var retainedNode = Assert.IsType<NodeViewModel>(legacyEditor.FindNode(TargetNodeId));
+        var retainedPort = Assert.IsType<PortViewModel>(retainedNode.GetPort(TargetPortId));
+        Assert.Same(retainedNode, target.Node);
+        Assert.Same(retainedPort, target.Port);
+    }
+#pragma warning restore CS0618
+
     [AvaloniaFact]
     public void GraphEditorView_RemainsCompatibilityFacadeDuringStagedMigration()
     {

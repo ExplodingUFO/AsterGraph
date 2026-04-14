@@ -297,6 +297,17 @@ dotnet test avalonia-node-map.sln --no-restore --nologo -v minimal
 
 Use `-t:Rebuild` rather than a plain incremental `dotnet build` when validating XML documentation warning cleanup. Incremental builds can reuse prior outputs and falsely appear warning-free.
 
+If local Avalonia validation starts failing with resource-resolution errors such as `AVLN2000` or `Unable to resolve !AvaloniaResources`, treat that as a stale local build-state problem first, not as a confirmed XAML regression. Clean `src/AsterGraph.Avalonia` and `src/AsterGraph.Demo`, then rerun the failing command sequentially:
+
+```powershell
+dotnet clean src/AsterGraph.Avalonia/AsterGraph.Avalonia.csproj -v minimal
+dotnet clean src/AsterGraph.Demo/AsterGraph.Demo.csproj -v minimal
+dotnet build src/AsterGraph.Demo/AsterGraph.Demo.csproj -v minimal
+dotnet test tests/AsterGraph.Editor.Tests/AsterGraph.Editor.Tests.csproj -v minimal
+```
+
+Avoid running overlapping `dotnet build` / `dotnet test` commands against the same worktree while debugging Avalonia resource issues; concurrent builds can produce file-lock noise and misleading XAML compiler failures.
+
 Sample local feed config:
 
 ```powershell

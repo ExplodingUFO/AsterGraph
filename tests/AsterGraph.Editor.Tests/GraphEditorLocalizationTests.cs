@@ -9,6 +9,7 @@ using AsterGraph.Editor.Catalog;
 using AsterGraph.Editor.Configuration;
 using AsterGraph.Editor.Localization;
 using AsterGraph.Editor.Menus;
+using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.ViewModels;
 using Xunit;
 
@@ -125,6 +126,42 @@ public sealed class GraphEditorLocalizationTests
     }
 
     [Fact]
+    public void SetLocalizationProvider_AfterConstruction_RebuildsSelectionProjectionAndComputedCaptions()
+    {
+        var editor = CreateConnectedEditor(provider: null);
+
+        editor.SetSelection([editor.Nodes[0], editor.Nodes[1]], editor.Nodes[0], status: null);
+        Assert.Equal("2 nodes selected  ·  primary Source", editor.SelectionCaption);
+        Assert.Equal("2 nodes  ·  1 links  ·  88% zoom", editor.StatsCaption);
+
+        editor.SetLocalizationProvider(new TestGraphLocalizationProvider(
+            new Dictionary<string, string>
+            {
+                ["editor.selection.multiple"] = "已选择 {0} 个节点 / 主节点 {1}",
+                ["editor.stats.caption"] = "{0} 个节点 / {1} 条连线 / {2:0}% 缩放",
+            }));
+
+        Assert.Equal("已选择 2 个节点 / 主节点 Source", editor.SelectionCaption);
+        Assert.Equal("2 个节点 / 1 条连线 / 88% 缩放", editor.StatsCaption);
+    }
+
+    [Fact]
+    public void SetLocalizationProvider_AfterConstruction_UpdatesSessionFeatureDescriptorAvailability()
+    {
+        var editor = CreateConnectedEditor(provider: null);
+
+        Assert.False(GetFeatureAvailability(editor, "integration.localization-provider"));
+
+        editor.SetLocalizationProvider(new TestGraphLocalizationProvider(new Dictionary<string, string>()));
+
+        Assert.True(GetFeatureAvailability(editor, "integration.localization-provider"));
+
+        editor.SetLocalizationProvider(null);
+
+        Assert.False(GetFeatureAvailability(editor, "integration.localization-provider"));
+    }
+
+    [Fact]
     public void InspectorProjection_UsesLocalizationProviderForStockProjectionText()
     {
         var editor = CreateConnectedEditor(new TestGraphLocalizationProvider(
@@ -140,6 +177,58 @@ public sealed class GraphEditorLocalizationTests
         Assert.Equal("Color => Color", editor.InspectorOutputs);
         Assert.Equal("无", editor.InspectorUpstream);
         Assert.Equal("Sink <= Input", editor.InspectorDownstream);
+    }
+
+    [Fact]
+    public void SessionCommand_DuplicateNode_UsesLocalizationProviderForRetainedStatusMessage()
+    {
+        var editor = CreateConnectedEditor(new TestGraphLocalizationProvider(
+            new Dictionary<string, string>
+            {
+                ["editor.status.node.duplicated"] = "已复制 {0}。",
+            }));
+        editor.StatusMessage = "stale";
+
+        var executed = editor.Session.Commands.TryExecuteCommand(
+            new GraphEditorCommandInvocationSnapshot(
+                "nodes.duplicate",
+                [
+                    new GraphEditorCommandArgumentSnapshot("nodeId", "node-source"),
+                ]));
+
+        Assert.True(executed);
+        Assert.Equal("已复制 Source。", editor.StatusMessage);
+    }
+
+    [Fact]
+    public void DeleteNodeById_UsesLocalizationProviderForConnectedNodePermissionDenial()
+    {
+        var behavior = GraphEditorBehaviorOptions.Default with
+        {
+            Commands = GraphEditorCommandPermissions.Default with
+            {
+                Connections = new ConnectionCommandPermissions
+                {
+                    AllowCreate = true,
+                    AllowDelete = false,
+                    AllowDisconnect = false,
+                },
+            },
+        };
+        var editor = CreateConnectedEditor(
+            new TestGraphLocalizationProvider(
+                new Dictionary<string, string>
+                {
+                    ["editor.status.node.delete.singleConnectedRequiresPermission"] = "删除带连线节点需要连线删除权限。",
+                }),
+            behavior);
+        editor.StatusMessage = "stale";
+
+        editor.DeleteNodeById("node-source");
+
+        Assert.Equal("删除带连线节点需要连线删除权限。", editor.StatusMessage);
+        Assert.Equal(2, editor.Nodes.Count);
+        Assert.Single(editor.Connections);
     }
 
     private static string ReadRepoFile(string relativePath)
@@ -173,7 +262,9 @@ public sealed class GraphEditorLocalizationTests
             localizationProvider: provider);
     }
 
-    private static GraphEditorViewModel CreateConnectedEditor(IGraphLocalizationProvider? provider)
+    private static GraphEditorViewModel CreateConnectedEditor(
+        IGraphLocalizationProvider? provider,
+        GraphEditorBehaviorOptions? behaviorOptions = null)
     {
         var sourceDefinitionId = new NodeDefinitionId("tests.localization.source");
         var sinkDefinitionId = new NodeDefinitionId("tests.localization.sink");
@@ -245,6 +336,7 @@ public sealed class GraphEditorLocalizationTests
                 ]),
             catalog,
             new DefaultPortCompatibilityService(),
+            behaviorOptions: behaviorOptions,
             localizationProvider: provider);
     }
 
@@ -260,4 +352,9 @@ public sealed class GraphEditorLocalizationTests
         public string GetString(string key, string fallback)
             => _values.TryGetValue(key, out var value) ? value : fallback;
     }
+
+    private static bool GetFeatureAvailability(GraphEditorViewModel editor, string descriptorId)
+        => editor.Session.Queries.GetFeatureDescriptors()
+            .Single(descriptor => descriptor.Id == descriptorId)
+            .IsAvailable;
 }

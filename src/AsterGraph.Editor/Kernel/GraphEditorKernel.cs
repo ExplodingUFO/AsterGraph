@@ -1,5 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using AsterGraph.Abstractions.Catalog;
 using AsterGraph.Abstractions.Compatibility;
 using AsterGraph.Abstractions.Definitions;
@@ -20,7 +18,7 @@ using AsterGraph.Editor.Viewport;
 
 namespace AsterGraph.Editor.Kernel;
 
-internal sealed class GraphEditorKernel : IGraphEditorSessionHost
+internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost, IGraphEditorKernelCommandRouterHost
 {
     private const double DefaultZoom = 0.88;
     private const double DefaultPanX = 110;
@@ -32,6 +30,19 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost
     private readonly GraphEditorHistoryService _historyService = new();
     private readonly GraphEditorKernelViewportCoordinator _viewportCoordinator = new(DefaultZoom, DefaultPanX, DefaultPanY);
     private readonly GraphEditorKernelCompatibilityQueries _compatibilityQueries;
+    private readonly GraphEditorKernelDocumentMutator _documentMutator = new();
+    private readonly GraphEditorKernelNodeMutationHost _nodeMutationHost;
+    private readonly GraphEditorKernelNodeMutationCoordinator _nodeMutationCoordinator;
+    private readonly GraphEditorKernelConnectionMutationHost _connectionMutationHost;
+    private readonly GraphEditorKernelConnectionMutationCoordinator _connectionMutationCoordinator;
+    private readonly GraphEditorKernelCommandRouter _commandRouter;
+    private readonly GraphEditorKernelHistoryCoordinator _historyCoordinator;
+    private readonly GraphEditorKernelWorkspaceSaveCoordinatorHost _workspaceSaveCoordinatorHost;
+    private readonly GraphEditorKernelWorkspaceLoadCoordinatorHost _workspaceLoadCoordinatorHost;
+    private readonly GraphEditorWorkspaceSaveCoordinator _workspaceSaveCoordinator;
+    private readonly GraphEditorWorkspaceLoadCoordinator _workspaceLoadCoordinator;
+    private readonly GraphEditorKernelSelectionCoordinator _selectionCoordinator;
+    private readonly GraphEditorKernelProjectionCoordinator _projectionCoordinator;
     private GraphEditorBehaviorOptions _behaviorOptions;
     private readonly GraphEditorStyleOptions _styleOptions;
     private GraphDocument _document;
@@ -65,8 +76,20 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost
         _compatibilityQueries = new GraphEditorKernelCompatibilityQueries(compatibilityService);
         _styleOptions = styleOptions;
         _behaviorOptions = behaviorOptions;
+        _nodeMutationHost = new GraphEditorKernelNodeMutationHost(this);
+        _nodeMutationCoordinator = new GraphEditorKernelNodeMutationCoordinator(_nodeMutationHost, _documentMutator);
+        _connectionMutationHost = new GraphEditorKernelConnectionMutationHost(this);
+        _connectionMutationCoordinator = new GraphEditorKernelConnectionMutationCoordinator(_connectionMutationHost, _documentMutator);
+        _commandRouter = new GraphEditorKernelCommandRouter(this);
+        _historyCoordinator = new GraphEditorKernelHistoryCoordinator(this);
+        _selectionCoordinator = new GraphEditorKernelSelectionCoordinator(this);
+        _projectionCoordinator = new GraphEditorKernelProjectionCoordinator(this);
+        _workspaceSaveCoordinatorHost = new GraphEditorKernelWorkspaceSaveCoordinatorHost(this);
+        _workspaceLoadCoordinatorHost = new GraphEditorKernelWorkspaceLoadCoordinatorHost(this);
+        _workspaceSaveCoordinator = new GraphEditorWorkspaceSaveCoordinator(_workspaceSaveCoordinatorHost);
+        _workspaceLoadCoordinator = new GraphEditorWorkspaceLoadCoordinator(_workspaceLoadCoordinatorHost);
         _lastSavedDocumentSignature = CreateDocumentSignature(_document);
-        _historyService.Reset(CaptureHistoryState());
+        _historyService.Reset(_historyCoordinator.CaptureHistoryState());
         CurrentStatusMessage = "Ready to edit.";
     }
 
@@ -101,360 +124,92 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost
 
     public string CurrentStatusMessage { get; private set; } = string.Empty;
 
+    GraphEditorBehaviorOptions IGraphEditorKernelCommandRouterHost.BehaviorOptions => _behaviorOptions;
+
+    GraphDocument IGraphEditorKernelCommandRouterHost.Document => _document;
+
+    int IGraphEditorKernelCommandRouterHost.SelectedNodeCount => _selectedNodeIds.Count;
+
+    GraphEditorPendingConnectionSnapshot IGraphEditorKernelCommandRouterHost.PendingConnection => _pendingConnection;
+
+    double IGraphEditorKernelCommandRouterHost.ViewportWidth => _viewportWidth;
+
+    double IGraphEditorKernelCommandRouterHost.ViewportHeight => _viewportHeight;
+
+    bool IGraphEditorKernelCommandRouterHost.WorkspaceExists => _workspaceService.Exists();
+
     internal bool IsDirty
-        => !string.Equals(CreateDocumentSignature(_document), _lastSavedDocumentSignature, StringComparison.Ordinal);
+        => _historyCoordinator.IsDirty(_lastSavedDocumentSignature);
 
     public void Undo()
-    {
-        if (!_behaviorOptions.History.EnableUndoRedo || !_behaviorOptions.Commands.History.AllowUndo)
-        {
-            CurrentStatusMessage = "Undo is disabled by host permissions.";
-            return;
-        }
-
-        if (!_historyService.TryUndo(out var state) || state is null)
-        {
-            CurrentStatusMessage = "No more undo steps.";
-            return;
-        }
-
-        RestoreHistoryState(state, "Undo applied.", GraphEditorDocumentChangeKind.Undo);
-    }
+        => _historyCoordinator.Undo();
 
     public void Redo()
-    {
-        if (!_behaviorOptions.History.EnableUndoRedo || !_behaviorOptions.Commands.History.AllowRedo)
-        {
-            CurrentStatusMessage = "Redo is disabled by host permissions.";
-            return;
-        }
-
-        if (!_historyService.TryRedo(out var state) || state is null)
-        {
-            CurrentStatusMessage = "No more redo steps.";
-            return;
-        }
-
-        RestoreHistoryState(state, "Redo applied.", GraphEditorDocumentChangeKind.Redo);
-    }
+        => _historyCoordinator.Redo();
 
     public void ClearSelection(bool updateStatus)
-        => SetSelection([], null, updateStatus);
+        => _selectionCoordinator.ClearSelection(updateStatus);
 
     public void SetSelection(IReadOnlyList<string> nodeIds, string? primaryNodeId, bool updateStatus)
-    {
-        var existingIds = _document.Nodes.Select(node => node.Id).ToHashSet(StringComparer.Ordinal);
-        var selectedIds = nodeIds
-            .Where(existingIds.Contains)
-            .Distinct(StringComparer.Ordinal)
-            .ToList();
-        var nextPrimary = !string.IsNullOrWhiteSpace(primaryNodeId) && selectedIds.Contains(primaryNodeId, StringComparer.Ordinal)
-            ? primaryNodeId
-            : selectedIds.LastOrDefault();
-
-        if (_selectedNodeIds.SequenceEqual(selectedIds, StringComparer.Ordinal)
-            && string.Equals(_primarySelectedNodeId, nextPrimary, StringComparison.Ordinal))
-        {
-            return;
-        }
-
-        _selectedNodeIds = selectedIds;
-        _primarySelectedNodeId = nextPrimary;
-        if (updateStatus)
-        {
-            CurrentStatusMessage = selectedIds.Count == 0
-                ? "Selection cleared."
-                : $"Selected {selectedIds.Count} node{(selectedIds.Count == 1 ? string.Empty : "s")}.";
-        }
-
-        SelectionChanged?.Invoke(this, new GraphEditorSelectionChangedEventArgs(_selectedNodeIds.ToList(), _primarySelectedNodeId));
-    }
+        => _selectionCoordinator.SetSelection(nodeIds, primaryNodeId, updateStatus);
 
     public void AddNode(NodeDefinitionId definitionId, GraphPoint? preferredWorldPosition)
-    {
-        ArgumentNullException.ThrowIfNull(definitionId);
+        => _nodeMutationCoordinator.AddNode(definitionId, preferredWorldPosition);
 
-        if (!_behaviorOptions.Commands.Nodes.AllowCreate)
-        {
-            CurrentStatusMessage = "Node creation is disabled by host permissions.";
-            return;
-        }
+    public void DeleteNodeById(string nodeId)
+        => _nodeMutationCoordinator.DeleteNodeById(nodeId);
 
-        if (!_nodeCatalog.TryGetDefinition(definitionId, out var definition) || definition is null)
-        {
-            throw new InvalidOperationException($"Node definition '{definitionId}' is not registered in the current editor catalog.");
-        }
-
-        var position = preferredWorldPosition ?? GetViewportCenter();
-        var offset = 26 * (_document.Nodes.Count % 4);
-        var node = new GraphNode(
-            CreateNodeId(definitionId),
-            definition.DisplayName,
-            definition.Category,
-            definition.Subtitle,
-            definition.Description ?? definition.Subtitle,
-            new GraphPoint(
-                position.X - (definition.DefaultWidth / 2) + offset,
-                position.Y - (definition.DefaultHeight / 2) + offset),
-            new GraphSize(definition.DefaultWidth, definition.DefaultHeight),
-            definition.InputPorts.Select(port => new GraphPort(port.Key, port.DisplayName, PortDirection.Input, port.TypeId.Value, port.AccentHex, port.TypeId)).ToList(),
-            definition.OutputPorts.Select(port => new GraphPort(port.Key, port.DisplayName, PortDirection.Output, port.TypeId.Value, port.AccentHex, port.TypeId)).ToList(),
-            definition.AccentHex,
-            definition.Id,
-            definition.Parameters.Select(parameter => new GraphParameterValue(parameter.Key, parameter.ValueType, parameter.DefaultValue)).ToList());
-
-        _document = _document with
-        {
-            Nodes = _document.Nodes.Concat([node]).ToList(),
-        };
-        SetSelection([node.Id], node.Id, updateStatus: false);
-        MarkDirty($"Added {node.Title}.", GraphEditorDocumentChangeKind.NodesAdded, [node.Id], null);
-    }
+    public void DuplicateNode(string nodeId)
+        => _nodeMutationCoordinator.DuplicateNode(nodeId);
 
     public void DeleteSelection()
-    {
-        if (!_behaviorOptions.Commands.Nodes.AllowDelete)
-        {
-            CurrentStatusMessage = "Node deletion is disabled by host permissions.";
-            return;
-        }
-
-        if (_selectedNodeIds.Count == 0)
-        {
-            CurrentStatusMessage = "Select a node before deleting.";
-            return;
-        }
-
-        var removedNodeIds = _selectedNodeIds.ToHashSet(StringComparer.Ordinal);
-        var removedNodes = _document.Nodes.Where(node => removedNodeIds.Contains(node.Id)).ToList();
-        var removedConnections = _document.Connections
-            .Where(connection => removedNodeIds.Contains(connection.SourceNodeId) || removedNodeIds.Contains(connection.TargetNodeId))
-            .ToList();
-
-        if (removedConnections.Count > 0 && !CanRemoveConnectionsAsSideEffect())
-        {
-            CurrentStatusMessage = "Deleting connected nodes requires delete or disconnect permission for the affected links.";
-            return;
-        }
-
-        _document = _document with
-        {
-            Nodes = _document.Nodes.Where(node => !removedNodeIds.Contains(node.Id)).ToList(),
-            Connections = _document.Connections.Where(connection => !removedConnections.Contains(connection)).ToList(),
-        };
-        CancelPendingConnection();
-        SetSelection([], null, updateStatus: false);
-        var status = removedNodes.Count == 1
-            ? $"Deleted {removedNodes[0].Title}."
-            : $"Deleted {removedNodes.Count} nodes.";
-        MarkDirty(
-            status,
-            GraphEditorDocumentChangeKind.NodesRemoved,
-            removedNodeIds.ToList(),
-            removedConnections.Select(connection => connection.Id).ToList());
-    }
+        => _nodeMutationCoordinator.DeleteSelection();
 
     public void SetNodePositions(IReadOnlyList<NodePositionSnapshot> positions, bool updateStatus)
-    {
-        ArgumentNullException.ThrowIfNull(positions);
-
-        if (!_behaviorOptions.Commands.Nodes.AllowMove)
-        {
-            if (updateStatus)
-            {
-                CurrentStatusMessage = "Node movement is disabled by host permissions.";
-            }
-
-            return;
-        }
-
-        var requested = positions
-            .GroupBy(snapshot => snapshot.NodeId, StringComparer.Ordinal)
-            .Select(group => group.Last())
-            .ToDictionary(snapshot => snapshot.NodeId, snapshot => snapshot.Position, StringComparer.Ordinal);
-
-        if (requested.Count == 0)
-        {
-            if (updateStatus)
-            {
-                CurrentStatusMessage = "No node positions were provided.";
-            }
-
-            return;
-        }
-
-        var changedNodeIds = new List<string>();
-        var updatedNodes = _document.Nodes
-            .Select(node =>
-            {
-                if (!requested.TryGetValue(node.Id, out var position) || node.Position == position)
-                {
-                    return node;
-                }
-
-                changedNodeIds.Add(node.Id);
-                return node with { Position = position };
-            })
-            .ToList();
-
-        if (changedNodeIds.Count == 0)
-        {
-            if (updateStatus)
-            {
-                CurrentStatusMessage = "No matching nodes were found for the provided positions.";
-            }
-
-            return;
-        }
-
-        _document = _document with { Nodes = updatedNodes };
-        if (updateStatus)
-        {
-            CurrentStatusMessage = changedNodeIds.Count == 1
-                ? "Updated 1 node position."
-                : $"Updated {changedNodeIds.Count} node positions.";
-        }
-
-        MarkDirty(CurrentStatusMessage, GraphEditorDocumentChangeKind.LayoutChanged, changedNodeIds, null, preserveStatus: true);
-    }
+        => _nodeMutationCoordinator.SetNodePositions(positions, updateStatus);
 
     public void StartConnection(string sourceNodeId, string sourcePortId)
-    {
-        if (!_behaviorOptions.Commands.Connections.AllowCreate)
-        {
-            CurrentStatusMessage = "Connection creation is disabled by host permissions.";
-            return;
-        }
-
-        var sourceNode = FindNode(sourceNodeId);
-        var sourcePort = sourceNode?.Outputs.FirstOrDefault(port => string.Equals(port.Id, sourcePortId, StringComparison.Ordinal));
-        if (sourceNode is null || sourcePort is null)
-        {
-            return;
-        }
-
-        var nextPending = GraphEditorPendingConnectionSnapshot.Create(true, sourceNode.Id, sourcePort.Id);
-        if (_pendingConnection == nextPending)
-        {
-            CancelPendingConnection();
-            return;
-        }
-
-        _pendingConnection = nextPending;
-        CurrentStatusMessage = $"Connecting from {sourceNode.Title}.{sourcePort.Label}.";
-        PendingConnectionChanged?.Invoke(this, new GraphEditorPendingConnectionChangedEventArgs(_pendingConnection));
-    }
+        => _connectionMutationCoordinator.StartConnection(sourceNodeId, sourcePortId);
 
     public void CompleteConnection(string targetNodeId, string targetPortId)
-    {
-        if (!_pendingConnection.HasPendingConnection || _pendingConnection.SourceNodeId is null || _pendingConnection.SourcePortId is null)
-        {
-            return;
-        }
-
-        ConnectPorts(_pendingConnection.SourceNodeId, _pendingConnection.SourcePortId, targetNodeId, targetPortId);
-    }
+        => _connectionMutationCoordinator.CompleteConnection(targetNodeId, targetPortId);
 
     public void CancelPendingConnection()
-    {
-        if (!_pendingConnection.HasPendingConnection)
-        {
-            return;
-        }
-
-        _pendingConnection = GraphEditorPendingConnectionSnapshot.Create(false, null, null);
-        PendingConnectionChanged?.Invoke(this, new GraphEditorPendingConnectionChangedEventArgs(_pendingConnection));
-    }
+        => _connectionMutationCoordinator.CancelPendingConnection();
 
     public void DeleteConnection(string connectionId)
-    {
-        if (!_behaviorOptions.Commands.Connections.AllowDelete)
-        {
-            CurrentStatusMessage = "Connection deletion is disabled by host permissions.";
-            return;
-        }
-
-        var connection = _document.Connections.FirstOrDefault(candidate => string.Equals(candidate.Id, connectionId, StringComparison.Ordinal));
-        if (connection is null)
-        {
-            return;
-        }
-
-        _document = _document with
-        {
-            Connections = _document.Connections.Where(candidate => !ReferenceEquals(candidate, connection)).ToList(),
-        };
-        MarkDirty($"Deleted connection {connection.Label}.", GraphEditorDocumentChangeKind.ConnectionsChanged, null, [connection.Id]);
-    }
+        => _connectionMutationCoordinator.DeleteConnection(connectionId);
 
     public void BreakConnectionsForPort(string nodeId, string portId)
-    {
-        if (!_behaviorOptions.Commands.Connections.AllowDisconnect)
-        {
-            CurrentStatusMessage = "Disconnect is disabled by host permissions.";
-            return;
-        }
-
-        RemoveConnections(
-            connection =>
-                (connection.SourceNodeId == nodeId && connection.SourcePortId == portId)
-                || (connection.TargetNodeId == nodeId && connection.TargetPortId == portId),
-            "Disconnected port links.");
-    }
+        => _connectionMutationCoordinator.BreakConnectionsForPort(nodeId, portId);
 
     public void DisconnectIncoming(string nodeId)
-    {
-        if (!_behaviorOptions.Commands.Connections.AllowDisconnect)
-        {
-            CurrentStatusMessage = "Disconnect is disabled by host permissions.";
-            return;
-        }
-
-        RemoveConnections(connection => connection.TargetNodeId == nodeId, "Disconnected incoming links.");
-    }
+        => _connectionMutationCoordinator.DisconnectIncoming(nodeId);
 
     public void DisconnectOutgoing(string nodeId)
-    {
-        if (!_behaviorOptions.Commands.Connections.AllowDisconnect)
-        {
-            CurrentStatusMessage = "Disconnect is disabled by host permissions.";
-            return;
-        }
-
-        RemoveConnections(connection => connection.SourceNodeId == nodeId, "Disconnected outgoing links.");
-    }
+        => _connectionMutationCoordinator.DisconnectOutgoing(nodeId);
 
     public void DisconnectAll(string nodeId)
-    {
-        if (!_behaviorOptions.Commands.Connections.AllowDisconnect)
-        {
-            CurrentStatusMessage = "Disconnect is disabled by host permissions.";
-            return;
-        }
-
-        RemoveConnections(
-            connection => connection.SourceNodeId == nodeId || connection.TargetNodeId == nodeId,
-            "Disconnected all links.");
-    }
+        => _connectionMutationCoordinator.DisconnectAll(nodeId);
 
     public void PanBy(double deltaX, double deltaY)
     {
-        ApplyViewportSnapshot(_viewportCoordinator.PanBy(GetViewportSnapshot(), deltaX, deltaY));
+        _historyCoordinator.ApplyViewportSnapshot(_viewportCoordinator.PanBy(GetViewportSnapshot(), deltaX, deltaY));
     }
 
     public void ZoomAt(double factor, GraphPoint screenAnchor)
     {
-        ApplyViewportSnapshot(_viewportCoordinator.ZoomAt(GetViewportSnapshot(), factor, screenAnchor));
+        _historyCoordinator.ApplyViewportSnapshot(_viewportCoordinator.ZoomAt(GetViewportSnapshot(), factor, screenAnchor));
     }
 
     public void UpdateViewportSize(double width, double height)
     {
-        ApplyViewportSnapshot(_viewportCoordinator.UpdateViewportSize(GetViewportSnapshot(), width, height));
+        _historyCoordinator.ApplyViewportSnapshot(_viewportCoordinator.UpdateViewportSize(GetViewportSnapshot(), width, height));
     }
 
     public void ResetView(bool updateStatus)
     {
-        ApplyViewportSnapshot(_viewportCoordinator.ResetView(GetViewportSnapshot()));
+        _historyCoordinator.ApplyViewportSnapshot(_viewportCoordinator.ResetView(GetViewportSnapshot()));
         if (updateStatus)
         {
             CurrentStatusMessage = "Viewport reset.";
@@ -473,7 +228,7 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost
             return;
         }
 
-        ApplyViewportSnapshot(updatedViewport);
+        _historyCoordinator.ApplyViewportSnapshot(updatedViewport);
         if (updateStatus)
         {
             CurrentStatusMessage = "Viewport fit to scene.";
@@ -488,7 +243,7 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost
             return;
         }
 
-        ApplyViewportSnapshot(updatedViewport);
+        _historyCoordinator.ApplyViewportSnapshot(updatedViewport);
         CurrentStatusMessage = $"Centered on {node!.Title}.";
     }
 
@@ -499,7 +254,7 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost
             return;
         }
 
-        ApplyViewportSnapshot(updatedViewport);
+        _historyCoordinator.ApplyViewportSnapshot(updatedViewport);
         if (updateStatus)
         {
             CurrentStatusMessage = "Viewport centered from mini map.";
@@ -507,418 +262,31 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost
     }
 
     public void SaveWorkspace()
-    {
-        if (!_behaviorOptions.Commands.Workspace.AllowSave)
-        {
-            CurrentStatusMessage = "Saving is disabled by host permissions.";
-            return;
-        }
-
-        try
-        {
-            _workspaceService.Save(_document);
-            _lastSavedDocumentSignature = CreateDocumentSignature(_document);
-            CurrentStatusMessage = $"Saved snapshot to {_workspaceService.WorkspacePath}.";
-            DiagnosticPublished?.Invoke(new GraphEditorDiagnostic(
-                "workspace.save.succeeded",
-                "workspace.save",
-                CurrentStatusMessage,
-                GraphEditorDiagnosticSeverity.Info));
-            DocumentChanged?.Invoke(this, new GraphEditorDocumentChangedEventArgs(GraphEditorDocumentChangeKind.WorkspaceSaved, statusMessage: CurrentStatusMessage));
-        }
-        catch (Exception exception)
-        {
-            CurrentStatusMessage = $"Save failed: {exception.Message}";
-            RecoverableFailureRaised?.Invoke(
-                this,
-                new GraphEditorRecoverableFailureEventArgs(
-                    "workspace.save.failed",
-                    "workspace.save",
-                    CurrentStatusMessage,
-                    exception));
-        }
-    }
+        => _workspaceSaveCoordinator.SaveWorkspace();
 
     public bool LoadWorkspace()
-    {
-        if (!_behaviorOptions.Commands.Workspace.AllowLoad)
-        {
-            CurrentStatusMessage = "Loading is disabled by host permissions.";
-            return false;
-        }
-
-        try
-        {
-            if (!_workspaceService.Exists())
-            {
-                CurrentStatusMessage = "No saved snapshot yet. Save once to create one.";
-                DiagnosticPublished?.Invoke(new GraphEditorDiagnostic(
-                    "workspace.load.missing",
-                    "workspace.load",
-                    CurrentStatusMessage,
-                    GraphEditorDiagnosticSeverity.Warning));
-                return false;
-            }
-
-            var document = _workspaceService.Load();
-            LoadDocument(document, "Workspace loaded from disk.", markClean: true, resetHistory: true);
-            CancelPendingConnection();
-            ClearSelection(updateStatus: false);
-            ResetView(updateStatus: false);
-            DiagnosticPublished?.Invoke(new GraphEditorDiagnostic(
-                "workspace.load.succeeded",
-                "workspace.load",
-                _workspaceService.WorkspacePath,
-                GraphEditorDiagnosticSeverity.Info));
-            DocumentChanged?.Invoke(this, new GraphEditorDocumentChangedEventArgs(GraphEditorDocumentChangeKind.WorkspaceLoaded, statusMessage: CurrentStatusMessage));
-            return true;
-        }
-        catch (Exception exception)
-        {
-            CurrentStatusMessage = $"Load failed: {exception.Message}";
-            RecoverableFailureRaised?.Invoke(
-                this,
-                new GraphEditorRecoverableFailureEventArgs(
-                    "workspace.load.failed",
-                    "workspace.load",
-                    CurrentStatusMessage,
-                    exception));
-            return false;
-        }
-    }
+        => _workspaceLoadCoordinator.LoadWorkspace();
 
     public GraphDocument CreateDocumentSnapshot()
         => CloneDocument(_document);
 
     public GraphEditorSelectionSnapshot GetSelectionSnapshot()
-        => new(_selectedNodeIds.ToList(), _primarySelectedNodeId);
+        => _selectionCoordinator.GetSelectionSnapshot();
 
     public GraphEditorViewportSnapshot GetViewportSnapshot()
         => new(_zoom, _panX, _panY, _viewportWidth, _viewportHeight);
 
     public GraphEditorCapabilitySnapshot GetCapabilitySnapshot()
-        => new(
-            _historyService.CanUndo && _behaviorOptions.History.EnableUndoRedo && _behaviorOptions.Commands.History.AllowUndo,
-            _historyService.CanRedo && _behaviorOptions.History.EnableUndoRedo && _behaviorOptions.Commands.History.AllowRedo,
-            _selectedNodeIds.Count > 0,
-            false,
-            _behaviorOptions.Commands.Workspace.AllowSave,
-            _behaviorOptions.Commands.Workspace.AllowLoad)
-        {
-            CanSetSelection = true,
-            CanMoveNodes = _behaviorOptions.Commands.Nodes.AllowMove,
-            CanCreateConnections = _behaviorOptions.Commands.Connections.AllowCreate,
-            CanDeleteConnections = _behaviorOptions.Commands.Connections.AllowDelete,
-            CanBreakConnections = _behaviorOptions.Commands.Connections.AllowDisconnect,
-            CanUpdateViewport = true,
-            CanFitToViewport = _document.Nodes.Count > 0 && _viewportWidth > 0 && _viewportHeight > 0,
-            CanCenterViewport = _viewportWidth > 0 && _viewportHeight > 0,
-        };
+        => _projectionCoordinator.GetCapabilitySnapshot();
 
     public IReadOnlyList<GraphEditorFeatureDescriptorSnapshot> GetFeatureDescriptors()
-        =>
-        [
-            new GraphEditorFeatureDescriptorSnapshot("query.feature-descriptors", "query", true),
-            new GraphEditorFeatureDescriptorSnapshot("query.document-snapshot", "query", true),
-            new GraphEditorFeatureDescriptorSnapshot("query.selection-snapshot", "query", true),
-            new GraphEditorFeatureDescriptorSnapshot("query.viewport-snapshot", "query", true),
-            new GraphEditorFeatureDescriptorSnapshot("query.node-positions", "query", true),
-            new GraphEditorFeatureDescriptorSnapshot("query.pending-connection-snapshot", "query", true),
-            new GraphEditorFeatureDescriptorSnapshot("query.compatible-port-target-snapshot", "query", true),
-            new GraphEditorFeatureDescriptorSnapshot("query.compatible-target-mvvm-shim", "query", true),
-            new GraphEditorFeatureDescriptorSnapshot("service.workspace", "service", true),
-            new GraphEditorFeatureDescriptorSnapshot("service.diagnostics", "service", true),
-            new GraphEditorFeatureDescriptorSnapshot("surface.mutation.batch", "surface", true),
-        ];
+        => _projectionCoordinator.GetFeatureDescriptors();
 
     public IReadOnlyList<GraphEditorCommandDescriptorSnapshot> GetCommandDescriptors()
-        =>
-        [
-            new GraphEditorCommandDescriptorSnapshot(
-                "nodes.add",
-                _behaviorOptions.Commands.Nodes.AllowCreate),
-            new GraphEditorCommandDescriptorSnapshot(
-                "selection.set",
-                true),
-            new GraphEditorCommandDescriptorSnapshot(
-                "selection.delete",
-                _selectedNodeIds.Count > 0 && _behaviorOptions.Commands.Nodes.AllowDelete),
-            new GraphEditorCommandDescriptorSnapshot(
-                "nodes.move",
-                _behaviorOptions.Commands.Nodes.AllowMove),
-            new GraphEditorCommandDescriptorSnapshot(
-                "connections.start",
-                _behaviorOptions.Commands.Connections.AllowCreate),
-            new GraphEditorCommandDescriptorSnapshot(
-                "connections.complete",
-                _pendingConnection.HasPendingConnection && _behaviorOptions.Commands.Connections.AllowCreate),
-            new GraphEditorCommandDescriptorSnapshot(
-                "connections.connect",
-                _behaviorOptions.Commands.Connections.AllowCreate),
-            new GraphEditorCommandDescriptorSnapshot(
-                "connections.cancel",
-                _pendingConnection.HasPendingConnection),
-            new GraphEditorCommandDescriptorSnapshot(
-                "connections.delete",
-                _behaviorOptions.Commands.Connections.AllowDelete),
-            new GraphEditorCommandDescriptorSnapshot(
-                "connections.break-port",
-                _behaviorOptions.Commands.Connections.AllowDisconnect),
-            new GraphEditorCommandDescriptorSnapshot(
-                "connections.disconnect-incoming",
-                _behaviorOptions.Commands.Connections.AllowDisconnect),
-            new GraphEditorCommandDescriptorSnapshot(
-                "connections.disconnect-outgoing",
-                _behaviorOptions.Commands.Connections.AllowDisconnect),
-            new GraphEditorCommandDescriptorSnapshot(
-                "connections.disconnect-all",
-                _behaviorOptions.Commands.Connections.AllowDisconnect),
-            new GraphEditorCommandDescriptorSnapshot(
-                "viewport.fit",
-                _document.Nodes.Count > 0 && _viewportWidth > 0 && _viewportHeight > 0),
-            new GraphEditorCommandDescriptorSnapshot(
-                "viewport.pan",
-                true),
-            new GraphEditorCommandDescriptorSnapshot(
-                "viewport.resize",
-                true),
-            new GraphEditorCommandDescriptorSnapshot(
-                "viewport.reset",
-                true),
-            new GraphEditorCommandDescriptorSnapshot(
-                "viewport.center-node",
-                _viewportWidth > 0 && _viewportHeight > 0),
-            new GraphEditorCommandDescriptorSnapshot(
-                "viewport.center",
-                _viewportWidth > 0 && _viewportHeight > 0),
-            new GraphEditorCommandDescriptorSnapshot(
-                "workspace.save",
-                _behaviorOptions.Commands.Workspace.AllowSave,
-                _behaviorOptions.Commands.Workspace.AllowSave ? null : "Snapshot saving is disabled by host permissions."),
-            new GraphEditorCommandDescriptorSnapshot(
-                "workspace.load",
-                _behaviorOptions.Commands.Workspace.AllowLoad && _workspaceService.Exists(),
-                !_behaviorOptions.Commands.Workspace.AllowLoad
-                    ? "Snapshot loading is disabled by host permissions."
-                    : _workspaceService.Exists()
-                        ? null
-                        : "No saved snapshot yet. Save once to create one."),
-        ];
+        => _commandRouter.GetCommandDescriptors();
 
     public bool TryExecuteCommand(GraphEditorCommandInvocationSnapshot command)
-    {
-        ArgumentNullException.ThrowIfNull(command);
-
-        switch (command.CommandId)
-        {
-            case "nodes.add":
-                if (!TryGetRequiredArgument(command, "definitionId", out var definitionValue))
-                {
-                    return false;
-                }
-
-                var definitionId = new NodeDefinitionId(definitionValue);
-                GraphPoint? worldPosition = null;
-                if (command.TryGetArgument("worldX", out var worldX)
-                    && command.TryGetArgument("worldY", out var worldY)
-                    && double.TryParse(worldX, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsedX)
-                    && double.TryParse(worldY, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsedY))
-                {
-                    worldPosition = new GraphPoint(parsedX, parsedY);
-                }
-
-                AddNode(definitionId, worldPosition);
-                return true;
-
-            case "selection.set":
-                var nodeIds = command.GetArguments("nodeId")
-                    .Where(value => !string.IsNullOrWhiteSpace(value))
-                    .ToList();
-                if (nodeIds.Count == 0)
-                {
-                    return false;
-                }
-
-                command.TryGetArgument("primaryNodeId", out var primaryNodeId);
-                var updateSelectionStatus = !command.TryGetArgument("updateStatus", out var selectionUpdateStatusValue)
-                    || !bool.TryParse(selectionUpdateStatusValue, out var parsedSelectionUpdateStatus)
-                    || parsedSelectionUpdateStatus;
-
-                SetSelection(nodeIds, primaryNodeId, updateSelectionStatus);
-                return true;
-
-            case "selection.delete":
-                DeleteSelection();
-                return true;
-
-            case "nodes.move":
-                var positions = command.GetArguments("position")
-                    .Select(ParseNodePosition)
-                    .ToList();
-                if (positions.Count == 0 || positions.Any(position => position is null))
-                {
-                    return false;
-                }
-
-                var updateMoveStatus = !command.TryGetArgument("updateStatus", out var moveUpdateStatusValue)
-                    || !bool.TryParse(moveUpdateStatusValue, out var parsedMoveUpdateStatus)
-                    || parsedMoveUpdateStatus;
-
-                SetNodePositions(positions.Select(position => position!).ToList(), updateMoveStatus);
-                return true;
-
-            case "connections.start":
-                if (!TryGetRequiredArgument(command, "sourceNodeId", out var sourceNodeId)
-                    || !TryGetRequiredArgument(command, "sourcePortId", out var sourcePortId))
-                {
-                    return false;
-                }
-
-                StartConnection(sourceNodeId, sourcePortId);
-                return true;
-
-            case "connections.complete":
-                if (!TryGetRequiredArgument(command, "targetNodeId", out var completeTargetNodeId)
-                    || !TryGetRequiredArgument(command, "targetPortId", out var completeTargetPortId))
-                {
-                    return false;
-                }
-
-                CompleteConnection(completeTargetNodeId, completeTargetPortId);
-                return true;
-
-            case "connections.connect":
-                if (!TryGetRequiredArgument(command, "sourceNodeId", out var connectSourceNodeId)
-                    || !TryGetRequiredArgument(command, "sourcePortId", out var connectSourcePortId)
-                    || !TryGetRequiredArgument(command, "targetNodeId", out var targetNodeId)
-                    || !TryGetRequiredArgument(command, "targetPortId", out var targetPortId))
-                {
-                    return false;
-                }
-
-                StartConnection(connectSourceNodeId, connectSourcePortId);
-                CompleteConnection(targetNodeId, targetPortId);
-                return true;
-
-            case "connections.cancel":
-                CancelPendingConnection();
-                return true;
-
-            case "connections.delete":
-                if (!TryGetRequiredArgument(command, "connectionId", out var connectionId))
-                {
-                    return false;
-                }
-
-                DeleteConnection(connectionId);
-                return true;
-
-            case "connections.break-port":
-                if (!TryGetRequiredArgument(command, "nodeId", out var nodeId)
-                    || !TryGetRequiredArgument(command, "portId", out var portId))
-                {
-                    return false;
-                }
-
-                BreakConnectionsForPort(nodeId, portId);
-                return true;
-
-            case "connections.disconnect-incoming":
-                if (!TryGetRequiredArgument(command, "nodeId", out var disconnectIncomingNodeId))
-                {
-                    return false;
-                }
-
-                DisconnectIncoming(disconnectIncomingNodeId);
-                return true;
-
-            case "connections.disconnect-outgoing":
-                if (!TryGetRequiredArgument(command, "nodeId", out var disconnectOutgoingNodeId))
-                {
-                    return false;
-                }
-
-                DisconnectOutgoing(disconnectOutgoingNodeId);
-                return true;
-
-            case "connections.disconnect-all":
-                if (!TryGetRequiredArgument(command, "nodeId", out var disconnectAllNodeId))
-                {
-                    return false;
-                }
-
-                DisconnectAll(disconnectAllNodeId);
-                return true;
-
-            case "viewport.fit":
-                FitToViewport(updateStatus: true);
-                return true;
-
-            case "viewport.pan":
-                if (!command.TryGetArgument("deltaX", out var deltaXValue)
-                    || !command.TryGetArgument("deltaY", out var deltaYValue)
-                    || !double.TryParse(deltaXValue, NumberStyles.Float, CultureInfo.InvariantCulture, out var deltaX)
-                    || !double.TryParse(deltaYValue, NumberStyles.Float, CultureInfo.InvariantCulture, out var deltaY))
-                {
-                    return false;
-                }
-
-                PanBy(deltaX, deltaY);
-                return true;
-
-            case "viewport.resize":
-                if (!command.TryGetArgument("width", out var widthValue)
-                    || !command.TryGetArgument("height", out var heightValue)
-                    || !double.TryParse(widthValue, NumberStyles.Float, CultureInfo.InvariantCulture, out var width)
-                    || !double.TryParse(heightValue, NumberStyles.Float, CultureInfo.InvariantCulture, out var height))
-                {
-                    return false;
-                }
-
-                UpdateViewportSize(width, height);
-                return true;
-
-            case "viewport.reset":
-                ResetView(updateStatus: true);
-                return true;
-
-            case "viewport.center-node":
-                if (!TryGetRequiredArgument(command, "nodeId", out var centerNodeId))
-                {
-                    return false;
-                }
-
-                CenterViewOnNode(centerNodeId);
-                return true;
-
-            case "viewport.center":
-                if (!command.TryGetArgument("worldX", out var centerXValue)
-                    || !command.TryGetArgument("worldY", out var centerYValue)
-                    || !double.TryParse(centerXValue, NumberStyles.Float, CultureInfo.InvariantCulture, out var centerX)
-                    || !double.TryParse(centerYValue, NumberStyles.Float, CultureInfo.InvariantCulture, out var centerY))
-                {
-                    return false;
-                }
-
-                var updateCenterStatus = !command.TryGetArgument("updateStatus", out var centerUpdateStatusValue)
-                    || !bool.TryParse(centerUpdateStatusValue, out var parsedCenterUpdateStatus)
-                    || parsedCenterUpdateStatus;
-
-                CenterViewAt(new GraphPoint(centerX, centerY), updateCenterStatus);
-                return true;
-
-            case "workspace.save":
-                SaveWorkspace();
-                return true;
-
-            case "workspace.load":
-                LoadWorkspace();
-                return true;
-
-            default:
-                return false;
-        }
-    }
+        => _commandRouter.TryExecuteCommand(command);
 
     public IReadOnlyList<NodePositionSnapshot> GetNodePositions()
         => _document.Nodes
@@ -931,136 +299,13 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost
     public IReadOnlyList<GraphEditorCompatiblePortTargetSnapshot> GetCompatiblePortTargets(string sourceNodeId, string sourcePortId)
         => _compatibilityQueries.GetCompatiblePortTargets(_document, sourceNodeId, sourcePortId);
 
-    private static NodePositionSnapshot? ParseNodePosition(string value)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            return null;
-        }
-
-        var parts = value.Split('|', StringSplitOptions.TrimEntries);
-        if (parts.Length != 3
-            || string.IsNullOrWhiteSpace(parts[0])
-            || !double.TryParse(parts[1], NumberStyles.Float, CultureInfo.InvariantCulture, out var x)
-            || !double.TryParse(parts[2], NumberStyles.Float, CultureInfo.InvariantCulture, out var y))
-        {
-            return null;
-        }
-
-        return new NodePositionSnapshot(parts[0], new GraphPoint(x, y));
-    }
-
-    private static bool TryGetRequiredArgument(
-        GraphEditorCommandInvocationSnapshot command,
-        string name,
-        [NotNullWhen(true)] out string? value)
-    {
-        if (!command.TryGetArgument(name, out value) || string.IsNullOrWhiteSpace(value))
-        {
-            value = null;
-            return false;
-        }
-
-        return true;
-    }
-
 #pragma warning disable CS0618
     public IReadOnlyList<CompatiblePortTarget> GetCompatibleTargets(string sourceNodeId, string sourcePortId)
         => _compatibilityQueries.GetCompatibleTargets(_document, sourceNodeId, sourcePortId);
 #pragma warning restore CS0618
 
-    private void ConnectPorts(string sourceNodeId, string sourcePortId, string targetNodeId, string targetPortId)
-    {
-        if (!_behaviorOptions.Commands.Connections.AllowCreate)
-        {
-            CurrentStatusMessage = "Connection creation is disabled by host permissions.";
-            return;
-        }
-
-        var sourceNode = FindNode(sourceNodeId);
-        var sourcePort = sourceNode?.Outputs.FirstOrDefault(port => string.Equals(port.Id, sourcePortId, StringComparison.Ordinal));
-        var targetNode = FindNode(targetNodeId);
-        var targetPort = targetNode?.Inputs.FirstOrDefault(port => string.Equals(port.Id, targetPortId, StringComparison.Ordinal));
-        if (sourceNode is null || sourcePort is null || targetNode is null || targetPort is null)
-        {
-            return;
-        }
-
-        if (sourcePort.TypeId is null || targetPort.TypeId is null)
-        {
-            CurrentStatusMessage = "Connection endpoints must expose stable type identifiers.";
-            return;
-        }
-
-        var compatibility = _compatibilityService.Evaluate(sourcePort.TypeId, targetPort.TypeId);
-        if (!compatibility.IsCompatible)
-        {
-            CurrentStatusMessage = $"Incompatible connection: {sourcePort.TypeId} -> {targetPort.TypeId}.";
-            return;
-        }
-
-        if (_document.Connections.Any(connection =>
-                connection.SourceNodeId == sourceNode.Id
-                && connection.SourcePortId == sourcePort.Id
-                && connection.TargetNodeId == targetNode.Id
-                && connection.TargetPortId == targetPort.Id))
-        {
-            CancelPendingConnection();
-            CurrentStatusMessage = "That connection already exists.";
-            return;
-        }
-
-        var replacedConnections = _document.Connections
-            .Where(connection => connection.TargetNodeId == targetNode.Id && connection.TargetPortId == targetPort.Id)
-            .ToList();
-        if (replacedConnections.Count > 0 && !CanReplaceIncomingConnection())
-        {
-            CurrentStatusMessage = "Replacing an incoming connection requires delete or disconnect permission.";
-            return;
-        }
-
-        var nextConnection = new GraphConnection(
-            CreateConnectionId(),
-            sourceNode.Id,
-            sourcePort.Id,
-            targetNode.Id,
-            targetPort.Id,
-            $"{sourcePort.Label} to {targetPort.Label}",
-            sourcePort.AccentHex,
-            compatibility.ConversionId);
-
-        _document = _document with
-        {
-            Connections = _document.Connections
-                .Except(replacedConnections)
-                .Concat([nextConnection])
-                .ToList(),
-        };
-        _pendingConnection = GraphEditorPendingConnectionSnapshot.Create(false, null, null);
-        PendingConnectionChanged?.Invoke(this, new GraphEditorPendingConnectionChangedEventArgs(_pendingConnection));
-        CurrentStatusMessage = compatibility.Kind == PortCompatibilityKind.ImplicitConversion
-            ? $"Connected {sourceNode.Title} to {targetNode.Title} with implicit conversion."
-            : $"Connected {sourceNode.Title} to {targetNode.Title}.";
-        MarkDirty(
-            CurrentStatusMessage,
-            GraphEditorDocumentChangeKind.ConnectionsChanged,
-            [sourceNode.Id, targetNode.Id],
-            [nextConnection.Id],
-            preserveStatus: true);
-    }
-
     private GraphPoint GetViewportCenter()
         => _viewportCoordinator.GetViewportCenter(GetViewportSnapshot());
-
-    private void ApplyViewportSnapshot(GraphEditorViewportSnapshot snapshot)
-    {
-        _zoom = snapshot.Zoom;
-        _panX = snapshot.PanX;
-        _panY = snapshot.PanY;
-        _viewportWidth = snapshot.ViewportWidth;
-        _viewportHeight = snapshot.ViewportHeight;
-        ViewportChanged?.Invoke(this, new GraphEditorViewportChangedEventArgs(_zoom, _panX, _panY, _viewportWidth, _viewportHeight));
-    }
 
     private void MarkDirty(
         string status,
@@ -1068,55 +313,13 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost
         IReadOnlyList<string>? nodeIds,
         IReadOnlyList<string>? connectionIds,
         bool preserveStatus = false)
-    {
-        if (!preserveStatus)
-        {
-            CurrentStatusMessage = status;
-        }
-
-        var state = CaptureHistoryState();
-        _historyService.Push(state);
-        DocumentChanged?.Invoke(this, new GraphEditorDocumentChangedEventArgs(changeKind, nodeIds, connectionIds, CurrentStatusMessage));
-    }
+        => _historyCoordinator.MarkDirty(status, changeKind, nodeIds, connectionIds, preserveStatus);
 
     private void LoadDocument(GraphDocument document, string status, bool markClean, bool resetHistory)
-    {
-        _document = CloneDocument(document);
-        _selectedNodeIds = [];
-        _primarySelectedNodeId = null;
-        _pendingConnection = GraphEditorPendingConnectionSnapshot.Create(false, null, null);
-        CurrentStatusMessage = status;
-
-        var historyState = CaptureHistoryState();
-        if (resetHistory)
-        {
-            _historyService.Reset(historyState);
-        }
-
-        if (markClean)
-        {
-            _lastSavedDocumentSignature = historyState.Signature;
-        }
-    }
-
-    private void RestoreHistoryState(GraphEditorHistoryState state, string status, GraphEditorDocumentChangeKind changeKind)
-    {
-        _document = state.Document;
-        _selectedNodeIds = state.SelectedNodeIds.ToList();
-        _primarySelectedNodeId = state.PrimarySelectedNodeId;
-        _pendingConnection = GraphEditorPendingConnectionSnapshot.Create(false, null, null);
-        CurrentStatusMessage = status;
-        SelectionChanged?.Invoke(this, new GraphEditorSelectionChangedEventArgs(_selectedNodeIds.ToList(), _primarySelectedNodeId));
-        PendingConnectionChanged?.Invoke(this, new GraphEditorPendingConnectionChangedEventArgs(_pendingConnection));
-        DocumentChanged?.Invoke(this, new GraphEditorDocumentChangedEventArgs(changeKind, statusMessage: CurrentStatusMessage));
-    }
+        => _historyCoordinator.LoadDocument(document, status, markClean, resetHistory);
 
     private GraphEditorHistoryState CaptureHistoryState()
-        => new(
-            CloneDocument(_document),
-            _selectedNodeIds.ToList(),
-            _primarySelectedNodeId,
-            CreateDocumentSignature(_document));
+        => _historyCoordinator.CaptureHistoryState();
 
     private bool CanReplaceIncomingConnection()
         => _behaviorOptions.Commands.Connections.AllowDelete || _behaviorOptions.Commands.Connections.AllowDisconnect;
@@ -1124,30 +327,19 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost
     private bool CanRemoveConnectionsAsSideEffect()
         => _behaviorOptions.Commands.Connections.AllowDelete || _behaviorOptions.Commands.Connections.AllowDisconnect;
 
-    private void RemoveConnections(Func<GraphConnection, bool> predicate, string status)
-    {
-        var removedConnections = _document.Connections
-            .Where(predicate)
-            .ToList();
-
-        if (removedConnections.Count == 0)
-        {
-            CurrentStatusMessage = "No matching connections to remove.";
-            return;
-        }
-
-        _document = _document with
-        {
-            Connections = _document.Connections.Where(connection => !removedConnections.Contains(connection)).ToList(),
-        };
-        MarkDirty(status, GraphEditorDocumentChangeKind.ConnectionsChanged, null, removedConnections.Select(connection => connection.Id).ToList());
-    }
-
     private GraphNode? FindNode(string nodeId)
         => _document.Nodes.FirstOrDefault(node => string.Equals(node.Id, nodeId, StringComparison.Ordinal));
 
     private string CreateNodeId(NodeDefinitionId definitionId)
-        => CreateUniqueId(_document.Nodes.Select(node => node.Id), $"{definitionId.Value.Replace(".", "-", StringComparison.Ordinal)}-");
+        => CreateNodeId(definitionId, definitionId.Value);
+
+    private string CreateNodeId(NodeDefinitionId? definitionId, string fallbackKey)
+        => CreateNodeId(
+            (definitionId?.Value ?? fallbackKey)
+            .Replace(".", "-", StringComparison.Ordinal));
+
+    private string CreateNodeId(string templateKey)
+        => CreateUniqueId(_document.Nodes.Select(node => node.Id), $"{templateKey}-");
 
     private string CreateConnectionId()
         => CreateUniqueId(_document.Connections.Select(connection => connection.Id), "connection-");

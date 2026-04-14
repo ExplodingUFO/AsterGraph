@@ -22,6 +22,14 @@ public sealed class GraphEditorTransactionTests
     private const string TargetPortId = "in";
 
     [Fact]
+    public void EditorAssembly_ContainsDedicatedHistoryStateCoordinator()
+    {
+        var coordinatorType = typeof(GraphEditorViewModel).Assembly.GetType("AsterGraph.Editor.Services.GraphEditorHistoryStateCoordinator");
+
+        Assert.NotNull(coordinatorType);
+    }
+
+    [Fact]
     public void RuntimeSession_BeginMutation_DefersRuntimeNotificationsUntilDisposed()
     {
         var definitionId = new NodeDefinitionId("tests.transaction.node");
@@ -295,6 +303,67 @@ public sealed class GraphEditorTransactionTests
         Assert.False(editor.IsDirty);
         Assert.Equal(origin.X + 64, redoneNode.X);
         Assert.Equal(origin.Y + 24, redoneNode.Y);
+        Assert.True(workspace.Exists());
+    }
+
+    [Fact]
+    public void GraphEditorViewModel_HistoryInteraction_RestoresSelectionMembershipAndPrimaryNodeAcrossUndoRedo()
+    {
+        var definitionId = new NodeDefinitionId("tests.transaction.selection-roundtrip");
+        var workspace = new RecordingWorkspaceService();
+        var editor = AsterGraphEditorFactory.Create(CreateOptions(definitionId) with
+        {
+            WorkspaceService = workspace,
+        });
+        var sourceNode = Assert.Single(editor.Nodes, node => node.Id == SourceNodeId);
+        var targetNode = Assert.Single(editor.Nodes, node => node.Id == TargetNodeId);
+        var initialPositions = new Dictionary<string, GraphPoint>(StringComparer.Ordinal)
+        {
+            [SourceNodeId] = new GraphPoint(sourceNode.X, sourceNode.Y),
+            [TargetNodeId] = new GraphPoint(targetNode.X, targetNode.Y),
+        };
+
+        editor.SaveWorkspace();
+        editor.SetSelection([sourceNode, targetNode], targetNode, status: null);
+
+        editor.BeginHistoryInteraction();
+        editor.ApplyDragOffset(initialPositions, 48, 18);
+        editor.CompleteHistoryInteraction("Moved with multi-selection.");
+
+        editor.SelectSingleNode(sourceNode, updateStatus: false);
+        var intermediatePositions = new Dictionary<string, GraphPoint>(StringComparer.Ordinal)
+        {
+            [SourceNodeId] = new GraphPoint(sourceNode.X, sourceNode.Y),
+            [TargetNodeId] = new GraphPoint(targetNode.X, targetNode.Y),
+        };
+
+        editor.BeginHistoryInteraction();
+        editor.ApplyDragOffset(intermediatePositions, -12, 30);
+        editor.CompleteHistoryInteraction("Moved with single selection.");
+
+        editor.Undo();
+
+        Assert.Equal([SourceNodeId, TargetNodeId], editor.SelectedNodes.Select(node => node.Id).OrderBy(id => id, StringComparer.Ordinal));
+        Assert.Equal(TargetNodeId, editor.SelectedNode?.Id);
+        Assert.True(editor.FindNode(SourceNodeId)!.IsSelected);
+        Assert.True(editor.FindNode(TargetNodeId)!.IsSelected);
+        var undoneSelection = editor.Session.Queries.GetSelectionSnapshot();
+        Assert.Equal([SourceNodeId, TargetNodeId], undoneSelection.SelectedNodeIds.OrderBy(id => id, StringComparer.Ordinal));
+        Assert.Equal(TargetNodeId, undoneSelection.PrimarySelectedNodeId);
+        Assert.True(editor.IsDirty);
+        Assert.True(editor.CanRedo);
+
+        editor.Redo();
+
+        Assert.Equal([SourceNodeId], editor.SelectedNodes.Select(node => node.Id));
+        Assert.Equal(SourceNodeId, editor.SelectedNode?.Id);
+        Assert.True(editor.FindNode(SourceNodeId)!.IsSelected);
+        Assert.False(editor.FindNode(TargetNodeId)!.IsSelected);
+        var redoneSelection = editor.Session.Queries.GetSelectionSnapshot();
+        Assert.Equal([SourceNodeId], redoneSelection.SelectedNodeIds);
+        Assert.Equal(SourceNodeId, redoneSelection.PrimarySelectedNodeId);
+        Assert.True(editor.IsDirty);
+        Assert.False(editor.CanRedo);
         Assert.True(workspace.Exists());
     }
 

@@ -94,7 +94,53 @@ public sealed class GraphEditorPresentationTests
         Assert.Single(node.Presentation.TopRightBadges);
     }
 
-    private static GraphEditorViewModel CreateEditor(INodePresentationProvider provider, int nodeCount)
+    [Fact]
+    public void SetNodePresentationProvider_RefreshImmediately_ReappliesExistingNodes()
+    {
+        var provider = new TestNodePresentationProvider();
+        var editor = CreateEditor(provider: null, nodeCount: 2);
+
+        provider.SetState(editor.Nodes[0].Id, new NodePresentationState(SubtitleOverride: "节点一"));
+        provider.SetState(editor.Nodes[1].Id, new NodePresentationState(SubtitleOverride: "节点二"));
+
+        editor.SetNodePresentationProvider(provider, refreshImmediately: true);
+
+        Assert.Equal("节点一", editor.Nodes[0].DisplaySubtitle);
+        Assert.Equal("节点二", editor.Nodes[1].DisplaySubtitle);
+        Assert.Equal(2, provider.CallCount);
+    }
+
+    [Fact]
+    public void SetNodePresentationProvider_AfterConstruction_UpdatesSessionFeatureDescriptorAvailability()
+    {
+        var provider = new TestNodePresentationProvider();
+        var editor = CreateEditor(provider: null, nodeCount: 1);
+
+        Assert.False(GetFeatureAvailability(editor, "integration.node-presentation-provider"));
+
+        editor.SetNodePresentationProvider(provider, refreshImmediately: false);
+
+        Assert.True(GetFeatureAvailability(editor, "integration.node-presentation-provider"));
+
+        editor.SetNodePresentationProvider(null, refreshImmediately: false);
+
+        Assert.False(GetFeatureAvailability(editor, "integration.node-presentation-provider"));
+    }
+
+    [Fact]
+    public void RefreshNodePresentation_ReturnsFalse_ForMissingNode_WithoutCallingProvider()
+    {
+        var provider = new TestNodePresentationProvider();
+        var editor = CreateEditor(provider, nodeCount: 1);
+        var baselineCallCount = provider.CallCount;
+
+        var refreshed = editor.RefreshNodePresentation("missing-node");
+
+        Assert.False(refreshed);
+        Assert.Equal(baselineCallCount, provider.CallCount);
+    }
+
+    private static GraphEditorViewModel CreateEditor(INodePresentationProvider? provider, int nodeCount)
     {
         var definitionId = new NodeDefinitionId("tests.editor.presentation.sample");
         var catalog = new NodeCatalog();
@@ -147,11 +193,20 @@ public sealed class GraphEditorPresentationTests
     private sealed class TestNodePresentationProvider : INodePresentationProvider
     {
         private readonly Dictionary<string, NodePresentationState> _states = new(StringComparer.Ordinal);
+        public int CallCount { get; private set; }
 
         public NodePresentationState GetNodePresentation(NodeViewModel node)
-            => _states.TryGetValue(node.Id, out var state) ? state : NodePresentationState.Empty;
+        {
+            CallCount++;
+            return _states.TryGetValue(node.Id, out var state) ? state : NodePresentationState.Empty;
+        }
 
         public void SetState(string nodeId, NodePresentationState state)
             => _states[nodeId] = state;
     }
+
+    private static bool GetFeatureAvailability(GraphEditorViewModel editor, string descriptorId)
+        => editor.Session.Queries.GetFeatureDescriptors()
+            .Single(descriptor => descriptor.Id == descriptorId)
+            .IsAvailable;
 }

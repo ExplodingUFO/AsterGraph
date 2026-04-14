@@ -46,12 +46,9 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
 
     public void Initialize()
     {
-        _owner.ApplyKernelDocument(_kernel.CreateDocumentSnapshot(), _kernel.CurrentStatusMessage, markClean: !_kernel.IsDirty);
-        _owner.ApplyKernelSelection(_kernel.GetSelectionSnapshot());
+        ApplyOwnerDocumentProjection(markClean: !_kernel.IsDirty);
         _owner.ApplyKernelViewport(_kernel.GetViewportSnapshot());
-        _owner.ApplyKernelPendingConnection(_kernel.GetPendingConnectionSnapshot());
-        _owner.ApplyKernelStatus(_kernel.CurrentStatusMessage);
-        _owner.ApplyKernelDirtyState(_kernel.IsDirty);
+        ApplyOwnerStatusProjection();
     }
 
     public void Undo() => _kernel.Undo();
@@ -291,18 +288,15 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
     private void HandleKernelDocumentChanged(object? sender, GraphEditorDocumentChangedEventArgs args)
     {
         var markClean = args.ChangeKind is GraphEditorDocumentChangeKind.WorkspaceLoaded or GraphEditorDocumentChangeKind.WorkspaceSaved;
-        _owner.ApplyKernelDocument(_kernel.CreateDocumentSnapshot(), _kernel.CurrentStatusMessage, markClean);
-        _owner.ApplyKernelSelection(_kernel.GetSelectionSnapshot());
-        _owner.ApplyKernelPendingConnection(_kernel.GetPendingConnectionSnapshot());
-        _owner.ApplyKernelStatus(_kernel.CurrentStatusMessage);
-        _owner.ApplyKernelDirtyState(_kernel.IsDirty);
+        ApplyOwnerDocumentProjection(markClean);
+        ApplyOwnerStatusProjection();
         DocumentChanged?.Invoke(this, args);
     }
 
     private void HandleKernelSelectionChanged(object? sender, GraphEditorSelectionChangedEventArgs args)
     {
         _owner.ApplyKernelSelection(args.SelectedNodeIds, args.PrimarySelectedNodeId);
-        _owner.ApplyKernelStatus(_kernel.CurrentStatusMessage);
+        ApplyOwnerStatusProjection();
         SelectionChanged?.Invoke(this, args);
     }
 
@@ -315,13 +309,13 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
     private void HandleKernelPendingConnectionChanged(object? sender, GraphEditorPendingConnectionChangedEventArgs args)
     {
         _owner.ApplyKernelPendingConnection(args.PendingConnection);
-        _owner.ApplyKernelStatus(_kernel.CurrentStatusMessage);
+        ApplyOwnerStatusProjection();
         PendingConnectionChanged?.Invoke(this, args);
     }
 
     private void HandleKernelRecoverableFailureRaised(object? sender, GraphEditorRecoverableFailureEventArgs args)
     {
-        _owner.ApplyKernelStatus(_kernel.CurrentStatusMessage);
+        ApplyOwnerStatusProjection();
         RecoverableFailureRaised?.Invoke(this, args);
     }
 
@@ -339,4 +333,17 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
 
     private void HandleOwnerDiagnosticPublished(GraphEditorDiagnostic diagnostic)
         => DiagnosticPublished?.Invoke(diagnostic);
+
+    private void ApplyOwnerDocumentProjection(bool markClean)
+    {
+        _owner.ApplyKernelDocument(_kernel.CreateDocumentSnapshot(), _kernel.CurrentStatusMessage, markClean);
+        _owner.ApplyKernelSelection(_kernel.GetSelectionSnapshot());
+        _owner.ApplyKernelPendingConnection(_kernel.GetPendingConnectionSnapshot());
+    }
+
+    private void ApplyOwnerStatusProjection()
+    {
+        _owner.ApplyKernelStatus(_kernel.CurrentStatusMessage);
+        _owner.ApplyKernelDirtyState(_kernel.IsDirty);
+    }
 }

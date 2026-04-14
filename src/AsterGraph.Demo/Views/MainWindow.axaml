@@ -20,6 +20,14 @@
     <vm:MainWindowViewModel/>
   </Design.DataContext>
 
+  <Window.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceInclude Source="avares://AsterGraph.Demo/Views/Resources/MainWindowResources.axaml" />
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </Window.Resources>
+
   <DockPanel Margin="24"
              LastChildFill="True">
     <Border DockPanel.Dock="Top"
@@ -173,22 +181,8 @@
                 <StackPanel x:Name="PART_ShowcaseDrawerSection"
                             Spacing="8"
                             IsVisible="{Binding IsShowcaseHostGroupSelected}">
-                  <ItemsControl ItemsSource="{Binding SelectedHostMenuGroupLines}">
-                    <ItemsControl.ItemTemplate>
-                      <DataTemplate>
-                        <Border Margin="0,0,0,8"
-                                Padding="12"
-                                Background="#14202B"
-                                BorderBrush="#365063"
-                                BorderThickness="1"
-                                CornerRadius="8">
-                          <TextBlock TextWrapping="Wrap"
-                                     Foreground="#D8EEF3"
-                                     Text="{Binding}" />
-                        </Border>
-                      </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                  </ItemsControl>
+                  <ItemsControl ItemsSource="{Binding SelectedHostMenuGroupLines}"
+                                ItemTemplate="{StaticResource HostDrawerLineTemplate}" />
                 </StackPanel>
 
                 <StackPanel x:Name="PART_ViewDrawerControls"
@@ -267,22 +261,8 @@
                                FontWeight="Bold"
                                Foreground="#7FE7D7"
                                Text="宿主开关快照" />
-                    <ItemsControl ItemsSource="{Binding CurrentConfigurationLines}">
-                      <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                          <Border Margin="0,0,0,8"
-                                  Padding="12"
-                                  Background="#14202B"
-                                  BorderBrush="#365063"
-                                  BorderThickness="1"
-                                  CornerRadius="8">
-                            <TextBlock TextWrapping="Wrap"
-                                       Foreground="#D8EEF3"
-                                       Text="{Binding}" />
-                          </Border>
-                        </DataTemplate>
-                      </ItemsControl.ItemTemplate>
-                    </ItemsControl>
+                    <ItemsControl ItemsSource="{Binding CurrentConfigurationLines}"
+                                  ItemTemplate="{StaticResource HostDrawerLineTemplate}" />
                   </StackPanel>
 
                   <StackPanel x:Name="PART_RuntimeSignalsSection"
@@ -292,22 +272,8 @@
                                FontWeight="Bold"
                                Foreground="#7FE7D7"
                                Text="共享运行时状态" />
-                    <ItemsControl ItemsSource="{Binding RuntimeSignalLines}">
-                      <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                          <Border Margin="0,0,0,8"
-                                  Padding="12"
-                                  Background="#14202B"
-                                  BorderBrush="#365063"
-                                  BorderThickness="1"
-                                  CornerRadius="8">
-                            <TextBlock TextWrapping="Wrap"
-                                       Foreground="#D8EEF3"
-                                       Text="{Binding}" />
-                          </Border>
-                        </DataTemplate>
-                      </ItemsControl.ItemTemplate>
-                    </ItemsControl>
+                    <ItemsControl ItemsSource="{Binding RuntimeSignalLines}"
+                                  ItemTemplate="{StaticResource HostDrawerLineTemplate}" />
                   </StackPanel>
                 </StackPanel>
 
@@ -330,22 +296,8 @@
                                Text="{Binding RuntimeDiagnosticsSummary}" />
                   </Border>
 
-                  <ItemsControl ItemsSource="{Binding RecentDiagnosticLines}">
-                    <ItemsControl.ItemTemplate>
-                      <DataTemplate>
-                        <Border Margin="0,0,0,8"
-                                Padding="12"
-                                Background="#14202B"
-                                BorderBrush="#365063"
-                                BorderThickness="1"
-                                CornerRadius="8">
-                          <TextBlock TextWrapping="Wrap"
-                                     Foreground="#D8EEF3"
-                                     Text="{Binding}" />
-                        </Border>
-                      </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                  </ItemsControl>
+                  <ItemsControl ItemsSource="{Binding RecentDiagnosticLines}"
+                                ItemTemplate="{StaticResource HostDrawerLineTemplate}" />
                 </StackPanel>
 
                 <StackPanel x:Name="PART_ProofDrawerSection"
@@ -358,22 +310,8 @@
                                FontWeight="Bold"
                                Foreground="#7FE7D7"
                                Text="宿主控制快照" />
-                    <ItemsControl ItemsSource="{Binding CurrentConfigurationLines}">
-                      <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                          <Border Margin="0,0,0,8"
-                                  Padding="12"
-                                  Background="#14202B"
-                                  BorderBrush="#365063"
-                                  BorderThickness="1"
-                                  CornerRadius="8">
-                            <TextBlock TextWrapping="Wrap"
-                                       Foreground="#D8EEF3"
-                                       Text="{Binding}" />
-                          </Border>
-                        </DataTemplate>
-                      </ItemsControl.ItemTemplate>
-                    </ItemsControl>
+                    <ItemsControl ItemsSource="{Binding CurrentConfigurationLines}"
+                                  ItemTemplate="{StaticResource HostDrawerLineTemplate}" />
                   </StackPanel>
 
                   <StackPanel x:Name="PART_ProofOwnershipSection"
@@ -383,22 +321,8 @@
                                FontWeight="Bold"
                                Foreground="#7FE7D7"
                                Text="边界证据" />
-                    <ItemsControl ItemsSource="{Binding OwnershipProofLines}">
-                      <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                          <Border Margin="0,0,0,8"
-                                  Padding="12"
-                                  Background="#14202B"
-                                  BorderBrush="#365063"
-                                  BorderThickness="1"
-                                  CornerRadius="8">
-                            <TextBlock TextWrapping="Wrap"
-                                       Foreground="#D8EEF3"
-                                       Text="{Binding}" />
-                          </Border>
-                        </DataTemplate>
-                      </ItemsControl.ItemTemplate>
-                    </ItemsControl>
+                    <ItemsControl ItemsSource="{Binding OwnershipProofLines}"
+                                  ItemTemplate="{StaticResource HostDrawerLineTemplate}" />
                   </StackPanel>
 
                   <StackPanel x:Name="PART_ProofRuntimeSignalsSection"
@@ -408,22 +332,8 @@
                                FontWeight="Bold"
                                Foreground="#7FE7D7"
                                Text="共享运行时证据" />
-                    <ItemsControl ItemsSource="{Binding RuntimeSignalLines}">
-                      <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                          <Border Margin="0,0,0,8"
-                                  Padding="12"
-                                  Background="#14202B"
-                                  BorderBrush="#365063"
-                                  BorderThickness="1"
-                                  CornerRadius="8">
-                            <TextBlock TextWrapping="Wrap"
-                                       Foreground="#D8EEF3"
-                                       Text="{Binding}" />
-                          </Border>
-                        </DataTemplate>
-                      </ItemsControl.ItemTemplate>
-                    </ItemsControl>
+                    <ItemsControl ItemsSource="{Binding RuntimeSignalLines}"
+                                  ItemTemplate="{StaticResource HostDrawerLineTemplate}" />
                   </StackPanel>
                 </StackPanel>
               </StackPanel>

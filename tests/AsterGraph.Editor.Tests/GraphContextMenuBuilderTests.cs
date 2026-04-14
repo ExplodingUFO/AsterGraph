@@ -4,6 +4,7 @@ using AsterGraph.Core.Compatibility;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Catalog;
 using AsterGraph.Editor.Configuration;
+using AsterGraph.Editor.Events;
 using AsterGraph.Editor.Menus;
 using AsterGraph.Editor.ViewModels;
 using Xunit;
@@ -50,4 +51,5 @@ public sealed class GraphContextMenuBuilderTests
             new DefaultPortCompatibilityService(),
             behaviorOptions: behavior);
     }
+
 }

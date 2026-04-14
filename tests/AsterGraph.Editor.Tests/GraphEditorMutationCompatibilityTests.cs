@@ -15,10 +15,10 @@ namespace AsterGraph.Editor.Tests;
 
 public sealed class GraphEditorMutationCompatibilityTests
 {
-    private const string SourceNodeId = "tests.compatibility.source-001";
-    private const string TargetNodeId = "tests.compatibility.target-001";
-    private const string SourcePortId = "out";
-    private const string TargetPortId = "in";
+    internal const string SourceNodeId = "tests.compatibility.source-001";
+    internal const string TargetNodeId = "tests.compatibility.target-001";
+    internal const string SourcePortId = "out";
+    internal const string TargetPortId = "in";
 
     [Fact]
     public void GraphEditorMutationCompatibility_NodeAndConnectionSnapshots_RemainAlignedBetweenRetainedAndRuntime()
@@ -140,21 +140,23 @@ public sealed class GraphEditorMutationCompatibilityTests
         AssertParity(retained, runtime);
     }
 
-    private static void ConnectDefaultPair(GraphEditorViewModel retained, IGraphEditorSession runtime)
+    internal static void ConnectDefaultPair(GraphEditorViewModel retained, IGraphEditorSession runtime)
     {
         retained.ConnectPorts(SourceNodeId, SourcePortId, TargetNodeId, TargetPortId);
         runtime.Commands.StartConnection(SourceNodeId, SourcePortId);
         runtime.Commands.CompleteConnection(TargetNodeId, TargetPortId);
     }
 
-    private static void SelectSourceNode(GraphEditorViewModel retained, IGraphEditorSession runtime)
+    internal static void SelectSourceNode(GraphEditorViewModel retained, IGraphEditorSession runtime)
     {
         retained.SelectSingleNode(Assert.Single(retained.Nodes, node => node.Id == SourceNodeId), updateStatus: false);
         runtime.Commands.SetSelection([SourceNodeId], SourceNodeId, updateStatus: false);
     }
 
-    private static void AssertParity(GraphEditorViewModel retained, IGraphEditorSession runtime)
+    internal static void AssertParity(GraphEditorViewModel retained, IGraphEditorSession runtime)
     {
+        AssertRetainedFacadeMatchesKernelSnapshots(retained);
+
         var retainedDocument = retained.CreateDocumentSnapshot();
         var runtimeDocument = runtime.Queries.CreateDocumentSnapshot();
 
@@ -162,13 +164,25 @@ public sealed class GraphEditorMutationCompatibilityTests
         Assert.Equal(CaptureSelectionSignature(retained), CaptureSelectionSignature(runtime));
     }
 
-    private static string CaptureSelectionSignature(GraphEditorViewModel editor)
+    internal static void AssertRetainedFacadeMatchesKernelSnapshots(GraphEditorViewModel editor)
+    {
+        ArgumentNullException.ThrowIfNull(editor);
+
+        var kernelDocument = editor.CreateDocumentSnapshot();
+        var sessionDocument = editor.Session.Queries.CreateDocumentSnapshot();
+
+        Assert.Equal(CreateShapeSignature(editor), CreateShapeSignature(kernelDocument));
+        Assert.Equal(CreateShapeSignature(kernelDocument), CreateShapeSignature(sessionDocument));
+        Assert.Equal(CaptureSelectionSignature(editor), CaptureSelectionSignature(editor.Session));
+    }
+
+    internal static string CaptureSelectionSignature(GraphEditorViewModel editor)
         => string.Join(
             "|",
             editor.SelectedNodes.Select(node => node.Id).OrderBy(id => id, StringComparer.Ordinal))
         + $"::{editor.SelectedNode?.Id ?? "<none>"}";
 
-    private static string CaptureSelectionSignature(IGraphEditorSession session)
+    internal static string CaptureSelectionSignature(IGraphEditorSession session)
     {
         var snapshot = session.Queries.GetSelectionSnapshot();
         return string.Join(
@@ -177,10 +191,54 @@ public sealed class GraphEditorMutationCompatibilityTests
         + $"::{snapshot.PrimarySelectedNodeId ?? "<none>"}";
     }
 
-    private static string CreateSignature(GraphDocument document)
+    internal static string CreateSignature(GraphDocument document)
         => GraphDocumentSerializer.Serialize(document);
 
-    private static GraphEditorViewModel CreateLegacyEditor(
+    private static string CreateShapeSignature(GraphEditorViewModel editor)
+    {
+        ArgumentNullException.ThrowIfNull(editor);
+
+        var nodeSignature = string.Join(
+            "|",
+            editor.Nodes
+                .OrderBy(node => node.Id, StringComparer.Ordinal)
+                .Select(node => string.Create(
+                    System.Globalization.CultureInfo.InvariantCulture,
+                    $"{node.Id}:{node.DefinitionId?.Value ?? "<none>"}:{node.Title}:{node.X}:{node.Y}")));
+        var connectionSignature = string.Join(
+            "|",
+            editor.Connections
+                .OrderBy(connection => connection.Id, StringComparer.Ordinal)
+                .Select(connection => string.Create(
+                    System.Globalization.CultureInfo.InvariantCulture,
+                    $"{connection.Id}:{connection.SourceNodeId}:{connection.SourcePortId}:{connection.TargetNodeId}:{connection.TargetPortId}:{connection.ConversionId?.Value ?? "<none>"}")));
+
+        return $"{editor.Title}::{editor.Description}::{nodeSignature}::{connectionSignature}";
+    }
+
+    private static string CreateShapeSignature(GraphDocument document)
+    {
+        ArgumentNullException.ThrowIfNull(document);
+
+        var nodeSignature = string.Join(
+            "|",
+            document.Nodes
+                .OrderBy(node => node.Id, StringComparer.Ordinal)
+                .Select(node => string.Create(
+                    System.Globalization.CultureInfo.InvariantCulture,
+                    $"{node.Id}:{node.DefinitionId?.Value ?? "<none>"}:{node.Title}:{node.Position.X}:{node.Position.Y}")));
+        var connectionSignature = string.Join(
+            "|",
+            document.Connections
+                .OrderBy(connection => connection.Id, StringComparer.Ordinal)
+                .Select(connection => string.Create(
+                    System.Globalization.CultureInfo.InvariantCulture,
+                    $"{connection.Id}:{connection.SourceNodeId}:{connection.SourcePortId}:{connection.TargetNodeId}:{connection.TargetPortId}:{connection.ConversionId?.Value ?? "<none>"}")));
+
+        return $"{document.Title}::{document.Description}::{nodeSignature}::{connectionSignature}";
+    }
+
+    internal static GraphEditorViewModel CreateLegacyEditor(
         NodeDefinitionId definitionId,
         IGraphWorkspaceService? workspaceService = null)
         => new(
@@ -189,7 +247,7 @@ public sealed class GraphEditorMutationCompatibilityTests
             new DefaultPortCompatibilityService(),
             workspaceService: workspaceService);
 
-    private static IGraphEditorSession CreateRuntimeSession(
+    internal static IGraphEditorSession CreateRuntimeSession(
         NodeDefinitionId definitionId,
         IGraphWorkspaceService? workspaceService = null)
         => AsterGraphEditorFactory.CreateSession(new AsterGraphEditorOptions
@@ -200,7 +258,7 @@ public sealed class GraphEditorMutationCompatibilityTests
             WorkspaceService = workspaceService,
         });
 
-    private static GraphDocument CreateDocument(NodeDefinitionId definitionId)
+    internal static GraphDocument CreateDocument(NodeDefinitionId definitionId)
         => new(
             "Compatibility Graph",
             "Retained facade and runtime parity coverage.",
@@ -232,7 +290,7 @@ public sealed class GraphEditorMutationCompatibilityTests
             ],
             []);
 
-    private static NodeCatalog CreateCatalog(NodeDefinitionId definitionId)
+    internal static NodeCatalog CreateCatalog(NodeDefinitionId definitionId)
     {
         var catalog = new NodeCatalog();
         catalog.RegisterDefinition(new NodeDefinition(

@@ -144,8 +144,8 @@ public static class AsterGraphEditorFactory
                 hasPluginLoader: true,
                 hasPluginTrustPolicy: resolved.Options.PluginTrustPolicy is not null,
                 hasContextMenuAugmentor: resolved.Options.ContextMenuAugmentor is not null || resolved.PluginContextMenuAugmentors.Count > 0,
-                hasNodePresentationProvider: resolved.NodePresentationProvider is not null,
-                hasLocalizationProvider: resolved.LocalizationProvider is not null));
+                hasNodePresentationProvider: () => resolved.NodePresentationProvider is not null,
+                hasLocalizationProvider: () => resolved.LocalizationProvider is not null));
         session.ConfigureInstrumentation(resolved.Options.Instrumentation);
         session.SetPluginContextMenuAugmentors(resolved.PluginContextMenuAugmentors);
         session.SetPluginLoadSnapshots(resolved.PluginLoadResult.Snapshots);
