@@ -111,6 +111,16 @@ public sealed class GraphEditorFacadeRefactorTests
     }
 
     [Fact]
+    public void EditorAssembly_ContainsDedicatedDocumentCollectionSynchronizerHost()
+    {
+        var hostType = typeof(GraphEditorViewModel).GetNestedType(
+            "GraphEditorViewModelDocumentCollectionSynchronizerHost",
+            System.Reflection.BindingFlags.NonPublic);
+
+        Assert.NotNull(hostType);
+    }
+
+    [Fact]
     public void EditorAssembly_ContainsDedicatedWorkspaceSaveCoordinator()
     {
         var coordinatorType = typeof(GraphEditorViewModel).Assembly.GetType("AsterGraph.Editor.Services.GraphEditorWorkspaceSaveCoordinator");
@@ -152,6 +162,17 @@ public sealed class GraphEditorFacadeRefactorTests
         Assert.DoesNotContain(
             implementedInterfaces,
             iface => iface.FullName == "AsterGraph.Editor.Services.IGraphEditorPresentationLocalizationCoordinatorHost");
+    }
+
+    [Fact]
+    public void GraphEditorViewModel_DoesNotImplementDocumentCollectionSynchronizerHost()
+    {
+        var viewModelType = typeof(GraphEditorViewModel);
+        var implementedInterfaces = viewModelType.GetInterfaces();
+
+        Assert.DoesNotContain(
+            implementedInterfaces,
+            iface => iface.FullName == "AsterGraph.Editor.Services.IGraphEditorDocumentCollectionSynchronizerHost");
     }
 
     [Fact]

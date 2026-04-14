@@ -38,7 +38,7 @@ namespace AsterGraph.Editor.ViewModels;
 /// 而自定义 UI 宿主应优先考虑 <see cref="AsterGraphEditorFactory.CreateSession(AsterGraphEditorOptions)"/>。
 /// 本类型在当前迁移窗口内仍然受支持，但不应再被视为新的首选组合根。
 /// </remarks>
-public sealed partial class GraphEditorViewModel : ObservableObject, IGraphContextMenuHost, GraphEditorViewModel.IGraphEditorCompatibilityCommandHost, GraphEditorViewModel.IGraphEditorFragmentCommandHost, IGraphEditorKernelProjectionHost, IGraphEditorHistoryStateHost, IGraphEditorSelectionCoordinatorHost, IGraphEditorSelectionStateSynchronizerHost, IGraphEditorSelectionProjectionApplierHost, IGraphEditorDocumentCollectionSynchronizerHost, IGraphEditorNodeLayoutCoordinatorHost
+public sealed partial class GraphEditorViewModel : ObservableObject, IGraphContextMenuHost, GraphEditorViewModel.IGraphEditorCompatibilityCommandHost, GraphEditorViewModel.IGraphEditorFragmentCommandHost, IGraphEditorKernelProjectionHost, IGraphEditorHistoryStateHost, IGraphEditorSelectionCoordinatorHost, IGraphEditorSelectionStateSynchronizerHost, IGraphEditorSelectionProjectionApplierHost, IGraphEditorNodeLayoutCoordinatorHost
 {
     private const double DefaultZoom = 0.88;
     private const double DefaultPanX = 110;
@@ -102,6 +102,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     private readonly GraphEditorSelectionCoordinator _selectionCoordinator;
     private readonly GraphEditorSelectionStateSynchronizer _selectionStateSynchronizer;
     private readonly GraphEditorSelectionProjectionApplier _selectionProjectionApplier;
+    private readonly GraphEditorViewModelDocumentCollectionSynchronizerHost _documentCollectionSynchronizerHost;
     private readonly GraphEditorDocumentCollectionSynchronizer _documentCollectionSynchronizer;
     private readonly GraphEditorDocumentLoadCoordinator _documentLoadCoordinator;
     private readonly GraphEditorViewModelNodePositionDirtyTrackerHost _nodePositionDirtyTrackerHost;
@@ -201,7 +202,8 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         _selectionCoordinator = new GraphEditorSelectionCoordinator(this);
         _selectionStateSynchronizer = new GraphEditorSelectionStateSynchronizer(this);
         _selectionProjectionApplier = new GraphEditorSelectionProjectionApplier(this, _selectionProjection);
-        _documentCollectionSynchronizer = new GraphEditorDocumentCollectionSynchronizer(this, _documentProjectionApplier);
+        _documentCollectionSynchronizerHost = new GraphEditorViewModelDocumentCollectionSynchronizerHost(this);
+        _documentCollectionSynchronizer = new GraphEditorDocumentCollectionSynchronizer(_documentCollectionSynchronizerHost, _documentProjectionApplier);
         _persistenceCoordinatorHost = new GraphEditorViewModelPersistenceCoordinatorHost(this);
         _documentLoadCoordinator = new GraphEditorDocumentLoadCoordinator(_persistenceCoordinatorHost);
         _nodePositionDirtyTrackerHost = new GraphEditorViewModelNodePositionDirtyTrackerHost(this);
@@ -944,18 +946,6 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         OnPropertyChanged(nameof(HasEditableParameters));
         OnPropertyChanged(nameof(HasBatchEditableParameters));
     }
-
-    void IGraphEditorDocumentCollectionSynchronizerHost.CoerceSelectionToExistingNodes()
-        => CoerceSelectionToExistingNodes();
-
-    void IGraphEditorDocumentCollectionSynchronizerHost.NotifyFitViewCommandCanExecuteChanged()
-        => FitViewCommand.NotifyCanExecuteChanged();
-
-    void IGraphEditorDocumentCollectionSynchronizerHost.RefreshSelectionProjection()
-        => RefreshSelectionProjection();
-
-    void IGraphEditorDocumentCollectionSynchronizerHost.RaiseComputedPropertyChanges()
-        => RaiseComputedPropertyChanges();
 
     GraphEditorCommandPermissions IGraphEditorNodeLayoutCoordinatorHost.CommandPermissions => CommandPermissions;
 
