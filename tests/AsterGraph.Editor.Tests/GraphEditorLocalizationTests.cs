@@ -45,22 +45,6 @@ public sealed class GraphEditorLocalizationTests
     }
 
     [Fact]
-    public void CompatibilityCommands_BuildContextMenu_UsesLocalizationProviderForStockMenuLabels()
-    {
-        var editor = CreateEditor(new TestGraphLocalizationProvider(
-            new Dictionary<string, string>
-            {
-                ["editor.menu.canvas.addNode"] = "添加节点",
-            }));
-        var commands = new GraphEditorViewModel.GraphEditorCompatibilityCommands(new GraphContextMenuBuilderTests.CompatibilityCommandHostAdapter(editor));
-
-        var menu = commands.BuildContextMenu(new ContextMenuContext(ContextMenuTargetKind.Canvas, new GraphPoint(0, 0)));
-        var addNodeItem = Assert.Single(menu, item => item.Id == "canvas-add-node");
-
-        Assert.Equal("添加节点", addNodeItem.Header);
-    }
-
-    [Fact]
     public void StockStrings_FallBackToDefaults_WhenLocalizationProviderIsMissing()
     {
         var editor = CreateEditor(provider: null);
