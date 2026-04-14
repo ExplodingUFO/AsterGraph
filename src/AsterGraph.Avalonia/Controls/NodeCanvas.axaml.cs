@@ -81,6 +81,7 @@ public partial class NodeCanvas : UserControl
     private readonly IGraphNodeVisualPresenter _stockNodeVisualPresenter = new DefaultGraphNodeVisualPresenter();
     private readonly NodeCanvasInteractionSession _interactionSession = new();
     private readonly NodeCanvasConnectionSceneRenderer _connectionSceneRenderer = new();
+    private readonly NodeCanvasContextMenuCoordinator _contextMenuCoordinator;
     private bool _isAttachedToVisualTree;
 
     /// <summary>
@@ -90,6 +91,7 @@ public partial class NodeCanvas : UserControl
     {
         InitializeComponent();
         Focusable = true;
+        _contextMenuCoordinator = new NodeCanvasContextMenuCoordinator(new NodeCanvasContextMenuHost(this), this);
 
         ContextRequested += HandleCanvasContextRequested;
         KeyDown += HandleCanvasKeyDown;
@@ -319,8 +321,8 @@ public partial class NodeCanvas : UserControl
             () => Focus(),
             BeginNodeDrag,
             ActivatePortFromVisual,
-            OpenNodeContextMenu,
-            OpenPortContextMenu);
+            _contextMenuCoordinator.OpenNodeContextMenu,
+            _contextMenuCoordinator.OpenPortContextMenu);
     }
 
     private void ActivatePortFromVisual(NodeViewModel node, PortViewModel port)
@@ -328,54 +330,6 @@ public partial class NodeCanvas : UserControl
         Focus();
         ViewModel?.ActivatePort(node, port);
         RenderConnections();
-    }
-
-    private bool OpenNodeContextMenu(Control target, NodeViewModel node, ContextRequestedEventArgs args)
-    {
-        if (ViewModel is null)
-        {
-            return false;
-        }
-
-        Focus();
-        var targetKind = ContextMenuTargetKind.Node;
-        if (ViewModel.HasMultipleSelection && node.IsSelected)
-        {
-            ViewModel.SetSelection(ViewModel.SelectedNodes.ToList(), node);
-            targetKind = ContextMenuTargetKind.Selection;
-        }
-        else
-        {
-            ViewModel.SelectSingleNode(node);
-        }
-
-        return OpenContextMenu(
-            target,
-            NodeCanvasContextMenuContextFactory.CreateNodeContext(
-                CreateContextMenuSnapshot(),
-                ResolveWorldPosition(args, this),
-                node.Id,
-                useSelectionTools: targetKind == ContextMenuTargetKind.Selection,
-                hostContext: ViewModel.HostContext));
-    }
-
-    private bool OpenPortContextMenu(Control target, NodeViewModel node, PortViewModel port, ContextRequestedEventArgs args)
-    {
-        if (ViewModel is null)
-        {
-            return false;
-        }
-
-        Focus();
-        ViewModel.SelectNode(node);
-        return OpenContextMenu(
-            target,
-            NodeCanvasContextMenuContextFactory.CreatePortContext(
-                CreateContextMenuSnapshot(),
-                ResolveWorldPosition(args, this),
-                node.Id,
-                port.Id,
-                hostContext: ViewModel.HostContext));
     }
 
     private void UpdateViewportTransform()
@@ -622,21 +576,7 @@ public partial class NodeCanvas : UserControl
     }
 
     private void HandleCanvasContextRequested(object? sender, ContextRequestedEventArgs args)
-    {
-        if (ViewModel is null || args.Handled || !EnableDefaultContextMenu)
-        {
-            return;
-        }
-
-        // 多选激活时，空白画布右击同样复用批量选择菜单。
-        args.Handled = OpenContextMenu(
-            this,
-            NodeCanvasContextMenuContextFactory.CreateCanvasContext(
-                CreateContextMenuSnapshot(),
-                ResolveWorldPosition(args, this),
-                useSelectionTools: ViewModel.HasMultipleSelection,
-                hostContext: ViewModel.HostContext));
-    }
+        => args.Handled = _contextMenuCoordinator.HandleCanvasContextRequested(this, args);
 
     private void HandleViewModelPropertyChanged(object? sender, PropertyChangedEventArgs args)
     {
@@ -762,9 +702,9 @@ public partial class NodeCanvas : UserControl
             _nodeVisuals,
             _interactionSession.PointerScreenPosition,
             GetConnectionStyle,
-            CreateContextMenuSnapshot,
-            ResolveWorldPosition,
-            OpenContextMenu);
+            _contextMenuCoordinator.CreateContextMenuSnapshot,
+            _contextMenuCoordinator.ResolveWorldPosition,
+            _contextMenuCoordinator.OpenContextMenu);
 
     private ConnectionStyleOptions GetConnectionStyle(ConnectionViewModel connection)
         => connection.ConversionId is not null
@@ -784,27 +724,6 @@ public partial class NodeCanvas : UserControl
         return ViewModel is null ? new GraphPoint(0, 0) : ViewModel.ScreenToWorld(new GraphPoint(0, 0));
     }
 
-    private bool OpenContextMenu(Control target, ContextMenuContext context)
-    {
-        if (ViewModel is null || !EnableDefaultContextMenu)
-        {
-            return false;
-        }
-
-        var descriptors = ViewModel.Session.Queries.BuildContextMenuDescriptors(context);
-        if (descriptors.Count == 0)
-        {
-            return false;
-        }
-
-        (ContextMenuPresenter ?? _stockContextMenuPresenter).Open(
-            target,
-            descriptors,
-            ViewModel.Session.Commands,
-            ViewModel.StyleOptions.ContextMenu);
-        return true;
-    }
-
     private NodeCanvasContextMenuSnapshot CreateContextMenuSnapshot()
         => ViewModel is null
             ? new NodeCanvasContextMenuSnapshot(null, [], [])
@@ -812,6 +731,33 @@ public partial class NodeCanvas : UserControl
                 ViewModel.SelectedNode?.Id,
                 ViewModel.SelectedNodes.Select(selected => selected.Id).ToList(),
                 ViewModel.NodeTemplates.Select(template => template.Definition).ToList());
+
+    private sealed class NodeCanvasContextMenuHost : INodeCanvasContextMenuHost
+    {
+        private readonly NodeCanvas _owner;
+
+        public NodeCanvasContextMenuHost(NodeCanvas owner)
+        {
+            _owner = owner ?? throw new ArgumentNullException(nameof(owner));
+        }
+
+        public GraphEditorViewModel? ViewModel => _owner.ViewModel;
+
+        public bool EnableDefaultContextMenu => _owner.EnableDefaultContextMenu;
+
+        public IGraphContextMenuPresenter? ContextMenuPresenter => _owner.ContextMenuPresenter;
+
+        public IGraphContextMenuPresenter StockContextMenuPresenter => _owner._stockContextMenuPresenter;
+
+        public void FocusCanvas()
+            => _owner.Focus();
+
+        public GraphPoint ResolveWorldPosition(ContextRequestedEventArgs args, Control relativeTo)
+            => _owner.ResolveWorldPosition(args, relativeTo);
+
+        public NodeCanvasContextMenuSnapshot CreateContextMenuSnapshot()
+            => _owner.CreateContextMenuSnapshot();
+    }
 
     private void ApplySelectionAdornerStyle()
     {
