@@ -24,6 +24,14 @@ public sealed class GraphEditorViewModelProjectionTests
     }
 
     [Fact]
+    public void EditorAssembly_ContainsDedicatedDocumentLoadCoordinator()
+    {
+        var coordinatorType = typeof(GraphEditorViewModel).Assembly.GetType("AsterGraph.Editor.Services.GraphEditorDocumentLoadCoordinator");
+
+        Assert.NotNull(coordinatorType);
+    }
+
+    [Fact]
     public void SelectionProjection_ProjectInspectorState_UsesConnectionSummariesAndSelectionCaption()
     {
         var definitionId = new NodeDefinitionId("tests.editor.projection.selection");
@@ -90,6 +98,35 @@ public sealed class GraphEditorViewModelProjectionTests
         Assert.Equal("No selection", editor.SelectionCaption);
         Assert.Equal("Select a node to inspect its connection summary.", editor.InspectorConnections);
         Assert.False(editor.IsDirty);
+        Assert.Equal("Loaded replacement.", editor.StatusMessage);
+    }
+
+    [Fact]
+    public void GraphEditorViewModel_ApplyKernelDocument_WhenMarkCleanFalse_LeavesDocumentDirty()
+    {
+        var initialDefinitionId = new NodeDefinitionId("tests.editor.projection.initial-dirty");
+        var replacementDefinitionId = new NodeDefinitionId("tests.editor.projection.replacement-dirty");
+        var editor = CreateEditor(CreateDocument(
+            "Initial Graph",
+            "Initial document.",
+            initialDefinitionId,
+            sourceNodeId: "initial-source",
+            targetNodeId: "initial-target",
+            includeConnection: false));
+
+        var replacementDocument = CreateDocument(
+            "Replacement Graph",
+            "Replacement document.",
+            replacementDefinitionId,
+            sourceNodeId: "replacement-source",
+            targetNodeId: "replacement-target",
+            includeConnection: true);
+
+        editor.ApplyKernelDocument(replacementDocument, "Loaded replacement.", markClean: false);
+
+        Assert.Equal("Replacement Graph", editor.Title);
+        Assert.Single(editor.Connections);
+        Assert.True(editor.IsDirty);
         Assert.Equal("Loaded replacement.", editor.StatusMessage);
     }
 

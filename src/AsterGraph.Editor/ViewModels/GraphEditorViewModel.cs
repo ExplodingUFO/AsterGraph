@@ -38,7 +38,7 @@ namespace AsterGraph.Editor.ViewModels;
 /// 而自定义 UI 宿主应优先考虑 <see cref="AsterGraphEditorFactory.CreateSession(AsterGraphEditorOptions)"/>。
 /// 本类型在当前迁移窗口内仍然受支持，但不应再被视为新的首选组合根。
 /// </remarks>
-public sealed partial class GraphEditorViewModel : ObservableObject, IGraphContextMenuHost, GraphEditorViewModel.IGraphEditorCompatibilityCommandHost, GraphEditorViewModel.IGraphEditorFragmentCommandHost, IGraphEditorKernelProjectionHost, IGraphEditorHistoryStateHost, IGraphEditorSelectionCoordinatorHost, IGraphEditorSelectionStateSynchronizerHost, IGraphEditorSelectionProjectionApplierHost, IGraphEditorDocumentCollectionSynchronizerHost, IGraphEditorNodePositionDirtyTrackerHost, IGraphEditorRetainedEventPublisherHost, IGraphEditorNodeLayoutCoordinatorHost, IGraphEditorPresentationLocalizationCoordinatorHost, IGraphEditorWorkspaceSaveCoordinatorHost
+public sealed partial class GraphEditorViewModel : ObservableObject, IGraphContextMenuHost, GraphEditorViewModel.IGraphEditorCompatibilityCommandHost, GraphEditorViewModel.IGraphEditorFragmentCommandHost, IGraphEditorKernelProjectionHost, IGraphEditorHistoryStateHost, IGraphEditorSelectionCoordinatorHost, IGraphEditorSelectionStateSynchronizerHost, IGraphEditorSelectionProjectionApplierHost, IGraphEditorDocumentCollectionSynchronizerHost, IGraphEditorDocumentLoadCoordinatorHost, IGraphEditorNodePositionDirtyTrackerHost, IGraphEditorRetainedEventPublisherHost, IGraphEditorNodeLayoutCoordinatorHost, IGraphEditorPresentationLocalizationCoordinatorHost, IGraphEditorWorkspaceSaveCoordinatorHost
 {
     private const double DefaultZoom = 0.88;
     private const double DefaultPanX = 110;
@@ -103,6 +103,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     private readonly GraphEditorSelectionStateSynchronizer _selectionStateSynchronizer;
     private readonly GraphEditorSelectionProjectionApplier _selectionProjectionApplier;
     private readonly GraphEditorDocumentCollectionSynchronizer _documentCollectionSynchronizer;
+    private readonly GraphEditorDocumentLoadCoordinator _documentLoadCoordinator;
     private readonly GraphEditorNodePositionDirtyTracker _nodePositionDirtyTracker;
     private readonly GraphEditorRetainedEventPublisher _retainedEventPublisher;
     private readonly GraphEditorNodeLayoutCoordinator _nodeLayoutCoordinator;
@@ -196,6 +197,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         _selectionStateSynchronizer = new GraphEditorSelectionStateSynchronizer(this);
         _selectionProjectionApplier = new GraphEditorSelectionProjectionApplier(this, _selectionProjection);
         _documentCollectionSynchronizer = new GraphEditorDocumentCollectionSynchronizer(this, _documentProjectionApplier);
+        _documentLoadCoordinator = new GraphEditorDocumentLoadCoordinator(this);
         _nodePositionDirtyTracker = new GraphEditorNodePositionDirtyTracker(this);
         _retainedEventPublisher = new GraphEditorRetainedEventPublisher(this);
         _nodeLayoutCoordinator = new GraphEditorNodeLayoutCoordinator(this);
@@ -945,6 +947,56 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         => RefreshSelectionProjection();
 
     void IGraphEditorDocumentCollectionSynchronizerHost.RaiseComputedPropertyChanges()
+        => RaiseComputedPropertyChanges();
+
+    bool IGraphEditorDocumentLoadCoordinatorHost.IsDirtyTrackingSuspended
+    {
+        get => _suspendDirtyTracking;
+        set => _suspendDirtyTracking = value;
+    }
+
+    bool IGraphEditorDocumentLoadCoordinatorHost.IsHistoryTrackingSuspended
+    {
+        get => _suspendHistoryTracking;
+        set => _suspendHistoryTracking = value;
+    }
+
+    bool IGraphEditorDocumentLoadCoordinatorHost.IsSelectionTrackingSuspended
+    {
+        get => _suspendSelectionTracking;
+        set => _suspendSelectionTracking = value;
+    }
+
+    ObservableCollection<NodeViewModel> IGraphEditorDocumentLoadCoordinatorHost.SelectedNodes
+        => SelectedNodes;
+
+    ObservableCollection<NodeParameterViewModel> IGraphEditorDocumentLoadCoordinatorHost.SelectedNodeParameters
+        => SelectedNodeParameters;
+
+    void IGraphEditorDocumentLoadCoordinatorHost.ApplyDocumentProjection(GraphDocument document)
+        => _documentProjectionApplier.ApplyDocument(
+            document,
+            Nodes,
+            Connections,
+            _presentationLocalizationCoordinator.ApplyNodePresentation,
+            HandleNodePropertyChanged);
+
+    void IGraphEditorDocumentLoadCoordinatorHost.ClearPendingInteractionState()
+        => _pendingInteractionState = null;
+
+    GraphEditorHistoryState IGraphEditorDocumentLoadCoordinatorHost.CaptureHistoryState()
+        => CaptureHistoryState();
+
+    void IGraphEditorDocumentLoadCoordinatorHost.ResetHistory(GraphEditorHistoryState state)
+        => _historyService.Reset(state);
+
+    void IGraphEditorDocumentLoadCoordinatorHost.SetLastSavedDocumentSignature(string signature)
+        => _lastSavedDocumentSignature = signature;
+
+    void IGraphEditorDocumentLoadCoordinatorHost.RefreshSelectionProjection()
+        => RefreshSelectionProjection();
+
+    void IGraphEditorDocumentLoadCoordinatorHost.RaiseComputedPropertyChanges()
         => RaiseComputedPropertyChanges();
 
     bool IGraphEditorNodePositionDirtyTrackerHost.IsDirtyTrackingSuspended => _suspendDirtyTracking;
@@ -2161,49 +2213,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         => _documentProjectionApplier.FindNode(nodeId);
 
     private void LoadDocument(GraphDocument document, string status, bool markClean, bool resetHistory = true)
-    {
-        _suspendDirtyTracking = true;
-        _suspendHistoryTracking = true;
-
-        Title = document.Title;
-        Description = document.Description;
-        _documentProjectionApplier.ApplyDocument(
-            document,
-            Nodes,
-            Connections,
-            _presentationLocalizationCoordinator.ApplyNodePresentation,
-            HandleNodePropertyChanged);
-
-        _suspendSelectionTracking = true;
-        SelectedNodes.Clear();
-        SelectedNode = null;
-        _suspendSelectionTracking = false;
-        SelectedNodeParameters.Clear();
-        _pendingInteractionState = null;
-        IsDirty = !markClean;
-        StatusMessage = status;
-        _suspendHistoryTracking = false;
-        _suspendDirtyTracking = false;
-
-        GraphEditorHistoryState? historyState = null;
-        if (resetHistory || markClean)
-        {
-            historyState = CaptureHistoryState();
-        }
-
-        if (resetHistory && historyState is not null)
-        {
-            _historyService.Reset(historyState);
-        }
-
-        if (markClean && historyState is not null)
-        {
-            _lastSavedDocumentSignature = historyState.Signature;
-        }
-
-        RefreshSelectionProjection();
-        RaiseComputedPropertyChanges();
-    }
+        => _documentLoadCoordinator.LoadDocument(document, status, markClean, resetHistory);
 
     private void MarkDirty(string status)
         => _historyStateCoordinator.MarkDirty(status);
