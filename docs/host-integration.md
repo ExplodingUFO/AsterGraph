@@ -86,26 +86,31 @@ If push fails with authentication or permission errors (401/403), refresh source
 
 ## Release Verification
 
-Before pushing packages, verify both the packed-consumer path and the normal host/project path.
+Before pushing packages, verify both the packed-consumer path and the two regression lanes through the phase-gate script.
 
 Recommended local verification sequence:
 
 ```powershell
-# 1. rebuild the package-producing solution outputs
-dotnet build src/AsterGraph.Editor/AsterGraph.Editor.csproj -t:Rebuild --no-restore -p:NoWarn= --nologo -v minimal
-dotnet build avalonia-node-map.sln -t:Rebuild --no-restore -p:NoWarn= --nologo -v minimal
+# 1) script-first full gate (build + split-lane tests + smoke checks)
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane all -Framework all -Configuration Release
+```
 
-# 2. produce fresh local packages
-dotnet pack src/AsterGraph.Abstractions/AsterGraph.Abstractions.csproj -c Release -o artifacts/packages --nologo
-dotnet pack src/AsterGraph.Core/AsterGraph.Core.csproj -c Release -o artifacts/packages --nologo
-dotnet pack src/AsterGraph.Editor/AsterGraph.Editor.csproj -c Release -o artifacts/packages --nologo
-dotnet pack src/AsterGraph.Avalonia/AsterGraph.Avalonia.csproj -c Release -o artifacts/packages --nologo
+For lane-aware diagnostics or shorter feedback, run lanes directly:
 
-# 3. verify NuGet consumption against the packed artifacts
+```powershell
+# core SDK regression lane
+dotnet test tests/AsterGraph.Serialization.Tests/AsterGraph.Serialization.Tests.csproj --nologo -v minimal
+dotnet test tests/AsterGraph.Editor.Tests/AsterGraph.Editor.Tests.csproj --nologo -v minimal
+
+# demo/sample regression lane
+dotnet test tests/AsterGraph.Demo.Tests/AsterGraph.Demo.Tests.csproj --nologo -v minimal
+```
+
+Run the live proof tools from local package builds:
+
+```powershell
 dotnet run --project tools/AsterGraph.PackageSmoke/AsterGraph.PackageSmoke.csproj -p:UsePackedAsterGraphPackages=true --nologo
-
-# 4. keep the standard regression suite green
-dotnet test avalonia-node-map.sln --no-restore --nologo -v minimal
+dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj --nologo
 ```
 
 Notes:
@@ -115,6 +120,11 @@ Notes:
 - `src/AsterGraph.Demo` is now the single visual host-composition sample for the default Avalonia shell and related host seams.
 - `tools/AsterGraph.PackageSmoke` is intentionally narrow: it proves packaged consumption across the runtime-first, hosted-UI, and retained compatibility routes, then emits stable `PACKAGE_SMOKE_*` markers.
 - `tools/AsterGraph.ScaleSmoke` keeps the larger-graph scale/readiness proof path separate from the package-consumption smoke tool.
+
+The verification split is:
+
+- Core SDK regression lane: `tests/AsterGraph.Editor.Tests` plus `tests/AsterGraph.Serialization.Tests`
+- Demo/sample regression lane: `tests/AsterGraph.Demo.Tests`
 
 ## Canonical Host Composition
 

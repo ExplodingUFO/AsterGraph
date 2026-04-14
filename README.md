@@ -238,14 +238,16 @@ var run = session.Automation.Execute(new GraphEditorAutomationRunRequest(
     ]));
 ```
 
-The proof ring for this extension story lives in the same public surfaces:
+The proof surface for this extension story is:
 
-- focused regressions:
-  - `tests/AsterGraph.Editor.Tests/GraphEditorPluginDiscoveryTests.cs`
-  - `tests/AsterGraph.Editor.Tests/GraphEditorPluginLoadingTests.cs`
-  - `tests/AsterGraph.Editor.Tests/GraphEditorPluginInspectionContractsTests.cs`
-  - `tests/AsterGraph.Editor.Tests/GraphEditorAutomationExecutionTests.cs`
-  - `tests/AsterGraph.Editor.Tests/GraphEditorProofRingTests.cs`
+- live package/runtime proof:
+  - `tools/AsterGraph.PackageSmoke`
+  - `tools/AsterGraph.ScaleSmoke`
+- core SDK regression lane:
+  - `tests/AsterGraph.Editor.Tests`
+  - `tests/AsterGraph.Serialization.Tests`
+- demo/sample regression lane:
+  - `tests/AsterGraph.Demo.Tests` (sample-host and interaction-path checks)
 - runnable package/runtime proof:
   - `dotnet run --project tools/AsterGraph.PackageSmoke/AsterGraph.PackageSmoke.csproj --nologo`
     - proves packaged consumption across the runtime-first, hosted-UI, and retained compatibility routes
@@ -282,16 +284,26 @@ dotnet pack src/AsterGraph.Avalonia/AsterGraph.Avalonia.csproj -c Release -o art
 Release verification before publish:
 
 ```powershell
-# force a full rebuild when checking XML warning debt
-dotnet build src/AsterGraph.Editor/AsterGraph.Editor.csproj -t:Rebuild --no-restore -p:NoWarn= --nologo -v minimal
-dotnet build avalonia-node-map.sln -t:Rebuild --no-restore -p:NoWarn= --nologo -v minimal
+# preferred phase-gate (build + split-lane validation + smoke tooling)
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane all -Framework all -Configuration Release
+```
 
-# verify the packed package path and scale smoke tools
+To validate regression lanes independently:
+
+```powershell
+# core SDK lane
+dotnet test tests/AsterGraph.Serialization.Tests/AsterGraph.Serialization.Tests.csproj --nologo -v minimal
+dotnet test tests/AsterGraph.Editor.Tests/AsterGraph.Editor.Tests.csproj --nologo -v minimal
+
+# demo/sample lane
+dotnet test tests/AsterGraph.Demo.Tests/AsterGraph.Demo.Tests.csproj --nologo -v minimal
+```
+
+Run smoke tools with the same build outputs:
+
+```powershell
 dotnet run --project tools/AsterGraph.PackageSmoke/AsterGraph.PackageSmoke.csproj -p:UsePackedAsterGraphPackages=true --nologo
 dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj --nologo
-
-# keep the normal solution test gate green
-dotnet test avalonia-node-map.sln --no-restore --nologo -v minimal
 ```
 
 Use `-t:Rebuild` rather than a plain incremental `dotnet build` when validating XML documentation warning cleanup. Incremental builds can reuse prior outputs and falsely appear warning-free.

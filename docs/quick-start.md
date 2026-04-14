@@ -101,10 +101,33 @@ Route guide:
 
 - use `AsterGraphEditorFactory.CreateSession(...)` if your host owns the UI and only wants the canonical runtime boundary
 - use `AsterGraphEditorFactory.Create(...)` plus `AsterGraphAvaloniaViewFactory.Create(...)` for the canonical shipped-UI path
-- keep `new GraphEditorViewModel(...)` or `new GraphEditorView { Editor = ... }` only when you are intentionally staying on the retained compatibility path during migration
-- see `src/AsterGraph.Demo` for the visual hosted-UI reference
-- see `tools/AsterGraph.PackageSmoke` for the machine-checkable `PACKAGE_SMOKE_*` package-consumption markers
-- see `tools/AsterGraph.ScaleSmoke` for the large-graph scale/readiness markers
+ - keep `new GraphEditorViewModel(...)` or `new GraphEditorView { Editor = ... }` only when you are intentionally staying on the retained compatibility path during migration
+ - see `src/AsterGraph.Demo` for the visual hosted-UI reference
+ - see `tools/AsterGraph.PackageSmoke` for the machine-checkable `PACKAGE_SMOKE_*` package-consumption markers
+ - see `tools/AsterGraph.ScaleSmoke` for the large-graph scale/readiness markers
+
+## 6) Proof surface and regression lanes
+
+The live proof surface now uses the dedicated tools:
+
+- `tools/AsterGraph.PackageSmoke`
+- `tools/AsterGraph.ScaleSmoke`
+
+Validate through the repository CI entrypoint first:
+
+```powershell
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane all -Framework all -Configuration Release
+```
+
+When you need lane-level checks:
+
+```powershell
+dotnet test tests/AsterGraph.Editor.Tests/AsterGraph.Editor.Tests.csproj --nologo -v minimal
+dotnet test tests/AsterGraph.Serialization.Tests/AsterGraph.Serialization.Tests.csproj --nologo -v minimal
+dotnet test tests/AsterGraph.Demo.Tests/AsterGraph.Demo.Tests.csproj --nologo -v minimal
+```
+
+This split keeps sample-host behavior in `AsterGraph.Demo.Tests` separate from the core SDK regression lane.
 
 ## 5) Where Abstractions fits
 
