@@ -38,7 +38,7 @@ namespace AsterGraph.Editor.ViewModels;
 /// 而自定义 UI 宿主应优先考虑 <see cref="AsterGraphEditorFactory.CreateSession(AsterGraphEditorOptions)"/>。
 /// 本类型在当前迁移窗口内仍然受支持，但不应再被视为新的首选组合根。
 /// </remarks>
-public sealed partial class GraphEditorViewModel : ObservableObject, IGraphContextMenuHost, GraphEditorViewModel.IGraphEditorFragmentCommandHost, IGraphEditorHistoryStateHost
+public sealed partial class GraphEditorViewModel : ObservableObject, IGraphContextMenuHost, GraphEditorViewModel.IGraphEditorFragmentCommandHost
 {
     private const double DefaultZoom = 0.88;
     private const double DefaultPanX = 110;
@@ -100,6 +100,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     private readonly GraphEditorViewModelKernelProjectionHost _kernelProjectionHost;
     private readonly GraphEditorViewModelSelectionProjectionApplierHost _selectionProjectionApplierHost;
     private readonly GraphEditorKernelProjectionApplier _kernelProjectionApplier;
+    private readonly GraphEditorViewModelHistoryStateHost _historyStateHost;
     private readonly GraphEditorHistoryStateCoordinator _historyStateCoordinator;
     private readonly GraphEditorSelectionCoordinator _selectionCoordinator;
     private readonly GraphEditorViewModelSelectionCoordinatorHost _selectionCoordinatorHost;
@@ -205,7 +206,8 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             (key, fallback, arguments) => LocalizeFormat(key, fallback, arguments));
         _kernelProjectionHost = new GraphEditorViewModelKernelProjectionHost(this);
         _kernelProjectionApplier = new GraphEditorKernelProjectionApplier(_kernelProjectionHost);
-        _historyStateCoordinator = new GraphEditorHistoryStateCoordinator(this, _historyService);
+        _historyStateHost = new GraphEditorViewModelHistoryStateHost(this);
+        _historyStateCoordinator = new GraphEditorHistoryStateCoordinator(_historyStateHost, _historyService);
         _selectionCoordinatorHost = new GraphEditorViewModelSelectionCoordinatorHost(this);
         _selectionCoordinator = new GraphEditorSelectionCoordinator(_selectionCoordinatorHost);
         _selectionStateSynchronizerHost = new GraphEditorViewModelSelectionStateSynchronizerHost(this);
@@ -726,38 +728,6 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
                 path,
                 fragment.Nodes.Count,
                 fragment.Connections.Count));
-
-    IReadOnlyList<NodeViewModel> IGraphEditorHistoryStateHost.SelectedNodes => SelectedNodes;
-
-    NodeViewModel? IGraphEditorHistoryStateHost.SelectedNode => SelectedNode;
-
-    string? IGraphEditorHistoryStateHost.LastSavedDocumentSignature => _lastSavedDocumentSignature;
-
-    bool IGraphEditorHistoryStateHost.IsHistoryTrackingSuspended
-    {
-        get => _suspendHistoryTracking;
-        set => _suspendHistoryTracking = value;
-    }
-
-    bool IGraphEditorHistoryStateHost.IsDirtyTrackingSuspended => _suspendDirtyTracking;
-
-    GraphDocument IGraphEditorHistoryStateHost.CreateViewModelDocumentSnapshot()
-        => CreateViewModelDocumentSnapshot();
-
-    void IGraphEditorHistoryStateHost.LoadDocumentCore(GraphDocument document, string status, bool markClean, bool resetHistory)
-        => LoadDocument(document, status, markClean, resetHistory);
-
-    void IGraphEditorHistoryStateHost.SetSelection(IReadOnlyList<NodeViewModel> nodes, NodeViewModel? primaryNode, string? status)
-        => SetSelection(nodes, primaryNode, status);
-
-    void IGraphEditorHistoryStateHost.SetStatusMessage(string status)
-        => StatusMessage = status;
-
-    void IGraphEditorHistoryStateHost.SetDirtyState(bool isDirty)
-        => IsDirty = isDirty;
-
-    void IGraphEditorHistoryStateHost.RaiseComputedPropertyChanges()
-        => RaiseComputedPropertyChanges();
 
     [ObservableProperty]
     private double zoom = DefaultZoom;

@@ -131,62 +131,6 @@ public sealed class GraphEditorViewModelProjectionTests
     }
 
     [Fact]
-    public void GraphEditorViewModel_LoadDocumentCore_WhenResetHistoryFalse_PreservesUndoStateAndSaveBoundary()
-    {
-        var initialDefinitionId = new NodeDefinitionId("tests.editor.projection.history-initial");
-        var replacementDefinitionId = new NodeDefinitionId("tests.editor.projection.history-replacement");
-        var editor = CreateEditor(CreateDocument(
-            "Initial Graph",
-            "Initial document.",
-            initialDefinitionId,
-            sourceNodeId: "initial-source",
-            targetNodeId: "initial-target",
-            includeConnection: false));
-        var sourceNode = editor.FindNode("initial-source");
-        Assert.NotNull(sourceNode);
-        var origin = new GraphPoint(sourceNode.X, sourceNode.Y);
-
-        editor.SaveWorkspace();
-        editor.BeginHistoryInteraction();
-        editor.ApplyDragOffset(
-            new Dictionary<string, GraphPoint>(StringComparer.Ordinal)
-            {
-                [sourceNode.Id] = origin,
-            },
-            48,
-            20);
-        editor.CompleteHistoryInteraction("Moved before history restore.");
-        Assert.True(editor.IsDirty);
-        Assert.True(editor.CanUndo);
-
-        var replacementDocument = CreateDocument(
-            "History Restored Graph",
-            "Loaded through history host.",
-            replacementDefinitionId,
-            sourceNodeId: "restored-source",
-            targetNodeId: "restored-target",
-            includeConnection: true);
-
-        ((IGraphEditorHistoryStateHost)editor).LoadDocumentCore(
-            replacementDocument,
-            "History restored.",
-            markClean: false,
-            resetHistory: false);
-
-        Assert.Equal("History Restored Graph", editor.Title);
-        Assert.Single(editor.Connections);
-        Assert.True(editor.IsDirty);
-        Assert.True(editor.CanUndo);
-        Assert.Equal("History restored.", editor.StatusMessage);
-
-        editor.Undo();
-
-        Assert.Equal("Initial Graph", editor.Title);
-        Assert.False(editor.IsDirty);
-        Assert.False(editor.CanUndo);
-    }
-
-    [Fact]
     public void GraphEditorViewModel_ApplyKernelSelection_UsesRebuiltIndexesForInspectorProjection()
     {
         var definitionId = new NodeDefinitionId("tests.editor.projection.selection-rebuild");
