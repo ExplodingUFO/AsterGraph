@@ -18,7 +18,7 @@ using AsterGraph.Editor.Viewport;
 
 namespace AsterGraph.Editor.Kernel;
 
-internal sealed class GraphEditorKernel : IGraphEditorSessionHost, IGraphEditorKernelCommandRouterHost, IGraphEditorWorkspaceSaveCoordinatorHost
+internal sealed class GraphEditorKernel : IGraphEditorSessionHost, IGraphEditorKernelCommandRouterHost, IGraphEditorWorkspaceSaveCoordinatorHost, IGraphEditorWorkspaceLoadCoordinatorHost
 {
     private const double DefaultZoom = 0.88;
     private const double DefaultPanX = 110;
@@ -33,6 +33,7 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost, IGraphEditorK
     private readonly GraphEditorKernelDocumentMutator _documentMutator = new();
     private readonly GraphEditorKernelCommandRouter _commandRouter;
     private readonly GraphEditorWorkspaceSaveCoordinator _workspaceSaveCoordinator;
+    private readonly GraphEditorWorkspaceLoadCoordinator _workspaceLoadCoordinator;
     private GraphEditorBehaviorOptions _behaviorOptions;
     private readonly GraphEditorStyleOptions _styleOptions;
     private GraphDocument _document;
@@ -68,6 +69,7 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost, IGraphEditorK
         _behaviorOptions = behaviorOptions;
         _commandRouter = new GraphEditorKernelCommandRouter(this);
         _workspaceSaveCoordinator = new GraphEditorWorkspaceSaveCoordinator(this);
+        _workspaceLoadCoordinator = new GraphEditorWorkspaceLoadCoordinator(this);
         _lastSavedDocumentSignature = CreateDocumentSignature(_document);
         _historyService.Reset(CaptureHistoryState());
         CurrentStatusMessage = "Ready to edit.";
@@ -148,6 +150,61 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost, IGraphEditorK
 
     void IGraphEditorWorkspaceSaveCoordinatorHost.CompleteWorkspaceSaveAttempt()
     {
+    }
+
+    bool IGraphEditorWorkspaceLoadCoordinatorHost.CanLoadWorkspace
+        => _behaviorOptions.Commands.Workspace.AllowLoad;
+
+    bool IGraphEditorWorkspaceLoadCoordinatorHost.WorkspaceExists
+        => _workspaceService.Exists();
+
+    string IGraphEditorWorkspaceLoadCoordinatorHost.WorkspacePath
+        => _workspaceService.WorkspacePath;
+
+    GraphDocument IGraphEditorWorkspaceLoadCoordinatorHost.LoadWorkspaceDocument()
+        => _workspaceService.Load();
+
+    void IGraphEditorWorkspaceLoadCoordinatorHost.SetWorkspaceLoadDisabledStatus()
+        => CurrentStatusMessage = "Loading is disabled by host permissions.";
+
+    void IGraphEditorWorkspaceLoadCoordinatorHost.HandleWorkspaceLoadMissing(string statusMessage)
+    {
+        CurrentStatusMessage = statusMessage;
+        DiagnosticPublished?.Invoke(new GraphEditorDiagnostic(
+            "workspace.load.missing",
+            "workspace.load",
+            CurrentStatusMessage,
+            GraphEditorDiagnosticSeverity.Warning));
+    }
+
+    void IGraphEditorWorkspaceLoadCoordinatorHost.ApplyLoadedWorkspaceDocument(GraphDocument document, string statusMessage)
+    {
+        LoadDocument(document, statusMessage, markClean: true, resetHistory: true);
+        CancelPendingConnection();
+        ClearSelection(updateStatus: false);
+        ResetView(updateStatus: false);
+    }
+
+    void IGraphEditorWorkspaceLoadCoordinatorHost.HandleWorkspaceLoadSucceeded(string diagnosticMessage)
+    {
+        DiagnosticPublished?.Invoke(new GraphEditorDiagnostic(
+            "workspace.load.succeeded",
+            "workspace.load",
+            diagnosticMessage,
+            GraphEditorDiagnosticSeverity.Info));
+        DocumentChanged?.Invoke(this, new GraphEditorDocumentChangedEventArgs(GraphEditorDocumentChangeKind.WorkspaceLoaded, statusMessage: CurrentStatusMessage));
+    }
+
+    void IGraphEditorWorkspaceLoadCoordinatorHost.HandleWorkspaceLoadFailed(string statusMessage, Exception exception)
+    {
+        CurrentStatusMessage = statusMessage;
+        RecoverableFailureRaised?.Invoke(
+            this,
+            new GraphEditorRecoverableFailureEventArgs(
+                "workspace.load.failed",
+                "workspace.load",
+                CurrentStatusMessage,
+                exception));
     }
 
     GraphEditorBehaviorOptions IGraphEditorKernelCommandRouterHost.BehaviorOptions => _behaviorOptions;
@@ -612,52 +669,7 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost, IGraphEditorK
         => _workspaceSaveCoordinator.SaveWorkspace();
 
     public bool LoadWorkspace()
-    {
-        if (!_behaviorOptions.Commands.Workspace.AllowLoad)
-        {
-            CurrentStatusMessage = "Loading is disabled by host permissions.";
-            return false;
-        }
-
-        try
-        {
-            if (!_workspaceService.Exists())
-            {
-                CurrentStatusMessage = "No saved snapshot yet. Save once to create one.";
-                DiagnosticPublished?.Invoke(new GraphEditorDiagnostic(
-                    "workspace.load.missing",
-                    "workspace.load",
-                    CurrentStatusMessage,
-                    GraphEditorDiagnosticSeverity.Warning));
-                return false;
-            }
-
-            var document = _workspaceService.Load();
-            LoadDocument(document, "Workspace loaded from disk.", markClean: true, resetHistory: true);
-            CancelPendingConnection();
-            ClearSelection(updateStatus: false);
-            ResetView(updateStatus: false);
-            DiagnosticPublished?.Invoke(new GraphEditorDiagnostic(
-                "workspace.load.succeeded",
-                "workspace.load",
-                _workspaceService.WorkspacePath,
-                GraphEditorDiagnosticSeverity.Info));
-            DocumentChanged?.Invoke(this, new GraphEditorDocumentChangedEventArgs(GraphEditorDocumentChangeKind.WorkspaceLoaded, statusMessage: CurrentStatusMessage));
-            return true;
-        }
-        catch (Exception exception)
-        {
-            CurrentStatusMessage = $"Load failed: {exception.Message}";
-            RecoverableFailureRaised?.Invoke(
-                this,
-                new GraphEditorRecoverableFailureEventArgs(
-                    "workspace.load.failed",
-                    "workspace.load",
-                    CurrentStatusMessage,
-                    exception));
-            return false;
-        }
-    }
+        => _workspaceLoadCoordinator.LoadWorkspace();
 
     public GraphDocument CreateDocumentSnapshot()
         => CloneDocument(_document);

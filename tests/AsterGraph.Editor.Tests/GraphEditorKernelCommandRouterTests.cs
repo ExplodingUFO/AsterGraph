@@ -6,6 +6,7 @@ using AsterGraph.Core.Compatibility;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Catalog;
 using AsterGraph.Editor.Configuration;
+using AsterGraph.Editor.Events;
 using AsterGraph.Editor.Kernel;
 using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.Services;
@@ -33,6 +34,14 @@ public sealed class GraphEditorKernelCommandRouterTests
         Assert.NotNull(routerType);
         Assert.DoesNotContain("ParseNodePosition", methods);
         Assert.DoesNotContain("TryGetRequiredArgument", methods);
+    }
+
+    [Fact]
+    public void EditorAssembly_ContainsDedicatedWorkspaceLoadCoordinator()
+    {
+        var coordinatorType = typeof(GraphEditorKernel).Assembly.GetType("AsterGraph.Editor.Services.GraphEditorWorkspaceLoadCoordinator");
+
+        Assert.NotNull(coordinatorType);
     }
 
     [Fact]
@@ -133,6 +142,38 @@ public sealed class GraphEditorKernelCommandRouterTests
         Assert.False(kernel.IsDirty);
     }
 
+    [Fact]
+    public void GraphEditorKernel_LoadWorkspace_ReplacesDocumentAndResetsTransientState()
+    {
+        var workspace = new LoadedWorkspaceService(CreateLoadedDocument());
+        var kernel = CreateKernel(workspace);
+        GraphEditorDocumentChangedEventArgs? documentChanged = null;
+        kernel.DocumentChanged += (_, args) => documentChanged = args;
+
+        kernel.UpdateViewportSize(1280, 720);
+        kernel.PanBy(40, -20);
+        kernel.ZoomAt(1.2, new GraphPoint(640, 360));
+        kernel.SetSelection([SourceNodeId], SourceNodeId, updateStatus: false);
+        kernel.StartConnection(SourceNodeId, SourcePortId);
+
+        var loaded = kernel.LoadWorkspace();
+
+        Assert.True(loaded);
+        Assert.Equal("Loaded Kernel Graph", kernel.CreateDocumentSnapshot().Title);
+        Assert.Single(kernel.CreateDocumentSnapshot().Connections);
+        Assert.Empty(kernel.GetSelectionSnapshot().SelectedNodeIds);
+        Assert.False(kernel.GetPendingConnectionSnapshot().HasPendingConnection);
+        Assert.Equal(0.88, kernel.GetViewportSnapshot().Zoom);
+        Assert.Equal(110, kernel.GetViewportSnapshot().PanX);
+        Assert.Equal(96, kernel.GetViewportSnapshot().PanY);
+        Assert.Equal(1280, kernel.GetViewportSnapshot().ViewportWidth);
+        Assert.Equal(720, kernel.GetViewportSnapshot().ViewportHeight);
+        Assert.Equal("Workspace loaded from disk.", kernel.CurrentStatusMessage);
+        Assert.NotNull(documentChanged);
+        Assert.Equal(GraphEditorDocumentChangeKind.WorkspaceLoaded, documentChanged!.ChangeKind);
+        Assert.Equal("Workspace loaded from disk.", documentChanged.StatusMessage);
+    }
+
     private static GraphEditorKernel CreateKernel(IGraphWorkspaceService? workspaceService = null)
         => new(
             CreateDocument(),
@@ -173,6 +214,40 @@ public sealed class GraphEditorKernelCommandRouterTests
                     DefinitionId),
             ],
             []);
+
+    private static GraphDocument CreateLoadedDocument()
+        => new(
+            "Loaded Kernel Graph",
+            "Loaded from workspace service.",
+            [
+                new GraphNode(
+                    "loaded-source",
+                    "Loaded Source",
+                    "Tests",
+                    "Kernel",
+                    "Loaded source node for workspace tests.",
+                    new GraphPoint(160, 120),
+                    new GraphSize(220, 140),
+                    [],
+                    [new GraphPort(SourcePortId, "Output", PortDirection.Output, "float", "#6AD5C4", new PortTypeId("float"))],
+                    "#6AD5C4",
+                    DefinitionId),
+                new GraphNode(
+                    "loaded-target",
+                    "Loaded Target",
+                    "Tests",
+                    "Kernel",
+                    "Loaded target node for workspace tests.",
+                    new GraphPoint(460, 180),
+                    new GraphSize(220, 140),
+                    [new GraphPort(TargetPortId, "Input", PortDirection.Input, "float", "#F3B36B", new PortTypeId("float"))],
+                    [],
+                    "#F3B36B",
+                    DefinitionId),
+            ],
+            [
+                new GraphConnection("loaded-connection", "loaded-source", SourcePortId, "loaded-target", TargetPortId, "loaded-link", "#55D8C1"),
+            ]);
 
     private static NodeCatalog CreateCatalog()
     {
@@ -242,5 +317,24 @@ public sealed class GraphEditorKernelCommandRouterTests
 
         public bool Exists()
             => false;
+    }
+
+    private sealed class LoadedWorkspaceService : IGraphWorkspaceService
+    {
+        private readonly GraphDocument _document;
+
+        public LoadedWorkspaceService(GraphDocument document)
+        {
+            _document = document ?? throw new ArgumentNullException(nameof(document));
+        }
+
+        public string WorkspacePath => "workspace://loaded";
+
+        public void Save(GraphDocument document)
+            => throw new InvalidOperationException("Save should not be called in this test.");
+
+        public GraphDocument Load() => _document;
+
+        public bool Exists() => true;
     }
 }
