@@ -117,11 +117,18 @@ The live proof surface now uses the dedicated tools:
 - `tools/AsterGraph.PackageSmoke`
 - `tools/AsterGraph.ScaleSmoke`
 
-Validate through the repository CI entrypoint first:
+Validate split-regression/build gates through the repository CI entrypoint first:
 
 ```powershell
 # validate with the repository entrypoint in eng/ci.ps1
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane all -Framework all -Configuration Release
+```
+
+Run the smoke tools separately for executable proof:
+
+```powershell
+dotnet run --project tools/AsterGraph.PackageSmoke/AsterGraph.PackageSmoke.csproj -p:UsePackedAsterGraphPackages=true --nologo
+dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj --nologo
 ```
 
 When you need lane-level checks:

@@ -284,7 +284,7 @@ dotnet pack src/AsterGraph.Avalonia/AsterGraph.Avalonia.csproj -c Release -o art
 Release verification before publish:
 
 ```powershell
-# preferred phase-gate (build + split-lane validation + smoke tooling)
+# preferred phase-gate (build + split-lane regression + smoke-tool project validation/build wiring)
 # execute via the repository script entrypoint: eng/ci.ps1
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane all -Framework all -Configuration Release
 ```
@@ -300,10 +300,12 @@ dotnet test tests/AsterGraph.Editor.Tests/AsterGraph.Editor.Tests.csproj --nolog
 dotnet test tests/AsterGraph.Demo.Tests/AsterGraph.Demo.Tests.csproj --nologo -v minimal
 ```
 
-Run smoke tools with the same build outputs:
+Run the smoke tools separately when you need executable proof:
 
 ```powershell
+# execute PackageSmoke against local packages (different restore path than the CI build step above)
 dotnet run --project tools/AsterGraph.PackageSmoke/AsterGraph.PackageSmoke.csproj -p:UsePackedAsterGraphPackages=true --nologo
+# execute ScaleSmoke against current build outputs
 dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj --nologo
 ```
 

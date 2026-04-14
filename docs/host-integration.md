@@ -91,7 +91,7 @@ Before pushing packages, verify both the packed-consumer path and the two regres
 Recommended local verification sequence:
 
 ```powershell
-# 1) script-first full gate (build + split-lane tests + smoke checks) via `eng/ci.ps1`
+# 1) script-first full gate (build + split-lane tests + smoke-tool project build wiring) via `eng/ci.ps1`
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane all -Framework all -Configuration Release
 ```
 
@@ -106,7 +106,7 @@ dotnet test tests/AsterGraph.Editor.Tests/AsterGraph.Editor.Tests.csproj --nolog
 dotnet test tests/AsterGraph.Demo.Tests/AsterGraph.Demo.Tests.csproj --nologo -v minimal
 ```
 
-Run the live proof tools from local package builds:
+Run the live proof tools as a separate step:
 
 ```powershell
 dotnet run --project tools/AsterGraph.PackageSmoke/AsterGraph.PackageSmoke.csproj -p:UsePackedAsterGraphPackages=true --nologo
