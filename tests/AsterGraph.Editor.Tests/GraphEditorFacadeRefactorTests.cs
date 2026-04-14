@@ -242,6 +242,24 @@ public sealed class GraphEditorFacadeRefactorTests
         Assert.Equal("None", editor.InspectorUpstream);
     }
 
+    [Fact]
+    public void SelectedNodeChange_RaisesEditableParameterProjectionPropertyChanged()
+    {
+        var definitionId = new NodeDefinitionId("tests.editor.facade.parameter-projection-notify");
+        var editor = CreateEditorWithSharedDefinitionNodes(definitionId);
+        var first = editor.Nodes[0];
+        var second = editor.Nodes[1];
+        var changedProperties = new List<string?>();
+
+        editor.SetSelection([first, second], first, status: null);
+        editor.PropertyChanged += (_, args) => changedProperties.Add(args.PropertyName);
+
+        editor.SelectedNode = second;
+
+        Assert.Contains(nameof(GraphEditorViewModel.HasEditableParameters), changedProperties);
+        Assert.Contains(nameof(GraphEditorViewModel.HasBatchEditableParameters), changedProperties);
+    }
+
     private static NodeViewModel CreateNode(
         string nodeId,
         NodeDefinitionId definitionId,
