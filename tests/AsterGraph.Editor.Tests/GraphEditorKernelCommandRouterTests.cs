@@ -190,6 +190,36 @@ public sealed class GraphEditorKernelCommandRouterTests
         Assert.Contains("diagnostic boom", failure.Message, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void GraphEditorKernel_LoadWorkspace_WhenExistsThrows_RaisesRecoverableFailure()
+    {
+        var kernel = CreateKernel(new ThrowingExistsWorkspaceService());
+        GraphEditorRecoverableFailureEventArgs? failure = null;
+        kernel.RecoverableFailureRaised += (_, args) => failure = args;
+
+        var loaded = kernel.LoadWorkspace();
+
+        Assert.False(loaded);
+        Assert.NotNull(failure);
+        Assert.Equal("workspace.load.failed", failure!.Code);
+        Assert.Contains("exists boom", failure.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void GraphEditorKernel_LoadWorkspace_WhenLoadThrows_RaisesRecoverableFailure()
+    {
+        var kernel = CreateKernel(new ThrowingLoadWorkspaceService());
+        GraphEditorRecoverableFailureEventArgs? failure = null;
+        kernel.RecoverableFailureRaised += (_, args) => failure = args;
+
+        var loaded = kernel.LoadWorkspace();
+
+        Assert.False(loaded);
+        Assert.NotNull(failure);
+        Assert.Equal("workspace.load.failed", failure!.Code);
+        Assert.Contains("load boom", failure.Message, StringComparison.Ordinal);
+    }
+
     private static GraphEditorKernel CreateKernel(IGraphWorkspaceService? workspaceService = null)
         => new(
             CreateDocument(),
@@ -350,6 +380,33 @@ public sealed class GraphEditorKernelCommandRouterTests
             => throw new InvalidOperationException("Save should not be called in this test.");
 
         public GraphDocument Load() => _document;
+
+        public bool Exists() => true;
+    }
+
+    private sealed class ThrowingExistsWorkspaceService : IGraphWorkspaceService
+    {
+        public string WorkspacePath => "workspace://exists-throw";
+
+        public void Save(GraphDocument document)
+            => throw new InvalidOperationException("Save should not be called in this test.");
+
+        public GraphDocument Load()
+            => throw new InvalidOperationException("Load should not be called when Exists throws.");
+
+        public bool Exists()
+            => throw new InvalidOperationException("exists boom");
+    }
+
+    private sealed class ThrowingLoadWorkspaceService : IGraphWorkspaceService
+    {
+        public string WorkspacePath => "workspace://load-throw";
+
+        public void Save(GraphDocument document)
+            => throw new InvalidOperationException("Save should not be called in this test.");
+
+        public GraphDocument Load()
+            => throw new InvalidOperationException("load boom");
 
         public bool Exists() => true;
     }
