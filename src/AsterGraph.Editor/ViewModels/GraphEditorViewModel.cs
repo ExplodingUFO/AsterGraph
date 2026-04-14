@@ -32,7 +32,7 @@ namespace AsterGraph.Editor.ViewModels;
 /// 图编辑器的主视图模型，承载选择、布局、连线、剪贴板和持久化状态。
 /// </summary>
 /// <remarks>
-/// 本类型是当前迁移窗口内保留的兼容立面，
+/// 本类型是当前迁移窗口内保留的 compatibility facade，
 /// 用于支持现有宿主基于 <c>new GraphEditorViewModel(...)</c> 的直接集成路径。
 /// 新的默认 hosted-UI 组合代码应优先考虑 <see cref="AsterGraphEditorFactory.Create(AsterGraphEditorOptions)"/>，
 /// 而自定义 UI 宿主应优先考虑 <see cref="AsterGraphEditorFactory.CreateSession(AsterGraphEditorOptions)"/>。

@@ -207,6 +207,30 @@ public sealed class GraphEditorMigrationCompatibilityTests
     }
 #pragma warning restore CS0618
 
+    [Fact]
+    public void MigrationGuidance_KeepsCompatibilityShimRetirementExplicit()
+    {
+        var queryMethod = typeof(IGraphEditorQueries).GetMethod(nameof(IGraphEditorQueries.GetCompatibleTargets), [typeof(string), typeof(string)]);
+
+        Assert.NotNull(queryMethod);
+        var queryAttribute = Assert.Single(
+            queryMethod!.GetCustomAttributes(typeof(ObsoleteAttribute), inherit: false),
+            attribute => attribute is ObsoleteAttribute);
+#pragma warning disable CS0618
+        var shimAttribute = Assert.Single(
+            typeof(CompatiblePortTarget).GetCustomAttributes(typeof(ObsoleteAttribute), inherit: false),
+            attribute => attribute is ObsoleteAttribute);
+#pragma warning restore CS0618
+
+        var queryObsolete = Assert.IsType<ObsoleteAttribute>(queryAttribute);
+        var shimObsolete = Assert.IsType<ObsoleteAttribute>(shimAttribute);
+        Assert.Contains("canonical runtime queries", queryObsolete.Message, StringComparison.Ordinal);
+        Assert.Contains("later minor releases may add stronger warnings", queryObsolete.Message, StringComparison.Ordinal);
+        Assert.Contains("future major release may remove it", queryObsolete.Message, StringComparison.Ordinal);
+        Assert.Contains("Retained compatibility shim", shimObsolete.Message, StringComparison.Ordinal);
+        Assert.Contains("future major release may remove it", shimObsolete.Message, StringComparison.Ordinal);
+    }
+
     [AvaloniaFact]
     public void GraphEditorView_RemainsCompatibilityFacadeDuringStagedMigration()
     {

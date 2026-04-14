@@ -316,19 +316,27 @@ public sealed class GraphEditorSessionTests
         var method = typeof(IGraphEditorQueries).GetMethod(nameof(IGraphEditorQueries.GetCompatibleTargets), [typeof(string), typeof(string)]);
 
         Assert.NotNull(method);
-        Assert.Contains(
+        var attribute = Assert.Single(
             method!.GetCustomAttributes(typeof(ObsoleteAttribute), inherit: false),
             attribute => attribute is ObsoleteAttribute);
+        var obsolete = Assert.IsType<ObsoleteAttribute>(attribute);
+        Assert.Contains("canonical runtime queries", obsolete.Message, StringComparison.Ordinal);
+        Assert.Contains("later minor releases may add stronger warnings", obsolete.Message, StringComparison.Ordinal);
+        Assert.Contains("future major release may remove it", obsolete.Message, StringComparison.Ordinal);
     }
 
     [Fact]
     public void CompatiblePortTarget_IsMarkedAsCompatibilityOnlyShim()
     {
 #pragma warning disable CS0618
-        Assert.Contains(
+        var attribute = Assert.Single(
             typeof(CompatiblePortTarget).GetCustomAttributes(typeof(ObsoleteAttribute), inherit: false),
             attribute => attribute is ObsoleteAttribute);
 #pragma warning restore CS0618
+        var obsolete = Assert.IsType<ObsoleteAttribute>(attribute);
+        Assert.Contains("Retained compatibility shim", obsolete.Message, StringComparison.Ordinal);
+        Assert.Contains("canonical runtime queries", obsolete.Message, StringComparison.Ordinal);
+        Assert.Contains("future major release may remove it", obsolete.Message, StringComparison.Ordinal);
     }
 
     [Fact]

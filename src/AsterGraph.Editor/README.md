@@ -53,6 +53,15 @@ Use this package together with `AsterGraph.Avalonia` when the host embeds the de
 
 The MVVM-typed compatibility query path remains available for legacy integrations, but new host code should treat it as compatibility-only rather than the canonical runtime surface.
 
+Compatibility shim migration:
+
+- canonical runtime query: `IGraphEditorQueries.GetCompatiblePortTargets(...)`
+- retained compatibility shim: `IGraphEditorQueries.GetCompatibleTargets(...)` plus `CompatiblePortTarget`
+- retained compatibility facade: `GraphEditorViewModel`
+- v1.5 keeps the shim with strong migration guidance
+- later minor releases may add stronger warnings
+- future major release may remove it
+
 The same guidance now applies to host extension seams:
 
 - prefer `GraphContextMenuAugmentationContext` over taking `GraphEditorViewModel` directly
