@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.5
 milestone_name: Runtime Boundary Cleanup and Quality Gates
 status: completed
-stopped_at: Phase 27 plans drafted
-last_updated: "2026-04-14T10:47:20.462Z"
-last_activity: 2026-04-14 - Verified and completed Phase 26
+stopped_at: Phase 27 complete
+last_updated: "2026-04-14T10:53:50.8062516Z"
+last_activity: 2026-04-14 - Verified and completed Phase 27
 progress:
   total_phases: 4
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 6
-  completed_plans: 3
+  completed_plans: 6
 ---
 
 # Project State
@@ -20,14 +20,14 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-04-14)
 
 **Core value:** Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
-**Current focus:** Phase 27 planning for repo quality gates and target matrix
+**Current focus:** Phase 28 discussion for proof surface and regression lane alignment
 
 ## Current Position
 
-Phase: 27
+Phase: 28
 Plan: Not started
-Status: Phase 26 complete
-Last activity: 2026-04-14 - Verified and completed Phase 26
+Status: Phase 27 complete
+Last activity: 2026-04-14 - Verified and completed Phase 27
 
 ## Accumulated Context
 
@@ -58,7 +58,7 @@ None captured yet.
 - `MILESTONES.md` still stops at v1.3 even though v1.4 execution is complete; archive/history cleanup is now part of the v1.5 proof/doc alignment scope.
 - `HostSample` remains referenced in planning/docs even though there is no live project in the current tree.
 - `AsterGraph.Editor.Tests` still references `AsterGraph.Demo`, which blurs the core SDK regression lane and the sample/demo lane.
-- There is still no checked-in CI workflow, central package management, or automated public API/package compatibility lane.
+- Release-grade package smoke gating, coverage/reporting, and public API/package compatibility are still not automated.
 - The known `STATE_HISTORY_OK` mismatch remains a pre-existing baseline issue if v1.5 touches history/save semantics.
 
 ### Quick Tasks Completed
@@ -71,6 +71,6 @@ None captured yet.
 
 ## Session Continuity
 
-Last session: 2026-04-14T10:47:20.458Z
-Stopped at: Phase 27 plans drafted
-Resume file: .planning/phases/27-repo-quality-gates-and-target-matrix/27-01-PLAN.md
+Last session: 2026-04-14T10:53:50.8062516Z
+Stopped at: Phase 27 complete
+Resume file: .planning/phases/27-repo-quality-gates-and-target-matrix/27-VERIFICATION.md

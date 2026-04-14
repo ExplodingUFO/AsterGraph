@@ -25,7 +25,7 @@ Hosts can integrate only the graph-editor pieces they need, replace default UI a
 - Public host-facing capability, command, menu, diagnostics, plugin, and automation reads now prefer descriptor and snapshot contracts over MVVM object shape.
 - Plugin loading and automation execution shipped in v1.4 through the canonical session boundary and are already backed by focused regressions plus `PackageSmoke` and `ScaleSmoke`.
 - Phase 26 completed the runtime-boundary cleanup for compatible-target discovery: canonical runtime queries now stay on DTO/snapshot contracts, while retained MVVM-shaped compatible-target APIs are explicitly isolated to the staged migration window.
-- Repo-level quality gates are still mostly manual: there is no checked-in CI workflow, no central package management, and no automated public API/package compatibility lane yet.
+- Phase 27 completed the repo-quality baseline: the repo now carries tracked `.editorconfig`, `Directory.Packages.props`, deterministic `NuGet.config`, a shared `eng/ci.ps1` validation script, and checked-in GitHub Actions CI for explicit `net8.0` / `net9.0` lanes.
 - The proof/documentation surface is partially out of sync: `ScaleSmoke` exists, `HostSample` is still referenced in planning/docs despite not being present in the current tree, and `AsterGraph.Editor.Tests` still pulls `AsterGraph.Demo` into the core test lane.
 
 ## Requirements
@@ -58,11 +58,13 @@ Hosts can integrate only the graph-editor pieces they need, replace default UI a
 - ✓ README-backed proof commands now route hosts to the same canonical plugin/automation story used in milestone verification - v1.4 Phase 25
 - ✓ Canonical compatible-target discovery now stays on DTO/snapshot runtime queries, while internal host/kernel/runtime seams no longer expose the legacy MVVM-shaped shim - v1.5 Phase 26
 - ✓ Retained `GraphEditorViewModel` / `GraphEditorView` hosts still run over the adapter-backed kernel/session runtime path, and the remaining compatibility-only APIs now carry explicit staged retirement guidance - v1.5 Phase 26
+- ✓ Contributors now build and test under one tracked repo baseline with shared editor rules, centralized package versions, deterministic restore sources, and a reusable `eng/ci.ps1` entry point - v1.5 Phase 27
+- ✓ The supported package boundary is now validated automatically across explicit `net8.0` and `net9.0` lanes through checked-in CI and the same repo-local command path used outside CI - v1.5 Phase 27
 
 ### Active
 
-- [ ] Add repo-level quality gates and automated validation across the supported package and target-framework matrix.
 - [ ] Reconcile docs, solution membership, proof tooling, and test lanes so the release story is trustworthy and machine-checkable from one source of truth.
+- [ ] Add release-grade package smoke, coverage/reporting, and public API/package compatibility checks without falling back to README-only manual verification.
 
 ### Out of Scope
 
@@ -104,8 +106,9 @@ v1.5 therefore focuses on hardening the SDK's actual contract boundary and the v
 | Keep the first automation runner synchronous, in-process, and descriptor-first | The first shipped automation value should validate the canonical runtime boundary before richer product layers are considered | ✓ Good |
 | Keep plugin/automation proof aligned across focused tests, smoke tools, and README commands | Public claims should stay machine-checkable from the same canonical host boundary everywhere | ✓ Good |
 | Focus v1.5 on runtime boundary cleanup, automated quality gates, and proof/doc alignment rather than another net-new feature band | The main remaining risk is SDK maintainability and release trust, not missing capability surface | ✓ Phase 26 started this cleanup by finishing runtime boundary canonicalization |
-| Treat the four-package boundary, `CreateSession(...)`, and the current proof ring as fixed baseline during v1.5 | Current strengths should be hardened rather than reopened | - Pending |
+| Treat the four-package boundary, `CreateSession(...)`, and the current proof ring as fixed baseline during v1.5 | Current strengths should be hardened rather than reopened | ✓ Phase 27 kept the package boundary fixed while adding repo-level validation around it |
 | Use staged deprecation guidance for compatibility APIs instead of a one-shot public break | Hosts still need a planned migration path while canonical DTO/snapshot contracts become authoritative | ✓ Phase 26 applied this guidance to compatible-target APIs |
+| Keep one repo-local validation command path for both contributors and CI | Quality gates drift quickly if YAML and local commands diverge | ✓ Phase 27 shipped `eng/ci.ps1` plus workflow reuse |
 
 ## Next Milestone Goals
 
@@ -140,4 +143,4 @@ This document evolves at milestone boundaries.
 4. Reset active requirements so the next roadmap starts from the highest remaining product risk instead of stale execution context.
 
 ---
-*Last updated: 2026-04-14 after completing Phase 26*
+*Last updated: 2026-04-14 after completing Phase 27*

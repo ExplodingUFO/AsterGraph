@@ -11,7 +11,7 @@
 
 ## Overview
 
-The kernel-first runtime, descriptor contracts, graph-first demo showcase, plugin loading, automation execution, and proof-backed host story have all shipped. The highest remaining risk is now drift: the retained compatibility surface still exposes some MVVM-shaped runtime debt, repo-level quality gates remain manual, and the documented verification surface no longer cleanly matches the tree.
+The kernel-first runtime, descriptor contracts, graph-first demo showcase, plugin loading, automation execution, and a tracked repo-level validation baseline have all shipped. The highest remaining risk is now proof-surface drift and release-readiness gaps: docs, solution membership, proof tooling, and regression lanes still do not cleanly match the current tree, and release-grade checks such as package smoke gating, coverage/reporting, and public API/package compatibility remain staged work.
 
 This milestone turns the v1.4 baseline into a more durable SDK release posture. The work is organized to first tighten the canonical runtime boundary, then establish repo-level validation gates, then align docs/proof/test lanes with the real tree, and finally close the loop with automated release validation and a shorter canonical host-adoption path.
 
@@ -23,7 +23,7 @@ This milestone turns the v1.4 baseline into a more durable SDK release posture. 
 ## Phases
 
 - [x] **Phase 26: Runtime Boundary Canonicalization** - Tighten the retained compatibility facade around the kernel/session-owned runtime and continue retiring MVVM-shaped runtime shims. (completed 2026-04-14)
-- [ ] **Phase 27: Repo Quality Gates And Target Matrix** - Add tracked repo-level quality and CI baseline across the supported package and target-framework surface.
+- [x] **Phase 27: Repo Quality Gates And Target Matrix** - Add tracked repo-level quality and CI baseline across the supported package and target-framework surface. (completed 2026-04-14)
 - [ ] **Phase 28: Proof Surface And Regression Lane Alignment** - Make docs, solution membership, proof tools, and test lanes describe the same verification surface.
 - [ ] **Phase 29: Release Validation And Canonical Adoption Path** - Close the milestone with automated release checks and one synchronized canonical integration path for hosts.
 
@@ -74,10 +74,10 @@ This milestone turns the v1.4 baseline into a more durable SDK release posture. 
 | Phase | Requirements | Status |
 |-------|--------------|--------|
 | 26. Runtime Boundary Canonicalization | BOUND-01, BOUND-02, BOUND-03 | Complete |
-| 27. Repo Quality Gates And Target Matrix | QUAL-01, QUAL-02 | Pending |
+| 27. Repo Quality Gates And Target Matrix | QUAL-01, QUAL-02 | Complete |
 | 28. Proof Surface And Regression Lane Alignment | PROOF-01, PROOF-02 | Pending |
 | 29. Release Validation And Canonical Adoption Path | QUAL-03, PROOF-03 | Pending |
 
 ## Next Action
 
-**Phase 27: Repo Quality Gates And Target Matrix** is the next execution target.
+**Phase 28: Proof Surface And Regression Lane Alignment** is the next execution target.

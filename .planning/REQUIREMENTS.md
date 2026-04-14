@@ -14,8 +14,8 @@
 
 ### Quality Gates
 
-- [ ] **QUAL-01**: Contributors build and test the repo under one tracked source/package configuration baseline, including shared editor rules and centralized package version management
-- [ ] **QUAL-02**: The supported package boundary is validated automatically for both `net8.0` and `net9.0` through checked-in CI or equivalent scripted automation
+- [x] **QUAL-01**: Contributors build and test the repo under one tracked source/package configuration baseline, including shared editor rules and centralized package version management
+- [x] **QUAL-02**: The supported package boundary is validated automatically for both `net8.0` and `net9.0` through checked-in CI or equivalent scripted automation
 - [ ] **QUAL-03**: Release validation automatically checks package smoke, coverage reporting or thresholds, and public API or package-compatibility regressions instead of relying mainly on manual README commands
 
 ### Docs, Proof, And Samples
@@ -49,8 +49,8 @@
 | BOUND-01 | Phase 26 | Complete |
 | BOUND-02 | Phase 26 | Complete |
 | BOUND-03 | Phase 26 | Complete |
-| QUAL-01 | Phase 27 | Pending |
-| QUAL-02 | Phase 27 | Pending |
+| QUAL-01 | Phase 27 | Complete |
+| QUAL-02 | Phase 27 | Complete |
 | QUAL-03 | Phase 29 | Pending |
 | PROOF-01 | Phase 28 | Pending |
 | PROOF-02 | Phase 28 | Pending |
@@ -63,4 +63,4 @@
 
 ---
 *Requirements defined: 2026-04-14*
-*Last updated: 2026-04-14 after Phase 26 completion*
+*Last updated: 2026-04-14 after Phase 27 completion*
