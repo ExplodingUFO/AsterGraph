@@ -16,31 +16,21 @@ namespace AsterGraph.Editor.Runtime;
 /// <summary>
 /// 默认的图编辑器运行时会话实现。
 /// </summary>
-public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorAutomationRunner, IGraphEditorCommands, IGraphEditorQueries, IGraphEditorEvents, IGraphEditorDiagnostics
+public sealed partial class GraphEditorSession : IGraphEditorSession, IGraphEditorAutomationRunner, IGraphEditorCommands, IGraphEditorQueries, IGraphEditorEvents, IGraphEditorDiagnostics
 {
     private const int RecentDiagnosticsCapacity = 32;
     private readonly IGraphEditorSessionHost _host;
     private readonly IGraphEditorDiagnosticsSink? _diagnosticsSink;
     private readonly GraphEditorSessionDescriptorSupport? _descriptorSupport;
     private readonly GraphEditorSessionStockMenuDescriptorBuilder _stockMenuDescriptorBuilder;
+    private readonly GraphEditorSessionMutationBatchHost _mutationBatchHost;
+    private readonly GraphEditorSessionMutationBatcher _mutationBatcher;
     private readonly List<GraphEditorDiagnostic> _recentDiagnostics = [];
     private IReadOnlyList<IGraphEditorPluginContextMenuAugmentor> _pluginContextMenuAugmentors = [];
     private IReadOnlyList<GraphEditorPluginLoadSnapshot> _pluginLoadSnapshots = [];
     private bool _hasPluginTrustPolicy;
     private ILogger? _logger;
     private ActivitySource? _activitySource;
-    private int _mutationDepth;
-    private string? _currentMutationLabel;
-    private GraphEditorDocumentChangedEventArgs? _pendingDocumentChanged;
-    private GraphEditorSelectionChangedEventArgs? _pendingSelectionChanged;
-    private GraphEditorViewportChangedEventArgs? _pendingViewportChanged;
-    private GraphEditorPendingConnectionChangedEventArgs? _pendingPendingConnectionChanged;
-    private GraphEditorPendingConnectionSnapshot _lastPendingConnectionSnapshot;
-    private GraphEditorPendingConnectionSnapshot? _batchEntryPendingConnectionSnapshot;
-    private readonly List<GraphEditorFragmentEventArgs> _pendingFragmentExported = [];
-    private readonly List<GraphEditorFragmentEventArgs> _pendingFragmentImported = [];
-    private readonly List<GraphEditorCommandExecutedEventArgs> _pendingCommandExecuted = [];
-    private readonly List<GraphEditorRecoverableFailureEventArgs> _pendingRecoverableFailures = [];
 
     /// <summary>
     /// 初始化运行时会话。
@@ -66,14 +56,15 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorAutoma
             _host.GetCompatiblePortTargets,
             Localize,
             () => _descriptorSupport?.Definitions ?? Array.Empty<INodeDefinition>());
-        _lastPendingConnectionSnapshot = CreatePendingConnectionSnapshot();
-        _host.DocumentChanged += HandleDocumentChanged;
-        _host.SelectionChanged += HandleSelectionChanged;
-        _host.ViewportChanged += HandleViewportChanged;
-        _host.FragmentExported += HandleFragmentExported;
-        _host.FragmentImported += HandleFragmentImported;
-        _host.PendingConnectionChanged += HandlePendingConnectionChanged;
-        _host.RecoverableFailureRaised += HandleRecoverableFailureRaised;
+        _mutationBatchHost = new GraphEditorSessionMutationBatchHost(this);
+        _mutationBatcher = new GraphEditorSessionMutationBatcher(_mutationBatchHost);
+        _host.DocumentChanged += _mutationBatcher.HandleDocumentChanged;
+        _host.SelectionChanged += _mutationBatcher.HandleSelectionChanged;
+        _host.ViewportChanged += _mutationBatcher.HandleViewportChanged;
+        _host.FragmentExported += _mutationBatcher.HandleFragmentExported;
+        _host.FragmentImported += _mutationBatcher.HandleFragmentImported;
+        _host.PendingConnectionChanged += _mutationBatcher.HandlePendingConnectionChanged;
+        _host.RecoverableFailureRaised += _mutationBatcher.HandleRecoverableFailureRaised;
         _host.DiagnosticPublished += HandleDiagnosticPublished;
     }
 
@@ -94,16 +85,7 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorAutoma
 
     /// <inheritdoc />
     public IGraphEditorMutationScope BeginMutation(string? label = null)
-    {
-        if (_mutationDepth == 0)
-        {
-            _batchEntryPendingConnectionSnapshot = _lastPendingConnectionSnapshot;
-        }
-
-        _mutationDepth++;
-        _currentMutationLabel ??= label;
-        return new GraphEditorMutationScope(this, label);
-    }
+        => _mutationBatcher.BeginMutation(label);
 
     /// <inheritdoc />
     public event EventHandler<GraphEditorDocumentChangedEventArgs>? DocumentChanged;
@@ -359,7 +341,7 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorAutoma
             return false;
         }
 
-        PublishCommandExecuted(command.CommandId);
+        _mutationBatcher.PublishCommandExecuted(command.CommandId);
         return true;
     }
 
@@ -457,7 +439,7 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorAutoma
             }
             catch (Exception exception)
             {
-                PublishRecoverableFailure(new GraphEditorRecoverableFailureEventArgs(
+                _mutationBatcher.PublishRecoverableFailure(new GraphEditorRecoverableFailureEventArgs(
                     "plugin.contextmenu.augment.failed",
                     "plugin.contextmenu.augment",
                     $"Plugin context menu augmentor failed: {augmentor.GetType().Name}. Using current menu.",
@@ -474,7 +456,7 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorAutoma
 
     /// <inheritdoc />
     public GraphEditorPendingConnectionSnapshot GetPendingConnectionSnapshot()
-        => CreatePendingConnectionSnapshot();
+        => _host.GetPendingConnectionSnapshot();
 
     /// <inheritdoc />
     public IReadOnlyList<GraphEditorCompatiblePortTargetSnapshot> GetCompatiblePortTargets(string sourceNodeId, string sourcePortId)
@@ -489,7 +471,7 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorAutoma
     /// <inheritdoc />
     public GraphEditorInspectionSnapshot CaptureInspectionSnapshot()
     {
-        var pendingConnection = CreatePendingConnectionSnapshot();
+        var pendingConnection = _host.GetPendingConnectionSnapshot();
         return new(
             CreateDocumentSnapshot(),
             GetSelectionSnapshot(),
@@ -517,24 +499,7 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorAutoma
     }
 
     internal void PublishRecoverableFailure(GraphEditorRecoverableFailureEventArgs failure)
-    {
-        var diagnostic = new GraphEditorDiagnostic(
-            failure.Code,
-            failure.Operation,
-            failure.Message,
-            GraphEditorDiagnosticSeverity.Error,
-            failure.Exception);
-
-        if (IsBatching)
-        {
-            _pendingRecoverableFailures.Add(failure);
-            PublishDiagnostic(diagnostic);
-            return;
-        }
-
-        PublishDiagnostic(diagnostic);
-        RecoverableFailure?.Invoke(this, failure);
-    }
+        => _mutationBatcher.PublishRecoverableFailure(failure);
 
     internal void ConfigureInstrumentation(GraphEditorInstrumentationOptions? instrumentation)
     {
@@ -571,8 +536,6 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorAutoma
     internal void SetPluginTrustPolicyConfigured(bool isConfigured)
         => _hasPluginTrustPolicy = isConfigured;
 
-    private bool IsBatching => _mutationDepth > 0;
-
     private void EmitInstrumentation(GraphEditorDiagnostic diagnostic)
     {
         using var activity = _activitySource?.StartActivity(diagnostic.Operation, ActivityKind.Internal);
@@ -605,98 +568,16 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorAutoma
             diagnostic.Message);
     }
 
-    private void HandleDocumentChanged(object? sender, GraphEditorDocumentChangedEventArgs args)
-    {
-        if (!IsBatching)
-        {
-            DocumentChanged?.Invoke(this, args);
-            return;
-        }
-
-        _pendingDocumentChanged = _pendingDocumentChanged is null
-            ? args
-            : MergeDocumentChanged(_pendingDocumentChanged, args);
-    }
-
-    private void HandleSelectionChanged(object? sender, GraphEditorSelectionChangedEventArgs args)
-    {
-        if (!IsBatching)
-        {
-            SelectionChanged?.Invoke(this, args);
-            return;
-        }
-
-        _pendingSelectionChanged = args;
-    }
-
-    private void HandleViewportChanged(object? sender, GraphEditorViewportChangedEventArgs args)
-    {
-        if (!IsBatching)
-        {
-            ViewportChanged?.Invoke(this, args);
-            return;
-        }
-
-        _pendingViewportChanged = args;
-    }
-
-    private void HandleFragmentExported(object? sender, GraphEditorFragmentEventArgs args)
-    {
-        if (!IsBatching)
-        {
-            FragmentExported?.Invoke(this, args);
-            return;
-        }
-
-        _pendingFragmentExported.Add(args);
-    }
-
-    private void HandleFragmentImported(object? sender, GraphEditorFragmentEventArgs args)
-    {
-        if (!IsBatching)
-        {
-            FragmentImported?.Invoke(this, args);
-            return;
-        }
-
-        _pendingFragmentImported.Add(args);
-    }
-
-    private void HandlePendingConnectionChanged(object? sender, GraphEditorPendingConnectionChangedEventArgs args)
-    {
-        var current = args.PendingConnection;
-        if (_lastPendingConnectionSnapshot == current)
-        {
-            return;
-        }
-
-        if (!_lastPendingConnectionSnapshot.HasPendingConnection && !current.HasPendingConnection)
-        {
-            _lastPendingConnectionSnapshot = current;
-            return;
-        }
-
-        _lastPendingConnectionSnapshot = current;
-
-        if (IsBatching)
-        {
-            _pendingPendingConnectionChanged = args;
-            return;
-        }
-
-        PendingConnectionChanged?.Invoke(this, args);
-    }
-
     private void Execute(string commandId, Action action)
     {
         action();
-        PublishCommandExecuted(commandId);
+        _mutationBatcher.PublishCommandExecuted(commandId);
     }
 
     private T Execute<T>(string commandId, Func<T> action)
     {
         var result = action();
-        PublishCommandExecuted(commandId);
+        _mutationBatcher.PublishCommandExecuted(commandId);
         return result;
     }
 
@@ -753,96 +634,6 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorAutoma
         string failureMessage)
         => new(stepIndex, step.StepId, step.Command.CommandId, false, failureCode, failureMessage);
 
-    private void PublishCommandExecuted(string commandId)
-    {
-        var args = new GraphEditorCommandExecutedEventArgs(
-            commandId,
-            _currentMutationLabel,
-            IsBatching,
-            _host.CurrentStatusMessage);
-
-        if (IsBatching)
-        {
-            _pendingCommandExecuted.Add(args);
-            return;
-        }
-
-        CommandExecuted?.Invoke(this, args);
-    }
-
-    private void FlushPendingEvents()
-    {
-        if (_pendingDocumentChanged is not null)
-        {
-            DocumentChanged?.Invoke(this, _pendingDocumentChanged);
-            _pendingDocumentChanged = null;
-        }
-
-        foreach (var args in _pendingFragmentExported)
-        {
-            FragmentExported?.Invoke(this, args);
-        }
-        _pendingFragmentExported.Clear();
-
-        foreach (var args in _pendingFragmentImported)
-        {
-            FragmentImported?.Invoke(this, args);
-        }
-        _pendingFragmentImported.Clear();
-
-        if (_pendingSelectionChanged is not null)
-        {
-            SelectionChanged?.Invoke(this, _pendingSelectionChanged);
-            _pendingSelectionChanged = null;
-        }
-
-        if (_pendingViewportChanged is not null)
-        {
-            ViewportChanged?.Invoke(this, _pendingViewportChanged);
-            _pendingViewportChanged = null;
-        }
-
-        if (_pendingPendingConnectionChanged is not null)
-        {
-            if (_batchEntryPendingConnectionSnapshot != _pendingPendingConnectionChanged.PendingConnection)
-            {
-                PendingConnectionChanged?.Invoke(this, _pendingPendingConnectionChanged);
-            }
-
-            _pendingPendingConnectionChanged = null;
-        }
-
-        _batchEntryPendingConnectionSnapshot = null;
-
-        foreach (var args in _pendingCommandExecuted)
-        {
-            CommandExecuted?.Invoke(this, args);
-        }
-        _pendingCommandExecuted.Clear();
-
-        foreach (var args in _pendingRecoverableFailures)
-        {
-            RecoverableFailure?.Invoke(this, args);
-        }
-        _pendingRecoverableFailures.Clear();
-    }
-
-    private static GraphEditorDocumentChangedEventArgs MergeDocumentChanged(
-        GraphEditorDocumentChangedEventArgs current,
-        GraphEditorDocumentChangedEventArgs next)
-    {
-        if (current.ChangeKind != next.ChangeKind)
-        {
-            return next;
-        }
-
-        return new GraphEditorDocumentChangedEventArgs(
-            current.ChangeKind,
-            current.NodeIds.Concat(next.NodeIds).Distinct(StringComparer.Ordinal).ToList(),
-            current.ConnectionIds.Concat(next.ConnectionIds).Distinct(StringComparer.Ordinal).ToList(),
-            next.StatusMessage ?? current.StatusMessage);
-    }
-
     private static LogLevel ToLogLevel(GraphEditorDiagnosticSeverity severity)
         => severity switch
         {
@@ -852,45 +643,9 @@ public sealed class GraphEditorSession : IGraphEditorSession, IGraphEditorAutoma
             _ => LogLevel.None,
         };
 
-    private void HandleRecoverableFailureRaised(object? sender, GraphEditorRecoverableFailureEventArgs args)
-        => PublishRecoverableFailure(args);
-
     private void HandleDiagnosticPublished(GraphEditorDiagnostic diagnostic)
         => PublishDiagnostic(diagnostic);
 
-    private GraphEditorPendingConnectionSnapshot CreatePendingConnectionSnapshot()
-        => _host.GetPendingConnectionSnapshot();
-
     private string Localize(string key, string fallback)
         => _descriptorSupport?.Localize(key, fallback) ?? fallback;
-
-    private sealed class GraphEditorMutationScope : IGraphEditorMutationScope
-    {
-        private readonly GraphEditorSession _owner;
-        private bool _disposed;
-
-        public GraphEditorMutationScope(GraphEditorSession owner, string? label)
-        {
-            _owner = owner;
-            Label = label;
-        }
-
-        public string? Label { get; }
-
-        public void Dispose()
-        {
-            if (_disposed)
-            {
-                return;
-            }
-
-            _disposed = true;
-            _owner._mutationDepth--;
-            if (_owner._mutationDepth == 0)
-            {
-                _owner._currentMutationLabel = null;
-                _owner.FlushPendingEvents();
-            }
-        }
-    }
 }
