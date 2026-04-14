@@ -38,7 +38,7 @@ namespace AsterGraph.Editor.ViewModels;
 /// 而自定义 UI 宿主应优先考虑 <see cref="AsterGraphEditorFactory.CreateSession(AsterGraphEditorOptions)"/>。
 /// 本类型在当前迁移窗口内仍然受支持，但不应再被视为新的首选组合根。
 /// </remarks>
-public sealed partial class GraphEditorViewModel : ObservableObject, IGraphContextMenuHost, GraphEditorViewModel.IGraphEditorCompatibilityCommandHost, GraphEditorViewModel.IGraphEditorFragmentCommandHost, IGraphEditorKernelProjectionHost, IGraphEditorHistoryStateHost, IGraphEditorSelectionCoordinatorHost, IGraphEditorSelectionStateSynchronizerHost, IGraphEditorSelectionProjectionApplierHost, IGraphEditorDocumentCollectionSynchronizerHost, IGraphEditorDocumentLoadCoordinatorHost, IGraphEditorNodePositionDirtyTrackerHost, IGraphEditorRetainedEventPublisherHost, IGraphEditorNodeLayoutCoordinatorHost, IGraphEditorPresentationLocalizationCoordinatorHost, IGraphEditorWorkspaceSaveCoordinatorHost
+public sealed partial class GraphEditorViewModel : ObservableObject, IGraphContextMenuHost, GraphEditorViewModel.IGraphEditorCompatibilityCommandHost, GraphEditorViewModel.IGraphEditorFragmentCommandHost, IGraphEditorKernelProjectionHost, IGraphEditorHistoryStateHost, IGraphEditorSelectionCoordinatorHost, IGraphEditorSelectionStateSynchronizerHost, IGraphEditorSelectionProjectionApplierHost, IGraphEditorDocumentCollectionSynchronizerHost, IGraphEditorNodePositionDirtyTrackerHost, IGraphEditorRetainedEventPublisherHost, IGraphEditorNodeLayoutCoordinatorHost, IGraphEditorPresentationLocalizationCoordinatorHost
 {
     private const double DefaultZoom = 0.88;
     private const double DefaultPanX = 110;
@@ -108,6 +108,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     private readonly GraphEditorRetainedEventPublisher _retainedEventPublisher;
     private readonly GraphEditorNodeLayoutCoordinator _nodeLayoutCoordinator;
     private readonly GraphEditorPresentationLocalizationCoordinator _presentationLocalizationCoordinator;
+    private readonly GraphEditorViewModelPersistenceCoordinatorHost _persistenceCoordinatorHost;
     private readonly GraphEditorWorkspaceSaveCoordinator _workspaceSaveCoordinator;
     private readonly GraphEditorKernel _kernel;
     private readonly GraphEditorViewModelKernelAdapter _sessionHost;
@@ -197,11 +198,12 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         _selectionStateSynchronizer = new GraphEditorSelectionStateSynchronizer(this);
         _selectionProjectionApplier = new GraphEditorSelectionProjectionApplier(this, _selectionProjection);
         _documentCollectionSynchronizer = new GraphEditorDocumentCollectionSynchronizer(this, _documentProjectionApplier);
-        _documentLoadCoordinator = new GraphEditorDocumentLoadCoordinator(this);
+        _persistenceCoordinatorHost = new GraphEditorViewModelPersistenceCoordinatorHost(this);
+        _documentLoadCoordinator = new GraphEditorDocumentLoadCoordinator(_persistenceCoordinatorHost);
         _nodePositionDirtyTracker = new GraphEditorNodePositionDirtyTracker(this);
         _retainedEventPublisher = new GraphEditorRetainedEventPublisher(this);
         _nodeLayoutCoordinator = new GraphEditorNodeLayoutCoordinator(this);
-        _workspaceSaveCoordinator = new GraphEditorWorkspaceSaveCoordinator(this);
+        _workspaceSaveCoordinator = new GraphEditorWorkspaceSaveCoordinator(_persistenceCoordinatorHost);
         StyleOptions = styleOptions ?? GraphEditorStyleOptions.Default;
         BehaviorOptions = ResolveBehaviorOptions(behaviorOptions, StyleOptions);
 
@@ -949,56 +951,6 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     void IGraphEditorDocumentCollectionSynchronizerHost.RaiseComputedPropertyChanges()
         => RaiseComputedPropertyChanges();
 
-    bool IGraphEditorDocumentLoadCoordinatorHost.IsDirtyTrackingSuspended
-    {
-        get => _suspendDirtyTracking;
-        set => _suspendDirtyTracking = value;
-    }
-
-    bool IGraphEditorDocumentLoadCoordinatorHost.IsHistoryTrackingSuspended
-    {
-        get => _suspendHistoryTracking;
-        set => _suspendHistoryTracking = value;
-    }
-
-    bool IGraphEditorDocumentLoadCoordinatorHost.IsSelectionTrackingSuspended
-    {
-        get => _suspendSelectionTracking;
-        set => _suspendSelectionTracking = value;
-    }
-
-    ObservableCollection<NodeViewModel> IGraphEditorDocumentLoadCoordinatorHost.SelectedNodes
-        => SelectedNodes;
-
-    ObservableCollection<NodeParameterViewModel> IGraphEditorDocumentLoadCoordinatorHost.SelectedNodeParameters
-        => SelectedNodeParameters;
-
-    void IGraphEditorDocumentLoadCoordinatorHost.ApplyDocumentProjection(GraphDocument document)
-        => _documentProjectionApplier.ApplyDocument(
-            document,
-            Nodes,
-            Connections,
-            _presentationLocalizationCoordinator.ApplyNodePresentation,
-            HandleNodePropertyChanged);
-
-    void IGraphEditorDocumentLoadCoordinatorHost.ClearPendingInteractionState()
-        => _pendingInteractionState = null;
-
-    GraphEditorHistoryState IGraphEditorDocumentLoadCoordinatorHost.CaptureHistoryState()
-        => CaptureHistoryState();
-
-    void IGraphEditorDocumentLoadCoordinatorHost.ResetHistory(GraphEditorHistoryState state)
-        => _historyService.Reset(state);
-
-    void IGraphEditorDocumentLoadCoordinatorHost.SetLastSavedDocumentSignature(string signature)
-        => _lastSavedDocumentSignature = signature;
-
-    void IGraphEditorDocumentLoadCoordinatorHost.RefreshSelectionProjection()
-        => RefreshSelectionProjection();
-
-    void IGraphEditorDocumentLoadCoordinatorHost.RaiseComputedPropertyChanges()
-        => RaiseComputedPropertyChanges();
-
     bool IGraphEditorNodePositionDirtyTrackerHost.IsDirtyTrackingSuspended => _suspendDirtyTracking;
 
     bool IGraphEditorNodePositionDirtyTrackerHost.IsDirty
@@ -1092,51 +1044,6 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     void IGraphEditorPresentationLocalizationCoordinatorHost.NotifyFragmentLibraryCaptionChanged()
         => OnPropertyChanged(nameof(FragmentLibraryCaption));
-
-    bool IGraphEditorWorkspaceSaveCoordinatorHost.CanSaveWorkspace
-        => CommandPermissions.Workspace.AllowSave;
-
-    string IGraphEditorWorkspaceSaveCoordinatorHost.WorkspacePath
-        => WorkspacePath;
-
-    GraphDocument IGraphEditorWorkspaceSaveCoordinatorHost.CreateWorkspaceDocumentSnapshot()
-        => CreateViewModelDocumentSnapshot();
-
-    void IGraphEditorWorkspaceSaveCoordinatorHost.SaveWorkspaceDocument(GraphDocument document)
-        => _workspaceService.Save(document);
-
-    string IGraphEditorWorkspaceSaveCoordinatorHost.CreateWorkspaceDocumentSignature(GraphDocument document)
-        => CreateDocumentSignature(document);
-
-    void IGraphEditorWorkspaceSaveCoordinatorHost.SetWorkspaceSaveDisabledStatus()
-        => SetStatus("editor.status.workspace.save.disabledByPermissions", "Saving is disabled by host permissions.");
-
-    void IGraphEditorWorkspaceSaveCoordinatorHost.HandleWorkspaceSaveSucceeded(string signature, string statusMessage)
-    {
-        _lastSavedDocumentSignature = signature;
-        IsDirty = false;
-        SetStatus("editor.status.workspace.saved", statusMessage);
-        PublishRuntimeDiagnostic(
-            "workspace.save.succeeded",
-            "workspace.save",
-            StatusMessage,
-            GraphEditorDiagnosticSeverity.Info);
-    }
-
-    void IGraphEditorWorkspaceSaveCoordinatorHost.HandleWorkspaceSaveFailed(string statusMessage, Exception exception)
-    {
-        SetStatus("editor.status.workspace.save.failed", statusMessage);
-        PublishRecoverableFailure("workspace.save.failed", "workspace.save", StatusMessage, exception);
-        PublishRuntimeDiagnostic(
-            "workspace.save.failed",
-            "workspace.save",
-            StatusMessage,
-            GraphEditorDiagnosticSeverity.Warning,
-            exception);
-    }
-
-    void IGraphEditorWorkspaceSaveCoordinatorHost.CompleteWorkspaceSaveAttempt()
-        => RaiseComputedPropertyChanges();
 
     [ObservableProperty]
     private double zoom = DefaultZoom;
