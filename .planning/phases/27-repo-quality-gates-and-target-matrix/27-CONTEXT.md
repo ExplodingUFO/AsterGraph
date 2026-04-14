@@ -91,7 +91,6 @@ This phase is not about:
 - `tests/AsterGraph.TestPlugins/AsterGraph.TestPlugins.csproj` - plugin fixture project used by focused tests
 - `tools/AsterGraph.PackageSmoke/AsterGraph.PackageSmoke.csproj` - current package-consumption smoke surface targeting `net8.0`
 - `tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj` - current large-graph proof surface targeting `net8.0`
-- `tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj` - current host sample project present in the tree but not yet the focus of this phase
 
 </canonical_refs>
 
@@ -133,6 +132,7 @@ This phase is not about:
 ## Deferred Ideas
 
 - Resolve `HostSample` vs solution/doc drift in Phase 28 rather than folding that cleanup into this quality-baseline phase.
+- Resolve the stale `tools/AsterGraph.HostSample` tree state in Phase 28; the directory exists today only as build artifacts and does not currently contain a live project file.
 - Split demo-coupled regressions from core SDK regressions in Phase 28.
 - Add package smoke gating, coverage thresholds, and public API/package compatibility baselines in Phase 29.
 
