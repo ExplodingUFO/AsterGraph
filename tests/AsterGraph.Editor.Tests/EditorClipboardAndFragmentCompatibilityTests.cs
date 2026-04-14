@@ -40,20 +40,6 @@ public sealed class EditorClipboardAndFragmentCompatibilityTests
     }
 
     [Fact]
-    public async Task FragmentCommands_CopySelectionAsync_WritesVersionedClipboardPayload()
-    {
-        var bridge = new TestClipboardBridge();
-        var editor = CreateEditor(bridge);
-        var commands = new GraphEditorViewModel.GraphEditorFragmentCommands(new FragmentCommandHostAdapter(editor));
-        editor.SelectSingleNode(editor.Nodes[0]);
-
-        await commands.CopySelectionAsync();
-
-        Assert.NotNull(bridge.Text);
-        Assert.Contains("\"SchemaVersion\": 1", bridge.Text);
-    }
-
-    [Fact]
     public async Task PasteSelectionAsync_ReadsLegacyClipboardPayload()
     {
         var bridge = new TestClipboardBridge
@@ -100,30 +86,6 @@ public sealed class EditorClipboardAndFragmentCompatibilityTests
         try
         {
             var imported = editor.ImportFragmentFrom(path);
-
-            Assert.True(imported);
-            Assert.Single(editor.Nodes);
-        }
-        finally
-        {
-            if (File.Exists(path))
-            {
-                File.Delete(path);
-            }
-        }
-    }
-
-    [Fact]
-    public void FragmentCommands_ImportFragmentFrom_ReadsLegacyFragmentPayload()
-    {
-        var editor = CreateEditor(nodes: []);
-        var commands = new GraphEditorViewModel.GraphEditorFragmentCommands(new FragmentCommandHostAdapter(editor));
-        var path = Path.Combine(Path.GetTempPath(), $"astergraph-fragment-{Guid.NewGuid():N}.json");
-        File.WriteAllText(path, CreateLegacyClipboardJson());
-
-        try
-        {
-            var imported = commands.ImportFragmentFrom(path);
 
             Assert.True(imported);
             Assert.Single(editor.Nodes);
@@ -229,89 +191,5 @@ public sealed class EditorClipboardAndFragmentCompatibilityTests
                     defaultWidth: 240,
                     defaultHeight: 160),
             ];
-    }
-
-    private sealed class FragmentCommandHostAdapter : GraphEditorViewModel.IGraphEditorFragmentCommandHost
-    {
-        private readonly GraphEditorViewModel.IGraphEditorFragmentCommandHost _inner;
-
-        public FragmentCommandHostAdapter(GraphEditorViewModel editor)
-        {
-            ArgumentNullException.ThrowIfNull(editor);
-            _inner = editor;
-        }
-
-        public GraphEditorCommandPermissions CommandPermissions => _inner.CommandPermissions;
-
-        public GraphEditorBehaviorOptions BehaviorOptions => _inner.BehaviorOptions;
-
-        public IEnumerable<NodeViewModel> SelectedNodes => _inner.SelectedNodes;
-
-        public string? SelectedNodeId => _inner.SelectedNodeId;
-
-        public string? SelectedNodeTitle => _inner.SelectedNodeTitle;
-
-        public IEnumerable<ConnectionViewModel> Connections => _inner.Connections;
-
-        public string? SelectedFragmentTemplatePath => _inner.SelectedFragmentTemplatePath;
-
-        public IGraphTextClipboardBridge? TextClipboardBridge => _inner.TextClipboardBridge;
-
-        public IGraphClipboardPayloadSerializer ClipboardPayloadSerializer => _inner.ClipboardPayloadSerializer;
-
-        public IGraphFragmentWorkspaceService FragmentWorkspaceService => _inner.FragmentWorkspaceService;
-
-        public IGraphFragmentLibraryService FragmentLibraryService => _inner.FragmentLibraryService;
-
-        public void StoreSelectionClipboard(GraphSelectionFragment fragment)
-            => _inner.StoreSelectionClipboard(fragment);
-
-        public GraphSelectionFragment? PeekSelectionClipboard()
-            => _inner.PeekSelectionClipboard();
-
-        public GraphPoint GetNextPasteOrigin()
-            => _inner.GetNextPasteOrigin();
-
-        public string CreateNodeId(NodeDefinitionId? definitionId, string fallbackKey)
-            => _inner.CreateNodeId(definitionId, fallbackKey);
-
-        public string CreateConnectionId()
-            => _inner.CreateConnectionId();
-
-        public void ApplyNodePresentation(NodeViewModel node)
-            => _inner.ApplyNodePresentation(node);
-
-        public void AddNode(NodeViewModel node)
-            => _inner.AddNode(node);
-
-        public void AddConnection(ConnectionViewModel connection)
-            => _inner.AddConnection(connection);
-
-        public void SetSelection(IReadOnlyList<NodeViewModel> nodes, NodeViewModel? primaryNode)
-            => _inner.SetSelection(nodes, primaryNode);
-
-        public void RefreshFragmentTemplates()
-            => _inner.RefreshFragmentTemplates();
-
-        public void RaiseComputedPropertyChanges()
-            => _inner.RaiseComputedPropertyChanges();
-
-        public string StatusText(string key, string fallback, params object?[] arguments)
-            => _inner.StatusText(key, fallback, arguments);
-
-        public string SetStatus(string key, string fallback, params object?[] arguments)
-            => _inner.SetStatus(key, fallback, arguments);
-
-        public string MarkDirty(string status)
-            => _inner.MarkDirty(status);
-
-        public void PublishRuntimeDiagnostic(string code, string operation, string message, GraphEditorDiagnosticSeverity severity, Exception? exception = null)
-            => _inner.PublishRuntimeDiagnostic(code, operation, message, severity, exception);
-
-        public void RaiseFragmentExported(string path, GraphSelectionFragment fragment)
-            => _inner.RaiseFragmentExported(path, fragment);
-
-        public void RaiseFragmentImported(string path, GraphSelectionFragment fragment)
-            => _inner.RaiseFragmentImported(path, fragment);
     }
 }

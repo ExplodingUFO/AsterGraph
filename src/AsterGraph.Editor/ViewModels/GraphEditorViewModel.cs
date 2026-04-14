@@ -38,7 +38,7 @@ namespace AsterGraph.Editor.ViewModels;
 /// 而自定义 UI 宿主应优先考虑 <see cref="AsterGraphEditorFactory.CreateSession(AsterGraphEditorOptions)"/>。
 /// 本类型在当前迁移窗口内仍然受支持，但不应再被视为新的首选组合根。
 /// </remarks>
-public sealed partial class GraphEditorViewModel : ObservableObject, IGraphContextMenuHost, GraphEditorViewModel.IGraphEditorFragmentCommandHost
+public sealed partial class GraphEditorViewModel : ObservableObject, IGraphContextMenuHost
 {
     private const double DefaultZoom = 0.88;
     private const double DefaultPanX = 110;
@@ -124,6 +124,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     private readonly GraphEditorViewModelKernelAdapter _sessionHost;
     private readonly GraphEditorCommandStateNotifier _commandStateNotifier = new();
     private readonly GraphEditorViewModelCompatibilityCommandHost _compatibilityCommandHost;
+    private readonly GraphEditorViewModelFragmentCommandHost _fragmentCommandHost;
     private readonly IRelayCommand[] _computedStateCommands;
     private string _inspectorConnectionsText = string.Empty;
     private string _inspectorUpstreamText = string.Empty;
@@ -295,7 +296,8 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         _contextMenuBuilder = new GraphContextMenuBuilder(this, LocalizeText);
         _compatibilityCommandHost = new GraphEditorViewModelCompatibilityCommandHost(this);
         _compatibilityCommands = new GraphEditorCompatibilityCommands(_compatibilityCommandHost);
-        _fragmentCommands = new GraphEditorFragmentCommands(this);
+        _fragmentCommandHost = new GraphEditorViewModelFragmentCommandHost(this);
+        _fragmentCommands = new GraphEditorFragmentCommands(_fragmentCommandHost);
 
         Nodes = new ObservableCollection<NodeViewModel>();
         Connections = new ObservableCollection<ConnectionViewModel>();
@@ -638,96 +640,6 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     ICommand IGraphContextMenuHost.DistributeVerticallyCommand => DistributeVerticallyCommand;
 
     ICommand IGraphContextMenuHost.CancelPendingConnectionCommand => CancelPendingConnectionCommand;
-
-    GraphEditorCommandPermissions IGraphEditorFragmentCommandHost.CommandPermissions => CommandPermissions;
-
-    GraphEditorBehaviorOptions IGraphEditorFragmentCommandHost.BehaviorOptions => BehaviorOptions;
-
-    IEnumerable<NodeViewModel> IGraphEditorFragmentCommandHost.SelectedNodes => SelectedNodes;
-
-    string? IGraphEditorFragmentCommandHost.SelectedNodeId => SelectedNode?.Id;
-
-    string? IGraphEditorFragmentCommandHost.SelectedNodeTitle => SelectedNode?.Title;
-
-    IEnumerable<ConnectionViewModel> IGraphEditorFragmentCommandHost.Connections => Connections;
-
-    string? IGraphEditorFragmentCommandHost.SelectedFragmentTemplatePath => SelectedFragmentTemplate?.Path;
-
-    IGraphTextClipboardBridge? IGraphEditorFragmentCommandHost.TextClipboardBridge => _textClipboardBridge;
-
-    IGraphClipboardPayloadSerializer IGraphEditorFragmentCommandHost.ClipboardPayloadSerializer => _clipboardPayloadSerializer;
-
-    IGraphFragmentWorkspaceService IGraphEditorFragmentCommandHost.FragmentWorkspaceService => _fragmentWorkspaceService;
-
-    IGraphFragmentLibraryService IGraphEditorFragmentCommandHost.FragmentLibraryService => _fragmentLibraryService;
-
-    void IGraphEditorFragmentCommandHost.StoreSelectionClipboard(GraphSelectionFragment fragment)
-        => _selectionClipboard.Store(fragment);
-
-    GraphSelectionFragment? IGraphEditorFragmentCommandHost.PeekSelectionClipboard()
-        => _selectionClipboard.Peek();
-
-    GraphPoint IGraphEditorFragmentCommandHost.GetNextPasteOrigin()
-        => _selectionClipboard.GetNextPasteOrigin(GetViewportCenter());
-
-    string IGraphEditorFragmentCommandHost.CreateNodeId(NodeDefinitionId? definitionId, string fallbackKey)
-        => CreateNodeId(definitionId, fallbackKey);
-
-    string IGraphEditorFragmentCommandHost.CreateConnectionId()
-        => CreateConnectionId();
-
-    void IGraphEditorFragmentCommandHost.ApplyNodePresentation(NodeViewModel node)
-        => _presentationLocalizationCoordinator.ApplyNodePresentation(node);
-
-    void IGraphEditorFragmentCommandHost.AddNode(NodeViewModel node)
-        => Nodes.Add(node);
-
-    void IGraphEditorFragmentCommandHost.AddConnection(ConnectionViewModel connection)
-        => Connections.Add(connection);
-
-    void IGraphEditorFragmentCommandHost.SetSelection(IReadOnlyList<NodeViewModel> nodes, NodeViewModel? primaryNode)
-        => SetSelection(nodes, primaryNode);
-
-    void IGraphEditorFragmentCommandHost.RefreshFragmentTemplates()
-        => RefreshFragmentTemplates();
-
-    void IGraphEditorFragmentCommandHost.RaiseComputedPropertyChanges()
-        => RaiseComputedPropertyChanges();
-
-    string IGraphEditorFragmentCommandHost.StatusText(string key, string fallback, params object?[] arguments)
-        => StatusText(key, fallback, arguments);
-
-    string IGraphEditorFragmentCommandHost.SetStatus(string key, string fallback, params object?[] arguments)
-    {
-        var status = StatusText(key, fallback, arguments);
-        StatusMessage = status;
-        return status;
-    }
-
-    string IGraphEditorFragmentCommandHost.MarkDirty(string status)
-    {
-        MarkDirty(status);
-        return status;
-    }
-
-    void IGraphEditorFragmentCommandHost.PublishRuntimeDiagnostic(string code, string operation, string message, GraphEditorDiagnosticSeverity severity, Exception? exception)
-        => PublishRuntimeDiagnostic(code, operation, message, severity, exception);
-
-    void IGraphEditorFragmentCommandHost.RaiseFragmentExported(string path, GraphSelectionFragment fragment)
-        => FragmentExported?.Invoke(
-            this,
-            new GraphEditorFragmentEventArgs(
-                path,
-                fragment.Nodes.Count,
-                fragment.Connections.Count));
-
-    void IGraphEditorFragmentCommandHost.RaiseFragmentImported(string path, GraphSelectionFragment fragment)
-        => FragmentImported?.Invoke(
-            this,
-            new GraphEditorFragmentEventArgs(
-                path,
-                fragment.Nodes.Count,
-                fragment.Connections.Count));
 
     [ObservableProperty]
     private double zoom = DefaultZoom;
