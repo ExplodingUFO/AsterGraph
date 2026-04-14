@@ -4,6 +4,7 @@ using AsterGraph.Core.Compatibility;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Catalog;
 using AsterGraph.Editor.Configuration;
+using AsterGraph.Editor.Diagnostics;
 using AsterGraph.Editor.Events;
 using AsterGraph.Editor.Hosting;
 using AsterGraph.Editor.Models;
@@ -75,6 +76,14 @@ public sealed class GraphEditorFacadeRefactorTests
     public void EditorAssembly_ContainsDedicatedPresentationLocalizationCoordinator()
     {
         var coordinatorType = typeof(GraphEditorViewModel).Assembly.GetType("AsterGraph.Editor.Services.GraphEditorPresentationLocalizationCoordinator");
+
+        Assert.NotNull(coordinatorType);
+    }
+
+    [Fact]
+    public void EditorAssembly_ContainsDedicatedWorkspaceSaveCoordinator()
+    {
+        var coordinatorType = typeof(GraphEditorViewModel).Assembly.GetType("AsterGraph.Editor.Services.GraphEditorWorkspaceSaveCoordinator");
 
         Assert.NotNull(coordinatorType);
     }
@@ -606,6 +615,57 @@ public sealed class GraphEditorFacadeRefactorTests
         Assert.Contains("No matching nodes", editor.StatusMessage, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void GraphEditorViewModel_SaveWorkspace_WhenSaveDisabled_DoesNotWriteWorkspace()
+    {
+        var definitionId = new NodeDefinitionId("tests.editor.facade.workspace-save-disabled");
+        var workspace = new RecordingWorkspaceService();
+        var editor = CreateEditorWithSharedDefinitionNodes(
+            definitionId,
+            behaviorOptions: GraphEditorBehaviorOptions.Default with
+            {
+                Commands = GraphEditorCommandPermissions.Default with
+                {
+                    Workspace = new WorkspaceCommandPermissions
+                    {
+                        AllowSave = false,
+                        AllowLoad = true,
+                    },
+                },
+            },
+            workspaceService: workspace);
+
+        editor.SaveWorkspace();
+
+        Assert.Equal(0, workspace.SaveCalls);
+        Assert.Contains("Saving is disabled", editor.StatusMessage, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void GraphEditorViewModel_SaveWorkspace_Failure_PublishesRecoverableFailureAndPreservesDirtyState()
+    {
+        var definitionId = new NodeDefinitionId("tests.editor.facade.workspace-save-failure");
+        var workspace = new ThrowingWorkspaceService();
+        var editor = CreateEditorWithSharedDefinitionNodes(definitionId, workspaceService: workspace);
+        var diagnostics = new List<GraphEditorDiagnostic>();
+        GraphEditorRecoverableFailureEventArgs? failure = null;
+
+        editor.Nodes[0].X += 24;
+        Assert.True(editor.IsDirty);
+
+        editor.DiagnosticPublished += diagnostics.Add;
+        editor.RecoverableFailureRaised += (_, args) => failure = args;
+
+        editor.SaveWorkspace();
+
+        Assert.True(editor.IsDirty);
+        Assert.NotNull(failure);
+        Assert.Equal("workspace.save.failed", failure!.Code);
+        Assert.Single(diagnostics);
+        Assert.Equal("workspace.save.failed", diagnostics[0].Code);
+        Assert.Equal(GraphEditorDiagnosticSeverity.Warning, diagnostics[0].Severity);
+    }
+
     private static NodeViewModel CreateNode(
         string nodeId,
         NodeDefinitionId definitionId,
@@ -643,7 +703,8 @@ public sealed class GraphEditorFacadeRefactorTests
         string secondTitle = "Input node",
         GraphEditorBehaviorOptions? behaviorOptions = null,
         GraphPoint? firstPosition = null,
-        GraphPoint? secondPosition = null)
+        GraphPoint? secondPosition = null,
+        IGraphWorkspaceService? workspaceService = null)
     {
         var catalog = new NodeCatalog();
         catalog.RegisterDefinition(new NodeDefinition(
@@ -682,6 +743,7 @@ public sealed class GraphEditorFacadeRefactorTests
             document,
             catalog,
             new DefaultPortCompatibilityService(),
+            workspaceService: workspaceService,
             behaviorOptions: behaviorOptions);
     }
 
@@ -706,5 +768,37 @@ public sealed class GraphEditorFacadeRefactorTests
     private sealed record TestGraphHostContext(object Owner, object? TopLevel) : IGraphHostContext
     {
         public IServiceProvider? Services => null;
+    }
+
+    private sealed class RecordingWorkspaceService : IGraphWorkspaceService
+    {
+        public int SaveCalls { get; private set; }
+
+        public string WorkspacePath { get; } = "workspace://facade-refactor";
+
+        public bool Exists() => false;
+
+        public GraphDocument Load() => throw new InvalidOperationException("Load should not be called in this test.");
+
+        public void Save(GraphDocument document)
+        {
+            ArgumentNullException.ThrowIfNull(document);
+            SaveCalls++;
+        }
+    }
+
+    private sealed class ThrowingWorkspaceService : IGraphWorkspaceService
+    {
+        public string WorkspacePath { get; } = "workspace://facade-refactor-failure";
+
+        public bool Exists() => false;
+
+        public GraphDocument Load() => throw new InvalidOperationException("Load should not be called in this test.");
+
+        public void Save(GraphDocument document)
+        {
+            ArgumentNullException.ThrowIfNull(document);
+            throw new InvalidOperationException("save failed on purpose");
+        }
     }
 }

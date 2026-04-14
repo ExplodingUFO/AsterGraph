@@ -38,7 +38,7 @@ namespace AsterGraph.Editor.ViewModels;
 /// 而自定义 UI 宿主应优先考虑 <see cref="AsterGraphEditorFactory.CreateSession(AsterGraphEditorOptions)"/>。
 /// 本类型在当前迁移窗口内仍然受支持，但不应再被视为新的首选组合根。
 /// </remarks>
-public sealed partial class GraphEditorViewModel : ObservableObject, IGraphContextMenuHost, GraphEditorViewModel.IGraphEditorCompatibilityCommandHost, GraphEditorViewModel.IGraphEditorFragmentCommandHost, IGraphEditorKernelProjectionHost, IGraphEditorHistoryStateHost, IGraphEditorSelectionCoordinatorHost, IGraphEditorSelectionStateSynchronizerHost, IGraphEditorSelectionProjectionApplierHost, IGraphEditorDocumentCollectionSynchronizerHost, IGraphEditorNodePositionDirtyTrackerHost, IGraphEditorRetainedEventPublisherHost, IGraphEditorNodeLayoutCoordinatorHost, IGraphEditorPresentationLocalizationCoordinatorHost
+public sealed partial class GraphEditorViewModel : ObservableObject, IGraphContextMenuHost, GraphEditorViewModel.IGraphEditorCompatibilityCommandHost, GraphEditorViewModel.IGraphEditorFragmentCommandHost, IGraphEditorKernelProjectionHost, IGraphEditorHistoryStateHost, IGraphEditorSelectionCoordinatorHost, IGraphEditorSelectionStateSynchronizerHost, IGraphEditorSelectionProjectionApplierHost, IGraphEditorDocumentCollectionSynchronizerHost, IGraphEditorNodePositionDirtyTrackerHost, IGraphEditorRetainedEventPublisherHost, IGraphEditorNodeLayoutCoordinatorHost, IGraphEditorPresentationLocalizationCoordinatorHost, IGraphEditorWorkspaceSaveCoordinatorHost
 {
     private const double DefaultZoom = 0.88;
     private const double DefaultPanX = 110;
@@ -107,6 +107,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     private readonly GraphEditorRetainedEventPublisher _retainedEventPublisher;
     private readonly GraphEditorNodeLayoutCoordinator _nodeLayoutCoordinator;
     private readonly GraphEditorPresentationLocalizationCoordinator _presentationLocalizationCoordinator;
+    private readonly GraphEditorWorkspaceSaveCoordinator _workspaceSaveCoordinator;
     private readonly GraphEditorKernel _kernel;
     private readonly GraphEditorViewModelKernelAdapter _sessionHost;
     private readonly GraphEditorCommandStateNotifier _commandStateNotifier = new();
@@ -198,6 +199,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         _nodePositionDirtyTracker = new GraphEditorNodePositionDirtyTracker(this);
         _retainedEventPublisher = new GraphEditorRetainedEventPublisher(this);
         _nodeLayoutCoordinator = new GraphEditorNodeLayoutCoordinator(this);
+        _workspaceSaveCoordinator = new GraphEditorWorkspaceSaveCoordinator(this);
         StyleOptions = styleOptions ?? GraphEditorStyleOptions.Default;
         BehaviorOptions = ResolveBehaviorOptions(behaviorOptions, StyleOptions);
 
@@ -1038,6 +1040,51 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     void IGraphEditorPresentationLocalizationCoordinatorHost.NotifyFragmentLibraryCaptionChanged()
         => OnPropertyChanged(nameof(FragmentLibraryCaption));
+
+    bool IGraphEditorWorkspaceSaveCoordinatorHost.CanSaveWorkspace
+        => CommandPermissions.Workspace.AllowSave;
+
+    string IGraphEditorWorkspaceSaveCoordinatorHost.WorkspacePath
+        => WorkspacePath;
+
+    GraphDocument IGraphEditorWorkspaceSaveCoordinatorHost.CreateWorkspaceDocumentSnapshot()
+        => CreateViewModelDocumentSnapshot();
+
+    void IGraphEditorWorkspaceSaveCoordinatorHost.SaveWorkspaceDocument(GraphDocument document)
+        => _workspaceService.Save(document);
+
+    string IGraphEditorWorkspaceSaveCoordinatorHost.CreateWorkspaceDocumentSignature(GraphDocument document)
+        => CreateDocumentSignature(document);
+
+    void IGraphEditorWorkspaceSaveCoordinatorHost.SetWorkspaceSaveDisabledStatus()
+        => SetStatus("editor.status.workspace.save.disabledByPermissions", "Saving is disabled by host permissions.");
+
+    void IGraphEditorWorkspaceSaveCoordinatorHost.HandleWorkspaceSaveSucceeded(string signature, string statusMessage)
+    {
+        _lastSavedDocumentSignature = signature;
+        IsDirty = false;
+        SetStatus("editor.status.workspace.saved", statusMessage);
+        PublishRuntimeDiagnostic(
+            "workspace.save.succeeded",
+            "workspace.save",
+            StatusMessage,
+            GraphEditorDiagnosticSeverity.Info);
+    }
+
+    void IGraphEditorWorkspaceSaveCoordinatorHost.HandleWorkspaceSaveFailed(string statusMessage, Exception exception)
+    {
+        SetStatus("editor.status.workspace.save.failed", statusMessage);
+        PublishRecoverableFailure("workspace.save.failed", "workspace.save", StatusMessage, exception);
+        PublishRuntimeDiagnostic(
+            "workspace.save.failed",
+            "workspace.save",
+            StatusMessage,
+            GraphEditorDiagnosticSeverity.Warning,
+            exception);
+    }
+
+    void IGraphEditorWorkspaceSaveCoordinatorHost.CompleteWorkspaceSaveAttempt()
+        => RaiseComputedPropertyChanges();
 
     [ObservableProperty]
     private double zoom = DefaultZoom;
@@ -2064,40 +2111,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// 将当前图保存到默认工作区文件。
     /// </summary>
     public void SaveWorkspace()
-    {
-        if (!CommandPermissions.Workspace.AllowSave)
-        {
-            SetStatus("editor.status.workspace.save.disabledByPermissions", "Saving is disabled by host permissions.");
-            return;
-        }
-
-        try
-        {
-            var document = CreateViewModelDocumentSnapshot();
-            _workspaceService.Save(document);
-            _lastSavedDocumentSignature = CreateDocumentSignature(document);
-            IsDirty = false;
-            SetStatus("editor.status.workspace.saved", $"Saved snapshot to {_workspaceService.WorkspacePath}.");
-            PublishRuntimeDiagnostic(
-                "workspace.save.succeeded",
-                "workspace.save",
-                StatusMessage,
-                GraphEditorDiagnosticSeverity.Info);
-        }
-        catch (Exception exception)
-        {
-            SetStatus("editor.status.workspace.save.failed", $"Save failed: {exception.Message}");
-            PublishRecoverableFailure("workspace.save.failed", "workspace.save", StatusMessage, exception);
-            PublishRuntimeDiagnostic(
-                "workspace.save.failed",
-                "workspace.save",
-                StatusMessage,
-                GraphEditorDiagnosticSeverity.Warning,
-                exception);
-        }
-
-        RaiseComputedPropertyChanges();
-    }
+        => _workspaceSaveCoordinator.SaveWorkspace();
 
     /// <summary>
     /// 从默认工作区文件加载图。

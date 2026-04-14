@@ -18,7 +18,7 @@ using AsterGraph.Editor.Viewport;
 
 namespace AsterGraph.Editor.Kernel;
 
-internal sealed class GraphEditorKernel : IGraphEditorSessionHost, IGraphEditorKernelCommandRouterHost
+internal sealed class GraphEditorKernel : IGraphEditorSessionHost, IGraphEditorKernelCommandRouterHost, IGraphEditorWorkspaceSaveCoordinatorHost
 {
     private const double DefaultZoom = 0.88;
     private const double DefaultPanX = 110;
@@ -32,6 +32,7 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost, IGraphEditorK
     private readonly GraphEditorKernelCompatibilityQueries _compatibilityQueries;
     private readonly GraphEditorKernelDocumentMutator _documentMutator = new();
     private readonly GraphEditorKernelCommandRouter _commandRouter;
+    private readonly GraphEditorWorkspaceSaveCoordinator _workspaceSaveCoordinator;
     private GraphEditorBehaviorOptions _behaviorOptions;
     private readonly GraphEditorStyleOptions _styleOptions;
     private GraphDocument _document;
@@ -66,6 +67,7 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost, IGraphEditorK
         _styleOptions = styleOptions;
         _behaviorOptions = behaviorOptions;
         _commandRouter = new GraphEditorKernelCommandRouter(this);
+        _workspaceSaveCoordinator = new GraphEditorWorkspaceSaveCoordinator(this);
         _lastSavedDocumentSignature = CreateDocumentSignature(_document);
         _historyService.Reset(CaptureHistoryState());
         CurrentStatusMessage = "Ready to edit.";
@@ -101,6 +103,52 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost, IGraphEditorK
     public event Action<GraphEditorDiagnostic>? DiagnosticPublished;
 
     public string CurrentStatusMessage { get; private set; } = string.Empty;
+
+    bool IGraphEditorWorkspaceSaveCoordinatorHost.CanSaveWorkspace
+        => _behaviorOptions.Commands.Workspace.AllowSave;
+
+    string IGraphEditorWorkspaceSaveCoordinatorHost.WorkspacePath
+        => _workspaceService.WorkspacePath;
+
+    GraphDocument IGraphEditorWorkspaceSaveCoordinatorHost.CreateWorkspaceDocumentSnapshot()
+        => CloneDocument(_document);
+
+    void IGraphEditorWorkspaceSaveCoordinatorHost.SaveWorkspaceDocument(GraphDocument document)
+        => _workspaceService.Save(document);
+
+    string IGraphEditorWorkspaceSaveCoordinatorHost.CreateWorkspaceDocumentSignature(GraphDocument document)
+        => CreateDocumentSignature(document);
+
+    void IGraphEditorWorkspaceSaveCoordinatorHost.SetWorkspaceSaveDisabledStatus()
+        => CurrentStatusMessage = "Saving is disabled by host permissions.";
+
+    void IGraphEditorWorkspaceSaveCoordinatorHost.HandleWorkspaceSaveSucceeded(string signature, string statusMessage)
+    {
+        _lastSavedDocumentSignature = signature;
+        CurrentStatusMessage = statusMessage;
+        DiagnosticPublished?.Invoke(new GraphEditorDiagnostic(
+            "workspace.save.succeeded",
+            "workspace.save",
+            CurrentStatusMessage,
+            GraphEditorDiagnosticSeverity.Info));
+        DocumentChanged?.Invoke(this, new GraphEditorDocumentChangedEventArgs(GraphEditorDocumentChangeKind.WorkspaceSaved, statusMessage: CurrentStatusMessage));
+    }
+
+    void IGraphEditorWorkspaceSaveCoordinatorHost.HandleWorkspaceSaveFailed(string statusMessage, Exception exception)
+    {
+        CurrentStatusMessage = statusMessage;
+        RecoverableFailureRaised?.Invoke(
+            this,
+            new GraphEditorRecoverableFailureEventArgs(
+                "workspace.save.failed",
+                "workspace.save",
+                CurrentStatusMessage,
+                exception));
+    }
+
+    void IGraphEditorWorkspaceSaveCoordinatorHost.CompleteWorkspaceSaveAttempt()
+    {
+    }
 
     GraphEditorBehaviorOptions IGraphEditorKernelCommandRouterHost.BehaviorOptions => _behaviorOptions;
 
@@ -561,37 +609,7 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost, IGraphEditorK
     }
 
     public void SaveWorkspace()
-    {
-        if (!_behaviorOptions.Commands.Workspace.AllowSave)
-        {
-            CurrentStatusMessage = "Saving is disabled by host permissions.";
-            return;
-        }
-
-        try
-        {
-            _workspaceService.Save(_document);
-            _lastSavedDocumentSignature = CreateDocumentSignature(_document);
-            CurrentStatusMessage = $"Saved snapshot to {_workspaceService.WorkspacePath}.";
-            DiagnosticPublished?.Invoke(new GraphEditorDiagnostic(
-                "workspace.save.succeeded",
-                "workspace.save",
-                CurrentStatusMessage,
-                GraphEditorDiagnosticSeverity.Info));
-            DocumentChanged?.Invoke(this, new GraphEditorDocumentChangedEventArgs(GraphEditorDocumentChangeKind.WorkspaceSaved, statusMessage: CurrentStatusMessage));
-        }
-        catch (Exception exception)
-        {
-            CurrentStatusMessage = $"Save failed: {exception.Message}";
-            RecoverableFailureRaised?.Invoke(
-                this,
-                new GraphEditorRecoverableFailureEventArgs(
-                    "workspace.save.failed",
-                    "workspace.save",
-                    CurrentStatusMessage,
-                    exception));
-        }
-    }
+        => _workspaceSaveCoordinator.SaveWorkspace();
 
     public bool LoadWorkspace()
     {
