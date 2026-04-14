@@ -3,6 +3,7 @@ using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Core.Compatibility;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Catalog;
+using AsterGraph.Editor.Events;
 using AsterGraph.Editor.Hosting;
 using AsterGraph.Editor.Services;
 using AsterGraph.Editor.ViewModels;
@@ -307,6 +308,49 @@ public sealed class GraphEditorFacadeRefactorTests
         Assert.Contains("Unsaved changes", editor.WorkspaceCaption, StringComparison.Ordinal);
         Assert.Contains(nameof(GraphEditorViewModel.WorkspaceCaption), changedProperties);
         Assert.Equal(1, changedProperties.Count(propertyName => propertyName == nameof(GraphEditorViewModel.WorkspaceCaption)));
+    }
+
+    [Fact]
+    public void GraphEditorViewModel_PanBy_PublishesRetainedViewportChanged()
+    {
+        var definitionId = new NodeDefinitionId("tests.editor.facade.retained-viewport");
+        var editor = CreateEditorWithSharedDefinitionNodes(definitionId);
+        GraphEditorViewportChangedEventArgs? viewportChanged = null;
+
+        editor.UpdateViewportSize(1280, 720);
+        editor.ViewportChanged += (_, args) => viewportChanged = args;
+
+        editor.PanBy(16, 12);
+
+        Assert.NotNull(viewportChanged);
+        Assert.Equal(0.88, viewportChanged!.Zoom);
+        Assert.Equal(126, viewportChanged.PanX);
+        Assert.Equal(108, viewportChanged.PanY);
+        Assert.Equal(1280, viewportChanged.ViewportWidth);
+        Assert.Equal(720, viewportChanged.ViewportHeight);
+    }
+
+    [Fact]
+    public void GraphEditorViewModel_PanBy_PublishesRetainedAndSessionViewportEvents()
+    {
+        var definitionId = new NodeDefinitionId("tests.editor.facade.retained-session-viewport");
+        var editor = CreateEditorWithSharedDefinitionNodes(definitionId);
+        GraphEditorViewportChangedEventArgs? retainedViewportChanged = null;
+        GraphEditorViewportChangedEventArgs? sessionViewportChanged = null;
+
+        editor.UpdateViewportSize(1280, 720);
+        editor.ViewportChanged += (_, args) => retainedViewportChanged = args;
+        editor.Session.Events.ViewportChanged += (_, args) => sessionViewportChanged = args;
+
+        editor.PanBy(16, 12);
+
+        Assert.NotNull(retainedViewportChanged);
+        Assert.NotNull(sessionViewportChanged);
+        Assert.Equal(sessionViewportChanged!.Zoom, retainedViewportChanged!.Zoom);
+        Assert.Equal(sessionViewportChanged.PanX, retainedViewportChanged.PanX);
+        Assert.Equal(sessionViewportChanged.PanY, retainedViewportChanged.PanY);
+        Assert.Equal(sessionViewportChanged.ViewportWidth, retainedViewportChanged.ViewportWidth);
+        Assert.Equal(sessionViewportChanged.ViewportHeight, retainedViewportChanged.ViewportHeight);
     }
 
     private static NodeViewModel CreateNode(

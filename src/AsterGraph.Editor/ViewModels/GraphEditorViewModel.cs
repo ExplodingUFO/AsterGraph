@@ -776,6 +776,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         PanY = snapshot.PanY;
         FitViewCommand.NotifyCanExecuteChanged();
         RaiseComputedPropertyChanges();
+        NotifyViewportChanged();
     }
 
     void IGraphEditorKernelProjectionHost.ApplyKernelPendingConnectionCore(NodeViewModel? pendingNode, PortViewModel? pendingPort)
