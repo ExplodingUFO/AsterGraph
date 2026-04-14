@@ -36,10 +36,13 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost, IGrap
     private readonly GraphEditorKernelConnectionMutationHost _connectionMutationHost;
     private readonly GraphEditorKernelConnectionMutationCoordinator _connectionMutationCoordinator;
     private readonly GraphEditorKernelCommandRouter _commandRouter;
+    private readonly GraphEditorKernelHistoryCoordinator _historyCoordinator;
     private readonly GraphEditorKernelWorkspaceSaveCoordinatorHost _workspaceSaveCoordinatorHost;
     private readonly GraphEditorKernelWorkspaceLoadCoordinatorHost _workspaceLoadCoordinatorHost;
     private readonly GraphEditorWorkspaceSaveCoordinator _workspaceSaveCoordinator;
     private readonly GraphEditorWorkspaceLoadCoordinator _workspaceLoadCoordinator;
+    private readonly GraphEditorKernelSelectionCoordinator _selectionCoordinator;
+    private readonly GraphEditorKernelProjectionCoordinator _projectionCoordinator;
     private GraphEditorBehaviorOptions _behaviorOptions;
     private readonly GraphEditorStyleOptions _styleOptions;
     private GraphDocument _document;
@@ -78,12 +81,15 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost, IGrap
         _connectionMutationHost = new GraphEditorKernelConnectionMutationHost(this);
         _connectionMutationCoordinator = new GraphEditorKernelConnectionMutationCoordinator(_connectionMutationHost, _documentMutator);
         _commandRouter = new GraphEditorKernelCommandRouter(this);
+        _historyCoordinator = new GraphEditorKernelHistoryCoordinator(this);
+        _selectionCoordinator = new GraphEditorKernelSelectionCoordinator(this);
+        _projectionCoordinator = new GraphEditorKernelProjectionCoordinator(this);
         _workspaceSaveCoordinatorHost = new GraphEditorKernelWorkspaceSaveCoordinatorHost(this);
         _workspaceLoadCoordinatorHost = new GraphEditorKernelWorkspaceLoadCoordinatorHost(this);
         _workspaceSaveCoordinator = new GraphEditorWorkspaceSaveCoordinator(_workspaceSaveCoordinatorHost);
         _workspaceLoadCoordinator = new GraphEditorWorkspaceLoadCoordinator(_workspaceLoadCoordinatorHost);
         _lastSavedDocumentSignature = CreateDocumentSignature(_document);
-        _historyService.Reset(CaptureHistoryState());
+        _historyService.Reset(_historyCoordinator.CaptureHistoryState());
         CurrentStatusMessage = "Ready to edit.";
     }
 
@@ -133,73 +139,19 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost, IGrap
     bool IGraphEditorKernelCommandRouterHost.WorkspaceExists => _workspaceService.Exists();
 
     internal bool IsDirty
-        => !string.Equals(CreateDocumentSignature(_document), _lastSavedDocumentSignature, StringComparison.Ordinal);
+        => _historyCoordinator.IsDirty(_lastSavedDocumentSignature);
 
     public void Undo()
-    {
-        if (!_behaviorOptions.History.EnableUndoRedo || !_behaviorOptions.Commands.History.AllowUndo)
-        {
-            CurrentStatusMessage = "Undo is disabled by host permissions.";
-            return;
-        }
-
-        if (!_historyService.TryUndo(out var state) || state is null)
-        {
-            CurrentStatusMessage = "No more undo steps.";
-            return;
-        }
-
-        RestoreHistoryState(state, "Undo applied.", GraphEditorDocumentChangeKind.Undo);
-    }
+        => _historyCoordinator.Undo();
 
     public void Redo()
-    {
-        if (!_behaviorOptions.History.EnableUndoRedo || !_behaviorOptions.Commands.History.AllowRedo)
-        {
-            CurrentStatusMessage = "Redo is disabled by host permissions.";
-            return;
-        }
-
-        if (!_historyService.TryRedo(out var state) || state is null)
-        {
-            CurrentStatusMessage = "No more redo steps.";
-            return;
-        }
-
-        RestoreHistoryState(state, "Redo applied.", GraphEditorDocumentChangeKind.Redo);
-    }
+        => _historyCoordinator.Redo();
 
     public void ClearSelection(bool updateStatus)
-        => SetSelection([], null, updateStatus);
+        => _selectionCoordinator.ClearSelection(updateStatus);
 
     public void SetSelection(IReadOnlyList<string> nodeIds, string? primaryNodeId, bool updateStatus)
-    {
-        var existingIds = _document.Nodes.Select(node => node.Id).ToHashSet(StringComparer.Ordinal);
-        var selectedIds = nodeIds
-            .Where(existingIds.Contains)
-            .Distinct(StringComparer.Ordinal)
-            .ToList();
-        var nextPrimary = !string.IsNullOrWhiteSpace(primaryNodeId) && selectedIds.Contains(primaryNodeId, StringComparer.Ordinal)
-            ? primaryNodeId
-            : selectedIds.LastOrDefault();
-
-        if (_selectedNodeIds.SequenceEqual(selectedIds, StringComparer.Ordinal)
-            && string.Equals(_primarySelectedNodeId, nextPrimary, StringComparison.Ordinal))
-        {
-            return;
-        }
-
-        _selectedNodeIds = selectedIds;
-        _primarySelectedNodeId = nextPrimary;
-        if (updateStatus)
-        {
-            CurrentStatusMessage = selectedIds.Count == 0
-                ? "Selection cleared."
-                : $"Selected {selectedIds.Count} node{(selectedIds.Count == 1 ? string.Empty : "s")}.";
-        }
-
-        SelectionChanged?.Invoke(this, new GraphEditorSelectionChangedEventArgs(_selectedNodeIds.ToList(), _primarySelectedNodeId));
-    }
+        => _selectionCoordinator.SetSelection(nodeIds, primaryNodeId, updateStatus);
 
     public void AddNode(NodeDefinitionId definitionId, GraphPoint? preferredWorldPosition)
         => _nodeMutationCoordinator.AddNode(definitionId, preferredWorldPosition);
@@ -242,22 +194,22 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost, IGrap
 
     public void PanBy(double deltaX, double deltaY)
     {
-        ApplyViewportSnapshot(_viewportCoordinator.PanBy(GetViewportSnapshot(), deltaX, deltaY));
+        _historyCoordinator.ApplyViewportSnapshot(_viewportCoordinator.PanBy(GetViewportSnapshot(), deltaX, deltaY));
     }
 
     public void ZoomAt(double factor, GraphPoint screenAnchor)
     {
-        ApplyViewportSnapshot(_viewportCoordinator.ZoomAt(GetViewportSnapshot(), factor, screenAnchor));
+        _historyCoordinator.ApplyViewportSnapshot(_viewportCoordinator.ZoomAt(GetViewportSnapshot(), factor, screenAnchor));
     }
 
     public void UpdateViewportSize(double width, double height)
     {
-        ApplyViewportSnapshot(_viewportCoordinator.UpdateViewportSize(GetViewportSnapshot(), width, height));
+        _historyCoordinator.ApplyViewportSnapshot(_viewportCoordinator.UpdateViewportSize(GetViewportSnapshot(), width, height));
     }
 
     public void ResetView(bool updateStatus)
     {
-        ApplyViewportSnapshot(_viewportCoordinator.ResetView(GetViewportSnapshot()));
+        _historyCoordinator.ApplyViewportSnapshot(_viewportCoordinator.ResetView(GetViewportSnapshot()));
         if (updateStatus)
         {
             CurrentStatusMessage = "Viewport reset.";
@@ -276,7 +228,7 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost, IGrap
             return;
         }
 
-        ApplyViewportSnapshot(updatedViewport);
+        _historyCoordinator.ApplyViewportSnapshot(updatedViewport);
         if (updateStatus)
         {
             CurrentStatusMessage = "Viewport fit to scene.";
@@ -291,7 +243,7 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost, IGrap
             return;
         }
 
-        ApplyViewportSnapshot(updatedViewport);
+        _historyCoordinator.ApplyViewportSnapshot(updatedViewport);
         CurrentStatusMessage = $"Centered on {node!.Title}.";
     }
 
@@ -302,7 +254,7 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost, IGrap
             return;
         }
 
-        ApplyViewportSnapshot(updatedViewport);
+        _historyCoordinator.ApplyViewportSnapshot(updatedViewport);
         if (updateStatus)
         {
             CurrentStatusMessage = "Viewport centered from mini map.";
@@ -319,45 +271,16 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost, IGrap
         => CloneDocument(_document);
 
     public GraphEditorSelectionSnapshot GetSelectionSnapshot()
-        => new(_selectedNodeIds.ToList(), _primarySelectedNodeId);
+        => _selectionCoordinator.GetSelectionSnapshot();
 
     public GraphEditorViewportSnapshot GetViewportSnapshot()
         => new(_zoom, _panX, _panY, _viewportWidth, _viewportHeight);
 
     public GraphEditorCapabilitySnapshot GetCapabilitySnapshot()
-        => new(
-            _historyService.CanUndo && _behaviorOptions.History.EnableUndoRedo && _behaviorOptions.Commands.History.AllowUndo,
-            _historyService.CanRedo && _behaviorOptions.History.EnableUndoRedo && _behaviorOptions.Commands.History.AllowRedo,
-            _selectedNodeIds.Count > 0,
-            false,
-            _behaviorOptions.Commands.Workspace.AllowSave,
-            _behaviorOptions.Commands.Workspace.AllowLoad)
-        {
-            CanSetSelection = true,
-            CanMoveNodes = _behaviorOptions.Commands.Nodes.AllowMove,
-            CanCreateConnections = _behaviorOptions.Commands.Connections.AllowCreate,
-            CanDeleteConnections = _behaviorOptions.Commands.Connections.AllowDelete,
-            CanBreakConnections = _behaviorOptions.Commands.Connections.AllowDisconnect,
-            CanUpdateViewport = true,
-            CanFitToViewport = _document.Nodes.Count > 0 && _viewportWidth > 0 && _viewportHeight > 0,
-            CanCenterViewport = _viewportWidth > 0 && _viewportHeight > 0,
-        };
+        => _projectionCoordinator.GetCapabilitySnapshot();
 
     public IReadOnlyList<GraphEditorFeatureDescriptorSnapshot> GetFeatureDescriptors()
-        =>
-        [
-            new GraphEditorFeatureDescriptorSnapshot("query.feature-descriptors", "query", true),
-            new GraphEditorFeatureDescriptorSnapshot("query.document-snapshot", "query", true),
-            new GraphEditorFeatureDescriptorSnapshot("query.selection-snapshot", "query", true),
-            new GraphEditorFeatureDescriptorSnapshot("query.viewport-snapshot", "query", true),
-            new GraphEditorFeatureDescriptorSnapshot("query.node-positions", "query", true),
-            new GraphEditorFeatureDescriptorSnapshot("query.pending-connection-snapshot", "query", true),
-            new GraphEditorFeatureDescriptorSnapshot("query.compatible-port-target-snapshot", "query", true),
-            new GraphEditorFeatureDescriptorSnapshot("query.compatible-target-mvvm-shim", "query", true),
-            new GraphEditorFeatureDescriptorSnapshot("service.workspace", "service", true),
-            new GraphEditorFeatureDescriptorSnapshot("service.diagnostics", "service", true),
-            new GraphEditorFeatureDescriptorSnapshot("surface.mutation.batch", "surface", true),
-        ];
+        => _projectionCoordinator.GetFeatureDescriptors();
 
     public IReadOnlyList<GraphEditorCommandDescriptorSnapshot> GetCommandDescriptors()
         => _commandRouter.GetCommandDescriptors();
@@ -384,71 +307,19 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost, IGrap
     private GraphPoint GetViewportCenter()
         => _viewportCoordinator.GetViewportCenter(GetViewportSnapshot());
 
-    private void ApplyViewportSnapshot(GraphEditorViewportSnapshot snapshot)
-    {
-        _zoom = snapshot.Zoom;
-        _panX = snapshot.PanX;
-        _panY = snapshot.PanY;
-        _viewportWidth = snapshot.ViewportWidth;
-        _viewportHeight = snapshot.ViewportHeight;
-        ViewportChanged?.Invoke(this, new GraphEditorViewportChangedEventArgs(_zoom, _panX, _panY, _viewportWidth, _viewportHeight));
-    }
-
     private void MarkDirty(
         string status,
         GraphEditorDocumentChangeKind changeKind,
         IReadOnlyList<string>? nodeIds,
         IReadOnlyList<string>? connectionIds,
         bool preserveStatus = false)
-    {
-        if (!preserveStatus)
-        {
-            CurrentStatusMessage = status;
-        }
-
-        var state = CaptureHistoryState();
-        _historyService.Push(state);
-        DocumentChanged?.Invoke(this, new GraphEditorDocumentChangedEventArgs(changeKind, nodeIds, connectionIds, CurrentStatusMessage));
-    }
+        => _historyCoordinator.MarkDirty(status, changeKind, nodeIds, connectionIds, preserveStatus);
 
     private void LoadDocument(GraphDocument document, string status, bool markClean, bool resetHistory)
-    {
-        _document = CloneDocument(document);
-        _selectedNodeIds = [];
-        _primarySelectedNodeId = null;
-        _pendingConnection = GraphEditorPendingConnectionSnapshot.Create(false, null, null);
-        CurrentStatusMessage = status;
-
-        var historyState = CaptureHistoryState();
-        if (resetHistory)
-        {
-            _historyService.Reset(historyState);
-        }
-
-        if (markClean)
-        {
-            _lastSavedDocumentSignature = historyState.Signature;
-        }
-    }
-
-    private void RestoreHistoryState(GraphEditorHistoryState state, string status, GraphEditorDocumentChangeKind changeKind)
-    {
-        _document = state.Document;
-        _selectedNodeIds = state.SelectedNodeIds.ToList();
-        _primarySelectedNodeId = state.PrimarySelectedNodeId;
-        _pendingConnection = GraphEditorPendingConnectionSnapshot.Create(false, null, null);
-        CurrentStatusMessage = status;
-        SelectionChanged?.Invoke(this, new GraphEditorSelectionChangedEventArgs(_selectedNodeIds.ToList(), _primarySelectedNodeId));
-        PendingConnectionChanged?.Invoke(this, new GraphEditorPendingConnectionChangedEventArgs(_pendingConnection));
-        DocumentChanged?.Invoke(this, new GraphEditorDocumentChangedEventArgs(changeKind, statusMessage: CurrentStatusMessage));
-    }
+        => _historyCoordinator.LoadDocument(document, status, markClean, resetHistory);
 
     private GraphEditorHistoryState CaptureHistoryState()
-        => new(
-            CloneDocument(_document),
-            _selectedNodeIds.ToList(),
-            _primarySelectedNodeId,
-            CreateDocumentSignature(_document));
+        => _historyCoordinator.CaptureHistoryState();
 
     private bool CanReplaceIncomingConnection()
         => _behaviorOptions.Commands.Connections.AllowDelete || _behaviorOptions.Commands.Connections.AllowDisconnect;
