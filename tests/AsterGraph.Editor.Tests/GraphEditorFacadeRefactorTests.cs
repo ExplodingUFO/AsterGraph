@@ -515,7 +515,7 @@ public sealed class GraphEditorFacadeRefactorTests
     }
 
     [Fact]
-    public void GraphEditorViewModel_TrySetNodePosition_WhenPositionUnchanged_ReturnsTrueWithoutStatusChange()
+    public void GraphEditorViewModel_TrySetNodePosition_WhenPositionUnchanged_ReturnsTrueWithoutChangingState()
     {
         var definitionId = new NodeDefinitionId("tests.editor.facade.layout-position-noop");
         var editor = CreateEditorWithSharedDefinitionNodes(definitionId);
@@ -533,14 +533,42 @@ public sealed class GraphEditorFacadeRefactorTests
     }
 
     [Fact]
-    public void GraphEditorViewModel_MoveNode_WithMultiSelectionMovesEntireSelection()
+    public void GraphEditorViewModel_TrySetNodePosition_WhenPositionChangesAndUpdateStatusDisabled_PreservesKernelStatusMessage()
+    {
+        var definitionId = new NodeDefinitionId("tests.editor.facade.layout-position-update-no-status");
+        var editor = CreateEditorWithSharedDefinitionNodes(definitionId);
+        var source = editor.Nodes[0];
+        var firstPosition = new GraphPoint(source.X + 16, source.Y + 12);
+        var secondPosition = new GraphPoint(source.X + 64, source.Y + 28);
+
+        Assert.True(editor.TrySetNodePosition(source.Id, firstPosition, updateStatus: true));
+        var preservedStatus = editor.StatusMessage;
+
+        var result = editor.TrySetNodePosition(source.Id, secondPosition, updateStatus: false);
+        var movedNode = Assert.IsType<NodeViewModel>(editor.FindNode(source.Id));
+
+        Assert.True(result);
+        Assert.Equal(secondPosition.X, movedNode.X);
+        Assert.Equal(secondPosition.Y, movedNode.Y);
+        Assert.Equal(preservedStatus, editor.StatusMessage);
+    }
+
+    [Fact]
+    public void GraphEditorViewModel_MoveNode_WithMultiSelectionMovesOnlySelectedNodes()
     {
         var definitionId = new NodeDefinitionId("tests.editor.facade.layout-move-multi-selection");
         var editor = CreateEditorWithSharedDefinitionNodes(definitionId);
         var source = editor.Nodes[0];
         var target = editor.Nodes[1];
+        var unaffected = CreateNode("node-003", definitionId, threshold: 0.5, enabled: true, title: "Unaffected node");
         var sourceOrigin = new GraphPoint(source.X, source.Y);
         var targetOrigin = new GraphPoint(target.X, target.Y);
+        var unaffectedOrigin = new GraphPoint(unaffected.X, unaffected.Y);
+
+        unaffected.X = 720;
+        unaffected.Y = 420;
+        unaffectedOrigin = new GraphPoint(unaffected.X, unaffected.Y);
+        editor.Nodes.Add(unaffected);
 
         editor.SetSelection([source, target], source, status: null);
 
@@ -550,6 +578,8 @@ public sealed class GraphEditorFacadeRefactorTests
         Assert.Equal(sourceOrigin.Y + 18, source.Y);
         Assert.Equal(targetOrigin.X + 36, target.X);
         Assert.Equal(targetOrigin.Y + 18, target.Y);
+        Assert.Equal(unaffectedOrigin.X, unaffected.X);
+        Assert.Equal(unaffectedOrigin.Y, unaffected.Y);
     }
 
     [Fact]
