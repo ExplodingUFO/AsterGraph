@@ -377,6 +377,8 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     /// <summary>
     /// 获取与当前兼容立面共享的运行时会话。
+    /// 该会话通过 adapter-backed kernel 路径暴露运行时能力，
+    /// 不会把 <see cref="GraphEditorViewModel"/> 重新当作 canonical runtime state owner。
     /// </summary>
     public IGraphEditorSession Session { get; }
 

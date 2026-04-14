@@ -207,6 +207,35 @@ public sealed class GraphEditorProofRingTests
     }
 
     [Fact]
+#pragma warning disable CS0618
+    public void RetainedCompatibilityProof_ProjectsCompatibleTargetsBackToRetainedFacadeInstances()
+    {
+        var legacyEditor = new GraphEditorViewModel(
+            CreateDocument(),
+            CreateCatalog(),
+            new ExactCompatibilityService());
+        var factoryEditor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
+        {
+            Document = CreateDocument(),
+            NodeCatalog = CreateCatalog(),
+            CompatibilityService = new ExactCompatibilityService(),
+        });
+
+        var legacyTarget = Assert.Single(legacyEditor.GetCompatibleTargets(SourceNodeId, SourcePortId));
+        var factoryTarget = Assert.Single(factoryEditor.GetCompatibleTargets(SourceNodeId, SourcePortId));
+        var legacyRetainedNode = Assert.IsType<NodeViewModel>(legacyEditor.FindNode(TargetNodeId));
+        var factoryRetainedNode = Assert.IsType<NodeViewModel>(factoryEditor.FindNode(TargetNodeId));
+        var legacyRetainedPort = Assert.IsType<PortViewModel>(legacyRetainedNode.GetPort(TargetPortId));
+        var factoryRetainedPort = Assert.IsType<PortViewModel>(factoryRetainedNode.GetPort(TargetPortId));
+
+        Assert.Same(legacyRetainedNode, legacyTarget.Node);
+        Assert.Same(factoryRetainedNode, factoryTarget.Node);
+        Assert.Same(legacyRetainedPort, legacyTarget.Port);
+        Assert.Same(factoryRetainedPort, factoryTarget.Port);
+    }
+#pragma warning restore CS0618
+
+    [Fact]
     public void RuntimeAndRetainedProof_StayAlignedOnSharedDescriptorSignatures()
     {
         var legacyEditor = new GraphEditorViewModel(

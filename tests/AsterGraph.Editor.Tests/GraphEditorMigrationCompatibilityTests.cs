@@ -166,6 +166,47 @@ public sealed class GraphEditorMigrationCompatibilityTests
     }
 #pragma warning restore CS0618
 
+    [Fact]
+#pragma warning disable CS0618
+    public void RetainedCompatibilityFacade_RemainsLocalizedWhileSessionHostStaysAdapterBacked()
+    {
+        var harness = CreateHarness();
+        var legacyEditor = CreateLegacyEditor(harness);
+        var factoryEditor = CreateFactoryEditor(harness);
+        var legacyHost = legacyEditor.Session.GetType()
+            .GetField("_host", BindingFlags.Instance | BindingFlags.NonPublic)!
+            .GetValue(legacyEditor.Session);
+        var factoryHost = factoryEditor.Session.GetType()
+            .GetField("_host", BindingFlags.Instance | BindingFlags.NonPublic)!
+            .GetValue(factoryEditor.Session);
+        var legacyFacadeTarget = Assert.Single(legacyEditor.GetCompatibleTargets(SourceNodeId, SourcePortId));
+        var factoryFacadeTarget = Assert.Single(factoryEditor.GetCompatibleTargets(SourceNodeId, SourcePortId));
+        var legacySessionTarget = Assert.Single(legacyEditor.Session.Queries.GetCompatibleTargets(SourceNodeId, SourcePortId));
+        var factorySessionTarget = Assert.Single(factoryEditor.Session.Queries.GetCompatibleTargets(SourceNodeId, SourcePortId));
+        var legacyRetainedNode = Assert.IsType<NodeViewModel>(legacyEditor.FindNode(TargetNodeId));
+        var factoryRetainedNode = Assert.IsType<NodeViewModel>(factoryEditor.FindNode(TargetNodeId));
+        var legacyRetainedPort = Assert.IsType<PortViewModel>(legacyRetainedNode.GetPort(TargetPortId));
+        var factoryRetainedPort = Assert.IsType<PortViewModel>(factoryRetainedNode.GetPort(TargetPortId));
+
+        Assert.NotNull(legacyHost);
+        Assert.NotNull(factoryHost);
+        Assert.IsType<GraphEditorViewModelKernelAdapter>(legacyHost);
+        Assert.IsType<GraphEditorViewModelKernelAdapter>(factoryHost);
+        Assert.Null(legacyHost!.GetType().GetMethod(nameof(IGraphEditorQueries.GetCompatibleTargets), [typeof(string), typeof(string)]));
+        Assert.Null(factoryHost!.GetType().GetMethod(nameof(IGraphEditorQueries.GetCompatibleTargets), [typeof(string), typeof(string)]));
+        Assert.Same(legacyRetainedNode, legacyFacadeTarget.Node);
+        Assert.Same(factoryRetainedNode, factoryFacadeTarget.Node);
+        Assert.Same(legacyRetainedPort, legacyFacadeTarget.Port);
+        Assert.Same(factoryRetainedPort, factoryFacadeTarget.Port);
+        Assert.NotSame(legacyRetainedNode, legacySessionTarget.Node);
+        Assert.NotSame(factoryRetainedNode, factorySessionTarget.Node);
+        Assert.Equal(legacyFacadeTarget.Node.Id, legacySessionTarget.Node.Id);
+        Assert.Equal(factoryFacadeTarget.Node.Id, factorySessionTarget.Node.Id);
+        Assert.Equal(legacyFacadeTarget.Port.Id, legacySessionTarget.Port.Id);
+        Assert.Equal(factoryFacadeTarget.Port.Id, factorySessionTarget.Port.Id);
+    }
+#pragma warning restore CS0618
+
     [AvaloniaFact]
     public void GraphEditorView_RemainsCompatibilityFacadeDuringStagedMigration()
     {
