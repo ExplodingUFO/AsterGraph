@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+  <DataCollectionRunSettings>
+    <DataCollectors>
+      <DataCollector friendlyName="XPlat Code Coverage">
+        <Configuration>
+          <Format>cobertura</Format>
+          <Include>[AsterGraph.Abstractions*]*,[AsterGraph.Core*]*,[AsterGraph.Editor*]*,[AsterGraph.Avalonia*]*</Include>
+          <Exclude>[xunit*]*,[*.Tests]*,[AsterGraph.TestPlugins*]*,[AsterGraph.Demo*]*</Exclude>
+          <ExcludeByAttribute>CompilerGeneratedAttribute,ExcludeFromCodeCoverageAttribute,GeneratedCodeAttribute,ObsoleteAttribute</ExcludeByAttribute>
+          <IncludeTestAssembly>false</IncludeTestAssembly>
+          <SingleHit>false</SingleHit>
+          <SkipAutoProps>true</SkipAutoProps>
+          <UseSourceLink>false</UseSourceLink>
+        </Configuration>
+      </DataCollector>
+    </DataCollectors>
+  </DataCollectionRunSettings>
+</RunSettings>

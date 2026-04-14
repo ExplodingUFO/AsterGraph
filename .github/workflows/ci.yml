@@ -31,3 +31,24 @@ jobs:
       - name: Run repo validation lane
         shell: pwsh
         run: .\eng\ci.ps1 -Lane all -Framework ${{ matrix.framework }} -Configuration Release
+
+  release-validation:
+    name: release-validation
+    runs-on: windows-latest
+    needs: quality-gates
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Run release validation lane
+        shell: pwsh
+        run: .\eng\ci.ps1 -Lane release -Framework all -Configuration Release

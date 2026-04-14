@@ -18,4 +18,9 @@
     <!-- Keep generated audit snapshots out of SDK compile globs so verification builds stay deterministic. -->
     <DefaultItemExcludes>$(DefaultItemExcludes);$(MSBuildProjectDirectory)\artifacts\**</DefaultItemExcludes>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(IsPackable)' == 'true'">
+    <!-- Run SDK-integrated package validation for the publishable library surface during pack. -->
+    <EnablePackageValidation>true</EnablePackageValidation>
+  </PropertyGroup>
 </Project>
