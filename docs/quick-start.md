@@ -106,6 +106,10 @@ Route guide:
  - see `tools/AsterGraph.PackageSmoke` for the machine-checkable `PACKAGE_SMOKE_*` package-consumption markers
  - see `tools/AsterGraph.ScaleSmoke` for the large-graph scale/readiness markers
 
+## 5) Where Abstractions fits
+
+Use `AsterGraph.Abstractions` to define and distribute node contracts (`INodeDefinitionProvider`, `NodeDefinitionId`, related definition/identifier types) so host-side providers and libraries remain stable and UI-independent.
+
 ## 6) Proof surface and regression lanes
 
 The live proof surface now uses the dedicated tools:
@@ -129,7 +133,3 @@ dotnet test tests/AsterGraph.Demo.Tests/AsterGraph.Demo.Tests.csproj --nologo -v
 ```
 
 This split keeps sample-host behavior in `AsterGraph.Demo.Tests` separate from the core SDK regression lane.
-
-## 5) Where Abstractions fits
-
-Use `AsterGraph.Abstractions` to define and distribute node contracts (`INodeDefinitionProvider`, `NodeDefinitionId`, related definition/identifier types) so host-side providers and libraries remain stable and UI-independent.
