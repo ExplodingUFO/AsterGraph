@@ -252,7 +252,7 @@ The proof surface for this extension story is:
 
 ## Quick Start
 
-For first-time onboarding (package choice, private feed setup, install commands, and the minimum Avalonia host path), start with the [Quick Start guide](./docs/quick-start.md).
+For first-time onboarding (package choice, private feed setup, install commands, and the minimum Avalonia host path), start with the [canonical Quick Start route](./docs/quick-start.md#canonical-adoption-path).
 
 Build:
 
@@ -278,8 +278,14 @@ dotnet pack src/AsterGraph.Avalonia/AsterGraph.Avalonia.csproj -c Release -o art
 Release verification before publish:
 
 ```powershell
-# preferred phase-gate (build + split-lane regression + smoke-tool project validation/build wiring)
-# execute via the repository script entrypoint: eng/ci.ps1
+# preferred release gate (packs packages, runs PackageSmoke + ScaleSmoke, collects coverage, and runs package validation)
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framework all -Configuration Release
+```
+
+For faster local feedback before the full release gate:
+
+```powershell
+# build + split regression lanes without release-only pack/smoke/report steps
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane all -Framework all -Configuration Release
 ```
 
@@ -294,7 +300,7 @@ dotnet test tests/AsterGraph.Editor.Tests/AsterGraph.Editor.Tests.csproj --nolog
 dotnet test tests/AsterGraph.Demo.Tests/AsterGraph.Demo.Tests.csproj --nologo -v minimal
 ```
 
-Run the smoke tools separately when you need executable proof:
+Run the smoke tools separately only when you need their raw proof markers while debugging:
 
 ```powershell
 # execute PackageSmoke against local packages (different restore path than the CI build step above)

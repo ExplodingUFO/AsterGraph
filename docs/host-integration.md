@@ -96,16 +96,23 @@ If push fails with authentication or permission errors (401/403), refresh source
 
 ## Release Verification
 
-Before pushing packages, verify both the packed-consumer path and the two regression lanes through the phase-gate script.
+Before pushing packages, run the release-validation lane through the repo-local script entrypoint.
 
 Recommended local verification sequence:
 
 ```powershell
-# 1) script-first full gate (build + split-lane tests + smoke-tool project build wiring) via `eng/ci.ps1`
+# 1) script-first release gate: pack + PackageSmoke + ScaleSmoke + coverage + package validation
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framework all -Configuration Release
+```
+
+For shorter build/test feedback before the full release gate:
+
+```powershell
+# build + split regression lanes without release-only pack/smoke/report steps
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane all -Framework all -Configuration Release
 ```
 
-For lane-aware diagnostics or shorter feedback, run lanes directly:
+For lane-aware diagnostics, run lanes directly:
 
 ```powershell
 # core SDK regression lane
@@ -116,7 +123,7 @@ dotnet test tests/AsterGraph.Editor.Tests/AsterGraph.Editor.Tests.csproj --nolog
 dotnet test tests/AsterGraph.Demo.Tests/AsterGraph.Demo.Tests.csproj --nologo -v minimal
 ```
 
-Run the live proof tools as a separate step:
+Run the live proof tools separately only when you need their raw markers while debugging:
 
 ```powershell
 dotnet run --project tools/AsterGraph.PackageSmoke/AsterGraph.PackageSmoke.csproj -p:UsePackedAsterGraphPackages=true --nologo

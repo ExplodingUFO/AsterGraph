@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.5
 milestone_name: Runtime Boundary Cleanup and Quality Gates
-status: Ready to execute
-stopped_at: Phase 29 planned
-last_updated: "2026-04-14T13:01:50.775Z"
+status: Milestone complete
+stopped_at: Phase 29 complete
+last_updated: "2026-04-14T13:05:30.608Z"
 progress:
   total_phases: 4
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 12
-  completed_plans: 11
+  completed_plans: 12
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-04-14)
 
 **Core value:** Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
-**Current focus:** Phase 29 — release-validation-and-canonical-adoption-path
+**Current focus:** Milestone archive and next-milestone framing
 
 ## Current Position
 
-Phase: 29 (release-validation-and-canonical-adoption-path) — EXECUTING
-Plan: 3 of 3
+Phase: 29 (release-validation-and-canonical-adoption-path) — COMPLETE
+Plan: 3 of 3 complete
 
 ## Accumulated Context
 
@@ -52,10 +52,8 @@ None captured yet.
 
 ### Blockers/Concerns
 
-- `MILESTONES.md` still stops at v1.3 even though v1.4 execution is complete; archive/history cleanup is now part of the v1.5 proof/doc alignment scope.
-- `eng/ci.ps1` now gives one accurate repo-local build/test entry point, but release-grade package smoke execution, coverage/reporting, and public API/package compatibility are still not automated.
-- Hosts still do not have one short synchronized adoption guide that covers runtime-only, shipped-UI, and retained-facade migration decisions from a single entry point.
-- The known `STATE_HISTORY_OK` mismatch remains a pre-existing baseline issue if v1.5 touches history/save semantics.
+- `MILESTONES.md` still stops at v1.3 even though v1.4 and v1.5 execution are complete; archive/history cleanup is the remaining milestone-maintenance task.
+- The known `STATE_HISTORY_OK` mismatch remains a pre-existing baseline issue if future work touches history/save semantics.
 
 ### Quick Tasks Completed
 
@@ -68,5 +66,5 @@ None captured yet.
 ## Session Continuity
 
 Last session: 2026-04-14T20:20:09.9120467+08:00
-Stopped at: Phase 29 planned
-Resume file: .planning/phases/29-release-validation-and-canonical-adoption-path/29-01-PLAN.md
+Stopped at: Phase 29 complete
+Resume file: .planning/ROADMAP.md

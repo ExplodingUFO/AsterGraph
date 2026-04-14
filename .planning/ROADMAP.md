@@ -2,7 +2,7 @@
 
 ## Milestones
 
-- 🚧 **v1.5 Runtime Boundary Cleanup and Quality Gates** - Phases 26-29 planned
+- 🚧 **v1.5 Runtime Boundary Cleanup and Quality Gates** - Phases 26-29 complete, ready to archive
 - 🚧 **v1.4 Plugin Loading and Automation Execution** - Phases 22-25 complete, ready to archive
 - ✅ **[v1.3 Demo Showcase](./milestones/v1.3-ROADMAP.md)** - Phases 19-21, shipped 2026-04-08
 - ✅ **[v1.2 Kernel Extraction, Capability Contracts, and Plugin Readiness](./milestones/v1.2-ROADMAP.md)** - Phases 13-18, shipped 2026-04-08
@@ -11,9 +11,9 @@
 
 ## Overview
 
-The kernel-first runtime, descriptor contracts, graph-first demo showcase, plugin loading, automation execution, tracked repo-level validation baseline, and proof-surface alignment have all shipped. The highest remaining risk is now release-readiness and adoption-path clarity: release-grade checks such as package smoke execution gating, coverage/reporting, and public API/package compatibility are still staged work, and hosts still need one shorter synchronized decision path for runtime-only, default UI, and migration scenarios.
+The kernel-first runtime, descriptor contracts, graph-first demo showcase, plugin loading, automation execution, tracked repo-level validation baseline, proof-surface alignment, release-validation lane, and canonical host-adoption path have all shipped. The v1.5 execution work is complete; the remaining milestone task is archive/history follow-through rather than another delivery phase.
 
-This milestone turns the v1.4 baseline into a more durable SDK release posture. The work first tightened the canonical runtime boundary, then established repo-level validation gates, then aligned docs/proof/test lanes with the real tree, and now closes the loop with automated release validation and a shorter canonical host-adoption path.
+This milestone turned the v1.4 baseline into a more durable SDK release posture. The work first tightened the canonical runtime boundary, then established repo-level validation gates, then aligned docs/proof/test lanes with the real tree, and finally closed the loop with automated release validation and a shorter canonical host-adoption path.
 
 ## Milestone
 
@@ -25,7 +25,7 @@ This milestone turns the v1.4 baseline into a more durable SDK release posture. 
 - [x] **Phase 26: Runtime Boundary Canonicalization** - Tighten the retained compatibility facade around the kernel/session-owned runtime and continue retiring MVVM-shaped runtime shims. (completed 2026-04-14)
 - [x] **Phase 27: Repo Quality Gates And Target Matrix** - Add tracked repo-level quality and CI baseline across the supported package and target-framework surface. (completed 2026-04-14)
 - [x] **Phase 28: Proof Surface And Regression Lane Alignment** - Make docs, solution membership, proof tools, and test lanes describe the same verification surface. (completed 2026-04-14)
-- [ ] **Phase 29: Release Validation And Canonical Adoption Path** - Close the milestone with automated release checks and one synchronized canonical integration path for hosts.
+- [x] **Phase 29: Release Validation And Canonical Adoption Path** - Close the milestone with automated release checks and one synchronized canonical integration path for hosts. (completed 2026-04-14)
 
 ## Phase Details
 
@@ -76,8 +76,8 @@ This milestone turns the v1.4 baseline into a more durable SDK release posture. 
 | 26. Runtime Boundary Canonicalization | BOUND-01, BOUND-02, BOUND-03 | Complete |
 | 27. Repo Quality Gates And Target Matrix | QUAL-01, QUAL-02 | Complete |
 | 28. Proof Surface And Regression Lane Alignment | PROOF-01, PROOF-02 | Complete |
-| 29. Release Validation And Canonical Adoption Path | QUAL-03, PROOF-03 | Pending |
+| 29. Release Validation And Canonical Adoption Path | QUAL-03, PROOF-03 | Complete |
 
 ## Next Action
 
-**Phase 29: Release Validation And Canonical Adoption Path** is the next execution target.
+**Next action:** archive the completed v1.5 milestone and record its shipped history.

@@ -132,14 +132,20 @@ The live proof surface now uses the dedicated tools:
 - `tools/AsterGraph.PackageSmoke`
 - `tools/AsterGraph.ScaleSmoke`
 
-Validate split-regression/build gates through the repository CI entrypoint first:
+Validate the full release surface through the repository entrypoint first:
 
 ```powershell
-# validate with the repository entrypoint in eng/ci.ps1
+# packs packages, runs PackageSmoke + ScaleSmoke, collects coverage, and runs package validation
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framework all -Configuration Release
+```
+
+For a faster build/test-only loop before the release gate:
+
+```powershell
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane all -Framework all -Configuration Release
 ```
 
-Run the smoke tools separately for executable proof:
+Run the smoke tools separately only when you want their raw marker output:
 
 ```powershell
 dotnet run --project tools/AsterGraph.PackageSmoke/AsterGraph.PackageSmoke.csproj -p:UsePackedAsterGraphPackages=true --nologo

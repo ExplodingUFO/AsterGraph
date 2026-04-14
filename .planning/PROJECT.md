@@ -27,7 +27,7 @@ Hosts can integrate only the graph-editor pieces they need, replace default UI a
 - Phase 26 completed the runtime-boundary cleanup for compatible-target discovery: canonical runtime queries now stay on DTO/snapshot contracts, while retained MVVM-shaped compatible-target APIs are explicitly isolated to the staged migration window.
 - Phase 27 completed the repo-quality baseline: the repo now carries tracked `.editorconfig`, `Directory.Packages.props`, deterministic `NuGet.config`, a shared `eng/ci.ps1` validation script, and checked-in GitHub Actions CI for explicit `net8.0` / `net9.0` lanes.
 - Phase 28 completed the proof-surface alignment: `AsterGraph.ScaleSmoke` is part of the tracked solution surface, stale `HostSample` claims are removed from current planning/codebase maps, public docs now describe the live `PackageSmoke` / `ScaleSmoke` / sample-only `AsterGraph.Demo` proof surface, and `AsterGraph.Demo.Tests` now carries the demo/sample regression lane separate from the core SDK regression lane.
-- The remaining v1.5 gap is release-grade validation and adoption clarity: `eng/ci.ps1` proves build/test wiring and smoke-tool project buildability today, but release automation still does not execute packed-package smoke, enforce coverage/reporting, or check public API/package compatibility, and hosts still need one shorter canonical adoption path.
+- Phase 29 completed the remaining v1.5 gap: `eng/ci.ps1 -Lane release` now packs the publishable packages, runs `PackageSmoke`, runs `ScaleSmoke`, collects checked-in coverage/reporting, and enforces SDK package validation, while `docs/quick-start.md` now carries the synchronized three-way canonical adoption path for runtime-only, shipped-UI, and retained-migration hosts.
 
 ## Requirements
 
@@ -66,8 +66,7 @@ Hosts can integrate only the graph-editor pieces they need, replace default UI a
 
 ### Active
 
-- [ ] Add release-grade package smoke execution gating, coverage/reporting, and public API/package compatibility checks without falling back to README-only manual verification.
-- [ ] Add one short synchronized host-adoption path that covers runtime-only, default shipped UI, and staged retained-facade migration scenarios.
+- None. Phase 29 closed the remaining v1.5 product gaps; the next step is milestone archive and next-milestone selection.
 
 ### Out of Scope
 
@@ -147,4 +146,4 @@ This document evolves at milestone boundaries.
 4. Reset active requirements so the next roadmap starts from the highest remaining product risk instead of stale execution context.
 
 ---
-*Last updated: 2026-04-14 after completing Phase 28*
+*Last updated: 2026-04-14 after completing Phase 29*

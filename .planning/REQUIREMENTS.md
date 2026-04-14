@@ -16,13 +16,13 @@
 
 - [x] **QUAL-01**: Contributors build and test the repo under one tracked source/package configuration baseline, including shared editor rules and centralized package version management
 - [x] **QUAL-02**: The supported package boundary is validated automatically for both `net8.0` and `net9.0` through checked-in CI or equivalent scripted automation
-- [ ] **QUAL-03**: Release validation automatically checks package smoke, coverage reporting or thresholds, and public API or package-compatibility regressions instead of relying mainly on manual README commands
+- [x] **QUAL-03**: Release validation automatically checks package smoke, coverage reporting or thresholds, and public API or package-compatibility regressions instead of relying mainly on manual README commands
 
 ### Docs, Proof, And Samples
 
 - [x] **PROOF-01**: README, planning docs, solution/project lists, and proof tooling reference the same current verification surface with no stale sample or tool claims
 - [x] **PROOF-02**: Core SDK regression coverage is distinguishable from demo/sample integration coverage so failures reveal whether the SDK boundary or the showcase host regressed
-- [ ] **PROOF-03**: Host can find a short canonical integration path for runtime-only, default UI, and migration scenarios from one synchronized doc or proof entry point
+- [x] **PROOF-03**: Host can find a short canonical integration path for runtime-only, default UI, and migration scenarios from one synchronized doc or proof entry point
 
 ## Future Requirements
 
@@ -51,10 +51,10 @@
 | BOUND-03 | Phase 26 | Complete |
 | QUAL-01 | Phase 27 | Complete |
 | QUAL-02 | Phase 27 | Complete |
-| QUAL-03 | Phase 29 | Pending |
+| QUAL-03 | Phase 29 | Complete |
 | PROOF-01 | Phase 28 | Complete |
 | PROOF-02 | Phase 28 | Complete |
-| PROOF-03 | Phase 29 | Pending |
+| PROOF-03 | Phase 29 | Complete |
 
 **Coverage:**
 - milestone requirements: 9 total
@@ -63,4 +63,4 @@
 
 ---
 *Requirements defined: 2026-04-14*
-*Last updated: 2026-04-14 after Phase 28 completion*
+*Last updated: 2026-04-14 after Phase 29 completion*
