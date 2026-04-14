@@ -1,10 +1,10 @@
 # Technology Stack
 
-**Analysis Date:** 2026-04-08
+**Analysis Date:** 2026-04-14
 
 ## Languages
 
-- C# is the primary implementation language across `src/AsterGraph.Abstractions`, `src/AsterGraph.Core`, `src/AsterGraph.Editor`, `src/AsterGraph.Avalonia`, `src/AsterGraph.Demo`, `tests/AsterGraph.Editor.Tests`, `tests/AsterGraph.Serialization.Tests`, `tools/AsterGraph.HostSample`, `tools/AsterGraph.PackageSmoke`, and `tools/AsterGraph.ScaleSmoke`.
+- C# is the primary implementation language across `src/AsterGraph.Abstractions`, `src/AsterGraph.Core`, `src/AsterGraph.Editor`, `src/AsterGraph.Avalonia`, `src/AsterGraph.Demo`, `tests/AsterGraph.Editor.Tests`, `tests/AsterGraph.Serialization.Tests`, `tools/AsterGraph.PackageSmoke`, and `tools/AsterGraph.ScaleSmoke`.
 - Avalonia XAML (`.axaml`) is used for desktop UI markup in `src/AsterGraph.Avalonia/Controls/GraphEditorView.axaml`, `src/AsterGraph.Avalonia/Controls/GraphInspectorView.axaml`, `src/AsterGraph.Avalonia/Controls/NodeCanvas.axaml`, `src/AsterGraph.Demo/App.axaml`, and `src/AsterGraph.Demo/Views/MainWindow.axaml`.
 - MSBuild XML drives the solution, package metadata, and project graph in `Directory.Build.props`, `avalonia-node-map.sln`, `avalonia-node-map.slnx`, and every `*.csproj` under `src/`, `tests/`, and `tools/`.
 - Markdown is used for public documentation and GSD artifacts in `README.md`, `docs/*.md`, and `.planning/**/*.md`.
@@ -16,7 +16,7 @@
 - The demo desktop app in `src/AsterGraph.Demo/AsterGraph.Demo.csproj` targets `net9.0`.
 - The main UI-heavy test project in `tests/AsterGraph.Editor.Tests/AsterGraph.Editor.Tests.csproj` targets `net9.0`.
 - The serialization regression project in `tests/AsterGraph.Serialization.Tests/AsterGraph.Serialization.Tests.csproj` targets `net8.0`.
-- The host/proof tools in `tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj`, `tools/AsterGraph.PackageSmoke/AsterGraph.PackageSmoke.csproj`, and `tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj` target `net8.0`.
+- The maintained proof tools in `tools/AsterGraph.PackageSmoke/AsterGraph.PackageSmoke.csproj` and `tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj` target `net8.0`.
 - Package restore and build run through the `dotnet` CLI and NuGet/MSBuild restore flow.
 - No `global.json`, `Directory.Packages.props`, or `packages.lock.json` is tracked at the repository root.
 
@@ -55,10 +55,10 @@
 
 - The primary shipped deliverables are the four NuGet packages under `src/AsterGraph.Abstractions`, `src/AsterGraph.Core`, `src/AsterGraph.Editor`, and `src/AsterGraph.Avalonia`.
 - Local package output is documented at `artifacts/packages` in `README.md`.
-- The only runnable UI application in-repo is the Avalonia desktop demo in `src/AsterGraph.Demo`.
+- The only runnable UI application in-repo is the sample-only Avalonia desktop demo in `src/AsterGraph.Demo`.
 - The repository has no server runtime, container target, database runtime, or cloud deployment manifests.
 - Runtime validation is split between `dotnet test`, `tools/AsterGraph.PackageSmoke`, and `tools/AsterGraph.ScaleSmoke`.
 
 ---
 
-*Stack analysis refreshed: 2026-04-08*
+*Stack analysis refreshed: 2026-04-14*

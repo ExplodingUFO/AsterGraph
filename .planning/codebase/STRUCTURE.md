@@ -1,6 +1,6 @@
 # Codebase Structure
 
-**Analysis Date:** 2026-04-08
+**Analysis Date:** 2026-04-14
 
 ## Repository Layout
 
@@ -8,7 +8,7 @@
 [project-root]/
 |- src/                 # publishable libraries plus demo app
 |- tests/               # xUnit regression projects
-|- tools/               # host sample and smoke/proof tools
+|- tools/               # proof tools and package-consumption utilities
 |- docs/                # host-facing guides
 |- .planning/           # GSD planning, roadmap, and codebase map artifacts
 |- artifacts/           # local pack outputs
@@ -67,11 +67,6 @@
 
 ## Tools And Proofs
 
-### `tools/AsterGraph.HostSample`
-
-- Purpose: reference host showing runtime-first and compatibility integrations.
-- Anchor file: `tools/AsterGraph.HostSample/Program.cs`.
-
 ### `tools/AsterGraph.PackageSmoke`
 
 - Purpose: validate public package boundaries and packed-package consumption.
@@ -86,7 +81,7 @@
 
 - Public integration docs live in `docs/host-integration.md`, `docs/quick-start.md`, `docs/interactions-and-shortcuts.md`, and `docs/node-presentation-guidelines.md`.
 - GSD state lives under `.planning/PROJECT.md`, `.planning/REQUIREMENTS.md`, `.planning/ROADMAP.md`, `.planning/STATE.md`, `.planning/phases/`, `.planning/research/`, and `.planning/codebase/`.
-- The current roadmap indicates Phase 13 complete and Phase 14 planned in `.planning/ROADMAP.md`.
+- `.planning/ROADMAP.md` currently tracks the active v1.5 milestone, with Phases 26-27 complete and Phases 28-29 still open.
 
 ## Key File Locations
 
@@ -95,7 +90,8 @@
 - `src/AsterGraph.Editor/Hosting/AsterGraphEditorFactory.cs`
 - `src/AsterGraph.Avalonia/Hosting/AsterGraphAvaloniaViewFactory.cs`
 - `src/AsterGraph.Demo/Program.cs`
-- `tools/AsterGraph.HostSample/Program.cs`
+- `tools/AsterGraph.PackageSmoke/Program.cs`
+- `tools/AsterGraph.ScaleSmoke/Program.cs`
 
 ### Runtime Hotspots
 
@@ -134,4 +130,4 @@
 
 ---
 
-*Structure analysis refreshed: 2026-04-08*
+*Structure analysis refreshed: 2026-04-14*

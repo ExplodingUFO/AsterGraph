@@ -1,6 +1,6 @@
 # Testing Patterns
 
-**Analysis Date:** 2026-04-08
+**Analysis Date:** 2026-04-14
 
 ## Test Frameworks
 
@@ -42,14 +42,14 @@
   - host-service overrides
   - menu/presentation replacement seams
   - legacy-vs-factory migration parity
+- `src/AsterGraph.Demo` remains a sample-only host rather than a supported package, and demo-focused suites such as `tests/AsterGraph.Editor.Tests/DemoMainWindowTests.cs`, `tests/AsterGraph.Editor.Tests/DemoHostMenuControlTests.cs`, and `tests/AsterGraph.Editor.Tests/GraphEditorDemoShellTests.cs` keep that composition path under regression coverage.
 - The repository does not contain browser automation, screenshot approval tests, or end-to-end desktop automation.
 
 ## Smoke And Proof Tools
 
 - `tools/AsterGraph.PackageSmoke/Program.cs` is a package-surface regression tool that exercises both legacy and factory/session paths.
-- `tools/AsterGraph.HostSample/Program.cs` is a runnable reference host rather than a formal test project, but it acts as a high-value integration proof.
 - `tools/AsterGraph.ScaleSmoke/Program.cs` emits repeatable `SCALE_*` markers for large-graph and runtime-state continuity checks.
-- These tools are part of the practical verification story even though they are not xUnit projects.
+- Together with the editor and serialization xUnit projects, these tools make up the maintained proof surface even though they are not formal test projects.
 
 ## Commands
 
@@ -80,4 +80,4 @@ dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj --
 
 ---
 
-*Testing analysis refreshed: 2026-04-08*
+*Testing analysis refreshed: 2026-04-14*
