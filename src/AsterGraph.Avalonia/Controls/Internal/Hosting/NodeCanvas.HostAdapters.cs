@@ -1,8 +1,11 @@
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
+using AsterGraph.Abstractions.Styling;
 using AsterGraph.Avalonia.Controls.Internal;
 using AsterGraph.Avalonia.Presentation;
 using AsterGraph.Core.Models;
+using AsterGraph.Editor.Configuration;
 using AsterGraph.Editor.ViewModels;
 
 namespace AsterGraph.Avalonia.Controls;
@@ -114,5 +117,49 @@ public partial class NodeCanvas
 
         public void UpdateNodeVisual(NodeViewModel node)
             => _owner.UpdateNodeVisual(node);
+    }
+
+    private sealed class NodeCanvasOverlayHost : INodeCanvasOverlayHost
+    {
+        private readonly NodeCanvas _owner;
+
+        public NodeCanvasOverlayHost(NodeCanvas owner)
+        {
+            _owner = owner ?? throw new ArgumentNullException(nameof(owner));
+        }
+
+        public GraphEditorStyleOptions StyleOptions => _owner.ViewModel?.StyleOptions ?? GraphEditorStyleOptions.Default;
+
+        public GraphEditorBehaviorOptions BehaviorOptions => _owner.ViewModel?.BehaviorOptions ?? GraphEditorBehaviorOptions.Default;
+
+        public double Zoom => _owner.ViewModel?.Zoom ?? 1;
+
+        public IReadOnlyList<NodeViewModel> Nodes => _owner.ViewModel?.Nodes ?? [];
+
+        public IReadOnlyList<NodeViewModel> SelectedNodes => _owner.ViewModel?.SelectedNodes ?? [];
+
+        public NodeViewModel? SelectedNode => _owner.ViewModel?.SelectedNode;
+
+        public Size Bounds => _owner.Bounds.Size;
+
+        public Border? SelectionAdorner => _owner._selectionAdorner;
+
+        public Border? VerticalGuideAdorner => _owner._verticalGuideAdorner;
+
+        public Border? HorizontalGuideAdorner => _owner._horizontalGuideAdorner;
+
+        public GraphPoint WorldToScreen(double x, double y)
+            => _owner.WorldToScreen(x, y);
+
+        public GraphPoint ScreenToWorld(GraphPoint point)
+            => _owner.ViewModel?.ScreenToWorld(point) ?? point;
+
+        public IReadOnlyList<NodeViewModel> GetNodesInRectangle(GraphPoint firstCorner, GraphPoint secondCorner)
+            => _owner.ViewModel?.GetNodesInRectangle(firstCorner, secondCorner) ?? [];
+
+        public NodeCanvasInteractionSession InteractionSession => _owner._interactionSession;
+
+        public void SetSelection(IReadOnlyList<NodeViewModel> nodes, NodeViewModel? primaryNode, string? status = null)
+            => _owner.ViewModel?.SetSelection(nodes, primaryNode, status);
     }
 }

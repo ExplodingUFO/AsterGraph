@@ -2,13 +2,10 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Markup.Xaml;
-using Avalonia.Media;
 using Avalonia.VisualTree;
-using AsterGraph.Abstractions.Styling;
 using AsterGraph.Avalonia.Controls.Internal;
 using AsterGraph.Avalonia.Menus;
 using AsterGraph.Avalonia.Presentation;
-using AsterGraph.Avalonia.Styling;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Geometry;
 using AsterGraph.Editor.Menus;
@@ -80,6 +77,7 @@ public partial class NodeCanvas : UserControl
     private readonly NodeCanvasContextMenuCoordinator _contextMenuCoordinator;
     private readonly NodeCanvasSceneHost _sceneHost;
     private readonly NodeCanvasViewModelObserver _viewModelObserver;
+    private readonly NodeCanvasOverlayCoordinator _overlayCoordinator;
     private bool _isAttachedToVisualTree;
 
     /// <summary>
@@ -92,6 +90,7 @@ public partial class NodeCanvas : UserControl
         _contextMenuCoordinator = new NodeCanvasContextMenuCoordinator(new NodeCanvasContextMenuHost(this), this);
         _sceneHost = new NodeCanvasSceneHost(new NodeCanvasSceneHostAdapter(this));
         _viewModelObserver = new NodeCanvasViewModelObserver(new NodeCanvasViewModelObserverHost(this));
+        _overlayCoordinator = new NodeCanvasOverlayCoordinator(new NodeCanvasOverlayHost(this));
 
         ContextRequested += HandleCanvasContextRequested;
         KeyDown += HandleCanvasKeyDown;
@@ -523,264 +522,28 @@ public partial class NodeCanvas : UserControl
                 ViewModel.NodeTemplates.Select(template => template.Definition).ToList());
 
     private void ApplySelectionAdornerStyle()
-    {
-        if (_selectionAdorner is null)
-        {
-            return;
-        }
-
-        var style = ViewModel?.StyleOptions.Canvas ?? GraphEditorStyleOptions.Default.Canvas;
-        _selectionAdorner.BorderBrush = BrushFactory.Solid(style.SelectionBorderHex);
-        _selectionAdorner.Background = BrushFactory.Solid(style.SelectionFillHex, style.SelectionFillOpacity);
-        _selectionAdorner.BorderThickness = new Thickness(style.SelectionBorderThickness);
-        _selectionAdorner.CornerRadius = new CornerRadius(style.SelectionCornerRadius);
-    }
+        => _overlayCoordinator.ApplySelectionAdornerStyle();
 
     private void ApplyGuideAdornerStyle()
-    {
-        var style = ViewModel?.StyleOptions.Canvas ?? GraphEditorStyleOptions.Default.Canvas;
-        if (_verticalGuideAdorner is not null)
-        {
-            _verticalGuideAdorner.Background = BrushFactory.Solid(style.GuideHex, style.GuideOpacity);
-            _verticalGuideAdorner.Width = style.GuideThickness;
-        }
-
-        if (_horizontalGuideAdorner is not null)
-        {
-            _horizontalGuideAdorner.Background = BrushFactory.Solid(style.GuideHex, style.GuideOpacity);
-            _horizontalGuideAdorner.Height = style.GuideThickness;
-        }
-    }
+        => _overlayCoordinator.ApplyGuideAdornerStyle();
 
     private void UpdateMarqueeSelection(Point currentScreenPosition, bool finalize)
-    {
-        if (ViewModel is null
-            || _overlayLayer is null
-            || _selectionAdorner is null
-            || _interactionSession.SelectionStartScreenPosition is null)
-        {
-            return;
-        }
-
-        var start = _interactionSession.SelectionStartScreenPosition.Value;
-        var left = Math.Min(start.X, currentScreenPosition.X);
-        var top = Math.Min(start.Y, currentScreenPosition.Y);
-        var width = Math.Abs(currentScreenPosition.X - start.X);
-        var height = Math.Abs(currentScreenPosition.Y - start.Y);
-
-        _selectionAdorner.IsVisible = true;
-        _selectionAdorner.Width = width;
-        _selectionAdorner.Height = height;
-        Canvas.SetLeft(_selectionAdorner, left);
-        Canvas.SetTop(_selectionAdorner, top);
-
-        var worldStart = ViewModel.ScreenToWorld(new GraphPoint(start.X, start.Y));
-        var worldEnd = ViewModel.ScreenToWorld(new GraphPoint(currentScreenPosition.X, currentScreenPosition.Y));
-        var hitNodes = ViewModel.GetNodesInRectangle(worldStart, worldEnd).ToList();
-        var nodes = ApplySelectionModifiers(hitNodes);
-        var primaryNode = nodes.LastOrDefault();
-
-        if (SelectionsMatchCurrentState(nodes, primaryNode))
-        {
-            return;
-        }
-
-        ViewModel.SetSelection(
-            nodes,
-            primaryNode,
-            finalize
-                ? nodes.Count switch
-                {
-                    0 => "No nodes inside marquee selection.",
-                    1 => $"Selected {nodes[0].Title}.",
-                    _ => $"Selected {nodes.Count} nodes.",
-                }
-                : null);
-    }
-
-    private bool SelectionsMatchCurrentState(IReadOnlyList<NodeViewModel> nodes, NodeViewModel? primaryNode)
-    {
-        if (ViewModel is null)
-        {
-            return false;
-        }
-
-        if (!ReferenceEquals(ViewModel.SelectedNode, primaryNode))
-        {
-            return false;
-        }
-
-        if (ViewModel.SelectedNodes.Count != nodes.Count)
-        {
-            return false;
-        }
-
-        for (var index = 0; index < nodes.Count; index++)
-        {
-            if (!ReferenceEquals(ViewModel.SelectedNodes[index], nodes[index]))
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
+        => _overlayCoordinator.UpdateMarqueeSelection(currentScreenPosition, finalize);
 
     private void HideSelectionAdorner()
-    {
-        if (_selectionAdorner is null)
-        {
-            return;
-        }
-
-        _selectionAdorner.IsVisible = false;
-        _selectionAdorner.Width = 0;
-        _selectionAdorner.Height = 0;
-    }
-
-    private IReadOnlyList<NodeViewModel> ApplySelectionModifiers(IReadOnlyList<NodeViewModel> hitNodes)
-    {
-        if (ViewModel is null)
-        {
-            return hitNodes;
-        }
-
-        if (_interactionSession.SelectionModifiers.HasFlag(KeyModifiers.Control))
-        {
-            var toggled = _interactionSession.SelectionBaselineNodes.ToList();
-            foreach (var node in hitNodes)
-            {
-                if (!toggled.Remove(node))
-                {
-                    toggled.Add(node);
-                }
-            }
-
-            return toggled;
-        }
-
-        if (_interactionSession.SelectionModifiers.HasFlag(KeyModifiers.Shift))
-        {
-            return _interactionSession.SelectionBaselineNodes
-                .Concat(hitNodes)
-                .Distinct()
-                .ToList();
-        }
-
-        return hitNodes;
-    }
+        => _overlayCoordinator.HideSelectionAdorner();
 
     private GraphPoint ApplyDragAssist(NodeCanvasDragSession dragSession, double deltaX, double deltaY)
-    {
-        if (ViewModel is null)
-        {
-            return new GraphPoint(deltaX, deltaY);
-        }
-
-        var style = ViewModel.StyleOptions.Canvas;
-        var behavior = ViewModel.BehaviorOptions.DragAssist;
-        HideGuideAdorners();
-
-        if (!behavior.EnableGridSnapping && !behavior.EnableAlignmentGuides)
-        {
-            return new GraphPoint(deltaX, deltaY);
-        }
-
-        var tolerance = behavior.SnapTolerance / Math.Max(ViewModel.Zoom, 0.001);
-        IEnumerable<NodeBounds> candidateBounds = [];
-        if (behavior.EnableAlignmentGuides)
-        {
-            var movingNodeIds = dragSession.Nodes.Select(node => node.Id).ToHashSet(StringComparer.Ordinal);
-            candidateBounds = ViewModel.Nodes
-                .Where(node => !movingNodeIds.Contains(node.Id))
-                .Select(node => new NodeBounds(node.X, node.Y, node.Width, node.Height));
-        }
-
-        var result = NodeCanvasDragAssistCalculator.Calculate(
-            dragSession.OriginBounds,
-            deltaX,
-            deltaY,
-            candidateBounds,
-            behavior.EnableGridSnapping,
-            behavior.EnableAlignmentGuides,
-            style.PrimaryGridSpacing,
-            tolerance);
-
-        ShowGuideAdorners(result.GuideWorldX, result.GuideWorldY);
-        return result.AdjustedDelta;
-    }
-
-    private NodeBounds GetSelectionBounds(IReadOnlyList<NodeViewModel> nodes)
-    {
-        var left = nodes.Min(node => node.X);
-        var top = nodes.Min(node => node.Y);
-        var right = nodes.Max(node => node.X + node.Width);
-        var bottom = nodes.Max(node => node.Y + node.Height);
-        return new NodeBounds(left, top, right - left, bottom - top);
-    }
+        => _overlayCoordinator.ApplyDragAssist(dragSession, deltaX, deltaY);
 
     private NodeCanvasDragSession CreateDragSession(IReadOnlyList<NodeViewModel> nodes)
-    {
-        var originPositions = nodes.ToDictionary(
-            node => node.Id,
-            node => new GraphPoint(node.X, node.Y),
-            StringComparer.Ordinal);
-
-        return new NodeCanvasDragSession(nodes, originPositions, GetSelectionBounds(nodes));
-    }
+        => _overlayCoordinator.CreateDragSession(nodes);
 
     private void ShowGuideAdorners(double? worldX, double? worldY)
-    {
-        if (ViewModel is null || _overlayLayer is null)
-        {
-            return;
-        }
-
-        if (_verticalGuideAdorner is not null)
-        {
-            if (worldX is double x)
-            {
-                var screenX = WorldToScreen(x, 0).X;
-                _verticalGuideAdorner.IsVisible = true;
-                _verticalGuideAdorner.Height = Bounds.Height;
-                Canvas.SetLeft(_verticalGuideAdorner, screenX - (_verticalGuideAdorner.Width / 2));
-                Canvas.SetTop(_verticalGuideAdorner, 0);
-            }
-            else
-            {
-                _verticalGuideAdorner.IsVisible = false;
-            }
-        }
-
-        if (_horizontalGuideAdorner is not null)
-        {
-            if (worldY is double y)
-            {
-                var screenY = WorldToScreen(0, y).Y;
-                _horizontalGuideAdorner.IsVisible = true;
-                _horizontalGuideAdorner.Width = Bounds.Width;
-                Canvas.SetLeft(_horizontalGuideAdorner, 0);
-                Canvas.SetTop(_horizontalGuideAdorner, screenY - (_horizontalGuideAdorner.Height / 2));
-            }
-            else
-            {
-                _horizontalGuideAdorner.IsVisible = false;
-            }
-        }
-    }
+        => _overlayCoordinator.ShowGuideAdorners(worldX, worldY);
 
     private void HideGuideAdorners()
-    {
-        if (_verticalGuideAdorner is not null)
-        {
-            _verticalGuideAdorner.IsVisible = false;
-        }
-
-        if (_horizontalGuideAdorner is not null)
-        {
-            _horizontalGuideAdorner.IsVisible = false;
-        }
-    }
+        => _overlayCoordinator.HideGuideAdorners();
 
     private GraphPoint WorldToScreen(double x, double y)
         => ViewportMath.WorldToScreen(
