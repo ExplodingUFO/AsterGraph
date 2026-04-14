@@ -51,6 +51,16 @@ public sealed class GraphEditorFacadeRefactorTests
     }
 
     [Fact]
+    public void EditorAssembly_ContainsDedicatedKernelProjectionHost()
+    {
+        var hostType = typeof(GraphEditorViewModel).GetNestedType(
+            "GraphEditorViewModelKernelProjectionHost",
+            System.Reflection.BindingFlags.NonPublic);
+
+        Assert.NotNull(hostType);
+    }
+
+    [Fact]
     public void EditorAssembly_ContainsDedicatedSelectionCoordinatorHost()
     {
         var hostType = typeof(GraphEditorViewModel).GetNestedType(
@@ -236,6 +246,17 @@ public sealed class GraphEditorFacadeRefactorTests
         Assert.DoesNotContain(
             implementedInterfaces,
             iface => iface.FullName == "AsterGraph.Editor.Services.IGraphEditorSelectionProjectionApplierHost");
+    }
+
+    [Fact]
+    public void GraphEditorViewModel_DoesNotImplementKernelProjectionHostInterface()
+    {
+        var viewModelType = typeof(GraphEditorViewModel);
+        var implementedInterfaces = viewModelType.GetInterfaces();
+
+        Assert.DoesNotContain(
+            implementedInterfaces,
+            iface => iface.FullName == "AsterGraph.Editor.Services.IGraphEditorKernelProjectionHost");
     }
 
     [Fact]

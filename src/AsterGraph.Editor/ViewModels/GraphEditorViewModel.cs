@@ -38,7 +38,7 @@ namespace AsterGraph.Editor.ViewModels;
 /// 而自定义 UI 宿主应优先考虑 <see cref="AsterGraphEditorFactory.CreateSession(AsterGraphEditorOptions)"/>。
 /// 本类型在当前迁移窗口内仍然受支持，但不应再被视为新的首选组合根。
 /// </remarks>
-public sealed partial class GraphEditorViewModel : ObservableObject, IGraphContextMenuHost, GraphEditorViewModel.IGraphEditorCompatibilityCommandHost, GraphEditorViewModel.IGraphEditorFragmentCommandHost, IGraphEditorKernelProjectionHost, IGraphEditorHistoryStateHost
+public sealed partial class GraphEditorViewModel : ObservableObject, IGraphContextMenuHost, GraphEditorViewModel.IGraphEditorCompatibilityCommandHost, GraphEditorViewModel.IGraphEditorFragmentCommandHost, IGraphEditorHistoryStateHost
 {
     private const double DefaultZoom = 0.88;
     private const double DefaultPanX = 110;
@@ -97,6 +97,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     private readonly GraphEditorHistoryService _historyService;
     private readonly GraphEditorDocumentProjectionApplier _documentProjectionApplier;
     private readonly GraphEditorSelectionProjection _selectionProjection;
+    private readonly GraphEditorViewModelKernelProjectionHost _kernelProjectionHost;
     private readonly GraphEditorViewModelSelectionProjectionApplierHost _selectionProjectionApplierHost;
     private readonly GraphEditorKernelProjectionApplier _kernelProjectionApplier;
     private readonly GraphEditorHistoryStateCoordinator _historyStateCoordinator;
@@ -201,7 +202,8 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         _selectionProjection = new GraphEditorSelectionProjection(
             LocalizeText,
             (key, fallback, arguments) => LocalizeFormat(key, fallback, arguments));
-        _kernelProjectionApplier = new GraphEditorKernelProjectionApplier(this);
+        _kernelProjectionHost = new GraphEditorViewModelKernelProjectionHost(this);
+        _kernelProjectionApplier = new GraphEditorKernelProjectionApplier(_kernelProjectionHost);
         _historyStateCoordinator = new GraphEditorHistoryStateCoordinator(this, _historyService);
         _selectionCoordinatorHost = new GraphEditorViewModelSelectionCoordinatorHost(this);
         _selectionCoordinator = new GraphEditorSelectionCoordinator(_selectionCoordinatorHost);
@@ -773,48 +775,6 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
                 path,
                 fragment.Nodes.Count,
                 fragment.Connections.Count));
-
-    void IGraphEditorKernelProjectionHost.RunInKernelProjectionScope(Action action)
-    {
-        ArgumentNullException.ThrowIfNull(action);
-
-        _isApplyingKernelProjection = true;
-        try
-        {
-            action();
-        }
-        finally
-        {
-            _isApplyingKernelProjection = false;
-        }
-    }
-
-    void IGraphEditorKernelProjectionHost.ApplyKernelDocumentCore(GraphDocument document, string status, bool markClean)
-        => LoadDocument(document, status, markClean);
-
-    void IGraphEditorKernelProjectionHost.ApplyKernelSelectionCore(IReadOnlyList<NodeViewModel> nodes, NodeViewModel? primaryNode)
-        => SetSelectionCore(nodes, primaryNode);
-
-    void IGraphEditorKernelProjectionHost.ApplyKernelViewportCore(GraphEditorViewportSnapshot snapshot)
-    {
-        _viewportWidth = snapshot.ViewportWidth;
-        _viewportHeight = snapshot.ViewportHeight;
-        Zoom = snapshot.Zoom;
-        PanX = snapshot.PanX;
-        PanY = snapshot.PanY;
-        FitViewCommand.NotifyCanExecuteChanged();
-        RaiseComputedPropertyChanges();
-        NotifyViewportChanged();
-    }
-
-    void IGraphEditorKernelProjectionHost.ApplyKernelPendingConnectionCore(NodeViewModel? pendingNode, PortViewModel? pendingPort)
-    {
-        PendingSourceNode = pendingNode;
-        PendingSourcePort = pendingPort;
-    }
-
-    NodeViewModel? IGraphEditorKernelProjectionHost.FindNode(string nodeId)
-        => FindNode(nodeId);
 
     IReadOnlyList<NodeViewModel> IGraphEditorHistoryStateHost.SelectedNodes => SelectedNodes;
 
