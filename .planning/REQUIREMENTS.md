@@ -46,21 +46,21 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| BOUND-01 | Pending roadmap | Pending |
-| BOUND-02 | Pending roadmap | Pending |
-| BOUND-03 | Pending roadmap | Pending |
-| QUAL-01 | Pending roadmap | Pending |
-| QUAL-02 | Pending roadmap | Pending |
-| QUAL-03 | Pending roadmap | Pending |
-| PROOF-01 | Pending roadmap | Pending |
-| PROOF-02 | Pending roadmap | Pending |
-| PROOF-03 | Pending roadmap | Pending |
+| BOUND-01 | Phase 26 | Pending |
+| BOUND-02 | Phase 26 | Pending |
+| BOUND-03 | Phase 26 | Pending |
+| QUAL-01 | Phase 27 | Pending |
+| QUAL-02 | Phase 27 | Pending |
+| QUAL-03 | Phase 29 | Pending |
+| PROOF-01 | Phase 28 | Pending |
+| PROOF-02 | Phase 28 | Pending |
+| PROOF-03 | Phase 29 | Pending |
 
 **Coverage:**
 - milestone requirements: 9 total
-- mapped to phases: 0
-- unmapped: 9
+- mapped to phases: 9
+- unmapped: 0
 
 ---
 *Requirements defined: 2026-04-14*
-*Last updated: 2026-04-14 after initial definition*
+*Last updated: 2026-04-14 after roadmap approval*

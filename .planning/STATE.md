@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.5
 milestone_name: Runtime Boundary Cleanup and Quality Gates
-status: Defining requirements
-stopped_at: Milestone framing confirmed; defining v1.5 requirements and roadmap
-last_updated: "2026-04-14T10:03:42.7705089Z"
+status: Milestone initialized
+stopped_at: v1.5 initialized; next step is to discuss or plan Phase 26
+last_updated: "2026-04-14T10:08:46.8230922Z"
 last_activity: 2026-04-14
 progress:
-  total_phases: 0
+  total_phases: 4
   completed_phases: 0
-  total_plans: 0
+  total_plans: 12
   completed_plans: 0
 ---
 
@@ -20,14 +20,14 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-04-14)
 
 **Core value:** Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
-**Current focus:** v1.5 milestone definition around runtime boundary cleanup, quality gates, and proof/doc alignment
+**Current focus:** Phase 26 planning for runtime boundary cleanup and compatibility-surface consolidation
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: -
-Status: Defining requirements
-Last activity: 2026-04-14 - Milestone v1.5 started
+Phase: 26
+Plan: Ready for Phase 26 planning
+Status: Milestone initialized
+Last activity: 2026-04-14 - Approved and initialized the v1.5 roadmap through Phase 29
 
 ## Accumulated Context
 
@@ -55,7 +55,7 @@ None captured yet.
 
 ### Blockers/Concerns
 
-- `MILESTONES.md` still stops at v1.3 even though v1.4 execution is complete; archive/history cleanup is still pending.
+- `MILESTONES.md` still stops at v1.3 even though v1.4 execution is complete; archive/history cleanup is now part of the v1.5 proof/doc alignment scope.
 - `HostSample` remains referenced in planning/docs even though there is no live project in the current tree.
 - `AsterGraph.Editor.Tests` still references `AsterGraph.Demo`, which blurs the core SDK regression lane and the sample/demo lane.
 - There is still no checked-in CI workflow, central package management, or automated public API/package compatibility lane.
@@ -72,5 +72,5 @@ None captured yet.
 ## Session Continuity
 
 Last session: 2026-04-14
-Stopped at: Milestone framing confirmed; next step is to define v1.5 requirements and create the roadmap
+Stopped at: v1.5 initialized; next step is to discuss or plan Phase 26
 Resume file: .planning/STATE.md
