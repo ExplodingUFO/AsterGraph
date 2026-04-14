@@ -130,6 +130,7 @@ public sealed class GraphEditorKernelCommandRouterTests
         kernel.SaveWorkspace();
 
         Assert.Equal(3, kernel.CreateDocumentSnapshot().Nodes.Count);
+        Assert.False(kernel.IsDirty);
     }
 
     private static GraphEditorKernel CreateKernel(IGraphWorkspaceService? workspaceService = null)
