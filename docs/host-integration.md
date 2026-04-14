@@ -2,7 +2,17 @@
 
 This guide shows how to host AsterGraph without over-coupling your application to internal editor details.
 
-Quick Start: see the [minimal onboarding guide](./quick-start.md) for the shortest package/setup/integration path.
+Quick Start: see the [canonical adoption path](./quick-start.md#canonical-adoption-path) for the short route guide. This document expands the same three routes instead of defining a second route tree.
+
+## Canonical Adoption Path
+
+The short source of truth lives in [Quick Start](./quick-start.md#canonical-adoption-path):
+
+- runtime-only or custom UI: `AsterGraphEditorFactory.CreateSession(...)`
+- shipped Avalonia UI: `AsterGraphEditorFactory.Create(...)` plus `AsterGraphAvaloniaViewFactory.Create(...)`
+- retained migration: `new GraphEditorViewModel(...)` plus `new GraphEditorView { Editor = editor }`
+
+If you want to reuse standalone Avalonia surfaces such as `AsterGraphCanvasViewFactory.Create(...)`, `AsterGraphInspectorViewFactory.Create(...)`, or `AsterGraphMiniMapViewFactory.Create(...)`, treat that as an advanced composition detail inside the `Create(...)` family, not as a fourth canonical entry path.
 
 ## Package Choice
 
@@ -126,9 +136,9 @@ The verification split is:
 - Core SDK regression lane: `tests/AsterGraph.Editor.Tests` plus `tests/AsterGraph.Serialization.Tests`
 - Demo/sample regression lane: `tests/AsterGraph.Demo.Tests`
 
-## Canonical Host Composition
+## Composition Details
 
-AsterGraph currently gives hosts two canonical entry paths. Pick the narrowest surface that matches what you want to own.
+The canonical adoption path stays three-way. The sections below expand those three routes and the advanced Avalonia composition details that sit under the `Create(...)` family.
 
 Runtime-only or custom-UI host:
 
@@ -222,7 +232,7 @@ Phase 16 adapter-boundary notes for the default shell:
 - `GraphEditorView` owns clipboard and host-context binding for the full shell. Its embedded `NodeCanvas` does not take over those platform seams.
 - If the host uses `AsterGraphCanvasViewFactory.Create(...)` directly, that standalone `NodeCanvas` becomes the Avalonia owner for those clipboard and host-context seams when attached.
 
-Host-managed Avalonia surface composition:
+Advanced Avalonia surface composition under the `Create(...)` route:
 
 1. Build the editor compatibility facade through `AsterGraphEditorFactory.Create(...)`.
 2. Compose the stock Avalonia surfaces you want to keep:

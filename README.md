@@ -93,24 +93,18 @@ All four publishable packages currently target `net8.0` and `net9.0`.
 
 ## Initialization And Migration Story
 
-Phase 2 adds a public runtime-session path in `AsterGraph.Editor`. Choose the entry point that matches the host boundary you want:
+Start with the [canonical adoption path](./docs/quick-start.md#canonical-adoption-path). The short source of truth is:
 
-- runtime-only host or custom UI host:
+- runtime-only or custom UI host:
   - `AsterGraphEditorFactory.CreateSession(...)`
-  - use `IGraphEditorSession.Commands`, `Queries`, `Events`, and `BeginMutation(...)`
-- default full-shell Avalonia host:
+- shipped Avalonia UI host:
   - `AsterGraphEditorFactory.Create(...)`
   - `AsterGraphAvaloniaViewFactory.Create(...)`
-- host-managed Avalonia surface composition:
-  - `AsterGraphEditorFactory.Create(...)`
-  - `AsterGraphCanvasViewFactory.Create(...)`
-  - `AsterGraphInspectorViewFactory.Create(...)`
-  - `AsterGraphMiniMapViewFactory.Create(...)`
-- staged migration for existing hosts:
+- retained migration for existing hosts:
   - `new GraphEditorViewModel(...)`
   - `new GraphEditorView { Editor = editor }`
 
-New hosts should start from `CreateSession(...)` when they only need the editor runtime, from `Create(...)` plus `AsterGraphAvaloniaViewFactory` when they want the shipped full shell, or from `Create(...)` plus the standalone surface factories when they want to own Avalonia layout while still reusing the stock canvas, inspector, or mini map. The constructor/view path remains supported so hosts can migrate in planned batches instead of rewriting in one shot.
+If you want to own Avalonia layout while still reusing the stock canvas, inspector, or mini map, stay on the `Create(...)` family and treat those surface factories as advanced hosted-UI composition detail rather than a fourth canonical entry path. The constructor/view path remains supported so hosts can migrate in planned batches instead of rewriting in one shot.
 
 ## Runtime Session And Services
 

@@ -66,7 +66,23 @@ When your host directly composes runtime/editor APIs, also add:
 dotnet add package AsterGraph.Editor
 ```
 
-## 4) Minimal Avalonia host composition
+## Canonical Adoption Path
+
+This is the short source of truth for host adoption.
+
+| If your host needs | Start here | Notes |
+| --- | --- | --- |
+| Runtime-only or custom UI | `AsterGraphEditorFactory.CreateSession(...)` | Canonical runtime-first boundary. Drive the host through `IGraphEditorSession.Commands`, `Queries`, `Events`, and `Diagnostics`. |
+| Shipped Avalonia UI | `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` | Canonical hosted-UI path for new Avalonia hosts that want the shipped shell. |
+| Retained migration | `new GraphEditorViewModel(...)` + `new GraphEditorView { Editor = editor }` | Compatibility-only path for hosts that are intentionally migrating in stages. |
+
+Use the first two routes for new integrations. Keep the third route only when you are deliberately staying on the retained migration window.
+
+If you want to own Avalonia layout while still reusing the stock canvas, inspector, or mini map, stay on the `Create(...)` family and treat those surface factories as an advanced hosted-UI detail, not as a fourth canonical entry path.
+
+See [`docs/host-integration.md`](./host-integration.md) for the longer composition walkthrough behind each route.
+
+## Minimal Shipped UI Composition
 
 ```csharp
 using AsterGraph.Abstractions.Catalog;
@@ -95,16 +111,15 @@ var view = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOption
 // Set `view` as content in your Avalonia window.
 ```
 
-This is the canonical hosted-UI path for new Avalonia hosts.
+This is the canonical shipped-UI route for new Avalonia hosts.
 
-Route guide:
+For the other two routes:
 
-- use `AsterGraphEditorFactory.CreateSession(...)` if your host owns the UI and only wants the canonical runtime boundary
-- use `AsterGraphEditorFactory.Create(...)` plus `AsterGraphAvaloniaViewFactory.Create(...)` for the canonical shipped-UI path
-- keep `new GraphEditorViewModel(...)` or `new GraphEditorView { Editor = ... }` only when you are intentionally staying on the retained compatibility path during migration
-- see `src/AsterGraph.Demo` for the visual hosted-UI reference
-- see `tools/AsterGraph.PackageSmoke` for the machine-checkable `PACKAGE_SMOKE_*` package-consumption markers
-- see `tools/AsterGraph.ScaleSmoke` for the large-graph scale/readiness markers
+- runtime-only/custom UI details: [`docs/host-integration.md`](./host-integration.md#runtime-session-surface)
+- retained migration details: [`docs/host-integration.md`](./host-integration.md#staged-migration-compatibility-path)
+- visual/default hosted-UI reference: `src/AsterGraph.Demo`
+- machine-checkable package/runtime proof: `tools/AsterGraph.PackageSmoke`
+- machine-checkable scale/readiness proof: `tools/AsterGraph.ScaleSmoke`
 
 ## 5) Where Abstractions fits
 
