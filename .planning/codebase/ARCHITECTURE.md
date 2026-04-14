@@ -1,6 +1,6 @@
 # Architecture
 
-**Analysis Date:** 2026-04-08
+**Analysis Date:** 2026-04-14
 
 ## Pattern Overview
 
@@ -16,7 +16,7 @@
 - `src/AsterGraph.Editor/Kernel/GraphEditorKernel.cs` owns canonical runtime state for the session-first path.
 - `src/AsterGraph.Editor/Runtime/GraphEditorSession.cs` exposes commands, queries, events, diagnostics, and mutation batching over an internal `IGraphEditorSessionHost`.
 - `src/AsterGraph.Editor/ViewModels/GraphEditorViewModel.cs` still acts as a large adapter and compatibility entry point for legacy hosts and Avalonia surfaces.
-- The repo's `.planning/STATE.md` and `.planning/ROADMAP.md` confirm that Phase 13 landed and Phase 14 is the next decoupling step.
+- The repo's `.planning/STATE.md` and `.planning/ROADMAP.md` track `.planning` reality at v1.5: runtime-boundary cleanup is completed in Phase 26, proof-surface alignment is completed in Phase 28, and Phase 29 is next.
 
 ## Layers
 
@@ -55,9 +55,9 @@
 
 ### Host, Demo, And Proof Layer
 
-- Location: `src/AsterGraph.Demo`, `tools/AsterGraph.HostSample`, `tools/AsterGraph.PackageSmoke`, `tools/AsterGraph.ScaleSmoke`
+- Location: `src/AsterGraph.Demo`, `tools/AsterGraph.PackageSmoke`, `tools/AsterGraph.ScaleSmoke`
 - Responsibility: demonstrate supported composition paths and prove package/runtime behavior.
-- Examples: `src/AsterGraph.Demo/ViewModels/MainWindowViewModel.cs`, `tools/AsterGraph.HostSample/Program.cs`, `tools/AsterGraph.PackageSmoke/Program.cs`, `tools/AsterGraph.ScaleSmoke/Program.cs`
+- Examples: `src/AsterGraph.Demo/ViewModels/MainWindowViewModel.cs`, `tools/AsterGraph.PackageSmoke/Program.cs`, `tools/AsterGraph.ScaleSmoke/Program.cs`
 
 ## Data Flow
 
@@ -82,7 +82,7 @@
 
 - `src/AsterGraph.Editor/Kernel/GraphEditorKernel.cs`
 - `src/AsterGraph.Editor/Runtime/GraphEditorSession.cs`
-- This is the canonical state owner for the runtime-first path introduced in Phase 13.
+- This is the canonical state owner for the kernel-first runtime path introduced in v1.2/Phase 13; v1.5 further tightened the boundary and migration posture.
 
 ### Compatibility Facade
 
@@ -111,7 +111,8 @@
 - `src/AsterGraph.Editor/Hosting/AsterGraphEditorFactory.cs` is the main non-demo composition root.
 - `src/AsterGraph.Avalonia/Hosting/AsterGraphAvaloniaViewFactory.cs` is the main full-shell UI composition root.
 - `src/AsterGraph.Avalonia/Hosting/AsterGraphCanvasViewFactory.cs`, `src/AsterGraph.Avalonia/Hosting/AsterGraphInspectorViewFactory.cs`, and `src/AsterGraph.Avalonia/Hosting/AsterGraphMiniMapViewFactory.cs` expose standalone surfaces.
-- `tools/AsterGraph.HostSample/Program.cs`, `tools/AsterGraph.PackageSmoke/Program.cs`, and `tools/AsterGraph.ScaleSmoke/Program.cs` are the main proof and sample entry points.
+- `src/AsterGraph.Demo/Program.cs` is the runnable visual sample integration path.
+- `tools/AsterGraph.PackageSmoke/Program.cs` and `tools/AsterGraph.ScaleSmoke/Program.cs` are the machine-checkable proof entry points.
 
 ## Error Handling
 
@@ -130,4 +131,4 @@
 
 ---
 
-*Architecture analysis refreshed: 2026-04-08*
+*Architecture analysis refreshed: 2026-04-14*

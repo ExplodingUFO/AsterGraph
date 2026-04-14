@@ -1,6 +1,6 @@
 # Coding Conventions
 
-**Analysis Date:** 2026-04-08
+**Analysis Date:** 2026-04-14
 
 ## Naming Patterns
 
@@ -14,7 +14,7 @@
 
 ## Code Style
 
-- No repo-level `.editorconfig`, ruleset, or analyzer config is tracked.
+- A repo-level `.editorconfig` is tracked.
 - The prevailing C# style is modern SDK-style C# with 4-space indentation, braces on new lines, and file-scoped namespaces.
 - Nullable reference types and implicit usings are enabled through `Directory.Build.props`.
 - Collection expressions, `with` expressions, and other modern C# constructs are used freely in `src/` and `tests/`.
@@ -40,7 +40,7 @@
 - Historically the editor surface leaned on properties/events such as `StatusMessage`.
 - Current host-facing diagnostics live in `src/AsterGraph.Editor/Diagnostics/*.cs`.
 - Optional structured logging/tracing is host-supplied through `GraphEditorInstrumentationOptions` rather than hard-wired into the library.
-- Tooling and proof programs still use `Console.WriteLine` heavily, especially in `tools/AsterGraph.HostSample/Program.cs`, `tools/AsterGraph.PackageSmoke/Program.cs`, and `tools/AsterGraph.ScaleSmoke/Program.cs`.
+- Tooling and proof programs still use `Console.WriteLine` heavily, especially in `tools/AsterGraph.PackageSmoke/Program.cs` and `tools/AsterGraph.ScaleSmoke/Program.cs`.
 
 ## Documentation And Comments
 
@@ -60,9 +60,9 @@
 
 - Tests prefer real objects plus handwritten doubles over mocking frameworks.
 - Helper factories usually live inside the test file that uses them.
-- Headless Avalonia tests live beside runtime tests in `tests/AsterGraph.Editor.Tests`.
+- Headless Avalonia tests are split across `tests/AsterGraph.Editor.Tests` and `tests/AsterGraph.Demo.Tests`.
 - Proof-oriented suites verify migration parity, diagnostics continuity, and package-surface stability in addition to classic unit behavior.
 
 ---
 
-*Convention analysis refreshed: 2026-04-08*
+*Convention analysis refreshed: 2026-04-14*
