@@ -45,6 +45,14 @@ public sealed class GraphEditorFacadeRefactorTests
     }
 
     [Fact]
+    public void EditorAssembly_ContainsDedicatedNodePositionDirtyTracker()
+    {
+        var trackerType = typeof(GraphEditorViewModel).Assembly.GetType("AsterGraph.Editor.Services.GraphEditorNodePositionDirtyTracker");
+
+        Assert.NotNull(trackerType);
+    }
+
+    [Fact]
     public void GraphEditorViewModel_RebuildsMixedParametersThroughPublicSelectionPath()
     {
         var definitionId = new NodeDefinitionId("tests.editor.facade.public-path");
@@ -280,6 +288,24 @@ public sealed class GraphEditorFacadeRefactorTests
         editor.Nodes.Clear();
 
         Assert.False(editor.FitViewCommand.CanExecute(null));
+    }
+
+    [Fact]
+    public void NodePositionChange_MarksEditorDirtyAndRefreshesWorkspaceCaption()
+    {
+        var definitionId = new NodeDefinitionId("tests.editor.facade.node-position-dirty");
+        var editor = CreateEditorWithSharedDefinitionNodes(definitionId);
+        var node = editor.Nodes[0];
+        var changedProperties = new List<string?>();
+
+        Assert.False(editor.IsDirty);
+        editor.PropertyChanged += (_, args) => changedProperties.Add(args.PropertyName);
+
+        node.X += 24;
+
+        Assert.True(editor.IsDirty);
+        Assert.Contains("Unsaved changes", editor.WorkspaceCaption, StringComparison.Ordinal);
+        Assert.Contains(nameof(GraphEditorViewModel.WorkspaceCaption), changedProperties);
     }
 
     private static NodeViewModel CreateNode(

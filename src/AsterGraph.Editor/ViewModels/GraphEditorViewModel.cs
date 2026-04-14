@@ -38,7 +38,7 @@ namespace AsterGraph.Editor.ViewModels;
 /// 而自定义 UI 宿主应优先考虑 <see cref="AsterGraphEditorFactory.CreateSession(AsterGraphEditorOptions)"/>。
 /// 本类型在当前迁移窗口内仍然受支持，但不应再被视为新的首选组合根。
 /// </remarks>
-public sealed partial class GraphEditorViewModel : ObservableObject, IGraphContextMenuHost, GraphEditorViewModel.IGraphEditorCompatibilityCommandHost, GraphEditorViewModel.IGraphEditorFragmentCommandHost, IGraphEditorKernelProjectionHost, IGraphEditorHistoryStateHost, IGraphEditorSelectionCoordinatorHost, IGraphEditorSelectionStateSynchronizerHost, IGraphEditorSelectionProjectionApplierHost, IGraphEditorDocumentCollectionSynchronizerHost
+public sealed partial class GraphEditorViewModel : ObservableObject, IGraphContextMenuHost, GraphEditorViewModel.IGraphEditorCompatibilityCommandHost, GraphEditorViewModel.IGraphEditorFragmentCommandHost, IGraphEditorKernelProjectionHost, IGraphEditorHistoryStateHost, IGraphEditorSelectionCoordinatorHost, IGraphEditorSelectionStateSynchronizerHost, IGraphEditorSelectionProjectionApplierHost, IGraphEditorDocumentCollectionSynchronizerHost, IGraphEditorNodePositionDirtyTrackerHost
 {
     private const double DefaultZoom = 0.88;
     private const double DefaultPanX = 110;
@@ -103,6 +103,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     private readonly GraphEditorSelectionStateSynchronizer _selectionStateSynchronizer;
     private readonly GraphEditorSelectionProjectionApplier _selectionProjectionApplier;
     private readonly GraphEditorDocumentCollectionSynchronizer _documentCollectionSynchronizer;
+    private readonly GraphEditorNodePositionDirtyTracker _nodePositionDirtyTracker;
     private readonly GraphEditorKernel _kernel;
     private readonly GraphEditorViewModelKernelAdapter _sessionHost;
     private readonly GraphEditorCommandStateNotifier _commandStateNotifier = new();
@@ -190,6 +191,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         _selectionStateSynchronizer = new GraphEditorSelectionStateSynchronizer(this);
         _selectionProjectionApplier = new GraphEditorSelectionProjectionApplier(this, _selectionProjection);
         _documentCollectionSynchronizer = new GraphEditorDocumentCollectionSynchronizer(this, _documentProjectionApplier);
+        _nodePositionDirtyTracker = new GraphEditorNodePositionDirtyTracker(this);
         StyleOptions = styleOptions ?? GraphEditorStyleOptions.Default;
         BehaviorOptions = ResolveBehaviorOptions(behaviorOptions, StyleOptions);
 
@@ -934,6 +936,17 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         => RefreshSelectionProjection();
 
     void IGraphEditorDocumentCollectionSynchronizerHost.RaiseComputedPropertyChanges()
+        => RaiseComputedPropertyChanges();
+
+    bool IGraphEditorNodePositionDirtyTrackerHost.IsDirtyTrackingSuspended => _suspendDirtyTracking;
+
+    bool IGraphEditorNodePositionDirtyTrackerHost.IsDirty
+    {
+        get => IsDirty;
+        set => IsDirty = value;
+    }
+
+    void IGraphEditorNodePositionDirtyTrackerHost.RaiseComputedPropertyChanges()
         => RaiseComputedPropertyChanges();
 
     [ObservableProperty]
@@ -2491,21 +2504,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         => _selectionStateSynchronizer.HandleSelectedNodesCollectionChanged();
 
     private void HandleNodePropertyChanged(object? sender, PropertyChangedEventArgs args)
-    {
-        if (_suspendDirtyTracking || sender is not NodeViewModel)
-        {
-            return;
-        }
-
-        if (args.PropertyName is nameof(NodeViewModel.X) or nameof(NodeViewModel.Y))
-        {
-            if (!IsDirty)
-            {
-                IsDirty = true;
-                RaiseComputedPropertyChanges();
-            }
-        }
-    }
+        => _nodePositionDirtyTracker.HandleNodePropertyChanged(sender, args);
 
     private void RaiseComputedPropertyChanges()
     {
