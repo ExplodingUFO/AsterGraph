@@ -24,7 +24,7 @@ Hosts can integrate only the graph-editor pieces they need, replace default UI a
 - Canonical composition is now kernel-first through `AsterGraphEditorFactory.CreateSession(...)` and `AsterGraphEditorFactory.Create(...)`, without `GraphEditorViewModel` as the canonical runtime state owner.
 - Public host-facing capability, command, menu, diagnostics, plugin, and automation reads now prefer descriptor and snapshot contracts over MVVM object shape.
 - Plugin loading and automation execution shipped in v1.4 through the canonical session boundary and are already backed by focused regressions plus `PackageSmoke` and `ScaleSmoke`.
-- Remaining boundary debt is concentrated in compatibility-only runtime queries/types, retained `GraphEditorViewModel` forwarding seams, and the staged migration window around obsolete APIs.
+- Phase 26 completed the runtime-boundary cleanup for compatible-target discovery: canonical runtime queries now stay on DTO/snapshot contracts, while retained MVVM-shaped compatible-target APIs are explicitly isolated to the staged migration window.
 - Repo-level quality gates are still mostly manual: there is no checked-in CI workflow, no central package management, and no automated public API/package compatibility lane yet.
 - The proof/documentation surface is partially out of sync: `ScaleSmoke` exists, `HostSample` is still referenced in planning/docs despite not being present in the current tree, and `AsterGraph.Editor.Tests` still pulls `AsterGraph.Demo` into the core test lane.
 
@@ -56,10 +56,11 @@ Hosts can integrate only the graph-editor pieces they need, replace default UI a
 - ✓ Host can now observe automation started/progress/completed signals through typed runtime events and machine-readable diagnostics suitable for non-Avalonia consumers - v1.4 Phase 24
 - ✓ `PackageSmoke`, `ScaleSmoke`, and focused regressions now prove plugin composition and automation execution from the canonical host boundary - v1.4 Phase 25
 - ✓ README-backed proof commands now route hosts to the same canonical plugin/automation story used in milestone verification - v1.4 Phase 25
+- ✓ Canonical compatible-target discovery now stays on DTO/snapshot runtime queries, while internal host/kernel/runtime seams no longer expose the legacy MVVM-shaped shim - v1.5 Phase 26
+- ✓ Retained `GraphEditorViewModel` / `GraphEditorView` hosts still run over the adapter-backed kernel/session runtime path, and the remaining compatibility-only APIs now carry explicit staged retirement guidance - v1.5 Phase 26
 
 ### Active
 
-- [ ] Reduce remaining retained-facade and canonical-runtime drift, especially around compatibility-only query surfaces and MVVM-shaped runtime shims.
 - [ ] Add repo-level quality gates and automated validation across the supported package and target-framework matrix.
 - [ ] Reconcile docs, solution membership, proof tooling, and test lanes so the release story is trustworthy and machine-checkable from one source of truth.
 
@@ -102,9 +103,9 @@ v1.5 therefore focuses on hardening the SDK's actual contract boundary and the v
 | Keep plugin and automation surfaces rooted in `IGraphEditorSession`, descriptors, and command IDs | Extension work should build on the canonical runtime boundary rather than retained MVVM or Avalonia shims | ✓ Good |
 | Keep the first automation runner synchronous, in-process, and descriptor-first | The first shipped automation value should validate the canonical runtime boundary before richer product layers are considered | ✓ Good |
 | Keep plugin/automation proof aligned across focused tests, smoke tools, and README commands | Public claims should stay machine-checkable from the same canonical host boundary everywhere | ✓ Good |
-| Focus v1.5 on runtime boundary cleanup, automated quality gates, and proof/doc alignment rather than another net-new feature band | The main remaining risk is SDK maintainability and release trust, not missing capability surface | - Pending |
+| Focus v1.5 on runtime boundary cleanup, automated quality gates, and proof/doc alignment rather than another net-new feature band | The main remaining risk is SDK maintainability and release trust, not missing capability surface | ✓ Phase 26 started this cleanup by finishing runtime boundary canonicalization |
 | Treat the four-package boundary, `CreateSession(...)`, and the current proof ring as fixed baseline during v1.5 | Current strengths should be hardened rather than reopened | - Pending |
-| Use staged deprecation guidance for compatibility APIs instead of a one-shot public break | Hosts still need a planned migration path while canonical DTO/snapshot contracts become authoritative | - Pending |
+| Use staged deprecation guidance for compatibility APIs instead of a one-shot public break | Hosts still need a planned migration path while canonical DTO/snapshot contracts become authoritative | ✓ Phase 26 applied this guidance to compatible-target APIs |
 
 ## Next Milestone Goals
 
@@ -139,4 +140,4 @@ This document evolves at milestone boundaries.
 4. Reset active requirements so the next roadmap starts from the highest remaining product risk instead of stale execution context.
 
 ---
-*Last updated: 2026-04-14 after starting milestone v1.5*
+*Last updated: 2026-04-14 after completing Phase 26*
