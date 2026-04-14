@@ -38,7 +38,7 @@ namespace AsterGraph.Editor.ViewModels;
 /// 而自定义 UI 宿主应优先考虑 <see cref="AsterGraphEditorFactory.CreateSession(AsterGraphEditorOptions)"/>。
 /// 本类型在当前迁移窗口内仍然受支持，但不应再被视为新的首选组合根。
 /// </remarks>
-public sealed partial class GraphEditorViewModel : ObservableObject, IGraphContextMenuHost, GraphEditorViewModel.IGraphEditorCompatibilityCommandHost, GraphEditorViewModel.IGraphEditorFragmentCommandHost, IGraphEditorKernelProjectionHost, IGraphEditorHistoryStateHost, IGraphEditorSelectionCoordinatorHost, IGraphEditorNodeLayoutCoordinatorHost
+public sealed partial class GraphEditorViewModel : ObservableObject, IGraphContextMenuHost, GraphEditorViewModel.IGraphEditorCompatibilityCommandHost, GraphEditorViewModel.IGraphEditorFragmentCommandHost, IGraphEditorKernelProjectionHost, IGraphEditorHistoryStateHost, IGraphEditorNodeLayoutCoordinatorHost
 {
     private const double DefaultZoom = 0.88;
     private const double DefaultPanX = 110;
@@ -101,6 +101,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     private readonly GraphEditorKernelProjectionApplier _kernelProjectionApplier;
     private readonly GraphEditorHistoryStateCoordinator _historyStateCoordinator;
     private readonly GraphEditorSelectionCoordinator _selectionCoordinator;
+    private readonly GraphEditorViewModelSelectionCoordinatorHost _selectionCoordinatorHost;
     private readonly GraphEditorViewModelSelectionStateSynchronizerHost _selectionStateSynchronizerHost;
     private readonly GraphEditorSelectionStateSynchronizer _selectionStateSynchronizer;
     private readonly GraphEditorSelectionProjectionApplier _selectionProjectionApplier;
@@ -201,7 +202,8 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             (key, fallback, arguments) => LocalizeFormat(key, fallback, arguments));
         _kernelProjectionApplier = new GraphEditorKernelProjectionApplier(this);
         _historyStateCoordinator = new GraphEditorHistoryStateCoordinator(this, _historyService);
-        _selectionCoordinator = new GraphEditorSelectionCoordinator(this);
+        _selectionCoordinatorHost = new GraphEditorViewModelSelectionCoordinatorHost(this);
+        _selectionCoordinator = new GraphEditorSelectionCoordinator(_selectionCoordinatorHost);
         _selectionStateSynchronizerHost = new GraphEditorViewModelSelectionStateSynchronizerHost(this);
         _selectionStateSynchronizer = new GraphEditorSelectionStateSynchronizer(_selectionStateSynchronizerHost);
         _selectionProjectionApplierHost = new GraphEditorViewModelSelectionProjectionApplierHost(this);
@@ -842,47 +844,6 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         => IsDirty = isDirty;
 
     void IGraphEditorHistoryStateHost.RaiseComputedPropertyChanges()
-        => RaiseComputedPropertyChanges();
-
-    IReadOnlyList<NodeViewModel> IGraphEditorSelectionCoordinatorHost.AllNodes => Nodes;
-
-    ObservableCollection<NodeViewModel> IGraphEditorSelectionCoordinatorHost.SelectionNodes => SelectedNodes;
-
-    NodeViewModel? IGraphEditorSelectionCoordinatorHost.PrimarySelectedNode
-    {
-        get => SelectedNode;
-        set => SelectedNode = value;
-    }
-
-    bool IGraphEditorSelectionCoordinatorHost.HasPendingConnection => HasPendingConnection;
-
-    bool IGraphEditorSelectionCoordinatorHost.IsApplyingKernelProjection => _isApplyingKernelProjection;
-
-    bool IGraphEditorSelectionCoordinatorHost.IsSelectionTrackingSuspended
-    {
-        get => _suspendSelectionTracking;
-        set => _suspendSelectionTracking = value;
-    }
-
-    string IGraphEditorSelectionCoordinatorHost.StatusText(string key, string fallback)
-        => StatusText(key, fallback);
-
-    string IGraphEditorSelectionCoordinatorHost.StatusText(string key, string fallback, params object?[] arguments)
-        => StatusText(key, fallback, arguments);
-
-    void IGraphEditorSelectionCoordinatorHost.SetStatusMessage(string status)
-        => StatusMessage = status;
-
-    void IGraphEditorSelectionCoordinatorHost.SetKernelSelection(IReadOnlyList<string> nodeIds, string? primaryNodeId, bool updateStatus)
-        => _kernel.SetSelection(nodeIds, primaryNodeId, updateStatus);
-
-    void IGraphEditorSelectionCoordinatorHost.RefreshSelectionProjection()
-        => RefreshSelectionProjection();
-
-    void IGraphEditorSelectionCoordinatorHost.NotifySelectionChanged()
-        => NotifySelectionChanged();
-
-    void IGraphEditorSelectionCoordinatorHost.RaiseComputedPropertyChanges()
         => RaiseComputedPropertyChanges();
 
     GraphEditorCommandPermissions IGraphEditorNodeLayoutCoordinatorHost.CommandPermissions => CommandPermissions;

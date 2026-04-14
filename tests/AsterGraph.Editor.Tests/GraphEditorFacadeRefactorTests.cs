@@ -51,6 +51,16 @@ public sealed class GraphEditorFacadeRefactorTests
     }
 
     [Fact]
+    public void EditorAssembly_ContainsDedicatedSelectionCoordinatorHost()
+    {
+        var hostType = typeof(GraphEditorViewModel).GetNestedType(
+            "GraphEditorViewModelSelectionCoordinatorHost",
+            System.Reflection.BindingFlags.NonPublic);
+
+        Assert.NotNull(hostType);
+    }
+
+    [Fact]
     public void EditorAssembly_ContainsDedicatedDocumentCollectionSynchronizer()
     {
         var synchronizerType = typeof(GraphEditorViewModel).Assembly.GetType("AsterGraph.Editor.Services.GraphEditorDocumentCollectionSynchronizer");
@@ -194,6 +204,17 @@ public sealed class GraphEditorFacadeRefactorTests
         Assert.DoesNotContain(
             implementedInterfaces,
             iface => iface.FullName == "AsterGraph.Editor.Services.IGraphEditorSelectionStateSynchronizerHost");
+    }
+
+    [Fact]
+    public void GraphEditorViewModel_DoesNotImplementSelectionCoordinatorHostInterface()
+    {
+        var viewModelType = typeof(GraphEditorViewModel);
+        var implementedInterfaces = viewModelType.GetInterfaces();
+
+        Assert.DoesNotContain(
+            implementedInterfaces,
+            iface => iface.FullName == "AsterGraph.Editor.Services.IGraphEditorSelectionCoordinatorHost");
     }
 
     [Fact]
