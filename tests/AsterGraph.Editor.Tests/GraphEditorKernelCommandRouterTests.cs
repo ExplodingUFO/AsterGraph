@@ -121,12 +121,23 @@ public sealed class GraphEditorKernelCommandRouterTests
         Assert.False(kernel.TryExecuteCommand(CreateCommand("nodes.move", ("position", "bad-payload"))));
     }
 
-    private static GraphEditorKernel CreateKernel()
+    [Fact]
+    public void GraphEditorKernel_SaveWorkspace_PassesLiveDocumentToWorkspaceService()
+    {
+        var workspace = new MutatingWorkspaceService();
+        var kernel = CreateKernel(workspace);
+
+        kernel.SaveWorkspace();
+
+        Assert.Equal(3, kernel.CreateDocumentSnapshot().Nodes.Count);
+    }
+
+    private static GraphEditorKernel CreateKernel(IGraphWorkspaceService? workspaceService = null)
         => new(
             CreateDocument(),
             CreateCatalog(),
             new DefaultPortCompatibilityService(),
-            new EmptyWorkspaceService(),
+            workspaceService ?? new EmptyWorkspaceService(),
             GraphEditorStyleOptions.Default,
             GraphEditorBehaviorOptions.Default);
 
@@ -193,6 +204,36 @@ public sealed class GraphEditorKernelCommandRouterTests
 
         public void Save(GraphDocument document)
         {
+        }
+
+        public GraphDocument Load()
+            => throw new InvalidOperationException("No saved snapshot.");
+
+        public bool Exists()
+            => false;
+    }
+
+    private sealed class MutatingWorkspaceService : IGraphWorkspaceService
+    {
+        public string WorkspacePath => "workspace://mutating";
+
+        public void Save(GraphDocument document)
+        {
+            ArgumentNullException.ThrowIfNull(document);
+
+            var nodes = Assert.IsType<List<GraphNode>>(document.Nodes);
+            nodes.Add(new GraphNode(
+                "workspace-node",
+                "Workspace Added",
+                "Tests",
+                "Kernel",
+                "Added during save to verify live document semantics.",
+                new GraphPoint(640, 160),
+                new GraphSize(220, 140),
+                [],
+                [],
+                "#55D8C1",
+                DefinitionId));
         }
 
         public GraphDocument Load()

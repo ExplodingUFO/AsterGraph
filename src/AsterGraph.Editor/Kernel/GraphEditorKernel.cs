@@ -111,7 +111,7 @@ internal sealed class GraphEditorKernel : IGraphEditorSessionHost, IGraphEditorK
         => _workspaceService.WorkspacePath;
 
     GraphDocument IGraphEditorWorkspaceSaveCoordinatorHost.CreateWorkspaceDocumentSnapshot()
-        => CloneDocument(_document);
+        => _document;
 
     void IGraphEditorWorkspaceSaveCoordinatorHost.SaveWorkspaceDocument(GraphDocument document)
         => _workspaceService.Save(document);
