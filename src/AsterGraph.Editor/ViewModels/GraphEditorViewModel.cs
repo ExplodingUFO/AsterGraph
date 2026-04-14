@@ -38,7 +38,7 @@ namespace AsterGraph.Editor.ViewModels;
 /// 而自定义 UI 宿主应优先考虑 <see cref="AsterGraphEditorFactory.CreateSession(AsterGraphEditorOptions)"/>。
 /// 本类型在当前迁移窗口内仍然受支持，但不应再被视为新的首选组合根。
 /// </remarks>
-public sealed partial class GraphEditorViewModel : ObservableObject, IGraphContextMenuHost, GraphEditorViewModel.IGraphEditorCompatibilityCommandHost, GraphEditorViewModel.IGraphEditorFragmentCommandHost, IGraphEditorKernelProjectionHost, IGraphEditorHistoryStateHost, IGraphEditorSelectionCoordinatorHost, IGraphEditorSelectionStateSynchronizerHost, IGraphEditorSelectionProjectionApplierHost
+public sealed partial class GraphEditorViewModel : ObservableObject, IGraphContextMenuHost, GraphEditorViewModel.IGraphEditorCompatibilityCommandHost, GraphEditorViewModel.IGraphEditorFragmentCommandHost, IGraphEditorKernelProjectionHost, IGraphEditorHistoryStateHost, IGraphEditorSelectionCoordinatorHost, IGraphEditorSelectionStateSynchronizerHost, IGraphEditorSelectionProjectionApplierHost, IGraphEditorDocumentCollectionSynchronizerHost
 {
     private const double DefaultZoom = 0.88;
     private const double DefaultPanX = 110;
@@ -102,6 +102,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     private readonly GraphEditorSelectionCoordinator _selectionCoordinator;
     private readonly GraphEditorSelectionStateSynchronizer _selectionStateSynchronizer;
     private readonly GraphEditorSelectionProjectionApplier _selectionProjectionApplier;
+    private readonly GraphEditorDocumentCollectionSynchronizer _documentCollectionSynchronizer;
     private readonly GraphEditorKernel _kernel;
     private readonly GraphEditorViewModelKernelAdapter _sessionHost;
     private readonly GraphEditorCommandStateNotifier _commandStateNotifier = new();
@@ -188,6 +189,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         _selectionCoordinator = new GraphEditorSelectionCoordinator(this);
         _selectionStateSynchronizer = new GraphEditorSelectionStateSynchronizer(this);
         _selectionProjectionApplier = new GraphEditorSelectionProjectionApplier(this, _selectionProjection);
+        _documentCollectionSynchronizer = new GraphEditorDocumentCollectionSynchronizer(this, _documentProjectionApplier);
         StyleOptions = styleOptions ?? GraphEditorStyleOptions.Default;
         BehaviorOptions = ResolveBehaviorOptions(behaviorOptions, StyleOptions);
 
@@ -921,6 +923,18 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         OnPropertyChanged(nameof(HasEditableParameters));
         OnPropertyChanged(nameof(HasBatchEditableParameters));
     }
+
+    void IGraphEditorDocumentCollectionSynchronizerHost.CoerceSelectionToExistingNodes()
+        => CoerceSelectionToExistingNodes();
+
+    void IGraphEditorDocumentCollectionSynchronizerHost.NotifyFitViewCommandCanExecuteChanged()
+        => FitViewCommand.NotifyCanExecuteChanged();
+
+    void IGraphEditorDocumentCollectionSynchronizerHost.RefreshSelectionProjection()
+        => RefreshSelectionProjection();
+
+    void IGraphEditorDocumentCollectionSynchronizerHost.RaiseComputedPropertyChanges()
+        => RaiseComputedPropertyChanges();
 
     [ObservableProperty]
     private double zoom = DefaultZoom;
@@ -2468,20 +2482,10 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     partial void OnIsDirtyChanged(bool value) => RaiseComputedPropertyChanges();
 
     private void HandleNodesCollectionChanged(object? sender, NotifyCollectionChangedEventArgs args)
-    {
-        _documentProjectionApplier.HandleNodesCollectionChanged(args, HandleNodePropertyChanged);
-        CoerceSelectionToExistingNodes();
-        FitViewCommand.NotifyCanExecuteChanged();
-        RefreshSelectionProjection();
-        RaiseComputedPropertyChanges();
-    }
+        => _documentCollectionSynchronizer.HandleNodesCollectionChanged(args, HandleNodePropertyChanged);
 
     private void HandleConnectionsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs args)
-    {
-        _documentProjectionApplier.HandleConnectionsCollectionChanged(args);
-        RefreshSelectionProjection();
-        RaiseComputedPropertyChanges();
-    }
+        => _documentCollectionSynchronizer.HandleConnectionsCollectionChanged(args);
 
     private void HandleSelectedNodesCollectionChanged(object? sender, NotifyCollectionChangedEventArgs args)
         => _selectionStateSynchronizer.HandleSelectedNodesCollectionChanged();

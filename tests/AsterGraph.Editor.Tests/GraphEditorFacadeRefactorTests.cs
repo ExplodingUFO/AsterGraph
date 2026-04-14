@@ -37,6 +37,14 @@ public sealed class GraphEditorFacadeRefactorTests
     }
 
     [Fact]
+    public void EditorAssembly_ContainsDedicatedDocumentCollectionSynchronizer()
+    {
+        var synchronizerType = typeof(GraphEditorViewModel).Assembly.GetType("AsterGraph.Editor.Services.GraphEditorDocumentCollectionSynchronizer");
+
+        Assert.NotNull(synchronizerType);
+    }
+
+    [Fact]
     public void GraphEditorViewModel_RebuildsMixedParametersThroughPublicSelectionPath()
     {
         var definitionId = new NodeDefinitionId("tests.editor.facade.public-path");
@@ -258,6 +266,20 @@ public sealed class GraphEditorFacadeRefactorTests
 
         Assert.Contains(nameof(GraphEditorViewModel.HasEditableParameters), changedProperties);
         Assert.Contains(nameof(GraphEditorViewModel.HasBatchEditableParameters), changedProperties);
+    }
+
+    [Fact]
+    public void NodesCollectionChange_RefreshesFitViewCommandAvailability()
+    {
+        var definitionId = new NodeDefinitionId("tests.editor.facade.fit-view-refresh");
+        var editor = CreateEditorWithSharedDefinitionNodes(definitionId);
+
+        editor.UpdateViewportSize(1280, 720);
+        Assert.True(editor.FitViewCommand.CanExecute(null));
+
+        editor.Nodes.Clear();
+
+        Assert.False(editor.FitViewCommand.CanExecute(null));
     }
 
     private static NodeViewModel CreateNode(
