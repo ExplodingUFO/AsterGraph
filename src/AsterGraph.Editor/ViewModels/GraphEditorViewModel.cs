@@ -38,7 +38,7 @@ namespace AsterGraph.Editor.ViewModels;
 /// 而自定义 UI 宿主应优先考虑 <see cref="AsterGraphEditorFactory.CreateSession(AsterGraphEditorOptions)"/>。
 /// 本类型在当前迁移窗口内仍然受支持，但不应再被视为新的首选组合根。
 /// </remarks>
-public sealed partial class GraphEditorViewModel : ObservableObject, IGraphContextMenuHost, GraphEditorViewModel.IGraphEditorCompatibilityCommandHost, GraphEditorViewModel.IGraphEditorFragmentCommandHost, IGraphEditorKernelProjectionHost, IGraphEditorHistoryStateHost, IGraphEditorNodeLayoutCoordinatorHost
+public sealed partial class GraphEditorViewModel : ObservableObject, IGraphContextMenuHost, GraphEditorViewModel.IGraphEditorCompatibilityCommandHost, GraphEditorViewModel.IGraphEditorFragmentCommandHost, IGraphEditorKernelProjectionHost, IGraphEditorHistoryStateHost
 {
     private const double DefaultZoom = 0.88;
     private const double DefaultPanX = 110;
@@ -112,6 +112,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     private readonly GraphEditorNodePositionDirtyTracker _nodePositionDirtyTracker;
     private readonly GraphEditorViewModelRetainedEventPublisherHost _retainedEventPublisherHost;
     private readonly GraphEditorRetainedEventPublisher _retainedEventPublisher;
+    private readonly GraphEditorViewModelNodeLayoutCoordinatorHost _nodeLayoutCoordinatorHost;
     private readonly GraphEditorNodeLayoutCoordinator _nodeLayoutCoordinator;
     private readonly GraphEditorViewModelPresentationLocalizationCoordinatorHost _presentationLocalizationCoordinatorHost;
     private readonly GraphEditorPresentationLocalizationCoordinator _presentationLocalizationCoordinator;
@@ -216,7 +217,8 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         _nodePositionDirtyTracker = new GraphEditorNodePositionDirtyTracker(_nodePositionDirtyTrackerHost);
         _retainedEventPublisherHost = new GraphEditorViewModelRetainedEventPublisherHost(this);
         _retainedEventPublisher = new GraphEditorRetainedEventPublisher(_retainedEventPublisherHost);
-        _nodeLayoutCoordinator = new GraphEditorNodeLayoutCoordinator(this);
+        _nodeLayoutCoordinatorHost = new GraphEditorViewModelNodeLayoutCoordinatorHost(this);
+        _nodeLayoutCoordinator = new GraphEditorNodeLayoutCoordinator(_nodeLayoutCoordinatorHost);
         _workspaceSaveCoordinator = new GraphEditorWorkspaceSaveCoordinator(_persistenceCoordinatorHost);
         StyleOptions = styleOptions ?? GraphEditorStyleOptions.Default;
         BehaviorOptions = ResolveBehaviorOptions(behaviorOptions, StyleOptions);
@@ -845,47 +847,6 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     void IGraphEditorHistoryStateHost.RaiseComputedPropertyChanges()
         => RaiseComputedPropertyChanges();
-
-    GraphEditorCommandPermissions IGraphEditorNodeLayoutCoordinatorHost.CommandPermissions => CommandPermissions;
-
-    IReadOnlyList<NodeViewModel> IGraphEditorNodeLayoutCoordinatorHost.Nodes => Nodes;
-
-    IReadOnlyList<NodeViewModel> IGraphEditorNodeLayoutCoordinatorHost.SelectedNodes => SelectedNodes;
-
-    NodeViewModel? IGraphEditorNodeLayoutCoordinatorHost.FindNode(string nodeId)
-        => FindNode(nodeId);
-
-    void IGraphEditorNodeLayoutCoordinatorHost.SetNodeMoveDisabledStatus()
-        => SetStatus("editor.status.node.move.disabledByPermissions", "Node movement is disabled by host permissions.");
-
-    void IGraphEditorNodeLayoutCoordinatorHost.SetNodeNotFoundStatus(string nodeId)
-        => SetStatus("editor.status.node.notFoundById", "Node '{0}' was not found.", nodeId);
-
-    void IGraphEditorNodeLayoutCoordinatorHost.SetNodePositionNoneProvidedStatus()
-        => SetStatus("editor.status.node.position.noneProvided", "No node positions were provided.");
-
-    void IGraphEditorNodeLayoutCoordinatorHost.SetNodePositionNoMatchesStatus()
-        => SetStatus("editor.status.node.position.noMatches", "No matching nodes were found for the provided positions.");
-
-    void IGraphEditorNodeLayoutCoordinatorHost.SetLayoutDisabledStatus()
-        => SetStatus("editor.status.layout.disabledByPermissions", "Layout tools are disabled by host permissions.");
-
-    void IGraphEditorNodeLayoutCoordinatorHost.SetLayoutSelectionTooSmallStatus(int minimumCount)
-        => SetStatus(minimumCount switch
-        {
-            2 => ("editor.status.layout.selectAtLeastTwo", "Select at least two nodes for alignment."),
-            3 => ("editor.status.layout.selectAtLeastThree", "Select at least three nodes for distribution."),
-            _ => ("editor.status.layout.selectionTooSmall", "Selection is too small for that operation."),
-        });
-
-    void IGraphEditorNodeLayoutCoordinatorHost.ApplyNodePositionUpdates(IReadOnlyList<NodePositionSnapshot> positions, bool updateStatus)
-        => _kernel.SetNodePositions(positions, updateStatus);
-
-    void IGraphEditorNodeLayoutCoordinatorHost.CompleteLayoutChange(IReadOnlyList<NodeViewModel> nodes, string status)
-    {
-        MarkDirty(status);
-        NotifyDocumentChanged(GraphEditorDocumentChangeKind.LayoutChanged, nodes.Select(node => node.Id).ToList());
-    }
 
     [ObservableProperty]
     private double zoom = DefaultZoom;
