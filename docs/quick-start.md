@@ -101,10 +101,10 @@ Route guide:
 
 - use `AsterGraphEditorFactory.CreateSession(...)` if your host owns the UI and only wants the canonical runtime boundary
 - use `AsterGraphEditorFactory.Create(...)` plus `AsterGraphAvaloniaViewFactory.Create(...)` for the canonical shipped-UI path
- - keep `new GraphEditorViewModel(...)` or `new GraphEditorView { Editor = ... }` only when you are intentionally staying on the retained compatibility path during migration
- - see `src/AsterGraph.Demo` for the visual hosted-UI reference
- - see `tools/AsterGraph.PackageSmoke` for the machine-checkable `PACKAGE_SMOKE_*` package-consumption markers
- - see `tools/AsterGraph.ScaleSmoke` for the large-graph scale/readiness markers
+- keep `new GraphEditorViewModel(...)` or `new GraphEditorView { Editor = ... }` only when you are intentionally staying on the retained compatibility path during migration
+- see `src/AsterGraph.Demo` for the visual hosted-UI reference
+- see `tools/AsterGraph.PackageSmoke` for the machine-checkable `PACKAGE_SMOKE_*` package-consumption markers
+- see `tools/AsterGraph.ScaleSmoke` for the large-graph scale/readiness markers
 
 ## 5) Where Abstractions fits
 
