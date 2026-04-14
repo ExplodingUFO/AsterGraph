@@ -54,6 +54,14 @@ public sealed class GraphEditorFacadeRefactorTests
     }
 
     [Fact]
+    public void EditorAssembly_ContainsDedicatedRetainedEventPublisher()
+    {
+        var publisherType = typeof(GraphEditorViewModel).Assembly.GetType("AsterGraph.Editor.Services.GraphEditorRetainedEventPublisher");
+
+        Assert.NotNull(publisherType);
+    }
+
+    [Fact]
     public void GraphEditorViewModel_RebuildsMixedParametersThroughPublicSelectionPath()
     {
         var definitionId = new NodeDefinitionId("tests.editor.facade.public-path");
@@ -351,6 +359,62 @@ public sealed class GraphEditorFacadeRefactorTests
         Assert.Equal(sessionViewportChanged.PanY, retainedViewportChanged.PanY);
         Assert.Equal(sessionViewportChanged.ViewportWidth, retainedViewportChanged.ViewportWidth);
         Assert.Equal(sessionViewportChanged.ViewportHeight, retainedViewportChanged.ViewportHeight);
+    }
+
+    [Fact]
+    public void GraphEditorViewModel_SelectSingleNode_PublishesRetainedSelectionChangedOnce()
+    {
+        var definitionId = new NodeDefinitionId("tests.editor.facade.retained-selection");
+        var editor = CreateEditorWithSharedDefinitionNodes(definitionId);
+        var selectionChanges = new List<GraphEditorSelectionChangedEventArgs>();
+        var target = editor.Nodes[1];
+
+        editor.SelectionChanged += (_, args) => selectionChanges.Add(args);
+
+        editor.SelectSingleNode(target, updateStatus: false);
+
+        var selectionChanged = Assert.Single(selectionChanges);
+        Assert.Equal([target.Id], selectionChanged.SelectedNodeIds);
+        Assert.Equal(target.Id, selectionChanged.PrimarySelectedNodeId);
+    }
+
+    [Fact]
+    public void GraphEditorViewModel_CancelPendingConnection_PublishesRetainedPendingConnectionChangedOnce()
+    {
+        var definitionId = new NodeDefinitionId("tests.editor.facade.retained-pending");
+        var editor = CreateEditorWithSharedDefinitionNodes(definitionId);
+        var pendingChanges = new List<GraphEditorPendingConnectionChangedEventArgs>();
+        var source = editor.Nodes[0];
+
+        editor.StartConnection(source.Id, "out");
+        editor.PendingConnectionChanged += (_, args) => pendingChanges.Add(args);
+
+        editor.CancelPendingConnection(status: null);
+
+        var pendingChanged = Assert.Single(pendingChanges);
+        Assert.False(pendingChanged.PendingConnection.HasPendingConnection);
+        Assert.Null(pendingChanged.PendingConnection.SourceNodeId);
+        Assert.Null(pendingChanged.PendingConnection.SourcePortId);
+    }
+
+    [Fact]
+    public void GraphEditorViewModel_AlignSelectionLeft_PublishesRetainedDocumentChangedOnce()
+    {
+        var definitionId = new NodeDefinitionId("tests.editor.facade.retained-document");
+        var editor = CreateEditorWithSharedDefinitionNodes(definitionId);
+        var source = editor.Nodes[0];
+        var target = editor.Nodes[1];
+        var documentChanges = new List<GraphEditorDocumentChangedEventArgs>();
+
+        editor.SetSelection([source, target], source, status: null);
+        editor.DocumentChanged += (_, args) => documentChanges.Add(args);
+
+        editor.AlignSelectionLeft();
+
+        var documentChanged = Assert.Single(documentChanges);
+        Assert.Equal(GraphEditorDocumentChangeKind.LayoutChanged, documentChanged.ChangeKind);
+        Assert.Equal([source.Id, target.Id], documentChanged.NodeIds);
+        Assert.Equal(editor.StatusMessage, documentChanged.StatusMessage);
     }
 
     private static NodeViewModel CreateNode(

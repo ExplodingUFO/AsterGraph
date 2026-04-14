@@ -38,7 +38,7 @@ namespace AsterGraph.Editor.ViewModels;
 /// 而自定义 UI 宿主应优先考虑 <see cref="AsterGraphEditorFactory.CreateSession(AsterGraphEditorOptions)"/>。
 /// 本类型在当前迁移窗口内仍然受支持，但不应再被视为新的首选组合根。
 /// </remarks>
-public sealed partial class GraphEditorViewModel : ObservableObject, IGraphContextMenuHost, GraphEditorViewModel.IGraphEditorCompatibilityCommandHost, GraphEditorViewModel.IGraphEditorFragmentCommandHost, IGraphEditorKernelProjectionHost, IGraphEditorHistoryStateHost, IGraphEditorSelectionCoordinatorHost, IGraphEditorSelectionStateSynchronizerHost, IGraphEditorSelectionProjectionApplierHost, IGraphEditorDocumentCollectionSynchronizerHost, IGraphEditorNodePositionDirtyTrackerHost
+public sealed partial class GraphEditorViewModel : ObservableObject, IGraphContextMenuHost, GraphEditorViewModel.IGraphEditorCompatibilityCommandHost, GraphEditorViewModel.IGraphEditorFragmentCommandHost, IGraphEditorKernelProjectionHost, IGraphEditorHistoryStateHost, IGraphEditorSelectionCoordinatorHost, IGraphEditorSelectionStateSynchronizerHost, IGraphEditorSelectionProjectionApplierHost, IGraphEditorDocumentCollectionSynchronizerHost, IGraphEditorNodePositionDirtyTrackerHost, IGraphEditorRetainedEventPublisherHost
 {
     private const double DefaultZoom = 0.88;
     private const double DefaultPanX = 110;
@@ -104,6 +104,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     private readonly GraphEditorSelectionProjectionApplier _selectionProjectionApplier;
     private readonly GraphEditorDocumentCollectionSynchronizer _documentCollectionSynchronizer;
     private readonly GraphEditorNodePositionDirtyTracker _nodePositionDirtyTracker;
+    private readonly GraphEditorRetainedEventPublisher _retainedEventPublisher;
     private readonly GraphEditorKernel _kernel;
     private readonly GraphEditorViewModelKernelAdapter _sessionHost;
     private readonly GraphEditorCommandStateNotifier _commandStateNotifier = new();
@@ -192,6 +193,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         _selectionProjectionApplier = new GraphEditorSelectionProjectionApplier(this, _selectionProjection);
         _documentCollectionSynchronizer = new GraphEditorDocumentCollectionSynchronizer(this, _documentProjectionApplier);
         _nodePositionDirtyTracker = new GraphEditorNodePositionDirtyTracker(this);
+        _retainedEventPublisher = new GraphEditorRetainedEventPublisher(this);
         StyleOptions = styleOptions ?? GraphEditorStyleOptions.Default;
         BehaviorOptions = ResolveBehaviorOptions(behaviorOptions, StyleOptions);
 
@@ -946,6 +948,27 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         get => IsDirty;
         set => IsDirty = value;
     }
+
+    IReadOnlyList<NodeViewModel> IGraphEditorRetainedEventPublisherHost.SelectionNodes => SelectedNodes;
+
+    NodeViewModel? IGraphEditorRetainedEventPublisherHost.PrimarySelectedNode => SelectedNode;
+
+    bool IGraphEditorRetainedEventPublisherHost.HasPendingConnection => HasPendingConnection;
+
+    NodeViewModel? IGraphEditorRetainedEventPublisherHost.PendingSourceNode => PendingSourceNode;
+
+    PortViewModel? IGraphEditorRetainedEventPublisherHost.PendingSourcePort => PendingSourcePort;
+
+    string IGraphEditorRetainedEventPublisherHost.CurrentStatusMessage => StatusMessage;
+
+    void IGraphEditorRetainedEventPublisherHost.RaiseDocumentChanged(GraphEditorDocumentChangedEventArgs args)
+        => DocumentChanged?.Invoke(this, args);
+
+    void IGraphEditorRetainedEventPublisherHost.RaiseSelectionChanged(GraphEditorSelectionChangedEventArgs args)
+        => SelectionChanged?.Invoke(this, args);
+
+    void IGraphEditorRetainedEventPublisherHost.RaisePendingConnectionChanged(GraphEditorPendingConnectionChangedEventArgs args)
+        => PendingConnectionChanged?.Invoke(this, args);
 
     [ObservableProperty]
     private double zoom = DefaultZoom;
@@ -2515,37 +2538,17 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         => _selectionProjectionApplier.RefreshSelectionProjection();
 
     private void NotifyPendingConnectionChanged()
-        => PendingConnectionChanged?.Invoke(
-            this,
-            new GraphEditorPendingConnectionChangedEventArgs(
-                GraphEditorPendingConnectionSnapshot.Create(
-                    HasPendingConnection,
-                    PendingSourceNode?.Id,
-                    PendingSourcePort?.Id)));
+        => _retainedEventPublisher.PublishPendingConnectionChanged();
 
     private void NotifyDocumentChanged(
         GraphEditorDocumentChangeKind changeKind,
         IReadOnlyList<string>? nodeIds = null,
         IReadOnlyList<string>? connectionIds = null,
         string? statusMessage = null)
-    {
-        DocumentChanged?.Invoke(
-            this,
-            new GraphEditorDocumentChangedEventArgs(
-                changeKind,
-                nodeIds,
-                connectionIds,
-                statusMessage ?? StatusMessage));
-    }
+        => _retainedEventPublisher.PublishDocumentChanged(changeKind, nodeIds, connectionIds, statusMessage);
 
     private void NotifySelectionChanged()
-    {
-        SelectionChanged?.Invoke(
-            this,
-            new GraphEditorSelectionChangedEventArgs(
-                SelectedNodes.Select(node => node.Id).ToList(),
-                SelectedNode?.Id));
-    }
+        => _retainedEventPublisher.PublishSelectionChanged();
 
     private void NotifyViewportChanged()
     {
