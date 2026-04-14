@@ -22,7 +22,7 @@ This milestone turns the v1.4 baseline into a more durable SDK release posture. 
 
 ## Phases
 
-- [ ] **Phase 26: Runtime Boundary Canonicalization** - Tighten the retained compatibility facade around the kernel/session-owned runtime and continue retiring MVVM-shaped runtime shims.
+- [x] **Phase 26: Runtime Boundary Canonicalization** - Tighten the retained compatibility facade around the kernel/session-owned runtime and continue retiring MVVM-shaped runtime shims. (completed 2026-04-14)
 - [ ] **Phase 27: Repo Quality Gates And Target Matrix** - Add tracked repo-level quality and CI baseline across the supported package and target-framework surface.
 - [ ] **Phase 28: Proof Surface And Regression Lane Alignment** - Make docs, solution membership, proof tools, and test lanes describe the same verification surface.
 - [ ] **Phase 29: Release Validation And Canonical Adoption Path** - Close the milestone with automated release checks and one synchronized canonical integration path for hosts.
@@ -73,11 +73,11 @@ This milestone turns the v1.4 baseline into a more durable SDK release posture. 
 
 | Phase | Requirements | Status |
 |-------|--------------|--------|
-| 26. Runtime Boundary Canonicalization | BOUND-01, BOUND-02, BOUND-03 | Pending |
+| 26. Runtime Boundary Canonicalization | BOUND-01, BOUND-02, BOUND-03 | Complete |
 | 27. Repo Quality Gates And Target Matrix | QUAL-01, QUAL-02 | Pending |
 | 28. Proof Surface And Regression Lane Alignment | PROOF-01, PROOF-02 | Pending |
 | 29. Release Validation And Canonical Adoption Path | QUAL-03, PROOF-03 | Pending |
 
 ## Next Action
 
-**Phase 26: Runtime Boundary Canonicalization** is the next execution target once the milestone roadmap is approved.
+**Phase 27: Repo Quality Gates And Target Matrix** is the next execution target.

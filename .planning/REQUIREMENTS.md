@@ -8,9 +8,9 @@
 
 ### Runtime Boundary
 
-- [ ] **BOUND-01**: Host can discover compatible connection targets through canonical DTO/snapshot queries without depending on `CompatiblePortTarget` or other MVVM-shaped public runtime types
-- [ ] **BOUND-02**: Retained `GraphEditorViewModel` / `GraphEditorView` hosts continue to work as compatibility facades over the same kernel/session-owned runtime state instead of implying a separate runtime path
-- [ ] **BOUND-03**: Host receives explicit migration guidance and compiler-visible deprecation signals for remaining compatibility-only runtime APIs, with a documented staged removal plan
+- [x] **BOUND-01**: Host can discover compatible connection targets through canonical DTO/snapshot queries without depending on `CompatiblePortTarget` or other MVVM-shaped public runtime types
+- [x] **BOUND-02**: Retained `GraphEditorViewModel` / `GraphEditorView` hosts continue to work as compatibility facades over the same kernel/session-owned runtime state instead of implying a separate runtime path
+- [x] **BOUND-03**: Host receives explicit migration guidance and compiler-visible deprecation signals for remaining compatibility-only runtime APIs, with a documented staged removal plan
 
 ### Quality Gates
 
@@ -46,9 +46,9 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| BOUND-01 | Phase 26 | Pending |
-| BOUND-02 | Phase 26 | Pending |
-| BOUND-03 | Phase 26 | Pending |
+| BOUND-01 | Phase 26 | Complete |
+| BOUND-02 | Phase 26 | Complete |
+| BOUND-03 | Phase 26 | Complete |
 | QUAL-01 | Phase 27 | Pending |
 | QUAL-02 | Phase 27 | Pending |
 | QUAL-03 | Phase 29 | Pending |
@@ -63,4 +63,4 @@
 
 ---
 *Requirements defined: 2026-04-14*
-*Last updated: 2026-04-14 after roadmap approval*
+*Last updated: 2026-04-14 after Phase 26 completion*
