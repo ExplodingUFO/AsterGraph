@@ -1,33 +1,30 @@
-# Requirements: AsterGraph v1.4
+# Requirements: AsterGraph v1.5
 
-**Defined:** 2026-04-08
-**Milestone:** v1.4 Plugin Loading and Automation Execution
+**Defined:** 2026-04-14
+**Milestone:** v1.5 Runtime Boundary Cleanup and Quality Gates
 **Core Value:** Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
 
 ## Milestone Requirements
 
-### Plugin Loading
+### Runtime Boundary
 
-- [x] **PLUG-01**: Host can load one or more runtime plugins through a public composition path rooted in `AsterGraphEditorFactory` / `AsterGraphEditorOptions` instead of internal editor or Avalonia object access
-- [x] **PLUG-02**: Loaded plugins can contribute additive services, menus, presentation, diagnostics, or related host seams through explicit contracts that stay compatible with the canonical session/runtime boundary
-- [x] **PLUG-03**: Host can inspect loaded plugin descriptors, availability, and failures through canonical runtime inspection or diagnostics surfaces
+- [ ] **BOUND-01**: Host can discover compatible connection targets through canonical DTO/snapshot queries without depending on `CompatiblePortTarget` or other MVVM-shaped public runtime types
+- [ ] **BOUND-02**: Retained `GraphEditorViewModel` / `GraphEditorView` hosts continue to work as compatibility facades over the same kernel/session-owned runtime state instead of implying a separate runtime path
+- [ ] **BOUND-03**: Host receives explicit migration guidance and compiler-visible deprecation signals for remaining compatibility-only runtime APIs, with a documented staged removal plan
 
-### Automation Execution
+### Quality Gates
 
-- [x] **AUTO-01**: Host can execute automation or macro steps against canonical command IDs, query snapshots, and batched mutation paths without depending on `GraphEditorViewModel` methods
-- [x] **AUTO-02**: Host can observe automation progress, failures, and results through typed runtime diagnostics/events suitable for non-Avalonia or headless consumers
+- [ ] **QUAL-01**: Contributors build and test the repo under one tracked source/package configuration baseline, including shared editor rules and centralized package version management
+- [ ] **QUAL-02**: The supported package boundary is validated automatically for both `net8.0` and `net9.0` through checked-in CI or equivalent scripted automation
+- [ ] **QUAL-03**: Release validation automatically checks package smoke, coverage reporting or thresholds, and public API or package-compatibility regressions instead of relying mainly on manual README commands
 
-### Proof And Samples
+### Docs, Proof, And Samples
 
-- [x] **PROOF-01**: `HostSample`, `PackageSmoke`, and focused regression coverage prove the plugin composition and automation execution story from the canonical host boundary
-- [x] **PROOF-02**: `ScaleSmoke` or equivalent large-graph proof shows the automation path remains credible on larger sessions, and docs point hosts to the canonical plugin/automation path
+- [ ] **PROOF-01**: README, planning docs, solution/project lists, and proof tooling reference the same current verification surface with no stale sample or tool claims
+- [ ] **PROOF-02**: Core SDK regression coverage is distinguishable from demo/sample integration coverage so failures reveal whether the SDK boundary or the showcase host regressed
+- [ ] **PROOF-03**: Host can find a short canonical integration path for runtime-only, default UI, and migration scenarios from one synchronized doc or proof entry point
 
 ## Future Requirements
-
-### Showcase Follow-ons
-
-- **PRESET-01**: User can save and recall named showcase presets for common host integration narratives
-- **TOUR-01**: User can step through a guided capability tour that highlights specific seams in sequence
 
 ### Deferred Platform Work
 
@@ -39,28 +36,31 @@
 
 | Feature | Reason |
 |---------|--------|
-| New graph-editing end-user features unrelated to plugin or automation delivery | This milestone is about extending the host/runtime platform, not broadening the editor feature set |
-| Another demo-showcase-only milestone for presets or guided tours | The highest remaining product risk is real extension delivery, not more presentation polish |
-| Plugin marketplace, remote distribution, trust UI, or isolation policy design | The first milestone should prove the public loader boundary before expanding into deployment and security product work |
-| Dedicated scripting language or workflow-designer UI | The first automation baseline should stay descriptor-first and command-driven |
-| Replacing Avalonia or rewriting retained compatibility hosts | This milestone should build on the shipped kernel/session boundary rather than reopening stack or migration strategy |
+| New graph-editing end-user features unrelated to boundary cleanup, release validation, or host integration clarity | v1.5 is about SDK hardening rather than broadening the editor feature surface |
+| Plugin marketplace, remote distribution, signing, trust UI, or stronger isolation policy work | Those remain follow-on platform investments after the current boundary and validation work lands |
+| Dedicated scripting language, workflow-designer UI, or richer automation authoring product layers | The shipped command/query automation runner remains the baseline for now |
+| Replacing Avalonia or rewriting the retained compatibility story from scratch | This milestone should harden the current stack rather than reopen product positioning |
+| A one-shot removal of all compatibility APIs | Staged migration remains part of the product promise until stronger warnings, docs, and proof close the gap |
 
 ## Traceability
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PLUG-01 | Phase 22 | Complete |
-| PLUG-02 | Phase 23 | Complete |
-| PLUG-03 | Phase 23 | Complete |
-| AUTO-01 | Phase 24 | Complete |
-| AUTO-02 | Phase 24 | Complete |
-| PROOF-01 | Phase 25 | Complete |
-| PROOF-02 | Phase 25 | Complete |
+| BOUND-01 | Pending roadmap | Pending |
+| BOUND-02 | Pending roadmap | Pending |
+| BOUND-03 | Pending roadmap | Pending |
+| QUAL-01 | Pending roadmap | Pending |
+| QUAL-02 | Pending roadmap | Pending |
+| QUAL-03 | Pending roadmap | Pending |
+| PROOF-01 | Pending roadmap | Pending |
+| PROOF-02 | Pending roadmap | Pending |
+| PROOF-03 | Pending roadmap | Pending |
 
 **Coverage:**
-- milestone requirements: 7 total
-- mapped to phases: 7
-- unmapped: 0
+- milestone requirements: 9 total
+- mapped to phases: 0
+- unmapped: 9
 
 ---
-*Requirements defined: 2026-04-08*
+*Requirements defined: 2026-04-14*
+*Last updated: 2026-04-14 after initial definition*
