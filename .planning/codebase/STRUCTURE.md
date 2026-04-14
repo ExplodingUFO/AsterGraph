@@ -9,13 +9,21 @@
 |- src/                 # publishable libraries plus demo app
 |- tests/               # xUnit regression projects
 |- tools/               # proof tools and package-consumption utilities
+|- eng/                # scripted validation entrypoint for build/test lanes
 |- docs/                # host-facing guides
 |- .planning/           # GSD planning, roadmap, and codebase map artifacts
+|- .github/             # checked-in workflow definitions
+|  `- workflows/        # CI configuration and branch validation
 |- artifacts/           # local pack outputs
 |- .worktrees/          # local worktree storage
 |- Directory.Build.props
-|- avalonia-node-map.sln
-|- avalonia-node-map.slnx
+|- Directory.Packages.props
+|- NuGet.config
+|- NuGet.config.sample
+|- avalonia-node-map.sln # canonical solution entrypoint
+|- avalonia-node-map.slnx  # placeholder, not maintained as canonical entrypoint
+|- eng/ci.ps1           # script-first CI/build/test orchestration
+|- .github/workflows/ci.yml # checked-in CI workflow invoking `eng/ci.ps1`
 |- README.md
 |- AGENTS.md
 `- CLAUDE.md
@@ -65,6 +73,11 @@
 - Purpose: graph-document and clipboard compatibility regression tests.
 - Anchor file: `tests/AsterGraph.Serialization.Tests/SerializationCompatibilityTests.cs`.
 
+### `tests/AsterGraph.Demo.Tests`
+
+- Purpose: demo and host shell proof lanes for sample-first composition and sample integration behavior.
+- Notable suites: `tests/AsterGraph.Demo.Tests/DemoMainWindowTests.cs`, `tests/AsterGraph.Demo.Tests/DemoHostMenuControlTests.cs`, `tests/AsterGraph.Demo.Tests/GraphEditorDemoShellTests.cs`, `tests/AsterGraph.Demo.Tests/GraphEditorLocalizationDemoTests.cs`.
+
 ## Tools And Proofs
 
 ### `tools/AsterGraph.PackageSmoke`
@@ -80,8 +93,9 @@
 ## Documentation And Planning
 
 - Public integration docs live in `docs/host-integration.md`, `docs/quick-start.md`, `docs/interactions-and-shortcuts.md`, and `docs/node-presentation-guidelines.md`.
-- GSD state lives under `.planning/PROJECT.md`, `.planning/REQUIREMENTS.md`, `.planning/ROADMAP.md`, `.planning/STATE.md`, `.planning/phases/`, `.planning/research/`, and `.planning/codebase/`.
-- `.planning/ROADMAP.md` currently tracks the active v1.5 milestone, with Phases 26-27 complete and Phases 28-29 still open.
+- GSD state and planning live under `.planning/PROJECT.md`, `.planning/REQUIREMENTS.md`, `.planning/ROADMAP.md`, `.planning/STATE.md`, `.planning/phases/`, `.planning/research/`, and `.planning/codebase/`.
+- `.planning/STATE.md` currently tracks the phase posture as **Phase 28 complete** with **Phase 29 next**.
+- `.planning/ROADMAP.md` currently tracks the active v1.5 milestone and the phase sequence around this transition.
 
 ## Key File Locations
 

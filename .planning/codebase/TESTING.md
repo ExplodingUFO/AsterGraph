@@ -4,16 +4,17 @@
 
 ## Test Frameworks
 
-- `xunit` `2.9.2` is the base test framework for both projects under `tests/`.
+- `xunit` `2.9.2` is the base test framework for all test projects.
 - `Microsoft.NET.Test.Sdk` `17.11.1` provides test runner integration.
 - `xunit.runner.visualstudio` `2.8.2` is included for IDE and CLI discovery.
-- `Avalonia.Headless.XUnit` `11.3.10` and `Avalonia.Themes.Fluent` `11.3.10` support headless UI tests in `tests/AsterGraph.Editor.Tests/AsterGraph.Editor.Tests.csproj`.
+- `Avalonia.Headless.XUnit` `11.3.10` and `Avalonia.Themes.Fluent` `11.3.10` support headless UI tests in both UI test projects.
 - No `FluentAssertions`, snapshot framework, or mocking library is used.
 
 ## Test Project Layout
 
-- `tests/AsterGraph.Editor.Tests/AsterGraph.Editor.Tests.csproj` targets `net9.0` and references all four library projects plus `src/AsterGraph.Demo`.
+- `tests/AsterGraph.Editor.Tests/AsterGraph.Editor.Tests.csproj` targets `net9.0` and focuses on core SDK runtime/behavior proofing.
 - `tests/AsterGraph.Serialization.Tests/AsterGraph.Serialization.Tests.csproj` targets `net8.0` and focuses on persistence compatibility.
+- `tests/AsterGraph.Demo.Tests/AsterGraph.Demo.Tests.csproj` targets `net9.0` and owns demo/sample-host integration surface tests and host-shell coverage.
 - Test code is kept in dedicated projects rather than colocated beside production code.
 
 ## Main Test Areas
@@ -42,21 +43,26 @@
   - host-service overrides
   - menu/presentation replacement seams
   - legacy-vs-factory migration parity
-- `src/AsterGraph.Demo` remains a sample-only host rather than a supported package, and demo-focused suites such as `tests/AsterGraph.Editor.Tests/DemoMainWindowTests.cs`, `tests/AsterGraph.Editor.Tests/DemoHostMenuControlTests.cs`, and `tests/AsterGraph.Editor.Tests/GraphEditorDemoShellTests.cs` keep that composition path under regression coverage.
+- `tests/AsterGraph.Demo.Tests` is the dedicated lane for demo/sample-host coverage, including:
+  - `tests/AsterGraph.Demo.Tests/DemoMainWindowTests.cs`
+  - `tests/AsterGraph.Demo.Tests/DemoHostMenuControlTests.cs`
+  - `tests/AsterGraph.Demo.Tests/GraphEditorDemoShellTests.cs`
+  - `tests/AsterGraph.Demo.Tests/GraphEditorLocalizationDemoTests.cs`
+- `tests/AsterGraph.Editor.Tests` is no longer responsible for demo host regression suites.
 - The repository does not contain browser automation, screenshot approval tests, or end-to-end desktop automation.
 
 ## Smoke And Proof Tools
 
 - `tools/AsterGraph.PackageSmoke/Program.cs` is a package-surface regression tool that exercises both legacy and factory/session paths.
 - `tools/AsterGraph.ScaleSmoke/Program.cs` emits repeatable `SCALE_*` markers for large-graph and runtime-state continuity checks.
-- Together with the editor and serialization xUnit projects, these tools make up the maintained proof surface even though they are not formal test projects.
+- Together with the three xUnit projects, these tools form the maintained proof surface.
 
 ## Commands
 
 ```powershell
-dotnet test avalonia-node-map.sln
-dotnet test tests/AsterGraph.Editor.Tests/AsterGraph.Editor.Tests.csproj
-dotnet test tests/AsterGraph.Serialization.Tests/AsterGraph.Serialization.Tests.csproj
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane all -Framework all -Configuration Release
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane build -Framework all -Configuration Release
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane test -Framework net9.0 -Configuration Release
 dotnet run --project tools/AsterGraph.PackageSmoke/AsterGraph.PackageSmoke.csproj
 dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj --nologo
 ```
@@ -64,12 +70,13 @@ dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj --
 ## Coverage And Gaps
 
 - No coverage collector, threshold, or `runsettings` file is tracked.
-- No checked-in CI workflow was detected under `.github/workflows/`.
-- The repo relies on xUnit regressions plus smoke/proof tools rather than benchmark automation or coverage enforcement.
+- `.github/workflows/ci.yml` is checked in and invokes `eng/ci.ps1` for matrixed lane validation.
+- The repo relies on xUnit regressions plus proof tools rather than benchmark automation or coverage enforcement.
+- `eng/ci.ps1` is the script-first repo gate; smoke-tool execution (`dotnet run`) remains an explicit separate step after lane execution.
 - Current risk areas are less about missing tests entirely and more about maintaining alignment across:
   - kernel-first runtime path
   - retained `GraphEditorViewModel` compatibility path
-  - Avalonia full-shell and standalone surfaces
+  - split-lane proof alignment (core SDK vs demo/sample host)
 
 ## Testing Conventions
 
