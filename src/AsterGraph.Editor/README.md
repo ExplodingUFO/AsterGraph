@@ -62,12 +62,12 @@ The older MVVM-rooted extension methods remain available only as migration shims
 
 Phase 18 readiness proof is anchored on the session boundary, not on the retained constructor path:
 
-- `tools/AsterGraph.HostSample` prints the human-readable readiness seam summary
-- `tools/AsterGraph.PackageSmoke` emits machine-checkable `PHASE18_*` markers
+- `src/AsterGraph.Demo` remains the visual/default host-composition sample
+- `tools/AsterGraph.PackageSmoke` emits machine-checkable `PACKAGE_SMOKE_*` markers
 - `tools/AsterGraph.ScaleSmoke` proves the same session/inspection-driven readiness story on a larger graph
 
 Reference material:
 
 - [Host Integration Guide](https://github.com/ExplodingUFO/AsterGraph/blob/master/docs/host-integration.md)
-- [Host Sample](https://github.com/ExplodingUFO/AsterGraph/tree/master/tools/AsterGraph.HostSample)
+- [Demo App](https://github.com/ExplodingUFO/AsterGraph/tree/master/src/AsterGraph.Demo)
 - [Root README](https://github.com/ExplodingUFO/AsterGraph/blob/master/README.md)

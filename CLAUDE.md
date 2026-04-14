@@ -21,9 +21,9 @@ AsterGraph is a modular node-graph editor toolkit for .NET with a reusable edito
 ## Technology Stack
 
 ## Languages
-- C# - Main implementation language across the solution in `src/AsterGraph.Abstractions`, `src/AsterGraph.Core`, `src/AsterGraph.Editor`, `src/AsterGraph.Avalonia`, `src/AsterGraph.Demo`, `tests/AsterGraph.Editor.Tests`, `tests/AsterGraph.Serialization.Tests`, `tools/AsterGraph.HostSample`, and `tools/AsterGraph.PackageSmoke`.
+- C# - Main implementation language across the solution in `src/AsterGraph.Abstractions`, `src/AsterGraph.Core`, `src/AsterGraph.Editor`, `src/AsterGraph.Avalonia`, `src/AsterGraph.Demo`, `tests/AsterGraph.Editor.Tests`, `tests/AsterGraph.Serialization.Tests`, `tools/AsterGraph.PackageSmoke`, and `tools/AsterGraph.ScaleSmoke`.
 - Avalonia XAML (`.axaml`) - Desktop UI markup for the Avalonia shell in `src/AsterGraph.Avalonia/Controls/GraphEditorView.axaml`, `src/AsterGraph.Avalonia/Controls/NodeCanvas.axaml`, `src/AsterGraph.Demo/App.axaml`, and `src/AsterGraph.Demo/Views/MainWindow.axaml`.
-- MSBuild XML - Build, packaging, and solution metadata in `Directory.Build.props`, `avalonia-node-map.sln`, `src/AsterGraph.Abstractions/AsterGraph.Abstractions.csproj`, `src/AsterGraph.Core/AsterGraph.Core.csproj`, `src/AsterGraph.Editor/AsterGraph.Editor.csproj`, `src/AsterGraph.Avalonia/AsterGraph.Avalonia.csproj`, `src/AsterGraph.Demo/AsterGraph.Demo.csproj`, `tests/AsterGraph.Editor.Tests/AsterGraph.Editor.Tests.csproj`, `tests/AsterGraph.Serialization.Tests/AsterGraph.Serialization.Tests.csproj`, `tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj`, `tools/AsterGraph.PackageSmoke/AsterGraph.PackageSmoke.csproj`, and `NuGet.config.sample`.
+- MSBuild XML - Build, packaging, and solution metadata in `Directory.Build.props`, `avalonia-node-map.sln`, `src/AsterGraph.Abstractions/AsterGraph.Abstractions.csproj`, `src/AsterGraph.Core/AsterGraph.Core.csproj`, `src/AsterGraph.Editor/AsterGraph.Editor.csproj`, `src/AsterGraph.Avalonia/AsterGraph.Avalonia.csproj`, `src/AsterGraph.Demo/AsterGraph.Demo.csproj`, `tests/AsterGraph.Editor.Tests/AsterGraph.Editor.Tests.csproj`, `tests/AsterGraph.Serialization.Tests/AsterGraph.Serialization.Tests.csproj`, `tools/AsterGraph.PackageSmoke/AsterGraph.PackageSmoke.csproj`, `tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj`, and `NuGet.config.sample`.
 ## Runtime
 - .NET SDK `10.0.201` detected locally via `dotnet --version`.
 - Target frameworks are `net8.0` and `net9.0` for the packable libraries in `src/AsterGraph.Abstractions/AsterGraph.Abstractions.csproj`, `src/AsterGraph.Core/AsterGraph.Core.csproj`, `src/AsterGraph.Editor/AsterGraph.Editor.csproj`, and `src/AsterGraph.Avalonia/AsterGraph.Avalonia.csproj`.
@@ -103,7 +103,7 @@ AsterGraph is a modular node-graph editor toolkit for .NET with a reusable edito
 - Use typed result objects or boolean success paths when validation is part of normal workflow, for example `NodeParameterValueNormalizationResult` in `src/AsterGraph.Editor/Parameters/NodeParameterValueAdapter.cs` and the export/import methods exercised by `tests/AsterGraph.Editor.Tests/EditorClipboardAndFragmentCompatibilityTests.cs`.
 ## Logging
 - Runtime state is surfaced through view-model properties and events rather than structured logging, for example `StatusMessage` and command state inside `src/AsterGraph.Editor/ViewModels/GraphEditorViewModel.cs`.
-- `Console.WriteLine` is used only in tooling and sample host programs such as `tools/AsterGraph.PackageSmoke/Program.cs` and `tools/AsterGraph.HostSample/Program.cs`.
+- `Console.WriteLine` is used only in tooling programs such as `tools/AsterGraph.PackageSmoke/Program.cs` and `tools/AsterGraph.ScaleSmoke/Program.cs`.
 ## Comments
 - Public or host-facing types usually carry XML documentation comments, often written in Chinese, for example `src/AsterGraph.Abstractions/Definitions/NodeDefinition.cs`, `src/AsterGraph.Editor/ViewModels/GraphEditorViewModel.cs`, and `src/AsterGraph.Avalonia/Controls/GraphEditorView.axaml.cs`.
 - Internal code uses short inline comments only where intent is not obvious, for example the serializer stability note in `src/AsterGraph.Core/Serialization/GraphDocumentSerializer.cs` and the clipboard-bridge boundary comment in `src/AsterGraph.Avalonia/Controls/GraphEditorView.axaml.cs`.
@@ -133,25 +133,25 @@ AsterGraph is a modular node-graph editor toolkit for .NET with a reusable edito
 - Location: `src/AsterGraph.Abstractions`
 - Contains: `Catalog`, `Compatibility`, `Definitions`, `Identifiers`, and `Styling` types such as `src/AsterGraph.Abstractions/Catalog/INodeCatalog.cs`, `src/AsterGraph.Abstractions/Compatibility/IPortCompatibilityService.cs`, and `src/AsterGraph.Abstractions/Styling/GraphEditorStyleOptions.cs`.
 - Depends on: BCL only.
-- Used by: `src/AsterGraph.Core`, `src/AsterGraph.Editor`, `src/AsterGraph.Avalonia`, `src/AsterGraph.Demo`, `tools/AsterGraph.HostSample`, and both test projects.
+- Used by: `src/AsterGraph.Core`, `src/AsterGraph.Editor`, `src/AsterGraph.Avalonia`, `src/AsterGraph.Demo`, and both test projects.
 - Purpose: Model graph documents and own stable JSON persistence plus the default port-compatibility policy.
 - Location: `src/AsterGraph.Core`
 - Contains: Immutable records in `src/AsterGraph.Core/Models/*.cs`, compatibility policy in `src/AsterGraph.Core/Compatibility/DefaultPortCompatibilityService.cs`, and serializer/compatibility helpers in `src/AsterGraph.Core/Serialization/*.cs`.
 - Depends on: `src/AsterGraph.Abstractions`
-- Used by: `src/AsterGraph.Editor`, `src/AsterGraph.Avalonia`, `src/AsterGraph.Demo`, `tools/AsterGraph.HostSample`, and tests.
+- Used by: `src/AsterGraph.Editor`, `src/AsterGraph.Avalonia`, `src/AsterGraph.Demo`, and tests.
 - Purpose: Hold mutable editor state, commands, selection, history, menus, workspace/file services, inspector projection, and host extension seams.
 - Location: `src/AsterGraph.Editor`
 - Contains: The main facade `src/AsterGraph.Editor/ViewModels/GraphEditorViewModel.cs`, mutable projections such as `src/AsterGraph.Editor/ViewModels/NodeViewModel.cs`, configuration records in `src/AsterGraph.Editor/Configuration/*.cs`, menu descriptors/builders in `src/AsterGraph.Editor/Menus/*.cs`, and services in `src/AsterGraph.Editor/Services/*.cs`.
 - Depends on: `src/AsterGraph.Abstractions`, `src/AsterGraph.Core`, and `CommunityToolkit.Mvvm`.
-- Used by: `src/AsterGraph.Avalonia`, `src/AsterGraph.Demo`, `tools/AsterGraph.HostSample`, `tools/AsterGraph.PackageSmoke`, and tests.
+- Used by: `src/AsterGraph.Avalonia`, `src/AsterGraph.Demo`, `tools/AsterGraph.PackageSmoke`, `tools/AsterGraph.ScaleSmoke`, and tests.
 - Purpose: Adapt editor state into Avalonia controls, resources, clipboard integration, host context propagation, and pointer/keyboard interaction.
 - Location: `src/AsterGraph.Avalonia`
 - Contains: Shell view in `src/AsterGraph.Avalonia/Controls/GraphEditorView.axaml` and `src/AsterGraph.Avalonia/Controls/GraphEditorView.axaml.cs`, canvas interaction in `src/AsterGraph.Avalonia/Controls/NodeCanvas.axaml.cs`, context menu rendering in `src/AsterGraph.Avalonia/Menus/GraphContextMenuPresenter.cs`, style adaptation in `src/AsterGraph.Avalonia/Styling/GraphEditorStyleAdapter.cs`, and theme resources in `src/AsterGraph.Avalonia/Themes/AsterGraphTheme.axaml`.
 - Depends on: `src/AsterGraph.Core`, `src/AsterGraph.Editor`, Avalonia, and `CommunityToolkit.Mvvm`.
-- Used by: `src/AsterGraph.Demo`, `tools/AsterGraph.HostSample`, `tools/AsterGraph.PackageSmoke`, and UI-focused tests.
+- Used by: `src/AsterGraph.Demo`, `tools/AsterGraph.PackageSmoke`, `tools/AsterGraph.ScaleSmoke`, and UI-focused tests.
 - Purpose: Compose catalogs, documents, style/behavior options, and optional host extensions into runnable applications.
-- Location: `src/AsterGraph.Demo` and `tools/AsterGraph.HostSample`
-- Contains: Avalonia app bootstrap in `src/AsterGraph.Demo/Program.cs` and `src/AsterGraph.Demo/App.axaml.cs`, demo composition in `src/AsterGraph.Demo/ViewModels/MainWindowViewModel.cs`, sample host API usage in `tools/AsterGraph.HostSample/Program.cs`, and demo-only node/menu content in `src/AsterGraph.Demo/Definitions/DemoNodeDefinitionProvider.cs` and `src/AsterGraph.Demo/Menus/DemoNodeResultsMenuContributor.cs`.
+- Location: `src/AsterGraph.Demo`, `tools/AsterGraph.PackageSmoke`, and `tools/AsterGraph.ScaleSmoke`
+- Contains: Avalonia app bootstrap in `src/AsterGraph.Demo/Program.cs` and `src/AsterGraph.Demo/App.axaml.cs`, demo composition in `src/AsterGraph.Demo/ViewModels/MainWindowViewModel.cs`, packaged-consumption smoke validation in `tools/AsterGraph.PackageSmoke/Program.cs`, scale/regression smoke validation in `tools/AsterGraph.ScaleSmoke/Program.cs`, and demo-only node/menu content in `src/AsterGraph.Demo/Definitions/DemoNodeDefinitionProvider.cs` and `src/AsterGraph.Demo/Menus/DemoNodeResultsMenuContributor.cs`.
 - Depends on: All publishable library projects as needed by the host.
 - Used by: Developers validating the package boundary and integration story.
 ## Data Flow
@@ -189,9 +189,9 @@ AsterGraph is a modular node-graph editor toolkit for .NET with a reusable edito
 - Location: `src/AsterGraph.Avalonia/Controls/GraphEditorView.axaml` and `src/AsterGraph.Avalonia/Controls/GraphEditorView.axaml.cs`
 - Triggers: Any host embedding the control.
 - Responsibilities: Bind the shell layout, wire keyboard shortcuts, adapt style resources, and connect Avalonia clipboard/host context services to the editor facade.
-- Location: `tools/AsterGraph.HostSample/Program.cs`
-- Triggers: `dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj`
-- Responsibilities: Demonstrate package-consumption boundaries, host context, localization, presentation provider, menu augmentation, and `GraphEditorViewChromeMode`.
+- Location: `tools/AsterGraph.PackageSmoke/Program.cs`
+- Triggers: `dotnet run --project tools/AsterGraph.PackageSmoke/AsterGraph.PackageSmoke.csproj`
+- Responsibilities: Verify packaged consumption through the runtime-first, hosted-UI, and retained compatibility routes without depending on the demo shell.
 ## Error Handling
 - Wrap host extension execution in `try/catch` and fall back to stock behavior in `src/AsterGraph.Editor/ViewModels/GraphEditorViewModel.cs` when `IGraphContextMenuAugmentor` throws.
 - Convert save/load failures into editor status messages in `src/AsterGraph.Editor/ViewModels/GraphEditorViewModel.cs` instead of crashing the host.

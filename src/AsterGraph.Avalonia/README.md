@@ -39,7 +39,7 @@ Those responsibilities live in `AsterGraph.Abstractions`, `AsterGraph.Core`, and
 Integration entry points:
 
 - [Host Integration Guide](https://github.com/ExplodingUFO/AsterGraph/blob/master/docs/host-integration.md)
-- [Host Sample](https://github.com/ExplodingUFO/AsterGraph/tree/master/tools/AsterGraph.HostSample)
+- [Demo App](https://github.com/ExplodingUFO/AsterGraph/tree/master/src/AsterGraph.Demo)
 
 Canonical and compatibility UI entry paths:
 
@@ -54,7 +54,7 @@ Per-surface presentation replacement is opt-in through `AsterGraphPresentationOp
 Phase 18 readiness note:
 
 - future plugin/automation work should anchor on `editor.Session` / `CreateSession(...)`, not on Avalonia controls themselves
-- `tools/AsterGraph.HostSample`, `tools/AsterGraph.PackageSmoke`, and `tools/AsterGraph.ScaleSmoke` now carry the readiness proof markers for that runtime boundary
+- `src/AsterGraph.Demo`, `tools/AsterGraph.PackageSmoke`, and `tools/AsterGraph.ScaleSmoke` now carry the current host/UI validation signals for that runtime boundary
 
 Phase 16 adapter boundary:
 

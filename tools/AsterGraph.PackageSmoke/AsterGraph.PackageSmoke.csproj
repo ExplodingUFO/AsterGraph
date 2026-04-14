@@ -21,4 +21,9 @@
     <ProjectReference Include="..\..\src\AsterGraph.Avalonia\AsterGraph.Avalonia.csproj" />
     <ProjectReference Include="..\..\src\AsterGraph.Editor\AsterGraph.Editor.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia.Headless" Version="11.3.10" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.10" />
+  </ItemGroup>
 </Project>

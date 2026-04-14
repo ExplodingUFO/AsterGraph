@@ -246,13 +246,13 @@ The proof ring for this extension story lives in the same public surfaces:
   - `tests/AsterGraph.Editor.Tests/GraphEditorPluginInspectionContractsTests.cs`
   - `tests/AsterGraph.Editor.Tests/GraphEditorAutomationExecutionTests.cs`
   - `tests/AsterGraph.Editor.Tests/GraphEditorProofRingTests.cs`
-- runnable host/package proof:
-  - `dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj --nologo`
-    - proves trusted-load continuity and blocked-load behavior from the canonical host boundary
+- runnable package/runtime proof:
   - `dotnet run --project tools/AsterGraph.PackageSmoke/AsterGraph.PackageSmoke.csproj --nologo`
-    - proves local candidate discovery, pre-load evaluation, and package-consumption trust continuity
+    - proves packaged consumption across the runtime-first, hosted-UI, and retained compatibility routes
   - `dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj --nologo`
     - keeps the larger-session automation proof path credible; it is not the trust/distribution proof surface
+  - `dotnet run --project src/AsterGraph.Demo/AsterGraph.Demo.csproj --nologo`
+    - remains the interactive host-composition sample for visual/manual inspection
 
 ## Quick Start
 
@@ -286,9 +286,8 @@ Release verification before publish:
 dotnet build src/AsterGraph.Editor/AsterGraph.Editor.csproj -t:Rebuild --no-restore -p:NoWarn= --nologo -v minimal
 dotnet build avalonia-node-map.sln -t:Rebuild --no-restore -p:NoWarn= --nologo -v minimal
 
-# verify the packed package path and the project-reference host sample
+# verify the packed package path and scale smoke tools
 dotnet run --project tools/AsterGraph.PackageSmoke/AsterGraph.PackageSmoke.csproj -p:UsePackedAsterGraphPackages=true --nologo
-dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj --nologo
 dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj --nologo
 
 # keep the normal solution test gate green
@@ -454,25 +453,23 @@ That guide covers:
 - how to opt out of stock standalone-canvas menu and shortcut behavior
 - how to replace node/menu/inspector/mini-map presenters per surface without moving behavior into the host
 
-Reference host sample:
+Interactive demo host:
 
-- `tools/AsterGraph.HostSample`
+- `src/AsterGraph.Demo`
 - Run with:
-  - `dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj`
-- The sample now explicitly demonstrates:
-  - `IGraphEditorSession`
-  - runtime command/query/event access
-  - recoverable-failure diagnostics through `IGraphEditorDiagnosticsSink`
-  - inspection snapshots and bounded recent diagnostics through `IGraphEditorSession.Diagnostics`
-  - opt-in `ILoggerFactory` / `ActivitySource` instrumentation through `GraphEditorInstrumentationOptions`
-  - host-supplied `CompatibilityService`
-  - `IGraphLocalizationProvider`
-  - `INodePresentationProvider`
-  - typed `ContextMenuContext` host access
-  - `GraphEditorStyleOptions`
-  - `GraphEditorView.ChromeMode`
-  - standalone `NodeCanvas`, `GraphInspectorView`, and `GraphMiniMap` composition
-  - `EnableDefaultContextMenu` and `EnableDefaultCommandShortcuts`
+  - `dotnet run --project src/AsterGraph.Demo/AsterGraph.Demo.csproj --nologo`
+- Use the demo when you want the visual/default host-composition reference, host menu seams, chrome toggles, and live shell behavior.
+
+Package consumption smoke:
+
+- `tools/AsterGraph.PackageSmoke`
+- Run with:
+  - `dotnet run --project tools/AsterGraph.PackageSmoke/AsterGraph.PackageSmoke.csproj --nologo`
+- The tool emits stable markers for:
+  - runtime-first session creation
+  - canonical hosted-UI composition via `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)`
+  - retained compatibility composition via `new GraphEditorViewModel(...)` + `new GraphEditorView { Editor = ... }`
+  - packaged restore / consumption viability without depending on the demo shell
 
 Repeatable scale validation:
 

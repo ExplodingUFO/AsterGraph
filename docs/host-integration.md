@@ -104,10 +104,7 @@ dotnet pack src/AsterGraph.Avalonia/AsterGraph.Avalonia.csproj -c Release -o art
 # 3. verify NuGet consumption against the packed artifacts
 dotnet run --project tools/AsterGraph.PackageSmoke/AsterGraph.PackageSmoke.csproj -p:UsePackedAsterGraphPackages=true --nologo
 
-# 4. verify the project-reference host sample still behaves correctly
-dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj --nologo
-
-# 5. keep the standard regression suite green
+# 4. keep the standard regression suite green
 dotnet test avalonia-node-map.sln --no-restore --nologo -v minimal
 ```
 
@@ -115,9 +112,9 @@ Notes:
 
 - Use `-t:Rebuild` when checking XML documentation warning retirement. Incremental `dotnet build` can reuse existing outputs and hide `CS1591` regressions.
 - `tools/AsterGraph.PackageSmoke` should be run with `UsePackedAsterGraphPackages=true` so it restores from `artifacts/packages` instead of falling back to project references.
-- `tools/AsterGraph.HostSample` stays valuable even after package smoke passes because it validates the supported host-composition path, diagnostics flow, and stock Avalonia integration surface under normal project references.
-- Phase 17 migration proof adds human-readable route guidance in `tools/AsterGraph.HostSample` and machine-checkable `PHASE17_ROUTE_SIGNAL_OK` / `PHASE17_SHARED_CANONICAL_OK` markers in `tools/AsterGraph.PackageSmoke`.
-- Phase 18 readiness proof adds human-readable seam/readiness reporting in `tools/AsterGraph.HostSample`, machine-checkable `PHASE18_*` markers in `tools/AsterGraph.PackageSmoke`, and `PHASE18_SCALE_READINESS_OK` in `tools/AsterGraph.ScaleSmoke`.
+- `src/AsterGraph.Demo` is now the single visual host-composition sample for the default Avalonia shell and related host seams.
+- `tools/AsterGraph.PackageSmoke` is intentionally narrow: it proves packaged consumption across the runtime-first, hosted-UI, and retained compatibility routes, then emits stable `PACKAGE_SMOKE_*` markers.
+- `tools/AsterGraph.ScaleSmoke` keeps the larger-graph scale/readiness proof path separate from the package-consumption smoke tool.
 
 ## Canonical Host Composition
 
@@ -474,14 +471,13 @@ Header, library, and status chrome remain shell-only in Phase 3. If a host wants
 
 Reference sample:
 
-- `tools/AsterGraph.HostSample`
+- `src/AsterGraph.Demo`
 - Run with:
-  - `dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj`
-- The sample demonstrates both the convenience full shell and standalone canvas/inspector/mini map composition against the same editor state.
-- It also prints human-readable diagnostics/inspection evidence, machine-checkable descriptor/runtime markers from earlier phases, Phase 16 adapter-boundary markers, Phase 17 migration guidance, and Phase 18 readiness seam output for the canonical runtime boundary.
+  - `dotnet run --project src/AsterGraph.Demo/AsterGraph.Demo.csproj --nologo`
+- The demo remains the interactive/default host sample for the shipped shell plus standalone canvas/inspector/mini map surfaces.
 - `tools/AsterGraph.PackageSmoke`
   - `dotnet run --project tools/AsterGraph.PackageSmoke/AsterGraph.PackageSmoke.csproj --nologo`
-  - emits machine-checkable `PHASE17_*` and `PHASE18_*` markers, including canonical readiness parity and the legacy direct-constructor readiness window boundary
+  - emits machine-checkable `PACKAGE_SMOKE_ROUTE_OK`, `PACKAGE_SMOKE_RUNTIME_OK`, `PACKAGE_SMOKE_HOSTED_UI_OK`, `PACKAGE_SMOKE_COMPAT_OK`, and `PACKAGE_SMOKE_OK`
 - `tools/AsterGraph.ScaleSmoke`
   - `dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj --nologo`
   - emits `PHASE18_SCALE_READINESS_OK` to prove session-driven automation/inspection primitives still hold on a larger graph
