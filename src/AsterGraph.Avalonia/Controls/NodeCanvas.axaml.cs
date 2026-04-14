@@ -5,7 +5,6 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media;
-using Avalonia.Threading;
 using Avalonia.VisualTree;
 using AsterGraph.Abstractions.Styling;
 using AsterGraph.Avalonia.Controls.Internal;
@@ -80,8 +79,8 @@ public partial class NodeCanvas : UserControl
     private readonly GraphContextMenuPresenter _stockContextMenuPresenter = new();
     private readonly IGraphNodeVisualPresenter _stockNodeVisualPresenter = new DefaultGraphNodeVisualPresenter();
     private readonly NodeCanvasInteractionSession _interactionSession = new();
-    private readonly NodeCanvasConnectionSceneRenderer _connectionSceneRenderer = new();
     private readonly NodeCanvasContextMenuCoordinator _contextMenuCoordinator;
+    private readonly NodeCanvasSceneHost _sceneHost;
     private bool _isAttachedToVisualTree;
 
     /// <summary>
@@ -92,6 +91,7 @@ public partial class NodeCanvas : UserControl
         InitializeComponent();
         Focusable = true;
         _contextMenuCoordinator = new NodeCanvasContextMenuCoordinator(new NodeCanvasContextMenuHost(this), this);
+        _sceneHost = new NodeCanvasSceneHost(new NodeCanvasSceneHostAdapter(this));
 
         ContextRequested += HandleCanvasContextRequested;
         KeyDown += HandleCanvasKeyDown;
@@ -276,54 +276,7 @@ public partial class NodeCanvas : UserControl
     }
 
     private void RebuildScene()
-    {
-        if (_nodeLayer is null || _connectionLayer is null)
-        {
-            return;
-        }
-
-        _nodeLayer.Children.Clear();
-        _connectionLayer.Children.Clear();
-        _nodeVisuals.Clear();
-
-        if (ViewModel is null)
-        {
-            return;
-        }
-
-        foreach (var node in ViewModel.Nodes)
-        {
-            var visual = CreateNodeVisual(node);
-            _nodeVisuals[node] = visual;
-            _nodeLayer.Children.Add(visual.Root);
-            UpdateNodeVisual(node);
-        }
-
-        UpdateViewportTransform();
-        RenderConnections();
-        Dispatcher.UIThread.Post(RenderConnections, DispatcherPriority.Loaded);
-    }
-
-    private NodeCanvasRenderedNodeVisual CreateNodeVisual(NodeViewModel node)
-    {
-        var presenter = NodeVisualPresenter ?? _stockNodeVisualPresenter;
-        var visual = presenter.Create(CreateNodeVisualContext(node));
-        return new NodeCanvasRenderedNodeVisual(visual.Root, presenter, visual);
-    }
-
-    private GraphNodeVisualContext CreateNodeVisualContext(NodeViewModel node)
-    {
-        var editor = ViewModel ?? throw new InvalidOperationException("Node visuals require a bound editor view model.");
-        return new GraphNodeVisualContext(
-            editor,
-            node,
-            editor.StyleOptions,
-            () => Focus(),
-            BeginNodeDrag,
-            ActivatePortFromVisual,
-            _contextMenuCoordinator.OpenNodeContextMenu,
-            _contextMenuCoordinator.OpenPortContextMenu);
-    }
+        => _sceneHost.RebuildScene();
 
     private void ActivatePortFromVisual(NodeViewModel node, PortViewModel port)
     {
@@ -333,21 +286,10 @@ public partial class NodeCanvas : UserControl
     }
 
     private void UpdateViewportTransform()
-    {
-        if (_sceneRoot is null || ViewModel is null)
-        {
-            return;
-        }
-
-        var transforms = new TransformGroup();
-        transforms.Children.Add(new ScaleTransform(ViewModel.Zoom, ViewModel.Zoom));
-        transforms.Children.Add(new TranslateTransform(ViewModel.PanX, ViewModel.PanY));
-        _sceneRoot.RenderTransform = transforms;
-        _backgroundGrid?.InvalidateVisual();
-    }
+        => _sceneHost.UpdateViewportTransform();
 
     private void RenderConnections()
-        => _connectionSceneRenderer.RenderConnections(CreateConnectionSceneContext());
+        => _sceneHost.RenderConnections();
 
     private void BeginNodeDrag(NodeViewModel node, PointerPressedEventArgs args)
     {
@@ -662,57 +604,16 @@ public partial class NodeCanvas : UserControl
     }
 
     private void UpdateSelectionState()
-    {
-        foreach (var node in ViewModel?.Nodes ?? [])
-        {
-            UpdateNodeVisual(node);
-        }
-    }
+        => _sceneHost.UpdateSelectionState();
 
     private void UpdateNodePosition(NodeViewModel node)
-    {
-        if (_nodeVisuals.TryGetValue(node, out var visual))
-        {
-            Canvas.SetLeft(visual.Root, node.X);
-            Canvas.SetTop(visual.Root, node.Y);
-        }
-    }
+        => _sceneHost.UpdateNodePosition(node);
 
     private void UpdateNodeVisual(NodeViewModel node)
-    {
-        if (!_nodeVisuals.TryGetValue(node, out var visual))
-        {
-            return;
-        }
-
-        visual.Presenter.Update(visual.Visual, CreateNodeVisualContext(node));
-        Canvas.SetLeft(visual.Root, node.X);
-        Canvas.SetTop(visual.Root, node.Y);
-    }
+        => _sceneHost.UpdateNodeVisual(node);
 
     private GraphPoint GetPortAnchor(NodeViewModel node, PortViewModel port)
-        => _connectionSceneRenderer.GetPortAnchor(CreateConnectionSceneContext(), node, port);
-
-    private NodeCanvasConnectionSceneContext CreateConnectionSceneContext()
-        => new(
-            ViewModel,
-            _connectionLayer,
-            _nodeLayer,
-            this,
-            _nodeVisuals,
-            _interactionSession.PointerScreenPosition,
-            GetConnectionStyle,
-            _contextMenuCoordinator.CreateContextMenuSnapshot,
-            _contextMenuCoordinator.ResolveWorldPosition,
-            _contextMenuCoordinator.OpenContextMenu);
-
-    private ConnectionStyleOptions GetConnectionStyle(ConnectionViewModel connection)
-        => connection.ConversionId is not null
-            ? ViewModel?.StyleOptions.ConnectionOverrides.FirstOrDefault(overrideStyle => overrideStyle.ConversionId == connection.ConversionId)?.Style
-              ?? ViewModel?.StyleOptions.Connection
-              ?? GraphEditorStyleOptions.Default.Connection
-            : ViewModel?.StyleOptions.Connection
-              ?? GraphEditorStyleOptions.Default.Connection;
+        => _sceneHost.GetPortAnchor(node, port);
 
     private GraphPoint ResolveWorldPosition(ContextRequestedEventArgs args, Control relativeTo)
     {
@@ -757,6 +658,47 @@ public partial class NodeCanvas : UserControl
 
         public NodeCanvasContextMenuSnapshot CreateContextMenuSnapshot()
             => _owner.CreateContextMenuSnapshot();
+    }
+
+    private sealed class NodeCanvasSceneHostAdapter : INodeCanvasSceneHost
+    {
+        private readonly NodeCanvas _owner;
+
+        public NodeCanvasSceneHostAdapter(NodeCanvas owner)
+        {
+            _owner = owner ?? throw new ArgumentNullException(nameof(owner));
+        }
+
+        public GraphEditorViewModel? ViewModel => _owner.ViewModel;
+
+        public Grid? SceneRoot => _owner._sceneRoot;
+
+        public Canvas? ConnectionLayer => _owner._connectionLayer;
+
+        public Canvas? NodeLayer => _owner._nodeLayer;
+
+        public Control CoordinateRoot => _owner;
+
+        public GridBackground? BackgroundGrid => _owner._backgroundGrid;
+
+        public Dictionary<NodeViewModel, NodeCanvasRenderedNodeVisual> NodeVisuals => _owner._nodeVisuals;
+
+        public IGraphNodeVisualPresenter? NodeVisualPresenter => _owner.NodeVisualPresenter;
+
+        public IGraphNodeVisualPresenter StockNodeVisualPresenter => _owner._stockNodeVisualPresenter;
+
+        public NodeCanvasInteractionSession InteractionSession => _owner._interactionSession;
+
+        public NodeCanvasContextMenuCoordinator ContextMenuCoordinator => _owner._contextMenuCoordinator;
+
+        public void FocusCanvas()
+            => _owner.Focus();
+
+        public void BeginNodeDrag(NodeViewModel node, PointerPressedEventArgs args)
+            => _owner.BeginNodeDrag(node, args);
+
+        public void ActivatePort(NodeViewModel node, PortViewModel port)
+            => _owner.ActivatePortFromVisual(node, port);
     }
 
     private void ApplySelectionAdornerStyle()

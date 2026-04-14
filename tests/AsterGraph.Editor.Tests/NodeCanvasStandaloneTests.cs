@@ -18,6 +18,7 @@ using AsterGraph.Core.Compatibility;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Catalog;
 using AsterGraph.Editor.Menus;
+using AsterGraph.Editor.Presentation;
 using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.ViewModels;
 using Xunit;
@@ -308,6 +309,42 @@ public sealed class NodeCanvasStandaloneTests
     }
 
     [AvaloniaFact]
+    public void StandaloneCanvas_CustomNodeVisualPresenter_UpdatesWhenSelectionAndPresentationChange()
+    {
+        var editor = CreateEditor();
+        var customPresenter = new CustomNodeVisualPresenter();
+        var (window, canvas) = CreateStandaloneCanvasWindow(
+            editor,
+            presentation: new AsterGraphPresentationOptions
+            {
+                NodeVisualPresenter = customPresenter,
+            });
+
+        try
+        {
+            var sourceNode = editor.Nodes.Single(node => node.Id == SourceNodeId);
+            var afterInitialRender = customPresenter.UpdateCalls;
+
+            editor.SelectSingleNode(sourceNode, updateStatus: false);
+
+            Assert.True(customPresenter.UpdateCalls >= afterInitialRender + editor.Nodes.Count);
+            var afterSelection = customPresenter.UpdateCalls;
+
+            sourceNode.UpdatePresentation(new NodePresentationState(
+                StatusBar: new NodeStatusBarDescriptor("Ready", "#7FE7D7")));
+
+            Assert.True(customPresenter.UpdateCalls >= afterSelection + 1);
+            Assert.Equal(sourceNode.Id, customPresenter.LastUpdatedNodeId);
+            Assert.True(customPresenter.LastUpdatedNodeWasSelected);
+            Assert.Equal(sourceNode.Height, customPresenter.LastUpdatedNodeHeight);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
     public void WheelViewportGestures_CanBeDisabledForHostCooperativeScrolling()
     {
         var editor = CreateEditor();
@@ -548,8 +585,19 @@ public sealed class NodeCanvasStandaloneTests
 
     private sealed class CustomNodeVisualPresenter : IGraphNodeVisualPresenter
     {
+        public int CreateCalls { get; private set; }
+
+        public int UpdateCalls { get; private set; }
+
+        public string? LastUpdatedNodeId { get; private set; }
+
+        public bool LastUpdatedNodeWasSelected { get; private set; }
+
+        public double LastUpdatedNodeHeight { get; private set; }
+
         public GraphNodeVisual Create(GraphNodeVisualContext context)
         {
+            CreateCalls++;
             var surface = new Border
             {
                 Width = context.Node.Width,
@@ -604,6 +652,10 @@ public sealed class NodeCanvasStandaloneTests
 
         public void Update(GraphNodeVisual visual, GraphNodeVisualContext context)
         {
+            UpdateCalls++;
+            LastUpdatedNodeId = context.Node.Id;
+            LastUpdatedNodeWasSelected = context.Node.IsSelected;
+            LastUpdatedNodeHeight = context.Node.Height;
             visual.Root.Width = context.Node.Width;
             visual.Root.Height = context.Node.Height;
         }
