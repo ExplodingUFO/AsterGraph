@@ -33,6 +33,8 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost, IGrap
     private readonly GraphEditorKernelDocumentMutator _documentMutator = new();
     private readonly GraphEditorKernelNodeMutationHost _nodeMutationHost;
     private readonly GraphEditorKernelNodeMutationCoordinator _nodeMutationCoordinator;
+    private readonly GraphEditorKernelConnectionMutationHost _connectionMutationHost;
+    private readonly GraphEditorKernelConnectionMutationCoordinator _connectionMutationCoordinator;
     private readonly GraphEditorKernelCommandRouter _commandRouter;
     private readonly GraphEditorKernelWorkspaceSaveCoordinatorHost _workspaceSaveCoordinatorHost;
     private readonly GraphEditorKernelWorkspaceLoadCoordinatorHost _workspaceLoadCoordinatorHost;
@@ -73,6 +75,8 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost, IGrap
         _behaviorOptions = behaviorOptions;
         _nodeMutationHost = new GraphEditorKernelNodeMutationHost(this);
         _nodeMutationCoordinator = new GraphEditorKernelNodeMutationCoordinator(_nodeMutationHost, _documentMutator);
+        _connectionMutationHost = new GraphEditorKernelConnectionMutationHost(this);
+        _connectionMutationCoordinator = new GraphEditorKernelConnectionMutationCoordinator(_connectionMutationHost, _documentMutator);
         _commandRouter = new GraphEditorKernelCommandRouter(this);
         _workspaceSaveCoordinatorHost = new GraphEditorKernelWorkspaceSaveCoordinatorHost(this);
         _workspaceLoadCoordinatorHost = new GraphEditorKernelWorkspaceLoadCoordinatorHost(this);
@@ -213,120 +217,28 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost, IGrap
         => _nodeMutationCoordinator.SetNodePositions(positions, updateStatus);
 
     public void StartConnection(string sourceNodeId, string sourcePortId)
-    {
-        if (!_behaviorOptions.Commands.Connections.AllowCreate)
-        {
-            CurrentStatusMessage = "Connection creation is disabled by host permissions.";
-            return;
-        }
-
-        var sourceNode = FindNode(sourceNodeId);
-        var sourcePort = sourceNode?.Outputs.FirstOrDefault(port => string.Equals(port.Id, sourcePortId, StringComparison.Ordinal));
-        if (sourceNode is null || sourcePort is null)
-        {
-            return;
-        }
-
-        var nextPending = GraphEditorPendingConnectionSnapshot.Create(true, sourceNode.Id, sourcePort.Id);
-        if (_pendingConnection == nextPending)
-        {
-            CancelPendingConnection();
-            return;
-        }
-
-        _pendingConnection = nextPending;
-        CurrentStatusMessage = $"Connecting from {sourceNode.Title}.{sourcePort.Label}.";
-        PendingConnectionChanged?.Invoke(this, new GraphEditorPendingConnectionChangedEventArgs(_pendingConnection));
-    }
+        => _connectionMutationCoordinator.StartConnection(sourceNodeId, sourcePortId);
 
     public void CompleteConnection(string targetNodeId, string targetPortId)
-    {
-        if (!_pendingConnection.HasPendingConnection || _pendingConnection.SourceNodeId is null || _pendingConnection.SourcePortId is null)
-        {
-            return;
-        }
-
-        ConnectPorts(_pendingConnection.SourceNodeId, _pendingConnection.SourcePortId, targetNodeId, targetPortId);
-    }
+        => _connectionMutationCoordinator.CompleteConnection(targetNodeId, targetPortId);
 
     public void CancelPendingConnection()
-    {
-        if (!_pendingConnection.HasPendingConnection)
-        {
-            return;
-        }
-
-        _pendingConnection = GraphEditorPendingConnectionSnapshot.Create(false, null, null);
-        PendingConnectionChanged?.Invoke(this, new GraphEditorPendingConnectionChangedEventArgs(_pendingConnection));
-    }
+        => _connectionMutationCoordinator.CancelPendingConnection();
 
     public void DeleteConnection(string connectionId)
-    {
-        if (!_behaviorOptions.Commands.Connections.AllowDelete)
-        {
-            CurrentStatusMessage = "Connection deletion is disabled by host permissions.";
-            return;
-        }
-
-        var mutation = _documentMutator.DeleteConnection(_document, connectionId);
-        if (mutation.Connection is null)
-        {
-            return;
-        }
-
-        _document = mutation.Document;
-        MarkDirty($"Deleted connection {mutation.Connection.Label}.", GraphEditorDocumentChangeKind.ConnectionsChanged, null, [mutation.Connection.Id]);
-    }
+        => _connectionMutationCoordinator.DeleteConnection(connectionId);
 
     public void BreakConnectionsForPort(string nodeId, string portId)
-    {
-        if (!_behaviorOptions.Commands.Connections.AllowDisconnect)
-        {
-            CurrentStatusMessage = "Disconnect is disabled by host permissions.";
-            return;
-        }
-
-        RemoveConnections(
-            connection =>
-                (connection.SourceNodeId == nodeId && connection.SourcePortId == portId)
-                || (connection.TargetNodeId == nodeId && connection.TargetPortId == portId),
-            "Disconnected port links.");
-    }
+        => _connectionMutationCoordinator.BreakConnectionsForPort(nodeId, portId);
 
     public void DisconnectIncoming(string nodeId)
-    {
-        if (!_behaviorOptions.Commands.Connections.AllowDisconnect)
-        {
-            CurrentStatusMessage = "Disconnect is disabled by host permissions.";
-            return;
-        }
-
-        RemoveConnections(connection => connection.TargetNodeId == nodeId, "Disconnected incoming links.");
-    }
+        => _connectionMutationCoordinator.DisconnectIncoming(nodeId);
 
     public void DisconnectOutgoing(string nodeId)
-    {
-        if (!_behaviorOptions.Commands.Connections.AllowDisconnect)
-        {
-            CurrentStatusMessage = "Disconnect is disabled by host permissions.";
-            return;
-        }
-
-        RemoveConnections(connection => connection.SourceNodeId == nodeId, "Disconnected outgoing links.");
-    }
+        => _connectionMutationCoordinator.DisconnectOutgoing(nodeId);
 
     public void DisconnectAll(string nodeId)
-    {
-        if (!_behaviorOptions.Commands.Connections.AllowDisconnect)
-        {
-            CurrentStatusMessage = "Disconnect is disabled by host permissions.";
-            return;
-        }
-
-        RemoveConnections(
-            connection => connection.SourceNodeId == nodeId || connection.TargetNodeId == nodeId,
-            "Disconnected all links.");
-    }
+        => _connectionMutationCoordinator.DisconnectAll(nodeId);
 
     public void PanBy(double deltaX, double deltaY)
     {
@@ -469,86 +381,6 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost, IGrap
         => _compatibilityQueries.GetCompatibleTargets(_document, sourceNodeId, sourcePortId);
 #pragma warning restore CS0618
 
-    private void ConnectPorts(string sourceNodeId, string sourcePortId, string targetNodeId, string targetPortId)
-    {
-        if (!_behaviorOptions.Commands.Connections.AllowCreate)
-        {
-            CurrentStatusMessage = "Connection creation is disabled by host permissions.";
-            return;
-        }
-
-        var sourceNode = FindNode(sourceNodeId);
-        var sourcePort = sourceNode?.Outputs.FirstOrDefault(port => string.Equals(port.Id, sourcePortId, StringComparison.Ordinal));
-        var targetNode = FindNode(targetNodeId);
-        var targetPort = targetNode?.Inputs.FirstOrDefault(port => string.Equals(port.Id, targetPortId, StringComparison.Ordinal));
-        if (sourceNode is null || sourcePort is null || targetNode is null || targetPort is null)
-        {
-            return;
-        }
-
-        if (sourcePort.TypeId is null || targetPort.TypeId is null)
-        {
-            CurrentStatusMessage = "Connection endpoints must expose stable type identifiers.";
-            return;
-        }
-
-        var compatibility = _compatibilityService.Evaluate(sourcePort.TypeId, targetPort.TypeId);
-        if (!compatibility.IsCompatible)
-        {
-            CurrentStatusMessage = $"Incompatible connection: {sourcePort.TypeId} -> {targetPort.TypeId}.";
-            return;
-        }
-
-        if (_document.Connections.Any(connection =>
-                connection.SourceNodeId == sourceNode.Id
-                && connection.SourcePortId == sourcePort.Id
-                && connection.TargetNodeId == targetNode.Id
-                && connection.TargetPortId == targetPort.Id))
-        {
-            CancelPendingConnection();
-            CurrentStatusMessage = "That connection already exists.";
-            return;
-        }
-
-        var replacedConnections = _document.Connections
-            .Where(connection => connection.TargetNodeId == targetNode.Id && connection.TargetPortId == targetPort.Id)
-            .ToList();
-        if (replacedConnections.Count > 0 && !CanReplaceIncomingConnection())
-        {
-            CurrentStatusMessage = "Replacing an incoming connection requires delete or disconnect permission.";
-            return;
-        }
-
-        var nextConnection = new GraphConnection(
-            CreateConnectionId(),
-            sourceNode.Id,
-            sourcePort.Id,
-            targetNode.Id,
-            targetPort.Id,
-            $"{sourcePort.Label} to {targetPort.Label}",
-            sourcePort.AccentHex,
-            compatibility.ConversionId);
-
-        _document = _document with
-        {
-            Connections = _document.Connections
-                .Except(replacedConnections)
-                .Concat([nextConnection])
-                .ToList(),
-        };
-        _pendingConnection = GraphEditorPendingConnectionSnapshot.Create(false, null, null);
-        PendingConnectionChanged?.Invoke(this, new GraphEditorPendingConnectionChangedEventArgs(_pendingConnection));
-        CurrentStatusMessage = compatibility.Kind == PortCompatibilityKind.ImplicitConversion
-            ? $"Connected {sourceNode.Title} to {targetNode.Title} with implicit conversion."
-            : $"Connected {sourceNode.Title} to {targetNode.Title}.";
-        MarkDirty(
-            CurrentStatusMessage,
-            GraphEditorDocumentChangeKind.ConnectionsChanged,
-            [sourceNode.Id, targetNode.Id],
-            [nextConnection.Id],
-            preserveStatus: true);
-    }
-
     private GraphPoint GetViewportCenter()
         => _viewportCoordinator.GetViewportCenter(GetViewportSnapshot());
 
@@ -623,19 +455,6 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost, IGrap
 
     private bool CanRemoveConnectionsAsSideEffect()
         => _behaviorOptions.Commands.Connections.AllowDelete || _behaviorOptions.Commands.Connections.AllowDisconnect;
-
-    private void RemoveConnections(Func<GraphConnection, bool> predicate, string status)
-    {
-        var mutation = _documentMutator.RemoveConnections(_document, predicate);
-        if (mutation.RemovedConnections.Count == 0)
-        {
-            CurrentStatusMessage = "No matching connections to remove.";
-            return;
-        }
-
-        _document = mutation.Document;
-        MarkDirty(status, GraphEditorDocumentChangeKind.ConnectionsChanged, null, mutation.RemovedConnections.Select(connection => connection.Id).ToList());
-    }
 
     private GraphNode? FindNode(string nodeId)
         => _document.Nodes.FirstOrDefault(node => string.Equals(node.Id, nodeId, StringComparison.Ordinal));
