@@ -38,7 +38,7 @@ namespace AsterGraph.Editor.ViewModels;
 /// 而自定义 UI 宿主应优先考虑 <see cref="AsterGraphEditorFactory.CreateSession(AsterGraphEditorOptions)"/>。
 /// 本类型在当前迁移窗口内仍然受支持，但不应再被视为新的首选组合根。
 /// </remarks>
-public sealed partial class GraphEditorViewModel : ObservableObject, IGraphContextMenuHost, GraphEditorViewModel.IGraphEditorCompatibilityCommandHost, GraphEditorViewModel.IGraphEditorFragmentCommandHost, IGraphEditorKernelProjectionHost, IGraphEditorHistoryStateHost, IGraphEditorSelectionCoordinatorHost, IGraphEditorSelectionStateSynchronizerHost, IGraphEditorSelectionProjectionApplierHost, IGraphEditorDocumentCollectionSynchronizerHost, IGraphEditorNodePositionDirtyTrackerHost, IGraphEditorRetainedEventPublisherHost, IGraphEditorNodeLayoutCoordinatorHost, IGraphEditorPresentationLocalizationCoordinatorHost
+public sealed partial class GraphEditorViewModel : ObservableObject, IGraphContextMenuHost, GraphEditorViewModel.IGraphEditorCompatibilityCommandHost, GraphEditorViewModel.IGraphEditorFragmentCommandHost, IGraphEditorKernelProjectionHost, IGraphEditorHistoryStateHost, IGraphEditorSelectionCoordinatorHost, IGraphEditorSelectionStateSynchronizerHost, IGraphEditorSelectionProjectionApplierHost, IGraphEditorDocumentCollectionSynchronizerHost, IGraphEditorNodePositionDirtyTrackerHost, IGraphEditorRetainedEventPublisherHost, IGraphEditorNodeLayoutCoordinatorHost
 {
     private const double DefaultZoom = 0.88;
     private const double DefaultPanX = 110;
@@ -107,6 +107,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     private readonly GraphEditorNodePositionDirtyTracker _nodePositionDirtyTracker;
     private readonly GraphEditorRetainedEventPublisher _retainedEventPublisher;
     private readonly GraphEditorNodeLayoutCoordinator _nodeLayoutCoordinator;
+    private readonly GraphEditorViewModelPresentationLocalizationCoordinatorHost _presentationLocalizationCoordinatorHost;
     private readonly GraphEditorPresentationLocalizationCoordinator _presentationLocalizationCoordinator;
     private readonly GraphEditorViewModelPersistenceCoordinatorHost _persistenceCoordinatorHost;
     private readonly GraphEditorWorkspaceSaveCoordinator _workspaceSaveCoordinator;
@@ -188,7 +189,8 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         _nodePresentationProvider = nodePresentationProvider;
         _localizationProvider = localizationProvider;
         _documentProjectionApplier = new GraphEditorDocumentProjectionApplier();
-        _presentationLocalizationCoordinator = new GraphEditorPresentationLocalizationCoordinator(this);
+        _presentationLocalizationCoordinatorHost = new GraphEditorViewModelPresentationLocalizationCoordinatorHost(this);
+        _presentationLocalizationCoordinator = new GraphEditorPresentationLocalizationCoordinator(_presentationLocalizationCoordinatorHost);
         _selectionProjection = new GraphEditorSelectionProjection(
             LocalizeText,
             (key, fallback, arguments) => LocalizeFormat(key, fallback, arguments));
@@ -1020,30 +1022,6 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         MarkDirty(status);
         NotifyDocumentChanged(GraphEditorDocumentChangeKind.LayoutChanged, nodes.Select(node => node.Id).ToList());
     }
-
-    INodePresentationProvider? IGraphEditorPresentationLocalizationCoordinatorHost.CurrentNodePresentationProvider
-        => _nodePresentationProvider;
-
-    IGraphLocalizationProvider? IGraphEditorPresentationLocalizationCoordinatorHost.CurrentLocalizationProvider
-        => _localizationProvider;
-
-    IReadOnlyList<NodeViewModel> IGraphEditorPresentationLocalizationCoordinatorHost.Nodes
-        => Nodes;
-
-    bool IGraphEditorPresentationLocalizationCoordinatorHost.TrySetNodePresentationProvider(INodePresentationProvider? provider)
-        => SetProperty(ref _nodePresentationProvider, provider, nameof(NodePresentationProvider));
-
-    bool IGraphEditorPresentationLocalizationCoordinatorHost.TrySetLocalizationProvider(IGraphLocalizationProvider? provider)
-        => SetProperty(ref _localizationProvider, provider, nameof(LocalizationProvider));
-
-    void IGraphEditorPresentationLocalizationCoordinatorHost.RefreshSelectionProjection()
-        => RefreshSelectionProjection();
-
-    void IGraphEditorPresentationLocalizationCoordinatorHost.RaiseComputedPropertyChanges()
-        => RaiseComputedPropertyChanges();
-
-    void IGraphEditorPresentationLocalizationCoordinatorHost.NotifyFragmentLibraryCaptionChanged()
-        => OnPropertyChanged(nameof(FragmentLibraryCaption));
 
     [ObservableProperty]
     private double zoom = DefaultZoom;
@@ -2146,6 +2124,12 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     private string StatusText(string key, string fallback, params object?[] arguments)
         => _presentationLocalizationCoordinator.StatusText(key, fallback, arguments);
+
+    private bool TrySetNodePresentationProvider(INodePresentationProvider? provider)
+        => SetProperty(ref _nodePresentationProvider, provider, nameof(NodePresentationProvider));
+
+    private bool TrySetLocalizationProvider(IGraphLocalizationProvider? provider)
+        => SetProperty(ref _localizationProvider, provider, nameof(LocalizationProvider));
 
     private void SetStatus(string key, string fallback)
         => StatusMessage = StatusText(key, fallback);
