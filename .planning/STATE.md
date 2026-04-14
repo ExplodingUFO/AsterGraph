@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.5
 milestone_name: Runtime Boundary Cleanup and Quality Gates
 status: completed
-stopped_at: Phase 28 complete
-last_updated: "2026-04-14T19:48:43.2062260+08:00"
-last_activity: 2026-04-14 - Verified and completed Phase 28
+stopped_at: Phase 29 planned
+last_updated: "2026-04-14T20:20:09.9120467+08:00"
+last_activity: 2026-04-14 - Captured and planned Phase 29
 progress:
   total_phases: 4
   completed_phases: 3
-  total_plans: 9
+  total_plans: 12
   completed_plans: 9
 ---
 
@@ -20,14 +20,14 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-04-14)
 
 **Core value:** Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
-**Current focus:** Phase 29 discussion for release validation and canonical adoption path
+**Current focus:** Phase 29 execution for release validation and canonical adoption path
 
 ## Current Position
 
 Phase: 29
-Plan: Not started
-Status: Phase 28 complete
-Last activity: 2026-04-14 - Verified and completed Phase 28
+Plan: Planned
+Status: Phase 29 planned
+Last activity: 2026-04-14 - Captured and planned Phase 29
 
 ## Accumulated Context
 
@@ -70,6 +70,6 @@ None captured yet.
 
 ## Session Continuity
 
-Last session: 2026-04-14T19:48:43.2062260+08:00
-Stopped at: Phase 28 complete
-Resume file: .planning/ROADMAP.md
+Last session: 2026-04-14T20:20:09.9120467+08:00
+Stopped at: Phase 29 planned
+Resume file: .planning/phases/29-release-validation-and-canonical-adoption-path/29-01-PLAN.md
