@@ -38,7 +38,7 @@ namespace AsterGraph.Editor.ViewModels;
 /// 而自定义 UI 宿主应优先考虑 <see cref="AsterGraphEditorFactory.CreateSession(AsterGraphEditorOptions)"/>。
 /// 本类型在当前迁移窗口内仍然受支持，但不应再被视为新的首选组合根。
 /// </remarks>
-public sealed partial class GraphEditorViewModel : ObservableObject, IGraphContextMenuHost, GraphEditorViewModel.IGraphEditorCompatibilityCommandHost, GraphEditorViewModel.IGraphEditorFragmentCommandHost, IGraphEditorKernelProjectionHost, IGraphEditorHistoryStateHost, IGraphEditorSelectionCoordinatorHost, IGraphEditorSelectionStateSynchronizerHost, IGraphEditorSelectionProjectionApplierHost, IGraphEditorDocumentCollectionSynchronizerHost, IGraphEditorNodePositionDirtyTrackerHost, IGraphEditorRetainedEventPublisherHost, IGraphEditorNodeLayoutCoordinatorHost
+public sealed partial class GraphEditorViewModel : ObservableObject, IGraphContextMenuHost, GraphEditorViewModel.IGraphEditorCompatibilityCommandHost, GraphEditorViewModel.IGraphEditorFragmentCommandHost, IGraphEditorKernelProjectionHost, IGraphEditorHistoryStateHost, IGraphEditorSelectionCoordinatorHost, IGraphEditorSelectionStateSynchronizerHost, IGraphEditorSelectionProjectionApplierHost, IGraphEditorDocumentCollectionSynchronizerHost, IGraphEditorNodePositionDirtyTrackerHost, IGraphEditorRetainedEventPublisherHost, IGraphEditorNodeLayoutCoordinatorHost, IGraphEditorPresentationLocalizationCoordinatorHost
 {
     private const double DefaultZoom = 0.88;
     private const double DefaultPanX = 110;
@@ -106,6 +106,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     private readonly GraphEditorNodePositionDirtyTracker _nodePositionDirtyTracker;
     private readonly GraphEditorRetainedEventPublisher _retainedEventPublisher;
     private readonly GraphEditorNodeLayoutCoordinator _nodeLayoutCoordinator;
+    private readonly GraphEditorPresentationLocalizationCoordinator _presentationLocalizationCoordinator;
     private readonly GraphEditorKernel _kernel;
     private readonly GraphEditorViewModelKernelAdapter _sessionHost;
     private readonly GraphEditorCommandStateNotifier _commandStateNotifier = new();
@@ -184,6 +185,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         _nodePresentationProvider = nodePresentationProvider;
         _localizationProvider = localizationProvider;
         _documentProjectionApplier = new GraphEditorDocumentProjectionApplier();
+        _presentationLocalizationCoordinator = new GraphEditorPresentationLocalizationCoordinator(this);
         _selectionProjection = new GraphEditorSelectionProjection(
             LocalizeText,
             (key, fallback, arguments) => LocalizeFormat(key, fallback, arguments));
@@ -347,15 +349,15 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     internal GraphEditorSessionDescriptorSupport CreateSessionDescriptorSupport()
         => new(
             _nodeCatalog,
-            LocalizeText,
+            _presentationLocalizationCoordinator.LocalizeText,
             this,
             hasFragmentWorkspaceService: _fragmentWorkspaceService is not null,
             hasFragmentLibraryService: _fragmentLibraryService is not null,
             hasClipboardPayloadSerializer: _clipboardPayloadSerializer is not null,
             hasPluginLoader: true,
             hasContextMenuAugmentor: _contextMenuAugmentor is not null,
-            hasNodePresentationProvider: _nodePresentationProvider is not null,
-            hasLocalizationProvider: _localizationProvider is not null);
+            hasNodePresentationProvider: _presentationLocalizationCoordinator.HasNodePresentationProvider,
+            hasLocalizationProvider: _presentationLocalizationCoordinator.HasLocalizationProvider);
 
     /// <summary>
     /// 获取当前命令权限配置。
@@ -698,7 +700,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         => CreateConnectionId();
 
     void IGraphEditorFragmentCommandHost.ApplyNodePresentation(NodeViewModel node)
-        => ApplyNodePresentation(node);
+        => _presentationLocalizationCoordinator.ApplyNodePresentation(node);
 
     void IGraphEditorFragmentCommandHost.AddNode(NodeViewModel node)
         => Nodes.Add(node);
@@ -1012,6 +1014,30 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         MarkDirty(status);
         NotifyDocumentChanged(GraphEditorDocumentChangeKind.LayoutChanged, nodes.Select(node => node.Id).ToList());
     }
+
+    INodePresentationProvider? IGraphEditorPresentationLocalizationCoordinatorHost.CurrentNodePresentationProvider
+        => _nodePresentationProvider;
+
+    IGraphLocalizationProvider? IGraphEditorPresentationLocalizationCoordinatorHost.CurrentLocalizationProvider
+        => _localizationProvider;
+
+    IReadOnlyList<NodeViewModel> IGraphEditorPresentationLocalizationCoordinatorHost.Nodes
+        => Nodes;
+
+    bool IGraphEditorPresentationLocalizationCoordinatorHost.TrySetNodePresentationProvider(INodePresentationProvider? provider)
+        => SetProperty(ref _nodePresentationProvider, provider, nameof(NodePresentationProvider));
+
+    bool IGraphEditorPresentationLocalizationCoordinatorHost.TrySetLocalizationProvider(IGraphLocalizationProvider? provider)
+        => SetProperty(ref _localizationProvider, provider, nameof(LocalizationProvider));
+
+    void IGraphEditorPresentationLocalizationCoordinatorHost.RefreshSelectionProjection()
+        => RefreshSelectionProjection();
+
+    void IGraphEditorPresentationLocalizationCoordinatorHost.RaiseComputedPropertyChanges()
+        => RaiseComputedPropertyChanges();
+
+    void IGraphEditorPresentationLocalizationCoordinatorHost.NotifyFragmentLibraryCaptionChanged()
+        => OnPropertyChanged(nameof(FragmentLibraryCaption));
 
     [ObservableProperty]
     private double zoom = DefaultZoom;
@@ -1419,16 +1445,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// </summary>
     /// <param name="provider">本地化提供器；为 <see langword="null"/> 时回退到默认文案。</param>
     public void SetLocalizationProvider(IGraphLocalizationProvider? provider)
-    {
-        if (!SetProperty(ref _localizationProvider, provider, nameof(LocalizationProvider)))
-        {
-            return;
-        }
-
-        RefreshSelectionProjection();
-        RaiseComputedPropertyChanges();
-        OnPropertyChanged(nameof(FragmentLibraryCaption));
-    }
+        => _presentationLocalizationCoordinator.SetLocalizationProvider(provider);
 
     /// <summary>
     /// 设置节点展示状态提供器。
@@ -1436,17 +1453,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// <param name="provider">新的展示状态提供器。</param>
     /// <param name="refreshImmediately">是否立即刷新当前全部节点展示状态。</param>
     public void SetNodePresentationProvider(INodePresentationProvider? provider, bool refreshImmediately = true)
-    {
-        if (!SetProperty(ref _nodePresentationProvider, provider, nameof(NodePresentationProvider)))
-        {
-            return;
-        }
-
-        if (refreshImmediately)
-        {
-            RefreshNodePresentations();
-        }
-    }
+        => _presentationLocalizationCoordinator.SetNodePresentationProvider(provider, refreshImmediately);
 
     /// <summary>
     /// 刷新单个节点的展示状态。
@@ -1454,32 +1461,14 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// <param name="nodeId">目标节点标识。</param>
     /// <returns>找到节点并完成刷新时返回 <see langword="true"/>。</returns>
     public bool RefreshNodePresentation(string nodeId)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(nodeId);
-
-        var node = FindNode(nodeId);
-        if (node is null)
-        {
-            return false;
-        }
-
-        ApplyNodePresentation(node);
-        return true;
-    }
+        => _presentationLocalizationCoordinator.RefreshNodePresentation(nodeId);
 
     /// <summary>
     /// 刷新当前图中全部节点的展示状态。
     /// </summary>
     /// <returns>刷新节点数量。</returns>
     public int RefreshNodePresentations()
-    {
-        foreach (var node in Nodes)
-        {
-            ApplyNodePresentation(node);
-        }
-
-        return Nodes.Count;
-    }
+        => _presentationLocalizationCoordinator.RefreshNodePresentations();
 
     /// <summary>
     /// 重新扫描片段模板库并刷新当前模板列表。
@@ -2157,33 +2146,6 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     public NodeViewModel? FindNode(string nodeId)
         => _documentProjectionApplier.FindNode(nodeId);
 
-    private void ApplyNodePresentation(NodeViewModel node)
-    {
-        if (_nodePresentationProvider is null)
-        {
-            node.UpdatePresentation(NodePresentationState.Empty);
-            return;
-        }
-
-        var state = _nodePresentationProvider.GetNodePresentation(
-            new NodePresentationContext(
-                Session,
-                node.Id,
-                node.DefinitionId,
-                node.Title,
-                node.Category,
-                node.Subtitle,
-                node.Description,
-                node.AccentHex,
-                node.IsSelected,
-                node.InputCount,
-                node.OutputCount,
-                node.ParameterValues,
-                node));
-        ArgumentNullException.ThrowIfNull(state);
-        node.UpdatePresentation(state);
-    }
-
     private void LoadDocument(GraphDocument document, string status, bool markClean, bool resetHistory = true)
     {
         _suspendDirtyTracking = true;
@@ -2191,7 +2153,12 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
         Title = document.Title;
         Description = document.Description;
-        _documentProjectionApplier.ApplyDocument(document, Nodes, Connections, ApplyNodePresentation, HandleNodePropertyChanged);
+        _documentProjectionApplier.ApplyDocument(
+            document,
+            Nodes,
+            Connections,
+            _presentationLocalizationCoordinator.ApplyNodePresentation,
+            HandleNodePropertyChanged);
 
         _suspendSelectionTracking = true;
         SelectedNodes.Clear();
@@ -2238,24 +2205,16 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     }
 
     private string LocalizeText(string key, string fallback)
-    {
-        if (_localizationProvider is null)
-        {
-            return fallback;
-        }
-
-        var localized = _localizationProvider.GetString(key, fallback);
-        return string.IsNullOrWhiteSpace(localized) ? fallback : localized;
-    }
+        => _presentationLocalizationCoordinator.LocalizeText(key, fallback);
 
     private string LocalizeFormat(string key, string fallback, params object?[] arguments)
-        => string.Format(CultureInfo.InvariantCulture, LocalizeText(key, fallback), arguments);
+        => _presentationLocalizationCoordinator.LocalizeFormat(key, fallback, arguments);
 
     private string StatusText(string key, string fallback)
-        => LocalizeText(key, fallback);
+        => _presentationLocalizationCoordinator.StatusText(key, fallback);
 
     private string StatusText(string key, string fallback, params object?[] arguments)
-        => LocalizeFormat(key, fallback, arguments);
+        => _presentationLocalizationCoordinator.StatusText(key, fallback, arguments);
 
     private void SetStatus(string key, string fallback)
         => StatusMessage = StatusText(key, fallback);

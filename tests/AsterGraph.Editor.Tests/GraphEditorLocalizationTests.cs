@@ -142,6 +142,26 @@ public sealed class GraphEditorLocalizationTests
     }
 
     [Fact]
+    public void SetLocalizationProvider_AfterConstruction_RebuildsSelectionProjectionAndComputedCaptions()
+    {
+        var editor = CreateConnectedEditor(provider: null);
+
+        editor.SetSelection([editor.Nodes[0], editor.Nodes[1]], editor.Nodes[0], status: null);
+        Assert.Equal("2 nodes selected  ·  primary Source", editor.SelectionCaption);
+        Assert.Equal("2 nodes  ·  1 links  ·  88% zoom", editor.StatsCaption);
+
+        editor.SetLocalizationProvider(new TestGraphLocalizationProvider(
+            new Dictionary<string, string>
+            {
+                ["editor.selection.multiple"] = "已选择 {0} 个节点 / 主节点 {1}",
+                ["editor.stats.caption"] = "{0} 个节点 / {1} 条连线 / {2:0}% 缩放",
+            }));
+
+        Assert.Equal("已选择 2 个节点 / 主节点 Source", editor.SelectionCaption);
+        Assert.Equal("2 个节点 / 1 条连线 / 88% 缩放", editor.StatsCaption);
+    }
+
+    [Fact]
     public void InspectorProjection_UsesLocalizationProviderForStockProjectionText()
     {
         var editor = CreateConnectedEditor(new TestGraphLocalizationProvider(
