@@ -29,6 +29,14 @@ public sealed class GraphEditorFacadeRefactorTests
     }
 
     [Fact]
+    public void EditorAssembly_ContainsDedicatedSelectionProjectionApplier()
+    {
+        var applierType = typeof(GraphEditorViewModel).Assembly.GetType("AsterGraph.Editor.Services.GraphEditorSelectionProjectionApplier");
+
+        Assert.NotNull(applierType);
+    }
+
+    [Fact]
     public void GraphEditorViewModel_RebuildsMixedParametersThroughPublicSelectionPath()
     {
         var definitionId = new NodeDefinitionId("tests.editor.facade.public-path");
@@ -170,6 +178,68 @@ public sealed class GraphEditorFacadeRefactorTests
         Assert.Equal([first], editor.SelectedNodes);
         Assert.Same(first, editor.SelectedNode);
         Assert.True(first.IsSelected);
+        Assert.Equal("1 inputs  ·  1 outputs", editor.SelectionCaption);
+        Assert.Equal("0 incoming  ·  0 outgoing", editor.InspectorConnections);
+        Assert.Equal("None", editor.InspectorUpstream);
+        Assert.Equal("None", editor.InspectorDownstream);
+    }
+
+    [Fact]
+    public void SelectedNodeChange_RebuildsInspectorProjectionAndBatchParameterProjection()
+    {
+        var definitionId = new NodeDefinitionId("tests.editor.facade.selection-primary-refresh");
+        var editor = CreateEditorWithSharedDefinitionNodes(
+            definitionId,
+            firstTitle: "Source node",
+            secondTitle: "Target node");
+        var source = editor.Nodes[0];
+        var target = editor.Nodes[1];
+
+        editor.Connections.Add(new ConnectionViewModel("c-001", source.Id, "out", target.Id, "in", "link", "#55D8C1"));
+        editor.SetSelection([source, target], source, status: null);
+
+        Assert.Equal("2 nodes selected  ·  primary Source node", editor.SelectionCaption);
+        Assert.Equal("0 incoming  ·  1 outgoing", editor.InspectorConnections);
+        Assert.Contains("Target node", editor.InspectorDownstream, StringComparison.Ordinal);
+        Assert.Contains("Input", editor.InspectorDownstream, StringComparison.Ordinal);
+        Assert.Equal(2, editor.SelectedNodeParameters.Count);
+
+        editor.SelectedNode = target;
+
+        Assert.Equal("2 nodes selected  ·  primary Target node", editor.SelectionCaption);
+        Assert.Equal("1 incoming  ·  0 outgoing", editor.InspectorConnections);
+        Assert.Contains("Source node", editor.InspectorUpstream, StringComparison.Ordinal);
+        Assert.Contains("Output", editor.InspectorUpstream, StringComparison.Ordinal);
+        Assert.Equal(2, editor.SelectedNodeParameters.Count);
+    }
+
+    [Fact]
+    public void ConnectionsCollectionChange_RefreshesInspectorProjectionForSelectedNode()
+    {
+        var definitionId = new NodeDefinitionId("tests.editor.facade.connection-refresh");
+        var editor = CreateEditorWithSharedDefinitionNodes(
+            definitionId,
+            firstTitle: "Source node",
+            secondTitle: "Target node");
+        var source = editor.Nodes[0];
+        var target = editor.Nodes[1];
+        var connection = new ConnectionViewModel("c-001", source.Id, "out", target.Id, "in", "link", "#55D8C1");
+
+        editor.SelectSingleNode(target, updateStatus: false);
+
+        Assert.Equal("0 incoming  ·  0 outgoing", editor.InspectorConnections);
+        Assert.Equal("None", editor.InspectorUpstream);
+
+        editor.Connections.Add(connection);
+
+        Assert.Equal("1 incoming  ·  0 outgoing", editor.InspectorConnections);
+        Assert.Contains("Source node", editor.InspectorUpstream, StringComparison.Ordinal);
+        Assert.Contains("Output", editor.InspectorUpstream, StringComparison.Ordinal);
+
+        editor.Connections.Remove(connection);
+
+        Assert.Equal("0 incoming  ·  0 outgoing", editor.InspectorConnections);
+        Assert.Equal("None", editor.InspectorUpstream);
     }
 
     private static NodeViewModel CreateNode(
@@ -177,12 +247,13 @@ public sealed class GraphEditorFacadeRefactorTests
         NodeDefinitionId definitionId,
         double threshold,
         bool enabled,
+        string? title = null,
         string inputLabel = "Input",
         string outputLabel = "Output")
     {
         return new NodeViewModel(new GraphNode(
             nodeId,
-            nodeId == "node-out" ? "Output node" : "Input node",
+            title ?? (nodeId == "node-out" ? "Output node" : "Input node"),
             "Tests",
             "Facade",
             "Node for projection tests.",
@@ -202,7 +273,10 @@ public sealed class GraphEditorFacadeRefactorTests
             ]));
     }
 
-    private static GraphEditorViewModel CreateEditorWithSharedDefinitionNodes(NodeDefinitionId definitionId)
+    private static GraphEditorViewModel CreateEditorWithSharedDefinitionNodes(
+        NodeDefinitionId definitionId,
+        string firstTitle = "Input node",
+        string secondTitle = "Input node")
     {
         var catalog = new NodeCatalog();
         catalog.RegisterDefinition(new NodeDefinition(
@@ -232,8 +306,8 @@ public sealed class GraphEditorFacadeRefactorTests
             "Facade Test",
             "Regression coverage for editor facade projection path.",
             [
-                CreateNode("node-001", definitionId, threshold: 0.25, enabled: true).ToModel(),
-                CreateNode("node-002", definitionId, threshold: 0.75, enabled: true).ToModel(),
+                CreateNode("node-001", definitionId, threshold: 0.25, enabled: true, title: firstTitle).ToModel(),
+                CreateNode("node-002", definitionId, threshold: 0.75, enabled: true, title: secondTitle).ToModel(),
             ],
             []);
 

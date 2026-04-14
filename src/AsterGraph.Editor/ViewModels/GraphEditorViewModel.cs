@@ -38,7 +38,7 @@ namespace AsterGraph.Editor.ViewModels;
 /// 而自定义 UI 宿主应优先考虑 <see cref="AsterGraphEditorFactory.CreateSession(AsterGraphEditorOptions)"/>。
 /// 本类型在当前迁移窗口内仍然受支持，但不应再被视为新的首选组合根。
 /// </remarks>
-public sealed partial class GraphEditorViewModel : ObservableObject, IGraphContextMenuHost, GraphEditorViewModel.IGraphEditorCompatibilityCommandHost, GraphEditorViewModel.IGraphEditorFragmentCommandHost, IGraphEditorKernelProjectionHost, IGraphEditorHistoryStateHost, IGraphEditorSelectionCoordinatorHost, IGraphEditorSelectionStateSynchronizerHost
+public sealed partial class GraphEditorViewModel : ObservableObject, IGraphContextMenuHost, GraphEditorViewModel.IGraphEditorCompatibilityCommandHost, GraphEditorViewModel.IGraphEditorFragmentCommandHost, IGraphEditorKernelProjectionHost, IGraphEditorHistoryStateHost, IGraphEditorSelectionCoordinatorHost, IGraphEditorSelectionStateSynchronizerHost, IGraphEditorSelectionProjectionApplierHost
 {
     private const double DefaultZoom = 0.88;
     private const double DefaultPanX = 110;
@@ -101,6 +101,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     private readonly GraphEditorHistoryStateCoordinator _historyStateCoordinator;
     private readonly GraphEditorSelectionCoordinator _selectionCoordinator;
     private readonly GraphEditorSelectionStateSynchronizer _selectionStateSynchronizer;
+    private readonly GraphEditorSelectionProjectionApplier _selectionProjectionApplier;
     private readonly GraphEditorKernel _kernel;
     private readonly GraphEditorViewModelKernelAdapter _sessionHost;
     private readonly GraphEditorCommandStateNotifier _commandStateNotifier = new();
@@ -186,6 +187,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         _historyStateCoordinator = new GraphEditorHistoryStateCoordinator(this, _historyService);
         _selectionCoordinator = new GraphEditorSelectionCoordinator(this);
         _selectionStateSynchronizer = new GraphEditorSelectionStateSynchronizer(this);
+        _selectionProjectionApplier = new GraphEditorSelectionProjectionApplier(this, _selectionProjection);
         StyleOptions = styleOptions ?? GraphEditorStyleOptions.Default;
         BehaviorOptions = ResolveBehaviorOptions(behaviorOptions, StyleOptions);
 
@@ -877,6 +879,48 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     void IGraphEditorSelectionStateSynchronizerHost.RaiseComputedPropertyChanges()
         => RaiseComputedPropertyChanges();
+
+    NodeViewModel? IGraphEditorSelectionProjectionApplierHost.PrimarySelectedNode => SelectedNode;
+
+    IReadOnlyList<NodeViewModel> IGraphEditorSelectionProjectionApplierHost.SelectionNodes => SelectedNodes;
+
+    ObservableCollection<NodeParameterViewModel> IGraphEditorSelectionProjectionApplierHost.SelectedParameters => SelectedNodeParameters;
+
+    INodeCatalog IGraphEditorSelectionProjectionApplierHost.NodeCatalog => _nodeCatalog;
+
+    bool IGraphEditorSelectionProjectionApplierHost.EnableBatchParameterEditing => BehaviorOptions.Selection.EnableBatchParameterEditing;
+
+    bool IGraphEditorSelectionProjectionApplierHost.CanEditNodeParameters => CanEditNodeParameters;
+
+    void IGraphEditorSelectionProjectionApplierHost.ApplyParameterValue(NodeParameterViewModel parameter, object? value)
+        => ApplyParameterValue(parameter, value);
+
+    IReadOnlyList<ConnectionViewModel> IGraphEditorSelectionProjectionApplierHost.GetIncomingConnections(NodeViewModel node)
+        => _documentProjectionApplier.GetIncomingConnections(node);
+
+    IReadOnlyList<ConnectionViewModel> IGraphEditorSelectionProjectionApplierHost.GetOutgoingConnections(NodeViewModel node)
+        => _documentProjectionApplier.GetOutgoingConnections(node);
+
+    NodeViewModel? IGraphEditorSelectionProjectionApplierHost.FindNode(string nodeId)
+        => FindNode(nodeId);
+
+    void IGraphEditorSelectionProjectionApplierHost.ApplyProjectionText(
+        string inspectorConnectionsText,
+        string inspectorUpstreamText,
+        string inspectorDownstreamText,
+        string selectionCaptionText)
+    {
+        _inspectorConnectionsText = inspectorConnectionsText;
+        _inspectorUpstreamText = inspectorUpstreamText;
+        _inspectorDownstreamText = inspectorDownstreamText;
+        _selectionCaptionText = selectionCaptionText;
+    }
+
+    void IGraphEditorSelectionProjectionApplierHost.RaiseParameterProjectionPropertyChanges()
+    {
+        OnPropertyChanged(nameof(HasEditableParameters));
+        OnPropertyChanged(nameof(HasBatchEditableParameters));
+    }
 
     [ObservableProperty]
     private double zoom = DefaultZoom;
@@ -2467,32 +2511,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     }
 
     private void RefreshSelectionProjection()
-    {
-        var projection = _selectionProjection.Project(
-            SelectedNode,
-            SelectedNodes,
-            _nodeCatalog,
-            BehaviorOptions.Selection.EnableBatchParameterEditing,
-            CanEditNodeParameters,
-            ApplyParameterValue,
-            _documentProjectionApplier.GetIncomingConnections,
-            _documentProjectionApplier.GetOutgoingConnections,
-            FindNode);
-
-        _inspectorConnectionsText = projection.InspectorConnectionsText;
-        _inspectorUpstreamText = projection.InspectorUpstreamText;
-        _inspectorDownstreamText = projection.InspectorDownstreamText;
-        _selectionCaptionText = projection.SelectionCaptionText;
-
-        SelectedNodeParameters.Clear();
-        foreach (var parameter in projection.Parameters)
-        {
-            SelectedNodeParameters.Add(parameter);
-        }
-
-        OnPropertyChanged(nameof(HasEditableParameters));
-        OnPropertyChanged(nameof(HasBatchEditableParameters));
-    }
+        => _selectionProjectionApplier.RefreshSelectionProjection();
 
     private void NotifyPendingConnectionChanged()
         => PendingConnectionChanged?.Invoke(
