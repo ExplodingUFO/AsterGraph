@@ -1,5 +1,3 @@
-using System.Collections.Specialized;
-using System.ComponentModel;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -81,6 +79,7 @@ public partial class NodeCanvas : UserControl
     private readonly NodeCanvasInteractionSession _interactionSession = new();
     private readonly NodeCanvasContextMenuCoordinator _contextMenuCoordinator;
     private readonly NodeCanvasSceneHost _sceneHost;
+    private readonly NodeCanvasViewModelObserver _viewModelObserver;
     private bool _isAttachedToVisualTree;
 
     /// <summary>
@@ -92,6 +91,7 @@ public partial class NodeCanvas : UserControl
         Focusable = true;
         _contextMenuCoordinator = new NodeCanvasContextMenuCoordinator(new NodeCanvasContextMenuHost(this), this);
         _sceneHost = new NodeCanvasSceneHost(new NodeCanvasSceneHostAdapter(this));
+        _viewModelObserver = new NodeCanvasViewModelObserver(new NodeCanvasViewModelObserverHost(this));
 
         ContextRequested += HandleCanvasContextRequested;
         KeyDown += HandleCanvasKeyDown;
@@ -245,35 +245,7 @@ public partial class NodeCanvas : UserControl
     }
 
     private void AttachViewModel(GraphEditorViewModel? previous, GraphEditorViewModel? current)
-    {
-        if (previous is not null)
-        {
-            previous.PropertyChanged -= HandleViewModelPropertyChanged;
-            previous.Nodes.CollectionChanged -= HandleNodesCollectionChanged;
-            previous.Connections.CollectionChanged -= HandleConnectionsCollectionChanged;
-
-            foreach (var node in previous.Nodes)
-            {
-                node.PropertyChanged -= HandleNodePropertyChanged;
-            }
-        }
-
-        if (current is not null)
-        {
-            current.PropertyChanged += HandleViewModelPropertyChanged;
-            current.Nodes.CollectionChanged += HandleNodesCollectionChanged;
-            current.Connections.CollectionChanged += HandleConnectionsCollectionChanged;
-
-            foreach (var node in current.Nodes)
-            {
-                node.PropertyChanged += HandleNodePropertyChanged;
-            }
-        }
-
-        ApplySelectionAdornerStyle();
-        ApplyGuideAdornerStyle();
-        RebuildScene();
-    }
+        => _viewModelObserver.AttachViewModel(previous, current);
 
     private void RebuildScene()
         => _sceneHost.RebuildScene();
@@ -520,89 +492,6 @@ public partial class NodeCanvas : UserControl
     private void HandleCanvasContextRequested(object? sender, ContextRequestedEventArgs args)
         => args.Handled = _contextMenuCoordinator.HandleCanvasContextRequested(this, args);
 
-    private void HandleViewModelPropertyChanged(object? sender, PropertyChangedEventArgs args)
-    {
-        switch (args.PropertyName)
-        {
-            case nameof(GraphEditorViewModel.Zoom):
-            case nameof(GraphEditorViewModel.PanX):
-            case nameof(GraphEditorViewModel.PanY):
-                UpdateViewportTransform();
-                if (ViewModel?.HasPendingConnection == true)
-                {
-                    RenderConnections();
-                }
-                break;
-            case nameof(GraphEditorViewModel.SelectedNode):
-                UpdateSelectionState();
-                RenderConnections();
-                break;
-            case nameof(GraphEditorViewModel.StyleOptions):
-                ApplySelectionAdornerStyle();
-                ApplyGuideAdornerStyle();
-                break;
-            case nameof(GraphEditorViewModel.BehaviorOptions):
-                if (ViewModel?.BehaviorOptions.DragAssist.EnableAlignmentGuides != true)
-                {
-                    HideGuideAdorners();
-                }
-                break;
-            case nameof(GraphEditorViewModel.PendingSourceNode):
-            case nameof(GraphEditorViewModel.PendingSourcePort):
-                RenderConnections();
-                break;
-        }
-    }
-
-    private void HandleNodesCollectionChanged(object? sender, NotifyCollectionChangedEventArgs args)
-    {
-        if (args.OldItems is not null)
-        {
-            foreach (NodeViewModel node in args.OldItems)
-            {
-                node.PropertyChanged -= HandleNodePropertyChanged;
-            }
-        }
-
-        if (args.NewItems is not null)
-        {
-            foreach (NodeViewModel node in args.NewItems)
-            {
-                node.PropertyChanged += HandleNodePropertyChanged;
-            }
-        }
-
-        RebuildScene();
-    }
-
-    private void HandleConnectionsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs args)
-        => RenderConnections();
-
-    private void HandleNodePropertyChanged(object? sender, PropertyChangedEventArgs args)
-    {
-        if (sender is not NodeViewModel node)
-        {
-            return;
-        }
-
-        switch (args.PropertyName)
-        {
-            case nameof(NodeViewModel.X):
-            case nameof(NodeViewModel.Y):
-                UpdateNodePosition(node);
-                RenderConnections();
-                break;
-            case nameof(NodeViewModel.Height):
-                UpdateNodeVisual(node);
-                RenderConnections();
-                break;
-            case nameof(NodeViewModel.IsSelected):
-            case nameof(NodeViewModel.Presentation):
-                UpdateNodeVisual(node);
-                break;
-        }
-    }
-
     private void UpdateSelectionState()
         => _sceneHost.UpdateSelectionState();
 
@@ -699,6 +588,45 @@ public partial class NodeCanvas : UserControl
 
         public void ActivatePort(NodeViewModel node, PortViewModel port)
             => _owner.ActivatePortFromVisual(node, port);
+    }
+
+    private sealed class NodeCanvasViewModelObserverHost : INodeCanvasViewModelObserverHost
+    {
+        private readonly NodeCanvas _owner;
+
+        public NodeCanvasViewModelObserverHost(NodeCanvas owner)
+        {
+            _owner = owner ?? throw new ArgumentNullException(nameof(owner));
+        }
+
+        public GraphEditorViewModel? ViewModel => _owner.ViewModel;
+
+        public void UpdateViewportTransform()
+            => _owner.UpdateViewportTransform();
+
+        public void RenderConnections()
+            => _owner.RenderConnections();
+
+        public void UpdateSelectionState()
+            => _owner.UpdateSelectionState();
+
+        public void ApplySelectionAdornerStyle()
+            => _owner.ApplySelectionAdornerStyle();
+
+        public void ApplyGuideAdornerStyle()
+            => _owner.ApplyGuideAdornerStyle();
+
+        public void HideGuideAdorners()
+            => _owner.HideGuideAdorners();
+
+        public void RebuildScene()
+            => _owner.RebuildScene();
+
+        public void UpdateNodePosition(NodeViewModel node)
+            => _owner.UpdateNodePosition(node);
+
+        public void UpdateNodeVisual(NodeViewModel node)
+            => _owner.UpdateNodeVisual(node);
     }
 
     private void ApplySelectionAdornerStyle()
