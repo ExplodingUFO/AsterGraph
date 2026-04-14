@@ -39,7 +39,8 @@ $frameworkTestProjects = @{
     'tests/AsterGraph.Serialization.Tests/AsterGraph.Serialization.Tests.csproj'
   )
   'net9.0' = @(
-    'tests/AsterGraph.Editor.Tests/AsterGraph.Editor.Tests.csproj'
+    'tests/AsterGraph.Editor.Tests/AsterGraph.Editor.Tests.csproj',
+    'tests/AsterGraph.Demo.Tests/AsterGraph.Demo.Tests.csproj'
   )
 }
 
