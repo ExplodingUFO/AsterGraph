@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Headless.XUnit;
 using Avalonia.Input;
 using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Abstractions.Styling;
@@ -14,7 +15,7 @@ namespace AsterGraph.Editor.Tests;
 
 public sealed class NodeCanvasOverlayCoordinatorTests
 {
-    [Fact]
+    [AvaloniaFact]
     public void CreateDragSession_ComputesSelectionBoundsAcrossNodes()
     {
         var host = new TestOverlayHost();
@@ -34,7 +35,7 @@ public sealed class NodeCanvasOverlayCoordinatorTests
             session.OriginBounds);
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void ShowGuideAdorners_UsesScreenProjectionAndBounds()
     {
         var host = new TestOverlayHost
@@ -70,7 +71,7 @@ public sealed class NodeCanvasOverlayCoordinatorTests
         Assert.False(host.HorizontalGuideAdorner.IsVisible);
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void ApplyDragAssist_WhenAssistDisabled_ReturnsRawDeltaAndHidesGuides()
     {
         var host = new TestOverlayHost
@@ -97,7 +98,7 @@ public sealed class NodeCanvasOverlayCoordinatorTests
         Assert.False(host.HorizontalGuideAdorner.IsVisible);
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void UpdateMarqueeSelection_WithControlModifier_TogglesAgainstBaselineAndSetsFinalizeStatus()
     {
         var host = new TestOverlayHost();
@@ -120,7 +121,7 @@ public sealed class NodeCanvasOverlayCoordinatorTests
         Assert.Equal($"Selected {second.Title}.", host.LastStatus);
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void UpdateMarqueeSelection_WithShiftModifier_UnionsBaselineAndHitNodes()
     {
         var host = new TestOverlayHost();
