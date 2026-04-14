@@ -1,33 +1,33 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.4
-milestone_name: Plugin Loading and Automation Execution
-status: Phase 25 Complete
-stopped_at: Phase 25 complete; next step is to archive the v1.4 milestone
-last_updated: "2026-04-13T15:51:29.3110335Z"
-last_activity: 2026-04-13
+milestone: v1.5
+milestone_name: Runtime Boundary Cleanup and Quality Gates
+status: Defining requirements
+stopped_at: Milestone framing confirmed; defining v1.5 requirements and roadmap
+last_updated: "2026-04-14T10:03:42.7705089Z"
+last_activity: 2026-04-14
 progress:
-  total_phases: 4
-  completed_phases: 4
-  total_plans: 12
-  completed_plans: 12
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-04-08)
+See: `.planning/PROJECT.md` (updated 2026-04-14)
 
 **Core value:** Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
-**Current focus:** v1.4 milestone closeout after Phase 25 proof ring completion
+**Current focus:** v1.5 milestone definition around runtime boundary cleanup, quality gates, and proof/doc alignment
 
 ## Current Position
 
-Phase: 25
-Plan: Execution Complete
-Status: Phase 25 Complete
-Last activity: 2026-04-13 — Completed quick task 260413-x3v: keep GraphEditorSession stock menu builder reading live node catalog definitions
+Phase: Not started (defining requirements)
+Plan: -
+Status: Defining requirements
+Last activity: 2026-04-14 - Milestone v1.5 started
 
 ## Accumulated Context
 
@@ -39,36 +39,15 @@ Carry-forward decisions from shipped milestones:
 - Keep `CreateSession(...)` and `Create(...)` as the canonical composition routes, while `GraphEditorViewModel` / `GraphEditorView` remain the retained compatibility window.
 - Prefer descriptor and snapshot control-plane contracts over exposing MVVM implementation types as the canonical host surface.
 - Keep Avalonia as an adapter layer over shared runtime contracts and proof-backed platform seams.
-- Preserve `HostSample`, `PackageSmoke`, and `ScaleSmoke` as the runnable proof ring for migration, readiness, and future extension work.
-- Lead v1.3 with a demo showcase refresh so the shipped SDK story is easier to understand before adding another layer of runtime features.
-- Keep the next demo experience on one live graph session controlled by host-level menus rather than switching between canned scenes.
-- Keep the new in-window host menu as the first visible shell control plane in the demo.
-- Keep secondary showcase detail behind a compact on-demand pane so the graph remains the dominant surface.
-- Keep the top host menu as the first control plane and use direct checkable menu items for the highest-signal view/behavior toggles.
-- Keep the right-side `SplitView` pane as the compact dense control/readout surface for the currently active menu group.
-- Keep all Phase 20 control state bound to the existing `MainWindowViewModel` booleans and `Editor.Session` projections rather than duplicating editor or runtime state.
-- Keep runtime summary metrics and recent diagnostics as separate sections inside the existing right-side pane instead of introducing a second runtime dashboard.
-- Keep Phase 21 proof cues embedded near the active graph and drawer sections instead of reintroducing a permanent explanation rail.
-- Keep host-owned seams and shared runtime/session state explicit through short labels plus live values rather than paragraph-heavy summary cards.
-- Keep README aligned with the graph-first showcase story so the demo window and repo narrative describe the same proof.
-- Keep the demo showcase positioned as a host-facing SDK proof surface rather than a productized workflow shell or scene-switching gallery.
-- Return to plugin and automation implementation after the showcase milestone instead of extending presentation-only work indefinitely.
+- Preserve `PackageSmoke` and `ScaleSmoke` as runnable proof surfaces for migration, readiness, and future extension work.
 - Keep plugin loading and automation execution rooted in `IGraphEditorSession`, descriptors, and command IDs rather than retained MVVM compatibility APIs.
-- Keep the first public plugin surface inside `AsterGraph.Editor` and rooted in `AsterGraphEditorOptions` / `AsterGraphEditorFactory`, not `AsterGraph.Avalonia`.
-- Use a custom `AssemblyLoadContext` plus `AssemblyDependencyResolver` for assembly-path plugins while keeping shared `AsterGraph.*` runtime contracts in the default load context.
-- Keep Phase 22 limited to public plugin composition/loading contracts and loader discoverability; actual plugin-contributed seam integration remains Phase 23.
-- Keep plugin-load failures recoverable and descriptor-first through canonical session diagnostics instead of factory-thrown ordinary host failures.
-- Keep Phase 23 focused on live integration of the explicit Phase 22 plugin contribution contracts plus canonical plugin inspection, rather than widening into arbitrary plugin-owned service injection.
-- Keep plugin inspection readable through canonical query/inspection DTOs, with diagnostics history as supporting evidence rather than the only source of truth.
-- Keep host-supplied context-menu, localization, and node-presentation seams as the final override layer when plugin contributions are composed.
-- Keep plugin load inspection parity across `CreateSession(...)` and `Create(...)` so retained compatibility hosts do not lose canonical runtime visibility.
-- Keep plugin node definitions, menu augmentation, localization, and presentation composed through one factory/session path rather than retained-only compatibility hooks.
-- Keep the first automation baseline rooted in `IGraphEditorSession`, stable command IDs, query snapshots, and mutation batching rather than `GraphEditorViewModel` methods.
-- Keep automation progress/failure visibility on typed runtime events plus machine-readable diagnostics instead of status-text scraping or UI-bound progress surfaces.
-- Keep the first automation runner synchronous, in-process, and descriptor-first rather than expanding into a workflow engine or script host in the same phase.
-- Reuse the existing mutation scope as the automation batching primitive instead of introducing a parallel transaction model.
-- Keep the plugin and automation proof ring aligned across focused regressions, `HostSample`, `PackageSmoke`, `ScaleSmoke`, and README commands instead of relying on docs-only claims.
-- Keep Phase 25 proof rooted in public `AsterGraphEditorFactory`, `IGraphEditorSession`, plugin registration, query, diagnostics, and automation APIs.
+- Keep plugin load failures and automation telemetry recoverable and machine-readable through canonical runtime diagnostics/events.
+
+New v1.5 framing decisions:
+
+- Start v1.5 around runtime boundary cleanup, repo-level quality gates, and proof/doc alignment rather than another new feature band.
+- Continue phase numbering from 26 because v1.5 builds directly on the shipped v1.4 baseline.
+- Skip milestone research by default because this milestone is brownfield SDK hardening rather than a new external domain exploration.
 
 ### Pending Todos
 
@@ -76,12 +55,11 @@ None captured yet.
 
 ### Blockers/Concerns
 
-- No active blocker in the main workspace.
-- The known `STATE_HISTORY_OK` mismatch remains a pre-existing baseline issue if the next milestone touches history/save semantics.
-- `GraphEditorTransactionTests.GraphEditorViewModel_HistoryInteraction_PreservesUndoAndDirtySemantics` and `GraphEditorViewModel_SaveBoundary_PreservesUndoRedoDirtySemantics` still fail on the detached clean `d7939a5` baseline; they remain a carry-forward proof concern rather than a Phase 24 regression.
-- The next milestone should avoid reopening kernel/facade ownership drift unless new evidence requires it.
-- The first automation baseline should stay command/query/batch driven rather than expand into a full scripting language or workflow-designer product.
-- Phase 25 resolved the proof-ring alignment gap, but future milestone work should preserve the same focused-test/sample/smoke parity so extension claims stay machine-checkable.
+- `MILESTONES.md` still stops at v1.3 even though v1.4 execution is complete; archive/history cleanup is still pending.
+- `HostSample` remains referenced in planning/docs even though there is no live project in the current tree.
+- `AsterGraph.Editor.Tests` still references `AsterGraph.Demo`, which blurs the core SDK regression lane and the sample/demo lane.
+- There is still no checked-in CI workflow, central package management, or automated public API/package compatibility lane.
+- The known `STATE_HISTORY_OK` mismatch remains a pre-existing baseline issue if v1.5 touches history/save semantics.
 
 ### Quick Tasks Completed
 
@@ -93,6 +71,6 @@ None captured yet.
 
 ## Session Continuity
 
-Last session: 2026-04-13
-Stopped at: Quick task 260413-x3v complete; next step is to continue the next Phase 35 God Code split slice or archive quick-task notes
-Resume file: .planning/quick/260413-x3v-follow-up-fix-keep-grapheditorsession-st/260413-x3v-SUMMARY.md
+Last session: 2026-04-14
+Stopped at: Milestone framing confirmed; next step is to define v1.5 requirements and create the roadmap
+Resume file: .planning/STATE.md
