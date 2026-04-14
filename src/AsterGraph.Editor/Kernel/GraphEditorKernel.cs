@@ -9,7 +9,6 @@ using AsterGraph.Editor.Configuration;
 using AsterGraph.Editor.Diagnostics;
 using AsterGraph.Editor.Events;
 using AsterGraph.Editor.Kernel.Internal;
-using AsterGraph.Editor.Menus;
 using AsterGraph.Editor.Models;
 using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.Services;
@@ -298,11 +297,6 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost, IGrap
 
     public IReadOnlyList<GraphEditorCompatiblePortTargetSnapshot> GetCompatiblePortTargets(string sourceNodeId, string sourcePortId)
         => _compatibilityQueries.GetCompatiblePortTargets(_document, sourceNodeId, sourcePortId);
-
-#pragma warning disable CS0618
-    public IReadOnlyList<CompatiblePortTarget> GetCompatibleTargets(string sourceNodeId, string sourcePortId)
-        => _compatibilityQueries.GetCompatibleTargets(_document, sourceNodeId, sourcePortId);
-#pragma warning restore CS0618
 
     private GraphPoint GetViewportCenter()
         => _viewportCoordinator.GetViewportCenter(GetViewportSnapshot());

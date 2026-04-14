@@ -290,6 +290,27 @@ public sealed class GraphEditorSessionTests
     }
 
     [Fact]
+    public void IGraphEditorSessionHost_RuntimeBoundary_NoLongerDefinesLegacyCompatibleTargetShim()
+    {
+        var hostType = typeof(IGraphEditorSessionHost);
+
+        Assert.NotNull(hostType.GetMethod(nameof(IGraphEditorSessionHost.GetCompatiblePortTargets), [typeof(string), typeof(string)]));
+        Assert.Null(hostType.GetMethod(nameof(IGraphEditorQueries.GetCompatibleTargets), [typeof(string), typeof(string)]));
+    }
+
+    [Fact]
+    public void GraphEditorKernelCompatibilityQueries_RuntimeBoundary_NoLongerDefinesLegacyCompatibleTargetShim()
+    {
+        var compatibilityQueryType = typeof(AsterGraphEditorFactory).Assembly
+            .GetType("AsterGraph.Editor.Kernel.Internal.GraphEditorKernelCompatibilityQueries");
+
+        Assert.NotNull(compatibilityQueryType);
+        Assert.NotNull(compatibilityQueryType!.GetMethod("GetCompatibleTargetStates"));
+        Assert.NotNull(compatibilityQueryType.GetMethod(nameof(IGraphEditorQueries.GetCompatiblePortTargets), [typeof(GraphDocument), typeof(string), typeof(string)]));
+        Assert.Null(compatibilityQueryType.GetMethod(nameof(IGraphEditorQueries.GetCompatibleTargets), [typeof(GraphDocument), typeof(string), typeof(string)]));
+    }
+
+    [Fact]
     public void IGraphEditorQueries_GetCompatibleTargets_IsMarkedAsCompatibilityOnlyShim()
     {
         var method = typeof(IGraphEditorQueries).GetMethod(nameof(IGraphEditorQueries.GetCompatibleTargets), [typeof(string), typeof(string)]);
@@ -325,6 +346,28 @@ public sealed class GraphEditorSessionTests
         Assert.Equal("node-1", snapshot.NodeTitle);
         Assert.Equal("port-1", snapshot.PortLabel);
         Assert.Equal(string.Empty, snapshot.PortAccentHex);
+    }
+
+    [Fact]
+    public void GraphEditorSession_GetCompatibleTargets_ComposesCompatibilityShimFromCanonicalSnapshots()
+    {
+        var definitionId = new NodeDefinitionId("tests.session.compatibility-bridge");
+        var session = AsterGraphEditorFactory.CreateSession(CreateOptions(definitionId));
+
+        var snapshot = Assert.Single(session.Queries.GetCompatiblePortTargets(SourceNodeId, SourcePortId));
+#pragma warning disable CS0618
+        var compatibleTarget = Assert.Single(session.Queries.GetCompatibleTargets(SourceNodeId, SourcePortId));
+#pragma warning restore CS0618
+
+        Assert.Equal(snapshot.NodeId, compatibleTarget.Node.Id);
+        Assert.Equal(snapshot.NodeTitle, compatibleTarget.Node.Title);
+        Assert.Equal("Tests", compatibleTarget.Node.Category);
+        Assert.Equal("Session target node.", compatibleTarget.Node.Description);
+        Assert.Equal(snapshot.PortId, compatibleTarget.Port.Id);
+        Assert.Equal(snapshot.PortLabel, compatibleTarget.Port.Label);
+        Assert.Equal(snapshot.PortTypeId, compatibleTarget.Port.TypeId);
+        Assert.Equal(snapshot.PortAccentHex, compatibleTarget.Port.AccentHex);
+        Assert.Equal(snapshot.Compatibility, compatibleTarget.Compatibility);
     }
 
     [Fact]

@@ -3,6 +3,7 @@ using AsterGraph.Editor;
 using AsterGraph.Editor.Diagnostics;
 using AsterGraph.Editor.Models;
 using AsterGraph.Editor.Plugins;
+using AsterGraph.Editor.ViewModels;
 using AsterGraph.Core.Models;
 using System;
 using System.Collections.Generic;
@@ -87,7 +88,23 @@ public sealed partial class GraphEditorSession
 
 #pragma warning disable CS0618
     public IReadOnlyList<CompatiblePortTarget> GetCompatibleTargets(string sourceNodeId, string sourcePortId)
-        => _host.GetCompatibleTargets(sourceNodeId, sourcePortId);
+    {
+        var compatibleTargets = _host.GetCompatiblePortTargets(sourceNodeId, sourcePortId);
+        if (compatibleTargets.Count == 0)
+        {
+            return [];
+        }
+
+        var nodesById = _host.CreateDocumentSnapshot()
+            .Nodes
+            .ToDictionary(node => node.Id, StringComparer.Ordinal);
+
+        return compatibleTargets
+            .Select(target => CreateCompatibilityShimTarget(target, nodesById))
+            .Where(target => target is not null)
+            .Select(target => target!)
+            .ToList();
+    }
 #pragma warning restore CS0618
 
     public GraphEditorInspectionSnapshot CaptureInspectionSnapshot()
@@ -108,4 +125,22 @@ public sealed partial class GraphEditorSession
 
     private GraphEditorPendingConnectionSnapshot CreatePendingConnectionSnapshot()
         => _host.GetPendingConnectionSnapshot();
+
+#pragma warning disable CS0618
+    private static CompatiblePortTarget? CreateCompatibilityShimTarget(
+        GraphEditorCompatiblePortTargetSnapshot target,
+        IReadOnlyDictionary<string, GraphNode> nodesById)
+    {
+        if (!nodesById.TryGetValue(target.NodeId, out var nodeModel))
+        {
+            return null;
+        }
+
+        var node = new NodeViewModel(nodeModel);
+        var port = node.GetPort(target.PortId);
+        return port is null
+            ? null
+            : new CompatiblePortTarget(node, port, target.Compatibility);
+    }
+#pragma warning restore CS0618
 }

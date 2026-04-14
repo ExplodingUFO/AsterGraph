@@ -4,7 +4,6 @@ using AsterGraph.Core.Models;
 using AsterGraph.Editor.Diagnostics;
 using AsterGraph.Editor.Events;
 using AsterGraph.Editor.Kernel;
-using AsterGraph.Editor.Menus;
 using AsterGraph.Editor.Models;
 using AsterGraph.Editor.Runtime;
 
@@ -264,11 +263,6 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
 
     public IReadOnlyList<GraphEditorCompatiblePortTargetSnapshot> GetCompatiblePortTargets(string sourceNodeId, string sourcePortId)
         => _kernel.GetCompatiblePortTargets(sourceNodeId, sourcePortId);
-
-#pragma warning disable CS0618
-    public IReadOnlyList<CompatiblePortTarget> GetCompatibleTargets(string sourceNodeId, string sourcePortId)
-        => _kernel.GetCompatibleTargets(sourceNodeId, sourcePortId);
-#pragma warning restore CS0618
 
     public void Dispose()
     {
