@@ -315,15 +315,15 @@ public sealed class GraphEditorFacadeRefactorTests
     {
         var definitionId = new NodeDefinitionId("tests.editor.facade.retained-viewport");
         var editor = CreateEditorWithSharedDefinitionNodes(definitionId);
-        GraphEditorViewportChangedEventArgs? viewportChanged = null;
+        var viewportChanges = new List<GraphEditorViewportChangedEventArgs>();
 
         editor.UpdateViewportSize(1280, 720);
-        editor.ViewportChanged += (_, args) => viewportChanged = args;
+        editor.ViewportChanged += (_, args) => viewportChanges.Add(args);
 
         editor.PanBy(16, 12);
 
-        Assert.NotNull(viewportChanged);
-        Assert.Equal(0.88, viewportChanged!.Zoom);
+        var viewportChanged = Assert.Single(viewportChanges);
+        Assert.Equal(0.88, viewportChanged.Zoom);
         Assert.Equal(126, viewportChanged.PanX);
         Assert.Equal(108, viewportChanged.PanY);
         Assert.Equal(1280, viewportChanged.ViewportWidth);
@@ -335,18 +335,18 @@ public sealed class GraphEditorFacadeRefactorTests
     {
         var definitionId = new NodeDefinitionId("tests.editor.facade.retained-session-viewport");
         var editor = CreateEditorWithSharedDefinitionNodes(definitionId);
-        GraphEditorViewportChangedEventArgs? retainedViewportChanged = null;
-        GraphEditorViewportChangedEventArgs? sessionViewportChanged = null;
+        var retainedViewportChanges = new List<GraphEditorViewportChangedEventArgs>();
+        var sessionViewportChanges = new List<GraphEditorViewportChangedEventArgs>();
 
         editor.UpdateViewportSize(1280, 720);
-        editor.ViewportChanged += (_, args) => retainedViewportChanged = args;
-        editor.Session.Events.ViewportChanged += (_, args) => sessionViewportChanged = args;
+        editor.ViewportChanged += (_, args) => retainedViewportChanges.Add(args);
+        editor.Session.Events.ViewportChanged += (_, args) => sessionViewportChanges.Add(args);
 
         editor.PanBy(16, 12);
 
-        Assert.NotNull(retainedViewportChanged);
-        Assert.NotNull(sessionViewportChanged);
-        Assert.Equal(sessionViewportChanged!.Zoom, retainedViewportChanged!.Zoom);
+        var retainedViewportChanged = Assert.Single(retainedViewportChanges);
+        var sessionViewportChanged = Assert.Single(sessionViewportChanges);
+        Assert.Equal(sessionViewportChanged.Zoom, retainedViewportChanged.Zoom);
         Assert.Equal(sessionViewportChanged.PanX, retainedViewportChanged.PanX);
         Assert.Equal(sessionViewportChanged.PanY, retainedViewportChanged.PanY);
         Assert.Equal(sessionViewportChanged.ViewportWidth, retainedViewportChanged.ViewportWidth);
