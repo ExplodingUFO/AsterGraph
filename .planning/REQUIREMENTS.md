@@ -20,8 +20,8 @@
 
 ### Docs, Proof, And Samples
 
-- [ ] **PROOF-01**: README, planning docs, solution/project lists, and proof tooling reference the same current verification surface with no stale sample or tool claims
-- [ ] **PROOF-02**: Core SDK regression coverage is distinguishable from demo/sample integration coverage so failures reveal whether the SDK boundary or the showcase host regressed
+- [x] **PROOF-01**: README, planning docs, solution/project lists, and proof tooling reference the same current verification surface with no stale sample or tool claims
+- [x] **PROOF-02**: Core SDK regression coverage is distinguishable from demo/sample integration coverage so failures reveal whether the SDK boundary or the showcase host regressed
 - [ ] **PROOF-03**: Host can find a short canonical integration path for runtime-only, default UI, and migration scenarios from one synchronized doc or proof entry point
 
 ## Future Requirements
@@ -52,8 +52,8 @@
 | QUAL-01 | Phase 27 | Complete |
 | QUAL-02 | Phase 27 | Complete |
 | QUAL-03 | Phase 29 | Pending |
-| PROOF-01 | Phase 28 | Pending |
-| PROOF-02 | Phase 28 | Pending |
+| PROOF-01 | Phase 28 | Complete |
+| PROOF-02 | Phase 28 | Complete |
 | PROOF-03 | Phase 29 | Pending |
 
 **Coverage:**
@@ -63,4 +63,4 @@
 
 ---
 *Requirements defined: 2026-04-14*
-*Last updated: 2026-04-14 after Phase 27 completion*
+*Last updated: 2026-04-14 after Phase 28 completion*

@@ -26,7 +26,8 @@ Hosts can integrate only the graph-editor pieces they need, replace default UI a
 - Plugin loading and automation execution shipped in v1.4 through the canonical session boundary and are already backed by focused regressions plus `PackageSmoke` and `ScaleSmoke`.
 - Phase 26 completed the runtime-boundary cleanup for compatible-target discovery: canonical runtime queries now stay on DTO/snapshot contracts, while retained MVVM-shaped compatible-target APIs are explicitly isolated to the staged migration window.
 - Phase 27 completed the repo-quality baseline: the repo now carries tracked `.editorconfig`, `Directory.Packages.props`, deterministic `NuGet.config`, a shared `eng/ci.ps1` validation script, and checked-in GitHub Actions CI for explicit `net8.0` / `net9.0` lanes.
-- The proof/documentation surface is partially out of sync: `ScaleSmoke` exists, `HostSample` is still referenced in planning/docs despite not being present in the current tree, and `AsterGraph.Editor.Tests` still pulls `AsterGraph.Demo` into the core test lane.
+- Phase 28 completed the proof-surface alignment: `AsterGraph.ScaleSmoke` is part of the tracked solution surface, stale `HostSample` claims are removed from current planning/codebase maps, public docs now describe the live `PackageSmoke` / `ScaleSmoke` / sample-only `AsterGraph.Demo` proof surface, and `AsterGraph.Demo.Tests` now carries the demo/sample regression lane separate from the core SDK regression lane.
+- The remaining v1.5 gap is release-grade validation and adoption clarity: `eng/ci.ps1` proves build/test wiring and smoke-tool project buildability today, but release automation still does not execute packed-package smoke, enforce coverage/reporting, or check public API/package compatibility, and hosts still need one shorter canonical adoption path.
 
 ## Requirements
 
@@ -60,11 +61,13 @@ Hosts can integrate only the graph-editor pieces they need, replace default UI a
 - ✓ Retained `GraphEditorViewModel` / `GraphEditorView` hosts still run over the adapter-backed kernel/session runtime path, and the remaining compatibility-only APIs now carry explicit staged retirement guidance - v1.5 Phase 26
 - ✓ Contributors now build and test under one tracked repo baseline with shared editor rules, centralized package versions, deterministic restore sources, and a reusable `eng/ci.ps1` entry point - v1.5 Phase 27
 - ✓ The supported package boundary is now validated automatically across explicit `net8.0` and `net9.0` lanes through checked-in CI and the same repo-local command path used outside CI - v1.5 Phase 27
+- ✓ README, planning docs, solution membership, proof-tool references, and regression-lane guidance now point at the same live Phase 28 verification surface with no stale `HostSample` claims - v1.5 Phase 28
+- ✓ Core SDK regression coverage is now split cleanly from demo/sample integration coverage through `AsterGraph.Editor.Tests` / `AsterGraph.Serialization.Tests` versus `AsterGraph.Demo.Tests`, so failures identify the right layer - v1.5 Phase 28
 
 ### Active
 
-- [ ] Reconcile docs, solution membership, proof tooling, and test lanes so the release story is trustworthy and machine-checkable from one source of truth.
-- [ ] Add release-grade package smoke, coverage/reporting, and public API/package compatibility checks without falling back to README-only manual verification.
+- [ ] Add release-grade package smoke execution gating, coverage/reporting, and public API/package compatibility checks without falling back to README-only manual verification.
+- [ ] Add one short synchronized host-adoption path that covers runtime-only, default shipped UI, and staged retained-facade migration scenarios.
 
 ### Out of Scope
 
@@ -78,7 +81,7 @@ Hosts can integrate only the graph-editor pieces they need, replace default UI a
 
 Milestone `v1.4` finished execution on 2026-04-13 after phases 22-25 delivered plugin loading, runtime plugin inspection, descriptor-first automation execution, and the associated proof ring. The four-package boundary, canonical session-first factory path, and proof-backed host story are now real strengths rather than forward-looking plans.
 
-The highest remaining product risk is now maintainability, not missing surface area. The codebase still carries compatibility-only runtime shapes such as obsolete compatible-target queries and retained forwarding seams, while the release process still relies too heavily on manual commands and human memory. Planning and docs also show visible drift: `ScaleSmoke` exists in the tree, `HostSample` remains referenced in planning/docs without a live project, and core editor tests still reference `AsterGraph.Demo`.
+The highest remaining product risk is now release trust and host-adoption clarity, not missing surface area. The codebase still carries some compatibility-only runtime debt, but Phase 28 closed the visible proof/doc drift by aligning solution membership, proof-tool references, and regression lanes around the live tree. The remaining weak point is that release-grade validation still depends too heavily on manual smoke execution and missing compatibility/coverage gates, while adoption guidance is still broader than it should be for first-time hosts.
 
 v1.5 therefore focuses on hardening the SDK's actual contract boundary and the verification machinery around it. The milestone should build on the shipped v1.4 baseline, preserve the staged migration posture, and leave the repo in a state where future work on trust/distribution, richer automation authoring, or host ergonomics can proceed without first re-litigating the boundary.
 
@@ -109,6 +112,7 @@ v1.5 therefore focuses on hardening the SDK's actual contract boundary and the v
 | Treat the four-package boundary, `CreateSession(...)`, and the current proof ring as fixed baseline during v1.5 | Current strengths should be hardened rather than reopened | ✓ Phase 27 kept the package boundary fixed while adding repo-level validation around it |
 | Use staged deprecation guidance for compatibility APIs instead of a one-shot public break | Hosts still need a planned migration path while canonical DTO/snapshot contracts become authoritative | ✓ Phase 26 applied this guidance to compatible-target APIs |
 | Keep one repo-local validation command path for both contributors and CI | Quality gates drift quickly if YAML and local commands diverge | ✓ Phase 27 shipped `eng/ci.ps1` plus workflow reuse |
+| Align docs, solution membership, proof tools, and regression lanes around the live tree before adding stronger release gates | Release automation and host guidance are not trustworthy if they point at stale proof surfaces | ✓ Phase 28 aligned the tracked proof surface and split core-vs-demo regression lanes |
 
 ## Next Milestone Goals
 
@@ -143,4 +147,4 @@ This document evolves at milestone boundaries.
 4. Reset active requirements so the next roadmap starts from the highest remaining product risk instead of stale execution context.
 
 ---
-*Last updated: 2026-04-14 after completing Phase 27*
+*Last updated: 2026-04-14 after completing Phase 28*

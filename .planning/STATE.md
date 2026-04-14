@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.5
 milestone_name: Runtime Boundary Cleanup and Quality Gates
 status: completed
-stopped_at: Phase 28 context gathered
-last_updated: "2026-04-14T10:56:26.376Z"
-last_activity: 2026-04-14 - Verified and completed Phase 27
+stopped_at: Phase 28 complete
+last_updated: "2026-04-14T19:48:43.2062260+08:00"
+last_activity: 2026-04-14 - Verified and completed Phase 28
 progress:
   total_phases: 4
-  completed_phases: 2
-  total_plans: 6
-  completed_plans: 6
+  completed_phases: 3
+  total_plans: 9
+  completed_plans: 9
 ---
 
 # Project State
@@ -20,14 +20,14 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-04-14)
 
 **Core value:** Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
-**Current focus:** Phase 28 discussion for proof surface and regression lane alignment
+**Current focus:** Phase 29 discussion for release validation and canonical adoption path
 
 ## Current Position
 
-Phase: 28
+Phase: 29
 Plan: Not started
-Status: Phase 27 complete
-Last activity: 2026-04-14 - Verified and completed Phase 27
+Status: Phase 28 complete
+Last activity: 2026-04-14 - Verified and completed Phase 28
 
 ## Accumulated Context
 
@@ -56,9 +56,8 @@ None captured yet.
 ### Blockers/Concerns
 
 - `MILESTONES.md` still stops at v1.3 even though v1.4 execution is complete; archive/history cleanup is now part of the v1.5 proof/doc alignment scope.
-- `HostSample` remains referenced in planning/docs even though there is no live project in the current tree.
-- `AsterGraph.Editor.Tests` still references `AsterGraph.Demo`, which blurs the core SDK regression lane and the sample/demo lane.
-- Release-grade package smoke gating, coverage/reporting, and public API/package compatibility are still not automated.
+- `eng/ci.ps1` now gives one accurate repo-local build/test entry point, but release-grade package smoke execution, coverage/reporting, and public API/package compatibility are still not automated.
+- Hosts still do not have one short synchronized adoption guide that covers runtime-only, shipped-UI, and retained-facade migration decisions from a single entry point.
 - The known `STATE_HISTORY_OK` mismatch remains a pre-existing baseline issue if v1.5 touches history/save semantics.
 
 ### Quick Tasks Completed
@@ -71,6 +70,6 @@ None captured yet.
 
 ## Session Continuity
 
-Last session: 2026-04-14T10:56:26.373Z
-Stopped at: Phase 28 context gathered
-Resume file: .planning/phases/28-proof-surface-and-regression-lane-alignment/28-CONTEXT.md
+Last session: 2026-04-14T19:48:43.2062260+08:00
+Stopped at: Phase 28 complete
+Resume file: .planning/ROADMAP.md
