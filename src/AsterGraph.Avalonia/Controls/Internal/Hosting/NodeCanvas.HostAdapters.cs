@@ -163,6 +163,41 @@ public partial class NodeCanvas
             => _owner.ViewModel?.SetSelection(nodes, primaryNode, status);
     }
 
+    private sealed class NodeCanvasNodeDragHost : INodeCanvasNodeDragHost
+    {
+        private readonly NodeCanvas _owner;
+
+        public NodeCanvasNodeDragHost(NodeCanvas owner)
+        {
+            _owner = owner ?? throw new ArgumentNullException(nameof(owner));
+        }
+
+        public GraphEditorViewModel? ViewModel => _owner.ViewModel;
+
+        public NodeCanvasInteractionSession InteractionSession => _owner._interactionSession;
+
+        public void FocusCanvas()
+            => _owner.Focus();
+
+        public void HideSelectionAdorner()
+            => _owner.HideSelectionAdorner();
+
+        public void HideGuideAdorners()
+            => _owner.HideGuideAdorners();
+
+        public void BringNodeVisualToFront(NodeViewModel node)
+        {
+            if (_owner._nodeLayer is not null && _owner._nodeVisuals.TryGetValue(node, out var visual))
+            {
+                _owner._nodeLayer.Children.Remove(visual.Root);
+                _owner._nodeLayer.Children.Add(visual.Root);
+            }
+        }
+
+        public NodeCanvasDragSession CreateDragSession(IReadOnlyList<NodeViewModel> nodes)
+            => _owner.CreateDragSession(nodes);
+    }
+
     private sealed class NodeCanvasWheelInteractionHost : INodeCanvasWheelInteractionHost
     {
         private readonly NodeCanvas _owner;

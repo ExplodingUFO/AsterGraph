@@ -78,6 +78,7 @@ public partial class NodeCanvas : UserControl
     private readonly NodeCanvasSceneHost _sceneHost;
     private readonly NodeCanvasViewModelObserver _viewModelObserver;
     private readonly NodeCanvasOverlayCoordinator _overlayCoordinator;
+    private readonly NodeCanvasNodeDragCoordinator _nodeDragCoordinator;
     private readonly NodeCanvasWheelInteractionCoordinator _wheelInteractionCoordinator;
     private bool _isAttachedToVisualTree;
 
@@ -92,6 +93,7 @@ public partial class NodeCanvas : UserControl
         _sceneHost = new NodeCanvasSceneHost(new NodeCanvasSceneHostAdapter(this));
         _viewModelObserver = new NodeCanvasViewModelObserver(new NodeCanvasViewModelObserverHost(this));
         _overlayCoordinator = new NodeCanvasOverlayCoordinator(new NodeCanvasOverlayHost(this));
+        _nodeDragCoordinator = new NodeCanvasNodeDragCoordinator(new NodeCanvasNodeDragHost(this));
         _wheelInteractionCoordinator = new NodeCanvasWheelInteractionCoordinator(new NodeCanvasWheelInteractionHost(this));
 
         ContextRequested += HandleCanvasContextRequested;
@@ -266,58 +268,23 @@ public partial class NodeCanvas : UserControl
 
     private void BeginNodeDrag(NodeViewModel node, PointerPressedEventArgs args)
     {
-        if (ViewModel is null)
-        {
-            return;
-        }
-
         var props = args.GetCurrentPoint(this).Properties;
-        if (!props.IsLeftButtonPressed)
+        var result = _nodeDragCoordinator.BeginNodeDrag(
+            node,
+            args.GetPosition(this),
+            props.IsLeftButtonPressed,
+            args.KeyModifiers);
+
+        if (!result.Handled)
         {
             return;
         }
 
-        if (args.KeyModifiers.HasFlag(KeyModifiers.Control))
+        if (result.CapturePointer)
         {
-            Focus();
-            ViewModel.ToggleNodeSelection(node);
-            args.Handled = true;
-            return;
+            args.Pointer.Capture(this);
         }
 
-        if (args.KeyModifiers.HasFlag(KeyModifiers.Shift))
-        {
-            Focus();
-            ViewModel.AddNodeToSelection(node);
-            args.Handled = true;
-            return;
-        }
-
-        Focus();
-        if (node.IsSelected && ViewModel.HasMultipleSelection)
-        {
-            ViewModel.SetSelection(ViewModel.SelectedNodes.ToList(), node);
-        }
-        else
-        {
-            ViewModel.SelectSingleNode(node);
-        }
-
-        if (_nodeLayer is not null && _nodeVisuals.TryGetValue(node, out var visual))
-        {
-            _nodeLayer.Children.Remove(visual.Root);
-            _nodeLayer.Children.Add(visual.Root);
-        }
-
-        HideSelectionAdorner();
-        HideGuideAdorners();
-        var dragStart = args.GetPosition(this);
-        var dragNodes = node.IsSelected && ViewModel.HasMultipleSelection
-            ? ViewModel.SelectedNodes.ToList()
-            : [node];
-        _interactionSession.BeginNodeDrag(node, dragStart, CreateDragSession(dragNodes));
-        ViewModel.BeginHistoryInteraction();
-        args.Pointer.Capture(this);
         args.Handled = true;
     }
 
