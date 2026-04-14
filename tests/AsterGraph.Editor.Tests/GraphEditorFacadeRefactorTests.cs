@@ -65,6 +65,26 @@ public sealed class GraphEditorFacadeRefactorTests
     }
 
     [Fact]
+    public void EditorAssembly_ContainsDedicatedNodePositionDirtyTrackerHost()
+    {
+        var hostType = typeof(GraphEditorViewModel).GetNestedType(
+            "GraphEditorViewModelNodePositionDirtyTrackerHost",
+            System.Reflection.BindingFlags.NonPublic);
+
+        Assert.NotNull(hostType);
+    }
+
+    [Fact]
+    public void EditorAssembly_ContainsDedicatedRetainedEventPublisherHost()
+    {
+        var hostType = typeof(GraphEditorViewModel).GetNestedType(
+            "GraphEditorViewModelRetainedEventPublisherHost",
+            System.Reflection.BindingFlags.NonPublic);
+
+        Assert.NotNull(hostType);
+    }
+
+    [Fact]
     public void EditorAssembly_ContainsDedicatedNodeLayoutCoordinator()
     {
         var coordinatorType = typeof(GraphEditorViewModel).Assembly.GetType("AsterGraph.Editor.Services.GraphEditorNodeLayoutCoordinator");
@@ -132,6 +152,28 @@ public sealed class GraphEditorFacadeRefactorTests
         Assert.DoesNotContain(
             implementedInterfaces,
             iface => iface.FullName == "AsterGraph.Editor.Services.IGraphEditorPresentationLocalizationCoordinatorHost");
+    }
+
+    [Fact]
+    public void GraphEditorViewModel_DoesNotImplementNodePositionDirtyTrackerHost()
+    {
+        var viewModelType = typeof(GraphEditorViewModel);
+        var implementedInterfaces = viewModelType.GetInterfaces();
+
+        Assert.DoesNotContain(
+            implementedInterfaces,
+            iface => iface.FullName == "AsterGraph.Editor.Services.IGraphEditorNodePositionDirtyTrackerHost");
+    }
+
+    [Fact]
+    public void GraphEditorViewModel_DoesNotImplementRetainedEventPublisherHost()
+    {
+        var viewModelType = typeof(GraphEditorViewModel);
+        var implementedInterfaces = viewModelType.GetInterfaces();
+
+        Assert.DoesNotContain(
+            implementedInterfaces,
+            iface => iface.FullName == "AsterGraph.Editor.Services.IGraphEditorRetainedEventPublisherHost");
     }
 
     [Fact]

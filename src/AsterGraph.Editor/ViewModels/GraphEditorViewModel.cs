@@ -38,7 +38,7 @@ namespace AsterGraph.Editor.ViewModels;
 /// 而自定义 UI 宿主应优先考虑 <see cref="AsterGraphEditorFactory.CreateSession(AsterGraphEditorOptions)"/>。
 /// 本类型在当前迁移窗口内仍然受支持，但不应再被视为新的首选组合根。
 /// </remarks>
-public sealed partial class GraphEditorViewModel : ObservableObject, IGraphContextMenuHost, GraphEditorViewModel.IGraphEditorCompatibilityCommandHost, GraphEditorViewModel.IGraphEditorFragmentCommandHost, IGraphEditorKernelProjectionHost, IGraphEditorHistoryStateHost, IGraphEditorSelectionCoordinatorHost, IGraphEditorSelectionStateSynchronizerHost, IGraphEditorSelectionProjectionApplierHost, IGraphEditorDocumentCollectionSynchronizerHost, IGraphEditorNodePositionDirtyTrackerHost, IGraphEditorRetainedEventPublisherHost, IGraphEditorNodeLayoutCoordinatorHost
+public sealed partial class GraphEditorViewModel : ObservableObject, IGraphContextMenuHost, GraphEditorViewModel.IGraphEditorCompatibilityCommandHost, GraphEditorViewModel.IGraphEditorFragmentCommandHost, IGraphEditorKernelProjectionHost, IGraphEditorHistoryStateHost, IGraphEditorSelectionCoordinatorHost, IGraphEditorSelectionStateSynchronizerHost, IGraphEditorSelectionProjectionApplierHost, IGraphEditorDocumentCollectionSynchronizerHost, IGraphEditorNodeLayoutCoordinatorHost
 {
     private const double DefaultZoom = 0.88;
     private const double DefaultPanX = 110;
@@ -104,7 +104,9 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     private readonly GraphEditorSelectionProjectionApplier _selectionProjectionApplier;
     private readonly GraphEditorDocumentCollectionSynchronizer _documentCollectionSynchronizer;
     private readonly GraphEditorDocumentLoadCoordinator _documentLoadCoordinator;
+    private readonly GraphEditorViewModelNodePositionDirtyTrackerHost _nodePositionDirtyTrackerHost;
     private readonly GraphEditorNodePositionDirtyTracker _nodePositionDirtyTracker;
+    private readonly GraphEditorViewModelRetainedEventPublisherHost _retainedEventPublisherHost;
     private readonly GraphEditorRetainedEventPublisher _retainedEventPublisher;
     private readonly GraphEditorNodeLayoutCoordinator _nodeLayoutCoordinator;
     private readonly GraphEditorViewModelPresentationLocalizationCoordinatorHost _presentationLocalizationCoordinatorHost;
@@ -202,8 +204,10 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         _documentCollectionSynchronizer = new GraphEditorDocumentCollectionSynchronizer(this, _documentProjectionApplier);
         _persistenceCoordinatorHost = new GraphEditorViewModelPersistenceCoordinatorHost(this);
         _documentLoadCoordinator = new GraphEditorDocumentLoadCoordinator(_persistenceCoordinatorHost);
-        _nodePositionDirtyTracker = new GraphEditorNodePositionDirtyTracker(this);
-        _retainedEventPublisher = new GraphEditorRetainedEventPublisher(this);
+        _nodePositionDirtyTrackerHost = new GraphEditorViewModelNodePositionDirtyTrackerHost(this);
+        _nodePositionDirtyTracker = new GraphEditorNodePositionDirtyTracker(_nodePositionDirtyTrackerHost);
+        _retainedEventPublisherHost = new GraphEditorViewModelRetainedEventPublisherHost(this);
+        _retainedEventPublisher = new GraphEditorRetainedEventPublisher(_retainedEventPublisherHost);
         _nodeLayoutCoordinator = new GraphEditorNodeLayoutCoordinator(this);
         _workspaceSaveCoordinator = new GraphEditorWorkspaceSaveCoordinator(_persistenceCoordinatorHost);
         StyleOptions = styleOptions ?? GraphEditorStyleOptions.Default;
@@ -952,35 +956,6 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     void IGraphEditorDocumentCollectionSynchronizerHost.RaiseComputedPropertyChanges()
         => RaiseComputedPropertyChanges();
-
-    bool IGraphEditorNodePositionDirtyTrackerHost.IsDirtyTrackingSuspended => _suspendDirtyTracking;
-
-    bool IGraphEditorNodePositionDirtyTrackerHost.IsDirty
-    {
-        get => IsDirty;
-        set => IsDirty = value;
-    }
-
-    IReadOnlyList<NodeViewModel> IGraphEditorRetainedEventPublisherHost.SelectionNodes => SelectedNodes;
-
-    NodeViewModel? IGraphEditorRetainedEventPublisherHost.PrimarySelectedNode => SelectedNode;
-
-    bool IGraphEditorRetainedEventPublisherHost.HasPendingConnection => HasPendingConnection;
-
-    NodeViewModel? IGraphEditorRetainedEventPublisherHost.PendingSourceNode => PendingSourceNode;
-
-    PortViewModel? IGraphEditorRetainedEventPublisherHost.PendingSourcePort => PendingSourcePort;
-
-    string IGraphEditorRetainedEventPublisherHost.CurrentStatusMessage => StatusMessage;
-
-    void IGraphEditorRetainedEventPublisherHost.RaiseDocumentChanged(GraphEditorDocumentChangedEventArgs args)
-        => DocumentChanged?.Invoke(this, args);
-
-    void IGraphEditorRetainedEventPublisherHost.RaiseSelectionChanged(GraphEditorSelectionChangedEventArgs args)
-        => SelectionChanged?.Invoke(this, args);
-
-    void IGraphEditorRetainedEventPublisherHost.RaisePendingConnectionChanged(GraphEditorPendingConnectionChangedEventArgs args)
-        => PendingConnectionChanged?.Invoke(this, args);
 
     GraphEditorCommandPermissions IGraphEditorNodeLayoutCoordinatorHost.CommandPermissions => CommandPermissions;
 
