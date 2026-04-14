@@ -946,9 +946,6 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         set => IsDirty = value;
     }
 
-    void IGraphEditorNodePositionDirtyTrackerHost.RaiseComputedPropertyChanges()
-        => RaiseComputedPropertyChanges();
-
     [ObservableProperty]
     private double zoom = DefaultZoom;
 

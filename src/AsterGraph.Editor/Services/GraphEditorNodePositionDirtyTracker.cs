@@ -8,8 +8,6 @@ internal interface IGraphEditorNodePositionDirtyTrackerHost
     bool IsDirtyTrackingSuspended { get; }
 
     bool IsDirty { get; set; }
-
-    void RaiseComputedPropertyChanges();
 }
 
 internal sealed class GraphEditorNodePositionDirtyTracker
@@ -35,7 +33,6 @@ internal sealed class GraphEditorNodePositionDirtyTracker
             if (!_host.IsDirty)
             {
                 _host.IsDirty = true;
-                _host.RaiseComputedPropertyChanges();
             }
         }
     }

@@ -306,6 +306,7 @@ public sealed class GraphEditorFacadeRefactorTests
         Assert.True(editor.IsDirty);
         Assert.Contains("Unsaved changes", editor.WorkspaceCaption, StringComparison.Ordinal);
         Assert.Contains(nameof(GraphEditorViewModel.WorkspaceCaption), changedProperties);
+        Assert.Equal(1, changedProperties.Count(propertyName => propertyName == nameof(GraphEditorViewModel.WorkspaceCaption)));
     }
 
     private static NodeViewModel CreateNode(
