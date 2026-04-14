@@ -3,8 +3,10 @@ using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Core.Compatibility;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Catalog;
+using AsterGraph.Editor.Configuration;
 using AsterGraph.Editor.Events;
 using AsterGraph.Editor.Hosting;
+using AsterGraph.Editor.Models;
 using AsterGraph.Editor.Services;
 using AsterGraph.Editor.ViewModels;
 using Xunit;
@@ -59,6 +61,14 @@ public sealed class GraphEditorFacadeRefactorTests
         var publisherType = typeof(GraphEditorViewModel).Assembly.GetType("AsterGraph.Editor.Services.GraphEditorRetainedEventPublisher");
 
         Assert.NotNull(publisherType);
+    }
+
+    [Fact]
+    public void EditorAssembly_ContainsDedicatedNodeLayoutCoordinator()
+    {
+        var coordinatorType = typeof(GraphEditorViewModel).Assembly.GetType("AsterGraph.Editor.Services.GraphEditorNodeLayoutCoordinator");
+
+        Assert.NotNull(coordinatorType);
     }
 
     [Fact]
@@ -417,6 +427,89 @@ public sealed class GraphEditorFacadeRefactorTests
         Assert.Equal(editor.StatusMessage, documentChanged.StatusMessage);
     }
 
+    [Fact]
+    public void GraphEditorViewModel_ApplyDragOffset_WhenMoveDisabled_DoesNotChangeNodePositions()
+    {
+        var definitionId = new NodeDefinitionId("tests.editor.facade.layout-drag-permissions");
+        var editor = CreateEditorWithSharedDefinitionNodes(
+            definitionId,
+            behaviorOptions: GraphEditorBehaviorOptions.Default with
+            {
+                Commands = GraphEditorCommandPermissions.ReadOnly,
+            });
+        var source = editor.Nodes[0];
+        var target = editor.Nodes[1];
+        var sourceOrigin = new GraphPoint(source.X, source.Y);
+        var targetOrigin = new GraphPoint(target.X, target.Y);
+
+        editor.ApplyDragOffset(
+            new Dictionary<string, GraphPoint>(StringComparer.Ordinal)
+            {
+                [source.Id] = sourceOrigin,
+                [target.Id] = targetOrigin,
+            },
+            64,
+            32);
+
+        Assert.Equal(sourceOrigin.X, source.X);
+        Assert.Equal(sourceOrigin.Y, source.Y);
+        Assert.Equal(targetOrigin.X, target.X);
+        Assert.Equal(targetOrigin.Y, target.Y);
+    }
+
+    [Fact]
+    public void GraphEditorViewModel_GetNodesInRectangle_NormalizesCornerOrder()
+    {
+        var definitionId = new NodeDefinitionId("tests.editor.facade.layout-rectangle");
+        var editor = CreateEditorWithSharedDefinitionNodes(definitionId);
+        var source = editor.Nodes[0];
+        var target = editor.Nodes[1];
+
+        source.X = 120;
+        source.Y = 80;
+        target.X = 420;
+        target.Y = 260;
+
+        var selectedNodes = editor.GetNodesInRectangle(
+            new GraphPoint(target.X + target.Width + 20, target.Y + target.Height + 20),
+            new GraphPoint(target.X - 20, target.Y - 20));
+
+        Assert.Equal([target], selectedNodes);
+    }
+
+    [Fact]
+    public void GraphEditorViewModel_AlignSelectionLeft_WithSingleSelection_DoesNotPublishDocumentChanged()
+    {
+        var definitionId = new NodeDefinitionId("tests.editor.facade.layout-align-single");
+        var editor = CreateEditorWithSharedDefinitionNodes(definitionId);
+        var source = editor.Nodes[0];
+        var documentChanges = new List<GraphEditorDocumentChangedEventArgs>();
+
+        editor.SelectSingleNode(source, updateStatus: false);
+        editor.DocumentChanged += (_, args) => documentChanges.Add(args);
+
+        editor.AlignSelectionLeft();
+
+        Assert.Empty(documentChanges);
+        Assert.Contains("Select at least two", editor.StatusMessage, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void GraphEditorViewModel_SetNodePositions_WhenNoMatchingNodes_ReturnsZeroAndSetsStatus()
+    {
+        var definitionId = new NodeDefinitionId("tests.editor.facade.layout-position-no-match");
+        var editor = CreateEditorWithSharedDefinitionNodes(definitionId);
+
+        var appliedCount = editor.SetNodePositions(
+            [
+                new NodePositionSnapshot("missing-node", new GraphPoint(480, 320)),
+            ],
+            updateStatus: true);
+
+        Assert.Equal(0, appliedCount);
+        Assert.Contains("No matching nodes", editor.StatusMessage, StringComparison.Ordinal);
+    }
+
     private static NodeViewModel CreateNode(
         string nodeId,
         NodeDefinitionId definitionId,
@@ -451,7 +544,8 @@ public sealed class GraphEditorFacadeRefactorTests
     private static GraphEditorViewModel CreateEditorWithSharedDefinitionNodes(
         NodeDefinitionId definitionId,
         string firstTitle = "Input node",
-        string secondTitle = "Input node")
+        string secondTitle = "Input node",
+        GraphEditorBehaviorOptions? behaviorOptions = null)
     {
         var catalog = new NodeCatalog();
         catalog.RegisterDefinition(new NodeDefinition(
@@ -486,7 +580,11 @@ public sealed class GraphEditorFacadeRefactorTests
             ],
             []);
 
-        return new GraphEditorViewModel(document, catalog, new DefaultPortCompatibilityService());
+        return new GraphEditorViewModel(
+            document,
+            catalog,
+            new DefaultPortCompatibilityService(),
+            behaviorOptions: behaviorOptions);
     }
 
     private sealed record TestGraphHostContext(object Owner, object? TopLevel) : IGraphHostContext

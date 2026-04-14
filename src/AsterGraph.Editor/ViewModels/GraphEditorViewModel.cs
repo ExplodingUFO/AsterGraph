@@ -38,7 +38,7 @@ namespace AsterGraph.Editor.ViewModels;
 /// 而自定义 UI 宿主应优先考虑 <see cref="AsterGraphEditorFactory.CreateSession(AsterGraphEditorOptions)"/>。
 /// 本类型在当前迁移窗口内仍然受支持，但不应再被视为新的首选组合根。
 /// </remarks>
-public sealed partial class GraphEditorViewModel : ObservableObject, IGraphContextMenuHost, GraphEditorViewModel.IGraphEditorCompatibilityCommandHost, GraphEditorViewModel.IGraphEditorFragmentCommandHost, IGraphEditorKernelProjectionHost, IGraphEditorHistoryStateHost, IGraphEditorSelectionCoordinatorHost, IGraphEditorSelectionStateSynchronizerHost, IGraphEditorSelectionProjectionApplierHost, IGraphEditorDocumentCollectionSynchronizerHost, IGraphEditorNodePositionDirtyTrackerHost, IGraphEditorRetainedEventPublisherHost
+public sealed partial class GraphEditorViewModel : ObservableObject, IGraphContextMenuHost, GraphEditorViewModel.IGraphEditorCompatibilityCommandHost, GraphEditorViewModel.IGraphEditorFragmentCommandHost, IGraphEditorKernelProjectionHost, IGraphEditorHistoryStateHost, IGraphEditorSelectionCoordinatorHost, IGraphEditorSelectionStateSynchronizerHost, IGraphEditorSelectionProjectionApplierHost, IGraphEditorDocumentCollectionSynchronizerHost, IGraphEditorNodePositionDirtyTrackerHost, IGraphEditorRetainedEventPublisherHost, IGraphEditorNodeLayoutCoordinatorHost
 {
     private const double DefaultZoom = 0.88;
     private const double DefaultPanX = 110;
@@ -105,6 +105,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     private readonly GraphEditorDocumentCollectionSynchronizer _documentCollectionSynchronizer;
     private readonly GraphEditorNodePositionDirtyTracker _nodePositionDirtyTracker;
     private readonly GraphEditorRetainedEventPublisher _retainedEventPublisher;
+    private readonly GraphEditorNodeLayoutCoordinator _nodeLayoutCoordinator;
     private readonly GraphEditorKernel _kernel;
     private readonly GraphEditorViewModelKernelAdapter _sessionHost;
     private readonly GraphEditorCommandStateNotifier _commandStateNotifier = new();
@@ -194,6 +195,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         _documentCollectionSynchronizer = new GraphEditorDocumentCollectionSynchronizer(this, _documentProjectionApplier);
         _nodePositionDirtyTracker = new GraphEditorNodePositionDirtyTracker(this);
         _retainedEventPublisher = new GraphEditorRetainedEventPublisher(this);
+        _nodeLayoutCoordinator = new GraphEditorNodeLayoutCoordinator(this);
         StyleOptions = styleOptions ?? GraphEditorStyleOptions.Default;
         BehaviorOptions = ResolveBehaviorOptions(behaviorOptions, StyleOptions);
 
@@ -970,6 +972,47 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     void IGraphEditorRetainedEventPublisherHost.RaisePendingConnectionChanged(GraphEditorPendingConnectionChangedEventArgs args)
         => PendingConnectionChanged?.Invoke(this, args);
 
+    GraphEditorCommandPermissions IGraphEditorNodeLayoutCoordinatorHost.CommandPermissions => CommandPermissions;
+
+    IReadOnlyList<NodeViewModel> IGraphEditorNodeLayoutCoordinatorHost.Nodes => Nodes;
+
+    IReadOnlyList<NodeViewModel> IGraphEditorNodeLayoutCoordinatorHost.SelectedNodes => SelectedNodes;
+
+    NodeViewModel? IGraphEditorNodeLayoutCoordinatorHost.FindNode(string nodeId)
+        => FindNode(nodeId);
+
+    void IGraphEditorNodeLayoutCoordinatorHost.SetNodeMoveDisabledStatus()
+        => SetStatus("editor.status.node.move.disabledByPermissions", "Node movement is disabled by host permissions.");
+
+    void IGraphEditorNodeLayoutCoordinatorHost.SetNodeNotFoundStatus(string nodeId)
+        => SetStatus("editor.status.node.notFoundById", "Node '{0}' was not found.", nodeId);
+
+    void IGraphEditorNodeLayoutCoordinatorHost.SetNodePositionNoneProvidedStatus()
+        => SetStatus("editor.status.node.position.noneProvided", "No node positions were provided.");
+
+    void IGraphEditorNodeLayoutCoordinatorHost.SetNodePositionNoMatchesStatus()
+        => SetStatus("editor.status.node.position.noMatches", "No matching nodes were found for the provided positions.");
+
+    void IGraphEditorNodeLayoutCoordinatorHost.SetLayoutDisabledStatus()
+        => SetStatus("editor.status.layout.disabledByPermissions", "Layout tools are disabled by host permissions.");
+
+    void IGraphEditorNodeLayoutCoordinatorHost.SetLayoutSelectionTooSmallStatus(int minimumCount)
+        => SetStatus(minimumCount switch
+        {
+            2 => ("editor.status.layout.selectAtLeastTwo", "Select at least two nodes for alignment."),
+            3 => ("editor.status.layout.selectAtLeastThree", "Select at least three nodes for distribution."),
+            _ => ("editor.status.layout.selectionTooSmall", "Selection is too small for that operation."),
+        });
+
+    void IGraphEditorNodeLayoutCoordinatorHost.ApplyNodePositionUpdates(IReadOnlyList<NodePositionSnapshot> positions, bool updateStatus)
+        => _kernel.SetNodePositions(positions, updateStatus);
+
+    void IGraphEditorNodeLayoutCoordinatorHost.CompleteLayoutChange(IReadOnlyList<NodeViewModel> nodes, string status)
+    {
+        MarkDirty(status);
+        NotifyDocumentChanged(GraphEditorDocumentChangeKind.LayoutChanged, nodes.Select(node => node.Id).ToList());
+    }
+
     [ObservableProperty]
     private double zoom = DefaultZoom;
 
@@ -1477,26 +1520,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// <param name="deltaX">相对起始位置的水平偏移。</param>
     /// <param name="deltaY">相对起始位置的垂直偏移。</param>
     public void ApplyDragOffset(IReadOnlyDictionary<string, GraphPoint> originPositions, double deltaX, double deltaY)
-    {
-        ArgumentNullException.ThrowIfNull(originPositions);
-
-        if (!CommandPermissions.Nodes.AllowMove)
-        {
-            return;
-        }
-
-        foreach (var entry in originPositions)
-        {
-            var node = FindNode(entry.Key);
-            if (node is null)
-            {
-                continue;
-            }
-
-            node.X = entry.Value.X + deltaX;
-            node.Y = entry.Value.Y + deltaY;
-        }
-    }
+        => _nodeLayoutCoordinator.ApplyDragOffset(originPositions, deltaX, deltaY);
 
     /// <summary>
     /// 开始记录一次连续交互的历史基线，通常用于节点拖动这类高频操作。
@@ -1641,127 +1665,31 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// <param name="secondCorner">矩形第二个角点。</param>
     /// <returns>命中的节点集合。</returns>
     public IReadOnlyList<NodeViewModel> GetNodesInRectangle(GraphPoint firstCorner, GraphPoint secondCorner)
-    {
-        var left = Math.Min(firstCorner.X, secondCorner.X);
-        var top = Math.Min(firstCorner.Y, secondCorner.Y);
-        var right = Math.Max(firstCorner.X, secondCorner.X);
-        var bottom = Math.Max(firstCorner.Y, secondCorner.Y);
-
-        return Nodes
-            .Where(node => Intersects(node.Bounds, left, top, right, bottom))
-            .ToList();
-    }
+        => _nodeLayoutCoordinator.GetNodesInRectangle(firstCorner, secondCorner);
 
     /// <summary>
     /// 获取当前所有节点位置的不可变快照，供宿主持久化使用。
     /// </summary>
     public IReadOnlyList<NodePositionSnapshot> GetNodePositions()
-        => Nodes
-            .Select(node => new NodePositionSnapshot(node.Id, new GraphPoint(node.X, node.Y)))
-            .ToList();
+        => _nodeLayoutCoordinator.GetNodePositions();
 
     /// <summary>
     /// 按节点实例标识读取当前位置。
     /// </summary>
     public bool TryGetNodePosition(string nodeId, out NodePositionSnapshot? snapshot)
-    {
-        var node = FindNode(nodeId);
-        if (node is null)
-        {
-            snapshot = null;
-            return false;
-        }
-
-        snapshot = new NodePositionSnapshot(node.Id, new GraphPoint(node.X, node.Y));
-        return true;
-    }
+        => _nodeLayoutCoordinator.TryGetNodePosition(nodeId, out snapshot);
 
     /// <summary>
     /// 按节点实例标识更新单个节点的位置。
     /// </summary>
     public bool TrySetNodePosition(string nodeId, GraphPoint position, bool updateStatus = true)
-    {
-        if (!CommandPermissions.Nodes.AllowMove)
-        {
-            if (updateStatus)
-            {
-                SetStatus("editor.status.node.move.disabledByPermissions", "Node movement is disabled by host permissions.");
-            }
-
-            return false;
-        }
-
-        var node = FindNode(nodeId);
-        if (node is null)
-        {
-            if (updateStatus)
-            {
-                SetStatus("editor.status.node.notFoundById", "Node '{0}' was not found.", nodeId);
-            }
-
-            return false;
-        }
-
-        if (new GraphPoint(node.X, node.Y) == position)
-        {
-            return true;
-        }
-
-        _kernel.SetNodePositions([new NodePositionSnapshot(nodeId, position)], updateStatus);
-        return true;
-    }
+        => _nodeLayoutCoordinator.TrySetNodePosition(nodeId, position, updateStatus);
 
     /// <summary>
     /// 批量应用节点位置并返回实际更新的节点数量。
     /// </summary>
     public int SetNodePositions(IEnumerable<NodePositionSnapshot> positions, bool updateStatus = true)
-    {
-        ArgumentNullException.ThrowIfNull(positions);
-
-        if (!CommandPermissions.Nodes.AllowMove)
-        {
-            if (updateStatus)
-            {
-                SetStatus("editor.status.node.move.disabledByPermissions", "Node movement is disabled by host permissions.");
-            }
-
-            return 0;
-        }
-
-        var requestedPositions = positions
-            .GroupBy(snapshot => snapshot.NodeId, StringComparer.Ordinal)
-            .Select(group => group.Last())
-            .ToList();
-
-        if (requestedPositions.Count == 0)
-        {
-            if (updateStatus)
-            {
-                SetStatus("editor.status.node.position.noneProvided", "No node positions were provided.");
-            }
-
-            return 0;
-        }
-
-        var appliedCount = requestedPositions.Count(snapshot =>
-        {
-            var node = FindNode(snapshot.NodeId);
-            return node is not null && new GraphPoint(node.X, node.Y) != snapshot.Position;
-        });
-
-        if (appliedCount == 0)
-        {
-            if (updateStatus)
-            {
-                SetStatus("editor.status.node.position.noMatches", "No matching nodes were found for the provided positions.");
-            }
-
-            return 0;
-        }
-
-        _kernel.SetNodePositions(requestedPositions, updateStatus);
-        return appliedCount;
-    }
+        => _nodeLayoutCoordinator.SetNodePositions(positions, updateStatus);
 
     /// <summary>
     /// 将屏幕坐标转换为当前视口下的世界坐标。
@@ -1794,24 +1722,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// <param name="deltaX">水平偏移。</param>
     /// <param name="deltaY">垂直偏移。</param>
     public void MoveNode(NodeViewModel node, double deltaX, double deltaY)
-    {
-        if (!CommandPermissions.Nodes.AllowMove)
-        {
-            return;
-        }
-
-        if (node.IsSelected && SelectedNodes.Count > 1)
-        {
-            foreach (var selectedNode in SelectedNodes)
-            {
-                selectedNode.MoveBy(deltaX, deltaY);
-            }
-
-            return;
-        }
-
-        node.MoveBy(deltaX, deltaY);
-    }
+        => _nodeLayoutCoordinator.MoveNode(node, deltaX, deltaY);
 
     /// <summary>
     /// 按屏幕偏移平移当前视口。
@@ -1931,7 +1842,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// 将当前选择按左边缘对齐。
     /// </summary>
     public void AlignSelectionLeft()
-        => ApplySelectionLayout(
+        => _nodeLayoutCoordinator.ApplySelectionLayout(
             NodeSelectionLayoutService.AlignLeft,
             minimumCount: 2,
             StatusText("editor.status.layout.alignLeft", "Aligned selection left."));
@@ -1940,7 +1851,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// 将当前选择按水平中心对齐。
     /// </summary>
     public void AlignSelectionCenter()
-        => ApplySelectionLayout(
+        => _nodeLayoutCoordinator.ApplySelectionLayout(
             NodeSelectionLayoutService.AlignCenter,
             minimumCount: 2,
             StatusText("editor.status.layout.alignCenter", "Aligned selection center."));
@@ -1949,7 +1860,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// 将当前选择按右边缘对齐。
     /// </summary>
     public void AlignSelectionRight()
-        => ApplySelectionLayout(
+        => _nodeLayoutCoordinator.ApplySelectionLayout(
             NodeSelectionLayoutService.AlignRight,
             minimumCount: 2,
             StatusText("editor.status.layout.alignRight", "Aligned selection right."));
@@ -1958,7 +1869,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// 将当前选择按上边缘对齐。
     /// </summary>
     public void AlignSelectionTop()
-        => ApplySelectionLayout(
+        => _nodeLayoutCoordinator.ApplySelectionLayout(
             NodeSelectionLayoutService.AlignTop,
             minimumCount: 2,
             StatusText("editor.status.layout.alignTop", "Aligned selection top."));
@@ -1967,7 +1878,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// 将当前选择按垂直中心对齐。
     /// </summary>
     public void AlignSelectionMiddle()
-        => ApplySelectionLayout(
+        => _nodeLayoutCoordinator.ApplySelectionLayout(
             NodeSelectionLayoutService.AlignMiddle,
             minimumCount: 2,
             StatusText("editor.status.layout.alignMiddle", "Aligned selection middle."));
@@ -1976,7 +1887,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// 将当前选择按下边缘对齐。
     /// </summary>
     public void AlignSelectionBottom()
-        => ApplySelectionLayout(
+        => _nodeLayoutCoordinator.ApplySelectionLayout(
             NodeSelectionLayoutService.AlignBottom,
             minimumCount: 2,
             StatusText("editor.status.layout.alignBottom", "Aligned selection bottom."));
@@ -1985,7 +1896,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// 将当前选择按水平方向均匀分布。
     /// </summary>
     public void DistributeSelectionHorizontally()
-        => ApplySelectionLayout(
+        => _nodeLayoutCoordinator.ApplySelectionLayout(
             NodeSelectionLayoutService.DistributeHorizontally,
             minimumCount: 3,
             StatusText("editor.status.layout.distributeHorizontally", "Distributed selection horizontally."));
@@ -1994,7 +1905,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// 将当前选择按垂直方向均匀分布。
     /// </summary>
     public void DistributeSelectionVertically()
-        => ApplySelectionLayout(
+        => _nodeLayoutCoordinator.ApplySelectionLayout(
             NodeSelectionLayoutService.DistributeVertically,
             minimumCount: 3,
             StatusText("editor.status.layout.distributeVertically", "Distributed selection vertically."));
@@ -2083,32 +1994,6 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             .ToList();
     }
 #pragma warning restore CS0618
-
-    private void ApplySelectionLayout(Action<IReadOnlyList<NodeViewModel>> applyLayout, int minimumCount, string status)
-    {
-        if ((minimumCount >= 3 && !CommandPermissions.Layout.AllowDistribute)
-            || (minimumCount < 3 && !CommandPermissions.Layout.AllowAlign))
-        {
-            SetStatus("editor.status.layout.disabledByPermissions", "Layout tools are disabled by host permissions.");
-            return;
-        }
-
-        var selectedNodes = SelectedNodes.ToList();
-        if (selectedNodes.Count < minimumCount)
-        {
-            SetStatus(minimumCount switch
-            {
-                2 => ("editor.status.layout.selectAtLeastTwo", "Select at least two nodes for alignment."),
-                3 => ("editor.status.layout.selectAtLeastThree", "Select at least three nodes for distribution."),
-                _ => ("editor.status.layout.selectionTooSmall", "Selection is too small for that operation."),
-            });
-            return;
-        }
-
-        applyLayout(selectedNodes);
-        MarkDirty(status);
-        NotifyDocumentChanged(GraphEditorDocumentChangeKind.LayoutChanged, selectedNodes.Select(node => node.Id).ToList());
-    }
 
     private GraphSelectionFragment? CreateSelectionFragment()
         => _fragmentCommands.CreateSelectionFragment();
@@ -2410,25 +2295,6 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     private bool CanFitView()
         => Nodes.Count > 0 && _viewportWidth > 0 && _viewportHeight > 0;
-
-    private static bool Intersects(NodeBounds bounds, double left, double top, double right, double bottom)
-        => bounds.X < right
-           && (bounds.X + bounds.Width) > left
-           && bounds.Y < bottom
-           && (bounds.Y + bounds.Height) > top;
-
-    private static bool ApplyNodePosition(NodeViewModel node, GraphPoint position)
-    {
-        if (Math.Abs(node.X - position.X) < double.Epsilon
-            && Math.Abs(node.Y - position.Y) < double.Epsilon)
-        {
-            return false;
-        }
-
-        node.X = position.X;
-        node.Y = position.Y;
-        return true;
-    }
 
     private bool CanReplaceIncomingConnection()
         => CommandPermissions.Connections.AllowDelete || CommandPermissions.Connections.AllowDisconnect;
