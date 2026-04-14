@@ -7,7 +7,6 @@ using Avalonia.VisualTree;
 using AsterGraph.Avalonia.Controls.Internal;
 using AsterGraph.Avalonia.Hosting;
 using AsterGraph.Avalonia.Presentation;
-using AsterGraph.Avalonia.Styling;
 using AsterGraph.Editor.ViewModels;
 
 namespace AsterGraph.Avalonia.Controls;
@@ -102,6 +101,7 @@ public partial class GraphEditorView : UserControl
     private Border? _statusChrome;
     private double _defaultShellRowSpacing;
     private double _defaultShellColumnSpacing;
+    private readonly GraphEditorViewCompositionCoordinator _compositionCoordinator;
 
     /// <summary>
     /// 初始化图编辑器宿主视图。
@@ -113,6 +113,7 @@ public partial class GraphEditorView : UserControl
     /// </remarks>
     public GraphEditorView()
     {
+        _compositionCoordinator = new GraphEditorViewCompositionCoordinator(new GraphEditorViewCompositionHost(this));
         InitializeComponent();
         AddHandler(KeyDownEvent, HandleKeyDown, RoutingStrategies.Bubble);
     }
@@ -238,8 +239,8 @@ public partial class GraphEditorView : UserControl
                 change.GetNewValue<GraphEditorViewModel?>(),
                 this);
             var editor = change.GetNewValue<GraphEditorViewModel?>();
-            ApplyStyleOptions(editor);
-            ApplyPresentationOptions(Presentation);
+            _compositionCoordinator.ApplyStyleOptions(editor);
+            _compositionCoordinator.ApplyPresentationOptions(Presentation);
         }
         else if (change.Property == ChromeModeProperty
             || change.Property == IsHeaderChromeVisibleProperty
@@ -247,18 +248,18 @@ public partial class GraphEditorView : UserControl
             || change.Property == IsInspectorChromeVisibleProperty
             || change.Property == IsStatusChromeVisibleProperty)
         {
-            ApplyChromeMode(ChromeMode);
+            _compositionCoordinator.ApplyChromeMode();
         }
         else if (change.Property == EnableDefaultContextMenuProperty
             || change.Property == EnableDefaultCommandShortcutsProperty
             || change.Property == EnableDefaultWheelViewportGesturesProperty
             || change.Property == EnableAltLeftDragPanningProperty)
         {
-            ApplyCanvasBehaviorOptions();
+            _compositionCoordinator.ApplyCanvasBehaviorOptions();
         }
         else if (change.Property == PresentationProperty)
         {
-            ApplyPresentationOptions(change.GetNewValue<AsterGraphPresentationOptions?>());
+            _compositionCoordinator.ApplyPresentationOptions(change.GetNewValue<AsterGraphPresentationOptions?>());
         }
     }
 
@@ -293,87 +294,9 @@ public partial class GraphEditorView : UserControl
         }
         _defaultShellRowSpacing = _shellGrid?.RowSpacing ?? 0;
         _defaultShellColumnSpacing = _shellGrid?.ColumnSpacing ?? 0;
-        ApplyChromeMode(ChromeMode);
-        ApplyCanvasBehaviorOptions();
-        ApplyPresentationOptions(Presentation);
-    }
-
-    private void ApplyStyleOptions(GraphEditorViewModel? editor)
-    {
-        if (editor?.StyleOptions is null)
-        {
-            return;
-        }
-
-        var adapter = new GraphEditorStyleAdapter(editor.StyleOptions);
-        adapter.ApplyResources(Resources);
-    }
-
-    private void ApplyChromeMode(GraphEditorViewChromeMode chromeMode)
-    {
-        var showChrome = chromeMode == GraphEditorViewChromeMode.Default;
-        var showHeader = showChrome && IsHeaderChromeVisible;
-        var showLibrary = showChrome && IsLibraryChromeVisible;
-        var showInspector = showChrome && IsInspectorChromeVisible;
-        var showStatus = showChrome && IsStatusChromeVisible;
-
-        if (_headerChrome is not null)
-        {
-            _headerChrome.IsVisible = showHeader;
-        }
-
-        if (_libraryChrome is not null)
-        {
-            _libraryChrome.IsVisible = showLibrary;
-        }
-
-        if (_inspectorChrome is not null)
-        {
-            _inspectorChrome.IsVisible = showInspector;
-        }
-
-        if (_statusChrome is not null)
-        {
-            _statusChrome.IsVisible = showStatus;
-        }
-
-        if (_shellGrid is not null)
-        {
-            _shellGrid.RowSpacing = showHeader || showStatus ? _defaultShellRowSpacing : 0;
-            _shellGrid.ColumnSpacing = showLibrary || showInspector ? _defaultShellColumnSpacing : 0;
-        }
-    }
-
-    private void ApplyCanvasBehaviorOptions()
-    {
-        if (_nodeCanvas is null)
-        {
-            return;
-        }
-
-        _nodeCanvas.EnableDefaultContextMenu = EnableDefaultContextMenu;
-        _nodeCanvas.EnableDefaultCommandShortcuts = EnableDefaultCommandShortcuts;
-        _nodeCanvas.EnableDefaultWheelViewportGestures = EnableDefaultWheelViewportGestures;
-        _nodeCanvas.EnableAltLeftDragPanning = EnableAltLeftDragPanning;
-    }
-
-    private void ApplyPresentationOptions(AsterGraphPresentationOptions? presentation)
-    {
-        if (_nodeCanvas is not null)
-        {
-            _nodeCanvas.NodeVisualPresenter = presentation?.NodeVisualPresenter;
-            _nodeCanvas.ContextMenuPresenter = presentation?.ContextMenuPresenter;
-        }
-
-        if (_inspectorSurface is not null)
-        {
-            _inspectorSurface.InspectorPresenter = presentation?.InspectorPresenter;
-        }
-
-        if (_miniMapSurface is not null)
-        {
-            _miniMapSurface.MiniMapPresenter = presentation?.MiniMapPresenter;
-        }
+        _compositionCoordinator.ApplyChromeMode();
+        _compositionCoordinator.ApplyCanvasBehaviorOptions();
+        _compositionCoordinator.ApplyPresentationOptions(Presentation);
     }
 
     private void HandleKeyDown(object? sender, KeyEventArgs args)
@@ -392,5 +315,4 @@ public partial class GraphEditorView : UserControl
             args.Handled = true;
         }
     }
-
 }
