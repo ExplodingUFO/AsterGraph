@@ -31,6 +31,8 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost, IGrap
     private readonly GraphEditorKernelViewportCoordinator _viewportCoordinator = new(DefaultZoom, DefaultPanX, DefaultPanY);
     private readonly GraphEditorKernelCompatibilityQueries _compatibilityQueries;
     private readonly GraphEditorKernelDocumentMutator _documentMutator = new();
+    private readonly GraphEditorKernelNodeMutationHost _nodeMutationHost;
+    private readonly GraphEditorKernelNodeMutationCoordinator _nodeMutationCoordinator;
     private readonly GraphEditorKernelCommandRouter _commandRouter;
     private readonly GraphEditorKernelWorkspaceSaveCoordinatorHost _workspaceSaveCoordinatorHost;
     private readonly GraphEditorKernelWorkspaceLoadCoordinatorHost _workspaceLoadCoordinatorHost;
@@ -69,6 +71,8 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost, IGrap
         _compatibilityQueries = new GraphEditorKernelCompatibilityQueries(compatibilityService);
         _styleOptions = styleOptions;
         _behaviorOptions = behaviorOptions;
+        _nodeMutationHost = new GraphEditorKernelNodeMutationHost(this);
+        _nodeMutationCoordinator = new GraphEditorKernelNodeMutationCoordinator(_nodeMutationHost, _documentMutator);
         _commandRouter = new GraphEditorKernelCommandRouter(this);
         _workspaceSaveCoordinatorHost = new GraphEditorKernelWorkspaceSaveCoordinatorHost(this);
         _workspaceLoadCoordinatorHost = new GraphEditorKernelWorkspaceLoadCoordinatorHost(this);
@@ -194,194 +198,19 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost, IGrap
     }
 
     public void AddNode(NodeDefinitionId definitionId, GraphPoint? preferredWorldPosition)
-    {
-        ArgumentNullException.ThrowIfNull(definitionId);
-
-        if (!_behaviorOptions.Commands.Nodes.AllowCreate)
-        {
-            CurrentStatusMessage = "Node creation is disabled by host permissions.";
-            return;
-        }
-
-        if (!_nodeCatalog.TryGetDefinition(definitionId, out var definition) || definition is null)
-        {
-            throw new InvalidOperationException($"Node definition '{definitionId}' is not registered in the current editor catalog.");
-        }
-
-        var position = preferredWorldPosition ?? GetViewportCenter();
-        var offset = 26 * (_document.Nodes.Count % 4);
-        var node = new GraphNode(
-            CreateNodeId(definitionId),
-            definition.DisplayName,
-            definition.Category,
-            definition.Subtitle,
-            definition.Description ?? definition.Subtitle,
-            new GraphPoint(
-                position.X - (definition.DefaultWidth / 2) + offset,
-                position.Y - (definition.DefaultHeight / 2) + offset),
-            new GraphSize(definition.DefaultWidth, definition.DefaultHeight),
-            definition.InputPorts.Select(port => new GraphPort(port.Key, port.DisplayName, PortDirection.Input, port.TypeId.Value, port.AccentHex, port.TypeId)).ToList(),
-            definition.OutputPorts.Select(port => new GraphPort(port.Key, port.DisplayName, PortDirection.Output, port.TypeId.Value, port.AccentHex, port.TypeId)).ToList(),
-            definition.AccentHex,
-            definition.Id,
-            definition.Parameters.Select(parameter => new GraphParameterValue(parameter.Key, parameter.ValueType, parameter.DefaultValue)).ToList());
-
-        _document = _document with
-        {
-            Nodes = _document.Nodes.Concat([node]).ToList(),
-        };
-        SetSelection([node.Id], node.Id, updateStatus: false);
-        MarkDirty($"Added {node.Title}.", GraphEditorDocumentChangeKind.NodesAdded, [node.Id], null);
-    }
+        => _nodeMutationCoordinator.AddNode(definitionId, preferredWorldPosition);
 
     public void DeleteNodeById(string nodeId)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(nodeId);
-
-        if (!_behaviorOptions.Commands.Nodes.AllowDelete)
-        {
-            CurrentStatusMessage = "Node deletion is disabled by host permissions.";
-            return;
-        }
-
-        var mutation = _documentMutator.DeleteNode(_document, nodeId);
-        if (mutation.Node is null)
-        {
-            return;
-        }
-
-        if (mutation.RemovedConnections.Count > 0 && !CanRemoveConnectionsAsSideEffect())
-        {
-            CurrentStatusMessage = "Deleting a connected node requires delete or disconnect permission for the affected links.";
-            return;
-        }
-
-        _document = mutation.Document;
-        if (string.Equals(_pendingConnection.SourceNodeId, mutation.Node.Id, StringComparison.Ordinal))
-        {
-            CancelPendingConnection();
-        }
-
-        var remainingSelection = _selectedNodeIds
-            .Where(selectedNodeId => !string.Equals(selectedNodeId, mutation.Node.Id, StringComparison.Ordinal))
-            .ToList();
-        SetSelection(remainingSelection, remainingSelection.LastOrDefault(), updateStatus: false);
-        MarkDirty(
-            $"Deleted {mutation.Node.Title}.",
-            GraphEditorDocumentChangeKind.NodesRemoved,
-            [mutation.Node.Id],
-            mutation.RemovedConnections.Select(connection => connection.Id).ToList());
-    }
+        => _nodeMutationCoordinator.DeleteNodeById(nodeId);
 
     public void DuplicateNode(string nodeId)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(nodeId);
-
-        if (!_behaviorOptions.Commands.Nodes.AllowDuplicate)
-        {
-            CurrentStatusMessage = "Node duplication is disabled by host permissions.";
-            return;
-        }
-
-        var node = FindNode(nodeId);
-        if (node is null)
-        {
-            return;
-        }
-
-        var mutation = _documentMutator.DuplicateNode(
-            _document,
-            nodeId,
-            CreateNodeId(node.DefinitionId, node.Id),
-            new GraphPoint(node.Position.X + 48, node.Position.Y + 48));
-        if (mutation.Node is null)
-        {
-            return;
-        }
-
-        _document = mutation.Document;
-        SetSelection([mutation.Node.Id], mutation.Node.Id, updateStatus: false);
-        MarkDirty(
-            $"Duplicated {mutation.Node.Title}.",
-            GraphEditorDocumentChangeKind.NodesAdded,
-            [mutation.Node.Id],
-            null);
-    }
+        => _nodeMutationCoordinator.DuplicateNode(nodeId);
 
     public void DeleteSelection()
-    {
-        if (!_behaviorOptions.Commands.Nodes.AllowDelete)
-        {
-            CurrentStatusMessage = "Node deletion is disabled by host permissions.";
-            return;
-        }
-
-        if (_selectedNodeIds.Count == 0)
-        {
-            CurrentStatusMessage = "Select a node before deleting.";
-            return;
-        }
-
-        var mutation = _documentMutator.DeleteSelection(_document, _selectedNodeIds);
-        var removedNodes = mutation.RemovedNodes;
-        var removedConnections = mutation.RemovedConnections;
-
-        if (removedConnections.Count > 0 && !CanRemoveConnectionsAsSideEffect())
-        {
-            CurrentStatusMessage = "Deleting connected nodes requires delete or disconnect permission for the affected links.";
-            return;
-        }
-
-        _document = mutation.Document;
-        CancelPendingConnection();
-        SetSelection([], null, updateStatus: false);
-        var status = removedNodes.Count == 1
-            ? $"Deleted {removedNodes[0].Title}."
-            : $"Deleted {removedNodes.Count} nodes.";
-        MarkDirty(
-            status,
-            GraphEditorDocumentChangeKind.NodesRemoved,
-            removedNodes.Select(node => node.Id).ToList(),
-            removedConnections.Select(connection => connection.Id).ToList());
-    }
+        => _nodeMutationCoordinator.DeleteSelection();
 
     public void SetNodePositions(IReadOnlyList<NodePositionSnapshot> positions, bool updateStatus)
-    {
-        ArgumentNullException.ThrowIfNull(positions);
-
-        if (!_behaviorOptions.Commands.Nodes.AllowMove)
-        {
-            if (updateStatus)
-            {
-                CurrentStatusMessage = "Node movement is disabled by host permissions.";
-            }
-
-            return;
-        }
-
-        var mutation = _documentMutator.SetNodePositions(_document, positions);
-        if (mutation.ChangedNodeIds.Count == 0)
-        {
-            if (updateStatus)
-            {
-                CurrentStatusMessage = positions.Count == 0
-                    ? "No node positions were provided."
-                    : "No matching nodes were found for the provided positions.";
-            }
-
-            return;
-        }
-
-        _document = mutation.Document;
-        if (updateStatus)
-        {
-            CurrentStatusMessage = mutation.ChangedNodeIds.Count == 1
-                ? "Updated 1 node position."
-                : $"Updated {mutation.ChangedNodeIds.Count} node positions.";
-        }
-
-        MarkDirty(CurrentStatusMessage, GraphEditorDocumentChangeKind.LayoutChanged, mutation.ChangedNodeIds, null, preserveStatus: true);
-    }
+        => _nodeMutationCoordinator.SetNodePositions(positions, updateStatus);
 
     public void StartConnection(string sourceNodeId, string sourcePortId)
     {
