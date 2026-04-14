@@ -111,6 +111,23 @@ public sealed class GraphEditorPresentationTests
     }
 
     [Fact]
+    public void SetNodePresentationProvider_AfterConstruction_UpdatesSessionFeatureDescriptorAvailability()
+    {
+        var provider = new TestNodePresentationProvider();
+        var editor = CreateEditor(provider: null, nodeCount: 1);
+
+        Assert.False(GetFeatureAvailability(editor, "integration.node-presentation-provider"));
+
+        editor.SetNodePresentationProvider(provider, refreshImmediately: false);
+
+        Assert.True(GetFeatureAvailability(editor, "integration.node-presentation-provider"));
+
+        editor.SetNodePresentationProvider(null, refreshImmediately: false);
+
+        Assert.False(GetFeatureAvailability(editor, "integration.node-presentation-provider"));
+    }
+
+    [Fact]
     public void RefreshNodePresentation_ReturnsFalse_ForMissingNode_WithoutCallingProvider()
     {
         var provider = new TestNodePresentationProvider();
@@ -187,4 +204,9 @@ public sealed class GraphEditorPresentationTests
         public void SetState(string nodeId, NodePresentationState state)
             => _states[nodeId] = state;
     }
+
+    private static bool GetFeatureAvailability(GraphEditorViewModel editor, string descriptorId)
+        => editor.Session.Queries.GetFeatureDescriptors()
+            .Single(descriptor => descriptor.Id == descriptorId)
+            .IsAvailable;
 }

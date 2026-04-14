@@ -162,6 +162,22 @@ public sealed class GraphEditorLocalizationTests
     }
 
     [Fact]
+    public void SetLocalizationProvider_AfterConstruction_UpdatesSessionFeatureDescriptorAvailability()
+    {
+        var editor = CreateConnectedEditor(provider: null);
+
+        Assert.False(GetFeatureAvailability(editor, "integration.localization-provider"));
+
+        editor.SetLocalizationProvider(new TestGraphLocalizationProvider(new Dictionary<string, string>()));
+
+        Assert.True(GetFeatureAvailability(editor, "integration.localization-provider"));
+
+        editor.SetLocalizationProvider(null);
+
+        Assert.False(GetFeatureAvailability(editor, "integration.localization-provider"));
+    }
+
+    [Fact]
     public void InspectorProjection_UsesLocalizationProviderForStockProjectionText()
     {
         var editor = CreateConnectedEditor(new TestGraphLocalizationProvider(
@@ -352,4 +368,9 @@ public sealed class GraphEditorLocalizationTests
         public string GetString(string key, string fallback)
             => _values.TryGetValue(key, out var value) ? value : fallback;
     }
+
+    private static bool GetFeatureAvailability(GraphEditorViewModel editor, string descriptorId)
+        => editor.Session.Queries.GetFeatureDescriptors()
+            .Single(descriptor => descriptor.Id == descriptorId)
+            .IsAvailable;
 }

@@ -356,8 +356,8 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             hasClipboardPayloadSerializer: _clipboardPayloadSerializer is not null,
             hasPluginLoader: true,
             hasContextMenuAugmentor: _contextMenuAugmentor is not null,
-            hasNodePresentationProvider: _presentationLocalizationCoordinator.HasNodePresentationProvider,
-            hasLocalizationProvider: _presentationLocalizationCoordinator.HasLocalizationProvider);
+            hasNodePresentationProvider: () => _presentationLocalizationCoordinator.HasNodePresentationProvider,
+            hasLocalizationProvider: () => _presentationLocalizationCoordinator.HasLocalizationProvider);
 
     /// <summary>
     /// 获取当前命令权限配置。

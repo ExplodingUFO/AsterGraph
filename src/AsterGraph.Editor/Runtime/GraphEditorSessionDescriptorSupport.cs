@@ -7,6 +7,8 @@ namespace AsterGraph.Editor.Runtime;
 internal sealed class GraphEditorSessionDescriptorSupport
 {
     private readonly Func<string, string, string> _localize;
+    private readonly Func<bool> _hasNodePresentationProvider;
+    private readonly Func<bool> _hasLocalizationProvider;
 
     public GraphEditorSessionDescriptorSupport(
         INodeCatalog nodeCatalog,
@@ -18,11 +20,13 @@ internal sealed class GraphEditorSessionDescriptorSupport
         bool hasPluginLoader = false,
         bool hasPluginTrustPolicy = false,
         bool hasContextMenuAugmentor = false,
-        bool hasNodePresentationProvider = false,
-        bool hasLocalizationProvider = false)
+        Func<bool>? hasNodePresentationProvider = null,
+        Func<bool>? hasLocalizationProvider = null)
     {
         NodeCatalog = nodeCatalog ?? throw new ArgumentNullException(nameof(nodeCatalog));
         _localize = localize ?? ((_, fallback) => fallback);
+        _hasNodePresentationProvider = hasNodePresentationProvider ?? (() => false);
+        _hasLocalizationProvider = hasLocalizationProvider ?? (() => false);
         CompatibilityEditor = compatibilityEditor;
         HasFragmentWorkspaceService = hasFragmentWorkspaceService;
         HasFragmentLibraryService = hasFragmentLibraryService;
@@ -30,8 +34,6 @@ internal sealed class GraphEditorSessionDescriptorSupport
         HasPluginLoader = hasPluginLoader;
         HasPluginTrustPolicy = hasPluginTrustPolicy;
         HasContextMenuAugmentor = hasContextMenuAugmentor;
-        HasNodePresentationProvider = hasNodePresentationProvider;
-        HasLocalizationProvider = hasLocalizationProvider;
     }
 
     public INodeCatalog NodeCatalog { get; }
@@ -50,9 +52,9 @@ internal sealed class GraphEditorSessionDescriptorSupport
 
     public bool HasContextMenuAugmentor { get; }
 
-    public bool HasNodePresentationProvider { get; }
+    public bool HasNodePresentationProvider => _hasNodePresentationProvider();
 
-    public bool HasLocalizationProvider { get; }
+    public bool HasLocalizationProvider => _hasLocalizationProvider();
 
     public IReadOnlyCollection<INodeDefinition> Definitions => NodeCatalog.Definitions;
 
