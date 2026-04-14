@@ -79,6 +79,7 @@ public partial class NodeCanvas : UserControl
     private readonly NodeCanvasViewModelObserver _viewModelObserver;
     private readonly NodeCanvasOverlayCoordinator _overlayCoordinator;
     private readonly NodeCanvasNodeDragCoordinator _nodeDragCoordinator;
+    private readonly NodeCanvasPointerInteractionCoordinator _pointerInteractionCoordinator;
     private readonly NodeCanvasWheelInteractionCoordinator _wheelInteractionCoordinator;
     private bool _isAttachedToVisualTree;
 
@@ -94,6 +95,7 @@ public partial class NodeCanvas : UserControl
         _viewModelObserver = new NodeCanvasViewModelObserver(new NodeCanvasViewModelObserverHost(this));
         _overlayCoordinator = new NodeCanvasOverlayCoordinator(new NodeCanvasOverlayHost(this));
         _nodeDragCoordinator = new NodeCanvasNodeDragCoordinator(new NodeCanvasNodeDragHost(this));
+        _pointerInteractionCoordinator = new NodeCanvasPointerInteractionCoordinator(new NodeCanvasPointerInteractionHost(this));
         _wheelInteractionCoordinator = new NodeCanvasWheelInteractionCoordinator(new NodeCanvasWheelInteractionHost(this));
 
         ContextRequested += HandleCanvasContextRequested;
@@ -290,125 +292,38 @@ public partial class NodeCanvas : UserControl
 
     private void HandlePointerPressed(object? sender, PointerPressedEventArgs args)
     {
-        if (ViewModel is null || args.Handled)
-        {
-            return;
-        }
-
-        Focus();
-
         var props = args.GetCurrentPoint(this).Properties;
-        var current = args.GetPosition(this);
-        _interactionSession.UpdateLastPointerPosition(current);
-        _interactionSession.UpdatePointerPosition(current);
+        var result = _pointerInteractionCoordinator.HandlePressed(
+            args.Handled,
+            args.GetPosition(this),
+            props.IsLeftButtonPressed,
+            props.IsMiddleButtonPressed,
+            args.KeyModifiers);
 
-        // 如果按下鼠标中键，或者按住 Alt 键的同时点击鼠标左键，触发平移交互。
-        // 此改动允许触控板用户通过按住键盘 Alt 键 + 单指拖拽的方式平移视图。
-        if (props.IsMiddleButtonPressed
-            || (EnableAltLeftDragPanning && props.IsLeftButtonPressed && args.KeyModifiers.HasFlag(KeyModifiers.Alt)))
+        if (!result.Handled)
         {
-            _interactionSession.BeginPanning(current);
-            HideSelectionAdorner();
-            HideGuideAdorners();
-            args.Pointer.Capture(this);
-            args.Handled = true;
             return;
         }
 
-        if (props.IsLeftButtonPressed)
+        if (result.CapturePointer)
         {
-            if (ViewModel.HasPendingConnection)
-            {
-                ViewModel.CancelPendingConnection("Connection preview cancelled.");
-                RenderConnections();
-            }
-
-            _interactionSession.BeginCanvasSelection(current, args.KeyModifiers, ViewModel.SelectedNodes.ToList());
-            HideSelectionAdorner();
-            HideGuideAdorners();
             args.Pointer.Capture(this);
-            args.Handled = true;
         }
+
+        args.Handled = true;
     }
 
     private void HandlePointerMoved(object? sender, PointerEventArgs args)
     {
-        if (ViewModel is null)
+        if (_pointerInteractionCoordinator.HandleMoved(args.GetPosition(this), SelectionDragThreshold))
         {
-            return;
-        }
-
-        var current = args.GetPosition(this);
-        _interactionSession.UpdatePointerPosition(current);
-
-        if (_interactionSession.SelectionStartScreenPosition is not null
-            && !_interactionSession.IsPanning
-            && _interactionSession.DragNode is null)
-        {
-            if (_interactionSession.TryBeginMarqueeSelection(current, SelectionDragThreshold))
-            {
-                UpdateMarqueeSelection(current, finalize: false);
-                args.Handled = true;
-                return;
-            }
-        }
-
-        if (_interactionSession.IsPanning || _interactionSession.DragNode is not null)
-        {
-            if (_interactionSession.DragNode is not null)
-            {
-                if (_interactionSession.DragSession is not null && _interactionSession.DragStartScreenPosition is not null)
-                {
-                    var rawDelta = current - _interactionSession.DragStartScreenPosition.Value;
-                    var adjustedDelta = ApplyDragAssist(
-                        _interactionSession.DragSession.Value,
-                        rawDelta.X / ViewModel.Zoom,
-                        rawDelta.Y / ViewModel.Zoom);
-                    ViewModel.ApplyDragOffset(_interactionSession.DragSession.Value.OriginPositions, adjustedDelta.X, adjustedDelta.Y);
-                }
-            }
-            else if (_interactionSession.IsPanning)
-            {
-                var delta = current - _interactionSession.LastPointerPosition;
-                _interactionSession.UpdateLastPointerPosition(current);
-                ViewModel.PanBy(delta.X, delta.Y);
-            }
-
             args.Handled = true;
-        }
-
-        if (ViewModel.HasPendingConnection)
-        {
-            RenderConnections();
         }
     }
 
     private void HandlePointerReleased(object? sender, PointerReleasedEventArgs args)
     {
-        if (_interactionSession.SelectionStartScreenPosition is not null)
-        {
-            if (_interactionSession.IsMarqueeSelecting)
-            {
-                UpdateMarqueeSelection(args.GetPosition(this), finalize: true);
-            }
-            else
-            {
-                ViewModel?.ClearSelection();
-            }
-
-            HideSelectionAdorner();
-        }
-
-        if (_interactionSession.DragNode is not null)
-        {
-            ViewModel?.CompleteHistoryInteraction(
-                ViewModel.HasMultipleSelection
-                    ? "Moved selection."
-                    : $"Moved {_interactionSession.DragNode.Title}.");
-        }
-
-        _interactionSession.ResetAfterPointerRelease();
-        HideGuideAdorners();
+        _pointerInteractionCoordinator.HandleReleased(args.GetPosition(this));
         args.Pointer.Capture(null);
     }
 

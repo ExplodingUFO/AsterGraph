@@ -198,6 +198,40 @@ public partial class NodeCanvas
             => _owner.CreateDragSession(nodes);
     }
 
+    private sealed class NodeCanvasPointerInteractionHost : INodeCanvasPointerInteractionHost
+    {
+        private readonly NodeCanvas _owner;
+
+        public NodeCanvasPointerInteractionHost(NodeCanvas owner)
+        {
+            _owner = owner ?? throw new ArgumentNullException(nameof(owner));
+        }
+
+        public GraphEditorViewModel? ViewModel => _owner.ViewModel;
+
+        public bool EnableAltLeftDragPanning => _owner.EnableAltLeftDragPanning;
+
+        public NodeCanvasInteractionSession InteractionSession => _owner._interactionSession;
+
+        public void FocusCanvas()
+            => _owner.Focus();
+
+        public void HideSelectionAdorner()
+            => _owner.HideSelectionAdorner();
+
+        public void HideGuideAdorners()
+            => _owner.HideGuideAdorners();
+
+        public void RenderConnections()
+            => _owner.RenderConnections();
+
+        public void UpdateMarqueeSelection(Point currentScreenPosition, bool finalize)
+            => _owner.UpdateMarqueeSelection(currentScreenPosition, finalize);
+
+        public GraphPoint ApplyDragAssist(NodeCanvasDragSession dragSession, double deltaX, double deltaY)
+            => _owner.ApplyDragAssist(dragSession, deltaX, deltaY);
+    }
+
     private sealed class NodeCanvasWheelInteractionHost : INodeCanvasWheelInteractionHost
     {
         private readonly NodeCanvas _owner;
