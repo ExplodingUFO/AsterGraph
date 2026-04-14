@@ -176,6 +176,27 @@ public sealed class GraphEditorFacadeRefactorTests
     }
 
     [Fact]
+    public void GraphEditorViewModel_DoesNotImplementSelectionStateSynchronizerHostInterface()
+    {
+        var viewModelType = typeof(GraphEditorViewModel);
+        var implementedInterfaces = viewModelType.GetInterfaces();
+
+        Assert.DoesNotContain(
+            implementedInterfaces,
+            iface => iface.FullName == "AsterGraph.Editor.Services.IGraphEditorSelectionStateSynchronizerHost");
+    }
+
+    [Fact]
+    public void GraphEditorViewModel_ContainsSelectionStateSynchronizerHost()
+    {
+        var hostType = typeof(GraphEditorViewModel).GetNestedType(
+            "GraphEditorViewModelSelectionStateSynchronizerHost",
+            System.Reflection.BindingFlags.NonPublic);
+
+        Assert.NotNull(hostType);
+    }
+
+    [Fact]
     public void GraphEditorViewModel_DoesNotImplementNodePositionDirtyTrackerHost()
     {
         var viewModelType = typeof(GraphEditorViewModel);
