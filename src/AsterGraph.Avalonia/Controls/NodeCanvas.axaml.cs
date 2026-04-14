@@ -78,6 +78,7 @@ public partial class NodeCanvas : UserControl
     private readonly NodeCanvasSceneHost _sceneHost;
     private readonly NodeCanvasViewModelObserver _viewModelObserver;
     private readonly NodeCanvasOverlayCoordinator _overlayCoordinator;
+    private readonly NodeCanvasWheelInteractionCoordinator _wheelInteractionCoordinator;
     private bool _isAttachedToVisualTree;
 
     /// <summary>
@@ -91,6 +92,7 @@ public partial class NodeCanvas : UserControl
         _sceneHost = new NodeCanvasSceneHost(new NodeCanvasSceneHostAdapter(this));
         _viewModelObserver = new NodeCanvasViewModelObserver(new NodeCanvasViewModelObserverHost(this));
         _overlayCoordinator = new NodeCanvasOverlayCoordinator(new NodeCanvasOverlayHost(this));
+        _wheelInteractionCoordinator = new NodeCanvasWheelInteractionCoordinator(new NodeCanvasWheelInteractionHost(this));
 
         ContextRequested += HandleCanvasContextRequested;
         KeyDown += HandleCanvasKeyDown;
@@ -445,30 +447,10 @@ public partial class NodeCanvas : UserControl
 
     private void HandlePointerWheelChanged(object? sender, PointerWheelEventArgs args)
     {
-        if (ViewModel is null || !EnableDefaultWheelViewportGestures)
+        if (_wheelInteractionCoordinator.HandleWheel(args.GetPosition(this), args.Delta, args.KeyModifiers))
         {
-            return;
+            args.Handled = true;
         }
-
-        var point = args.GetPosition(this);
-        _interactionSession.UpdatePointerPosition(point);
-
-        // 判断是否按住了 Control 键。多数精度触控板的"捏合"手势，会被转化为带 Control 修饰符的滚轮事件。
-        if (args.KeyModifiers.HasFlag(KeyModifiers.Control))
-        {
-            // 执行缩放：向上滚动（Delta.Y > 0）或展开双指为放大，向下滚动或捏合双指为缩小。
-            var factor = args.Delta.Y >= 0 ? 1.12 : 1 / 1.12;
-            ViewModel.ZoomAt(factor, new GraphPoint(point.X, point.Y));
-        }
-        else
-        {
-            // 执行平移：常规滚轮或触控板双指平行滑动，将移动画布的视口。
-            // 滚轮事件的 Delta 单位常常是行距，通过乘以平移常量转化为视口的像素偏移。
-            const double scrollSpeedMultiplier = 40.0;
-            ViewModel.PanBy(args.Delta.X * scrollSpeedMultiplier, args.Delta.Y * scrollSpeedMultiplier);
-        }
-
-        args.Handled = true;
     }
 
     private void HandleCanvasKeyDown(object? sender, KeyEventArgs args)

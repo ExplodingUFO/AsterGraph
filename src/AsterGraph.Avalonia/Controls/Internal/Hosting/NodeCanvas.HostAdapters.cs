@@ -162,4 +162,20 @@ public partial class NodeCanvas
         public void SetSelection(IReadOnlyList<NodeViewModel> nodes, NodeViewModel? primaryNode, string? status = null)
             => _owner.ViewModel?.SetSelection(nodes, primaryNode, status);
     }
+
+    private sealed class NodeCanvasWheelInteractionHost : INodeCanvasWheelInteractionHost
+    {
+        private readonly NodeCanvas _owner;
+
+        public NodeCanvasWheelInteractionHost(NodeCanvas owner)
+        {
+            _owner = owner ?? throw new ArgumentNullException(nameof(owner));
+        }
+
+        public GraphEditorViewModel? ViewModel => _owner.ViewModel;
+
+        public bool EnableDefaultWheelViewportGestures => _owner.EnableDefaultWheelViewportGestures;
+
+        public NodeCanvasInteractionSession InteractionSession => _owner._interactionSession;
+    }
 }
