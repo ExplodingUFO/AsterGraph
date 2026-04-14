@@ -107,6 +107,8 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     private readonly GraphEditorViewModelSelectionStateSynchronizerHost _selectionStateSynchronizerHost;
     private readonly GraphEditorSelectionStateSynchronizer _selectionStateSynchronizer;
     private readonly GraphEditorSelectionProjectionApplier _selectionProjectionApplier;
+    private readonly GraphEditorViewModelParameterEditHost _parameterEditHost;
+    private readonly GraphEditorParameterEditCoordinator _parameterEditCoordinator;
     private readonly GraphEditorViewModelDocumentCollectionSynchronizerHost _documentCollectionSynchronizerHost;
     private readonly GraphEditorDocumentCollectionSynchronizer _documentCollectionSynchronizer;
     private readonly GraphEditorDocumentLoadCoordinator _documentLoadCoordinator;
@@ -218,6 +220,8 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         _selectionStateSynchronizer = new GraphEditorSelectionStateSynchronizer(_selectionStateSynchronizerHost);
         _selectionProjectionApplierHost = new GraphEditorViewModelSelectionProjectionApplierHost(this);
         _selectionProjectionApplier = new GraphEditorSelectionProjectionApplier(_selectionProjectionApplierHost, _selectionProjection);
+        _parameterEditHost = new GraphEditorViewModelParameterEditHost(this);
+        _parameterEditCoordinator = new GraphEditorParameterEditCoordinator(_parameterEditHost);
         _documentCollectionSynchronizerHost = new GraphEditorViewModelDocumentCollectionSynchronizerHost(this);
         _documentCollectionSynchronizer = new GraphEditorDocumentCollectionSynchronizer(_documentCollectionSynchronizerHost, _documentProjectionApplier);
         _persistenceCoordinatorHost = new GraphEditorViewModelPersistenceCoordinatorHost(this);
@@ -1917,26 +1921,6 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     }
 
     private void ApplyParameterValue(NodeParameterViewModel parameter, object? value)
-    {
-        if (SelectedNodes.Count == 0)
-        {
-            return;
-        }
-
-        if (!CanEditNodeParameters)
-        {
-            SetStatus("editor.status.parameter.edit.disabledByPermissions", "Parameter editing is disabled by host permissions.");
-            return;
-        }
-
-        foreach (var node in SelectedNodes)
-        {
-            node.SetParameterValue(parameter.Key, parameter.TypeId, value);
-        }
-
-        MarkDirty(SelectedNodes.Count == 1
-            ? StatusText("editor.status.parameter.updatedSingle", "Updated {0} / {1}.", SelectedNode!.Title, parameter.DisplayName)
-            : StatusText("editor.status.parameter.updatedMultiple", "Updated {0} nodes / {1}.", SelectedNodes.Count, parameter.DisplayName));
-    }
+        => _parameterEditCoordinator.ApplyParameterValue(parameter, value);
 
 }
