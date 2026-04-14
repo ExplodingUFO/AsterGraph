@@ -40,14 +40,14 @@ internal sealed class GraphEditorWorkspaceLoadCoordinator
             return false;
         }
 
-        if (!_host.WorkspaceExists)
-        {
-            _host.HandleWorkspaceLoadMissing("No saved snapshot yet. Save once to create one.");
-            return false;
-        }
-
         try
         {
+            if (!_host.WorkspaceExists)
+            {
+                _host.HandleWorkspaceLoadMissing("No saved snapshot yet. Save once to create one.");
+                return false;
+            }
+
             var document = _host.LoadWorkspaceDocument();
             _host.ApplyLoadedWorkspaceDocument(document, "Workspace loaded from disk.");
             _host.HandleWorkspaceLoadSucceeded(_host.WorkspacePath);

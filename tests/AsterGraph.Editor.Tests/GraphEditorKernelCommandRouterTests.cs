@@ -174,6 +174,22 @@ public sealed class GraphEditorKernelCommandRouterTests
         Assert.Equal("Workspace loaded from disk.", documentChanged.StatusMessage);
     }
 
+    [Fact]
+    public void GraphEditorKernel_LoadWorkspace_WhenMissingDiagnosticPublicationThrows_RaisesRecoverableFailure()
+    {
+        var kernel = CreateKernel();
+        GraphEditorRecoverableFailureEventArgs? failure = null;
+        kernel.RecoverableFailureRaised += (_, args) => failure = args;
+        kernel.DiagnosticPublished += _ => throw new InvalidOperationException("diagnostic boom");
+
+        var loaded = kernel.LoadWorkspace();
+
+        Assert.False(loaded);
+        Assert.NotNull(failure);
+        Assert.Equal("workspace.load.failed", failure!.Code);
+        Assert.Contains("diagnostic boom", failure.Message, StringComparison.Ordinal);
+    }
+
     private static GraphEditorKernel CreateKernel(IGraphWorkspaceService? workspaceService = null)
         => new(
             CreateDocument(),
