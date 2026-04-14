@@ -118,6 +118,8 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     private readonly GraphEditorNodeLayoutCoordinator _nodeLayoutCoordinator;
     private readonly GraphEditorViewModelPresentationLocalizationCoordinatorHost _presentationLocalizationCoordinatorHost;
     private readonly GraphEditorPresentationLocalizationCoordinator _presentationLocalizationCoordinator;
+    private readonly GraphEditorViewModelStorageProjectionHost _storageProjectionHost;
+    private readonly GraphEditorStorageProjectionSupport _storageProjectionSupport;
     private readonly GraphEditorViewModelPersistenceCoordinatorHost _persistenceCoordinatorHost;
     private readonly GraphEditorWorkspaceSaveCoordinator _workspaceSaveCoordinator;
     private readonly GraphEditorKernel _kernel;
@@ -201,6 +203,8 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         _documentProjectionApplier = new GraphEditorDocumentProjectionApplier();
         _presentationLocalizationCoordinatorHost = new GraphEditorViewModelPresentationLocalizationCoordinatorHost(this);
         _presentationLocalizationCoordinator = new GraphEditorPresentationLocalizationCoordinator(_presentationLocalizationCoordinatorHost);
+        _storageProjectionHost = new GraphEditorViewModelStorageProjectionHost(this);
+        _storageProjectionSupport = new GraphEditorStorageProjectionSupport(_storageProjectionHost);
         _selectionProjection = new GraphEditorSelectionProjection(
             LocalizeText,
             (key, fallback, arguments) => LocalizeFormat(key, fallback, arguments));
@@ -845,66 +849,25 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// 工作区状态摘要文本。
     /// </summary>
     public string WorkspaceCaption
-    {
-        get
-        {
-            var workspaceState = IsDirty
-                ? LocalizeText("editor.workspace.state.unsaved", "Unsaved changes")
-                : LocalizeText("editor.workspace.state.synced", "Snapshot synced");
-            return LocalizeFormat(
-                "editor.workspace.caption",
-                "{0}  ·  {1}",
-                workspaceState,
-                WorkspacePath);
-        }
-    }
+        => _storageProjectionSupport.GetWorkspaceCaption();
 
     /// <summary>
     /// 片段工作区状态摘要文本。
     /// </summary>
     public string FragmentCaption
-    {
-        get
-        {
-            var availability = _fragmentWorkspaceService.Exists()
-                ? LocalizeText("editor.fragment.state.available", "Fragment available")
-                : LocalizeText("editor.fragment.state.missing", "No fragment file");
-            return LocalizeFormat(
-                "editor.fragment.caption",
-                "{0}  ·  {1}",
-                availability,
-                _fragmentWorkspaceService.FragmentPath);
-        }
-    }
+        => _storageProjectionSupport.GetFragmentCaption();
 
     /// <summary>
     /// 片段文件更新时间摘要文本。
     /// </summary>
     public string FragmentStatusCaption
-        => !_fragmentWorkspaceService.Exists()
-            ? LocalizeText("editor.fragment.status.missing", "No saved fragment file.")
-            : LocalizeFormat(
-                "editor.fragment.status.updated",
-                "Last updated {0:yyyy-MM-dd HH:mm:ss}",
-                File.GetLastWriteTime(_fragmentWorkspaceService.FragmentPath));
+        => _storageProjectionSupport.GetFragmentStatusCaption();
 
     /// <summary>
     /// 片段模板库状态摘要文本。
     /// </summary>
     public string FragmentLibraryCaption
-    {
-        get
-        {
-            var templateState = HasFragmentTemplates
-                ? LocalizeFormat("editor.fragmentLibrary.state.hasTemplates", "{0} templates", FragmentTemplates.Count)
-                : LocalizeText("editor.fragmentLibrary.state.noTemplates", "No templates");
-            return LocalizeFormat(
-                "editor.fragmentLibrary.caption",
-                "{0}  ·  {1}",
-                templateState,
-                FragmentLibraryPath);
-        }
-    }
+        => _storageProjectionSupport.GetFragmentLibraryCaption();
 
     /// <summary>
     /// 当前编辑模式摘要文本。
@@ -1074,16 +1037,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// 重新扫描片段模板库并刷新当前模板列表。
     /// </summary>
     public void RefreshFragmentTemplates()
-    {
-        FragmentTemplates.Clear();
-        foreach (var template in _fragmentLibraryService.EnumerateTemplates())
-        {
-            FragmentTemplates.Add(new FragmentTemplateViewModel(template));
-        }
-
-        SelectedFragmentTemplate = FragmentTemplates.FirstOrDefault();
-        RaiseComputedPropertyChanges();
-    }
+        => _storageProjectionSupport.RefreshFragmentTemplates();
 
     /// <summary>
     /// 在运行时替换编辑器行为配置。
