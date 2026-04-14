@@ -19,13 +19,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Remove="DemoDiagnosticsProjectionTests.cs" />
-    <Compile Remove="DemoHostMenuControlTests.cs" />
-    <Compile Remove="DemoMainWindowTests.cs" />
-    <Compile Remove="GraphEditorDemoShellTests.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\..\src\AsterGraph.Abstractions\AsterGraph.Abstractions.csproj" />
     <ProjectReference Include="..\..\src\AsterGraph.Core\AsterGraph.Core.csproj" />
     <ProjectReference Include="..\..\src\AsterGraph.Editor\AsterGraph.Editor.csproj" />
