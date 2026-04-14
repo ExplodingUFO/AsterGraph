@@ -91,7 +91,7 @@ Before pushing packages, verify both the packed-consumer path and the two regres
 Recommended local verification sequence:
 
 ```powershell
-# 1) script-first full gate (build + split-lane tests + smoke checks)
+# 1) script-first full gate (build + split-lane tests + smoke checks) via `eng/ci.ps1`
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane all -Framework all -Configuration Release
 ```
 

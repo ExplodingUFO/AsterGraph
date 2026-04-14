@@ -116,6 +116,7 @@ The live proof surface now uses the dedicated tools:
 Validate through the repository CI entrypoint first:
 
 ```powershell
+# validate with the repository entrypoint in eng/ci.ps1
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane all -Framework all -Configuration Release
 ```
 

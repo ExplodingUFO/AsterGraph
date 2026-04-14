@@ -285,6 +285,7 @@ Release verification before publish:
 
 ```powershell
 # preferred phase-gate (build + split-lane validation + smoke tooling)
+# execute via the repository script entrypoint: eng/ci.ps1
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane all -Framework all -Configuration Release
 ```
 
