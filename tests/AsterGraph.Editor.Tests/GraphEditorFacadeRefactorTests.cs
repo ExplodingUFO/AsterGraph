@@ -428,6 +428,26 @@ public sealed class GraphEditorFacadeRefactorTests
     }
 
     [Fact]
+    public void GraphEditorViewModel_AlignSelectionLeft_PublishesDirtyStateBeforeRetainedDocumentChanged()
+    {
+        var definitionId = new NodeDefinitionId("tests.editor.facade.layout-event-order");
+        var editor = CreateEditorWithSharedDefinitionNodes(
+            definitionId,
+            secondPosition: new GraphPoint(420, 220));
+        var source = editor.Nodes[0];
+        var target = editor.Nodes[1];
+        var dirtyStatesDuringEvents = new List<bool>();
+
+        editor.SetSelection([source, target], source, status: null);
+        editor.DocumentChanged += (_, _) => dirtyStatesDuringEvents.Add(editor.IsDirty);
+
+        editor.AlignSelectionLeft();
+
+        Assert.Equal([true], dirtyStatesDuringEvents);
+        Assert.True(editor.IsDirty);
+    }
+
+    [Fact]
     public void GraphEditorViewModel_ApplyDragOffset_WhenMoveDisabled_DoesNotChangeNodePositions()
     {
         var definitionId = new NodeDefinitionId("tests.editor.facade.layout-drag-permissions");
@@ -495,6 +515,44 @@ public sealed class GraphEditorFacadeRefactorTests
     }
 
     [Fact]
+    public void GraphEditorViewModel_TrySetNodePosition_WhenPositionUnchanged_ReturnsTrueWithoutStatusChange()
+    {
+        var definitionId = new NodeDefinitionId("tests.editor.facade.layout-position-noop");
+        var editor = CreateEditorWithSharedDefinitionNodes(definitionId);
+        var source = editor.Nodes[0];
+        var origin = new GraphPoint(source.X, source.Y);
+
+        editor.StatusMessage = "Keep existing status.";
+
+        var result = editor.TrySetNodePosition(source.Id, origin, updateStatus: false);
+
+        Assert.True(result);
+        Assert.Equal(origin.X, source.X);
+        Assert.Equal(origin.Y, source.Y);
+        Assert.Equal("Keep existing status.", editor.StatusMessage);
+    }
+
+    [Fact]
+    public void GraphEditorViewModel_MoveNode_WithMultiSelectionMovesEntireSelection()
+    {
+        var definitionId = new NodeDefinitionId("tests.editor.facade.layout-move-multi-selection");
+        var editor = CreateEditorWithSharedDefinitionNodes(definitionId);
+        var source = editor.Nodes[0];
+        var target = editor.Nodes[1];
+        var sourceOrigin = new GraphPoint(source.X, source.Y);
+        var targetOrigin = new GraphPoint(target.X, target.Y);
+
+        editor.SetSelection([source, target], source, status: null);
+
+        editor.MoveNode(source, 36, 18);
+
+        Assert.Equal(sourceOrigin.X + 36, source.X);
+        Assert.Equal(sourceOrigin.Y + 18, source.Y);
+        Assert.Equal(targetOrigin.X + 36, target.X);
+        Assert.Equal(targetOrigin.Y + 18, target.Y);
+    }
+
+    [Fact]
     public void GraphEditorViewModel_SetNodePositions_WhenNoMatchingNodes_ReturnsZeroAndSetsStatus()
     {
         var definitionId = new NodeDefinitionId("tests.editor.facade.layout-position-no-match");
@@ -545,7 +603,9 @@ public sealed class GraphEditorFacadeRefactorTests
         NodeDefinitionId definitionId,
         string firstTitle = "Input node",
         string secondTitle = "Input node",
-        GraphEditorBehaviorOptions? behaviorOptions = null)
+        GraphEditorBehaviorOptions? behaviorOptions = null,
+        GraphPoint? firstPosition = null,
+        GraphPoint? secondPosition = null)
     {
         var catalog = new NodeCatalog();
         catalog.RegisterDefinition(new NodeDefinition(
@@ -575,8 +635,8 @@ public sealed class GraphEditorFacadeRefactorTests
             "Facade Test",
             "Regression coverage for editor facade projection path.",
             [
-                CreateNode("node-001", definitionId, threshold: 0.25, enabled: true, title: firstTitle).ToModel(),
-                CreateNode("node-002", definitionId, threshold: 0.75, enabled: true, title: secondTitle).ToModel(),
+                CreateConfiguredNode("node-001", definitionId, firstTitle, threshold: 0.25, enabled: true, firstPosition).ToModel(),
+                CreateConfiguredNode("node-002", definitionId, secondTitle, threshold: 0.75, enabled: true, secondPosition).ToModel(),
             ],
             []);
 
@@ -585,6 +645,24 @@ public sealed class GraphEditorFacadeRefactorTests
             catalog,
             new DefaultPortCompatibilityService(),
             behaviorOptions: behaviorOptions);
+    }
+
+    private static NodeViewModel CreateConfiguredNode(
+        string nodeId,
+        NodeDefinitionId definitionId,
+        string title,
+        double threshold,
+        bool enabled,
+        GraphPoint? position)
+    {
+        var node = CreateNode(nodeId, definitionId, threshold, enabled, title: title);
+        if (position is { } resolvedPosition)
+        {
+            node.X = resolvedPosition.X;
+            node.Y = resolvedPosition.Y;
+        }
+
+        return node;
     }
 
     private sealed record TestGraphHostContext(object Owner, object? TopLevel) : IGraphHostContext
