@@ -136,7 +136,6 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     private IGraphHostContext? _hostContext;
     private INodePresentationProvider? _nodePresentationProvider;
     private IGraphLocalizationProvider? _localizationProvider;
-    private readonly GraphContextMenuBuilder _contextMenuBuilder;
     private readonly GraphEditorCompatibilityCommands _compatibilityCommands;
     private readonly GraphEditorFragmentCommands _fragmentCommands;
     private bool _suspendSelectionTracking;
@@ -293,7 +292,6 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             AddNodeCommand,
         ];
 
-        _contextMenuBuilder = new GraphContextMenuBuilder(this, LocalizeText);
         _compatibilityCommandHost = new GraphEditorViewModelCompatibilityCommandHost(this);
         _compatibilityCommands = new GraphEditorCompatibilityCommands(_compatibilityCommandHost);
         _fragmentCommandHost = new GraphEditorViewModelFragmentCommandHost(this);
@@ -1566,24 +1564,18 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// </summary>
 #pragma warning disable CS0618
     public IReadOnlyList<CompatiblePortTarget> GetCompatibleTargets(string sourceNodeId, string sourcePortId)
-    {
-        var sourceNode = FindNode(sourceNodeId);
-        var sourcePort = sourceNode?.GetPort(sourcePortId);
-        if (sourceNode is null || sourcePort is null || sourcePort.Direction != PortDirection.Output)
-        {
-            return [];
-        }
-
-        return Nodes
-            .SelectMany(node => node.Inputs.Select(port => (node, port)))
-            .Where(target => !(target.node.Id == sourceNode.Id && target.port.Id == sourcePort.Id))
-            .Select(target => new CompatiblePortTarget(
-                target.node,
-                target.port,
-                _compatibilityService.Evaluate(sourcePort.TypeId, target.port.TypeId)))
-            .Where(target => target.Compatibility.IsCompatible)
+        => _kernel.GetCompatiblePortTargets(sourceNodeId, sourcePortId)
+            .Select(target =>
+            {
+                var node = FindNode(target.NodeId);
+                var port = node?.GetPort(target.PortId);
+                return node is null || port is null
+                    ? null
+                    : new CompatiblePortTarget(node, port, target.Compatibility);
+            })
+            .Where(target => target is not null)
+            .Select(target => target!)
             .ToList();
-    }
 #pragma warning restore CS0618
 
     private GraphSelectionFragment? CreateSelectionFragment()
