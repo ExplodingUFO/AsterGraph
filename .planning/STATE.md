@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.6
 milestone_name: Facade Convergence and Proof Guardrails
-status: planning
-stopped_at: Phase 31 completed and verified
-last_updated: "2026-04-16T05:11:33.6830902Z"
-last_activity: 2026-04-16 -- Phase 31 completed and verified
+status: executing
+stopped_at: Phase 32 planning complete
+last_updated: "2026-04-16T05:19:11.3745918Z"
+last_activity: 2026-04-16 -- Phase 32 planning complete
 progress:
   total_phases: 4
   completed_phases: 2
-  total_plans: 6
+  total_plans: 9
   completed_plans: 6
-  percent: 50
+  percent: 75
 ---
 
 # Project State
@@ -21,14 +21,14 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-04-16)
 
 **Core value:** Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
-**Current focus:** Phase 32 ready to plan - grapheditorviewmodel-facade-convergence
+**Current focus:** Phase 32 ready to execute - grapheditorviewmodel-facade-convergence
 
 ## Current Position
 
-Phase: 32 (grapheditorviewmodel-facade-convergence) - READY TO PLAN
-Plan: Not started
-Status: Ready for planning
-Last activity: 2026-04-16 -- completed Phase 31 history/save semantic closure, review, and verification
+Phase: 32 (grapheditorviewmodel-facade-convergence) - READY TO EXECUTE
+Plan: 3 plans ready
+Status: Ready to execute
+Last activity: 2026-04-16 -- Phase 32 planning complete
 
 ## Performance Metrics
 
@@ -65,6 +65,8 @@ New v1.6 framing decisions:
 - [Phase 31]: Retained mutation completion and retained save must commit through kernel-owned history/save authority instead of keeping a second retained undo/redo owner. — Mixed runtime-plus-retained flows were already shipping, so semantic parity had to be fixed at the authority boundary rather than by adding more compatibility cases.
 - [Phase 31]: Successful save must replace the current history entry rather than append a new undo step. — Save-boundary dirty semantics only stay stable when the saved snapshot becomes the current history baseline.
 - [Phase 31]: `ScaleSmoke` and proof-ring tests should expose explicit history-contract pass/fail output instead of a carried known-mismatch tuple. — Planning notes were no longer an acceptable substitute for machine-checkable proof.
+- [Phase 32 planning]: The next highest-value facade contraction is bootstrap plus retained-only compatibility/fragment orchestration, not kernel or canvas refactoring. — `GraphEditorViewModel` is still the composition hotspot, while fragment/menu collaborators already exist and can be lifted cleanly behind the existing host pattern.
+- [Phase 32 planning]: Phase 32 must keep public retained entry points stable and use focused menu/fragment/service-seam parity tests as the main guardrail. — The remaining risk is internal drift under a supported public compatibility surface, not missing capability.
 
 ### Pending Todos
 
@@ -85,6 +87,6 @@ None captured yet.
 
 ## Session Continuity
 
-Last session: 2026-04-16T05:11:33.6830902Z
-Stopped at: Phase 31 completed and verified
-Resume file: .planning/ROADMAP.md
+Last session: 2026-04-16T05:19:11.3745918Z
+Stopped at: Phase 32 planning complete
+Resume file: .planning/phases/32-grapheditorviewmodel-facade-convergence/32-01-PLAN.md
