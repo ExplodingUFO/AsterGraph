@@ -15,8 +15,8 @@
 
 - [x] **FACADE-01**: Host can keep using the current public factory, session, and retained `GraphEditorViewModel` / `GraphEditorView` entry points while hotspot refactors move remaining orchestration out of `GraphEditorViewModel`
 - [x] **FACADE-02**: Internal runtime mutations, selection flow, and menu/projection orchestration that move during refactoring continue to execute against kernel-owned state instead of introducing a second mutable runtime owner
-- [ ] **FACADE-03**: Contributors can change one `GraphEditorViewModel` hotspot collaborator at a time because the remaining responsibilities are split into narrower internal seams with focused tests
-- [ ] **FACADE-04**: Contributors can continue hotspot reduction in `GraphEditorKernel` and `NodeCanvas` without changing public embedding behavior because cross-cutting responsibilities are isolated behind internal coordinators or helpers
+- [x] **FACADE-03**: Contributors can change one `GraphEditorViewModel` hotspot collaborator at a time because the remaining responsibilities are split into narrower internal seams with focused tests
+- [x] **FACADE-04**: Contributors can continue hotspot reduction in `GraphEditorKernel` and `NodeCanvas` without changing public embedding behavior because cross-cutting responsibilities are isolated behind internal coordinators or helpers
 
 ### History And Save Semantics
 
@@ -27,7 +27,7 @@
 ### Maintenance Guardrails
 
 - [x] **GUARD-01**: Contributors can run one checked-in maintenance/refactor gate that exercises the hotspot-sensitive regression surface without manually curating commands
-- [ ] **GUARD-02**: Publishable packages touched during hotspot refactors stop extending blanket public XML-doc debt, using real docs or scoped suppressions instead of relying on one repo-wide `CS1591` blanket forever
+- [x] **GUARD-02**: Publishable packages touched during hotspot refactors stop extending blanket public XML-doc debt, using real docs or scoped suppressions instead of relying on one repo-wide `CS1591` blanket forever
 
 ## Future Requirements
 
@@ -56,13 +56,13 @@
 | CLOSE-02 | Phase 30 | Complete |
 | FACADE-01 | Phase 32 | Complete |
 | FACADE-02 | Phase 32 | Complete |
-| FACADE-03 | Phase 33 | Pending |
-| FACADE-04 | Phase 33 | Pending |
+| FACADE-03 | Phase 33 | Complete |
+| FACADE-04 | Phase 33 | Complete |
 | STATE-01 | Phase 31 | Complete |
 | STATE-02 | Phase 31 | Complete |
 | STATE-03 | Phase 31 | Complete |
 | GUARD-01 | Phase 30 | Complete |
-| GUARD-02 | Phase 33 | Pending |
+| GUARD-02 | Phase 33 | Complete |
 
 **Coverage:**
 - milestone requirements: 11 total
@@ -71,4 +71,4 @@
 
 ---
 *Requirements defined: 2026-04-16*
-*Last updated: 2026-04-16 after Phase 32 completion*
+*Last updated: 2026-04-16 after Phase 33 completion*

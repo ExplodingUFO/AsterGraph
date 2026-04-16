@@ -12,7 +12,7 @@
 
 ## Overview
 
-AsterGraph now has the runtime-first SDK boundary, archived milestone history, an explicit history/save proof contract, a scripted maintenance lane, and a materially narrower retained `GraphEditorViewModel` facade. The remaining v1.6 work is the downstream hotspot follow-through: keep shrinking `GraphEditorKernel` and `NodeCanvas`, then tighten the remaining XML-doc guardrail debt without public API churn.
+AsterGraph now has the runtime-first SDK boundary, archived milestone history, an explicit history/save proof contract, a scripted maintenance lane, a materially narrower retained `GraphEditorViewModel` facade, and the next kernel/canvas hotspot seams moved behind dedicated helpers. The remaining v1.6 work is milestone lifecycle: audit, archive, and cleanup the completed contraction milestone without reopening its shipped SDK surface.
 
 v1.6 deliberately avoids reopening already-shipped baseline work such as `.editorconfig`, central package management, CI setup, or `ScaleSmoke` solution alignment unless a live regression appears in the repo itself.
 
@@ -26,7 +26,7 @@ v1.6 deliberately avoids reopening already-shipped baseline work such as `.edito
 - [x] **Phase 30: Milestone History And Refactor Gate Closeout** - Archive the missing milestone history and normalize the maintainer entry points for refactor-sensitive proof. (planned 2026-04-16) (completed 2026-04-16)
 - [x] **Phase 31: History And Save Semantic Closure** - Remove the carried `STATE_HISTORY_OK` mismatch and harden focused history/save regressions. (planned 2026-04-16) (completed 2026-04-16)
 - [x] **Phase 32: GraphEditorViewModel Facade Convergence** - Continue moving retained-facade orchestration out of `GraphEditorViewModel` while preserving the public SDK surface. (planned 2026-04-16) (completed 2026-04-16)
-- [ ] **Phase 33: Kernel, Canvas, And Guardrail Follow-Through** - Finish the next hotspot splits around downstream collaborators and tighten the remaining documentation/maintenance debt. (planned 2026-04-16)
+- [x] **Phase 33: Kernel, Canvas, And Guardrail Follow-Through** - Finish the next hotspot splits around downstream collaborators and tighten the remaining documentation/maintenance debt. (planned 2026-04-16) (completed 2026-04-16)
 
 ## Phase Details
 
@@ -77,8 +77,8 @@ v1.6 deliberately avoids reopening already-shipped baseline work such as `.edito
 | 30. Milestone History And Refactor Gate Closeout | CLOSE-01, CLOSE-02, GUARD-01 | Complete |
 | 31. History And Save Semantic Closure | STATE-01, STATE-02, STATE-03 | Complete |
 | 32. GraphEditorViewModel Facade Convergence | FACADE-01, FACADE-02 | Complete |
-| 33. Kernel, Canvas, And Guardrail Follow-Through | FACADE-03, FACADE-04, GUARD-02 | Ready to execute |
+| 33. Kernel, Canvas, And Guardrail Follow-Through | FACADE-03, FACADE-04, GUARD-02 | Complete |
 
 ## Next Action
 
-**Next action:** execute Phase 33 with `$gsd-execute-phase 33`
+**Next action:** audit and archive the completed v1.6 milestone with `$gsd-audit-milestone`

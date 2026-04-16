@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.6
 milestone_name: Facade Convergence and Proof Guardrails
 status: executing
-stopped_at: Phase 33 planning complete
-last_updated: "2026-04-16T06:55:00.0000000Z"
-last_activity: 2026-04-16 -- Phase 33 planning complete
+stopped_at: Phase 33 complete
+last_updated: "2026-04-16T05:48:26.0049851Z"
+last_activity: 2026-04-16 -- Phase 33 complete
 progress:
   total_phases: 4
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 12
-  completed_plans: 9
-  percent: 75
+  completed_plans: 12
+  percent: 100
 ---
 
 # Project State
@@ -21,14 +21,14 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-04-16)
 
 **Core value:** Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
-**Current focus:** Phase 33 ready to execute - kernel-canvas-and-guardrail-follow-through
+**Current focus:** Milestone lifecycle ready - audit, archive, and cleanup v1.6
 
 ## Current Position
 
-Phase: 33 (kernel-canvas-and-guardrail-follow-through) - READY TO EXECUTE
-Plan: 3 plans ready
-Status: Ready to execute
-Last activity: 2026-04-16 -- Phase 33 planning complete
+Phase: 33 (kernel-canvas-and-guardrail-follow-through) - COMPLETE
+Plan: All 3 plans complete
+Status: Ready for milestone lifecycle
+Last activity: 2026-04-16 -- Phase 33 complete
 
 ## Performance Metrics
 
@@ -72,6 +72,8 @@ New v1.6 framing decisions:
 - [Phase 33 planning]: The next kernel hotspot should be command-router host ownership, because node/connection/workspace mutation paths already use dedicated host adapters while command routing still binds directly to GraphEditorKernel. — This is the clearest remaining inline ownership burden in the kernel.
 - [Phase 33 planning]: The next NodeCanvas hotspot should be lifecycle/property-routing glue, not drag or pointer math. — Pointer, drag, wheel, scene, overlay, and context-menu behavior already live in dedicated coordinators, but attach/property-change/bootstrap routing is still inline in NodeCanvas.axaml.cs.
 - [Phase 33 planning]: Repo-wide `CS1591` suppression is now broader than the real debt boundary. — `AsterGraph.Abstractions` and `AsterGraph.Core` build clean under `warnaserror:CS1591`, while `AsterGraph.Editor` still has explicit public-doc debt that should move to project scope.
+- [Phase 33]: Keep command-router host ownership and NodeCanvas lifecycle/property routing behind dedicated internal collaborators, then prove those seams through focused tests and the maintenance lane. — The next hotspot follow-through should reduce change radius without changing the public embedding surface.
+- [Phase 33]: Limit central `CS1591` suppression to non-packable projects and leave the remaining public XML-doc debt explicit in `AsterGraph.Editor`. — Package-boundary guardrails are only meaningful when the real debt boundary is visible in project configuration.
 
 ### Pending Todos
 
@@ -79,8 +81,7 @@ None captured yet.
 
 ### Blockers/Concerns
 
-- `GraphEditorKernel` and `NodeCanvas` remain the next obvious internal hotspots after the retained facade contraction completed.
-- Publishable-package XML doc debt still needs the scoped cleanup planned for Phase 33.
+None at the milestone phase level. Proceed to milestone audit and archive.
 
 ### Quick Tasks Completed
 
@@ -92,6 +93,6 @@ None captured yet.
 
 ## Session Continuity
 
-Last session: 2026-04-16T06:55:00.0000000Z
-Stopped at: Phase 33 planning complete
-Resume file: .planning/phases/33-kernel-canvas-and-guardrail-follow-through/33-01-PLAN.md
+Last session: 2026-04-16T05:48:26.0049851Z
+Stopped at: Phase 33 complete
+Resume file: .planning/phases/33-kernel-canvas-and-guardrail-follow-through/33-VERIFICATION.md
