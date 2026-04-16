@@ -1,84 +1,66 @@
-# Requirements: AsterGraph v1.8
+# Requirements: AsterGraph v1.9
 
 **Defined:** 2026-04-16
-**Milestone:** v1.8 Public Alpha Readiness and Canonical Demo
+**Milestone:** v1.9 Public Launch Gate and CI Stabilization
 **Core Value:** Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
 
 ## Milestone Requirements
 
-### Public Alpha Framing
+### Clean-Runner CI Parity
 
-- [x] **FRAM-01**: Public package metadata, README, planning artifacts, and top-level consumer docs all describe the same public-alpha version story, anchored on a stable prerelease semantic such as `0.2.0-alpha.1`
-- [x] **FRAM-02**: External readers can find one explicit alpha-status and known-limitations contract without having to infer stability from milestone notes or test names
-- [x] **FRAM-03**: The repo's public entry path prioritizes `README` plus `docs/` for consumers, while `.planning` remains available as secondary maintainer context instead of the first discovery surface
+- [ ] **CI-01**: `ci.yml` passes on clean GitHub-hosted Windows and Linux runners for the default branch without depending on locally prebuilt Debug plugin artifacts or other residue from developer machines
+- [ ] **CI-02**: Plugin discovery, loading, inspection, proof-ring, and package-staging tests resolve `AsterGraph.TestPlugins` payloads from deterministic built outputs for the active framework/configuration instead of hard-coded `bin/Debug/net9.0` paths
+- [ ] **CI-03**: The .NET package-cache strategy used by GitHub Actions no longer fails during post-job cleanup when the default global package path does not exist on disk
 
-### Open Source Governance And CI
+### Release Workflow Closure
 
-- [x] **OSS-01**: External contributors have explicit collaboration and reporting guidance through `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`, issue templates, and a PR template
-- [x] **OSS-02**: Local development and CI agree on a pinned SDK baseline through `global.json` instead of relying on floating `10.0.x` resolution alone
-- [x] **OSS-03**: CI exposes public-friendly behavior through concurrency control, restore caching, uploaded verification artifacts, and at least one Linux validation lane alongside the full Windows release lane
-- [x] **REL-01**: Public prerelease publishing is tag-driven, so pull requests validate the alpha surface without running publish logic
-- [x] **REL-02**: Public alpha releases attach smoke markers, coverage summary, and release-proof artifacts that let external evaluators verify what shipped without rerunning every lane locally first
+- [ ] **REL-01**: `.github/workflows/release.yml` evaluates successfully on GitHub Actions and only schedules jobs for tag pushes or manual dispatch, instead of failing immediately with zero jobs
+- [ ] **REL-02**: The prerelease workflow remains verification-first: validation runs before release creation, and NuGet publication stays gated behind repository secrets without breaking dry-run validation
+- [ ] **REL-03**: The repo exposes one reliable operational story for branch CI versus tag-driven prerelease publication, with no contradictory or broken workflow entry points
 
-### Canonical Demo And Consumer Separation
+### Public Launch Minimum Closure
 
-- [x] **DEMO-01**: `AsterGraph.Demo` uses the canonical factory/session/view-factory composition path instead of constructing `GraphEditorViewModel` directly as its main host route
-- [x] **DEMO-02**: The demo visibly showcases plugin trust, candidate discovery, trust decisions, loaded plugins, and contribution shape instead of leaving those capabilities only in docs and focused tests
-- [x] **DEMO-03**: The demo visibly showcases automation execution through canned runs, step/progress output, and linked diagnostics/events instead of exposing automation only as API surface
-- [x] **DEMO-04**: The demo includes real standalone-surface and presenter-replacement routes that can be operated directly, rather than capability text that only describes those seams
-- [x] **CONS-01**: `HostSample` is clearly positioned as the minimal consumer sample while `AsterGraph.Demo` is clearly positioned as the showcase host, in both docs and the demo itself
-
-### Bilingual Experience And Demo Proof
-
-- [x] **DOCS-01**: Core public guides exist in both English and `zh-CN`, with a stable structure for `README`, quick start, host integration, state contracts, extension contracts, demo guide, and alpha status
-- [x] **L10N-01**: The demo can switch between Chinese and English, and that toggle proves the host localization seam instead of just hardcoding mixed-language shell copy
-- [x] **TEST-01**: `AsterGraph.Demo.Tests` proves the canonical demo route, plugin/automation panes, standalone/presenter routes, and bilingual toggle so the showcase surface does not regress silently
+- [ ] **OSS-01**: README and alpha-status docs describe only the real remaining public-launch blockers and do not restate v1.8 work as if it were still open
+- [ ] **OSS-02**: The repo includes one checked-in public-launch checklist covering visibility flip, required checks, branch protection, first prerelease tag, and the proof artifacts maintainers should inspect before opening the repo
+- [ ] **OSS-03**: Public docs continue to distinguish `HostSample` as the minimal consumer proof and `AsterGraph.Demo` as the showcase host after the launch-gate edits
 
 ## Future Requirements
 
-### Deferred Platform And Distribution Work
+### Deferred Post-Launch Work
 
-- **TRUST-01**: Host can enforce stronger plugin signing, isolation, or remote-distribution policy beyond the current in-process trust baseline
-- **MARKET-01**: Host can browse, install, and update plugins through a first-class marketplace/feed experience
-- **SCRIPT-01**: Host can author automation flows through richer scripting or workflow-designer surfaces beyond canned execution and command/query composition
-- **DOCS-02**: Public docs expand beyond the core bilingual guides into broader tutorials, cookbook examples, and API-reference publishing
+- **OSS-04**: Make the repository visibility change, branch-protection policy, and release permissions themselves part of an automated operational workflow
+- **REL-04**: Add stronger prerelease/release-note automation such as templated changelogs or signed provenance beyond the current proof-artifact baseline
+- **DOCS-02**: Expand beyond the current core guides into broader tutorials, cookbook examples, and API-reference publication
+- **TRUST-01**: Strengthen plugin signing, isolation, and remote-distribution policy beyond the current in-process trust baseline
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| New graph-editing end-user features unrelated to public alpha readiness, demo completeness, or public release workflows | v1.8 is a public-alpha productization milestone, not a general feature-expansion band |
-| Replacing Avalonia, reopening kernel/session ownership, or redesigning the canonical runtime boundary | The runtime-first architecture is already the shipped baseline and should remain stable through alpha preparation |
-| One-shot removal of retained compatibility APIs | Migration remains staged; this milestone should clarify and demonstrate the boundary, not force an abrupt break |
-| Marketplace UX, remote plugin installation UI, or stronger plugin isolation products | Those belong after the public alpha baseline is in front of external users |
-| Rich automation authoring UI or embedded scripting IDE work | The goal is to make the shipped automation baseline visible and testable, not to broaden it into a new product tier |
+| New graph-editing capabilities unrelated to CI stability, release workflow validity, or public launch readiness | v1.9 is a launch-gate stabilization milestone, not another feature band |
+| Reworking the public runtime boundary, reopening kernel/session ownership, or redesigning the demo feature surface | Those architectural and product-surface changes were already settled in v1.8 |
+| Replacing the current lane structure or introducing a second validation script entry point | The goal is to stabilize the shipped gate, not invent a new one |
+| Marketplace UX, richer automation authoring UI, or stronger plugin-distribution products | Those remain post-launch work once the public repo is actually open |
 
 ## Traceability
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FRAM-01 | Phase 38 | Completed |
-| FRAM-02 | Phase 38 | Completed |
-| FRAM-03 | Phase 38 | Completed |
-| OSS-01 | Phase 38 | Completed |
-| OSS-02 | Phase 38 | Completed |
-| DEMO-01 | Phase 39 | Completed |
-| DEMO-02 | Phase 39 | Completed |
-| DEMO-03 | Phase 39 | Completed |
-| DEMO-04 | Phase 39 | Completed |
-| CONS-01 | Phase 39 | Completed |
-| DOCS-01 | Phase 40 | Completed |
-| L10N-01 | Phase 40 | Completed |
-| TEST-01 | Phase 40 | Completed |
-| OSS-03 | Phase 41 | Completed |
-| REL-01 | Phase 41 | Completed |
-| REL-02 | Phase 41 | Completed |
+| CI-01 | Phase 42 | Planned |
+| CI-02 | Phase 42 | Planned |
+| CI-03 | Phase 43 | Planned |
+| REL-01 | Phase 43 | Planned |
+| REL-02 | Phase 43 | Planned |
+| REL-03 | Phase 43 | Planned |
+| OSS-01 | Phase 44 | Planned |
+| OSS-02 | Phase 44 | Planned |
+| OSS-03 | Phase 44 | Planned |
 
 **Coverage:**
-- milestone requirements: 16 total
-- mapped to phases: 16
+- milestone requirements: 9 total
+- mapped to phases: 9
 - unmapped: 0
 
 ---
 *Requirements defined: 2026-04-16*
-*Last updated: 2026-04-16 after Phase 41 completion*
+*Last updated: 2026-04-16 for milestone v1.9 initialization*
