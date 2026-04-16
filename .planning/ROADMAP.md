@@ -2,7 +2,7 @@
 
 ## Milestones
 
-- 🚧 **v1.9 Public Launch Gate and CI Stabilization** - ready to plan
+- 🚧 **v1.9 Public Launch Gate and CI Stabilization** - Phase 42 ready to execute
 - ✅ **[v1.8 Public Alpha Readiness and Canonical Demo](./milestones/v1.8-ROADMAP.md)** - Phases 38-41, shipped 2026-04-16, archived 2026-04-16
 - ✅ **[v1.7 Consumer Closure / Release Hardening](./milestones/v1.7-ROADMAP.md)** - Phases 34-37, shipped 2026-04-16, archived 2026-04-16
 - ✅ **[v1.6 Facade Convergence and Proof Guardrails](./milestones/v1.6-ROADMAP.md)** - Phases 30-33, shipped 2026-04-16, archived 2026-04-16
@@ -79,4 +79,4 @@ v1.9 exists to close those blockers with the smallest possible scope, then publi
 
 ## Next Action
 
-**Next action:** plan Phase 42
+**Next action:** execute Phase 42

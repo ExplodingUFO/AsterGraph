@@ -4,8 +4,8 @@ milestone: v1.9
 milestone_name: Public Launch Gate and CI Stabilization
 status: active
 stopped_at: Phase 42 ready to plan
-last_updated: "2026-04-16T12:05:00.0000000Z"
-last_activity: 2026-04-16 -- Started milestone v1.9
+last_updated: "2026-04-16T12:20:00.0000000Z"
+last_activity: 2026-04-16 -- Planned Phase 42 clean runner CI parity
 progress:
   total_phases: 3
   completed_phases: 0
@@ -27,8 +27,8 @@ See: `.planning/PROJECT.md` (updated 2026-04-16)
 
 Phase: 42
 Plan: —
-Status: Ready to plan
-Last activity: 2026-04-16 -- Started milestone v1.9 for launch-gate stabilization
+Status: Ready to execute
+Last activity: 2026-04-16 -- Planned Phase 42 clean runner CI parity
 
 ## Accumulated Context
 
@@ -42,10 +42,10 @@ Last activity: 2026-04-16 -- Started milestone v1.9 for launch-gate stabilizatio
 
 ## Next Action
 
-Start Phase 42 planning with `$gsd-plan-phase 42`.
+Execute Phase 42 with `$gsd-execute-phase 42`.
 
 ## Session Continuity
 
-Last session: 2026-04-16T12:05:00.0000000Z
-Stopped at: Phase 42 ready to plan
+Last session: 2026-04-16T12:20:00.0000000Z
+Stopped at: Phase 42 ready to execute
 Resume file: .planning/ROADMAP.md
