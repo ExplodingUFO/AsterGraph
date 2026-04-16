@@ -36,8 +36,8 @@ Hosts can integrate only the graph-editor pieces they need, replace default UI a
 - The repo already carries `.editorconfig`, `Directory.Packages.props`, `tests/coverage.runsettings`, `.github/workflows/ci.yml`, and `eng/ci.ps1`; v1.6 should build on those guardrails rather than recreate them.
 - `v1.4` now has checked-in archive files under `.planning/milestones/` plus a retrospective milestone-ledger entry, so milestone history no longer depends on stale phase directories alone.
 - `eng/ci.ps1 -Lane maintenance` now exists as the hotspot-sensitive refactor gate over focused editor regressions plus `ScaleSmoke`.
-- `AsterGraph.ScaleSmoke` is already part of the tracked solution surface, so proof-surface alignment is no longer the primary gap.
-- The remaining obvious internal hotspots are still `GraphEditorViewModel`, `GraphEditorKernel`, and `NodeCanvas`, and the carried `STATE_HISTORY_OK` concern still marks history/save semantics as unfinished maintenance debt.
+- Phase 31 closed the carried history/save concern: retained undo/redo/dirty/save semantics now run on one kernel-owned authority, focused suites cover the interaction/save boundary directly, and `ScaleSmoke` emits `SCALE_HISTORY_CONTRACT_OK`.
+- The remaining obvious internal hotspots are still `GraphEditorViewModel`, `GraphEditorKernel`, and `NodeCanvas`.
 
 ## Requirements
 
@@ -77,11 +77,14 @@ Hosts can integrate only the graph-editor pieces they need, replace default UI a
 - ✓ Hosts can now follow one short canonical integration path for runtime-only, shipped-UI, and retained-migration scenarios - v1.5 Phase 29
 - ✓ Maintainer can now read archived `v1.4` milestone history through checked-in archive files and the milestone ledger without contradictory active-vs-archived planning state claims - v1.6 Phase 30
 - ✓ Contributors can now run `eng/ci.ps1 -Lane maintenance` as the hotspot-sensitive refactor gate while the history/save semantic contract remains active work for Phase 31 - v1.6 Phase 30
+- ✓ Host now sees one explicit retained undo/redo/dirty/save contract across mixed runtime and retained flows, including save-boundary behavior after undo/redo - v1.6 Phase 31
+- ✓ Contributors can now localize retained history interaction, save-boundary, and drag-boundary regressions through focused suites instead of one broad transaction file - v1.6 Phase 31
+- ✓ `ScaleSmoke` and proof-ring coverage now expose the same explicit history/save contract without the carried `STATE_HISTORY_OK` mismatch - v1.6 Phase 31
 
 ### Active
 
 - [ ] Host keeps the same public factory/session/view-model entry points while hotspot refactors continue to move retained-facade orchestration behind kernel-owned collaborators.
-- [ ] Contributors can trust one explicit history/save semantic contract while refactoring hotspot code through the checked-in maintenance gate.
+- [ ] Contributors can keep reducing `GraphEditorViewModel`, `GraphEditorKernel`, and `NodeCanvas` hotspots under the maintenance gate without widening public XML-doc debt again.
 
 ### Out of Scope
 
@@ -94,11 +97,11 @@ Hosts can integrate only the graph-editor pieces they need, replace default UI a
 
 ## Context
 
-Milestone `v1.5` shipped on 2026-04-14 and left the repo in a materially better release posture: the canonical runtime boundary is clearer, the proof surface is aligned, and the release lane is scripted. The next real gap is no longer missing capability surface. It is the cost of carrying retained compatibility complexity, hotspot classes, and one long-lived history/save semantic concern while trying to keep the SDK stable.
+Milestone `v1.5` shipped on 2026-04-14 and left the repo in a materially better release posture: the canonical runtime boundary is clearer, the proof surface is aligned, and the release lane is scripted. The next real gap is no longer missing capability surface. It is the cost of carrying retained compatibility complexity and hotspot classes while trying to keep the SDK stable.
 
-Current repo evidence on 2026-04-16 supports that narrower framing. `AsterGraph.ScaleSmoke` is already present in the solution and docs. The repo already has `.editorconfig`, central package versions, coverage runsettings, and checked-in CI. Phase 30 has now archived `v1.4` and added a dedicated maintenance gate in `eng/ci.ps1`. The carried concern that still stands out is the `STATE_HISTORY_OK` mismatch called out in `STATE.md`, along with the fact that `GraphEditorViewModel`, `GraphEditorKernel`, and `NodeCanvas` remain the obvious internal hotspots even after the earlier coordinator extractions.
+Current repo evidence on 2026-04-16 supports that narrower framing. `AsterGraph.ScaleSmoke` is already present in the solution and docs. The repo already has `.editorconfig`, central package versions, coverage runsettings, and checked-in CI. Phase 30 archived `v1.4` and added a dedicated maintenance gate in `eng/ci.ps1`. Phase 31 then removed the carried history/save mismatch by unifying retained mutation authority, splitting the retained semantic suites, and aligning `ScaleSmoke` plus proof-ring output to one explicit contract. What remains is the hotspot contraction itself: `GraphEditorViewModel`, `GraphEditorKernel`, and `NodeCanvas` are still the obvious internal hotspots even after the earlier coordinator extractions.
 
-v1.6 therefore focuses on contraction and proof closure: archive the lingering milestone history, make history/save semantics explicit and passing, and keep moving responsibilities away from `GraphEditorViewModel` without changing the public SDK boundary. If that work lands cleanly, the project can choose its next capability band from a much more stable maintenance position.
+v1.6 therefore stays focused on contraction: milestone history is archived, history/save semantics are explicit and passing, and the remaining work is to keep moving responsibilities away from `GraphEditorViewModel` without changing the public SDK boundary. If that work lands cleanly, the project can choose its next capability band from a much more stable maintenance position.
 
 ## Constraints
 
@@ -167,4 +170,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-16 after starting milestone v1.6*
+*Last updated: 2026-04-16 after Phase 31 completion*

@@ -12,7 +12,7 @@
 
 ## Overview
 
-AsterGraph now has the runtime-first SDK boundary, proof ring, and release-validation lane it needed from v1.5. The next milestone turns inward: normalize leftover planning history, eliminate the carried history/save semantic mismatch, and keep hotspot refactors moving without public API churn.
+AsterGraph now has the runtime-first SDK boundary, archived milestone history, an explicit history/save proof contract, and a scripted maintenance lane. The remaining v1.6 work is the hotspot contraction itself: keep shrinking `GraphEditorViewModel`, then continue the follow-through work in `GraphEditorKernel`, `NodeCanvas`, and the remaining doc guardrail debt without public API churn.
 
 v1.6 deliberately avoids reopening already-shipped baseline work such as `.editorconfig`, central package management, CI setup, or `ScaleSmoke` solution alignment unless a live regression appears in the repo itself.
 
@@ -24,7 +24,7 @@ v1.6 deliberately avoids reopening already-shipped baseline work such as `.edito
 ## Phases
 
 - [x] **Phase 30: Milestone History And Refactor Gate Closeout** - Archive the missing milestone history and normalize the maintainer entry points for refactor-sensitive proof. (planned 2026-04-16) (completed 2026-04-16)
-- [ ] **Phase 31: History And Save Semantic Closure** - Remove the carried `STATE_HISTORY_OK` mismatch and harden focused history/save regressions. (planned 2026-04-16)
+- [x] **Phase 31: History And Save Semantic Closure** - Remove the carried `STATE_HISTORY_OK` mismatch and harden focused history/save regressions. (planned 2026-04-16) (completed 2026-04-16)
 - [ ] **Phase 32: GraphEditorViewModel Facade Convergence** - Continue moving retained-facade orchestration out of `GraphEditorViewModel` while preserving the public SDK surface. (planned 2026-04-16)
 - [ ] **Phase 33: Kernel, Canvas, And Guardrail Follow-Through** - Finish the next hotspot splits around downstream collaborators and tighten the remaining documentation/maintenance debt. (planned 2026-04-16)
 
@@ -75,10 +75,10 @@ v1.6 deliberately avoids reopening already-shipped baseline work such as `.edito
 | Phase | Requirements | Status |
 |-------|--------------|--------|
 | 30. Milestone History And Refactor Gate Closeout | CLOSE-01, CLOSE-02, GUARD-01 | Complete |
-| 31. History And Save Semantic Closure | STATE-01, STATE-02, STATE-03 | Ready to execute |
+| 31. History And Save Semantic Closure | STATE-01, STATE-02, STATE-03 | Complete |
 | 32. GraphEditorViewModel Facade Convergence | FACADE-01, FACADE-02 | Planned |
 | 33. Kernel, Canvas, And Guardrail Follow-Through | FACADE-03, FACADE-04, GUARD-02 | Planned |
 
 ## Next Action
 
-**Next action:** execute Phase 31 with `$gsd-execute-phase 31`
+**Next action:** plan Phase 32 with `$gsd-plan-phase 32`

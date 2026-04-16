@@ -20,9 +20,9 @@
 
 ### History And Save Semantics
 
-- [ ] **STATE-01**: Host sees one explicit undo/redo/dirty/save contract across retained facade flows, including save-boundary behavior after undo/redo
-- [ ] **STATE-02**: Contributors can detect regressions in history interaction, drag, and save-boundary semantics through smaller focused regression tests instead of one broad transaction suite alone
-- [ ] **STATE-03**: Machine-checkable proof outputs that cover state/history semantics no longer rely on a carried `STATE_HISTORY_OK` known mismatch
+- [x] **STATE-01**: Host sees one explicit undo/redo/dirty/save contract across retained facade flows, including save-boundary behavior after undo/redo
+- [x] **STATE-02**: Contributors can detect regressions in history interaction, drag, and save-boundary semantics through smaller focused regression tests instead of one broad transaction suite alone
+- [x] **STATE-03**: Machine-checkable proof outputs that cover state/history semantics no longer rely on a carried `STATE_HISTORY_OK` known mismatch
 
 ### Maintenance Guardrails
 
@@ -58,9 +58,9 @@
 | FACADE-02 | Phase 32 | Pending |
 | FACADE-03 | Phase 33 | Pending |
 | FACADE-04 | Phase 33 | Pending |
-| STATE-01 | Phase 31 | Pending |
-| STATE-02 | Phase 31 | Pending |
-| STATE-03 | Phase 31 | Pending |
+| STATE-01 | Phase 31 | Complete |
+| STATE-02 | Phase 31 | Complete |
+| STATE-03 | Phase 31 | Complete |
 | GUARD-01 | Phase 30 | Complete |
 | GUARD-02 | Phase 33 | Pending |
 
@@ -71,4 +71,4 @@
 
 ---
 *Requirements defined: 2026-04-16*
-*Last updated: 2026-04-16 after Phase 30 completion*
+*Last updated: 2026-04-16 after Phase 31 completion*

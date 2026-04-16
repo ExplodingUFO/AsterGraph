@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.6
 milestone_name: Facade Convergence and Proof Guardrails
-status: executing
-stopped_at: Phase 31 planning complete
-last_updated: "2026-04-16T04:30:59.351Z"
-last_activity: 2026-04-16 -- Phase 31 planning complete
+status: planning
+stopped_at: Phase 31 completed and verified
+last_updated: "2026-04-16T05:11:33.6830902Z"
+last_activity: 2026-04-16 -- Phase 31 completed and verified
 progress:
   total_phases: 4
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 6
-  completed_plans: 3
+  completed_plans: 6
   percent: 50
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-04-16)
 
 **Core value:** Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
-**Current focus:** Phase 31 ready to execute - history-and-save-semantic-closure
+**Current focus:** Phase 32 ready to plan - grapheditorviewmodel-facade-convergence
 
 ## Current Position
 
-Phase: 31 (history-and-save-semantic-closure) - READY TO EXECUTE
-Plan: 3 plans ready
-Status: Ready to execute
-Last activity: 2026-04-16 -- Phase 31 planning complete
+Phase: 32 (grapheditorviewmodel-facade-convergence) - READY TO PLAN
+Plan: Not started
+Status: Ready for planning
+Last activity: 2026-04-16 -- completed Phase 31 history/save semantic closure, review, and verification
 
 ## Performance Metrics
 
@@ -62,6 +62,9 @@ New v1.6 framing decisions:
 - [Phase 30]: Record later pre-v1.5 trust, discovery, staging, and proof follow-up in the v1.4 ledger notes instead of editing it back into the archived snapshots. — The delivered pre-v1.5 surface exceeded the original four-phase roadmap, so the ledger needed to separate original framing from later follow-up honestly.
 - [Phase 30]: Keep the maintenance guardrail inside `eng/ci.ps1` as a dedicated `maintenance` lane instead of introducing a second script path. — Contributors and docs now have one repo-local refactor gate to point at.
 - [Phase 30]: Keep `maintenance` narrower than `release` by running focused hotspot suites plus `ScaleSmoke`, without pack, `PackageSmoke`, coverage, or package validation. — The new lane stays fast enough for refactor loops while still exercising one runnable readiness proof.
+- [Phase 31]: Retained mutation completion and retained save must commit through kernel-owned history/save authority instead of keeping a second retained undo/redo owner. — Mixed runtime-plus-retained flows were already shipping, so semantic parity had to be fixed at the authority boundary rather than by adding more compatibility cases.
+- [Phase 31]: Successful save must replace the current history entry rather than append a new undo step. — Save-boundary dirty semantics only stay stable when the saved snapshot becomes the current history baseline.
+- [Phase 31]: `ScaleSmoke` and proof-ring tests should expose explicit history-contract pass/fail output instead of a carried known-mismatch tuple. — Planning notes were no longer an acceptable substitute for machine-checkable proof.
 
 ### Pending Todos
 
@@ -69,8 +72,8 @@ None captured yet.
 
 ### Blockers/Concerns
 
-- The known `STATE_HISTORY_OK` mismatch remains a carried baseline issue until Phase 31 closes the history/save semantic contract.
 - `GraphEditorViewModel`, `GraphEditorKernel`, and `NodeCanvas` remain the obvious internal hotspots even after the earlier coordinator extractions.
+- Publishable-package XML doc debt still needs the scoped cleanup planned for Phase 33.
 
 ### Quick Tasks Completed
 
@@ -82,6 +85,6 @@ None captured yet.
 
 ## Session Continuity
 
-Last session: 2026-04-16T04:30:59.351Z
-Stopped at: Phase 31 planning complete
-Resume file: .planning/phases/31-history-and-save-semantic-closure/31-01-PLAN.md
+Last session: 2026-04-16T05:11:33.6830902Z
+Stopped at: Phase 31 completed and verified
+Resume file: .planning/ROADMAP.md
