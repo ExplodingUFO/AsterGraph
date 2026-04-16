@@ -3,8 +3,9 @@
 ## Current Alpha Target
 
 - package baseline: `0.2.0-alpha.1`
-- repo status: public alpha readiness
+- repo status: public alpha ready, pending visibility and first public prerelease operations
 - public entry path: `README.md` plus the guides under `docs/en` and `docs/zh-CN`
+- maintainer launch checklist: [Public Launch Checklist](./public-launch-checklist.md)
 
 `.planning` remains maintainer context, not the primary consumer guide.
 
@@ -16,6 +17,7 @@
 - plugin discovery, trust policy, load inspection, and runtime loading
 - automation execution through `IGraphEditorSession.Automation`
 - official proof lanes and smoke tools
+- packed `HostSample` compatibility proof under `.NET 10` inside the release lane
 
 ## Explicitly Not Included
 
@@ -33,13 +35,14 @@
 
 ## Known Limitations
 
-- public prerelease publication is still tightening around the tag-driven release flow
-- CI still keeps the deepest package-validation lane on Windows
+- repository visibility, branch protection, and the first public prerelease tag are still maintainer-run operational steps
+- the deepest package-validation lane and the `.NET 10` packed-consumer proof still run on the Windows release-validation path
 - retained compatibility APIs are still present during the migration window
 
 ## Recommended Entry Points
 
 - [Quick Start](./quick-start.md)
+- [Public Launch Checklist](./public-launch-checklist.md)
 - [Host Integration](./host-integration.md)
 - [State Contracts](./state-contracts.md)
 - [Extension Contracts](./extension-contracts.md)

@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.9
 milestone_name: Public Launch Gate and CI Stabilization
 status: active
-stopped_at: Phase 44 ready to execute
-last_updated: "2026-04-16T15:25:00.0000000Z"
-last_activity: 2026-04-16 -- Planned Phase 44 public launch checklist and entry tightening
+stopped_at: Milestone audit ready
+last_updated: "2026-04-16T16:00:00.0000000Z"
+last_activity: 2026-04-16 -- Completed Phase 44 public launch checklist and entry tightening
 progress:
   total_phases: 3
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 9
-  completed_plans: 6
-  percent: 67
+  completed_plans: 9
+  percent: 100
 ---
 
 # Project State
@@ -25,10 +25,10 @@ See: `.planning/PROJECT.md` (updated 2026-04-16)
 
 ## Current Position
 
-Phase: 44
+Phase: complete
 Plan: —
-Status: Ready to execute
-Last activity: 2026-04-16 -- Planned Phase 44 public launch checklist and entry tightening
+Status: Ready to audit milestone
+Last activity: 2026-04-16 -- Completed Phase 44 public launch checklist and entry tightening
 
 ## Accumulated Context
 
@@ -38,14 +38,15 @@ Last activity: 2026-04-16 -- Planned Phase 44 public launch checklist and entry 
   - `actions/setup-dotnet` cache cleanup used to fail because the default global package directory was absent; Phase 43 moved both workflows onto a workspace-local `NUGET_PACKAGES` path
   - `.github/workflows/release.yml` used to fail before jobs scheduled because the publish gate referenced `secrets.*` in a job-level `if:`; Phase 43 moved the secret gate inside the job and revalidated the release lane
 - Phase 43 also added one explicit packed `.NET 10` HostSample proof marker (`HOST_SAMPLE_NET10_OK:True`) to the release validation surface.
-- The remaining work is now public-launch messaging and checklist tightening, not runtime or CI mechanics.
+- Phase 44 closed the remaining public-entry narrative gap by linking one launch checklist and aligning README/alpha-status/quick-start with the actual maintained proof surface.
+- All planned v1.9 phase work is complete; only milestone audit and archive remain.
 
 ## Next Action
 
-Execute Phase 44 with `$gsd-execute-phase 44`.
+Audit and archive v1.9.
 
 ## Session Continuity
 
-Last session: 2026-04-16T15:25:00.0000000Z
-Stopped at: Phase 44 ready to execute
+Last session: 2026-04-16T16:00:00.0000000Z
+Stopped at: Milestone audit ready
 Resume file: .planning/ROADMAP.md

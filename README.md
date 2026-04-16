@@ -9,8 +9,10 @@ AsterGraph is a modular node-graph editor for .NET with an Avalonia UI shell, a 
 - 中文文档: [`docs/zh-CN/`](./docs/zh-CN/)
 - 中文总览: [`README.zh-CN.md`](./README.zh-CN.md)
 - current alpha scope, known limitations, and stability notes: [`docs/en/alpha-status.md`](./docs/en/alpha-status.md)
+- public launch checklist: [`docs/en/public-launch-checklist.md`](./docs/en/public-launch-checklist.md)
 
 Use [`.planning`](./.planning/) as maintainer context. It is not the primary consumer onboarding surface.
+The remaining work before a public visibility flip is operational rather than architectural: branch protection, visibility, and the first public prerelease/tag pass.
 
 ## Current Scope
 
@@ -98,6 +100,7 @@ All four publishable packages currently target `net8.0` and `net9.0`.
 
 - `net8.0` is the conservative downstream-host baseline because all four publishable packages, `AsterGraph.Serialization.Tests`, and the maintained proof tools run there.
 - `net9.0` is also supported for hosts already targeting the newer runtime; the main editor/demo regression suites and the demo app run there.
+- the packed consumer proof now also runs `HostSample` under `net10.0` during the release gate; treat that as a compatibility proof for downstream hosts rather than as a claim that the published packages target `net10.0`
 - `src/AsterGraph.Demo` targets `net9.0` only because it is a sample app, not a supported package.
 
 ## Initialization And Migration Story
@@ -117,6 +120,7 @@ If you want to own Avalonia layout while still reusing the stock canvas, inspect
 
 For the compact package/route/verification matrix, see [Quick Start](./docs/en/quick-start.md#canonical-adoption-path).
 For the current alpha scope and known limitations, see [Alpha Status](./docs/en/alpha-status.md).
+For the remaining maintainer-only public-opening steps, see [Public Launch Checklist](./docs/en/public-launch-checklist.md).
 For the explicit history/save/dirty behavior contract, see [State Contract](./docs/en/state-contracts.md).
 For stability tiers, compatibility retirement, extension precedence, and lane ownership, see [Extension Contracts](./docs/en/extension-contracts.md).
 
@@ -266,6 +270,7 @@ The official proof ring for the shipped surface is:
   - `dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj --nologo`
     - proves the minimal canonical host path from the consumer side
     - supports packed-package restore with `-p:UsePackedAsterGraphPackages=true`
+    - release validation also runs the packed sample under `.NET 10` and emits `HOST_SAMPLE_NET10_OK:True`
   - `dotnet run --project tools/AsterGraph.PackageSmoke/AsterGraph.PackageSmoke.csproj --nologo`
     - proves packaged consumption across the runtime-first, hosted-UI, and retained compatibility routes
   - `dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj --nologo`
@@ -304,6 +309,8 @@ Release verification before publish:
 # preferred release gate (runs focused contract proof, packs packages, runs HostSample + PackageSmoke + ScaleSmoke against packed packages, collects coverage, and runs package validation)
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framework all -Configuration Release
 ```
+
+Before a public visibility flip or the first public prerelease tag, follow the [Public Launch Checklist](./docs/en/public-launch-checklist.md).
 
 For a focused consumer/contract proof before the full release gate:
 
@@ -344,6 +351,8 @@ Run the smoke tools separately only when you need their raw proof markers while 
 dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj --nologo
 # prove the same sample through packed packages after pack/release validation
 dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj -p:UsePackedAsterGraphPackages=true --nologo
+# prove packed-package consumption from a .NET 10 host after pack/release validation
+dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj -f net10.0 -p:EnableNet10ConsumerProof=true -p:UsePackedAsterGraphPackages=true --nologo
 # execute PackageSmoke against local packages (different restore path than the CI build step above)
 dotnet run --project tools/AsterGraph.PackageSmoke/AsterGraph.PackageSmoke.csproj -p:UsePackedAsterGraphPackages=true --nologo
 # execute ScaleSmoke against current build outputs

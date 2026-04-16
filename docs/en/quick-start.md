@@ -5,6 +5,7 @@ This is the shortest path from a blank host to a running public-alpha integratio
 See also:
 
 - [Alpha Status](./alpha-status.md)
+- [Public Launch Checklist](./public-launch-checklist.md)
 - [Host Integration](./host-integration.md)
 - [State Contracts](./state-contracts.md)
 - [Extension Contracts](./extension-contracts.md)
@@ -26,7 +27,7 @@ Current source shapes:
 
 - repo-local feed in `artifacts/packages`
 - optional GitHub Packages feed
-- planned public prerelease channel on NuGet.org
+- tag-driven prerelease workflow for public packages once the maintainer checklist is complete
 
 For branch validation from source:
 
@@ -81,11 +82,14 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane contract -Frame
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framework all -Configuration Release
 ```
 
+Before a public visibility flip or the first public prerelease tag, follow the [Public Launch Checklist](./public-launch-checklist.md).
+
 Raw proof tools:
 
 ```powershell
 dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj --nologo
 dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj -p:UsePackedAsterGraphPackages=true --nologo
+dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj -f net10.0 -p:EnableNet10ConsumerProof=true -p:UsePackedAsterGraphPackages=true --nologo
 dotnet run --project tools/AsterGraph.PackageSmoke/AsterGraph.PackageSmoke.csproj -p:UsePackedAsterGraphPackages=true --nologo
 dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj --nologo
 ```
