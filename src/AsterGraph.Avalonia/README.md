@@ -2,7 +2,7 @@
 
 Avalonia UI shell for the AsterGraph editor.
 
-Quick Start: [main UI entry quick start](../../docs/quick-start.md).
+Quick Start: [main UI entry quick start](../../docs/en/quick-start.md).
 
 This package belongs to the supported AsterGraph package set with `AsterGraph.Abstractions`, `AsterGraph.Core`, and `AsterGraph.Editor`, and it targets `net8.0` and `net9.0`.
 
@@ -38,7 +38,7 @@ Those responsibilities live in `AsterGraph.Abstractions`, `AsterGraph.Core`, and
 
 Integration entry points:
 
-- [Host Integration Guide](https://github.com/ExplodingUFO/AsterGraph/blob/master/docs/host-integration.md)
+- [Host Integration Guide](https://github.com/ExplodingUFO/AsterGraph/blob/master/docs/en/host-integration.md)
 - [Demo App](https://github.com/ExplodingUFO/AsterGraph/tree/master/src/AsterGraph.Demo)
 
 Canonical and compatibility UI entry paths:

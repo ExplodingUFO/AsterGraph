@@ -2,7 +2,7 @@
 
 `AsterGraph.Abstractions` is the stable contract layer inside the supported AsterGraph package set.
 
-Quick Start: [contract entry quick start](../../docs/quick-start.md).
+Quick Start: [contract entry quick start](../../docs/en/quick-start.md).
 
 Supported package set:
 

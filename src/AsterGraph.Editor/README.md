@@ -115,7 +115,7 @@ Phase 18 readiness proof is anchored on the session boundary, not on the retaine
 
 Reference material:
 
-- [Host Integration Guide](https://github.com/ExplodingUFO/AsterGraph/blob/master/docs/host-integration.md)
-- [Extension Contracts](https://github.com/ExplodingUFO/AsterGraph/blob/master/docs/extension-contracts.md)
+- [Host Integration Guide](https://github.com/ExplodingUFO/AsterGraph/blob/master/docs/en/host-integration.md)
+- [Extension Contracts](https://github.com/ExplodingUFO/AsterGraph/blob/master/docs/en/extension-contracts.md)
 - [Demo App](https://github.com/ExplodingUFO/AsterGraph/tree/master/src/AsterGraph.Demo)
 - [Root README](https://github.com/ExplodingUFO/AsterGraph/blob/master/README.md)

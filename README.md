@@ -379,9 +379,9 @@ Sample local feed config:
 copy NuGet.config.sample NuGet.config
 ```
 
-Package-source and publish-channel details are documented in [`docs/host-integration.md`](./docs/host-integration.md#package-feed-options).
+Package-source and publish-channel details are documented in [`docs/en/host-integration.md`](./docs/en/host-integration.md#package-feed-options).
 
-For the detailed host setup and migration guidance, see [`docs/host-integration.md`](./docs/host-integration.md).
+For the detailed host setup and migration guidance, see [`docs/en/host-integration.md`](./docs/en/host-integration.md).
 
 ## Extension Model
 
@@ -502,9 +502,9 @@ Hosts can start from `GraphEditorCommandPermissions.Default` or `GraphEditorComm
 
 For a deeper host-composition walkthrough, see:
 
-- [`docs/host-integration.md`](./docs/host-integration.md)
-- [`docs/node-presentation-guidelines.md`](./docs/node-presentation-guidelines.md)
-- [`docs/interactions-and-shortcuts.md`](./docs/interactions-and-shortcuts.md)
+- [`docs/en/host-integration.md`](./docs/en/host-integration.md)
+- [`docs/en/node-presentation-guidelines.md`](./docs/en/node-presentation-guidelines.md)
+- [`docs/en/interactions-and-shortcuts.md`](./docs/en/interactions-and-shortcuts.md)
 
 That guide covers:
 
