@@ -32,7 +32,6 @@ Current capabilities:
 Current non-goals:
 
 - algorithm execution engine
-- undo/redo stack
 - property editor framework
 - plugin marketplace or remote install/update workflows
 - plugin unload lifecycle
@@ -87,8 +86,8 @@ Recommended package entry order:
 
 All four publishable packages currently target `net8.0` and `net9.0`.
 
-- `net8.0` is the safest baseline for downstream hosts because the test projects run there.
-- `net9.0` is also supported for hosts already targeting the newer runtime.
+- `net8.0` is the conservative downstream-host baseline because all four publishable packages, `AsterGraph.Serialization.Tests`, and the maintained proof tools run there.
+- `net9.0` is also supported for hosts already targeting the newer runtime; the main editor/demo regression suites and the demo app run there.
 - `src/AsterGraph.Demo` targets `net9.0` only because it is a sample app, not a supported package.
 
 ## Initialization And Migration Story
@@ -232,8 +231,13 @@ var run = session.Automation.Execute(new GraphEditorAutomationRunRequest(
     ]));
 ```
 
-The proof surface for this extension story is:
+The official proof ring for the shipped surface is:
 
+- official scripted gates:
+  - `eng/ci.ps1 -Lane release`
+  - `eng/ci.ps1 -Lane maintenance`
+- minimal consumer host sample:
+  - `tools/AsterGraph.HostSample`
 - live package/runtime proof:
   - `tools/AsterGraph.PackageSmoke`
   - `tools/AsterGraph.ScaleSmoke`
@@ -242,13 +246,16 @@ The proof surface for this extension story is:
   - `tests/AsterGraph.Serialization.Tests`
 - demo/sample regression lane:
   - `tests/AsterGraph.Demo.Tests` (sample-host and interaction-path checks)
-- runnable package/runtime proof:
+- runnable proof entry points:
+  - `dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj --nologo`
+    - proves the minimal canonical host path from the consumer side
+    - supports packed-package restore with `-p:UsePackedAsterGraphPackages=true`
   - `dotnet run --project tools/AsterGraph.PackageSmoke/AsterGraph.PackageSmoke.csproj --nologo`
     - proves packaged consumption across the runtime-first, hosted-UI, and retained compatibility routes
   - `dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj --nologo`
-    - keeps the larger-session automation proof path credible; it is not the trust/distribution proof surface
+    - keeps the larger-session readiness, history/save, and automation proof path credible
   - `dotnet run --project src/AsterGraph.Demo/AsterGraph.Demo.csproj --nologo`
-    - remains the interactive host-composition sample for visual/manual inspection
+    - remains the interactive visual sample for manual shell inspection, not the minimal consumer path
 
 ## Quick Start
 
@@ -310,6 +317,10 @@ dotnet test tests/AsterGraph.Demo.Tests/AsterGraph.Demo.Tests.csproj --nologo -v
 Run the smoke tools separately only when you need their raw proof markers while debugging:
 
 ```powershell
+# execute the minimal canonical host sample
+dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj --nologo
+# prove the same sample through packed packages after pack/release validation
+dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj -p:UsePackedAsterGraphPackages=true --nologo
 # execute PackageSmoke against local packages (different restore path than the CI build step above)
 dotnet run --project tools/AsterGraph.PackageSmoke/AsterGraph.PackageSmoke.csproj -p:UsePackedAsterGraphPackages=true --nologo
 # execute ScaleSmoke against current build outputs
@@ -481,6 +492,17 @@ Interactive demo host:
 - Run with:
   - `dotnet run --project src/AsterGraph.Demo/AsterGraph.Demo.csproj --nologo`
 - Use the demo when you want the visual/default host-composition reference, host menu seams, chrome toggles, and live shell behavior.
+
+Minimal consumer host sample:
+
+- `tools/AsterGraph.HostSample`
+- Run with:
+  - `dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj --nologo`
+  - `dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj -p:UsePackedAsterGraphPackages=true --nologo`
+- The sample keeps the code path narrow:
+  - canonical runtime-first creation via `AsterGraphEditorFactory.CreateSession(...)`
+  - canonical hosted-UI creation via `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)`
+  - optional packed-package restore without depending on the demo shell
 
 Package consumption smoke:
 

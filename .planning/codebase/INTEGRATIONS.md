@@ -1,6 +1,6 @@
 # Integrations
 
-**Analysis Date:** 2026-04-14
+**Analysis Date:** 2026-04-16
 
 ## External Services
 
@@ -13,6 +13,7 @@
 - `src/AsterGraph.Editor/Hosting/AsterGraphEditorOptions.cs` is the main host integration contract.
 - Hosts can inject `INodeCatalog`, `IPortCompatibilityService`, `IGraphWorkspaceService`, `IGraphFragmentWorkspaceService`, `IGraphFragmentLibraryService`, `IGraphClipboardPayloadSerializer`, `IGraphContextMenuAugmentor`, `INodePresentationProvider`, `IGraphLocalizationProvider`, `IGraphEditorDiagnosticsSink`, and `GraphEditorInstrumentationOptions`.
 - `src/AsterGraph.Editor/Hosting/AsterGraphEditorFactory.cs` exposes both `CreateSession(...)` for runtime-first composition and `Create(...)` for the retained `GraphEditorViewModel` path.
+- `tools/AsterGraph.HostSample` is the narrow runnable sample for the canonical consumer-facing host path.
 - `src/AsterGraph.Demo` is the runnable visual integration sample for these seams.
 
 ## Filesystem And Workspace Integration
@@ -36,7 +37,7 @@
 - Runtime diagnostics are exposed through `src/AsterGraph.Editor/Diagnostics/IGraphEditorDiagnostics.cs`, `src/AsterGraph.Editor/Diagnostics/IGraphEditorDiagnosticsSink.cs`, and `src/AsterGraph.Editor/Diagnostics/GraphEditorInspectionSnapshot.cs`.
 - Optional host logging and tracing are wired through `src/AsterGraph.Editor/Diagnostics/GraphEditorInstrumentationOptions.cs`, which expects host-supplied `ILoggerFactory` and `ActivitySource`.
 - `src/AsterGraph.Demo` exercises host object propagation and UI composition paths in the runnable shell.
-- `tools/AsterGraph.PackageSmoke/Program.cs` and `tools/AsterGraph.ScaleSmoke/Program.cs` exercise machine-checkable diagnostics and inspection proof behaviors.
+- `tools/AsterGraph.HostSample/Program.cs`, `tools/AsterGraph.PackageSmoke/Program.cs`, and `tools/AsterGraph.ScaleSmoke/Program.cs` exercise the maintained sample/smoke proof behaviors.
 - The diagnostics surface is intentionally editor-owned rather than Avalonia-owned.
 
 ## Avalonia Surface Integration
@@ -50,7 +51,8 @@
 
 - Shared package metadata and repository URLs are defined in `Directory.Build.props`.
 - `README.md` documents `dotnet pack` output to `artifacts/packages`.
-- `tools/AsterGraph.PackageSmoke/Program.cs` is the main integration proof for packed-package consumption.
+- `tools/AsterGraph.HostSample/Program.cs` is the minimal integration proof for the canonical consumer host path.
+- `tools/AsterGraph.PackageSmoke/Program.cs` is the main integration proof for packed-package consumption breadth across supported routes.
 - `tools/AsterGraph.ScaleSmoke/Program.cs` is a runtime proof tool for selection, compatibility, history, viewport, diagnostics, and workspace continuity under larger graph sizes.
 
 ## Environment, Secrets, And Identity
@@ -69,4 +71,4 @@
 
 ---
 
-*Integration analysis refreshed: 2026-04-14*
+*Integration analysis refreshed: 2026-04-16*

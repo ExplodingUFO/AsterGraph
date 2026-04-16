@@ -71,6 +71,7 @@ The older MVVM-rooted extension methods remain available only as migration shims
 
 Phase 18 readiness proof is anchored on the session boundary, not on the retained constructor path:
 
+- `tools/AsterGraph.HostSample` is the minimal consumer-facing sample for the canonical host path
 - `src/AsterGraph.Demo` remains the visual/default host-composition sample
 - `tools/AsterGraph.PackageSmoke` emits machine-checkable `PACKAGE_SMOKE_*` markers
 - `tools/AsterGraph.ScaleSmoke` proves the same session/inspection-driven readiness story on a larger graph

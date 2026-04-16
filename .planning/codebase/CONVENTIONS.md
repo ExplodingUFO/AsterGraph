@@ -1,6 +1,6 @@
 # Coding Conventions
 
-**Analysis Date:** 2026-04-14
+**Analysis Date:** 2026-04-16
 
 ## Naming Patterns
 
@@ -19,7 +19,7 @@
 - Nullable reference types and implicit usings are enabled through `Directory.Build.props`.
 - Collection expressions, `with` expressions, and other modern C# constructs are used freely in `src/` and `tests/`.
 - Production projects generate XML docs by default; tests disable doc generation in their `*.csproj` files.
-- The repo currently suppresses `CS1591` in `Directory.Build.props` while public XML docs continue to be added.
+- `Directory.Build.props` suppresses `CS1591` only for non-packable projects; `AsterGraph.Editor` carries its remaining public XML-doc debt explicitly at project scope.
 
 ## Import And Module Organization
 
@@ -40,7 +40,7 @@
 - Historically the editor surface leaned on properties/events such as `StatusMessage`.
 - Current host-facing diagnostics live in `src/AsterGraph.Editor/Diagnostics/*.cs`.
 - Optional structured logging/tracing is host-supplied through `GraphEditorInstrumentationOptions` rather than hard-wired into the library.
-- Tooling and proof programs still use `Console.WriteLine` heavily, especially in `tools/AsterGraph.PackageSmoke/Program.cs` and `tools/AsterGraph.ScaleSmoke/Program.cs`.
+- Tooling and proof programs still use `Console.WriteLine` heavily, especially in `tools/AsterGraph.HostSample/Program.cs`, `tools/AsterGraph.PackageSmoke/Program.cs`, and `tools/AsterGraph.ScaleSmoke/Program.cs`.
 
 ## Documentation And Comments
 
@@ -65,4 +65,4 @@
 
 ---
 
-*Convention analysis refreshed: 2026-04-14*
+*Convention analysis refreshed: 2026-04-16*

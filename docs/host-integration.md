@@ -14,6 +14,23 @@ The short source of truth lives in [Quick Start](./quick-start.md#canonical-adop
 
 If you want to reuse standalone Avalonia surfaces such as `AsterGraphCanvasViewFactory.Create(...)`, `AsterGraphInspectorViewFactory.Create(...)`, or `AsterGraphMiniMapViewFactory.Create(...)`, treat that as an advanced composition detail inside the `Create(...)` family, not as a fourth canonical entry path.
 
+## Minimal Consumer Host Sample
+
+Use `tools/AsterGraph.HostSample` when you want the smallest runnable canonical host path in this repository.
+
+- It proves the two main consumer routes:
+  - `AsterGraphEditorFactory.CreateSession(...)`
+  - `AsterGraphEditorFactory.Create(...)` plus `AsterGraphAvaloniaViewFactory.Create(...)`
+- It stays intentionally narrow and does not try to replace `PackageSmoke`, `ScaleSmoke`, or the demo shell.
+- It can run against local project references or packed packages through `UsePackedAsterGraphPackages=true`.
+
+Commands:
+
+```powershell
+dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj --nologo
+dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj -p:UsePackedAsterGraphPackages=true --nologo
+```
+
 ## Package Choice
 
 The supported package publish boundary is exactly these four packages:
@@ -133,6 +150,8 @@ dotnet test tests/AsterGraph.Demo.Tests/AsterGraph.Demo.Tests.csproj --nologo -v
 Run the live proof tools separately only when you need their raw markers while debugging:
 
 ```powershell
+dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj --nologo
+dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj -p:UsePackedAsterGraphPackages=true --nologo
 dotnet run --project tools/AsterGraph.PackageSmoke/AsterGraph.PackageSmoke.csproj -p:UsePackedAsterGraphPackages=true --nologo
 dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj --nologo
 ```
@@ -140,8 +159,9 @@ dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj --
 Notes:
 
 - Use `-t:Rebuild` when checking XML documentation warning retirement. Incremental `dotnet build` can reuse existing outputs and hide `CS1591` regressions.
+- `tools/AsterGraph.HostSample` is the minimal consumer-facing sample. It proves the canonical code path without carrying the larger proof burden.
 - `tools/AsterGraph.PackageSmoke` should be run with `UsePackedAsterGraphPackages=true` so it restores from `artifacts/packages` instead of falling back to project references.
-- `src/AsterGraph.Demo` is now the single visual host-composition sample for the default Avalonia shell and related host seams.
+- `src/AsterGraph.Demo` remains the visual/default host-composition sample for the default Avalonia shell and related host seams.
 - `tools/AsterGraph.PackageSmoke` is intentionally narrow: it proves packaged consumption across the runtime-first, hosted-UI, and retained compatibility routes, then emits stable `PACKAGE_SMOKE_*` markers.
 - `tools/AsterGraph.ScaleSmoke` keeps the larger-graph scale/readiness proof path separate from the package-consumption smoke tool.
 

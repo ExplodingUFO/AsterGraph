@@ -51,6 +51,7 @@ Hosts can integrate only the graph-editor pieces they need, replace default UI a
 - Phase 31 closed the carried history/save concern: retained undo/redo/dirty/save semantics now run on one kernel-owned authority, focused suites cover the interaction/save boundary directly, and `ScaleSmoke` emits `SCALE_HISTORY_CONTRACT_OK`.
 - Phase 32 moved more retained bootstrap, menu, and fragment orchestration out of `GraphEditorViewModel` while keeping the public factory/session/view-model entry points stable.
 - Phase 33 split the next kernel and canvas hotspots behind dedicated internal collaborators, and publishable-package XML-doc debt no longer hides behind a repo-wide `CS1591` blanket.
+- Phase 34 aligned README, host docs, top-level planning artifacts, and codebase maps around one v1.7 proof story, then restored `AsterGraph.HostSample` as the minimal consumer-facing host sample.
 - v1.7 is now scoped as a productization-closeout milestone: truth alignment, proof-ring closure, release automation, minimal consumer onboarding, history/save contract publication, and extension-boundary hardening.
 
 ## Requirements
@@ -96,10 +97,12 @@ Hosts can integrate only the graph-editor pieces they need, replace default UI a
 - ✓ `ScaleSmoke` and proof-ring coverage now expose the same explicit history/save contract without the carried `STATE_HISTORY_OK` mismatch - v1.6 Phase 31
 - ✓ Host keeps the same public factory/session/view-model entry points while hotspot refactors continue to move retained-facade orchestration behind kernel-owned collaborators - v1.6 Phase 32
 - ✓ Contributors can keep reducing `GraphEditorViewModel`, `GraphEditorKernel`, and `NodeCanvas` hotspots under the maintenance gate without widening public XML-doc debt again - v1.6 Phase 33
+- ✓ Maintainers can now read README, ROADMAP, STATE, PROJECT, and current codebase maps without conflicting v1.7 proof-ring or milestone-state claims - v1.7 Phase 34
+- ✓ Consumer-facing docs no longer contradict themselves on undo/redo capability, target support, or proof-tool availability - v1.7 Phase 34
+- ✓ The official proof ring is now explicit around `eng/ci.ps1`, `HostSample`, `PackageSmoke`, `ScaleSmoke`, focused regressions, and the visual demo role split - v1.7 Phase 34
 
 ### Active
 
-- [ ] Documentation, planning artifacts, and codebase maps describe one truthful current milestone, capability story, proof ring, and support boundary.
 - [ ] Consumers can discover and run one official proof and release path that covers build, test, pack, smoke, and compatibility verification across the supported framework matrix.
 - [ ] Consumers can follow a minimal host onboarding path with canonical runtime-only, default Avalonia UI, trust/discovery, and automation entry routes.
 - [ ] Maintainers can keep shrinking compatibility and hotspot seams under explicit history/save, extension precedence, and compatibility-retirement contracts.
@@ -188,4 +191,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-16 after v1.7 milestone initialization*
+*Last updated: 2026-04-16 after Phase 34 completion*

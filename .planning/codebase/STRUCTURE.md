@@ -1,6 +1,6 @@
 # Codebase Structure
 
-**Analysis Date:** 2026-04-14
+**Analysis Date:** 2026-04-16
 
 ## Repository Layout
 
@@ -80,6 +80,11 @@
 
 ## Tools And Proofs
 
+### `tools/AsterGraph.HostSample`
+
+- Purpose: minimal canonical consumer host sample with optional packed-package restore mode.
+- Anchor files: `tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj`, `tools/AsterGraph.HostSample/Program.cs`.
+
 ### `tools/AsterGraph.PackageSmoke`
 
 - Purpose: validate public package boundaries and packed-package consumption.
@@ -94,8 +99,7 @@
 
 - Public integration docs live in `docs/host-integration.md`, `docs/quick-start.md`, `docs/interactions-and-shortcuts.md`, and `docs/node-presentation-guidelines.md`.
 - GSD state and planning live under `.planning/PROJECT.md`, `.planning/REQUIREMENTS.md`, `.planning/ROADMAP.md`, `.planning/STATE.md`, `.planning/phases/`, `.planning/research/`, and `.planning/codebase/`.
-- `.planning/STATE.md` currently tracks the phase posture as **Phase 28 complete** with **Phase 29 next**.
-- `.planning/ROADMAP.md` currently tracks the active v1.5 milestone and the phase sequence around this transition.
+- `.planning/STATE.md` and `.planning/ROADMAP.md` track the active v1.7 milestone and its current phase posture.
 
 ## Key File Locations
 
@@ -104,6 +108,7 @@
 - `src/AsterGraph.Editor/Hosting/AsterGraphEditorFactory.cs`
 - `src/AsterGraph.Avalonia/Hosting/AsterGraphAvaloniaViewFactory.cs`
 - `src/AsterGraph.Demo/Program.cs`
+- `tools/AsterGraph.HostSample/Program.cs`
 - `tools/AsterGraph.PackageSmoke/Program.cs`
 - `tools/AsterGraph.ScaleSmoke/Program.cs`
 
@@ -144,4 +149,4 @@
 
 ---
 
-*Structure analysis refreshed: 2026-04-14*
+*Structure analysis refreshed: 2026-04-16*

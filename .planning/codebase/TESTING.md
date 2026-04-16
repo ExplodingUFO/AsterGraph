@@ -1,6 +1,6 @@
 # Testing Patterns
 
-**Analysis Date:** 2026-04-14
+**Analysis Date:** 2026-04-16
 
 ## Test Frameworks
 
@@ -53,16 +53,19 @@
 
 ## Smoke And Proof Tools
 
-- `tools/AsterGraph.PackageSmoke/Program.cs` is a package-surface regression tool that exercises both legacy and factory/session paths.
-- `tools/AsterGraph.ScaleSmoke/Program.cs` emits repeatable `SCALE_*` markers for large-graph and runtime-state continuity checks.
-- Together with the three xUnit projects, these tools form the maintained proof surface.
+- `tools/AsterGraph.HostSample/Program.cs` is the minimal consumer-facing host sample. It proves the canonical runtime-first and hosted-UI routes and can switch to packed-package restore.
+- `tools/AsterGraph.PackageSmoke/Program.cs` is the package-surface regression tool that exercises runtime-first, hosted-UI, and retained compatibility paths.
+- `tools/AsterGraph.ScaleSmoke/Program.cs` emits repeatable `SCALE_*` markers for large-graph, history/save, and runtime-state continuity checks.
+- Together with the three xUnit projects and `eng/ci.ps1`, these tools form the maintained proof ring.
 
 ## Commands
 
 ```powershell
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane all -Framework all -Configuration Release
-pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane build -Framework all -Configuration Release
-pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane test -Framework net9.0 -Configuration Release
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane maintenance -Framework all -Configuration Release
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framework all -Configuration Release
+dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj --nologo
+dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj -p:UsePackedAsterGraphPackages=true --nologo
 dotnet run --project tools/AsterGraph.PackageSmoke/AsterGraph.PackageSmoke.csproj
 dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj --nologo
 ```
@@ -70,13 +73,14 @@ dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj --
 ## Coverage And Gaps
 
 - No coverage collector, threshold, or `runsettings` file is tracked.
-- `.github/workflows/ci.yml` is checked in and invokes `eng/ci.ps1` for matrixed lane validation.
+- `.github/workflows/ci.yml` is checked in and invokes `eng/ci.ps1` for matrixed lane validation plus release verification.
 - The repo relies on xUnit regressions plus proof tools rather than benchmark automation or coverage enforcement.
-- `eng/ci.ps1` is the script-first repo gate; smoke-tool execution (`dotnet run`) remains an explicit separate step after lane execution.
+- `eng/ci.ps1 -Lane release` is the official scripted gate; raw `dotnet run` commands remain useful when contributors want direct sample or smoke markers while debugging.
 - Current risk areas are less about missing tests entirely and more about maintaining alignment across:
   - kernel-first runtime path
   - retained `GraphEditorViewModel` compatibility path
   - split-lane proof alignment (core SDK vs demo/sample host)
+  - the minimal consumer host sample versus the heavier smoke tools
 
 ## Testing Conventions
 
@@ -87,4 +91,4 @@ dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj --
 
 ---
 
-*Testing analysis refreshed: 2026-04-14*
+*Testing analysis refreshed: 2026-04-16*

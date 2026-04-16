@@ -31,6 +31,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsterGraph.TestPlugins", "t
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsterGraph.Demo.Tests", "tests\AsterGraph.Demo.Tests\AsterGraph.Demo.Tests.csproj", "{DF753068-5376-4178-A58D-C9B6BC44CBD3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsterGraph.HostSample", "tools\AsterGraph.HostSample\AsterGraph.HostSample.csproj", "{8BB27B33-5359-46E2-9037-FC3FF36D48AD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -173,6 +175,18 @@ Global
 		{DF753068-5376-4178-A58D-C9B6BC44CBD3}.Release|x64.Build.0 = Release|Any CPU
 		{DF753068-5376-4178-A58D-C9B6BC44CBD3}.Release|x86.ActiveCfg = Release|Any CPU
 		{DF753068-5376-4178-A58D-C9B6BC44CBD3}.Release|x86.Build.0 = Release|Any CPU
+		{8BB27B33-5359-46E2-9037-FC3FF36D48AD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8BB27B33-5359-46E2-9037-FC3FF36D48AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8BB27B33-5359-46E2-9037-FC3FF36D48AD}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{8BB27B33-5359-46E2-9037-FC3FF36D48AD}.Debug|x64.Build.0 = Debug|Any CPU
+		{8BB27B33-5359-46E2-9037-FC3FF36D48AD}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{8BB27B33-5359-46E2-9037-FC3FF36D48AD}.Debug|x86.Build.0 = Debug|Any CPU
+		{8BB27B33-5359-46E2-9037-FC3FF36D48AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8BB27B33-5359-46E2-9037-FC3FF36D48AD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8BB27B33-5359-46E2-9037-FC3FF36D48AD}.Release|x64.ActiveCfg = Release|Any CPU
+		{8BB27B33-5359-46E2-9037-FC3FF36D48AD}.Release|x64.Build.0 = Release|Any CPU
+		{8BB27B33-5359-46E2-9037-FC3FF36D48AD}.Release|x86.ActiveCfg = Release|Any CPU
+		{8BB27B33-5359-46E2-9037-FC3FF36D48AD}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -189,5 +203,6 @@ Global
 		{B3EC8B7E-8FBC-4935-9A2E-A8F3A7EA5CBC} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 		{E31DAF15-13FB-451F-9B1C-4253FF4FEA8B} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 		{DF753068-5376-4178-A58D-C9B6BC44CBD3} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
+		{8BB27B33-5359-46E2-9037-FC3FF36D48AD} = {07C2787E-EAC7-C090-1BA3-A61EC2A24D84}
 	EndGlobalSection
 EndGlobal

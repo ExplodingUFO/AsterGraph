@@ -117,6 +117,7 @@ For the other two routes:
 
 - runtime-only/custom UI details: [`docs/host-integration.md`](./host-integration.md#runtime-session-surface)
 - retained migration details: [`docs/host-integration.md`](./host-integration.md#staged-migration-compatibility-path)
+- minimal canonical host sample: `tools/AsterGraph.HostSample`
 - visual/default hosted-UI reference: `src/AsterGraph.Demo`
 - machine-checkable package/runtime proof: `tools/AsterGraph.PackageSmoke`
 - machine-checkable scale/readiness proof: `tools/AsterGraph.ScaleSmoke`
@@ -127,8 +128,9 @@ Use `AsterGraph.Abstractions` to define and distribute node contracts (`INodeDef
 
 ## 6) Proof surface and regression lanes
 
-The live proof surface now uses the dedicated tools:
+The official proof ring now uses these maintained entry points:
 
+- `tools/AsterGraph.HostSample`
 - `tools/AsterGraph.PackageSmoke`
 - `tools/AsterGraph.ScaleSmoke`
 
@@ -148,6 +150,8 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane all -Framework 
 Run the smoke tools separately only when you want their raw marker output:
 
 ```powershell
+dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj --nologo
+dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj -p:UsePackedAsterGraphPackages=true --nologo
 dotnet run --project tools/AsterGraph.PackageSmoke/AsterGraph.PackageSmoke.csproj -p:UsePackedAsterGraphPackages=true --nologo
 dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj --nologo
 ```

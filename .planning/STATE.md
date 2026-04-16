@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.7
 milestone_name: Consumer Closure / Release Hardening
-status: executing
-stopped_at: Phase 34 planned
-last_updated: "2026-04-16T07:35:00.0000000Z"
-last_activity: 2026-04-16 -- Planned Phase 34 truth alignment and proof ring closure
+status: planning
+stopped_at: Phase 34 completed
+last_updated: "2026-04-16T08:05:00.0000000Z"
+last_activity: 2026-04-16 -- Completed Phase 34 truth alignment and proof ring closure
 progress:
   total_phases: 4
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 12
-  completed_plans: 0
-  percent: 0
+  completed_plans: 3
+  percent: 25
 ---
 
 # Project State
@@ -21,14 +21,14 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-04-16)
 
 **Core value:** Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
-**Current focus:** Phase 34 ready to execute - truth-alignment-and-proof-ring-closure
+**Current focus:** Phase 35 ready to plan - release-gate-and-matrix-automation
 
 ## Current Position
 
-Phase: 34 (truth-alignment-and-proof-ring-closure) - READY TO EXECUTE
-Plan: 3 plans written
-Status: Ready to execute
-Last activity: 2026-04-16 -- Planned Phase 34 truth alignment and proof ring closure
+Phase: 35 (release-gate-and-matrix-automation) - READY TO PLAN
+Plan: 3 plans outlined in roadmap
+Status: Ready to plan
+Last activity: 2026-04-16 -- Completed Phase 34 truth alignment and proof ring closure
 
 ## Performance Metrics
 
@@ -74,6 +74,9 @@ New v1.6 framing decisions:
 - [Phase 33 planning]: Repo-wide `CS1591` suppression is now broader than the real debt boundary. — `AsterGraph.Abstractions` and `AsterGraph.Core` build clean under `warnaserror:CS1591`, while `AsterGraph.Editor` still has explicit public-doc debt that should move to project scope.
 - [Phase 33]: Keep command-router host ownership and NodeCanvas lifecycle/property routing behind dedicated internal collaborators, then prove those seams through focused tests and the maintenance lane. — The next hotspot follow-through should reduce change radius without changing the public embedding surface.
 - [Phase 33]: Limit central `CS1591` suppression to non-packable projects and leave the remaining public XML-doc debt explicit in `AsterGraph.Editor`. — Package-boundary guardrails are only meaningful when the real debt boundary is visible in project configuration.
+- [Phase 34]: Treat `eng/ci.ps1 -Lane release` and `eng/ci.ps1 -Lane maintenance` as the official proof-ring entry points, then describe `HostSample`, `PackageSmoke`, `ScaleSmoke`, and `Demo` by role under that gate. — The repo already had the scripted gate; the gap was inconsistent narrative and discoverability.
+- [Phase 34]: Restore `AsterGraph.HostSample` as a narrow canonical consumer sample instead of reviving the older proof-heavy host app. — The minimal host path should be easy to read and run, while the broader proof burden stays in smoke tools and focused regressions.
+- [Phase 34]: Keep `src/AsterGraph.Demo` as the visual/manual sample and move the minimal consumer burden to `HostSample`. — Visual inspection and minimal adoption proof serve different audiences and should not share the same artifact.
 
 New v1.7 framing decisions:
 
@@ -88,11 +91,11 @@ None captured yet.
 
 ### Blockers/Concerns
 
-Current known Phase 34 drift:
+Current Phase 35 focus:
 
-- `tools/AsterGraph.HostSample` is an empty directory, not a real sample project.
-- README still contradicts itself on undo/redo capability versus non-goal status.
-- several `.planning/codebase` maps still describe the repo as if v1.5 / Phase 29 were current.
+- make the release gate and CI jobs express the target-matrix and compatibility responsibilities more explicitly
+- keep the official verification path centered on `eng/ci.ps1`, not README-only command stitching
+- verify that package compatibility checks stay machine-enforced in release validation
 
 ### Quick Tasks Completed
 
@@ -105,5 +108,5 @@ Current known Phase 34 drift:
 ## Session Continuity
 
 Last session: 2026-04-16T06:20:00.0000000Z
-Stopped at: Phase 34 planned
+Stopped at: Phase 34 completed
 Resume file: .planning/ROADMAP.md

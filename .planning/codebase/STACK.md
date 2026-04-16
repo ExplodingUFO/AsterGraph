@@ -1,10 +1,10 @@
 # Technology Stack
 
-**Analysis Date:** 2026-04-14
+**Analysis Date:** 2026-04-16
 
 ## Languages
 
-- C# is the primary implementation language across `src/AsterGraph.Abstractions`, `src/AsterGraph.Core`, `src/AsterGraph.Editor`, `src/AsterGraph.Avalonia`, `src/AsterGraph.Demo`, `tests/AsterGraph.Editor.Tests`, `tests/AsterGraph.Serialization.Tests`, `tests/AsterGraph.Demo.Tests`, `tools/AsterGraph.PackageSmoke`, and `tools/AsterGraph.ScaleSmoke`.
+- C# is the primary implementation language across `src/AsterGraph.Abstractions`, `src/AsterGraph.Core`, `src/AsterGraph.Editor`, `src/AsterGraph.Avalonia`, `src/AsterGraph.Demo`, `tests/AsterGraph.Editor.Tests`, `tests/AsterGraph.Serialization.Tests`, `tests/AsterGraph.Demo.Tests`, `tools/AsterGraph.HostSample`, `tools/AsterGraph.PackageSmoke`, and `tools/AsterGraph.ScaleSmoke`.
 - Avalonia XAML (`.axaml`) is used for desktop UI markup in `src/AsterGraph.Avalonia/Controls/GraphEditorView.axaml`, `src/AsterGraph.Avalonia/Controls/GraphInspectorView.axaml`, `src/AsterGraph.Avalonia/Controls/NodeCanvas.axaml`, `src/AsterGraph.Demo/App.axaml`, and `src/AsterGraph.Demo/Views/MainWindow.axaml`.
 - MSBuild XML drives project/build configuration in `Directory.Build.props`, `Directory.Packages.props`, and every `*.csproj` under `src/`, `tests/`, and `tools/`.
 - NuGet config and package sources are defined as XML in `NuGet.config`.
@@ -19,7 +19,7 @@
 - The main UI-heavy test project in `tests/AsterGraph.Editor.Tests/AsterGraph.Editor.Tests.csproj` targets `net9.0`.
 - The serialization regression project in `tests/AsterGraph.Serialization.Tests/AsterGraph.Serialization.Tests.csproj` targets `net8.0`.
 - The demo/sample-host proof project in `tests/AsterGraph.Demo.Tests/AsterGraph.Demo.Tests.csproj` targets `net9.0`.
-- The maintained proof tools in `tools/AsterGraph.PackageSmoke/AsterGraph.PackageSmoke.csproj` and `tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj` target `net8.0`.
+- The maintained proof tools in `tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj`, `tools/AsterGraph.PackageSmoke/AsterGraph.PackageSmoke.csproj`, and `tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj` target `net8.0`.
 - Package restore and build run through the `dotnet` CLI and NuGet/MSBuild restore flow.
 - `Directory.Packages.props` is tracked and defines the centralized version set.
 - No `global.json`, `packages.lock.json`, or lockfile policy file is tracked at the repository root.
@@ -42,6 +42,7 @@
 - `src/AsterGraph.Core` depends only on `src/AsterGraph.Abstractions`.
 - `src/AsterGraph.Editor` depends on `src/AsterGraph.Abstractions`, `src/AsterGraph.Core`, `CommunityToolkit.Mvvm`, and `Microsoft.Extensions.Logging.Abstractions`.
 - `src/AsterGraph.Avalonia` depends on `src/AsterGraph.Core`, `src/AsterGraph.Editor`, Avalonia, and `CommunityToolkit.Mvvm`.
+- `tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj` validates the minimal canonical host path and can switch between direct project references and packed package consumption.
 - `tools/AsterGraph.PackageSmoke/AsterGraph.PackageSmoke.csproj` validates both direct project references and packed package consumption of `AsterGraph.Abstractions`, `AsterGraph.Editor`, and `AsterGraph.Avalonia`.
 - `tools/AsterGraph.ScaleSmoke/Program.cs` is now part of the maintained proof surface for large-graph and session-state continuity.
 
@@ -68,4 +69,4 @@
 
 ---
 
-*Stack analysis refreshed: 2026-04-14*
+*Stack analysis refreshed: 2026-04-16*

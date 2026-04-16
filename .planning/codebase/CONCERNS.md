@@ -1,71 +1,56 @@
 # Codebase Concerns
 
-**Analysis Date:** 2026-04-14
+**Analysis Date:** 2026-04-16
 
-## Primary Architecture Concerns
+## Primary Product Concerns
 
-### Kernel-First Migration Is Not Finished
+### Truth Alignment Still Needs Active Maintenance
 
-- `src/AsterGraph.Editor/Kernel/GraphEditorKernel.cs` is now the canonical runtime state owner for the session-first path.
-- `src/AsterGraph.Editor/ViewModels/GraphEditorViewModel.cs` still implements `IGraphEditorSessionHost`, so compatibility-facade obligations remain.
-- `.planning/STATE.md` and `.planning/ROADMAP.md` now reflect v1.5 completion through Phase 28 with Phase 29 next.
-- Risk: dual-path drift remains between kernel-first runtime and retained compatibility pathways until migration debt is removed.
+- The active milestone is now v1.7 consumer closure and release hardening.
+- The main operational risk is not missing capability surface. It is drift between README, host docs, planning artifacts, codebase maps, and proof entry points.
+- A repo that ships runtime plugins, automation, smoke tools, and release gates still becomes hard to adopt if those surfaces are described inconsistently.
 
-### Public Surface Still Carries MVVM-Shaped Compatibility Debt
+### The Proof Ring Must Stay Discoverable
 
-- `src/AsterGraph.Editor/Menus/CompatiblePortTarget.cs` still exposes `NodeViewModel` and `PortViewModel` references.
-- `src/AsterGraph.Editor/Runtime/IGraphEditorQueries.cs` still includes legacy compatibility-oriented members such as `GetCompatibleTargets(...)`.
-- `[Obsolete(...)]` compatibility members are still present in extension and runtime seams.
-- Risk: later capability normalization and API simplification remain deferred until these signatures are retired.
+- `eng/ci.ps1 -Lane release` is the official scripted verification entry point.
+- `eng/ci.ps1 -Lane maintenance` is the hotspot refactor gate.
+- `tools/AsterGraph.HostSample`, `tools/AsterGraph.PackageSmoke`, and `tools/AsterGraph.ScaleSmoke` now form the maintained runnable proof-tool layer.
+- Risk: if solution membership, docs, or scripts drift apart again, external consumers and contributors will not know which entry points are authoritative.
 
-## Coordination Hotspots
+## Architecture Concerns
 
-### Large Orchestration Types Still Dominate Change Risk
+### Compatibility Debt Is Deliberate, But Still Real
 
-- `src/AsterGraph.Editor/ViewModels/GraphEditorViewModel.cs`, `src/AsterGraph.Editor/Kernel/GraphEditorKernel.cs`, and `src/AsterGraph.Avalonia/Controls/NodeCanvas.axaml.cs` remain the main coordination hotspots.
-- Even with recent extraction work, editor/session, MVVM projection, and Avalonia interaction logic remain concentrated in large files.
-- Risk: a local change in one boundary can propagate across command, selection, history, diagnostics, and rendering behavior.
+- `src/AsterGraph.Editor/Kernel/GraphEditorKernel.cs` is the canonical mutable runtime state owner.
+- `src/AsterGraph.Editor/ViewModels/GraphEditorViewModel.cs` is now a retained compatibility facade rather than the runtime owner, but it is still a large integration hotspot.
+- `src/AsterGraph.Editor/Menus/CompatiblePortTarget.cs` and `src/AsterGraph.Editor/Runtime/IGraphEditorQueries.cs::GetCompatibleTargets(...)` remain public compatibility shims.
+- Risk: maintainers still need clear retirement guidance so future simplification does not turn into accidental breaking change.
 
-### Compatibility And Proof Logic Are Mixed Into Production Flow
+### Hotspots Are Narrower, Not Gone
 
-- The repo intentionally keeps legacy composition paths while adding kernel/session composition and machine-checkable proofs.
-- `src/AsterGraph.Demo` (sample host) and `tools/AsterGraph.PackageSmoke`/`tools/AsterGraph.ScaleSmoke` (proof tools) still validate overlapping behavior.
-- Risk: maintenance overhead persists while two composition models remain behaviorally aligned.
+- `GraphEditorViewModel`, `GraphEditorKernel`, and `NodeCanvas.axaml.cs` remain the main concentrated change surfaces.
+- Recent extractions reduced inline ownership, but these files still coordinate many editor/runtime/UI concerns.
+- Risk: local refactors can still have wider blast radius than the public API suggests if focused proof is not kept aligned.
 
-## Quality And Tooling Concerns
+## Quality And Release Concerns
 
-### Quality Gates Are Improving, But Not Fully Mature
+### The Release Gate Exists, But Matrix Clarity Still Matters
 
-- `.editorconfig` is tracked, central package management exists (`Directory.Packages.props`), and checked-in CI exists (`.github/workflows/ci.yml`) invoking `eng/ci.ps1`.
-- Release-grade quality remains incomplete: no coverage thresholds or additional policy checks are enforced from a single release gate.
-- Risk: style and behavior drift can still appear in host-specific and adoption-path workflows that are not fully codified.
+- CI already runs `eng/ci.ps1 -Lane all` across `net8.0` / `net9.0` plus a `release` job.
+- Publishable packages target both frameworks; proof tools target `net8.0`; editor/demo regressions split across `net9.0` and `net8.0`.
+- Risk: framework-specific regressions can still hide if the repo gate and CI jobs stop making those responsibilities explicit.
 
-### Mixed Target Matrix Requires Ongoing Attention
+### History/Save Semantics Are Fixed In Code But Still Need Consumer-Level Publication
 
-- Publishable packages target `net8.0` and `net9.0`.
-- `tests/AsterGraph.Serialization.Tests` and tools are on `net8.0`; `tests/AsterGraph.Editor.Tests` and `tests/AsterGraph.Demo.Tests` are on `net9.0`.
-- Risk: target-specific behavior can still regress if lane coverage is not maintained across all relevant combinations.
-
-## Product And Roadmap Concerns
-
-### Plugin Loading And Automation Adoption
-
-- Plugin loading and richer automation shipped in v1.4, so it is no longer an open-scope gap.
-- Current risk is adoption-path clarity: host-facing sequencing between runtime-only, full-shell, and compatibility facade lanes.
-- Risk: external consumers can still misapply capabilities if migration boundaries are not read as intended.
-
-### Documentation Drift Is the Highest Operational Risk
-
-- The repo moves quickly through release cleanup phases (`Phase 26` runtime-boundary cleanup, `Phase 28` proof-surface alignment, `Phase 29` next).
-- `.planning/codebase` and related host/docs require periodic refresh to stay evidence-aligned.
-- Risk: stale guidance can mis-route integration planning and review priorities.
+- Focused regressions and `ScaleSmoke` now enforce one retained history/save contract.
+- Current remaining risk is documentation and onboarding: consumers still need that behavior described as a product contract, not only as passing tests.
 
 ## Suggested Next Watchpoints
 
-- Track when `GraphEditorViewModel` stops implementing `IGraphEditorSessionHost`.
-- Track when compatibility query and menu APIs stop relying on MVVM-oriented model shapes.
-- Keep package smoke, scale smoke, and migration suites synchronized with host/session contract changes.
+- Keep `HostSample`, `PackageSmoke`, `ScaleSmoke`, and the scripted release gate aligned as one proof system.
+- Keep compatibility-retirement wording explicit anywhere `GetCompatibleTargets(...)` and `CompatiblePortTarget` are still exposed.
+- Keep the maintenance lane focused on hotspot seams rather than allowing it to become a second broad release lane.
 
 ---
 
-*Concerns analysis refreshed: 2026-04-14*
+*Concerns analysis refreshed: 2026-04-16*

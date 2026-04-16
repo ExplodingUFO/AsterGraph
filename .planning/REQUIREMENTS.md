@@ -8,12 +8,12 @@
 
 ### Narrative And Truth Alignment
 
-- [ ] **ALIGN-01**: Maintainer can read `README`, `ROADMAP`, `STATE`, `PROJECT`, and current codebase maps without seeing conflicting milestone status, proof-ring composition, or shipped capability claims
-- [ ] **ALIGN-02**: Consumer-facing docs no longer contain internal contradictions around capability vs non-goal statements, target-framework support, or proof-tool availability
+- [x] **ALIGN-01**: Maintainer can read `README`, `ROADMAP`, `STATE`, `PROJECT`, and current codebase maps without seeing conflicting milestone status, proof-ring composition, or shipped capability claims
+- [x] **ALIGN-02**: Consumer-facing docs no longer contain internal contradictions around capability vs non-goal statements, target-framework support, or proof-tool availability
 
 ### Proof Ring And Release Gates
 
-- [ ] **PROOF-01**: The official proof ring is explicitly defined around real, discoverable entry points for `PackageSmoke`, `ScaleSmoke`, focused regressions, and a minimal consumer host path
+- [x] **PROOF-01**: The official proof ring is explicitly defined around real, discoverable entry points for `PackageSmoke`, `ScaleSmoke`, focused regressions, and a minimal consumer host path
 - [ ] **REL-01**: Maintainer can run one official verification entry point that executes build, test, pack, smoke, and compatibility checks instead of stitching together README-only commands
 - [ ] **REL-02**: CI covers the supported `net8.0` / `net9.0` matrix with explicit build, smoke, and focused contract lanes so framework-specific regressions surface automatically
 - [ ] **REL-03**: Publishable package compatibility remains machine-guarded during release verification through public API and/or package validation checks
@@ -54,9 +54,9 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| ALIGN-01 | Phase 34 | Pending |
-| ALIGN-02 | Phase 34 | Pending |
-| PROOF-01 | Phase 34 | Pending |
+| ALIGN-01 | Phase 34 | Completed |
+| ALIGN-02 | Phase 34 | Completed |
+| PROOF-01 | Phase 34 | Completed |
 | REL-01 | Phase 35 | Pending |
 | REL-02 | Phase 35 | Pending |
 | REL-03 | Phase 35 | Pending |
@@ -76,4 +76,4 @@
 
 ---
 *Requirements defined: 2026-04-16*
-*Last updated: 2026-04-16 after initial definition*
+*Last updated: 2026-04-16 after Phase 34 completion*
