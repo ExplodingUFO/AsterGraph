@@ -12,6 +12,41 @@ namespace AsterGraph.Avalonia.Controls;
 
 public partial class NodeCanvas
 {
+    private sealed class NodeCanvasLifecycleHost : INodeCanvasLifecycleHost
+    {
+        private readonly NodeCanvas _owner;
+
+        public NodeCanvasLifecycleHost(NodeCanvas owner)
+        {
+            _owner = owner ?? throw new ArgumentNullException(nameof(owner));
+        }
+
+        public bool AttachPlatformSeams => _owner.AttachPlatformSeams;
+
+        public bool IsAttachedToVisualTree
+        {
+            get => _owner._isAttachedToVisualTree;
+            set => _owner._isAttachedToVisualTree = value;
+        }
+
+        public GraphEditorViewModel? ViewModel => _owner.ViewModel;
+
+        public void ReplacePlatformSeams(GraphEditorViewModel? previous, GraphEditorViewModel? current)
+            => GraphEditorPlatformSeamBinder.Replace(previous, current, _owner);
+
+        public void ApplyPlatformSeams(GraphEditorViewModel? current)
+            => GraphEditorPlatformSeamBinder.Apply(current, _owner);
+
+        public void ClearPlatformSeams(GraphEditorViewModel? current)
+            => GraphEditorPlatformSeamBinder.Clear(current);
+
+        public void AttachViewModel(GraphEditorViewModel? previous, GraphEditorViewModel? current)
+            => _owner.AttachViewModel(previous, current);
+
+        public void RebuildScene()
+            => _owner.RebuildScene();
+    }
+
     private sealed class NodeCanvasContextMenuHost : INodeCanvasContextMenuHost
     {
         private readonly NodeCanvas _owner;

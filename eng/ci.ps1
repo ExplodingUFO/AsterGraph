@@ -74,6 +74,7 @@ $maintenanceTestFilter = @(
   'FullyQualifiedName~GraphEditorFacadeRefactorTests',
   'FullyQualifiedName~GraphEditorKernelCommandRouterTests',
   'FullyQualifiedName~GraphEditorViewModelProjectionTests',
+  'FullyQualifiedName~NodeCanvasStandaloneTests',
   'FullyQualifiedName~NodeCanvasNodeDragCoordinatorTests',
   'FullyQualifiedName~NodeCanvasPointerInteractionCoordinatorTests'
 ) -join '|'

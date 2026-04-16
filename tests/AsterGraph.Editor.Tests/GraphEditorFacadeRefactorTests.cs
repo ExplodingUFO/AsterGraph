@@ -1,5 +1,6 @@
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
+using AsterGraph.Avalonia.Controls;
 using AsterGraph.Core.Compatibility;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Catalog;
@@ -216,6 +217,14 @@ public sealed class GraphEditorFacadeRefactorTests
 
         Assert.NotNull(fragmentHostType);
         Assert.NotNull(fragmentCommandsType);
+    }
+
+    [Fact]
+    public void AvaloniaAssembly_ContainsDedicatedNodeCanvasLifecycleCoordinator()
+    {
+        var lifecycleType = typeof(NodeCanvas).Assembly.GetType("AsterGraph.Avalonia.Controls.Internal.NodeCanvasLifecycleCoordinator");
+
+        Assert.NotNull(lifecycleType);
     }
 
     [Fact]
