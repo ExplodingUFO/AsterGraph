@@ -82,6 +82,12 @@ dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj --
 - `.github/workflows/ci.yml` is checked in and invokes `eng/ci.ps1` through explicit framework-matrix (`all`), focused contract (`contract`), and release (`release`) jobs.
 - The repo relies on xUnit regressions plus proof tools rather than benchmark automation.
 - `eng/ci.ps1 -Lane release` is the official scripted publish gate; `contract` is the focused consumer/state-contract gate; raw `dotnet run` commands remain useful when contributors want direct sample or smoke markers while debugging.
+- Lane ownership is now explicit:
+  - `all` = framework-matrix build/test
+  - `contract` = consumer/runtime/plugin/history contract proof
+  - `maintenance` = compatibility-hotspot refactor gate
+  - `release` = publish validation
+  - `tests/AsterGraph.Demo.Tests` = demo/sample-host lane
 - Current risk areas are less about missing tests entirely and more about maintaining alignment across:
   - kernel-first runtime path
   - retained `GraphEditorViewModel` compatibility path

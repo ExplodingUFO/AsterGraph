@@ -61,6 +61,19 @@ Proof for that contract is anchored in:
 - `tests/AsterGraph.Editor.Tests/GraphEditorHistorySemanticTests.cs`
 - `SCALE_HISTORY_CONTRACT_OK` from `tools/AsterGraph.ScaleSmoke`
 
+## Extension And Stability Contract
+
+The explicit extension and maintenance contract lives in [`docs/extension-contracts.md`](./extension-contracts.md).
+
+Short version:
+
+- canonical runtime surfaces are `CreateSession(...)`, `Create(...)`, `IGraphEditorSession`, and DTO/snapshot queries
+- `GraphEditorViewModel` and `GraphEditorView` remain supported as retained migration facades, not as the canonical runtime owner
+- `GetCompatibleTargets(...)` and `CompatiblePortTarget` are compatibility-only shims on a staged retirement path
+- plugin trust is host-owned before activation
+- host localization and node-presentation providers run after plugin providers, so host overrides win final override fields
+- runtime-session menus apply plugin augmentors over stock descriptors, while retained `GraphEditorViewModel.BuildContextMenu(...)` gives the host augmentor the final override point
+
 ## Package Choice
 
 The supported package publish boundary is exactly these four packages:
@@ -211,6 +224,7 @@ The verification split is:
   - hosted-surface composition
   - history/save/dirty contract
 - Hotspot refactor gate: `eng/ci.ps1 -Lane maintenance`
+- Framework-matrix build/test lane: `eng/ci.ps1 -Lane all`
 - Core SDK regression lane: `tests/AsterGraph.Editor.Tests` plus `tests/AsterGraph.Serialization.Tests`
 - Demo/sample regression lane: `tests/AsterGraph.Demo.Tests`
 

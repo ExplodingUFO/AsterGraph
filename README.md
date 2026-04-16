@@ -107,6 +107,7 @@ If you want to own Avalonia layout while still reusing the stock canvas, inspect
 
 For the compact package/route/verification matrix, see [Quick Start](./docs/quick-start.md#canonical-adoption-path).
 For the explicit history/save/dirty behavior contract, see [State Contract](./docs/state-contracts.md).
+For stability tiers, compatibility retirement, extension precedence, and lane ownership, see [Extension Contracts](./docs/extension-contracts.md).
 
 ## Runtime Session And Services
 
