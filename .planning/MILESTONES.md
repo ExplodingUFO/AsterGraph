@@ -33,6 +33,40 @@
 
 ---
 
+## v1.4 Plugin Loading and Automation Execution (Shipped: 2026-04-08)
+
+**Delivered:** AsterGraph shipped the first public plugin-loading and automation-execution baseline on the canonical runtime/session boundary, with runtime inspection, typed automation signals, and proof coverage that no longer depended on retained `GraphEditorViewModel`-only host paths.
+
+**Phases completed:** 22-25 (12 plans total)
+
+**Archive:** [ROADMAP](./milestones/v1.4-ROADMAP.md) | [REQUIREMENTS](./milestones/v1.4-REQUIREMENTS.md)
+
+**Key accomplishments:**
+
+- Added public plugin composition and loading through `AsterGraphEditorFactory` / `AsterGraphEditorOptions` instead of editor-internal or Avalonia-internal construction paths.
+- Let loaded plugins contribute node definitions, menu augmentation, localization, node presentation, and recoverable diagnostics through the canonical runtime/session boundary while host-provided seams kept final override authority.
+- Added a descriptor-first automation runner over canonical command IDs, query snapshots, batching, and typed runtime signals suitable for non-Avalonia or headless consumers.
+- Closed the original v1.4 proof ring around plugin loading and automation execution through focused regressions plus `PackageSmoke`, `ScaleSmoke`, and README-backed proof commands.
+
+**Stats:**
+
+- 85 files modified
+- 6,392 insertions and 86 deletions across code, docs, tests, and planning artifacts
+- 4 phases and 12 plans
+- Timeline: 2026-04-08 to 2026-04-08
+
+**Git range:** `docs: define milestone v1.4 requirements` → `feat(proof): close plugin and automation proof ring`
+
+**Notes:**
+
+- This archive was reconstructed retrospectively on 2026-04-16 from the historical requirements snapshot at `7b99800` and roadmap snapshot at `5622eb7`; the archive files preserve that original framing instead of rewriting it into current milestone language.
+- The broader pre-`v1.5` evidence range `7b99800..ec8d566` covers 266 files changed, 27,048 insertions, and 8,532 deletions because later plugin trust, discovery, staging, smoke-surface, and refactor follow-up work landed before `v1.5` was initialized.
+- That later work is part of the delivered pre-`v1.5` surface, but it was not part of the original four-phase `v1.4` roadmap and is intentionally called out here rather than merged back into the archived snapshots.
+
+**What's next:** Use the reconstructed `v1.4` archive as historical context, but track current proof, refactor, and state-sync work through the live `v1.6` planning artifacts.
+
+---
+
 ## v1.3 Demo Showcase (Shipped: 2026-04-08)
 
 **Delivered:** AsterGraph now ships a graph-first, host-menu-first demo showcase that keeps one live session on screen while proving host-owned seams, shared runtime state, and live configuration through compact in-context controls and proof cues.
