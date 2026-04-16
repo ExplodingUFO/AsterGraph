@@ -2,6 +2,14 @@
 
 AsterGraph is a modular node-graph editor for .NET with an Avalonia UI shell, a reusable editor state layer, and compile-time extension points for registering custom algorithm nodes.
 
+## Public Alpha
+
+- current package baseline: `0.2.0-alpha.1`
+- primary public entry path: this `README` plus the guides under [`docs/`](./docs/)
+- current alpha scope, known limitations, and stability notes: [`docs/alpha-status.md`](./docs/alpha-status.md)
+
+Use [`.planning`](./.planning/) as maintainer context. It is not the primary consumer onboarding surface.
+
 ## Current Scope
 
 Current capabilities:
@@ -106,6 +114,7 @@ Start with the [canonical adoption path](./docs/quick-start.md#canonical-adoptio
 If you want to own Avalonia layout while still reusing the stock canvas, inspector, or mini map, stay on the `Create(...)` family and treat those surface factories as advanced hosted-UI composition detail rather than a fourth canonical entry path. The constructor/view path remains supported so hosts can migrate in planned batches instead of rewriting in one shot.
 
 For the compact package/route/verification matrix, see [Quick Start](./docs/quick-start.md#canonical-adoption-path).
+For the current alpha scope and known limitations, see [Alpha Status](./docs/alpha-status.md).
 For the explicit history/save/dirty behavior contract, see [State Contract](./docs/state-contracts.md).
 For stability tiers, compatibility retirement, extension precedence, and lane ownership, see [Extension Contracts](./docs/extension-contracts.md).
 
@@ -264,7 +273,7 @@ The official proof ring for the shipped surface is:
 
 ## Quick Start
 
-For first-time onboarding (package choice, private feed setup, install commands, and the minimum Avalonia host path), start with the [canonical Quick Start route](./docs/quick-start.md#canonical-adoption-path).
+For first-time onboarding (package choice, package-source options, install commands, and the minimum Avalonia host path), start with the [canonical Quick Start route](./docs/quick-start.md#canonical-adoption-path).
 
 Build:
 
@@ -358,7 +367,7 @@ Sample local feed config:
 copy NuGet.config.sample NuGet.config
 ```
 
-GitHub Packages setup and publish details are documented in [`docs/host-integration.md`](./docs/host-integration.md#github-packages-feed-setup).
+Package-source and publish-channel details are documented in [`docs/host-integration.md`](./docs/host-integration.md#package-feed-options).
 
 For the detailed host setup and migration guidance, see [`docs/host-integration.md`](./docs/host-integration.md).
 

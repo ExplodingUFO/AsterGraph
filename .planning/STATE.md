@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.8
 milestone_name: Public Alpha Readiness and Canonical Demo
 status: active
-stopped_at: Phase 38 ready to plan
-last_updated: "2026-04-16T14:00:00.0000000Z"
-last_activity: 2026-04-16 -- Started milestone v1.8 public alpha readiness and canonical demo
+stopped_at: Phase 39 in progress
+last_updated: "2026-04-16T14:55:00.0000000Z"
+last_activity: 2026-04-16 -- Completed Phase 38 alpha framing and OSS baseline
 progress:
   total_phases: 4
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 12
-  completed_plans: 0
-  percent: 0
+  completed_plans: 3
+  percent: 25
 ---
 
 # Project State
@@ -25,10 +25,10 @@ See: `.planning/PROJECT.md` (updated 2026-04-16)
 
 ## Current Position
 
-Phase: 38
-Plan: -
-Status: Ready to plan
-Last activity: 2026-04-16 -- Started milestone v1.8 public alpha readiness and canonical demo
+Phase: 39
+Plan: 39 execution
+Status: In progress
+Last activity: 2026-04-16 -- Completed Phase 38 alpha framing and OSS baseline
 
 ## Performance Metrics
 
@@ -109,9 +109,7 @@ None captured yet.
 
 Current framing concerns to close through v1.8:
 
-- Package metadata still reports `0.1.0-preview.8`, so the public version story is not aligned with an external alpha posture.
 - `AsterGraph.Demo` still uses direct `GraphEditorViewModel` construction instead of the canonical factory/view-factory route.
-- Public governance files and templates are missing, which raises friction for outside contributors and security reporting.
 - CI is still Windows-only and does not yet upload public release artifacts or run tag-driven prerelease publishing.
 
 ### Quick Tasks Completed
@@ -125,5 +123,5 @@ Current framing concerns to close through v1.8:
 ## Session Continuity
 
 Last session: 2026-04-16T06:20:00.0000000Z
-Stopped at: Phase 38 ready to plan
+Stopped at: Phase 39 in progress
 Resume file: .planning/ROADMAP.md

@@ -2,6 +2,8 @@
 
 This document publishes the contract around surface stability, compatibility retirement, extension precedence, and verification-lane ownership.
 
+For current alpha scope and known limitations, see [`alpha-status.md`](./alpha-status.md).
+
 ## Stability Tiers
 
 ### Stable canonical surfaces

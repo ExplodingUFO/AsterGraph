@@ -2,6 +2,8 @@
 
 This is the fastest path from a blank host to a running embedded editor.
 
+For current alpha scope, known limitations, and stability notes, see [`alpha-status.md`](./alpha-status.md).
+
 ## 1) Choose package entry
 
 | Host goal | Start package | Why |
@@ -11,7 +13,24 @@ This is the fastest path from a blank host to a running embedded editor.
 
 `AsterGraph.Demo` is sample-only. Do not use it as a package dependency.
 
-## 2) Configure private GitHub Packages feed
+## 2) Choose package source
+
+Today there are three source shapes to know about:
+
+- repo-local packages in `artifacts/packages`
+  - this is the proof path used by the maintained smoke and release-validation flows
+- GitHub Packages
+  - optional private/internal feed
+- NuGet.org prerelease
+  - intended public alpha channel once the tag-driven prerelease workflow is active
+
+Use the repo-local feed when validating the current branch from source.
+
+```powershell
+copy NuGet.config.sample NuGet.config
+```
+
+Optional GitHub Packages setup:
 
 ```powershell
 # Replace OWNER and credentials with your own values.
@@ -45,6 +64,8 @@ Credential-free source template:
   </packageSources>
 </configuration>
 ```
+
+See [`host-integration.md`](./host-integration.md#package-feed-options) for the longer feed and publish-channel guidance.
 
 ## 3) Install packages
 

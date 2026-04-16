@@ -4,6 +4,8 @@ This guide shows how to host AsterGraph without over-coupling your application t
 
 Quick Start: see the [canonical adoption path](./quick-start.md#canonical-adoption-path) for the short route guide. This document expands the same three routes instead of defining a second route tree.
 
+For current alpha scope, known limitations, and stability notes, see [`alpha-status.md`](./alpha-status.md).
+
 ## Canonical Adoption Path
 
 The short source of truth lives in [Quick Start](./quick-start.md#canonical-adoption-path):
@@ -99,9 +101,25 @@ Add a direct `AsterGraph.Core` reference when the host also needs direct access 
 
 `AsterGraph.Demo` is not a consumable package and is not part of the publish set.
 
-## GitHub Packages Feed Setup
+## Package Feed Options
 
-Use GitHub Packages for private restore and publish of the four supported SDK packages (`AsterGraph.Abstractions`, `AsterGraph.Core`, `AsterGraph.Editor`, `AsterGraph.Avalonia`).
+Current feed posture:
+
+- repo-local `artifacts/packages` is the maintained proof path used by `HostSample`, `PackageSmoke`, and the release lane
+- GitHub Packages remains an optional private/internal feed
+- NuGet.org prerelease is the intended public alpha channel once the tag-driven release workflow is active
+
+### Repo-local feed
+
+Use [`NuGet.config.sample`](../NuGet.config.sample) when validating the current branch from source:
+
+```powershell
+copy NuGet.config.sample NuGet.config
+```
+
+### Optional GitHub Packages feed
+
+Use GitHub Packages when you need a private feed for the four supported SDK packages (`AsterGraph.Abstractions`, `AsterGraph.Core`, `AsterGraph.Editor`, `AsterGraph.Avalonia`).
 
 Add source via CLI:
 
@@ -136,7 +154,7 @@ Prefer storing credentials in local user config or CI secrets, not in tracked re
 </configuration>
 ```
 
-Publish sequence (Demo excluded):
+Current publish sequence for a private/manual feed (Demo excluded):
 
 ```powershell
 # pack
@@ -153,6 +171,8 @@ dotnet nuget push "artifacts/packages/AsterGraph.Avalonia.*.nupkg" --source gith
 ```
 
 If push fails with authentication or permission errors (401/403), refresh source credentials (token with `write:packages`) and retry publish.
+
+Public prerelease publication is tracked separately through the release workflow and should target a public prerelease channel once that lane is complete.
 
 ## Release Verification
 

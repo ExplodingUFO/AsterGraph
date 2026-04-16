@@ -2,6 +2,8 @@
 
 This document publishes the host-facing state contract behind AsterGraph history, save, and dirty behavior.
 
+For current alpha scope, known limitations, and stability notes around the public prerelease baseline, see [`alpha-status.md`](./alpha-status.md).
+
 It is not a second implementation guide. It is the behavior contract that the focused proof lane must keep true.
 
 ## Scope
