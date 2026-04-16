@@ -14,9 +14,9 @@
 ### Proof Ring And Release Gates
 
 - [x] **PROOF-01**: The official proof ring is explicitly defined around real, discoverable entry points for `PackageSmoke`, `ScaleSmoke`, focused regressions, and a minimal consumer host path
-- [ ] **REL-01**: Maintainer can run one official verification entry point that executes build, test, pack, smoke, and compatibility checks instead of stitching together README-only commands
-- [ ] **REL-02**: CI covers the supported `net8.0` / `net9.0` matrix with explicit build, smoke, and focused contract lanes so framework-specific regressions surface automatically
-- [ ] **REL-03**: Publishable package compatibility remains machine-guarded during release verification through public API and/or package validation checks
+- [x] **REL-01**: Maintainer can run one official verification entry point that executes build, test, pack, smoke, and compatibility checks instead of stitching together README-only commands
+- [x] **REL-02**: CI covers the supported `net8.0` / `net9.0` matrix with explicit build, smoke, and focused contract lanes so framework-specific regressions surface automatically
+- [x] **REL-03**: Publishable package compatibility remains machine-guarded during release verification through public API and/or package validation checks
 
 ### Consumer Adoption And State Contracts
 
@@ -57,9 +57,9 @@
 | ALIGN-01 | Phase 34 | Completed |
 | ALIGN-02 | Phase 34 | Completed |
 | PROOF-01 | Phase 34 | Completed |
-| REL-01 | Phase 35 | Pending |
-| REL-02 | Phase 35 | Pending |
-| REL-03 | Phase 35 | Pending |
+| REL-01 | Phase 35 | Completed |
+| REL-02 | Phase 35 | Completed |
+| REL-03 | Phase 35 | Completed |
 | CONS-01 | Phase 36 | Pending |
 | CONS-02 | Phase 36 | Pending |
 | HIST-01 | Phase 36 | Pending |
@@ -76,4 +76,4 @@
 
 ---
 *Requirements defined: 2026-04-16*
-*Last updated: 2026-04-16 after Phase 34 completion*
+*Last updated: 2026-04-16 after Phase 35 completion*

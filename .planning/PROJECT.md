@@ -52,6 +52,7 @@ Hosts can integrate only the graph-editor pieces they need, replace default UI a
 - Phase 32 moved more retained bootstrap, menu, and fragment orchestration out of `GraphEditorViewModel` while keeping the public factory/session/view-model entry points stable.
 - Phase 33 split the next kernel and canvas hotspots behind dedicated internal collaborators, and publishable-package XML-doc debt no longer hides behind a repo-wide `CS1591` blanket.
 - Phase 34 aligned README, host docs, top-level planning artifacts, and codebase maps around one v1.7 proof story, then restored `AsterGraph.HostSample` as the minimal consumer-facing host sample.
+- Phase 35 turned release validation into an explicit three-lane system: framework matrix, focused contract proof, and the full publish gate, while also making packed `HostSample` part of the real release proof path.
 - v1.7 is now scoped as a productization-closeout milestone: truth alignment, proof-ring closure, release automation, minimal consumer onboarding, history/save contract publication, and extension-boundary hardening.
 
 ## Requirements
@@ -100,11 +101,14 @@ Hosts can integrate only the graph-editor pieces they need, replace default UI a
 - ✓ Maintainers can now read README, ROADMAP, STATE, PROJECT, and current codebase maps without conflicting v1.7 proof-ring or milestone-state claims - v1.7 Phase 34
 - ✓ Consumer-facing docs no longer contradict themselves on undo/redo capability, target support, or proof-tool availability - v1.7 Phase 34
 - ✓ The official proof ring is now explicit around `eng/ci.ps1`, `HostSample`, `PackageSmoke`, `ScaleSmoke`, focused regressions, and the visual demo role split - v1.7 Phase 34
+- ✓ Maintainers can now run one official release entry point that executes focused contract proof, pack, packed consumer proof, smoke proof, coverage, and package validation - v1.7 Phase 35
+- ✓ CI now exposes explicit framework-matrix, contract-proof, and release-validation jobs across the supported `net8.0` / `net9.0` story - v1.7 Phase 35
+- ✓ Packed consumer restore now stays compatible with central package management because the four publishable AsterGraph packages all have tracked central package versions - v1.7 Phase 35
 
 ### Active
 
-- [ ] Consumers can discover and run one official proof and release path that covers build, test, pack, smoke, and compatibility verification across the supported framework matrix.
 - [ ] Consumers can follow a minimal host onboarding path with canonical runtime-only, default Avalonia UI, trust/discovery, and automation entry routes.
+- [ ] History/save/dirty semantics should be published as a product contract rather than remaining mostly implicit in tests and smoke markers.
 - [ ] Maintainers can keep shrinking compatibility and hotspot seams under explicit history/save, extension precedence, and compatibility-retirement contracts.
 
 ### Out of Scope
@@ -191,4 +195,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-16 after Phase 34 completion*
+*Last updated: 2026-04-16 after Phase 35 completion*
