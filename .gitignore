@@ -17,6 +17,14 @@ artifacts/packages/
 artifacts/test-results/
 artifacts/coverage/
 artifacts/*.log
+/build.log
+/NuGet.config
+/.planning/
+/AGENTS.md
+/CLAUDE.md
+.env
+.env.*
+*.log
 
 # OS noise
 Thumbs.db
