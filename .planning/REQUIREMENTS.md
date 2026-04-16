@@ -26,7 +26,7 @@
 
 ### Maintenance Guardrails
 
-- [ ] **GUARD-01**: Contributors can run one checked-in maintenance/refactor gate that exercises the hotspot-sensitive regression surface without manually curating commands
+- [x] **GUARD-01**: Contributors can run one checked-in maintenance/refactor gate that exercises the hotspot-sensitive regression surface without manually curating commands
 - [ ] **GUARD-02**: Publishable packages touched during hotspot refactors stop extending blanket public XML-doc debt, using real docs or scoped suppressions instead of relying on one repo-wide `CS1591` blanket forever
 
 ## Future Requirements
@@ -61,7 +61,7 @@
 | STATE-01 | Phase 31 | Pending |
 | STATE-02 | Phase 31 | Pending |
 | STATE-03 | Phase 31 | Pending |
-| GUARD-01 | Phase 30 | Pending |
+| GUARD-01 | Phase 30 | Complete |
 | GUARD-02 | Phase 33 | Pending |
 
 **Coverage:**

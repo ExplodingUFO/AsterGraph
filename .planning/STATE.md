@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.6
 milestone_name: Facade Convergence and Proof Guardrails
 status: executing
-stopped_at: Completed 30-01-PLAN.md
+stopped_at: Completed 30-02-PLAN.md
 last_updated: "2026-04-16T03:55:35.273Z"
 last_activity: 2026-04-16
 progress:
   total_phases: 4
   completed_phases: 0
   total_plans: 3
-  completed_plans: 1
-  percent: 33
+  completed_plans: 2
+  percent: 67
 ---
 
 # Project State
@@ -21,20 +21,21 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-04-16)
 
 **Core value:** Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
-**Current focus:** Phase 30 Wave 2 prep - milestone-history-and-refactor-gate-closeout
+**Current focus:** Phase 30 Wave 3 prep - milestone-history-and-refactor-gate-closeout
 
 ## Current Position
 
 Phase: 30 (milestone-history-and-refactor-gate-closeout) - EXECUTING
-Plan: 1 of 3 complete
+Plan: 2 of 3 complete
 Status: In progress
-Last activity: 2026-04-16 - completed 30-01 archive reconstruction
+Last activity: 2026-04-16 - completed 30-02 maintenance refactor gate
 
 ## Performance Metrics
 
 | Plan | Duration | Tasks | Files |
 |------|----------|-------|-------|
 | Phase 30 P01 | 1 min | 2 tasks | 7 files |
+| Phase 30 P02 | 1 min | 2 tasks | 1 file |
 
 ## Accumulated Context
 
@@ -58,6 +59,8 @@ New v1.6 framing decisions:
 - Continue phase numbering from 30 because the latest executed phase is 29.
 - [Phase 30]: Reconstruct the missing v1.4 archive from historical snapshot commits instead of rewriting current milestone docs. — The archive needed explicit git-backed evidence so the recovered roadmap and requirements keep their original framing.
 - [Phase 30]: Record later pre-v1.5 trust, discovery, staging, and proof follow-up in the v1.4 ledger notes instead of editing it back into the archived snapshots. — The delivered pre-v1.5 surface exceeded the original four-phase roadmap, so the ledger needed to separate original framing from later follow-up honestly.
+- [Phase 30]: Keep the maintenance guardrail inside `eng/ci.ps1` as a dedicated `maintenance` lane instead of introducing a second script path. — Contributors and docs now have one repo-local refactor gate to point at.
+- [Phase 30]: Keep `maintenance` narrower than `release` by running focused hotspot suites plus `ScaleSmoke`, without pack, `PackageSmoke`, coverage, or package validation. — The new lane stays fast enough for refactor loops while still exercising one runnable readiness proof.
 
 ### Pending Todos
 
@@ -66,6 +69,7 @@ None captured yet.
 ### Blockers/Concerns
 
 - `v1.4` archive files now exist, but the live roadmap/current-state closeout still needs synchronization in later Phase 30 plans.
+- The maintenance/refactor gate now exists in `eng/ci.ps1`, but README, Host Integration, and live planning docs still need to point at it in Plan 03.
 - The known `STATE_HISTORY_OK` mismatch remains a carried baseline issue until the new history/save semantics work closes it.
 - `GraphEditorViewModel`, `GraphEditorKernel`, and `NodeCanvas` remain the obvious internal hotspots even after the earlier coordinator extractions.
 
@@ -80,5 +84,5 @@ None captured yet.
 ## Session Continuity
 
 Last session: 2026-04-16T03:54:47.309Z
-Stopped at: Completed 30-01-PLAN.md
-Resume file: .planning/phases/30-milestone-history-and-refactor-gate-closeout/30-02-PLAN.md
+Stopped at: Completed 30-02-PLAN.md
+Resume file: .planning/phases/30-milestone-history-and-refactor-gate-closeout/30-03-PLAN.md
