@@ -2,6 +2,7 @@ using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Configuration;
 using AsterGraph.Editor.Diagnostics;
+using AsterGraph.Editor.Events;
 using AsterGraph.Editor.Services;
 
 namespace AsterGraph.Editor.ViewModels;
@@ -58,7 +59,11 @@ public sealed partial class GraphEditorViewModel
 
         string SetStatus(string key, string fallback, params object?[] arguments);
 
-        string MarkDirty(string status);
+        string MarkDirty(
+            string status,
+            GraphEditorDocumentChangeKind changeKind,
+            IReadOnlyList<string>? nodeIds = null,
+            IReadOnlyList<string>? connectionIds = null);
 
         void PublishRuntimeDiagnostic(string code, string operation, string message, GraphEditorDiagnosticSeverity severity, Exception? exception = null);
 

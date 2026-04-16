@@ -56,8 +56,10 @@ public sealed partial class GraphEditorViewModel
 
         void IGraphEditorNodeLayoutCoordinatorHost.CompleteLayoutChange(IReadOnlyList<NodeViewModel> nodes, string status)
         {
-            _owner.MarkDirty(status);
-            _owner.NotifyDocumentChanged(GraphEditorDocumentChangeKind.LayoutChanged, nodes.Select(node => node.Id).ToList());
+            _owner.MarkDirty(
+                status,
+                GraphEditorDocumentChangeKind.LayoutChanged,
+                nodeIds: nodes.Select(node => node.Id).ToList());
         }
     }
 }

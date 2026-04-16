@@ -1,4 +1,5 @@
 using AsterGraph.Core.Models;
+using AsterGraph.Editor.Events;
 using AsterGraph.Editor.Services;
 
 namespace AsterGraph.Editor.ViewModels;
@@ -65,6 +66,7 @@ internal sealed class GraphEditorFragmentTransferSupport
         var targetOrigin = _host.GetNextPasteOrigin();
         var nodeIdMap = new Dictionary<string, string>(StringComparer.Ordinal);
         var pastedNodes = new List<NodeViewModel>(fragment.Nodes.Count);
+        var pastedConnectionIds = new List<string>(fragment.Connections.Count);
 
         foreach (var copiedNode in fragment.Nodes)
         {
@@ -91,8 +93,10 @@ internal sealed class GraphEditorFragmentTransferSupport
                 continue;
             }
 
+            var connectionId = _host.CreateConnectionId();
+            pastedConnectionIds.Add(connectionId);
             _host.AddConnection(new ConnectionViewModel(
-                _host.CreateConnectionId(),
+                connectionId,
                 sourceNodeId,
                 copiedConnection.SourcePortId,
                 targetNodeId,
@@ -118,6 +122,10 @@ internal sealed class GraphEditorFragmentTransferSupport
         var status = pastedNodes.Count == 1
             ? _host.StatusText("editor.status.fragment.action.single", "{0} {1}.", actionPrefix, pastedNodes[0].Title)
             : _host.StatusText("editor.status.fragment.action.multiple", "{0} {1} nodes.", actionPrefix, pastedNodes.Count);
-        return _host.MarkDirty(status);
+        return _host.MarkDirty(
+            status,
+            GraphEditorDocumentChangeKind.FragmentPasted,
+            nodeIds: pastedNodes.Select(node => node.Id).ToList(),
+            connectionIds: pastedConnectionIds);
     }
 }

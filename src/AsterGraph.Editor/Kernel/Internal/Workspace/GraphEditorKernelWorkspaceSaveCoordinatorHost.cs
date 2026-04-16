@@ -37,6 +37,7 @@ internal sealed partial class GraphEditorKernel
         void IGraphEditorWorkspaceSaveCoordinatorHost.HandleWorkspaceSaveSucceeded(string signature, string statusMessage)
         {
             _owner._lastSavedDocumentSignature = signature;
+            _owner._historyService.ReplaceCurrent(_owner.CaptureHistoryState());
             _owner.CurrentStatusMessage = statusMessage;
             _owner.DiagnosticPublished?.Invoke(new GraphEditorDiagnostic(
                 "workspace.save.succeeded",

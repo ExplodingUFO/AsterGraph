@@ -298,8 +298,110 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost, IGrap
     public IReadOnlyList<GraphEditorCompatiblePortTargetSnapshot> GetCompatiblePortTargets(string sourceNodeId, string sourcePortId)
         => _compatibilityQueries.GetCompatiblePortTargets(_document, sourceNodeId, sourcePortId);
 
+    internal void CommitRetainedMutation(
+        GraphDocument document,
+        GraphEditorSelectionSnapshot selection,
+        string status,
+        GraphEditorDocumentChangeKind changeKind,
+        IReadOnlyList<string>? nodeIds = null,
+        IReadOnlyList<string>? connectionIds = null)
+    {
+        ArgumentNullException.ThrowIfNull(document);
+        ArgumentNullException.ThrowIfNull(selection);
+
+        var selectionChanged = ApplyRetainedDocumentSnapshot(document, selection);
+        CurrentStatusMessage = status;
+        _historyService.Push(CaptureHistoryState());
+
+        if (selectionChanged)
+        {
+            SelectionChanged?.Invoke(
+                this,
+                new GraphEditorSelectionChangedEventArgs(_selectedNodeIds.ToList(), _primarySelectedNodeId));
+        }
+
+        DocumentChanged?.Invoke(
+            this,
+                new GraphEditorDocumentChangedEventArgs(changeKind, nodeIds, connectionIds, CurrentStatusMessage));
+    }
+
+    internal void SaveRetainedWorkspace(GraphDocument document, GraphEditorSelectionSnapshot selection)
+    {
+        ArgumentNullException.ThrowIfNull(document);
+        ArgumentNullException.ThrowIfNull(selection);
+
+        var selectionChanged = ApplyRetainedDocumentSnapshot(document, selection);
+
+        if (!_behaviorOptions.Commands.Workspace.AllowSave)
+        {
+            CurrentStatusMessage = "Saving is disabled by host permissions.";
+            return;
+        }
+
+        try
+        {
+            _workspaceService.Save(document);
+            _lastSavedDocumentSignature = CreateDocumentSignature(document);
+            _historyService.ReplaceCurrent(CaptureHistoryState());
+            CurrentStatusMessage = $"Saved snapshot to {_workspaceService.WorkspacePath}.";
+            DiagnosticPublished?.Invoke(new GraphEditorDiagnostic(
+                "workspace.save.succeeded",
+                "workspace.save",
+                CurrentStatusMessage,
+                GraphEditorDiagnosticSeverity.Info));
+            if (selectionChanged)
+            {
+                SelectionChanged?.Invoke(this, new GraphEditorSelectionChangedEventArgs(_selectedNodeIds.ToList(), _primarySelectedNodeId));
+            }
+
+            DocumentChanged?.Invoke(
+                this,
+                new GraphEditorDocumentChangedEventArgs(GraphEditorDocumentChangeKind.WorkspaceSaved, statusMessage: CurrentStatusMessage));
+        }
+        catch (Exception exception)
+        {
+            CurrentStatusMessage = $"Save failed: {exception.Message}";
+            DiagnosticPublished?.Invoke(new GraphEditorDiagnostic(
+                "workspace.save.failed",
+                "workspace.save",
+                CurrentStatusMessage,
+                GraphEditorDiagnosticSeverity.Warning,
+                exception));
+            RecoverableFailureRaised?.Invoke(
+                this,
+                new GraphEditorRecoverableFailureEventArgs(
+                    "workspace.save.failed",
+                    "workspace.save",
+                    CurrentStatusMessage,
+                    exception));
+        }
+    }
+
     private GraphPoint GetViewportCenter()
         => _viewportCoordinator.GetViewportCenter(GetViewportSnapshot());
+
+    private bool ApplyRetainedDocumentSnapshot(GraphDocument document, GraphEditorSelectionSnapshot selection)
+    {
+        _document = CloneDocument(document);
+
+        var existingIds = _document.Nodes
+            .Select(node => node.Id)
+            .ToHashSet(StringComparer.Ordinal);
+        var selectedNodeIds = selection.SelectedNodeIds
+            .Where(existingIds.Contains)
+            .Distinct(StringComparer.Ordinal)
+            .ToList();
+        var primaryNodeId = !string.IsNullOrWhiteSpace(selection.PrimarySelectedNodeId)
+            && selectedNodeIds.Contains(selection.PrimarySelectedNodeId, StringComparer.Ordinal)
+            ? selection.PrimarySelectedNodeId
+            : selectedNodeIds.LastOrDefault();
+        var selectionChanged = !_selectedNodeIds.SequenceEqual(selectedNodeIds, StringComparer.Ordinal)
+            || !string.Equals(_primarySelectedNodeId, primaryNodeId, StringComparison.Ordinal);
+
+        _selectedNodeIds = selectedNodeIds;
+        _primarySelectedNodeId = primaryNodeId;
+        return selectionChanged;
+    }
 
     private void MarkDirty(
         string status,

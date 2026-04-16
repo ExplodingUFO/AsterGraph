@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Configuration;
+using AsterGraph.Editor.Events;
 using AsterGraph.Editor.Hosting;
 using AsterGraph.Editor.Localization;
 using AsterGraph.Editor.Menus;
@@ -138,10 +139,10 @@ public sealed partial class GraphEditorViewModel
             return;
         }
 
-        StatusMessage = status;
-        UpdateDirtyState(currentState.Signature);
-        PushHistoryState(currentState);
-        RaiseComputedPropertyChanges();
+        CommitRetainedMutation(
+            status,
+            GraphEditorDocumentChangeKind.LayoutChanged,
+            currentState.SelectedNodeIds);
     }
 
     /// <summary>
@@ -155,19 +156,13 @@ public sealed partial class GraphEditorViewModel
             return;
         }
 
-        if (_kernel.GetCapabilitySnapshot().CanUndo)
-        {
-            _kernel.Undo();
-            return;
-        }
-
-        if (!_historyService.TryUndo(out var state) || state is null)
+        if (!_sessionHost.GetCapabilitySnapshot().CanUndo)
         {
             SetStatus("editor.status.history.undo.none", "No more undo steps.");
             return;
         }
 
-        RestoreHistoryState(state, "Undo applied.");
+        _sessionHost.Undo();
     }
 
     /// <summary>
@@ -181,19 +176,13 @@ public sealed partial class GraphEditorViewModel
             return;
         }
 
-        if (_kernel.GetCapabilitySnapshot().CanRedo)
-        {
-            _kernel.Redo();
-            return;
-        }
-
-        if (!_historyService.TryRedo(out var state) || state is null)
+        if (!_sessionHost.GetCapabilitySnapshot().CanRedo)
         {
             SetStatus("editor.status.history.redo.none", "No more redo steps.");
             return;
         }
 
-        RestoreHistoryState(state, "Redo applied.");
+        _sessionHost.Redo();
     }
 
     /// <summary>
