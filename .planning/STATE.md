@@ -1,17 +1,17 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.9
-milestone_name: Public Launch Gate and CI Stabilization
-status: archived
-stopped_at: v1.9 archived
-last_updated: "2026-04-16T11:25:20.3165013Z"
-last_activity: 2026-04-16 -- Archived milestone v1.9
+milestone: v1.10
+milestone_name: Public Repo Hygiene and Documentation Surface
+status: active
+stopped_at: Defining requirements
+last_updated: "2026-04-16T15:34:02.0858865Z"
+last_activity: 2026-04-16 -- Milestone v1.10 started
 progress:
-  total_phases: 3
-  completed_phases: 3
-  total_plans: 9
-  completed_plans: 9
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -21,32 +21,29 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-04-16)
 
 **Core value:** Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
-**Current focus:** no active milestone; v1.9 is archived
+**Current focus:** v1.10 public repo hygiene and documentation surface cleanup
 
 ## Current Position
 
-Milestone: v1.9 Public Launch Gate and CI Stabilization
-Status: Archived
-Last activity: 2026-04-16 -- Archived milestone v1.9 after audit, requirements closeout, and phase cleanup
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-04-16 -- Milestone v1.10 started
 
-## Archive Summary
+## Accumulated Context
 
-- Archive files:
-  - `.planning/milestones/v1.9-ROADMAP.md`
-  - `.planning/milestones/v1.9-REQUIREMENTS.md`
-  - `.planning/milestones/v1.9-MILESTONE-AUDIT.md`
-  - `.planning/milestones/v1.9-phases/`
-- Completed phases: 42-44
-- Completed plans: 9/9
-- Audit verdict: passed, 10/10 milestone requirements satisfied
-- Latest shipped posture: hosted CI parity, valid prerelease workflow scheduling, packed `.NET 10` consumer proof, and one explicit public-launch checklist are all in the archived milestone surface
+- v1.9 is fully shipped and archived. Hosted CI parity, prerelease workflow validity, packed `.NET 10` consumer proof, and the public launch checklist are already part of the repo baseline.
+- The remaining concern is no longer SDK readiness. It is the public git surface: `.planning/`, `AGENTS.md`, `CLAUDE.md`, `build.log`, and the tracked real `NuGet.config` still read like internal workflow or local-environment residue.
+- The repo already has the public-facing docs and governance surface needed for a normal open-source alpha: `README.md`, `README.zh-CN.md`, `docs/en`, `docs/zh-CN`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`, `global.json`, `HostSample`, `PackageSmoke`, and `ScaleSmoke`.
+- `README.md` still explicitly points readers at `.planning` as maintainer context, which conflicts with the new requirement to keep workflow traces out of the public repo surface.
+- This milestone should preserve any useful high-level roadmap or launch guidance by moving it under `docs/` instead of simply deleting it with the internal planning directory.
 
 ## Next Action
 
-Start a fresh milestone framing pass with `$gsd-new-milestone`.
+Define scoped requirements for v1.10, then create the roadmap starting at Phase 45.
 
 ## Session Continuity
 
-Last session: 2026-04-16T11:25:20.3165013Z
-Stopped at: v1.9 archived
-Resume file: .planning/MILESTONES.md
+Last session: 2026-04-16T15:34:02.0858865Z
+Stopped at: Defining requirements
+Resume file: .planning/PROJECT.md

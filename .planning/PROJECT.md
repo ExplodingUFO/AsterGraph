@@ -2,15 +2,21 @@
 
 ## What This Is
 
-AsterGraph is a modular node-graph editor toolkit for .NET with a kernel-first editor runtime, explicit descriptor-based host contracts, and an Avalonia UI shell. The shipped baseline now covers a publishable four-package SDK boundary, plugin loading, automation execution, proof tools, release validation, hosted-runner CI parity, and one explicit public-launch checklist. v1.9 closed the last operational blockers that still separated the shipped public-alpha surface from a repo that can be opened confidently.
+AsterGraph is a modular node-graph editor toolkit for .NET with a kernel-first editor runtime, explicit descriptor-based host contracts, and an Avalonia UI shell. The shipped baseline now covers a publishable four-package SDK boundary, plugin loading, automation execution, proof tools, release validation, hosted-runner CI parity, and one explicit public-launch checklist. The next gap is no longer runtime capability. It is repo hygiene: the public repository surface still exposes internal planning and AI-workflow artifacts that should not ship as part of the public project contract.
 
 ## Core Value
 
 Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
 
-## Current Milestone
+## Current Milestone: v1.10 Public Repo Hygiene and Documentation Surface
 
-No active milestone. v1.9 is complete and archived; the repo is ready for the next milestone framing pass.
+**Goal:** Remove internal planning and AI-workflow traces from the public git surface, then move any still-needed high-level status and entry guidance onto normal public docs paths.
+
+**Target features:**
+- Remove tracked internal workflow artifacts from the public repo surface, including `.planning/`, `AGENTS.md`, `CLAUDE.md`, `build.log`, and the real `NuGet.config`.
+- Preserve any still-public roadmap, status, and launch guidance by migrating it into the normal docs tree instead of leaving it under `.planning/`.
+- Tighten README and bilingual doc entry points so public readers only see consumer-facing docs, samples, proof tools, and governance files.
+- Lock the repo against reincluding local workflow or sensitive files through explicit ignore rules and a checked-in hygiene verification pass.
 
 ## Latest Shipped Milestone: v1.9 Public Launch Gate and CI Stabilization
 
@@ -76,7 +82,8 @@ No active milestone. v1.9 is complete and archived; the repo is ready for the ne
 - Hosted `ci.yml` now passes on clean GitHub-hosted Windows and Linux runners, and the manual `release.yml` dispatch path also validates correctly without scheduling broken zero-job runs.
 - The packed consumer proof story now includes an explicit `.NET 10` HostSample validation marker in the checked-in release lane.
 - A short public-launch checklist now captures the remaining operational steps for opening the repo without re-describing already-shipped product work.
-- v1.9 is complete; the next step is a fresh milestone framing pass rather than more launch-gate closeout.
+- The remaining public-repo gap is presentation and hygiene: internal planning/history directories, AI-collaboration instruction files, and local-only artifacts are still tracked and visible in the repo root.
+- v1.10 is therefore a repo-surface cleanup milestone, not another SDK feature band.
 
 ## Requirements
 
@@ -137,7 +144,10 @@ No active milestone. v1.9 is complete and archived; the repo is ready for the ne
 
 ### Active
 
-- None. No active milestone is currently framed.
+- [ ] Public repo no longer tracks internal planning or AI-workflow artifacts such as `.planning/`, `AGENTS.md`, `CLAUDE.md`, `build.log`, or a real `NuGet.config`.
+- [ ] Public-facing roadmap, status, and launch material that should remain visible has been migrated into normal docs paths under `docs/en` and `docs/zh-CN`.
+- [ ] README and bilingual public docs point only at public project surfaces and stop referencing `.planning` as part of the published entry story.
+- [ ] `.gitignore` and repo verification rules block internal workflow files, local configs, and stray logs from being reintroduced.
 
 ### Out of Scope
 
@@ -154,6 +164,8 @@ v1.7 closed the consumer-closure milestone: the repo gained one clearer proof st
 v1.8 turned that technical baseline into a public-alpha-ready repo surface: explicit alpha versioning, governance files, canonical demo composition, bilingual public guides, localization proof, and public release automation with proof artifacts.
 
 v1.9 then closed the last operational gap exposed only after those workflows hit GitHub-hosted runners: clean-runner plugin proof drift, cache-cleanup fragility, prerelease workflow scheduling failure, and the missing explicit `.NET 10` consumer proof. The repo now has one coherent public-alpha launch posture instead of a local-only one.
+
+That still leaves one avoidable public-repo problem: the tracked file set still exposes internal planning/history directories plus AI-collaboration instruction files that do not help external consumers or contributors. This milestone exists to cut that public surface down to normal open-source project artifacts while preserving the public docs people still need.
 
 ## Constraints
 
@@ -192,10 +204,15 @@ v1.9 then closed the last operational gap exposed only after those workflows hit
 | Extend CI with Linux validation and public artifacts without replacing the existing Windows release lane | Public alpha consumers expect broader signal, but the current Windows release path remains the most complete packaging proof | ✓ Good |
 | Fix hosted-runner parity by correcting proof assumptions instead of adding a second CI-only validation path | Clean-runner failures should close against the real repo-local proof surface, not a parallel script or special-case test setup | ✓ Good |
 | Add the `.NET 10` consumer check to the existing packed HostSample lane | Forward-compatibility proof should stay on the same shipped consumer story as the rest of release validation | ✓ Good |
+| Treat `.planning` and AI-instruction files as internal workflow state rather than as part of the public repository contract | External consumers need normal docs and source layout, not execution traces or agent instructions | ✓ Proposed |
+| Preserve any public roadmap or status material by migrating it into `docs/` instead of deleting it outright | A smaller public surface should not come at the cost of losing the useful high-level project story | ✓ Proposed |
 
 ## Next Milestone Goals
 
-- No active milestone goals. Start the next milestone from a fresh requirements pass.
+- Remove tracked internal workflow artifacts from the public repo surface and keep them ignored going forward.
+- Move any still-public roadmap, status, and launch guidance into `docs/en` and `docs/zh-CN`.
+- Tighten README and bilingual doc entry points so public readers no longer depend on `.planning`.
+- Add one explicit hygiene verification pass that proves no internal, sensitive, or local-only files remain tracked.
 
 ## Archived Milestone Framing
 
@@ -231,4 +248,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-16 after v1.9 archive*
+*Last updated: 2026-04-16 for milestone v1.10 initialization*
