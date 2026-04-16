@@ -1,5 +1,38 @@
 # Milestones
 
+## v1.7 Consumer Closure / Release Hardening (Shipped: 2026-04-16)
+
+**Delivered:** AsterGraph closed the productization milestone by aligning repo narrative to the real shipped proof surface, turning release validation into an explicit contract/release gate system, publishing a minimal consumer route plus explicit state semantics, and documenting the remaining stability, retirement, and extension-precedence rules without reopening runtime-boundary drift.
+
+**Phases completed:** 34-37 (12 plans total)
+
+**Archive:** [ROADMAP](./milestones/v1.7-ROADMAP.md) | [REQUIREMENTS](./milestones/v1.7-REQUIREMENTS.md) | [AUDIT](./milestones/v1.7-MILESTONE-AUDIT.md)
+
+**Key accomplishments:**
+
+- Realigned README, planning artifacts, and codebase maps around one truthful v1.7 proof story and restored `AsterGraph.HostSample` as the minimal consumer-facing sample.
+- Added a focused `contract` lane, explicit CI job split, packed `HostSample` release proof, and a stronger release gate around contract proof, pack, smoke, coverage, and package validation.
+- Published a compact consumer route matrix and an explicit history/save/dirty contract tied back to the `contract` lane and `SCALE_HISTORY_CONTRACT_OK`.
+- Published stability tiers, compatibility-retirement guidance, extension-precedence rules, and lane ownership so maintainers can continue shrinking retained compatibility safely.
+
+**Stats:**
+
+- 64 files modified
+- 3,292 insertions and 128 deletions across docs, CI, planning artifacts, samples, and proof wiring
+- 4 phases and 12 plans
+- Timeline: 2026-04-16 to 2026-04-16
+
+**Git range:** `docs: start milestone v1.7 consumer closure and release hardening` → `docs: audit v1.7 milestone`
+
+**Notes:**
+
+- `v1.7-MILESTONE-AUDIT.md` passed with all 14 milestone requirements satisfied.
+- Remaining non-critical debt at close: Nyquist frontmatter normalization across `34-37` validation files.
+
+**What's next:** Start the next milestone from a fresh requirements pass instead of carrying the v1.7 closeout framing forward by default.
+
+---
+
 ## v1.6 Facade Convergence and Proof Guardrails (Shipped: 2026-04-16)
 
 **Delivered:** AsterGraph completed the contraction milestone by archiving stale planning history, locking one explicit retained history/save contract into proof, narrowing the retained facade and downstream hotspots without public API churn, and scoping XML-doc debt to the real remaining project boundary.

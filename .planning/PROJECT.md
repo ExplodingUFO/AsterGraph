@@ -8,17 +8,23 @@ AsterGraph is a modular node-graph editor toolkit for .NET with a kernel-first e
 
 Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
 
-## Current Milestone: v1.7 Consumer Closure / Release Hardening
+## Current Milestone: None (v1.7 archived 2026-04-16)
+
+**Goal:** Start the next milestone from a fresh requirements pass instead of carrying the v1.7 closeout framing forward by default.
+
+## Latest Shipped Milestone: v1.7 Consumer Closure / Release Hardening
+
+**Status:** Shipped and archived on 2026-04-16
 
 **Goal:** Turn the shipped runtime, plugin, automation, and proof surfaces into a tighter consumer-facing product story with one truthful narrative, one executable proof ring, stronger release automation, and clearer long-term extension contracts.
 
-**Target features:**
-- Align README, planning artifacts, and codebase maps to one current story about shipped capabilities, proof tools, and support boundaries.
-- Collapse the proof ring into a real executable system around `PackageSmoke`, `ScaleSmoke`, focused regressions, and a minimal consumer host path.
-- Automate build, test, pack, smoke, and compatibility verification across the supported target-framework matrix.
-- Close the consumer path and maintenance gaps around minimal host onboarding, history/save semantics, compatibility retirement, and extension precedence rules.
+**Delivered in v1.7:**
+- Aligned README, planning artifacts, and codebase maps around one current proof story and restored `AsterGraph.HostSample` as the minimal consumer-facing sample.
+- Added an explicit `contract` lane, clearer CI job split, packed `HostSample` release proof, and a stronger publish gate around contract proof, pack, smoke, coverage, and package validation.
+- Published a compact consumer route matrix plus an explicit history/save/dirty contract tied back to the proof ring.
+- Published stability tiers, compatibility-retirement guidance, extension-precedence rules, and lane ownership for future maintainability work.
 
-## Latest Shipped Milestone: v1.6 Facade Convergence and Proof Guardrails
+## Prior Shipped Milestone: v1.6 Facade Convergence and Proof Guardrails
 
 **Status:** Shipped and archived on 2026-04-16
 
@@ -30,7 +36,7 @@ Hosts can integrate only the graph-editor pieces they need, replace default UI a
 - Narrowed `GraphEditorViewModel` further toward a compatibility facade while keeping kernel-owned state canonical.
 - Continued hotspot reduction in `GraphEditorKernel` and `NodeCanvas`, then scoped `CS1591` debt to the real remaining project boundary.
 
-## Prior Shipped Milestone: v1.5 Runtime Boundary Cleanup and Quality Gates
+## Earlier Shipped Milestone: v1.5 Runtime Boundary Cleanup and Quality Gates
 
 **Shipped goal:** Reduce the remaining gap between the canonical runtime boundary and retained compatibility facades, then automate the validation and documentation surface that protects the SDK boundary.
 
@@ -45,7 +51,7 @@ Hosts can integrate only the graph-editor pieces they need, replace default UI a
 - Shipped packages remain `AsterGraph.Abstractions`, `AsterGraph.Core`, `AsterGraph.Editor`, and `AsterGraph.Avalonia`.
 - Canonical composition is kernel-first through `AsterGraphEditorFactory.CreateSession(...)` and `AsterGraphEditorFactory.Create(...)`, without `GraphEditorViewModel` as the canonical runtime state owner.
 - Plugin loading and automation execution already ship on the canonical session boundary and are backed by focused regressions plus `PackageSmoke` and `ScaleSmoke`.
-- The repo already carries `.editorconfig`, `Directory.Packages.props`, `tests/coverage.runsettings`, `.github/workflows/ci.yml`, and `eng/ci.ps1`; v1.6 should build on those guardrails rather than recreate them.
+- The repo already carries `.editorconfig`, `Directory.Packages.props`, `tests/coverage.runsettings`, `.github/workflows/ci.yml`, and `eng/ci.ps1`; future milestones should build on those guardrails rather than recreate them.
 - `v1.4` now has checked-in archive files under `.planning/milestones/` plus a retrospective milestone-ledger entry, so milestone history no longer depends on stale phase directories alone.
 - `eng/ci.ps1 -Lane maintenance` now exists as the hotspot-sensitive refactor gate over focused editor regressions plus `ScaleSmoke`.
 - Phase 31 closed the carried history/save concern: retained undo/redo/dirty/save semantics now run on one kernel-owned authority, focused suites cover the interaction/save boundary directly, and `ScaleSmoke` emits `SCALE_HISTORY_CONTRACT_OK`.
@@ -55,7 +61,7 @@ Hosts can integrate only the graph-editor pieces they need, replace default UI a
 - Phase 35 turned release validation into an explicit three-lane system: framework matrix, focused contract proof, and the full publish gate, while also making packed `HostSample` part of the real release proof path.
 - Phase 36 added a compact consumer route matrix and published the explicit history/save/dirty contract, so consumers no longer have to reverse-engineer those rules from tests and long-form docs.
 - Phase 37 published explicit stability tiers, compatibility-retirement guidance, extension-precedence rules, and lane ownership so maintainers can keep shrinking the retained surface without reopening boundary drift.
-- v1.7 is now scoped as a productization-closeout milestone: truth alignment, proof-ring closure, release automation, minimal consumer onboarding, history/save contract publication, and extension-boundary hardening.
+- v1.7 is archived; the next step is fresh milestone framing rather than continuing to mutate this closeout milestone in place.
 
 ## Requirements
 
@@ -112,7 +118,7 @@ Hosts can integrate only the graph-editor pieces they need, replace default UI a
 
 ### Active
 
-- [ ] Audit and archive v1.7 so the live planning state and milestone history reflect the completed productization-closeout milestone.
+- [ ] Start the next milestone from a fresh requirements pass.
 
 ### Out of Scope
 

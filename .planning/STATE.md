@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.7
 milestone_name: Consumer Closure / Release Hardening
-status: planning
-stopped_at: Phase 37 completed
-last_updated: "2026-04-16T12:30:00.0000000Z"
-last_activity: 2026-04-16 -- Completed Phase 37 maintainability and extension contract hardening
+status: archived
+stopped_at: v1.7 archived
+last_updated: "2026-04-16T13:00:00.0000000Z"
+last_activity: 2026-04-16 -- Archived v1.7 consumer closure and release hardening
 progress:
   total_phases: 4
   completed_phases: 4
@@ -21,14 +21,14 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-04-16)
 
 **Core value:** Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
-**Current focus:** v1.7 audit and archive
+**Current focus:** no active milestone - ready for fresh framing
 
 ## Current Position
 
-Phase: milestone closeout - READY TO AUDIT
-Plan: all milestone phases complete
-Status: Planning
-Last activity: 2026-04-16 -- Completed Phase 37 maintainability and extension contract hardening
+Phase: milestone archived
+Plan: v1.7 complete
+Status: Archived
+Last activity: 2026-04-16 -- Archived v1.7 consumer closure and release hardening
 
 ## Performance Metrics
 
@@ -99,9 +99,7 @@ None captured yet.
 
 Current milestone-close work:
 
-- audit v1.7 against all 14 milestone requirements
-- archive the milestone into checked-in milestone snapshots
-- clean up phase directories after archive
+- completed
 
 ### Quick Tasks Completed
 
@@ -114,5 +112,5 @@ Current milestone-close work:
 ## Session Continuity
 
 Last session: 2026-04-16T06:20:00.0000000Z
-Stopped at: Phase 37 completed
+Stopped at: v1.7 archived
 Resume file: .planning/ROADMAP.md
