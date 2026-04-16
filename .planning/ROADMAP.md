@@ -75,10 +75,10 @@ v1.6 deliberately avoids reopening already-shipped baseline work such as `.edito
 | Phase | Requirements | Status |
 |-------|--------------|--------|
 | 30. Milestone History And Refactor Gate Closeout | CLOSE-01, CLOSE-02, GUARD-01 | Complete |
-| 31. History And Save Semantic Closure | STATE-01, STATE-02, STATE-03 | Planned |
+| 31. History And Save Semantic Closure | STATE-01, STATE-02, STATE-03 | Ready to execute |
 | 32. GraphEditorViewModel Facade Convergence | FACADE-01, FACADE-02 | Planned |
 | 33. Kernel, Canvas, And Guardrail Follow-Through | FACADE-03, FACADE-04, GUARD-02 | Planned |
 
 ## Next Action
 
-**Next action:** plan Phase 31 with `$gsd-plan-phase 31`
+**Next action:** execute Phase 31 with `$gsd-execute-phase 31`
