@@ -15,6 +15,7 @@ Hosts can integrate only the graph-editor pieces they need, replace default UI a
 **Target features:**
 - Make `ci.yml` pass on clean GitHub-hosted Windows and Linux runners without relying on locally prebuilt Debug plugin artifacts.
 - Fix the tag-driven prerelease workflow so it evaluates and schedules jobs correctly while staying secret-gated for real publishing.
+- Add one checked-in `.NET 10` compatibility proof on the consumer path so launch readiness is not limited to `net8.0` / `net9.0` validation alone.
 - Publish one short launch checklist and tighten public docs around the real remaining blockers instead of replaying work already shipped in v1.8.
 
 ## Latest Shipped Milestone: v1.8 Public Alpha Readiness and Canonical Demo
@@ -67,6 +68,7 @@ Hosts can integrate only the graph-editor pieces they need, replace default UI a
 - Public governance files, bilingual docs, a demo language toggle, and explicit alpha-status guidance now exist as part of the shipped repo surface.
 - CI now exposes concurrency, NuGet cache, Linux validation, uploaded proof artifacts, and a tag-driven prerelease workflow while keeping the Windows release lane authoritative.
 - The remaining blockers were exposed only after pushing v1.8 to GitHub-hosted runners: plugin proof tests still assume Debug test-plugin outputs, `actions/setup-dotnet` cache cleanup can fail when the default global package folder does not exist, and `release.yml` is currently failing before any jobs schedule.
+- The launch gate should also include one explicit `.NET 10` consumer compatibility proof instead of assuming forward compatibility from lower-target package assets alone.
 - v1.9 is therefore a launch-gate stabilization pass, not another feature milestone.
 
 ## Requirements

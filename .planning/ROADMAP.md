@@ -21,6 +21,7 @@ The first GitHub-hosted runs after archiving v1.8 exposed three concrete gaps th
 - plugin proof tests still bind to `tests/AsterGraph.TestPlugins/bin/Debug/net9.0/...` on clean runners
 - `actions/setup-dotnet` cache cleanup can fail because the expected global package path does not exist
 - `.github/workflows/release.yml` is failing before any jobs schedule
+- there is still no explicit `.NET 10` consumer compatibility proof in the checked-in validation story
 
 v1.9 exists to close those blockers with the smallest possible scope, then publish one explicit public-launch checklist instead of reopening feature work.
 
@@ -50,11 +51,12 @@ v1.9 exists to close those blockers with the smallest possible scope, then publi
 ### Phase 43: Workflow And Cache Stabilization
 **Goal**: Fix the `.NET` cache cleanup failure and make the prerelease workflow valid, tag-scoped, and operationally clear.
 **Depends on**: Phase 42
-**Requirements**: CI-03, REL-01, REL-02, REL-03
+**Requirements**: CI-03, CI-04, REL-01, REL-02, REL-03
 **Success Criteria**:
 1. `actions/setup-dotnet` no longer fails during post-job cleanup on successful matrix jobs.
 2. `.github/workflows/release.yml` evaluates successfully and only schedules work on tags or manual dispatch.
-3. Branch CI and tag prerelease publication have one explicit, non-contradictory operational story.
+3. One checked-in `.NET 10` consumer compatibility proof runs from the same validation story as the other launch gates.
+4. Branch CI and tag prerelease publication have one explicit, non-contradictory operational story.
 **Plans**: 3 plans
 
 ### Phase 44: Public Launch Checklist And Entry Tightening
@@ -72,7 +74,7 @@ v1.9 exists to close those blockers with the smallest possible scope, then publi
 | Phase | Requirements | Status |
 |-------|--------------|--------|
 | 42. Clean Runner CI Parity | CI-01, CI-02 | Planned |
-| 43. Workflow And Cache Stabilization | CI-03, REL-01, REL-02, REL-03 | Planned |
+| 43. Workflow And Cache Stabilization | CI-03, CI-04, REL-01, REL-02, REL-03 | Planned |
 | 44. Public Launch Checklist And Entry Tightening | OSS-01, OSS-02, OSS-03 | Planned |
 
 ## Next Action

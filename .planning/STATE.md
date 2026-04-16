@@ -37,6 +37,7 @@ Last activity: 2026-04-16 -- Started milestone v1.9 for launch-gate stabilizatio
   - plugin proof tests still resolve `AsterGraph.TestPlugins` from `bin/Debug/net9.0`
   - `actions/setup-dotnet` cache cleanup can fail because the default global package directory is absent
   - `.github/workflows/release.yml` is failing before any jobs schedule
+- The next launch-gate pass should also add one checked-in `.NET 10` compatibility proof through the consumer path instead of assuming forward compatibility from package targets alone.
 - Minimal public-open readiness therefore means closing those operational blockers, not reopening feature scope that v1.8 already shipped.
 
 ## Next Action

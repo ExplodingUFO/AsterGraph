@@ -11,6 +11,7 @@
 - [ ] **CI-01**: `ci.yml` passes on clean GitHub-hosted Windows and Linux runners for the default branch without depending on locally prebuilt Debug plugin artifacts or other residue from developer machines
 - [ ] **CI-02**: Plugin discovery, loading, inspection, proof-ring, and package-staging tests resolve `AsterGraph.TestPlugins` payloads from deterministic built outputs for the active framework/configuration instead of hard-coded `bin/Debug/net9.0` paths
 - [ ] **CI-03**: The .NET package-cache strategy used by GitHub Actions no longer fails during post-job cleanup when the default global package path does not exist on disk
+- [ ] **CI-04**: The repo includes one checked-in `.NET 10` compatibility proof on the consumer path, so a clean runner verifies that `HostSample` or an equivalent packaged-consumer route still works under `net10.0`
 
 ### Release Workflow Closure
 
@@ -49,6 +50,7 @@
 | CI-01 | Phase 42 | Planned |
 | CI-02 | Phase 42 | Planned |
 | CI-03 | Phase 43 | Planned |
+| CI-04 | Phase 43 | Planned |
 | REL-01 | Phase 43 | Planned |
 | REL-02 | Phase 43 | Planned |
 | REL-03 | Phase 43 | Planned |
@@ -57,8 +59,8 @@
 | OSS-03 | Phase 44 | Planned |
 
 **Coverage:**
-- milestone requirements: 9 total
-- mapped to phases: 9
+- milestone requirements: 10 total
+- mapped to phases: 10
 - unmapped: 0
 
 ---
