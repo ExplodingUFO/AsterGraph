@@ -1,3 +1,4 @@
+using System.IO;
 using System.Reflection;
 using AsterGraph.Abstractions.Catalog;
 using AsterGraph.Abstractions.Definitions;
@@ -81,9 +82,10 @@ public sealed class GraphEditorPluginContractsTests
     [Fact]
     public void GraphEditorPluginPackageDiscoverySource_UsesStableDirectoryAndArchiveDefaults()
     {
-        var source = new GraphEditorPluginPackageDiscoverySource(@"C:\packages\plugins");
+        const string packageDirectory = @"C:\packages\plugins";
+        var source = new GraphEditorPluginPackageDiscoverySource(packageDirectory);
 
-        Assert.Equal(@"C:\packages\plugins", source.DirectoryPath);
+        Assert.Equal(CanonicalPath(packageDirectory), source.DirectoryPath);
         Assert.Equal("*.nupkg", source.SearchPattern);
         Assert.False(source.IncludeSubdirectories);
     }
@@ -91,6 +93,8 @@ public sealed class GraphEditorPluginContractsTests
     [Fact]
     public void GraphEditorPluginRegistration_SupportsDirectAssemblyAndPackageInputs_WithOptionalManifestMetadata()
     {
+        const string assemblyPath = @"C:\plugins\sample\SamplePlugin.dll";
+        const string packagePath = @"C:\packages\sample\SamplePlugin.1.2.3.nupkg";
         var plugin = new TestPlugin();
         var provenanceEvidence = new GraphEditorPluginProvenanceEvidence(
             new GraphEditorPluginPackageIdentity("AsterGraph.SamplePlugin", "1.2.3"),
@@ -112,8 +116,8 @@ public sealed class GraphEditorPluginContractsTests
             capabilitySummary: "node-definitions, menus, localization");
 
         var direct = GraphEditorPluginRegistration.FromPlugin(plugin, manifest, provenanceEvidence);
-        var assembly = GraphEditorPluginRegistration.FromAssemblyPath(@"C:\plugins\sample\SamplePlugin.dll", "Sample.Plugin", manifest, provenanceEvidence);
-        var package = GraphEditorPluginRegistration.FromPackagePath(@"C:\packages\sample\SamplePlugin.1.2.3.nupkg", manifest, provenanceEvidence);
+        var assembly = GraphEditorPluginRegistration.FromAssemblyPath(assemblyPath, "Sample.Plugin", manifest, provenanceEvidence);
+        var package = GraphEditorPluginRegistration.FromPackagePath(packagePath, manifest, provenanceEvidence);
 
         Assert.Same(plugin, direct.Plugin);
         Assert.Null(direct.AssemblyPath);
@@ -126,7 +130,7 @@ public sealed class GraphEditorPluginContractsTests
         Assert.False(direct.IsPackageRegistration);
 
         Assert.Null(assembly.Plugin);
-        Assert.Equal(@"C:\plugins\sample\SamplePlugin.dll", assembly.AssemblyPath);
+        Assert.Equal(CanonicalPath(assemblyPath), assembly.AssemblyPath);
         Assert.Null(assembly.PackagePath);
         Assert.Equal("Sample.Plugin", assembly.PluginTypeName);
         Assert.Equal(manifest, assembly.Manifest);
@@ -137,7 +141,7 @@ public sealed class GraphEditorPluginContractsTests
 
         Assert.Null(package.Plugin);
         Assert.Null(package.AssemblyPath);
-        Assert.Equal(@"C:\packages\sample\SamplePlugin.1.2.3.nupkg", package.PackagePath);
+        Assert.Equal(CanonicalPath(packagePath), package.PackagePath);
         Assert.Null(package.PluginTypeName);
         Assert.Equal(manifest, package.Manifest);
         Assert.Equal(provenanceEvidence, package.ProvenanceEvidence);
@@ -149,6 +153,8 @@ public sealed class GraphEditorPluginContractsTests
     [Fact]
     public void GraphEditorPluginRegistration_FromStagedPackage_PreservesPackageOriginAndAssemblyLoadInputs()
     {
+        const string packagePath = @"C:\packages\staged\AsterGraph.StagedPlugin.2.0.0.nupkg";
+        const string assemblyPath = @"C:\staging\AsterGraph.StagedPlugin\2.0.0\AsterGraph.StagedPlugin.dll";
         var provenanceEvidence = new GraphEditorPluginProvenanceEvidence(
             new GraphEditorPluginPackageIdentity("AsterGraph.StagedPlugin", "2.0.0"),
             new GraphEditorPluginSignatureEvidence(GraphEditorPluginSignatureStatus.Valid));
@@ -163,23 +169,23 @@ public sealed class GraphEditorPluginContractsTests
             version: "2.0.0");
         var stage = new GraphEditorPluginStageSnapshot(
             GraphEditorPluginStageOutcome.Staged,
-            @"C:\packages\staged\AsterGraph.StagedPlugin.2.0.0.nupkg",
+            packagePath,
             provenanceEvidence.PackageIdentity,
             stagingDirectory: @"C:\staging\AsterGraph.StagedPlugin\2.0.0",
-            mainAssemblyPath: @"C:\staging\AsterGraph.StagedPlugin\2.0.0\AsterGraph.StagedPlugin.dll",
+            mainAssemblyPath: assemblyPath,
             pluginTypeName: "Tests.Plugin.Staged");
 
         var registration = GraphEditorPluginRegistration.FromStagedPackage(
-            @"C:\packages\staged\AsterGraph.StagedPlugin.2.0.0.nupkg",
-            @"C:\staging\AsterGraph.StagedPlugin\2.0.0\AsterGraph.StagedPlugin.dll",
+            packagePath,
+            assemblyPath,
             "Tests.Plugin.Staged",
             manifest,
             provenanceEvidence,
             stage);
 
         Assert.Null(registration.Plugin);
-        Assert.Equal(@"C:\packages\staged\AsterGraph.StagedPlugin.2.0.0.nupkg", registration.PackagePath);
-        Assert.Equal(@"C:\staging\AsterGraph.StagedPlugin\2.0.0\AsterGraph.StagedPlugin.dll", registration.AssemblyPath);
+        Assert.Equal(CanonicalPath(packagePath), registration.PackagePath);
+        Assert.Equal(CanonicalPath(assemblyPath), registration.AssemblyPath);
         Assert.Equal("Tests.Plugin.Staged", registration.PluginTypeName);
         Assert.Equal(manifest, registration.Manifest);
         Assert.Equal(provenanceEvidence, registration.ProvenanceEvidence);
@@ -227,12 +233,14 @@ public sealed class GraphEditorPluginContractsTests
     [Fact]
     public void GraphEditorPluginCandidateSnapshot_ExposesCanonicalDiscoveryMetadataAndPreLoadEvaluationState()
     {
+        const string assemblyPath = @"C:\plugins\candidate\DiscoveryCandidate.dll";
+        const string packagePath = @"C:\packages\candidate\DiscoveryCandidate.1.2.3.nupkg";
         var manifest = new GraphEditorPluginManifest(
             "tests.discovery.candidate",
             "Discovery Candidate",
             new GraphEditorPluginManifestProvenance(
                 GraphEditorPluginManifestSourceKind.AssemblyPath,
-                @"C:\plugins\candidate\DiscoveryCandidate.dll"),
+                assemblyPath),
             version: "1.2.3");
         var compatibility = new GraphEditorPluginCompatibilityEvaluation(
             GraphEditorPluginCompatibilityStatus.Compatible,
@@ -258,14 +266,14 @@ public sealed class GraphEditorPluginContractsTests
             compatibility,
             trust,
             provenanceEvidence,
-            assemblyPath: @"C:\plugins\candidate\DiscoveryCandidate.dll",
+            assemblyPath: assemblyPath,
             pluginTypeName: "Tests.Plugin.DiscoveryCandidate",
-            packagePath: @"C:\packages\candidate\DiscoveryCandidate.1.2.3.nupkg");
+            packagePath: packagePath);
 
         Assert.Equal(GraphEditorPluginCandidateSourceKind.PackageDirectory, snapshot.SourceKind);
         Assert.Equal(@"C:\plugins\candidate", snapshot.Source);
-        Assert.Equal(@"C:\plugins\candidate\DiscoveryCandidate.dll", snapshot.AssemblyPath);
-        Assert.Equal(@"C:\packages\candidate\DiscoveryCandidate.1.2.3.nupkg", snapshot.PackagePath);
+        Assert.Equal(CanonicalPath(assemblyPath), snapshot.AssemblyPath);
+        Assert.Equal(CanonicalPath(packagePath), snapshot.PackagePath);
         Assert.Equal("Tests.Plugin.DiscoveryCandidate", snapshot.PluginTypeName);
         Assert.Equal(manifest, snapshot.Manifest);
         Assert.Equal(compatibility, snapshot.Compatibility);
@@ -276,12 +284,13 @@ public sealed class GraphEditorPluginContractsTests
     [Fact]
     public void GraphEditorPluginLoadSnapshot_ExposesCanonicalPackageAwareInspectionMetadata()
     {
+        const string packagePath = @"C:\packages\candidate\LoadCandidate.1.2.3.nupkg";
         var manifest = new GraphEditorPluginManifest(
             "tests.load.package",
             "Package Load Snapshot",
             new GraphEditorPluginManifestProvenance(
                 GraphEditorPluginManifestSourceKind.PackageArchive,
-                @"C:\packages\candidate\LoadCandidate.1.2.3.nupkg"),
+                packagePath),
             version: "1.2.3");
         var compatibility = new GraphEditorPluginCompatibilityEvaluation(
             GraphEditorPluginCompatibilityStatus.Unknown,
@@ -290,7 +299,7 @@ public sealed class GraphEditorPluginContractsTests
         var trust = GraphEditorPluginTrustEvaluation.ImplicitAllow();
         var stage = new GraphEditorPluginStageSnapshot(
             GraphEditorPluginStageOutcome.CacheHit,
-            @"C:\packages\candidate\LoadCandidate.1.2.3.nupkg",
+            packagePath,
             new GraphEditorPluginPackageIdentity("AsterGraph.LoadCandidate", "1.2.3"),
             stagingDirectory: @"C:\staging\LoadCandidate\1.2.3",
             mainAssemblyPath: @"C:\staging\LoadCandidate\1.2.3\LoadCandidate.dll",
@@ -298,7 +307,7 @@ public sealed class GraphEditorPluginContractsTests
             usedCache: true);
         var snapshot = new GraphEditorPluginLoadSnapshot(
             GraphEditorPluginLoadSourceKind.Package,
-            @"C:\packages\candidate\LoadCandidate.1.2.3.nupkg",
+            packagePath,
             GraphEditorPluginLoadStatus.Failed,
             GraphEditorPluginContributionSummarySnapshot.Empty,
             manifest,
@@ -307,12 +316,12 @@ public sealed class GraphEditorPluginContractsTests
             GraphEditorPluginProvenanceEvidence.NotProvided,
             activationAttempted: false,
             failureMessage: "Package registrations are not supported yet.",
-            packagePath: @"C:\packages\candidate\LoadCandidate.1.2.3.nupkg",
+            packagePath: packagePath,
             stage: stage);
 
         Assert.Equal(GraphEditorPluginLoadSourceKind.Package, snapshot.SourceKind);
-        Assert.Equal(@"C:\packages\candidate\LoadCandidate.1.2.3.nupkg", snapshot.Source);
-        Assert.Equal(@"C:\packages\candidate\LoadCandidate.1.2.3.nupkg", snapshot.PackagePath);
+        Assert.Equal(packagePath, snapshot.Source);
+        Assert.Equal(CanonicalPath(packagePath), snapshot.PackagePath);
         Assert.Equal(stage, snapshot.Stage);
         Assert.False(snapshot.ActivationAttempted);
         Assert.Equal(GraphEditorPluginLoadStatus.Failed, snapshot.Status);
@@ -361,6 +370,7 @@ public sealed class GraphEditorPluginContractsTests
     [Fact]
     public void GraphEditorPluginManifestSourceCandidate_SupportsOptionalProvenanceEvidence()
     {
+        const string assemblyPath = @"C:\plugins\manifest\ManifestSource.dll";
         var manifest = new GraphEditorPluginManifest(
             "tests.manifest-source.candidate",
             "Manifest Source Candidate",
@@ -379,13 +389,13 @@ public sealed class GraphEditorPluginContractsTests
                 timestampAuthority: "tests.timestamp"));
         var candidate = new GraphEditorPluginManifestSourceCandidate(
             "tests.manifest-source",
-            @"C:\plugins\manifest\ManifestSource.dll",
+            assemblyPath,
             manifest,
             "Tests.Plugin.ManifestSource",
             provenanceEvidence);
 
         Assert.Equal("tests.manifest-source", candidate.Source);
-        Assert.Equal(@"C:\plugins\manifest\ManifestSource.dll", candidate.AssemblyPath);
+        Assert.Equal(CanonicalPath(assemblyPath), candidate.AssemblyPath);
         Assert.Equal(manifest, candidate.Manifest);
         Assert.Equal("Tests.Plugin.ManifestSource", candidate.PluginTypeName);
         Assert.Equal(provenanceEvidence, candidate.ProvenanceEvidence);
@@ -531,6 +541,9 @@ public sealed class GraphEditorPluginContractsTests
             || fullName.Contains("GraphEditorViewModel", StringComparison.Ordinal)
             || fullName.Contains("NodeViewModel", StringComparison.Ordinal);
     }
+
+    private static string CanonicalPath(string path)
+        => Path.GetFullPath(path);
 
     private sealed class TestPlugin : IGraphEditorPlugin
     {
