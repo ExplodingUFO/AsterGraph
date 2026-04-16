@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.6
 milestone_name: Facade Convergence and Proof Guardrails
-status: executing
-stopped_at: Phase 32 planning complete
-last_updated: "2026-04-16T05:19:11.3745918Z"
-last_activity: 2026-04-16 -- Phase 32 planning complete
+status: planning
+stopped_at: Phase 32 complete
+last_updated: "2026-04-16T06:24:00.0000000Z"
+last_activity: 2026-04-16 -- Phase 32 complete
 progress:
   total_phases: 4
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 9
-  completed_plans: 6
+  completed_plans: 9
   percent: 75
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-04-16)
 
 **Core value:** Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
-**Current focus:** Phase 32 ready to execute - grapheditorviewmodel-facade-convergence
+**Current focus:** Phase 33 ready to plan - kernel-canvas-and-guardrail-follow-through
 
 ## Current Position
 
-Phase: 32 (grapheditorviewmodel-facade-convergence) - READY TO EXECUTE
-Plan: 3 plans ready
-Status: Ready to execute
-Last activity: 2026-04-16 -- Phase 32 planning complete
+Phase: 33 (kernel-canvas-and-guardrail-follow-through) - READY TO PLAN
+Plan: not planned yet
+Status: Ready to plan
+Last activity: 2026-04-16 -- Phase 32 complete
 
 ## Performance Metrics
 
@@ -67,6 +67,8 @@ New v1.6 framing decisions:
 - [Phase 31]: `ScaleSmoke` and proof-ring tests should expose explicit history-contract pass/fail output instead of a carried known-mismatch tuple. — Planning notes were no longer an acceptable substitute for machine-checkable proof.
 - [Phase 32 planning]: The next highest-value facade contraction is bootstrap plus retained-only compatibility/fragment orchestration, not kernel or canvas refactoring. — `GraphEditorViewModel` is still the composition hotspot, while fragment/menu collaborators already exist and can be lifted cleanly behind the existing host pattern.
 - [Phase 32 planning]: Phase 32 must keep public retained entry points stable and use focused menu/fragment/service-seam parity tests as the main guardrail. — The remaining risk is internal drift under a supported public compatibility surface, not missing capability.
+- [Phase 32]: Keep retained public methods as thin delegations while moving bootstrap, descriptor assembly, context-menu compatibility, and fragment orchestration into narrower internal collaborators. — This materially reduces `GraphEditorViewModel` ownership without reopening public factory/session/view-model APIs.
+- [Phase 32]: Promote retained command collaborators to namespace-level internal types while keeping private host adapters in `GraphEditorViewModel`. — The extracted services are now easier to change in isolation and still preserve kernel-owned runtime authority.
 
 ### Pending Todos
 
@@ -74,7 +76,7 @@ None captured yet.
 
 ### Blockers/Concerns
 
-- `GraphEditorViewModel`, `GraphEditorKernel`, and `NodeCanvas` remain the obvious internal hotspots even after the earlier coordinator extractions.
+- `GraphEditorKernel` and `NodeCanvas` remain the next obvious internal hotspots after the retained facade contraction completed.
 - Publishable-package XML doc debt still needs the scoped cleanup planned for Phase 33.
 
 ### Quick Tasks Completed
@@ -87,6 +89,6 @@ None captured yet.
 
 ## Session Continuity
 
-Last session: 2026-04-16T05:19:11.3745918Z
-Stopped at: Phase 32 planning complete
-Resume file: .planning/phases/32-grapheditorviewmodel-facade-convergence/32-01-PLAN.md
+Last session: 2026-04-16T06:24:00.0000000Z
+Stopped at: Phase 32 complete
+Resume file: .planning/ROADMAP.md

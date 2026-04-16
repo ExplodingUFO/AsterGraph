@@ -13,8 +13,8 @@
 
 ### Runtime Facade Convergence
 
-- [ ] **FACADE-01**: Host can keep using the current public factory, session, and retained `GraphEditorViewModel` / `GraphEditorView` entry points while hotspot refactors move remaining orchestration out of `GraphEditorViewModel`
-- [ ] **FACADE-02**: Internal runtime mutations, selection flow, and menu/projection orchestration that move during refactoring continue to execute against kernel-owned state instead of introducing a second mutable runtime owner
+- [x] **FACADE-01**: Host can keep using the current public factory, session, and retained `GraphEditorViewModel` / `GraphEditorView` entry points while hotspot refactors move remaining orchestration out of `GraphEditorViewModel`
+- [x] **FACADE-02**: Internal runtime mutations, selection flow, and menu/projection orchestration that move during refactoring continue to execute against kernel-owned state instead of introducing a second mutable runtime owner
 - [ ] **FACADE-03**: Contributors can change one `GraphEditorViewModel` hotspot collaborator at a time because the remaining responsibilities are split into narrower internal seams with focused tests
 - [ ] **FACADE-04**: Contributors can continue hotspot reduction in `GraphEditorKernel` and `NodeCanvas` without changing public embedding behavior because cross-cutting responsibilities are isolated behind internal coordinators or helpers
 
@@ -54,8 +54,8 @@
 |-------------|-------|--------|
 | CLOSE-01 | Phase 30 | Complete |
 | CLOSE-02 | Phase 30 | Complete |
-| FACADE-01 | Phase 32 | Pending |
-| FACADE-02 | Phase 32 | Pending |
+| FACADE-01 | Phase 32 | Complete |
+| FACADE-02 | Phase 32 | Complete |
 | FACADE-03 | Phase 33 | Pending |
 | FACADE-04 | Phase 33 | Pending |
 | STATE-01 | Phase 31 | Complete |
@@ -71,4 +71,4 @@
 
 ---
 *Requirements defined: 2026-04-16*
-*Last updated: 2026-04-16 after Phase 31 completion*
+*Last updated: 2026-04-16 after Phase 32 completion*
