@@ -62,6 +62,17 @@ $frameworkTestProjects = @{
   )
 }
 
+$maintenanceTestFilter = @(
+  'FullyQualifiedName~GraphEditorMutationCompatibilityTests',
+  'FullyQualifiedName~GraphEditorFacadeMutationParityTests',
+  'FullyQualifiedName~GraphEditorSessionTests',
+  'FullyQualifiedName~GraphEditorTransactionTests',
+  'FullyQualifiedName~GraphEditorMigrationCompatibilityTests',
+  'FullyQualifiedName~GraphEditorFacadeRefactorTests',
+  'FullyQualifiedName~GraphEditorViewModelProjectionTests',
+  'FullyQualifiedName~NodeCanvasPointerInteractionCoordinatorTests'
+) -join '|'
+
 function Invoke-DotNet {
   param(
     [Parameter(Mandatory = $true)]
@@ -454,11 +465,12 @@ function Invoke-MaintenanceValidation {
   }
 
   Invoke-RestoreProjects -Projects @(
+    $scaleSmokeProject,
     $editorTestsProject
   )
 
   Write-Host ''
-  Write-Host '### Run maintenance editor validation lane' -ForegroundColor Yellow
+  Write-Host '### Run hotspot-sensitive editor regression surface' -ForegroundColor Yellow
 
   Invoke-DotNet -Arguments (@(
     'test',
@@ -468,8 +480,12 @@ function Invoke-MaintenanceValidation {
     '--no-restore',
     '--nologo',
     '-v',
-    'minimal'
+    'minimal',
+    '--filter',
+    $maintenanceTestFilter
   ) + $singleProcessBuildArguments + $buildStabilityProperties)
+
+  Invoke-ScaleSmoke
 }
 
 Set-Location $repoRoot
