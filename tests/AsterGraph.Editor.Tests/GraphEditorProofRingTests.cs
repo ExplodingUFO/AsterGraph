@@ -984,17 +984,7 @@ public sealed class GraphEditorProofRingTests
     }
 
     private static string GetSamplePluginAssemblyPath()
-        => Path.GetFullPath(Path.Combine(
-            AppContext.BaseDirectory,
-            "..",
-            "..",
-            "..",
-            "..",
-            "AsterGraph.TestPlugins",
-            "bin",
-            "Debug",
-            "net9.0",
-            "AsterGraph.TestPlugins.dll"));
+        => TestPluginArtifactPathHelper.GetSamplePluginAssemblyPath();
 
     private static GraphDocument CreateDocument()
         => new(

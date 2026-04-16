@@ -222,17 +222,7 @@ public sealed class GraphEditorPluginDiscoveryTests
         => Path.Combine(Path.GetTempPath(), "astergraph-plugin-discovery-tests", Guid.NewGuid().ToString("N"));
 
     private static string GetSamplePluginAssemblyPath()
-        => Path.GetFullPath(Path.Combine(
-            AppContext.BaseDirectory,
-            "..",
-            "..",
-            "..",
-            "..",
-            "AsterGraph.TestPlugins",
-            "bin",
-            "Debug",
-            "net9.0",
-            "AsterGraph.TestPlugins.dll"));
+        => TestPluginArtifactPathHelper.GetSamplePluginAssemblyPath();
 
     private static string? GetAssemblyLocation(Assembly assembly)
     {

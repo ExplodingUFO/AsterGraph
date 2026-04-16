@@ -400,17 +400,7 @@ public sealed class GraphEditorPluginInspectionContractsTests
     }
 
     private static string GetSamplePluginAssemblyPath()
-        => Path.GetFullPath(Path.Combine(
-            AppContext.BaseDirectory,
-            "..",
-            "..",
-            "..",
-            "..",
-            "AsterGraph.TestPlugins",
-            "bin",
-            "Debug",
-            "net9.0",
-            "AsterGraph.TestPlugins.dll"));
+        => TestPluginArtifactPathHelper.GetSamplePluginAssemblyPath();
 
     private static IReadOnlyList<Type> GetPubliclyReferencedTypes(Type type)
     {

@@ -1,7 +1,7 @@
 ---
 phase: 42
 title: Clean Runner CI Parity
-status: planned
+status: completed
 last_updated: 2026-04-16
 ---
 
