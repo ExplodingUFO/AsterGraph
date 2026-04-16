@@ -1,17 +1,17 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.6
-milestone_name: Facade Convergence and Proof Guardrails
-status: archived
-stopped_at: Milestone v1.6 archived
-last_updated: "2026-04-16T05:59:33.9267321Z"
-last_activity: 2026-04-16 -- Milestone v1.6 archived
+milestone: v1.7
+milestone_name: Consumer Closure / Release Hardening
+status: planning
+stopped_at: Milestone v1.7 initialized
+last_updated: "2026-04-16T06:20:00.0000000Z"
+last_activity: 2026-04-16 -- Milestone v1.7 initialized
 progress:
   total_phases: 4
-  completed_phases: 4
+  completed_phases: 0
   total_plans: 12
-  completed_plans: 12
-  percent: 100
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -21,14 +21,14 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-04-16)
 
 **Core value:** Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
-**Current focus:** Start the next milestone from fresh requirements and roadmap framing
+**Current focus:** Phase 34 ready to plan - truth-alignment-and-proof-ring-closure
 
 ## Current Position
 
-Milestone: v1.6 (Facade Convergence and Proof Guardrails) - ARCHIVED
-Phase: none active
-Status: Ready for next milestone framing
-Last activity: 2026-04-16 -- Milestone v1.6 archived
+Phase: 34 (truth-alignment-and-proof-ring-closure) - READY TO PLAN
+Plan: 3 plans outlined in roadmap
+Status: Ready to plan
+Last activity: 2026-04-16 -- Milestone v1.7 initialized
 
 ## Performance Metrics
 
@@ -75,13 +75,20 @@ New v1.6 framing decisions:
 - [Phase 33]: Keep command-router host ownership and NodeCanvas lifecycle/property routing behind dedicated internal collaborators, then prove those seams through focused tests and the maintenance lane. — The next hotspot follow-through should reduce change radius without changing the public embedding surface.
 - [Phase 33]: Limit central `CS1591` suppression to non-packable projects and leave the remaining public XML-doc debt explicit in `AsterGraph.Editor`. — Package-boundary guardrails are only meaningful when the real debt boundary is visible in project configuration.
 
+New v1.7 framing decisions:
+
+- The next milestone should be a consumer-closure and release-hardening pass, not another feature-expansion band. — The main risk now is repo self-description, proof discoverability, release automation, and maintenance clarity rather than missing runtime/plugin capability.
+- Truth alignment across README, planning artifacts, and codebase maps is first-order work, not polish. — A repo that ships more capability than its docs can describe cleanly is harder to adopt and maintain.
+- The official proof ring must be treated as one executable system around real tool entry points and consumer host proof, not a loose set of remembered commands and implied tools.
+- Minimal consumer onboarding, explicit history/save contracts, compatibility retirement, and extension-precedence rules are product requirements because they determine whether external hosts can adopt the SDK safely.
+
 ### Pending Todos
 
 None captured yet.
 
 ### Blockers/Concerns
 
-None. The milestone is archived and no active phase is open.
+None at initialization. The first milestone work is Phase 34 truth alignment and proof-ring closure.
 
 ### Quick Tasks Completed
 
@@ -93,6 +100,6 @@ None. The milestone is archived and no active phase is open.
 
 ## Session Continuity
 
-Last session: 2026-04-16T05:59:33.9267321Z
-Stopped at: Milestone v1.6 archived
-Resume file: .planning/MILESTONES.md
+Last session: 2026-04-16T06:20:00.0000000Z
+Stopped at: Milestone v1.7 initialized
+Resume file: .planning/ROADMAP.md

@@ -2,11 +2,21 @@
 
 ## What This Is
 
-AsterGraph is a modular node-graph editor toolkit for .NET with a kernel-first editor runtime, explicit descriptor-based host contracts, and an Avalonia UI shell. The shipped baseline already covers a publishable four-package SDK boundary, plugin loading, automation execution, proof tools, and release validation. v1.6 is a contraction milestone: keep that shipped surface stable while making the retained facade path, state semantics, and maintenance story easier to evolve.
+AsterGraph is a modular node-graph editor toolkit for .NET with a kernel-first editor runtime, explicit descriptor-based host contracts, and an Avalonia UI shell. The shipped baseline already covers a publishable four-package SDK boundary, plugin loading, automation execution, proof tools, and release validation. v1.7 focuses on consumer closure and release hardening so that the shipped surface is easier to publish, verify, adopt, and extend without reopening fundamental runtime-boundary work.
 
 ## Core Value
 
 Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
+
+## Current Milestone: v1.7 Consumer Closure / Release Hardening
+
+**Goal:** Turn the shipped runtime, plugin, automation, and proof surfaces into a tighter consumer-facing product story with one truthful narrative, one executable proof ring, stronger release automation, and clearer long-term extension contracts.
+
+**Target features:**
+- Align README, planning artifacts, and codebase maps to one current story about shipped capabilities, proof tools, and support boundaries.
+- Collapse the proof ring into a real executable system around `PackageSmoke`, `ScaleSmoke`, focused regressions, and a minimal consumer host path.
+- Automate build, test, pack, smoke, and compatibility verification across the supported target-framework matrix.
+- Close the consumer path and maintenance gaps around minimal host onboarding, history/save semantics, compatibility retirement, and extension precedence rules.
 
 ## Latest Shipped Milestone: v1.6 Facade Convergence and Proof Guardrails
 
@@ -41,7 +51,7 @@ Hosts can integrate only the graph-editor pieces they need, replace default UI a
 - Phase 31 closed the carried history/save concern: retained undo/redo/dirty/save semantics now run on one kernel-owned authority, focused suites cover the interaction/save boundary directly, and `ScaleSmoke` emits `SCALE_HISTORY_CONTRACT_OK`.
 - Phase 32 moved more retained bootstrap, menu, and fragment orchestration out of `GraphEditorViewModel` while keeping the public factory/session/view-model entry points stable.
 - Phase 33 split the next kernel and canvas hotspots behind dedicated internal collaborators, and publishable-package XML-doc debt no longer hides behind a repo-wide `CS1591` blanket.
-- v1.6 is archived; the next repo task is fresh milestone framing.
+- v1.7 is now scoped as a productization-closeout milestone: truth alignment, proof-ring closure, release automation, minimal consumer onboarding, history/save contract publication, and extension-boundary hardening.
 
 ## Requirements
 
@@ -89,7 +99,10 @@ Hosts can integrate only the graph-editor pieces they need, replace default UI a
 
 ### Active
 
-- (None currently - define the next active milestone through `$gsd-new-milestone` after v1.6 archive.)
+- [ ] Documentation, planning artifacts, and codebase maps describe one truthful current milestone, capability story, proof ring, and support boundary.
+- [ ] Consumers can discover and run one official proof and release path that covers build, test, pack, smoke, and compatibility verification across the supported framework matrix.
+- [ ] Consumers can follow a minimal host onboarding path with canonical runtime-only, default Avalonia UI, trust/discovery, and automation entry routes.
+- [ ] Maintainers can keep shrinking compatibility and hotspot seams under explicit history/save, extension precedence, and compatibility-retirement contracts.
 
 ### Out of Scope
 
@@ -104,9 +117,9 @@ Hosts can integrate only the graph-editor pieces they need, replace default UI a
 
 Milestone `v1.5` shipped on 2026-04-14 and left the repo in a materially better release posture: the canonical runtime boundary is clearer, the proof surface is aligned, and the release lane is scripted. The next real gap is no longer missing capability surface. It is the cost of carrying retained compatibility complexity and hotspot classes while trying to keep the SDK stable.
 
-Current repo evidence on 2026-04-16 supported that narrower framing, and the completed milestone now confirms it. `AsterGraph.ScaleSmoke` stayed in the solution and docs. The repo kept the shipped `.editorconfig`, central package versions, coverage runsettings, and checked-in CI from v1.5. Phase 30 archived `v1.4` and added `eng/ci.ps1 -Lane maintenance`. Phase 31 replaced the carried history/save mismatch with one explicit retained contract. Phase 32 then kept shrinking `GraphEditorViewModel` into a thinner compatibility facade, and Phase 33 followed through on the next `GraphEditorKernel` / `NodeCanvas` hotspots while scoping `CS1591` debt to the real remaining project boundary.
+Current repo evidence on 2026-04-16 supports a different next step from v1.6. The runtime/session-first boundary is largely settled, plugin trust/discovery and automation are no longer just README claims, and the repo already ships `PackageSmoke`, `ScaleSmoke`, CI, package validation, and a maintenance gate. The bigger risk is that README, planning artifacts, proof-ring entry points, and consumer onboarding still drift apart more easily than the underlying code.
 
-v1.6 therefore achieved the contraction goal: milestone history is archived, history/save semantics are explicit and passing, the retained facade path is narrower, downstream hotspots are easier to change in isolation, and the maintenance story matches the shipped proof ring. The project can now choose its next capability band from a materially cleaner baseline.
+v1.7 therefore focuses on productization closure rather than new capability expansion. The milestone should make the repo tell one truthful story, make the proof ring executable and discoverable, push release verification deeper into machine gates, provide a real minimal consumer host path, publish the history/save contract explicitly, and document what is stable versus transitional in the extension surface.
 
 ## Constraints
 
@@ -137,9 +150,9 @@ v1.6 therefore achieved the contraction goal: milestone history is archived, his
 
 ## Next Milestone Goals
 
-- Decide whether the next highest-value band is XML-doc debt retirement, remaining hotspot contraction, or a return to host-facing capability work such as trust/distribution.
-- Retire the recurring `NuGet.Packaging` `NU1901` warning path so build and smoke output carry less background noise.
-- Start the next milestone from a fresh requirements pass instead of carrying forward v1.6 contraction framing by inertia.
+- Refresh README, planning artifacts, and codebase maps until they all describe the same shipped capability and proof surface.
+- Turn build/test/pack/smoke and compatibility checks into one official release gate with explicit target-matrix coverage.
+- Close the consumer-facing adoption and maintenance gaps around minimal host onboarding, history/save contract publication, test-lane layering, and extension-boundary rules.
 
 ## Archived Milestone Framing
 
@@ -175,4 +188,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-16 after v1.6 milestone archive*
+*Last updated: 2026-04-16 after v1.7 milestone initialization*
