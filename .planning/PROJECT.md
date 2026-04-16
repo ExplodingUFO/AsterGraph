@@ -2,15 +2,15 @@
 
 ## What This Is
 
-AsterGraph is a modular node-graph editor toolkit for .NET with a kernel-first editor runtime, explicit descriptor-based host contracts, and an Avalonia UI shell. The shipped baseline already covers a publishable four-package SDK boundary, plugin loading, automation execution, proof tools, and release validation. v1.7 focuses on consumer closure and release hardening so that the shipped surface is easier to publish, verify, adopt, and extend without reopening fundamental runtime-boundary work.
+AsterGraph is a modular node-graph editor toolkit for .NET with a kernel-first editor runtime, explicit descriptor-based host contracts, and an Avalonia UI shell. The shipped baseline already covers a publishable four-package SDK boundary, plugin loading, automation execution, proof tools, and release validation. v1.8 focuses on turning that engineering baseline into a public alpha that outside consumers can evaluate, adopt, and contribute to through one canonical demo path, clearer public docs, and a predictable prerelease story.
 
 ## Core Value
 
 Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
 
-## Current Milestone: None (v1.7 archived 2026-04-16)
+## Current Milestone: v1.8 Public Alpha Readiness and Canonical Demo
 
-**Goal:** Start the next milestone from a fresh requirements pass instead of carrying the v1.7 closeout framing forward by default.
+**Goal:** Turn the already-shipped SDK baseline into a repo and demo that are suitable for public alpha evaluation, adoption, and contribution without reopening the runtime-boundary work that v1.2-v1.7 already settled.
 
 ## Latest Shipped Milestone: v1.7 Consumer Closure / Release Hardening
 
@@ -50,18 +50,17 @@ Hosts can integrate only the graph-editor pieces they need, replace default UI a
 
 - Shipped packages remain `AsterGraph.Abstractions`, `AsterGraph.Core`, `AsterGraph.Editor`, and `AsterGraph.Avalonia`.
 - Canonical composition is kernel-first through `AsterGraphEditorFactory.CreateSession(...)` and `AsterGraphEditorFactory.Create(...)`, without `GraphEditorViewModel` as the canonical runtime state owner.
-- Plugin loading and automation execution already ship on the canonical session boundary and are backed by focused regressions plus `PackageSmoke` and `ScaleSmoke`.
-- The repo already carries `.editorconfig`, `Directory.Packages.props`, `tests/coverage.runsettings`, `.github/workflows/ci.yml`, and `eng/ci.ps1`; future milestones should build on those guardrails rather than recreate them.
-- `v1.4` now has checked-in archive files under `.planning/milestones/` plus a retrospective milestone-ledger entry, so milestone history no longer depends on stale phase directories alone.
-- `eng/ci.ps1 -Lane maintenance` now exists as the hotspot-sensitive refactor gate over focused editor regressions plus `ScaleSmoke`.
-- Phase 31 closed the carried history/save concern: retained undo/redo/dirty/save semantics now run on one kernel-owned authority, focused suites cover the interaction/save boundary directly, and `ScaleSmoke` emits `SCALE_HISTORY_CONTRACT_OK`.
-- Phase 32 moved more retained bootstrap, menu, and fragment orchestration out of `GraphEditorViewModel` while keeping the public factory/session/view-model entry points stable.
-- Phase 33 split the next kernel and canvas hotspots behind dedicated internal collaborators, and publishable-package XML-doc debt no longer hides behind a repo-wide `CS1591` blanket.
+- Plugin loading and automation execution already ship on the canonical session boundary and are backed by focused regressions plus `PackageSmoke`, `ScaleSmoke`, `HostSample`, and the contract/release lanes.
+- The repo already carries `.editorconfig`, `Directory.Packages.props`, `tests/coverage.runsettings`, `.github/workflows/ci.yml`, and `eng/ci.ps1`; v1.8 should extend those guardrails instead of recreating them.
+- Package metadata still advertises `0.1.0-preview.8`, so the public version story has not yet been realigned to an external alpha contract.
+- `AsterGraph.HostSample` already proves the canonical factory/session/view-factory path, but `AsterGraph.Demo` still constructs `GraphEditorViewModel` directly as its main host route.
+- Public governance files such as `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`, `global.json`, issue templates, and a PR template are still missing.
+- CI currently runs only on Windows and does not yet expose public-facing artifact upload, caching, concurrency controls, Linux validation, or tag-driven prerelease publishing.
 - Phase 34 aligned README, host docs, top-level planning artifacts, and codebase maps around one v1.7 proof story, then restored `AsterGraph.HostSample` as the minimal consumer-facing host sample.
 - Phase 35 turned release validation into an explicit three-lane system: framework matrix, focused contract proof, and the full publish gate, while also making packed `HostSample` part of the real release proof path.
 - Phase 36 added a compact consumer route matrix and published the explicit history/save/dirty contract, so consumers no longer have to reverse-engineer those rules from tests and long-form docs.
 - Phase 37 published explicit stability tiers, compatibility-retirement guidance, extension-precedence rules, and lane ownership so maintainers can keep shrinking the retained surface without reopening boundary drift.
-- v1.7 is archived; the next step is fresh milestone framing rather than continuing to mutate this closeout milestone in place.
+- v1.7 is archived; v1.8 is the public-alpha milestone that turns this shipped baseline into an external-facing repo, demo, and release story.
 
 ## Requirements
 
@@ -118,24 +117,26 @@ Hosts can integrate only the graph-editor pieces they need, replace default UI a
 
 ### Active
 
-- [ ] Start the next milestone from a fresh requirements pass.
+- [ ] Unify public alpha versioning, repo narrative, and outward-facing alpha-status guidance around one explicit prerelease contract.
+- [ ] Move the main demo onto the canonical host path and turn plugin, automation, standalone-surface, and presenter-replacement seams into visible showcase surfaces.
+- [ ] Publish paired English and `zh-CN` public guides, and make localization switching part of the demo proof story.
+- [ ] Add the missing public governance files and extend CI/release automation for a tag-driven public alpha path.
 
 ### Out of Scope
 
-- New plugin marketplace, trust/distribution policy, signing, or stronger isolation product work - v1.6 is a contraction milestone, not the next plugin feature band
-- Dedicated scripting language, workflow-designer UI, or broader automation authoring product layers - the shipped command/query automation runner remains the baseline for now
-- New graph-editing end-user features unrelated to facade convergence, state semantics, or maintenance guardrails - this milestone is about internal contraction rather than broadening the editor surface
-- Replacing Avalonia or rewriting the retained compatibility story from scratch - the milestone should harden the current stack instead of reopening product positioning
-- A one-shot removal of all compatibility APIs or other public breaking changes - staged migration remains part of the product promise
-- Repeating v1.5 baseline work such as `.editorconfig`, central package management, CI setup, or `ScaleSmoke` solution alignment unless current repo evidence shows an actual regression
+- New graph-editing end-user features unrelated to public alpha readiness, demo completeness, or public release workflows
+- Marketplace UX, remote plugin installation UI, stronger plugin signing/isolation, or other post-alpha distribution product work
+- Rich automation authoring UI, workflow-designer surfaces, or embedded scripting-editor work beyond the shipped execution baseline
+- Replacing Avalonia, reopening kernel/session ownership, or redesigning the canonical runtime boundary
+- A one-shot removal of retained compatibility APIs or other abrupt public breaks before the alpha surface is externally exercised
 
 ## Context
 
-Milestone `v1.5` shipped on 2026-04-14 and left the repo in a materially better release posture: the canonical runtime boundary is clearer, the proof surface is aligned, and the release lane is scripted. The next real gap is no longer missing capability surface. It is the cost of carrying retained compatibility complexity and hotspot classes while trying to keep the SDK stable.
+v1.7 closed the consumer-closure milestone: the repo now has one clearer proof story, an explicit contract lane, packed `HostSample` release proof, a public state contract, and explicit extension-stability guidance. The next real gap is no longer missing runtime capability. It is whether this repo, demo, and release flow are actually ready for outside users instead of only for informed maintainers.
 
-Current repo evidence on 2026-04-16 supports a different next step from v1.6. The runtime/session-first boundary is largely settled, plugin trust/discovery and automation are no longer just README claims, and the repo already ships `PackageSmoke`, `ScaleSmoke`, CI, package validation, and a maintenance gate. The bigger risk is that README, planning artifacts, proof-ring entry points, and consumer onboarding still drift apart more easily than the underlying code.
+Current repo evidence on 2026-04-16 makes that gap concrete. Package metadata still reads `0.1.0-preview.8`, the main demo still uses the retained `GraphEditorViewModel` construction path, the public governance files are missing, CI is still Windows-only, and the bilingual strategy is implicit instead of productized. The code and proof lanes are ahead of the outward-facing repo contract.
 
-v1.7 therefore focuses on productization closure rather than new capability expansion. The milestone should make the repo tell one truthful story, make the proof ring executable and discoverable, push release verification deeper into machine gates, provide a real minimal consumer host path, publish the history/save contract explicitly, and document what is stable versus transitional in the extension surface.
+v1.8 therefore focuses on public alpha readiness rather than another feature band. The milestone should unify the public version story, publish explicit alpha boundaries, move the demo onto the canonical host path, make plugins and automation visible in the showcase, establish a bilingual docs strategy, and add the public governance plus release automation expected from an externally consumable alpha.
 
 ## Constraints
 
@@ -144,6 +145,8 @@ v1.7 therefore focuses on productization closure rather than new capability expa
 - **Product positioning**: Preserve publishable package quality for the four supported SDK packages
 - **Architecture**: Keep `GraphEditorKernel` as the canonical mutable runtime state owner while retained facades stay compatibility-only
 - **Public API stability**: Do not change the public factory, session, or retained view-model entry points during this milestone
+- **Public alpha scope**: Prefer closing adoption, docs, demo, and release gaps over expanding runtime capability surface
+- **Bilingual delivery**: Treat English plus `zh-CN` public guides and demo language switching as first-class product requirements rather than incidental mixed-language content
 - **Observability**: Diagnostics, proof outputs, smoke markers, and regression lanes remain part of the product surface, not local developer conveniences
 
 ## Key Decisions
@@ -163,26 +166,34 @@ v1.7 therefore focuses on productization closure rather than new capability expa
 | Treat v1.4 archive closure as current milestone work | Planning history drift is now a real maintenance cost rather than harmless backlog noise | ✓ Good |
 | Add one explicit maintenance lane to `eng/ci.ps1` instead of a second script path | Refactor-proof validation should stay on the same repo-local command story contributors and docs already use | ✓ Good |
 | Keep phase numbering continuous from 30 | The latest executed phase is 29, and reset numbering is unnecessary for this milestone | ✓ Good |
+| Use v1.8 as a public-alpha readiness milestone instead of another runtime/plugin feature band | The underlying SDK baseline is already shipped; the gap is external readiness and discoverability | ✓ Good |
+| Move public package semantics from `preview` to an explicit alpha contract | External consumers need a version story that reads as prerelease product posture instead of internal iteration cadence | ✓ Good |
+| Make the main demo use the canonical factory/session/view-factory route | The showcase host should demonstrate the recommended adoption path, while retained construction remains migration proof | ✓ Good |
+| Keep `HostSample` and `AsterGraph.Demo` as separate artifacts with separate jobs | The minimal consumer path and the capability showcase serve different audiences and should not collapse into one sample | ✓ Good |
+| Use bilingual docs plus a demo language toggle as the public localization strategy | The repo already mixes Chinese and English; alpha readiness requires making that policy intentional and testable | ✓ Good |
+| Keep public publishing tag-driven and verification-first | Pull requests should prove the surface; only tagged milestones should publish prerelease packages and release artifacts | ✓ Good |
+| Extend CI with Linux validation and public artifacts without replacing the existing Windows release lane | Public alpha consumers expect broader signal, but the current Windows release path remains the most complete packaging proof | ✓ Good |
 
 ## Next Milestone Goals
 
-- Refresh README, planning artifacts, and codebase maps until they all describe the same shipped capability and proof surface.
-- Turn build/test/pack/smoke and compatibility checks into one official release gate with explicit target-matrix coverage.
-- Close the consumer-facing adoption and maintenance gaps around minimal host onboarding, history/save contract publication, test-lane layering, and extension-boundary rules.
+- Unify the public version story, alpha-status guidance, and outward-facing repo/governance artifacts around one explicit prerelease contract.
+- Move the main demo onto the canonical host path and expand it until plugins, automation, standalone surfaces, presenter replacement, and localization are visible product surfaces.
+- Publish a bilingual public docs stack and make localization proof part of the demo and test surface.
+- Extend CI and release automation for public alpha consumption with Linux validation, artifacts, and tag-driven prerelease publishing.
 
 ## Archived Milestone Framing
 
 <details>
-<summary>v1.5 planning snapshot</summary>
+<summary>v1.7 planning snapshot</summary>
 
-Runtime Boundary Cleanup and Quality Gates focused on tightening the canonical runtime boundary, automating release validation, and aligning docs/proof/test lanes around one trustworthy SDK verification surface.
+Consumer Closure / Release Hardening focused on aligning the shipped proof story, making release validation executable and consumer-facing, publishing explicit state and extension contracts, and restoring `HostSample` as the minimal canonical host sample.
 
 </details>
 
 <details>
-<summary>v1.4 planning snapshot</summary>
+<summary>v1.6 planning snapshot</summary>
 
-Plugin Loading and Automation Execution focused on turning the shipped readiness descriptors and graph-first showcase proof into real runtime extension surfaces rooted in `AsterGraphEditorFactory`, `IGraphEditorSession`, descriptor-based inspection, and the same machine-checkable proof ring used for public claims.
+Facade Convergence and Proof Guardrails focused on closing the carried history/save concern, shrinking retained-facade hotspots, and tightening the maintenance guardrails needed for continued internal contraction without public API churn.
 
 </details>
 
@@ -204,4 +215,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-16 after Phase 37 completion*
+*Last updated: 2026-04-16 for milestone v1.8 initialization*

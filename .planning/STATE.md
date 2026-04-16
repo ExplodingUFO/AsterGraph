@@ -1,17 +1,17 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.7
-milestone_name: Consumer Closure / Release Hardening
-status: archived
-stopped_at: v1.7 archived
-last_updated: "2026-04-16T13:00:00.0000000Z"
-last_activity: 2026-04-16 -- Archived v1.7 consumer closure and release hardening
+milestone: v1.8
+milestone_name: Public Alpha Readiness and Canonical Demo
+status: active
+stopped_at: Phase 38 ready to plan
+last_updated: "2026-04-16T14:00:00.0000000Z"
+last_activity: 2026-04-16 -- Started milestone v1.8 public alpha readiness and canonical demo
 progress:
   total_phases: 4
-  completed_phases: 4
+  completed_phases: 0
   total_plans: 12
-  completed_plans: 12
-  percent: 100
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -21,14 +21,14 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-04-16)
 
 **Core value:** Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
-**Current focus:** no active milestone - ready for fresh framing
+**Current focus:** v1.8 public alpha readiness, canonical demo, bilingual docs, and public release closure
 
 ## Current Position
 
-Phase: milestone archived
-Plan: v1.7 complete
-Status: Archived
-Last activity: 2026-04-16 -- Archived v1.7 consumer closure and release hardening
+Phase: 38
+Plan: -
+Status: Ready to plan
+Last activity: 2026-04-16 -- Started milestone v1.8 public alpha readiness and canonical demo
 
 ## Performance Metrics
 
@@ -91,15 +91,28 @@ New v1.7 framing decisions:
 - The official proof ring must be treated as one executable system around real tool entry points and consumer host proof, not a loose set of remembered commands and implied tools.
 - Minimal consumer onboarding, explicit history/save contracts, compatibility retirement, and extension-precedence rules are product requirements because they determine whether external hosts can adopt the SDK safely.
 
+New v1.8 framing decisions:
+
+- The next milestone should make the repo suitable for public alpha use instead of widening the core runtime surface again. — The shipped SDK baseline is already credible; the gap is external readiness.
+- Public package semantics should move from `preview` cadence to an explicit alpha contract. — External consumers need a version story that reads as prerelease product posture rather than internal iteration.
+- `AsterGraph.Demo` should adopt the canonical factory/session/view-factory path as its main route, while retained construction remains proof and migration context. — The showcase host must teach the recommended embedding path.
+- `HostSample` and `AsterGraph.Demo` should stay separate and explicitly labeled. — Minimal consumer onboarding and feature showcase have different jobs.
+- The bilingual strategy should be intentional: English plus `zh-CN` guides, plus a real demo language toggle. — The repo already mixes languages; alpha readiness requires making that policy deliberate and testable.
+- Public-alpha publishing should be tag-driven, while pull requests remain verification-only. — Publishing on every validated branch would blur release intent and artifact provenance.
+- CI should expand with Linux validation, artifact uploads, caching, and concurrency without replacing the existing Windows release lane. — Public alpha consumers need broader signal, but the current Windows proof remains the deepest packaging path.
+
 ### Pending Todos
 
 None captured yet.
 
 ### Blockers/Concerns
 
-Current milestone-close work:
+Current framing concerns to close through v1.8:
 
-- completed
+- Package metadata still reports `0.1.0-preview.8`, so the public version story is not aligned with an external alpha posture.
+- `AsterGraph.Demo` still uses direct `GraphEditorViewModel` construction instead of the canonical factory/view-factory route.
+- Public governance files and templates are missing, which raises friction for outside contributors and security reporting.
+- CI is still Windows-only and does not yet upload public release artifacts or run tag-driven prerelease publishing.
 
 ### Quick Tasks Completed
 
@@ -112,5 +125,5 @@ Current milestone-close work:
 ## Session Continuity
 
 Last session: 2026-04-16T06:20:00.0000000Z
-Stopped at: v1.7 archived
+Stopped at: Phase 38 ready to plan
 Resume file: .planning/ROADMAP.md
