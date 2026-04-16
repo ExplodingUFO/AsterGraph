@@ -4,7 +4,7 @@
 
 - 🚧 **v1.6 Facade Convergence and Proof Guardrails** - Phases 30-33 planned
 - ✅ **[v1.5 Runtime Boundary Cleanup and Quality Gates](./milestones/v1.5-ROADMAP.md)** - Phases 26-29, shipped 2026-04-14
-- 🚧 **v1.4 Plugin Loading and Automation Execution** - Phases 22-25 complete, waiting for archive closeout
+- ✅ **[v1.4 Plugin Loading and Automation Execution](./milestones/v1.4-ROADMAP.md)** - Phases 22-25, shipped 2026-04-08, archived 2026-04-16
 - ✅ **[v1.3 Demo Showcase](./milestones/v1.3-ROADMAP.md)** - Phases 19-21, shipped 2026-04-08
 - ✅ **[v1.2 Kernel Extraction, Capability Contracts, and Plugin Readiness](./milestones/v1.2-ROADMAP.md)** - Phases 13-18, shipped 2026-04-08
 - ✅ **v1.1 Host Boundary, Native Integration, and Scaling** - Phases 07-12, shipped before milestone archive split
@@ -74,11 +74,11 @@ v1.6 deliberately avoids reopening already-shipped baseline work such as `.edito
 
 | Phase | Requirements | Status |
 |-------|--------------|--------|
-| 30. Milestone History And Refactor Gate Closeout | CLOSE-01, CLOSE-02, GUARD-01 | Planned |
+| 30. Milestone History And Refactor Gate Closeout | CLOSE-01, CLOSE-02, GUARD-01 | In Progress |
 | 31. History And Save Semantic Closure | STATE-01, STATE-02, STATE-03 | Planned |
 | 32. GraphEditorViewModel Facade Convergence | FACADE-01, FACADE-02 | Planned |
 | 33. Kernel, Canvas, And Guardrail Follow-Through | FACADE-03, FACADE-04, GUARD-02 | Planned |
 
 ## Next Action
 
-**Next action:** start Phase 30 planning with `$gsd-plan-phase 30`
+**Next action:** finish Phase 30 execution and verification with `$gsd-execute-phase 30`

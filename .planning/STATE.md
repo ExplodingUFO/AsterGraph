@@ -21,14 +21,14 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-04-16)
 
 **Core value:** Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
-**Current focus:** Phase 30 Wave 3 prep - milestone-history-and-refactor-gate-closeout
+**Current focus:** Phase 30 live planning sync - milestone-history-and-refactor-gate-closeout
 
 ## Current Position
 
 Phase: 30 (milestone-history-and-refactor-gate-closeout) - EXECUTING
 Plan: 2 of 3 complete
 Status: In progress
-Last activity: 2026-04-16 - completed 30-02 maintenance refactor gate
+Last activity: 2026-04-16 - synced live planning to archived v1.4 history and maintenance gate
 
 ## Performance Metrics
 
@@ -68,8 +68,8 @@ None captured yet.
 
 ### Blockers/Concerns
 
-- `v1.4` archive files now exist, but the live roadmap/current-state closeout still needs synchronization in later Phase 30 plans.
-- The maintenance/refactor gate now exists in `eng/ci.ps1`, but README, Host Integration, and live planning docs still need to point at it in Plan 03.
+- `v1.4` archive files and live planning links are now aligned, but README and Host Integration still need to point at the maintenance gate in the final Phase 30 plan.
+- The maintenance/refactor gate now exists in `eng/ci.ps1`, but contributor-facing docs still need to adopt it as the targeted hotspot-refactor command.
 - The known `STATE_HISTORY_OK` mismatch remains a carried baseline issue until the new history/save semantics work closes it.
 - `GraphEditorViewModel`, `GraphEditorKernel`, and `NodeCanvas` remain the obvious internal hotspots even after the earlier coordinator extractions.
 

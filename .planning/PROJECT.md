@@ -34,9 +34,10 @@ Hosts can integrate only the graph-editor pieces they need, replace default UI a
 - Canonical composition is kernel-first through `AsterGraphEditorFactory.CreateSession(...)` and `AsterGraphEditorFactory.Create(...)`, without `GraphEditorViewModel` as the canonical runtime state owner.
 - Plugin loading and automation execution already ship on the canonical session boundary and are backed by focused regressions plus `PackageSmoke` and `ScaleSmoke`.
 - The repo already carries `.editorconfig`, `Directory.Packages.props`, `tests/coverage.runsettings`, `.github/workflows/ci.yml`, and `eng/ci.ps1`; v1.6 should build on those guardrails rather than recreate them.
+- `v1.4` now has checked-in archive files under `.planning/milestones/` plus a retrospective milestone-ledger entry, so milestone history no longer depends on stale phase directories alone.
+- `eng/ci.ps1 -Lane maintenance` now exists as the hotspot-sensitive refactor gate over focused editor regressions plus `ScaleSmoke`.
 - `AsterGraph.ScaleSmoke` is already part of the tracked solution surface, so proof-surface alignment is no longer the primary gap.
 - The remaining obvious internal hotspots are still `GraphEditorViewModel`, `GraphEditorKernel`, and `NodeCanvas`, and the carried `STATE_HISTORY_OK` concern still marks history/save semantics as unfinished maintenance debt.
-- `v1.4` is still missing a checked-in milestone archive under `.planning/milestones/`, so planning history remains partially normalized even though later milestones were archived.
 
 ## Requirements
 
@@ -74,12 +75,13 @@ Hosts can integrate only the graph-editor pieces they need, replace default UI a
 - ✓ Core SDK regression coverage is now split cleanly from demo/sample integration coverage through `AsterGraph.Editor.Tests` / `AsterGraph.Serialization.Tests` versus `AsterGraph.Demo.Tests`, so failures identify the right layer - v1.5 Phase 28
 - ✓ Release validation now packs the publishable packages, runs `PackageSmoke`, runs `ScaleSmoke`, collects coverage, and enforces package validation from one repo-local entry point - v1.5 Phase 29
 - ✓ Hosts can now follow one short canonical integration path for runtime-only, shipped-UI, and retained-migration scenarios - v1.5 Phase 29
+- ✓ Maintainer can now read archived `v1.4` milestone history through checked-in archive files and the milestone ledger without contradictory active-vs-archived planning state claims - v1.6 Phase 30
+- ✓ Contributors can now run `eng/ci.ps1 -Lane maintenance` as the hotspot-sensitive refactor gate while the history/save semantic contract remains active work for Phase 31 - v1.6 Phase 30
 
 ### Active
 
-- [ ] Maintainer can read one consistent milestone/proof history after v1.4 closeout, without contradictory active-vs-archived planning state.
 - [ ] Host keeps the same public factory/session/view-model entry points while hotspot refactors continue to move retained-facade orchestration behind kernel-owned collaborators.
-- [ ] Contributors can trust one explicit history/save semantic contract and one checked-in maintenance gate while refactoring hotspot code.
+- [ ] Contributors can trust one explicit history/save semantic contract while refactoring hotspot code through the checked-in maintenance gate.
 
 ### Out of Scope
 
@@ -94,7 +96,7 @@ Hosts can integrate only the graph-editor pieces they need, replace default UI a
 
 Milestone `v1.5` shipped on 2026-04-14 and left the repo in a materially better release posture: the canonical runtime boundary is clearer, the proof surface is aligned, and the release lane is scripted. The next real gap is no longer missing capability surface. It is the cost of carrying retained compatibility complexity, hotspot classes, and one long-lived history/save semantic concern while trying to keep the SDK stable.
 
-Current repo evidence on 2026-04-16 supports that narrower framing. `AsterGraph.ScaleSmoke` is already present in the solution and docs. The repo already has `.editorconfig`, central package versions, coverage runsettings, and checked-in CI. The carried concerns that still stand out are the missing `v1.4` milestone archive, the `STATE_HISTORY_OK` mismatch called out in `STATE.md`, and the fact that `GraphEditorViewModel`, `GraphEditorKernel`, and `NodeCanvas` remain the obvious internal hotspots even after the earlier coordinator extractions.
+Current repo evidence on 2026-04-16 supports that narrower framing. `AsterGraph.ScaleSmoke` is already present in the solution and docs. The repo already has `.editorconfig`, central package versions, coverage runsettings, and checked-in CI. Phase 30 has now archived `v1.4` and added a dedicated maintenance gate in `eng/ci.ps1`. The carried concern that still stands out is the `STATE_HISTORY_OK` mismatch called out in `STATE.md`, along with the fact that `GraphEditorViewModel`, `GraphEditorKernel`, and `NodeCanvas` remain the obvious internal hotspots even after the earlier coordinator extractions.
 
 v1.6 therefore focuses on contraction and proof closure: archive the lingering milestone history, make history/save semantics explicit and passing, and keep moving responsibilities away from `GraphEditorViewModel` without changing the public SDK boundary. If that work lands cleanly, the project can choose its next capability band from a much more stable maintenance position.
 
@@ -120,8 +122,9 @@ v1.6 therefore focuses on contraction and proof closure: archive the lingering m
 | Keep plugin and automation surfaces rooted in `IGraphEditorSession`, descriptors, and command IDs | Extension work should build on the canonical runtime boundary rather than retained MVVM or Avalonia shims | ✓ Good |
 | Keep one repo-local validation command path for both contributors and CI | Quality gates drift quickly if YAML and local commands diverge | ✓ Good |
 | Use v1.6 as a contraction milestone instead of another plugin/automation feature band | The remaining risk is internal complexity and semantic drift, not missing capability surface | — Pending |
-| Build on the shipped v1.5 guardrails instead of recreating them | `.editorconfig`, central package versions, CI, coverage collection, and `ScaleSmoke` alignment already exist in the live repo | — Pending |
-| Treat v1.4 archive closure as current milestone work | Planning history drift is now a real maintenance cost rather than harmless backlog noise | — Pending |
+| Build on the shipped v1.5 guardrails instead of recreating them | `.editorconfig`, central package versions, CI, coverage collection, and `ScaleSmoke` alignment already exist in the live repo | ✓ Good |
+| Treat v1.4 archive closure as current milestone work | Planning history drift is now a real maintenance cost rather than harmless backlog noise | ✓ Good |
+| Add one explicit maintenance lane to `eng/ci.ps1` instead of a second script path | Refactor-proof validation should stay on the same repo-local command story contributors and docs already use | ✓ Good |
 | Keep phase numbering continuous from 30 | The latest executed phase is 29, and reset numbering is unnecessary for this milestone | — Pending |
 
 ## Next Milestone Goals
