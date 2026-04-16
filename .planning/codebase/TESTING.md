@@ -57,6 +57,11 @@
 - `tools/AsterGraph.PackageSmoke/Program.cs` is the package-surface regression tool that exercises runtime-first, hosted-UI, and retained compatibility paths.
 - `tools/AsterGraph.ScaleSmoke/Program.cs` emits repeatable `SCALE_*` markers for large-graph, history/save, and runtime-state continuity checks.
 - Together with the three xUnit projects and `eng/ci.ps1`, these tools form the maintained proof ring.
+- The focused state contract is enforced by:
+  - `tests/AsterGraph.Editor.Tests/GraphEditorHistoryInteractionTests.cs`
+  - `tests/AsterGraph.Editor.Tests/GraphEditorSaveBoundaryTests.cs`
+  - `tests/AsterGraph.Editor.Tests/GraphEditorHistorySemanticTests.cs`
+  - `SCALE_HISTORY_CONTRACT_OK`
 
 ## Commands
 
@@ -76,7 +81,7 @@ dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj --
 - `tests/coverage.runsettings` and `eng/coverage-report.ps1` are tracked and used by `eng/ci.ps1 -Lane release`.
 - `.github/workflows/ci.yml` is checked in and invokes `eng/ci.ps1` through explicit framework-matrix (`all`), focused contract (`contract`), and release (`release`) jobs.
 - The repo relies on xUnit regressions plus proof tools rather than benchmark automation.
-- `eng/ci.ps1 -Lane release` is the official scripted publish gate; `contract` is the focused consumer/proof gate; raw `dotnet run` commands remain useful when contributors want direct sample or smoke markers while debugging.
+- `eng/ci.ps1 -Lane release` is the official scripted publish gate; `contract` is the focused consumer/state-contract gate; raw `dotnet run` commands remain useful when contributors want direct sample or smoke markers while debugging.
 - Current risk areas are less about missing tests entirely and more about maintaining alignment across:
   - kernel-first runtime path
   - retained `GraphEditorViewModel` compatibility path

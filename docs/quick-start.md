@@ -70,17 +70,20 @@ dotnet add package AsterGraph.Editor
 
 This is the short source of truth for host adoption.
 
-| If your host needs | Start here | Notes |
-| --- | --- | --- |
-| Runtime-only or custom UI | `AsterGraphEditorFactory.CreateSession(...)` | Canonical runtime-first boundary. Drive the host through `IGraphEditorSession.Commands`, `Queries`, `Events`, and `Diagnostics`. |
-| Shipped Avalonia UI | `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` | Canonical hosted-UI path for new Avalonia hosts that want the shipped shell. |
-| Retained migration | `new GraphEditorViewModel(...)` + `new GraphEditorView { Editor = editor }` | Compatibility-only path for hosts that are intentionally migrating in stages. |
+| If your host needs | Packages to start with | Start here | Verify with |
+| --- | --- | --- | --- |
+| Runtime-only or custom UI | `AsterGraph.Abstractions`, `AsterGraph.Editor`; add `AsterGraph.Core` when host code also uses `GraphDocument`, serialization, or compatibility services directly | `AsterGraphEditorFactory.CreateSession(...)` | `dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj -p:UsePackedAsterGraphPackages=true --nologo` |
+| Shipped Avalonia UI | `AsterGraph.Avalonia`; add direct `AsterGraph.Editor` and/or `AsterGraph.Core` references only when the host uses those APIs directly | `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` | `dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj -p:UsePackedAsterGraphPackages=true --nologo` |
+| Plugin trust/discovery | `AsterGraph.Editor`; add `AsterGraph.Abstractions` when host code also shares node/provider contracts | `AsterGraphEditorFactory.DiscoverPluginCandidates(...)` + `AsterGraphEditorOptions.PluginTrustPolicy` | `pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane contract -Framework all -Configuration Release` |
+| Automation | `AsterGraph.Editor`; add `AsterGraph.Core` when host code also consumes direct snapshots/models outside the session facade | `IGraphEditorSession.Automation.Execute(...)` | `pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane contract -Framework all -Configuration Release` |
+| Retained migration | `AsterGraph.Editor` plus `AsterGraph.Avalonia` when the host still embeds `GraphEditorView` | `new GraphEditorViewModel(...)` + `new GraphEditorView { Editor = editor }` | `pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane contract -Framework all -Configuration Release` |
 
-Use the first two routes for new integrations. Keep the third route only when you are deliberately staying on the retained migration window.
+Use the runtime-only/custom UI route or the shipped Avalonia UI route for new integrations. Treat plugin trust/discovery and automation as capabilities layered on top of those canonical entry points. Keep the retained migration route only when you are deliberately staying on the compatibility window.
 
 If you want to own Avalonia layout while still reusing the stock canvas, inspector, or mini map, stay on the `Create(...)` family and treat those surface factories as an advanced hosted-UI detail, not as a fourth canonical entry path.
 
 See [`docs/host-integration.md`](./host-integration.md) for the longer composition walkthrough behind each route.
+See [`docs/state-contracts.md`](./state-contracts.md) for the explicit history/save/dirty behavior contract enforced by the focused proof lane.
 
 ## Minimal Shipped UI Composition
 
@@ -144,6 +147,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framew
 For the focused consumer/contract lane:
 
 ```powershell
+# plugin trust/discovery, automation, hosted-surface proof, and history/save/dirty contract
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane contract -Framework all -Configuration Release
 ```
 

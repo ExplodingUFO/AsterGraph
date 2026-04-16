@@ -105,6 +105,9 @@ Start with the [canonical adoption path](./docs/quick-start.md#canonical-adoptio
 
 If you want to own Avalonia layout while still reusing the stock canvas, inspector, or mini map, stay on the `Create(...)` family and treat those surface factories as advanced hosted-UI composition detail rather than a fourth canonical entry path. The constructor/view path remains supported so hosts can migrate in planned batches instead of rewriting in one shot.
 
+For the compact package/route/verification matrix, see [Quick Start](./docs/quick-start.md#canonical-adoption-path).
+For the explicit history/save/dirty behavior contract, see [State Contract](./docs/state-contracts.md).
+
 ## Runtime Session And Services
 
 `AsterGraph.Editor` now exposes one public runtime contract rooted at `IGraphEditorSession`:

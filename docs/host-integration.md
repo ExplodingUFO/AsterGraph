@@ -14,6 +14,16 @@ The short source of truth lives in [Quick Start](./quick-start.md#canonical-adop
 
 If you want to reuse standalone Avalonia surfaces such as `AsterGraphCanvasViewFactory.Create(...)`, `AsterGraphInspectorViewFactory.Create(...)`, or `AsterGraphMiniMapViewFactory.Create(...)`, treat that as an advanced composition detail inside the `Create(...)` family, not as a fourth canonical entry path.
 
+## Consumer Route Matrix
+
+| Need | Packages to start with | Canonical entry point | Verify with |
+| --- | --- | --- | --- |
+| Runtime-only or custom UI | `AsterGraph.Abstractions`, `AsterGraph.Editor`; add `AsterGraph.Core` if host code also works with `GraphDocument`, serialization, or compatibility services directly | `AsterGraphEditorFactory.CreateSession(...)` | `dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj -p:UsePackedAsterGraphPackages=true --nologo` |
+| Default Avalonia UI | `AsterGraph.Avalonia`; add direct `AsterGraph.Editor` and/or `AsterGraph.Core` only when the host uses those APIs directly | `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` | `dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj -p:UsePackedAsterGraphPackages=true --nologo` |
+| Plugin trust/discovery | `AsterGraph.Editor`; add `AsterGraph.Abstractions` when host code also ships shared contracts/providers | `AsterGraphEditorFactory.DiscoverPluginCandidates(...)` + `AsterGraphEditorOptions.PluginTrustPolicy` | `pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane contract -Framework all -Configuration Release` |
+| Automation | `AsterGraph.Editor`; add `AsterGraph.Core` when host code also reads/writes document or snapshot models directly | `IGraphEditorSession.Automation.Execute(...)` | `pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane contract -Framework all -Configuration Release` |
+| Retained migration | `AsterGraph.Editor`, plus `AsterGraph.Avalonia` when the host still embeds `GraphEditorView` | `new GraphEditorViewModel(...)` + `new GraphEditorView { Editor = editor }` | `pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane contract -Framework all -Configuration Release` |
+
 ## Minimal Consumer Host Sample
 
 Use `tools/AsterGraph.HostSample` when you want the smallest runnable canonical host path in this repository.
@@ -30,6 +40,26 @@ Commands:
 dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj --nologo
 dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj -p:UsePackedAsterGraphPackages=true --nologo
 ```
+
+## History, Save, and Dirty Contract
+
+The explicit product contract lives in [`docs/state-contracts.md`](./state-contracts.md).
+
+Short version:
+
+- successful save makes the current state clean
+- undo from the saved baseline makes the editor dirty when it leaves that saved snapshot
+- redo back to the saved baseline makes the editor clean again
+- no-op interactions must not leave dirty or undo state latched
+- retained and runtime mutations still resolve through one kernel-owned history/save authority
+
+Proof for that contract is anchored in:
+
+- `pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane contract -Framework all -Configuration Release`
+- `tests/AsterGraph.Editor.Tests/GraphEditorHistoryInteractionTests.cs`
+- `tests/AsterGraph.Editor.Tests/GraphEditorSaveBoundaryTests.cs`
+- `tests/AsterGraph.Editor.Tests/GraphEditorHistorySemanticTests.cs`
+- `SCALE_HISTORY_CONTRACT_OK` from `tools/AsterGraph.ScaleSmoke`
 
 ## Package Choice
 
@@ -176,6 +206,10 @@ The verification split is:
 
 - Scripted publish gate: `eng/ci.ps1 -Lane release`
 - Focused consumer/contract gate: `eng/ci.ps1 -Lane contract`
+  - plugin trust/discovery
+  - automation
+  - hosted-surface composition
+  - history/save/dirty contract
 - Hotspot refactor gate: `eng/ci.ps1 -Lane maintenance`
 - Core SDK regression lane: `tests/AsterGraph.Editor.Tests` plus `tests/AsterGraph.Serialization.Tests`
 - Demo/sample regression lane: `tests/AsterGraph.Demo.Tests`
