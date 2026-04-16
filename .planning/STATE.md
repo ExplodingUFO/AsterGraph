@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.6
 milestone_name: Facade Convergence and Proof Guardrails
-status: Defining requirements
-stopped_at: Milestone v1.6 started
-last_updated: "2026-04-16T11:14:19.5052998+08:00"
+status: v1.6 initialized
+stopped_at: Roadmap approved
+last_updated: "2026-04-16T11:17:10.5846951+08:00"
 progress:
-  total_phases: 0
+  total_phases: 4
   completed_phases: 0
-  total_plans: 0
+  total_plans: 12
   completed_plans: 0
 ---
 
@@ -19,14 +19,14 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-04-16)
 
 **Core value:** Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
-**Current focus:** Defining requirements for v1.6 Facade Convergence and Proof Guardrails
+**Current focus:** Phase 30 planning - Milestone History And Refactor Gate Closeout
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: -
-Status: Milestone v1.6 started
-Last activity: 2026-04-16 - started milestone v1.6
+Phase: 30 (milestone-history-and-refactor-gate-closeout) - READY TO PLAN
+Plan: 0 of 3 complete
+Status: Roadmap approved for milestone v1.6
+Last activity: 2026-04-16 - roadmap approved for v1.6
 
 ## Accumulated Context
 
@@ -69,6 +69,6 @@ None captured yet.
 
 ## Session Continuity
 
-Last session: 2026-04-16T11:14:19.5052998+08:00
-Stopped at: Milestone v1.6 started
-Resume file: .planning/REQUIREMENTS.md
+Last session: 2026-04-16T11:17:10.5846951+08:00
+Stopped at: Roadmap approved
+Resume file: .planning/ROADMAP.md

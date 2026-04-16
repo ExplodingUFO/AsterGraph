@@ -52,23 +52,23 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CLOSE-01 | TBD | Pending roadmap |
-| CLOSE-02 | TBD | Pending roadmap |
-| FACADE-01 | TBD | Pending roadmap |
-| FACADE-02 | TBD | Pending roadmap |
-| FACADE-03 | TBD | Pending roadmap |
-| FACADE-04 | TBD | Pending roadmap |
-| STATE-01 | TBD | Pending roadmap |
-| STATE-02 | TBD | Pending roadmap |
-| STATE-03 | TBD | Pending roadmap |
-| GUARD-01 | TBD | Pending roadmap |
-| GUARD-02 | TBD | Pending roadmap |
+| CLOSE-01 | Phase 30 | Pending |
+| CLOSE-02 | Phase 30 | Pending |
+| FACADE-01 | Phase 32 | Pending |
+| FACADE-02 | Phase 32 | Pending |
+| FACADE-03 | Phase 33 | Pending |
+| FACADE-04 | Phase 33 | Pending |
+| STATE-01 | Phase 31 | Pending |
+| STATE-02 | Phase 31 | Pending |
+| STATE-03 | Phase 31 | Pending |
+| GUARD-01 | Phase 30 | Pending |
+| GUARD-02 | Phase 33 | Pending |
 
 **Coverage:**
 - milestone requirements: 11 total
-- mapped to phases: 0
-- unmapped: 11 ⚠️
+- mapped to phases: 11
+- unmapped: 0
 
 ---
 *Requirements defined: 2026-04-16*
-*Last updated: 2026-04-16 after initial milestone scoping*
+*Last updated: 2026-04-16 after roadmap creation*
