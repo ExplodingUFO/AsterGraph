@@ -199,6 +199,37 @@ public sealed class GraphEditorFacadeRefactorTests
     }
 
     [Fact]
+    public void EditorAssembly_ContainsDedicatedCompatibilityCommandCollaborators()
+    {
+        var compatibilityHostType = typeof(GraphEditorViewModel).Assembly.GetType("AsterGraph.Editor.ViewModels.IGraphEditorCompatibilityCommandHost");
+        var compatibilityCommandsType = typeof(GraphEditorViewModel).Assembly.GetType("AsterGraph.Editor.ViewModels.GraphEditorCompatibilityCommands");
+
+        Assert.NotNull(compatibilityHostType);
+        Assert.NotNull(compatibilityCommandsType);
+    }
+
+    [Fact]
+    public void EditorAssembly_ContainsDedicatedFragmentCommandCollaborators()
+    {
+        var fragmentHostType = typeof(GraphEditorViewModel).Assembly.GetType("AsterGraph.Editor.ViewModels.IGraphEditorFragmentCommandHost");
+        var fragmentCommandsType = typeof(GraphEditorViewModel).Assembly.GetType("AsterGraph.Editor.ViewModels.GraphEditorFragmentCommands");
+
+        Assert.NotNull(fragmentHostType);
+        Assert.NotNull(fragmentCommandsType);
+    }
+
+    [Fact]
+    public void GraphEditorViewModel_DoesNotRetainNestedCompatibilityOrFragmentCommandTypes()
+    {
+        var viewModelType = typeof(GraphEditorViewModel);
+
+        Assert.Null(viewModelType.GetNestedType("IGraphEditorCompatibilityCommandHost", System.Reflection.BindingFlags.NonPublic));
+        Assert.Null(viewModelType.GetNestedType("GraphEditorCompatibilityCommands", System.Reflection.BindingFlags.NonPublic));
+        Assert.Null(viewModelType.GetNestedType("IGraphEditorFragmentCommandHost", System.Reflection.BindingFlags.NonPublic));
+        Assert.Null(viewModelType.GetNestedType("GraphEditorFragmentCommands", System.Reflection.BindingFlags.NonPublic));
+    }
+
+    [Fact]
     public void GraphEditorViewModel_DoesNotImplementPersistenceHostInterfaces()
     {
         var viewModelType = typeof(GraphEditorViewModel);

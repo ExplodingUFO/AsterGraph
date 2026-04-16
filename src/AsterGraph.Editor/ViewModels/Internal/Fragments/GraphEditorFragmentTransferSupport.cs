@@ -6,9 +6,9 @@ namespace AsterGraph.Editor.ViewModels;
 
 internal sealed class GraphEditorFragmentTransferSupport
 {
-    private readonly GraphEditorViewModel.IGraphEditorFragmentCommandHost _host;
+    private readonly IGraphEditorFragmentCommandHost _host;
 
-    public GraphEditorFragmentTransferSupport(GraphEditorViewModel.IGraphEditorFragmentCommandHost host)
+    public GraphEditorFragmentTransferSupport(IGraphEditorFragmentCommandHost host)
     {
         _host = host ?? throw new ArgumentNullException(nameof(host));
     }
