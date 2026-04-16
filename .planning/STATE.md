@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.6
 milestone_name: Facade Convergence and Proof Guardrails
-status: executing
-stopped_at: Phase 33 complete
-last_updated: "2026-04-16T05:48:26.0049851Z"
-last_activity: 2026-04-16 -- Phase 33 complete
+status: archived
+stopped_at: Milestone v1.6 archived
+last_updated: "2026-04-16T05:59:33.9267321Z"
+last_activity: 2026-04-16 -- Milestone v1.6 archived
 progress:
   total_phases: 4
   completed_phases: 4
@@ -21,14 +21,14 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-04-16)
 
 **Core value:** Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
-**Current focus:** Milestone lifecycle ready - audit, archive, and cleanup v1.6
+**Current focus:** Start the next milestone from fresh requirements and roadmap framing
 
 ## Current Position
 
-Phase: 33 (kernel-canvas-and-guardrail-follow-through) - COMPLETE
-Plan: All 3 plans complete
-Status: Ready for milestone lifecycle
-Last activity: 2026-04-16 -- Phase 33 complete
+Milestone: v1.6 (Facade Convergence and Proof Guardrails) - ARCHIVED
+Phase: none active
+Status: Ready for next milestone framing
+Last activity: 2026-04-16 -- Milestone v1.6 archived
 
 ## Performance Metrics
 
@@ -81,7 +81,7 @@ None captured yet.
 
 ### Blockers/Concerns
 
-None at the milestone phase level. Proceed to milestone audit and archive.
+None. The milestone is archived and no active phase is open.
 
 ### Quick Tasks Completed
 
@@ -93,6 +93,6 @@ None at the milestone phase level. Proceed to milestone audit and archive.
 
 ## Session Continuity
 
-Last session: 2026-04-16T05:48:26.0049851Z
-Stopped at: Phase 33 complete
-Resume file: .planning/phases/33-kernel-canvas-and-guardrail-follow-through/33-VERIFICATION.md
+Last session: 2026-04-16T05:59:33.9267321Z
+Stopped at: Milestone v1.6 archived
+Resume file: .planning/MILESTONES.md

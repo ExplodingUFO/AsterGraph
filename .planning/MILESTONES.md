@@ -1,5 +1,40 @@
 # Milestones
 
+## v1.6 Facade Convergence and Proof Guardrails (Shipped: 2026-04-16)
+
+**Delivered:** AsterGraph completed the contraction milestone by archiving stale planning history, locking one explicit retained history/save contract into proof, narrowing the retained facade and downstream hotspots without public API churn, and scoping XML-doc debt to the real remaining project boundary.
+
+**Phases completed:** 30-33 (12 plans total)
+
+**Archive:** [ROADMAP](./milestones/v1.6-ROADMAP.md) | [REQUIREMENTS](./milestones/v1.6-REQUIREMENTS.md) | [AUDIT](./milestones/v1.6-MILESTONE-AUDIT.md)
+
+**Key accomplishments:**
+
+- Reconstructed the missing `v1.4` milestone archive and aligned live planning/docs around one current proof story.
+- Added `eng/ci.ps1 -Lane maintenance` as the checked-in hotspot refactor gate over focused editor regressions plus `ScaleSmoke`.
+- Replaced the carried `STATE_HISTORY_OK` mismatch with one explicit retained history/save contract backed by focused suites, proof-ring tests, and smoke output.
+- Narrowed `GraphEditorViewModel` further by moving retained bootstrap, descriptor, compatibility-menu, and fragment orchestration behind dedicated internal collaborators.
+- Split the next `GraphEditorKernel` and `NodeCanvas` hotspots behind dedicated internal helpers without changing public embedding behavior.
+- Scoped `CS1591` debt to `AsterGraph.Editor` so the other publishable packages now prove clean package-boundary XML-doc builds.
+
+**Stats:**
+
+- 372 files modified
+- 5,305 insertions and 23,155 deletions across code, tests, docs, and planning artifacts
+- 4 phases and 12 plans
+- Timeline: 2026-04-16 to 2026-04-16
+
+**Git range:** `docs: start milestone v1.6 facade convergence and proof guardrails` → `docs: audit v1.6 milestone`
+
+**Notes:**
+
+- `v1.6-MILESTONE-AUDIT.md` passed with all 11 milestone requirements satisfied.
+- Remaining non-critical debt at close: `NU1901` warning noise from `NuGet.Packaging` 7.3.0 and missing Nyquist frontmatter normalization in `33-VALIDATION.md`.
+
+**What's next:** Start the next milestone from a fresh requirements pass rather than carrying v1.6 contraction framing forward by default.
+
+---
+
 ## v1.5 Runtime Boundary Cleanup and Quality Gates (Shipped: 2026-04-14)
 
 **Delivered:** AsterGraph now ships a release-grade validation lane and one short canonical host-adoption path on top of the already-shipped kernel-first SDK boundary, so package proof, coverage, package validation, CI, and public host guidance all point at the same runtime-first contract story.

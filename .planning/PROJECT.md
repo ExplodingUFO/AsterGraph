@@ -8,9 +8,9 @@ AsterGraph is a modular node-graph editor toolkit for .NET with a kernel-first e
 
 Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
 
-## Current Milestone: v1.6 Facade Convergence and Proof Guardrails
+## Latest Shipped Milestone: v1.6 Facade Convergence and Proof Guardrails
 
-**Status:** Execution complete, ready to audit and archive
+**Status:** Shipped and archived on 2026-04-16
 
 **Goal:** Reduce the remaining internal complexity around the retained facade path, close the carried history/save semantic concern, and tighten the maintenance guardrails needed for continued hotspot refactoring without changing the public SDK surface.
 
@@ -20,7 +20,7 @@ Hosts can integrate only the graph-editor pieces they need, replace default UI a
 - Narrowed `GraphEditorViewModel` further toward a compatibility facade while keeping kernel-owned state canonical.
 - Continued hotspot reduction in `GraphEditorKernel` and `NodeCanvas`, then scoped `CS1591` debt to the real remaining project boundary.
 
-## Latest Shipped Milestone: v1.5 Runtime Boundary Cleanup and Quality Gates
+## Prior Shipped Milestone: v1.5 Runtime Boundary Cleanup and Quality Gates
 
 **Shipped goal:** Reduce the remaining gap between the canonical runtime boundary and retained compatibility facades, then automate the validation and documentation surface that protects the SDK boundary.
 
@@ -41,7 +41,7 @@ Hosts can integrate only the graph-editor pieces they need, replace default UI a
 - Phase 31 closed the carried history/save concern: retained undo/redo/dirty/save semantics now run on one kernel-owned authority, focused suites cover the interaction/save boundary directly, and `ScaleSmoke` emits `SCALE_HISTORY_CONTRACT_OK`.
 - Phase 32 moved more retained bootstrap, menu, and fragment orchestration out of `GraphEditorViewModel` while keeping the public factory/session/view-model entry points stable.
 - Phase 33 split the next kernel and canvas hotspots behind dedicated internal collaborators, and publishable-package XML-doc debt no longer hides behind a repo-wide `CS1591` blanket.
-- v1.6 execution is complete; the next repo task is milestone audit/archive and then fresh milestone framing.
+- v1.6 is archived; the next repo task is fresh milestone framing.
 
 ## Requirements
 
@@ -175,4 +175,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-16 after Phase 33 completion*
+*Last updated: 2026-04-16 after v1.6 milestone archive*
