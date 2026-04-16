@@ -6,6 +6,8 @@
     <Description>Host-facing editor state, commands, menus, events, and workspace services for AsterGraph.</Description>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <IsPackable>true</IsPackable>
+    <!-- Public runtime/event snapshot docs still need a dedicated retirement pass; keep the debt explicit at project scope. -->
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
