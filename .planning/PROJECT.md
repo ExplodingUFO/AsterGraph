@@ -14,7 +14,7 @@ No active milestone. v1.8 is complete and archived; the repo is ready for the ne
 
 ## Latest Shipped Milestone: v1.8 Public Alpha Readiness and Canonical Demo
 
-**Status:** Shipped on 2026-04-16 and ready to archive
+**Status:** Shipped and archived on 2026-04-16
 
 **Goal:** Turn the already-shipped SDK baseline into a repo and demo that are suitable for public alpha evaluation, adoption, and contribution without reopening the runtime-boundary work that v1.2-v1.7 already settled.
 

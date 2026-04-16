@@ -1,5 +1,38 @@
 # Milestones
 
+## v1.8 Public Alpha Readiness and Canonical Demo (Shipped: 2026-04-16)
+
+**Delivered:** AsterGraph turned the already-shipped SDK baseline into a public-alpha-ready repo by aligning package and doc language around one alpha contract, adding the missing open-source governance files, moving the showcase host onto the canonical composition path, publishing bilingual guides plus localization proof, and wiring public CI/release automation around visible proof artifacts.
+
+**Phases completed:** 38-41 (12 plans total)
+
+**Archive:** [ROADMAP](./milestones/v1.8-ROADMAP.md) | [REQUIREMENTS](./milestones/v1.8-REQUIREMENTS.md) | [AUDIT](./milestones/v1.8-MILESTONE-AUDIT.md)
+
+**Key accomplishments:**
+
+- Realigned package metadata, README, planning artifacts, and public docs around the `0.2.0-alpha.1` public-alpha story, then added `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`, issue templates, a PR template, and `global.json`.
+- Moved `AsterGraph.Demo` onto the canonical factory/session/view-factory route and made plugin trust, automation execution, standalone surfaces, presenter replacement, and `HostSample` positioning visible in the shipped showcase.
+- Published paired English and `zh-CN` guides, added a Chinese root README, and proved the host/runtime localization seam through a real demo language toggle plus `AsterGraph.Demo.Tests`.
+- Extended CI and release automation with concurrency, restore caching, Linux validation, uploaded proof artifacts, and tag-driven prerelease workflows that preserve verification-only pull requests.
+
+**Stats:**
+
+- 80 files modified
+- 3,870 insertions and 346 deletions across code, docs, CI, tests, demo, and planning artifacts
+- 4 phases and 12 plans
+- Timeline: 2026-04-16 to 2026-04-16
+
+**Git range:** `docs: start milestone v1.8 public alpha readiness and canonical demo` → `docs: audit v1.8 milestone`
+
+**Notes:**
+
+- `v1.8-MILESTONE-AUDIT.md` passed with all 16 milestone requirements satisfied.
+- Remaining non-critical debt at close: Linux validation and tag-driven prerelease workflows were reviewed in tracked YAML but not executed against GitHub-hosted runners or live publish secrets from the local Windows workspace.
+
+**What's next:** Start the next milestone from a fresh requirements pass instead of carrying the public-alpha closeout framing forward by default.
+
+---
+
 ## v1.7 Consumer Closure / Release Hardening (Shipped: 2026-04-16)
 
 **Delivered:** AsterGraph closed the productization milestone by aligning repo narrative to the real shipped proof surface, turning release validation into an explicit contract/release gate system, publishing a minimal consumer route plus explicit state semantics, and documenting the remaining stability, retirement, and extension-precedence rules without reopening runtime-boundary drift.
