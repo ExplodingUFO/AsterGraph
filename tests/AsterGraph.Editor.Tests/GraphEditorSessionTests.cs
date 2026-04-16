@@ -567,6 +567,36 @@ public sealed class GraphEditorSessionTests
     }
 
     [Fact]
+    public void GraphEditorSession_ViewModelOverload_PreservesRetainedDescriptorSupportAndStockMenuDescriptors()
+    {
+        var definitionId = new NodeDefinitionId("tests.session.viewmodel-overload");
+        var editor = AsterGraphEditorFactory.Create(CreateOptions(definitionId) with
+        {
+            WorkspaceService = new EmptyWorkspaceService(),
+            FragmentWorkspaceService = new RecordingFragmentWorkspaceService("fragment://tests.session.viewmodel-overload"),
+            FragmentLibraryService = new RecordingFragmentLibraryService("library://tests.session.viewmodel-overload"),
+            ClipboardPayloadSerializer = new RecordingClipboardPayloadSerializer(),
+            ContextMenuAugmentor = new SessionFeatureAugmentor(),
+            NodePresentationProvider = new SessionFeaturePresentationProvider(),
+            LocalizationProvider = new SessionFeatureLocalizationProvider(),
+        });
+        var overloadSession = new GraphEditorSession(editor);
+        var menuContext = new ContextMenuContext(ContextMenuTargetKind.Canvas, new GraphPoint(160, 90));
+
+        var retainedFeatureDescriptors = editor.Session.Queries.GetFeatureDescriptors()
+            .OrderBy(descriptor => descriptor.Id, StringComparer.Ordinal)
+            .ToList();
+        var overloadFeatureDescriptors = overloadSession.Queries.GetFeatureDescriptors()
+            .OrderBy(descriptor => descriptor.Id, StringComparer.Ordinal)
+            .ToList();
+        var retainedMenuSignature = RenderMenuSignature(editor.Session.Queries.BuildContextMenuDescriptors(menuContext));
+        var overloadMenuSignature = RenderMenuSignature(overloadSession.Queries.BuildContextMenuDescriptors(menuContext));
+
+        Assert.Equal(retainedFeatureDescriptors, overloadFeatureDescriptors);
+        Assert.Equal(retainedMenuSignature, overloadMenuSignature);
+    }
+
+    [Fact]
     public void RuntimeSession_CaptureInspectionSnapshot_IncludesFeatureDescriptors()
     {
         var definitionId = new NodeDefinitionId("tests.session.inspection-features");
