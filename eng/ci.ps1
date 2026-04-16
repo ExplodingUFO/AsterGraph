@@ -66,10 +66,13 @@ $maintenanceTestFilter = @(
   'FullyQualifiedName~GraphEditorMutationCompatibilityTests',
   'FullyQualifiedName~GraphEditorFacadeMutationParityTests',
   'FullyQualifiedName~GraphEditorSessionTests',
-  'FullyQualifiedName~GraphEditorTransactionTests',
+  'FullyQualifiedName~GraphEditorHistorySemanticTests',
+  'FullyQualifiedName~GraphEditorHistoryInteractionTests',
+  'FullyQualifiedName~GraphEditorSaveBoundaryTests',
   'FullyQualifiedName~GraphEditorMigrationCompatibilityTests',
   'FullyQualifiedName~GraphEditorFacadeRefactorTests',
   'FullyQualifiedName~GraphEditorViewModelProjectionTests',
+  'FullyQualifiedName~NodeCanvasNodeDragCoordinatorTests',
   'FullyQualifiedName~NodeCanvasPointerInteractionCoordinatorTests'
 ) -join '|'
 

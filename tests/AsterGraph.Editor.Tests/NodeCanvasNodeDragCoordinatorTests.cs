@@ -77,6 +77,7 @@ public sealed class NodeCanvasNodeDragCoordinatorTests
         Assert.Equal(1, host.HideGuideAdornerCalls);
         Assert.Same(sourceNode, host.LastCreateDragSessionNodes!.Single());
         Assert.Same(host.NodeVisuals[sourceNode].Root, host.NodeLayer!.Children[^1]);
+        Assert.False(editor.CanUndo);
     }
 
     private static GraphEditorViewModel CreateEditor()

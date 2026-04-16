@@ -149,6 +149,45 @@ public sealed class NodeCanvasPointerInteractionCoordinatorTests
         Assert.Equal(1, host.HideGuideAdornerCalls);
     }
 
+    [Fact]
+    public void HandleReleased_AfterNodeDrag_CommitsHistoryInteractionBoundary()
+    {
+        var editor = CreateEditor();
+        var node = editor.Nodes[0];
+        var origin = new GraphPoint(node.X, node.Y);
+        var host = new TestPointerInteractionHost(editor)
+        {
+            DragAssistResult = new GraphPoint(24, 12),
+        };
+        editor.BeginHistoryInteraction();
+        host.InteractionSession.BeginNodeDrag(
+            node,
+            new Point(20, 30),
+            new NodeCanvasDragSession(
+                [node],
+                new Dictionary<string, GraphPoint>(StringComparer.Ordinal)
+                {
+                    [node.Id] = origin,
+                },
+                new NodeBounds(node.X, node.Y, node.Width, node.Height)));
+        var coordinator = new NodeCanvasPointerInteractionCoordinator(host);
+
+        coordinator.HandleMoved(new Point(56, 72), selectionDragThreshold: 6);
+        Assert.False(editor.CanUndo);
+
+        coordinator.HandleReleased(new Point(56, 72));
+
+        Assert.True(editor.CanUndo);
+        var movedNode = Assert.Single(editor.Nodes, candidate => candidate.Id == node.Id);
+        Assert.Equal(origin.X + 24, movedNode.X);
+        Assert.Equal(origin.Y + 12, movedNode.Y);
+
+        editor.Undo();
+        var restoredNode = Assert.Single(editor.Nodes, candidate => candidate.Id == node.Id);
+        Assert.Equal(origin.X, restoredNode.X);
+        Assert.Equal(origin.Y, restoredNode.Y);
+    }
+
     private static GraphEditorViewModel CreateEditor()
     {
         var catalog = new NodeCatalog();
