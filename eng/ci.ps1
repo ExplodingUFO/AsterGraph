@@ -16,8 +16,14 @@ $ErrorActionPreference = 'Stop'
 $repoRoot = Split-Path -Parent $PSScriptRoot
 $artifactsRoot = Join-Path $repoRoot 'artifacts'
 $packagesOutputPath = Join-Path $artifactsRoot 'packages'
+$proofArtifactsRoot = Join-Path $artifactsRoot 'proof'
 $coverageResultsRoot = Join-Path $artifactsRoot 'test-results\release'
 $coverageOutputPath = Join-Path $artifactsRoot 'coverage\release-summary.json'
+$coverageMarkerOutputPath = Join-Path $proofArtifactsRoot 'coverage-report.txt'
+$hostSampleProjectProofPath = Join-Path $proofArtifactsRoot 'hostsample-project.txt'
+$hostSamplePackedProofPath = Join-Path $proofArtifactsRoot 'hostsample-packed.txt'
+$packageSmokeProofPath = Join-Path $proofArtifactsRoot 'package-smoke.txt'
+$scaleSmokeProofPath = Join-Path $proofArtifactsRoot 'scale-smoke.txt'
 $dotnetCliHome = Join-Path $repoRoot '.dotnet-cli-home'
 $coverageRunSettingsPath = Join-Path $repoRoot 'tests/coverage.runsettings'
 $coverageReportScriptPath = Join-Path $repoRoot 'eng/coverage-report.ps1'
@@ -25,7 +31,8 @@ $hostSampleProject = 'tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj'
 $packageSmokeProject = 'tools/AsterGraph.PackageSmoke/AsterGraph.PackageSmoke.csproj'
 $scaleSmokeProject = 'tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj'
 $editorTestsProject = 'tests/AsterGraph.Editor.Tests/AsterGraph.Editor.Tests.csproj'
-$fallbackPackageCache = Join-Path $env:USERPROFILE '.nuget\packages'
+$userHome = if ([string]::IsNullOrWhiteSpace($env:USERPROFILE)) { $env:HOME } else { $env:USERPROFILE }
+$fallbackPackageCache = Join-Path $userHome '.nuget/packages'
 $singleProcessBuildArguments = @(
   '-m:1'
 )
@@ -116,6 +123,29 @@ function Invoke-DotNet {
   }
 }
 
+function Invoke-DotNetCapture {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string[]]$Arguments,
+
+    [Parameter(Mandatory = $true)]
+    [string]$CapturePath
+  )
+
+  $captureDirectory = Split-Path -Parent $CapturePath
+  if (-not [string]::IsNullOrWhiteSpace($captureDirectory)) {
+    Ensure-Directory -Path $captureDirectory
+  }
+
+  Write-Host "==> dotnet $($Arguments -join ' ')" -ForegroundColor Cyan
+  & dotnet @Arguments 2>&1 | Tee-Object -FilePath $CapturePath
+  $exitCode = $LASTEXITCODE
+
+  if ($exitCode -ne 0) {
+    throw "dotnet command failed with exit code ${exitCode}: dotnet $($Arguments -join ' ')"
+  }
+}
+
 function Reset-BuildServers {
   Write-Host "==> dotnet build-server shutdown" -ForegroundColor Cyan
   & dotnet build-server shutdown
@@ -167,6 +197,7 @@ function Reset-Directory {
 
 function Initialize-RepoToolingEnvironment {
   Ensure-Directory -Path $artifactsRoot
+  Ensure-Directory -Path $proofArtifactsRoot
   Ensure-Directory -Path $dotnetCliHome
 
   $env:DOTNET_CLI_HOME = $dotnetCliHome
@@ -396,7 +427,7 @@ function Invoke-PackageSmoke {
     '/p:UsePackedAsterGraphPackages=true'
   ) + $singleProcessBuildArguments + $buildStabilityProperties)
 
-  Invoke-DotNet -Arguments @(
+  Invoke-DotNetCapture -Arguments @(
     'run',
     '--project',
     (Resolve-ProjectPath -RelativePath $packageSmokeProject),
@@ -408,7 +439,7 @@ function Invoke-PackageSmoke {
     '--no-restore',
     '--nologo',
     '/p:UsePackedAsterGraphPackages=true'
-  )
+  ) -CapturePath $packageSmokeProofPath
 }
 
 function Invoke-HostSample {
@@ -430,6 +461,8 @@ function Invoke-HostSample {
   Write-Host ''
   Write-Host "### Run HostSample ($modeLabel)" -ForegroundColor Yellow
 
+  $capturePath = if ($UsePackedPackages) { $hostSamplePackedProofPath } else { $hostSampleProjectProofPath }
+
   Invoke-DotNet -Arguments (@(
     'build',
     (Resolve-ProjectPath -RelativePath $hostSampleProject),
@@ -443,7 +476,7 @@ function Invoke-HostSample {
     'minimal'
   ) + $propertyArguments + $singleProcessBuildArguments + $buildStabilityProperties)
 
-  Invoke-DotNet -Arguments (@(
+  Invoke-DotNetCapture -Arguments (@(
     'run',
     '--project',
     (Resolve-ProjectPath -RelativePath $hostSampleProject),
@@ -454,7 +487,7 @@ function Invoke-HostSample {
     '--no-build',
     '--no-restore',
     '--nologo'
-  ) + $propertyArguments)
+  ) + $propertyArguments) -CapturePath $capturePath
 }
 
 function Invoke-ScaleSmoke {
@@ -474,7 +507,7 @@ function Invoke-ScaleSmoke {
     'minimal'
   ) + $singleProcessBuildArguments + $buildStabilityProperties)
 
-  Invoke-DotNet -Arguments @(
+  Invoke-DotNetCapture -Arguments @(
     'run',
     '--project',
     (Resolve-ProjectPath -RelativePath $scaleSmokeProject),
@@ -485,12 +518,13 @@ function Invoke-ScaleSmoke {
     '--no-build',
     '--no-restore',
     '--nologo'
-  )
+  ) -CapturePath $scaleSmokeProofPath
 }
 
 function Invoke-CoverageValidation {
   Reset-Directory -Path $coverageResultsRoot
   Ensure-Directory -Path (Split-Path -Parent $coverageOutputPath)
+  Ensure-Directory -Path $proofArtifactsRoot
 
   Write-Host ''
   Write-Host '### Collect coverage and validate publishable-surface reporting' -ForegroundColor Yellow
@@ -518,6 +552,14 @@ function Invoke-CoverageValidation {
     -RepoRoot $repoRoot `
     -ResultsRoot $coverageResultsRoot `
     -OutputPath $coverageOutputPath
+
+  if ($LASTEXITCODE -ne 0) {
+    throw "coverage-report script failed with exit code ${LASTEXITCODE}"
+  }
+
+  $coverageSummary = Get-Content -LiteralPath $coverageOutputPath -Raw | ConvertFrom-Json
+  "COVERAGE_REPORT_OK:{0}:{1}:{2}" -f $coverageSummary.coveredLines, $coverageSummary.totalLines, $coverageSummary.lineRate |
+    Set-Content -LiteralPath $coverageMarkerOutputPath
 }
 
 function Invoke-ContractValidation {
@@ -528,6 +570,8 @@ function Invoke-ContractValidation {
   if ($Framework -ne 'all') {
     Write-Warning "Contract lane validates the cross-target consumer and contract surface. Ignoring -Framework $Framework and using all."
   }
+
+  Reset-Directory -Path $proofArtifactsRoot
 
   if (-not $SkipRestore) {
     Invoke-RestoreProjects -Projects @(
@@ -561,6 +605,7 @@ function Invoke-ReleaseValidation {
   }
 
   $releaseFrameworks = @('net8.0', 'net9.0')
+  Reset-Directory -Path $proofArtifactsRoot
 
   Invoke-RestoreProjects -Projects (Get-DefaultRestoreProjects -Frameworks $releaseFrameworks)
   Invoke-ContractValidation -SkipRestore
