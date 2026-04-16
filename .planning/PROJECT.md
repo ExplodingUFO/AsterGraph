@@ -10,13 +10,15 @@ Hosts can integrate only the graph-editor pieces they need, replace default UI a
 
 ## Current Milestone: v1.6 Facade Convergence and Proof Guardrails
 
+**Status:** Execution complete, ready to audit and archive
+
 **Goal:** Reduce the remaining internal complexity around the retained facade path, close the carried history/save semantic concern, and tighten the maintenance guardrails needed for continued hotspot refactoring without changing the public SDK surface.
 
-**Target features:**
-- Archive the remaining v1.4 planning history and make current planning/proof artifacts tell one consistent story.
-- Turn the carried `STATE_HISTORY_OK` mismatch and related history/save concerns into explicit, passing regression and proof coverage.
-- Continue shrinking `GraphEditorViewModel` toward a true compatibility facade while keeping `GraphEditorKernel` the only mutable runtime state owner.
-- Build one explicit maintenance/refactor gate and tighten one remaining long-lived guardrail debt instead of reopening the v1.5 baseline work.
+**Delivered in v1.6:**
+- Archived the missing `v1.4` milestone history and aligned live planning/docs around one current proof story.
+- Replaced the carried `STATE_HISTORY_OK` mismatch with explicit passing history/save regression and smoke coverage.
+- Narrowed `GraphEditorViewModel` further toward a compatibility facade while keeping kernel-owned state canonical.
+- Continued hotspot reduction in `GraphEditorKernel` and `NodeCanvas`, then scoped `CS1591` debt to the real remaining project boundary.
 
 ## Latest Shipped Milestone: v1.5 Runtime Boundary Cleanup and Quality Gates
 
@@ -37,7 +39,9 @@ Hosts can integrate only the graph-editor pieces they need, replace default UI a
 - `v1.4` now has checked-in archive files under `.planning/milestones/` plus a retrospective milestone-ledger entry, so milestone history no longer depends on stale phase directories alone.
 - `eng/ci.ps1 -Lane maintenance` now exists as the hotspot-sensitive refactor gate over focused editor regressions plus `ScaleSmoke`.
 - Phase 31 closed the carried history/save concern: retained undo/redo/dirty/save semantics now run on one kernel-owned authority, focused suites cover the interaction/save boundary directly, and `ScaleSmoke` emits `SCALE_HISTORY_CONTRACT_OK`.
-- The remaining obvious internal hotspots are still `GraphEditorViewModel`, `GraphEditorKernel`, and `NodeCanvas`.
+- Phase 32 moved more retained bootstrap, menu, and fragment orchestration out of `GraphEditorViewModel` while keeping the public factory/session/view-model entry points stable.
+- Phase 33 split the next kernel and canvas hotspots behind dedicated internal collaborators, and publishable-package XML-doc debt no longer hides behind a repo-wide `CS1591` blanket.
+- v1.6 execution is complete; the next repo task is milestone audit/archive and then fresh milestone framing.
 
 ## Requirements
 
@@ -80,11 +84,12 @@ Hosts can integrate only the graph-editor pieces they need, replace default UI a
 - ✓ Host now sees one explicit retained undo/redo/dirty/save contract across mixed runtime and retained flows, including save-boundary behavior after undo/redo - v1.6 Phase 31
 - ✓ Contributors can now localize retained history interaction, save-boundary, and drag-boundary regressions through focused suites instead of one broad transaction file - v1.6 Phase 31
 - ✓ `ScaleSmoke` and proof-ring coverage now expose the same explicit history/save contract without the carried `STATE_HISTORY_OK` mismatch - v1.6 Phase 31
+- ✓ Host keeps the same public factory/session/view-model entry points while hotspot refactors continue to move retained-facade orchestration behind kernel-owned collaborators - v1.6 Phase 32
+- ✓ Contributors can keep reducing `GraphEditorViewModel`, `GraphEditorKernel`, and `NodeCanvas` hotspots under the maintenance gate without widening public XML-doc debt again - v1.6 Phase 33
 
 ### Active
 
-- [ ] Host keeps the same public factory/session/view-model entry points while hotspot refactors continue to move retained-facade orchestration behind kernel-owned collaborators.
-- [ ] Contributors can keep reducing `GraphEditorViewModel`, `GraphEditorKernel`, and `NodeCanvas` hotspots under the maintenance gate without widening public XML-doc debt again.
+- (None currently - define the next active milestone through `$gsd-new-milestone` after v1.6 archive.)
 
 ### Out of Scope
 
@@ -99,9 +104,9 @@ Hosts can integrate only the graph-editor pieces they need, replace default UI a
 
 Milestone `v1.5` shipped on 2026-04-14 and left the repo in a materially better release posture: the canonical runtime boundary is clearer, the proof surface is aligned, and the release lane is scripted. The next real gap is no longer missing capability surface. It is the cost of carrying retained compatibility complexity and hotspot classes while trying to keep the SDK stable.
 
-Current repo evidence on 2026-04-16 supports that narrower framing. `AsterGraph.ScaleSmoke` is already present in the solution and docs. The repo already has `.editorconfig`, central package versions, coverage runsettings, and checked-in CI. Phase 30 archived `v1.4` and added a dedicated maintenance gate in `eng/ci.ps1`. Phase 31 then removed the carried history/save mismatch by unifying retained mutation authority, splitting the retained semantic suites, and aligning `ScaleSmoke` plus proof-ring output to one explicit contract. What remains is the hotspot contraction itself: `GraphEditorViewModel`, `GraphEditorKernel`, and `NodeCanvas` are still the obvious internal hotspots even after the earlier coordinator extractions.
+Current repo evidence on 2026-04-16 supported that narrower framing, and the completed milestone now confirms it. `AsterGraph.ScaleSmoke` stayed in the solution and docs. The repo kept the shipped `.editorconfig`, central package versions, coverage runsettings, and checked-in CI from v1.5. Phase 30 archived `v1.4` and added `eng/ci.ps1 -Lane maintenance`. Phase 31 replaced the carried history/save mismatch with one explicit retained contract. Phase 32 then kept shrinking `GraphEditorViewModel` into a thinner compatibility facade, and Phase 33 followed through on the next `GraphEditorKernel` / `NodeCanvas` hotspots while scoping `CS1591` debt to the real remaining project boundary.
 
-v1.6 therefore stays focused on contraction: milestone history is archived, history/save semantics are explicit and passing, and the remaining work is to keep moving responsibilities away from `GraphEditorViewModel` without changing the public SDK boundary. If that work lands cleanly, the project can choose its next capability band from a much more stable maintenance position.
+v1.6 therefore achieved the contraction goal: milestone history is archived, history/save semantics are explicit and passing, the retained facade path is narrower, downstream hotspots are easier to change in isolation, and the maintenance story matches the shipped proof ring. The project can now choose its next capability band from a materially cleaner baseline.
 
 ## Constraints
 
@@ -124,17 +129,17 @@ v1.6 therefore stays focused on contraction: milestone history is archived, hist
 | Use `PackageSmoke` and `ScaleSmoke` as proof-ring anchors for migration and readiness claims | Architectural claims stay machine-checkable and host-visible | ✓ Good |
 | Keep plugin and automation surfaces rooted in `IGraphEditorSession`, descriptors, and command IDs | Extension work should build on the canonical runtime boundary rather than retained MVVM or Avalonia shims | ✓ Good |
 | Keep one repo-local validation command path for both contributors and CI | Quality gates drift quickly if YAML and local commands diverge | ✓ Good |
-| Use v1.6 as a contraction milestone instead of another plugin/automation feature band | The remaining risk is internal complexity and semantic drift, not missing capability surface | — Pending |
+| Use v1.6 as a contraction milestone instead of another plugin/automation feature band | The remaining risk is internal complexity and semantic drift, not missing capability surface | ✓ Good |
 | Build on the shipped v1.5 guardrails instead of recreating them | `.editorconfig`, central package versions, CI, coverage collection, and `ScaleSmoke` alignment already exist in the live repo | ✓ Good |
 | Treat v1.4 archive closure as current milestone work | Planning history drift is now a real maintenance cost rather than harmless backlog noise | ✓ Good |
 | Add one explicit maintenance lane to `eng/ci.ps1` instead of a second script path | Refactor-proof validation should stay on the same repo-local command story contributors and docs already use | ✓ Good |
-| Keep phase numbering continuous from 30 | The latest executed phase is 29, and reset numbering is unnecessary for this milestone | — Pending |
+| Keep phase numbering continuous from 30 | The latest executed phase is 29, and reset numbering is unnecessary for this milestone | ✓ Good |
 
 ## Next Milestone Goals
 
-- Archive v1.4 cleanly so milestone history stops contradicting the current shipped state.
-- Eliminate the carried history/save semantic concern instead of letting it remain a baseline exception.
-- Continue hotspot reduction until `GraphEditorViewModel` is materially closer to a compatibility facade and downstream hotspots are easier to change in isolation.
+- Decide whether the next highest-value band is XML-doc debt retirement, remaining hotspot contraction, or a return to host-facing capability work such as trust/distribution.
+- Retire the recurring `NuGet.Packaging` `NU1901` warning path so build and smoke output carry less background noise.
+- Start the next milestone from a fresh requirements pass instead of carrying forward v1.6 contraction framing by inertia.
 
 ## Archived Milestone Framing
 
@@ -170,4 +175,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-16 after Phase 31 completion*
+*Last updated: 2026-04-16 after Phase 33 completion*
