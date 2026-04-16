@@ -60,6 +60,24 @@ public sealed class GraphEditorLocalizationDemoTests
         Assert.Contains(viewModel.LocalizationProofLines, line => line.Contains("Host override", StringComparison.Ordinal));
     }
 
+    [Fact]
+    public void MainWindowViewModel_PreservesCapabilityShowcaseSelectionAcrossLanguageSwitchWhenUiTemporarilyClearsSelectedItem()
+    {
+        var viewModel = new MainWindowViewModel();
+        var selected = Assert.Single(viewModel.Capabilities, item => item.Key == "automation-execution");
+        viewModel.SelectCapability(selected);
+
+        viewModel.SelectedCapability = null!;
+
+        Assert.Equal("自动化执行", viewModel.SelectedCapabilityTitle);
+
+        viewModel.SelectLanguage("en");
+
+        Assert.NotNull(viewModel.SelectedCapability);
+        Assert.Equal("automation-execution", viewModel.SelectedCapability.Key);
+        Assert.Equal("Automation Execution", viewModel.SelectedCapabilityTitle);
+    }
+
     private static string AssertAddNodeCaption(GraphEditorViewModel editor)
         => Assert.Single(
                 editor.BuildContextMenu(new ContextMenuContext(ContextMenuTargetKind.Canvas, new GraphPoint(0, 0))),

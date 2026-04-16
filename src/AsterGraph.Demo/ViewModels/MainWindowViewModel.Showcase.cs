@@ -4,15 +4,17 @@ namespace AsterGraph.Demo.ViewModels;
 
 public partial class MainWindowViewModel
 {
-    public string SelectedCapabilityTitle => SelectedCapability.Title;
+    private string? _lastSelectedCapabilityKey = "full-shell";
 
-    public string SelectedCapabilitySummary => SelectedCapability.Summary;
+    public string SelectedCapabilityTitle => ResolveSelectedCapability().Title;
 
-    public string SelectedCapabilityArchitecture => SelectedCapability.Architecture;
+    public string SelectedCapabilitySummary => ResolveSelectedCapability().Summary;
 
-    public IReadOnlyList<string> SelectedCapabilityBullets => SelectedCapability.Bullets;
+    public string SelectedCapabilityArchitecture => ResolveSelectedCapability().Architecture;
 
-    public IReadOnlyList<string> SelectedCapabilityProofLines => SelectedCapability.ProofLines;
+    public IReadOnlyList<string> SelectedCapabilityBullets => ResolveSelectedCapability().Bullets;
+
+    public IReadOnlyList<string> SelectedCapabilityProofLines => ResolveSelectedCapability().ProofLines;
 
     public bool IsShowcaseHostGroupSelected => SelectedHostMenuGroup == DemoHostMenuGroups.Showcase;
 
@@ -210,6 +212,11 @@ public partial class MainWindowViewModel
 
     partial void OnSelectedCapabilityChanged(CapabilityShowcaseItem value)
     {
+        if (value is not null)
+        {
+            _lastSelectedCapabilityKey = value.Key;
+        }
+
         OnPropertyChanged(nameof(SelectedCapabilityTitle));
         OnPropertyChanged(nameof(SelectedCapabilitySummary));
         OnPropertyChanged(nameof(SelectedCapabilityArchitecture));
@@ -219,7 +226,7 @@ public partial class MainWindowViewModel
 
     private void UpdateCapabilities()
     {
-        var selectedKey = SelectedCapability?.Key;
+        var selectedKey = SelectedCapability?.Key ?? _lastSelectedCapabilityKey;
         _capabilities = CreateCapabilityShowcaseItems();
         OnPropertyChanged(nameof(Capabilities));
 
@@ -228,6 +235,25 @@ public partial class MainWindowViewModel
             : _capabilities.SingleOrDefault(item => item.Key == selectedKey) ?? _capabilities[0];
 
         SelectedCapability = selected;
+    }
+
+    private CapabilityShowcaseItem ResolveSelectedCapability()
+    {
+        if (SelectedCapability is not null)
+        {
+            return SelectedCapability;
+        }
+
+        if (!string.IsNullOrWhiteSpace(_lastSelectedCapabilityKey))
+        {
+            var retained = _capabilities.SingleOrDefault(item => item.Key == _lastSelectedCapabilityKey);
+            if (retained is not null)
+            {
+                return retained;
+            }
+        }
+
+        return _capabilities[0];
     }
 
     private IReadOnlyList<CapabilityShowcaseItem> CreateCapabilityShowcaseItems()
