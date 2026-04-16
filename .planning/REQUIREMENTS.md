@@ -1,28 +1,33 @@
-# Requirements: AsterGraph v1.5
+# Requirements: AsterGraph v1.6
 
-**Defined:** 2026-04-14
-**Milestone:** v1.5 Runtime Boundary Cleanup and Quality Gates
+**Defined:** 2026-04-16
+**Milestone:** v1.6 Facade Convergence and Proof Guardrails
 **Core Value:** Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
 
 ## Milestone Requirements
 
-### Runtime Boundary
+### Milestone Closeout
 
-- [x] **BOUND-01**: Host can discover compatible connection targets through canonical DTO/snapshot queries without depending on `CompatiblePortTarget` or other MVVM-shaped public runtime types
-- [x] **BOUND-02**: Retained `GraphEditorViewModel` / `GraphEditorView` hosts continue to work as compatibility facades over the same kernel/session-owned runtime state instead of implying a separate runtime path
-- [x] **BOUND-03**: Host receives explicit migration guidance and compiler-visible deprecation signals for remaining compatibility-only runtime APIs, with a documented staged removal plan
+- [ ] **CLOSE-01**: Maintainer can archive the shipped `v1.4` milestone into checked-in milestone files so current planning artifacts no longer imply contradictory active-vs-archived states
+- [ ] **CLOSE-02**: Maintainer can identify the live proof ring, carried concerns, and next milestone entry point from current planning/docs without consulting stale phase directories
 
-### Quality Gates
+### Runtime Facade Convergence
 
-- [x] **QUAL-01**: Contributors build and test the repo under one tracked source/package configuration baseline, including shared editor rules and centralized package version management
-- [x] **QUAL-02**: The supported package boundary is validated automatically for both `net8.0` and `net9.0` through checked-in CI or equivalent scripted automation
-- [x] **QUAL-03**: Release validation automatically checks package smoke, coverage reporting or thresholds, and public API or package-compatibility regressions instead of relying mainly on manual README commands
+- [ ] **FACADE-01**: Host can keep using the current public factory, session, and retained `GraphEditorViewModel` / `GraphEditorView` entry points while hotspot refactors move remaining orchestration out of `GraphEditorViewModel`
+- [ ] **FACADE-02**: Internal runtime mutations, selection flow, and menu/projection orchestration that move during refactoring continue to execute against kernel-owned state instead of introducing a second mutable runtime owner
+- [ ] **FACADE-03**: Contributors can change one `GraphEditorViewModel` hotspot collaborator at a time because the remaining responsibilities are split into narrower internal seams with focused tests
+- [ ] **FACADE-04**: Contributors can continue hotspot reduction in `GraphEditorKernel` and `NodeCanvas` without changing public embedding behavior because cross-cutting responsibilities are isolated behind internal coordinators or helpers
 
-### Docs, Proof, And Samples
+### History And Save Semantics
 
-- [x] **PROOF-01**: README, planning docs, solution/project lists, and proof tooling reference the same current verification surface with no stale sample or tool claims
-- [x] **PROOF-02**: Core SDK regression coverage is distinguishable from demo/sample integration coverage so failures reveal whether the SDK boundary or the showcase host regressed
-- [x] **PROOF-03**: Host can find a short canonical integration path for runtime-only, default UI, and migration scenarios from one synchronized doc or proof entry point
+- [ ] **STATE-01**: Host sees one explicit undo/redo/dirty/save contract across retained facade flows, including save-boundary behavior after undo/redo
+- [ ] **STATE-02**: Contributors can detect regressions in history interaction, drag, and save-boundary semantics through smaller focused regression tests instead of one broad transaction suite alone
+- [ ] **STATE-03**: Machine-checkable proof outputs that cover state/history semantics no longer rely on a carried `STATE_HISTORY_OK` known mismatch
+
+### Maintenance Guardrails
+
+- [ ] **GUARD-01**: Contributors can run one checked-in maintenance/refactor gate that exercises the hotspot-sensitive regression surface without manually curating commands
+- [ ] **GUARD-02**: Publishable packages touched during hotspot refactors stop extending blanket public XML-doc debt, using real docs or scoped suppressions instead of relying on one repo-wide `CS1591` blanket forever
 
 ## Future Requirements
 
@@ -36,31 +41,34 @@
 
 | Feature | Reason |
 |---------|--------|
-| New graph-editing end-user features unrelated to boundary cleanup, release validation, or host integration clarity | v1.5 is about SDK hardening rather than broadening the editor feature surface |
-| Plugin marketplace, remote distribution, signing, trust UI, or stronger isolation policy work | Those remain follow-on platform investments after the current boundary and validation work lands |
-| Dedicated scripting language, workflow-designer UI, or richer automation authoring product layers | The shipped command/query automation runner remains the baseline for now |
-| Replacing Avalonia or rewriting the retained compatibility story from scratch | This milestone should harden the current stack rather than reopen product positioning |
-| A one-shot removal of all compatibility APIs | Staged migration remains part of the product promise until stronger warnings, docs, and proof close the gap |
+| New plugin marketplace, trust/distribution policy, signing, or stronger isolation product work | v1.6 is a contraction milestone, not the next plugin feature band |
+| Dedicated scripting language, workflow-designer UI, or broader automation authoring product layers | The shipped command/query automation runner remains the baseline for now |
+| New graph-editing end-user features unrelated to facade convergence, state semantics, or maintenance guardrails | This milestone is about internal contraction rather than broadening the editor surface |
+| Replacing Avalonia or rewriting the retained compatibility story from scratch | The milestone should harden the current stack instead of reopening product positioning |
+| A one-shot removal of all compatibility APIs or other public breaking changes | Staged migration remains part of the product promise |
+| Repeating v1.5 baseline work such as `.editorconfig`, central package management, CI setup, or `ScaleSmoke` solution alignment unless current repo evidence shows a live regression | Those tasks already landed in the shipped baseline and are not the current highest-value gap |
 
 ## Traceability
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| BOUND-01 | Phase 26 | Complete |
-| BOUND-02 | Phase 26 | Complete |
-| BOUND-03 | Phase 26 | Complete |
-| QUAL-01 | Phase 27 | Complete |
-| QUAL-02 | Phase 27 | Complete |
-| QUAL-03 | Phase 29 | Complete |
-| PROOF-01 | Phase 28 | Complete |
-| PROOF-02 | Phase 28 | Complete |
-| PROOF-03 | Phase 29 | Complete |
+| CLOSE-01 | TBD | Pending roadmap |
+| CLOSE-02 | TBD | Pending roadmap |
+| FACADE-01 | TBD | Pending roadmap |
+| FACADE-02 | TBD | Pending roadmap |
+| FACADE-03 | TBD | Pending roadmap |
+| FACADE-04 | TBD | Pending roadmap |
+| STATE-01 | TBD | Pending roadmap |
+| STATE-02 | TBD | Pending roadmap |
+| STATE-03 | TBD | Pending roadmap |
+| GUARD-01 | TBD | Pending roadmap |
+| GUARD-02 | TBD | Pending roadmap |
 
 **Coverage:**
-- milestone requirements: 9 total
-- mapped to phases: 9
-- unmapped: 0
+- milestone requirements: 11 total
+- mapped to phases: 0
+- unmapped: 11 ⚠️
 
 ---
-*Requirements defined: 2026-04-14*
-*Last updated: 2026-04-14 after Phase 29 completion*
+*Requirements defined: 2026-04-16*
+*Last updated: 2026-04-16 after initial milestone scoping*
