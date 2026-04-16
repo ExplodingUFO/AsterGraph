@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.10
 milestone_name: Public Repo Hygiene and Documentation Surface
 status: active
-stopped_at: Defining requirements
-last_updated: "2026-04-16T15:34:02.0858865Z"
-last_activity: 2026-04-16 -- Milestone v1.10 started
+stopped_at: Phase 45 ready to plan
+last_updated: "2026-04-16T15:36:01.3809497Z"
+last_activity: 2026-04-16 -- Defined v1.10 roadmap and requirements
 progress:
-  total_phases: 0
+  total_phases: 3
   completed_phases: 0
-  total_plans: 0
+  total_plans: 9
   completed_plans: 0
   percent: 0
 ---
@@ -21,14 +21,14 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-04-16)
 
 **Core value:** Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
-**Current focus:** v1.10 public repo hygiene and documentation surface cleanup
+**Current focus:** v1.10 public repo hygiene and documentation surface
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 45 Public Repo Hygiene Baseline
 Plan: —
-Status: Defining requirements
-Last activity: 2026-04-16 -- Milestone v1.10 started
+Status: Ready to plan
+Last activity: 2026-04-16 -- Defined v1.10 roadmap and requirements
 
 ## Accumulated Context
 
@@ -40,10 +40,10 @@ Last activity: 2026-04-16 -- Milestone v1.10 started
 
 ## Next Action
 
-Define scoped requirements for v1.10, then create the roadmap starting at Phase 45.
+Start planning with `$gsd-plan-phase 45`.
 
 ## Session Continuity
 
-Last session: 2026-04-16T15:34:02.0858865Z
-Stopped at: Defining requirements
-Resume file: .planning/PROJECT.md
+Last session: 2026-04-16T15:36:01.3809497Z
+Stopped at: Phase 45 ready to plan
+Resume file: .planning/ROADMAP.md

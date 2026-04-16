@@ -45,21 +45,21 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| REPO-01 | — | Pending roadmap |
-| REPO-02 | — | Pending roadmap |
-| REPO-03 | — | Pending roadmap |
-| DOCS-01 | — | Pending roadmap |
-| DOCS-02 | — | Pending roadmap |
-| DOCS-03 | — | Pending roadmap |
-| ENTRY-01 | — | Pending roadmap |
-| ENTRY-02 | — | Pending roadmap |
-| ENTRY-03 | — | Pending roadmap |
+| REPO-01 | Phase 45 | Planned |
+| REPO-02 | Phase 45 | Planned |
+| REPO-03 | Phase 47 | Planned |
+| DOCS-01 | Phase 46 | Planned |
+| DOCS-02 | Phase 46 | Planned |
+| DOCS-03 | Phase 47 | Planned |
+| ENTRY-01 | Phase 47 | Planned |
+| ENTRY-02 | Phase 47 | Planned |
+| ENTRY-03 | Phase 47 | Planned |
 
 **Coverage:**
 - milestone requirements: 9 total
-- mapped to phases: 0
-- unmapped: 9
+- mapped to phases: 9
+- unmapped: 0
 
 ---
 *Requirements defined: 2026-04-16*
-*Last updated: 2026-04-16 for milestone v1.10 initialization*
+*Last updated: 2026-04-16 after roadmap creation*
