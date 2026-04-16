@@ -27,10 +27,10 @@
 
 ### Maintainability And Extension Contracts
 
-- [ ] **MAINT-01**: `GraphEditorViewModel` can continue shrinking as a compatibility facade without reopening runtime ownership drift or creating a second mutable state owner
-- [ ] **MAINT-02**: Core contract, proof/integration, and demo/sample test lanes are more clearly separated so failures localize to the right maintenance surface
-- [ ] **EXT-01**: Obsolete compatibility shims have a documented retirement plan that tells consumers what to migrate to and when removals are expected
-- [ ] **EXT-02**: Extension precedence and stability rules are documented so consumers know which surfaces are stable contracts, which are migration bridges, and how host overrides interact with plugin contributions
+- [x] **MAINT-01**: `GraphEditorViewModel` can continue shrinking as a compatibility facade without reopening runtime ownership drift or creating a second mutable state owner
+- [x] **MAINT-02**: Core contract, proof/integration, and demo/sample test lanes are more clearly separated so failures localize to the right maintenance surface
+- [x] **EXT-01**: Obsolete compatibility shims have a documented retirement plan that tells consumers what to migrate to and when removals are expected
+- [x] **EXT-02**: Extension precedence and stability rules are documented so consumers know which surfaces are stable contracts, which are migration bridges, and how host overrides interact with plugin contributions
 
 ## Future Requirements
 
@@ -64,10 +64,10 @@
 | CONS-02 | Phase 36 | Completed |
 | HIST-01 | Phase 36 | Completed |
 | HIST-02 | Phase 36 | Completed |
-| MAINT-01 | Phase 37 | Pending |
-| MAINT-02 | Phase 37 | Pending |
-| EXT-01 | Phase 37 | Pending |
-| EXT-02 | Phase 37 | Pending |
+| MAINT-01 | Phase 37 | Completed |
+| MAINT-02 | Phase 37 | Completed |
+| EXT-01 | Phase 37 | Completed |
+| EXT-02 | Phase 37 | Completed |
 
 **Coverage:**
 - milestone requirements: 14 total
@@ -76,4 +76,4 @@
 
 ---
 *Requirements defined: 2026-04-16*
-*Last updated: 2026-04-16 after Phase 36 completion*
+*Last updated: 2026-04-16 after Phase 37 completion*

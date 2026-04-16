@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.7
 milestone_name: Consumer Closure / Release Hardening
-status: executing
-stopped_at: Phase 37 planned
-last_updated: "2026-04-16T11:30:00.0000000Z"
-last_activity: 2026-04-16 -- Planned Phase 37 maintainability and extension contract hardening
+status: planning
+stopped_at: Phase 37 completed
+last_updated: "2026-04-16T12:30:00.0000000Z"
+last_activity: 2026-04-16 -- Completed Phase 37 maintainability and extension contract hardening
 progress:
   total_phases: 4
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 12
-  completed_plans: 9
-  percent: 75
+  completed_plans: 12
+  percent: 100
 ---
 
 # Project State
@@ -21,14 +21,14 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-04-16)
 
 **Core value:** Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
-**Current focus:** Phase 37 ready to execute - maintainability-and-extension-contract-hardening
+**Current focus:** v1.7 audit and archive
 
 ## Current Position
 
-Phase: 37 (maintainability-and-extension-contract-hardening) - READY TO EXECUTE
-Plan: 3 plans written
-Status: Ready to execute
-Last activity: 2026-04-16 -- Planned Phase 37 maintainability and extension contract hardening
+Phase: milestone closeout - READY TO AUDIT
+Plan: all milestone phases complete
+Status: Planning
+Last activity: 2026-04-16 -- Completed Phase 37 maintainability and extension contract hardening
 
 ## Performance Metrics
 
@@ -82,6 +82,7 @@ New v1.6 framing decisions:
 - [Phase 35]: Keep CI responsibilities explicit as framework-matrix, contract-proof, and release-validation jobs. — The target matrix, focused contracts, and publish gate each fail for different reasons and should be visible separately.
 - [Phase 36]: Publish one compact consumer route matrix instead of further expanding narrative onboarding text. — Consumers need packages, entry points, and verification commands in one place.
 - [Phase 36]: Publish history/save/dirty semantics as a host-facing contract and point it at the `contract` lane plus `SCALE_HISTORY_CONTRACT_OK`. — The behavior was already proven; the missing part was a written contract.
+- [Phase 37]: Publish explicit stability tiers, extension-precedence rules, and lane ownership from the real runtime behavior instead of reopening boundary-changing refactors. — The repo already had the right implementation and proof; the gap was contract clarity.
 
 New v1.7 framing decisions:
 
@@ -96,11 +97,11 @@ None captured yet.
 
 ### Blockers/Concerns
 
-Current Phase 37 work:
+Current milestone-close work:
 
-- make lane boundaries and extension-boundary rules easier to reason about for maintainers
-- document compatibility-shim retirement and extension precedence explicitly
-- keep compatibility-hotspot reduction moving without reopening runtime ownership drift
+- audit v1.7 against all 14 milestone requirements
+- archive the milestone into checked-in milestone snapshots
+- clean up phase directories after archive
 
 ### Quick Tasks Completed
 
@@ -113,5 +114,5 @@ Current Phase 37 work:
 ## Session Continuity
 
 Last session: 2026-04-16T06:20:00.0000000Z
-Stopped at: Phase 37 planned
+Stopped at: Phase 37 completed
 Resume file: .planning/ROADMAP.md

@@ -54,6 +54,7 @@ Hosts can integrate only the graph-editor pieces they need, replace default UI a
 - Phase 34 aligned README, host docs, top-level planning artifacts, and codebase maps around one v1.7 proof story, then restored `AsterGraph.HostSample` as the minimal consumer-facing host sample.
 - Phase 35 turned release validation into an explicit three-lane system: framework matrix, focused contract proof, and the full publish gate, while also making packed `HostSample` part of the real release proof path.
 - Phase 36 added a compact consumer route matrix and published the explicit history/save/dirty contract, so consumers no longer have to reverse-engineer those rules from tests and long-form docs.
+- Phase 37 published explicit stability tiers, compatibility-retirement guidance, extension-precedence rules, and lane ownership so maintainers can keep shrinking the retained surface without reopening boundary drift.
 - v1.7 is now scoped as a productization-closeout milestone: truth alignment, proof-ring closure, release automation, minimal consumer onboarding, history/save contract publication, and extension-boundary hardening.
 
 ## Requirements
@@ -107,11 +108,11 @@ Hosts can integrate only the graph-editor pieces they need, replace default UI a
 - ✓ Packed consumer restore now stays compatible with central package management because the four publishable AsterGraph packages all have tracked central package versions - v1.7 Phase 35
 - ✓ Consumers now have one compact route matrix for runtime-only, shipped UI, plugin trust/discovery, automation, and retained migration, with package and verification guidance attached - v1.7 Phase 36
 - ✓ History/save/dirty behavior is now published as an explicit product contract and linked back to the proof lane plus `SCALE_HISTORY_CONTRACT_OK` - v1.7 Phase 36
+- ✓ Stability tiers, compatibility-retirement guidance, extension-precedence rules, and lane ownership are now published as explicit contracts instead of remaining implicit in code/tests - v1.7 Phase 37
 
 ### Active
 
-- [ ] Maintainers can keep shrinking compatibility and hotspot seams under explicit history/save, extension precedence, and compatibility-retirement contracts.
-- [ ] Maintainers should see the lane split, compatibility retirement, and extension precedence rules in one stable, consumer-safe contract story.
+- [ ] Audit and archive v1.7 so the live planning state and milestone history reflect the completed productization-closeout milestone.
 
 ### Out of Scope
 
@@ -197,4 +198,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-16 after Phase 36 completion*
+*Last updated: 2026-04-16 after Phase 37 completion*

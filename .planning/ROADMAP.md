@@ -2,7 +2,7 @@
 
 ## Milestones
 
-- 🚧 **v1.7 Consumer Closure / Release Hardening** - Phase 36 complete, Phase 37 planned
+- 🚧 **v1.7 Consumer Closure / Release Hardening** - Phase 37 complete, ready to audit and archive
 - ✅ **[v1.6 Facade Convergence and Proof Guardrails](./milestones/v1.6-ROADMAP.md)** - Phases 30-33, shipped 2026-04-16, archived 2026-04-16
 - ✅ **[v1.5 Runtime Boundary Cleanup and Quality Gates](./milestones/v1.5-ROADMAP.md)** - Phases 26-29, shipped 2026-04-14
 - ✅ **[v1.4 Plugin Loading and Automation Execution](./milestones/v1.4-ROADMAP.md)** - Phases 22-25, shipped 2026-04-08, archived 2026-04-16
@@ -27,7 +27,7 @@ v1.7 focuses on productization closure: align repo narrative and proof entry poi
 - [x] **Phase 34: Truth Alignment And Proof Ring Closure** - Align live docs and planning artifacts to one current story, then make the proof ring explicit around real tool entry points. (completed 2026-04-16)
 - [x] **Phase 35: Release Gate And Matrix Automation** - Turn the documented build/test/pack/smoke path into one machine gate with explicit framework-matrix and compatibility coverage. (completed 2026-04-16)
 - [x] **Phase 36: Consumer Path And State Contract Closure** - Close the minimal consumer onboarding path and publish the explicit history/save/dirty contract through docs plus proof. (completed 2026-04-16)
-- [ ] **Phase 37: Maintainability And Extension Contract Hardening** - Keep shrinking compatibility hotspots, separate maintenance lanes more clearly, and document extension and retirement rules. (planned 2026-04-16, ready to execute)
+- [x] **Phase 37: Maintainability And Extension Contract Hardening** - Keep shrinking compatibility hotspots, separate maintenance lanes more clearly, and document extension and retirement rules. (completed 2026-04-16)
 
 ## Phase Details
 
@@ -79,8 +79,8 @@ v1.7 focuses on productization closure: align repo narrative and proof entry poi
 | 34. Truth Alignment And Proof Ring Closure | ALIGN-01, ALIGN-02, PROOF-01 | Complete |
 | 35. Release Gate And Matrix Automation | REL-01, REL-02, REL-03 | Complete |
 | 36. Consumer Path And State Contract Closure | CONS-01, CONS-02, HIST-01, HIST-02 | Complete |
-| 37. Maintainability And Extension Contract Hardening | MAINT-01, MAINT-02, EXT-01, EXT-02 | Not started |
+| 37. Maintainability And Extension Contract Hardening | MAINT-01, MAINT-02, EXT-01, EXT-02 | Complete |
 
 ## Next Action
 
-**Next action:** execute Phase 37 with `$gsd-execute-phase 37`
+**Next action:** audit and archive the completed v1.7 milestone
