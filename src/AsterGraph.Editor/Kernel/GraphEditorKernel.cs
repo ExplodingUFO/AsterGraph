@@ -17,7 +17,7 @@ using AsterGraph.Editor.Viewport;
 
 namespace AsterGraph.Editor.Kernel;
 
-internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost, IGraphEditorKernelCommandRouterHost
+internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
 {
     private const double DefaultZoom = 0.88;
     private const double DefaultPanX = 110;
@@ -34,6 +34,7 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost, IGrap
     private readonly GraphEditorKernelNodeMutationCoordinator _nodeMutationCoordinator;
     private readonly GraphEditorKernelConnectionMutationHost _connectionMutationHost;
     private readonly GraphEditorKernelConnectionMutationCoordinator _connectionMutationCoordinator;
+    private readonly GraphEditorKernelCommandRouterHost _commandRouterHost;
     private readonly GraphEditorKernelCommandRouter _commandRouter;
     private readonly GraphEditorKernelHistoryCoordinator _historyCoordinator;
     private readonly GraphEditorKernelWorkspaceSaveCoordinatorHost _workspaceSaveCoordinatorHost;
@@ -79,7 +80,8 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost, IGrap
         _nodeMutationCoordinator = new GraphEditorKernelNodeMutationCoordinator(_nodeMutationHost, _documentMutator);
         _connectionMutationHost = new GraphEditorKernelConnectionMutationHost(this);
         _connectionMutationCoordinator = new GraphEditorKernelConnectionMutationCoordinator(_connectionMutationHost, _documentMutator);
-        _commandRouter = new GraphEditorKernelCommandRouter(this);
+        _commandRouterHost = new GraphEditorKernelCommandRouterHost(this);
+        _commandRouter = new GraphEditorKernelCommandRouter(_commandRouterHost);
         _historyCoordinator = new GraphEditorKernelHistoryCoordinator(this);
         _selectionCoordinator = new GraphEditorKernelSelectionCoordinator(this);
         _projectionCoordinator = new GraphEditorKernelProjectionCoordinator(this);
@@ -122,20 +124,6 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost, IGrap
     public event Action<GraphEditorDiagnostic>? DiagnosticPublished;
 
     public string CurrentStatusMessage { get; private set; } = string.Empty;
-
-    GraphEditorBehaviorOptions IGraphEditorKernelCommandRouterHost.BehaviorOptions => _behaviorOptions;
-
-    GraphDocument IGraphEditorKernelCommandRouterHost.Document => _document;
-
-    int IGraphEditorKernelCommandRouterHost.SelectedNodeCount => _selectedNodeIds.Count;
-
-    GraphEditorPendingConnectionSnapshot IGraphEditorKernelCommandRouterHost.PendingConnection => _pendingConnection;
-
-    double IGraphEditorKernelCommandRouterHost.ViewportWidth => _viewportWidth;
-
-    double IGraphEditorKernelCommandRouterHost.ViewportHeight => _viewportHeight;
-
-    bool IGraphEditorKernelCommandRouterHost.WorkspaceExists => _workspaceService.Exists();
 
     internal bool IsDirty
         => _historyCoordinator.IsDirty(_lastSavedDocumentSignature);

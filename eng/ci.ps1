@@ -72,6 +72,7 @@ $maintenanceTestFilter = @(
   'FullyQualifiedName~GraphEditorSaveBoundaryTests',
   'FullyQualifiedName~GraphEditorMigrationCompatibilityTests',
   'FullyQualifiedName~GraphEditorFacadeRefactorTests',
+  'FullyQualifiedName~GraphEditorKernelCommandRouterTests',
   'FullyQualifiedName~GraphEditorViewModelProjectionTests',
   'FullyQualifiedName~NodeCanvasNodeDragCoordinatorTests',
   'FullyQualifiedName~NodeCanvasPointerInteractionCoordinatorTests'
