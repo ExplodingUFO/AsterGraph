@@ -179,6 +179,26 @@ public sealed class GraphEditorFacadeRefactorTests
     }
 
     [Fact]
+    public void EditorAssembly_ContainsDedicatedFacadeBootstrap()
+    {
+        var hostType = typeof(GraphEditorViewModel).GetNestedType(
+            "GraphEditorViewModelFacadeBootstrap",
+            System.Reflection.BindingFlags.NonPublic);
+
+        Assert.NotNull(hostType);
+    }
+
+    [Fact]
+    public void EditorAssembly_ContainsDedicatedSessionDescriptorSupportBuilder()
+    {
+        var hostType = typeof(GraphEditorViewModel).GetNestedType(
+            "GraphEditorSessionDescriptorSupportBuilder",
+            System.Reflection.BindingFlags.NonPublic);
+
+        Assert.NotNull(hostType);
+    }
+
+    [Fact]
     public void GraphEditorViewModel_DoesNotImplementPersistenceHostInterfaces()
     {
         var viewModelType = typeof(GraphEditorViewModel);
