@@ -1,5 +1,39 @@
 # Milestones
 
+## v1.9 Public Launch Gate and CI Stabilization (Shipped: 2026-04-16)
+
+**Delivered:** AsterGraph closed the last public-opening operational gaps by making GitHub-hosted CI match the local proof story, stabilizing the prerelease workflow and cache behavior, adding an explicit packed `.NET 10` consumer proof, and publishing one short launch checklist tied to the real remaining repo-opening steps.
+
+**Phases completed:** 42-44 (9 plans total)
+
+**Archive:** [ROADMAP](./milestones/v1.9-ROADMAP.md) | [REQUIREMENTS](./milestones/v1.9-REQUIREMENTS.md) | [AUDIT](./milestones/v1.9-MILESTONE-AUDIT.md)
+
+**Key accomplishments:**
+
+- Removed the last hidden local-output assumptions from plugin proof tests, then aligned path-based contract assertions with canonical filesystem behavior so hosted Linux CI matches the local proof surface.
+- Moved workflow restore/cache behavior onto a workspace-local `NUGET_PACKAGES` path and repaired `release.yml` so validation jobs schedule correctly on manual dispatch and tag-driven release entry.
+- Added an explicit packed `.NET 10` HostSample proof into the release lane, alongside the existing `HostSample`, `PackageSmoke`, `ScaleSmoke`, and coverage outputs.
+- Published a short public-launch checklist and tightened README/alpha-status/quick-start so docs only describe the real remaining launch blockers while keeping `HostSample` versus `Demo` roles explicit.
+
+**Stats:**
+
+- 41 files modified
+- 842 insertions and 191 deletions across code, tests, workflows, docs, and planning artifacts
+- 3 phases and 9 plans
+- Timeline: 2026-04-16 to 2026-04-16
+
+**Git range:** `docs: start milestone v1.9 public launch gate and ci stabilization` → `docs: audit v1.9 milestone`
+
+**Notes:**
+
+- `v1.9-MILESTONE-AUDIT.md` passed with all 10 milestone requirements satisfied.
+- Hosted verification now exists for both branch CI (`24506891943`) and manual prerelease workflow dispatch (`24507210737`).
+- Remaining non-critical debt at close: GitHub-hosted runs emit Node.js 20 deprecation warnings for current action pins.
+
+**What's next:** Start the next milestone from a fresh requirements pass instead of carrying the public-launch closeout framing forward by default.
+
+---
+
 ## v1.8 Public Alpha Readiness and Canonical Demo (Shipped: 2026-04-16)
 
 **Delivered:** AsterGraph turned the already-shipped SDK baseline into a public-alpha-ready repo by aligning package and doc language around one alpha contract, adding the missing open-source governance files, moving the showcase host onto the canonical composition path, publishing bilingual guides plus localization proof, and wiring public CI/release automation around visible proof artifacts.
