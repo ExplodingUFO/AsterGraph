@@ -327,6 +327,11 @@ public sealed partial class GraphEditorViewModel
     /// <summary>
     /// 查询指定输出端口可连接的兼容输入端口。
     /// </summary>
+    /// <remarks>
+    /// 此兼容立面仅保留在 retained host 边界，
+    /// 并将运行时 snapshot 目标重新映射回当前 <see cref="GraphEditorViewModel"/> 持有的
+    /// <see cref="NodeViewModel"/> / <see cref="PortViewModel"/> 实例。
+    /// </remarks>
 #pragma warning disable CS0618
     public IReadOnlyList<CompatiblePortTarget> GetCompatibleTargets(string sourceNodeId, string sourcePortId)
         => _kernel.GetCompatiblePortTargets(sourceNodeId, sourcePortId)

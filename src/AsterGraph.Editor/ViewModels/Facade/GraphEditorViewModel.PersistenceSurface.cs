@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Diagnostics;
+using AsterGraph.Editor.Events;
 using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.Services;
 
@@ -87,7 +88,14 @@ public sealed partial class GraphEditorViewModel
     /// 将当前图保存到默认工作区文件。
     /// </summary>
     public void SaveWorkspace()
-        => _workspaceSaveCoordinator.SaveWorkspace();
+    {
+        _sessionHost.SaveRetainedWorkspace(
+            CreateCanonicalRetainedDocumentSnapshot(),
+            CreateSelectionSnapshot());
+        ApplyKernelStatus(_kernel.CurrentStatusMessage);
+        ApplyKernelDirtyState(_kernel.IsDirty);
+        RaiseComputedPropertyChanges();
+    }
 
     /// <summary>
     /// 从默认工作区文件加载图。
@@ -130,6 +138,12 @@ public sealed partial class GraphEditorViewModel
     internal void ApplyKernelDirtyState(bool isDirty)
         => IsDirty = isDirty;
 
+    internal void ApplyKernelRecoverableFailure(GraphEditorRecoverableFailureEventArgs args)
+        => RecoverableFailureRaised?.Invoke(this, args);
+
+    internal void ApplyKernelDiagnostic(GraphEditorDiagnostic diagnostic)
+        => DiagnosticPublished?.Invoke(diagnostic);
+
     /// <summary>
     /// 按实例标识查找节点视图模型。
     /// </summary>
@@ -139,8 +153,77 @@ public sealed partial class GraphEditorViewModel
     private void LoadDocument(GraphDocument document, string status, bool markClean, bool resetHistory = true)
         => _documentLoadCoordinator.LoadDocument(document, status, markClean, resetHistory);
 
-    private void MarkDirty(string status)
-        => _historyStateCoordinator.MarkDirty(status);
+    private void MarkDirty(
+        string status,
+        GraphEditorDocumentChangeKind changeKind,
+        IReadOnlyList<string>? nodeIds = null,
+        IReadOnlyList<string>? connectionIds = null)
+        => CommitRetainedMutation(status, changeKind, nodeIds, connectionIds);
+
+    private void CommitRetainedMutation(
+        string status,
+        GraphEditorDocumentChangeKind changeKind,
+        IReadOnlyList<string>? nodeIds = null,
+        IReadOnlyList<string>? connectionIds = null)
+    {
+        _sessionHost.CommitRetainedMutation(
+            CreateCanonicalRetainedDocumentSnapshot(),
+            CreateSelectionSnapshot(),
+            status,
+            changeKind,
+            nodeIds,
+            connectionIds);
+        ApplyKernelStatus(_kernel.CurrentStatusMessage);
+        ApplyKernelDirtyState(_kernel.IsDirty);
+        RaiseComputedPropertyChanges();
+        NotifyDocumentChanged(changeKind, nodeIds, connectionIds, StatusMessage);
+    }
+
+    private GraphEditorSelectionSnapshot CreateSelectionSnapshot()
+        => new(
+            SelectedNodes.Select(node => node.Id).ToList(),
+            SelectedNode?.Id);
+
+    private GraphDocument CreateCanonicalRetainedDocumentSnapshot()
+    {
+        var kernelDocument = _kernel.CreateDocumentSnapshot();
+        var kernelNodes = kernelDocument.Nodes.ToDictionary(node => node.Id, StringComparer.Ordinal);
+        var kernelConnections = kernelDocument.Connections.ToDictionary(connection => connection.Id, StringComparer.Ordinal);
+
+        return new GraphDocument(
+            Title,
+            Description,
+            Nodes
+                .Select(node => CreateCanonicalRetainedNodeSnapshot(node, kernelNodes))
+                .ToList(),
+            Connections
+                .Select(connection => kernelConnections.TryGetValue(connection.Id, out var kernelConnection)
+                    ? kernelConnection
+                    : connection.ToModel())
+                .ToList());
+    }
+
+    private static GraphNode CreateCanonicalRetainedNodeSnapshot(
+        NodeViewModel node,
+        IReadOnlyDictionary<string, GraphNode> kernelNodes)
+    {
+        ArgumentNullException.ThrowIfNull(node);
+        ArgumentNullException.ThrowIfNull(kernelNodes);
+
+        var parameterValues = node.ParameterValues.Values.ToList();
+        if (kernelNodes.TryGetValue(node.Id, out var kernelNode))
+        {
+            return kernelNode with
+            {
+                Position = new GraphPoint(node.X, node.Y),
+                ParameterValues = parameterValues.Count == 0 && kernelNode.ParameterValues is null
+                    ? null
+                    : parameterValues,
+            };
+        }
+
+        return node.ToModel();
+    }
 
     private GraphPoint GetViewportCenter()
     {

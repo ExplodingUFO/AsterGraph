@@ -2,7 +2,77 @@
 
 This guide shows how to host AsterGraph without over-coupling your application to internal editor details.
 
-Quick Start: see the [minimal onboarding guide](./quick-start.md) for the shortest package/setup/integration path.
+Quick Start: see the [canonical adoption path](./quick-start.md#canonical-adoption-path) for the short route guide. This document expands the same three routes instead of defining a second route tree.
+
+## Canonical Adoption Path
+
+The short source of truth lives in [Quick Start](./quick-start.md#canonical-adoption-path):
+
+- runtime-only or custom UI: `AsterGraphEditorFactory.CreateSession(...)`
+- shipped Avalonia UI: `AsterGraphEditorFactory.Create(...)` plus `AsterGraphAvaloniaViewFactory.Create(...)`
+- retained migration: `new GraphEditorViewModel(...)` plus `new GraphEditorView { Editor = editor }`
+
+If you want to reuse standalone Avalonia surfaces such as `AsterGraphCanvasViewFactory.Create(...)`, `AsterGraphInspectorViewFactory.Create(...)`, or `AsterGraphMiniMapViewFactory.Create(...)`, treat that as an advanced composition detail inside the `Create(...)` family, not as a fourth canonical entry path.
+
+## Consumer Route Matrix
+
+| Need | Packages to start with | Canonical entry point | Verify with |
+| --- | --- | --- | --- |
+| Runtime-only or custom UI | `AsterGraph.Abstractions`, `AsterGraph.Editor`; add `AsterGraph.Core` if host code also works with `GraphDocument`, serialization, or compatibility services directly | `AsterGraphEditorFactory.CreateSession(...)` | `dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj -p:UsePackedAsterGraphPackages=true --nologo` |
+| Default Avalonia UI | `AsterGraph.Avalonia`; add direct `AsterGraph.Editor` and/or `AsterGraph.Core` only when the host uses those APIs directly | `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` | `dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj -p:UsePackedAsterGraphPackages=true --nologo` |
+| Plugin trust/discovery | `AsterGraph.Editor`; add `AsterGraph.Abstractions` when host code also ships shared contracts/providers | `AsterGraphEditorFactory.DiscoverPluginCandidates(...)` + `AsterGraphEditorOptions.PluginTrustPolicy` | `pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane contract -Framework all -Configuration Release` |
+| Automation | `AsterGraph.Editor`; add `AsterGraph.Core` when host code also reads/writes document or snapshot models directly | `IGraphEditorSession.Automation.Execute(...)` | `pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane contract -Framework all -Configuration Release` |
+| Retained migration | `AsterGraph.Editor`, plus `AsterGraph.Avalonia` when the host still embeds `GraphEditorView` | `new GraphEditorViewModel(...)` + `new GraphEditorView { Editor = editor }` | `pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane contract -Framework all -Configuration Release` |
+
+## Minimal Consumer Host Sample
+
+Use `tools/AsterGraph.HostSample` when you want the smallest runnable canonical host path in this repository.
+
+- It proves the two main consumer routes:
+  - `AsterGraphEditorFactory.CreateSession(...)`
+  - `AsterGraphEditorFactory.Create(...)` plus `AsterGraphAvaloniaViewFactory.Create(...)`
+- It stays intentionally narrow and does not try to replace `PackageSmoke`, `ScaleSmoke`, or the demo shell.
+- It can run against local project references or packed packages through `UsePackedAsterGraphPackages=true`.
+
+Commands:
+
+```powershell
+dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj --nologo
+dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj -p:UsePackedAsterGraphPackages=true --nologo
+```
+
+## History, Save, and Dirty Contract
+
+The explicit product contract lives in [`docs/state-contracts.md`](./state-contracts.md).
+
+Short version:
+
+- successful save makes the current state clean
+- undo from the saved baseline makes the editor dirty when it leaves that saved snapshot
+- redo back to the saved baseline makes the editor clean again
+- no-op interactions must not leave dirty or undo state latched
+- retained and runtime mutations still resolve through one kernel-owned history/save authority
+
+Proof for that contract is anchored in:
+
+- `pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane contract -Framework all -Configuration Release`
+- `tests/AsterGraph.Editor.Tests/GraphEditorHistoryInteractionTests.cs`
+- `tests/AsterGraph.Editor.Tests/GraphEditorSaveBoundaryTests.cs`
+- `tests/AsterGraph.Editor.Tests/GraphEditorHistorySemanticTests.cs`
+- `SCALE_HISTORY_CONTRACT_OK` from `tools/AsterGraph.ScaleSmoke`
+
+## Extension And Stability Contract
+
+The explicit extension and maintenance contract lives in [`docs/extension-contracts.md`](./extension-contracts.md).
+
+Short version:
+
+- canonical runtime surfaces are `CreateSession(...)`, `Create(...)`, `IGraphEditorSession`, and DTO/snapshot queries
+- `GraphEditorViewModel` and `GraphEditorView` remain supported as retained migration facades, not as the canonical runtime owner
+- `GetCompatibleTargets(...)` and `CompatiblePortTarget` are compatibility-only shims on a staged retirement path
+- plugin trust is host-owned before activation
+- host localization and node-presentation providers run after plugin providers, so host overrides win final override fields
+- runtime-session menus apply plugin augmentors over stock descriptors, while retained `GraphEditorViewModel.BuildContextMenu(...)` gives the host augmentor the final override point
 
 ## Package Choice
 
@@ -86,39 +156,81 @@ If push fails with authentication or permission errors (401/403), refresh source
 
 ## Release Verification
 
-Before pushing packages, verify both the packed-consumer path and the normal host/project path.
+Before pushing packages, run the release-validation lane through the repo-local script entrypoint.
 
 Recommended local verification sequence:
 
 ```powershell
-# 1. rebuild the package-producing solution outputs
-dotnet build src/AsterGraph.Editor/AsterGraph.Editor.csproj -t:Rebuild --no-restore -p:NoWarn= --nologo -v minimal
-dotnet build avalonia-node-map.sln -t:Rebuild --no-restore -p:NoWarn= --nologo -v minimal
+# 1) script-first release gate: contract proof + packed HostSample/PackageSmoke/ScaleSmoke + coverage + package validation
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framework all -Configuration Release
+```
 
-# 2. produce fresh local packages
-dotnet pack src/AsterGraph.Abstractions/AsterGraph.Abstractions.csproj -c Release -o artifacts/packages --nologo
-dotnet pack src/AsterGraph.Core/AsterGraph.Core.csproj -c Release -o artifacts/packages --nologo
-dotnet pack src/AsterGraph.Editor/AsterGraph.Editor.csproj -c Release -o artifacts/packages --nologo
-dotnet pack src/AsterGraph.Avalonia/AsterGraph.Avalonia.csproj -c Release -o artifacts/packages --nologo
+For the focused consumer/contract proof lane:
 
-# 3. verify NuGet consumption against the packed artifacts
+```powershell
+# HostSample + consumer/runtime/plugin/history contract suites
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane contract -Framework all -Configuration Release
+```
+
+For a targeted maintenance gate during hotspot refactors:
+
+```powershell
+# focused hotspot editor regressions + ScaleSmoke
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane maintenance -Framework all -Configuration Release
+```
+
+For shorter build/test feedback before the full release gate:
+
+```powershell
+# framework matrix build/test lane without contract/release-only smoke/report steps
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane all -Framework all -Configuration Release
+```
+
+For lane-aware diagnostics, run lanes directly:
+
+```powershell
+# core SDK regression lane
+dotnet test tests/AsterGraph.Serialization.Tests/AsterGraph.Serialization.Tests.csproj --nologo -v minimal
+dotnet test tests/AsterGraph.Editor.Tests/AsterGraph.Editor.Tests.csproj --nologo -v minimal
+
+# demo/sample regression lane
+dotnet test tests/AsterGraph.Demo.Tests/AsterGraph.Demo.Tests.csproj --nologo -v minimal
+```
+
+Run the live proof tools separately only when you need their raw markers while debugging:
+
+```powershell
+dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj --nologo
+dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj -p:UsePackedAsterGraphPackages=true --nologo
 dotnet run --project tools/AsterGraph.PackageSmoke/AsterGraph.PackageSmoke.csproj -p:UsePackedAsterGraphPackages=true --nologo
-
-# 4. keep the standard regression suite green
-dotnet test avalonia-node-map.sln --no-restore --nologo -v minimal
+dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj --nologo
 ```
 
 Notes:
 
 - Use `-t:Rebuild` when checking XML documentation warning retirement. Incremental `dotnet build` can reuse existing outputs and hide `CS1591` regressions.
+- `tools/AsterGraph.HostSample` is the minimal consumer-facing sample. It proves the canonical code path without carrying the larger proof burden.
 - `tools/AsterGraph.PackageSmoke` should be run with `UsePackedAsterGraphPackages=true` so it restores from `artifacts/packages` instead of falling back to project references.
-- `src/AsterGraph.Demo` is now the single visual host-composition sample for the default Avalonia shell and related host seams.
+- `src/AsterGraph.Demo` remains the visual/default host-composition sample for the default Avalonia shell and related host seams.
 - `tools/AsterGraph.PackageSmoke` is intentionally narrow: it proves packaged consumption across the runtime-first, hosted-UI, and retained compatibility routes, then emits stable `PACKAGE_SMOKE_*` markers.
 - `tools/AsterGraph.ScaleSmoke` keeps the larger-graph scale/readiness proof path separate from the package-consumption smoke tool.
 
-## Canonical Host Composition
+The verification split is:
 
-AsterGraph currently gives hosts two canonical entry paths. Pick the narrowest surface that matches what you want to own.
+- Scripted publish gate: `eng/ci.ps1 -Lane release`
+- Focused consumer/contract gate: `eng/ci.ps1 -Lane contract`
+  - plugin trust/discovery
+  - automation
+  - hosted-surface composition
+  - history/save/dirty contract
+- Hotspot refactor gate: `eng/ci.ps1 -Lane maintenance`
+- Framework-matrix build/test lane: `eng/ci.ps1 -Lane all`
+- Core SDK regression lane: `tests/AsterGraph.Editor.Tests` plus `tests/AsterGraph.Serialization.Tests`
+- Demo/sample regression lane: `tests/AsterGraph.Demo.Tests`
+
+## Composition Details
+
+The canonical adoption path stays three-way. The sections below expand those three routes and the advanced Avalonia composition details that sit under the `Create(...)` family.
 
 Runtime-only or custom-UI host:
 
@@ -212,7 +324,7 @@ Phase 16 adapter-boundary notes for the default shell:
 - `GraphEditorView` owns clipboard and host-context binding for the full shell. Its embedded `NodeCanvas` does not take over those platform seams.
 - If the host uses `AsterGraphCanvasViewFactory.Create(...)` directly, that standalone `NodeCanvas` becomes the Avalonia owner for those clipboard and host-context seams when attached.
 
-Host-managed Avalonia surface composition:
+Advanced Avalonia surface composition under the `Create(...)` route:
 
 1. Build the editor compatibility facade through `AsterGraphEditorFactory.Create(...)`.
 2. Compose the stock Avalonia surfaces you want to keep:

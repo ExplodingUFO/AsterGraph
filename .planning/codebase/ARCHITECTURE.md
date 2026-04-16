@@ -1,12 +1,12 @@
 # Architecture
 
-**Analysis Date:** 2026-04-08
+**Analysis Date:** 2026-04-16
 
 ## Pattern Overview
 
 - AsterGraph is a layered .NET SDK with a framework-neutral contract layer, immutable graph models, an editor runtime layer, and an Avalonia adapter layer.
 - The architectural direction has shifted from a `GraphEditorViewModel`-centered design toward a kernel-first runtime centered on `src/AsterGraph.Editor/Kernel/GraphEditorKernel.cs` and `src/AsterGraph.Editor/Runtime/GraphEditorSession.cs`.
-- That shift is only partially complete: `src/AsterGraph.Editor/ViewModels/GraphEditorViewModel.cs` is still the retained compatibility facade and still implements `IGraphEditorSessionHost`.
+- `src/AsterGraph.Editor/ViewModels/GraphEditorViewModel.cs` is still the retained compatibility facade, but it no longer owns the canonical runtime state and no longer implements `IGraphEditorSessionHost` directly.
 
 ## Current Architecture State
 
@@ -15,8 +15,8 @@
   - `Create(...)` for the compatibility `GraphEditorViewModel` path.
 - `src/AsterGraph.Editor/Kernel/GraphEditorKernel.cs` owns canonical runtime state for the session-first path.
 - `src/AsterGraph.Editor/Runtime/GraphEditorSession.cs` exposes commands, queries, events, diagnostics, and mutation batching over an internal `IGraphEditorSessionHost`.
-- `src/AsterGraph.Editor/ViewModels/GraphEditorViewModel.cs` still acts as a large adapter and compatibility entry point for legacy hosts and Avalonia surfaces.
-- The repo's `.planning/STATE.md` and `.planning/ROADMAP.md` confirm that Phase 13 landed and Phase 14 is the next decoupling step.
+- `src/AsterGraph.Editor/ViewModels/GraphEditorViewModel.cs` still acts as a large adapter and compatibility entry point for legacy hosts and Avalonia surfaces, but it now fronts internal adapters and collaborators rather than serving as the runtime owner.
+- The repo's `.planning/STATE.md` and `.planning/ROADMAP.md` track the active v1.7 milestone: consumer closure, proof-ring clarity, release hardening, and extension-boundary documentation.
 
 ## Layers
 
@@ -82,7 +82,7 @@
 
 - `src/AsterGraph.Editor/Kernel/GraphEditorKernel.cs`
 - `src/AsterGraph.Editor/Runtime/GraphEditorSession.cs`
-- This is the canonical state owner for the runtime-first path introduced in Phase 13.
+- This is the canonical state owner for the kernel-first runtime path introduced in v1.2/Phase 13; v1.5 further tightened the boundary and migration posture.
 
 ### Compatibility Facade
 
@@ -111,7 +111,10 @@
 - `src/AsterGraph.Editor/Hosting/AsterGraphEditorFactory.cs` is the main non-demo composition root.
 - `src/AsterGraph.Avalonia/Hosting/AsterGraphAvaloniaViewFactory.cs` is the main full-shell UI composition root.
 - `src/AsterGraph.Avalonia/Hosting/AsterGraphCanvasViewFactory.cs`, `src/AsterGraph.Avalonia/Hosting/AsterGraphInspectorViewFactory.cs`, and `src/AsterGraph.Avalonia/Hosting/AsterGraphMiniMapViewFactory.cs` expose standalone surfaces.
-- `tools/AsterGraph.HostSample/Program.cs`, `tools/AsterGraph.PackageSmoke/Program.cs`, and `tools/AsterGraph.ScaleSmoke/Program.cs` are the main proof and sample entry points.
+- `src/AsterGraph.Demo/Program.cs` is the runnable visual sample integration path.
+- `tools/AsterGraph.HostSample/Program.cs` is the minimal consumer-facing sample path.
+- `tools/AsterGraph.PackageSmoke/Program.cs` and `tools/AsterGraph.ScaleSmoke/Program.cs` are the machine-checkable smoke/proof entry points.
+- `eng/ci.ps1` is the scripted verification entry point that ties build, test, pack, smoke, coverage, and package validation together.
 
 ## Error Handling
 
@@ -130,4 +133,4 @@
 
 ---
 
-*Architecture analysis refreshed: 2026-04-08*
+*Architecture analysis refreshed: 2026-04-16*

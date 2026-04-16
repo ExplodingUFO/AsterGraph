@@ -83,9 +83,13 @@ public sealed partial class GraphEditorViewModel
             return status;
         }
 
-        string IGraphEditorFragmentCommandHost.MarkDirty(string status)
+        string IGraphEditorFragmentCommandHost.MarkDirty(
+            string status,
+            GraphEditorDocumentChangeKind changeKind,
+            IReadOnlyList<string>? nodeIds,
+            IReadOnlyList<string>? connectionIds)
         {
-            _owner.MarkDirty(status);
+            _owner.MarkDirty(status, changeKind, nodeIds, connectionIds);
             return status;
         }
 

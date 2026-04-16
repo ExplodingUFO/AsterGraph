@@ -23,7 +23,7 @@ public sealed partial class GraphEditorViewModel
     public bool CanUndo
         => BehaviorOptions.History.EnableUndoRedo
            && CommandPermissions.History.AllowUndo
-           && (_kernel.GetCapabilitySnapshot().CanUndo || _historyService.CanUndo);
+           && _sessionHost.GetCapabilitySnapshot().CanUndo;
 
     /// <summary>
     /// 指示重做命令当前是否可用。
@@ -31,7 +31,7 @@ public sealed partial class GraphEditorViewModel
     public bool CanRedo
         => BehaviorOptions.History.EnableUndoRedo
            && CommandPermissions.History.AllowRedo
-           && (_kernel.GetCapabilitySnapshot().CanRedo || _historyService.CanRedo);
+           && _sessionHost.GetCapabilitySnapshot().CanRedo;
 
     /// <summary>
     /// 指示当前是否至少选中了一个节点。

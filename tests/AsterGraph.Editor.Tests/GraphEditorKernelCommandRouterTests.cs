@@ -30,10 +30,16 @@ public sealed class GraphEditorKernelCommandRouterTests
             .Select(method => method.Name)
             .ToHashSet(StringComparer.Ordinal);
         var routerType = typeof(GraphEditorKernel).Assembly.GetType("AsterGraph.Editor.Kernel.Internal.GraphEditorKernelCommandRouter");
+        var hostType = typeof(GraphEditorKernel).GetNestedType("GraphEditorKernelCommandRouterHost", BindingFlags.NonPublic);
+        var implementedInterfaces = typeof(GraphEditorKernel).GetInterfaces();
 
         Assert.NotNull(routerType);
+        Assert.NotNull(hostType);
         Assert.DoesNotContain("ParseNodePosition", methods);
         Assert.DoesNotContain("TryGetRequiredArgument", methods);
+        Assert.DoesNotContain(
+            implementedInterfaces,
+            iface => iface.FullName == "AsterGraph.Editor.Kernel.Internal.IGraphEditorKernelCommandRouterHost");
     }
 
     [Fact]

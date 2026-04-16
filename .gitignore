@@ -12,6 +12,11 @@ obj/
 # Local Codex/temp artifacts
 .codex-pack-check-*/
 .worktrees/
+.dotnet-cli-home/
+artifacts/packages/
+artifacts/test-results/
+artifacts/coverage/
+artifacts/*.log
 
 # OS noise
 Thumbs.db

@@ -1,5 +1,6 @@
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
+using AsterGraph.Avalonia.Controls;
 using AsterGraph.Core.Compatibility;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Catalog;
@@ -176,6 +177,65 @@ public sealed class GraphEditorFacadeRefactorTests
             System.Reflection.BindingFlags.NonPublic);
 
         Assert.NotNull(hostType);
+    }
+
+    [Fact]
+    public void EditorAssembly_ContainsDedicatedFacadeBootstrap()
+    {
+        var hostType = typeof(GraphEditorViewModel).GetNestedType(
+            "GraphEditorViewModelFacadeBootstrap",
+            System.Reflection.BindingFlags.NonPublic);
+
+        Assert.NotNull(hostType);
+    }
+
+    [Fact]
+    public void EditorAssembly_ContainsDedicatedSessionDescriptorSupportBuilder()
+    {
+        var hostType = typeof(GraphEditorViewModel).GetNestedType(
+            "GraphEditorSessionDescriptorSupportBuilder",
+            System.Reflection.BindingFlags.NonPublic);
+
+        Assert.NotNull(hostType);
+    }
+
+    [Fact]
+    public void EditorAssembly_ContainsDedicatedCompatibilityCommandCollaborators()
+    {
+        var compatibilityHostType = typeof(GraphEditorViewModel).Assembly.GetType("AsterGraph.Editor.ViewModels.IGraphEditorCompatibilityCommandHost");
+        var compatibilityCommandsType = typeof(GraphEditorViewModel).Assembly.GetType("AsterGraph.Editor.ViewModels.GraphEditorCompatibilityCommands");
+
+        Assert.NotNull(compatibilityHostType);
+        Assert.NotNull(compatibilityCommandsType);
+    }
+
+    [Fact]
+    public void EditorAssembly_ContainsDedicatedFragmentCommandCollaborators()
+    {
+        var fragmentHostType = typeof(GraphEditorViewModel).Assembly.GetType("AsterGraph.Editor.ViewModels.IGraphEditorFragmentCommandHost");
+        var fragmentCommandsType = typeof(GraphEditorViewModel).Assembly.GetType("AsterGraph.Editor.ViewModels.GraphEditorFragmentCommands");
+
+        Assert.NotNull(fragmentHostType);
+        Assert.NotNull(fragmentCommandsType);
+    }
+
+    [Fact]
+    public void AvaloniaAssembly_ContainsDedicatedNodeCanvasLifecycleCoordinator()
+    {
+        var lifecycleType = typeof(NodeCanvas).Assembly.GetType("AsterGraph.Avalonia.Controls.Internal.NodeCanvasLifecycleCoordinator");
+
+        Assert.NotNull(lifecycleType);
+    }
+
+    [Fact]
+    public void GraphEditorViewModel_DoesNotRetainNestedCompatibilityOrFragmentCommandTypes()
+    {
+        var viewModelType = typeof(GraphEditorViewModel);
+
+        Assert.Null(viewModelType.GetNestedType("IGraphEditorCompatibilityCommandHost", System.Reflection.BindingFlags.NonPublic));
+        Assert.Null(viewModelType.GetNestedType("GraphEditorCompatibilityCommands", System.Reflection.BindingFlags.NonPublic));
+        Assert.Null(viewModelType.GetNestedType("IGraphEditorFragmentCommandHost", System.Reflection.BindingFlags.NonPublic));
+        Assert.Null(viewModelType.GetNestedType("GraphEditorFragmentCommands", System.Reflection.BindingFlags.NonPublic));
     }
 
     [Fact]

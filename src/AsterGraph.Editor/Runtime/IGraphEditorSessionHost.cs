@@ -3,7 +3,6 @@ using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Diagnostics;
 using AsterGraph.Editor.Events;
-using AsterGraph.Editor.Menus;
 using AsterGraph.Editor.Models;
 
 namespace AsterGraph.Editor.Runtime;
@@ -53,7 +52,4 @@ internal interface IGraphEditorSessionHost
     IReadOnlyList<NodePositionSnapshot> GetNodePositions();
     GraphEditorPendingConnectionSnapshot GetPendingConnectionSnapshot();
     IReadOnlyList<GraphEditorCompatiblePortTargetSnapshot> GetCompatiblePortTargets(string sourceNodeId, string sourcePortId);
-#pragma warning disable CS0618
-    IReadOnlyList<CompatiblePortTarget> GetCompatibleTargets(string sourceNodeId, string sourcePortId);
-#pragma warning restore CS0618
 }

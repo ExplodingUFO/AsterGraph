@@ -2,95 +2,149 @@
 
 ## What This Is
 
-AsterGraph is a modular node-graph editor toolkit for .NET with a kernel-first editor runtime, explicit descriptor-based host contracts, and an Avalonia UI shell. The shipped baseline now covers a publishable four-package SDK boundary, runtime/session contracts, embeddable Avalonia surfaces, replaceable presentation seams, diagnostics hooks, scaling hardening, migration proof, and machine-checkable plugin-loading and automation proof.
+AsterGraph is a modular node-graph editor toolkit for .NET with a kernel-first editor runtime, explicit descriptor-based host contracts, and an Avalonia UI shell. The shipped baseline already covers a publishable four-package SDK boundary, plugin loading, automation execution, proof tools, and release validation. v1.7 focuses on consumer closure and release hardening so that the shipped surface is easier to publish, verify, adopt, and extend without reopening fundamental runtime-boundary work.
 
 ## Core Value
 
 Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
 
-## Current Milestone: v1.4 Plugin Loading and Automation Execution
+## Current Milestone: None (v1.7 archived 2026-04-16)
 
-**Goal:** Turn the shipped readiness descriptors and graph-first showcase proof into real plugin-loading and automation-execution surfaces that hosts can compose from the canonical session boundary.
+**Goal:** Start the next milestone from a fresh requirements pass instead of carrying the v1.7 closeout framing forward by default.
 
-**Target features:**
-- Add a public plugin composition/loading path rooted in `AsterGraphEditorFactory` and the kernel-first session contracts instead of internal editor or Avalonia object access.
-- Let loaded plugins contribute additive services, menus, presentation, diagnostics, or other host-facing seams through explicit contracts that remain inspectable from the canonical runtime boundary.
-- Add a descriptor-first automation runner that drives canonical command IDs, query snapshots, batching, and diagnostics without depending on `GraphEditorViewModel` methods.
-- Extend `HostSample`, `PackageSmoke`, `ScaleSmoke`, focused tests, and docs so plugin and automation claims remain machine-checkable.
+## Latest Shipped Milestone: v1.7 Consumer Closure / Release Hardening
+
+**Status:** Shipped and archived on 2026-04-16
+
+**Goal:** Turn the shipped runtime, plugin, automation, and proof surfaces into a tighter consumer-facing product story with one truthful narrative, one executable proof ring, stronger release automation, and clearer long-term extension contracts.
+
+**Delivered in v1.7:**
+- Aligned README, planning artifacts, and codebase maps around one current proof story and restored `AsterGraph.HostSample` as the minimal consumer-facing sample.
+- Added an explicit `contract` lane, clearer CI job split, packed `HostSample` release proof, and a stronger publish gate around contract proof, pack, smoke, coverage, and package validation.
+- Published a compact consumer route matrix plus an explicit history/save/dirty contract tied back to the proof ring.
+- Published stability tiers, compatibility-retirement guidance, extension-precedence rules, and lane ownership for future maintainability work.
+
+## Prior Shipped Milestone: v1.6 Facade Convergence and Proof Guardrails
+
+**Status:** Shipped and archived on 2026-04-16
+
+**Goal:** Reduce the remaining internal complexity around the retained facade path, close the carried history/save semantic concern, and tighten the maintenance guardrails needed for continued hotspot refactoring without changing the public SDK surface.
+
+**Delivered in v1.6:**
+- Archived the missing `v1.4` milestone history and aligned live planning/docs around one current proof story.
+- Replaced the carried `STATE_HISTORY_OK` mismatch with explicit passing history/save regression and smoke coverage.
+- Narrowed `GraphEditorViewModel` further toward a compatibility facade while keeping kernel-owned state canonical.
+- Continued hotspot reduction in `GraphEditorKernel` and `NodeCanvas`, then scoped `CS1591` debt to the real remaining project boundary.
+
+## Earlier Shipped Milestone: v1.5 Runtime Boundary Cleanup and Quality Gates
+
+**Shipped goal:** Reduce the remaining gap between the canonical runtime boundary and retained compatibility facades, then automate the validation and documentation surface that protects the SDK boundary.
+
+**Delivered in v1.5:**
+- Consolidated retained `GraphEditorViewModel` behavior around the kernel/session-owned runtime path and continued retiring MVVM-shaped runtime compatibility shims.
+- Added tracked repo-level quality gates for style, package/version management, target-matrix validation, coverage collection, CI, and package/public API checks.
+- Realigned documentation, solution membership, proof tools, and regression lanes around one trustworthy SDK verification surface.
+- Shortened the canonical host-adoption path while preserving the current proof ring and staged migration posture.
 
 ## Current State
 
 - Shipped packages remain `AsterGraph.Abstractions`, `AsterGraph.Core`, `AsterGraph.Editor`, and `AsterGraph.Avalonia`.
-- Canonical composition is now kernel-first through `AsterGraphEditorFactory.CreateSession(...)` and `AsterGraphEditorFactory.Create(...)`, without `GraphEditorViewModel` as the runtime state owner.
-- Public host-facing capability, command, menu, and graph-state reads now prefer descriptor and snapshot contracts over MVVM object shape.
-- Avalonia shell and canvas routing/platform seams now flow through shared adapters instead of duplicating policy independently.
-- Migration posture and plugin/automation readiness are locked by focused regressions plus runnable `HostSample`, `PackageSmoke`, and `ScaleSmoke` proof markers.
-- `AsterGraph.Demo` now exposes live view, behavior, and runtime host controls from the top menu and compact right-side pane over one retained editor/session path.
-- `AsterGraph.Demo` now also exposes compact in-context proof cues, live configuration summaries, and aligned README narrative over the same graph-first host shell.
-- The v1.3 showcase work is shipped and archived, and Phase 23 now proves that the same canonical session boundary can host real plugin loading plus canonical plugin inspection.
-- Loaded plugins now compose node definitions, context-menu augmentation, localization, and node presentation through the shared factory/session path while host-owned overrides keep final authority.
-- Hosts can now inspect structured plugin load snapshots, descriptors, contribution shape, and recoverable failures through canonical runtime queries and inspection snapshots.
-- Hosts can now execute synchronous descriptor-first automation runs through `IGraphEditorSession.Automation`, stable command IDs, mutation batching, and canonical inspection snapshots.
-- Automation lifecycle/progress/completion telemetry is now explicit on typed runtime events and machine-readable diagnostics instead of UI-bound status text.
-- `HostSample`, `PackageSmoke`, and focused regressions now prove the shipped plugin composition and automation execution story from the canonical host boundary.
-- `ScaleSmoke` now proves the automation path on a larger graph/session, and `README.md` points hosts to the same canonical plugin/automation proof commands used in milestone verification.
-- The known `STATE_HISTORY_OK` mismatch remains an unresolved pre-v1.2 baseline if the next milestone touches history/save semantics.
+- Canonical composition is kernel-first through `AsterGraphEditorFactory.CreateSession(...)` and `AsterGraphEditorFactory.Create(...)`, without `GraphEditorViewModel` as the canonical runtime state owner.
+- Plugin loading and automation execution already ship on the canonical session boundary and are backed by focused regressions plus `PackageSmoke` and `ScaleSmoke`.
+- The repo already carries `.editorconfig`, `Directory.Packages.props`, `tests/coverage.runsettings`, `.github/workflows/ci.yml`, and `eng/ci.ps1`; future milestones should build on those guardrails rather than recreate them.
+- `v1.4` now has checked-in archive files under `.planning/milestones/` plus a retrospective milestone-ledger entry, so milestone history no longer depends on stale phase directories alone.
+- `eng/ci.ps1 -Lane maintenance` now exists as the hotspot-sensitive refactor gate over focused editor regressions plus `ScaleSmoke`.
+- Phase 31 closed the carried history/save concern: retained undo/redo/dirty/save semantics now run on one kernel-owned authority, focused suites cover the interaction/save boundary directly, and `ScaleSmoke` emits `SCALE_HISTORY_CONTRACT_OK`.
+- Phase 32 moved more retained bootstrap, menu, and fragment orchestration out of `GraphEditorViewModel` while keeping the public factory/session/view-model entry points stable.
+- Phase 33 split the next kernel and canvas hotspots behind dedicated internal collaborators, and publishable-package XML-doc debt no longer hides behind a repo-wide `CS1591` blanket.
+- Phase 34 aligned README, host docs, top-level planning artifacts, and codebase maps around one v1.7 proof story, then restored `AsterGraph.HostSample` as the minimal consumer-facing host sample.
+- Phase 35 turned release validation into an explicit three-lane system: framework matrix, focused contract proof, and the full publish gate, while also making packed `HostSample` part of the real release proof path.
+- Phase 36 added a compact consumer route matrix and published the explicit history/save/dirty contract, so consumers no longer have to reverse-engineer those rules from tests and long-form docs.
+- Phase 37 published explicit stability tiers, compatibility-retirement guidance, extension-precedence rules, and lane ownership so maintainers can keep shrinking the retained surface without reopening boundary drift.
+- v1.7 is archived; the next step is fresh milestone framing rather than continuing to mutate this closeout milestone in place.
 
 ## Requirements
 
 ### Validated
 
-- ✓ Host can consume the four publishable AsterGraph packages through a documented SDK boundary and supported `net8.0` / `net9.0` target story — v1.0
-- ✓ Host can initialize the editor runtime and default Avalonia view through public factory/options APIs while the constructor-based path remains supported — v1.0
-- ✓ Host can migrate through a staged compatibility path backed by parity tests and smoke coverage across legacy and factory entry routes — v1.0 to v1.2
-- ✓ Host can drive the editor through public runtime-session contracts, typed events, batching, and replaceable services without depending on Avalonia control internals for shipped baseline flows — v1.0
-- ✓ Host can embed the full shell, standalone canvas, standalone inspector, and standalone mini map against the same editor state, with explicit standalone canvas stock-behavior opt-outs — v1.0
-- ✓ Host can replace stock visual presenters for nodes, menus, inspector, and mini map while reusing the existing editor-owned behavior and data projections — v1.0
-- ✓ Host can inspect diagnostics and receive machine-readable recoverable failures through the shipped diagnostics/session surface — v1.0
-- ✓ Host/runtime boundaries, native Avalonia behavior, hot-path scaling, and proof-ring validation are materially hardened through phases 07-12 — v1.1
-- ✓ The canonical runtime/editor state owner can be composed without constructing `GraphEditorViewModel` — v1.2
-- ✓ `IGraphEditorSession` and related runtime contracts now operate over kernel-owned state/contracts rather than a VM-owned facade — v1.2
-- ✓ Public command, capability, menu, and state-query contracts now use explicit descriptors and snapshots as the canonical host surface — v1.2
-- ✓ `AsterGraph.Avalonia` now consumes thinner kernel/facade contracts with shared command/menu/platform adapters — v1.2
-- ✓ Existing `GraphEditorViewModel` / `GraphEditorView` hosts keep a staged migration path while the kernel-first route is canonical and explicitly proven — v1.2
-- ✓ The shipped architecture is explicitly ready for later plugin loading and richer automation without another deep boundary rewrite — v1.2
-- ✓ The demo opens into a graph-first shell where the node graph and a host-level menu are the first things users see — v1.3 Phase 19
-- ✓ Users can adjust shell/view, editing behavior, and runtime-facing demo controls from compact host-level menu groups while staying on the same live graph — v1.3 Phase 20
-- ✓ The demo now distinguishes host-owned seams from shared runtime state through compact proof cues, live configuration sections, and aligned demo-facing documentation — v1.3 Phase 21
-- ✓ Host can now load one or more runtime plugins through a public composition path rooted in `AsterGraphEditorFactory` / `AsterGraphEditorOptions`, with canonical loader readiness and recoverable diagnostics — v1.4 Phase 22
-- ✓ Loaded plugins now contribute node definitions, context-menu augmentation, localization, and node presentation through the canonical factory/session boundary while host-supplied providers keep final override authority — v1.4 Phase 23
-- ✓ Host can now inspect loaded plugin descriptors, contribution shape, and recoverable failures through canonical runtime queries and inspection snapshots rather than diagnostics scraping alone — v1.4 Phase 23
-- ✓ Host can now execute multi-step automation runs against canonical command IDs, batching, and query snapshots through `IGraphEditorSession` instead of retained `GraphEditorViewModel` methods — v1.4 Phase 24
-- ✓ Host can now observe automation started/progress/completed signals through typed runtime events and machine-readable diagnostics suitable for non-Avalonia consumers — v1.4 Phase 24
-- ✓ `HostSample`, `PackageSmoke`, and focused regressions now prove plugin composition and automation execution from the canonical host boundary — v1.4 Phase 25
-- ✓ `ScaleSmoke` and README-backed proof commands now show the automation path remains credible on larger sessions and route hosts to the canonical plugin/automation story — v1.4 Phase 25
+- ✓ Host can consume the four publishable AsterGraph packages through a documented SDK boundary and supported `net8.0` / `net9.0` target story - v1.0
+- ✓ Host can initialize the editor runtime and default Avalonia view through public factory/options APIs while the constructor-based path remains supported - v1.0
+- ✓ Host can migrate through a staged compatibility path backed by parity tests and smoke coverage across legacy and factory entry routes - v1.0 to v1.2
+- ✓ Host can drive the editor through public runtime-session contracts, typed events, batching, and replaceable services without depending on Avalonia control internals for shipped baseline flows - v1.0
+- ✓ Host can embed the full shell, standalone canvas, standalone inspector, and standalone mini map against the same editor state, with explicit standalone canvas stock-behavior opt-outs - v1.0
+- ✓ Host can replace stock visual presenters for nodes, menus, inspector, and mini map while reusing the existing editor-owned behavior and data projections - v1.0
+- ✓ Host can inspect diagnostics and receive machine-readable recoverable failures through the shipped diagnostics/session surface - v1.0
+- ✓ Host/runtime boundaries, native Avalonia behavior, hot-path scaling, and proof-ring validation are materially hardened through phases 07-12 - v1.1
+- ✓ The canonical runtime/editor state owner can be composed without constructing `GraphEditorViewModel` - v1.2
+- ✓ `IGraphEditorSession` and related runtime contracts now operate over kernel-owned state/contracts rather than a VM-owned facade - v1.2
+- ✓ Public command, capability, menu, and state-query contracts now use explicit descriptors and snapshots as the canonical host surface - v1.2
+- ✓ `AsterGraph.Avalonia` now consumes thinner kernel/facade contracts with shared command/menu/platform adapters - v1.2
+- ✓ Existing `GraphEditorViewModel` / `GraphEditorView` hosts keep a staged migration path while the kernel-first route is canonical and explicitly proven - v1.2
+- ✓ The shipped architecture is explicitly ready for later plugin loading and richer automation without another deep boundary rewrite - v1.2
+- ✓ The demo opens into a graph-first shell where the node graph and a host-level menu are the first things users see - v1.3 Phase 19
+- ✓ Users can adjust shell/view, editing behavior, and runtime-facing demo controls from compact host-level menu groups while staying on the same live graph - v1.3 Phase 20
+- ✓ The demo now distinguishes host-owned seams from shared runtime state through compact proof cues, live configuration sections, and aligned demo-facing documentation - v1.3 Phase 21
+- ✓ Host can now load one or more runtime plugins through a public composition path rooted in `AsterGraphEditorFactory` / `AsterGraphEditorOptions`, with canonical loader readiness and recoverable diagnostics - v1.4 Phase 22
+- ✓ Loaded plugins now contribute node definitions, context-menu augmentation, localization, and node presentation through the canonical factory/session boundary while host-supplied providers keep final override authority - v1.4 Phase 23
+- ✓ Host can now inspect loaded plugin descriptors, contribution shape, and recoverable failures through canonical runtime queries and inspection snapshots rather than diagnostics scraping alone - v1.4 Phase 23
+- ✓ Host can now execute multi-step automation runs against canonical command IDs, batching, and query snapshots through `IGraphEditorSession` instead of retained `GraphEditorViewModel` methods - v1.4 Phase 24
+- ✓ Host can now observe automation started/progress/completed signals through typed runtime events and machine-readable diagnostics suitable for non-Avalonia consumers - v1.4 Phase 24
+- ✓ `PackageSmoke`, `ScaleSmoke`, and focused regressions now prove plugin composition and automation execution from the canonical host boundary - v1.4 Phase 25
+- ✓ README-backed proof commands now route hosts to the same canonical plugin/automation story used in milestone verification - v1.4 Phase 25
+- ✓ Canonical compatible-target discovery now stays on DTO/snapshot runtime queries, while internal host/kernel/runtime seams no longer expose the legacy MVVM-shaped shim - v1.5 Phase 26
+- ✓ Retained `GraphEditorViewModel` / `GraphEditorView` hosts still run over the adapter-backed kernel/session runtime path, and the remaining compatibility-only APIs now carry explicit staged retirement guidance - v1.5 Phase 26
+- ✓ Contributors now build and test under one tracked repo baseline with shared editor rules, centralized package versions, deterministic restore sources, and a reusable `eng/ci.ps1` entry point - v1.5 Phase 27
+- ✓ The supported package boundary is now validated automatically across explicit `net8.0` and `net9.0` lanes through checked-in CI and the same repo-local command path used outside CI - v1.5 Phase 27
+- ✓ README, planning docs, solution membership, proof-tool references, and regression-lane guidance now point at the same live Phase 28 verification surface with no stale `HostSample` claims - v1.5 Phase 28
+- ✓ Core SDK regression coverage is now split cleanly from demo/sample integration coverage through `AsterGraph.Editor.Tests` / `AsterGraph.Serialization.Tests` versus `AsterGraph.Demo.Tests`, so failures identify the right layer - v1.5 Phase 28
+- ✓ Release validation now packs the publishable packages, runs `PackageSmoke`, runs `ScaleSmoke`, collects coverage, and enforces package validation from one repo-local entry point - v1.5 Phase 29
+- ✓ Hosts can now follow one short canonical integration path for runtime-only, shipped-UI, and retained-migration scenarios - v1.5 Phase 29
+- ✓ Maintainer can now read archived `v1.4` milestone history through checked-in archive files and the milestone ledger without contradictory active-vs-archived planning state claims - v1.6 Phase 30
+- ✓ Contributors can now run `eng/ci.ps1 -Lane maintenance` as the hotspot-sensitive refactor gate while the history/save semantic contract remains active work for Phase 31 - v1.6 Phase 30
+- ✓ Host now sees one explicit retained undo/redo/dirty/save contract across mixed runtime and retained flows, including save-boundary behavior after undo/redo - v1.6 Phase 31
+- ✓ Contributors can now localize retained history interaction, save-boundary, and drag-boundary regressions through focused suites instead of one broad transaction file - v1.6 Phase 31
+- ✓ `ScaleSmoke` and proof-ring coverage now expose the same explicit history/save contract without the carried `STATE_HISTORY_OK` mismatch - v1.6 Phase 31
+- ✓ Host keeps the same public factory/session/view-model entry points while hotspot refactors continue to move retained-facade orchestration behind kernel-owned collaborators - v1.6 Phase 32
+- ✓ Contributors can keep reducing `GraphEditorViewModel`, `GraphEditorKernel`, and `NodeCanvas` hotspots under the maintenance gate without widening public XML-doc debt again - v1.6 Phase 33
+- ✓ Maintainers can now read README, ROADMAP, STATE, PROJECT, and current codebase maps without conflicting v1.7 proof-ring or milestone-state claims - v1.7 Phase 34
+- ✓ Consumer-facing docs no longer contradict themselves on undo/redo capability, target support, or proof-tool availability - v1.7 Phase 34
+- ✓ The official proof ring is now explicit around `eng/ci.ps1`, `HostSample`, `PackageSmoke`, `ScaleSmoke`, focused regressions, and the visual demo role split - v1.7 Phase 34
+- ✓ Maintainers can now run one official release entry point that executes focused contract proof, pack, packed consumer proof, smoke proof, coverage, and package validation - v1.7 Phase 35
+- ✓ CI now exposes explicit framework-matrix, contract-proof, and release-validation jobs across the supported `net8.0` / `net9.0` story - v1.7 Phase 35
+- ✓ Packed consumer restore now stays compatible with central package management because the four publishable AsterGraph packages all have tracked central package versions - v1.7 Phase 35
+- ✓ Consumers now have one compact route matrix for runtime-only, shipped UI, plugin trust/discovery, automation, and retained migration, with package and verification guidance attached - v1.7 Phase 36
+- ✓ History/save/dirty behavior is now published as an explicit product contract and linked back to the proof lane plus `SCALE_HISTORY_CONTRACT_OK` - v1.7 Phase 36
+- ✓ Stability tiers, compatibility-retirement guidance, extension-precedence rules, and lane ownership are now published as explicit contracts instead of remaining implicit in code/tests - v1.7 Phase 37
 
 ### Active
 
-- [ ] Archive v1.4 and frame the next milestone around the highest remaining product risk after plugin-loading and automation execution have shipped cleanly.
+- [ ] Start the next milestone from a fresh requirements pass.
 
 ### Out of Scope
 
-- New graph-editing end-user features unrelated to extensibility, host integration, or automation on top of the shipped SDK seams
-- Deep demo-showcase follow-on work such as named presets or guided tours in this milestone; that value is deferred until the platform work lands
-- Plugin marketplace/discovery UX, remote installation flows, signing, or isolation policy work beyond the first in-process loader baseline
-- Dedicated scripting language or workflow-designer product surface beyond descriptor-first automation execution
-- Replacing Avalonia with another UI stack before plugin/automation value is realized on the current stack
+- New plugin marketplace, trust/distribution policy, signing, or stronger isolation product work - v1.6 is a contraction milestone, not the next plugin feature band
+- Dedicated scripting language, workflow-designer UI, or broader automation authoring product layers - the shipped command/query automation runner remains the baseline for now
+- New graph-editing end-user features unrelated to facade convergence, state semantics, or maintenance guardrails - this milestone is about internal contraction rather than broadening the editor surface
+- Replacing Avalonia or rewriting the retained compatibility story from scratch - the milestone should harden the current stack instead of reopening product positioning
+- A one-shot removal of all compatibility APIs or other public breaking changes - staged migration remains part of the product promise
+- Repeating v1.5 baseline work such as `.editorconfig`, central package management, CI setup, or `ScaleSmoke` solution alignment unless current repo evidence shows an actual regression
 
 ## Context
 
-Milestone `v1.2` shipped on 2026-04-08 after phases 13-18 extracted the kernel, normalized descriptor contracts, thinned Avalonia adapters, and closed with migration/readiness proof. Milestone `v1.3` then shipped the graph-first demo showcase, so the host-level integration story is now legible on first read instead of being buried behind explanation-heavy panels. Phase 22 and Phase 23 of `v1.4` then turned that readiness posture into a real plugin-loading baseline with live additive composition and canonical inspection.
+Milestone `v1.5` shipped on 2026-04-14 and left the repo in a materially better release posture: the canonical runtime boundary is clearer, the proof surface is aligned, and the release lane is scripted. The next real gap is no longer missing capability surface. It is the cost of carrying retained compatibility complexity and hotspot classes while trying to keep the SDK stable.
 
-Phase 24 extended that same canonical session boundary into a shipped automation-execution baseline. Phase 25 then closed the proof gap across focused regressions, sample hosts, smoke tools, scale proof, and README guidance without reintroducing facade-shaped or Avalonia-shaped dependencies. v1.4 is now execution-complete and ready for milestone archive.
+Current repo evidence on 2026-04-16 supports a different next step from v1.6. The runtime/session-first boundary is largely settled, plugin trust/discovery and automation are no longer just README claims, and the repo already ships `PackageSmoke`, `ScaleSmoke`, CI, package validation, and a maintenance gate. The bigger risk is that README, planning artifacts, proof-ring entry points, and consumer onboarding still drift apart more easily than the underlying code.
+
+v1.7 therefore focuses on productization closure rather than new capability expansion. The milestone should make the repo tell one truthful story, make the proof ring executable and discoverable, push release verification deeper into machine gates, provide a real minimal consumer host path, publish the history/save contract explicitly, and document what is stable versus transitional in the extension surface.
 
 ## Constraints
 
 - **Tech stack**: Keep the solution centered on .NET, C#, and Avalonia
 - **Compatibility strategy**: Keep the migration window deliberate and additive rather than forcing a one-shot public break
 - **Product positioning**: Preserve publishable package quality for the four supported SDK packages
-- **Architecture**: Extend the shipped kernel-first baseline incrementally; do not rewrite the runtime or shell from scratch
-- **Extensibility**: Prefer stable descriptors, snapshots, and explicit service seams over leaking mutable MVVM implementation types
-- **Observability**: Diagnostics, proof outputs, and smoke markers remain part of the product surface, not local developer conveniences
+- **Architecture**: Keep `GraphEditorKernel` as the canonical mutable runtime state owner while retained facades stay compatibility-only
+- **Public API stability**: Do not change the public factory, session, or retained view-model entry points during this milestone
+- **Observability**: Diagnostics, proof outputs, smoke markers, and regression lanes remain part of the product surface, not local developer conveniences
 
 ## Key Decisions
 
@@ -101,44 +155,53 @@ Phase 24 extended that same canonical session boundary into a shipped automation
 | Normalize capability, command, and menu discovery around descriptors and snapshots | Stable host contracts are easier to version than MVVM object shape | ✓ Good |
 | Treat Avalonia as an adapter layer over shared runtime routing and seam binders | Shell/canvas duplication should not remain the policy source | ✓ Good |
 | Keep `GraphEditorViewModel` and `GraphEditorView` as retained compatibility facades with explicit proof | Staged migration remained possible while the canonical route moved to the kernel | ✓ Good |
-| Use `HostSample`, `PackageSmoke`, and `ScaleSmoke` as the proof ring for migration and readiness claims | Architectural claims stay machine-checkable and host-visible | ✓ Good |
-| Lead the next milestone with demo showcase UX rather than plugin/automation implementation | The shipped architecture is ready, but the demo still undersells the host integration story | ✓ Good |
-| Keep the demo on one live graph session with host-level menu controls instead of scene switching | A single-session showcase better demonstrates seam replacement without hiding runtime continuity | ✓ Good |
-| Use an in-window host menu as the first control plane in the demo shell | Makes the host integration story visible before explanatory content | ✓ Good |
-| Move secondary showcase content behind a compact on-demand pane | Preserves graph-first reading while keeping live proof available | ✓ Good |
-| Return to plugin/automation execution immediately after the showcase milestone | The integration story is now clear enough that the highest remaining product risk is real extension delivery, not more presentation polish | ✓ Good |
-| Keep new plugin and automation surfaces rooted in `IGraphEditorSession`, descriptors, and command IDs | Extension work should build on the canonical runtime boundary rather than retained MVVM or Avalonia compatibility shims | ✓ Good |
-| Use `AssemblyLoadContext` + `AssemblyDependencyResolver` while keeping shared `AsterGraph.*` contracts in the default context | Assembly-path plugins need intentional dependency isolation without breaking host/plugin type identity | ✓ Good |
-| Keep plugin inspection rooted in canonical query and inspection DTOs rather than diagnostics scraping | Hosts need stable current-state reads, not only append-only event history | ✓ Good |
-| Compose plugin contributions beneath explicit host-owned overrides on one shared factory/session path | Live plugin value should not fork retained/runtime behavior or regress host precedence | ✓ Good |
-| Keep the first automation runner synchronous, in-process, and rooted in `IGraphEditorSession` command/query/mutation contracts | The first shipped automation value should validate the canonical runtime boundary before richer authoring/product layers are considered | ✓ Good |
-| Publish automation lifecycle on typed runtime events plus diagnostics instead of changing generic command batching semantics | Hosts need explicit automation telemetry without regressing the existing control plane | ✓ Good |
-| Keep plugin/automation proof aligned across focused tests, samples, smoke tools, and README commands | Public claims should stay machine-checkable from the same canonical host boundary everywhere | ✓ Good |
+| Use `PackageSmoke` and `ScaleSmoke` as proof-ring anchors for migration and readiness claims | Architectural claims stay machine-checkable and host-visible | ✓ Good |
+| Keep plugin and automation surfaces rooted in `IGraphEditorSession`, descriptors, and command IDs | Extension work should build on the canonical runtime boundary rather than retained MVVM or Avalonia shims | ✓ Good |
+| Keep one repo-local validation command path for both contributors and CI | Quality gates drift quickly if YAML and local commands diverge | ✓ Good |
+| Use v1.6 as a contraction milestone instead of another plugin/automation feature band | The remaining risk is internal complexity and semantic drift, not missing capability surface | ✓ Good |
+| Build on the shipped v1.5 guardrails instead of recreating them | `.editorconfig`, central package versions, CI, coverage collection, and `ScaleSmoke` alignment already exist in the live repo | ✓ Good |
+| Treat v1.4 archive closure as current milestone work | Planning history drift is now a real maintenance cost rather than harmless backlog noise | ✓ Good |
+| Add one explicit maintenance lane to `eng/ci.ps1` instead of a second script path | Refactor-proof validation should stay on the same repo-local command story contributors and docs already use | ✓ Good |
+| Keep phase numbering continuous from 30 | The latest executed phase is 29, and reset numbering is unnecessary for this milestone | ✓ Good |
 
 ## Next Milestone Goals
 
-- Archive v1.4 cleanly and use the shipped proof ring as the baseline for the next milestone.
-- Decide which deferred platform risk comes next: plugin trust/isolation policy, marketplace/distribution work, richer automation authoring, or another host-facing gap surfaced by v1.4 validation.
-- Preserve the proof-ring discipline so future extension claims continue to close with machine-checkable tests, samples, smoke runs, and milestone artifacts.
+- Refresh README, planning artifacts, and codebase maps until they all describe the same shipped capability and proof surface.
+- Turn build/test/pack/smoke and compatibility checks into one official release gate with explicit target-matrix coverage.
+- Close the consumer-facing adoption and maintenance gaps around minimal host onboarding, history/save contract publication, test-lane layering, and extension-boundary rules.
 
 ## Archived Milestone Framing
 
 <details>
-<summary>v1.3 planning snapshot</summary>
+<summary>v1.5 planning snapshot</summary>
 
-Demo Showcase focused on turning `AsterGraph.Demo` into a graph-first, host-menu-first SDK proof surface so hosts can see seam ownership, live configuration, and shared runtime state without reading through a capability-console layout.
+Runtime Boundary Cleanup and Quality Gates focused on tightening the canonical runtime boundary, automating release validation, and aligning docs/proof/test lanes around one trustworthy SDK verification surface.
+
+</details>
+
+<details>
+<summary>v1.4 planning snapshot</summary>
+
+Plugin Loading and Automation Execution focused on turning the shipped readiness descriptors and graph-first showcase proof into real runtime extension surfaces rooted in `AsterGraphEditorFactory`, `IGraphEditorSession`, descriptor-based inspection, and the same machine-checkable proof ring used for public claims.
 
 </details>
 
 ## Evolution
 
-This document evolves at milestone boundaries.
+This document evolves at phase transitions and milestone boundaries.
+
+**After each phase transition**:
+1. Requirements invalidated? → Move to Out of Scope with reason
+2. Requirements validated? → Move to Validated with phase reference
+3. New requirements emerged? → Add to Active
+4. Decisions to log? → Add to Key Decisions
+5. "What This Is" still accurate? → Update if drifted
 
 **After each milestone**:
-1. Move newly shipped requirements into the validated section.
-2. Re-check whether the current core value and product description still match what the codebase actually delivers.
-3. Log the architectural decisions that proved durable during the milestone.
-4. Reset active requirements so the next roadmap starts from the highest remaining product risk instead of stale execution context.
+1. Full review of all sections
+2. Core Value check — still the right priority?
+3. Audit Out of Scope — reasons still valid?
+4. Update Context with current state
 
 ---
-*Last updated: 2026-04-08 after completing Phase 25*
+*Last updated: 2026-04-16 after Phase 37 completion*

@@ -4,7 +4,6 @@ using AsterGraph.Core.Models;
 using AsterGraph.Editor.Diagnostics;
 using AsterGraph.Editor.Events;
 using AsterGraph.Editor.Kernel;
-using AsterGraph.Editor.Menus;
 using AsterGraph.Editor.Models;
 using AsterGraph.Editor.Runtime;
 
@@ -14,6 +13,7 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
 {
     private readonly GraphEditorKernel _kernel;
     private readonly GraphEditorViewModel _owner;
+    private bool _suppressOwnerProjection;
 
     public GraphEditorViewModelKernelAdapter(GraphEditorKernel kernel, GraphEditorViewModel owner)
     {
@@ -248,6 +248,38 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
 
     public GraphEditorPendingConnectionSnapshot GetPendingConnectionSnapshot() => _kernel.GetPendingConnectionSnapshot();
 
+    internal void CommitRetainedMutation(
+        GraphDocument document,
+        GraphEditorSelectionSnapshot selection,
+        string status,
+        GraphEditorDocumentChangeKind changeKind,
+        IReadOnlyList<string>? nodeIds = null,
+        IReadOnlyList<string>? connectionIds = null)
+    {
+        _suppressOwnerProjection = true;
+        try
+        {
+            _kernel.CommitRetainedMutation(document, selection, status, changeKind, nodeIds, connectionIds);
+        }
+        finally
+        {
+            _suppressOwnerProjection = false;
+        }
+    }
+
+    internal void SaveRetainedWorkspace(GraphDocument document, GraphEditorSelectionSnapshot selection)
+    {
+        _suppressOwnerProjection = true;
+        try
+        {
+            _kernel.SaveRetainedWorkspace(document, selection);
+        }
+        finally
+        {
+            _suppressOwnerProjection = false;
+        }
+    }
+
     private static bool TryGetRequiredArgument(
         GraphEditorCommandInvocationSnapshot command,
         string name,
@@ -264,11 +296,6 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
 
     public IReadOnlyList<GraphEditorCompatiblePortTargetSnapshot> GetCompatiblePortTargets(string sourceNodeId, string sourcePortId)
         => _kernel.GetCompatiblePortTargets(sourceNodeId, sourcePortId);
-
-#pragma warning disable CS0618
-    public IReadOnlyList<CompatiblePortTarget> GetCompatibleTargets(string sourceNodeId, string sourcePortId)
-        => _kernel.GetCompatibleTargets(sourceNodeId, sourcePortId);
-#pragma warning restore CS0618
 
     public void Dispose()
     {
@@ -288,14 +315,22 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
     private void HandleKernelDocumentChanged(object? sender, GraphEditorDocumentChangedEventArgs args)
     {
         var markClean = args.ChangeKind is GraphEditorDocumentChangeKind.WorkspaceLoaded or GraphEditorDocumentChangeKind.WorkspaceSaved;
-        ApplyOwnerDocumentProjection(markClean);
+        if (!_suppressOwnerProjection)
+        {
+            ApplyOwnerDocumentProjection(markClean);
+        }
+
         ApplyOwnerStatusProjection();
         DocumentChanged?.Invoke(this, args);
     }
 
     private void HandleKernelSelectionChanged(object? sender, GraphEditorSelectionChangedEventArgs args)
     {
-        _owner.ApplyKernelSelection(args.SelectedNodeIds, args.PrimarySelectedNodeId);
+        if (!_suppressOwnerProjection)
+        {
+            _owner.ApplyKernelSelection(args.SelectedNodeIds, args.PrimarySelectedNodeId);
+        }
+
         ApplyOwnerStatusProjection();
         SelectionChanged?.Invoke(this, args);
     }
@@ -316,11 +351,13 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
     private void HandleKernelRecoverableFailureRaised(object? sender, GraphEditorRecoverableFailureEventArgs args)
     {
         ApplyOwnerStatusProjection();
-        RecoverableFailureRaised?.Invoke(this, args);
+        _owner.ApplyKernelRecoverableFailure(args);
     }
 
     private void HandleKernelDiagnosticPublished(GraphEditorDiagnostic diagnostic)
-        => DiagnosticPublished?.Invoke(diagnostic);
+    {
+        _owner.ApplyKernelDiagnostic(diagnostic);
+    }
 
     private void HandleOwnerFragmentExported(object? sender, GraphEditorFragmentEventArgs args)
         => FragmentExported?.Invoke(this, args);

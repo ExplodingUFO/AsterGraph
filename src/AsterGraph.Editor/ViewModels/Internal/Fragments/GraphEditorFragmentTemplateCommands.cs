@@ -2,12 +2,12 @@ namespace AsterGraph.Editor.ViewModels;
 
 internal sealed class GraphEditorFragmentTemplateCommands
 {
-    private readonly GraphEditorViewModel.IGraphEditorFragmentCommandHost _host;
+    private readonly IGraphEditorFragmentCommandHost _host;
     private readonly GraphEditorFragmentTransferSupport _transferSupport;
     private readonly GraphEditorFragmentWorkspaceCommands _workspaceCommands;
 
     public GraphEditorFragmentTemplateCommands(
-        GraphEditorViewModel.IGraphEditorFragmentCommandHost host,
+        IGraphEditorFragmentCommandHost host,
         GraphEditorFragmentTransferSupport transferSupport,
         GraphEditorFragmentWorkspaceCommands workspaceCommands)
     {

@@ -223,7 +223,10 @@ public sealed partial class GraphEditorViewModel
             Connections.Remove(connection);
         }
 
-        MarkDirty(status);
+        MarkDirty(
+            status,
+            GraphEditorDocumentChangeKind.ConnectionsChanged,
+            connectionIds: removed.Select(connection => connection.Id).ToList());
     }
 
     private static string CreateUniqueId(IEnumerable<string> existingIds, string prefix)

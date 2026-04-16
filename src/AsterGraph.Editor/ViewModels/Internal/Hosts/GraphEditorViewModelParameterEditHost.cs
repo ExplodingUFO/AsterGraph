@@ -1,4 +1,5 @@
 using AsterGraph.Editor.Services;
+using AsterGraph.Editor.Events;
 
 namespace AsterGraph.Editor.ViewModels;
 
@@ -26,6 +27,9 @@ public sealed partial class GraphEditorViewModel
             => _owner.SetStatus(key, fallback);
 
         void IGraphEditorParameterEditHost.MarkDirty(string status)
-            => _owner.MarkDirty(status);
+            => _owner.MarkDirty(
+                status,
+                GraphEditorDocumentChangeKind.ParametersChanged,
+                nodeIds: _owner.SelectedNodes.Select(node => node.Id).ToList());
     }
 }

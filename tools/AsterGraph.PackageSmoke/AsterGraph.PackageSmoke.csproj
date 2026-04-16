@@ -11,9 +11,9 @@
   </PropertyGroup>
 
   <ItemGroup Condition="'$(UsePackedAsterGraphPackages)' == 'true'">
-    <PackageReference Include="AsterGraph.Abstractions" Version="$(Version)" />
-    <PackageReference Include="AsterGraph.Avalonia" Version="$(Version)" />
-    <PackageReference Include="AsterGraph.Editor" Version="$(Version)" />
+    <PackageReference Include="AsterGraph.Abstractions" />
+    <PackageReference Include="AsterGraph.Avalonia" />
+    <PackageReference Include="AsterGraph.Editor" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(UsePackedAsterGraphPackages)' != 'true'">
@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Avalonia.Headless" Version="11.3.10" />
-    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.10" />
+    <PackageReference Include="Avalonia.Headless" />
+    <PackageReference Include="Avalonia.Themes.Fluent" />
   </ItemGroup>
 </Project>

@@ -1,19 +1,20 @@
 # Testing Patterns
 
-**Analysis Date:** 2026-04-08
+**Analysis Date:** 2026-04-16
 
 ## Test Frameworks
 
-- `xunit` `2.9.2` is the base test framework for both projects under `tests/`.
+- `xunit` `2.9.2` is the base test framework for all test projects.
 - `Microsoft.NET.Test.Sdk` `17.11.1` provides test runner integration.
 - `xunit.runner.visualstudio` `2.8.2` is included for IDE and CLI discovery.
-- `Avalonia.Headless.XUnit` `11.3.10` and `Avalonia.Themes.Fluent` `11.3.10` support headless UI tests in `tests/AsterGraph.Editor.Tests/AsterGraph.Editor.Tests.csproj`.
+- `Avalonia.Headless.XUnit` `11.3.10` and `Avalonia.Themes.Fluent` `11.3.10` support headless UI tests in both UI test projects.
 - No `FluentAssertions`, snapshot framework, or mocking library is used.
 
 ## Test Project Layout
 
-- `tests/AsterGraph.Editor.Tests/AsterGraph.Editor.Tests.csproj` targets `net9.0` and references all four library projects plus `src/AsterGraph.Demo`.
+- `tests/AsterGraph.Editor.Tests/AsterGraph.Editor.Tests.csproj` targets `net9.0` and focuses on core SDK runtime/behavior proofing.
 - `tests/AsterGraph.Serialization.Tests/AsterGraph.Serialization.Tests.csproj` targets `net8.0` and focuses on persistence compatibility.
+- `tests/AsterGraph.Demo.Tests/AsterGraph.Demo.Tests.csproj` targets `net9.0` and owns demo/sample-host integration surface tests and host-shell coverage.
 - Test code is kept in dedicated projects rather than colocated beside production code.
 
 ## Main Test Areas
@@ -42,34 +43,56 @@
   - host-service overrides
   - menu/presentation replacement seams
   - legacy-vs-factory migration parity
+- `tests/AsterGraph.Demo.Tests` is the dedicated lane for demo/sample-host coverage, including:
+  - `tests/AsterGraph.Demo.Tests/DemoMainWindowTests.cs`
+  - `tests/AsterGraph.Demo.Tests/DemoHostMenuControlTests.cs`
+  - `tests/AsterGraph.Demo.Tests/GraphEditorDemoShellTests.cs`
+  - `tests/AsterGraph.Demo.Tests/GraphEditorLocalizationDemoTests.cs`
+- `tests/AsterGraph.Editor.Tests` is no longer responsible for demo host regression suites.
 - The repository does not contain browser automation, screenshot approval tests, or end-to-end desktop automation.
 
 ## Smoke And Proof Tools
 
-- `tools/AsterGraph.PackageSmoke/Program.cs` is a package-surface regression tool that exercises both legacy and factory/session paths.
-- `tools/AsterGraph.HostSample/Program.cs` is a runnable reference host rather than a formal test project, but it acts as a high-value integration proof.
-- `tools/AsterGraph.ScaleSmoke/Program.cs` emits repeatable `SCALE_*` markers for large-graph and runtime-state continuity checks.
-- These tools are part of the practical verification story even though they are not xUnit projects.
+- `tools/AsterGraph.HostSample/Program.cs` is the minimal consumer-facing host sample. It proves the canonical runtime-first and hosted-UI routes and can switch to packed-package restore.
+- `tools/AsterGraph.PackageSmoke/Program.cs` is the package-surface regression tool that exercises runtime-first, hosted-UI, and retained compatibility paths.
+- `tools/AsterGraph.ScaleSmoke/Program.cs` emits repeatable `SCALE_*` markers for large-graph, history/save, and runtime-state continuity checks.
+- Together with the three xUnit projects and `eng/ci.ps1`, these tools form the maintained proof ring.
+- The focused state contract is enforced by:
+  - `tests/AsterGraph.Editor.Tests/GraphEditorHistoryInteractionTests.cs`
+  - `tests/AsterGraph.Editor.Tests/GraphEditorSaveBoundaryTests.cs`
+  - `tests/AsterGraph.Editor.Tests/GraphEditorHistorySemanticTests.cs`
+  - `SCALE_HISTORY_CONTRACT_OK`
 
 ## Commands
 
 ```powershell
-dotnet test avalonia-node-map.sln
-dotnet test tests/AsterGraph.Editor.Tests/AsterGraph.Editor.Tests.csproj
-dotnet test tests/AsterGraph.Serialization.Tests/AsterGraph.Serialization.Tests.csproj
-dotnet run --project tools/AsterGraph.PackageSmoke/AsterGraph.PackageSmoke.csproj
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane all -Framework all -Configuration Release
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane contract -Framework all -Configuration Release
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane maintenance -Framework all -Configuration Release
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framework all -Configuration Release
+dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj --nologo
+dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj -p:UsePackedAsterGraphPackages=true --nologo
+dotnet run --project tools/AsterGraph.PackageSmoke/AsterGraph.PackageSmoke.csproj -p:UsePackedAsterGraphPackages=true --nologo
 dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj --nologo
 ```
 
 ## Coverage And Gaps
 
-- No coverage collector, threshold, or `runsettings` file is tracked.
-- No checked-in CI workflow was detected under `.github/workflows/`.
-- The repo relies on xUnit regressions plus smoke/proof tools rather than benchmark automation or coverage enforcement.
+- `tests/coverage.runsettings` and `eng/coverage-report.ps1` are tracked and used by `eng/ci.ps1 -Lane release`.
+- `.github/workflows/ci.yml` is checked in and invokes `eng/ci.ps1` through explicit framework-matrix (`all`), focused contract (`contract`), and release (`release`) jobs.
+- The repo relies on xUnit regressions plus proof tools rather than benchmark automation.
+- `eng/ci.ps1 -Lane release` is the official scripted publish gate; `contract` is the focused consumer/state-contract gate; raw `dotnet run` commands remain useful when contributors want direct sample or smoke markers while debugging.
+- Lane ownership is now explicit:
+  - `all` = framework-matrix build/test
+  - `contract` = consumer/runtime/plugin/history contract proof
+  - `maintenance` = compatibility-hotspot refactor gate
+  - `release` = publish validation
+  - `tests/AsterGraph.Demo.Tests` = demo/sample-host lane
 - Current risk areas are less about missing tests entirely and more about maintaining alignment across:
   - kernel-first runtime path
   - retained `GraphEditorViewModel` compatibility path
-  - Avalonia full-shell and standalone surfaces
+  - split-lane proof alignment (core SDK vs demo/sample host)
+  - the minimal consumer host sample versus the heavier smoke tools
 
 ## Testing Conventions
 
@@ -80,4 +103,4 @@ dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj --
 
 ---
 
-*Testing analysis refreshed: 2026-04-08*
+*Testing analysis refreshed: 2026-04-16*

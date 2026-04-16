@@ -49,9 +49,55 @@ Recommended split:
 - use `Create(...)` when the host wants the shipped UI/factory story but still needs the retained editor facade
 - use the direct `GraphEditorViewModel` constructor only when the host is intentionally staying on the retained compatibility path during migration
 
+Stability tiers:
+
+- stable canonical surfaces:
+  - `AsterGraphEditorFactory.CreateSession(...)`
+  - `AsterGraphEditorFactory.Create(...)`
+  - `IGraphEditorSession`
+  - DTO/snapshot queries such as `GetCompatiblePortTargets(...)`
+- retained compatibility surfaces:
+  - `GraphEditorViewModel`
+  - `GraphEditorView`
+  - `GraphEditorViewModel.Session`
+- compatibility-only shims:
+  - `GetCompatibleTargets(...)`
+  - `CompatiblePortTarget`
+
+Retirement guidance:
+
+- keep new code on the stable canonical surfaces
+- keep retained facade usage only where migration is still in progress
+- treat compatibility-only shims as transitional; later minor releases may add stronger warnings and a future major release may remove them
+
+Extension precedence:
+
+- plugin trust is host-owned through `PluginTrustPolicy`
+- localization providers compose plugin-first, host-last
+- node presentation composes plugin-first, host-last, with host override fields winning final subtitle/description/status-bar output
+- runtime session menus apply plugin augmentors over stock descriptors
+- retained `GraphEditorViewModel.BuildContextMenu(...)` gives the host `IGraphContextMenuAugmentor` the final override point after runtime/plugin composition
+
+Lane ownership:
+
+- `all` = framework-matrix build/test
+- `contract` = focused consumer/state-contract proof
+- `maintenance` = hotspot-refactor proof
+- `release` = publish gate
+- `tests/AsterGraph.Demo.Tests` = demo/sample-host lane
+
 Use this package together with `AsterGraph.Avalonia` when the host embeds the default shell or standalone Avalonia surfaces. Hosts that provide their own UI can stop at the `IGraphEditorSession` boundary and avoid taking an Avalonia dependency in their composition root.
 
 The MVVM-typed compatibility query path remains available for legacy integrations, but new host code should treat it as compatibility-only rather than the canonical runtime surface.
+
+Compatibility shim migration:
+
+- canonical runtime query: `IGraphEditorQueries.GetCompatiblePortTargets(...)`
+- retained compatibility shim: `IGraphEditorQueries.GetCompatibleTargets(...)` plus `CompatiblePortTarget`
+- retained compatibility facade: `GraphEditorViewModel`
+- v1.5 keeps the shim with strong migration guidance
+- later minor releases may add stronger warnings
+- future major release may remove it
 
 The same guidance now applies to host extension seams:
 
@@ -62,6 +108,7 @@ The older MVVM-rooted extension methods remain available only as migration shims
 
 Phase 18 readiness proof is anchored on the session boundary, not on the retained constructor path:
 
+- `tools/AsterGraph.HostSample` is the minimal consumer-facing sample for the canonical host path
 - `src/AsterGraph.Demo` remains the visual/default host-composition sample
 - `tools/AsterGraph.PackageSmoke` emits machine-checkable `PACKAGE_SMOKE_*` markers
 - `tools/AsterGraph.ScaleSmoke` proves the same session/inspection-driven readiness story on a larger graph
@@ -69,5 +116,6 @@ Phase 18 readiness proof is anchored on the session boundary, not on the retaine
 Reference material:
 
 - [Host Integration Guide](https://github.com/ExplodingUFO/AsterGraph/blob/master/docs/host-integration.md)
+- [Extension Contracts](https://github.com/ExplodingUFO/AsterGraph/blob/master/docs/extension-contracts.md)
 - [Demo App](https://github.com/ExplodingUFO/AsterGraph/tree/master/src/AsterGraph.Demo)
 - [Root README](https://github.com/ExplodingUFO/AsterGraph/blob/master/README.md)

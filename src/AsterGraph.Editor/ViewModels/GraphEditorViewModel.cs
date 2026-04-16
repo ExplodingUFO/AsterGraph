@@ -32,7 +32,7 @@ namespace AsterGraph.Editor.ViewModels;
 /// 图编辑器的主视图模型，承载选择、布局、连线、剪贴板和持久化状态。
 /// </summary>
 /// <remarks>
-/// 本类型是当前迁移窗口内保留的兼容立面，
+/// 本类型是当前迁移窗口内保留的 compatibility facade，
 /// 用于支持现有宿主基于 <c>new GraphEditorViewModel(...)</c> 的直接集成路径。
 /// 新的默认 hosted-UI 组合代码应优先考虑 <see cref="AsterGraphEditorFactory.Create(AsterGraphEditorOptions)"/>，
 /// 而自定义 UI 宿主应优先考虑 <see cref="AsterGraphEditorFactory.CreateSession(AsterGraphEditorOptions)"/>。
@@ -202,37 +202,36 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         _contextMenuAugmentor = contextMenuAugmentor;
         _nodePresentationProvider = nodePresentationProvider;
         _localizationProvider = localizationProvider;
-        _documentProjectionApplier = new GraphEditorDocumentProjectionApplier();
-        _presentationLocalizationCoordinatorHost = new GraphEditorViewModelPresentationLocalizationCoordinatorHost(this);
-        _presentationLocalizationCoordinator = new GraphEditorPresentationLocalizationCoordinator(_presentationLocalizationCoordinatorHost);
-        _storageProjectionHost = new GraphEditorViewModelStorageProjectionHost(this);
-        _storageProjectionSupport = new GraphEditorStorageProjectionSupport(_storageProjectionHost);
-        _selectionProjection = new GraphEditorSelectionProjection(
-            LocalizeText,
-            (key, fallback, arguments) => LocalizeFormat(key, fallback, arguments));
-        _kernelProjectionHost = new GraphEditorViewModelKernelProjectionHost(this);
-        _kernelProjectionApplier = new GraphEditorKernelProjectionApplier(_kernelProjectionHost);
-        _historyStateHost = new GraphEditorViewModelHistoryStateHost(this);
-        _historyStateCoordinator = new GraphEditorHistoryStateCoordinator(_historyStateHost, _historyService);
-        _selectionCoordinatorHost = new GraphEditorViewModelSelectionCoordinatorHost(this);
-        _selectionCoordinator = new GraphEditorSelectionCoordinator(_selectionCoordinatorHost);
-        _selectionStateSynchronizerHost = new GraphEditorViewModelSelectionStateSynchronizerHost(this);
-        _selectionStateSynchronizer = new GraphEditorSelectionStateSynchronizer(_selectionStateSynchronizerHost);
-        _selectionProjectionApplierHost = new GraphEditorViewModelSelectionProjectionApplierHost(this);
-        _selectionProjectionApplier = new GraphEditorSelectionProjectionApplier(_selectionProjectionApplierHost, _selectionProjection);
-        _parameterEditHost = new GraphEditorViewModelParameterEditHost(this);
-        _parameterEditCoordinator = new GraphEditorParameterEditCoordinator(_parameterEditHost);
-        _documentCollectionSynchronizerHost = new GraphEditorViewModelDocumentCollectionSynchronizerHost(this);
-        _documentCollectionSynchronizer = new GraphEditorDocumentCollectionSynchronizer(_documentCollectionSynchronizerHost, _documentProjectionApplier);
-        _persistenceCoordinatorHost = new GraphEditorViewModelPersistenceCoordinatorHost(this);
-        _documentLoadCoordinator = new GraphEditorDocumentLoadCoordinator(_persistenceCoordinatorHost);
-        _nodePositionDirtyTrackerHost = new GraphEditorViewModelNodePositionDirtyTrackerHost(this);
-        _nodePositionDirtyTracker = new GraphEditorNodePositionDirtyTracker(_nodePositionDirtyTrackerHost);
-        _retainedEventPublisherHost = new GraphEditorViewModelRetainedEventPublisherHost(this);
-        _retainedEventPublisher = new GraphEditorRetainedEventPublisher(_retainedEventPublisherHost);
-        _nodeLayoutCoordinatorHost = new GraphEditorViewModelNodeLayoutCoordinatorHost(this);
-        _nodeLayoutCoordinator = new GraphEditorNodeLayoutCoordinator(_nodeLayoutCoordinatorHost);
-        _workspaceSaveCoordinator = new GraphEditorWorkspaceSaveCoordinator(_persistenceCoordinatorHost);
+        var facadeBootstrap = new GraphEditorViewModelFacadeBootstrap(this, _historyService);
+        _documentProjectionApplier = facadeBootstrap.DocumentProjectionApplier;
+        _presentationLocalizationCoordinatorHost = facadeBootstrap.PresentationLocalizationCoordinatorHost;
+        _presentationLocalizationCoordinator = facadeBootstrap.PresentationLocalizationCoordinator;
+        _storageProjectionHost = facadeBootstrap.StorageProjectionHost;
+        _storageProjectionSupport = facadeBootstrap.StorageProjectionSupport;
+        _selectionProjection = facadeBootstrap.SelectionProjection;
+        _kernelProjectionHost = facadeBootstrap.KernelProjectionHost;
+        _kernelProjectionApplier = facadeBootstrap.KernelProjectionApplier;
+        _historyStateHost = facadeBootstrap.HistoryStateHost;
+        _historyStateCoordinator = facadeBootstrap.HistoryStateCoordinator;
+        _selectionCoordinatorHost = facadeBootstrap.SelectionCoordinatorHost;
+        _selectionCoordinator = facadeBootstrap.SelectionCoordinator;
+        _selectionStateSynchronizerHost = facadeBootstrap.SelectionStateSynchronizerHost;
+        _selectionStateSynchronizer = facadeBootstrap.SelectionStateSynchronizer;
+        _selectionProjectionApplierHost = facadeBootstrap.SelectionProjectionApplierHost;
+        _selectionProjectionApplier = facadeBootstrap.SelectionProjectionApplier;
+        _parameterEditHost = facadeBootstrap.ParameterEditHost;
+        _parameterEditCoordinator = facadeBootstrap.ParameterEditCoordinator;
+        _documentCollectionSynchronizerHost = facadeBootstrap.DocumentCollectionSynchronizerHost;
+        _documentCollectionSynchronizer = facadeBootstrap.DocumentCollectionSynchronizer;
+        _persistenceCoordinatorHost = facadeBootstrap.PersistenceCoordinatorHost;
+        _documentLoadCoordinator = facadeBootstrap.DocumentLoadCoordinator;
+        _nodePositionDirtyTrackerHost = facadeBootstrap.NodePositionDirtyTrackerHost;
+        _nodePositionDirtyTracker = facadeBootstrap.NodePositionDirtyTracker;
+        _retainedEventPublisherHost = facadeBootstrap.RetainedEventPublisherHost;
+        _retainedEventPublisher = facadeBootstrap.RetainedEventPublisher;
+        _nodeLayoutCoordinatorHost = facadeBootstrap.NodeLayoutCoordinatorHost;
+        _nodeLayoutCoordinator = facadeBootstrap.NodeLayoutCoordinator;
+        _workspaceSaveCoordinator = facadeBootstrap.WorkspaceSaveCoordinator;
         StyleOptions = styleOptions ?? GraphEditorStyleOptions.Default;
         BehaviorOptions = ResolveBehaviorOptions(behaviorOptions, StyleOptions);
 
@@ -377,23 +376,15 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     /// <summary>
     /// 获取与当前兼容立面共享的运行时会话。
+    /// 该会话通过 adapter-backed kernel 路径暴露运行时能力，
+    /// 不会把 <see cref="GraphEditorViewModel"/> 重新当作 canonical runtime state owner。
     /// </summary>
     public IGraphEditorSession Session { get; }
 
     internal IGraphEditorSessionHost SessionHost => _sessionHost;
 
     internal GraphEditorSessionDescriptorSupport CreateSessionDescriptorSupport()
-        => new(
-            _nodeCatalog,
-            _presentationLocalizationCoordinator.LocalizeText,
-            this,
-            hasFragmentWorkspaceService: _fragmentWorkspaceService is not null,
-            hasFragmentLibraryService: _fragmentLibraryService is not null,
-            hasClipboardPayloadSerializer: _clipboardPayloadSerializer is not null,
-            hasPluginLoader: true,
-            hasContextMenuAugmentor: _contextMenuAugmentor is not null,
-            hasNodePresentationProvider: () => _presentationLocalizationCoordinator.HasNodePresentationProvider,
-            hasLocalizationProvider: () => _presentationLocalizationCoordinator.HasLocalizationProvider);
+        => new GraphEditorSessionDescriptorSupportBuilder(this).Build();
 
     [ObservableProperty]
     private double zoom = DefaultZoom;

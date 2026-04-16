@@ -1,6 +1,6 @@
 # Coding Conventions
 
-**Analysis Date:** 2026-04-08
+**Analysis Date:** 2026-04-16
 
 ## Naming Patterns
 
@@ -14,12 +14,12 @@
 
 ## Code Style
 
-- No repo-level `.editorconfig`, ruleset, or analyzer config is tracked.
+- A repo-level `.editorconfig` is tracked.
 - The prevailing C# style is modern SDK-style C# with 4-space indentation, braces on new lines, and file-scoped namespaces.
 - Nullable reference types and implicit usings are enabled through `Directory.Build.props`.
 - Collection expressions, `with` expressions, and other modern C# constructs are used freely in `src/` and `tests/`.
 - Production projects generate XML docs by default; tests disable doc generation in their `*.csproj` files.
-- The repo currently suppresses `CS1591` in `Directory.Build.props` while public XML docs continue to be added.
+- `Directory.Build.props` suppresses `CS1591` only for non-packable projects; `AsterGraph.Editor` carries its remaining public XML-doc debt explicitly at project scope.
 
 ## Import And Module Organization
 
@@ -60,9 +60,9 @@
 
 - Tests prefer real objects plus handwritten doubles over mocking frameworks.
 - Helper factories usually live inside the test file that uses them.
-- Headless Avalonia tests live beside runtime tests in `tests/AsterGraph.Editor.Tests`.
+- Headless Avalonia tests are split across `tests/AsterGraph.Editor.Tests` and `tests/AsterGraph.Demo.Tests`.
 - Proof-oriented suites verify migration parity, diagnostics continuity, and package-surface stability in addition to classic unit behavior.
 
 ---
 
-*Convention analysis refreshed: 2026-04-08*
+*Convention analysis refreshed: 2026-04-16*

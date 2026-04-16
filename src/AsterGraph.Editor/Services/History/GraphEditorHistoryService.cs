@@ -39,6 +39,19 @@ internal sealed class GraphEditorHistoryService
         _index = _states.Count - 1;
     }
 
+    public void ReplaceCurrent(GraphEditorHistoryState state)
+    {
+        ArgumentNullException.ThrowIfNull(state);
+
+        if (_index < 0)
+        {
+            Reset(state);
+            return;
+        }
+
+        _states[_index] = state;
+    }
+
     public bool TryUndo(out GraphEditorHistoryState? state)
     {
         if (!CanUndo)

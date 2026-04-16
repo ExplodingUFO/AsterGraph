@@ -1,6 +1,6 @@
 # Codebase Structure
 
-**Analysis Date:** 2026-04-08
+**Analysis Date:** 2026-04-16
 
 ## Repository Layout
 
@@ -8,14 +8,22 @@
 [project-root]/
 |- src/                 # publishable libraries plus demo app
 |- tests/               # xUnit regression projects
-|- tools/               # host sample and smoke/proof tools
+|- tools/               # proof tools and package-consumption utilities
+|- eng/                # scripted validation entrypoint for build/test lanes
 |- docs/                # host-facing guides
 |- .planning/           # GSD planning, roadmap, and codebase map artifacts
+|- .github/             # checked-in workflow definitions
+|  `- workflows/        # CI configuration and branch validation
 |- artifacts/           # local pack outputs
 |- .worktrees/          # local worktree storage
 |- Directory.Build.props
-|- avalonia-node-map.sln
-|- avalonia-node-map.slnx
+|- Directory.Packages.props
+|- NuGet.config
+|- NuGet.config.sample
+|- avalonia-node-map.sln # canonical solution entrypoint
+|- avalonia-node-map.slnx  # placeholder, not maintained as canonical entrypoint
+|- eng/ci.ps1           # script-first CI/build/test orchestration
+|- .github/workflows/ci.yml # checked-in CI workflow invoking `eng/ci.ps1`
 |- README.md
 |- AGENTS.md
 `- CLAUDE.md
@@ -65,12 +73,17 @@
 - Purpose: graph-document and clipboard compatibility regression tests.
 - Anchor file: `tests/AsterGraph.Serialization.Tests/SerializationCompatibilityTests.cs`.
 
+### `tests/AsterGraph.Demo.Tests`
+
+- Purpose: demo and host shell proof lanes for sample-first composition and sample integration behavior.
+- Notable suites: `tests/AsterGraph.Demo.Tests/DemoMainWindowTests.cs`, `tests/AsterGraph.Demo.Tests/DemoHostMenuControlTests.cs`, `tests/AsterGraph.Demo.Tests/GraphEditorDemoShellTests.cs`, `tests/AsterGraph.Demo.Tests/GraphEditorLocalizationDemoTests.cs`.
+
 ## Tools And Proofs
 
 ### `tools/AsterGraph.HostSample`
 
-- Purpose: reference host showing runtime-first and compatibility integrations.
-- Anchor file: `tools/AsterGraph.HostSample/Program.cs`.
+- Purpose: minimal canonical consumer host sample with optional packed-package restore mode.
+- Anchor files: `tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj`, `tools/AsterGraph.HostSample/Program.cs`.
 
 ### `tools/AsterGraph.PackageSmoke`
 
@@ -85,8 +98,8 @@
 ## Documentation And Planning
 
 - Public integration docs live in `docs/host-integration.md`, `docs/quick-start.md`, `docs/interactions-and-shortcuts.md`, and `docs/node-presentation-guidelines.md`.
-- GSD state lives under `.planning/PROJECT.md`, `.planning/REQUIREMENTS.md`, `.planning/ROADMAP.md`, `.planning/STATE.md`, `.planning/phases/`, `.planning/research/`, and `.planning/codebase/`.
-- The current roadmap indicates Phase 13 complete and Phase 14 planned in `.planning/ROADMAP.md`.
+- GSD state and planning live under `.planning/PROJECT.md`, `.planning/REQUIREMENTS.md`, `.planning/ROADMAP.md`, `.planning/STATE.md`, `.planning/phases/`, `.planning/research/`, and `.planning/codebase/`.
+- `.planning/STATE.md` and `.planning/ROADMAP.md` track the active v1.7 milestone and its current phase posture.
 
 ## Key File Locations
 
@@ -96,6 +109,8 @@
 - `src/AsterGraph.Avalonia/Hosting/AsterGraphAvaloniaViewFactory.cs`
 - `src/AsterGraph.Demo/Program.cs`
 - `tools/AsterGraph.HostSample/Program.cs`
+- `tools/AsterGraph.PackageSmoke/Program.cs`
+- `tools/AsterGraph.ScaleSmoke/Program.cs`
 
 ### Runtime Hotspots
 
@@ -134,4 +149,4 @@
 
 ---
 
-*Structure analysis refreshed: 2026-04-08*
+*Structure analysis refreshed: 2026-04-16*

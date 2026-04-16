@@ -1,8 +1,6 @@
 using AsterGraph.Abstractions.Compatibility;
 using AsterGraph.Core.Models;
-using AsterGraph.Editor.Menus;
 using AsterGraph.Editor.Runtime;
-using AsterGraph.Editor.ViewModels;
 
 namespace AsterGraph.Editor.Kernel.Internal;
 
@@ -55,22 +53,6 @@ internal sealed class GraphEditorKernelCompatibilityQueries
                 target.Port.AccentHex,
                 target.Compatibility))
             .ToList();
-
-#pragma warning disable CS0618
-    public IReadOnlyList<CompatiblePortTarget> GetCompatibleTargets(
-        GraphDocument document,
-        string sourceNodeId,
-        string sourcePortId)
-        => GetCompatibleTargetStates(document, sourceNodeId, sourcePortId)
-            .Select(target =>
-            {
-                var node = new NodeViewModel(target.Node);
-                var port = node.GetPort(target.Port.Id)
-                    ?? throw new InvalidOperationException($"Port '{target.Port.Id}' was not found on compatibility bridge node '{target.Node.Id}'.");
-                return new CompatiblePortTarget(node, port, target.Compatibility);
-            })
-            .ToList();
-#pragma warning restore CS0618
 
     private static GraphNode? FindNode(GraphDocument document, string nodeId)
         => document.Nodes.FirstOrDefault(node => string.Equals(node.Id, nodeId, StringComparison.Ordinal));

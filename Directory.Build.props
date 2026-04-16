@@ -12,10 +12,15 @@
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <!-- XML docs are generated for publishable packages while remaining CS1591 debt is retired in batches. -->
-    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <!-- Keep non-packable projects quiet while publishable-package CS1591 debt is made explicit at project scope. -->
+    <NoWarn Condition="'$(IsPackable)' != 'true'">$(NoWarn);CS1591</NoWarn>
     <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
     <!-- Keep generated audit snapshots out of SDK compile globs so verification builds stay deterministic. -->
     <DefaultItemExcludes>$(DefaultItemExcludes);$(MSBuildProjectDirectory)\artifacts\**</DefaultItemExcludes>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(IsPackable)' == 'true'">
+    <!-- Run SDK-integrated package validation for the publishable library surface during pack. -->
+    <EnablePackageValidation>true</EnablePackageValidation>
   </PropertyGroup>
 </Project>

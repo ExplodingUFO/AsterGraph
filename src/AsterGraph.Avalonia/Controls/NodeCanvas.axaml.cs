@@ -77,6 +77,7 @@ public partial class NodeCanvas : UserControl
     private readonly NodeCanvasContextMenuCoordinator _contextMenuCoordinator;
     private readonly NodeCanvasSceneHost _sceneHost;
     private readonly NodeCanvasViewModelObserver _viewModelObserver;
+    private readonly NodeCanvasLifecycleCoordinator _lifecycleCoordinator;
     private readonly NodeCanvasOverlayCoordinator _overlayCoordinator;
     private readonly NodeCanvasNodeDragCoordinator _nodeDragCoordinator;
     private readonly NodeCanvasPointerInteractionCoordinator _pointerInteractionCoordinator;
@@ -88,6 +89,7 @@ public partial class NodeCanvas : UserControl
     /// </summary>
     public NodeCanvas()
     {
+        _lifecycleCoordinator = new NodeCanvasLifecycleCoordinator(new NodeCanvasLifecycleHost(this));
         InitializeComponent();
         Focusable = true;
         _contextMenuCoordinator = new NodeCanvasContextMenuCoordinator(new NodeCanvasContextMenuHost(this), this);
@@ -194,45 +196,20 @@ public partial class NodeCanvas : UserControl
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
         base.OnPropertyChanged(change);
-
-        if (change.Property == ViewModelProperty)
-        {
-            var previous = change.GetOldValue<GraphEditorViewModel?>();
-            var current = change.GetNewValue<GraphEditorViewModel?>();
-            if (AttachPlatformSeams && _isAttachedToVisualTree)
-            {
-                GraphEditorPlatformSeamBinder.Replace(previous, current, this);
-            }
-
-            AttachViewModel(previous, current);
-        }
-        else if (change.Property == NodeVisualPresenterProperty)
-        {
-            RebuildScene();
-        }
+        _lifecycleCoordinator.HandlePropertyChanged(change);
     }
 
     /// <inheritdoc />
     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
     {
         base.OnAttachedToVisualTree(e);
-        _isAttachedToVisualTree = true;
-
-        if (AttachPlatformSeams)
-        {
-            GraphEditorPlatformSeamBinder.Apply(ViewModel, this);
-        }
+        _lifecycleCoordinator.HandleAttachedToVisualTree();
     }
 
     /// <inheritdoc />
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
     {
-        if (AttachPlatformSeams)
-        {
-            GraphEditorPlatformSeamBinder.Clear(ViewModel);
-        }
-
-        _isAttachedToVisualTree = false;
+        _lifecycleCoordinator.HandleDetachedFromVisualTree();
         base.OnDetachedFromVisualTree(e);
     }
 

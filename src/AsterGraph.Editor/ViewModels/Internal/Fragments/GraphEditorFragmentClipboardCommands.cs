@@ -5,11 +5,11 @@ namespace AsterGraph.Editor.ViewModels;
 
 internal sealed class GraphEditorFragmentClipboardCommands
 {
-    private readonly GraphEditorViewModel.IGraphEditorFragmentCommandHost _host;
+    private readonly IGraphEditorFragmentCommandHost _host;
     private readonly GraphEditorFragmentTransferSupport _transferSupport;
 
     public GraphEditorFragmentClipboardCommands(
-        GraphEditorViewModel.IGraphEditorFragmentCommandHost host,
+        IGraphEditorFragmentCommandHost host,
         GraphEditorFragmentTransferSupport transferSupport)
     {
         _host = host ?? throw new ArgumentNullException(nameof(host));

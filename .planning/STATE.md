@@ -1,33 +1,42 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.4
-milestone_name: Plugin Loading and Automation Execution
-status: Phase 25 Complete
-stopped_at: Phase 25 complete; next step is to archive the v1.4 milestone
-last_updated: "2026-04-13T15:51:29.3110335Z"
-last_activity: 2026-04-13
+milestone: v1.7
+milestone_name: Consumer Closure / Release Hardening
+status: archived
+stopped_at: v1.7 archived
+last_updated: "2026-04-16T13:00:00.0000000Z"
+last_activity: 2026-04-16 -- Archived v1.7 consumer closure and release hardening
 progress:
   total_phases: 4
   completed_phases: 4
   total_plans: 12
   completed_plans: 12
+  percent: 100
 ---
 
 # Project State
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-04-08)
+See: `.planning/PROJECT.md` (updated 2026-04-16)
 
 **Core value:** Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
-**Current focus:** v1.4 milestone closeout after Phase 25 proof ring completion
+**Current focus:** no active milestone - ready for fresh framing
 
 ## Current Position
 
-Phase: 25
-Plan: Execution Complete
-Status: Phase 25 Complete
-Last activity: 2026-04-13 — Completed quick task 260413-x3v: keep GraphEditorSession stock menu builder reading live node catalog definitions
+Phase: milestone archived
+Plan: v1.7 complete
+Status: Archived
+Last activity: 2026-04-16 -- Archived v1.7 consumer closure and release hardening
+
+## Performance Metrics
+
+| Plan | Duration | Tasks | Files |
+|------|----------|-------|-------|
+| Phase 30 P01 | 1 min | 2 tasks | 7 files |
+| Phase 30 P02 | 1 min | 2 tasks | 1 file |
+| Phase 30 P03 | 1 min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -39,36 +48,48 @@ Carry-forward decisions from shipped milestones:
 - Keep `CreateSession(...)` and `Create(...)` as the canonical composition routes, while `GraphEditorViewModel` / `GraphEditorView` remain the retained compatibility window.
 - Prefer descriptor and snapshot control-plane contracts over exposing MVVM implementation types as the canonical host surface.
 - Keep Avalonia as an adapter layer over shared runtime contracts and proof-backed platform seams.
-- Preserve `HostSample`, `PackageSmoke`, and `ScaleSmoke` as the runnable proof ring for migration, readiness, and future extension work.
-- Lead v1.3 with a demo showcase refresh so the shipped SDK story is easier to understand before adding another layer of runtime features.
-- Keep the next demo experience on one live graph session controlled by host-level menus rather than switching between canned scenes.
-- Keep the new in-window host menu as the first visible shell control plane in the demo.
-- Keep secondary showcase detail behind a compact on-demand pane so the graph remains the dominant surface.
-- Keep the top host menu as the first control plane and use direct checkable menu items for the highest-signal view/behavior toggles.
-- Keep the right-side `SplitView` pane as the compact dense control/readout surface for the currently active menu group.
-- Keep all Phase 20 control state bound to the existing `MainWindowViewModel` booleans and `Editor.Session` projections rather than duplicating editor or runtime state.
-- Keep runtime summary metrics and recent diagnostics as separate sections inside the existing right-side pane instead of introducing a second runtime dashboard.
-- Keep Phase 21 proof cues embedded near the active graph and drawer sections instead of reintroducing a permanent explanation rail.
-- Keep host-owned seams and shared runtime/session state explicit through short labels plus live values rather than paragraph-heavy summary cards.
-- Keep README aligned with the graph-first showcase story so the demo window and repo narrative describe the same proof.
-- Keep the demo showcase positioned as a host-facing SDK proof surface rather than a productized workflow shell or scene-switching gallery.
-- Return to plugin and automation implementation after the showcase milestone instead of extending presentation-only work indefinitely.
+- Preserve `PackageSmoke` and `ScaleSmoke` as runnable proof surfaces for migration, readiness, and future extension work.
 - Keep plugin loading and automation execution rooted in `IGraphEditorSession`, descriptors, and command IDs rather than retained MVVM compatibility APIs.
-- Keep the first public plugin surface inside `AsterGraph.Editor` and rooted in `AsterGraphEditorOptions` / `AsterGraphEditorFactory`, not `AsterGraph.Avalonia`.
-- Use a custom `AssemblyLoadContext` plus `AssemblyDependencyResolver` for assembly-path plugins while keeping shared `AsterGraph.*` runtime contracts in the default load context.
-- Keep Phase 22 limited to public plugin composition/loading contracts and loader discoverability; actual plugin-contributed seam integration remains Phase 23.
-- Keep plugin-load failures recoverable and descriptor-first through canonical session diagnostics instead of factory-thrown ordinary host failures.
-- Keep Phase 23 focused on live integration of the explicit Phase 22 plugin contribution contracts plus canonical plugin inspection, rather than widening into arbitrary plugin-owned service injection.
-- Keep plugin inspection readable through canonical query/inspection DTOs, with diagnostics history as supporting evidence rather than the only source of truth.
-- Keep host-supplied context-menu, localization, and node-presentation seams as the final override layer when plugin contributions are composed.
-- Keep plugin load inspection parity across `CreateSession(...)` and `Create(...)` so retained compatibility hosts do not lose canonical runtime visibility.
-- Keep plugin node definitions, menu augmentation, localization, and presentation composed through one factory/session path rather than retained-only compatibility hooks.
-- Keep the first automation baseline rooted in `IGraphEditorSession`, stable command IDs, query snapshots, and mutation batching rather than `GraphEditorViewModel` methods.
-- Keep automation progress/failure visibility on typed runtime events plus machine-readable diagnostics instead of status-text scraping or UI-bound progress surfaces.
-- Keep the first automation runner synchronous, in-process, and descriptor-first rather than expanding into a workflow engine or script host in the same phase.
-- Reuse the existing mutation scope as the automation batching primitive instead of introducing a parallel transaction model.
-- Keep the plugin and automation proof ring aligned across focused regressions, `HostSample`, `PackageSmoke`, `ScaleSmoke`, and README commands instead of relying on docs-only claims.
-- Keep Phase 25 proof rooted in public `AsterGraphEditorFactory`, `IGraphEditorSession`, plugin registration, query, diagnostics, and automation APIs.
+- Keep plugin load failures and automation telemetry recoverable and machine-readable through canonical runtime diagnostics/events.
+
+New v1.6 framing decisions:
+
+- Use the next milestone for contraction and hotspot guardrails rather than another plugin/automation capability band.
+- Build on the v1.5 quality baseline instead of reopening already-shipped `.editorconfig`, central package management, CI, or `ScaleSmoke` alignment work.
+- Treat the missing `v1.4` archive and the carried `STATE_HISTORY_OK` mismatch as current milestone work, not passive background debt.
+- Continue phase numbering from 30 because the latest executed phase is 29.
+- [Phase 30]: Reconstruct the missing v1.4 archive from historical snapshot commits instead of rewriting current milestone docs. — The archive needed explicit git-backed evidence so the recovered roadmap and requirements keep their original framing.
+- [Phase 30]: Record later pre-v1.5 trust, discovery, staging, and proof follow-up in the v1.4 ledger notes instead of editing it back into the archived snapshots. — The delivered pre-v1.5 surface exceeded the original four-phase roadmap, so the ledger needed to separate original framing from later follow-up honestly.
+- [Phase 30]: Keep the maintenance guardrail inside `eng/ci.ps1` as a dedicated `maintenance` lane instead of introducing a second script path. — Contributors and docs now have one repo-local refactor gate to point at.
+- [Phase 30]: Keep `maintenance` narrower than `release` by running focused hotspot suites plus `ScaleSmoke`, without pack, `PackageSmoke`, coverage, or package validation. — The new lane stays fast enough for refactor loops while still exercising one runnable readiness proof.
+- [Phase 31]: Retained mutation completion and retained save must commit through kernel-owned history/save authority instead of keeping a second retained undo/redo owner. — Mixed runtime-plus-retained flows were already shipping, so semantic parity had to be fixed at the authority boundary rather than by adding more compatibility cases.
+- [Phase 31]: Successful save must replace the current history entry rather than append a new undo step. — Save-boundary dirty semantics only stay stable when the saved snapshot becomes the current history baseline.
+- [Phase 31]: `ScaleSmoke` and proof-ring tests should expose explicit history-contract pass/fail output instead of a carried known-mismatch tuple. — Planning notes were no longer an acceptable substitute for machine-checkable proof.
+- [Phase 32 planning]: The next highest-value facade contraction is bootstrap plus retained-only compatibility/fragment orchestration, not kernel or canvas refactoring. — `GraphEditorViewModel` is still the composition hotspot, while fragment/menu collaborators already exist and can be lifted cleanly behind the existing host pattern.
+- [Phase 32 planning]: Phase 32 must keep public retained entry points stable and use focused menu/fragment/service-seam parity tests as the main guardrail. — The remaining risk is internal drift under a supported public compatibility surface, not missing capability.
+- [Phase 32]: Keep retained public methods as thin delegations while moving bootstrap, descriptor assembly, context-menu compatibility, and fragment orchestration into narrower internal collaborators. — This materially reduces `GraphEditorViewModel` ownership without reopening public factory/session/view-model APIs.
+- [Phase 32]: Promote retained command collaborators to namespace-level internal types while keeping private host adapters in `GraphEditorViewModel`. — The extracted services are now easier to change in isolation and still preserve kernel-owned runtime authority.
+- [Phase 33 planning]: The next kernel hotspot should be command-router host ownership, because node/connection/workspace mutation paths already use dedicated host adapters while command routing still binds directly to GraphEditorKernel. — This is the clearest remaining inline ownership burden in the kernel.
+- [Phase 33 planning]: The next NodeCanvas hotspot should be lifecycle/property-routing glue, not drag or pointer math. — Pointer, drag, wheel, scene, overlay, and context-menu behavior already live in dedicated coordinators, but attach/property-change/bootstrap routing is still inline in NodeCanvas.axaml.cs.
+- [Phase 33 planning]: Repo-wide `CS1591` suppression is now broader than the real debt boundary. — `AsterGraph.Abstractions` and `AsterGraph.Core` build clean under `warnaserror:CS1591`, while `AsterGraph.Editor` still has explicit public-doc debt that should move to project scope.
+- [Phase 33]: Keep command-router host ownership and NodeCanvas lifecycle/property routing behind dedicated internal collaborators, then prove those seams through focused tests and the maintenance lane. — The next hotspot follow-through should reduce change radius without changing the public embedding surface.
+- [Phase 33]: Limit central `CS1591` suppression to non-packable projects and leave the remaining public XML-doc debt explicit in `AsterGraph.Editor`. — Package-boundary guardrails are only meaningful when the real debt boundary is visible in project configuration.
+- [Phase 34]: Treat `eng/ci.ps1 -Lane release` and `eng/ci.ps1 -Lane maintenance` as the official proof-ring entry points, then describe `HostSample`, `PackageSmoke`, `ScaleSmoke`, and `Demo` by role under that gate. — The repo already had the scripted gate; the gap was inconsistent narrative and discoverability.
+- [Phase 34]: Restore `AsterGraph.HostSample` as a narrow canonical consumer sample instead of reviving the older proof-heavy host app. — The minimal host path should be easy to read and run, while the broader proof burden stays in smoke tools and focused regressions.
+- [Phase 34]: Keep `src/AsterGraph.Demo` as the visual/manual sample and move the minimal consumer burden to `HostSample`. — Visual inspection and minimal adoption proof serve different audiences and should not share the same artifact.
+- [Phase 35]: Add a focused `contract` lane instead of widening `maintenance`, then make `release` run that focused proof before packed-package smoke. — The repo needed a consumer/proof gate without diluting the hotspot-refactor loop.
+- [Phase 35]: Treat packed `HostSample` as part of the release proof ring, not as a README-only manual command. — The minimal consumer path must be machine-checked from the same packed artifacts shipped to consumers.
+- [Phase 35]: Keep CI responsibilities explicit as framework-matrix, contract-proof, and release-validation jobs. — The target matrix, focused contracts, and publish gate each fail for different reasons and should be visible separately.
+- [Phase 36]: Publish one compact consumer route matrix instead of further expanding narrative onboarding text. — Consumers need packages, entry points, and verification commands in one place.
+- [Phase 36]: Publish history/save/dirty semantics as a host-facing contract and point it at the `contract` lane plus `SCALE_HISTORY_CONTRACT_OK`. — The behavior was already proven; the missing part was a written contract.
+- [Phase 37]: Publish explicit stability tiers, extension-precedence rules, and lane ownership from the real runtime behavior instead of reopening boundary-changing refactors. — The repo already had the right implementation and proof; the gap was contract clarity.
+
+New v1.7 framing decisions:
+
+- The next milestone should be a consumer-closure and release-hardening pass, not another feature-expansion band. — The main risk now is repo self-description, proof discoverability, release automation, and maintenance clarity rather than missing runtime/plugin capability.
+- Truth alignment across README, planning artifacts, and codebase maps is first-order work, not polish. — A repo that ships more capability than its docs can describe cleanly is harder to adopt and maintain.
+- The official proof ring must be treated as one executable system around real tool entry points and consumer host proof, not a loose set of remembered commands and implied tools.
+- Minimal consumer onboarding, explicit history/save contracts, compatibility retirement, and extension-precedence rules are product requirements because they determine whether external hosts can adopt the SDK safely.
 
 ### Pending Todos
 
@@ -76,12 +97,9 @@ None captured yet.
 
 ### Blockers/Concerns
 
-- No active blocker in the main workspace.
-- The known `STATE_HISTORY_OK` mismatch remains a pre-existing baseline issue if the next milestone touches history/save semantics.
-- `GraphEditorTransactionTests.GraphEditorViewModel_HistoryInteraction_PreservesUndoAndDirtySemantics` and `GraphEditorViewModel_SaveBoundary_PreservesUndoRedoDirtySemantics` still fail on the detached clean `d7939a5` baseline; they remain a carry-forward proof concern rather than a Phase 24 regression.
-- The next milestone should avoid reopening kernel/facade ownership drift unless new evidence requires it.
-- The first automation baseline should stay command/query/batch driven rather than expand into a full scripting language or workflow-designer product.
-- Phase 25 resolved the proof-ring alignment gap, but future milestone work should preserve the same focused-test/sample/smoke parity so extension claims stay machine-checkable.
+Current milestone-close work:
+
+- completed
 
 ### Quick Tasks Completed
 
@@ -93,6 +111,6 @@ None captured yet.
 
 ## Session Continuity
 
-Last session: 2026-04-13
-Stopped at: Quick task 260413-x3v complete; next step is to continue the next Phase 35 God Code split slice or archive quick-task notes
-Resume file: .planning/quick/260413-x3v-follow-up-fix-keep-grapheditorsession-st/260413-x3v-SUMMARY.md
+Last session: 2026-04-16T06:20:00.0000000Z
+Stopped at: v1.7 archived
+Resume file: .planning/ROADMAP.md

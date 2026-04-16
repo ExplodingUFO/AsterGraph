@@ -1,78 +1,56 @@
 # Codebase Concerns
 
-**Analysis Date:** 2026-04-08
+**Analysis Date:** 2026-04-16
 
-## Primary Architecture Concerns
+## Primary Product Concerns
 
-### Kernel-First Migration Is Not Finished
+### Truth Alignment Still Needs Active Maintenance
 
-- `src/AsterGraph.Editor/Kernel/GraphEditorKernel.cs` now exists as the canonical runtime state owner for the session-first path.
-- `src/AsterGraph.Editor/ViewModels/GraphEditorViewModel.cs` still implements `IGraphEditorSessionHost`, which means the compatibility facade still owns part of the runtime contract surface.
-- `src/AsterGraph.Editor/Hosting/AsterGraphEditorFactory.cs`, `.planning/STATE.md`, and `.planning/ROADMAP.md` all point at Phase 14 as the next decoupling step.
-- Risk: dual-path drift between the kernel/session path and the retained facade path.
+- The active milestone is now v1.7 consumer closure and release hardening.
+- The main operational risk is not missing capability surface. It is drift between README, host docs, planning artifacts, codebase maps, and proof entry points.
+- A repo that ships runtime plugins, automation, smoke tools, and release gates still becomes hard to adopt if those surfaces are described inconsistently.
 
-### Public Surface Still Carries MVVM-Shaped Compatibility Debt
+### The Proof Ring Must Stay Discoverable
 
-- `src/AsterGraph.Editor/Menus/CompatiblePortTarget.cs` still exposes `NodeViewModel` and `PortViewModel` references.
-- `src/AsterGraph.Editor/Runtime/IGraphEditorQueries.cs` retains both DTO-style `GetCompatiblePortTargets(...)` and compatibility-oriented `GetCompatibleTargets(...)`.
-- Several extension interfaces and runtime members still carry `[Obsolete(...)]` compatibility overloads instead of being fully retired.
-- Risk: later capability normalization work remains harder until hosts no longer depend on view-model-shaped data.
+- `eng/ci.ps1 -Lane release` is the official scripted verification entry point.
+- `eng/ci.ps1 -Lane maintenance` is the hotspot refactor gate.
+- `tools/AsterGraph.HostSample`, `tools/AsterGraph.PackageSmoke`, and `tools/AsterGraph.ScaleSmoke` now form the maintained runnable proof-tool layer.
+- Risk: if solution membership, docs, or scripts drift apart again, external consumers and contributors will not know which entry points are authoritative.
 
-## Coordination Hotspots
+## Architecture Concerns
 
-### Large Orchestration Types Still Dominate Change Risk
+### Compatibility Debt Is Deliberate, But Still Real
 
-- `src/AsterGraph.Editor/ViewModels/GraphEditorViewModel.cs`, `src/AsterGraph.Editor/Kernel/GraphEditorKernel.cs`, and `src/AsterGraph.Avalonia/Controls/NodeCanvas.axaml.cs` remain the main coordination hotspots.
-- Even with recent extraction work, editor/session, MVVM projection, and Avalonia interaction logic are still concentrated in a few large files.
-- Risk: regressions can cross command, selection, history, diagnostics, and rendering boundaries when one hotspot changes.
+- `src/AsterGraph.Editor/Kernel/GraphEditorKernel.cs` is the canonical mutable runtime state owner.
+- `src/AsterGraph.Editor/ViewModels/GraphEditorViewModel.cs` is now a retained compatibility facade rather than the runtime owner, but it is still a large integration hotspot.
+- `src/AsterGraph.Editor/Menus/CompatiblePortTarget.cs` and `src/AsterGraph.Editor/Runtime/IGraphEditorQueries.cs::GetCompatibleTargets(...)` remain public compatibility shims.
+- Risk: maintainers still need clear retirement guidance so future simplification does not turn into accidental breaking change.
 
-### Compatibility And Proof Logic Are Mixed Into Production Flow
+### Hotspots Are Narrower, Not Gone
 
-- The repo intentionally keeps legacy constructor/view paths alive while adding new factory/session paths.
-- `tools/AsterGraph.HostSample/Program.cs` and `tools/AsterGraph.PackageSmoke/Program.cs` verify both stories at once.
-- Risk: this is useful proof coverage, but it also increases maintenance cost because two composition models must stay behaviorally aligned until migration is complete.
+- `GraphEditorViewModel`, `GraphEditorKernel`, and `NodeCanvas.axaml.cs` remain the main concentrated change surfaces.
+- Recent extractions reduced inline ownership, but these files still coordinate many editor/runtime/UI concerns.
+- Risk: local refactors can still have wider blast radius than the public API suggests if focused proof is not kept aligned.
 
-## Quality And Tooling Concerns
+## Quality And Release Concerns
 
-### No Strong Repo-Level Quality Gates
+### The Release Gate Exists, But Matrix Clarity Still Matters
 
-- No `.editorconfig`, analyzer ruleset, or central package-management file is tracked.
-- No coverage config or checked-in CI workflow was detected.
-- The main quality gates are `dotnet build`, `dotnet test`, and the proof tools.
-- Risk: style drift, unnoticed target-matrix regressions, and documentation drift are easier to accumulate.
+- CI already runs `eng/ci.ps1 -Lane all` across `net8.0` / `net9.0` plus a `release` job.
+- Publishable packages target both frameworks; proof tools target `net8.0`; editor/demo regressions split across `net9.0` and `net8.0`.
+- Risk: framework-specific regressions can still hide if the repo gate and CI jobs stop making those responsibilities explicit.
 
-### Mixed Target Matrix Requires Ongoing Attention
+### History/Save Semantics Are Fixed In Code But Still Need Consumer-Level Publication
 
-- Publishable packages target `net8.0` and `net9.0`.
-- `tests/AsterGraph.Editor.Tests` runs on `net9.0`, while `tests/AsterGraph.Serialization.Tests` and the tool projects run on `net8.0`.
-- Risk: behavior that only reproduces on one target framework may escape if verification is not run across the right combination of projects.
-
-## Product And Roadmap Concerns
-
-### Plugin And Automation Readiness Is Still Deferred
-
-- `.planning/REQUIREMENTS.md` keeps plugin loading and richer automation explicitly out of scope for the current milestone.
-- The architecture is being hardened for those later goals, but the runtime is not yet at the final explicit-capability boundary.
-- Risk: consumers may infer more runtime extensibility than the current public API actually stabilizes today.
-
-### Documentation Can Drift Quickly During Phase Work
-
-- The codebase moved materially after the previous map on 2026-04-03: Phase 13 landed, `GraphEditorKernel` was introduced, Phase 14 planning artifacts were added, and `tools/AsterGraph.ScaleSmoke` became part of the proof surface.
-- Generated planning/reference docs therefore need periodic refresh to remain trustworthy.
-- Risk: stale architecture or testing docs can push later planning and review work in the wrong direction.
-
-## What Looks Better Than Before
-
-- `Directory.Build.props` now excludes `artifacts/**` from default compile globs, reducing an earlier class of audit-output build risk.
-- `tools/AsterGraph.ScaleSmoke/Program.cs` gives the repo a more explicit large-graph proof surface than before.
-- Diagnostics, inspection snapshots, and instrumentation seams are now formalized in `src/AsterGraph.Editor/Diagnostics/*.cs`.
+- Focused regressions and `ScaleSmoke` now enforce one retained history/save contract.
+- Current remaining risk is documentation and onboarding: consumers still need that behavior described as a product contract, not only as passing tests.
 
 ## Suggested Next Watchpoints
 
-- Track when `GraphEditorViewModel` stops implementing `IGraphEditorSessionHost`.
-- Track when `CompatiblePortTarget` and related compatibility APIs stop exposing MVVM objects as canonical runtime data.
-- Keep the package smoke, scale smoke, and migration compatibility suites in sync whenever runtime/session contracts change.
+- Keep `HostSample`, `PackageSmoke`, `ScaleSmoke`, and the scripted release gate aligned as one proof system.
+- Keep compatibility-retirement wording explicit anywhere `GetCompatibleTargets(...)` and `CompatiblePortTarget` are still exposed.
+- Keep the maintenance lane focused on hotspot seams rather than allowing it to become a second broad release lane.
 
 ---
 
-*Concerns analysis refreshed: 2026-04-08*
+*Concerns analysis refreshed: 2026-04-16*
