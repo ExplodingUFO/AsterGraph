@@ -83,4 +83,4 @@ v1.7 focuses on productization closure: align repo narrative and proof entry poi
 
 ## Next Action
 
-**Next action:** plan Phase 35 with `$gsd-plan-phase 35`
+**Next action:** execute Phase 35 with `$gsd-execute-phase 35`

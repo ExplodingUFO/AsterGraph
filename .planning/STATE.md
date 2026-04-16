@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.7
 milestone_name: Consumer Closure / Release Hardening
-status: planning
-stopped_at: Phase 34 completed
-last_updated: "2026-04-16T08:05:00.0000000Z"
-last_activity: 2026-04-16 -- Completed Phase 34 truth alignment and proof ring closure
+status: executing
+stopped_at: Phase 35 planned
+last_updated: "2026-04-16T08:20:00.0000000Z"
+last_activity: 2026-04-16 -- Planned Phase 35 release gate and matrix automation
 progress:
   total_phases: 4
   completed_phases: 1
@@ -21,14 +21,14 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-04-16)
 
 **Core value:** Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
-**Current focus:** Phase 35 ready to plan - release-gate-and-matrix-automation
+**Current focus:** Phase 35 ready to execute - release-gate-and-matrix-automation
 
 ## Current Position
 
-Phase: 35 (release-gate-and-matrix-automation) - READY TO PLAN
-Plan: 3 plans outlined in roadmap
-Status: Ready to plan
-Last activity: 2026-04-16 -- Completed Phase 34 truth alignment and proof ring closure
+Phase: 35 (release-gate-and-matrix-automation) - READY TO EXECUTE
+Plan: 3 plans written
+Status: Ready to execute
+Last activity: 2026-04-16 -- Planned Phase 35 release gate and matrix automation
 
 ## Performance Metrics
 
@@ -91,11 +91,11 @@ None captured yet.
 
 ### Blockers/Concerns
 
-Current Phase 35 focus:
+Current Phase 35 work:
 
-- make the release gate and CI jobs express the target-matrix and compatibility responsibilities more explicitly
-- keep the official verification path centered on `eng/ci.ps1`, not README-only command stitching
-- verify that package compatibility checks stay machine-enforced in release validation
+- add a focused `contract` lane without widening `maintenance`
+- run `HostSample` as part of the official scripted proof system
+- split CI into explicit matrix, contract, and release jobs
 
 ### Quick Tasks Completed
 
@@ -108,5 +108,5 @@ Current Phase 35 focus:
 ## Session Continuity
 
 Last session: 2026-04-16T06:20:00.0000000Z
-Stopped at: Phase 34 completed
+Stopped at: Phase 35 planned
 Resume file: .planning/ROADMAP.md
