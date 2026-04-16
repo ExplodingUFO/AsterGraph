@@ -23,6 +23,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private const string ChromeModeHelper = "关闭后可体验完整编辑流程；开启后仅保留只读浏览。";
     private const string ChromeControlsHelper = "这些开关只控制壳层显示，不会重建当前 Editor 会话。";
     private const string DemoStorageFolderName = "AsterGraph.Demo";
+    private IReadOnlyList<CapabilityShowcaseItem> _capabilities = [];
 
     public MainWindowViewModel()
     {
@@ -90,7 +91,7 @@ public partial class MainWindowViewModel : ViewModelBase
             PluginRegistrations = pluginShowcase.Registrations,
             PluginTrustPolicy = pluginShowcase.TrustPolicy,
             ContextMenuAugmentor = contextMenuAugmentor,
-            LocalizationProvider = new DemoGraphLocalizationProvider(),
+            LocalizationProvider = CreateGraphLocalizationProvider(SelectedLanguage.Code),
         });
 
         Editor = editor;
@@ -104,7 +105,7 @@ public partial class MainWindowViewModel : ViewModelBase
         Editor.Session.Events.AutomationProgress += (_, args) => OnAutomationProgress(args);
         Editor.Session.Events.AutomationCompleted += (_, args) => OnAutomationCompleted(args);
 
-        Capabilities = CreateCapabilityShowcaseItems();
+        UpdateCapabilities();
         SelectedCapability = Capabilities[0];
         ApplyHostOptions(status: null);
         RefreshRuntimeProjection();
@@ -112,16 +113,9 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public GraphEditorViewModel Editor { get; }
 
-    public IReadOnlyList<CapabilityShowcaseItem> Capabilities { get; }
+    public IReadOnlyList<CapabilityShowcaseItem> Capabilities => _capabilities;
 
     public IReadOnlyList<GraphEditorPluginCandidateSnapshot> PluginCandidates { get; }
-
-    public IReadOnlyList<string> DemoEntries { get; } =
-    [
-        "LIVE：中心主编辑器始终绑定同一个 Editor。",
-        "STOCK：默认完整壳层来自 GraphEditorView。",
-        "CUSTOM：视觉替换通过 presenter seam 接入。",
-    ];
 
     [ObservableProperty]
     private CapabilityShowcaseItem selectedCapability = null!;
@@ -158,19 +152,4 @@ public partial class MainWindowViewModel : ViewModelBase
 
     [ObservableProperty]
     private bool isHostPaneOpen;
-
-    [ObservableProperty]
-    private string selectedHostMenuGroupTitle = "展示";
-
-    private sealed class DemoGraphLocalizationProvider : IGraphLocalizationProvider
-    {
-        private static readonly IReadOnlyDictionary<string, string> Values = new Dictionary<string, string>(StringComparer.Ordinal)
-        {
-            ["editor.menu.canvas.addNode"] = "添加节点",
-            ["editor.inspector.title.none"] = "请选择一个节点",
-        };
-
-        public string GetString(string key, string fallback)
-            => Values.TryGetValue(key, out var localized) ? localized : fallback;
-    }
 }

@@ -38,9 +38,6 @@ public partial class MainWindowViewModel
     partial void OnIsHostPaneOpenChanged(bool value)
         => RefreshRuntimeProjection();
 
-    partial void OnSelectedHostMenuGroupTitleChanged(string value)
-        => RefreshRuntimeProjection();
-
     [RelayCommand]
     public void SelectCapability(CapabilityShowcaseItem capability)
     {
@@ -56,7 +53,7 @@ public partial class MainWindowViewModel
             return;
         }
 
-        SelectedHostMenuGroupTitle = groupTitle;
+        SelectedHostMenuGroup = NormalizeHostMenuGroup(groupTitle);
         IsHostPaneOpen = true;
     }
 
@@ -134,6 +131,6 @@ public partial class MainWindowViewModel
         };
     }
 
-    private static string BoolText(bool value)
-        => value ? "是" : "否";
+    private string BoolText(bool value)
+        => value ? T("是", "Yes") : T("否", "No");
 }

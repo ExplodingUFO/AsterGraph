@@ -153,6 +153,28 @@ public sealed class DemoMainWindowTests
         Assert.False(graphEditorView.IsStatusChromeVisible);
     }
 
+    [AvaloniaFact]
+    public void MainWindow_SwitchesVisibleShellCopyWhenLanguageChanges()
+    {
+        var viewModel = new MainWindowViewModel();
+        var window = new MainWindow
+        {
+            DataContext = viewModel,
+        };
+
+        window.Show();
+
+        Assert.Equal("展示", Assert.IsType<MenuItem>(window.FindControl<MenuItem>("PART_ShowcaseMenu")).Header);
+        Assert.Equal("宿主控制抽屉", window.FindControl<TextBlock>("PART_HostDrawerCaptionText")?.Text);
+
+        viewModel.SelectLanguage("en");
+
+        Assert.Equal("Showcase", Assert.IsType<MenuItem>(window.FindControl<MenuItem>("PART_ShowcaseMenu")).Header);
+        Assert.Equal("Language", Assert.IsType<MenuItem>(window.FindControl<MenuItem>("PART_LanguageMenu")).Header);
+        Assert.Equal("Host Controls Drawer", window.FindControl<TextBlock>("PART_HostDrawerCaptionText")?.Text);
+        Assert.Equal("Host-Owned Showcase", window.FindControl<TextBlock>("PART_GraphIntroTitleText")?.Text);
+    }
+
     private static MainWindow CreateWindow()
     {
         var window = new MainWindow

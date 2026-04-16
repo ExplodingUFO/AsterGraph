@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.8
 milestone_name: Public Alpha Readiness and Canonical Demo
 status: active
-stopped_at: Phase 40 in progress
-last_updated: "2026-04-16T16:05:00.0000000Z"
-last_activity: 2026-04-16 -- Completed Phase 39 canonical demo and capability showcase
+stopped_at: Phase 41 in progress
+last_updated: "2026-04-16T17:40:00.0000000Z"
+last_activity: 2026-04-16 -- Completed Phase 40 bilingual docs and localization proof
 progress:
   total_phases: 4
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 12
-  completed_plans: 6
-  percent: 50
+  completed_plans: 9
+  percent: 75
 ---
 
 # Project State
@@ -25,10 +25,10 @@ See: `.planning/PROJECT.md` (updated 2026-04-16)
 
 ## Current Position
 
-Phase: 40
-Plan: 40 execution
+Phase: 41
+Plan: 41 execution
 Status: In progress
-Last activity: 2026-04-16 -- Completed Phase 39 canonical demo and capability showcase
+Last activity: 2026-04-16 -- Completed Phase 40 bilingual docs and localization proof
 
 ## Performance Metrics
 
@@ -110,7 +110,6 @@ None captured yet.
 Current framing concerns to close through v1.8:
 
 - CI is still Windows-only and does not yet upload public release artifacts or run tag-driven prerelease publishing.
- - Public docs are still primarily single-language surfaces, and the demo host shell still needs a user-visible language toggle.
 
 ### Quick Tasks Completed
 
@@ -123,5 +122,5 @@ Current framing concerns to close through v1.8:
 ## Session Continuity
 
 Last session: 2026-04-16T06:20:00.0000000Z
-Stopped at: Phase 40 in progress
+Stopped at: Phase 41 in progress
 Resume file: .planning/ROADMAP.md

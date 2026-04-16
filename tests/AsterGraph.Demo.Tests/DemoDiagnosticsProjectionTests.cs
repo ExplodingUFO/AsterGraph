@@ -48,8 +48,8 @@ public sealed class DemoDiagnosticsProjectionTests
         viewModel.Editor.Session.Commands.SaveWorkspace();
 
         var diagnostics = viewModel.Editor.Session.Diagnostics.GetRecentDiagnostics(10);
-        var latestDiagnostic = Assert.Single(diagnostics.Where(diagnostic => diagnostic.Code == "workspace.save.succeeded"));
-        var projectedDiagnostic = Assert.Single(viewModel.RecentDiagnostics.Where(diagnostic => diagnostic.Code == "workspace.save.succeeded"));
+        var latestDiagnostic = Assert.Single(diagnostics, diagnostic => diagnostic.Code == "workspace.save.succeeded");
+        var projectedDiagnostic = Assert.Single(viewModel.RecentDiagnostics, diagnostic => diagnostic.Code == "workspace.save.succeeded");
 
         Assert.Equal("以下诊断直接来自 Editor.Session.Diagnostics，用于确认共享运行时状态。", viewModel.RuntimeDiagnosticsSummary);
         Assert.Equal(viewModel.Editor.StatusMessage, viewModel.CompatibilityStatusMessage);

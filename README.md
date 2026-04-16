@@ -5,8 +5,10 @@ AsterGraph is a modular node-graph editor for .NET with an Avalonia UI shell, a 
 ## Public Alpha
 
 - current package baseline: `0.2.0-alpha.1`
-- primary public entry path: this `README` plus the guides under [`docs/`](./docs/)
-- current alpha scope, known limitations, and stability notes: [`docs/alpha-status.md`](./docs/alpha-status.md)
+- English docs: [`docs/en/`](./docs/en/)
+- 中文文档: [`docs/zh-CN/`](./docs/zh-CN/)
+- 中文总览: [`README.zh-CN.md`](./README.zh-CN.md)
+- current alpha scope, known limitations, and stability notes: [`docs/en/alpha-status.md`](./docs/en/alpha-status.md)
 
 Use [`.planning`](./.planning/) as maintainer context. It is not the primary consumer onboarding surface.
 
@@ -61,7 +63,7 @@ Current non-goals:
 
 ## Demo Showcase
 
-`src/AsterGraph.Demo` is the graph-first showcase for the SDK. The window keeps one live session on screen while the in-window host menu groups (`展示`, `视图`, `行为`, `运行时`, `证明`) adjust shell chrome, behavior toggles, runtime readouts, and proof cues around the same graph.
+`src/AsterGraph.Demo` is the graph-first showcase for the SDK. The window keeps one live session on screen while the in-window host menu groups (`展示`, `视图`, `行为`, `运行时`, `扩展`, `自动化`, `集成`, `证明`) adjust shell chrome, behavior toggles, runtime readouts, plugin/automation surfaces, and proof cues around the same graph. The top host menu also includes a visible language switch between Chinese and English.
 
 Use the demo to verify two things quickly:
 
@@ -100,7 +102,7 @@ All four publishable packages currently target `net8.0` and `net9.0`.
 
 ## Initialization And Migration Story
 
-Start with the [canonical adoption path](./docs/quick-start.md#canonical-adoption-path). The short source of truth is:
+Start with the [canonical adoption path](./docs/en/quick-start.md#canonical-adoption-path). The short source of truth is:
 
 - runtime-only or custom UI host:
   - `AsterGraphEditorFactory.CreateSession(...)`
@@ -113,10 +115,10 @@ Start with the [canonical adoption path](./docs/quick-start.md#canonical-adoptio
 
 If you want to own Avalonia layout while still reusing the stock canvas, inspector, or mini map, stay on the `Create(...)` family and treat those surface factories as advanced hosted-UI composition detail rather than a fourth canonical entry path. The constructor/view path remains supported so hosts can migrate in planned batches instead of rewriting in one shot.
 
-For the compact package/route/verification matrix, see [Quick Start](./docs/quick-start.md#canonical-adoption-path).
-For the current alpha scope and known limitations, see [Alpha Status](./docs/alpha-status.md).
-For the explicit history/save/dirty behavior contract, see [State Contract](./docs/state-contracts.md).
-For stability tiers, compatibility retirement, extension precedence, and lane ownership, see [Extension Contracts](./docs/extension-contracts.md).
+For the compact package/route/verification matrix, see [Quick Start](./docs/en/quick-start.md#canonical-adoption-path).
+For the current alpha scope and known limitations, see [Alpha Status](./docs/en/alpha-status.md).
+For the explicit history/save/dirty behavior contract, see [State Contract](./docs/en/state-contracts.md).
+For stability tiers, compatibility retirement, extension precedence, and lane ownership, see [Extension Contracts](./docs/en/extension-contracts.md).
 
 ## Runtime Session And Services
 
@@ -273,7 +275,7 @@ The official proof ring for the shipped surface is:
 
 ## Quick Start
 
-For first-time onboarding (package choice, package-source options, install commands, and the minimum Avalonia host path), start with the [canonical Quick Start route](./docs/quick-start.md#canonical-adoption-path).
+For first-time onboarding (package choice, package-source options, install commands, and the minimum Avalonia host path), start with the [canonical Quick Start route](./docs/en/quick-start.md#canonical-adoption-path).
 
 Build:
 

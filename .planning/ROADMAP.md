@@ -2,7 +2,7 @@
 
 ## Milestones
 
-- 🚧 **v1.8 Public Alpha Readiness and Canonical Demo** - Phase 40 in progress
+- 🚧 **v1.8 Public Alpha Readiness and Canonical Demo** - Phase 41 in progress
 - ✅ **[v1.7 Consumer Closure / Release Hardening](./milestones/v1.7-ROADMAP.md)** - Phases 34-37, shipped 2026-04-16, archived 2026-04-16
 - ✅ **[v1.6 Facade Convergence and Proof Guardrails](./milestones/v1.6-ROADMAP.md)** - Phases 30-33, shipped 2026-04-16, archived 2026-04-16
 - ✅ **[v1.5 Runtime Boundary Cleanup and Quality Gates](./milestones/v1.5-ROADMAP.md)** - Phases 26-29, shipped 2026-04-14
@@ -27,7 +27,7 @@ The next gap is public-alpha readiness. v1.8 therefore focuses on making the shi
 
 - [ ] **Phase 38: Alpha Framing And OSS Baseline** - Unify public versioning and alpha-status language, then add the public governance files and SDK pinning that an open alpha needs.
 - [ ] **Phase 39: Canonical Demo And Capability Showcase** - Move the main demo onto the canonical host path and make plugin, automation, standalone-surface, and presenter-replacement capabilities visible instead of implied.
-- [ ] **Phase 40: Bilingual Docs And Localization Proof** - Publish the core public guides in English and `zh-CN`, and make the demo's localization seam visible through a real language toggle plus proof coverage.
+- [x] **Phase 40: Bilingual Docs And Localization Proof** - Publish the core public guides in English and `zh-CN`, and make the demo's localization seam visible through a real language toggle plus proof coverage.
 - [ ] **Phase 41: Public Alpha Release Closure** - Extend CI and release automation for public alpha consumption with Linux validation, artifacts, and tag-driven prerelease publishing.
 
 ## Phase Details
@@ -78,9 +78,9 @@ The next gap is public-alpha readiness. v1.8 therefore focuses on making the shi
 |-------|--------------|--------|
 | 38. Alpha Framing And OSS Baseline | FRAM-01, FRAM-02, FRAM-03, OSS-01, OSS-02 | Completed |
 | 39. Canonical Demo And Capability Showcase | DEMO-01, DEMO-02, DEMO-03, DEMO-04, CONS-01 | Completed |
-| 40. Bilingual Docs And Localization Proof | DOCS-01, L10N-01, TEST-01 | In progress |
+| 40. Bilingual Docs And Localization Proof | DOCS-01, L10N-01, TEST-01 | Completed |
 | 41. Public Alpha Release Closure | OSS-03, REL-01, REL-02 | Planned |
 
 ## Next Action
 
-**Next action:** publish bilingual docs and wire the demo language toggle for Phase 40
+**Next action:** close public-alpha CI and tag-driven release automation for Phase 41

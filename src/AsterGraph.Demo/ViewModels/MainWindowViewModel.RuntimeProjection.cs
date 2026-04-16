@@ -11,13 +11,13 @@ public partial class MainWindowViewModel
 
     public IReadOnlyList<string> RuntimeSignalLines =>
     [
-        $"文档标题：{RuntimeDocumentTitle}",
-        $"节点数量：{RuntimeNodeCount}",
-        $"连线数量：{RuntimeConnectionCount}",
-        $"当前选择：{RuntimeSelectedNodeCount}",
-        $"视口缩放：{RuntimeViewportZoom:0.00}",
-        $"待完成连线：{BoolText(RuntimeHasPendingConnection)}",
-        $"当前状态：{CompatibilityStatusMessage}",
+        T("文档标题：", "Document title: ") + RuntimeDocumentTitle,
+        T("节点数量：", "Node count: ") + RuntimeNodeCount,
+        T("连线数量：", "Connection count: ") + RuntimeConnectionCount,
+        T("当前选择：", "Current selection: ") + RuntimeSelectedNodeCount,
+        T("视口缩放：", "Viewport zoom: ") + RuntimeViewportZoom.ToString("0.00"),
+        T("待完成连线：", "Pending connection: ") + BoolText(RuntimeHasPendingConnection),
+        T("当前状态：", "Current status: ") + CompatibilityStatusMessage,
     ];
 
     /// <summary>
@@ -26,8 +26,8 @@ public partial class MainWindowViewModel
     public IReadOnlyList<string> RuntimeMetricLines =>
     [
         .. RuntimeSignalLines.Take(5),
-        $"可保存工作区：{BoolText(CurrentInspection.Capabilities.CanSaveWorkspace)}",
-        $"可加载工作区：{BoolText(CurrentInspection.Capabilities.CanLoadWorkspace)}",
+        T("可保存工作区：", "Can save workspace: ") + BoolText(CurrentInspection.Capabilities.CanSaveWorkspace),
+        T("可加载工作区：", "Can load workspace: ") + BoolText(CurrentInspection.Capabilities.CanLoadWorkspace),
     ];
 
     /// <summary>
@@ -56,8 +56,8 @@ public partial class MainWindowViewModel
             {
                 return
                 [
-                    "最近诊断：0 条",
-                    $"当前状态消息：{CompatibilityStatusMessage}",
+                    T("最近诊断：0 条", "Recent diagnostics: 0"),
+                    T("当前状态消息：", "Current status message: ") + CompatibilityStatusMessage,
                 ];
             }
 
@@ -70,7 +70,8 @@ public partial class MainWindowViewModel
     /// <summary>
     /// 运行时诊断帮助文案。
     /// </summary>
-    public string RuntimeDiagnosticsSummary => RuntimeDiagnosticsHelper;
+    public string RuntimeDiagnosticsSummary
+        => T(RuntimeDiagnosticsHelper, "These diagnostics come directly from Editor.Session.Diagnostics so the shared runtime state stays visible.");
 
     /// <summary>
     /// 当前运行时文档标题。
@@ -125,15 +126,26 @@ public partial class MainWindowViewModel
     /// <summary>
     /// 主编辑器摘要文案。
     /// </summary>
-    public string MainEditorSummary => $"当前中心主编辑器绑定文档“{Editor.Title}”，并通过 Create(...) + AsterGraphAvaloniaViewFactory.Create(...) 暴露给同一个 Editor.Session。";
+    public string MainEditorSummary
+        => T("当前中心主编辑器绑定文档“", "The center editor is currently bound to document “")
+        + Editor.Title
+        + T("”，并通过 Create(...) + AsterGraphAvaloniaViewFactory.Create(...) 暴露给同一个 Editor.Session。", "” and is exposed through Create(...) + AsterGraphAvaloniaViewFactory.Create(...) on the same Editor.Session.");
 
     private GraphEditorInspectionSnapshot CurrentInspection
         => Editor.Session.Diagnostics.CaptureInspectionSnapshot();
 
     private void RefreshRuntimeProjection()
     {
+        OnPropertyChanged(nameof(UiText));
+        OnPropertyChanged(nameof(CurrentLanguageBadgeText));
+        OnPropertyChanged(nameof(SelectedHostMenuGroupTitle));
+        OnPropertyChanged(nameof(HostDrawerCaption));
+        OnPropertyChanged(nameof(LiveSessionTitle));
+        OnPropertyChanged(nameof(HostOwnershipBadgeText));
+        OnPropertyChanged(nameof(RuntimeOwnershipBadgeText));
         OnPropertyChanged(nameof(StandaloneSurfaceLines));
         OnPropertyChanged(nameof(PresentationLines));
+        OnPropertyChanged(nameof(LocalizationProofLines));
         OnPropertyChanged(nameof(SelectedHostMenuGroupSummary));
         OnPropertyChanged(nameof(SelectedHostMenuGroupLines));
         OnPropertyChanged(nameof(IsShowcaseHostGroupSelected));
@@ -183,9 +195,9 @@ public partial class MainWindowViewModel
     private static string SeverityText(GraphEditorDiagnosticSeverity severity)
         => severity switch
         {
-            GraphEditorDiagnosticSeverity.Info => "信息",
-            GraphEditorDiagnosticSeverity.Warning => "警告",
-            GraphEditorDiagnosticSeverity.Error => "错误",
+            GraphEditorDiagnosticSeverity.Info => "Info",
+            GraphEditorDiagnosticSeverity.Warning => "Warning",
+            GraphEditorDiagnosticSeverity.Error => "Error",
             _ => severity.ToString(),
         };
 
