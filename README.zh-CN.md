@@ -7,9 +7,10 @@ AsterGraph 是一个面向 .NET 的模块化节点图编辑器工具包，包含
 - 当前包版本基线：`0.2.0-alpha.1`
 - English docs：[`docs/en/`](./docs/en/)
 - 中文文档：[`docs/zh-CN/`](./docs/zh-CN/)
+- 项目当前状态：[`docs/zh-CN/project-status.md`](./docs/zh-CN/project-status.md)
 - Alpha 范围、已知限制与稳定性说明：[`docs/zh-CN/alpha-status.md`](./docs/zh-CN/alpha-status.md)
-
-把 [`.planning`](./.planning/) 视为维护者上下文，而不是外部接入入口。
+- 对外发布检查清单：[`docs/zh-CN/public-launch-checklist.md`](./docs/zh-CN/public-launch-checklist.md)
+- 公开仓库 hygiene 门禁：`pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane hygiene -Framework all -Configuration Release`
 
 ## 当前能力范围
 
@@ -60,10 +61,12 @@ AsterGraph 是一个面向 .NET 的模块化节点图编辑器工具包，包含
 更完整的分流和命令见：
 
 - [Quick Start](./docs/zh-CN/quick-start.md)
+- [Project Status](./docs/zh-CN/project-status.md)
 - [Host Integration](./docs/zh-CN/host-integration.md)
 - [State Contracts](./docs/zh-CN/state-contracts.md)
 - [Extension Contracts](./docs/zh-CN/extension-contracts.md)
 - [Demo Guide](./docs/zh-CN/demo-guide.md)
+- [Public Launch Checklist](./docs/zh-CN/public-launch-checklist.md)
 
 ## Demo
 
@@ -90,6 +93,7 @@ AsterGraph 是一个面向 .NET 的模块化节点图编辑器工具包，包含
 
 官方 proof ring 入口：
 
+- `pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane hygiene -Framework all -Configuration Release`
 - `pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane all -Framework all -Configuration Release`
 - `pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane contract -Framework all -Configuration Release`
 - `pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane maintenance -Framework all -Configuration Release`

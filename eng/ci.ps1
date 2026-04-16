@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-  [ValidateSet('restore', 'build', 'test', 'maintenance', 'contract', 'release', 'all')]
+  [ValidateSet('restore', 'build', 'test', 'maintenance', 'contract', 'release', 'hygiene', 'all')]
   [string]$Lane = 'all',
 
   [ValidateSet('all', 'net8.0', 'net9.0')]
@@ -20,6 +20,7 @@ $proofArtifactsRoot = Join-Path $artifactsRoot 'proof'
 $coverageResultsRoot = Join-Path $artifactsRoot 'test-results\release'
 $coverageOutputPath = Join-Path $artifactsRoot 'coverage\release-summary.json'
 $coverageMarkerOutputPath = Join-Path $proofArtifactsRoot 'coverage-report.txt'
+$publicRepoHygieneProofPath = Join-Path $proofArtifactsRoot 'public-repo-hygiene.txt'
 $hostSampleProjectProofPath = Join-Path $proofArtifactsRoot 'hostsample-project.txt'
 $hostSamplePackedProofPath = Join-Path $proofArtifactsRoot 'hostsample-packed.txt'
 $hostSampleNet10PackedProofPath = Join-Path $proofArtifactsRoot 'hostsample-net10-packed.txt'
@@ -122,6 +123,16 @@ function Invoke-DotNet {
   if ($LASTEXITCODE -ne 0) {
     throw "dotnet command failed with exit code ${LASTEXITCODE}: dotnet $($Arguments -join ' ')"
   }
+}
+
+function Test-GitTrackedPath {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$RelativePath
+  )
+
+  $null = & git -C $repoRoot ls-files --error-unmatch -- $RelativePath 2>$null
+  return $LASTEXITCODE -eq 0
 }
 
 function Invoke-DotNetCapture {
@@ -443,6 +454,41 @@ function Invoke-PackageSmoke {
   ) -CapturePath $packageSmokeProofPath
 }
 
+function Assert-RepoPathExists {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$RelativePath
+  )
+
+  $path = Resolve-ProjectPath -RelativePath $RelativePath
+  if (-not (Test-Path -LiteralPath $path)) {
+    throw "Required public repo path is missing: $RelativePath"
+  }
+}
+
+function Assert-RepoPathNotTracked {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$RelativePath
+  )
+
+  if (Test-GitTrackedPath -RelativePath $RelativePath) {
+    throw "Internal-only path is still tracked by git: $RelativePath"
+  }
+}
+
+function Assert-GitIgnoreContains {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$ExpectedEntry
+  )
+
+  $gitIgnorePath = Join-Path $repoRoot '.gitignore'
+  if (-not (Select-String -Path $gitIgnorePath -SimpleMatch -Pattern $ExpectedEntry -Quiet)) {
+    throw "Expected .gitignore entry was not found: $ExpectedEntry"
+  }
+}
+
 function Invoke-HostSample {
   param(
     [switch]$UsePackedPackages,
@@ -671,6 +717,61 @@ function Invoke-MaintenanceValidation {
   Invoke-ScaleSmoke
 }
 
+function Invoke-PublicRepoHygieneValidation {
+  if ($Framework -ne 'all') {
+    Write-Warning "Hygiene lane is framework-agnostic. Ignoring -Framework $Framework and validating the tracked repo surface."
+  }
+
+  Reset-Directory -Path $proofArtifactsRoot
+
+  Write-Host ''
+  Write-Host '### Validate public repo hygiene surface' -ForegroundColor Yellow
+
+  foreach ($path in @(
+    '.planning',
+    'AGENTS.md',
+    'CLAUDE.md',
+    'build.log',
+    'NuGet.config',
+    'docs/plans'
+  )) {
+    Assert-RepoPathNotTracked -RelativePath $path
+  }
+
+  foreach ($path in @(
+    'README.md',
+    'README.zh-CN.md',
+    'docs/en/project-status.md',
+    'docs/en/alpha-status.md',
+    'docs/en/public-launch-checklist.md',
+    'docs/zh-CN/project-status.md',
+    'docs/zh-CN/alpha-status.md',
+    'docs/zh-CN/public-launch-checklist.md',
+    'docs/en/quick-start.md',
+    'docs/zh-CN/quick-start.md',
+    'CONTRIBUTING.md',
+    'CODE_OF_CONDUCT.md',
+    'SECURITY.md',
+    'global.json'
+  )) {
+    Assert-RepoPathExists -RelativePath $path
+  }
+
+  foreach ($entry in @(
+    '/build.log',
+    '/NuGet.config',
+    '/.planning/',
+    '/AGENTS.md',
+    '/CLAUDE.md',
+    '/docs/plans/'
+  )) {
+    Assert-GitIgnoreContains -ExpectedEntry $entry
+  }
+
+  'PUBLIC_REPO_HYGIENE_OK:True' | Set-Content -LiteralPath $publicRepoHygieneProofPath
+  Write-Host 'PUBLIC_REPO_HYGIENE_OK:True' -ForegroundColor Green
+}
+
 Set-Location $repoRoot
 Initialize-RepoToolingEnvironment
 $frameworks = Get-Frameworks
@@ -695,6 +796,9 @@ switch ($Lane) {
   }
   'release' {
     Invoke-ReleaseValidation
+  }
+  'hygiene' {
+    Invoke-PublicRepoHygieneValidation
   }
   'all' {
     Invoke-RestoreProjects -Projects (Get-DefaultRestoreProjects -Frameworks $frameworks)

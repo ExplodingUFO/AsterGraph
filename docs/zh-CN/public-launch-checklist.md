@@ -14,6 +14,7 @@
 只跑维护中的官方入口，不要临时拼 ad-hoc 命令：
 
 ```powershell
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane hygiene -Framework all -Configuration Release
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane all -Framework all -Configuration Release
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane contract -Framework all -Configuration Release
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framework all -Configuration Release
@@ -23,6 +24,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framew
 
 公开前至少复核这些产物：
 
+- `artifacts/proof/public-repo-hygiene.txt`
 - `artifacts/proof/hostsample-packed.txt`
 - `artifacts/proof/hostsample-net10-packed.txt`
 - `artifacts/proof/package-smoke.txt`
@@ -32,6 +34,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framew
 
 重点 marker：
 
+- `PUBLIC_REPO_HYGIENE_OK:True`
 - `HOST_SAMPLE_OK:True`
 - `HOST_SAMPLE_NET10_OK:True`
 - `PACKAGE_SMOKE_OK:True`

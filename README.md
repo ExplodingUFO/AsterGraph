@@ -8,11 +8,10 @@ AsterGraph is a modular node-graph editor for .NET with an Avalonia UI shell, a 
 - English docs: [`docs/en/`](./docs/en/)
 - 中文文档: [`docs/zh-CN/`](./docs/zh-CN/)
 - 中文总览: [`README.zh-CN.md`](./README.zh-CN.md)
+- public project status: [`docs/en/project-status.md`](./docs/en/project-status.md)
 - current alpha scope, known limitations, and stability notes: [`docs/en/alpha-status.md`](./docs/en/alpha-status.md)
 - public launch checklist: [`docs/en/public-launch-checklist.md`](./docs/en/public-launch-checklist.md)
-
-Use [`.planning`](./.planning/) as maintainer context. It is not the primary consumer onboarding surface.
-The remaining work before a public visibility flip is operational rather than architectural: branch protection, visibility, and the first public prerelease/tag pass.
+- public repo hygiene gate: `pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane hygiene -Framework all -Configuration Release`
 
 ## Current Scope
 
@@ -119,6 +118,7 @@ Start with the [canonical adoption path](./docs/en/quick-start.md#canonical-adop
 If you want to own Avalonia layout while still reusing the stock canvas, inspector, or mini map, stay on the `Create(...)` family and treat those surface factories as advanced hosted-UI composition detail rather than a fourth canonical entry path. The constructor/view path remains supported so hosts can migrate in planned batches instead of rewriting in one shot.
 
 For the compact package/route/verification matrix, see [Quick Start](./docs/en/quick-start.md#canonical-adoption-path).
+For the public repo posture and near-term public-facing priorities, see [Project Status](./docs/en/project-status.md).
 For the current alpha scope and known limitations, see [Alpha Status](./docs/en/alpha-status.md).
 For the remaining maintainer-only public-opening steps, see [Public Launch Checklist](./docs/en/public-launch-checklist.md).
 For the explicit history/save/dirty behavior contract, see [State Contract](./docs/en/state-contracts.md).
@@ -253,6 +253,7 @@ var run = session.Automation.Execute(new GraphEditorAutomationRunRequest(
 The official proof ring for the shipped surface is:
 
 - official scripted gates:
+  - `eng/ci.ps1 -Lane hygiene`
   - `eng/ci.ps1 -Lane release`
   - `eng/ci.ps1 -Lane contract`
   - `eng/ci.ps1 -Lane maintenance`

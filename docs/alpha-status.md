@@ -3,10 +3,10 @@
 ## Current Alpha Target
 
 - package version baseline: `0.2.0-alpha.1`
-- repo status: public alpha readiness in progress
+- repo status: public alpha
 - current source of truth for consumer onboarding: [`README.md`](../README.md) plus the docs in this folder
-
-Use [`.planning`](../.planning/) as maintainer context, not as the first-stop consumer guide.
+- public status page: [`en/project-status.md`](./en/project-status.md)
+- launch checklist: [`en/public-launch-checklist.md`](./en/public-launch-checklist.md)
 
 ## Included In The Alpha Surface
 
@@ -56,14 +56,14 @@ See:
 
 ## Known Limitations
 
-- the main demo is still being moved onto the canonical host path
-- bilingual public docs are still being filled in
-- public prerelease publishing and release artifacts are still being tightened around the release workflow
+- public prerelease publishing and release artifacts still depend on the maintainer release flow
 - CI coverage is still expanding beyond the current Windows-first release path
 
 ## Recommended Entry Points
 
 - fastest package/route guide: [`quick-start.md`](./quick-start.md)
+- current public posture: [`en/project-status.md`](./en/project-status.md)
+- launch checklist: [`en/public-launch-checklist.md`](./en/public-launch-checklist.md)
 - longer host walkthrough: [`host-integration.md`](./host-integration.md)
 - state semantics: [`state-contracts.md`](./state-contracts.md)
 - extension precedence and retirement: [`extension-contracts.md`](./extension-contracts.md)

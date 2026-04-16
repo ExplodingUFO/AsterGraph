@@ -3,11 +3,10 @@
 ## Current Alpha Target
 
 - package baseline: `0.2.0-alpha.1`
-- repo status: public alpha ready, pending visibility and first public prerelease operations
+- repo status: public alpha
 - public entry path: `README.md` plus the guides under `docs/en` and `docs/zh-CN`
+- public status page: [Project Status](./project-status.md)
 - maintainer launch checklist: [Public Launch Checklist](./public-launch-checklist.md)
-
-`.planning` remains maintainer context, not the primary consumer guide.
 
 ## Included in the Alpha Surface
 
@@ -35,12 +34,13 @@
 
 ## Known Limitations
 
-- repository visibility, branch protection, and the first public prerelease tag are still maintainer-run operational steps
+- public prerelease publishing and release artifacts still depend on the maintainer release flow
 - the deepest package-validation lane and the `.NET 10` packed-consumer proof still run on the Windows release-validation path
 - retained compatibility APIs are still present during the migration window
 
 ## Recommended Entry Points
 
+- [Project Status](./project-status.md)
 - [Quick Start](./quick-start.md)
 - [Public Launch Checklist](./public-launch-checklist.md)
 - [Host Integration](./host-integration.md)

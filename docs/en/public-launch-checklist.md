@@ -14,6 +14,7 @@ Use this checklist immediately before making the repository public or pushing th
 Run the maintained entrypoints, not ad-hoc local commands:
 
 ```powershell
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane hygiene -Framework all -Configuration Release
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane all -Framework all -Configuration Release
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane contract -Framework all -Configuration Release
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framework all -Configuration Release
@@ -23,6 +24,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framew
 
 Review these release artifacts before opening the repo or announcing the prerelease:
 
+- `artifacts/proof/public-repo-hygiene.txt`
 - `artifacts/proof/hostsample-packed.txt`
 - `artifacts/proof/hostsample-net10-packed.txt`
 - `artifacts/proof/package-smoke.txt`
@@ -32,6 +34,7 @@ Review these release artifacts before opening the repo or announcing the prerele
 
 Expected high-signal markers:
 
+- `PUBLIC_REPO_HYGIENE_OK:True`
 - `HOST_SAMPLE_OK:True`
 - `HOST_SAMPLE_NET10_OK:True`
 - `PACKAGE_SMOKE_OK:True`

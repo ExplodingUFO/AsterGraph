@@ -3,10 +3,10 @@
 ## 当前 Alpha 目标
 
 - 包版本基线：`0.2.0-alpha.1`
-- 仓库状态：public alpha readiness
+- 仓库状态：public alpha
 - 对外入口：`README.md` / `README.zh-CN.md` 加上 `docs/en` / `docs/zh-CN`
-
-`.planning` 仍然是维护者上下文，不是外部接入入口。
+- 项目状态页：[Project Status](./project-status.md)
+- 对外发布检查清单：[Public Launch Checklist](./public-launch-checklist.md)
 
 ## Alpha Surface 当前包含
 
@@ -33,13 +33,15 @@
 
 ## 已知限制
 
-- public prerelease publish 还在继续收口到 tag-driven release flow
+- public prerelease publish 和 release artifact 仍然依赖维护者 release flow
 - 最深的 package validation lane 目前仍以 Windows 为主
 - retained compatibility API 仍处于迁移窗口内
 
 ## 推荐入口
 
+- [Project Status](./project-status.md)
 - [Quick Start](./quick-start.md)
+- [Public Launch Checklist](./public-launch-checklist.md)
 - [Host Integration](./host-integration.md)
 - [State Contracts](./state-contracts.md)
 - [Extension Contracts](./extension-contracts.md)
