@@ -1,79 +1,84 @@
-# Requirements: AsterGraph v1.7
+# Requirements: AsterGraph v1.8
 
 **Defined:** 2026-04-16
-**Milestone:** v1.7 Consumer Closure / Release Hardening
+**Milestone:** v1.8 Public Alpha Readiness and Canonical Demo
 **Core Value:** Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
 
 ## Milestone Requirements
 
-### Narrative And Truth Alignment
+### Public Alpha Framing
 
-- [x] **ALIGN-01**: Maintainer can read `README`, `ROADMAP`, `STATE`, `PROJECT`, and current codebase maps without seeing conflicting milestone status, proof-ring composition, or shipped capability claims
-- [x] **ALIGN-02**: Consumer-facing docs no longer contain internal contradictions around capability vs non-goal statements, target-framework support, or proof-tool availability
+- [ ] **FRAM-01**: Public package metadata, README, planning artifacts, and top-level consumer docs all describe the same public-alpha version story, anchored on a stable prerelease semantic such as `0.2.0-alpha.1`
+- [ ] **FRAM-02**: External readers can find one explicit alpha-status and known-limitations contract without having to infer stability from milestone notes or test names
+- [ ] **FRAM-03**: The repo's public entry path prioritizes `README` plus `docs/` for consumers, while `.planning` remains available as secondary maintainer context instead of the first discovery surface
 
-### Proof Ring And Release Gates
+### Open Source Governance And CI
 
-- [x] **PROOF-01**: The official proof ring is explicitly defined around real, discoverable entry points for `PackageSmoke`, `ScaleSmoke`, focused regressions, and a minimal consumer host path
-- [x] **REL-01**: Maintainer can run one official verification entry point that executes build, test, pack, smoke, and compatibility checks instead of stitching together README-only commands
-- [x] **REL-02**: CI covers the supported `net8.0` / `net9.0` matrix with explicit build, smoke, and focused contract lanes so framework-specific regressions surface automatically
-- [x] **REL-03**: Publishable package compatibility remains machine-guarded during release verification through public API and/or package validation checks
+- [ ] **OSS-01**: External contributors have explicit collaboration and reporting guidance through `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`, issue templates, and a PR template
+- [ ] **OSS-02**: Local development and CI agree on a pinned SDK baseline through `global.json` instead of relying on floating `10.0.x` resolution alone
+- [ ] **OSS-03**: CI exposes public-friendly behavior through concurrency control, restore caching, uploaded verification artifacts, and at least one Linux validation lane alongside the full Windows release lane
+- [ ] **REL-01**: Public prerelease publishing is tag-driven, so pull requests validate the alpha surface without running publish logic
+- [ ] **REL-02**: Public alpha releases attach smoke markers, coverage summary, and release-proof artifacts that let external evaluators verify what shipped without rerunning every lane locally first
 
-### Consumer Adoption And State Contracts
+### Canonical Demo And Consumer Separation
 
-- [x] **CONS-01**: Consumer can open one minimal host sample that proves the canonical package-consumption path without relying on the demo shell or project-reference-only setup
-- [x] **CONS-02**: Consumer docs provide short, explicit routes for runtime-only, default Avalonia UI, plugin trust/discovery, and automation adoption, each with required packages and verification steps
-- [x] **HIST-01**: History/save/dirty semantics are documented as an explicit product contract instead of living only inside tests or carried planning concerns
-- [x] **HIST-02**: Focused history/save proof remains part of the official verification gate so semantic regressions fail automation instead of surviving as known drift
+- [ ] **DEMO-01**: `AsterGraph.Demo` uses the canonical factory/session/view-factory composition path instead of constructing `GraphEditorViewModel` directly as its main host route
+- [ ] **DEMO-02**: The demo visibly showcases plugin trust, candidate discovery, trust decisions, loaded plugins, and contribution shape instead of leaving those capabilities only in docs and focused tests
+- [ ] **DEMO-03**: The demo visibly showcases automation execution through canned runs, step/progress output, and linked diagnostics/events instead of exposing automation only as API surface
+- [ ] **DEMO-04**: The demo includes real standalone-surface and presenter-replacement routes that can be operated directly, rather than capability text that only describes those seams
+- [ ] **CONS-01**: `HostSample` is clearly positioned as the minimal consumer sample while `AsterGraph.Demo` is clearly positioned as the showcase host, in both docs and the demo itself
 
-### Maintainability And Extension Contracts
+### Bilingual Experience And Demo Proof
 
-- [x] **MAINT-01**: `GraphEditorViewModel` can continue shrinking as a compatibility facade without reopening runtime ownership drift or creating a second mutable state owner
-- [x] **MAINT-02**: Core contract, proof/integration, and demo/sample test lanes are more clearly separated so failures localize to the right maintenance surface
-- [x] **EXT-01**: Obsolete compatibility shims have a documented retirement plan that tells consumers what to migrate to and when removals are expected
-- [x] **EXT-02**: Extension precedence and stability rules are documented so consumers know which surfaces are stable contracts, which are migration bridges, and how host overrides interact with plugin contributions
+- [ ] **DOCS-01**: Core public guides exist in both English and `zh-CN`, with a stable structure for `README`, quick start, host integration, state contracts, extension contracts, demo guide, and alpha status
+- [ ] **L10N-01**: The demo can switch between Chinese and English, and that toggle proves the host localization seam instead of just hardcoding mixed-language shell copy
+- [ ] **TEST-01**: `AsterGraph.Demo.Tests` proves the canonical demo route, plugin/automation panes, standalone/presenter routes, and bilingual toggle so the showcase surface does not regress silently
 
 ## Future Requirements
 
-### Deferred Platform Work
+### Deferred Platform And Distribution Work
 
-- **TRUST-01**: Host can enforce deeper plugin trust, distribution, signing, or stronger isolation workflows beyond the shipped in-process policy baseline
-- **MARKET-01**: Host can discover, install, and update plugins through marketplace/feed-oriented workflows
-- **SCRIPT-01**: Host can author automation through richer scripting or workflow-designer surfaces beyond the shipped command/query runner baseline
+- **TRUST-01**: Host can enforce stronger plugin signing, isolation, or remote-distribution policy beyond the current in-process trust baseline
+- **MARKET-01**: Host can browse, install, and update plugins through a first-class marketplace/feed experience
+- **SCRIPT-01**: Host can author automation flows through richer scripting or workflow-designer surfaces beyond canned execution and command/query composition
+- **DOCS-02**: Public docs expand beyond the core bilingual guides into broader tutorials, cookbook examples, and API-reference publishing
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| New end-user graph-editing capabilities unrelated to consumer closure, release hardening, or maintenance boundaries | v1.7 is a productization-closeout milestone, not a broad feature-expansion band |
-| Replacing Avalonia or re-arguing kernel/session runtime ownership | The current runtime-first direction is already the shipped baseline and should not be reopened |
-| One-shot removal of all compatibility APIs | Migration remains staged; this milestone should document and prepare retirement rather than force an abrupt break |
-| Marketplace UX, remote plugin distribution UI, or stronger trust-isolation products | Those are later platform bets after the consumer/release closure work lands |
-| Workflow-designer UI or deeper automation authoring product layers | The shipped automation runner remains the baseline while this milestone tightens consumer closure |
+| New graph-editing end-user features unrelated to public alpha readiness, demo completeness, or public release workflows | v1.8 is a public-alpha productization milestone, not a general feature-expansion band |
+| Replacing Avalonia, reopening kernel/session ownership, or redesigning the canonical runtime boundary | The runtime-first architecture is already the shipped baseline and should remain stable through alpha preparation |
+| One-shot removal of retained compatibility APIs | Migration remains staged; this milestone should clarify and demonstrate the boundary, not force an abrupt break |
+| Marketplace UX, remote plugin installation UI, or stronger plugin isolation products | Those belong after the public alpha baseline is in front of external users |
+| Rich automation authoring UI or embedded scripting IDE work | The goal is to make the shipped automation baseline visible and testable, not to broaden it into a new product tier |
 
 ## Traceability
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| ALIGN-01 | Phase 34 | Completed |
-| ALIGN-02 | Phase 34 | Completed |
-| PROOF-01 | Phase 34 | Completed |
-| REL-01 | Phase 35 | Completed |
-| REL-02 | Phase 35 | Completed |
-| REL-03 | Phase 35 | Completed |
-| CONS-01 | Phase 36 | Completed |
-| CONS-02 | Phase 36 | Completed |
-| HIST-01 | Phase 36 | Completed |
-| HIST-02 | Phase 36 | Completed |
-| MAINT-01 | Phase 37 | Completed |
-| MAINT-02 | Phase 37 | Completed |
-| EXT-01 | Phase 37 | Completed |
-| EXT-02 | Phase 37 | Completed |
+| FRAM-01 | Phase 38 | Planned |
+| FRAM-02 | Phase 38 | Planned |
+| FRAM-03 | Phase 38 | Planned |
+| OSS-01 | Phase 38 | Planned |
+| OSS-02 | Phase 38 | Planned |
+| DEMO-01 | Phase 39 | Planned |
+| DEMO-02 | Phase 39 | Planned |
+| DEMO-03 | Phase 39 | Planned |
+| DEMO-04 | Phase 39 | Planned |
+| CONS-01 | Phase 39 | Planned |
+| DOCS-01 | Phase 40 | Planned |
+| L10N-01 | Phase 40 | Planned |
+| TEST-01 | Phase 40 | Planned |
+| OSS-03 | Phase 41 | Planned |
+| REL-01 | Phase 41 | Planned |
+| REL-02 | Phase 41 | Planned |
 
 **Coverage:**
-- milestone requirements: 14 total
-- mapped to phases: 14
+- milestone requirements: 16 total
+- mapped to phases: 16
 - unmapped: 0
 
 ---
 *Requirements defined: 2026-04-16*
-*Last updated: 2026-04-16 after Phase 37 completion*
+*Last updated: 2026-04-16 for milestone initialization*
