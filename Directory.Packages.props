@@ -6,6 +6,7 @@
   <ItemGroup>
     <PackageVersion Include="AsterGraph.Abstractions" Version="$(Version)" />
     <PackageVersion Include="AsterGraph.Avalonia" Version="$(Version)" />
+    <PackageVersion Include="AsterGraph.Core" Version="$(Version)" />
     <PackageVersion Include="AsterGraph.Editor" Version="$(Version)" />
     <PackageVersion Include="Avalonia" Version="11.3.10" />
     <PackageVersion Include="Avalonia.Desktop" Version="11.3.10" />

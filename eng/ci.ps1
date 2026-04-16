@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-  [ValidateSet('restore', 'build', 'test', 'maintenance', 'release', 'all')]
+  [ValidateSet('restore', 'build', 'test', 'maintenance', 'contract', 'release', 'all')]
   [string]$Lane = 'all',
 
   [ValidateSet('all', 'net8.0', 'net9.0')]
@@ -21,6 +21,7 @@ $coverageOutputPath = Join-Path $artifactsRoot 'coverage\release-summary.json'
 $dotnetCliHome = Join-Path $repoRoot '.dotnet-cli-home'
 $coverageRunSettingsPath = Join-Path $repoRoot 'tests/coverage.runsettings'
 $coverageReportScriptPath = Join-Path $repoRoot 'eng/coverage-report.ps1'
+$hostSampleProject = 'tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj'
 $packageSmokeProject = 'tools/AsterGraph.PackageSmoke/AsterGraph.PackageSmoke.csproj'
 $scaleSmokeProject = 'tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj'
 $editorTestsProject = 'tests/AsterGraph.Editor.Tests/AsterGraph.Editor.Tests.csproj'
@@ -43,6 +44,7 @@ $publishableProjects = @(
 
 $frameworkBuildProjects = @{
   'net8.0' = @(
+    $hostSampleProject,
     $packageSmokeProject,
     $scaleSmokeProject
   )
@@ -77,6 +79,27 @@ $maintenanceTestFilter = @(
   'FullyQualifiedName~NodeCanvasStandaloneTests',
   'FullyQualifiedName~NodeCanvasNodeDragCoordinatorTests',
   'FullyQualifiedName~NodeCanvasPointerInteractionCoordinatorTests'
+) -join '|'
+
+$contractTestFilter = @(
+  'FullyQualifiedName~GraphEditorSessionTests',
+  'FullyQualifiedName~GraphEditorProofRingTests',
+  'FullyQualifiedName~GraphEditorSurfaceCompositionTests',
+  'FullyQualifiedName~GraphEditorServiceSeamsTests',
+  'FullyQualifiedName~GraphEditorDiagnosticsContractsTests',
+  'FullyQualifiedName~GraphEditorDiagnosticsInspectionTests',
+  'FullyQualifiedName~GraphEditorDiagnosticsInstrumentationTests',
+  'FullyQualifiedName~GraphEditorAutomationContractsTests',
+  'FullyQualifiedName~GraphEditorAutomationExecutionTests',
+  'FullyQualifiedName~GraphEditorPluginContractsTests',
+  'FullyQualifiedName~GraphEditorPluginDiscoveryTests',
+  'FullyQualifiedName~GraphEditorPluginInspectionContractsTests',
+  'FullyQualifiedName~GraphEditorPluginLoadingTests',
+  'FullyQualifiedName~GraphEditorPluginPackageStagingTests',
+  'FullyQualifiedName~GraphEditorMigrationCompatibilityTests',
+  'FullyQualifiedName~GraphEditorHistorySemanticTests',
+  'FullyQualifiedName~GraphEditorHistoryInteractionTests',
+  'FullyQualifiedName~GraphEditorSaveBoundaryTests'
 ) -join '|'
 
 function Invoke-DotNet {
@@ -388,6 +411,52 @@ function Invoke-PackageSmoke {
   )
 }
 
+function Invoke-HostSample {
+  param(
+    [switch]$UsePackedPackages
+  )
+
+  $propertyArguments = @()
+  $restoreProperties = @{}
+  $modeLabel = 'project references'
+
+  if ($UsePackedPackages) {
+    $modeLabel = 'packed packages'
+    $restoreProperties = @{ UsePackedAsterGraphPackages = 'true' }
+    $propertyArguments += '/p:UsePackedAsterGraphPackages=true'
+    Invoke-RestoreProjects -Projects @($hostSampleProject) -Properties $restoreProperties
+  }
+
+  Write-Host ''
+  Write-Host "### Run HostSample ($modeLabel)" -ForegroundColor Yellow
+
+  Invoke-DotNet -Arguments (@(
+    'build',
+    (Resolve-ProjectPath -RelativePath $hostSampleProject),
+    '-c',
+    $Configuration,
+    '--framework',
+    'net8.0',
+    '--no-restore',
+    '--nologo',
+    '-v',
+    'minimal'
+  ) + $propertyArguments + $singleProcessBuildArguments + $buildStabilityProperties)
+
+  Invoke-DotNet -Arguments (@(
+    'run',
+    '--project',
+    (Resolve-ProjectPath -RelativePath $hostSampleProject),
+    '-c',
+    $Configuration,
+    '--framework',
+    'net8.0',
+    '--no-build',
+    '--no-restore',
+    '--nologo'
+  ) + $propertyArguments)
+}
+
 function Invoke-ScaleSmoke {
   Write-Host ''
   Write-Host '### Run ScaleSmoke readiness proof' -ForegroundColor Yellow
@@ -451,6 +520,41 @@ function Invoke-CoverageValidation {
     -OutputPath $coverageOutputPath
 }
 
+function Invoke-ContractValidation {
+  param(
+    [switch]$SkipRestore
+  )
+
+  if ($Framework -ne 'all') {
+    Write-Warning "Contract lane validates the cross-target consumer and contract surface. Ignoring -Framework $Framework and using all."
+  }
+
+  if (-not $SkipRestore) {
+    Invoke-RestoreProjects -Projects @(
+      $hostSampleProject,
+      $editorTestsProject
+    )
+  }
+
+  Invoke-HostSample
+
+  Write-Host ''
+  Write-Host '### Run focused contract and proof regression surface' -ForegroundColor Yellow
+
+  Invoke-DotNet -Arguments (@(
+    'test',
+    (Resolve-ProjectPath -RelativePath $editorTestsProject),
+    '-c',
+    $Configuration,
+    '--no-restore',
+    '--nologo',
+    '-v',
+    'minimal',
+    '--filter',
+    $contractTestFilter
+  ) + $singleProcessBuildArguments + $buildStabilityProperties)
+}
+
 function Invoke-ReleaseValidation {
   if ($Framework -ne 'all') {
     Write-Warning "Release lane validates the full release surface. Ignoring -Framework $Framework and using all."
@@ -459,7 +563,9 @@ function Invoke-ReleaseValidation {
   $releaseFrameworks = @('net8.0', 'net9.0')
 
   Invoke-RestoreProjects -Projects (Get-DefaultRestoreProjects -Frameworks $releaseFrameworks)
+  Invoke-ContractValidation -SkipRestore
   Invoke-Packages
+  Invoke-HostSample -UsePackedPackages
   Invoke-PackageSmoke
   Invoke-ScaleSmoke
   Invoke-CoverageValidation
@@ -512,6 +618,9 @@ switch ($Lane) {
   }
   'maintenance' {
     Invoke-MaintenanceValidation
+  }
+  'contract' {
+    Invoke-ContractValidation
   }
   'release' {
     Invoke-ReleaseValidation

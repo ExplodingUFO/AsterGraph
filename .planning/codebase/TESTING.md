@@ -62,20 +62,21 @@
 
 ```powershell
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane all -Framework all -Configuration Release
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane contract -Framework all -Configuration Release
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane maintenance -Framework all -Configuration Release
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framework all -Configuration Release
 dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj --nologo
 dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj -p:UsePackedAsterGraphPackages=true --nologo
-dotnet run --project tools/AsterGraph.PackageSmoke/AsterGraph.PackageSmoke.csproj
+dotnet run --project tools/AsterGraph.PackageSmoke/AsterGraph.PackageSmoke.csproj -p:UsePackedAsterGraphPackages=true --nologo
 dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj --nologo
 ```
 
 ## Coverage And Gaps
 
-- No coverage collector, threshold, or `runsettings` file is tracked.
-- `.github/workflows/ci.yml` is checked in and invokes `eng/ci.ps1` for matrixed lane validation plus release verification.
-- The repo relies on xUnit regressions plus proof tools rather than benchmark automation or coverage enforcement.
-- `eng/ci.ps1 -Lane release` is the official scripted gate; raw `dotnet run` commands remain useful when contributors want direct sample or smoke markers while debugging.
+- `tests/coverage.runsettings` and `eng/coverage-report.ps1` are tracked and used by `eng/ci.ps1 -Lane release`.
+- `.github/workflows/ci.yml` is checked in and invokes `eng/ci.ps1` through explicit framework-matrix (`all`), focused contract (`contract`), and release (`release`) jobs.
+- The repo relies on xUnit regressions plus proof tools rather than benchmark automation.
+- `eng/ci.ps1 -Lane release` is the official scripted publish gate; `contract` is the focused consumer/proof gate; raw `dotnet run` commands remain useful when contributors want direct sample or smoke markers while debugging.
 - Current risk areas are less about missing tests entirely and more about maintaining alignment across:
   - kernel-first runtime path
   - retained `GraphEditorViewModel` compatibility path

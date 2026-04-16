@@ -137,8 +137,14 @@ The official proof ring now uses these maintained entry points:
 Validate the full release surface through the repository entrypoint first:
 
 ```powershell
-# packs packages, runs PackageSmoke + ScaleSmoke, collects coverage, and runs package validation
+# runs focused contract proof, packs packages, runs HostSample + PackageSmoke + ScaleSmoke against packed packages, collects coverage, and runs package validation
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framework all -Configuration Release
+```
+
+For the focused consumer/contract lane:
+
+```powershell
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane contract -Framework all -Configuration Release
 ```
 
 For a faster build/test-only loop before the release gate:

@@ -118,8 +118,15 @@ Before pushing packages, run the release-validation lane through the repo-local 
 Recommended local verification sequence:
 
 ```powershell
-# 1) script-first release gate: pack + PackageSmoke + ScaleSmoke + coverage + package validation
+# 1) script-first release gate: contract proof + packed HostSample/PackageSmoke/ScaleSmoke + coverage + package validation
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framework all -Configuration Release
+```
+
+For the focused consumer/contract proof lane:
+
+```powershell
+# HostSample + consumer/runtime/plugin/history contract suites
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane contract -Framework all -Configuration Release
 ```
 
 For a targeted maintenance gate during hotspot refactors:
@@ -132,7 +139,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane maintenance -Fr
 For shorter build/test feedback before the full release gate:
 
 ```powershell
-# build + split regression lanes without release-only pack/smoke/report steps
+# framework matrix build/test lane without contract/release-only smoke/report steps
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane all -Framework all -Configuration Release
 ```
 
@@ -167,6 +174,9 @@ Notes:
 
 The verification split is:
 
+- Scripted publish gate: `eng/ci.ps1 -Lane release`
+- Focused consumer/contract gate: `eng/ci.ps1 -Lane contract`
+- Hotspot refactor gate: `eng/ci.ps1 -Lane maintenance`
 - Core SDK regression lane: `tests/AsterGraph.Editor.Tests` plus `tests/AsterGraph.Serialization.Tests`
 - Demo/sample regression lane: `tests/AsterGraph.Demo.Tests`
 

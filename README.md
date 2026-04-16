@@ -235,6 +235,7 @@ The official proof ring for the shipped surface is:
 
 - official scripted gates:
   - `eng/ci.ps1 -Lane release`
+  - `eng/ci.ps1 -Lane contract`
   - `eng/ci.ps1 -Lane maintenance`
 - minimal consumer host sample:
   - `tools/AsterGraph.HostSample`
@@ -285,8 +286,15 @@ dotnet pack src/AsterGraph.Avalonia/AsterGraph.Avalonia.csproj -c Release -o art
 Release verification before publish:
 
 ```powershell
-# preferred release gate (packs packages, runs PackageSmoke + ScaleSmoke, collects coverage, and runs package validation)
+# preferred release gate (runs focused contract proof, packs packages, runs HostSample + PackageSmoke + ScaleSmoke against packed packages, collects coverage, and runs package validation)
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framework all -Configuration Release
+```
+
+For a focused consumer/contract proof before the full release gate:
+
+```powershell
+# focused consumer/proof gate: HostSample + contract suites + history/save proof
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane contract -Framework all -Configuration Release
 ```
 
 For a targeted maintenance gate during hotspot refactors:
@@ -299,7 +307,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane maintenance -Fr
 For broader local feedback before the full release gate:
 
 ```powershell
-# build + split regression lanes without release-only pack/smoke/report steps
+# framework matrix build/test lane without contract/release-only smoke/report steps
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane all -Framework all -Configuration Release
 ```
 

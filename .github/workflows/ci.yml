@@ -6,8 +6,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  quality-gates:
-    name: quality-gates (${{ matrix.framework }})
+  framework-matrix:
+    name: framework-matrix (${{ matrix.framework }})
     runs-on: windows-latest
     strategy:
       fail-fast: false
@@ -32,10 +32,31 @@ jobs:
         shell: pwsh
         run: .\eng\ci.ps1 -Lane all -Framework ${{ matrix.framework }} -Configuration Release
 
+  contract-proof:
+    name: contract-proof
+    runs-on: windows-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Run contract proof lane
+        shell: pwsh
+        run: .\eng\ci.ps1 -Lane contract -Framework all -Configuration Release
+
   release-validation:
     name: release-validation
     runs-on: windows-latest
-    needs: quality-gates
+    needs:
+      - framework-matrix
+      - contract-proof
 
     permissions:
       contents: read
