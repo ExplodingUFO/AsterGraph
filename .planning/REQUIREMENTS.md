@@ -9,7 +9,7 @@
 ### Milestone Closeout
 
 - [x] **CLOSE-01**: Maintainer can archive the shipped `v1.4` milestone into checked-in milestone files so current planning artifacts no longer imply contradictory active-vs-archived states
-- [ ] **CLOSE-02**: Maintainer can identify the live proof ring, carried concerns, and next milestone entry point from current planning/docs without consulting stale phase directories
+- [x] **CLOSE-02**: Maintainer can identify the live proof ring, carried concerns, and next milestone entry point from current planning/docs without consulting stale phase directories
 
 ### Runtime Facade Convergence
 
@@ -53,7 +53,7 @@
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | CLOSE-01 | Phase 30 | Complete |
-| CLOSE-02 | Phase 30 | Pending |
+| CLOSE-02 | Phase 30 | Complete |
 | FACADE-01 | Phase 32 | Pending |
 | FACADE-02 | Phase 32 | Pending |
 | FACADE-03 | Phase 33 | Pending |
@@ -71,4 +71,4 @@
 
 ---
 *Requirements defined: 2026-04-16*
-*Last updated: 2026-04-16 after roadmap creation*
+*Last updated: 2026-04-16 after Phase 30 completion*

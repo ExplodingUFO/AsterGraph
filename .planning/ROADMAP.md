@@ -23,7 +23,7 @@ v1.6 deliberately avoids reopening already-shipped baseline work such as `.edito
 
 ## Phases
 
-- [ ] **Phase 30: Milestone History And Refactor Gate Closeout** - Archive the missing milestone history and normalize the maintainer entry points for refactor-sensitive proof. (planned 2026-04-16)
+- [x] **Phase 30: Milestone History And Refactor Gate Closeout** - Archive the missing milestone history and normalize the maintainer entry points for refactor-sensitive proof. (planned 2026-04-16) (completed 2026-04-16)
 - [ ] **Phase 31: History And Save Semantic Closure** - Remove the carried `STATE_HISTORY_OK` mismatch and harden focused history/save regressions. (planned 2026-04-16)
 - [ ] **Phase 32: GraphEditorViewModel Facade Convergence** - Continue moving retained-facade orchestration out of `GraphEditorViewModel` while preserving the public SDK surface. (planned 2026-04-16)
 - [ ] **Phase 33: Kernel, Canvas, And Guardrail Follow-Through** - Finish the next hotspot splits around downstream collaborators and tighten the remaining documentation/maintenance debt. (planned 2026-04-16)
@@ -74,11 +74,11 @@ v1.6 deliberately avoids reopening already-shipped baseline work such as `.edito
 
 | Phase | Requirements | Status |
 |-------|--------------|--------|
-| 30. Milestone History And Refactor Gate Closeout | CLOSE-01, CLOSE-02, GUARD-01 | In Progress |
+| 30. Milestone History And Refactor Gate Closeout | CLOSE-01, CLOSE-02, GUARD-01 | Complete |
 | 31. History And Save Semantic Closure | STATE-01, STATE-02, STATE-03 | Planned |
 | 32. GraphEditorViewModel Facade Convergence | FACADE-01, FACADE-02 | Planned |
 | 33. Kernel, Canvas, And Guardrail Follow-Through | FACADE-03, FACADE-04, GUARD-02 | Planned |
 
 ## Next Action
 
-**Next action:** finish Phase 30 execution and verification with `$gsd-execute-phase 30`
+**Next action:** plan Phase 31 with `$gsd-plan-phase 31`
