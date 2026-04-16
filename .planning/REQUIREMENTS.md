@@ -20,10 +20,10 @@
 
 ### Consumer Adoption And State Contracts
 
-- [ ] **CONS-01**: Consumer can open one minimal host sample that proves the canonical package-consumption path without relying on the demo shell or project-reference-only setup
-- [ ] **CONS-02**: Consumer docs provide short, explicit routes for runtime-only, default Avalonia UI, plugin trust/discovery, and automation adoption, each with required packages and verification steps
-- [ ] **HIST-01**: History/save/dirty semantics are documented as an explicit product contract instead of living only inside tests or carried planning concerns
-- [ ] **HIST-02**: Focused history/save proof remains part of the official verification gate so semantic regressions fail automation instead of surviving as known drift
+- [x] **CONS-01**: Consumer can open one minimal host sample that proves the canonical package-consumption path without relying on the demo shell or project-reference-only setup
+- [x] **CONS-02**: Consumer docs provide short, explicit routes for runtime-only, default Avalonia UI, plugin trust/discovery, and automation adoption, each with required packages and verification steps
+- [x] **HIST-01**: History/save/dirty semantics are documented as an explicit product contract instead of living only inside tests or carried planning concerns
+- [x] **HIST-02**: Focused history/save proof remains part of the official verification gate so semantic regressions fail automation instead of surviving as known drift
 
 ### Maintainability And Extension Contracts
 
@@ -60,10 +60,10 @@
 | REL-01 | Phase 35 | Completed |
 | REL-02 | Phase 35 | Completed |
 | REL-03 | Phase 35 | Completed |
-| CONS-01 | Phase 36 | Pending |
-| CONS-02 | Phase 36 | Pending |
-| HIST-01 | Phase 36 | Pending |
-| HIST-02 | Phase 36 | Pending |
+| CONS-01 | Phase 36 | Completed |
+| CONS-02 | Phase 36 | Completed |
+| HIST-01 | Phase 36 | Completed |
+| HIST-02 | Phase 36 | Completed |
 | MAINT-01 | Phase 37 | Pending |
 | MAINT-02 | Phase 37 | Pending |
 | EXT-01 | Phase 37 | Pending |
@@ -76,4 +76,4 @@
 
 ---
 *Requirements defined: 2026-04-16*
-*Last updated: 2026-04-16 after Phase 35 completion*
+*Last updated: 2026-04-16 after Phase 36 completion*
