@@ -66,6 +66,7 @@ $maintenanceTestFilter = @(
   'FullyQualifiedName~GraphEditorMutationCompatibilityTests',
   'FullyQualifiedName~GraphEditorFacadeMutationParityTests',
   'FullyQualifiedName~GraphEditorSessionTests',
+  'FullyQualifiedName~GraphEditorServiceSeamsTests',
   'FullyQualifiedName~GraphEditorHistorySemanticTests',
   'FullyQualifiedName~GraphEditorHistoryInteractionTests',
   'FullyQualifiedName~GraphEditorSaveBoundaryTests',
