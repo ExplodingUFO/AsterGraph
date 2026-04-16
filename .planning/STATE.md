@@ -1,31 +1,32 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.5
-milestone_name: Runtime Boundary Cleanup and Quality Gates
-status: v1.5 milestone archived
-stopped_at: v1.5 archive recorded
-last_updated: "2026-04-14T21:23:51.6311355+08:00"
+milestone: v1.6
+milestone_name: Facade Convergence and Proof Guardrails
+status: Defining requirements
+stopped_at: Milestone v1.6 started
+last_updated: "2026-04-16T11:14:19.5052998+08:00"
 progress:
-  total_phases: 4
-  completed_phases: 4
-  total_plans: 12
-  completed_plans: 12
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-04-14)
+See: `.planning/PROJECT.md` (updated 2026-04-16)
 
 **Core value:** Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
-**Current focus:** v1.4 archive cleanup and next-milestone framing
+**Current focus:** Defining requirements for v1.6 Facade Convergence and Proof Guardrails
 
 ## Current Position
 
-Milestone: v1.5 archived
-Latest shipped phase: 29 (release-validation-and-canonical-adoption-path)
-Plans: 12 of 12 complete
+Phase: Not started (defining requirements)
+Plan: -
+Status: Milestone v1.6 started
+Last activity: 2026-04-16 - started milestone v1.6
 
 ## Accumulated Context
 
@@ -41,11 +42,12 @@ Carry-forward decisions from shipped milestones:
 - Keep plugin loading and automation execution rooted in `IGraphEditorSession`, descriptors, and command IDs rather than retained MVVM compatibility APIs.
 - Keep plugin load failures and automation telemetry recoverable and machine-readable through canonical runtime diagnostics/events.
 
-New v1.5 framing decisions:
+New v1.6 framing decisions:
 
-- Start v1.5 around runtime boundary cleanup, repo-level quality gates, and proof/doc alignment rather than another new feature band.
-- Continue phase numbering from 26 because v1.5 builds directly on the shipped v1.4 baseline.
-- Skip milestone research by default because this milestone is brownfield SDK hardening rather than a new external domain exploration.
+- Use the next milestone for contraction and hotspot guardrails rather than another plugin/automation capability band.
+- Build on the v1.5 quality baseline instead of reopening already-shipped `.editorconfig`, central package management, CI, or `ScaleSmoke` alignment work.
+- Treat the missing `v1.4` archive and the carried `STATE_HISTORY_OK` mismatch as current milestone work, not passive background debt.
+- Continue phase numbering from 30 because the latest executed phase is 29.
 
 ### Pending Todos
 
@@ -53,8 +55,9 @@ None captured yet.
 
 ### Blockers/Concerns
 
-- v1.4 still has no archived milestone files in `.planning/milestones/`, so milestone history is only partially normalized to the newer archive format.
-- The known `STATE_HISTORY_OK` mismatch remains a pre-existing baseline issue if future work touches history/save semantics.
+- `v1.4` still has no archived milestone files in `.planning/milestones/`, so milestone history is only partially normalized.
+- The known `STATE_HISTORY_OK` mismatch remains a carried baseline issue until the new history/save semantics work closes it.
+- `GraphEditorViewModel`, `GraphEditorKernel`, and `NodeCanvas` remain the obvious internal hotspots even after the earlier coordinator extractions.
 
 ### Quick Tasks Completed
 
@@ -66,6 +69,6 @@ None captured yet.
 
 ## Session Continuity
 
-Last session: 2026-04-14T20:20:09.9120467+08:00
-Stopped at: v1.5 archive recorded
-Resume file: .planning/MILESTONES.md
+Last session: 2026-04-16T11:14:19.5052998+08:00
+Stopped at: Milestone v1.6 started
+Resume file: .planning/REQUIREMENTS.md
