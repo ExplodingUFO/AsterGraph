@@ -103,6 +103,34 @@
                       Command="{Binding OpenHostMenuGroupCommand}"
                       CommandParameter="运行时" />
           </MenuItem>
+          <MenuItem x:Name="PART_ExtensionsMenu"
+                    Header="扩展">
+            <MenuItem Header="查看插件候选项"
+                      Command="{Binding OpenHostMenuGroupCommand}"
+                      CommandParameter="扩展" />
+            <MenuItem Header="查看加载与信任"
+                      Command="{Binding OpenHostMenuGroupCommand}"
+                      CommandParameter="扩展" />
+          </MenuItem>
+          <MenuItem x:Name="PART_AutomationMenu"
+                    Header="自动化">
+            <MenuItem Header="运行焦点自动化"
+                      Command="{Binding RunSelectionAutomationCommand}" />
+            <MenuItem Header="运行插件自动化"
+                      Command="{Binding RunPluginAutomationCommand}" />
+            <MenuItem Header="打开自动化面板"
+                      Command="{Binding OpenHostMenuGroupCommand}"
+                      CommandParameter="自动化" />
+          </MenuItem>
+          <MenuItem x:Name="PART_IntegrationMenu"
+                    Header="集成">
+            <MenuItem Header="查看 consumer path"
+                      Command="{Binding OpenHostMenuGroupCommand}"
+                      CommandParameter="集成" />
+            <MenuItem Header="查看独立表面"
+                      Command="{Binding OpenHostMenuGroupCommand}"
+                      CommandParameter="集成" />
+          </MenuItem>
           <MenuItem x:Name="PART_ProofMenu"
                     Header="证明">
             <MenuItem Header="查看宿主边界"
@@ -181,6 +209,46 @@
                 <StackPanel x:Name="PART_ShowcaseDrawerSection"
                             Spacing="8"
                             IsVisible="{Binding IsShowcaseHostGroupSelected}">
+                  <Border Padding="12"
+                          Background="#14202B"
+                          BorderBrush="#365063"
+                          BorderThickness="1"
+                          CornerRadius="8">
+                    <StackPanel Spacing="10">
+                      <TextBlock FontSize="12"
+                                 FontWeight="Bold"
+                                 Foreground="#7FE7D7"
+                                 Text="Capability Showcase" />
+                      <ListBox ItemsSource="{Binding Capabilities}"
+                               SelectedItem="{Binding SelectedCapability, Mode=TwoWay}"
+                               Background="Transparent"
+                               BorderThickness="0">
+                        <ListBox.ItemTemplate>
+                          <DataTemplate>
+                            <TextBlock Text="{Binding Title}"
+                                       Foreground="#F4FFFC" />
+                          </DataTemplate>
+                        </ListBox.ItemTemplate>
+                      </ListBox>
+                    </StackPanel>
+                  </Border>
+                  <Border Padding="12"
+                          Background="#14202B"
+                          BorderBrush="#365063"
+                          BorderThickness="1"
+                          CornerRadius="8">
+                    <StackPanel Spacing="8">
+                      <TextBlock FontSize="14"
+                                 FontWeight="SemiBold"
+                                 Foreground="#F4FFFC"
+                                 Text="{Binding SelectedCapabilityTitle}" />
+                      <TextBlock TextWrapping="Wrap"
+                                 Foreground="#C2D7E4"
+                                 Text="{Binding SelectedCapabilitySummary}" />
+                      <ItemsControl ItemsSource="{Binding SelectedCapabilityBullets}"
+                                    ItemTemplate="{StaticResource HostDrawerLineTemplate}" />
+                    </StackPanel>
+                  </Border>
                   <ItemsControl ItemsSource="{Binding SelectedHostMenuGroupLines}"
                                 ItemTemplate="{StaticResource HostDrawerLineTemplate}" />
                 </StackPanel>
@@ -298,6 +366,138 @@
 
                   <ItemsControl ItemsSource="{Binding RecentDiagnosticLines}"
                                 ItemTemplate="{StaticResource HostDrawerLineTemplate}" />
+                </StackPanel>
+
+                <StackPanel x:Name="PART_ExtensionDrawerSection"
+                            Spacing="8"
+                            IsVisible="{Binding IsExtensionsHostGroupSelected}">
+                  <TextBlock FontSize="12"
+                             FontWeight="Bold"
+                             Foreground="#7FE7D7"
+                             Text="Plugin Candidates" />
+                  <ItemsControl ItemsSource="{Binding PluginCandidateLines}"
+                                ItemTemplate="{StaticResource HostDrawerLineTemplate}" />
+                  <TextBlock FontSize="12"
+                             FontWeight="Bold"
+                             Foreground="#7FE7D7"
+                             Text="Plugin Load Snapshots" />
+                  <ItemsControl ItemsSource="{Binding PluginLoadLines}"
+                                ItemTemplate="{StaticResource HostDrawerLineTemplate}" />
+                </StackPanel>
+
+                <StackPanel x:Name="PART_AutomationDrawerSection"
+                            Spacing="8"
+                            IsVisible="{Binding IsAutomationHostGroupSelected}">
+                  <Border Padding="12"
+                          Background="#14202B"
+                          BorderBrush="#365063"
+                          BorderThickness="1"
+                          CornerRadius="8">
+                    <StackPanel Spacing="8">
+                      <Button x:Name="PART_RunSelectionAutomationButton"
+                              Padding="10,8"
+                              Background="#101923"
+                              BorderBrush="#365063"
+                              BorderThickness="1"
+                              CornerRadius="8"
+                              Command="{Binding RunSelectionAutomationCommand}"
+                              Content="运行焦点自动化"
+                              Foreground="#F4FFFC" />
+                      <Button x:Name="PART_RunPluginAutomationButton"
+                              Padding="10,8"
+                              Background="#101923"
+                              BorderBrush="#365063"
+                              BorderThickness="1"
+                              CornerRadius="8"
+                              Command="{Binding RunPluginAutomationCommand}"
+                              Content="运行插件自动化"
+                              Foreground="#F4FFFC" />
+                      <Button x:Name="PART_RunWorkspaceAutomationButton"
+                              Padding="10,8"
+                              Background="#101923"
+                              BorderBrush="#365063"
+                              BorderThickness="1"
+                              CornerRadius="8"
+                              Command="{Binding RunWorkspaceAutomationCommand}"
+                              Content="运行工作区自动化"
+                              Foreground="#F4FFFC" />
+                    </StackPanel>
+                  </Border>
+                  <TextBlock FontSize="12"
+                             FontWeight="Bold"
+                             Foreground="#7FE7D7"
+                             Text="Automation Request" />
+                  <ItemsControl ItemsSource="{Binding AutomationRequestLines}"
+                                ItemTemplate="{StaticResource HostDrawerLineTemplate}" />
+                  <TextBlock FontSize="12"
+                             FontWeight="Bold"
+                             Foreground="#7FE7D7"
+                             Text="Automation Progress" />
+                  <ItemsControl ItemsSource="{Binding AutomationProgressLines}"
+                                ItemTemplate="{StaticResource HostDrawerLineTemplate}" />
+                  <TextBlock FontSize="12"
+                             FontWeight="Bold"
+                             Foreground="#7FE7D7"
+                             Text="Automation Result" />
+                  <ItemsControl ItemsSource="{Binding AutomationResultLines}"
+                                ItemTemplate="{StaticResource HostDrawerLineTemplate}" />
+                </StackPanel>
+
+                <StackPanel x:Name="PART_IntegrationDrawerSection"
+                            Spacing="8"
+                            IsVisible="{Binding IsIntegrationHostGroupSelected}">
+                  <TextBlock FontSize="12"
+                             FontWeight="Bold"
+                             Foreground="#7FE7D7"
+                             Text="Consumer Path" />
+                  <ItemsControl ItemsSource="{Binding ConsumerPathLines}"
+                                ItemTemplate="{StaticResource HostDrawerLineTemplate}" />
+                  <TextBlock FontSize="12"
+                             FontWeight="Bold"
+                             Foreground="#7FE7D7"
+                             Text="Standalone Surfaces" />
+                  <Border Padding="8"
+                          Background="#14202B"
+                          BorderBrush="#365063"
+                          BorderThickness="1"
+                          CornerRadius="8">
+                    <ContentControl x:Name="PART_StandaloneCanvasHost"
+                                    MinHeight="180" />
+                  </Border>
+                  <Border Padding="8"
+                          Background="#14202B"
+                          BorderBrush="#365063"
+                          BorderThickness="1"
+                          CornerRadius="8">
+                    <ContentControl x:Name="PART_StandaloneInspectorHost" />
+                  </Border>
+                  <Border Padding="8"
+                          Background="#14202B"
+                          BorderBrush="#365063"
+                          BorderThickness="1"
+                          CornerRadius="8">
+                    <ContentControl x:Name="PART_StandaloneMiniMapHost"
+                                    MinHeight="120" />
+                  </Border>
+                  <TextBlock FontSize="12"
+                             FontWeight="Bold"
+                             Foreground="#7FE7D7"
+                             Text="Presenter Replacement" />
+                  <Border Padding="8"
+                          Background="#14202B"
+                          BorderBrush="#365063"
+                          BorderThickness="1"
+                          CornerRadius="8">
+                    <ContentControl x:Name="PART_CustomInspectorHost" />
+                  </Border>
+                  <Border Padding="8"
+                          Background="#14202B"
+                          BorderBrush="#365063"
+                          BorderThickness="1"
+                          CornerRadius="8">
+                    <ContentControl x:Name="PART_CustomMiniMapHost"
+                                    MinHeight="120" />
+                  </Border>
                 </StackPanel>
 
                 <StackPanel x:Name="PART_ProofDrawerSection"
@@ -429,14 +629,9 @@
                   BorderThickness="1"
                   CornerRadius="8"
                   ClipToBounds="True">
-            <controls:GraphEditorView x:Name="MainGraphEditorView"
-                                      Editor="{Binding Editor}"
-                                      VerticalAlignment="Stretch"
-                                      HorizontalAlignment="Stretch"
-                                      IsHeaderChromeVisible="{Binding IsHeaderChromeVisible}"
-                                      IsLibraryChromeVisible="{Binding IsLibraryChromeVisible}"
-                                      IsInspectorChromeVisible="{Binding IsInspectorChromeVisible}"
-                                      IsStatusChromeVisible="{Binding IsStatusChromeVisible}" />
+            <ContentControl x:Name="PART_MainGraphEditorHost"
+                            VerticalAlignment="Stretch"
+                            HorizontalAlignment="Stretch" />
           </Border>
         </Grid>
       </Border>

@@ -31,7 +31,8 @@ public sealed class DemoMainWindowTests
         Assert.Equal("证明", Assert.IsType<MenuItem>(window.FindControl<MenuItem>("PART_ProofMenu")).Header);
 
         Assert.Single(window.GetVisualDescendants().OfType<GraphEditorView>());
-        Assert.NotNull(window.FindControl<Control>("MainGraphEditorView"));
+        var mainHost = Assert.IsType<ContentControl>(window.FindControl<ContentControl>("PART_MainGraphEditorHost"));
+        Assert.IsType<GraphEditorView>(mainHost.Content);
         Assert.Null(window.FindControl<Grid>("MainShellGrid"));
     }
 
@@ -141,7 +142,8 @@ public sealed class DemoMainWindowTests
     public void MainWindow_KeepsSingleCanvasFirstEditorComposition()
     {
         var window = CreateWindow();
-        var graphEditorView = window.FindControl<GraphEditorView>("MainGraphEditorView");
+        var graphEditorView = Assert.IsType<GraphEditorView>(
+            Assert.IsType<ContentControl>(window.FindControl<ContentControl>("PART_MainGraphEditorHost")).Content);
 
         Assert.NotNull(graphEditorView);
         Assert.Single(window.GetVisualDescendants().OfType<GraphEditorView>());

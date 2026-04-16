@@ -1,0 +1,107 @@
+using System;
+using System.Linq;
+using Avalonia.Controls;
+using Avalonia.Headless.XUnit;
+using Avalonia.VisualTree;
+using AsterGraph.Avalonia.Controls;
+using AsterGraph.Demo.ViewModels;
+using AsterGraph.Demo.Views;
+using AsterGraph.Editor.Plugins;
+using Xunit;
+
+namespace AsterGraph.Demo.Tests;
+
+public sealed class DemoCapabilityShowcaseTests
+{
+    [Fact]
+    public void MainWindowViewModel_ExpandsCapabilityShowcaseToCurrentProductSurface()
+    {
+        var viewModel = new MainWindowViewModel();
+
+        Assert.True(viewModel.Capabilities.Count >= 8);
+        Assert.Contains(viewModel.Capabilities, item => item.Key == "plugin-trust-and-loading");
+        Assert.Contains(viewModel.Capabilities, item => item.Key == "automation-execution");
+        Assert.Contains(viewModel.Capabilities, item => item.Key == "consumer-host-path");
+        Assert.Contains(viewModel.Capabilities, item => item.Key == "history-save-contract");
+    }
+
+    [Fact]
+    public void MainWindowViewModel_ProjectsPluginCandidatesAndLoadSnapshots()
+    {
+        var viewModel = new MainWindowViewModel();
+
+        Assert.NotEmpty(viewModel.PluginCandidates);
+        Assert.NotEmpty(viewModel.PluginLoadSnapshots);
+        Assert.Contains(viewModel.PluginCandidates, candidate => candidate.TrustEvaluation.Decision == GraphEditorPluginTrustDecision.Allowed);
+        Assert.Contains(viewModel.PluginCandidates, candidate => candidate.TrustEvaluation.Decision == GraphEditorPluginTrustDecision.Blocked);
+        Assert.Contains(viewModel.PluginLoadSnapshots, snapshot => snapshot.Status == GraphEditorPluginLoadStatus.Loaded);
+        Assert.Contains(viewModel.PluginLoadSnapshots, snapshot => snapshot.Status == GraphEditorPluginLoadStatus.Blocked);
+        Assert.Contains(viewModel.ConsumerPathLines, line => line.Contains("HostSample", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void MainWindowViewModel_RunsAutomationShowcaseAndCapturesTypedResult()
+    {
+        var viewModel = new MainWindowViewModel();
+
+        viewModel.RunPluginAutomation();
+
+        Assert.NotNull(viewModel.LastAutomationRequest);
+        Assert.NotNull(viewModel.LastAutomationResult);
+        var request = viewModel.LastAutomationRequest!;
+        var result = viewModel.LastAutomationResult!;
+
+        Assert.Equal(request.RunId, result.RunId);
+        Assert.True(result.Succeeded);
+        Assert.NotEmpty(result.Steps);
+        Assert.NotEmpty(viewModel.AutomationProgressSteps);
+        Assert.Contains(viewModel.AutomationResultLines, line => line.Contains(request.RunId, StringComparison.Ordinal));
+    }
+
+    [AvaloniaFact]
+    public void MainWindow_RendersCanonicalDemoMenusAndIntegrationHosts()
+    {
+        var window = new MainWindow
+        {
+            DataContext = new MainWindowViewModel(),
+        };
+
+        window.Show();
+
+        Assert.NotNull(window.FindControl<MenuItem>("PART_ExtensionsMenu"));
+        Assert.NotNull(window.FindControl<MenuItem>("PART_AutomationMenu"));
+        Assert.NotNull(window.FindControl<MenuItem>("PART_IntegrationMenu"));
+        Assert.NotNull(window.FindControl<ContentControl>("PART_MainGraphEditorHost"));
+        Assert.NotNull(window.FindControl<ContentControl>("PART_StandaloneCanvasHost"));
+        Assert.NotNull(window.FindControl<ContentControl>("PART_StandaloneInspectorHost"));
+        Assert.NotNull(window.FindControl<ContentControl>("PART_StandaloneMiniMapHost"));
+        Assert.NotNull(window.FindControl<ContentControl>("PART_CustomInspectorHost"));
+        Assert.NotNull(window.FindControl<ContentControl>("PART_CustomMiniMapHost"));
+    }
+
+    [AvaloniaFact]
+    public void MainWindow_CreatesMainEditorAndStandaloneSurfacesFromLiveEditorSession()
+    {
+        var viewModel = new MainWindowViewModel();
+        var window = new MainWindow
+        {
+            DataContext = viewModel,
+        };
+
+        window.Show();
+
+        var graphEditorView = Assert.IsType<GraphEditorView>(
+            Assert.IsType<ContentControl>(window.FindControl<ContentControl>("PART_MainGraphEditorHost")).Content);
+        var canvas = Assert.IsType<NodeCanvas>(
+            Assert.IsType<ContentControl>(window.FindControl<ContentControl>("PART_StandaloneCanvasHost")).Content);
+        var inspector = Assert.IsType<GraphInspectorView>(
+            Assert.IsType<ContentControl>(window.FindControl<ContentControl>("PART_StandaloneInspectorHost")).Content);
+        var miniMap = Assert.IsType<GraphMiniMap>(
+            Assert.IsType<ContentControl>(window.FindControl<ContentControl>("PART_StandaloneMiniMapHost")).Content);
+
+        Assert.Same(viewModel.Editor, graphEditorView.Editor);
+        Assert.Equal("StandaloneCanvasPreview", canvas.Name);
+        Assert.Equal("StandaloneInspectorPreview", inspector.Name);
+        Assert.Equal("StandaloneMiniMapPreview", miniMap.Name);
+    }
+}

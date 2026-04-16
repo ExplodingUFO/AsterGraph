@@ -121,7 +121,8 @@ public sealed class DemoHostMenuControlTests
 
         window.Show();
 
-        var graphEditorView = Assert.IsType<GraphEditorView>(window.FindControl<GraphEditorView>("MainGraphEditorView"));
+        var graphEditorView = Assert.IsType<GraphEditorView>(
+            Assert.IsType<ContentControl>(window.FindControl<ContentControl>("PART_MainGraphEditorHost")).Content);
 
         viewModel.IsHeaderChromeVisible = true;
         viewModel.IsLibraryChromeVisible = true;
@@ -147,7 +148,8 @@ public sealed class DemoHostMenuControlTests
 
         var viewMenu = Assert.IsType<MenuItem>(window.FindControl<MenuItem>("PART_ViewMenu"));
         var behaviorMenu = Assert.IsType<MenuItem>(window.FindControl<MenuItem>("PART_BehaviorMenu"));
-        var graphEditorView = Assert.IsType<GraphEditorView>(window.FindControl<GraphEditorView>("MainGraphEditorView"));
+        var graphEditorView = Assert.IsType<GraphEditorView>(
+            Assert.IsType<ContentControl>(window.FindControl<ContentControl>("PART_MainGraphEditorHost")).Content);
 
         var headerChromeMenuItem = GetMenuItem(viewMenu, "显示顶栏");
         var gridSnappingMenuItem = GetMenuItem(behaviorMenu, "网格吸附");

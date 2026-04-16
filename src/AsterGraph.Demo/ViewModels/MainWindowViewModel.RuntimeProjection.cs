@@ -125,7 +125,7 @@ public partial class MainWindowViewModel
     /// <summary>
     /// 主编辑器摘要文案。
     /// </summary>
-    public string MainEditorSummary => $"当前中心主编辑器绑定文档“{Editor.Title}”，宿主菜单与抽屉都作用于同一个 Editor.Session。";
+    public string MainEditorSummary => $"当前中心主编辑器绑定文档“{Editor.Title}”，并通过 Create(...) + AsterGraphAvaloniaViewFactory.Create(...) 暴露给同一个 Editor.Session。";
 
     private GraphEditorInspectionSnapshot CurrentInspection
         => Editor.Session.Diagnostics.CaptureInspectionSnapshot();
@@ -140,11 +140,25 @@ public partial class MainWindowViewModel
         OnPropertyChanged(nameof(IsViewHostGroupSelected));
         OnPropertyChanged(nameof(IsBehaviorHostGroupSelected));
         OnPropertyChanged(nameof(IsRuntimeHostGroupSelected));
+        OnPropertyChanged(nameof(IsExtensionsHostGroupSelected));
+        OnPropertyChanged(nameof(IsAutomationHostGroupSelected));
+        OnPropertyChanged(nameof(IsIntegrationHostGroupSelected));
         OnPropertyChanged(nameof(IsProofHostGroupSelected));
         OnPropertyChanged(nameof(ActiveHostGroupBadgeText));
         OnPropertyChanged(nameof(HostPaneStateCaption));
         OnPropertyChanged(nameof(HostSessionContinuityCaption));
         OnPropertyChanged(nameof(CurrentConfigurationLines));
+        OnPropertyChanged(nameof(PluginCandidates));
+        OnPropertyChanged(nameof(PluginLoadSnapshots));
+        OnPropertyChanged(nameof(PluginCandidateLines));
+        OnPropertyChanged(nameof(PluginLoadLines));
+        OnPropertyChanged(nameof(ConsumerPathLines));
+        OnPropertyChanged(nameof(LastAutomationRequest));
+        OnPropertyChanged(nameof(LastAutomationResult));
+        OnPropertyChanged(nameof(AutomationProgressSteps));
+        OnPropertyChanged(nameof(AutomationRequestLines));
+        OnPropertyChanged(nameof(AutomationProgressLines));
+        OnPropertyChanged(nameof(AutomationResultLines));
         OnPropertyChanged(nameof(RuntimeSignalLines));
         OnPropertyChanged(nameof(OwnershipProofLines));
         OnPropertyChanged(nameof(RuntimeMetricLines));

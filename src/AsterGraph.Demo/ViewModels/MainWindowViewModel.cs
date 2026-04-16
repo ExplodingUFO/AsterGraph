@@ -1,12 +1,15 @@
+using System.IO;
 using CommunityToolkit.Mvvm.ComponentModel;
 using AsterGraph.Abstractions.Styling;
 using AsterGraph.Core.Compatibility;
 using AsterGraph.Demo.Definitions;
+using AsterGraph.Demo.Integration;
 using AsterGraph.Demo.Menus;
 using AsterGraph.Editor.Catalog;
 using AsterGraph.Editor.Configuration;
+using AsterGraph.Editor.Hosting;
 using AsterGraph.Editor.Localization;
-using AsterGraph.Editor.Services;
+using AsterGraph.Editor.Plugins;
 using AsterGraph.Editor.ViewModels;
 
 namespace AsterGraph.Demo.ViewModels;
@@ -19,11 +22,13 @@ public partial class MainWindowViewModel : ViewModelBase
     private const string PresentationHelper = "可替换的是视觉呈现，不是编辑行为。";
     private const string ChromeModeHelper = "关闭后可体验完整编辑流程；开启后仅保留只读浏览。";
     private const string ChromeControlsHelper = "这些开关只控制壳层显示，不会重建当前 Editor 会话。";
+    private const string DemoStorageFolderName = "AsterGraph.Demo";
 
     public MainWindowViewModel()
     {
         var catalog = new NodeCatalog();
         catalog.RegisterProvider(new DemoNodeDefinitionProvider());
+        var pluginShowcase = DemoPluginShowcase.Create();
         var style = GraphEditorStyleOptions.Default with
         {
             Shell = GraphEditorStyleOptions.Default.Shell with
@@ -74,23 +79,30 @@ public partial class MainWindowViewModel : ViewModelBase
             }
         });
 
-        editor = new GraphEditorViewModel(
-            DemoGraphFactory.CreateDefault(catalog),
-            catalog,
-            new DefaultPortCompatibilityService(),
-            new GraphWorkspaceService(),
-            null,
-            style,
-            behavior,
-            contextMenuAugmentor: contextMenuAugmentor,
-            localizationProvider: new DemoGraphLocalizationProvider());
+        editor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
+        {
+            Document = DemoGraphFactory.CreateDefault(catalog),
+            NodeCatalog = catalog,
+            CompatibilityService = new DefaultPortCompatibilityService(),
+            StorageRootPath = Path.Combine(Path.GetTempPath(), DemoStorageFolderName),
+            StyleOptions = style,
+            BehaviorOptions = behavior,
+            PluginRegistrations = pluginShowcase.Registrations,
+            PluginTrustPolicy = pluginShowcase.TrustPolicy,
+            ContextMenuAugmentor = contextMenuAugmentor,
+            LocalizationProvider = new DemoGraphLocalizationProvider(),
+        });
 
         Editor = editor;
+        PluginCandidates = AsterGraphEditorFactory.DiscoverPluginCandidates(pluginShowcase.DiscoveryOptions);
         Editor.DocumentChanged += (_, _) => RefreshRuntimeProjection();
         Editor.SelectionChanged += (_, _) => RefreshRuntimeProjection();
         Editor.ViewportChanged += (_, _) => RefreshRuntimeProjection();
         Editor.FragmentExported += (_, _) => RefreshRuntimeProjection();
         Editor.FragmentImported += (_, _) => RefreshRuntimeProjection();
+        Editor.Session.Events.AutomationStarted += (_, args) => OnAutomationStarted(args);
+        Editor.Session.Events.AutomationProgress += (_, args) => OnAutomationProgress(args);
+        Editor.Session.Events.AutomationCompleted += (_, args) => OnAutomationCompleted(args);
 
         Capabilities = CreateCapabilityShowcaseItems();
         SelectedCapability = Capabilities[0];
@@ -101,6 +113,8 @@ public partial class MainWindowViewModel : ViewModelBase
     public GraphEditorViewModel Editor { get; }
 
     public IReadOnlyList<CapabilityShowcaseItem> Capabilities { get; }
+
+    public IReadOnlyList<GraphEditorPluginCandidateSnapshot> PluginCandidates { get; }
 
     public IReadOnlyList<string> DemoEntries { get; } =
     [

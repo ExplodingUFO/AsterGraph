@@ -22,6 +22,12 @@ public partial class MainWindowViewModel
 
     public bool IsRuntimeHostGroupSelected => SelectedHostMenuGroupTitle == "运行时";
 
+    public bool IsExtensionsHostGroupSelected => SelectedHostMenuGroupTitle == "扩展";
+
+    public bool IsAutomationHostGroupSelected => SelectedHostMenuGroupTitle == "自动化";
+
+    public bool IsIntegrationHostGroupSelected => SelectedHostMenuGroupTitle == "集成";
+
     public bool IsProofHostGroupSelected => SelectedHostMenuGroupTitle == "证明";
 
     public string HostDrawerCaption => "宿主控制抽屉";
@@ -54,6 +60,7 @@ public partial class MainWindowViewModel
         "宿主壳层开关由 MainWindowViewModel 持有，只控制菜单与抽屉，不会生成第二个编辑器。",
         $"共享运行时证据来自 {RuntimeDiagnosticsSourceName} 的检查快照与最近诊断。",
         "中心画布、宿主菜单和抽屉始终指向同一个 Editor.Session。",
+        "主编辑器通过 AsterGraphEditorFactory.Create(...) 和 AsterGraphAvaloniaViewFactory.Create(...) 组合。",
         $"当前展示能力：{SelectedCapabilityTitle}",
     ];
 
@@ -88,6 +95,9 @@ public partial class MainWindowViewModel
         "视图" => "壳层与视图开关仍作用于同一个 GraphEditorView，只是默认不再把大块说明区常驻在首屏。",
         "行为" => "编辑行为仍由同一个 Editor 负责；宿主菜单只是集中暴露能力入口，不替代运行时本身。",
         "运行时" => "运行时面板直接读取共享运行时的文档、选择、视口和诊断，方便操作时核对同一个 Editor.Session 的当前状态。",
+        "扩展" => "扩展面板把 plugin discovery、trust decision、load snapshot 和 contribution shape 放在同一个位置，证明这些能力不是 README-only 叙事。",
+        "自动化" => "自动化面板提供可直接执行的 canned run，并把 request、step progress 和 result snapshot 连到同一会话上。",
+        "集成" => "集成面板同时说明 HostSample 的最小 consumer path，并展示独立表面与 presenter replacement 的真实组合结果。",
         "证明" => "证明面板把宿主壳层控制与共享运行时证据并排展示，用来确认当前窗口没有第二个编辑器实例，只有同一个 Editor.Session。",
         _ => "通过宿主级菜单控制同一张实时节点图。"
     };
@@ -123,6 +133,24 @@ public partial class MainWindowViewModel
             $"共享运行时入口：{RuntimeDiagnosticsSourceName}",
             $"最近诊断：{RecentDiagnostics.Count} 条",
             RuntimeDiagnosticsHelper,
+        ],
+        "扩展" =>
+        [
+            $"发现候选项：{PluginCandidates.Count} 个",
+            $"加载快照：{PluginLoadSnapshots.Count} 条",
+            .. PluginCandidateLines,
+            .. PluginLoadLines,
+        ],
+        "自动化" =>
+        [
+            .. AutomationRequestLines,
+            .. AutomationResultLines,
+        ],
+        "集成" =>
+        [
+            .. ConsumerPathLines,
+            StandaloneSurfaceHelper,
+            PresentationHelper,
         ],
         "证明" =>
         [
@@ -213,6 +241,62 @@ public partial class MainWindowViewModel
                 [
                     RuntimeDiagnosticsHelper,
                     $"最近诊断数量：{Editor.Session.Diagnostics.GetRecentDiagnostics(10).Count}。",
+                ]),
+            new CapabilityShowcaseItem(
+                "plugin-trust-and-loading",
+                "插件信任与加载",
+                "把 candidate discovery、trust policy 和 load snapshot 变成真正可见的产品面。",
+                "Demo 同时声明 plugin registration、trust policy 和 manifest-source discovery，再把候选项与加载结果直接投影到宿主抽屉。",
+                [
+                    "所属层：AsterGraph.Editor plugin contracts。",
+                    "宿主入口：DiscoverPluginCandidates(...)、PluginTrustPolicy、GetPluginLoadSnapshots()。",
+                    "可替换点：宿主可替换 trust policy、manifest source 和 future distribution policy。",
+                ],
+                [
+                    $"发现候选项：{PluginCandidates.Count}。",
+                    $"加载快照：{PluginLoadSnapshots.Count}。",
+                ]),
+            new CapabilityShowcaseItem(
+                "automation-execution",
+                "自动化执行",
+                "把 IGraphEditorSession.Automation 的 request、progress 和 result 做成可运行的 demo surface。",
+                "宿主通过稳定 command id 组合 canned automation run，运行结果回到 typed snapshot 与共享诊断里。",
+                [
+                    "所属层：AsterGraph.Editor automation contract。",
+                    "宿主入口：IGraphEditorSession.Automation.Execute(...).",
+                    "可替换点：宿主可以继续叠加审批、日志、编排或脚本层。",
+                ],
+                [
+                    "三组 canned automation 可直接运行。",
+                    "progress 与 result snapshot 会持续投影到抽屉。",
+                ]),
+            new CapabilityShowcaseItem(
+                "consumer-host-path",
+                "Consumer Path",
+                "把 HostSample 和 Demo 的职责分开，让最小接入路径与 showcase host 各司其职。",
+                "HostSample 证明最小 consumer path；Demo 负责展示完整能力和宿主边界，不再兼任最小样例。",
+                [
+                    "所属层：consumer onboarding。",
+                    "宿主入口：CreateSession(...)、Create(...)、AsterGraphAvaloniaViewFactory、HostSample。",
+                    "可替换点：宿主可只采用 runtime、完整壳层或独立表面。",
+                ],
+                [
+                    "HostSample 明确作为最小 consumer path。",
+                    "Demo 明确作为 showcase host。",
+                ]),
+            new CapabilityShowcaseItem(
+                "history-save-contract",
+                "History / Save Contract",
+                "把 save/dirty/history 语义继续留在公开产品面，而不是只藏在 regression lane 里。",
+                "Demo 的 automation、diagnostics 和 consumer docs 围绕同一份 state contract 组织，避免运行时语义只存在于内部经验里。",
+                [
+                    "所属层：state contract / proof ring。",
+                    "宿主入口：state-contracts.md、contract lane、ScaleSmoke markers。",
+                    "可替换点：宿主可以依赖 contract，而不是猜 retained facade 的行为。",
+                ],
+                [
+                    "automation run 会触达同一个 save/history baseline。",
+                    "proof ring 继续对这条线做机器化保护。",
                 ]),
         ];
     }
