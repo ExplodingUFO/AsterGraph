@@ -9,6 +9,9 @@ on:
 permissions:
   contents: write
 
+env:
+  NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+
 concurrency:
   group: prerelease-${{ github.ref }}
   cancel-in-progress: false
@@ -21,6 +24,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Prepare NuGet cache directory
+        shell: pwsh
+        run: New-Item -ItemType Directory -Force -Path $env:NUGET_PACKAGES | Out-Null
 
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4
@@ -48,6 +55,49 @@ jobs:
             artifacts/test-results/**
           if-no-files-found: error
 
+      - name: Publish prerelease summary
+        if: always()
+        shell: pwsh
+        run: |
+          $summaryLines = [System.Collections.Generic.List[string]]::new()
+          $summaryLines.Add('## Prerelease Validation Summary')
+          $summaryLines.Add('')
+
+          if (Test-Path -LiteralPath 'artifacts/proof/hostsample-packed.txt') {
+            $hostLine = Select-String -Path 'artifacts/proof/hostsample-packed.txt' -Pattern 'HOST_SAMPLE_OK' | Select-Object -First 1
+            if ($hostLine) {
+              $summaryLines.Add("- $($hostLine.Line)")
+            }
+          }
+
+          if (Test-Path -LiteralPath 'artifacts/proof/hostsample-net10-packed.txt') {
+            $hostNet10Line = Select-String -Path 'artifacts/proof/hostsample-net10-packed.txt' -Pattern 'HOST_SAMPLE_NET10_OK' | Select-Object -First 1
+            if ($hostNet10Line) {
+              $summaryLines.Add("- $($hostNet10Line.Line)")
+            }
+          }
+
+          if (Test-Path -LiteralPath 'artifacts/proof/package-smoke.txt') {
+            $packageLine = Select-String -Path 'artifacts/proof/package-smoke.txt' -Pattern 'PACKAGE_SMOKE_OK' | Select-Object -First 1
+            if ($packageLine) {
+              $summaryLines.Add("- $($packageLine.Line)")
+            }
+          }
+
+          if (Test-Path -LiteralPath 'artifacts/proof/scale-smoke.txt') {
+            $scaleLine = Select-String -Path 'artifacts/proof/scale-smoke.txt' -Pattern 'SCALE_HISTORY_CONTRACT_OK' | Select-Object -First 1
+            if ($scaleLine) {
+              $summaryLines.Add("- $($scaleLine.Line)")
+            }
+          }
+
+          if (Test-Path -LiteralPath 'artifacts/coverage/release-summary.json') {
+            $coverage = Get-Content 'artifacts/coverage/release-summary.json' -Raw | ConvertFrom-Json
+            $summaryLines.Add("- COVERAGE_REPORT_OK:$($coverage.coveredLines):$($coverage.totalLines):$($coverage.lineRate)")
+          }
+
+          $summaryLines -join [Environment]::NewLine | Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY
+
   linux-validation:
     name: linux-validation
     runs-on: ubuntu-latest
@@ -55,6 +105,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Prepare NuGet cache directory
+        shell: pwsh
+        run: New-Item -ItemType Directory -Force -Path $env:NUGET_PACKAGES | Out-Null
 
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4
@@ -103,9 +157,18 @@ jobs:
     needs:
       - windows-release-validation
       - linux-validation
-    if: ${{ startsWith(github.ref, 'refs/tags/') && secrets.NUGET_API_KEY != '' }}
+    if: ${{ startsWith(github.ref, 'refs/tags/') }}
+    env:
+      NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare NuGet cache directory
+        shell: pwsh
+        run: New-Item -ItemType Directory -Force -Path $env:NUGET_PACKAGES | Out-Null
+
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4
         with:
@@ -117,10 +180,14 @@ jobs:
           name: prerelease-artifacts
           path: prerelease-artifacts
 
-      - name: Push NuGet prerelease packages
+      - name: Skip NuGet publish when no API key is configured
+        if: ${{ env.NUGET_API_KEY == '' }}
         shell: pwsh
-        env:
-          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: Write-Host 'NUGET_API_KEY is not configured; skipping NuGet prerelease publish.'
+
+      - name: Push NuGet prerelease packages
+        if: ${{ env.NUGET_API_KEY != '' }}
+        shell: pwsh
         run: |
           $packages = Get-ChildItem -Path 'prerelease-artifacts/packages' -Filter '*.nupkg' -File |
             Where-Object { $_.Name -notlike '*.snupkg' }

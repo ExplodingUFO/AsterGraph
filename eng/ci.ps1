@@ -22,6 +22,7 @@ $coverageOutputPath = Join-Path $artifactsRoot 'coverage\release-summary.json'
 $coverageMarkerOutputPath = Join-Path $proofArtifactsRoot 'coverage-report.txt'
 $hostSampleProjectProofPath = Join-Path $proofArtifactsRoot 'hostsample-project.txt'
 $hostSamplePackedProofPath = Join-Path $proofArtifactsRoot 'hostsample-packed.txt'
+$hostSampleNet10PackedProofPath = Join-Path $proofArtifactsRoot 'hostsample-net10-packed.txt'
 $packageSmokeProofPath = Join-Path $proofArtifactsRoot 'package-smoke.txt'
 $scaleSmokeProofPath = Join-Path $proofArtifactsRoot 'scale-smoke.txt'
 $dotnetCliHome = Join-Path $repoRoot '.dotnet-cli-home'
@@ -444,24 +445,44 @@ function Invoke-PackageSmoke {
 
 function Invoke-HostSample {
   param(
-    [switch]$UsePackedPackages
+    [switch]$UsePackedPackages,
+
+    [ValidateSet('net8.0', 'net10.0')]
+    [string]$TargetFramework = 'net8.0'
   )
+
+  if ($TargetFramework -eq 'net10.0' -and -not $UsePackedPackages) {
+    throw '.NET 10 HostSample proof requires packed-package consumption.'
+  }
 
   $propertyArguments = @()
   $restoreProperties = @{}
-  $modeLabel = 'project references'
+  $modeLabel = if ($TargetFramework -eq 'net10.0') { 'packed packages (.NET 10)' } else { 'project references' }
 
   if ($UsePackedPackages) {
-    $modeLabel = 'packed packages'
+    if ($TargetFramework -eq 'net8.0') {
+      $modeLabel = 'packed packages'
+    }
+
     $restoreProperties = @{ UsePackedAsterGraphPackages = 'true' }
     $propertyArguments += '/p:UsePackedAsterGraphPackages=true'
+    if ($TargetFramework -eq 'net10.0') {
+      $restoreProperties.EnableNet10ConsumerProof = 'true'
+      $propertyArguments += '/p:EnableNet10ConsumerProof=true'
+    }
+
     Invoke-RestoreProjects -Projects @($hostSampleProject) -Properties $restoreProperties
   }
 
   Write-Host ''
   Write-Host "### Run HostSample ($modeLabel)" -ForegroundColor Yellow
 
-  $capturePath = if ($UsePackedPackages) { $hostSamplePackedProofPath } else { $hostSampleProjectProofPath }
+  $capturePath = switch ($TargetFramework) {
+    'net10.0' { $hostSampleNet10PackedProofPath }
+    default {
+      if ($UsePackedPackages) { $hostSamplePackedProofPath } else { $hostSampleProjectProofPath }
+    }
+  }
 
   Invoke-DotNet -Arguments (@(
     'build',
@@ -469,7 +490,7 @@ function Invoke-HostSample {
     '-c',
     $Configuration,
     '--framework',
-    'net8.0',
+    $TargetFramework,
     '--no-restore',
     '--nologo',
     '-v',
@@ -483,11 +504,15 @@ function Invoke-HostSample {
     '-c',
     $Configuration,
     '--framework',
-    'net8.0',
+    $TargetFramework,
     '--no-build',
     '--no-restore',
     '--nologo'
   ) + $propertyArguments) -CapturePath $capturePath
+
+  if ($TargetFramework -eq 'net10.0') {
+    Add-Content -LiteralPath $capturePath -Value 'HOST_SAMPLE_NET10_OK:True'
+  }
 }
 
 function Invoke-ScaleSmoke {
@@ -611,6 +636,7 @@ function Invoke-ReleaseValidation {
   Invoke-ContractValidation -SkipRestore
   Invoke-Packages
   Invoke-HostSample -UsePackedPackages
+  Invoke-HostSample -UsePackedPackages -TargetFramework net10.0
   Invoke-PackageSmoke
   Invoke-ScaleSmoke
   Invoke-CoverageValidation
