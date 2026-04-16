@@ -282,7 +282,14 @@ Release verification before publish:
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framework all -Configuration Release
 ```
 
-For faster local feedback before the full release gate:
+For a targeted maintenance gate during hotspot refactors:
+
+```powershell
+# targeted maintenance gate: focused hotspot editor regressions + ScaleSmoke
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane maintenance -Framework all -Configuration Release
+```
+
+For broader local feedback before the full release gate:
 
 ```powershell
 # build + split regression lanes without release-only pack/smoke/report steps

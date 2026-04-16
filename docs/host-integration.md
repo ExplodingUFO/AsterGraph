@@ -105,6 +105,13 @@ Recommended local verification sequence:
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framework all -Configuration Release
 ```
 
+For a targeted maintenance gate during hotspot refactors:
+
+```powershell
+# focused hotspot editor regressions + ScaleSmoke
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane maintenance -Framework all -Configuration Release
+```
+
 For shorter build/test feedback before the full release gate:
 
 ```powershell
