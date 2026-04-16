@@ -327,6 +327,64 @@ public sealed class GraphEditorProofRingTests
     }
 
     [Fact]
+    public void RuntimeAndRetainedProof_ExposeAlignedHistorySaveContract()
+    {
+        var workspace = new RecordingWorkspaceService();
+        var editor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
+        {
+            Document = CreateDocument(),
+            NodeCatalog = CreateCatalog(),
+            CompatibilityService = new ExactCompatibilityService(),
+            WorkspaceService = workspace,
+        });
+        var session = editor.Session;
+        var sourceNode = Assert.IsType<NodeViewModel>(editor.FindNode(SourceNodeId));
+        var targetNode = Assert.IsType<NodeViewModel>(editor.FindNode(TargetNodeId));
+        var originPositions = new Dictionary<string, GraphPoint>(StringComparer.Ordinal)
+        {
+            [SourceNodeId] = new GraphPoint(sourceNode.X, sourceNode.Y),
+            [TargetNodeId] = new GraphPoint(targetNode.X, targetNode.Y),
+        };
+
+        session.Commands.StartConnection(SourceNodeId, SourcePortId);
+        session.Commands.CompleteConnection(TargetNodeId, TargetPortId);
+
+        editor.BeginHistoryInteraction();
+        editor.ApplyDragOffset(originPositions, 42, 18);
+        editor.CompleteHistoryInteraction("Proof move complete.");
+        var dirtyAfterMove = editor.IsDirty;
+
+        editor.SaveWorkspace();
+        var dirtyAfterSave = editor.IsDirty;
+
+        editor.Undo();
+        var dirtyAfterUndo = editor.IsDirty;
+        var undoneSource = Assert.IsType<NodeViewModel>(editor.FindNode(SourceNodeId));
+        var undoneTarget = Assert.IsType<NodeViewModel>(editor.FindNode(TargetNodeId));
+        Assert.Single(editor.CreateDocumentSnapshot().Connections);
+        Assert.Equal(originPositions[SourceNodeId].X, undoneSource.X);
+        Assert.Equal(originPositions[SourceNodeId].Y, undoneSource.Y);
+        Assert.Equal(originPositions[TargetNodeId].X, undoneTarget.X);
+        Assert.Equal(originPositions[TargetNodeId].Y, undoneTarget.Y);
+
+        editor.Redo();
+        var dirtyAfterRedo = editor.IsDirty;
+        var redoneSource = Assert.IsType<NodeViewModel>(editor.FindNode(SourceNodeId));
+        var redoneTarget = Assert.IsType<NodeViewModel>(editor.FindNode(TargetNodeId));
+        Assert.Single(editor.CreateDocumentSnapshot().Connections);
+        Assert.Equal(originPositions[SourceNodeId].X + 42, redoneSource.X);
+        Assert.Equal(originPositions[SourceNodeId].Y + 18, redoneSource.Y);
+        Assert.Equal(originPositions[TargetNodeId].X + 42, redoneTarget.X);
+        Assert.Equal(originPositions[TargetNodeId].Y + 18, redoneTarget.Y);
+
+        Assert.True(dirtyAfterMove);
+        Assert.False(dirtyAfterSave);
+        Assert.True(dirtyAfterUndo);
+        Assert.False(dirtyAfterRedo);
+        Assert.True(workspace.Exists());
+    }
+
+    [Fact]
     public void RuntimeAndRetainedProof_ExposeEquivalentDirectPluginCompositionAndAutomationProof()
     {
         var options = new AsterGraphEditorOptions

@@ -77,8 +77,12 @@ editor.Undo();
 var dirtyAfterUndo = editor.IsDirty;
 editor.Redo();
 var dirtyAfterRedo = editor.IsDirty;
+var historyContractPassed = dirtyAfterMove
+    && !dirtyAfterSave
+    && dirtyAfterUndo
+    && !dirtyAfterRedo;
 historyWatch.Stop();
-Console.WriteLine($"SCALE_HISTORY_OK:{dirtyAfterMove}:{dirtyAfterSave}:{dirtyAfterUndo}:{dirtyAfterRedo}:{historyWatch.ElapsedMilliseconds}");
+Console.WriteLine($"SCALE_HISTORY_CONTRACT_OK:{historyContractPassed}:{dirtyAfterMove}:{dirtyAfterSave}:{dirtyAfterUndo}:{dirtyAfterRedo}:{historyWatch.ElapsedMilliseconds}");
 
 var viewportWatch = Stopwatch.StartNew();
 session.Commands.UpdateViewportSize(1600, 900);
