@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-  [ValidateSet('restore', 'build', 'test', 'release', 'all')]
+  [ValidateSet('restore', 'build', 'test', 'maintenance', 'release', 'all')]
   [string]$Lane = 'all',
 
   [ValidateSet('all', 'net8.0', 'net9.0')]
@@ -23,6 +23,7 @@ $coverageRunSettingsPath = Join-Path $repoRoot 'tests/coverage.runsettings'
 $coverageReportScriptPath = Join-Path $repoRoot 'eng/coverage-report.ps1'
 $packageSmokeProject = 'tools/AsterGraph.PackageSmoke/AsterGraph.PackageSmoke.csproj'
 $scaleSmokeProject = 'tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj'
+$editorTestsProject = 'tests/AsterGraph.Editor.Tests/AsterGraph.Editor.Tests.csproj'
 $fallbackPackageCache = Join-Path $env:USERPROFILE '.nuget\packages'
 $singleProcessBuildArguments = @(
   '-m:1'
@@ -447,6 +448,30 @@ function Invoke-ReleaseValidation {
   Invoke-CoverageValidation
 }
 
+function Invoke-MaintenanceValidation {
+  if ($Framework -ne 'all') {
+    Write-Warning "Maintenance lane validates the hotspot refactor surface across the required frameworks. Ignoring -Framework $Framework and using all."
+  }
+
+  Invoke-RestoreProjects -Projects @(
+    $editorTestsProject
+  )
+
+  Write-Host ''
+  Write-Host '### Run maintenance editor validation lane' -ForegroundColor Yellow
+
+  Invoke-DotNet -Arguments (@(
+    'test',
+    (Resolve-ProjectPath -RelativePath $editorTestsProject),
+    '-c',
+    $Configuration,
+    '--no-restore',
+    '--nologo',
+    '-v',
+    'minimal'
+  ) + $singleProcessBuildArguments + $buildStabilityProperties)
+}
+
 Set-Location $repoRoot
 Initialize-RepoToolingEnvironment
 $frameworks = Get-Frameworks
@@ -462,6 +487,9 @@ switch ($Lane) {
   'test' {
     Invoke-RestoreProjects -Projects (Get-DefaultRestoreProjects -Frameworks $frameworks)
     Invoke-TestAndTooling -Frameworks $frameworks
+  }
+  'maintenance' {
+    Invoke-MaintenanceValidation
   }
   'release' {
     Invoke-ReleaseValidation
