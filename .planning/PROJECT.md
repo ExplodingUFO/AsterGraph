@@ -2,15 +2,20 @@
 
 ## What This Is
 
-AsterGraph is a modular node-graph editor toolkit for .NET with a kernel-first editor runtime, explicit descriptor-based host contracts, and an Avalonia UI shell. The shipped baseline already covers a publishable four-package SDK boundary, plugin loading, automation execution, proof tools, and release validation. v1.8 focuses on turning that engineering baseline into a public alpha that outside consumers can evaluate, adopt, and contribute to through one canonical demo path, clearer public docs, and a predictable prerelease story.
+AsterGraph is a modular node-graph editor toolkit for .NET with a kernel-first editor runtime, explicit descriptor-based host contracts, and an Avalonia UI shell. The shipped baseline already covers a publishable four-package SDK boundary, plugin loading, automation execution, proof tools, and release validation. v1.9 focuses on the last launch-gate blockers that still separate the shipped public-alpha surface from a repo that can be opened confidently: green GitHub-hosted CI, a valid tag-only prerelease workflow, and one small checked-in public-launch checklist.
 
 ## Core Value
 
 Hosts can integrate only the graph-editor pieces they need, replace default UI and behavior seams safely, and keep building on a stable public API instead of patching internal implementation details.
 
-## Current Milestone
+## Current Milestone: v1.9 Public Launch Gate and CI Stabilization
 
-No active milestone. v1.8 is complete and archived; the repo is ready for the next milestone framing pass.
+**Goal:** Close the remaining clean-runner CI, workflow-validity, and public-launch-checklist gaps so the existing `0.2.0-alpha.1` surface can move from "technically ready" to "operationally ready" for public opening.
+
+**Target features:**
+- Make `ci.yml` pass on clean GitHub-hosted Windows and Linux runners without relying on locally prebuilt Debug plugin artifacts.
+- Fix the tag-driven prerelease workflow so it evaluates and schedules jobs correctly while staying secret-gated for real publishing.
+- Publish one short launch checklist and tighten public docs around the real remaining blockers instead of replaying work already shipped in v1.8.
 
 ## Latest Shipped Milestone: v1.8 Public Alpha Readiness and Canonical Demo
 
@@ -61,7 +66,8 @@ No active milestone. v1.8 is complete and archived; the repo is ready for the ne
 - `AsterGraph.HostSample` proves the minimal canonical consumer path, while `AsterGraph.Demo` proves the fuller showcase host route through the same factory/session boundary.
 - Public governance files, bilingual docs, a demo language toggle, and explicit alpha-status guidance now exist as part of the shipped repo surface.
 - CI now exposes concurrency, NuGet cache, Linux validation, uploaded proof artifacts, and a tag-driven prerelease workflow while keeping the Windows release lane authoritative.
-- v1.8 is complete; the next step is a fresh milestone framing pass rather than more closeout work on this milestone.
+- The remaining blockers were exposed only after pushing v1.8 to GitHub-hosted runners: plugin proof tests still assume Debug test-plugin outputs, `actions/setup-dotnet` cache cleanup can fail when the default global package folder does not exist, and `release.yml` is currently failing before any jobs schedule.
+- v1.9 is therefore a launch-gate stabilization pass, not another feature milestone.
 
 ## Requirements
 
@@ -175,10 +181,10 @@ v1.8 closed that gap. The repo now has an external-facing alpha version story, e
 
 ## Next Milestone Goals
 
-- Unify the public version story, alpha-status guidance, and outward-facing repo/governance artifacts around one explicit prerelease contract.
-- Move the main demo onto the canonical host path and expand it until plugins, automation, standalone surfaces, presenter replacement, and localization are visible product surfaces.
-- Publish a bilingual public docs stack and make localization proof part of the demo and test surface.
-- Extend CI and release automation for public alpha consumption with Linux validation, artifacts, and tag-driven prerelease publishing.
+- Make the current CI lanes pass on GitHub-hosted runners by removing hidden local-environment assumptions from plugin proof tests and helper code.
+- Fix the current release-workflow validity problem and keep prerelease publication tag-scoped and secret-gated.
+- Publish one minimal public-launch checklist that covers repo visibility, required checks, first prerelease tag, and artifact inspection.
+- Keep the current public docs truthful by pointing them at the real remaining launch blockers instead of re-describing work already shipped in v1.8.
 
 ## Archived Milestone Framing
 
@@ -214,4 +220,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-16 for milestone v1.8 initialization*
+*Last updated: 2026-04-16 for milestone v1.9 initialization*
