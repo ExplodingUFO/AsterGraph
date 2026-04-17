@@ -11,6 +11,9 @@ AsterGraph is a modular node-graph editor for .NET with an Avalonia UI shell, a 
 - public project status: [`docs/en/project-status.md`](./docs/en/project-status.md)
 - current alpha scope, known limitations, and stability notes: [`docs/en/alpha-status.md`](./docs/en/alpha-status.md)
 - public launch checklist: [`docs/en/public-launch-checklist.md`](./docs/en/public-launch-checklist.md)
+- contributor guide: [`CONTRIBUTING.md`](./CONTRIBUTING.md)
+- code of conduct: [`CODE_OF_CONDUCT.md`](./CODE_OF_CONDUCT.md)
+- security reporting: [`SECURITY.md`](./SECURITY.md)
 - public repo hygiene gate: `pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane hygiene -Framework all -Configuration Release`
 
 Public entry map:

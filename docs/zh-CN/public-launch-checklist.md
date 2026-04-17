@@ -9,7 +9,14 @@
 - 要求通过代表官方发布门禁的 `ci` workflow checks
 - 确认 release 权限和 NuGet 发布权限只给维护者
 
-## 2. 必跑验证
+## 2. 公开仓库表面
+
+- 确认 `README.md` 和 `README.zh-CN.md` 都指向当前 public alpha 文档和入口矩阵
+- 确认 `CONTRIBUTING.md`、`CODE_OF_CONDUCT.md`、`SECURITY.md` 都存在且内容仍然准确
+- 确认 `.github` 里的 issue templates 和 pull request template 已启用
+- 确认仓库 description、topics、homepage 和当前 alpha 叙事一致
+
+## 3. 必跑验证
 
 只跑维护中的官方入口，不要临时拼 ad-hoc 命令：
 
@@ -20,7 +27,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane contract -Frame
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framework all -Configuration Release
 ```
 
-## 3. 检查 Proof Artifact
+## 4. 检查 Proof Artifact
 
 公开前至少复核这些产物：
 
@@ -41,7 +48,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framew
 - `SCALE_HISTORY_CONTRACT_OK:...`
 - `COVERAGE_REPORT_OK:...`
 
-## 4. 第一个公开 Prerelease Tag
+## 5. 第一个公开 Prerelease Tag
 
 - 确认工作区干净
 - 先把要打 tag 的分支或 `master` 推上去
@@ -50,7 +57,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framew
 - 如果配置了 `NUGET_API_KEY`，确认包发布成功
 - 如果没有配置 `NUGET_API_KEY`，确认 workflow 是有意跳过 NuGet publish，而不是失败
 
-## 5. 对外入口说明
+## 6. 对外入口说明
 
 在 release note、公告、README 里把入口说清楚：
 

@@ -7,7 +7,7 @@ AsterGraph is currently in public alpha preparation. Security fixes are only gua
 - the latest code on `master`
 - the latest prerelease tag once prerelease publishing is active
 
-Older milestone snapshots under [`.planning/milestones`](./.planning/milestones/) are historical records, not supported deployment targets.
+Older historical commits and outdated prerelease tags are not supported deployment targets.
 
 ## Reporting a Vulnerability
 

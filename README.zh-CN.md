@@ -10,6 +10,9 @@ AsterGraph 是一个面向 .NET 的模块化节点图编辑器工具包，包含
 - 项目当前状态：[`docs/zh-CN/project-status.md`](./docs/zh-CN/project-status.md)
 - Alpha 范围、已知限制与稳定性说明：[`docs/zh-CN/alpha-status.md`](./docs/zh-CN/alpha-status.md)
 - 对外发布检查清单：[`docs/zh-CN/public-launch-checklist.md`](./docs/zh-CN/public-launch-checklist.md)
+- 贡献指南：[`CONTRIBUTING.md`](./CONTRIBUTING.md)
+- 行为准则：[`CODE_OF_CONDUCT.md`](./CODE_OF_CONDUCT.md)
+- 安全上报：[`SECURITY.md`](./SECURITY.md)
 - 公开仓库 hygiene 门禁：`pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane hygiene -Framework all -Configuration Release`
 
 公开入口分工：

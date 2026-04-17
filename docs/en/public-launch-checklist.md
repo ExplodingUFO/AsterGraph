@@ -9,7 +9,14 @@ Use this checklist immediately before making the repository public or pushing th
 - require the `ci` workflow checks that represent the shipped gate
 - confirm release permissions and NuGet publication permissions are limited to maintainers
 
-## 2. Required Validation
+## 2. Public Repo Surface
+
+- confirm `README.md` and `README.zh-CN.md` both point to the current public-alpha docs and entry matrix
+- confirm `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, and `SECURITY.md` are present and still accurate
+- confirm issue templates and the pull request template are enabled in `.github`
+- confirm repository description, topics, and homepage match the current alpha narrative
+
+## 3. Required Validation
 
 Run the maintained entrypoints, not ad-hoc local commands:
 
@@ -20,7 +27,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane contract -Frame
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framework all -Configuration Release
 ```
 
-## 3. Proof Artifact Review
+## 4. Proof Artifact Review
 
 Review these release artifacts before opening the repo or announcing the prerelease:
 
@@ -41,7 +48,7 @@ Expected high-signal markers:
 - `SCALE_HISTORY_CONTRACT_OK:...`
 - `COVERAGE_REPORT_OK:...`
 
-## 4. First Public Prerelease Tag
+## 5. First Public Prerelease Tag
 
 - confirm the working tree is clean
 - push the release branch or `master` state that should back the tag
@@ -50,7 +57,7 @@ Expected high-signal markers:
 - if `NUGET_API_KEY` is configured, confirm package publication succeeds
 - if `NUGET_API_KEY` is not configured, confirm the workflow reports a deliberate NuGet publish skip instead of a failure
 
-## 5. Public Entry Guidance
+## 6. Public Entry Guidance
 
 Keep the consumer entry story explicit in release notes and public announcements:
 
