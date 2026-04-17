@@ -37,14 +37,20 @@ dotnet add package AsterGraph.Abstractions --prerelease
 dotnet run --project tools/AsterGraph.HelloWorld/AsterGraph.HelloWorld.csproj --nologo
 ```
 
-`HelloWorld` 适合第一次上手；`HostSample` 适合证明推荐的仅运行时和默认 UI 两条路线都能成立。
+如果你想先跑最小默认 UI 路线，执行：
+
+```powershell
+dotnet run --project tools/AsterGraph.HelloWorld.Avalonia/AsterGraph.HelloWorld.Avalonia.csproj --nologo
+```
+
+`HelloWorld` 适合最简单的 runtime-only 第一跑；`HelloWorld.Avalonia` 适合最小默认 UI 第一跑；`HostSample` 只适合做推荐路线验证。
 
 ## 4. 推荐接入路线
 
 | 宿主需要什么 | 从哪里开始 | 第一个样例 |
 | --- | --- | --- |
 | 只要运行时 / 自定义 UI | `AsterGraphEditorFactory.CreateSession(...)` | `tools/AsterGraph.HelloWorld` |
-| 默认 Avalonia UI | `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` | `tools/AsterGraph.HostSample` |
+| 默认 Avalonia UI | `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` | `tools/AsterGraph.HelloWorld.Avalonia` |
 | plugin trust / discovery | `AsterGraphEditorFactory.DiscoverPluginCandidates(...)` + `AsterGraphEditorOptions.PluginTrustPolicy` | [Host Integration](./host-integration.md) |
 | automation | `IGraphEditorSession.Automation.Execute(...)` | [Host Integration](./host-integration.md) |
 | retained 迁移 | `new GraphEditorViewModel(...)` + `new GraphEditorView { Editor = editor }` | [Host Integration](./host-integration.md) |
@@ -61,7 +67,7 @@ using AsterGraph.Core.Models;
 using AsterGraph.Editor.Hosting;
 
 INodeCatalog catalog = CreateCatalog();
-var document = GraphDocument.Empty;
+var document = CreateDocument();
 
 var editor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
 {
@@ -85,9 +91,9 @@ var view = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOption
 - [Host Integration](./host-integration.md) = 包边界、路线矩阵、迁移说明
 - [Alpha Status](./alpha-status.md) = 当前范围、非目标、已知限制
 - [Demo Guide](./demo-guide.md) = 完整展示宿主
-- [`tools/AsterGraph.HostSample`](../../tools/AsterGraph.HostSample/) = 最小推荐路线验证样例
-- [`tools/AsterGraph.PackageSmoke`](../../tools/AsterGraph.PackageSmoke/) = 打包消费验证
-- [`tools/AsterGraph.ScaleSmoke`](../../tools/AsterGraph.ScaleSmoke/) = 规模、历史记录与状态连续性验证
+- [ScaleSmoke 基线](./scale-baseline.md) = 公开的规模分层与防回归红线
+- [Plugin 与自定义节点 Recipe](./plugin-recipe.md) = 最小可复制 plugin/custom-node 路线
+- [Retained 到 Session 的迁移 Recipe](./retained-migration-recipe.md) = 老宿主的渐进迁移指南
 
 ## 8. 维护者与源码验证入口
 
@@ -96,3 +102,4 @@ var view = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOption
 - 维护流程与 lane 说明：[CONTRIBUTING.md](../../CONTRIBUTING.md)
 - release sign-off 与手动 NuGet 发布流程：[Public Launch Checklist](./public-launch-checklist.md)
 - 历史 tag 与包版本的关系：[Versioning](./versioning.md)
+- proof harness：[`tools/AsterGraph.HostSample`](../../tools/AsterGraph.HostSample/)、[`tools/AsterGraph.PackageSmoke`](../../tools/AsterGraph.PackageSmoke/)、[`tools/AsterGraph.ScaleSmoke`](../../tools/AsterGraph.ScaleSmoke/)

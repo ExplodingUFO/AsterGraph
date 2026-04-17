@@ -1,12 +1,12 @@
 namespace AsterGraph.Editor.Plugins;
 
 /// <summary>
-/// 表示一次稳定的插件包暂存结果。
+/// Captures one stable plugin-package staging result.
 /// </summary>
 public sealed record GraphEditorPluginPackageStageResult
 {
     /// <summary>
-    /// 初始化插件包暂存结果。
+    /// Initializes a plugin-package staging result.
     /// </summary>
     public GraphEditorPluginPackageStageResult(
         GraphEditorPluginStageSnapshot stage,
@@ -49,27 +49,27 @@ public sealed record GraphEditorPluginPackageStageResult
     }
 
     /// <summary>
-    /// 当前暂存结果快照。
+    /// Gets the current staging snapshot.
     /// </summary>
     public GraphEditorPluginStageSnapshot Stage { get; }
 
     /// <summary>
-    /// 当前可见的插件清单。
+    /// Gets the visible plugin manifest.
     /// </summary>
     public GraphEditorPluginManifest Manifest { get; }
 
     /// <summary>
-    /// 当前来源和签名证据。
+    /// Gets the provenance and signature evidence.
     /// </summary>
     public GraphEditorPluginProvenanceEvidence ProvenanceEvidence { get; }
 
     /// <summary>
-    /// 当前信任评估结果。
+    /// Gets the trust-evaluation result.
     /// </summary>
     public GraphEditorPluginTrustEvaluation TrustEvaluation { get; }
 
     /// <summary>
-    /// 可选的已桥接加载注册项。
+    /// Gets the optional registration bridged from the staged package.
     /// </summary>
     public GraphEditorPluginRegistration? Registration { get; }
 }

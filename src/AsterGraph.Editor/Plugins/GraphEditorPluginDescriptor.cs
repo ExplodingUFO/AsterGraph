@@ -1,12 +1,12 @@
 namespace AsterGraph.Editor.Plugins;
 
 /// <summary>
-/// 描述一个可加载图编辑器插件的稳定元数据。
+/// Describes the stable metadata for a loadable editor plugin.
 /// </summary>
 public sealed record GraphEditorPluginDescriptor
 {
     /// <summary>
-    /// 初始化插件描述。
+    /// Initializes a plugin descriptor.
     /// </summary>
     public GraphEditorPluginDescriptor(
         string id,
@@ -24,32 +24,32 @@ public sealed record GraphEditorPluginDescriptor
     }
 
     /// <summary>
-    /// 稳定插件标识。
+    /// Gets the stable plugin identifier.
     /// </summary>
     public string Id { get; }
 
     /// <summary>
-    /// 宿主可读名称。
+    /// Gets the host-readable plugin name.
     /// </summary>
     public string DisplayName { get; }
 
     /// <summary>
-    /// 可选描述。
+    /// Gets the optional plugin description.
     /// </summary>
     public string? Description { get; }
 
     /// <summary>
-    /// 可选版本文本。
+    /// Gets the optional plugin version text.
     /// </summary>
     public string? Version { get; }
 
     /// <summary>
-    /// 基于当前描述生成一个最小插件清单。
+    /// Builds a minimal plugin manifest from the current descriptor.
     /// </summary>
-    /// <param name="provenance">来源信息。</param>
-    /// <param name="compatibility">可选兼容性摘要。</param>
-    /// <param name="capabilitySummary">可选能力摘要。</param>
-    /// <returns>新的插件清单。</returns>
+    /// <param name="provenance">The provenance information.</param>
+    /// <param name="compatibility">The optional compatibility summary.</param>
+    /// <param name="capabilitySummary">The optional capability summary.</param>
+    /// <returns>A new plugin manifest.</returns>
     public GraphEditorPluginManifest ToManifest(
         GraphEditorPluginManifestProvenance provenance,
         GraphEditorPluginCompatibilityManifest? compatibility = null,

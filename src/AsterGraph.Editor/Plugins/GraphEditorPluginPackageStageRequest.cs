@@ -3,12 +3,12 @@ using System.IO;
 namespace AsterGraph.Editor.Plugins;
 
 /// <summary>
-/// 表示一次显式插件包暂存请求。
+/// Describes one explicit plugin-package staging request.
 /// </summary>
 public sealed record GraphEditorPluginPackageStageRequest
 {
     /// <summary>
-    /// 初始化插件包暂存请求。
+    /// Initializes a plugin-package staging request.
     /// </summary>
     public GraphEditorPluginPackageStageRequest(
         GraphEditorPluginCandidateSnapshot candidate,
@@ -21,12 +21,12 @@ public sealed record GraphEditorPluginPackageStageRequest
     }
 
     /// <summary>
-    /// 要进入暂存流程的候选项快照。
+    /// Gets the candidate snapshot that should enter staging.
     /// </summary>
     public GraphEditorPluginCandidateSnapshot Candidate { get; }
 
     /// <summary>
-    /// 宿主可选提供的暂存根目录绝对路径。
+    /// Gets the optional absolute staging-root path supplied by the host.
     /// </summary>
     public string? StagingRootPath { get; }
 }

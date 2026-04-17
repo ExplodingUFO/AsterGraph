@@ -1,33 +1,33 @@
 namespace AsterGraph.Editor.Plugins;
 
 /// <summary>
-/// 指示插件候选项的发现来源类型。
+/// Identifies the discovery source kind for a plugin candidate.
 /// </summary>
 public enum GraphEditorPluginCandidateSourceKind
 {
     /// <summary>
-    /// 来自本地目录扫描。
+    /// Discovered by scanning a local directory.
     /// </summary>
     Directory,
 
     /// <summary>
-    /// 来自本地包目录扫描。
+    /// Discovered by scanning a local package directory.
     /// </summary>
     PackageDirectory,
 
     /// <summary>
-    /// 来自宿主提供的清单源。
+    /// Discovered through a host-supplied manifest source.
     /// </summary>
     ManifestSource,
 }
 
 /// <summary>
-/// 表示一次稳定的插件候选项检查快照。
+/// Captures one stable plugin-candidate discovery snapshot.
 /// </summary>
 public sealed record GraphEditorPluginCandidateSnapshot
 {
     /// <summary>
-    /// 初始化插件候选项快照。
+    /// Initializes a plugin-candidate snapshot.
     /// </summary>
     public GraphEditorPluginCandidateSnapshot(
         GraphEditorPluginCandidateSourceKind sourceKind,
@@ -58,47 +58,48 @@ public sealed record GraphEditorPluginCandidateSnapshot
     }
 
     /// <summary>
-    /// 发现来源类型。
+    /// Gets the discovery source kind.
     /// </summary>
     public GraphEditorPluginCandidateSourceKind SourceKind { get; }
 
     /// <summary>
-    /// 稳定来源标识。目录发现时通常为目录路径，清单源发现时为源标识。
+    /// Gets the stable source identifier. Directory discovery typically uses a directory path and
+    /// manifest discovery typically uses a source identifier.
     /// </summary>
     public string Source { get; }
 
     /// <summary>
-    /// 候选项对应的本地程序集绝对路径。
+    /// Gets the absolute local assembly path for the candidate when one is available.
     /// </summary>
     public string? AssemblyPath { get; }
 
     /// <summary>
-    /// 候选项对应的本地包归档绝对路径。
+    /// Gets the absolute local package-archive path for the candidate when one is available.
     /// </summary>
     public string? PackagePath { get; }
 
     /// <summary>
-    /// 可选的显式插件类型名。
+    /// Gets the optional explicit plugin type name.
     /// </summary>
     public string? PluginTypeName { get; }
 
     /// <summary>
-    /// 候选项可见的插件清单。
+    /// Gets the visible plugin manifest for the candidate.
     /// </summary>
     public GraphEditorPluginManifest Manifest { get; }
 
     /// <summary>
-    /// 当前兼容性评估结果。
+    /// Gets the current compatibility evaluation.
     /// </summary>
     public GraphEditorPluginCompatibilityEvaluation Compatibility { get; }
 
     /// <summary>
-    /// 当前信任评估结果。
+    /// Gets the current trust evaluation.
     /// </summary>
     public GraphEditorPluginTrustEvaluation TrustEvaluation { get; }
 
     /// <summary>
-    /// 当前来源和签名证据。
+    /// Gets the current provenance and signature evidence.
     /// </summary>
     public GraphEditorPluginProvenanceEvidence ProvenanceEvidence { get; }
 }

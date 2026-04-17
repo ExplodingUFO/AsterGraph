@@ -37,14 +37,20 @@ For the smallest possible runtime-only sample, run:
 dotnet run --project tools/AsterGraph.HelloWorld/AsterGraph.HelloWorld.csproj --nologo
 ```
 
-Use `HelloWorld` when you want the simplest starting point. Use `HostSample` when you want a proof harness for the canonical runtime-only and hosted-UI routes.
+For the smallest hosted-UI sample, run:
+
+```powershell
+dotnet run --project tools/AsterGraph.HelloWorld.Avalonia/AsterGraph.HelloWorld.Avalonia.csproj --nologo
+```
+
+Use `HelloWorld` when you want the simplest runtime-only starting point. Use `HelloWorld.Avalonia` when you want the smallest shipped-shell sample. Use `HostSample` only when you want a proof harness for canonical route validation.
 
 ## 4. Canonical Adoption Routes
 
 | If your host needs | Start here | First sample |
 | --- | --- | --- |
 | Runtime-only or custom UI | `AsterGraphEditorFactory.CreateSession(...)` | `tools/AsterGraph.HelloWorld` |
-| Shipped Avalonia UI | `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` | `tools/AsterGraph.HostSample` |
+| Shipped Avalonia UI | `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` | `tools/AsterGraph.HelloWorld.Avalonia` |
 | Plugin trust/discovery | `AsterGraphEditorFactory.DiscoverPluginCandidates(...)` + `AsterGraphEditorOptions.PluginTrustPolicy` | [Host Integration](./host-integration.md) |
 | Automation | `IGraphEditorSession.Automation.Execute(...)` | [Host Integration](./host-integration.md) |
 | Retained migration | `new GraphEditorViewModel(...)` + `new GraphEditorView { Editor = editor }` | [Host Integration](./host-integration.md) |
@@ -61,7 +67,7 @@ using AsterGraph.Core.Models;
 using AsterGraph.Editor.Hosting;
 
 INodeCatalog catalog = CreateCatalog();
-var document = GraphDocument.Empty;
+var document = CreateDocument();
 
 var editor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
 {
@@ -85,9 +91,9 @@ Plugin loading is currently in-process. Hosts can discover candidates, apply an 
 - [Host Integration](./host-integration.md) = package boundary, route matrix, migration guidance
 - [Alpha Status](./alpha-status.md) = current scope, non-goals, and known limitations
 - [Demo Guide](./demo-guide.md) = full showcase host
-- [`tools/AsterGraph.HostSample`](../../tools/AsterGraph.HostSample/) = minimal canonical proof harness
-- [`tools/AsterGraph.PackageSmoke`](../../tools/AsterGraph.PackageSmoke/) = packed-package proof
-- [`tools/AsterGraph.ScaleSmoke`](../../tools/AsterGraph.ScaleSmoke/) = scale/history/state proof
+- [ScaleSmoke Baseline](./scale-baseline.md) = public graph-size tiers and defended redlines
+- [Plugin And Custom Node Recipe](./plugin-recipe.md) = smallest copyable plugin/custom-node path
+- [Retained-To-Session Migration Recipe](./retained-migration-recipe.md) = phased migration guide for older hosts
 
 ## 8. Maintainer And Source-Validation Paths
 
@@ -96,3 +102,4 @@ If you are validating the repository itself instead of consuming the published p
 - maintainer workflow and lanes: [CONTRIBUTING.md](../../CONTRIBUTING.md)
 - release sign-off and manual NuGet publish flow: [Public Launch Checklist](./public-launch-checklist.md)
 - historical tags versus package versions: [Versioning](./versioning.md)
+- proof harnesses: [`tools/AsterGraph.HostSample`](../../tools/AsterGraph.HostSample/), [`tools/AsterGraph.PackageSmoke`](../../tools/AsterGraph.PackageSmoke/), [`tools/AsterGraph.ScaleSmoke`](../../tools/AsterGraph.ScaleSmoke/)

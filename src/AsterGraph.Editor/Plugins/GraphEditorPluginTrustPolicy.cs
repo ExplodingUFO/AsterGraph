@@ -1,44 +1,44 @@
 namespace AsterGraph.Editor.Plugins;
 
 /// <summary>
-/// 描述插件信任评估的决策结果。
+/// Describes the decision returned by a plugin trust evaluation.
 /// </summary>
 public enum GraphEditorPluginTrustDecision
 {
     /// <summary>
-    /// 允许继续进入加载流程。
+    /// Allows the plugin to continue into the loading pipeline.
     /// </summary>
     Allowed,
 
     /// <summary>
-    /// 在执行插件贡献代码前阻止加载。
+    /// Blocks the plugin before any contribution code executes.
     /// </summary>
     Blocked,
 }
 
 /// <summary>
-/// 描述插件信任评估结果的来源。
+/// Describes where a plugin trust evaluation came from.
 /// </summary>
 public enum GraphEditorPluginTrustEvaluationSource
 {
     /// <summary>
-    /// 未配置宿主策略时的隐式允许。
+    /// The plugin was implicitly allowed because no host policy was configured.
     /// </summary>
     ImplicitAllow,
 
     /// <summary>
-    /// 来自宿主提供的显式策略。
+    /// The result came from an explicit host-supplied policy.
     /// </summary>
     HostPolicy,
 }
 
 /// <summary>
-/// 表示一次插件信任评估的上下文。
+/// Carries the context for one plugin trust evaluation.
 /// </summary>
 public sealed record GraphEditorPluginTrustPolicyContext
 {
     /// <summary>
-    /// 初始化信任评估上下文。
+    /// Initializes a trust-policy context.
     /// </summary>
     public GraphEditorPluginTrustPolicyContext(
         GraphEditorPluginRegistration registration,
@@ -55,33 +55,33 @@ public sealed record GraphEditorPluginTrustPolicyContext
     }
 
     /// <summary>
-    /// 当前插件注册项。
+    /// Gets the current plugin registration.
     /// </summary>
     public GraphEditorPluginRegistration Registration { get; }
 
     /// <summary>
-    /// 当前可见的插件清单。
+    /// Gets the visible plugin manifest.
     /// </summary>
     public GraphEditorPluginManifest Manifest { get; }
 
     /// <summary>
-    /// 当前可见的来源和签名证据。
+    /// Gets the visible provenance and signature evidence.
     /// </summary>
     public GraphEditorPluginProvenanceEvidence ProvenanceEvidence { get; }
 
     /// <summary>
-    /// 当前注册关联的本地包归档绝对路径。
+    /// Gets the absolute local package path associated with the registration, when present.
     /// </summary>
     public string? PackagePath => Registration.PackagePath;
 }
 
 /// <summary>
-/// 描述一次稳定的插件信任评估结果。
+/// Captures one stable plugin trust-evaluation result.
 /// </summary>
 public sealed record GraphEditorPluginTrustEvaluation
 {
     /// <summary>
-    /// 初始化信任评估结果。
+    /// Initializes a trust-evaluation result.
     /// </summary>
     public GraphEditorPluginTrustEvaluation(
         GraphEditorPluginTrustDecision decision,
@@ -96,27 +96,27 @@ public sealed record GraphEditorPluginTrustEvaluation
     }
 
     /// <summary>
-    /// 决策结果。
+    /// Gets the trust decision.
     /// </summary>
     public GraphEditorPluginTrustDecision Decision { get; }
 
     /// <summary>
-    /// 决策来源。
+    /// Gets the source of the decision.
     /// </summary>
     public GraphEditorPluginTrustEvaluationSource Source { get; }
 
     /// <summary>
-    /// 可选的稳定原因代码。
+    /// Gets the optional machine-readable reason code.
     /// </summary>
     public string? ReasonCode { get; }
 
     /// <summary>
-    /// 可选的宿主可读原因文本。
+    /// Gets the optional host-readable reason message.
     /// </summary>
     public string? ReasonMessage { get; }
 
     /// <summary>
-    /// 创建未配置策略时的默认允许结果。
+    /// Creates the default allow result used when no trust policy is configured.
     /// </summary>
     public static GraphEditorPluginTrustEvaluation ImplicitAllow(
         string? reasonCode = "trust.policy.not-configured",
@@ -129,14 +129,14 @@ public sealed record GraphEditorPluginTrustEvaluation
 }
 
 /// <summary>
-/// 定义宿主可插入的插件信任策略。
+/// Defines a host-supplied plugin trust policy.
 /// </summary>
 public interface IGraphEditorPluginTrustPolicy
 {
     /// <summary>
-    /// 对当前插件清单执行一次加载前评估。
+    /// Evaluates a plugin before any contribution code is allowed to execute.
     /// </summary>
-    /// <param name="context">评估上下文。</param>
-    /// <returns>机器可读的评估结果。</returns>
+    /// <param name="context">The trust-evaluation context.</param>
+    /// <returns>A machine-readable trust-evaluation result.</returns>
     GraphEditorPluginTrustEvaluation Evaluate(GraphEditorPluginTrustPolicyContext context);
 }

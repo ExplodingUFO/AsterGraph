@@ -13,22 +13,21 @@ using AsterGraph.Editor.ViewModels;
 namespace AsterGraph.Editor.Hosting;
 
 /// <summary>
-/// 提供 AsterGraph 编辑器运行时的规范宿主组合入口。
+/// Provides the canonical host composition entry points for the AsterGraph editor runtime.
 /// </summary>
 /// <remarks>
-/// <see cref="CreateSession(AsterGraphEditorOptions)"/> 是当前的规范 runtime-first 组合入口，
-/// 适用于宿主自定义 UI 或直接围绕 <see cref="IGraphEditorSession"/> 进行集成。
-/// <see cref="Create(AsterGraphEditorOptions)"/> 是当前的规范 hosted-UI 组合入口，
-/// 返回保留的 <see cref="GraphEditorViewModel"/> 兼容立面，便于宿主在迁移窗口内继续接入默认 Avalonia 外壳。
-/// 直接构造 <see cref="GraphEditorViewModel"/> 仍然受支持，但应视为兼容路径而不是新的首选组合方式。
+/// <see cref="CreateSession(AsterGraphEditorOptions)" /> is the runtime-first entry point for custom UI hosts and
+/// integrations that want to work directly with <see cref="IGraphEditorSession" />. <see cref="Create(AsterGraphEditorOptions)" />
+/// is the hosted-UI entry point that returns the retained <see cref="GraphEditorViewModel" /> facade for the stock Avalonia shell.
+/// Direct <see cref="GraphEditorViewModel" /> construction is still supported, but it should be treated as a compatibility path.
 /// </remarks>
 public static class AsterGraphEditorFactory
 {
     /// <summary>
-    /// 使用宿主提供的发现选项读取本地插件候选项集合。
+    /// Discovers plugin candidates by using host-supplied discovery sources and trust policy inputs.
     /// </summary>
-    /// <param name="options">插件候选项发现选项。</param>
-    /// <returns>候选项快照集合。</returns>
+    /// <param name="options">The plugin discovery options.</param>
+    /// <returns>A stable snapshot collection of discovered candidates.</returns>
     public static IReadOnlyList<GraphEditorPluginCandidateSnapshot> DiscoverPluginCandidates(GraphEditorPluginDiscoveryOptions options)
     {
         ArgumentNullException.ThrowIfNull(options);
@@ -36,10 +35,10 @@ public static class AsterGraphEditorFactory
     }
 
     /// <summary>
-    /// 使用宿主提供的候选项快照显式发起一次插件包暂存请求。
+    /// Starts an explicit plugin-package staging request for a previously discovered candidate.
     /// </summary>
-    /// <param name="request">包暂存请求。</param>
-    /// <returns>当前阶段可见的机器可读暂存结果。</returns>
+    /// <param name="request">The package staging request.</param>
+    /// <returns>A machine-readable staging result that is safe to inspect before loading the plugin.</returns>
     public static GraphEditorPluginPackageStageResult StagePluginPackage(GraphEditorPluginPackageStageRequest request)
     {
         ArgumentNullException.ThrowIfNull(request);
@@ -72,14 +71,15 @@ public static class AsterGraphEditorFactory
     }
 
     /// <summary>
-    /// 使用宿主提供的选项创建一个 <see cref="GraphEditorViewModel"/>。
+    /// Creates a hosted-UI editor facade from host-supplied options.
     /// </summary>
-    /// <param name="options">宿主组合选项。</param>
-    /// <returns>新的图编辑器视图模型。</returns>
+    /// <param name="options">The host composition options.</param>
+    /// <returns>A new graph-editor view model.</returns>
     /// <remarks>
-    /// 新的默认宿主 UI 组合代码应优先使用此工厂入口，然后搭配
-    /// <c>AsterGraphAvaloniaViewFactory.Create(...)</c> 或其他保留的 UI 表面工厂。
-    /// 该返回值仍然是兼容立面，但其 <see cref="GraphEditorViewModel.Session"/> 现在建立在共享 runtime 边界之上。
+    /// New hosted-UI code should start here and then compose the Avalonia shell through
+    /// <c>AsterGraphAvaloniaViewFactory.Create(...)</c> or another retained UI surface factory.
+    /// The returned object is still a compatibility facade, but its <see cref="GraphEditorViewModel.Session" />
+    /// now sits on top of the shared runtime boundary.
     /// </remarks>
     public static GraphEditorViewModel Create(AsterGraphEditorOptions options)
     {
@@ -113,14 +113,14 @@ public static class AsterGraphEditorFactory
     }
 
     /// <summary>
-    /// 使用宿主提供的选项创建一个 <see cref="IGraphEditorSession"/>。
+    /// Creates an <see cref="IGraphEditorSession" /> from host-supplied options.
     /// </summary>
-    /// <param name="options">宿主组合选项。</param>
-    /// <returns>新的图编辑器运行时会话。</returns>
+    /// <param name="options">The host composition options.</param>
+    /// <returns>A new graph-editor runtime session.</returns>
     /// <remarks>
-    /// 这是当前自定义 UI 宿主和自动化/插件前置集成的规范入口。
-    /// 与 <see cref="Create(AsterGraphEditorOptions)"/> 返回的保留兼容立面相比，
-    /// 该路径不会携带 <see cref="GraphEditorViewModel"/> 特有的兼容命令或 MVVM 表面。
+    /// This is the canonical entry point for custom UI hosts and for plugin or automation-first integrations.
+    /// Unlike <see cref="Create(AsterGraphEditorOptions)" />, this route does not carry the retained
+    /// <see cref="GraphEditorViewModel" /> surface or its compatibility-only helpers.
     /// </remarks>
     public static IGraphEditorSession CreateSession(AsterGraphEditorOptions options)
     {

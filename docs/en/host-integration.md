@@ -18,7 +18,7 @@ Standalone Avalonia surfaces such as `AsterGraphCanvasViewFactory`, `AsterGraphI
 | Need | Packages to start with | Canonical entry point | First sample |
 | --- | --- | --- | --- |
 | Runtime-only/custom UI | `AsterGraph.Editor` (+ `AsterGraph.Abstractions` when defining nodes) | `CreateSession(...)` | `tools/AsterGraph.HelloWorld` |
-| Default Avalonia UI | `AsterGraph.Avalonia` | `Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` | `tools/AsterGraph.HostSample` |
+| Default Avalonia UI | `AsterGraph.Avalonia` | `Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` | `tools/AsterGraph.HelloWorld.Avalonia` |
 | Plugin trust/discovery | `AsterGraph.Editor` | `DiscoverPluginCandidates(...)` + `PluginTrustPolicy` | `src/AsterGraph.Demo` |
 | Automation | `AsterGraph.Editor` | `IGraphEditorSession.Automation.Execute(...)` | `src/AsterGraph.Demo` |
 | Retained migration | `AsterGraph.Editor` (+ `AsterGraph.Avalonia` when embedding `GraphEditorView`) | retained constructor path | migration-only |
@@ -26,9 +26,10 @@ Standalone Avalonia surfaces such as `AsterGraphCanvasViewFactory`, `AsterGraphI
 ## Sample Roles
 
 - `AsterGraph.HelloWorld` = first-run sample for the runtime-only path
+- `AsterGraph.HelloWorld.Avalonia` = first-run sample for the shipped Avalonia UI path
 - `AsterGraph.HostSample` = narrow proof harness for the canonical runtime-only and hosted-UI routes
 - `AsterGraph.PackageSmoke` = packed-package proof
-- `AsterGraph.ScaleSmoke` = scale/history/state proof
+- `AsterGraph.ScaleSmoke` = public scale baseline plus history/state proof
 - `AsterGraph.Demo` = full showcase host for visual inspection
 
 ## State Contract
@@ -59,3 +60,9 @@ Important defaults:
 Plugin trust is host-owned. AsterGraph can help the host discover candidates, apply allow/block policy, and inspect outcomes, but it does not sandbox plugin code or isolate untrusted execution.
 
 For deeper proof, CI lanes, and release gates, use [CONTRIBUTING.md](../../CONTRIBUTING.md) and [Public Launch Checklist](./public-launch-checklist.md).
+
+## Recipes
+
+- [Plugin And Custom Node Recipe](./plugin-recipe.md)
+- [Retained-To-Session Migration Recipe](./retained-migration-recipe.md)
+- [ScaleSmoke Baseline](./scale-baseline.md)

@@ -31,6 +31,7 @@ $coverageRunSettingsPath = Join-Path $repoRoot 'tests/coverage.runsettings'
 $coverageReportScriptPath = Join-Path $repoRoot 'eng/coverage-report.ps1'
 $hostSampleProject = 'tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj'
 $helloWorldProject = 'tools/AsterGraph.HelloWorld/AsterGraph.HelloWorld.csproj'
+$helloWorldAvaloniaProject = 'tools/AsterGraph.HelloWorld.Avalonia/AsterGraph.HelloWorld.Avalonia.csproj'
 $packageSmokeProject = 'tools/AsterGraph.PackageSmoke/AsterGraph.PackageSmoke.csproj'
 $scaleSmokeProject = 'tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj'
 $editorTestsProject = 'tests/AsterGraph.Editor.Tests/AsterGraph.Editor.Tests.csproj'
@@ -55,6 +56,7 @@ $publishableProjects = @(
 $frameworkBuildProjects = @{
   'net8.0' = @(
     $helloWorldProject,
+    $helloWorldAvaloniaProject,
     $hostSampleProject,
     $packageSmokeProject,
     $scaleSmokeProject
@@ -746,9 +748,15 @@ function Invoke-PublicRepoHygieneValidation {
     'docs/en/project-status.md',
     'docs/en/alpha-status.md',
     'docs/en/public-launch-checklist.md',
+    'docs/en/scale-baseline.md',
+    'docs/en/plugin-recipe.md',
+    'docs/en/retained-migration-recipe.md',
     'docs/zh-CN/project-status.md',
     'docs/zh-CN/alpha-status.md',
     'docs/zh-CN/public-launch-checklist.md',
+    'docs/zh-CN/scale-baseline.md',
+    'docs/zh-CN/plugin-recipe.md',
+    'docs/zh-CN/retained-migration-recipe.md',
     'docs/en/quick-start.md',
     'docs/zh-CN/quick-start.md',
     'CONTRIBUTING.md',

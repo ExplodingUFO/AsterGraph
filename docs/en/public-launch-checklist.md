@@ -45,6 +45,7 @@ Expected high-signal markers:
 - `HOST_SAMPLE_OK:True`
 - `HOST_SAMPLE_NET10_OK:True`
 - `PACKAGE_SMOKE_OK:True`
+- `SCALE_PERFORMANCE_BUDGET_OK:baseline:True:...`
 - `SCALE_HISTORY_CONTRACT_OK:...`
 - `COVERAGE_REPORT_OK:...`
 
@@ -54,9 +55,11 @@ Expected high-signal markers:
 - push the release branch or `master` state that should back the tag
 - create and push the next public tag in the form `v0.x.y-alpha.z`
 - watch `.github/workflows/release.yml` from start to finish
+- remember that the prerelease workflow now enforces an exact tag-to-package-version match
 - if `NUGET_API_KEY` is configured, confirm package publication succeeds
 - if `NUGET_API_KEY` is not configured, confirm the workflow reports a deliberate NuGet publish skip instead of a failure
 - do not present historical milestone-style tags such as `v1.9` as the current public package version; use [Versioning](./versioning.md) as the public rule
+- in the first screen of release notes, list the installable package version first, the matching public tag second, and any legacy `v1.x` milestone reference only as historical context
 
 For a maintainer-driven manual alpha publish without pushing a new tag:
 
@@ -72,9 +75,10 @@ For a maintainer-driven manual alpha publish without pushing a new tag:
 Keep the consumer entry story explicit in release notes and public announcements:
 
 - `tools/AsterGraph.HelloWorld` = fastest runtime-only first-run sample
+- `tools/AsterGraph.HelloWorld.Avalonia` = fastest hosted-UI first-run sample
 - `tools/AsterGraph.HostSample` = minimal consumer proof
 - `tools/AsterGraph.PackageSmoke` = packaged-consumption proof
-- `tools/AsterGraph.ScaleSmoke` = scale/history/state-continuity proof
+- `tools/AsterGraph.ScaleSmoke` = scale baseline plus history/state-continuity proof
 - `src/AsterGraph.Demo` = showcase host
 - `docs/en/versioning.md` = package version versus historical repository-tag guidance
 - `docs/en/quick-start.md` = canonical adoption path

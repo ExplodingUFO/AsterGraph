@@ -35,6 +35,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsterGraph.HostSample", "to
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsterGraph.HelloWorld", "tools\AsterGraph.HelloWorld\AsterGraph.HelloWorld.csproj", "{4396C3D7-7021-4ED0-8876-83C87CFA657D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsterGraph.HelloWorld.Avalonia", "tools\AsterGraph.HelloWorld.Avalonia\AsterGraph.HelloWorld.Avalonia.csproj", "{868AF41C-3C2F-4687-A8CA-058536980D5C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -201,6 +203,18 @@ Global
 		{4396C3D7-7021-4ED0-8876-83C87CFA657D}.Release|x64.Build.0 = Release|Any CPU
 		{4396C3D7-7021-4ED0-8876-83C87CFA657D}.Release|x86.ActiveCfg = Release|Any CPU
 		{4396C3D7-7021-4ED0-8876-83C87CFA657D}.Release|x86.Build.0 = Release|Any CPU
+		{868AF41C-3C2F-4687-A8CA-058536980D5C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{868AF41C-3C2F-4687-A8CA-058536980D5C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{868AF41C-3C2F-4687-A8CA-058536980D5C}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{868AF41C-3C2F-4687-A8CA-058536980D5C}.Debug|x64.Build.0 = Debug|Any CPU
+		{868AF41C-3C2F-4687-A8CA-058536980D5C}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{868AF41C-3C2F-4687-A8CA-058536980D5C}.Debug|x86.Build.0 = Debug|Any CPU
+		{868AF41C-3C2F-4687-A8CA-058536980D5C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{868AF41C-3C2F-4687-A8CA-058536980D5C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{868AF41C-3C2F-4687-A8CA-058536980D5C}.Release|x64.ActiveCfg = Release|Any CPU
+		{868AF41C-3C2F-4687-A8CA-058536980D5C}.Release|x64.Build.0 = Release|Any CPU
+		{868AF41C-3C2F-4687-A8CA-058536980D5C}.Release|x86.ActiveCfg = Release|Any CPU
+		{868AF41C-3C2F-4687-A8CA-058536980D5C}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -219,5 +233,6 @@ Global
 		{DF753068-5376-4178-A58D-C9B6BC44CBD3} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 		{8BB27B33-5359-46E2-9037-FC3FF36D48AD} = {07C2787E-EAC7-C090-1BA3-A61EC2A24D84}
 		{4396C3D7-7021-4ED0-8876-83C87CFA657D} = {07C2787E-EAC7-C090-1BA3-A61EC2A24D84}
+		{868AF41C-3C2F-4687-A8CA-058536980D5C} = {07C2787E-EAC7-C090-1BA3-A61EC2A24D84}
 	EndGlobalSection
 EndGlobal

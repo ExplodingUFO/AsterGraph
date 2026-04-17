@@ -3,6 +3,7 @@
 ## 当前状态
 
 - 包版本基线：`0.2.0-alpha.1`
+- 最新历史仓库里程碑标签：`v1.9`
 - 仓库阶段：公开 Alpha
 - 对外版本说明：[Versioning](./versioning.md)
 - 当前公开支持的发布包：
@@ -12,9 +13,10 @@
   - `AsterGraph.Avalonia`
 - 示例与验证工具：
   - `tools/AsterGraph.HelloWorld`：最快的 runtime-only 第一跑样例
-  - `tools/AsterGraph.HostSample`：最小接入路径
+  - `tools/AsterGraph.HelloWorld.Avalonia`：最快的默认 UI 第一跑样例
+  - `tools/AsterGraph.HostSample`：最小接入验证样例
   - `tools/AsterGraph.PackageSmoke`：打包消费验证
-  - `tools/AsterGraph.ScaleSmoke`：规模与状态连续性验证
+  - `tools/AsterGraph.ScaleSmoke`：公开的大图基线与状态连续性验证
 - 推荐接入路径：
   - runtime-only 宿主使用 `AsterGraphEditorFactory.CreateSession(...)`
   - Avalonia UI 宿主使用 `AsterGraphEditorFactory.Create(...)` 加 `AsterGraphAvaloniaViewFactory.Create(...)`
@@ -26,7 +28,7 @@
 - 默认 Avalonia 壳层与 standalone surfaces
 - plugin discovery、trust policy、loading、inspection
 - `IGraphEditorSession.Automation`
-- contract、maintenance、release proof lanes
+- contract、maintenance、release 验证 lanes
 - release lane 里的 `.NET 10` 打包 `HostSample` 兼容性验证
 
 ## 当前优先事项
@@ -47,15 +49,19 @@
 ## 公开入口分工
 
 - `tools/AsterGraph.HelloWorld` = runtime-only 第一跑样例
+- `tools/AsterGraph.HelloWorld.Avalonia` = 默认 UI 第一跑样例
 - `tools/AsterGraph.HostSample` = 最小推荐接入验证
 - `tools/AsterGraph.PackageSmoke` = 打包消费验证
-- `tools/AsterGraph.ScaleSmoke` = 大图、历史记录和状态连续性验证
+- `tools/AsterGraph.ScaleSmoke` = 大图基线加历史记录与状态连续性验证
 - `src/AsterGraph.Demo` = 可视化展示宿主
 
 ## 对外入口
 
 - [Versioning](./versioning.md)
 - [Quick Start](./quick-start.md)
+- [ScaleSmoke 基线](./scale-baseline.md)
+- [Plugin 与自定义节点 Recipe](./plugin-recipe.md)
+- [Retained 到 Session 的迁移 Recipe](./retained-migration-recipe.md)
 - [Alpha 状态](./alpha-status.md)
 - [Public Launch Checklist](./public-launch-checklist.md)
 - [Host Integration](./host-integration.md)

@@ -53,6 +53,19 @@ jobs:
             NuGet.config.sample
             **/*.csproj
 
+      - name: Validate tag matches package version
+        if: ${{ startsWith(github.ref, 'refs/tags/') }}
+        shell: pwsh
+        run: |
+          [xml]$props = Get-Content -LiteralPath 'Directory.Build.props'
+          $packageVersion = $props.Project.PropertyGroup.Version
+          $expectedTag = "v$packageVersion"
+          $actualTag = $env:GITHUB_REF_NAME
+
+          if ($actualTag -ne $expectedTag) {
+            throw "Public prerelease tag '$actualTag' does not match package version '$expectedTag'."
+          }
+
       - name: Run release validation lane
         shell: pwsh
         run: .\eng\ci.ps1 -Lane release -Framework all -Configuration Release
@@ -98,6 +111,10 @@ jobs:
           }
 
           if (Test-Path -LiteralPath 'artifacts/proof/scale-smoke.txt') {
+            $scaleBudgetLine = Select-String -Path 'artifacts/proof/scale-smoke.txt' -Pattern 'SCALE_PERFORMANCE_BUDGET_OK' | Select-Object -First 1
+            if ($scaleBudgetLine) {
+              $summaryLines.Add("- $($scaleBudgetLine.Line)")
+            }
             $scaleLine = Select-String -Path 'artifacts/proof/scale-smoke.txt' -Pattern 'SCALE_HISTORY_CONTRACT_OK' | Select-Object -First 1
             if ($scaleLine) {
               $summaryLines.Add("- $($scaleLine.Line)")

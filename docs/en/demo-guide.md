@@ -47,7 +47,8 @@ The top menu also exposes the visible language switch.
 ## Demo vs Other Entry Samples
 
 - `HelloWorld` = smallest runtime-only first-run sample
+- `HelloWorld.Avalonia` = smallest hosted-UI first-run sample
 - `HostSample` = narrow proof harness for the canonical consumer routes
 - `Demo` = full showcase host for product surface and host boundary
 
-Use the demo when you need to inspect behavior visually. Use `HelloWorld` for the quickest first run and `HostSample` for proof-oriented route validation.
+Use the demo when you need to inspect behavior visually. Use `HelloWorld` or `HelloWorld.Avalonia` for the quickest first run on a single route and `HostSample` for proof-oriented route validation.

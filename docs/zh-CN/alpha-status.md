@@ -34,7 +34,7 @@
 
 ## 已知限制
 
-- 仓库里仍保留了 `v1.9`、`v1.10` 这类公开前的历史 tag；对外版本以 NuGet 包版本为准
+- 仓库里仍保留了 `v1.9` 这个公开前的历史 tag；对外版本以 NuGet 包版本为准
 - public prerelease publish 和 release artifact 仍然依赖维护者 release flow
 - 最深的 package validation lane 目前仍以 Windows 为主
 - retained compatibility API 仍处于迁移窗口内
@@ -44,6 +44,9 @@
 - [Versioning](./versioning.md)
 - [Project Status](./project-status.md)
 - [Quick Start](./quick-start.md)
+- [ScaleSmoke 基线](./scale-baseline.md)
+- [Plugin 与自定义节点 Recipe](./plugin-recipe.md)
+- [Retained 到 Session 的迁移 Recipe](./retained-migration-recipe.md)
 - [Public Launch Checklist](./public-launch-checklist.md)
 - [Host Integration](./host-integration.md)
 - [State Contracts](./state-contracts.md)

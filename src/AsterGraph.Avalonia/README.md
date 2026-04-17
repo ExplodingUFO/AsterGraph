@@ -41,7 +41,8 @@ For new work, prefer the factory-based routes. Treat the direct `GraphEditorView
 
 ## Start Here
 
-- quickest hosted-UI onboarding: [Quick Start](../../docs/en/quick-start.md)
+- quickest hosted-UI first run: [`tools/AsterGraph.HelloWorld.Avalonia`](../../tools/AsterGraph.HelloWorld.Avalonia/)
+- canonical onboarding: [Quick Start](../../docs/en/quick-start.md)
 - route and composition guidance: [Host Integration](../../docs/en/host-integration.md)
 - visual showcase host: [`src/AsterGraph.Demo`](../../src/AsterGraph.Demo/)
 - product overview: [Root README](../../README.md)

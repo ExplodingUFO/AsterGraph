@@ -9,9 +9,11 @@ AsterGraph 是一个面向 .NET 的模块化节点图编辑器工具包，提供
 
 ## 公开 Alpha
 
-- 当前包版本基线：`0.2.0-alpha.1`
+- 最新可安装包版本：`0.2.0-alpha.1`
+- 最新历史仓库里程碑标签：`v1.9`（公开前的旧检查点，不是 NuGet 包版本）
 - 公开发布包目标框架：`net8.0`、`net9.0`
 - release lane 还会用打包后的 `HostSample` 额外证明下游 `.NET 10` 消费兼容性
+- 后续对外 prerelease tag 应与包 SemVer 对齐，比如 `v0.2.0-alpha.2`
 - 包版本与历史仓库 tag 的关系说明：[Versioning](./docs/zh-CN/versioning.md)
 - 当前范围、非目标与已知限制：[Alpha Status](./docs/zh-CN/alpha-status.md)
 
@@ -20,7 +22,7 @@ AsterGraph 是一个面向 .NET 的模块化节点图编辑器工具包，提供
 | 我现在要做什么 | 先看哪里 | 为什么 |
 | --- | --- | --- |
 | 想最快跑起来 | [`tools/AsterGraph.HelloWorld`](./tools/AsterGraph.HelloWorld/) | 最小仅运行时样例；一条路径、一个命令 |
-| 想嵌入默认 Avalonia UI | [Quick Start](./docs/zh-CN/quick-start.md) | 直接给安装命令和推荐接入路径 |
+| 想嵌入默认 Avalonia UI | [`tools/AsterGraph.HelloWorld.Avalonia`](./tools/AsterGraph.HelloWorld.Avalonia/) | 基于 factory 路线的最小默认 UI 样例 |
 | 想接到现有宿主里 | [Host Integration](./docs/zh-CN/host-integration.md) | 路线矩阵、包边界和迁移说明 |
 | 想先把完整能力看一遍 | [Demo Guide](./docs/zh-CN/demo-guide.md) | 展示插件、自动化、本地化和独立表面 |
 | 想验证打包消费或维护发布 | [CONTRIBUTING.md](./CONTRIBUTING.md) 和 [Public Launch Checklist](./docs/zh-CN/public-launch-checklist.md) | proof lanes、CI 和 release 流程 |
@@ -55,9 +57,10 @@ dotnet add package AsterGraph.Abstractions --prerelease
 ## 公开入口分工
 
 - [`tools/AsterGraph.HelloWorld`](./tools/AsterGraph.HelloWorld/) = 仅运行时第一跑样例
+- [`tools/AsterGraph.HelloWorld.Avalonia`](./tools/AsterGraph.HelloWorld.Avalonia/) = 默认 Avalonia UI 第一跑样例
 - [`tools/AsterGraph.HostSample`](./tools/AsterGraph.HostSample/) = 仅运行时 / 默认 UI 两条推荐路线的最小验证样例
 - [`tools/AsterGraph.PackageSmoke`](./tools/AsterGraph.PackageSmoke/) = 打包消费验证
-- [`tools/AsterGraph.ScaleSmoke`](./tools/AsterGraph.ScaleSmoke/) = 大图、历史记录和状态连续性验证
+- [`tools/AsterGraph.ScaleSmoke`](./tools/AsterGraph.ScaleSmoke/) = 公开的大图基线加 history/state 验证
 - [`src/AsterGraph.Demo`](./src/AsterGraph.Demo/) = 展示宿主；菜单标签会跟着当前 UI 语言切换
 
 ## 支持的包边界
@@ -109,8 +112,12 @@ dotnet add package AsterGraph.Abstractions --prerelease
 
 面向使用者的核心文档：
 
+- [Versioning](./docs/zh-CN/versioning.md)
 - [Quick Start](./docs/zh-CN/quick-start.md)
 - [Host Integration](./docs/zh-CN/host-integration.md)
+- [ScaleSmoke 基线](./docs/zh-CN/scale-baseline.md)
+- [Plugin 与自定义节点 Recipe](./docs/zh-CN/plugin-recipe.md)
+- [Retained 到 Session 的迁移 Recipe](./docs/zh-CN/retained-migration-recipe.md)
 - [State Contracts](./docs/zh-CN/state-contracts.md)
 - [Extension Contracts](./docs/zh-CN/extension-contracts.md)
 - [Alpha Status](./docs/zh-CN/alpha-status.md)

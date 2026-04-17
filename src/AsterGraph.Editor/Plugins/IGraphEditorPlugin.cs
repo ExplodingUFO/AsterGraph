@@ -1,18 +1,18 @@
 namespace AsterGraph.Editor.Plugins;
 
 /// <summary>
-/// 定义图编辑器插件的最小公共合同。
+/// Defines the minimal public contract for an editor plugin.
 /// </summary>
 public interface IGraphEditorPlugin
 {
     /// <summary>
-    /// 插件描述信息。
+    /// Gets the plugin descriptor.
     /// </summary>
     GraphEditorPluginDescriptor Descriptor { get; }
 
     /// <summary>
-    /// 向组合构建器注册插件贡献。
+    /// Registers the plugin contributions into the composition builder.
     /// </summary>
-    /// <param name="builder">插件组合构建器。</param>
+    /// <param name="builder">The plugin composition builder.</param>
     void Register(GraphEditorPluginBuilder builder);
 }

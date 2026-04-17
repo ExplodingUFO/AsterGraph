@@ -3,6 +3,7 @@
 ## Current Status
 
 - package baseline: `0.2.0-alpha.1`
+- latest historical repository milestone tag: `v1.9`
 - repo posture: public alpha
 - public versioning guidance: [Versioning](./versioning.md)
 - supported published packages:
@@ -12,9 +13,10 @@
   - `AsterGraph.Avalonia`
 - sample and proof tools:
   - `tools/AsterGraph.HelloWorld` for the quickest runtime-only first run
-  - `tools/AsterGraph.HostSample` for the minimal consumer path
+  - `tools/AsterGraph.HelloWorld.Avalonia` for the quickest hosted-UI first run
+  - `tools/AsterGraph.HostSample` for the minimal consumer proof harness
   - `tools/AsterGraph.PackageSmoke` for packed-package proof
-  - `tools/AsterGraph.ScaleSmoke` for scale and state-continuity proof
+  - `tools/AsterGraph.ScaleSmoke` for the public scale baseline and state-continuity proof
 - canonical adoption path:
   - runtime-only hosts use `AsterGraphEditorFactory.CreateSession(...)`
   - Avalonia UI hosts use `AsterGraphEditorFactory.Create(...)` plus `AsterGraphAvaloniaViewFactory.Create(...)`
@@ -47,15 +49,19 @@ The current public-repo priority is not new runtime capability. It is keeping th
 ## Public Entry Matrix
 
 - `tools/AsterGraph.HelloWorld` = first-run runtime-only sample
+- `tools/AsterGraph.HelloWorld.Avalonia` = first-run hosted-UI sample
 - `tools/AsterGraph.HostSample` = minimal canonical adoption proof
 - `tools/AsterGraph.PackageSmoke` = packed-package consumption proof
-- `tools/AsterGraph.ScaleSmoke` = larger-graph, history, and state-continuity proof
+- `tools/AsterGraph.ScaleSmoke` = larger-graph baseline plus history/state-continuity proof
 - `src/AsterGraph.Demo` = showcase host for visual/manual inspection
 
 ## Public Entry Points
 
 - [Versioning](./versioning.md)
 - [Quick Start](./quick-start.md)
+- [ScaleSmoke Baseline](./scale-baseline.md)
+- [Plugin And Custom Node Recipe](./plugin-recipe.md)
+- [Retained-To-Session Migration Recipe](./retained-migration-recipe.md)
 - [Alpha Status](./alpha-status.md)
 - [Public Launch Checklist](./public-launch-checklist.md)
 - [Host Integration](./host-integration.md)

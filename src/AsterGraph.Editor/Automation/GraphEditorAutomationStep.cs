@@ -3,15 +3,15 @@ using AsterGraph.Editor.Runtime;
 namespace AsterGraph.Editor.Automation;
 
 /// <summary>
-/// 表示一个自动化步骤。
+/// Describes one automation step.
 /// </summary>
 public sealed record GraphEditorAutomationStep
 {
     /// <summary>
-    /// 初始化自动化步骤。
+    /// Initializes one automation step.
     /// </summary>
-    /// <param name="stepId">稳定步骤标识。</param>
-    /// <param name="command">稳定命令调用描述。</param>
+    /// <param name="stepId">A stable step identifier.</param>
+    /// <param name="command">The stable command invocation executed by the step.</param>
     public GraphEditorAutomationStep(string stepId, GraphEditorCommandInvocationSnapshot command)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(stepId);
@@ -22,12 +22,12 @@ public sealed record GraphEditorAutomationStep
     }
 
     /// <summary>
-    /// 稳定步骤标识。
+    /// Gets the stable step identifier.
     /// </summary>
     public string StepId { get; }
 
     /// <summary>
-    /// 步骤对应的稳定命令调用描述。
+    /// Gets the stable command invocation executed by the step.
     /// </summary>
     public GraphEditorCommandInvocationSnapshot Command { get; }
 }

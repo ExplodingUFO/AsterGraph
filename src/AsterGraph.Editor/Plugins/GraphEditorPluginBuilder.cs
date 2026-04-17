@@ -7,7 +7,7 @@ using AsterGraph.Editor.Runtime;
 namespace AsterGraph.Editor.Plugins;
 
 /// <summary>
-/// 收集插件声明的运行时贡献。
+/// Collects runtime contributions declared by plugins.
 /// </summary>
 public sealed class GraphEditorPluginBuilder
 {
@@ -17,27 +17,27 @@ public sealed class GraphEditorPluginBuilder
     private readonly List<IGraphEditorPluginLocalizationProvider> _localizationProviders = [];
 
     /// <summary>
-    /// 节点定义提供器集合。
+    /// Gets the registered node-definition providers.
     /// </summary>
     public IReadOnlyList<INodeDefinitionProvider> NodeDefinitionProviders => _nodeDefinitionProviders;
 
     /// <summary>
-    /// 右键菜单增强器集合。
+    /// Gets the registered context-menu augmentors.
     /// </summary>
     public IReadOnlyList<IGraphEditorPluginContextMenuAugmentor> ContextMenuAugmentors => _contextMenuAugmentors;
 
     /// <summary>
-    /// 节点展示提供器集合。
+    /// Gets the registered node-presentation providers.
     /// </summary>
     public IReadOnlyList<IGraphEditorPluginNodePresentationProvider> NodePresentationProviders => _nodePresentationProviders;
 
     /// <summary>
-    /// 本地化提供器集合。
+    /// Gets the registered localization providers.
     /// </summary>
     public IReadOnlyList<IGraphEditorPluginLocalizationProvider> LocalizationProviders => _localizationProviders;
 
     /// <summary>
-    /// 添加一个节点定义提供器。
+    /// Adds one node-definition provider.
     /// </summary>
     public GraphEditorPluginBuilder AddNodeDefinitionProvider(INodeDefinitionProvider provider)
     {
@@ -47,7 +47,7 @@ public sealed class GraphEditorPluginBuilder
     }
 
     /// <summary>
-    /// 批量添加节点定义提供器。
+    /// Adds multiple node-definition providers.
     /// </summary>
     public GraphEditorPluginBuilder AddNodeDefinitionProviders(IEnumerable<INodeDefinitionProvider> providers)
     {
@@ -62,7 +62,7 @@ public sealed class GraphEditorPluginBuilder
     }
 
     /// <summary>
-    /// 添加一个稳定菜单增强器。
+    /// Adds one stable menu augmentor.
     /// </summary>
     public GraphEditorPluginBuilder AddContextMenuAugmentor(IGraphEditorPluginContextMenuAugmentor augmentor)
     {
@@ -72,7 +72,7 @@ public sealed class GraphEditorPluginBuilder
     }
 
     /// <summary>
-    /// 添加一个稳定节点展示提供器。
+    /// Adds one stable node-presentation provider.
     /// </summary>
     public GraphEditorPluginBuilder AddNodePresentationProvider(IGraphEditorPluginNodePresentationProvider provider)
     {
@@ -82,7 +82,7 @@ public sealed class GraphEditorPluginBuilder
     }
 
     /// <summary>
-    /// 添加一个稳定本地化提供器。
+    /// Adds one stable localization provider.
     /// </summary>
     public GraphEditorPluginBuilder AddLocalizationProvider(IGraphEditorPluginLocalizationProvider provider)
     {
@@ -110,12 +110,12 @@ public sealed class GraphEditorPluginBuilder
 }
 
 /// <summary>
-/// 描述一次插件菜单增强请求。
+/// Describes one plugin menu-augmentation request.
 /// </summary>
 public sealed record GraphEditorPluginMenuAugmentationContext
 {
     /// <summary>
-    /// 初始化插件菜单增强上下文。
+    /// Initializes a plugin menu-augmentation context.
     /// </summary>
     public GraphEditorPluginMenuAugmentationContext(
         IGraphEditorSession session,
@@ -128,39 +128,39 @@ public sealed record GraphEditorPluginMenuAugmentationContext
     }
 
     /// <summary>
-    /// 当前运行时会话。
+    /// Gets the current runtime session.
     /// </summary>
     public IGraphEditorSession Session { get; }
 
     /// <summary>
-    /// 当前命中上下文。
+    /// Gets the current hit-test context.
     /// </summary>
     public ContextMenuContext Context { get; }
 
     /// <summary>
-    /// 编辑器默认生成的稳定菜单描述。
+    /// Gets the stock stable menu descriptors produced by the editor before plugin augmentation.
     /// </summary>
     public IReadOnlyList<GraphEditorMenuItemDescriptorSnapshot> StockItems { get; }
 }
 
 /// <summary>
-/// 定义稳定的插件菜单增强接口。
+/// Defines the stable plugin menu-augmentation contract.
 /// </summary>
 public interface IGraphEditorPluginContextMenuAugmentor
 {
     /// <summary>
-    /// 返回增强后的稳定菜单描述集合。
+    /// Returns the augmented stable menu descriptor set.
     /// </summary>
     IReadOnlyList<GraphEditorMenuItemDescriptorSnapshot> Augment(GraphEditorPluginMenuAugmentationContext context);
 }
 
 /// <summary>
-/// 描述一次插件节点展示计算请求。
+/// Describes one plugin node-presentation request.
 /// </summary>
 public sealed record GraphEditorPluginNodePresentationContext
 {
     /// <summary>
-    /// 初始化插件节点展示上下文。
+    /// Initializes a plugin node-presentation context.
     /// </summary>
     public GraphEditorPluginNodePresentationContext(
         IGraphEditorSession session,
@@ -173,39 +173,39 @@ public sealed record GraphEditorPluginNodePresentationContext
     }
 
     /// <summary>
-    /// 当前运行时会话。
+    /// Gets the current runtime session.
     /// </summary>
     public IGraphEditorSession Session { get; }
 
     /// <summary>
-    /// 当前节点快照。
+    /// Gets the current node snapshot.
     /// </summary>
     public GraphNode Node { get; }
 
     /// <summary>
-    /// 节点当前是否选中。
+    /// Gets whether the node is currently selected.
     /// </summary>
     public bool IsSelected { get; }
 }
 
 /// <summary>
-/// 定义稳定的插件节点展示接口。
+/// Defines the stable plugin node-presentation contract.
 /// </summary>
 public interface IGraphEditorPluginNodePresentationProvider
 {
     /// <summary>
-    /// 计算节点展示状态。
+    /// Computes the node presentation state.
     /// </summary>
     NodePresentationState GetNodePresentation(GraphEditorPluginNodePresentationContext context);
 }
 
 /// <summary>
-/// 定义稳定的插件本地化接口。
+/// Defines the stable plugin localization contract.
 /// </summary>
 public interface IGraphEditorPluginLocalizationProvider
 {
     /// <summary>
-    /// 按键查询本地化文本。
+    /// Resolves a localized string by key.
     /// </summary>
     string GetString(string key, string fallback);
 }

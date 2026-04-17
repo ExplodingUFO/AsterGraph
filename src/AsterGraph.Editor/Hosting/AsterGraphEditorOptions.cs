@@ -13,97 +13,96 @@ using AsterGraph.Editor.Services;
 namespace AsterGraph.Editor.Hosting;
 
 /// <summary>
-/// 定义通过 <see cref="AsterGraphEditorFactory"/> 组合图编辑器运行时所需的宿主输入。
+/// Defines the host inputs required by <see cref="AsterGraphEditorFactory" /> when composing an editor runtime.
 /// </summary>
 /// <remarks>
-/// 该选项契约是当前规范宿主入口；
-/// 直接使用 <c>new GraphEditorViewModel(...)</c> 仍然是受支持的兼容路径，
-/// 便于现有宿主逐步迁移。
+/// This options contract is the canonical host entry point. Direct <c>new GraphEditorViewModel(...)</c> usage
+/// remains supported as a retained compatibility path for incremental migration.
 /// </remarks>
 public sealed record AsterGraphEditorOptions
 {
     /// <summary>
-    /// 要加载到编辑器中的初始图文档。
+    /// The initial graph document loaded into the editor.
     /// </summary>
     public GraphDocument? Document { get; init; }
 
     /// <summary>
-    /// 节点目录。
+    /// The node catalog visible to the editor.
     /// </summary>
     public INodeCatalog? NodeCatalog { get; init; }
 
     /// <summary>
-    /// 端口兼容性服务。
+    /// The port-compatibility service used for connection validation.
     /// </summary>
     public IPortCompatibilityService? CompatibilityService { get; init; }
 
     /// <summary>
-    /// 可选的整图工作区服务。
+    /// Optional whole-document workspace service.
     /// </summary>
     public IGraphWorkspaceService? WorkspaceService { get; init; }
 
     /// <summary>
-    /// 可选的片段工作区服务。
+    /// Optional fragment-workspace service.
     /// </summary>
     public IGraphFragmentWorkspaceService? FragmentWorkspaceService { get; init; }
 
     /// <summary>
-    /// 可选的显式存储根目录；未提供时回退到包中立默认路径。
+    /// Optional explicit storage root. When omitted, the package-neutral default paths are used.
     /// </summary>
     public string? StorageRootPath { get; init; }
 
     /// <summary>
-    /// 可选的样式配置。
+    /// Optional style configuration.
     /// </summary>
     public GraphEditorStyleOptions? StyleOptions { get; init; }
 
     /// <summary>
-    /// 可选的行为配置。
+    /// Optional behavior configuration.
     /// </summary>
     public GraphEditorBehaviorOptions? BehaviorOptions { get; init; }
 
     /// <summary>
-    /// 可选的片段模板库服务。
+    /// Optional fragment-library service.
     /// </summary>
     public IGraphFragmentLibraryService? FragmentLibraryService { get; init; }
 
     /// <summary>
-    /// 可选的片段剪贴板负载序列化器。
+    /// Optional fragment clipboard-payload serializer.
     /// </summary>
     public IGraphClipboardPayloadSerializer? ClipboardPayloadSerializer { get; init; }
 
     /// <summary>
-    /// 可选的插件注册集合；用于通过规范工厂入口声明直接实例或程序集路径插件。
+    /// Optional plugin registrations for directly supplied plugin instances, assemblies, or staged packages.
     /// </summary>
     public IReadOnlyList<GraphEditorPluginRegistration> PluginRegistrations { get; init; } = [];
 
     /// <summary>
-    /// 可选的插件信任策略；用于在执行插件贡献代码前执行宿主治理决策。
+    /// Optional plugin trust policy used to make host-governed decisions before plugin code runs.
     /// </summary>
     public IGraphEditorPluginTrustPolicy? PluginTrustPolicy { get; init; }
 
     /// <summary>
-    /// 可选的宿主右键菜单增强器。
+    /// Optional host context-menu augmentor.
     /// </summary>
     public IGraphContextMenuAugmentor? ContextMenuAugmentor { get; init; }
 
     /// <summary>
-    /// 可选的节点展示状态提供器。
+    /// Optional node-presentation provider.
     /// </summary>
     public INodePresentationProvider? NodePresentationProvider { get; init; }
 
     /// <summary>
-    /// 可选的图编辑器内置文案本地化提供器。
+    /// Optional localization provider for built-in editor strings.
     /// </summary>
     public IGraphLocalizationProvider? LocalizationProvider { get; init; }
 
     /// <summary>
-    /// 可选的运行时诊断发布器。
+    /// Optional runtime diagnostics sink.
     /// </summary>
     public IGraphEditorDiagnosticsSink? DiagnosticsSink { get; init; }
 
     /// <summary>
-    /// 可选的运行时日志与跟踪配置。
+    /// Optional runtime logging and tracing configuration.
     /// </summary>
     public GraphEditorInstrumentationOptions? Instrumentation { get; init; }
 }

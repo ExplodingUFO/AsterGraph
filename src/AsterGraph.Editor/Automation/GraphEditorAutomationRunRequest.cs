@@ -1,18 +1,18 @@
 namespace AsterGraph.Editor.Automation;
 
 /// <summary>
-/// 表示一次自动化运行请求。
+/// Describes one automation run request.
 /// </summary>
 public sealed record GraphEditorAutomationRunRequest
 {
     /// <summary>
-    /// 初始化自动化运行请求。
+    /// Initializes an automation run request.
     /// </summary>
-    /// <param name="runId">稳定运行标识。</param>
-    /// <param name="steps">要顺序执行的步骤集合。</param>
-    /// <param name="runInMutationScope">是否在一个批量变更作用域中执行。</param>
-    /// <param name="mutationLabel">可选的批量变更标签。</param>
-    /// <param name="stopOnFailure">遇到失败后是否立即停止。</param>
+    /// <param name="runId">A stable run identifier.</param>
+    /// <param name="steps">The ordered step list to execute.</param>
+    /// <param name="runInMutationScope">Whether to execute the run inside one mutation scope.</param>
+    /// <param name="mutationLabel">An optional mutation label associated with the run.</param>
+    /// <param name="stopOnFailure">Whether execution should stop as soon as one step fails.</param>
     public GraphEditorAutomationRunRequest(
         string runId,
         IReadOnlyList<GraphEditorAutomationStep> steps,
@@ -31,27 +31,27 @@ public sealed record GraphEditorAutomationRunRequest
     }
 
     /// <summary>
-    /// 稳定运行标识。
+    /// Gets the stable run identifier.
     /// </summary>
     public string RunId { get; }
 
     /// <summary>
-    /// 顺序执行的自动化步骤集合。
+    /// Gets the ordered automation steps.
     /// </summary>
     public IReadOnlyList<GraphEditorAutomationStep> Steps { get; }
 
     /// <summary>
-    /// 是否在一个批量变更作用域中执行。
+    /// Gets whether the run executes inside one mutation scope.
     /// </summary>
     public bool RunInMutationScope { get; }
 
     /// <summary>
-    /// 关联到批量变更的稳定标签。
+    /// Gets the stable label associated with the mutation scope.
     /// </summary>
     public string? MutationLabel { get; }
 
     /// <summary>
-    /// 遇到失败时是否立即停止执行。
+    /// Gets whether execution stops immediately after a failure.
     /// </summary>
     public bool StopOnFailure { get; }
 }

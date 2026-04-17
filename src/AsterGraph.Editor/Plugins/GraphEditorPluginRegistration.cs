@@ -3,7 +3,7 @@ using System.IO;
 namespace AsterGraph.Editor.Plugins;
 
 /// <summary>
-/// 表示一次显式插件注册请求。
+/// Describes one explicit plugin registration request.
 /// </summary>
 public sealed record GraphEditorPluginRegistration
 {
@@ -26,57 +26,57 @@ public sealed record GraphEditorPluginRegistration
     }
 
     /// <summary>
-    /// 直接注册的插件实例。
+    /// Gets the directly registered plugin instance.
     /// </summary>
     public IGraphEditorPlugin? Plugin { get; }
 
     /// <summary>
-    /// 程序集路径注册时的插件程序集绝对路径。
+    /// Gets the absolute plugin assembly path for assembly-path registrations.
     /// </summary>
     public string? AssemblyPath { get; }
 
     /// <summary>
-    /// 包路径注册时的插件包归档绝对路径。
+    /// Gets the absolute plugin package path for package-path registrations.
     /// </summary>
     public string? PackagePath { get; }
 
     /// <summary>
-    /// 可选的显式插件类型名。
+    /// Gets the optional explicit plugin type name.
     /// </summary>
     public string? PluginTypeName { get; }
 
     /// <summary>
-    /// 可选的插件清单元数据。
+    /// Gets the optional plugin manifest metadata.
     /// </summary>
     public GraphEditorPluginManifest? Manifest { get; }
 
     /// <summary>
-    /// 可选的来源和签名证据。
+    /// Gets the provenance and signature evidence carried with the registration.
     /// </summary>
     public GraphEditorPluginProvenanceEvidence ProvenanceEvidence { get; }
 
     /// <summary>
-    /// 可选的包暂存结果元数据。
+    /// Gets the optional staged-package metadata.
     /// </summary>
     public GraphEditorPluginStageSnapshot? Stage { get; }
 
     /// <summary>
-    /// 是否为直接实例注册。
+    /// Gets whether this registration was created from a direct plugin instance.
     /// </summary>
     public bool IsDirectRegistration => Plugin is not null;
 
     /// <summary>
-    /// 是否为程序集路径注册。
+    /// Gets whether this registration was created from an assembly path.
     /// </summary>
     public bool IsAssemblyRegistration => AssemblyPath is not null;
 
     /// <summary>
-    /// 是否为包路径注册。
+    /// Gets whether this registration was created from a package path.
     /// </summary>
     public bool IsPackageRegistration => PackagePath is not null;
 
     /// <summary>
-    /// 基于直接插件实例创建注册项。
+    /// Creates a registration from a direct plugin instance.
     /// </summary>
     public static GraphEditorPluginRegistration FromPlugin(
         IGraphEditorPlugin plugin,
@@ -88,7 +88,7 @@ public sealed record GraphEditorPluginRegistration
     }
 
     /// <summary>
-    /// 基于程序集路径创建注册项。
+    /// Creates a registration from a plugin assembly path.
     /// </summary>
     public static GraphEditorPluginRegistration FromAssemblyPath(
         string assemblyPath,
@@ -114,7 +114,7 @@ public sealed record GraphEditorPluginRegistration
     }
 
     /// <summary>
-    /// 基于包路径创建注册项。
+    /// Creates a registration from a plugin package path.
     /// </summary>
     public static GraphEditorPluginRegistration FromPackagePath(
         string packagePath,
@@ -134,7 +134,7 @@ public sealed record GraphEditorPluginRegistration
     }
 
     /// <summary>
-    /// 基于已验证暂存的包和主程序集路径创建注册项。
+    /// Creates a registration from a previously staged package and its main assembly path.
     /// </summary>
     public static GraphEditorPluginRegistration FromStagedPackage(
         string packagePath,

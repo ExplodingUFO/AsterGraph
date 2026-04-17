@@ -3,20 +3,20 @@ using AsterGraph.Avalonia.Controls;
 namespace AsterGraph.Avalonia.Hosting;
 
 /// <summary>
-/// 提供默认 <see cref="GraphEditorView"/> 的规范宿主组合入口。
+/// Provides the canonical hosted-UI composition entry point for the default <see cref="GraphEditorView" />.
 /// </summary>
 /// <remarks>
-/// 该工厂只负责应用宿主提供的编辑器实例与视图选项，
-/// 并返回由独立画布、检查器与缩略图表面组合而成的默认完整外壳；
-/// 直接构造 <see cref="GraphEditorView"/> 仍然受支持，便于宿主渐进迁移。
+/// This factory applies host-supplied editor and view options and returns the stock shell that composes
+/// the canvas, inspector, and mini-map surfaces. Direct <see cref="GraphEditorView" /> construction remains
+/// supported for gradual migration, but new hosted-UI code should prefer this factory.
 /// </remarks>
 public static class AsterGraphAvaloniaViewFactory
 {
     /// <summary>
-    /// 使用宿主提供的选项创建一个默认 <see cref="GraphEditorView"/>。
+    /// Creates a default <see cref="GraphEditorView" /> from host-supplied options.
     /// </summary>
-    /// <param name="options">宿主组合选项。</param>
-    /// <returns>新的图编辑器视图。</returns>
+    /// <param name="options">The hosted-UI composition options.</param>
+    /// <returns>A new graph-editor view.</returns>
     public static GraphEditorView Create(AsterGraphAvaloniaViewOptions options)
     {
         ArgumentNullException.ThrowIfNull(options);

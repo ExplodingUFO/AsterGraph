@@ -49,5 +49,7 @@ Keep new code on the stable canonical surfaces. Treat retained and compatibility
 - quickest runtime-only first run: [`tools/AsterGraph.HelloWorld`](../../tools/AsterGraph.HelloWorld/)
 - canonical onboarding: [Quick Start](../../docs/en/quick-start.md)
 - route and package boundary details: [Host Integration](../../docs/en/host-integration.md)
+- plugin and custom-node starting point: [Plugin And Custom Node Recipe](../../docs/en/plugin-recipe.md)
+- retained-to-session migration guide: [Retained-To-Session Migration Recipe](../../docs/en/retained-migration-recipe.md)
 - stability, precedence, and retirement rules: [Extension Contracts](../../docs/en/extension-contracts.md)
 - product overview: [Root README](../../README.md)

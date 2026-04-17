@@ -35,7 +35,7 @@
 
 ## Known Limitations
 
-- historical repository tags such as `v1.9` and `v1.10` still exist as pre-launch milestone markers; treat the package version as the public version source of truth
+- the historical repository tag `v1.9` still exists as a pre-launch milestone marker; treat the package version as the public version source of truth
 - public prerelease publishing and release artifacts still depend on the maintainer release flow
 - the deepest package-validation lane and the `.NET 10` packed-consumer proof still run on the Windows release-validation path
 - retained compatibility APIs are still present during the migration window
@@ -45,6 +45,9 @@
 - [Versioning](./versioning.md)
 - [Project Status](./project-status.md)
 - [Quick Start](./quick-start.md)
+- [ScaleSmoke Baseline](./scale-baseline.md)
+- [Plugin And Custom Node Recipe](./plugin-recipe.md)
+- [Retained-To-Session Migration Recipe](./retained-migration-recipe.md)
 - [Public Launch Checklist](./public-launch-checklist.md)
 - [Host Integration](./host-integration.md)
 - [State Contracts](./state-contracts.md)

@@ -3,12 +3,12 @@ using AsterGraph.Editor.Diagnostics;
 namespace AsterGraph.Editor.Automation;
 
 /// <summary>
-/// 表示一次自动化运行的结果快照。
+/// Captures the result of one automation run.
 /// </summary>
 public sealed record GraphEditorAutomationExecutionSnapshot
 {
     /// <summary>
-    /// 初始化自动化执行结果快照。
+    /// Initializes an automation execution snapshot.
     /// </summary>
     public GraphEditorAutomationExecutionSnapshot(
         string runId,
@@ -40,34 +40,64 @@ public sealed record GraphEditorAutomationExecutionSnapshot
         FailureMessage = string.IsNullOrWhiteSpace(failureMessage) ? null : failureMessage.Trim();
     }
 
+    /// <summary>
+    /// Gets the stable run identifier.
+    /// </summary>
     public string RunId { get; }
 
+    /// <summary>
+    /// Gets whether the overall run succeeded.
+    /// </summary>
     public bool Succeeded { get; }
 
+    /// <summary>
+    /// Gets whether the run executed inside one mutation scope.
+    /// </summary>
     public bool UsedMutationScope { get; }
 
+    /// <summary>
+    /// Gets the mutation label associated with the run.
+    /// </summary>
     public string? MutationLabel { get; }
 
+    /// <summary>
+    /// Gets the number of steps that executed before the run completed or failed.
+    /// </summary>
     public int ExecutedStepCount { get; }
 
+    /// <summary>
+    /// Gets the total number of requested steps.
+    /// </summary>
     public int TotalStepCount { get; }
 
+    /// <summary>
+    /// Gets the per-step execution results.
+    /// </summary>
     public IReadOnlyList<GraphEditorAutomationStepExecutionSnapshot> Steps { get; }
 
+    /// <summary>
+    /// Gets the post-run inspection snapshot.
+    /// </summary>
     public GraphEditorInspectionSnapshot Inspection { get; }
 
+    /// <summary>
+    /// Gets the machine-readable failure code when the run fails.
+    /// </summary>
     public string? FailureCode { get; }
 
+    /// <summary>
+    /// Gets the host-readable failure message when the run fails.
+    /// </summary>
     public string? FailureMessage { get; }
 }
 
 /// <summary>
-/// 表示自动化运行中单个步骤的结果。
+/// Captures the result of one automation step inside a run.
 /// </summary>
 public sealed record GraphEditorAutomationStepExecutionSnapshot
 {
     /// <summary>
-    /// 初始化步骤结果。
+    /// Initializes one step execution snapshot.
     /// </summary>
     public GraphEditorAutomationStepExecutionSnapshot(
         int stepIndex,
@@ -89,15 +119,33 @@ public sealed record GraphEditorAutomationStepExecutionSnapshot
         FailureMessage = string.IsNullOrWhiteSpace(failureMessage) ? null : failureMessage.Trim();
     }
 
+    /// <summary>
+    /// Gets the zero-based step index inside the run.
+    /// </summary>
     public int StepIndex { get; }
 
+    /// <summary>
+    /// Gets the stable step identifier.
+    /// </summary>
     public string StepId { get; }
 
+    /// <summary>
+    /// Gets the stable command identifier executed by the step.
+    /// </summary>
     public string CommandId { get; }
 
+    /// <summary>
+    /// Gets whether the step succeeded.
+    /// </summary>
     public bool Succeeded { get; }
 
+    /// <summary>
+    /// Gets the machine-readable failure code when the step fails.
+    /// </summary>
     public string? FailureCode { get; }
 
+    /// <summary>
+    /// Gets the host-readable failure message when the step fails.
+    /// </summary>
     public string? FailureMessage { get; }
 }
