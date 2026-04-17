@@ -2,7 +2,7 @@
 
 ## Supported Versions
 
-AsterGraph is currently in public alpha preparation. Security fixes are only guaranteed for:
+AsterGraph is currently in public alpha. Security fixes are only guaranteed for:
 
 - the latest code on `master`
 - the latest prerelease tag once prerelease publishing is active

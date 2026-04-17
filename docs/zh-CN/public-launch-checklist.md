@@ -11,9 +11,9 @@
 
 ## 2. 公开仓库表面
 
-- 确认 `README.md` 和 `README.zh-CN.md` 都指向当前 public alpha 文档和入口矩阵
+- 确认 `README.md` 和 `README.zh-CN.md` 都指向当前公开 Alpha 文档和入口矩阵
 - 确认 `CONTRIBUTING.md`、`CODE_OF_CONDUCT.md`、`SECURITY.md` 都存在且内容仍然准确
-- 确认 `.github` 里的 issue templates 和 pull request template 已启用
+- 确认 `.github` 里的 issue 模板和 pull request 模板已启用
 - 确认仓库 description、topics、homepage 和当前 alpha 叙事一致
 
 ## 3. 必跑验证
@@ -61,9 +61,9 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framew
 
 在 release note、公告、README 里把入口说清楚：
 
-- `tools/AsterGraph.HostSample` = 最小 consumer proof
-- `tools/AsterGraph.PackageSmoke` = packaged-consumption proof
-- `tools/AsterGraph.ScaleSmoke` = 规模 / history / 状态连续性 proof
-- `src/AsterGraph.Demo` = showcase host
-- `docs/zh-CN/quick-start.md` = canonical adoption path
+- `tools/AsterGraph.HostSample` = 最小接入验证
+- `tools/AsterGraph.PackageSmoke` = 打包消费验证
+- `tools/AsterGraph.ScaleSmoke` = 规模、历史记录与状态连续性验证
+- `src/AsterGraph.Demo` = 展示宿主
+- `docs/zh-CN/quick-start.md` = 推荐接入路径
 - `docs/zh-CN/alpha-status.md` = alpha 范围与限制

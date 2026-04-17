@@ -3,17 +3,17 @@
 ## 当前状态
 
 - 包版本基线：`0.2.0-alpha.1`
-- 仓库阶段：public alpha
+- 仓库阶段：公开 Alpha
 - 当前公开支持的发布包：
   - `AsterGraph.Abstractions`
   - `AsterGraph.Core`
   - `AsterGraph.Editor`
   - `AsterGraph.Avalonia`
-- sample 与 proof 工具：
-  - `tools/AsterGraph.HostSample`：最小 consumer 路径
-  - `tools/AsterGraph.PackageSmoke`：packed package 验证
+- 示例与验证工具：
+  - `tools/AsterGraph.HostSample`：最小接入路径
+  - `tools/AsterGraph.PackageSmoke`：打包消费验证
   - `tools/AsterGraph.ScaleSmoke`：规模与状态连续性验证
-- canonical 接入路径：
+- 推荐接入路径：
   - runtime-only 宿主使用 `AsterGraphEditorFactory.CreateSession(...)`
   - Avalonia UI 宿主使用 `AsterGraphEditorFactory.Create(...)` 加 `AsterGraphAvaloniaViewFactory.Create(...)`
 
@@ -25,7 +25,7 @@
 - plugin discovery、trust policy、loading、inspection
 - `IGraphEditorSession.Automation`
 - contract、maintenance、release proof lanes
-- release lane 里的 `.NET 10` packed `HostSample` 兼容性验证
+- release lane 里的 `.NET 10` 打包 `HostSample` 兼容性验证
 
 ## 当前优先事项
 
@@ -37,17 +37,17 @@
 
 ## 近期路线
 
-- 保持 public alpha 文档和 proof 指引清晰可执行
-- 继续维护 hosted CI 与核心 proof lane 的一致性
-- 在不突然 breaking 的前提下继续保留 retained compatibility migration window
+- 保持公开 Alpha 文档和验证指引清晰可执行
+- 继续维护托管 CI 与核心验证 lane 的一致性
+- 在不突然 breaking 的前提下继续保留兼容迁移窗口
 - 以后续 alpha 使用反馈决定下一轮真正的产品功能里程碑
 
 ## 公开入口分工
 
-- `tools/AsterGraph.HostSample` = 最小 canonical 接入 proof
-- `tools/AsterGraph.PackageSmoke` = packed package consumption proof
-- `tools/AsterGraph.ScaleSmoke` = 大图、history 和状态连续性 proof
-- `src/AsterGraph.Demo` = 可视化 showcase host
+- `tools/AsterGraph.HostSample` = 最小推荐接入验证
+- `tools/AsterGraph.PackageSmoke` = 打包消费验证
+- `tools/AsterGraph.ScaleSmoke` = 大图、历史记录和状态连续性验证
+- `src/AsterGraph.Demo` = 可视化展示宿主
 
 ## 对外入口
 
