@@ -57,6 +57,15 @@ Expected high-signal markers:
 - if `NUGET_API_KEY` is configured, confirm package publication succeeds
 - if `NUGET_API_KEY` is not configured, confirm the workflow reports a deliberate NuGet publish skip instead of a failure
 
+For a maintainer-driven manual alpha publish without pushing a new tag:
+
+- add the `NUGET_API_KEY` repository secret in GitHub
+- open `Actions > prerelease > Run workflow`
+- set `publish_to_nuget` to `true`
+- optionally set `release_ref` to the branch or `v*` tag that should be packed
+- keep using a committed `0.x.y-alpha.z` package version; the manual path publishes the version already checked into the repository
+- leave GitHub prerelease creation tag-driven; manual dispatch is only the NuGet publish escape hatch
+
 ## 6. Public Entry Guidance
 
 Keep the consumer entry story explicit in release notes and public announcements:

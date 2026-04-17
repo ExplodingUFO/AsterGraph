@@ -23,6 +23,7 @@ artifacts/*.log
 /AGENTS.md
 /CLAUDE.md
 /docs/plans/
+/CON
 .env
 .env.*
 *.log

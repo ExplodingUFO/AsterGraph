@@ -57,6 +57,15 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framew
 - 如果配置了 `NUGET_API_KEY`，确认包发布成功
 - 如果没有配置 `NUGET_API_KEY`，确认 workflow 是有意跳过 NuGet publish，而不是失败
 
+如果你想在不新推 tag 的情况下手动发布 alpha 包：
+
+- 先在 GitHub 仓库 secret 里配置 `NUGET_API_KEY`
+- 打开 `Actions > prerelease > Run workflow`
+- 把 `publish_to_nuget` 设为 `true`
+- 如果要从特定分支或 `v*` tag 打包，就填写 `release_ref`
+- 保持仓库里已经提交好的 `0.x.y-alpha.z` 版本号；手动触发不会替你改版本，只会发布当前提交里的版本
+- GitHub prerelease 仍然建议走 tag 驱动；手动触发只作为 NuGet alpha 发布的补充入口
+
 ## 6. 对外入口说明
 
 在 release note、公告、README 里把入口说清楚：
