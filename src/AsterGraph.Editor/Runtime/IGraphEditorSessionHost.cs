@@ -27,6 +27,7 @@ internal interface IGraphEditorSessionHost
     void AddNode(NodeDefinitionId definitionId, GraphPoint? preferredWorldPosition);
     void DeleteSelection();
     void SetNodePositions(IReadOnlyList<NodePositionSnapshot> positions, bool updateStatus);
+    bool TrySetSelectedNodeParameterValue(string parameterKey, object? value);
     void StartConnection(string sourceNodeId, string sourcePortId);
     void CompleteConnection(string targetNodeId, string targetPortId);
     void CancelPendingConnection();

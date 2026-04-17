@@ -10,6 +10,7 @@ using AsterGraph.Editor.Diagnostics;
 using AsterGraph.Editor.Events;
 using AsterGraph.Editor.Kernel.Internal;
 using AsterGraph.Editor.Models;
+using AsterGraph.Editor.Parameters;
 using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.Services;
 using AsterGraph.Editor.ViewModels;
@@ -154,6 +155,66 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
 
     public void SetNodePositions(IReadOnlyList<NodePositionSnapshot> positions, bool updateStatus)
         => _nodeMutationCoordinator.SetNodePositions(positions, updateStatus);
+
+    public bool TrySetSelectedNodeParameterValue(string parameterKey, object? value)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(parameterKey);
+
+        if (!_behaviorOptions.Commands.Nodes.AllowEditParameters)
+        {
+            CurrentStatusMessage = "Parameter editing is disabled by host permissions.";
+            return false;
+        }
+
+        if (!TryGetSharedSelectionDefinition(out var definition, out var selectedNodes) || definition is null)
+        {
+            CurrentStatusMessage = _selectedNodeIds.Count == 0
+                ? "Select a node before editing parameters."
+                : "Parameter editing requires selected nodes to share one definition.";
+            return false;
+        }
+
+        var parameterDefinition = definition.Parameters.FirstOrDefault(parameter => string.Equals(parameter.Key, parameterKey, StringComparison.Ordinal));
+        if (parameterDefinition is null)
+        {
+            CurrentStatusMessage = $"Parameter '{parameterKey}' is not declared by {definition.DisplayName}.";
+            return false;
+        }
+
+        if (parameterDefinition.Constraints.IsReadOnly)
+        {
+            CurrentStatusMessage = $"{parameterDefinition.DisplayName} is read-only.";
+            return false;
+        }
+
+        var normalized = NodeParameterValueAdapter.NormalizeValue(parameterDefinition, value);
+        if (!normalized.IsValid)
+        {
+            CurrentStatusMessage = normalized.ValidationError ?? $"Parameter '{parameterDefinition.DisplayName}' could not be normalized.";
+            return false;
+        }
+
+        var mutation = _documentMutator.SetNodeParameterValue(
+            _document,
+            selectedNodes.Select(node => node.Id).ToList(),
+            parameterDefinition,
+            normalized.Value);
+        if (mutation.ChangedNodeIds.Count == 0)
+        {
+            CurrentStatusMessage = $"No parameter changes were applied for {parameterDefinition.DisplayName}.";
+            return false;
+        }
+
+        _document = mutation.Document;
+        MarkDirty(
+            mutation.ChangedNodeIds.Count == 1
+                ? $"Updated {parameterDefinition.DisplayName} on 1 node."
+                : $"Updated {parameterDefinition.DisplayName} on {mutation.ChangedNodeIds.Count} nodes.",
+            GraphEditorDocumentChangeKind.ParametersChanged,
+            mutation.ChangedNodeIds,
+            null);
+        return true;
+    }
 
     public void StartConnection(string sourceNodeId, string sourcePortId)
         => _connectionMutationCoordinator.StartConnection(sourceNodeId, sourcePortId);
@@ -410,6 +471,46 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
 
     private bool CanRemoveConnectionsAsSideEffect()
         => _behaviorOptions.Commands.Connections.AllowDelete || _behaviorOptions.Commands.Connections.AllowDisconnect;
+
+    private bool HasSharedSelectionDefinitionWithParameters()
+        => TryGetSharedSelectionDefinition(out var definition, out _) && definition is { Parameters.Count: > 0 };
+
+    private bool TryGetSharedSelectionDefinition(
+        out INodeDefinition? definition,
+        out IReadOnlyList<GraphNode> selectedNodes)
+    {
+        definition = null;
+        selectedNodes = [];
+
+        if (_selectedNodeIds.Count == 0)
+        {
+            return false;
+        }
+
+        var nodesById = _document.Nodes.ToDictionary(node => node.Id, StringComparer.Ordinal);
+        var resolvedNodes = _selectedNodeIds
+            .Where(nodeId => nodesById.ContainsKey(nodeId))
+            .Select(nodeId => nodesById[nodeId])
+            .ToList();
+        if (resolvedNodes.Count == 0)
+        {
+            return false;
+        }
+
+        var sharedDefinitionId = resolvedNodes[0].DefinitionId;
+        if (sharedDefinitionId is null || resolvedNodes.Any(node => node.DefinitionId != sharedDefinitionId))
+        {
+            return false;
+        }
+
+        if (!_nodeCatalog.TryGetDefinition(sharedDefinitionId, out definition) || definition is null)
+        {
+            return false;
+        }
+
+        selectedNodes = resolvedNodes;
+        return true;
+    }
 
     private GraphNode? FindNode(string nodeId)
         => _document.Nodes.FirstOrDefault(node => string.Equals(node.Id, nodeId, StringComparison.Ordinal));

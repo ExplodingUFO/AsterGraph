@@ -5,6 +5,8 @@ using AsterGraph.Editor.Models;
 using AsterGraph.Editor.Plugins;
 using AsterGraph.Editor.ViewModels;
 using AsterGraph.Core.Models;
+using AsterGraph.Abstractions.Definitions;
+using AsterGraph.Editor.Parameters;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,6 +30,7 @@ public sealed partial class GraphEditorSession
     public IReadOnlyList<GraphEditorFeatureDescriptorSnapshot> GetFeatureDescriptors()
     {
         var capabilities = GetCapabilitySnapshot();
+        var supportsDefinitionMetadata = _descriptorSupport is not null;
         var descriptors = _host.GetFeatureDescriptors()
             .Concat(
             [
@@ -39,6 +42,7 @@ public sealed partial class GraphEditorSession
                 new GraphEditorFeatureDescriptorSnapshot("capability.workspace.load", "capability", capabilities.CanLoadWorkspace),
                 new GraphEditorFeatureDescriptorSnapshot("capability.selection.set", "capability", capabilities.CanSetSelection),
                 new GraphEditorFeatureDescriptorSnapshot("capability.nodes.move", "capability", capabilities.CanMoveNodes),
+                new GraphEditorFeatureDescriptorSnapshot("capability.nodes.parameters.edit", "capability", capabilities.CanEditNodeParameters),
                 new GraphEditorFeatureDescriptorSnapshot("capability.connections.create", "capability", capabilities.CanCreateConnections),
                 new GraphEditorFeatureDescriptorSnapshot("capability.connections.delete", "capability", capabilities.CanDeleteConnections),
                 new GraphEditorFeatureDescriptorSnapshot("capability.connections.break", "capability", capabilities.CanBreakConnections),
@@ -46,6 +50,9 @@ public sealed partial class GraphEditorSession
                 new GraphEditorFeatureDescriptorSnapshot("capability.viewport.fit", "capability", capabilities.CanFitToViewport),
                 new GraphEditorFeatureDescriptorSnapshot("capability.viewport.center", "capability", capabilities.CanCenterViewport),
                 new GraphEditorFeatureDescriptorSnapshot("query.plugin-load-snapshots", "query", _descriptorSupport?.HasPluginLoader ?? false),
+                new GraphEditorFeatureDescriptorSnapshot("query.registered-node-definitions", "query", supportsDefinitionMetadata),
+                new GraphEditorFeatureDescriptorSnapshot("query.shared-selection-definition", "query", supportsDefinitionMetadata),
+                new GraphEditorFeatureDescriptorSnapshot("query.selected-node-parameter-snapshots", "query", supportsDefinitionMetadata),
                 new GraphEditorFeatureDescriptorSnapshot("surface.automation.runner", "surface", true),
                 new GraphEditorFeatureDescriptorSnapshot("service.fragment-workspace", "service", _descriptorSupport?.HasFragmentWorkspaceService ?? false),
                 new GraphEditorFeatureDescriptorSnapshot("service.fragment-library", "service", _descriptorSupport?.HasFragmentLibraryService ?? false),
@@ -69,6 +76,46 @@ public sealed partial class GraphEditorSession
             .ToList();
 
         return descriptors;
+    }
+
+    public IReadOnlyList<INodeDefinition> GetRegisteredNodeDefinitions()
+        => _descriptorSupport?.Definitions
+            .OrderBy(definition => definition.Category, StringComparer.Ordinal)
+            .ThenBy(definition => definition.DisplayName, StringComparer.Ordinal)
+            .ToList()
+            ?? [];
+
+    public INodeDefinition? GetSharedSelectionDefinition()
+    {
+        ResolveSelectedNodesAndSharedDefinition(out _, out var definition);
+        return definition;
+    }
+
+    public IReadOnlyList<GraphEditorNodeParameterSnapshot> GetSelectedNodeParameterSnapshots()
+    {
+        if (!ResolveSelectedNodesAndSharedDefinition(out var selectedNodes, out var definition)
+            || definition is null)
+        {
+            return [];
+        }
+
+        var canEditParameters = GetCapabilitySnapshot().CanEditNodeParameters;
+        return definition.Parameters
+            .Select(parameter =>
+            {
+                var values = selectedNodes
+                    .Select(node => ResolveNodeParameterValue(node, parameter))
+                    .ToList();
+                var firstValue = values[0];
+                var hasMixedValues = values.Skip(1).Any(value => !Equals(value, firstValue));
+
+                return new GraphEditorNodeParameterSnapshot(
+                    parameter,
+                    hasMixedValues ? null : firstValue,
+                    hasMixedValues,
+                    canEditParameters && !parameter.Constraints.IsReadOnly);
+            })
+            .ToList();
     }
 
     public IReadOnlyList<GraphEditorCommandDescriptorSnapshot> GetCommandDescriptors()
@@ -125,6 +172,55 @@ public sealed partial class GraphEditorSession
 
     private GraphEditorPendingConnectionSnapshot CreatePendingConnectionSnapshot()
         => _host.GetPendingConnectionSnapshot();
+
+    private bool ResolveSelectedNodesAndSharedDefinition(
+        out IReadOnlyList<GraphNode> selectedNodes,
+        out INodeDefinition? definition)
+    {
+        selectedNodes = [];
+        definition = null;
+
+        if (_descriptorSupport is null)
+        {
+            return false;
+        }
+
+        var document = _host.CreateDocumentSnapshot();
+        var selection = _host.GetSelectionSnapshot();
+        if (selection.SelectedNodeIds.Count == 0)
+        {
+            return false;
+        }
+
+        var nodesById = document.Nodes.ToDictionary(node => node.Id, StringComparer.Ordinal);
+        var resolvedNodes = selection.SelectedNodeIds
+            .Where(nodeId => nodesById.ContainsKey(nodeId))
+            .Select(nodeId => nodesById[nodeId])
+            .ToList();
+        if (resolvedNodes.Count == 0)
+        {
+            return false;
+        }
+
+        var sharedDefinitionId = resolvedNodes[0].DefinitionId;
+        if (sharedDefinitionId is null || resolvedNodes.Any(node => node.DefinitionId != sharedDefinitionId))
+        {
+            return false;
+        }
+
+        if (!_descriptorSupport.NodeCatalog.TryGetDefinition(sharedDefinitionId, out definition) || definition is null)
+        {
+            return false;
+        }
+
+        selectedNodes = resolvedNodes;
+        return true;
+    }
+
+    private static object? ResolveNodeParameterValue(GraphNode node, NodeParameterDefinition parameter)
+        => NodeParameterValueAdapter.NormalizeIncomingValue(
+            node.ParameterValues?.FirstOrDefault(candidate => string.Equals(candidate.Key, parameter.Key, StringComparison.Ordinal))?.Value
+            ?? parameter.DefaultValue);
 
 #pragma warning disable CS0618
     private static CompatiblePortTarget? CreateCompatibilityShimTarget(

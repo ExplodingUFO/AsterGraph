@@ -25,6 +25,9 @@ internal sealed partial class GraphEditorKernel
 
         int IGraphEditorKernelCommandRouterHost.SelectedNodeCount => _owner._selectedNodeIds.Count;
 
+        bool IGraphEditorKernelCommandRouterHost.CanEditSelectedNodeParameters
+            => _owner._behaviorOptions.Commands.Nodes.AllowEditParameters && _owner.HasSharedSelectionDefinitionWithParameters();
+
         GraphEditorPendingConnectionSnapshot IGraphEditorKernelCommandRouterHost.PendingConnection => _owner._pendingConnection;
 
         double IGraphEditorKernelCommandRouterHost.ViewportWidth => _owner._viewportWidth;
@@ -44,6 +47,9 @@ internal sealed partial class GraphEditorKernel
 
         void IGraphEditorKernelCommandRouterHost.SetNodePositions(IReadOnlyList<NodePositionSnapshot> positions, bool updateStatus)
             => _owner.SetNodePositions(positions, updateStatus);
+
+        bool IGraphEditorKernelCommandRouterHost.TrySetSelectedNodeParameterValue(string parameterKey, object? value)
+            => _owner.TrySetSelectedNodeParameterValue(parameterKey, value);
 
         void IGraphEditorKernelCommandRouterHost.StartConnection(string sourceNodeId, string sourcePortId)
             => _owner.StartConnection(sourceNodeId, sourcePortId);

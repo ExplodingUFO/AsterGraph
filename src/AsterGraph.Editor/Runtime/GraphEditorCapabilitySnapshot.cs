@@ -65,6 +65,11 @@ public sealed record GraphEditorCapabilitySnapshot(
     public bool CanMoveNodes { get; init; }
 
     /// <summary>
+    /// Current whether node parameter editing is allowed for the active selection.
+    /// </summary>
+    public bool CanEditNodeParameters { get; init; }
+
+    /// <summary>
     /// 当前是否允许创建连线。
     /// </summary>
     public bool CanCreateConnections { get; init; }

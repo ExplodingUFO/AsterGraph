@@ -3,6 +3,7 @@ using AsterGraph.Editor.Diagnostics;
 using AsterGraph.Editor.Menus;
 using AsterGraph.Editor.Models;
 using AsterGraph.Editor.Plugins;
+using AsterGraph.Abstractions.Definitions;
 
 namespace AsterGraph.Editor.Runtime;
 
@@ -40,6 +41,27 @@ public interface IGraphEditorQueries
     /// </summary>
     /// <returns>稳定的特性描述集合。</returns>
     IReadOnlyList<GraphEditorFeatureDescriptorSnapshot> GetFeatureDescriptors()
+        => throw new NotSupportedException();
+
+    /// <summary>
+    /// Gets the currently registered node definitions exposed by the active node catalog.
+    /// </summary>
+    /// <returns>A stable read-only definition collection for host discovery scenarios.</returns>
+    IReadOnlyList<INodeDefinition> GetRegisteredNodeDefinitions()
+        => throw new NotSupportedException();
+
+    /// <summary>
+    /// Gets the shared definition for the current selection when every selected node resolves to the same catalog definition.
+    /// </summary>
+    /// <returns>The shared node definition, or <see langword="null"/> when the selection is empty or heterogeneous.</returns>
+    INodeDefinition? GetSharedSelectionDefinition()
+        => throw new NotSupportedException();
+
+    /// <summary>
+    /// Gets parameter snapshots projected from the current selection and shared node definition.
+    /// </summary>
+    /// <returns>A stable snapshot collection suitable for host-side property editors and inspection UIs.</returns>
+    IReadOnlyList<GraphEditorNodeParameterSnapshot> GetSelectedNodeParameterSnapshots()
         => throw new NotSupportedException();
 
     /// <summary>

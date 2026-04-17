@@ -1,5 +1,7 @@
 using AsterGraph.Core.Models;
+using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Editor.Models;
+using AsterGraph.Editor.Parameters;
 
 namespace AsterGraph.Editor.Kernel.Internal;
 
@@ -160,6 +162,63 @@ internal sealed class GraphEditorKernelDocumentMutator
                 },
                 removedConnections);
     }
+
+    public GraphEditorKernelNodeParameterMutationResult SetNodeParameterValue(
+        GraphDocument document,
+        IReadOnlyCollection<string> selectedNodeIds,
+        NodeParameterDefinition parameterDefinition,
+        object? normalizedValue)
+    {
+        ArgumentNullException.ThrowIfNull(document);
+        ArgumentNullException.ThrowIfNull(selectedNodeIds);
+        ArgumentNullException.ThrowIfNull(parameterDefinition);
+
+        if (selectedNodeIds.Count == 0)
+        {
+            return GraphEditorKernelNodeParameterMutationResult.Empty(document);
+        }
+
+        var selectedNodeIdSet = selectedNodeIds.ToHashSet(StringComparer.Ordinal);
+        var changedNodeIds = new List<string>();
+        var updatedNodes = document.Nodes
+            .Select(node =>
+            {
+                if (!selectedNodeIdSet.Contains(node.Id))
+                {
+                    return node;
+                }
+
+                var existingValues = node.ParameterValues?.ToList() ?? [];
+                var existingIndex = existingValues.FindIndex(parameter => string.Equals(parameter.Key, parameterDefinition.Key, StringComparison.Ordinal));
+                var currentEffectiveValue = existingIndex >= 0
+                    ? NodeParameterValueAdapter.NormalizeIncomingValue(existingValues[existingIndex].Value)
+                    : NodeParameterValueAdapter.NormalizeIncomingValue(parameterDefinition.DefaultValue);
+                if (Equals(currentEffectiveValue, normalizedValue))
+                {
+                    return node;
+                }
+
+                changedNodeIds.Add(node.Id);
+
+                if (existingIndex >= 0)
+                {
+                    existingValues[existingIndex] = existingValues[existingIndex] with { Value = normalizedValue };
+                }
+                else
+                {
+                    existingValues.Add(new GraphParameterValue(parameterDefinition.Key, parameterDefinition.ValueType, normalizedValue));
+                }
+
+                return node with { ParameterValues = existingValues };
+            })
+            .ToList();
+
+        return changedNodeIds.Count == 0
+            ? GraphEditorKernelNodeParameterMutationResult.Empty(document)
+            : new GraphEditorKernelNodeParameterMutationResult(
+                document with { Nodes = updatedNodes },
+                changedNodeIds);
+    }
 }
 
 internal sealed record GraphEditorKernelDeleteNodeResult(
@@ -205,5 +264,13 @@ internal sealed record GraphEditorKernelRemoveConnectionsResult(
     IReadOnlyList<GraphConnection> RemovedConnections)
 {
     public static GraphEditorKernelRemoveConnectionsResult Empty(GraphDocument document)
+        => new(document, []);
+}
+
+internal sealed record GraphEditorKernelNodeParameterMutationResult(
+    GraphDocument Document,
+    IReadOnlyList<string> ChangedNodeIds)
+{
+    public static GraphEditorKernelNodeParameterMutationResult Empty(GraphDocument document)
         => new(document, []);
 }

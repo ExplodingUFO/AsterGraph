@@ -25,6 +25,7 @@ internal sealed partial class GraphEditorKernel
             {
                 CanSetSelection = true,
                 CanMoveNodes = _owner._behaviorOptions.Commands.Nodes.AllowMove,
+                CanEditNodeParameters = _owner._behaviorOptions.Commands.Nodes.AllowEditParameters && _owner.HasSharedSelectionDefinitionWithParameters(),
                 CanCreateConnections = _owner._behaviorOptions.Commands.Connections.AllowCreate,
                 CanDeleteConnections = _owner._behaviorOptions.Commands.Connections.AllowDelete,
                 CanBreakConnections = _owner._behaviorOptions.Commands.Connections.AllowDisconnect,
@@ -43,9 +44,13 @@ internal sealed partial class GraphEditorKernel
                 new GraphEditorFeatureDescriptorSnapshot("query.node-positions", "query", true),
                 new GraphEditorFeatureDescriptorSnapshot("query.pending-connection-snapshot", "query", true),
                 new GraphEditorFeatureDescriptorSnapshot("query.compatible-port-target-snapshot", "query", true),
+                new GraphEditorFeatureDescriptorSnapshot("query.registered-node-definitions", "query", true),
+                new GraphEditorFeatureDescriptorSnapshot("query.shared-selection-definition", "query", true),
+                new GraphEditorFeatureDescriptorSnapshot("query.selected-node-parameter-snapshots", "query", true),
                 new GraphEditorFeatureDescriptorSnapshot("query.compatible-target-mvvm-shim", "query", true),
                 new GraphEditorFeatureDescriptorSnapshot("service.workspace", "service", true),
                 new GraphEditorFeatureDescriptorSnapshot("service.diagnostics", "service", true),
+                new GraphEditorFeatureDescriptorSnapshot("surface.parameter-editing", "surface", true),
                 new GraphEditorFeatureDescriptorSnapshot("surface.mutation.batch", "surface", true),
             ];
     }

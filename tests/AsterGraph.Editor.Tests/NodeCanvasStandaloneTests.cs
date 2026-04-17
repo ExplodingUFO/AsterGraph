@@ -392,6 +392,71 @@ public sealed class NodeCanvasStandaloneTests
         }
     }
 
+    [AvaloniaFact]
+    public void AltLeftDragPanning_RoutesThroughCanvasHandlers_AndReleasesPointerCapture()
+    {
+        var editor = CreateEditor();
+        var (window, canvas) = CreateStandaloneCanvasWindow(editor);
+        var pointer = new global::Avalonia.Input.Pointer(1, PointerType.Mouse, isPrimary: true);
+        var pressedArgs = CreatePointerPressedArgs(canvas, pointer, new Point(80, 80), KeyModifiers.Alt);
+        var movedArgs = CreatePointerMovedArgs(canvas, pointer, new Point(140, 170), KeyModifiers.Alt);
+        var releasedArgs = CreatePointerReleasedArgs(canvas, pointer, new Point(140, 170), KeyModifiers.Alt);
+
+        try
+        {
+            InvokeCanvasPointerPressed(canvas, pressedArgs);
+            Assert.True(pressedArgs.Handled);
+            Assert.Same(canvas, pointer.Captured);
+
+            InvokeCanvasPointerMoved(canvas, movedArgs);
+            Assert.True(movedArgs.Handled);
+            Assert.Equal(170, editor.PanX);
+            Assert.Equal(186, editor.PanY);
+
+            InvokeCanvasPointerReleased(canvas, releasedArgs);
+            Assert.Null(pointer.Captured);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
+    public void MarqueeSelection_RoutesThroughCanvasHandlers_AndSelectsHitNodes()
+    {
+        var editor = CreateEditor();
+        var (window, canvas) = CreateStandaloneCanvasWindow(editor);
+        var pointer = new global::Avalonia.Input.Pointer(1, PointerType.Mouse, isPrimary: true);
+        var sourceNode = editor.Nodes.Single(node => node.Id == SourceNodeId);
+        var start = InvokeCanvasMethod<GraphPoint>("WorldToScreen", canvas, sourceNode.X - 24, sourceNode.Y - 24);
+        var finish = InvokeCanvasMethod<GraphPoint>("WorldToScreen", canvas, sourceNode.X + sourceNode.Width + 24, sourceNode.Y + sourceNode.Height + 24);
+        var pressedArgs = CreatePointerPressedArgs(canvas, pointer, new Point(start.X, start.Y), KeyModifiers.None);
+        var movedArgs = CreatePointerMovedArgs(canvas, pointer, new Point(finish.X, finish.Y), KeyModifiers.None);
+        var releasedArgs = CreatePointerReleasedArgs(canvas, pointer, new Point(finish.X, finish.Y), KeyModifiers.None);
+
+        try
+        {
+            InvokeCanvasPointerPressed(canvas, pressedArgs);
+            Assert.True(pressedArgs.Handled);
+            Assert.Same(canvas, pointer.Captured);
+
+            InvokeCanvasPointerMoved(canvas, movedArgs);
+            Assert.True(movedArgs.Handled);
+
+            InvokeCanvasPointerReleased(canvas, releasedArgs);
+
+            var selected = Assert.Single(editor.SelectedNodes);
+            Assert.Equal(SourceNodeId, selected.Id);
+            Assert.Equal(SourceNodeId, editor.SelectedNode?.Id);
+            Assert.Null(pointer.Captured);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
     private static void InvokeCanvasContextRequested(NodeCanvas canvas, ContextRequestedEventArgs args)
         => InvokeCanvasHandler("HandleCanvasContextRequested", canvas, args);
 
@@ -401,8 +466,73 @@ public sealed class NodeCanvasStandaloneTests
     private static void InvokeCanvasPointerPressed(NodeCanvas canvas, PointerPressedEventArgs args)
         => InvokeCanvasHandler("HandlePointerPressed", canvas, args);
 
+    private static void InvokeCanvasPointerMoved(NodeCanvas canvas, PointerEventArgs args)
+        => InvokeCanvasHandler("HandlePointerMoved", canvas, args);
+
+    private static void InvokeCanvasPointerReleased(NodeCanvas canvas, PointerReleasedEventArgs args)
+        => InvokeCanvasHandler("HandlePointerReleased", canvas, args);
+
     private static void InvokeCanvasWheelChanged(NodeCanvas canvas, PointerWheelEventArgs args)
         => InvokeCanvasHandler("HandlePointerWheelChanged", canvas, args);
+
+    private static PointerPressedEventArgs CreatePointerPressedArgs(NodeCanvas canvas, global::Avalonia.Input.Pointer pointer, Point position, KeyModifiers modifiers)
+        => new(
+            canvas,
+            pointer,
+            canvas,
+            position,
+            0UL,
+            new PointerPointProperties(RawInputModifiers.LeftMouseButton | ToRawModifiers(modifiers), PointerUpdateKind.LeftButtonPressed),
+            modifiers,
+            1);
+
+    private static PointerEventArgs CreatePointerMovedArgs(NodeCanvas canvas, global::Avalonia.Input.Pointer pointer, Point position, KeyModifiers modifiers)
+        => new(
+            InputElement.PointerMovedEvent,
+            canvas,
+            pointer,
+            canvas,
+            position,
+            0UL,
+            new PointerPointProperties(RawInputModifiers.LeftMouseButton | ToRawModifiers(modifiers), PointerUpdateKind.Other),
+            modifiers);
+
+    private static PointerReleasedEventArgs CreatePointerReleasedArgs(NodeCanvas canvas, global::Avalonia.Input.Pointer pointer, Point position, KeyModifiers modifiers)
+        => new(
+            canvas,
+            pointer,
+            canvas,
+            position,
+            0UL,
+            new PointerPointProperties(ToRawModifiers(modifiers), PointerUpdateKind.LeftButtonReleased),
+            modifiers,
+            MouseButton.Left);
+
+    private static RawInputModifiers ToRawModifiers(KeyModifiers modifiers)
+    {
+        var raw = RawInputModifiers.None;
+        if (modifiers.HasFlag(KeyModifiers.Alt))
+        {
+            raw |= RawInputModifiers.Alt;
+        }
+
+        if (modifiers.HasFlag(KeyModifiers.Control))
+        {
+            raw |= RawInputModifiers.Control;
+        }
+
+        if (modifiers.HasFlag(KeyModifiers.Shift))
+        {
+            raw |= RawInputModifiers.Shift;
+        }
+
+        if (modifiers.HasFlag(KeyModifiers.Meta))
+        {
+            raw |= RawInputModifiers.Meta;
+        }
+
+        return raw;
+    }
 
     private static void ClickPortButton(NodeCanvas canvas, string portId, PortDirection direction)
     {

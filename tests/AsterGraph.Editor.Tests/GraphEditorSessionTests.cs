@@ -187,6 +187,8 @@ public sealed class GraphEditorSessionTests
         AssertMethod(commandsType, nameof(IGraphEditorCommands.AddNode), typeof(NodeDefinitionId), typeof(GraphPoint?));
         AssertMethod(commandsType, nameof(IGraphEditorCommands.DeleteSelection));
         AssertMethod(commandsType, nameof(IGraphEditorCommands.SetNodePositions), typeof(IReadOnlyList<NodePositionSnapshot>), typeof(bool));
+        AssertMethod(commandsType, nameof(IGraphEditorCommands.TrySetSelectedNodeParameterValue), typeof(string), typeof(object));
+        Assert.Equal(typeof(bool), commandsType.GetMethod(nameof(IGraphEditorCommands.TrySetSelectedNodeParameterValue), [typeof(string), typeof(object)])!.ReturnType);
         AssertMethod(commandsType, nameof(IGraphEditorCommands.StartConnection), typeof(string), typeof(string));
         AssertMethod(commandsType, nameof(IGraphEditorCommands.CompleteConnection), typeof(string), typeof(string));
         AssertMethod(commandsType, nameof(IGraphEditorCommands.CancelPendingConnection));
@@ -229,6 +231,17 @@ public sealed class GraphEditorSessionTests
         Assert.Equal(
             typeof(IReadOnlyList<GraphEditorFeatureDescriptorSnapshot>),
             queriesType.GetMethod(nameof(IGraphEditorQueries.GetFeatureDescriptors))!.ReturnType);
+
+        AssertMethod(queriesType, nameof(IGraphEditorQueries.GetRegisteredNodeDefinitions));
+        Assert.Equal(typeof(IReadOnlyList<INodeDefinition>), queriesType.GetMethod(nameof(IGraphEditorQueries.GetRegisteredNodeDefinitions))!.ReturnType);
+
+        AssertMethod(queriesType, nameof(IGraphEditorQueries.GetSharedSelectionDefinition));
+        Assert.Equal(typeof(INodeDefinition), queriesType.GetMethod(nameof(IGraphEditorQueries.GetSharedSelectionDefinition))!.ReturnType);
+
+        AssertMethod(queriesType, nameof(IGraphEditorQueries.GetSelectedNodeParameterSnapshots));
+        Assert.Equal(
+            typeof(IReadOnlyList<GraphEditorNodeParameterSnapshot>),
+            queriesType.GetMethod(nameof(IGraphEditorQueries.GetSelectedNodeParameterSnapshots))!.ReturnType);
 
         AssertMethod(queriesType, nameof(IGraphEditorQueries.GetCommandDescriptors));
         Assert.Equal(

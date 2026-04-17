@@ -40,6 +40,19 @@ public sealed partial class GraphEditorSession
         Execute("nodes.move", () => _host.SetNodePositions(positions, updateStatus));
     }
 
+    public bool TrySetSelectedNodeParameterValue(string parameterKey, object? value)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(parameterKey);
+
+        var edited = _host.TrySetSelectedNodeParameterValue(parameterKey, value);
+        if (edited)
+        {
+            PublishCommandExecuted("nodes.parameters.set");
+        }
+
+        return edited;
+    }
+
     [Obsolete("Use StartConnection instead.")]
     public void BeginConnection(string sourceNodeId, string sourcePortId)
         => StartConnection(sourceNodeId, sourcePortId);

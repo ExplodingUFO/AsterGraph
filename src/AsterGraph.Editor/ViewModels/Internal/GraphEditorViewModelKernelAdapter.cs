@@ -68,6 +68,9 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
     public void SetNodePositions(IReadOnlyList<NodePositionSnapshot> positions, bool updateStatus)
         => _kernel.SetNodePositions(positions, updateStatus);
 
+    public bool TrySetSelectedNodeParameterValue(string parameterKey, object? value)
+        => _kernel.TrySetSelectedNodeParameterValue(parameterKey, value);
+
     public void StartConnection(string sourceNodeId, string sourcePortId)
         => _kernel.StartConnection(sourceNodeId, sourcePortId);
 

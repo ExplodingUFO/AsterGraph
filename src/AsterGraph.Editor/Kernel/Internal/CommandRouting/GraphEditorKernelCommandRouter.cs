@@ -17,6 +17,8 @@ internal interface IGraphEditorKernelCommandRouterHost
 
     int SelectedNodeCount { get; }
 
+    bool CanEditSelectedNodeParameters { get; }
+
     GraphEditorPendingConnectionSnapshot PendingConnection { get; }
 
     double ViewportWidth { get; }
@@ -32,6 +34,8 @@ internal interface IGraphEditorKernelCommandRouterHost
     void DeleteSelection();
 
     void SetNodePositions(IReadOnlyList<NodePositionSnapshot> positions, bool updateStatus);
+
+    bool TrySetSelectedNodeParameterValue(string parameterKey, object? value);
 
     void StartConnection(string sourceNodeId, string sourcePortId);
 
@@ -90,6 +94,12 @@ internal sealed class GraphEditorKernelCommandRouter
             new GraphEditorCommandDescriptorSnapshot(
                 "nodes.move",
                 _host.BehaviorOptions.Commands.Nodes.AllowMove),
+            new GraphEditorCommandDescriptorSnapshot(
+                "nodes.parameters.set",
+                _host.CanEditSelectedNodeParameters,
+                _host.CanEditSelectedNodeParameters
+                    ? null
+                    : "Parameter editing requires node-edit permissions and a shared node definition selection."),
             new GraphEditorCommandDescriptorSnapshot(
                 "connections.start",
                 _host.BehaviorOptions.Commands.Connections.AllowCreate),
@@ -202,6 +212,15 @@ internal sealed class GraphEditorKernelCommandRouter
 
                 _host.SetNodePositions(positions.Select(position => position!).ToList(), ResolveOptionalUpdateStatus(command, "updateStatus"));
                 return true;
+
+            case "nodes.parameters.set":
+                if (!TryGetRequiredArgument(command, "parameterKey", out var parameterKey)
+                    || !command.TryGetArgument("value", out var parameterValue))
+                {
+                    return false;
+                }
+
+                return _host.TrySetSelectedNodeParameterValue(parameterKey, parameterValue);
 
             case "connections.start":
                 if (!TryGetRequiredArgument(command, "sourceNodeId", out var sourceNodeId)

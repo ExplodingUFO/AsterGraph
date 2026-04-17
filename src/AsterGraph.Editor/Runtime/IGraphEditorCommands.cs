@@ -55,6 +55,15 @@ public interface IGraphEditorCommands
         => throw new NotSupportedException();
 
     /// <summary>
+    /// Attempts to set one parameter value across the current selection when every selected node shares the same definition.
+    /// </summary>
+    /// <param name="parameterKey">Stable parameter key declared by the shared node definition.</param>
+    /// <param name="value">Candidate parameter value that will be normalized against the definition metadata.</param>
+    /// <returns><see langword="true"/> when the mutation succeeds and changes the runtime document.</returns>
+    bool TrySetSelectedNodeParameterValue(string parameterKey, object? value)
+        => throw new NotSupportedException();
+
+    /// <summary>
     /// 开始一条待完成连线。
     /// </summary>
     /// <param name="sourceNodeId">源节点标识。</param>
