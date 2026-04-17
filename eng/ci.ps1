@@ -29,6 +29,7 @@ $scaleSmokeProofPath = Join-Path $proofArtifactsRoot 'scale-smoke.txt'
 $dotnetCliHome = Join-Path $repoRoot '.dotnet-cli-home'
 $coverageRunSettingsPath = Join-Path $repoRoot 'tests/coverage.runsettings'
 $coverageReportScriptPath = Join-Path $repoRoot 'eng/coverage-report.ps1'
+$defaultVsTestConnectionTimeoutSeconds = 180
 $hostSampleProject = 'tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj'
 $helloWorldProject = 'tools/AsterGraph.HelloWorld/AsterGraph.HelloWorld.csproj'
 $helloWorldAvaloniaProject = 'tools/AsterGraph.HelloWorld.Avalonia/AsterGraph.HelloWorld.Avalonia.csproj'
@@ -222,6 +223,12 @@ function Initialize-RepoToolingEnvironment {
   $env:DOTNET_SKIP_FIRST_TIME_EXPERIENCE = '1'
   $env:DOTNET_NOLOGO = '1'
   $env:MSBuildEnableWorkloadResolver = 'false'
+
+  if ([string]::IsNullOrWhiteSpace($env:VSTEST_CONNECTION_TIMEOUT)) {
+    $env:VSTEST_CONNECTION_TIMEOUT = $defaultVsTestConnectionTimeoutSeconds.ToString([System.Globalization.CultureInfo]::InvariantCulture)
+  }
+
+  Write-Host "Using VSTEST_CONNECTION_TIMEOUT=$($env:VSTEST_CONNECTION_TIMEOUT)" -ForegroundColor DarkGray
 }
 
 function Get-Frameworks {
