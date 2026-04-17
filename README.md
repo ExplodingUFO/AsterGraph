@@ -1,5 +1,10 @@
 # AsterGraph
 
+<p align="right">
+  <img alt="English (current)" src="https://img.shields.io/badge/English-current-111827?style=flat-square" />
+  <a href="./README.zh-CN.md"><img alt="简体中文" src="https://img.shields.io/badge/简体中文-switch-2563eb?style=flat-square" /></a>
+</p>
+
 AsterGraph is a modular node-graph editor for .NET with an Avalonia UI shell, a reusable editor state layer, and compile-time extension points for registering custom algorithm nodes.
 
 ## Public Alpha
@@ -7,7 +12,6 @@ AsterGraph is a modular node-graph editor for .NET with an Avalonia UI shell, a 
 - current package baseline: `0.2.0-alpha.1`
 - English docs: [`docs/en/`](./docs/en/)
 - 中文文档: [`docs/zh-CN/`](./docs/zh-CN/)
-- 中文总览: [`README.zh-CN.md`](./README.zh-CN.md)
 - public project status: [`docs/en/project-status.md`](./docs/en/project-status.md)
 - current alpha scope, known limitations, and stability notes: [`docs/en/alpha-status.md`](./docs/en/alpha-status.md)
 - public launch checklist: [`docs/en/public-launch-checklist.md`](./docs/en/public-launch-checklist.md)

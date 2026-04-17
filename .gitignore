@@ -26,6 +26,7 @@ artifacts/*.log
 .env
 .env.*
 *.log
+/avalonia-node-map.slnx
 
 # OS noise
 Thumbs.db

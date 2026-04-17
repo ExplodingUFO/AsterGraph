@@ -1,11 +1,15 @@
 # AsterGraph
 
+<p align="right">
+  <a href="./README.md"><img alt="English" src="https://img.shields.io/badge/English-switch-2563eb?style=flat-square" /></a>
+  <img alt="简体中文（当前）" src="https://img.shields.io/badge/简体中文-当前-111827?style=flat-square" />
+</p>
+
 AsterGraph 是一个面向 .NET 的模块化节点图编辑器工具包，包含可复用的编辑器运行时层、Avalonia UI 壳层，以及面向宿主的扩展与诊断边界。
 
 ## 公开 Alpha
 
 - 当前包版本基线：`0.2.0-alpha.1`
-- 英文总览：[`README.md`](./README.md)
 - 英文文档：[`docs/en/`](./docs/en/)
 - 中文文档：[`docs/zh-CN/`](./docs/zh-CN/)
 - 项目当前状态：[`docs/zh-CN/project-status.md`](./docs/zh-CN/project-status.md)
