@@ -55,6 +55,8 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framew
 在 release note、公告、README 里把入口说清楚：
 
 - `tools/AsterGraph.HostSample` = 最小 consumer proof
+- `tools/AsterGraph.PackageSmoke` = packaged-consumption proof
+- `tools/AsterGraph.ScaleSmoke` = 规模 / history / 状态连续性 proof
 - `src/AsterGraph.Demo` = showcase host
 - `docs/zh-CN/quick-start.md` = canonical adoption path
 - `docs/zh-CN/alpha-status.md` = alpha 范围与限制

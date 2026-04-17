@@ -5,6 +5,7 @@
 相关文档：
 
 - [Alpha 状态](./alpha-status.md)
+- [对外发布检查清单](./public-launch-checklist.md)
 - [Host Integration](./host-integration.md)
 - [State Contracts](./state-contracts.md)
 - [Extension Contracts](./extension-contracts.md)
@@ -26,7 +27,7 @@
 
 - 仓库内本地 feed：`artifacts/packages`
 - 可选的 GitHub Packages
-- 计划中的 NuGet.org prerelease 通道
+- 维护者完成发布检查后触发的 tag-driven prerelease workflow
 
 从源码验证当前分支时：
 
@@ -81,11 +82,14 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane contract -Frame
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framework all -Configuration Release
 ```
 
+在切公开仓库可见性，或者推第一个公开 prerelease tag 之前，先按 [对外发布检查清单](./public-launch-checklist.md) 走一遍。
+
 原始 proof tools：
 
 ```powershell
 dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj --nologo
 dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj -p:UsePackedAsterGraphPackages=true --nologo
+dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj -f net10.0 -p:EnableNet10ConsumerProof=true -p:UsePackedAsterGraphPackages=true --nologo
 dotnet run --project tools/AsterGraph.PackageSmoke/AsterGraph.PackageSmoke.csproj -p:UsePackedAsterGraphPackages=true --nologo
 dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj --nologo
 ```

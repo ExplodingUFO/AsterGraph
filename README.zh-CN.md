@@ -12,6 +12,13 @@ AsterGraph 是一个面向 .NET 的模块化节点图编辑器工具包，包含
 - 对外发布检查清单：[`docs/zh-CN/public-launch-checklist.md`](./docs/zh-CN/public-launch-checklist.md)
 - 公开仓库 hygiene 门禁：`pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane hygiene -Framework all -Configuration Release`
 
+公开入口分工：
+
+- `tools/AsterGraph.HostSample` = 最小 canonical consumer path
+- `tools/AsterGraph.PackageSmoke` = packaged-consumption proof
+- `tools/AsterGraph.ScaleSmoke` = 规模 / history / 状态连续性 proof
+- `src/AsterGraph.Demo` = 可视化 showcase host
+
 ## 当前能力范围
 
 当前已提供：

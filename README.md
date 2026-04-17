@@ -13,6 +13,13 @@ AsterGraph is a modular node-graph editor for .NET with an Avalonia UI shell, a 
 - public launch checklist: [`docs/en/public-launch-checklist.md`](./docs/en/public-launch-checklist.md)
 - public repo hygiene gate: `pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane hygiene -Framework all -Configuration Release`
 
+Public entry map:
+
+- `tools/AsterGraph.HostSample` = minimal canonical consumer path
+- `tools/AsterGraph.PackageSmoke` = packaged-consumption proof
+- `tools/AsterGraph.ScaleSmoke` = scale/history/state-continuity proof
+- `src/AsterGraph.Demo` = visual showcase host
+
 ## Current Scope
 
 Current capabilities:

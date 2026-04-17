@@ -55,6 +55,8 @@ Expected high-signal markers:
 Keep the consumer entry story explicit in release notes and public announcements:
 
 - `tools/AsterGraph.HostSample` = minimal consumer proof
+- `tools/AsterGraph.PackageSmoke` = packaged-consumption proof
+- `tools/AsterGraph.ScaleSmoke` = scale/history/state-continuity proof
 - `src/AsterGraph.Demo` = showcase host
 - `docs/en/quick-start.md` = canonical adoption path
 - `docs/en/alpha-status.md` = current alpha scope and limitations

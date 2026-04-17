@@ -42,6 +42,13 @@
 - 在不突然 breaking 的前提下继续保留 retained compatibility migration window
 - 以后续 alpha 使用反馈决定下一轮真正的产品功能里程碑
 
+## 公开入口分工
+
+- `tools/AsterGraph.HostSample` = 最小 canonical 接入 proof
+- `tools/AsterGraph.PackageSmoke` = packed package consumption proof
+- `tools/AsterGraph.ScaleSmoke` = 大图、history 和状态连续性 proof
+- `src/AsterGraph.Demo` = 可视化 showcase host
+
 ## 对外入口
 
 - [Quick Start](./quick-start.md)

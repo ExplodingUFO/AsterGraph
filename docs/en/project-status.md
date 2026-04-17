@@ -42,6 +42,13 @@ The current public-repo priority is not new runtime capability. It is keeping th
 - continue the retained compatibility migration window without abrupt public breaks
 - use external alpha feedback to decide what should become the next product-facing milestone
 
+## Public Entry Matrix
+
+- `tools/AsterGraph.HostSample` = minimal canonical adoption proof
+- `tools/AsterGraph.PackageSmoke` = packed-package consumption proof
+- `tools/AsterGraph.ScaleSmoke` = larger-graph, history, and state-continuity proof
+- `src/AsterGraph.Demo` = showcase host for visual/manual inspection
+
 ## Public Entry Points
 
 - [Quick Start](./quick-start.md)

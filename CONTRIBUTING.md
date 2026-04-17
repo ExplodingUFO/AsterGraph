@@ -78,10 +78,16 @@ dotnet test tests/AsterGraph.Demo.Tests/AsterGraph.Demo.Tests.csproj --nologo -v
 For externally visible changes, update the matching public docs:
 
 - [`README.md`](./README.md)
-- [`docs/quick-start.md`](./docs/quick-start.md)
-- [`docs/host-integration.md`](./docs/host-integration.md)
-- [`docs/state-contracts.md`](./docs/state-contracts.md)
-- [`docs/extension-contracts.md`](./docs/extension-contracts.md)
-- [`docs/alpha-status.md`](./docs/alpha-status.md)
+- [`README.zh-CN.md`](./README.zh-CN.md)
+- [`docs/en/quick-start.md`](./docs/en/quick-start.md)
+- [`docs/en/host-integration.md`](./docs/en/host-integration.md)
+- [`docs/en/state-contracts.md`](./docs/en/state-contracts.md)
+- [`docs/en/extension-contracts.md`](./docs/en/extension-contracts.md)
+- [`docs/en/alpha-status.md`](./docs/en/alpha-status.md)
+- [`docs/zh-CN/quick-start.md`](./docs/zh-CN/quick-start.md)
+- [`docs/zh-CN/host-integration.md`](./docs/zh-CN/host-integration.md)
+- [`docs/zh-CN/state-contracts.md`](./docs/zh-CN/state-contracts.md)
+- [`docs/zh-CN/extension-contracts.md`](./docs/zh-CN/extension-contracts.md)
+- [`docs/zh-CN/alpha-status.md`](./docs/zh-CN/alpha-status.md)
 
-Planning files under [`.planning`](./.planning/) are maintainer-facing context. Public onboarding should remain understandable from `README` plus `docs/`.
+Keep public onboarding understandable from `README.md`, `README.zh-CN.md`, and the canonical guides under `docs/en` and `docs/zh-CN`. Do not introduce public dependencies on local-only planning files or other ignored maintainer context.
