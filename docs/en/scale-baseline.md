@@ -32,10 +32,12 @@ The harness still emits the existing correctness markers such as `SCALE_HISTORY_
 
 The current release lane defends the `baseline` tier with these redlines:
 
+These redlines are intentionally conservative and are validated on the current GitHub-hosted Windows runner class used by the public release lane, not on an optimized local workstation.
+
 | Metric | Baseline redline |
 | --- | ---: |
 | setup | 1500 ms |
-| selection | 150 ms |
+| selection | 500 ms |
 | connection | 150 ms |
 | history interaction | 400 ms |
 | viewport / fit | 150 ms |

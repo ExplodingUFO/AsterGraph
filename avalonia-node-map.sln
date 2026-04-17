@@ -37,6 +37,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsterGraph.HelloWorld", "to
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsterGraph.HelloWorld.Avalonia", "tools\AsterGraph.HelloWorld.Avalonia\AsterGraph.HelloWorld.Avalonia.csproj", "{868AF41C-3C2F-4687-A8CA-058536980D5C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsterGraph.ScaleSmoke.Tests", "tests\AsterGraph.ScaleSmoke.Tests\AsterGraph.ScaleSmoke.Tests.csproj", "{F4ADC6FE-C100-4FBF-B445-F45076B8C52F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -215,6 +217,18 @@ Global
 		{868AF41C-3C2F-4687-A8CA-058536980D5C}.Release|x64.Build.0 = Release|Any CPU
 		{868AF41C-3C2F-4687-A8CA-058536980D5C}.Release|x86.ActiveCfg = Release|Any CPU
 		{868AF41C-3C2F-4687-A8CA-058536980D5C}.Release|x86.Build.0 = Release|Any CPU
+		{F4ADC6FE-C100-4FBF-B445-F45076B8C52F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F4ADC6FE-C100-4FBF-B445-F45076B8C52F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F4ADC6FE-C100-4FBF-B445-F45076B8C52F}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{F4ADC6FE-C100-4FBF-B445-F45076B8C52F}.Debug|x64.Build.0 = Debug|Any CPU
+		{F4ADC6FE-C100-4FBF-B445-F45076B8C52F}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F4ADC6FE-C100-4FBF-B445-F45076B8C52F}.Debug|x86.Build.0 = Debug|Any CPU
+		{F4ADC6FE-C100-4FBF-B445-F45076B8C52F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F4ADC6FE-C100-4FBF-B445-F45076B8C52F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F4ADC6FE-C100-4FBF-B445-F45076B8C52F}.Release|x64.ActiveCfg = Release|Any CPU
+		{F4ADC6FE-C100-4FBF-B445-F45076B8C52F}.Release|x64.Build.0 = Release|Any CPU
+		{F4ADC6FE-C100-4FBF-B445-F45076B8C52F}.Release|x86.ActiveCfg = Release|Any CPU
+		{F4ADC6FE-C100-4FBF-B445-F45076B8C52F}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -234,5 +248,6 @@ Global
 		{8BB27B33-5359-46E2-9037-FC3FF36D48AD} = {07C2787E-EAC7-C090-1BA3-A61EC2A24D84}
 		{4396C3D7-7021-4ED0-8876-83C87CFA657D} = {07C2787E-EAC7-C090-1BA3-A61EC2A24D84}
 		{868AF41C-3C2F-4687-A8CA-058536980D5C} = {07C2787E-EAC7-C090-1BA3-A61EC2A24D84}
+		{F4ADC6FE-C100-4FBF-B445-F45076B8C52F} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 	EndGlobalSection
 EndGlobal

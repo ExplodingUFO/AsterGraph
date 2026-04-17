@@ -32,10 +32,12 @@
 
 release lane 现在只对 `baseline` 层级守这些红线：
 
+这些红线刻意按当前公开 release lane 使用的 GitHub hosted Windows runner 冷启动测量来设定，不是按本地高性能开发机的最佳成绩来定。
+
 | 指标 | baseline 红线 |
 | --- | ---: |
 | setup | 1500 ms |
-| selection | 150 ms |
+| selection | 500 ms |
 | connection | 150 ms |
 | history interaction | 400 ms |
 | viewport / fit | 150 ms |

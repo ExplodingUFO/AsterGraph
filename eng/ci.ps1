@@ -35,6 +35,7 @@ $helloWorldAvaloniaProject = 'tools/AsterGraph.HelloWorld.Avalonia/AsterGraph.He
 $packageSmokeProject = 'tools/AsterGraph.PackageSmoke/AsterGraph.PackageSmoke.csproj'
 $scaleSmokeProject = 'tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj'
 $editorTestsProject = 'tests/AsterGraph.Editor.Tests/AsterGraph.Editor.Tests.csproj'
+$scaleSmokeTestsProject = 'tests/AsterGraph.ScaleSmoke.Tests/AsterGraph.ScaleSmoke.Tests.csproj'
 $userHome = if ([string]::IsNullOrWhiteSpace($env:USERPROFILE)) { $env:HOME } else { $env:USERPROFILE }
 $fallbackPackageCache = Join-Path $userHome '.nuget/packages'
 $singleProcessBuildArguments = @(
@@ -69,7 +70,8 @@ $frameworkBuildProjects = @{
 
 $frameworkTestProjects = @{
   'net8.0' = @(
-    'tests/AsterGraph.Serialization.Tests/AsterGraph.Serialization.Tests.csproj'
+    'tests/AsterGraph.Serialization.Tests/AsterGraph.Serialization.Tests.csproj',
+    $scaleSmokeTestsProject
   )
   'net9.0' = @(
     'tests/AsterGraph.Editor.Tests/AsterGraph.Editor.Tests.csproj',
