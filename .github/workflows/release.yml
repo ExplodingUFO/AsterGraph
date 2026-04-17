@@ -34,7 +34,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ github.event_name == 'workflow_dispatch' && inputs.release_ref || github.ref }}
 
@@ -43,7 +43,7 @@ jobs:
         run: New-Item -ItemType Directory -Force -Path $env:NUGET_PACKAGES | Out-Null
 
       - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           global-json-file: global.json
           cache: true
@@ -71,7 +71,7 @@ jobs:
         run: .\eng\ci.ps1 -Lane release -Framework all -Configuration Release
 
       - name: Upload prerelease artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: prerelease-artifacts
           path: |
@@ -134,7 +134,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ github.event_name == 'workflow_dispatch' && inputs.release_ref || github.ref }}
 
@@ -143,7 +143,7 @@ jobs:
         run: New-Item -ItemType Directory -Force -Path $env:NUGET_PACKAGES | Out-Null
 
       - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           global-json-file: global.json
           cache: true
@@ -195,7 +195,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ github.event_name == 'workflow_dispatch' && inputs.release_ref || github.ref }}
 
@@ -204,7 +204,7 @@ jobs:
         run: New-Item -ItemType Directory -Force -Path $env:NUGET_PACKAGES | Out-Null
 
       - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           global-json-file: global.json
 
