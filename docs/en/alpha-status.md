@@ -4,6 +4,7 @@
 
 - package baseline: `0.2.0-alpha.1`
 - repo status: public alpha
+- public versioning guidance: [Versioning](./versioning.md)
 - public entry path: `README.md` plus the guides under `docs/en` and `docs/zh-CN`
 - public status page: [Project Status](./project-status.md)
 - maintainer launch checklist: [Public Launch Checklist](./public-launch-checklist.md)
@@ -34,12 +35,14 @@
 
 ## Known Limitations
 
+- historical repository tags such as `v1.9` and `v1.10` still exist as pre-launch milestone markers; treat the package version as the public version source of truth
 - public prerelease publishing and release artifacts still depend on the maintainer release flow
 - the deepest package-validation lane and the `.NET 10` packed-consumer proof still run on the Windows release-validation path
 - retained compatibility APIs are still present during the migration window
 
 ## Recommended Entry Points
 
+- [Versioning](./versioning.md)
 - [Project Status](./project-status.md)
 - [Quick Start](./quick-start.md)
 - [Public Launch Checklist](./public-launch-checklist.md)

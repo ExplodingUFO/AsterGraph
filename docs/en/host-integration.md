@@ -1,6 +1,6 @@
 # Host Integration Guide
 
-This guide expands the canonical host routes without introducing a second route tree.
+This guide expands the supported host routes without turning the public onboarding flow into maintainer proof documentation.
 
 ## Canonical Routes
 
@@ -11,30 +11,25 @@ This guide expands the canonical host routes without introducing a second route 
 3. Retained migration  
    `new GraphEditorViewModel(...)` + `new GraphEditorView { Editor = editor }`
 
-Standalone Avalonia surfaces such as `AsterGraphCanvasViewFactory`, `AsterGraphInspectorViewFactory`, and `AsterGraphMiniMapViewFactory` belong to route 2. They are composition details under the canonical hosted-UI family, not a fourth primary route.
+Standalone Avalonia surfaces such as `AsterGraphCanvasViewFactory`, `AsterGraphInspectorViewFactory`, and `AsterGraphMiniMapViewFactory` belong to route 2. They are composition details under the hosted-UI family, not a fourth primary route.
 
 ## Consumer Route Matrix
 
-| Need | Packages to start with | Canonical entry point | Verify with |
+| Need | Packages to start with | Canonical entry point | First sample |
 | --- | --- | --- | --- |
-| Runtime-only/custom UI | `AsterGraph.Abstractions`, `AsterGraph.Editor` | `CreateSession(...)` | packed `HostSample` |
-| Default Avalonia UI | `AsterGraph.Avalonia` | `Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` | packed `HostSample` |
-| Plugin trust/discovery | `AsterGraph.Editor` | `DiscoverPluginCandidates(...)` + `PluginTrustPolicy` | `eng/ci.ps1 -Lane contract` |
-| Automation | `AsterGraph.Editor` | `IGraphEditorSession.Automation.Execute(...)` | `eng/ci.ps1 -Lane contract` |
-| Retained migration | `AsterGraph.Editor` (+ `AsterGraph.Avalonia` when embedding `GraphEditorView`) | retained constructor path | `eng/ci.ps1 -Lane contract` |
+| Runtime-only/custom UI | `AsterGraph.Editor` (+ `AsterGraph.Abstractions` when defining nodes) | `CreateSession(...)` | `tools/AsterGraph.HelloWorld` |
+| Default Avalonia UI | `AsterGraph.Avalonia` | `Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` | `tools/AsterGraph.HostSample` |
+| Plugin trust/discovery | `AsterGraph.Editor` | `DiscoverPluginCandidates(...)` + `PluginTrustPolicy` | `src/AsterGraph.Demo` |
+| Automation | `AsterGraph.Editor` | `IGraphEditorSession.Automation.Execute(...)` | `src/AsterGraph.Demo` |
+| Retained migration | `AsterGraph.Editor` (+ `AsterGraph.Avalonia` when embedding `GraphEditorView`) | retained constructor path | migration-only |
 
-## Minimal Consumer Host
+## Sample Roles
 
-Use `tools/AsterGraph.HostSample` when you want the smallest runnable proof of:
-
-- `CreateSession(...)`
-- `Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)`
-
-`HostSample` is intentionally narrow. It does not replace:
-
-- `AsterGraph.PackageSmoke`
-- `AsterGraph.ScaleSmoke`
-- `AsterGraph.Demo`
+- `AsterGraph.HelloWorld` = first-run sample for the runtime-only path
+- `AsterGraph.HostSample` = narrow proof harness for the canonical runtime-only and hosted-UI routes
+- `AsterGraph.PackageSmoke` = packed-package proof
+- `AsterGraph.ScaleSmoke` = scale/history/state proof
+- `AsterGraph.Demo` = full showcase host for visual inspection
 
 ## State Contract
 
@@ -59,19 +54,8 @@ Important defaults:
 - host localization runs after plugin localization, so host override wins
 - runtime/session menu composition differs from retained host augmentor composition; use the runtime path for new work
 
-## Release Verification
+## Plugin Trust Boundary
 
-Preferred proof-ring entrypoints:
+Plugin trust is host-owned. AsterGraph can help the host discover candidates, apply allow/block policy, and inspect outcomes, but it does not sandbox plugin code or isolate untrusted execution.
 
-```powershell
-pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane contract -Framework all -Configuration Release
-pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane maintenance -Framework all -Configuration Release
-pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framework all -Configuration Release
-```
-
-Tool roles:
-
-- `AsterGraph.HostSample` = minimal consumer proof
-- `AsterGraph.PackageSmoke` = packed package consumption proof
-- `AsterGraph.ScaleSmoke` = larger-graph and history/readiness proof
-- `AsterGraph.Demo` = visual/manual showcase host
+For deeper proof, CI lanes, and release gates, use [CONTRIBUTING.md](../../CONTRIBUTING.md) and [Public Launch Checklist](./public-launch-checklist.md).

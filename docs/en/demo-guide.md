@@ -13,6 +13,8 @@
 
 ## Host Menu Groups
 
+When the demo runs in English:
+
 - `Showcase`
 - `View`
 - `Behavior`
@@ -21,6 +23,17 @@
 - `Automation`
 - `Integration`
 - `Proof`
+
+When the demo runs in Chinese:
+
+- `展示`
+- `视图`
+- `行为`
+- `运行时`
+- `扩展`
+- `自动化`
+- `集成`
+- `证明`
 
 The top menu also exposes the visible language switch.
 
@@ -31,9 +44,10 @@ The top menu also exposes the visible language switch.
 - `Integration` points to `HostSample`, renders standalone surfaces, and shows presenter-replacement previews.
 - `Proof` keeps host-owned shell state next to shared runtime evidence.
 
-## Demo vs HostSample
+## Demo vs Other Entry Samples
 
-- `HostSample` = smallest canonical consumer path
+- `HelloWorld` = smallest runtime-only first-run sample
+- `HostSample` = narrow proof harness for the canonical consumer routes
 - `Demo` = full showcase host for product surface and host boundary
 
-Use the demo when you need to inspect behavior visually. Use `HostSample` when you need the shortest adoption proof.
+Use the demo when you need to inspect behavior visually. Use `HelloWorld` for the quickest first run and `HostSample` for proof-oriented route validation.

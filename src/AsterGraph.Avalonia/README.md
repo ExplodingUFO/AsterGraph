@@ -1,92 +1,47 @@
 # AsterGraph.Avalonia
 
-Avalonia UI shell for the AsterGraph editor.
+`AsterGraph.Avalonia` is the default Avalonia UI package for AsterGraph.
 
-Quick Start: [main UI entry quick start](../../docs/en/quick-start.md).
+It belongs to the supported published package set with `AsterGraph.Abstractions`, `AsterGraph.Core`, and `AsterGraph.Editor`, and it targets `net8.0` and `net9.0`.
 
-This package belongs to the supported AsterGraph package set with `AsterGraph.Abstractions`, `AsterGraph.Core`, and `AsterGraph.Editor`, and it targets `net8.0` and `net9.0`.
+## Reference This Package When
 
-Direct package reference:
+- the host wants the shipped full editor shell
+- the host wants standalone Avalonia surfaces such as the stock canvas, inspector, or mini map
+- the host wants stock Avalonia presenters with optional presenter replacement through `AsterGraphPresentationOptions`
 
-- Yes, this is the default UI package for hosts embedding the editor.
-- Pair it with `AsterGraph.Editor` for the canonical hosted-UI composition path.
-- Pair it with `AsterGraph.Abstractions` for node definitions and shared style contracts.
-- Add `AsterGraph.Core` when the host also needs direct model or serialization access.
-
-This project intentionally contains:
+## This Package Owns
 
 - `GraphEditorView`
-- `GraphEditorView.ChromeMode` for switching between the default shell and `CanvasOnly`
-- `NodeCanvas` as a supported standalone graph surface
-- `GraphInspectorView` as a supported standalone inspector surface
-- `GraphMiniMap` as a supported standalone mini map surface
-- `GraphContextMenuPresenter` as the stock Avalonia menu presenter
-- `AsterGraphPresentationOptions` plus node/menu/inspector/mini-map presenter contracts for opt-in visual replacement
-- canvas rendering and pointer interaction
-- theme resources
-- context-menu presentation from editor descriptors
-- rendered-control-based anchor resolution for connection endpoints
+- `NodeCanvas`
+- `GraphInspectorView`
+- `GraphMiniMap`
+- stock Avalonia menu and presentation wiring
+- `AsterGraphAvaloniaViewFactory` plus standalone surface factories
+- Avalonia theme resources, input handling, and control-level integration glue
 
-This project intentionally does not own:
+## This Package Does Not Own
 
-- node definition contracts
+- node-definition contracts
 - compatibility policy
 - editor-state orchestration
-- demo node content
+- demo content
 
-Those responsibilities live in `AsterGraph.Abstractions`, `AsterGraph.Core`, and `AsterGraph.Editor`. `AsterGraph.Demo` remains a sample app only.
+Those responsibilities live in `AsterGraph.Abstractions`, `AsterGraph.Core`, `AsterGraph.Editor`, and the consuming host.
 
-Integration entry points:
+## Canonical UI Entry Paths
 
-- [Host Integration Guide](https://github.com/ExplodingUFO/AsterGraph/blob/master/docs/en/host-integration.md)
-- [Demo App](https://github.com/ExplodingUFO/AsterGraph/tree/master/src/AsterGraph.Demo)
+- hosted full shell: `AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOptions { ... })`
+- standalone canvas: `AsterGraphCanvasViewFactory.Create(...)`
+- standalone inspector: `AsterGraphInspectorViewFactory.Create(...)`
+- standalone mini map: `AsterGraphMiniMapViewFactory.Create(...)`
+- retained compatibility: `new GraphEditorView { Editor = editor }`
 
-Canonical and compatibility UI entry paths:
+For new work, prefer the factory-based routes. Treat the direct `GraphEditorView` constructor path as retained compatibility.
 
-- Canonical full shell: `AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOptions { ... })`
-- Canonical standalone canvas: `AsterGraphCanvasViewFactory.Create(new AsterGraphCanvasViewOptions { ... })`
-- Canonical standalone inspector: `AsterGraphInspectorViewFactory.Create(new AsterGraphInspectorViewOptions { ... })`
-- Canonical standalone mini map: `AsterGraphMiniMapViewFactory.Create(new AsterGraphMiniMapViewOptions { ... })`
-- Compatibility: `new GraphEditorView { Editor = editor }`
+## Start Here
 
-Per-surface presentation replacement is opt-in through `AsterGraphPresentationOptions`.
-
-Phase 18 readiness note:
-
-- future plugin/automation work should anchor on `editor.Session` / `CreateSession(...)`, not on Avalonia controls themselves
-- `src/AsterGraph.Demo`, `tools/AsterGraph.PackageSmoke`, and `tools/AsterGraph.ScaleSmoke` now carry the current host/UI validation signals for that runtime boundary
-
-Phase 16 adapter boundary:
-
-- Stock full-shell and standalone-canvas context menus are built from `editor.Session.Queries.BuildContextMenuDescriptors(...)`.
-- `IGraphContextMenuPresenter` implementations can opt into the canonical descriptor overload and receive `IGraphEditorCommands` directly. The older `MenuItemDescriptor` overload remains as a compatibility path.
-- Stock default keyboard shortcuts in `GraphEditorView` and `NodeCanvas` now route through a shared Avalonia shortcut adapter over `editor.Session.Commands`.
-- `GraphEditorView` owns Avalonia clipboard and host-context seam binding for the full shell. Its embedded `NodeCanvas` keeps platform-seam ownership disabled.
-- A standalone `NodeCanvas` owns those Avalonia clipboard and host-context seams when it is attached to the visual tree.
-
-Example full-shell configuration:
-
-```csharp
-var view = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOptions
-{
-    Editor = editor,
-    Presentation = new AsterGraphPresentationOptions
-    {
-        NodeVisualPresenter = customNodePresenter,
-        ContextMenuPresenter = customMenuPresenter,
-        InspectorPresenter = customInspectorPresenter,
-        MiniMapPresenter = customMiniMapPresenter,
-    },
-});
-```
-
-If `Presentation` is omitted, the shipped stock presenters remain active.
-
-Standalone canvas keeps the stock context menu and stock command shortcuts enabled by default. Hosts can explicitly opt out through:
-
-- `EnableDefaultContextMenu`
-- `EnableDefaultCommandShortcuts`
-
-If a host replaces only the presenter, not the editor state, the recommended path is to keep consuming canonical session descriptors/commands and treat `GraphEditorViewModel.BuildContextMenu(...)` as retained compatibility surface.
-
-Header/library/status chrome remain shell-only. Phase 4 adds presenter replacement for node visuals, menus, inspector, and mini map without moving editor behavior into the host.
+- quickest hosted-UI onboarding: [Quick Start](../../docs/en/quick-start.md)
+- route and composition guidance: [Host Integration](../../docs/en/host-integration.md)
+- visual showcase host: [`src/AsterGraph.Demo`](../../src/AsterGraph.Demo/)
+- product overview: [Root README](../../README.md)

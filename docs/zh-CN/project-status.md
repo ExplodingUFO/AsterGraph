@@ -4,12 +4,14 @@
 
 - 包版本基线：`0.2.0-alpha.1`
 - 仓库阶段：公开 Alpha
+- 对外版本说明：[Versioning](./versioning.md)
 - 当前公开支持的发布包：
   - `AsterGraph.Abstractions`
   - `AsterGraph.Core`
   - `AsterGraph.Editor`
   - `AsterGraph.Avalonia`
 - 示例与验证工具：
+  - `tools/AsterGraph.HelloWorld`：最快的 runtime-only 第一跑样例
   - `tools/AsterGraph.HostSample`：最小接入路径
   - `tools/AsterGraph.PackageSmoke`：打包消费验证
   - `tools/AsterGraph.ScaleSmoke`：规模与状态连续性验证
@@ -44,6 +46,7 @@
 
 ## 公开入口分工
 
+- `tools/AsterGraph.HelloWorld` = runtime-only 第一跑样例
 - `tools/AsterGraph.HostSample` = 最小推荐接入验证
 - `tools/AsterGraph.PackageSmoke` = 打包消费验证
 - `tools/AsterGraph.ScaleSmoke` = 大图、历史记录和状态连续性验证
@@ -51,6 +54,7 @@
 
 ## 对外入口
 
+- [Versioning](./versioning.md)
 - [Quick Start](./quick-start.md)
 - [Alpha 状态](./alpha-status.md)
 - [Public Launch Checklist](./public-launch-checklist.md)

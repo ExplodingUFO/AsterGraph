@@ -4,6 +4,7 @@
 
 - 包版本基线：`0.2.0-alpha.1`
 - 仓库状态：public alpha
+- 对外版本说明：[Versioning](./versioning.md)
 - 对外入口：`README.md` / `README.zh-CN.md` 加上 `docs/en` / `docs/zh-CN`
 - 项目状态页：[Project Status](./project-status.md)
 - 对外发布检查清单：[Public Launch Checklist](./public-launch-checklist.md)
@@ -33,12 +34,14 @@
 
 ## 已知限制
 
+- 仓库里仍保留了 `v1.9`、`v1.10` 这类公开前的历史 tag；对外版本以 NuGet 包版本为准
 - public prerelease publish 和 release artifact 仍然依赖维护者 release flow
 - 最深的 package validation lane 目前仍以 Windows 为主
 - retained compatibility API 仍处于迁移窗口内
 
 ## 推荐入口
 
+- [Versioning](./versioning.md)
 - [Project Status](./project-status.md)
 - [Quick Start](./quick-start.md)
 - [Public Launch Checklist](./public-launch-checklist.md)

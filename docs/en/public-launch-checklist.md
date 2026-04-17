@@ -52,10 +52,11 @@ Expected high-signal markers:
 
 - confirm the working tree is clean
 - push the release branch or `master` state that should back the tag
-- create and push the next public `v*` tag
+- create and push the next public tag in the form `v0.x.y-alpha.z`
 - watch `.github/workflows/release.yml` from start to finish
 - if `NUGET_API_KEY` is configured, confirm package publication succeeds
 - if `NUGET_API_KEY` is not configured, confirm the workflow reports a deliberate NuGet publish skip instead of a failure
+- do not present historical milestone-style tags such as `v1.9` as the current public package version; use [Versioning](./versioning.md) as the public rule
 
 For a maintainer-driven manual alpha publish without pushing a new tag:
 
@@ -70,9 +71,11 @@ For a maintainer-driven manual alpha publish without pushing a new tag:
 
 Keep the consumer entry story explicit in release notes and public announcements:
 
+- `tools/AsterGraph.HelloWorld` = fastest runtime-only first-run sample
 - `tools/AsterGraph.HostSample` = minimal consumer proof
 - `tools/AsterGraph.PackageSmoke` = packaged-consumption proof
 - `tools/AsterGraph.ScaleSmoke` = scale/history/state-continuity proof
 - `src/AsterGraph.Demo` = showcase host
+- `docs/en/versioning.md` = package version versus historical repository-tag guidance
 - `docs/en/quick-start.md` = canonical adoption path
 - `docs/en/alpha-status.md` = current alpha scope and limitations

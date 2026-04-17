@@ -30,6 +30,7 @@ $dotnetCliHome = Join-Path $repoRoot '.dotnet-cli-home'
 $coverageRunSettingsPath = Join-Path $repoRoot 'tests/coverage.runsettings'
 $coverageReportScriptPath = Join-Path $repoRoot 'eng/coverage-report.ps1'
 $hostSampleProject = 'tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj'
+$helloWorldProject = 'tools/AsterGraph.HelloWorld/AsterGraph.HelloWorld.csproj'
 $packageSmokeProject = 'tools/AsterGraph.PackageSmoke/AsterGraph.PackageSmoke.csproj'
 $scaleSmokeProject = 'tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj'
 $editorTestsProject = 'tests/AsterGraph.Editor.Tests/AsterGraph.Editor.Tests.csproj'
@@ -53,6 +54,7 @@ $publishableProjects = @(
 
 $frameworkBuildProjects = @{
   'net8.0' = @(
+    $helloWorldProject,
     $hostSampleProject,
     $packageSmokeProject,
     $scaleSmokeProject

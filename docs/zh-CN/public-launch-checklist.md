@@ -52,10 +52,11 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framew
 
 - 确认工作区干净
 - 先把要打 tag 的分支或 `master` 推上去
-- 创建并推送下一个公开 `v*` tag
+- 创建并推送下一个形如 `v0.x.y-alpha.z` 的公开 tag
 - 从头到尾观察 `.github/workflows/release.yml`
 - 如果配置了 `NUGET_API_KEY`，确认包发布成功
 - 如果没有配置 `NUGET_API_KEY`，确认 workflow 是有意跳过 NuGet publish，而不是失败
+- 不要再把 `v1.9` 这类历史 milestone tag 当成当前公开包版本；对外统一以 [Versioning](./versioning.md) 为准
 
 如果你想在不新推 tag 的情况下手动发布 alpha 包：
 
@@ -70,9 +71,11 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framew
 
 在 release note、公告、README 里把入口说清楚：
 
+- `tools/AsterGraph.HelloWorld` = 最快的 runtime-only 第一跑样例
 - `tools/AsterGraph.HostSample` = 最小接入验证
 - `tools/AsterGraph.PackageSmoke` = 打包消费验证
 - `tools/AsterGraph.ScaleSmoke` = 规模、历史记录与状态连续性验证
 - `src/AsterGraph.Demo` = 展示宿主
+- `docs/zh-CN/versioning.md` = 包版本与历史仓库 tag 的对应说明
 - `docs/zh-CN/quick-start.md` = 推荐接入路径
 - `docs/zh-CN/alpha-status.md` = alpha 范围与限制

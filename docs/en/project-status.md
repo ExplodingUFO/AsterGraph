@@ -4,12 +4,14 @@
 
 - package baseline: `0.2.0-alpha.1`
 - repo posture: public alpha
+- public versioning guidance: [Versioning](./versioning.md)
 - supported published packages:
   - `AsterGraph.Abstractions`
   - `AsterGraph.Core`
   - `AsterGraph.Editor`
   - `AsterGraph.Avalonia`
 - sample and proof tools:
+  - `tools/AsterGraph.HelloWorld` for the quickest runtime-only first run
   - `tools/AsterGraph.HostSample` for the minimal consumer path
   - `tools/AsterGraph.PackageSmoke` for packed-package proof
   - `tools/AsterGraph.ScaleSmoke` for scale and state-continuity proof
@@ -44,6 +46,7 @@ The current public-repo priority is not new runtime capability. It is keeping th
 
 ## Public Entry Matrix
 
+- `tools/AsterGraph.HelloWorld` = first-run runtime-only sample
 - `tools/AsterGraph.HostSample` = minimal canonical adoption proof
 - `tools/AsterGraph.PackageSmoke` = packed-package consumption proof
 - `tools/AsterGraph.ScaleSmoke` = larger-graph, history, and state-continuity proof
@@ -51,6 +54,7 @@ The current public-repo priority is not new runtime capability. It is keeping th
 
 ## Public Entry Points
 
+- [Versioning](./versioning.md)
 - [Quick Start](./quick-start.md)
 - [Alpha Status](./alpha-status.md)
 - [Public Launch Checklist](./public-launch-checklist.md)
