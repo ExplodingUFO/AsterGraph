@@ -52,11 +52,15 @@ The first lines of a public prerelease note should always expose:
 2. the matching public tag
 3. an optional historical milestone reference only when older repo history needs explaining
 
+The public prerelease workflow now generates and validates that header automatically. Maintainers should not hand-edit the first block of the GitHub prerelease body unless a legacy historical note must be added for context.
+
 Example:
 
 - package version: `0.2.0-alpha.2`
 - public tag: `v0.2.0-alpha.2`
 - historical repo checkpoint reference: `v1.9` (legacy, not installable)
+
+The generated prerelease body also carries the public proof summary from the release lane so external adopters can see the same installation, compatibility, scale, and coverage signals that gate publication.
 
 ## Related Docs
 

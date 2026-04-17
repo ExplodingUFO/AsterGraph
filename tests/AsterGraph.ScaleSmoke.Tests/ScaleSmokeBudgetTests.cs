@@ -6,6 +6,30 @@ namespace AsterGraph.ScaleSmoke.Tests;
 public sealed class ScaleSmokeBudgetTests
 {
     [Fact]
+    public void BaselineTier_EmitsMachineReadableBudgetMarker()
+    {
+        var tier = ScaleSmokeTier.Parse(["--tier", "baseline"]);
+
+        var marker = tier.ToBudgetMarker();
+
+        Assert.Equal(
+            "SCALE_TIER_BUDGET:baseline:nodes=180:selection=48:moves=24:setup<=1500:selection<=500:connection<=150:history<=400:viewport<=150:save<=150:reload<=1200",
+            marker);
+    }
+
+    [Fact]
+    public void LargeTier_EmitsInformationalOnlyBudgetMarker()
+    {
+        var tier = ScaleSmokeTier.Parse(["--tier", "large"]);
+
+        var marker = tier.ToBudgetMarker();
+
+        Assert.Equal(
+            "SCALE_TIER_BUDGET:large:nodes=1000:selection=128:moves=64:budget=informational-only",
+            marker);
+    }
+
+    [Fact]
     public void BaselineBudget_AllowsObservedGithubRunnerMetrics()
     {
         var tier = ScaleSmokeTier.Parse(["--tier", "baseline"]);

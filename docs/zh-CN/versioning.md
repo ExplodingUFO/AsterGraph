@@ -52,11 +52,15 @@
 2. 与之匹配的公开 tag
 3. 只有在确实需要解释旧仓库历史时，才补一行历史 milestone 引用
 
+这几行现在由公开 prerelease workflow 自动生成并校验。除非确实需要补 legacy 历史说明，否则维护者不应该手工改 release note 的第一块内容。
+
 例如：
 
 - 包版本：`0.2.0-alpha.2`
 - 公开 tag：`v0.2.0-alpha.2`
 - 历史仓库检查点引用：`v1.9`（legacy，不是可安装版本）
+
+自动生成的 prerelease note 还会带上 release lane 的 proof summary，让外部使用者直接看到同一组安装、兼容性、规模和覆盖率信号，而不必再去翻 workflow artifact。
 
 ## 相关文档
 

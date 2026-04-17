@@ -20,6 +20,7 @@ $proofArtifactsRoot = Join-Path $artifactsRoot 'proof'
 $coverageResultsRoot = Join-Path $artifactsRoot 'test-results\release'
 $coverageOutputPath = Join-Path $artifactsRoot 'coverage\release-summary.json'
 $coverageMarkerOutputPath = Join-Path $proofArtifactsRoot 'coverage-report.txt'
+$prereleaseNotesOutputPath = Join-Path $proofArtifactsRoot 'prerelease-notes.md'
 $publicRepoHygieneProofPath = Join-Path $proofArtifactsRoot 'public-repo-hygiene.txt'
 $hostSampleProjectProofPath = Join-Path $proofArtifactsRoot 'hostsample-project.txt'
 $hostSamplePackedProofPath = Join-Path $proofArtifactsRoot 'hostsample-packed.txt'
@@ -29,6 +30,7 @@ $scaleSmokeProofPath = Join-Path $proofArtifactsRoot 'scale-smoke.txt'
 $dotnetCliHome = Join-Path $repoRoot '.dotnet-cli-home'
 $coverageRunSettingsPath = Join-Path $repoRoot 'tests/coverage.runsettings'
 $coverageReportScriptPath = Join-Path $repoRoot 'eng/coverage-report.ps1'
+$prereleaseNotesScriptPath = Join-Path $repoRoot 'eng/write-prerelease-notes.ps1'
 $defaultVsTestConnectionTimeoutSeconds = 180
 $hostSampleProject = 'tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj'
 $helloWorldProject = 'tools/AsterGraph.HelloWorld/AsterGraph.HelloWorld.csproj'
@@ -646,6 +648,50 @@ function Invoke-CoverageValidation {
     Set-Content -LiteralPath $coverageMarkerOutputPath
 }
 
+function Invoke-PrereleaseNotesValidation {
+  param(
+    [string]$PublicTag
+  )
+
+  Write-Host ''
+  Write-Host '### Generate prerelease notes proof' -ForegroundColor Yellow
+
+  & $prereleaseNotesScriptPath `
+    -RepoRoot $repoRoot `
+    -ProofRoot $proofArtifactsRoot `
+    -OutputPath $prereleaseNotesOutputPath `
+    -CoverageSummaryPath $coverageOutputPath `
+    -PublicTag $PublicTag
+
+  if ($LASTEXITCODE -ne 0) {
+    throw "write-prerelease-notes script failed with exit code ${LASTEXITCODE}"
+  }
+
+  [xml]$props = Get-Content -LiteralPath (Join-Path $repoRoot 'Directory.Build.props') -Raw
+  $versionNode = $props.SelectSingleNode('/Project/PropertyGroup/Version')
+  $packageVersion = if ($null -ne $versionNode) { $versionNode.InnerText } else { $null }
+  $expectedTag = if ([string]::IsNullOrWhiteSpace($PublicTag)) { "v$packageVersion" } else { $PublicTag }
+  $noteText = Get-Content -LiteralPath $prereleaseNotesOutputPath -Raw
+
+  foreach ($requiredText in @(
+    "installable package version: ``$packageVersion``",
+    "matching public tag: ``$expectedTag``",
+    '## Proof Summary',
+    'PUBLIC_REPO_HYGIENE_OK:True',
+    'HOST_SAMPLE_OK:True',
+    'HOST_SAMPLE_NET10_OK:True',
+    'PACKAGE_SMOKE_OK:True',
+    'SCALE_TIER_BUDGET:',
+    'SCALE_PERFORMANCE_BUDGET_OK:',
+    'SCALE_HISTORY_CONTRACT_OK:',
+    'COVERAGE_REPORT_OK:'
+  )) {
+    if (-not $noteText.Contains($requiredText, [System.StringComparison]::Ordinal)) {
+      throw "Generated prerelease notes are missing required text: $requiredText"
+    }
+  }
+}
+
 function Invoke-ContractValidation {
   param(
     [switch]$SkipRestore
@@ -699,6 +745,8 @@ function Invoke-ReleaseValidation {
   Invoke-PackageSmoke
   Invoke-ScaleSmoke
   Invoke-CoverageValidation
+  Invoke-PublicRepoHygieneValidation -PreserveExistingProofArtifacts
+  Invoke-PrereleaseNotesValidation
 }
 
 function Invoke-MaintenanceValidation {
@@ -731,11 +779,20 @@ function Invoke-MaintenanceValidation {
 }
 
 function Invoke-PublicRepoHygieneValidation {
+  param(
+    [switch]$PreserveExistingProofArtifacts
+  )
+
   if ($Framework -ne 'all') {
     Write-Warning "Hygiene lane is framework-agnostic. Ignoring -Framework $Framework and validating the tracked repo surface."
   }
 
-  Reset-Directory -Path $proofArtifactsRoot
+  if ($PreserveExistingProofArtifacts) {
+    Ensure-Directory -Path $proofArtifactsRoot
+  }
+  else {
+    Reset-Directory -Path $proofArtifactsRoot
+  }
 
   Write-Host ''
   Write-Host '### Validate public repo hygiene surface' -ForegroundColor Yellow

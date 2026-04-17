@@ -29,6 +29,30 @@ public sealed record ScaleSmokeTier(
 {
     public bool EnforceBudgets => Budget is not null;
 
+    public string ToBudgetMarker()
+    {
+        if (Budget is null)
+        {
+            return $"SCALE_TIER_BUDGET:{Id}:nodes={NodeCount}:selection={SelectionCount}:moves={MoveCount}:budget=informational-only";
+        }
+
+        return string.Join(
+            ':',
+            [
+                $"SCALE_TIER_BUDGET:{Id}",
+                $"nodes={NodeCount}",
+                $"selection={SelectionCount}",
+                $"moves={MoveCount}",
+                $"setup<={Budget.SetupMs}",
+                $"selection<={Budget.SelectionMs}",
+                $"connection<={Budget.ConnectionMs}",
+                $"history<={Budget.HistoryMs}",
+                $"viewport<={Budget.ViewportMs}",
+                $"save<={Budget.SaveMs}",
+                $"reload<={Budget.ReloadMs}",
+            ]);
+    }
+
     public ScaleSmokeBudgetEvaluation Evaluate(ScaleSmokeMetrics metrics)
     {
         if (Budget is null)

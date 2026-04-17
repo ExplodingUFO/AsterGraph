@@ -16,6 +16,42 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  hygiene-proof:
+    name: hygiene-proof
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Prepare NuGet cache directory
+        shell: pwsh
+        run: New-Item -ItemType Directory -Force -Path $env:NUGET_PACKAGES | Out-Null
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+          cache: true
+          cache-dependency-path: |
+            global.json
+            Directory.Build.props
+            NuGet.config.sample
+            **/*.csproj
+
+      - name: Run public repo hygiene lane
+        shell: pwsh
+        run: .\eng\ci.ps1 -Lane hygiene -Framework all -Configuration Release
+
+      - name: Upload hygiene proof artifacts
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: hygiene-proof-artifacts
+          path: |
+            artifacts/proof/public-repo-hygiene.txt
+          if-no-files-found: warn
+
   framework-matrix:
     name: framework-matrix (${{ matrix.framework }})
     runs-on: windows-latest
@@ -116,6 +152,7 @@ jobs:
     name: release-validation
     runs-on: windows-latest
     needs:
+      - hygiene-proof
       - framework-matrix
       - linux-validation
       - contract-proof

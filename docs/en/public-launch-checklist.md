@@ -56,6 +56,11 @@ Expected high-signal markers:
 - create and push the next public tag in the form `v0.x.y-alpha.z`
 - watch `.github/workflows/release.yml` from start to finish
 - remember that the prerelease workflow now enforces an exact tag-to-package-version match
+- confirm the generated prerelease notes begin with the automated header block:
+  - installable package version
+  - matching public tag
+  - optional legacy historical repo checkpoint reference
+- confirm the generated prerelease notes also publish the proof summary block, not only workflow artifacts
 - if `NUGET_API_KEY` is configured, confirm package publication succeeds
 - if `NUGET_API_KEY` is not configured, confirm the workflow reports a deliberate NuGet publish skip instead of a failure
 - do not present historical milestone-style tags such as `v1.9` as the current public package version; use [Versioning](./versioning.md) as the public rule
@@ -81,5 +86,6 @@ Keep the consumer entry story explicit in release notes and public announcements
 - `tools/AsterGraph.ScaleSmoke` = scale baseline plus history/state-continuity proof
 - `src/AsterGraph.Demo` = showcase host
 - `docs/en/versioning.md` = package version versus historical repository-tag guidance
+- `docs/en/project-status.md` = current public alpha status snapshot
 - `docs/en/quick-start.md` = canonical adoption path
 - `docs/en/alpha-status.md` = current alpha scope and limitations

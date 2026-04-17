@@ -68,8 +68,11 @@ dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj --
 High-signal lines:
 
 - `SCALE_TIER_INFO:...`
+- `SCALE_TIER_BUDGET:...`
 - `SCALE_PERF_METRICS:...`
 - `SCALE_PERFORMANCE_BUDGET_OK:...`
 - `SCALE_HISTORY_CONTRACT_OK:...`
 
-Treat the budget marker as the defended release signal. Treat the larger-tier metric line as public telemetry until the alpha line is ready to commit to stronger scale guarantees.
+`SCALE_TIER_BUDGET` is the machine-readable declaration of the defended tier, scenario sizes, and threshold policy for the current run. Release notes and proof summaries can quote that marker directly without re-parsing the table above.
+
+Treat `SCALE_PERFORMANCE_BUDGET_OK` as the defended release signal. Treat the larger-tier metric line as public telemetry until the alpha line is ready to commit to stronger scale guarantees.

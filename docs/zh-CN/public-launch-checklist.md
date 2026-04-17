@@ -56,6 +56,11 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framew
 - 创建并推送下一个形如 `v0.x.y-alpha.z` 的公开 tag
 - 从头到尾观察 `.github/workflows/release.yml`
 - 现在 prerelease workflow 会强制校验：公开 tag 必须和包版本完全一致
+- 确认自动生成的 prerelease notes 第一屏带有固定 header：
+  - 可安装包版本
+  - 与之匹配的公开 tag
+  - 可选的 legacy 历史仓库检查点引用
+- 确认自动生成的 prerelease notes 同时把 proof summary 发出来，而不只是留在 workflow artifact 里
 - 如果配置了 `NUGET_API_KEY`，确认包发布成功
 - 如果没有配置 `NUGET_API_KEY`，确认 workflow 是有意跳过 NuGet publish，而不是失败
 - 不要再把 `v1.9` 这类历史里程碑标签当成当前公开包版本；对外统一以 [Versioning](./versioning.md) 为准
@@ -81,5 +86,6 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framew
 - `tools/AsterGraph.ScaleSmoke` = 规模基线加历史记录与状态连续性验证
 - `src/AsterGraph.Demo` = 展示宿主
 - `docs/zh-CN/versioning.md` = 包版本与历史仓库 tag 的对应说明
+- `docs/zh-CN/project-status.md` = 当前公开 alpha 状态快照
 - `docs/zh-CN/quick-start.md` = 推荐接入路径
 - `docs/zh-CN/alpha-status.md` = alpha 范围与限制

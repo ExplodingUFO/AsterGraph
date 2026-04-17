@@ -68,8 +68,11 @@ dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj --
 最有信号的几行是：
 
 - `SCALE_TIER_INFO:...`
+- `SCALE_TIER_BUDGET:...`
 - `SCALE_PERF_METRICS:...`
 - `SCALE_PERFORMANCE_BUDGET_OK:...`
 - `SCALE_HISTORY_CONTRACT_OK:...`
 
-其中 budget marker 是当前真正对外承诺的 release 信号；更大层级的 metric 行暂时只算公开遥测，不算正式性能承诺。
+其中 `SCALE_TIER_BUDGET` 是当前运行的机器可读预算声明，直接把防守层级、场景规模和阈值策略编码成一行，release note 和 proof summary 可以直接引用。
+
+真正对外承诺的 release 信号还是 `SCALE_PERFORMANCE_BUDGET_OK`；更大层级的 metric 行暂时只算公开遥测，不算正式性能承诺。

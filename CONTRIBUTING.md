@@ -84,10 +84,18 @@ For externally visible changes, update the matching public docs:
 - [`docs/en/state-contracts.md`](./docs/en/state-contracts.md)
 - [`docs/en/extension-contracts.md`](./docs/en/extension-contracts.md)
 - [`docs/en/alpha-status.md`](./docs/en/alpha-status.md)
+- [`docs/en/versioning.md`](./docs/en/versioning.md)
+- [`docs/en/project-status.md`](./docs/en/project-status.md)
+- [`docs/en/public-launch-checklist.md`](./docs/en/public-launch-checklist.md)
+- [`docs/en/demo-guide.md`](./docs/en/demo-guide.md)
 - [`docs/zh-CN/quick-start.md`](./docs/zh-CN/quick-start.md)
 - [`docs/zh-CN/host-integration.md`](./docs/zh-CN/host-integration.md)
 - [`docs/zh-CN/state-contracts.md`](./docs/zh-CN/state-contracts.md)
 - [`docs/zh-CN/extension-contracts.md`](./docs/zh-CN/extension-contracts.md)
 - [`docs/zh-CN/alpha-status.md`](./docs/zh-CN/alpha-status.md)
+- [`docs/zh-CN/versioning.md`](./docs/zh-CN/versioning.md)
+- [`docs/zh-CN/project-status.md`](./docs/zh-CN/project-status.md)
+- [`docs/zh-CN/public-launch-checklist.md`](./docs/zh-CN/public-launch-checklist.md)
+- [`docs/zh-CN/demo-guide.md`](./docs/zh-CN/demo-guide.md)
 
 Keep public onboarding understandable from `README.md`, `README.zh-CN.md`, and the canonical guides under `docs/en` and `docs/zh-CN`. Do not introduce public dependencies on local-only planning files or other ignored maintainer context.

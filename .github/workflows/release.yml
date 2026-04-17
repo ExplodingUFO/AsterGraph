@@ -38,6 +38,28 @@ jobs:
         with:
           ref: ${{ github.event_name == 'workflow_dispatch' && inputs.release_ref || github.ref }}
 
+      - name: Resolve release tag context
+        id: release_context
+        shell: pwsh
+        run: |
+          $releaseRef = if ($env:GITHUB_EVENT_NAME -eq 'workflow_dispatch' -and -not [string]::IsNullOrWhiteSpace('${{ inputs.release_ref }}')) {
+            '${{ inputs.release_ref }}'.Trim()
+          } else {
+            $env:GITHUB_REF_NAME
+          }
+
+          if ($releaseRef.StartsWith('refs/tags/', [System.StringComparison]::OrdinalIgnoreCase)) {
+            $releaseTag = $releaseRef.Substring('refs/tags/'.Length)
+          }
+          elseif ($releaseRef.StartsWith('v', [System.StringComparison]::OrdinalIgnoreCase)) {
+            $releaseTag = $releaseRef
+          }
+          else {
+            $releaseTag = ''
+          }
+
+          "release_tag=$releaseTag" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+
       - name: Prepare NuGet cache directory
         shell: pwsh
         run: New-Item -ItemType Directory -Force -Path $env:NUGET_PACKAGES | Out-Null
@@ -54,13 +76,13 @@ jobs:
             **/*.csproj
 
       - name: Validate tag matches package version
-        if: ${{ startsWith(github.ref, 'refs/tags/') }}
+        if: ${{ steps.release_context.outputs.release_tag != '' }}
         shell: pwsh
         run: |
           [xml]$props = Get-Content -LiteralPath 'Directory.Build.props'
           $packageVersion = $props.Project.PropertyGroup.Version
           $expectedTag = "v$packageVersion"
-          $actualTag = $env:GITHUB_REF_NAME
+          $actualTag = '${{ steps.release_context.outputs.release_tag }}'
 
           if ($actualTag -ne $expectedTag) {
             throw "Public prerelease tag '$actualTag' does not match package version '$expectedTag'."
@@ -128,6 +150,32 @@ jobs:
 
           $summaryLines -join [Environment]::NewLine | Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY
 
+      - name: Generate prerelease note body
+        if: ${{ startsWith(github.ref, 'refs/tags/') }}
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $proofRoot = Join-Path $PWD 'artifacts/proof'
+          $generatedNotesPath = Join-Path $proofRoot 'generated-release-notes.md'
+          $prereleaseNotesPath = Join-Path $proofRoot 'prerelease-notes.md'
+          $coverageSummaryPath = Join-Path $PWD 'artifacts/coverage/release-summary.json'
+
+          gh api `
+            -X POST `
+            -H "Accept: application/vnd.github+json" `
+            "/repos/$env:GITHUB_REPOSITORY/releases/generate-notes" `
+            -f tag_name=$env:GITHUB_REF_NAME `
+            --jq '.body' | Set-Content -LiteralPath $generatedNotesPath
+
+          .\eng\write-prerelease-notes.ps1 `
+            -RepoRoot $PWD `
+            -ProofRoot $proofRoot `
+            -OutputPath $prereleaseNotesPath `
+            -CoverageSummaryPath $coverageSummaryPath `
+            -PublicTag $env:GITHUB_REF_NAME `
+            -GeneratedNotesPath $generatedNotesPath
+
   linux-validation:
     name: linux-validation
     runs-on: ubuntu-latest
@@ -176,7 +224,8 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           prerelease: true
-          generate_release_notes: true
+          name: AsterGraph ${{ github.ref_name }}
+          body_path: prerelease-artifacts/proof/prerelease-notes.md
           files: |
             prerelease-artifacts/packages/*.nupkg
             prerelease-artifacts/packages/*.snupkg

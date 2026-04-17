@@ -32,6 +32,7 @@ var session = editor.Session;
 setupWatch.Stop();
 
 Console.WriteLine($"SCALE_TIER_INFO:{tier.Id}:{tier.NodeCount}:{tier.SelectionCount}:{tier.MoveCount}:{tier.EnforceBudgets}");
+Console.WriteLine(tier.ToBudgetMarker());
 Console.WriteLine($"SCALE_SETUP_OK:{editor.Nodes.Count}:{editor.Connections.Count}");
 
 var selectionWatch = Stopwatch.StartNew();

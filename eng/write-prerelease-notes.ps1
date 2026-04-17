@@ -1,0 +1,172 @@
+[CmdletBinding()]
+param(
+  [Parameter(Mandatory = $true)]
+  [string]$RepoRoot,
+
+  [Parameter(Mandatory = $true)]
+  [string]$ProofRoot,
+
+  [Parameter(Mandatory = $true)]
+  [string]$OutputPath,
+
+  [string]$PublicTag,
+
+  [string]$GeneratedNotesPath,
+
+  [string]$CoverageSummaryPath
+)
+
+Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Stop'
+
+function Get-PackageVersion {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$PropsPath
+  )
+
+  [xml]$props = Get-Content -LiteralPath $PropsPath -Raw
+  $versionNode = $props.SelectSingleNode('/Project/PropertyGroup/Version')
+  $version = if ($null -ne $versionNode) { $versionNode.InnerText } else { $null }
+  if ([string]::IsNullOrWhiteSpace($version)) {
+    throw "Could not read package version from $PropsPath"
+  }
+
+  return $version.Trim()
+}
+
+function Get-LatestLegacyMilestoneTag {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$WorkingDirectory
+  )
+
+  $tags = & git -C $WorkingDirectory tag --list 'v1.*' --sort=-version:refname
+  if ($LASTEXITCODE -ne 0) {
+    throw 'Failed to enumerate legacy milestone tags.'
+  }
+
+  return ($tags | Select-Object -First 1)
+}
+
+function Get-FirstMatchingLine {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$FilePath,
+
+    [Parameter(Mandatory = $true)]
+    [string]$Pattern
+  )
+
+  if (-not (Test-Path -LiteralPath $FilePath)) {
+    return $null
+  }
+
+  $match = Select-String -Path $FilePath -Pattern $Pattern | Select-Object -First 1
+  if ($null -eq $match) {
+    return $null
+  }
+
+  return $match.Line
+}
+
+function Get-CoverageMarker {
+  param(
+    [string]$CoverageSummaryJsonPath,
+    [string]$ProofRootPath
+  )
+
+  $coverageMarkerPath = Join-Path $ProofRootPath 'coverage-report.txt'
+  $coverageMarker = Get-FirstMatchingLine -FilePath $coverageMarkerPath -Pattern 'COVERAGE_REPORT_OK'
+  if ($coverageMarker) {
+    return $coverageMarker
+  }
+
+  if ([string]::IsNullOrWhiteSpace($CoverageSummaryJsonPath) -or -not (Test-Path -LiteralPath $CoverageSummaryJsonPath)) {
+    return $null
+  }
+
+  $coverage = Get-Content -LiteralPath $CoverageSummaryJsonPath -Raw | ConvertFrom-Json
+  return "COVERAGE_REPORT_OK:{0}:{1}:{2}" -f $coverage.coveredLines, $coverage.totalLines, $coverage.lineRate
+}
+
+$resolvedRepoRoot = [System.IO.Path]::GetFullPath($RepoRoot)
+$resolvedProofRoot = [System.IO.Path]::GetFullPath($ProofRoot)
+$resolvedOutputPath = [System.IO.Path]::GetFullPath($OutputPath)
+$propsPath = Join-Path $resolvedRepoRoot 'Directory.Build.props'
+$packageVersion = Get-PackageVersion -PropsPath $propsPath
+$expectedTag = "v$packageVersion"
+$effectiveTag = if ([string]::IsNullOrWhiteSpace($PublicTag)) { $expectedTag } else { $PublicTag.Trim() }
+
+if ($effectiveTag -ne $expectedTag) {
+  throw "Public prerelease tag '$effectiveTag' does not match package version '$expectedTag'."
+}
+
+$legacyTag = Get-LatestLegacyMilestoneTag -WorkingDirectory $resolvedRepoRoot
+$generatedNotes = if (-not [string]::IsNullOrWhiteSpace($GeneratedNotesPath) -and (Test-Path -LiteralPath $GeneratedNotesPath)) {
+  (Get-Content -LiteralPath $GeneratedNotesPath -Raw).Trim()
+} else {
+  $null
+}
+
+$proofLines = @(
+  Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'public-repo-hygiene.txt') -Pattern 'PUBLIC_REPO_HYGIENE_OK'
+  Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'hostsample-packed.txt') -Pattern 'HOST_SAMPLE_OK'
+  Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'hostsample-net10-packed.txt') -Pattern 'HOST_SAMPLE_NET10_OK'
+  Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'package-smoke.txt') -Pattern 'PACKAGE_SMOKE_OK'
+  Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'scale-smoke.txt') -Pattern 'SCALE_TIER_BUDGET'
+  Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'scale-smoke.txt') -Pattern 'SCALE_PERFORMANCE_BUDGET_OK'
+  Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'scale-smoke.txt') -Pattern 'SCALE_HISTORY_CONTRACT_OK'
+  Get-CoverageMarker -CoverageSummaryJsonPath $CoverageSummaryPath -ProofRootPath $resolvedProofRoot
+) | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
+
+$environmentLines = @(
+  '- validation lanes: GitHub-hosted Windows release validation plus GitHub-hosted Linux matrix validation',
+  '- packed consumer proofs: `HostSample`, `.NET 10` packed consumer path, and `PackageSmoke`',
+  '- scale proof source: `ScaleSmoke` baseline tier plus history/state continuity checks'
+)
+
+$builder = [System.Text.StringBuilder]::new()
+[void]$builder.AppendLine("# AsterGraph $effectiveTag")
+[void]$builder.AppendLine()
+[void]$builder.AppendLine("## Release Header")
+[void]$builder.AppendLine()
+[void]$builder.AppendLine(('- installable package version: `{0}`' -f $packageVersion))
+[void]$builder.AppendLine(('- matching public tag: `{0}`' -f $effectiveTag))
+if (-not [string]::IsNullOrWhiteSpace($legacyTag)) {
+  [void]$builder.AppendLine(('- historical repo checkpoint reference: `{0}` (legacy, not installable)' -f $legacyTag))
+}
+[void]$builder.AppendLine()
+[void]$builder.AppendLine("## Proof Summary")
+[void]$builder.AppendLine()
+foreach ($line in $proofLines) {
+  [void]$builder.AppendLine("- $line")
+}
+[void]$builder.AppendLine()
+[void]$builder.AppendLine("## Validation Environment")
+[void]$builder.AppendLine()
+foreach ($line in $environmentLines) {
+  [void]$builder.AppendLine($line)
+}
+[void]$builder.AppendLine()
+[void]$builder.AppendLine("## References")
+[void]$builder.AppendLine()
+[void]$builder.AppendLine("- [Versioning](./docs/en/versioning.md)")
+[void]$builder.AppendLine("- [Project Status](./docs/en/project-status.md)")
+[void]$builder.AppendLine("- [ScaleSmoke Baseline](./docs/en/scale-baseline.md)")
+[void]$builder.AppendLine("- [Public Launch Checklist](./docs/en/public-launch-checklist.md)")
+
+if (-not [string]::IsNullOrWhiteSpace($generatedNotes)) {
+  [void]$builder.AppendLine()
+  [void]$builder.AppendLine("## Generated Change Notes")
+  [void]$builder.AppendLine()
+  [void]$builder.AppendLine($generatedNotes)
+}
+
+$outputDirectory = Split-Path -Parent $resolvedOutputPath
+if (-not [string]::IsNullOrWhiteSpace($outputDirectory) -and -not (Test-Path -LiteralPath $outputDirectory)) {
+  New-Item -ItemType Directory -Force -Path $outputDirectory | Out-Null
+}
+
+$builder.ToString().TrimEnd() + [Environment]::NewLine | Set-Content -LiteralPath $resolvedOutputPath
+Write-Host ('PRERELEASE_NOTES_OK:{0}:{1}' -f $packageVersion, $effectiveTag)
