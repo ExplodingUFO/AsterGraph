@@ -229,7 +229,7 @@ jobs:
 
     steps:
       - name: Download prerelease artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: prerelease-artifacts
           path: prerelease-artifacts
@@ -272,7 +272,7 @@ jobs:
           global-json-file: global.json
 
       - name: Download prerelease artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: prerelease-artifacts
           path: prerelease-artifacts
