@@ -141,7 +141,9 @@ function Test-GitTrackedPath {
   )
 
   $null = & git -C $repoRoot ls-files --error-unmatch -- $RelativePath 2>$null
-  return $LASTEXITCODE -eq 0
+  $isTracked = $LASTEXITCODE -eq 0
+  $global:LASTEXITCODE = 0
+  return $isTracked
 }
 
 function Invoke-DotNetCapture {
