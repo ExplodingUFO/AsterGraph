@@ -2,7 +2,7 @@
 
 ## Current Alpha Target
 
-- package baseline: `0.2.0-alpha.2`
+- package baseline: `0.2.0-alpha.3`
 - repo status: public alpha
 - public versioning guidance: [Versioning](./versioning.md)
 - public entry path: `README.md` plus the guides under `docs/en` and `docs/zh-CN`
@@ -38,7 +38,7 @@
 
 ## Known Limitations
 
-- the latest public prerelease tag is `v0.2.0-alpha.2`, while `v1.9` remains only as a historical pre-launch milestone marker
+- the latest public prerelease tag is `v0.2.0-alpha.3`, while `v1.9` remains only as a historical pre-launch milestone marker
 - public prerelease publishing and release artifacts still depend on the maintainer release flow
 - the deepest package-validation lane and the `.NET 10` packed-consumer proof still run on the Windows release-validation path
 - retained compatibility APIs are still present during the migration window

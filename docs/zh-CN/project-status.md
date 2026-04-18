@@ -2,8 +2,8 @@
 
 ## 当前状态
 
-- 包版本基线：`0.2.0-alpha.2`
-- 最新对外 SemVer prerelease 标签：`v0.2.0-alpha.2`
+- 包版本基线：`0.2.0-alpha.3`
+- 最新对外 SemVer prerelease 标签：`v0.2.0-alpha.3`
 - 最新历史仓库里程碑标签：`v1.9`
 - 仓库阶段：公开 Alpha
 - 对外版本说明：[Versioning](./versioning.md)

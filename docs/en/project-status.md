@@ -2,8 +2,8 @@
 
 ## Current Status
 
-- package baseline: `0.2.0-alpha.2`
-- latest semver-aligned public prerelease tag: `v0.2.0-alpha.2`
+- package baseline: `0.2.0-alpha.3`
+- latest semver-aligned public prerelease tag: `v0.2.0-alpha.3`
 - latest legacy repository milestone tag: `v1.9`
 - repo posture: public alpha
 - public versioning guidance: [Versioning](./versioning.md)

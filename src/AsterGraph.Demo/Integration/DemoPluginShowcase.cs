@@ -20,11 +20,11 @@ internal static class DemoPluginShowcase
             "demo.manifest.allowed",
             publisher: "AsterGraph Demo",
             packageId: "AsterGraph.Demo.TrustedPlugin",
-            packageVersion: "0.2.0-alpha.2"),
+            packageVersion: "0.2.0-alpha.3"),
         description: "Trusted showcase plugin for the public alpha demo.",
-        version: "0.2.0-alpha.2",
+        version: "0.2.0-alpha.3",
         compatibility: new GraphEditorPluginCompatibilityManifest(
-            minimumAsterGraphVersion: "0.2.0-alpha.2",
+            minimumAsterGraphVersion: "0.2.0-alpha.3",
             runtimeSurface: "CreateSession/Create + hosted Avalonia"),
         capabilitySummary: "Adds node, menu, localization, and presentation contributions.");
 
@@ -36,16 +36,16 @@ internal static class DemoPluginShowcase
             "demo.manifest.blocked",
             publisher: "AsterGraph Demo",
             packageId: "AsterGraph.Demo.BlockedPlugin",
-            packageVersion: "0.2.0-alpha.2"),
+            packageVersion: "0.2.0-alpha.3"),
         description: "Blocked showcase plugin used to prove trust-policy decisions.",
-        version: "0.2.0-alpha.2",
+        version: "0.2.0-alpha.3",
         compatibility: new GraphEditorPluginCompatibilityManifest(
-            minimumAsterGraphVersion: "0.2.0-alpha.2",
+            minimumAsterGraphVersion: "0.2.0-alpha.3",
             runtimeSurface: "CreateSession/Create + hosted Avalonia"),
         capabilitySummary: "Intentionally blocked by the demo trust policy.");
 
     private static readonly GraphEditorPluginProvenanceEvidence AllowedProvenance = new(
-        new GraphEditorPluginPackageIdentity("AsterGraph.Demo.TrustedPlugin", "0.2.0-alpha.2"),
+        new GraphEditorPluginPackageIdentity("AsterGraph.Demo.TrustedPlugin", "0.2.0-alpha.3"),
         new GraphEditorPluginSignatureEvidence(
             GraphEditorPluginSignatureStatus.Valid,
             GraphEditorPluginSignatureKind.Repository,
@@ -54,7 +54,7 @@ internal static class DemoPluginShowcase
             reasonMessage: "Repository signature validated for the demo showcase."));
 
     private static readonly GraphEditorPluginProvenanceEvidence BlockedProvenance = new(
-        new GraphEditorPluginPackageIdentity("AsterGraph.Demo.BlockedPlugin", "0.2.0-alpha.2"),
+        new GraphEditorPluginPackageIdentity("AsterGraph.Demo.BlockedPlugin", "0.2.0-alpha.3"),
         new GraphEditorPluginSignatureEvidence(
             GraphEditorPluginSignatureStatus.Unsigned,
             GraphEditorPluginSignatureKind.Unknown,
@@ -133,7 +133,7 @@ internal static class DemoPluginShowcase
             "aster.demo.plugin.allowed",
             "Demo Trusted Plugin",
             "Public alpha showcase plugin.",
-            "0.2.0-alpha.2");
+            "0.2.0-alpha.3");
 
         public void Register(GraphEditorPluginBuilder builder)
         {
@@ -152,7 +152,7 @@ internal static class DemoPluginShowcase
             "aster.demo.plugin.blocked",
             "Demo Blocked Plugin",
             "Blocked by the demo trust policy.",
-            "0.2.0-alpha.2");
+            "0.2.0-alpha.3");
 
         public void Register(GraphEditorPluginBuilder builder)
         {

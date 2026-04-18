@@ -9,12 +9,12 @@ AsterGraph is a modular node-graph editor toolkit for .NET. It gives hosts a reu
 
 ## Public Alpha
 
-- latest installable package version: `0.2.0-alpha.2`
-- latest semver-aligned public prerelease tag: `v0.2.0-alpha.2`
+- latest installable package version: `0.2.0-alpha.3`
+- latest semver-aligned public prerelease tag: `v0.2.0-alpha.3`
 - latest legacy repository milestone tag: `v1.9` (historical pre-launch checkpoint, not the NuGet version)
 - published packages target `net8.0` and `net9.0`
 - packed `HostSample` also proves downstream `.NET 10` consumption during the release gate
-- future public prerelease tags should match package SemVer, for example `v0.2.0-alpha.2`
+- future public prerelease tags should match package SemVer, for example `v0.2.0-alpha.3`
 - package version versus historical repository-tag guidance: [Versioning](./docs/en/versioning.md)
 - current scope, non-goals, and known limitations: [Alpha Status](./docs/en/alpha-status.md)
 

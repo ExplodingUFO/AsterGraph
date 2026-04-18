@@ -9,12 +9,12 @@ AsterGraph 是一个面向 .NET 的模块化节点图编辑器工具包，提供
 
 ## 公开 Alpha
 
-- 最新可安装包版本：`0.2.0-alpha.2`
-- 最新对外 SemVer prerelease 标签：`v0.2.0-alpha.2`
+- 最新可安装包版本：`0.2.0-alpha.3`
+- 最新对外 SemVer prerelease 标签：`v0.2.0-alpha.3`
 - 最新历史仓库里程碑标签：`v1.9`（公开前的旧检查点，不是 NuGet 包版本）
 - 公开发布包目标框架：`net8.0`、`net9.0`
 - release lane 还会用打包后的 `HostSample` 额外证明下游 `.NET 10` 消费兼容性
-- 后续对外 prerelease tag 应与包 SemVer 对齐，比如 `v0.2.0-alpha.2`
+- 后续对外 prerelease tag 应与包 SemVer 对齐，比如 `v0.2.0-alpha.3`
 - 包版本与历史仓库 tag 的关系说明：[Versioning](./docs/zh-CN/versioning.md)
 - 当前范围、非目标与已知限制：[Alpha Status](./docs/zh-CN/alpha-status.md)
 

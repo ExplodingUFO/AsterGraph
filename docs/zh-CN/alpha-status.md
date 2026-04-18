@@ -2,7 +2,7 @@
 
 ## 当前 Alpha 目标
 
-- 包版本基线：`0.2.0-alpha.2`
+- 包版本基线：`0.2.0-alpha.3`
 - 仓库状态：public alpha
 - 对外版本说明：[Versioning](./versioning.md)
 - 对外入口：`README.md` / `README.zh-CN.md` 加上 `docs/en` / `docs/zh-CN`
@@ -37,7 +37,7 @@
 
 ## 已知限制
 
-- 当前最新对外 prerelease tag 是 `v0.2.0-alpha.2`；`v1.9` 只保留为公开前的历史里程碑 tag
+- 当前最新对外 prerelease tag 是 `v0.2.0-alpha.3`；`v1.9` 只保留为公开前的历史里程碑 tag
 - public prerelease publish 和 release artifact 仍然依赖维护者 release flow
 - 最深的 package validation lane 目前仍以 Windows 为主
 - retained compatibility API 仍处于迁移窗口内

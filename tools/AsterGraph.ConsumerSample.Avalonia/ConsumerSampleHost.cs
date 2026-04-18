@@ -284,17 +284,17 @@ public sealed class ConsumerSampleHost : IDisposable
                 "consumer.sample.plugin",
                 publisher: "AsterGraph Samples",
                 packageId: "AsterGraph.ConsumerSample.Plugin",
-                packageVersion: "0.2.0-alpha.2"),
+                packageVersion: "0.2.0-alpha.3"),
             description: "Trusted sample plugin that adds one audit node plus menu and presentation hooks.",
-            version: "0.2.0-alpha.2",
+            version: "0.2.0-alpha.3",
             compatibility: new GraphEditorPluginCompatibilityManifest(
-                minimumAsterGraphVersion: "0.2.0-alpha.2",
+                minimumAsterGraphVersion: "0.2.0-alpha.3",
                 runtimeSurface: "Create + AsterGraphAvaloniaViewFactory"),
             capabilitySummary: "Adds one node definition, one menu augmentation, one presentation badge, and one localization override.");
 
     private static GraphEditorPluginProvenanceEvidence CreatePluginProvenance()
         => new(
-            new GraphEditorPluginPackageIdentity("AsterGraph.ConsumerSample.Plugin", "0.2.0-alpha.2"),
+            new GraphEditorPluginPackageIdentity("AsterGraph.ConsumerSample.Plugin", "0.2.0-alpha.3"),
             new GraphEditorPluginSignatureEvidence(
                 GraphEditorPluginSignatureStatus.Valid,
                 GraphEditorPluginSignatureKind.Repository,
@@ -328,7 +328,7 @@ public sealed class ConsumerSampleHost : IDisposable
             PluginId,
             "Consumer Audit Plugin",
             "Trusted sample plugin for the medium adoption host.",
-            "0.2.0-alpha.2");
+            "0.2.0-alpha.3");
 
         public void Register(GraphEditorPluginBuilder builder)
         {

@@ -11,15 +11,15 @@
 
 当前公开基线：
 
-- 包版本：`0.2.0-alpha.2`
-- 最新对外 SemVer prerelease 标签：`v0.2.0-alpha.2`
+- 包版本：`0.2.0-alpha.3`
+- 最新对外 SemVer prerelease 标签：`v0.2.0-alpha.3`
 - 最新历史仓库里程碑标签：`v1.9`
 
 如果宿主问“我该装哪个版本的 AsterGraph”，以这个包版本为准。
 
 ## 仓库 Tag 与 GitHub Release
 
-仓库现在已经开始发布和包版本一致的公开 prerelease tag，例如 `v0.2.0-alpha.2`。
+仓库现在已经开始发布和包版本一致的公开 prerelease tag，例如 `v0.2.0-alpha.3`。
 
 仓库里也仍保留着像 `v1.9` 这样的历史 tag。
 
@@ -27,7 +27,7 @@
 
 后续对外版本约定是：
 
-- 公开发布包使用与包 SemVer 对齐的 tag，例如 `v0.2.0-alpha.2`
+- 公开发布包使用与包 SemVer 对齐的 tag，例如 `v0.2.0-alpha.3`
 - GitHub prerelease 与 NuGet 发布包使用同一套版本号
 - milestone 风格的本地规划版本可以继续私下使用，但不再作为对外包版本展示
 
@@ -35,8 +35,8 @@
 
 | 对外概念 | 当前值 | 应该怎么理解 |
 | --- | --- | --- |
-| 可安装包版本 | `0.2.0-alpha.2` | 外部用户从 nuget.org 安装的版本 |
-| 当前对外 prerelease tag | `v0.2.0-alpha.2` | GitHub 上与可安装包版本严格对齐的公开 tag |
+| 可安装包版本 | `0.2.0-alpha.3` | 外部用户从 nuget.org 安装的版本 |
+| 当前对外 prerelease tag | `v0.2.0-alpha.3` | GitHub 上与可安装包版本严格对齐的公开 tag |
 | 历史公开仓库里程碑标签 | `v1.9` | 仅用于回看公开前的旧检查点 |
 
 ## 实际使用规则
@@ -59,8 +59,8 @@
 
 例如：
 
-- 包版本：`0.2.0-alpha.2`
-- 公开 tag：`v0.2.0-alpha.2`
+- 包版本：`0.2.0-alpha.3`
+- 公开 tag：`v0.2.0-alpha.3`
 - 历史仓库检查点引用：`v1.9`（legacy，不是可安装版本）
 
 自动生成的 prerelease note 还会带上 release lane 的 proof summary，让外部使用者直接看到同一组安装、兼容性、规模和覆盖率信号，而不必再去翻 workflow artifact。
