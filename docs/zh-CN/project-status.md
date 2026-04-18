@@ -2,7 +2,8 @@
 
 ## 当前状态
 
-- 包版本基线：`0.2.0-alpha.1`
+- 包版本基线：`0.2.0-alpha.2`
+- 最新对外 SemVer prerelease 标签：`v0.2.0-alpha.2`
 - 最新历史仓库里程碑标签：`v1.9`
 - 仓库阶段：公开 Alpha
 - 对外版本说明：[Versioning](./versioning.md)
@@ -14,6 +15,7 @@
 - 示例与验证工具：
   - `tools/AsterGraph.HelloWorld`：最快的 runtime-only 第一跑样例
   - `tools/AsterGraph.HelloWorld.Avalonia`：最快的默认 UI 第一跑样例
+  - `tools/AsterGraph.ConsumerSample.Avalonia`：介于 HelloWorld 和 Demo 之间的真实宿主样例
   - `tools/AsterGraph.HostSample`：最小接入验证样例
   - `tools/AsterGraph.PackageSmoke`：打包消费验证
   - `tools/AsterGraph.ScaleSmoke`：公开的大图基线与状态连续性验证
@@ -50,6 +52,7 @@
 
 - `tools/AsterGraph.HelloWorld` = runtime-only 第一跑样例
 - `tools/AsterGraph.HelloWorld.Avalonia` = 默认 UI 第一跑样例
+- `tools/AsterGraph.ConsumerSample.Avalonia` = 真实 hosted-UI 宿主样例
 - `tools/AsterGraph.HostSample` = 最小推荐接入验证
 - `tools/AsterGraph.PackageSmoke` = 打包消费验证
 - `tools/AsterGraph.ScaleSmoke` = 大图基线加历史记录与状态连续性验证
@@ -59,7 +62,9 @@
 
 - [Versioning](./versioning.md)
 - [Quick Start](./quick-start.md)
+- [Consumer Sample](./consumer-sample.md)
 - [ScaleSmoke 基线](./scale-baseline.md)
+- [Adoption Feedback Loop](./adoption-feedback.md)
 - [Plugin 与自定义节点 Recipe](./plugin-recipe.md)
 - [Retained 到 Session 的迁移 Recipe](./retained-migration-recipe.md)
 - [Alpha 状态](./alpha-status.md)

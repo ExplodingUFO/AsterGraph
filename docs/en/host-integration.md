@@ -19,7 +19,7 @@ Standalone Avalonia surfaces such as `AsterGraphCanvasViewFactory`, `AsterGraphI
 | --- | --- | --- | --- |
 | Runtime-only/custom UI | `AsterGraph.Editor` (+ `AsterGraph.Abstractions` when defining nodes) | `CreateSession(...)` | `tools/AsterGraph.HelloWorld` |
 | Default Avalonia UI | `AsterGraph.Avalonia` | `Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` | `tools/AsterGraph.HelloWorld.Avalonia` |
-| Plugin trust/discovery | `AsterGraph.Editor` | `DiscoverPluginCandidates(...)` + `PluginTrustPolicy` | `src/AsterGraph.Demo` |
+| Plugin trust/discovery | `AsterGraph.Editor` | `DiscoverPluginCandidates(...)` + `PluginTrustPolicy` | `tools/AsterGraph.ConsumerSample.Avalonia` |
 | Automation | `AsterGraph.Editor` | `IGraphEditorSession.Automation.Execute(...)` | `src/AsterGraph.Demo` |
 | Retained migration | `AsterGraph.Editor` (+ `AsterGraph.Avalonia` when embedding `GraphEditorView`) | retained constructor path | migration-only |
 
@@ -27,6 +27,7 @@ Standalone Avalonia surfaces such as `AsterGraphCanvasViewFactory`, `AsterGraphI
 
 - `AsterGraph.HelloWorld` = first-run sample for the runtime-only path
 - `AsterGraph.HelloWorld.Avalonia` = first-run sample for the shipped Avalonia UI path
+- `AsterGraph.ConsumerSample.Avalonia` = medium hosted-UI sample with host actions, parameter editing, and one trusted plugin
 - `AsterGraph.HostSample` = narrow proof harness for the canonical runtime-only and hosted-UI routes
 - `AsterGraph.PackageSmoke` = packed-package proof
 - `AsterGraph.ScaleSmoke` = public scale baseline plus history/state proof

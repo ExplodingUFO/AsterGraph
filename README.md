@@ -9,8 +9,9 @@ AsterGraph is a modular node-graph editor toolkit for .NET. It gives hosts a reu
 
 ## Public Alpha
 
-- latest installable package version: `0.2.0-alpha.1`
-- latest historical repository milestone tag: `v1.9` (legacy pre-launch checkpoint, not the NuGet version)
+- latest installable package version: `0.2.0-alpha.2`
+- latest semver-aligned public prerelease tag: `v0.2.0-alpha.2`
+- latest legacy repository milestone tag: `v1.9` (historical pre-launch checkpoint, not the NuGet version)
 - published packages target `net8.0` and `net9.0`
 - packed `HostSample` also proves downstream `.NET 10` consumption during the release gate
 - future public prerelease tags should match package SemVer, for example `v0.2.0-alpha.2`
@@ -23,6 +24,7 @@ AsterGraph is a modular node-graph editor toolkit for .NET. It gives hosts a reu
 | --- | --- | --- |
 | get the fastest first run | [`tools/AsterGraph.HelloWorld`](./tools/AsterGraph.HelloWorld/) | smallest runtime-only sample; one route, one command |
 | embed the shipped Avalonia UI | [`tools/AsterGraph.HelloWorld.Avalonia`](./tools/AsterGraph.HelloWorld.Avalonia/) | smallest hosted-UI sample on the factory-based Avalonia route |
+| try a realistic hosted integration | [Consumer Sample](./docs/en/consumer-sample.md) | medium sample with host-owned actions, parameter editing, and one trusted plugin |
 | integrate into an existing host | [Host Integration](./docs/en/host-integration.md) | route matrix, package boundary, migration guidance |
 | inspect the full surface visually | [Demo Guide](./docs/en/demo-guide.md) | showcase host for plugins, automation, localization, and standalone surfaces |
 | validate packed consumption or maintain releases | [Contributing](./CONTRIBUTING.md) and [Public Launch Checklist](./docs/en/public-launch-checklist.md) | proof lanes, CI, and release flow |
@@ -58,6 +60,7 @@ For new work, stay on the first two routes. Treat the retained route as migratio
 
 - [`tools/AsterGraph.HelloWorld`](./tools/AsterGraph.HelloWorld/) = first-run sample for the runtime-only path
 - [`tools/AsterGraph.HelloWorld.Avalonia`](./tools/AsterGraph.HelloWorld.Avalonia/) = first-run sample for the hosted Avalonia UI path
+- [`tools/AsterGraph.ConsumerSample.Avalonia`](./tools/AsterGraph.ConsumerSample.Avalonia/) = medium hosted-UI consumer sample with one custom node family, one host action rail, and one trusted plugin
 - [`tools/AsterGraph.HostSample`](./tools/AsterGraph.HostSample/) = minimal canonical proof harness for runtime-only and hosted-UI validation
 - [`tools/AsterGraph.PackageSmoke`](./tools/AsterGraph.PackageSmoke/) = packed-package proof
 - [`tools/AsterGraph.ScaleSmoke`](./tools/AsterGraph.ScaleSmoke/) = public larger-graph baseline plus history/state proof
@@ -114,8 +117,10 @@ Consumer-facing guides:
 
 - [Versioning](./docs/en/versioning.md)
 - [Quick Start](./docs/en/quick-start.md)
+- [Consumer Sample](./docs/en/consumer-sample.md)
 - [Host Integration](./docs/en/host-integration.md)
 - [ScaleSmoke Baseline](./docs/en/scale-baseline.md)
+- [Adoption Feedback Loop](./docs/en/adoption-feedback.md)
 - [Plugin And Custom Node Recipe](./docs/en/plugin-recipe.md)
 - [Retained-To-Session Migration Recipe](./docs/en/retained-migration-recipe.md)
 - [State Contracts](./docs/en/state-contracts.md)

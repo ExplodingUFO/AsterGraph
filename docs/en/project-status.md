@@ -2,8 +2,9 @@
 
 ## Current Status
 
-- package baseline: `0.2.0-alpha.1`
-- latest historical repository milestone tag: `v1.9`
+- package baseline: `0.2.0-alpha.2`
+- latest semver-aligned public prerelease tag: `v0.2.0-alpha.2`
+- latest legacy repository milestone tag: `v1.9`
 - repo posture: public alpha
 - public versioning guidance: [Versioning](./versioning.md)
 - supported published packages:
@@ -14,6 +15,7 @@
 - sample and proof tools:
   - `tools/AsterGraph.HelloWorld` for the quickest runtime-only first run
   - `tools/AsterGraph.HelloWorld.Avalonia` for the quickest hosted-UI first run
+  - `tools/AsterGraph.ConsumerSample.Avalonia` for one realistic hosted integration before the full Demo shell
   - `tools/AsterGraph.HostSample` for the minimal consumer proof harness
   - `tools/AsterGraph.PackageSmoke` for packed-package proof
   - `tools/AsterGraph.ScaleSmoke` for the public scale baseline and state-continuity proof
@@ -50,6 +52,7 @@ The current public-repo priority is not new runtime capability. It is keeping th
 
 - `tools/AsterGraph.HelloWorld` = first-run runtime-only sample
 - `tools/AsterGraph.HelloWorld.Avalonia` = first-run hosted-UI sample
+- `tools/AsterGraph.ConsumerSample.Avalonia` = realistic hosted integration sample
 - `tools/AsterGraph.HostSample` = minimal canonical adoption proof
 - `tools/AsterGraph.PackageSmoke` = packed-package consumption proof
 - `tools/AsterGraph.ScaleSmoke` = larger-graph baseline plus history/state-continuity proof
@@ -59,7 +62,9 @@ The current public-repo priority is not new runtime capability. It is keeping th
 
 - [Versioning](./versioning.md)
 - [Quick Start](./quick-start.md)
+- [Consumer Sample](./consumer-sample.md)
 - [ScaleSmoke Baseline](./scale-baseline.md)
+- [Adoption Feedback Loop](./adoption-feedback.md)
 - [Plugin And Custom Node Recipe](./plugin-recipe.md)
 - [Retained-To-Session Migration Recipe](./retained-migration-recipe.md)
 - [Alpha Status](./alpha-status.md)

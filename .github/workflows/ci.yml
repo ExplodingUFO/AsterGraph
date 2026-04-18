@@ -207,6 +207,13 @@ jobs:
             }
           }
 
+          if (Test-Path -LiteralPath 'artifacts/proof/consumer-sample.txt') {
+            $consumerSampleLine = Select-String -Path 'artifacts/proof/consumer-sample.txt' -Pattern 'CONSUMER_SAMPLE_OK' | Select-Object -First 1
+            if ($consumerSampleLine) {
+              $summaryLines.Add("- $($consumerSampleLine.Line)")
+            }
+          }
+
           if (Test-Path -LiteralPath 'artifacts/proof/hostsample-net10-packed.txt') {
             $hostNet10Line = Select-String -Path 'artifacts/proof/hostsample-net10-packed.txt' -Pattern 'HOST_SAMPLE_NET10_OK' | Select-Object -First 1
             if ($hostNet10Line) {

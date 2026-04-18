@@ -1,1 +1,8 @@
 blank_issues_enabled: true
+contact_links:
+  - name: Quick Start
+    url: https://github.com/ExplodingUFO/AsterGraph/blob/master/docs/en/quick-start.md
+    about: Start here if you need the shortest installation and route guide.
+  - name: Versioning
+    url: https://github.com/ExplodingUFO/AsterGraph/blob/master/docs/en/versioning.md
+    about: Use this if you need to understand NuGet package versions versus repository tags.

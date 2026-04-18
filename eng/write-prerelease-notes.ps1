@@ -112,6 +112,7 @@ $generatedNotes = if (-not [string]::IsNullOrWhiteSpace($GeneratedNotesPath) -an
 $proofLines = @(
   Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'public-repo-hygiene.txt') -Pattern 'PUBLIC_REPO_HYGIENE_OK'
   Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'hostsample-packed.txt') -Pattern 'HOST_SAMPLE_OK'
+  Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'consumer-sample.txt') -Pattern 'CONSUMER_SAMPLE_OK'
   Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'hostsample-net10-packed.txt') -Pattern 'HOST_SAMPLE_NET10_OK'
   Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'package-smoke.txt') -Pattern 'PACKAGE_SMOKE_OK'
   Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'scale-smoke.txt') -Pattern 'SCALE_TIER_BUDGET'
@@ -122,6 +123,7 @@ $proofLines = @(
 
 $environmentLines = @(
   '- validation lanes: GitHub-hosted Windows release validation plus GitHub-hosted Linux matrix validation',
+  '- medium host proof: `AsterGraph.ConsumerSample.Avalonia` on the hosted-UI route with host actions, parameter editing, and one trusted plugin',
   '- packed consumer proofs: `HostSample`, `.NET 10` packed consumer path, and `PackageSmoke`',
   '- scale proof source: `ScaleSmoke` baseline tier plus history/state continuity checks'
 )

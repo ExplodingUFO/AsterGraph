@@ -11,16 +11,19 @@ The consumer-facing version for AsterGraph is the NuGet package version on the f
 
 Current public baseline:
 
-- package version: `0.2.0-alpha.1`
-- latest historical repository milestone tag: `v1.9`
+- package version: `0.2.0-alpha.2`
+- latest semver-aligned public prerelease tag: `v0.2.0-alpha.2`
+- latest legacy repository milestone tag: `v1.9`
 
 When a host asks "which version of AsterGraph should I install?", this package version is the authoritative answer.
 
 ## Repository Tags And Releases
 
-The repository still carries a historical tag such as `v1.9`.
+The repository now publishes public prerelease tags that match the installable package version, for example `v0.2.0-alpha.2`.
 
-Those tags came from milestone-style repository checkpoints during the pre-launch workflow. They are useful for maintainer history, but they are **not** the package version that consumers install from NuGet.
+The repository also still carries a historical tag such as `v1.9`.
+
+Those `v1.x` tags came from milestone-style repository checkpoints during the pre-launch workflow. They are useful for maintainer history, but they are **not** the package version that consumers install from NuGet.
 
 Going forward, the public release convention is:
 
@@ -32,9 +35,9 @@ Going forward, the public release convention is:
 
 | Public concept | Current value | How to read it |
 | --- | --- | --- |
-| installable package version | `0.2.0-alpha.1` | the version consumers install from nuget.org |
+| installable package version | `0.2.0-alpha.2` | the version consumers install from nuget.org |
+| current public prerelease tag | `v0.2.0-alpha.2` | the GitHub prerelease tag that must match the installable package version |
 | historical public repo milestone tag | `v1.9` | a pre-launch checkpoint tag kept for repo history only |
-| future public prerelease tag rule | `v0.x.y-alpha.z` | should match the installable package version |
 
 ## Practical Rule
 

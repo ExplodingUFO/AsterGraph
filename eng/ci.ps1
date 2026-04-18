@@ -23,6 +23,7 @@ $coverageMarkerOutputPath = Join-Path $proofArtifactsRoot 'coverage-report.txt'
 $prereleaseNotesOutputPath = Join-Path $proofArtifactsRoot 'prerelease-notes.md'
 $publicRepoHygieneProofPath = Join-Path $proofArtifactsRoot 'public-repo-hygiene.txt'
 $hostSampleProjectProofPath = Join-Path $proofArtifactsRoot 'hostsample-project.txt'
+$consumerSampleProofPath = Join-Path $proofArtifactsRoot 'consumer-sample.txt'
 $hostSamplePackedProofPath = Join-Path $proofArtifactsRoot 'hostsample-packed.txt'
 $hostSampleNet10PackedProofPath = Join-Path $proofArtifactsRoot 'hostsample-net10-packed.txt'
 $packageSmokeProofPath = Join-Path $proofArtifactsRoot 'package-smoke.txt'
@@ -33,11 +34,13 @@ $coverageReportScriptPath = Join-Path $repoRoot 'eng/coverage-report.ps1'
 $prereleaseNotesScriptPath = Join-Path $repoRoot 'eng/write-prerelease-notes.ps1'
 $defaultVsTestConnectionTimeoutSeconds = 180
 $hostSampleProject = 'tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj'
+$consumerSampleProject = 'tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.ConsumerSample.Avalonia.csproj'
 $helloWorldProject = 'tools/AsterGraph.HelloWorld/AsterGraph.HelloWorld.csproj'
 $helloWorldAvaloniaProject = 'tools/AsterGraph.HelloWorld.Avalonia/AsterGraph.HelloWorld.Avalonia.csproj'
 $packageSmokeProject = 'tools/AsterGraph.PackageSmoke/AsterGraph.PackageSmoke.csproj'
 $scaleSmokeProject = 'tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj'
 $editorTestsProject = 'tests/AsterGraph.Editor.Tests/AsterGraph.Editor.Tests.csproj'
+$consumerSampleTestsProject = 'tests/AsterGraph.ConsumerSample.Tests/AsterGraph.ConsumerSample.Tests.csproj'
 $scaleSmokeTestsProject = 'tests/AsterGraph.ScaleSmoke.Tests/AsterGraph.ScaleSmoke.Tests.csproj'
 $userHome = if ([string]::IsNullOrWhiteSpace($env:USERPROFILE)) { $env:HOME } else { $env:USERPROFILE }
 $fallbackPackageCache = Join-Path $userHome '.nuget/packages'
@@ -62,6 +65,7 @@ $frameworkBuildProjects = @{
     $helloWorldProject,
     $helloWorldAvaloniaProject,
     $hostSampleProject,
+    $consumerSampleProject,
     $packageSmokeProject,
     $scaleSmokeProject
   )
@@ -74,6 +78,7 @@ $frameworkBuildProjects = @{
 $frameworkTestProjects = @{
   'net8.0' = @(
     'tests/AsterGraph.Serialization.Tests/AsterGraph.Serialization.Tests.csproj',
+    $consumerSampleTestsProject,
     $scaleSmokeTestsProject
   )
   'net9.0' = @(
@@ -578,6 +583,39 @@ function Invoke-HostSample {
   }
 }
 
+function Invoke-ConsumerSampleProof {
+  Write-Host ''
+  Write-Host '### Run medium consumer sample proof' -ForegroundColor Yellow
+
+  Invoke-DotNet -Arguments (@(
+    'build',
+    (Resolve-ProjectPath -RelativePath $consumerSampleProject),
+    '-c',
+    $Configuration,
+    '--framework',
+    'net8.0',
+    '--no-restore',
+    '--nologo',
+    '-v',
+    'minimal'
+  ) + $singleProcessBuildArguments + $buildStabilityProperties)
+
+  Invoke-DotNetCapture -Arguments @(
+    'run',
+    '--project',
+    (Resolve-ProjectPath -RelativePath $consumerSampleProject),
+    '-c',
+    $Configuration,
+    '--framework',
+    'net8.0',
+    '--no-build',
+    '--no-restore',
+    '--nologo',
+    '--',
+    '--proof'
+  ) -CapturePath $consumerSampleProofPath
+}
+
 function Invoke-ScaleSmoke {
   Write-Host ''
   Write-Host '### Run ScaleSmoke readiness proof' -ForegroundColor Yellow
@@ -681,6 +719,7 @@ function Invoke-PrereleaseNotesValidation {
     '## Proof Summary',
     'PUBLIC_REPO_HYGIENE_OK:True',
     'HOST_SAMPLE_OK:True',
+    'CONSUMER_SAMPLE_OK:True',
     'HOST_SAMPLE_NET10_OK:True',
     'PACKAGE_SMOKE_OK:True',
     'SCALE_TIER_BUDGET:',
@@ -708,11 +747,13 @@ function Invoke-ContractValidation {
   if (-not $SkipRestore) {
     Invoke-RestoreProjects -Projects @(
       $hostSampleProject,
+      $consumerSampleProject,
       $editorTestsProject
     )
   }
 
   Invoke-HostSample
+  Invoke-ConsumerSampleProof
 
   Write-Host ''
   Write-Host '### Run focused contract and proof regression surface' -ForegroundColor Yellow
@@ -813,13 +854,18 @@ function Invoke-PublicRepoHygieneValidation {
   foreach ($path in @(
     'README.md',
     'README.zh-CN.md',
+    'tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.ConsumerSample.Avalonia.csproj',
     'docs/en/project-status.md',
+    'docs/en/consumer-sample.md',
+    'docs/en/adoption-feedback.md',
     'docs/en/alpha-status.md',
     'docs/en/public-launch-checklist.md',
     'docs/en/scale-baseline.md',
     'docs/en/plugin-recipe.md',
     'docs/en/retained-migration-recipe.md',
     'docs/zh-CN/project-status.md',
+    'docs/zh-CN/consumer-sample.md',
+    'docs/zh-CN/adoption-feedback.md',
     'docs/zh-CN/alpha-status.md',
     'docs/zh-CN/public-launch-checklist.md',
     'docs/zh-CN/scale-baseline.md',
@@ -830,7 +876,8 @@ function Invoke-PublicRepoHygieneValidation {
     'CONTRIBUTING.md',
     'CODE_OF_CONDUCT.md',
     'SECURITY.md',
-    'global.json'
+    'global.json',
+    '.github/ISSUE_TEMPLATE/adoption_feedback.yml'
   )) {
     Assert-RepoPathExists -RelativePath $path
   }

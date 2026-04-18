@@ -33,6 +33,7 @@ Review these release artifacts before opening the repo or announcing the prerele
 
 - `artifacts/proof/public-repo-hygiene.txt`
 - `artifacts/proof/hostsample-packed.txt`
+- `artifacts/proof/consumer-sample.txt`
 - `artifacts/proof/hostsample-net10-packed.txt`
 - `artifacts/proof/package-smoke.txt`
 - `artifacts/proof/scale-smoke.txt`
@@ -43,6 +44,7 @@ Expected high-signal markers:
 
 - `PUBLIC_REPO_HYGIENE_OK:True`
 - `HOST_SAMPLE_OK:True`
+- `CONSUMER_SAMPLE_OK:True`
 - `HOST_SAMPLE_NET10_OK:True`
 - `PACKAGE_SMOKE_OK:True`
 - `SCALE_PERFORMANCE_BUDGET_OK:baseline:True:...`
@@ -81,6 +83,7 @@ Keep the consumer entry story explicit in release notes and public announcements
 
 - `tools/AsterGraph.HelloWorld` = fastest runtime-only first-run sample
 - `tools/AsterGraph.HelloWorld.Avalonia` = fastest hosted-UI first-run sample
+- `tools/AsterGraph.ConsumerSample.Avalonia` = realistic hosted-UI consumer sample with one host action rail and one trusted plugin
 - `tools/AsterGraph.HostSample` = minimal consumer proof
 - `tools/AsterGraph.PackageSmoke` = packaged-consumption proof
 - `tools/AsterGraph.ScaleSmoke` = scale baseline plus history/state-continuity proof

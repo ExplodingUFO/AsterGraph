@@ -33,6 +33,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framew
 
 - `artifacts/proof/public-repo-hygiene.txt`
 - `artifacts/proof/hostsample-packed.txt`
+- `artifacts/proof/consumer-sample.txt`
 - `artifacts/proof/hostsample-net10-packed.txt`
 - `artifacts/proof/package-smoke.txt`
 - `artifacts/proof/scale-smoke.txt`
@@ -43,6 +44,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framew
 
 - `PUBLIC_REPO_HYGIENE_OK:True`
 - `HOST_SAMPLE_OK:True`
+- `CONSUMER_SAMPLE_OK:True`
 - `HOST_SAMPLE_NET10_OK:True`
 - `PACKAGE_SMOKE_OK:True`
 - `SCALE_PERFORMANCE_BUDGET_OK:baseline:True:...`
@@ -81,6 +83,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framew
 
 - `tools/AsterGraph.HelloWorld` = 最快的 runtime-only 第一跑样例
 - `tools/AsterGraph.HelloWorld.Avalonia` = 最快的默认 UI 第一跑样例
+- `tools/AsterGraph.ConsumerSample.Avalonia` = 真实 hosted-UI consumer 样例，带宿主动作和一个可信插件
 - `tools/AsterGraph.HostSample` = 最小接入验证
 - `tools/AsterGraph.PackageSmoke` = 打包消费验证
 - `tools/AsterGraph.ScaleSmoke` = 规模基线加历史记录与状态连续性验证

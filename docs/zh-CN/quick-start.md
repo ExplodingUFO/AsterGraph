@@ -43,7 +43,13 @@ dotnet run --project tools/AsterGraph.HelloWorld/AsterGraph.HelloWorld.csproj --
 dotnet run --project tools/AsterGraph.HelloWorld.Avalonia/AsterGraph.HelloWorld.Avalonia.csproj --nologo
 ```
 
-`HelloWorld` 适合最简单的 runtime-only 第一跑；`HelloWorld.Avalonia` 适合最小默认 UI 第一跑；`HostSample` 只适合做推荐路线验证。
+如果你想先看一个更真实的宿主集成，带宿主动作、参数编辑和一个可信插件，可以运行：
+
+```powershell
+dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.ConsumerSample.Avalonia.csproj --nologo
+```
+
+`HelloWorld` 适合最简单的 runtime-only 第一跑；`HelloWorld.Avalonia` 适合最小默认 UI 第一跑；`ConsumerSample.Avalonia` 适合在跳到 `Demo` 之前先看一个真实宿主；`HostSample` 只适合做推荐路线验证。
 
 ## 4. 推荐接入路线
 
@@ -51,7 +57,7 @@ dotnet run --project tools/AsterGraph.HelloWorld.Avalonia/AsterGraph.HelloWorld.
 | --- | --- | --- |
 | 只要运行时 / 自定义 UI | `AsterGraphEditorFactory.CreateSession(...)` | `tools/AsterGraph.HelloWorld` |
 | 默认 Avalonia UI | `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` | `tools/AsterGraph.HelloWorld.Avalonia` |
-| plugin trust / discovery | `AsterGraphEditorFactory.DiscoverPluginCandidates(...)` + `AsterGraphEditorOptions.PluginTrustPolicy` | [Host Integration](./host-integration.md) |
+| plugin trust / discovery | `AsterGraphEditorFactory.DiscoverPluginCandidates(...)` + `AsterGraphEditorOptions.PluginTrustPolicy` | [`tools/AsterGraph.ConsumerSample.Avalonia`](../../tools/AsterGraph.ConsumerSample.Avalonia/) |
 | automation | `IGraphEditorSession.Automation.Execute(...)` | [Host Integration](./host-integration.md) |
 | retained 迁移 | `new GraphEditorViewModel(...)` + `new GraphEditorView { Editor = editor }` | [Host Integration](./host-integration.md) |
 
@@ -89,6 +95,7 @@ var view = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOption
 ## 7. 超过“第一跑”之后看哪里
 
 - [Host Integration](./host-integration.md) = 包边界、路线矩阵、迁移说明
+- [Consumer Sample](./consumer-sample.md) = 介于 HelloWorld 和 Demo 之间的真实宿主样例
 - [Alpha Status](./alpha-status.md) = 当前范围、非目标、已知限制
 - [Demo Guide](./demo-guide.md) = 完整展示宿主
 - [ScaleSmoke 基线](./scale-baseline.md) = 公开的规模分层与防回归红线
@@ -103,3 +110,4 @@ var view = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOption
 - release sign-off 与手动 NuGet 发布流程：[Public Launch Checklist](./public-launch-checklist.md)
 - 历史 tag 与包版本的关系：[Versioning](./versioning.md)
 - proof harness：[`tools/AsterGraph.HostSample`](../../tools/AsterGraph.HostSample/)、[`tools/AsterGraph.PackageSmoke`](../../tools/AsterGraph.PackageSmoke/)、[`tools/AsterGraph.ScaleSmoke`](../../tools/AsterGraph.ScaleSmoke/)
+- 中等样例：[`tools/AsterGraph.ConsumerSample.Avalonia`](../../tools/AsterGraph.ConsumerSample.Avalonia/)

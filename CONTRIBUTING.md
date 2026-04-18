@@ -80,6 +80,7 @@ For externally visible changes, update the matching public docs:
 - [`README.md`](./README.md)
 - [`README.zh-CN.md`](./README.zh-CN.md)
 - [`docs/en/quick-start.md`](./docs/en/quick-start.md)
+- [`docs/en/consumer-sample.md`](./docs/en/consumer-sample.md)
 - [`docs/en/host-integration.md`](./docs/en/host-integration.md)
 - [`docs/en/state-contracts.md`](./docs/en/state-contracts.md)
 - [`docs/en/extension-contracts.md`](./docs/en/extension-contracts.md)
@@ -88,7 +89,9 @@ For externally visible changes, update the matching public docs:
 - [`docs/en/project-status.md`](./docs/en/project-status.md)
 - [`docs/en/public-launch-checklist.md`](./docs/en/public-launch-checklist.md)
 - [`docs/en/demo-guide.md`](./docs/en/demo-guide.md)
+- [`docs/en/adoption-feedback.md`](./docs/en/adoption-feedback.md)
 - [`docs/zh-CN/quick-start.md`](./docs/zh-CN/quick-start.md)
+- [`docs/zh-CN/consumer-sample.md`](./docs/zh-CN/consumer-sample.md)
 - [`docs/zh-CN/host-integration.md`](./docs/zh-CN/host-integration.md)
 - [`docs/zh-CN/state-contracts.md`](./docs/zh-CN/state-contracts.md)
 - [`docs/zh-CN/extension-contracts.md`](./docs/zh-CN/extension-contracts.md)
@@ -97,5 +100,6 @@ For externally visible changes, update the matching public docs:
 - [`docs/zh-CN/project-status.md`](./docs/zh-CN/project-status.md)
 - [`docs/zh-CN/public-launch-checklist.md`](./docs/zh-CN/public-launch-checklist.md)
 - [`docs/zh-CN/demo-guide.md`](./docs/zh-CN/demo-guide.md)
+- [`docs/zh-CN/adoption-feedback.md`](./docs/zh-CN/adoption-feedback.md)
 
 Keep public onboarding understandable from `README.md`, `README.zh-CN.md`, and the canonical guides under `docs/en` and `docs/zh-CN`. Do not introduce public dependencies on local-only planning files or other ignored maintainer context.

@@ -2,7 +2,7 @@
 
 ## Current Alpha Target
 
-- package baseline: `0.2.0-alpha.1`
+- package baseline: `0.2.0-alpha.2`
 - repo status: public alpha
 - public versioning guidance: [Versioning](./versioning.md)
 - public entry path: `README.md` plus the guides under `docs/en` and `docs/zh-CN`
@@ -17,6 +17,7 @@
 - plugin discovery, trust policy, load inspection, and runtime loading
 - automation execution through `IGraphEditorSession.Automation`
 - official proof lanes and smoke tools
+- one medium hosted-UI consumer sample between HelloWorld and Demo
 - packed `HostSample` compatibility proof under `.NET 10` inside the release lane
 
 ## Explicitly Not Included
@@ -35,7 +36,7 @@
 
 ## Known Limitations
 
-- the historical repository tag `v1.9` still exists as a pre-launch milestone marker; treat the package version as the public version source of truth
+- the latest public prerelease tag is `v0.2.0-alpha.2`, while `v1.9` remains only as a historical pre-launch milestone marker
 - public prerelease publishing and release artifacts still depend on the maintainer release flow
 - the deepest package-validation lane and the `.NET 10` packed-consumer proof still run on the Windows release-validation path
 - retained compatibility APIs are still present during the migration window

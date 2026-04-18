@@ -43,7 +43,13 @@ For the smallest hosted-UI sample, run:
 dotnet run --project tools/AsterGraph.HelloWorld.Avalonia/AsterGraph.HelloWorld.Avalonia.csproj --nologo
 ```
 
-Use `HelloWorld` when you want the simplest runtime-only starting point. Use `HelloWorld.Avalonia` when you want the smallest shipped-shell sample. Use `HostSample` only when you want a proof harness for canonical route validation.
+For one realistic hosted integration with a host-owned action rail, parameter editing, and one trusted plugin, run:
+
+```powershell
+dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.ConsumerSample.Avalonia.csproj --nologo
+```
+
+Use `HelloWorld` when you want the simplest runtime-only starting point. Use `HelloWorld.Avalonia` when you want the smallest shipped-shell sample. Use `ConsumerSample.Avalonia` when you want one realistic host before jumping to `Demo`. Use `HostSample` only when you want a proof harness for canonical route validation.
 
 ## 4. Canonical Adoption Routes
 
@@ -51,7 +57,7 @@ Use `HelloWorld` when you want the simplest runtime-only starting point. Use `He
 | --- | --- | --- |
 | Runtime-only or custom UI | `AsterGraphEditorFactory.CreateSession(...)` | `tools/AsterGraph.HelloWorld` |
 | Shipped Avalonia UI | `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` | `tools/AsterGraph.HelloWorld.Avalonia` |
-| Plugin trust/discovery | `AsterGraphEditorFactory.DiscoverPluginCandidates(...)` + `AsterGraphEditorOptions.PluginTrustPolicy` | [Host Integration](./host-integration.md) |
+| Plugin trust/discovery | `AsterGraphEditorFactory.DiscoverPluginCandidates(...)` + `AsterGraphEditorOptions.PluginTrustPolicy` | [`tools/AsterGraph.ConsumerSample.Avalonia`](../../tools/AsterGraph.ConsumerSample.Avalonia/) |
 | Automation | `IGraphEditorSession.Automation.Execute(...)` | [Host Integration](./host-integration.md) |
 | Retained migration | `new GraphEditorViewModel(...)` + `new GraphEditorView { Editor = editor }` | [Host Integration](./host-integration.md) |
 
@@ -89,6 +95,7 @@ Plugin loading is currently in-process. Hosts can discover candidates, apply an 
 ## 7. Need More Than The First Run?
 
 - [Host Integration](./host-integration.md) = package boundary, route matrix, migration guidance
+- [Consumer Sample](./consumer-sample.md) = one realistic hosted integration between HelloWorld and Demo
 - [Alpha Status](./alpha-status.md) = current scope, non-goals, and known limitations
 - [Demo Guide](./demo-guide.md) = full showcase host
 - [ScaleSmoke Baseline](./scale-baseline.md) = public graph-size tiers and defended redlines
@@ -103,3 +110,4 @@ If you are validating the repository itself instead of consuming the published p
 - release sign-off and manual NuGet publish flow: [Public Launch Checklist](./public-launch-checklist.md)
 - historical tags versus package versions: [Versioning](./versioning.md)
 - proof harnesses: [`tools/AsterGraph.HostSample`](../../tools/AsterGraph.HostSample/), [`tools/AsterGraph.PackageSmoke`](../../tools/AsterGraph.PackageSmoke/), [`tools/AsterGraph.ScaleSmoke`](../../tools/AsterGraph.ScaleSmoke/)
+- medium consumer sample: [`tools/AsterGraph.ConsumerSample.Avalonia`](../../tools/AsterGraph.ConsumerSample.Avalonia/)

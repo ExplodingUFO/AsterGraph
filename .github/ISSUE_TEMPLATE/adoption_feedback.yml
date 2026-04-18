@@ -1,0 +1,61 @@
+name: Adoption feedback
+description: Report how a real or trial adoption attempt went, where friction appeared, and what should come next.
+title: "[Adoption] "
+labels:
+  - feedback
+body:
+  - type: input
+    id: version
+    attributes:
+      label: AsterGraph version
+      description: NuGet package version or public tag you evaluated
+      placeholder: 0.2.0-alpha.2 / v0.2.0-alpha.2
+    validations:
+      required: true
+  - type: dropdown
+    id: route
+    attributes:
+      label: Route or artifact tried
+      options:
+        - HelloWorld
+        - HelloWorld.Avalonia
+        - ConsumerSample.Avalonia
+        - HostSample
+        - PackageSmoke
+        - ScaleSmoke
+        - Demo
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: persona
+    attributes:
+      label: Adopter persona
+      description: What kind of host or team are you evaluating for?
+      placeholder: Existing Avalonia host, custom UI host, retained migration, plugin-extensible editor, etc.
+    validations:
+      required: true
+  - type: textarea
+    id: worked
+    attributes:
+      label: What worked
+      description: Which step or sample got you to first success?
+  - type: textarea
+    id: friction
+    attributes:
+      label: Main friction
+      description: What slowed you down or felt unclear?
+    validations:
+      required: true
+  - type: textarea
+    id: request
+    attributes:
+      label: Requested next capability
+      description: If maintainers should invest next in usability, scale, metadata editing, or something else, say why.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Proof or evidence
+      description: Commands, screenshots, repro links, or proof markers if you have them

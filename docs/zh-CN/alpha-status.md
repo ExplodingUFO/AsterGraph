@@ -2,7 +2,7 @@
 
 ## 当前 Alpha 目标
 
-- 包版本基线：`0.2.0-alpha.1`
+- 包版本基线：`0.2.0-alpha.2`
 - 仓库状态：public alpha
 - 对外版本说明：[Versioning](./versioning.md)
 - 对外入口：`README.md` / `README.zh-CN.md` 加上 `docs/en` / `docs/zh-CN`
@@ -17,6 +17,7 @@
 - plugin discovery / trust policy / load inspection / runtime loading
 - `IGraphEditorSession.Automation`
 - 官方 proof lanes 与 smoke tools
+- 一个介于 HelloWorld 和 Demo 之间的中等 hosted-UI consumer 样例
 
 ## 当前明确不包含
 
@@ -34,7 +35,7 @@
 
 ## 已知限制
 
-- 仓库里仍保留了 `v1.9` 这个公开前的历史 tag；对外版本以 NuGet 包版本为准
+- 当前最新对外 prerelease tag 是 `v0.2.0-alpha.2`；`v1.9` 只保留为公开前的历史里程碑 tag
 - public prerelease publish 和 release artifact 仍然依赖维护者 release flow
 - 最深的 package validation lane 目前仍以 Windows 为主
 - retained compatibility API 仍处于迁移窗口内
