@@ -80,7 +80,14 @@ jobs:
         shell: pwsh
         run: |
           [xml]$props = Get-Content -LiteralPath 'Directory.Build.props'
-          $packageVersion = $props.Project.PropertyGroup.Version
+          $packageVersion = @($props.Project.PropertyGroup.Version) |
+            Where-Object { -not [string]::IsNullOrWhiteSpace([string]$_) } |
+            Select-Object -First 1
+
+          if ([string]::IsNullOrWhiteSpace($packageVersion)) {
+            throw 'Directory.Build.props does not define a non-empty package version.'
+          }
+
           $expectedTag = "v$packageVersion"
           $actualTag = '${{ steps.release_context.outputs.release_tag }}'
 
