@@ -19,12 +19,14 @@
 - official proof lanes and smoke tools
 - one medium hosted-UI consumer sample between HelloWorld and Demo
 - packed `HostSample` compatibility proof under `.NET 10` inside the release lane
+- shipped definition-driven inspector metadata plus stock text/number/boolean/enum/list editors
 
 ## Explicitly Not Included
 
 - plugin marketplace or remote install/update workflows
 - plugin unload lifecycle
 - sandboxing or untrusted-code isolation guarantees
+- arbitrary host-agnostic property editor frameworks beyond the shipped definition-driven inspector
 - richer automation authoring UI or embedded scripting IDE workflows
 - abrupt removal of retained compatibility APIs
 
@@ -47,6 +49,7 @@
 - [Project Status](./project-status.md)
 - [Quick Start](./quick-start.md)
 - [ScaleSmoke Baseline](./scale-baseline.md)
+- [Authoring Inspector Recipe](./authoring-inspector-recipe.md)
 - [Plugin And Custom Node Recipe](./plugin-recipe.md)
 - [Retained-To-Session Migration Recipe](./retained-migration-recipe.md)
 - [Public Launch Checklist](./public-launch-checklist.md)

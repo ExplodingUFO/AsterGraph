@@ -216,6 +216,74 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
         return true;
     }
 
+    public bool TrySetSelectedNodeParameterValues(IReadOnlyDictionary<string, object?> values)
+    {
+        ArgumentNullException.ThrowIfNull(values);
+
+        if (values.Count == 0)
+        {
+            CurrentStatusMessage = "No parameter changes were supplied.";
+            return false;
+        }
+
+        if (!_behaviorOptions.Commands.Nodes.AllowEditParameters)
+        {
+            CurrentStatusMessage = "Parameter editing is disabled by host permissions.";
+            return false;
+        }
+
+        if (!TryGetSharedSelectionDefinition(out var definition, out var selectedNodes) || definition is null)
+        {
+            CurrentStatusMessage = _selectedNodeIds.Count == 0
+                ? "Select a node before editing parameters."
+                : "Parameter editing requires selected nodes to share one definition.";
+            return false;
+        }
+
+        var normalizedValues = new List<GraphEditorKernelParameterValueUpdate>(values.Count);
+        foreach (var pair in values)
+        {
+            var parameterDefinition = definition.Parameters.FirstOrDefault(parameter => string.Equals(parameter.Key, pair.Key, StringComparison.Ordinal));
+            if (parameterDefinition is null)
+            {
+                CurrentStatusMessage = $"Parameter '{pair.Key}' is not declared by {definition.DisplayName}.";
+                return false;
+            }
+
+            if (parameterDefinition.Constraints.IsReadOnly)
+            {
+                CurrentStatusMessage = $"{parameterDefinition.DisplayName} is read-only.";
+                return false;
+            }
+
+            var normalized = NodeParameterValueAdapter.NormalizeValue(parameterDefinition, pair.Value);
+            if (!normalized.IsValid)
+            {
+                CurrentStatusMessage = normalized.ValidationError ?? $"Parameter '{parameterDefinition.DisplayName}' could not be normalized.";
+                return false;
+            }
+
+            normalizedValues.Add(new GraphEditorKernelParameterValueUpdate(parameterDefinition, normalized.Value));
+        }
+
+        var mutation = _documentMutator.SetNodeParameterValues(
+            _document,
+            selectedNodes.Select(node => node.Id).ToList(),
+            normalizedValues);
+        if (mutation.ChangedNodeIds.Count == 0)
+        {
+            CurrentStatusMessage = "No parameter changes were applied.";
+            return false;
+        }
+
+        _document = mutation.Document;
+        CurrentStatusMessage = normalizedValues.Count == 1
+            ? $"Updated {normalizedValues[0].Definition.DisplayName} on {mutation.ChangedNodeIds.Count} node{(mutation.ChangedNodeIds.Count == 1 ? string.Empty : "s")}."
+            : $"Updated {normalizedValues.Count} parameters on {mutation.ChangedNodeIds.Count} nodes.";
+        MarkDirty(CurrentStatusMessage, GraphEditorDocumentChangeKind.ParametersChanged, mutation.ChangedNodeIds, null, preserveStatus: true);
+        return true;
+    }
+
     public void StartConnection(string sourceNodeId, string sourcePortId)
         => _connectionMutationCoordinator.StartConnection(sourceNodeId, sourcePortId);
 

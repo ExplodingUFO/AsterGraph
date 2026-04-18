@@ -14,6 +14,7 @@ It belongs to the supported published package set with `AsterGraph.Abstractions`
 ## This Package Owns
 
 - `IGraphEditorSession` plus `Commands`, `Queries`, `Events`, and mutation batching
+- definition-driven parameter snapshots, validation-aware inspector data, and batch parameter editing
 - `AsterGraphEditorFactory` and `AsterGraphEditorOptions`
 - replaceable storage, clipboard, diagnostics, localization, menu, and presentation seams
 - plugin discovery, trust policy, load inspection, and automation entry points
@@ -49,6 +50,7 @@ Keep new code on the stable canonical surfaces. Treat retained and compatibility
 - quickest runtime-only first run: [`tools/AsterGraph.HelloWorld`](../../tools/AsterGraph.HelloWorld/)
 - canonical onboarding: [Quick Start](../../docs/en/quick-start.md)
 - route and package boundary details: [Host Integration](../../docs/en/host-integration.md)
+- definition-driven inspector recipe: [Authoring Inspector Recipe](../../docs/en/authoring-inspector-recipe.md)
 - plugin and custom-node starting point: [Plugin And Custom Node Recipe](../../docs/en/plugin-recipe.md)
 - retained-to-session migration guide: [Retained-To-Session Migration Recipe](../../docs/en/retained-migration-recipe.md)
 - stability, precedence, and retirement rules: [Extension Contracts](../../docs/en/extension-contracts.md)

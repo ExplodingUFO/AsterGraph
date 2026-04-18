@@ -17,6 +17,7 @@ It belongs to the supported published package set with `AsterGraph.Abstractions`
 - `GraphInspectorView`
 - `GraphMiniMap`
 - stock Avalonia menu and presentation wiring
+- stock grouped inspector sections plus text/number/boolean/enum/list editors
 - `AsterGraphAvaloniaViewFactory` plus standalone surface factories
 - Avalonia theme resources, input handling, and control-level integration glue
 
@@ -44,5 +45,6 @@ For new work, prefer the factory-based routes. Treat the direct `GraphEditorView
 - quickest hosted-UI first run: [`tools/AsterGraph.HelloWorld.Avalonia`](../../tools/AsterGraph.HelloWorld.Avalonia/)
 - canonical onboarding: [Quick Start](../../docs/en/quick-start.md)
 - route and composition guidance: [Host Integration](../../docs/en/host-integration.md)
+- definition-driven inspector recipe: [Authoring Inspector Recipe](../../docs/en/authoring-inspector-recipe.md)
 - visual showcase host: [`src/AsterGraph.Demo`](../../src/AsterGraph.Demo/)
 - product overview: [Root README](../../README.md)

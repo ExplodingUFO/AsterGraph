@@ -18,7 +18,9 @@ public sealed record NodeParameterDefinition
         bool isRequired = false,
         string? description = null,
         object? defaultValue = null,
-        ParameterConstraints? constraints = null)
+        ParameterConstraints? constraints = null,
+        string? groupName = null,
+        string? placeholderText = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(key);
         ArgumentException.ThrowIfNullOrWhiteSpace(displayName);
@@ -31,6 +33,8 @@ public sealed record NodeParameterDefinition
         Description = string.IsNullOrWhiteSpace(description) ? null : description.Trim();
         DefaultValue = defaultValue;
         Constraints = constraints ?? new ParameterConstraints();
+        GroupName = string.IsNullOrWhiteSpace(groupName) ? null : groupName.Trim();
+        PlaceholderText = string.IsNullOrWhiteSpace(placeholderText) ? null : placeholderText.Trim();
     }
 
     /// <summary>
@@ -72,4 +76,14 @@ public sealed record NodeParameterDefinition
     /// 参数约束。
     /// </summary>
     public ParameterConstraints Constraints { get; }
+
+    /// <summary>
+    /// Optional inspector group name for shipped or custom property editors.
+    /// </summary>
+    public string? GroupName { get; }
+
+    /// <summary>
+    /// Optional placeholder text or short display hint for text-oriented editors.
+    /// </summary>
+    public string? PlaceholderText { get; }
 }

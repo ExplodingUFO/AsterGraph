@@ -6,6 +6,7 @@
 
 - the main demo route now uses `AsterGraphEditorFactory.Create(...)`
 - Avalonia surfaces are composed through the view factories
+- definition-driven inspector groups, shipped editors, and validation cues are visible on real demo node definitions
 - plugin trust/discovery/load state is visible in the UI
 - automation request/progress/result is visible in the UI
 - standalone surfaces and presenter replacement are rendered as real controls

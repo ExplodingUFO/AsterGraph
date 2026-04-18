@@ -56,6 +56,7 @@ file static class HostedHelloWorldWindowFactory
             NodeCatalog = catalog,
             CompatibilityService = new DefaultPortCompatibilityService(),
         });
+        editor.Session.Commands.SetSelection([SourceNodeId], SourceNodeId, updateStatus: false);
         var view = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOptions
         {
             Editor = editor,
@@ -76,15 +77,64 @@ file static class HostedHelloWorldWindowFactory
         var catalog = new NodeCatalog();
         catalog.RegisterDefinition(new NodeDefinition(
             definitionId,
-            "Hello World Node",
-            "Hello",
-            "Minimal hosted-UI node definition for the first shipped-shell sample.",
-            [
-                new PortDefinition(TargetPortId, "Input", new PortTypeId("float"), "#F3B36B"),
-            ],
-            [
-                new PortDefinition(SourcePortId, "Output", new PortTypeId("float"), "#6AD5C4"),
-            ]));
+                "Hello World Node",
+                "Hello",
+                "Minimal hosted-UI node definition for the first shipped-shell sample with authoring metadata.",
+                [
+                    new PortDefinition(TargetPortId, "Input", new PortTypeId("float"), "#F3B36B"),
+                ],
+                [
+                    new PortDefinition(SourcePortId, "Output", new PortTypeId("float"), "#6AD5C4"),
+                ],
+                parameters:
+                [
+                    new NodeParameterDefinition(
+                        "threshold",
+                        "Threshold",
+                        new PortTypeId("float"),
+                        ParameterEditorKind.Number,
+                        description: "Controls when the demo source emits a stronger pulse.",
+                        defaultValue: 0.5d,
+                        constraints: new ParameterConstraints(Minimum: 0, Maximum: 1),
+                        groupName: "Behavior"),
+                    new NodeParameterDefinition(
+                        "mode",
+                        "Mode",
+                        new PortTypeId("enum"),
+                        ParameterEditorKind.Enum,
+                        description: "Chooses how the sample node responds to the threshold.",
+                        defaultValue: "steady",
+                        constraints: new ParameterConstraints(
+                            AllowedOptions:
+                            [
+                                new ParameterOptionDefinition("steady", "Steady"),
+                                new ParameterOptionDefinition("pulse", "Pulse"),
+                            ]),
+                        groupName: "Behavior"),
+                    new NodeParameterDefinition(
+                        "slug",
+                        "Slug",
+                        new PortTypeId("string"),
+                        ParameterEditorKind.Text,
+                        description: "Stable lowercase identifier shown by the hosted inspector.",
+                        defaultValue: "hello-source",
+                        constraints: new ParameterConstraints(
+                            MinimumLength: 3,
+                            ValidationPattern: "^[a-z-]+$",
+                            ValidationPatternDescription: "lowercase letters and dashes"),
+                        groupName: "Metadata",
+                        placeholderText: "hello-source"),
+                    new NodeParameterDefinition(
+                        "tags",
+                        "Tags",
+                        new PortTypeId("string-list"),
+                        ParameterEditorKind.List,
+                        description: "One tag per line to demonstrate the shipped multiline list editor.",
+                        defaultValue: new[] { "hello", "avalonia" },
+                        constraints: new ParameterConstraints(MinimumItemCount: 1, MaximumItemCount: 5),
+                        groupName: "Metadata",
+                        placeholderText: "one tag per line"),
+                ]));
         return catalog;
     }
 
@@ -106,7 +156,13 @@ file static class HostedHelloWorldWindowFactory
                         new GraphPort(SourcePortId, "Output", PortDirection.Output, "float", "#6AD5C4", new PortTypeId("float")),
                     ],
                     "#6AD5C4",
-                    definitionId),
+                    definitionId,
+                    [
+                        new GraphParameterValue("threshold", new PortTypeId("float"), 0.65d),
+                        new GraphParameterValue("mode", new PortTypeId("enum"), "pulse"),
+                        new GraphParameterValue("slug", new PortTypeId("string"), "hello-source"),
+                        new GraphParameterValue("tags", new PortTypeId("string-list"), new[] { "hello", "authoring" }),
+                    ]),
                 new GraphNode(
                     TargetNodeId,
                     "Hello UI Target",
@@ -120,7 +176,13 @@ file static class HostedHelloWorldWindowFactory
                     ],
                     [],
                     "#F3B36B",
-                    definitionId),
+                    definitionId,
+                    [
+                        new GraphParameterValue("threshold", new PortTypeId("float"), 0.4d),
+                        new GraphParameterValue("mode", new PortTypeId("enum"), "steady"),
+                        new GraphParameterValue("slug", new PortTypeId("string"), "hello-target"),
+                        new GraphParameterValue("tags", new PortTypeId("string-list"), new[] { "target" }),
+                    ]),
             ],
             [
                 new GraphConnection(

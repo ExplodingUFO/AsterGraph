@@ -107,13 +107,16 @@ public sealed partial class GraphEditorSession
                     .Select(node => ResolveNodeParameterValue(node, parameter))
                     .ToList();
                 var firstValue = values[0];
-                var hasMixedValues = values.Skip(1).Any(value => !Equals(value, firstValue));
+                var hasMixedValues = values.Skip(1).Any(value => !NodeParameterValueAdapter.AreEquivalent(value, firstValue));
+                var validation = NodeParameterValueAdapter.NormalizeValue(parameter, firstValue);
 
                 return new GraphEditorNodeParameterSnapshot(
                     parameter,
                     hasMixedValues ? null : firstValue,
                     hasMixedValues,
-                    canEditParameters && !parameter.Constraints.IsReadOnly);
+                    canEditParameters && !parameter.Constraints.IsReadOnly,
+                    validation.IsValid,
+                    validation.ValidationError);
             })
             .ToList();
     }

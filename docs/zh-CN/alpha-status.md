@@ -18,12 +18,14 @@
 - `IGraphEditorSession.Automation`
 - 官方 proof lanes 与 smoke tools
 - 一个介于 HelloWorld 和 Demo 之间的中等 hosted-UI consumer 样例
+- shipped definition-driven inspector 元数据和内建 text/number/boolean/enum/list editor
 
 ## 当前明确不包含
 
 - plugin marketplace 或远程安装 / 更新
 - plugin unload lifecycle
 - sandbox / 不受信任代码隔离保证
+- 超出 shipped definition-driven inspector 之外的任意 host-agnostic property editor framework
 - 更复杂的 automation authoring UI 或内建脚本 IDE
 - 突然移除 retained compatibility API
 
@@ -46,6 +48,7 @@
 - [Project Status](./project-status.md)
 - [Quick Start](./quick-start.md)
 - [ScaleSmoke 基线](./scale-baseline.md)
+- [Authoring Inspector Recipe](./authoring-inspector-recipe.md)
 - [Plugin 与自定义节点 Recipe](./plugin-recipe.md)
 - [Retained 到 Session 的迁移 Recipe](./retained-migration-recipe.md)
 - [Public Launch Checklist](./public-launch-checklist.md)

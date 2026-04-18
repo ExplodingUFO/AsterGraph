@@ -117,17 +117,31 @@ internal sealed class GraphEditorInspectorProjection
             return [];
         }
 
+        var orderedGroups = definition.Parameters
+            .Select(parameter => parameter.GroupName ?? string.Empty)
+            .Distinct(StringComparer.Ordinal)
+            .ToList();
+        var shouldShowGroupHeaders = orderedGroups.Count > 1 || orderedGroups.Any(group => !string.IsNullOrWhiteSpace(group));
         var parameters = new List<NodeParameterViewModel>(definition.Parameters.Count);
-        foreach (var parameter in definition.Parameters)
+        foreach (var group in orderedGroups)
         {
-            var currentValues = selectedNodes
-                .Select(node => node.GetParameterValue(parameter.Key) ?? parameter.DefaultValue)
+            var groupParameters = definition.Parameters
+                .Where(parameter => string.Equals(parameter.GroupName ?? string.Empty, group, StringComparison.Ordinal))
                 .ToList();
-            parameters.Add(new NodeParameterViewModel(
-                parameter,
-                currentValues,
-                applyParameterValue,
-                isHostReadOnly: !canEditNodeParameters));
+            for (var index = 0; index < groupParameters.Count; index++)
+            {
+                var parameter = groupParameters[index];
+                var currentValues = selectedNodes
+                    .Select(node => node.GetParameterValue(parameter.Key) ?? parameter.DefaultValue)
+                    .ToList();
+                parameters.Add(new NodeParameterViewModel(
+                    parameter,
+                    currentValues,
+                    applyParameterValue,
+                    isHostReadOnly: !canEditNodeParameters,
+                    groupDisplayName: string.IsNullOrWhiteSpace(group) ? "General" : group,
+                    isGroupHeaderVisible: shouldShowGroupHeaders && index == 0));
+            }
         }
 
         return parameters;

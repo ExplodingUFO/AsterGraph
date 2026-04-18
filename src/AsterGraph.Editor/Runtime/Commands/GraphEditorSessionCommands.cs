@@ -53,6 +53,19 @@ public sealed partial class GraphEditorSession
         return edited;
     }
 
+    public bool TrySetSelectedNodeParameterValues(IReadOnlyDictionary<string, object?> values)
+    {
+        ArgumentNullException.ThrowIfNull(values);
+
+        var edited = _host.TrySetSelectedNodeParameterValues(values);
+        if (edited)
+        {
+            PublishCommandExecuted("nodes.parameters.batch-set");
+        }
+
+        return edited;
+    }
+
     [Obsolete("Use StartConnection instead.")]
     public void BeginConnection(string sourceNodeId, string sourcePortId)
         => StartConnection(sourceNodeId, sourcePortId);

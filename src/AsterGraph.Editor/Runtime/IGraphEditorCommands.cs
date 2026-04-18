@@ -64,6 +64,14 @@ public interface IGraphEditorCommands
         => throw new NotSupportedException();
 
     /// <summary>
+    /// Attempts to set multiple parameter values across the current selection when every selected node shares the same definition.
+    /// </summary>
+    /// <param name="values">Stable parameter keys mapped to candidate values that will be normalized against the definition metadata.</param>
+    /// <returns><see langword="true"/> when the mutation succeeds and changes the runtime document.</returns>
+    bool TrySetSelectedNodeParameterValues(IReadOnlyDictionary<string, object?> values)
+        => throw new NotSupportedException();
+
+    /// <summary>
     /// 开始一条待完成连线。
     /// </summary>
     /// <param name="sourceNodeId">源节点标识。</param>

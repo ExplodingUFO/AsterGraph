@@ -9,8 +9,12 @@ namespace AsterGraph.Editor.Runtime;
 /// <param name="CurrentValue">Normalized value shared by the current selection, or <see langword="null"/> for mixed values.</param>
 /// <param name="HasMixedValues">Whether the selected nodes currently expose different effective values for this parameter.</param>
 /// <param name="CanEdit">Whether the current host permissions and parameter constraints allow mutation.</param>
+/// <param name="IsValid">Whether the current effective value satisfies the definition metadata.</param>
+/// <param name="ValidationMessage">Validation feedback when <paramref name="IsValid"/> is <see langword="false"/>.</param>
 public sealed record GraphEditorNodeParameterSnapshot(
     NodeParameterDefinition Definition,
     object? CurrentValue,
     bool HasMixedValues,
-    bool CanEdit);
+    bool CanEdit,
+    bool IsValid,
+    string? ValidationMessage);

@@ -87,6 +87,7 @@ dotnet add package AsterGraph.Abstractions --prerelease
 - 缩放、平移、缩略图、待完成连线预览
 - 保存 / 加载、撤销 / 重做、复制 / 粘贴、片段导入导出
 - 对齐、分布、兼容多选下的共享参数编辑
+- definition-driven inspector 元数据，支持参数分组、内建 list/text/number/bool/enum editor 和校验反馈
 - 编译期节点定义注册与运行时插件注册
 - 宿主控制的插件信任策略、本地候选发现和加载状态检查
 - `IGraphEditorSession.Automation`
@@ -95,7 +96,7 @@ dotnet add package AsterGraph.Abstractions --prerelease
 当前明确不做：
 
 - 算法执行引擎
-- property editor framework
+- 超出 shipped definition-driven inspector 之外的任意 host-agnostic property editor framework
 - 插件 marketplace 或远程安装 / 更新流程
 - 插件卸载生命周期
 - 进程级沙箱或不受信任代码隔离保证
@@ -120,6 +121,7 @@ dotnet add package AsterGraph.Abstractions --prerelease
 - [Consumer Sample](./docs/zh-CN/consumer-sample.md)
 - [Host Integration](./docs/zh-CN/host-integration.md)
 - [ScaleSmoke 基线](./docs/zh-CN/scale-baseline.md)
+- [Authoring Inspector Recipe](./docs/zh-CN/authoring-inspector-recipe.md)
 - [Adoption Feedback Loop](./docs/zh-CN/adoption-feedback.md)
 - [Plugin 与自定义节点 Recipe](./docs/zh-CN/plugin-recipe.md)
 - [Retained 到 Session 的迁移 Recipe](./docs/zh-CN/retained-migration-recipe.md)

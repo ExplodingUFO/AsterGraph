@@ -99,6 +99,7 @@ var view = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOption
 - [Alpha Status](./alpha-status.md) = 当前范围、非目标、已知限制
 - [Demo Guide](./demo-guide.md) = 完整展示宿主
 - [ScaleSmoke 基线](./scale-baseline.md) = 公开的规模分层与防回归红线
+- [Authoring Inspector Recipe](./authoring-inspector-recipe.md) = definition-driven 参数、分组、校验与 shipped inspector editor
 - [Plugin 与自定义节点 Recipe](./plugin-recipe.md) = 最小可复制 plugin/custom-node 路线
 - [Retained 到 Session 的迁移 Recipe](./retained-migration-recipe.md) = 老宿主的渐进迁移指南
 

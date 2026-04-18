@@ -19,11 +19,15 @@ public sealed partial class NodeParameterViewModel : ObservableObject
     /// <param name="currentValues">当前选择中的参数值集合。</param>
     /// <param name="applyValue">应用规范化参数值的回调。</param>
     /// <param name="isHostReadOnly">宿主是否强制将该参数标记为只读。</param>
+    /// <param name="groupDisplayName">检查器分组标题；无需显示分组时可为空。</param>
+    /// <param name="isGroupHeaderVisible">是否在当前参数前显示分组标题。</param>
     public NodeParameterViewModel(
         NodeParameterDefinition definition,
         IReadOnlyList<object?> currentValues,
         Action<NodeParameterViewModel, object?> applyValue,
-        bool isHostReadOnly = false)
+        bool isHostReadOnly = false,
+        string? groupDisplayName = null,
+        bool isGroupHeaderVisible = false)
     {
         Definition = definition;
         _applyValue = applyValue;
@@ -35,6 +39,9 @@ public sealed partial class NodeParameterViewModel : ObservableObject
         TypeId = definition.ValueType;
         IsRequired = definition.IsRequired;
         IsReadOnly = definition.Constraints.IsReadOnly || isHostReadOnly;
+        GroupDisplayName = groupDisplayName;
+        IsGroupHeaderVisible = isGroupHeaderVisible;
+        PlaceholderText = definition.PlaceholderText;
         Options = definition.Constraints.AllowedOptions
             .Select(option => new NodeParameterOptionViewModel(option.Value, option.Label, option.Description))
             .ToList()
@@ -119,9 +126,39 @@ public sealed partial class NodeParameterViewModel : ObservableObject
     public bool IsColor => EditorKind == ParameterEditorKind.Color;
 
     /// <summary>
+    /// Indicates the parameter uses a multiline list editor.
+    /// </summary>
+    public bool IsList => EditorKind == ParameterEditorKind.List;
+
+    /// <summary>
     /// 指示当前参数是否通过文本输入控件编辑。
     /// </summary>
     public bool UsesTextInput => IsText || IsNumber || IsColor;
+
+    /// <summary>
+    /// Indicates the parameter uses a multiline text input.
+    /// </summary>
+    public bool UsesMultilineTextInput => IsList;
+
+    /// <summary>
+    /// Optional grouped inspector heading shown before the parameter card.
+    /// </summary>
+    public string? GroupDisplayName { get; }
+
+    /// <summary>
+    /// Whether the grouped inspector heading should be shown before this parameter.
+    /// </summary>
+    public bool IsGroupHeaderVisible { get; }
+
+    /// <summary>
+    /// Optional placeholder text provided by the parameter definition.
+    /// </summary>
+    public string? PlaceholderText { get; }
+
+    /// <summary>
+    /// Watermark shown by shipped text-based editors.
+    /// </summary>
+    public string InputWatermark => HasMixedValues ? MixedValueHint : PlaceholderText ?? string.Empty;
 
     /// <summary>
     /// 指示当前参数是否存在验证错误。
@@ -204,7 +241,7 @@ public sealed partial class NodeParameterViewModel : ObservableObject
             .Select(NodeParameterValueAdapter.NormalizeIncomingValue)
             .ToList();
         var firstValue = normalizedValues[0];
-        _hasMixedValues = normalizedValues.Skip(1).Any(value => !Equals(value, firstValue));
+        _hasMixedValues = normalizedValues.Skip(1).Any(value => !NodeParameterValueAdapter.AreEquivalent(value, firstValue));
 
         if (_hasMixedValues)
         {

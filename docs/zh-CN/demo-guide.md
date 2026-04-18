@@ -6,6 +6,7 @@
 
 - 主 demo 路线已经改成 `AsterGraphEditorFactory.Create(...)`
 - Avalonia 表面通过 view factory 组合
+- definition-driven inspector 分组、内建 editor 和校验提示已经能在真实 demo 节点定义上直接看到
 - plugin trust / discovery / load 在 UI 里可见
 - automation request / progress / result 在 UI 里可见
 - standalone surfaces 与 presenter replacement 是真实控件，不是文字说明

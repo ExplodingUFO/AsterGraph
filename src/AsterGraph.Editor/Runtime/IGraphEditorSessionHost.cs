@@ -28,6 +28,7 @@ internal interface IGraphEditorSessionHost
     void DeleteSelection();
     void SetNodePositions(IReadOnlyList<NodePositionSnapshot> positions, bool updateStatus);
     bool TrySetSelectedNodeParameterValue(string parameterKey, object? value);
+    bool TrySetSelectedNodeParameterValues(IReadOnlyDictionary<string, object?> values);
     void StartConnection(string sourceNodeId, string sourcePortId);
     void CompleteConnection(string targetNodeId, string targetPortId);
     void CancelPendingConnection();

@@ -138,6 +138,42 @@ public sealed class GraphInspectorStandaloneTests
         }
     }
 
+    [AvaloniaFact]
+    public void StandaloneInspector_RendersGroupedSectionsListEditorAndValidationHints()
+    {
+        var editor = CreateAuthoringEditor();
+        editor.SelectSingleNode(editor.Nodes[0], updateStatus: false);
+        var (window, inspector) = CreateInspectorWindow(editor);
+
+        try
+        {
+            var allText = string.Join(
+                "\n",
+                inspector.GetVisualDescendants()
+                    .OfType<TextBlock>()
+                    .Select(block => block.Text)
+                    .Where(text => !string.IsNullOrWhiteSpace(text)));
+            var multilineInputs = inspector.GetVisualDescendants()
+                .OfType<TextBox>()
+                .Where(textBox => textBox.AcceptsReturn)
+                .ToList();
+            var slugInput = inspector.GetVisualDescendants()
+                .OfType<TextBox>()
+                .FirstOrDefault(textBox => string.Equals(textBox.Watermark?.ToString(), "lowercase-id", StringComparison.Ordinal));
+
+            Assert.Contains("Behavior", allText);
+            Assert.Contains("Metadata", allText);
+            Assert.Contains("lowercase letters and dashes", allText);
+            Assert.Contains("Tags", allText);
+            Assert.NotEmpty(multilineInputs);
+            Assert.NotNull(slugInput);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
     private static (Window Window, GraphInspectorView Inspector) CreateInspectorWindow(
         GraphEditorViewModel editor,
         AsterGraphPresentationOptions? presentation = null)
@@ -199,6 +235,90 @@ public sealed class GraphInspectorStandaloneTests
                         InspectorDefinitionId,
                         [
                             new GraphParameterValue("threshold", new PortTypeId("float"), 0.75),
+                        ]),
+                ],
+                []),
+            catalog,
+            new DefaultPortCompatibilityService());
+    }
+
+    private static GraphEditorViewModel CreateAuthoringEditor()
+    {
+        var definitionId = new NodeDefinitionId("tests.inspector.authoring-node");
+        var catalog = new NodeCatalog();
+        catalog.RegisterDefinition(
+            new NodeDefinition(
+                definitionId,
+                "Authoring Node",
+                "Tests",
+                "Authoring Inspector",
+                [],
+                [],
+                parameters:
+                [
+                    new NodeParameterDefinition(
+                        "threshold",
+                        "Threshold",
+                        new PortTypeId("float"),
+                        ParameterEditorKind.Number,
+                        description: "Controls the authoring threshold.",
+                        defaultValue: 0.5,
+                        groupName: "Behavior"),
+                    new NodeParameterDefinition(
+                        "enabled",
+                        "Enabled",
+                        new PortTypeId("bool"),
+                        ParameterEditorKind.Boolean,
+                        defaultValue: true,
+                        groupName: "Behavior"),
+                    new NodeParameterDefinition(
+                        "slug",
+                        "Slug",
+                        new PortTypeId("string"),
+                        ParameterEditorKind.Text,
+                        description: "Stable lowercase identifier.",
+                        defaultValue: "valid-id",
+                        constraints: new ParameterConstraints(
+                            MinimumLength: 3,
+                            ValidationPattern: "^[a-z-]+$",
+                            ValidationPatternDescription: "lowercase letters and dashes"),
+                        groupName: "Metadata",
+                        placeholderText: "lowercase-id"),
+                    new NodeParameterDefinition(
+                        "tags",
+                        "Tags",
+                        new PortTypeId("string-list"),
+                        ParameterEditorKind.List,
+                        description: "One tag per line.",
+                        defaultValue: new[] { "alpha", "beta" },
+                        constraints: new ParameterConstraints(MinimumItemCount: 1, MaximumItemCount: 5),
+                        groupName: "Metadata",
+                        placeholderText: "one tag per line"),
+                ],
+                description: "Used to verify grouped authoring inspector UX."));
+
+        return new GraphEditorViewModel(
+            new GraphDocument(
+                "Authoring Inspector Graph",
+                "Regression coverage for grouped authoring inspector composition.",
+                [
+                    new GraphNode(
+                        "tests.inspector.authoring-node-001",
+                        "Authoring Node",
+                        "Tests",
+                        "Authoring Inspector",
+                        "Used to project grouped parameters and validation.",
+                        new GraphPoint(120, 160),
+                        new GraphSize(240, 160),
+                        [],
+                        [],
+                        "#6AD5C4",
+                        definitionId,
+                        [
+                            new GraphParameterValue("threshold", new PortTypeId("float"), 0.75),
+                            new GraphParameterValue("enabled", new PortTypeId("bool"), true),
+                            new GraphParameterValue("slug", new PortTypeId("string"), "AbC"),
+                            new GraphParameterValue("tags", new PortTypeId("string-list"), new[] { "alpha", "beta" }),
                         ]),
                 ],
                 []),

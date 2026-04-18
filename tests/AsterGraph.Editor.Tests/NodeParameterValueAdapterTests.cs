@@ -108,6 +108,54 @@ public sealed class NodeParameterValueAdapterTests
     }
 
     [Fact]
+    public void NormalizeValue_TextEnforcesLengthAndPatternMetadata()
+    {
+        var definition = new NodeParameterDefinition(
+            key: "slug",
+            displayName: "Slug",
+            valueType: new PortTypeId("string"),
+            editorKind: ParameterEditorKind.Text,
+            constraints: new ParameterConstraints(
+                MinimumLength: 3,
+                MaximumLength: 8,
+                ValidationPattern: "^[a-z]+$",
+                ValidationPatternDescription: "lowercase letters only"));
+
+        var tooShort = NodeParameterValueAdapter.NormalizeValue(definition, "ab");
+        var invalidPattern = NodeParameterValueAdapter.NormalizeValue(definition, "Hello");
+        var valid = NodeParameterValueAdapter.NormalizeValue(definition, "author");
+
+        Assert.False(tooShort.IsValid);
+        Assert.Equal("Slug must be at least 3 characters.", tooShort.ValidationError);
+        Assert.False(invalidPattern.IsValid);
+        Assert.Equal("Slug must match lowercase letters only.", invalidPattern.ValidationError);
+        Assert.True(valid.IsValid);
+        Assert.Equal("author", Assert.IsType<string>(valid.Value));
+    }
+
+    [Fact]
+    public void NormalizeValue_ListAcceptsMultilineInputAndEnforcesItemBounds()
+    {
+        var definition = new NodeParameterDefinition(
+            key: "tags",
+            displayName: "Tags",
+            valueType: new PortTypeId("string-list"),
+            editorKind: ParameterEditorKind.List,
+            constraints: new ParameterConstraints(
+                MinimumItemCount: 1,
+                MaximumItemCount: 3));
+
+        var tooMany = NodeParameterValueAdapter.NormalizeValue(definition, "alpha\nbeta\ngamma\ndelta");
+        var valid = NodeParameterValueAdapter.NormalizeValue(definition, "alpha\n beta \n\n gamma ");
+
+        Assert.False(tooMany.IsValid);
+        Assert.Equal("Tags must contain at most 3 items.", tooMany.ValidationError);
+        Assert.True(valid.IsValid);
+        Assert.Equal(["alpha", "beta", "gamma"], Assert.IsAssignableFrom<IReadOnlyList<string>>(valid.Value));
+        Assert.Equal($"alpha{Environment.NewLine}beta{Environment.NewLine}gamma", NodeParameterValueAdapter.FormatValueForEditor(valid.Value));
+    }
+
+    [Fact]
     public void NormalizeIncomingValue_ReadsJsonAndFormatUsesInvariant()
     {
         using var json = JsonDocument.Parse("""{"number": 1.5}""");
@@ -116,6 +164,16 @@ public sealed class NodeParameterValueAdapterTests
 
         Assert.Equal(1.5d, Assert.IsType<double>(normalized));
         Assert.Equal("1.5", formatted);
+    }
+
+    [Fact]
+    public void NormalizeIncomingValue_ReadsJsonArraysAsStringLists()
+    {
+        using var json = JsonDocument.Parse("""{"tags": ["alpha", "beta", "gamma"]}""");
+
+        var normalized = NodeParameterValueAdapter.NormalizeIncomingValue(json.RootElement.GetProperty("tags"));
+
+        Assert.Equal(["alpha", "beta", "gamma"], Assert.IsAssignableFrom<IReadOnlyList<string>>(normalized));
     }
 
     [Fact]

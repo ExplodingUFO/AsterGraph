@@ -71,6 +71,9 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
     public bool TrySetSelectedNodeParameterValue(string parameterKey, object? value)
         => _kernel.TrySetSelectedNodeParameterValue(parameterKey, value);
 
+    public bool TrySetSelectedNodeParameterValues(IReadOnlyDictionary<string, object?> values)
+        => _kernel.TrySetSelectedNodeParameterValues(values);
+
     public void StartConnection(string sourceNodeId, string sourcePortId)
         => _kernel.StartConnection(sourceNodeId, sourcePortId);
 

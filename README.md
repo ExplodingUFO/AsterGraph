@@ -87,6 +87,7 @@ Current capabilities:
 - zoom, pan, mini map, and pending-connection preview
 - save/load, undo/redo, copy/paste, and fragment import/export
 - batch alignment, distribution, and shared-parameter editing for compatible selections
+- definition-driven inspector metadata with grouped parameters, shipped list/text/number/bool/enum editors, and validation feedback
 - compile-time node-definition registration and runtime plugin registration
 - host-governed plugin trust policy, local candidate discovery, and load-state inspection
 - descriptor-first automation through `IGraphEditorSession.Automation`
@@ -95,7 +96,7 @@ Current capabilities:
 Current non-goals:
 
 - algorithm execution engine
-- property editor framework
+- arbitrary host-agnostic property editor framework beyond the shipped definition-driven inspector
 - plugin marketplace or remote install/update workflows
 - plugin unload lifecycle
 - process sandboxing or untrusted-code isolation guarantees
@@ -120,6 +121,7 @@ Consumer-facing guides:
 - [Consumer Sample](./docs/en/consumer-sample.md)
 - [Host Integration](./docs/en/host-integration.md)
 - [ScaleSmoke Baseline](./docs/en/scale-baseline.md)
+- [Authoring Inspector Recipe](./docs/en/authoring-inspector-recipe.md)
 - [Adoption Feedback Loop](./docs/en/adoption-feedback.md)
 - [Plugin And Custom Node Recipe](./docs/en/plugin-recipe.md)
 - [Retained-To-Session Migration Recipe](./docs/en/retained-migration-recipe.md)

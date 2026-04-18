@@ -158,90 +158,107 @@
             <ItemsControl ItemsSource="{Binding SelectedNodeParameters}">
               <ItemsControl.ItemTemplate>
                 <DataTemplate x:DataType="viewModels:NodeParameterViewModel">
-                  <Border Classes="astergraph-parameter-card">
-                    <StackPanel Spacing="8">
-                      <Grid ColumnDefinitions="*,Auto"
-                            ColumnSpacing="8">
-                        <StackPanel Spacing="2">
-                          <TextBlock Text="{Binding DisplayName}"
-                                     FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
-                                     FontWeight="SemiBold"
-                                     Foreground="{DynamicResource AsterGraph.HeadlineBrush}" />
-                          <TextBlock Text="{Binding Description}"
-                                     FontSize="{DynamicResource AsterGraph.InspectorCaptionFontSize}"
-                                     TextWrapping="Wrap"
-                                     Foreground="{DynamicResource AsterGraph.BodyBrush}" />
-                        </StackPanel>
+                  <StackPanel Spacing="6">
+                    <TextBlock Text="{Binding GroupDisplayName}"
+                               IsVisible="{Binding IsGroupHeaderVisible}"
+                               FontSize="{DynamicResource AsterGraph.SectionEyebrowFontSize}"
+                               FontWeight="Bold"
+                               Foreground="{DynamicResource AsterGraph.HighlightBrush}" />
 
-                        <StackPanel Grid.Column="1"
-                                    Orientation="Horizontal"
-                                    Spacing="4"
-                                    VerticalAlignment="Top">
-                          <Border Classes="astergraph-parameter-state-pill"
-                                  Background="{DynamicResource AsterGraph.ParameterEditableBadgeBrush}"
-                                  IsVisible="{Binding CanEdit}">
-                            <TextBlock Text="可编辑"
-                                       FontSize="{DynamicResource AsterGraph.InspectorCaptionFontSize}"
+                    <Border Classes="astergraph-parameter-card">
+                      <StackPanel Spacing="8">
+                        <Grid ColumnDefinitions="*,Auto"
+                              ColumnSpacing="8">
+                          <StackPanel Spacing="2">
+                            <TextBlock Text="{Binding DisplayName}"
+                                       FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
+                                       FontWeight="SemiBold"
                                        Foreground="{DynamicResource AsterGraph.HeadlineBrush}" />
-                          </Border>
-                          <Border Classes="astergraph-parameter-state-pill"
-                                  Background="{DynamicResource AsterGraph.ParameterReadOnlyBadgeBrush}"
-                                  IsVisible="{Binding IsReadOnly}">
-                            <TextBlock Text="只读"
+                            <TextBlock Text="{Binding Description}"
                                        FontSize="{DynamicResource AsterGraph.InspectorCaptionFontSize}"
-                                       Foreground="{DynamicResource AsterGraph.HeadlineBrush}" />
-                          </Border>
-                        </StackPanel>
-                      </Grid>
+                                       TextWrapping="Wrap"
+                                       Foreground="{DynamicResource AsterGraph.BodyBrush}" />
+                          </StackPanel>
 
-                      <TextBlock Text="编辑值"
-                                 FontSize="{DynamicResource AsterGraph.InspectorCaptionFontSize}"
-                                 FontWeight="SemiBold"
-                                 Foreground="{DynamicResource AsterGraph.EyebrowBrush}" />
+                          <StackPanel Grid.Column="1"
+                                      Orientation="Horizontal"
+                                      Spacing="4"
+                                      VerticalAlignment="Top">
+                            <Border Classes="astergraph-parameter-state-pill"
+                                    Background="{DynamicResource AsterGraph.ParameterEditableBadgeBrush}"
+                                    IsVisible="{Binding CanEdit}">
+                              <TextBlock Text="可编辑"
+                                         FontSize="{DynamicResource AsterGraph.InspectorCaptionFontSize}"
+                                         Foreground="{DynamicResource AsterGraph.HeadlineBrush}" />
+                            </Border>
+                            <Border Classes="astergraph-parameter-state-pill"
+                                    Background="{DynamicResource AsterGraph.ParameterReadOnlyBadgeBrush}"
+                                    IsVisible="{Binding IsReadOnly}">
+                              <TextBlock Text="只读"
+                                         FontSize="{DynamicResource AsterGraph.InspectorCaptionFontSize}"
+                                         Foreground="{DynamicResource AsterGraph.HeadlineBrush}" />
+                            </Border>
+                          </StackPanel>
+                        </Grid>
 
-                      <TextBox Text="{Binding StringValue}"
-                               Classes="astergraph-input"
-                               IsVisible="{Binding UsesTextInput}"
-                               IsReadOnly="{Binding IsReadOnly}"
-                               Watermark="{Binding MixedValueHint}" />
-
-                      <CheckBox Content="{Binding BooleanCaption}"
-                                Classes="astergraph-input"
-                                IsVisible="{Binding IsBoolean}"
-                                IsThreeState="True"
-                                IsChecked="{Binding BoolValue}"
-                                IsEnabled="{Binding CanEdit}" />
-
-                      <ComboBox ItemsSource="{Binding Options}"
-                                Classes="astergraph-input"
-                                SelectedItem="{Binding SelectedOption}"
-                                IsVisible="{Binding IsEnum}"
-                                IsEnabled="{Binding CanEdit}" />
-
-                      <Border Classes="astergraph-parameter-state-pill"
-                              IsVisible="{Binding HasMixedValues}">
-                        <TextBlock Text="包含多个节点的不同值，请确认后统一输入。"
+                        <TextBlock Text="编辑值"
                                    FontSize="{DynamicResource AsterGraph.InspectorCaptionFontSize}"
+                                   FontWeight="SemiBold"
                                    Foreground="{DynamicResource AsterGraph.EyebrowBrush}" />
-                      </Border>
 
-                      <Border Classes="astergraph-parameter-state-pill"
-                              Background="{DynamicResource AsterGraph.ParameterReadOnlyBadgeBrush}"
-                              IsVisible="{Binding IsReadOnly}">
-                        <TextBlock Text="当前参数受宿主或定义约束，无法修改。"
-                                   FontSize="{DynamicResource AsterGraph.InspectorCaptionFontSize}"
-                                   Foreground="{DynamicResource AsterGraph.HeadlineBrush}" />
-                      </Border>
+                        <TextBox Text="{Binding StringValue}"
+                                 Classes="astergraph-input"
+                                 IsVisible="{Binding UsesTextInput}"
+                                 IsReadOnly="{Binding IsReadOnly}"
+                                 Watermark="{Binding InputWatermark}" />
 
-                      <Border Classes="astergraph-parameter-state-pill"
-                              Background="{DynamicResource AsterGraph.ValidationErrorBadgeBrush}"
-                              IsVisible="{Binding HasValidationError}">
-                        <TextBlock Text="{Binding ValidationMessage}"
-                                   FontSize="{DynamicResource AsterGraph.InspectorCaptionFontSize}"
-                                   Foreground="{DynamicResource AsterGraph.ValidationErrorBrush}" />
-                      </Border>
-                    </StackPanel>
-                  </Border>
+                        <TextBox Text="{Binding StringValue}"
+                                 Classes="astergraph-input"
+                                 IsVisible="{Binding UsesMultilineTextInput}"
+                                 IsReadOnly="{Binding IsReadOnly}"
+                                 AcceptsReturn="True"
+                                 TextWrapping="Wrap"
+                                 MinHeight="96"
+                                 Watermark="{Binding InputWatermark}" />
+
+                        <CheckBox Content="{Binding BooleanCaption}"
+                                  Classes="astergraph-input"
+                                  IsVisible="{Binding IsBoolean}"
+                                  IsThreeState="True"
+                                  IsChecked="{Binding BoolValue}"
+                                  IsEnabled="{Binding CanEdit}" />
+
+                        <ComboBox ItemsSource="{Binding Options}"
+                                  Classes="astergraph-input"
+                                  SelectedItem="{Binding SelectedOption}"
+                                  IsVisible="{Binding IsEnum}"
+                                  IsEnabled="{Binding CanEdit}" />
+
+                        <Border Classes="astergraph-parameter-state-pill"
+                                IsVisible="{Binding HasMixedValues}">
+                          <TextBlock Text="包含多个节点的不同值，请确认后统一输入。"
+                                     FontSize="{DynamicResource AsterGraph.InspectorCaptionFontSize}"
+                                     Foreground="{DynamicResource AsterGraph.EyebrowBrush}" />
+                        </Border>
+
+                        <Border Classes="astergraph-parameter-state-pill"
+                                Background="{DynamicResource AsterGraph.ParameterReadOnlyBadgeBrush}"
+                                IsVisible="{Binding IsReadOnly}">
+                          <TextBlock Text="当前参数受宿主或定义约束，无法修改。"
+                                     FontSize="{DynamicResource AsterGraph.InspectorCaptionFontSize}"
+                                     Foreground="{DynamicResource AsterGraph.HeadlineBrush}" />
+                        </Border>
+
+                        <Border Classes="astergraph-parameter-state-pill"
+                                Background="{DynamicResource AsterGraph.ValidationErrorBadgeBrush}"
+                                IsVisible="{Binding HasValidationError}">
+                          <TextBlock Text="{Binding ValidationMessage}"
+                                     FontSize="{DynamicResource AsterGraph.InspectorCaptionFontSize}"
+                                     Foreground="{DynamicResource AsterGraph.ValidationErrorBrush}" />
+                        </Border>
+                      </StackPanel>
+                    </Border>
+                  </StackPanel>
                 </DataTemplate>
               </ItemsControl.ItemTemplate>
             </ItemsControl>

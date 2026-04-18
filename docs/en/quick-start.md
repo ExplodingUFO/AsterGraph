@@ -99,6 +99,7 @@ Plugin loading is currently in-process. Hosts can discover candidates, apply an 
 - [Alpha Status](./alpha-status.md) = current scope, non-goals, and known limitations
 - [Demo Guide](./demo-guide.md) = full showcase host
 - [ScaleSmoke Baseline](./scale-baseline.md) = public graph-size tiers and defended redlines
+- [Authoring Inspector Recipe](./authoring-inspector-recipe.md) = definition-driven parameters, groups, validation, and shipped inspector editors
 - [Plugin And Custom Node Recipe](./plugin-recipe.md) = smallest copyable plugin/custom-node path
 - [Retained-To-Session Migration Recipe](./retained-migration-recipe.md) = phased migration guide for older hosts
 

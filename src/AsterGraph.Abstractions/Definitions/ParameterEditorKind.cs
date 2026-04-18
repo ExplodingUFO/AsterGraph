@@ -29,4 +29,9 @@ public enum ParameterEditorKind
     /// Color picker or color text editor.
     /// </summary>
     Color = 4,
+
+    /// <summary>
+    /// Multiline list editor.
+    /// </summary>
+    List = 5,
 }

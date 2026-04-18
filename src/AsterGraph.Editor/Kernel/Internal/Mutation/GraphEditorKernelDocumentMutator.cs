@@ -168,12 +168,21 @@ internal sealed class GraphEditorKernelDocumentMutator
         IReadOnlyCollection<string> selectedNodeIds,
         NodeParameterDefinition parameterDefinition,
         object? normalizedValue)
+        => SetNodeParameterValues(
+            document,
+            selectedNodeIds,
+            [new GraphEditorKernelParameterValueUpdate(parameterDefinition, normalizedValue)]);
+
+    public GraphEditorKernelNodeParameterMutationResult SetNodeParameterValues(
+        GraphDocument document,
+        IReadOnlyCollection<string> selectedNodeIds,
+        IReadOnlyList<GraphEditorKernelParameterValueUpdate> updates)
     {
         ArgumentNullException.ThrowIfNull(document);
         ArgumentNullException.ThrowIfNull(selectedNodeIds);
-        ArgumentNullException.ThrowIfNull(parameterDefinition);
+        ArgumentNullException.ThrowIfNull(updates);
 
-        if (selectedNodeIds.Count == 0)
+        if (selectedNodeIds.Count == 0 || updates.Count == 0)
         {
             return GraphEditorKernelNodeParameterMutationResult.Empty(document);
         }
@@ -189,26 +198,36 @@ internal sealed class GraphEditorKernelDocumentMutator
                 }
 
                 var existingValues = node.ParameterValues?.ToList() ?? [];
-                var existingIndex = existingValues.FindIndex(parameter => string.Equals(parameter.Key, parameterDefinition.Key, StringComparison.Ordinal));
-                var currentEffectiveValue = existingIndex >= 0
-                    ? NodeParameterValueAdapter.NormalizeIncomingValue(existingValues[existingIndex].Value)
-                    : NodeParameterValueAdapter.NormalizeIncomingValue(parameterDefinition.DefaultValue);
-                if (Equals(currentEffectiveValue, normalizedValue))
+                var nodeChanged = false;
+
+                foreach (var update in updates)
+                {
+                    var existingIndex = existingValues.FindIndex(parameter => string.Equals(parameter.Key, update.Definition.Key, StringComparison.Ordinal));
+                    var currentEffectiveValue = existingIndex >= 0
+                        ? NodeParameterValueAdapter.NormalizeIncomingValue(existingValues[existingIndex].Value)
+                        : NodeParameterValueAdapter.NormalizeIncomingValue(update.Definition.DefaultValue);
+                    if (NodeParameterValueAdapter.AreEquivalent(currentEffectiveValue, update.Value))
+                    {
+                        continue;
+                    }
+
+                    nodeChanged = true;
+                    if (existingIndex >= 0)
+                    {
+                        existingValues[existingIndex] = existingValues[existingIndex] with { Value = update.Value };
+                    }
+                    else
+                    {
+                        existingValues.Add(new GraphParameterValue(update.Definition.Key, update.Definition.ValueType, update.Value));
+                    }
+                }
+
+                if (!nodeChanged)
                 {
                     return node;
                 }
 
                 changedNodeIds.Add(node.Id);
-
-                if (existingIndex >= 0)
-                {
-                    existingValues[existingIndex] = existingValues[existingIndex] with { Value = normalizedValue };
-                }
-                else
-                {
-                    existingValues.Add(new GraphParameterValue(parameterDefinition.Key, parameterDefinition.ValueType, normalizedValue));
-                }
-
                 return node with { ParameterValues = existingValues };
             })
             .ToList();
@@ -274,3 +293,7 @@ internal sealed record GraphEditorKernelNodeParameterMutationResult(
     public static GraphEditorKernelNodeParameterMutationResult Empty(GraphDocument document)
         => new(document, []);
 }
+
+internal sealed record GraphEditorKernelParameterValueUpdate(
+    NodeParameterDefinition Definition,
+    object? Value);
