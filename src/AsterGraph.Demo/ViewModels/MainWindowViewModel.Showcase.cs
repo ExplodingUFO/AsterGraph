@@ -402,13 +402,14 @@ public partial class MainWindowViewModel
                     "The demo now shows an expanded node card, an editor-only group boundary, and the single-source rule where unconnected inputs edit inline while connected inputs defer to upstream values."),
                 [
                     T("所属层：AsterGraph.Editor node-surface contract + AsterGraph.Avalonia stock canvas。", "Layer: AsterGraph.Editor node-surface contract plus the stock AsterGraph.Avalonia canvas."),
-                    T("宿主入口：GetNodeSurfaceSnapshots()、GetNodeGroups()、TrySetNodeWidth(...)、TrySetNodeExpansionState(...)。", "Host entry: GetNodeSurfaceSnapshots(), GetNodeGroups(), TrySetNodeWidth(...), and TrySetNodeExpansionState(...)."),
-                    T("可替换点：宿主可复用同一份 surface state，再决定自定义卡片、分组样式或后续 composite node 路径。", "Seams: hosts can reuse the same surface state while customizing cards, group visuals, or a later composite-node path."),
+                    T("宿主入口：GetNodeSurfaceSnapshots()、GetNodeGroupSnapshots()、TrySetNodeWidth(...)、TrySetNodeExpansionState(...)、TrySetNodeGroupExtraPadding(...)。", "Host entry: GetNodeSurfaceSnapshots(), GetNodeGroupSnapshots(), TrySetNodeWidth(...), TrySetNodeExpansionState(...), and TrySetNodeGroupExtraPadding(...)."),
+                    T("可替换点：宿主可复用同一份 surface state，再决定自定义卡片、分组样式、resolved bounds 策略或后续 composite node 路径。", "Seams: hosts can reuse the same surface state while customizing cards, group visuals, resolved-bounds policy, or a later composite-node path."),
                 ],
                 [
-                    T("默认图包含 editor-only 分组边界。", "The default graph includes an editor-only group boundary."),
+                    T("默认图包含会随成员节点自动贴合的 editor-only 分组边界。", "The default graph includes an editor-only group boundary that auto-fits its member nodes."),
                     T("Lighting Mix 节点默认展开，并显示 inline input authoring。", "The Lighting Mix node starts expanded and exposes inline input authoring."),
                     T("连接中的 Pulse 输入会覆盖本地 literal，未连接的 Rim Mask 继续内联编辑。", "The connected Pulse input overrides its local literal while the unconnected Rim Mask stays inline-editable."),
+                    T("组框支持按边拉伸并保留额外留白，同时继续跟随成员节点移动与扩展。", "Group frames support per-edge resize with persistent whitespace while continuing to follow member-node movement and expansion."),
                 ]),
         ];
     }

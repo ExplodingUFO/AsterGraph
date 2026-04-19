@@ -11,12 +11,13 @@ public sealed record DemoProofResult(
     bool ShellWorkflowOk,
     bool CommandSurfaceOk,
     bool ProgressiveNodeSurfaceOk,
+    bool AdaptiveGroupBoundsOk,
     double StartupMs,
     double InspectorProjectionMs,
     double PluginScanMs,
     double CommandLatencyMs)
 {
-    public bool IsOk => TrustTransparencyOk && ShellWorkflowOk && CommandSurfaceOk && ProgressiveNodeSurfaceOk;
+    public bool IsOk => TrustTransparencyOk && ShellWorkflowOk && CommandSurfaceOk && ProgressiveNodeSurfaceOk && AdaptiveGroupBoundsOk;
 
     public IReadOnlyList<string> MetricLines =>
     [
@@ -66,6 +67,8 @@ public static class DemoProof
             .Single(snapshot => string.Equals(snapshot.NodeId, "light", StringComparison.Ordinal));
         var terrainGroup = shell.Editor.Session.Queries.GetNodeGroups()
             .SingleOrDefault(group => string.Equals(group.Id, "terrain-authoring", StringComparison.Ordinal));
+        var terrainGroupSnapshot = shell.Editor.GetNodeGroupSnapshots()
+            .SingleOrDefault(group => string.Equals(group.Id, "terrain-authoring", StringComparison.Ordinal));
         var progressiveNodeSurfaceOk =
             lightSurface.ExpansionState == GraphNodeExpansionState.Expanded
             && terrainGroup is not null
@@ -74,6 +77,23 @@ public static class DemoProof
             && !shell.Editor.HasIncomingConnection(lightingNode, rimMaskPort)
             && shell.Editor.ResolveInlineParameter(lightingNode, pulsePort) is not null
             && shell.Editor.ResolveInlineParameter(lightingNode, rimMaskPort)?.Key == "rimMask";
+        var noiseNode = shell.Editor.FindNode("noise")
+            ?? throw new InvalidOperationException("Demo proof requires the noise node.");
+        var adaptivePadding = new GraphPadding(52, 40, 44, 36);
+        var adaptiveBoundsOk =
+            terrainGroupSnapshot is not null
+            && shell.Editor.TrySetNodeGroupExtraPadding("terrain-authoring", adaptivePadding, updateStatus: false)
+            && shell.Editor.TrySetNodeWidth(noiseNode, noiseNode.Width + 48d, updateStatus: false);
+        var terrainGroupAfterResize = shell.Editor.GetNodeGroupSnapshots()
+            .SingleOrDefault(group => string.Equals(group.Id, "terrain-authoring", StringComparison.Ordinal));
+        var adaptiveGroupBoundsOk =
+            adaptiveBoundsOk
+            && terrainGroupAfterResize is not null
+            && terrainGroupAfterResize.ExtraPadding == adaptivePadding
+            && terrainGroupAfterResize.Position.X <= shell.Editor.FindNode("gradient")!.X
+            && terrainGroupAfterResize.Position.Y <= Math.Min(shell.Editor.FindNode("gradient")!.Y, shell.Editor.FindNode("noise")!.Y)
+            && terrainGroupAfterResize.Size.Width > terrainGroupSnapshot!.Size.Width
+            && terrainGroupAfterResize.Size.Height >= terrainGroupSnapshot.Size.Height;
 
         var exportPath = Path.Combine(storageRoot, "plugin-allowlist-proof.json");
         var trustTransparencyOk =
@@ -102,6 +122,7 @@ public static class DemoProof
             shellWorkflowOk,
             commandSurfaceOk,
             progressiveNodeSurfaceOk,
+            adaptiveGroupBoundsOk,
             startupMs,
             inspectorProjectionMs,
             pluginScanMs,

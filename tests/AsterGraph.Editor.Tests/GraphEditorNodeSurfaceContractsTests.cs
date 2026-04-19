@@ -48,6 +48,17 @@ public sealed class GraphEditorNodeSurfaceContractsTests
             typeof(IReadOnlyList<GraphNodeGroup>),
             queriesType.GetMethod(nameof(IGraphEditorQueries.GetNodeGroups))!.ReturnType);
 
+        AssertMethod(queriesType, nameof(IGraphEditorQueries.GetNodeGroupSnapshots));
+        Assert.Equal(
+            typeof(IReadOnlyList<GraphEditorNodeGroupSnapshot>),
+            queriesType.GetMethod(nameof(IGraphEditorQueries.GetNodeGroupSnapshots))!.ReturnType);
+
+        Assert.NotNull(typeof(GraphEditorNodeGroupSnapshot).GetProperty(nameof(GraphEditorNodeGroupSnapshot.Position)));
+        Assert.NotNull(typeof(GraphEditorNodeGroupSnapshot).GetProperty(nameof(GraphEditorNodeGroupSnapshot.Size)));
+        Assert.NotNull(typeof(GraphEditorNodeGroupSnapshot).GetProperty(nameof(GraphEditorNodeGroupSnapshot.ContentPosition)));
+        Assert.NotNull(typeof(GraphEditorNodeGroupSnapshot).GetProperty(nameof(GraphEditorNodeGroupSnapshot.ContentSize)));
+        Assert.NotNull(typeof(GraphEditorNodeGroupSnapshot).GetProperty(nameof(GraphEditorNodeGroupSnapshot.ExtraPadding)));
+
         AssertMethod(commandsType, nameof(IGraphEditorCommands.TryCreateNodeGroupFromSelection), typeof(string));
         Assert.Equal(
             typeof(string),
@@ -62,6 +73,11 @@ public sealed class GraphEditorNodeSurfaceContractsTests
         Assert.Equal(
             typeof(bool),
             commandsType.GetMethod(nameof(IGraphEditorCommands.TrySetNodeGroupPosition), [typeof(string), typeof(GraphPoint), typeof(bool), typeof(bool)])!.ReturnType);
+
+        AssertMethod(commandsType, nameof(IGraphEditorCommands.TrySetNodeGroupExtraPadding), typeof(string), typeof(GraphPadding), typeof(bool));
+        Assert.Equal(
+            typeof(bool),
+            commandsType.GetMethod(nameof(IGraphEditorCommands.TrySetNodeGroupExtraPadding), [typeof(string), typeof(GraphPadding), typeof(bool)])!.ReturnType);
     }
 
     [Fact]
@@ -111,7 +127,7 @@ public sealed class GraphEditorNodeSurfaceContractsTests
     }
 
     [Fact]
-    public void SessionCommands_NodeGroups_PersistMembershipCollapseAndMovement()
+    public void SessionCommands_NodeGroups_ExposeResolvedBounds_PersistPadding_AndTrackNodeSurfaceChanges()
     {
         var session = CreateSession();
 
@@ -121,21 +137,49 @@ public sealed class GraphEditorNodeSurfaceContractsTests
         Assert.False(string.IsNullOrWhiteSpace(groupId));
 
         var createdGroup = Assert.Single(session.Queries.GetNodeGroups());
+        var createdSnapshot = Assert.Single(session.Queries.GetNodeGroupSnapshots());
         Assert.Equal(groupId, createdGroup.Id);
         Assert.Equal("Surface Cluster", createdGroup.Title);
+        Assert.Equal(new GraphPadding(24d, 44d, 24d, 28d), createdGroup.ExtraPadding);
         Assert.Equal(
             [NodeId, SiblingNodeId],
             createdGroup.NodeIds.OrderBy(id => id, StringComparer.Ordinal));
+        Assert.Equal(createdGroup.Position, createdSnapshot.Position);
+        Assert.Equal(createdGroup.Size, createdSnapshot.Size);
+        Assert.Equal(new GraphPoint(120d, 160d), createdSnapshot.ContentPosition);
+        Assert.Equal(new GraphSize(520d, 196d), createdSnapshot.ContentSize);
 
         var initialPositions = session.Queries.CreateDocumentSnapshot().Nodes
             .ToDictionary(node => node.Id, node => node.Position, StringComparer.Ordinal);
+        var initialSnapshot = createdSnapshot;
+
+        Assert.True(session.Commands.TrySetNodeExpansionState(NodeId, GraphNodeExpansionState.Expanded));
+        var expandedSnapshot = Assert.Single(session.Queries.GetNodeGroupSnapshots());
+        Assert.Equal(initialSnapshot.Position, expandedSnapshot.Position);
+        Assert.Equal(initialSnapshot.Size.Width, expandedSnapshot.Size.Width);
+        Assert.Equal(initialSnapshot.Size.Height + 152d, expandedSnapshot.Size.Height);
+
+        Assert.True(session.Commands.TrySetNodeWidth(SiblingNodeId, 320d, updateStatus: false));
+        var resizedSnapshot = Assert.Single(session.Queries.GetNodeGroupSnapshots());
+        Assert.Equal(expandedSnapshot.Position, resizedSnapshot.Position);
+        Assert.Equal(expandedSnapshot.Size.Width + 100d, resizedSnapshot.Size.Width);
+
+        Assert.True(session.Commands.TrySetNodeGroupExtraPadding(groupId!, new GraphPadding(40d, 60d, 32d, 24d), updateStatus: false));
+        var paddedGroup = Assert.Single(session.Queries.GetNodeGroups());
+        var paddedSnapshot = Assert.Single(session.Queries.GetNodeGroupSnapshots());
+        Assert.Equal(new GraphPadding(40d, 60d, 32d, 24d), paddedGroup.ExtraPadding);
+        Assert.Equal(new GraphPoint(80d, 100d), paddedSnapshot.Position);
+        Assert.Equal(new GraphSize(692d, 432d), paddedSnapshot.Size);
 
         Assert.True(session.Commands.TrySetNodeGroupCollapsed(groupId!, isCollapsed: true));
         Assert.True(session.Commands.TrySetNodeGroupPosition(groupId, new GraphPoint(200, 120), moveMemberNodes: true, updateStatus: false));
 
         var movedGroup = Assert.Single(session.Queries.GetNodeGroups());
+        var movedSnapshot = Assert.Single(session.Queries.GetNodeGroupSnapshots());
         Assert.True(movedGroup.IsCollapsed);
         Assert.Equal(new GraphPoint(200, 120), movedGroup.Position);
+        Assert.Equal(movedGroup.Position, movedSnapshot.Position);
+        Assert.Equal(movedGroup.Size, movedSnapshot.Size);
 
         var movedDocument = session.Queries.CreateDocumentSnapshot();
         foreach (var node in movedDocument.Nodes)
@@ -150,6 +194,7 @@ public sealed class GraphEditorNodeSurfaceContractsTests
         Assert.Equal(groupId, restoredGroup.Id);
         Assert.True(restoredGroup.IsCollapsed);
         Assert.Equal(new GraphPoint(200, 120), restoredGroup.Position);
+        Assert.Equal(new GraphPadding(40d, 60d, 32d, 24d), restoredGroup.ExtraPadding);
         Assert.All(restored.Nodes, node => Assert.Equal(groupId, node.Surface?.GroupId));
     }
 

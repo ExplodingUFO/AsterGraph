@@ -636,6 +636,162 @@ public sealed class NodeCanvasStandaloneTests
         }
     }
 
+    [AvaloniaFact]
+    public void GroupSurface_UsesResolvedBounds_WhenMemberNodeExpands()
+    {
+        var editor = CreateEditor();
+        editor.Session.Commands.SetSelection([SourceNodeId, TargetNodeId], TargetNodeId, updateStatus: false);
+        var groupId = editor.Session.Commands.TryCreateNodeGroupFromSelection("Canvas Cluster");
+        Assert.False(string.IsNullOrWhiteSpace(groupId));
+
+        var (window, canvas) = CreateStandaloneCanvasWindow(editor);
+
+        try
+        {
+            var groupSurface = canvas.GetVisualDescendants()
+                .OfType<Border>()
+                .Single(control => string.Equals(
+                    AutomationProperties.GetName(control),
+                    "Canvas Cluster group",
+                    StringComparison.Ordinal));
+            var initialSnapshot = Assert.Single(editor.GetNodeGroupSnapshots());
+
+            Assert.Equal(initialSnapshot.Size.Height, groupSurface.Height);
+
+            Assert.True(editor.Session.Commands.TrySetNodeExpansionState(TargetNodeId, GraphNodeExpansionState.Expanded));
+
+            var expandedSnapshot = Assert.Single(editor.GetNodeGroupSnapshots());
+            Assert.True(expandedSnapshot.Size.Height > initialSnapshot.Size.Height);
+            Assert.Equal(expandedSnapshot.Size.Height, groupSurface.Height);
+            Assert.Equal(expandedSnapshot.Position.Y, Canvas.GetTop(groupSurface));
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
+    public void GroupResizeThumb_UpdatesPersistedPadding_AndResolvedSurfaceWidth()
+    {
+        var editor = CreateEditor();
+        editor.Session.Commands.SetSelection([SourceNodeId, TargetNodeId], TargetNodeId, updateStatus: false);
+        var groupId = editor.Session.Commands.TryCreateNodeGroupFromSelection("Canvas Cluster");
+        Assert.False(string.IsNullOrWhiteSpace(groupId));
+
+        var (window, canvas) = CreateStandaloneCanvasWindow(editor);
+
+        try
+        {
+            var groupSurface = canvas.GetVisualDescendants()
+                .OfType<Border>()
+                .Single(control => string.Equals(
+                    AutomationProperties.GetName(control),
+                    "Canvas Cluster group",
+                    StringComparison.Ordinal));
+            var thumb = canvas.GetVisualDescendants()
+                .OfType<Thumb>()
+                .Single(control => string.Equals(
+                    AutomationProperties.GetName(control),
+                    "Canvas Cluster group right resize handle",
+                    StringComparison.Ordinal));
+            var initialSnapshot = Assert.Single(editor.GetNodeGroupSnapshots());
+
+            thumb.RaiseEvent(new VectorEventArgs
+            {
+                RoutedEvent = Thumb.DragDeltaEvent,
+                Vector = new Vector(36, 0),
+                Source = thumb,
+            });
+
+            var group = Assert.Single(editor.Session.Queries.GetNodeGroups());
+            var resizedSnapshot = Assert.Single(editor.GetNodeGroupSnapshots());
+
+            Assert.Equal(new GraphPadding(24, 44, 60, 28), group.ExtraPadding);
+            Assert.Equal(initialSnapshot.Size.Width + 36d, resizedSnapshot.Size.Width);
+            Assert.Equal(resizedSnapshot.Size.Width, groupSurface.Width);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
+    public void GroupDrag_MovesMemberNodes_PreservesPadding_AndSupportsUndoRedo()
+    {
+        var editor = CreateEditor();
+        editor.Session.Commands.SetSelection([SourceNodeId, TargetNodeId], TargetNodeId, updateStatus: false);
+        var groupId = editor.Session.Commands.TryCreateNodeGroupFromSelection("Canvas Cluster");
+        Assert.False(string.IsNullOrWhiteSpace(groupId));
+        Assert.True(editor.Session.Commands.TrySetNodeGroupExtraPadding(groupId!, new GraphPadding(36, 52, 30, 24), updateStatus: false));
+
+        var sourceNode = editor.Nodes.Single(node => node.Id == SourceNodeId);
+        var targetNode = editor.Nodes.Single(node => node.Id == TargetNodeId);
+        var initialSource = new GraphPoint(sourceNode.X, sourceNode.Y);
+        var initialTarget = new GraphPoint(targetNode.X, targetNode.Y);
+        var initialSnapshot = Assert.Single(editor.GetNodeGroupSnapshots());
+
+        var (window, canvas) = CreateStandaloneCanvasWindow(editor);
+        var pointer = new global::Avalonia.Input.Pointer(1, PointerType.Mouse, isPrimary: true);
+
+        try
+        {
+            var groupSurface = canvas.GetVisualDescendants()
+                .OfType<Border>()
+                .Single(control => string.Equals(
+                    AutomationProperties.GetName(control),
+                    "Canvas Cluster group",
+                    StringComparison.Ordinal));
+            var pressedArgs = CreatePointerPressedArgs(groupSurface, canvas, pointer, new Point(120, 88), KeyModifiers.None);
+            var movedArgs = CreatePointerMovedArgs(canvas, pointer, new Point(164, 110), KeyModifiers.None);
+            var releasedArgs = CreatePointerReleasedArgs(canvas, pointer, new Point(164, 110), KeyModifiers.None);
+
+            groupSurface.RaiseEvent(pressedArgs);
+            Assert.Same(canvas, pointer.Captured);
+
+            InvokeCanvasPointerMoved(canvas, movedArgs);
+            InvokeCanvasPointerReleased(canvas, releasedArgs);
+
+            var movedSnapshot = Assert.Single(editor.GetNodeGroupSnapshots());
+            var movedGroup = Assert.Single(editor.Session.Queries.GetNodeGroups());
+            Assert.Equal(new GraphPadding(36, 52, 30, 24), movedGroup.ExtraPadding);
+            Assert.Equal(initialSource.X + 50d, sourceNode.X);
+            Assert.Equal(initialSource.Y + 25d, sourceNode.Y);
+            Assert.Equal(initialTarget.X + 50d, targetNode.X);
+            Assert.Equal(initialTarget.Y + 25d, targetNode.Y);
+            Assert.Equal(initialSnapshot.Position.X + 50d, movedSnapshot.Position.X);
+            Assert.Equal(initialSnapshot.Position.Y + 25d, movedSnapshot.Position.Y);
+
+            editor.Undo();
+
+            var undoneSnapshot = Assert.Single(editor.GetNodeGroupSnapshots());
+            var undoneSource = editor.Nodes.Single(node => node.Id == SourceNodeId);
+            var undoneTarget = editor.Nodes.Single(node => node.Id == TargetNodeId);
+            Assert.Equal(initialSource.X, undoneSource.X);
+            Assert.Equal(initialSource.Y, undoneSource.Y);
+            Assert.Equal(initialTarget.X, undoneTarget.X);
+            Assert.Equal(initialTarget.Y, undoneTarget.Y);
+            Assert.Equal(initialSnapshot.Position, undoneSnapshot.Position);
+
+            editor.Redo();
+
+            var redoneSnapshot = Assert.Single(editor.GetNodeGroupSnapshots());
+            var redoneSource = editor.Nodes.Single(node => node.Id == SourceNodeId);
+            var redoneTarget = editor.Nodes.Single(node => node.Id == TargetNodeId);
+            Assert.Equal(initialSource.X + 50d, redoneSource.X);
+            Assert.Equal(initialSource.Y + 25d, redoneSource.Y);
+            Assert.Equal(initialTarget.X + 50d, redoneTarget.X);
+            Assert.Equal(initialTarget.Y + 25d, redoneTarget.Y);
+            Assert.Equal(initialSnapshot.Position.X + 50d, redoneSnapshot.Position.X);
+            Assert.Equal(initialSnapshot.Position.Y + 25d, redoneSnapshot.Position.Y);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
     private static void InvokeCanvasContextRequested(NodeCanvas canvas, ContextRequestedEventArgs args)
         => InvokeCanvasHandler("HandleCanvasContextRequested", canvas, args);
 
@@ -655,8 +811,16 @@ public sealed class NodeCanvasStandaloneTests
         => InvokeCanvasHandler("HandlePointerWheelChanged", canvas, args);
 
     private static PointerPressedEventArgs CreatePointerPressedArgs(NodeCanvas canvas, global::Avalonia.Input.Pointer pointer, Point position, KeyModifiers modifiers)
+        => CreatePointerPressedArgs(canvas, canvas, pointer, position, modifiers);
+
+    private static PointerPressedEventArgs CreatePointerPressedArgs(
+        InputElement source,
+        NodeCanvas canvas,
+        global::Avalonia.Input.Pointer pointer,
+        Point position,
+        KeyModifiers modifiers)
         => new(
-            canvas,
+            source,
             pointer,
             canvas,
             position,

@@ -95,6 +95,7 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
         if (_host.InteractionSession.SelectionStartScreenPosition is not null
             && !_host.InteractionSession.IsPanning
             && _host.InteractionSession.DragNode is null
+            && _host.InteractionSession.DragGroupId is null
             && _host.InteractionSession.TryBeginMarqueeSelection(currentScreenPosition, selectionDragThreshold))
         {
             _host.UpdateMarqueeSelection(currentScreenPosition, finalize: false);
@@ -102,18 +103,23 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
         }
 
         var handled = false;
-        if (_host.InteractionSession.IsPanning || _host.InteractionSession.DragNode is not null)
+        if (_host.InteractionSession.IsPanning
+            || _host.InteractionSession.DragNode is not null
+            || _host.InteractionSession.DragGroupId is not null)
         {
             if (_host.InteractionSession.DragNode is not null
-                && _host.InteractionSession.DragSession is NodeCanvasDragSession dragSession
-                && _host.InteractionSession.DragStartScreenPosition is Point dragStart)
+                || _host.InteractionSession.DragGroupId is not null)
             {
-                var rawDelta = currentScreenPosition - dragStart;
-                var adjustedDelta = _host.ApplyDragAssist(
-                    dragSession,
-                    rawDelta.X / _host.ViewModel.Zoom,
-                    rawDelta.Y / _host.ViewModel.Zoom);
-                _host.ViewModel.ApplyDragOffset(dragSession.OriginPositions, adjustedDelta.X, adjustedDelta.Y);
+                if (_host.InteractionSession.DragSession is NodeCanvasDragSession dragSession
+                    && _host.InteractionSession.DragStartScreenPosition is Point dragStart)
+                {
+                    var rawDelta = currentScreenPosition - dragStart;
+                    var adjustedDelta = _host.ApplyDragAssist(
+                        dragSession,
+                        rawDelta.X / _host.ViewModel.Zoom,
+                        rawDelta.Y / _host.ViewModel.Zoom);
+                    _host.ViewModel.ApplyDragOffset(dragSession.OriginPositions, adjustedDelta.X, adjustedDelta.Y);
+                }
             }
             else if (_host.InteractionSession.IsPanning)
             {
@@ -149,7 +155,11 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
             _host.HideSelectionAdorner();
         }
 
-        if (_host.InteractionSession.DragNode is not null)
+        if (_host.InteractionSession.DragGroupId is not null)
+        {
+            _host.ViewModel?.CompleteHistoryInteraction($"Moved {_host.InteractionSession.DragGroupTitle}.");
+        }
+        else if (_host.InteractionSession.DragNode is not null)
         {
             _host.ViewModel?.CompleteHistoryInteraction(
                 _host.ViewModel is not null && _host.ViewModel.HasMultipleSelection

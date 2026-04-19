@@ -34,9 +34,10 @@ public static class DemoGraphFactory
                 new GraphNodeGroup(
                     "terrain-authoring",
                     "Terrain Authoring",
-                    new GraphPoint(280, 10),
-                    new GraphSize(360, 440),
-                    ["gradient", "noise"]),
+                    Position: default,
+                    Size: default,
+                    NodeIds: ["gradient", "noise"],
+                    ExtraPadding: new GraphPadding(44, 36, 36, 32)),
             ]);
 
     private static GraphNode CreateNode(

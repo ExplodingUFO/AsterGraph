@@ -17,6 +17,8 @@ internal interface INodeCanvasViewModelObserverHost
 
     void UpdateSelectionState();
 
+    void UpdateGroupVisuals();
+
     void ApplySelectionAdornerStyle();
 
     void ApplyGuideAdornerStyle();
@@ -193,17 +195,23 @@ internal sealed class NodeCanvasViewModelObserver
             case nameof(NodeViewModel.X):
             case nameof(NodeViewModel.Y):
                 _host.UpdateNodePosition(node);
+                _host.UpdateGroupVisuals();
                 _host.RenderConnections();
                 break;
             case nameof(NodeViewModel.Width):
             case nameof(NodeViewModel.Height):
             case nameof(NodeViewModel.Surface):
                 _host.UpdateNodeVisual(node);
+                _host.UpdateGroupVisuals();
                 _host.RenderConnections();
                 break;
             case nameof(NodeViewModel.IsSelected):
+                _host.UpdateNodeVisual(node);
+                break;
             case nameof(NodeViewModel.Presentation):
                 _host.UpdateNodeVisual(node);
+                _host.UpdateGroupVisuals();
+                _host.RenderConnections();
                 break;
         }
     }
@@ -217,9 +225,9 @@ internal sealed class NodeCanvasViewModelObserver
 
         return string.Join(
             "|",
-            viewModel.GetNodeGroups()
+            viewModel.GetNodeGroupSnapshots()
                 .OrderBy(group => group.Id, StringComparer.Ordinal)
                 .Select(group =>
-                    $"{group.Id}:{group.Title}:{group.Position.X.ToString("0.###", CultureInfo.InvariantCulture)}:{group.Position.Y.ToString("0.###", CultureInfo.InvariantCulture)}:{group.Size.Width.ToString("0.###", CultureInfo.InvariantCulture)}:{group.Size.Height.ToString("0.###", CultureInfo.InvariantCulture)}:{group.IsCollapsed}:{string.Join(",", group.NodeIds.OrderBy(id => id, StringComparer.Ordinal))}"));
+                    $"{group.Id}:{group.Title}:{group.Position.X.ToString("0.###", CultureInfo.InvariantCulture)}:{group.Position.Y.ToString("0.###", CultureInfo.InvariantCulture)}:{group.Size.Width.ToString("0.###", CultureInfo.InvariantCulture)}:{group.Size.Height.ToString("0.###", CultureInfo.InvariantCulture)}:{group.ExtraPadding.Left.ToString("0.###", CultureInfo.InvariantCulture)}:{group.ExtraPadding.Top.ToString("0.###", CultureInfo.InvariantCulture)}:{group.ExtraPadding.Right.ToString("0.###", CultureInfo.InvariantCulture)}:{group.ExtraPadding.Bottom.ToString("0.###", CultureInfo.InvariantCulture)}:{group.IsCollapsed}:{string.Join(",", group.NodeIds.OrderBy(id => id, StringComparer.Ordinal))}"));
     }
 }

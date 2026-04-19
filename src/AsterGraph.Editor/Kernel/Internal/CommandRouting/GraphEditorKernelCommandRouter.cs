@@ -49,6 +49,8 @@ internal interface IGraphEditorKernelCommandRouterHost
 
     bool TrySetNodeGroupPosition(string groupId, GraphPoint position, bool moveMemberNodes, bool updateStatus);
 
+    bool TrySetNodeGroupExtraPadding(string groupId, GraphPadding extraPadding, bool updateStatus);
+
     bool TrySetSelectedNodeParameterValue(string parameterKey, object? value);
 
     void StartConnection(string sourceNodeId, string sourcePortId);
@@ -129,6 +131,10 @@ internal sealed class GraphEditorKernelCommandRouter
                 _host.Document.Groups?.Count > 0 && _host.BehaviorOptions.Commands.Nodes.AllowMove),
             GraphEditorCommandDescriptorCatalog.Create(
                 "groups.move",
+                GraphEditorCommandSourceKind.Kernel,
+                _host.Document.Groups?.Count > 0 && _host.BehaviorOptions.Commands.Nodes.AllowMove),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "groups.resize",
                 GraphEditorCommandSourceKind.Kernel,
                 _host.Document.Groups?.Count > 0 && _host.BehaviorOptions.Commands.Nodes.AllowMove),
             GraphEditorCommandDescriptorCatalog.Create(
@@ -308,6 +314,21 @@ internal sealed class GraphEditorKernelCommandRouter
                     moveGroupId,
                     new GraphPoint(groupX, groupY),
                     moveMembers,
+                    ResolveOptionalUpdateStatus(command, "updateStatus"));
+
+            case "groups.resize":
+                if (!TryGetRequiredArgument(command, "groupId", out var resizeGroupId)
+                    || !TryGetDoubleArgument(command, "left", out var left)
+                    || !TryGetDoubleArgument(command, "top", out var top)
+                    || !TryGetDoubleArgument(command, "right", out var right)
+                    || !TryGetDoubleArgument(command, "bottom", out var bottom))
+                {
+                    return false;
+                }
+
+                return _host.TrySetNodeGroupExtraPadding(
+                    resizeGroupId,
+                    new GraphPadding(left, top, right, bottom),
                     ResolveOptionalUpdateStatus(command, "updateStatus"));
 
             case "connections.start":

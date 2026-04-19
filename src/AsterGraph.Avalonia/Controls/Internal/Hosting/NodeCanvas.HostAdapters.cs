@@ -6,6 +6,7 @@ using AsterGraph.Avalonia.Controls.Internal;
 using AsterGraph.Avalonia.Presentation;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Configuration;
+using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.ViewModels;
 
 namespace AsterGraph.Avalonia.Controls;
@@ -115,6 +116,9 @@ public partial class NodeCanvas
         public void BeginNodeDrag(NodeViewModel node, PointerPressedEventArgs args)
             => _owner.BeginNodeDrag(node, args);
 
+        public void BeginGroupDrag(GraphEditorNodeGroupSnapshot group, PointerPressedEventArgs args)
+            => _owner.BeginGroupDrag(group, args);
+
         public void ActivatePort(NodeViewModel node, PortViewModel port)
             => _owner.ActivatePortFromVisual(node, port);
     }
@@ -138,6 +142,9 @@ public partial class NodeCanvas
 
         public void UpdateSelectionState()
             => _owner.UpdateSelectionState();
+
+        public void UpdateGroupVisuals()
+            => _owner.UpdateGroupVisuals();
 
         public void ApplySelectionAdornerStyle()
             => _owner.ApplySelectionAdornerStyle();

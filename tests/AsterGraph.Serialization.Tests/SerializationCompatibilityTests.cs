@@ -22,7 +22,7 @@ public sealed class SerializationCompatibilityTests
     [Fact]
     public void GraphDocumentCompatibility_ExposesCurrentSchemaVersion()
     {
-        Assert.Equal(2, GraphDocumentCompatibility.CurrentSchemaVersion);
+        Assert.Equal(3, GraphDocumentCompatibility.CurrentSchemaVersion);
     }
 
     [Fact]
@@ -32,7 +32,7 @@ public sealed class SerializationCompatibilityTests
 
         var json = GraphDocumentSerializer.Serialize(document);
 
-        Assert.Contains("\"SchemaVersion\": 2", json);
+        Assert.Contains("\"SchemaVersion\": 3", json);
     }
 
     [Fact]
@@ -91,6 +91,72 @@ public sealed class SerializationCompatibilityTests
         Assert.Equal(GraphNodeExpansionState.Collapsed, node.Surface!.ExpansionState);
         Assert.Null(node.Surface.GroupId);
         Assert.Empty(restored.Groups ?? []);
+    }
+
+    [Fact]
+    public void GraphDocumentSerializer_ReadsSchemaVersion2Payload_AndMigratesLegacyGroupBoundsToPadding()
+    {
+        const string json = """
+        {
+          "SchemaVersion": 2,
+          "Title": "Legacy v2",
+          "Description": "Old group bounds payload",
+          "Nodes": [
+            {
+              "Id": "node-001",
+              "Title": "Legacy Node",
+              "Category": "Tests",
+              "Subtitle": "Legacy",
+              "Description": "Older payload with group bounds.",
+              "Position": {
+                "X": 100,
+                "Y": 120
+              },
+              "Size": {
+                "Width": 240,
+                "Height": 160
+              },
+              "Inputs": [],
+              "Outputs": [],
+              "AccentHex": "#6AD5C4",
+              "DefinitionId": {
+                "Value": "tests.node"
+              },
+              "ParameterValues": [],
+              "Surface": {
+                "ExpansionState": "Collapsed",
+                "GroupId": "group-001"
+              }
+            }
+          ],
+          "Connections": [],
+          "Groups": [
+            {
+              "Id": "group-001",
+              "Title": "Legacy Group",
+              "Position": {
+                "X": 76,
+                "Y": 76
+              },
+              "Size": {
+                "Width": 288,
+                "Height": 232
+              },
+              "NodeIds": [
+                "node-001"
+              ],
+              "IsCollapsed": false
+            }
+          ]
+        }
+        """;
+
+        var restored = GraphDocumentSerializer.Deserialize(json);
+        var group = Assert.Single(restored.Groups!);
+
+        Assert.Equal(new GraphPoint(76, 76), group.Position);
+        Assert.Equal(new GraphSize(288, 232), group.Size);
+        Assert.Equal(new GraphPadding(24, 44, 24, 28), group.ExtraPadding);
     }
 
     [Fact]

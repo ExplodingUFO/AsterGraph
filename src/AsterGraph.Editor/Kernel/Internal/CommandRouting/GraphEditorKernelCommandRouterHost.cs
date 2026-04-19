@@ -69,6 +69,9 @@ internal sealed partial class GraphEditorKernel
         bool IGraphEditorKernelCommandRouterHost.TrySetNodeGroupPosition(string groupId, GraphPoint position, bool moveMemberNodes, bool updateStatus)
             => _owner.TrySetNodeGroupPosition(groupId, position, moveMemberNodes, updateStatus);
 
+        bool IGraphEditorKernelCommandRouterHost.TrySetNodeGroupExtraPadding(string groupId, GraphPadding extraPadding, bool updateStatus)
+            => _owner.TrySetNodeGroupExtraPadding(groupId, extraPadding, updateStatus);
+
         bool IGraphEditorKernelCommandRouterHost.TrySetSelectedNodeParameterValue(string parameterKey, object? value)
             => _owner.TrySetSelectedNodeParameterValue(parameterKey, value);
 

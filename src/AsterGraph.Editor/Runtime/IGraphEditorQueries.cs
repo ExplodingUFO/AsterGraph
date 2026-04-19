@@ -79,6 +79,13 @@ public interface IGraphEditorQueries
         => throw new NotSupportedException();
 
     /// <summary>
+    /// Gets resolved editor-only node-group boundary snapshots for the current document.
+    /// </summary>
+    /// <returns>A stable read-only group snapshot collection.</returns>
+    IReadOnlyList<GraphEditorNodeGroupSnapshot> GetNodeGroupSnapshots()
+        => throw new NotSupportedException();
+
+    /// <summary>
     /// 获取当前稳定命令描述集合。
     /// </summary>
     /// <returns>命令描述集合。</returns>

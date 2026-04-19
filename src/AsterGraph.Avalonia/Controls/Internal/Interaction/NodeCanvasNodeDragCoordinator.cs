@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Input;
+using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.ViewModels;
 
 namespace AsterGraph.Avalonia.Controls.Internal;
@@ -77,6 +78,44 @@ internal sealed class NodeCanvasNodeDragCoordinator
             ? _host.ViewModel.SelectedNodes.ToList()
             : [node];
         _host.InteractionSession.BeginNodeDrag(node, dragStart, _host.CreateDragSession(dragNodes));
+        _host.ViewModel.BeginHistoryInteraction();
+        return new NodeCanvasNodeDragStartResult(Handled: true, CapturePointer: true);
+    }
+
+    public NodeCanvasNodeDragStartResult BeginGroupDrag(
+        GraphEditorNodeGroupSnapshot group,
+        Point dragStart,
+        bool isLeftButtonPressed,
+        KeyModifiers modifiers)
+    {
+        ArgumentNullException.ThrowIfNull(group);
+
+        if (_host.ViewModel is null || !isLeftButtonPressed)
+        {
+            return default;
+        }
+
+        if (modifiers.HasFlag(KeyModifiers.Control) || modifiers.HasFlag(KeyModifiers.Shift))
+        {
+            return default;
+        }
+
+        var nodes = group.NodeIds
+            .Select(_host.ViewModel.FindNode)
+            .Where(node => node is not null)
+            .Select(node => node!)
+            .ToList();
+        if (nodes.Count == 0)
+        {
+            return default;
+        }
+
+        _host.FocusCanvas();
+        _host.ViewModel.SetSelection(nodes, nodes.LastOrDefault(), status: null);
+        _host.HideSelectionAdorner();
+        _host.HideGuideAdorners();
+
+        _host.InteractionSession.BeginGroupDrag(group.Id, group.Title, dragStart, _host.CreateDragSession(nodes));
         _host.ViewModel.BeginHistoryInteraction();
         return new NodeCanvasNodeDragStartResult(Handled: true, CapturePointer: true);
     }

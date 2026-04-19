@@ -32,6 +32,7 @@ internal interface IGraphEditorSessionHost
     string TryCreateNodeGroupFromSelection(string title);
     bool TrySetNodeGroupCollapsed(string groupId, bool isCollapsed);
     bool TrySetNodeGroupPosition(string groupId, GraphPoint position, bool moveMemberNodes, bool updateStatus);
+    bool TrySetNodeGroupExtraPadding(string groupId, GraphPadding extraPadding, bool updateStatus);
     bool TrySetSelectedNodeParameterValue(string parameterKey, object? value);
     bool TrySetSelectedNodeParameterValues(IReadOnlyDictionary<string, object?> values);
     void StartConnection(string sourceNodeId, string sourcePortId);
@@ -56,6 +57,7 @@ internal interface IGraphEditorSessionHost
     IReadOnlyList<GraphEditorFeatureDescriptorSnapshot> GetFeatureDescriptors();
     IReadOnlyList<GraphEditorNodeSurfaceSnapshot> GetNodeSurfaceSnapshots();
     IReadOnlyList<GraphNodeGroup> GetNodeGroups();
+    IReadOnlyList<GraphEditorNodeGroupSnapshot> GetNodeGroupSnapshots();
     IReadOnlyList<GraphEditorCommandDescriptorSnapshot> GetCommandDescriptors();
     bool TryExecuteCommand(GraphEditorCommandInvocationSnapshot command);
     IReadOnlyList<NodePositionSnapshot> GetNodePositions();

@@ -9,6 +9,7 @@ using AsterGraph.Avalonia.Presentation;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Geometry;
 using AsterGraph.Editor.Menus;
+using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.ViewModels;
 using AsterGraph.Editor.Viewport;
 
@@ -270,6 +271,28 @@ public partial class NodeCanvas : UserControl
         args.Handled = true;
     }
 
+    private void BeginGroupDrag(GraphEditorNodeGroupSnapshot group, PointerPressedEventArgs args)
+    {
+        var props = args.GetCurrentPoint(this).Properties;
+        var result = _nodeDragCoordinator.BeginGroupDrag(
+            group,
+            args.GetPosition(this),
+            props.IsLeftButtonPressed,
+            args.KeyModifiers);
+
+        if (!result.Handled)
+        {
+            return;
+        }
+
+        if (result.CapturePointer)
+        {
+            args.Pointer.Capture(this);
+        }
+
+        args.Handled = true;
+    }
+
     private void HandlePointerPressed(object? sender, PointerPressedEventArgs args)
     {
         var props = args.GetCurrentPoint(this).Properties;
@@ -337,6 +360,9 @@ public partial class NodeCanvas : UserControl
 
     private void UpdateSelectionState()
         => _sceneHost.UpdateSelectionState();
+
+    private void UpdateGroupVisuals()
+        => _sceneHost.UpdateGroupVisuals();
 
     private void UpdateNodePosition(NodeViewModel node)
         => _sceneHost.UpdateNodePosition(node);

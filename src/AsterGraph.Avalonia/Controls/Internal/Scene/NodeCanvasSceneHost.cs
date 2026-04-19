@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Automation;
 using Avalonia.Layout;
@@ -10,6 +11,7 @@ using AsterGraph.Avalonia.Presentation;
 using AsterGraph.Avalonia.Styling;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Geometry;
+using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.ViewModels;
 
 namespace AsterGraph.Avalonia.Controls.Internal;
@@ -46,6 +48,8 @@ internal interface INodeCanvasSceneHost
 
     void BeginNodeDrag(NodeViewModel node, PointerPressedEventArgs args);
 
+    void BeginGroupDrag(GraphEditorNodeGroupSnapshot group, PointerPressedEventArgs args);
+
     void ActivatePort(NodeViewModel node, PortViewModel port);
 }
 
@@ -53,7 +57,11 @@ internal sealed record NodeCanvasRenderedGroupVisual(
     Border Root,
     Button HeaderButton,
     Border BodyBorder,
-    TextBlock TitleText);
+    TextBlock TitleText,
+    Thumb LeftResizeThumb,
+    Thumb TopResizeThumb,
+    Thumb RightResizeThumb,
+    Thumb BottomResizeThumb);
 
 internal sealed class NodeCanvasSceneHost
 {
@@ -83,7 +91,7 @@ internal sealed class NodeCanvasSceneHost
             return;
         }
 
-        foreach (var group in _host.ViewModel.GetNodeGroups())
+        foreach (var group in _host.ViewModel.GetNodeGroupSnapshots())
         {
             var visual = CreateGroupVisual(group);
             _host.GroupVisuals[group.Id] = visual;
@@ -128,7 +136,12 @@ internal sealed class NodeCanvasSceneHost
             UpdateNodeVisual(node);
         }
 
-        foreach (var group in _host.ViewModel?.GetNodeGroups() ?? [])
+        UpdateGroupVisuals();
+    }
+
+    public void UpdateGroupVisuals()
+    {
+        foreach (var group in _host.ViewModel?.GetNodeGroupSnapshots() ?? [])
         {
             UpdateGroupVisual(group);
         }
@@ -165,7 +178,7 @@ internal sealed class NodeCanvasSceneHost
         return new NodeCanvasRenderedNodeVisual(visual.Root, presenter, visual);
     }
 
-    private NodeCanvasRenderedGroupVisual CreateGroupVisual(GraphNodeGroup group)
+    private NodeCanvasRenderedGroupVisual CreateGroupVisual(GraphEditorNodeGroupSnapshot group)
     {
         var root = new Border
         {
@@ -173,11 +186,22 @@ internal sealed class NodeCanvasSceneHost
             BorderThickness = new Thickness(1),
         };
         AutomationProperties.SetName(root, $"{group.Title} group");
+        root.PointerPressed += (_, args) =>
+        {
+            if (args.Source is Thumb)
+            {
+                return;
+            }
+
+            _host.BeginGroupDrag(group, args);
+        };
 
         var layout = new Grid
         {
             RowDefinitions = new RowDefinitions("40,*"),
         };
+        var chrome = new Grid();
+        chrome.Children.Add(layout);
 
         var titleText = new TextBlock
         {
@@ -197,12 +221,13 @@ internal sealed class NodeCanvasSceneHost
         AutomationProperties.SetName(header, $"{group.Title} group header");
         header.Click += (_, _) =>
         {
-            if (_host.ViewModel is null)
+            var currentGroup = ResolveCurrentGroupSnapshot(group.Id);
+            if (_host.ViewModel is null || currentGroup is null)
             {
                 return;
             }
 
-            var nodes = group.NodeIds
+            var nodes = currentGroup.NodeIds
                 .Select(_host.ViewModel.FindNode)
                 .Where(node => node is not null)
                 .Select(node => node!)
@@ -217,12 +242,13 @@ internal sealed class NodeCanvasSceneHost
         };
         header.DoubleTapped += (_, args) =>
         {
-            if (_host.ViewModel is null)
+            var currentGroup = ResolveCurrentGroupSnapshot(group.Id);
+            if (_host.ViewModel is null || currentGroup is null)
             {
                 return;
             }
 
-            args.Handled = _host.ViewModel.TrySetNodeGroupCollapsed(group.Id, !group.IsCollapsed);
+            args.Handled = _host.ViewModel.TrySetNodeGroupCollapsed(group.Id, !currentGroup.IsCollapsed);
         };
         layout.Children.Add(header);
 
@@ -235,11 +261,57 @@ internal sealed class NodeCanvasSceneHost
         Grid.SetRow(body, 1);
         layout.Children.Add(body);
 
-        root.Child = layout;
-        return new NodeCanvasRenderedGroupVisual(root, header, body, titleText);
+        var leftThumb = CreateGroupResizeThumb(
+            group.Id,
+            $"{group.Title} group left resize handle",
+            new Cursor(StandardCursorType.SizeWestEast),
+            HorizontalAlignment.Left,
+            VerticalAlignment.Stretch,
+            width: 12d,
+            height: double.NaN,
+            vector => vector.X,
+            (padding, delta) => padding with { Left = padding.Left - delta });
+        var topThumb = CreateGroupResizeThumb(
+            group.Id,
+            $"{group.Title} group top resize handle",
+            new Cursor(StandardCursorType.SizeNorthSouth),
+            HorizontalAlignment.Stretch,
+            VerticalAlignment.Top,
+            width: double.NaN,
+            height: 12d,
+            vector => vector.Y,
+            (padding, delta) => padding with { Top = padding.Top - delta });
+        var rightThumb = CreateGroupResizeThumb(
+            group.Id,
+            $"{group.Title} group right resize handle",
+            new Cursor(StandardCursorType.SizeWestEast),
+            HorizontalAlignment.Right,
+            VerticalAlignment.Stretch,
+            width: 12d,
+            height: double.NaN,
+            vector => vector.X,
+            (padding, delta) => padding with { Right = padding.Right + delta });
+        var bottomThumb = CreateGroupResizeThumb(
+            group.Id,
+            $"{group.Title} group bottom resize handle",
+            new Cursor(StandardCursorType.SizeNorthSouth),
+            HorizontalAlignment.Stretch,
+            VerticalAlignment.Bottom,
+            width: double.NaN,
+            height: 12d,
+            vector => vector.Y,
+            (padding, delta) => padding with { Bottom = padding.Bottom + delta });
+
+        chrome.Children.Add(leftThumb);
+        chrome.Children.Add(topThumb);
+        chrome.Children.Add(rightThumb);
+        chrome.Children.Add(bottomThumb);
+
+        root.Child = chrome;
+        return new NodeCanvasRenderedGroupVisual(root, header, body, titleText, leftThumb, topThumb, rightThumb, bottomThumb);
     }
 
-    private void UpdateGroupVisual(GraphNodeGroup group)
+    private void UpdateGroupVisual(GraphEditorNodeGroupSnapshot group)
     {
         if (_host.ViewModel is null || !_host.GroupVisuals.TryGetValue(group.Id, out var visual))
         {
@@ -268,6 +340,47 @@ internal sealed class NodeCanvasSceneHost
         visual.BodyBorder.BorderBrush = BrushFactory.Solid("#365063", 0.6);
         visual.BodyBorder.Background = BrushFactory.Solid("#122130", 0.32);
     }
+
+    private Thumb CreateGroupResizeThumb(
+        string groupId,
+        string automationName,
+        Cursor cursor,
+        HorizontalAlignment horizontalAlignment,
+        VerticalAlignment verticalAlignment,
+        double width,
+        double height,
+        Func<Vector, double> deltaSelector,
+        Func<GraphPadding, double, GraphPadding> updatePadding)
+    {
+        var thumb = new Thumb
+        {
+            Background = Brushes.Transparent,
+            HorizontalAlignment = horizontalAlignment,
+            VerticalAlignment = verticalAlignment,
+            Width = width,
+            Height = height,
+            Cursor = cursor,
+        };
+        AutomationProperties.SetName(thumb, automationName);
+        thumb.DragDelta += (_, args) =>
+        {
+            var editor = _host.ViewModel;
+            var currentGroup = ResolveCurrentGroupSnapshot(groupId);
+            if (editor is null || currentGroup is null)
+            {
+                return;
+            }
+
+            var nextPadding = updatePadding(currentGroup.ExtraPadding, deltaSelector(args.Vector)).ClampNonNegative();
+            args.Handled = editor.TrySetNodeGroupExtraPadding(groupId, nextPadding, updateStatus: false);
+        };
+
+        return thumb;
+    }
+
+    private GraphEditorNodeGroupSnapshot? ResolveCurrentGroupSnapshot(string groupId)
+        => _host.ViewModel?.GetNodeGroupSnapshots()
+            .FirstOrDefault(group => string.Equals(group.Id, groupId, StringComparison.Ordinal));
 
     private GraphNodeVisualContext CreateNodeVisualContext(NodeViewModel node)
     {

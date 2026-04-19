@@ -20,6 +20,7 @@ sealed class Program
             Console.WriteLine($"DEMO_SHELL_OK:{result.ShellWorkflowOk}");
             Console.WriteLine($"COMMAND_SURFACE_OK:{result.CommandSurfaceOk}");
             Console.WriteLine($"PROGRESSIVE_NODE_SURFACE_OK:{result.ProgressiveNodeSurfaceOk}");
+            Console.WriteLine($"ADAPTIVE_GROUP_BOUNDS_OK:{result.AdaptiveGroupBoundsOk}");
             foreach (var line in result.MetricLines)
             {
                 Console.WriteLine(line);

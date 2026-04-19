@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Headless.XUnit;
 using Avalonia.VisualTree;
 using Avalonia.Automation;
@@ -119,6 +120,7 @@ public sealed class DemoCapabilityShowcaseTests
         Assert.True(result.ShellWorkflowOk);
         Assert.True(result.CommandSurfaceOk);
         Assert.True(result.ProgressiveNodeSurfaceOk);
+        Assert.True(result.AdaptiveGroupBoundsOk);
         Assert.True(result.StartupMs >= 0);
         Assert.True(result.InspectorProjectionMs >= 0);
         Assert.True(result.PluginScanMs >= 0);
@@ -191,12 +193,21 @@ public sealed class DemoCapabilityShowcaseTests
 
         Assert.NotNull(canvas);
         Assert.Contains(viewModel.Editor.GetNodeGroups(), group => group.Id == "terrain-authoring");
+        Assert.Contains(
+            viewModel.Editor.GetNodeGroupSnapshots(),
+            group => group.Id == "terrain-authoring" && group.ExtraPadding.Left > 0d);
         Assert.Contains(viewModel.Editor.Nodes, node => node.Id == "light" && node.IsExpanded);
         Assert.Contains(
             canvas!.GetVisualDescendants().OfType<Border>(),
             border => string.Equals(
                 AutomationProperties.GetName(border),
                 "Terrain Authoring group",
+                StringComparison.Ordinal));
+        Assert.Contains(
+            canvas.GetVisualDescendants().OfType<Thumb>(),
+            thumb => string.Equals(
+                AutomationProperties.GetName(thumb),
+                "Terrain Authoring group right resize handle",
                 StringComparison.Ordinal));
     }
 

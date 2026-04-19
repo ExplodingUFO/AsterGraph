@@ -8,13 +8,6 @@ namespace AsterGraph.Editor.ViewModels;
 
 public sealed partial class NodeViewModel : ObservableObject
 {
-    private const double MinimumBodyHeight = 158;
-    private const double BaseChromeHeight = 132;
-    private const double DescriptionHeight = 40;
-    private const double PortRowHeight = 24;
-    private const double PortRowSpacing = 8;
-    private const double StatusBarHeight = 28;
-    private const double ExpandedSurfaceHeight = 152;
     private readonly Dictionary<string, GraphParameterValue> _parameterValues;
     private readonly double _baseHeight;
 
@@ -49,7 +42,7 @@ public sealed partial class NodeViewModel : ObservableObject
         _parameterValues = (model.ParameterValues ?? [])
             .ToDictionary(parameter => parameter.Key, StringComparer.Ordinal);
 
-        _baseHeight = Math.Max(model.Size.Height, CalculateRequiredHeight());
+        _baseHeight = GraphEditorNodeSurfaceMetrics.CalculateBaseHeight(model.Size.Height, model.Inputs.Count, model.Outputs.Count);
         Height = CalculateRenderedHeight();
     }
 
@@ -281,19 +274,9 @@ public sealed partial class NodeViewModel : ObservableObject
         OnPropertyChanged(nameof(IsExpanded));
     }
 
-    private double CalculateRequiredHeight()
-    {
-        var visiblePortRows = Math.Max(Math.Max(Inputs.Count, Outputs.Count), 1);
-        var portsHeight = (visiblePortRows * PortRowHeight)
-            + ((visiblePortRows - 1) * PortRowSpacing);
-
-        return Math.Max(
-            MinimumBodyHeight,
-            BaseChromeHeight + DescriptionHeight + portsHeight);
-    }
-
     private double CalculateRenderedHeight()
-        => _baseHeight
-           + (Presentation.StatusBar is null ? 0 : StatusBarHeight)
-           + (IsExpanded ? ExpandedSurfaceHeight : 0);
+        => GraphEditorNodeSurfaceMetrics.CalculateRenderedHeight(
+            _baseHeight,
+            ExpansionState,
+            hasStatusBar: Presentation.StatusBar is not null);
 }

@@ -15,6 +15,10 @@ internal sealed class NodeCanvasInteractionSession
 {
     public NodeViewModel? DragNode { get; private set; }
 
+    public string? DragGroupId { get; private set; }
+
+    public string? DragGroupTitle { get; private set; }
+
     public bool IsPanning { get; private set; }
 
     public bool IsMarqueeSelecting { get; private set; }
@@ -36,6 +40,8 @@ internal sealed class NodeCanvasInteractionSession
     public void BeginCanvasSelection(Point startScreenPosition, KeyModifiers modifiers, IReadOnlyList<NodeViewModel> baselineNodes)
     {
         DragNode = null;
+        DragGroupId = null;
+        DragGroupTitle = null;
         IsPanning = false;
         DragStartScreenPosition = null;
         DragSession = null;
@@ -50,6 +56,8 @@ internal sealed class NodeCanvasInteractionSession
     public void BeginNodeDrag(NodeViewModel node, Point startScreenPosition, NodeCanvasDragSession dragSession)
     {
         DragNode = node;
+        DragGroupId = null;
+        DragGroupTitle = null;
         IsPanning = false;
         SelectionStartScreenPosition = null;
         IsMarqueeSelecting = false;
@@ -63,12 +71,31 @@ internal sealed class NodeCanvasInteractionSession
     {
         IsPanning = true;
         DragNode = null;
+        DragGroupId = null;
+        DragGroupTitle = null;
         DragStartScreenPosition = null;
         DragSession = null;
         SelectionStartScreenPosition = null;
         IsMarqueeSelecting = false;
         LastPointerPosition = startScreenPosition;
         PointerScreenPosition = startScreenPosition;
+    }
+
+    public void BeginGroupDrag(string groupId, string groupTitle, Point startScreenPosition, NodeCanvasDragSession dragSession)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(groupId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(groupTitle);
+
+        DragNode = null;
+        DragGroupId = groupId;
+        DragGroupTitle = groupTitle;
+        IsPanning = false;
+        SelectionStartScreenPosition = null;
+        IsMarqueeSelecting = false;
+        DragStartScreenPosition = startScreenPosition;
+        LastPointerPosition = startScreenPosition;
+        PointerScreenPosition = startScreenPosition;
+        DragSession = dragSession;
     }
 
     public void UpdatePointerPosition(Point currentScreenPosition)
@@ -79,7 +106,7 @@ internal sealed class NodeCanvasInteractionSession
 
     public bool TryBeginMarqueeSelection(Point currentScreenPosition, double threshold)
     {
-        if (SelectionStartScreenPosition is null || IsPanning || DragNode is not null)
+        if (SelectionStartScreenPosition is null || IsPanning || DragNode is not null || DragGroupId is not null)
         {
             return false;
         }
@@ -104,6 +131,8 @@ internal sealed class NodeCanvasInteractionSession
         IsMarqueeSelecting = false;
         SelectionBaselineNodes = [];
         DragNode = null;
+        DragGroupId = null;
+        DragGroupTitle = null;
         DragStartScreenPosition = null;
         DragSession = null;
         IsPanning = false;

@@ -102,6 +102,16 @@ public interface IGraphEditorCommands
         => throw new NotSupportedException();
 
     /// <summary>
+    /// Attempts to update one node group's persisted per-edge padding envelope.
+    /// </summary>
+    /// <param name="groupId">Stable group identifier.</param>
+    /// <param name="extraPadding">Requested per-edge padding envelope.</param>
+    /// <param name="updateStatus">Whether to update status text for no-op or success cases.</param>
+    /// <returns><see langword="true"/> when the padding changes.</returns>
+    bool TrySetNodeGroupExtraPadding(string groupId, GraphPadding extraPadding, bool updateStatus = true)
+        => throw new NotSupportedException();
+
+    /// <summary>
     /// Attempts to set one parameter value across the current selection when every selected node shares the same definition.
     /// </summary>
     /// <param name="parameterKey">Stable parameter key declared by the shared node definition.</param>

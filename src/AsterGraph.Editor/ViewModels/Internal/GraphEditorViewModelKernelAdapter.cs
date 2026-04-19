@@ -83,6 +83,9 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
     public bool TrySetNodeGroupPosition(string groupId, GraphPoint position, bool moveMemberNodes, bool updateStatus)
         => _kernel.TrySetNodeGroupPosition(groupId, position, moveMemberNodes, updateStatus);
 
+    public bool TrySetNodeGroupExtraPadding(string groupId, GraphPadding extraPadding, bool updateStatus)
+        => _kernel.TrySetNodeGroupExtraPadding(groupId, extraPadding, updateStatus);
+
     public bool TrySetSelectedNodeParameterValue(string parameterKey, object? value)
         => _kernel.TrySetSelectedNodeParameterValue(parameterKey, value);
 
@@ -133,6 +136,26 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
     public IReadOnlyList<GraphEditorNodeSurfaceSnapshot> GetNodeSurfaceSnapshots() => _kernel.GetNodeSurfaceSnapshots();
 
     public IReadOnlyList<GraphNodeGroup> GetNodeGroups() => _kernel.GetNodeGroups();
+
+    public IReadOnlyList<GraphEditorNodeGroupSnapshot> GetNodeGroupSnapshots()
+    {
+        var groups = _kernel.GetNodeGroups();
+        if (groups.Count == 0)
+        {
+            return [];
+        }
+
+        var boundsByNodeId = _owner.Nodes.ToDictionary(
+            node => node.Id,
+            node => new GraphEditorNodeGroupMemberBounds(
+                new GraphPoint(node.X, node.Y),
+                new GraphSize(node.Width, node.Height)),
+            StringComparer.Ordinal);
+
+        return groups
+            .Select(group => GraphEditorNodeGroupLayoutResolver.CreateSnapshot(group, boundsByNodeId))
+            .ToList();
+    }
 
     public IReadOnlyList<GraphEditorCommandDescriptorSnapshot> GetCommandDescriptors()
     {

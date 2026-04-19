@@ -105,6 +105,19 @@ public sealed partial class GraphEditorSession
         return edited;
     }
 
+    public bool TrySetNodeGroupExtraPadding(string groupId, GraphPadding extraPadding, bool updateStatus = true)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(groupId);
+
+        var edited = _host.TrySetNodeGroupExtraPadding(groupId, extraPadding, updateStatus);
+        if (edited)
+        {
+            PublishCommandExecuted("groups.resize");
+        }
+
+        return edited;
+    }
+
     public bool TrySetSelectedNodeParameterValue(string parameterKey, object? value)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(parameterKey);

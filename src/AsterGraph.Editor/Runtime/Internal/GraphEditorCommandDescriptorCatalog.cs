@@ -15,6 +15,7 @@ internal static class GraphEditorCommandDescriptorCatalog
             ["groups.create"] = new("Create Group", "groups", "group-create", null),
             ["groups.collapse"] = new("Toggle Group Collapse", "groups", "group-collapse", null),
             ["groups.move"] = new("Move Group", "groups", "group-move", null),
+            ["groups.resize"] = new("Resize Group", "groups", "group-resize", null),
             ["connections.start"] = new("Start Connection", "connections", "connect", null),
             ["connections.complete"] = new("Complete Connection", "connections", "connect", null),
             ["connections.connect"] = new("Create Connection", "connections", "connect", null),

@@ -45,6 +45,7 @@ public sealed partial class GraphEditorSession
                 new GraphEditorFeatureDescriptorSnapshot("capability.nodes.parameters.edit", "capability", capabilities.CanEditNodeParameters),
                 new GraphEditorFeatureDescriptorSnapshot("query.node-surface-snapshots", "query", true),
                 new GraphEditorFeatureDescriptorSnapshot("query.node-groups", "query", true),
+                new GraphEditorFeatureDescriptorSnapshot("query.node-group-snapshots", "query", true),
                 new GraphEditorFeatureDescriptorSnapshot("capability.connections.create", "capability", capabilities.CanCreateConnections),
                 new GraphEditorFeatureDescriptorSnapshot("capability.connections.delete", "capability", capabilities.CanDeleteConnections),
                 new GraphEditorFeatureDescriptorSnapshot("capability.connections.break", "capability", capabilities.CanBreakConnections),
@@ -131,6 +132,9 @@ public sealed partial class GraphEditorSession
 
     public IReadOnlyList<GraphNodeGroup> GetNodeGroups()
         => _host.GetNodeGroups();
+
+    public IReadOnlyList<GraphEditorNodeGroupSnapshot> GetNodeGroupSnapshots()
+        => _host.GetNodeGroupSnapshots();
 
     public IReadOnlyList<GraphEditorPluginLoadSnapshot> GetPluginLoadSnapshots()
         => _pluginLoadSnapshots.ToList();

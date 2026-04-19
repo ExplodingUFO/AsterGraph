@@ -70,7 +70,7 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
         ArgumentNullException.ThrowIfNull(compatibilityService);
         ArgumentNullException.ThrowIfNull(workspaceService);
 
-        _document = CloneDocument(document);
+        _document = _documentMutator.NormalizeNodeGroupBounds(CloneDocument(document));
         _nodeCatalog = nodeCatalog;
         _compatibilityService = compatibilityService;
         _workspaceService = workspaceService;
@@ -304,6 +304,37 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
 
         _document = mutation.Document;
         CurrentStatusMessage = $"Moved group {mutation.Group.Title}.";
+        MarkDirty(CurrentStatusMessage, GraphEditorDocumentChangeKind.LayoutChanged, mutation.ChangedNodeIds, null, preserveStatus: !updateStatus);
+        return true;
+    }
+
+    public bool TrySetNodeGroupExtraPadding(string groupId, GraphPadding extraPadding, bool updateStatus)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(groupId);
+
+        if (!_behaviorOptions.Commands.Nodes.AllowMove)
+        {
+            if (updateStatus)
+            {
+                CurrentStatusMessage = "Node grouping is disabled by host permissions.";
+            }
+
+            return false;
+        }
+
+        var mutation = _documentMutator.SetNodeGroupExtraPadding(_document, groupId, extraPadding);
+        if (mutation.Group is null)
+        {
+            if (updateStatus)
+            {
+                CurrentStatusMessage = "No matching group padding change was applied.";
+            }
+
+            return false;
+        }
+
+        _document = mutation.Document;
+        CurrentStatusMessage = $"Resized group {mutation.Group.Title}.";
         MarkDirty(CurrentStatusMessage, GraphEditorDocumentChangeKind.LayoutChanged, mutation.ChangedNodeIds, null, preserveStatus: !updateStatus);
         return true;
     }
@@ -562,6 +593,19 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
     public IReadOnlyList<GraphNodeGroup> GetNodeGroups()
         => _document.Groups?.Select(CloneGroup).ToList() ?? [];
 
+    public IReadOnlyList<GraphEditorNodeGroupSnapshot> GetNodeGroupSnapshots()
+    {
+        if (_document.Groups is not { Count: > 0 })
+        {
+            return [];
+        }
+
+        var boundsByNodeId = CreateGroupMemberBounds(_document.Nodes);
+        return _document.Groups
+            .Select(group => GraphEditorNodeGroupLayoutResolver.CreateSnapshot(group, boundsByNodeId))
+            .ToList();
+    }
+
     public IReadOnlyList<GraphEditorCommandDescriptorSnapshot> GetCommandDescriptors()
         => _commandRouter.GetCommandDescriptors();
 
@@ -747,6 +791,14 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
     private GraphNode? FindNode(string nodeId)
         => _document.Nodes.FirstOrDefault(node => string.Equals(node.Id, nodeId, StringComparison.Ordinal));
 
+    private static IReadOnlyDictionary<string, GraphEditorNodeGroupMemberBounds> CreateGroupMemberBounds(IReadOnlyList<GraphNode> nodes)
+        => nodes.ToDictionary(
+            node => node.Id,
+            node => new GraphEditorNodeGroupMemberBounds(
+                node.Position,
+                new GraphSize(node.Size.Width, GraphEditorNodeSurfaceMetrics.CalculateRenderedHeight(node))),
+            StringComparer.Ordinal);
+
     private string CreateNodeId(NodeDefinitionId definitionId)
         => CreateNodeId(definitionId, definitionId.Value);
 
@@ -834,7 +886,8 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
             group.Position,
             group.Size,
             group.NodeIds.ToList(),
-            group.IsCollapsed);
+            group.IsCollapsed,
+            group.ExtraPadding);
 
     private static GraphConnection CloneConnection(GraphConnection connection)
         => new(

@@ -161,13 +161,18 @@ public sealed class GraphEditorHistoryInteractionTests
 
         var groupId = editor.TryCreateNodeGroupFromSelection("History Cluster");
         Assert.False(string.IsNullOrWhiteSpace(groupId));
+        Assert.True(editor.TrySetNodeGroupExtraPadding(groupId, new GraphPadding(40, 52, 36, 24), updateStatus: false));
         Assert.True(editor.TrySetNodeGroupCollapsed(groupId, isCollapsed: true));
         Assert.True(editor.TrySetNodeGroupPosition(groupId, new GraphPoint(160, 120), moveMemberNodes: true, updateStatus: false));
 
         var movedGroup = Assert.Single(editor.GetNodeGroups());
+        var movedSnapshot = Assert.Single(editor.GetNodeGroupSnapshots());
         Assert.Equal(groupId, movedGroup.Id);
         Assert.True(movedGroup.IsCollapsed);
         Assert.Equal(new GraphPoint(160, 120), movedGroup.Position);
+        Assert.Equal(new GraphPadding(40, 52, 36, 24), movedGroup.ExtraPadding);
+        Assert.Equal(movedGroup.Position, movedSnapshot.Position);
+        Assert.Equal(movedGroup.Size, movedSnapshot.Size);
         Assert.True(editor.IsDirty);
 
         foreach (var node in editor.Nodes)
@@ -186,11 +191,18 @@ public sealed class GraphEditorHistoryInteractionTests
             editor.FindNode(GraphEditorHistoryTestSupport.TargetNodeId)!.X);
         Assert.NotEqual(new GraphPoint(160, 120), undoneMove.Position);
         Assert.True(undoneMove.IsCollapsed);
+        Assert.Equal(new GraphPadding(40, 52, 36, 24), undoneMove.ExtraPadding);
         Assert.True(editor.IsDirty);
 
         editor.Undo();
         var undoneCollapse = Assert.Single(editor.GetNodeGroups());
         Assert.False(undoneCollapse.IsCollapsed);
+        Assert.Equal(new GraphPadding(40, 52, 36, 24), undoneCollapse.ExtraPadding);
+        Assert.True(editor.IsDirty);
+
+        editor.Undo();
+        var undonePadding = Assert.Single(editor.GetNodeGroups());
+        Assert.Equal(new GraphPadding(24, 44, 24, 28), undonePadding.ExtraPadding);
         Assert.True(editor.IsDirty);
 
         editor.Undo();
@@ -201,11 +213,13 @@ public sealed class GraphEditorHistoryInteractionTests
         editor.Redo();
         editor.Redo();
         editor.Redo();
+        editor.Redo();
 
         var redoneGroup = Assert.Single(editor.GetNodeGroups());
         Assert.Equal(groupId, redoneGroup.Id);
         Assert.True(redoneGroup.IsCollapsed);
         Assert.Equal(new GraphPoint(160, 120), redoneGroup.Position);
+        Assert.Equal(new GraphPadding(40, 52, 36, 24), redoneGroup.ExtraPadding);
         Assert.All(editor.Nodes, node => Assert.Equal(groupId, node.GroupId));
         Assert.True(editor.IsDirty);
         Assert.False(editor.CanRedo);

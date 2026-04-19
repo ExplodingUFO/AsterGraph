@@ -2,11 +2,21 @@ using AsterGraph.Core.Models;
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Editor.Models;
 using AsterGraph.Editor.Parameters;
+using AsterGraph.Editor.Runtime;
+using AsterGraph.Editor.ViewModels;
 
 namespace AsterGraph.Editor.Kernel.Internal;
 
 internal sealed class GraphEditorKernelDocumentMutator
 {
+    private static readonly GraphPadding DefaultGroupPadding = new(24d, 44d, 24d, 28d);
+
+    internal GraphDocument NormalizeNodeGroupBounds(GraphDocument document)
+    {
+        ArgumentNullException.ThrowIfNull(document);
+        return RefreshNodeGroupBounds(document);
+    }
+
     public GraphEditorKernelDeleteNodeResult DeleteNode(GraphDocument document, string nodeId)
     {
         ArgumentNullException.ThrowIfNull(document);
@@ -22,13 +32,15 @@ internal sealed class GraphEditorKernelDocumentMutator
             .Where(connection => connection.SourceNodeId == nodeId || connection.TargetNodeId == nodeId)
             .ToList();
 
+        var updatedDocument = document with
+        {
+            Nodes = document.Nodes.Where(candidate => !ReferenceEquals(candidate, node)).ToList(),
+            Connections = document.Connections.Where(connection => !removedConnections.Contains(connection)).ToList(),
+            Groups = RemoveNodeIdsFromGroups(document.Groups, [nodeId]),
+        };
+
         return new GraphEditorKernelDeleteNodeResult(
-            document with
-            {
-                Nodes = document.Nodes.Where(candidate => !ReferenceEquals(candidate, node)).ToList(),
-                Connections = document.Connections.Where(connection => !removedConnections.Contains(connection)).ToList(),
-                Groups = RemoveNodeIdsFromGroups(document.Groups, [nodeId]),
-            },
+            RefreshNodeGroupBounds(updatedDocument),
             node,
             removedConnections);
     }
@@ -46,13 +58,15 @@ internal sealed class GraphEditorKernelDocumentMutator
             .Where(connection => removedNodeIdSet.Contains(connection.SourceNodeId) || removedNodeIdSet.Contains(connection.TargetNodeId))
             .ToList();
 
+        var updatedDocument = document with
+        {
+            Nodes = document.Nodes.Where(node => !removedNodeIdSet.Contains(node.Id)).ToList(),
+            Connections = document.Connections.Where(connection => !removedConnections.Contains(connection)).ToList(),
+            Groups = RemoveNodeIdsFromGroups(document.Groups, removedNodeIdSet),
+        };
+
         return new GraphEditorKernelDeleteSelectionResult(
-            document with
-            {
-                Nodes = document.Nodes.Where(node => !removedNodeIdSet.Contains(node.Id)).ToList(),
-                Connections = document.Connections.Where(connection => !removedConnections.Contains(connection)).ToList(),
-                Groups = RemoveNodeIdsFromGroups(document.Groups, removedNodeIdSet),
-            },
+            RefreshNodeGroupBounds(updatedDocument),
             removedNodes,
             removedConnections);
     }
@@ -82,11 +96,13 @@ internal sealed class GraphEditorKernelDocumentMutator
                 : node.Surface with { GroupId = null },
         };
 
+        var updatedDocument = document with
+        {
+            Nodes = document.Nodes.Concat([duplicate]).ToList(),
+        };
+
         return new GraphEditorKernelDuplicateNodeResult(
-            document with
-            {
-                Nodes = document.Nodes.Concat([duplicate]).ToList(),
-            },
+            RefreshNodeGroupBounds(updatedDocument),
             duplicate);
     }
 
@@ -124,7 +140,7 @@ internal sealed class GraphEditorKernelDocumentMutator
         return changedNodeIds.Count == 0
             ? GraphEditorKernelNodePositionMutationResult.Empty(document)
             : new GraphEditorKernelNodePositionMutationResult(
-                document with { Nodes = updatedNodes },
+                RefreshNodeGroupBounds(document with { Nodes = updatedNodes }),
                 changedNodeIds);
     }
 
@@ -277,7 +293,7 @@ internal sealed class GraphEditorKernelDocumentMutator
         return updatedNode is null
             ? GraphEditorKernelNodeWidthMutationResult.Empty(document)
             : new GraphEditorKernelNodeWidthMutationResult(
-                document with { Nodes = updatedNodes },
+                RefreshNodeGroupBounds(document with { Nodes = updatedNodes }),
                 updatedNode.Id,
                 updatedNode.Size.Width);
     }
@@ -316,7 +332,7 @@ internal sealed class GraphEditorKernelDocumentMutator
         return updatedNode is null
             ? GraphEditorKernelNodeSurfaceMutationResult.Empty(document)
             : new GraphEditorKernelNodeSurfaceMutationResult(
-                document with { Nodes = updatedNodes },
+                RefreshNodeGroupBounds(document with { Nodes = updatedNodes }),
                 updatedNode.Id,
                 updatedNode.Surface ?? GraphNodeSurfaceState.Default);
     }
@@ -341,19 +357,13 @@ internal sealed class GraphEditorKernelDocumentMutator
             return GraphEditorKernelNodeGroupMutationResult.Empty(document);
         }
 
-        const double horizontalPadding = 24d;
-        const double topPadding = 44d;
-        const double bottomPadding = 28d;
-        var left = selectedNodes.Min(node => node.Position.X) - horizontalPadding;
-        var top = selectedNodes.Min(node => node.Position.Y) - topPadding;
-        var right = selectedNodes.Max(node => node.Position.X + node.Size.Width) + horizontalPadding;
-        var bottom = selectedNodes.Max(node => node.Position.Y + node.Size.Height) + bottomPadding;
         var group = new GraphNodeGroup(
             groupId,
             title.Trim(),
-            new GraphPoint(left, top),
-            new GraphSize(right - left, bottom - top),
-            selectedNodes.Select(node => node.Id).ToList());
+            Position: default,
+            Size: default,
+            NodeIds: selectedNodes.Select(node => node.Id).ToList(),
+            ExtraPadding: DefaultGroupPadding);
 
         var updatedGroups = RemoveNodeIdsFromGroups(document.Groups, selectedNodeIdSet).ToList();
         updatedGroups.Add(group);
@@ -364,13 +374,17 @@ internal sealed class GraphEditorKernelDocumentMutator
                 : node)
             .ToList();
 
-        return new GraphEditorKernelNodeGroupMutationResult(
+        var updatedDocument = RefreshNodeGroupBounds(
             document with
             {
                 Nodes = updatedNodes,
                 Groups = updatedGroups,
-            },
-            group,
+            });
+        var createdGroup = updatedDocument.Groups!.Single(candidate => string.Equals(candidate.Id, groupId, StringComparison.Ordinal));
+
+        return new GraphEditorKernelNodeGroupMutationResult(
+            updatedDocument,
+            createdGroup,
             selectedNodes.Select(node => node.Id).ToList());
     }
 
@@ -458,11 +472,60 @@ internal sealed class GraphEditorKernelDocumentMutator
                     .ToList(),
             };
         }
+        else
+        {
+            var currentRight = previousGroup.Position.X + previousGroup.Size.Width;
+            var currentBottom = previousGroup.Position.Y + previousGroup.Size.Height;
+            updatedDocument = SetNodeGroupExtraPaddingCore(
+                updatedDocument,
+                groupId,
+                CreatePaddingFromResolvedBounds(
+                    updatedDocument,
+                    groupId,
+                    position,
+                    new GraphSize(currentRight - position.X, currentBottom - position.Y)));
+        }
+
+        updatedDocument = RefreshNodeGroupBounds(updatedDocument);
+        updatedGroup = (updatedDocument.Groups ?? [])
+            .FirstOrDefault(group => string.Equals(group.Id, groupId, StringComparison.Ordinal));
+
+        if (updatedGroup is null)
+        {
+            return GraphEditorKernelNodeGroupMutationResult.Empty(document);
+        }
 
         return new GraphEditorKernelNodeGroupMutationResult(
             updatedDocument,
             updatedGroup,
             updatedGroup.NodeIds.ToList());
+    }
+
+    public GraphEditorKernelNodeGroupMutationResult SetNodeGroupExtraPadding(
+        GraphDocument document,
+        string groupId,
+        GraphPadding extraPadding)
+    {
+        ArgumentNullException.ThrowIfNull(document);
+        ArgumentException.ThrowIfNullOrWhiteSpace(groupId);
+
+        var normalizedPadding = extraPadding.ClampNonNegative();
+        var updatedDocument = SetNodeGroupExtraPaddingCore(document, groupId, normalizedPadding);
+        if (ReferenceEquals(updatedDocument, document))
+        {
+            return GraphEditorKernelNodeGroupMutationResult.Empty(document);
+        }
+
+        updatedDocument = RefreshNodeGroupBounds(updatedDocument);
+        var updatedGroup = (updatedDocument.Groups ?? [])
+            .FirstOrDefault(group => string.Equals(group.Id, groupId, StringComparison.Ordinal));
+
+        return updatedGroup is null
+            ? GraphEditorKernelNodeGroupMutationResult.Empty(document)
+            : new GraphEditorKernelNodeGroupMutationResult(
+                updatedDocument,
+                updatedGroup,
+                updatedGroup.NodeIds.ToList());
     }
 
     private static IReadOnlyList<GraphNodeGroup> RemoveNodeIdsFromGroups(
@@ -493,6 +556,83 @@ internal sealed class GraphEditorKernelDocumentMutator
         {
             Surface = surface with { GroupId = groupId },
         };
+    }
+
+    private static GraphDocument SetNodeGroupExtraPaddingCore(
+        GraphDocument document,
+        string groupId,
+        GraphPadding extraPadding)
+    {
+        var changed = false;
+        var updatedGroups = (document.Groups ?? [])
+            .Select(group =>
+            {
+                if (!string.Equals(group.Id, groupId, StringComparison.Ordinal)
+                    || group.ExtraPadding == extraPadding)
+                {
+                    return group;
+                }
+
+                changed = true;
+                return group with { ExtraPadding = extraPadding };
+            })
+            .ToList();
+
+        return changed
+            ? document with { Groups = updatedGroups }
+            : document;
+    }
+
+    private static GraphDocument RefreshNodeGroupBounds(GraphDocument document)
+    {
+        if (document.Groups is not { Count: > 0 })
+        {
+            return document;
+        }
+
+        var boundsByNodeId = document.Nodes.ToDictionary(
+            node => node.Id,
+            node => new GraphEditorNodeGroupMemberBounds(
+                node.Position,
+                new GraphSize(node.Size.Width, GraphEditorNodeSurfaceMetrics.CalculateRenderedHeight(node))),
+            StringComparer.Ordinal);
+
+        var updatedGroups = document.Groups
+            .Select(group => GraphEditorNodeGroupLayoutResolver.ResolvePersistedBounds(group, boundsByNodeId))
+            .ToList();
+        return document with { Groups = updatedGroups };
+    }
+
+    private static GraphPadding CreatePaddingFromResolvedBounds(
+        GraphDocument document,
+        string groupId,
+        GraphPoint position,
+        GraphSize size)
+    {
+        var group = (document.Groups ?? [])
+            .FirstOrDefault(candidate => string.Equals(candidate.Id, groupId, StringComparison.Ordinal));
+        if (group is null)
+        {
+            return default;
+        }
+
+        var boundsByNodeId = document.Nodes.ToDictionary(
+            node => node.Id,
+            node => new GraphEditorNodeGroupMemberBounds(
+                node.Position,
+                new GraphSize(node.Size.Width, GraphEditorNodeSurfaceMetrics.CalculateRenderedHeight(node))),
+            StringComparer.Ordinal);
+        var snapshot = GraphEditorNodeGroupLayoutResolver.CreateSnapshot(group, boundsByNodeId);
+        var requestedRight = position.X + Math.Max(0d, size.Width);
+        var requestedBottom = position.Y + Math.Max(0d, size.Height);
+        var contentRight = snapshot.ContentPosition.X + snapshot.ContentSize.Width;
+        var contentBottom = snapshot.ContentPosition.Y + snapshot.ContentSize.Height;
+
+        return new GraphPadding(
+            snapshot.ContentPosition.X - position.X,
+            snapshot.ContentPosition.Y - position.Y,
+            requestedRight - contentRight,
+            requestedBottom - contentBottom).ClampNonNegative();
     }
 }
 

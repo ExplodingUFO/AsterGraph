@@ -196,11 +196,13 @@ public sealed class GraphEditorProofRingTests
 
         var groupId = session.Commands.TryCreateNodeGroupFromSelection("Proof Cluster");
         Assert.False(string.IsNullOrWhiteSpace(groupId));
+        Assert.True(session.Commands.TrySetNodeGroupExtraPadding(groupId, new GraphPadding(36, 52, 30, 24), updateStatus: false));
         Assert.True(session.Commands.TrySetNodeGroupCollapsed(groupId, isCollapsed: true));
         Assert.True(session.Commands.TrySetNodeGroupPosition(groupId, new GraphPoint(72, 88), moveMemberNodes: true, updateStatus: false));
 
         var surface = Assert.Single(session.Queries.GetNodeSurfaceSnapshots(), snapshot => snapshot.NodeId == TargetNodeId);
         var group = Assert.Single(session.Queries.GetNodeGroups());
+        var groupSnapshot = Assert.Single(session.Queries.GetNodeGroupSnapshots());
         var featureIds = session.Queries.GetFeatureDescriptors()
             .Where(descriptor => descriptor.IsAvailable)
             .Select(descriptor => descriptor.Id)
@@ -215,14 +217,19 @@ public sealed class GraphEditorProofRingTests
         Assert.Equal("Proof Cluster", group.Title);
         Assert.True(group.IsCollapsed);
         Assert.Equal(new GraphPoint(72, 88), group.Position);
+        Assert.Equal(group.Position, groupSnapshot.Position);
+        Assert.Equal(group.Size, groupSnapshot.Size);
+        Assert.Equal(new GraphPadding(36, 52, 30, 24), group.ExtraPadding);
         Assert.Equal(
             [SourceNodeId, TargetNodeId],
             group.NodeIds.OrderBy(id => id, StringComparer.Ordinal));
         Assert.Contains("query.node-surface-snapshots", featureIds);
         Assert.Contains("query.node-groups", featureIds);
+        Assert.Contains("query.node-group-snapshots", featureIds);
         Assert.Contains("groups.create", commandIds);
         Assert.Contains("groups.collapse", commandIds);
         Assert.Contains("groups.move", commandIds);
+        Assert.Contains("groups.resize", commandIds);
     }
 
     [Fact]
@@ -1334,6 +1341,7 @@ public sealed class GraphEditorProofRingTests
         "groups.create",
         "groups.collapse",
         "groups.move",
+        "groups.resize",
         "connections.start",
         "connections.complete",
         "connections.connect",

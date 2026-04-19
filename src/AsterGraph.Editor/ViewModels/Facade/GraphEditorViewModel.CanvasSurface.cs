@@ -5,6 +5,7 @@ using AsterGraph.Abstractions.Compatibility;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Menus;
 using AsterGraph.Editor.Models;
+using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.Services;
 using AsterGraph.Editor.Viewport;
 
@@ -70,6 +71,12 @@ public sealed partial class GraphEditorViewModel
         => _sessionHost.GetNodeGroups();
 
     /// <summary>
+    /// Gets resolved editor-only node-group boundary snapshots from the shared runtime session.
+    /// </summary>
+    public IReadOnlyList<GraphEditorNodeGroupSnapshot> GetNodeGroupSnapshots()
+        => _sessionHost.GetNodeGroupSnapshots();
+
+    /// <summary>
     /// Attempts to create one editor-only group from the current selection.
     /// </summary>
     public string TryCreateNodeGroupFromSelection(string title)
@@ -94,6 +101,15 @@ public sealed partial class GraphEditorViewModel
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(groupId);
         return _sessionHost.TrySetNodeGroupPosition(groupId, position, moveMemberNodes, updateStatus);
+    }
+
+    /// <summary>
+    /// Attempts to update one group's persisted per-edge padding envelope.
+    /// </summary>
+    public bool TrySetNodeGroupExtraPadding(string groupId, GraphPadding extraPadding, bool updateStatus = true)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(groupId);
+        return _sessionHost.TrySetNodeGroupExtraPadding(groupId, extraPadding, updateStatus);
     }
 
     /// <summary>
