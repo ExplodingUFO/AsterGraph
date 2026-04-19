@@ -9,6 +9,7 @@ namespace AsterGraph.Editor.ViewModels;
 public sealed partial class NodeParameterViewModel : ObservableObject
 {
     private readonly Action<NodeParameterViewModel, object?> _applyValue;
+    private readonly object? _defaultValue;
     private bool _suppressChangeNotifications;
     private bool _hasMixedValues;
 
@@ -31,6 +32,7 @@ public sealed partial class NodeParameterViewModel : ObservableObject
     {
         Definition = definition;
         _applyValue = applyValue;
+        _defaultValue = NodeParameterValueAdapter.NormalizeIncomingValue(definition.DefaultValue);
 
         Key = definition.Key;
         DisplayName = definition.DisplayName;
@@ -39,9 +41,11 @@ public sealed partial class NodeParameterViewModel : ObservableObject
         TypeId = definition.ValueType;
         IsRequired = definition.IsRequired;
         IsReadOnly = definition.Constraints.IsReadOnly || isHostReadOnly;
+        ReadOnlyReason = BuildReadOnlyReason(definition, isHostReadOnly);
         GroupDisplayName = groupDisplayName;
         IsGroupHeaderVisible = isGroupHeaderVisible;
         PlaceholderText = definition.PlaceholderText;
+        HelpText = BuildHelpText(definition, _defaultValue);
         Options = definition.Constraints.AllowedOptions
             .Select(option => new NodeParameterOptionViewModel(option.Value, option.Label, option.Description))
             .ToList()
@@ -94,6 +98,16 @@ public sealed partial class NodeParameterViewModel : ObservableObject
     /// 指示当前参数是否允许编辑。
     /// </summary>
     public bool CanEdit => !IsReadOnly;
+
+    /// <summary>
+    /// 宿主 UI 可用的只读原因说明。
+    /// </summary>
+    public string? ReadOnlyReason { get; }
+
+    /// <summary>
+    /// 指示当前是否应显示只读原因说明。
+    /// </summary>
+    public bool HasReadOnlyReason => !string.IsNullOrWhiteSpace(ReadOnlyReason);
 
     /// <summary>
     /// 参数约束公开的允许选项集合。
@@ -156,6 +170,16 @@ public sealed partial class NodeParameterViewModel : ObservableObject
     public string? PlaceholderText { get; }
 
     /// <summary>
+    /// 可见的参数帮助提示，聚合默认值、格式约束等高信号说明。
+    /// </summary>
+    public string? HelpText { get; }
+
+    /// <summary>
+    /// 指示当前是否存在显式帮助提示。
+    /// </summary>
+    public bool HasHelpText => !string.IsNullOrWhiteSpace(HelpText);
+
+    /// <summary>
     /// Watermark shown by shipped text-based editors.
     /// </summary>
     public string InputWatermark => HasMixedValues ? MixedValueHint : PlaceholderText ?? string.Empty;
@@ -184,6 +208,13 @@ public sealed partial class NodeParameterViewModel : ObservableObject
     /// 当前已规范化的参数值；混合值投影时为 <see langword="null"/>。
     /// </summary>
     public object? CurrentValue { get; private set; }
+
+    /// <summary>
+    /// 指示当前参数是否允许恢复定义默认值。
+    /// </summary>
+    public bool CanResetToDefault
+        => CanEdit
+           && (HasMixedValues || !NodeParameterValueAdapter.AreEquivalent(CurrentValue, _defaultValue));
 
     [ObservableProperty]
     private string stringValue = string.Empty;
@@ -235,6 +266,20 @@ public sealed partial class NodeParameterViewModel : ObservableObject
         ValidateAndApply(value?.Value, commit: true);
     }
 
+    /// <summary>
+    /// 将当前参数恢复到定义默认值。
+    /// </summary>
+    public void ResetToDefault()
+    {
+        if (!CanResetToDefault)
+        {
+            return;
+        }
+
+        SetFromCurrentValue(_defaultValue);
+        ValidateAndApply(_defaultValue, commit: true);
+    }
+
     private void InitializeValues(IReadOnlyList<object?> currentValues)
     {
         var normalizedValues = currentValues
@@ -253,17 +298,13 @@ public sealed partial class NodeParameterViewModel : ObservableObject
             IsValid = true;
             ValidationMessage = null;
             _suppressChangeNotifications = false;
-            OnPropertyChanged(nameof(HasMixedValues));
-            OnPropertyChanged(nameof(MixedValueHint));
-            OnPropertyChanged(nameof(BooleanCaption));
+            RaiseSelectionStatePropertyChanges();
             return;
         }
 
         SetFromCurrentValue(firstValue);
         ValidateAndApply(CurrentValue, commit: false);
-        OnPropertyChanged(nameof(HasMixedValues));
-        OnPropertyChanged(nameof(MixedValueHint));
-        OnPropertyChanged(nameof(BooleanCaption));
+        RaiseSelectionStatePropertyChanges();
     }
 
     private void SetFromCurrentValue(object? value)
@@ -276,6 +317,7 @@ public sealed partial class NodeParameterViewModel : ObservableObject
         SelectedOption = Options.FirstOrDefault(option => option.Value.Equals(NodeParameterValueAdapter.FormatValueForEditor(value), StringComparison.Ordinal));
 
         _suppressChangeNotifications = false;
+        OnPropertyChanged(nameof(CanResetToDefault));
     }
 
     private void ValidateAndApply(object? candidateValue, bool commit)
@@ -292,11 +334,112 @@ public sealed partial class NodeParameterViewModel : ObservableObject
         }
 
         CurrentValue = result.Value;
+        if (_hasMixedValues)
+        {
+            _hasMixedValues = false;
+            RaiseSelectionStatePropertyChanges();
+        }
+        else
+        {
+            OnPropertyChanged(nameof(CanResetToDefault));
+        }
 
         if (commit)
         {
             _applyValue(this, result.Value);
         }
+    }
+
+    private void RaiseSelectionStatePropertyChanges()
+    {
+        OnPropertyChanged(nameof(HasMixedValues));
+        OnPropertyChanged(nameof(MixedValueHint));
+        OnPropertyChanged(nameof(BooleanCaption));
+        OnPropertyChanged(nameof(InputWatermark));
+        OnPropertyChanged(nameof(CanResetToDefault));
+    }
+
+    private static string? BuildReadOnlyReason(NodeParameterDefinition definition, bool isHostReadOnly)
+    {
+        if (definition.Constraints.IsReadOnly && isHostReadOnly)
+        {
+            return "参数定义和宿主策略都将此字段标记为只读。";
+        }
+
+        if (definition.Constraints.IsReadOnly)
+        {
+            return "参数定义将此字段标记为只读。";
+        }
+
+        if (isHostReadOnly)
+        {
+            return "宿主策略当前禁止修改该参数。";
+        }
+
+        return null;
+    }
+
+    private static string? BuildHelpText(NodeParameterDefinition definition, object? defaultValue)
+    {
+        var guidance = new List<string>();
+        var formattedDefault = NodeParameterValueAdapter.FormatValueForEditor(defaultValue);
+        if (!string.IsNullOrWhiteSpace(definition.PlaceholderText))
+        {
+            guidance.Add($"提示: {definition.PlaceholderText}");
+        }
+
+        if (!string.IsNullOrWhiteSpace(formattedDefault))
+        {
+            guidance.Add($"默认值: {formattedDefault}");
+        }
+
+        if (!string.IsNullOrWhiteSpace(definition.Constraints.ValidationPatternDescription))
+        {
+            guidance.Add($"格式: {definition.Constraints.ValidationPatternDescription}");
+        }
+
+        if (definition.Constraints.Minimum is double min && definition.Constraints.Maximum is double max)
+        {
+            guidance.Add($"范围: {min} - {max}");
+        }
+        else if (definition.Constraints.Minimum is double minimum)
+        {
+            guidance.Add($"最小值: {minimum}");
+        }
+        else if (definition.Constraints.Maximum is double maximum)
+        {
+            guidance.Add($"最大值: {maximum}");
+        }
+
+        if (definition.Constraints.MinimumLength is int minLength && definition.Constraints.MaximumLength is int maxLength)
+        {
+            guidance.Add($"长度: {minLength} - {maxLength}");
+        }
+        else if (definition.Constraints.MinimumLength is int minimumLength)
+        {
+            guidance.Add($"最短长度: {minimumLength}");
+        }
+        else if (definition.Constraints.MaximumLength is int maximumLength)
+        {
+            guidance.Add($"最长长度: {maximumLength}");
+        }
+
+        if (definition.Constraints.MinimumItemCount is int minItems && definition.Constraints.MaximumItemCount is int maxItems)
+        {
+            guidance.Add($"项目数: {minItems} - {maxItems}");
+        }
+        else if (definition.Constraints.MinimumItemCount is int minimumItems)
+        {
+            guidance.Add($"最少项目: {minimumItems}");
+        }
+        else if (definition.Constraints.MaximumItemCount is int maximumItems)
+        {
+            guidance.Add($"最多项目: {maximumItems}");
+        }
+
+        return guidance.Count == 0
+            ? null
+            : string.Join("  ·  ", guidance);
     }
 
 }

@@ -1,10 +1,13 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
+using Avalonia.Input;
 using Avalonia.Themes.Fluent;
 using Avalonia.VisualTree;
 using AsterGraph.Avalonia.Controls;
@@ -175,6 +178,92 @@ public sealed class DemoMainWindowTests
         Assert.Equal("Host-Owned Showcase", window.FindControl<TextBlock>("PART_GraphIntroTitleText")?.Text);
     }
 
+    [AvaloniaFact]
+    public void MainWindow_FirstCloseCancelsDirtyExitAndSecondCloseSucceeds()
+    {
+        var storageRoot = CreateTempDirectory();
+        var viewModel = new MainWindowViewModel(new MainWindowShellOptions(
+            StorageRootPath: storageRoot,
+            EnableStatePersistence: true,
+            RestoreLastWorkspaceOnStartup: false));
+        var window = new MainWindow
+        {
+            DataContext = viewModel,
+        };
+
+        window.Show();
+        viewModel.Editor.Session.Commands.AddNode(viewModel.Editor.NodeTemplates[0].Definition.Id);
+
+        window.Close();
+
+        Assert.True(window.IsVisible);
+        Assert.True(viewModel.DirtyExitPromptPending);
+        Assert.True(File.Exists(viewModel.AutosaveDraftPath));
+
+        window.Close();
+        Assert.False(window.IsVisible);
+    }
+
+    [AvaloniaFact]
+    public void MainWindow_RestoresPersistedLayoutAndLoadsDroppedWorkspace()
+    {
+        var storageRoot = CreateTempDirectory();
+        var savePath = Path.Combine(storageRoot, "drop-open.json");
+
+        var firstViewModel = new MainWindowViewModel(new MainWindowShellOptions(
+            StorageRootPath: storageRoot,
+            EnableStatePersistence: true,
+            RestoreLastWorkspaceOnStartup: false));
+        firstViewModel.IsHeaderChromeVisible = true;
+        firstViewModel.IsLibraryChromeVisible = true;
+        firstViewModel.IsInspectorChromeVisible = true;
+        firstViewModel.IsStatusChromeVisible = true;
+        firstViewModel.IsMiniMapVisible = false;
+        firstViewModel.RecordWindowSize(1660, 940);
+        firstViewModel.Editor.Session.Commands.AddNode(firstViewModel.Editor.NodeTemplates[0].Definition.Id);
+        firstViewModel.Editor.Session.Commands.PanBy(24, -18);
+        firstViewModel.Editor.Session.Commands.ZoomAt(1.18, new AsterGraph.Core.Models.GraphPoint(0, 0));
+        firstViewModel.SaveWorkspaceAs(savePath);
+
+        var restoredViewModel = new MainWindowViewModel(new MainWindowShellOptions(
+            StorageRootPath: storageRoot,
+            EnableStatePersistence: true,
+            RestoreLastWorkspaceOnStartup: true));
+        var restoredWindow = new MainWindow
+        {
+            DataContext = restoredViewModel,
+        };
+
+        restoredWindow.Show();
+
+        Assert.True(restoredViewModel.IsHeaderChromeVisible);
+        Assert.True(restoredViewModel.IsLibraryChromeVisible);
+        Assert.True(restoredViewModel.IsInspectorChromeVisible);
+        Assert.True(restoredViewModel.IsStatusChromeVisible);
+        Assert.False(restoredViewModel.IsMiniMapVisible);
+        Assert.Equal(savePath, restoredViewModel.ActiveWorkspacePath);
+        Assert.True(restoredWindow.Width >= 1660);
+        Assert.True(restoredWindow.Height >= 940);
+        Assert.Contains(restoredViewModel.ShellWorkflowLines, line => line.Contains("Ctrl", StringComparison.Ordinal) || line.Contains("Cmd", StringComparison.Ordinal));
+        Assert.Contains(restoredViewModel.ShellWorkflowLines, line => line.Contains("IME", StringComparison.Ordinal));
+        Assert.Contains(restoredViewModel.ShellWorkflowLines, line => line.Contains("theme", StringComparison.OrdinalIgnoreCase) || line.Contains("主题", StringComparison.Ordinal));
+
+        var droppedViewModel = new MainWindowViewModel(new MainWindowShellOptions(
+            StorageRootPath: CreateTempDirectory(),
+            EnableStatePersistence: true,
+            RestoreLastWorkspaceOnStartup: false));
+        var droppedWindow = new MainWindow
+        {
+            DataContext = droppedViewModel,
+        };
+
+        droppedWindow.Show();
+        var originalNodeCount = droppedViewModel.Editor.Nodes.Count;
+
+        Assert.True(droppedWindow.TryOpenWorkspaceFiles([savePath]));
+        Assert.NotEqual(originalNodeCount, droppedViewModel.Editor.Nodes.Count);
+    }
+
     private static MainWindow CreateWindow()
     {
         var window = new MainWindow
@@ -206,6 +295,13 @@ public sealed class DemoMainWindowTests
         => parent.Items is IEnumerable items
             ? items.OfType<MenuItem>().ToArray()
             : [];
+
+    private static string CreateTempDirectory()
+    {
+        var path = Path.Combine(Path.GetTempPath(), "AsterGraph.Demo.Tests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(path);
+        return path;
+    }
 }
 
 public sealed class DemoMainWindowTestsAppBuilder

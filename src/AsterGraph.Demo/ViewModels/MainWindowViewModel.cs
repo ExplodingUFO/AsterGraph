@@ -11,6 +11,7 @@ using AsterGraph.Editor.Hosting;
 using AsterGraph.Editor.Localization;
 using AsterGraph.Editor.Plugins;
 using AsterGraph.Editor.ViewModels;
+using AsterGraph.Demo.Shell;
 
 namespace AsterGraph.Demo.ViewModels;
 
@@ -26,10 +27,20 @@ public partial class MainWindowViewModel : ViewModelBase
     private IReadOnlyList<CapabilityShowcaseItem> _capabilities = [];
 
     public MainWindowViewModel()
+        : this(null)
     {
+    }
+
+    public MainWindowViewModel(MainWindowShellOptions? shellOptions)
+    {
+        _shellOptions = shellOptions ?? new MainWindowShellOptions();
+        var storageRootPath = _shellOptions.ResolveStorageRootPath();
+        _shellStateStore = new DemoShellStateStore(storageRootPath);
+        _workspaceService = new DemoMutableWorkspaceService(_shellOptions.ResolveDefaultWorkspacePath(storageRootPath));
+
         var catalog = new NodeCatalog();
         catalog.RegisterProvider(new DemoNodeDefinitionProvider());
-        var pluginShowcase = DemoPluginShowcase.Create();
+        _pluginShowcase = DemoPluginShowcase.Create(storageRootPath);
         var style = GraphEditorStyleOptions.Default with
         {
             Shell = GraphEditorStyleOptions.Default.Shell with
@@ -85,28 +96,34 @@ public partial class MainWindowViewModel : ViewModelBase
             Document = DemoGraphFactory.CreateDefault(catalog),
             NodeCatalog = catalog,
             CompatibilityService = new DefaultPortCompatibilityService(),
-            StorageRootPath = Path.Combine(Path.GetTempPath(), DemoStorageFolderName),
+            StorageRootPath = storageRootPath,
+            WorkspaceService = _workspaceService,
             StyleOptions = style,
             BehaviorOptions = behavior,
-            PluginRegistrations = pluginShowcase.Registrations,
-            PluginTrustPolicy = pluginShowcase.TrustPolicy,
+            PluginRegistrations = _pluginShowcase.Registrations,
+            PluginTrustPolicy = _pluginShowcase.TrustPolicy,
             ContextMenuAugmentor = contextMenuAugmentor,
             LocalizationProvider = CreateGraphLocalizationProvider(SelectedLanguage.Code),
         });
 
         Editor = editor;
-        PluginCandidates = AsterGraphEditorFactory.DiscoverPluginCandidates(pluginShowcase.DiscoveryOptions);
+        RefreshPluginCandidates();
         Editor.DocumentChanged += (_, _) => RefreshRuntimeProjection();
         Editor.SelectionChanged += (_, _) => RefreshRuntimeProjection();
         Editor.ViewportChanged += (_, _) => RefreshRuntimeProjection();
         Editor.FragmentExported += (_, _) => RefreshRuntimeProjection();
         Editor.FragmentImported += (_, _) => RefreshRuntimeProjection();
+        Editor.Session.Events.DocumentChanged += (_, _) => PersistAutosaveDraft();
+        Editor.Session.Events.CommandExecuted += (_, _) => PersistAutosaveDraft();
         Editor.Session.Events.AutomationStarted += (_, args) => OnAutomationStarted(args);
         Editor.Session.Events.AutomationProgress += (_, args) => OnAutomationProgress(args);
         Editor.Session.Events.AutomationCompleted += (_, args) => OnAutomationCompleted(args);
+        Editor.DocumentChanged += (_, _) => PersistAutosaveDraft();
+        Editor.ViewportChanged += (_, _) => PersistShellState();
 
         UpdateCapabilities();
         SelectedCapability = Capabilities[0];
+        InitializeShellState();
         ApplyHostOptions(status: null);
         RefreshRuntimeProjection();
     }
@@ -114,8 +131,6 @@ public partial class MainWindowViewModel : ViewModelBase
     public GraphEditorViewModel Editor { get; }
 
     public IReadOnlyList<CapabilityShowcaseItem> Capabilities => _capabilities;
-
-    public IReadOnlyList<GraphEditorPluginCandidateSnapshot> PluginCandidates { get; }
 
     [ObservableProperty]
     private CapabilityShowcaseItem selectedCapability = null!;

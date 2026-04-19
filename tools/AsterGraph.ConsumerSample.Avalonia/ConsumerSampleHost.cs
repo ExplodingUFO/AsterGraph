@@ -27,12 +27,22 @@ public sealed class ConsumerSampleHost : IDisposable
     private const string PluginId = "consumer.sample.audit-plugin";
     private const string PluginMenuItemId = "consumer-sample.plugin.menu";
     private readonly GraphEditorViewModel _editor;
+    private readonly ConsumerSamplePluginAllowlistTrustPolicy _trustPolicy;
+    private readonly GraphEditorPluginDiscoveryOptions _pluginDiscoveryOptions;
+    private readonly string _storageRootPath;
     private int _nextHostNodeOrdinal = 2;
     private int _nextPluginNodeOrdinal = 1;
 
-    private ConsumerSampleHost(GraphEditorViewModel editor)
+    private ConsumerSampleHost(
+        GraphEditorViewModel editor,
+        ConsumerSamplePluginAllowlistTrustPolicy trustPolicy,
+        GraphEditorPluginDiscoveryOptions pluginDiscoveryOptions,
+        string storageRootPath)
     {
         _editor = editor;
+        _trustPolicy = trustPolicy;
+        _pluginDiscoveryOptions = pluginDiscoveryOptions;
+        _storageRootPath = storageRootPath;
         _editor.Session.Events.DocumentChanged += HandleStateChanged;
         _editor.Session.Events.SelectionChanged += HandleStateChanged;
         _editor.Session.Events.CommandExecuted += HandleStateChanged;
@@ -46,11 +56,55 @@ public sealed class ConsumerSampleHost : IDisposable
 
     public IReadOnlyList<GraphEditorPluginLoadSnapshot> PluginLoadSnapshots => Session.Queries.GetPluginLoadSnapshots();
 
-    public string TrustBoundaryText =>
-        "Plugins run in-process. This sample uses a direct plugin registration plus an explicit allowlist trust policy. It does not sandbox plugin code.";
+    public IReadOnlyList<GraphEditorPluginCandidateSnapshot> PluginCandidates
+        => AsterGraphEditorFactory.DiscoverPluginCandidates(_pluginDiscoveryOptions);
 
-    public static ConsumerSampleHost Create()
+    public IReadOnlyList<ConsumerSamplePluginCandidateEntry> PluginCandidateEntries
+        => PluginCandidates.Select(CreatePluginCandidateEntry).ToArray();
+
+    public IReadOnlyList<string> PluginAllowlistLines
     {
+        get
+        {
+            var entries = _trustPolicy.Entries;
+            var lines = new List<string>
+            {
+                "Allowlist decisions: " + entries.Count,
+                "Allowlist export path: " + PluginAllowlistExchangePath,
+            };
+
+            if (entries.Count == 0)
+            {
+                lines.Add("No persisted allowlist decisions.");
+            }
+            else
+            {
+                lines.AddRange(entries.Select(entry =>
+                    $"{entry.DisplayName} · {entry.PackageId ?? entry.PluginId}@{entry.PackageVersion ?? entry.Version ?? "?"} · fingerprint {FormatFingerprint(entry.TrustFingerprint)}"));
+            }
+
+            return lines;
+        }
+    }
+
+    public string TrustBoundaryText =>
+        "Plugins run in-process. This sample surfaces provenance, trusted/blocked reasons, and persisted allowlist import/export. It does not sandbox plugin code.";
+
+    public string PluginAllowlistExchangePath
+        => Path.Combine(_storageRootPath, "plugin-allowlist-export.json");
+
+    public static ConsumerSampleHost Create(string? storageRootPath = null)
+    {
+        var resolvedStorageRoot = ResolveStorageRootPath(storageRootPath);
+        var manifest = CreatePluginManifest();
+        var provenance = CreatePluginProvenance();
+        var allowlistStore = new ConsumerSamplePluginAllowlistStore(resolvedStorageRoot);
+        var trustPolicy = new ConsumerSamplePluginAllowlistTrustPolicy(
+            allowlistStore,
+            [
+                ConsumerSamplePluginAllowlistTrustPolicy.CreateEntry(manifest, provenance),
+            ]);
+        var discoveryOptions = CreatePluginDiscoveryOptions(manifest, provenance, trustPolicy);
         var options = new AsterGraphEditorOptions
         {
             Document = CreateDocument(),
@@ -60,14 +114,14 @@ public sealed class ConsumerSampleHost : IDisposable
             [
                 GraphEditorPluginRegistration.FromPlugin(
                     new ConsumerAuditPlugin(),
-                    CreatePluginManifest(),
-                    CreatePluginProvenance()),
+                    manifest,
+                    provenance),
             ],
-            PluginTrustPolicy = new ConsumerSamplePluginTrustPolicy(),
+            PluginTrustPolicy = trustPolicy,
         };
 
         var editor = AsterGraphEditorFactory.Create(options);
-        var host = new ConsumerSampleHost(editor);
+        var host = new ConsumerSampleHost(editor, trustPolicy, discoveryOptions, resolvedStorageRoot);
         host.SelectNode(InitialReviewNodeId);
         return host;
     }
@@ -119,6 +173,50 @@ public sealed class ConsumerSampleHost : IDisposable
 
     public bool HasPluginNodeDefinition()
         => Session.Queries.GetRegisteredNodeDefinitions().Any(definition => definition.Id == PluginAuditDefinitionId);
+
+    public bool TrustPluginCandidate(string pluginId)
+    {
+        var candidate = FindPluginCandidate(pluginId);
+        if (candidate is null)
+        {
+            return false;
+        }
+
+        var changed = _trustPolicy.Allow(candidate.Manifest, candidate.ProvenanceEvidence);
+        StateChanged?.Invoke(this, EventArgs.Empty);
+        return changed;
+    }
+
+    public bool BlockPluginCandidate(string pluginId)
+    {
+        var candidate = FindPluginCandidate(pluginId);
+        if (candidate is null)
+        {
+            return false;
+        }
+
+        var changed = _trustPolicy.Block(candidate.Manifest, candidate.ProvenanceEvidence);
+        if (changed)
+        {
+            StateChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        return changed;
+    }
+
+    public bool ExportPluginAllowlist(string? path = null)
+        => _trustPolicy.Export(string.IsNullOrWhiteSpace(path) ? PluginAllowlistExchangePath : path);
+
+    public bool ImportPluginAllowlist(string? path = null)
+    {
+        var changed = _trustPolicy.Import(string.IsNullOrWhiteSpace(path) ? PluginAllowlistExchangePath : path);
+        if (changed)
+        {
+            StateChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        return changed;
+    }
 
     public string GetFirstReviewNodeId()
         => Session.Queries.CreateDocumentSnapshot().Nodes
@@ -289,6 +387,7 @@ public sealed class ConsumerSampleHost : IDisposable
             version: "0.2.0-alpha.3",
             compatibility: new GraphEditorPluginCompatibilityManifest(
                 minimumAsterGraphVersion: "0.2.0-alpha.3",
+                targetFramework: "net8.0",
                 runtimeSurface: "Create + AsterGraphAvaloniaViewFactory"),
             capabilitySummary: "Adds one node definition, one menu augmentation, one presentation badge, and one localization override.");
 
@@ -301,26 +400,6 @@ public sealed class ConsumerSampleHost : IDisposable
                 new GraphEditorPluginSignerIdentity("AsterGraph Samples", "SAMPLE-TRUST-001"),
                 reasonCode: "consumer.sample.signature.valid",
                 reasonMessage: "Repository-signed sample plugin used for the consumer adoption sample."));
-
-    private sealed class ConsumerSamplePluginTrustPolicy : IGraphEditorPluginTrustPolicy
-    {
-        public GraphEditorPluginTrustEvaluation Evaluate(GraphEditorPluginTrustPolicyContext context)
-        {
-            ArgumentNullException.ThrowIfNull(context);
-
-            return string.Equals(context.Manifest.Id, PluginId, StringComparison.Ordinal)
-                ? new GraphEditorPluginTrustEvaluation(
-                    GraphEditorPluginTrustDecision.Allowed,
-                    GraphEditorPluginTrustEvaluationSource.HostPolicy,
-                    reasonCode: "consumer.sample.trust.allowed",
-                    reasonMessage: "The consumer sample explicitly allowlists the audit plugin.")
-                : new GraphEditorPluginTrustEvaluation(
-                    GraphEditorPluginTrustDecision.Blocked,
-                    GraphEditorPluginTrustEvaluationSource.HostPolicy,
-                    reasonCode: "consumer.sample.trust.blocked",
-                    reasonMessage: "The consumer sample blocks unknown plugins by default.");
-        }
-    }
 
     private sealed class ConsumerAuditPlugin : IGraphEditorPlugin
     {
@@ -419,5 +498,83 @@ public sealed class ConsumerSampleHost : IDisposable
             => key == "editor.menu.canvas.addNode"
                 ? "Plugin Add Node"
                 : fallback;
+    }
+
+    private GraphEditorPluginCandidateSnapshot? FindPluginCandidate(string pluginId)
+        => PluginCandidates.SingleOrDefault(candidate => string.Equals(candidate.Manifest.Id, pluginId, StringComparison.Ordinal));
+
+    private static ConsumerSamplePluginCandidateEntry CreatePluginCandidateEntry(GraphEditorPluginCandidateSnapshot candidate)
+    {
+        var manifest = candidate.Manifest;
+        var provenance = candidate.ProvenanceEvidence;
+        var fingerprint = ConsumerSamplePluginAllowlistTrustPolicy.BuildTrustFingerprint(manifest, provenance);
+        var version = manifest.Version ?? "?";
+        var targetFramework = manifest.Compatibility.TargetFramework ?? "?";
+        var reason = candidate.TrustEvaluation.ReasonMessage ?? candidate.TrustEvaluation.ReasonCode ?? "No policy note.";
+        var packageId = provenance.PackageIdentity?.Id ?? manifest.Provenance.PackageId ?? manifest.Id;
+        var packageVersion = provenance.PackageIdentity?.Version ?? manifest.Provenance.PackageVersion ?? version;
+        var signerFingerprint = provenance.Signature.Signer?.Fingerprint ?? provenance.Signature.Status.ToString();
+        var isAllowed = candidate.TrustEvaluation.Decision == GraphEditorPluginTrustDecision.Allowed;
+
+        return new ConsumerSamplePluginCandidateEntry(
+            manifest.Id,
+            manifest.DisplayName,
+            version,
+            targetFramework,
+            fingerprint,
+            reason,
+            isAllowed,
+            !isAllowed,
+            $"{manifest.Id} · {version} · tfm {targetFramework}",
+            $"package {packageId}@{packageVersion} · signer {signerFingerprint}",
+            $"{candidate.TrustEvaluation.Decision} · fingerprint {FormatFingerprint(fingerprint)} · {reason}");
+    }
+
+    private static GraphEditorPluginDiscoveryOptions CreatePluginDiscoveryOptions(
+        GraphEditorPluginManifest manifest,
+        GraphEditorPluginProvenanceEvidence provenance,
+        ConsumerSamplePluginAllowlistTrustPolicy trustPolicy)
+    {
+        var assemblyPath = typeof(ConsumerAuditPlugin).Assembly.Location;
+        return new GraphEditorPluginDiscoveryOptions
+        {
+            ManifestSources =
+            [
+                new ConsumerSampleManifestSource(
+                [
+                    new GraphEditorPluginManifestSourceCandidate(
+                        "consumer.sample.plugin",
+                        assemblyPath,
+                        manifest,
+                        typeof(ConsumerAuditPlugin).FullName,
+                        provenance),
+                ]),
+            ],
+            TrustPolicy = trustPolicy,
+        };
+    }
+
+    private static string ResolveStorageRootPath(string? storageRootPath)
+    {
+        if (!string.IsNullOrWhiteSpace(storageRootPath))
+        {
+            Directory.CreateDirectory(storageRootPath);
+            return storageRootPath;
+        }
+
+        var defaultRoot = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "AsterGraph.ConsumerSample");
+        Directory.CreateDirectory(defaultRoot);
+        return defaultRoot;
+    }
+
+    private static string FormatFingerprint(string fingerprint)
+        => fingerprint.Length <= 12 ? fingerprint : fingerprint[..12] + "…";
+
+    private sealed class ConsumerSampleManifestSource(IReadOnlyList<GraphEditorPluginManifestSourceCandidate> candidates) : IGraphEditorPluginManifestSource
+    {
+        public IReadOnlyList<GraphEditorPluginManifestSourceCandidate> GetCandidates()
+            => candidates;
     }
 }

@@ -79,12 +79,62 @@ public sealed class GraphEditorKernelCommandRouterTests
             ]);
 
         var expected = """
-            initial:nodes.add:True:-|selection.set:True:-|selection.delete:False:-|nodes.move:True:-|nodes.parameters.set:False:Parameter editing requires node-edit permissions and a shared node definition selection.|connections.start:True:-|connections.complete:False:-|connections.connect:True:-|connections.cancel:False:-|connections.delete:True:-|connections.break-port:True:-|connections.disconnect-incoming:True:-|connections.disconnect-outgoing:True:-|connections.disconnect-all:True:-|viewport.fit:True:-|viewport.pan:True:-|viewport.resize:True:-|viewport.reset:True:-|viewport.center-node:True:-|viewport.center:True:-|workspace.save:True:-|workspace.load:False:No saved snapshot yet. Save once to create one.
-            selected:nodes.add:True:-|selection.set:True:-|selection.delete:True:-|nodes.move:True:-|nodes.parameters.set:False:Parameter editing requires node-edit permissions and a shared node definition selection.|connections.start:True:-|connections.complete:False:-|connections.connect:True:-|connections.cancel:False:-|connections.delete:True:-|connections.break-port:True:-|connections.disconnect-incoming:True:-|connections.disconnect-outgoing:True:-|connections.disconnect-all:True:-|viewport.fit:True:-|viewport.pan:True:-|viewport.resize:True:-|viewport.reset:True:-|viewport.center-node:True:-|viewport.center:True:-|workspace.save:True:-|workspace.load:False:No saved snapshot yet. Save once to create one.
-            pending:nodes.add:True:-|selection.set:True:-|selection.delete:True:-|nodes.move:True:-|nodes.parameters.set:False:Parameter editing requires node-edit permissions and a shared node definition selection.|connections.start:True:-|connections.complete:True:-|connections.connect:True:-|connections.cancel:True:-|connections.delete:True:-|connections.break-port:True:-|connections.disconnect-incoming:True:-|connections.disconnect-outgoing:True:-|connections.disconnect-all:True:-|viewport.fit:True:-|viewport.pan:True:-|viewport.resize:True:-|viewport.reset:True:-|viewport.center-node:True:-|viewport.center:True:-|workspace.save:True:-|workspace.load:False:No saved snapshot yet. Save once to create one.
+            initial:nodes.add:True:-|selection.set:True:-|selection.delete:False:-|nodes.move:True:-|nodes.parameters.set:False:Parameter editing requires node-edit permissions and a shared node definition selection.|connections.start:True:-|connections.complete:False:-|connections.connect:True:-|connections.cancel:False:-|connections.delete:True:-|connections.break-port:True:-|connections.disconnect-incoming:True:-|connections.disconnect-outgoing:True:-|connections.disconnect-all:True:-|history.undo:False:-|history.redo:False:-|viewport.fit:True:-|viewport.pan:True:-|viewport.resize:True:-|viewport.reset:True:-|viewport.center-node:True:-|viewport.center:True:-|workspace.save:True:-|workspace.load:False:No saved snapshot yet. Save once to create one.
+            selected:nodes.add:True:-|selection.set:True:-|selection.delete:True:-|nodes.move:True:-|nodes.parameters.set:False:Parameter editing requires node-edit permissions and a shared node definition selection.|connections.start:True:-|connections.complete:False:-|connections.connect:True:-|connections.cancel:False:-|connections.delete:True:-|connections.break-port:True:-|connections.disconnect-incoming:True:-|connections.disconnect-outgoing:True:-|connections.disconnect-all:True:-|history.undo:False:-|history.redo:False:-|viewport.fit:True:-|viewport.pan:True:-|viewport.resize:True:-|viewport.reset:True:-|viewport.center-node:True:-|viewport.center:True:-|workspace.save:True:-|workspace.load:False:No saved snapshot yet. Save once to create one.
+            pending:nodes.add:True:-|selection.set:True:-|selection.delete:True:-|nodes.move:True:-|nodes.parameters.set:False:Parameter editing requires node-edit permissions and a shared node definition selection.|connections.start:True:-|connections.complete:True:-|connections.connect:True:-|connections.cancel:True:-|connections.delete:True:-|connections.break-port:True:-|connections.disconnect-incoming:True:-|connections.disconnect-outgoing:True:-|connections.disconnect-all:True:-|history.undo:False:-|history.redo:False:-|viewport.fit:True:-|viewport.pan:True:-|viewport.resize:True:-|viewport.reset:True:-|viewport.center-node:True:-|viewport.center:True:-|workspace.save:True:-|workspace.load:False:No saved snapshot yet. Save once to create one.
             """;
 
         Assert.Equal(expected.ReplaceLineEndings("\n"), signature.ReplaceLineEndings("\n"));
+    }
+
+    [Fact]
+    public void GraphEditorKernel_CommandDescriptors_ExposeCanonicalMetadataAndKernelSource()
+    {
+        var kernel = CreateKernel();
+        kernel.UpdateViewportSize(1280, 720);
+
+        var descriptors = kernel.GetCommandDescriptors().ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
+
+        var saveWorkspace = descriptors["workspace.save"];
+        Assert.Equal("Save Workspace", saveWorkspace.Title);
+        Assert.Equal("workspace", saveWorkspace.Group);
+        Assert.Equal("save", saveWorkspace.IconKey);
+        Assert.Equal("Ctrl+S", saveWorkspace.DefaultShortcut);
+        Assert.Equal(GraphEditorCommandSourceKind.Kernel, saveWorkspace.Source);
+        Assert.True(saveWorkspace.CanExecute);
+        Assert.True(saveWorkspace.IsEnabled);
+
+        var deleteSelection = descriptors["selection.delete"];
+        Assert.Equal("Delete Selection", deleteSelection.Title);
+        Assert.Equal("selection", deleteSelection.Group);
+        Assert.Equal("delete", deleteSelection.IconKey);
+        Assert.Equal("Delete", deleteSelection.DefaultShortcut);
+        Assert.Equal(GraphEditorCommandSourceKind.Kernel, deleteSelection.Source);
+        Assert.False(deleteSelection.CanExecute);
+        Assert.False(deleteSelection.IsEnabled);
+
+        var cancelPendingConnection = descriptors["connections.cancel"];
+        Assert.Equal("Cancel Pending Connection", cancelPendingConnection.Title);
+        Assert.Equal("connections", cancelPendingConnection.Group);
+        Assert.Equal("cancel", cancelPendingConnection.IconKey);
+        Assert.Equal("Escape", cancelPendingConnection.DefaultShortcut);
+        Assert.Equal(GraphEditorCommandSourceKind.Kernel, cancelPendingConnection.Source);
+
+        var undo = descriptors["history.undo"];
+        Assert.Equal("Undo", undo.Title);
+        Assert.Equal("history", undo.Group);
+        Assert.Equal("undo", undo.IconKey);
+        Assert.Equal("Ctrl+Z", undo.DefaultShortcut);
+        Assert.Equal(GraphEditorCommandSourceKind.Kernel, undo.Source);
+        Assert.False(undo.CanExecute);
+        Assert.False(undo.IsEnabled);
+
+        var redo = descriptors["history.redo"];
+        Assert.Equal("Redo", redo.Title);
+        Assert.Equal("history", redo.Group);
+        Assert.Equal("redo", redo.IconKey);
+        Assert.Equal("Ctrl+Y", redo.DefaultShortcut);
+        Assert.Equal(GraphEditorCommandSourceKind.Kernel, redo.Source);
     }
 
     [Fact]

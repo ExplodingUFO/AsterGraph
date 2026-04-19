@@ -1,4 +1,5 @@
 using System.Linq;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
 using Avalonia.Interactivity;
@@ -174,6 +175,78 @@ public sealed class GraphInspectorStandaloneTests
         }
     }
 
+    [AvaloniaFact]
+    public void StandaloneInspector_SupportsParameterSearchAndGroupCollapse()
+    {
+        var editor = CreateAuthoringEditor();
+        editor.SelectSingleNode(editor.Nodes[0], updateStatus: false);
+        var (window, inspector) = CreateInspectorWindow(editor);
+
+        try
+        {
+            var searchBox = inspector.FindControl<TextBox>("PART_ParameterSearchBox");
+            Assert.NotNull(searchBox);
+
+            searchBox!.Text = "slug";
+            searchBox.RaiseEvent(new TextChangedEventArgs(TextBox.TextChangedEvent));
+            RefreshInspectorLayout(window, inspector);
+
+            Assert.Equal(["slug"], GetVisibleParameterKeys(inspector));
+
+            searchBox.Text = string.Empty;
+            searchBox.RaiseEvent(new TextChangedEventArgs(TextBox.TextChangedEvent));
+            RefreshInspectorLayout(window, inspector);
+
+            typeof(GraphInspectorView)
+                .GetMethod("HandleGroupToggleClick", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)!
+                .Invoke(inspector, [new Button { Tag = "Behavior" }, new RoutedEventArgs(Button.ClickEvent)]);
+            RefreshInspectorLayout(window, inspector);
+
+            Assert.True(GetGroupCollapsedState(inspector, "Behavior"));
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
+    public void StandaloneInspector_ShowsValidationSummaryReadonlyReasonAndResetAffordance()
+    {
+        var editor = CreateAuthoringEditor();
+        editor.SelectSingleNode(editor.Nodes[0], updateStatus: false);
+        var (window, inspector) = CreateInspectorWindow(editor);
+
+        try
+        {
+            var allText = string.Join(
+                "\n",
+                inspector.GetVisualDescendants()
+                    .OfType<TextBlock>()
+                    .Select(block => block.Text)
+                    .Where(text => !string.IsNullOrWhiteSpace(text)));
+            var validationSummary = inspector.FindControl<TextBlock>("PART_ParameterValidationSummaryText");
+            var resetSlugButton = inspector.GetVisualDescendants()
+                .OfType<Button>()
+                .Single(button => button.Classes.Contains("astergraph-reset-parameter-button") && Equals(button.Tag, "slug"));
+
+            Assert.NotNull(validationSummary);
+            Assert.Contains("Slug", validationSummary!.Text);
+            Assert.Contains("参数定义将此字段标记为只读。", allText);
+            Assert.Contains("使用搜索过滤参数、折叠分组，并在需要时恢复默认值。", allText);
+
+            resetSlugButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            RefreshInspectorLayout(window, inspector);
+
+            Assert.Equal("valid-id", editor.SelectedNodeParameters.Single(parameter => parameter.Key == "slug").StringValue);
+            Assert.DoesNotContain("Slug", inspector.FindControl<TextBlock>("PART_ParameterValidationSummaryText")!.Text);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
     private static (Window Window, GraphInspectorView Inspector) CreateInspectorWindow(
         GraphEditorViewModel editor,
         AsterGraphPresentationOptions? presentation = null)
@@ -294,6 +367,16 @@ public sealed class GraphInspectorStandaloneTests
                         constraints: new ParameterConstraints(MinimumItemCount: 1, MaximumItemCount: 5),
                         groupName: "Metadata",
                         placeholderText: "one tag per line"),
+                    new NodeParameterDefinition(
+                        "system-key",
+                        "System Key",
+                        new PortTypeId("string"),
+                        ParameterEditorKind.Text,
+                        description: "Managed by the definition and shown for transparency.",
+                        defaultValue: "system-core",
+                        constraints: new ParameterConstraints(IsReadOnly: true),
+                        groupName: "Metadata",
+                        placeholderText: "system-core"),
                 ],
                 description: "Used to verify grouped authoring inspector UX."));
 
@@ -319,6 +402,7 @@ public sealed class GraphInspectorStandaloneTests
                             new GraphParameterValue("enabled", new PortTypeId("bool"), true),
                             new GraphParameterValue("slug", new PortTypeId("string"), "AbC"),
                             new GraphParameterValue("tags", new PortTypeId("string-list"), new[] { "alpha", "beta" }),
+                            new GraphParameterValue("system-key", new PortTypeId("string"), "system-lock"),
                         ]),
                 ],
                 []),
@@ -360,5 +444,38 @@ public sealed class GraphInspectorStandaloneTests
                 },
             };
         }
+    }
+
+    private static void RefreshInspectorLayout(Window window, GraphInspectorView inspector)
+    {
+        inspector.Measure(new Size(window.Width, window.Height));
+        inspector.Arrange(new Rect(0, 0, window.Width, window.Height));
+    }
+
+    private static List<string> GetVisibleParameterKeys(GraphInspectorView inspector)
+    {
+        var groupsControl = inspector.FindControl<ItemsControl>("PART_ParameterGroups");
+        Assert.NotNull(groupsControl);
+
+        return groupsControl!.ItemsSource!
+            .Cast<object>()
+            .SelectMany(group => (IEnumerable<object>)group.GetType().GetProperty("Parameters")!.GetValue(group)!)
+            .Select(parameter => (string)parameter.GetType().GetProperty("Key")!.GetValue(parameter)!)
+            .ToList();
+    }
+
+    private static bool GetGroupCollapsedState(GraphInspectorView inspector, string groupName)
+    {
+        var groupsControl = inspector.FindControl<ItemsControl>("PART_ParameterGroups");
+        Assert.NotNull(groupsControl);
+
+        var group = groupsControl!.ItemsSource!
+            .Cast<object>()
+            .Single(candidate => string.Equals(
+                candidate.GetType().GetProperty("GroupName")!.GetValue(candidate)?.ToString(),
+                groupName,
+                StringComparison.Ordinal));
+
+        return (bool)group.GetType().GetProperty("IsCollapsed")!.GetValue(group)!;
     }
 }

@@ -27,9 +27,14 @@ public static class ConsumerSampleWindowFactory
     {
         private readonly ConsumerSampleHost _host;
         private readonly bool _ownsHost;
+        private readonly MenuItem _actionsMenu;
+        private readonly StackPanel _actionRailItems;
         private readonly ItemsControl _parameterItems;
+        private readonly ItemsControl _pluginCandidateItems;
         private readonly ItemsControl _pluginSnapshotItems;
+        private readonly ItemsControl _allowlistItems;
         private readonly TextBlock _selectionSummaryText;
+        private readonly TextBlock _trustBoundaryText;
 
         public ConsumerSampleWindow(ConsumerSampleHost host, bool ownsHost)
         {
@@ -48,20 +53,22 @@ public static class ConsumerSampleWindowFactory
             });
             editorView.Name = "PART_EditorView";
 
+            _actionsMenu = new MenuItem
+            {
+                Name = "PART_ActionsMenu",
+                Header = "Actions",
+            };
+
             var menu = new Menu
             {
                 Name = "PART_MainMenu",
-                ItemsSource = new[]
-                {
-                    CreateMenuItem("Actions",
-                    new[]
-                    {
-                        CreateMenuItem("Add Review Node", (_, _) => { _host.AddHostReviewNode(); RefreshPanels(); }),
-                        CreateMenuItem("Add Plugin Audit Node", (_, _) => { _host.AddPluginAuditNode(); RefreshPanels(); }),
-                        CreateMenuItem("Approve Selection", (_, _) => { _host.ApproveSelection(); RefreshPanels(); }),
-                        CreateMenuItem("Fit View", (_, _) => _host.FitView()),
-                    }),
-                },
+                ItemsSource = new[] { _actionsMenu },
+            };
+
+            _actionRailItems = new StackPanel
+            {
+                Spacing = 10,
+                Name = "PART_ActionRail",
             };
 
             var leftRail = new StackPanel
@@ -70,10 +77,7 @@ public static class ConsumerSampleWindowFactory
                 Width = 250,
                 Children =
                 {
-                    CreateActionButton("PART_AddReviewNodeButton", "Add Review Node", () => _host.AddHostReviewNode()),
-                    CreateActionButton("PART_AddPluginNodeButton", "Add Plugin Audit Node", () => _host.AddPluginAuditNode()),
-                    CreateActionButton("PART_ApproveSelectionButton", "Approve Selection", _host.ApproveSelection),
-                    CreateActionButton("PART_FitViewButton", "Fit View", () => { _host.FitView(); return true; }),
+                    _actionRailItems,
                     new Border
                     {
                         CornerRadius = new CornerRadius(8),
@@ -99,12 +103,22 @@ public static class ConsumerSampleWindowFactory
                 Name = "PART_ParameterItems",
             };
 
+            _pluginCandidateItems = new ItemsControl
+            {
+                Name = "PART_PluginCandidateItems",
+            };
+
             _pluginSnapshotItems = new ItemsControl
             {
                 Name = "PART_PluginSnapshotItems",
             };
 
-            var trustBoundary = new TextBlock
+            _allowlistItems = new ItemsControl
+            {
+                Name = "PART_AllowlistItems",
+            };
+
+            _trustBoundaryText = new TextBlock
             {
                 Name = "PART_TrustBoundaryText",
                 TextWrapping = TextWrapping.Wrap,
@@ -119,8 +133,10 @@ public static class ConsumerSampleWindowFactory
                 {
                     CreateSection("Selection", _selectionSummaryText),
                     CreateSection("Selected Parameters", _parameterItems),
+                    CreateSection("Plugin Candidates", _pluginCandidateItems),
                     CreateSection("Plugin Load Snapshots", _pluginSnapshotItems),
-                    CreateSection("Trust Boundary", trustBoundary),
+                    CreateSection("Allowlist Decisions", CreateAllowlistPanel()),
+                    CreateSection("Trust Boundary", _trustBoundaryText),
                 },
             };
 
@@ -173,13 +189,36 @@ public static class ConsumerSampleWindowFactory
 
         private void RefreshPanels()
         {
+            RebuildActionSurfaces();
+
             var selection = _host.Session.Queries.GetSelectionSnapshot();
             _selectionSummaryText.Text = selection.PrimarySelectedNodeId is null
                 ? "No node is selected."
                 : $"Primary node: {selection.PrimarySelectedNodeId}\nSelected nodes: {selection.SelectedNodeIds.Count}";
 
             RebuildParameterItems();
+            RebuildPluginCandidateItems();
             RebuildPluginSnapshotItems();
+            _trustBoundaryText.Text = _host.TrustBoundaryText;
+            _allowlistItems.ItemsSource = _host.PluginAllowlistLines
+                .Select(line => new TextBlock
+                {
+                    TextWrapping = TextWrapping.Wrap,
+                    Text = line,
+                })
+                .ToList();
+        }
+
+        private void RebuildActionSurfaces()
+        {
+            var actions = BuildHostedActions();
+            _actionRailItems.Children.Clear();
+            foreach (var action in actions)
+            {
+                _actionRailItems.Children.Add(CreateActionButton(action));
+            }
+
+            _actionsMenu.ItemsSource = actions.Select(CreateMenuItem).ToList();
         }
 
         private void RebuildParameterItems()
@@ -223,6 +262,62 @@ public static class ConsumerSampleWindowFactory
             }
 
             _pluginSnapshotItems.ItemsSource = items;
+        }
+
+        private void RebuildPluginCandidateItems()
+        {
+            var items = new List<Control>();
+
+            foreach (var entry in _host.PluginCandidateEntries)
+            {
+                items.Add(new Border
+                {
+                    CornerRadius = new CornerRadius(8),
+                    Padding = new Thickness(10),
+                    Background = Brush.Parse("#111827"),
+                    Child = new StackPanel
+                    {
+                        Spacing = 6,
+                        Children =
+                        {
+                            new TextBlock
+                            {
+                                Text = entry.DisplayName,
+                                FontWeight = FontWeight.SemiBold,
+                            },
+                            new TextBlock
+                            {
+                                TextWrapping = TextWrapping.Wrap,
+                                Text = entry.SummaryLine,
+                            },
+                            new TextBlock
+                            {
+                                TextWrapping = TextWrapping.Wrap,
+                                Opacity = 0.78,
+                                Text = entry.ProvenanceLine,
+                            },
+                            new TextBlock
+                            {
+                                TextWrapping = TextWrapping.Wrap,
+                                Opacity = 0.86,
+                                Text = entry.TrustLine,
+                            },
+                            new StackPanel
+                            {
+                                Orientation = Orientation.Horizontal,
+                                Spacing = 8,
+                                Children =
+                                {
+                                    CreateTrustButton("Trust", entry.PluginId, entry.IsBlocked),
+                                    CreateBlockButton("Block", entry.PluginId, entry.IsAllowed),
+                                },
+                            },
+                        },
+                    },
+                });
+            }
+
+            _pluginCandidateItems.ItemsSource = items;
         }
 
         private Control CreateParameterEditor(GraphEditorNodeParameterSnapshot snapshot)
@@ -331,37 +426,159 @@ public static class ConsumerSampleWindowFactory
                 },
             };
 
-        private static MenuItem CreateMenuItem(string header, IReadOnlyList<MenuItem> items)
-            => new()
+        private Control CreateAllowlistPanel()
+        {
+            var exportButton = new Button
             {
-                Header = header,
-                ItemsSource = items,
+                Name = "PART_ExportAllowlistButton",
+                Content = "Export allowlist",
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+            };
+            exportButton.Click += (_, _) =>
+            {
+                _host.ExportPluginAllowlist();
+                RefreshPanels();
             };
 
-        private static MenuItem CreateMenuItem(string header, EventHandler<RoutedEventArgs> onClick)
+            var importButton = new Button
+            {
+                Name = "PART_ImportAllowlistButton",
+                Content = "Import allowlist",
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+            };
+            importButton.Click += (_, _) =>
+            {
+                _host.ImportPluginAllowlist();
+                RefreshPanels();
+            };
+
+            return new StackPanel
+            {
+                Spacing = 8,
+                Children =
+                {
+                    new StackPanel
+                    {
+                        Orientation = Orientation.Horizontal,
+                        Spacing = 8,
+                        Children =
+                        {
+                            exportButton,
+                            importButton,
+                        },
+                    },
+                    _allowlistItems,
+                },
+            };
+        }
+
+        private IReadOnlyList<AsterGraphHostedActionDescriptor> BuildHostedActions()
+        {
+            var commandActions = AsterGraphHostedActionFactory.CreateCommandActions(
+                _host.Session,
+                ["workspace.save", "workspace.load", "history.undo", "history.redo", "viewport.fit"]);
+
+            return
+            [
+                AsterGraphHostedActionFactory.CreateHostAction(
+                    "consumer.add-review",
+                    "Add Review Node",
+                    "consumer",
+                    _host.AddHostReviewNode,
+                    iconKey: "add"),
+                AsterGraphHostedActionFactory.CreateHostAction(
+                    "consumer.add-plugin-audit",
+                    "Add Plugin Audit Node",
+                    "consumer",
+                    _host.AddPluginAuditNode,
+                    iconKey: "plugin"),
+                AsterGraphHostedActionFactory.CreateHostAction(
+                    "consumer.approve-selection",
+                    "Approve Selection",
+                    "consumer",
+                    _host.ApproveSelection,
+                    iconKey: "approve",
+                    disabledReason: _host.Session.Queries.GetSelectionSnapshot().PrimarySelectedNodeId is null
+                        ? "Select one review node before approving."
+                        : null,
+                    canExecute: _host.Session.Queries.GetSelectionSnapshot().PrimarySelectedNodeId is not null),
+                .. commandActions,
+            ];
+        }
+
+        private MenuItem CreateMenuItem(AsterGraphHostedActionDescriptor action)
         {
             var item = new MenuItem
             {
-                Header = header,
+                Name = $"PART_ActionMenuItem_{action.Id}",
+                Header = action.Title,
+                IsEnabled = action.CanExecute,
             };
-            item.Click += onClick;
+            item.Click += (_, _) =>
+            {
+                action.TryExecute();
+                RefreshPanels();
+            };
             return item;
         }
 
-        private Button CreateActionButton(string name, string label, Func<bool> action)
+        private Button CreateActionButton(AsterGraphHostedActionDescriptor action)
         {
             var button = new Button
             {
-                Name = name,
-                Content = label,
+                Name = ResolveActionButtonName(action),
+                Content = action.Title,
+                IsEnabled = action.CanExecute,
                 HorizontalAlignment = HorizontalAlignment.Stretch,
             };
             button.Click += (_, _) =>
             {
-                action();
+                action.TryExecute();
                 RefreshPanels();
             };
             return button;
         }
+
+        private Button CreateTrustButton(string title, string pluginId, bool isEnabled)
+        {
+            var button = new Button
+            {
+                Content = title,
+                IsEnabled = isEnabled,
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+            };
+            button.Click += (_, _) =>
+            {
+                _host.TrustPluginCandidate(pluginId);
+                RefreshPanels();
+            };
+            return button;
+        }
+
+        private Button CreateBlockButton(string title, string pluginId, bool isEnabled)
+        {
+            var button = new Button
+            {
+                Content = title,
+                IsEnabled = isEnabled,
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+            };
+            button.Click += (_, _) =>
+            {
+                _host.BlockPluginCandidate(pluginId);
+                RefreshPanels();
+            };
+            return button;
+        }
+
+        private static string ResolveActionButtonName(AsterGraphHostedActionDescriptor action)
+            => action.Id switch
+            {
+                "consumer.add-review" => "PART_AddReviewNodeButton",
+                "consumer.add-plugin-audit" => "PART_AddPluginNodeButton",
+                "consumer.approve-selection" => "PART_ApproveSelectionButton",
+                "viewport.fit" => "PART_FitViewButton",
+                _ => $"PART_Action_{action.Id}",
+            };
     }
 }

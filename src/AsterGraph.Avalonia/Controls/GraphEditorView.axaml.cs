@@ -1,3 +1,4 @@
+using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -7,6 +8,7 @@ using Avalonia.VisualTree;
 using AsterGraph.Avalonia.Controls.Internal;
 using AsterGraph.Avalonia.Hosting;
 using AsterGraph.Avalonia.Presentation;
+using AsterGraph.Editor.Events;
 using AsterGraph.Editor.ViewModels;
 
 namespace AsterGraph.Avalonia.Controls;
@@ -23,6 +25,17 @@ namespace AsterGraph.Avalonia.Controls;
 /// </remarks>
 public partial class GraphEditorView : UserControl
 {
+    private static readonly IReadOnlyList<string> HeaderCommandIds =
+    [
+        "workspace.save",
+        "workspace.load",
+        "history.undo",
+        "history.redo",
+        "viewport.fit",
+        "viewport.reset",
+        "selection.delete",
+    ];
+
     /// <summary>
     /// 编辑器视图模型依赖属性。
     /// </summary>
@@ -99,9 +112,16 @@ public partial class GraphEditorView : UserControl
     private Border? _libraryChrome;
     private Border? _inspectorChrome;
     private Border? _statusChrome;
+    private WrapPanel? _headerToolbar;
+    private StackPanel? _shortcutHelpList;
+    private Button? _openCommandPaletteButton;
+    private Border? _commandPaletteChrome;
+    private TextBox? _commandPaletteSearchBox;
+    private StackPanel? _commandPaletteItems;
     private double _defaultShellRowSpacing;
     private double _defaultShellColumnSpacing;
     private readonly GraphEditorViewCompositionCoordinator _compositionCoordinator;
+    private string _commandPaletteFilter = string.Empty;
 
     /// <summary>
     /// 初始化图编辑器宿主视图。
@@ -234,13 +254,17 @@ public partial class GraphEditorView : UserControl
 
         if (change.Property == EditorProperty)
         {
-            GraphEditorPlatformSeamBinder.Replace(
-                change.GetOldValue<GraphEditorViewModel?>(),
-                change.GetNewValue<GraphEditorViewModel?>(),
-                this);
+            var oldEditor = change.GetOldValue<GraphEditorViewModel?>();
             var editor = change.GetNewValue<GraphEditorViewModel?>();
+            DetachCommandSurfaceSubscriptions(oldEditor);
+            GraphEditorPlatformSeamBinder.Replace(
+                oldEditor,
+                editor,
+                this);
+            AttachCommandSurfaceSubscriptions(editor);
             _compositionCoordinator.ApplyStyleOptions(editor);
             _compositionCoordinator.ApplyPresentationOptions(Presentation);
+            RefreshCommandSurface();
         }
         else if (change.Property == ChromeModeProperty
             || change.Property == IsHeaderChromeVisibleProperty
@@ -268,11 +292,14 @@ public partial class GraphEditorView : UserControl
     {
         base.OnAttachedToVisualTree(e);
         GraphEditorPlatformSeamBinder.Apply(Editor, this);
+        AttachCommandSurfaceSubscriptions(Editor);
+        RefreshCommandSurface();
     }
 
     /// <inheritdoc />
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
     {
+        DetachCommandSurfaceSubscriptions(Editor);
         GraphEditorPlatformSeamBinder.Clear(Editor);
         base.OnDetachedFromVisualTree(e);
     }
@@ -285,9 +312,25 @@ public partial class GraphEditorView : UserControl
         _libraryChrome = this.FindControl<Border>("PART_LibraryChrome");
         _inspectorChrome = this.FindControl<Border>("PART_InspectorChrome");
         _statusChrome = this.FindControl<Border>("PART_StatusChrome");
+        _headerToolbar = this.FindControl<WrapPanel>("PART_HeaderToolbar");
+        _shortcutHelpList = this.FindControl<StackPanel>("PART_ShortcutHelpList");
+        _openCommandPaletteButton = this.FindControl<Button>("PART_OpenCommandPaletteButton");
+        _commandPaletteChrome = this.FindControl<Border>("PART_CommandPaletteChrome");
+        _commandPaletteSearchBox = this.FindControl<TextBox>("PART_CommandPaletteSearchBox");
+        _commandPaletteItems = this.FindControl<StackPanel>("PART_CommandPaletteItems");
         _nodeCanvas = this.FindControl<NodeCanvas>("PART_NodeCanvas");
         _inspectorSurface = this.FindControl<GraphInspectorView>("PART_InspectorSurface");
         _miniMapSurface = this.FindControl<GraphMiniMap>("PART_MiniMapSurface");
+        if (_openCommandPaletteButton is not null)
+        {
+            _openCommandPaletteButton.Click += HandleOpenCommandPaletteClick;
+        }
+
+        if (_commandPaletteSearchBox is not null)
+        {
+            _commandPaletteSearchBox.TextChanged += HandleCommandPaletteSearchChanged;
+        }
+
         if (_nodeCanvas is not null)
         {
             _nodeCanvas.AttachPlatformSeams = false;
@@ -297,10 +340,24 @@ public partial class GraphEditorView : UserControl
         _compositionCoordinator.ApplyChromeMode();
         _compositionCoordinator.ApplyCanvasBehaviorOptions();
         _compositionCoordinator.ApplyPresentationOptions(Presentation);
+        RefreshCommandSurface();
     }
 
     private void HandleKeyDown(object? sender, KeyEventArgs args)
     {
+        if (TryHandleCommandPaletteShortcut(args))
+        {
+            args.Handled = true;
+            return;
+        }
+
+        if (_commandPaletteChrome?.IsVisible == true && args.Key == Key.Escape)
+        {
+            CloseCommandPalette();
+            args.Handled = true;
+            return;
+        }
+
         if (!EnableDefaultCommandShortcuts)
         {
             return;
@@ -314,5 +371,256 @@ public partial class GraphEditorView : UserControl
         {
             args.Handled = true;
         }
+    }
+
+    private void HandleOpenCommandPaletteClick(object? sender, RoutedEventArgs args)
+    {
+        ToggleCommandPalette();
+        args.Handled = true;
+    }
+
+    private void HandleCommandPaletteSearchChanged(object? sender, TextChangedEventArgs args)
+    {
+        _commandPaletteFilter = _commandPaletteSearchBox?.Text?.Trim() ?? string.Empty;
+        BuildCommandPaletteItems();
+    }
+
+    private void AttachCommandSurfaceSubscriptions(GraphEditorViewModel? editor)
+    {
+        if (editor is null)
+        {
+            return;
+        }
+
+        editor.Session.Events.DocumentChanged -= HandleCommandSurfaceChanged;
+        editor.Session.Events.SelectionChanged -= HandleCommandSurfaceChanged;
+        editor.Session.Events.ViewportChanged -= HandleCommandSurfaceChanged;
+        editor.Session.Events.CommandExecuted -= HandleCommandSurfaceChanged;
+        editor.Session.Events.PendingConnectionChanged -= HandleCommandSurfaceChanged;
+
+        editor.Session.Events.DocumentChanged += HandleCommandSurfaceChanged;
+        editor.Session.Events.SelectionChanged += HandleCommandSurfaceChanged;
+        editor.Session.Events.ViewportChanged += HandleCommandSurfaceChanged;
+        editor.Session.Events.CommandExecuted += HandleCommandSurfaceChanged;
+        editor.Session.Events.PendingConnectionChanged += HandleCommandSurfaceChanged;
+    }
+
+    private void DetachCommandSurfaceSubscriptions(GraphEditorViewModel? editor)
+    {
+        if (editor is null)
+        {
+            return;
+        }
+
+        editor.Session.Events.DocumentChanged -= HandleCommandSurfaceChanged;
+        editor.Session.Events.SelectionChanged -= HandleCommandSurfaceChanged;
+        editor.Session.Events.ViewportChanged -= HandleCommandSurfaceChanged;
+        editor.Session.Events.CommandExecuted -= HandleCommandSurfaceChanged;
+        editor.Session.Events.PendingConnectionChanged -= HandleCommandSurfaceChanged;
+    }
+
+    private void HandleCommandSurfaceChanged(object? sender, EventArgs args)
+        => RefreshCommandSurface();
+
+    private void RefreshCommandSurface()
+    {
+        BuildHeaderToolbar();
+        BuildShortcutHelp();
+        BuildCommandPaletteItems();
+        if (Editor is null)
+        {
+            CloseCommandPalette();
+        }
+    }
+
+    private void BuildHeaderToolbar()
+    {
+        if (_headerToolbar is null)
+        {
+            return;
+        }
+
+        _headerToolbar.Children.Clear();
+        if (Editor is null)
+        {
+            return;
+        }
+
+        foreach (var action in AsterGraphHostedActionFactory.CreateCommandActions(Editor.Session, HeaderCommandIds))
+        {
+            _headerToolbar.Children.Add(CreateActionButton(action, $"PART_HeaderCommand_{action.Id}"));
+        }
+    }
+
+    private void BuildShortcutHelp()
+    {
+        if (_shortcutHelpList is null)
+        {
+            return;
+        }
+
+        _shortcutHelpList.Children.Clear();
+        if (Editor is null)
+        {
+            return;
+        }
+
+        var shortcutActions = AsterGraphHostedActionFactory.CreateCommandActions(Editor.Session)
+            .Where(action => !string.IsNullOrWhiteSpace(action.DefaultShortcut))
+            .ToList();
+        foreach (var action in shortcutActions)
+        {
+            _shortcutHelpList.Children.Add(CreateShortcutHelpItem($"{action.DefaultShortcut}：{action.Title}"));
+        }
+    }
+
+    private void BuildCommandPaletteItems()
+    {
+        if (_commandPaletteItems is null)
+        {
+            return;
+        }
+
+        _commandPaletteItems.Children.Clear();
+        if (Editor is null)
+        {
+            return;
+        }
+
+        var actions = AsterGraphHostedActionFactory.CreateCommandActions(Editor.Session)
+            .Where(MatchesCommandPaletteFilter)
+            .ToList();
+        if (actions.Count == 0)
+        {
+            _commandPaletteItems.Children.Add(new TextBlock
+            {
+                Text = "No matching commands.",
+            });
+            return;
+        }
+
+        foreach (var action in actions)
+        {
+            _commandPaletteItems.Children.Add(CreateActionButton(
+                action,
+                $"PART_CommandPaletteAction_{action.Id}",
+                includeShortcut: true,
+                closePaletteOnExecute: true));
+        }
+    }
+
+    private bool MatchesCommandPaletteFilter(AsterGraphHostedActionDescriptor action)
+    {
+        if (string.IsNullOrWhiteSpace(_commandPaletteFilter))
+        {
+            return true;
+        }
+
+        return action.Title.Contains(_commandPaletteFilter, StringComparison.OrdinalIgnoreCase)
+            || action.Group.Contains(_commandPaletteFilter, StringComparison.OrdinalIgnoreCase)
+            || action.Id.Contains(_commandPaletteFilter, StringComparison.OrdinalIgnoreCase)
+            || (!string.IsNullOrWhiteSpace(action.DefaultShortcut)
+                && action.DefaultShortcut.Contains(_commandPaletteFilter, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private Button CreateActionButton(
+        AsterGraphHostedActionDescriptor action,
+        string name,
+        bool includeShortcut = false,
+        bool closePaletteOnExecute = false)
+    {
+        var button = new Button
+        {
+            Name = name,
+            Content = includeShortcut && !string.IsNullOrWhiteSpace(action.DefaultShortcut)
+                ? $"{action.Title} ({action.DefaultShortcut})"
+                : action.Title,
+            IsEnabled = action.CanExecute,
+        };
+        button.Classes.Add("astergraph-toolbar-action");
+        if (!string.IsNullOrWhiteSpace(action.DisabledReason))
+        {
+            ToolTip.SetTip(button, action.DisabledReason);
+        }
+
+        button.Click += (_, _) =>
+        {
+            action.TryExecute();
+            if (closePaletteOnExecute)
+            {
+                CloseCommandPalette();
+            }
+
+            RefreshCommandSurface();
+        };
+        return button;
+    }
+
+    private Border CreateShortcutHelpItem(string text)
+        => new()
+        {
+            Classes = { "astergraph-inspector-section" },
+            Child = new TextBlock
+            {
+                Text = text,
+                FontSize = 14,
+            },
+        };
+
+    private bool TryHandleCommandPaletteShortcut(KeyEventArgs args)
+    {
+        if (args.Key != Key.P || !args.KeyModifiers.HasFlag(KeyModifiers.Shift))
+        {
+            return false;
+        }
+
+        var hasPrimaryModifier = args.KeyModifiers.HasFlag(KeyModifiers.Control)
+            || args.KeyModifiers.HasFlag(KeyModifiers.Meta);
+        if (!hasPrimaryModifier)
+        {
+            return false;
+        }
+
+        ToggleCommandPalette();
+        return true;
+    }
+
+    private void ToggleCommandPalette()
+    {
+        if (_commandPaletteChrome?.IsVisible == true)
+        {
+            CloseCommandPalette();
+            return;
+        }
+
+        OpenCommandPalette();
+    }
+
+    private void OpenCommandPalette()
+    {
+        if (_commandPaletteChrome is null)
+        {
+            return;
+        }
+
+        _commandPaletteFilter = string.Empty;
+        if (_commandPaletteSearchBox is not null)
+        {
+            _commandPaletteSearchBox.Text = string.Empty;
+        }
+
+        _commandPaletteChrome.IsVisible = true;
+        BuildCommandPaletteItems();
+        _commandPaletteSearchBox?.Focus();
+    }
+
+    private void CloseCommandPalette()
+    {
+        if (_commandPaletteChrome is null)
+        {
+            return;
+        }
+
+        _commandPaletteChrome.IsVisible = false;
     }
 }

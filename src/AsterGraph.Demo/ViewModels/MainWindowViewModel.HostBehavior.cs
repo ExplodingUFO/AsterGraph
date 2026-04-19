@@ -24,19 +24,34 @@ public partial class MainWindowViewModel
         => ApplyHostOptions();
 
     partial void OnIsHeaderChromeVisibleChanged(bool value)
-        => RefreshRuntimeProjection();
+    {
+        PersistShellState();
+        RefreshRuntimeProjection();
+    }
 
     partial void OnIsLibraryChromeVisibleChanged(bool value)
-        => RefreshRuntimeProjection();
+    {
+        PersistShellState();
+        RefreshRuntimeProjection();
+    }
 
     partial void OnIsInspectorChromeVisibleChanged(bool value)
-        => RefreshRuntimeProjection();
+    {
+        PersistShellState();
+        RefreshRuntimeProjection();
+    }
 
     partial void OnIsStatusChromeVisibleChanged(bool value)
-        => RefreshRuntimeProjection();
+    {
+        PersistShellState();
+        RefreshRuntimeProjection();
+    }
 
     partial void OnIsHostPaneOpenChanged(bool value)
-        => RefreshRuntimeProjection();
+    {
+        PersistShellState();
+        RefreshRuntimeProjection();
+    }
 
     [RelayCommand]
     public void SelectCapability(CapabilityShowcaseItem capability)
@@ -71,6 +86,10 @@ public partial class MainWindowViewModel
                     EnableGridSnapping = IsGridSnappingEnabled,
                     EnableAlignmentGuides = IsAlignmentGuidesEnabled,
                     SnapTolerance = DemoSnapTolerance,
+                },
+                View = Editor.BehaviorOptions.View with
+                {
+                    ShowMiniMap = IsMiniMapVisible,
                 },
                 Commands = BuildCommandPermissions(),
             },

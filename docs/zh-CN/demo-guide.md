@@ -7,10 +7,11 @@
 - 主 demo 路线已经改成 `AsterGraphEditorFactory.Create(...)`
 - Avalonia 表面通过 view factory 组合
 - definition-driven inspector 分组、内建 editor 和校验提示已经能在真实 demo 节点定义上直接看到
-- plugin trust / discovery / load 在 UI 里可见
+- plugin trust / discovery / load 在 UI 里可见，而且会显示 version、target framework、fingerprint、reason 和 allowlist 导入/导出
 - automation request / progress / result 在 UI 里可见
 - standalone surfaces 与 presenter replacement 是真实控件，不是文字说明
 - host shell 可以在中文与 English 之间切换，而且不会重建 editor session
+- recent files、autosave 恢复、dirty-exit 保护、drag-and-drop 打开和布局持久化都已经变成宿主自管的 shell workflow
 
 ## 宿主菜单分组
 
@@ -38,12 +39,29 @@
 
 顶栏菜单里还有可见的语言切换入口。
 
+## Proof 模式
+
+```powershell
+dotnet run --project src/AsterGraph.Demo/AsterGraph.Demo.csproj --nologo -- --proof
+```
+
+预期 marker：
+
+- `DEMO_TRUST_OK:True`
+- `DEMO_SHELL_OK:True`
+- `COMMAND_SURFACE_OK:True`
+- `HOST_NATIVE_METRIC:startup_ms=...`
+- `HOST_NATIVE_METRIC:inspector_projection_ms=...`
+- `HOST_NATIVE_METRIC:plugin_scan_ms=...`
+- `HOST_NATIVE_METRIC:command_latency_ms=...`
+- `DEMO_OK:True`
+
 ## 怎么看
 
-- `扩展`：看 candidate discovery、trust decision、load snapshot
+- `扩展`：看 candidate discovery、trust decision、load snapshot 和 allowlist 决策
 - `自动化`：看 typed automation execution 与结果投影
 - `集成`：看 `HostSample`、standalone surfaces、presenter replacement、本地化证明
-- `证明`：看 host-owned shell state 与 shared runtime evidence 并排出现
+- `运行时` 和 `证明`：一起看 host-owned shell state、recent workspace、autosave 提示和 shared runtime evidence
 
 ## Demo 与其他入口样例的分工
 

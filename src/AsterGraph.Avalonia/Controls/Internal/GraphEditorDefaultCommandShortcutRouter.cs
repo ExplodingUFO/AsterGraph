@@ -1,3 +1,4 @@
+using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -23,83 +24,9 @@ internal static class GraphEditorDefaultCommandShortcutRouter
         }
 
         var session = editor.Session;
-        var capabilities = session.Queries.GetCapabilitySnapshot();
         var commands = session.Queries.GetCommandDescriptors()
             .ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
-
-        if (args.KeyModifiers.HasFlag(KeyModifiers.Control) && args.Key == Key.S)
-        {
-            TryExecute(commands, session.Commands, "workspace.save");
-            return true;
-        }
-
-        if (args.KeyModifiers.HasFlag(KeyModifiers.Control) && args.Key == Key.O)
-        {
-            TryExecute(commands, session.Commands, "workspace.load");
-            return true;
-        }
-
-        if (args.KeyModifiers.HasFlag(KeyModifiers.Control)
-            && (args.Key == Key.Y || (args.Key == Key.Z && args.KeyModifiers.HasFlag(KeyModifiers.Shift))))
-        {
-            if (capabilities.CanRedo)
-            {
-                session.Commands.Redo();
-            }
-
-            return true;
-        }
-
-        if (args.KeyModifiers.HasFlag(KeyModifiers.Control) && args.Key == Key.Z)
-        {
-            if (capabilities.CanUndo)
-            {
-                session.Commands.Undo();
-            }
-
-            return true;
-        }
-
-        // Copy/paste remain compatibility-executed until the runtime command contract
-        // grows canonical invocation IDs for those async clipboard operations.
-        if (args.KeyModifiers.HasFlag(KeyModifiers.Control) && args.Key == Key.C)
-        {
-            if (capabilities.CanCopySelection && editor.CopySelectionCommand.CanExecute(null))
-            {
-                editor.CopySelectionCommand.Execute(null);
-            }
-
-            return true;
-        }
-
-        if (args.KeyModifiers.HasFlag(KeyModifiers.Control) && args.Key == Key.V)
-        {
-            if (capabilities.CanPaste && editor.PasteCommand.CanExecute(null))
-            {
-                editor.PasteCommand.Execute(null);
-            }
-
-            return true;
-        }
-
-        if (args.Key == Key.Delete)
-        {
-            TryExecute(commands, session.Commands, "selection.delete");
-            return true;
-        }
-
-        if (includePendingConnectionCancel && args.Key == Key.Escape)
-        {
-            if (IsEnabled(commands, "connections.cancel"))
-            {
-                session.Commands.CancelPendingConnection();
-                return true;
-            }
-
-            return false;
-        }
-
-        return false;
+        return TryHandleDescriptorShortcut(commands, session.Commands, args, includePendingConnectionCancel);
     }
 
     private static void TryExecute(
@@ -117,6 +44,116 @@ internal static class GraphEditorDefaultCommandShortcutRouter
         IReadOnlyDictionary<string, GraphEditorCommandDescriptorSnapshot> commands,
         string commandId)
         => commands.TryGetValue(commandId, out var descriptor) && descriptor.IsEnabled;
+
+    private static bool TryHandleDescriptorShortcut(
+        IReadOnlyDictionary<string, GraphEditorCommandDescriptorSnapshot> commands,
+        IGraphEditorCommands commandSurface,
+        KeyEventArgs args,
+        bool includePendingConnectionCancel)
+    {
+        foreach (var descriptor in commands.Values.Where(descriptor => !string.IsNullOrWhiteSpace(descriptor.DefaultShortcut)))
+        {
+            if (!includePendingConnectionCancel
+                && string.Equals(descriptor.Id, "connections.cancel", StringComparison.Ordinal))
+            {
+                continue;
+            }
+
+            if (!MatchesShortcut(descriptor, args))
+            {
+                continue;
+            }
+
+            TryExecute(commands, commandSurface, descriptor.Id);
+            return true;
+        }
+
+        return false;
+    }
+
+    private static bool MatchesShortcut(GraphEditorCommandDescriptorSnapshot descriptor, KeyEventArgs args)
+    {
+        if (string.Equals(descriptor.Id, "history.redo", StringComparison.Ordinal))
+        {
+            return MatchesShortcutText("Ctrl+Y", args) || MatchesShortcutText("Ctrl+Shift+Z", args);
+        }
+
+        return MatchesShortcutText(descriptor.DefaultShortcut, args);
+    }
+
+    private static bool MatchesShortcutText(string? shortcutText, KeyEventArgs args)
+    {
+        if (string.IsNullOrWhiteSpace(shortcutText))
+        {
+            return false;
+        }
+
+        return shortcutText
+            .Split('/', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Any(candidate => MatchesShortcutCandidate(candidate, args));
+    }
+
+    private static bool MatchesShortcutCandidate(string candidate, KeyEventArgs args)
+    {
+        var tokens = candidate.Split('+', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        if (tokens.Length == 0)
+        {
+            return false;
+        }
+
+        var requiresPrimaryModifier = false;
+        var requiresShift = false;
+        var requiresAlt = false;
+        Key? expectedKey = null;
+
+        foreach (var token in tokens)
+        {
+            switch (token.ToUpperInvariant())
+            {
+                case "CTRL":
+                case "CMD":
+                case "COMMAND":
+                    requiresPrimaryModifier = true;
+                    break;
+                case "SHIFT":
+                    requiresShift = true;
+                    break;
+                case "ALT":
+                case "OPTION":
+                    requiresAlt = true;
+                    break;
+                case "DELETE":
+                    expectedKey = Key.Delete;
+                    break;
+                case "ESC":
+                case "ESCAPE":
+                    expectedKey = Key.Escape;
+                    break;
+                default:
+                    if (Enum.TryParse<Key>(token, ignoreCase: true, out var parsedKey))
+                    {
+                        expectedKey = parsedKey;
+                    }
+
+                    break;
+            }
+        }
+
+        if (expectedKey is null)
+        {
+            return false;
+        }
+
+        var hasPrimaryModifier = args.KeyModifiers.HasFlag(KeyModifiers.Control)
+            || args.KeyModifiers.HasFlag(KeyModifiers.Meta);
+        var hasShift = args.KeyModifiers.HasFlag(KeyModifiers.Shift);
+        var hasAlt = args.KeyModifiers.HasFlag(KeyModifiers.Alt);
+
+        return args.Key == expectedKey
+            && hasPrimaryModifier == requiresPrimaryModifier
+            && hasShift == requiresShift
+            && hasAlt == requiresAlt;
+    }
 
     private static bool ShortcutBelongsToInputControl(object? source)
     {

@@ -64,6 +64,9 @@
             <MenuItem Header="{Binding UiText[menu.view.status]}"
                       ToggleType="CheckBox"
                       IsChecked="{Binding IsStatusChromeVisible, Mode=TwoWay}" />
+            <MenuItem Header="{Binding UiText[menu.view.minimap]}"
+                      ToggleType="CheckBox"
+                      IsChecked="{Binding IsMiniMapVisible, Mode=TwoWay}" />
             <Separator />
             <MenuItem Header="{Binding UiText[menu.view.open]}"
                       Command="{Binding OpenHostMenuGroupCommand}"
@@ -102,6 +105,14 @@
             <MenuItem Header="{Binding UiText[menu.runtime.diagnostics]}"
                       Command="{Binding OpenHostMenuGroupCommand}"
                       CommandParameter="runtime" />
+            <Separator />
+            <MenuItem Header="{Binding UiText[menu.runtime.saveAs]}"
+                      Command="{Binding SaveWorkspaceAsShellCommand}" />
+            <MenuItem Header="{Binding UiText[menu.runtime.reopenLast]}"
+                      Command="{Binding ReopenLastWorkspaceShellCommand}" />
+            <MenuItem Header="{Binding UiText[menu.runtime.restoreDraft]}"
+                      Command="{Binding RestoreAutosaveDraftShellCommand}"
+                      IsEnabled="{Binding HasAutosaveDraft}" />
           </MenuItem>
           <MenuItem x:Name="PART_ExtensionsMenu"
                     Header="{Binding UiText[menu.extensions]}">
@@ -299,6 +310,8 @@
                                 IsChecked="{Binding IsInspectorChromeVisible}" />
                       <CheckBox Content="{Binding UiText[menu.view.status]}"
                                 IsChecked="{Binding IsStatusChromeVisible}" />
+                      <CheckBox Content="{Binding UiText[menu.view.minimap]}"
+                                IsChecked="{Binding IsMiniMapVisible}" />
                     </StackPanel>
                   </Border>
                 </StackPanel>
@@ -362,6 +375,76 @@
                     <ItemsControl ItemsSource="{Binding RuntimeSignalLines}"
                                   ItemTemplate="{StaticResource HostDrawerLineTemplate}" />
                   </StackPanel>
+
+                  <StackPanel x:Name="PART_RuntimeShellSection"
+                              Spacing="8">
+                    <TextBlock x:Name="PART_RuntimeShellHeading"
+                               FontSize="12"
+                               FontWeight="Bold"
+                               Foreground="#7FE7D7"
+                               Text="{Binding UiText[runtime.shell.heading]}" />
+                    <Border Padding="12"
+                            Background="#14202B"
+                            BorderBrush="#365063"
+                            BorderThickness="1"
+                            CornerRadius="8">
+                      <StackPanel Spacing="8">
+                        <Button x:Name="PART_RuntimeSaveAsButton"
+                                Padding="10,8"
+                                Background="#101923"
+                                BorderBrush="#365063"
+                                BorderThickness="1"
+                                CornerRadius="8"
+                                Command="{Binding SaveWorkspaceAsShellCommand}"
+                                Content="{Binding UiText[menu.runtime.saveAs]}"
+                                Foreground="#F4FFFC" />
+                        <Button x:Name="PART_RuntimeReopenLastButton"
+                                Padding="10,8"
+                                Background="#101923"
+                                BorderBrush="#365063"
+                                BorderThickness="1"
+                                CornerRadius="8"
+                                Command="{Binding ReopenLastWorkspaceShellCommand}"
+                                Content="{Binding UiText[menu.runtime.reopenLast]}"
+                                Foreground="#F4FFFC" />
+                        <Button x:Name="PART_RuntimeRestoreDraftButton"
+                                Padding="10,8"
+                                Background="#101923"
+                                BorderBrush="#365063"
+                                BorderThickness="1"
+                                CornerRadius="8"
+                                Command="{Binding RestoreAutosaveDraftShellCommand}"
+                                Content="{Binding UiText[menu.runtime.restoreDraft]}"
+                                Foreground="#F4FFFC"
+                                IsEnabled="{Binding HasAutosaveDraft}" />
+                        <TextBlock x:Name="PART_DirtyExitPromptText"
+                                   TextWrapping="Wrap"
+                                   Foreground="#F3C97A"
+                                   IsVisible="{Binding DirtyExitPromptPending}"
+                                   Text="{Binding DirtyExitPromptMessage}" />
+                      </StackPanel>
+                    </Border>
+                    <ItemsControl x:Name="PART_RuntimeShellLines"
+                                  ItemsSource="{Binding ShellWorkflowLines}"
+                                  ItemTemplate="{StaticResource HostDrawerLineTemplate}" />
+                    <ItemsControl x:Name="PART_RuntimeRecentWorkspaceItems"
+                                  ItemsSource="{Binding RecentWorkspaceEntries}">
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:RecentWorkspaceEntry">
+                          <Button Padding="10,8"
+                                  HorizontalAlignment="Stretch"
+                                  Background="#101923"
+                                  BorderBrush="#365063"
+                                  BorderThickness="1"
+                                  CornerRadius="8"
+                                  Command="{Binding $parent[Window].DataContext.OpenRecentWorkspaceCommand}"
+                                  CommandParameter="{Binding Path}"
+                                  Content="{Binding DisplayName}"
+                                  Foreground="#F4FFFC" />
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                  </StackPanel>
                 </StackPanel>
 
                 <StackPanel x:Name="PART_RuntimeDiagnosticsSection"
@@ -394,8 +477,96 @@
                              FontWeight="Bold"
                              Foreground="#7FE7D7"
                              Text="{Binding UiText[extensions.candidates.heading]}" />
+                  <ItemsControl x:Name="PART_PluginCandidateEntries"
+                                ItemsSource="{Binding PluginCandidateEntries}">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate x:DataType="vm:PluginCandidateEntry">
+                        <Border Margin="0,0,0,8"
+                                Padding="12"
+                                Background="#14202B"
+                                BorderBrush="#365063"
+                                BorderThickness="1"
+                                CornerRadius="8">
+                          <StackPanel Spacing="6">
+                            <TextBlock FontSize="14"
+                                       FontWeight="SemiBold"
+                                       Foreground="#F4FFFC"
+                                       Text="{Binding DisplayName}" />
+                            <TextBlock TextWrapping="Wrap"
+                                       Foreground="#D8EEF3"
+                                       Text="{Binding SummaryLine}" />
+                            <TextBlock TextWrapping="Wrap"
+                                       Foreground="#B6CBD8"
+                                       Text="{Binding ProvenanceLine}" />
+                            <TextBlock TextWrapping="Wrap"
+                                       Foreground="#7FE7D7"
+                                       Text="{Binding TrustLine}" />
+                            <StackPanel Orientation="Horizontal"
+                                        Spacing="8">
+                              <Button Padding="10,6"
+                                      Background="#101923"
+                                      BorderBrush="#365063"
+                                      BorderThickness="1"
+                                      CornerRadius="8"
+                                      Command="{Binding $parent[Window].DataContext.TrustPluginCandidateShellCommand}"
+                                      CommandParameter="{Binding PluginId}"
+                                      Content="Trust"
+                                      Foreground="#F4FFFC"
+                                      IsEnabled="{Binding IsBlocked}" />
+                              <Button Padding="10,6"
+                                      Background="#101923"
+                                      BorderBrush="#365063"
+                                      BorderThickness="1"
+                                      CornerRadius="8"
+                                      Command="{Binding $parent[Window].DataContext.BlockPluginCandidateShellCommand}"
+                                      CommandParameter="{Binding PluginId}"
+                                      Content="Block"
+                                      Foreground="#F4FFFC"
+                                      IsEnabled="{Binding IsAllowed}" />
+                            </StackPanel>
+                          </StackPanel>
+                        </Border>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
                   <ItemsControl ItemsSource="{Binding PluginCandidateLines}"
                                 ItemTemplate="{StaticResource HostDrawerLineTemplate}" />
+                  <TextBlock FontSize="12"
+                             FontWeight="Bold"
+                             Foreground="#7FE7D7"
+                             Text="{Binding UiText[extensions.allowlist.heading]}" />
+                  <Border Padding="12"
+                          Background="#14202B"
+                          BorderBrush="#365063"
+                          BorderThickness="1"
+                          CornerRadius="8">
+                    <StackPanel Spacing="8">
+                      <StackPanel Orientation="Horizontal"
+                                  Spacing="8">
+                        <Button x:Name="PART_ExportPluginAllowlistButton"
+                                Padding="10,8"
+                                Background="#101923"
+                                BorderBrush="#365063"
+                                BorderThickness="1"
+                                CornerRadius="8"
+                                Command="{Binding ExportPluginAllowlistShellCommand}"
+                                Content="{Binding UiText[menu.extensions.exportAllowlist]}"
+                                Foreground="#F4FFFC" />
+                        <Button x:Name="PART_ImportPluginAllowlistButton"
+                                Padding="10,8"
+                                Background="#101923"
+                                BorderBrush="#365063"
+                                BorderThickness="1"
+                                CornerRadius="8"
+                                Command="{Binding ImportPluginAllowlistShellCommand}"
+                                Content="{Binding UiText[menu.extensions.importAllowlist]}"
+                                Foreground="#F4FFFC" />
+                      </StackPanel>
+                      <ItemsControl x:Name="PART_PluginAllowlistItems"
+                                    ItemsSource="{Binding PluginAllowlistLines}"
+                                    ItemTemplate="{StaticResource HostDrawerLineTemplate}" />
+                    </StackPanel>
+                  </Border>
                   <TextBlock FontSize="12"
                              FontWeight="Bold"
                              Foreground="#7FE7D7"
@@ -560,6 +731,17 @@
                     <ItemsControl ItemsSource="{Binding RuntimeSignalLines}"
                                   ItemTemplate="{StaticResource HostDrawerLineTemplate}" />
                   </StackPanel>
+
+                  <StackPanel x:Name="PART_ProofShellSignalsSection"
+                              Spacing="8">
+                    <TextBlock x:Name="PART_ProofShellSignalsHeading"
+                               FontSize="12"
+                               FontWeight="Bold"
+                               Foreground="#7FE7D7"
+                               Text="{Binding UiText[proof.shell.heading]}" />
+                    <ItemsControl ItemsSource="{Binding ShellWorkflowLines}"
+                                  ItemTemplate="{StaticResource HostDrawerLineTemplate}" />
+                  </StackPanel>
                 </StackPanel>
               </StackPanel>
             </ScrollViewer>
@@ -606,6 +788,11 @@
                 <TextBlock TextWrapping="Wrap"
                            Foreground="#C2D7E4"
                            Text="{Binding MainEditorSummary}" />
+                <WrapPanel x:Name="PART_CommandRail"
+                           Margin="0,8,0,0"
+                           Orientation="Horizontal"
+                           ItemHeight="40"
+                           ItemWidth="124" />
               </StackPanel>
 
               <StackPanel Grid.Column="1"

@@ -11,6 +11,7 @@ namespace AsterGraph.Demo.Integration;
 internal static class DemoPluginShowcase
 {
     public static readonly NodeDefinitionId ShowcaseNodeDefinitionId = new("aster.demo.plugin.showcase-node");
+    public static readonly NodeDefinitionId BlockedShowcaseNodeDefinitionId = new("aster.demo.plugin.blocked-node");
 
     private static readonly GraphEditorPluginManifest AllowedManifest = new(
         "aster.demo.plugin.allowed",
@@ -25,6 +26,7 @@ internal static class DemoPluginShowcase
         version: "0.2.0-alpha.3",
         compatibility: new GraphEditorPluginCompatibilityManifest(
             minimumAsterGraphVersion: "0.2.0-alpha.3",
+            targetFramework: "net9.0",
             runtimeSurface: "CreateSession/Create + hosted Avalonia"),
         capabilitySummary: "Adds node, menu, localization, and presentation contributions.");
 
@@ -41,6 +43,7 @@ internal static class DemoPluginShowcase
         version: "0.2.0-alpha.3",
         compatibility: new GraphEditorPluginCompatibilityManifest(
             minimumAsterGraphVersion: "0.2.0-alpha.3",
+            targetFramework: "net9.0",
             runtimeSurface: "CreateSession/Create + hosted Avalonia"),
         capabilitySummary: "Intentionally blocked by the demo trust policy.");
 
@@ -61,10 +64,15 @@ internal static class DemoPluginShowcase
             reasonCode: "demo.signature.unsigned",
             reasonMessage: "Unsigned package used to prove a blocked trust decision."));
 
-    public static DemoPluginShowcaseConfiguration Create()
+    public static DemoPluginShowcaseConfiguration Create(string storageRootPath)
     {
         var assemblyPath = typeof(DemoAllowedPlugin).Assembly.Location;
-        var trustPolicy = new DemoPluginTrustPolicy();
+        var allowlistStore = new DemoPluginAllowlistStore(storageRootPath);
+        var trustPolicy = new DemoPluginAllowlistTrustPolicy(
+            allowlistStore,
+            [
+                DemoPluginAllowlistTrustPolicy.CreateEntry(AllowedManifest, AllowedProvenance),
+            ]);
 
         return new DemoPluginShowcaseConfiguration(
             [
@@ -98,33 +106,13 @@ internal static class DemoPluginShowcase
 
     internal sealed record DemoPluginShowcaseConfiguration(
         IReadOnlyList<GraphEditorPluginRegistration> Registrations,
-        IGraphEditorPluginTrustPolicy TrustPolicy,
+        DemoPluginAllowlistTrustPolicy TrustPolicy,
         GraphEditorPluginDiscoveryOptions DiscoveryOptions);
 
     private sealed class DemoManifestSource(IReadOnlyList<GraphEditorPluginManifestSourceCandidate> candidates) : IGraphEditorPluginManifestSource
     {
         public IReadOnlyList<GraphEditorPluginManifestSourceCandidate> GetCandidates()
             => candidates;
-    }
-
-    private sealed class DemoPluginTrustPolicy : IGraphEditorPluginTrustPolicy
-    {
-        public GraphEditorPluginTrustEvaluation Evaluate(GraphEditorPluginTrustPolicyContext context)
-        {
-            ArgumentNullException.ThrowIfNull(context);
-
-            return string.Equals(context.Manifest.Id, BlockedManifest.Id, StringComparison.Ordinal)
-                ? new GraphEditorPluginTrustEvaluation(
-                    GraphEditorPluginTrustDecision.Blocked,
-                    GraphEditorPluginTrustEvaluationSource.HostPolicy,
-                    reasonCode: "demo.trust.blocked",
-                    reasonMessage: "Demo policy blocks this candidate to visualize trust gating.")
-                : new GraphEditorPluginTrustEvaluation(
-                    GraphEditorPluginTrustDecision.Allowed,
-                    GraphEditorPluginTrustEvaluationSource.HostPolicy,
-                    reasonCode: "demo.trust.allowed",
-                    reasonMessage: "Demo policy explicitly allows trusted showcase plugins.");
-        }
     }
 
     private sealed class DemoAllowedPlugin : IGraphEditorPlugin
@@ -139,7 +127,11 @@ internal static class DemoPluginShowcase
         {
             ArgumentNullException.ThrowIfNull(builder);
 
-            builder.AddNodeDefinitionProvider(new DemoPluginNodeDefinitionProvider());
+            builder.AddNodeDefinitionProvider(new DemoPluginNodeDefinitionProvider(
+                ShowcaseNodeDefinitionId,
+                "Plugin Relay",
+                "Trusted plugin node surfaced by the demo trust showcase.",
+                "#6AD5C4"));
             builder.AddContextMenuAugmentor(new DemoPluginContextMenuAugmentor());
             builder.AddNodePresentationProvider(new DemoPluginNodePresentationProvider());
             builder.AddLocalizationProvider(new DemoPluginLocalizationProvider());
@@ -157,24 +149,32 @@ internal static class DemoPluginShowcase
         public void Register(GraphEditorPluginBuilder builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
-            builder.AddNodeDefinitionProvider(new DemoPluginNodeDefinitionProvider());
+            builder.AddNodeDefinitionProvider(new DemoPluginNodeDefinitionProvider(
+                BlockedShowcaseNodeDefinitionId,
+                "Blocked Relay",
+                "Blocked plugin node that becomes available only after allowlist approval.",
+                "#FF8A5B"));
         }
     }
 
-    private sealed class DemoPluginNodeDefinitionProvider : INodeDefinitionProvider
+    private sealed class DemoPluginNodeDefinitionProvider(
+        NodeDefinitionId definitionId,
+        string displayName,
+        string description,
+        string accentHex) : INodeDefinitionProvider
     {
         public IReadOnlyList<INodeDefinition> GetNodeDefinitions()
             =>
             [
                 new NodeDefinition(
-                    ShowcaseNodeDefinitionId,
-                    "Plugin Relay",
+                    definitionId,
+                    displayName,
                     "Demo Plugins",
                     "Trusted",
                     [new PortDefinition("input", "Input", new PortTypeId("float"), "#F3B36B")],
                     [new PortDefinition("output", "Output", new PortTypeId("float"), "#6AD5C4")],
-                    description: "Trusted plugin node surfaced by the demo trust showcase.",
-                    accentHex: "#6AD5C4"),
+                    description: description,
+                    accentHex: accentHex),
             ];
     }
 

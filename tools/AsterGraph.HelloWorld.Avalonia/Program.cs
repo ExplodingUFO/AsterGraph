@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using System.Globalization;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -11,6 +13,22 @@ using AsterGraph.Core.Compatibility;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Catalog;
 using AsterGraph.Editor.Hosting;
+using AsterGraph.Editor.Plugins;
+using AsterGraph.Editor.ViewModels;
+
+if (args.Any(static arg => string.Equals(arg, "--proof", StringComparison.OrdinalIgnoreCase)))
+{
+    var result = HostedHelloWorldProof.Run();
+
+    Console.WriteLine($"COMMAND_SURFACE_OK:{result.CommandSurfaceOk}");
+    foreach (var line in result.MetricLines)
+    {
+        Console.WriteLine(line);
+    }
+
+    Console.WriteLine($"HELLOWORLD_AVALONIA_OK:{result.IsOk}");
+    return;
+}
 
 HostedHelloWorldAppBuilder.BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
 
@@ -47,6 +65,29 @@ file static class HostedHelloWorldWindowFactory
     private const string TargetPortId = "in";
 
     public static Window Create()
+        => CreateRuntimeSurface().Window;
+
+    public static HostedHelloWorldRuntimeSurface CreateRuntimeSurface()
+    {
+        var editor = CreateEditor();
+        var view = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOptions
+        {
+            Editor = editor,
+            ChromeMode = GraphEditorViewChromeMode.Default,
+        });
+
+        return new HostedHelloWorldRuntimeSurface(
+            editor,
+            new Window
+            {
+                Title = "AsterGraph HelloWorld (Avalonia)",
+                Width = 1280,
+                Height = 900,
+                Content = view,
+            });
+    }
+
+    public static GraphEditorViewModel CreateEditor()
     {
         var definitionId = new NodeDefinitionId("hello.ui.node");
         INodeCatalog catalog = CreateCatalog(definitionId);
@@ -57,19 +98,7 @@ file static class HostedHelloWorldWindowFactory
             CompatibilityService = new DefaultPortCompatibilityService(),
         });
         editor.Session.Commands.SetSelection([SourceNodeId], SourceNodeId, updateStatus: false);
-        var view = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOptions
-        {
-            Editor = editor,
-            ChromeMode = GraphEditorViewChromeMode.Default,
-        });
-
-        return new Window
-        {
-            Title = "AsterGraph HelloWorld (Avalonia)",
-            Width = 1280,
-            Height = 900,
-            Content = view,
-        };
+        return editor;
     }
 
     private static NodeCatalog CreateCatalog(NodeDefinitionId definitionId)
@@ -194,4 +223,68 @@ file static class HostedHelloWorldWindowFactory
                     "Hello UI Connection",
                     "#6AD5C4"),
             ]);
+}
+
+file sealed record HostedHelloWorldRuntimeSurface(
+    GraphEditorViewModel Editor,
+    Window Window);
+
+public sealed record HostedHelloWorldProofResult(
+    bool CommandSurfaceOk,
+    double StartupMs,
+    double InspectorProjectionMs,
+    double PluginScanMs,
+    double CommandLatencyMs)
+{
+    public bool IsOk => CommandSurfaceOk;
+
+    public IReadOnlyList<string> MetricLines =>
+    [
+        FormatMetric("startup_ms", StartupMs),
+        FormatMetric("inspector_projection_ms", InspectorProjectionMs),
+        FormatMetric("plugin_scan_ms", PluginScanMs),
+        FormatMetric("command_latency_ms", CommandLatencyMs),
+    ];
+
+    private static string FormatMetric(string name, double value)
+        => $"HOST_NATIVE_METRIC:{name}={value.ToString("0.###", CultureInfo.InvariantCulture)}";
+}
+
+public static class HostedHelloWorldProof
+{
+    public static HostedHelloWorldProofResult Run()
+    {
+        GraphEditorViewModel? editor = null;
+        var startupMs = MeasureMilliseconds(() => editor = HostedHelloWorldWindowFactory.CreateEditor());
+        if (editor is null)
+        {
+            throw new InvalidOperationException("HelloWorld editor was not created.");
+        }
+
+        var inspectorProjectionMs = MeasureMilliseconds(() => editor.Session.Queries.GetSelectedNodeParameterSnapshots().ToArray());
+        var pluginScanMs = MeasureMilliseconds(() => AsterGraphEditorFactory.DiscoverPluginCandidates(new GraphEditorPluginDiscoveryOptions()).ToArray());
+
+        var nodeCountBeforeUndo = editor.Session.Queries.CreateDocumentSnapshot().Nodes.Count;
+        editor.Session.Commands.AddNode(editor.NodeTemplates[0].Definition.Id, new GraphPoint(720, 220));
+        var undoAction = AsterGraphHostedActionFactory.CreateCommandActions(editor.Session, ["history.undo"])
+            .Single(action => string.Equals(action.Id, "history.undo", StringComparison.Ordinal));
+        var commandLatencyMs = MeasureMilliseconds(() => undoAction.TryExecute());
+        var commandSurfaceOk = undoAction.CanExecute
+            && editor.Session.Queries.CreateDocumentSnapshot().Nodes.Count == nodeCountBeforeUndo;
+
+        return new HostedHelloWorldProofResult(
+            commandSurfaceOk,
+            startupMs,
+            inspectorProjectionMs,
+            pluginScanMs,
+            commandLatencyMs);
+    }
+
+    private static double MeasureMilliseconds(Action action)
+    {
+        var stopwatch = Stopwatch.StartNew();
+        action();
+        stopwatch.Stop();
+        return stopwatch.Elapsed.TotalMilliseconds;
+    }
 }

@@ -1,9 +1,11 @@
 using System;
+using System.IO;
 using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
 using Avalonia.VisualTree;
 using AsterGraph.Avalonia.Controls;
+using AsterGraph.Demo;
 using AsterGraph.Demo.ViewModels;
 using AsterGraph.Demo.Views;
 using AsterGraph.Editor.Plugins;
@@ -40,6 +42,53 @@ public sealed class DemoCapabilityShowcaseTests
     }
 
     [Fact]
+    public void MainWindowViewModel_ProjectsPluginProvenanceAndTrustTransparency()
+    {
+        var viewModel = new MainWindowViewModel(new MainWindowShellOptions(
+            StorageRootPath: CreateTempDirectory(),
+            EnableStatePersistence: true,
+            RestoreLastWorkspaceOnStartup: false));
+
+        Assert.NotEmpty(viewModel.PluginCandidateEntries);
+        Assert.Contains(viewModel.PluginCandidateEntries, entry => !string.IsNullOrWhiteSpace(entry.Version));
+        Assert.Contains(viewModel.PluginCandidateEntries, entry => !string.IsNullOrWhiteSpace(entry.TargetFramework));
+        Assert.Contains(viewModel.PluginCandidateEntries, entry => !string.IsNullOrWhiteSpace(entry.TrustFingerprint));
+        Assert.Contains(viewModel.PluginCandidateEntries, entry => entry.TrustReason.Contains("allowlist", StringComparison.OrdinalIgnoreCase));
+        Assert.Contains(viewModel.PluginAllowlistLines, line => line.Contains("allowlist", StringComparison.OrdinalIgnoreCase) || line.Contains("Allowlist", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void MainWindowViewModel_PersistsExportsAndImportsPluginAllowlistDecisions()
+    {
+        var storageRoot = CreateTempDirectory();
+        var viewModel = new MainWindowViewModel(new MainWindowShellOptions(
+            StorageRootPath: storageRoot,
+            EnableStatePersistence: true,
+            RestoreLastWorkspaceOnStartup: false));
+
+        Assert.Contains(viewModel.PluginCandidateEntries, entry => entry.PluginId == "aster.demo.plugin.blocked" && entry.IsBlocked);
+
+        Assert.True(viewModel.TrustPluginCandidate("aster.demo.plugin.blocked"));
+        Assert.Contains(viewModel.PluginCandidateEntries, entry => entry.PluginId == "aster.demo.plugin.blocked" && entry.IsAllowed);
+
+        var exportPath = Path.Combine(storageRoot, "plugin-allowlist-export.json");
+        Assert.True(viewModel.ExportPluginAllowlist(exportPath));
+        Assert.True(File.Exists(exportPath));
+
+        Assert.True(viewModel.BlockPluginCandidate("aster.demo.plugin.blocked"));
+        Assert.Contains(viewModel.PluginCandidateEntries, entry => entry.PluginId == "aster.demo.plugin.blocked" && entry.IsBlocked);
+
+        Assert.True(viewModel.ImportPluginAllowlist(exportPath));
+        Assert.Contains(viewModel.PluginCandidateEntries, entry => entry.PluginId == "aster.demo.plugin.blocked" && entry.IsAllowed);
+
+        var reloaded = new MainWindowViewModel(new MainWindowShellOptions(
+            StorageRootPath: storageRoot,
+            EnableStatePersistence: true,
+            RestoreLastWorkspaceOnStartup: false));
+        Assert.Contains(reloaded.PluginCandidateEntries, entry => entry.PluginId == "aster.demo.plugin.blocked" && entry.IsAllowed);
+    }
+
+    [Fact]
     public void MainWindowViewModel_RunsAutomationShowcaseAndCapturesTypedResult()
     {
         var viewModel = new MainWindowViewModel();
@@ -56,6 +105,23 @@ public sealed class DemoCapabilityShowcaseTests
         Assert.NotEmpty(result.Steps);
         Assert.NotEmpty(viewModel.AutomationProgressSteps);
         Assert.Contains(viewModel.AutomationResultLines, line => line.Contains(request.RunId, StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void DemoProof_Run_EmitsMetricsAndGreenMarkers()
+    {
+        var result = DemoProof.Run(CreateTempDirectory());
+
+        Assert.True(result.IsOk);
+        Assert.True(result.TrustTransparencyOk);
+        Assert.True(result.ShellWorkflowOk);
+        Assert.True(result.CommandSurfaceOk);
+        Assert.True(result.StartupMs >= 0);
+        Assert.True(result.InspectorProjectionMs >= 0);
+        Assert.True(result.PluginScanMs >= 0);
+        Assert.True(result.CommandLatencyMs >= 0);
+        Assert.Contains(result.MetricLines, line => line.Contains("startup_ms", StringComparison.Ordinal));
+        Assert.Contains(result.MetricLines, line => line.Contains("command_latency_ms", StringComparison.Ordinal));
     }
 
     [AvaloniaFact]
@@ -103,5 +169,12 @@ public sealed class DemoCapabilityShowcaseTests
         Assert.Equal("StandaloneCanvasPreview", canvas.Name);
         Assert.Equal("StandaloneInspectorPreview", inspector.Name);
         Assert.Equal("StandaloneMiniMapPreview", miniMap.Name);
+    }
+
+    private static string CreateTempDirectory()
+    {
+        var path = Path.Combine(Path.GetTempPath(), "AsterGraph.Demo.Tests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(path);
+        return path;
     }
 }

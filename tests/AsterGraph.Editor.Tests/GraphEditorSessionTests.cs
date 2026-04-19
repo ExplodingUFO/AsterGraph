@@ -867,6 +867,55 @@ public sealed class GraphEditorSessionTests
         Assert.DoesNotContain("nodes.duplicate", runtimeCommandIds);
     }
 
+    [Fact]
+    public void FactoryEditorSession_ExposesRetainedCommandMetadataThroughSharedDescriptorContract()
+    {
+        var definitionId = new NodeDefinitionId("tests.session.retained-command-metadata");
+        var editor = AsterGraphEditorFactory.Create(CreateOptions(definitionId));
+        var runtimeSession = AsterGraphEditorFactory.CreateSession(CreateOptions(definitionId));
+
+        var retainedCommands = editor.Session.Queries.GetCommandDescriptors().ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
+        var runtimeCommands = runtimeSession.Queries.GetCommandDescriptors().ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
+
+        var duplicate = retainedCommands["nodes.duplicate"];
+        Assert.Equal("Duplicate Node", duplicate.Title);
+        Assert.Equal("nodes", duplicate.Group);
+        Assert.Equal("duplicate", duplicate.IconKey);
+        Assert.Null(duplicate.DefaultShortcut);
+        Assert.Equal(GraphEditorCommandSourceKind.Retained, duplicate.Source);
+        Assert.True(duplicate.CanExecute);
+
+        var retainedDisconnectAll = retainedCommands["connections.disconnect-all"];
+        var runtimeDisconnectAll = runtimeCommands["connections.disconnect-all"];
+
+        Assert.Equal("Disconnect All", retainedDisconnectAll.Title);
+        Assert.Equal("connections", retainedDisconnectAll.Group);
+        Assert.Equal("disconnect", retainedDisconnectAll.IconKey);
+        Assert.Equal(GraphEditorCommandSourceKind.Retained, retainedDisconnectAll.Source);
+        Assert.Equal(GraphEditorCommandSourceKind.Kernel, runtimeDisconnectAll.Source);
+
+        var undo = runtimeCommands["history.undo"];
+        Assert.Equal("Undo", undo.Title);
+        Assert.Equal("history", undo.Group);
+        Assert.Equal("undo", undo.IconKey);
+        Assert.Equal("Ctrl+Z", undo.DefaultShortcut);
+        Assert.Equal(GraphEditorCommandSourceKind.Kernel, undo.Source);
+
+        var copy = retainedCommands["clipboard.copy"];
+        Assert.Equal("Copy Selection", copy.Title);
+        Assert.Equal("clipboard", copy.Group);
+        Assert.Equal("copy", copy.IconKey);
+        Assert.Equal("Ctrl+C", copy.DefaultShortcut);
+        Assert.Equal(GraphEditorCommandSourceKind.Retained, copy.Source);
+
+        var paste = retainedCommands["clipboard.paste"];
+        Assert.Equal("Paste Selection", paste.Title);
+        Assert.Equal("clipboard", paste.Group);
+        Assert.Equal("paste", paste.IconKey);
+        Assert.Equal("Ctrl+V", paste.DefaultShortcut);
+        Assert.Equal(GraphEditorCommandSourceKind.Retained, paste.Source);
+    }
+
     private static void AssertProperty(Type declaringType, string propertyName, Type propertyType)
     {
         var property = declaringType.GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance);
@@ -945,6 +994,8 @@ public sealed class GraphEditorSessionTests
         "connections.cancel",
         "connections.delete",
         "connections.break-port",
+        "history.undo",
+        "history.redo",
         "nodes.move",
         "viewport.pan",
         "viewport.resize",

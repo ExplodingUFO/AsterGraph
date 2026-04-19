@@ -59,6 +59,7 @@ public partial class MainWindowViewModel
         T("显示节点库：", "Show library: ") + BoolText(IsLibraryChromeVisible),
         T("显示检查器：", "Show inspector: ") + BoolText(IsInspectorChromeVisible),
         T("显示状态栏：", "Show status bar: ") + BoolText(IsStatusChromeVisible),
+        T("显示迷你地图：", "Show mini map: ") + BoolText(IsMiniMapVisible),
         T("只读模式：", "Read-only mode: ") + BoolText(IsReadOnlyEnabled),
         T("网格吸附：", "Grid snapping: ") + BoolText(IsGridSnappingEnabled),
         T("对齐辅助线：", "Alignment guides: ") + BoolText(IsAlignmentGuidesEnabled),
@@ -173,8 +174,10 @@ public partial class MainWindowViewModel
         DemoHostMenuGroups.Extensions =>
         [
             T("发现候选项：", "Discovered candidates: ") + PluginCandidates.Count + T(" 个", ""),
+            T("Allowlist 决策：", "Allowlist decisions: ") + _pluginShowcase.TrustPolicy.Entries.Count,
             T("加载快照：", "Load snapshots: ") + PluginLoadSnapshots.Count + T(" 条", ""),
             .. PluginCandidateLines,
+            .. PluginAllowlistLines,
             .. PluginLoadLines,
         ],
         DemoHostMenuGroups.Automation =>
@@ -335,10 +338,11 @@ public partial class MainWindowViewModel
                 [
                     T("所属层：AsterGraph.Editor plugin contracts。", "Layer: AsterGraph.Editor plugin contracts."),
                     T("宿主入口：DiscoverPluginCandidates(...)、PluginTrustPolicy、GetPluginLoadSnapshots()。", "Host entry: DiscoverPluginCandidates(...), PluginTrustPolicy, and GetPluginLoadSnapshots()."),
-                    T("可替换点：宿主可替换 trust policy、manifest source 和 future distribution policy。", "Seams: hosts can replace the trust policy, manifest source, and future distribution policy."),
+                    T("可替换点：宿主可替换 trust policy、manifest source、allowlist persistence 和 future distribution policy。", "Seams: hosts can replace the trust policy, manifest source, allowlist persistence, and future distribution policy."),
                 ],
                 [
                     T("发现候选项：", "Discovered candidates: ") + PluginCandidates.Count + "。",
+                    T("Allowlist 决策：", "Allowlist decisions: ") + _pluginShowcase.TrustPolicy.Entries.Count + "。",
                     T("加载快照：", "Load snapshots: ") + PluginLoadSnapshots.Count + "。",
                 ]),
             new CapabilityShowcaseItem(

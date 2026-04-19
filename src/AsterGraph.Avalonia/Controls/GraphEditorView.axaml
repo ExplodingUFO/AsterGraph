@@ -106,29 +106,11 @@
           <WrapPanel x:Name="PART_HeaderToolbar"
                      Orientation="Horizontal"
                      ItemHeight="40"
-                     ItemWidth="120">
-            <Button Classes="astergraph-toolbar-action"
-                    Command="{Binding SaveCommand}"
-                    Content="保存快照" />
-            <Button Classes="astergraph-toolbar-action"
-                    Command="{Binding LoadCommand}"
-                    Content="加载快照" />
-            <Button Classes="astergraph-toolbar-action"
-                    Command="{Binding UndoCommand}"
-                    Content="撤销" />
-            <Button Classes="astergraph-toolbar-action"
-                    Command="{Binding RedoCommand}"
-                    Content="重做" />
-            <Button Classes="astergraph-toolbar-action"
-                    Command="{Binding FitViewCommand}"
-                    Content="适配视图" />
-            <Button Classes="astergraph-toolbar-action"
-                    Command="{Binding ResetViewCommand}"
-                    Content="重置视图" />
-            <Button Classes="astergraph-toolbar-action"
-                    Command="{Binding DeleteSelectionCommand}"
-                    Content="删除所选节点" />
-          </WrapPanel>
+                     ItemWidth="120" />
+          <Button x:Name="PART_OpenCommandPaletteButton"
+                  Classes="astergraph-toolbar-action"
+                  HorizontalAlignment="Left"
+                  Content="Command Palette" />
         </StackPanel>
       </Border>
 
@@ -313,22 +295,7 @@
                            Foreground="{DynamicResource AsterGraph.BodyBrush}" />
               </Border>
               <Border Classes="astergraph-inspector-section">
-                <TextBlock Text="Ctrl+S / Ctrl+O：保存或加载快照"
-                           FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
-                           Foreground="{DynamicResource AsterGraph.BodyBrush}" />
-              </Border>
-              <Border Classes="astergraph-inspector-section">
-                <TextBlock Text="Ctrl+Z / Ctrl+Y：撤销或重做图编辑操作"
-                           FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
-                           Foreground="{DynamicResource AsterGraph.BodyBrush}" />
-              </Border>
-              <Border Classes="astergraph-inspector-section">
                 <TextBlock Text="右键单击多选结果：打开包含对齐与分布工具的批量菜单"
-                           FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
-                           Foreground="{DynamicResource AsterGraph.BodyBrush}" />
-              </Border>
-              <Border Classes="astergraph-inspector-section">
-                <TextBlock Text="Ctrl+C / Ctrl+V：通过系统剪贴板复制并粘贴当前选择"
                            FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                            Foreground="{DynamicResource AsterGraph.BodyBrush}" />
               </Border>
@@ -337,11 +304,8 @@
                            FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                            Foreground="{DynamicResource AsterGraph.BodyBrush}" />
               </Border>
-              <Border Classes="astergraph-inspector-section">
-                <TextBlock Text="Delete / Escape：删除当前选择或取消待连接状态"
-                           FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
-                           Foreground="{DynamicResource AsterGraph.BodyBrush}" />
-              </Border>
+              <StackPanel x:Name="PART_ShortcutHelpList"
+                          Spacing="8" />
             </StackPanel>
           </StackPanel>
         </ScrollViewer>
@@ -372,6 +336,36 @@
                      TextWrapping="Wrap"
                      Foreground="{DynamicResource AsterGraph.HeadlineBrush}" />
         </Grid>
+      </Border>
+
+      <Border x:Name="PART_CommandPaletteChrome"
+              Grid.ColumnSpan="3"
+              Grid.RowSpan="3"
+              Width="520"
+              Margin="0,52,0,0"
+              Padding="18"
+              HorizontalAlignment="Center"
+              VerticalAlignment="Top"
+              Background="{DynamicResource AsterGraph.PanelBrush}"
+              BorderBrush="{DynamicResource AsterGraph.PanelBorderBrush}"
+              BorderThickness="1"
+              CornerRadius="{DynamicResource AsterGraph.DefaultCornerRadius}"
+              IsVisible="False"
+              ZIndex="20">
+        <StackPanel Spacing="12">
+          <TextBlock Text="Command Palette"
+                     FontSize="18"
+                     FontWeight="SemiBold"
+                     Foreground="{DynamicResource AsterGraph.HeadlineBrush}" />
+          <TextBox x:Name="PART_CommandPaletteSearchBox"
+                   Watermark="Search commands"
+                   Classes="astergraph-input" />
+          <ScrollViewer MaxHeight="360"
+                        HorizontalScrollBarVisibility="Disabled">
+            <StackPanel x:Name="PART_CommandPaletteItems"
+                        Spacing="8" />
+          </ScrollViewer>
+        </StackPanel>
       </Border>
     </Grid>
   </Border>

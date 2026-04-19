@@ -65,7 +65,7 @@ public sealed partial class GraphEditorViewModel
     /// <summary>
     /// 当前工作区快照文件路径。
     /// </summary>
-    public string WorkspacePath { get; }
+    public string WorkspacePath => _workspaceService.WorkspacePath;
 
     /// <summary>
     /// 当前默认片段文件路径。

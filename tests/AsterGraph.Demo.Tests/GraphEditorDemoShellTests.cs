@@ -1,4 +1,5 @@
 using System.Windows.Input;
+using System.IO;
 using Avalonia.Headless.XUnit;
 using AsterGraph.Demo.ViewModels;
 using Xunit;
@@ -100,5 +101,82 @@ public sealed class GraphEditorDemoShellTests
         Assert.Equal(
             "当前分组 · 证明",
             Assert.IsType<string>(viewModel.GetType().GetProperty("ActiveHostGroupBadgeText")?.GetValue(viewModel)));
+    }
+
+    [Fact]
+    public void MainWindowViewModel_SaveAsTracksRecentWorkspaceAndReopensLastWorkspace()
+    {
+        var storageRoot = CreateTempDirectory();
+        var saveAsPath = Path.Combine(storageRoot, "saved-as.json");
+        var viewModel = new MainWindowViewModel(new MainWindowShellOptions(
+            StorageRootPath: storageRoot,
+            EnableStatePersistence: true,
+            RestoreLastWorkspaceOnStartup: false));
+
+        var originalNodeCount = viewModel.Editor.Nodes.Count;
+
+        viewModel.SaveWorkspaceAs(saveAsPath);
+        viewModel.Editor.Session.Commands.AddNode(viewModel.Editor.NodeTemplates[0].Definition.Id);
+
+        var changedNodeCount = viewModel.Editor.Nodes.Count;
+        Assert.True(changedNodeCount > originalNodeCount);
+
+        Assert.True(viewModel.TryOpenWorkspacePath(saveAsPath));
+        Assert.Equal(originalNodeCount, viewModel.Editor.Nodes.Count);
+        Assert.Equal(saveAsPath, viewModel.ActiveWorkspacePath);
+        Assert.Contains(saveAsPath, viewModel.RecentWorkspacePaths);
+
+        viewModel.Editor.Session.Commands.AddNode(viewModel.Editor.NodeTemplates[0].Definition.Id);
+        Assert.True(viewModel.ReopenLastWorkspace());
+        Assert.Equal(originalNodeCount, viewModel.Editor.Nodes.Count);
+    }
+
+    [Fact]
+    public void MainWindowViewModel_PersistsCrashSafeAutosaveDraftAcrossRestart()
+    {
+        var storageRoot = CreateTempDirectory();
+        var options = new MainWindowShellOptions(
+            StorageRootPath: storageRoot,
+            EnableStatePersistence: true,
+            RestoreLastWorkspaceOnStartup: false);
+
+        var initialNodeCount = 0;
+        var autosavedNodeCount = 0;
+        using (var firstLifetime = new DemoShellViewModelLifetime(options))
+        {
+            initialNodeCount = firstLifetime.ViewModel.Editor.Nodes.Count;
+            firstLifetime.ViewModel.Editor.Session.Commands.AddNode(firstLifetime.ViewModel.Editor.NodeTemplates[0].Definition.Id);
+            autosavedNodeCount = firstLifetime.ViewModel.Editor.Nodes.Count;
+
+            Assert.True(firstLifetime.ViewModel.HasAutosaveDraft);
+            Assert.True(File.Exists(firstLifetime.ViewModel.AutosaveDraftPath));
+        }
+
+        var secondViewModel = new MainWindowViewModel(options);
+        Assert.True(secondViewModel.HasAutosaveDraft);
+        Assert.Equal(initialNodeCount, secondViewModel.Editor.Nodes.Count);
+
+        Assert.True(secondViewModel.RestoreAutosaveDraft());
+        Assert.Equal(autosavedNodeCount, secondViewModel.Editor.Nodes.Count);
+    }
+
+    private static string CreateTempDirectory()
+    {
+        var path = Path.Combine(Path.GetTempPath(), "AsterGraph.Demo.Tests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(path);
+        return path;
+    }
+
+    private sealed class DemoShellViewModelLifetime : IDisposable
+    {
+        public DemoShellViewModelLifetime(MainWindowShellOptions options)
+        {
+            ViewModel = new MainWindowViewModel(options);
+        }
+
+        public MainWindowViewModel ViewModel { get; }
+
+        public void Dispose()
+            => GC.KeepAlive(ViewModel);
     }
 }

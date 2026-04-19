@@ -13,8 +13,8 @@ public partial class MainWindowViewModel
             [
                 T("当前未发现插件候选项。", "No plugin candidates discovered."),
             ]
-            : PluginCandidates.Select(candidate =>
-                $"{candidate.Manifest.DisplayName} · {candidate.SourceKind} · {TrustDecisionText(candidate.TrustEvaluation.Decision)} · {candidate.TrustEvaluation.ReasonMessage ?? T("无策略说明。", "No policy note.")}")
+            : PluginCandidateEntries.Select(entry =>
+                $"{entry.DisplayName} · {entry.Source} · {entry.Version} · {entry.TrustLine}")
                 .ToArray();
 
     public IReadOnlyList<string> PluginLoadLines =>

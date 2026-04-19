@@ -10,6 +10,21 @@ It starts with one node selected so the shipped inspector immediately shows grou
 dotnet run --project tools/AsterGraph.HelloWorld.Avalonia/AsterGraph.HelloWorld.Avalonia.csproj --nologo
 ```
 
+For proof mode:
+
+```powershell
+dotnet run --project tools/AsterGraph.HelloWorld.Avalonia/AsterGraph.HelloWorld.Avalonia.csproj --nologo -- --proof
+```
+
+Expected markers:
+
+- `COMMAND_SURFACE_OK:True`
+- `HOST_NATIVE_METRIC:startup_ms=...`
+- `HOST_NATIVE_METRIC:inspector_projection_ms=...`
+- `HOST_NATIVE_METRIC:plugin_scan_ms=...`
+- `HOST_NATIVE_METRIC:command_latency_ms=...`
+- `HELLOWORLD_AVALONIA_OK:True`
+
 It deliberately shows only one route:
 
 - `AsterGraphEditorFactory.Create(...)`

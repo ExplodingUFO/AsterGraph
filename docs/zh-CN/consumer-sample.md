@@ -8,8 +8,9 @@
 
 - 一条宿主自管的动作栏
 - 一组宿主自定义节点
+- 通过 `AsterGraphHostedActionFactory.CreateCommandActions(...)` 把共享 command descriptor 投到宿主动作栏
 - 通过 canonical session commands/queries 做共享参数编辑
-- 一个可信插件注册与可见的 load snapshot
+- 一个可信插件注册，以及可见的 provenance、trust reason 和 allowlist 导入/导出
 - 基于 factory 的默认 Avalonia hosted-UI 路线
 
 ## 如何运行
@@ -30,6 +31,12 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 - `CONSUMER_SAMPLE_PLUGIN_OK:True`
 - `CONSUMER_SAMPLE_PARAMETER_OK:True`
 - `CONSUMER_SAMPLE_WINDOW_OK:True`
+- `CONSUMER_SAMPLE_TRUST_OK:True`
+- `COMMAND_SURFACE_OK:True`
+- `HOST_NATIVE_METRIC:startup_ms=...`
+- `HOST_NATIVE_METRIC:inspector_projection_ms=...`
+- `HOST_NATIVE_METRIC:plugin_scan_ms=...`
+- `HOST_NATIVE_METRIC:command_latency_ms=...`
 - `CONSUMER_SAMPLE_OK:True`
 
 ## 什么时候看它
@@ -49,10 +56,20 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 
 这个样例刻意控制在可复制范围内：
 
-- 宿主动作在编辑器壳层之外
-- 插件信任策略保持显式且由宿主管理
+- 宿主动作在编辑器壳层之外，并且直接复用共享 command descriptor，而不是再维护一份独立动作表
+- 插件信任策略保持显式且由宿主管理，并把 provenance、reason 和 allowlist 持久化放在一起
 - 参数编辑走 `IGraphEditorSession.Commands` 和 `IGraphEditorSession.Queries`
+- allowlist 决策可以导出/导入，不需要重建整条 trust-policy 流程
 - 插件加载仍是进程内执行，不提供沙箱或不受信任代码隔离
+
+## 可直接照抄的接法
+
+如果你想在自己的宿主里做同等级别的接入，可以按这个顺序抄：
+
+- command rail：通过 `AsterGraphHostedActionFactory.CreateCommandActions(...)` 消费共享 command descriptor
+- trust workflow：把 `GraphEditorPluginDiscoveryOptions`、provenance snapshot 和宿主自管 allowlist policy 放在同一层
+- parameter editing：只通过 `IGraphEditorSession.Commands` 修改当前选中节点参数
+- proof mode：输出 `COMMAND_SURFACE_OK` 和四条 `HOST_NATIVE_METRIC:*`，这样你能和官方 sample 做横向比较
 
 ## 相关文档
 

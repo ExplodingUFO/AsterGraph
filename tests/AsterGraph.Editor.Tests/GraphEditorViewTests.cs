@@ -1,7 +1,9 @@
+using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
+using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Themes.Fluent;
 using Avalonia.VisualTree;
@@ -64,6 +66,37 @@ public sealed class GraphEditorViewTests
         Assert.Equal(40, toolbar.ItemHeight);
         Assert.Equal(120, toolbar.ItemWidth);
         Assert.True(toolbar.Children.Count >= 7);
+    }
+
+    [AvaloniaFact]
+    public void HeaderCommandSurface_UsesSharedDescriptorsForToolbarAndPalette()
+    {
+        var editor = CreateEditor();
+        var window = CreateWindow(new GraphEditorView
+        {
+            Editor = editor,
+        });
+        var view = (GraphEditorView)window.Content!;
+
+        var saveButton = FindRequiredDescendant<Button>(view, "PART_HeaderCommand_workspace.save");
+        var undoButton = FindRequiredDescendant<Button>(view, "PART_HeaderCommand_history.undo");
+        var paletteToggle = FindRequiredControl<Button>(view, "PART_OpenCommandPaletteButton");
+
+        Assert.Equal("Save Workspace", Assert.IsType<string>(saveButton.Content));
+        Assert.Equal("Undo", Assert.IsType<string>(undoButton.Content));
+
+        paletteToggle.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+
+        var paletteChrome = FindRequiredControl<Border>(view, "PART_CommandPaletteChrome");
+        var paletteItems = FindRequiredControl<StackPanel>(view, "PART_CommandPaletteItems");
+
+        Assert.True(paletteChrome.IsVisible);
+        Assert.Contains(
+            paletteItems.Children.OfType<Button>(),
+            button => string.Equals(button.Name, "PART_CommandPaletteAction_workspace.save", StringComparison.Ordinal));
+        Assert.Contains(
+            paletteItems.Children.OfType<Button>(),
+            button => string.Equals(button.Name, "PART_CommandPaletteAction_history.undo", StringComparison.Ordinal));
     }
 
     [AvaloniaFact]
@@ -238,6 +271,13 @@ public sealed class GraphEditorViewTests
     private static T FindRequiredControl<T>(Control root, string name)
         where T : Control
         => root.FindControl<T>(name) ?? throw new Xunit.Sdk.XunitException($"Could not find control '{name}'.");
+
+    private static T FindRequiredDescendant<T>(Control root, string name)
+        where T : Control
+        => root.GetVisualDescendants()
+            .OfType<T>()
+            .FirstOrDefault(control => string.Equals(control.Name, name, StringComparison.Ordinal))
+            ?? throw new Xunit.Sdk.XunitException($"Could not find descendant control '{name}'.");
 
     private static GraphEditorViewModel CreateEditor(IGraphContextMenuAugmentor? augmentor = null)
     {

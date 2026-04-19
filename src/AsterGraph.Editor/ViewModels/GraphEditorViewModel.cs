@@ -325,8 +325,6 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         Connections.CollectionChanged += HandleConnectionsCollectionChanged;
         SelectedNodes.CollectionChanged += HandleSelectedNodesCollectionChanged;
 
-        WorkspacePath = _workspaceService.WorkspacePath;
-
         RefreshFragmentTemplates();
         _sessionHost.Initialize();
         _historyService.Reset(CaptureHistoryState());

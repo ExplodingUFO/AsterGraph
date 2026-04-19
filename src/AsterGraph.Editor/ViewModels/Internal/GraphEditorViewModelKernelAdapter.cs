@@ -120,22 +120,24 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
         var descriptors = _kernel.GetCommandDescriptors()
             .Concat(
             [
-                new GraphEditorCommandDescriptorSnapshot("fragments.export-selection", _owner.CanExportSelectionFragment),
-                new GraphEditorCommandDescriptorSnapshot("fragments.import", _owner.CanImportFragment),
-                new GraphEditorCommandDescriptorSnapshot("layout.align-left", _owner.CanAlignSelection),
-                new GraphEditorCommandDescriptorSnapshot("layout.align-center", _owner.CanAlignSelection),
-                new GraphEditorCommandDescriptorSnapshot("layout.align-right", _owner.CanAlignSelection),
-                new GraphEditorCommandDescriptorSnapshot("layout.align-top", _owner.CanAlignSelection),
-                new GraphEditorCommandDescriptorSnapshot("layout.align-middle", _owner.CanAlignSelection),
-                new GraphEditorCommandDescriptorSnapshot("layout.align-bottom", _owner.CanAlignSelection),
-                new GraphEditorCommandDescriptorSnapshot("layout.distribute-horizontal", _owner.CanDistributeSelection),
-                new GraphEditorCommandDescriptorSnapshot("layout.distribute-vertical", _owner.CanDistributeSelection),
-                new GraphEditorCommandDescriptorSnapshot("nodes.inspect", true),
-                new GraphEditorCommandDescriptorSnapshot("nodes.delete-by-id", _owner.CommandPermissions.Nodes.AllowDelete),
-                new GraphEditorCommandDescriptorSnapshot("nodes.duplicate", _owner.CommandPermissions.Nodes.AllowDuplicate),
-                new GraphEditorCommandDescriptorSnapshot("connections.disconnect-incoming", _owner.CommandPermissions.Connections.AllowDisconnect),
-                new GraphEditorCommandDescriptorSnapshot("connections.disconnect-outgoing", _owner.CommandPermissions.Connections.AllowDisconnect),
-                new GraphEditorCommandDescriptorSnapshot("connections.disconnect-all", _owner.CommandPermissions.Connections.AllowDisconnect),
+                GraphEditorCommandDescriptorCatalog.Create("fragments.export-selection", GraphEditorCommandSourceKind.Retained, _owner.CanExportSelectionFragment),
+                GraphEditorCommandDescriptorCatalog.Create("fragments.import", GraphEditorCommandSourceKind.Retained, _owner.CanImportFragment),
+                GraphEditorCommandDescriptorCatalog.Create("layout.align-left", GraphEditorCommandSourceKind.Retained, _owner.CanAlignSelection),
+                GraphEditorCommandDescriptorCatalog.Create("layout.align-center", GraphEditorCommandSourceKind.Retained, _owner.CanAlignSelection),
+                GraphEditorCommandDescriptorCatalog.Create("layout.align-right", GraphEditorCommandSourceKind.Retained, _owner.CanAlignSelection),
+                GraphEditorCommandDescriptorCatalog.Create("layout.align-top", GraphEditorCommandSourceKind.Retained, _owner.CanAlignSelection),
+                GraphEditorCommandDescriptorCatalog.Create("layout.align-middle", GraphEditorCommandSourceKind.Retained, _owner.CanAlignSelection),
+                GraphEditorCommandDescriptorCatalog.Create("layout.align-bottom", GraphEditorCommandSourceKind.Retained, _owner.CanAlignSelection),
+                GraphEditorCommandDescriptorCatalog.Create("layout.distribute-horizontal", GraphEditorCommandSourceKind.Retained, _owner.CanDistributeSelection),
+                GraphEditorCommandDescriptorCatalog.Create("layout.distribute-vertical", GraphEditorCommandSourceKind.Retained, _owner.CanDistributeSelection),
+                GraphEditorCommandDescriptorCatalog.Create("nodes.inspect", GraphEditorCommandSourceKind.Retained, true),
+                GraphEditorCommandDescriptorCatalog.Create("nodes.delete-by-id", GraphEditorCommandSourceKind.Retained, _owner.CommandPermissions.Nodes.AllowDelete),
+                GraphEditorCommandDescriptorCatalog.Create("nodes.duplicate", GraphEditorCommandSourceKind.Retained, _owner.CommandPermissions.Nodes.AllowDuplicate),
+                GraphEditorCommandDescriptorCatalog.Create("clipboard.copy", GraphEditorCommandSourceKind.Retained, _owner.CanCopySelection),
+                GraphEditorCommandDescriptorCatalog.Create("clipboard.paste", GraphEditorCommandSourceKind.Retained, _owner.CanPaste),
+                GraphEditorCommandDescriptorCatalog.Create("connections.disconnect-incoming", GraphEditorCommandSourceKind.Retained, _owner.CommandPermissions.Connections.AllowDisconnect),
+                GraphEditorCommandDescriptorCatalog.Create("connections.disconnect-outgoing", GraphEditorCommandSourceKind.Retained, _owner.CommandPermissions.Connections.AllowDisconnect),
+                GraphEditorCommandDescriptorCatalog.Create("connections.disconnect-all", GraphEditorCommandSourceKind.Retained, _owner.CommandPermissions.Connections.AllowDisconnect),
             ])
             .GroupBy(descriptor => descriptor.Id, StringComparer.Ordinal)
             .Select(group => group.Last())
@@ -216,6 +218,22 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
                 }
 
                 _owner.DuplicateNode(duplicateNodeId);
+                return true;
+
+            case "clipboard.copy":
+                if (_owner.CopySelectionCommand.CanExecute(null))
+                {
+                    _owner.CopySelectionCommand.Execute(null);
+                }
+
+                return true;
+
+            case "clipboard.paste":
+                if (_owner.PasteCommand.CanExecute(null))
+                {
+                    _owner.PasteCommand.Execute(null);
+                }
+
                 return true;
 
             case "connections.disconnect-incoming":

@@ -85,11 +85,14 @@ public sealed class GraphEditorDiagnosticsContractsTests
         var commandArgumentType = GetRequiredType("AsterGraph.Editor.Runtime.GraphEditorCommandArgumentSnapshot");
         var commandInvocationType = GetRequiredType("AsterGraph.Editor.Runtime.GraphEditorCommandInvocationSnapshot");
         var commandDescriptorType = GetRequiredType("AsterGraph.Editor.Runtime.GraphEditorCommandDescriptorSnapshot");
+        var commandSourceType = GetRequiredType("AsterGraph.Editor.Runtime.GraphEditorCommandSourceKind");
         var menuDescriptorType = GetRequiredType("AsterGraph.Editor.Menus.GraphEditorMenuItemDescriptorSnapshot");
 
         Assert.True(commandArgumentType.IsPublic);
         Assert.True(commandInvocationType.IsPublic);
         Assert.True(commandDescriptorType.IsPublic);
+        Assert.True(commandSourceType.IsPublic);
+        Assert.True(commandSourceType.IsEnum);
         Assert.True(menuDescriptorType.IsPublic);
 
         AssertProperty(commandArgumentType, "Name", typeof(string));
@@ -97,7 +100,13 @@ public sealed class GraphEditorDiagnosticsContractsTests
         AssertProperty(commandInvocationType, "CommandId", typeof(string));
         AssertProperty(commandInvocationType, "Arguments", typeof(IReadOnlyList<>).MakeGenericType(commandArgumentType));
         AssertProperty(commandDescriptorType, "Id", typeof(string));
+        AssertProperty(commandDescriptorType, "Title", typeof(string));
+        AssertProperty(commandDescriptorType, "Group", typeof(string));
+        AssertProperty(commandDescriptorType, "IconKey", typeof(string));
+        AssertProperty(commandDescriptorType, "DefaultShortcut", typeof(string));
+        AssertProperty(commandDescriptorType, "CanExecute", typeof(bool));
         AssertProperty(commandDescriptorType, "IsEnabled", typeof(bool));
+        AssertProperty(commandDescriptorType, "Source", commandSourceType);
         AssertProperty(menuDescriptorType, "Command", commandInvocationType);
         AssertProperty(menuDescriptorType, "Children", typeof(IReadOnlyList<>).MakeGenericType(menuDescriptorType));
         Assert.Null(menuDescriptorType.GetProperty("Command")!.PropertyType.GetProperty("Execute"));

@@ -17,6 +17,10 @@ internal interface IGraphEditorKernelCommandRouterHost
 
     int SelectedNodeCount { get; }
 
+    bool CanUndo { get; }
+
+    bool CanRedo { get; }
+
     bool CanEditSelectedNodeParameters { get; }
 
     GraphEditorPendingConnectionSnapshot PendingConnection { get; }
@@ -26,6 +30,10 @@ internal interface IGraphEditorKernelCommandRouterHost
     double ViewportHeight { get; }
 
     bool WorkspaceExists { get; }
+
+    void Undo();
+
+    void Redo();
 
     void AddNode(NodeDefinitionId definitionId, GraphPoint? preferredWorldPosition);
 
@@ -82,75 +90,105 @@ internal sealed class GraphEditorKernelCommandRouter
     public IReadOnlyList<GraphEditorCommandDescriptorSnapshot> GetCommandDescriptors()
         =>
         [
-            new GraphEditorCommandDescriptorSnapshot(
+            GraphEditorCommandDescriptorCatalog.Create(
                 "nodes.add",
+                GraphEditorCommandSourceKind.Kernel,
                 _host.BehaviorOptions.Commands.Nodes.AllowCreate),
-            new GraphEditorCommandDescriptorSnapshot(
+            GraphEditorCommandDescriptorCatalog.Create(
                 "selection.set",
+                GraphEditorCommandSourceKind.Kernel,
                 true),
-            new GraphEditorCommandDescriptorSnapshot(
+            GraphEditorCommandDescriptorCatalog.Create(
                 "selection.delete",
+                GraphEditorCommandSourceKind.Kernel,
                 _host.SelectedNodeCount > 0 && _host.BehaviorOptions.Commands.Nodes.AllowDelete),
-            new GraphEditorCommandDescriptorSnapshot(
+            GraphEditorCommandDescriptorCatalog.Create(
                 "nodes.move",
+                GraphEditorCommandSourceKind.Kernel,
                 _host.BehaviorOptions.Commands.Nodes.AllowMove),
-            new GraphEditorCommandDescriptorSnapshot(
+            GraphEditorCommandDescriptorCatalog.Create(
                 "nodes.parameters.set",
+                GraphEditorCommandSourceKind.Kernel,
                 _host.CanEditSelectedNodeParameters,
                 _host.CanEditSelectedNodeParameters
                     ? null
                     : "Parameter editing requires node-edit permissions and a shared node definition selection."),
-            new GraphEditorCommandDescriptorSnapshot(
+            GraphEditorCommandDescriptorCatalog.Create(
                 "connections.start",
+                GraphEditorCommandSourceKind.Kernel,
                 _host.BehaviorOptions.Commands.Connections.AllowCreate),
-            new GraphEditorCommandDescriptorSnapshot(
+            GraphEditorCommandDescriptorCatalog.Create(
                 "connections.complete",
+                GraphEditorCommandSourceKind.Kernel,
                 _host.PendingConnection.HasPendingConnection && _host.BehaviorOptions.Commands.Connections.AllowCreate),
-            new GraphEditorCommandDescriptorSnapshot(
+            GraphEditorCommandDescriptorCatalog.Create(
                 "connections.connect",
+                GraphEditorCommandSourceKind.Kernel,
                 _host.BehaviorOptions.Commands.Connections.AllowCreate),
-            new GraphEditorCommandDescriptorSnapshot(
+            GraphEditorCommandDescriptorCatalog.Create(
                 "connections.cancel",
+                GraphEditorCommandSourceKind.Kernel,
                 _host.PendingConnection.HasPendingConnection),
-            new GraphEditorCommandDescriptorSnapshot(
+            GraphEditorCommandDescriptorCatalog.Create(
                 "connections.delete",
+                GraphEditorCommandSourceKind.Kernel,
                 _host.BehaviorOptions.Commands.Connections.AllowDelete),
-            new GraphEditorCommandDescriptorSnapshot(
+            GraphEditorCommandDescriptorCatalog.Create(
                 "connections.break-port",
+                GraphEditorCommandSourceKind.Kernel,
                 _host.BehaviorOptions.Commands.Connections.AllowDisconnect),
-            new GraphEditorCommandDescriptorSnapshot(
+            GraphEditorCommandDescriptorCatalog.Create(
                 "connections.disconnect-incoming",
+                GraphEditorCommandSourceKind.Kernel,
                 _host.BehaviorOptions.Commands.Connections.AllowDisconnect),
-            new GraphEditorCommandDescriptorSnapshot(
+            GraphEditorCommandDescriptorCatalog.Create(
                 "connections.disconnect-outgoing",
+                GraphEditorCommandSourceKind.Kernel,
                 _host.BehaviorOptions.Commands.Connections.AllowDisconnect),
-            new GraphEditorCommandDescriptorSnapshot(
+            GraphEditorCommandDescriptorCatalog.Create(
                 "connections.disconnect-all",
+                GraphEditorCommandSourceKind.Kernel,
                 _host.BehaviorOptions.Commands.Connections.AllowDisconnect),
-            new GraphEditorCommandDescriptorSnapshot(
+            GraphEditorCommandDescriptorCatalog.Create(
+                "history.undo",
+                GraphEditorCommandSourceKind.Kernel,
+                _host.CanUndo),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "history.redo",
+                GraphEditorCommandSourceKind.Kernel,
+                _host.CanRedo),
+            GraphEditorCommandDescriptorCatalog.Create(
                 "viewport.fit",
+                GraphEditorCommandSourceKind.Kernel,
                 _host.Document.Nodes.Count > 0 && _host.ViewportWidth > 0 && _host.ViewportHeight > 0),
-            new GraphEditorCommandDescriptorSnapshot(
+            GraphEditorCommandDescriptorCatalog.Create(
                 "viewport.pan",
+                GraphEditorCommandSourceKind.Kernel,
                 true),
-            new GraphEditorCommandDescriptorSnapshot(
+            GraphEditorCommandDescriptorCatalog.Create(
                 "viewport.resize",
+                GraphEditorCommandSourceKind.Kernel,
                 true),
-            new GraphEditorCommandDescriptorSnapshot(
+            GraphEditorCommandDescriptorCatalog.Create(
                 "viewport.reset",
+                GraphEditorCommandSourceKind.Kernel,
                 true),
-            new GraphEditorCommandDescriptorSnapshot(
+            GraphEditorCommandDescriptorCatalog.Create(
                 "viewport.center-node",
+                GraphEditorCommandSourceKind.Kernel,
                 _host.ViewportWidth > 0 && _host.ViewportHeight > 0),
-            new GraphEditorCommandDescriptorSnapshot(
+            GraphEditorCommandDescriptorCatalog.Create(
                 "viewport.center",
+                GraphEditorCommandSourceKind.Kernel,
                 _host.ViewportWidth > 0 && _host.ViewportHeight > 0),
-            new GraphEditorCommandDescriptorSnapshot(
+            GraphEditorCommandDescriptorCatalog.Create(
                 "workspace.save",
+                GraphEditorCommandSourceKind.Kernel,
                 _host.BehaviorOptions.Commands.Workspace.AllowSave,
                 _host.BehaviorOptions.Commands.Workspace.AllowSave ? null : "Snapshot saving is disabled by host permissions."),
-            new GraphEditorCommandDescriptorSnapshot(
+            GraphEditorCommandDescriptorCatalog.Create(
                 "workspace.load",
+                GraphEditorCommandSourceKind.Kernel,
                 _host.BehaviorOptions.Commands.Workspace.AllowLoad && _host.WorkspaceExists,
                 !_host.BehaviorOptions.Commands.Workspace.AllowLoad
                     ? "Snapshot loading is disabled by host permissions."
@@ -303,6 +341,14 @@ internal sealed class GraphEditorKernelCommandRouter
                 }
 
                 _host.DisconnectAll(disconnectAllNodeId);
+                return true;
+
+            case "history.undo":
+                _host.Undo();
+                return true;
+
+            case "history.redo":
+                _host.Redo();
                 return true;
 
             case "viewport.fit":

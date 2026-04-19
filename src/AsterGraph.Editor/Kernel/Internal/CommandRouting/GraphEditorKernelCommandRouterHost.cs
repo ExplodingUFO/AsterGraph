@@ -25,6 +25,12 @@ internal sealed partial class GraphEditorKernel
 
         int IGraphEditorKernelCommandRouterHost.SelectedNodeCount => _owner._selectedNodeIds.Count;
 
+        bool IGraphEditorKernelCommandRouterHost.CanUndo
+            => _owner._historyService.CanUndo && _owner._behaviorOptions.History.EnableUndoRedo && _owner._behaviorOptions.Commands.History.AllowUndo;
+
+        bool IGraphEditorKernelCommandRouterHost.CanRedo
+            => _owner._historyService.CanRedo && _owner._behaviorOptions.History.EnableUndoRedo && _owner._behaviorOptions.Commands.History.AllowRedo;
+
         bool IGraphEditorKernelCommandRouterHost.CanEditSelectedNodeParameters
             => _owner._behaviorOptions.Commands.Nodes.AllowEditParameters && _owner.HasSharedSelectionDefinitionWithParameters();
 
@@ -35,6 +41,12 @@ internal sealed partial class GraphEditorKernel
         double IGraphEditorKernelCommandRouterHost.ViewportHeight => _owner._viewportHeight;
 
         bool IGraphEditorKernelCommandRouterHost.WorkspaceExists => _owner._workspaceService.Exists();
+
+        void IGraphEditorKernelCommandRouterHost.Undo()
+            => _owner.Undo();
+
+        void IGraphEditorKernelCommandRouterHost.Redo()
+            => _owner.Redo();
 
         void IGraphEditorKernelCommandRouterHost.AddNode(NodeDefinitionId definitionId, GraphPoint? preferredWorldPosition)
             => _owner.AddNode(definitionId, preferredWorldPosition);

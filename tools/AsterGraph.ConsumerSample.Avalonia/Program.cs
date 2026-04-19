@@ -41,6 +41,12 @@ public static class Program
             Console.WriteLine($"CONSUMER_SAMPLE_PLUGIN_OK:{result.PluginContributionOk}");
             Console.WriteLine($"CONSUMER_SAMPLE_PARAMETER_OK:{result.ParameterEditingOk}");
             Console.WriteLine($"CONSUMER_SAMPLE_WINDOW_OK:{result.WindowCompositionOk}");
+            Console.WriteLine($"CONSUMER_SAMPLE_TRUST_OK:{result.TrustTransparencyOk}");
+            Console.WriteLine($"COMMAND_SURFACE_OK:{result.CommandSurfaceOk}");
+            foreach (var line in result.MetricLines)
+            {
+                Console.WriteLine(line);
+            }
             Console.WriteLine($"CONSUMER_SAMPLE_OK:{result.IsOk}");
 
             if (!result.IsOk)

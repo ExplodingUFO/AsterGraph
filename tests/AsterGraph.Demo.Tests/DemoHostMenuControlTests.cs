@@ -2,7 +2,10 @@ using System;
 using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
+using Avalonia.Interactivity;
+using Avalonia.VisualTree;
 using AsterGraph.Avalonia.Controls;
+using AsterGraph.Core.Models;
 using AsterGraph.Demo.ViewModels;
 using AsterGraph.Demo.Views;
 using Xunit;
@@ -243,6 +246,28 @@ public sealed class DemoHostMenuControlTests
 
         Assert.Equal(initialNodeCount, viewModel.Editor.Nodes.Count);
         Assert.Equal(selectedNode.Id, viewModel.Editor.SelectedNode?.Id);
+    }
+
+    [AvaloniaFact]
+    public void MainWindow_CommandRailUsesSharedSessionCommandSurface()
+    {
+        var viewModel = new MainWindowViewModel();
+        var window = new MainWindow
+        {
+            DataContext = viewModel,
+        };
+
+        window.Show();
+
+        var initialNodeCount = viewModel.Editor.Nodes.Count;
+        viewModel.Editor.Session.Commands.AddNode(viewModel.Editor.NodeTemplates[0].Definition.Id, new GraphPoint(760, 320));
+
+        var undoButton = window.GetVisualDescendants()
+            .OfType<Button>()
+            .Single(control => string.Equals(control.Name, "PART_HostCommand_history.undo", StringComparison.Ordinal));
+        undoButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+
+        Assert.Equal(initialNodeCount, viewModel.Editor.Nodes.Count);
     }
 
     private static MenuItem GetMenuItem(MenuItem parent, string header)

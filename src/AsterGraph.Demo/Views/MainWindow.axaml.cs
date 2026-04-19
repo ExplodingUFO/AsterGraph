@@ -1,5 +1,8 @@
 using Avalonia.Controls;
 using Avalonia.Data;
+using Avalonia.Input;
+using Avalonia.Platform.Storage;
+using Avalonia.Styling;
 using AsterGraph.Avalonia.Controls;
 using AsterGraph.Avalonia.Hosting;
 using AsterGraph.Demo.Presentation;
@@ -9,16 +12,34 @@ namespace AsterGraph.Demo.Views;
 
 public partial class MainWindow : Window
 {
+    private static readonly IReadOnlyList<string> HostCommandRailIds =
+    [
+        "workspace.save",
+        "workspace.load",
+        "history.undo",
+        "history.redo",
+        "viewport.fit",
+        "viewport.reset",
+    ];
+
     private MainWindowViewModel? _currentViewModel;
 
     public MainWindow()
     {
         InitializeComponent();
+        DragDrop.SetAllowDrop(this, true);
+        AddHandler(DragDrop.DragOverEvent, HandleWorkspaceDragOver);
+        AddHandler(DragDrop.DropEvent, HandleWorkspaceDrop);
     }
 
     protected override void OnDataContextChanged(EventArgs e)
     {
         base.OnDataContextChanged(e);
+
+        if (_currentViewModel is not null)
+        {
+            DetachCommandRailSubscriptions(_currentViewModel);
+        }
 
         if (DataContext is not MainWindowViewModel viewModel || ReferenceEquals(viewModel, _currentViewModel))
         {
@@ -27,6 +48,10 @@ public partial class MainWindow : Window
 
         _currentViewModel = viewModel;
         ComposeSurfaces(viewModel);
+        AttachCommandRailSubscriptions(viewModel);
+        RebuildCommandRail(viewModel);
+        ApplyWindowShellState(viewModel);
+        UpdateThemeProjection(viewModel);
     }
 
     private void ComposeSurfaces(MainWindowViewModel viewModel)
@@ -96,4 +121,167 @@ public partial class MainWindow : Window
             host.Content = control;
         }
     }
+
+    private void AttachCommandRailSubscriptions(MainWindowViewModel viewModel)
+    {
+        viewModel.Editor.Session.Events.DocumentChanged -= HandleCommandRailChanged;
+        viewModel.Editor.Session.Events.SelectionChanged -= HandleCommandRailChanged;
+        viewModel.Editor.Session.Events.ViewportChanged -= HandleCommandRailChanged;
+        viewModel.Editor.Session.Events.CommandExecuted -= HandleCommandRailChanged;
+        viewModel.Editor.Session.Events.PendingConnectionChanged -= HandleCommandRailChanged;
+
+        viewModel.Editor.Session.Events.DocumentChanged += HandleCommandRailChanged;
+        viewModel.Editor.Session.Events.SelectionChanged += HandleCommandRailChanged;
+        viewModel.Editor.Session.Events.ViewportChanged += HandleCommandRailChanged;
+        viewModel.Editor.Session.Events.CommandExecuted += HandleCommandRailChanged;
+        viewModel.Editor.Session.Events.PendingConnectionChanged += HandleCommandRailChanged;
+    }
+
+    private void DetachCommandRailSubscriptions(MainWindowViewModel viewModel)
+    {
+        viewModel.Editor.Session.Events.DocumentChanged -= HandleCommandRailChanged;
+        viewModel.Editor.Session.Events.SelectionChanged -= HandleCommandRailChanged;
+        viewModel.Editor.Session.Events.ViewportChanged -= HandleCommandRailChanged;
+        viewModel.Editor.Session.Events.CommandExecuted -= HandleCommandRailChanged;
+        viewModel.Editor.Session.Events.PendingConnectionChanged -= HandleCommandRailChanged;
+    }
+
+    private void HandleCommandRailChanged(object? sender, EventArgs e)
+    {
+        if (_currentViewModel is not null)
+        {
+            RebuildCommandRail(_currentViewModel);
+        }
+    }
+
+    private void RebuildCommandRail(MainWindowViewModel viewModel)
+    {
+        var rail = this.FindControl<WrapPanel>("PART_CommandRail");
+        if (rail is null)
+        {
+            return;
+        }
+
+        rail.Children.Clear();
+        foreach (var action in AsterGraphHostedActionFactory.CreateCommandActions(viewModel.Editor.Session, HostCommandRailIds))
+        {
+            var button = new Button
+            {
+                Name = $"PART_HostCommand_{action.Id}",
+                Content = action.Title,
+                IsEnabled = action.CanExecute,
+            };
+            if (!string.IsNullOrWhiteSpace(action.DisabledReason))
+            {
+                ToolTip.SetTip(button, action.DisabledReason);
+            }
+
+            button.Click += (_, _) =>
+            {
+                action.TryExecute();
+                RebuildCommandRail(viewModel);
+            };
+            rail.Children.Add(button);
+        }
+    }
+
+    protected override void OnOpened(EventArgs e)
+    {
+        base.OnOpened(e);
+        if (_currentViewModel is null)
+        {
+            return;
+        }
+
+        ApplyWindowShellState(_currentViewModel);
+        _currentViewModel.RestorePendingViewport();
+        UpdateThemeProjection(_currentViewModel);
+    }
+
+    protected override void OnClosing(WindowClosingEventArgs e)
+    {
+        if (_currentViewModel?.HandleWindowClosingRequest() == true)
+        {
+            e.Cancel = true;
+            return;
+        }
+
+        base.OnClosing(e);
+    }
+
+    protected override void OnSizeChanged(SizeChangedEventArgs e)
+    {
+        base.OnSizeChanged(e);
+        _currentViewModel?.RecordWindowSize(e.NewSize.Width, e.NewSize.Height);
+    }
+
+    public bool TryOpenWorkspaceFiles(IReadOnlyList<string> paths)
+    {
+        if (_currentViewModel is null)
+        {
+            return false;
+        }
+
+        foreach (var path in paths.Where(path => !string.IsNullOrWhiteSpace(path)))
+        {
+            if (_currentViewModel.TryOpenWorkspacePath(path))
+            {
+                _currentViewModel.RestorePendingViewport();
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private void ApplyWindowShellState(MainWindowViewModel viewModel)
+    {
+        if (viewModel.PreferredWindowWidth > 0)
+        {
+            Width = Math.Max(MinWidth, viewModel.PreferredWindowWidth);
+        }
+
+        if (viewModel.PreferredWindowHeight > 0)
+        {
+            Height = Math.Max(MinHeight, viewModel.PreferredWindowHeight);
+        }
+    }
+
+    private void UpdateThemeProjection(MainWindowViewModel viewModel)
+    {
+        RequestedThemeVariant = ThemeVariant.Default;
+        viewModel.UpdateThemeVariant(ActualThemeVariant?.ToString() ?? RequestedThemeVariant?.ToString());
+    }
+
+    private void HandleWorkspaceDragOver(object? sender, DragEventArgs e)
+    {
+        if (ResolveDroppedWorkspacePaths(e).Count == 0)
+        {
+            return;
+        }
+
+        e.DragEffects = DragDropEffects.Copy;
+        e.Handled = true;
+    }
+
+    private void HandleWorkspaceDrop(object? sender, DragEventArgs e)
+    {
+        var paths = ResolveDroppedWorkspacePaths(e);
+        if (paths.Count == 0)
+        {
+            return;
+        }
+
+        TryOpenWorkspaceFiles(paths);
+        e.Handled = true;
+    }
+
+    private static List<string> ResolveDroppedWorkspacePaths(DragEventArgs args)
+        => args.Data.GetFiles()?
+            .Select(item => item.TryGetLocalPath())
+            .Where(path => !string.IsNullOrWhiteSpace(path))
+            .Cast<string>()
+            .Where(path => path.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
+            .ToList()
+        ?? [];
 }

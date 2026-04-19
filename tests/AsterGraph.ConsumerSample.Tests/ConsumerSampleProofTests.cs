@@ -1,6 +1,6 @@
 using System.Linq;
 using Avalonia.Controls;
-using Avalonia.Headless.XUnit;
+using Avalonia.Interactivity;
 using Avalonia.VisualTree;
 using AsterGraph.Avalonia.Controls;
 using AsterGraph.ConsumerSample;
@@ -48,11 +48,42 @@ public sealed class ConsumerSampleProofTests
         Assert.True(result.HostMenuActionOk);
         Assert.True(result.PluginContributionOk);
         Assert.True(result.ParameterEditingOk);
+        Assert.True(result.TrustTransparencyOk);
+        Assert.True(result.CommandSurfaceOk);
+        Assert.True(result.StartupMs >= 0);
+        Assert.True(result.InspectorProjectionMs >= 0);
+        Assert.True(result.PluginScanMs >= 0);
+        Assert.True(result.CommandLatencyMs >= 0);
+        Assert.Contains(result.MetricLines, line => line.Contains("startup_ms", StringComparison.Ordinal));
+        Assert.Contains(result.MetricLines, line => line.Contains("command_latency_ms", StringComparison.Ordinal));
     }
 
-    [AvaloniaFact]
+    [Fact]
+    public void ConsumerSampleHost_PersistsExportsAndImportsPluginAllowlistDecisions()
+    {
+        var storageRoot = Path.Combine(Path.GetTempPath(), "AsterGraph.ConsumerSample.Tests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(storageRoot);
+
+        using var host = ConsumerSampleHost.Create(storageRoot);
+
+        Assert.Contains(host.PluginCandidateEntries, entry => entry.PluginId == "consumer.sample.audit-plugin" && entry.IsAllowed);
+
+        var exportPath = Path.Combine(storageRoot, "consumer-allowlist-export.json");
+        Assert.True(host.ExportPluginAllowlist(exportPath));
+        Assert.True(File.Exists(exportPath));
+
+        Assert.True(host.BlockPluginCandidate("consumer.sample.audit-plugin"));
+        Assert.Contains(host.PluginCandidateEntries, entry => entry.PluginId == "consumer.sample.audit-plugin" && entry.IsBlocked);
+
+        Assert.True(host.ImportPluginAllowlist(exportPath));
+        Assert.Contains(host.PluginCandidateEntries, entry => entry.PluginId == "consumer.sample.audit-plugin" && entry.IsAllowed);
+        Assert.Contains(host.PluginAllowlistLines, line => line.Contains("Allowlist", StringComparison.Ordinal));
+    }
+
+    [Fact]
     public void ConsumerSampleWindow_RendersHostedEditorAndIntegrationPanels()
     {
+        ConsumerSampleHeadlessEnvironment.EnsureInitialized();
         using var host = ConsumerSampleHost.Create();
         var window = ConsumerSampleWindowFactory.Create(host);
 
@@ -66,8 +97,37 @@ public sealed class ConsumerSampleProofTests
             Assert.NotNull(FindNamed<Button>(window, "PART_ApproveSelectionButton"));
             Assert.NotNull(FindNamed<GraphEditorView>(window, "PART_EditorView"));
             Assert.NotNull(FindNamed<ItemsControl>(window, "PART_ParameterItems"));
+            Assert.NotNull(FindNamed<ItemsControl>(window, "PART_PluginCandidateItems"));
             Assert.NotNull(FindNamed<ItemsControl>(window, "PART_PluginSnapshotItems"));
+            Assert.NotNull(FindNamed<ItemsControl>(window, "PART_AllowlistItems"));
             Assert.NotNull(FindNamed<TextBlock>(window, "PART_TrustBoundaryText"));
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [Fact]
+    public void ConsumerSampleWindow_CommandRailUsesSharedSessionActionPath()
+    {
+        ConsumerSampleHeadlessEnvironment.EnsureInitialized();
+        using var host = ConsumerSampleHost.Create();
+        var window = ConsumerSampleWindowFactory.Create(host);
+
+        try
+        {
+            window.Show();
+
+            var initialNodeCount = host.Session.Queries.CreateDocumentSnapshot().Nodes.Count;
+            var addReview = Assert.IsType<Button>(FindNamed<Button>(window, "PART_AddReviewNodeButton"));
+
+            addReview.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            Assert.Equal(initialNodeCount + 1, host.Session.Queries.CreateDocumentSnapshot().Nodes.Count);
+
+            var undo = Assert.IsType<Button>(FindNamed<Button>(window, "PART_Action_history.undo"));
+            undo.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            Assert.Equal(initialNodeCount, host.Session.Queries.CreateDocumentSnapshot().Nodes.Count);
         }
         finally
         {
