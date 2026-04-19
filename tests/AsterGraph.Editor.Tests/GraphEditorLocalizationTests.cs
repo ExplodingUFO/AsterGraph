@@ -62,12 +62,12 @@ public sealed class GraphEditorLocalizationTests
 
         var expectedLiterals = new[]
         {
-            "保存快照",
-            "加载快照",
-            "删除所选节点",
+            "节点图 SDK 演示台",
             "节点库",
+            "单击卡片可在当前视口中心附近插入节点。",
             "工作区",
             "片段",
+            "导出片段",
             "迷你地图",
             "快捷键",
         };
