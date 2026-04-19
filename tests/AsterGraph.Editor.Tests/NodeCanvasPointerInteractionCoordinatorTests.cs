@@ -130,6 +130,64 @@ public sealed class NodeCanvasPointerInteractionCoordinatorTests
     }
 
     [Fact]
+    public void HandleMoved_AndReleased_WhenDraggingNode_UseGroupContentAreaForAttachment()
+    {
+        var editor = CreateEditor();
+        editor.SelectSingleNode(editor.Nodes[0], updateStatus: false);
+        var groupId = editor.Session.Commands.TryCreateNodeGroupFromSelection("Pointer Cluster");
+        Assert.False(string.IsNullOrWhiteSpace(groupId));
+
+        var targetNode = editor.Nodes[1];
+        var groupSnapshot = Assert.Single(editor.GetNodeGroupSnapshots());
+        var origin = new GraphPoint(targetNode.X, targetNode.Y);
+        var host = new TestPointerInteractionHost(editor)
+        {
+            DragAssistResult = new GraphPoint(0, 0),
+        };
+        host.InteractionSession.BeginNodeDrag(
+            targetNode,
+            new Point(30, 40),
+            new NodeCanvasDragSession(
+                [targetNode],
+                new Dictionary<string, GraphPoint>(StringComparer.Ordinal)
+                {
+                    [targetNode.Id] = origin,
+                },
+                new NodeBounds(targetNode.X, targetNode.Y, targetNode.Width, targetNode.Height)),
+            [groupSnapshot]);
+        var coordinator = new NodeCanvasPointerInteractionCoordinator(host);
+
+        var headerOffset = new GraphPoint(
+            (groupSnapshot.ContentPosition.X - 12d) - origin.X,
+            (groupSnapshot.Position.Y + 8d) - origin.Y);
+        host.DragAssistResult = headerOffset;
+
+        var handled = coordinator.HandleMoved(new Point(48, 60), selectionDragThreshold: 6);
+
+        Assert.True(handled);
+        Assert.Null(host.InteractionSession.HoveredDropGroupId);
+        Assert.Equal(0, host.UpdateGroupVisualsCalls);
+
+        var contentOffset = new GraphPoint(
+            groupSnapshot.ContentPosition.X - origin.X,
+            groupSnapshot.ContentPosition.Y - origin.Y);
+        host.DragAssistResult = contentOffset;
+
+        handled = coordinator.HandleMoved(new Point(72, 84), selectionDragThreshold: 6);
+
+        Assert.True(handled);
+        Assert.Equal(groupId, host.InteractionSession.HoveredDropGroupId);
+        Assert.Equal(1, host.UpdateGroupVisualsCalls);
+
+        coordinator.HandleReleased(new Point(72, 84));
+
+        var attachedNode = Assert.Single(editor.Nodes, candidate => candidate.Id == targetNode.Id);
+        Assert.Equal(groupId, attachedNode.GroupId);
+        Assert.Equal(2, host.UpdateGroupVisualsCalls);
+        Assert.Null(host.InteractionSession.HoveredDropGroupId);
+    }
+
+    [Fact]
     public void HandleReleased_AfterMarqueeSelection_FinalizesSelectionAndResetsSession()
     {
         var editor = CreateEditor();
@@ -300,7 +358,7 @@ public sealed class NodeCanvasPointerInteractionCoordinatorTests
 
         public int ApplyDragAssistCalls { get; private set; }
 
-        public GraphPoint DragAssistResult { get; init; } = new(0, 0);
+        public GraphPoint DragAssistResult { get; set; } = new(0, 0);
 
         public void FocusCanvas()
         {

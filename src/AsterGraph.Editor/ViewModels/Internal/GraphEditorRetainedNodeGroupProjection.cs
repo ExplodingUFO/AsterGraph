@@ -22,19 +22,14 @@ internal static class GraphEditorRetainedNodeGroupProjection
                 group => group.Key,
                 group => (IReadOnlyList<string>)group.Select(node => node.Id).ToList(),
                 StringComparer.Ordinal);
-        var boundsByNodeId = CreateBoundsByNodeId(nodes);
-
         return kernelGroups
-            .Select(group => nodeIdsByGroupId.TryGetValue(group.Id, out var nodeIds)
-                ? GraphEditorNodeGroupLayoutResolver.ResolvePersistedBounds(
-                    group with
-                    {
-                        NodeIds = nodeIds.ToList(),
-                    },
-                    boundsByNodeId)
-                : null)
-            .Where(group => group is { NodeIds.Count: > 0 })
-            .Select(group => group!)
+            .Select(group => GraphEditorNodeGroupLayoutResolver.ResolvePersistedBounds(
+                group with
+                {
+                    NodeIds = nodeIdsByGroupId.TryGetValue(group.Id, out var nodeIds)
+                        ? nodeIds.ToList()
+                        : [],
+                }))
             .ToList();
     }
 
@@ -48,17 +43,8 @@ internal static class GraphEditorRetainedNodeGroupProjection
             return [];
         }
 
-        var boundsByNodeId = CreateBoundsByNodeId(nodes);
         return resolvedGroups
-            .Select(group => GraphEditorNodeGroupLayoutResolver.CreateSnapshot(group, boundsByNodeId))
+            .Select(GraphEditorNodeGroupLayoutResolver.CreateSnapshot)
             .ToList();
     }
-
-    private static IReadOnlyDictionary<string, GraphEditorNodeGroupMemberBounds> CreateBoundsByNodeId(IReadOnlyList<NodeViewModel> nodes)
-        => nodes.ToDictionary(
-            node => node.Id,
-            node => new GraphEditorNodeGroupMemberBounds(
-                new GraphPoint(node.X, node.Y),
-                new GraphSize(node.Width, node.Height)),
-            StringComparer.Ordinal);
 }

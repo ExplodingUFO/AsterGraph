@@ -22,7 +22,7 @@ public sealed class SerializationCompatibilityTests
     [Fact]
     public void GraphDocumentCompatibility_ExposesCurrentSchemaVersion()
     {
-        Assert.Equal(3, GraphDocumentCompatibility.CurrentSchemaVersion);
+        Assert.Equal(4, GraphDocumentCompatibility.CurrentSchemaVersion);
     }
 
     [Fact]
@@ -32,7 +32,7 @@ public sealed class SerializationCompatibilityTests
 
         var json = GraphDocumentSerializer.Serialize(document);
 
-        Assert.Contains("\"SchemaVersion\": 3", json);
+        Assert.Contains("\"SchemaVersion\": 4", json);
     }
 
     [Fact]
@@ -94,7 +94,7 @@ public sealed class SerializationCompatibilityTests
     }
 
     [Fact]
-    public void GraphDocumentSerializer_ReadsSchemaVersion2Payload_AndMigratesLegacyGroupBoundsToPadding()
+    public void GraphDocumentSerializer_ReadsSchemaVersion2Payload_AndPreservesLegacyGroupFrame()
     {
         const string json = """
         {
@@ -156,7 +156,6 @@ public sealed class SerializationCompatibilityTests
 
         Assert.Equal(new GraphPoint(76, 76), group.Position);
         Assert.Equal(new GraphSize(288, 232), group.Size);
-        Assert.Equal(new GraphPadding(24, 44, 24, 28), group.ExtraPadding);
     }
 
     [Fact]

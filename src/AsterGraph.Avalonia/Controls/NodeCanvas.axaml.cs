@@ -63,6 +63,12 @@ public partial class NodeCanvas : UserControl
     public static readonly StyledProperty<IGraphContextMenuPresenter?> ContextMenuPresenterProperty =
         AvaloniaProperty.Register<NodeCanvas, IGraphContextMenuPresenter?>(nameof(ContextMenuPresenter));
 
+    /// <summary>
+    /// Controls the registry used by shipped inline parameter-editor hosts.
+    /// </summary>
+    public static readonly StyledProperty<INodeParameterEditorRegistry?> NodeParameterEditorRegistryProperty =
+        AvaloniaProperty.Register<NodeCanvas, INodeParameterEditorRegistry?>(nameof(NodeParameterEditorRegistry));
+
     private readonly Dictionary<NodeViewModel, NodeCanvasRenderedNodeVisual> _nodeVisuals = new();
     private readonly Dictionary<string, NodeCanvasRenderedGroupVisual> _groupVisuals = new(StringComparer.Ordinal);
     private Grid? _sceneRoot;
@@ -181,6 +187,15 @@ public partial class NodeCanvas : UserControl
     {
         get => GetValue(ContextMenuPresenterProperty);
         set => SetValue(ContextMenuPresenterProperty, value);
+    }
+
+    /// <summary>
+    /// Registry used by shipped node-inline parameter editors.
+    /// </summary>
+    public INodeParameterEditorRegistry? NodeParameterEditorRegistry
+    {
+        get => GetValue(NodeParameterEditorRegistryProperty);
+        set => SetValue(NodeParameterEditorRegistryProperty, value);
     }
 
     /// <summary>

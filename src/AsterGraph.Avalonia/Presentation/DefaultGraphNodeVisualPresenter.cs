@@ -7,6 +7,7 @@ using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
 using AsterGraph.Abstractions.Styling;
+using AsterGraph.Avalonia.Controls;
 using AsterGraph.Avalonia.Styling;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.ViewModels;
@@ -21,6 +22,7 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
 {
     private const double MinimumNodeWidth = 180d;
     private const double InlineSurfaceMaxHeight = 132d;
+    private const double MinimumNodeHeight = 158d;
 
     /// <inheritdoc />
     public GraphNodeVisual Create(GraphNodeVisualContext context)
@@ -176,10 +178,11 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
 
         var resizeThumb = new Thumb
         {
-            Width = 12,
+            Width = 16,
+            Height = 16,
             HorizontalAlignment = HorizontalAlignment.Right,
-            VerticalAlignment = VerticalAlignment.Stretch,
-            Margin = new Thickness(0, 22, 0, 18),
+            VerticalAlignment = VerticalAlignment.Bottom,
+            Margin = new Thickness(0, 0, 10, 10),
             Background = Brushes.Transparent,
             Cursor = new Cursor(StandardCursorType.SizeWestEast),
         };
@@ -199,17 +202,6 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
             border.Focus();
             context.BeginNodeDrag(context.Node, args);
         };
-        border.DoubleTapped += (_, args) =>
-        {
-            if (args.Source is StyledElement { DataContext: PortViewModel or NodeParameterViewModel })
-            {
-                return;
-            }
-
-            args.Handled = context.TrySetNodeExpansionState(
-                context.Node,
-                context.Node.IsExpanded ? GraphNodeExpansionState.Collapsed : GraphNodeExpansionState.Expanded);
-        };
         border.KeyDown += (_, args) =>
         {
             if (args.Key == Key.Apps || (args.Key == Key.F10 && args.KeyModifiers.HasFlag(KeyModifiers.Shift)))
@@ -225,9 +217,11 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
 
         resizeThumb.DragDelta += (_, args) =>
         {
-            args.Handled = context.TrySetNodeWidth(
+            args.Handled = context.TrySetNodeSize(
                 context.Node,
-                Math.Max(MinimumNodeWidth, context.Node.Width + args.Vector.X),
+                new GraphSize(
+                    Math.Max(MinimumNodeWidth, context.Node.Width + args.Vector.X),
+                    Math.Max(MinimumNodeHeight, context.Node.Height + args.Vector.Y)),
                 false);
         };
 
@@ -265,6 +259,7 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
         state.Border.BorderThickness = new Thickness(node.IsSelected ? nodeStyle.SelectedBorderThickness : nodeStyle.BorderThickness);
         state.Subtitle.Text = node.DisplaySubtitle;
         state.Description.Text = node.DisplayDescription;
+        state.Description.IsVisible = node.ActiveSurfaceTier.ShowsSection(AsterGraph.Abstractions.Definitions.NodeSurfaceSectionKeys.Description);
         state.InlineSurface.BorderBrush = BrushFactory.Solid(node.AccentHex, 0.45);
         state.InlineSurface.Background = BrushFactory.Solid(nodeStyle.BackgroundHex, 0.92);
 
@@ -319,8 +314,10 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
     private static void RebuildInlineSurface(GraphNodeVisualContext context, DefaultNodeVisualState state)
     {
         state.InlineContent.Children.Clear();
-        state.InlineSurface.IsVisible = context.Node.IsExpanded;
-        if (!context.Node.IsExpanded)
+        var showInlineInputs = context.Node.ActiveSurfaceTier.ShowsSection(AsterGraph.Abstractions.Definitions.NodeSurfaceSectionKeys.InlineInputs);
+        var showParameters = context.Node.ActiveSurfaceTier.ShowsSection(AsterGraph.Abstractions.Definitions.NodeSurfaceSectionKeys.Parameters);
+        state.InlineSurface.IsVisible = showInlineInputs || showParameters;
+        if (!state.InlineSurface.IsVisible)
         {
             return;
         }
@@ -349,14 +346,16 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
             .Where(item => item.Parameter is not null)
             .ToList();
 
-        if (inlineInputs.Count > 0)
+        if (showInlineInputs && inlineInputs.Count > 0)
         {
             renderedAnySection = true;
             state.InlineContent.Children.Add(CreateSectionHeader("Input Values"));
             foreach (var item in inlineInputs)
             {
                 state.InlineContent.Children.Add(CreateParameterCard(
+                    context.NodeParameterEditorRegistry,
                     item.Parameter!,
+                    context.Node.ActiveSurfaceTier.InlineEditorTemplateKey,
                     item.Port.Label,
                     item.IsConnected
                         ? "Connected input overrides the local literal."
@@ -367,13 +366,18 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
         var generalParameters = context.Editor.SelectedNodeParameters
             .Where(parameter => !boundInputKeys.Contains(parameter.Key))
             .ToList();
-        if (generalParameters.Count > 0)
+        if (showParameters && generalParameters.Count > 0)
         {
             renderedAnySection = true;
             state.InlineContent.Children.Add(CreateSectionHeader("Parameters"));
             foreach (var parameter in generalParameters)
             {
-                state.InlineContent.Children.Add(CreateParameterCard(parameter, null, null));
+                state.InlineContent.Children.Add(CreateParameterCard(
+                    context.NodeParameterEditorRegistry,
+                    parameter,
+                    context.Node.ActiveSurfaceTier.InlineEditorTemplateKey,
+                    null,
+                    null));
             }
         }
 
@@ -384,7 +388,9 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
     }
 
     private static Control CreateParameterCard(
+        INodeParameterEditorRegistry? nodeParameterEditorRegistry,
         NodeParameterViewModel parameter,
+        string? templateKey,
         string? portLabel,
         string? upstreamReason)
     {
@@ -470,7 +476,13 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
         }
         else
         {
-            stack.Children.Add(CreateEditorControl(parameter));
+            stack.Children.Add(new NodeParameterEditorHost
+            {
+                Parameter = parameter,
+                TemplateKey = templateKey,
+                NodeParameterEditorRegistry = nodeParameterEditorRegistry,
+                Usage = NodeParameterEditorUsage.NodeInline,
+            });
         }
 
         var help = new TextBlock
@@ -506,61 +518,6 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
         card.Child = stack;
         card.DataContext = parameter;
         return card;
-    }
-
-    private static Control CreateEditorControl(NodeParameterViewModel parameter)
-    {
-        Control control;
-        if (parameter.UsesMultilineTextInput)
-        {
-            var textBox = new TextBox
-            {
-                MinHeight = 88,
-                AcceptsReturn = true,
-                TextWrapping = TextWrapping.Wrap,
-            };
-            textBox.Bind(TextBox.TextProperty, new Binding(nameof(NodeParameterViewModel.StringValue)) { Mode = BindingMode.TwoWay });
-            textBox.Bind(InputElement.IsEnabledProperty, new Binding(nameof(NodeParameterViewModel.CanEdit)));
-            textBox.Bind(TextBox.WatermarkProperty, new Binding(nameof(NodeParameterViewModel.InputWatermark)));
-            control = textBox;
-        }
-        else if (parameter.UsesTextInput)
-        {
-            var textBox = new TextBox
-            {
-                MinHeight = 34,
-            };
-            textBox.Bind(TextBox.TextProperty, new Binding(nameof(NodeParameterViewModel.StringValue)) { Mode = BindingMode.TwoWay });
-            textBox.Bind(InputElement.IsEnabledProperty, new Binding(nameof(NodeParameterViewModel.CanEdit)));
-            textBox.Bind(TextBox.WatermarkProperty, new Binding(nameof(NodeParameterViewModel.InputWatermark)));
-            control = textBox;
-        }
-        else if (parameter.IsBoolean)
-        {
-            var checkBox = new CheckBox();
-            checkBox.Bind(ToggleButton.IsCheckedProperty, new Binding(nameof(NodeParameterViewModel.BoolValue)) { Mode = BindingMode.TwoWay });
-            checkBox.Bind(ContentControl.ContentProperty, new Binding(nameof(NodeParameterViewModel.BooleanCaption)));
-            checkBox.Bind(InputElement.IsEnabledProperty, new Binding(nameof(NodeParameterViewModel.CanEdit)));
-            control = checkBox;
-        }
-        else if (parameter.IsEnum)
-        {
-            var comboBox = new ComboBox
-            {
-                ItemsSource = parameter.Options,
-                MinHeight = 34,
-            };
-            comboBox.Bind(SelectingItemsControl.SelectedItemProperty, new Binding(nameof(NodeParameterViewModel.SelectedOption)) { Mode = BindingMode.TwoWay });
-            comboBox.Bind(InputElement.IsEnabledProperty, new Binding(nameof(NodeParameterViewModel.CanEdit)));
-            control = comboBox;
-        }
-        else
-        {
-            control = CreateMutedMessage("No shipped inline editor is available for this value.");
-        }
-
-        control.DataContext = parameter;
-        return control;
     }
 
     private static TextBlock CreateSectionHeader(string text)

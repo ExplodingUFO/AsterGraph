@@ -20,6 +20,8 @@ internal sealed class NodeCanvasInteractionSession
 
     public string? DragGroupTitle { get; private set; }
 
+    public GraphPoint? DragGroupOriginPosition { get; private set; }
+
     public bool IsPanning { get; private set; }
 
     public bool IsMarqueeSelecting { get; private set; }
@@ -47,6 +49,7 @@ internal sealed class NodeCanvasInteractionSession
         DragNode = null;
         DragGroupId = null;
         DragGroupTitle = null;
+        DragGroupOriginPosition = null;
         IsPanning = false;
         DragStartScreenPosition = null;
         DragSession = null;
@@ -69,6 +72,7 @@ internal sealed class NodeCanvasInteractionSession
         DragNode = node;
         DragGroupId = null;
         DragGroupTitle = null;
+        DragGroupOriginPosition = null;
         IsPanning = false;
         SelectionStartScreenPosition = null;
         IsMarqueeSelecting = false;
@@ -86,6 +90,7 @@ internal sealed class NodeCanvasInteractionSession
         DragNode = null;
         DragGroupId = null;
         DragGroupTitle = null;
+        DragGroupOriginPosition = null;
         DragStartScreenPosition = null;
         DragSession = null;
         DragGroupDropZones = [];
@@ -96,7 +101,7 @@ internal sealed class NodeCanvasInteractionSession
         PointerScreenPosition = startScreenPosition;
     }
 
-    public void BeginGroupDrag(string groupId, string groupTitle, Point startScreenPosition, NodeCanvasDragSession dragSession)
+    public void BeginGroupDrag(string groupId, string groupTitle, GraphPoint groupOriginPosition, Point startScreenPosition, NodeCanvasDragSession dragSession)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(groupId);
         ArgumentException.ThrowIfNullOrWhiteSpace(groupTitle);
@@ -104,6 +109,7 @@ internal sealed class NodeCanvasInteractionSession
         DragNode = null;
         DragGroupId = groupId;
         DragGroupTitle = groupTitle;
+        DragGroupOriginPosition = groupOriginPosition;
         IsPanning = false;
         SelectionStartScreenPosition = null;
         IsMarqueeSelecting = false;
@@ -161,6 +167,7 @@ internal sealed class NodeCanvasInteractionSession
         DragNode = null;
         DragGroupId = null;
         DragGroupTitle = null;
+        DragGroupOriginPosition = null;
         DragStartScreenPosition = null;
         DragSession = null;
         DragGroupDropZones = [];

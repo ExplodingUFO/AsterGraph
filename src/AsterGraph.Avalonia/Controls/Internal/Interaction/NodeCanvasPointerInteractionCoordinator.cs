@@ -110,8 +110,7 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
             || _host.InteractionSession.DragNode is not null
             || _host.InteractionSession.DragGroupId is not null)
         {
-            if (_host.InteractionSession.DragNode is not null
-                || _host.InteractionSession.DragGroupId is not null)
+            if (_host.InteractionSession.DragNode is not null)
             {
                 if (_host.InteractionSession.DragSession is NodeCanvasDragSession dragSession
                     && _host.InteractionSession.DragStartScreenPosition is Point dragStart)
@@ -130,6 +129,10 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
                         _host.UpdateGroupVisuals();
                     }
                 }
+            }
+            else if (_host.InteractionSession.DragGroupId is not null)
+            {
+                handled = true;
             }
             else if (_host.InteractionSession.IsPanning)
             {
@@ -157,6 +160,22 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
             ApplyDraggedNodeGroupMembership(dragSession.Nodes, _host.InteractionSession.DragGroupDropZones);
         }
 
+        if (_host.InteractionSession.DragGroupId is not null
+            && _host.InteractionSession.DragGroupOriginPosition is GraphPoint groupOriginPosition
+            && _host.InteractionSession.DragStartScreenPosition is Point dragStart
+            && _host.ViewModel is not null)
+        {
+            var rawDelta = currentScreenPosition - dragStart;
+            var requestedPosition = new GraphPoint(
+                groupOriginPosition.X + (rawDelta.X / _host.ViewModel.Zoom),
+                groupOriginPosition.Y + (rawDelta.Y / _host.ViewModel.Zoom));
+            _host.ViewModel.TrySetNodeGroupPosition(
+                _host.InteractionSession.DragGroupId,
+                requestedPosition,
+                moveMemberNodes: true,
+                updateStatus: false);
+        }
+
         if (_host.InteractionSession.SelectionStartScreenPosition is not null)
         {
             if (_host.InteractionSession.IsMarqueeSelecting)
@@ -171,11 +190,7 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
             _host.HideSelectionAdorner();
         }
 
-        if (_host.InteractionSession.DragGroupId is not null)
-        {
-            _host.ViewModel?.CompleteHistoryInteraction($"Moved {_host.InteractionSession.DragGroupTitle}.");
-        }
-        else if (_host.InteractionSession.DragNode is not null)
+        if (_host.InteractionSession.DragNode is not null)
         {
             _host.ViewModel?.CompleteHistoryInteraction(
                 _host.ViewModel is not null && _host.ViewModel.HasMultipleSelection
@@ -251,13 +266,23 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
 
     private static bool IsNodeWithinGroupBounds(NodeViewModel node, GraphEditorNodeGroupSnapshot group)
     {
+        if (group.IsCollapsed)
+        {
+            return false;
+        }
+
+        if (group.ContentSize.Width <= 0d || group.ContentSize.Height <= 0d)
+        {
+            return false;
+        }
+
         var right = node.X + node.Width;
         var bottom = node.Y + node.Height;
-        var groupRight = group.Position.X + group.Size.Width;
-        var groupBottom = group.Position.Y + group.Size.Height;
+        var groupRight = group.ContentPosition.X + group.ContentSize.Width;
+        var groupBottom = group.ContentPosition.Y + group.ContentSize.Height;
 
-        return node.X >= group.Position.X
-               && node.Y >= group.Position.Y
+        return node.X >= group.ContentPosition.X
+               && node.Y >= group.ContentPosition.Y
                && right <= groupRight
                && bottom <= groupBottom;
     }

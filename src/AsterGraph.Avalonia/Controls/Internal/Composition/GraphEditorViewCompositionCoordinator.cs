@@ -125,11 +125,13 @@ internal sealed class GraphEditorViewCompositionCoordinator
         {
             _host.NodeCanvas.NodeVisualPresenter = presentation?.NodeVisualPresenter;
             _host.NodeCanvas.ContextMenuPresenter = presentation?.ContextMenuPresenter;
+            _host.NodeCanvas.NodeParameterEditorRegistry = presentation?.NodeParameterEditorRegistry;
         }
 
         if (_host.InspectorSurface is not null)
         {
             _host.InspectorSurface.InspectorPresenter = presentation?.InspectorPresenter;
+            _host.InspectorSurface.NodeParameterEditorRegistry = presentation?.NodeParameterEditorRegistry;
         }
 
         if (_host.MiniMapSurface is not null)

@@ -303,33 +303,10 @@
                                          FontWeight="SemiBold"
                                          Foreground="{DynamicResource AsterGraph.EyebrowBrush}" />
 
-                              <TextBox Text="{Binding StringValue}"
-                                       Classes="astergraph-input"
-                                       IsVisible="{Binding UsesTextInput}"
-                                       IsReadOnly="{Binding IsReadOnly}"
-                                       Watermark="{Binding InputWatermark}" />
-
-                              <TextBox Text="{Binding StringValue}"
-                                       Classes="astergraph-input"
-                                       IsVisible="{Binding UsesMultilineTextInput}"
-                                       IsReadOnly="{Binding IsReadOnly}"
-                                       AcceptsReturn="True"
-                                       TextWrapping="Wrap"
-                                       MinHeight="96"
-                                       Watermark="{Binding InputWatermark}" />
-
-                              <CheckBox Content="{Binding BooleanCaption}"
-                                        Classes="astergraph-input"
-                                        IsVisible="{Binding IsBoolean}"
-                                        IsThreeState="True"
-                                        IsChecked="{Binding BoolValue}"
-                                        IsEnabled="{Binding CanEdit}" />
-
-                              <ComboBox ItemsSource="{Binding Options}"
-                                        Classes="astergraph-input"
-                                        SelectedItem="{Binding SelectedOption}"
-                                        IsVisible="{Binding IsEnum}"
-                                        IsEnabled="{Binding CanEdit}" />
+                              <controls:NodeParameterEditorHost Parameter="{Binding}"
+                                                                 NodeParameterEditorRegistry="{Binding NodeParameterEditorRegistry, ElementName=Root}"
+                                                                 TemplateKey="{Binding Definition.TemplateKey}"
+                                                                 Usage="Inspector" />
 
                               <Border Classes="astergraph-parameter-state-pill"
                                       IsVisible="{Binding HasMixedValues}">

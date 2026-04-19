@@ -180,7 +180,7 @@ public sealed class GraphEditorProofRingTests
     }
 
     [Fact]
-    public void RuntimeSessionProof_CoversProgressiveNodeSurfaceAndEditorOnlyGroups()
+    public void RuntimeSessionProof_CoversTieredSurfaceAndFixedGroupFrames()
     {
         var session = AsterGraphEditorFactory.CreateSession(new AsterGraphEditorOptions
         {
@@ -191,12 +191,11 @@ public sealed class GraphEditorProofRingTests
 
         session.Commands.SetSelection([SourceNodeId, TargetNodeId], TargetNodeId, updateStatus: false);
 
-        Assert.True(session.Commands.TrySetNodeWidth(TargetNodeId, 336d, updateStatus: false));
-        Assert.True(session.Commands.TrySetNodeExpansionState(TargetNodeId, GraphNodeExpansionState.Expanded));
+        Assert.True(session.Commands.TrySetNodeSize(TargetNodeId, new GraphSize(420d, 260d), updateStatus: false));
 
         var groupId = session.Commands.TryCreateNodeGroupFromSelection("Proof Cluster");
         Assert.False(string.IsNullOrWhiteSpace(groupId));
-        Assert.True(session.Commands.TrySetNodeGroupExtraPadding(groupId, new GraphPadding(36, 52, 30, 24), updateStatus: false));
+        Assert.True(session.Commands.TrySetNodeGroupSize(groupId, new GraphSize(640d, 300d), updateStatus: false));
         Assert.True(session.Commands.TrySetNodeGroupCollapsed(groupId, isCollapsed: true));
         Assert.True(session.Commands.TrySetNodeGroupPosition(groupId, new GraphPoint(72, 88), moveMemberNodes: true, updateStatus: false));
 
@@ -211,15 +210,16 @@ public sealed class GraphEditorProofRingTests
             .Select(descriptor => descriptor.Id)
             .ToHashSet(StringComparer.Ordinal);
 
-        Assert.Equal(336d, surface.Size.Width);
-        Assert.Equal(GraphNodeExpansionState.Expanded, surface.ExpansionState);
+        Assert.Equal(new GraphSize(420d, 260d), surface.Size);
+        Assert.Equal(GraphNodeExpansionState.Collapsed, surface.ExpansionState);
+        Assert.Equal("inline-rich", surface.ActiveTier.Key);
         Assert.Equal(groupId, surface.GroupId);
         Assert.Equal("Proof Cluster", group.Title);
         Assert.True(group.IsCollapsed);
         Assert.Equal(new GraphPoint(72, 88), group.Position);
         Assert.Equal(group.Position, groupSnapshot.Position);
         Assert.Equal(group.Size, groupSnapshot.Size);
-        Assert.Equal(new GraphPadding(36, 52, 30, 24), group.ExtraPadding);
+        Assert.Equal(new GraphSize(640d, 300d), group.Size);
         Assert.Equal(
             [SourceNodeId, TargetNodeId],
             group.NodeIds.OrderBy(id => id, StringComparer.Ordinal));

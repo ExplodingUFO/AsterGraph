@@ -61,6 +61,11 @@ public interface INodeDefinition
     /// 参数定义集合。
     /// </summary>
     IReadOnlyList<NodeParameterDefinition> Parameters { get; }
+
+    /// <summary>
+    /// Optional node-specific size-tier policy override.
+    /// </summary>
+    NodeSurfaceTierProfile? SurfaceTierProfile { get; }
 }
 
 /// <summary>
@@ -82,6 +87,7 @@ public sealed record NodeDefinition : INodeDefinition
     /// <param name="accentHex">节点强调色。</param>
     /// <param name="defaultWidth">默认节点宽度。</param>
     /// <param name="defaultHeight">默认节点高度。</param>
+    /// <param name="surfaceTierProfile">可选的节点级尺寸分层策略覆盖。</param>
     public NodeDefinition(
         NodeDefinitionId id,
         string displayName,
@@ -93,7 +99,8 @@ public sealed record NodeDefinition : INodeDefinition
         string? description = null,
         string accentHex = "#FFFFFF",
         double defaultWidth = 220d,
-        double defaultHeight = 140d)
+        double defaultHeight = 140d,
+        NodeSurfaceTierProfile? surfaceTierProfile = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(displayName);
         ArgumentException.ThrowIfNullOrWhiteSpace(category);
@@ -126,6 +133,7 @@ public sealed record NodeDefinition : INodeDefinition
         InputPorts = [.. inputPorts];
         OutputPorts = [.. outputPorts];
         Parameters = parameters is null ? [] : [.. parameters];
+        SurfaceTierProfile = surfaceTierProfile;
 
         EnsureUniqueKeys(Parameters.Select(parameter => parameter.Key), "parameter");
     }
@@ -162,6 +170,11 @@ public sealed record NodeDefinition : INodeDefinition
 
     /// <inheritdoc />
     public IReadOnlyList<NodeParameterDefinition> Parameters { get; }
+
+    /// <summary>
+    /// Optional node-specific size-tier policy override.
+    /// </summary>
+    public NodeSurfaceTierProfile? SurfaceTierProfile { get; }
 
     private static void EnsureUniqueKeys(IEnumerable<string> keys, string scope)
     {

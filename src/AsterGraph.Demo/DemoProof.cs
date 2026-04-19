@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Globalization;
+using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Avalonia.Hosting;
 using AsterGraph.Core.Models;
 using AsterGraph.Demo.ViewModels;
@@ -10,14 +11,14 @@ public sealed record DemoProofResult(
     bool TrustTransparencyOk,
     bool ShellWorkflowOk,
     bool CommandSurfaceOk,
-    bool ProgressiveNodeSurfaceOk,
-    bool AdaptiveGroupBoundsOk,
+    bool TieredNodeSurfaceOk,
+    bool FixedGroupFrameOk,
     double StartupMs,
     double InspectorProjectionMs,
     double PluginScanMs,
     double CommandLatencyMs)
 {
-    public bool IsOk => TrustTransparencyOk && ShellWorkflowOk && CommandSurfaceOk && ProgressiveNodeSurfaceOk && AdaptiveGroupBoundsOk;
+    public bool IsOk => TrustTransparencyOk && ShellWorkflowOk && CommandSurfaceOk && TieredNodeSurfaceOk && FixedGroupFrameOk;
 
     public IReadOnlyList<string> MetricLines =>
     [
@@ -65,12 +66,20 @@ public static class DemoProof
         var rimMaskPort = lightingNode.Inputs.Single(port => string.Equals(port.Id, "rimMask", StringComparison.Ordinal));
         var lightSurface = shell.Editor.Session.Queries.GetNodeSurfaceSnapshots()
             .Single(snapshot => string.Equals(snapshot.NodeId, "light", StringComparison.Ordinal));
+        var lightingNodeTier = lightSurface.ActiveTier;
         var terrainGroup = shell.Editor.Session.Queries.GetNodeGroups()
             .SingleOrDefault(group => string.Equals(group.Id, "terrain-authoring", StringComparison.Ordinal));
         var terrainGroupSnapshot = shell.Editor.GetNodeGroupSnapshots()
             .SingleOrDefault(group => string.Equals(group.Id, "terrain-authoring", StringComparison.Ordinal));
-        var progressiveNodeSurfaceOk =
-            lightSurface.ExpansionState == GraphNodeExpansionState.Expanded
+        var gradientNode = shell.Editor.FindNode("gradient")
+            ?? throw new InvalidOperationException("Demo proof requires the gradient node.");
+        var tieredNodeSurfaceOk =
+            lightingNodeTier.Key == "inline-rich"
+            && lightingNodeTier.MinWidth == 420d
+            && lightingNodeTier.MinHeight == 250d
+            && lightingNodeTier.ShowsSection(NodeSurfaceSectionKeys.InlineInputs)
+            && lightingNodeTier.ShowsSection(NodeSurfaceSectionKeys.Parameters)
+            && string.Equals(lightingNodeTier.InlineEditorTemplateKey, "stock.inline.rich", StringComparison.Ordinal)
             && terrainGroup is not null
             && terrainGroup.NodeIds.Count == 2
             && shell.Editor.HasIncomingConnection(lightingNode, pulsePort)
@@ -79,21 +88,42 @@ public static class DemoProof
             && shell.Editor.ResolveInlineParameter(lightingNode, rimMaskPort)?.Key == "rimMask";
         var noiseNode = shell.Editor.FindNode("noise")
             ?? throw new InvalidOperationException("Demo proof requires the noise node.");
-        var adaptivePadding = new GraphPadding(52, 40, 44, 36);
-        var adaptiveBoundsOk =
-            terrainGroupSnapshot is not null
-            && shell.Editor.TrySetNodeGroupExtraPadding("terrain-authoring", adaptivePadding, updateStatus: false)
-            && shell.Editor.TrySetNodeWidth(noiseNode, noiseNode.Width + 48d, updateStatus: false);
+        var expectedGroupLeft = Math.Min(gradientNode.X, noiseNode.X);
+        var expectedGroupTop = Math.Min(gradientNode.Y, noiseNode.Y);
+        var expectedGroupRight = Math.Max(gradientNode.X + gradientNode.Width, noiseNode.X + noiseNode.Width);
+        var expectedGroupBottom = Math.Max(gradientNode.Y + gradientNode.Height, noiseNode.Y + noiseNode.Height);
+        var expectedGroupPosition = new GraphPoint(expectedGroupLeft, expectedGroupTop);
+        var expectedGroupSize = new GraphSize(expectedGroupRight - expectedGroupLeft, expectedGroupBottom - expectedGroupTop);
+        var resizedGroupFrameSize = new GraphSize(expectedGroupSize.Width + 84d, expectedGroupSize.Height + 56d);
+        if (terrainGroupSnapshot is null)
+        {
+            throw new InvalidOperationException("Demo proof requires the terrain authoring group snapshot.");
+        }
+
+        var fixedGroupFrameOk =
+            terrainGroupSnapshot.NodeIds.OrderBy(id => id, StringComparer.Ordinal).SequenceEqual(["gradient", "noise"])
+            && terrainGroupSnapshot.Position == expectedGroupPosition
+            && terrainGroupSnapshot.Size == expectedGroupSize
+            && terrainGroupSnapshot.ContentPosition == expectedGroupPosition
+            && terrainGroupSnapshot.ContentSize == expectedGroupSize
+            && terrainGroupSnapshot.ExtraPadding == default
+            && shell.Editor.TrySetNodeGroupSize("terrain-authoring", resizedGroupFrameSize, updateStatus: false);
+        var terrainGroupAfterFrameResize = shell.Editor.GetNodeGroupSnapshots()
+            .SingleOrDefault(group => string.Equals(group.Id, "terrain-authoring", StringComparison.Ordinal));
+        fixedGroupFrameOk =
+            fixedGroupFrameOk
+            && terrainGroupAfterFrameResize is not null
+            && terrainGroupAfterFrameResize.Position == terrainGroupSnapshot.Position
+            && terrainGroupAfterFrameResize.Size == resizedGroupFrameSize
+            && shell.Editor.TrySetNodeSize(noiseNode, new GraphSize(noiseNode.Width + 48d, noiseNode.Height + 36d), updateStatus: false);
         var terrainGroupAfterResize = shell.Editor.GetNodeGroupSnapshots()
             .SingleOrDefault(group => string.Equals(group.Id, "terrain-authoring", StringComparison.Ordinal));
-        var adaptiveGroupBoundsOk =
-            adaptiveBoundsOk
+        fixedGroupFrameOk =
+            fixedGroupFrameOk
             && terrainGroupAfterResize is not null
-            && terrainGroupAfterResize.ExtraPadding == adaptivePadding
-            && terrainGroupAfterResize.Position.X <= shell.Editor.FindNode("gradient")!.X
-            && terrainGroupAfterResize.Position.Y <= Math.Min(shell.Editor.FindNode("gradient")!.Y, shell.Editor.FindNode("noise")!.Y)
-            && terrainGroupAfterResize.Size.Width > terrainGroupSnapshot!.Size.Width
-            && terrainGroupAfterResize.Size.Height >= terrainGroupSnapshot.Size.Height;
+            && terrainGroupAfterResize.Position == terrainGroupSnapshot.Position
+            && terrainGroupAfterResize.Size == resizedGroupFrameSize
+            && terrainGroupAfterResize.NodeIds.OrderBy(id => id, StringComparer.Ordinal).SequenceEqual(["gradient", "noise"]);
 
         var exportPath = Path.Combine(storageRoot, "plugin-allowlist-proof.json");
         var trustTransparencyOk =
@@ -121,8 +151,8 @@ public static class DemoProof
             trustTransparencyOk,
             shellWorkflowOk,
             commandSurfaceOk,
-            progressiveNodeSurfaceOk,
-            adaptiveGroupBoundsOk,
+            tieredNodeSurfaceOk,
+            fixedGroupFrameOk,
             startupMs,
             inspectorProjectionMs,
             pluginScanMs,

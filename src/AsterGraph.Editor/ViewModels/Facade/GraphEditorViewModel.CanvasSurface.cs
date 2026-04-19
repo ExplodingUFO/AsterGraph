@@ -56,6 +56,15 @@ public sealed partial class GraphEditorViewModel
     }
 
     /// <summary>
+    /// Attempts to persist one node size through the session runtime surface path.
+    /// </summary>
+    public bool TrySetNodeSize(NodeViewModel node, GraphSize size, bool updateStatus = true)
+    {
+        ArgumentNullException.ThrowIfNull(node);
+        return _sessionHost.TrySetNodeSize(node.Id, size, updateStatus);
+    }
+
+    /// <summary>
     /// Attempts to persist one node expansion-state change through the session runtime surface path.
     /// </summary>
     public bool TrySetNodeExpansionState(NodeViewModel node, GraphNodeExpansionState expansionState)
@@ -104,12 +113,30 @@ public sealed partial class GraphEditorViewModel
     }
 
     /// <summary>
+    /// Attempts to update one group's fixed frame size.
+    /// </summary>
+    public bool TrySetNodeGroupSize(string groupId, GraphSize size, bool updateStatus = true)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(groupId);
+        return _sessionHost.TrySetNodeGroupSize(groupId, size, updateStatus);
+    }
+
+    /// <summary>
     /// Attempts to update one group's persisted per-edge padding envelope.
     /// </summary>
     public bool TrySetNodeGroupExtraPadding(string groupId, GraphPadding extraPadding, bool updateStatus = true)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(groupId);
         return _sessionHost.TrySetNodeGroupExtraPadding(groupId, extraPadding, updateStatus);
+    }
+
+    /// <summary>
+    /// Attempts to apply one or more node-group membership changes.
+    /// </summary>
+    public bool TrySetNodeGroupMemberships(IReadOnlyList<GraphEditorNodeGroupMembershipChange> changes, bool updateStatus = true)
+    {
+        ArgumentNullException.ThrowIfNull(changes);
+        return _sessionHost.TrySetNodeGroupMemberships(changes, updateStatus);
     }
 
     /// <summary>

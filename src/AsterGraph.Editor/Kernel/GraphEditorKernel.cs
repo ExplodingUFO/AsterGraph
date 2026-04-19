@@ -192,7 +192,48 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
         }
 
         _document = mutation.Document;
-        CurrentStatusMessage = $"Updated node width to {mutation.Width:0.##}.";
+        CurrentStatusMessage = $"Updated node width to {mutation.Size!.Value.Width:0.##}.";
+        MarkDirty(CurrentStatusMessage, GraphEditorDocumentChangeKind.LayoutChanged, [mutation.NodeId], null, preserveStatus: !updateStatus);
+        return true;
+    }
+
+    public bool TrySetNodeSize(string nodeId, GraphSize size, bool updateStatus)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(nodeId);
+
+        if (!_behaviorOptions.Commands.Nodes.AllowMove)
+        {
+            if (updateStatus)
+            {
+                CurrentStatusMessage = "Node surface editing is disabled by host permissions.";
+            }
+
+            return false;
+        }
+
+        if (size.Width <= 0d || size.Height <= 0d)
+        {
+            if (updateStatus)
+            {
+                CurrentStatusMessage = "Node size must be positive.";
+            }
+
+            return false;
+        }
+
+        var mutation = _documentMutator.SetNodeSize(_document, nodeId, size);
+        if (mutation.NodeId is null)
+        {
+            if (updateStatus)
+            {
+                CurrentStatusMessage = "No matching node size change was applied.";
+            }
+
+            return false;
+        }
+
+        _document = mutation.Document;
+        CurrentStatusMessage = $"Updated node size to {mutation.Size!.Value.Width:0.##} × {mutation.Size.Value.Height:0.##}.";
         MarkDirty(CurrentStatusMessage, GraphEditorDocumentChangeKind.LayoutChanged, [mutation.NodeId], null, preserveStatus: !updateStatus);
         return true;
     }
@@ -308,6 +349,47 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
         return true;
     }
 
+    public bool TrySetNodeGroupSize(string groupId, GraphSize size, bool updateStatus)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(groupId);
+
+        if (!_behaviorOptions.Commands.Nodes.AllowMove)
+        {
+            if (updateStatus)
+            {
+                CurrentStatusMessage = "Node grouping is disabled by host permissions.";
+            }
+
+            return false;
+        }
+
+        if (size.Width <= 0d || size.Height <= 0d)
+        {
+            if (updateStatus)
+            {
+                CurrentStatusMessage = "Group frame size must be positive.";
+            }
+
+            return false;
+        }
+
+        var mutation = _documentMutator.SetNodeGroupSize(_document, groupId, size);
+        if (mutation.Group is null)
+        {
+            if (updateStatus)
+            {
+                CurrentStatusMessage = "No matching group size change was applied.";
+            }
+
+            return false;
+        }
+
+        _document = mutation.Document;
+        CurrentStatusMessage = $"Resized group {mutation.Group.Title}.";
+        MarkDirty(CurrentStatusMessage, GraphEditorDocumentChangeKind.LayoutChanged, mutation.ChangedNodeIds, null, preserveStatus: !updateStatus);
+        return true;
+    }
+
     public bool TrySetNodeGroupExtraPadding(string groupId, GraphPadding extraPadding, bool updateStatus)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(groupId);
@@ -335,6 +417,39 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
 
         _document = mutation.Document;
         CurrentStatusMessage = $"Resized group {mutation.Group.Title}.";
+        MarkDirty(CurrentStatusMessage, GraphEditorDocumentChangeKind.LayoutChanged, mutation.ChangedNodeIds, null, preserveStatus: !updateStatus);
+        return true;
+    }
+
+    public bool TrySetNodeGroupMemberships(IReadOnlyList<GraphEditorNodeGroupMembershipChange> changes, bool updateStatus)
+    {
+        ArgumentNullException.ThrowIfNull(changes);
+
+        if (!_behaviorOptions.Commands.Nodes.AllowMove)
+        {
+            if (updateStatus)
+            {
+                CurrentStatusMessage = "Node grouping is disabled by host permissions.";
+            }
+
+            return false;
+        }
+
+        var mutation = _documentMutator.SetNodeGroupMemberships(_document, changes);
+        if (mutation.ChangedNodeIds.Count == 0)
+        {
+            if (updateStatus)
+            {
+                CurrentStatusMessage = "No node-group membership changes were applied.";
+            }
+
+            return false;
+        }
+
+        _document = mutation.Document;
+        CurrentStatusMessage = mutation.ChangedNodeIds.Count == 1
+            ? "Updated 1 node-group membership."
+            : $"Updated {mutation.ChangedNodeIds.Count} node-group memberships.";
         MarkDirty(CurrentStatusMessage, GraphEditorDocumentChangeKind.LayoutChanged, mutation.ChangedNodeIds, null, preserveStatus: !updateStatus);
         return true;
     }
@@ -586,7 +701,9 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
             .Select(node =>
             {
                 var surface = node.Surface ?? GraphNodeSurfaceState.Default;
-                return new GraphEditorNodeSurfaceSnapshot(node.Id, node.Size, surface.ExpansionState, surface.GroupId);
+                var definition = GraphEditorNodeSurfaceTierResolver.ResolveDefinition(_nodeCatalog, node.DefinitionId);
+                var activeTier = GraphEditorNodeSurfaceTierResolver.ResolveActiveTier(node.Size, _behaviorOptions, definition);
+                return new GraphEditorNodeSurfaceSnapshot(node.Id, node.Size, activeTier, surface.ExpansionState, surface.GroupId);
             })
             .ToList();
 
@@ -600,9 +717,8 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
             return [];
         }
 
-        var boundsByNodeId = CreateGroupMemberBounds(_document.Nodes);
         return _document.Groups
-            .Select(group => GraphEditorNodeGroupLayoutResolver.CreateSnapshot(group, boundsByNodeId))
+            .Select(GraphEditorNodeGroupLayoutResolver.CreateSnapshot)
             .ToList();
     }
 
@@ -796,7 +912,7 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
             node => node.Id,
             node => new GraphEditorNodeGroupMemberBounds(
                 node.Position,
-                new GraphSize(node.Size.Width, GraphEditorNodeSurfaceMetrics.CalculateRenderedHeight(node))),
+                node.Size),
             StringComparer.Ordinal);
 
     private string CreateNodeId(NodeDefinitionId definitionId)

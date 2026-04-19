@@ -9,6 +9,7 @@ internal static class GraphEditorCommandDescriptorCatalog
             ["selection.set"] = new("Set Selection", "selection", "select", null),
             ["selection.delete"] = new("Delete Selection", "selection", "delete", "Delete"),
             ["nodes.move"] = new("Move Nodes", "nodes", "move", null),
+            ["nodes.resize"] = new("Resize Node", "nodes", "resize", null),
             ["nodes.resize-width"] = new("Resize Node Width", "nodes", "resize-width", null),
             ["nodes.surface.expand"] = new("Toggle Node Expansion", "nodes", "expand", null),
             ["nodes.parameters.set"] = new("Edit Parameters", "nodes", "parameter", null),

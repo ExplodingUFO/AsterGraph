@@ -40,6 +40,8 @@ internal interface INodeCanvasSceneHost
 
     IGraphNodeVisualPresenter StockNodeVisualPresenter { get; }
 
+    INodeParameterEditorRegistry? NodeParameterEditorRegistry { get; }
+
     NodeCanvasInteractionSession InteractionSession { get; }
 
     NodeCanvasContextMenuCoordinator ContextMenuCoordinator { get; }
@@ -55,7 +57,7 @@ internal interface INodeCanvasSceneHost
 
 internal sealed record NodeCanvasRenderedGroupVisual(
     Border Root,
-    Button HeaderButton,
+    Border HeaderControl,
     Border BodyBorder,
     TextBlock TitleText,
     Thumb LeftResizeThumb,
@@ -186,19 +188,10 @@ internal sealed class NodeCanvasSceneHost
             BorderThickness = new Thickness(1),
         };
         AutomationProperties.SetName(root, $"{group.Title} group");
-        root.PointerPressed += (_, args) =>
-        {
-            if (args.Source is Thumb)
-            {
-                return;
-            }
-
-            _host.BeginGroupDrag(group, args);
-        };
 
         var layout = new Grid
         {
-            RowDefinitions = new RowDefinitions("40,*"),
+            RowDefinitions = new RowDefinitions($"{NodeCanvasGroupChromeMetrics.HeaderHeight},*"),
         };
         var chrome = new Grid();
         chrome.Children.Add(layout);
@@ -210,16 +203,25 @@ internal sealed class NodeCanvasSceneHost
             VerticalAlignment = VerticalAlignment.Center,
         };
 
-        var header = new Button
+        var header = new Border
         {
             Background = Brushes.Transparent,
-            BorderThickness = new Thickness(0),
-            Padding = new Thickness(12, 8),
-            HorizontalContentAlignment = HorizontalAlignment.Left,
-            Content = titleText,
+            Padding = new Thickness(
+                NodeCanvasGroupChromeMetrics.HeaderHorizontalPadding,
+                NodeCanvasGroupChromeMetrics.HeaderVerticalPadding),
+            Child = titleText,
         };
         AutomationProperties.SetName(header, $"{group.Title} group header");
-        header.Click += (_, _) =>
+        header.PointerPressed += (_, args) =>
+        {
+            if (args.Source is Thumb)
+            {
+                return;
+            }
+
+            _host.BeginGroupDrag(group, args);
+        };
+        header.Tapped += (_, _) =>
         {
             var currentGroup = ResolveCurrentGroupSnapshot(group.Id);
             if (_host.ViewModel is null || currentGroup is null)
@@ -254,7 +256,11 @@ internal sealed class NodeCanvasSceneHost
 
         var body = new Border
         {
-            Margin = new Thickness(12, 0, 12, 12),
+            Margin = new Thickness(
+                NodeCanvasGroupChromeMetrics.HeaderHorizontalPadding,
+                0,
+                NodeCanvasGroupChromeMetrics.HeaderHorizontalPadding,
+                NodeCanvasGroupChromeMetrics.BottomInset),
             BorderThickness = new Thickness(1),
             CornerRadius = new CornerRadius(12),
         };
@@ -267,7 +273,7 @@ internal sealed class NodeCanvasSceneHost
             new Cursor(StandardCursorType.SizeWestEast),
             HorizontalAlignment.Left,
             VerticalAlignment.Stretch,
-            width: 12d,
+            width: NodeCanvasGroupChromeMetrics.ResizeHandleThickness,
             height: double.NaN,
             vector => vector.X,
             (padding, delta) => padding with { Left = padding.Left - delta });
@@ -278,7 +284,7 @@ internal sealed class NodeCanvasSceneHost
             HorizontalAlignment.Stretch,
             VerticalAlignment.Top,
             width: double.NaN,
-            height: 12d,
+            height: NodeCanvasGroupChromeMetrics.ResizeHandleThickness,
             vector => vector.Y,
             (padding, delta) => padding with { Top = padding.Top - delta });
         var rightThumb = CreateGroupResizeThumb(
@@ -287,7 +293,7 @@ internal sealed class NodeCanvasSceneHost
             new Cursor(StandardCursorType.SizeWestEast),
             HorizontalAlignment.Right,
             VerticalAlignment.Stretch,
-            width: 12d,
+            width: NodeCanvasGroupChromeMetrics.ResizeHandleThickness,
             height: double.NaN,
             vector => vector.X,
             (padding, delta) => padding with { Right = padding.Right + delta });
@@ -298,7 +304,7 @@ internal sealed class NodeCanvasSceneHost
             HorizontalAlignment.Stretch,
             VerticalAlignment.Bottom,
             width: double.NaN,
-            height: 12d,
+            height: NodeCanvasGroupChromeMetrics.ResizeHandleThickness,
             vector => vector.Y,
             (padding, delta) => padding with { Bottom = padding.Bottom + delta });
 
@@ -323,10 +329,9 @@ internal sealed class NodeCanvasSceneHost
             .ToHashSet(StringComparer.Ordinal);
         var isSelected = group.NodeIds.Count > 0 && group.NodeIds.All(selectedNodeIds.Contains);
         var isDropTarget = string.Equals(_host.InteractionSession.HoveredDropGroupId, group.Id, StringComparison.Ordinal);
-        var headerHeight = 40d;
-        var renderedHeight = group.IsCollapsed ? headerHeight : Math.Max(headerHeight + 16d, group.Size.Height);
+        var renderedHeight = NodeCanvasGroupChromeMetrics.ResolveRenderedHeight(group);
 
-        visual.Root.Width = Math.Max(168d, group.Size.Width);
+        visual.Root.Width = NodeCanvasGroupChromeMetrics.ResolveRenderedWidth(group);
         visual.Root.Height = renderedHeight;
         visual.Root.BorderBrush = BrushFactory.Solid(
             isDropTarget ? "#F8CF6A" : isSelected ? "#7FE7D7" : "#365063",
@@ -337,13 +342,15 @@ internal sealed class NodeCanvasSceneHost
         Canvas.SetLeft(visual.Root, group.Position.X);
         Canvas.SetTop(visual.Root, group.Position.Y);
 
-        visual.HeaderButton.Background = BrushFactory.Solid(
+        visual.HeaderControl.Background = BrushFactory.Solid(
             isDropTarget ? "#4A3917" : isSelected ? "#173241" : "#132131",
             0.96);
         visual.TitleText.Text = $"{group.Title} ({group.NodeIds.Count})";
         visual.TitleText.Foreground = BrushFactory.Solid(isSelected ? "#F4FFFC" : "#D8EEF3", 0.98);
         visual.BodyBorder.IsVisible = !group.IsCollapsed;
-        visual.BodyBorder.Height = Math.Max(0d, renderedHeight - headerHeight - 12d);
+        visual.BodyBorder.Height = Math.Max(
+            0d,
+            renderedHeight - NodeCanvasGroupChromeMetrics.HeaderHeight - NodeCanvasGroupChromeMetrics.BottomInset);
         visual.BodyBorder.BorderBrush = BrushFactory.Solid("#365063", 0.6);
         visual.BodyBorder.Background = BrushFactory.Solid("#122130", 0.32);
     }
@@ -398,10 +405,12 @@ internal sealed class NodeCanvasSceneHost
             editor.StyleOptions,
             _host.FocusCanvas,
             _host.BeginNodeDrag,
+            (targetNode, size, updateStatus) => editor.TrySetNodeSize(targetNode, size, updateStatus),
             (targetNode, width, updateStatus) => editor.TrySetNodeWidth(targetNode, width, updateStatus),
             (targetNode, expansionState) => editor.TrySetNodeExpansionState(targetNode, expansionState),
             (targetNode, port) => editor.HasIncomingConnection(targetNode, port),
             (targetNode, port) => editor.ResolveInlineParameter(targetNode, port),
+            _host.NodeParameterEditorRegistry,
             _host.ActivatePort,
             _host.ContextMenuCoordinator.OpenNodeContextMenu,
             _host.ContextMenuCoordinator.OpenPortContextMenu);

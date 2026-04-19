@@ -8,7 +8,7 @@ namespace AsterGraph.Core.Serialization;
 /// </summary>
 internal static class GraphDocumentCompatibility
 {
-    public const int CurrentSchemaVersion = 3;
+    public const int CurrentSchemaVersion = 4;
 
     public static GraphDocumentSerializer.GraphDocumentFilePayload CreatePayload(GraphDocument document)
     {
@@ -52,27 +52,58 @@ internal static class GraphDocumentCompatibility
     {
         ArgumentNullException.ThrowIfNull(document);
 
+        var groups = document.Groups ?? [];
+        var validGroupIds = groups
+            .Select(group => group.Id)
+            .Where(id => !string.IsNullOrWhiteSpace(id))
+            .ToHashSet(StringComparer.Ordinal);
+        var fallbackMembershipByNodeId = groups
+            .SelectMany(group => group.NodeIds
+                .Where(nodeId => !string.IsNullOrWhiteSpace(nodeId))
+                .Select(nodeId => new KeyValuePair<string, string>(nodeId, group.Id)))
+            .GroupBy(pair => pair.Key, StringComparer.Ordinal)
+            .ToDictionary(group => group.Key, group => group.Last().Value, StringComparer.Ordinal);
+
         var normalizedNodes = document.Nodes
             .Select(node => node with { Surface = node.Surface ?? GraphNodeSurfaceState.Default })
+            .Select(node =>
+            {
+                var currentGroupId = node.Surface?.GroupId;
+                if (!string.IsNullOrWhiteSpace(currentGroupId) && validGroupIds.Contains(currentGroupId))
+                {
+                    return node;
+                }
+
+                if (fallbackMembershipByNodeId.TryGetValue(node.Id, out var fallbackGroupId)
+                    && validGroupIds.Contains(fallbackGroupId))
+                {
+                    return node with
+                    {
+                        Surface = (node.Surface ?? GraphNodeSurfaceState.Default) with { GroupId = fallbackGroupId },
+                    };
+                }
+
+                return node with
+                {
+                    Surface = (node.Surface ?? GraphNodeSurfaceState.Default) with { GroupId = null },
+                };
+            })
             .ToList();
 
         return document with
         {
             Nodes = normalizedNodes,
-            Groups = NormalizeGroups(document.Groups, normalizedNodes, schemaVersion),
+            Groups = NormalizeGroups(groups, normalizedNodes, schemaVersion),
         };
     }
 
     private static List<GraphNodeGroup> NormalizeGroups(
-        IReadOnlyList<GraphNodeGroup>? groups,
+        IReadOnlyList<GraphNodeGroup> groups,
         IReadOnlyList<GraphNode> nodes,
         int? schemaVersion)
-    {
-        var normalizedGroups = (groups ?? [])
+        => groups
             .Select(group => NormalizeGroup(group, nodes, schemaVersion))
             .ToList();
-        return normalizedGroups;
-    }
 
     private static GraphNodeGroup NormalizeGroup(
         GraphNodeGroup group,
@@ -82,41 +113,19 @@ internal static class GraphDocumentCompatibility
         ArgumentNullException.ThrowIfNull(group);
         ArgumentNullException.ThrowIfNull(nodes);
 
-        var nodeBounds = nodes
-            .Where(node => group.NodeIds.Contains(node.Id, StringComparer.Ordinal))
-            .ToList();
-        if (nodeBounds.Count == 0)
-        {
-            return group with
-            {
-                NodeIds = group.NodeIds.ToList(),
-                ExtraPadding = group.ExtraPadding.ClampNonNegative(),
-            };
-        }
-
-        var contentLeft = nodeBounds.Min(node => node.Position.X);
-        var contentTop = nodeBounds.Min(node => node.Position.Y);
-        var contentRight = nodeBounds.Max(node => node.Position.X + node.Size.Width);
-        var contentBottom = nodeBounds.Max(node => node.Position.Y + node.Size.Height);
-
         var padding = schemaVersion is null or < 3
-            ? new GraphPadding(
-                contentLeft - group.Position.X,
-                contentTop - group.Position.Y,
-                (group.Position.X + group.Size.Width) - contentRight,
-                (group.Position.Y + group.Size.Height) - contentBottom).ClampNonNegative()
+            ? new GraphPadding(24d, 44d, 24d, 28d)
             : group.ExtraPadding.ClampNonNegative();
-
-        var position = new GraphPoint(contentLeft - padding.Left, contentTop - padding.Top);
-        var size = new GraphSize(
-            (contentRight - contentLeft) + padding.Left + padding.Right,
-            (contentBottom - contentTop) + padding.Top + padding.Bottom);
+        var nodeIds = nodes
+            .Where(node => string.Equals(node.Surface?.GroupId, group.Id, StringComparison.Ordinal))
+            .Select(node => node.Id)
+            .ToList();
 
         return group with
         {
-            Position = position,
-            Size = size,
-            NodeIds = group.NodeIds.ToList(),
+            Position = group.Position,
+            Size = group.Size,
+            NodeIds = nodeIds,
             ExtraPadding = padding,
         };
     }

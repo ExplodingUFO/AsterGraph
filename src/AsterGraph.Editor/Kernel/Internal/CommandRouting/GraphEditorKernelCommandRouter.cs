@@ -43,13 +43,19 @@ internal interface IGraphEditorKernelCommandRouterHost
 
     void SetNodePositions(IReadOnlyList<NodePositionSnapshot> positions, bool updateStatus);
 
+    bool TrySetNodeSize(string nodeId, GraphSize size, bool updateStatus);
+
     string TryCreateNodeGroupFromSelection(string title);
 
     bool TrySetNodeGroupCollapsed(string groupId, bool isCollapsed);
 
     bool TrySetNodeGroupPosition(string groupId, GraphPoint position, bool moveMemberNodes, bool updateStatus);
 
+    bool TrySetNodeGroupSize(string groupId, GraphSize size, bool updateStatus);
+
     bool TrySetNodeGroupExtraPadding(string groupId, GraphPadding extraPadding, bool updateStatus);
+
+    bool TrySetNodeGroupMemberships(IReadOnlyList<GraphEditorNodeGroupMembershipChange> changes, bool updateStatus);
 
     bool TrySetSelectedNodeParameterValue(string parameterKey, object? value);
 
@@ -115,6 +121,10 @@ internal sealed class GraphEditorKernelCommandRouter
                 GraphEditorCommandSourceKind.Kernel,
                 _host.BehaviorOptions.Commands.Nodes.AllowMove),
             GraphEditorCommandDescriptorCatalog.Create(
+                "nodes.resize",
+                GraphEditorCommandSourceKind.Kernel,
+                _host.BehaviorOptions.Commands.Nodes.AllowMove),
+            GraphEditorCommandDescriptorCatalog.Create(
                 "nodes.parameters.set",
                 GraphEditorCommandSourceKind.Kernel,
                 _host.CanEditSelectedNodeParameters,
@@ -135,6 +145,10 @@ internal sealed class GraphEditorKernelCommandRouter
                 _host.Document.Groups?.Count > 0 && _host.BehaviorOptions.Commands.Nodes.AllowMove),
             GraphEditorCommandDescriptorCatalog.Create(
                 "groups.resize",
+                GraphEditorCommandSourceKind.Kernel,
+                _host.Document.Groups?.Count > 0 && _host.BehaviorOptions.Commands.Nodes.AllowMove),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "groups.membership.set",
                 GraphEditorCommandSourceKind.Kernel,
                 _host.Document.Groups?.Count > 0 && _host.BehaviorOptions.Commands.Nodes.AllowMove),
             GraphEditorCommandDescriptorCatalog.Create(
@@ -275,6 +289,19 @@ internal sealed class GraphEditorKernelCommandRouter
                 _host.SetNodePositions(positions.Select(position => position!).ToList(), ResolveOptionalUpdateStatus(command, "updateStatus"));
                 return true;
 
+            case "nodes.resize":
+                if (!TryGetRequiredArgument(command, "nodeId", out var resizeNodeId)
+                    || !TryGetDoubleArgument(command, "width", out var nodeWidth)
+                    || !TryGetDoubleArgument(command, "height", out var nodeHeight))
+                {
+                    return false;
+                }
+
+                return _host.TrySetNodeSize(
+                    resizeNodeId,
+                    new GraphSize(nodeWidth, nodeHeight),
+                    ResolveOptionalUpdateStatus(command, "updateStatus"));
+
             case "nodes.parameters.set":
                 if (!TryGetRequiredArgument(command, "parameterKey", out var parameterKey)
                     || !command.TryGetArgument("value", out var parameterValue))
@@ -318,17 +345,28 @@ internal sealed class GraphEditorKernelCommandRouter
 
             case "groups.resize":
                 if (!TryGetRequiredArgument(command, "groupId", out var resizeGroupId)
-                    || !TryGetDoubleArgument(command, "left", out var left)
-                    || !TryGetDoubleArgument(command, "top", out var top)
-                    || !TryGetDoubleArgument(command, "right", out var right)
-                    || !TryGetDoubleArgument(command, "bottom", out var bottom))
+                    || !TryGetDoubleArgument(command, "width", out var resizeWidth)
+                    || !TryGetDoubleArgument(command, "height", out var resizeHeight))
                 {
                     return false;
                 }
 
-                return _host.TrySetNodeGroupExtraPadding(
+                return _host.TrySetNodeGroupSize(
                     resizeGroupId,
-                    new GraphPadding(left, top, right, bottom),
+                    new GraphSize(resizeWidth, resizeHeight),
+                    ResolveOptionalUpdateStatus(command, "updateStatus"));
+
+            case "groups.membership.set":
+                var membershipChanges = command.GetArguments("membership")
+                    .Select(ParseGroupMembershipChange)
+                    .ToList();
+                if (membershipChanges.Count == 0 || membershipChanges.Any(change => change is null))
+                {
+                    return false;
+                }
+
+                return _host.TrySetNodeGroupMemberships(
+                    membershipChanges.Select(change => change!).ToList(),
                     ResolveOptionalUpdateStatus(command, "updateStatus"));
 
             case "connections.start":
@@ -534,6 +572,24 @@ internal sealed class GraphEditorKernelCommandRouter
         }
 
         return new NodePositionSnapshot(parts[0], new GraphPoint(x, y));
+    }
+
+    private static GraphEditorNodeGroupMembershipChange? ParseGroupMembershipChange(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return null;
+        }
+
+        var parts = value.Split('|', StringSplitOptions.TrimEntries);
+        if (parts.Length != 2 || string.IsNullOrWhiteSpace(parts[0]))
+        {
+            return null;
+        }
+
+        return new GraphEditorNodeGroupMembershipChange(
+            parts[0],
+            string.IsNullOrWhiteSpace(parts[1]) ? null : parts[1]);
     }
 
     private static bool TryGetRequiredArgument(

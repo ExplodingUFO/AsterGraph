@@ -15,9 +15,9 @@ It belongs to the supported published package set with `AsterGraph.Abstractions`
 
 - `IGraphEditorSession` plus `Commands`, `Queries`, `Events`, and mutation batching
 - definition-driven parameter snapshots, validation-aware inspector data, and batch parameter editing
-- node-surface queries and mutations for persisted width, card expansion, resolved node-group bounds, persisted per-edge group padding, and editor-only node groups
+- node-surface queries and mutations for persisted node size, resolved width/height tiers, fixed node-group frames, geometry-based membership, and editor-only node groups
 - `AsterGraphEditorFactory` and `AsterGraphEditorOptions`
-- replaceable storage, clipboard, diagnostics, localization, menu, and presentation seams
+- replaceable storage, clipboard, diagnostics, localization, menu, presentation, and inline-editor registry seams
 - plugin discovery, trust policy, load inspection, and automation entry points
 - retained migration facades such as `GraphEditorViewModel`
 
@@ -36,7 +36,7 @@ Those responsibilities live in `AsterGraph.Avalonia` or the consuming host.
   - `AsterGraphEditorFactory.Create(...)`
   - `IGraphEditorSession`
 - DTO/snapshot queries such as `GetCompatiblePortTargets(...)`, `GetNodeSurfaceSnapshots()`, `GetNodeGroups()`, and `GetNodeGroupSnapshots()`
-- group-bound mutations such as `TrySetNodeGroupExtraPadding(...)` when a host wants to keep deliberate whitespace without breaking auto-fit framing
+- node/group mutations such as `TrySetNodeSize(...)`, `TrySetNodeGroupPosition(...)`, `TrySetNodeGroupSize(...)`, and `TrySetNodeGroupMemberships(...)`
 - retained compatibility surfaces:
   - `GraphEditorViewModel`
   - `GraphEditorView`
@@ -44,6 +44,8 @@ Those responsibilities live in `AsterGraph.Avalonia` or the consuming host.
 - compatibility-only shims:
   - `GetCompatibleTargets(...)`
   - `CompatiblePortTarget`
+  - `TrySetNodeExpansionState(...)`
+  - `TrySetNodeGroupExtraPadding(...)`
 
 Keep new code on the stable canonical surfaces. Treat retained and compatibility-only APIs as migration support.
 
@@ -53,8 +55,8 @@ Keep new code on the stable canonical surfaces. Treat retained and compatibility
 - canonical onboarding: [Quick Start](../../docs/en/quick-start.md)
 - route and package boundary details: [Host Integration](../../docs/en/host-integration.md)
 - definition-driven inspector recipe: [Authoring Inspector Recipe](../../docs/en/authoring-inspector-recipe.md)
-- progressive node-surface route: resize, expand, inline literal authoring, and adaptive group framing travel through the same session/runtime path
-- adaptive group framing resolves as `member bounds + persisted extra padding`, so hosts can consume stable snapshots instead of recomputing group geometry in UI code
+- tiered node-surface route: width/height resize, inline literal authoring, fixed user-owned group frames, and geometry-based group membership travel through the same session/runtime path
+- hosts can consume `GetNodeSurfaceSnapshots()` plus `GetNodeGroupSnapshots()` and drive `TrySetNodeSize(...)`, `TrySetNodeGroupSize(...)`, and `TrySetNodeGroupMemberships(...)` instead of recomputing canvas geometry in UI code
 - plugin and custom-node starting point: [Plugin And Custom Node Recipe](../../docs/en/plugin-recipe.md)
 - retained-to-session migration guide: [Retained-To-Session Migration Recipe](../../docs/en/retained-migration-recipe.md)
 - stability, precedence, and retirement rules: [Extension Contracts](../../docs/en/extension-contracts.md)

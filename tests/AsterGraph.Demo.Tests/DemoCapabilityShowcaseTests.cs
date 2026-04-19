@@ -7,6 +7,7 @@ using Avalonia.Headless.XUnit;
 using Avalonia.VisualTree;
 using Avalonia.Automation;
 using AsterGraph.Avalonia.Controls;
+using AsterGraph.Core.Models;
 using AsterGraph.Demo;
 using AsterGraph.Demo.ViewModels;
 using AsterGraph.Demo.Views;
@@ -27,7 +28,7 @@ public sealed class DemoCapabilityShowcaseTests
         Assert.Contains(viewModel.Capabilities, item => item.Key == "automation-execution");
         Assert.Contains(viewModel.Capabilities, item => item.Key == "consumer-host-path");
         Assert.Contains(viewModel.Capabilities, item => item.Key == "history-save-contract");
-        Assert.Contains(viewModel.Capabilities, item => item.Key == "progressive-node-surface");
+        Assert.Contains(viewModel.Capabilities, item => item.Key == "tiered-surface-layout");
     }
 
     [Fact]
@@ -119,8 +120,8 @@ public sealed class DemoCapabilityShowcaseTests
         Assert.True(result.TrustTransparencyOk);
         Assert.True(result.ShellWorkflowOk);
         Assert.True(result.CommandSurfaceOk);
-        Assert.True(result.ProgressiveNodeSurfaceOk);
-        Assert.True(result.AdaptiveGroupBoundsOk);
+        Assert.True(result.TieredNodeSurfaceOk);
+        Assert.True(result.FixedGroupFrameOk);
         Assert.True(result.StartupMs >= 0);
         Assert.True(result.InspectorProjectionMs >= 0);
         Assert.True(result.PluginScanMs >= 0);
@@ -177,7 +178,7 @@ public sealed class DemoCapabilityShowcaseTests
     }
 
     [AvaloniaFact]
-    public void MainWindow_RendersProgressiveNodeSurfaceShowcaseArtifacts()
+    public void MainWindow_RendersFixedGroupAndSizeDrivenTierShowcaseArtifacts()
     {
         var viewModel = new MainWindowViewModel();
         var window = new MainWindow
@@ -195,8 +196,13 @@ public sealed class DemoCapabilityShowcaseTests
         Assert.Contains(viewModel.Editor.GetNodeGroups(), group => group.Id == "terrain-authoring");
         Assert.Contains(
             viewModel.Editor.GetNodeGroupSnapshots(),
-            group => group.Id == "terrain-authoring" && group.ExtraPadding.Left > 0d);
-        Assert.Contains(viewModel.Editor.Nodes, node => node.Id == "light" && node.IsExpanded);
+            group => group.Id == "terrain-authoring"
+                && group.Position == new GraphPoint(340, 40)
+                && group.Size == new GraphSize(292, 446)
+                && group.ExtraPadding == default);
+        var lightSurface = Assert.Single(viewModel.Editor.Session.Queries.GetNodeSurfaceSnapshots(), snapshot => snapshot.NodeId == "light");
+        Assert.Equal(GraphNodeExpansionState.Collapsed, lightSurface.ExpansionState);
+        Assert.Equal("inline-rich", lightSurface.ActiveTier.Key);
         Assert.Contains(
             canvas!.GetVisualDescendants().OfType<Border>(),
             border => string.Equals(

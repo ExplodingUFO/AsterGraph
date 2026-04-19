@@ -53,6 +53,19 @@ public sealed partial class GraphEditorSession
         return edited;
     }
 
+    public bool TrySetNodeSize(string nodeId, GraphSize size, bool updateStatus = true)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(nodeId);
+
+        var edited = _host.TrySetNodeSize(nodeId, size, updateStatus);
+        if (edited)
+        {
+            PublishCommandExecuted("nodes.resize");
+        }
+
+        return edited;
+    }
+
     public bool TrySetNodeExpansionState(string nodeId, GraphNodeExpansionState expansionState)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(nodeId);
@@ -105,6 +118,19 @@ public sealed partial class GraphEditorSession
         return edited;
     }
 
+    public bool TrySetNodeGroupSize(string groupId, GraphSize size, bool updateStatus = true)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(groupId);
+
+        var edited = _host.TrySetNodeGroupSize(groupId, size, updateStatus);
+        if (edited)
+        {
+            PublishCommandExecuted("groups.resize");
+        }
+
+        return edited;
+    }
+
     public bool TrySetNodeGroupExtraPadding(string groupId, GraphPadding extraPadding, bool updateStatus = true)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(groupId);
@@ -113,6 +139,19 @@ public sealed partial class GraphEditorSession
         if (edited)
         {
             PublishCommandExecuted("groups.resize");
+        }
+
+        return edited;
+    }
+
+    public bool TrySetNodeGroupMemberships(IReadOnlyList<GraphEditorNodeGroupMembershipChange> changes, bool updateStatus = true)
+    {
+        ArgumentNullException.ThrowIfNull(changes);
+
+        var edited = _host.TrySetNodeGroupMemberships(changes, updateStatus);
+        if (edited)
+        {
+            PublishCommandExecuted("groups.membership.set");
         }
 
         return edited;

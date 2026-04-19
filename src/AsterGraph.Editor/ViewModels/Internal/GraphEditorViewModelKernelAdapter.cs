@@ -71,6 +71,9 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
     public bool TrySetNodeWidth(string nodeId, double width, bool updateStatus)
         => _kernel.TrySetNodeWidth(nodeId, width, updateStatus);
 
+    public bool TrySetNodeSize(string nodeId, GraphSize size, bool updateStatus)
+        => _kernel.TrySetNodeSize(nodeId, size, updateStatus);
+
     public bool TrySetNodeExpansionState(string nodeId, GraphNodeExpansionState expansionState)
         => _kernel.TrySetNodeExpansionState(nodeId, expansionState);
 
@@ -83,8 +86,14 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
     public bool TrySetNodeGroupPosition(string groupId, GraphPoint position, bool moveMemberNodes, bool updateStatus)
         => _kernel.TrySetNodeGroupPosition(groupId, position, moveMemberNodes, updateStatus);
 
+    public bool TrySetNodeGroupSize(string groupId, GraphSize size, bool updateStatus)
+        => _kernel.TrySetNodeGroupSize(groupId, size, updateStatus);
+
     public bool TrySetNodeGroupExtraPadding(string groupId, GraphPadding extraPadding, bool updateStatus)
         => _kernel.TrySetNodeGroupExtraPadding(groupId, extraPadding, updateStatus);
+
+    public bool TrySetNodeGroupMemberships(IReadOnlyList<GraphEditorNodeGroupMembershipChange> changes, bool updateStatus)
+        => _kernel.TrySetNodeGroupMemberships(changes, updateStatus);
 
     public bool TrySetSelectedNodeParameterValue(string parameterKey, object? value)
         => _kernel.TrySetSelectedNodeParameterValue(parameterKey, value);
@@ -138,24 +147,7 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
     public IReadOnlyList<GraphNodeGroup> GetNodeGroups() => _kernel.GetNodeGroups();
 
     public IReadOnlyList<GraphEditorNodeGroupSnapshot> GetNodeGroupSnapshots()
-    {
-        var groups = _kernel.GetNodeGroups();
-        if (groups.Count == 0)
-        {
-            return [];
-        }
-
-        var boundsByNodeId = _owner.Nodes.ToDictionary(
-            node => node.Id,
-            node => new GraphEditorNodeGroupMemberBounds(
-                new GraphPoint(node.X, node.Y),
-                new GraphSize(node.Width, node.Height)),
-            StringComparer.Ordinal);
-
-        return groups
-            .Select(group => GraphEditorNodeGroupLayoutResolver.CreateSnapshot(group, boundsByNodeId))
-            .ToList();
-    }
+        => _kernel.GetNodeGroupSnapshots();
 
     public IReadOnlyList<GraphEditorCommandDescriptorSnapshot> GetCommandDescriptors()
     {

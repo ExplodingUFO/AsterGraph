@@ -54,7 +54,7 @@ public sealed class GraphEditorPresentationTests
     }
 
     [Fact]
-    public void RefreshNodePresentation_RecalculatesHeightWhenStatusBarChanges()
+    public void RefreshNodePresentation_LeavesPersistedHeightStableWhenStatusBarChanges()
     {
         var provider = new TestNodePresentationProvider();
         var editor = CreateEditor(provider, nodeCount: 1);
@@ -68,7 +68,7 @@ public sealed class GraphEditorPresentationTests
 
         editor.RefreshNodePresentation(node.Id);
 
-        Assert.True(node.Height > baselineHeight);
+        Assert.Equal(baselineHeight, node.Height);
 
         provider.SetState(node.Id, NodePresentationState.Empty);
         editor.RefreshNodePresentation(node.Id);

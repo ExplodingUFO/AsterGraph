@@ -28,11 +28,14 @@ internal interface IGraphEditorSessionHost
     void DeleteSelection();
     void SetNodePositions(IReadOnlyList<NodePositionSnapshot> positions, bool updateStatus);
     bool TrySetNodeWidth(string nodeId, double width, bool updateStatus);
+    bool TrySetNodeSize(string nodeId, GraphSize size, bool updateStatus);
     bool TrySetNodeExpansionState(string nodeId, GraphNodeExpansionState expansionState);
     string TryCreateNodeGroupFromSelection(string title);
     bool TrySetNodeGroupCollapsed(string groupId, bool isCollapsed);
     bool TrySetNodeGroupPosition(string groupId, GraphPoint position, bool moveMemberNodes, bool updateStatus);
+    bool TrySetNodeGroupSize(string groupId, GraphSize size, bool updateStatus);
     bool TrySetNodeGroupExtraPadding(string groupId, GraphPadding extraPadding, bool updateStatus);
+    bool TrySetNodeGroupMemberships(IReadOnlyList<GraphEditorNodeGroupMembershipChange> changes, bool updateStatus);
     bool TrySetSelectedNodeParameterValue(string parameterKey, object? value);
     bool TrySetSelectedNodeParameterValues(IReadOnlyDictionary<string, object?> values);
     void StartConnection(string sourceNodeId, string sourcePortId);

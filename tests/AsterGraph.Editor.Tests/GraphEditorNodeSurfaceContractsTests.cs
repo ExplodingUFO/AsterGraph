@@ -4,6 +4,7 @@ using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Core.Compatibility;
 using AsterGraph.Core.Models;
 using AsterGraph.Core.Serialization;
+using AsterGraph.Editor.Configuration;
 using AsterGraph.Editor.Catalog;
 using AsterGraph.Editor.Hosting;
 using AsterGraph.Editor.Runtime;
@@ -13,7 +14,8 @@ namespace AsterGraph.Editor.Tests;
 
 public sealed class GraphEditorNodeSurfaceContractsTests
 {
-    private static readonly NodeDefinitionId DefinitionId = new("tests.node-surface.contracts");
+    private static readonly NodeDefinitionId TieredDefinitionId = new("tests.node-surface.tiered");
+    private static readonly NodeDefinitionId DefaultDefinitionId = new("tests.node-surface.default");
     private const string NodeId = "tests.node-surface.node-001";
     private const string SiblingNodeId = "tests.node-surface.node-002";
 
@@ -30,6 +32,7 @@ public sealed class GraphEditorNodeSurfaceContractsTests
 
         Assert.NotNull(typeof(GraphEditorNodeSurfaceSnapshot).GetProperty(nameof(GraphEditorNodeSurfaceSnapshot.NodeId)));
         Assert.NotNull(typeof(GraphEditorNodeSurfaceSnapshot).GetProperty(nameof(GraphEditorNodeSurfaceSnapshot.Size)));
+        Assert.NotNull(typeof(GraphEditorNodeSurfaceSnapshot).GetProperty(nameof(GraphEditorNodeSurfaceSnapshot.ActiveTier)));
         Assert.NotNull(typeof(GraphEditorNodeSurfaceSnapshot).GetProperty(nameof(GraphEditorNodeSurfaceSnapshot.ExpansionState)));
         Assert.NotNull(typeof(GraphEditorNodeSurfaceSnapshot).GetProperty(nameof(GraphEditorNodeSurfaceSnapshot.GroupId)));
 
@@ -37,6 +40,11 @@ public sealed class GraphEditorNodeSurfaceContractsTests
         Assert.Equal(
             typeof(bool),
             commandsType.GetMethod(nameof(IGraphEditorCommands.TrySetNodeWidth), [typeof(string), typeof(double), typeof(bool)])!.ReturnType);
+
+        AssertMethod(commandsType, nameof(IGraphEditorCommands.TrySetNodeSize), typeof(string), typeof(GraphSize), typeof(bool));
+        Assert.Equal(
+            typeof(bool),
+            commandsType.GetMethod(nameof(IGraphEditorCommands.TrySetNodeSize), [typeof(string), typeof(GraphSize), typeof(bool)])!.ReturnType);
 
         AssertMethod(commandsType, nameof(IGraphEditorCommands.TrySetNodeExpansionState), typeof(string), typeof(GraphNodeExpansionState));
         Assert.Equal(
@@ -57,7 +65,6 @@ public sealed class GraphEditorNodeSurfaceContractsTests
         Assert.NotNull(typeof(GraphEditorNodeGroupSnapshot).GetProperty(nameof(GraphEditorNodeGroupSnapshot.Size)));
         Assert.NotNull(typeof(GraphEditorNodeGroupSnapshot).GetProperty(nameof(GraphEditorNodeGroupSnapshot.ContentPosition)));
         Assert.NotNull(typeof(GraphEditorNodeGroupSnapshot).GetProperty(nameof(GraphEditorNodeGroupSnapshot.ContentSize)));
-        Assert.NotNull(typeof(GraphEditorNodeGroupSnapshot).GetProperty(nameof(GraphEditorNodeGroupSnapshot.ExtraPadding)));
 
         AssertMethod(commandsType, nameof(IGraphEditorCommands.TryCreateNodeGroupFromSelection), typeof(string));
         Assert.Equal(
@@ -74,10 +81,15 @@ public sealed class GraphEditorNodeSurfaceContractsTests
             typeof(bool),
             commandsType.GetMethod(nameof(IGraphEditorCommands.TrySetNodeGroupPosition), [typeof(string), typeof(GraphPoint), typeof(bool), typeof(bool)])!.ReturnType);
 
-        AssertMethod(commandsType, nameof(IGraphEditorCommands.TrySetNodeGroupExtraPadding), typeof(string), typeof(GraphPadding), typeof(bool));
+        AssertMethod(commandsType, nameof(IGraphEditorCommands.TrySetNodeGroupSize), typeof(string), typeof(GraphSize), typeof(bool));
         Assert.Equal(
             typeof(bool),
-            commandsType.GetMethod(nameof(IGraphEditorCommands.TrySetNodeGroupExtraPadding), [typeof(string), typeof(GraphPadding), typeof(bool)])!.ReturnType);
+            commandsType.GetMethod(nameof(IGraphEditorCommands.TrySetNodeGroupSize), [typeof(string), typeof(GraphSize), typeof(bool)])!.ReturnType);
+
+        AssertMethod(commandsType, nameof(IGraphEditorCommands.TrySetNodeGroupMemberships), typeof(IReadOnlyList<GraphEditorNodeGroupMembershipChange>), typeof(bool));
+        Assert.Equal(
+            typeof(bool),
+            commandsType.GetMethod(nameof(IGraphEditorCommands.TrySetNodeGroupMemberships), [typeof(IReadOnlyList<GraphEditorNodeGroupMembershipChange>), typeof(bool)])!.ReturnType);
     }
 
     [Fact]
@@ -106,6 +118,32 @@ public sealed class GraphEditorNodeSurfaceContractsTests
     }
 
     [Fact]
+    public void SessionCommands_TrySetNodeSize_PersistsUndoableTierDrivenMutation()
+    {
+        var session = CreateSession();
+        var commandIds = new List<string>();
+        session.Events.CommandExecuted += (_, args) => commandIds.Add(args.CommandId);
+
+        var changed = session.Commands.TrySetNodeSize(NodeId, new GraphSize(420d, 260d), updateStatus: false);
+
+        Assert.True(changed);
+        Assert.Contains("nodes.resize", commandIds);
+
+        var node = Assert.Single(session.Queries.CreateDocumentSnapshot().Nodes, candidate => candidate.Id == NodeId);
+        Assert.Equal(new GraphSize(420d, 260d), node.Size);
+
+        var surface = Assert.Single(session.Queries.GetNodeSurfaceSnapshots(), snapshot => snapshot.NodeId == NodeId);
+        Assert.Equal(new GraphSize(420d, 260d), surface.Size);
+        Assert.Equal("inline-rich", surface.ActiveTier.Key);
+
+        session.Commands.Undo();
+        Assert.Equal(new GraphSize(240d, 160d), Assert.Single(session.Queries.CreateDocumentSnapshot().Nodes, candidate => candidate.Id == NodeId).Size);
+
+        session.Commands.Redo();
+        Assert.Equal(new GraphSize(420d, 260d), Assert.Single(session.Queries.CreateDocumentSnapshot().Nodes, candidate => candidate.Id == NodeId).Size);
+    }
+
+    [Fact]
     public void SessionCommands_TrySetNodeExpansionState_PersistsAcrossSerialization()
     {
         var session = CreateSession();
@@ -127,7 +165,24 @@ public sealed class GraphEditorNodeSurfaceContractsTests
     }
 
     [Fact]
-    public void SessionCommands_NodeGroups_ExposeResolvedBounds_PersistPadding_AndTrackNodeSurfaceChanges()
+    public void SessionQueries_GetNodeSurfaceSnapshots_ResolveActiveTier_FromBehaviorDefaults_AndDefinitionOverrides()
+    {
+        var session = CreateSession();
+
+        var surfaces = session.Queries.GetNodeSurfaceSnapshots();
+        var overrideSurface = Assert.Single(surfaces, snapshot => snapshot.NodeId == NodeId);
+        var defaultSurface = Assert.Single(surfaces, snapshot => snapshot.NodeId == SiblingNodeId);
+
+        Assert.Equal("details", overrideSurface.ActiveTier.Key);
+        Assert.Equal("project-inline", defaultSurface.ActiveTier.Key);
+
+        Assert.True(session.Commands.TrySetNodeSize(SiblingNodeId, new GraphSize(420d, 260d), updateStatus: false));
+        defaultSurface = Assert.Single(session.Queries.GetNodeSurfaceSnapshots(), snapshot => snapshot.NodeId == SiblingNodeId);
+        Assert.Equal("project-rich", defaultSurface.ActiveTier.Key);
+    }
+
+    [Fact]
+    public void SessionCommands_NodeGroups_ExposeFixedFrames_AndIgnoreMemberGeometryChanges()
     {
         var session = CreateSession();
 
@@ -140,36 +195,52 @@ public sealed class GraphEditorNodeSurfaceContractsTests
         var createdSnapshot = Assert.Single(session.Queries.GetNodeGroupSnapshots());
         Assert.Equal(groupId, createdGroup.Id);
         Assert.Equal("Surface Cluster", createdGroup.Title);
-        Assert.Equal(new GraphPadding(24d, 44d, 24d, 28d), createdGroup.ExtraPadding);
         Assert.Equal(
             [NodeId, SiblingNodeId],
             createdGroup.NodeIds.OrderBy(id => id, StringComparer.Ordinal));
         Assert.Equal(createdGroup.Position, createdSnapshot.Position);
         Assert.Equal(createdGroup.Size, createdSnapshot.Size);
-        Assert.Equal(new GraphPoint(120d, 160d), createdSnapshot.ContentPosition);
-        Assert.Equal(new GraphSize(520d, 196d), createdSnapshot.ContentSize);
+        Assert.True(createdSnapshot.ContentPosition.X >= createdGroup.Position.X);
+        Assert.True(createdSnapshot.ContentPosition.Y >= createdGroup.Position.Y);
+        Assert.True(createdSnapshot.ContentSize.Width > 0d);
+        Assert.True(createdSnapshot.ContentSize.Height > 0d);
+        Assert.True(createdSnapshot.ContentPosition.X + createdSnapshot.ContentSize.Width <= createdGroup.Position.X + createdGroup.Size.Width);
+        Assert.True(createdSnapshot.ContentPosition.Y + createdSnapshot.ContentSize.Height <= createdGroup.Position.Y + createdGroup.Size.Height);
 
-        var initialPositions = session.Queries.CreateDocumentSnapshot().Nodes
-            .ToDictionary(node => node.Id, node => node.Position, StringComparer.Ordinal);
-        var initialSnapshot = createdSnapshot;
+        var initialFramePosition = createdSnapshot.Position;
+        var initialFrameSize = createdSnapshot.Size;
+        var initialContentPosition = createdSnapshot.ContentPosition;
+        var initialContentSize = createdSnapshot.ContentSize;
 
         Assert.True(session.Commands.TrySetNodeExpansionState(NodeId, GraphNodeExpansionState.Expanded));
         var expandedSnapshot = Assert.Single(session.Queries.GetNodeGroupSnapshots());
-        Assert.Equal(initialSnapshot.Position, expandedSnapshot.Position);
-        Assert.Equal(initialSnapshot.Size.Width, expandedSnapshot.Size.Width);
-        Assert.Equal(initialSnapshot.Size.Height + 152d, expandedSnapshot.Size.Height);
+        Assert.Equal(initialFramePosition, expandedSnapshot.Position);
+        Assert.Equal(initialFrameSize, expandedSnapshot.Size);
+        Assert.Equal(initialContentPosition, expandedSnapshot.ContentPosition);
+        Assert.Equal(initialContentSize, expandedSnapshot.ContentSize);
 
         Assert.True(session.Commands.TrySetNodeWidth(SiblingNodeId, 320d, updateStatus: false));
         var resizedSnapshot = Assert.Single(session.Queries.GetNodeGroupSnapshots());
-        Assert.Equal(expandedSnapshot.Position, resizedSnapshot.Position);
-        Assert.Equal(expandedSnapshot.Size.Width + 100d, resizedSnapshot.Size.Width);
+        Assert.Equal(initialFramePosition, resizedSnapshot.Position);
+        Assert.Equal(initialFrameSize, resizedSnapshot.Size);
 
-        Assert.True(session.Commands.TrySetNodeGroupExtraPadding(groupId!, new GraphPadding(40d, 60d, 32d, 24d), updateStatus: false));
-        var paddedGroup = Assert.Single(session.Queries.GetNodeGroups());
-        var paddedSnapshot = Assert.Single(session.Queries.GetNodeGroupSnapshots());
-        Assert.Equal(new GraphPadding(40d, 60d, 32d, 24d), paddedGroup.ExtraPadding);
-        Assert.Equal(new GraphPoint(80d, 100d), paddedSnapshot.Position);
-        Assert.Equal(new GraphSize(692d, 432d), paddedSnapshot.Size);
+        Assert.True(session.Commands.TrySetNodeGroupSize(groupId!, new GraphSize(640d, 300d), updateStatus: false));
+        var resizedGroup = Assert.Single(session.Queries.GetNodeGroups());
+        var resizedFrameSnapshot = Assert.Single(session.Queries.GetNodeGroupSnapshots());
+        Assert.Equal(new GraphSize(640d, 300d), resizedGroup.Size);
+        Assert.Equal(new GraphSize(640d, 300d), resizedFrameSnapshot.Size);
+        Assert.Equal(
+            initialContentPosition.X - initialFramePosition.X,
+            resizedFrameSnapshot.ContentPosition.X - resizedGroup.Position.X);
+        Assert.Equal(
+            initialContentPosition.Y - initialFramePosition.Y,
+            resizedFrameSnapshot.ContentPosition.Y - resizedGroup.Position.Y);
+        Assert.Equal(
+            initialContentSize.Width + (640d - initialFrameSize.Width),
+            resizedFrameSnapshot.ContentSize.Width);
+        Assert.Equal(
+            initialContentSize.Height + (300d - initialFrameSize.Height),
+            resizedFrameSnapshot.ContentSize.Height);
 
         Assert.True(session.Commands.TrySetNodeGroupCollapsed(groupId!, isCollapsed: true));
         Assert.True(session.Commands.TrySetNodeGroupPosition(groupId, new GraphPoint(200, 120), moveMemberNodes: true, updateStatus: false));
@@ -181,21 +252,41 @@ public sealed class GraphEditorNodeSurfaceContractsTests
         Assert.Equal(movedGroup.Position, movedSnapshot.Position);
         Assert.Equal(movedGroup.Size, movedSnapshot.Size);
 
-        var movedDocument = session.Queries.CreateDocumentSnapshot();
-        foreach (var node in movedDocument.Nodes)
-        {
-            Assert.Equal(groupId, node.Surface?.GroupId);
-            Assert.NotEqual(initialPositions[node.Id], node.Position);
-        }
-
-        var json = GraphDocumentSerializer.Serialize(movedDocument);
+        var json = GraphDocumentSerializer.Serialize(session.Queries.CreateDocumentSnapshot());
         var restored = GraphDocumentSerializer.Deserialize(json);
         var restoredGroup = Assert.Single(restored.Groups!);
         Assert.Equal(groupId, restoredGroup.Id);
         Assert.True(restoredGroup.IsCollapsed);
         Assert.Equal(new GraphPoint(200, 120), restoredGroup.Position);
-        Assert.Equal(new GraphPadding(40d, 60d, 32d, 24d), restoredGroup.ExtraPadding);
-        Assert.All(restored.Nodes, node => Assert.Equal(groupId, node.Surface?.GroupId));
+        Assert.Equal(new GraphSize(640d, 300d), restoredGroup.Size);
+    }
+
+    [Fact]
+    public void SessionCommands_NodeGroups_PreserveEmptyGroupsAcrossMembershipMutations()
+    {
+        var session = CreateSession();
+
+        session.Commands.SetSelection([NodeId], NodeId, updateStatus: false);
+        var groupId = session.Commands.TryCreateNodeGroupFromSelection("Surface Cluster");
+
+        Assert.False(string.IsNullOrWhiteSpace(groupId));
+        Assert.True(
+            session.Commands.TrySetNodeGroupMemberships(
+                [
+                    new GraphEditorNodeGroupMembershipChange(NodeId, null),
+                ],
+                updateStatus: false));
+
+        var detachedGroup = Assert.Single(session.Queries.GetNodeGroups());
+        Assert.Equal(groupId, detachedGroup.Id);
+        Assert.Empty(detachedGroup.NodeIds);
+        Assert.All(session.Queries.CreateDocumentSnapshot().Nodes, node => Assert.Null(node.Surface?.GroupId));
+
+        var json = GraphDocumentSerializer.Serialize(session.Queries.CreateDocumentSnapshot());
+        var restored = GraphDocumentSerializer.Deserialize(json);
+        var restoredGroup = Assert.Single(restored.Groups!);
+        Assert.Equal(groupId, restoredGroup.Id);
+        Assert.Empty(restoredGroup.NodeIds);
     }
 
     private static IGraphEditorSession CreateSession()
@@ -216,7 +307,7 @@ public sealed class GraphEditorNodeSurfaceContractsTests
                         [],
                         [],
                         "#6AD5C4",
-                        DefinitionId,
+                        TieredDefinitionId,
                         []),
                     new GraphNode(
                         SiblingNodeId,
@@ -229,12 +320,41 @@ public sealed class GraphEditorNodeSurfaceContractsTests
                         [],
                         [],
                         "#F3B36B",
-                        DefinitionId,
+                        DefaultDefinitionId,
                         []),
                 ],
                 []),
             NodeCatalog = CreateCatalog(),
             CompatibilityService = new DefaultPortCompatibilityService(),
+            BehaviorOptions = new GraphEditorBehaviorOptions
+            {
+                View = new ViewBehaviorOptions
+                {
+                    NodeSurfaceTierProfile = new NodeSurfaceTierProfile(
+                    [
+                        new NodeSurfaceTierDefinition("project-compact"),
+                        new NodeSurfaceTierDefinition(
+                            "project-inline",
+                            minWidth: 200d,
+                            minHeight: 140d,
+                            visibleSectionKeys:
+                            [
+                                NodeSurfaceSectionKeys.Description,
+                                NodeSurfaceSectionKeys.InlineInputs,
+                            ]),
+                        new NodeSurfaceTierDefinition(
+                            "project-rich",
+                            minWidth: 360d,
+                            minHeight: 220d,
+                            visibleSectionKeys:
+                            [
+                                NodeSurfaceSectionKeys.Description,
+                                NodeSurfaceSectionKeys.InlineInputs,
+                                NodeSurfaceSectionKeys.Parameters,
+                            ]),
+                    ]),
+                },
+            },
         });
 
     private static INodeCatalog CreateCatalog()
@@ -242,15 +362,48 @@ public sealed class GraphEditorNodeSurfaceContractsTests
         var catalog = new NodeCatalog();
         catalog.RegisterDefinition(
             new NodeDefinition(
-                DefinitionId,
-                "Node Surface",
+                TieredDefinitionId,
+                "Node Surface Tiered",
                 "Tests",
                 "Contracts",
                 [],
                 [],
                 description: "Node surface regression definition.",
                 defaultWidth: 240d,
-                defaultHeight: 160d));
+                defaultHeight: 160d,
+                surfaceTierProfile: new NodeSurfaceTierProfile(
+                [
+                    new NodeSurfaceTierDefinition("compact"),
+                    new NodeSurfaceTierDefinition(
+                        "details",
+                        minWidth: 220d,
+                        minHeight: 150d,
+                        visibleSectionKeys:
+                        [
+                            NodeSurfaceSectionKeys.Description,
+                        ]),
+                    new NodeSurfaceTierDefinition(
+                        "inline-rich",
+                        minWidth: 400d,
+                        minHeight: 240d,
+                        visibleSectionKeys:
+                        [
+                            NodeSurfaceSectionKeys.Description,
+                            NodeSurfaceSectionKeys.InlineInputs,
+                            NodeSurfaceSectionKeys.Parameters,
+                        ]),
+                ])));
+        catalog.RegisterDefinition(
+            new NodeDefinition(
+                DefaultDefinitionId,
+                "Node Surface Default",
+                "Tests",
+                "Contracts",
+                [],
+                [],
+                description: "Node surface behavior-default definition.",
+                defaultWidth: 220d,
+                defaultHeight: 150d));
         return catalog;
     }
 

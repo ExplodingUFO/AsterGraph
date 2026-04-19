@@ -3,13 +3,13 @@ using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Geometry;
 using AsterGraph.Editor.Presentation;
+using AsterGraph.Editor.Runtime;
 
 namespace AsterGraph.Editor.ViewModels;
 
 public sealed partial class NodeViewModel : ObservableObject
 {
     private readonly Dictionary<string, GraphParameterValue> _parameterValues;
-    private readonly double _baseHeight;
 
     /// <summary>
     /// 由不可变节点模型快照初始化节点运行时投影。
@@ -25,6 +25,7 @@ public sealed partial class NodeViewModel : ObservableObject
         Description = model.Description;
         AccentHex = model.AccentHex;
         Width = model.Size.Width;
+        Height = model.Size.Height;
         Surface = model.Surface ?? GraphNodeSurfaceState.Default;
         X = model.Position.X;
         Y = model.Position.Y;
@@ -42,8 +43,10 @@ public sealed partial class NodeViewModel : ObservableObject
         _parameterValues = (model.ParameterValues ?? [])
             .ToDictionary(parameter => parameter.Key, StringComparer.Ordinal);
 
-        _baseHeight = GraphEditorNodeSurfaceMetrics.CalculateBaseHeight(model.Size.Height, model.Inputs.Count, model.Outputs.Count);
-        Height = CalculateRenderedHeight();
+        ActiveSurfaceTier = GraphEditorNodeSurfaceTierResolver.ResolveActiveTier(
+            model.Size,
+            AsterGraph.Editor.Configuration.GraphEditorBehaviorOptions.Default,
+            definition: null);
     }
 
     /// <summary>
@@ -110,19 +113,27 @@ public sealed partial class NodeViewModel : ObservableObject
     private GraphNodeSurfaceState surface = GraphNodeSurfaceState.Default;
 
     /// <summary>
-    /// 当前节点卡片展开状态。
-    /// </summary>
-    public GraphNodeExpansionState ExpansionState => Surface.ExpansionState;
-
-    /// <summary>
     /// 当前节点所属的 editor-only 分组标识；未分组时为空。
     /// </summary>
     public string? GroupId => Surface.GroupId;
 
     /// <summary>
-    /// 指示当前节点卡片是否处于展开模式。
+    /// 当前解析得到的节点表面 tier。
     /// </summary>
-    public bool IsExpanded => ExpansionState == GraphNodeExpansionState.Expanded;
+    [ObservableProperty]
+    private GraphEditorNodeSurfaceTierSnapshot activeSurfaceTier = new(
+        "compact",
+        0d,
+        0d,
+        [],
+        null);
+
+    /// <summary>
+    /// Indicates whether the active tier exposes inline authoring affordances.
+    /// </summary>
+    public bool AllowsInlineAuthoring
+        => ActiveSurfaceTier.ShowsSection(AsterGraph.Abstractions.Definitions.NodeSurfaceSectionKeys.InlineInputs)
+           || ActiveSurfaceTier.ShowsSection(AsterGraph.Abstractions.Definitions.NodeSurfaceSectionKeys.Parameters);
 
     [ObservableProperty]
     private double height;
@@ -194,7 +205,7 @@ public sealed partial class NodeViewModel : ObservableObject
             Subtitle,
             Description,
             new GraphPoint(X, Y),
-            new GraphSize(Width, _baseHeight),
+            new GraphSize(Width, Height),
             Inputs.Select(port => port.ToModel()).ToList(),
             Outputs.Select(port => port.ToModel()).ToList(),
             AccentHex,
@@ -241,6 +252,12 @@ public sealed partial class NodeViewModel : ObservableObject
         => Surface = state ?? GraphNodeSurfaceState.Default;
 
     /// <summary>
+    /// Updates the resolved size-driven tier snapshot used by shipped and custom host surfaces.
+    /// </summary>
+    public void UpdateActiveSurfaceTier(GraphEditorNodeSurfaceTierSnapshot activeTier)
+        => ActiveSurfaceTier = activeTier ?? throw new ArgumentNullException(nameof(activeTier));
+
+    /// <summary>
     /// 更新节点展示状态快照。
     /// </summary>
     /// <param name="state">新的展示状态；为空时回退到默认展示。</param>
@@ -249,7 +266,6 @@ public sealed partial class NodeViewModel : ObservableObject
 
     partial void OnPresentationChanged(NodePresentationState value)
     {
-        Height = CalculateRenderedHeight();
         OnPropertyChanged(nameof(DisplaySubtitle));
         OnPropertyChanged(nameof(DisplayDescription));
     }
@@ -268,15 +284,11 @@ public sealed partial class NodeViewModel : ObservableObject
 
     partial void OnSurfaceChanged(GraphNodeSurfaceState value)
     {
-        Height = CalculateRenderedHeight();
-        OnPropertyChanged(nameof(ExpansionState));
         OnPropertyChanged(nameof(GroupId));
-        OnPropertyChanged(nameof(IsExpanded));
     }
 
-    private double CalculateRenderedHeight()
-        => GraphEditorNodeSurfaceMetrics.CalculateRenderedHeight(
-            _baseHeight,
-            ExpansionState,
-            hasStatusBar: Presentation.StatusBar is not null);
+    partial void OnActiveSurfaceTierChanged(GraphEditorNodeSurfaceTierSnapshot value)
+    {
+        OnPropertyChanged(nameof(AllowsInlineAuthoring));
+    }
 }

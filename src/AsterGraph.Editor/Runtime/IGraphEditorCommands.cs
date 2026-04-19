@@ -65,6 +65,16 @@ public interface IGraphEditorCommands
         => throw new NotSupportedException();
 
     /// <summary>
+    /// Attempts to update one node's persisted card size through the runtime mutation path.
+    /// </summary>
+    /// <param name="nodeId">Stable node identifier.</param>
+    /// <param name="size">Requested persisted card size.</param>
+    /// <param name="updateStatus">Whether to update status text for no-op or success cases.</param>
+    /// <returns><see langword="true"/> when the size changes.</returns>
+    bool TrySetNodeSize(string nodeId, GraphSize size, bool updateStatus = true)
+        => throw new NotSupportedException();
+
+    /// <summary>
     /// Attempts to update one node's persisted card expansion state.
     /// </summary>
     /// <param name="nodeId">Stable node identifier.</param>
@@ -102,6 +112,16 @@ public interface IGraphEditorCommands
         => throw new NotSupportedException();
 
     /// <summary>
+    /// Attempts to update one node group's persisted frame size.
+    /// </summary>
+    /// <param name="groupId">Stable group identifier.</param>
+    /// <param name="size">Requested fixed frame size.</param>
+    /// <param name="updateStatus">Whether to update status text for no-op or success cases.</param>
+    /// <returns><see langword="true"/> when the size changes.</returns>
+    bool TrySetNodeGroupSize(string groupId, GraphSize size, bool updateStatus = true)
+        => throw new NotSupportedException();
+
+    /// <summary>
     /// Attempts to update one node group's persisted per-edge padding envelope.
     /// </summary>
     /// <param name="groupId">Stable group identifier.</param>
@@ -109,6 +129,15 @@ public interface IGraphEditorCommands
     /// <param name="updateStatus">Whether to update status text for no-op or success cases.</param>
     /// <returns><see langword="true"/> when the padding changes.</returns>
     bool TrySetNodeGroupExtraPadding(string groupId, GraphPadding extraPadding, bool updateStatus = true)
+        => throw new NotSupportedException();
+
+    /// <summary>
+    /// Attempts to update one or more node-to-group memberships.
+    /// </summary>
+    /// <param name="changes">Requested membership changes.</param>
+    /// <param name="updateStatus">Whether to update status text for no-op or success cases.</param>
+    /// <returns><see langword="true"/> when at least one membership changes.</returns>
+    bool TrySetNodeGroupMemberships(IReadOnlyList<GraphEditorNodeGroupMembershipChange> changes, bool updateStatus = true)
         => throw new NotSupportedException();
 
     /// <summary>

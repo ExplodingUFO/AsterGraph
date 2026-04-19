@@ -106,6 +106,8 @@ public partial class NodeCanvas
 
         public IGraphNodeVisualPresenter StockNodeVisualPresenter => _owner._stockNodeVisualPresenter;
 
+        public INodeParameterEditorRegistry? NodeParameterEditorRegistry => _owner.NodeParameterEditorRegistry;
+
         public NodeCanvasInteractionSession InteractionSession => _owner._interactionSession;
 
         public NodeCanvasContextMenuCoordinator ContextMenuCoordinator => _owner._contextMenuCoordinator;

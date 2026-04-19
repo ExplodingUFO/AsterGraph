@@ -95,6 +95,7 @@ public sealed partial class GraphEditorViewModel
 
         _kernel.UpdateBehaviorOptions(behaviorOptions);
         BehaviorOptions = behaviorOptions;
+        RefreshNodeSurfaceTiers();
         if (!string.IsNullOrWhiteSpace(status))
         {
             StatusMessage = status;

@@ -394,22 +394,22 @@ public partial class MainWindowViewModel
                     T("proof ring 继续对这条线做机器化保护。", "The proof ring keeps this line machine-protected."),
                 ]),
             new CapabilityShowcaseItem(
-                "progressive-node-surface",
-                T("渐进式节点表面", "Progressive Node Surface"),
-                T("把宽度、展开态、分组和输入端内联值编辑变成同一条 node surface 路径。", "Turn width, expansion, grouping, and inline input literals into one shared node-surface path."),
+                "tiered-surface-layout",
+                T("分层节点表面", "Tiered Surface Layout"),
+                T("把固定组框、几何驱动 membership、宽高分层和输入端内联值编辑收敛为同一条 node surface 路径。", "Unify fixed group frames, geometry-driven membership, width/height tiers, and inline input literals through one shared node-surface route."),
                 T(
-                    "Demo 现在默认展示 expanded node card、editor-only group boundary，以及“未连接时可内联、连接后以上游值为准”的单一值来源规则。",
-                    "The demo now shows an expanded node card, an editor-only group boundary, and the single-source rule where unconnected inputs edit inline while connected inputs defer to upstream values."),
+                    "Demo 现在默认展示固定 Terrain Authoring 组框、命中 inline-rich tier 的 Lighting Mix 卡片，以及“未连接时可内联、连接后以上游值为准”的单一值来源规则。",
+                    "The demo now shows a fixed Terrain Authoring group frame, a Lighting Mix card that resolves to the inline-rich tier, and the single-source rule where unconnected inputs edit inline while connected inputs defer to upstream values."),
                 [
                     T("所属层：AsterGraph.Editor node-surface contract + AsterGraph.Avalonia stock canvas。", "Layer: AsterGraph.Editor node-surface contract plus the stock AsterGraph.Avalonia canvas."),
-                    T("宿主入口：GetNodeSurfaceSnapshots()、GetNodeGroupSnapshots()、TrySetNodeWidth(...)、TrySetNodeExpansionState(...)、TrySetNodeGroupExtraPadding(...)。", "Host entry: GetNodeSurfaceSnapshots(), GetNodeGroupSnapshots(), TrySetNodeWidth(...), TrySetNodeExpansionState(...), and TrySetNodeGroupExtraPadding(...)."),
-                    T("可替换点：宿主可复用同一份 surface state，再决定自定义卡片、分组样式、resolved bounds 策略或后续 composite node 路径。", "Seams: hosts can reuse the same surface state while customizing cards, group visuals, resolved-bounds policy, or a later composite-node path."),
+                    T("宿主入口：GetNodeSurfaceSnapshots()、GetNodeGroupSnapshots()、TrySetNodeSize(...)、TrySetNodeGroupSize(...)、TrySetNodeGroupMemberships(...)。", "Host entry: GetNodeSurfaceSnapshots(), GetNodeGroupSnapshots(), TrySetNodeSize(...), TrySetNodeGroupSize(...), and TrySetNodeGroupMemberships(...)."),
+                    T("可替换点：宿主可复用同一份 tier/group state，再通过 template keys 和 NodeParameterEditorRegistry 替换内联编辑器，而不用重写 tier 解析或校验逻辑。", "Seams: hosts can reuse the shared tier/group state, then swap inline editors through template keys and NodeParameterEditorRegistry without reimplementing tier resolution or validation."),
                 ],
                 [
-                    T("默认图包含会随成员节点自动贴合的 editor-only 分组边界。", "The default graph includes an editor-only group boundary that auto-fits its member nodes."),
-                    T("Lighting Mix 节点默认展开，并显示 inline input authoring。", "The Lighting Mix node starts expanded and exposes inline input authoring."),
+                    T("默认图包含固定大小的 Terrain Authoring 组框，节点完全进入内容区会入组，拖出内容区会脱组。", "The default graph includes a fixed-size Terrain Authoring group frame; nodes attach when fully inside the content area and detach when dragged back out."),
+                    T("Lighting Mix 节点默认以 430x260 打开，直接命中 inline-rich tier。", "The Lighting Mix node starts at 430x260, so it resolves directly to the inline-rich tier."),
                     T("连接中的 Pulse 输入会覆盖本地 literal，未连接的 Rim Mask 继续内联编辑。", "The connected Pulse input overrides its local literal while the unconnected Rim Mask stays inline-editable."),
-                    T("组框支持按边拉伸并保留额外留白，同时继续跟随成员节点移动与扩展。", "Group frames support per-edge resize with persistent whitespace while continuing to follow member-node movement and expansion."),
+                    T("Lighting Mix 的输入参数声明了 template key，宿主可以通过 registry 定向替换这些内联编辑器。", "Lighting Mix input parameters declare template keys so hosts can replace those inline editors through the registry seam."),
                 ]),
         ];
     }

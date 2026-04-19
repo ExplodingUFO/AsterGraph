@@ -20,7 +20,8 @@ public sealed record NodeParameterDefinition
         object? defaultValue = null,
         ParameterConstraints? constraints = null,
         string? groupName = null,
-        string? placeholderText = null)
+        string? placeholderText = null,
+        string? templateKey = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(key);
         ArgumentException.ThrowIfNullOrWhiteSpace(displayName);
@@ -35,6 +36,7 @@ public sealed record NodeParameterDefinition
         Constraints = constraints ?? new ParameterConstraints();
         GroupName = string.IsNullOrWhiteSpace(groupName) ? null : groupName.Trim();
         PlaceholderText = string.IsNullOrWhiteSpace(placeholderText) ? null : placeholderText.Trim();
+        TemplateKey = string.IsNullOrWhiteSpace(templateKey) ? null : templateKey.Trim();
     }
 
     /// <summary>
@@ -86,4 +88,9 @@ public sealed record NodeParameterDefinition
     /// Optional placeholder text or short display hint for text-oriented editors.
     /// </summary>
     public string? PlaceholderText { get; }
+
+    /// <summary>
+    /// Optional host-facing editor template key used by stock and custom UI registries.
+    /// </summary>
+    public string? TemplateKey { get; }
 }

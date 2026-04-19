@@ -25,10 +25,12 @@ public sealed class GraphNodeVisualContext
         GraphEditorStyleOptions styleOptions,
         Action focusCanvas,
         Action<NodeViewModel, PointerPressedEventArgs> beginNodeDrag,
+        Func<NodeViewModel, GraphSize, bool, bool> trySetNodeSize,
         Func<NodeViewModel, double, bool, bool> trySetNodeWidth,
         Func<NodeViewModel, GraphNodeExpansionState, bool> trySetNodeExpansionState,
         Func<NodeViewModel, PortViewModel, bool> hasIncomingConnection,
         Func<NodeViewModel, PortViewModel, NodeParameterViewModel?> resolveInlineParameter,
+        INodeParameterEditorRegistry? nodeParameterEditorRegistry,
         Action<NodeViewModel, PortViewModel> activatePort,
         Func<Control, NodeViewModel, ContextRequestedEventArgs, bool> openNodeContextMenu,
         Func<Control, NodeViewModel, PortViewModel, ContextRequestedEventArgs, bool> openPortContextMenu)
@@ -38,6 +40,7 @@ public sealed class GraphNodeVisualContext
         ArgumentNullException.ThrowIfNull(styleOptions);
         ArgumentNullException.ThrowIfNull(focusCanvas);
         ArgumentNullException.ThrowIfNull(beginNodeDrag);
+        ArgumentNullException.ThrowIfNull(trySetNodeSize);
         ArgumentNullException.ThrowIfNull(trySetNodeWidth);
         ArgumentNullException.ThrowIfNull(trySetNodeExpansionState);
         ArgumentNullException.ThrowIfNull(hasIncomingConnection);
@@ -51,10 +54,12 @@ public sealed class GraphNodeVisualContext
         StyleOptions = styleOptions;
         FocusCanvas = focusCanvas;
         BeginNodeDrag = beginNodeDrag;
+        TrySetNodeSize = trySetNodeSize;
         TrySetNodeWidth = trySetNodeWidth;
         TrySetNodeExpansionState = trySetNodeExpansionState;
         HasIncomingConnection = hasIncomingConnection;
         ResolveInlineParameter = resolveInlineParameter;
+        NodeParameterEditorRegistry = nodeParameterEditorRegistry;
         ActivatePort = activatePort;
         OpenNodeContextMenu = openNodeContextMenu;
         OpenPortContextMenu = openPortContextMenu;
@@ -90,6 +95,11 @@ public sealed class GraphNodeVisualContext
     public Action<NodeViewModel, PointerPressedEventArgs> BeginNodeDrag { get; }
 
     /// <summary>
+    /// Requests a persisted node-size mutation.
+    /// </summary>
+    public Func<NodeViewModel, GraphSize, bool, bool> TrySetNodeSize { get; }
+
+    /// <summary>
     /// Requests a persisted node-width mutation.
     /// </summary>
     public Func<NodeViewModel, double, bool, bool> TrySetNodeWidth { get; }
@@ -108,6 +118,11 @@ public sealed class GraphNodeVisualContext
     /// Resolves the shared node-parameter view model bound to one inline-editable input port.
     /// </summary>
     public Func<NodeViewModel, PortViewModel, NodeParameterViewModel?> ResolveInlineParameter { get; }
+
+    /// <summary>
+    /// Optional registry used by shipped inline hosts to create editor bodies.
+    /// </summary>
+    public INodeParameterEditorRegistry? NodeParameterEditorRegistry { get; }
 
     /// <summary>
     /// 请求激活某个端口。

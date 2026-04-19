@@ -5,6 +5,7 @@ using AsterGraph.Editor.Configuration;
 using AsterGraph.Editor.Diagnostics;
 using AsterGraph.Editor.Kernel.Internal;
 using AsterGraph.Editor.Models;
+using AsterGraph.Editor.Runtime;
 
 namespace AsterGraph.Editor.Kernel;
 
@@ -60,6 +61,9 @@ internal sealed partial class GraphEditorKernel
         void IGraphEditorKernelCommandRouterHost.SetNodePositions(IReadOnlyList<NodePositionSnapshot> positions, bool updateStatus)
             => _owner.SetNodePositions(positions, updateStatus);
 
+        bool IGraphEditorKernelCommandRouterHost.TrySetNodeSize(string nodeId, GraphSize size, bool updateStatus)
+            => _owner.TrySetNodeSize(nodeId, size, updateStatus);
+
         string IGraphEditorKernelCommandRouterHost.TryCreateNodeGroupFromSelection(string title)
             => _owner.TryCreateNodeGroupFromSelection(title);
 
@@ -69,8 +73,14 @@ internal sealed partial class GraphEditorKernel
         bool IGraphEditorKernelCommandRouterHost.TrySetNodeGroupPosition(string groupId, GraphPoint position, bool moveMemberNodes, bool updateStatus)
             => _owner.TrySetNodeGroupPosition(groupId, position, moveMemberNodes, updateStatus);
 
+        bool IGraphEditorKernelCommandRouterHost.TrySetNodeGroupSize(string groupId, GraphSize size, bool updateStatus)
+            => _owner.TrySetNodeGroupSize(groupId, size, updateStatus);
+
         bool IGraphEditorKernelCommandRouterHost.TrySetNodeGroupExtraPadding(string groupId, GraphPadding extraPadding, bool updateStatus)
             => _owner.TrySetNodeGroupExtraPadding(groupId, extraPadding, updateStatus);
+
+        bool IGraphEditorKernelCommandRouterHost.TrySetNodeGroupMemberships(IReadOnlyList<GraphEditorNodeGroupMembershipChange> changes, bool updateStatus)
+            => _owner.TrySetNodeGroupMemberships(changes, updateStatus);
 
         bool IGraphEditorKernelCommandRouterHost.TrySetSelectedNodeParameterValue(string parameterKey, object? value)
             => _owner.TrySetSelectedNodeParameterValue(parameterKey, value);

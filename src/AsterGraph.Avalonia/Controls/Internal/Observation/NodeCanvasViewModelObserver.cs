@@ -201,6 +201,7 @@ internal sealed class NodeCanvasViewModelObserver
             case nameof(NodeViewModel.Width):
             case nameof(NodeViewModel.Height):
             case nameof(NodeViewModel.Surface):
+            case nameof(NodeViewModel.ActiveSurfaceTier):
                 _host.UpdateNodeVisual(node);
                 _host.UpdateGroupVisuals();
                 _host.RenderConnections();

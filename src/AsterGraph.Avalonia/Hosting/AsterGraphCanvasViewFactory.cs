@@ -24,6 +24,7 @@ public static class AsterGraphCanvasViewFactory
             EnableDefaultCommandShortcuts = options.EnableDefaultCommandShortcuts,
             NodeVisualPresenter = options.Presentation?.NodeVisualPresenter,
             ContextMenuPresenter = options.Presentation?.ContextMenuPresenter,
+            NodeParameterEditorRegistry = options.Presentation?.NodeParameterEditorRegistry,
         };
     }
 }
