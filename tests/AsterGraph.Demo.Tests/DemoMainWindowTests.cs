@@ -269,6 +269,10 @@ public sealed class DemoMainWindowTests
     [AvaloniaFact]
     public void MainWindow_ResolvesDroppedWorkspacePaths_FromDataTransferFiles()
     {
+        var storageRoot = CreateTempDirectory();
+        var workspacePath = Path.Combine(storageRoot, "workspace.json");
+        var readmePath = Path.Combine(storageRoot, "readme.txt");
+
         var method = typeof(MainWindow).GetMethod(
             "ResolveDroppedWorkspacePaths",
             BindingFlags.NonPublic | BindingFlags.Static,
@@ -279,12 +283,12 @@ public sealed class DemoMainWindowTests
         Assert.NotNull(method);
 
         var dataTransfer = new DataTransfer();
-        dataTransfer.Add(DataTransferItem.CreateFile(CreateStorageFile(@"C:\temp\workspace.json")));
-        dataTransfer.Add(DataTransferItem.CreateFile(CreateStorageFile(@"C:\temp\readme.txt")));
+        dataTransfer.Add(DataTransferItem.CreateFile(CreateStorageFile(workspacePath)));
+        dataTransfer.Add(DataTransferItem.CreateFile(CreateStorageFile(readmePath)));
 
         var paths = Assert.IsType<List<string>>(method!.Invoke(null, [dataTransfer]));
 
-        Assert.Equal([@"C:\temp\workspace.json"], paths);
+        Assert.Equal([workspacePath], paths);
     }
 
     private static MainWindow CreateWindow()
