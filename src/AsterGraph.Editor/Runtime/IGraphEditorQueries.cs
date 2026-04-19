@@ -65,6 +65,20 @@ public interface IGraphEditorQueries
         => throw new NotSupportedException();
 
     /// <summary>
+    /// Gets stable node-surface snapshots for every node in the current document.
+    /// </summary>
+    /// <returns>One surface snapshot per node.</returns>
+    IReadOnlyList<GraphEditorNodeSurfaceSnapshot> GetNodeSurfaceSnapshots()
+        => throw new NotSupportedException();
+
+    /// <summary>
+    /// Gets persisted editor-only node groups for the current document.
+    /// </summary>
+    /// <returns>A stable read-only group collection.</returns>
+    IReadOnlyList<GraphNodeGroup> GetNodeGroups()
+        => throw new NotSupportedException();
+
+    /// <summary>
     /// 获取当前稳定命令描述集合。
     /// </summary>
     /// <returns>命令描述集合。</returns>

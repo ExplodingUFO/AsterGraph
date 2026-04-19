@@ -7,8 +7,10 @@ namespace AsterGraph.Core.Models;
 /// <param name="Description">Optional document description or summary.</param>
 /// <param name="Nodes">All nodes contained in the graph.</param>
 /// <param name="Connections">All connections contained in the graph.</param>
+/// <param name="Groups">Optional editor-only node groups persisted with the document.</param>
 public sealed record GraphDocument(
     string Title,
     string Description,
     IReadOnlyList<GraphNode> Nodes,
-    IReadOnlyList<GraphConnection> Connections);
+    IReadOnlyList<GraphConnection> Connections,
+    IReadOnlyList<GraphNodeGroup>? Groups = null);

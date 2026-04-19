@@ -93,11 +93,7 @@ public sealed partial class GraphEditorViewModel
         => _historyStateCoordinator.PushHistoryState(state);
 
     private GraphDocument CreateViewModelDocumentSnapshot()
-        => new(
-            Title,
-            Description,
-            Nodes.Select(node => node.ToModel()).ToList(),
-            Connections.Select(connection => connection.ToModel()).ToList());
+        => CreateCanonicalRetainedDocumentSnapshot();
 
     private string CreateDocumentSignature()
         => CreateDocumentSignature(CreateViewModelDocumentSnapshot());

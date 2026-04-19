@@ -10,6 +10,7 @@
                           ViewModel="{Binding}" />
     <Grid x:Name="SceneRoot"
           RenderTransformOrigin="0,0">
+      <Canvas x:Name="GroupLayer" />
       <Canvas x:Name="ConnectionLayer"
               IsHitTestVisible="False" />
       <Canvas x:Name="NodeLayer" />

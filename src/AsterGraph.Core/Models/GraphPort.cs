@@ -11,10 +11,12 @@ namespace AsterGraph.Core.Models;
 /// <param name="DataType">Human-readable data type caption.</param>
 /// <param name="AccentHex">Accent color used for the port dot and related visuals.</param>
 /// <param name="TypeId">Optional stable type identifier used by compatibility services.</param>
+/// <param name="InlineParameterKey">Optional parameter key bound to this port for inline literal editing.</param>
 public sealed record GraphPort(
     string Id,
     string Label,
     PortDirection Direction,
     string DataType,
     string AccentHex,
-    PortTypeId? TypeId = null);
+    PortTypeId? TypeId = null,
+    string? InlineParameterKey = null);

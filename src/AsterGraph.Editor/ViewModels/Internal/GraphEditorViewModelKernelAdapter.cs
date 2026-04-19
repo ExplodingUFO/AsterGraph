@@ -68,6 +68,21 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
     public void SetNodePositions(IReadOnlyList<NodePositionSnapshot> positions, bool updateStatus)
         => _kernel.SetNodePositions(positions, updateStatus);
 
+    public bool TrySetNodeWidth(string nodeId, double width, bool updateStatus)
+        => _kernel.TrySetNodeWidth(nodeId, width, updateStatus);
+
+    public bool TrySetNodeExpansionState(string nodeId, GraphNodeExpansionState expansionState)
+        => _kernel.TrySetNodeExpansionState(nodeId, expansionState);
+
+    public string TryCreateNodeGroupFromSelection(string title)
+        => _kernel.TryCreateNodeGroupFromSelection(title);
+
+    public bool TrySetNodeGroupCollapsed(string groupId, bool isCollapsed)
+        => _kernel.TrySetNodeGroupCollapsed(groupId, isCollapsed);
+
+    public bool TrySetNodeGroupPosition(string groupId, GraphPoint position, bool moveMemberNodes, bool updateStatus)
+        => _kernel.TrySetNodeGroupPosition(groupId, position, moveMemberNodes, updateStatus);
+
     public bool TrySetSelectedNodeParameterValue(string parameterKey, object? value)
         => _kernel.TrySetSelectedNodeParameterValue(parameterKey, value);
 
@@ -114,6 +129,10 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
     public GraphEditorCapabilitySnapshot GetCapabilitySnapshot() => _kernel.GetCapabilitySnapshot();
 
     public IReadOnlyList<GraphEditorFeatureDescriptorSnapshot> GetFeatureDescriptors() => _kernel.GetFeatureDescriptors();
+
+    public IReadOnlyList<GraphEditorNodeSurfaceSnapshot> GetNodeSurfaceSnapshots() => _kernel.GetNodeSurfaceSnapshots();
+
+    public IReadOnlyList<GraphNodeGroup> GetNodeGroups() => _kernel.GetNodeGroups();
 
     public IReadOnlyList<GraphEditorCommandDescriptorSnapshot> GetCommandDescriptors()
     {

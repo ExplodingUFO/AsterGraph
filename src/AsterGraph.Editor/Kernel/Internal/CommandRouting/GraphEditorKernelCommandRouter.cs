@@ -43,6 +43,12 @@ internal interface IGraphEditorKernelCommandRouterHost
 
     void SetNodePositions(IReadOnlyList<NodePositionSnapshot> positions, bool updateStatus);
 
+    string TryCreateNodeGroupFromSelection(string title);
+
+    bool TrySetNodeGroupCollapsed(string groupId, bool isCollapsed);
+
+    bool TrySetNodeGroupPosition(string groupId, GraphPoint position, bool moveMemberNodes, bool updateStatus);
+
     bool TrySetSelectedNodeParameterValue(string parameterKey, object? value);
 
     void StartConnection(string sourceNodeId, string sourcePortId);
@@ -113,6 +119,18 @@ internal sealed class GraphEditorKernelCommandRouter
                 _host.CanEditSelectedNodeParameters
                     ? null
                     : "Parameter editing requires node-edit permissions and a shared node definition selection."),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "groups.create",
+                GraphEditorCommandSourceKind.Kernel,
+                _host.SelectedNodeCount > 0 && _host.BehaviorOptions.Commands.Nodes.AllowMove),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "groups.collapse",
+                GraphEditorCommandSourceKind.Kernel,
+                _host.Document.Groups?.Count > 0 && _host.BehaviorOptions.Commands.Nodes.AllowMove),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "groups.move",
+                GraphEditorCommandSourceKind.Kernel,
+                _host.Document.Groups?.Count > 0 && _host.BehaviorOptions.Commands.Nodes.AllowMove),
             GraphEditorCommandDescriptorCatalog.Create(
                 "connections.start",
                 GraphEditorCommandSourceKind.Kernel,
@@ -259,6 +277,38 @@ internal sealed class GraphEditorKernelCommandRouter
                 }
 
                 return _host.TrySetSelectedNodeParameterValue(parameterKey, parameterValue);
+
+            case "groups.create":
+                var title = command.TryGetArgument("title", out var rawTitle) && !string.IsNullOrWhiteSpace(rawTitle)
+                    ? rawTitle
+                    : "Group";
+                return !string.IsNullOrWhiteSpace(_host.TryCreateNodeGroupFromSelection(title));
+
+            case "groups.collapse":
+                if (!TryGetRequiredArgument(command, "groupId", out var collapseGroupId)
+                    || !TryGetBoolArgument(command, "isCollapsed", out var isCollapsed))
+                {
+                    return false;
+                }
+
+                return _host.TrySetNodeGroupCollapsed(collapseGroupId, isCollapsed);
+
+            case "groups.move":
+                if (!TryGetRequiredArgument(command, "groupId", out var moveGroupId)
+                    || !TryGetDoubleArgument(command, "worldX", out var groupX)
+                    || !TryGetDoubleArgument(command, "worldY", out var groupY))
+                {
+                    return false;
+                }
+
+                var moveMembers = !command.TryGetArgument("moveMemberNodes", out var rawMoveMembers)
+                    || !bool.TryParse(rawMoveMembers, out var parsedMoveMembers)
+                    || parsedMoveMembers;
+                return _host.TrySetNodeGroupPosition(
+                    moveGroupId,
+                    new GraphPoint(groupX, groupY),
+                    moveMembers,
+                    ResolveOptionalUpdateStatus(command, "updateStatus"));
 
             case "connections.start":
                 if (!TryGetRequiredArgument(command, "sourceNodeId", out var sourceNodeId)
@@ -423,6 +473,21 @@ internal sealed class GraphEditorKernelCommandRouter
     {
         if (!command.TryGetArgument(name, out var rawValue)
             || !double.TryParse(rawValue, NumberStyles.Float, CultureInfo.InvariantCulture, out value))
+        {
+            value = default;
+            return false;
+        }
+
+        return true;
+    }
+
+    private static bool TryGetBoolArgument(
+        GraphEditorCommandInvocationSnapshot command,
+        string name,
+        out bool value)
+    {
+        if (!command.TryGetArgument(name, out var rawValue)
+            || !bool.TryParse(rawValue, out value))
         {
             value = default;
             return false;

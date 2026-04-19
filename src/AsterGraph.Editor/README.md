@@ -15,6 +15,7 @@ It belongs to the supported published package set with `AsterGraph.Abstractions`
 
 - `IGraphEditorSession` plus `Commands`, `Queries`, `Events`, and mutation batching
 - definition-driven parameter snapshots, validation-aware inspector data, and batch parameter editing
+- node-surface queries and mutations for persisted width, card expansion, and editor-only node groups
 - `AsterGraphEditorFactory` and `AsterGraphEditorOptions`
 - replaceable storage, clipboard, diagnostics, localization, menu, and presentation seams
 - plugin discovery, trust policy, load inspection, and automation entry points
@@ -34,7 +35,7 @@ Those responsibilities live in `AsterGraph.Avalonia` or the consuming host.
   - `AsterGraphEditorFactory.CreateSession(...)`
   - `AsterGraphEditorFactory.Create(...)`
   - `IGraphEditorSession`
-  - DTO/snapshot queries such as `GetCompatiblePortTargets(...)`
+  - DTO/snapshot queries such as `GetCompatiblePortTargets(...)`, `GetNodeSurfaceSnapshots()`, and `GetNodeGroups()`
 - retained compatibility surfaces:
   - `GraphEditorViewModel`
   - `GraphEditorView`
@@ -51,6 +52,7 @@ Keep new code on the stable canonical surfaces. Treat retained and compatibility
 - canonical onboarding: [Quick Start](../../docs/en/quick-start.md)
 - route and package boundary details: [Host Integration](../../docs/en/host-integration.md)
 - definition-driven inspector recipe: [Authoring Inspector Recipe](../../docs/en/authoring-inspector-recipe.md)
+- progressive node-surface route: resize, expand, group, and inline literal authoring travel through the same session/runtime path
 - plugin and custom-node starting point: [Plugin And Custom Node Recipe](../../docs/en/plugin-recipe.md)
 - retained-to-session migration guide: [Retained-To-Session Migration Recipe](../../docs/en/retained-migration-recipe.md)
 - stability, precedence, and retirement rules: [Extension Contracts](../../docs/en/extension-contracts.md)

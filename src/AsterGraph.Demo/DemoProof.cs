@@ -10,12 +10,13 @@ public sealed record DemoProofResult(
     bool TrustTransparencyOk,
     bool ShellWorkflowOk,
     bool CommandSurfaceOk,
+    bool ProgressiveNodeSurfaceOk,
     double StartupMs,
     double InspectorProjectionMs,
     double PluginScanMs,
     double CommandLatencyMs)
 {
-    public bool IsOk => TrustTransparencyOk && ShellWorkflowOk && CommandSurfaceOk;
+    public bool IsOk => TrustTransparencyOk && ShellWorkflowOk && CommandSurfaceOk && ProgressiveNodeSurfaceOk;
 
     public IReadOnlyList<string> MetricLines =>
     [
@@ -56,6 +57,23 @@ public static class DemoProof
             .Single(action => string.Equals(action.Id, "history.undo", StringComparison.Ordinal));
         var commandLatencyMs = MeasureMilliseconds(() => undoAction.TryExecute());
         var commandSurfaceOk = undoAction.CanExecute && shell.Editor.Nodes.Count == nodeCountBeforeUndo;
+        var lightingNode = shell.Editor.FindNode("light")
+            ?? throw new InvalidOperationException("Demo proof requires the lighting node.");
+        shell.Editor.SelectSingleNode(lightingNode, updateStatus: false);
+        var pulsePort = lightingNode.Inputs.Single(port => string.Equals(port.Id, "pulse", StringComparison.Ordinal));
+        var rimMaskPort = lightingNode.Inputs.Single(port => string.Equals(port.Id, "rimMask", StringComparison.Ordinal));
+        var lightSurface = shell.Editor.Session.Queries.GetNodeSurfaceSnapshots()
+            .Single(snapshot => string.Equals(snapshot.NodeId, "light", StringComparison.Ordinal));
+        var terrainGroup = shell.Editor.Session.Queries.GetNodeGroups()
+            .SingleOrDefault(group => string.Equals(group.Id, "terrain-authoring", StringComparison.Ordinal));
+        var progressiveNodeSurfaceOk =
+            lightSurface.ExpansionState == GraphNodeExpansionState.Expanded
+            && terrainGroup is not null
+            && terrainGroup.NodeIds.Count == 2
+            && shell.Editor.HasIncomingConnection(lightingNode, pulsePort)
+            && !shell.Editor.HasIncomingConnection(lightingNode, rimMaskPort)
+            && shell.Editor.ResolveInlineParameter(lightingNode, pulsePort) is not null
+            && shell.Editor.ResolveInlineParameter(lightingNode, rimMaskPort)?.Key == "rimMask";
 
         var exportPath = Path.Combine(storageRoot, "plugin-allowlist-proof.json");
         var trustTransparencyOk =
@@ -83,6 +101,7 @@ public static class DemoProof
             trustTransparencyOk,
             shellWorkflowOk,
             commandSurfaceOk,
+            progressiveNodeSurfaceOk,
             startupMs,
             inspectorProjectionMs,
             pluginScanMs,

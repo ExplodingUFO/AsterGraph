@@ -22,7 +22,7 @@ public sealed class SerializationCompatibilityTests
     [Fact]
     public void GraphDocumentCompatibility_ExposesCurrentSchemaVersion()
     {
-        Assert.Equal(1, GraphDocumentCompatibility.CurrentSchemaVersion);
+        Assert.Equal(2, GraphDocumentCompatibility.CurrentSchemaVersion);
     }
 
     [Fact]
@@ -32,7 +32,7 @@ public sealed class SerializationCompatibilityTests
 
         var json = GraphDocumentSerializer.Serialize(document);
 
-        Assert.Contains("\"SchemaVersion\": 1", json);
+        Assert.Contains("\"SchemaVersion\": 2", json);
     }
 
     [Fact]
@@ -46,6 +46,51 @@ public sealed class SerializationCompatibilityTests
         Assert.Equal(document.Title, restored.Title);
         Assert.Equal(document.Nodes.Count, restored.Nodes.Count);
         Assert.Equal(document.Connections.Count, restored.Connections.Count);
+    }
+
+    [Fact]
+    public void GraphDocumentSerializer_ReadsSchemaVersion1Payload_WithDefaultSurfaceState()
+    {
+        const string json = """
+        {
+          "SchemaVersion": 1,
+          "Title": "Legacy v1",
+          "Description": "Old payload",
+          "Nodes": [
+            {
+              "Id": "node-001",
+              "Title": "Legacy Node",
+              "Category": "Tests",
+              "Subtitle": "Legacy",
+              "Description": "Older payload without surface state.",
+              "Position": {
+                "X": 12,
+                "Y": 24
+              },
+              "Size": {
+                "Width": 240,
+                "Height": 160
+              },
+              "Inputs": [],
+              "Outputs": [],
+              "AccentHex": "#6AD5C4",
+              "DefinitionId": {
+                "Value": "tests.node"
+              },
+              "ParameterValues": []
+            }
+          ],
+          "Connections": []
+        }
+        """;
+
+        var restored = GraphDocumentSerializer.Deserialize(json);
+        var node = Assert.Single(restored.Nodes);
+
+        Assert.NotNull(node.Surface);
+        Assert.Equal(GraphNodeExpansionState.Collapsed, node.Surface!.ExpansionState);
+        Assert.Null(node.Surface.GroupId);
+        Assert.Empty(restored.Groups ?? []);
     }
 
     [Fact]
@@ -133,7 +178,8 @@ public sealed class SerializationCompatibilityTests
             "Serialization Test",
             "Exercise versioned graph document payloads.",
             [CreateNode()],
-            [CreateConnection()]);
+            [CreateConnection()],
+            []);
 
     private static GraphSelectionFragment CreateFragment()
         => new(
@@ -162,7 +208,9 @@ public sealed class SerializationCompatibilityTests
                     new PortTypeId("float")),
             ],
             "#6AD5C4",
-            new NodeDefinitionId("tests.node"));
+            new NodeDefinitionId("tests.node"),
+            null,
+            new GraphNodeSurfaceState(GraphNodeExpansionState.Expanded));
 
     private static GraphConnection CreateConnection()
         => new(

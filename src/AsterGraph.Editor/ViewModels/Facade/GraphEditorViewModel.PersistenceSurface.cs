@@ -200,7 +200,8 @@ public sealed partial class GraphEditorViewModel
                 .Select(connection => kernelConnections.TryGetValue(connection.Id, out var kernelConnection)
                     ? kernelConnection
                     : connection.ToModel())
-                .ToList());
+                .ToList(),
+            kernelDocument.Groups?.Select(group => group with { NodeIds = group.NodeIds.ToList() }).ToList() ?? []);
     }
 
     private static GraphNode CreateCanonicalRetainedNodeSnapshot(

@@ -68,9 +68,10 @@ public static class GraphDocumentSerializer
         string Title,
         string Description,
         IReadOnlyList<GraphNode> Nodes,
-        IReadOnlyList<GraphConnection> Connections)
+        IReadOnlyList<GraphConnection> Connections,
+        IReadOnlyList<GraphNodeGroup>? Groups = null)
     {
         public GraphDocument ToDocument()
-            => new(Title, Description, Nodes, Connections);
+            => new(Title, Description, Nodes, Connections, Groups);
     }
 }

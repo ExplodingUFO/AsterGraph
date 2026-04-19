@@ -40,6 +40,71 @@ public sealed partial class GraphEditorSession
         Execute("nodes.move", () => _host.SetNodePositions(positions, updateStatus));
     }
 
+    public bool TrySetNodeWidth(string nodeId, double width, bool updateStatus = true)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(nodeId);
+
+        var edited = _host.TrySetNodeWidth(nodeId, width, updateStatus);
+        if (edited)
+        {
+            PublishCommandExecuted("nodes.resize-width");
+        }
+
+        return edited;
+    }
+
+    public bool TrySetNodeExpansionState(string nodeId, GraphNodeExpansionState expansionState)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(nodeId);
+
+        var edited = _host.TrySetNodeExpansionState(nodeId, expansionState);
+        if (edited)
+        {
+            PublishCommandExecuted("nodes.surface.expand");
+        }
+
+        return edited;
+    }
+
+    public string TryCreateNodeGroupFromSelection(string title)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(title);
+
+        var groupId = _host.TryCreateNodeGroupFromSelection(title);
+        if (!string.IsNullOrWhiteSpace(groupId))
+        {
+            PublishCommandExecuted("groups.create");
+        }
+
+        return groupId;
+    }
+
+    public bool TrySetNodeGroupCollapsed(string groupId, bool isCollapsed)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(groupId);
+
+        var edited = _host.TrySetNodeGroupCollapsed(groupId, isCollapsed);
+        if (edited)
+        {
+            PublishCommandExecuted("groups.collapse");
+        }
+
+        return edited;
+    }
+
+    public bool TrySetNodeGroupPosition(string groupId, GraphPoint position, bool moveMemberNodes = true, bool updateStatus = true)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(groupId);
+
+        var edited = _host.TrySetNodeGroupPosition(groupId, position, moveMemberNodes, updateStatus);
+        if (edited)
+        {
+            PublishCommandExecuted("groups.move");
+        }
+
+        return edited;
+    }
+
     public bool TrySetSelectedNodeParameterValue(string parameterKey, object? value)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(parameterKey);

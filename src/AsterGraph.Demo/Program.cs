@@ -19,6 +19,7 @@ sealed class Program
             Console.WriteLine($"DEMO_TRUST_OK:{result.TrustTransparencyOk}");
             Console.WriteLine($"DEMO_SHELL_OK:{result.ShellWorkflowOk}");
             Console.WriteLine($"COMMAND_SURFACE_OK:{result.CommandSurfaceOk}");
+            Console.WriteLine($"PROGRESSIVE_NODE_SURFACE_OK:{result.ProgressiveNodeSurfaceOk}");
             foreach (var line in result.MetricLines)
             {
                 Console.WriteLine(line);

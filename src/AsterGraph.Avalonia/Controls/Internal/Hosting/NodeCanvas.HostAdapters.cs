@@ -87,6 +87,8 @@ public partial class NodeCanvas
 
         public Grid? SceneRoot => _owner._sceneRoot;
 
+        public Canvas? GroupLayer => _owner._groupLayer;
+
         public Canvas? ConnectionLayer => _owner._connectionLayer;
 
         public Canvas? NodeLayer => _owner._nodeLayer;
@@ -96,6 +98,8 @@ public partial class NodeCanvas
         public GridBackground? BackgroundGrid => _owner._backgroundGrid;
 
         public Dictionary<NodeViewModel, NodeCanvasRenderedNodeVisual> NodeVisuals => _owner._nodeVisuals;
+
+        public Dictionary<string, NodeCanvasRenderedGroupVisual> GroupVisuals => _owner._groupVisuals;
 
         public IGraphNodeVisualPresenter? NodeVisualPresenter => _owner.NodeVisualPresenter;
 

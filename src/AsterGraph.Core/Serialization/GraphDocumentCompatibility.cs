@@ -8,7 +8,7 @@ namespace AsterGraph.Core.Serialization;
 /// </summary>
 internal static class GraphDocumentCompatibility
 {
-    public const int CurrentSchemaVersion = 1;
+    public const int CurrentSchemaVersion = 2;
 
     public static GraphDocumentSerializer.GraphDocumentFilePayload CreatePayload(GraphDocument document)
     {
@@ -19,7 +19,8 @@ internal static class GraphDocumentCompatibility
             document.Title,
             document.Description,
             document.Nodes,
-            document.Connections);
+            document.Connections,
+            document.Groups);
     }
 
     public static GraphDocument Deserialize(string json, JsonSerializerOptions options)
@@ -32,11 +33,11 @@ internal static class GraphDocumentCompatibility
         if (!root.TryGetProperty(nameof(GraphDocumentSerializer.GraphDocumentFilePayload.SchemaVersion), out var versionElement))
         {
             var legacy = JsonSerializer.Deserialize<GraphDocument>(json, options);
-            return legacy ?? throw new InvalidOperationException("Failed to deserialize legacy graph document.");
+            return NormalizeDocument(legacy ?? throw new InvalidOperationException("Failed to deserialize legacy graph document."));
         }
 
         var schemaVersion = versionElement.GetInt32();
-        if (schemaVersion != CurrentSchemaVersion)
+        if (schemaVersion is not 1 and not CurrentSchemaVersion)
         {
             throw new InvalidOperationException(
                 $"Unsupported graph document schema version '{schemaVersion}'. Current version is '{CurrentSchemaVersion}'.");
@@ -44,6 +45,19 @@ internal static class GraphDocumentCompatibility
 
         var payload = JsonSerializer.Deserialize<GraphDocumentSerializer.GraphDocumentFilePayload>(json, options)
             ?? throw new InvalidOperationException("Failed to deserialize versioned graph document.");
-        return payload.ToDocument();
+        return NormalizeDocument(payload.ToDocument());
+    }
+
+    private static GraphDocument NormalizeDocument(GraphDocument document)
+    {
+        ArgumentNullException.ThrowIfNull(document);
+
+        return document with
+        {
+            Nodes = document.Nodes
+                .Select(node => node with { Surface = node.Surface ?? GraphNodeSurfaceState.Default })
+                .ToList(),
+            Groups = document.Groups?.ToList() ?? [],
+        };
     }
 }

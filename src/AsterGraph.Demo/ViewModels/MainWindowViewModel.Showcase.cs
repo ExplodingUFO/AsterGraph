@@ -393,6 +393,23 @@ public partial class MainWindowViewModel
                     T("automation run 会触达同一个 save/history baseline。", "Automation runs touch the same save/history baseline."),
                     T("proof ring 继续对这条线做机器化保护。", "The proof ring keeps this line machine-protected."),
                 ]),
+            new CapabilityShowcaseItem(
+                "progressive-node-surface",
+                T("渐进式节点表面", "Progressive Node Surface"),
+                T("把宽度、展开态、分组和输入端内联值编辑变成同一条 node surface 路径。", "Turn width, expansion, grouping, and inline input literals into one shared node-surface path."),
+                T(
+                    "Demo 现在默认展示 expanded node card、editor-only group boundary，以及“未连接时可内联、连接后以上游值为准”的单一值来源规则。",
+                    "The demo now shows an expanded node card, an editor-only group boundary, and the single-source rule where unconnected inputs edit inline while connected inputs defer to upstream values."),
+                [
+                    T("所属层：AsterGraph.Editor node-surface contract + AsterGraph.Avalonia stock canvas。", "Layer: AsterGraph.Editor node-surface contract plus the stock AsterGraph.Avalonia canvas."),
+                    T("宿主入口：GetNodeSurfaceSnapshots()、GetNodeGroups()、TrySetNodeWidth(...)、TrySetNodeExpansionState(...)。", "Host entry: GetNodeSurfaceSnapshots(), GetNodeGroups(), TrySetNodeWidth(...), and TrySetNodeExpansionState(...)."),
+                    T("可替换点：宿主可复用同一份 surface state，再决定自定义卡片、分组样式或后续 composite node 路径。", "Seams: hosts can reuse the same surface state while customizing cards, group visuals, or a later composite-node path."),
+                ],
+                [
+                    T("默认图包含 editor-only 分组边界。", "The default graph includes an editor-only group boundary."),
+                    T("Lighting Mix 节点默认展开，并显示 inline input authoring。", "The Lighting Mix node starts expanded and exposes inline input authoring."),
+                    T("连接中的 Pulse 输入会覆盖本地 literal，未连接的 Rim Mask 继续内联编辑。", "The connected Pulse input overrides its local literal while the unconnected Rim Mask stays inline-editable."),
+                ]),
         ];
     }
 

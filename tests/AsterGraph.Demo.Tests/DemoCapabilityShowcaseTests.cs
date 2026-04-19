@@ -4,6 +4,7 @@ using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
 using Avalonia.VisualTree;
+using Avalonia.Automation;
 using AsterGraph.Avalonia.Controls;
 using AsterGraph.Demo;
 using AsterGraph.Demo.ViewModels;
@@ -20,11 +21,12 @@ public sealed class DemoCapabilityShowcaseTests
     {
         var viewModel = new MainWindowViewModel();
 
-        Assert.True(viewModel.Capabilities.Count >= 8);
+        Assert.True(viewModel.Capabilities.Count >= 9);
         Assert.Contains(viewModel.Capabilities, item => item.Key == "plugin-trust-and-loading");
         Assert.Contains(viewModel.Capabilities, item => item.Key == "automation-execution");
         Assert.Contains(viewModel.Capabilities, item => item.Key == "consumer-host-path");
         Assert.Contains(viewModel.Capabilities, item => item.Key == "history-save-contract");
+        Assert.Contains(viewModel.Capabilities, item => item.Key == "progressive-node-surface");
     }
 
     [Fact]
@@ -116,6 +118,7 @@ public sealed class DemoCapabilityShowcaseTests
         Assert.True(result.TrustTransparencyOk);
         Assert.True(result.ShellWorkflowOk);
         Assert.True(result.CommandSurfaceOk);
+        Assert.True(result.ProgressiveNodeSurfaceOk);
         Assert.True(result.StartupMs >= 0);
         Assert.True(result.InspectorProjectionMs >= 0);
         Assert.True(result.PluginScanMs >= 0);
@@ -169,6 +172,32 @@ public sealed class DemoCapabilityShowcaseTests
         Assert.Equal("StandaloneCanvasPreview", canvas.Name);
         Assert.Equal("StandaloneInspectorPreview", inspector.Name);
         Assert.Equal("StandaloneMiniMapPreview", miniMap.Name);
+    }
+
+    [AvaloniaFact]
+    public void MainWindow_RendersProgressiveNodeSurfaceShowcaseArtifacts()
+    {
+        var viewModel = new MainWindowViewModel();
+        var window = new MainWindow
+        {
+            DataContext = viewModel,
+        };
+
+        window.Show();
+
+        var graphEditorView = Assert.IsType<GraphEditorView>(
+            Assert.IsType<ContentControl>(window.FindControl<ContentControl>("PART_MainGraphEditorHost")).Content);
+        var canvas = graphEditorView.FindControl<NodeCanvas>("PART_NodeCanvas");
+
+        Assert.NotNull(canvas);
+        Assert.Contains(viewModel.Editor.GetNodeGroups(), group => group.Id == "terrain-authoring");
+        Assert.Contains(viewModel.Editor.Nodes, node => node.Id == "light" && node.IsExpanded);
+        Assert.Contains(
+            canvas!.GetVisualDescendants().OfType<Border>(),
+            border => string.Equals(
+                AutomationProperties.GetName(border),
+                "Terrain Authoring group",
+                StringComparison.Ordinal));
     }
 
     private static string CreateTempDirectory()

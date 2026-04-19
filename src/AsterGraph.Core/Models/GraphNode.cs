@@ -17,6 +17,7 @@ namespace AsterGraph.Core.Models;
 /// <param name="AccentHex">Primary accent color for the node card.</param>
 /// <param name="DefinitionId">Optional stable definition identifier used to resolve catalog metadata.</param>
 /// <param name="ParameterValues">Optional persisted parameter values for the node.</param>
+/// <param name="Surface">Optional persisted host/runtime node surface state.</param>
 public sealed record GraphNode(
     string Id,
     string Title,
@@ -29,4 +30,5 @@ public sealed record GraphNode(
     IReadOnlyList<GraphPort> Outputs,
     string AccentHex,
     NodeDefinitionId? DefinitionId = null,
-    IReadOnlyList<GraphParameterValue>? ParameterValues = null);
+    IReadOnlyList<GraphParameterValue>? ParameterValues = null,
+    GraphNodeSurfaceState? Surface = null);

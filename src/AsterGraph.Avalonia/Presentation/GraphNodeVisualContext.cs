@@ -1,6 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Input;
 using AsterGraph.Abstractions.Styling;
+using AsterGraph.Core.Models;
 using AsterGraph.Editor.ViewModels;
 
 namespace AsterGraph.Avalonia.Presentation;
@@ -24,6 +25,10 @@ public sealed class GraphNodeVisualContext
         GraphEditorStyleOptions styleOptions,
         Action focusCanvas,
         Action<NodeViewModel, PointerPressedEventArgs> beginNodeDrag,
+        Func<NodeViewModel, double, bool, bool> trySetNodeWidth,
+        Func<NodeViewModel, GraphNodeExpansionState, bool> trySetNodeExpansionState,
+        Func<NodeViewModel, PortViewModel, bool> hasIncomingConnection,
+        Func<NodeViewModel, PortViewModel, NodeParameterViewModel?> resolveInlineParameter,
         Action<NodeViewModel, PortViewModel> activatePort,
         Func<Control, NodeViewModel, ContextRequestedEventArgs, bool> openNodeContextMenu,
         Func<Control, NodeViewModel, PortViewModel, ContextRequestedEventArgs, bool> openPortContextMenu)
@@ -33,6 +38,10 @@ public sealed class GraphNodeVisualContext
         ArgumentNullException.ThrowIfNull(styleOptions);
         ArgumentNullException.ThrowIfNull(focusCanvas);
         ArgumentNullException.ThrowIfNull(beginNodeDrag);
+        ArgumentNullException.ThrowIfNull(trySetNodeWidth);
+        ArgumentNullException.ThrowIfNull(trySetNodeExpansionState);
+        ArgumentNullException.ThrowIfNull(hasIncomingConnection);
+        ArgumentNullException.ThrowIfNull(resolveInlineParameter);
         ArgumentNullException.ThrowIfNull(activatePort);
         ArgumentNullException.ThrowIfNull(openNodeContextMenu);
         ArgumentNullException.ThrowIfNull(openPortContextMenu);
@@ -42,6 +51,10 @@ public sealed class GraphNodeVisualContext
         StyleOptions = styleOptions;
         FocusCanvas = focusCanvas;
         BeginNodeDrag = beginNodeDrag;
+        TrySetNodeWidth = trySetNodeWidth;
+        TrySetNodeExpansionState = trySetNodeExpansionState;
+        HasIncomingConnection = hasIncomingConnection;
+        ResolveInlineParameter = resolveInlineParameter;
         ActivatePort = activatePort;
         OpenNodeContextMenu = openNodeContextMenu;
         OpenPortContextMenu = openPortContextMenu;
@@ -75,6 +88,26 @@ public sealed class GraphNodeVisualContext
     /// 请求开始节点拖动交互。
     /// </summary>
     public Action<NodeViewModel, PointerPressedEventArgs> BeginNodeDrag { get; }
+
+    /// <summary>
+    /// Requests a persisted node-width mutation.
+    /// </summary>
+    public Func<NodeViewModel, double, bool, bool> TrySetNodeWidth { get; }
+
+    /// <summary>
+    /// Requests a persisted node expansion-state mutation.
+    /// </summary>
+    public Func<NodeViewModel, GraphNodeExpansionState, bool> TrySetNodeExpansionState { get; }
+
+    /// <summary>
+    /// Determines whether the given input port currently has an incoming connection.
+    /// </summary>
+    public Func<NodeViewModel, PortViewModel, bool> HasIncomingConnection { get; }
+
+    /// <summary>
+    /// Resolves the shared node-parameter view model bound to one inline-editable input port.
+    /// </summary>
+    public Func<NodeViewModel, PortViewModel, NodeParameterViewModel?> ResolveInlineParameter { get; }
 
     /// <summary>
     /// 请求激活某个端口。

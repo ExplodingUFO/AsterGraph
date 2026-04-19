@@ -1,6 +1,9 @@
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Globalization;
+using System.Linq;
 using AsterGraph.Editor.ViewModels;
+using AsterGraph.Editor.Events;
 
 namespace AsterGraph.Avalonia.Controls.Internal;
 
@@ -30,6 +33,7 @@ internal interface INodeCanvasViewModelObserverHost
 internal sealed class NodeCanvasViewModelObserver
 {
     private readonly INodeCanvasViewModelObserverHost _host;
+    private string _lastGroupSignature = string.Empty;
 
     public NodeCanvasViewModelObserver(INodeCanvasViewModelObserverHost host)
     {
@@ -40,27 +44,43 @@ internal sealed class NodeCanvasViewModelObserver
     {
         if (previous is not null)
         {
+            previous.DocumentChanged -= HandleViewModelDocumentChanged;
             previous.PropertyChanged -= HandleViewModelPropertyChanged;
             previous.Nodes.CollectionChanged -= HandleNodesCollectionChanged;
             previous.Connections.CollectionChanged -= HandleConnectionsCollectionChanged;
+            previous.SelectedNodeParameters.CollectionChanged -= HandleSelectedNodeParametersCollectionChanged;
 
             foreach (var node in previous.Nodes)
             {
                 node.PropertyChanged -= HandleNodePropertyChanged;
             }
+
+            foreach (var parameter in previous.SelectedNodeParameters)
+            {
+                parameter.PropertyChanged -= HandleSelectedNodeParameterPropertyChanged;
+            }
         }
 
         if (current is not null)
         {
+            current.DocumentChanged += HandleViewModelDocumentChanged;
             current.PropertyChanged += HandleViewModelPropertyChanged;
             current.Nodes.CollectionChanged += HandleNodesCollectionChanged;
             current.Connections.CollectionChanged += HandleConnectionsCollectionChanged;
+            current.SelectedNodeParameters.CollectionChanged += HandleSelectedNodeParametersCollectionChanged;
 
             foreach (var node in current.Nodes)
             {
                 node.PropertyChanged += HandleNodePropertyChanged;
             }
+
+            foreach (var parameter in current.SelectedNodeParameters)
+            {
+                parameter.PropertyChanged += HandleSelectedNodeParameterPropertyChanged;
+            }
         }
+
+        _lastGroupSignature = CaptureGroupSignature(current);
 
         _host.ApplySelectionAdornerStyle();
         _host.ApplyGuideAdornerStyle();
@@ -125,6 +145,42 @@ internal sealed class NodeCanvasViewModelObserver
     private void HandleConnectionsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs args)
         => _host.RenderConnections();
 
+    private void HandleViewModelDocumentChanged(object? sender, GraphEditorDocumentChangedEventArgs args)
+    {
+        var currentSignature = CaptureGroupSignature(_host.ViewModel);
+        if (string.Equals(_lastGroupSignature, currentSignature, StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        _lastGroupSignature = currentSignature;
+        _host.RebuildScene();
+    }
+
+    private void HandleSelectedNodeParametersCollectionChanged(object? sender, NotifyCollectionChangedEventArgs args)
+    {
+        if (args.OldItems is not null)
+        {
+            foreach (NodeParameterViewModel parameter in args.OldItems)
+            {
+                parameter.PropertyChanged -= HandleSelectedNodeParameterPropertyChanged;
+            }
+        }
+
+        if (args.NewItems is not null)
+        {
+            foreach (NodeParameterViewModel parameter in args.NewItems)
+            {
+                parameter.PropertyChanged += HandleSelectedNodeParameterPropertyChanged;
+            }
+        }
+
+        _host.UpdateSelectionState();
+    }
+
+    private void HandleSelectedNodeParameterPropertyChanged(object? sender, PropertyChangedEventArgs args)
+        => _host.UpdateSelectionState();
+
     private void HandleNodePropertyChanged(object? sender, PropertyChangedEventArgs args)
     {
         if (sender is not NodeViewModel node)
@@ -139,7 +195,9 @@ internal sealed class NodeCanvasViewModelObserver
                 _host.UpdateNodePosition(node);
                 _host.RenderConnections();
                 break;
+            case nameof(NodeViewModel.Width):
             case nameof(NodeViewModel.Height):
+            case nameof(NodeViewModel.Surface):
                 _host.UpdateNodeVisual(node);
                 _host.RenderConnections();
                 break;
@@ -148,5 +206,20 @@ internal sealed class NodeCanvasViewModelObserver
                 _host.UpdateNodeVisual(node);
                 break;
         }
+    }
+
+    private static string CaptureGroupSignature(GraphEditorViewModel? viewModel)
+    {
+        if (viewModel is null)
+        {
+            return string.Empty;
+        }
+
+        return string.Join(
+            "|",
+            viewModel.GetNodeGroups()
+                .OrderBy(group => group.Id, StringComparer.Ordinal)
+                .Select(group =>
+                    $"{group.Id}:{group.Title}:{group.Position.X.ToString("0.###", CultureInfo.InvariantCulture)}:{group.Position.Y.ToString("0.###", CultureInfo.InvariantCulture)}:{group.Size.Width.ToString("0.###", CultureInfo.InvariantCulture)}:{group.Size.Height.ToString("0.###", CultureInfo.InvariantCulture)}:{group.IsCollapsed}:{string.Join(",", group.NodeIds.OrderBy(id => id, StringComparer.Ordinal))}"));
     }
 }

@@ -85,11 +85,12 @@ internal sealed class GraphEditorKernelNodeMutationCoordinator
                 position.X - (definition.DefaultWidth / 2) + offset,
                 position.Y - (definition.DefaultHeight / 2) + offset),
             new GraphSize(definition.DefaultWidth, definition.DefaultHeight),
-            definition.InputPorts.Select(port => new GraphPort(port.Key, port.DisplayName, PortDirection.Input, port.TypeId.Value, port.AccentHex, port.TypeId)).ToList(),
-            definition.OutputPorts.Select(port => new GraphPort(port.Key, port.DisplayName, PortDirection.Output, port.TypeId.Value, port.AccentHex, port.TypeId)).ToList(),
+            definition.InputPorts.Select(port => new GraphPort(port.Key, port.DisplayName, PortDirection.Input, port.TypeId.Value, port.AccentHex, port.TypeId, port.InlineParameterKey)).ToList(),
+            definition.OutputPorts.Select(port => new GraphPort(port.Key, port.DisplayName, PortDirection.Output, port.TypeId.Value, port.AccentHex, port.TypeId, port.InlineParameterKey)).ToList(),
             definition.AccentHex,
             definition.Id,
-            definition.Parameters.Select(parameter => new GraphParameterValue(parameter.Key, parameter.ValueType, parameter.DefaultValue)).ToList());
+            definition.Parameters.Select(parameter => new GraphParameterValue(parameter.Key, parameter.ValueType, parameter.DefaultValue)).ToList(),
+            GraphNodeSurfaceState.Default);
 
         _host.UpdateDocument(_host.Document with
         {

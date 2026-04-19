@@ -156,6 +156,158 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
     public void SetNodePositions(IReadOnlyList<NodePositionSnapshot> positions, bool updateStatus)
         => _nodeMutationCoordinator.SetNodePositions(positions, updateStatus);
 
+    public bool TrySetNodeWidth(string nodeId, double width, bool updateStatus)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(nodeId);
+
+        if (!_behaviorOptions.Commands.Nodes.AllowMove)
+        {
+            if (updateStatus)
+            {
+                CurrentStatusMessage = "Node surface editing is disabled by host permissions.";
+            }
+
+            return false;
+        }
+
+        if (width <= 0d)
+        {
+            if (updateStatus)
+            {
+                CurrentStatusMessage = "Node width must be positive.";
+            }
+
+            return false;
+        }
+
+        var mutation = _documentMutator.SetNodeWidth(_document, nodeId, width);
+        if (mutation.NodeId is null)
+        {
+            if (updateStatus)
+            {
+                CurrentStatusMessage = "No matching node width change was applied.";
+            }
+
+            return false;
+        }
+
+        _document = mutation.Document;
+        CurrentStatusMessage = $"Updated node width to {mutation.Width:0.##}.";
+        MarkDirty(CurrentStatusMessage, GraphEditorDocumentChangeKind.LayoutChanged, [mutation.NodeId], null, preserveStatus: !updateStatus);
+        return true;
+    }
+
+    public bool TrySetNodeExpansionState(string nodeId, GraphNodeExpansionState expansionState)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(nodeId);
+
+        if (!_behaviorOptions.Commands.Nodes.AllowMove)
+        {
+            CurrentStatusMessage = "Node surface editing is disabled by host permissions.";
+            return false;
+        }
+
+        var mutation = _documentMutator.SetNodeExpansionState(_document, nodeId, expansionState);
+        if (mutation.NodeId is null)
+        {
+            CurrentStatusMessage = "No matching node surface change was applied.";
+            return false;
+        }
+
+        _document = mutation.Document;
+        CurrentStatusMessage = expansionState == GraphNodeExpansionState.Expanded
+            ? "Expanded node card."
+            : "Collapsed node card.";
+        MarkDirty(CurrentStatusMessage, GraphEditorDocumentChangeKind.LayoutChanged, [mutation.NodeId], null, preserveStatus: true);
+        return true;
+    }
+
+    public string TryCreateNodeGroupFromSelection(string title)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(title);
+
+        if (!_behaviorOptions.Commands.Nodes.AllowMove)
+        {
+            CurrentStatusMessage = "Node grouping is disabled by host permissions.";
+            return string.Empty;
+        }
+
+        if (_selectedNodeIds.Count == 0)
+        {
+            CurrentStatusMessage = "Select one or more nodes before creating a group.";
+            return string.Empty;
+        }
+
+        var groupId = CreateUniqueId((_document.Groups ?? []).Select(group => group.Id), "group-");
+        var mutation = _documentMutator.CreateNodeGroupFromSelection(_document, _selectedNodeIds, groupId, title);
+        if (mutation.Group is null)
+        {
+            CurrentStatusMessage = "No node group was created.";
+            return string.Empty;
+        }
+
+        _document = mutation.Document;
+        CurrentStatusMessage = $"Created group {mutation.Group.Title}.";
+        MarkDirty(CurrentStatusMessage, GraphEditorDocumentChangeKind.LayoutChanged, mutation.ChangedNodeIds, null, preserveStatus: true);
+        return mutation.Group.Id;
+    }
+
+    public bool TrySetNodeGroupCollapsed(string groupId, bool isCollapsed)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(groupId);
+
+        if (!_behaviorOptions.Commands.Nodes.AllowMove)
+        {
+            CurrentStatusMessage = "Node grouping is disabled by host permissions.";
+            return false;
+        }
+
+        var mutation = _documentMutator.SetNodeGroupCollapsed(_document, groupId, isCollapsed);
+        if (mutation.Group is null)
+        {
+            CurrentStatusMessage = "No matching group collapse change was applied.";
+            return false;
+        }
+
+        _document = mutation.Document;
+        CurrentStatusMessage = isCollapsed
+            ? $"Collapsed group {mutation.Group.Title}."
+            : $"Expanded group {mutation.Group.Title}.";
+        MarkDirty(CurrentStatusMessage, GraphEditorDocumentChangeKind.LayoutChanged, mutation.ChangedNodeIds, null, preserveStatus: true);
+        return true;
+    }
+
+    public bool TrySetNodeGroupPosition(string groupId, GraphPoint position, bool moveMemberNodes, bool updateStatus)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(groupId);
+
+        if (!_behaviorOptions.Commands.Nodes.AllowMove)
+        {
+            if (updateStatus)
+            {
+                CurrentStatusMessage = "Node grouping is disabled by host permissions.";
+            }
+
+            return false;
+        }
+
+        var mutation = _documentMutator.SetNodeGroupPosition(_document, groupId, position, moveMemberNodes);
+        if (mutation.Group is null)
+        {
+            if (updateStatus)
+            {
+                CurrentStatusMessage = "No matching group position change was applied.";
+            }
+
+            return false;
+        }
+
+        _document = mutation.Document;
+        CurrentStatusMessage = $"Moved group {mutation.Group.Title}.";
+        MarkDirty(CurrentStatusMessage, GraphEditorDocumentChangeKind.LayoutChanged, mutation.ChangedNodeIds, null, preserveStatus: !updateStatus);
+        return true;
+    }
+
     public bool TrySetSelectedNodeParameterValue(string parameterKey, object? value)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(parameterKey);
@@ -398,6 +550,18 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
     public IReadOnlyList<GraphEditorFeatureDescriptorSnapshot> GetFeatureDescriptors()
         => _projectionCoordinator.GetFeatureDescriptors();
 
+    public IReadOnlyList<GraphEditorNodeSurfaceSnapshot> GetNodeSurfaceSnapshots()
+        => _document.Nodes
+            .Select(node =>
+            {
+                var surface = node.Surface ?? GraphNodeSurfaceState.Default;
+                return new GraphEditorNodeSurfaceSnapshot(node.Id, node.Size, surface.ExpansionState, surface.GroupId);
+            })
+            .ToList();
+
+    public IReadOnlyList<GraphNodeGroup> GetNodeGroups()
+        => _document.Groups?.Select(CloneGroup).ToList() ?? [];
+
     public IReadOnlyList<GraphEditorCommandDescriptorSnapshot> GetCommandDescriptors()
         => _commandRouter.GetCommandDescriptors();
 
@@ -634,7 +798,8 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
             document.Title,
             document.Description,
             document.Nodes.Select(CloneNode).ToList(),
-            document.Connections.Select(CloneConnection).ToList());
+            document.Connections.Select(CloneConnection).ToList(),
+            document.Groups?.Select(CloneGroup).ToList() ?? []);
 
     private static GraphNode CloneNode(GraphNode node)
         => new(
@@ -649,7 +814,8 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
             node.Outputs.Select(ClonePort).ToList(),
             node.AccentHex,
             node.DefinitionId,
-            node.ParameterValues?.Select(CloneParameterValue).ToList());
+            node.ParameterValues?.Select(CloneParameterValue).ToList(),
+            node.Surface is null ? null : node.Surface with { });
 
     private static GraphPort ClonePort(GraphPort port)
         => new(
@@ -658,7 +824,17 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
             port.Direction,
             port.DataType,
             port.AccentHex,
-            port.TypeId);
+            port.TypeId,
+            port.InlineParameterKey);
+
+    private static GraphNodeGroup CloneGroup(GraphNodeGroup group)
+        => new(
+            group.Id,
+            group.Title,
+            group.Position,
+            group.Size,
+            group.NodeIds.ToList(),
+            group.IsCollapsed);
 
     private static GraphConnection CloneConnection(GraphConnection connection)
         => new(

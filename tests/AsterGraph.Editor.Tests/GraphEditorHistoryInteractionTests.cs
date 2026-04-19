@@ -136,4 +136,79 @@ public sealed class GraphEditorHistoryInteractionTests
         Assert.False(editor.CanRedo);
         Assert.True(workspace.Exists());
     }
+
+    [Fact]
+    public void GraphEditorViewModel_NodeGroupMutations_PreserveUndoRedoAndDirtySemantics()
+    {
+        var definitionId = new NodeDefinitionId("tests.history.node-groups");
+        var workspace = new GraphEditorHistoryTestSupport.RecordingWorkspaceService();
+        var editor = GraphEditorHistoryTestSupport.CreateEditor(definitionId, workspace);
+        var originalPositions = editor.Nodes.ToDictionary(
+            node => node.Id,
+            node => new GraphPoint(node.X, node.Y),
+            StringComparer.Ordinal);
+
+        editor.SaveWorkspace();
+        Assert.False(editor.IsDirty);
+
+        editor.SetSelection(
+            [
+                editor.FindNode(GraphEditorHistoryTestSupport.SourceNodeId)!,
+                editor.FindNode(GraphEditorHistoryTestSupport.TargetNodeId)!,
+            ],
+            editor.FindNode(GraphEditorHistoryTestSupport.TargetNodeId),
+            status: null);
+
+        var groupId = editor.TryCreateNodeGroupFromSelection("History Cluster");
+        Assert.False(string.IsNullOrWhiteSpace(groupId));
+        Assert.True(editor.TrySetNodeGroupCollapsed(groupId, isCollapsed: true));
+        Assert.True(editor.TrySetNodeGroupPosition(groupId, new GraphPoint(160, 120), moveMemberNodes: true, updateStatus: false));
+
+        var movedGroup = Assert.Single(editor.GetNodeGroups());
+        Assert.Equal(groupId, movedGroup.Id);
+        Assert.True(movedGroup.IsCollapsed);
+        Assert.Equal(new GraphPoint(160, 120), movedGroup.Position);
+        Assert.True(editor.IsDirty);
+
+        foreach (var node in editor.Nodes)
+        {
+            Assert.Equal(groupId, node.GroupId);
+            Assert.NotEqual(originalPositions[node.Id], new GraphPoint(node.X, node.Y));
+        }
+
+        editor.Undo();
+        var undoneMove = Assert.Single(editor.GetNodeGroups());
+        Assert.Equal(
+            originalPositions[GraphEditorHistoryTestSupport.SourceNodeId].X,
+            editor.FindNode(GraphEditorHistoryTestSupport.SourceNodeId)!.X);
+        Assert.Equal(
+            originalPositions[GraphEditorHistoryTestSupport.TargetNodeId].X,
+            editor.FindNode(GraphEditorHistoryTestSupport.TargetNodeId)!.X);
+        Assert.NotEqual(new GraphPoint(160, 120), undoneMove.Position);
+        Assert.True(undoneMove.IsCollapsed);
+        Assert.True(editor.IsDirty);
+
+        editor.Undo();
+        var undoneCollapse = Assert.Single(editor.GetNodeGroups());
+        Assert.False(undoneCollapse.IsCollapsed);
+        Assert.True(editor.IsDirty);
+
+        editor.Undo();
+        Assert.Empty(editor.GetNodeGroups());
+        Assert.All(editor.Nodes, node => Assert.Null(node.GroupId));
+        Assert.False(editor.IsDirty);
+
+        editor.Redo();
+        editor.Redo();
+        editor.Redo();
+
+        var redoneGroup = Assert.Single(editor.GetNodeGroups());
+        Assert.Equal(groupId, redoneGroup.Id);
+        Assert.True(redoneGroup.IsCollapsed);
+        Assert.Equal(new GraphPoint(160, 120), redoneGroup.Position);
+        Assert.All(editor.Nodes, node => Assert.Equal(groupId, node.GroupId));
+        Assert.True(editor.IsDirty);
+        Assert.False(editor.CanRedo);
+        Assert.True(workspace.Exists());
+    }
 }

@@ -8,6 +8,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.VisualTree;
+using Avalonia.Automation;
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Abstractions.Styling;
@@ -457,6 +458,184 @@ public sealed class NodeCanvasStandaloneTests
         }
     }
 
+    [AvaloniaFact]
+    public void DoubleTappedNode_TogglesExpandedSurfaceState_AndRendersInlineSection()
+    {
+        var editor = CreateEditor();
+        editor.SelectSingleNode(editor.Nodes.Single(node => node.Id == TargetNodeId), updateStatus: false);
+        var (window, canvas) = CreateStandaloneCanvasWindow(editor);
+        var pointer = new global::Avalonia.Input.Pointer(1, PointerType.Mouse, isPrimary: true);
+        var pointerArgs = CreatePointerPressedArgs(canvas, pointer, new Point(420, 160), KeyModifiers.None);
+
+        try
+        {
+            var nodeRoot = canvas.GetVisualDescendants()
+                .OfType<Border>()
+                .Single(border => string.Equals(
+                    AutomationProperties.GetName(border),
+                    "Canvas Target node",
+                    StringComparison.Ordinal));
+
+            nodeRoot.RaiseEvent(new TappedEventArgs(InputElement.DoubleTappedEvent, pointerArgs)
+            {
+                Source = nodeRoot,
+            });
+
+            var surface = editor.Session.Queries.GetNodeSurfaceSnapshots()
+                .Single(snapshot => snapshot.NodeId == TargetNodeId);
+
+            Assert.Equal(GraphNodeExpansionState.Expanded, surface.ExpansionState);
+            Assert.True(editor.Nodes.Single(node => node.Id == TargetNodeId).Height > 160d);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
+    public void ExpandedNode_RendersInlineInputEditor_WhenInputIsUnconnected()
+    {
+        var editor = CreateEditor();
+        editor.SelectSingleNode(editor.Nodes.Single(node => node.Id == TargetNodeId), updateStatus: false);
+        Assert.True(editor.Session.Commands.TrySetNodeExpansionState(TargetNodeId, GraphNodeExpansionState.Expanded));
+        var (window, canvas) = CreateStandaloneCanvasWindow(editor);
+
+        try
+        {
+            var inlineEditor = canvas.GetVisualDescendants()
+                .OfType<TextBox>()
+                .SingleOrDefault(control => control.DataContext is NodeParameterViewModel parameter
+                                            && string.Equals(parameter.Key, "gain", StringComparison.Ordinal));
+
+            Assert.NotNull(inlineEditor);
+            Assert.Equal("0.35", inlineEditor!.Text);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
+    public void ExpandedNode_ShowsConnectedOverrideMessage_WhenInlineInputReceivesUpstreamValue()
+    {
+        var editor = CreateEditor();
+        editor.SelectSingleNode(editor.Nodes.Single(node => node.Id == TargetNodeId), updateStatus: false);
+        editor.Session.Commands.StartConnection(SourceNodeId, SourcePortId);
+        editor.Session.Commands.CompleteConnection(TargetNodeId, TargetPortId);
+        Assert.True(editor.Session.Commands.TrySetNodeExpansionState(TargetNodeId, GraphNodeExpansionState.Expanded));
+        var (window, canvas) = CreateStandaloneCanvasWindow(editor);
+
+        try
+        {
+            var allText = string.Join(
+                "\n",
+                canvas.GetVisualDescendants()
+                    .OfType<TextBlock>()
+                    .Select(block => block.Text)
+                    .Where(text => !string.IsNullOrWhiteSpace(text)));
+
+            Assert.Contains("Connected input overrides the local literal.", allText, StringComparison.Ordinal);
+            Assert.DoesNotContain(
+                canvas.GetVisualDescendants().OfType<TextBox>(),
+                control => control.DataContext is NodeParameterViewModel parameter
+                           && string.Equals(parameter.Key, "gain", StringComparison.Ordinal));
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
+    public void ResizeThumb_UpdatesPersistedNodeWidth()
+    {
+        var editor = CreateEditor();
+        var (window, canvas) = CreateStandaloneCanvasWindow(editor);
+
+        try
+        {
+            var thumb = canvas.GetVisualDescendants()
+                .OfType<Thumb>()
+                .Single(control => string.Equals(
+                    AutomationProperties.GetName(control),
+                    "Canvas Target resize handle",
+                    StringComparison.Ordinal));
+
+            thumb.RaiseEvent(new VectorEventArgs
+            {
+                RoutedEvent = Thumb.DragDeltaEvent,
+                Vector = new Vector(80, 0),
+                Source = thumb,
+            });
+
+            var target = editor.Nodes.Single(node => node.Id == TargetNodeId);
+            Assert.Equal(320d, target.Width);
+
+            var surface = editor.Session.Queries.GetNodeSurfaceSnapshots()
+                .Single(snapshot => snapshot.NodeId == TargetNodeId);
+            Assert.Equal(320d, surface.Size.Width);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
+    public void GroupHeader_RendersAtPersistedPosition_SelectsMembers_AndTogglesCollapse()
+    {
+        var editor = CreateEditor();
+        editor.Session.Commands.SetSelection([SourceNodeId, TargetNodeId], TargetNodeId, updateStatus: false);
+        var groupId = editor.Session.Commands.TryCreateNodeGroupFromSelection("Canvas Cluster");
+        Assert.False(string.IsNullOrWhiteSpace(groupId));
+        Assert.True(editor.Session.Commands.TrySetNodeGroupPosition(groupId!, new GraphPoint(80, 60), moveMemberNodes: false, updateStatus: false));
+
+        var (window, canvas) = CreateStandaloneCanvasWindow(editor);
+        var pointer = new global::Avalonia.Input.Pointer(1, PointerType.Mouse, isPrimary: true);
+        var pointerArgs = CreatePointerPressedArgs(canvas, pointer, new Point(120, 88), KeyModifiers.None);
+
+        try
+        {
+            var groupSurface = canvas.GetVisualDescendants()
+                .OfType<Border>()
+                .Single(control => string.Equals(
+                    AutomationProperties.GetName(control),
+                    "Canvas Cluster group",
+                    StringComparison.Ordinal));
+            var groupHeader = canvas.GetVisualDescendants()
+                .OfType<Button>()
+                .Single(control => string.Equals(
+                    AutomationProperties.GetName(control),
+                    "Canvas Cluster group header",
+                    StringComparison.Ordinal));
+
+            Assert.Equal(80d, Canvas.GetLeft(groupSurface));
+            Assert.Equal(60d, Canvas.GetTop(groupSurface));
+
+            groupHeader.RaiseEvent(new RoutedEventArgs(Button.ClickEvent)
+            {
+                Source = groupHeader,
+            });
+
+            Assert.Equal(
+                [SourceNodeId, TargetNodeId],
+                editor.SelectedNodes.Select(node => node.Id).OrderBy(id => id, StringComparer.Ordinal));
+
+            groupHeader.RaiseEvent(new TappedEventArgs(InputElement.DoubleTappedEvent, pointerArgs)
+            {
+                Source = groupHeader,
+            });
+
+            Assert.True(editor.Session.Queries.GetNodeGroups().Single().IsCollapsed);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
     private static void InvokeCanvasContextRequested(NodeCanvas canvas, ContextRequestedEventArgs args)
         => InvokeCanvasHandler("HandleCanvasContextRequested", canvas, args);
 
@@ -616,9 +795,20 @@ public sealed class NodeCanvasStandaloneTests
                         TargetPortId,
                         "Input",
                         new PortTypeId("float"),
-                        "#F3B36B"),
+                        "#F3B36B",
+                        inlineParameterKey: "gain"),
                 ],
-                []));
+                [],
+                parameters:
+                [
+                    new NodeParameterDefinition(
+                        "gain",
+                        "Gain",
+                        new PortTypeId("float"),
+                        ParameterEditorKind.Number,
+                        description: "Inline input literal shown when the input is unconnected.",
+                        defaultValue: 0.35d),
+                ]));
 
         return new GraphEditorViewModel(
             new GraphDocument(
@@ -660,11 +850,15 @@ public sealed class NodeCanvasStandaloneTests
                                 PortDirection.Input,
                                 "float",
                                 "#F3B36B",
-                                new PortTypeId("float")),
+                                new PortTypeId("float"),
+                                "gain"),
                         ],
                         [],
                         "#F3B36B",
-                        TargetDefinitionId),
+                        TargetDefinitionId,
+                        [
+                            new GraphParameterValue("gain", new PortTypeId("float"), 0.35d),
+                        ]),
                 ],
                 []),
             catalog,

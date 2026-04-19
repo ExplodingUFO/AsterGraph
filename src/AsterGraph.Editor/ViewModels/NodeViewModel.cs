@@ -14,6 +14,7 @@ public sealed partial class NodeViewModel : ObservableObject
     private const double PortRowHeight = 24;
     private const double PortRowSpacing = 8;
     private const double StatusBarHeight = 28;
+    private const double ExpandedSurfaceHeight = 152;
     private readonly Dictionary<string, GraphParameterValue> _parameterValues;
     private readonly double _baseHeight;
 
@@ -31,6 +32,7 @@ public sealed partial class NodeViewModel : ObservableObject
         Description = model.Description;
         AccentHex = model.AccentHex;
         Width = model.Size.Width;
+        Surface = model.Surface ?? GraphNodeSurfaceState.Default;
         X = model.Position.X;
         Y = model.Position.Y;
 
@@ -105,7 +107,29 @@ public sealed partial class NodeViewModel : ObservableObject
     /// <summary>
     /// 节点宽度。
     /// </summary>
-    public double Width { get; }
+    [ObservableProperty]
+    private double width;
+
+    /// <summary>
+    /// 当前节点持久化 surface 状态快照。
+    /// </summary>
+    [ObservableProperty]
+    private GraphNodeSurfaceState surface = GraphNodeSurfaceState.Default;
+
+    /// <summary>
+    /// 当前节点卡片展开状态。
+    /// </summary>
+    public GraphNodeExpansionState ExpansionState => Surface.ExpansionState;
+
+    /// <summary>
+    /// 当前节点所属的 editor-only 分组标识；未分组时为空。
+    /// </summary>
+    public string? GroupId => Surface.GroupId;
+
+    /// <summary>
+    /// 指示当前节点卡片是否处于展开模式。
+    /// </summary>
+    public bool IsExpanded => ExpansionState == GraphNodeExpansionState.Expanded;
 
     [ObservableProperty]
     private double height;
@@ -182,7 +206,8 @@ public sealed partial class NodeViewModel : ObservableObject
             Outputs.Select(port => port.ToModel()).ToList(),
             AccentHex,
             DefinitionId,
-            _parameterValues.Values.ToList());
+            _parameterValues.Values.ToList(),
+            Surface);
 
     /// <summary>
     /// 按指定偏移量移动节点位置。
@@ -216,6 +241,13 @@ public sealed partial class NodeViewModel : ObservableObject
     }
 
     /// <summary>
+    /// Updates the persisted surface state snapshot.
+    /// </summary>
+    /// <param name="state">New surface state.</param>
+    public void UpdateSurface(GraphNodeSurfaceState? state)
+        => Surface = state ?? GraphNodeSurfaceState.Default;
+
+    /// <summary>
     /// 更新节点展示状态快照。
     /// </summary>
     /// <param name="state">新的展示状态；为空时回退到默认展示。</param>
@@ -227,6 +259,26 @@ public sealed partial class NodeViewModel : ObservableObject
         Height = CalculateRenderedHeight();
         OnPropertyChanged(nameof(DisplaySubtitle));
         OnPropertyChanged(nameof(DisplayDescription));
+    }
+
+    partial void OnWidthChanged(double value)
+        => OnPropertyChanged(nameof(Bounds));
+
+    partial void OnHeightChanged(double value)
+        => OnPropertyChanged(nameof(Bounds));
+
+    partial void OnXChanged(double value)
+        => OnPropertyChanged(nameof(Bounds));
+
+    partial void OnYChanged(double value)
+        => OnPropertyChanged(nameof(Bounds));
+
+    partial void OnSurfaceChanged(GraphNodeSurfaceState value)
+    {
+        Height = CalculateRenderedHeight();
+        OnPropertyChanged(nameof(ExpansionState));
+        OnPropertyChanged(nameof(GroupId));
+        OnPropertyChanged(nameof(IsExpanded));
     }
 
     private double CalculateRequiredHeight()
@@ -241,5 +293,7 @@ public sealed partial class NodeViewModel : ObservableObject
     }
 
     private double CalculateRenderedHeight()
-        => _baseHeight + (Presentation.StatusBar is null ? 0 : StatusBarHeight);
+        => _baseHeight
+           + (Presentation.StatusBar is null ? 0 : StatusBarHeight)
+           + (IsExpanded ? ExpandedSurfaceHeight : 0);
 }

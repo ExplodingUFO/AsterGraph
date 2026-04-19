@@ -55,6 +55,53 @@ public interface IGraphEditorCommands
         => throw new NotSupportedException();
 
     /// <summary>
+    /// Attempts to update one node's persisted card width through the runtime mutation path.
+    /// </summary>
+    /// <param name="nodeId">Stable node identifier.</param>
+    /// <param name="width">Requested card width.</param>
+    /// <param name="updateStatus">Whether to update status text for no-op or success cases.</param>
+    /// <returns><see langword="true"/> when the width changes.</returns>
+    bool TrySetNodeWidth(string nodeId, double width, bool updateStatus = true)
+        => throw new NotSupportedException();
+
+    /// <summary>
+    /// Attempts to update one node's persisted card expansion state.
+    /// </summary>
+    /// <param name="nodeId">Stable node identifier.</param>
+    /// <param name="expansionState">Requested expansion state.</param>
+    /// <returns><see langword="true"/> when the state changes.</returns>
+    bool TrySetNodeExpansionState(string nodeId, GraphNodeExpansionState expansionState)
+        => throw new NotSupportedException();
+
+    /// <summary>
+    /// Attempts to create one editor-only node group from the current selection.
+    /// </summary>
+    /// <param name="title">Requested group title.</param>
+    /// <returns>The created stable group identifier, or an empty string when creation fails.</returns>
+    string TryCreateNodeGroupFromSelection(string title)
+        => throw new NotSupportedException();
+
+    /// <summary>
+    /// Attempts to update one node group's collapsed state.
+    /// </summary>
+    /// <param name="groupId">Stable group identifier.</param>
+    /// <param name="isCollapsed">Requested collapsed state.</param>
+    /// <returns><see langword="true"/> when the state changes.</returns>
+    bool TrySetNodeGroupCollapsed(string groupId, bool isCollapsed)
+        => throw new NotSupportedException();
+
+    /// <summary>
+    /// Attempts to update one node group's persisted position and optionally move its member nodes together.
+    /// </summary>
+    /// <param name="groupId">Stable group identifier.</param>
+    /// <param name="position">Requested top-left world position.</param>
+    /// <param name="moveMemberNodes">Whether to translate group member nodes by the same delta.</param>
+    /// <param name="updateStatus">Whether to update status text for no-op or success cases.</param>
+    /// <returns><see langword="true"/> when the position changes.</returns>
+    bool TrySetNodeGroupPosition(string groupId, GraphPoint position, bool moveMemberNodes = true, bool updateStatus = true)
+        => throw new NotSupportedException();
+
+    /// <summary>
     /// Attempts to set one parameter value across the current selection when every selected node shares the same definition.
     /// </summary>
     /// <param name="parameterKey">Stable parameter key declared by the shared node definition.</param>

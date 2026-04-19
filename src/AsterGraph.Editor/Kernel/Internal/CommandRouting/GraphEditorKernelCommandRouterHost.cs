@@ -60,6 +60,15 @@ internal sealed partial class GraphEditorKernel
         void IGraphEditorKernelCommandRouterHost.SetNodePositions(IReadOnlyList<NodePositionSnapshot> positions, bool updateStatus)
             => _owner.SetNodePositions(positions, updateStatus);
 
+        string IGraphEditorKernelCommandRouterHost.TryCreateNodeGroupFromSelection(string title)
+            => _owner.TryCreateNodeGroupFromSelection(title);
+
+        bool IGraphEditorKernelCommandRouterHost.TrySetNodeGroupCollapsed(string groupId, bool isCollapsed)
+            => _owner.TrySetNodeGroupCollapsed(groupId, isCollapsed);
+
+        bool IGraphEditorKernelCommandRouterHost.TrySetNodeGroupPosition(string groupId, GraphPoint position, bool moveMemberNodes, bool updateStatus)
+            => _owner.TrySetNodeGroupPosition(groupId, position, moveMemberNodes, updateStatus);
+
         bool IGraphEditorKernelCommandRouterHost.TrySetSelectedNodeParameterValue(string parameterKey, object? value)
             => _owner.TrySetSelectedNodeParameterValue(parameterKey, value);
 

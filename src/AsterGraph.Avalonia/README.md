@@ -17,6 +17,7 @@ It belongs to the supported published package set with `AsterGraph.Abstractions`
 - `GraphInspectorView`
 - `GraphMiniMap`
 - stock Avalonia menu and presentation wiring
+- stock progressive node cards with persisted width, expand/collapse, inline literal editors, and editor-only group boundaries
 - stock grouped inspector sections plus text/number/boolean/enum/list editors
 - `AsterGraphAvaloniaViewFactory` plus standalone surface factories
 - Avalonia theme resources, input handling, and control-level integration glue
@@ -39,6 +40,8 @@ Those responsibilities live in `AsterGraph.Abstractions`, `AsterGraph.Core`, `As
 - retained compatibility: `new GraphEditorView { Editor = editor }`
 
 For new work, prefer the factory-based routes. Treat the direct `GraphEditorView` constructor path as retained compatibility.
+
+`NodeCanvas` consumes the shared editor command/query surface for progressive authoring UX. The same persisted node-surface state drives resize handles, double-click expand/collapse, inline input literals, and editor-only group chrome.
 
 ## Start Here
 

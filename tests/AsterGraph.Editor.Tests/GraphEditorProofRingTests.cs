@@ -180,6 +180,52 @@ public sealed class GraphEditorProofRingTests
     }
 
     [Fact]
+    public void RuntimeSessionProof_CoversProgressiveNodeSurfaceAndEditorOnlyGroups()
+    {
+        var session = AsterGraphEditorFactory.CreateSession(new AsterGraphEditorOptions
+        {
+            Document = CreateDocument(),
+            NodeCatalog = CreateCatalog(),
+            CompatibilityService = new ExactCompatibilityService(),
+        });
+
+        session.Commands.SetSelection([SourceNodeId, TargetNodeId], TargetNodeId, updateStatus: false);
+
+        Assert.True(session.Commands.TrySetNodeWidth(TargetNodeId, 336d, updateStatus: false));
+        Assert.True(session.Commands.TrySetNodeExpansionState(TargetNodeId, GraphNodeExpansionState.Expanded));
+
+        var groupId = session.Commands.TryCreateNodeGroupFromSelection("Proof Cluster");
+        Assert.False(string.IsNullOrWhiteSpace(groupId));
+        Assert.True(session.Commands.TrySetNodeGroupCollapsed(groupId, isCollapsed: true));
+        Assert.True(session.Commands.TrySetNodeGroupPosition(groupId, new GraphPoint(72, 88), moveMemberNodes: true, updateStatus: false));
+
+        var surface = Assert.Single(session.Queries.GetNodeSurfaceSnapshots(), snapshot => snapshot.NodeId == TargetNodeId);
+        var group = Assert.Single(session.Queries.GetNodeGroups());
+        var featureIds = session.Queries.GetFeatureDescriptors()
+            .Where(descriptor => descriptor.IsAvailable)
+            .Select(descriptor => descriptor.Id)
+            .ToHashSet(StringComparer.Ordinal);
+        var commandIds = session.Queries.GetCommandDescriptors()
+            .Select(descriptor => descriptor.Id)
+            .ToHashSet(StringComparer.Ordinal);
+
+        Assert.Equal(336d, surface.Size.Width);
+        Assert.Equal(GraphNodeExpansionState.Expanded, surface.ExpansionState);
+        Assert.Equal(groupId, surface.GroupId);
+        Assert.Equal("Proof Cluster", group.Title);
+        Assert.True(group.IsCollapsed);
+        Assert.Equal(new GraphPoint(72, 88), group.Position);
+        Assert.Equal(
+            [SourceNodeId, TargetNodeId],
+            group.NodeIds.OrderBy(id => id, StringComparer.Ordinal));
+        Assert.Contains("query.node-surface-snapshots", featureIds);
+        Assert.Contains("query.node-groups", featureIds);
+        Assert.Contains("groups.create", commandIds);
+        Assert.Contains("groups.collapse", commandIds);
+        Assert.Contains("groups.move", commandIds);
+    }
+
+    [Fact]
     public void RetainedCompatibilityProof_UsesAdapterBackedSessionHost()
     {
         var legacyEditor = new GraphEditorViewModel(
@@ -1283,6 +1329,11 @@ public sealed class GraphEditorProofRingTests
         "nodes.add",
         "selection.set",
         "selection.delete",
+        "nodes.resize-width",
+        "nodes.surface.expand",
+        "groups.create",
+        "groups.collapse",
+        "groups.move",
         "connections.start",
         "connections.complete",
         "connections.connect",

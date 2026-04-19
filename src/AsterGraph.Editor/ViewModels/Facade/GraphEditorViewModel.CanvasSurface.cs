@@ -46,6 +46,90 @@ public sealed partial class GraphEditorViewModel
         => _nodeLayoutCoordinator.SetNodePositions(positions, updateStatus);
 
     /// <summary>
+    /// Attempts to persist one node width through the session runtime surface path.
+    /// </summary>
+    public bool TrySetNodeWidth(NodeViewModel node, double width, bool updateStatus = true)
+    {
+        ArgumentNullException.ThrowIfNull(node);
+        return _sessionHost.TrySetNodeWidth(node.Id, width, updateStatus);
+    }
+
+    /// <summary>
+    /// Attempts to persist one node expansion-state change through the session runtime surface path.
+    /// </summary>
+    public bool TrySetNodeExpansionState(NodeViewModel node, GraphNodeExpansionState expansionState)
+    {
+        ArgumentNullException.ThrowIfNull(node);
+        return _sessionHost.TrySetNodeExpansionState(node.Id, expansionState);
+    }
+
+    /// <summary>
+    /// Gets persisted editor-only node groups from the shared runtime session.
+    /// </summary>
+    public IReadOnlyList<GraphNodeGroup> GetNodeGroups()
+        => _sessionHost.GetNodeGroups();
+
+    /// <summary>
+    /// Attempts to create one editor-only group from the current selection.
+    /// </summary>
+    public string TryCreateNodeGroupFromSelection(string title)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(title);
+        return _sessionHost.TryCreateNodeGroupFromSelection(title);
+    }
+
+    /// <summary>
+    /// Attempts to update one persisted group's collapsed state.
+    /// </summary>
+    public bool TrySetNodeGroupCollapsed(string groupId, bool isCollapsed)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(groupId);
+        return _sessionHost.TrySetNodeGroupCollapsed(groupId, isCollapsed);
+    }
+
+    /// <summary>
+    /// Attempts to move one persisted group and optionally its member nodes.
+    /// </summary>
+    public bool TrySetNodeGroupPosition(string groupId, GraphPoint position, bool moveMemberNodes = true, bool updateStatus = true)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(groupId);
+        return _sessionHost.TrySetNodeGroupPosition(groupId, position, moveMemberNodes, updateStatus);
+    }
+
+    /// <summary>
+    /// Determines whether an input port currently receives an upstream connection.
+    /// </summary>
+    public bool HasIncomingConnection(NodeViewModel node, PortViewModel port)
+    {
+        ArgumentNullException.ThrowIfNull(node);
+        ArgumentNullException.ThrowIfNull(port);
+
+        return Connections.Any(connection =>
+            string.Equals(connection.TargetNodeId, node.Id, StringComparison.Ordinal)
+            && string.Equals(connection.TargetPortId, port.Id, StringComparison.Ordinal));
+    }
+
+    /// <summary>
+    /// Resolves the shared inline-parameter editor bound to one input port when the node is the primary single selection.
+    /// </summary>
+    public NodeParameterViewModel? ResolveInlineParameter(NodeViewModel node, PortViewModel port)
+    {
+        ArgumentNullException.ThrowIfNull(node);
+        ArgumentNullException.ThrowIfNull(port);
+
+        if (port.Direction != PortDirection.Input
+            || string.IsNullOrWhiteSpace(port.InlineParameterKey)
+            || !ReferenceEquals(SelectedNode, node)
+            || HasMultipleSelection)
+        {
+            return null;
+        }
+
+        return SelectedNodeParameters.FirstOrDefault(parameter =>
+            string.Equals(parameter.Key, port.InlineParameterKey, StringComparison.Ordinal));
+    }
+
+    /// <summary>
     /// 将屏幕坐标转换为当前视口下的世界坐标。
     /// </summary>
     /// <param name="screen">待转换的屏幕坐标。</param>

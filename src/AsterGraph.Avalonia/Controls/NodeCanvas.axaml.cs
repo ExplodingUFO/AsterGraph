@@ -63,7 +63,9 @@ public partial class NodeCanvas : UserControl
         AvaloniaProperty.Register<NodeCanvas, IGraphContextMenuPresenter?>(nameof(ContextMenuPresenter));
 
     private readonly Dictionary<NodeViewModel, NodeCanvasRenderedNodeVisual> _nodeVisuals = new();
+    private readonly Dictionary<string, NodeCanvasRenderedGroupVisual> _groupVisuals = new(StringComparer.Ordinal);
     private Grid? _sceneRoot;
+    private Canvas? _groupLayer;
     private Canvas? _connectionLayer;
     private Canvas? _nodeLayer;
     private Canvas? _overlayLayer;
@@ -217,6 +219,7 @@ public partial class NodeCanvas : UserControl
     {
         AvaloniaXamlLoader.Load(this);
         _sceneRoot = this.FindControl<Grid>("SceneRoot");
+        _groupLayer = this.FindControl<Canvas>("GroupLayer");
         _connectionLayer = this.FindControl<Canvas>("ConnectionLayer");
         _nodeLayer = this.FindControl<Canvas>("NodeLayer");
         _overlayLayer = this.FindControl<Canvas>("OverlayLayer");
