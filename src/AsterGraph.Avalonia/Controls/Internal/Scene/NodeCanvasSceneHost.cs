@@ -322,17 +322,24 @@ internal sealed class NodeCanvasSceneHost
             .Select(node => node.Id)
             .ToHashSet(StringComparer.Ordinal);
         var isSelected = group.NodeIds.Count > 0 && group.NodeIds.All(selectedNodeIds.Contains);
+        var isDropTarget = string.Equals(_host.InteractionSession.HoveredDropGroupId, group.Id, StringComparison.Ordinal);
         var headerHeight = 40d;
         var renderedHeight = group.IsCollapsed ? headerHeight : Math.Max(headerHeight + 16d, group.Size.Height);
 
         visual.Root.Width = Math.Max(168d, group.Size.Width);
         visual.Root.Height = renderedHeight;
-        visual.Root.BorderBrush = BrushFactory.Solid(isSelected ? "#7FE7D7" : "#365063", isSelected ? 0.95 : 0.72);
-        visual.Root.Background = BrushFactory.Solid("#0E1824", group.IsCollapsed ? 0.72 : 0.18);
+        visual.Root.BorderBrush = BrushFactory.Solid(
+            isDropTarget ? "#F8CF6A" : isSelected ? "#7FE7D7" : "#365063",
+            isDropTarget ? 0.98 : isSelected ? 0.95 : 0.72);
+        visual.Root.Background = BrushFactory.Solid(
+            isDropTarget ? "#2C2412" : "#0E1824",
+            isDropTarget ? 0.38 : group.IsCollapsed ? 0.72 : 0.18);
         Canvas.SetLeft(visual.Root, group.Position.X);
         Canvas.SetTop(visual.Root, group.Position.Y);
 
-        visual.HeaderButton.Background = BrushFactory.Solid(isSelected ? "#173241" : "#132131", 0.96);
+        visual.HeaderButton.Background = BrushFactory.Solid(
+            isDropTarget ? "#4A3917" : isSelected ? "#173241" : "#132131",
+            0.96);
         visual.TitleText.Text = $"{group.Title} ({group.NodeIds.Count})";
         visual.TitleText.Foreground = BrushFactory.Solid(isSelected ? "#F4FFFC" : "#D8EEF3", 0.98);
         visual.BodyBorder.IsVisible = !group.IsCollapsed;

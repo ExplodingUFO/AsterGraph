@@ -290,6 +290,8 @@ public sealed class NodeCanvasPointerInteractionCoordinatorTests
 
         public int RenderConnectionsCalls { get; private set; }
 
+        public int UpdateGroupVisualsCalls { get; private set; }
+
         public int UpdateMarqueeSelectionCalls { get; private set; }
 
         public Point? LastMarqueePoint { get; private set; }
@@ -312,6 +314,9 @@ public sealed class NodeCanvasPointerInteractionCoordinatorTests
 
         public void RenderConnections()
             => RenderConnectionsCalls++;
+
+        public void UpdateGroupVisuals()
+            => UpdateGroupVisualsCalls++;
 
         public void UpdateMarqueeSelection(Point currentScreenPosition, bool finalize)
         {

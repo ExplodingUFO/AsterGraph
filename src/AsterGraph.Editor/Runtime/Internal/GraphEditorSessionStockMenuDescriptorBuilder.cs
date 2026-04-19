@@ -105,6 +105,7 @@ internal sealed class GraphEditorSessionStockMenuDescriptorBuilder
             ? context.SelectedNodeIds.Count
             : _selectionSnapshotFactory().SelectedNodeIds.Count;
         var delete = GetCommandDescriptor(commands, "selection.delete");
+        var createGroup = GetCommandDescriptor(commands, "groups.create");
         var export = GetCommandDescriptor(commands, "fragments.export-selection");
         var alignLeft = GetCommandDescriptor(commands, "layout.align-left");
         var alignCenter = GetCommandDescriptor(commands, "layout.align-center");
@@ -133,6 +134,13 @@ internal sealed class GraphEditorSessionStockMenuDescriptorBuilder
                 iconKey: "export",
                 isEnabled: export.IsEnabled,
                 disabledReason: export.DisabledReason),
+            new GraphEditorMenuItemDescriptorSnapshot(
+                "selection-create-group",
+                Localize("editor.menu.selection.createGroup", "Create Group"),
+                CreateCommand("groups.create", ("title", "Group")),
+                iconKey: "group-create",
+                isEnabled: createGroup.IsEnabled,
+                disabledReason: createGroup.DisabledReason),
             GraphEditorMenuItemDescriptorSnapshot.Separator("selection-sep-1"),
             new GraphEditorMenuItemDescriptorSnapshot(
                 "selection-align",

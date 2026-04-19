@@ -77,7 +77,11 @@ internal sealed class NodeCanvasNodeDragCoordinator
         var dragNodes = node.IsSelected && _host.ViewModel.HasMultipleSelection
             ? _host.ViewModel.SelectedNodes.ToList()
             : [node];
-        _host.InteractionSession.BeginNodeDrag(node, dragStart, _host.CreateDragSession(dragNodes));
+        _host.InteractionSession.BeginNodeDrag(
+            node,
+            dragStart,
+            _host.CreateDragSession(dragNodes),
+            _host.ViewModel.GetNodeGroupSnapshots().ToList());
         _host.ViewModel.BeginHistoryInteraction();
         return new NodeCanvasNodeDragStartResult(Handled: true, CapturePointer: true);
     }

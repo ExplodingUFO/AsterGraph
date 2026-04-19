@@ -271,6 +271,9 @@ public partial class NodeCanvas
         public void RenderConnections()
             => _owner.RenderConnections();
 
+        public void UpdateGroupVisuals()
+            => _owner.UpdateGroupVisuals();
+
         public void UpdateMarqueeSelection(Point currentScreenPosition, bool finalize)
             => _owner.UpdateMarqueeSelection(currentScreenPosition, finalize);
 

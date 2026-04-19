@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Input;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Geometry;
+using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.ViewModels;
 
 namespace AsterGraph.Avalonia.Controls.Internal;
@@ -21,6 +22,8 @@ internal interface INodeCanvasPointerInteractionHost
     void HideGuideAdorners();
 
     void RenderConnections();
+
+    void UpdateGroupVisuals();
 
     void UpdateMarqueeSelection(Point currentScreenPosition, bool finalize);
 
@@ -119,6 +122,13 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
                         rawDelta.X / _host.ViewModel.Zoom,
                         rawDelta.Y / _host.ViewModel.Zoom);
                     _host.ViewModel.ApplyDragOffset(dragSession.OriginPositions, adjustedDelta.X, adjustedDelta.Y);
+
+                    if (_host.InteractionSession.DragNode is not null
+                        && _host.InteractionSession.UpdateHoveredDropGroup(
+                            ResolveHoveredDropGroupId(dragSession.Nodes, _host.InteractionSession.DragGroupDropZones)))
+                    {
+                        _host.UpdateGroupVisuals();
+                    }
                 }
             }
             else if (_host.InteractionSession.IsPanning)
@@ -141,6 +151,12 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
 
     public void HandleReleased(Point currentScreenPosition)
     {
+        if (_host.InteractionSession.DragNode is not null
+            && _host.InteractionSession.DragSession is NodeCanvasDragSession dragSession)
+        {
+            ApplyDraggedNodeGroupMembership(dragSession.Nodes, _host.InteractionSession.DragGroupDropZones);
+        }
+
         if (_host.InteractionSession.SelectionStartScreenPosition is not null)
         {
             if (_host.InteractionSession.IsMarqueeSelecting)
@@ -167,7 +183,82 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
                     : $"Moved {_host.InteractionSession.DragNode.Title}.");
         }
 
+        if (_host.InteractionSession.UpdateHoveredDropGroup(null))
+        {
+            _host.UpdateGroupVisuals();
+        }
+
         _host.InteractionSession.ResetAfterPointerRelease();
         _host.HideGuideAdorners();
+    }
+
+    private static void ApplyDraggedNodeGroupMembership(
+        IReadOnlyList<NodeViewModel> nodes,
+        IReadOnlyList<GraphEditorNodeGroupSnapshot> dropZones)
+    {
+        foreach (var node in nodes)
+        {
+            var targetGroupId = ResolveDropGroupId(node, dropZones);
+            if (string.Equals(node.GroupId, targetGroupId, StringComparison.Ordinal))
+            {
+                continue;
+            }
+
+            node.Surface = node.Surface with
+            {
+                GroupId = targetGroupId,
+            };
+        }
+    }
+
+    private static string? ResolveHoveredDropGroupId(
+        IReadOnlyList<NodeViewModel> nodes,
+        IReadOnlyList<GraphEditorNodeGroupSnapshot> dropZones)
+    {
+        string? hoveredGroupId = null;
+        foreach (var node in nodes)
+        {
+            var targetGroupId = ResolveDropGroupId(node, dropZones);
+            if (string.IsNullOrWhiteSpace(targetGroupId))
+            {
+                return null;
+            }
+
+            if (hoveredGroupId is null)
+            {
+                hoveredGroupId = targetGroupId;
+                continue;
+            }
+
+            if (!string.Equals(hoveredGroupId, targetGroupId, StringComparison.Ordinal))
+            {
+                return null;
+            }
+        }
+
+        return hoveredGroupId;
+    }
+
+    private static string? ResolveDropGroupId(
+        NodeViewModel node,
+        IReadOnlyList<GraphEditorNodeGroupSnapshot> dropZones)
+        => dropZones
+            .Where(group => IsNodeWithinGroupBounds(node, group))
+            .OrderBy(group => group.Size.Width * group.Size.Height)
+            .ThenBy(group => group.Id, StringComparer.Ordinal)
+            .Select(group => group.Id)
+            .FirstOrDefault();
+
+    private static bool IsNodeWithinGroupBounds(NodeViewModel node, GraphEditorNodeGroupSnapshot group)
+    {
+        var right = node.X + node.Width;
+        var bottom = node.Y + node.Height;
+        var groupRight = group.Position.X + group.Size.Width;
+        var groupBottom = group.Position.Y + group.Size.Height;
+
+        return node.X >= group.Position.X
+               && node.Y >= group.Position.Y
+               && right <= groupRight
+               && bottom <= groupBottom;
     }
 }

@@ -657,6 +657,26 @@ public sealed class GraphEditorSessionTests
     }
 
     [Fact]
+    public void RuntimeSession_SelectionContextMenuDescriptors_ExposeCreateGroupAction()
+    {
+        var definitionId = new NodeDefinitionId("tests.session.selection-group-menu");
+        var session = AsterGraphEditorFactory.CreateSession(CreateOptions(definitionId));
+        session.Commands.SetSelection([SourceNodeId, TargetNodeId], SourceNodeId, updateStatus: false);
+
+        var selectionMenu = session.Queries.BuildContextMenuDescriptors(
+            new ContextMenuContext(
+                ContextMenuTargetKind.Selection,
+                new GraphPoint(160, 90),
+                selectedNodeId: SourceNodeId,
+                selectedNodeIds: [SourceNodeId, TargetNodeId]));
+
+        var createGroup = Assert.Single(selectionMenu, item => item.Id == "selection-create-group");
+        Assert.True(createGroup.IsEnabled);
+        Assert.Equal("groups.create", createGroup.Command!.CommandId);
+        Assert.Contains(createGroup.Command.Arguments, argument => argument.Name == "title" && argument.Value == "Group");
+    }
+
+    [Fact]
     public void RuntimeSession_StockContextMenuDescriptorSignatures_RemainStableAcrossTargets()
     {
         var definitionId = new NodeDefinitionId("tests.session.stock-menu-signatures");
@@ -725,7 +745,7 @@ public sealed class GraphEditorSessionTests
 
         var expected = """
             canvas:canvas-add-node~Add Node~add~True~-~False~-~[add-category-Tests~Tests~-~True~-~False~-~[add-node-tests-session-stock-menu-signatures~Session Node~node~True~-~False~nodes.add(definitionId=tests.session.stock-menu-signatures,worldX=160,worldY=90)~[-]]]||canvas-sep-1~~-~False~-~True~-~[-]||canvas-fit-view~Fit View~fit~True~-~False~viewport.fit()~[-]||canvas-reset-view~Reset View~reset~True~-~False~viewport.reset()~[-]||canvas-sep-2~~-~False~-~True~-~[-]||canvas-save~Save Snapshot~save~True~-~False~workspace.save()~[-]||canvas-load~Load Snapshot~load~False~No saved snapshot yet. Save once to create one.~False~workspace.load()~[-]||canvas-import-fragment~Import Fragment~import~False~-~False~fragments.import()~[-]||canvas-cancel-pending~Cancel Pending Connection~cancel~False~-~False~connections.cancel()~[-]
-            selection:selection-delete~Delete 2 Selected Nodes~delete~True~-~False~selection.delete()~[-]||selection-export~Export Fragment~export~False~-~False~fragments.export-selection()~[-]||selection-sep-1~~-~False~-~True~-~[-]||selection-align~Align~align~True~-~False~-~[selection-align-left~Left~align-left~False~-~False~layout.align-left()~[-]>>selection-align-center~Center~align-center~False~-~False~layout.align-center()~[-]>>selection-align-right~Right~align-right~False~-~False~layout.align-right()~[-]>>selection-align-top~Top~align-top~False~-~False~layout.align-top()~[-]>>selection-align-middle~Middle~align-middle~False~-~False~layout.align-middle()~[-]>>selection-align-bottom~Bottom~align-bottom~False~-~False~layout.align-bottom()~[-]]||selection-distribute~Distribute~distribute~True~-~False~-~[selection-distribute-horizontal~Horizontally~distribute-horizontal~False~-~False~layout.distribute-horizontal()~[-]>>selection-distribute-vertical~Vertically~distribute-vertical~False~-~False~layout.distribute-vertical()~[-]]
+            selection:selection-delete~Delete 2 Selected Nodes~delete~True~-~False~selection.delete()~[-]||selection-export~Export Fragment~export~False~-~False~fragments.export-selection()~[-]||selection-create-group~Create Group~group-create~True~-~False~groups.create(title=Group)~[-]||selection-sep-1~~-~False~-~True~-~[-]||selection-align~Align~align~True~-~False~-~[selection-align-left~Left~align-left~False~-~False~layout.align-left()~[-]>>selection-align-center~Center~align-center~False~-~False~layout.align-center()~[-]>>selection-align-right~Right~align-right~False~-~False~layout.align-right()~[-]>>selection-align-top~Top~align-top~False~-~False~layout.align-top()~[-]>>selection-align-middle~Middle~align-middle~False~-~False~layout.align-middle()~[-]>>selection-align-bottom~Bottom~align-bottom~False~-~False~layout.align-bottom()~[-]]||selection-distribute~Distribute~distribute~True~-~False~-~[selection-distribute-horizontal~Horizontally~distribute-horizontal~False~-~False~layout.distribute-horizontal()~[-]>>selection-distribute-vertical~Vertically~distribute-vertical~False~-~False~layout.distribute-vertical()~[-]]
             node:node-inspect~Inspect Source Node~inspect~False~-~False~nodes.inspect(nodeId=tests.session.source-001)~[-]||node-center~Center View Here~center~True~-~False~viewport.center-node(nodeId=tests.session.source-001)~[-]||node-sep-1~~-~False~-~True~-~[-]||node-delete~Delete Node~delete~False~-~False~nodes.delete-by-id(nodeId=tests.session.source-001)~[-]||node-duplicate~Duplicate Node~duplicate~False~-~False~nodes.duplicate(nodeId=tests.session.source-001)~[-]||node-disconnect~Disconnect~disconnect~True~-~False~-~[node-disconnect-in~Incoming~disconnect~True~-~False~connections.disconnect-incoming(nodeId=tests.session.source-001)~[-]>>node-disconnect-out~Outgoing~disconnect~True~-~False~connections.disconnect-outgoing(nodeId=tests.session.source-001)~[-]>>node-disconnect-all~All~disconnect~True~-~False~connections.disconnect-all(nodeId=tests.session.source-001)~[-]]||node-create-connection~Create Connection From~connect~True~-~False~-~[node-connect-tests.session.source-001-out~Output~-~True~-~False~-~[compatible-node-tests.session.target-001~Target Node~-~True~-~False~-~[compatible-port-tests.session.target-001-in~Input~connect~True~-~False~connections.connect(sourceNodeId=tests.session.source-001,sourcePortId=out,targetNodeId=tests.session.target-001,targetPortId=in)~[-]]]]
             port-output:port-start~Start Connection~connect~True~-~False~connections.start(sourceNodeId=tests.session.source-001,sourcePortId=out)~[-]||port-compatible-targets~Compatible Targets~compatible~True~-~False~-~[compatible-node-tests.session.target-001~Target Node~-~True~-~False~-~[compatible-port-tests.session.target-001-in~Input~connect~True~-~False~connections.connect(sourceNodeId=tests.session.source-001,sourcePortId=out,targetNodeId=tests.session.target-001,targetPortId=in)~[-]]]||port-sep-1~~-~False~-~True~-~[-]||port-info~Type: float~type~False~-~False~-~[-]
             port-input:port-break-connections~Break Connections~disconnect~True~-~False~connections.break-port(nodeId=tests.session.target-001,portId=in)~[-]||port-sep-2~~-~False~-~True~-~[-]||port-info~Type: float~type~False~-~False~-~[-]
