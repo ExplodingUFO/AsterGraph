@@ -277,7 +277,10 @@ public partial class MainWindow : Window
     }
 
     private static List<string> ResolveDroppedWorkspacePaths(DragEventArgs args)
-        => args.Data.GetFiles()?
+        => ResolveDroppedWorkspacePaths(args.DataTransfer);
+
+    private static List<string> ResolveDroppedWorkspacePaths(IDataTransfer? dataTransfer)
+        => (dataTransfer is null ? null : dataTransfer.TryGetFiles())?
             .Select(item => item.TryGetLocalPath())
             .Where(path => !string.IsNullOrWhiteSpace(path))
             .Cast<string>()

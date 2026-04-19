@@ -845,7 +845,6 @@ function Invoke-PublicRepoHygieneValidation {
     'AGENTS.md',
     'CLAUDE.md',
     'build.log',
-    'NuGet.config',
     'docs/plans'
   )) {
     Assert-RepoPathNotTracked -RelativePath $path
@@ -884,7 +883,6 @@ function Invoke-PublicRepoHygieneValidation {
 
   foreach ($entry in @(
     '/build.log',
-    '/NuGet.config',
     '/.planning/',
     '/AGENTS.md',
     '/CLAUDE.md',

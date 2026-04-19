@@ -3,11 +3,13 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
 using Avalonia.Input;
+using Avalonia.Platform.Storage;
 using Avalonia.Themes.Fluent;
 using Avalonia.VisualTree;
 using AsterGraph.Avalonia.Controls;
@@ -264,6 +266,27 @@ public sealed class DemoMainWindowTests
         Assert.NotEqual(originalNodeCount, droppedViewModel.Editor.Nodes.Count);
     }
 
+    [AvaloniaFact]
+    public void MainWindow_ResolvesDroppedWorkspacePaths_FromDataTransferFiles()
+    {
+        var method = typeof(MainWindow).GetMethod(
+            "ResolveDroppedWorkspacePaths",
+            BindingFlags.NonPublic | BindingFlags.Static,
+            binder: null,
+            types: [typeof(IDataTransfer)],
+            modifiers: null);
+
+        Assert.NotNull(method);
+
+        var dataTransfer = new DataTransfer();
+        dataTransfer.Add(DataTransferItem.CreateFile(CreateStorageFile(@"C:\temp\workspace.json")));
+        dataTransfer.Add(DataTransferItem.CreateFile(CreateStorageFile(@"C:\temp\readme.txt")));
+
+        var paths = Assert.IsType<List<string>>(method!.Invoke(null, [dataTransfer]));
+
+        Assert.Equal([@"C:\temp\workspace.json"], paths);
+    }
+
     private static MainWindow CreateWindow()
     {
         var window = new MainWindow
@@ -301,6 +324,17 @@ public sealed class DemoMainWindowTests
         var path = Path.Combine(Path.GetTempPath(), "AsterGraph.Demo.Tests", Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(path);
         return path;
+    }
+
+    private static IStorageItem CreateStorageFile(string localPath)
+    {
+        var storageFileType = typeof(MainWindow).Assembly
+            .GetReferencedAssemblies()
+            .Select(Assembly.Load)
+            .Select(assembly => assembly.GetType("Avalonia.Platform.Storage.FileIO.BclStorageFile", throwOnError: false))
+            .First(type => type is not null);
+
+        return (IStorageItem)Activator.CreateInstance(storageFileType!, new FileInfo(localPath))!;
     }
 }
 
