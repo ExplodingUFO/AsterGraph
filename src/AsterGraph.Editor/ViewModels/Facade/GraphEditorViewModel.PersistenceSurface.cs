@@ -186,13 +186,12 @@ public sealed partial class GraphEditorViewModel
 
     private GraphDocument CreateCanonicalRetainedDocumentSnapshot()
     {
-        var kernelDocument = _kernel.CreateDocumentSnapshot();
-        var kernelNodes = kernelDocument.Nodes.ToDictionary(node => node.Id, StringComparer.Ordinal);
-        var kernelConnections = kernelDocument.Connections.ToDictionary(connection => connection.Id, StringComparer.Ordinal);
+        var activeKernelDocument = _kernel.CreateActiveScopeDocumentSnapshot();
+        var kernelNodes = activeKernelDocument.Nodes.ToDictionary(node => node.Id, StringComparer.Ordinal);
+        var kernelConnections = activeKernelDocument.Connections.ToDictionary(connection => connection.Id, StringComparer.Ordinal);
+        var retainedGroups = GraphEditorRetainedNodeGroupProjection.CreateResolvedGroups(activeKernelDocument.Groups ?? [], Nodes);
 
-        return new GraphDocument(
-            Title,
-            Description,
+        return _kernel.CreateDocumentSnapshotWithActiveScopeContents(
             Nodes
                 .Select(node => CreateCanonicalRetainedNodeSnapshot(node, kernelNodes))
                 .ToList(),
@@ -201,7 +200,7 @@ public sealed partial class GraphEditorViewModel
                     ? kernelConnection
                     : connection.ToModel())
                 .ToList(),
-            kernelDocument.Groups?.Select(group => group with { NodeIds = group.NodeIds.ToList() }).ToList() ?? []);
+            retainedGroups.ToList());
     }
 
     private static GraphNode CreateCanonicalRetainedNodeSnapshot(
@@ -217,6 +216,9 @@ public sealed partial class GraphEditorViewModel
             return kernelNode with
             {
                 Position = new GraphPoint(node.X, node.Y),
+                Surface = node.Surface == GraphNodeSurfaceState.Default
+                    ? null
+                    : node.Surface,
                 ParameterValues = parameterValues.Count == 0 && kernelNode.ParameterValues is null
                     ? null
                     : parameterValues,

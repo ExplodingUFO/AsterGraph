@@ -45,6 +45,7 @@ public sealed partial class GraphEditorSession
                 new GraphEditorFeatureDescriptorSnapshot("capability.nodes.parameters.edit", "capability", capabilities.CanEditNodeParameters),
                 new GraphEditorFeatureDescriptorSnapshot("query.node-surface-snapshots", "query", true),
                 new GraphEditorFeatureDescriptorSnapshot("query.node-groups", "query", true),
+                new GraphEditorFeatureDescriptorSnapshot("query.node-group-snapshots", "query", true),
                 new GraphEditorFeatureDescriptorSnapshot("capability.connections.create", "capability", capabilities.CanCreateConnections),
                 new GraphEditorFeatureDescriptorSnapshot("capability.connections.delete", "capability", capabilities.CanDeleteConnections),
                 new GraphEditorFeatureDescriptorSnapshot("capability.connections.break", "capability", capabilities.CanBreakConnections),
@@ -129,8 +130,17 @@ public sealed partial class GraphEditorSession
     public IReadOnlyList<GraphEditorNodeSurfaceSnapshot> GetNodeSurfaceSnapshots()
         => _host.GetNodeSurfaceSnapshots();
 
+    public IReadOnlyList<GraphEditorCompositeNodeSnapshot> GetCompositeNodeSnapshots()
+        => _host.GetCompositeNodeSnapshots();
+
+    public GraphEditorScopeNavigationSnapshot GetScopeNavigationSnapshot()
+        => _host.GetScopeNavigationSnapshot();
+
     public IReadOnlyList<GraphNodeGroup> GetNodeGroups()
         => _host.GetNodeGroups();
+
+    public IReadOnlyList<GraphEditorNodeGroupSnapshot> GetNodeGroupSnapshots()
+        => _host.GetNodeGroupSnapshots();
 
     public IReadOnlyList<GraphEditorPluginLoadSnapshot> GetPluginLoadSnapshots()
         => _pluginLoadSnapshots.ToList();
@@ -140,6 +150,9 @@ public sealed partial class GraphEditorSession
 
     public GraphEditorPendingConnectionSnapshot GetPendingConnectionSnapshot()
         => CreatePendingConnectionSnapshot();
+
+    public IReadOnlyList<GraphEditorCompatibleConnectionTargetSnapshot> GetCompatibleConnectionTargets(string sourceNodeId, string sourcePortId)
+        => _host.GetCompatibleConnectionTargets(sourceNodeId, sourcePortId);
 
     public IReadOnlyList<GraphEditorCompatiblePortTargetSnapshot> GetCompatiblePortTargets(string sourceNodeId, string sourcePortId)
         => _host.GetCompatiblePortTargets(sourceNodeId, sourcePortId);
@@ -153,7 +166,7 @@ public sealed partial class GraphEditorSession
             return [];
         }
 
-        var nodesById = _host.CreateDocumentSnapshot()
+        var nodesById = _host.CreateActiveScopeDocumentSnapshot()
             .Nodes
             .ToDictionary(node => node.Id, StringComparer.Ordinal);
 
@@ -196,7 +209,7 @@ public sealed partial class GraphEditorSession
             return false;
         }
 
-        var document = _host.CreateDocumentSnapshot();
+        var document = _host.CreateActiveScopeDocumentSnapshot();
         var selection = _host.GetSelectionSnapshot();
         if (selection.SelectedNodeIds.Count == 0)
         {

@@ -50,6 +50,9 @@ Expected proof markers:
 - `DEMO_TRUST_OK:True`
 - `DEMO_SHELL_OK:True`
 - `COMMAND_SURFACE_OK:True`
+- `COMPOSITE_SCOPE_OK:True`
+- `EDGE_NOTE_OK:True`
+- `DISCONNECT_FLOW_OK:True`
 - `HOST_NATIVE_METRIC:startup_ms=...`
 - `HOST_NATIVE_METRIC:inspector_projection_ms=...`
 - `HOST_NATIVE_METRIC:plugin_scan_ms=...`
@@ -62,6 +65,7 @@ Expected proof markers:
 - `Automation` proves typed execution and result projection.
 - `Integration` points to `HostSample`, renders standalone surfaces, and shows presenter-replacement previews.
 - `Runtime` and `Proof` keep host-owned shell state, recent workspaces, autosave cues, and shared runtime evidence in one place.
+- `View and Proof` can verify composite scope navigation (`COMPOSITE_SCOPE_OK`), editable edge notes (`EDGE_NOTE_OK`), and disconnect recovery (`DISCONNECT_FLOW_OK`).
 
 ## Demo vs Other Entry Samples
 

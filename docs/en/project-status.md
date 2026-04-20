@@ -28,6 +28,10 @@
 - the four-package SDK boundary
 - kernel/session-first runtime ownership
 - default Avalonia shell plus standalone surfaces
+- v1.21 semantic graph composition proof markers:
+  - `COMPOSITE_SCOPE_OK:True`
+  - `EDGE_NOTE_OK:True`
+  - `DISCONNECT_FLOW_OK:True`
 - plugin discovery, trust policy, loading, and inspection
 - automation execution through `IGraphEditorSession.Automation`
 - contract, maintenance, and release proof lanes

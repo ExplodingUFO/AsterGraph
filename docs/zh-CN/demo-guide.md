@@ -50,6 +50,9 @@ dotnet run --project src/AsterGraph.Demo/AsterGraph.Demo.csproj --nologo -- --pr
 - `DEMO_TRUST_OK:True`
 - `DEMO_SHELL_OK:True`
 - `COMMAND_SURFACE_OK:True`
+- `COMPOSITE_SCOPE_OK:True`
+- `EDGE_NOTE_OK:True`
+- `DISCONNECT_FLOW_OK:True`
 - `HOST_NATIVE_METRIC:startup_ms=...`
 - `HOST_NATIVE_METRIC:inspector_projection_ms=...`
 - `HOST_NATIVE_METRIC:plugin_scan_ms=...`
@@ -62,6 +65,7 @@ dotnet run --project src/AsterGraph.Demo/AsterGraph.Demo.csproj --nologo -- --pr
 - `自动化`：看 typed automation execution 与结果投影
 - `集成`：看 `HostSample`、standalone surfaces、presenter replacement、本地化证明
 - `运行时` 和 `证明`：一起看 host-owned shell state、recent workspace、autosave 提示和 shared runtime evidence
+- `视图` 和 `证明`：同时验证 `COMPOSITE_SCOPE_OK`（复合图层导航）、`EDGE_NOTE_OK`（边注解展示编辑）、`DISCONNECT_FLOW_OK`（断开连接后的恢复语义）
 
 ## Demo 与其他入口样例的分工
 

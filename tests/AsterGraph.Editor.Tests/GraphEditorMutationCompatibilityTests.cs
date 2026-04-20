@@ -65,6 +65,37 @@ public sealed class GraphEditorMutationCompatibilityTests
     }
 
     [Fact]
+    public void GraphEditorMutationCompatibility_DisconnectConnectionCommand_KeepSelectionAndSnapshotConsistent()
+    {
+        var definitionId = new NodeDefinitionId("tests.compatibility.disconnect-connection");
+        var retained = CreateLegacyEditor(definitionId);
+        var runtime = CreateRuntimeSession(definitionId);
+
+        ConnectDefaultPair(retained, runtime);
+        SelectSourceNode(retained, runtime);
+
+        var retainedConnectionId = Assert.Single(retained.CreateDocumentSnapshot().Connections).Id;
+        var runtimeConnectionId = Assert.Single(runtime.Queries.CreateDocumentSnapshot().Connections).Id;
+
+        Assert.True(retained.Session.Commands.TryExecuteCommand(
+            new GraphEditorCommandInvocationSnapshot(
+                "connections.disconnect",
+                [
+                    new GraphEditorCommandArgumentSnapshot("connectionId", retainedConnectionId),
+                ])));
+        Assert.True(runtime.Commands.TryExecuteCommand(
+            new GraphEditorCommandInvocationSnapshot(
+                "connections.disconnect",
+                [
+                    new GraphEditorCommandArgumentSnapshot("connectionId", runtimeConnectionId),
+                ])));
+
+        Assert.Empty(retained.CreateDocumentSnapshot().Connections);
+        Assert.Empty(runtime.Queries.CreateDocumentSnapshot().Connections);
+        AssertParity(retained, runtime);
+    }
+
+    [Fact]
     public void GraphEditorMutationCompatibility_BreakConnectionsForPort_KeepSelectionAndSnapshotConsistent()
     {
         var definitionId = new NodeDefinitionId("tests.compatibility.break-port");
@@ -79,6 +110,27 @@ public sealed class GraphEditorMutationCompatibilityTests
 
         Assert.Empty(retained.CreateDocumentSnapshot().Connections);
         Assert.Empty(runtime.Queries.CreateDocumentSnapshot().Connections);
+        AssertParity(retained, runtime);
+    }
+
+    [Fact]
+    public void GraphEditorMutationCompatibility_SetConnectionNoteText_KeepSelectionAndSnapshotConsistent()
+    {
+        var definitionId = new NodeDefinitionId("tests.compatibility.connection-note");
+        var retained = CreateLegacyEditor(definitionId);
+        var runtime = CreateRuntimeSession(definitionId);
+
+        ConnectDefaultPair(retained, runtime);
+        SelectSourceNode(retained, runtime);
+
+        var retainedConnectionId = Assert.Single(retained.CreateDocumentSnapshot().Connections).Id;
+        var runtimeConnectionId = Assert.Single(runtime.Queries.CreateDocumentSnapshot().Connections).Id;
+
+        Assert.True(retained.TrySetConnectionNoteText(retainedConnectionId, "Preview branch", updateStatus: false));
+        Assert.True(runtime.Commands.TrySetConnectionNoteText(runtimeConnectionId, "Preview branch", updateStatus: false));
+
+        Assert.Equal("Preview branch", Assert.Single(retained.CreateDocumentSnapshot().Connections).Presentation?.NoteText);
+        Assert.Equal("Preview branch", Assert.Single(runtime.Queries.CreateDocumentSnapshot().Connections).Presentation?.NoteText);
         AssertParity(retained, runtime);
     }
 

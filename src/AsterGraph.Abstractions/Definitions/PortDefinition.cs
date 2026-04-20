@@ -55,7 +55,8 @@ public sealed record PortDefinition
     public string? Description { get; }
 
     /// <summary>
-    /// Optional parameter key used by shipped and custom progressive surfaces for inline literal editing.
+    /// Retained for host/plugin source compatibility. Shipped parameter-rail surfaces now prefer
+    /// explicit parameter endpoint bindings instead of this implicit inline hint.
     /// </summary>
     public string? InlineParameterKey { get; }
 }

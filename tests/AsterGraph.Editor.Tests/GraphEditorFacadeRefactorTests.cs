@@ -739,6 +739,23 @@ public sealed class GraphEditorFacadeRefactorTests
     }
 
     [Fact]
+    public void GraphEditorViewModel_RuntimeTrySetNodeSize_PublishesOwnerDocumentChangedOnce()
+    {
+        var definitionId = new NodeDefinitionId("tests.editor.facade.runtime-document");
+        var editor = CreateEditorWithSharedDefinitionNodes(definitionId);
+        var documentChanges = new List<GraphEditorDocumentChangedEventArgs>();
+
+        editor.DocumentChanged += (_, args) => documentChanges.Add(args);
+
+        Assert.True(editor.Session.Commands.TrySetNodeSize("node-001", new GraphSize(320, 220), updateStatus: true));
+
+        var documentChanged = Assert.Single(documentChanges);
+        Assert.Equal(GraphEditorDocumentChangeKind.LayoutChanged, documentChanged.ChangeKind);
+        Assert.Equal(["node-001"], documentChanged.NodeIds);
+        Assert.Equal(editor.StatusMessage, documentChanged.StatusMessage);
+    }
+
+    [Fact]
     public void GraphEditorViewModel_ApplyDragOffset_WhenMoveDisabled_DoesNotChangeNodePositions()
     {
         var definitionId = new NodeDefinitionId("tests.editor.facade.layout-drag-permissions");

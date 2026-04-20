@@ -1,10 +1,18 @@
 using Avalonia.Controls;
 using Avalonia.Input;
 using AsterGraph.Abstractions.Styling;
+using AsterGraph.Avalonia.Presentation;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.ViewModels;
 
 namespace AsterGraph.Avalonia.Presentation;
+
+public enum GraphNodeResizeHandleKind
+{
+    Right = 0,
+    Bottom = 1,
+    BottomRight = 2,
+}
 
 /// <summary>
 /// 提供节点展示器创建或更新可视树时所需的编辑器状态与交互回调。
@@ -23,6 +31,69 @@ public sealed class GraphNodeVisualContext
         GraphEditorViewModel editor,
         NodeViewModel node,
         GraphEditorStyleOptions styleOptions,
+        INodeParameterEditorRegistry? nodeParameterEditorRegistry,
+        Action focusCanvas,
+        Action<NodeViewModel, PointerPressedEventArgs> beginNodeDrag,
+        Action<NodeViewModel, GraphNodeResizeHandleKind, PointerPressedEventArgs> beginNodeResize,
+        Action beginHistoryInteraction,
+        Action<string> completeHistoryInteraction,
+        Func<NodeViewModel, GraphSize, bool, bool> trySetNodeSize,
+        Func<NodeViewModel, double, bool, bool> trySetNodeWidth,
+        Func<NodeViewModel, GraphNodeExpansionState, bool> trySetNodeExpansionState,
+        Func<NodeViewModel, PortViewModel, bool> hasIncomingConnection,
+        Action<NodeViewModel, PortViewModel> activatePort,
+        Action<NodeViewModel, GraphConnectionTargetRef> activateConnectionTarget,
+        Func<Control, NodeViewModel, ContextRequestedEventArgs, bool> openNodeContextMenu,
+        Func<Control, NodeViewModel, PortViewModel, ContextRequestedEventArgs, bool> openPortContextMenu,
+        Func<NodeViewModel, PortViewModel, NodeParameterViewModel?>? resolveInlineParameter = null)
+    {
+        ArgumentNullException.ThrowIfNull(editor);
+        ArgumentNullException.ThrowIfNull(node);
+        ArgumentNullException.ThrowIfNull(styleOptions);
+        ArgumentNullException.ThrowIfNull(focusCanvas);
+        ArgumentNullException.ThrowIfNull(beginNodeDrag);
+        ArgumentNullException.ThrowIfNull(beginNodeResize);
+        ArgumentNullException.ThrowIfNull(beginHistoryInteraction);
+        ArgumentNullException.ThrowIfNull(completeHistoryInteraction);
+        ArgumentNullException.ThrowIfNull(trySetNodeSize);
+        ArgumentNullException.ThrowIfNull(trySetNodeWidth);
+        ArgumentNullException.ThrowIfNull(trySetNodeExpansionState);
+        ArgumentNullException.ThrowIfNull(hasIncomingConnection);
+        ArgumentNullException.ThrowIfNull(activatePort);
+        ArgumentNullException.ThrowIfNull(activateConnectionTarget);
+        ArgumentNullException.ThrowIfNull(openNodeContextMenu);
+        ArgumentNullException.ThrowIfNull(openPortContextMenu);
+
+        Editor = editor;
+        Node = node;
+        StyleOptions = styleOptions;
+        NodeParameterEditorRegistry = nodeParameterEditorRegistry;
+        FocusCanvas = focusCanvas;
+        BeginNodeDrag = beginNodeDrag;
+        BeginNodeResize = beginNodeResize;
+        BeginHistoryInteraction = beginHistoryInteraction;
+        CompleteHistoryInteraction = completeHistoryInteraction;
+        TrySetNodeSize = trySetNodeSize;
+        TrySetNodeWidth = trySetNodeWidth;
+        TrySetNodeExpansionState = trySetNodeExpansionState;
+        HasIncomingConnection = hasIncomingConnection;
+        ResolveInlineParameter = resolveInlineParameter ?? EmptyInlineParameterResolver;
+        ActivatePort = activatePort;
+        ActivateConnectionTarget = activateConnectionTarget;
+        OpenNodeContextMenu = openNodeContextMenu;
+        OpenPortContextMenu = openPortContextMenu;
+    }
+
+    /// <summary>
+    /// Compatibility constructor retained for custom presenters that still bind the legacy
+    /// inline-parameter seam. New host surfaces should use node-local parameter endpoints and
+    /// typed connection targets instead.
+    /// </summary>
+    [Obsolete("Compatibility-only retained constructor. Prefer the overload that exposes node-size, node-resize, and typed connection-target seams.")]
+    public GraphNodeVisualContext(
+        GraphEditorViewModel editor,
+        NodeViewModel node,
+        GraphEditorStyleOptions styleOptions,
         Action focusCanvas,
         Action<NodeViewModel, PointerPressedEventArgs> beginNodeDrag,
         Func<NodeViewModel, double, bool, bool> trySetNodeWidth,
@@ -32,32 +103,26 @@ public sealed class GraphNodeVisualContext
         Action<NodeViewModel, PortViewModel> activatePort,
         Func<Control, NodeViewModel, ContextRequestedEventArgs, bool> openNodeContextMenu,
         Func<Control, NodeViewModel, PortViewModel, ContextRequestedEventArgs, bool> openPortContextMenu)
+        : this(
+            editor,
+            node,
+            styleOptions,
+            nodeParameterEditorRegistry: null,
+            focusCanvas,
+            beginNodeDrag,
+            beginNodeResize: static (_, _, _) => { },
+            beginHistoryInteraction: static () => { },
+            completeHistoryInteraction: static _ => { },
+            trySetNodeSize: static (_, _, _) => false,
+            trySetNodeWidth,
+            trySetNodeExpansionState,
+            hasIncomingConnection,
+            activatePort,
+            activateConnectionTarget: static (_, _) => { },
+            openNodeContextMenu,
+            openPortContextMenu,
+            resolveInlineParameter)
     {
-        ArgumentNullException.ThrowIfNull(editor);
-        ArgumentNullException.ThrowIfNull(node);
-        ArgumentNullException.ThrowIfNull(styleOptions);
-        ArgumentNullException.ThrowIfNull(focusCanvas);
-        ArgumentNullException.ThrowIfNull(beginNodeDrag);
-        ArgumentNullException.ThrowIfNull(trySetNodeWidth);
-        ArgumentNullException.ThrowIfNull(trySetNodeExpansionState);
-        ArgumentNullException.ThrowIfNull(hasIncomingConnection);
-        ArgumentNullException.ThrowIfNull(resolveInlineParameter);
-        ArgumentNullException.ThrowIfNull(activatePort);
-        ArgumentNullException.ThrowIfNull(openNodeContextMenu);
-        ArgumentNullException.ThrowIfNull(openPortContextMenu);
-
-        Editor = editor;
-        Node = node;
-        StyleOptions = styleOptions;
-        FocusCanvas = focusCanvas;
-        BeginNodeDrag = beginNodeDrag;
-        TrySetNodeWidth = trySetNodeWidth;
-        TrySetNodeExpansionState = trySetNodeExpansionState;
-        HasIncomingConnection = hasIncomingConnection;
-        ResolveInlineParameter = resolveInlineParameter;
-        ActivatePort = activatePort;
-        OpenNodeContextMenu = openNodeContextMenu;
-        OpenPortContextMenu = openPortContextMenu;
     }
 
     /// <summary>
@@ -80,6 +145,11 @@ public sealed class GraphNodeVisualContext
     public GraphEditorStyleOptions StyleOptions { get; }
 
     /// <summary>
+    /// Optional replaceable registry used by node-side parameter editor surfaces.
+    /// </summary>
+    public INodeParameterEditorRegistry? NodeParameterEditorRegistry { get; }
+
+    /// <summary>
     /// 请求将焦点切回画布。
     /// </summary>
     public Action FocusCanvas { get; }
@@ -88,6 +158,26 @@ public sealed class GraphNodeVisualContext
     /// 请求开始节点拖动交互。
     /// </summary>
     public Action<NodeViewModel, PointerPressedEventArgs> BeginNodeDrag { get; }
+
+    /// <summary>
+    /// Requests a canvas-owned node resize session using the given handle kind.
+    /// </summary>
+    public Action<NodeViewModel, GraphNodeResizeHandleKind, PointerPressedEventArgs> BeginNodeResize { get; }
+
+    /// <summary>
+    /// Begins one grouped history interaction boundary.
+    /// </summary>
+    public Action BeginHistoryInteraction { get; }
+
+    /// <summary>
+    /// Completes the active grouped history interaction boundary.
+    /// </summary>
+    public Action<string> CompleteHistoryInteraction { get; }
+
+    /// <summary>
+    /// Requests a persisted node-size mutation.
+    /// </summary>
+    public Func<NodeViewModel, GraphSize, bool, bool> TrySetNodeSize { get; }
 
     /// <summary>
     /// Requests a persisted node-width mutation.
@@ -105,7 +195,7 @@ public sealed class GraphNodeVisualContext
     public Func<NodeViewModel, PortViewModel, bool> HasIncomingConnection { get; }
 
     /// <summary>
-    /// Resolves the shared node-parameter view model bound to one inline-editable input port.
+    /// Resolves the shared inline-parameter view model bound to one legacy inline-editable port.
     /// </summary>
     public Func<NodeViewModel, PortViewModel, NodeParameterViewModel?> ResolveInlineParameter { get; }
 
@@ -113,6 +203,11 @@ public sealed class GraphNodeVisualContext
     /// 请求激活某个端口。
     /// </summary>
     public Action<NodeViewModel, PortViewModel> ActivatePort { get; }
+
+    /// <summary>
+    /// Requests activation of a typed connection target such as a parameter endpoint.
+    /// </summary>
+    public Action<NodeViewModel, GraphConnectionTargetRef> ActivateConnectionTarget { get; }
 
     /// <summary>
     /// 请求打开节点上下文菜单。
@@ -123,4 +218,7 @@ public sealed class GraphNodeVisualContext
     /// 请求打开端口上下文菜单。
     /// </summary>
     public Func<Control, NodeViewModel, PortViewModel, ContextRequestedEventArgs, bool> OpenPortContextMenu { get; }
+
+    private static NodeParameterViewModel? EmptyInlineParameterResolver(NodeViewModel _, PortViewModel __)
+        => null;
 }

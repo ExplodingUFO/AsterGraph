@@ -20,7 +20,7 @@ internal sealed partial class GraphEditorKernel
 
         public void SetSelection(IReadOnlyList<string> nodeIds, string? primaryNodeId, bool updateStatus)
         {
-            var existingIds = _owner._document.Nodes.Select(node => node.Id).ToHashSet(StringComparer.Ordinal);
+            var existingIds = _owner.GetActiveGraphScope().Nodes.Select(node => node.Id).ToHashSet(StringComparer.Ordinal);
             var selectedIds = nodeIds
                 .Where(existingIds.Contains)
                 .Distinct(StringComparer.Ordinal)

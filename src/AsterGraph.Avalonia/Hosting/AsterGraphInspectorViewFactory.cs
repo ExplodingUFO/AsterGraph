@@ -21,6 +21,7 @@ public static class AsterGraphInspectorViewFactory
         {
             Editor = options.Editor,
             InspectorPresenter = options.Presentation?.InspectorPresenter,
+            NodeParameterEditorRegistry = options.Presentation?.NodeParameterEditorRegistry,
         };
     }
 }

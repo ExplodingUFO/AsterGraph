@@ -1,22 +1,17 @@
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Geometry;
 using AsterGraph.Editor.Presentation;
+using AsterGraph.Editor.Runtime;
 
 namespace AsterGraph.Editor.ViewModels;
 
 public sealed partial class NodeViewModel : ObservableObject
 {
-    private const double MinimumBodyHeight = 158;
-    private const double BaseChromeHeight = 132;
-    private const double DescriptionHeight = 40;
-    private const double PortRowHeight = 24;
-    private const double PortRowSpacing = 8;
-    private const double StatusBarHeight = 28;
-    private const double ExpandedSurfaceHeight = 152;
     private readonly Dictionary<string, GraphParameterValue> _parameterValues;
-    private readonly double _baseHeight;
+    private readonly ObservableCollection<NodeParameterEndpointViewModel> _parameterEndpoints = [];
 
     /// <summary>
     /// 由不可变节点模型快照初始化节点运行时投影。
@@ -24,6 +19,11 @@ public sealed partial class NodeViewModel : ObservableObject
     /// <param name="model">节点模型快照。</param>
     public NodeViewModel(GraphNode model)
     {
+        var normalizedSize = GraphEditorNodeSurfaceMetrics.NormalizePersistedSize(
+            model.Size,
+            model.Inputs.Count,
+            model.Outputs.Count);
+
         Id = model.Id;
         DefinitionId = model.DefinitionId;
         Title = model.Title;
@@ -31,7 +31,8 @@ public sealed partial class NodeViewModel : ObservableObject
         Subtitle = model.Subtitle;
         Description = model.Description;
         AccentHex = model.AccentHex;
-        Width = model.Size.Width;
+        Width = normalizedSize.Width;
+        Height = normalizedSize.Height;
         Surface = model.Surface ?? GraphNodeSurfaceState.Default;
         X = model.Position.X;
         Y = model.Position.Y;
@@ -49,8 +50,10 @@ public sealed partial class NodeViewModel : ObservableObject
         _parameterValues = (model.ParameterValues ?? [])
             .ToDictionary(parameter => parameter.Key, StringComparer.Ordinal);
 
-        _baseHeight = Math.Max(model.Size.Height, CalculateRequiredHeight());
-        Height = CalculateRenderedHeight();
+        ActiveSurfaceTier = GraphEditorNodeSurfaceTierResolver.ResolveActiveTier(
+            normalizedSize,
+            AsterGraph.Editor.Configuration.GraphEditorBehaviorOptions.Default,
+            definition: null);
     }
 
     /// <summary>
@@ -117,19 +120,38 @@ public sealed partial class NodeViewModel : ObservableObject
     private GraphNodeSurfaceState surface = GraphNodeSurfaceState.Default;
 
     /// <summary>
-    /// 当前节点卡片展开状态。
-    /// </summary>
-    public GraphNodeExpansionState ExpansionState => Surface.ExpansionState;
-
-    /// <summary>
     /// 当前节点所属的 editor-only 分组标识；未分组时为空。
     /// </summary>
     public string? GroupId => Surface.GroupId;
 
     /// <summary>
-    /// 指示当前节点卡片是否处于展开模式。
+    /// Retained compatibility property for presenters that still read the legacy node-card expansion state.
     /// </summary>
+    [Obsolete("Compatibility-only retained property. Prefer ActiveSurfaceTier or Surface.ExpansionState for hosted UI decisions.")]
+    public GraphNodeExpansionState ExpansionState => Surface.ExpansionState;
+
+    /// <summary>
+    /// Retained compatibility property for presenters that still branch on the legacy expanded/collapsed card state.
+    /// </summary>
+    [Obsolete("Compatibility-only retained property. Prefer ActiveSurfaceTier or Surface.ExpansionState for hosted UI decisions.")]
     public bool IsExpanded => ExpansionState == GraphNodeExpansionState.Expanded;
+
+    /// <summary>
+    /// 当前解析得到的节点表面 tier。
+    /// </summary>
+    [ObservableProperty]
+    private GraphEditorNodeSurfaceTierSnapshot activeSurfaceTier = new(
+        "compact",
+        0d,
+        0d,
+        []);
+
+    /// <summary>
+    /// Indicates whether the active tier exposes parameter authoring affordances.
+    /// </summary>
+    public bool AllowsParameterAuthoring
+        => ActiveSurfaceTier.ShowsSection(AsterGraph.Abstractions.Definitions.NodeSurfaceSectionKeys.ParameterRail)
+           || ActiveSurfaceTier.ShowsSection(AsterGraph.Abstractions.Definitions.NodeSurfaceSectionKeys.ParameterEditors);
 
     [ObservableProperty]
     private double height;
@@ -158,6 +180,16 @@ public sealed partial class NodeViewModel : ObservableObject
     /// 当前节点参数值的只读字典视图。
     /// </summary>
     public IReadOnlyDictionary<string, GraphParameterValue> ParameterValues => _parameterValues;
+
+    /// <summary>
+    /// Node-local parameter endpoints rendered by hosted node-side authoring surfaces.
+    /// </summary>
+    public ObservableCollection<NodeParameterEndpointViewModel> ParameterEndpoints => _parameterEndpoints;
+
+    /// <summary>
+    /// Whether the node currently exposes any node-local parameter endpoints.
+    /// </summary>
+    public bool HasParameterEndpoints => _parameterEndpoints.Count > 0;
 
     [ObservableProperty]
     private double x;
@@ -201,7 +233,7 @@ public sealed partial class NodeViewModel : ObservableObject
             Subtitle,
             Description,
             new GraphPoint(X, Y),
-            new GraphSize(Width, _baseHeight),
+            new GraphSize(Width, Height),
             Inputs.Select(port => port.ToModel()).ToList(),
             Outputs.Select(port => port.ToModel()).ToList(),
             AccentHex,
@@ -241,11 +273,33 @@ public sealed partial class NodeViewModel : ObservableObject
     }
 
     /// <summary>
+    /// Replaces the node-local parameter endpoint projection.
+    /// </summary>
+    public void UpdateParameterEndpoints(IReadOnlyList<NodeParameterEndpointViewModel> endpoints)
+    {
+        ArgumentNullException.ThrowIfNull(endpoints);
+
+        _parameterEndpoints.Clear();
+        foreach (var endpoint in endpoints)
+        {
+            _parameterEndpoints.Add(endpoint);
+        }
+
+        OnPropertyChanged(nameof(HasParameterEndpoints));
+    }
+
+    /// <summary>
     /// Updates the persisted surface state snapshot.
     /// </summary>
     /// <param name="state">New surface state.</param>
     public void UpdateSurface(GraphNodeSurfaceState? state)
         => Surface = state ?? GraphNodeSurfaceState.Default;
+
+    /// <summary>
+    /// Updates the resolved size-driven tier snapshot used by shipped and custom host surfaces.
+    /// </summary>
+    public void UpdateActiveSurfaceTier(GraphEditorNodeSurfaceTierSnapshot activeTier)
+        => ActiveSurfaceTier = activeTier ?? throw new ArgumentNullException(nameof(activeTier));
 
     /// <summary>
     /// 更新节点展示状态快照。
@@ -256,7 +310,6 @@ public sealed partial class NodeViewModel : ObservableObject
 
     partial void OnPresentationChanged(NodePresentationState value)
     {
-        Height = CalculateRenderedHeight();
         OnPropertyChanged(nameof(DisplaySubtitle));
         OnPropertyChanged(nameof(DisplayDescription));
     }
@@ -275,25 +328,13 @@ public sealed partial class NodeViewModel : ObservableObject
 
     partial void OnSurfaceChanged(GraphNodeSurfaceState value)
     {
-        Height = CalculateRenderedHeight();
-        OnPropertyChanged(nameof(ExpansionState));
         OnPropertyChanged(nameof(GroupId));
-        OnPropertyChanged(nameof(IsExpanded));
+        OnPropertyChanged("ExpansionState");
+        OnPropertyChanged("IsExpanded");
     }
 
-    private double CalculateRequiredHeight()
+    partial void OnActiveSurfaceTierChanged(GraphEditorNodeSurfaceTierSnapshot value)
     {
-        var visiblePortRows = Math.Max(Math.Max(Inputs.Count, Outputs.Count), 1);
-        var portsHeight = (visiblePortRows * PortRowHeight)
-            + ((visiblePortRows - 1) * PortRowSpacing);
-
-        return Math.Max(
-            MinimumBodyHeight,
-            BaseChromeHeight + DescriptionHeight + portsHeight);
+        OnPropertyChanged(nameof(AllowsParameterAuthoring));
     }
-
-    private double CalculateRenderedHeight()
-        => _baseHeight
-           + (Presentation.StatusBar is null ? 0 : StatusBarHeight)
-           + (IsExpanded ? ExpandedSurfaceHeight : 0);
 }

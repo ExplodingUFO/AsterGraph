@@ -19,7 +19,11 @@ sealed class Program
             Console.WriteLine($"DEMO_TRUST_OK:{result.TrustTransparencyOk}");
             Console.WriteLine($"DEMO_SHELL_OK:{result.ShellWorkflowOk}");
             Console.WriteLine($"COMMAND_SURFACE_OK:{result.CommandSurfaceOk}");
-            Console.WriteLine($"PROGRESSIVE_NODE_SURFACE_OK:{result.ProgressiveNodeSurfaceOk}");
+            Console.WriteLine($"TIERED_NODE_SURFACE_OK:{result.TieredNodeSurfaceOk}");
+            Console.WriteLine($"FIXED_GROUP_FRAME_OK:{result.FixedGroupFrameOk}");
+            Console.WriteLine($"COMPOSITE_SCOPE_OK:{result.CompositeScopeOk}");
+            Console.WriteLine($"EDGE_NOTE_OK:{result.EdgeNoteOk}");
+            Console.WriteLine($"DISCONNECT_FLOW_OK:{result.DisconnectFlowOk}");
             foreach (var line in result.MetricLines)
             {
                 Console.WriteLine(line);

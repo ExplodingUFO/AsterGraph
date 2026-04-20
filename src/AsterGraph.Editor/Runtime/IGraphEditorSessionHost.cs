@@ -28,16 +28,30 @@ internal interface IGraphEditorSessionHost
     void DeleteSelection();
     void SetNodePositions(IReadOnlyList<NodePositionSnapshot> positions, bool updateStatus);
     bool TrySetNodeWidth(string nodeId, double width, bool updateStatus);
+    bool TrySetNodeSize(string nodeId, GraphSize size, bool updateStatus);
     bool TrySetNodeExpansionState(string nodeId, GraphNodeExpansionState expansionState);
     string TryCreateNodeGroupFromSelection(string title);
     bool TrySetNodeGroupCollapsed(string groupId, bool isCollapsed);
     bool TrySetNodeGroupPosition(string groupId, GraphPoint position, bool moveMemberNodes, bool updateStatus);
+    bool TrySetNodeGroupSize(string groupId, GraphSize size, bool updateStatus);
+    bool TrySetNodeGroupExtraPadding(string groupId, GraphPadding extraPadding, bool updateStatus);
+    bool TrySetNodeGroupMemberships(IReadOnlyList<GraphEditorNodeGroupMembershipChange> changes, bool updateStatus);
+    string TryPromoteNodeGroupToComposite(string groupId, string? title, bool updateStatus);
+    string TryExposeCompositePort(string compositeNodeId, string childNodeId, string childPortId, string? label, bool updateStatus);
+    bool TryUnexposeCompositePort(string compositeNodeId, string boundaryPortId, bool updateStatus);
+    bool TryEnterCompositeChildGraph(string compositeNodeId, bool updateStatus)
+        => false;
+    bool TryReturnToParentGraphScope(bool updateStatus)
+        => false;
+    bool TrySetNodeParameterValue(string nodeId, string parameterKey, object? value);
     bool TrySetSelectedNodeParameterValue(string parameterKey, object? value);
     bool TrySetSelectedNodeParameterValues(IReadOnlyDictionary<string, object?> values);
     void StartConnection(string sourceNodeId, string sourcePortId);
-    void CompleteConnection(string targetNodeId, string targetPortId);
+    void CompleteConnection(GraphConnectionTargetRef target);
     void CancelPendingConnection();
     void DeleteConnection(string connectionId);
+    bool TrySetConnectionNoteText(string connectionId, string? noteText, bool updateStatus)
+        => false;
     void BreakConnectionsForPort(string nodeId, string portId);
     void PanBy(double deltaX, double deltaY);
     void ZoomAt(double factor, GraphPoint screenAnchor);
@@ -50,15 +64,22 @@ internal interface IGraphEditorSessionHost
     bool LoadWorkspace();
 
     GraphDocument CreateDocumentSnapshot();
+    GraphDocument CreateActiveScopeDocumentSnapshot()
+        => CreateDocumentSnapshot();
     GraphEditorSelectionSnapshot GetSelectionSnapshot();
     GraphEditorViewportSnapshot GetViewportSnapshot();
     GraphEditorCapabilitySnapshot GetCapabilitySnapshot();
     IReadOnlyList<GraphEditorFeatureDescriptorSnapshot> GetFeatureDescriptors();
     IReadOnlyList<GraphEditorNodeSurfaceSnapshot> GetNodeSurfaceSnapshots();
+    IReadOnlyList<GraphEditorCompositeNodeSnapshot> GetCompositeNodeSnapshots();
+    GraphEditorScopeNavigationSnapshot GetScopeNavigationSnapshot()
+        => new(CreateDocumentSnapshot().RootGraphId, null, false, []);
     IReadOnlyList<GraphNodeGroup> GetNodeGroups();
+    IReadOnlyList<GraphEditorNodeGroupSnapshot> GetNodeGroupSnapshots();
     IReadOnlyList<GraphEditorCommandDescriptorSnapshot> GetCommandDescriptors();
     bool TryExecuteCommand(GraphEditorCommandInvocationSnapshot command);
     IReadOnlyList<NodePositionSnapshot> GetNodePositions();
     GraphEditorPendingConnectionSnapshot GetPendingConnectionSnapshot();
+    IReadOnlyList<GraphEditorCompatibleConnectionTargetSnapshot> GetCompatibleConnectionTargets(string sourceNodeId, string sourcePortId);
     IReadOnlyList<GraphEditorCompatiblePortTargetSnapshot> GetCompatiblePortTargets(string sourceNodeId, string sourcePortId);
 }

@@ -22,6 +22,20 @@
 - 优先用 DTO/snapshot query
 - `GraphEditorViewModel` 只保留成 UI bridge，等宿主其余部分慢慢迁走
 
+### 补充说明：兼容桥接
+
+新增逻辑优先走 canonical 的运行时命令链路（建议统一用 `connections.disconnect-*`，目前可用实例为 `connections.disconnect-all`），再考虑 retained 的兼容入口。
+
+迁移窗口内仍可保留的兼容 shim：
+
+- 兼容查询：`GetCompatibleTargets(...)` 与 `CompatiblePortTarget`
+- 推荐替代：`GetCompatiblePortTargets(...)` 与 `GraphEditorCompatiblePortTargetSnapshot`
+
+在临时兼容阶段，保持以下 retained 辅助方法仅作过渡：
+
+- `TrySetNodeExpansionState(...)`
+- `TrySetNodeGroupExtraPadding(...)`
+
 ## 第三步：先迁不依赖 Avalonia 的调用方
 
 如果宿主里有一块根本不需要 Avalonia 控件，先迁成：

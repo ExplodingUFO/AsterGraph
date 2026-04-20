@@ -11,13 +11,13 @@ internal sealed class GraphEditorSessionStockMenuDescriptorBuilder
     private readonly Func<IReadOnlyCollection<INodeDefinition>> _defaultDefinitionsProvider;
     private readonly Func<GraphDocument> _documentSnapshotFactory;
     private readonly Func<GraphEditorSelectionSnapshot> _selectionSnapshotFactory;
-    private readonly Func<string, string, IReadOnlyList<GraphEditorCompatiblePortTargetSnapshot>> _compatibleTargetsFactory;
+    private readonly Func<string, string, IReadOnlyList<GraphEditorCompatibleConnectionTargetSnapshot>> _compatibleTargetsFactory;
     private readonly Func<string, string, string> _localize;
 
     public GraphEditorSessionStockMenuDescriptorBuilder(
         Func<GraphDocument> documentSnapshotFactory,
         Func<GraphEditorSelectionSnapshot> selectionSnapshotFactory,
-        Func<string, string, IReadOnlyList<GraphEditorCompatiblePortTargetSnapshot>> compatibleTargetsFactory,
+        Func<string, string, IReadOnlyList<GraphEditorCompatibleConnectionTargetSnapshot>> compatibleTargetsFactory,
         Func<string, string, string> localize,
         Func<IReadOnlyCollection<INodeDefinition>>? defaultDefinitionsProvider = null)
     {
@@ -105,6 +105,7 @@ internal sealed class GraphEditorSessionStockMenuDescriptorBuilder
             ? context.SelectedNodeIds.Count
             : _selectionSnapshotFactory().SelectedNodeIds.Count;
         var delete = GetCommandDescriptor(commands, "selection.delete");
+        var createGroup = GetCommandDescriptor(commands, "groups.create");
         var export = GetCommandDescriptor(commands, "fragments.export-selection");
         var alignLeft = GetCommandDescriptor(commands, "layout.align-left");
         var alignCenter = GetCommandDescriptor(commands, "layout.align-center");
@@ -133,6 +134,13 @@ internal sealed class GraphEditorSessionStockMenuDescriptorBuilder
                 iconKey: "export",
                 isEnabled: export.IsEnabled,
                 disabledReason: export.DisabledReason),
+            new GraphEditorMenuItemDescriptorSnapshot(
+                "selection-create-group",
+                Localize("editor.menu.selection.createGroup", "Create Group"),
+                CreateCommand("groups.create", ("title", "Group")),
+                iconKey: "group-create",
+                isEnabled: createGroup.IsEnabled,
+                disabledReason: createGroup.DisabledReason),
             GraphEditorMenuItemDescriptorSnapshot.Separator("selection-sep-1"),
             new GraphEditorMenuItemDescriptorSnapshot(
                 "selection-align",
@@ -269,14 +277,14 @@ internal sealed class GraphEditorSessionStockMenuDescriptorBuilder
             return [];
         }
 
-        var delete = GetCommandDescriptor(commands, "connections.delete");
+        var disconnect = GetCommandDescriptor(commands, "connections.disconnect");
         var conversionLabel = connection.ConversionId is null
             ? Localize("editor.menu.connection.noImplicitConversion", "No implicit conversion")
             : LocalizeFormat("editor.menu.connection.conversion", "Conversion: {0}", connection.ConversionId.Value);
 
         return
         [
-            new GraphEditorMenuItemDescriptorSnapshot("connection-delete", Localize("editor.menu.connection.deleteConnection", "Delete Connection"), CreateCommand("connections.delete", ("connectionId", connection.Id)), iconKey: "delete", isEnabled: delete.IsEnabled, disabledReason: delete.DisabledReason),
+            new GraphEditorMenuItemDescriptorSnapshot("connection-disconnect", Localize("editor.menu.connection.disconnectConnection", "Disconnect Connection"), CreateCommand("connections.disconnect", ("connectionId", connection.Id)), iconKey: "disconnect", isEnabled: disconnect.IsEnabled, disabledReason: disconnect.DisabledReason),
             new GraphEditorMenuItemDescriptorSnapshot("connection-conversion", conversionLabel, iconKey: "conversion", isEnabled: false),
         ];
     }
@@ -301,13 +309,28 @@ internal sealed class GraphEditorSessionStockMenuDescriptorBuilder
                 $"compatible-node-{group.Key}",
                 GetNodeMenuHeader(document, group.Key),
                 children: group
-                    .OrderBy(item => item.PortLabel, StringComparer.Ordinal)
+                    .OrderBy(item => item.TargetLabel, StringComparer.Ordinal)
                     .Select(target => new GraphEditorMenuItemDescriptorSnapshot(
-                        $"compatible-port-{target.NodeId}-{target.PortId}",
+                        target.TargetKind == GraphConnectionTargetKind.Port
+                            ? $"compatible-port-{target.NodeId}-{target.TargetId}"
+                            : $"compatible-parameter-{target.NodeId}-{target.TargetId}",
                         target.Compatibility.Kind == PortCompatibilityKind.ImplicitConversion
-                            ? LocalizeFormat("editor.menu.compatibility.implicitTarget", "{0} (implicit: {1})", target.PortLabel, target.Compatibility.ConversionId!.Value)
-                            : target.PortLabel,
-                        CreateCommand("connections.connect", ("sourceNodeId", sourceNode.Id), ("sourcePortId", sourcePort.Id), ("targetNodeId", target.NodeId), ("targetPortId", target.PortId)),
+                            ? LocalizeFormat("editor.menu.compatibility.implicitTarget", "{0} (implicit: {1})", target.TargetLabel, target.Compatibility.ConversionId!.Value)
+                            : target.TargetLabel,
+                        target.TargetKind == GraphConnectionTargetKind.Port
+                            ? CreateCommand(
+                                "connections.connect",
+                                (Name: "sourceNodeId", Value: sourceNode.Id),
+                                (Name: "sourcePortId", Value: sourcePort.Id),
+                                (Name: "targetNodeId", Value: target.NodeId),
+                                (Name: "targetPortId", Value: target.TargetId))
+                            : CreateCommand(
+                                "connections.connect",
+                                (Name: "sourceNodeId", Value: sourceNode.Id),
+                                (Name: "sourcePortId", Value: sourcePort.Id),
+                                (Name: "targetNodeId", Value: target.NodeId),
+                                (Name: "targetPortId", Value: target.TargetId),
+                                (Name: "targetKind", Value: target.TargetKind.ToString())),
                         iconKey: target.Compatibility.Kind == PortCompatibilityKind.ImplicitConversion ? "conversion" : "connect",
                         isEnabled: connect.IsEnabled,
                         disabledReason: connect.DisabledReason))

@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Markup.Xaml;
 using Avalonia.VisualTree;
@@ -9,6 +10,7 @@ using AsterGraph.Avalonia.Presentation;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Geometry;
 using AsterGraph.Editor.Menus;
+using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.ViewModels;
 using AsterGraph.Editor.Viewport;
 
@@ -61,6 +63,12 @@ public partial class NodeCanvas : UserControl
     /// </summary>
     public static readonly StyledProperty<IGraphContextMenuPresenter?> ContextMenuPresenterProperty =
         AvaloniaProperty.Register<NodeCanvas, IGraphContextMenuPresenter?>(nameof(ContextMenuPresenter));
+
+    /// <summary>
+    /// Controls the registry used by shipped inline parameter-editor hosts.
+    /// </summary>
+    public static readonly StyledProperty<INodeParameterEditorRegistry?> NodeParameterEditorRegistryProperty =
+        AvaloniaProperty.Register<NodeCanvas, INodeParameterEditorRegistry?>(nameof(NodeParameterEditorRegistry));
 
     private readonly Dictionary<NodeViewModel, NodeCanvasRenderedNodeVisual> _nodeVisuals = new();
     private readonly Dictionary<string, NodeCanvasRenderedGroupVisual> _groupVisuals = new(StringComparer.Ordinal);
@@ -183,6 +191,15 @@ public partial class NodeCanvas : UserControl
     }
 
     /// <summary>
+    /// Registry used by shipped node-side parameter editors.
+    /// </summary>
+    public INodeParameterEditorRegistry? NodeParameterEditorRegistry
+    {
+        get => GetValue(NodeParameterEditorRegistryProperty);
+        set => SetValue(NodeParameterEditorRegistryProperty, value);
+    }
+
+    /// <summary>
     /// 将当前图内容缩放到可视区域。
     /// </summary>
     public void FitToScene(bool updateStatus = true)
@@ -270,8 +287,74 @@ public partial class NodeCanvas : UserControl
         args.Handled = true;
     }
 
+    private void BeginNodeResize(NodeViewModel node, GraphNodeResizeHandleKind handleKind, PointerPressedEventArgs args)
+    {
+        if (ViewModel is null || !args.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
+        {
+            return;
+        }
+
+        Focus();
+        ViewModel.SelectSingleNode(node, updateStatus: false);
+        _interactionSession.BeginNodeResize(
+            ViewModel.FindNode(node.Id) ?? node,
+            handleKind,
+            args.GetPosition(this));
+        ViewModel.BeginHistoryInteraction();
+        args.Pointer.Capture(this);
+        args.Handled = true;
+    }
+
+    private void BeginGroupDrag(GraphEditorNodeGroupSnapshot group, PointerPressedEventArgs args)
+    {
+        var props = args.GetCurrentPoint(this).Properties;
+        var result = _nodeDragCoordinator.BeginGroupDrag(
+            group,
+            args.GetPosition(this),
+            props.IsLeftButtonPressed,
+            args.KeyModifiers);
+
+        if (!result.Handled)
+        {
+            return;
+        }
+
+        if (result.CapturePointer)
+        {
+            args.Pointer.Capture(this);
+        }
+
+        args.Handled = true;
+    }
+
+    private void BeginGroupResize(string groupId, string groupTitle, NodeCanvasGroupResizeEdge edge, PointerPressedEventArgs args)
+    {
+        if (ViewModel is null || !args.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
+        {
+            return;
+        }
+
+        var group = ViewModel.GetNodeGroupSnapshots()
+            .FirstOrDefault(candidate => string.Equals(candidate.Id, groupId, StringComparison.Ordinal));
+        if (group is null)
+        {
+            return;
+        }
+
+        Focus();
+        _interactionSession.BeginGroupResize(group.Id, groupTitle, edge, group.Position, group.Size, args.GetPosition(this));
+        ViewModel.BeginHistoryInteraction();
+        args.Pointer.Capture(this);
+        args.Handled = true;
+    }
+
     private void HandlePointerPressed(object? sender, PointerPressedEventArgs args)
     {
+        if (args.Source is Thumb)
+        {
+            return;
+        }
+
         var props = args.GetCurrentPoint(this).Properties;
         var result = _pointerInteractionCoordinator.HandlePressed(
             args.Handled,
@@ -337,6 +420,9 @@ public partial class NodeCanvas : UserControl
 
     private void UpdateSelectionState()
         => _sceneHost.UpdateSelectionState();
+
+    private void UpdateGroupVisuals()
+        => _sceneHost.UpdateGroupVisuals();
 
     private void UpdateNodePosition(NodeViewModel node)
         => _sceneHost.UpdateNodePosition(node);

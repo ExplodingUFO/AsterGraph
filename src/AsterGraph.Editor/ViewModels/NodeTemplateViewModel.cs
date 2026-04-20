@@ -20,7 +20,10 @@ public sealed class NodeTemplateViewModel
         Category = definition.Category;
         Subtitle = definition.Subtitle;
         Description = definition.Description ?? string.Empty;
-        Size = new GraphSize(definition.DefaultWidth, definition.DefaultHeight);
+        Size = GraphEditorNodeSurfaceMetrics.NormalizePersistedSize(
+            new GraphSize(definition.DefaultWidth, definition.DefaultHeight),
+            definition.InputPorts.Count,
+            definition.OutputPorts.Count);
         AccentHex = definition.AccentHex;
     }
 

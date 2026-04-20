@@ -17,8 +17,9 @@ It belongs to the supported published package set with `AsterGraph.Abstractions`
 - `GraphInspectorView`
 - `GraphMiniMap`
 - stock Avalonia menu and presentation wiring
-- stock progressive node cards with persisted width, expand/collapse, inline literal editors, and editor-only group boundaries
+- stock tiered node cards with persisted width/height, node-side parameter editors gated by tier and connection state, fixed user-owned group frames, and geometry-based group membership
 - stock grouped inspector sections plus text/number/boolean/enum/list editors
+- stock parameter-editor registry wiring through `AsterGraphPresentationOptions.NodeParameterEditorRegistry`
 - `AsterGraphAvaloniaViewFactory` plus standalone surface factories
 - Avalonia theme resources, input handling, and control-level integration glue
 
@@ -41,7 +42,11 @@ Those responsibilities live in `AsterGraph.Abstractions`, `AsterGraph.Core`, `As
 
 For new work, prefer the factory-based routes. Treat the direct `GraphEditorView` constructor path as retained compatibility.
 
-`NodeCanvas` consumes the shared editor command/query surface for progressive authoring UX. The same persisted node-surface state drives resize handles, double-click expand/collapse, inline input literals, and editor-only group chrome.
+`NodeCanvas` consumes the shared editor command/query surface for tiered authoring UX. The same persisted node/group state drives resize handles, width/height tiers, node-side parameter values, fixed group frames, geometry-based membership, and editor-only group chrome.
+
+Group frames keep header, border, and content-area semantics separate: the stock canvas drags from the header, resizes from the border, and treats the content area as the membership zone while keeping the stored frame boundary stable.
+
+Node-side parameter editors are created through the stock `NodeParameterEditorRegistry` seam. The canvas only renders a parameter editor when the active tier exposes the section and the parameter endpoint is not connected upstream.
 
 ## Start Here
 

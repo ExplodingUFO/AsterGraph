@@ -16,7 +16,7 @@ public static class DemoGraphFactory
                 CreateNode(catalog, "noise", new NodeDefinitionId("aster.demo.noise-field"), new GraphPoint(360, 40), groupId: "terrain-authoring"),
                 CreateNode(catalog, "gradient", new NodeDefinitionId("aster.demo.palette-ramp"), new GraphPoint(340, 300), groupId: "terrain-authoring"),
                 CreateNode(catalog, "slope", new NodeDefinitionId("aster.demo.slope-blend"), new GraphPoint(700, 170)),
-                CreateNode(catalog, "light", new NodeDefinitionId("aster.demo.lighting-mix"), new GraphPoint(1080, 110), surface: new GraphNodeSurfaceState(GraphNodeExpansionState.Expanded)),
+                CreateNode(catalog, "light", new NodeDefinitionId("aster.demo.lighting-mix"), new GraphPoint(1080, 110)),
                 CreateNode(catalog, "output", new NodeDefinitionId("aster.demo.viewport-output"), new GraphPoint(1460, 180)),
             ],
             [
@@ -34,8 +34,8 @@ public static class DemoGraphFactory
                 new GraphNodeGroup(
                     "terrain-authoring",
                     "Terrain Authoring",
-                    new GraphPoint(280, 10),
-                    new GraphSize(360, 440),
+                    new GraphPoint(340, 40),
+                    new GraphSize(292, 446),
                     ["gradient", "noise"]),
             ]);
 
@@ -77,8 +77,7 @@ public static class DemoGraphFactory
             direction,
             definition.TypeId.Value,
             definition.AccentHex,
-            definition.TypeId,
-            definition.InlineParameterKey);
+            definition.TypeId);
 
     private static GraphConnection Connect(
         string sourceNodeId,

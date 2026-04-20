@@ -23,7 +23,7 @@ internal sealed partial class GraphEditorKernel
 
         INodeCatalog IGraphEditorKernelNodeMutationHost.NodeCatalog => _owner._nodeCatalog;
 
-        GraphDocument IGraphEditorKernelNodeMutationHost.Document => _owner._document;
+        GraphDocument IGraphEditorKernelNodeMutationHost.Document => _owner.CreateActiveScopeDocumentSnapshot();
 
         IReadOnlyList<string> IGraphEditorKernelNodeMutationHost.SelectedNodeIds => _owner._selectedNodeIds;
 
@@ -39,7 +39,7 @@ internal sealed partial class GraphEditorKernel
             => _owner.CreateNodeId(definitionId, fallbackKey);
 
         void IGraphEditorKernelNodeMutationHost.UpdateDocument(GraphDocument document)
-            => _owner._document = document;
+            => _owner.ApplyActiveScopeDocument(document);
 
         void IGraphEditorKernelNodeMutationHost.SetSelection(IReadOnlyList<string> nodeIds, string? primaryNodeId, bool updateStatus)
             => _owner.SetSelection(nodeIds, primaryNodeId, updateStatus);

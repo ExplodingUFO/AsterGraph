@@ -58,7 +58,7 @@ public sealed class PortViewModel
     public string AccentHex { get; }
 
     /// <summary>
-    /// Optional parameter key used for inline literal editing when the port is unconnected.
+    /// Retained compatibility hint for legacy inline-parameter presenters.
     /// </summary>
     public string? InlineParameterKey { get; }
 

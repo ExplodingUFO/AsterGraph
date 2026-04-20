@@ -329,6 +329,23 @@ public partial class MainWindowViewModel
                     T("最近诊断数量：", "Recent diagnostic count: ") + Editor.Session.Diagnostics.GetRecentDiagnostics(10).Count + "。",
                 ]),
             new CapabilityShowcaseItem(
+                "semantic-graph-composition",
+                T("语义图组合", "Semantic Graph Composition"),
+                T("把组提升为复合节点、公开边界端点、作用域导航、边注释和单边断开收敛到同一条语义图编辑路径。", "Unify composite promotion, public boundary ports, scoped navigation, edge notes, and single-edge disconnect through one semantic graph editing path."),
+                T(
+                    "这条路径继续由 Editor.Session 命令和查询驱动：group promotion 生成 child scope，boundary port 暴露内部端口，edge note 保持纯展示语义，而 canonical disconnect 会让参数端点重新回到本地值来源。",
+                    "This path stays on top of Editor.Session commands and queries: group promotion creates a child scope, boundary ports expose inner ports, edge notes stay display-only, and canonical disconnect returns parameter endpoints to their local value source once the edge is removed."),
+                [
+                    T("所属层：AsterGraph.Editor semantic graph contract + AsterGraph.Avalonia stock host surfaces。", "Layer: AsterGraph.Editor semantic graph contract plus AsterGraph.Avalonia stock host surfaces."),
+                    T("宿主入口：TryPromoteNodeGroupToComposite(...)、TryExposeCompositePort(...)、TryEnterCompositeChildGraph(...)、TrySetConnectionNoteText(...)、connections.disconnect。", "Host entry: TryPromoteNodeGroupToComposite(...), TryExposeCompositePort(...), TryEnterCompositeChildGraph(...), TrySetConnectionNoteText(...), and connections.disconnect."),
+                    T("兼容边界：connections.delete 仍保留为兼容别名；retained 的 TrySetNodeExpansionState(...) 和 TrySetNodeGroupExtraPadding(...) 继续存在但只作为迁移辅助。", "Compatibility boundary: connections.delete stays as a compatibility alias; retained TrySetNodeExpansionState(...) and TrySetNodeGroupExtraPadding(...) remain only as migration helpers."),
+                ],
+                [
+                    T("proof 会把节点组提升为复合节点，公开 Composite Phase / Composite Tint 两个边界端点，并验证作用域进入与返回。", "Proof promotes a node group into a composite, exposes Composite Phase / Composite Tint boundary ports, and validates enter/return scope navigation."),
+                    T("连线会写入 Preview branch 注释，并通过 canonical connections.disconnect 恢复 Pulse Bias 的本地参数值来源。", "The edge records a Preview branch note and restores the Pulse Bias local parameter-value source through canonical connections.disconnect."),
+                    "COMPOSITE_SCOPE_OK / EDGE_NOTE_OK / DISCONNECT_FLOW_OK",
+                ]),
+            new CapabilityShowcaseItem(
                 "plugin-trust-and-loading",
                 T("插件信任与加载", "Plugin Trust And Loading"),
                 T("把 candidate discovery、trust policy 和 load snapshot 变成真正可见的产品面。", "Turn candidate discovery, trust policy, and load snapshots into a visible product surface."),
@@ -394,21 +411,22 @@ public partial class MainWindowViewModel
                     T("proof ring 继续对这条线做机器化保护。", "The proof ring keeps this line machine-protected."),
                 ]),
             new CapabilityShowcaseItem(
-                "progressive-node-surface",
-                T("渐进式节点表面", "Progressive Node Surface"),
-                T("把宽度、展开态、分组和输入端内联值编辑变成同一条 node surface 路径。", "Turn width, expansion, grouping, and inline input literals into one shared node-surface path."),
+                "tiered-surface-layout",
+                T("分层节点表面", "Tiered Surface Layout"),
+                T("把固定组框、几何驱动 membership、宽高分层和节点旁路参数 rail 收敛为同一条 node surface 路径。", "Unify fixed group frames, geometry-driven membership, width/height tiers, and node-side parameter rails through one shared node-surface route."),
                 T(
-                    "Demo 现在默认展示 expanded node card、editor-only group boundary，以及“未连接时可内联、连接后以上游值为准”的单一值来源规则。",
-                    "The demo now shows an expanded node card, an editor-only group boundary, and the single-source rule where unconnected inputs edit inline while connected inputs defer to upstream values."),
+                    "Demo 现在默认展示固定 Terrain Authoring 组框、命中 parameter-editors tier 的 Lighting Mix 卡片，以及“未连接时走本地参数值、连接后以上游值为准”的单一值来源规则。",
+                    "The demo now shows a fixed Terrain Authoring group frame, a Lighting Mix card that resolves to the parameter-editors tier, and the single-source rule where unconnected inputs use local parameter values while connected inputs defer to upstream values."),
                 [
                     T("所属层：AsterGraph.Editor node-surface contract + AsterGraph.Avalonia stock canvas。", "Layer: AsterGraph.Editor node-surface contract plus the stock AsterGraph.Avalonia canvas."),
-                    T("宿主入口：GetNodeSurfaceSnapshots()、GetNodeGroups()、TrySetNodeWidth(...)、TrySetNodeExpansionState(...)。", "Host entry: GetNodeSurfaceSnapshots(), GetNodeGroups(), TrySetNodeWidth(...), and TrySetNodeExpansionState(...)."),
-                    T("可替换点：宿主可复用同一份 surface state，再决定自定义卡片、分组样式或后续 composite node 路径。", "Seams: hosts can reuse the same surface state while customizing cards, group visuals, or a later composite-node path."),
+                    T("宿主入口：GetNodeSurfaceSnapshots()、GetNodeGroupSnapshots()、TrySetNodeSize(...)、TrySetNodeGroupSize(...)、TrySetNodeGroupMemberships(...)。", "Host entry: GetNodeSurfaceSnapshots(), GetNodeGroupSnapshots(), TrySetNodeSize(...), TrySetNodeGroupSize(...), and TrySetNodeGroupMemberships(...)."),
+                    T("可替换点：宿主可复用同一份 tier/group state，再通过 template keys 和 NodeParameterEditorRegistry 替换节点旁路参数编辑器，而不用重写 tier 解析或校验逻辑。", "Seams: hosts can reuse the shared tier/group state, then swap node-side parameter editors through template keys and NodeParameterEditorRegistry without reimplementing tier resolution or validation."),
                 ],
                 [
-                    T("默认图包含 editor-only 分组边界。", "The default graph includes an editor-only group boundary."),
-                    T("Lighting Mix 节点默认展开，并显示 inline input authoring。", "The Lighting Mix node starts expanded and exposes inline input authoring."),
-                    T("连接中的 Pulse 输入会覆盖本地 literal，未连接的 Rim Mask 继续内联编辑。", "The connected Pulse input overrides its local literal while the unconnected Rim Mask stays inline-editable."),
+                    T("默认图包含固定大小的 Terrain Authoring 组框，节点完全进入内容区会入组，拖出内容区会脱组。", "The default graph includes a fixed-size Terrain Authoring group frame; nodes attach when fully inside the content area and detach when dragged back out."),
+                    T("Lighting Mix 节点默认以 430x260 打开，直接命中 parameter-editors tier。", "The Lighting Mix node starts at 430x260, so it resolves directly to the parameter-editors tier."),
+                    T("连接中的 Pulse 输入会覆盖本地参数值，未连接的 Rim Mask 会在节点旁路 rail 中继续编辑。", "The connected Pulse input overrides its local parameter value while the unconnected Rim Mask stays editable in the node-side rail."),
+                    T("Lighting Mix 的输入参数声明了 template key，宿主可以通过 registry 定向替换这些节点旁路参数编辑器。", "Lighting Mix input parameters declare template keys so hosts can replace those node-side parameter editors through the registry seam."),
                 ]),
         ];
     }

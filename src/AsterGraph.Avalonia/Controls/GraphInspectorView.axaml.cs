@@ -41,6 +41,12 @@ public partial class GraphInspectorView : UserControl
         AvaloniaProperty.Register<GraphInspectorView, IGraphInspectorPresenter?>(nameof(InspectorPresenter));
 
     /// <summary>
+    /// Optional registry used by shipped inspector parameter-editor hosts.
+    /// </summary>
+    public static readonly StyledProperty<INodeParameterEditorRegistry?> NodeParameterEditorRegistryProperty =
+        AvaloniaProperty.Register<GraphInspectorView, INodeParameterEditorRegistry?>(nameof(NodeParameterEditorRegistry));
+
+    /// <summary>
     /// 初始化独立检查器视图。
     /// </summary>
     public GraphInspectorView()
@@ -66,6 +72,15 @@ public partial class GraphInspectorView : UserControl
     {
         get => GetValue(InspectorPresenterProperty);
         set => SetValue(InspectorPresenterProperty, value);
+    }
+
+    /// <summary>
+    /// Registry used by shipped inspector parameter editors.
+    /// </summary>
+    public INodeParameterEditorRegistry? NodeParameterEditorRegistry
+    {
+        get => GetValue(NodeParameterEditorRegistryProperty);
+        set => SetValue(NodeParameterEditorRegistryProperty, value);
     }
 
     /// <inheritdoc />

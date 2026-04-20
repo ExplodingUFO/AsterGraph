@@ -39,9 +39,9 @@ public sealed partial class GraphEditorSession :
         _diagnosticsSink = diagnosticsSink;
         _descriptorSupport = descriptorSupport;
         _stockMenuDescriptorBuilder = new GraphEditorSessionStockMenuDescriptorBuilder(
-            _host.CreateDocumentSnapshot,
+            _host.CreateActiveScopeDocumentSnapshot,
             _host.GetSelectionSnapshot,
-            _host.GetCompatiblePortTargets,
+            _host.GetCompatibleConnectionTargets,
             Localize,
             () => _descriptorSupport?.Definitions ?? Array.Empty<global::AsterGraph.Abstractions.Definitions.INodeDefinition>());
 

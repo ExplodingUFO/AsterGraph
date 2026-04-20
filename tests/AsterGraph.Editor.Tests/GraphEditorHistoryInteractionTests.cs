@@ -161,13 +161,18 @@ public sealed class GraphEditorHistoryInteractionTests
 
         var groupId = editor.TryCreateNodeGroupFromSelection("History Cluster");
         Assert.False(string.IsNullOrWhiteSpace(groupId));
+        Assert.True(editor.TrySetNodeGroupSize(groupId, new GraphSize(620, 320), updateStatus: false));
         Assert.True(editor.TrySetNodeGroupCollapsed(groupId, isCollapsed: true));
         Assert.True(editor.TrySetNodeGroupPosition(groupId, new GraphPoint(160, 120), moveMemberNodes: true, updateStatus: false));
 
         var movedGroup = Assert.Single(editor.GetNodeGroups());
+        var movedSnapshot = Assert.Single(editor.GetNodeGroupSnapshots());
         Assert.Equal(groupId, movedGroup.Id);
         Assert.True(movedGroup.IsCollapsed);
         Assert.Equal(new GraphPoint(160, 120), movedGroup.Position);
+        Assert.Equal(new GraphSize(620, 320), movedGroup.Size);
+        Assert.Equal(movedGroup.Position, movedSnapshot.Position);
+        Assert.Equal(movedGroup.Size, movedSnapshot.Size);
         Assert.True(editor.IsDirty);
 
         foreach (var node in editor.Nodes)
@@ -186,11 +191,18 @@ public sealed class GraphEditorHistoryInteractionTests
             editor.FindNode(GraphEditorHistoryTestSupport.TargetNodeId)!.X);
         Assert.NotEqual(new GraphPoint(160, 120), undoneMove.Position);
         Assert.True(undoneMove.IsCollapsed);
+        Assert.Equal(new GraphSize(620, 320), undoneMove.Size);
         Assert.True(editor.IsDirty);
 
         editor.Undo();
         var undoneCollapse = Assert.Single(editor.GetNodeGroups());
         Assert.False(undoneCollapse.IsCollapsed);
+        Assert.Equal(new GraphSize(620, 320), undoneCollapse.Size);
+        Assert.True(editor.IsDirty);
+
+        editor.Undo();
+        var undoneResize = Assert.Single(editor.GetNodeGroups());
+        Assert.NotEqual(new GraphSize(620, 320), undoneResize.Size);
         Assert.True(editor.IsDirty);
 
         editor.Undo();
@@ -201,12 +213,77 @@ public sealed class GraphEditorHistoryInteractionTests
         editor.Redo();
         editor.Redo();
         editor.Redo();
+        editor.Redo();
 
         var redoneGroup = Assert.Single(editor.GetNodeGroups());
         Assert.Equal(groupId, redoneGroup.Id);
         Assert.True(redoneGroup.IsCollapsed);
         Assert.Equal(new GraphPoint(160, 120), redoneGroup.Position);
+        Assert.Equal(new GraphSize(620, 320), redoneGroup.Size);
         Assert.All(editor.Nodes, node => Assert.Equal(groupId, node.GroupId));
+        Assert.True(editor.IsDirty);
+        Assert.False(editor.CanRedo);
+        Assert.True(workspace.Exists());
+    }
+
+    [Fact]
+    public void GraphEditorViewModel_CompositePromotion_PreservesUndoRedoAndDirtySemantics()
+    {
+        var definitionId = new NodeDefinitionId("tests.history.composite-promotion");
+        var workspace = new GraphEditorHistoryTestSupport.RecordingWorkspaceService();
+        var editor = GraphEditorHistoryTestSupport.CreateEditor(definitionId, workspace);
+
+        editor.SaveWorkspace();
+        Assert.False(editor.IsDirty);
+
+        editor.SetSelection(
+            [
+                editor.FindNode(GraphEditorHistoryTestSupport.SourceNodeId)!,
+                editor.FindNode(GraphEditorHistoryTestSupport.TargetNodeId)!,
+            ],
+            editor.FindNode(GraphEditorHistoryTestSupport.TargetNodeId),
+            status: null);
+
+        var groupId = editor.TryCreateNodeGroupFromSelection("Composite Cluster");
+        Assert.False(string.IsNullOrWhiteSpace(groupId));
+
+        var compositeNodeId = editor.Session.Commands.TryPromoteNodeGroupToComposite(groupId, "Composite Cluster", updateStatus: false);
+        Assert.False(string.IsNullOrWhiteSpace(compositeNodeId));
+
+        var boundaryPortId = editor.Session.Commands.TryExposeCompositePort(
+            compositeNodeId,
+            GraphEditorHistoryTestSupport.SourceNodeId,
+            GraphEditorHistoryTestSupport.SourcePortId,
+            "Composite Output",
+            updateStatus: false);
+        Assert.False(string.IsNullOrWhiteSpace(boundaryPortId));
+        Assert.True(editor.Session.Commands.TryUnexposeCompositePort(compositeNodeId, boundaryPortId, updateStatus: false));
+        Assert.True(editor.IsDirty);
+
+        editor.Undo();
+        Assert.Single(editor.Session.Queries.GetCompositeNodeSnapshots()[0].Outputs);
+
+        editor.Undo();
+        Assert.Empty(editor.Session.Queries.GetCompositeNodeSnapshots()[0].Outputs);
+
+        editor.Undo();
+        Assert.Empty(editor.Session.Queries.GetCompositeNodeSnapshots());
+        Assert.Single(editor.GetNodeGroups());
+        Assert.True(editor.IsDirty);
+
+        editor.Undo();
+        Assert.Empty(editor.GetNodeGroups());
+        Assert.False(editor.IsDirty);
+
+        editor.Redo();
+        editor.Redo();
+        editor.Redo();
+        editor.Redo();
+
+        Assert.Empty(editor.GetNodeGroups());
+        var compositeSnapshot = Assert.Single(editor.Session.Queries.GetCompositeNodeSnapshots());
+        Assert.Equal(compositeNodeId, compositeSnapshot.NodeId);
+        Assert.Empty(compositeSnapshot.Outputs);
         Assert.True(editor.IsDirty);
         Assert.False(editor.CanRedo);
         Assert.True(workspace.Exists());

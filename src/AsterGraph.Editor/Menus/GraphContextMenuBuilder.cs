@@ -242,7 +242,7 @@ internal sealed class GraphContextMenuBuilder
 
         return
         [
-            new MenuItemDescriptor("connection-delete", L("editor.menu.connection.deleteConnection", "Delete Connection"), new RelayCommand(() => _editor.DeleteConnection(connection.Id)), iconKey: "delete", isEnabled: _editor.CommandPermissions.Connections.AllowDelete),
+            new MenuItemDescriptor("connection-disconnect", L("editor.menu.connection.disconnectConnection", "Disconnect Connection"), new RelayCommand(() => _editor.DisconnectConnection(connection.Id)), iconKey: "disconnect", isEnabled: _editor.CommandPermissions.Connections.AllowDisconnect),
             new MenuItemDescriptor("connection-conversion", conversionLabel, iconKey: "conversion", isEnabled: false),
         ];
     }

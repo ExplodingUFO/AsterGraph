@@ -15,6 +15,12 @@ namespace AsterGraph.Editor.Tests;
 
 public sealed class GraphEditorViewModelProjectionTests
 {
+    private const string CompositeNodeId = "tests.editor.projection.composite-001";
+    private const string RootStandaloneNodeId = "tests.editor.projection.root-001";
+    private const string ChildGraphId = "graph-child-001";
+    private const string ChildSourceNodeId = "tests.editor.projection.child-source-001";
+    private const string ChildTargetNodeId = "tests.editor.projection.child-target-001";
+
     [Fact]
     public void EditorAssembly_ContainsDedicatedKernelProjectionApplier()
     {
@@ -228,6 +234,34 @@ public sealed class GraphEditorViewModelProjectionTests
         Assert.Contains("Workspace loaded", editor.StatusMessage, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void GraphEditorViewModel_SessionScopeNavigation_RebuildsActiveScopeProjection_WithoutDirtyingDocument()
+    {
+        var definitionId = new NodeDefinitionId("tests.editor.projection.scope-navigation");
+        var editor = CreateEditor(CreateScopedNavigationDocument(definitionId));
+
+        Assert.Equal(
+            [CompositeNodeId, RootStandaloneNodeId],
+            editor.Nodes.Select(node => node.Id).OrderBy(id => id, StringComparer.Ordinal));
+        Assert.False(editor.IsDirty);
+
+        Assert.True(editor.Session.Commands.TryEnterCompositeChildGraph(CompositeNodeId, updateStatus: false));
+
+        Assert.Equal([ChildSourceNodeId, ChildTargetNodeId], editor.Nodes.Select(node => node.Id).OrderBy(id => id, StringComparer.Ordinal));
+        Assert.Null(editor.FindNode(CompositeNodeId));
+        Assert.NotNull(editor.FindNode(ChildSourceNodeId));
+        Assert.False(editor.IsDirty);
+
+        Assert.True(editor.Session.Commands.TryReturnToParentGraphScope(updateStatus: false));
+
+        Assert.Equal(
+            [CompositeNodeId, RootStandaloneNodeId],
+            editor.Nodes.Select(node => node.Id).OrderBy(id => id, StringComparer.Ordinal));
+        Assert.NotNull(editor.FindNode(CompositeNodeId));
+        Assert.Null(editor.FindNode(ChildSourceNodeId));
+        Assert.False(editor.IsDirty);
+    }
+
     private static GraphEditorViewModel CreateEditor(GraphDocument document)
         => new(
             document,
@@ -286,6 +320,42 @@ public sealed class GraphEditorViewModelProjectionTests
                 ]
                 : []);
     }
+
+    private static GraphDocument CreateScopedNavigationDocument(NodeDefinitionId definitionId)
+        => GraphDocument.CreateScoped(
+            "Projection Scoped Graph",
+            "Projection scope-navigation document.",
+            "graph-root",
+            [
+                new GraphScope(
+                    "graph-root",
+                    [
+                        new GraphNode(
+                            CompositeNodeId,
+                            "Composite Node",
+                            "Tests",
+                            "Projection",
+                            "Composite shell for projection scope-navigation tests.",
+                            new GraphPoint(120, 80),
+                            new GraphSize(260, 180),
+                            [],
+                            [],
+                            "#A67CF5",
+                            null,
+                            [],
+                            null,
+                            new GraphCompositeNode(ChildGraphId, [], [])),
+                        CreateNode(RootStandaloneNodeId, definitionId, "Root Node", inputLabel: "Input", outputLabel: "Output").ToModel(),
+                    ],
+                    []),
+                new GraphScope(
+                    ChildGraphId,
+                    [
+                        CreateNode(ChildSourceNodeId, definitionId, "Child Source", inputLabel: "Input", outputLabel: "Output").ToModel(),
+                        CreateNode(ChildTargetNodeId, definitionId, "Child Target", inputLabel: "Input", outputLabel: "Result").ToModel(),
+                    ],
+                    []),
+            ]);
 
     private static NodeViewModel CreateNode(
         string nodeId,

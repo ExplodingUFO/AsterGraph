@@ -1,4 +1,7 @@
 using AsterGraph.Abstractions.Compatibility;
+using AsterGraph.Abstractions.Catalog;
+using AsterGraph.Abstractions.Definitions;
+using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Configuration;
 using AsterGraph.Editor.Diagnostics;
@@ -11,6 +14,8 @@ internal interface IGraphEditorKernelConnectionMutationHost
     GraphEditorBehaviorOptions BehaviorOptions { get; }
 
     IPortCompatibilityService CompatibilityService { get; }
+
+    INodeCatalog NodeCatalog { get; }
 
     GraphDocument Document { get; }
 
@@ -73,7 +78,7 @@ internal sealed class GraphEditorKernelConnectionMutationCoordinator
         _host.SetStatus($"Connecting from {sourceNode.Title}.{sourcePort.Label}.");
     }
 
-    public void CompleteConnection(string targetNodeId, string targetPortId)
+    public void CompleteConnection(GraphConnectionTargetRef target)
     {
         if (!_host.PendingConnection.HasPendingConnection
             || _host.PendingConnection.SourceNodeId is null
@@ -82,7 +87,7 @@ internal sealed class GraphEditorKernelConnectionMutationCoordinator
             return;
         }
 
-        ConnectPorts(_host.PendingConnection.SourceNodeId, _host.PendingConnection.SourcePortId, targetNodeId, targetPortId);
+        ConnectToTarget(_host.PendingConnection.SourceNodeId, _host.PendingConnection.SourcePortId, target);
     }
 
     public void CancelPendingConnection()
@@ -117,6 +122,28 @@ internal sealed class GraphEditorKernelConnectionMutationCoordinator
             [mutation.Connection.Id]);
     }
 
+    public void DisconnectConnection(string connectionId)
+    {
+        if (!_host.BehaviorOptions.Commands.Connections.AllowDisconnect)
+        {
+            _host.SetStatus("Disconnect is disabled by host permissions.");
+            return;
+        }
+
+        var mutation = _documentMutator.DeleteConnection(_host.Document, connectionId);
+        if (mutation.Connection is null)
+        {
+            return;
+        }
+
+        _host.UpdateDocument(mutation.Document);
+        _host.MarkDirty(
+            $"Disconnected connection {mutation.Connection.Label}.",
+            GraphEditorDocumentChangeKind.ConnectionsChanged,
+            null,
+            [mutation.Connection.Id]);
+    }
+
     public void BreakConnectionsForPort(string nodeId, string portId)
     {
         if (!_host.BehaviorOptions.Commands.Connections.AllowDisconnect)
@@ -128,7 +155,9 @@ internal sealed class GraphEditorKernelConnectionMutationCoordinator
         RemoveConnections(
             connection =>
                 (connection.SourceNodeId == nodeId && connection.SourcePortId == portId)
-                || (connection.TargetNodeId == nodeId && connection.TargetPortId == portId),
+                || (connection.TargetKind == GraphConnectionTargetKind.Port
+                    && connection.TargetNodeId == nodeId
+                    && connection.TargetPortId == portId),
             "Disconnected port links.");
     }
 
@@ -167,7 +196,7 @@ internal sealed class GraphEditorKernelConnectionMutationCoordinator
             "Disconnected all links.");
     }
 
-    private void ConnectPorts(string sourceNodeId, string sourcePortId, string targetNodeId, string targetPortId)
+    private void ConnectToTarget(string sourceNodeId, string sourcePortId, GraphConnectionTargetRef target)
     {
         if (!_host.BehaviorOptions.Commands.Connections.AllowCreate)
         {
@@ -177,31 +206,31 @@ internal sealed class GraphEditorKernelConnectionMutationCoordinator
 
         var sourceNode = FindNode(sourceNodeId);
         var sourcePort = sourceNode?.Outputs.FirstOrDefault(port => string.Equals(port.Id, sourcePortId, StringComparison.Ordinal));
-        var targetNode = FindNode(targetNodeId);
-        var targetPort = targetNode?.Inputs.FirstOrDefault(port => string.Equals(port.Id, targetPortId, StringComparison.Ordinal));
-        if (sourceNode is null || sourcePort is null || targetNode is null || targetPort is null)
+        var resolvedTarget = ResolveTarget(target);
+        if (sourceNode is null || sourcePort is null || resolvedTarget is null)
         {
             return;
         }
 
-        if (sourcePort.TypeId is null || targetPort.TypeId is null)
+        if (sourcePort.TypeId is null || resolvedTarget.TypeId is null)
         {
             _host.SetStatus("Connection endpoints must expose stable type identifiers.");
             return;
         }
 
-        var compatibility = _host.CompatibilityService.Evaluate(sourcePort.TypeId, targetPort.TypeId);
+        var compatibility = _host.CompatibilityService.Evaluate(sourcePort.TypeId, resolvedTarget.TypeId);
         if (!compatibility.IsCompatible)
         {
-            _host.SetStatus($"Incompatible connection: {sourcePort.TypeId} -> {targetPort.TypeId}.");
+            _host.SetStatus($"Incompatible connection: {sourcePort.TypeId} -> {resolvedTarget.TypeId}.");
             return;
         }
 
         if (_host.Document.Connections.Any(connection =>
                 connection.SourceNodeId == sourceNode.Id
                 && connection.SourcePortId == sourcePort.Id
-                && connection.TargetNodeId == targetNode.Id
-                && connection.TargetPortId == targetPort.Id))
+                && connection.TargetNodeId == resolvedTarget.Node.Id
+                && connection.TargetPortId == resolvedTarget.Target.TargetId
+                && connection.TargetKind == resolvedTarget.Target.Kind))
         {
             CancelPendingConnection();
             _host.SetStatus("That connection already exists.");
@@ -209,7 +238,10 @@ internal sealed class GraphEditorKernelConnectionMutationCoordinator
         }
 
         var replacedConnections = _host.Document.Connections
-            .Where(connection => connection.TargetNodeId == targetNode.Id && connection.TargetPortId == targetPort.Id)
+            .Where(connection =>
+                connection.TargetNodeId == resolvedTarget.Node.Id
+                && connection.TargetPortId == resolvedTarget.Target.TargetId
+                && connection.TargetKind == resolvedTarget.Target.Kind)
             .ToList();
         if (replacedConnections.Count > 0 && !_host.CanReplaceIncomingConnection())
         {
@@ -221,11 +253,14 @@ internal sealed class GraphEditorKernelConnectionMutationCoordinator
             _host.CreateConnectionId(),
             sourceNode.Id,
             sourcePort.Id,
-            targetNode.Id,
-            targetPort.Id,
-            $"{sourcePort.Label} to {targetPort.Label}",
+            resolvedTarget.Node.Id,
+            resolvedTarget.Target.TargetId,
+            $"{sourcePort.Label} to {resolvedTarget.Label}",
             sourcePort.AccentHex,
-            compatibility.ConversionId);
+            compatibility.ConversionId)
+        {
+            TargetKind = resolvedTarget.Target.Kind,
+        };
 
         _host.UpdateDocument(_host.Document with
         {
@@ -236,13 +271,13 @@ internal sealed class GraphEditorKernelConnectionMutationCoordinator
         });
         _host.SetPendingConnection(GraphEditorPendingConnectionSnapshot.Create(false, null, null));
         var status = compatibility.Kind == PortCompatibilityKind.ImplicitConversion
-            ? $"Connected {sourceNode.Title} to {targetNode.Title} with implicit conversion."
-            : $"Connected {sourceNode.Title} to {targetNode.Title}.";
+            ? $"Connected {sourceNode.Title} to {resolvedTarget.Node.Title} with implicit conversion."
+            : $"Connected {sourceNode.Title} to {resolvedTarget.Node.Title}.";
         _host.SetStatus(status);
         _host.MarkDirty(
             status,
             GraphEditorDocumentChangeKind.ConnectionsChanged,
-            [sourceNode.Id, targetNode.Id],
+            [sourceNode.Id, resolvedTarget.Node.Id],
             [nextConnection.Id],
             preserveStatus: true);
     }
@@ -266,4 +301,54 @@ internal sealed class GraphEditorKernelConnectionMutationCoordinator
 
     private GraphNode? FindNode(string nodeId)
         => _host.Document.Nodes.FirstOrDefault(node => string.Equals(node.Id, nodeId, StringComparison.Ordinal));
+
+    private ResolvedConnectionTarget? ResolveTarget(GraphConnectionTargetRef target)
+    {
+        var targetNode = FindNode(target.NodeId);
+        if (targetNode is null)
+        {
+            return null;
+        }
+
+        if (target.Kind == GraphConnectionTargetKind.Port)
+        {
+            var targetPort = targetNode.Inputs.FirstOrDefault(port => string.Equals(port.Id, target.TargetId, StringComparison.Ordinal));
+            return targetPort is null
+                ? null
+                : new ResolvedConnectionTarget(
+                    targetNode,
+                    target,
+                    targetPort.Label,
+                    targetPort.TypeId,
+                    targetPort.AccentHex);
+        }
+
+        if (targetNode.DefinitionId is null
+            || !_host.NodeCatalog.TryGetDefinition(targetNode.DefinitionId, out var definition)
+            || definition is null)
+        {
+            _host.SetStatus("Parameter targets require a registered node definition.");
+            return null;
+        }
+
+        var parameter = definition.Parameters.FirstOrDefault(candidate => string.Equals(candidate.Key, target.TargetId, StringComparison.Ordinal));
+        if (parameter is null)
+        {
+            return null;
+        }
+
+        return new ResolvedConnectionTarget(
+            targetNode,
+            target,
+            parameter.DisplayName,
+            parameter.ValueType,
+            targetNode.AccentHex);
+    }
+
+    private sealed record ResolvedConnectionTarget(
+        GraphNode Node,
+        GraphConnectionTargetRef Target,
+        string Label,
+        PortTypeId? TypeId,
+        string AccentHex);
 }

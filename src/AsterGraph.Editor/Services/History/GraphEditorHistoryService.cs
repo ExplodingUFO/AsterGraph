@@ -83,4 +83,5 @@ internal sealed record GraphEditorHistoryState(
     GraphDocument Document,
     IReadOnlyList<string> SelectedNodeIds,
     string? PrimarySelectedNodeId,
+    string ActiveGraphId,
     string Signature);

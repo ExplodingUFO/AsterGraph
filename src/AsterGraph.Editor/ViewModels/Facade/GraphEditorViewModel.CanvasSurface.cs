@@ -5,6 +5,7 @@ using AsterGraph.Abstractions.Compatibility;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Menus;
 using AsterGraph.Editor.Models;
+using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.Services;
 using AsterGraph.Editor.Viewport;
 
@@ -55,8 +56,18 @@ public sealed partial class GraphEditorViewModel
     }
 
     /// <summary>
+    /// Attempts to persist one node size through the session runtime surface path.
+    /// </summary>
+    public bool TrySetNodeSize(NodeViewModel node, GraphSize size, bool updateStatus = true)
+    {
+        ArgumentNullException.ThrowIfNull(node);
+        return _sessionHost.TrySetNodeSize(node.Id, size, updateStatus);
+    }
+
+    /// <summary>
     /// Attempts to persist one node expansion-state change through the session runtime surface path.
     /// </summary>
+    [Obsolete("Compatibility-only retained helper. Use Session.Commands.TrySetNodeExpansionState(node.Id, ...) for canonical runtime updates, drive size-based disclosure with Session.Commands.TrySetNodeSize(...), and inspect Session.Queries.GetNodeSurfaceSnapshots() for persisted node-surface state.")]
     public bool TrySetNodeExpansionState(NodeViewModel node, GraphNodeExpansionState expansionState)
     {
         ArgumentNullException.ThrowIfNull(node);
@@ -68,6 +79,12 @@ public sealed partial class GraphEditorViewModel
     /// </summary>
     public IReadOnlyList<GraphNodeGroup> GetNodeGroups()
         => _sessionHost.GetNodeGroups();
+
+    /// <summary>
+    /// Gets resolved editor-only node-group boundary snapshots from the shared runtime session.
+    /// </summary>
+    public IReadOnlyList<GraphEditorNodeGroupSnapshot> GetNodeGroupSnapshots()
+        => _sessionHost.GetNodeGroupSnapshots();
 
     /// <summary>
     /// Attempts to create one editor-only group from the current selection.
@@ -97,6 +114,34 @@ public sealed partial class GraphEditorViewModel
     }
 
     /// <summary>
+    /// Attempts to update one group's fixed frame size.
+    /// </summary>
+    public bool TrySetNodeGroupSize(string groupId, GraphSize size, bool updateStatus = true)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(groupId);
+        return _sessionHost.TrySetNodeGroupSize(groupId, size, updateStatus);
+    }
+
+    /// <summary>
+    /// Attempts to update one group's persisted per-edge padding envelope.
+    /// </summary>
+    [Obsolete("Compatibility-only retained helper. Prefer fixed-frame group edits through Session.Commands.TrySetNodeGroupSize(...) and Session.Commands.TrySetNodeGroupPosition(...), then inspect Session.Queries.GetNodeGroupSnapshots() for canonical persisted bounds.")]
+    public bool TrySetNodeGroupExtraPadding(string groupId, GraphPadding extraPadding, bool updateStatus = true)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(groupId);
+        return _sessionHost.TrySetNodeGroupExtraPadding(groupId, extraPadding, updateStatus);
+    }
+
+    /// <summary>
+    /// Attempts to apply one or more node-group membership changes.
+    /// </summary>
+    public bool TrySetNodeGroupMemberships(IReadOnlyList<GraphEditorNodeGroupMembershipChange> changes, bool updateStatus = true)
+    {
+        ArgumentNullException.ThrowIfNull(changes);
+        return _sessionHost.TrySetNodeGroupMemberships(changes, updateStatus);
+    }
+
+    /// <summary>
     /// Determines whether an input port currently receives an upstream connection.
     /// </summary>
     public bool HasIncomingConnection(NodeViewModel node, PortViewModel port)
@@ -105,13 +150,16 @@ public sealed partial class GraphEditorViewModel
         ArgumentNullException.ThrowIfNull(port);
 
         return Connections.Any(connection =>
-            string.Equals(connection.TargetNodeId, node.Id, StringComparison.Ordinal)
+            connection.TargetKind == GraphConnectionTargetKind.Port
+            && string.Equals(connection.TargetNodeId, node.Id, StringComparison.Ordinal)
             && string.Equals(connection.TargetPortId, port.Id, StringComparison.Ordinal));
     }
 
     /// <summary>
     /// Resolves the shared inline-parameter editor bound to one input port when the node is the primary single selection.
+    /// Retained for compatibility with custom presenters still consuming the legacy seam.
     /// </summary>
+    [Obsolete("Compatibility-only retained helper. Prefer node.ParameterEndpoints for hosted parameter rails, or Session.Queries.GetNodeSurfaceSnapshots() plus Session.Commands.TrySetNodeParameterValue(...) for canonical runtime-driven parameter authoring.")]
     public NodeParameterViewModel? ResolveInlineParameter(NodeViewModel node, PortViewModel port)
     {
         ArgumentNullException.ThrowIfNull(node);
@@ -214,6 +262,23 @@ public sealed partial class GraphEditorViewModel
     }
 
     /// <summary>
+    /// Activates a typed connection target exposed by node-local hosted UI.
+    /// </summary>
+    public void ActivateConnectionTarget(NodeViewModel node, GraphConnectionTargetRef target)
+    {
+        ArgumentNullException.ThrowIfNull(node);
+
+        SelectSingleNode(node);
+        if (!HasPendingConnection)
+        {
+            SetStatus("editor.status.connection.selectOutputPortFirst", "Select an output port first.");
+            return;
+        }
+
+        ConnectToTarget(PendingSourceNode!.Id, PendingSourcePort!.Id, target);
+    }
+
+    /// <summary>
     /// 以指定输出端口作为连线起点。
     /// </summary>
     public void StartConnection(string sourceNodeId, string sourcePortId)
@@ -223,18 +288,21 @@ public sealed partial class GraphEditorViewModel
     /// 连接源输出端口与目标输入端口。
     /// </summary>
     public void ConnectPorts(string sourceNodeId, string sourcePortId, string targetNodeId, string targetPortId)
+        => ConnectToTarget(sourceNodeId, sourcePortId, new GraphConnectionTargetRef(targetNodeId, targetPortId));
+
+    public void ConnectToTarget(string sourceNodeId, string sourcePortId, GraphConnectionTargetRef target)
     {
         var pendingConnection = _kernel.GetPendingConnectionSnapshot();
         if (pendingConnection.HasPendingConnection
             && string.Equals(pendingConnection.SourceNodeId, sourceNodeId, StringComparison.Ordinal)
             && string.Equals(pendingConnection.SourcePortId, sourcePortId, StringComparison.Ordinal))
         {
-            _kernel.CompleteConnection(targetNodeId, targetPortId);
+            _kernel.CompleteConnection(target);
             return;
         }
 
         _kernel.StartConnection(sourceNodeId, sourcePortId);
-        _kernel.CompleteConnection(targetNodeId, targetPortId);
+        _kernel.CompleteConnection(target);
     }
 
     /// <summary>
@@ -389,6 +457,18 @@ public sealed partial class GraphEditorViewModel
     /// </summary>
     public void DeleteConnection(string connectionId)
         => _compatibilityCommands.DeleteConnection(connectionId);
+
+    /// <summary>
+    /// 断开指定连线。
+    /// </summary>
+    public void DisconnectConnection(string connectionId)
+        => _compatibilityCommands.DisconnectConnection(connectionId);
+
+    /// <summary>
+    /// 更新指定连线的纯展示注释文本。
+    /// </summary>
+    public bool TrySetConnectionNoteText(string connectionId, string? noteText, bool updateStatus = true)
+        => _kernel.TrySetConnectionNoteText(connectionId, noteText, updateStatus);
 
     /// <summary>
     /// 按实例标识查找连线视图模型。

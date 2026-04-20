@@ -60,6 +60,7 @@ internal sealed class GraphEditorHistoryStateCoordinator
             document,
             _host.SelectedNodes.Select(node => node.Id).ToList(),
             _host.SelectedNode?.Id,
+            document.RootGraphId,
             CreateDocumentSignature(document));
     }
 

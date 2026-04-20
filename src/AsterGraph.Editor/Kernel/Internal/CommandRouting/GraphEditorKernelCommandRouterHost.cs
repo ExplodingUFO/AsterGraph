@@ -5,6 +5,7 @@ using AsterGraph.Editor.Configuration;
 using AsterGraph.Editor.Diagnostics;
 using AsterGraph.Editor.Kernel.Internal;
 using AsterGraph.Editor.Models;
+using AsterGraph.Editor.Runtime;
 
 namespace AsterGraph.Editor.Kernel;
 
@@ -21,7 +22,7 @@ internal sealed partial class GraphEditorKernel
 
         GraphEditorBehaviorOptions IGraphEditorKernelCommandRouterHost.BehaviorOptions => _owner._behaviorOptions;
 
-        GraphDocument IGraphEditorKernelCommandRouterHost.Document => _owner._document;
+        GraphDocument IGraphEditorKernelCommandRouterHost.Document => _owner.CreateActiveScopeDocumentSnapshot();
 
         int IGraphEditorKernelCommandRouterHost.SelectedNodeCount => _owner._selectedNodeIds.Count;
 
@@ -42,6 +43,9 @@ internal sealed partial class GraphEditorKernel
 
         bool IGraphEditorKernelCommandRouterHost.WorkspaceExists => _owner._workspaceService.Exists();
 
+        bool IGraphEditorKernelCommandRouterHost.CanNavigateToParentGraphScope
+            => _owner.GetScopeNavigationSnapshot().CanNavigateToParent;
+
         void IGraphEditorKernelCommandRouterHost.Undo()
             => _owner.Undo();
 
@@ -60,6 +64,9 @@ internal sealed partial class GraphEditorKernel
         void IGraphEditorKernelCommandRouterHost.SetNodePositions(IReadOnlyList<NodePositionSnapshot> positions, bool updateStatus)
             => _owner.SetNodePositions(positions, updateStatus);
 
+        bool IGraphEditorKernelCommandRouterHost.TrySetNodeSize(string nodeId, GraphSize size, bool updateStatus)
+            => _owner.TrySetNodeSize(nodeId, size, updateStatus);
+
         string IGraphEditorKernelCommandRouterHost.TryCreateNodeGroupFromSelection(string title)
             => _owner.TryCreateNodeGroupFromSelection(title);
 
@@ -69,20 +76,47 @@ internal sealed partial class GraphEditorKernel
         bool IGraphEditorKernelCommandRouterHost.TrySetNodeGroupPosition(string groupId, GraphPoint position, bool moveMemberNodes, bool updateStatus)
             => _owner.TrySetNodeGroupPosition(groupId, position, moveMemberNodes, updateStatus);
 
+        bool IGraphEditorKernelCommandRouterHost.TrySetNodeGroupSize(string groupId, GraphSize size, bool updateStatus)
+            => _owner.TrySetNodeGroupSize(groupId, size, updateStatus);
+
+        bool IGraphEditorKernelCommandRouterHost.TrySetNodeGroupExtraPadding(string groupId, GraphPadding extraPadding, bool updateStatus)
+            => _owner.TrySetNodeGroupExtraPadding(groupId, extraPadding, updateStatus);
+
+        bool IGraphEditorKernelCommandRouterHost.TrySetNodeGroupMemberships(IReadOnlyList<GraphEditorNodeGroupMembershipChange> changes, bool updateStatus)
+            => _owner.TrySetNodeGroupMemberships(changes, updateStatus);
+
+        string IGraphEditorKernelCommandRouterHost.TryPromoteNodeGroupToComposite(string groupId, string? title, bool updateStatus)
+            => _owner.TryPromoteNodeGroupToComposite(groupId, title, updateStatus);
+
+        string IGraphEditorKernelCommandRouterHost.TryExposeCompositePort(string compositeNodeId, string childNodeId, string childPortId, string? label, bool updateStatus)
+            => _owner.TryExposeCompositePort(compositeNodeId, childNodeId, childPortId, label, updateStatus);
+
+        bool IGraphEditorKernelCommandRouterHost.TryUnexposeCompositePort(string compositeNodeId, string boundaryPortId, bool updateStatus)
+            => _owner.TryUnexposeCompositePort(compositeNodeId, boundaryPortId, updateStatus);
+
+        bool IGraphEditorKernelCommandRouterHost.TryEnterCompositeChildGraph(string compositeNodeId, bool updateStatus)
+            => _owner.TryEnterCompositeChildGraph(compositeNodeId, updateStatus);
+
+        bool IGraphEditorKernelCommandRouterHost.TryReturnToParentGraphScope(bool updateStatus)
+            => _owner.TryReturnToParentGraphScope(updateStatus);
+
         bool IGraphEditorKernelCommandRouterHost.TrySetSelectedNodeParameterValue(string parameterKey, object? value)
             => _owner.TrySetSelectedNodeParameterValue(parameterKey, value);
 
         void IGraphEditorKernelCommandRouterHost.StartConnection(string sourceNodeId, string sourcePortId)
             => _owner.StartConnection(sourceNodeId, sourcePortId);
 
-        void IGraphEditorKernelCommandRouterHost.CompleteConnection(string targetNodeId, string targetPortId)
-            => _owner.CompleteConnection(targetNodeId, targetPortId);
+        void IGraphEditorKernelCommandRouterHost.CompleteConnection(GraphConnectionTargetRef target)
+            => _owner.CompleteConnection(target);
 
         void IGraphEditorKernelCommandRouterHost.CancelPendingConnection()
             => _owner.CancelPendingConnection();
 
         void IGraphEditorKernelCommandRouterHost.DeleteConnection(string connectionId)
             => _owner.DeleteConnection(connectionId);
+
+        void IGraphEditorKernelCommandRouterHost.DisconnectConnection(string connectionId)
+            => _owner.DisconnectConnection(connectionId);
 
         void IGraphEditorKernelCommandRouterHost.BreakConnectionsForPort(string nodeId, string portId)
             => _owner.BreakConnectionsForPort(nodeId, portId);

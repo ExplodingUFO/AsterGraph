@@ -6,6 +6,7 @@ using AsterGraph.Avalonia.Controls.Internal;
 using AsterGraph.Avalonia.Presentation;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Configuration;
+using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.ViewModels;
 
 namespace AsterGraph.Avalonia.Controls;
@@ -105,6 +106,8 @@ public partial class NodeCanvas
 
         public IGraphNodeVisualPresenter StockNodeVisualPresenter => _owner._stockNodeVisualPresenter;
 
+        public INodeParameterEditorRegistry? NodeParameterEditorRegistry => _owner.NodeParameterEditorRegistry;
+
         public NodeCanvasInteractionSession InteractionSession => _owner._interactionSession;
 
         public NodeCanvasContextMenuCoordinator ContextMenuCoordinator => _owner._contextMenuCoordinator;
@@ -114,6 +117,15 @@ public partial class NodeCanvas
 
         public void BeginNodeDrag(NodeViewModel node, PointerPressedEventArgs args)
             => _owner.BeginNodeDrag(node, args);
+
+        public void BeginNodeResize(NodeViewModel node, GraphNodeResizeHandleKind handleKind, PointerPressedEventArgs args)
+            => _owner.BeginNodeResize(node, handleKind, args);
+
+        public void BeginGroupDrag(GraphEditorNodeGroupSnapshot group, PointerPressedEventArgs args)
+            => _owner.BeginGroupDrag(group, args);
+
+        public void BeginGroupResize(string groupId, string groupTitle, NodeCanvasGroupResizeEdge edge, PointerPressedEventArgs args)
+            => _owner.BeginGroupResize(groupId, groupTitle, edge, args);
 
         public void ActivatePort(NodeViewModel node, PortViewModel port)
             => _owner.ActivatePortFromVisual(node, port);
@@ -138,6 +150,9 @@ public partial class NodeCanvas
 
         public void UpdateSelectionState()
             => _owner.UpdateSelectionState();
+
+        public void UpdateGroupVisuals()
+            => _owner.UpdateGroupVisuals();
 
         public void ApplySelectionAdornerStyle()
             => _owner.ApplySelectionAdornerStyle();
@@ -263,6 +278,9 @@ public partial class NodeCanvas
 
         public void RenderConnections()
             => _owner.RenderConnections();
+
+        public void UpdateGroupVisuals()
+            => _owner.UpdateGroupVisuals();
 
         public void UpdateMarqueeSelection(Point currentScreenPosition, bool finalize)
             => _owner.UpdateMarqueeSelection(currentScreenPosition, finalize);

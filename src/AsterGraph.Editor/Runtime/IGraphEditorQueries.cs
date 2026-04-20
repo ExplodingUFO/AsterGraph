@@ -72,10 +72,31 @@ public interface IGraphEditorQueries
         => throw new NotSupportedException();
 
     /// <summary>
+    /// Gets host-facing composite node snapshots for the current root graph.
+    /// </summary>
+    /// <returns>A stable read-only composite snapshot collection.</returns>
+    IReadOnlyList<GraphEditorCompositeNodeSnapshot> GetCompositeNodeSnapshots()
+        => throw new NotSupportedException();
+
+    /// <summary>
+    /// Gets the current active-scope navigation snapshot.
+    /// </summary>
+    /// <returns>Stable scope navigation metadata for hosted navigation surfaces.</returns>
+    GraphEditorScopeNavigationSnapshot GetScopeNavigationSnapshot()
+        => throw new NotSupportedException();
+
+    /// <summary>
     /// Gets persisted editor-only node groups for the current document.
     /// </summary>
     /// <returns>A stable read-only group collection.</returns>
     IReadOnlyList<GraphNodeGroup> GetNodeGroups()
+        => throw new NotSupportedException();
+
+    /// <summary>
+    /// Gets resolved editor-only node-group boundary snapshots for the current document.
+    /// </summary>
+    /// <returns>A stable read-only group snapshot collection.</returns>
+    IReadOnlyList<GraphEditorNodeGroupSnapshot> GetNodeGroupSnapshots()
         => throw new NotSupportedException();
 
     /// <summary>
@@ -111,6 +132,15 @@ public interface IGraphEditorQueries
     /// </summary>
     /// <returns>当前待完成连线状态。</returns>
     GraphEditorPendingConnectionSnapshot GetPendingConnectionSnapshot()
+        => throw new NotSupportedException();
+
+    /// <summary>
+    /// Gets typed compatible connection targets for the specified source output port.
+    /// </summary>
+    /// <param name="sourceNodeId">Source node instance identifier.</param>
+    /// <param name="sourcePortId">Source output port identifier.</param>
+    /// <returns>Compatible target endpoint snapshots.</returns>
+    IReadOnlyList<GraphEditorCompatibleConnectionTargetSnapshot> GetCompatibleConnectionTargets(string sourceNodeId, string sourcePortId)
         => throw new NotSupportedException();
 
     /// <summary>

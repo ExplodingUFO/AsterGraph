@@ -9,10 +9,12 @@ namespace AsterGraph.Core.Models;
 /// <param name="Size">World-space group boundary size.</param>
 /// <param name="NodeIds">Stable node identifiers attached to the group.</param>
 /// <param name="IsCollapsed">Whether the group is currently collapsed in the editor surface.</param>
+/// <param name="ExtraPadding">Persisted per-edge padding envelope around the member-node bounds.</param>
 public sealed record GraphNodeGroup(
     string Id,
     string Title,
     GraphPoint Position,
     GraphSize Size,
     IReadOnlyList<string> NodeIds,
-    bool IsCollapsed = false);
+    bool IsCollapsed = false,
+    GraphPadding ExtraPadding = default);
