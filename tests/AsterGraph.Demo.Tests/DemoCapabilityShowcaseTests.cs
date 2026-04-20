@@ -11,6 +11,7 @@ using AsterGraph.Core.Models;
 using AsterGraph.Demo;
 using AsterGraph.Demo.ViewModels;
 using AsterGraph.Demo.Views;
+using AsterGraph.Editor.ViewModels;
 using AsterGraph.Editor.Plugins;
 using Xunit;
 
@@ -123,6 +124,8 @@ public sealed class DemoCapabilityShowcaseTests
         Assert.True(result.CommandSurfaceOk);
         Assert.True(result.TieredNodeSurfaceOk);
         Assert.True(result.FixedGroupFrameOk);
+        Assert.True(result.NonObscuringEditingOk);
+        Assert.True(result.VisualSemanticsOk);
         Assert.True(result.CompositeScopeOk);
         Assert.True(result.EdgeNoteOk);
         Assert.True(result.DisconnectFlowOk);
@@ -130,6 +133,20 @@ public sealed class DemoCapabilityShowcaseTests
         Assert.True(result.InspectorProjectionMs >= 0);
         Assert.True(result.PluginScanMs >= 0);
         Assert.True(result.CommandLatencyMs >= 0);
+        foreach (var requiredProofLine in new[]
+                 {
+                     "COMMAND_SURFACE_OK:True",
+                     "TIERED_NODE_SURFACE_OK:True",
+                     "FIXED_GROUP_FRAME_OK:True",
+                     "NON_OBSCURING_EDITING_OK:True",
+                     "VISUAL_SEMANTICS_OK:True",
+                     "COMPOSITE_SCOPE_OK:True",
+                     "EDGE_NOTE_OK:True",
+                     "DISCONNECT_FLOW_OK:True",
+                 })
+        {
+            Assert.Contains(result.ProofLines, line => string.Equals(line, requiredProofLine, StringComparison.Ordinal));
+        }
         Assert.Contains(result.MetricLines, line => line.Contains("startup_ms", StringComparison.Ordinal));
         Assert.Contains(result.MetricLines, line => line.Contains("command_latency_ms", StringComparison.Ordinal));
     }
@@ -205,8 +222,11 @@ public sealed class DemoCapabilityShowcaseTests
                 && group.Size == new GraphSize(292, 446)
                 && group.ExtraPadding == default);
         var lightSurface = Assert.Single(viewModel.Editor.Session.Queries.GetNodeSurfaceSnapshots(), snapshot => snapshot.NodeId == "light");
+        var lightNode = Assert.IsType<NodeViewModel>(viewModel.Editor.FindNode("light"));
         Assert.Equal(GraphNodeExpansionState.Collapsed, lightSurface.ExpansionState);
-        Assert.Equal("parameter-editors", lightSurface.ActiveTier.Key);
+        Assert.Equal("details", lightSurface.ActiveTier.Key);
+        Assert.True(lightNode.SurfaceMeasurement.HeightToRevealAdditionalInputs > lightNode.Height);
+        Assert.True(lightNode.SurfaceMeasurement.WidthToRevealInlineEditors > lightNode.Width);
         Assert.Contains(
             canvas!.GetVisualDescendants().OfType<Border>(),
             border => string.Equals(

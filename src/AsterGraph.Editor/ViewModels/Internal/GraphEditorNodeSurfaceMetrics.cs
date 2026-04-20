@@ -25,6 +25,15 @@ internal static class GraphEditorNodeSurfaceMetrics
             Math.Max(size.Width, MinimumNodeWidth),
             Math.Max(size.Height, CalculateRequiredHeight(inputCount, outputCount)));
 
+    internal static GraphSize NormalizePersistedSize(GraphSize size, GraphEditorNodeSurfaceMeasurement measurement)
+    {
+        ArgumentNullException.ThrowIfNull(measurement);
+
+        return new GraphSize(
+            Math.Max(size.Width, measurement.BaselineSize.Width),
+            Math.Max(size.Height, measurement.BaselineSize.Height));
+    }
+
     internal static double CalculateRenderedHeight(
         GraphSize persistedSize,
         GraphEditorNodeSurfaceTierSnapshot activeTier,

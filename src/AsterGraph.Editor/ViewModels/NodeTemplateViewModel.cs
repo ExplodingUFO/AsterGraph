@@ -1,5 +1,6 @@
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Core.Models;
+using AsterGraph.Editor.Runtime;
 
 namespace AsterGraph.Editor.ViewModels;
 
@@ -20,10 +21,10 @@ public sealed class NodeTemplateViewModel
         Category = definition.Category;
         Subtitle = definition.Subtitle;
         Description = definition.Description ?? string.Empty;
+        var contentPlan = GraphEditorNodeSurfacePlanner.Create(definition);
         Size = GraphEditorNodeSurfaceMetrics.NormalizePersistedSize(
             new GraphSize(definition.DefaultWidth, definition.DefaultHeight),
-            definition.InputPorts.Count,
-            definition.OutputPorts.Count);
+            GraphEditorNodeSurfaceMeasurer.Measure(contentPlan));
         AccentHex = definition.AccentHex;
     }
 

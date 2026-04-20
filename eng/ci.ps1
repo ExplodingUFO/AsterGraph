@@ -28,6 +28,7 @@ $hostSamplePackedProofPath = Join-Path $proofArtifactsRoot 'hostsample-packed.tx
 $hostSampleNet10PackedProofPath = Join-Path $proofArtifactsRoot 'hostsample-net10-packed.txt'
 $packageSmokeProofPath = Join-Path $proofArtifactsRoot 'package-smoke.txt'
 $scaleSmokeProofPath = Join-Path $proofArtifactsRoot 'scale-smoke.txt'
+$demoProofPath = Join-Path $proofArtifactsRoot 'demo-proof.txt'
 $dotnetCliHome = Join-Path $repoRoot '.dotnet-cli-home'
 $coverageRunSettingsPath = Join-Path $repoRoot 'tests/coverage.runsettings'
 $coverageReportScriptPath = Join-Path $repoRoot 'eng/coverage-report.ps1'
@@ -39,6 +40,7 @@ $helloWorldProject = 'tools/AsterGraph.HelloWorld/AsterGraph.HelloWorld.csproj'
 $helloWorldAvaloniaProject = 'tools/AsterGraph.HelloWorld.Avalonia/AsterGraph.HelloWorld.Avalonia.csproj'
 $packageSmokeProject = 'tools/AsterGraph.PackageSmoke/AsterGraph.PackageSmoke.csproj'
 $scaleSmokeProject = 'tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj'
+$demoProject = 'src/AsterGraph.Demo/AsterGraph.Demo.csproj'
 $editorTestsProject = 'tests/AsterGraph.Editor.Tests/AsterGraph.Editor.Tests.csproj'
 $consumerSampleTestsProject = 'tests/AsterGraph.ConsumerSample.Tests/AsterGraph.ConsumerSample.Tests.csproj'
 $scaleSmokeTestsProject = 'tests/AsterGraph.ScaleSmoke.Tests/AsterGraph.ScaleSmoke.Tests.csproj'
@@ -647,6 +649,39 @@ function Invoke-ScaleSmoke {
   ) -CapturePath $scaleSmokeProofPath
 }
 
+function Invoke-DemoProof {
+  Write-Host ''
+  Write-Host '### Run Demo usability proof' -ForegroundColor Yellow
+
+  Invoke-DotNet -Arguments (@(
+    'build',
+    (Resolve-ProjectPath -RelativePath $demoProject),
+    '-c',
+    $Configuration,
+    '--framework',
+    'net9.0',
+    '--no-restore',
+    '--nologo',
+    '-v',
+    'minimal'
+  ) + $singleProcessBuildArguments + $buildStabilityProperties)
+
+  Invoke-DotNetCapture -Arguments @(
+    'run',
+    '--project',
+    (Resolve-ProjectPath -RelativePath $demoProject),
+    '-c',
+    $Configuration,
+    '--framework',
+    'net9.0',
+    '--no-build',
+    '--no-restore',
+    '--nologo',
+    '--',
+    '--proof'
+  ) -CapturePath $demoProofPath
+}
+
 function Invoke-CoverageValidation {
   Reset-Directory -Path $coverageResultsRoot
   Ensure-Directory -Path (Split-Path -Parent $coverageOutputPath)
@@ -720,6 +755,9 @@ function Invoke-PrereleaseNotesValidation {
     'PUBLIC_REPO_HYGIENE_OK:True',
     'HOST_SAMPLE_OK:True',
     'CONSUMER_SAMPLE_OK:True',
+    'DEMO_OK:True',
+    'NON_OBSCURING_EDITING_OK:True',
+    'VISUAL_SEMANTICS_OK:True',
     'HOST_SAMPLE_NET10_OK:True',
     'PACKAGE_SMOKE_OK:True',
     'SCALE_TIER_BUDGET:',
@@ -748,12 +786,14 @@ function Invoke-ContractValidation {
     Invoke-RestoreProjects -Projects @(
       $hostSampleProject,
       $consumerSampleProject,
+      $demoProject,
       $editorTestsProject
     )
   }
 
   Invoke-HostSample
   Invoke-ConsumerSampleProof
+  Invoke-DemoProof
 
   Write-Host ''
   Write-Host '### Run focused contract and proof regression surface' -ForegroundColor Yellow

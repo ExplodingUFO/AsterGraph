@@ -76,7 +76,8 @@ internal sealed class NodeCanvasConnectionSceneRenderer
                 context,
                 GetPortAnchor(context, sourceNode, sourcePort),
                 target,
-                connection);
+                connection,
+                sourcePort);
         }
 
         if (context.ViewModel.HasPendingConnection
@@ -102,6 +103,7 @@ internal sealed class NodeCanvasConnectionSceneRenderer
                     string.Empty,
                     "pending",
                     context.ViewModel.PendingSourcePort.AccentHex),
+                context.ViewModel.PendingSourcePort,
                 isPreview: true);
         }
     }
@@ -179,6 +181,7 @@ internal sealed class NodeCanvasConnectionSceneRenderer
         GraphPoint start,
         GraphPoint end,
         ConnectionViewModel connection,
+        PortViewModel? sourcePort = null,
         bool isPreview = false)
     {
         if (context.ConnectionLayer is null || context.ViewModel is null)
@@ -187,6 +190,8 @@ internal sealed class NodeCanvasConnectionSceneRenderer
         }
 
         var connectionStyle = context.ResolveConnectionStyle(connection);
+        var focusKind = context.ViewModel.InteractionFocus.GetConnectionFocusKind(connection);
+        var hasInspectionFocus = context.ViewModel.InteractionFocus.HasInspection;
         var curve = ConnectionPathBuilder.Build(start, end);
         var path = new global::Avalonia.Controls.Shapes.Path
         {
@@ -195,8 +200,14 @@ internal sealed class NodeCanvasConnectionSceneRenderer
                 $"C {curve.Control1.X:0.##},{curve.Control1.Y:0.##} " +
                 $"{curve.Control2.X:0.##},{curve.Control2.Y:0.##} " +
                 $"{curve.End.X:0.##},{curve.End.Y:0.##}"),
-            Stroke = BrushFactory.Solid(connection.AccentHex, isPreview ? connectionStyle.PreviewStrokeOpacity : connectionStyle.StrokeOpacity),
-            StrokeThickness = isPreview ? connectionStyle.PreviewThickness : connectionStyle.Thickness,
+            Stroke = BrushFactory.Solid(
+                connection.AccentHex,
+                isPreview
+                    ? connectionStyle.PreviewStrokeOpacity
+                    : ResolveStrokeOpacity(connectionStyle, focusKind, hasInspectionFocus)),
+            StrokeThickness = isPreview
+                ? connectionStyle.PreviewThickness
+                : ResolveStrokeThickness(connectionStyle, focusKind),
             StrokeLineCap = PenLineCap.Round,
         };
         context.ConnectionLayer.Children.Add(path);
@@ -207,18 +218,32 @@ internal sealed class NodeCanvasConnectionSceneRenderer
         }
 
         var midpoint = new Point((curve.Start.X + curve.End.X) / 2, (curve.Start.Y + curve.End.Y) / 2);
+        var typeToken = sourcePort is null ? string.Empty : GraphTypeCueFormatter.FormatPortToken(sourcePort);
+        var displayText = GetDisplayedChipText(connection, connection.NoteText, typeToken, focusKind);
 
         var chip = new Border
         {
-            Background = BrushFactory.Solid(connectionStyle.LabelBackgroundHex, connectionStyle.LabelBackgroundOpacity),
-            BorderBrush = BrushFactory.Solid(connection.AccentHex, connectionStyle.LabelBorderOpacity),
+            Background = BrushFactory.Solid(
+                connectionStyle.LabelBackgroundHex,
+                ResolveLabelBackgroundOpacity(connectionStyle, focusKind, hasInspectionFocus)),
+            BorderBrush = BrushFactory.Solid(
+                connection.AccentHex,
+                ResolveLabelBorderOpacity(connectionStyle, focusKind, hasInspectionFocus)),
             BorderThickness = new Thickness(connectionStyle.LabelBorderThickness),
             CornerRadius = new CornerRadius(connectionStyle.LabelCornerRadius),
             Padding = new Thickness(connectionStyle.LabelHorizontalPadding, connectionStyle.LabelVerticalPadding),
             Focusable = true,
-            Child = CreateLabelBlock(connectionStyle, GetDisplayedChipText(connection, connection.NoteText)),
+            Child = CreateLabelBlock(connectionStyle, displayText),
         };
-        AutomationProperties.SetName(chip, $"{GetDisplayedChipText(connection, connection.NoteText)} connection");
+        AutomationProperties.SetName(chip, $"{displayText} connection");
+        if (!string.IsNullOrWhiteSpace(connection.Label) && !string.Equals(displayText, connection.Label, StringComparison.Ordinal))
+        {
+            ToolTip.SetTip(chip, connection.Label);
+        }
+        else
+        {
+            ToolTip.SetTip(chip, null);
+        }
         chip.KeyDown += (_, args) =>
         {
             if (string.IsNullOrWhiteSpace(connection.TargetNodeId))
@@ -268,9 +293,19 @@ internal sealed class NodeCanvasConnectionSceneRenderer
 
             void RestoreLabel(string? noteText)
             {
-                var displayText = GetDisplayedChipText(connection, noteText);
-                chip.Child = CreateLabelBlock(connectionStyle, displayText);
-                AutomationProperties.SetName(chip, $"{displayText} connection");
+                var restoredText = GetDisplayedChipText(connection, noteText, typeToken, focusKind);
+                chip.Child = CreateLabelBlock(connectionStyle, restoredText);
+                AutomationProperties.SetName(chip, $"{restoredText} connection");
+                if (!string.IsNullOrWhiteSpace(connection.Label)
+                    && !string.Equals(restoredText, connection.Label, StringComparison.Ordinal)
+                    && string.IsNullOrWhiteSpace(noteText))
+                {
+                    ToolTip.SetTip(chip, connection.Label);
+                }
+                else
+                {
+                    ToolTip.SetTip(chip, null);
+                }
             }
 
             void Complete(bool commit)
@@ -317,6 +352,52 @@ internal sealed class NodeCanvasConnectionSceneRenderer
         context.ConnectionLayer.Children.Add(chip);
     }
 
+    private static double ResolveStrokeOpacity(
+        ConnectionStyleOptions connectionStyle,
+        GraphEditorConnectionFocusKind focusKind,
+        bool hasInspectionFocus)
+        => focusKind switch
+        {
+            GraphEditorConnectionFocusKind.Editing => Math.Max(connectionStyle.StrokeOpacity, 0.98d),
+            GraphEditorConnectionFocusKind.Inspected => Math.Max(connectionStyle.StrokeOpacity, 0.86d),
+            _ when hasInspectionFocus => Math.Min(connectionStyle.StrokeOpacity, 0.24d),
+            _ => connectionStyle.StrokeOpacity,
+        };
+
+    private static double ResolveStrokeThickness(
+        ConnectionStyleOptions connectionStyle,
+        GraphEditorConnectionFocusKind focusKind)
+        => focusKind switch
+        {
+            GraphEditorConnectionFocusKind.Editing => connectionStyle.Thickness + 1.5d,
+            GraphEditorConnectionFocusKind.Inspected => connectionStyle.Thickness + 0.75d,
+            _ => connectionStyle.Thickness,
+        };
+
+    private static double ResolveLabelBackgroundOpacity(
+        ConnectionStyleOptions connectionStyle,
+        GraphEditorConnectionFocusKind focusKind,
+        bool hasInspectionFocus)
+        => focusKind switch
+        {
+            GraphEditorConnectionFocusKind.Editing => Math.Max(connectionStyle.LabelBackgroundOpacity, 0.94d),
+            GraphEditorConnectionFocusKind.Inspected => Math.Max(connectionStyle.LabelBackgroundOpacity, 0.84d),
+            _ when hasInspectionFocus => Math.Min(connectionStyle.LabelBackgroundOpacity, 0.22d),
+            _ => connectionStyle.LabelBackgroundOpacity,
+        };
+
+    private static double ResolveLabelBorderOpacity(
+        ConnectionStyleOptions connectionStyle,
+        GraphEditorConnectionFocusKind focusKind,
+        bool hasInspectionFocus)
+        => focusKind switch
+        {
+            GraphEditorConnectionFocusKind.Editing => Math.Max(connectionStyle.LabelBorderOpacity, 0.98d),
+            GraphEditorConnectionFocusKind.Inspected => Math.Max(connectionStyle.LabelBorderOpacity, 0.88d),
+            _ when hasInspectionFocus => Math.Min(connectionStyle.LabelBorderOpacity, 0.24d),
+            _ => connectionStyle.LabelBorderOpacity,
+        };
+
     private static TextBlock CreateLabelBlock(ConnectionStyleOptions connectionStyle, string text)
         => new()
         {
@@ -325,8 +406,24 @@ internal sealed class NodeCanvasConnectionSceneRenderer
             Foreground = BrushFactory.Solid(connectionStyle.LabelForegroundHex, connectionStyle.LabelForegroundOpacity),
         };
 
-    private static string GetDisplayedChipText(ConnectionViewModel connection, string? noteText)
-        => string.IsNullOrWhiteSpace(noteText)
-            ? connection.Label
-            : noteText.Trim();
+    private static string GetDisplayedChipText(
+        ConnectionViewModel connection,
+        string? noteText,
+        string typeToken,
+        GraphEditorConnectionFocusKind focusKind)
+    {
+        if (!string.IsNullOrWhiteSpace(noteText))
+        {
+            return noteText.Trim();
+        }
+
+        if (string.IsNullOrWhiteSpace(typeToken))
+        {
+            return connection.Label;
+        }
+
+        return focusKind == GraphEditorConnectionFocusKind.None || string.IsNullOrWhiteSpace(connection.Label)
+            ? typeToken
+            : $"{typeToken} · {connection.Label}";
+    }
 }

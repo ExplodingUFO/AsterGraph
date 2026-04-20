@@ -28,6 +28,12 @@
 - the four-package SDK boundary
 - kernel/session-first runtime ownership
 - default Avalonia shell plus standalone surfaces
+- v1.23 graph-surface usability proof markers:
+  - `COMMAND_SURFACE_OK:True`
+  - `TIERED_NODE_SURFACE_OK:True`
+  - `FIXED_GROUP_FRAME_OK:True`
+  - `NON_OBSCURING_EDITING_OK:True`
+  - `VISUAL_SEMANTICS_OK:True`
 - v1.21 semantic graph composition proof markers:
   - `COMPOSITE_SCOPE_OK:True`
   - `EDGE_NOTE_OK:True`

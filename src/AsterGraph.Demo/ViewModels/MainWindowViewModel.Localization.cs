@@ -284,12 +284,34 @@ public partial class MainWindowViewModel
         {
             ["editor.menu.canvas.addNode"] = "添加节点",
             ["editor.inspector.title.none"] = "请选择一个节点",
+            ["editor.inspector.chrome.title"] = "检查器",
+            ["editor.inspector.section.connections"] = "连接关系",
+            ["editor.inspector.section.inputs"] = "输入端口",
+            ["editor.inspector.section.outputs"] = "输出端口",
+            ["editor.inspector.section.upstream"] = "上游依赖",
+            ["editor.inspector.section.downstream"] = "下游依赖",
+            ["editor.inspector.section.parameters"] = "参数编辑",
+            ["editor.inspector.section.parameters.intro"] = "以下控件直接编辑当前节点参数。",
+            ["editor.inspector.section.parameters.surface"] = "详细参数编辑固定在检查器中，避免遮挡节点端口和连线。",
+            ["editor.inspector.section.parameters.guidance"] = "使用搜索过滤参数、折叠分组，并在需要时恢复默认值。",
+            ["editor.inspector.section.parameters.search"] = "搜索参数、分组或提示信息",
         };
 
         private static readonly IReadOnlyDictionary<string, string> EnglishValues = new Dictionary<string, string>(StringComparer.Ordinal)
         {
             ["editor.menu.canvas.addNode"] = "Add Node",
             ["editor.inspector.title.none"] = "Select a node",
+            ["editor.inspector.chrome.title"] = "Inspector",
+            ["editor.inspector.section.connections"] = "Connections",
+            ["editor.inspector.section.inputs"] = "Inputs",
+            ["editor.inspector.section.outputs"] = "Outputs",
+            ["editor.inspector.section.upstream"] = "Upstream",
+            ["editor.inspector.section.downstream"] = "Downstream",
+            ["editor.inspector.section.parameters"] = "Parameter Editing",
+            ["editor.inspector.section.parameters.intro"] = "Use these controls to edit the current node parameters directly.",
+            ["editor.inspector.section.parameters.surface"] = "Detailed parameter editing stays in the inspector so ports and edges remain visible.",
+            ["editor.inspector.section.parameters.guidance"] = "Use search to filter parameters, collapse groups, and reset defaults when needed.",
+            ["editor.inspector.section.parameters.search"] = "Search parameters, groups, or help",
         };
 
         public string GetString(string key, string fallback)

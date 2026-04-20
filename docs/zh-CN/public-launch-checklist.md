@@ -34,6 +34,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framew
 - `artifacts/proof/public-repo-hygiene.txt`
 - `artifacts/proof/hostsample-packed.txt`
 - `artifacts/proof/consumer-sample.txt`
+- `artifacts/proof/demo-proof.txt`
 - `artifacts/proof/hostsample-net10-packed.txt`
 - `artifacts/proof/package-smoke.txt`
 - `artifacts/proof/scale-smoke.txt`
@@ -45,6 +46,9 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framew
 - `PUBLIC_REPO_HYGIENE_OK:True`
 - `HOST_SAMPLE_OK:True`
 - `CONSUMER_SAMPLE_OK:True`
+- `DEMO_OK:True`
+- `NON_OBSCURING_EDITING_OK:True`
+- `VISUAL_SEMANTICS_OK:True`
 - `HOST_SAMPLE_NET10_OK:True`
 - `PACKAGE_SMOKE_OK:True`
 - `SCALE_PERFORMANCE_BUDGET_OK:baseline:True:...`

@@ -4,6 +4,7 @@ using AsterGraph.Core.Compatibility;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Catalog;
 using AsterGraph.Editor.Hosting;
+using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.ViewModels;
 using System.Linq;
 using Xunit;
@@ -53,7 +54,8 @@ public sealed class NodeSurfaceNormalizationTests
         session.Commands.AddNode(DefinitionId, new GraphPoint(320, 180));
 
         var created = Assert.Single(session.Queries.CreateDocumentSnapshot().Nodes);
-        Assert.Equal(220d, created.Size.Width);
+        var measurement = GraphEditorNodeSurfaceMeasurer.Measure(GraphEditorNodeSurfacePlanner.Create(Assert.Single(catalog.Definitions)));
+        Assert.Equal(measurement.BaselineSize.Width, created.Size.Width);
         Assert.Equal(GraphEditorNodeSurfaceMetrics.CalculateRequiredHeight(3, 0), created.Size.Height);
     }
 

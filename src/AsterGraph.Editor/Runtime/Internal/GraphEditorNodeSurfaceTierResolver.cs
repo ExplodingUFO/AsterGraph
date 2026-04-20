@@ -50,6 +50,67 @@ internal static class GraphEditorNodeSurfaceTierResolver
     internal static GraphEditorNodeSurfaceTierSnapshot ResolveActiveTier(
         GraphSize size,
         GraphEditorBehaviorOptions behaviorOptions,
+        INodeDefinition? definition,
+        GraphEditorNodeSurfaceMeasurement measurement)
+    {
+        ArgumentNullException.ThrowIfNull(behaviorOptions);
+        ArgumentNullException.ThrowIfNull(measurement);
+
+        var hasExplicitProfile = definition?.SurfaceTierProfile is not null
+            || !ReferenceEquals(behaviorOptions.View.NodeSurfaceTierProfile, NodeSurfaceTierProfile.Default);
+        if (hasExplicitProfile)
+        {
+            return ResolveActiveTier(size, ResolveProfile(behaviorOptions, definition));
+        }
+
+        return ResolveAdaptiveDefaultTier(size, measurement);
+    }
+
+    internal static GraphEditorNodeSurfaceTierSnapshot ResolveActiveTier(
+        GraphSize size,
+        GraphEditorBehaviorOptions behaviorOptions,
         INodeDefinition? definition)
-        => ResolveActiveTier(size, ResolveProfile(behaviorOptions, definition));
+        => ResolveActiveTier(size, behaviorOptions, definition, GraphEditorNodeSurfaceMeasurement.Default);
+
+    private static GraphEditorNodeSurfaceTierSnapshot ResolveAdaptiveDefaultTier(
+        GraphSize size,
+        GraphEditorNodeSurfaceMeasurement measurement)
+    {
+        var tiers = new List<NodeSurfaceTierDefinition>
+        {
+            new("compact"),
+            new(
+                "details",
+                minWidth: measurement.BaselineSize.Width,
+                minHeight: measurement.BaselineSize.Height),
+        };
+
+        if (measurement.SupportsParameterSummaries)
+        {
+            tiers.Add(new NodeSurfaceTierDefinition(
+                "parameter-rail",
+                minWidth: measurement.WidthToRevealParameterSummaries,
+                minHeight: measurement.BaselineSize.Height,
+                visibleSectionKeys:
+                [
+                    NodeSurfaceSectionKeys.ParameterRail,
+                ]));
+        }
+
+        if (measurement.SupportsInlineEditors)
+        {
+            tiers.Add(new NodeSurfaceTierDefinition(
+                "parameter-editors",
+                minWidth: measurement.WidthToRevealInlineEditors,
+                minHeight: measurement.BaselineSize.Height,
+                visibleSectionKeys:
+                [
+                    NodeSurfaceSectionKeys.Description,
+                    NodeSurfaceSectionKeys.ParameterRail,
+                    NodeSurfaceSectionKeys.ParameterEditors,
+                ]));
+        }
+
+        return ResolveActiveTier(size, new NodeSurfaceTierProfile(tiers));
+    }
 }

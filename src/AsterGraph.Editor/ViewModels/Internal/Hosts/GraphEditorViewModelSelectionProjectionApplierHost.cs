@@ -57,6 +57,9 @@ public sealed partial class GraphEditorViewModel
             _owner._selectionCaptionText = selectionCaptionText;
         }
 
+        void IGraphEditorSelectionProjectionApplierHost.SynchronizeInteractionFocus()
+            => _owner.SynchronizeInteractionFocus();
+
         void IGraphEditorSelectionProjectionApplierHost.RaiseParameterProjectionPropertyChanges()
         {
             _owner.OnPropertyChanged(nameof(GraphEditorViewModel.HasEditableParameters));

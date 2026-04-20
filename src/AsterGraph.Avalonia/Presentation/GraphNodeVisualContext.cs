@@ -68,6 +68,7 @@ public sealed class GraphNodeVisualContext
         Node = node;
         StyleOptions = styleOptions;
         NodeParameterEditorRegistry = nodeParameterEditorRegistry;
+        InteractionFocus = editor.InteractionFocus;
         FocusCanvas = focusCanvas;
         BeginNodeDrag = beginNodeDrag;
         BeginNodeResize = beginNodeResize;
@@ -148,6 +149,11 @@ public sealed class GraphNodeVisualContext
     /// Optional replaceable registry used by node-side parameter editor surfaces.
     /// </summary>
     public INodeParameterEditorRegistry? NodeParameterEditorRegistry { get; }
+
+    /// <summary>
+    /// Current host-facing interaction focus snapshot.
+    /// </summary>
+    public GraphEditorInteractionFocusState InteractionFocus { get; }
 
     /// <summary>
     /// 请求将焦点切回画布。

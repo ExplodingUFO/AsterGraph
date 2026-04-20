@@ -7,6 +7,7 @@ using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Threading;
+using Avalonia.VisualTree;
 using AsterGraph.Abstractions.Styling;
 using AsterGraph.Avalonia.Presentation;
 using AsterGraph.Avalonia.Styling;
@@ -202,6 +203,13 @@ internal sealed class NodeCanvasSceneHost
             ClipToBounds = true,
         };
         AutomationProperties.SetName(root, $"{group.Title} group");
+        root.PointerPressed += (_, args) =>
+        {
+            if (TryBeginGroupResize(root, group, args))
+            {
+                return;
+            }
+        };
 
         var layout = new Grid
         {
@@ -229,6 +237,11 @@ internal sealed class NodeCanvasSceneHost
         AutomationProperties.SetName(header, $"{group.Title} group header");
         header.PointerPressed += (_, args) =>
         {
+            if (TryBeginGroupResize(root, group, args))
+            {
+                return;
+            }
+
             if (args.Source is Thumb)
             {
                 return;
@@ -363,7 +376,7 @@ internal sealed class NodeCanvasSceneHost
         visual.HeaderControl.Background = BrushFactory.Solid(
             isDropTarget ? "#4A3917" : isSelected ? "#173241" : "#132131",
             0.96);
-        visual.TitleText.Text = $"{group.Title} ({group.NodeIds.Count})";
+        visual.TitleText.Text = FormatGroupHeaderTitle(group);
         visual.TitleText.Foreground = BrushFactory.Solid(isSelected ? "#F4FFFC" : "#D8EEF3", 0.98);
         visual.BodyBorder.IsVisible = !group.IsCollapsed;
         visual.BodyBorder.Height = Math.Max(
@@ -409,6 +422,87 @@ internal sealed class NodeCanvasSceneHost
             handledEventsToo: true);
 
         return thumb;
+    }
+
+    private bool TryBeginGroupResize(
+        Border surface,
+        GraphEditorNodeGroupSnapshot group,
+        PointerPressedEventArgs args)
+    {
+        if (args.Source is Thumb || !TryResolveGroupResizeEdge(surface, group, args, out var edge))
+        {
+            return false;
+        }
+
+        _host.BeginGroupResize(group.Id, group.Title, edge, args);
+        return args.Handled;
+    }
+
+    private static string FormatGroupHeaderTitle(GraphEditorNodeGroupSnapshot group)
+        => group.Title;
+
+    private static bool TryResolveGroupResizeEdge(
+        Border surface,
+        GraphEditorNodeGroupSnapshot group,
+        PointerPressedEventArgs args,
+        out NodeCanvasGroupResizeEdge edge)
+    {
+        edge = default;
+        var point = ResolveSurfacePoint(surface, group, args);
+        var width = double.IsNaN(surface.Width) ? surface.Bounds.Width : surface.Width;
+        var height = double.IsNaN(surface.Height) ? surface.Bounds.Height : surface.Height;
+        if (width <= 0d || height <= 0d)
+        {
+            return false;
+        }
+
+        var thickness = NodeCanvasGroupChromeMetrics.ResizeHandleThickness;
+        var nearLeftEdge = point.X <= thickness;
+        var nearTopEdge = point.Y <= thickness;
+        var nearRightEdge = point.X >= width - thickness;
+        var nearBottomEdge = point.Y >= height - thickness;
+
+        if (nearLeftEdge)
+        {
+            edge = NodeCanvasGroupResizeEdge.Left;
+            return true;
+        }
+
+        if (nearTopEdge)
+        {
+            edge = NodeCanvasGroupResizeEdge.Top;
+            return true;
+        }
+
+        if (nearRightEdge)
+        {
+            edge = NodeCanvasGroupResizeEdge.Right;
+            return true;
+        }
+
+        if (nearBottomEdge)
+        {
+            edge = NodeCanvasGroupResizeEdge.Bottom;
+            return true;
+        }
+
+        return false;
+    }
+
+    private static Point ResolveSurfacePoint(
+        Border surface,
+        GraphEditorNodeGroupSnapshot group,
+        PointerPressedEventArgs args)
+    {
+        if (surface.Parent is Visual parent)
+        {
+            var parentPoint = args.GetPosition(parent);
+            return new Point(
+                parentPoint.X - group.Position.X,
+                parentPoint.Y - group.Position.Y);
+        }
+
+        return args.GetPosition(surface);
     }
 
     private GraphEditorNodeGroupSnapshot? ResolveCurrentGroupSnapshot(string groupId)

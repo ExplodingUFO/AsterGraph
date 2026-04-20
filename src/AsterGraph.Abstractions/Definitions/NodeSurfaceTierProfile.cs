@@ -38,18 +38,13 @@ public sealed record NodeSurfaceTierProfile
         new NodeSurfaceTierDefinition(
             "details",
             minWidth: 220d,
-            minHeight: 150d,
-            visibleSectionKeys:
-            [
-                NodeSurfaceSectionKeys.Description,
-            ]),
+            minHeight: 150d),
         new NodeSurfaceTierDefinition(
             "parameter-rail",
             minWidth: 320d,
             minHeight: 210d,
             visibleSectionKeys:
             [
-                NodeSurfaceSectionKeys.Description,
                 NodeSurfaceSectionKeys.ParameterRail,
             ]),
         new NodeSurfaceTierDefinition(

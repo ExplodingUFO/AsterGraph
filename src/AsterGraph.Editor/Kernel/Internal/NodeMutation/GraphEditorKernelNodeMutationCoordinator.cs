@@ -6,6 +6,7 @@ using AsterGraph.Editor.Configuration;
 using AsterGraph.Editor.Diagnostics;
 using AsterGraph.Editor.Events;
 using AsterGraph.Editor.Models;
+using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.ViewModels;
 
 namespace AsterGraph.Editor.Kernel.Internal;
@@ -76,10 +77,11 @@ internal sealed class GraphEditorKernelNodeMutationCoordinator
 
         var position = preferredWorldPosition ?? _host.GetViewportCenter();
         var offset = 26 * (_host.Document.Nodes.Count % 4);
+        var contentPlan = GraphEditorNodeSurfacePlanner.Create(definition);
+        var measurement = GraphEditorNodeSurfaceMeasurer.Measure(contentPlan);
         var normalizedSize = GraphEditorNodeSurfaceMetrics.NormalizePersistedSize(
             new GraphSize(definition.DefaultWidth, definition.DefaultHeight),
-            definition.InputPorts.Count,
-            definition.OutputPorts.Count);
+            measurement);
         var node = new GraphNode(
             _host.CreateNodeId(definitionId),
             definition.DisplayName,

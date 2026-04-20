@@ -106,6 +106,10 @@ internal sealed class NodeCanvasViewModelObserver
                 _host.UpdateSelectionState();
                 _host.RenderConnections();
                 break;
+            case nameof(GraphEditorViewModel.InteractionFocus):
+                _host.UpdateSelectionState();
+                _host.RenderConnections();
+                break;
             case nameof(GraphEditorViewModel.StyleOptions):
                 _host.ApplySelectionAdornerStyle();
                 _host.ApplyGuideAdornerStyle();

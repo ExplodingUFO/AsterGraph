@@ -2,6 +2,7 @@ using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.VisualTree;
 using AsterGraph.Abstractions.Definitions;
@@ -12,6 +13,7 @@ using AsterGraph.Avalonia.Presentation;
 using AsterGraph.Core.Compatibility;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Catalog;
+using AsterGraph.Editor.Localization;
 using AsterGraph.Editor.ViewModels;
 using Xunit;
 
@@ -40,12 +42,12 @@ public sealed class GraphInspectorStandaloneTests
                     .Select(block => block.Text)
                     .Where(text => !string.IsNullOrWhiteSpace(text)));
 
-            Assert.Contains("Connections", allText);
-            Assert.Contains("Inputs", allText);
-            Assert.Contains("Outputs", allText);
-            Assert.Contains("Upstream", allText);
-            Assert.Contains("Downstream", allText);
-            Assert.Contains("参数编辑", allText);
+            Assert.Contains(editor.InspectorConnectionsTitle, allText);
+            Assert.Contains(editor.InspectorInputsTitle, allText);
+            Assert.Contains(editor.InspectorOutputsTitle, allText);
+            Assert.Contains(editor.InspectorUpstreamTitle, allText);
+            Assert.Contains(editor.InspectorDownstreamTitle, allText);
+            Assert.Contains(editor.InspectorParametersTitle, allText);
             Assert.Contains("可编辑", allText);
             Assert.Contains("编辑值", allText);
             Assert.Single(editor.SelectedNodeParameters);
@@ -92,8 +94,95 @@ public sealed class GraphInspectorStandaloneTests
             Assert.NotEmpty(statePills);
             Assert.Contains("参数编辑", allText);
             Assert.Contains("以下控件直接编辑当前节点参数。", allText);
+            Assert.Contains("详细参数编辑固定在检查器中，避免遮挡节点端口和连线。", allText);
             Assert.Contains("可编辑", allText);
             Assert.Contains("编辑值", allText);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
+    public void StandaloneInspector_FocusingParameterEditor_UpdatesInteractionFocus()
+    {
+        var editor = CreateAuthoringEditor();
+        editor.SelectSingleNode(editor.Nodes[0], updateStatus: false);
+        var (window, inspector) = CreateInspectorWindow(editor);
+
+        try
+        {
+            RefreshInspectorLayout(window, inspector);
+
+            var thresholdEditorHost = inspector.GetVisualDescendants()
+                .OfType<NodeParameterEditorHost>()
+                .First(host => string.Equals(host.Parameter?.Key, "threshold", StringComparison.Ordinal));
+            var parameterInput = thresholdEditorHost.GetVisualDescendants()
+                .OfType<TextBox>()
+                .First();
+            parameterInput.RaiseEvent(new GotFocusEventArgs
+            {
+                RoutedEvent = InputElement.GotFocusEvent,
+                Source = parameterInput,
+            });
+
+            Assert.Equal(editor.SelectedNode!.Id, editor.InteractionFocus.InspectedNodeId);
+            Assert.Equal(editor.SelectedNode!.Id, editor.InteractionFocus.EditingNodeId);
+            Assert.Equal("threshold", editor.InteractionFocus.EditingParameterKey);
+
+            var searchBox = inspector.FindControl<TextBox>("PART_ParameterSearchBox");
+            Assert.NotNull(searchBox);
+            searchBox!.RaiseEvent(new GotFocusEventArgs
+            {
+                RoutedEvent = InputElement.GotFocusEvent,
+                Source = searchBox,
+            });
+
+            Assert.Equal(editor.SelectedNode!.Id, editor.InteractionFocus.InspectedNodeId);
+            Assert.Null(editor.InteractionFocus.EditingNodeId);
+            Assert.Null(editor.InteractionFocus.EditingParameterKey);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
+    public void StandaloneInspector_LocalizationProvider_LocalizesStockSectionChrome()
+    {
+        var editor = CreateEditor();
+        editor.SetLocalizationProvider(new DictionaryLocalizationProvider(new Dictionary<string, string>(StringComparer.Ordinal)
+        {
+            ["editor.inspector.section.connections"] = "连接关系",
+            ["editor.inspector.section.inputs"] = "输入端口",
+            ["editor.inspector.section.outputs"] = "输出端口",
+            ["editor.inspector.section.upstream"] = "上游依赖",
+            ["editor.inspector.section.downstream"] = "下游依赖",
+            ["editor.inspector.section.parameters"] = "参数编辑",
+            ["editor.inspector.section.parameters.intro"] = "以下控件直接编辑当前节点参数。",
+            ["editor.inspector.section.parameters.surface"] = "详细参数编辑固定在检查器中，避免遮挡节点端口和连线。",
+        }));
+        editor.SelectSingleNode(editor.Nodes[0], updateStatus: false);
+        var (window, inspector) = CreateInspectorWindow(editor);
+
+        try
+        {
+            var allText = string.Join(
+                "\n",
+                inspector.GetVisualDescendants()
+                    .OfType<TextBlock>()
+                    .Select(block => block.Text)
+                    .Where(text => !string.IsNullOrWhiteSpace(text)));
+
+            Assert.Contains("连接关系", allText);
+            Assert.Contains("输入端口", allText);
+            Assert.Contains("输出端口", allText);
+            Assert.Contains("参数编辑", allText);
+            Assert.DoesNotContain("Connections", allText, StringComparison.Ordinal);
+            Assert.DoesNotContain("Inputs", allText, StringComparison.Ordinal);
+            Assert.DoesNotContain("Outputs", allText, StringComparison.Ordinal);
         }
         finally
         {
@@ -450,6 +539,12 @@ public sealed class GraphInspectorStandaloneTests
     {
         inspector.Measure(new Size(window.Width, window.Height));
         inspector.Arrange(new Rect(0, 0, window.Width, window.Height));
+    }
+
+    private sealed class DictionaryLocalizationProvider(IReadOnlyDictionary<string, string> values) : IGraphLocalizationProvider
+    {
+        public string GetString(string key, string fallback)
+            => values.TryGetValue(key, out var localized) ? localized : fallback;
     }
 
     private static List<string> GetVisibleParameterKeys(GraphInspectorView inspector)

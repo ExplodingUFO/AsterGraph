@@ -147,6 +147,12 @@ public sealed partial class NodeViewModel : ObservableObject
         []);
 
     /// <summary>
+    /// Measured surface thresholds derived from definition facts and current projection policy.
+    /// </summary>
+    [ObservableProperty]
+    private GraphEditorNodeSurfaceMeasurement surfaceMeasurement = GraphEditorNodeSurfaceMeasurement.Default;
+
+    /// <summary>
     /// Indicates whether the active tier exposes parameter authoring affordances.
     /// </summary>
     public bool AllowsParameterAuthoring
@@ -300,6 +306,12 @@ public sealed partial class NodeViewModel : ObservableObject
     /// </summary>
     public void UpdateActiveSurfaceTier(GraphEditorNodeSurfaceTierSnapshot activeTier)
         => ActiveSurfaceTier = activeTier ?? throw new ArgumentNullException(nameof(activeTier));
+
+    /// <summary>
+    /// Updates the measured surface thresholds used by renderers and resize interactions.
+    /// </summary>
+    public void UpdateSurfaceMeasurement(GraphEditorNodeSurfaceMeasurement measurement)
+        => SurfaceMeasurement = measurement ?? throw new ArgumentNullException(nameof(measurement));
 
     /// <summary>
     /// 更新节点展示状态快照。

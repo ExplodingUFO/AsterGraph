@@ -415,8 +415,8 @@ public partial class MainWindowViewModel
                 T("分层节点表面", "Tiered Surface Layout"),
                 T("把固定组框、几何驱动 membership、宽高分层和节点旁路参数 rail 收敛为同一条 node surface 路径。", "Unify fixed group frames, geometry-driven membership, width/height tiers, and node-side parameter rails through one shared node-surface route."),
                 T(
-                    "Demo 现在默认展示固定 Terrain Authoring 组框、命中 parameter-editors tier 的 Lighting Mix 卡片，以及“未连接时走本地参数值、连接后以上游值为准”的单一值来源规则。",
-                    "The demo now shows a fixed Terrain Authoring group frame, a Lighting Mix card that resolves to the parameter-editors tier, and the single-source rule where unconnected inputs use local parameter values while connected inputs defer to upstream values."),
+                    "Demo 现在默认展示固定 Terrain Authoring 组框、处于基线 details tier 的 Lighting Mix 卡片，以及“未连接时走本地参数值、连接后以上游值为准”的单一值来源规则。",
+                    "The demo now shows a fixed Terrain Authoring group frame, a Lighting Mix card that starts in the baseline details tier, and the single-source rule where unconnected inputs use local parameter values while connected inputs defer to upstream values."),
                 [
                     T("所属层：AsterGraph.Editor node-surface contract + AsterGraph.Avalonia stock canvas。", "Layer: AsterGraph.Editor node-surface contract plus the stock AsterGraph.Avalonia canvas."),
                     T("宿主入口：GetNodeSurfaceSnapshots()、GetNodeGroupSnapshots()、TrySetNodeSize(...)、TrySetNodeGroupSize(...)、TrySetNodeGroupMemberships(...)。", "Host entry: GetNodeSurfaceSnapshots(), GetNodeGroupSnapshots(), TrySetNodeSize(...), TrySetNodeGroupSize(...), and TrySetNodeGroupMemberships(...)."),
@@ -424,8 +424,8 @@ public partial class MainWindowViewModel
                 ],
                 [
                     T("默认图包含固定大小的 Terrain Authoring 组框，节点完全进入内容区会入组，拖出内容区会脱组。", "The default graph includes a fixed-size Terrain Authoring group frame; nodes attach when fully inside the content area and detach when dragged back out."),
-                    T("Lighting Mix 节点默认以 430x260 打开，直接命中 parameter-editors tier。", "The Lighting Mix node starts at 430x260, so it resolves directly to the parameter-editors tier."),
-                    T("连接中的 Pulse 输入会覆盖本地参数值，未连接的 Rim Mask 会在节点旁路 rail 中继续编辑。", "The connected Pulse input overrides its local parameter value while the unconnected Rim Mask stays editable in the node-side rail."),
+                    T("Lighting Mix 节点默认以 430x260 打开，先停在 details tier；继续加宽并拉高后才会进入 parameter-editors tier。", "The Lighting Mix node starts at 430x260 in the details tier, then moves into the parameter-editors tier only after the surface is widened and raised further."),
+                    T("连接中的 Pulse 输入会覆盖本地参数值，未连接的 Rim Mask 会在宽度足够时出现在节点旁路 rail 中继续编辑。", "The connected Pulse input overrides its local parameter value while the unconnected Rim Mask remains editable through the node-side rail once the surface is wide enough."),
                     T("Lighting Mix 的输入参数声明了 template key，宿主可以通过 registry 定向替换这些节点旁路参数编辑器。", "Lighting Mix input parameters declare template keys so hosts can replace those node-side parameter editors through the registry seam."),
                 ]),
         ];

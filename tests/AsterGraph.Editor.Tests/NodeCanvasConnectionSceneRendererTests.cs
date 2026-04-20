@@ -96,7 +96,8 @@ public sealed class NodeCanvasConnectionSceneRendererTests
 
             var chip = Assert.Single(hostedScene.ConnectionLayer.Children.OfType<Border>());
             var label = Assert.IsType<TextBlock>(chip.Child);
-            Assert.Equal("Float Flow", label.Text);
+            Assert.Equal("FLOAT", label.Text);
+            Assert.Equal("Float Flow", ToolTip.GetTip(chip));
 
             var args = new ContextRequestedEventArgs
             {
@@ -177,6 +178,36 @@ public sealed class NodeCanvasConnectionSceneRendererTests
             Assert.Equal(
                 "Preview branch",
                 Assert.Single(editor.CreateDocumentSnapshot().Connections).Presentation?.NoteText);
+        }
+        finally
+        {
+            hostedScene.Window.Close();
+        }
+    }
+
+    [AvaloniaFact]
+    public void RenderConnections_RelatedInspectionFocus_UsesEmphasizedConnectionStroke()
+    {
+        var renderer = new NodeCanvasConnectionSceneRenderer();
+        var editor = CreateEditor(includeConnection: true);
+        editor.SelectSingleNode(editor.FindNode(TargetNodeId)!, updateStatus: false);
+        var hostedScene = CreateHostedScene(editor);
+
+        try
+        {
+            renderer.RenderConnections(CreateSceneContext(
+                editor,
+                hostedScene.ConnectionLayer,
+                hostedScene.NodeLayer,
+                hostedScene.CoordinateRoot,
+                hostedScene.NodeVisuals));
+
+            var connectionPath = Assert.Single(hostedScene.ConnectionLayer.Children.OfType<global::Avalonia.Controls.Shapes.Path>());
+            var chip = Assert.Single(hostedScene.ConnectionLayer.Children.OfType<Border>());
+            var chipLabel = Assert.IsType<TextBlock>(chip.Child);
+            Assert.True(connectionPath.StrokeThickness > GraphEditorStyleOptions.Default.Connection.Thickness);
+            Assert.Contains("FLOAT", chipLabel.Text, StringComparison.Ordinal);
+            Assert.Contains("Float Flow", chipLabel.Text, StringComparison.Ordinal);
         }
         finally
         {

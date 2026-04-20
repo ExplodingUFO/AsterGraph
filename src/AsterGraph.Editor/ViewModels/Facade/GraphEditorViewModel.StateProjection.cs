@@ -195,6 +195,9 @@ public sealed partial class GraphEditorViewModel
         _ => LocalizeFormat("editor.inspector.title.multiple", "{0} Nodes Selected", SelectedNodes.Count),
     };
 
+    public string InspectorChromeTitle
+        => LocalizeText("editor.inspector.chrome.title", "检查器");
+
     /// <summary>
     /// 获取基于当前选择生成的检查器分类文本。
     /// </summary>
@@ -233,12 +236,21 @@ public sealed partial class GraphEditorViewModel
         ? LocalizeText("editor.inspector.inputs.none", "Select a node to inspect its input ports.")
         : _selectionProjection.FormatPorts(SelectedNode.Inputs);
 
+    public string InspectorConnectionsTitle
+        => LocalizeText("editor.inspector.section.connections", "连接关系");
+
+    public string InspectorInputsTitle
+        => LocalizeText("editor.inspector.section.inputs", "输入端口");
+
     /// <summary>
     /// 获取当前主选节点的输出端口摘要文本。
     /// </summary>
     public string InspectorOutputs => SelectedNode is null
         ? LocalizeText("editor.inspector.outputs.none", "Select a node to inspect its output ports.")
         : _selectionProjection.FormatPorts(SelectedNode.Outputs);
+
+    public string InspectorOutputsTitle
+        => LocalizeText("editor.inspector.section.outputs", "输出端口");
 
     /// <summary>
     /// 获取当前主选节点的连线统计摘要文本。
@@ -254,12 +266,41 @@ public sealed partial class GraphEditorViewModel
         ? LocalizeText("editor.inspector.upstream.none", "Select a node to see upstream dependencies.")
         : _inspectorUpstreamText;
 
+    public string InspectorUpstreamTitle
+        => LocalizeText("editor.inspector.section.upstream", "上游依赖");
+
     /// <summary>
     /// 获取当前主选节点的下游消费者摘要文本。
     /// </summary>
     public string InspectorDownstream => SelectedNode is null
         ? LocalizeText("editor.inspector.downstream.none", "Select a node to see downstream consumers.")
         : _inspectorDownstreamText;
+
+    public string InspectorDownstreamTitle
+        => LocalizeText("editor.inspector.section.downstream", "下游依赖");
+
+    public string InspectorParametersTitle
+        => LocalizeText("editor.inspector.section.parameters", "参数编辑");
+
+    public string InspectorParametersIntro
+        => LocalizeText(
+            "editor.inspector.section.parameters.intro",
+            "以下控件直接编辑当前节点参数。");
+
+    public string InspectorParametersSurfaceHint
+        => LocalizeText(
+            "editor.inspector.section.parameters.surface",
+            "详细参数编辑固定在检查器中，避免遮挡节点端口和连线。");
+
+    public string InspectorParametersGuidance
+        => LocalizeText(
+            "editor.inspector.section.parameters.guidance",
+            "使用搜索过滤参数、折叠分组，并在需要时恢复默认值。");
+
+    public string InspectorParametersSearchWatermark
+        => LocalizeText(
+            "editor.inspector.section.parameters.search",
+            "搜索参数、分组或提示信息");
 
     /// <summary>
     /// 获取面向状态栏和检查器的当前选择摘要文本。
