@@ -179,6 +179,10 @@
             <TextBlock Text="以下控件直接编辑当前节点参数。"
                        FontSize="{DynamicResource AsterGraph.InspectorCaptionFontSize}"
                        Foreground="{DynamicResource AsterGraph.BodyBrush}" />
+            <TextBlock Text="详细参数编辑固定在检查器中，避免遮挡节点端口和连线。"
+                       FontSize="{DynamicResource AsterGraph.InspectorCaptionFontSize}"
+                       TextWrapping="Wrap"
+                       Foreground="{DynamicResource AsterGraph.BodyBrush}" />
             <Border Classes="astergraph-parameter-guidance">
               <TextBlock Text="使用搜索过滤参数、折叠分组，并在需要时恢复默认值。"
                          FontSize="{DynamicResource AsterGraph.InspectorCaptionFontSize}"

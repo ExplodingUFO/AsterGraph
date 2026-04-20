@@ -312,17 +312,49 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
     {
         var node = context.Node;
         var nodeStyle = GetNodeCardStyle(context);
+        var isSelected = node.IsSelected;
+        var isInspected = context.InteractionFocus.IsNodeInspected(node.Id);
+        var isEditing = context.InteractionFocus.IsNodeEditing(node.Id);
 
         state.Border.Width = node.Width;
-        state.Border.Background = BrushFactory.Solid(node.IsSelected ? nodeStyle.SelectedBackgroundHex : nodeStyle.BackgroundHex);
-        state.Border.BorderBrush = BrushFactory.Solid(node.IsSelected ? node.AccentHex : nodeStyle.BorderHex);
-        state.Header.Background = BrushFactory.Solid(node.AccentHex, node.IsSelected ? nodeStyle.SelectedHeaderOpacity : nodeStyle.HeaderOpacity);
-        state.Border.BorderThickness = new Thickness(node.IsSelected ? nodeStyle.SelectedBorderThickness : nodeStyle.BorderThickness);
+        state.Border.Background = BrushFactory.Solid(
+            isSelected || isInspected
+                ? nodeStyle.SelectedBackgroundHex
+                : nodeStyle.BackgroundHex,
+            isEditing ? 0.98d : 1d);
+        state.Border.BorderBrush = BrushFactory.Solid(
+            isSelected || isInspected
+                ? node.AccentHex
+                : nodeStyle.BorderHex,
+            isEditing ? 1d : 0.98d);
+        state.Header.Background = BrushFactory.Solid(
+            node.AccentHex,
+            isEditing
+                ? 0.96d
+                : isInspected
+                    ? 0.82d
+                    : isSelected
+                        ? nodeStyle.SelectedHeaderOpacity
+                        : nodeStyle.HeaderOpacity);
+        state.Border.BorderThickness = new Thickness(
+            isEditing
+                ? nodeStyle.SelectedBorderThickness + 1d
+                : isInspected || isSelected
+                    ? nodeStyle.SelectedBorderThickness
+                    : nodeStyle.BorderThickness);
+        SetStateClass(state.Border, "astergraph-node-selected", isSelected);
+        SetStateClass(state.Border, "astergraph-node-inspected", isInspected);
+        SetStateClass(state.Border, "astergraph-node-editing", isEditing);
         state.Subtitle.Text = node.DisplaySubtitle;
         state.Description.Text = node.DisplayDescription;
         state.Description.IsVisible = node.ActiveSurfaceTier.ShowsSection(NodeSurfaceSectionKeys.Description);
 
         state.BadgePanel.Children.Clear();
+        foreach (var focusBadge in CreateFocusBadges(node, isInspected, isEditing))
+        {
+            state.BadgePanel.Children.Add(focusBadge);
+        }
+
         foreach (var badge in node.Presentation.TopRightBadges)
         {
             var badgeBorder = new Border
@@ -404,7 +436,13 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
 
         state.ParameterRail.Width = ResolveParameterRailWidth(node);
         state.ParameterRail.Background = BrushFactory.Solid("#0F1A26", 0.94);
-        state.ParameterRail.BorderBrush = BrushFactory.Solid(node.AccentHex, node.IsSelected ? 0.84 : 0.56);
+        state.ParameterRail.BorderBrush = BrushFactory.Solid(
+            node.AccentHex,
+            context.InteractionFocus.IsNodeEditing(node.Id)
+                ? 0.94d
+                : node.IsSelected || context.InteractionFocus.IsNodeInspected(node.Id)
+                    ? 0.84d
+                    : 0.56d);
 
         foreach (var endpoint in node.ParameterEndpoints)
         {
@@ -795,6 +833,55 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
             ? context.StyleOptions.Port
             : context.StyleOptions.PortOverrides.FirstOrDefault(overrideStyle => overrideStyle.TypeId == port.TypeId)?.Style
               ?? context.StyleOptions.Port;
+
+    private static IEnumerable<Border> CreateFocusBadges(NodeViewModel node, bool isInspected, bool isEditing)
+    {
+        if (isEditing)
+        {
+            yield return CreateFocusBadge("Editing", node.AccentHex, "Inspector editing focus");
+        }
+        else if (isInspected)
+        {
+            yield return CreateFocusBadge("Inspect", node.AccentHex, "Primary inspected node");
+        }
+    }
+
+    private static Border CreateFocusBadge(string text, string accentHex, string toolTip)
+    {
+        var badge = new Border
+        {
+            CornerRadius = new CornerRadius(999),
+            BorderThickness = new Thickness(1),
+            BorderBrush = BrushFactory.SolidSafe(accentHex, "#FFFFFF", 0.88),
+            Background = BrushFactory.SolidSafe(accentHex, "#FFFFFF", 0.24),
+            Padding = new Thickness(7, 2),
+            Child = new TextBlock
+            {
+                Text = text,
+                FontSize = 10,
+                FontWeight = FontWeight.SemiBold,
+                Foreground = BrushFactory.Solid("#FFFFFF", 0.95),
+                TextWrapping = TextWrapping.NoWrap,
+            },
+        };
+        ToolTip.SetTip(badge, toolTip);
+        return badge;
+    }
+
+    private static void SetStateClass(StyledElement element, string className, bool isActive)
+    {
+        if (isActive)
+        {
+            if (!element.Classes.Contains(className))
+            {
+                element.Classes.Add(className);
+            }
+
+            return;
+        }
+
+        element.Classes.Remove(className);
+    }
 
     private sealed record DefaultNodeVisualState(
         Border Border,

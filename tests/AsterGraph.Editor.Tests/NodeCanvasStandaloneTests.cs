@@ -624,6 +624,72 @@ public sealed class NodeCanvasStandaloneTests
     }
 
     [AvaloniaFact]
+    public void StandaloneCanvas_PrimarySelectionProjectsDistinctSelectedAndInspectedNodeClasses()
+    {
+        var editor = CreateEditor();
+        var source = editor.FindNode(SourceNodeId)!;
+        var target = editor.FindNode(TargetNodeId)!;
+        editor.SetSelection([source, target], target, status: null);
+        var (window, canvas) = CreateStandaloneCanvasWindow(editor);
+
+        try
+        {
+            var sourceSurface = canvas.GetVisualDescendants()
+                .OfType<Border>()
+                .Single(control => string.Equals(
+                    AutomationProperties.GetName(control),
+                    "Canvas Source node",
+                    StringComparison.Ordinal));
+            var targetSurface = canvas.GetVisualDescendants()
+                .OfType<Border>()
+                .Single(control => string.Equals(
+                    AutomationProperties.GetName(control),
+                    "Canvas Target node",
+                    StringComparison.Ordinal));
+
+            Assert.Contains("astergraph-node-selected", sourceSurface.Classes);
+            Assert.DoesNotContain("astergraph-node-inspected", sourceSurface.Classes);
+            Assert.DoesNotContain("astergraph-node-editing", sourceSurface.Classes);
+
+            Assert.Contains("astergraph-node-selected", targetSurface.Classes);
+            Assert.Contains("astergraph-node-inspected", targetSurface.Classes);
+            Assert.DoesNotContain("astergraph-node-editing", targetSurface.Classes);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
+    public void StandaloneCanvas_InspectorEditingFocus_ProjectsEditingNodeClass()
+    {
+        var editor = CreateEditor();
+        var target = editor.FindNode(TargetNodeId)!;
+        editor.SelectSingleNode(target, updateStatus: false);
+        editor.SetInspectorEditingParameter("gain");
+        var (window, canvas) = CreateStandaloneCanvasWindow(editor);
+
+        try
+        {
+            var targetSurface = canvas.GetVisualDescendants()
+                .OfType<Border>()
+                .Single(control => string.Equals(
+                    AutomationProperties.GetName(control),
+                    "Canvas Target node",
+                    StringComparison.Ordinal));
+
+            Assert.Contains("astergraph-node-selected", targetSurface.Classes);
+            Assert.Contains("astergraph-node-inspected", targetSurface.Classes);
+            Assert.Contains("astergraph-node-editing", targetSurface.Classes);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
     public void AdaptiveSurface_DefaultSize_ShowsRequiredParameterEndpointOnly()
     {
         var editor = CreateAdaptiveSurfaceEditor();

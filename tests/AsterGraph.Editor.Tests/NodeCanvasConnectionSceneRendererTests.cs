@@ -184,6 +184,32 @@ public sealed class NodeCanvasConnectionSceneRendererTests
         }
     }
 
+    [AvaloniaFact]
+    public void RenderConnections_RelatedInspectionFocus_UsesEmphasizedConnectionStroke()
+    {
+        var renderer = new NodeCanvasConnectionSceneRenderer();
+        var editor = CreateEditor(includeConnection: true);
+        editor.SelectSingleNode(editor.FindNode(TargetNodeId)!, updateStatus: false);
+        var hostedScene = CreateHostedScene(editor);
+
+        try
+        {
+            renderer.RenderConnections(CreateSceneContext(
+                editor,
+                hostedScene.ConnectionLayer,
+                hostedScene.NodeLayer,
+                hostedScene.CoordinateRoot,
+                hostedScene.NodeVisuals));
+
+            var connectionPath = Assert.Single(hostedScene.ConnectionLayer.Children.OfType<global::Avalonia.Controls.Shapes.Path>());
+            Assert.True(connectionPath.StrokeThickness > GraphEditorStyleOptions.Default.Connection.Thickness);
+        }
+        finally
+        {
+            hostedScene.Window.Close();
+        }
+    }
+
     private static NodeCanvasConnectionSceneContext CreateSceneContext(
         GraphEditorViewModel editor,
         Canvas connectionLayer,

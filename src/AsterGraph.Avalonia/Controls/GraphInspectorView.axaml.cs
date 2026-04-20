@@ -4,8 +4,11 @@ using System.ComponentModel;
 using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
+using Avalonia.Threading;
+using Avalonia.VisualTree;
 using AsterGraph.Avalonia.Presentation;
 using AsterGraph.Editor.ViewModels;
 
@@ -54,6 +57,16 @@ public partial class GraphInspectorView : UserControl
         InitializeComponent();
         _stockContent = Content;
         InitializeStockControls();
+        AddHandler(
+            InputElement.GotFocusEvent,
+            HandleInspectorFocusChanged,
+            RoutingStrategies.Tunnel | RoutingStrategies.Bubble,
+            handledEventsToo: true);
+        AddHandler(
+            InputElement.LostFocusEvent,
+            HandleInspectorFocusChanged,
+            RoutingStrategies.Tunnel | RoutingStrategies.Bubble,
+            handledEventsToo: true);
     }
 
     /// <summary>
@@ -171,6 +184,7 @@ public partial class GraphInspectorView : UserControl
             parameter.PropertyChanged -= HandleParameterPropertyChanged;
         }
 
+        _subscribedEditor.SetInspectorEditingParameter(null);
         _subscribedEditor = null;
     }
 
@@ -227,6 +241,48 @@ public partial class GraphInspectorView : UserControl
             ?.ResetToDefault();
 
         RefreshParameterSurface();
+    }
+
+    private void HandleInspectorFocusChanged(object? sender, RoutedEventArgs e)
+    {
+        if (e.RoutedEvent == InputElement.GotFocusEvent)
+        {
+            UpdateInspectorEditingFocus(e.Source as IInputElement);
+            return;
+        }
+
+        Dispatcher.UIThread.Post(
+            () => UpdateInspectorEditingFocus(),
+            DispatcherPriority.Input);
+    }
+
+    private void UpdateInspectorEditingFocus(IInputElement? focusSource = null)
+        => Editor?.SetInspectorEditingParameter(
+            ResolveFocusedParameterKey(
+                TopLevel.GetTopLevel(this)?.FocusManager?.GetFocusedElement()
+                ?? focusSource));
+
+    private static string? ResolveFocusedParameterKey(IInputElement? focusedElement)
+    {
+        AvaloniaObject? current = focusedElement as AvaloniaObject;
+        while (current is not null)
+        {
+            if (current is Border border
+                && border.Classes.Contains("astergraph-parameter-card")
+                && border.Tag is string parameterKey)
+            {
+                return parameterKey;
+            }
+
+            current = current switch
+            {
+                Visual visual => visual.GetVisualParent() as AvaloniaObject,
+                StyledElement styledElement => styledElement.Parent as AvaloniaObject,
+                _ => null,
+            };
+        }
+
+        return null;
     }
 
     private void RefreshParameterSurface()

@@ -2,6 +2,7 @@ using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.VisualTree;
 using AsterGraph.Abstractions.Definitions;
@@ -92,8 +93,54 @@ public sealed class GraphInspectorStandaloneTests
             Assert.NotEmpty(statePills);
             Assert.Contains("参数编辑", allText);
             Assert.Contains("以下控件直接编辑当前节点参数。", allText);
+            Assert.Contains("详细参数编辑固定在检查器中，避免遮挡节点端口和连线。", allText);
             Assert.Contains("可编辑", allText);
             Assert.Contains("编辑值", allText);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
+    public void StandaloneInspector_FocusingParameterEditor_UpdatesInteractionFocus()
+    {
+        var editor = CreateAuthoringEditor();
+        editor.SelectSingleNode(editor.Nodes[0], updateStatus: false);
+        var (window, inspector) = CreateInspectorWindow(editor);
+
+        try
+        {
+            RefreshInspectorLayout(window, inspector);
+
+            var thresholdEditorHost = inspector.GetVisualDescendants()
+                .OfType<NodeParameterEditorHost>()
+                .First(host => string.Equals(host.Parameter?.Key, "threshold", StringComparison.Ordinal));
+            var parameterInput = thresholdEditorHost.GetVisualDescendants()
+                .OfType<TextBox>()
+                .First();
+            parameterInput.RaiseEvent(new GotFocusEventArgs
+            {
+                RoutedEvent = InputElement.GotFocusEvent,
+                Source = parameterInput,
+            });
+
+            Assert.Equal(editor.SelectedNode!.Id, editor.InteractionFocus.InspectedNodeId);
+            Assert.Equal(editor.SelectedNode!.Id, editor.InteractionFocus.EditingNodeId);
+            Assert.Equal("threshold", editor.InteractionFocus.EditingParameterKey);
+
+            var searchBox = inspector.FindControl<TextBox>("PART_ParameterSearchBox");
+            Assert.NotNull(searchBox);
+            searchBox!.RaiseEvent(new GotFocusEventArgs
+            {
+                RoutedEvent = InputElement.GotFocusEvent,
+                Source = searchBox,
+            });
+
+            Assert.Equal(editor.SelectedNode!.Id, editor.InteractionFocus.InspectedNodeId);
+            Assert.Null(editor.InteractionFocus.EditingNodeId);
+            Assert.Null(editor.InteractionFocus.EditingParameterKey);
         }
         finally
         {

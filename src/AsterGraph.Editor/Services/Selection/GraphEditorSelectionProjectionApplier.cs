@@ -32,6 +32,8 @@ internal interface IGraphEditorSelectionProjectionApplierHost
         string inspectorDownstreamText,
         string selectionCaptionText);
 
+    void SynchronizeInteractionFocus();
+
     void RaiseParameterProjectionPropertyChanges();
 }
 
@@ -73,6 +75,7 @@ internal sealed class GraphEditorSelectionProjectionApplier
             _host.SelectedParameters.Add(parameter);
         }
 
+        _host.SynchronizeInteractionFocus();
         _host.RaiseParameterProjectionPropertyChanges();
     }
 }

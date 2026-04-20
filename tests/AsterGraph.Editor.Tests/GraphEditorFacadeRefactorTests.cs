@@ -540,6 +540,33 @@ public sealed class GraphEditorFacadeRefactorTests
     }
 
     [Fact]
+    public void InteractionFocus_FollowsPrimarySelectionAndClearsInvalidEditingState()
+    {
+        var definitionId = new NodeDefinitionId("tests.editor.facade.interaction-focus");
+        var editor = CreateEditorWithSharedDefinitionNodes(definitionId);
+        var first = editor.Nodes[0];
+        var second = editor.Nodes[1];
+
+        editor.SetSelection([first], first, status: null);
+
+        Assert.Equal(first.Id, editor.InteractionFocus.InspectedNodeId);
+        Assert.Null(editor.InteractionFocus.EditingNodeId);
+        Assert.Null(editor.InteractionFocus.EditingParameterKey);
+
+        editor.SetInspectorEditingParameter("threshold");
+
+        Assert.Equal(first.Id, editor.InteractionFocus.InspectedNodeId);
+        Assert.Equal(first.Id, editor.InteractionFocus.EditingNodeId);
+        Assert.Equal("threshold", editor.InteractionFocus.EditingParameterKey);
+
+        editor.SetSelection([first, second], second, status: null);
+
+        Assert.Equal(second.Id, editor.InteractionFocus.InspectedNodeId);
+        Assert.Null(editor.InteractionFocus.EditingNodeId);
+        Assert.Null(editor.InteractionFocus.EditingParameterKey);
+    }
+
+    [Fact]
     public void ConnectionsCollectionChange_RefreshesInspectorProjectionForSelectedNode()
     {
         var definitionId = new NodeDefinitionId("tests.editor.facade.connection-refresh");
