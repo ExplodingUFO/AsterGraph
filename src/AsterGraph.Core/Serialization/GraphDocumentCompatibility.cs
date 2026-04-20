@@ -32,8 +32,10 @@ internal static class GraphDocumentCompatibility
         var root = document.RootElement;
         if (!root.TryGetProperty(nameof(GraphDocumentSerializer.GraphDocumentFilePayload.SchemaVersion), out var versionElement))
         {
-            var legacy = JsonSerializer.Deserialize<GraphDocument>(json, options);
-            return NormalizeDocument(legacy ?? throw new InvalidOperationException("Failed to deserialize legacy graph document."), null);
+            var legacyDocumentPayload = JsonSerializer.Deserialize<LegacyUnversionedGraphDocumentPayload>(json, options);
+            return NormalizeDocument(
+                legacyDocumentPayload?.ToDocument() ?? throw new InvalidOperationException("Failed to deserialize legacy graph document."),
+                null);
         }
 
         var schemaVersion = versionElement.GetInt32();
@@ -157,6 +159,17 @@ internal static class GraphDocumentCompatibility
 
     private sealed record LegacyGraphDocumentFilePayload(
         int SchemaVersion,
+        string Title,
+        string Description,
+        IReadOnlyList<GraphNode> Nodes,
+        IReadOnlyList<GraphConnection> Connections,
+        IReadOnlyList<GraphNodeGroup>? Groups = null)
+    {
+        public GraphDocument ToDocument()
+            => new(Title, Description, Nodes, Connections, Groups);
+    }
+
+    private sealed record LegacyUnversionedGraphDocumentPayload(
         string Title,
         string Description,
         IReadOnlyList<GraphNode> Nodes,

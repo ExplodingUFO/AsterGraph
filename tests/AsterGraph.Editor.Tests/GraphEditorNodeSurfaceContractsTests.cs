@@ -41,6 +41,8 @@ public sealed class GraphEditorNodeSurfaceContractsTests
         Assert.NotNull(typeof(GraphEditorNodeSurfaceSnapshot).GetProperty(nameof(GraphEditorNodeSurfaceSnapshot.ActiveTier)));
         Assert.NotNull(typeof(GraphEditorNodeSurfaceSnapshot).GetProperty(nameof(GraphEditorNodeSurfaceSnapshot.ExpansionState)));
         Assert.NotNull(typeof(GraphEditorNodeSurfaceSnapshot).GetProperty(nameof(GraphEditorNodeSurfaceSnapshot.GroupId)));
+        Assert.NotNull(typeof(NodeViewModel).GetProperty("ExpansionState"));
+        Assert.NotNull(typeof(NodeViewModel).GetProperty("IsExpanded"));
 
         AssertMethod(commandsType, nameof(IGraphEditorCommands.TrySetNodeWidth), typeof(string), typeof(double), typeof(bool));
         Assert.Equal(

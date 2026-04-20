@@ -21,6 +21,19 @@ public sealed record GraphDocument
     public const string DefaultRootGraphId = "graph-root";
 
     /// <summary>
+    /// Retained constructor shape for legacy hosts and plugins that target the original root-only document model.
+    /// </summary>
+    public GraphDocument(
+        string Title,
+        string Description,
+        IReadOnlyList<GraphNode> Nodes,
+        IReadOnlyList<GraphConnection> Connections,
+        IReadOnlyList<GraphNodeGroup>? Groups = null)
+        : this(Title, Description, Nodes, Connections, Groups, DefaultRootGraphId, null)
+    {
+    }
+
+    /// <summary>
     /// Creates a graph document snapshot.
     /// </summary>
     public GraphDocument(
@@ -28,8 +41,8 @@ public sealed record GraphDocument
         string description,
         IReadOnlyList<GraphNode> nodes,
         IReadOnlyList<GraphConnection> connections,
-        IReadOnlyList<GraphNodeGroup>? groups = null,
-        string rootGraphId = DefaultRootGraphId,
+        IReadOnlyList<GraphNodeGroup>? groups,
+        string rootGraphId,
         IReadOnlyList<GraphScope>? graphScopes = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(title);

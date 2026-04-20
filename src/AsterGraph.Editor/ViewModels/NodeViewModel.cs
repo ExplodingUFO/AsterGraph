@@ -125,6 +125,18 @@ public sealed partial class NodeViewModel : ObservableObject
     public string? GroupId => Surface.GroupId;
 
     /// <summary>
+    /// Retained compatibility property for presenters that still read the legacy node-card expansion state.
+    /// </summary>
+    [Obsolete("Compatibility-only retained property. Prefer ActiveSurfaceTier or Surface.ExpansionState for hosted UI decisions.")]
+    public GraphNodeExpansionState ExpansionState => Surface.ExpansionState;
+
+    /// <summary>
+    /// Retained compatibility property for presenters that still branch on the legacy expanded/collapsed card state.
+    /// </summary>
+    [Obsolete("Compatibility-only retained property. Prefer ActiveSurfaceTier or Surface.ExpansionState for hosted UI decisions.")]
+    public bool IsExpanded => ExpansionState == GraphNodeExpansionState.Expanded;
+
+    /// <summary>
     /// 当前解析得到的节点表面 tier。
     /// </summary>
     [ObservableProperty]
@@ -317,6 +329,8 @@ public sealed partial class NodeViewModel : ObservableObject
     partial void OnSurfaceChanged(GraphNodeSurfaceState value)
     {
         OnPropertyChanged(nameof(GroupId));
+        OnPropertyChanged("ExpansionState");
+        OnPropertyChanged("IsExpanded");
     }
 
     partial void OnActiveSurfaceTierChanged(GraphEditorNodeSurfaceTierSnapshot value)

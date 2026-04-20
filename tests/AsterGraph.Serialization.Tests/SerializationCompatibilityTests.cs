@@ -206,6 +206,14 @@ public sealed class SerializationCompatibilityTests
         Assert.Empty(connections);
         Assert.Null(groups);
         Assert.Equal("gain", Assert.Single(nodes).Inputs[0].InlineParameterKey);
+        Assert.NotNull(typeof(GraphDocument).GetConstructor(
+        [
+            typeof(string),
+            typeof(string),
+            typeof(IReadOnlyList<GraphNode>),
+            typeof(IReadOnlyList<GraphConnection>),
+            typeof(IReadOnlyList<GraphNodeGroup>),
+        ]));
     }
 
     [Fact]
