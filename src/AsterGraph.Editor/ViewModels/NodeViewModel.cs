@@ -156,8 +156,8 @@ public sealed partial class NodeViewModel : ObservableObject
     /// Indicates whether the active tier exposes parameter authoring affordances.
     /// </summary>
     public bool AllowsParameterAuthoring
-        => ActiveSurfaceTier.ShowsSection(AsterGraph.Abstractions.Definitions.NodeSurfaceSectionKeys.ParameterRail)
-           || ActiveSurfaceTier.ShowsSection(AsterGraph.Abstractions.Definitions.NodeSurfaceSectionKeys.ParameterEditors);
+        => ActiveSurfaceTier.ShowsSection(AsterGraph.Abstractions.Definitions.NodeSurfaceSectionKeys.InputSummaries)
+           || ActiveSurfaceTier.ShowsSection(AsterGraph.Abstractions.Definitions.NodeSurfaceSectionKeys.InputEditors);
 
     [ObservableProperty]
     private double height;

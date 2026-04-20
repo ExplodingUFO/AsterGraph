@@ -432,8 +432,8 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
     private static void UpdateParameterRail(DefaultNodeVisualState state, GraphNodeVisualContext context, NodeCardStyleOptions nodeStyle, double renderedWidth)
     {
         var node = context.Node;
-        var railVisible = node.ParameterEndpoints.Count > 0 && node.ActiveSurfaceTier.ShowsSection(NodeSurfaceSectionKeys.ParameterRail);
-        var editorsVisible = railVisible && node.ActiveSurfaceTier.ShowsSection(NodeSurfaceSectionKeys.ParameterEditors);
+        var railVisible = node.ParameterEndpoints.Count > 0 && node.ActiveSurfaceTier.ShowsSection(NodeSurfaceSectionKeys.InputSummaries);
+        var editorsVisible = railVisible && node.ActiveSurfaceTier.ShowsSection(NodeSurfaceSectionKeys.InputEditors);
 
         state.ParameterRailStack.Children.Clear();
         state.ParameterRail.IsVisible = railVisible;
@@ -665,7 +665,7 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
 
     private static double ResolveParameterRailWidth(NodeViewModel node, double renderedWidth)
     {
-        var desiredWidth = node.ActiveSurfaceTier.ShowsSection(NodeSurfaceSectionKeys.ParameterEditors)
+        var desiredWidth = node.ActiveSurfaceTier.ShowsSection(NodeSurfaceSectionKeys.InputEditors)
             ? EditorParameterRailWidth
             : MinimumParameterRailWidth;
         return Math.Min(

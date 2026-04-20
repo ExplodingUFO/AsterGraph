@@ -226,7 +226,7 @@ public sealed class DemoCapabilityShowcaseTests
         Assert.Equal(GraphNodeExpansionState.Collapsed, lightSurface.ExpansionState);
         Assert.Equal("details", lightSurface.ActiveTier.Key);
         Assert.True(lightNode.SurfaceMeasurement.HeightToRevealAdditionalInputs > lightNode.Height);
-        Assert.True(lightNode.SurfaceMeasurement.WidthToRevealInlineEditors > lightNode.Width);
+        Assert.True(lightNode.SurfaceMeasurement.WidthToRevealInputEditors > lightNode.Width);
         Assert.Contains(
             canvas!.GetVisualDescendants().OfType<Border>(),
             border => string.Equals(

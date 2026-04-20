@@ -85,29 +85,29 @@ internal static class GraphEditorNodeSurfaceTierResolver
                 minHeight: measurement.BaselineSize.Height),
         };
 
-        if (measurement.SupportsParameterSummaries)
+        if (measurement.SupportsInputSummaries)
         {
             tiers.Add(new NodeSurfaceTierDefinition(
-                "parameter-rail",
-                minWidth: measurement.WidthToRevealParameterSummaries,
+                "input-summaries",
+                minWidth: measurement.WidthToRevealInputSummaries,
                 minHeight: measurement.BaselineSize.Height,
                 visibleSectionKeys:
                 [
-                    NodeSurfaceSectionKeys.ParameterRail,
+                    NodeSurfaceSectionKeys.InputSummaries,
                 ]));
         }
 
-        if (measurement.SupportsInlineEditors)
+        if (measurement.SupportsInputEditors)
         {
             tiers.Add(new NodeSurfaceTierDefinition(
-                "parameter-editors",
-                minWidth: measurement.WidthToRevealInlineEditors,
+                "input-editors",
+                minWidth: measurement.WidthToRevealInputEditors,
                 minHeight: measurement.BaselineSize.Height,
                 visibleSectionKeys:
                 [
                     NodeSurfaceSectionKeys.Description,
-                    NodeSurfaceSectionKeys.ParameterRail,
-                    NodeSurfaceSectionKeys.ParameterEditors,
+                    NodeSurfaceSectionKeys.InputSummaries,
+                    NodeSurfaceSectionKeys.InputEditors,
                 ]));
         }
 

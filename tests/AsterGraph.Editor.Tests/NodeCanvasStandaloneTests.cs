@@ -481,7 +481,7 @@ public sealed class NodeCanvasStandaloneTests
             var surface = editor.Session.Queries.GetNodeSurfaceSnapshots()
                 .Single(snapshot => snapshot.NodeId == TargetNodeId);
 
-            Assert.Equal("parameter-editors", surface.ActiveTier.Key);
+            Assert.Equal("input-editors", surface.ActiveTier.Key);
         }
         finally
         {

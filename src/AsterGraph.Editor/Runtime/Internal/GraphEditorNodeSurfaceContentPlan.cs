@@ -12,5 +12,5 @@ internal sealed record GraphEditorNodeSurfaceContentPlan(
     int OutputPortCount,
     IReadOnlyList<NodeParameterDefinition> RequiredParameters,
     IReadOnlyList<NodeParameterDefinition> OptionalParameters,
-    bool SupportsParameterSummaries,
-    bool SupportsInlineEditors);
+    bool SupportsInputSummaries,
+    bool SupportsInputEditors);
