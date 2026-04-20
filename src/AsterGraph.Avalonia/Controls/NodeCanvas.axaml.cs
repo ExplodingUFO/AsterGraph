@@ -546,6 +546,14 @@ public partial class NodeCanvas : UserControl
     private GraphPoint ApplyDragAssist(NodeCanvasDragSession dragSession, double deltaX, double deltaY)
         => _overlayCoordinator.ApplyDragAssist(dragSession, deltaX, deltaY);
 
+    private NodeCanvasGroupResizePreview ApplyGroupResizeAssist(
+        GraphEditorNodeGroupSnapshot group,
+        NodeCanvasGroupResizeEdge edge,
+        GraphPoint proposedPosition,
+        GraphSize proposedSize,
+        GraphSize minimumSize)
+        => _overlayCoordinator.ApplyGroupResizeAssist(group, edge, proposedPosition, proposedSize, minimumSize);
+
     private NodeCanvasDragSession CreateDragSession(IReadOnlyList<NodeViewModel> nodes)
         => _overlayCoordinator.CreateDragSession(nodes);
 
