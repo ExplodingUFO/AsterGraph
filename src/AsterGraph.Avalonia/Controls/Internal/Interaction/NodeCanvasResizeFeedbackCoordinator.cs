@@ -54,8 +54,7 @@ internal sealed class NodeCanvasResizeFeedbackCoordinator
             return;
         }
 
-        var world = _host.ViewModel.ScreenToWorld(new GraphPoint(currentScreenPosition.X, currentScreenPosition.Y));
-        if (TryResolveNodeHit(world, out var hit) || TryResolveGroupHit(world, out hit))
+        if (TryResolveHit(currentScreenPosition, out var hit))
         {
             Apply(hit);
             return;
@@ -84,61 +83,63 @@ internal sealed class NodeCanvasResizeFeedbackCoordinator
         ClearSession();
     }
 
-    private bool TryResolveNodeHit(GraphPoint world, out NodeCanvasResizeFeedbackHit hit)
+    private bool TryResolveHit(Point rootPoint, out NodeCanvasResizeFeedbackHit hit)
     {
         hit = default;
-        if (_host.NodeLayer is null)
+        var world = _host.ViewModel?.ScreenToWorld(new GraphPoint(rootPoint.X, rootPoint.Y));
+        if (world is null)
         {
             return false;
         }
 
-        foreach (var surface in _host.NodeLayer.Children.OfType<Control>().Reverse())
+        if (_host.NodeLayer is not null)
         {
-            if (!_host.ResizeFeedbackNodeSurfaces.TryGetValue(surface, out var node))
+            for (var index = _host.NodeLayer.Children.Count - 1; index >= 0; index--)
             {
-                continue;
-            }
+                if (_host.NodeLayer.Children[index] is not Control nodeSurface
+                    || !_host.ResizeFeedbackNodeSurfaces.TryGetValue(nodeSurface, out var node))
+                {
+                    continue;
+                }
 
-            var local = new Point(world.X - node.X, world.Y - node.Y);
-            if (local.X < 0d || local.Y < 0d || local.X > surface.Bounds.Width || local.Y > surface.Bounds.Height)
-            {
-                continue;
-            }
-
-            if (NodeCanvasResizeFeedbackResolver.TryResolveNode(surface, local, out hit))
-            {
-                return true;
+                var local = new Point(world.Value.X - node.X, world.Value.Y - node.Y);
+                if (local.X >= 0d
+                    && local.Y >= 0d
+                    && local.X <= nodeSurface.Bounds.Width
+                    && local.Y <= nodeSurface.Bounds.Height
+                    && NodeCanvasResizeFeedbackResolver.TryResolveNode(
+                        nodeSurface,
+                        local,
+                        out hit))
+                {
+                    return true;
+                }
             }
         }
 
-        return false;
-    }
-
-    private bool TryResolveGroupHit(GraphPoint world, out NodeCanvasResizeFeedbackHit hit)
-    {
-        hit = default;
-        if (_host.GroupLayer is null || _host.ViewModel is null)
+        if (_host.GroupLayer is not null)
         {
-            return false;
-        }
-
-        foreach (var surface in _host.GroupLayer.Children.OfType<Border>().Reverse())
-        {
-            if (!_host.ResizeFeedbackGroupSurfaces.TryGetValue(surface, out var groupId)
-                || !_host.ResizeFeedbackGroupSnapshots.TryGetValue(groupId, out var snapshot))
+            for (var index = _host.GroupLayer.Children.Count - 1; index >= 0; index--)
             {
-                continue;
-            }
+                if (_host.GroupLayer.Children[index] is not Border groupSurface
+                    || !_host.ResizeFeedbackGroupSurfaces.TryGetValue(groupSurface, out var groupId)
+                    || !_host.ResizeFeedbackGroupSnapshots.TryGetValue(groupId, out var snapshot))
+                {
+                    continue;
+                }
 
-            var local = new Point(world.X - snapshot.Position.X, world.Y - snapshot.Position.Y);
-            if (local.X < 0d || local.Y < 0d || local.X > surface.Bounds.Width || local.Y > surface.Bounds.Height)
-            {
-                continue;
-            }
-
-            if (NodeCanvasResizeFeedbackResolver.TryResolveGroup(surface, local, out hit))
-            {
-                return true;
+                var local = new Point(world.Value.X - snapshot.Position.X, world.Value.Y - snapshot.Position.Y);
+                if (local.X >= 0d
+                    && local.Y >= 0d
+                    && local.X <= groupSurface.Bounds.Width
+                    && local.Y <= groupSurface.Bounds.Height
+                    && NodeCanvasResizeFeedbackResolver.TryResolveGroup(
+                        groupSurface,
+                        local,
+                        out hit))
+                {
+                    return true;
+                }
             }
         }
 

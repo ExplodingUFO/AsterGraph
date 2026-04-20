@@ -248,6 +248,7 @@ public partial class NodeCanvas : UserControl
     /// <inheritdoc />
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
     {
+        ClearResizeFeedback();
         _lifecycleCoordinator.HandleDetachedFromVisualTree();
         base.OnDetachedFromVisualTree(e);
     }
@@ -271,6 +272,7 @@ public partial class NodeCanvas : UserControl
 
     private void RebuildScene()
     {
+        ClearResizeFeedback();
         _sceneHost.RebuildScene();
         RefreshResizeFeedbackNodeSurfaceIndex();
         RefreshResizeFeedbackGroupSurfaceIndex();
