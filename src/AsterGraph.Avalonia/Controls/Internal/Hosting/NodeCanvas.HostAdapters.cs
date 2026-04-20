@@ -312,9 +312,11 @@ public partial class NodeCanvas
 
         public Canvas? GroupLayer => _owner._groupLayer;
 
-        public IReadOnlyDictionary<NodeViewModel, NodeCanvasRenderedNodeVisual> NodeVisuals => _owner._nodeVisuals;
+        public IReadOnlyDictionary<Control, NodeViewModel> ResizeFeedbackNodeSurfaces => _owner._resizeFeedbackNodesBySurface;
 
-        public IReadOnlyDictionary<string, NodeCanvasRenderedGroupVisual> GroupVisuals => _owner._groupVisuals;
+        public IReadOnlyDictionary<Border, string> ResizeFeedbackGroupSurfaces => _owner._resizeFeedbackGroupsBySurface;
+
+        public IReadOnlyDictionary<string, GraphEditorNodeGroupSnapshot> ResizeFeedbackGroupSnapshots => _owner._resizeFeedbackGroupSnapshots;
 
         public IGraphResizeFeedbackPolicy? ResizeFeedbackPolicy => _owner.ResizeFeedbackPolicy;
     }

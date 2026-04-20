@@ -78,6 +78,9 @@ public partial class NodeCanvas : UserControl
 
     private readonly Dictionary<NodeViewModel, NodeCanvasRenderedNodeVisual> _nodeVisuals = new();
     private readonly Dictionary<string, NodeCanvasRenderedGroupVisual> _groupVisuals = new(StringComparer.Ordinal);
+    private readonly Dictionary<Control, NodeViewModel> _resizeFeedbackNodesBySurface = new();
+    private readonly Dictionary<Border, string> _resizeFeedbackGroupsBySurface = new();
+    private readonly Dictionary<string, GraphEditorNodeGroupSnapshot> _resizeFeedbackGroupSnapshots = new(StringComparer.Ordinal);
     private Grid? _sceneRoot;
     private Canvas? _groupLayer;
     private Canvas? _connectionLayer;
@@ -267,7 +270,11 @@ public partial class NodeCanvas : UserControl
         => _viewModelObserver.AttachViewModel(previous, current);
 
     private void RebuildScene()
-        => _sceneHost.RebuildScene();
+    {
+        _sceneHost.RebuildScene();
+        RefreshResizeFeedbackNodeSurfaceIndex();
+        RefreshResizeFeedbackGroupSurfaceIndex();
+    }
 
     private void ActivatePortFromVisual(NodeViewModel node, PortViewModel port)
     {
@@ -462,13 +469,43 @@ public partial class NodeCanvas : UserControl
         => _sceneHost.UpdateSelectionState();
 
     private void UpdateGroupVisuals()
-        => _sceneHost.UpdateGroupVisuals();
+    {
+        _sceneHost.UpdateGroupVisuals();
+        RefreshResizeFeedbackGroupSurfaceIndex();
+    }
 
     private void UpdateNodePosition(NodeViewModel node)
         => _sceneHost.UpdateNodePosition(node);
 
     private void UpdateNodeVisual(NodeViewModel node)
-        => _sceneHost.UpdateNodeVisual(node);
+    {
+        _sceneHost.UpdateNodeVisual(node);
+        RefreshResizeFeedbackNodeSurfaceIndex();
+    }
+
+    private void RefreshResizeFeedbackNodeSurfaceIndex()
+    {
+        _resizeFeedbackNodesBySurface.Clear();
+        foreach (var entry in _nodeVisuals)
+        {
+            _resizeFeedbackNodesBySurface[entry.Value.Root] = entry.Key;
+        }
+    }
+
+    private void RefreshResizeFeedbackGroupSurfaceIndex()
+    {
+        _resizeFeedbackGroupsBySurface.Clear();
+        foreach (var entry in _groupVisuals)
+        {
+            _resizeFeedbackGroupsBySurface[entry.Value.Root] = entry.Key;
+        }
+
+        _resizeFeedbackGroupSnapshots.Clear();
+        foreach (var snapshot in ViewModel?.GetNodeGroupSnapshots() ?? [])
+        {
+            _resizeFeedbackGroupSnapshots[snapshot.Id] = snapshot;
+        }
+    }
 
     private GraphPoint GetPortAnchor(NodeViewModel node, PortViewModel port)
         => _sceneHost.GetPortAnchor(node, port);

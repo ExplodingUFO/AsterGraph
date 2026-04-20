@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using AsterGraph.Avalonia.Presentation;
 using AsterGraph.Core.Models;
+using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.ViewModels;
 
 namespace AsterGraph.Avalonia.Controls.Internal;
@@ -17,9 +18,11 @@ internal interface INodeCanvasResizeFeedbackHost
 
     Canvas? GroupLayer { get; }
 
-    IReadOnlyDictionary<NodeViewModel, NodeCanvasRenderedNodeVisual> NodeVisuals { get; }
+    IReadOnlyDictionary<Control, NodeViewModel> ResizeFeedbackNodeSurfaces { get; }
 
-    IReadOnlyDictionary<string, NodeCanvasRenderedGroupVisual> GroupVisuals { get; }
+    IReadOnlyDictionary<Border, string> ResizeFeedbackGroupSurfaces { get; }
+
+    IReadOnlyDictionary<string, GraphEditorNodeGroupSnapshot> ResizeFeedbackGroupSnapshots { get; }
 
     IGraphResizeFeedbackPolicy? ResizeFeedbackPolicy { get; }
 }
@@ -89,12 +92,9 @@ internal sealed class NodeCanvasResizeFeedbackCoordinator
             return false;
         }
 
-        var nodesBySurface = _host.NodeVisuals.ToDictionary(
-            entry => entry.Value.Root,
-            entry => entry.Key);
         foreach (var surface in _host.NodeLayer.Children.OfType<Control>().Reverse())
         {
-            if (!nodesBySurface.TryGetValue(surface, out var node))
+            if (!_host.ResizeFeedbackNodeSurfaces.TryGetValue(surface, out var node))
             {
                 continue;
             }
@@ -122,15 +122,10 @@ internal sealed class NodeCanvasResizeFeedbackCoordinator
             return false;
         }
 
-        var groupsBySurface = _host.GroupVisuals.ToDictionary(
-            entry => entry.Value.Root,
-            entry => entry.Key);
-        var snapshotsById = _host.ViewModel.GetNodeGroupSnapshots()
-            .ToDictionary(group => group.Id, StringComparer.Ordinal);
         foreach (var surface in _host.GroupLayer.Children.OfType<Border>().Reverse())
         {
-            if (!groupsBySurface.TryGetValue(surface, out var groupId)
-                || !snapshotsById.TryGetValue(groupId, out var snapshot))
+            if (!_host.ResizeFeedbackGroupSurfaces.TryGetValue(surface, out var groupId)
+                || !_host.ResizeFeedbackGroupSnapshots.TryGetValue(groupId, out var snapshot))
             {
                 continue;
             }

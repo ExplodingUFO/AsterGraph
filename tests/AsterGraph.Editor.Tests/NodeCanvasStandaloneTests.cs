@@ -888,6 +888,44 @@ public sealed class NodeCanvasStandaloneTests
     }
 
     [AvaloniaFact]
+    public void NodeSurfaceHover_LeavingResizeHotspot_ClearsResizeCursor()
+    {
+        var editor = CreateEditor();
+        var target = editor.FindNode(TargetNodeId)!;
+        var (window, canvas) = CreateStandaloneCanvasWindow(editor);
+        var pointer = new global::Avalonia.Input.Pointer(1, PointerType.Mouse, isPrimary: true);
+
+        try
+        {
+            var targetSurface = canvas.GetVisualDescendants()
+                .OfType<Border>()
+                .Single(control => string.Equals(
+                    AutomationProperties.GetName(control),
+                    "Canvas Target node",
+                    StringComparison.Ordinal));
+            var edgeHoverPoint = WorldToScreenPoint(
+                canvas,
+                target.X + targetSurface.Width - 3d,
+                target.Y + (targetSurface.Height / 2d));
+            var interiorPoint = WorldToScreenPoint(
+                canvas,
+                target.X + 32d,
+                target.Y + 32d);
+
+            InvokeCanvasPointerMoved(canvas, CreatePointerMovedArgs(canvas, pointer, edgeHoverPoint, KeyModifiers.None));
+            AssertCursor(StandardCursorType.SizeWestEast, targetSurface.Cursor);
+
+            InvokeCanvasPointerMoved(canvas, CreatePointerMovedArgs(canvas, pointer, interiorPoint, KeyModifiers.None));
+
+            Assert.Null(targetSurface.Cursor);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
     public void GroupSurfaceHover_NearBottomEdge_UsesResizeCursorBeforePress()
     {
         var editor = CreateEditor();
@@ -1061,6 +1099,42 @@ public sealed class NodeCanvasStandaloneTests
 
             Assert.True(pressedArgs.Handled);
             AssertCursor(StandardCursorType.Hand, canvas.Cursor);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
+    public void BorderResizeHandles_PointerRelease_ClearsActiveResizeCursor()
+    {
+        var editor = CreateEditor();
+        var policy = new RecordingResizeFeedbackPolicy(new Cursor(StandardCursorType.Hand));
+        var (window, canvas) = CreateStandaloneCanvasWindow(
+            editor,
+            presentation: new AsterGraphPresentationOptions
+            {
+                ResizeFeedbackPolicy = policy,
+            });
+        var pointer = new global::Avalonia.Input.Pointer(1, PointerType.Mouse, isPrimary: true);
+
+        try
+        {
+            var widthThumb = canvas.GetVisualDescendants()
+                .OfType<Thumb>()
+                .Single(control => string.Equals(
+                    AutomationProperties.GetName(control),
+                    "Canvas Target width resize handle",
+                    StringComparison.Ordinal));
+            var pressedArgs = CreatePointerPressedArgs(widthThumb, canvas, pointer, new Point(655, 220), KeyModifiers.None);
+
+            widthThumb.RaiseEvent(pressedArgs);
+            AssertCursor(StandardCursorType.Hand, canvas.Cursor);
+
+            InvokeCanvasPointerReleased(canvas, CreatePointerReleasedArgs(canvas, pointer, new Point(655, 220), KeyModifiers.None));
+
+            Assert.Null(canvas.Cursor);
         }
         finally
         {
