@@ -7,6 +7,7 @@ using Avalonia.Headless.XUnit;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Media;
+using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Avalonia.Automation;
 using AsterGraph.Abstractions.Definitions;
@@ -233,7 +234,7 @@ public sealed class NodeCanvasStandaloneTests
     }
 
     [AvaloniaFact]
-    public void ManualPortClick_CanReconnectSameEndpointsAfterDeletingConnection()
+    public void ManualPortClick_CanReconnectSameEndpointsAfterDisconnectingConnection()
     {
         var editor = CreateEditor();
         var (window, canvas) = CreateStandaloneCanvasWindow(editor);
@@ -247,14 +248,14 @@ public sealed class NodeCanvasStandaloneTests
             var initialConnection = Assert.Single(editor.Connections);
             Assert.False(editor.HasPendingConnection);
 
-            var deleted = editor.Session.Commands.TryExecuteCommand(
+            var disconnected = editor.Session.Commands.TryExecuteCommand(
                 new GraphEditorCommandInvocationSnapshot(
-                    "connections.delete",
+                    "connections.disconnect",
                     [
                         new GraphEditorCommandArgumentSnapshot("connectionId", initialConnection.Id),
                     ]));
 
-            Assert.True(deleted);
+            Assert.True(disconnected);
             Assert.Empty(editor.Connections);
 
             ClickPortButton(canvas, SourcePortId, PortDirection.Output);
@@ -532,6 +533,73 @@ public sealed class NodeCanvasStandaloneTests
                 canvas.GetVisualDescendants().OfType<TextBox>(),
                 control => control.DataContext is NodeParameterViewModel parameter
                            && string.Equals(parameter.Key, "gain", StringComparison.Ordinal));
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
+    public void RichTierNode_DisconnectingInputConnection_RestoresInlineInputEditor()
+    {
+        var editor = CreateEditor();
+        editor.SelectSingleNode(editor.Nodes.Single(node => node.Id == TargetNodeId), updateStatus: false);
+        editor.Session.Commands.StartConnection(SourceNodeId, SourcePortId);
+        editor.Session.Commands.CompleteConnection(TargetNodeId, TargetPortId);
+        Assert.True(editor.Session.Commands.TrySetNodeSize(TargetNodeId, new GraphSize(420d, 260d), updateStatus: false));
+        var (window, canvas) = CreateStandaloneCanvasWindow(editor);
+
+        try
+        {
+            Assert.Contains(
+                canvas.GetVisualDescendants().OfType<TextBlock>().Select(block => block.Text),
+                text => string.Equals(text, "Connected input overrides the local literal.", StringComparison.Ordinal));
+
+            Assert.True(editor.Session.Commands.TryExecuteCommand(
+                new GraphEditorCommandInvocationSnapshot(
+                    "connections.disconnect-all",
+                    [
+                        new GraphEditorCommandArgumentSnapshot("nodeId", TargetNodeId),
+                    ])));
+            Dispatcher.UIThread.RunJobs();
+
+            Assert.Empty(editor.Connections);
+            Assert.Equal(TargetNodeId, editor.SelectedNode?.Id);
+            Assert.Contains(
+                editor.SelectedNodeParameters,
+                parameter => string.Equals(parameter.Key, "gain", StringComparison.Ordinal));
+            var updatedTargetNode = editor.Nodes.Single(node => node.Id == TargetNodeId);
+            Assert.Same(updatedTargetNode, editor.SelectedNode);
+            Assert.Equal(420d, updatedTargetNode.Width);
+            Assert.Equal(260d, updatedTargetNode.Height);
+            Assert.True(updatedTargetNode.ActiveSurfaceTier.ShowsSection(NodeSurfaceSectionKeys.InlineInputs));
+            Assert.False(editor.HasIncomingConnection(
+                updatedTargetNode,
+                updatedTargetNode.Inputs.Single(port => string.Equals(port.Id, TargetPortId, StringComparison.Ordinal))));
+
+            var inlineEditorHost = canvas.GetVisualDescendants()
+                .OfType<NodeParameterEditorHost>()
+                .SingleOrDefault(control => control.Parameter is NodeParameterViewModel parameter
+                                            && string.Equals(parameter.Key, "gain", StringComparison.Ordinal));
+
+            var visibleText = string.Join(
+                "\n",
+                canvas.GetVisualDescendants()
+                    .OfType<TextBlock>()
+                    .Select(block => block.Text)
+                    .Where(text => !string.IsNullOrWhiteSpace(text)));
+            Assert.True(inlineEditorHost is not null, $"Expected inline editor host for gain. Visible text:{Environment.NewLine}{visibleText}");
+            var inlineEditor = canvas.GetVisualDescendants()
+                .OfType<TextBox>()
+                .SingleOrDefault(control => control.DataContext is NodeParameterViewModel parameter
+                                            && string.Equals(parameter.Key, "gain", StringComparison.Ordinal));
+
+            Assert.True(inlineEditor is not null, $"Expected inline text editor for gain. Visible text:{Environment.NewLine}{visibleText}");
+            Assert.Equal("0.35", inlineEditor!.Text);
+            Assert.DoesNotContain(
+                canvas.GetVisualDescendants().OfType<TextBlock>().Select(block => block.Text),
+                text => string.Equals(text, "Connected input overrides the local literal.", StringComparison.Ordinal));
         }
         finally
         {

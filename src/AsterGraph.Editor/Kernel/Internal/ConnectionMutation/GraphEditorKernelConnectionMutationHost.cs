@@ -22,7 +22,7 @@ internal sealed partial class GraphEditorKernel
 
         IPortCompatibilityService IGraphEditorKernelConnectionMutationHost.CompatibilityService => _owner._compatibilityService;
 
-        GraphDocument IGraphEditorKernelConnectionMutationHost.Document => _owner._document;
+        GraphDocument IGraphEditorKernelConnectionMutationHost.Document => _owner.CreateActiveScopeDocumentSnapshot();
 
         GraphEditorPendingConnectionSnapshot IGraphEditorKernelConnectionMutationHost.PendingConnection => _owner._pendingConnection;
 
@@ -30,7 +30,7 @@ internal sealed partial class GraphEditorKernel
             => _owner.CreateConnectionId();
 
         void IGraphEditorKernelConnectionMutationHost.UpdateDocument(GraphDocument document)
-            => _owner._document = document;
+            => _owner.ApplyActiveScopeDocument(document);
 
         void IGraphEditorKernelConnectionMutationHost.SetPendingConnection(GraphEditorPendingConnectionSnapshot pendingConnection)
         {

@@ -329,6 +329,23 @@ public partial class MainWindowViewModel
                     T("最近诊断数量：", "Recent diagnostic count: ") + Editor.Session.Diagnostics.GetRecentDiagnostics(10).Count + "。",
                 ]),
             new CapabilityShowcaseItem(
+                "semantic-graph-composition",
+                T("语义图组合", "Semantic Graph Composition"),
+                T("把组提升为复合节点、公开边界端点、作用域导航、边注释和单边断开收敛到同一条语义图编辑路径。", "Unify composite promotion, public boundary ports, scoped navigation, edge notes, and single-edge disconnect through one semantic graph editing path."),
+                T(
+                    "这条路径继续由 Editor.Session 命令和查询驱动：group promotion 生成 child scope，boundary port 暴露内部端口，edge note 保持纯展示语义，而 canonical disconnect 让连接断开后重新回到 inline literal。",
+                    "This path stays on top of Editor.Session commands and queries: group promotion creates a child scope, boundary ports expose inner ports, edge notes stay display-only, and canonical disconnect returns inputs to inline literals once the edge is removed."),
+                [
+                    T("所属层：AsterGraph.Editor semantic graph contract + AsterGraph.Avalonia stock host surfaces。", "Layer: AsterGraph.Editor semantic graph contract plus AsterGraph.Avalonia stock host surfaces."),
+                    T("宿主入口：TryPromoteNodeGroupToComposite(...)、TryExposeCompositePort(...)、TryEnterCompositeChildGraph(...)、TrySetConnectionNoteText(...)、connections.disconnect。", "Host entry: TryPromoteNodeGroupToComposite(...), TryExposeCompositePort(...), TryEnterCompositeChildGraph(...), TrySetConnectionNoteText(...), and connections.disconnect."),
+                    T("兼容边界：connections.delete 仍保留为兼容别名；retained 的 TrySetNodeExpansionState(...) 和 TrySetNodeGroupExtraPadding(...) 继续存在但只作为迁移辅助。", "Compatibility boundary: connections.delete stays as a compatibility alias; retained TrySetNodeExpansionState(...) and TrySetNodeGroupExtraPadding(...) remain only as migration helpers."),
+                ],
+                [
+                    T("proof 会把节点组提升为复合节点，公开 Composite Phase / Composite Tint 两个边界端点，并验证作用域进入与返回。", "Proof promotes a node group into a composite, exposes Composite Phase / Composite Tint boundary ports, and validates enter/return scope navigation."),
+                    T("连线会写入 Preview branch 注释，并通过 canonical connections.disconnect 恢复 Pulse Bias 的内联值来源。", "The edge records a Preview branch note and restores the Pulse Bias inline value source through canonical connections.disconnect."),
+                    "COMPOSITE_SCOPE_OK / EDGE_NOTE_OK / DISCONNECT_FLOW_OK",
+                ]),
+            new CapabilityShowcaseItem(
                 "plugin-trust-and-loading",
                 T("插件信任与加载", "Plugin Trust And Loading"),
                 T("把 candidate discovery、trust policy 和 load snapshot 变成真正可见的产品面。", "Turn candidate discovery, trust policy, and load snapshots into a visible product surface."),

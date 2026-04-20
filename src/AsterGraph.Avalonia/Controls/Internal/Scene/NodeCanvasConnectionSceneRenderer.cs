@@ -163,14 +163,9 @@ internal sealed class NodeCanvasConnectionSceneRenderer
             CornerRadius = new CornerRadius(connectionStyle.LabelCornerRadius),
             Padding = new Thickness(connectionStyle.LabelHorizontalPadding, connectionStyle.LabelVerticalPadding),
             Focusable = true,
-            Child = new TextBlock
-            {
-                Text = connection.Label,
-                FontSize = connectionStyle.LabelFontSize,
-                Foreground = BrushFactory.Solid(connectionStyle.LabelForegroundHex, connectionStyle.LabelForegroundOpacity),
-            },
+            Child = CreateLabelBlock(connectionStyle, GetDisplayedChipText(connection, connection.NoteText)),
         };
-        AutomationProperties.SetName(chip, $"{connection.Label} connection");
+        AutomationProperties.SetName(chip, $"{GetDisplayedChipText(connection, connection.NoteText)} connection");
         chip.KeyDown += (_, args) =>
         {
             if (string.IsNullOrWhiteSpace(connection.TargetNodeId))
@@ -204,9 +199,81 @@ internal sealed class NodeCanvasConnectionSceneRenderer
                     connection.Id,
                     hostContext: context.ViewModel.HostContext));
         };
+        chip.DoubleTapped += (_, args) =>
+        {
+            if (chip.Child is TextBox || context.ViewModel is null)
+            {
+                return;
+            }
+
+            var editor = new TextBox
+            {
+                Text = connection.NoteText ?? string.Empty,
+                MinWidth = 160,
+            };
+            var finalized = false;
+
+            void RestoreLabel(string? noteText)
+            {
+                var displayText = GetDisplayedChipText(connection, noteText);
+                chip.Child = CreateLabelBlock(connectionStyle, displayText);
+                AutomationProperties.SetName(chip, $"{displayText} connection");
+            }
+
+            void Complete(bool commit)
+            {
+                if (finalized)
+                {
+                    return;
+                }
+
+                finalized = true;
+                if (commit)
+                {
+                    context.ViewModel.TrySetConnectionNoteText(connection.Id, editor.Text, updateStatus: true);
+                    RestoreLabel(editor.Text);
+                    return;
+                }
+
+                RestoreLabel(connection.NoteText);
+            }
+
+            editor.KeyDown += (_, keyArgs) =>
+            {
+                switch (keyArgs.Key)
+                {
+                    case Key.Enter:
+                        keyArgs.Handled = true;
+                        Complete(commit: true);
+                        break;
+                    case Key.Escape:
+                        keyArgs.Handled = true;
+                        Complete(commit: false);
+                        break;
+                }
+            };
+            editor.LostFocus += (_, _) => Complete(commit: true);
+
+            chip.Child = editor;
+            editor.Focus();
+            args.Handled = true;
+        };
 
         Canvas.SetLeft(chip, midpoint.X + connectionStyle.LabelOffsetX);
         Canvas.SetTop(chip, midpoint.Y + connectionStyle.LabelOffsetY);
         context.ConnectionLayer.Children.Add(chip);
     }
+
+    private static TextBlock CreateLabelBlock(ConnectionStyleOptions connectionStyle, string text)
+        => new()
+        {
+            Text = text,
+            FontSize = connectionStyle.LabelFontSize,
+            Foreground = BrushFactory.Solid(connectionStyle.LabelForegroundHex, connectionStyle.LabelForegroundOpacity),
+        };
+
+    private static string GetDisplayedChipText(ConnectionViewModel connection, string? noteText)
+        => string.IsNullOrWhiteSpace(noteText)
+            ? connection.Label
+            : noteText.Trim();
 }

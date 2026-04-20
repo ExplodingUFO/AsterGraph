@@ -22,6 +22,18 @@ When adding new host features:
 - prefer DTO/snapshot queries over retained view-model projections
 - keep `GraphEditorViewModel` only as a UI bridge while the host is still migrating
 
+### Step 2 Note: Compatibility Bridges
+
+Canonical connection control should use runtime session commands (`connections.disconnect-*`, especially `connections.disconnect-all`) before adding retained-only variants. The existing retained compatibility shape for compatibility target discovery is still available while migrating:
+
+- compatibility query: `GetCompatibleTargets(...)` and `CompatiblePortTarget`
+- canonical replacement: `GetCompatiblePortTargets(...)` and `GraphEditorCompatiblePortTargetSnapshot`
+
+For node-group UI parity during migration, retain compatibility helpers only when required:
+
+- `TrySetNodeExpansionState(...)`
+- `TrySetNodeGroupExtraPadding(...)`
+
 ## Step 3: Switch Runtime-Only Callers First
 
 If part of the host does not need Avalonia controls, convert that slice to:

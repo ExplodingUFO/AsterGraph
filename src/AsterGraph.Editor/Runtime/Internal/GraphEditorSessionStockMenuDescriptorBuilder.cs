@@ -277,14 +277,14 @@ internal sealed class GraphEditorSessionStockMenuDescriptorBuilder
             return [];
         }
 
-        var delete = GetCommandDescriptor(commands, "connections.delete");
+        var disconnect = GetCommandDescriptor(commands, "connections.disconnect");
         var conversionLabel = connection.ConversionId is null
             ? Localize("editor.menu.connection.noImplicitConversion", "No implicit conversion")
             : LocalizeFormat("editor.menu.connection.conversion", "Conversion: {0}", connection.ConversionId.Value);
 
         return
         [
-            new GraphEditorMenuItemDescriptorSnapshot("connection-delete", Localize("editor.menu.connection.deleteConnection", "Delete Connection"), CreateCommand("connections.delete", ("connectionId", connection.Id)), iconKey: "delete", isEnabled: delete.IsEnabled, disabledReason: delete.DisabledReason),
+            new GraphEditorMenuItemDescriptorSnapshot("connection-disconnect", Localize("editor.menu.connection.disconnectConnection", "Disconnect Connection"), CreateCommand("connections.disconnect", ("connectionId", connection.Id)), iconKey: "disconnect", isEnabled: disconnect.IsEnabled, disabledReason: disconnect.DisabledReason),
             new GraphEditorMenuItemDescriptorSnapshot("connection-conversion", conversionLabel, iconKey: "conversion", isEnabled: false),
         ];
     }

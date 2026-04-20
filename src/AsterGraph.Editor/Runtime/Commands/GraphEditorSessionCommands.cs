@@ -157,6 +157,77 @@ public sealed partial class GraphEditorSession
         return edited;
     }
 
+    public string TryPromoteNodeGroupToComposite(string groupId, string? title = null, bool updateStatus = true)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(groupId);
+
+        var compositeNodeId = _host.TryPromoteNodeGroupToComposite(groupId, title, updateStatus);
+        if (!string.IsNullOrWhiteSpace(compositeNodeId))
+        {
+            PublishCommandExecuted("groups.promote");
+        }
+
+        return compositeNodeId;
+    }
+
+    public string TryExposeCompositePort(
+        string compositeNodeId,
+        string childNodeId,
+        string childPortId,
+        string? label = null,
+        bool updateStatus = true)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(compositeNodeId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(childNodeId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(childPortId);
+
+        var boundaryPortId = _host.TryExposeCompositePort(compositeNodeId, childNodeId, childPortId, label, updateStatus);
+        if (!string.IsNullOrWhiteSpace(boundaryPortId))
+        {
+            PublishCommandExecuted("composites.expose-port");
+        }
+
+        return boundaryPortId;
+    }
+
+    public bool TryUnexposeCompositePort(string compositeNodeId, string boundaryPortId, bool updateStatus = true)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(compositeNodeId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(boundaryPortId);
+
+        var edited = _host.TryUnexposeCompositePort(compositeNodeId, boundaryPortId, updateStatus);
+        if (edited)
+        {
+            PublishCommandExecuted("composites.unexpose-port");
+        }
+
+        return edited;
+    }
+
+    public bool TryEnterCompositeChildGraph(string compositeNodeId, bool updateStatus = true)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(compositeNodeId);
+
+        var navigated = _host.TryEnterCompositeChildGraph(compositeNodeId, updateStatus);
+        if (navigated)
+        {
+            PublishCommandExecuted("scopes.enter");
+        }
+
+        return navigated;
+    }
+
+    public bool TryReturnToParentGraphScope(bool updateStatus = true)
+    {
+        var navigated = _host.TryReturnToParentGraphScope(updateStatus);
+        if (navigated)
+        {
+            PublishCommandExecuted("scopes.exit");
+        }
+
+        return navigated;
+    }
+
     public bool TrySetSelectedNodeParameterValue(string parameterKey, object? value)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(parameterKey);
@@ -210,6 +281,19 @@ public sealed partial class GraphEditorSession
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(connectionId);
         Execute("connections.delete", () => _host.DeleteConnection(connectionId));
+    }
+
+    public bool TrySetConnectionNoteText(string connectionId, string? noteText, bool updateStatus = true)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(connectionId);
+
+        var edited = _host.TrySetConnectionNoteText(connectionId, noteText, updateStatus);
+        if (edited)
+        {
+            PublishCommandExecuted("connections.note.set");
+        }
+
+        return edited;
     }
 
     public void BreakConnectionsForPort(string nodeId, string portId)

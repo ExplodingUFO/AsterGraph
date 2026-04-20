@@ -19,6 +19,7 @@ public sealed class ConnectionViewModel
     /// <param name="label">连线标签。</param>
     /// <param name="accentHex">连线强调色。</param>
     /// <param name="conversionId">可选的隐式转换标识。</param>
+    /// <param name="noteText">可选的纯展示注释文本。</param>
     public ConnectionViewModel(
         string id,
         string sourceNodeId,
@@ -27,7 +28,8 @@ public sealed class ConnectionViewModel
         string targetPortId,
         string label,
         string accentHex,
-        ConversionId? conversionId = null)
+        ConversionId? conversionId = null,
+        string? noteText = null)
     {
         Id = id;
         SourceNodeId = sourceNodeId;
@@ -37,6 +39,7 @@ public sealed class ConnectionViewModel
         Label = label;
         AccentHex = accentHex;
         ConversionId = conversionId;
+        NoteText = string.IsNullOrWhiteSpace(noteText) ? null : noteText.Trim();
     }
 
     /// <summary>
@@ -80,9 +83,23 @@ public sealed class ConnectionViewModel
     public ConversionId? ConversionId { get; }
 
     /// <summary>
+    /// 可选的纯展示注释文本。
+    /// </summary>
+    public string? NoteText { get; }
+
+    /// <summary>
     /// 转回不可变模型快照。
     /// </summary>
     /// <returns>对应的不可变连线模型。</returns>
     public GraphConnection ToModel()
-        => new(Id, SourceNodeId, SourcePortId, TargetNodeId, TargetPortId, Label, AccentHex, ConversionId);
+        => new(
+            Id,
+            SourceNodeId,
+            SourcePortId,
+            TargetNodeId,
+            TargetPortId,
+            Label,
+            AccentHex,
+            ConversionId,
+            string.IsNullOrWhiteSpace(NoteText) ? null : new GraphEdgePresentation(NoteText));
 }

@@ -130,6 +130,12 @@ public sealed partial class GraphEditorSession
     public IReadOnlyList<GraphEditorNodeSurfaceSnapshot> GetNodeSurfaceSnapshots()
         => _host.GetNodeSurfaceSnapshots();
 
+    public IReadOnlyList<GraphEditorCompositeNodeSnapshot> GetCompositeNodeSnapshots()
+        => _host.GetCompositeNodeSnapshots();
+
+    public GraphEditorScopeNavigationSnapshot GetScopeNavigationSnapshot()
+        => _host.GetScopeNavigationSnapshot();
+
     public IReadOnlyList<GraphNodeGroup> GetNodeGroups()
         => _host.GetNodeGroups();
 
@@ -157,7 +163,7 @@ public sealed partial class GraphEditorSession
             return [];
         }
 
-        var nodesById = _host.CreateDocumentSnapshot()
+        var nodesById = _host.CreateActiveScopeDocumentSnapshot()
             .Nodes
             .ToDictionary(node => node.Id, StringComparer.Ordinal);
 
@@ -200,7 +206,7 @@ public sealed partial class GraphEditorSession
             return false;
         }
 
-        var document = _host.CreateDocumentSnapshot();
+        var document = _host.CreateActiveScopeDocumentSnapshot();
         var selection = _host.GetSelectionSnapshot();
         if (selection.SelectedNodeIds.Count == 0)
         {

@@ -18,6 +18,8 @@ public sealed class GraphEditorNodeSurfaceContractsTests
     private static readonly NodeDefinitionId DefaultDefinitionId = new("tests.node-surface.default");
     private const string NodeId = "tests.node-surface.node-001";
     private const string SiblingNodeId = "tests.node-surface.node-002";
+    private const string OutputPortId = "output-001";
+    private const string InputPortId = "input-001";
 
     [Fact]
     public void RuntimeContracts_ExposeNodeSurfaceQueriesAndCommands()
@@ -56,6 +58,15 @@ public sealed class GraphEditorNodeSurfaceContractsTests
             typeof(IReadOnlyList<GraphNodeGroup>),
             queriesType.GetMethod(nameof(IGraphEditorQueries.GetNodeGroups))!.ReturnType);
 
+        AssertMethod(queriesType, nameof(IGraphEditorQueries.GetCompositeNodeSnapshots));
+        Assert.Equal(
+            typeof(IReadOnlyList<GraphEditorCompositeNodeSnapshot>),
+            queriesType.GetMethod(nameof(IGraphEditorQueries.GetCompositeNodeSnapshots))!.ReturnType);
+        Assert.NotNull(typeof(GraphEditorCompositeNodeSnapshot).GetProperty(nameof(GraphEditorCompositeNodeSnapshot.NodeId)));
+        Assert.NotNull(typeof(GraphEditorCompositeNodeSnapshot).GetProperty(nameof(GraphEditorCompositeNodeSnapshot.ChildGraphId)));
+        Assert.NotNull(typeof(GraphEditorCompositeNodeSnapshot).GetProperty(nameof(GraphEditorCompositeNodeSnapshot.Inputs)));
+        Assert.NotNull(typeof(GraphEditorCompositeNodeSnapshot).GetProperty(nameof(GraphEditorCompositeNodeSnapshot.Outputs)));
+
         AssertMethod(queriesType, nameof(IGraphEditorQueries.GetNodeGroupSnapshots));
         Assert.Equal(
             typeof(IReadOnlyList<GraphEditorNodeGroupSnapshot>),
@@ -90,6 +101,21 @@ public sealed class GraphEditorNodeSurfaceContractsTests
         Assert.Equal(
             typeof(bool),
             commandsType.GetMethod(nameof(IGraphEditorCommands.TrySetNodeGroupMemberships), [typeof(IReadOnlyList<GraphEditorNodeGroupMembershipChange>), typeof(bool)])!.ReturnType);
+
+        AssertMethod(commandsType, nameof(IGraphEditorCommands.TryPromoteNodeGroupToComposite), typeof(string), typeof(string), typeof(bool));
+        Assert.Equal(
+            typeof(string),
+            commandsType.GetMethod(nameof(IGraphEditorCommands.TryPromoteNodeGroupToComposite), [typeof(string), typeof(string), typeof(bool)])!.ReturnType);
+
+        AssertMethod(commandsType, nameof(IGraphEditorCommands.TryExposeCompositePort), typeof(string), typeof(string), typeof(string), typeof(string), typeof(bool));
+        Assert.Equal(
+            typeof(string),
+            commandsType.GetMethod(nameof(IGraphEditorCommands.TryExposeCompositePort), [typeof(string), typeof(string), typeof(string), typeof(string), typeof(bool)])!.ReturnType);
+
+        AssertMethod(commandsType, nameof(IGraphEditorCommands.TryUnexposeCompositePort), typeof(string), typeof(string), typeof(bool));
+        Assert.Equal(
+            typeof(bool),
+            commandsType.GetMethod(nameof(IGraphEditorCommands.TryUnexposeCompositePort), [typeof(string), typeof(string), typeof(bool)])!.ReturnType);
     }
 
     [Fact]
@@ -289,42 +315,77 @@ public sealed class GraphEditorNodeSurfaceContractsTests
         Assert.Empty(restoredGroup.NodeIds);
     }
 
-    private static IGraphEditorSession CreateSession()
+    [Fact]
+    public void SessionQueries_CreateDocumentSnapshot_PreservesChildScopesAndCompositeMetadata()
+    {
+        var session = CreateSession(CreateScopedDocument());
+
+        Assert.True(session.Commands.TrySetNodeSize(NodeId, new GraphSize(420d, 260d), updateStatus: false));
+
+        var snapshot = session.Queries.CreateDocumentSnapshot();
+
+        Assert.Equal("graph-root", snapshot.RootGraphId);
+        Assert.Equal(2, snapshot.GraphScopes!.Count);
+
+        var rootScope = Assert.Single(snapshot.GraphScopes, scope => scope.Id == "graph-root");
+        Assert.Equal(new GraphSize(420d, 260d), Assert.Single(rootScope.Nodes, node => node.Id == NodeId).Size);
+
+        var compositeNode = Assert.Single(rootScope.Nodes, node => node.Id == "tests.node-surface.composite-001");
+        Assert.NotNull(compositeNode.Composite);
+        Assert.Equal("graph-composite-001", compositeNode.Composite!.ChildGraphId);
+
+        var childScope = Assert.Single(snapshot.GraphScopes, scope => scope.Id == "graph-composite-001");
+        var childConnection = Assert.Single(childScope.Connections);
+        Assert.NotNull(childConnection.Presentation);
+        Assert.Equal("Preview branch", childConnection.Presentation!.NoteText);
+    }
+
+    [Fact]
+    public void SessionCommands_NodeGroups_PromoteToComposite_AndExposeBoundaryPorts()
+    {
+        var session = CreateSession(CreatePromotionDocument(), CreatePromotionCatalog());
+
+        session.Commands.SetSelection([NodeId, SiblingNodeId], SiblingNodeId, updateStatus: false);
+        var groupId = session.Commands.TryCreateNodeGroupFromSelection("Composite Cluster");
+        Assert.False(string.IsNullOrWhiteSpace(groupId));
+
+        var compositeNodeId = session.Commands.TryPromoteNodeGroupToComposite(groupId, "Composite Cluster", updateStatus: false);
+        Assert.False(string.IsNullOrWhiteSpace(compositeNodeId));
+
+        var snapshot = session.Queries.CreateDocumentSnapshot();
+        Assert.Equal(2, snapshot.GraphScopes.Count);
+
+        var rootScope = Assert.Single(snapshot.GraphScopes, scope => scope.Id == snapshot.RootGraphId);
+        var compositeNode = Assert.Single(rootScope.Nodes, node => node.Id == compositeNodeId);
+        Assert.NotNull(compositeNode.Composite);
+        Assert.Empty(compositeNode.Composite!.Outputs ?? []);
+
+        var compositeSnapshot = Assert.Single(session.Queries.GetCompositeNodeSnapshots());
+        Assert.Equal(compositeNodeId, compositeSnapshot.NodeId);
+        Assert.Equal(compositeNode.Composite.ChildGraphId, compositeSnapshot.ChildGraphId);
+        Assert.Empty(compositeSnapshot.Outputs);
+
+        var boundaryPortId = session.Commands.TryExposeCompositePort(
+            compositeNodeId,
+            NodeId,
+            OutputPortId,
+            "Composite Output",
+            updateStatus: false);
+        Assert.False(string.IsNullOrWhiteSpace(boundaryPortId));
+
+        compositeSnapshot = Assert.Single(session.Queries.GetCompositeNodeSnapshots());
+        Assert.Equal(boundaryPortId, Assert.Single(compositeSnapshot.Outputs).Id);
+
+        Assert.True(session.Commands.TryUnexposeCompositePort(compositeNodeId, boundaryPortId, updateStatus: false));
+        compositeSnapshot = Assert.Single(session.Queries.GetCompositeNodeSnapshots());
+        Assert.Empty(compositeSnapshot.Outputs);
+    }
+
+    private static IGraphEditorSession CreateSession(GraphDocument? document = null, INodeCatalog? catalog = null)
         => AsterGraphEditorFactory.CreateSession(new AsterGraphEditorOptions
         {
-            Document = new GraphDocument(
-                "Node Surface Graph",
-                "Covers runtime node surface contracts.",
-                [
-                    new GraphNode(
-                        NodeId,
-                        "Node Surface",
-                        "Tests",
-                        "Contracts",
-                        "Covers width and expanded-state mutations.",
-                        new GraphPoint(120, 160),
-                        new GraphSize(240, 160),
-                        [],
-                        [],
-                        "#6AD5C4",
-                        TieredDefinitionId,
-                        []),
-                    new GraphNode(
-                        SiblingNodeId,
-                        "Node Surface Sibling",
-                        "Tests",
-                        "Contracts",
-                        "Covers grouped node-surface mutations.",
-                        new GraphPoint(420, 160),
-                        new GraphSize(220, 150),
-                        [],
-                        [],
-                        "#F3B36B",
-                        DefaultDefinitionId,
-                        []),
-                ],
-                []),
-            NodeCatalog = CreateCatalog(),
+            Document = document ?? CreateRootDocument(),
+            NodeCatalog = catalog ?? CreateCatalog(),
             CompatibilityService = new DefaultPortCompatibilityService(),
             BehaviorOptions = new GraphEditorBehaviorOptions
             {
@@ -356,6 +417,179 @@ public sealed class GraphEditorNodeSurfaceContractsTests
                 },
             },
         });
+
+    private static GraphDocument CreateRootDocument()
+        => new(
+            "Node Surface Graph",
+            "Covers runtime node surface contracts.",
+            [
+                new GraphNode(
+                    NodeId,
+                    "Node Surface",
+                    "Tests",
+                    "Contracts",
+                    "Covers width and expanded-state mutations.",
+                    new GraphPoint(120, 160),
+                    new GraphSize(240, 160),
+                    [],
+                    [],
+                    "#6AD5C4",
+                    TieredDefinitionId,
+                    []),
+                new GraphNode(
+                    SiblingNodeId,
+                    "Node Surface Sibling",
+                    "Tests",
+                    "Contracts",
+                    "Covers grouped node-surface mutations.",
+                    new GraphPoint(420, 160),
+                    new GraphSize(220, 150),
+                    [],
+                    [],
+                    "#F3B36B",
+                    DefaultDefinitionId,
+                    []),
+            ],
+            []);
+
+    private static GraphDocument CreatePromotionDocument()
+        => new(
+            "Composite Promotion Graph",
+            "Covers group promotion and boundary-port exposure contracts.",
+            [
+                new GraphNode(
+                    NodeId,
+                    "Promote Source",
+                    "Tests",
+                    "Contracts",
+                    "Source node promoted into child scope.",
+                    new GraphPoint(120, 160),
+                    new GraphSize(240, 160),
+                    [],
+                    [new GraphPort(OutputPortId, "Output", PortDirection.Output, "float", "#6AD5C4", new PortTypeId("float"))],
+                    "#6AD5C4",
+                    DefaultDefinitionId,
+                    []),
+                new GraphNode(
+                    SiblingNodeId,
+                    "Promote Target",
+                    "Tests",
+                    "Contracts",
+                    "Target node promoted into child scope.",
+                    new GraphPoint(420, 160),
+                    new GraphSize(220, 150),
+                    [new GraphPort(InputPortId, "Input", PortDirection.Input, "float", "#F3B36B", new PortTypeId("float"))],
+                    [],
+                    "#F3B36B",
+                    DefaultDefinitionId,
+                    []),
+            ],
+            [
+                new GraphConnection(
+                    "connection-root-001",
+                    NodeId,
+                    OutputPortId,
+                    SiblingNodeId,
+                    InputPortId,
+                    "Promoted Flow",
+                    "#6AD5C4"),
+            ]);
+
+    private static GraphDocument CreateScopedDocument()
+        => GraphDocument.CreateScoped(
+            "Node Surface Graph",
+            "Covers runtime node surface contracts.",
+            "graph-root",
+            [
+                new GraphScope(
+                    "graph-root",
+                    [
+                        new GraphNode(
+                            NodeId,
+                            "Node Surface",
+                            "Tests",
+                            "Contracts",
+                            "Covers width and expanded-state mutations.",
+                            new GraphPoint(120, 160),
+                            new GraphSize(240, 160),
+                            [],
+                            [],
+                            "#6AD5C4",
+                            TieredDefinitionId,
+                            []),
+                        new GraphNode(
+                            "tests.node-surface.composite-001",
+                            "Composite",
+                            "Tests",
+                            "Contracts",
+                            "Composite shell.",
+                            new GraphPoint(520, 160),
+                            new GraphSize(280, 180),
+                            [],
+                            [],
+                            "#A67CF5",
+                            null,
+                            [],
+                            null,
+                            new GraphCompositeNode(
+                                "graph-composite-001",
+                                [],
+                                [
+                                    new GraphCompositeBoundaryPort(
+                                        "boundary-output-001",
+                                        "Composite Output",
+                                        PortDirection.Output,
+                                        "float",
+                                        "#A67CF5",
+                                        "tests.node-surface.child-001",
+                                        "output-001",
+                                        new PortTypeId("float")),
+                                ])),
+                    ],
+                    []),
+                new GraphScope(
+                    "graph-composite-001",
+                    [
+                        new GraphNode(
+                            "tests.node-surface.child-001",
+                            "Child Source",
+                            "Tests",
+                            "Contracts",
+                            "Child scope source.",
+                            new GraphPoint(40, 40),
+                            new GraphSize(220, 150),
+                            [],
+                            [],
+                            "#6AD5C4",
+                            DefaultDefinitionId,
+                            []),
+                        new GraphNode(
+                            "tests.node-surface.child-002",
+                            "Child Target",
+                            "Tests",
+                            "Contracts",
+                            "Child scope target.",
+                            new GraphPoint(320, 40),
+                            new GraphSize(220, 150),
+                            [],
+                            [],
+                            "#F3B36B",
+                            DefaultDefinitionId,
+                            []),
+                    ],
+                    [
+                        new GraphConnection(
+                            "connection-child-001",
+                            "tests.node-surface.child-001",
+                            "output-001",
+                            "tests.node-surface.child-002",
+                            "input-001",
+                            "Child Flow",
+                            "#6AD5C4",
+                            null,
+                            new GraphEdgePresentation("Preview branch")),
+                    ]),
+            ]);
 
     private static INodeCatalog CreateCatalog()
     {
@@ -404,6 +638,23 @@ public sealed class GraphEditorNodeSurfaceContractsTests
                 description: "Node surface behavior-default definition.",
                 defaultWidth: 220d,
                 defaultHeight: 150d));
+        return catalog;
+    }
+
+    private static INodeCatalog CreatePromotionCatalog()
+    {
+        var catalog = new NodeCatalog();
+        catalog.RegisterDefinition(
+            new NodeDefinition(
+                DefaultDefinitionId,
+                "Composite Promotion",
+                "Tests",
+                "Contracts",
+                [new PortDefinition(InputPortId, "Input", new PortTypeId("float"), "#F3B36B")],
+                [new PortDefinition(OutputPortId, "Output", new PortTypeId("float"), "#6AD5C4")],
+                description: "Composite promotion regression definition.",
+                defaultWidth: 240d,
+                defaultHeight: 160d));
         return catalog;
     }
 

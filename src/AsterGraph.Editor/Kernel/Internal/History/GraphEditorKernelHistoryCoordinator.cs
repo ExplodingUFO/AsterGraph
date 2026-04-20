@@ -88,7 +88,8 @@ internal sealed partial class GraphEditorKernel
 
         public void LoadDocument(GraphDocument document, string status, bool markClean, bool resetHistory)
         {
-            _owner._document = CloneDocument(document);
+            _owner._document = _owner._documentMutator.NormalizeNodeGroupBounds(CloneDocument(document));
+            _owner._activeGraphId = _owner._document.RootGraphId;
             _owner._selectedNodeIds = [];
             _owner._primarySelectedNodeId = null;
             _owner._pendingConnection = GraphEditorPendingConnectionSnapshot.Create(false, null, null);
@@ -111,13 +112,16 @@ internal sealed partial class GraphEditorKernel
                 CloneDocument(_owner._document),
                 _owner._selectedNodeIds.ToList(),
                 _owner._primarySelectedNodeId,
+                _owner._activeGraphId,
                 CreateDocumentSignature(_owner._document));
 
         private void RestoreHistoryState(GraphEditorHistoryState state, string status, GraphEditorDocumentChangeKind changeKind)
         {
-            _owner._document = state.Document;
+            _owner._document = _owner._documentMutator.NormalizeNodeGroupBounds(CloneDocument(state.Document));
+            _owner._activeGraphId = state.ActiveGraphId;
             _owner._selectedNodeIds = state.SelectedNodeIds.ToList();
             _owner._primarySelectedNodeId = state.PrimarySelectedNodeId;
+            _owner.NormalizeSessionStateAfterDocumentChange();
             _owner._pendingConnection = GraphEditorPendingConnectionSnapshot.Create(false, null, null);
             _owner.CurrentStatusMessage = status;
             _owner.SelectionChanged?.Invoke(_owner, new GraphEditorSelectionChangedEventArgs(_owner._selectedNodeIds.ToList(), _owner._primarySelectedNodeId));

@@ -31,6 +31,8 @@ internal interface IGraphEditorKernelCommandRouterHost
 
     bool WorkspaceExists { get; }
 
+    bool CanNavigateToParentGraphScope { get; }
+
     void Undo();
 
     void Redo();
@@ -57,6 +59,16 @@ internal interface IGraphEditorKernelCommandRouterHost
 
     bool TrySetNodeGroupMemberships(IReadOnlyList<GraphEditorNodeGroupMembershipChange> changes, bool updateStatus);
 
+    string TryPromoteNodeGroupToComposite(string groupId, string? title, bool updateStatus);
+
+    string TryExposeCompositePort(string compositeNodeId, string childNodeId, string childPortId, string? label, bool updateStatus);
+
+    bool TryUnexposeCompositePort(string compositeNodeId, string boundaryPortId, bool updateStatus);
+
+    bool TryEnterCompositeChildGraph(string compositeNodeId, bool updateStatus);
+
+    bool TryReturnToParentGraphScope(bool updateStatus);
+
     bool TrySetSelectedNodeParameterValue(string parameterKey, object? value);
 
     void StartConnection(string sourceNodeId, string sourcePortId);
@@ -66,6 +78,8 @@ internal interface IGraphEditorKernelCommandRouterHost
     void CancelPendingConnection();
 
     void DeleteConnection(string connectionId);
+
+    void DisconnectConnection(string connectionId);
 
     void BreakConnectionsForPort(string nodeId, string portId);
 
@@ -152,6 +166,29 @@ internal sealed class GraphEditorKernelCommandRouter
                 GraphEditorCommandSourceKind.Kernel,
                 _host.Document.Groups?.Count > 0 && _host.BehaviorOptions.Commands.Nodes.AllowMove),
             GraphEditorCommandDescriptorCatalog.Create(
+                "groups.promote",
+                GraphEditorCommandSourceKind.Kernel,
+                _host.Document.Groups?.Count > 0 && _host.BehaviorOptions.Commands.Nodes.AllowMove),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "composites.expose-port",
+                GraphEditorCommandSourceKind.Kernel,
+                _host.Document.Nodes.Any(node => node.Composite is not null) && _host.BehaviorOptions.Commands.Nodes.AllowMove),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "composites.unexpose-port",
+                GraphEditorCommandSourceKind.Kernel,
+                _host.Document.Nodes.Any(node =>
+                    node.Composite is not null
+                    && ((node.Composite.Inputs?.Count ?? 0) > 0 || (node.Composite.Outputs?.Count ?? 0) > 0))
+                && _host.BehaviorOptions.Commands.Nodes.AllowMove),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "scopes.enter",
+                GraphEditorCommandSourceKind.Kernel,
+                _host.Document.Nodes.Any(node => node.Composite is not null)),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "scopes.exit",
+                GraphEditorCommandSourceKind.Kernel,
+                _host.CanNavigateToParentGraphScope),
+            GraphEditorCommandDescriptorCatalog.Create(
                 "connections.start",
                 GraphEditorCommandSourceKind.Kernel,
                 _host.BehaviorOptions.Commands.Connections.AllowCreate),
@@ -171,6 +208,10 @@ internal sealed class GraphEditorKernelCommandRouter
                 "connections.delete",
                 GraphEditorCommandSourceKind.Kernel,
                 _host.BehaviorOptions.Commands.Connections.AllowDelete),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "connections.disconnect",
+                GraphEditorCommandSourceKind.Kernel,
+                _host.BehaviorOptions.Commands.Connections.AllowDisconnect),
             GraphEditorCommandDescriptorCatalog.Create(
                 "connections.break-port",
                 GraphEditorCommandSourceKind.Kernel,
@@ -369,6 +410,65 @@ internal sealed class GraphEditorKernelCommandRouter
                     membershipChanges.Select(change => change!).ToList(),
                     ResolveOptionalUpdateStatus(command, "updateStatus"));
 
+            case "groups.promote":
+                if (!TryGetRequiredArgument(command, "groupId", out var promoteGroupId))
+                {
+                    return false;
+                }
+
+                var promoteTitle = command.TryGetArgument("title", out var rawPromoteTitle) && !string.IsNullOrWhiteSpace(rawPromoteTitle)
+                    ? rawPromoteTitle
+                    : null;
+                return !string.IsNullOrWhiteSpace(
+                    _host.TryPromoteNodeGroupToComposite(
+                        promoteGroupId,
+                        promoteTitle,
+                        ResolveOptionalUpdateStatus(command, "updateStatus")));
+
+            case "composites.expose-port":
+                if (!TryGetRequiredArgument(command, "compositeNodeId", out var compositeNodeId)
+                    || !TryGetRequiredArgument(command, "childNodeId", out var childNodeId)
+                    || !TryGetRequiredArgument(command, "childPortId", out var childPortId))
+                {
+                    return false;
+                }
+
+                var label = command.TryGetArgument("label", out var rawLabel) && !string.IsNullOrWhiteSpace(rawLabel)
+                    ? rawLabel
+                    : null;
+                return !string.IsNullOrWhiteSpace(
+                    _host.TryExposeCompositePort(
+                        compositeNodeId,
+                        childNodeId,
+                        childPortId,
+                        label,
+                        ResolveOptionalUpdateStatus(command, "updateStatus")));
+
+            case "composites.unexpose-port":
+                if (!TryGetRequiredArgument(command, "compositeNodeId", out var unexposeCompositeNodeId)
+                    || !TryGetRequiredArgument(command, "boundaryPortId", out var boundaryPortId))
+                {
+                    return false;
+                }
+
+                return _host.TryUnexposeCompositePort(
+                    unexposeCompositeNodeId,
+                    boundaryPortId,
+                    ResolveOptionalUpdateStatus(command, "updateStatus"));
+
+            case "scopes.enter":
+                if (!TryGetRequiredArgument(command, "compositeNodeId", out var scopeCompositeNodeId))
+                {
+                    return false;
+                }
+
+                return _host.TryEnterCompositeChildGraph(
+                    scopeCompositeNodeId,
+                    ResolveOptionalUpdateStatus(command, "updateStatus"));
+
+            case "scopes.exit":
+                return _host.TryReturnToParentGraphScope(ResolveOptionalUpdateStatus(command, "updateStatus"));
+
             case "connections.start":
                 if (!TryGetRequiredArgument(command, "sourceNodeId", out var sourceNodeId)
                     || !TryGetRequiredArgument(command, "sourcePortId", out var sourcePortId))
@@ -413,6 +513,15 @@ internal sealed class GraphEditorKernelCommandRouter
                 }
 
                 _host.DeleteConnection(connectionId);
+                return true;
+
+            case "connections.disconnect":
+                if (!TryGetRequiredArgument(command, "connectionId", out var disconnectConnectionId))
+                {
+                    return false;
+                }
+
+                _host.DisconnectConnection(disconnectConnectionId);
                 return true;
 
             case "connections.break-port":

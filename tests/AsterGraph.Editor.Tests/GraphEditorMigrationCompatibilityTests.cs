@@ -231,6 +231,36 @@ public sealed class GraphEditorMigrationCompatibilityTests
         Assert.Contains("future major release may remove it", shimObsolete.Message, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void RetainedNodeSurfaceCompatibilityHelpers_AreExplicitlyMarkedObsoleteWithRuntimeReplacements()
+    {
+        var expansionMethod = typeof(GraphEditorViewModel).GetMethod(
+            nameof(GraphEditorViewModel.TrySetNodeExpansionState),
+            [typeof(NodeViewModel), typeof(GraphNodeExpansionState)]);
+        var groupPaddingMethod = typeof(GraphEditorViewModel).GetMethod(
+            nameof(GraphEditorViewModel.TrySetNodeGroupExtraPadding),
+            [typeof(string), typeof(GraphPadding), typeof(bool)]);
+
+        Assert.NotNull(expansionMethod);
+        Assert.NotNull(groupPaddingMethod);
+
+        var expansionAttribute = Assert.Single(
+            expansionMethod!.GetCustomAttributes(typeof(ObsoleteAttribute), inherit: false),
+            attribute => attribute is ObsoleteAttribute);
+        var groupPaddingAttribute = Assert.Single(
+            groupPaddingMethod!.GetCustomAttributes(typeof(ObsoleteAttribute), inherit: false),
+            attribute => attribute is ObsoleteAttribute);
+
+        var expansionObsolete = Assert.IsType<ObsoleteAttribute>(expansionAttribute);
+        var groupPaddingObsolete = Assert.IsType<ObsoleteAttribute>(groupPaddingAttribute);
+
+        Assert.Contains("TrySetNodeSize", expansionObsolete.Message, StringComparison.Ordinal);
+        Assert.Contains("GetNodeSurfaceSnapshots", expansionObsolete.Message, StringComparison.Ordinal);
+        Assert.Contains("TrySetNodeGroupSize", groupPaddingObsolete.Message, StringComparison.Ordinal);
+        Assert.Contains("TrySetNodeGroupPosition", groupPaddingObsolete.Message, StringComparison.Ordinal);
+        Assert.Contains("GetNodeGroupSnapshots", groupPaddingObsolete.Message, StringComparison.Ordinal);
+    }
+
     [AvaloniaFact]
     public void GraphEditorView_RemainsCompatibilityFacadeDuringStagedMigration()
     {

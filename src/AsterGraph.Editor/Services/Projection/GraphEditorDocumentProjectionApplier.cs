@@ -56,7 +56,8 @@ internal sealed class GraphEditorDocumentProjectionApplier
                 connection.TargetPortId,
                 connection.Label,
                 connection.AccentHex,
-                connection.ConversionId));
+                connection.ConversionId,
+                connection.Presentation?.NoteText));
         }
     }
 

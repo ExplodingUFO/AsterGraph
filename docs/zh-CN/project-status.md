@@ -28,6 +28,10 @@
 - 四个可发布 SDK 包边界
 - kernel/session-first 的运行时状态所有权
 - 默认 Avalonia 壳层与 standalone surfaces
+- v1.21 语义图组合 proof marker：
+  - `COMPOSITE_SCOPE_OK:True`
+  - `EDGE_NOTE_OK:True`
+  - `DISCONNECT_FLOW_OK:True`
 - plugin discovery、trust policy、loading、inspection
 - `IGraphEditorSession.Automation`
 - contract、maintenance、release 验证 lanes

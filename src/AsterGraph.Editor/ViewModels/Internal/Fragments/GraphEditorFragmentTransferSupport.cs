@@ -103,7 +103,8 @@ internal sealed class GraphEditorFragmentTransferSupport
                 copiedConnection.TargetPortId,
                 copiedConnection.Label,
                 copiedConnection.AccentHex,
-                copiedConnection.ConversionId));
+                copiedConnection.ConversionId,
+                copiedConnection.Presentation?.NoteText));
         }
 
         if (pastedNodes.Count == 0)

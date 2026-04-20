@@ -95,6 +95,21 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
     public bool TrySetNodeGroupMemberships(IReadOnlyList<GraphEditorNodeGroupMembershipChange> changes, bool updateStatus)
         => _kernel.TrySetNodeGroupMemberships(changes, updateStatus);
 
+    public string TryPromoteNodeGroupToComposite(string groupId, string? title, bool updateStatus)
+        => _kernel.TryPromoteNodeGroupToComposite(groupId, title, updateStatus);
+
+    public string TryExposeCompositePort(string compositeNodeId, string childNodeId, string childPortId, string? label, bool updateStatus)
+        => _kernel.TryExposeCompositePort(compositeNodeId, childNodeId, childPortId, label, updateStatus);
+
+    public bool TryUnexposeCompositePort(string compositeNodeId, string boundaryPortId, bool updateStatus)
+        => _kernel.TryUnexposeCompositePort(compositeNodeId, boundaryPortId, updateStatus);
+
+    public bool TryEnterCompositeChildGraph(string compositeNodeId, bool updateStatus)
+        => _kernel.TryEnterCompositeChildGraph(compositeNodeId, updateStatus);
+
+    public bool TryReturnToParentGraphScope(bool updateStatus)
+        => _kernel.TryReturnToParentGraphScope(updateStatus);
+
     public bool TrySetSelectedNodeParameterValue(string parameterKey, object? value)
         => _kernel.TrySetSelectedNodeParameterValue(parameterKey, value);
 
@@ -110,6 +125,9 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
     public void CancelPendingConnection() => _kernel.CancelPendingConnection();
 
     public void DeleteConnection(string connectionId) => _kernel.DeleteConnection(connectionId);
+
+    public bool TrySetConnectionNoteText(string connectionId, string? noteText, bool updateStatus)
+        => _kernel.TrySetConnectionNoteText(connectionId, noteText, updateStatus);
 
     public void BreakConnectionsForPort(string nodeId, string portId)
         => _kernel.BreakConnectionsForPort(nodeId, portId);
@@ -134,6 +152,8 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
 
     public GraphDocument CreateDocumentSnapshot() => _kernel.CreateDocumentSnapshot();
 
+    public GraphDocument CreateActiveScopeDocumentSnapshot() => _kernel.CreateActiveScopeDocumentSnapshot();
+
     public GraphEditorSelectionSnapshot GetSelectionSnapshot() => _kernel.GetSelectionSnapshot();
 
     public GraphEditorViewportSnapshot GetViewportSnapshot() => _kernel.GetViewportSnapshot();
@@ -143,6 +163,10 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
     public IReadOnlyList<GraphEditorFeatureDescriptorSnapshot> GetFeatureDescriptors() => _kernel.GetFeatureDescriptors();
 
     public IReadOnlyList<GraphEditorNodeSurfaceSnapshot> GetNodeSurfaceSnapshots() => _kernel.GetNodeSurfaceSnapshots();
+
+    public IReadOnlyList<GraphEditorCompositeNodeSnapshot> GetCompositeNodeSnapshots() => _kernel.GetCompositeNodeSnapshots();
+
+    public GraphEditorScopeNavigationSnapshot GetScopeNavigationSnapshot() => _kernel.GetScopeNavigationSnapshot();
 
     public IReadOnlyList<GraphNodeGroup> GetNodeGroups() => _kernel.GetNodeGroups();
 
@@ -169,6 +193,7 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
                 GraphEditorCommandDescriptorCatalog.Create("nodes.duplicate", GraphEditorCommandSourceKind.Retained, _owner.CommandPermissions.Nodes.AllowDuplicate),
                 GraphEditorCommandDescriptorCatalog.Create("clipboard.copy", GraphEditorCommandSourceKind.Retained, _owner.CanCopySelection),
                 GraphEditorCommandDescriptorCatalog.Create("clipboard.paste", GraphEditorCommandSourceKind.Retained, _owner.CanPaste),
+                GraphEditorCommandDescriptorCatalog.Create("connections.disconnect", GraphEditorCommandSourceKind.Retained, _owner.CommandPermissions.Connections.AllowDisconnect),
                 GraphEditorCommandDescriptorCatalog.Create("connections.disconnect-incoming", GraphEditorCommandSourceKind.Retained, _owner.CommandPermissions.Connections.AllowDisconnect),
                 GraphEditorCommandDescriptorCatalog.Create("connections.disconnect-outgoing", GraphEditorCommandSourceKind.Retained, _owner.CommandPermissions.Connections.AllowDisconnect),
                 GraphEditorCommandDescriptorCatalog.Create("connections.disconnect-all", GraphEditorCommandSourceKind.Retained, _owner.CommandPermissions.Connections.AllowDisconnect),
@@ -279,6 +304,15 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
                 _kernel.DisconnectIncoming(incomingNodeId);
                 return true;
 
+            case "connections.disconnect":
+                if (!TryGetRequiredArgument(command, "connectionId", out var disconnectConnectionId))
+                {
+                    return false;
+                }
+
+                _kernel.DisconnectConnection(disconnectConnectionId);
+                return true;
+
             case "connections.disconnect-outgoing":
                 if (!TryGetRequiredArgument(command, "nodeId", out var outgoingNodeId))
                 {
@@ -379,6 +413,11 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
         }
 
         ApplyOwnerStatusProjection();
+        if (!_suppressOwnerProjection)
+        {
+            _owner.NotifyKernelProjectedDocumentChanged(args);
+        }
+
         DocumentChanged?.Invoke(this, args);
     }
 
@@ -431,7 +470,7 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
 
     private void ApplyOwnerDocumentProjection(bool markClean)
     {
-        _owner.ApplyKernelDocument(_kernel.CreateDocumentSnapshot(), _kernel.CurrentStatusMessage, markClean);
+        _owner.ApplyKernelDocument(_kernel.CreateActiveScopeDocumentSnapshot(), _kernel.CurrentStatusMessage, markClean);
         _owner.ApplyKernelSelection(_kernel.GetSelectionSnapshot());
         _owner.ApplyKernelPendingConnection(_kernel.GetPendingConnectionSnapshot());
     }

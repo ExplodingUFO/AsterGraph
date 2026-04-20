@@ -67,6 +67,7 @@ public sealed partial class GraphEditorViewModel
     /// <summary>
     /// Attempts to persist one node expansion-state change through the session runtime surface path.
     /// </summary>
+    [Obsolete("Compatibility-only retained helper. Use Session.Commands.TrySetNodeExpansionState(node.Id, ...) for canonical runtime updates, drive size-based disclosure with Session.Commands.TrySetNodeSize(...), and inspect Session.Queries.GetNodeSurfaceSnapshots() for persisted node-surface state.")]
     public bool TrySetNodeExpansionState(NodeViewModel node, GraphNodeExpansionState expansionState)
     {
         ArgumentNullException.ThrowIfNull(node);
@@ -124,6 +125,7 @@ public sealed partial class GraphEditorViewModel
     /// <summary>
     /// Attempts to update one group's persisted per-edge padding envelope.
     /// </summary>
+    [Obsolete("Compatibility-only retained helper. Prefer fixed-frame group edits through Session.Commands.TrySetNodeGroupSize(...) and Session.Commands.TrySetNodeGroupPosition(...), then inspect Session.Queries.GetNodeGroupSnapshots() for canonical persisted bounds.")]
     public bool TrySetNodeGroupExtraPadding(string groupId, GraphPadding extraPadding, bool updateStatus = true)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(groupId);
@@ -432,6 +434,18 @@ public sealed partial class GraphEditorViewModel
     /// </summary>
     public void DeleteConnection(string connectionId)
         => _compatibilityCommands.DeleteConnection(connectionId);
+
+    /// <summary>
+    /// 断开指定连线。
+    /// </summary>
+    public void DisconnectConnection(string connectionId)
+        => _compatibilityCommands.DisconnectConnection(connectionId);
+
+    /// <summary>
+    /// 更新指定连线的纯展示注释文本。
+    /// </summary>
+    public bool TrySetConnectionNoteText(string connectionId, string? noteText, bool updateStatus = true)
+        => _kernel.TrySetConnectionNoteText(connectionId, noteText, updateStatus);
 
     /// <summary>
     /// 按实例标识查找连线视图模型。

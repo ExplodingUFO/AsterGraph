@@ -186,14 +186,12 @@ public sealed partial class GraphEditorViewModel
 
     private GraphDocument CreateCanonicalRetainedDocumentSnapshot()
     {
-        var kernelDocument = _kernel.CreateDocumentSnapshot();
-        var kernelNodes = kernelDocument.Nodes.ToDictionary(node => node.Id, StringComparer.Ordinal);
-        var kernelConnections = kernelDocument.Connections.ToDictionary(connection => connection.Id, StringComparer.Ordinal);
-        var retainedGroups = GraphEditorRetainedNodeGroupProjection.CreateResolvedGroups(kernelDocument.Groups ?? [], Nodes);
+        var activeKernelDocument = _kernel.CreateActiveScopeDocumentSnapshot();
+        var kernelNodes = activeKernelDocument.Nodes.ToDictionary(node => node.Id, StringComparer.Ordinal);
+        var kernelConnections = activeKernelDocument.Connections.ToDictionary(connection => connection.Id, StringComparer.Ordinal);
+        var retainedGroups = GraphEditorRetainedNodeGroupProjection.CreateResolvedGroups(activeKernelDocument.Groups ?? [], Nodes);
 
-        return new GraphDocument(
-            Title,
-            Description,
+        return _kernel.CreateDocumentSnapshotWithActiveScopeContents(
             Nodes
                 .Select(node => CreateCanonicalRetainedNodeSnapshot(node, kernelNodes))
                 .ToList(),

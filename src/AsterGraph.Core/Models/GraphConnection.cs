@@ -13,6 +13,7 @@ namespace AsterGraph.Core.Models;
 /// <param name="Label">Host-visible connection label.</param>
 /// <param name="AccentHex">Accent color used to render the connection.</param>
 /// <param name="ConversionId">Optional implicit-conversion identifier applied to the connection.</param>
+/// <param name="Presentation">Optional host-owned presentation metadata for the edge.</param>
 public sealed record GraphConnection(
     string Id,
     string SourceNodeId,
@@ -21,4 +22,5 @@ public sealed record GraphConnection(
     string TargetPortId,
     string Label,
     string AccentHex,
-    ConversionId? ConversionId = null);
+    ConversionId? ConversionId = null,
+    GraphEdgePresentation? Presentation = null);

@@ -26,6 +26,11 @@ public sealed class GraphEditorSessionTests
     private const string TargetNodeId = "tests.session.target-001";
     private const string SourcePortId = "out";
     private const string TargetPortId = "in";
+    private const string CompositeNodeId = "tests.session.composite-001";
+    private const string RootStandaloneNodeId = "tests.session.root-standalone-001";
+    private const string ChildGraphId = "graph-child-001";
+    private const string ChildSourceNodeId = "tests.session.child-source-001";
+    private const string ChildTargetNodeId = "tests.session.child-target-001";
 
     [Fact]
     public void IGraphEditorSession_ExposesCommandsQueriesAndEventsProperties()
@@ -193,6 +198,8 @@ public sealed class GraphEditorSessionTests
         AssertMethod(commandsType, nameof(IGraphEditorCommands.CompleteConnection), typeof(string), typeof(string));
         AssertMethod(commandsType, nameof(IGraphEditorCommands.CancelPendingConnection));
         AssertMethod(commandsType, nameof(IGraphEditorCommands.DeleteConnection), typeof(string));
+        AssertMethod(commandsType, nameof(IGraphEditorCommands.TrySetConnectionNoteText), typeof(string), typeof(string), typeof(bool));
+        Assert.Equal(typeof(bool), commandsType.GetMethod(nameof(IGraphEditorCommands.TrySetConnectionNoteText), [typeof(string), typeof(string), typeof(bool)])!.ReturnType);
         AssertMethod(commandsType, nameof(IGraphEditorCommands.BreakConnectionsForPort), typeof(string), typeof(string));
         AssertMethod(commandsType, nameof(IGraphEditorCommands.PanBy), typeof(double), typeof(double));
         AssertMethod(commandsType, nameof(IGraphEditorCommands.ZoomAt), typeof(double), typeof(GraphPoint));
@@ -201,6 +208,10 @@ public sealed class GraphEditorSessionTests
         AssertMethod(commandsType, nameof(IGraphEditorCommands.FitToViewport), typeof(bool));
         AssertMethod(commandsType, nameof(IGraphEditorCommands.CenterViewOnNode), typeof(string));
         AssertMethod(commandsType, nameof(IGraphEditorCommands.CenterViewAt), typeof(GraphPoint), typeof(bool));
+        AssertMethod(commandsType, nameof(IGraphEditorCommands.TryEnterCompositeChildGraph), typeof(string), typeof(bool));
+        Assert.Equal(typeof(bool), commandsType.GetMethod(nameof(IGraphEditorCommands.TryEnterCompositeChildGraph), [typeof(string), typeof(bool)])!.ReturnType);
+        AssertMethod(commandsType, nameof(IGraphEditorCommands.TryReturnToParentGraphScope), typeof(bool));
+        Assert.Equal(typeof(bool), commandsType.GetMethod(nameof(IGraphEditorCommands.TryReturnToParentGraphScope), [typeof(bool)])!.ReturnType);
         AssertMethod(commandsType, nameof(IGraphEditorCommands.SaveWorkspace));
         AssertMethod(commandsType, nameof(IGraphEditorCommands.LoadWorkspace));
         AssertMethod(commandsType, nameof(IGraphEditorCommands.TryExecuteCommand), typeof(GraphEditorCommandInvocationSnapshot));
@@ -242,6 +253,17 @@ public sealed class GraphEditorSessionTests
         Assert.Equal(
             typeof(IReadOnlyList<GraphEditorNodeParameterSnapshot>),
             queriesType.GetMethod(nameof(IGraphEditorQueries.GetSelectedNodeParameterSnapshots))!.ReturnType);
+
+        AssertMethod(queriesType, nameof(IGraphEditorQueries.GetScopeNavigationSnapshot));
+        Assert.Equal(
+            typeof(GraphEditorScopeNavigationSnapshot),
+            queriesType.GetMethod(nameof(IGraphEditorQueries.GetScopeNavigationSnapshot))!.ReturnType);
+        Assert.NotNull(typeof(GraphEditorScopeNavigationSnapshot).GetProperty(nameof(GraphEditorScopeNavigationSnapshot.CurrentScopeId)));
+        Assert.NotNull(typeof(GraphEditorScopeNavigationSnapshot).GetProperty(nameof(GraphEditorScopeNavigationSnapshot.ParentScopeId)));
+        Assert.NotNull(typeof(GraphEditorScopeNavigationSnapshot).GetProperty(nameof(GraphEditorScopeNavigationSnapshot.CanNavigateToParent)));
+        Assert.NotNull(typeof(GraphEditorScopeNavigationSnapshot).GetProperty(nameof(GraphEditorScopeNavigationSnapshot.Breadcrumbs)));
+        Assert.NotNull(typeof(GraphEditorScopeBreadcrumbSnapshot).GetProperty(nameof(GraphEditorScopeBreadcrumbSnapshot.ScopeId)));
+        Assert.NotNull(typeof(GraphEditorScopeBreadcrumbSnapshot).GetProperty(nameof(GraphEditorScopeBreadcrumbSnapshot.Title)));
 
         AssertMethod(queriesType, nameof(IGraphEditorQueries.GetCommandDescriptors));
         Assert.Equal(
@@ -415,6 +437,59 @@ public sealed class GraphEditorSessionTests
         Assert.NotNull(viewportChanged);
         Assert.Equal(122, viewportChanged!.PanX);
         Assert.Equal(114, viewportChanged.PanY);
+    }
+
+    [Fact]
+    public void AsterGraphEditorFactory_CreateSession_NavigatesCompositeChildGraph_AndEditsWithinActiveScope()
+    {
+        var definitionId = new NodeDefinitionId("tests.session.scope-navigation");
+        var session = AsterGraphEditorFactory.CreateSession(new AsterGraphEditorOptions
+        {
+            Document = CreateScopedNavigationDocument(definitionId),
+            NodeCatalog = CreateCatalog(definitionId),
+            CompatibilityService = new DefaultPortCompatibilityService(),
+        });
+
+        var rootNavigation = session.Queries.GetScopeNavigationSnapshot();
+        Assert.Equal("graph-root", rootNavigation.CurrentScopeId);
+        Assert.Null(rootNavigation.ParentScopeId);
+        Assert.False(rootNavigation.CanNavigateToParent);
+        Assert.Equal(["graph-root"], rootNavigation.Breadcrumbs.Select(breadcrumb => breadcrumb.ScopeId));
+        Assert.Equal(
+            [CompositeNodeId, RootStandaloneNodeId],
+            session.Queries.GetNodePositions().Select(position => position.NodeId).OrderBy(id => id, StringComparer.Ordinal));
+
+        Assert.True(session.Commands.TryEnterCompositeChildGraph(CompositeNodeId, updateStatus: false));
+
+        var childNavigation = session.Queries.GetScopeNavigationSnapshot();
+        Assert.Equal(ChildGraphId, childNavigation.CurrentScopeId);
+        Assert.Equal("graph-root", childNavigation.ParentScopeId);
+        Assert.True(childNavigation.CanNavigateToParent);
+        Assert.Equal(
+            ["graph-root", ChildGraphId],
+            childNavigation.Breadcrumbs.Select(breadcrumb => breadcrumb.ScopeId));
+        Assert.Equal(
+            [ChildSourceNodeId, ChildTargetNodeId],
+            session.Queries.GetNodePositions().Select(position => position.NodeId).OrderBy(id => id, StringComparer.Ordinal));
+
+        var compatibleTarget = Assert.Single(session.Queries.GetCompatiblePortTargets(ChildSourceNodeId, SourcePortId));
+        Assert.Equal(ChildTargetNodeId, compatibleTarget.NodeId);
+
+        session.Commands.AddNode(definitionId, new GraphPoint(360, 220));
+
+        var document = session.Queries.CreateDocumentSnapshot();
+        var rootScope = Assert.Single(document.GraphScopes, scope => scope.Id == "graph-root");
+        var childScope = Assert.Single(document.GraphScopes, scope => scope.Id == ChildGraphId);
+        Assert.Equal(
+            [CompositeNodeId, RootStandaloneNodeId],
+            rootScope.Nodes.Select(node => node.Id).OrderBy(id => id, StringComparer.Ordinal));
+        Assert.Equal(3, childScope.Nodes.Count);
+
+        Assert.True(session.Commands.TryReturnToParentGraphScope(updateStatus: false));
+        Assert.Equal("graph-root", session.Queries.GetScopeNavigationSnapshot().CurrentScopeId);
+        Assert.Equal(
+            [CompositeNodeId, RootStandaloneNodeId],
+            session.Queries.GetNodePositions().Select(position => position.NodeId).OrderBy(id => id, StringComparer.Ordinal));
     }
 
     [Fact]
@@ -749,7 +824,7 @@ public sealed class GraphEditorSessionTests
             node:node-inspect~Inspect Source Node~inspect~False~-~False~nodes.inspect(nodeId=tests.session.source-001)~[-]||node-center~Center View Here~center~True~-~False~viewport.center-node(nodeId=tests.session.source-001)~[-]||node-sep-1~~-~False~-~True~-~[-]||node-delete~Delete Node~delete~False~-~False~nodes.delete-by-id(nodeId=tests.session.source-001)~[-]||node-duplicate~Duplicate Node~duplicate~False~-~False~nodes.duplicate(nodeId=tests.session.source-001)~[-]||node-disconnect~Disconnect~disconnect~True~-~False~-~[node-disconnect-in~Incoming~disconnect~True~-~False~connections.disconnect-incoming(nodeId=tests.session.source-001)~[-]>>node-disconnect-out~Outgoing~disconnect~True~-~False~connections.disconnect-outgoing(nodeId=tests.session.source-001)~[-]>>node-disconnect-all~All~disconnect~True~-~False~connections.disconnect-all(nodeId=tests.session.source-001)~[-]]||node-create-connection~Create Connection From~connect~True~-~False~-~[node-connect-tests.session.source-001-out~Output~-~True~-~False~-~[compatible-node-tests.session.target-001~Target Node~-~True~-~False~-~[compatible-port-tests.session.target-001-in~Input~connect~True~-~False~connections.connect(sourceNodeId=tests.session.source-001,sourcePortId=out,targetNodeId=tests.session.target-001,targetPortId=in)~[-]]]]
             port-output:port-start~Start Connection~connect~True~-~False~connections.start(sourceNodeId=tests.session.source-001,sourcePortId=out)~[-]||port-compatible-targets~Compatible Targets~compatible~True~-~False~-~[compatible-node-tests.session.target-001~Target Node~-~True~-~False~-~[compatible-port-tests.session.target-001-in~Input~connect~True~-~False~connections.connect(sourceNodeId=tests.session.source-001,sourcePortId=out,targetNodeId=tests.session.target-001,targetPortId=in)~[-]]]||port-sep-1~~-~False~-~True~-~[-]||port-info~Type: float~type~False~-~False~-~[-]
             port-input:port-break-connections~Break Connections~disconnect~True~-~False~connections.break-port(nodeId=tests.session.target-001,portId=in)~[-]||port-sep-2~~-~False~-~True~-~[-]||port-info~Type: float~type~False~-~False~-~[-]
-            connection:connection-delete~Delete Connection~delete~True~-~False~connections.delete(connectionId=connection-001)~[-]||connection-conversion~No implicit conversion~conversion~False~-~False~-~[-]
+            connection:connection-disconnect~Disconnect Connection~disconnect~True~-~False~connections.disconnect(connectionId=connection-001)~[-]||connection-conversion~No implicit conversion~conversion~False~-~False~-~[-]
             """;
 
         Assert.Equal(expected.ReplaceLineEndings("\n"), signature.ReplaceLineEndings("\n"));
@@ -905,14 +980,14 @@ public sealed class GraphEditorSessionTests
         Assert.Equal(GraphEditorCommandSourceKind.Retained, duplicate.Source);
         Assert.True(duplicate.CanExecute);
 
-        var retainedDisconnectAll = retainedCommands["connections.disconnect-all"];
-        var runtimeDisconnectAll = runtimeCommands["connections.disconnect-all"];
+        var retainedDisconnect = retainedCommands["connections.disconnect"];
+        var runtimeDisconnect = runtimeCommands["connections.disconnect"];
 
-        Assert.Equal("Disconnect All", retainedDisconnectAll.Title);
-        Assert.Equal("connections", retainedDisconnectAll.Group);
-        Assert.Equal("disconnect", retainedDisconnectAll.IconKey);
-        Assert.Equal(GraphEditorCommandSourceKind.Retained, retainedDisconnectAll.Source);
-        Assert.Equal(GraphEditorCommandSourceKind.Kernel, runtimeDisconnectAll.Source);
+        Assert.Equal("Disconnect Connection", retainedDisconnect.Title);
+        Assert.Equal("connections", retainedDisconnect.Group);
+        Assert.Equal("disconnect", retainedDisconnect.IconKey);
+        Assert.Equal(GraphEditorCommandSourceKind.Retained, retainedDisconnect.Source);
+        Assert.Equal(GraphEditorCommandSourceKind.Kernel, runtimeDisconnect.Source);
 
         var undo = runtimeCommands["history.undo"];
         Assert.Equal("Undo", undo.Title);
@@ -1013,6 +1088,7 @@ public sealed class GraphEditorSessionTests
         "connections.connect",
         "connections.cancel",
         "connections.delete",
+        "connections.disconnect",
         "connections.break-port",
         "history.undo",
         "history.redo",
@@ -1023,6 +1099,8 @@ public sealed class GraphEditorSessionTests
         "viewport.fit",
         "viewport.reset",
         "viewport.center-node",
+        "scopes.enter",
+        "scopes.exit",
         "workspace.save",
         "workspace.load",
     ];
@@ -1091,6 +1169,75 @@ public sealed class GraphEditorSessionTests
                     definitionId),
             },
             new List<GraphConnection>());
+
+    private static GraphDocument CreateScopedNavigationDocument(NodeDefinitionId definitionId)
+        => GraphDocument.CreateScoped(
+            "Scoped Session Graph",
+            "Runtime session scope-navigation coverage.",
+            "graph-root",
+            [
+                new GraphScope(
+                    "graph-root",
+                    [
+                        new GraphNode(
+                            CompositeNodeId,
+                            "Composite Node",
+                            "Tests",
+                            "Runtime",
+                            "Composite shell for scope navigation tests.",
+                            new GraphPoint(120, 160),
+                            new GraphSize(260, 180),
+                            [],
+                            [],
+                            "#A67CF5",
+                            null,
+                            [],
+                            null,
+                            new GraphCompositeNode(ChildGraphId, [], [])),
+                        new GraphNode(
+                            RootStandaloneNodeId,
+                            "Root Standalone",
+                            "Tests",
+                            "Runtime",
+                            "Root scope node that should remain visible only in the root graph.",
+                            new GraphPoint(460, 180),
+                            new GraphSize(240, 160),
+                            [new GraphPort(TargetPortId, "Input", PortDirection.Input, "float", "#F3B36B", new PortTypeId("float"))],
+                            [],
+                            "#F3B36B",
+                            definitionId),
+                    ],
+                    []),
+                new GraphScope(
+                    ChildGraphId,
+                    [
+                        new GraphNode(
+                            ChildSourceNodeId,
+                            "Child Source",
+                            "Tests",
+                            "Runtime",
+                            "Child scope source node.",
+                            new GraphPoint(80, 100),
+                            new GraphSize(220, 150),
+                            [],
+                            [new GraphPort(SourcePortId, "Output", PortDirection.Output, "float", "#6AD5C4", new PortTypeId("float"))],
+                            "#6AD5C4",
+                            definitionId),
+                        new GraphNode(
+                            ChildTargetNodeId,
+                            "Child Target",
+                            "Tests",
+                            "Runtime",
+                            "Child scope target node.",
+                            new GraphPoint(360, 140),
+                            new GraphSize(220, 150),
+                            [new GraphPort(TargetPortId, "Input", PortDirection.Input, "float", "#F3B36B", new PortTypeId("float"))],
+                            [],
+                            "#F3B36B",
+                            definitionId),
+                    ],
+                    []),
+            ]);
 
     private static NodeCatalog CreateCatalog(NodeDefinitionId definitionId)
     {

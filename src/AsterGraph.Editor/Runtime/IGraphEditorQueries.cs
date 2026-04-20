@@ -72,6 +72,20 @@ public interface IGraphEditorQueries
         => throw new NotSupportedException();
 
     /// <summary>
+    /// Gets host-facing composite node snapshots for the current root graph.
+    /// </summary>
+    /// <returns>A stable read-only composite snapshot collection.</returns>
+    IReadOnlyList<GraphEditorCompositeNodeSnapshot> GetCompositeNodeSnapshots()
+        => throw new NotSupportedException();
+
+    /// <summary>
+    /// Gets the current active-scope navigation snapshot.
+    /// </summary>
+    /// <returns>Stable scope navigation metadata for hosted navigation surfaces.</returns>
+    GraphEditorScopeNavigationSnapshot GetScopeNavigationSnapshot()
+        => throw new NotSupportedException();
+
+    /// <summary>
     /// Gets persisted editor-only node groups for the current document.
     /// </summary>
     /// <returns>A stable read-only group collection.</returns>

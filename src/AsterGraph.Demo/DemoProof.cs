@@ -1,9 +1,17 @@
 using System.Diagnostics;
 using System.Globalization;
+using AsterGraph.Abstractions.Catalog;
 using AsterGraph.Abstractions.Definitions;
+using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Avalonia.Hosting;
+using AsterGraph.Core.Compatibility;
 using AsterGraph.Core.Models;
+using AsterGraph.Demo.Definitions;
 using AsterGraph.Demo.ViewModels;
+using AsterGraph.Editor.Catalog;
+using AsterGraph.Editor.Hosting;
+using AsterGraph.Editor.Runtime;
+using AsterGraph.Editor.ViewModels;
 
 namespace AsterGraph.Demo;
 
@@ -13,12 +21,23 @@ public sealed record DemoProofResult(
     bool CommandSurfaceOk,
     bool TieredNodeSurfaceOk,
     bool FixedGroupFrameOk,
+    bool CompositeScopeOk,
+    bool EdgeNoteOk,
+    bool DisconnectFlowOk,
     double StartupMs,
     double InspectorProjectionMs,
     double PluginScanMs,
     double CommandLatencyMs)
 {
-    public bool IsOk => TrustTransparencyOk && ShellWorkflowOk && CommandSurfaceOk && TieredNodeSurfaceOk && FixedGroupFrameOk;
+    public bool IsOk =>
+        TrustTransparencyOk
+        && ShellWorkflowOk
+        && CommandSurfaceOk
+        && TieredNodeSurfaceOk
+        && FixedGroupFrameOk
+        && CompositeScopeOk
+        && EdgeNoteOk
+        && DisconnectFlowOk;
 
     public IReadOnlyList<string> MetricLines =>
     [
@@ -146,6 +165,7 @@ public static class DemoProof
             && shell.Editor.Nodes.Count == baselineNodeCount
             && shell.RecentWorkspacePaths.Any(path => string.Equals(path, workspacePath, StringComparison.OrdinalIgnoreCase))
             && shell.ShellWorkflowLines.Any(line => line.Contains("workspace", StringComparison.OrdinalIgnoreCase) || line.Contains("工作区", StringComparison.Ordinal));
+        var (compositeScopeOk, edgeNoteOk, disconnectFlowOk) = RunSemanticGraphProof(storageRoot);
 
         return new DemoProofResult(
             trustTransparencyOk,
@@ -153,6 +173,9 @@ public static class DemoProof
             commandSurfaceOk,
             tieredNodeSurfaceOk,
             fixedGroupFrameOk,
+            compositeScopeOk,
+            edgeNoteOk,
+            disconnectFlowOk,
             startupMs,
             inspectorProjectionMs,
             pluginScanMs,
@@ -166,4 +189,257 @@ public static class DemoProof
         stopwatch.Stop();
         return stopwatch.Elapsed.TotalMilliseconds;
     }
+
+    private static (bool CompositeScopeOk, bool EdgeNoteOk, bool DisconnectFlowOk) RunSemanticGraphProof(string storageRoot)
+    {
+        var catalog = CreateProofCatalog();
+        var compositeEditor = CreateProofEditor(
+            CreateCompositeProofDocument(catalog),
+            catalog,
+            Path.Combine(storageRoot, "semantic-composite"));
+        var edgeEditor = CreateProofEditor(
+            CreateEdgeProofDocument(catalog),
+            catalog,
+            Path.Combine(storageRoot, "semantic-edge"));
+
+        var compositeScopeOk = RunCompositeScopeProof(compositeEditor);
+        var (edgeNoteOk, disconnectFlowOk) = RunEdgeSemanticsProof(edgeEditor);
+        return (compositeScopeOk, edgeNoteOk, disconnectFlowOk);
+    }
+
+    private static bool RunCompositeScopeProof(GraphEditorViewModel editor)
+    {
+        var rootGraphId = editor.CreateDocumentSnapshot().RootGraphId;
+        editor.Session.Commands.SetSelection(["noise", "gradient"], "gradient", updateStatus: false);
+
+        var groupId = editor.Session.Commands.TryCreateNodeGroupFromSelection("Semantic Composite");
+        if (string.IsNullOrWhiteSpace(groupId))
+        {
+            return false;
+        }
+
+        var compositeNodeId = editor.Session.Commands.TryPromoteNodeGroupToComposite(groupId, "Semantic Composite", updateStatus: false);
+        if (string.IsNullOrWhiteSpace(compositeNodeId))
+        {
+            return false;
+        }
+
+        var inputBoundaryPortId = editor.Session.Commands.TryExposeCompositePort(
+            compositeNodeId,
+            "noise",
+            "phase",
+            "Composite Phase",
+            updateStatus: false);
+        var outputBoundaryPortId = editor.Session.Commands.TryExposeCompositePort(
+            compositeNodeId,
+            "gradient",
+            "tint",
+            "Composite Tint",
+            updateStatus: false);
+        if (string.IsNullOrWhiteSpace(inputBoundaryPortId) || string.IsNullOrWhiteSpace(outputBoundaryPortId))
+        {
+            return false;
+        }
+
+        var compositeSnapshot = editor.Session.Queries.GetCompositeNodeSnapshots()
+            .SingleOrDefault(snapshot => string.Equals(snapshot.NodeId, compositeNodeId, StringComparison.Ordinal));
+        if (compositeSnapshot is null)
+        {
+            return false;
+        }
+
+        var inputPort = compositeSnapshot.Inputs.SingleOrDefault(port => string.Equals(port.Id, inputBoundaryPortId, StringComparison.Ordinal));
+        var outputPort = compositeSnapshot.Outputs.SingleOrDefault(port => string.Equals(port.Id, outputBoundaryPortId, StringComparison.Ordinal));
+        if (inputPort is null
+            || outputPort is null
+            || !string.Equals(inputPort.Label, "Composite Phase", StringComparison.Ordinal)
+            || !string.Equals(outputPort.Label, "Composite Tint", StringComparison.Ordinal)
+            || !string.Equals(inputPort.ChildNodeId, "noise", StringComparison.Ordinal)
+            || !string.Equals(inputPort.ChildPortId, "phase", StringComparison.Ordinal)
+            || !string.Equals(outputPort.ChildNodeId, "gradient", StringComparison.Ordinal)
+            || !string.Equals(outputPort.ChildPortId, "tint", StringComparison.Ordinal))
+        {
+            return false;
+        }
+
+        if (!editor.Session.Commands.TryEnterCompositeChildGraph(compositeNodeId, updateStatus: false))
+        {
+            return false;
+        }
+
+        var childScope = editor.Session.Queries.GetScopeNavigationSnapshot();
+        var childNodeIds = editor.Nodes
+            .Select(node => node.Id)
+            .OrderBy(id => id, StringComparer.Ordinal)
+            .ToArray();
+        if (!childScope.CanNavigateToParent
+            || !string.Equals(childScope.ParentScopeId, rootGraphId, StringComparison.Ordinal)
+            || !string.Equals(childScope.CurrentScopeId, compositeSnapshot.ChildGraphId, StringComparison.Ordinal)
+            || childScope.Breadcrumbs.Count != 2
+            || !string.Equals(childScope.Breadcrumbs[0].ScopeId, rootGraphId, StringComparison.Ordinal)
+            || !string.Equals(childScope.Breadcrumbs[0].Title, "Semantic Composite Proof", StringComparison.Ordinal)
+            || !string.Equals(childScope.Breadcrumbs[1].ScopeId, compositeSnapshot.ChildGraphId, StringComparison.Ordinal)
+            || !string.Equals(childScope.Breadcrumbs[1].Title, "Semantic Composite", StringComparison.Ordinal)
+            || !childNodeIds.SequenceEqual(["gradient", "noise"], StringComparer.Ordinal))
+        {
+            return false;
+        }
+
+        if (!editor.Session.Commands.TryReturnToParentGraphScope(updateStatus: false))
+        {
+            return false;
+        }
+
+        var rootScope = editor.Session.Queries.GetScopeNavigationSnapshot();
+        var rootNodeIds = editor.Nodes
+            .Select(node => node.Id)
+            .OrderBy(id => id, StringComparer.Ordinal)
+            .ToArray();
+        return !rootScope.CanNavigateToParent
+            && string.Equals(rootScope.CurrentScopeId, rootGraphId, StringComparison.Ordinal)
+            && rootScope.Breadcrumbs.Count == 1
+            && string.Equals(rootScope.Breadcrumbs[0].Title, "Semantic Composite Proof", StringComparison.Ordinal)
+            && rootNodeIds.SequenceEqual([compositeNodeId], StringComparer.Ordinal);
+    }
+
+    private static (bool EdgeNoteOk, bool DisconnectFlowOk) RunEdgeSemanticsProof(GraphEditorViewModel editor)
+    {
+        var lightNode = editor.FindNode("light");
+        if (lightNode is null)
+        {
+            return (false, false);
+        }
+
+        var pulsePort = lightNode.Inputs.SingleOrDefault(port => string.Equals(port.Id, "pulse", StringComparison.Ordinal));
+        var connection = editor.CreateDocumentSnapshot().Connections.SingleOrDefault();
+        if (pulsePort is null || connection is null)
+        {
+            return (false, false);
+        }
+
+        editor.SelectSingleNode(lightNode, updateStatus: false);
+        var edgeNoteOk =
+            editor.Session.Commands.TrySetConnectionNoteText(connection.Id, "Preview branch", updateStatus: false)
+            && string.Equals(
+                editor.CreateDocumentSnapshot().Connections.Single().Presentation?.NoteText,
+                "Preview branch",
+                StringComparison.Ordinal);
+
+        var disconnectFlowOk =
+            editor.Session.Commands.TryExecuteCommand(
+                new GraphEditorCommandInvocationSnapshot(
+                    "connections.disconnect",
+                    [new GraphEditorCommandArgumentSnapshot("connectionId", connection.Id)]));
+        var updatedLightNode = editor.FindNode("light");
+        var updatedPulsePort = updatedLightNode?.Inputs.SingleOrDefault(port => string.Equals(port.Id, "pulse", StringComparison.Ordinal));
+        disconnectFlowOk =
+            disconnectFlowOk
+            && editor.CreateDocumentSnapshot().Connections.Count == 0
+            && updatedLightNode is not null
+            && updatedPulsePort is not null
+            && !editor.HasIncomingConnection(updatedLightNode, updatedPulsePort)
+            && string.Equals(editor.ResolveInlineParameter(updatedLightNode, updatedPulsePort)?.Key, "pulseBias", StringComparison.Ordinal);
+
+        return (edgeNoteOk, disconnectFlowOk);
+    }
+
+    private static NodeCatalog CreateProofCatalog()
+    {
+        var catalog = new NodeCatalog();
+        catalog.RegisterProvider(new DemoNodeDefinitionProvider());
+        return catalog;
+    }
+
+    private static GraphEditorViewModel CreateProofEditor(GraphDocument document, INodeCatalog catalog, string storageRootPath)
+    {
+        Directory.CreateDirectory(storageRootPath);
+        return AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
+        {
+            Document = document,
+            NodeCatalog = catalog,
+            CompatibilityService = new DefaultPortCompatibilityService(),
+            StorageRootPath = storageRootPath,
+        });
+    }
+
+    private static GraphDocument CreateCompositeProofDocument(INodeCatalog catalog)
+        => new(
+            "Semantic Composite Proof",
+            "Promotes a grouped authoring cluster into a scoped composite and returns to the root graph.",
+            [
+                CreateProofNode(catalog, "noise", new NodeDefinitionId("aster.demo.noise-field"), new GraphPoint(120, 80)),
+                CreateProofNode(catalog, "gradient", new NodeDefinitionId("aster.demo.palette-ramp"), new GraphPoint(420, 120)),
+            ],
+            [],
+            []);
+
+    private static GraphDocument CreateEdgeProofDocument(INodeCatalog catalog)
+        => new(
+            "Edge Semantics Proof",
+            "Verifies edge annotations and canonical single-edge disconnect behavior.",
+            [
+                CreateProofNode(catalog, "time", new NodeDefinitionId("aster.demo.time-driver"), new GraphPoint(80, 120)),
+                CreateProofNode(catalog, "light", new NodeDefinitionId("aster.demo.lighting-mix"), new GraphPoint(420, 90)),
+            ],
+            [
+                CreateProofConnection("time", "pulse", "light", "pulse", "animated rim", "#78F0E5"),
+            ],
+            []);
+
+    private static GraphNode CreateProofNode(
+        INodeCatalog catalog,
+        string instanceId,
+        NodeDefinitionId definitionId,
+        GraphPoint position,
+        string? groupId = null,
+        GraphNodeSurfaceState? surface = null)
+    {
+        if (!catalog.TryGetDefinition(definitionId, out var definition) || definition is null)
+        {
+            throw new InvalidOperationException($"Missing demo node definition '{definitionId}'.");
+        }
+
+        return new GraphNode(
+            instanceId,
+            definition.DisplayName,
+            definition.Category,
+            definition.Subtitle,
+            definition.Description ?? string.Empty,
+            position,
+            new GraphSize(definition.DefaultWidth, definition.DefaultHeight),
+            definition.InputPorts.Select(port => CreateProofPort(port, PortDirection.Input)).ToList(),
+            definition.OutputPorts.Select(port => CreateProofPort(port, PortDirection.Output)).ToList(),
+            definition.AccentHex,
+            definition.Id,
+            definition.Parameters
+                .Select(parameter => new GraphParameterValue(parameter.Key, parameter.ValueType, parameter.DefaultValue))
+                .ToList(),
+            surface ?? new GraphNodeSurfaceState(GraphNodeExpansionState.Collapsed, groupId));
+    }
+
+    private static GraphPort CreateProofPort(PortDefinition definition, PortDirection direction)
+        => new(
+            definition.Key,
+            definition.DisplayName,
+            direction,
+            definition.TypeId.Value,
+            definition.AccentHex,
+            definition.TypeId,
+            definition.InlineParameterKey);
+
+    private static GraphConnection CreateProofConnection(
+        string sourceNodeId,
+        string sourcePortId,
+        string targetNodeId,
+        string targetPortId,
+        string label,
+        string accentHex)
+        => new(
+            $"{sourceNodeId}.{sourcePortId}->{targetNodeId}.{targetPortId}",
+            sourceNodeId,
+            sourcePortId,
+            targetNodeId,
+            targetPortId,
+            label,
+            accentHex);
 }

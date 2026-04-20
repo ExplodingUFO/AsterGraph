@@ -476,13 +476,15 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
         }
         else
         {
-            stack.Children.Add(new NodeParameterEditorHost
+            var editorHost = new NodeParameterEditorHost
             {
                 Parameter = parameter,
                 TemplateKey = templateKey,
                 NodeParameterEditorRegistry = nodeParameterEditorRegistry,
                 Usage = NodeParameterEditorUsage.NodeInline,
-            });
+            };
+            editorHost.ApplyTemplate();
+            stack.Children.Add(editorHost);
         }
 
         var help = new TextBlock

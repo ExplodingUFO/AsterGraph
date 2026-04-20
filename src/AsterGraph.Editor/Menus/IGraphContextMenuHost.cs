@@ -80,6 +80,8 @@ internal interface IGraphContextMenuHost
 
     void DeleteConnection(string connectionId);
 
+    void DisconnectConnection(string connectionId);
+
     void ConnectPorts(string sourceNodeId, string sourcePortId, string targetNodeId, string targetPortId);
 
     NodeViewModel? FindNode(string nodeId);

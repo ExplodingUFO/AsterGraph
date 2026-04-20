@@ -166,6 +166,51 @@ internal sealed class GraphEditorKernelDocumentMutator
             connection);
     }
 
+    public GraphEditorKernelConnectionNoteMutationResult SetConnectionNoteText(
+        GraphDocument document,
+        string connectionId,
+        string? noteText)
+    {
+        ArgumentNullException.ThrowIfNull(document);
+        ArgumentException.ThrowIfNullOrWhiteSpace(connectionId);
+
+        var normalizedNoteText = string.IsNullOrWhiteSpace(noteText)
+            ? null
+            : noteText.Trim();
+        GraphConnection? updatedConnection = null;
+        var updatedConnections = document.Connections
+            .Select(connection =>
+            {
+                if (!string.Equals(connection.Id, connectionId, StringComparison.Ordinal))
+                {
+                    return connection;
+                }
+
+                var currentNoteText = string.IsNullOrWhiteSpace(connection.Presentation?.NoteText)
+                    ? null
+                    : connection.Presentation.NoteText.Trim();
+                if (string.Equals(currentNoteText, normalizedNoteText, StringComparison.Ordinal))
+                {
+                    return connection;
+                }
+
+                updatedConnection = connection with
+                {
+                    Presentation = normalizedNoteText is null
+                        ? null
+                        : new GraphEdgePresentation(normalizedNoteText),
+                };
+                return updatedConnection;
+            })
+            .ToList();
+
+        return updatedConnection is null
+            ? GraphEditorKernelConnectionNoteMutationResult.NotFound(document)
+            : new GraphEditorKernelConnectionNoteMutationResult(
+                document with { Connections = updatedConnections },
+                updatedConnection);
+    }
+
     public GraphEditorKernelRemoveConnectionsResult RemoveConnections(
         GraphDocument document,
         Func<GraphConnection, bool> predicate)
@@ -682,6 +727,259 @@ internal sealed class GraphEditorKernelDocumentMutator
             changedNodeIds);
     }
 
+    public GraphEditorKernelCompositePromotionResult PromoteNodeGroupToComposite(
+        GraphDocument document,
+        string groupId,
+        string compositeNodeId,
+        string childGraphId,
+        string? title)
+    {
+        ArgumentNullException.ThrowIfNull(document);
+        ArgumentException.ThrowIfNullOrWhiteSpace(groupId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(compositeNodeId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(childGraphId);
+
+        var group = (document.Groups ?? [])
+            .FirstOrDefault(candidate => string.Equals(candidate.Id, groupId, StringComparison.Ordinal));
+        if (group is null)
+        {
+            return GraphEditorKernelCompositePromotionResult.Failed(document, "No matching group was found for promotion.");
+        }
+
+        var nodesById = document.Nodes.ToDictionary(node => node.Id, StringComparer.Ordinal);
+        var memberNodeIds = group.NodeIds
+            .Where(nodeId => nodesById.ContainsKey(nodeId))
+            .Distinct(StringComparer.Ordinal)
+            .ToList();
+        if (memberNodeIds.Count == 0)
+        {
+            return GraphEditorKernelCompositePromotionResult.Failed(document, "Groups must contain at least one node before promotion.");
+        }
+
+        var memberNodeIdSet = memberNodeIds.ToHashSet(StringComparer.Ordinal);
+        var crossBoundaryConnections = document.Connections
+            .Where(connection => memberNodeIdSet.Contains(connection.SourceNodeId) ^ memberNodeIdSet.Contains(connection.TargetNodeId))
+            .ToList();
+        if (crossBoundaryConnections.Count > 0)
+        {
+            return GraphEditorKernelCompositePromotionResult.Failed(document, "Cannot promote groups with cross-boundary connections yet.");
+        }
+
+        var childNodes = memberNodeIds
+            .Select(nodeId => UpdateNodeGroupId(nodesById[nodeId], null))
+            .ToList();
+        var childConnections = document.Connections
+            .Where(connection => memberNodeIdSet.Contains(connection.SourceNodeId) && memberNodeIdSet.Contains(connection.TargetNodeId))
+            .ToList();
+        var compositeTitle = string.IsNullOrWhiteSpace(title)
+            ? group.Title
+            : title;
+        var compositeNode = new GraphNode(
+            compositeNodeId,
+            compositeTitle,
+            "Composite",
+            "Composite",
+            $"Promoted from group {group.Title}.",
+            group.Position,
+            group.Size,
+            [],
+            [],
+            "#A67CF5",
+            null,
+            [],
+            null,
+            new GraphCompositeNode(childGraphId, [], []));
+
+        var rootNodes = document.Nodes
+            .Where(node => !memberNodeIdSet.Contains(node.Id))
+            .Concat([compositeNode])
+            .ToList();
+        var rootConnections = document.Connections
+            .Where(connection => !memberNodeIdSet.Contains(connection.SourceNodeId) && !memberNodeIdSet.Contains(connection.TargetNodeId))
+            .ToList();
+        var rootGroups = (document.Groups ?? [])
+            .Where(candidate => !string.Equals(candidate.Id, groupId, StringComparison.Ordinal))
+            .ToList();
+        var childScopes = document.GraphScopes
+            .Where(scope => !string.Equals(scope.Id, document.RootGraphId, StringComparison.Ordinal)
+                && !string.Equals(scope.Id, childGraphId, StringComparison.Ordinal))
+            .ToList();
+        childScopes.Add(new GraphScope(childGraphId, childNodes, childConnections, []));
+
+        var updatedDocument = SyncNodeGroupMemberships(new GraphDocument(
+            document.Title,
+            document.Description,
+            rootNodes,
+            rootConnections,
+            rootGroups,
+            document.RootGraphId,
+            childScopes));
+        var promotedNode = updatedDocument.Nodes
+            .FirstOrDefault(node => string.Equals(node.Id, compositeNodeId, StringComparison.Ordinal));
+
+        return promotedNode is null
+            ? GraphEditorKernelCompositePromotionResult.Failed(document, "Promotion did not produce a composite node.")
+            : new GraphEditorKernelCompositePromotionResult(updatedDocument, promotedNode, null);
+    }
+
+    public GraphEditorKernelCompositePortMutationResult ExposeCompositePort(
+        GraphDocument document,
+        string compositeNodeId,
+        string childNodeId,
+        string childPortId,
+        string boundaryPortId,
+        string? label)
+    {
+        ArgumentNullException.ThrowIfNull(document);
+        ArgumentException.ThrowIfNullOrWhiteSpace(compositeNodeId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(childNodeId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(childPortId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(boundaryPortId);
+
+        if (!TryResolveCompositeContext(
+                document,
+                compositeNodeId,
+                out var compositeNode,
+                out var composite,
+                out var childScope,
+                out var failureReason))
+        {
+            return GraphEditorKernelCompositePortMutationResult.Failed(document, failureReason);
+        }
+
+        var childNode = childScope!.Nodes.FirstOrDefault(node => string.Equals(node.Id, childNodeId, StringComparison.Ordinal));
+        if (childNode is null)
+        {
+            return GraphEditorKernelCompositePortMutationResult.Failed(document, "No matching child node was found for the composite port exposure.");
+        }
+
+        var childPort = childNode.Inputs.FirstOrDefault(port => string.Equals(port.Id, childPortId, StringComparison.Ordinal))
+            ?? childNode.Outputs.FirstOrDefault(port => string.Equals(port.Id, childPortId, StringComparison.Ordinal));
+        if (childPort is null)
+        {
+            return GraphEditorKernelCompositePortMutationResult.Failed(document, "No matching child port was found for the composite port exposure.");
+        }
+
+        var currentBoundaryPorts = childPort.Direction == PortDirection.Input
+            ? composite!.Inputs?.ToList() ?? []
+            : composite!.Outputs?.ToList() ?? [];
+        if (currentBoundaryPorts.Any(port => string.Equals(port.ChildNodeId, childNodeId, StringComparison.Ordinal)
+            && string.Equals(port.ChildPortId, childPortId, StringComparison.Ordinal)
+            && port.Direction == childPort.Direction))
+        {
+            return GraphEditorKernelCompositePortMutationResult.Failed(document, "That child port is already exposed on the composite node.");
+        }
+
+        var boundaryPort = new GraphCompositeBoundaryPort(
+            boundaryPortId,
+            string.IsNullOrWhiteSpace(label) ? childPort.Label : label,
+            childPort.Direction,
+            childPort.DataType,
+            childPort.AccentHex,
+            childNodeId,
+            childPortId,
+            childPort.TypeId,
+            childPort.InlineParameterKey);
+        currentBoundaryPorts.Add(boundaryPort);
+
+        var updatedComposite = childPort.Direction == PortDirection.Input
+            ? composite with { Inputs = currentBoundaryPorts }
+            : composite with { Outputs = currentBoundaryPorts };
+        var updatedRootPort = new GraphPort(
+            boundaryPort.Id,
+            boundaryPort.Label,
+            boundaryPort.Direction,
+            boundaryPort.DataType,
+            boundaryPort.AccentHex,
+            boundaryPort.TypeId,
+            boundaryPort.InlineParameterKey);
+        var updatedNode = childPort.Direction == PortDirection.Input
+            ? compositeNode! with
+            {
+                Inputs = compositeNode.Inputs.Concat([updatedRootPort]).ToList(),
+                Composite = updatedComposite,
+            }
+            : compositeNode! with
+            {
+                Outputs = compositeNode.Outputs.Concat([updatedRootPort]).ToList(),
+                Composite = updatedComposite,
+            };
+
+        var updatedDocument = document.WithRootGraphContents(
+            document.Nodes
+                .Select(node => string.Equals(node.Id, compositeNodeId, StringComparison.Ordinal)
+                    ? updatedNode
+                    : node)
+                .ToList(),
+            document.Connections,
+            document.Groups);
+        return new GraphEditorKernelCompositePortMutationResult(updatedDocument, updatedNode, boundaryPort.Id, null);
+    }
+
+    public GraphEditorKernelCompositePortMutationResult UnexposeCompositePort(
+        GraphDocument document,
+        string compositeNodeId,
+        string boundaryPortId)
+    {
+        ArgumentNullException.ThrowIfNull(document);
+        ArgumentException.ThrowIfNullOrWhiteSpace(compositeNodeId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(boundaryPortId);
+
+        if (!TryResolveCompositeContext(
+                document,
+                compositeNodeId,
+                out var compositeNode,
+                out var composite,
+                out _,
+                out var failureReason))
+        {
+            return GraphEditorKernelCompositePortMutationResult.Failed(document, failureReason);
+        }
+
+        var inputBoundaryPorts = composite!.Inputs?.ToList() ?? [];
+        var outputBoundaryPorts = composite.Outputs?.ToList() ?? [];
+        var removedBoundaryPort = inputBoundaryPorts.FirstOrDefault(port => string.Equals(port.Id, boundaryPortId, StringComparison.Ordinal))
+            ?? outputBoundaryPorts.FirstOrDefault(port => string.Equals(port.Id, boundaryPortId, StringComparison.Ordinal));
+        if (removedBoundaryPort is null)
+        {
+            return GraphEditorKernelCompositePortMutationResult.Failed(document, "No matching composite boundary port was found.");
+        }
+
+        var hasRootConnections = document.Connections.Any(connection =>
+            (string.Equals(connection.SourceNodeId, compositeNodeId, StringComparison.Ordinal)
+             && string.Equals(connection.SourcePortId, boundaryPortId, StringComparison.Ordinal))
+            || (string.Equals(connection.TargetNodeId, compositeNodeId, StringComparison.Ordinal)
+                && string.Equals(connection.TargetPortId, boundaryPortId, StringComparison.Ordinal)));
+        if (hasRootConnections)
+        {
+            return GraphEditorKernelCompositePortMutationResult.Failed(document, "Cannot unexpose a composite port while root connections still depend on it.");
+        }
+
+        inputBoundaryPorts.RemoveAll(port => string.Equals(port.Id, boundaryPortId, StringComparison.Ordinal));
+        outputBoundaryPorts.RemoveAll(port => string.Equals(port.Id, boundaryPortId, StringComparison.Ordinal));
+        var updatedComposite = composite with
+        {
+            Inputs = inputBoundaryPorts,
+            Outputs = outputBoundaryPorts,
+        };
+        var updatedNode = compositeNode! with
+        {
+            Inputs = compositeNode.Inputs.Where(port => !string.Equals(port.Id, boundaryPortId, StringComparison.Ordinal)).ToList(),
+            Outputs = compositeNode.Outputs.Where(port => !string.Equals(port.Id, boundaryPortId, StringComparison.Ordinal)).ToList(),
+            Composite = updatedComposite,
+        };
+
+        var updatedDocument = document.WithRootGraphContents(
+            document.Nodes
+                .Select(node => string.Equals(node.Id, compositeNodeId, StringComparison.Ordinal)
+                    ? updatedNode
+                    : node)
+                .ToList(),
+            document.Connections,
+            document.Groups);
+        return new GraphEditorKernelCompositePortMutationResult(updatedDocument, updatedNode, boundaryPortId, null);
+    }
+
     private static IReadOnlyList<GraphNodeGroup> RemoveNodeIdsFromGroups(
         IReadOnlyList<GraphNodeGroup>? groups,
         IEnumerable<string> nodeIds)
@@ -766,6 +1064,38 @@ internal sealed class GraphEditorKernelDocumentMutator
         };
     }
 
+    private static bool TryResolveCompositeContext(
+        GraphDocument document,
+        string compositeNodeId,
+        out GraphNode? compositeNode,
+        out GraphCompositeNode? composite,
+        out GraphScope? childScope,
+        out string? failureReason)
+    {
+        compositeNode = document.Nodes
+            .FirstOrDefault(node => string.Equals(node.Id, compositeNodeId, StringComparison.Ordinal));
+        if (compositeNode?.Composite is null)
+        {
+            composite = null;
+            childScope = null;
+            failureReason = "No matching composite node was found.";
+            return false;
+        }
+
+        composite = compositeNode.Composite;
+        var childGraphId = composite.ChildGraphId;
+        childScope = document.GraphScopes
+            .FirstOrDefault(scope => string.Equals(scope.Id, childGraphId, StringComparison.Ordinal));
+        if (childScope is null)
+        {
+            failureReason = "The composite node is missing its child graph scope.";
+            return false;
+        }
+
+        failureReason = null;
+        return true;
+    }
+
     private static IReadOnlyDictionary<string, GraphEditorNodeGroupMemberBounds> CreateBoundsByNodeId(IReadOnlyList<GraphNode> nodes)
         => nodes.ToDictionary(
             node => node.Id,
@@ -848,6 +1178,14 @@ internal sealed record GraphEditorKernelDeleteConnectionResult(
         => new(document, null);
 }
 
+internal sealed record GraphEditorKernelConnectionNoteMutationResult(
+    GraphDocument Document,
+    GraphConnection? Connection)
+{
+    public static GraphEditorKernelConnectionNoteMutationResult NotFound(GraphDocument document)
+        => new(document, null);
+}
+
 internal sealed record GraphEditorKernelRemoveConnectionsResult(
     GraphDocument Document,
     IReadOnlyList<GraphConnection> RemovedConnections)
@@ -867,3 +1205,22 @@ internal sealed record GraphEditorKernelNodeParameterMutationResult(
 internal sealed record GraphEditorKernelParameterValueUpdate(
     NodeParameterDefinition Definition,
     object? Value);
+
+internal sealed record GraphEditorKernelCompositePromotionResult(
+    GraphDocument Document,
+    GraphNode? CompositeNode,
+    string? FailureReason)
+{
+    public static GraphEditorKernelCompositePromotionResult Failed(GraphDocument document, string? failureReason)
+        => new(document, null, failureReason);
+}
+
+internal sealed record GraphEditorKernelCompositePortMutationResult(
+    GraphDocument Document,
+    GraphNode? CompositeNode,
+    string? BoundaryPortId,
+    string? FailureReason)
+{
+    public static GraphEditorKernelCompositePortMutationResult Failed(GraphDocument document, string? failureReason)
+        => new(document, null, null, failureReason);
+}

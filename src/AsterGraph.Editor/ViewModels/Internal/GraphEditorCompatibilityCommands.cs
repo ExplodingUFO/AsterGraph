@@ -39,6 +39,8 @@ internal interface IGraphEditorCompatibilityCommandHost
     void BreakConnectionsForPortCore(string nodeId, string portId);
 
     void DeleteConnectionCore(string connectionId);
+
+    void DisconnectConnectionCore(string connectionId);
 }
 
 internal sealed class GraphEditorCompatibilityCommands
@@ -186,5 +188,22 @@ internal sealed class GraphEditorCompatibilityCommands
         }
 
         _host.DeleteConnectionCore(connectionId);
+    }
+
+    internal void DisconnectConnection(string connectionId)
+    {
+        if (!_host.CommandPermissions.Connections.AllowDisconnect)
+        {
+            _host.SetStatus("editor.status.connection.disconnect.disabledByPermissions", "Disconnect is disabled by host permissions.");
+            return;
+        }
+
+        var connection = _host.FindConnection(connectionId);
+        if (connection is null)
+        {
+            return;
+        }
+
+        _host.DisconnectConnectionCore(connectionId);
     }
 }

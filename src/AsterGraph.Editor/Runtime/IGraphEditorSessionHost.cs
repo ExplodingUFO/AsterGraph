@@ -36,12 +36,21 @@ internal interface IGraphEditorSessionHost
     bool TrySetNodeGroupSize(string groupId, GraphSize size, bool updateStatus);
     bool TrySetNodeGroupExtraPadding(string groupId, GraphPadding extraPadding, bool updateStatus);
     bool TrySetNodeGroupMemberships(IReadOnlyList<GraphEditorNodeGroupMembershipChange> changes, bool updateStatus);
+    string TryPromoteNodeGroupToComposite(string groupId, string? title, bool updateStatus);
+    string TryExposeCompositePort(string compositeNodeId, string childNodeId, string childPortId, string? label, bool updateStatus);
+    bool TryUnexposeCompositePort(string compositeNodeId, string boundaryPortId, bool updateStatus);
+    bool TryEnterCompositeChildGraph(string compositeNodeId, bool updateStatus)
+        => false;
+    bool TryReturnToParentGraphScope(bool updateStatus)
+        => false;
     bool TrySetSelectedNodeParameterValue(string parameterKey, object? value);
     bool TrySetSelectedNodeParameterValues(IReadOnlyDictionary<string, object?> values);
     void StartConnection(string sourceNodeId, string sourcePortId);
     void CompleteConnection(string targetNodeId, string targetPortId);
     void CancelPendingConnection();
     void DeleteConnection(string connectionId);
+    bool TrySetConnectionNoteText(string connectionId, string? noteText, bool updateStatus)
+        => false;
     void BreakConnectionsForPort(string nodeId, string portId);
     void PanBy(double deltaX, double deltaY);
     void ZoomAt(double factor, GraphPoint screenAnchor);
@@ -54,11 +63,16 @@ internal interface IGraphEditorSessionHost
     bool LoadWorkspace();
 
     GraphDocument CreateDocumentSnapshot();
+    GraphDocument CreateActiveScopeDocumentSnapshot()
+        => CreateDocumentSnapshot();
     GraphEditorSelectionSnapshot GetSelectionSnapshot();
     GraphEditorViewportSnapshot GetViewportSnapshot();
     GraphEditorCapabilitySnapshot GetCapabilitySnapshot();
     IReadOnlyList<GraphEditorFeatureDescriptorSnapshot> GetFeatureDescriptors();
     IReadOnlyList<GraphEditorNodeSurfaceSnapshot> GetNodeSurfaceSnapshots();
+    IReadOnlyList<GraphEditorCompositeNodeSnapshot> GetCompositeNodeSnapshots();
+    GraphEditorScopeNavigationSnapshot GetScopeNavigationSnapshot()
+        => new(CreateDocumentSnapshot().RootGraphId, null, false, []);
     IReadOnlyList<GraphNodeGroup> GetNodeGroups();
     IReadOnlyList<GraphEditorNodeGroupSnapshot> GetNodeGroupSnapshots();
     IReadOnlyList<GraphEditorCommandDescriptorSnapshot> GetCommandDescriptors();

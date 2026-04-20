@@ -141,6 +141,60 @@ public interface IGraphEditorCommands
         => throw new NotSupportedException();
 
     /// <summary>
+    /// Attempts to promote one persisted node group into a composite node with a child graph scope.
+    /// </summary>
+    /// <param name="groupId">Stable group identifier.</param>
+    /// <param name="title">Optional composite shell title override.</param>
+    /// <param name="updateStatus">Whether to update status text for no-op or success cases.</param>
+    /// <returns>The created composite shell node identifier, or an empty string when promotion fails.</returns>
+    string TryPromoteNodeGroupToComposite(string groupId, string? title = null, bool updateStatus = true)
+        => throw new NotSupportedException();
+
+    /// <summary>
+    /// Attempts to expose one child graph port as a public composite boundary port.
+    /// </summary>
+    /// <param name="compositeNodeId">Composite shell node identifier.</param>
+    /// <param name="childNodeId">Child graph node identifier that owns the inner port.</param>
+    /// <param name="childPortId">Child graph port identifier to expose.</param>
+    /// <param name="label">Optional exposed label override.</param>
+    /// <param name="updateStatus">Whether to update status text for no-op or success cases.</param>
+    /// <returns>The created boundary port identifier, or an empty string when exposure fails.</returns>
+    string TryExposeCompositePort(
+        string compositeNodeId,
+        string childNodeId,
+        string childPortId,
+        string? label = null,
+        bool updateStatus = true)
+        => throw new NotSupportedException();
+
+    /// <summary>
+    /// Attempts to remove one exposed composite boundary port.
+    /// </summary>
+    /// <param name="compositeNodeId">Composite shell node identifier.</param>
+    /// <param name="boundaryPortId">Boundary port identifier.</param>
+    /// <param name="updateStatus">Whether to update status text for no-op or success cases.</param>
+    /// <returns><see langword="true"/> when the boundary port is removed.</returns>
+    bool TryUnexposeCompositePort(string compositeNodeId, string boundaryPortId, bool updateStatus = true)
+        => throw new NotSupportedException();
+
+    /// <summary>
+    /// Attempts to enter the child graph scope owned by one composite node in the current active scope.
+    /// </summary>
+    /// <param name="compositeNodeId">Composite shell node identifier in the current active scope.</param>
+    /// <param name="updateStatus">Whether to update status text for no-op or success cases.</param>
+    /// <returns><see langword="true"/> when navigation succeeds.</returns>
+    bool TryEnterCompositeChildGraph(string compositeNodeId, bool updateStatus = true)
+        => throw new NotSupportedException();
+
+    /// <summary>
+    /// Attempts to return from the current active scope to its parent scope.
+    /// </summary>
+    /// <param name="updateStatus">Whether to update status text for no-op or success cases.</param>
+    /// <returns><see langword="true"/> when navigation succeeds.</returns>
+    bool TryReturnToParentGraphScope(bool updateStatus = true)
+        => throw new NotSupportedException();
+
+    /// <summary>
     /// Attempts to set one parameter value across the current selection when every selected node shares the same definition.
     /// </summary>
     /// <param name="parameterKey">Stable parameter key declared by the shared node definition.</param>
@@ -192,6 +246,16 @@ public interface IGraphEditorCommands
     /// </summary>
     /// <param name="connectionId">连线标识。</param>
     void DeleteConnection(string connectionId)
+        => throw new NotSupportedException();
+
+    /// <summary>
+    /// Attempts to update one connection's pure display note text.
+    /// </summary>
+    /// <param name="connectionId">Stable connection identifier.</param>
+    /// <param name="noteText">New display-only note text, or <see langword="null"/> / blank to clear it.</param>
+    /// <param name="updateStatus">Whether to update status text for no-op or success cases.</param>
+    /// <returns><see langword="true"/> when the note text changes.</returns>
+    bool TrySetConnectionNoteText(string connectionId, string? noteText, bool updateStatus = true)
         => throw new NotSupportedException();
 
     /// <summary>

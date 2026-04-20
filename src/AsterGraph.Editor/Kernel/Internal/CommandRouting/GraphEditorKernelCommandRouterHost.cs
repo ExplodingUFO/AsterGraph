@@ -22,7 +22,7 @@ internal sealed partial class GraphEditorKernel
 
         GraphEditorBehaviorOptions IGraphEditorKernelCommandRouterHost.BehaviorOptions => _owner._behaviorOptions;
 
-        GraphDocument IGraphEditorKernelCommandRouterHost.Document => _owner._document;
+        GraphDocument IGraphEditorKernelCommandRouterHost.Document => _owner.CreateActiveScopeDocumentSnapshot();
 
         int IGraphEditorKernelCommandRouterHost.SelectedNodeCount => _owner._selectedNodeIds.Count;
 
@@ -42,6 +42,9 @@ internal sealed partial class GraphEditorKernel
         double IGraphEditorKernelCommandRouterHost.ViewportHeight => _owner._viewportHeight;
 
         bool IGraphEditorKernelCommandRouterHost.WorkspaceExists => _owner._workspaceService.Exists();
+
+        bool IGraphEditorKernelCommandRouterHost.CanNavigateToParentGraphScope
+            => _owner.GetScopeNavigationSnapshot().CanNavigateToParent;
 
         void IGraphEditorKernelCommandRouterHost.Undo()
             => _owner.Undo();
@@ -82,6 +85,21 @@ internal sealed partial class GraphEditorKernel
         bool IGraphEditorKernelCommandRouterHost.TrySetNodeGroupMemberships(IReadOnlyList<GraphEditorNodeGroupMembershipChange> changes, bool updateStatus)
             => _owner.TrySetNodeGroupMemberships(changes, updateStatus);
 
+        string IGraphEditorKernelCommandRouterHost.TryPromoteNodeGroupToComposite(string groupId, string? title, bool updateStatus)
+            => _owner.TryPromoteNodeGroupToComposite(groupId, title, updateStatus);
+
+        string IGraphEditorKernelCommandRouterHost.TryExposeCompositePort(string compositeNodeId, string childNodeId, string childPortId, string? label, bool updateStatus)
+            => _owner.TryExposeCompositePort(compositeNodeId, childNodeId, childPortId, label, updateStatus);
+
+        bool IGraphEditorKernelCommandRouterHost.TryUnexposeCompositePort(string compositeNodeId, string boundaryPortId, bool updateStatus)
+            => _owner.TryUnexposeCompositePort(compositeNodeId, boundaryPortId, updateStatus);
+
+        bool IGraphEditorKernelCommandRouterHost.TryEnterCompositeChildGraph(string compositeNodeId, bool updateStatus)
+            => _owner.TryEnterCompositeChildGraph(compositeNodeId, updateStatus);
+
+        bool IGraphEditorKernelCommandRouterHost.TryReturnToParentGraphScope(bool updateStatus)
+            => _owner.TryReturnToParentGraphScope(updateStatus);
+
         bool IGraphEditorKernelCommandRouterHost.TrySetSelectedNodeParameterValue(string parameterKey, object? value)
             => _owner.TrySetSelectedNodeParameterValue(parameterKey, value);
 
@@ -96,6 +114,9 @@ internal sealed partial class GraphEditorKernel
 
         void IGraphEditorKernelCommandRouterHost.DeleteConnection(string connectionId)
             => _owner.DeleteConnection(connectionId);
+
+        void IGraphEditorKernelCommandRouterHost.DisconnectConnection(string connectionId)
+            => _owner.DisconnectConnection(connectionId);
 
         void IGraphEditorKernelCommandRouterHost.BreakConnectionsForPort(string nodeId, string portId)
             => _owner.BreakConnectionsForPort(nodeId, portId);

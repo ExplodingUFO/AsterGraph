@@ -67,11 +67,10 @@ public static class GraphDocumentSerializer
         int SchemaVersion,
         string Title,
         string Description,
-        IReadOnlyList<GraphNode> Nodes,
-        IReadOnlyList<GraphConnection> Connections,
-        IReadOnlyList<GraphNodeGroup>? Groups = null)
+        string RootGraphId,
+        IReadOnlyList<GraphScope> GraphScopes)
     {
         public GraphDocument ToDocument()
-            => new(Title, Description, Nodes, Connections, Groups);
+            => GraphDocument.CreateScoped(Title, Description, RootGraphId, GraphScopes);
     }
 }

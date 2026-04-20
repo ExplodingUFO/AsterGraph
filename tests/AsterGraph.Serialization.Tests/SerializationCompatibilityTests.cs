@@ -22,7 +22,7 @@ public sealed class SerializationCompatibilityTests
     [Fact]
     public void GraphDocumentCompatibility_ExposesCurrentSchemaVersion()
     {
-        Assert.Equal(4, GraphDocumentCompatibility.CurrentSchemaVersion);
+        Assert.Equal(5, GraphDocumentCompatibility.CurrentSchemaVersion);
     }
 
     [Fact]
@@ -32,7 +32,9 @@ public sealed class SerializationCompatibilityTests
 
         var json = GraphDocumentSerializer.Serialize(document);
 
-        Assert.Contains("\"SchemaVersion\": 4", json);
+        Assert.Contains("\"SchemaVersion\": 5", json);
+        Assert.Contains("\"RootGraphId\": \"graph-root\"", json);
+        Assert.Contains("\"GraphScopes\"", json);
     }
 
     [Fact]
@@ -46,6 +48,143 @@ public sealed class SerializationCompatibilityTests
         Assert.Equal(document.Title, restored.Title);
         Assert.Equal(document.Nodes.Count, restored.Nodes.Count);
         Assert.Equal(document.Connections.Count, restored.Connections.Count);
+        Assert.Equal("graph-root", restored.RootGraphId);
+        var graphScopes = Assert.IsAssignableFrom<IReadOnlyList<GraphScope>>(restored.GraphScopes);
+        Assert.Single(graphScopes);
+        Assert.Equal("graph-root", graphScopes[0].Id);
+    }
+
+    [Fact]
+    public void GraphDocumentSerializer_WritesAndReadsScopedCompositePayload_WithEdgePresentation()
+    {
+        var document = CreateScopedDocument();
+
+        var json = GraphDocumentSerializer.Serialize(document);
+        var restored = GraphDocumentSerializer.Deserialize(json);
+
+        Assert.Contains("\"RootGraphId\": \"graph-root\"", json);
+        Assert.Contains("\"ChildGraphId\": \"graph-composite-001\"", json);
+        Assert.Contains("\"NoteText\": \"Preview branch\"", json);
+
+        Assert.Equal("graph-root", restored.RootGraphId);
+        Assert.Equal(2, restored.GraphScopes!.Count);
+
+        var rootScope = Assert.Single(restored.GraphScopes, scope => scope.Id == "graph-root");
+        var rootCompositeNode = Assert.Single(rootScope.Nodes, node => node.Id == "node-composite-001");
+        var composite = Assert.IsType<GraphCompositeNode>(rootCompositeNode.Composite);
+        Assert.Equal("graph-composite-001", composite.ChildGraphId);
+        Assert.Single(Assert.IsAssignableFrom<IReadOnlyList<GraphCompositeBoundaryPort>>(composite.Outputs));
+
+        var childScope = Assert.Single(restored.GraphScopes, scope => scope.Id == "graph-composite-001");
+        var childConnection = Assert.Single(childScope.Connections);
+        Assert.NotNull(childConnection.Presentation);
+        Assert.Equal("Preview branch", childConnection.Presentation!.NoteText);
+    }
+
+    [Fact]
+    public void GraphDocument_Constructor_CanonicalizesRootScopeAgainstTopLevelFields()
+    {
+        var document = new GraphDocument(
+            "Scoped Graph",
+            "Constructor canonicalization.",
+            [CreateNode("node-root-top")],
+            [],
+            [],
+            "graph-root",
+            [
+                new GraphScope(
+                    "graph-root",
+                    [CreateNode("node-root-conflict")],
+                    []),
+                new GraphScope(
+                    "graph-composite-001",
+                    [CreateNode("node-child-001")],
+                    []),
+            ]);
+
+        var rootScope = Assert.Single(document.GraphScopes, scope => scope.Id == "graph-root");
+        Assert.Equal("node-root-top", Assert.Single(rootScope.Nodes).Id);
+    }
+
+    [Fact]
+    public void GraphDocument_WithExpression_UpdatesRootScopeSnapshot()
+    {
+        var updatedNode = CreateNode("node-root-updated");
+        var document = CreateScopedDocument();
+
+        var mutated = document with
+        {
+            Nodes = [updatedNode],
+        };
+
+        var rootScope = Assert.Single(mutated.GraphScopes, scope => scope.Id == "graph-root");
+        Assert.Equal(updatedNode.Id, Assert.Single(rootScope.Nodes).Id);
+    }
+
+    [Fact]
+    public void GraphDocument_WithExpression_DeepCopiesUpdatedRootCollections()
+    {
+        var externalNodes = new List<GraphNode> { CreateNode("node-root-001") };
+        var document = CreateScopedDocument();
+
+        var mutated = document with
+        {
+            Nodes = externalNodes,
+        };
+
+        externalNodes.Add(CreateNode("node-root-002"));
+
+        Assert.Single(mutated.Nodes);
+        var rootScope = Assert.Single(mutated.GraphScopes, scope => scope.Id == "graph-root");
+        Assert.Single(rootScope.Nodes);
+    }
+
+    [Fact]
+    public void GraphDocument_WithExpression_KeepsGraphScopeIdsUnique_WhenRootGraphIdChanges()
+    {
+        var document = CreateScopedDocument();
+
+        var mutated = document with
+        {
+            RootGraphId = "graph-composite-001",
+        };
+
+        Assert.Equal(
+            mutated.GraphScopes.Select(scope => scope.Id).Distinct(StringComparer.Ordinal).Count(),
+            mutated.GraphScopes.Count);
+    }
+
+    [Fact]
+    public void GraphDocument_CreateScoped_DeepCopiesNestedScopeCollections()
+    {
+        var rootNodes = new List<GraphNode> { CreateNode("node-root-001") };
+        var childNodes = new List<GraphNode> { CreateNode("node-child-001") };
+        var scopes = new List<GraphScope>
+        {
+            new(
+                "graph-root",
+                rootNodes,
+                []),
+            new(
+                "graph-composite-001",
+                childNodes,
+                []),
+        };
+
+        var document = GraphDocument.CreateScoped(
+            "Scoped Graph",
+            "Deep copy contract.",
+            "graph-root",
+            scopes);
+
+        rootNodes.Add(CreateNode("node-root-002"));
+        childNodes.Clear();
+
+        var rootScope = Assert.Single(document.GraphScopes, scope => scope.Id == "graph-root");
+        Assert.Single(rootScope.Nodes);
+
+        var childScope = Assert.Single(document.GraphScopes, scope => scope.Id == "graph-composite-001");
+        Assert.Single(childScope.Nodes);
     }
 
     [Fact]
@@ -246,6 +385,51 @@ public sealed class SerializationCompatibilityTests
             [CreateConnection()],
             []);
 
+    private static GraphDocument CreateScopedDocument()
+        => GraphDocument.CreateScoped(
+            "Scoped Graph",
+            "Exercise graph scopes and composite payloads.",
+            "graph-root",
+            [
+                new GraphScope(
+                    "graph-root",
+                    [
+                        CreateNode("node-root-001"),
+                        CreateNode(
+                            "node-composite-001",
+                            composite: new GraphCompositeNode(
+                                "graph-composite-001",
+                                [],
+                                [
+                                    new GraphCompositeBoundaryPort(
+                                        "boundary-output-001",
+                                        "Composite Output",
+                                        PortDirection.Output,
+                                        "float",
+                                        "#6AD5C4",
+                                        "node-child-001",
+                                        "output-001",
+                                        new PortTypeId("float")),
+                                ])),
+                    ],
+                    []),
+                new GraphScope(
+                    "graph-composite-001",
+                    [
+                        CreateNode("node-child-001"),
+                        CreateNode("node-child-002"),
+                    ],
+                    [
+                        CreateConnection(
+                            "connection-child-001",
+                            "node-child-001",
+                            "output-001",
+                            "node-child-002",
+                            "input-001",
+                            presentation: new GraphEdgePresentation("Preview branch")),
+                    ]),
+            ]);
+
     private static GraphSelectionFragment CreateFragment()
         => new(
             [CreateNode()],
@@ -253,9 +437,11 @@ public sealed class SerializationCompatibilityTests
             new GraphPoint(12, 24),
             "node-001");
 
-    private static GraphNode CreateNode()
+    private static GraphNode CreateNode(
+        string nodeId = "node-001",
+        GraphCompositeNode? composite = null)
         => new(
-            "node-001",
+            nodeId,
             "Test Node",
             "Tests",
             "Subtitle",
@@ -275,16 +461,24 @@ public sealed class SerializationCompatibilityTests
             "#6AD5C4",
             new NodeDefinitionId("tests.node"),
             null,
-            new GraphNodeSurfaceState(GraphNodeExpansionState.Expanded));
+            new GraphNodeSurfaceState(GraphNodeExpansionState.Expanded),
+            composite);
 
-    private static GraphConnection CreateConnection()
+    private static GraphConnection CreateConnection(
+        string connectionId = "connection-001",
+        string sourceNodeId = "node-001",
+        string sourcePortId = "output-001",
+        string targetNodeId = "node-002",
+        string targetPortId = "input-001",
+        GraphEdgePresentation? presentation = null)
         => new(
-            "connection-001",
-            "node-001",
-            "output-001",
-            "node-002",
-            "input-001",
+            connectionId,
+            sourceNodeId,
+            sourcePortId,
+            targetNodeId,
+            targetPortId,
             "Output to Input",
             "#6AD5C4",
-            new ConversionId("tests.float-pass-through"));
+            new ConversionId("tests.float-pass-through"),
+            presentation);
 }

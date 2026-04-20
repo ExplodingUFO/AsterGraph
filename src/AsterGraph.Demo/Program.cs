@@ -21,6 +21,9 @@ sealed class Program
             Console.WriteLine($"COMMAND_SURFACE_OK:{result.CommandSurfaceOk}");
             Console.WriteLine($"TIERED_NODE_SURFACE_OK:{result.TieredNodeSurfaceOk}");
             Console.WriteLine($"FIXED_GROUP_FRAME_OK:{result.FixedGroupFrameOk}");
+            Console.WriteLine($"COMPOSITE_SCOPE_OK:{result.CompositeScopeOk}");
+            Console.WriteLine($"EDGE_NOTE_OK:{result.EdgeNoteOk}");
+            Console.WriteLine($"DISCONNECT_FLOW_OK:{result.DisconnectFlowOk}");
             foreach (var line in result.MetricLines)
             {
                 Console.WriteLine(line);

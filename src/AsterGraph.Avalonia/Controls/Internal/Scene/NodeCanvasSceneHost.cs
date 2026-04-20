@@ -386,7 +386,7 @@ internal sealed class NodeCanvasSceneHost
             }
 
             var nextPadding = updatePadding(currentGroup.ExtraPadding, deltaSelector(args.Vector)).ClampNonNegative();
-            args.Handled = editor.TrySetNodeGroupExtraPadding(groupId, nextPadding, updateStatus: false);
+            args.Handled = editor.Session.Commands.TrySetNodeGroupExtraPadding(groupId, nextPadding, updateStatus: false);
         };
 
         return thumb;
@@ -407,7 +407,7 @@ internal sealed class NodeCanvasSceneHost
             _host.BeginNodeDrag,
             (targetNode, size, updateStatus) => editor.TrySetNodeSize(targetNode, size, updateStatus),
             (targetNode, width, updateStatus) => editor.TrySetNodeWidth(targetNode, width, updateStatus),
-            (targetNode, expansionState) => editor.TrySetNodeExpansionState(targetNode, expansionState),
+            (targetNode, expansionState) => editor.Session.Commands.TrySetNodeExpansionState(targetNode.Id, expansionState),
             (targetNode, port) => editor.HasIncomingConnection(targetNode, port),
             (targetNode, port) => editor.ResolveInlineParameter(targetNode, port),
             _host.NodeParameterEditorRegistry,

@@ -117,6 +117,28 @@ internal sealed class GraphEditorKernelConnectionMutationCoordinator
             [mutation.Connection.Id]);
     }
 
+    public void DisconnectConnection(string connectionId)
+    {
+        if (!_host.BehaviorOptions.Commands.Connections.AllowDisconnect)
+        {
+            _host.SetStatus("Disconnect is disabled by host permissions.");
+            return;
+        }
+
+        var mutation = _documentMutator.DeleteConnection(_host.Document, connectionId);
+        if (mutation.Connection is null)
+        {
+            return;
+        }
+
+        _host.UpdateDocument(mutation.Document);
+        _host.MarkDirty(
+            $"Disconnected connection {mutation.Connection.Label}.",
+            GraphEditorDocumentChangeKind.ConnectionsChanged,
+            null,
+            [mutation.Connection.Id]);
+    }
+
     public void BreakConnectionsForPort(string nodeId, string portId)
     {
         if (!_host.BehaviorOptions.Commands.Connections.AllowDisconnect)

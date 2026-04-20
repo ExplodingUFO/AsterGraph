@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
@@ -115,6 +116,74 @@ public sealed class NodeCanvasConnectionSceneRendererTests
         }
     }
 
+    [AvaloniaFact]
+    public void RenderConnections_RendersEdgeNoteText_WhenPresentationNoteIsPresent()
+    {
+        var renderer = new NodeCanvasConnectionSceneRenderer();
+        var editor = CreateEditor(includeConnection: true, noteText: "Preview branch");
+        var hostedScene = CreateHostedScene(editor);
+
+        try
+        {
+            renderer.RenderConnections(CreateSceneContext(
+                editor,
+                hostedScene.ConnectionLayer,
+                hostedScene.NodeLayer,
+                hostedScene.CoordinateRoot,
+                hostedScene.NodeVisuals));
+
+            var chip = Assert.Single(hostedScene.ConnectionLayer.Children.OfType<Border>());
+            var label = Assert.IsType<TextBlock>(chip.Child);
+            Assert.Equal("Preview branch", label.Text);
+        }
+        finally
+        {
+            hostedScene.Window.Close();
+        }
+    }
+
+    [AvaloniaFact]
+    public void RenderConnections_DoubleTappedChip_CommitsEditedNoteText()
+    {
+        var renderer = new NodeCanvasConnectionSceneRenderer();
+        var editor = CreateEditor(includeConnection: true);
+        var hostedScene = CreateHostedScene(editor);
+        var pointer = new global::Avalonia.Input.Pointer(0, PointerType.Mouse, true);
+
+        try
+        {
+            renderer.RenderConnections(CreateSceneContext(
+                editor,
+                hostedScene.ConnectionLayer,
+                hostedScene.NodeLayer,
+                hostedScene.CoordinateRoot,
+                hostedScene.NodeVisuals));
+
+            var chip = Assert.Single(hostedScene.ConnectionLayer.Children.OfType<Border>());
+            var pointerArgs = CreatePointerPressedArgs(chip, hostedScene.CoordinateRoot, pointer, new Point(760, 300), KeyModifiers.None);
+
+            chip.RaiseEvent(new TappedEventArgs(InputElement.DoubleTappedEvent, pointerArgs)
+            {
+                Source = chip,
+            });
+
+            var editorBox = Assert.IsType<TextBox>(chip.Child);
+            editorBox.Text = "Preview branch";
+            editorBox.RaiseEvent(new RoutedEventArgs(InputElement.LostFocusEvent)
+            {
+                Source = editorBox,
+            });
+
+            Assert.Equal(
+                "Preview branch",
+                Assert.Single(editor.CreateDocumentSnapshot().Connections).Presentation?.NoteText);
+        }
+        finally
+        {
+            hostedScene.Window.Close();
+        }
+    }
+
     private static NodeCanvasConnectionSceneContext CreateSceneContext(
         GraphEditorViewModel editor,
         Canvas connectionLayer,
@@ -200,7 +269,7 @@ public sealed class NodeCanvasConnectionSceneRendererTests
             new GraphNodeVisual(root, portAnchors));
     }
 
-    private static GraphEditorViewModel CreateEditor(bool includeConnection)
+    private static GraphEditorViewModel CreateEditor(bool includeConnection, string? noteText = null)
     {
         var catalog = new NodeCatalog();
         catalog.RegisterDefinition(
@@ -242,7 +311,8 @@ public sealed class NodeCanvasConnectionSceneRendererTests
                     TargetNodeId,
                     TargetPortId,
                     "Float Flow",
-                    "#6AD5C4"),
+                    "#6AD5C4",
+                    Presentation: string.IsNullOrWhiteSpace(noteText) ? null : new GraphEdgePresentation(noteText)),
             }
             : [];
 
@@ -314,4 +384,20 @@ public sealed class NodeCanvasConnectionSceneRendererTests
         {
         }
     }
+
+    private static PointerPressedEventArgs CreatePointerPressedArgs(
+        InputElement source,
+        InputElement root,
+        global::Avalonia.Input.Pointer pointer,
+        Point position,
+        KeyModifiers modifiers)
+        => new(
+            source,
+            pointer,
+            root,
+            position,
+            0UL,
+            new PointerPointProperties(RawInputModifiers.LeftMouseButton, PointerUpdateKind.LeftButtonPressed),
+            modifiers,
+            1);
 }

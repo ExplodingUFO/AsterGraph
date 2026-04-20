@@ -65,5 +65,8 @@ public sealed partial class GraphEditorViewModel
 
         void IGraphEditorCompatibilityCommandHost.DeleteConnectionCore(string connectionId)
             => _owner._kernel.DeleteConnection(connectionId);
+
+        void IGraphEditorCompatibilityCommandHost.DisconnectConnectionCore(string connectionId)
+            => _owner._kernel.DisconnectConnection(connectionId);
     }
 }

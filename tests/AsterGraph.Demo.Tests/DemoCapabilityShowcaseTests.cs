@@ -24,6 +24,7 @@ public sealed class DemoCapabilityShowcaseTests
         var viewModel = new MainWindowViewModel();
 
         Assert.True(viewModel.Capabilities.Count >= 9);
+        Assert.Contains(viewModel.Capabilities, item => item.Key == "semantic-graph-composition");
         Assert.Contains(viewModel.Capabilities, item => item.Key == "plugin-trust-and-loading");
         Assert.Contains(viewModel.Capabilities, item => item.Key == "automation-execution");
         Assert.Contains(viewModel.Capabilities, item => item.Key == "consumer-host-path");
@@ -122,6 +123,9 @@ public sealed class DemoCapabilityShowcaseTests
         Assert.True(result.CommandSurfaceOk);
         Assert.True(result.TieredNodeSurfaceOk);
         Assert.True(result.FixedGroupFrameOk);
+        Assert.True(result.CompositeScopeOk);
+        Assert.True(result.EdgeNoteOk);
+        Assert.True(result.DisconnectFlowOk);
         Assert.True(result.StartupMs >= 0);
         Assert.True(result.InspectorProjectionMs >= 0);
         Assert.True(result.PluginScanMs >= 0);

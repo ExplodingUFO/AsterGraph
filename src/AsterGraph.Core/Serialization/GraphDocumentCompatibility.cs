@@ -8,19 +8,19 @@ namespace AsterGraph.Core.Serialization;
 /// </summary>
 internal static class GraphDocumentCompatibility
 {
-    public const int CurrentSchemaVersion = 4;
+    public const int CurrentSchemaVersion = 5;
 
     public static GraphDocumentSerializer.GraphDocumentFilePayload CreatePayload(GraphDocument document)
     {
         ArgumentNullException.ThrowIfNull(document);
 
+        var graphScopes = document.GetGraphScopes();
         return new GraphDocumentSerializer.GraphDocumentFilePayload(
             CurrentSchemaVersion,
             document.Title,
             document.Description,
-            document.Nodes,
-            document.Connections,
-            document.Groups);
+            document.RootGraphId,
+            graphScopes);
     }
 
     public static GraphDocument Deserialize(string json, JsonSerializerOptions options)
@@ -43,16 +43,41 @@ internal static class GraphDocumentCompatibility
                 $"Unsupported graph document schema version '{schemaVersion}'. Current version is '{CurrentSchemaVersion}'.");
         }
 
-        var payload = JsonSerializer.Deserialize<GraphDocumentSerializer.GraphDocumentFilePayload>(json, options)
+        if (schemaVersion == CurrentSchemaVersion)
+        {
+            var payload = JsonSerializer.Deserialize<GraphDocumentSerializer.GraphDocumentFilePayload>(json, options)
+                ?? throw new InvalidOperationException("Failed to deserialize scoped graph document.");
+            return NormalizeDocument(payload.ToDocument(), schemaVersion);
+        }
+
+        var legacyPayload = JsonSerializer.Deserialize<LegacyGraphDocumentFilePayload>(json, options)
             ?? throw new InvalidOperationException("Failed to deserialize versioned graph document.");
-        return NormalizeDocument(payload.ToDocument(), schemaVersion);
+        return NormalizeDocument(legacyPayload.ToDocument(), schemaVersion);
     }
 
     private static GraphDocument NormalizeDocument(GraphDocument document, int? schemaVersion)
     {
         ArgumentNullException.ThrowIfNull(document);
 
-        var groups = document.Groups ?? [];
+        var rootGraphId = string.IsNullOrWhiteSpace(document.RootGraphId)
+            ? GraphDocument.DefaultRootGraphId
+            : document.RootGraphId;
+        var normalizedScopes = document.GetGraphScopes()
+            .Select(scope => NormalizeScope(scope, schemaVersion))
+            .ToList();
+
+        return GraphDocument.CreateScoped(
+            document.Title,
+            document.Description,
+            rootGraphId,
+            normalizedScopes);
+    }
+
+    private static GraphScope NormalizeScope(GraphScope scope, int? schemaVersion)
+    {
+        ArgumentNullException.ThrowIfNull(scope);
+
+        var groups = scope.Groups ?? [];
         var validGroupIds = groups
             .Select(group => group.Id)
             .Where(id => !string.IsNullOrWhiteSpace(id))
@@ -64,7 +89,7 @@ internal static class GraphDocumentCompatibility
             .GroupBy(pair => pair.Key, StringComparer.Ordinal)
             .ToDictionary(group => group.Key, group => group.Last().Value, StringComparer.Ordinal);
 
-        var normalizedNodes = document.Nodes
+        var normalizedNodes = scope.Nodes
             .Select(node => node with { Surface = node.Surface ?? GraphNodeSurfaceState.Default })
             .Select(node =>
             {
@@ -90,11 +115,11 @@ internal static class GraphDocumentCompatibility
             })
             .ToList();
 
-        return document with
-        {
-            Nodes = normalizedNodes,
-            Groups = NormalizeGroups(groups, normalizedNodes, schemaVersion),
-        };
+        return new GraphScope(
+            scope.Id,
+            normalizedNodes,
+            scope.Connections.ToList(),
+            NormalizeGroups(groups, normalizedNodes, schemaVersion));
     }
 
     private static List<GraphNodeGroup> NormalizeGroups(
@@ -128,5 +153,17 @@ internal static class GraphDocumentCompatibility
             NodeIds = nodeIds,
             ExtraPadding = padding,
         };
+    }
+
+    private sealed record LegacyGraphDocumentFilePayload(
+        int SchemaVersion,
+        string Title,
+        string Description,
+        IReadOnlyList<GraphNode> Nodes,
+        IReadOnlyList<GraphConnection> Connections,
+        IReadOnlyList<GraphNodeGroup>? Groups = null)
+    {
+        public GraphDocument ToDocument()
+            => new(Title, Description, Nodes, Connections, Groups);
     }
 }

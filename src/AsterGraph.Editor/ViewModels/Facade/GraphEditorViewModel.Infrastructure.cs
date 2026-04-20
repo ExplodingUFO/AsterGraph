@@ -190,6 +190,18 @@ public sealed partial class GraphEditorViewModel
     private void NotifySelectionChanged()
         => _retainedEventPublisher.PublishSelectionChanged();
 
+    internal void NotifyKernelProjectedDocumentChanged(GraphEditorDocumentChangedEventArgs args)
+    {
+        ArgumentNullException.ThrowIfNull(args);
+        DocumentChanged?.Invoke(this, args);
+    }
+
+    internal void NotifyKernelProjectedSelectionChanged(GraphEditorSelectionChangedEventArgs args)
+    {
+        ArgumentNullException.ThrowIfNull(args);
+        SelectionChanged?.Invoke(this, args);
+    }
+
     private void NotifyViewportChanged()
     {
         ViewportChanged?.Invoke(

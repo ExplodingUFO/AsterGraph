@@ -26,6 +26,10 @@ public enum GraphEditorDocumentChangeKind
     /// </summary>
     ParametersChanged,
     /// <summary>
+    /// 当前活动图作用域发生了变化。
+    /// </summary>
+    ScopeChanged,
+    /// <summary>
     /// 粘贴了片段。
     /// </summary>
     FragmentPasted,

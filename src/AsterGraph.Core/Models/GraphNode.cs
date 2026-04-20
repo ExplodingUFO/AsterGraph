@@ -18,6 +18,7 @@ namespace AsterGraph.Core.Models;
 /// <param name="DefinitionId">Optional stable definition identifier used to resolve catalog metadata.</param>
 /// <param name="ParameterValues">Optional persisted parameter values for the node.</param>
 /// <param name="Surface">Optional persisted host/runtime node surface state.</param>
+/// <param name="Composite">Optional composite child-graph metadata owned by the node shell.</param>
 public sealed record GraphNode(
     string Id,
     string Title,
@@ -31,4 +32,5 @@ public sealed record GraphNode(
     string AccentHex,
     NodeDefinitionId? DefinitionId = null,
     IReadOnlyList<GraphParameterValue>? ParameterValues = null,
-    GraphNodeSurfaceState? Surface = null);
+    GraphNodeSurfaceState? Surface = null,
+    GraphCompositeNode? Composite = null);
