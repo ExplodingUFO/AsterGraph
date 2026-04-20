@@ -9,6 +9,7 @@ using Avalonia.Media;
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Styling;
 using AsterGraph.Avalonia.Controls;
+using AsterGraph.Avalonia.Controls.Internal;
 using AsterGraph.Avalonia.Styling;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.ViewModels;
@@ -29,8 +30,6 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
     private const double MinimumParameterRailWidth = 144d;
     private const double EditorParameterRailWidth = 192d;
     private const double MaximumParameterRailWidth = 228d;
-    private const double EdgeResizeHitThickness = 10d;
-    private const double CornerResizeHitThickness = 16d;
 
     public GraphNodeVisual Create(GraphNodeVisualContext context)
     {
@@ -206,7 +205,9 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
             VerticalAlignment.Stretch,
             width: 10,
             height: double.NaN,
-            new Cursor(StandardCursorType.SizeWestEast));
+            GraphResizeFeedbackDefaults.ResolveCursor(new GraphResizeFeedbackContext(
+                GraphResizeFeedbackSurfaceKind.Node,
+                GraphResizeFeedbackHandle.RightEdge)));
         widthResizeThumb.AddHandler(
             InputElement.PointerPressedEvent,
             (_, args) => context.BeginNodeResize(context.Node, GraphNodeResizeHandleKind.Right, args),
@@ -221,7 +222,9 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
             VerticalAlignment.Bottom,
             width: double.NaN,
             height: 10,
-            new Cursor(StandardCursorType.SizeNorthSouth));
+            GraphResizeFeedbackDefaults.ResolveCursor(new GraphResizeFeedbackContext(
+                GraphResizeFeedbackSurfaceKind.Node,
+                GraphResizeFeedbackHandle.BottomEdge)));
         heightResizeThumb.AddHandler(
             InputElement.PointerPressedEvent,
             (_, args) => context.BeginNodeResize(context.Node, GraphNodeResizeHandleKind.Bottom, args),
@@ -236,7 +239,9 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
             VerticalAlignment.Bottom,
             width: 16,
             height: 16,
-            new Cursor(StandardCursorType.SizeWestEast),
+            GraphResizeFeedbackDefaults.ResolveCursor(new GraphResizeFeedbackContext(
+                GraphResizeFeedbackSurfaceKind.Node,
+                GraphResizeFeedbackHandle.BottomRightCorner)),
             margin: new Thickness(0, 0, 2, 2));
         resizeThumb.AddHandler(
             InputElement.PointerPressedEvent,
@@ -257,7 +262,8 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
                 return;
             }
 
-            if (TryResolveSurfaceResizeHandle(border, args, out var handleKind))
+            if (NodeCanvasResizeFeedbackResolver.TryResolveNode(border, args.GetPosition(border), out var resizeHit)
+                && resizeHit.NodeHandle is GraphNodeResizeHandleKind handleKind)
             {
                 context.BeginNodeResize(context.Node, handleKind, args);
                 return;
@@ -796,46 +802,6 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
         };
         AutomationProperties.SetName(thumb, automationName);
         return thumb;
-    }
-
-    private static bool TryResolveSurfaceResizeHandle(
-        Border border,
-        PointerPressedEventArgs args,
-        out GraphNodeResizeHandleKind handleKind)
-    {
-        handleKind = default;
-        var point = args.GetPosition(border);
-        var width = double.IsNaN(border.Width) ? border.Bounds.Width : border.Width;
-        var height = double.IsNaN(border.Height) ? border.Bounds.Height : border.Height;
-        if (width <= 0d || height <= 0d)
-        {
-            return false;
-        }
-
-        var nearRightEdge = point.X >= width - EdgeResizeHitThickness;
-        var nearBottomEdge = point.Y >= height - EdgeResizeHitThickness;
-        var nearCorner = point.X >= width - CornerResizeHitThickness
-            && point.Y >= height - CornerResizeHitThickness;
-
-        if (nearCorner)
-        {
-            handleKind = GraphNodeResizeHandleKind.BottomRight;
-            return true;
-        }
-
-        if (nearRightEdge)
-        {
-            handleKind = GraphNodeResizeHandleKind.Right;
-            return true;
-        }
-
-        if (nearBottomEdge)
-        {
-            handleKind = GraphNodeResizeHandleKind.Bottom;
-            return true;
-        }
-
-        return false;
     }
 
     private static NodeCardStyleOptions GetNodeCardStyle(GraphNodeVisualContext context)

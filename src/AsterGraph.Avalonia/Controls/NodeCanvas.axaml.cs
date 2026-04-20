@@ -70,6 +70,12 @@ public partial class NodeCanvas : UserControl
     public static readonly StyledProperty<INodeParameterEditorRegistry?> NodeParameterEditorRegistryProperty =
         AvaloniaProperty.Register<NodeCanvas, INodeParameterEditorRegistry?>(nameof(NodeParameterEditorRegistry));
 
+    /// <summary>
+    /// Controls stock resize-hover feedback resolution for node and group surfaces.
+    /// </summary>
+    public static readonly StyledProperty<IGraphResizeFeedbackPolicy?> ResizeFeedbackPolicyProperty =
+        AvaloniaProperty.Register<NodeCanvas, IGraphResizeFeedbackPolicy?>(nameof(ResizeFeedbackPolicy));
+
     private readonly Dictionary<NodeViewModel, NodeCanvasRenderedNodeVisual> _nodeVisuals = new();
     private readonly Dictionary<string, NodeCanvasRenderedGroupVisual> _groupVisuals = new(StringComparer.Ordinal);
     private Grid? _sceneRoot;
@@ -91,6 +97,7 @@ public partial class NodeCanvas : UserControl
     private readonly NodeCanvasOverlayCoordinator _overlayCoordinator;
     private readonly NodeCanvasNodeDragCoordinator _nodeDragCoordinator;
     private readonly NodeCanvasPointerInteractionCoordinator _pointerInteractionCoordinator;
+    private readonly NodeCanvasResizeFeedbackCoordinator _resizeFeedbackCoordinator;
     private readonly NodeCanvasWheelInteractionCoordinator _wheelInteractionCoordinator;
     private bool _isAttachedToVisualTree;
 
@@ -108,6 +115,7 @@ public partial class NodeCanvas : UserControl
         _overlayCoordinator = new NodeCanvasOverlayCoordinator(new NodeCanvasOverlayHost(this));
         _nodeDragCoordinator = new NodeCanvasNodeDragCoordinator(new NodeCanvasNodeDragHost(this));
         _pointerInteractionCoordinator = new NodeCanvasPointerInteractionCoordinator(new NodeCanvasPointerInteractionHost(this));
+        _resizeFeedbackCoordinator = new NodeCanvasResizeFeedbackCoordinator(new NodeCanvasResizeFeedbackHost(this));
         _wheelInteractionCoordinator = new NodeCanvasWheelInteractionCoordinator(new NodeCanvasWheelInteractionHost(this));
 
         ContextRequested += HandleCanvasContextRequested;
@@ -197,6 +205,15 @@ public partial class NodeCanvas : UserControl
     {
         get => GetValue(NodeParameterEditorRegistryProperty);
         set => SetValue(NodeParameterEditorRegistryProperty, value);
+    }
+
+    /// <summary>
+    /// Host-owned policy used to override or extend stock resize-hover feedback.
+    /// </summary>
+    public IGraphResizeFeedbackPolicy? ResizeFeedbackPolicy
+    {
+        get => GetValue(ResizeFeedbackPolicyProperty);
+        set => SetValue(ResizeFeedbackPolicyProperty, value);
     }
 
     /// <summary>
@@ -295,6 +312,7 @@ public partial class NodeCanvas : UserControl
         }
 
         Focus();
+        ClearResizeFeedback();
         ViewModel.SelectSingleNode(node, updateStatus: false);
         _interactionSession.BeginNodeResize(
             ViewModel.FindNode(node.Id) ?? node,
@@ -342,6 +360,7 @@ public partial class NodeCanvas : UserControl
         }
 
         Focus();
+        ClearResizeFeedback();
         _interactionSession.BeginGroupResize(group.Id, groupTitle, edge, group.Position, group.Size, args.GetPosition(this));
         ViewModel.BeginHistoryInteraction();
         args.Pointer.Capture(this);
@@ -389,6 +408,12 @@ public partial class NodeCanvas : UserControl
         _pointerInteractionCoordinator.HandleReleased(args.GetPosition(this));
         args.Pointer.Capture(null);
     }
+
+    private void UpdateResizeFeedback(Point currentScreenPosition)
+        => _resizeFeedbackCoordinator.Update(currentScreenPosition);
+
+    private void ClearResizeFeedback()
+        => _resizeFeedbackCoordinator.Clear();
 
     private void HandlePointerWheelChanged(object? sender, PointerWheelEventArgs args)
     {

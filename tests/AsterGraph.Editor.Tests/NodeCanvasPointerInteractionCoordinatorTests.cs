@@ -436,5 +436,13 @@ public sealed class NodeCanvasPointerInteractionCoordinatorTests
             ApplyDragAssistCalls++;
             return DragAssistResult;
         }
+
+        public void UpdateResizeFeedback(Point currentScreenPosition)
+        {
+        }
+
+        public void ClearResizeFeedback()
+        {
+        }
     }
 }

@@ -300,7 +300,9 @@ internal sealed class NodeCanvasSceneHost
             group.Title,
             NodeCanvasGroupResizeEdge.Left,
             $"{group.Title} group left resize handle",
-            new Cursor(StandardCursorType.SizeWestEast),
+            GraphResizeFeedbackDefaults.ResolveCursor(new GraphResizeFeedbackContext(
+                GraphResizeFeedbackSurfaceKind.Group,
+                GraphResizeFeedbackHandle.LeftEdge)),
             HorizontalAlignment.Left,
             VerticalAlignment.Stretch,
             width: NodeCanvasGroupChromeMetrics.ResizeHandleThickness,
@@ -310,7 +312,9 @@ internal sealed class NodeCanvasSceneHost
             group.Title,
             NodeCanvasGroupResizeEdge.Top,
             $"{group.Title} group top resize handle",
-            new Cursor(StandardCursorType.SizeNorthSouth),
+            GraphResizeFeedbackDefaults.ResolveCursor(new GraphResizeFeedbackContext(
+                GraphResizeFeedbackSurfaceKind.Group,
+                GraphResizeFeedbackHandle.TopEdge)),
             HorizontalAlignment.Stretch,
             VerticalAlignment.Top,
             width: double.NaN,
@@ -320,7 +324,9 @@ internal sealed class NodeCanvasSceneHost
             group.Title,
             NodeCanvasGroupResizeEdge.Right,
             $"{group.Title} group right resize handle",
-            new Cursor(StandardCursorType.SizeWestEast),
+            GraphResizeFeedbackDefaults.ResolveCursor(new GraphResizeFeedbackContext(
+                GraphResizeFeedbackSurfaceKind.Group,
+                GraphResizeFeedbackHandle.RightEdge)),
             HorizontalAlignment.Right,
             VerticalAlignment.Stretch,
             width: NodeCanvasGroupChromeMetrics.ResizeHandleThickness,
@@ -330,7 +336,9 @@ internal sealed class NodeCanvasSceneHost
             group.Title,
             NodeCanvasGroupResizeEdge.Bottom,
             $"{group.Title} group bottom resize handle",
-            new Cursor(StandardCursorType.SizeNorthSouth),
+            GraphResizeFeedbackDefaults.ResolveCursor(new GraphResizeFeedbackContext(
+                GraphResizeFeedbackSurfaceKind.Group,
+                GraphResizeFeedbackHandle.BottomEdge)),
             HorizontalAlignment.Stretch,
             VerticalAlignment.Bottom,
             width: double.NaN,
@@ -429,7 +437,14 @@ internal sealed class NodeCanvasSceneHost
         GraphEditorNodeGroupSnapshot group,
         PointerPressedEventArgs args)
     {
-        if (args.Source is Thumb || !TryResolveGroupResizeEdge(surface, group, args, out var edge))
+        if (args.Source is Thumb)
+        {
+            return false;
+        }
+
+        var point = ResolveSurfacePoint(surface, group, args);
+        if (!NodeCanvasResizeFeedbackResolver.TryResolveGroup(surface, point, out var resizeHit)
+            || resizeHit.GroupEdge is not NodeCanvasGroupResizeEdge edge)
         {
             return false;
         }
@@ -440,54 +455,6 @@ internal sealed class NodeCanvasSceneHost
 
     private static string FormatGroupHeaderTitle(GraphEditorNodeGroupSnapshot group)
         => group.Title;
-
-    private static bool TryResolveGroupResizeEdge(
-        Border surface,
-        GraphEditorNodeGroupSnapshot group,
-        PointerPressedEventArgs args,
-        out NodeCanvasGroupResizeEdge edge)
-    {
-        edge = default;
-        var point = ResolveSurfacePoint(surface, group, args);
-        var width = double.IsNaN(surface.Width) ? surface.Bounds.Width : surface.Width;
-        var height = double.IsNaN(surface.Height) ? surface.Bounds.Height : surface.Height;
-        if (width <= 0d || height <= 0d)
-        {
-            return false;
-        }
-
-        var thickness = NodeCanvasGroupChromeMetrics.ResizeHandleThickness;
-        var nearLeftEdge = point.X <= thickness;
-        var nearTopEdge = point.Y <= thickness;
-        var nearRightEdge = point.X >= width - thickness;
-        var nearBottomEdge = point.Y >= height - thickness;
-
-        if (nearLeftEdge)
-        {
-            edge = NodeCanvasGroupResizeEdge.Left;
-            return true;
-        }
-
-        if (nearTopEdge)
-        {
-            edge = NodeCanvasGroupResizeEdge.Top;
-            return true;
-        }
-
-        if (nearRightEdge)
-        {
-            edge = NodeCanvasGroupResizeEdge.Right;
-            return true;
-        }
-
-        if (nearBottomEdge)
-        {
-            edge = NodeCanvasGroupResizeEdge.Bottom;
-            return true;
-        }
-
-        return false;
-    }
 
     private static Point ResolveSurfacePoint(
         Border surface,
