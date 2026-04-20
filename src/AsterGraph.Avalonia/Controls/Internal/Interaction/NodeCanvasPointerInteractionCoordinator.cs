@@ -29,6 +29,10 @@ internal interface INodeCanvasPointerInteractionHost
     void UpdateMarqueeSelection(Point currentScreenPosition, bool finalize);
 
     GraphPoint ApplyDragAssist(NodeCanvasDragSession dragSession, double deltaX, double deltaY);
+
+    void UpdateResizeFeedback(Point currentScreenPosition);
+
+    void ClearResizeFeedback();
 }
 
 internal readonly record struct NodeCanvasPointerPressedResult(bool Handled, bool CapturePointer);
@@ -61,6 +65,7 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
         if (isMiddleButtonPressed
             || (_host.EnableAltLeftDragPanning && isLeftButtonPressed && modifiers.HasFlag(KeyModifiers.Alt)))
         {
+            _host.ClearResizeFeedback();
             _host.InteractionSession.BeginPanning(currentScreenPosition);
             _host.HideSelectionAdorner();
             _host.HideGuideAdorners();
@@ -72,6 +77,7 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
             return default;
         }
 
+        _host.ClearResizeFeedback();
         if (_host.ViewModel.HasPendingConnection)
         {
             _host.ViewModel.CancelPendingConnection("Connection preview cancelled.");
@@ -112,6 +118,7 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
             && _host.InteractionSession.DragGroupId is null
             && _host.InteractionSession.TryBeginMarqueeSelection(currentScreenPosition, selectionDragThreshold))
         {
+            _host.ClearResizeFeedback();
             _host.UpdateMarqueeSelection(currentScreenPosition, finalize: false);
             return true;
         }
@@ -121,6 +128,7 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
             || _host.InteractionSession.DragNode is not null
             || _host.InteractionSession.DragGroupId is not null)
         {
+            _host.ClearResizeFeedback();
             if (_host.InteractionSession.DragNode is not null)
             {
                 if (_host.InteractionSession.DragSession is NodeCanvasDragSession dragSession
@@ -170,6 +178,11 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
         if (_host.ViewModel.HasPendingConnection)
         {
             _host.RenderConnections();
+        }
+
+        if (!handled)
+        {
+            _host.UpdateResizeFeedback(currentScreenPosition);
         }
 
         return handled;
@@ -240,6 +253,8 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
 
         _host.InteractionSession.ResetAfterPointerRelease();
         _host.HideGuideAdorners();
+        _host.ClearResizeFeedback();
+        _host.UpdateResizeFeedback(currentScreenPosition);
     }
 
     private bool HandleNodeResizeMove(NodeCanvasNodeResizeSession resizeSession, Point currentScreenPosition)
