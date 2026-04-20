@@ -542,46 +542,74 @@ public sealed class NodeCanvasStandaloneTests
     }
 
     [AvaloniaFact]
-    public void ParameterRail_UsesTierThresholdsForEndpointAndEditorVisibility()
+    public void InlineInputRows_UseTierThresholdsForSummaryAndEditorVisibility()
     {
         var editor = CreateEditor();
+        var targetNode = editor.FindNode(TargetNodeId)!;
+        var measurement = targetNode.SurfaceMeasurement;
         var (window, canvas) = CreateStandaloneCanvasWindow(editor);
 
         try
         {
             Assert.DoesNotContain(
-                canvas.GetVisualDescendants().OfType<Button>(),
+                canvas.GetVisualDescendants().OfType<Control>(),
                 control => string.Equals(
                     AutomationProperties.GetName(control),
-                    "Canvas Target parameter endpoint Gain",
+                    "Canvas Target input row Gain",
                     StringComparison.Ordinal));
-
-            Assert.True(editor.Session.Commands.TrySetNodeSize(TargetNodeId, new GraphSize(320d, 210d), updateStatus: false));
-
-            var railEndpoint = Assert.Single(
-                canvas.GetVisualDescendants().OfType<Button>(),
-                control => string.Equals(
-                    AutomationProperties.GetName(control),
-                    "Canvas Target parameter endpoint Gain",
-                    StringComparison.Ordinal));
-            Assert.Equal("Canvas Target parameter endpoint Gain", AutomationProperties.GetName(railEndpoint));
             Assert.DoesNotContain(
-                canvas.GetVisualDescendants().OfType<NodeParameterEditorHost>(),
-                control => string.Equals(control.Parameter?.Key, "gain", StringComparison.Ordinal));
-
-            Assert.True(editor.Session.Commands.TrySetNodeSize(TargetNodeId, new GraphSize(420d, 260d), updateStatus: false));
-
-            railEndpoint = Assert.Single(
-                canvas.GetVisualDescendants().OfType<Button>(),
+                canvas.GetVisualDescendants().OfType<Control>(),
                 control => string.Equals(
                     AutomationProperties.GetName(control),
-                    "Canvas Target parameter endpoint Gain",
+                    "Canvas Target parameter rail",
+                    StringComparison.Ordinal));
+
+            Assert.True(editor.Session.Commands.TrySetNodeSize(
+                TargetNodeId,
+                new GraphSize(measurement.WidthToRevealInputSummaries, measurement.HeightToRevealAdditionalInputs),
+                updateStatus: false));
+            targetNode = editor.FindNode(TargetNodeId)!;
+            var summaryProjection = Assert.Single(
+                targetNode.InputRows,
+                row => string.Equals(row.ParameterEndpoint?.Parameter.Key, "gain", StringComparison.Ordinal));
+            Assert.Equal(NodeSurfaceInlineContentKind.Summary, summaryProjection.InlineContentKind);
+
+            var summaryRow = Assert.Single(
+                canvas.GetVisualDescendants().OfType<Control>(),
+                control => string.Equals(
+                    AutomationProperties.GetName(control),
+                    "Canvas Target input row Gain",
+                    StringComparison.Ordinal));
+            Assert.DoesNotContain(
+                summaryRow.GetVisualDescendants().OfType<NodeParameterEditorHost>(),
+                control => string.Equals(control.Parameter?.Key, "gain", StringComparison.Ordinal));
+            var summaryBadge = Assert.Single(
+                canvas.GetVisualDescendants().OfType<Control>(),
+                control => string.Equals(
+                    AutomationProperties.GetName(control),
+                    "Canvas Target input summary Gain",
+                    StringComparison.Ordinal));
+            var summaryText = Assert.Single(
+                summaryBadge.GetVisualDescendants().OfType<TextBlock>(),
+                block => string.Equals(block.Text, "0.35", StringComparison.Ordinal));
+            Assert.Equal("0.35", summaryText.Text);
+
+            Assert.True(editor.Session.Commands.TrySetNodeSize(
+                TargetNodeId,
+                new GraphSize(measurement.WidthToRevealInputEditors, measurement.HeightToRevealAdditionalInputs),
+                updateStatus: false));
+
+            var editorRow = Assert.Single(
+                canvas.GetVisualDescendants().OfType<Control>(),
+                control => string.Equals(
+                    AutomationProperties.GetName(control),
+                    "Canvas Target input row Gain",
                     StringComparison.Ordinal));
             var editorHost = Assert.Single(
-                canvas.GetVisualDescendants().OfType<NodeParameterEditorHost>(),
+                editorRow.GetVisualDescendants().OfType<NodeParameterEditorHost>(),
                 control => string.Equals(control.Parameter?.Key, "gain", StringComparison.Ordinal));
             Assert.Equal("gain", editorHost.Parameter?.Key);
-            Assert.Equal("Canvas Target parameter endpoint Gain", AutomationProperties.GetName(railEndpoint));
+            Assert.Equal("Canvas Target input row Gain", AutomationProperties.GetName(editorRow));
         }
         finally
         {
@@ -590,10 +618,15 @@ public sealed class NodeCanvasStandaloneTests
     }
 
     [AvaloniaFact]
-    public void ParameterRail_ConnectedEndpointShowsSourceBindingAndConnectionPath()
+    public void InlineInputRows_ConnectedParameterRowsShowBindingInlineAndSuppressEditors()
     {
         var editor = CreateEditor();
-        Assert.True(editor.Session.Commands.TrySetNodeSize(TargetNodeId, new GraphSize(420d, 260d), updateStatus: false));
+        var targetNode = editor.FindNode(TargetNodeId)!;
+        var measurement = targetNode.SurfaceMeasurement;
+        Assert.True(editor.Session.Commands.TrySetNodeSize(
+            TargetNodeId,
+            new GraphSize(measurement.WidthToRevealInputEditors, measurement.HeightToRevealAdditionalInputs),
+            updateStatus: false));
         editor.ConnectToTarget(
             SourceNodeId,
             SourcePortId,
@@ -608,18 +641,30 @@ public sealed class NodeCanvasStandaloneTests
             Assert.Equal("gain", connected.TargetPortId);
 
             Assert.Single(canvas.GetVisualDescendants().OfType<global::Avalonia.Controls.Shapes.Path>());
-            Assert.DoesNotContain(
-                canvas.GetVisualDescendants().OfType<NodeParameterEditorHost>(),
-                control => string.Equals(control.Parameter?.Key, "gain", StringComparison.Ordinal));
-            var bindingSummary = Assert.Single(
+            var inputRow = Assert.Single(
                 canvas.GetVisualDescendants().OfType<Control>(),
                 control => string.Equals(
                     AutomationProperties.GetName(control),
-                    "Canvas Target parameter binding Gain",
+                    "Canvas Target input row Gain",
+                    StringComparison.Ordinal));
+            Assert.DoesNotContain(
+                inputRow.GetVisualDescendants().OfType<NodeParameterEditorHost>(),
+                control => string.Equals(control.Parameter?.Key, "gain", StringComparison.Ordinal));
+            var bindingSummary = Assert.Single(
+                inputRow.GetVisualDescendants().OfType<Control>(),
+                control => string.Equals(
+                    AutomationProperties.GetName(control),
+                    "Canvas Target input binding Gain",
                     StringComparison.Ordinal));
             var summaryText = Assert.IsType<TextBlock>(
                 bindingSummary.GetVisualDescendants().OfType<TextBlock>().First(block => !string.IsNullOrWhiteSpace(block.Text)));
             Assert.Contains("Canvas Source", summaryText.Text, StringComparison.Ordinal);
+            Assert.DoesNotContain(
+                canvas.GetVisualDescendants().OfType<Control>(),
+                control => string.Equals(
+                    AutomationProperties.GetName(control),
+                    "Canvas Target parameter rail",
+                    StringComparison.Ordinal));
         }
         finally
         {
@@ -754,7 +799,7 @@ public sealed class NodeCanvasStandaloneTests
     }
 
     [AvaloniaFact]
-    public void AdaptiveSurface_DefaultSize_ShowsRequiredParameterEndpointOnly()
+    public void AdaptiveSurface_DefaultSize_ShowsRequiredInputRowOnly()
     {
         var editor = CreateAdaptiveSurfaceEditor();
         var (window, canvas) = CreateStandaloneCanvasWindow(editor);
@@ -762,16 +807,16 @@ public sealed class NodeCanvasStandaloneTests
         try
         {
             Assert.Contains(
-                canvas.GetVisualDescendants().OfType<Button>(),
+                canvas.GetVisualDescendants().OfType<Control>(),
                 control => string.Equals(
                     AutomationProperties.GetName(control),
-                    "Adaptive Surface parameter endpoint Required Input",
+                    "Adaptive Surface input row Required Input",
                     StringComparison.Ordinal));
             Assert.DoesNotContain(
-                canvas.GetVisualDescendants().OfType<Button>(),
+                canvas.GetVisualDescendants().OfType<Control>(),
                 control => string.Equals(
                     AutomationProperties.GetName(control),
-                    "Adaptive Surface parameter endpoint Optional Gain",
+                    "Adaptive Surface input row Optional Gain",
                     StringComparison.Ordinal));
             Assert.DoesNotContain(
                 canvas.GetVisualDescendants().OfType<NodeParameterEditorHost>(),
@@ -784,30 +829,31 @@ public sealed class NodeCanvasStandaloneTests
     }
 
     [AvaloniaFact]
-    public void AdaptiveSurface_HeightAndWidthProgressivelyRevealOptionalEndpointAndInlineEditors()
+    public void AdaptiveSurface_HeightAndWidthProgressivelyRevealOptionalRowsAndInlineEditors()
     {
         var editor = CreateAdaptiveSurfaceEditor();
         var adaptiveNode = editor.Nodes.Single(node => node.Id == AdaptiveNodeId);
+        var measurement = adaptiveNode.SurfaceMeasurement;
         var (window, canvas) = CreateStandaloneCanvasWindow(editor);
 
         try
         {
             Assert.True(editor.Session.Commands.TrySetNodeSize(
                 AdaptiveNodeId,
-                new GraphSize(adaptiveNode.Width, adaptiveNode.Height + 96d),
+                new GraphSize(adaptiveNode.Width, measurement.HeightToRevealAdditionalInputs),
                 updateStatus: false));
 
             Assert.Contains(
-                canvas.GetVisualDescendants().OfType<Button>(),
+                canvas.GetVisualDescendants().OfType<Control>(),
                 control => string.Equals(
                     AutomationProperties.GetName(control),
-                    "Adaptive Surface parameter endpoint Required Input",
+                    "Adaptive Surface input row Required Input",
                     StringComparison.Ordinal));
             Assert.Contains(
-                canvas.GetVisualDescendants().OfType<Button>(),
+                canvas.GetVisualDescendants().OfType<Control>(),
                 control => string.Equals(
                     AutomationProperties.GetName(control),
-                    "Adaptive Surface parameter endpoint Optional Gain",
+                    "Adaptive Surface input row Optional Gain",
                     StringComparison.Ordinal));
             Assert.DoesNotContain(
                 canvas.GetVisualDescendants().OfType<NodeParameterEditorHost>(),
@@ -815,11 +861,17 @@ public sealed class NodeCanvasStandaloneTests
 
             Assert.True(editor.Session.Commands.TrySetNodeSize(
                 AdaptiveNodeId,
-                new GraphSize(adaptiveNode.Width + 180d, adaptiveNode.Height + 96d),
+                new GraphSize(measurement.WidthToRevealInputEditors, measurement.HeightToRevealAdditionalInputs),
                 updateStatus: false));
 
+            var optionalRow = Assert.Single(
+                canvas.GetVisualDescendants().OfType<Control>(),
+                control => string.Equals(
+                    AutomationProperties.GetName(control),
+                    "Adaptive Surface input row Optional Gain",
+                    StringComparison.Ordinal));
             var editorHost = Assert.Single(
-                canvas.GetVisualDescendants().OfType<NodeParameterEditorHost>(),
+                optionalRow.GetVisualDescendants().OfType<NodeParameterEditorHost>(),
                 control => string.Equals(control.Parameter?.Key, OptionalParameterKey, StringComparison.Ordinal));
             Assert.Equal(OptionalParameterKey, editorHost.Parameter?.Key);
         }

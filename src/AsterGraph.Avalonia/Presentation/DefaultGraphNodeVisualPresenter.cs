@@ -27,9 +27,6 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
     private const double MinimumNodeChromeHeight = 180d;
     private const double AdditionalPortRowHeight = 34d;
     private const double StatusBarReserveHeight = 34d;
-    private const double MinimumParameterRailWidth = 144d;
-    private const double EditorParameterRailWidth = 192d;
-    private const double MaximumParameterRailWidth = 228d;
 
     public GraphNodeVisual Create(GraphNodeVisualContext context)
     {
@@ -143,43 +140,18 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
         Grid.SetColumnSpan(description, 2);
         mainBody.Children.Add(description);
 
-        var inputs = BuildPortPanel(context, node.Inputs, isInput: true, portAnchors);
-        var parameterEndpointStack = new StackPanel
-        {
-            Spacing = 8,
-        };
-        var inputColumn = new StackPanel
+        var inputRowStack = new StackPanel
         {
             Spacing = nodeStyle.BodyRowSpacing,
             HorizontalAlignment = HorizontalAlignment.Left,
         };
-        inputColumn.Children.Add(inputs);
-        inputColumn.Children.Add(parameterEndpointStack);
-        Grid.SetRow(inputColumn, 1);
-        mainBody.Children.Add(inputColumn);
+        Grid.SetRow(inputRowStack, 1);
+        mainBody.Children.Add(inputRowStack);
 
         var outputs = BuildPortPanel(context, node.Outputs, isInput: false, portAnchors);
         Grid.SetRow(outputs, 1);
         Grid.SetColumn(outputs, 1);
         mainBody.Children.Add(outputs);
-
-        var parameterRailStack = new StackPanel
-        {
-            Spacing = 10,
-        };
-        var parameterRail = new Border
-        {
-            IsVisible = false,
-            BorderThickness = new Thickness(1),
-            CornerRadius = new CornerRadius(Math.Max(10, nodeStyle.CornerRadius - 10)),
-            Padding = new Thickness(10),
-            Child = parameterRailStack,
-            VerticalAlignment = VerticalAlignment.Stretch,
-        };
-        parameterRail.PointerPressed += (_, args) => args.Handled = true;
-        AutomationProperties.SetName(parameterRail, $"{node.Title} parameter rail");
-        Grid.SetColumn(parameterRail, 1);
-        contentGrid.Children.Add(parameterRail);
 
         var statusBarText = new TextBlock
         {
@@ -283,10 +255,8 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
             subtitle,
             description,
             badgePanel,
-            contentGrid,
-            parameterEndpointStack,
-            parameterRail,
-            parameterRailStack,
+            inputRowStack,
+            portAnchors,
             connectionTargetAnchors,
             statusBar,
             statusBarText);
@@ -412,126 +382,118 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
             ToolTip.SetTip(state.StatusBar, null);
         }
 
-        UpdateParameterEndpointRows(state, context);
-        UpdateParameterRail(state, context, nodeStyle, renderedSize.Width);
+        UpdateInputRows(state, context, nodeStyle);
         state.Border.Height = ResolveRenderedNodeHeight(node, renderedSize.Height, state.StatusBar.IsVisible);
     }
 
-    private static void UpdateParameterEndpointRows(DefaultNodeVisualState state, GraphNodeVisualContext context)
+    private static void UpdateInputRows(
+        DefaultNodeVisualState state,
+        GraphNodeVisualContext context,
+        NodeCardStyleOptions nodeStyle)
     {
         var node = context.Node;
+        foreach (var port in node.Inputs)
+        {
+            state.PortAnchors.Remove(port.Id);
+        }
+
         state.ConnectionTargetAnchors.Clear();
-        state.ParameterEndpointStack.Children.Clear();
+        state.InputRowStack.Children.Clear();
 
-        foreach (var endpoint in node.ParameterEndpoints)
+        foreach (var row in node.InputRows)
         {
-            state.ParameterEndpointStack.Children.Add(CreateParameterEndpointButton(context, endpoint, state.ConnectionTargetAnchors));
+            state.InputRowStack.Children.Add(CreateInputRowControl(context, row, state.PortAnchors, state.ConnectionTargetAnchors, nodeStyle));
         }
     }
 
-    private static void UpdateParameterRail(DefaultNodeVisualState state, GraphNodeVisualContext context, NodeCardStyleOptions nodeStyle, double renderedWidth)
-    {
-        var node = context.Node;
-        var railVisible = node.ParameterEndpoints.Count > 0 && node.ActiveSurfaceTier.ShowsSection(NodeSurfaceSectionKeys.InputSummaries);
-        var editorsVisible = railVisible && node.ActiveSurfaceTier.ShowsSection(NodeSurfaceSectionKeys.InputEditors);
-
-        state.ParameterRailStack.Children.Clear();
-        state.ParameterRail.IsVisible = railVisible;
-        state.ContentGrid.ColumnDefinitions = railVisible
-            ? new ColumnDefinitions("*,Auto")
-            : new ColumnDefinitions("*");
-        Grid.SetColumnSpan(state.StatusBar, railVisible ? 2 : 1);
-
-        if (!railVisible)
-        {
-            return;
-        }
-
-        state.ParameterRail.Width = ResolveParameterRailWidth(node, renderedWidth);
-        state.ParameterRail.Background = BrushFactory.Solid("#0F1A26", 0.94);
-        state.ParameterRail.BorderBrush = BrushFactory.Solid(
-            node.AccentHex,
-            context.InteractionFocus.IsNodeEditing(node.Id)
-                ? 0.94d
-                : node.IsSelected || context.InteractionFocus.IsNodeInspected(node.Id)
-                    ? 0.84d
-                    : 0.56d);
-
-        foreach (var endpoint in node.ParameterEndpoints)
-        {
-            state.ParameterRailStack.Children.Add(CreateParameterRailSection(context, endpoint, nodeStyle, editorsVisible));
-        }
-    }
-
-    private static Control CreateParameterRailSection(
+    private static Control CreateInputRowControl(
         GraphNodeVisualContext context,
-        NodeParameterEndpointViewModel endpoint,
-        NodeCardStyleOptions nodeStyle,
-        bool editorsVisible)
+        NodeSurfaceInputRowViewModel row,
+        Dictionary<string, Control> portAnchors,
+        Dictionary<GraphConnectionTargetRef, Control> connectionTargetAnchors,
+        NodeCardStyleOptions nodeStyle)
     {
-        var header = new TextBlock
+        if (row.Kind == NodeSurfaceInputRowKind.Port)
         {
-            Text = endpoint.Parameter.DisplayName,
-            FontSize = 12,
-            FontWeight = FontWeight.SemiBold,
-            Foreground = BrushFactory.Solid("#F1F7FA", 0.98),
-        };
+            return CreatePortButton(context, row.Port!, isInput: true, portAnchors);
+        }
 
-        if (!editorsVisible)
+        return CreateParameterInputRow(context, row, connectionTargetAnchors, nodeStyle);
+    }
+
+    private static Control CreateParameterInputRow(
+        GraphNodeVisualContext context,
+        NodeSurfaceInputRowViewModel row,
+        Dictionary<GraphConnectionTargetRef, Control> connectionTargetAnchors,
+        NodeCardStyleOptions nodeStyle)
+    {
+        var endpoint = row.ParameterEndpoint!;
+        var root = new Border
         {
-            return new StackPanel
+            Background = Brushes.Transparent,
+            Padding = new Thickness(0),
+        };
+        AutomationProperties.SetName(root, $"{context.Node.Title} input row {row.Label}");
+        var layout = new Grid
+        {
+            ColumnDefinitions = new ColumnDefinitions("Auto,*"),
+            ColumnSpacing = 10,
+        };
+        layout.Children.Add(CreateParameterTargetButton(context, endpoint, row.Label, connectionTargetAnchors));
+        root.Child = layout;
+
+        if (row.InlineContentKind == NodeSurfaceInlineContentKind.Editor)
+        {
+            var editorStack = new StackPanel
             {
-                Spacing = 6,
-                Children =
-                {
-                    header,
-                    new TextBlock
-                    {
-                        Text = endpoint.IsConnected
-                            ? endpoint.ConnectedDisplayText ?? "Connected"
-                            : DescribeParameterValue(endpoint.Parameter),
-                        FontSize = 10,
-                        TextWrapping = TextWrapping.Wrap,
-                        Foreground = BrushFactory.Solid("#A5C3CE", 0.92),
-                    },
-                },
+                Spacing = 4,
+                VerticalAlignment = VerticalAlignment.Center,
             };
-        }
-
-        var section = new StackPanel { Spacing = 6 };
-        section.Children.Add(header);
-        if (endpoint.IsConnected)
-        {
-            section.Children.Add(CreateConnectedParameterBinding(context, endpoint));
-            return section;
-        }
-
-        var editorHost = new NodeParameterEditorHost
-        {
-            Parameter = endpoint.Parameter,
-            NodeParameterEditorRegistry = context.NodeParameterEditorRegistry,
-            Usage = NodeParameterEditorUsage.NodeSurface,
-        };
-        AutomationProperties.SetName(editorHost, $"{context.Node.Title} parameter editor {endpoint.Parameter.DisplayName}");
-        section.Children.Add(editorHost);
-
-        if (endpoint.Parameter.HasHelpText)
-        {
-            section.Children.Add(new TextBlock
+            var editorHost = new NodeParameterEditorHost
             {
-                Text = endpoint.Parameter.HelpText,
-                FontSize = 10,
-                TextWrapping = TextWrapping.Wrap,
-                Foreground = BrushFactory.Solid(nodeStyle.SubtitleTextHex, 0.72),
-            });
+                Parameter = endpoint.Parameter,
+                NodeParameterEditorRegistry = context.NodeParameterEditorRegistry,
+                Usage = NodeParameterEditorUsage.NodeSurface,
+            };
+            AutomationProperties.SetName(editorHost, $"{context.Node.Title} input editor {row.Label}");
+            editorStack.Children.Add(editorHost);
+
+            if (endpoint.Parameter.HasHelpText)
+            {
+                editorStack.Children.Add(new TextBlock
+                {
+                    Text = endpoint.Parameter.HelpText,
+                    FontSize = 10,
+                    TextWrapping = TextWrapping.Wrap,
+                    Foreground = BrushFactory.Solid(nodeStyle.SubtitleTextHex, 0.72),
+                });
+            }
+
+            Grid.SetColumn(editorStack, 1);
+            layout.Children.Add(editorStack);
+            return root;
         }
 
-        return section;
+        Control? accessory = row.InlineContentKind switch
+        {
+            NodeSurfaceInlineContentKind.Summary => CreateInlineSummaryBadge(context, row.Label, row.InlineDisplayText!),
+            NodeSurfaceInlineContentKind.Connection => CreateInlineBindingSummary(context, row.Label, row.InlineDisplayText!),
+            _ => null,
+        };
+
+        if (accessory is not null)
+        {
+            Grid.SetColumn(accessory, 1);
+            layout.Children.Add(accessory);
+        }
+
+        return root;
     }
 
-    private static Button CreateParameterEndpointButton(
+    private static Button CreateParameterTargetButton(
         GraphNodeVisualContext context,
         NodeParameterEndpointViewModel endpoint,
+        string label,
         Dictionary<GraphConnectionTargetRef, Control> connectionTargetAnchors)
     {
         var dot = new Border
@@ -540,38 +502,27 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
             Height = 10,
             CornerRadius = new CornerRadius(999),
             Background = BrushFactory.Solid("#F3B36B"),
-            VerticalAlignment = VerticalAlignment.Top,
-            Margin = new Thickness(0, 4, 0, 0),
+            VerticalAlignment = VerticalAlignment.Center,
         };
         connectionTargetAnchors[endpoint.Target] = dot;
 
-        var summary = endpoint.IsConnected
-            ? endpoint.ConnectedDisplayText ?? "Connected"
-            : DescribeParameterValue(endpoint.Parameter);
+        var labelText = new TextBlock
+        {
+            Text = label,
+            FontSize = 12,
+            FontWeight = FontWeight.SemiBold,
+            Foreground = BrushFactory.Solid("#F1F7FA", 0.98),
+            VerticalAlignment = VerticalAlignment.Center,
+        };
+
         var content = new Grid
         {
             ColumnDefinitions = new ColumnDefinitions("Auto,*"),
             ColumnSpacing = 8,
         };
         content.Children.Add(dot);
-
-        var textStack = new StackPanel { Spacing = 2 };
-        textStack.Children.Add(new TextBlock
-        {
-            Text = endpoint.Parameter.DisplayName,
-            FontSize = 12,
-            FontWeight = FontWeight.SemiBold,
-            Foreground = BrushFactory.Solid("#F1F7FA", 0.98),
-        });
-        textStack.Children.Add(new TextBlock
-        {
-            Text = summary,
-            FontSize = 10,
-            TextWrapping = TextWrapping.Wrap,
-            Foreground = BrushFactory.Solid("#A5C3CE", 0.92),
-        });
-        Grid.SetColumn(textStack, 1);
-        content.Children.Add(textStack);
+        Grid.SetColumn(labelText, 1);
+        content.Children.Add(labelText);
 
         var button = new Button
         {
@@ -583,7 +534,7 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
             HorizontalContentAlignment = HorizontalAlignment.Stretch,
             Content = content,
         };
-        AutomationProperties.SetName(button, $"{context.Node.Title} parameter endpoint {endpoint.Parameter.DisplayName}");
+        AutomationProperties.SetName(button, $"{context.Node.Title} input target {label}");
         button.PointerPressed += (_, args) =>
         {
             if (args.GetCurrentPoint(button).Properties.IsLeftButtonPressed)
@@ -599,7 +550,10 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
         return button;
     }
 
-    private static Border CreateConnectedParameterBinding(GraphNodeVisualContext context, NodeParameterEndpointViewModel endpoint)
+    private static Border CreateInlineBindingSummary(
+        GraphNodeVisualContext context,
+        string label,
+        string bindingText)
     {
         var bindingSummary = new Border
         {
@@ -607,18 +561,44 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
             BorderBrush = BrushFactory.Solid("#F3B36B", 0.5),
             BorderThickness = new Thickness(1),
             CornerRadius = new CornerRadius(8),
-            Padding = new Thickness(8, 6),
+            Padding = new Thickness(8, 4),
+            VerticalAlignment = VerticalAlignment.Center,
             Child = new TextBlock
             {
-                Text = endpoint.ConnectedDisplayText ?? "Connected",
+                Text = bindingText,
                 FontSize = 11,
                 TextWrapping = TextWrapping.Wrap,
                 Foreground = BrushFactory.Solid("#F8FBFD", 0.96),
             },
         };
-        AutomationProperties.SetName(bindingSummary, $"{context.Node.Title} parameter binding {endpoint.Parameter.DisplayName}");
+        AutomationProperties.SetName(bindingSummary, $"{context.Node.Title} input binding {label}");
         bindingSummary.PointerPressed += (_, args) => args.Handled = true;
         return bindingSummary;
+    }
+
+    private static Border CreateInlineSummaryBadge(
+        GraphNodeVisualContext context,
+        string label,
+        string summaryText)
+    {
+        var summary = new Border
+        {
+            Background = BrushFactory.Solid("#152434", 0.56),
+            BorderBrush = BrushFactory.Solid("#365063", 0.5),
+            BorderThickness = new Thickness(1),
+            CornerRadius = new CornerRadius(8),
+            Padding = new Thickness(8, 4),
+            VerticalAlignment = VerticalAlignment.Center,
+            Child = new TextBlock
+            {
+                Text = summaryText,
+                FontSize = 10,
+                TextWrapping = TextWrapping.Wrap,
+                Foreground = BrushFactory.Solid("#A5C3CE", 0.92),
+            },
+        };
+        AutomationProperties.SetName(summary, $"{context.Node.Title} input summary {label}");
+        return summary;
     }
 
     private static string DescribeParameterValue(NodeParameterViewModel parameter)
@@ -645,7 +625,7 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
 
     private static double ResolveMinimumChromeHeight(NodeViewModel node)
     {
-        var visiblePortRows = Math.Max(Math.Max(node.Inputs.Count + node.ParameterEndpoints.Count, node.Outputs.Count), 1);
+        var visiblePortRows = Math.Max(Math.Max(node.InputRows.Count, node.Outputs.Count), 1);
         return MinimumNodeChromeHeight + (Math.Max(0, visiblePortRows - 1) * AdditionalPortRowHeight);
     }
 
@@ -661,16 +641,6 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
         }
 
         return renderedHeight;
-    }
-
-    private static double ResolveParameterRailWidth(NodeViewModel node, double renderedWidth)
-    {
-        var desiredWidth = node.ActiveSurfaceTier.ShowsSection(NodeSurfaceSectionKeys.InputEditors)
-            ? EditorParameterRailWidth
-            : MinimumParameterRailWidth;
-        return Math.Min(
-            MaximumParameterRailWidth,
-            Math.Max(desiredWidth, renderedWidth * 0.32d));
     }
 
     private static GraphSize ResolveRenderedNodeSize(GraphNodeVisualContext context)
@@ -691,90 +661,100 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
 
         foreach (var port in ports)
         {
-            var row = new StackPanel
-            {
-                Orientation = Orientation.Horizontal,
-                Spacing = portStyle.RowSpacing,
-                HorizontalAlignment = isInput ? HorizontalAlignment.Left : HorizontalAlignment.Right,
-            };
-
-            var dot = new Border
-            {
-                Width = portStyle.DotSize,
-                Height = portStyle.DotSize,
-                CornerRadius = new CornerRadius(999),
-                Background = BrushFactory.Solid(port.AccentHex),
-                VerticalAlignment = VerticalAlignment.Center,
-            };
-
-            var text = new StackPanel
-            {
-                Spacing = portStyle.TextSpacing,
-                HorizontalAlignment = isInput ? HorizontalAlignment.Left : HorizontalAlignment.Right,
-            };
-            text.Children.Add(new TextBlock
-            {
-                Text = port.Label,
-                FontSize = portStyle.LabelFontSize,
-                FontWeight = FontWeight.Medium,
-                Foreground = BrushFactory.Solid(portStyle.LabelHex),
-                TextAlignment = isInput ? TextAlignment.Left : TextAlignment.Right,
-            });
-            text.Children.Add(new TextBlock
-            {
-                Text = GraphTypeCueFormatter.FormatPortToken(port),
-                FontSize = portStyle.TypeFontSize,
-                Foreground = BrushFactory.Solid(portStyle.TypeHex, portStyle.TypeOpacity),
-                TextAlignment = isInput ? TextAlignment.Left : TextAlignment.Right,
-            });
-
-            if (isInput)
-            {
-                row.Children.Add(dot);
-                row.Children.Add(text);
-            }
-            else
-            {
-                row.Children.Add(text);
-                row.Children.Add(dot);
-            }
-
-            var button = new Button
-            {
-                DataContext = port,
-                Background = Brushes.Transparent,
-                BorderThickness = new Thickness(0),
-                Padding = new Thickness(0),
-                HorizontalAlignment = isInput ? HorizontalAlignment.Left : HorizontalAlignment.Right,
-                HorizontalContentAlignment = isInput ? HorizontalAlignment.Left : HorizontalAlignment.Right,
-                Content = row,
-            };
-            AutomationProperties.SetName(
-                button,
-                $"{context.Node.Title} {(isInput ? "input" : "output")} {port.Label}");
-
-            button.PointerPressed += (_, args) =>
-            {
-                if (args.GetCurrentPoint(button).Properties.IsLeftButtonPressed)
-                {
-                    args.Handled = true;
-                }
-            };
-            button.Click += (_, _) =>
-            {
-                context.FocusCanvas();
-                context.ActivatePort(context.Node, port);
-            };
-            button.ContextRequested += (_, args) =>
-            {
-                args.Handled = context.OpenPortContextMenu(button, context.Node, port, args);
-            };
-
-            portAnchors[port.Id] = dot;
-            panel.Children.Add(button);
+            panel.Children.Add(CreatePortButton(context, port, isInput, portAnchors));
         }
 
         return panel;
+    }
+
+    private static Button CreatePortButton(
+        GraphNodeVisualContext context,
+        PortViewModel port,
+        bool isInput,
+        Dictionary<string, Control> portAnchors)
+    {
+        var portStyle = GetPortStyle(context, port);
+        var row = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Spacing = portStyle.RowSpacing,
+            HorizontalAlignment = isInput ? HorizontalAlignment.Left : HorizontalAlignment.Right,
+        };
+
+        var dot = new Border
+        {
+            Width = portStyle.DotSize,
+            Height = portStyle.DotSize,
+            CornerRadius = new CornerRadius(999),
+            Background = BrushFactory.Solid(port.AccentHex),
+            VerticalAlignment = VerticalAlignment.Center,
+        };
+
+        var text = new StackPanel
+        {
+            Spacing = portStyle.TextSpacing,
+            HorizontalAlignment = isInput ? HorizontalAlignment.Left : HorizontalAlignment.Right,
+        };
+        text.Children.Add(new TextBlock
+        {
+            Text = port.Label,
+            FontSize = portStyle.LabelFontSize,
+            FontWeight = FontWeight.Medium,
+            Foreground = BrushFactory.Solid(portStyle.LabelHex),
+            TextAlignment = isInput ? TextAlignment.Left : TextAlignment.Right,
+        });
+        text.Children.Add(new TextBlock
+        {
+            Text = GraphTypeCueFormatter.FormatPortToken(port),
+            FontSize = portStyle.TypeFontSize,
+            Foreground = BrushFactory.Solid(portStyle.TypeHex, portStyle.TypeOpacity),
+            TextAlignment = isInput ? TextAlignment.Left : TextAlignment.Right,
+        });
+
+        if (isInput)
+        {
+            row.Children.Add(dot);
+            row.Children.Add(text);
+        }
+        else
+        {
+            row.Children.Add(text);
+            row.Children.Add(dot);
+        }
+
+        var button = new Button
+        {
+            DataContext = port,
+            Background = Brushes.Transparent,
+            BorderThickness = new Thickness(0),
+            Padding = new Thickness(0),
+            HorizontalAlignment = isInput ? HorizontalAlignment.Left : HorizontalAlignment.Right,
+            HorizontalContentAlignment = isInput ? HorizontalAlignment.Left : HorizontalAlignment.Right,
+            Content = row,
+        };
+        AutomationProperties.SetName(
+            button,
+            $"{context.Node.Title} {(isInput ? "input" : "output")} {port.Label}");
+
+        button.PointerPressed += (_, args) =>
+        {
+            if (args.GetCurrentPoint(button).Properties.IsLeftButtonPressed)
+            {
+                args.Handled = true;
+            }
+        };
+        button.Click += (_, _) =>
+        {
+            context.FocusCanvas();
+            context.ActivatePort(context.Node, port);
+        };
+        button.ContextRequested += (_, args) =>
+        {
+            args.Handled = context.OpenPortContextMenu(button, context.Node, port, args);
+        };
+
+        portAnchors[port.Id] = dot;
+        return button;
     }
 
     private static Thumb CreateResizeThumb(
@@ -875,10 +855,8 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
         TextBlock Subtitle,
         TextBlock Description,
         StackPanel BadgePanel,
-        Grid ContentGrid,
-        StackPanel ParameterEndpointStack,
-        Border ParameterRail,
-        StackPanel ParameterRailStack,
+        StackPanel InputRowStack,
+        Dictionary<string, Control> PortAnchors,
         Dictionary<GraphConnectionTargetRef, Control> ConnectionTargetAnchors,
         Border StatusBar,
         TextBlock StatusBarText);
