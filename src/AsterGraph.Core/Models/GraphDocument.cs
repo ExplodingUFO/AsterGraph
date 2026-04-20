@@ -165,6 +165,23 @@ public sealed record GraphDocument
             GraphScopes);
     }
 
+    /// <summary>
+    /// Retained positional deconstruction contract for legacy hosts and plugins.
+    /// </summary>
+    public void Deconstruct(
+        out string title,
+        out string description,
+        out IReadOnlyList<GraphNode> nodes,
+        out IReadOnlyList<GraphConnection> connections,
+        out IReadOnlyList<GraphNodeGroup>? groups)
+    {
+        title = Title;
+        description = Description;
+        nodes = Nodes;
+        connections = Connections;
+        groups = Groups;
+    }
+
     private IReadOnlyList<GraphScope> BuildGraphScopesSnapshot()
     {
         var rootScope = new GraphScope(
@@ -245,7 +262,8 @@ public sealed record GraphDocument
                 port.Direction,
                 port.DataType,
                 port.AccentHex,
-                port.TypeId))
+                port.TypeId,
+                port.InlineParameterKey))
             .ToList();
 
     private static List<GraphParameterValue> CloneParameterValues(IReadOnlyList<GraphParameterValue> parameterValues)

@@ -169,6 +169,46 @@ public sealed class SerializationCompatibilityTests
     }
 
     [Fact]
+    public void GraphDocument_RetainsLegacyDeconstructAndInlineParameterCloneContracts()
+    {
+        var legacyPort = new GraphPort(
+            "input-001",
+            "Input",
+            PortDirection.Input,
+            "float",
+            "#F3B36B",
+            new PortTypeId("float"),
+            "gain");
+        var document = new GraphDocument(
+            "Legacy Graph",
+            "Compatibility contract.",
+            [
+                new GraphNode(
+                    "node-001",
+                    "Node",
+                    "Tests",
+                    "Compat",
+                    "Carries legacy inline parameter metadata.",
+                    new GraphPoint(0, 0),
+                    new GraphSize(240, 160),
+                    [legacyPort],
+                    [],
+                    "#6AD5C4",
+                    new NodeDefinitionId("tests.node"),
+                    []),
+            ],
+            []);
+
+        var (title, description, nodes, connections, groups) = document;
+
+        Assert.Equal("Legacy Graph", title);
+        Assert.Equal("Compatibility contract.", description);
+        Assert.Empty(connections);
+        Assert.Null(groups);
+        Assert.Equal("gain", Assert.Single(nodes).Inputs[0].InlineParameterKey);
+    }
+
+    [Fact]
     public void GraphDocument_WithExpression_KeepsGraphScopeIdsUnique_WhenRootGraphIdChanges()
     {
         var document = CreateScopedDocument();
