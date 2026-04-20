@@ -50,6 +50,10 @@ dotnet run --project src/AsterGraph.Demo/AsterGraph.Demo.csproj --nologo -- --pr
 - `DEMO_TRUST_OK:True`
 - `DEMO_SHELL_OK:True`
 - `COMMAND_SURFACE_OK:True`
+- `TIERED_NODE_SURFACE_OK:True`
+- `FIXED_GROUP_FRAME_OK:True`
+- `NON_OBSCURING_EDITING_OK:True`
+- `VISUAL_SEMANTICS_OK:True`
 - `COMPOSITE_SCOPE_OK:True`
 - `EDGE_NOTE_OK:True`
 - `DISCONNECT_FLOW_OK:True`
@@ -64,7 +68,8 @@ dotnet run --project src/AsterGraph.Demo/AsterGraph.Demo.csproj --nologo -- --pr
 - `扩展`：看 candidate discovery、trust decision、load snapshot 和 allowlist 决策
 - `自动化`：看 typed automation execution 与结果投影
 - `集成`：看 `HostSample`、standalone surfaces、presenter replacement、本地化证明
-- `运行时` 和 `证明`：一起看 host-owned shell state、recent workspace、autosave 提示和 shared runtime evidence
+- `运行时` 和 `证明`：一起看 host-owned shell state、recent workspace、autosave 提示、threshold-driven side rails 和 shared runtime evidence
+- `证明`：还会直接给出 `NON_OBSCURING_EDITING_OK` 与 `VISUAL_SEMANTICS_OK`，用于确认参数编辑不会遮挡主流程、图面语义也已经收口
 - `视图` 和 `证明`：同时验证 `COMPOSITE_SCOPE_OK`（复合图层导航）、`EDGE_NOTE_OK`（边注解展示编辑）、`DISCONNECT_FLOW_OK`（断开连接后的恢复语义）
 
 ## Demo 与其他入口样例的分工

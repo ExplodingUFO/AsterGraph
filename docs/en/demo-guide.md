@@ -50,6 +50,10 @@ Expected proof markers:
 - `DEMO_TRUST_OK:True`
 - `DEMO_SHELL_OK:True`
 - `COMMAND_SURFACE_OK:True`
+- `TIERED_NODE_SURFACE_OK:True`
+- `FIXED_GROUP_FRAME_OK:True`
+- `NON_OBSCURING_EDITING_OK:True`
+- `VISUAL_SEMANTICS_OK:True`
 - `COMPOSITE_SCOPE_OK:True`
 - `EDGE_NOTE_OK:True`
 - `DISCONNECT_FLOW_OK:True`
@@ -64,7 +68,8 @@ Expected proof markers:
 - `Extensions` proves candidate discovery, trust decisions, load snapshots, and persisted allowlist decisions.
 - `Automation` proves typed execution and result projection.
 - `Integration` points to `HostSample`, renders standalone surfaces, and shows presenter-replacement previews.
-- `Runtime` and `Proof` keep host-owned shell state, recent workspaces, autosave cues, and shared runtime evidence in one place.
+- `Runtime` and `Proof` keep host-owned shell state, recent workspaces, autosave cues, threshold-driven side rails, and shared runtime evidence in one place.
+- `Proof` also confirms non-obscuring parameter editing (`NON_OBSCURING_EDITING_OK`) and the cleaned graph-surface visual semantics (`VISUAL_SEMANTICS_OK`).
 - `View and Proof` can verify composite scope navigation (`COMPOSITE_SCOPE_OK`), editable edge notes (`EDGE_NOTE_OK`), and disconnect recovery (`DISCONNECT_FLOW_OK`).
 
 ## Demo vs Other Entry Samples

@@ -28,6 +28,12 @@
 - 四个可发布 SDK 包边界
 - kernel/session-first 的运行时状态所有权
 - 默认 Avalonia 壳层与 standalone surfaces
+- v1.23 图面可用性 proof marker：
+  - `COMMAND_SURFACE_OK:True`
+  - `TIERED_NODE_SURFACE_OK:True`
+  - `FIXED_GROUP_FRAME_OK:True`
+  - `NON_OBSCURING_EDITING_OK:True`
+  - `VISUAL_SEMANTICS_OK:True`
 - v1.21 语义图组合 proof marker：
   - `COMPOSITE_SCOPE_OK:True`
   - `EDGE_NOTE_OK:True`

@@ -21,6 +21,8 @@ public sealed record DemoProofResult(
     bool CommandSurfaceOk,
     bool TieredNodeSurfaceOk,
     bool FixedGroupFrameOk,
+    bool NonObscuringEditingOk,
+    bool VisualSemanticsOk,
     bool CompositeScopeOk,
     bool EdgeNoteOk,
     bool DisconnectFlowOk,
@@ -35,9 +37,25 @@ public sealed record DemoProofResult(
         && CommandSurfaceOk
         && TieredNodeSurfaceOk
         && FixedGroupFrameOk
+        && NonObscuringEditingOk
+        && VisualSemanticsOk
         && CompositeScopeOk
         && EdgeNoteOk
         && DisconnectFlowOk;
+
+    public IReadOnlyList<string> ProofLines =>
+    [
+        $"DEMO_TRUST_OK:{TrustTransparencyOk}",
+        $"DEMO_SHELL_OK:{ShellWorkflowOk}",
+        $"COMMAND_SURFACE_OK:{CommandSurfaceOk}",
+        $"TIERED_NODE_SURFACE_OK:{TieredNodeSurfaceOk}",
+        $"FIXED_GROUP_FRAME_OK:{FixedGroupFrameOk}",
+        $"NON_OBSCURING_EDITING_OK:{NonObscuringEditingOk}",
+        $"VISUAL_SEMANTICS_OK:{VisualSemanticsOk}",
+        $"COMPOSITE_SCOPE_OK:{CompositeScopeOk}",
+        $"EDGE_NOTE_OK:{EdgeNoteOk}",
+        $"DISCONNECT_FLOW_OK:{DisconnectFlowOk}",
+    ];
 
     public IReadOnlyList<string> MetricLines =>
     [
@@ -152,6 +170,35 @@ public static class DemoProof
             && terrainGroupAfterResize.Position == terrainGroupSnapshot.Position
             && terrainGroupAfterResize.Size == resizedGroupFrameSize
             && terrainGroupAfterResize.NodeIds.OrderBy(id => id, StringComparer.Ordinal).SequenceEqual(["gradient", "noise"]);
+        var editableLightingParameter = shell.Editor.Session.Queries.GetSelectedNodeParameterSnapshots()
+            .FirstOrDefault(snapshot => snapshot.CanEdit);
+        if (editableLightingParameter is not null)
+        {
+            shell.Editor.SetInspectorEditingParameter(editableLightingParameter.Definition.Key);
+        }
+
+        var nonObscuringEditingOk =
+            editableLightingParameter is not null
+            && shell.Editor.InteractionFocus.IsNodeInspected(lightingNode.Id)
+            && shell.Editor.InteractionFocus.IsNodeEditing(lightingNode.Id)
+            && string.Equals(
+                shell.Editor.InteractionFocus.EditingParameterKey,
+                editableLightingParameter.Definition.Key,
+                StringComparison.Ordinal)
+            && !shell.Editor.HasPendingConnection
+            && shell.StandaloneSurfaceLines.Any(line => line.Contains("AsterGraphInspectorViewFactory", StringComparison.Ordinal));
+        shell.Editor.SetInspectorEditingParameter(null);
+        var outputNode = shell.Editor.FindNode("output")
+            ?? throw new InvalidOperationException("Demo proof requires the output node.");
+        var visualSemanticsOk =
+            string.Equals(outputNode.Category, "Output", StringComparison.Ordinal)
+            && terrainGroupAfterResize is not null
+            && string.Equals(terrainGroupAfterResize.Title, "Terrain Authoring", StringComparison.Ordinal)
+            && !shell.Editor.InspectorConnectionsTitle.Contains('/', StringComparison.Ordinal)
+            && !shell.Editor.InspectorInputsTitle.Contains('/', StringComparison.Ordinal)
+            && !shell.Editor.InspectorOutputsTitle.Contains('/', StringComparison.Ordinal)
+            && string.Equals(shell.Editor.InspectorParametersTitle, "参数编辑", StringComparison.Ordinal)
+            && !string.IsNullOrWhiteSpace(shell.Editor.InspectorParametersGuidance);
 
         var exportPath = Path.Combine(storageRoot, "plugin-allowlist-proof.json");
         var trustTransparencyOk =
@@ -182,6 +229,8 @@ public static class DemoProof
             commandSurfaceOk,
             tieredNodeSurfaceOk,
             fixedGroupFrameOk,
+            nonObscuringEditingOk,
+            visualSemanticsOk,
             compositeScopeOk,
             edgeNoteOk,
             disconnectFlowOk,
