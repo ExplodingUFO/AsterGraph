@@ -348,24 +348,23 @@ internal sealed class NodeCanvasSceneHost
             return;
         }
 
+        var renderedGroup = ResolveRenderedGroupSnapshot(group);
         var selectedNodeIds = _host.ViewModel.SelectedNodes
             .Select(node => node.Id)
             .ToHashSet(StringComparer.Ordinal);
         var isSelected = group.NodeIds.Count > 0 && group.NodeIds.All(selectedNodeIds.Contains);
         var isDropTarget = string.Equals(_host.InteractionSession.HoveredDropGroupId, group.Id, StringComparison.Ordinal);
-        var renderedHeight = NodeCanvasGroupChromeMetrics.ResolveRenderedHeight(group);
+        var renderedHeight = NodeCanvasGroupChromeMetrics.ResolveRenderedHeight(renderedGroup);
 
-        visual.Root.Width = NodeCanvasGroupChromeMetrics.ResolveRenderedWidth(group);
+        visual.Root.Width = NodeCanvasGroupChromeMetrics.ResolveRenderedWidth(renderedGroup);
         visual.Root.Height = renderedHeight;
         visual.Root.BorderBrush = BrushFactory.Solid(
             isDropTarget ? "#F8CF6A" : isSelected ? "#7FE7D7" : "#365063",
             isDropTarget ? 0.98 : isSelected ? 0.95 : 0.72);
         visual.Root.Background = BrushFactory.Solid(
             isDropTarget ? "#2C2412" : "#0E1824",
-            isDropTarget ? 0.38 : group.IsCollapsed ? 0.72 : 0.18);
-        var renderedPosition = string.Equals(_host.InteractionSession.DragGroupId, group.Id, StringComparison.Ordinal)
-            ? _host.InteractionSession.DragGroupPreviewPosition ?? group.Position
-            : group.Position;
+            isDropTarget ? 0.38 : renderedGroup.IsCollapsed ? 0.72 : 0.18);
+        var renderedPosition = renderedGroup.Position;
         Canvas.SetLeft(visual.Root, renderedPosition.X);
         Canvas.SetTop(visual.Root, renderedPosition.Y);
 
@@ -374,7 +373,7 @@ internal sealed class NodeCanvasSceneHost
             0.96);
         visual.TitleText.Text = FormatGroupHeaderTitle(group);
         visual.TitleText.Foreground = BrushFactory.Solid(isSelected ? "#F4FFFC" : "#D8EEF3", 0.98);
-        visual.BodyBorder.IsVisible = !group.IsCollapsed;
+        visual.BodyBorder.IsVisible = !renderedGroup.IsCollapsed;
         visual.BodyBorder.Height = Math.Max(
             0d,
             renderedHeight - NodeCanvasGroupChromeMetrics.HeaderHeight - NodeCanvasGroupChromeMetrics.BottomInset);
@@ -462,6 +461,36 @@ internal sealed class NodeCanvasSceneHost
         => _host.ViewModel?.GetNodeGroupSnapshots()
             .FirstOrDefault(group => string.Equals(group.Id, groupId, StringComparison.Ordinal));
 
+    private GraphSize? ResolveNodePreviewSize(NodeViewModel node)
+        => _host.InteractionSession.NodeResizePreview is NodeCanvasNodeResizePreview preview
+           && string.Equals(preview.NodeId, node.Id, StringComparison.Ordinal)
+            ? preview.Size
+            : null;
+
+    private GraphEditorNodeGroupSnapshot ResolveRenderedGroupSnapshot(GraphEditorNodeGroupSnapshot group)
+    {
+        if (_host.InteractionSession.GroupResizePreview is NodeCanvasGroupResizePreview resizePreview
+            && string.Equals(resizePreview.GroupId, group.Id, StringComparison.Ordinal))
+        {
+            return group with
+            {
+                Position = resizePreview.Position,
+                Size = resizePreview.Size,
+            };
+        }
+
+        if (string.Equals(_host.InteractionSession.DragGroupId, group.Id, StringComparison.Ordinal)
+            && _host.InteractionSession.DragGroupPreviewPosition is GraphPoint dragPreviewPosition)
+        {
+            return group with
+            {
+                Position = dragPreviewPosition,
+            };
+        }
+
+        return group;
+    }
+
     private GraphNodeVisualContext CreateNodeVisualContext(NodeViewModel node)
     {
         var editor = _host.ViewModel ?? throw new InvalidOperationException("Node visuals require a bound editor view model.");
@@ -483,7 +512,8 @@ internal sealed class NodeCanvasSceneHost
             (targetNode, target) => editor.ActivateConnectionTarget(targetNode, target),
             _host.ContextMenuCoordinator.OpenNodeContextMenu,
             _host.ContextMenuCoordinator.OpenPortContextMenu,
-            ResolveInlineParameter);
+            ResolveInlineParameter,
+            surfacePreviewSize: ResolveNodePreviewSize(node));
     }
 
     private NodeCanvasConnectionSceneContext CreateConnectionSceneContext()
@@ -497,7 +527,8 @@ internal sealed class NodeCanvasSceneHost
             GetConnectionStyle,
             _host.ContextMenuCoordinator.CreateContextMenuSnapshot,
             _host.ContextMenuCoordinator.ResolveWorldPosition,
-            _host.ContextMenuCoordinator.OpenContextMenu);
+            _host.ContextMenuCoordinator.OpenContextMenu,
+            ResolveNodePreviewSize);
 
     private ConnectionStyleOptions GetConnectionStyle(ConnectionViewModel connection)
         => connection.ConversionId is not null

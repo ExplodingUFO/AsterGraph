@@ -36,13 +36,14 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
         ArgumentNullException.ThrowIfNull(context);
 
         var node = context.Node;
+        var renderedSize = ResolveRenderedNodeSize(context);
         var nodeStyle = GetNodeCardStyle(context);
         var portAnchors = new Dictionary<string, Control>(StringComparer.Ordinal);
         var connectionTargetAnchors = new Dictionary<GraphConnectionTargetRef, Control>();
         var border = new Border
         {
-            Width = node.Width,
-            Height = ResolveRenderedNodeHeight(node, hasStatusBar: false),
+            Width = renderedSize.Width,
+            Height = ResolveRenderedNodeHeight(node, renderedSize.Height, hasStatusBar: false),
             CornerRadius = new CornerRadius(nodeStyle.CornerRadius),
             BorderThickness = new Thickness(nodeStyle.BorderThickness),
             Focusable = true,
@@ -308,13 +309,14 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
     private static void UpdateVisualState(DefaultNodeVisualState state, GraphNodeVisualContext context)
     {
         var node = context.Node;
+        var renderedSize = ResolveRenderedNodeSize(context);
         var nodeStyle = GetNodeCardStyle(context);
         var isSelected = node.IsSelected;
         var isInspected = context.InteractionFocus.IsNodeInspected(node.Id);
         var isEditing = context.InteractionFocus.IsNodeEditing(node.Id);
         var isOutputNode = IsOutputNode(node);
 
-        state.Border.Width = node.Width;
+        state.Border.Width = renderedSize.Width;
         state.Border.Background = BrushFactory.Solid(
             isSelected || isInspected
                 ? nodeStyle.SelectedBackgroundHex
@@ -411,8 +413,8 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
         }
 
         UpdateParameterEndpointRows(state, context);
-        UpdateParameterRail(state, context, nodeStyle);
-        state.Border.Height = ResolveRenderedNodeHeight(node, state.StatusBar.IsVisible);
+        UpdateParameterRail(state, context, nodeStyle, renderedSize.Width);
+        state.Border.Height = ResolveRenderedNodeHeight(node, renderedSize.Height, state.StatusBar.IsVisible);
     }
 
     private static void UpdateParameterEndpointRows(DefaultNodeVisualState state, GraphNodeVisualContext context)
@@ -427,7 +429,7 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
         }
     }
 
-    private static void UpdateParameterRail(DefaultNodeVisualState state, GraphNodeVisualContext context, NodeCardStyleOptions nodeStyle)
+    private static void UpdateParameterRail(DefaultNodeVisualState state, GraphNodeVisualContext context, NodeCardStyleOptions nodeStyle, double renderedWidth)
     {
         var node = context.Node;
         var railVisible = node.ParameterEndpoints.Count > 0 && node.ActiveSurfaceTier.ShowsSection(NodeSurfaceSectionKeys.ParameterRail);
@@ -445,7 +447,7 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
             return;
         }
 
-        state.ParameterRail.Width = ResolveParameterRailWidth(node);
+        state.ParameterRail.Width = ResolveParameterRailWidth(node, renderedWidth);
         state.ParameterRail.Background = BrushFactory.Solid("#0F1A26", 0.94);
         state.ParameterRail.BorderBrush = BrushFactory.Solid(
             node.AccentHex,
@@ -650,9 +652,9 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
     private static double ResolveInteractiveMinimumHeight(NodeViewModel node)
         => Math.Max(MinimumNodeHeight, ResolveMinimumChromeHeight(node));
 
-    private static double ResolveRenderedNodeHeight(NodeViewModel node, bool hasStatusBar)
+    private static double ResolveRenderedNodeHeight(NodeViewModel node, double renderedHeight, bool hasStatusBar)
     {
-        var renderedHeight = Math.Max(node.Height, ResolveInteractiveMinimumHeight(node));
+        renderedHeight = Math.Max(renderedHeight, ResolveInteractiveMinimumHeight(node));
         if (hasStatusBar)
         {
             renderedHeight += StatusBarReserveHeight;
@@ -661,15 +663,18 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
         return renderedHeight;
     }
 
-    private static double ResolveParameterRailWidth(NodeViewModel node)
+    private static double ResolveParameterRailWidth(NodeViewModel node, double renderedWidth)
     {
         var desiredWidth = node.ActiveSurfaceTier.ShowsSection(NodeSurfaceSectionKeys.ParameterEditors)
             ? EditorParameterRailWidth
             : MinimumParameterRailWidth;
         return Math.Min(
             MaximumParameterRailWidth,
-            Math.Max(desiredWidth, node.Width * 0.32d));
+            Math.Max(desiredWidth, renderedWidth * 0.32d));
     }
+
+    private static GraphSize ResolveRenderedNodeSize(GraphNodeVisualContext context)
+        => context.SurfacePreviewSize ?? new GraphSize(context.Node.Width, context.Node.Height);
 
     private static StackPanel BuildPortPanel(
         GraphNodeVisualContext context,

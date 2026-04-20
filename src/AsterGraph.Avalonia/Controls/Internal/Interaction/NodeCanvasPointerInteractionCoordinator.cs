@@ -24,6 +24,8 @@ internal interface INodeCanvasPointerInteractionHost
 
     void RenderConnections();
 
+    void UpdateNodeVisual(NodeViewModel node);
+
     void UpdateGroupVisuals();
 
     void UpdateMarqueeSelection(Point currentScreenPosition, bool finalize);
@@ -212,6 +214,25 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
                 updateStatus: false);
         }
 
+        if (_host.InteractionSession.NodeResizeSession is NodeCanvasNodeResizeSession activeNodeResizeSession
+            && _host.InteractionSession.NodeResizePreview is NodeCanvasNodeResizePreview nodeResizePreview
+            && _host.ViewModel is not null)
+        {
+            var node = _host.ViewModel.FindNode(activeNodeResizeSession.Node.Id) ?? activeNodeResizeSession.Node;
+            _host.ViewModel.TrySetNodeSize(node, nodeResizePreview.Size, updateStatus: false);
+        }
+
+        if (_host.InteractionSession.GroupResizeSession is NodeCanvasGroupResizeSession activeGroupResizeSession
+            && _host.InteractionSession.GroupResizePreview is NodeCanvasGroupResizePreview groupResizePreview
+            && _host.ViewModel is not null)
+        {
+            _host.ViewModel.TrySetNodeGroupFrame(
+                activeGroupResizeSession.GroupId,
+                groupResizePreview.Position,
+                groupResizePreview.Size,
+                updateStatus: false);
+        }
+
         if (_host.InteractionSession.SelectionStartScreenPosition is not null)
         {
             if (_host.InteractionSession.IsMarqueeSelecting)
@@ -277,11 +298,15 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
         var nextHeight = resizeSession.HandleKind is GraphNodeResizeHandleKind.Bottom or GraphNodeResizeHandleKind.BottomRight
             ? Math.Max(minimumHeight, resizeSession.OriginSize.Height + deltaY)
             : resizeSession.OriginSize.Height;
+        var nextSize = new GraphSize(nextWidth, nextHeight);
+        if (!_host.InteractionSession.UpdateNodeResizePreview(node.Id, nextSize))
+        {
+            return false;
+        }
 
-        return _host.ViewModel.TrySetNodeSize(
-            node,
-            new GraphSize(nextWidth, nextHeight),
-            updateStatus: false);
+        _host.UpdateNodeVisual(node);
+        _host.RenderConnections();
+        return true;
     }
 
     private bool HandleGroupResizeMove(NodeCanvasGroupResizeSession resizeSession, Point currentScreenPosition)
@@ -340,25 +365,14 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
                 break;
         }
 
-        var changed = false;
-        if (nextPosition != currentGroup.Position)
+        if (!_host.InteractionSession.UpdateGroupResizePreview(resizeSession.GroupId, nextPosition, nextSize))
         {
-            changed = _host.ViewModel.TrySetNodeGroupPosition(
-                resizeSession.GroupId,
-                nextPosition,
-                moveMemberNodes: false,
-                updateStatus: false);
+            return false;
         }
 
-        if (nextSize != currentGroup.Size)
-        {
-            changed = _host.ViewModel.TrySetNodeGroupSize(
-                resizeSession.GroupId,
-                nextSize,
-                updateStatus: false) || changed;
-        }
-
-        return changed;
+        _host.UpdateGroupVisuals();
+        _host.RenderConnections();
+        return true;
     }
 
     private static GraphSize ResolveMinimumGroupSize(GraphEditorNodeGroupSnapshot group)

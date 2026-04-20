@@ -279,6 +279,9 @@ public partial class NodeCanvas
         public void RenderConnections()
             => _owner.RenderConnections();
 
+        public void UpdateNodeVisual(NodeViewModel node)
+            => _owner.UpdateNodeVisual(node);
+
         public void UpdateGroupVisuals()
             => _owner.UpdateGroupVisuals();
 

@@ -45,7 +45,8 @@ public sealed class GraphNodeVisualContext
         Action<NodeViewModel, GraphConnectionTargetRef> activateConnectionTarget,
         Func<Control, NodeViewModel, ContextRequestedEventArgs, bool> openNodeContextMenu,
         Func<Control, NodeViewModel, PortViewModel, ContextRequestedEventArgs, bool> openPortContextMenu,
-        Func<NodeViewModel, PortViewModel, NodeParameterViewModel?>? resolveInlineParameter = null)
+        Func<NodeViewModel, PortViewModel, NodeParameterViewModel?>? resolveInlineParameter = null,
+        GraphSize? surfacePreviewSize = null)
     {
         ArgumentNullException.ThrowIfNull(editor);
         ArgumentNullException.ThrowIfNull(node);
@@ -83,6 +84,7 @@ public sealed class GraphNodeVisualContext
         ActivateConnectionTarget = activateConnectionTarget;
         OpenNodeContextMenu = openNodeContextMenu;
         OpenPortContextMenu = openPortContextMenu;
+        SurfacePreviewSize = surfacePreviewSize;
     }
 
     /// <summary>
@@ -122,7 +124,8 @@ public sealed class GraphNodeVisualContext
             activateConnectionTarget: static (_, _) => { },
             openNodeContextMenu,
             openPortContextMenu,
-            resolveInlineParameter)
+            resolveInlineParameter,
+            surfacePreviewSize: null)
     {
     }
 
@@ -214,6 +217,11 @@ public sealed class GraphNodeVisualContext
     /// Requests activation of a typed connection target such as a parameter endpoint.
     /// </summary>
     public Action<NodeViewModel, GraphConnectionTargetRef> ActivateConnectionTarget { get; }
+
+    /// <summary>
+    /// Optional transient host-owned preview size used during interaction-time resize.
+    /// </summary>
+    public GraphSize? SurfacePreviewSize { get; }
 
     /// <summary>
     /// 请求打开节点上下文菜单。
