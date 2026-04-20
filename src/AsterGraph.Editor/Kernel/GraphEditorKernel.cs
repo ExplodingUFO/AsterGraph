@@ -404,6 +404,54 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
         return true;
     }
 
+    public bool TrySetNodeGroupFrame(string groupId, GraphPoint position, GraphSize size, bool updateStatus)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(groupId);
+
+        if (!_behaviorOptions.Commands.Nodes.AllowMove)
+        {
+            if (updateStatus)
+            {
+                CurrentStatusMessage = "Node grouping is disabled by host permissions.";
+            }
+
+            return false;
+        }
+
+        if (size.Width <= 0d || size.Height <= 0d)
+        {
+            if (updateStatus)
+            {
+                CurrentStatusMessage = "Group frame size must be positive.";
+            }
+
+            return false;
+        }
+
+        var activeScope = CreateActiveScopeDocumentSnapshot();
+        var positionMutation = _documentMutator.SetNodeGroupPosition(activeScope, groupId, position, moveMemberNodes: false);
+        var workingDocument = positionMutation.Group is null ? activeScope : positionMutation.Document;
+        var sizeMutation = _documentMutator.SetNodeGroupSize(workingDocument, groupId, size);
+        var finalDocument = sizeMutation.Group is null ? workingDocument : sizeMutation.Document;
+        var finalGroup = (finalDocument.Groups ?? [])
+            .FirstOrDefault(group => string.Equals(group.Id, groupId, StringComparison.Ordinal));
+
+        if (finalGroup is null || (positionMutation.Group is null && sizeMutation.Group is null))
+        {
+            if (updateStatus)
+            {
+                CurrentStatusMessage = "No matching group frame change was applied.";
+            }
+
+            return false;
+        }
+
+        ApplyActiveScopeDocument(finalDocument);
+        CurrentStatusMessage = $"Resized group {finalGroup.Title}.";
+        MarkDirty(CurrentStatusMessage, GraphEditorDocumentChangeKind.LayoutChanged, finalGroup.NodeIds.ToList(), null, preserveStatus: !updateStatus);
+        return true;
+    }
+
     public bool TrySetNodeGroupExtraPadding(string groupId, GraphPadding extraPadding, bool updateStatus)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(groupId);

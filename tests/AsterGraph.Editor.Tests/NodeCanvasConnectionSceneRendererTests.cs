@@ -11,6 +11,7 @@ using AsterGraph.Avalonia.Presentation;
 using AsterGraph.Core.Compatibility;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Catalog;
+using AsterGraph.Editor.Geometry;
 using AsterGraph.Editor.Menus;
 using AsterGraph.Editor.ViewModels;
 using Xunit;
@@ -58,6 +59,67 @@ public sealed class NodeCanvasConnectionSceneRendererTests
             var fallback = renderer.GetPortAnchor(fallbackContext, sourceNode, sourcePort);
 
             Assert.Equal(sourceNode.GetPortAnchor(sourcePort), fallback);
+        }
+        finally
+        {
+            hostedScene.Window.Close();
+        }
+    }
+
+    [AvaloniaFact]
+    public void GetPortAnchor_UsesPreviewSizeWhenRenderedAnchorIsUnavailable()
+    {
+        var renderer = new NodeCanvasConnectionSceneRenderer();
+        var editor = CreateEditor(includeConnection: false);
+        var sourceNode = editor.Nodes.Single(node => node.Id == SourceNodeId);
+        var sourcePort = sourceNode.Outputs.Single(port => port.Id == SourcePortId);
+        var previewSize = new GraphSize(sourceNode.Width + 140d, sourceNode.Height + 80d);
+        var context = CreateSceneContext(
+            editor,
+            connectionLayer: new Canvas(),
+            nodeLayer: new Canvas(),
+            coordinateRoot: new Grid(),
+            nodeVisuals: new Dictionary<NodeViewModel, NodeCanvasRenderedNodeVisual>(),
+            resolveNodePreviewSize: node => string.Equals(node.Id, sourceNode.Id, StringComparison.Ordinal) ? previewSize : null);
+
+        var anchor = renderer.GetPortAnchor(context, sourceNode, sourcePort);
+
+        var expected = PortAnchorCalculator.GetAnchor(
+            new NodeBounds(sourceNode.X, sourceNode.Y, previewSize.Width, previewSize.Height),
+            sourcePort.Direction,
+            sourcePort.Index,
+            sourcePort.Total);
+        Assert.Equal(expected, anchor);
+    }
+
+    [AvaloniaFact]
+    public void GetPortAnchor_PrefersPreviewGeometryWhenVisualBoundsLagBehindResizePreview()
+    {
+        var renderer = new NodeCanvasConnectionSceneRenderer();
+        var editor = CreateEditor(includeConnection: false);
+        var sourceNode = editor.Nodes.Single(node => node.Id == SourceNodeId);
+        var sourcePort = sourceNode.Outputs.Single(port => port.Id == SourcePortId);
+        var previewSize = new GraphSize(sourceNode.Width + 160d, sourceNode.Height + 90d);
+        var hostedScene = CreateHostedScene(editor);
+
+        try
+        {
+            var context = CreateSceneContext(
+                editor,
+                hostedScene.ConnectionLayer,
+                hostedScene.NodeLayer,
+                hostedScene.CoordinateRoot,
+                hostedScene.NodeVisuals,
+                resolveNodePreviewSize: node => string.Equals(node.Id, sourceNode.Id, StringComparison.Ordinal) ? previewSize : null);
+
+            var anchor = renderer.GetPortAnchor(context, sourceNode, sourcePort);
+
+            var expected = PortAnchorCalculator.GetAnchor(
+                new NodeBounds(sourceNode.X, sourceNode.Y, previewSize.Width, previewSize.Height),
+                sourcePort.Direction,
+                sourcePort.Index,
+                sourcePort.Total);
+            Assert.Equal(expected, anchor);
         }
         finally
         {
@@ -222,7 +284,8 @@ public sealed class NodeCanvasConnectionSceneRendererTests
         Control coordinateRoot,
         IReadOnlyDictionary<NodeViewModel, NodeCanvasRenderedNodeVisual> nodeVisuals,
         Point? pointerScreenPosition = null,
-        Func<Control, ContextMenuContext, bool>? openContextMenu = null)
+        Func<Control, ContextMenuContext, bool>? openContextMenu = null,
+        Func<NodeViewModel, GraphSize?>? resolveNodePreviewSize = null)
         => new(
             editor,
             connectionLayer,
@@ -236,7 +299,8 @@ public sealed class NodeCanvasConnectionSceneRendererTests
                 editor.SelectedNodes.Select(node => node.Id).ToList(),
                 []),
             (_, _) => new GraphPoint(42, 24),
-            openContextMenu ?? ((_, _) => false));
+            openContextMenu ?? ((_, _) => false),
+            resolveNodePreviewSize ?? (_ => null));
 
     private static HostedScene CreateHostedScene(GraphEditorViewModel editor)
     {

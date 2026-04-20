@@ -1296,6 +1296,53 @@ public sealed class NodeCanvasStandaloneTests
     }
 
     [AvaloniaFact]
+    public void BorderResizeHandles_PointerMove_PreviewsNodeResizeBeforeReleaseCommit()
+    {
+        var editor = CreateEditor();
+        var target = editor.FindNode(TargetNodeId)!;
+        var initialSize = new GraphSize(target.Width, target.Height);
+        var documentChangedCount = 0;
+        editor.Session.Events.DocumentChanged += (_, _) => documentChangedCount++;
+        var (window, canvas) = CreateStandaloneCanvasWindow(editor);
+        var pointer = new global::Avalonia.Input.Pointer(1, PointerType.Mouse, isPrimary: true);
+
+        try
+        {
+            var thumb = canvas.GetVisualDescendants()
+                .OfType<Thumb>()
+                .Single(control => string.Equals(
+                    AutomationProperties.GetName(control),
+                    "Canvas Target width resize handle",
+                    StringComparison.Ordinal));
+            var targetSurface = canvas.GetVisualDescendants()
+                .OfType<Border>()
+                .Single(control => string.Equals(
+                    AutomationProperties.GetName(control),
+                    "Canvas Target node",
+                    StringComparison.Ordinal));
+            var movedPoint = new Point(655 + (48d * editor.Zoom), 220);
+
+            thumb.RaiseEvent(CreatePointerPressedArgs(thumb, canvas, pointer, new Point(655, 220), KeyModifiers.None));
+            InvokeCanvasPointerMoved(canvas, CreatePointerMovedArgs(canvas, pointer, movedPoint, KeyModifiers.None));
+
+            target = editor.FindNode(TargetNodeId)!;
+            Assert.Equal(initialSize, new GraphSize(target.Width, target.Height));
+            Assert.True(targetSurface.Width > initialSize.Width + 30d);
+            Assert.Equal(0, documentChangedCount);
+
+            InvokeCanvasPointerReleased(canvas, CreatePointerReleasedArgs(canvas, pointer, movedPoint, KeyModifiers.None));
+
+            target = editor.FindNode(TargetNodeId)!;
+            Assert.True(target.Width > initialSize.Width + 30d);
+            Assert.True(documentChangedCount > 0);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
     public void NodeSurfaceBorderPress_NearRightEdge_ResizesWidth_InsteadOfDragging()
     {
         var editor = CreateEditor();
@@ -1329,7 +1376,8 @@ public sealed class NodeCanvasStandaloneTests
             target = editor.FindNode(TargetNodeId)!;
             Assert.True(pressedArgs.Handled);
             Assert.Same(canvas, pointer.Captured);
-            Assert.True(target.Width > initialSize.Width + 30d);
+            Assert.Equal(initialSize.Width, target.Width);
+            Assert.True(targetSurface.Width > initialSize.Width + 30d);
             Assert.Equal(initialPosition.X, target.X);
             Assert.Equal(initialPosition.Y, target.Y);
 
@@ -1380,7 +1428,8 @@ public sealed class NodeCanvasStandaloneTests
             target = editor.FindNode(TargetNodeId)!;
             Assert.True(pressedArgs.Handled);
             Assert.Same(canvas, pointer.Captured);
-            Assert.True(target.Height >= initialSize.Height + 30d);
+            Assert.Equal(initialSize.Height, target.Height);
+            Assert.True(targetSurface.Height >= initialSize.Height + 30d);
             Assert.Equal(initialPosition.X, target.X);
             Assert.Equal(initialPosition.Y, target.Y);
 
@@ -1431,8 +1480,10 @@ public sealed class NodeCanvasStandaloneTests
             target = editor.FindNode(TargetNodeId)!;
             Assert.True(pressedArgs.Handled);
             Assert.Same(canvas, pointer.Captured);
-            Assert.True(target.Width > initialSize.Width + 30d);
-            Assert.True(target.Height >= initialSize.Height + 24d);
+            Assert.Equal(initialSize.Width, target.Width);
+            Assert.Equal(initialSize.Height, target.Height);
+            Assert.True(targetSurface.Width > initialSize.Width + 30d);
+            Assert.True(targetSurface.Height >= initialSize.Height + 24d);
             Assert.Equal(initialPosition.X, target.X);
             Assert.Equal(initialPosition.Y, target.Y);
 
@@ -1712,6 +1763,56 @@ public sealed class NodeCanvasStandaloneTests
     }
 
     [AvaloniaFact]
+    public void GroupResizeHandles_PointerMove_PreviewsFrameBeforeReleaseCommit()
+    {
+        var editor = CreateEditor();
+        editor.Session.Commands.SetSelection([SourceNodeId, TargetNodeId], TargetNodeId, updateStatus: false);
+        var groupId = editor.Session.Commands.TryCreateNodeGroupFromSelection("Canvas Cluster");
+        Assert.False(string.IsNullOrWhiteSpace(groupId));
+
+        var initialSnapshot = Assert.Single(editor.GetNodeGroupSnapshots());
+        var documentChangedCount = 0;
+        editor.Session.Events.DocumentChanged += (_, _) => documentChangedCount++;
+        var (window, canvas) = CreateStandaloneCanvasWindow(editor);
+        var pointer = new global::Avalonia.Input.Pointer(1, PointerType.Mouse, isPrimary: true);
+
+        try
+        {
+            var groupSurface = canvas.GetVisualDescendants()
+                .OfType<Border>()
+                .Single(control => string.Equals(
+                    AutomationProperties.GetName(control),
+                    "Canvas Cluster group",
+                    StringComparison.Ordinal));
+            var thumb = canvas.GetVisualDescendants()
+                .OfType<Thumb>()
+                .Single(control => string.Equals(
+                    AutomationProperties.GetName(control),
+                    "Canvas Cluster group right resize handle",
+                    StringComparison.Ordinal));
+            var movedPoint = new Point(652 + (36d * editor.Zoom), 240);
+
+            thumb.RaiseEvent(CreatePointerPressedArgs(thumb, canvas, pointer, new Point(652, 240), KeyModifiers.None));
+            InvokeCanvasPointerMoved(canvas, CreatePointerMovedArgs(canvas, pointer, movedPoint, KeyModifiers.None));
+
+            var currentSnapshot = Assert.Single(editor.GetNodeGroupSnapshots());
+            Assert.Equal(initialSnapshot.Size, currentSnapshot.Size);
+            Assert.True(groupSurface.Width > initialSnapshot.Size.Width + 30d);
+            Assert.Equal(0, documentChangedCount);
+
+            InvokeCanvasPointerReleased(canvas, CreatePointerReleasedArgs(canvas, pointer, movedPoint, KeyModifiers.None));
+
+            var resizedSnapshot = Assert.Single(editor.GetNodeGroupSnapshots());
+            Assert.True(resizedSnapshot.Size.Width > initialSnapshot.Size.Width + 30d);
+            Assert.True(documentChangedCount > 0);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
     public void GroupSurfaceBorderPress_NearRightAndBottomEdges_ResizesFrame_InsteadOfSelectionOnly()
     {
         var editor = CreateEditor();
@@ -1747,8 +1848,9 @@ public sealed class NodeCanvasStandaloneTests
             var resizedSnapshot = Assert.Single(editor.GetNodeGroupSnapshots());
             Assert.True(rightPressedArgs.Handled);
             Assert.Same(canvas, pointer.Captured);
-            Assert.True(resizedSnapshot.Size.Width > initialSnapshot.Size.Width + 30d);
+            Assert.Equal(initialSnapshot.Size, resizedSnapshot.Size);
             Assert.Equal(initialSnapshot.Position, resizedSnapshot.Position);
+            Assert.True(groupSurface.Width > initialSnapshot.Size.Width + 30d);
 
             InvokeCanvasPointerReleased(canvas, CreatePointerReleasedArgs(canvas, pointer, rightMovedPoint, KeyModifiers.None));
 
@@ -1770,10 +1872,17 @@ public sealed class NodeCanvasStandaloneTests
 
             groupSurface.RaiseEvent(bottomPressedArgs);
             InvokeCanvasPointerMoved(canvas, CreatePointerMovedArgs(canvas, pointer, bottomMovedPoint, KeyModifiers.None));
-            InvokeCanvasPointerReleased(canvas, CreatePointerReleasedArgs(canvas, pointer, bottomMovedPoint, KeyModifiers.None));
 
             resizedSnapshot = Assert.Single(editor.GetNodeGroupSnapshots());
             Assert.True(bottomPressedArgs.Handled);
+            Assert.True(groupSurface.Height > resizedSnapshot.Size.Height + 20d);
+            Assert.True(resizedSnapshot.Size.Width > initialSnapshot.Size.Width + 30d);
+            Assert.Equal(initialSnapshot.Size.Height, resizedSnapshot.Size.Height);
+            Assert.Equal(initialSnapshot.Position, resizedSnapshot.Position);
+
+            InvokeCanvasPointerReleased(canvas, CreatePointerReleasedArgs(canvas, pointer, bottomMovedPoint, KeyModifiers.None));
+
+            resizedSnapshot = Assert.Single(editor.GetNodeGroupSnapshots());
             Assert.True(resizedSnapshot.Size.Width > initialSnapshot.Size.Width + 30d);
             Assert.True(resizedSnapshot.Size.Height > initialSnapshot.Size.Height + 20d);
             Assert.Equal(initialSnapshot.Position, resizedSnapshot.Position);

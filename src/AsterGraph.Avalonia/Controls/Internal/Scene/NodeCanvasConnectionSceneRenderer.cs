@@ -23,7 +23,8 @@ internal readonly record struct NodeCanvasConnectionSceneContext(
     Func<ConnectionViewModel, ConnectionStyleOptions> ResolveConnectionStyle,
     Func<NodeCanvasContextMenuSnapshot> CreateContextMenuSnapshot,
     Func<ContextRequestedEventArgs, Control, GraphPoint> ResolveWorldPosition,
-    Func<Control, ContextMenuContext, bool> OpenContextMenu);
+    Func<Control, ContextMenuContext, bool> OpenContextMenu,
+    Func<NodeViewModel, GraphSize?> ResolveNodePreviewSize);
 
 internal sealed record NodeCanvasRenderedNodeVisual(
     Control Root,
@@ -110,10 +111,19 @@ internal sealed class NodeCanvasConnectionSceneRenderer
 
     public GraphPoint GetPortAnchor(NodeCanvasConnectionSceneContext context, NodeViewModel node, PortViewModel port)
     {
+        var previewSize = context.ResolveNodePreviewSize(node);
+
         // 吸附拖动时，节点外层 Canvas 的绝对布局可能还没完成新一轮 Arrange。
         // 因此这里优先读取“端口圆点在节点卡内部的局部坐标”，再叠加当前节点的 X/Y，
         // 这样连线能跟随最新的节点位置，而不会因为布局时序晚一拍出现偏移。
         if (context.NodeVisuals.TryGetValue(node, out var visual)
+            && previewSize is GraphSize resolvedPreviewSize
+            && ShouldPreferPreviewAnchor(visual.Root, resolvedPreviewSize))
+        {
+            return ResolvePreviewPortAnchor(node, port, resolvedPreviewSize);
+        }
+
+        if (context.NodeVisuals.TryGetValue(node, out visual)
             && visual.Visual.PortAnchors.TryGetValue(port.Id, out var anchorDot))
         {
             var center = new Point(anchorDot.Bounds.Width / 2, anchorDot.Bounds.Height / 2);
@@ -133,6 +143,11 @@ internal sealed class NodeCanvasConnectionSceneRenderer
                     return new GraphPoint(translated.Value.X, translated.Value.Y);
                 }
             }
+        }
+
+        if (previewSize is GraphSize fallbackPreviewSize)
+        {
+            return ResolvePreviewPortAnchor(node, port, fallbackPreviewSize);
         }
 
         return node.GetPortAnchor(port);
@@ -171,10 +186,22 @@ internal sealed class NodeCanvasConnectionSceneRenderer
             }
         }
 
+        var renderedWidth = context.ResolveNodePreviewSize(node)?.Width ?? node.Width;
         return new GraphPoint(
-            node.X + Math.Max(24d, node.Width - 18d),
+            node.X + Math.Max(24d, renderedWidth - 18d),
             node.Y + 56d);
     }
+
+    private static GraphPoint ResolvePreviewPortAnchor(NodeViewModel node, PortViewModel port, GraphSize previewSize)
+        => PortAnchorCalculator.GetAnchor(
+            new NodeBounds(node.X, node.Y, previewSize.Width, previewSize.Height),
+            port.Direction,
+            port.Index,
+            port.Total);
+
+    private static bool ShouldPreferPreviewAnchor(Control root, GraphSize previewSize)
+        => Math.Abs(root.Bounds.Width - previewSize.Width) > 0.5d
+           || Math.Abs(root.Bounds.Height - previewSize.Height) > 0.5d;
 
     private void DrawConnection(
         NodeCanvasConnectionSceneContext context,

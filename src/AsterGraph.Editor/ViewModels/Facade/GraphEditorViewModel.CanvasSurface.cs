@@ -123,6 +123,15 @@ public sealed partial class GraphEditorViewModel
     }
 
     /// <summary>
+    /// Attempts to persist one group's fixed frame position and size as a single layout mutation.
+    /// </summary>
+    public bool TrySetNodeGroupFrame(string groupId, GraphPoint position, GraphSize size, bool updateStatus = true)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(groupId);
+        return _sessionHost.TrySetNodeGroupFrame(groupId, position, size, updateStatus);
+    }
+
+    /// <summary>
     /// Attempts to update one group's persisted per-edge padding envelope.
     /// </summary>
     [Obsolete("Compatibility-only retained helper. Prefer fixed-frame group edits through Session.Commands.TrySetNodeGroupSize(...) and Session.Commands.TrySetNodeGroupPosition(...), then inspect Session.Queries.GetNodeGroupSnapshots() for canonical persisted bounds.")]
