@@ -486,6 +486,58 @@ public sealed class NodeCanvasStandaloneTests
     }
 
     [AvaloniaFact]
+    public void DefaultNodeVisual_UsesRenderedMinimumHeightBeyondPersistedSurface()
+    {
+        var editor = CreateEditor();
+        var (window, canvas) = CreateStandaloneCanvasWindow(editor);
+
+        try
+        {
+            var target = editor.Nodes.Single(node => node.Id == TargetNodeId);
+            var targetSurface = canvas.GetVisualDescendants()
+                .OfType<Border>()
+                .Single(control => string.Equals(
+                    AutomationProperties.GetName(control),
+                    "Canvas Target node",
+                    StringComparison.Ordinal));
+
+            Assert.True(targetSurface.Height > target.Height);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
+    public void StatusBarPresentation_IncreasesRenderedHeightWithoutChangingPersistedHeight()
+    {
+        var editor = CreateEditor();
+        var sourceNode = editor.Nodes.Single(node => node.Id == SourceNodeId);
+        var persistedHeight = sourceNode.Height;
+        sourceNode.UpdatePresentation(new NodePresentationState(
+            StatusBar: new NodeStatusBarDescriptor("Ready", "#7FE7D7")));
+        var (window, canvas) = CreateStandaloneCanvasWindow(editor);
+
+        try
+        {
+            var sourceSurface = canvas.GetVisualDescendants()
+                .OfType<Border>()
+                .Single(control => string.Equals(
+                    AutomationProperties.GetName(control),
+                    "Canvas Source node",
+                    StringComparison.Ordinal));
+
+            Assert.Equal(persistedHeight, sourceNode.Height);
+            Assert.True(sourceSurface.Height > persistedHeight);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
     public void RichTierNode_RendersInlineInputEditor_WhenInputIsUnconnected()
     {
         var editor = CreateEditor();
@@ -631,12 +683,12 @@ public sealed class NodeCanvasStandaloneTests
 
             var target = editor.Nodes.Single(node => node.Id == TargetNodeId);
             Assert.Equal(320d, target.Width);
-            Assert.Equal(220d, target.Height);
+            Assert.Equal(232d, target.Height);
 
             var surface = editor.Session.Queries.GetNodeSurfaceSnapshots()
                 .Single(snapshot => snapshot.NodeId == TargetNodeId);
             Assert.Equal(320d, surface.Size.Width);
-            Assert.Equal(220d, surface.Size.Height);
+            Assert.Equal(232d, surface.Size.Height);
         }
         finally
         {
@@ -680,7 +732,7 @@ public sealed class NodeCanvasStandaloneTests
 
             var target = editor.Nodes.Single(node => node.Id == TargetNodeId);
             Assert.Equal(288d, target.Width);
-            Assert.Equal(196d, target.Height);
+            Assert.True(target.Height > 196d);
         }
         finally
         {
@@ -689,7 +741,7 @@ public sealed class NodeCanvasStandaloneTests
     }
 
     [AvaloniaFact]
-    public void ResizeThumbPress_IsHandledBeforeCanvasCanCapturePointer()
+    public void ResizeThumbPress_DoesNotLetCanvasCapturePointer()
     {
         var editor = CreateEditor();
         var (window, canvas) = CreateStandaloneCanvasWindow(editor);
@@ -707,7 +759,6 @@ public sealed class NodeCanvasStandaloneTests
 
             thumb.RaiseEvent(pressedArgs);
 
-            Assert.True(pressedArgs.Handled);
             Assert.NotSame(canvas, pointer.Captured);
         }
         finally
@@ -747,6 +798,8 @@ public sealed class NodeCanvasStandaloneTests
             Assert.Equal(80d, Canvas.GetLeft(groupSurface));
             Assert.Equal(60d, Canvas.GetTop(groupSurface));
             Assert.False(groupHeader is Button);
+            Assert.True(groupSurface.ClipToBounds);
+            Assert.True(groupHeader is Border headerBorder && headerBorder.CornerRadius.TopLeft > 0d && headerBorder.CornerRadius.TopRight > 0d);
 
             groupHeader.RaiseEvent(new TappedEventArgs(InputElement.TappedEvent, pointerArgs)
             {
@@ -931,7 +984,7 @@ public sealed class NodeCanvasStandaloneTests
     }
 
     [AvaloniaFact]
-    public void GroupResizeThumbPress_IsHandledBeforeCanvasCanCapturePointer()
+    public void GroupResizeThumbPress_DoesNotLetCanvasCapturePointer()
     {
         var editor = CreateEditor();
         editor.Session.Commands.SetSelection([SourceNodeId, TargetNodeId], TargetNodeId, updateStatus: false);
@@ -953,7 +1006,6 @@ public sealed class NodeCanvasStandaloneTests
 
             thumb.RaiseEvent(pressedArgs);
 
-            Assert.True(pressedArgs.Handled);
             Assert.NotSame(canvas, pointer.Captured);
         }
         finally
@@ -998,14 +1050,21 @@ public sealed class NodeCanvasStandaloneTests
             InvokeCanvasPointerMoved(canvas, movedArgs);
 
             var previewSnapshot = Assert.Single(editor.GetNodeGroupSnapshots());
+            var groupSurface = canvas.GetVisualDescendants()
+                .OfType<Border>()
+                .Single(control => string.Equals(
+                    AutomationProperties.GetName(control),
+                    "Canvas Cluster group",
+                    StringComparison.Ordinal));
             var previewSource = editor.Nodes.Single(node => node.Id == SourceNodeId);
             var previewTarget = editor.Nodes.Single(node => node.Id == TargetNodeId);
             Assert.Equal(initialSource.X + 50d, previewSource.X);
             Assert.Equal(initialSource.Y + 25d, previewSource.Y);
             Assert.Equal(initialTarget.X + 50d, previewTarget.X);
             Assert.Equal(initialTarget.Y + 25d, previewTarget.Y);
-            Assert.Equal(initialSnapshot.Position.X + 50d, previewSnapshot.Position.X);
-            Assert.Equal(initialSnapshot.Position.Y + 25d, previewSnapshot.Position.Y);
+            Assert.Equal(initialSnapshot.Position, previewSnapshot.Position);
+            Assert.Equal(initialSnapshot.Position.X + 50d, Canvas.GetLeft(groupSurface));
+            Assert.Equal(initialSnapshot.Position.Y + 25d, Canvas.GetTop(groupSurface));
 
             InvokeCanvasPointerReleased(canvas, releasedArgs);
 

@@ -22,6 +22,8 @@ internal sealed class NodeCanvasInteractionSession
 
     public GraphPoint? DragGroupOriginPosition { get; private set; }
 
+    public GraphPoint? DragGroupPreviewPosition { get; private set; }
+
     public bool IsPanning { get; private set; }
 
     public bool IsMarqueeSelecting { get; private set; }
@@ -50,6 +52,7 @@ internal sealed class NodeCanvasInteractionSession
         DragGroupId = null;
         DragGroupTitle = null;
         DragGroupOriginPosition = null;
+        DragGroupPreviewPosition = null;
         IsPanning = false;
         DragStartScreenPosition = null;
         DragSession = null;
@@ -73,6 +76,7 @@ internal sealed class NodeCanvasInteractionSession
         DragGroupId = null;
         DragGroupTitle = null;
         DragGroupOriginPosition = null;
+        DragGroupPreviewPosition = null;
         IsPanning = false;
         SelectionStartScreenPosition = null;
         IsMarqueeSelecting = false;
@@ -91,6 +95,7 @@ internal sealed class NodeCanvasInteractionSession
         DragGroupId = null;
         DragGroupTitle = null;
         DragGroupOriginPosition = null;
+        DragGroupPreviewPosition = null;
         DragStartScreenPosition = null;
         DragSession = null;
         DragGroupDropZones = [];
@@ -110,6 +115,7 @@ internal sealed class NodeCanvasInteractionSession
         DragGroupId = groupId;
         DragGroupTitle = groupTitle;
         DragGroupOriginPosition = groupOriginPosition;
+        DragGroupPreviewPosition = groupOriginPosition;
         IsPanning = false;
         SelectionStartScreenPosition = null;
         IsMarqueeSelecting = false;
@@ -126,6 +132,17 @@ internal sealed class NodeCanvasInteractionSession
 
     public void UpdateLastPointerPosition(Point currentScreenPosition)
         => LastPointerPosition = currentScreenPosition;
+
+    public bool UpdateDragGroupPreviewPosition(GraphPoint? position)
+    {
+        if (DragGroupPreviewPosition == position)
+        {
+            return false;
+        }
+
+        DragGroupPreviewPosition = position;
+        return true;
+    }
 
     public bool UpdateHoveredDropGroup(string? groupId)
     {
@@ -168,6 +185,7 @@ internal sealed class NodeCanvasInteractionSession
         DragGroupId = null;
         DragGroupTitle = null;
         DragGroupOriginPosition = null;
+        DragGroupPreviewPosition = null;
         DragStartScreenPosition = null;
         DragSession = null;
         DragGroupDropZones = [];

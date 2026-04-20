@@ -188,6 +188,54 @@ public sealed class NodeCanvasPointerInteractionCoordinatorTests
     }
 
     [Fact]
+    public void HandleMoved_WhenDraggingGroup_UsesTransientPreviewUntilRelease()
+    {
+        var editor = CreateEditor();
+        editor.SelectSingleNode(editor.Nodes[0], updateStatus: false);
+        var groupId = editor.Session.Commands.TryCreateNodeGroupFromSelection("Pointer Cluster");
+        Assert.False(string.IsNullOrWhiteSpace(groupId));
+
+        var groupSnapshot = Assert.Single(editor.GetNodeGroupSnapshots());
+        var sourceNode = editor.Nodes.Single(node => node.Id == SourceNodeId);
+        var initialGroupPosition = groupSnapshot.Position;
+        var initialSourcePosition = new GraphPoint(sourceNode.X, sourceNode.Y);
+        var documentChangedCount = 0;
+        editor.Session.Events.DocumentChanged += (_, _) => documentChangedCount++;
+
+        var host = new TestPointerInteractionHost(editor);
+        host.InteractionSession.BeginGroupDrag(
+            groupId!,
+            groupSnapshot.Title,
+            groupSnapshot.Position,
+            new Point(30, 40),
+            new NodeCanvasDragSession(
+                [sourceNode],
+                new Dictionary<string, GraphPoint>(StringComparer.Ordinal)
+                {
+                    [sourceNode.Id] = initialSourcePosition,
+                },
+                new NodeBounds(sourceNode.X, sourceNode.Y, sourceNode.Width, sourceNode.Height)));
+        var coordinator = new NodeCanvasPointerInteractionCoordinator(host);
+
+        var handled = coordinator.HandleMoved(new Point(74, 62), selectionDragThreshold: 6);
+
+        Assert.True(handled);
+        Assert.Equal(initialSourcePosition.X + 50d, sourceNode.X);
+        Assert.Equal(initialSourcePosition.Y + 25d, sourceNode.Y);
+        Assert.Equal(0, documentChangedCount);
+
+        var previewSnapshot = Assert.Single(editor.GetNodeGroupSnapshots());
+        Assert.Equal(initialGroupPosition, previewSnapshot.Position);
+
+        coordinator.HandleReleased(new Point(74, 62));
+
+        var movedSnapshot = Assert.Single(editor.GetNodeGroupSnapshots());
+        Assert.Equal(initialGroupPosition.X + 50d, movedSnapshot.Position.X);
+        Assert.Equal(initialGroupPosition.Y + 25d, movedSnapshot.Position.Y);
+        Assert.True(documentChangedCount > 0);
+    }
+
+    [Fact]
     public void HandleReleased_AfterMarqueeSelection_FinalizesSelectionAndResetsSession()
     {
         var editor = CreateEditor();

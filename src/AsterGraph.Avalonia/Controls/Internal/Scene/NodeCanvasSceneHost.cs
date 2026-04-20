@@ -194,6 +194,7 @@ internal sealed class NodeCanvasSceneHost
         {
             CornerRadius = new CornerRadius(16),
             BorderThickness = new Thickness(1),
+            ClipToBounds = true,
         };
         AutomationProperties.SetName(root, $"{group.Title} group");
 
@@ -217,6 +218,7 @@ internal sealed class NodeCanvasSceneHost
             Padding = new Thickness(
                 NodeCanvasGroupChromeMetrics.HeaderHorizontalPadding,
                 NodeCanvasGroupChromeMetrics.HeaderVerticalPadding),
+            CornerRadius = new CornerRadius(16, 16, 0, 0),
             Child = titleText,
         };
         AutomationProperties.SetName(header, $"{group.Title} group header");
@@ -347,8 +349,11 @@ internal sealed class NodeCanvasSceneHost
         visual.Root.Background = BrushFactory.Solid(
             isDropTarget ? "#2C2412" : "#0E1824",
             isDropTarget ? 0.38 : group.IsCollapsed ? 0.72 : 0.18);
-        Canvas.SetLeft(visual.Root, group.Position.X);
-        Canvas.SetTop(visual.Root, group.Position.Y);
+        var renderedPosition = string.Equals(_host.InteractionSession.DragGroupId, group.Id, StringComparison.Ordinal)
+            ? _host.InteractionSession.DragGroupPreviewPosition ?? group.Position
+            : group.Position;
+        Canvas.SetLeft(visual.Root, renderedPosition.X);
+        Canvas.SetTop(visual.Root, renderedPosition.Y);
 
         visual.HeaderControl.Background = BrushFactory.Solid(
             isDropTarget ? "#4A3917" : isSelected ? "#173241" : "#132131",
@@ -392,7 +397,6 @@ internal sealed class NodeCanvasSceneHost
             }
 
             _host.FocusCanvas();
-            args.Handled = true;
         };
         thumb.DragStarted += (_, _) => _host.ViewModel?.BeginHistoryInteraction();
         thumb.DragDelta += (_, args) =>

@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Markup.Xaml;
 using Avalonia.VisualTree;
@@ -310,6 +311,11 @@ public partial class NodeCanvas : UserControl
 
     private void HandlePointerPressed(object? sender, PointerPressedEventArgs args)
     {
+        if (args.Source is Thumb)
+        {
+            return;
+        }
+
         var props = args.GetCurrentPoint(this).Properties;
         var result = _pointerInteractionCoordinator.HandlePressed(
             args.Handled,

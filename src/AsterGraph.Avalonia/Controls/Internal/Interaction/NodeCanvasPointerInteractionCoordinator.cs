@@ -133,17 +133,15 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
             else if (_host.InteractionSession.DragGroupId is not null)
             {
                 if (_host.InteractionSession.DragGroupOriginPosition is GraphPoint groupOriginPosition
+                    && _host.InteractionSession.DragSession is NodeCanvasDragSession dragSession
                     && _host.InteractionSession.DragStartScreenPosition is Point dragStart)
                 {
                     var rawDelta = currentScreenPosition - dragStart;
-                    var requestedPosition = new GraphPoint(
-                        groupOriginPosition.X + (rawDelta.X / _host.ViewModel.Zoom),
-                        groupOriginPosition.Y + (rawDelta.Y / _host.ViewModel.Zoom));
-                    _host.ViewModel.TrySetNodeGroupPosition(
-                        _host.InteractionSession.DragGroupId,
-                        requestedPosition,
-                        moveMemberNodes: true,
-                        updateStatus: false);
+                    var deltaX = rawDelta.X / _host.ViewModel.Zoom;
+                    var deltaY = rawDelta.Y / _host.ViewModel.Zoom;
+                    var requestedPosition = new GraphPoint(groupOriginPosition.X + deltaX, groupOriginPosition.Y + deltaY);
+                    _host.InteractionSession.UpdateDragGroupPreviewPosition(requestedPosition);
+                    _host.ViewModel.ApplyDragOffset(dragSession.OriginPositions, deltaX, deltaY);
                 }
 
                 handled = true;

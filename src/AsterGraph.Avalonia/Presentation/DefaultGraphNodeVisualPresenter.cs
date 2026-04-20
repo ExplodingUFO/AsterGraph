@@ -23,6 +23,10 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
     private const double MinimumNodeWidth = 180d;
     private const double InlineSurfaceMaxHeight = 132d;
     private const double MinimumNodeHeight = 158d;
+    private const double MinimumNodeChromeHeight = 172d;
+    private const double AdditionalPortRowHeight = 34d;
+    private const double StatusBarReserveHeight = 34d;
+    private const double InlineSurfaceReserveHeight = 152d;
 
     /// <inheritdoc />
     public GraphNodeVisual Create(GraphNodeVisualContext context)
@@ -35,7 +39,7 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
         var border = new Border
         {
             Width = node.Width,
-            Height = node.Height,
+            Height = ResolveRenderedNodeHeight(node, hasStatusBar: false, hasInlineSurface: false),
             CornerRadius = new CornerRadius(nodeStyle.CornerRadius),
             BorderThickness = new Thickness(nodeStyle.BorderThickness),
             Focusable = true,
@@ -252,7 +256,7 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
                 currentNode,
                 new GraphSize(
                     currentNode.Width,
-                    Math.Max(MinimumNodeHeight, currentNode.Height + args.Vector.Y)),
+                    Math.Max(ResolveInteractiveMinimumHeight(currentNode), Math.Max(currentNode.Height, ResolveMinimumChromeHeight(currentNode)) + args.Vector.Y)),
                 false);
         };
         resizeThumb.DragDelta += (_, args) =>
@@ -262,7 +266,7 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
                 currentNode,
                 new GraphSize(
                     Math.Max(MinimumNodeWidth, currentNode.Width + args.Vector.X),
-                    Math.Max(MinimumNodeHeight, currentNode.Height + args.Vector.Y)),
+                    Math.Max(ResolveInteractiveMinimumHeight(currentNode), Math.Max(currentNode.Height, ResolveMinimumChromeHeight(currentNode)) + args.Vector.Y)),
                 false);
         };
 
@@ -293,7 +297,6 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
         var nodeStyle = GetNodeCardStyle(context);
 
         state.Border.Width = node.Width;
-        state.Border.Height = node.Height;
         state.Border.Background = BrushFactory.Solid(node.IsSelected ? nodeStyle.SelectedBackgroundHex : nodeStyle.BackgroundHex);
         state.Border.BorderBrush = BrushFactory.Solid(node.IsSelected ? node.AccentHex : nodeStyle.BorderHex);
         state.Header.Background = BrushFactory.Solid(node.AccentHex, node.IsSelected ? nodeStyle.SelectedHeaderOpacity : nodeStyle.HeaderOpacity);
@@ -350,6 +353,32 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
         }
 
         RebuildInlineSurface(context, state);
+        state.Border.Height = ResolveRenderedNodeHeight(node, state.StatusBar.IsVisible, state.InlineSurface.IsVisible);
+    }
+
+    private static double ResolveMinimumChromeHeight(NodeViewModel node)
+    {
+        var visiblePortRows = Math.Max(Math.Max(node.Inputs.Count, node.Outputs.Count), 1);
+        return MinimumNodeChromeHeight + (Math.Max(0, visiblePortRows - 1) * AdditionalPortRowHeight);
+    }
+
+    private static double ResolveInteractiveMinimumHeight(NodeViewModel node)
+        => Math.Max(MinimumNodeHeight, ResolveMinimumChromeHeight(node));
+
+    private static double ResolveRenderedNodeHeight(NodeViewModel node, bool hasStatusBar, bool hasInlineSurface)
+    {
+        var renderedHeight = Math.Max(node.Height, ResolveInteractiveMinimumHeight(node));
+        if (hasStatusBar)
+        {
+            renderedHeight += StatusBarReserveHeight;
+        }
+
+        if (hasInlineSurface)
+        {
+            renderedHeight += InlineSurfaceReserveHeight;
+        }
+
+        return renderedHeight;
     }
 
     private static void RebuildInlineSurface(GraphNodeVisualContext context, DefaultNodeVisualState state)
@@ -715,7 +744,6 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
             }
 
             context.FocusCanvas();
-            args.Handled = true;
         };
         thumb.DragStarted += (_, _) => context.BeginHistoryInteraction();
         thumb.DragCompleted += (_, _) => context.CompleteHistoryInteraction(completionStatus);
