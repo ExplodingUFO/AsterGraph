@@ -25,6 +25,8 @@ public sealed class GraphNodeVisualContext
         GraphEditorStyleOptions styleOptions,
         Action focusCanvas,
         Action<NodeViewModel, PointerPressedEventArgs> beginNodeDrag,
+        Action beginHistoryInteraction,
+        Action<string> completeHistoryInteraction,
         Func<NodeViewModel, GraphSize, bool, bool> trySetNodeSize,
         Func<NodeViewModel, double, bool, bool> trySetNodeWidth,
         Func<NodeViewModel, GraphNodeExpansionState, bool> trySetNodeExpansionState,
@@ -40,6 +42,8 @@ public sealed class GraphNodeVisualContext
         ArgumentNullException.ThrowIfNull(styleOptions);
         ArgumentNullException.ThrowIfNull(focusCanvas);
         ArgumentNullException.ThrowIfNull(beginNodeDrag);
+        ArgumentNullException.ThrowIfNull(beginHistoryInteraction);
+        ArgumentNullException.ThrowIfNull(completeHistoryInteraction);
         ArgumentNullException.ThrowIfNull(trySetNodeSize);
         ArgumentNullException.ThrowIfNull(trySetNodeWidth);
         ArgumentNullException.ThrowIfNull(trySetNodeExpansionState);
@@ -54,6 +58,8 @@ public sealed class GraphNodeVisualContext
         StyleOptions = styleOptions;
         FocusCanvas = focusCanvas;
         BeginNodeDrag = beginNodeDrag;
+        BeginHistoryInteraction = beginHistoryInteraction;
+        CompleteHistoryInteraction = completeHistoryInteraction;
         TrySetNodeSize = trySetNodeSize;
         TrySetNodeWidth = trySetNodeWidth;
         TrySetNodeExpansionState = trySetNodeExpansionState;
@@ -93,6 +99,16 @@ public sealed class GraphNodeVisualContext
     /// 请求开始节点拖动交互。
     /// </summary>
     public Action<NodeViewModel, PointerPressedEventArgs> BeginNodeDrag { get; }
+
+    /// <summary>
+    /// Begins one grouped history interaction boundary.
+    /// </summary>
+    public Action BeginHistoryInteraction { get; }
+
+    /// <summary>
+    /// Completes the active grouped history interaction boundary.
+    /// </summary>
+    public Action<string> CompleteHistoryInteraction { get; }
 
     /// <summary>
     /// Requests a persisted node-size mutation.

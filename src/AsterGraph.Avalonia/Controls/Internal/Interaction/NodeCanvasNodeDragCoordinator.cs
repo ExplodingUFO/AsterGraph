@@ -120,6 +120,7 @@ internal sealed class NodeCanvasNodeDragCoordinator
         _host.HideGuideAdorners();
 
         _host.InteractionSession.BeginGroupDrag(group.Id, group.Title, group.Position, dragStart, _host.CreateDragSession(nodes));
+        _host.ViewModel.BeginHistoryInteraction();
         return new NodeCanvasNodeDragStartResult(Handled: true, CapturePointer: true);
     }
 }

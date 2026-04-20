@@ -645,6 +645,78 @@ public sealed class NodeCanvasStandaloneTests
     }
 
     [AvaloniaFact]
+    public void BorderResizeThumbs_UpdatePersistedNodeWidthAndHeight()
+    {
+        var editor = CreateEditor();
+        var (window, canvas) = CreateStandaloneCanvasWindow(editor);
+
+        try
+        {
+            var widthThumb = canvas.GetVisualDescendants()
+                .OfType<Thumb>()
+                .Single(control => string.Equals(
+                    AutomationProperties.GetName(control),
+                    "Canvas Target width resize handle",
+                    StringComparison.Ordinal));
+            var heightThumb = canvas.GetVisualDescendants()
+                .OfType<Thumb>()
+                .Single(control => string.Equals(
+                    AutomationProperties.GetName(control),
+                    "Canvas Target height resize handle",
+                    StringComparison.Ordinal));
+
+            widthThumb.RaiseEvent(new VectorEventArgs
+            {
+                RoutedEvent = Thumb.DragDeltaEvent,
+                Vector = new Vector(48, 0),
+                Source = widthThumb,
+            });
+            heightThumb.RaiseEvent(new VectorEventArgs
+            {
+                RoutedEvent = Thumb.DragDeltaEvent,
+                Vector = new Vector(0, 36),
+                Source = heightThumb,
+            });
+
+            var target = editor.Nodes.Single(node => node.Id == TargetNodeId);
+            Assert.Equal(288d, target.Width);
+            Assert.Equal(196d, target.Height);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
+    public void ResizeThumbPress_IsHandledBeforeCanvasCanCapturePointer()
+    {
+        var editor = CreateEditor();
+        var (window, canvas) = CreateStandaloneCanvasWindow(editor);
+        var pointer = new global::Avalonia.Input.Pointer(1, PointerType.Mouse, isPrimary: true);
+
+        try
+        {
+            var thumb = canvas.GetVisualDescendants()
+                .OfType<Thumb>()
+                .Single(control => string.Equals(
+                    AutomationProperties.GetName(control),
+                    "Canvas Target width resize handle",
+                    StringComparison.Ordinal));
+            var pressedArgs = CreatePointerPressedArgs(thumb, canvas, pointer, new Point(655, 220), KeyModifiers.None);
+
+            thumb.RaiseEvent(pressedArgs);
+
+            Assert.True(pressedArgs.Handled);
+            Assert.NotSame(canvas, pointer.Captured);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
     public void GroupHeader_IsNotButton_AndSupportsSelectionAndCollapse()
     {
         var editor = CreateEditor();
@@ -791,7 +863,7 @@ public sealed class NodeCanvasStandaloneTests
     }
 
     [AvaloniaFact]
-    public void GroupResizeThumb_UpdatesPersistedPadding_AndResolvedSurfaceWidth()
+    public void GroupResizeThumb_UpdatesPersistedFixedFrame_AndResolvedSurfaceBounds()
     {
         var editor = CreateEditor();
         editor.Session.Commands.SetSelection([SourceNodeId, TargetNodeId], TargetNodeId, updateStatus: false);
@@ -815,6 +887,7 @@ public sealed class NodeCanvasStandaloneTests
                     "Canvas Cluster group right resize handle",
                     StringComparison.Ordinal));
             var initialSnapshot = Assert.Single(editor.GetNodeGroupSnapshots());
+            var initialGroup = Assert.Single(editor.Session.Queries.GetNodeGroups());
 
             thumb.RaiseEvent(new VectorEventArgs
             {
@@ -823,12 +896,65 @@ public sealed class NodeCanvasStandaloneTests
                 Source = thumb,
             });
 
+            var bottomThumb = canvas.GetVisualDescendants()
+                .OfType<Thumb>()
+                .Single(control => string.Equals(
+                    AutomationProperties.GetName(control),
+                    "Canvas Cluster group bottom resize handle",
+                    StringComparison.Ordinal));
+            bottomThumb.RaiseEvent(new VectorEventArgs
+            {
+                RoutedEvent = Thumb.DragDeltaEvent,
+                Vector = new Vector(0, 24),
+                Source = bottomThumb,
+            });
+
             var group = Assert.Single(editor.Session.Queries.GetNodeGroups());
             var resizedSnapshot = Assert.Single(editor.GetNodeGroupSnapshots());
+            groupSurface = canvas.GetVisualDescendants()
+                .OfType<Border>()
+                .Single(control => string.Equals(
+                    AutomationProperties.GetName(control),
+                    "Canvas Cluster group",
+                    StringComparison.Ordinal));
 
-            Assert.Equal(new GraphPadding(24, 44, 60, 28), group.ExtraPadding);
+            Assert.Equal(initialGroup.ExtraPadding, group.ExtraPadding);
             Assert.Equal(initialSnapshot.Size.Width + 36d, resizedSnapshot.Size.Width);
+            Assert.Equal(initialSnapshot.Size.Height + 24d, resizedSnapshot.Size.Height);
             Assert.Equal(resizedSnapshot.Size.Width, groupSurface.Width);
+            Assert.Equal(resizedSnapshot.Size.Height, groupSurface.Height);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
+    public void GroupResizeThumbPress_IsHandledBeforeCanvasCanCapturePointer()
+    {
+        var editor = CreateEditor();
+        editor.Session.Commands.SetSelection([SourceNodeId, TargetNodeId], TargetNodeId, updateStatus: false);
+        var groupId = editor.Session.Commands.TryCreateNodeGroupFromSelection("Canvas Cluster");
+        Assert.False(string.IsNullOrWhiteSpace(groupId));
+
+        var (window, canvas) = CreateStandaloneCanvasWindow(editor);
+        var pointer = new global::Avalonia.Input.Pointer(1, PointerType.Mouse, isPrimary: true);
+
+        try
+        {
+            var thumb = canvas.GetVisualDescendants()
+                .OfType<Thumb>()
+                .Single(control => string.Equals(
+                    AutomationProperties.GetName(control),
+                    "Canvas Cluster group right resize handle",
+                    StringComparison.Ordinal));
+            var pressedArgs = CreatePointerPressedArgs(thumb, canvas, pointer, new Point(652, 240), KeyModifiers.None);
+
+            thumb.RaiseEvent(pressedArgs);
+
+            Assert.True(pressedArgs.Handled);
+            Assert.NotSame(canvas, pointer.Captured);
         }
         finally
         {
@@ -870,6 +996,17 @@ public sealed class NodeCanvasStandaloneTests
             Assert.Same(canvas, pointer.Captured);
 
             InvokeCanvasPointerMoved(canvas, movedArgs);
+
+            var previewSnapshot = Assert.Single(editor.GetNodeGroupSnapshots());
+            var previewSource = editor.Nodes.Single(node => node.Id == SourceNodeId);
+            var previewTarget = editor.Nodes.Single(node => node.Id == TargetNodeId);
+            Assert.Equal(initialSource.X + 50d, previewSource.X);
+            Assert.Equal(initialSource.Y + 25d, previewSource.Y);
+            Assert.Equal(initialTarget.X + 50d, previewTarget.X);
+            Assert.Equal(initialTarget.Y + 25d, previewTarget.Y);
+            Assert.Equal(initialSnapshot.Position.X + 50d, previewSnapshot.Position.X);
+            Assert.Equal(initialSnapshot.Position.Y + 25d, previewSnapshot.Position.Y);
+
             InvokeCanvasPointerReleased(canvas, releasedArgs);
 
             var movedSnapshot = Assert.Single(editor.GetNodeGroupSnapshots());

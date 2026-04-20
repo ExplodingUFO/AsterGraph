@@ -17,6 +17,11 @@ public sealed partial class NodeViewModel : ObservableObject
     /// <param name="model">节点模型快照。</param>
     public NodeViewModel(GraphNode model)
     {
+        var normalizedSize = GraphEditorNodeSurfaceMetrics.NormalizePersistedSize(
+            model.Size,
+            model.Inputs.Count,
+            model.Outputs.Count);
+
         Id = model.Id;
         DefinitionId = model.DefinitionId;
         Title = model.Title;
@@ -24,8 +29,8 @@ public sealed partial class NodeViewModel : ObservableObject
         Subtitle = model.Subtitle;
         Description = model.Description;
         AccentHex = model.AccentHex;
-        Width = model.Size.Width;
-        Height = model.Size.Height;
+        Width = normalizedSize.Width;
+        Height = normalizedSize.Height;
         Surface = model.Surface ?? GraphNodeSurfaceState.Default;
         X = model.Position.X;
         Y = model.Position.Y;
@@ -44,7 +49,7 @@ public sealed partial class NodeViewModel : ObservableObject
             .ToDictionary(parameter => parameter.Key, StringComparer.Ordinal);
 
         ActiveSurfaceTier = GraphEditorNodeSurfaceTierResolver.ResolveActiveTier(
-            model.Size,
+            normalizedSize,
             AsterGraph.Editor.Configuration.GraphEditorBehaviorOptions.Default,
             definition: null);
     }

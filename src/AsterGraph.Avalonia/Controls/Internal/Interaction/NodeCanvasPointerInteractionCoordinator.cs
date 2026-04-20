@@ -132,6 +132,20 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
             }
             else if (_host.InteractionSession.DragGroupId is not null)
             {
+                if (_host.InteractionSession.DragGroupOriginPosition is GraphPoint groupOriginPosition
+                    && _host.InteractionSession.DragStartScreenPosition is Point dragStart)
+                {
+                    var rawDelta = currentScreenPosition - dragStart;
+                    var requestedPosition = new GraphPoint(
+                        groupOriginPosition.X + (rawDelta.X / _host.ViewModel.Zoom),
+                        groupOriginPosition.Y + (rawDelta.Y / _host.ViewModel.Zoom));
+                    _host.ViewModel.TrySetNodeGroupPosition(
+                        _host.InteractionSession.DragGroupId,
+                        requestedPosition,
+                        moveMemberNodes: true,
+                        updateStatus: false);
+                }
+
                 handled = true;
             }
             else if (_host.InteractionSession.IsPanning)
@@ -196,6 +210,10 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
                 _host.ViewModel is not null && _host.ViewModel.HasMultipleSelection
                     ? "Moved selection."
                     : $"Moved {_host.InteractionSession.DragNode.Title}.");
+        }
+        else if (_host.InteractionSession.DragGroupId is not null && !string.IsNullOrWhiteSpace(_host.InteractionSession.DragGroupTitle))
+        {
+            _host.ViewModel?.CompleteHistoryInteraction($"Moved {_host.InteractionSession.DragGroupTitle} group.");
         }
 
         if (_host.InteractionSession.UpdateHoveredDropGroup(null))

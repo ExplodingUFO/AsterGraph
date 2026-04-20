@@ -65,6 +65,14 @@ internal sealed record NodeCanvasRenderedGroupVisual(
     Thumb RightResizeThumb,
     Thumb BottomResizeThumb);
 
+internal enum NodeCanvasGroupResizeEdge
+{
+    Left,
+    Top,
+    Right,
+    Bottom,
+}
+
 internal sealed class NodeCanvasSceneHost
 {
     private readonly INodeCanvasSceneHost _host;
@@ -269,44 +277,44 @@ internal sealed class NodeCanvasSceneHost
 
         var leftThumb = CreateGroupResizeThumb(
             group.Id,
+            group.Title,
+            NodeCanvasGroupResizeEdge.Left,
             $"{group.Title} group left resize handle",
             new Cursor(StandardCursorType.SizeWestEast),
             HorizontalAlignment.Left,
             VerticalAlignment.Stretch,
             width: NodeCanvasGroupChromeMetrics.ResizeHandleThickness,
-            height: double.NaN,
-            vector => vector.X,
-            (padding, delta) => padding with { Left = padding.Left - delta });
+            height: double.NaN);
         var topThumb = CreateGroupResizeThumb(
             group.Id,
+            group.Title,
+            NodeCanvasGroupResizeEdge.Top,
             $"{group.Title} group top resize handle",
             new Cursor(StandardCursorType.SizeNorthSouth),
             HorizontalAlignment.Stretch,
             VerticalAlignment.Top,
             width: double.NaN,
-            height: NodeCanvasGroupChromeMetrics.ResizeHandleThickness,
-            vector => vector.Y,
-            (padding, delta) => padding with { Top = padding.Top - delta });
+            height: NodeCanvasGroupChromeMetrics.ResizeHandleThickness);
         var rightThumb = CreateGroupResizeThumb(
             group.Id,
+            group.Title,
+            NodeCanvasGroupResizeEdge.Right,
             $"{group.Title} group right resize handle",
             new Cursor(StandardCursorType.SizeWestEast),
             HorizontalAlignment.Right,
             VerticalAlignment.Stretch,
             width: NodeCanvasGroupChromeMetrics.ResizeHandleThickness,
-            height: double.NaN,
-            vector => vector.X,
-            (padding, delta) => padding with { Right = padding.Right + delta });
+            height: double.NaN);
         var bottomThumb = CreateGroupResizeThumb(
             group.Id,
+            group.Title,
+            NodeCanvasGroupResizeEdge.Bottom,
             $"{group.Title} group bottom resize handle",
             new Cursor(StandardCursorType.SizeNorthSouth),
             HorizontalAlignment.Stretch,
             VerticalAlignment.Bottom,
             width: double.NaN,
-            height: NodeCanvasGroupChromeMetrics.ResizeHandleThickness,
-            vector => vector.Y,
-            (padding, delta) => padding with { Bottom = padding.Bottom + delta });
+            height: NodeCanvasGroupChromeMetrics.ResizeHandleThickness);
 
         chrome.Children.Add(leftThumb);
         chrome.Children.Add(topThumb);
@@ -357,14 +365,14 @@ internal sealed class NodeCanvasSceneHost
 
     private Thumb CreateGroupResizeThumb(
         string groupId,
+        string groupTitle,
+        NodeCanvasGroupResizeEdge edge,
         string automationName,
         Cursor cursor,
         HorizontalAlignment horizontalAlignment,
         VerticalAlignment verticalAlignment,
         double width,
-        double height,
-        Func<Vector, double> deltaSelector,
-        Func<GraphPadding, double, GraphPadding> updatePadding)
+        double height)
     {
         var thumb = new Thumb
         {
@@ -376,6 +384,17 @@ internal sealed class NodeCanvasSceneHost
             Cursor = cursor,
         };
         AutomationProperties.SetName(thumb, automationName);
+        thumb.PointerPressed += (_, args) =>
+        {
+            if (_host.ViewModel is null || !args.GetCurrentPoint(thumb).Properties.IsLeftButtonPressed)
+            {
+                return;
+            }
+
+            _host.FocusCanvas();
+            args.Handled = true;
+        };
+        thumb.DragStarted += (_, _) => _host.ViewModel?.BeginHistoryInteraction();
         thumb.DragDelta += (_, args) =>
         {
             var editor = _host.ViewModel;
@@ -385,12 +404,82 @@ internal sealed class NodeCanvasSceneHost
                 return;
             }
 
-            var nextPadding = updatePadding(currentGroup.ExtraPadding, deltaSelector(args.Vector)).ClampNonNegative();
-            args.Handled = editor.Session.Commands.TrySetNodeGroupExtraPadding(groupId, nextPadding, updateStatus: false);
+            args.Handled = TryApplyGroupResize(editor, currentGroup, edge, args.Vector);
         };
+        thumb.DragCompleted += (_, _) => _host.ViewModel?.CompleteHistoryInteraction($"Resized {groupTitle} group.");
 
         return thumb;
     }
+
+    private static bool TryApplyGroupResize(
+        GraphEditorViewModel editor,
+        GraphEditorNodeGroupSnapshot currentGroup,
+        NodeCanvasGroupResizeEdge edge,
+        Vector delta)
+    {
+        var minimumSize = ResolveMinimumGroupSize(currentGroup);
+        var nextPosition = currentGroup.Position;
+        var nextSize = currentGroup.Size;
+
+        switch (edge)
+        {
+            case NodeCanvasGroupResizeEdge.Left:
+            {
+                var proposedWidth = Math.Max(minimumSize.Width, currentGroup.Size.Width - delta.X);
+                nextPosition = new GraphPoint(
+                    currentGroup.Position.X + (currentGroup.Size.Width - proposedWidth),
+                    currentGroup.Position.Y);
+                nextSize = new GraphSize(proposedWidth, currentGroup.Size.Height);
+                break;
+            }
+
+            case NodeCanvasGroupResizeEdge.Top:
+            {
+                var proposedHeight = Math.Max(minimumSize.Height, currentGroup.Size.Height - delta.Y);
+                nextPosition = new GraphPoint(
+                    currentGroup.Position.X,
+                    currentGroup.Position.Y + (currentGroup.Size.Height - proposedHeight));
+                nextSize = new GraphSize(currentGroup.Size.Width, proposedHeight);
+                break;
+            }
+
+            case NodeCanvasGroupResizeEdge.Right:
+                nextSize = new GraphSize(
+                    Math.Max(minimumSize.Width, currentGroup.Size.Width + delta.X),
+                    currentGroup.Size.Height);
+                break;
+
+            case NodeCanvasGroupResizeEdge.Bottom:
+                nextSize = new GraphSize(
+                    currentGroup.Size.Width,
+                    Math.Max(minimumSize.Height, currentGroup.Size.Height + delta.Y));
+                break;
+        }
+
+        var changed = false;
+        if (nextPosition != currentGroup.Position)
+        {
+            changed = editor.TrySetNodeGroupPosition(currentGroup.Id, nextPosition, moveMemberNodes: false, updateStatus: false);
+        }
+
+        if (nextSize != currentGroup.Size)
+        {
+            changed = editor.TrySetNodeGroupSize(currentGroup.Id, nextSize, updateStatus: false) || changed;
+        }
+
+        return changed;
+    }
+
+    private static GraphSize ResolveMinimumGroupSize(GraphEditorNodeGroupSnapshot group)
+        => new(
+            Math.Max(
+                NodeCanvasGroupChromeMetrics.MinimumWidth,
+                group.ExtraPadding.Left + group.ExtraPadding.Right + 48d),
+            group.IsCollapsed
+                ? NodeCanvasGroupChromeMetrics.HeaderHeight
+                : Math.Max(
+                    NodeCanvasGroupChromeMetrics.MinimumExpandedHeight,
+                    group.ExtraPadding.Top + group.ExtraPadding.Bottom + 24d));
 
     private GraphEditorNodeGroupSnapshot? ResolveCurrentGroupSnapshot(string groupId)
         => _host.ViewModel?.GetNodeGroupSnapshots()
@@ -405,6 +494,8 @@ internal sealed class NodeCanvasSceneHost
             editor.StyleOptions,
             _host.FocusCanvas,
             _host.BeginNodeDrag,
+            editor.BeginHistoryInteraction,
+            editor.CompleteHistoryInteraction,
             (targetNode, size, updateStatus) => editor.TrySetNodeSize(targetNode, size, updateStatus),
             (targetNode, width, updateStatus) => editor.TrySetNodeWidth(targetNode, width, updateStatus),
             (targetNode, expansionState) => editor.Session.Commands.TrySetNodeExpansionState(targetNode.Id, expansionState),

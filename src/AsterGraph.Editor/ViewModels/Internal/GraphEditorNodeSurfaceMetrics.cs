@@ -8,8 +8,6 @@ internal static class GraphEditorNodeSurfaceMetrics
 {
     private const double MinimumBodyHeight = 158d;
     internal const double MinimumNodeWidth = 180d;
-    private const double BaseChromeHeight = 132d;
-    private const double DescriptionHeight = 40d;
     private const double PortRowHeight = 24d;
     private const double PortRowSpacing = 8d;
     private const double StatusBarHeight = 28d;
@@ -19,12 +17,8 @@ internal static class GraphEditorNodeSurfaceMetrics
     internal static double CalculateRequiredHeight(int inputCount, int outputCount)
     {
         var visiblePortRows = Math.Max(Math.Max(inputCount, outputCount), 1);
-        var portsHeight = (visiblePortRows * PortRowHeight)
-            + ((visiblePortRows - 1) * PortRowSpacing);
-
-        return Math.Max(
-            MinimumBodyHeight,
-            BaseChromeHeight + DescriptionHeight + portsHeight);
+        var additionalPortRows = Math.Max(0, visiblePortRows - 1);
+        return MinimumBodyHeight + (additionalPortRows * (PortRowHeight + PortRowSpacing));
     }
 
     internal static double CalculateBaseHeight(double persistedHeight, int inputCount, int outputCount)

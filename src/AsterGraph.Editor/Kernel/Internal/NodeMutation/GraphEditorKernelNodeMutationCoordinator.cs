@@ -6,6 +6,7 @@ using AsterGraph.Editor.Configuration;
 using AsterGraph.Editor.Diagnostics;
 using AsterGraph.Editor.Events;
 using AsterGraph.Editor.Models;
+using AsterGraph.Editor.ViewModels;
 
 namespace AsterGraph.Editor.Kernel.Internal;
 
@@ -75,6 +76,10 @@ internal sealed class GraphEditorKernelNodeMutationCoordinator
 
         var position = preferredWorldPosition ?? _host.GetViewportCenter();
         var offset = 26 * (_host.Document.Nodes.Count % 4);
+        var normalizedSize = GraphEditorNodeSurfaceMetrics.NormalizePersistedSize(
+            new GraphSize(definition.DefaultWidth, definition.DefaultHeight),
+            definition.InputPorts.Count,
+            definition.OutputPorts.Count);
         var node = new GraphNode(
             _host.CreateNodeId(definitionId),
             definition.DisplayName,
@@ -82,9 +87,9 @@ internal sealed class GraphEditorKernelNodeMutationCoordinator
             definition.Subtitle,
             definition.Description ?? definition.Subtitle,
             new GraphPoint(
-                position.X - (definition.DefaultWidth / 2) + offset,
-                position.Y - (definition.DefaultHeight / 2) + offset),
-            new GraphSize(definition.DefaultWidth, definition.DefaultHeight),
+                position.X - (normalizedSize.Width / 2) + offset,
+                position.Y - (normalizedSize.Height / 2) + offset),
+            normalizedSize,
             definition.InputPorts.Select(port => new GraphPort(port.Key, port.DisplayName, PortDirection.Input, port.TypeId.Value, port.AccentHex, port.TypeId, port.InlineParameterKey)).ToList(),
             definition.OutputPorts.Select(port => new GraphPort(port.Key, port.DisplayName, PortDirection.Output, port.TypeId.Value, port.AccentHex, port.TypeId, port.InlineParameterKey)).ToList(),
             definition.AccentHex,

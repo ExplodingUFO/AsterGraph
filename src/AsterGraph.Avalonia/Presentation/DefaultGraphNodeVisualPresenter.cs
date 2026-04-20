@@ -176,17 +176,34 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
         Grid.SetRow(inlineSurface, 2);
         root.Children.Add(inlineSurface);
 
-        var resizeThumb = new Thumb
-        {
-            Width = 16,
-            Height = 16,
-            HorizontalAlignment = HorizontalAlignment.Right,
-            VerticalAlignment = VerticalAlignment.Bottom,
-            Margin = new Thickness(0, 0, 10, 10),
-            Background = Brushes.Transparent,
-            Cursor = new Cursor(StandardCursorType.SizeWestEast),
-        };
-        AutomationProperties.SetName(resizeThumb, $"{node.Title} resize handle");
+        var widthResizeThumb = CreateResizeThumb(
+            $"{node.Title} width resize handle",
+            HorizontalAlignment.Right,
+            VerticalAlignment.Stretch,
+            width: 10,
+            height: double.NaN,
+            new Cursor(StandardCursorType.SizeWestEast));
+        Grid.SetRowSpan(widthResizeThumb, 3);
+        root.Children.Add(widthResizeThumb);
+
+        var heightResizeThumb = CreateResizeThumb(
+            $"{node.Title} height resize handle",
+            HorizontalAlignment.Stretch,
+            VerticalAlignment.Bottom,
+            width: double.NaN,
+            height: 10,
+            new Cursor(StandardCursorType.SizeNorthSouth));
+        Grid.SetRowSpan(heightResizeThumb, 3);
+        root.Children.Add(heightResizeThumb);
+
+        var resizeThumb = CreateResizeThumb(
+            $"{node.Title} resize handle",
+            HorizontalAlignment.Right,
+            VerticalAlignment.Bottom,
+            width: 16,
+            height: 16,
+            new Cursor(StandardCursorType.SizeWestEast),
+            margin: new Thickness(0, 0, 2, 2));
         Grid.SetRowSpan(resizeThumb, 3);
         root.Children.Add(resizeThumb);
 
@@ -194,7 +211,8 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
 
         border.PointerPressed += (_, args) =>
         {
-            if (args.Source is StyledElement { DataContext: PortViewModel or NodeParameterViewModel })
+            if (args.Source is Thumb
+                || args.Source is StyledElement { DataContext: PortViewModel or NodeParameterViewModel })
             {
                 return;
             }
@@ -215,13 +233,36 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
             args.Handled = context.OpenNodeContextMenu(border, context.Node, args);
         };
 
+        AttachResizeHistoryLifecycle(widthResizeThumb, context, $"Resized {node.Title} width.");
+        AttachResizeHistoryLifecycle(heightResizeThumb, context, $"Resized {node.Title} height.");
+        AttachResizeHistoryLifecycle(resizeThumb, context, $"Resized {node.Title}.");
+
+        widthResizeThumb.DragDelta += (_, args) =>
+        {
+            var currentNode = ResolveCurrentNode(context);
+            args.Handled = context.TrySetNodeWidth(
+                currentNode,
+                Math.Max(MinimumNodeWidth, currentNode.Width + args.Vector.X),
+                false);
+        };
+        heightResizeThumb.DragDelta += (_, args) =>
+        {
+            var currentNode = ResolveCurrentNode(context);
+            args.Handled = context.TrySetNodeSize(
+                currentNode,
+                new GraphSize(
+                    currentNode.Width,
+                    Math.Max(MinimumNodeHeight, currentNode.Height + args.Vector.Y)),
+                false);
+        };
         resizeThumb.DragDelta += (_, args) =>
         {
+            var currentNode = ResolveCurrentNode(context);
             args.Handled = context.TrySetNodeSize(
-                context.Node,
+                currentNode,
                 new GraphSize(
-                    Math.Max(MinimumNodeWidth, context.Node.Width + args.Vector.X),
-                    Math.Max(MinimumNodeHeight, context.Node.Height + args.Vector.Y)),
+                    Math.Max(MinimumNodeWidth, currentNode.Width + args.Vector.X),
+                    Math.Max(MinimumNodeHeight, currentNode.Height + args.Vector.Y)),
                 false);
         };
 
@@ -640,6 +681,48 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
 
         return panel;
     }
+
+    private static Thumb CreateResizeThumb(
+        string automationName,
+        HorizontalAlignment horizontalAlignment,
+        VerticalAlignment verticalAlignment,
+        double width,
+        double height,
+        Cursor cursor,
+        Thickness? margin = null)
+    {
+        var thumb = new Thumb
+        {
+            Background = Brushes.Transparent,
+            HorizontalAlignment = horizontalAlignment,
+            VerticalAlignment = verticalAlignment,
+            Width = width,
+            Height = height,
+            Cursor = cursor,
+            Margin = margin ?? default,
+        };
+        AutomationProperties.SetName(thumb, automationName);
+        return thumb;
+    }
+
+    private static void AttachResizeHistoryLifecycle(Thumb thumb, GraphNodeVisualContext context, string completionStatus)
+    {
+        thumb.PointerPressed += (_, args) =>
+        {
+            if (!args.GetCurrentPoint(thumb).Properties.IsLeftButtonPressed)
+            {
+                return;
+            }
+
+            context.FocusCanvas();
+            args.Handled = true;
+        };
+        thumb.DragStarted += (_, _) => context.BeginHistoryInteraction();
+        thumb.DragCompleted += (_, _) => context.CompleteHistoryInteraction(completionStatus);
+    }
+
+    private static NodeViewModel ResolveCurrentNode(GraphNodeVisualContext context)
+        => context.Editor.FindNode(context.Node.Id) ?? context.Node;
 
     private static NodeCardStyleOptions GetNodeCardStyle(GraphNodeVisualContext context)
         => context.StyleOptions.NodeOverrides.FirstOrDefault(overrideStyle => overrideStyle.DefinitionId == context.Node.DefinitionId)?.Style
