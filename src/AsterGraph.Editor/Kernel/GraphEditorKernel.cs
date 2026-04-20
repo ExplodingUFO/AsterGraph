@@ -182,7 +182,13 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
             return false;
         }
 
-        var mutation = _documentMutator.SetNodeWidth(CreateActiveScopeDocumentSnapshot(), nodeId, width);
+        var activeScope = CreateActiveScopeDocumentSnapshot();
+        var node = activeScope.Nodes.FirstOrDefault(candidate => string.Equals(candidate.Id, nodeId, StringComparison.Ordinal));
+        var definition = node is null ? null : GraphEditorNodeSurfaceTierResolver.ResolveDefinition(_nodeCatalog, node.DefinitionId);
+        var normalizedSize = node is null
+            ? new GraphSize(width, 0d)
+            : NormalizeNodeSurfaceSize(node, definition, node.Size with { Width = width });
+        var mutation = _documentMutator.SetNodeWidth(activeScope, nodeId, normalizedSize.Width);
         if (mutation.NodeId is null)
         {
             if (updateStatus)
@@ -223,7 +229,13 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
             return false;
         }
 
-        var mutation = _documentMutator.SetNodeSize(CreateActiveScopeDocumentSnapshot(), nodeId, size);
+        var activeScope = CreateActiveScopeDocumentSnapshot();
+        var node = activeScope.Nodes.FirstOrDefault(candidate => string.Equals(candidate.Id, nodeId, StringComparison.Ordinal));
+        var definition = node is null ? null : GraphEditorNodeSurfaceTierResolver.ResolveDefinition(_nodeCatalog, node.DefinitionId);
+        var normalizedSize = node is null
+            ? size
+            : NormalizeNodeSurfaceSize(node, definition, size);
+        var mutation = _documentMutator.SetNodeSize(activeScope, nodeId, normalizedSize);
         if (mutation.NodeId is null)
         {
             if (updateStatus)
@@ -978,10 +990,20 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
             {
                 var surface = node.Surface ?? GraphNodeSurfaceState.Default;
                 var definition = GraphEditorNodeSurfaceTierResolver.ResolveDefinition(_nodeCatalog, node.DefinitionId);
-                var activeTier = GraphEditorNodeSurfaceTierResolver.ResolveActiveTier(node.Size, _behaviorOptions, definition);
+                var measurement = GraphEditorNodeSurfaceMeasurer.Measure(GraphEditorNodeSurfacePlanner.Create(node, definition));
+                var activeTier = GraphEditorNodeSurfaceTierResolver.ResolveActiveTier(node.Size, _behaviorOptions, definition, measurement);
                 return new GraphEditorNodeSurfaceSnapshot(node.Id, node.Size, activeTier, surface.ExpansionState, surface.GroupId);
             })
             .ToList();
+
+    private static GraphSize NormalizeNodeSurfaceSize(
+        GraphNode node,
+        AsterGraph.Abstractions.Definitions.INodeDefinition? definition,
+        GraphSize requestedSize)
+    {
+        var measurement = GraphEditorNodeSurfaceMeasurer.Measure(GraphEditorNodeSurfacePlanner.Create(node, definition));
+        return GraphEditorNodeSurfaceMetrics.NormalizePersistedSize(requestedSize, measurement);
+    }
 
     public IReadOnlyList<GraphEditorCompositeNodeSnapshot> GetCompositeNodeSnapshots()
         => GetActiveGraphScope().Nodes

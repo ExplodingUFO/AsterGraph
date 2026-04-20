@@ -20,6 +20,7 @@ public sealed class GraphEditorNodeSurfaceContractsTests
 {
     private static readonly NodeDefinitionId TieredDefinitionId = new("tests.node-surface.tiered");
     private static readonly NodeDefinitionId DefaultDefinitionId = new("tests.node-surface.default");
+    private static readonly NodeDefinitionId AdaptiveDefinitionId = new("tests.node-surface.adaptive");
     private const string NodeId = "tests.node-surface.node-001";
     private const string SiblingNodeId = "tests.node-surface.node-002";
     private const string OutputPortId = "output-001";
@@ -192,6 +193,48 @@ public sealed class GraphEditorNodeSurfaceContractsTests
 
         Assert.NotNull(constructor);
         Assert.NotNull(typeof(GraphNodeVisualContext).GetProperty(nameof(GraphNodeVisualContext.ResolveInlineParameter)));
+    }
+
+    [Fact]
+    public void AdaptiveSurfaceMeasurement_UsesRequiredParametersForBaselineAndOptionalParametersForDisclosure()
+    {
+        var definition = CreateAdaptiveDefinition();
+
+        var plan = GraphEditorNodeSurfacePlanner.Create(definition);
+        var measurement = GraphEditorNodeSurfaceMeasurer.Measure(plan);
+
+        Assert.Equal(1, measurement.RequiredParameterCount);
+        Assert.Equal(1, measurement.OptionalParameterCount);
+        Assert.True(measurement.BaselineSize.Height < measurement.HeightToRevealAdditionalInputs);
+        Assert.True(measurement.BaselineSize.Width < measurement.WidthToRevealParameterSummaries);
+        Assert.True(measurement.WidthToRevealParameterSummaries < measurement.WidthToRevealInlineEditors);
+    }
+
+    [Fact]
+    public void AdaptiveSurfaceTierResolver_UsesMeasuredThresholdsForDefaultProfile()
+    {
+        var definition = CreateAdaptiveDefinition();
+        var measurement = GraphEditorNodeSurfaceMeasurer.Measure(GraphEditorNodeSurfacePlanner.Create(definition));
+
+        var baselineTier = GraphEditorNodeSurfaceTierResolver.ResolveActiveTier(
+            measurement.BaselineSize,
+            GraphEditorBehaviorOptions.Default,
+            definition,
+            measurement);
+        var summaryTier = GraphEditorNodeSurfaceTierResolver.ResolveActiveTier(
+            new GraphSize(measurement.WidthToRevealParameterSummaries, measurement.HeightToRevealAdditionalInputs),
+            GraphEditorBehaviorOptions.Default,
+            definition,
+            measurement);
+        var editorTier = GraphEditorNodeSurfaceTierResolver.ResolveActiveTier(
+            new GraphSize(measurement.WidthToRevealInlineEditors, measurement.HeightToRevealAdditionalInputs),
+            GraphEditorBehaviorOptions.Default,
+            definition,
+            measurement);
+
+        Assert.Equal("details", baselineTier.Key);
+        Assert.Equal("parameter-rail", summaryTier.Key);
+        Assert.Equal("parameter-editors", editorTier.Key);
     }
 
     [Fact]
@@ -716,6 +759,30 @@ public sealed class GraphEditorNodeSurfaceContractsTests
                 defaultHeight: 150d));
         return catalog;
     }
+
+    private static NodeDefinition CreateAdaptiveDefinition()
+        => new(
+            AdaptiveDefinitionId,
+            "Adaptive Surface",
+            "Tests",
+            "Contracts",
+            [],
+            [new PortDefinition(OutputPortId, "Result", new PortTypeId("float"), "#6AD5C4")],
+            parameters:
+            [
+                new NodeParameterDefinition(
+                    "required-input",
+                    "Required Input",
+                    new PortTypeId("float"),
+                    ParameterEditorKind.Number,
+                    isRequired: true),
+                new NodeParameterDefinition(
+                    "optional-gain",
+                    "Optional Gain",
+                    new PortTypeId("float"),
+                    ParameterEditorKind.Number,
+                    defaultValue: 0.5d),
+            ]);
 
     private static INodeCatalog CreatePromotionCatalog()
     {

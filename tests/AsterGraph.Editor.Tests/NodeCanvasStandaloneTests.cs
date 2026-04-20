@@ -31,10 +31,15 @@ public sealed class NodeCanvasStandaloneTests
 {
     private static readonly NodeDefinitionId SourceDefinitionId = new("tests.canvas.source");
     private static readonly NodeDefinitionId TargetDefinitionId = new("tests.canvas.target");
+    private static readonly NodeDefinitionId AdaptiveDefinitionId = new("tests.canvas.adaptive");
     private const string SourceNodeId = "tests.canvas.source-001";
     private const string TargetNodeId = "tests.canvas.target-001";
+    private const string AdaptiveNodeId = "tests.canvas.adaptive-001";
     private const string SourcePortId = "out";
     private const string TargetPortId = "in";
+    private const string AdaptiveOutputPortId = "result";
+    private const string RequiredParameterKey = "required-input";
+    private const string OptionalParameterKey = "optional-gain";
 
     [AvaloniaFact]
     public void StandaloneCanvasFactory_BindsSharedEditorAndKeepsDefaultInteractionsEnabled()
@@ -611,6 +616,82 @@ public sealed class NodeCanvasStandaloneTests
             var summaryText = Assert.IsType<TextBlock>(
                 bindingSummary.GetVisualDescendants().OfType<TextBlock>().First(block => !string.IsNullOrWhiteSpace(block.Text)));
             Assert.Contains("Canvas Source", summaryText.Text, StringComparison.Ordinal);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
+    public void AdaptiveSurface_DefaultSize_ShowsRequiredParameterEndpointOnly()
+    {
+        var editor = CreateAdaptiveSurfaceEditor();
+        var (window, canvas) = CreateStandaloneCanvasWindow(editor);
+
+        try
+        {
+            Assert.Contains(
+                canvas.GetVisualDescendants().OfType<Button>(),
+                control => string.Equals(
+                    AutomationProperties.GetName(control),
+                    "Adaptive Surface parameter endpoint Required Input",
+                    StringComparison.Ordinal));
+            Assert.DoesNotContain(
+                canvas.GetVisualDescendants().OfType<Button>(),
+                control => string.Equals(
+                    AutomationProperties.GetName(control),
+                    "Adaptive Surface parameter endpoint Optional Gain",
+                    StringComparison.Ordinal));
+            Assert.DoesNotContain(
+                canvas.GetVisualDescendants().OfType<NodeParameterEditorHost>(),
+                control => string.Equals(control.Parameter?.Key, OptionalParameterKey, StringComparison.Ordinal));
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
+    public void AdaptiveSurface_HeightAndWidthProgressivelyRevealOptionalEndpointAndInlineEditors()
+    {
+        var editor = CreateAdaptiveSurfaceEditor();
+        var adaptiveNode = editor.Nodes.Single(node => node.Id == AdaptiveNodeId);
+        var (window, canvas) = CreateStandaloneCanvasWindow(editor);
+
+        try
+        {
+            Assert.True(editor.Session.Commands.TrySetNodeSize(
+                AdaptiveNodeId,
+                new GraphSize(adaptiveNode.Width, adaptiveNode.Height + 96d),
+                updateStatus: false));
+
+            Assert.Contains(
+                canvas.GetVisualDescendants().OfType<Button>(),
+                control => string.Equals(
+                    AutomationProperties.GetName(control),
+                    "Adaptive Surface parameter endpoint Required Input",
+                    StringComparison.Ordinal));
+            Assert.Contains(
+                canvas.GetVisualDescendants().OfType<Button>(),
+                control => string.Equals(
+                    AutomationProperties.GetName(control),
+                    "Adaptive Surface parameter endpoint Optional Gain",
+                    StringComparison.Ordinal));
+            Assert.DoesNotContain(
+                canvas.GetVisualDescendants().OfType<NodeParameterEditorHost>(),
+                control => string.Equals(control.Parameter?.Key, OptionalParameterKey, StringComparison.Ordinal));
+
+            Assert.True(editor.Session.Commands.TrySetNodeSize(
+                AdaptiveNodeId,
+                new GraphSize(adaptiveNode.Width + 180d, adaptiveNode.Height + 96d),
+                updateStatus: false));
+
+            var editorHost = Assert.Single(
+                canvas.GetVisualDescendants().OfType<NodeParameterEditorHost>(),
+                control => string.Equals(control.Parameter?.Key, OptionalParameterKey, StringComparison.Ordinal));
+            Assert.Equal(OptionalParameterKey, editorHost.Parameter?.Key);
         }
         finally
         {
@@ -1648,6 +1729,76 @@ public sealed class NodeCanvasStandaloneTests
                         TargetDefinitionId,
                         [
                             new GraphParameterValue("gain", new PortTypeId("float"), 0.35d),
+                        ]),
+                ],
+                []),
+            catalog,
+            new DefaultPortCompatibilityService(),
+            styleOptions: GraphEditorStyleOptions.Default);
+    }
+
+    private static GraphEditorViewModel CreateAdaptiveSurfaceEditor()
+    {
+        var catalog = new NodeCatalog();
+        catalog.RegisterDefinition(
+            new NodeDefinition(
+                AdaptiveDefinitionId,
+                "Adaptive Surface",
+                "Tests",
+                "Standalone canvas node used to verify adaptive parameter rail thresholds.",
+                [],
+                [
+                    new PortDefinition(
+                        AdaptiveOutputPortId,
+                        "Result",
+                        new PortTypeId("float"),
+                        "#6AD5C4"),
+                ],
+                parameters:
+                [
+                    new NodeParameterDefinition(
+                        RequiredParameterKey,
+                        "Required Input",
+                        new PortTypeId("float"),
+                        ParameterEditorKind.Number,
+                        isRequired: true,
+                        description: "Required parameter that should remain visible at the baseline size."),
+                    new NodeParameterDefinition(
+                        OptionalParameterKey,
+                        "Optional Gain",
+                        new PortTypeId("float"),
+                        ParameterEditorKind.Number,
+                        description: "Optional parameter that should appear after the node is expanded.",
+                        defaultValue: 0.5d),
+                ]));
+
+        return new GraphEditorViewModel(
+            new GraphDocument(
+                "Adaptive Surface Graph",
+                "Regression coverage for adaptive node sizing and parameter disclosure.",
+                [
+                    new GraphNode(
+                        AdaptiveNodeId,
+                        "Adaptive Surface",
+                        "Tests",
+                        "Adaptive Canvas",
+                        "Verifies baseline required inputs and progressive optional parameter disclosure.",
+                        new GraphPoint(180, 180),
+                        new GraphSize(300, 180),
+                        [],
+                        [
+                            new GraphPort(
+                                AdaptiveOutputPortId,
+                                "Result",
+                                PortDirection.Output,
+                                "float",
+                                "#6AD5C4",
+                                new PortTypeId("float")),
+                        ],
+                        "#6AD5C4",
+                        AdaptiveDefinitionId,
+                        [
+                            new GraphParameterValue(OptionalParameterKey, new PortTypeId("float"), 0.5d),
                         ]),
                 ],
                 []),

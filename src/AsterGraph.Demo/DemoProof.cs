@@ -80,6 +80,8 @@ public static class DemoProof
         var commandSurfaceOk = undoAction.CanExecute && shell.Editor.Nodes.Count == nodeCountBeforeUndo;
         var lightingNode = shell.Editor.FindNode("light")
             ?? throw new InvalidOperationException("Demo proof requires the lighting node.");
+        var lightingNodeViewModel = lightingNode as NodeViewModel
+            ?? throw new InvalidOperationException("Demo proof requires the lighting node view model.");
         shell.Editor.SelectSingleNode(lightingNode, updateStatus: false);
         var pulsePort = lightingNode.Inputs.Single(port => string.Equals(port.Id, "pulse", StringComparison.Ordinal));
         var rimMaskPort = lightingNode.Inputs.Single(port => string.Equals(port.Id, "rimMask", StringComparison.Ordinal));
@@ -92,12 +94,22 @@ public static class DemoProof
             .SingleOrDefault(group => string.Equals(group.Id, "terrain-authoring", StringComparison.Ordinal));
         var gradientNode = shell.Editor.FindNode("gradient")
             ?? throw new InvalidOperationException("Demo proof requires the gradient node.");
+        var lightingMeasurement = lightingNodeViewModel.SurfaceMeasurement;
         var tieredNodeSurfaceOk =
-            lightingNodeTier.Key == "parameter-editors"
-            && lightingNodeTier.MinWidth == 420d
-            && lightingNodeTier.MinHeight == 250d
-            && lightingNodeTier.ShowsSection(NodeSurfaceSectionKeys.ParameterRail)
-            && lightingNodeTier.ShowsSection(NodeSurfaceSectionKeys.ParameterEditors)
+            lightingNodeTier.Key == "details"
+            && !lightingNodeTier.ShowsSection(NodeSurfaceSectionKeys.ParameterRail)
+            && lightingMeasurement.OptionalParameterCount == 3
+            && lightingMeasurement.HeightToRevealAdditionalInputs > lightingNodeViewModel.Height
+            && lightingMeasurement.WidthToRevealInlineEditors > lightingNodeViewModel.Width
+            && shell.Editor.TrySetNodeSize(
+                lightingNodeViewModel,
+                new GraphSize(
+                    lightingMeasurement.WidthToRevealInlineEditors,
+                    lightingMeasurement.HeightToRevealAdditionalInputs),
+                updateStatus: false)
+            && shell.Editor.Session.Queries.GetNodeSurfaceSnapshots()
+                .Single(snapshot => string.Equals(snapshot.NodeId, "light", StringComparison.Ordinal))
+                .ActiveTier.Key == "parameter-editors"
             && terrainGroup is not null
             && terrainGroup.NodeIds.Count == 2
             && shell.Editor.HasIncomingConnection(lightingNode, pulsePort)

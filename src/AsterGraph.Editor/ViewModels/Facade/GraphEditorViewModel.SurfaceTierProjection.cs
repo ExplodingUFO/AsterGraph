@@ -10,8 +10,8 @@ public sealed partial class GraphEditorViewModel
     {
         ArgumentNullException.ThrowIfNull(node);
 
-        ApplyNodeSurfaceTier(node);
         _presentationLocalizationCoordinator.ApplyNodePresentation(node);
+        ApplyNodeSurfaceTier(node);
     }
 
     internal void FinalizeNodeViewProjection(NodeViewModel node)
@@ -26,6 +26,7 @@ public sealed partial class GraphEditorViewModel
         foreach (var node in Nodes)
         {
             ApplyNodeSurfaceTier(node);
+            ApplyNodeParameterEndpoints(node);
         }
     }
 
@@ -33,30 +34,40 @@ public sealed partial class GraphEditorViewModel
     {
         ArgumentNullException.ThrowIfNull(node);
 
-        var definition = node.DefinitionId is not null && _nodeCatalog.TryGetDefinition(node.DefinitionId, out var resolvedDefinition)
-            ? resolvedDefinition
-            : null;
+        var (definition, _, measurement) = ResolveNodeSurfacePlan(node);
         return GraphEditorNodeSurfaceTierResolver.ResolveActiveTier(
             new Core.Models.GraphSize(node.Width, node.Height),
             BehaviorOptions,
-            definition);
+            definition,
+            measurement);
     }
 
     private void ApplyNodeSurfaceTier(NodeViewModel node)
-        => node.UpdateActiveSurfaceTier(ResolveNodeSurfaceTier(node));
+    {
+        var (_, _, measurement) = ResolveNodeSurfacePlan(node);
+        node.UpdateSurfaceMeasurement(measurement);
+        node.UpdateActiveSurfaceTier(ResolveNodeSurfaceTier(node));
+    }
 
     private void ApplyNodeParameterEndpoints(NodeViewModel node)
     {
-        var definition = node.DefinitionId is not null && _nodeCatalog.TryGetDefinition(node.DefinitionId, out var resolvedDefinition)
-            ? resolvedDefinition
-            : null;
+        var (definition, _, measurement) = ResolveNodeSurfacePlan(node);
         if (definition is null || definition.Parameters.Count == 0)
         {
             node.UpdateParameterEndpoints([]);
             return;
         }
 
+        var revealsOptionalParameters = node.Height >= measurement.HeightToRevealAdditionalInputs;
         var endpoints = definition.Parameters
+            .Where(parameter =>
+            {
+                var connection = Connections.FirstOrDefault(candidate =>
+                    candidate.TargetKind == GraphConnectionTargetKind.Parameter
+                    && string.Equals(candidate.TargetNodeId, node.Id, StringComparison.Ordinal)
+                    && string.Equals(candidate.TargetPortId, parameter.Key, StringComparison.Ordinal));
+                return parameter.IsRequired || revealsOptionalParameters || connection is not null;
+            })
             .Select(parameter =>
             {
                 var connection = Connections.FirstOrDefault(candidate =>
@@ -79,6 +90,16 @@ public sealed partial class GraphEditorViewModel
             .ToList();
 
         node.UpdateParameterEndpoints(endpoints);
+    }
+
+    private (INodeDefinition? Definition, GraphEditorNodeSurfaceContentPlan Plan, GraphEditorNodeSurfaceMeasurement Measurement) ResolveNodeSurfacePlan(NodeViewModel node)
+    {
+        var definition = node.DefinitionId is not null && _nodeCatalog.TryGetDefinition(node.DefinitionId, out var resolvedDefinition)
+            ? resolvedDefinition
+            : null;
+        var plan = GraphEditorNodeSurfacePlanner.Create(node, definition);
+        var measurement = GraphEditorNodeSurfaceMeasurer.Measure(plan);
+        return (definition, plan, measurement);
     }
 
     private string ResolveConnectionSourceDisplay(ConnectionViewModel connection)

@@ -144,8 +144,19 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
         mainBody.Children.Add(description);
 
         var inputs = BuildPortPanel(context, node.Inputs, isInput: true, portAnchors);
-        Grid.SetRow(inputs, 1);
-        mainBody.Children.Add(inputs);
+        var parameterEndpointStack = new StackPanel
+        {
+            Spacing = 8,
+        };
+        var inputColumn = new StackPanel
+        {
+            Spacing = nodeStyle.BodyRowSpacing,
+            HorizontalAlignment = HorizontalAlignment.Left,
+        };
+        inputColumn.Children.Add(inputs);
+        inputColumn.Children.Add(parameterEndpointStack);
+        Grid.SetRow(inputColumn, 1);
+        mainBody.Children.Add(inputColumn);
 
         var outputs = BuildPortPanel(context, node.Outputs, isInput: false, portAnchors);
         Grid.SetRow(outputs, 1);
@@ -275,6 +286,7 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
             description,
             badgePanel,
             contentGrid,
+            parameterEndpointStack,
             parameterRail,
             parameterRailStack,
             connectionTargetAnchors,
@@ -355,17 +367,29 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
             ToolTip.SetTip(state.StatusBar, null);
         }
 
+        UpdateParameterEndpointRows(state, context);
         UpdateParameterRail(state, context, nodeStyle);
         state.Border.Height = ResolveRenderedNodeHeight(node, state.StatusBar.IsVisible);
+    }
+
+    private static void UpdateParameterEndpointRows(DefaultNodeVisualState state, GraphNodeVisualContext context)
+    {
+        var node = context.Node;
+        state.ConnectionTargetAnchors.Clear();
+        state.ParameterEndpointStack.Children.Clear();
+
+        foreach (var endpoint in node.ParameterEndpoints)
+        {
+            state.ParameterEndpointStack.Children.Add(CreateParameterEndpointButton(context, endpoint, state.ConnectionTargetAnchors));
+        }
     }
 
     private static void UpdateParameterRail(DefaultNodeVisualState state, GraphNodeVisualContext context, NodeCardStyleOptions nodeStyle)
     {
         var node = context.Node;
-        var railVisible = node.HasParameterEndpoints && node.ActiveSurfaceTier.ShowsSection(NodeSurfaceSectionKeys.ParameterRail);
+        var railVisible = node.ParameterEndpoints.Count > 0 && node.ActiveSurfaceTier.ShowsSection(NodeSurfaceSectionKeys.ParameterRail);
         var editorsVisible = railVisible && node.ActiveSurfaceTier.ShowsSection(NodeSurfaceSectionKeys.ParameterEditors);
 
-        state.ConnectionTargetAnchors.Clear();
         state.ParameterRailStack.Children.Clear();
         state.ParameterRail.IsVisible = railVisible;
         state.ContentGrid.ColumnDefinitions = railVisible
@@ -384,42 +408,74 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
 
         foreach (var endpoint in node.ParameterEndpoints)
         {
-            var section = new StackPanel { Spacing = 6 };
-            var headerButton = CreateParameterEndpointButton(context, endpoint, state.ConnectionTargetAnchors);
-            section.Children.Add(headerButton);
-
-            if (editorsVisible)
-            {
-                if (endpoint.IsConnected)
-                {
-                    section.Children.Add(CreateConnectedParameterBinding(context, endpoint));
-                }
-                else
-                {
-                    var editorHost = new NodeParameterEditorHost
-                    {
-                        Parameter = endpoint.Parameter,
-                        NodeParameterEditorRegistry = context.NodeParameterEditorRegistry,
-                        Usage = NodeParameterEditorUsage.NodeSurface,
-                    };
-                    AutomationProperties.SetName(editorHost, $"{node.Title} parameter editor {endpoint.Parameter.DisplayName}");
-                    section.Children.Add(editorHost);
-
-                    if (endpoint.Parameter.HasHelpText)
-                    {
-                        section.Children.Add(new TextBlock
-                        {
-                            Text = endpoint.Parameter.HelpText,
-                            FontSize = 10,
-                            TextWrapping = TextWrapping.Wrap,
-                            Foreground = BrushFactory.Solid(nodeStyle.SubtitleTextHex, 0.72),
-                        });
-                    }
-                }
-            }
-
-            state.ParameterRailStack.Children.Add(section);
+            state.ParameterRailStack.Children.Add(CreateParameterRailSection(context, endpoint, nodeStyle, editorsVisible));
         }
+    }
+
+    private static Control CreateParameterRailSection(
+        GraphNodeVisualContext context,
+        NodeParameterEndpointViewModel endpoint,
+        NodeCardStyleOptions nodeStyle,
+        bool editorsVisible)
+    {
+        var header = new TextBlock
+        {
+            Text = endpoint.Parameter.DisplayName,
+            FontSize = 12,
+            FontWeight = FontWeight.SemiBold,
+            Foreground = BrushFactory.Solid("#F1F7FA", 0.98),
+        };
+
+        if (!editorsVisible)
+        {
+            return new StackPanel
+            {
+                Spacing = 6,
+                Children =
+                {
+                    header,
+                    new TextBlock
+                    {
+                        Text = endpoint.IsConnected
+                            ? endpoint.ConnectedDisplayText ?? "Connected"
+                            : DescribeParameterValue(endpoint.Parameter),
+                        FontSize = 10,
+                        TextWrapping = TextWrapping.Wrap,
+                        Foreground = BrushFactory.Solid("#A5C3CE", 0.92),
+                    },
+                },
+            };
+        }
+
+        var section = new StackPanel { Spacing = 6 };
+        section.Children.Add(header);
+        if (endpoint.IsConnected)
+        {
+            section.Children.Add(CreateConnectedParameterBinding(context, endpoint));
+            return section;
+        }
+
+        var editorHost = new NodeParameterEditorHost
+        {
+            Parameter = endpoint.Parameter,
+            NodeParameterEditorRegistry = context.NodeParameterEditorRegistry,
+            Usage = NodeParameterEditorUsage.NodeSurface,
+        };
+        AutomationProperties.SetName(editorHost, $"{context.Node.Title} parameter editor {endpoint.Parameter.DisplayName}");
+        section.Children.Add(editorHost);
+
+        if (endpoint.Parameter.HasHelpText)
+        {
+            section.Children.Add(new TextBlock
+            {
+                Text = endpoint.Parameter.HelpText,
+                FontSize = 10,
+                TextWrapping = TextWrapping.Wrap,
+                Foreground = BrushFactory.Solid(nodeStyle.SubtitleTextHex, 0.72),
+            });
+        }
+
+        return section;
     }
 
     private static Button CreateParameterEndpointButton(
@@ -538,7 +594,7 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
 
     private static double ResolveMinimumChromeHeight(NodeViewModel node)
     {
-        var visiblePortRows = Math.Max(Math.Max(node.Inputs.Count, node.Outputs.Count), 1);
+        var visiblePortRows = Math.Max(Math.Max(node.Inputs.Count + node.ParameterEndpoints.Count, node.Outputs.Count), 1);
         return MinimumNodeChromeHeight + (Math.Max(0, visiblePortRows - 1) * AdditionalPortRowHeight);
     }
 
@@ -747,6 +803,7 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
         TextBlock Description,
         StackPanel BadgePanel,
         Grid ContentGrid,
+        StackPanel ParameterEndpointStack,
         Border ParameterRail,
         StackPanel ParameterRailStack,
         Dictionary<GraphConnectionTargetRef, Control> ConnectionTargetAnchors,

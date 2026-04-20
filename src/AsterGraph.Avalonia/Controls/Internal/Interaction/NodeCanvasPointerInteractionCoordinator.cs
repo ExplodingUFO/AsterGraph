@@ -35,9 +35,6 @@ internal readonly record struct NodeCanvasPointerPressedResult(bool Handled, boo
 
 internal sealed class NodeCanvasPointerInteractionCoordinator
 {
-    private const double MinimumNodeWidth = 180d;
-    private const double MinimumNodeHeight = 172d;
-    private const double AdditionalPortRowHeight = 34d;
     private readonly INodeCanvasPointerInteractionHost _host;
 
     public NodeCanvasPointerInteractionCoordinator(INodeCanvasPointerInteractionHost host)
@@ -256,10 +253,11 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
         var delta = currentScreenPosition - resizeStart;
         var deltaX = delta.X / _host.ViewModel.Zoom;
         var deltaY = delta.Y / _host.ViewModel.Zoom;
-        var minimumHeight = ResolveMinimumNodeHeight(node);
+        var minimumWidth = node.SurfaceMeasurement.BaselineSize.Width;
+        var minimumHeight = node.SurfaceMeasurement.BaselineSize.Height;
 
         var nextWidth = resizeSession.HandleKind is GraphNodeResizeHandleKind.Right or GraphNodeResizeHandleKind.BottomRight
-            ? Math.Max(MinimumNodeWidth, resizeSession.OriginSize.Width + deltaX)
+            ? Math.Max(minimumWidth, resizeSession.OriginSize.Width + deltaX)
             : resizeSession.OriginSize.Width;
         var nextHeight = resizeSession.HandleKind is GraphNodeResizeHandleKind.Bottom or GraphNodeResizeHandleKind.BottomRight
             ? Math.Max(minimumHeight, resizeSession.OriginSize.Height + deltaY)
@@ -346,12 +344,6 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
         }
 
         return changed;
-    }
-
-    private static double ResolveMinimumNodeHeight(NodeViewModel node)
-    {
-        var visiblePortRows = Math.Max(Math.Max(node.Inputs.Count, node.Outputs.Count), 1);
-        return MinimumNodeHeight + (Math.Max(0, visiblePortRows - 1) * AdditionalPortRowHeight);
     }
 
     private static GraphSize ResolveMinimumGroupSize(GraphEditorNodeGroupSnapshot group)

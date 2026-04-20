@@ -11,6 +11,7 @@ using AsterGraph.Core.Models;
 using AsterGraph.Demo;
 using AsterGraph.Demo.ViewModels;
 using AsterGraph.Demo.Views;
+using AsterGraph.Editor.ViewModels;
 using AsterGraph.Editor.Plugins;
 using Xunit;
 
@@ -205,8 +206,11 @@ public sealed class DemoCapabilityShowcaseTests
                 && group.Size == new GraphSize(292, 446)
                 && group.ExtraPadding == default);
         var lightSurface = Assert.Single(viewModel.Editor.Session.Queries.GetNodeSurfaceSnapshots(), snapshot => snapshot.NodeId == "light");
+        var lightNode = Assert.IsType<NodeViewModel>(viewModel.Editor.FindNode("light"));
         Assert.Equal(GraphNodeExpansionState.Collapsed, lightSurface.ExpansionState);
-        Assert.Equal("parameter-editors", lightSurface.ActiveTier.Key);
+        Assert.Equal("details", lightSurface.ActiveTier.Key);
+        Assert.True(lightNode.SurfaceMeasurement.HeightToRevealAdditionalInputs > lightNode.Height);
+        Assert.True(lightNode.SurfaceMeasurement.WidthToRevealInlineEditors > lightNode.Width);
         Assert.Contains(
             canvas!.GetVisualDescendants().OfType<Border>(),
             border => string.Equals(
