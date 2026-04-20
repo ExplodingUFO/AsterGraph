@@ -119,6 +119,52 @@ public sealed class GraphEditorNodeSurfaceContractsTests
     }
 
     [Fact]
+    public void PortDefinition_LegacyInlineParameterKeyContract_RemainsAvailable()
+    {
+        var port = new PortDefinition(
+            "input",
+            "Input",
+            new PortTypeId("float"),
+            "#F3B36B",
+            "Legacy compatibility check",
+            " gain ");
+
+        Assert.Equal("gain", port.InlineParameterKey);
+    }
+
+    [Fact]
+    public void GraphEditorNodeSurfaceSnapshot_LegacyPositionalShape_RemainsAvailable()
+    {
+        var snapshot = new GraphEditorNodeSurfaceSnapshot(
+            NodeId,
+            new GraphSize(240d, 160d),
+            GraphNodeExpansionState.Collapsed,
+            "group-001");
+
+        var (nodeId, size, expansionState, groupId) = snapshot;
+
+        Assert.Equal(NodeId, nodeId);
+        Assert.Equal(new GraphSize(240d, 160d), size);
+        Assert.Equal(GraphNodeExpansionState.Collapsed, expansionState);
+        Assert.Equal("group-001", groupId);
+        Assert.False(string.IsNullOrWhiteSpace(snapshot.ActiveTier.Key));
+
+        var explicitTier = new GraphEditorNodeSurfaceTierSnapshot(
+            "parameter-editors",
+            420d,
+            250d,
+            [NodeSurfaceSectionKeys.Description, NodeSurfaceSectionKeys.ParameterRail, NodeSurfaceSectionKeys.ParameterEditors]);
+        var snapshotWithTier = new GraphEditorNodeSurfaceSnapshot(
+            NodeId,
+            new GraphSize(430d, 260d),
+            explicitTier,
+            GraphNodeExpansionState.Collapsed,
+            "group-002");
+
+        Assert.Equal("parameter-editors", snapshotWithTier.ActiveTier.Key);
+    }
+
+    [Fact]
     public void SessionCommands_TrySetNodeWidth_PersistsUndoableSurfaceMutation()
     {
         var session = CreateSession();
