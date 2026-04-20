@@ -435,7 +435,8 @@ internal sealed class NodeCanvasSceneHost
             _host.ActivatePort,
             (targetNode, target) => editor.ActivateConnectionTarget(targetNode, target),
             _host.ContextMenuCoordinator.OpenNodeContextMenu,
-            _host.ContextMenuCoordinator.OpenPortContextMenu);
+            _host.ContextMenuCoordinator.OpenPortContextMenu,
+            ResolveInlineParameter);
     }
 
     private NodeCanvasConnectionSceneContext CreateConnectionSceneContext()
@@ -458,4 +459,20 @@ internal sealed class NodeCanvasSceneHost
               ?? GraphEditorStyleOptions.Default.Connection
             : _host.ViewModel?.StyleOptions.Connection
               ?? GraphEditorStyleOptions.Default.Connection;
+
+    private NodeParameterViewModel? ResolveInlineParameter(NodeViewModel node, PortViewModel port)
+    {
+        var editor = _host.ViewModel;
+        if (editor is null
+            || port.Direction != PortDirection.Input
+            || string.IsNullOrWhiteSpace(port.InlineParameterKey)
+            || !ReferenceEquals(editor.SelectedNode, node)
+            || editor.HasMultipleSelection)
+        {
+            return null;
+        }
+
+        return editor.SelectedNodeParameters.FirstOrDefault(parameter =>
+            string.Equals(parameter.Key, port.InlineParameterKey, StringComparison.Ordinal));
+    }
 }

@@ -1,6 +1,9 @@
+using Avalonia.Controls;
+using Avalonia.Input;
 using AsterGraph.Abstractions.Catalog;
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
+using AsterGraph.Avalonia.Presentation;
 using AsterGraph.Core.Compatibility;
 using AsterGraph.Core.Models;
 using AsterGraph.Core.Serialization;
@@ -8,6 +11,7 @@ using AsterGraph.Editor.Configuration;
 using AsterGraph.Editor.Catalog;
 using AsterGraph.Editor.Hosting;
 using AsterGraph.Editor.Runtime;
+using AsterGraph.Editor.ViewModels;
 using Xunit;
 
 namespace AsterGraph.Editor.Tests;
@@ -130,6 +134,7 @@ public sealed class GraphEditorNodeSurfaceContractsTests
             " gain ");
 
         Assert.Equal("gain", port.InlineParameterKey);
+        Assert.Equal("gain", new PortViewModel(new GraphPort("input", "Input", PortDirection.Input, "float", "#F3B36B", new PortTypeId("float"), "gain"), 0, 1).InlineParameterKey);
     }
 
     [Fact]
@@ -162,6 +167,29 @@ public sealed class GraphEditorNodeSurfaceContractsTests
             "group-002");
 
         Assert.Equal("parameter-editors", snapshotWithTier.ActiveTier.Key);
+    }
+
+    [Fact]
+    public void GraphNodeVisualContext_LegacyPresenterConstructor_RemainsAvailable()
+    {
+        var constructor = typeof(GraphNodeVisualContext).GetConstructor(
+        [
+            typeof(GraphEditorViewModel),
+            typeof(NodeViewModel),
+            typeof(AsterGraph.Abstractions.Styling.GraphEditorStyleOptions),
+            typeof(Action),
+            typeof(Action<NodeViewModel, PointerPressedEventArgs>),
+            typeof(Func<NodeViewModel, double, bool, bool>),
+            typeof(Func<NodeViewModel, GraphNodeExpansionState, bool>),
+            typeof(Func<NodeViewModel, PortViewModel, bool>),
+            typeof(Func<NodeViewModel, PortViewModel, NodeParameterViewModel?>),
+            typeof(Action<NodeViewModel, PortViewModel>),
+            typeof(Func<Control, NodeViewModel, ContextRequestedEventArgs, bool>),
+            typeof(Func<Control, NodeViewModel, PortViewModel, ContextRequestedEventArgs, bool>),
+        ]);
+
+        Assert.NotNull(constructor);
+        Assert.NotNull(typeof(GraphNodeVisualContext).GetProperty(nameof(GraphNodeVisualContext.ResolveInlineParameter)));
     }
 
     [Fact]

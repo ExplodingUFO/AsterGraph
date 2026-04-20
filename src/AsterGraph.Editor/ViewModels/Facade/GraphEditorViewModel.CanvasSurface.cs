@@ -156,6 +156,28 @@ public sealed partial class GraphEditorViewModel
     }
 
     /// <summary>
+    /// Resolves the shared inline-parameter editor bound to one input port when the node is the primary single selection.
+    /// Retained for compatibility with custom presenters still consuming the legacy seam.
+    /// </summary>
+    [Obsolete("Compatibility-only retained helper. Prefer node.ParameterEndpoints for hosted parameter rails, or Session.Queries.GetNodeSurfaceSnapshots() plus Session.Commands.TrySetNodeParameterValue(...) for canonical runtime-driven parameter authoring.")]
+    public NodeParameterViewModel? ResolveInlineParameter(NodeViewModel node, PortViewModel port)
+    {
+        ArgumentNullException.ThrowIfNull(node);
+        ArgumentNullException.ThrowIfNull(port);
+
+        if (port.Direction != PortDirection.Input
+            || string.IsNullOrWhiteSpace(port.InlineParameterKey)
+            || !ReferenceEquals(SelectedNode, node)
+            || HasMultipleSelection)
+        {
+            return null;
+        }
+
+        return SelectedNodeParameters.FirstOrDefault(parameter =>
+            string.Equals(parameter.Key, port.InlineParameterKey, StringComparison.Ordinal));
+    }
+
+    /// <summary>
     /// 将屏幕坐标转换为当前视口下的世界坐标。
     /// </summary>
     /// <param name="screen">待转换的屏幕坐标。</param>
