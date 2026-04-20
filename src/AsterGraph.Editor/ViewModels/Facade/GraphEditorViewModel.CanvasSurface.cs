@@ -123,6 +123,15 @@ public sealed partial class GraphEditorViewModel
     }
 
     /// <summary>
+    /// Attempts to persist one group's fixed frame position and size as a single layout mutation.
+    /// </summary>
+    public bool TrySetNodeGroupFrame(string groupId, GraphPoint position, GraphSize size, bool updateStatus = true)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(groupId);
+        return _sessionHost.TrySetNodeGroupFrame(groupId, position, size, updateStatus);
+    }
+
+    /// <summary>
     /// Attempts to update one group's persisted per-edge padding envelope.
     /// </summary>
     [Obsolete("Compatibility-only retained helper. Prefer fixed-frame group edits through Session.Commands.TrySetNodeGroupSize(...) and Session.Commands.TrySetNodeGroupPosition(...), then inspect Session.Queries.GetNodeGroupSnapshots() for canonical persisted bounds.")]
@@ -153,28 +162,6 @@ public sealed partial class GraphEditorViewModel
             connection.TargetKind == GraphConnectionTargetKind.Port
             && string.Equals(connection.TargetNodeId, node.Id, StringComparison.Ordinal)
             && string.Equals(connection.TargetPortId, port.Id, StringComparison.Ordinal));
-    }
-
-    /// <summary>
-    /// Resolves the shared inline-parameter editor bound to one input port when the node is the primary single selection.
-    /// Retained for compatibility with custom presenters still consuming the legacy seam.
-    /// </summary>
-    [Obsolete("Compatibility-only retained helper. Prefer node.ParameterEndpoints for hosted parameter rails, or Session.Queries.GetNodeSurfaceSnapshots() plus Session.Commands.TrySetNodeParameterValue(...) for canonical runtime-driven parameter authoring.")]
-    public NodeParameterViewModel? ResolveInlineParameter(NodeViewModel node, PortViewModel port)
-    {
-        ArgumentNullException.ThrowIfNull(node);
-        ArgumentNullException.ThrowIfNull(port);
-
-        if (port.Direction != PortDirection.Input
-            || string.IsNullOrWhiteSpace(port.InlineParameterKey)
-            || !ReferenceEquals(SelectedNode, node)
-            || HasMultipleSelection)
-        {
-            return null;
-        }
-
-        return SelectedNodeParameters.FirstOrDefault(parameter =>
-            string.Equals(parameter.Key, port.InlineParameterKey, StringComparison.Ordinal));
     }
 
     /// <summary>

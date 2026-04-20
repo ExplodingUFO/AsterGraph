@@ -25,6 +25,7 @@ public static class AsterGraphCanvasViewFactory
             NodeVisualPresenter = options.Presentation?.NodeVisualPresenter,
             ContextMenuPresenter = options.Presentation?.ContextMenuPresenter,
             NodeParameterEditorRegistry = options.Presentation?.NodeParameterEditorRegistry,
+            ResizeFeedbackPolicy = options.Presentation?.ResizeFeedbackPolicy,
         };
     }
 }

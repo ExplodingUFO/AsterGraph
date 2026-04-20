@@ -26,10 +26,10 @@ internal static class GraphEditorNodeSurfaceMeasurer
             Math.Max(
                 plan.PreferredWidth,
                 ResolveBaselineWidth(plan)));
-        var summaryWidth = plan.SupportsParameterSummaries
+        var summaryWidth = plan.SupportsInputSummaries
             ? Math.Max(MinimumSummaryDisclosureWidth, baselineWidth + SummaryWidthDelta)
             : double.PositiveInfinity;
-        var editorWidth = plan.SupportsInlineEditors
+        var editorWidth = plan.SupportsInputEditors
             ? Math.Max(MinimumInlineEditorDisclosureWidth, Math.Max(summaryWidth + InlineEditorWidthDelta, baselineWidth))
             : double.PositiveInfinity;
 
@@ -40,8 +40,8 @@ internal static class GraphEditorNodeSurfaceMeasurer
             editorWidth,
             plan.RequiredParameters.Count,
             plan.OptionalParameters.Count,
-            plan.SupportsParameterSummaries,
-            plan.SupportsInlineEditors);
+            plan.SupportsInputSummaries,
+            plan.SupportsInputEditors);
     }
 
     private static double ResolveBaselineWidth(GraphEditorNodeSurfaceContentPlan plan)

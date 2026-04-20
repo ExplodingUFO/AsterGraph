@@ -190,6 +190,8 @@ public partial class NodeCanvas
 
         public IReadOnlyList<NodeViewModel> Nodes => _owner.ViewModel?.Nodes ?? [];
 
+        public IReadOnlyList<GraphEditorNodeGroupSnapshot> GroupSnapshots => _owner.ViewModel?.GetNodeGroupSnapshots() ?? [];
+
         public IReadOnlyList<NodeViewModel> SelectedNodes => _owner.ViewModel?.SelectedNodes ?? [];
 
         public NodeViewModel? SelectedNode => _owner.ViewModel?.SelectedNode;
@@ -279,6 +281,9 @@ public partial class NodeCanvas
         public void RenderConnections()
             => _owner.RenderConnections();
 
+        public void UpdateNodeVisual(NodeViewModel node)
+            => _owner.UpdateNodeVisual(node);
+
         public void UpdateGroupVisuals()
             => _owner.UpdateGroupVisuals();
 
@@ -287,6 +292,46 @@ public partial class NodeCanvas
 
         public GraphPoint ApplyDragAssist(NodeCanvasDragSession dragSession, double deltaX, double deltaY)
             => _owner.ApplyDragAssist(dragSession, deltaX, deltaY);
+
+        public NodeCanvasGroupResizePreview ApplyGroupResizeAssist(
+            GraphEditorNodeGroupSnapshot group,
+            NodeCanvasGroupResizeEdge edge,
+            GraphPoint proposedPosition,
+            GraphSize proposedSize,
+            GraphSize minimumSize)
+            => _owner.ApplyGroupResizeAssist(group, edge, proposedPosition, proposedSize, minimumSize);
+
+        public void UpdateResizeFeedback(Point currentScreenPosition)
+            => _owner.UpdateResizeFeedback(currentScreenPosition);
+
+        public void ClearResizeFeedback()
+            => _owner.ClearResizeFeedback();
+    }
+
+    private sealed class NodeCanvasResizeFeedbackHost : INodeCanvasResizeFeedbackHost
+    {
+        private readonly NodeCanvas _owner;
+
+        public NodeCanvasResizeFeedbackHost(NodeCanvas owner)
+        {
+            _owner = owner ?? throw new ArgumentNullException(nameof(owner));
+        }
+
+        public GraphEditorViewModel? ViewModel => _owner.ViewModel;
+
+        public Control Root => _owner;
+
+        public Canvas? NodeLayer => _owner._nodeLayer;
+
+        public Canvas? GroupLayer => _owner._groupLayer;
+
+        public IReadOnlyDictionary<Control, NodeViewModel> ResizeFeedbackNodeSurfaces => _owner._resizeFeedbackNodesBySurface;
+
+        public IReadOnlyDictionary<Border, string> ResizeFeedbackGroupSurfaces => _owner._resizeFeedbackGroupsBySurface;
+
+        public IReadOnlyDictionary<string, GraphEditorNodeGroupSnapshot> ResizeFeedbackGroupSnapshots => _owner._resizeFeedbackGroupSnapshots;
+
+        public IGraphResizeFeedbackPolicy? ResizeFeedbackPolicy => _owner.ResizeFeedbackPolicy;
     }
 
     private sealed class NodeCanvasWheelInteractionHost : INodeCanvasWheelInteractionHost

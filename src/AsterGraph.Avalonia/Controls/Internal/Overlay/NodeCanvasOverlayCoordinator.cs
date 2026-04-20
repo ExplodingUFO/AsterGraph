@@ -6,6 +6,7 @@ using AsterGraph.Avalonia.Styling;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Configuration;
 using AsterGraph.Editor.Geometry;
+using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.ViewModels;
 
 namespace AsterGraph.Avalonia.Controls.Internal;
@@ -19,6 +20,8 @@ internal interface INodeCanvasOverlayHost
     double Zoom { get; }
 
     IReadOnlyList<NodeViewModel> Nodes { get; }
+
+    IReadOnlyList<GraphEditorNodeGroupSnapshot> GroupSnapshots { get; }
 
     IReadOnlyList<NodeViewModel> SelectedNodes { get; }
 
@@ -150,20 +153,11 @@ internal sealed class NodeCanvasOverlayCoordinator
         }
 
         var tolerance = behavior.SnapTolerance / Math.Max(_host.Zoom, 0.001);
-        IEnumerable<NodeBounds> candidateBounds = [];
-        if (behavior.EnableAlignmentGuides)
-        {
-            var movingNodeIds = dragSession.Nodes.Select(node => node.Id).ToHashSet(StringComparer.Ordinal);
-            candidateBounds = _host.Nodes
-                .Where(node => !movingNodeIds.Contains(node.Id))
-                .Select(node => new NodeBounds(node.X, node.Y, node.Width, node.Height));
-        }
-
         var result = NodeCanvasDragAssistCalculator.Calculate(
             dragSession.OriginBounds,
             deltaX,
             deltaY,
-            candidateBounds,
+            ResolveDragCandidateBounds(dragSession),
             behavior.EnableGridSnapping,
             behavior.EnableAlignmentGuides,
             style.PrimaryGridSpacing,
@@ -171,6 +165,44 @@ internal sealed class NodeCanvasOverlayCoordinator
 
         ShowGuideAdorners(result.GuideWorldX, result.GuideWorldY);
         return result.AdjustedDelta;
+    }
+
+    public NodeCanvasGroupResizePreview ApplyGroupResizeAssist(
+        GraphEditorNodeGroupSnapshot group,
+        NodeCanvasGroupResizeEdge edge,
+        GraphPoint proposedPosition,
+        GraphSize proposedSize,
+        GraphSize minimumSize)
+    {
+        var style = _host.StyleOptions.Canvas;
+        var behavior = _host.BehaviorOptions.DragAssist;
+        HideGuideAdorners();
+
+        if (!behavior.EnableGridSnapping && !behavior.EnableAlignmentGuides)
+        {
+            return new NodeCanvasGroupResizePreview(group.Id, proposedPosition, proposedSize);
+        }
+
+        var tolerance = behavior.SnapTolerance / Math.Max(_host.Zoom, 0.001);
+        var originBounds = new NodeBounds(group.Position.X, group.Position.Y, group.Size.Width, group.Size.Height);
+        var proposedBounds = new NodeBounds(proposedPosition.X, proposedPosition.Y, proposedSize.Width, proposedSize.Height);
+        var result = NodeCanvasDragAssistCalculator.CalculateBounds(
+            originBounds,
+            proposedBounds,
+            ResolveHorizontalMode(edge),
+            ResolveVerticalMode(edge),
+            ResolveGroupCandidateBounds(group),
+            behavior.EnableGridSnapping,
+            behavior.EnableAlignmentGuides,
+            style.PrimaryGridSpacing,
+            tolerance);
+        var adjustedBounds = EnforceMinimumBounds(result.AdjustedBounds, edge, minimumSize);
+
+        ShowGuideAdorners(result.GuideWorldX, result.GuideWorldY);
+        return new NodeCanvasGroupResizePreview(
+            group.Id,
+            new GraphPoint(adjustedBounds.X, adjustedBounds.Y),
+            new GraphSize(adjustedBounds.Width, adjustedBounds.Height));
     }
 
     public NodeCanvasDragSession CreateDragSession(IReadOnlyList<NodeViewModel> nodes)
@@ -288,5 +320,94 @@ internal sealed class NodeCanvasOverlayCoordinator
         var right = nodes.Max(node => node.X + node.Width);
         var bottom = nodes.Max(node => node.Y + node.Height);
         return new NodeBounds(left, top, right - left, bottom - top);
+    }
+
+    private IEnumerable<NodeBounds> ResolveDragCandidateBounds(NodeCanvasDragSession dragSession)
+    {
+        var movingNodeIds = dragSession.Nodes.Select(node => node.Id).ToHashSet(StringComparer.Ordinal);
+        return _host.Nodes
+            .Where(node => !movingNodeIds.Contains(node.Id))
+            .Select(node => new NodeBounds(node.X, node.Y, node.Width, node.Height));
+    }
+
+    private IEnumerable<NodeBounds> ResolveGroupCandidateBounds(GraphEditorNodeGroupSnapshot group)
+    {
+        var memberIds = group.NodeIds.ToHashSet(StringComparer.Ordinal);
+        foreach (var node in _host.Nodes)
+        {
+            if (memberIds.Contains(node.Id))
+            {
+                continue;
+            }
+
+            yield return new NodeBounds(node.X, node.Y, node.Width, node.Height);
+        }
+
+        foreach (var candidateGroup in _host.GroupSnapshots)
+        {
+            if (string.Equals(candidateGroup.Id, group.Id, StringComparison.Ordinal))
+            {
+                continue;
+            }
+
+            yield return new NodeBounds(
+                candidateGroup.Position.X,
+                candidateGroup.Position.Y,
+                candidateGroup.Size.Width,
+                candidateGroup.Size.Height);
+        }
+    }
+
+    private static NodeCanvasPlacementAxisMode ResolveHorizontalMode(NodeCanvasGroupResizeEdge edge)
+        => edge switch
+        {
+            NodeCanvasGroupResizeEdge.Left => NodeCanvasPlacementAxisMode.StartEdge,
+            NodeCanvasGroupResizeEdge.Right => NodeCanvasPlacementAxisMode.EndEdge,
+            _ => NodeCanvasPlacementAxisMode.None,
+        };
+
+    private static NodeCanvasPlacementAxisMode ResolveVerticalMode(NodeCanvasGroupResizeEdge edge)
+        => edge switch
+        {
+            NodeCanvasGroupResizeEdge.Top => NodeCanvasPlacementAxisMode.StartEdge,
+            NodeCanvasGroupResizeEdge.Bottom => NodeCanvasPlacementAxisMode.EndEdge,
+            _ => NodeCanvasPlacementAxisMode.None,
+        };
+
+    private static NodeBounds EnforceMinimumBounds(NodeBounds bounds, NodeCanvasGroupResizeEdge edge, GraphSize minimumSize)
+    {
+        var x = bounds.X;
+        var y = bounds.Y;
+        var width = bounds.Width;
+        var height = bounds.Height;
+
+        switch (edge)
+        {
+            case NodeCanvasGroupResizeEdge.Left:
+            {
+                var right = bounds.X + bounds.Width;
+                width = Math.Max(minimumSize.Width, bounds.Width);
+                x = right - width;
+                break;
+            }
+
+            case NodeCanvasGroupResizeEdge.Top:
+            {
+                var bottom = bounds.Y + bounds.Height;
+                height = Math.Max(minimumSize.Height, bounds.Height);
+                y = bottom - height;
+                break;
+            }
+
+            case NodeCanvasGroupResizeEdge.Right:
+                width = Math.Max(minimumSize.Width, bounds.Width);
+                break;
+
+            case NodeCanvasGroupResizeEdge.Bottom:
+                height = Math.Max(minimumSize.Height, bounds.Height);
+                break;
+        }
+
+        return new NodeBounds(x, y, width, height);
     }
 }

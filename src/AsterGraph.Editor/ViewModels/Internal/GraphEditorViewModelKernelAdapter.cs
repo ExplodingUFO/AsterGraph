@@ -89,6 +89,9 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
     public bool TrySetNodeGroupSize(string groupId, GraphSize size, bool updateStatus)
         => _kernel.TrySetNodeGroupSize(groupId, size, updateStatus);
 
+    public bool TrySetNodeGroupFrame(string groupId, GraphPoint position, GraphSize size, bool updateStatus)
+        => _kernel.TrySetNodeGroupFrame(groupId, position, size, updateStatus);
+
     public bool TrySetNodeGroupExtraPadding(string groupId, GraphPadding extraPadding, bool updateStatus)
         => _kernel.TrySetNodeGroupExtraPadding(groupId, extraPadding, updateStatus);
 

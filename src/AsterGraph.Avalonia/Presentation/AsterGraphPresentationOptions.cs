@@ -33,4 +33,9 @@ public sealed record AsterGraphPresentationOptions
     /// Optional registry used by shipped node-side parameter and inspector surfaces to create parameter-editor bodies.
     /// </summary>
     public INodeParameterEditorRegistry? NodeParameterEditorRegistry { get; init; }
+
+    /// <summary>
+    /// Optional host override for stock resize-hover cursor feedback.
+    /// </summary>
+    public IGraphResizeFeedbackPolicy? ResizeFeedbackPolicy { get; init; }
 }

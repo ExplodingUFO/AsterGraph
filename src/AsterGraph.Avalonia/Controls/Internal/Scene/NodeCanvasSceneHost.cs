@@ -300,7 +300,6 @@ internal sealed class NodeCanvasSceneHost
             group.Title,
             NodeCanvasGroupResizeEdge.Left,
             $"{group.Title} group left resize handle",
-            new Cursor(StandardCursorType.SizeWestEast),
             HorizontalAlignment.Left,
             VerticalAlignment.Stretch,
             width: NodeCanvasGroupChromeMetrics.ResizeHandleThickness,
@@ -310,7 +309,6 @@ internal sealed class NodeCanvasSceneHost
             group.Title,
             NodeCanvasGroupResizeEdge.Top,
             $"{group.Title} group top resize handle",
-            new Cursor(StandardCursorType.SizeNorthSouth),
             HorizontalAlignment.Stretch,
             VerticalAlignment.Top,
             width: double.NaN,
@@ -320,7 +318,6 @@ internal sealed class NodeCanvasSceneHost
             group.Title,
             NodeCanvasGroupResizeEdge.Right,
             $"{group.Title} group right resize handle",
-            new Cursor(StandardCursorType.SizeWestEast),
             HorizontalAlignment.Right,
             VerticalAlignment.Stretch,
             width: NodeCanvasGroupChromeMetrics.ResizeHandleThickness,
@@ -330,7 +327,6 @@ internal sealed class NodeCanvasSceneHost
             group.Title,
             NodeCanvasGroupResizeEdge.Bottom,
             $"{group.Title} group bottom resize handle",
-            new Cursor(StandardCursorType.SizeNorthSouth),
             HorizontalAlignment.Stretch,
             VerticalAlignment.Bottom,
             width: double.NaN,
@@ -352,24 +348,23 @@ internal sealed class NodeCanvasSceneHost
             return;
         }
 
+        var renderedGroup = ResolveRenderedGroupSnapshot(group);
         var selectedNodeIds = _host.ViewModel.SelectedNodes
             .Select(node => node.Id)
             .ToHashSet(StringComparer.Ordinal);
         var isSelected = group.NodeIds.Count > 0 && group.NodeIds.All(selectedNodeIds.Contains);
         var isDropTarget = string.Equals(_host.InteractionSession.HoveredDropGroupId, group.Id, StringComparison.Ordinal);
-        var renderedHeight = NodeCanvasGroupChromeMetrics.ResolveRenderedHeight(group);
+        var renderedHeight = NodeCanvasGroupChromeMetrics.ResolveRenderedHeight(renderedGroup);
 
-        visual.Root.Width = NodeCanvasGroupChromeMetrics.ResolveRenderedWidth(group);
+        visual.Root.Width = NodeCanvasGroupChromeMetrics.ResolveRenderedWidth(renderedGroup);
         visual.Root.Height = renderedHeight;
         visual.Root.BorderBrush = BrushFactory.Solid(
             isDropTarget ? "#F8CF6A" : isSelected ? "#7FE7D7" : "#365063",
             isDropTarget ? 0.98 : isSelected ? 0.95 : 0.72);
         visual.Root.Background = BrushFactory.Solid(
             isDropTarget ? "#2C2412" : "#0E1824",
-            isDropTarget ? 0.38 : group.IsCollapsed ? 0.72 : 0.18);
-        var renderedPosition = string.Equals(_host.InteractionSession.DragGroupId, group.Id, StringComparison.Ordinal)
-            ? _host.InteractionSession.DragGroupPreviewPosition ?? group.Position
-            : group.Position;
+            isDropTarget ? 0.38 : renderedGroup.IsCollapsed ? 0.72 : 0.18);
+        var renderedPosition = renderedGroup.Position;
         Canvas.SetLeft(visual.Root, renderedPosition.X);
         Canvas.SetTop(visual.Root, renderedPosition.Y);
 
@@ -378,7 +373,7 @@ internal sealed class NodeCanvasSceneHost
             0.96);
         visual.TitleText.Text = FormatGroupHeaderTitle(group);
         visual.TitleText.Foreground = BrushFactory.Solid(isSelected ? "#F4FFFC" : "#D8EEF3", 0.98);
-        visual.BodyBorder.IsVisible = !group.IsCollapsed;
+        visual.BodyBorder.IsVisible = !renderedGroup.IsCollapsed;
         visual.BodyBorder.Height = Math.Max(
             0d,
             renderedHeight - NodeCanvasGroupChromeMetrics.HeaderHeight - NodeCanvasGroupChromeMetrics.BottomInset);
@@ -391,7 +386,6 @@ internal sealed class NodeCanvasSceneHost
         string groupTitle,
         NodeCanvasGroupResizeEdge edge,
         string automationName,
-        Cursor cursor,
         HorizontalAlignment horizontalAlignment,
         VerticalAlignment verticalAlignment,
         double width,
@@ -404,7 +398,6 @@ internal sealed class NodeCanvasSceneHost
             VerticalAlignment = verticalAlignment,
             Width = width,
             Height = height,
-            Cursor = cursor,
         };
         AutomationProperties.SetName(thumb, automationName);
         thumb.AddHandler(
@@ -429,7 +422,14 @@ internal sealed class NodeCanvasSceneHost
         GraphEditorNodeGroupSnapshot group,
         PointerPressedEventArgs args)
     {
-        if (args.Source is Thumb || !TryResolveGroupResizeEdge(surface, group, args, out var edge))
+        if (args.Source is Thumb)
+        {
+            return false;
+        }
+
+        var point = ResolveSurfacePoint(surface, group, args);
+        if (!NodeCanvasResizeFeedbackResolver.TryResolveGroup(surface, point, out var resizeHit)
+            || resizeHit.GroupEdge is not NodeCanvasGroupResizeEdge edge)
         {
             return false;
         }
@@ -440,54 +440,6 @@ internal sealed class NodeCanvasSceneHost
 
     private static string FormatGroupHeaderTitle(GraphEditorNodeGroupSnapshot group)
         => group.Title;
-
-    private static bool TryResolveGroupResizeEdge(
-        Border surface,
-        GraphEditorNodeGroupSnapshot group,
-        PointerPressedEventArgs args,
-        out NodeCanvasGroupResizeEdge edge)
-    {
-        edge = default;
-        var point = ResolveSurfacePoint(surface, group, args);
-        var width = double.IsNaN(surface.Width) ? surface.Bounds.Width : surface.Width;
-        var height = double.IsNaN(surface.Height) ? surface.Bounds.Height : surface.Height;
-        if (width <= 0d || height <= 0d)
-        {
-            return false;
-        }
-
-        var thickness = NodeCanvasGroupChromeMetrics.ResizeHandleThickness;
-        var nearLeftEdge = point.X <= thickness;
-        var nearTopEdge = point.Y <= thickness;
-        var nearRightEdge = point.X >= width - thickness;
-        var nearBottomEdge = point.Y >= height - thickness;
-
-        if (nearLeftEdge)
-        {
-            edge = NodeCanvasGroupResizeEdge.Left;
-            return true;
-        }
-
-        if (nearTopEdge)
-        {
-            edge = NodeCanvasGroupResizeEdge.Top;
-            return true;
-        }
-
-        if (nearRightEdge)
-        {
-            edge = NodeCanvasGroupResizeEdge.Right;
-            return true;
-        }
-
-        if (nearBottomEdge)
-        {
-            edge = NodeCanvasGroupResizeEdge.Bottom;
-            return true;
-        }
-
-        return false;
-    }
 
     private static Point ResolveSurfacePoint(
         Border surface,
@@ -508,6 +460,36 @@ internal sealed class NodeCanvasSceneHost
     private GraphEditorNodeGroupSnapshot? ResolveCurrentGroupSnapshot(string groupId)
         => _host.ViewModel?.GetNodeGroupSnapshots()
             .FirstOrDefault(group => string.Equals(group.Id, groupId, StringComparison.Ordinal));
+
+    private GraphSize? ResolveNodePreviewSize(NodeViewModel node)
+        => _host.InteractionSession.NodeResizePreview is NodeCanvasNodeResizePreview preview
+           && string.Equals(preview.NodeId, node.Id, StringComparison.Ordinal)
+            ? preview.Size
+            : null;
+
+    private GraphEditorNodeGroupSnapshot ResolveRenderedGroupSnapshot(GraphEditorNodeGroupSnapshot group)
+    {
+        if (_host.InteractionSession.GroupResizePreview is NodeCanvasGroupResizePreview resizePreview
+            && string.Equals(resizePreview.GroupId, group.Id, StringComparison.Ordinal))
+        {
+            return group with
+            {
+                Position = resizePreview.Position,
+                Size = resizePreview.Size,
+            };
+        }
+
+        if (string.Equals(_host.InteractionSession.DragGroupId, group.Id, StringComparison.Ordinal)
+            && _host.InteractionSession.DragGroupPreviewPosition is GraphPoint dragPreviewPosition)
+        {
+            return group with
+            {
+                Position = dragPreviewPosition,
+            };
+        }
+
+        return group;
+    }
 
     private GraphNodeVisualContext CreateNodeVisualContext(NodeViewModel node)
     {
@@ -530,7 +512,7 @@ internal sealed class NodeCanvasSceneHost
             (targetNode, target) => editor.ActivateConnectionTarget(targetNode, target),
             _host.ContextMenuCoordinator.OpenNodeContextMenu,
             _host.ContextMenuCoordinator.OpenPortContextMenu,
-            ResolveInlineParameter);
+            surfacePreviewSize: ResolveNodePreviewSize(node));
     }
 
     private NodeCanvasConnectionSceneContext CreateConnectionSceneContext()
@@ -544,7 +526,8 @@ internal sealed class NodeCanvasSceneHost
             GetConnectionStyle,
             _host.ContextMenuCoordinator.CreateContextMenuSnapshot,
             _host.ContextMenuCoordinator.ResolveWorldPosition,
-            _host.ContextMenuCoordinator.OpenContextMenu);
+            _host.ContextMenuCoordinator.OpenContextMenu,
+            ResolveNodePreviewSize);
 
     private ConnectionStyleOptions GetConnectionStyle(ConnectionViewModel connection)
         => connection.ConversionId is not null
@@ -554,19 +537,4 @@ internal sealed class NodeCanvasSceneHost
             : _host.ViewModel?.StyleOptions.Connection
               ?? GraphEditorStyleOptions.Default.Connection;
 
-    private NodeParameterViewModel? ResolveInlineParameter(NodeViewModel node, PortViewModel port)
-    {
-        var editor = _host.ViewModel;
-        if (editor is null
-            || port.Direction != PortDirection.Input
-            || string.IsNullOrWhiteSpace(port.InlineParameterKey)
-            || !ReferenceEquals(editor.SelectedNode, node)
-            || editor.HasMultipleSelection)
-        {
-            return null;
-        }
-
-        return editor.SelectedNodeParameters.FirstOrDefault(parameter =>
-            string.Equals(parameter.Key, port.InlineParameterKey, StringComparison.Ordinal));
-    }
 }

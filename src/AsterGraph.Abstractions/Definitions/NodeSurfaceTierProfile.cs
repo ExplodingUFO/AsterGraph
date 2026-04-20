@@ -40,22 +40,22 @@ public sealed record NodeSurfaceTierProfile
             minWidth: 220d,
             minHeight: 150d),
         new NodeSurfaceTierDefinition(
-            "parameter-rail",
+            "input-summaries",
             minWidth: 320d,
             minHeight: 210d,
             visibleSectionKeys:
             [
-                NodeSurfaceSectionKeys.ParameterRail,
+                NodeSurfaceSectionKeys.InputSummaries,
             ]),
         new NodeSurfaceTierDefinition(
-            "parameter-editors",
+            "input-editors",
             minWidth: 420d,
             minHeight: 250d,
             visibleSectionKeys:
             [
                 NodeSurfaceSectionKeys.Description,
-                NodeSurfaceSectionKeys.ParameterRail,
-                NodeSurfaceSectionKeys.ParameterEditors,
+                NodeSurfaceSectionKeys.InputSummaries,
+                NodeSurfaceSectionKeys.InputEditors,
             ]),
     ]);
 

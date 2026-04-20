@@ -12,6 +12,8 @@ public sealed partial class NodeViewModel : ObservableObject
 {
     private readonly Dictionary<string, GraphParameterValue> _parameterValues;
     private readonly ObservableCollection<NodeParameterEndpointViewModel> _parameterEndpoints = [];
+    private readonly ObservableCollection<NodeSurfaceInputRowViewModel> _inputRows = [];
+    private readonly ReadOnlyObservableCollection<NodeSurfaceInputRowViewModel> _readOnlyInputRows;
 
     /// <summary>
     /// 由不可变节点模型快照初始化节点运行时投影。
@@ -19,6 +21,8 @@ public sealed partial class NodeViewModel : ObservableObject
     /// <param name="model">节点模型快照。</param>
     public NodeViewModel(GraphNode model)
     {
+        _readOnlyInputRows = new ReadOnlyObservableCollection<NodeSurfaceInputRowViewModel>(_inputRows);
+
         var normalizedSize = GraphEditorNodeSurfaceMetrics.NormalizePersistedSize(
             model.Size,
             model.Inputs.Count,
@@ -156,8 +160,8 @@ public sealed partial class NodeViewModel : ObservableObject
     /// Indicates whether the active tier exposes parameter authoring affordances.
     /// </summary>
     public bool AllowsParameterAuthoring
-        => ActiveSurfaceTier.ShowsSection(AsterGraph.Abstractions.Definitions.NodeSurfaceSectionKeys.ParameterRail)
-           || ActiveSurfaceTier.ShowsSection(AsterGraph.Abstractions.Definitions.NodeSurfaceSectionKeys.ParameterEditors);
+        => ActiveSurfaceTier.ShowsSection(AsterGraph.Abstractions.Definitions.NodeSurfaceSectionKeys.InputSummaries)
+           || ActiveSurfaceTier.ShowsSection(AsterGraph.Abstractions.Definitions.NodeSurfaceSectionKeys.InputEditors);
 
     [ObservableProperty]
     private double height;
@@ -193,9 +197,19 @@ public sealed partial class NodeViewModel : ObservableObject
     public ObservableCollection<NodeParameterEndpointViewModel> ParameterEndpoints => _parameterEndpoints;
 
     /// <summary>
+    /// Unified node-local input row projection consumed by hosted authoring surfaces.
+    /// </summary>
+    public ReadOnlyObservableCollection<NodeSurfaceInputRowViewModel> InputRows => _readOnlyInputRows;
+
+    /// <summary>
     /// Whether the node currently exposes any node-local parameter endpoints.
     /// </summary>
     public bool HasParameterEndpoints => _parameterEndpoints.Count > 0;
+
+    /// <summary>
+    /// Whether the node currently exposes any node-local input rows.
+    /// </summary>
+    public bool HasInputRows => _inputRows.Count > 0;
 
     [ObservableProperty]
     private double x;
@@ -292,6 +306,22 @@ public sealed partial class NodeViewModel : ObservableObject
         }
 
         OnPropertyChanged(nameof(HasParameterEndpoints));
+    }
+
+    /// <summary>
+    /// Replaces the node-local input row projection.
+    /// </summary>
+    public void UpdateInputRows(IReadOnlyList<NodeSurfaceInputRowViewModel> rows)
+    {
+        ArgumentNullException.ThrowIfNull(rows);
+
+        _inputRows.Clear();
+        foreach (var row in rows)
+        {
+            _inputRows.Add(row);
+        }
+
+        OnPropertyChanged(nameof(HasInputRows));
     }
 
     /// <summary>

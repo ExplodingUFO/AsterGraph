@@ -169,16 +169,8 @@ public sealed class SerializationCompatibilityTests
     }
 
     [Fact]
-    public void GraphDocument_RetainsLegacyDeconstructAndInlineParameterCloneContracts()
+    public void GraphDocument_RetainsLegacyDeconstructContract_WithoutInlineParameterMetadata()
     {
-        var legacyPort = new GraphPort(
-            "input-001",
-            "Input",
-            PortDirection.Input,
-            "float",
-            "#F3B36B",
-            new PortTypeId("float"),
-            "gain");
         var document = new GraphDocument(
             "Legacy Graph",
             "Compatibility contract.",
@@ -191,7 +183,7 @@ public sealed class SerializationCompatibilityTests
                     "Carries legacy inline parameter metadata.",
                     new GraphPoint(0, 0),
                     new GraphSize(240, 160),
-                    [legacyPort],
+                    [new GraphPort("input-001", "Input", PortDirection.Input, "float", "#F3B36B", new PortTypeId("float"))],
                     [],
                     "#6AD5C4",
                     new NodeDefinitionId("tests.node"),
@@ -205,7 +197,7 @@ public sealed class SerializationCompatibilityTests
         Assert.Equal("Compatibility contract.", description);
         Assert.Empty(connections);
         Assert.Null(groups);
-        Assert.Equal("gain", Assert.Single(nodes).Inputs[0].InlineParameterKey);
+        Assert.Null(typeof(GraphPort).GetProperty("InlineParameterKey"));
         Assert.NotNull(typeof(GraphDocument).GetConstructor(
         [
             typeof(string),

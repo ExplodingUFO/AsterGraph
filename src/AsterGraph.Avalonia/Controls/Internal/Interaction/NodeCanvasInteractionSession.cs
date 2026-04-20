@@ -18,12 +18,21 @@ internal readonly record struct NodeCanvasNodeResizeSession(
     GraphNodeResizeHandleKind HandleKind,
     GraphSize OriginSize);
 
+internal readonly record struct NodeCanvasNodeResizePreview(
+    string NodeId,
+    GraphSize Size);
+
 internal readonly record struct NodeCanvasGroupResizeSession(
     string GroupId,
     string GroupTitle,
     NodeCanvasGroupResizeEdge Edge,
     GraphPoint OriginPosition,
     GraphSize OriginSize);
+
+internal readonly record struct NodeCanvasGroupResizePreview(
+    string GroupId,
+    GraphPoint Position,
+    GraphSize Size);
 
 internal sealed class NodeCanvasInteractionSession
 {
@@ -63,6 +72,10 @@ internal sealed class NodeCanvasInteractionSession
 
     public NodeCanvasGroupResizeSession? GroupResizeSession { get; private set; }
 
+    public NodeCanvasNodeResizePreview? NodeResizePreview { get; private set; }
+
+    public NodeCanvasGroupResizePreview? GroupResizePreview { get; private set; }
+
     public void BeginCanvasSelection(Point startScreenPosition, KeyModifiers modifiers, IReadOnlyList<NodeViewModel> baselineNodes)
     {
         DragNode = null;
@@ -77,6 +90,8 @@ internal sealed class NodeCanvasInteractionSession
         HoveredDropGroupId = null;
         NodeResizeSession = null;
         GroupResizeSession = null;
+        NodeResizePreview = null;
+        GroupResizePreview = null;
         SelectionStartScreenPosition = startScreenPosition;
         IsMarqueeSelecting = false;
         SelectionModifiers = modifiers;
@@ -107,6 +122,8 @@ internal sealed class NodeCanvasInteractionSession
         HoveredDropGroupId = null;
         NodeResizeSession = null;
         GroupResizeSession = null;
+        NodeResizePreview = null;
+        GroupResizePreview = null;
     }
 
     public void BeginPanning(Point startScreenPosition)
@@ -123,6 +140,8 @@ internal sealed class NodeCanvasInteractionSession
         HoveredDropGroupId = null;
         NodeResizeSession = null;
         GroupResizeSession = null;
+        NodeResizePreview = null;
+        GroupResizePreview = null;
         SelectionStartScreenPosition = null;
         IsMarqueeSelecting = false;
         LastPointerPosition = startScreenPosition;
@@ -150,6 +169,8 @@ internal sealed class NodeCanvasInteractionSession
         HoveredDropGroupId = null;
         NodeResizeSession = null;
         GroupResizeSession = null;
+        NodeResizePreview = null;
+        GroupResizePreview = null;
     }
 
     public void BeginNodeResize(NodeViewModel node, GraphNodeResizeHandleKind handleKind, Point startScreenPosition)
@@ -175,6 +196,8 @@ internal sealed class NodeCanvasInteractionSession
             handleKind,
             new GraphSize(node.Width, node.Height));
         GroupResizeSession = null;
+        NodeResizePreview = new NodeCanvasNodeResizePreview(node.Id, new GraphSize(node.Width, node.Height));
+        GroupResizePreview = null;
     }
 
     public void BeginGroupResize(
@@ -209,6 +232,8 @@ internal sealed class NodeCanvasInteractionSession
             edge,
             groupOriginPosition,
             groupOriginSize);
+        NodeResizePreview = null;
+        GroupResizePreview = new NodeCanvasGroupResizePreview(groupId, groupOriginPosition, groupOriginSize);
     }
 
     public void UpdatePointerPosition(Point currentScreenPosition)
@@ -236,6 +261,34 @@ internal sealed class NodeCanvasInteractionSession
         }
 
         HoveredDropGroupId = groupId;
+        return true;
+    }
+
+    public bool UpdateNodeResizePreview(string nodeId, GraphSize size)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(nodeId);
+
+        var preview = new NodeCanvasNodeResizePreview(nodeId, size);
+        if (NodeResizePreview == preview)
+        {
+            return false;
+        }
+
+        NodeResizePreview = preview;
+        return true;
+    }
+
+    public bool UpdateGroupResizePreview(string groupId, GraphPoint position, GraphSize size)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(groupId);
+
+        var preview = new NodeCanvasGroupResizePreview(groupId, position, size);
+        if (GroupResizePreview == preview)
+        {
+            return false;
+        }
+
+        GroupResizePreview = preview;
         return true;
     }
 
@@ -277,5 +330,7 @@ internal sealed class NodeCanvasInteractionSession
         IsPanning = false;
         NodeResizeSession = null;
         GroupResizeSession = null;
+        NodeResizePreview = null;
+        GroupResizePreview = null;
     }
 }

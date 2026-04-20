@@ -45,7 +45,7 @@ public sealed class GraphNodeVisualContext
         Action<NodeViewModel, GraphConnectionTargetRef> activateConnectionTarget,
         Func<Control, NodeViewModel, ContextRequestedEventArgs, bool> openNodeContextMenu,
         Func<Control, NodeViewModel, PortViewModel, ContextRequestedEventArgs, bool> openPortContextMenu,
-        Func<NodeViewModel, PortViewModel, NodeParameterViewModel?>? resolveInlineParameter = null)
+        GraphSize? surfacePreviewSize = null)
     {
         ArgumentNullException.ThrowIfNull(editor);
         ArgumentNullException.ThrowIfNull(node);
@@ -78,52 +78,11 @@ public sealed class GraphNodeVisualContext
         TrySetNodeWidth = trySetNodeWidth;
         TrySetNodeExpansionState = trySetNodeExpansionState;
         HasIncomingConnection = hasIncomingConnection;
-        ResolveInlineParameter = resolveInlineParameter ?? EmptyInlineParameterResolver;
         ActivatePort = activatePort;
         ActivateConnectionTarget = activateConnectionTarget;
         OpenNodeContextMenu = openNodeContextMenu;
         OpenPortContextMenu = openPortContextMenu;
-    }
-
-    /// <summary>
-    /// Compatibility constructor retained for custom presenters that still bind the legacy
-    /// inline-parameter seam. New host surfaces should use node-local parameter endpoints and
-    /// typed connection targets instead.
-    /// </summary>
-    [Obsolete("Compatibility-only retained constructor. Prefer the overload that exposes node-size, node-resize, and typed connection-target seams.")]
-    public GraphNodeVisualContext(
-        GraphEditorViewModel editor,
-        NodeViewModel node,
-        GraphEditorStyleOptions styleOptions,
-        Action focusCanvas,
-        Action<NodeViewModel, PointerPressedEventArgs> beginNodeDrag,
-        Func<NodeViewModel, double, bool, bool> trySetNodeWidth,
-        Func<NodeViewModel, GraphNodeExpansionState, bool> trySetNodeExpansionState,
-        Func<NodeViewModel, PortViewModel, bool> hasIncomingConnection,
-        Func<NodeViewModel, PortViewModel, NodeParameterViewModel?> resolveInlineParameter,
-        Action<NodeViewModel, PortViewModel> activatePort,
-        Func<Control, NodeViewModel, ContextRequestedEventArgs, bool> openNodeContextMenu,
-        Func<Control, NodeViewModel, PortViewModel, ContextRequestedEventArgs, bool> openPortContextMenu)
-        : this(
-            editor,
-            node,
-            styleOptions,
-            nodeParameterEditorRegistry: null,
-            focusCanvas,
-            beginNodeDrag,
-            beginNodeResize: static (_, _, _) => { },
-            beginHistoryInteraction: static () => { },
-            completeHistoryInteraction: static _ => { },
-            trySetNodeSize: static (_, _, _) => false,
-            trySetNodeWidth,
-            trySetNodeExpansionState,
-            hasIncomingConnection,
-            activatePort,
-            activateConnectionTarget: static (_, _) => { },
-            openNodeContextMenu,
-            openPortContextMenu,
-            resolveInlineParameter)
-    {
+        SurfacePreviewSize = surfacePreviewSize;
     }
 
     /// <summary>
@@ -201,11 +160,6 @@ public sealed class GraphNodeVisualContext
     public Func<NodeViewModel, PortViewModel, bool> HasIncomingConnection { get; }
 
     /// <summary>
-    /// Resolves the shared inline-parameter view model bound to one legacy inline-editable port.
-    /// </summary>
-    public Func<NodeViewModel, PortViewModel, NodeParameterViewModel?> ResolveInlineParameter { get; }
-
-    /// <summary>
     /// 请求激活某个端口。
     /// </summary>
     public Action<NodeViewModel, PortViewModel> ActivatePort { get; }
@@ -216,6 +170,11 @@ public sealed class GraphNodeVisualContext
     public Action<NodeViewModel, GraphConnectionTargetRef> ActivateConnectionTarget { get; }
 
     /// <summary>
+    /// Optional transient host-owned preview size used during interaction-time resize.
+    /// </summary>
+    public GraphSize? SurfacePreviewSize { get; }
+
+    /// <summary>
     /// 请求打开节点上下文菜单。
     /// </summary>
     public Func<Control, NodeViewModel, ContextRequestedEventArgs, bool> OpenNodeContextMenu { get; }
@@ -224,7 +183,4 @@ public sealed class GraphNodeVisualContext
     /// 请求打开端口上下文菜单。
     /// </summary>
     public Func<Control, NodeViewModel, PortViewModel, ContextRequestedEventArgs, bool> OpenPortContextMenu { get; }
-
-    private static NodeParameterViewModel? EmptyInlineParameterResolver(NodeViewModel _, PortViewModel __)
-        => null;
 }

@@ -8,6 +8,7 @@ using AsterGraph.Avalonia.Controls.Internal;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Configuration;
 using AsterGraph.Editor.Geometry;
+using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.ViewModels;
 using Xunit;
 
@@ -165,6 +166,8 @@ public sealed class NodeCanvasOverlayCoordinatorTests
         public double Zoom { get; set; } = 1;
 
         public IReadOnlyList<NodeViewModel> Nodes { get; set; } = [];
+
+        public IReadOnlyList<GraphEditorNodeGroupSnapshot> GroupSnapshots { get; set; } = [];
 
         public Size Bounds { get; set; } = new(800, 600);
 

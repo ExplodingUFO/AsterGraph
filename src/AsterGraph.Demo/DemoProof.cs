@@ -115,19 +115,19 @@ public static class DemoProof
         var lightingMeasurement = lightingNodeViewModel.SurfaceMeasurement;
         var tieredNodeSurfaceOk =
             lightingNodeTier.Key == "details"
-            && !lightingNodeTier.ShowsSection(NodeSurfaceSectionKeys.ParameterRail)
+            && !lightingNodeTier.ShowsSection(NodeSurfaceSectionKeys.InputSummaries)
             && lightingMeasurement.OptionalParameterCount == 3
             && lightingMeasurement.HeightToRevealAdditionalInputs > lightingNodeViewModel.Height
-            && lightingMeasurement.WidthToRevealInlineEditors > lightingNodeViewModel.Width
+            && lightingMeasurement.WidthToRevealInputEditors > lightingNodeViewModel.Width
             && shell.Editor.TrySetNodeSize(
                 lightingNodeViewModel,
                 new GraphSize(
-                    lightingMeasurement.WidthToRevealInlineEditors,
+                    lightingMeasurement.WidthToRevealInputEditors,
                     lightingMeasurement.HeightToRevealAdditionalInputs),
                 updateStatus: false)
             && shell.Editor.Session.Queries.GetNodeSurfaceSnapshots()
                 .Single(snapshot => string.Equals(snapshot.NodeId, "light", StringComparison.Ordinal))
-                .ActiveTier.Key == "parameter-editors"
+                .ActiveTier.Key == "input-editors"
             && terrainGroup is not null
             && terrainGroup.NodeIds.Count == 2
             && shell.Editor.HasIncomingConnection(lightingNode, pulsePort)

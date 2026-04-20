@@ -1,5 +1,7 @@
 using Avalonia;
 using Avalonia.Input;
+using AsterGraph.Core.Models;
+using AsterGraph.Editor.Geometry;
 using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.ViewModels;
 
@@ -119,8 +121,28 @@ internal sealed class NodeCanvasNodeDragCoordinator
         _host.HideSelectionAdorner();
         _host.HideGuideAdorners();
 
-        _host.InteractionSession.BeginGroupDrag(group.Id, group.Title, group.Position, dragStart, _host.CreateDragSession(nodes));
+        _host.InteractionSession.BeginGroupDrag(
+            group.Id,
+            group.Title,
+            group.Position,
+            dragStart,
+            CreateGroupDragSession(group, nodes));
         _host.ViewModel.BeginHistoryInteraction();
         return new NodeCanvasNodeDragStartResult(Handled: true, CapturePointer: true);
+    }
+
+    private static NodeCanvasDragSession CreateGroupDragSession(
+        GraphEditorNodeGroupSnapshot group,
+        IReadOnlyList<NodeViewModel> nodes)
+    {
+        var originPositions = nodes.ToDictionary(
+            node => node.Id,
+            node => new GraphPoint(node.X, node.Y),
+            StringComparer.Ordinal);
+
+        return new NodeCanvasDragSession(
+            nodes,
+            originPositions,
+            new NodeBounds(group.Position.X, group.Position.Y, group.Size.Width, group.Size.Height));
     }
 }

@@ -70,8 +70,17 @@ public partial class NodeCanvas : UserControl
     public static readonly StyledProperty<INodeParameterEditorRegistry?> NodeParameterEditorRegistryProperty =
         AvaloniaProperty.Register<NodeCanvas, INodeParameterEditorRegistry?>(nameof(NodeParameterEditorRegistry));
 
+    /// <summary>
+    /// Controls stock resize-hover feedback resolution for node and group surfaces.
+    /// </summary>
+    public static readonly StyledProperty<IGraphResizeFeedbackPolicy?> ResizeFeedbackPolicyProperty =
+        AvaloniaProperty.Register<NodeCanvas, IGraphResizeFeedbackPolicy?>(nameof(ResizeFeedbackPolicy));
+
     private readonly Dictionary<NodeViewModel, NodeCanvasRenderedNodeVisual> _nodeVisuals = new();
     private readonly Dictionary<string, NodeCanvasRenderedGroupVisual> _groupVisuals = new(StringComparer.Ordinal);
+    private readonly Dictionary<Control, NodeViewModel> _resizeFeedbackNodesBySurface = new();
+    private readonly Dictionary<Border, string> _resizeFeedbackGroupsBySurface = new();
+    private readonly Dictionary<string, GraphEditorNodeGroupSnapshot> _resizeFeedbackGroupSnapshots = new(StringComparer.Ordinal);
     private Grid? _sceneRoot;
     private Canvas? _groupLayer;
     private Canvas? _connectionLayer;
@@ -91,6 +100,7 @@ public partial class NodeCanvas : UserControl
     private readonly NodeCanvasOverlayCoordinator _overlayCoordinator;
     private readonly NodeCanvasNodeDragCoordinator _nodeDragCoordinator;
     private readonly NodeCanvasPointerInteractionCoordinator _pointerInteractionCoordinator;
+    private readonly NodeCanvasResizeFeedbackCoordinator _resizeFeedbackCoordinator;
     private readonly NodeCanvasWheelInteractionCoordinator _wheelInteractionCoordinator;
     private bool _isAttachedToVisualTree;
 
@@ -108,6 +118,7 @@ public partial class NodeCanvas : UserControl
         _overlayCoordinator = new NodeCanvasOverlayCoordinator(new NodeCanvasOverlayHost(this));
         _nodeDragCoordinator = new NodeCanvasNodeDragCoordinator(new NodeCanvasNodeDragHost(this));
         _pointerInteractionCoordinator = new NodeCanvasPointerInteractionCoordinator(new NodeCanvasPointerInteractionHost(this));
+        _resizeFeedbackCoordinator = new NodeCanvasResizeFeedbackCoordinator(new NodeCanvasResizeFeedbackHost(this));
         _wheelInteractionCoordinator = new NodeCanvasWheelInteractionCoordinator(new NodeCanvasWheelInteractionHost(this));
 
         ContextRequested += HandleCanvasContextRequested;
@@ -200,6 +211,15 @@ public partial class NodeCanvas : UserControl
     }
 
     /// <summary>
+    /// Host-owned policy used to override or extend stock resize-hover feedback.
+    /// </summary>
+    public IGraphResizeFeedbackPolicy? ResizeFeedbackPolicy
+    {
+        get => GetValue(ResizeFeedbackPolicyProperty);
+        set => SetValue(ResizeFeedbackPolicyProperty, value);
+    }
+
+    /// <summary>
     /// 将当前图内容缩放到可视区域。
     /// </summary>
     public void FitToScene(bool updateStatus = true)
@@ -228,6 +248,8 @@ public partial class NodeCanvas : UserControl
     /// <inheritdoc />
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
     {
+        ClearResizeFeedback();
+        _interactionSession.ResetAfterPointerRelease();
         _lifecycleCoordinator.HandleDetachedFromVisualTree();
         base.OnDetachedFromVisualTree(e);
     }
@@ -250,7 +272,12 @@ public partial class NodeCanvas : UserControl
         => _viewModelObserver.AttachViewModel(previous, current);
 
     private void RebuildScene()
-        => _sceneHost.RebuildScene();
+    {
+        ClearResizeFeedback();
+        _sceneHost.RebuildScene();
+        RefreshResizeFeedbackNodeSurfaceIndex();
+        RefreshResizeFeedbackGroupSurfaceIndex();
+    }
 
     private void ActivatePortFromVisual(NodeViewModel node, PortViewModel port)
     {
@@ -295,6 +322,14 @@ public partial class NodeCanvas : UserControl
         }
 
         Focus();
+        _resizeFeedbackCoordinator.BeginResizeSession(new GraphResizeFeedbackContext(
+            GraphResizeFeedbackSurfaceKind.Node,
+            handleKind switch
+            {
+                GraphNodeResizeHandleKind.Right => GraphResizeFeedbackHandle.RightEdge,
+                GraphNodeResizeHandleKind.Bottom => GraphResizeFeedbackHandle.BottomEdge,
+                _ => GraphResizeFeedbackHandle.BottomRightCorner,
+            }));
         ViewModel.SelectSingleNode(node, updateStatus: false);
         _interactionSession.BeginNodeResize(
             ViewModel.FindNode(node.Id) ?? node,
@@ -342,6 +377,15 @@ public partial class NodeCanvas : UserControl
         }
 
         Focus();
+        _resizeFeedbackCoordinator.BeginResizeSession(new GraphResizeFeedbackContext(
+            GraphResizeFeedbackSurfaceKind.Group,
+            edge switch
+            {
+                NodeCanvasGroupResizeEdge.Left => GraphResizeFeedbackHandle.LeftEdge,
+                NodeCanvasGroupResizeEdge.Top => GraphResizeFeedbackHandle.TopEdge,
+                NodeCanvasGroupResizeEdge.Right => GraphResizeFeedbackHandle.RightEdge,
+                _ => GraphResizeFeedbackHandle.BottomEdge,
+            }));
         _interactionSession.BeginGroupResize(group.Id, groupTitle, edge, group.Position, group.Size, args.GetPosition(this));
         ViewModel.BeginHistoryInteraction();
         args.Pointer.Capture(this);
@@ -390,6 +434,12 @@ public partial class NodeCanvas : UserControl
         args.Pointer.Capture(null);
     }
 
+    private void UpdateResizeFeedback(Point currentScreenPosition)
+        => _resizeFeedbackCoordinator.Update(currentScreenPosition);
+
+    private void ClearResizeFeedback()
+        => _resizeFeedbackCoordinator.Clear();
+
     private void HandlePointerWheelChanged(object? sender, PointerWheelEventArgs args)
     {
         if (_wheelInteractionCoordinator.HandleWheel(args.GetPosition(this), args.Delta, args.KeyModifiers))
@@ -422,13 +472,43 @@ public partial class NodeCanvas : UserControl
         => _sceneHost.UpdateSelectionState();
 
     private void UpdateGroupVisuals()
-        => _sceneHost.UpdateGroupVisuals();
+    {
+        _sceneHost.UpdateGroupVisuals();
+        RefreshResizeFeedbackGroupSurfaceIndex();
+    }
 
     private void UpdateNodePosition(NodeViewModel node)
         => _sceneHost.UpdateNodePosition(node);
 
     private void UpdateNodeVisual(NodeViewModel node)
-        => _sceneHost.UpdateNodeVisual(node);
+    {
+        _sceneHost.UpdateNodeVisual(node);
+        RefreshResizeFeedbackNodeSurfaceIndex();
+    }
+
+    private void RefreshResizeFeedbackNodeSurfaceIndex()
+    {
+        _resizeFeedbackNodesBySurface.Clear();
+        foreach (var entry in _nodeVisuals)
+        {
+            _resizeFeedbackNodesBySurface[entry.Value.Root] = entry.Key;
+        }
+    }
+
+    private void RefreshResizeFeedbackGroupSurfaceIndex()
+    {
+        _resizeFeedbackGroupsBySurface.Clear();
+        foreach (var entry in _groupVisuals)
+        {
+            _resizeFeedbackGroupsBySurface[entry.Value.Root] = entry.Key;
+        }
+
+        _resizeFeedbackGroupSnapshots.Clear();
+        foreach (var snapshot in ViewModel?.GetNodeGroupSnapshots() ?? [])
+        {
+            _resizeFeedbackGroupSnapshots[snapshot.Id] = snapshot;
+        }
+    }
 
     private GraphPoint GetPortAnchor(NodeViewModel node, PortViewModel port)
         => _sceneHost.GetPortAnchor(node, port);
@@ -465,6 +545,14 @@ public partial class NodeCanvas : UserControl
 
     private GraphPoint ApplyDragAssist(NodeCanvasDragSession dragSession, double deltaX, double deltaY)
         => _overlayCoordinator.ApplyDragAssist(dragSession, deltaX, deltaY);
+
+    private NodeCanvasGroupResizePreview ApplyGroupResizeAssist(
+        GraphEditorNodeGroupSnapshot group,
+        NodeCanvasGroupResizeEdge edge,
+        GraphPoint proposedPosition,
+        GraphSize proposedSize,
+        GraphSize minimumSize)
+        => _overlayCoordinator.ApplyGroupResizeAssist(group, edge, proposedPosition, proposedSize, minimumSize);
 
     private NodeCanvasDragSession CreateDragSession(IReadOnlyList<NodeViewModel> nodes)
         => _overlayCoordinator.CreateDragSession(nodes);

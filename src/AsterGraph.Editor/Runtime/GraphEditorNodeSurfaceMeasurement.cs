@@ -8,12 +8,12 @@ namespace AsterGraph.Editor.Runtime;
 public sealed record GraphEditorNodeSurfaceMeasurement(
     GraphSize BaselineSize,
     double HeightToRevealAdditionalInputs,
-    double WidthToRevealParameterSummaries,
-    double WidthToRevealInlineEditors,
+    double WidthToRevealInputSummaries,
+    double WidthToRevealInputEditors,
     int RequiredParameterCount,
     int OptionalParameterCount,
-    bool SupportsParameterSummaries,
-    bool SupportsInlineEditors)
+    bool SupportsInputSummaries,
+    bool SupportsInputEditors)
 {
     public static GraphEditorNodeSurfaceMeasurement Default { get; } = new(
         new GraphSize(180d, 158d),
@@ -22,6 +22,6 @@ public sealed record GraphEditorNodeSurfaceMeasurement(
         420d,
         0,
         0,
-        SupportsParameterSummaries: false,
-        SupportsInlineEditors: false);
+        SupportsInputSummaries: false,
+        SupportsInputEditors: false);
 }

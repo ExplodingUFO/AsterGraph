@@ -1,5 +1,7 @@
 global using AsterGraph.Editor.Hosting;
 
+using System.Collections.ObjectModel;
+using AsterGraph.Abstractions.Catalog;
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Core.Compatibility;
@@ -199,6 +201,165 @@ public sealed class GraphEditorViewModelProjectionTests
     }
 
     [Fact]
+    public void GraphEditorViewModel_SurfaceTierProjection_DefaultSizeProjectsInputPortAndRequiredParameterRows()
+    {
+        var definitionId = new NodeDefinitionId("tests.editor.projection.input-rows");
+        var editor = CreateEditor(CreateInputRowDocument(definitionId), CreateInputRowCatalog(definitionId));
+
+        var targetNode = Assert.IsType<NodeViewModel>(editor.FindNode("target-node"));
+        Assert.IsType<ReadOnlyObservableCollection<NodeSurfaceInputRowViewModel>>(targetNode.InputRows);
+
+        Assert.Collection(
+            targetNode.InputRows,
+            row =>
+            {
+                Assert.Equal(NodeSurfaceInputRowKind.Port, row.Kind);
+                Assert.Equal("Input", row.Label);
+                Assert.Equal(NodeSurfaceInlineContentKind.None, row.InlineContentKind);
+                Assert.NotNull(row.Port);
+                Assert.Null(row.ParameterEndpoint);
+            },
+            row =>
+            {
+                Assert.Equal(NodeSurfaceInputRowKind.ParameterEndpoint, row.Kind);
+                Assert.Equal("Required Gain", row.Label);
+                Assert.Equal(NodeSurfaceInlineContentKind.None, row.InlineContentKind);
+                Assert.Null(row.Port);
+                Assert.Equal("required-gain", row.ParameterEndpoint?.Parameter.Key);
+            });
+        Assert.DoesNotContain(
+            targetNode.InputRows,
+            row => string.Equals(row.ParameterEndpoint?.Parameter.Key, "optional-gain", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void GraphEditorViewModel_SurfaceTierProjection_SummaryWidthRevealsOptionalRowsAndInlineSummaries()
+    {
+        var definitionId = new NodeDefinitionId("tests.editor.projection.input-rows-summary");
+        var editor = CreateEditor(CreateInputRowDocument(definitionId), CreateInputRowCatalog(definitionId));
+        var targetNode = Assert.IsType<NodeViewModel>(editor.FindNode("target-node"));
+        var measurement = targetNode.SurfaceMeasurement;
+
+        Assert.True(editor.Session.Commands.TrySetNodeSize(
+            targetNode.Id,
+            new GraphSize(measurement.WidthToRevealInputSummaries, measurement.HeightToRevealAdditionalInputs),
+            updateStatus: false));
+
+        targetNode = Assert.IsType<NodeViewModel>(editor.FindNode("target-node"));
+        var requiredRow = Assert.Single(
+            targetNode.InputRows,
+            row => string.Equals(row.ParameterEndpoint?.Parameter.Key, "required-gain", StringComparison.Ordinal));
+        var optionalRow = Assert.Single(
+            targetNode.InputRows,
+            row => string.Equals(row.ParameterEndpoint?.Parameter.Key, "optional-gain", StringComparison.Ordinal));
+
+        Assert.Equal(NodeSurfaceInlineContentKind.Summary, requiredRow.InlineContentKind);
+        Assert.False(string.IsNullOrWhiteSpace(requiredRow.InlineDisplayText));
+        Assert.Equal(NodeSurfaceInlineContentKind.Summary, optionalRow.InlineContentKind);
+        Assert.False(string.IsNullOrWhiteSpace(optionalRow.InlineDisplayText));
+    }
+
+    [Fact]
+    public void GraphEditorViewModel_SurfaceTierProjection_SummaryWidthRefreshesInlineSummaryAfterParameterEdit()
+    {
+        var definitionId = new NodeDefinitionId("tests.editor.projection.input-rows-summary-update");
+        var editor = CreateEditor(CreateInputRowDocument(definitionId), CreateInputRowCatalog(definitionId));
+        var targetNode = Assert.IsType<NodeViewModel>(editor.FindNode("target-node"));
+        var measurement = targetNode.SurfaceMeasurement;
+
+        Assert.True(editor.Session.Commands.TrySetNodeSize(
+            targetNode.Id,
+            new GraphSize(measurement.WidthToRevealInputSummaries, measurement.HeightToRevealAdditionalInputs),
+            updateStatus: false));
+        Assert.True(editor.Session.Commands.TrySetNodeParameterValue(targetNode.Id, "required-gain", 0.9d));
+
+        targetNode = Assert.IsType<NodeViewModel>(editor.FindNode("target-node"));
+        var requiredRow = Assert.Single(
+            targetNode.InputRows,
+            row => string.Equals(row.ParameterEndpoint?.Parameter.Key, "required-gain", StringComparison.Ordinal));
+
+        Assert.Equal(NodeSurfaceInlineContentKind.Summary, requiredRow.InlineContentKind);
+        Assert.Contains("0.9", requiredRow.InlineDisplayText, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void GraphEditorViewModel_SurfaceTierProjection_InputEditorWidthUsesEditorModeUntilConnectionOverridesIt()
+    {
+        var definitionId = new NodeDefinitionId("tests.editor.projection.input-rows-editor");
+        var editor = CreateEditor(CreateInputRowDocument(definitionId), CreateInputRowCatalog(definitionId));
+        var targetNode = Assert.IsType<NodeViewModel>(editor.FindNode("target-node"));
+        var measurement = targetNode.SurfaceMeasurement;
+
+        Assert.True(editor.Session.Commands.TrySetNodeSize(
+            targetNode.Id,
+            new GraphSize(measurement.WidthToRevealInputEditors, measurement.HeightToRevealAdditionalInputs),
+            updateStatus: false));
+
+        targetNode = Assert.IsType<NodeViewModel>(editor.FindNode("target-node"));
+        var requiredRow = Assert.Single(
+            targetNode.InputRows,
+            row => string.Equals(row.ParameterEndpoint?.Parameter.Key, "required-gain", StringComparison.Ordinal));
+        var optionalRow = Assert.Single(
+            targetNode.InputRows,
+            row => string.Equals(row.ParameterEndpoint?.Parameter.Key, "optional-gain", StringComparison.Ordinal));
+
+        Assert.Equal(NodeSurfaceInlineContentKind.Editor, requiredRow.InlineContentKind);
+        Assert.Equal(NodeSurfaceInlineContentKind.Editor, optionalRow.InlineContentKind);
+
+        editor.ConnectToTarget(
+            "source-node",
+            "out",
+            new GraphConnectionTargetRef(targetNode.Id, "required-gain", GraphConnectionTargetKind.Parameter));
+
+        targetNode = Assert.IsType<NodeViewModel>(editor.FindNode("target-node"));
+        requiredRow = Assert.Single(
+            targetNode.InputRows,
+            row => string.Equals(row.ParameterEndpoint?.Parameter.Key, "required-gain", StringComparison.Ordinal));
+        optionalRow = Assert.Single(
+            targetNode.InputRows,
+            row => string.Equals(row.ParameterEndpoint?.Parameter.Key, "optional-gain", StringComparison.Ordinal));
+
+        Assert.Equal(NodeSurfaceInlineContentKind.Connection, requiredRow.InlineContentKind);
+        Assert.Contains("Source Node", requiredRow.InlineDisplayText, StringComparison.Ordinal);
+        Assert.Equal(NodeSurfaceInlineContentKind.Editor, optionalRow.InlineContentKind);
+    }
+
+    [Fact]
+    public void GraphEditorViewModel_SurfaceTierProjection_DisconnectingParameterConnectionRestoresEditorMode()
+    {
+        var definitionId = new NodeDefinitionId("tests.editor.projection.input-rows-editor-disconnect");
+        var editor = CreateEditor(CreateInputRowDocument(definitionId), CreateInputRowCatalog(definitionId));
+        var targetNode = Assert.IsType<NodeViewModel>(editor.FindNode("target-node"));
+        var measurement = targetNode.SurfaceMeasurement;
+
+        Assert.True(editor.Session.Commands.TrySetNodeSize(
+            targetNode.Id,
+            new GraphSize(measurement.WidthToRevealInputEditors, measurement.HeightToRevealAdditionalInputs),
+            updateStatus: false));
+
+        editor.ConnectToTarget(
+            "source-node",
+            "out",
+            new GraphConnectionTargetRef(targetNode.Id, "required-gain", GraphConnectionTargetKind.Parameter));
+
+        var connectionId = Assert.Single(
+            editor.Connections,
+            connection =>
+                connection.TargetKind == GraphConnectionTargetKind.Parameter
+                && string.Equals(connection.TargetNodeId, targetNode.Id, StringComparison.Ordinal)
+                && string.Equals(connection.TargetPortId, "required-gain", StringComparison.Ordinal)).Id;
+        editor.DisconnectConnection(connectionId);
+
+        targetNode = Assert.IsType<NodeViewModel>(editor.FindNode("target-node"));
+        var requiredRow = Assert.Single(
+            targetNode.InputRows,
+            row => string.Equals(row.ParameterEndpoint?.Parameter.Key, "required-gain", StringComparison.Ordinal));
+
+        Assert.Equal(NodeSurfaceInlineContentKind.Editor, requiredRow.InlineContentKind);
+        Assert.Null(requiredRow.InlineDisplayText);
+    }
+
+    [Fact]
     public void GraphEditorViewModel_SessionLoadWorkspace_BridgesKernelDocumentProjectionIntoFacade()
     {
         var initialDefinitionId = new NodeDefinitionId("tests.editor.projection.bridge.initial");
@@ -262,10 +423,10 @@ public sealed class GraphEditorViewModelProjectionTests
         Assert.False(editor.IsDirty);
     }
 
-    private static GraphEditorViewModel CreateEditor(GraphDocument document)
+    private static GraphEditorViewModel CreateEditor(GraphDocument document, INodeCatalog? catalog = null)
         => new(
             document,
-            CreateCatalog(document.Nodes.Select(node => node.DefinitionId).OfType<NodeDefinitionId>().Distinct().ToArray()),
+            catalog ?? CreateCatalog(document.Nodes.Select(node => node.DefinitionId).OfType<NodeDefinitionId>().Distinct().ToArray()),
             new DefaultPortCompatibilityService());
 
     private static NodeCatalog CreateCatalog(params NodeDefinitionId[] definitionIds)
@@ -356,6 +517,51 @@ public sealed class GraphEditorViewModelProjectionTests
                     ],
                     []),
             ]);
+
+    private static NodeCatalog CreateInputRowCatalog(NodeDefinitionId definitionId)
+    {
+        var catalog = new NodeCatalog();
+        catalog.RegisterDefinition(new NodeDefinition(
+            definitionId,
+            "Input Row Node",
+            "Tests",
+            "Projection",
+            [
+                new PortDefinition("in", "Input", new PortTypeId("float"), "#F3B36B"),
+            ],
+            [
+                new PortDefinition("out", "Output", new PortTypeId("float"), "#55D8C1"),
+            ],
+            description: "Projects node input rows.",
+            defaultWidth: 220d,
+            defaultHeight: 160d,
+            parameters:
+            [
+                new NodeParameterDefinition(
+                    "required-gain",
+                    "Required Gain",
+                    new PortTypeId("float"),
+                    ParameterEditorKind.Number,
+                    isRequired: true,
+                    defaultValue: 0.5d),
+                new NodeParameterDefinition(
+                    "optional-gain",
+                    "Optional Gain",
+                    new PortTypeId("float"),
+                    ParameterEditorKind.Number,
+                    defaultValue: 0.25d),
+            ]));
+        return catalog;
+    }
+
+    private static GraphDocument CreateInputRowDocument(NodeDefinitionId definitionId)
+        => CreateDocument(
+            "Input Row Graph",
+            "Projects input rows from node surface tiers.",
+            definitionId,
+            sourceNodeId: "source-node",
+            targetNodeId: "target-node",
+            includeConnection: false);
 
     private static NodeViewModel CreateNode(
         string nodeId,

@@ -126,18 +126,11 @@ public sealed class GraphEditorNodeSurfaceContractsTests
     }
 
     [Fact]
-    public void PortDefinition_LegacyInlineParameterKeyContract_RemainsAvailable()
+    public void PortDefinition_AndPortViewModel_DoNotExposeLegacyInlineParameterKey()
     {
-        var port = new PortDefinition(
-            "input",
-            "Input",
-            new PortTypeId("float"),
-            "#F3B36B",
-            "Legacy compatibility check",
-            " gain ");
-
-        Assert.Equal("gain", port.InlineParameterKey);
-        Assert.Equal("gain", new PortViewModel(new GraphPort("input", "Input", PortDirection.Input, "float", "#F3B36B", new PortTypeId("float"), "gain"), 0, 1).InlineParameterKey);
+        Assert.Null(typeof(PortDefinition).GetProperty("InlineParameterKey"));
+        Assert.Null(typeof(GraphPort).GetProperty("InlineParameterKey"));
+        Assert.Null(typeof(PortViewModel).GetProperty("InlineParameterKey"));
     }
 
     [Fact]
@@ -158,10 +151,10 @@ public sealed class GraphEditorNodeSurfaceContractsTests
         Assert.False(string.IsNullOrWhiteSpace(snapshot.ActiveTier.Key));
 
         var explicitTier = new GraphEditorNodeSurfaceTierSnapshot(
-            "parameter-editors",
+            "input-editors",
             420d,
             250d,
-            [NodeSurfaceSectionKeys.Description, NodeSurfaceSectionKeys.ParameterRail, NodeSurfaceSectionKeys.ParameterEditors]);
+            [NodeSurfaceSectionKeys.Description, NodeSurfaceSectionKeys.InputSummaries, NodeSurfaceSectionKeys.InputEditors]);
         var snapshotWithTier = new GraphEditorNodeSurfaceSnapshot(
             NodeId,
             new GraphSize(430d, 260d),
@@ -169,11 +162,11 @@ public sealed class GraphEditorNodeSurfaceContractsTests
             GraphNodeExpansionState.Collapsed,
             "group-002");
 
-        Assert.Equal("parameter-editors", snapshotWithTier.ActiveTier.Key);
+        Assert.Equal("input-editors", snapshotWithTier.ActiveTier.Key);
     }
 
     [Fact]
-    public void GraphNodeVisualContext_LegacyPresenterConstructor_RemainsAvailable()
+    public void GraphNodeVisualContext_DoesNotExposeLegacyInlineParameterResolver()
     {
         var constructor = typeof(GraphNodeVisualContext).GetConstructor(
         [
@@ -191,8 +184,8 @@ public sealed class GraphEditorNodeSurfaceContractsTests
             typeof(Func<Control, NodeViewModel, PortViewModel, ContextRequestedEventArgs, bool>),
         ]);
 
-        Assert.NotNull(constructor);
-        Assert.NotNull(typeof(GraphNodeVisualContext).GetProperty(nameof(GraphNodeVisualContext.ResolveInlineParameter)));
+        Assert.Null(constructor);
+        Assert.Null(typeof(GraphNodeVisualContext).GetProperty("ResolveInlineParameter"));
     }
 
     [Fact]
@@ -206,8 +199,8 @@ public sealed class GraphEditorNodeSurfaceContractsTests
         Assert.Equal(1, measurement.RequiredParameterCount);
         Assert.Equal(1, measurement.OptionalParameterCount);
         Assert.True(measurement.BaselineSize.Height < measurement.HeightToRevealAdditionalInputs);
-        Assert.True(measurement.BaselineSize.Width < measurement.WidthToRevealParameterSummaries);
-        Assert.True(measurement.WidthToRevealParameterSummaries < measurement.WidthToRevealInlineEditors);
+        Assert.True(measurement.BaselineSize.Width < measurement.WidthToRevealInputSummaries);
+        Assert.True(measurement.WidthToRevealInputSummaries < measurement.WidthToRevealInputEditors);
     }
 
     [Fact]
@@ -222,19 +215,19 @@ public sealed class GraphEditorNodeSurfaceContractsTests
             definition,
             measurement);
         var summaryTier = GraphEditorNodeSurfaceTierResolver.ResolveActiveTier(
-            new GraphSize(measurement.WidthToRevealParameterSummaries, measurement.HeightToRevealAdditionalInputs),
+            new GraphSize(measurement.WidthToRevealInputSummaries, measurement.HeightToRevealAdditionalInputs),
             GraphEditorBehaviorOptions.Default,
             definition,
             measurement);
         var editorTier = GraphEditorNodeSurfaceTierResolver.ResolveActiveTier(
-            new GraphSize(measurement.WidthToRevealInlineEditors, measurement.HeightToRevealAdditionalInputs),
+            new GraphSize(measurement.WidthToRevealInputEditors, measurement.HeightToRevealAdditionalInputs),
             GraphEditorBehaviorOptions.Default,
             definition,
             measurement);
 
         Assert.Equal("details", baselineTier.Key);
-        Assert.Equal("parameter-rail", summaryTier.Key);
-        Assert.Equal("parameter-editors", editorTier.Key);
+        Assert.Equal("input-summaries", summaryTier.Key);
+        Assert.Equal("input-editors", editorTier.Key);
     }
 
     [Fact]
@@ -249,12 +242,12 @@ public sealed class GraphEditorNodeSurfaceContractsTests
             definition,
             measurement);
         var summaryTier = GraphEditorNodeSurfaceTierResolver.ResolveActiveTier(
-            new GraphSize(measurement.WidthToRevealParameterSummaries, measurement.HeightToRevealAdditionalInputs),
+            new GraphSize(measurement.WidthToRevealInputSummaries, measurement.HeightToRevealAdditionalInputs),
             GraphEditorBehaviorOptions.Default,
             definition,
             measurement);
         var editorTier = GraphEditorNodeSurfaceTierResolver.ResolveActiveTier(
-            new GraphSize(measurement.WidthToRevealInlineEditors, measurement.HeightToRevealAdditionalInputs),
+            new GraphSize(measurement.WidthToRevealInputEditors, measurement.HeightToRevealAdditionalInputs),
             GraphEditorBehaviorOptions.Default,
             definition,
             measurement);
@@ -306,7 +299,7 @@ public sealed class GraphEditorNodeSurfaceContractsTests
 
         var surface = Assert.Single(session.Queries.GetNodeSurfaceSnapshots(), snapshot => snapshot.NodeId == NodeId);
         Assert.Equal(new GraphSize(420d, 260d), surface.Size);
-        Assert.Equal("parameter-editors", surface.ActiveTier.Key);
+        Assert.Equal("input-editors", surface.ActiveTier.Key);
 
         session.Commands.Undo();
         Assert.Equal(new GraphSize(240d, 160d), Assert.Single(session.Queries.CreateDocumentSnapshot().Nodes, candidate => candidate.Id == NodeId).Size);
@@ -346,11 +339,11 @@ public sealed class GraphEditorNodeSurfaceContractsTests
         var defaultSurface = Assert.Single(surfaces, snapshot => snapshot.NodeId == SiblingNodeId);
 
         Assert.Equal("details", overrideSurface.ActiveTier.Key);
-        Assert.Equal("project-parameter-rail", defaultSurface.ActiveTier.Key);
+        Assert.Equal("project-input-summaries", defaultSurface.ActiveTier.Key);
 
         Assert.True(session.Commands.TrySetNodeSize(SiblingNodeId, new GraphSize(420d, 260d), updateStatus: false));
         defaultSurface = Assert.Single(session.Queries.GetNodeSurfaceSnapshots(), snapshot => snapshot.NodeId == SiblingNodeId);
-        Assert.Equal("project-parameter-editors", defaultSurface.ActiveTier.Key);
+        Assert.Equal("project-input-editors", defaultSurface.ActiveTier.Key);
     }
 
     [Fact]
@@ -541,23 +534,23 @@ public sealed class GraphEditorNodeSurfaceContractsTests
                     [
                         new NodeSurfaceTierDefinition("project-compact"),
                         new NodeSurfaceTierDefinition(
-                            "project-parameter-rail",
+                            "project-input-summaries",
                             minWidth: 200d,
                             minHeight: 140d,
                             visibleSectionKeys:
                             [
                                 NodeSurfaceSectionKeys.Description,
-                                NodeSurfaceSectionKeys.ParameterRail,
+                                NodeSurfaceSectionKeys.InputSummaries,
                             ]),
                         new NodeSurfaceTierDefinition(
-                            "project-parameter-editors",
+                            "project-input-editors",
                             minWidth: 360d,
                             minHeight: 220d,
                             visibleSectionKeys:
                             [
                                 NodeSurfaceSectionKeys.Description,
-                                NodeSurfaceSectionKeys.ParameterRail,
-                                NodeSurfaceSectionKeys.ParameterEditors,
+                                NodeSurfaceSectionKeys.InputSummaries,
+                                NodeSurfaceSectionKeys.InputEditors,
                             ]),
                     ]),
                 },
@@ -763,14 +756,14 @@ public sealed class GraphEditorNodeSurfaceContractsTests
                             NodeSurfaceSectionKeys.Description,
                         ]),
                     new NodeSurfaceTierDefinition(
-                        "parameter-editors",
+                        "input-editors",
                         minWidth: 400d,
                         minHeight: 240d,
                         visibleSectionKeys:
                         [
                             NodeSurfaceSectionKeys.Description,
-                            NodeSurfaceSectionKeys.ParameterRail,
-                            NodeSurfaceSectionKeys.ParameterEditors,
+                            NodeSurfaceSectionKeys.InputSummaries,
+                            NodeSurfaceSectionKeys.InputEditors,
                         ]),
                 ])));
         catalog.RegisterDefinition(

@@ -3,10 +3,12 @@ using Avalonia.Input;
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Avalonia.Controls.Internal;
+using AsterGraph.Avalonia.Presentation;
 using AsterGraph.Core.Compatibility;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Catalog;
 using AsterGraph.Editor.Geometry;
+using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.ViewModels;
 using Xunit;
 
@@ -66,6 +68,25 @@ public sealed class NodeCanvasPointerInteractionCoordinatorTests
     }
 
     [Fact]
+    public void HandlePressed_WithSecondaryPress_DoesNotClearResizeFeedback()
+    {
+        var editor = CreateEditor();
+        var host = new TestPointerInteractionHost(editor);
+        var coordinator = new NodeCanvasPointerInteractionCoordinator(host);
+
+        var result = coordinator.HandlePressed(
+            isAlreadyHandled: false,
+            currentScreenPosition: new Point(40, 64),
+            isLeftButtonPressed: false,
+            isMiddleButtonPressed: false,
+            modifiers: KeyModifiers.None);
+
+        Assert.False(result.Handled);
+        Assert.False(result.CapturePointer);
+        Assert.Equal(0, host.ClearResizeFeedbackCalls);
+    }
+
+    [Fact]
     public void HandleMoved_WhenCanvasSelectionCrossesThreshold_TriggersMarqueeUpdate()
     {
         var editor = CreateEditor();
@@ -98,6 +119,8 @@ public sealed class NodeCanvasPointerInteractionCoordinatorTests
         Assert.Equal(initialPanX + 28, editor.PanX);
         Assert.Equal(initialPanY + 36, editor.PanY);
         Assert.Equal(new Point(40, 54), host.InteractionSession.LastPointerPosition);
+        Assert.Equal(0, host.UpdateResizeFeedbackCalls);
+        Assert.Equal(1, host.ClearResizeFeedbackCalls);
     }
 
     [Fact]
@@ -127,6 +150,131 @@ public sealed class NodeCanvasPointerInteractionCoordinatorTests
         Assert.Equal(1, host.ApplyDragAssistCalls);
         Assert.Equal(138, node.X);
         Assert.Equal(154, node.Y);
+        Assert.Equal(0, host.UpdateResizeFeedbackCalls);
+        Assert.Equal(1, host.ClearResizeFeedbackCalls);
+    }
+
+    [Fact]
+    public void HandleMoved_WhenDraggingGroup_AppliesDragAssistAndOffsetsPreview()
+    {
+        var editor = CreateEditor();
+        editor.SelectSingleNode(editor.Nodes[0], updateStatus: false);
+        var groupId = editor.Session.Commands.TryCreateNodeGroupFromSelection("Pointer Cluster");
+        Assert.False(string.IsNullOrWhiteSpace(groupId));
+
+        var groupSnapshot = Assert.Single(editor.GetNodeGroupSnapshots());
+        var node = editor.Nodes[0];
+        var origin = new GraphPoint(node.X, node.Y);
+        var host = new TestPointerInteractionHost(editor)
+        {
+            DragAssistResult = new GraphPoint(24, -12),
+        };
+        host.InteractionSession.BeginGroupDrag(
+            groupSnapshot.Id,
+            groupSnapshot.Title,
+            groupSnapshot.Position,
+            new Point(30, 40),
+            new NodeCanvasDragSession(
+                [node],
+                new Dictionary<string, GraphPoint>(StringComparer.Ordinal)
+                {
+                    [node.Id] = origin,
+                },
+                new NodeBounds(groupSnapshot.Position.X, groupSnapshot.Position.Y, groupSnapshot.Size.Width, groupSnapshot.Size.Height)));
+        var coordinator = new NodeCanvasPointerInteractionCoordinator(host);
+
+        var handled = coordinator.HandleMoved(new Point(72, 90), selectionDragThreshold: 6);
+
+        Assert.True(handled);
+        Assert.Equal(1, host.ApplyDragAssistCalls);
+        Assert.Equal(groupSnapshot.Position.X + 24d, host.InteractionSession.DragGroupPreviewPosition?.X);
+        Assert.Equal(groupSnapshot.Position.Y - 12d, host.InteractionSession.DragGroupPreviewPosition?.Y);
+        Assert.Equal(origin.X + 24d, node.X);
+        Assert.Equal(origin.Y - 12d, node.Y);
+    }
+
+    [Fact]
+    public void HandleMoved_WhenNodeResizeSession_StoresPreviewWithoutPersistingNodeMutation()
+    {
+        var editor = CreateEditor();
+        var node = editor.Nodes[1];
+        var originalSize = new GraphSize(node.Width, node.Height);
+        var host = new TestPointerInteractionHost(editor);
+        host.InteractionSession.BeginNodeResize(node, GraphNodeResizeHandleKind.Right, new Point(30, 40));
+        var coordinator = new NodeCanvasPointerInteractionCoordinator(host);
+
+        var handled = coordinator.HandleMoved(new Point(72, 40), selectionDragThreshold: 6);
+
+        Assert.True(handled);
+        Assert.Equal(originalSize, new GraphSize(node.Width, node.Height));
+        Assert.NotNull(host.InteractionSession.NodeResizePreview);
+        Assert.True(host.InteractionSession.NodeResizePreview.Value.Size.Width > originalSize.Width + 30d);
+        Assert.Equal(originalSize.Height, host.InteractionSession.NodeResizePreview.Value.Size.Height);
+        Assert.Equal(1, host.UpdateNodeVisualCalls);
+        Assert.Equal(1, host.RenderConnectionsCalls);
+    }
+
+    [Fact]
+    public void HandleMoved_WhenGroupResizeSession_StoresPreviewWithoutPersistingGroupMutation()
+    {
+        var editor = CreateEditor();
+        editor.SelectSingleNode(editor.Nodes[0], updateStatus: false);
+        var groupId = editor.Session.Commands.TryCreateNodeGroupFromSelection("Pointer Cluster");
+        Assert.False(string.IsNullOrWhiteSpace(groupId));
+
+        var originalSnapshot = Assert.Single(editor.GetNodeGroupSnapshots());
+        var host = new TestPointerInteractionHost(editor);
+        host.InteractionSession.BeginGroupResize(
+            originalSnapshot.Id,
+            originalSnapshot.Title,
+            NodeCanvasGroupResizeEdge.Right,
+            originalSnapshot.Position,
+            originalSnapshot.Size,
+            new Point(30, 40));
+        var coordinator = new NodeCanvasPointerInteractionCoordinator(host);
+
+        var handled = coordinator.HandleMoved(new Point(78, 40), selectionDragThreshold: 6);
+
+        Assert.True(handled);
+        var currentSnapshot = Assert.Single(editor.GetNodeGroupSnapshots());
+        Assert.Equal(originalSnapshot.Size, currentSnapshot.Size);
+        Assert.NotNull(host.InteractionSession.GroupResizePreview);
+        Assert.True(host.InteractionSession.GroupResizePreview.Value.Size.Width > originalSnapshot.Size.Width + 40d);
+        Assert.Equal(originalSnapshot.Position, host.InteractionSession.GroupResizePreview.Value.Position);
+        Assert.Equal(1, host.UpdateGroupVisualsCalls);
+        Assert.Equal(1, host.RenderConnectionsCalls);
+    }
+
+    [Fact]
+    public void HandleMoved_WhenGroupTopResizeSession_StoresPreviewPositionAndHeightWithoutPersistingMutation()
+    {
+        var editor = CreateEditor();
+        editor.SelectSingleNode(editor.Nodes[0], updateStatus: false);
+        var groupId = editor.Session.Commands.TryCreateNodeGroupFromSelection("Pointer Cluster");
+        Assert.False(string.IsNullOrWhiteSpace(groupId));
+
+        var originalSnapshot = Assert.Single(editor.GetNodeGroupSnapshots());
+        var host = new TestPointerInteractionHost(editor);
+        host.InteractionSession.BeginGroupResize(
+            originalSnapshot.Id,
+            originalSnapshot.Title,
+            NodeCanvasGroupResizeEdge.Top,
+            originalSnapshot.Position,
+            originalSnapshot.Size,
+            new Point(30, 40));
+        var coordinator = new NodeCanvasPointerInteractionCoordinator(host);
+
+        var handled = coordinator.HandleMoved(new Point(30, 6), selectionDragThreshold: 6);
+
+        Assert.True(handled);
+        var currentSnapshot = Assert.Single(editor.GetNodeGroupSnapshots());
+        Assert.Equal(originalSnapshot.Size, currentSnapshot.Size);
+        Assert.NotNull(host.InteractionSession.GroupResizePreview);
+        Assert.True(host.InteractionSession.GroupResizePreview.Value.Position.Y < originalSnapshot.Position.Y);
+        Assert.True(host.InteractionSession.GroupResizePreview.Value.Size.Height > originalSnapshot.Size.Height + 30d);
+        Assert.Equal(originalSnapshot.Size.Width, host.InteractionSession.GroupResizePreview.Value.Size.Width);
+        Assert.Equal(1, host.UpdateGroupVisualsCalls);
+        Assert.Equal(1, host.RenderConnectionsCalls);
     }
 
     [Fact]
@@ -202,7 +350,11 @@ public sealed class NodeCanvasPointerInteractionCoordinatorTests
         var documentChangedCount = 0;
         editor.Session.Events.DocumentChanged += (_, _) => documentChangedCount++;
 
-        var host = new TestPointerInteractionHost(editor);
+        var expectedDelta = new GraphPoint(44d / editor.Zoom, 22d / editor.Zoom);
+        var host = new TestPointerInteractionHost(editor)
+        {
+            DragAssistResult = expectedDelta,
+        };
         host.InteractionSession.BeginGroupDrag(
             groupId!,
             groupSnapshot.Title,
@@ -214,14 +366,14 @@ public sealed class NodeCanvasPointerInteractionCoordinatorTests
                 {
                     [sourceNode.Id] = initialSourcePosition,
                 },
-                new NodeBounds(sourceNode.X, sourceNode.Y, sourceNode.Width, sourceNode.Height)));
+                new NodeBounds(groupSnapshot.Position.X, groupSnapshot.Position.Y, groupSnapshot.Size.Width, groupSnapshot.Size.Height)));
         var coordinator = new NodeCanvasPointerInteractionCoordinator(host);
 
         var handled = coordinator.HandleMoved(new Point(74, 62), selectionDragThreshold: 6);
 
         Assert.True(handled);
-        Assert.Equal(initialSourcePosition.X + 50d, sourceNode.X);
-        Assert.Equal(initialSourcePosition.Y + 25d, sourceNode.Y);
+        Assert.Equal(initialSourcePosition.X + expectedDelta.X, sourceNode.X);
+        Assert.Equal(initialSourcePosition.Y + expectedDelta.Y, sourceNode.Y);
         Assert.Equal(0, documentChangedCount);
 
         var previewSnapshot = Assert.Single(editor.GetNodeGroupSnapshots());
@@ -230,8 +382,8 @@ public sealed class NodeCanvasPointerInteractionCoordinatorTests
         coordinator.HandleReleased(new Point(74, 62));
 
         var movedSnapshot = Assert.Single(editor.GetNodeGroupSnapshots());
-        Assert.Equal(initialGroupPosition.X + 50d, movedSnapshot.Position.X);
-        Assert.Equal(initialGroupPosition.Y + 25d, movedSnapshot.Position.Y);
+        Assert.Equal(initialGroupPosition.X + expectedDelta.X, movedSnapshot.Position.X);
+        Assert.Equal(initialGroupPosition.Y + expectedDelta.Y, movedSnapshot.Position.Y);
         Assert.True(documentChangedCount > 0);
     }
 
@@ -292,6 +444,41 @@ public sealed class NodeCanvasPointerInteractionCoordinatorTests
         var restoredNode = Assert.Single(editor.Nodes, candidate => candidate.Id == node.Id);
         Assert.Equal(origin.X, restoredNode.X);
         Assert.Equal(origin.Y, restoredNode.Y);
+    }
+
+    [Fact]
+    public void HandleReleased_AfterLeftEdgeGroupResize_RestoresOriginalFrameWithSingleUndo()
+    {
+        var editor = CreateEditor();
+        editor.SelectSingleNode(editor.Nodes[0], updateStatus: false);
+        var groupId = editor.Session.Commands.TryCreateNodeGroupFromSelection("Pointer Cluster");
+        Assert.False(string.IsNullOrWhiteSpace(groupId));
+
+        var originalSnapshot = Assert.Single(editor.GetNodeGroupSnapshots());
+        var host = new TestPointerInteractionHost(editor);
+        editor.BeginHistoryInteraction();
+        host.InteractionSession.BeginGroupResize(
+            originalSnapshot.Id,
+            originalSnapshot.Title,
+            NodeCanvasGroupResizeEdge.Left,
+            originalSnapshot.Position,
+            originalSnapshot.Size,
+            new Point(60, 40));
+        var coordinator = new NodeCanvasPointerInteractionCoordinator(host);
+        var movedPoint = new Point(24, 40);
+
+        coordinator.HandleMoved(movedPoint, selectionDragThreshold: 6);
+        coordinator.HandleReleased(movedPoint);
+
+        var resizedSnapshot = Assert.Single(editor.GetNodeGroupSnapshots());
+        Assert.True(resizedSnapshot.Position.X < originalSnapshot.Position.X);
+        Assert.True(resizedSnapshot.Size.Width > originalSnapshot.Size.Width);
+
+        editor.Undo();
+
+        var restoredSnapshot = Assert.Single(editor.GetNodeGroupSnapshots());
+        Assert.Equal(originalSnapshot.Position, restoredSnapshot.Position);
+        Assert.Equal(originalSnapshot.Size, restoredSnapshot.Size);
     }
 
     private static GraphEditorViewModel CreateEditor()
@@ -398,6 +585,8 @@ public sealed class NodeCanvasPointerInteractionCoordinatorTests
 
         public int UpdateGroupVisualsCalls { get; private set; }
 
+        public int UpdateNodeVisualCalls { get; private set; }
+
         public int UpdateMarqueeSelectionCalls { get; private set; }
 
         public Point? LastMarqueePoint { get; private set; }
@@ -407,6 +596,12 @@ public sealed class NodeCanvasPointerInteractionCoordinatorTests
         public int ApplyDragAssistCalls { get; private set; }
 
         public GraphPoint DragAssistResult { get; set; } = new(0, 0);
+
+        public int ApplyGroupResizeAssistCalls { get; private set; }
+
+        public int UpdateResizeFeedbackCalls { get; private set; }
+
+        public int ClearResizeFeedbackCalls { get; private set; }
 
         public void FocusCanvas()
         {
@@ -424,6 +619,9 @@ public sealed class NodeCanvasPointerInteractionCoordinatorTests
         public void UpdateGroupVisuals()
             => UpdateGroupVisualsCalls++;
 
+        public void UpdateNodeVisual(NodeViewModel node)
+            => UpdateNodeVisualCalls++;
+
         public void UpdateMarqueeSelection(Point currentScreenPosition, bool finalize)
         {
             UpdateMarqueeSelectionCalls++;
@@ -435,6 +633,27 @@ public sealed class NodeCanvasPointerInteractionCoordinatorTests
         {
             ApplyDragAssistCalls++;
             return DragAssistResult;
+        }
+
+        public NodeCanvasGroupResizePreview ApplyGroupResizeAssist(
+            GraphEditorNodeGroupSnapshot group,
+            NodeCanvasGroupResizeEdge edge,
+            GraphPoint proposedPosition,
+            GraphSize proposedSize,
+            GraphSize minimumSize)
+        {
+            ApplyGroupResizeAssistCalls++;
+            return new NodeCanvasGroupResizePreview(group.Id, proposedPosition, proposedSize);
+        }
+
+        public void UpdateResizeFeedback(Point currentScreenPosition)
+        {
+            UpdateResizeFeedbackCalls++;
+        }
+
+        public void ClearResizeFeedback()
+        {
+            ClearResizeFeedbackCalls++;
         }
     }
 }

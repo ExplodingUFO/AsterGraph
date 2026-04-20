@@ -67,8 +67,8 @@ internal static class GraphEditorNodeSurfacePlanner
         var optionalParameters = parameters
             .Where(parameter => !parameter.IsRequired)
             .ToList();
-        var supportsSummaries = parameters.Count > 0;
-        var supportsInlineEditors = parameters.Count > 0;
+        var supportsInputSummaries = parameters.Count > 0;
+        var supportsInputEditors = parameters.Count > 0;
 
         return new GraphEditorNodeSurfaceContentPlan(
             title,
@@ -80,7 +80,7 @@ internal static class GraphEditorNodeSurfacePlanner
             outputPortCount,
             requiredParameters,
             optionalParameters,
-            supportsSummaries,
-            supportsInlineEditors);
+            supportsInputSummaries,
+            supportsInputEditors);
     }
 }
