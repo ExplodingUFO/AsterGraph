@@ -96,7 +96,8 @@ public sealed class NodeCanvasConnectionSceneRendererTests
 
             var chip = Assert.Single(hostedScene.ConnectionLayer.Children.OfType<Border>());
             var label = Assert.IsType<TextBlock>(chip.Child);
-            Assert.Equal("Float Flow", label.Text);
+            Assert.Equal("FLOAT", label.Text);
+            Assert.Equal("Float Flow", ToolTip.GetTip(chip));
 
             var args = new ContextRequestedEventArgs
             {
@@ -202,7 +203,11 @@ public sealed class NodeCanvasConnectionSceneRendererTests
                 hostedScene.NodeVisuals));
 
             var connectionPath = Assert.Single(hostedScene.ConnectionLayer.Children.OfType<global::Avalonia.Controls.Shapes.Path>());
+            var chip = Assert.Single(hostedScene.ConnectionLayer.Children.OfType<Border>());
+            var chipLabel = Assert.IsType<TextBlock>(chip.Child);
             Assert.True(connectionPath.StrokeThickness > GraphEditorStyleOptions.Default.Connection.Thickness);
+            Assert.Contains("FLOAT", chipLabel.Text, StringComparison.Ordinal);
+            Assert.Contains("Float Flow", chipLabel.Text, StringComparison.Ordinal);
         }
         finally
         {

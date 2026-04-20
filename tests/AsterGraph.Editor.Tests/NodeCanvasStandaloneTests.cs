@@ -32,12 +32,15 @@ public sealed class NodeCanvasStandaloneTests
     private static readonly NodeDefinitionId SourceDefinitionId = new("tests.canvas.source");
     private static readonly NodeDefinitionId TargetDefinitionId = new("tests.canvas.target");
     private static readonly NodeDefinitionId AdaptiveDefinitionId = new("tests.canvas.adaptive");
+    private static readonly NodeDefinitionId OutputDefinitionId = new("tests.canvas.output");
     private const string SourceNodeId = "tests.canvas.source-001";
     private const string TargetNodeId = "tests.canvas.target-001";
     private const string AdaptiveNodeId = "tests.canvas.adaptive-001";
+    private const string OutputNodeId = "tests.canvas.output-001";
     private const string SourcePortId = "out";
     private const string TargetPortId = "in";
     private const string AdaptiveOutputPortId = "result";
+    private const string OutputInputPortId = "viewport";
     private const string RequiredParameterKey = "required-input";
     private const string OptionalParameterKey = "optional-gain";
 
@@ -690,6 +693,66 @@ public sealed class NodeCanvasStandaloneTests
     }
 
     [AvaloniaFact]
+    public void StandaloneCanvas_PortTypeCue_UsesCompactUppercaseToken()
+    {
+        var editor = CreateEditor();
+        var (window, canvas) = CreateStandaloneCanvasWindow(editor);
+
+        try
+        {
+            var outputButton = canvas.GetVisualDescendants()
+                .OfType<Button>()
+                .Single(control => string.Equals(
+                    AutomationProperties.GetName(control),
+                    "Canvas Source output Result",
+                    StringComparison.Ordinal));
+            var outputText = string.Join(
+                " ",
+                outputButton.GetVisualDescendants()
+                    .OfType<TextBlock>()
+                    .Select(block => block.Text)
+                    .Where(text => !string.IsNullOrWhiteSpace(text)));
+
+            Assert.Contains("FLOAT", outputText, StringComparison.Ordinal);
+            Assert.DoesNotContain("float", outputText, StringComparison.Ordinal);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
+    public void StandaloneCanvas_OutputNode_ProjectsDedicatedOutputChrome()
+    {
+        var editor = CreateOutputEditor();
+        var (window, canvas) = CreateStandaloneCanvasWindow(editor);
+
+        try
+        {
+            var outputSurface = canvas.GetVisualDescendants()
+                .OfType<Border>()
+                .Single(control => string.Equals(
+                    AutomationProperties.GetName(control),
+                    "Viewport Terminal node",
+                    StringComparison.Ordinal));
+            var outputText = string.Join(
+                " ",
+                outputSurface.GetVisualDescendants()
+                    .OfType<TextBlock>()
+                    .Select(block => block.Text)
+                    .Where(text => !string.IsNullOrWhiteSpace(text)));
+
+            Assert.Contains("astergraph-node-output", outputSurface.Classes);
+            Assert.Contains("Output", outputText, StringComparison.Ordinal);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
     public void AdaptiveSurface_DefaultSize_ShowsRequiredParameterEndpointOnly()
     {
         var editor = CreateAdaptiveSurfaceEditor();
@@ -1062,7 +1125,9 @@ public sealed class NodeCanvasStandaloneTests
             Assert.Equal(60d, Canvas.GetTop(groupSurface));
             Assert.False(groupHeader is Button);
             Assert.True(groupSurface.ClipToBounds);
-            Assert.True(groupHeader is Border headerBorder && headerBorder.CornerRadius.TopLeft > 0d && headerBorder.CornerRadius.TopRight > 0d);
+            var headerBorder = Assert.IsType<Border>(groupHeader);
+            Assert.True(headerBorder.CornerRadius.TopLeft > 0d && headerBorder.CornerRadius.TopRight > 0d);
+            Assert.Equal("Canvas Cluster", Assert.IsType<TextBlock>(headerBorder.Child).Text);
 
             groupHeader.RaiseEvent(new TappedEventArgs(InputElement.TappedEvent, pointerArgs)
             {
@@ -1866,6 +1931,57 @@ public sealed class NodeCanvasStandaloneTests
                         [
                             new GraphParameterValue(OptionalParameterKey, new PortTypeId("float"), 0.5d),
                         ]),
+                ],
+                []),
+            catalog,
+            new DefaultPortCompatibilityService(),
+            styleOptions: GraphEditorStyleOptions.Default);
+    }
+
+    private static GraphEditorViewModel CreateOutputEditor()
+    {
+        var catalog = new NodeCatalog();
+        catalog.RegisterDefinition(
+            new NodeDefinition(
+                OutputDefinitionId,
+                "Viewport Terminal",
+                "Output",
+                "Final Preview",
+                [
+                    new PortDefinition(
+                        OutputInputPortId,
+                        "Viewport",
+                        new PortTypeId("color"),
+                        "#FFF1AA"),
+                ],
+                [],
+                description: "Terminal output node used to verify dedicated output chrome."));
+
+        return new GraphEditorViewModel(
+            new GraphDocument(
+                "Output Canvas Graph",
+                "Regression coverage for output-node emphasis.",
+                [
+                    new GraphNode(
+                        OutputNodeId,
+                        "Viewport Terminal",
+                        "Output",
+                        "Final Preview",
+                        "Terminal output node used to verify dedicated output chrome.",
+                        new GraphPoint(220, 180),
+                        new GraphSize(240, 160),
+                        [
+                            new GraphPort(
+                                OutputInputPortId,
+                                "Viewport",
+                                PortDirection.Input,
+                                "color",
+                                "#FFF1AA",
+                                new PortTypeId("color")),
+                        ],
+                        [],
+                        "#FFF1AA",
+                        OutputDefinitionId),
                 ],
                 []),
             catalog,

@@ -238,6 +238,33 @@ public sealed class GraphEditorNodeSurfaceContractsTests
     }
 
     [Fact]
+    public void AdaptiveSurfaceTierResolver_RevealsDescriptionOnlyAtEditorTierByDefault()
+    {
+        var definition = CreateAdaptiveDefinition();
+        var measurement = GraphEditorNodeSurfaceMeasurer.Measure(GraphEditorNodeSurfacePlanner.Create(definition));
+
+        var baselineTier = GraphEditorNodeSurfaceTierResolver.ResolveActiveTier(
+            measurement.BaselineSize,
+            GraphEditorBehaviorOptions.Default,
+            definition,
+            measurement);
+        var summaryTier = GraphEditorNodeSurfaceTierResolver.ResolveActiveTier(
+            new GraphSize(measurement.WidthToRevealParameterSummaries, measurement.HeightToRevealAdditionalInputs),
+            GraphEditorBehaviorOptions.Default,
+            definition,
+            measurement);
+        var editorTier = GraphEditorNodeSurfaceTierResolver.ResolveActiveTier(
+            new GraphSize(measurement.WidthToRevealInlineEditors, measurement.HeightToRevealAdditionalInputs),
+            GraphEditorBehaviorOptions.Default,
+            definition,
+            measurement);
+
+        Assert.False(baselineTier.ShowsSection(NodeSurfaceSectionKeys.Description));
+        Assert.False(summaryTier.ShowsSection(NodeSurfaceSectionKeys.Description));
+        Assert.True(editorTier.ShowsSection(NodeSurfaceSectionKeys.Description));
+    }
+
+    [Fact]
     public void SessionCommands_TrySetNodeWidth_PersistsUndoableSurfaceMutation()
     {
         var session = CreateSession();

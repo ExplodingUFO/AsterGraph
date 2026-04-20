@@ -315,18 +315,27 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
         var isSelected = node.IsSelected;
         var isInspected = context.InteractionFocus.IsNodeInspected(node.Id);
         var isEditing = context.InteractionFocus.IsNodeEditing(node.Id);
+        var isOutputNode = IsOutputNode(node);
 
         state.Border.Width = node.Width;
         state.Border.Background = BrushFactory.Solid(
             isSelected || isInspected
                 ? nodeStyle.SelectedBackgroundHex
                 : nodeStyle.BackgroundHex,
-            isEditing ? 0.98d : 1d);
+            isEditing
+                ? 0.98d
+                : isOutputNode
+                    ? 0.94d
+                    : 1d);
         state.Border.BorderBrush = BrushFactory.Solid(
-            isSelected || isInspected
+            isSelected || isInspected || isOutputNode
                 ? node.AccentHex
                 : nodeStyle.BorderHex,
-            isEditing ? 1d : 0.98d);
+            isEditing
+                ? 1d
+                : isOutputNode
+                    ? 0.84d
+                    : 0.98d);
         state.Header.Background = BrushFactory.Solid(
             node.AccentHex,
             isEditing
@@ -335,22 +344,27 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
                     ? 0.82d
                     : isSelected
                         ? nodeStyle.SelectedHeaderOpacity
+                        : isOutputNode
+                            ? Math.Max(nodeStyle.HeaderOpacity, 0.66d)
                         : nodeStyle.HeaderOpacity);
         state.Border.BorderThickness = new Thickness(
             isEditing
                 ? nodeStyle.SelectedBorderThickness + 1d
                 : isInspected || isSelected
                     ? nodeStyle.SelectedBorderThickness
+                    : isOutputNode
+                        ? nodeStyle.BorderThickness + 0.5d
                     : nodeStyle.BorderThickness);
         SetStateClass(state.Border, "astergraph-node-selected", isSelected);
         SetStateClass(state.Border, "astergraph-node-inspected", isInspected);
         SetStateClass(state.Border, "astergraph-node-editing", isEditing);
+        SetStateClass(state.Border, "astergraph-node-output", isOutputNode);
         state.Subtitle.Text = node.DisplaySubtitle;
         state.Description.Text = node.DisplayDescription;
         state.Description.IsVisible = node.ActiveSurfaceTier.ShowsSection(NodeSurfaceSectionKeys.Description);
 
         state.BadgePanel.Children.Clear();
-        foreach (var focusBadge in CreateFocusBadges(node, isInspected, isEditing))
+        foreach (var focusBadge in CreateSystemBadges(node, isInspected, isEditing, isOutputNode))
         {
             state.BadgePanel.Children.Add(focusBadge);
         }
@@ -706,7 +720,7 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
             });
             text.Children.Add(new TextBlock
             {
-                Text = port.DataType,
+                Text = GraphTypeCueFormatter.FormatPortToken(port),
                 FontSize = portStyle.TypeFontSize,
                 Foreground = BrushFactory.Solid(portStyle.TypeHex, portStyle.TypeOpacity),
                 TextAlignment = isInput ? TextAlignment.Left : TextAlignment.Right,
@@ -834,8 +848,20 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
             : context.StyleOptions.PortOverrides.FirstOrDefault(overrideStyle => overrideStyle.TypeId == port.TypeId)?.Style
               ?? context.StyleOptions.Port;
 
-    private static IEnumerable<Border> CreateFocusBadges(NodeViewModel node, bool isInspected, bool isEditing)
+    private static bool IsOutputNode(NodeViewModel node)
+        => string.Equals(node.Category, "Output", StringComparison.OrdinalIgnoreCase);
+
+    private static IEnumerable<Border> CreateSystemBadges(
+        NodeViewModel node,
+        bool isInspected,
+        bool isEditing,
+        bool isOutputNode)
     {
+        if (isOutputNode)
+        {
+            yield return CreateFocusBadge("Output", node.AccentHex, "Terminal output node");
+        }
+
         if (isEditing)
         {
             yield return CreateFocusBadge("Editing", node.AccentHex, "Inspector editing focus");

@@ -76,7 +76,8 @@ internal sealed class NodeCanvasConnectionSceneRenderer
                 context,
                 GetPortAnchor(context, sourceNode, sourcePort),
                 target,
-                connection);
+                connection,
+                sourcePort);
         }
 
         if (context.ViewModel.HasPendingConnection
@@ -102,6 +103,7 @@ internal sealed class NodeCanvasConnectionSceneRenderer
                     string.Empty,
                     "pending",
                     context.ViewModel.PendingSourcePort.AccentHex),
+                context.ViewModel.PendingSourcePort,
                 isPreview: true);
         }
     }
@@ -179,6 +181,7 @@ internal sealed class NodeCanvasConnectionSceneRenderer
         GraphPoint start,
         GraphPoint end,
         ConnectionViewModel connection,
+        PortViewModel? sourcePort = null,
         bool isPreview = false)
     {
         if (context.ConnectionLayer is null || context.ViewModel is null)
@@ -215,6 +218,8 @@ internal sealed class NodeCanvasConnectionSceneRenderer
         }
 
         var midpoint = new Point((curve.Start.X + curve.End.X) / 2, (curve.Start.Y + curve.End.Y) / 2);
+        var typeToken = sourcePort is null ? string.Empty : GraphTypeCueFormatter.FormatPortToken(sourcePort);
+        var displayText = GetDisplayedChipText(connection, connection.NoteText, typeToken, focusKind);
 
         var chip = new Border
         {
@@ -228,9 +233,17 @@ internal sealed class NodeCanvasConnectionSceneRenderer
             CornerRadius = new CornerRadius(connectionStyle.LabelCornerRadius),
             Padding = new Thickness(connectionStyle.LabelHorizontalPadding, connectionStyle.LabelVerticalPadding),
             Focusable = true,
-            Child = CreateLabelBlock(connectionStyle, GetDisplayedChipText(connection, connection.NoteText)),
+            Child = CreateLabelBlock(connectionStyle, displayText),
         };
-        AutomationProperties.SetName(chip, $"{GetDisplayedChipText(connection, connection.NoteText)} connection");
+        AutomationProperties.SetName(chip, $"{displayText} connection");
+        if (!string.IsNullOrWhiteSpace(connection.Label) && !string.Equals(displayText, connection.Label, StringComparison.Ordinal))
+        {
+            ToolTip.SetTip(chip, connection.Label);
+        }
+        else
+        {
+            ToolTip.SetTip(chip, null);
+        }
         chip.KeyDown += (_, args) =>
         {
             if (string.IsNullOrWhiteSpace(connection.TargetNodeId))
@@ -280,9 +293,19 @@ internal sealed class NodeCanvasConnectionSceneRenderer
 
             void RestoreLabel(string? noteText)
             {
-                var displayText = GetDisplayedChipText(connection, noteText);
-                chip.Child = CreateLabelBlock(connectionStyle, displayText);
-                AutomationProperties.SetName(chip, $"{displayText} connection");
+                var restoredText = GetDisplayedChipText(connection, noteText, typeToken, focusKind);
+                chip.Child = CreateLabelBlock(connectionStyle, restoredText);
+                AutomationProperties.SetName(chip, $"{restoredText} connection");
+                if (!string.IsNullOrWhiteSpace(connection.Label)
+                    && !string.Equals(restoredText, connection.Label, StringComparison.Ordinal)
+                    && string.IsNullOrWhiteSpace(noteText))
+                {
+                    ToolTip.SetTip(chip, connection.Label);
+                }
+                else
+                {
+                    ToolTip.SetTip(chip, null);
+                }
             }
 
             void Complete(bool commit)
@@ -383,8 +406,24 @@ internal sealed class NodeCanvasConnectionSceneRenderer
             Foreground = BrushFactory.Solid(connectionStyle.LabelForegroundHex, connectionStyle.LabelForegroundOpacity),
         };
 
-    private static string GetDisplayedChipText(ConnectionViewModel connection, string? noteText)
-        => string.IsNullOrWhiteSpace(noteText)
-            ? connection.Label
-            : noteText.Trim();
+    private static string GetDisplayedChipText(
+        ConnectionViewModel connection,
+        string? noteText,
+        string typeToken,
+        GraphEditorConnectionFocusKind focusKind)
+    {
+        if (!string.IsNullOrWhiteSpace(noteText))
+        {
+            return noteText.Trim();
+        }
+
+        if (string.IsNullOrWhiteSpace(typeToken))
+        {
+            return connection.Label;
+        }
+
+        return focusKind == GraphEditorConnectionFocusKind.None || string.IsNullOrWhiteSpace(connection.Label)
+            ? typeToken
+            : $"{typeToken} · {connection.Label}";
+    }
 }

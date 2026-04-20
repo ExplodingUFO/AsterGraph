@@ -82,11 +82,7 @@ internal static class GraphEditorNodeSurfaceTierResolver
             new(
                 "details",
                 minWidth: measurement.BaselineSize.Width,
-                minHeight: measurement.BaselineSize.Height,
-                visibleSectionKeys:
-                [
-                    NodeSurfaceSectionKeys.Description,
-                ]),
+                minHeight: measurement.BaselineSize.Height),
         };
 
         if (measurement.SupportsParameterSummaries)
@@ -97,7 +93,6 @@ internal static class GraphEditorNodeSurfaceTierResolver
                 minHeight: measurement.BaselineSize.Height,
                 visibleSectionKeys:
                 [
-                    NodeSurfaceSectionKeys.Description,
                     NodeSurfaceSectionKeys.ParameterRail,
                 ]));
         }

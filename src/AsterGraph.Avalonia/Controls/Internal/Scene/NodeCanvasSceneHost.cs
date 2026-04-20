@@ -376,7 +376,7 @@ internal sealed class NodeCanvasSceneHost
         visual.HeaderControl.Background = BrushFactory.Solid(
             isDropTarget ? "#4A3917" : isSelected ? "#173241" : "#132131",
             0.96);
-        visual.TitleText.Text = $"{group.Title} ({group.NodeIds.Count})";
+        visual.TitleText.Text = FormatGroupHeaderTitle(group);
         visual.TitleText.Foreground = BrushFactory.Solid(isSelected ? "#F4FFFC" : "#D8EEF3", 0.98);
         visual.BodyBorder.IsVisible = !group.IsCollapsed;
         visual.BodyBorder.Height = Math.Max(
@@ -437,6 +437,9 @@ internal sealed class NodeCanvasSceneHost
         _host.BeginGroupResize(group.Id, group.Title, edge, args);
         return args.Handled;
     }
+
+    private static string FormatGroupHeaderTitle(GraphEditorNodeGroupSnapshot group)
+        => group.Title;
 
     private static bool TryResolveGroupResizeEdge(
         Border surface,

@@ -88,7 +88,7 @@
                   HorizontalScrollBarVisibility="Disabled">
       <StackPanel Spacing="{DynamicResource AsterGraph.DefaultSpacing}">
         <StackPanel Spacing="6">
-          <TextBlock Text="检查器"
+          <TextBlock Text="{Binding InspectorChromeTitle}"
                      FontSize="{DynamicResource AsterGraph.SectionEyebrowFontSize}"
                      FontWeight="Bold"
                      Foreground="{DynamicResource AsterGraph.EyebrowBrush}" />
@@ -112,7 +112,7 @@
         <Border Classes="astergraph-inspector-section">
           <StackPanel Spacing="{DynamicResource AsterGraph.InspectorSectionSpacing}">
             <StackPanel Spacing="4">
-              <TextBlock Text="连接关系 / Connections"
+              <TextBlock Text="{Binding InspectorConnectionsTitle}"
                          FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                          FontWeight="Bold"
                          Foreground="{DynamicResource AsterGraph.EyebrowBrush}" />
@@ -122,7 +122,7 @@
                          Foreground="{DynamicResource AsterGraph.BodyBrush}" />
             </StackPanel>
             <StackPanel Spacing="4">
-              <TextBlock Text="输入端口 / Inputs"
+              <TextBlock Text="{Binding InspectorInputsTitle}"
                          FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                          FontWeight="Bold"
                          Foreground="{DynamicResource AsterGraph.EyebrowBrush}" />
@@ -132,7 +132,7 @@
                          Foreground="{DynamicResource AsterGraph.BodyBrush}" />
             </StackPanel>
             <StackPanel Spacing="4">
-              <TextBlock Text="输出端口 / Outputs"
+              <TextBlock Text="{Binding InspectorOutputsTitle}"
                          FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                          FontWeight="Bold"
                          Foreground="{DynamicResource AsterGraph.EyebrowBrush}" />
@@ -147,7 +147,7 @@
         <Border Classes="astergraph-inspector-section">
           <StackPanel Spacing="{DynamicResource AsterGraph.InspectorSectionSpacing}">
             <StackPanel Spacing="4">
-              <TextBlock Text="上游依赖 / Upstream"
+              <TextBlock Text="{Binding InspectorUpstreamTitle}"
                          FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                          FontWeight="Bold"
                          Foreground="{DynamicResource AsterGraph.EyebrowBrush}" />
@@ -157,7 +157,7 @@
                          Foreground="{DynamicResource AsterGraph.BodyBrush}" />
             </StackPanel>
             <StackPanel Spacing="4">
-              <TextBlock Text="下游依赖 / Downstream"
+              <TextBlock Text="{Binding InspectorDownstreamTitle}"
                          FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                          FontWeight="Bold"
                          Foreground="{DynamicResource AsterGraph.EyebrowBrush}" />
@@ -172,19 +172,19 @@
         <Border Classes="astergraph-inspector-section"
                 IsVisible="{Binding HasAnyEditableParameters, Mode=OneWay}">
           <StackPanel Spacing="{DynamicResource AsterGraph.InspectorSectionSpacing}">
-            <TextBlock Text="参数编辑"
+            <TextBlock Text="{Binding InspectorParametersTitle}"
                        FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                        FontWeight="Bold"
                        Foreground="{DynamicResource AsterGraph.EyebrowBrush}" />
-            <TextBlock Text="以下控件直接编辑当前节点参数。"
+            <TextBlock Text="{Binding InspectorParametersIntro}"
                        FontSize="{DynamicResource AsterGraph.InspectorCaptionFontSize}"
                        Foreground="{DynamicResource AsterGraph.BodyBrush}" />
-            <TextBlock Text="详细参数编辑固定在检查器中，避免遮挡节点端口和连线。"
+            <TextBlock Text="{Binding InspectorParametersSurfaceHint}"
                        FontSize="{DynamicResource AsterGraph.InspectorCaptionFontSize}"
                        TextWrapping="Wrap"
                        Foreground="{DynamicResource AsterGraph.BodyBrush}" />
             <Border Classes="astergraph-parameter-guidance">
-              <TextBlock Text="使用搜索过滤参数、折叠分组，并在需要时恢复默认值。"
+              <TextBlock Text="{Binding InspectorParametersGuidance}"
                          FontSize="{DynamicResource AsterGraph.InspectorCaptionFontSize}"
                          TextWrapping="Wrap"
                          Foreground="{DynamicResource AsterGraph.EyebrowBrush}" />
@@ -192,7 +192,7 @@
 
             <TextBox x:Name="PART_ParameterSearchBox"
                      Classes="astergraph-input"
-                     Watermark="搜索参数、分组或提示信息"
+                     Watermark="{Binding InspectorParametersSearchWatermark}"
                      TextChanged="HandleParameterSearchTextChanged" />
 
             <Border x:Name="PART_ParameterValidationSummary"
