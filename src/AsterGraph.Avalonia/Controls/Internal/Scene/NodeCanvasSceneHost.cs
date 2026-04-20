@@ -512,7 +512,6 @@ internal sealed class NodeCanvasSceneHost
             (targetNode, target) => editor.ActivateConnectionTarget(targetNode, target),
             _host.ContextMenuCoordinator.OpenNodeContextMenu,
             _host.ContextMenuCoordinator.OpenPortContextMenu,
-            ResolveInlineParameter,
             surfacePreviewSize: ResolveNodePreviewSize(node));
     }
 
@@ -538,19 +537,4 @@ internal sealed class NodeCanvasSceneHost
             : _host.ViewModel?.StyleOptions.Connection
               ?? GraphEditorStyleOptions.Default.Connection;
 
-    private NodeParameterViewModel? ResolveInlineParameter(NodeViewModel node, PortViewModel port)
-    {
-        var editor = _host.ViewModel;
-        if (editor is null
-            || port.Direction != PortDirection.Input
-            || string.IsNullOrWhiteSpace(port.InlineParameterKey)
-            || !ReferenceEquals(editor.SelectedNode, node)
-            || editor.HasMultipleSelection)
-        {
-            return null;
-        }
-
-        return editor.SelectedNodeParameters.FirstOrDefault(parameter =>
-            string.Equals(parameter.Key, port.InlineParameterKey, StringComparison.Ordinal));
-    }
 }

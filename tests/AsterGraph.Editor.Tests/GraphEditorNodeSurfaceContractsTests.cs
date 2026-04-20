@@ -126,18 +126,11 @@ public sealed class GraphEditorNodeSurfaceContractsTests
     }
 
     [Fact]
-    public void PortDefinition_LegacyInlineParameterKeyContract_RemainsAvailable()
+    public void PortDefinition_AndPortViewModel_DoNotExposeLegacyInlineParameterKey()
     {
-        var port = new PortDefinition(
-            "input",
-            "Input",
-            new PortTypeId("float"),
-            "#F3B36B",
-            "Legacy compatibility check",
-            " gain ");
-
-        Assert.Equal("gain", port.InlineParameterKey);
-        Assert.Equal("gain", new PortViewModel(new GraphPort("input", "Input", PortDirection.Input, "float", "#F3B36B", new PortTypeId("float"), "gain"), 0, 1).InlineParameterKey);
+        Assert.Null(typeof(PortDefinition).GetProperty("InlineParameterKey"));
+        Assert.Null(typeof(GraphPort).GetProperty("InlineParameterKey"));
+        Assert.Null(typeof(PortViewModel).GetProperty("InlineParameterKey"));
     }
 
     [Fact]
@@ -173,7 +166,7 @@ public sealed class GraphEditorNodeSurfaceContractsTests
     }
 
     [Fact]
-    public void GraphNodeVisualContext_LegacyPresenterConstructor_RemainsAvailable()
+    public void GraphNodeVisualContext_DoesNotExposeLegacyInlineParameterResolver()
     {
         var constructor = typeof(GraphNodeVisualContext).GetConstructor(
         [
@@ -191,8 +184,8 @@ public sealed class GraphEditorNodeSurfaceContractsTests
             typeof(Func<Control, NodeViewModel, PortViewModel, ContextRequestedEventArgs, bool>),
         ]);
 
-        Assert.NotNull(constructor);
-        Assert.NotNull(typeof(GraphNodeVisualContext).GetProperty(nameof(GraphNodeVisualContext.ResolveInlineParameter)));
+        Assert.Null(constructor);
+        Assert.Null(typeof(GraphNodeVisualContext).GetProperty("ResolveInlineParameter"));
     }
 
     [Fact]

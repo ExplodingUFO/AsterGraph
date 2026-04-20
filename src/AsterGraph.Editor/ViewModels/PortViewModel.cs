@@ -22,7 +22,6 @@ public sealed class PortViewModel
         DataType = model.DataType;
         TypeId = model.TypeId ?? new PortTypeId(model.DataType);
         AccentHex = model.AccentHex;
-        InlineParameterKey = model.InlineParameterKey;
         Index = index;
         Total = total;
     }
@@ -58,11 +57,6 @@ public sealed class PortViewModel
     public string AccentHex { get; }
 
     /// <summary>
-    /// Retained compatibility hint for legacy inline-parameter presenters.
-    /// </summary>
-    public string? InlineParameterKey { get; }
-
-    /// <summary>
     /// 端口在所属边上的索引。
     /// </summary>
     public int Index { get; }
@@ -77,5 +71,5 @@ public sealed class PortViewModel
     /// </summary>
     /// <returns>对应的不可变端口模型。</returns>
     public GraphPort ToModel()
-        => new(Id, Label, Direction, DataType, AccentHex, TypeId, InlineParameterKey);
+        => new(Id, Label, Direction, DataType, AccentHex, TypeId);
 }
