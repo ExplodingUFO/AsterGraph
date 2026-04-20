@@ -55,7 +55,7 @@ Keep new code on the stable canonical surfaces. Treat retained and compatibility
 - canonical onboarding: [Quick Start](../../docs/en/quick-start.md)
 - route and package boundary details: [Host Integration](../../docs/en/host-integration.md)
 - definition-driven inspector recipe: [Authoring Inspector Recipe](../../docs/en/authoring-inspector-recipe.md)
-- tiered node-surface route: width/height resize, inline literal authoring, fixed user-owned group frames, and geometry-based group membership travel through the same session/runtime path
+- tiered node-surface route: width/height resize, node-side parameter editing, fixed user-owned group frames, and geometry-based group membership travel through the same session/runtime path
 - hosts can consume `GetNodeSurfaceSnapshots()` plus `GetNodeGroupSnapshots()` and drive `TrySetNodeSize(...)`, `TrySetNodeGroupSize(...)`, and `TrySetNodeGroupMemberships(...)` instead of recomputing canvas geometry in UI code
 - plugin and custom-node starting point: [Plugin And Custom Node Recipe](../../docs/en/plugin-recipe.md)
 - retained-to-session migration guide: [Retained-To-Session Migration Recipe](../../docs/en/retained-migration-recipe.md)

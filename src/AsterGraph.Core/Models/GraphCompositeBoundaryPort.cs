@@ -13,7 +13,6 @@ namespace AsterGraph.Core.Models;
 /// <param name="ChildNodeId">Child graph node identifier that owns the exposed inner port.</param>
 /// <param name="ChildPortId">Child graph port identifier exposed through the boundary port.</param>
 /// <param name="TypeId">Optional stable type identifier used by compatibility services.</param>
-/// <param name="InlineParameterKey">Optional inline parameter key surfaced when no upstream connection is present.</param>
 public sealed record GraphCompositeBoundaryPort(
     string Id,
     string Label,
@@ -22,5 +21,4 @@ public sealed record GraphCompositeBoundaryPort(
     string AccentHex,
     string ChildNodeId,
     string ChildPortId,
-    PortTypeId? TypeId = null,
-    string? InlineParameterKey = null);
+    PortTypeId? TypeId = null);

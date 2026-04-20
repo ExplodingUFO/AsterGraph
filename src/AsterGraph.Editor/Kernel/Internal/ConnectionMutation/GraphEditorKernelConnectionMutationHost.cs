@@ -1,4 +1,5 @@
 using AsterGraph.Abstractions.Compatibility;
+using AsterGraph.Abstractions.Catalog;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Configuration;
 using AsterGraph.Editor.Diagnostics;
@@ -21,6 +22,8 @@ internal sealed partial class GraphEditorKernel
         GraphEditorBehaviorOptions IGraphEditorKernelConnectionMutationHost.BehaviorOptions => _owner._behaviorOptions;
 
         IPortCompatibilityService IGraphEditorKernelConnectionMutationHost.CompatibilityService => _owner._compatibilityService;
+
+        INodeCatalog IGraphEditorKernelConnectionMutationHost.NodeCatalog => _owner._nodeCatalog;
 
         GraphDocument IGraphEditorKernelConnectionMutationHost.Document => _owner.CreateActiveScopeDocumentSnapshot();
 

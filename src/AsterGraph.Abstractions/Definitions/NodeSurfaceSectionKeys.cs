@@ -6,6 +6,6 @@ namespace AsterGraph.Abstractions.Definitions;
 public static class NodeSurfaceSectionKeys
 {
     public const string Description = "description";
-    public const string InlineInputs = "inline-inputs";
-    public const string Parameters = "parameters";
+    public const string ParameterRail = "parameter-rail";
+    public const string ParameterEditors = "parameter-editors";
 }

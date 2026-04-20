@@ -151,6 +151,9 @@ public sealed partial class GraphEditorSession
     public GraphEditorPendingConnectionSnapshot GetPendingConnectionSnapshot()
         => CreatePendingConnectionSnapshot();
 
+    public IReadOnlyList<GraphEditorCompatibleConnectionTargetSnapshot> GetCompatibleConnectionTargets(string sourceNodeId, string sourcePortId)
+        => _host.GetCompatibleConnectionTargets(sourceNodeId, sourcePortId);
+
     public IReadOnlyList<GraphEditorCompatiblePortTargetSnapshot> GetCompatiblePortTargets(string sourceNodeId, string sourcePortId)
         => _host.GetCompatiblePortTargets(sourceNodeId, sourcePortId);
 

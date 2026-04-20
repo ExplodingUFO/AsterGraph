@@ -30,7 +30,7 @@ public sealed record AsterGraphPresentationOptions
     public IGraphMiniMapPresenter? MiniMapPresenter { get; init; }
 
     /// <summary>
-    /// Optional registry used by shipped node-inline and inspector surfaces to create parameter-editor bodies.
+    /// Optional registry used by shipped node-side parameter and inspector surfaces to create parameter-editor bodies.
     /// </summary>
     public INodeParameterEditorRegistry? NodeParameterEditorRegistry { get; init; }
 }

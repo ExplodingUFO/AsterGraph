@@ -82,6 +82,35 @@ public sealed class SerializationCompatibilityTests
     }
 
     [Fact]
+    public void GraphDocumentSerializer_WritesAndReadsParameterTargetKind()
+    {
+        var document = new GraphDocument(
+            "Parameter Target Graph",
+            "Parameter connection target roundtrip.",
+            [CreateNode("node-parameter-source"), CreateNode("node-parameter-target")],
+            [
+                CreateConnection(
+                    "connection-parameter-001",
+                    "node-parameter-source",
+                    "output-001",
+                    "node-parameter-target",
+                    "gain") with
+                {
+                    TargetKind = GraphConnectionTargetKind.Parameter,
+                },
+            ],
+            []);
+
+        var json = GraphDocumentSerializer.Serialize(document);
+        var restored = GraphDocumentSerializer.Deserialize(json);
+        var connection = Assert.Single(restored.Connections);
+
+        Assert.Contains("\"TargetKind\": \"Parameter\"", json);
+        Assert.Equal(GraphConnectionTargetKind.Parameter, connection.TargetKind);
+        Assert.Equal("gain", connection.TargetPortId);
+    }
+
+    [Fact]
     public void GraphDocument_Constructor_CanonicalizesRootScopeAgainstTopLevelFields()
     {
         var document = new GraphDocument(
@@ -295,6 +324,72 @@ public sealed class SerializationCompatibilityTests
 
         Assert.Equal(new GraphPoint(76, 76), group.Position);
         Assert.Equal(new GraphSize(288, 232), group.Size);
+    }
+
+    [Fact]
+    public void GraphDocumentSerializer_ReadsLegacyConnectionWithoutTargetKind_AsPortTarget()
+    {
+        const string json = """
+        {
+          "Title": "Legacy Graph",
+          "Description": "Legacy connection payload",
+          "Nodes": [
+            {
+              "Id": "node-source",
+              "Title": "Source",
+              "Category": "Tests",
+              "Subtitle": "Legacy",
+              "Description": "",
+              "Position": { "X": 0, "Y": 0 },
+              "Size": { "Width": 220, "Height": 140 },
+              "Inputs": [],
+              "Outputs": [
+                {
+                  "Id": "output-001",
+                  "Label": "Output",
+                  "Direction": "Output",
+                  "DataType": "float",
+                  "AccentHex": "#6AD5C4",
+                  "TypeId": { "Value": "float" }
+                }
+              ],
+              "AccentHex": "#6AD5C4",
+              "DefinitionId": { "Value": "tests.node" },
+              "ParameterValues": []
+            },
+            {
+              "Id": "node-target",
+              "Title": "Target",
+              "Category": "Tests",
+              "Subtitle": "Legacy",
+              "Description": "",
+              "Position": { "X": 240, "Y": 0 },
+              "Size": { "Width": 220, "Height": 140 },
+              "Inputs": [],
+              "Outputs": [],
+              "AccentHex": "#F3B36B",
+              "DefinitionId": { "Value": "tests.node" },
+              "ParameterValues": []
+            }
+          ],
+          "Connections": [
+            {
+              "Id": "connection-001",
+              "SourceNodeId": "node-source",
+              "SourcePortId": "output-001",
+              "TargetNodeId": "node-target",
+              "TargetPortId": "input-001",
+              "Label": "Output to Input",
+              "AccentHex": "#6AD5C4"
+            }
+          ]
+        }
+        """;
+
+        var restored = GraphDocumentSerializer.Deserialize(json);
+        var connection = Assert.Single(restored.Connections);
+
+        Assert.Equal(GraphConnectionTargetKind.Port, connection.TargetKind);
     }
 
     [Fact]

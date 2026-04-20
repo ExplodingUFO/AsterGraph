@@ -2,10 +2,11 @@ using Avalonia;
 using Avalonia.Automation;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
-using Avalonia.Data;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
+using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Styling;
 using AsterGraph.Avalonia.Controls;
 using AsterGraph.Avalonia.Styling;
@@ -21,14 +22,14 @@ namespace AsterGraph.Avalonia.Presentation;
 public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
 {
     private const double MinimumNodeWidth = 180d;
-    private const double InlineSurfaceMaxHeight = 132d;
-    private const double MinimumNodeHeight = 158d;
-    private const double MinimumNodeChromeHeight = 172d;
+    private const double MinimumNodeHeight = 160d;
+    private const double MinimumNodeChromeHeight = 180d;
     private const double AdditionalPortRowHeight = 34d;
     private const double StatusBarReserveHeight = 34d;
-    private const double InlineSurfaceReserveHeight = 152d;
+    private const double MinimumParameterRailWidth = 144d;
+    private const double EditorParameterRailWidth = 192d;
+    private const double MaximumParameterRailWidth = 228d;
 
-    /// <inheritdoc />
     public GraphNodeVisual Create(GraphNodeVisualContext context)
     {
         ArgumentNullException.ThrowIfNull(context);
@@ -36,19 +37,21 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
         var node = context.Node;
         var nodeStyle = GetNodeCardStyle(context);
         var portAnchors = new Dictionary<string, Control>(StringComparer.Ordinal);
+        var connectionTargetAnchors = new Dictionary<GraphConnectionTargetRef, Control>();
         var border = new Border
         {
             Width = node.Width,
-            Height = ResolveRenderedNodeHeight(node, hasStatusBar: false, hasInlineSurface: false),
+            Height = ResolveRenderedNodeHeight(node, hasStatusBar: false),
             CornerRadius = new CornerRadius(nodeStyle.CornerRadius),
             BorderThickness = new Thickness(nodeStyle.BorderThickness),
             Focusable = true,
+            ClipToBounds = true,
         };
         AutomationProperties.SetName(border, $"{node.Title} node");
 
         var root = new Grid
         {
-            RowDefinitions = new RowDefinitions("Auto,*,Auto"),
+            RowDefinitions = new RowDefinitions("Auto,*"),
         };
 
         var header = new Border
@@ -82,6 +85,7 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
             FontWeight = FontWeight.SemiBold,
             Foreground = BrushFactory.Solid(nodeStyle.TitleTextHex),
         });
+
         var subtitle = new TextBlock
         {
             FontSize = nodeStyle.SubtitleFontSize,
@@ -100,22 +104,32 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
         };
         Grid.SetColumn(badgePanel, 1);
         headerGrid.Children.Add(badgePanel);
+
         header.Child = headerGrid;
         root.Children.Add(header);
 
-        var body = new Grid
+        var contentGrid = new Grid
         {
             Margin = new Thickness(
                 nodeStyle.BodyHorizontalPadding,
                 nodeStyle.BodyTopPadding,
                 nodeStyle.BodyHorizontalPadding,
                 nodeStyle.BodyBottomPadding),
-            RowDefinitions = new RowDefinitions("Auto,*,Auto"),
+            RowDefinitions = new RowDefinitions("*,Auto"),
+            ColumnDefinitions = new ColumnDefinitions("*"),
+            ColumnSpacing = nodeStyle.BodyColumnSpacing,
+            RowSpacing = nodeStyle.BodyRowSpacing,
+        };
+        Grid.SetRow(contentGrid, 1);
+
+        var mainBody = new Grid
+        {
+            RowDefinitions = new RowDefinitions("Auto,*"),
             ColumnDefinitions = new ColumnDefinitions("*,*"),
             ColumnSpacing = nodeStyle.BodyColumnSpacing,
             RowSpacing = nodeStyle.BodyRowSpacing,
         };
-        Grid.SetRow(body, 1);
+        contentGrid.Children.Add(mainBody);
 
         var description = new TextBlock
         {
@@ -125,16 +139,34 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
             MaxHeight = nodeStyle.DescriptionMaxHeight,
         };
         Grid.SetColumnSpan(description, 2);
-        body.Children.Add(description);
+        mainBody.Children.Add(description);
 
         var inputs = BuildPortPanel(context, node.Inputs, isInput: true, portAnchors);
         Grid.SetRow(inputs, 1);
-        body.Children.Add(inputs);
+        mainBody.Children.Add(inputs);
 
         var outputs = BuildPortPanel(context, node.Outputs, isInput: false, portAnchors);
         Grid.SetRow(outputs, 1);
         Grid.SetColumn(outputs, 1);
-        body.Children.Add(outputs);
+        mainBody.Children.Add(outputs);
+
+        var parameterRailStack = new StackPanel
+        {
+            Spacing = 10,
+        };
+        var parameterRail = new Border
+        {
+            IsVisible = false,
+            BorderThickness = new Thickness(1),
+            CornerRadius = new CornerRadius(Math.Max(10, nodeStyle.CornerRadius - 10)),
+            Padding = new Thickness(10),
+            Child = parameterRailStack,
+            VerticalAlignment = VerticalAlignment.Stretch,
+        };
+        parameterRail.PointerPressed += (_, args) => args.Handled = true;
+        AutomationProperties.SetName(parameterRail, $"{node.Title} parameter rail");
+        Grid.SetColumn(parameterRail, 1);
+        contentGrid.Children.Add(parameterRail);
 
         var statusBarText = new TextBlock
         {
@@ -152,33 +184,8 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
             Padding = new Thickness(10, 4),
             Child = statusBarText,
         };
-        Grid.SetRow(statusBar, 2);
-        Grid.SetColumnSpan(statusBar, 2);
-        body.Children.Add(statusBar);
-        root.Children.Add(body);
-
-        var inlineContent = new StackPanel { Spacing = 10 };
-        var inlineSurface = new Border
-        {
-            IsVisible = false,
-            Margin = new Thickness(
-                nodeStyle.BodyHorizontalPadding,
-                0,
-                nodeStyle.BodyHorizontalPadding,
-                nodeStyle.BodyBottomPadding),
-            Padding = new Thickness(12),
-            BorderThickness = new Thickness(1),
-            CornerRadius = new CornerRadius(Math.Max(8, nodeStyle.CornerRadius - 10)),
-            Child = new ScrollViewer
-            {
-                VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
-                HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled,
-                MaxHeight = InlineSurfaceMaxHeight,
-                Content = inlineContent,
-            },
-        };
-        Grid.SetRow(inlineSurface, 2);
-        root.Children.Add(inlineSurface);
+        Grid.SetRow(statusBar, 1);
+        contentGrid.Children.Add(statusBar);
 
         var widthResizeThumb = CreateResizeThumb(
             $"{node.Title} width resize handle",
@@ -187,7 +194,12 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
             width: 10,
             height: double.NaN,
             new Cursor(StandardCursorType.SizeWestEast));
-        Grid.SetRowSpan(widthResizeThumb, 3);
+        widthResizeThumb.AddHandler(
+            InputElement.PointerPressedEvent,
+            (_, args) => context.BeginNodeResize(context.Node, GraphNodeResizeHandleKind.Right, args),
+            RoutingStrategies.Tunnel | RoutingStrategies.Bubble,
+            handledEventsToo: true);
+        Grid.SetRowSpan(widthResizeThumb, 2);
         root.Children.Add(widthResizeThumb);
 
         var heightResizeThumb = CreateResizeThumb(
@@ -197,7 +209,12 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
             width: double.NaN,
             height: 10,
             new Cursor(StandardCursorType.SizeNorthSouth));
-        Grid.SetRowSpan(heightResizeThumb, 3);
+        heightResizeThumb.AddHandler(
+            InputElement.PointerPressedEvent,
+            (_, args) => context.BeginNodeResize(context.Node, GraphNodeResizeHandleKind.Bottom, args),
+            RoutingStrategies.Tunnel | RoutingStrategies.Bubble,
+            handledEventsToo: true);
+        Grid.SetRowSpan(heightResizeThumb, 2);
         root.Children.Add(heightResizeThumb);
 
         var resizeThumb = CreateResizeThumb(
@@ -208,15 +225,21 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
             height: 16,
             new Cursor(StandardCursorType.SizeWestEast),
             margin: new Thickness(0, 0, 2, 2));
-        Grid.SetRowSpan(resizeThumb, 3);
+        resizeThumb.AddHandler(
+            InputElement.PointerPressedEvent,
+            (_, args) => context.BeginNodeResize(context.Node, GraphNodeResizeHandleKind.BottomRight, args),
+            RoutingStrategies.Tunnel | RoutingStrategies.Bubble,
+            handledEventsToo: true);
+        Grid.SetRowSpan(resizeThumb, 2);
         root.Children.Add(resizeThumb);
 
+        root.Children.Add(contentGrid);
         border.Child = root;
-
         border.PointerPressed += (_, args) =>
         {
             if (args.Source is Thumb
-                || args.Source is StyledElement { DataContext: PortViewModel or NodeParameterViewModel })
+                || args.Source is StyledElement { DataContext: PortViewModel }
+                || args.Source is StyledElement { DataContext: NodeParameterEndpointViewModel })
             {
                 return;
             }
@@ -237,55 +260,23 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
             args.Handled = context.OpenNodeContextMenu(border, context.Node, args);
         };
 
-        AttachResizeHistoryLifecycle(widthResizeThumb, context, $"Resized {node.Title} width.");
-        AttachResizeHistoryLifecycle(heightResizeThumb, context, $"Resized {node.Title} height.");
-        AttachResizeHistoryLifecycle(resizeThumb, context, $"Resized {node.Title}.");
-
-        widthResizeThumb.DragDelta += (_, args) =>
-        {
-            var currentNode = ResolveCurrentNode(context);
-            args.Handled = context.TrySetNodeWidth(
-                currentNode,
-                Math.Max(MinimumNodeWidth, currentNode.Width + args.Vector.X),
-                false);
-        };
-        heightResizeThumb.DragDelta += (_, args) =>
-        {
-            var currentNode = ResolveCurrentNode(context);
-            args.Handled = context.TrySetNodeSize(
-                currentNode,
-                new GraphSize(
-                    currentNode.Width,
-                    Math.Max(ResolveInteractiveMinimumHeight(currentNode), Math.Max(currentNode.Height, ResolveMinimumChromeHeight(currentNode)) + args.Vector.Y)),
-                false);
-        };
-        resizeThumb.DragDelta += (_, args) =>
-        {
-            var currentNode = ResolveCurrentNode(context);
-            args.Handled = context.TrySetNodeSize(
-                currentNode,
-                new GraphSize(
-                    Math.Max(MinimumNodeWidth, currentNode.Width + args.Vector.X),
-                    Math.Max(ResolveInteractiveMinimumHeight(currentNode), Math.Max(currentNode.Height, ResolveMinimumChromeHeight(currentNode)) + args.Vector.Y)),
-                false);
-        };
-
-        return new GraphNodeVisual(
+        var state = new DefaultNodeVisualState(
             border,
-            portAnchors,
-            new DefaultNodeVisualState(
-                border,
-                header,
-                subtitle,
-                description,
-                badgePanel,
-                statusBar,
-                statusBarText,
-                inlineSurface,
-                inlineContent));
+            header,
+            subtitle,
+            description,
+            badgePanel,
+            contentGrid,
+            parameterRail,
+            parameterRailStack,
+            connectionTargetAnchors,
+            statusBar,
+            statusBarText);
+
+        UpdateVisualState(state, context);
+        return new GraphNodeVisual(border, portAnchors, connectionTargetAnchors, state);
     }
 
-    /// <inheritdoc />
     public void Update(GraphNodeVisual visual, GraphNodeVisualContext context)
     {
         ArgumentNullException.ThrowIfNull(visual);
@@ -293,6 +284,12 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
 
         var state = visual.PresenterState as DefaultNodeVisualState
             ?? throw new InvalidOperationException("DefaultGraphNodeVisualPresenter requires its own visual state payload.");
+
+        UpdateVisualState(state, context);
+    }
+
+    private static void UpdateVisualState(DefaultNodeVisualState state, GraphNodeVisualContext context)
+    {
         var node = context.Node;
         var nodeStyle = GetNodeCardStyle(context);
 
@@ -303,9 +300,7 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
         state.Border.BorderThickness = new Thickness(node.IsSelected ? nodeStyle.SelectedBorderThickness : nodeStyle.BorderThickness);
         state.Subtitle.Text = node.DisplaySubtitle;
         state.Description.Text = node.DisplayDescription;
-        state.Description.IsVisible = node.ActiveSurfaceTier.ShowsSection(AsterGraph.Abstractions.Definitions.NodeSurfaceSectionKeys.Description);
-        state.InlineSurface.BorderBrush = BrushFactory.Solid(node.AccentHex, 0.45);
-        state.InlineSurface.Background = BrushFactory.Solid(nodeStyle.BackgroundHex, 0.92);
+        state.Description.IsVisible = node.ActiveSurfaceTier.ShowsSection(NodeSurfaceSectionKeys.Description);
 
         state.BadgePanel.Children.Clear();
         foreach (var badge in node.Presentation.TopRightBadges)
@@ -352,8 +347,185 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
             ToolTip.SetTip(state.StatusBar, null);
         }
 
-        RebuildInlineSurface(context, state);
-        state.Border.Height = ResolveRenderedNodeHeight(node, state.StatusBar.IsVisible, state.InlineSurface.IsVisible);
+        UpdateParameterRail(state, context, nodeStyle);
+        state.Border.Height = ResolveRenderedNodeHeight(node, state.StatusBar.IsVisible);
+    }
+
+    private static void UpdateParameterRail(DefaultNodeVisualState state, GraphNodeVisualContext context, NodeCardStyleOptions nodeStyle)
+    {
+        var node = context.Node;
+        var railVisible = node.HasParameterEndpoints && node.ActiveSurfaceTier.ShowsSection(NodeSurfaceSectionKeys.ParameterRail);
+        var editorsVisible = railVisible && node.ActiveSurfaceTier.ShowsSection(NodeSurfaceSectionKeys.ParameterEditors);
+
+        state.ConnectionTargetAnchors.Clear();
+        state.ParameterRailStack.Children.Clear();
+        state.ParameterRail.IsVisible = railVisible;
+        state.ContentGrid.ColumnDefinitions = railVisible
+            ? new ColumnDefinitions("*,Auto")
+            : new ColumnDefinitions("*");
+        Grid.SetColumnSpan(state.StatusBar, railVisible ? 2 : 1);
+
+        if (!railVisible)
+        {
+            return;
+        }
+
+        state.ParameterRail.Width = ResolveParameterRailWidth(node);
+        state.ParameterRail.Background = BrushFactory.Solid("#0F1A26", 0.94);
+        state.ParameterRail.BorderBrush = BrushFactory.Solid(node.AccentHex, node.IsSelected ? 0.84 : 0.56);
+
+        foreach (var endpoint in node.ParameterEndpoints)
+        {
+            var section = new StackPanel { Spacing = 6 };
+            var headerButton = CreateParameterEndpointButton(context, endpoint, state.ConnectionTargetAnchors);
+            section.Children.Add(headerButton);
+
+            if (editorsVisible)
+            {
+                if (endpoint.IsConnected)
+                {
+                    section.Children.Add(CreateConnectedParameterBinding(context, endpoint));
+                }
+                else
+                {
+                    var editorHost = new NodeParameterEditorHost
+                    {
+                        Parameter = endpoint.Parameter,
+                        NodeParameterEditorRegistry = context.NodeParameterEditorRegistry,
+                        Usage = NodeParameterEditorUsage.NodeSurface,
+                    };
+                    AutomationProperties.SetName(editorHost, $"{node.Title} parameter editor {endpoint.Parameter.DisplayName}");
+                    section.Children.Add(editorHost);
+
+                    if (endpoint.Parameter.HasHelpText)
+                    {
+                        section.Children.Add(new TextBlock
+                        {
+                            Text = endpoint.Parameter.HelpText,
+                            FontSize = 10,
+                            TextWrapping = TextWrapping.Wrap,
+                            Foreground = BrushFactory.Solid(nodeStyle.SubtitleTextHex, 0.72),
+                        });
+                    }
+                }
+            }
+
+            state.ParameterRailStack.Children.Add(section);
+        }
+    }
+
+    private static Button CreateParameterEndpointButton(
+        GraphNodeVisualContext context,
+        NodeParameterEndpointViewModel endpoint,
+        Dictionary<GraphConnectionTargetRef, Control> connectionTargetAnchors)
+    {
+        var dot = new Border
+        {
+            Width = 10,
+            Height = 10,
+            CornerRadius = new CornerRadius(999),
+            Background = BrushFactory.Solid("#F3B36B"),
+            VerticalAlignment = VerticalAlignment.Top,
+            Margin = new Thickness(0, 4, 0, 0),
+        };
+        connectionTargetAnchors[endpoint.Target] = dot;
+
+        var summary = endpoint.IsConnected
+            ? endpoint.ConnectedDisplayText ?? "Connected"
+            : DescribeParameterValue(endpoint.Parameter);
+        var content = new Grid
+        {
+            ColumnDefinitions = new ColumnDefinitions("Auto,*"),
+            ColumnSpacing = 8,
+        };
+        content.Children.Add(dot);
+
+        var textStack = new StackPanel { Spacing = 2 };
+        textStack.Children.Add(new TextBlock
+        {
+            Text = endpoint.Parameter.DisplayName,
+            FontSize = 12,
+            FontWeight = FontWeight.SemiBold,
+            Foreground = BrushFactory.Solid("#F1F7FA", 0.98),
+        });
+        textStack.Children.Add(new TextBlock
+        {
+            Text = summary,
+            FontSize = 10,
+            TextWrapping = TextWrapping.Wrap,
+            Foreground = BrushFactory.Solid("#A5C3CE", 0.92),
+        });
+        Grid.SetColumn(textStack, 1);
+        content.Children.Add(textStack);
+
+        var button = new Button
+        {
+            DataContext = endpoint,
+            Background = Brushes.Transparent,
+            BorderThickness = new Thickness(0),
+            Padding = new Thickness(0),
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            HorizontalContentAlignment = HorizontalAlignment.Stretch,
+            Content = content,
+        };
+        AutomationProperties.SetName(button, $"{context.Node.Title} parameter endpoint {endpoint.Parameter.DisplayName}");
+        button.PointerPressed += (_, args) =>
+        {
+            if (args.GetCurrentPoint(button).Properties.IsLeftButtonPressed)
+            {
+                args.Handled = true;
+            }
+        };
+        button.Click += (_, _) =>
+        {
+            context.FocusCanvas();
+            context.ActivateConnectionTarget(context.Node, endpoint.Target);
+        };
+        return button;
+    }
+
+    private static Border CreateConnectedParameterBinding(GraphNodeVisualContext context, NodeParameterEndpointViewModel endpoint)
+    {
+        var bindingSummary = new Border
+        {
+            Background = BrushFactory.Solid("#152434", 0.98),
+            BorderBrush = BrushFactory.Solid("#F3B36B", 0.5),
+            BorderThickness = new Thickness(1),
+            CornerRadius = new CornerRadius(8),
+            Padding = new Thickness(8, 6),
+            Child = new TextBlock
+            {
+                Text = endpoint.ConnectedDisplayText ?? "Connected",
+                FontSize = 11,
+                TextWrapping = TextWrapping.Wrap,
+                Foreground = BrushFactory.Solid("#F8FBFD", 0.96),
+            },
+        };
+        AutomationProperties.SetName(bindingSummary, $"{context.Node.Title} parameter binding {endpoint.Parameter.DisplayName}");
+        bindingSummary.PointerPressed += (_, args) => args.Handled = true;
+        return bindingSummary;
+    }
+
+    private static string DescribeParameterValue(NodeParameterViewModel parameter)
+    {
+        if (parameter.HasMixedValues)
+        {
+            return parameter.MixedValueHint;
+        }
+
+        if (parameter.IsBoolean)
+        {
+            return parameter.BoolValue is true ? "Enabled" : "Disabled";
+        }
+
+        if (parameter.IsEnum)
+        {
+            return parameter.SelectedOption?.Label ?? parameter.StringValue;
+        }
+
+        return string.IsNullOrWhiteSpace(parameter.StringValue)
+            ? parameter.TypeId.Value
+            : parameter.StringValue;
     }
 
     private static double ResolveMinimumChromeHeight(NodeViewModel node)
@@ -365,7 +537,7 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
     private static double ResolveInteractiveMinimumHeight(NodeViewModel node)
         => Math.Max(MinimumNodeHeight, ResolveMinimumChromeHeight(node));
 
-    private static double ResolveRenderedNodeHeight(NodeViewModel node, bool hasStatusBar, bool hasInlineSurface)
+    private static double ResolveRenderedNodeHeight(NodeViewModel node, bool hasStatusBar)
     {
         var renderedHeight = Math.Max(node.Height, ResolveInteractiveMinimumHeight(node));
         if (hasStatusBar)
@@ -373,242 +545,18 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
             renderedHeight += StatusBarReserveHeight;
         }
 
-        if (hasInlineSurface)
-        {
-            renderedHeight += InlineSurfaceReserveHeight;
-        }
-
         return renderedHeight;
     }
 
-    private static void RebuildInlineSurface(GraphNodeVisualContext context, DefaultNodeVisualState state)
+    private static double ResolveParameterRailWidth(NodeViewModel node)
     {
-        state.InlineContent.Children.Clear();
-        var showInlineInputs = context.Node.ActiveSurfaceTier.ShowsSection(AsterGraph.Abstractions.Definitions.NodeSurfaceSectionKeys.InlineInputs);
-        var showParameters = context.Node.ActiveSurfaceTier.ShowsSection(AsterGraph.Abstractions.Definitions.NodeSurfaceSectionKeys.Parameters);
-        state.InlineSurface.IsVisible = showInlineInputs || showParameters;
-        if (!state.InlineSurface.IsVisible)
-        {
-            return;
-        }
-
-        if (!ReferenceEquals(context.Editor.SelectedNode, context.Node) || context.Editor.HasMultipleSelection)
-        {
-            state.InlineContent.Children.Add(CreateMutedMessage("Select only this node to edit inline values."));
-            return;
-        }
-
-        var boundInputKeys = context.Node.Inputs
-            .Select(port => port.InlineParameterKey)
-            .Where(key => !string.IsNullOrWhiteSpace(key))
-            .Cast<string>()
-            .ToHashSet(StringComparer.Ordinal);
-
-        var renderedAnySection = false;
-        var inlineInputs = context.Node.Inputs
-            .Where(port => !string.IsNullOrWhiteSpace(port.InlineParameterKey))
-            .Select(port => new
-            {
-                Port = port,
-                Parameter = context.ResolveInlineParameter(context.Node, port),
-                IsConnected = context.HasIncomingConnection(context.Node, port),
-            })
-            .Where(item => item.Parameter is not null)
-            .ToList();
-
-        if (showInlineInputs && inlineInputs.Count > 0)
-        {
-            renderedAnySection = true;
-            state.InlineContent.Children.Add(CreateSectionHeader("Input Values"));
-            foreach (var item in inlineInputs)
-            {
-                state.InlineContent.Children.Add(CreateParameterCard(
-                    context.NodeParameterEditorRegistry,
-                    item.Parameter!,
-                    context.Node.ActiveSurfaceTier.InlineEditorTemplateKey,
-                    item.Port.Label,
-                    item.IsConnected
-                        ? "Connected input overrides the local literal."
-                        : null));
-            }
-        }
-
-        var generalParameters = context.Editor.SelectedNodeParameters
-            .Where(parameter => !boundInputKeys.Contains(parameter.Key))
-            .ToList();
-        if (showParameters && generalParameters.Count > 0)
-        {
-            renderedAnySection = true;
-            state.InlineContent.Children.Add(CreateSectionHeader("Parameters"));
-            foreach (var parameter in generalParameters)
-            {
-                state.InlineContent.Children.Add(CreateParameterCard(
-                    context.NodeParameterEditorRegistry,
-                    parameter,
-                    context.Node.ActiveSurfaceTier.InlineEditorTemplateKey,
-                    null,
-                    null));
-            }
-        }
-
-        if (!renderedAnySection)
-        {
-            state.InlineContent.Children.Add(CreateMutedMessage("This node has no inline-editable values."));
-        }
+        var desiredWidth = node.ActiveSurfaceTier.ShowsSection(NodeSurfaceSectionKeys.ParameterEditors)
+            ? EditorParameterRailWidth
+            : MinimumParameterRailWidth;
+        return Math.Min(
+            MaximumParameterRailWidth,
+            Math.Max(desiredWidth, node.Width * 0.32d));
     }
-
-    private static Control CreateParameterCard(
-        INodeParameterEditorRegistry? nodeParameterEditorRegistry,
-        NodeParameterViewModel parameter,
-        string? templateKey,
-        string? portLabel,
-        string? upstreamReason)
-    {
-        var card = new Border
-        {
-            Background = BrushFactory.Solid("#0B1420", 0.24),
-            BorderBrush = BrushFactory.Solid("#FFFFFF", 0.08),
-            BorderThickness = new Thickness(1),
-            CornerRadius = new CornerRadius(10),
-            Padding = new Thickness(10),
-        };
-
-        var stack = new StackPanel { Spacing = 6 };
-        var header = new Grid
-        {
-            ColumnDefinitions = new ColumnDefinitions("*,Auto"),
-            ColumnSpacing = 8,
-        };
-
-        var titleStack = new StackPanel { Spacing = 2 };
-        titleStack.Children.Add(new TextBlock
-        {
-            Text = parameter.DisplayName,
-            FontSize = 13,
-            FontWeight = FontWeight.SemiBold,
-            Foreground = BrushFactory.Solid("#F7FBFF", 0.96),
-        });
-        if (!string.IsNullOrWhiteSpace(portLabel))
-        {
-            titleStack.Children.Add(new TextBlock
-            {
-                Text = $"Port: {portLabel}",
-                FontSize = 11,
-                Foreground = BrushFactory.Solid("#9FB5C8", 0.92),
-            });
-        }
-
-        if (!string.IsNullOrWhiteSpace(parameter.Description))
-        {
-            titleStack.Children.Add(new TextBlock
-            {
-                Text = parameter.Description,
-                FontSize = 11,
-                TextWrapping = TextWrapping.Wrap,
-                Foreground = BrushFactory.Solid("#BFD0DE", 0.9),
-            });
-        }
-
-        header.Children.Add(titleStack);
-
-        var resetButton = new Button
-        {
-            Content = "Reset",
-            Padding = new Thickness(10, 4),
-            MinHeight = 28,
-            IsVisible = parameter.CanResetToDefault,
-            IsEnabled = parameter.CanResetToDefault,
-        };
-        resetButton.Bind(Visual.IsVisibleProperty, new Binding(nameof(NodeParameterViewModel.CanResetToDefault)));
-        resetButton.Bind(InputElement.IsEnabledProperty, new Binding(nameof(NodeParameterViewModel.CanResetToDefault)));
-        resetButton.Click += (_, _) => parameter.ResetToDefault();
-        Grid.SetColumn(resetButton, 1);
-        header.Children.Add(resetButton);
-        stack.Children.Add(header);
-
-        if (!string.IsNullOrWhiteSpace(upstreamReason))
-        {
-            stack.Children.Add(new Border
-            {
-                Background = BrushFactory.Solid("#26445D", 0.42),
-                BorderBrush = BrushFactory.Solid("#89BFF1", 0.42),
-                BorderThickness = new Thickness(1),
-                CornerRadius = new CornerRadius(999),
-                Padding = new Thickness(8, 4),
-                Child = new TextBlock
-                {
-                    Text = upstreamReason,
-                    FontSize = 11,
-                    TextWrapping = TextWrapping.Wrap,
-                    Foreground = BrushFactory.Solid("#DCEEFF", 0.96),
-                },
-            });
-        }
-        else
-        {
-            var editorHost = new NodeParameterEditorHost
-            {
-                Parameter = parameter,
-                TemplateKey = templateKey,
-                NodeParameterEditorRegistry = nodeParameterEditorRegistry,
-                Usage = NodeParameterEditorUsage.NodeInline,
-            };
-            editorHost.ApplyTemplate();
-            stack.Children.Add(editorHost);
-        }
-
-        var help = new TextBlock
-        {
-            FontSize = 11,
-            TextWrapping = TextWrapping.Wrap,
-            Foreground = BrushFactory.Solid("#A8BFCE", 0.92),
-        };
-        help.Bind(TextBlock.TextProperty, new Binding(nameof(NodeParameterViewModel.HelpText)));
-        help.Bind(Visual.IsVisibleProperty, new Binding(nameof(NodeParameterViewModel.HasHelpText)));
-        stack.Children.Add(help);
-
-        var readOnlyReason = new TextBlock
-        {
-            FontSize = 11,
-            TextWrapping = TextWrapping.Wrap,
-            Foreground = BrushFactory.Solid("#F2D08E", 0.96),
-        };
-        readOnlyReason.Bind(TextBlock.TextProperty, new Binding(nameof(NodeParameterViewModel.ReadOnlyReason)));
-        readOnlyReason.Bind(Visual.IsVisibleProperty, new Binding(nameof(NodeParameterViewModel.HasReadOnlyReason)));
-        stack.Children.Add(readOnlyReason);
-
-        var validation = new TextBlock
-        {
-            FontSize = 11,
-            TextWrapping = TextWrapping.Wrap,
-            Foreground = BrushFactory.Solid("#FF8F8F", 0.98),
-        };
-        validation.Bind(TextBlock.TextProperty, new Binding(nameof(NodeParameterViewModel.ValidationMessage)));
-        validation.Bind(Visual.IsVisibleProperty, new Binding(nameof(NodeParameterViewModel.HasValidationError)));
-        stack.Children.Add(validation);
-
-        card.Child = stack;
-        card.DataContext = parameter;
-        return card;
-    }
-
-    private static TextBlock CreateSectionHeader(string text)
-        => new()
-        {
-            Text = text,
-            FontSize = 11,
-            FontWeight = FontWeight.Bold,
-            Foreground = BrushFactory.Solid("#8EA7BA", 0.95),
-        };
-
-    private static TextBlock CreateMutedMessage(string text)
-        => new()
-        {
-            Text = text,
-            FontSize = 11,
-            TextWrapping = TextWrapping.Wrap,
-            Foreground = BrushFactory.Solid("#9FB5C8", 0.92),
-        };
 
     private static StackPanel BuildPortPanel(
         GraphNodeVisualContext context,
@@ -734,24 +682,6 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
         return thumb;
     }
 
-    private static void AttachResizeHistoryLifecycle(Thumb thumb, GraphNodeVisualContext context, string completionStatus)
-    {
-        thumb.PointerPressed += (_, args) =>
-        {
-            if (!args.GetCurrentPoint(thumb).Properties.IsLeftButtonPressed)
-            {
-                return;
-            }
-
-            context.FocusCanvas();
-        };
-        thumb.DragStarted += (_, _) => context.BeginHistoryInteraction();
-        thumb.DragCompleted += (_, _) => context.CompleteHistoryInteraction(completionStatus);
-    }
-
-    private static NodeViewModel ResolveCurrentNode(GraphNodeVisualContext context)
-        => context.Editor.FindNode(context.Node.Id) ?? context.Node;
-
     private static NodeCardStyleOptions GetNodeCardStyle(GraphNodeVisualContext context)
         => context.StyleOptions.NodeOverrides.FirstOrDefault(overrideStyle => overrideStyle.DefinitionId == context.Node.DefinitionId)?.Style
            ?? context.StyleOptions.NodeCard;
@@ -768,8 +698,10 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
         TextBlock Subtitle,
         TextBlock Description,
         StackPanel BadgePanel,
+        Grid ContentGrid,
+        Border ParameterRail,
+        StackPanel ParameterRailStack,
+        Dictionary<GraphConnectionTargetRef, Control> ConnectionTargetAnchors,
         Border StatusBar,
-        TextBlock StatusBarText,
-        Border InlineSurface,
-        StackPanel InlineContent);
+        TextBlock StatusBarText);
 }

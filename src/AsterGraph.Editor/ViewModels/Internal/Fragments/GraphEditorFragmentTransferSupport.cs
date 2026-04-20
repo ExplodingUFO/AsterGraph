@@ -104,7 +104,8 @@ internal sealed class GraphEditorFragmentTransferSupport
                 copiedConnection.Label,
                 copiedConnection.AccentHex,
                 copiedConnection.ConversionId,
-                copiedConnection.Presentation?.NoteText));
+                copiedConnection.Presentation?.NoteText,
+                copiedConnection.TargetKind));
         }
 
         if (pastedNodes.Count == 0)

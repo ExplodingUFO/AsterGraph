@@ -206,7 +206,7 @@ public sealed class DemoCapabilityShowcaseTests
                 && group.ExtraPadding == default);
         var lightSurface = Assert.Single(viewModel.Editor.Session.Queries.GetNodeSurfaceSnapshots(), snapshot => snapshot.NodeId == "light");
         Assert.Equal(GraphNodeExpansionState.Collapsed, lightSurface.ExpansionState);
-        Assert.Equal("inline-rich", lightSurface.ActiveTier.Key);
+        Assert.Equal("parameter-editors", lightSurface.ActiveTier.Key);
         Assert.Contains(
             canvas!.GetVisualDescendants().OfType<Border>(),
             border => string.Equals(

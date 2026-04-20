@@ -93,18 +93,15 @@ public static class DemoProof
         var gradientNode = shell.Editor.FindNode("gradient")
             ?? throw new InvalidOperationException("Demo proof requires the gradient node.");
         var tieredNodeSurfaceOk =
-            lightingNodeTier.Key == "inline-rich"
+            lightingNodeTier.Key == "parameter-editors"
             && lightingNodeTier.MinWidth == 420d
             && lightingNodeTier.MinHeight == 250d
-            && lightingNodeTier.ShowsSection(NodeSurfaceSectionKeys.InlineInputs)
-            && lightingNodeTier.ShowsSection(NodeSurfaceSectionKeys.Parameters)
-            && string.Equals(lightingNodeTier.InlineEditorTemplateKey, "stock.inline.rich", StringComparison.Ordinal)
+            && lightingNodeTier.ShowsSection(NodeSurfaceSectionKeys.ParameterRail)
+            && lightingNodeTier.ShowsSection(NodeSurfaceSectionKeys.ParameterEditors)
             && terrainGroup is not null
             && terrainGroup.NodeIds.Count == 2
             && shell.Editor.HasIncomingConnection(lightingNode, pulsePort)
-            && !shell.Editor.HasIncomingConnection(lightingNode, rimMaskPort)
-            && shell.Editor.ResolveInlineParameter(lightingNode, pulsePort) is not null
-            && shell.Editor.ResolveInlineParameter(lightingNode, rimMaskPort)?.Key == "rimMask";
+            && !shell.Editor.HasIncomingConnection(lightingNode, rimMaskPort);
         var noiseNode = shell.Editor.FindNode("noise")
             ?? throw new InvalidOperationException("Demo proof requires the noise node.");
         var expectedGroupLeft = Math.Min(gradientNode.X, noiseNode.X);
@@ -337,8 +334,7 @@ public static class DemoProof
             && editor.CreateDocumentSnapshot().Connections.Count == 0
             && updatedLightNode is not null
             && updatedPulsePort is not null
-            && !editor.HasIncomingConnection(updatedLightNode, updatedPulsePort)
-            && string.Equals(editor.ResolveInlineParameter(updatedLightNode, updatedPulsePort)?.Key, "pulseBias", StringComparison.Ordinal);
+            && !editor.HasIncomingConnection(updatedLightNode, updatedPulsePort);
 
         return (edgeNoteOk, disconnectFlowOk);
     }
@@ -424,8 +420,7 @@ public static class DemoProof
             direction,
             definition.TypeId.Value,
             definition.AccentHex,
-            definition.TypeId,
-            definition.InlineParameterKey);
+            definition.TypeId);
 
     private static GraphConnection CreateProofConnection(
         string sourceNodeId,

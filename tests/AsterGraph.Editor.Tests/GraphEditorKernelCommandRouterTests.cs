@@ -21,6 +21,7 @@ public sealed class GraphEditorKernelCommandRouterTests
     private const string TargetNodeId = "tests.kernel.target-001";
     private const string SourcePortId = "out";
     private const string TargetPortId = "in";
+    private const string TargetParameterKey = "gain";
     private const string CompositeNodeId = "tests.kernel.composite-001";
     private const string ChildGraphId = "graph-child-001";
     private const string ChildSourceNodeId = "tests.kernel.child-source-001";
@@ -286,6 +287,27 @@ public sealed class GraphEditorKernelCommandRouterTests
     }
 
     [Fact]
+    public void GraphEditorKernel_TryExecuteCommand_AcceptsTypedParameterTargets()
+    {
+        var kernel = CreateParameterEndpointKernel();
+
+        var connected = kernel.TryExecuteCommand(
+            CreateCommand(
+                "connections.connect",
+                ("sourceNodeId", SourceNodeId),
+                ("sourcePortId", SourcePortId),
+                ("targetNodeId", TargetNodeId),
+                ("targetPortId", TargetParameterKey),
+                ("targetKind", nameof(GraphConnectionTargetKind.Parameter))));
+
+        var connection = Assert.Single(kernel.CreateDocumentSnapshot().Connections);
+
+        Assert.True(connected);
+        Assert.Equal(TargetParameterKey, connection.TargetPortId);
+        Assert.Equal(GraphConnectionTargetKind.Parameter, connection.TargetKind);
+    }
+
+    [Fact]
     public void GraphEditorKernel_TryExecuteCommand_AcceptsCompositePromotionPayloads()
     {
         var kernel = CreateKernel();
@@ -466,6 +488,17 @@ public sealed class GraphEditorKernelCommandRouterTests
             GraphEditorStyleOptions.Default,
             behaviorOptions ?? GraphEditorBehaviorOptions.Default);
 
+    private static GraphEditorKernel CreateParameterEndpointKernel(
+        IGraphWorkspaceService? workspaceService = null,
+        GraphEditorBehaviorOptions? behaviorOptions = null)
+        => new(
+            CreateParameterEndpointDocument(),
+            CreateParameterEndpointCatalog(),
+            new DefaultPortCompatibilityService(),
+            workspaceService ?? new EmptyWorkspaceService(),
+            GraphEditorStyleOptions.Default,
+            behaviorOptions ?? GraphEditorBehaviorOptions.Default);
+
     private static GraphDocument CreateDocument()
         => new(
             "Kernel Command Router Graph",
@@ -531,6 +564,38 @@ public sealed class GraphEditorKernelCommandRouterTests
             [
                 new GraphConnection("loaded-connection", "loaded-source", SourcePortId, "loaded-target", TargetPortId, "loaded-link", "#55D8C1"),
             ]);
+
+    private static GraphDocument CreateParameterEndpointDocument()
+        => new(
+            "Kernel Parameter Graph",
+            "Regression coverage for parameter connection targets.",
+            [
+                new GraphNode(
+                    SourceNodeId,
+                    "Kernel Source",
+                    "Tests",
+                    "Kernel",
+                    "Source node for command router tests.",
+                    new GraphPoint(120, 160),
+                    new GraphSize(220, 140),
+                    [],
+                    [new GraphPort(SourcePortId, "Output", PortDirection.Output, "float", "#6AD5C4", new PortTypeId("float"))],
+                    "#6AD5C4",
+                    DefinitionId),
+                new GraphNode(
+                    TargetNodeId,
+                    "Kernel Target",
+                    "Tests",
+                    "Kernel",
+                    "Target node for command router tests.",
+                    new GraphPoint(420, 160),
+                    new GraphSize(220, 140),
+                    [new GraphPort(TargetPortId, "Input", PortDirection.Input, "float", "#F3B36B", new PortTypeId("float"))],
+                    [],
+                    "#F3B36B",
+                    DefinitionId),
+            ],
+            []);
 
     private static GraphDocument CreateScopedDocument()
         => GraphDocument.CreateScoped(
@@ -623,6 +688,27 @@ public sealed class GraphEditorKernelCommandRouterTests
             "Kernel",
             [new PortDefinition(TargetPortId, "Input", new PortTypeId("float"), "#F3B36B")],
             [new PortDefinition(SourcePortId, "Output", new PortTypeId("float"), "#6AD5C4")]));
+        return catalog;
+    }
+
+    private static NodeCatalog CreateParameterEndpointCatalog()
+    {
+        var catalog = new NodeCatalog();
+        catalog.RegisterDefinition(new NodeDefinition(
+            DefinitionId,
+            "Kernel Node",
+            "Tests",
+            "Kernel",
+            [new PortDefinition(TargetPortId, "Input", new PortTypeId("float"), "#F3B36B")],
+            [new PortDefinition(SourcePortId, "Output", new PortTypeId("float"), "#6AD5C4")],
+            [
+                new NodeParameterDefinition(
+                    TargetParameterKey,
+                    "Gain",
+                    new PortTypeId("float"),
+                    ParameterEditorKind.Number,
+                    defaultValue: 1.0d),
+            ]));
         return catalog;
     }
 

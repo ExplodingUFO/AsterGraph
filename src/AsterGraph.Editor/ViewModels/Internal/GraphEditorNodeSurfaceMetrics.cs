@@ -1,4 +1,3 @@
-using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Runtime;
 
@@ -11,9 +10,6 @@ internal static class GraphEditorNodeSurfaceMetrics
     private const double PortRowHeight = 24d;
     private const double PortRowSpacing = 8d;
     private const double StatusBarHeight = 28d;
-    private const double InlineInputsHeight = 108d;
-    private const double ParametersHeight = 144d;
-
     internal static double CalculateRequiredHeight(int inputCount, int outputCount)
     {
         var visiblePortRows = Math.Max(Math.Max(inputCount, outputCount), 1);
@@ -34,22 +30,10 @@ internal static class GraphEditorNodeSurfaceMetrics
         GraphEditorNodeSurfaceTierSnapshot activeTier,
         bool hasStatusBar)
     {
-        ArgumentNullException.ThrowIfNull(activeTier);
-
         var renderedHeight = persistedSize.Height;
         if (hasStatusBar)
         {
             renderedHeight += StatusBarHeight;
-        }
-
-        if (activeTier.ShowsSection(NodeSurfaceSectionKeys.InlineInputs))
-        {
-            renderedHeight += InlineInputsHeight;
-        }
-
-        if (activeTier.ShowsSection(NodeSurfaceSectionKeys.Parameters))
-        {
-            renderedHeight += ParametersHeight;
         }
 
         return renderedHeight;

@@ -8,7 +8,7 @@ using AsterGraph.Editor.ViewModels;
 namespace AsterGraph.Avalonia.Presentation;
 
 /// <summary>
-/// Stock Avalonia parameter-editor registry used by shipped inspector and inline authoring surfaces.
+/// Stock Avalonia parameter-editor registry used by shipped inspector and node-surface authoring surfaces.
 /// </summary>
 public sealed class DefaultNodeParameterEditorRegistry : INodeParameterEditorRegistry
 {
@@ -25,7 +25,7 @@ public sealed class DefaultNodeParameterEditorRegistry : INodeParameterEditorReg
         {
             var textBox = new TextBox
             {
-                MinHeight = request.Usage == NodeParameterEditorUsage.NodeInline ? 88 : 96,
+                MinHeight = request.Usage == NodeParameterEditorUsage.NodeSurface ? 88 : 96,
                 AcceptsReturn = true,
                 TextWrapping = TextWrapping.Wrap,
                 Classes = { "astergraph-input" },
@@ -74,7 +74,7 @@ public sealed class DefaultNodeParameterEditorRegistry : INodeParameterEditorReg
         {
             control = new TextBlock
             {
-                Text = "No shipped inline editor is available for this value.",
+                Text = "No shipped parameter editor is available for this value.",
                 FontSize = 11,
                 TextWrapping = TextWrapping.Wrap,
             };

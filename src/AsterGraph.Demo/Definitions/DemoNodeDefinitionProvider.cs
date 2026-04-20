@@ -186,8 +186,8 @@ public sealed class DemoNodeDefinitionProvider : INodeDefinitionProvider
                 [
                     new PortDefinition("albedo", "Albedo", new PortTypeId("color3"), palette.Procedure),
                     new PortDefinition("rough", "Roughness", new PortTypeId("float"), palette.Highlight),
-                    new PortDefinition("pulse", "Pulse", new PortTypeId("float"), palette.Signal, inlineParameterKey: "pulseBias"),
-                    new PortDefinition("rimMask", "Rim Mask", new PortTypeId("float"), palette.Input, inlineParameterKey: "rimMask"),
+                    new PortDefinition("pulse", "Pulse", new PortTypeId("float"), palette.Signal),
+                    new PortDefinition("rimMask", "Rim Mask", new PortTypeId("float"), palette.Input),
                 ],
                 [
                     new PortDefinition("lit", "Lit Color", new PortTypeId("color3"), palette.Color),
@@ -207,7 +207,7 @@ public sealed class DemoNodeDefinitionProvider : INodeDefinitionProvider
                         "Pulse Bias",
                         new PortTypeId("float"),
                         ParameterEditorKind.Number,
-                        description: "Inline fallback literal shown when the pulse input is disconnected.",
+                        description: "Parameter fallback value shown when the pulse input is disconnected.",
                         defaultValue: 0.2,
                         constraints: new ParameterConstraints(Minimum: -1, Maximum: 1),
                         groupName: "Inputs",
@@ -217,7 +217,7 @@ public sealed class DemoNodeDefinitionProvider : INodeDefinitionProvider
                         "Rim Mask",
                         new PortTypeId("float"),
                         ParameterEditorKind.Number,
-                        description: "Inline authoring value shown when the active tier allows inline inputs and the rim mask input is disconnected.",
+                        description: "Parameter value shown when the active tier exposes the node-side rail and the rim mask input is disconnected.",
                         defaultValue: 0.68,
                         constraints: new ParameterConstraints(Minimum: 0, Maximum: 1),
                         groupName: "Inputs",

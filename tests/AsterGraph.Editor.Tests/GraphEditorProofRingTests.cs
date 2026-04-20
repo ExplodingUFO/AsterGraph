@@ -212,7 +212,7 @@ public sealed class GraphEditorProofRingTests
 
         Assert.Equal(new GraphSize(420d, 260d), surface.Size);
         Assert.Equal(GraphNodeExpansionState.Collapsed, surface.ExpansionState);
-        Assert.Equal("inline-rich", surface.ActiveTier.Key);
+        Assert.Equal("parameter-editors", surface.ActiveTier.Key);
         Assert.Equal(groupId, surface.GroupId);
         Assert.Equal("Proof Cluster", group.Title);
         Assert.True(group.IsCollapsed);

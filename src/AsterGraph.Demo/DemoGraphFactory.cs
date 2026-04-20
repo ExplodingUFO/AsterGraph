@@ -77,8 +77,7 @@ public static class DemoGraphFactory
             direction,
             definition.TypeId.Value,
             definition.AccentHex,
-            definition.TypeId,
-            definition.InlineParameterKey);
+            definition.TypeId);
 
     private static GraphConnection Connect(
         string sourceNodeId,

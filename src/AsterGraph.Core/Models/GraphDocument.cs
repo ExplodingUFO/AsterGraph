@@ -245,8 +245,7 @@ public sealed record GraphDocument
                 port.Direction,
                 port.DataType,
                 port.AccentHex,
-                port.TypeId,
-                port.InlineParameterKey))
+                port.TypeId))
             .ToList();
 
     private static List<GraphParameterValue> CloneParameterValues(IReadOnlyList<GraphParameterValue> parameterValues)
@@ -269,7 +268,10 @@ public sealed record GraphDocument
             connection.Label,
             connection.AccentHex,
             connection.ConversionId,
-            connection.Presentation is null ? null : new GraphEdgePresentation(connection.Presentation.NoteText));
+            connection.Presentation is null ? null : new GraphEdgePresentation(connection.Presentation.NoteText))
+        {
+            TargetKind = connection.TargetKind,
+        };
 
     private static List<GraphNodeGroup> CloneGroups(IReadOnlyList<GraphNodeGroup> groups)
         => groups
@@ -298,6 +300,5 @@ public sealed record GraphDocument
             port.AccentHex,
             port.ChildNodeId,
             port.ChildPortId,
-            port.TypeId,
-            port.InlineParameterKey);
+            port.TypeId);
 }

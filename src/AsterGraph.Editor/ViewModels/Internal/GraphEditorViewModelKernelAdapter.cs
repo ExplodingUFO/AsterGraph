@@ -110,6 +110,9 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
     public bool TryReturnToParentGraphScope(bool updateStatus)
         => _kernel.TryReturnToParentGraphScope(updateStatus);
 
+    public bool TrySetNodeParameterValue(string nodeId, string parameterKey, object? value)
+        => _kernel.TrySetNodeParameterValue(nodeId, parameterKey, value);
+
     public bool TrySetSelectedNodeParameterValue(string parameterKey, object? value)
         => _kernel.TrySetSelectedNodeParameterValue(parameterKey, value);
 
@@ -119,8 +122,8 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
     public void StartConnection(string sourceNodeId, string sourcePortId)
         => _kernel.StartConnection(sourceNodeId, sourcePortId);
 
-    public void CompleteConnection(string targetNodeId, string targetPortId)
-        => _kernel.CompleteConnection(targetNodeId, targetPortId);
+    public void CompleteConnection(GraphConnectionTargetRef target)
+        => _kernel.CompleteConnection(target);
 
     public void CancelPendingConnection() => _kernel.CancelPendingConnection();
 
@@ -339,6 +342,9 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
     public IReadOnlyList<NodePositionSnapshot> GetNodePositions() => _kernel.GetNodePositions();
 
     public GraphEditorPendingConnectionSnapshot GetPendingConnectionSnapshot() => _kernel.GetPendingConnectionSnapshot();
+
+    public IReadOnlyList<GraphEditorCompatibleConnectionTargetSnapshot> GetCompatibleConnectionTargets(string sourceNodeId, string sourcePortId)
+        => _kernel.GetCompatibleConnectionTargets(sourceNodeId, sourcePortId);
 
     internal void CommitRetainedMutation(
         GraphDocument document,

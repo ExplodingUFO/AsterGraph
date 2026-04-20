@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Automation;
+using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Threading;
@@ -50,7 +51,11 @@ internal interface INodeCanvasSceneHost
 
     void BeginNodeDrag(NodeViewModel node, PointerPressedEventArgs args);
 
+    void BeginNodeResize(NodeViewModel node, GraphNodeResizeHandleKind handleKind, PointerPressedEventArgs args);
+
     void BeginGroupDrag(GraphEditorNodeGroupSnapshot group, PointerPressedEventArgs args);
+
+    void BeginGroupResize(string groupId, string groupTitle, NodeCanvasGroupResizeEdge edge, PointerPressedEventArgs args);
 
     void ActivatePort(NodeViewModel node, PortViewModel port);
 }
@@ -389,101 +394,22 @@ internal sealed class NodeCanvasSceneHost
             Cursor = cursor,
         };
         AutomationProperties.SetName(thumb, automationName);
-        thumb.PointerPressed += (_, args) =>
-        {
-            if (_host.ViewModel is null || !args.GetCurrentPoint(thumb).Properties.IsLeftButtonPressed)
+        thumb.AddHandler(
+            InputElement.PointerPressedEvent,
+            (_, args) =>
             {
-                return;
-            }
+                if (_host.ViewModel is null)
+                {
+                    return;
+                }
 
-            _host.FocusCanvas();
-        };
-        thumb.DragStarted += (_, _) => _host.ViewModel?.BeginHistoryInteraction();
-        thumb.DragDelta += (_, args) =>
-        {
-            var editor = _host.ViewModel;
-            var currentGroup = ResolveCurrentGroupSnapshot(groupId);
-            if (editor is null || currentGroup is null)
-            {
-                return;
-            }
-
-            args.Handled = TryApplyGroupResize(editor, currentGroup, edge, args.Vector);
-        };
-        thumb.DragCompleted += (_, _) => _host.ViewModel?.CompleteHistoryInteraction($"Resized {groupTitle} group.");
+                _host.BeginGroupResize(groupId, groupTitle, edge, args);
+            },
+            RoutingStrategies.Tunnel | RoutingStrategies.Bubble,
+            handledEventsToo: true);
 
         return thumb;
     }
-
-    private static bool TryApplyGroupResize(
-        GraphEditorViewModel editor,
-        GraphEditorNodeGroupSnapshot currentGroup,
-        NodeCanvasGroupResizeEdge edge,
-        Vector delta)
-    {
-        var minimumSize = ResolveMinimumGroupSize(currentGroup);
-        var nextPosition = currentGroup.Position;
-        var nextSize = currentGroup.Size;
-
-        switch (edge)
-        {
-            case NodeCanvasGroupResizeEdge.Left:
-            {
-                var proposedWidth = Math.Max(minimumSize.Width, currentGroup.Size.Width - delta.X);
-                nextPosition = new GraphPoint(
-                    currentGroup.Position.X + (currentGroup.Size.Width - proposedWidth),
-                    currentGroup.Position.Y);
-                nextSize = new GraphSize(proposedWidth, currentGroup.Size.Height);
-                break;
-            }
-
-            case NodeCanvasGroupResizeEdge.Top:
-            {
-                var proposedHeight = Math.Max(minimumSize.Height, currentGroup.Size.Height - delta.Y);
-                nextPosition = new GraphPoint(
-                    currentGroup.Position.X,
-                    currentGroup.Position.Y + (currentGroup.Size.Height - proposedHeight));
-                nextSize = new GraphSize(currentGroup.Size.Width, proposedHeight);
-                break;
-            }
-
-            case NodeCanvasGroupResizeEdge.Right:
-                nextSize = new GraphSize(
-                    Math.Max(minimumSize.Width, currentGroup.Size.Width + delta.X),
-                    currentGroup.Size.Height);
-                break;
-
-            case NodeCanvasGroupResizeEdge.Bottom:
-                nextSize = new GraphSize(
-                    currentGroup.Size.Width,
-                    Math.Max(minimumSize.Height, currentGroup.Size.Height + delta.Y));
-                break;
-        }
-
-        var changed = false;
-        if (nextPosition != currentGroup.Position)
-        {
-            changed = editor.TrySetNodeGroupPosition(currentGroup.Id, nextPosition, moveMemberNodes: false, updateStatus: false);
-        }
-
-        if (nextSize != currentGroup.Size)
-        {
-            changed = editor.TrySetNodeGroupSize(currentGroup.Id, nextSize, updateStatus: false) || changed;
-        }
-
-        return changed;
-    }
-
-    private static GraphSize ResolveMinimumGroupSize(GraphEditorNodeGroupSnapshot group)
-        => new(
-            Math.Max(
-                NodeCanvasGroupChromeMetrics.MinimumWidth,
-                group.ExtraPadding.Left + group.ExtraPadding.Right + 48d),
-            group.IsCollapsed
-                ? NodeCanvasGroupChromeMetrics.HeaderHeight
-                : Math.Max(
-                    NodeCanvasGroupChromeMetrics.MinimumExpandedHeight,
-                    group.ExtraPadding.Top + group.ExtraPadding.Bottom + 24d));
 
     private GraphEditorNodeGroupSnapshot? ResolveCurrentGroupSnapshot(string groupId)
         => _host.ViewModel?.GetNodeGroupSnapshots()
@@ -496,17 +422,18 @@ internal sealed class NodeCanvasSceneHost
             editor,
             node,
             editor.StyleOptions,
+            _host.NodeParameterEditorRegistry,
             _host.FocusCanvas,
             _host.BeginNodeDrag,
+            _host.BeginNodeResize,
             editor.BeginHistoryInteraction,
             editor.CompleteHistoryInteraction,
             (targetNode, size, updateStatus) => editor.TrySetNodeSize(targetNode, size, updateStatus),
             (targetNode, width, updateStatus) => editor.TrySetNodeWidth(targetNode, width, updateStatus),
             (targetNode, expansionState) => editor.Session.Commands.TrySetNodeExpansionState(targetNode.Id, expansionState),
             (targetNode, port) => editor.HasIncomingConnection(targetNode, port),
-            (targetNode, port) => editor.ResolveInlineParameter(targetNode, port),
-            _host.NodeParameterEditorRegistry,
             _host.ActivatePort,
+            (targetNode, target) => editor.ActivateConnectionTarget(targetNode, target),
             _host.ContextMenuCoordinator.OpenNodeContextMenu,
             _host.ContextMenuCoordinator.OpenPortContextMenu);
     }

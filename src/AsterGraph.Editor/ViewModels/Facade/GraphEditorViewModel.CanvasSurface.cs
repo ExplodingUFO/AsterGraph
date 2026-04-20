@@ -150,28 +150,9 @@ public sealed partial class GraphEditorViewModel
         ArgumentNullException.ThrowIfNull(port);
 
         return Connections.Any(connection =>
-            string.Equals(connection.TargetNodeId, node.Id, StringComparison.Ordinal)
+            connection.TargetKind == GraphConnectionTargetKind.Port
+            && string.Equals(connection.TargetNodeId, node.Id, StringComparison.Ordinal)
             && string.Equals(connection.TargetPortId, port.Id, StringComparison.Ordinal));
-    }
-
-    /// <summary>
-    /// Resolves the shared inline-parameter editor bound to one input port when the node is the primary single selection.
-    /// </summary>
-    public NodeParameterViewModel? ResolveInlineParameter(NodeViewModel node, PortViewModel port)
-    {
-        ArgumentNullException.ThrowIfNull(node);
-        ArgumentNullException.ThrowIfNull(port);
-
-        if (port.Direction != PortDirection.Input
-            || string.IsNullOrWhiteSpace(port.InlineParameterKey)
-            || !ReferenceEquals(SelectedNode, node)
-            || HasMultipleSelection)
-        {
-            return null;
-        }
-
-        return SelectedNodeParameters.FirstOrDefault(parameter =>
-            string.Equals(parameter.Key, port.InlineParameterKey, StringComparison.Ordinal));
     }
 
     /// <summary>
@@ -259,6 +240,23 @@ public sealed partial class GraphEditorViewModel
     }
 
     /// <summary>
+    /// Activates a typed connection target exposed by node-local hosted UI.
+    /// </summary>
+    public void ActivateConnectionTarget(NodeViewModel node, GraphConnectionTargetRef target)
+    {
+        ArgumentNullException.ThrowIfNull(node);
+
+        SelectSingleNode(node);
+        if (!HasPendingConnection)
+        {
+            SetStatus("editor.status.connection.selectOutputPortFirst", "Select an output port first.");
+            return;
+        }
+
+        ConnectToTarget(PendingSourceNode!.Id, PendingSourcePort!.Id, target);
+    }
+
+    /// <summary>
     /// 以指定输出端口作为连线起点。
     /// </summary>
     public void StartConnection(string sourceNodeId, string sourcePortId)
@@ -268,18 +266,21 @@ public sealed partial class GraphEditorViewModel
     /// 连接源输出端口与目标输入端口。
     /// </summary>
     public void ConnectPorts(string sourceNodeId, string sourcePortId, string targetNodeId, string targetPortId)
+        => ConnectToTarget(sourceNodeId, sourcePortId, new GraphConnectionTargetRef(targetNodeId, targetPortId));
+
+    public void ConnectToTarget(string sourceNodeId, string sourcePortId, GraphConnectionTargetRef target)
     {
         var pendingConnection = _kernel.GetPendingConnectionSnapshot();
         if (pendingConnection.HasPendingConnection
             && string.Equals(pendingConnection.SourceNodeId, sourceNodeId, StringComparison.Ordinal)
             && string.Equals(pendingConnection.SourcePortId, sourcePortId, StringComparison.Ordinal))
         {
-            _kernel.CompleteConnection(targetNodeId, targetPortId);
+            _kernel.CompleteConnection(target);
             return;
         }
 
         _kernel.StartConnection(sourceNodeId, sourcePortId);
-        _kernel.CompleteConnection(targetNodeId, targetPortId);
+        _kernel.CompleteConnection(target);
     }
 
     /// <summary>

@@ -11,13 +11,13 @@ internal sealed class GraphEditorSessionStockMenuDescriptorBuilder
     private readonly Func<IReadOnlyCollection<INodeDefinition>> _defaultDefinitionsProvider;
     private readonly Func<GraphDocument> _documentSnapshotFactory;
     private readonly Func<GraphEditorSelectionSnapshot> _selectionSnapshotFactory;
-    private readonly Func<string, string, IReadOnlyList<GraphEditorCompatiblePortTargetSnapshot>> _compatibleTargetsFactory;
+    private readonly Func<string, string, IReadOnlyList<GraphEditorCompatibleConnectionTargetSnapshot>> _compatibleTargetsFactory;
     private readonly Func<string, string, string> _localize;
 
     public GraphEditorSessionStockMenuDescriptorBuilder(
         Func<GraphDocument> documentSnapshotFactory,
         Func<GraphEditorSelectionSnapshot> selectionSnapshotFactory,
-        Func<string, string, IReadOnlyList<GraphEditorCompatiblePortTargetSnapshot>> compatibleTargetsFactory,
+        Func<string, string, IReadOnlyList<GraphEditorCompatibleConnectionTargetSnapshot>> compatibleTargetsFactory,
         Func<string, string, string> localize,
         Func<IReadOnlyCollection<INodeDefinition>>? defaultDefinitionsProvider = null)
     {
@@ -309,13 +309,28 @@ internal sealed class GraphEditorSessionStockMenuDescriptorBuilder
                 $"compatible-node-{group.Key}",
                 GetNodeMenuHeader(document, group.Key),
                 children: group
-                    .OrderBy(item => item.PortLabel, StringComparer.Ordinal)
+                    .OrderBy(item => item.TargetLabel, StringComparer.Ordinal)
                     .Select(target => new GraphEditorMenuItemDescriptorSnapshot(
-                        $"compatible-port-{target.NodeId}-{target.PortId}",
+                        target.TargetKind == GraphConnectionTargetKind.Port
+                            ? $"compatible-port-{target.NodeId}-{target.TargetId}"
+                            : $"compatible-parameter-{target.NodeId}-{target.TargetId}",
                         target.Compatibility.Kind == PortCompatibilityKind.ImplicitConversion
-                            ? LocalizeFormat("editor.menu.compatibility.implicitTarget", "{0} (implicit: {1})", target.PortLabel, target.Compatibility.ConversionId!.Value)
-                            : target.PortLabel,
-                        CreateCommand("connections.connect", ("sourceNodeId", sourceNode.Id), ("sourcePortId", sourcePort.Id), ("targetNodeId", target.NodeId), ("targetPortId", target.PortId)),
+                            ? LocalizeFormat("editor.menu.compatibility.implicitTarget", "{0} (implicit: {1})", target.TargetLabel, target.Compatibility.ConversionId!.Value)
+                            : target.TargetLabel,
+                        target.TargetKind == GraphConnectionTargetKind.Port
+                            ? CreateCommand(
+                                "connections.connect",
+                                (Name: "sourceNodeId", Value: sourceNode.Id),
+                                (Name: "sourcePortId", Value: sourcePort.Id),
+                                (Name: "targetNodeId", Value: target.NodeId),
+                                (Name: "targetPortId", Value: target.TargetId))
+                            : CreateCommand(
+                                "connections.connect",
+                                (Name: "sourceNodeId", Value: sourceNode.Id),
+                                (Name: "sourcePortId", Value: sourcePort.Id),
+                                (Name: "targetNodeId", Value: target.NodeId),
+                                (Name: "targetPortId", Value: target.TargetId),
+                                (Name: "targetKind", Value: target.TargetKind.ToString())),
                         iconKey: target.Compatibility.Kind == PortCompatibilityKind.ImplicitConversion ? "conversion" : "connect",
                         isEnabled: connect.IsEnabled,
                         disabledReason: connect.DisabledReason))

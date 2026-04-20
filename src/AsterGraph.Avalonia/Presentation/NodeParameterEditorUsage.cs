@@ -6,5 +6,5 @@ namespace AsterGraph.Avalonia.Presentation;
 public enum NodeParameterEditorUsage
 {
     Inspector = 0,
-    NodeInline = 1,
+    NodeSurface = 1,
 }

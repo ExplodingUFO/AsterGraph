@@ -9,8 +9,7 @@ public sealed record NodeSurfaceTierDefinition
         string key,
         double minWidth = 0d,
         double minHeight = 0d,
-        IReadOnlyList<string>? visibleSectionKeys = null,
-        string? inlineEditorTemplateKey = null)
+        IReadOnlyList<string>? visibleSectionKeys = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(key);
 
@@ -28,7 +27,6 @@ public sealed record NodeSurfaceTierDefinition
         MinWidth = minWidth;
         MinHeight = minHeight;
         VisibleSectionKeys = NormalizeVisibleSectionKeys(visibleSectionKeys);
-        InlineEditorTemplateKey = string.IsNullOrWhiteSpace(inlineEditorTemplateKey) ? null : inlineEditorTemplateKey.Trim();
     }
 
     public string Key { get; }
@@ -38,8 +36,6 @@ public sealed record NodeSurfaceTierDefinition
     public double MinHeight { get; }
 
     public IReadOnlyList<string> VisibleSectionKeys { get; }
-
-    public string? InlineEditorTemplateKey { get; }
 
     private static IReadOnlyList<string> NormalizeVisibleSectionKeys(IReadOnlyList<string>? visibleSectionKeys)
         => visibleSectionKeys is null

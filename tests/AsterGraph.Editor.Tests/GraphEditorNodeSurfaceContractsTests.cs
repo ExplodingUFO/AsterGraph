@@ -160,7 +160,7 @@ public sealed class GraphEditorNodeSurfaceContractsTests
 
         var surface = Assert.Single(session.Queries.GetNodeSurfaceSnapshots(), snapshot => snapshot.NodeId == NodeId);
         Assert.Equal(new GraphSize(420d, 260d), surface.Size);
-        Assert.Equal("inline-rich", surface.ActiveTier.Key);
+        Assert.Equal("parameter-editors", surface.ActiveTier.Key);
 
         session.Commands.Undo();
         Assert.Equal(new GraphSize(240d, 160d), Assert.Single(session.Queries.CreateDocumentSnapshot().Nodes, candidate => candidate.Id == NodeId).Size);
@@ -200,11 +200,11 @@ public sealed class GraphEditorNodeSurfaceContractsTests
         var defaultSurface = Assert.Single(surfaces, snapshot => snapshot.NodeId == SiblingNodeId);
 
         Assert.Equal("details", overrideSurface.ActiveTier.Key);
-        Assert.Equal("project-inline", defaultSurface.ActiveTier.Key);
+        Assert.Equal("project-parameter-rail", defaultSurface.ActiveTier.Key);
 
         Assert.True(session.Commands.TrySetNodeSize(SiblingNodeId, new GraphSize(420d, 260d), updateStatus: false));
         defaultSurface = Assert.Single(session.Queries.GetNodeSurfaceSnapshots(), snapshot => snapshot.NodeId == SiblingNodeId);
-        Assert.Equal("project-rich", defaultSurface.ActiveTier.Key);
+        Assert.Equal("project-parameter-editors", defaultSurface.ActiveTier.Key);
     }
 
     [Fact]
@@ -395,23 +395,23 @@ public sealed class GraphEditorNodeSurfaceContractsTests
                     [
                         new NodeSurfaceTierDefinition("project-compact"),
                         new NodeSurfaceTierDefinition(
-                            "project-inline",
+                            "project-parameter-rail",
                             minWidth: 200d,
                             minHeight: 140d,
                             visibleSectionKeys:
                             [
                                 NodeSurfaceSectionKeys.Description,
-                                NodeSurfaceSectionKeys.InlineInputs,
+                                NodeSurfaceSectionKeys.ParameterRail,
                             ]),
                         new NodeSurfaceTierDefinition(
-                            "project-rich",
+                            "project-parameter-editors",
                             minWidth: 360d,
                             minHeight: 220d,
                             visibleSectionKeys:
                             [
                                 NodeSurfaceSectionKeys.Description,
-                                NodeSurfaceSectionKeys.InlineInputs,
-                                NodeSurfaceSectionKeys.Parameters,
+                                NodeSurfaceSectionKeys.ParameterRail,
+                                NodeSurfaceSectionKeys.ParameterEditors,
                             ]),
                     ]),
                 },
@@ -617,14 +617,14 @@ public sealed class GraphEditorNodeSurfaceContractsTests
                             NodeSurfaceSectionKeys.Description,
                         ]),
                     new NodeSurfaceTierDefinition(
-                        "inline-rich",
+                        "parameter-editors",
                         minWidth: 400d,
                         minHeight: 240d,
                         visibleSectionKeys:
                         [
                             NodeSurfaceSectionKeys.Description,
-                            NodeSurfaceSectionKeys.InlineInputs,
-                            NodeSurfaceSectionKeys.Parameters,
+                            NodeSurfaceSectionKeys.ParameterRail,
+                            NodeSurfaceSectionKeys.ParameterEditors,
                         ]),
                 ])));
         catalog.RegisterDefinition(

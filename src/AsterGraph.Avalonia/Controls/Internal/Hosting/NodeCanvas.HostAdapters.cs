@@ -118,8 +118,14 @@ public partial class NodeCanvas
         public void BeginNodeDrag(NodeViewModel node, PointerPressedEventArgs args)
             => _owner.BeginNodeDrag(node, args);
 
+        public void BeginNodeResize(NodeViewModel node, GraphNodeResizeHandleKind handleKind, PointerPressedEventArgs args)
+            => _owner.BeginNodeResize(node, handleKind, args);
+
         public void BeginGroupDrag(GraphEditorNodeGroupSnapshot group, PointerPressedEventArgs args)
             => _owner.BeginGroupDrag(group, args);
+
+        public void BeginGroupResize(string groupId, string groupTitle, NodeCanvasGroupResizeEdge edge, PointerPressedEventArgs args)
+            => _owner.BeginGroupResize(groupId, groupTitle, edge, args);
 
         public void ActivatePort(NodeViewModel node, PortViewModel port)
             => _owner.ActivatePortFromVisual(node, port);

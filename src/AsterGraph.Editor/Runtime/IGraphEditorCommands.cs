@@ -195,6 +195,16 @@ public interface IGraphEditorCommands
         => throw new NotSupportedException();
 
     /// <summary>
+    /// Attempts to set one parameter value on one specific node instance.
+    /// </summary>
+    /// <param name="nodeId">Stable node instance identifier.</param>
+    /// <param name="parameterKey">Stable parameter key declared by the node definition.</param>
+    /// <param name="value">Candidate parameter value that will be normalized against the definition metadata.</param>
+    /// <returns><see langword="true"/> when the mutation succeeds and changes the runtime document.</returns>
+    bool TrySetNodeParameterValue(string nodeId, string parameterKey, object? value)
+        => throw new NotSupportedException();
+
+    /// <summary>
     /// Attempts to set one parameter value across the current selection when every selected node shares the same definition.
     /// </summary>
     /// <param name="parameterKey">Stable parameter key declared by the shared node definition.</param>
@@ -233,6 +243,13 @@ public interface IGraphEditorCommands
     /// <param name="targetNodeId">目标节点标识。</param>
     /// <param name="targetPortId">目标端口标识。</param>
     void CompleteConnection(string targetNodeId, string targetPortId)
+        => CompleteConnection(new GraphConnectionTargetRef(targetNodeId, targetPortId));
+
+    /// <summary>
+    /// Completes the current pending connection against a typed target endpoint.
+    /// </summary>
+    /// <param name="target">Stable target endpoint reference.</param>
+    void CompleteConnection(GraphConnectionTargetRef target)
         => throw new NotSupportedException();
 
     /// <summary>

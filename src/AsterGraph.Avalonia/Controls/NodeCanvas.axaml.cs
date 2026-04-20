@@ -191,7 +191,7 @@ public partial class NodeCanvas : UserControl
     }
 
     /// <summary>
-    /// Registry used by shipped node-inline parameter editors.
+    /// Registry used by shipped node-side parameter editors.
     /// </summary>
     public INodeParameterEditorRegistry? NodeParameterEditorRegistry
     {
@@ -287,6 +287,24 @@ public partial class NodeCanvas : UserControl
         args.Handled = true;
     }
 
+    private void BeginNodeResize(NodeViewModel node, GraphNodeResizeHandleKind handleKind, PointerPressedEventArgs args)
+    {
+        if (ViewModel is null || !args.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
+        {
+            return;
+        }
+
+        Focus();
+        ViewModel.SelectSingleNode(node, updateStatus: false);
+        _interactionSession.BeginNodeResize(
+            ViewModel.FindNode(node.Id) ?? node,
+            handleKind,
+            args.GetPosition(this));
+        ViewModel.BeginHistoryInteraction();
+        args.Pointer.Capture(this);
+        args.Handled = true;
+    }
+
     private void BeginGroupDrag(GraphEditorNodeGroupSnapshot group, PointerPressedEventArgs args)
     {
         var props = args.GetCurrentPoint(this).Properties;
@@ -306,6 +324,27 @@ public partial class NodeCanvas : UserControl
             args.Pointer.Capture(this);
         }
 
+        args.Handled = true;
+    }
+
+    private void BeginGroupResize(string groupId, string groupTitle, NodeCanvasGroupResizeEdge edge, PointerPressedEventArgs args)
+    {
+        if (ViewModel is null || !args.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
+        {
+            return;
+        }
+
+        var group = ViewModel.GetNodeGroupSnapshots()
+            .FirstOrDefault(candidate => string.Equals(candidate.Id, groupId, StringComparison.Ordinal));
+        if (group is null)
+        {
+            return;
+        }
+
+        Focus();
+        _interactionSession.BeginGroupResize(group.Id, groupTitle, edge, group.Position, group.Size, args.GetPosition(this));
+        ViewModel.BeginHistoryInteraction();
+        args.Pointer.Capture(this);
         args.Handled = true;
     }
 

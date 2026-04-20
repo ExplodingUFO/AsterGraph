@@ -27,7 +27,7 @@
 
 - 参数会从当前选中节点定义投影出来
 - 多选且共享定义时可以直接 batch edit
-- 校验错误会在 inspector 内联显示
+- 校验错误会直接显示在 inspector 中
 - 只读约束会明确展示
 - `List` 参数使用一行一个项的 multiline editor
 

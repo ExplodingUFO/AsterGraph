@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Core.Models;
@@ -10,6 +11,7 @@ namespace AsterGraph.Editor.ViewModels;
 public sealed partial class NodeViewModel : ObservableObject
 {
     private readonly Dictionary<string, GraphParameterValue> _parameterValues;
+    private readonly ObservableCollection<NodeParameterEndpointViewModel> _parameterEndpoints = [];
 
     /// <summary>
     /// 由不可变节点模型快照初始化节点运行时投影。
@@ -130,15 +132,14 @@ public sealed partial class NodeViewModel : ObservableObject
         "compact",
         0d,
         0d,
-        [],
-        null);
+        []);
 
     /// <summary>
-    /// Indicates whether the active tier exposes inline authoring affordances.
+    /// Indicates whether the active tier exposes parameter authoring affordances.
     /// </summary>
-    public bool AllowsInlineAuthoring
-        => ActiveSurfaceTier.ShowsSection(AsterGraph.Abstractions.Definitions.NodeSurfaceSectionKeys.InlineInputs)
-           || ActiveSurfaceTier.ShowsSection(AsterGraph.Abstractions.Definitions.NodeSurfaceSectionKeys.Parameters);
+    public bool AllowsParameterAuthoring
+        => ActiveSurfaceTier.ShowsSection(AsterGraph.Abstractions.Definitions.NodeSurfaceSectionKeys.ParameterRail)
+           || ActiveSurfaceTier.ShowsSection(AsterGraph.Abstractions.Definitions.NodeSurfaceSectionKeys.ParameterEditors);
 
     [ObservableProperty]
     private double height;
@@ -167,6 +168,16 @@ public sealed partial class NodeViewModel : ObservableObject
     /// 当前节点参数值的只读字典视图。
     /// </summary>
     public IReadOnlyDictionary<string, GraphParameterValue> ParameterValues => _parameterValues;
+
+    /// <summary>
+    /// Node-local parameter endpoints rendered by hosted node-side authoring surfaces.
+    /// </summary>
+    public ObservableCollection<NodeParameterEndpointViewModel> ParameterEndpoints => _parameterEndpoints;
+
+    /// <summary>
+    /// Whether the node currently exposes any node-local parameter endpoints.
+    /// </summary>
+    public bool HasParameterEndpoints => _parameterEndpoints.Count > 0;
 
     [ObservableProperty]
     private double x;
@@ -250,6 +261,22 @@ public sealed partial class NodeViewModel : ObservableObject
     }
 
     /// <summary>
+    /// Replaces the node-local parameter endpoint projection.
+    /// </summary>
+    public void UpdateParameterEndpoints(IReadOnlyList<NodeParameterEndpointViewModel> endpoints)
+    {
+        ArgumentNullException.ThrowIfNull(endpoints);
+
+        _parameterEndpoints.Clear();
+        foreach (var endpoint in endpoints)
+        {
+            _parameterEndpoints.Add(endpoint);
+        }
+
+        OnPropertyChanged(nameof(HasParameterEndpoints));
+    }
+
+    /// <summary>
     /// Updates the persisted surface state snapshot.
     /// </summary>
     /// <param name="state">New surface state.</param>
@@ -294,6 +321,6 @@ public sealed partial class NodeViewModel : ObservableObject
 
     partial void OnActiveSurfaceTierChanged(GraphEditorNodeSurfaceTierSnapshot value)
     {
-        OnPropertyChanged(nameof(AllowsInlineAuthoring));
+        OnPropertyChanged(nameof(AllowsParameterAuthoring));
     }
 }

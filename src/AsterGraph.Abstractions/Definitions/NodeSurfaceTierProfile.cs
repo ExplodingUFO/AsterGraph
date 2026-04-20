@@ -44,26 +44,24 @@ public sealed record NodeSurfaceTierProfile
                 NodeSurfaceSectionKeys.Description,
             ]),
         new NodeSurfaceTierDefinition(
-            "inline-inputs",
+            "parameter-rail",
             minWidth: 320d,
             minHeight: 210d,
             visibleSectionKeys:
             [
                 NodeSurfaceSectionKeys.Description,
-                NodeSurfaceSectionKeys.InlineInputs,
-            ],
-            inlineEditorTemplateKey: "stock.inline.input"),
+                NodeSurfaceSectionKeys.ParameterRail,
+            ]),
         new NodeSurfaceTierDefinition(
-            "inline-rich",
+            "parameter-editors",
             minWidth: 420d,
             minHeight: 250d,
             visibleSectionKeys:
             [
                 NodeSurfaceSectionKeys.Description,
-                NodeSurfaceSectionKeys.InlineInputs,
-                NodeSurfaceSectionKeys.Parameters,
-            ],
-            inlineEditorTemplateKey: "stock.inline.rich"),
+                NodeSurfaceSectionKeys.ParameterRail,
+                NodeSurfaceSectionKeys.ParameterEditors,
+            ]),
     ]);
 
     public IReadOnlyList<NodeSurfaceTierDefinition> Tiers { get; }

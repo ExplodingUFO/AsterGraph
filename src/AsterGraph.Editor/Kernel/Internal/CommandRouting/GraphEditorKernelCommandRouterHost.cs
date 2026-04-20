@@ -106,8 +106,8 @@ internal sealed partial class GraphEditorKernel
         void IGraphEditorKernelCommandRouterHost.StartConnection(string sourceNodeId, string sourcePortId)
             => _owner.StartConnection(sourceNodeId, sourcePortId);
 
-        void IGraphEditorKernelCommandRouterHost.CompleteConnection(string targetNodeId, string targetPortId)
-            => _owner.CompleteConnection(targetNodeId, targetPortId);
+        void IGraphEditorKernelCommandRouterHost.CompleteConnection(GraphConnectionTargetRef target)
+            => _owner.CompleteConnection(target);
 
         void IGraphEditorKernelCommandRouterHost.CancelPendingConnection()
             => _owner.CancelPendingConnection();

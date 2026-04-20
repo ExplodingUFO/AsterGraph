@@ -7,8 +7,7 @@ public sealed record GraphEditorNodeSurfaceTierSnapshot(
     string Key,
     double MinWidth,
     double MinHeight,
-    IReadOnlyList<string> VisibleSectionKeys,
-    string? InlineEditorTemplateKey)
+    IReadOnlyList<string> VisibleSectionKeys)
 {
     public bool ShowsSection(string sectionKey)
         => VisibleSectionKeys.Contains(sectionKey, StringComparer.Ordinal);

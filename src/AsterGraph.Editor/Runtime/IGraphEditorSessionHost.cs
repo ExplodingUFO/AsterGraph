@@ -43,10 +43,11 @@ internal interface IGraphEditorSessionHost
         => false;
     bool TryReturnToParentGraphScope(bool updateStatus)
         => false;
+    bool TrySetNodeParameterValue(string nodeId, string parameterKey, object? value);
     bool TrySetSelectedNodeParameterValue(string parameterKey, object? value);
     bool TrySetSelectedNodeParameterValues(IReadOnlyDictionary<string, object?> values);
     void StartConnection(string sourceNodeId, string sourcePortId);
-    void CompleteConnection(string targetNodeId, string targetPortId);
+    void CompleteConnection(GraphConnectionTargetRef target);
     void CancelPendingConnection();
     void DeleteConnection(string connectionId);
     bool TrySetConnectionNoteText(string connectionId, string? noteText, bool updateStatus)
@@ -79,5 +80,6 @@ internal interface IGraphEditorSessionHost
     bool TryExecuteCommand(GraphEditorCommandInvocationSnapshot command);
     IReadOnlyList<NodePositionSnapshot> GetNodePositions();
     GraphEditorPendingConnectionSnapshot GetPendingConnectionSnapshot();
+    IReadOnlyList<GraphEditorCompatibleConnectionTargetSnapshot> GetCompatibleConnectionTargets(string sourceNodeId, string sourcePortId);
     IReadOnlyList<GraphEditorCompatiblePortTargetSnapshot> GetCompatiblePortTargets(string sourceNodeId, string sourcePortId);
 }

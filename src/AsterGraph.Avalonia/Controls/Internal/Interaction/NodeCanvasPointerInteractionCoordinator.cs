@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Input;
+using AsterGraph.Avalonia.Presentation;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Geometry;
 using AsterGraph.Editor.Runtime;
@@ -34,6 +35,9 @@ internal readonly record struct NodeCanvasPointerPressedResult(bool Handled, boo
 
 internal sealed class NodeCanvasPointerInteractionCoordinator
 {
+    private const double MinimumNodeWidth = 180d;
+    private const double MinimumNodeHeight = 172d;
+    private const double AdditionalPortRowHeight = 34d;
     private readonly INodeCanvasPointerInteractionHost _host;
 
     public NodeCanvasPointerInteractionCoordinator(INodeCanvasPointerInteractionHost host)
@@ -94,6 +98,16 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
         }
 
         _host.InteractionSession.UpdatePointerPosition(currentScreenPosition);
+
+        if (_host.InteractionSession.NodeResizeSession is NodeCanvasNodeResizeSession nodeResizeSession)
+        {
+            return HandleNodeResizeMove(nodeResizeSession, currentScreenPosition);
+        }
+
+        if (_host.InteractionSession.GroupResizeSession is NodeCanvasGroupResizeSession groupResizeSession)
+        {
+            return HandleGroupResizeMove(groupResizeSession, currentScreenPosition);
+        }
 
         if (_host.InteractionSession.SelectionStartScreenPosition is not null
             && !_host.InteractionSession.IsPanning
@@ -209,9 +223,17 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
                     ? "Moved selection."
                     : $"Moved {_host.InteractionSession.DragNode.Title}.");
         }
+        else if (_host.InteractionSession.NodeResizeSession is NodeCanvasNodeResizeSession nodeResizeSession)
+        {
+            _host.ViewModel?.CompleteHistoryInteraction($"Resized {nodeResizeSession.Node.Title}.");
+        }
         else if (_host.InteractionSession.DragGroupId is not null && !string.IsNullOrWhiteSpace(_host.InteractionSession.DragGroupTitle))
         {
             _host.ViewModel?.CompleteHistoryInteraction($"Moved {_host.InteractionSession.DragGroupTitle} group.");
+        }
+        else if (_host.InteractionSession.GroupResizeSession is NodeCanvasGroupResizeSession groupResizeSession)
+        {
+            _host.ViewModel?.CompleteHistoryInteraction($"Resized {groupResizeSession.GroupTitle} group.");
         }
 
         if (_host.InteractionSession.UpdateHoveredDropGroup(null))
@@ -222,6 +244,126 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
         _host.InteractionSession.ResetAfterPointerRelease();
         _host.HideGuideAdorners();
     }
+
+    private bool HandleNodeResizeMove(NodeCanvasNodeResizeSession resizeSession, Point currentScreenPosition)
+    {
+        if (_host.ViewModel is null || _host.InteractionSession.DragStartScreenPosition is not Point resizeStart)
+        {
+            return false;
+        }
+
+        var node = _host.ViewModel.FindNode(resizeSession.Node.Id) ?? resizeSession.Node;
+        var delta = currentScreenPosition - resizeStart;
+        var deltaX = delta.X / _host.ViewModel.Zoom;
+        var deltaY = delta.Y / _host.ViewModel.Zoom;
+        var minimumHeight = ResolveMinimumNodeHeight(node);
+
+        var nextWidth = resizeSession.HandleKind is GraphNodeResizeHandleKind.Right or GraphNodeResizeHandleKind.BottomRight
+            ? Math.Max(MinimumNodeWidth, resizeSession.OriginSize.Width + deltaX)
+            : resizeSession.OriginSize.Width;
+        var nextHeight = resizeSession.HandleKind is GraphNodeResizeHandleKind.Bottom or GraphNodeResizeHandleKind.BottomRight
+            ? Math.Max(minimumHeight, resizeSession.OriginSize.Height + deltaY)
+            : resizeSession.OriginSize.Height;
+
+        return _host.ViewModel.TrySetNodeSize(
+            node,
+            new GraphSize(nextWidth, nextHeight),
+            updateStatus: false);
+    }
+
+    private bool HandleGroupResizeMove(NodeCanvasGroupResizeSession resizeSession, Point currentScreenPosition)
+    {
+        if (_host.ViewModel is null || _host.InteractionSession.DragStartScreenPosition is not Point resizeStart)
+        {
+            return false;
+        }
+
+        var currentGroup = _host.ViewModel.GetNodeGroupSnapshots()
+            .FirstOrDefault(group => string.Equals(group.Id, resizeSession.GroupId, StringComparison.Ordinal));
+        if (currentGroup is null)
+        {
+            return false;
+        }
+
+        var delta = currentScreenPosition - resizeStart;
+        var deltaX = delta.X / _host.ViewModel.Zoom;
+        var deltaY = delta.Y / _host.ViewModel.Zoom;
+        var minimumSize = ResolveMinimumGroupSize(currentGroup);
+        var nextPosition = resizeSession.OriginPosition;
+        var nextSize = resizeSession.OriginSize;
+
+        switch (resizeSession.Edge)
+        {
+            case NodeCanvasGroupResizeEdge.Left:
+            {
+                var proposedWidth = Math.Max(minimumSize.Width, resizeSession.OriginSize.Width - deltaX);
+                nextPosition = new GraphPoint(
+                    resizeSession.OriginPosition.X + (resizeSession.OriginSize.Width - proposedWidth),
+                    resizeSession.OriginPosition.Y);
+                nextSize = new GraphSize(proposedWidth, resizeSession.OriginSize.Height);
+                break;
+            }
+
+            case NodeCanvasGroupResizeEdge.Top:
+            {
+                var proposedHeight = Math.Max(minimumSize.Height, resizeSession.OriginSize.Height - deltaY);
+                nextPosition = new GraphPoint(
+                    resizeSession.OriginPosition.X,
+                    resizeSession.OriginPosition.Y + (resizeSession.OriginSize.Height - proposedHeight));
+                nextSize = new GraphSize(resizeSession.OriginSize.Width, proposedHeight);
+                break;
+            }
+
+            case NodeCanvasGroupResizeEdge.Right:
+                nextSize = new GraphSize(
+                    Math.Max(minimumSize.Width, resizeSession.OriginSize.Width + deltaX),
+                    resizeSession.OriginSize.Height);
+                break;
+
+            case NodeCanvasGroupResizeEdge.Bottom:
+                nextSize = new GraphSize(
+                    resizeSession.OriginSize.Width,
+                    Math.Max(minimumSize.Height, resizeSession.OriginSize.Height + deltaY));
+                break;
+        }
+
+        var changed = false;
+        if (nextPosition != currentGroup.Position)
+        {
+            changed = _host.ViewModel.TrySetNodeGroupPosition(
+                resizeSession.GroupId,
+                nextPosition,
+                moveMemberNodes: false,
+                updateStatus: false);
+        }
+
+        if (nextSize != currentGroup.Size)
+        {
+            changed = _host.ViewModel.TrySetNodeGroupSize(
+                resizeSession.GroupId,
+                nextSize,
+                updateStatus: false) || changed;
+        }
+
+        return changed;
+    }
+
+    private static double ResolveMinimumNodeHeight(NodeViewModel node)
+    {
+        var visiblePortRows = Math.Max(Math.Max(node.Inputs.Count, node.Outputs.Count), 1);
+        return MinimumNodeHeight + (Math.Max(0, visiblePortRows - 1) * AdditionalPortRowHeight);
+    }
+
+    private static GraphSize ResolveMinimumGroupSize(GraphEditorNodeGroupSnapshot group)
+        => new(
+            Math.Max(
+                NodeCanvasGroupChromeMetrics.MinimumWidth,
+                group.ExtraPadding.Left + group.ExtraPadding.Right + 48d),
+            group.IsCollapsed
+                ? NodeCanvasGroupChromeMetrics.HeaderHeight
+                : Math.Max(
+                    NodeCanvasGroupChromeMetrics.MinimumExpandedHeight,
+                    group.ExtraPadding.Top + group.ExtraPadding.Bottom + 24d));
 
     private static void ApplyDraggedNodeGroupMembership(
         IReadOnlyList<NodeViewModel> nodes,

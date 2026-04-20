@@ -73,7 +73,7 @@ internal interface IGraphEditorKernelCommandRouterHost
 
     void StartConnection(string sourceNodeId, string sourcePortId);
 
-    void CompleteConnection(string targetNodeId, string targetPortId);
+    void CompleteConnection(GraphConnectionTargetRef target);
 
     void CancelPendingConnection();
 
@@ -486,7 +486,7 @@ internal sealed class GraphEditorKernelCommandRouter
                     return false;
                 }
 
-                _host.CompleteConnection(completeTargetNodeId, completeTargetPortId);
+                _host.CompleteConnection(CreateConnectionTarget(command, completeTargetNodeId, completeTargetPortId));
                 return true;
 
             case "connections.connect":
@@ -499,7 +499,7 @@ internal sealed class GraphEditorKernelCommandRouter
                 }
 
                 _host.StartConnection(connectSourceNodeId, connectSourcePortId);
-                _host.CompleteConnection(targetNodeId, targetPortId);
+                _host.CompleteConnection(CreateConnectionTarget(command, targetNodeId, targetPortId));
                 return true;
 
             case "connections.cancel":
@@ -633,6 +633,21 @@ internal sealed class GraphEditorKernelCommandRouter
         => !command.TryGetArgument(argumentName, out var updateStatusValue)
             || !bool.TryParse(updateStatusValue, out var parsedUpdateStatus)
             || parsedUpdateStatus;
+
+    private static GraphConnectionTargetRef CreateConnectionTarget(
+        GraphEditorCommandInvocationSnapshot command,
+        string targetNodeId,
+        string targetId)
+    {
+        if (!command.TryGetArgument("targetKind", out var rawKind)
+            || string.IsNullOrWhiteSpace(rawKind)
+            || !Enum.TryParse<GraphConnectionTargetKind>(rawKind, ignoreCase: true, out var targetKind))
+        {
+            targetKind = GraphConnectionTargetKind.Port;
+        }
+
+        return new GraphConnectionTargetRef(targetNodeId, targetId, targetKind);
+    }
 
     private static bool TryGetDoubleArgument(
         GraphEditorCommandInvocationSnapshot command,

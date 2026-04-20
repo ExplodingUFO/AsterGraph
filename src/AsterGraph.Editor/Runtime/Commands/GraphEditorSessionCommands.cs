@@ -271,7 +271,15 @@ public sealed partial class GraphEditorSession
         ArgumentException.ThrowIfNullOrWhiteSpace(targetNodeId);
         ArgumentException.ThrowIfNullOrWhiteSpace(targetPortId);
 
-        Execute("connections.complete", () => _host.CompleteConnection(targetNodeId, targetPortId));
+        CompleteConnection(new GraphConnectionTargetRef(targetNodeId, targetPortId));
+    }
+
+    public void CompleteConnection(GraphConnectionTargetRef target)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(target.NodeId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(target.TargetId);
+
+        Execute("connections.complete", () => _host.CompleteConnection(target));
     }
 
     public void CancelPendingConnection()
@@ -291,6 +299,20 @@ public sealed partial class GraphEditorSession
         if (edited)
         {
             PublishCommandExecuted("connections.note.set");
+        }
+
+        return edited;
+    }
+
+    public bool TrySetNodeParameterValue(string nodeId, string parameterKey, object? value)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(nodeId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(parameterKey);
+
+        var edited = _host.TrySetNodeParameterValue(nodeId, parameterKey, value);
+        if (edited)
+        {
+            PublishCommandExecuted("nodes.parameter.set");
         }
 
         return edited;

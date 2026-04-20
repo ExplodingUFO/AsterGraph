@@ -44,8 +44,7 @@ internal static class GraphEditorNodeSurfaceTierResolver
             activeTier.Key,
             activeTier.MinWidth,
             activeTier.MinHeight,
-            activeTier.VisibleSectionKeys.ToList(),
-            activeTier.InlineEditorTemplateKey);
+            activeTier.VisibleSectionKeys.ToList());
     }
 
     internal static GraphEditorNodeSurfaceTierSnapshot ResolveActiveTier(

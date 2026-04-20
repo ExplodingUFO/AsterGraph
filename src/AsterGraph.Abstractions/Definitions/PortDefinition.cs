@@ -15,8 +15,7 @@ public sealed record PortDefinition
         string displayName,
         PortTypeId typeId,
         string accentHex = "#FFFFFF",
-        string? description = null,
-        string? inlineParameterKey = null)
+        string? description = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(key);
         ArgumentException.ThrowIfNullOrWhiteSpace(displayName);
@@ -26,7 +25,6 @@ public sealed record PortDefinition
         TypeId = typeId;
         AccentHex = accentHex;
         Description = string.IsNullOrWhiteSpace(description) ? null : description.Trim();
-        InlineParameterKey = string.IsNullOrWhiteSpace(inlineParameterKey) ? null : inlineParameterKey.Trim();
     }
 
     /// <summary>
@@ -53,9 +51,4 @@ public sealed record PortDefinition
     /// 端口描述。
     /// </summary>
     public string? Description { get; }
-
-    /// <summary>
-    /// Optional parameter key used by shipped and custom progressive surfaces for inline literal editing.
-    /// </summary>
-    public string? InlineParameterKey { get; }
 }

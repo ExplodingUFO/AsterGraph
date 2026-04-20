@@ -135,6 +135,15 @@ public interface IGraphEditorQueries
         => throw new NotSupportedException();
 
     /// <summary>
+    /// Gets typed compatible connection targets for the specified source output port.
+    /// </summary>
+    /// <param name="sourceNodeId">Source node instance identifier.</param>
+    /// <param name="sourcePortId">Source output port identifier.</param>
+    /// <returns>Compatible target endpoint snapshots.</returns>
+    IReadOnlyList<GraphEditorCompatibleConnectionTargetSnapshot> GetCompatibleConnectionTargets(string sourceNodeId, string sourcePortId)
+        => throw new NotSupportedException();
+
+    /// <summary>
     /// 获取指定源端口的运行时兼容连接目标。
     /// </summary>
     /// <param name="sourceNodeId">源节点实例标识。</param>

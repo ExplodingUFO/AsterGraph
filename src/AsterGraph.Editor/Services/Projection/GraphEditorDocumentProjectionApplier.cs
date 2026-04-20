@@ -18,6 +18,7 @@ internal sealed class GraphEditorDocumentProjectionApplier
         ObservableCollection<NodeViewModel> nodes,
         ObservableCollection<ConnectionViewModel> connections,
         Action<NodeViewModel> applyNodePresentation,
+        Action<NodeViewModel>? finalizeNodeProjection,
         PropertyChangedEventHandler nodePropertyChangedHandler)
     {
         ArgumentNullException.ThrowIfNull(document);
@@ -57,7 +58,16 @@ internal sealed class GraphEditorDocumentProjectionApplier
                 connection.Label,
                 connection.AccentHex,
                 connection.ConversionId,
-                connection.Presentation?.NoteText));
+                connection.Presentation?.NoteText,
+                connection.TargetKind));
+        }
+
+        if (finalizeNodeProjection is not null)
+        {
+            foreach (var node in nodes)
+            {
+                finalizeNodeProjection(node);
+            }
         }
     }
 

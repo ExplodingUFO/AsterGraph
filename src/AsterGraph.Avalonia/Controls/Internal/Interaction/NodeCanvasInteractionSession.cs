@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Input;
 using AsterGraph.Core.Models;
+using AsterGraph.Avalonia.Presentation;
 using AsterGraph.Editor.Geometry;
 using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.ViewModels;
@@ -11,6 +12,18 @@ internal readonly record struct NodeCanvasDragSession(
     IReadOnlyList<NodeViewModel> Nodes,
     IReadOnlyDictionary<string, GraphPoint> OriginPositions,
     NodeBounds OriginBounds);
+
+internal readonly record struct NodeCanvasNodeResizeSession(
+    NodeViewModel Node,
+    GraphNodeResizeHandleKind HandleKind,
+    GraphSize OriginSize);
+
+internal readonly record struct NodeCanvasGroupResizeSession(
+    string GroupId,
+    string GroupTitle,
+    NodeCanvasGroupResizeEdge Edge,
+    GraphPoint OriginPosition,
+    GraphSize OriginSize);
 
 internal sealed class NodeCanvasInteractionSession
 {
@@ -46,6 +59,10 @@ internal sealed class NodeCanvasInteractionSession
 
     public Point? SelectionStartScreenPosition { get; private set; }
 
+    public NodeCanvasNodeResizeSession? NodeResizeSession { get; private set; }
+
+    public NodeCanvasGroupResizeSession? GroupResizeSession { get; private set; }
+
     public void BeginCanvasSelection(Point startScreenPosition, KeyModifiers modifiers, IReadOnlyList<NodeViewModel> baselineNodes)
     {
         DragNode = null;
@@ -58,6 +75,8 @@ internal sealed class NodeCanvasInteractionSession
         DragSession = null;
         DragGroupDropZones = [];
         HoveredDropGroupId = null;
+        NodeResizeSession = null;
+        GroupResizeSession = null;
         SelectionStartScreenPosition = startScreenPosition;
         IsMarqueeSelecting = false;
         SelectionModifiers = modifiers;
@@ -86,6 +105,8 @@ internal sealed class NodeCanvasInteractionSession
         DragSession = dragSession;
         DragGroupDropZones = dragGroupDropZones?.ToList() ?? [];
         HoveredDropGroupId = null;
+        NodeResizeSession = null;
+        GroupResizeSession = null;
     }
 
     public void BeginPanning(Point startScreenPosition)
@@ -100,6 +121,8 @@ internal sealed class NodeCanvasInteractionSession
         DragSession = null;
         DragGroupDropZones = [];
         HoveredDropGroupId = null;
+        NodeResizeSession = null;
+        GroupResizeSession = null;
         SelectionStartScreenPosition = null;
         IsMarqueeSelecting = false;
         LastPointerPosition = startScreenPosition;
@@ -125,6 +148,67 @@ internal sealed class NodeCanvasInteractionSession
         DragSession = dragSession;
         DragGroupDropZones = [];
         HoveredDropGroupId = null;
+        NodeResizeSession = null;
+        GroupResizeSession = null;
+    }
+
+    public void BeginNodeResize(NodeViewModel node, GraphNodeResizeHandleKind handleKind, Point startScreenPosition)
+    {
+        ArgumentNullException.ThrowIfNull(node);
+
+        DragNode = null;
+        DragGroupId = null;
+        DragGroupTitle = null;
+        DragGroupOriginPosition = null;
+        DragGroupPreviewPosition = null;
+        IsPanning = false;
+        SelectionStartScreenPosition = null;
+        IsMarqueeSelecting = false;
+        DragStartScreenPosition = startScreenPosition;
+        LastPointerPosition = startScreenPosition;
+        PointerScreenPosition = startScreenPosition;
+        DragSession = null;
+        DragGroupDropZones = [];
+        HoveredDropGroupId = null;
+        NodeResizeSession = new NodeCanvasNodeResizeSession(
+            node,
+            handleKind,
+            new GraphSize(node.Width, node.Height));
+        GroupResizeSession = null;
+    }
+
+    public void BeginGroupResize(
+        string groupId,
+        string groupTitle,
+        NodeCanvasGroupResizeEdge edge,
+        GraphPoint groupOriginPosition,
+        GraphSize groupOriginSize,
+        Point startScreenPosition)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(groupId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(groupTitle);
+
+        DragNode = null;
+        DragGroupId = null;
+        DragGroupTitle = null;
+        DragGroupOriginPosition = null;
+        DragGroupPreviewPosition = null;
+        IsPanning = false;
+        SelectionStartScreenPosition = null;
+        IsMarqueeSelecting = false;
+        DragStartScreenPosition = startScreenPosition;
+        LastPointerPosition = startScreenPosition;
+        PointerScreenPosition = startScreenPosition;
+        DragSession = null;
+        DragGroupDropZones = [];
+        HoveredDropGroupId = null;
+        NodeResizeSession = null;
+        GroupResizeSession = new NodeCanvasGroupResizeSession(
+            groupId,
+            groupTitle,
+            edge,
+            groupOriginPosition,
+            groupOriginSize);
     }
 
     public void UpdatePointerPosition(Point currentScreenPosition)
@@ -191,5 +275,7 @@ internal sealed class NodeCanvasInteractionSession
         DragGroupDropZones = [];
         HoveredDropGroupId = null;
         IsPanning = false;
+        NodeResizeSession = null;
+        GroupResizeSession = null;
     }
 }

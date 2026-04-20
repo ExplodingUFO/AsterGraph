@@ -26,6 +26,7 @@ public sealed class GraphEditorSessionTests
     private const string TargetNodeId = "tests.session.target-001";
     private const string SourcePortId = "out";
     private const string TargetPortId = "in";
+    private const string TargetParameterKey = "gain";
     private const string CompositeNodeId = "tests.session.composite-001";
     private const string RootStandaloneNodeId = "tests.session.root-standalone-001";
     private const string ChildGraphId = "graph-child-001";
@@ -196,6 +197,7 @@ public sealed class GraphEditorSessionTests
         Assert.Equal(typeof(bool), commandsType.GetMethod(nameof(IGraphEditorCommands.TrySetSelectedNodeParameterValue), [typeof(string), typeof(object)])!.ReturnType);
         AssertMethod(commandsType, nameof(IGraphEditorCommands.StartConnection), typeof(string), typeof(string));
         AssertMethod(commandsType, nameof(IGraphEditorCommands.CompleteConnection), typeof(string), typeof(string));
+        AssertMethod(commandsType, nameof(IGraphEditorCommands.CompleteConnection), typeof(GraphConnectionTargetRef));
         AssertMethod(commandsType, nameof(IGraphEditorCommands.CancelPendingConnection));
         AssertMethod(commandsType, nameof(IGraphEditorCommands.DeleteConnection), typeof(string));
         AssertMethod(commandsType, nameof(IGraphEditorCommands.TrySetConnectionNoteText), typeof(string), typeof(string), typeof(bool));
@@ -281,6 +283,11 @@ public sealed class GraphEditorSessionTests
         AssertMethod(queriesType, nameof(IGraphEditorQueries.GetPendingConnectionSnapshot));
         Assert.Equal(typeof(GraphEditorPendingConnectionSnapshot), queriesType.GetMethod(nameof(IGraphEditorQueries.GetPendingConnectionSnapshot))!.ReturnType);
 
+        AssertMethod(queriesType, nameof(IGraphEditorQueries.GetCompatibleConnectionTargets), typeof(string), typeof(string));
+        Assert.Equal(
+            typeof(IReadOnlyList<GraphEditorCompatibleConnectionTargetSnapshot>),
+            queriesType.GetMethod(nameof(IGraphEditorQueries.GetCompatibleConnectionTargets))!.ReturnType);
+
         AssertMethod(queriesType, nameof(IGraphEditorQueries.GetCompatiblePortTargets), typeof(string), typeof(string));
         Assert.Equal(
             typeof(IReadOnlyList<GraphEditorCompatiblePortTargetSnapshot>),
@@ -325,10 +332,22 @@ public sealed class GraphEditorSessionTests
     }
 
     [Fact]
+    public void GraphEditorCompatibleConnectionTargetSnapshot_IsRuntimeSafeAndMvvmFree()
+    {
+        var snapshotType = typeof(GraphEditorCompatibleConnectionTargetSnapshot);
+
+        Assert.True(snapshotType.IsPublic);
+        Assert.DoesNotContain(
+            snapshotType.GetProperties(BindingFlags.Public | BindingFlags.Instance),
+            property => property.PropertyType == typeof(NodeViewModel) || property.PropertyType == typeof(PortViewModel));
+    }
+
+    [Fact]
     public void IGraphEditorSessionHost_RuntimeBoundary_NoLongerDefinesLegacyCompatibleTargetShim()
     {
         var hostType = typeof(IGraphEditorSessionHost);
 
+        Assert.NotNull(hostType.GetMethod(nameof(IGraphEditorSessionHost.GetCompatibleConnectionTargets), [typeof(string), typeof(string)]));
         Assert.NotNull(hostType.GetMethod(nameof(IGraphEditorSessionHost.GetCompatiblePortTargets), [typeof(string), typeof(string)]));
         Assert.Null(hostType.GetMethod(nameof(IGraphEditorQueries.GetCompatibleTargets), [typeof(string), typeof(string)]));
     }
@@ -341,6 +360,7 @@ public sealed class GraphEditorSessionTests
 
         Assert.NotNull(compatibilityQueryType);
         Assert.NotNull(compatibilityQueryType!.GetMethod("GetCompatibleTargetStates"));
+        Assert.NotNull(compatibilityQueryType.GetMethod(nameof(IGraphEditorQueries.GetCompatibleConnectionTargets), [typeof(GraphDocument), typeof(string), typeof(string)]));
         Assert.NotNull(compatibilityQueryType.GetMethod(nameof(IGraphEditorQueries.GetCompatiblePortTargets), [typeof(GraphDocument), typeof(string), typeof(string)]));
         Assert.Null(compatibilityQueryType.GetMethod(nameof(IGraphEditorQueries.GetCompatibleTargets), [typeof(GraphDocument), typeof(string), typeof(string)]));
     }
@@ -411,6 +431,41 @@ public sealed class GraphEditorSessionTests
         Assert.Equal(snapshot.PortTypeId, compatibleTarget.Port.TypeId);
         Assert.Equal(snapshot.PortAccentHex, compatibleTarget.Port.AccentHex);
         Assert.Equal(snapshot.Compatibility, compatibleTarget.Compatibility);
+    }
+
+    [Fact]
+    public void GraphEditorSession_GetCompatibleConnectionTargets_IncludeParameterEndpoints()
+    {
+        var session = AsterGraphEditorFactory.CreateSession(CreateParameterEndpointOptions());
+
+        var compatibleTargets = session.Queries.GetCompatibleConnectionTargets(SourceNodeId, SourcePortId);
+        var parameterTarget = Assert.Single(compatibleTargets, target =>
+            target.TargetKind == GraphConnectionTargetKind.Parameter
+            && target.NodeId == TargetNodeId
+            && target.TargetId == TargetParameterKey);
+        var portTarget = Assert.Single(compatibleTargets, target =>
+            target.TargetKind == GraphConnectionTargetKind.Port
+            && target.NodeId == TargetNodeId
+            && target.TargetId == TargetPortId);
+
+        Assert.Equal("Gain", parameterTarget.TargetLabel);
+        Assert.Equal(new PortTypeId("float"), parameterTarget.TargetTypeId);
+        Assert.Equal("#F3B36B", parameterTarget.TargetAccentHex);
+        Assert.Equal("Input", portTarget.TargetLabel);
+    }
+
+    [Fact]
+    public void GraphEditorSession_CompleteConnection_AcceptsTypedParameterTarget()
+    {
+        var session = AsterGraphEditorFactory.CreateSession(CreateParameterEndpointOptions());
+
+        session.Commands.StartConnection(SourceNodeId, SourcePortId);
+        session.Commands.CompleteConnection(new GraphConnectionTargetRef(TargetNodeId, TargetParameterKey, GraphConnectionTargetKind.Parameter));
+
+        var connection = Assert.Single(session.Queries.CreateDocumentSnapshot().Connections);
+        Assert.Equal(TargetNodeId, connection.TargetNodeId);
+        Assert.Equal(TargetParameterKey, connection.TargetPortId);
+        Assert.Equal(GraphConnectionTargetKind.Parameter, connection.TargetKind);
     }
 
     [Fact]
@@ -1072,6 +1127,46 @@ public sealed class GraphEditorSessionTests
             CompatibilityService = new DefaultPortCompatibilityService(),
         };
 
+    private static AsterGraphEditorOptions CreateParameterEndpointOptions()
+    {
+        var definitionId = new NodeDefinitionId("tests.session.parameter-endpoint");
+        return new AsterGraphEditorOptions
+        {
+            Document = new GraphDocument(
+                "Parameter Endpoint Graph",
+                "Runtime parameter target coverage.",
+                [
+                    new GraphNode(
+                        SourceNodeId,
+                        "Source Node",
+                        "Tests",
+                        "Runtime",
+                        "Session source node.",
+                        new GraphPoint(120, 160),
+                        new GraphSize(240, 160),
+                        [],
+                        [new GraphPort(SourcePortId, "Output", PortDirection.Output, "float", "#6AD5C4", new PortTypeId("float"))],
+                        "#6AD5C4",
+                        definitionId),
+                    new GraphNode(
+                        TargetNodeId,
+                        "Target Node",
+                        "Tests",
+                        "Runtime",
+                        "Session target node.",
+                        new GraphPoint(520, 180),
+                        new GraphSize(240, 160),
+                        [new GraphPort(TargetPortId, "Input", PortDirection.Input, "float", "#F3B36B", new PortTypeId("float"))],
+                        [],
+                        "#F3B36B",
+                        definitionId),
+                ],
+                []),
+            NodeCatalog = CreateParameterEndpointCatalog(definitionId),
+            CompatibilityService = new DefaultPortCompatibilityService(),
+        };
+    }
+
     private sealed record SessionSignature(
         string FeatureDescriptorSignature,
         string CommandDescriptorSignature,
@@ -1249,6 +1344,27 @@ public sealed class GraphEditorSessionTests
             "Runtime",
             [new PortDefinition(TargetPortId, "Input", new PortTypeId("float"), "#F3B36B")],
             [new PortDefinition(SourcePortId, "Output", new PortTypeId("float"), "#6AD5C4")]));
+        return catalog;
+    }
+
+    private static NodeCatalog CreateParameterEndpointCatalog(NodeDefinitionId definitionId)
+    {
+        var catalog = new NodeCatalog();
+        catalog.RegisterDefinition(new NodeDefinition(
+            definitionId,
+            "Parameter Session Node",
+            "Tests",
+            "Runtime",
+            [new PortDefinition(TargetPortId, "Input", new PortTypeId("float"), "#F3B36B")],
+            [new PortDefinition(SourcePortId, "Output", new PortTypeId("float"), "#6AD5C4")],
+            [
+                new NodeParameterDefinition(
+                    TargetParameterKey,
+                    "Gain",
+                    new PortTypeId("float"),
+                    ParameterEditorKind.Number,
+                    defaultValue: 1.0d),
+            ]));
         return catalog;
     }
 

@@ -51,16 +51,31 @@ internal sealed class NodeCanvasConnectionSceneRenderer
             }
 
             var sourcePort = sourceNode.GetPort(connection.SourcePortId);
-            var targetPort = targetNode.GetPort(connection.TargetPortId);
-            if (sourcePort is null || targetPort is null)
+            if (sourcePort is null)
             {
                 continue;
+            }
+
+            GraphPoint target;
+            if (connection.TargetKind == GraphConnectionTargetKind.Port)
+            {
+                var targetPort = targetNode.GetPort(connection.TargetPortId);
+                if (targetPort is null)
+                {
+                    continue;
+                }
+
+                target = GetPortAnchor(context, targetNode, targetPort);
+            }
+            else
+            {
+                target = GetConnectionTargetAnchor(context, targetNode, connection.Target);
             }
 
             DrawConnection(
                 context,
                 GetPortAnchor(context, sourceNode, sourcePort),
-                GetPortAnchor(context, targetNode, targetPort),
+                target,
                 connection);
         }
 
@@ -119,6 +134,44 @@ internal sealed class NodeCanvasConnectionSceneRenderer
         }
 
         return node.GetPortAnchor(port);
+    }
+
+    public GraphPoint GetConnectionTargetAnchor(NodeCanvasConnectionSceneContext context, NodeViewModel node, GraphConnectionTargetRef target)
+    {
+        if (target.Kind == GraphConnectionTargetKind.Port)
+        {
+            var port = node.GetPort(target.TargetId);
+            if (port is not null)
+            {
+                return GetPortAnchor(context, node, port);
+            }
+        }
+
+        if (context.NodeVisuals.TryGetValue(node, out var visual)
+            && visual.Visual.ConnectionTargetAnchors.TryGetValue(target, out var anchorControl))
+        {
+            var center = new Point(anchorControl.Bounds.Width / 2, anchorControl.Bounds.Height / 2);
+            var localToNode = anchorControl.TranslatePoint(center, visual.Root);
+            if (localToNode is not null)
+            {
+                return new GraphPoint(
+                    node.X + localToNode.Value.X,
+                    node.Y + localToNode.Value.Y);
+            }
+
+            if (context.NodeLayer is not null)
+            {
+                var translated = anchorControl.TranslatePoint(center, context.NodeLayer);
+                if (translated is not null)
+                {
+                    return new GraphPoint(translated.Value.X, translated.Value.Y);
+                }
+            }
+        }
+
+        return new GraphPoint(
+            node.X + Math.Max(24d, node.Width - 18d),
+            node.Y + 56d);
     }
 
     private void DrawConnection(

@@ -76,7 +76,7 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
         _nodeCatalog = nodeCatalog;
         _compatibilityService = compatibilityService;
         _workspaceService = workspaceService;
-        _compatibilityQueries = new GraphEditorKernelCompatibilityQueries(compatibilityService);
+        _compatibilityQueries = new GraphEditorKernelCompatibilityQueries(compatibilityService, nodeCatalog);
         _styleOptions = styleOptions;
         _behaviorOptions = behaviorOptions;
         _nodeMutationHost = new GraphEditorKernelNodeMutationHost(this);
@@ -573,6 +573,67 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
         return true;
     }
 
+    public bool TrySetNodeParameterValue(string nodeId, string parameterKey, object? value)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(nodeId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(parameterKey);
+
+        if (!_behaviorOptions.Commands.Nodes.AllowEditParameters)
+        {
+            CurrentStatusMessage = "Parameter editing is disabled by host permissions.";
+            return false;
+        }
+
+        var node = FindNode(nodeId);
+        if (node is null)
+        {
+            CurrentStatusMessage = "No matching node was found for parameter editing.";
+            return false;
+        }
+
+        if (node.DefinitionId is null || !_nodeCatalog.TryGetDefinition(node.DefinitionId, out var definition) || definition is null)
+        {
+            CurrentStatusMessage = "Parameter editing requires a registered node definition.";
+            return false;
+        }
+
+        var parameterDefinition = definition.Parameters.FirstOrDefault(parameter => string.Equals(parameter.Key, parameterKey, StringComparison.Ordinal));
+        if (parameterDefinition is null)
+        {
+            CurrentStatusMessage = $"Parameter '{parameterKey}' is not declared by {definition.DisplayName}.";
+            return false;
+        }
+
+        if (parameterDefinition.Constraints.IsReadOnly)
+        {
+            CurrentStatusMessage = $"{parameterDefinition.DisplayName} is read-only.";
+            return false;
+        }
+
+        var normalized = NodeParameterValueAdapter.NormalizeValue(parameterDefinition, value);
+        if (!normalized.IsValid)
+        {
+            CurrentStatusMessage = normalized.ValidationError ?? $"Parameter '{parameterDefinition.DisplayName}' could not be normalized.";
+            return false;
+        }
+
+        var mutation = _documentMutator.SetNodeParameterValue(
+            CreateActiveScopeDocumentSnapshot(),
+            [nodeId],
+            parameterDefinition,
+            normalized.Value);
+        if (mutation.ChangedNodeIds.Count == 0)
+        {
+            CurrentStatusMessage = $"No parameter changes were applied for {parameterDefinition.DisplayName}.";
+            return false;
+        }
+
+        ApplyActiveScopeDocument(mutation.Document);
+        CurrentStatusMessage = $"Updated {parameterDefinition.DisplayName} on {node.Title}.";
+        MarkDirty(CurrentStatusMessage, GraphEditorDocumentChangeKind.ParametersChanged, mutation.ChangedNodeIds, null, preserveStatus: true);
+        return true;
+    }
+
     public bool TrySetSelectedNodeParameterValue(string parameterKey, object? value)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(parameterKey);
@@ -705,7 +766,10 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
         => _connectionMutationCoordinator.StartConnection(sourceNodeId, sourcePortId);
 
     public void CompleteConnection(string targetNodeId, string targetPortId)
-        => _connectionMutationCoordinator.CompleteConnection(targetNodeId, targetPortId);
+        => CompleteConnection(new GraphConnectionTargetRef(targetNodeId, targetPortId));
+
+    public void CompleteConnection(GraphConnectionTargetRef target)
+        => _connectionMutationCoordinator.CompleteConnection(target);
 
     public void CancelPendingConnection()
         => _connectionMutationCoordinator.CancelPendingConnection();
@@ -969,6 +1033,9 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
 
     public GraphEditorPendingConnectionSnapshot GetPendingConnectionSnapshot()
         => _pendingConnection;
+
+    public IReadOnlyList<GraphEditorCompatibleConnectionTargetSnapshot> GetCompatibleConnectionTargets(string sourceNodeId, string sourcePortId)
+        => _compatibilityQueries.GetCompatibleConnectionTargets(CreateActiveScopeDocumentSnapshot(), sourceNodeId, sourcePortId);
 
     public IReadOnlyList<GraphEditorCompatiblePortTargetSnapshot> GetCompatiblePortTargets(string sourceNodeId, string sourcePortId)
         => _compatibilityQueries.GetCompatiblePortTargets(CreateActiveScopeDocumentSnapshot(), sourceNodeId, sourcePortId);
@@ -1440,8 +1507,7 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
             port.Direction,
             port.DataType,
             port.AccentHex,
-            port.TypeId,
-            port.InlineParameterKey);
+            port.TypeId);
 
     private static GraphNodeGroup CloneGroup(GraphNodeGroup group)
         => new(
@@ -1463,7 +1529,10 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
             connection.Label,
             connection.AccentHex,
             connection.ConversionId,
-            connection.Presentation is null ? null : CloneEdgePresentation(connection.Presentation));
+            connection.Presentation is null ? null : CloneEdgePresentation(connection.Presentation))
+        {
+            TargetKind = connection.TargetKind,
+        };
 
     private static GraphScope CloneScope(GraphScope scope)
         => new(
@@ -1487,8 +1556,7 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
             port.AccentHex,
             port.ChildNodeId,
             port.ChildPortId,
-            port.TypeId,
-            port.InlineParameterKey);
+            port.TypeId);
 
     private static GraphEdgePresentation CloneEdgePresentation(GraphEdgePresentation presentation)
         => new(presentation.NoteText);

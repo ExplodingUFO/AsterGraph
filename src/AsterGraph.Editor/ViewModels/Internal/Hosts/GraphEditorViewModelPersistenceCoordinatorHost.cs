@@ -78,6 +78,7 @@ public sealed partial class GraphEditorViewModel
                 _owner.Nodes,
                 _owner.Connections,
                 _owner.ApplyNodeViewProjection,
+                _owner.FinalizeNodeViewProjection,
                 _owner.HandleNodePropertyChanged);
 
         void IGraphEditorDocumentLoadCoordinatorHost.ClearPendingInteractionState()

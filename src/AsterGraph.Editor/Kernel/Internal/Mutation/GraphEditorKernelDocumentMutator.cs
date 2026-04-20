@@ -878,8 +878,7 @@ internal sealed class GraphEditorKernelDocumentMutator
             childPort.AccentHex,
             childNodeId,
             childPortId,
-            childPort.TypeId,
-            childPort.InlineParameterKey);
+            childPort.TypeId);
         currentBoundaryPorts.Add(boundaryPort);
 
         var updatedComposite = childPort.Direction == PortDirection.Input
@@ -891,8 +890,7 @@ internal sealed class GraphEditorKernelDocumentMutator
             boundaryPort.Direction,
             boundaryPort.DataType,
             boundaryPort.AccentHex,
-            boundaryPort.TypeId,
-            boundaryPort.InlineParameterKey);
+            boundaryPort.TypeId);
         var updatedNode = childPort.Direction == PortDirection.Input
             ? compositeNode! with
             {
@@ -949,6 +947,7 @@ internal sealed class GraphEditorKernelDocumentMutator
             (string.Equals(connection.SourceNodeId, compositeNodeId, StringComparison.Ordinal)
              && string.Equals(connection.SourcePortId, boundaryPortId, StringComparison.Ordinal))
             || (string.Equals(connection.TargetNodeId, compositeNodeId, StringComparison.Ordinal)
+                && connection.TargetKind == GraphConnectionTargetKind.Port
                 && string.Equals(connection.TargetPortId, boundaryPortId, StringComparison.Ordinal)));
         if (hasRootConnections)
         {
