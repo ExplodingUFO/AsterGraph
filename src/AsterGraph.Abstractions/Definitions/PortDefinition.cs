@@ -55,7 +55,7 @@ public sealed record PortDefinition
     public string? Description { get; }
 
     /// <summary>
-    /// Retained for host/plugin source compatibility. Shipped parameter-rail surfaces now prefer
+    /// Retained for host/plugin source compatibility. Shipped row-local authoring surfaces now prefer
     /// explicit parameter endpoint bindings instead of this implicit inline hint.
     /// </summary>
     public string? InlineParameterKey { get; }

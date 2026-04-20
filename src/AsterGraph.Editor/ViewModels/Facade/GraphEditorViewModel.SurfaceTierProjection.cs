@@ -18,7 +18,7 @@ public sealed partial class GraphEditorViewModel
     {
         ArgumentNullException.ThrowIfNull(node);
 
-        ApplyNodeParameterEndpoints(node);
+        ApplyNodeInputProjection(node);
     }
 
     internal void RefreshNodeSurfaceTiers()
@@ -26,7 +26,7 @@ public sealed partial class GraphEditorViewModel
         foreach (var node in Nodes)
         {
             ApplyNodeSurfaceTier(node);
-            ApplyNodeParameterEndpoints(node);
+            ApplyNodeInputProjection(node);
         }
     }
 
@@ -49,31 +49,42 @@ public sealed partial class GraphEditorViewModel
         node.UpdateActiveSurfaceTier(ResolveNodeSurfaceTier(node));
     }
 
-    private void ApplyNodeParameterEndpoints(NodeViewModel node)
+    private void ApplyNodeInputProjection(NodeViewModel node)
     {
         var (definition, _, measurement) = ResolveNodeSurfacePlan(node);
+        var visibleInputs = new List<NodeSurfaceInputRowViewModel>(node.Inputs.Count + Math.Max(definition?.Parameters.Count ?? 0, 0));
+
+        foreach (var port in node.Inputs)
+        {
+            visibleInputs.Add(new NodeSurfaceInputRowViewModel(
+                NodeSurfaceInputRowKind.Port,
+                port.Label,
+                port.TypeId,
+                port: port));
+        }
+
         if (definition is null || definition.Parameters.Count == 0)
         {
             node.UpdateParameterEndpoints([]);
+            node.UpdateInputRows(visibleInputs);
             return;
         }
 
         var revealsOptionalParameters = node.Height >= measurement.HeightToRevealAdditionalInputs;
+        var parameterConnectionsByKey = Connections
+            .Where(candidate =>
+                candidate.TargetKind == GraphConnectionTargetKind.Parameter
+                && string.Equals(candidate.TargetNodeId, node.Id, StringComparison.Ordinal))
+            .ToDictionary(connection => connection.TargetPortId, StringComparer.Ordinal);
         var endpoints = definition.Parameters
             .Where(parameter =>
             {
-                var connection = Connections.FirstOrDefault(candidate =>
-                    candidate.TargetKind == GraphConnectionTargetKind.Parameter
-                    && string.Equals(candidate.TargetNodeId, node.Id, StringComparison.Ordinal)
-                    && string.Equals(candidate.TargetPortId, parameter.Key, StringComparison.Ordinal));
+                parameterConnectionsByKey.TryGetValue(parameter.Key, out var connection);
                 return parameter.IsRequired || revealsOptionalParameters || connection is not null;
             })
             .Select(parameter =>
             {
-                var connection = Connections.FirstOrDefault(candidate =>
-                    candidate.TargetKind == GraphConnectionTargetKind.Parameter
-                    && string.Equals(candidate.TargetNodeId, node.Id, StringComparison.Ordinal)
-                    && string.Equals(candidate.TargetPortId, parameter.Key, StringComparison.Ordinal));
+                parameterConnectionsByKey.TryGetValue(parameter.Key, out var connection);
                 var currentValue = node.GetParameterValue(parameter.Key) ?? parameter.DefaultValue;
                 var parameterViewModel = new NodeParameterViewModel(
                     parameter,
@@ -90,6 +101,19 @@ public sealed partial class GraphEditorViewModel
             .ToList();
 
         node.UpdateParameterEndpoints(endpoints);
+        foreach (var endpoint in endpoints)
+        {
+            var inlineContentKind = ResolveInlineContentKind(node.ActiveSurfaceTier, endpoint);
+            visibleInputs.Add(new NodeSurfaceInputRowViewModel(
+                NodeSurfaceInputRowKind.ParameterEndpoint,
+                endpoint.Parameter.DisplayName,
+                endpoint.Parameter.TypeId,
+                parameterEndpoint: endpoint,
+                inlineContentKind: inlineContentKind,
+                inlineDisplayText: ResolveInlineDisplayText(endpoint, inlineContentKind)));
+        }
+
+        node.UpdateInputRows(visibleInputs);
     }
 
     private (INodeDefinition? Definition, GraphEditorNodeSurfaceContentPlan Plan, GraphEditorNodeSurfaceMeasurement Measurement) ResolveNodeSurfacePlan(NodeViewModel node)
@@ -109,5 +133,56 @@ public sealed partial class GraphEditorViewModel
         return sourceNode is null
             ? connection.Label
             : $"{sourceNode.Title} · {sourcePort?.Label ?? connection.SourcePortId}";
+    }
+
+    private static NodeSurfaceInlineContentKind ResolveInlineContentKind(
+        GraphEditorNodeSurfaceTierSnapshot tier,
+        NodeParameterEndpointViewModel endpoint)
+    {
+        if (endpoint.IsConnected)
+        {
+            return NodeSurfaceInlineContentKind.Connection;
+        }
+
+        if (tier.ShowsSection(NodeSurfaceSectionKeys.InputEditors))
+        {
+            return NodeSurfaceInlineContentKind.Editor;
+        }
+
+        return tier.ShowsSection(NodeSurfaceSectionKeys.InputSummaries)
+            ? NodeSurfaceInlineContentKind.Summary
+            : NodeSurfaceInlineContentKind.None;
+    }
+
+    private static string? ResolveInlineDisplayText(
+        NodeParameterEndpointViewModel endpoint,
+        NodeSurfaceInlineContentKind inlineContentKind)
+        => inlineContentKind switch
+        {
+            NodeSurfaceInlineContentKind.Connection => endpoint.ConnectedDisplayText ?? "Connected",
+            NodeSurfaceInlineContentKind.Summary => DescribeParameterValue(endpoint.Parameter),
+            _ => null,
+        };
+
+    private static string DescribeParameterValue(NodeParameterViewModel parameter)
+    {
+        if (parameter.HasMixedValues)
+        {
+            return parameter.MixedValueHint;
+        }
+
+        if (parameter.IsBoolean)
+        {
+            return parameter.BoolValue is true ? "Enabled" : "Disabled";
+        }
+
+        if (parameter.IsEnum)
+        {
+            return parameter.SelectedOption?.Label ?? parameter.StringValue;
+        }
+
+        return string.IsNullOrWhiteSpace(parameter.StringValue)
+            ? parameter.TypeId.Value
+            : parameter.StringValue;
     }
 }
