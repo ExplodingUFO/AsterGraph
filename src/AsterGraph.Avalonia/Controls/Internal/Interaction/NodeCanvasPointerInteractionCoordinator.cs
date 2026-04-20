@@ -179,7 +179,10 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
             _host.RenderConnections();
         }
 
-        _host.UpdateResizeFeedback(currentScreenPosition);
+        if (!handled)
+        {
+            _host.UpdateResizeFeedback(currentScreenPosition);
+        }
 
         return handled;
     }
@@ -249,6 +252,7 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
 
         _host.InteractionSession.ResetAfterPointerRelease();
         _host.HideGuideAdorners();
+        _host.ClearResizeFeedback();
         _host.UpdateResizeFeedback(currentScreenPosition);
     }
 

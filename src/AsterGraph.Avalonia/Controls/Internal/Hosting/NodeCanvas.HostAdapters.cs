@@ -306,6 +306,8 @@ public partial class NodeCanvas
 
         public GraphEditorViewModel? ViewModel => _owner.ViewModel;
 
+        public Control Root => _owner;
+
         public Canvas? NodeLayer => _owner._nodeLayer;
 
         public Canvas? GroupLayer => _owner._groupLayer;

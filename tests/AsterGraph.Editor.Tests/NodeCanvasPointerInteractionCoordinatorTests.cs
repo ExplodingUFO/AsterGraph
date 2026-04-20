@@ -98,6 +98,8 @@ public sealed class NodeCanvasPointerInteractionCoordinatorTests
         Assert.Equal(initialPanX + 28, editor.PanX);
         Assert.Equal(initialPanY + 36, editor.PanY);
         Assert.Equal(new Point(40, 54), host.InteractionSession.LastPointerPosition);
+        Assert.Equal(0, host.UpdateResizeFeedbackCalls);
+        Assert.Equal(1, host.ClearResizeFeedbackCalls);
     }
 
     [Fact]
@@ -127,6 +129,8 @@ public sealed class NodeCanvasPointerInteractionCoordinatorTests
         Assert.Equal(1, host.ApplyDragAssistCalls);
         Assert.Equal(138, node.X);
         Assert.Equal(154, node.Y);
+        Assert.Equal(0, host.UpdateResizeFeedbackCalls);
+        Assert.Equal(1, host.ClearResizeFeedbackCalls);
     }
 
     [Fact]
@@ -408,6 +412,10 @@ public sealed class NodeCanvasPointerInteractionCoordinatorTests
 
         public GraphPoint DragAssistResult { get; set; } = new(0, 0);
 
+        public int UpdateResizeFeedbackCalls { get; private set; }
+
+        public int ClearResizeFeedbackCalls { get; private set; }
+
         public void FocusCanvas()
         {
         }
@@ -439,10 +447,12 @@ public sealed class NodeCanvasPointerInteractionCoordinatorTests
 
         public void UpdateResizeFeedback(Point currentScreenPosition)
         {
+            UpdateResizeFeedbackCalls++;
         }
 
         public void ClearResizeFeedback()
         {
+            ClearResizeFeedbackCalls++;
         }
     }
 }

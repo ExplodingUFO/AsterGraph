@@ -300,9 +300,6 @@ internal sealed class NodeCanvasSceneHost
             group.Title,
             NodeCanvasGroupResizeEdge.Left,
             $"{group.Title} group left resize handle",
-            GraphResizeFeedbackDefaults.ResolveCursor(new GraphResizeFeedbackContext(
-                GraphResizeFeedbackSurfaceKind.Group,
-                GraphResizeFeedbackHandle.LeftEdge)),
             HorizontalAlignment.Left,
             VerticalAlignment.Stretch,
             width: NodeCanvasGroupChromeMetrics.ResizeHandleThickness,
@@ -312,9 +309,6 @@ internal sealed class NodeCanvasSceneHost
             group.Title,
             NodeCanvasGroupResizeEdge.Top,
             $"{group.Title} group top resize handle",
-            GraphResizeFeedbackDefaults.ResolveCursor(new GraphResizeFeedbackContext(
-                GraphResizeFeedbackSurfaceKind.Group,
-                GraphResizeFeedbackHandle.TopEdge)),
             HorizontalAlignment.Stretch,
             VerticalAlignment.Top,
             width: double.NaN,
@@ -324,9 +318,6 @@ internal sealed class NodeCanvasSceneHost
             group.Title,
             NodeCanvasGroupResizeEdge.Right,
             $"{group.Title} group right resize handle",
-            GraphResizeFeedbackDefaults.ResolveCursor(new GraphResizeFeedbackContext(
-                GraphResizeFeedbackSurfaceKind.Group,
-                GraphResizeFeedbackHandle.RightEdge)),
             HorizontalAlignment.Right,
             VerticalAlignment.Stretch,
             width: NodeCanvasGroupChromeMetrics.ResizeHandleThickness,
@@ -336,9 +327,6 @@ internal sealed class NodeCanvasSceneHost
             group.Title,
             NodeCanvasGroupResizeEdge.Bottom,
             $"{group.Title} group bottom resize handle",
-            GraphResizeFeedbackDefaults.ResolveCursor(new GraphResizeFeedbackContext(
-                GraphResizeFeedbackSurfaceKind.Group,
-                GraphResizeFeedbackHandle.BottomEdge)),
             HorizontalAlignment.Stretch,
             VerticalAlignment.Bottom,
             width: double.NaN,
@@ -399,7 +387,6 @@ internal sealed class NodeCanvasSceneHost
         string groupTitle,
         NodeCanvasGroupResizeEdge edge,
         string automationName,
-        Cursor cursor,
         HorizontalAlignment horizontalAlignment,
         VerticalAlignment verticalAlignment,
         double width,
@@ -412,7 +399,6 @@ internal sealed class NodeCanvasSceneHost
             VerticalAlignment = verticalAlignment,
             Width = width,
             Height = height,
-            Cursor = cursor,
         };
         AutomationProperties.SetName(thumb, automationName);
         thumb.AddHandler(

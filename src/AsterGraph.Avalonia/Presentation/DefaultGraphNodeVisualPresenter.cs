@@ -204,10 +204,7 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
             HorizontalAlignment.Right,
             VerticalAlignment.Stretch,
             width: 10,
-            height: double.NaN,
-            GraphResizeFeedbackDefaults.ResolveCursor(new GraphResizeFeedbackContext(
-                GraphResizeFeedbackSurfaceKind.Node,
-                GraphResizeFeedbackHandle.RightEdge)));
+            height: double.NaN);
         widthResizeThumb.AddHandler(
             InputElement.PointerPressedEvent,
             (_, args) => context.BeginNodeResize(context.Node, GraphNodeResizeHandleKind.Right, args),
@@ -221,10 +218,7 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
             HorizontalAlignment.Stretch,
             VerticalAlignment.Bottom,
             width: double.NaN,
-            height: 10,
-            GraphResizeFeedbackDefaults.ResolveCursor(new GraphResizeFeedbackContext(
-                GraphResizeFeedbackSurfaceKind.Node,
-                GraphResizeFeedbackHandle.BottomEdge)));
+            height: 10);
         heightResizeThumb.AddHandler(
             InputElement.PointerPressedEvent,
             (_, args) => context.BeginNodeResize(context.Node, GraphNodeResizeHandleKind.Bottom, args),
@@ -239,9 +233,6 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
             VerticalAlignment.Bottom,
             width: 16,
             height: 16,
-            GraphResizeFeedbackDefaults.ResolveCursor(new GraphResizeFeedbackContext(
-                GraphResizeFeedbackSurfaceKind.Node,
-                GraphResizeFeedbackHandle.BottomRightCorner)),
             margin: new Thickness(0, 0, 2, 2));
         resizeThumb.AddHandler(
             InputElement.PointerPressedEvent,
@@ -787,7 +778,6 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
         VerticalAlignment verticalAlignment,
         double width,
         double height,
-        Cursor cursor,
         Thickness? margin = null)
     {
         var thumb = new Thumb
@@ -797,7 +787,6 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
             VerticalAlignment = verticalAlignment,
             Width = width,
             Height = height,
-            Cursor = cursor,
             Margin = margin ?? default,
         };
         AutomationProperties.SetName(thumb, automationName);

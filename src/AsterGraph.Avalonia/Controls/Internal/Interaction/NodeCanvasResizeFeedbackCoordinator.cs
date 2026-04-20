@@ -11,6 +11,8 @@ internal interface INodeCanvasResizeFeedbackHost
 {
     GraphEditorViewModel? ViewModel { get; }
 
+    Control Root { get; }
+
     Canvas? NodeLayer { get; }
 
     Canvas? GroupLayer { get; }
@@ -25,9 +27,11 @@ internal interface INodeCanvasResizeFeedbackHost
 internal sealed class NodeCanvasResizeFeedbackCoordinator
 {
     private readonly INodeCanvasResizeFeedbackHost _host;
-    private Control? _activeSurface;
-    private Cursor? _activeSurfaceOriginalCursor;
-    private Cursor? _activeCursor;
+    private Control? _activeHoverSurface;
+    private Cursor? _activeHoverSurfaceOriginalCursor;
+    private GraphResizeFeedbackContext? _activeHoverContext;
+    private Cursor? _activeSessionOriginalCursor;
+    private GraphResizeFeedbackContext? _activeSessionContext;
 
     public NodeCanvasResizeFeedbackCoordinator(INodeCanvasResizeFeedbackHost host)
     {
@@ -36,6 +40,11 @@ internal sealed class NodeCanvasResizeFeedbackCoordinator
 
     public void Update(Point currentScreenPosition)
     {
+        if (_activeSessionContext is not null)
+        {
+            return;
+        }
+
         if (_host.ViewModel is null)
         {
             Clear();
@@ -52,16 +61,24 @@ internal sealed class NodeCanvasResizeFeedbackCoordinator
         Clear();
     }
 
-    public void Clear()
+    public void BeginResizeSession(GraphResizeFeedbackContext context)
     {
-        if (_activeSurface is not null)
+        ClearHover();
+        if (_activeSessionContext == context)
         {
-            _activeSurface.Cursor = _activeSurfaceOriginalCursor;
+            return;
         }
 
-        _activeSurface = null;
-        _activeSurfaceOriginalCursor = null;
-        _activeCursor = null;
+        ClearSession();
+        _activeSessionOriginalCursor = _host.Root.Cursor;
+        _activeSessionContext = context;
+        _host.Root.Cursor = ResolveCursor(context);
+    }
+
+    public void Clear()
+    {
+        ClearHover();
+        ClearSession();
     }
 
     private bool TryResolveNodeHit(GraphPoint world, out NodeCanvasResizeFeedbackHit hit)
@@ -72,11 +89,12 @@ internal sealed class NodeCanvasResizeFeedbackCoordinator
             return false;
         }
 
+        var nodesBySurface = _host.NodeVisuals.ToDictionary(
+            entry => entry.Value.Root,
+            entry => entry.Key);
         foreach (var surface in _host.NodeLayer.Children.OfType<Control>().Reverse())
         {
-            var nodeEntry = _host.NodeVisuals.FirstOrDefault(entry => ReferenceEquals(entry.Value.Root, surface));
-            var node = nodeEntry.Key;
-            if (node is null)
+            if (!nodesBySurface.TryGetValue(surface, out var node))
             {
                 continue;
             }
@@ -104,17 +122,15 @@ internal sealed class NodeCanvasResizeFeedbackCoordinator
             return false;
         }
 
-        foreach (var surface in _host.GroupLayer.Children.OfType<Control>().Reverse())
+        var groupsBySurface = _host.GroupVisuals.ToDictionary(
+            entry => entry.Value.Root,
+            entry => entry.Key);
+        var snapshotsById = _host.ViewModel.GetNodeGroupSnapshots()
+            .ToDictionary(group => group.Id, StringComparer.Ordinal);
+        foreach (var surface in _host.GroupLayer.Children.OfType<Border>().Reverse())
         {
-            var groupEntry = _host.GroupVisuals.FirstOrDefault(entry => ReferenceEquals(entry.Value.Root, surface));
-            if (groupEntry.Value.Root is null)
-            {
-                continue;
-            }
-
-            var snapshot = _host.ViewModel.GetNodeGroupSnapshots()
-                .FirstOrDefault(candidate => string.Equals(candidate.Id, groupEntry.Key, StringComparison.Ordinal));
-            if (snapshot is null)
+            if (!groupsBySurface.TryGetValue(surface, out var groupId)
+                || !snapshotsById.TryGetValue(groupId, out var snapshot))
             {
                 continue;
             }
@@ -136,18 +152,42 @@ internal sealed class NodeCanvasResizeFeedbackCoordinator
 
     private void Apply(NodeCanvasResizeFeedbackHit hit)
     {
-        var cursor = _host.ResizeFeedbackPolicy?.ResolveCursor(hit.Context)
-            ?? GraphResizeFeedbackDefaults.ResolveCursor(hit.Context);
-
-        if (ReferenceEquals(_activeSurface, hit.Surface) && Equals(_activeCursor, cursor))
+        if (ReferenceEquals(_activeHoverSurface, hit.Surface) && _activeHoverContext == hit.Context)
         {
             return;
         }
 
-        Clear();
-        _activeSurface = hit.Surface;
-        _activeSurfaceOriginalCursor = hit.Surface.Cursor;
-        _activeCursor = cursor;
-        hit.Surface.Cursor = cursor;
+        ClearHover();
+        _activeHoverSurface = hit.Surface;
+        _activeHoverSurfaceOriginalCursor = hit.Surface.Cursor;
+        _activeHoverContext = hit.Context;
+        hit.Surface.Cursor = ResolveCursor(hit.Context);
     }
+
+    private void ClearHover()
+    {
+        if (_activeHoverSurface is not null)
+        {
+            _activeHoverSurface.Cursor = _activeHoverSurfaceOriginalCursor;
+        }
+
+        _activeHoverSurface = null;
+        _activeHoverSurfaceOriginalCursor = null;
+        _activeHoverContext = null;
+    }
+
+    private void ClearSession()
+    {
+        if (_activeSessionContext is not null)
+        {
+            _host.Root.Cursor = _activeSessionOriginalCursor;
+        }
+
+        _activeSessionOriginalCursor = null;
+        _activeSessionContext = null;
+    }
+
+    private Cursor ResolveCursor(GraphResizeFeedbackContext context)
+        => _host.ResizeFeedbackPolicy?.ResolveCursor(context)
+            ?? GraphResizeFeedbackDefaults.ResolveCursor(context);
 }

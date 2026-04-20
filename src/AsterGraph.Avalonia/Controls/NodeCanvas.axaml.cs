@@ -312,7 +312,14 @@ public partial class NodeCanvas : UserControl
         }
 
         Focus();
-        ClearResizeFeedback();
+        _resizeFeedbackCoordinator.BeginResizeSession(new GraphResizeFeedbackContext(
+            GraphResizeFeedbackSurfaceKind.Node,
+            handleKind switch
+            {
+                GraphNodeResizeHandleKind.Right => GraphResizeFeedbackHandle.RightEdge,
+                GraphNodeResizeHandleKind.Bottom => GraphResizeFeedbackHandle.BottomEdge,
+                _ => GraphResizeFeedbackHandle.BottomRightCorner,
+            }));
         ViewModel.SelectSingleNode(node, updateStatus: false);
         _interactionSession.BeginNodeResize(
             ViewModel.FindNode(node.Id) ?? node,
@@ -360,7 +367,15 @@ public partial class NodeCanvas : UserControl
         }
 
         Focus();
-        ClearResizeFeedback();
+        _resizeFeedbackCoordinator.BeginResizeSession(new GraphResizeFeedbackContext(
+            GraphResizeFeedbackSurfaceKind.Group,
+            edge switch
+            {
+                NodeCanvasGroupResizeEdge.Left => GraphResizeFeedbackHandle.LeftEdge,
+                NodeCanvasGroupResizeEdge.Top => GraphResizeFeedbackHandle.TopEdge,
+                NodeCanvasGroupResizeEdge.Right => GraphResizeFeedbackHandle.RightEdge,
+                _ => GraphResizeFeedbackHandle.BottomEdge,
+            }));
         _interactionSession.BeginGroupResize(group.Id, groupTitle, edge, group.Position, group.Size, args.GetPosition(this));
         ViewModel.BeginHistoryInteraction();
         args.Pointer.Capture(this);
