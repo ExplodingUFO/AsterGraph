@@ -76,7 +76,7 @@ public static class ConsumerSampleProof
 
         var afterHostSnapshot = host.Session.Queries.CreateDocumentSnapshot();
         var pluginContributionOk = host.HasPluginNodeDefinition()
-            && host.HasPluginMenuContribution()
+            && host.HasPluginCommandContribution()
             && host.AddPluginAuditNode()
             && host.PluginLoadSnapshots.Any(snapshot => snapshot.Descriptor?.Id == "consumer.sample.audit-plugin")
             && host.Session.Queries.CreateDocumentSnapshot().Nodes.Count == afterHostSnapshot.Nodes.Count + 1;

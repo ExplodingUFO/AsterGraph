@@ -29,8 +29,9 @@
 - plugin trust 由 host 决定，并且发生在 activation 之前
 - plugin localization 先组合，host localization 最后覆盖
 - plugin node presentation 先组合，host presentation 覆盖最终字段，合并型 adornment 继续累积
-- runtime/session menu 先组合 stock descriptor + plugin augmentor
-- retained `GraphEditorViewModel.BuildContextMenu(...)` 再提供最终 host override 点
+- plugin command 通过 canonical session command descriptor pipeline 注册；如果和 stock command 撞 id，stock command 继续保留执行权
+- runtime/session menu 当前仍以 stock descriptor 投影为主，并继续向共享 command source 收敛
+- retained `GraphEditorViewModel.BuildContextMenu(...)` 仍是 compatibility host 的最终 override 点
 
 ## Lane Ownership
 

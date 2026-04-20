@@ -44,23 +44,9 @@ public static class AsterGraphHostedActionFactory
     }
 
     public static AsterGraphHostedActionDescriptor CreateHostAction(
-        string id,
-        string title,
-        string group,
-        Func<bool> execute,
-        bool canExecute = true,
-        string? iconKey = null,
-        string? defaultShortcut = null,
-        string? disabledReason = null)
-        => new(
-            id,
-            title,
-            group,
-            execute,
-            canExecute,
-            iconKey,
-            defaultShortcut,
-            disabledReason);
+        GraphEditorCommandDescriptorSnapshot descriptor,
+        Func<bool> execute)
+        => new(descriptor, execute);
 
     private static Dictionary<string, AsterGraphHostedActionDescriptor> CreateCommandActionMap(IGraphEditorSession session)
         => session.Queries.GetCommandDescriptors()
@@ -75,14 +61,7 @@ public static class AsterGraphHostedActionFactory
         IGraphEditorSession session,
         GraphEditorCommandDescriptorSnapshot descriptor)
         => new(
-            descriptor.Id,
-            descriptor.Title,
-            descriptor.Group,
+            descriptor,
             () => session.Commands.TryExecuteCommand(new GraphEditorCommandInvocationSnapshot(descriptor.Id)),
-            descriptor.CanExecute,
-            descriptor.IconKey,
-            descriptor.DefaultShortcut,
-            descriptor.DisabledReason,
-            descriptor.Id,
-            descriptor.Source);
+            descriptor.Id);
 }

@@ -54,7 +54,8 @@
 - 推荐的稳定入口是 `CreateSession(...)`、`Create(...)`、`IGraphEditorSession` 和 DTO/snapshot queries
 - retained `GraphEditorViewModel` / `GraphEditorView` 仍是受支持的 migration facade
 - host localization 在 plugin localization 之后执行，所以 host override 最终生效
-- runtime/session menu composition 与 retained augmentor composition 不同；新代码优先走运行时路线
+- plugin command 现在通过 canonical session command descriptor 暴露，并通过 `IGraphEditorSession.Commands.TryExecuteCommand(...)` 执行
+- retained augmentor composition 仍然和 runtime 路线不同；新代码优先走运行时路线
 
 ## 插件信任边界
 

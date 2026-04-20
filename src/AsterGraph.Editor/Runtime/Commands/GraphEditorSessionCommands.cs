@@ -360,7 +360,12 @@ public sealed partial class GraphEditorSession
     {
         ArgumentNullException.ThrowIfNull(command);
 
-        var executed = _host.TryExecuteCommand(command);
+        var hostCommandIds = _host.GetCommandDescriptors()
+            .Select(descriptor => descriptor.Id)
+            .ToHashSet(StringComparer.Ordinal);
+        var executed = hostCommandIds.Contains(command.CommandId)
+            ? _host.TryExecuteCommand(command)
+            : TryExecutePluginCommand(command);
         if (!executed)
         {
             return false;

@@ -3,8 +3,8 @@ using System.Reflection;
 using AsterGraph.Abstractions.Catalog;
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
+using AsterGraph.Core.Models;
 using AsterGraph.Editor.Hosting;
-using AsterGraph.Editor.Menus;
 using AsterGraph.Editor.Plugins;
 using AsterGraph.Editor.Presentation;
 using AsterGraph.Editor.Runtime;
@@ -433,8 +433,9 @@ public sealed class GraphEditorPluginContractsTests
             typeof(GraphEditorPluginManifestSourceCandidate),
             typeof(GraphEditorPluginRegistration),
             typeof(GraphEditorPluginBuilder),
-            typeof(GraphEditorPluginMenuAugmentationContext),
-            typeof(IGraphEditorPluginContextMenuAugmentor),
+            typeof(GraphEditorPluginCommandContext),
+            typeof(GraphEditorPluginCommandExecutionContext),
+            typeof(IGraphEditorPluginCommandContributor),
             typeof(GraphEditorPluginNodePresentationContext),
             typeof(IGraphEditorPluginNodePresentationProvider),
             typeof(IGraphEditorPluginLocalizationProvider),
@@ -457,17 +458,17 @@ public sealed class GraphEditorPluginContractsTests
     {
         var builder = new GraphEditorPluginBuilder();
         var definitionProvider = new TestDefinitionProvider();
-        var menuAugmentor = new TestMenuAugmentor();
+        var commandContributor = new TestCommandContributor();
         var nodePresentationProvider = new TestNodePresentationProvider();
         var localizationProvider = new TestLocalizationProvider();
 
         builder.AddNodeDefinitionProvider(definitionProvider);
-        builder.AddContextMenuAugmentor(menuAugmentor);
+        builder.AddCommandContributor(commandContributor);
         builder.AddNodePresentationProvider(nodePresentationProvider);
         builder.AddLocalizationProvider(localizationProvider);
 
         Assert.Same(definitionProvider, Assert.Single(builder.NodeDefinitionProviders));
-        Assert.Same(menuAugmentor, Assert.Single(builder.ContextMenuAugmentors));
+        Assert.Same(commandContributor, Assert.Single(builder.CommandContributors));
         Assert.Same(nodePresentationProvider, Assert.Single(builder.NodePresentationProviders));
         Assert.Same(localizationProvider, Assert.Single(builder.LocalizationProviders));
     }
@@ -562,12 +563,28 @@ public sealed class GraphEditorPluginContractsTests
             => [new NodeDefinition(new NodeDefinitionId("tests.plugin.node"), "Plugin Node", "Tests", "Plugin", [], [])];
     }
 
-    private sealed class TestMenuAugmentor : IGraphEditorPluginContextMenuAugmentor
+    private sealed class TestCommandContributor : IGraphEditorPluginCommandContributor
     {
-        public IReadOnlyList<GraphEditorMenuItemDescriptorSnapshot> Augment(GraphEditorPluginMenuAugmentationContext context)
+        public IReadOnlyList<GraphEditorCommandDescriptorSnapshot> GetCommandDescriptors(GraphEditorPluginCommandContext context)
         {
             ArgumentNullException.ThrowIfNull(context);
-            return context.StockItems;
+            return
+            [
+                new GraphEditorCommandDescriptorSnapshot(
+                    "tests.plugin.command",
+                    "Test Plugin Command",
+                    "plugin",
+                    "plugin",
+                    null,
+                    GraphEditorCommandSourceKind.Plugin,
+                    isEnabled: true),
+            ];
+        }
+
+        public bool TryExecuteCommand(GraphEditorPluginCommandExecutionContext context)
+        {
+            ArgumentNullException.ThrowIfNull(context);
+            return true;
         }
     }
 

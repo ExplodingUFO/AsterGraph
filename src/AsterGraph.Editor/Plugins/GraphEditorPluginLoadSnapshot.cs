@@ -52,17 +52,17 @@ public sealed record GraphEditorPluginContributionSummarySnapshot
     /// </summary>
     public GraphEditorPluginContributionSummarySnapshot(
         int nodeDefinitionProviderCount,
-        int contextMenuAugmentorCount,
+        int commandContributorCount,
         int nodePresentationProviderCount,
         int localizationProviderCount)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(nodeDefinitionProviderCount);
-        ArgumentOutOfRangeException.ThrowIfNegative(contextMenuAugmentorCount);
+        ArgumentOutOfRangeException.ThrowIfNegative(commandContributorCount);
         ArgumentOutOfRangeException.ThrowIfNegative(nodePresentationProviderCount);
         ArgumentOutOfRangeException.ThrowIfNegative(localizationProviderCount);
 
         NodeDefinitionProviderCount = nodeDefinitionProviderCount;
-        ContextMenuAugmentorCount = contextMenuAugmentorCount;
+        CommandContributorCount = commandContributorCount;
         NodePresentationProviderCount = nodePresentationProviderCount;
         LocalizationProviderCount = localizationProviderCount;
     }
@@ -73,9 +73,9 @@ public sealed record GraphEditorPluginContributionSummarySnapshot
     public int NodeDefinitionProviderCount { get; }
 
     /// <summary>
-    /// 右键菜单增强器数量。
+    /// 命令贡献器数量。
     /// </summary>
-    public int ContextMenuAugmentorCount { get; }
+    public int CommandContributorCount { get; }
 
     /// <summary>
     /// 节点展示提供器数量。

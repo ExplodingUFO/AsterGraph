@@ -6,7 +6,6 @@ using AsterGraph.Core.Compatibility;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Catalog;
 using AsterGraph.Editor.Hosting;
-using AsterGraph.Editor.Menus;
 using AsterGraph.Editor.Plugins;
 using AsterGraph.Editor.Presentation;
 using AsterGraph.Editor.Runtime;
@@ -25,13 +24,12 @@ public sealed class ConsumerSampleHost : IDisposable
     private const string InputPortId = "input";
     private const string OutputPortId = "output";
     private const string PluginId = "consumer.sample.audit-plugin";
-    private const string PluginMenuItemId = "consumer-sample.plugin.menu";
+    public const string PluginCommandId = "consumer.sample.plugin.add-audit-node";
     private readonly GraphEditorViewModel _editor;
     private readonly ConsumerSamplePluginAllowlistTrustPolicy _trustPolicy;
     private readonly GraphEditorPluginDiscoveryOptions _pluginDiscoveryOptions;
     private readonly string _storageRootPath;
     private int _nextHostNodeOrdinal = 2;
-    private int _nextPluginNodeOrdinal = 1;
 
     private ConsumerSampleHost(
         GraphEditorViewModel editor,
@@ -138,15 +136,7 @@ public sealed class ConsumerSampleHost : IDisposable
     }
 
     public bool AddPluginAuditNode()
-    {
-        var before = Session.Queries.CreateDocumentSnapshot();
-        _editor.Session.Commands.AddNode(
-            PluginAuditDefinitionId,
-            new GraphPoint(240 + ((_nextPluginNodeOrdinal - 1) * 260), 520));
-        _nextPluginNodeOrdinal++;
-
-        return Session.Queries.CreateDocumentSnapshot().Nodes.Count == before.Nodes.Count + 1;
-    }
+        => Session.Commands.TryExecuteCommand(new GraphEditorCommandInvocationSnapshot(PluginCommandId));
 
     public bool ApproveSelection()
         => Session.Commands.TrySetSelectedNodeParameterValue("status", "approved");
@@ -163,13 +153,8 @@ public sealed class ConsumerSampleHost : IDisposable
     public IReadOnlyList<GraphEditorNodeParameterSnapshot> GetSelectedParameterSnapshots()
         => Session.Queries.GetSelectedNodeParameterSnapshots();
 
-    public IReadOnlyList<GraphEditorMenuItemDescriptorSnapshot> BuildCanvasContextMenu()
-        => Session.Queries.BuildContextMenuDescriptors(new ContextMenuContext(
-            ContextMenuTargetKind.Canvas,
-            new GraphPoint(320, 220)));
-
-    public bool HasPluginMenuContribution()
-        => BuildCanvasContextMenu().Any(item => item.Id == PluginMenuItemId);
+    public bool HasPluginCommandContribution()
+        => Session.Queries.GetCommandDescriptors().Any(descriptor => descriptor.Id == PluginCommandId);
 
     public bool HasPluginNodeDefinition()
         => Session.Queries.GetRegisteredNodeDefinitions().Any(definition => definition.Id == PluginAuditDefinitionId);
@@ -383,13 +368,13 @@ public sealed class ConsumerSampleHost : IDisposable
                 publisher: "AsterGraph Samples",
                 packageId: "AsterGraph.ConsumerSample.Plugin",
                 packageVersion: "0.2.0-alpha.3"),
-            description: "Trusted sample plugin that adds one audit node plus menu and presentation hooks.",
+            description: "Trusted sample plugin that adds one audit node plus executable command, presentation, and localization hooks.",
             version: "0.2.0-alpha.3",
             compatibility: new GraphEditorPluginCompatibilityManifest(
                 minimumAsterGraphVersion: "0.2.0-alpha.3",
                 targetFramework: "net8.0",
                 runtimeSurface: "Create + AsterGraphAvaloniaViewFactory"),
-            capabilitySummary: "Adds one node definition, one menu augmentation, one presentation badge, and one localization override.");
+            capabilitySummary: "Adds one node definition, one executable command, one presentation badge, and one localization override.");
 
     private static GraphEditorPluginProvenanceEvidence CreatePluginProvenance()
         => new(
@@ -413,7 +398,7 @@ public sealed class ConsumerSampleHost : IDisposable
         {
             ArgumentNullException.ThrowIfNull(builder);
             builder.AddNodeDefinitionProvider(new ConsumerAuditNodeDefinitionProvider());
-            builder.AddContextMenuAugmentor(new ConsumerAuditContextMenuAugmentor());
+            builder.AddCommandContributor(new ConsumerAuditCommandContributor());
             builder.AddNodePresentationProvider(new ConsumerAuditPresentationProvider());
             builder.AddLocalizationProvider(new ConsumerAuditLocalizationProvider());
         }
@@ -456,22 +441,35 @@ public sealed class ConsumerSampleHost : IDisposable
             ];
     }
 
-    private sealed class ConsumerAuditContextMenuAugmentor : IGraphEditorPluginContextMenuAugmentor
+    private sealed class ConsumerAuditCommandContributor : IGraphEditorPluginCommandContributor
     {
-        public IReadOnlyList<GraphEditorMenuItemDescriptorSnapshot> Augment(GraphEditorPluginMenuAugmentationContext context)
+        public IReadOnlyList<GraphEditorCommandDescriptorSnapshot> GetCommandDescriptors(GraphEditorPluginCommandContext context)
         {
             ArgumentNullException.ThrowIfNull(context);
 
             return
             [
-                .. context.StockItems,
-                new GraphEditorMenuItemDescriptorSnapshot(
-                    PluginMenuItemId,
-                    "Plugin Audit Contribution",
+                new GraphEditorCommandDescriptorSnapshot(
+                    PluginCommandId,
+                    "Add Plugin Audit Node",
+                    "consumer",
                     iconKey: "plugin",
-                    isEnabled: false,
-                    disabledReason: "This sample keeps the plugin action read-only to show menu augmentation without adding custom command plumbing."),
+                    defaultShortcut: "Ctrl+Shift+A",
+                    source: GraphEditorCommandSourceKind.Plugin,
+                    isEnabled: true),
             ];
+        }
+
+        public bool TryExecuteCommand(GraphEditorPluginCommandExecutionContext context)
+        {
+            ArgumentNullException.ThrowIfNull(context);
+
+            var pluginNodeCount = context.Session.Queries.CreateDocumentSnapshot().Nodes.Count(node => node.DefinitionId == PluginAuditDefinitionId);
+            var beforeCount = context.Session.Queries.CreateDocumentSnapshot().Nodes.Count;
+            context.Session.Commands.AddNode(
+                PluginAuditDefinitionId,
+                new GraphPoint(240 + (pluginNodeCount * 260), 520));
+            return context.Session.Queries.CreateDocumentSnapshot().Nodes.Count == beforeCount + 1;
         }
     }
 

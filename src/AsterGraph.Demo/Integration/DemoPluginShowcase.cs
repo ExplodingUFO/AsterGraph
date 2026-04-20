@@ -1,7 +1,7 @@
 using AsterGraph.Abstractions.Catalog;
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
-using AsterGraph.Editor.Menus;
+using AsterGraph.Core.Models;
 using AsterGraph.Editor.Plugins;
 using AsterGraph.Editor.Presentation;
 using AsterGraph.Editor.Runtime;
@@ -12,6 +12,7 @@ internal static class DemoPluginShowcase
 {
     public static readonly NodeDefinitionId ShowcaseNodeDefinitionId = new("aster.demo.plugin.showcase-node");
     public static readonly NodeDefinitionId BlockedShowcaseNodeDefinitionId = new("aster.demo.plugin.blocked-node");
+    public const string AllowedPluginCommandId = "aster.demo.plugin.add-showcase-node";
 
     private static readonly GraphEditorPluginManifest AllowedManifest = new(
         "aster.demo.plugin.allowed",
@@ -28,7 +29,7 @@ internal static class DemoPluginShowcase
             minimumAsterGraphVersion: "0.2.0-alpha.3",
             targetFramework: "net9.0",
             runtimeSurface: "CreateSession/Create + hosted Avalonia"),
-        capabilitySummary: "Adds node, menu, localization, and presentation contributions.");
+        capabilitySummary: "Adds node, executable command, localization, and presentation contributions.");
 
     private static readonly GraphEditorPluginManifest BlockedManifest = new(
         "aster.demo.plugin.blocked",
@@ -132,7 +133,7 @@ internal static class DemoPluginShowcase
                 "Plugin Relay",
                 "Trusted plugin node surfaced by the demo trust showcase.",
                 "#6AD5C4"));
-            builder.AddContextMenuAugmentor(new DemoPluginContextMenuAugmentor());
+            builder.AddCommandContributor(new DemoPluginCommandContributor());
             builder.AddNodePresentationProvider(new DemoPluginNodePresentationProvider());
             builder.AddLocalizationProvider(new DemoPluginLocalizationProvider());
         }
@@ -178,21 +179,32 @@ internal static class DemoPluginShowcase
             ];
     }
 
-    private sealed class DemoPluginContextMenuAugmentor : IGraphEditorPluginContextMenuAugmentor
+    private sealed class DemoPluginCommandContributor : IGraphEditorPluginCommandContributor
     {
-        public IReadOnlyList<GraphEditorMenuItemDescriptorSnapshot> Augment(GraphEditorPluginMenuAugmentationContext context)
+        public IReadOnlyList<GraphEditorCommandDescriptorSnapshot> GetCommandDescriptors(GraphEditorPluginCommandContext context)
         {
             ArgumentNullException.ThrowIfNull(context);
 
             return
             [
-                .. context.StockItems,
-                new GraphEditorMenuItemDescriptorSnapshot(
-                    "demo.plugin.menu",
-                    "Trusted Plugin Contribution",
+                new GraphEditorCommandDescriptorSnapshot(
+                    AllowedPluginCommandId,
+                    "Add Trusted Plugin Node",
+                    "plugin",
                     iconKey: "plugin",
-                    isEnabled: false),
+                    defaultShortcut: "Ctrl+Shift+D",
+                    source: GraphEditorCommandSourceKind.Plugin,
+                    isEnabled: true),
             ];
+        }
+
+        public bool TryExecuteCommand(GraphEditorPluginCommandExecutionContext context)
+        {
+            ArgumentNullException.ThrowIfNull(context);
+
+            var beforeCount = context.Session.Queries.CreateDocumentSnapshot().Nodes.Count;
+            context.Session.Commands.AddNode(ShowcaseNodeDefinitionId, new GraphPoint(920, 260));
+            return context.Session.Queries.CreateDocumentSnapshot().Nodes.Count == beforeCount + 1;
         }
     }
 

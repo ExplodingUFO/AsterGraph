@@ -256,7 +256,7 @@ public static class ConsumerSampleWindowFactory
                             $"{snapshot.Manifest.DisplayName}\n" +
                             $"Status: {snapshot.Status}\n" +
                             $"Trust: {snapshot.TrustEvaluation.Decision} ({snapshot.TrustEvaluation.ReasonCode})\n" +
-                            $"Contributions: nodes={snapshot.Contributions.NodeDefinitionProviderCount}, menu={snapshot.Contributions.ContextMenuAugmentorCount}, presentation={snapshot.Contributions.NodePresentationProviderCount}",
+                            $"Contributions: nodes={snapshot.Contributions.NodeDefinitionProviderCount}, commands={snapshot.Contributions.CommandContributorCount}, presentation={snapshot.Contributions.NodePresentationProviderCount}",
                         },
                 });
             }
@@ -474,34 +474,36 @@ public static class ConsumerSampleWindowFactory
 
         private IReadOnlyList<AsterGraphHostedActionDescriptor> BuildHostedActions()
         {
+            var selection = _host.Session.Queries.GetSelectionSnapshot();
             var commandActions = AsterGraphHostedActionFactory.CreateCommandActions(
                 _host.Session,
-                ["workspace.save", "workspace.load", "history.undo", "history.redo", "viewport.fit"]);
+                [ConsumerSampleHost.PluginCommandId, "workspace.save", "workspace.load", "history.undo", "history.redo", "viewport.fit"]);
 
             return
             [
                 AsterGraphHostedActionFactory.CreateHostAction(
-                    "consumer.add-review",
-                    "Add Review Node",
-                    "consumer",
-                    _host.AddHostReviewNode,
-                    iconKey: "add"),
+                    new GraphEditorCommandDescriptorSnapshot(
+                        "consumer.add-review",
+                        "Add Review Node",
+                        "consumer",
+                        "add",
+                        null,
+                        GraphEditorCommandSourceKind.Host,
+                        isEnabled: true),
+                    _host.AddHostReviewNode),
                 AsterGraphHostedActionFactory.CreateHostAction(
-                    "consumer.add-plugin-audit",
-                    "Add Plugin Audit Node",
-                    "consumer",
-                    _host.AddPluginAuditNode,
-                    iconKey: "plugin"),
-                AsterGraphHostedActionFactory.CreateHostAction(
-                    "consumer.approve-selection",
-                    "Approve Selection",
-                    "consumer",
-                    _host.ApproveSelection,
-                    iconKey: "approve",
-                    disabledReason: _host.Session.Queries.GetSelectionSnapshot().PrimarySelectedNodeId is null
-                        ? "Select one review node before approving."
-                        : null,
-                    canExecute: _host.Session.Queries.GetSelectionSnapshot().PrimarySelectedNodeId is not null),
+                    new GraphEditorCommandDescriptorSnapshot(
+                        "consumer.approve-selection",
+                        "Approve Selection",
+                        "consumer",
+                        "approve",
+                        null,
+                        GraphEditorCommandSourceKind.Host,
+                        isEnabled: selection.PrimarySelectedNodeId is not null,
+                        disabledReason: selection.PrimarySelectedNodeId is null
+                            ? "Select one review node before approving."
+                            : null),
+                    _host.ApproveSelection),
                 .. commandActions,
             ];
         }
@@ -575,7 +577,7 @@ public static class ConsumerSampleWindowFactory
             => action.Id switch
             {
                 "consumer.add-review" => "PART_AddReviewNodeButton",
-                "consumer.add-plugin-audit" => "PART_AddPluginNodeButton",
+                ConsumerSampleHost.PluginCommandId => "PART_AddPluginNodeButton",
                 "consumer.approve-selection" => "PART_ApproveSelectionButton",
                 "viewport.fit" => "PART_FitViewButton",
                 _ => $"PART_Action_{action.Id}",

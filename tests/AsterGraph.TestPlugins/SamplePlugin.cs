@@ -1,14 +1,18 @@
 using AsterGraph.Abstractions.Catalog;
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
-using AsterGraph.Editor.Menus;
+using AsterGraph.Core.Models;
 using AsterGraph.Editor.Plugins;
 using AsterGraph.Editor.Presentation;
+using AsterGraph.Editor.Runtime;
 
 namespace AsterGraph.TestPlugins;
 
 public sealed class SamplePlugin : IGraphEditorPlugin
 {
+    internal static readonly NodeDefinitionId DefinitionId = new("tests.sample-plugin.node");
+    public const string AddNodeCommandId = "tests.sample-plugin.add-node";
+
     public GraphEditorPluginDescriptor Descriptor { get; } = new(
         "tests.sample-plugin",
         "Sample Plugin",
@@ -20,7 +24,7 @@ public sealed class SamplePlugin : IGraphEditorPlugin
         ArgumentNullException.ThrowIfNull(builder);
 
         builder.AddNodeDefinitionProvider(new SampleNodeDefinitionProvider());
-        builder.AddContextMenuAugmentor(new SampleContextMenuAugmentor());
+        builder.AddCommandContributor(new SampleCommandContributor());
         builder.AddNodePresentationProvider(new SampleNodePresentationProvider());
         builder.AddLocalizationProvider(new SampleLocalizationProvider());
     }
@@ -29,22 +33,32 @@ public sealed class SamplePlugin : IGraphEditorPlugin
 internal sealed class SampleNodeDefinitionProvider : INodeDefinitionProvider
 {
     public IReadOnlyList<INodeDefinition> GetNodeDefinitions()
-        => [new NodeDefinition(new NodeDefinitionId("tests.sample-plugin.node"), "Sample Plugin Node", "Plugins", "Fixture", [], [])];
+        => [new NodeDefinition(SamplePlugin.DefinitionId, "Sample Plugin Node", "Plugins", "Fixture", [], [])];
 }
 
-internal sealed class SampleContextMenuAugmentor : IGraphEditorPluginContextMenuAugmentor
+internal sealed class SampleCommandContributor : IGraphEditorPluginCommandContributor
 {
-    public IReadOnlyList<GraphEditorMenuItemDescriptorSnapshot> Augment(GraphEditorPluginMenuAugmentationContext context)
-        => context.StockItems
-            .Concat(
+    public IReadOnlyList<GraphEditorCommandDescriptorSnapshot> GetCommandDescriptors(GraphEditorPluginCommandContext context)
+        =>
             [
-                new GraphEditorMenuItemDescriptorSnapshot(
-                    "plugin-sample-menu",
-                    "Plugin Menu Evidence",
+                new GraphEditorCommandDescriptorSnapshot(
+                    SamplePlugin.AddNodeCommandId,
+                    "Add Sample Plugin Node",
+                    "plugin",
                     iconKey: "plugin",
-                    isEnabled: false),
-            ])
-            .ToList();
+                    defaultShortcut: "Ctrl+Shift+P",
+                    source: GraphEditorCommandSourceKind.Plugin,
+                    isEnabled: true),
+            ];
+
+    public bool TryExecuteCommand(GraphEditorPluginCommandExecutionContext context)
+    {
+        ArgumentNullException.ThrowIfNull(context);
+
+        var beforeCount = context.Session.Queries.CreateDocumentSnapshot().Nodes.Count;
+        context.Session.Commands.AddNode(SamplePlugin.DefinitionId, new GraphPoint(640, 220));
+        return context.Session.Queries.CreateDocumentSnapshot().Nodes.Count == beforeCount + 1;
+    }
 }
 
 internal sealed class SampleNodePresentationProvider : IGraphEditorPluginNodePresentationProvider

@@ -7,7 +7,6 @@ using AsterGraph.Core.Models;
 using AsterGraph.Editor.Catalog;
 using AsterGraph.Editor.Diagnostics;
 using AsterGraph.Editor.Hosting;
-using AsterGraph.Editor.Menus;
 using AsterGraph.Editor.Plugins;
 using AsterGraph.Editor.Plugins.Internal;
 using AsterGraph.Editor.Runtime;
@@ -81,7 +80,7 @@ public sealed class GraphEditorPluginInspectionContractsTests
         Assert.NotNull(snapshot.Descriptor);
         Assert.Equal("tests.sample-plugin", snapshot.Descriptor!.Id);
         Assert.Equal(1, snapshot.Contributions.NodeDefinitionProviderCount);
-        Assert.Equal(1, snapshot.Contributions.ContextMenuAugmentorCount);
+        Assert.Equal(1, snapshot.Contributions.CommandContributorCount);
         Assert.Equal(1, snapshot.Contributions.NodePresentationProviderCount);
         Assert.Equal(1, snapshot.Contributions.LocalizationProviderCount);
         Assert.Null(snapshot.FailureMessage);
@@ -112,7 +111,7 @@ public sealed class GraphEditorPluginInspectionContractsTests
         Assert.NotNull(snapshot.FailureMessage);
         Assert.Contains("missing-plugin.dll", snapshot.FailureMessage!, StringComparison.OrdinalIgnoreCase);
         Assert.Equal(0, snapshot.Contributions.NodeDefinitionProviderCount);
-        Assert.Equal(0, snapshot.Contributions.ContextMenuAugmentorCount);
+        Assert.Equal(0, snapshot.Contributions.CommandContributorCount);
         Assert.Equal(0, snapshot.Contributions.NodePresentationProviderCount);
         Assert.Equal(0, snapshot.Contributions.LocalizationProviderCount);
     }
@@ -514,7 +513,7 @@ public sealed class GraphEditorPluginInspectionContractsTests
         {
             ArgumentNullException.ThrowIfNull(builder);
             RegisterCallCount++;
-            builder.AddContextMenuAugmentor(new PassThroughMenuAugmentor());
+            builder.AddCommandContributor(new PassThroughCommandContributor());
         }
     }
 
@@ -528,17 +527,30 @@ public sealed class GraphEditorPluginInspectionContractsTests
         {
             ArgumentNullException.ThrowIfNull(builder);
             RegisterCallCount++;
-            builder.AddContextMenuAugmentor(new PassThroughMenuAugmentor());
+            builder.AddCommandContributor(new PassThroughCommandContributor());
         }
     }
 
-    private sealed class PassThroughMenuAugmentor : IGraphEditorPluginContextMenuAugmentor
+    private sealed class PassThroughCommandContributor : IGraphEditorPluginCommandContributor
     {
-        public IReadOnlyList<GraphEditorMenuItemDescriptorSnapshot> Augment(GraphEditorPluginMenuAugmentationContext context)
+        public IReadOnlyList<GraphEditorCommandDescriptorSnapshot> GetCommandDescriptors(GraphEditorPluginCommandContext context)
         {
             ArgumentNullException.ThrowIfNull(context);
-            return context.StockItems;
+            return
+            [
+                new GraphEditorCommandDescriptorSnapshot(
+                    "tests.plugin.inspection.command",
+                    "Inspection Command",
+                    "plugin",
+                    "plugin",
+                    null,
+                    GraphEditorCommandSourceKind.Plugin,
+                    isEnabled: true),
+            ];
         }
+
+        public bool TryExecuteCommand(GraphEditorPluginCommandExecutionContext context)
+            => true;
     }
 
     private sealed class BlockByManifestIdTrustPolicy(string blockedId) : IGraphEditorPluginTrustPolicy

@@ -476,6 +476,8 @@ public sealed class GraphEditorProofRingTests
         var runtimeSnapshots = runtimeSession.Queries.GetPluginLoadSnapshots();
         var retainedCanvasDescriptors = retainedEditor.Session.Queries.BuildContextMenuDescriptors(new ContextMenuContext(ContextMenuTargetKind.Canvas, new GraphPoint(240, 180)));
         var runtimeCanvasDescriptors = runtimeSession.Queries.BuildContextMenuDescriptors(new ContextMenuContext(ContextMenuTargetKind.Canvas, new GraphPoint(240, 180)));
+        var retainedCommands = retainedEditor.Session.Queries.GetCommandDescriptors();
+        var runtimeCommands = runtimeSession.Queries.GetCommandDescriptors();
         var retainedSourceNode = Assert.Single(retainedEditor.Nodes, node => node.Id == SourceNodeId);
         var automationResult = runtimeSession.Automation.Execute(CreatePluginAutomationRunRequest("proof-plugin-automation"));
 
@@ -492,13 +494,13 @@ public sealed class GraphEditorProofRingTests
         Assert.True(pluginSnapshot.ActivationAttempted);
         Assert.Equal("tests.proof.plugin", pluginSnapshot.Descriptor?.Id);
         Assert.Equal(1, pluginSnapshot.Contributions.NodeDefinitionProviderCount);
-        Assert.Equal(1, pluginSnapshot.Contributions.ContextMenuAugmentorCount);
+        Assert.Equal(1, pluginSnapshot.Contributions.CommandContributorCount);
         Assert.Equal(1, pluginSnapshot.Contributions.NodePresentationProviderCount);
         Assert.Equal(1, pluginSnapshot.Contributions.LocalizationProviderCount);
         Assert.Equal("Proof Plugin Add Node", Assert.Single(runtimeCanvasDescriptors, descriptor => descriptor.Id == "canvas-add-node").Header);
         Assert.Equal("Proof Plugin Add Node", Assert.Single(retainedCanvasDescriptors, descriptor => descriptor.Id == "canvas-add-node").Header);
-        Assert.Contains(runtimeCanvasDescriptors, descriptor => descriptor.Id == "proof-plugin-menu");
-        Assert.Contains(retainedCanvasDescriptors, descriptor => descriptor.Id == "proof-plugin-menu");
+        Assert.Contains(runtimeCommands, descriptor => descriptor.Id == "tests.proof.plugin.add-node" && descriptor.Source == GraphEditorCommandSourceKind.Plugin);
+        Assert.Contains(retainedCommands, descriptor => descriptor.Id == "tests.proof.plugin.add-node" && descriptor.Source == GraphEditorCommandSourceKind.Plugin);
         Assert.Contains(retainedSourceNode.Presentation.TopRightBadges, badge => badge.Text == "Plugin");
         Assert.Contains(automationResult.Inspection.Document.Nodes, node => node.DefinitionId is { Value: "tests.proof.plugin" });
         Assert.True(automationResult.Succeeded);
@@ -1393,7 +1395,7 @@ public sealed class GraphEditorProofRingTests
         {
             ArgumentNullException.ThrowIfNull(builder);
             builder.AddNodeDefinitionProvider(new ProofPluginNodeDefinitionProvider());
-            builder.AddContextMenuAugmentor(new ProofPluginContextMenuAugmentor());
+            builder.AddCommandContributor(new ProofPluginCommandContributor());
             builder.AddNodePresentationProvider(new ProofPluginPresentationProvider());
             builder.AddLocalizationProvider(new ProofPluginLocalizationProvider());
         }
@@ -1463,19 +1465,29 @@ public sealed class GraphEditorProofRingTests
             ];
     }
 
-    private sealed class ProofPluginContextMenuAugmentor : IGraphEditorPluginContextMenuAugmentor
+    private sealed class ProofPluginCommandContributor : IGraphEditorPluginCommandContributor
     {
-        public IReadOnlyList<GraphEditorMenuItemDescriptorSnapshot> Augment(GraphEditorPluginMenuAugmentationContext context)
-            => context.StockItems
-                .Concat(
+        public IReadOnlyList<GraphEditorCommandDescriptorSnapshot> GetCommandDescriptors(GraphEditorPluginCommandContext context)
+            =>
                 [
-                    new GraphEditorMenuItemDescriptorSnapshot(
-                        "proof-plugin-menu",
-                        "Proof Plugin Menu",
+                    new GraphEditorCommandDescriptorSnapshot(
+                        "tests.proof.plugin.add-node",
+                        "Add Proof Plugin Node",
+                        "plugin",
                         iconKey: "plugin",
-                        isEnabled: false),
-                ])
-                .ToList();
+                        defaultShortcut: null,
+                        source: GraphEditorCommandSourceKind.Plugin,
+                        isEnabled: true),
+                ];
+
+        public bool TryExecuteCommand(GraphEditorPluginCommandExecutionContext context)
+        {
+            ArgumentNullException.ThrowIfNull(context);
+
+            var beforeCount = context.Session.Queries.CreateDocumentSnapshot().Nodes.Count;
+            context.Session.Commands.AddNode(new NodeDefinitionId("tests.proof.plugin"), new GraphPoint(760, 240));
+            return context.Session.Queries.CreateDocumentSnapshot().Nodes.Count == beforeCount + 1;
+        }
     }
 
     private sealed class ProofPluginPresentationProvider : IGraphEditorPluginNodePresentationProvider

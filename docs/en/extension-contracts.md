@@ -29,8 +29,9 @@ This document publishes the contract around surface stability, compatibility ret
 - plugin trust is host-owned and runs before activation
 - plugin localization composes first; host localization runs last and wins final override
 - plugin node presentation composes first; host presentation wins final override fields while merged adornments remain
-- runtime/session menus compose stock descriptors plus plugin augmentors
-- retained `GraphEditorViewModel.BuildContextMenu(...)` remains the final host override point on top of that runtime/plugin composition
+- plugin commands register through the canonical session command descriptor pipeline; stock commands keep id authority when collisions exist
+- runtime/session menus project stock descriptors today and will keep converging toward that shared command source
+- retained `GraphEditorViewModel.BuildContextMenu(...)` remains the final host override point for compatibility hosts
 
 ## Lane Ownership
 

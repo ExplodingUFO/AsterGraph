@@ -12,6 +12,7 @@ using AsterGraph.Editor.Menus;
 using AsterGraph.Editor.Plugins;
 using AsterGraph.Editor.Plugins.Internal;
 using AsterGraph.Editor.Presentation;
+using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.ViewModels;
 using Xunit;
 
@@ -27,6 +28,7 @@ public sealed class GraphEditorPluginLoadingTests
         var descriptors = session.Queries.GetFeatureDescriptors().ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
         var canvasMenu = session.Queries.BuildContextMenuDescriptors(new ContextMenuContext(ContextMenuTargetKind.Canvas, new GraphPoint(240, 180)));
         var addNode = Assert.Single(canvasMenu, item => item.Id == "canvas-add-node");
+        var commandDescriptors = session.Queries.GetCommandDescriptors();
         var pluginLoadDiagnostic = Assert.Single(diagnostics.Diagnostics, diagnostic => diagnostic.Code == "plugin.load.succeeded");
 
         session.Commands.AddNode(new NodeDefinitionId("tests.sample-plugin.node"));
@@ -34,10 +36,11 @@ public sealed class GraphEditorPluginLoadingTests
 
         Assert.True(descriptors["integration.plugin-loader"].IsAvailable);
         Assert.True(descriptors["query.plugin-load-snapshots"].IsAvailable);
+        Assert.True(descriptors["integration.command-contributor"].IsAvailable);
         Assert.Contains(session.Diagnostics.GetRecentDiagnostics(), diagnostic => diagnostic.Code == "plugin.load.succeeded");
         Assert.Equal(GraphEditorDiagnosticSeverity.Info, pluginLoadDiagnostic.Severity);
         Assert.Equal("Plugin Add Node", addNode.Header);
-        Assert.Contains(canvasMenu, item => item.Id == "plugin-sample-menu");
+        Assert.Contains(commandDescriptors, descriptor => descriptor.Id == "tests.sample-plugin.add-node" && descriptor.Source == GraphEditorCommandSourceKind.Plugin);
         Assert.Contains(document.Nodes, node => node.DefinitionId is { Value: "tests.sample-plugin.node" });
     }
 
@@ -92,6 +95,8 @@ public sealed class GraphEditorPluginLoadingTests
         var runtimeSnapshots = session.Queries.GetPluginLoadSnapshots();
         var retainedCanvasMenu = editor.Session.Queries.BuildContextMenuDescriptors(new ContextMenuContext(ContextMenuTargetKind.Canvas, new GraphPoint(240, 180)));
         var runtimeCanvasMenu = session.Queries.BuildContextMenuDescriptors(new ContextMenuContext(ContextMenuTargetKind.Canvas, new GraphPoint(240, 180)));
+        var retainedCommands = editor.Session.Queries.GetCommandDescriptors();
+        var runtimeCommands = session.Queries.GetCommandDescriptors();
         var sourceNode = Assert.Single(editor.Nodes, node => node.Id == "source-node");
 
         Assert.Equal(runtimeSnapshots, retainedSnapshots);
@@ -100,13 +105,13 @@ public sealed class GraphEditorPluginLoadingTests
         Assert.Equal(GraphEditorPluginLoadStatus.Loaded, snapshot.Status);
         Assert.Equal("tests.direct-plugin", snapshot.Descriptor?.Id);
         Assert.Equal(1, snapshot.Contributions.NodeDefinitionProviderCount);
-        Assert.Equal(1, snapshot.Contributions.ContextMenuAugmentorCount);
+        Assert.Equal(1, snapshot.Contributions.CommandContributorCount);
         Assert.Equal(1, snapshot.Contributions.NodePresentationProviderCount);
         Assert.Equal(1, snapshot.Contributions.LocalizationProviderCount);
         Assert.Equal("Direct Add Node", Assert.Single(runtimeCanvasMenu, item => item.Id == "canvas-add-node").Header);
         Assert.Equal("Direct Add Node", Assert.Single(retainedCanvasMenu, item => item.Id == "canvas-add-node").Header);
-        Assert.Contains(runtimeCanvasMenu, item => item.Id == "direct-plugin-menu");
-        Assert.Contains(retainedCanvasMenu, item => item.Id == "direct-plugin-menu");
+        Assert.Contains(runtimeCommands, descriptor => descriptor.Id == "tests.direct-plugin.add-node" && descriptor.Source == GraphEditorCommandSourceKind.Plugin);
+        Assert.Contains(retainedCommands, descriptor => descriptor.Id == "tests.direct-plugin.add-node" && descriptor.Source == GraphEditorCommandSourceKind.Plugin);
         Assert.Contains(sourceNode.Presentation.TopRightBadges, badge => badge.Text == "Direct");
     }
 
@@ -160,13 +165,14 @@ public sealed class GraphEditorPluginLoadingTests
         editor.RefreshNodePresentations();
         var canvasMenu = editor.Session.Queries.BuildContextMenuDescriptors(new ContextMenuContext(ContextMenuTargetKind.Canvas, new GraphPoint(240, 180)));
         var addNode = Assert.Single(canvasMenu, item => item.Id == "canvas-add-node");
+        var commandDescriptors = editor.Session.Queries.GetCommandDescriptors();
         var sourceNode = Assert.Single(editor.Nodes, node => node.Id == "source-node");
 
         Assert.Equal("Host Add Node", addNode.Header);
         Assert.Equal("Host Subtitle", sourceNode.DisplaySubtitle);
         Assert.Contains(sourceNode.Presentation.TopRightBadges, badge => badge.Text == "Plugin");
         Assert.Contains(sourceNode.Presentation.TopRightBadges, badge => badge.Text == "Host");
-        Assert.Contains(editor.BuildContextMenu(new ContextMenuContext(ContextMenuTargetKind.Canvas, new GraphPoint(240, 180))), item => item.Id == "plugin-sample-menu");
+        Assert.Contains(commandDescriptors, descriptor => descriptor.Id == "tests.sample-plugin.add-node" && descriptor.Source == GraphEditorCommandSourceKind.Plugin);
     }
 
     [Fact]
@@ -426,6 +432,8 @@ public sealed class GraphEditorPluginLoadingTests
         var runtimeSnapshots = session.Queries.GetPluginLoadSnapshots();
         var runtimeCanvasMenu = session.Queries.BuildContextMenuDescriptors(new ContextMenuContext(ContextMenuTargetKind.Canvas, new GraphPoint(240, 180)));
         var retainedCanvasMenu = editor.Session.Queries.BuildContextMenuDescriptors(new ContextMenuContext(ContextMenuTargetKind.Canvas, new GraphPoint(240, 180)));
+        var runtimeCommands = session.Queries.GetCommandDescriptors();
+        var retainedCommands = editor.Session.Queries.GetCommandDescriptors();
 
         Assert.Equal(runtimeSnapshots, retainedSnapshots);
         var snapshot = Assert.Single(runtimeSnapshots);
@@ -440,8 +448,8 @@ public sealed class GraphEditorPluginLoadingTests
         Assert.Equal("tests.sample-plugin", snapshot.Descriptor?.Id);
         Assert.Equal("Plugin Add Node", Assert.Single(runtimeCanvasMenu, item => item.Id == "canvas-add-node").Header);
         Assert.Equal("Plugin Add Node", Assert.Single(retainedCanvasMenu, item => item.Id == "canvas-add-node").Header);
-        Assert.Contains(runtimeCanvasMenu, item => item.Id == "plugin-sample-menu");
-        Assert.Contains(retainedCanvasMenu, item => item.Id == "plugin-sample-menu");
+        Assert.Contains(runtimeCommands, descriptor => descriptor.Id == "tests.sample-plugin.add-node" && descriptor.Source == GraphEditorCommandSourceKind.Plugin);
+        Assert.Contains(retainedCommands, descriptor => descriptor.Id == "tests.sample-plugin.add-node" && descriptor.Source == GraphEditorCommandSourceKind.Plugin);
         Assert.Contains(editorDiagnostics.Diagnostics, diagnostic => diagnostic.Code == "plugin.load.succeeded");
         Assert.Contains(runtimeDiagnostics.Diagnostics, diagnostic => diagnostic.Code == "plugin.load.succeeded");
     }
@@ -609,7 +617,7 @@ public sealed class GraphEditorPluginLoadingTests
         {
             ArgumentNullException.ThrowIfNull(builder);
             builder.AddNodeDefinitionProvider(new DirectNodeDefinitionProvider());
-            builder.AddContextMenuAugmentor(new DirectContextMenuAugmentor());
+            builder.AddCommandContributor(new DirectCommandContributor());
             builder.AddNodePresentationProvider(new DirectPresentationProvider());
             builder.AddLocalizationProvider(new DirectLocalizationProvider());
         }
@@ -621,19 +629,29 @@ public sealed class GraphEditorPluginLoadingTests
             => [new NodeDefinition(new NodeDefinitionId("tests.direct-plugin.node"), "Direct Plugin Node", "Tests", "Plugins", [], [])];
     }
 
-    private sealed class DirectContextMenuAugmentor : IGraphEditorPluginContextMenuAugmentor
+    private sealed class DirectCommandContributor : IGraphEditorPluginCommandContributor
     {
-        public IReadOnlyList<GraphEditorMenuItemDescriptorSnapshot> Augment(GraphEditorPluginMenuAugmentationContext context)
-            => context.StockItems
-                .Concat(
+        public IReadOnlyList<GraphEditorCommandDescriptorSnapshot> GetCommandDescriptors(GraphEditorPluginCommandContext context)
+            =>
                 [
-                    new GraphEditorMenuItemDescriptorSnapshot(
-                        "direct-plugin-menu",
-                        "Direct Plugin Menu",
+                    new GraphEditorCommandDescriptorSnapshot(
+                        "tests.direct-plugin.add-node",
+                        "Add Direct Plugin Node",
+                        "plugin",
                         iconKey: "plugin",
-                        isEnabled: false),
-                ])
-                .ToList();
+                        defaultShortcut: null,
+                        source: GraphEditorCommandSourceKind.Plugin,
+                        isEnabled: true),
+                ];
+
+        public bool TryExecuteCommand(GraphEditorPluginCommandExecutionContext context)
+        {
+            ArgumentNullException.ThrowIfNull(context);
+
+            var beforeCount = context.Session.Queries.CreateDocumentSnapshot().Nodes.Count;
+            context.Session.Commands.AddNode(new NodeDefinitionId("tests.direct-plugin.node"), new GraphPoint(680, 220));
+            return context.Session.Queries.CreateDocumentSnapshot().Nodes.Count == beforeCount + 1;
+        }
     }
 
     private sealed class DirectPresentationProvider : IGraphEditorPluginNodePresentationProvider
@@ -691,7 +709,7 @@ public sealed class GraphEditorPluginLoadingTests
         {
             ArgumentNullException.ThrowIfNull(builder);
             RegisterCallCount++;
-            builder.AddContextMenuAugmentor(new DirectContextMenuAugmentor());
+            builder.AddCommandContributor(new DirectCommandContributor());
         }
     }
 
@@ -705,7 +723,7 @@ public sealed class GraphEditorPluginLoadingTests
         {
             ArgumentNullException.ThrowIfNull(builder);
             RegisterCallCount++;
-            builder.AddContextMenuAugmentor(new DirectContextMenuAugmentor());
+            builder.AddCommandContributor(new DirectCommandContributor());
         }
     }
 

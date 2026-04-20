@@ -10,51 +10,36 @@ public sealed class AsterGraphHostedActionDescriptor
     private readonly Func<bool> _execute;
 
     public AsterGraphHostedActionDescriptor(
-        string id,
-        string title,
-        string group,
+        GraphEditorCommandDescriptorSnapshot descriptor,
         Func<bool> execute,
-        bool canExecute,
-        string? iconKey = null,
-        string? defaultShortcut = null,
-        string? disabledReason = null,
-        string? commandId = null,
-        GraphEditorCommandSourceKind? commandSource = null)
+        string? commandId = null)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(id);
-        ArgumentException.ThrowIfNullOrWhiteSpace(title);
-        ArgumentException.ThrowIfNullOrWhiteSpace(group);
+        Descriptor = descriptor ?? throw new ArgumentNullException(nameof(descriptor));
         ArgumentNullException.ThrowIfNull(execute);
 
-        Id = id;
-        Title = title;
-        Group = group;
-        IconKey = iconKey;
-        DefaultShortcut = defaultShortcut;
-        DisabledReason = disabledReason;
         CommandId = commandId;
-        CommandSource = commandSource;
-        CanExecute = canExecute;
         _execute = execute;
     }
 
-    public string Id { get; }
+    public GraphEditorCommandDescriptorSnapshot Descriptor { get; }
 
-    public string Title { get; }
+    public string Id => Descriptor.Id;
 
-    public string Group { get; }
+    public string Title => Descriptor.Title;
 
-    public string? IconKey { get; }
+    public string Group => Descriptor.Group;
 
-    public string? DefaultShortcut { get; }
+    public string? IconKey => Descriptor.IconKey;
 
-    public string? DisabledReason { get; }
+    public string? DefaultShortcut => Descriptor.DefaultShortcut;
+
+    public string? DisabledReason => Descriptor.DisabledReason;
 
     public string? CommandId { get; }
 
-    public GraphEditorCommandSourceKind? CommandSource { get; }
+    public GraphEditorCommandSourceKind CommandSource => Descriptor.Source;
 
-    public bool CanExecute { get; }
+    public bool CanExecute => Descriptor.CanExecute;
 
     public bool TryExecute()
         => CanExecute && _execute();

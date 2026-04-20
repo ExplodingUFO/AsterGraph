@@ -10,7 +10,7 @@ internal static class GraphEditorPluginLoadDiagnosticsFactory
 
         return new GraphEditorPluginContributionSummarySnapshot(
             contributions.NodeDefinitionProviders.Count,
-            contributions.ContextMenuAugmentors.Count,
+            contributions.CommandContributors.Count,
             contributions.NodePresentationProviders.Count,
             contributions.LocalizationProviders.Count);
     }

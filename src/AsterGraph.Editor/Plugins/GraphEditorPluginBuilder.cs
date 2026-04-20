@@ -1,6 +1,5 @@
 using AsterGraph.Abstractions.Catalog;
 using AsterGraph.Core.Models;
-using AsterGraph.Editor.Menus;
 using AsterGraph.Editor.Presentation;
 using AsterGraph.Editor.Runtime;
 
@@ -12,7 +11,7 @@ namespace AsterGraph.Editor.Plugins;
 public sealed class GraphEditorPluginBuilder
 {
     private readonly List<INodeDefinitionProvider> _nodeDefinitionProviders = [];
-    private readonly List<IGraphEditorPluginContextMenuAugmentor> _contextMenuAugmentors = [];
+    private readonly List<IGraphEditorPluginCommandContributor> _commandContributors = [];
     private readonly List<IGraphEditorPluginNodePresentationProvider> _nodePresentationProviders = [];
     private readonly List<IGraphEditorPluginLocalizationProvider> _localizationProviders = [];
 
@@ -22,9 +21,9 @@ public sealed class GraphEditorPluginBuilder
     public IReadOnlyList<INodeDefinitionProvider> NodeDefinitionProviders => _nodeDefinitionProviders;
 
     /// <summary>
-    /// Gets the registered context-menu augmentors.
+    /// Gets the registered command contributors.
     /// </summary>
-    public IReadOnlyList<IGraphEditorPluginContextMenuAugmentor> ContextMenuAugmentors => _contextMenuAugmentors;
+    public IReadOnlyList<IGraphEditorPluginCommandContributor> CommandContributors => _commandContributors;
 
     /// <summary>
     /// Gets the registered node-presentation providers.
@@ -62,12 +61,12 @@ public sealed class GraphEditorPluginBuilder
     }
 
     /// <summary>
-    /// Adds one stable menu augmentor.
+    /// Adds one stable command contributor.
     /// </summary>
-    public GraphEditorPluginBuilder AddContextMenuAugmentor(IGraphEditorPluginContextMenuAugmentor augmentor)
+    public GraphEditorPluginBuilder AddCommandContributor(IGraphEditorPluginCommandContributor contributor)
     {
-        ArgumentNullException.ThrowIfNull(augmentor);
-        _contextMenuAugmentors.Add(augmentor);
+        ArgumentNullException.ThrowIfNull(contributor);
+        _commandContributors.Add(contributor);
         return this;
     }
 
@@ -96,7 +95,7 @@ public sealed class GraphEditorPluginBuilder
         ArgumentNullException.ThrowIfNull(contributions);
 
         _nodeDefinitionProviders.AddRange(contributions.NodeDefinitionProviders);
-        _contextMenuAugmentors.AddRange(contributions.ContextMenuAugmentors);
+        _commandContributors.AddRange(contributions.CommandContributors);
         _nodePresentationProviders.AddRange(contributions.NodePresentationProviders);
         _localizationProviders.AddRange(contributions.LocalizationProviders);
     }
@@ -104,27 +103,44 @@ public sealed class GraphEditorPluginBuilder
     internal GraphEditorPluginContributionSet Build()
         => new(
             _nodeDefinitionProviders.ToList(),
-            _contextMenuAugmentors.ToList(),
+            _commandContributors.ToList(),
             _nodePresentationProviders.ToList(),
             _localizationProviders.ToList());
 }
 
 /// <summary>
-/// Describes one plugin menu-augmentation request.
+/// Describes one plugin command-descriptor query.
 /// </summary>
-public sealed record GraphEditorPluginMenuAugmentationContext
+public sealed record GraphEditorPluginCommandContext
 {
     /// <summary>
-    /// Initializes a plugin menu-augmentation context.
+    /// Initializes a plugin command context.
     /// </summary>
-    public GraphEditorPluginMenuAugmentationContext(
-        IGraphEditorSession session,
-        ContextMenuContext context,
-        IReadOnlyList<GraphEditorMenuItemDescriptorSnapshot> stockItems)
+    public GraphEditorPluginCommandContext(IGraphEditorSession session)
     {
         Session = session ?? throw new ArgumentNullException(nameof(session));
-        Context = context ?? throw new ArgumentNullException(nameof(context));
-        StockItems = stockItems ?? throw new ArgumentNullException(nameof(stockItems));
+    }
+
+    /// <summary>
+    /// Gets the current runtime session.
+    /// </summary>
+    public IGraphEditorSession Session { get; }
+}
+
+/// <summary>
+/// Describes one plugin command execution request.
+/// </summary>
+public sealed record GraphEditorPluginCommandExecutionContext
+{
+    /// <summary>
+    /// Initializes a plugin command execution context.
+    /// </summary>
+    public GraphEditorPluginCommandExecutionContext(
+        IGraphEditorSession session,
+        GraphEditorCommandInvocationSnapshot command)
+    {
+        Session = session ?? throw new ArgumentNullException(nameof(session));
+        Command = command ?? throw new ArgumentNullException(nameof(command));
     }
 
     /// <summary>
@@ -133,25 +149,25 @@ public sealed record GraphEditorPluginMenuAugmentationContext
     public IGraphEditorSession Session { get; }
 
     /// <summary>
-    /// Gets the current hit-test context.
+    /// Gets the command being executed.
     /// </summary>
-    public ContextMenuContext Context { get; }
-
-    /// <summary>
-    /// Gets the stock stable menu descriptors produced by the editor before plugin augmentation.
-    /// </summary>
-    public IReadOnlyList<GraphEditorMenuItemDescriptorSnapshot> StockItems { get; }
+    public GraphEditorCommandInvocationSnapshot Command { get; }
 }
 
 /// <summary>
-/// Defines the stable plugin menu-augmentation contract.
+/// Defines the stable plugin command contribution contract.
 /// </summary>
-public interface IGraphEditorPluginContextMenuAugmentor
+public interface IGraphEditorPluginCommandContributor
 {
     /// <summary>
-    /// Returns the augmented stable menu descriptor set.
+    /// Returns the current contributed command descriptors.
     /// </summary>
-    IReadOnlyList<GraphEditorMenuItemDescriptorSnapshot> Augment(GraphEditorPluginMenuAugmentationContext context);
+    IReadOnlyList<GraphEditorCommandDescriptorSnapshot> GetCommandDescriptors(GraphEditorPluginCommandContext context);
+
+    /// <summary>
+    /// Attempts to execute one contributed command.
+    /// </summary>
+    bool TryExecuteCommand(GraphEditorPluginCommandExecutionContext context);
 }
 
 /// <summary>
@@ -212,7 +228,7 @@ public interface IGraphEditorPluginLocalizationProvider
 
 internal sealed record GraphEditorPluginContributionSet(
     IReadOnlyList<INodeDefinitionProvider> NodeDefinitionProviders,
-    IReadOnlyList<IGraphEditorPluginContextMenuAugmentor> ContextMenuAugmentors,
+    IReadOnlyList<IGraphEditorPluginCommandContributor> CommandContributors,
     IReadOnlyList<IGraphEditorPluginNodePresentationProvider> NodePresentationProviders,
     IReadOnlyList<IGraphEditorPluginLocalizationProvider> LocalizationProviders)
 {

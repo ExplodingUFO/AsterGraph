@@ -9,6 +9,7 @@
 - 一条宿主自管的动作栏
 - 一组宿主自定义节点
 - 通过 `AsterGraphHostedActionFactory.CreateCommandActions(...)` 把共享 command descriptor 投到宿主动作栏
+- 一个 plugin command 也走同一条动作路径，而不是样例私有的菜单占位项
 - 通过 canonical session commands/queries 做共享参数编辑
 - 一个可信插件注册，以及可见的 provenance、trust reason 和 allowlist 导入/导出
 - 基于 factory 的默认 Avalonia hosted-UI 路线
@@ -57,6 +58,7 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 这个样例刻意控制在可复制范围内：
 
 - 宿主动作在编辑器壳层之外，并且直接复用共享 command descriptor，而不是再维护一份独立动作表
+- plugin 动作也通过共享 command descriptor 进入同一条宿主动作路径，不需要额外的 sample 专属 plumbing
 - 插件信任策略保持显式且由宿主管理，并把 provenance、reason 和 allowlist 持久化放在一起
 - 参数编辑走 `IGraphEditorSession.Commands` 和 `IGraphEditorSession.Queries`
 - allowlist 决策可以导出/导入，不需要重建整条 trust-policy 流程

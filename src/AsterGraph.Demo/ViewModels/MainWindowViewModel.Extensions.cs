@@ -24,7 +24,7 @@ public partial class MainWindowViewModel
                 T("当前未加载插件。", "No plugins loaded."),
             ]
             : PluginLoadSnapshots.Select(snapshot =>
-                $"{snapshot.Manifest.DisplayName} · {snapshot.Status} · nodes {snapshot.Contributions.NodeDefinitionProviderCount} · menu {snapshot.Contributions.ContextMenuAugmentorCount} · l10n {snapshot.Contributions.LocalizationProviderCount} · presentation {snapshot.Contributions.NodePresentationProviderCount}")
+                $"{snapshot.Manifest.DisplayName} · {snapshot.Status} · nodes {snapshot.Contributions.NodeDefinitionProviderCount} · commands {snapshot.Contributions.CommandContributorCount} · l10n {snapshot.Contributions.LocalizationProviderCount} · presentation {snapshot.Contributions.NodePresentationProviderCount}")
                 .ToArray();
 
     public IReadOnlyList<string> ConsumerPathLines =>

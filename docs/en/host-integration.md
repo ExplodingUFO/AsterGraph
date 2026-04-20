@@ -54,7 +54,8 @@ Important defaults:
 - canonical surfaces are `CreateSession(...)`, `Create(...)`, `IGraphEditorSession`, and DTO/snapshot queries
 - retained `GraphEditorViewModel` / `GraphEditorView` remain supported migration facades
 - host localization runs after plugin localization, so host override wins
-- runtime/session menu composition differs from retained host augmentor composition; use the runtime path for new work
+- plugin-contributed commands now surface through the canonical session command descriptors and execute through `IGraphEditorSession.Commands.TryExecuteCommand(...)`
+- retained host augmentor composition still differs from the runtime path; use the runtime path for new work
 
 ## Plugin Trust Boundary
 

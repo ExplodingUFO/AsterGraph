@@ -19,6 +19,7 @@ internal sealed class GraphEditorSessionDescriptorSupport
         bool hasClipboardPayloadSerializer = false,
         bool hasPluginLoader = false,
         bool hasPluginTrustPolicy = false,
+        bool hasCommandContributor = false,
         bool hasContextMenuAugmentor = false,
         Func<bool>? hasNodePresentationProvider = null,
         Func<bool>? hasLocalizationProvider = null)
@@ -33,6 +34,7 @@ internal sealed class GraphEditorSessionDescriptorSupport
         HasClipboardPayloadSerializer = hasClipboardPayloadSerializer;
         HasPluginLoader = hasPluginLoader;
         HasPluginTrustPolicy = hasPluginTrustPolicy;
+        HasCommandContributor = hasCommandContributor;
         HasContextMenuAugmentor = hasContextMenuAugmentor;
     }
 
@@ -49,6 +51,8 @@ internal sealed class GraphEditorSessionDescriptorSupport
     public bool HasPluginLoader { get; }
 
     public bool HasPluginTrustPolicy { get; }
+
+    public bool HasCommandContributor { get; }
 
     public bool HasContextMenuAugmentor { get; }
 
