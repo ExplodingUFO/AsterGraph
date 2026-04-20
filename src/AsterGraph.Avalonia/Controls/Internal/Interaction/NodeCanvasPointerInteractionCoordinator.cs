@@ -32,6 +32,13 @@ internal interface INodeCanvasPointerInteractionHost
 
     GraphPoint ApplyDragAssist(NodeCanvasDragSession dragSession, double deltaX, double deltaY);
 
+    NodeCanvasGroupResizePreview ApplyGroupResizeAssist(
+        GraphEditorNodeGroupSnapshot group,
+        NodeCanvasGroupResizeEdge edge,
+        GraphPoint proposedPosition,
+        GraphSize proposedSize,
+        GraphSize minimumSize);
+
     void UpdateResizeFeedback(Point currentScreenPosition);
 
     void ClearResizeFeedback();
@@ -158,11 +165,15 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
                     && _host.InteractionSession.DragStartScreenPosition is Point dragStart)
                 {
                     var rawDelta = currentScreenPosition - dragStart;
-                    var deltaX = rawDelta.X / _host.ViewModel.Zoom;
-                    var deltaY = rawDelta.Y / _host.ViewModel.Zoom;
-                    var requestedPosition = new GraphPoint(groupOriginPosition.X + deltaX, groupOriginPosition.Y + deltaY);
+                    var adjustedDelta = _host.ApplyDragAssist(
+                        dragSession,
+                        rawDelta.X / _host.ViewModel.Zoom,
+                        rawDelta.Y / _host.ViewModel.Zoom);
+                    var requestedPosition = new GraphPoint(
+                        groupOriginPosition.X + adjustedDelta.X,
+                        groupOriginPosition.Y + adjustedDelta.Y);
                     _host.InteractionSession.UpdateDragGroupPreviewPosition(requestedPosition);
-                    _host.ViewModel.ApplyDragOffset(dragSession.OriginPositions, deltaX, deltaY);
+                    _host.ViewModel.ApplyDragOffset(dragSession.OriginPositions, adjustedDelta.X, adjustedDelta.Y);
                 }
 
                 handled = true;
@@ -204,9 +215,10 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
             && _host.ViewModel is not null)
         {
             var rawDelta = currentScreenPosition - dragStart;
-            var requestedPosition = new GraphPoint(
-                groupOriginPosition.X + (rawDelta.X / _host.ViewModel.Zoom),
-                groupOriginPosition.Y + (rawDelta.Y / _host.ViewModel.Zoom));
+            var requestedPosition = _host.InteractionSession.DragGroupPreviewPosition
+                ?? new GraphPoint(
+                    groupOriginPosition.X + (rawDelta.X / _host.ViewModel.Zoom),
+                    groupOriginPosition.Y + (rawDelta.Y / _host.ViewModel.Zoom));
             _host.ViewModel.TrySetNodeGroupPosition(
                 _host.InteractionSession.DragGroupId,
                 requestedPosition,
@@ -365,7 +377,16 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
                 break;
         }
 
-        if (!_host.InteractionSession.UpdateGroupResizePreview(resizeSession.GroupId, nextPosition, nextSize))
+        var adjustedPreview = _host.ApplyGroupResizeAssist(
+            currentGroup,
+            resizeSession.Edge,
+            nextPosition,
+            nextSize,
+            minimumSize);
+        if (!_host.InteractionSession.UpdateGroupResizePreview(
+                resizeSession.GroupId,
+                adjustedPreview.Position,
+                adjustedPreview.Size))
         {
             return false;
         }

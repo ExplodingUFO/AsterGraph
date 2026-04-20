@@ -8,6 +8,19 @@ internal readonly record struct NodeCanvasDragAssistResult(
     double? GuideWorldX,
     double? GuideWorldY);
 
+internal enum NodeCanvasPlacementAxisMode
+{
+    None,
+    Translate,
+    StartEdge,
+    EndEdge,
+}
+
+internal readonly record struct NodeCanvasPlacementAssistResult(
+    NodeBounds AdjustedBounds,
+    double? GuideWorldX,
+    double? GuideWorldY);
+
 internal static class NodeCanvasDragAssistCalculator
 {
     public static NodeCanvasDragAssistResult Calculate(
@@ -33,31 +46,118 @@ internal static class NodeCanvasDragAssistCalculator
             movingBounds.Y + deltaY,
             movingBounds.Width,
             movingBounds.Height);
+        var result = CalculateBounds(
+            movingBounds,
+            proposedBounds,
+            NodeCanvasPlacementAxisMode.Translate,
+            NodeCanvasPlacementAxisMode.Translate,
+            candidateBounds,
+            enableGridSnapping,
+            enableAlignmentGuides,
+            primaryGridSpacing,
+            tolerance);
+
+        return new NodeCanvasDragAssistResult(
+            new GraphPoint(
+                result.AdjustedBounds.X - movingBounds.X,
+                result.AdjustedBounds.Y - movingBounds.Y),
+            result.GuideWorldX,
+            result.GuideWorldY);
+    }
+
+    public static NodeCanvasPlacementAssistResult CalculateBounds(
+        NodeBounds originBounds,
+        NodeBounds proposedBounds,
+        NodeCanvasPlacementAxisMode horizontalMode,
+        NodeCanvasPlacementAxisMode verticalMode,
+        IEnumerable<NodeBounds> candidateBounds,
+        bool enableGridSnapping,
+        bool enableAlignmentGuides,
+        double primaryGridSpacing,
+        double tolerance)
+    {
+        ArgumentNullException.ThrowIfNull(candidateBounds);
+        tolerance = Math.Max(0d, tolerance);
+
+        if (!enableGridSnapping && !enableAlignmentGuides)
+        {
+            return new NodeCanvasPlacementAssistResult(proposedBounds, null, null);
+        }
+
+        var candidates = enableAlignmentGuides ? candidateBounds.ToList() : [];
+        var horizontal = CalculateAxis(
+            originBounds.X,
+            originBounds.Width,
+            proposedBounds.X,
+            proposedBounds.Width,
+            horizontalMode,
+            candidates,
+            enableGridSnapping,
+            enableAlignmentGuides,
+            primaryGridSpacing,
+            tolerance,
+            static candidate => candidate.X,
+            static candidate => candidate.X + (candidate.Width / 2d),
+            static candidate => candidate.X + candidate.Width);
+        var vertical = CalculateAxis(
+            originBounds.Y,
+            originBounds.Height,
+            proposedBounds.Y,
+            proposedBounds.Height,
+            verticalMode,
+            candidates,
+            enableGridSnapping,
+            enableAlignmentGuides,
+            primaryGridSpacing,
+            tolerance,
+            static candidate => candidate.Y,
+            static candidate => candidate.Y + (candidate.Height / 2d),
+            static candidate => candidate.Y + candidate.Height);
+
+        return new NodeCanvasPlacementAssistResult(
+            new NodeBounds(horizontal.Start, vertical.Start, horizontal.Length, vertical.Length),
+            horizontal.GuideWorld,
+            vertical.GuideWorld);
+    }
+
+    private static NodeCanvasPlacementAxisResult CalculateAxis(
+        double originStart,
+        double originLength,
+        double proposedStart,
+        double proposedLength,
+        NodeCanvasPlacementAxisMode mode,
+        IReadOnlyList<NodeBounds> candidateBounds,
+        bool enableGridSnapping,
+        bool enableAlignmentGuides,
+        double primaryGridSpacing,
+        double tolerance,
+        Func<NodeBounds, double> candidateStartSelector,
+        Func<NodeBounds, double> candidateCenterSelector,
+        Func<NodeBounds, double> candidateEndSelector)
+    {
+        if (mode is NodeCanvasPlacementAxisMode.None)
+        {
+            return new NodeCanvasPlacementAxisResult(proposedStart, proposedLength, null);
+        }
 
         var snapDeltaX = 0d;
-        var snapDeltaY = 0d;
-        double? guideWorldX = null;
-        double? guideWorldY = null;
         var bestXDelta = double.PositiveInfinity;
-        var bestYDelta = double.PositiveInfinity;
+        double? guideWorldX = null;
+        var proposedEnd = proposedStart + proposedLength;
+        var originEnd = originStart + originLength;
+        var gridAnchor = mode is NodeCanvasPlacementAxisMode.EndEdge
+            ? proposedEnd
+            : proposedStart;
 
         if (enableGridSnapping && primaryGridSpacing > 0d)
         {
-            var snappedX = Math.Round(proposedBounds.X / primaryGridSpacing) * primaryGridSpacing;
-            var snappedY = Math.Round(proposedBounds.Y / primaryGridSpacing) * primaryGridSpacing;
-            var gridDeltaX = snappedX - proposedBounds.X;
-            var gridDeltaY = snappedY - proposedBounds.Y;
+            var snappedX = Math.Round(gridAnchor / primaryGridSpacing) * primaryGridSpacing;
+            var gridDeltaX = snappedX - gridAnchor;
 
             if (Math.Abs(gridDeltaX) <= tolerance)
             {
                 snapDeltaX = gridDeltaX;
                 bestXDelta = Math.Abs(gridDeltaX);
-            }
-
-            if (Math.Abs(gridDeltaY) <= tolerance)
-            {
-                snapDeltaY = gridDeltaY;
-                bestYDelta = Math.Abs(gridDeltaY);
             }
         }
 
@@ -66,35 +166,36 @@ internal static class NodeCanvasDragAssistCalculator
             foreach (var candidate in candidateBounds)
             {
                 EvaluateGuideAxis(
-                    proposedBounds.X,
-                    proposedBounds.X + (proposedBounds.Width / 2),
-                    proposedBounds.X + proposedBounds.Width,
-                    candidate.X,
-                    candidate.X + (candidate.Width / 2),
-                    candidate.X + candidate.Width,
+                    proposedStart,
+                    proposedStart + (proposedLength / 2d),
+                    proposedEnd,
+                    candidateStartSelector(candidate),
+                    candidateCenterSelector(candidate),
+                    candidateEndSelector(candidate),
+                    mode,
                     tolerance,
                     ref snapDeltaX,
                     ref bestXDelta,
                     ref guideWorldX);
-
-                EvaluateGuideAxis(
-                    proposedBounds.Y,
-                    proposedBounds.Y + (proposedBounds.Height / 2),
-                    proposedBounds.Y + proposedBounds.Height,
-                    candidate.Y,
-                    candidate.Y + (candidate.Height / 2),
-                    candidate.Y + candidate.Height,
-                    tolerance,
-                    ref snapDeltaY,
-                    ref bestYDelta,
-                    ref guideWorldY);
             }
         }
 
-        return new NodeCanvasDragAssistResult(
-            new GraphPoint(deltaX + snapDeltaX, deltaY + snapDeltaY),
-            guideWorldX,
-            guideWorldY);
+        return mode switch
+        {
+            NodeCanvasPlacementAxisMode.Translate => new NodeCanvasPlacementAxisResult(
+                proposedStart + snapDeltaX,
+                proposedLength,
+                guideWorldX),
+            NodeCanvasPlacementAxisMode.StartEdge => new NodeCanvasPlacementAxisResult(
+                proposedStart + snapDeltaX,
+                Math.Max(0d, originEnd - (proposedStart + snapDeltaX)),
+                guideWorldX),
+            NodeCanvasPlacementAxisMode.EndEdge => new NodeCanvasPlacementAxisResult(
+                proposedStart,
+                Math.Max(0d, (proposedEnd + snapDeltaX) - proposedStart),
+                guideWorldX),
+            _ => new NodeCanvasPlacementAxisResult(proposedStart, proposedLength, null),
+        };
     }
 
     private static void EvaluateGuideAxis(
@@ -104,14 +205,24 @@ internal static class NodeCanvasDragAssistCalculator
         double candidateStart,
         double candidateCenter,
         double candidateEnd,
+        NodeCanvasPlacementAxisMode mode,
         double tolerance,
         ref double snapDelta,
         ref double bestDeltaMagnitude,
         ref double? guideWorld)
     {
-        EvaluatePair(movingStart, candidateStart, tolerance, ref snapDelta, ref bestDeltaMagnitude, ref guideWorld);
-        EvaluatePair(movingCenter, candidateCenter, tolerance, ref snapDelta, ref bestDeltaMagnitude, ref guideWorld);
-        EvaluatePair(movingEnd, candidateEnd, tolerance, ref snapDelta, ref bestDeltaMagnitude, ref guideWorld);
+        if (mode is NodeCanvasPlacementAxisMode.Translate)
+        {
+            EvaluatePair(movingStart, candidateStart, tolerance, ref snapDelta, ref bestDeltaMagnitude, ref guideWorld);
+            EvaluatePair(movingCenter, candidateCenter, tolerance, ref snapDelta, ref bestDeltaMagnitude, ref guideWorld);
+            EvaluatePair(movingEnd, candidateEnd, tolerance, ref snapDelta, ref bestDeltaMagnitude, ref guideWorld);
+            return;
+        }
+
+        var movingAnchor = mode is NodeCanvasPlacementAxisMode.EndEdge ? movingEnd : movingStart;
+        EvaluatePair(movingAnchor, candidateStart, tolerance, ref snapDelta, ref bestDeltaMagnitude, ref guideWorld);
+        EvaluatePair(movingAnchor, candidateCenter, tolerance, ref snapDelta, ref bestDeltaMagnitude, ref guideWorld);
+        EvaluatePair(movingAnchor, candidateEnd, tolerance, ref snapDelta, ref bestDeltaMagnitude, ref guideWorld);
     }
 
     private static void EvaluatePair(
@@ -134,3 +245,8 @@ internal static class NodeCanvasDragAssistCalculator
         guideWorld = candidate;
     }
 }
+
+internal readonly record struct NodeCanvasPlacementAxisResult(
+    double Start,
+    double Length,
+    double? GuideWorld);

@@ -190,6 +190,8 @@ public partial class NodeCanvas
 
         public IReadOnlyList<NodeViewModel> Nodes => _owner.ViewModel?.Nodes ?? [];
 
+        public IReadOnlyList<GraphEditorNodeGroupSnapshot> GroupSnapshots => _owner.ViewModel?.GetNodeGroupSnapshots() ?? [];
+
         public IReadOnlyList<NodeViewModel> SelectedNodes => _owner.ViewModel?.SelectedNodes ?? [];
 
         public NodeViewModel? SelectedNode => _owner.ViewModel?.SelectedNode;
@@ -290,6 +292,14 @@ public partial class NodeCanvas
 
         public GraphPoint ApplyDragAssist(NodeCanvasDragSession dragSession, double deltaX, double deltaY)
             => _owner.ApplyDragAssist(dragSession, deltaX, deltaY);
+
+        public NodeCanvasGroupResizePreview ApplyGroupResizeAssist(
+            GraphEditorNodeGroupSnapshot group,
+            NodeCanvasGroupResizeEdge edge,
+            GraphPoint proposedPosition,
+            GraphSize proposedSize,
+            GraphSize minimumSize)
+            => _owner.ApplyGroupResizeAssist(group, edge, proposedPosition, proposedSize, minimumSize);
 
         public void UpdateResizeFeedback(Point currentScreenPosition)
             => _owner.UpdateResizeFeedback(currentScreenPosition);
