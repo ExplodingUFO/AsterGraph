@@ -66,6 +66,25 @@ public sealed class NodeCanvasPointerInteractionCoordinatorTests
     }
 
     [Fact]
+    public void HandlePressed_WithSecondaryPress_DoesNotClearResizeFeedback()
+    {
+        var editor = CreateEditor();
+        var host = new TestPointerInteractionHost(editor);
+        var coordinator = new NodeCanvasPointerInteractionCoordinator(host);
+
+        var result = coordinator.HandlePressed(
+            isAlreadyHandled: false,
+            currentScreenPosition: new Point(40, 64),
+            isLeftButtonPressed: false,
+            isMiddleButtonPressed: false,
+            modifiers: KeyModifiers.None);
+
+        Assert.False(result.Handled);
+        Assert.False(result.CapturePointer);
+        Assert.Equal(0, host.ClearResizeFeedbackCalls);
+    }
+
+    [Fact]
     public void HandleMoved_WhenCanvasSelectionCrossesThreshold_TriggersMarqueeUpdate()
     {
         var editor = CreateEditor();

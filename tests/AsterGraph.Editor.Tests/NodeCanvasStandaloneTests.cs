@@ -14,6 +14,7 @@ using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Abstractions.Styling;
 using AsterGraph.Avalonia.Controls;
+using AsterGraph.Avalonia.Controls.Internal;
 using AsterGraph.Avalonia.Hosting;
 using AsterGraph.Avalonia.Presentation;
 using AsterGraph.Core.Compatibility;
@@ -1210,6 +1211,44 @@ public sealed class NodeCanvasStandaloneTests
         finally
         {
             window.Close();
+        }
+    }
+
+    [AvaloniaFact]
+    public void BorderResizeHandles_Detach_ClearsResizeInteractionSession()
+    {
+        var editor = CreateEditor();
+        var (window, canvas) = CreateStandaloneCanvasWindow(editor);
+        var pointer = new global::Avalonia.Input.Pointer(1, PointerType.Mouse, isPrimary: true);
+
+        try
+        {
+            var widthThumb = canvas.GetVisualDescendants()
+                .OfType<Thumb>()
+                .Single(control => string.Equals(
+                    AutomationProperties.GetName(control),
+                    "Canvas Target width resize handle",
+                    StringComparison.Ordinal));
+            var pressedArgs = CreatePointerPressedArgs(widthThumb, canvas, pointer, new Point(655, 220), KeyModifiers.None);
+
+            widthThumb.RaiseEvent(pressedArgs);
+
+            var interactionSessionField = typeof(NodeCanvas).GetField("_interactionSession", BindingFlags.Instance | BindingFlags.NonPublic)
+                ?? throw new Xunit.Sdk.XunitException("Could not access NodeCanvas interaction session.");
+            var interactionSession = Assert.IsType<NodeCanvasInteractionSession>(interactionSessionField.GetValue(canvas));
+            Assert.NotNull(interactionSession.NodeResizeSession);
+
+            window.Close();
+
+            Assert.Null(interactionSession.NodeResizeSession);
+            Assert.Null(interactionSession.GroupResizeSession);
+        }
+        finally
+        {
+            if (window.IsVisible)
+            {
+                window.Close();
+            }
         }
     }
 

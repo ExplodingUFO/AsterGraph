@@ -61,11 +61,11 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
         _host.FocusCanvas();
         _host.InteractionSession.UpdateLastPointerPosition(currentScreenPosition);
         _host.InteractionSession.UpdatePointerPosition(currentScreenPosition);
-        _host.ClearResizeFeedback();
 
         if (isMiddleButtonPressed
             || (_host.EnableAltLeftDragPanning && isLeftButtonPressed && modifiers.HasFlag(KeyModifiers.Alt)))
         {
+            _host.ClearResizeFeedback();
             _host.InteractionSession.BeginPanning(currentScreenPosition);
             _host.HideSelectionAdorner();
             _host.HideGuideAdorners();
@@ -77,6 +77,7 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
             return default;
         }
 
+        _host.ClearResizeFeedback();
         if (_host.ViewModel.HasPendingConnection)
         {
             _host.ViewModel.CancelPendingConnection("Connection preview cancelled.");

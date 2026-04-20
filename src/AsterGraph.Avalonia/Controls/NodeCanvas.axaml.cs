@@ -249,6 +249,7 @@ public partial class NodeCanvas : UserControl
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
     {
         ClearResizeFeedback();
+        _interactionSession.ResetAfterPointerRelease();
         _lifecycleCoordinator.HandleDetachedFromVisualTree();
         base.OnDetachedFromVisualTree(e);
     }
