@@ -29,6 +29,8 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
     private const double MinimumParameterRailWidth = 144d;
     private const double EditorParameterRailWidth = 192d;
     private const double MaximumParameterRailWidth = 228d;
+    private const double EdgeResizeHitThickness = 10d;
+    private const double CornerResizeHitThickness = 16d;
 
     public GraphNodeVisual Create(GraphNodeVisualContext context)
     {
@@ -241,6 +243,12 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
                 || args.Source is StyledElement { DataContext: PortViewModel }
                 || args.Source is StyledElement { DataContext: NodeParameterEndpointViewModel })
             {
+                return;
+            }
+
+            if (TryResolveSurfaceResizeHandle(border, args, out var handleKind))
+            {
+                context.BeginNodeResize(context.Node, handleKind, args);
                 return;
             }
 
@@ -680,6 +688,46 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
         };
         AutomationProperties.SetName(thumb, automationName);
         return thumb;
+    }
+
+    private static bool TryResolveSurfaceResizeHandle(
+        Border border,
+        PointerPressedEventArgs args,
+        out GraphNodeResizeHandleKind handleKind)
+    {
+        handleKind = default;
+        var point = args.GetPosition(border);
+        var width = double.IsNaN(border.Width) ? border.Bounds.Width : border.Width;
+        var height = double.IsNaN(border.Height) ? border.Bounds.Height : border.Height;
+        if (width <= 0d || height <= 0d)
+        {
+            return false;
+        }
+
+        var nearRightEdge = point.X >= width - EdgeResizeHitThickness;
+        var nearBottomEdge = point.Y >= height - EdgeResizeHitThickness;
+        var nearCorner = point.X >= width - CornerResizeHitThickness
+            && point.Y >= height - CornerResizeHitThickness;
+
+        if (nearCorner)
+        {
+            handleKind = GraphNodeResizeHandleKind.BottomRight;
+            return true;
+        }
+
+        if (nearRightEdge)
+        {
+            handleKind = GraphNodeResizeHandleKind.Right;
+            return true;
+        }
+
+        if (nearBottomEdge)
+        {
+            handleKind = GraphNodeResizeHandleKind.Bottom;
+            return true;
+        }
+
+        return false;
     }
 
     private static NodeCardStyleOptions GetNodeCardStyle(GraphNodeVisualContext context)
