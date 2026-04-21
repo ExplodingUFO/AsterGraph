@@ -522,6 +522,9 @@ internal sealed class NodeCanvasSceneHost
             _host.NodeLayer,
             _host.CoordinateRoot,
             _host.NodeVisuals,
+            _host.ViewModel?.Session.Queries.GetConnectionGeometrySnapshots()
+                .ToDictionary(snapshot => snapshot.ConnectionId, StringComparer.Ordinal)
+                ?? new Dictionary<string, GraphEditorConnectionGeometrySnapshot>(StringComparer.Ordinal),
             _host.InteractionSession.PointerScreenPosition,
             GetConnectionStyle,
             _host.ContextMenuCoordinator.CreateContextMenuSnapshot,
