@@ -15,11 +15,12 @@ public static class AsterGraphMiniMapViewFactory
     public static GraphMiniMap Create(AsterGraphMiniMapViewOptions options)
     {
         ArgumentNullException.ThrowIfNull(options);
-        ArgumentNullException.ThrowIfNull(options.Editor);
+        ArgumentNullException.ThrowIfNull(options.Session);
 
         return new GraphMiniMap
         {
-            ViewModel = options.Editor,
+            Session = options.Session,
+            StyleOptions = options.StyleOptions,
             MiniMapPresenter = options.Presentation?.MiniMapPresenter,
         };
     }

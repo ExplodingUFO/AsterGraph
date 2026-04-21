@@ -371,13 +371,13 @@ public sealed class GraphEditorInitializationTests
         });
         var miniMap = AsterGraphMiniMapViewFactory.Create(new AsterGraphMiniMapViewOptions
         {
-            Editor = editor,
+            Session = editor.Session,
             Presentation = presentation,
         });
 
         Assert.Same(editor, canvas.ViewModel);
         Assert.Same(editor, inspector.Editor);
-        Assert.Same(editor, miniMap.ViewModel);
+        Assert.Same(editor.Session, miniMap.Session);
         Assert.False(canvas.EnableDefaultContextMenu);
         Assert.False(canvas.CommandShortcutPolicy.Enabled);
         Assert.Same(presentation.NodeVisualPresenter, canvas.NodeVisualPresenter);
@@ -705,10 +705,10 @@ public sealed class GraphEditorInitializationTests
 
     private sealed class RecordingMiniMapPresenter : IGraphMiniMapPresenter
     {
-        public Control Create(GraphEditorViewModel? editor)
+        public Control Create(IGraphEditorSession? session)
             => new TextBlock
             {
-                Text = $"INIT MINIMAP:{editor?.Title ?? "<none>"}",
+                Text = $"INIT MINIMAP:{session?.Queries.CreateDocumentSnapshot().Title ?? "<none>"}",
             };
     }
 

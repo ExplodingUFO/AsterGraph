@@ -84,7 +84,8 @@ public partial class MainWindow : Window
 
         var standaloneMiniMap = AsterGraphMiniMapViewFactory.Create(new AsterGraphMiniMapViewOptions
         {
-            Editor = viewModel.Editor,
+            Session = viewModel.Session,
+            StyleOptions = viewModel.Editor.StyleOptions,
         });
         standaloneMiniMap.Name = "StandaloneMiniMapPreview";
         SetHostContent("PART_StandaloneMiniMapHost", standaloneMiniMap);
@@ -99,7 +100,8 @@ public partial class MainWindow : Window
 
         var customMiniMap = AsterGraphMiniMapViewFactory.Create(new AsterGraphMiniMapViewOptions
         {
-            Editor = viewModel.Editor,
+            Session = viewModel.Session,
+            StyleOptions = viewModel.Editor.StyleOptions,
             Presentation = replacementPresentation,
         });
         customMiniMap.Name = "CustomMiniMapPreview";

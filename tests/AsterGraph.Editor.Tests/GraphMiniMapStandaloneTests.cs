@@ -12,6 +12,7 @@ using AsterGraph.Avalonia.Presentation;
 using AsterGraph.Core.Compatibility;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Catalog;
+using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.ViewModels;
 using Xunit;
 
@@ -23,15 +24,15 @@ public sealed class GraphMiniMapStandaloneTests
     private static readonly NodeDefinitionId TargetDefinitionId = new("tests.minimap.target");
 
     [AvaloniaFact]
-    public void StandaloneMiniMapFactory_BindsEditorAndRemainsNonFocusable()
+    public void StandaloneMiniMapFactory_BindsSessionAndRemainsNonFocusable()
     {
         var editor = CreateEditor();
         var miniMap = AsterGraphMiniMapViewFactory.Create(new AsterGraphMiniMapViewOptions
         {
-            Editor = editor,
+            Session = editor.Session,
         });
 
-        Assert.Same(editor, miniMap.ViewModel);
+        Assert.Same(editor.Session, miniMap.Session);
         Assert.False(miniMap.Focusable);
     }
 
@@ -42,16 +43,16 @@ public sealed class GraphMiniMapStandaloneTests
         editor.UpdateViewportSize(480, 320);
         var miniMap = AsterGraphMiniMapViewFactory.Create(new AsterGraphMiniMapViewOptions
         {
-            Editor = editor,
+            Session = editor.Session,
         });
         miniMap.Measure(new Size(240, 160));
         miniMap.Arrange(new Rect(0, 0, 240, 160));
 
-        InvokeMiniMapMethod("CenterViewportFromMiniMap", miniMap, editor, new Point(32, 28), false);
+        InvokeMiniMapMethod("CenterViewportFromMiniMap", miniMap, editor.Session, new Point(32, 28), false);
 
         var panAfterFirstRecenter = (editor.PanX, editor.PanY);
 
-        InvokeMiniMapMethod("CenterViewportFromMiniMap", miniMap, editor, new Point(180, 120), false);
+        InvokeMiniMapMethod("CenterViewportFromMiniMap", miniMap, editor.Session, new Point(180, 120), false);
 
         Assert.NotEqual((0d, 0d), panAfterFirstRecenter);
         Assert.NotEqual(panAfterFirstRecenter, (editor.PanX, editor.PanY));
@@ -65,7 +66,7 @@ public sealed class GraphMiniMapStandaloneTests
         var customPresenter = new RecordingMiniMapPresenter();
         var miniMap = AsterGraphMiniMapViewFactory.Create(new AsterGraphMiniMapViewOptions
         {
-            Editor = editor,
+            Session = editor.Session,
             Presentation = new AsterGraphPresentationOptions
             {
                 MiniMapPresenter = customPresenter,
@@ -93,7 +94,7 @@ public sealed class GraphMiniMapStandaloneTests
 
             button.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
 
-            Assert.Same(editor, customPresenter.LastEditor);
+            Assert.Same(editor.Session, customPresenter.LastSession);
             Assert.Same(customPresenter, miniMap.MiniMapPresenter);
             Assert.Contains("CUSTOM MINIMAP SURFACE", allText);
             Assert.NotEqual((0d, 0d), (editor.PanX, editor.PanY));
@@ -109,6 +110,15 @@ public sealed class GraphMiniMapStandaloneTests
         var method = typeof(GraphMiniMap).GetMethod(methodName, BindingFlags.Instance | BindingFlags.NonPublic)
             ?? throw new Xunit.Sdk.XunitException($"Could not find GraphMiniMap handler '{methodName}'.");
         method.Invoke(miniMap, args);
+    }
+
+    [Fact]
+    public void MiniMapPresenter_UsesSessionContract()
+    {
+        var createMethod = typeof(IGraphMiniMapPresenter).GetMethod(nameof(IGraphMiniMapPresenter.Create))
+            ?? throw new Xunit.Sdk.XunitException("Could not find minimap presenter create method.");
+
+        Assert.Equal(typeof(IGraphEditorSession), createMethod.GetParameters().Single().ParameterType);
     }
 
     private static GraphEditorViewModel CreateEditor()
@@ -196,17 +206,17 @@ public sealed class GraphMiniMapStandaloneTests
 
     private sealed class RecordingMiniMapPresenter : IGraphMiniMapPresenter
     {
-        public GraphEditorViewModel? LastEditor { get; private set; }
+        public IGraphEditorSession? LastSession { get; private set; }
 
-        public Control Create(GraphEditorViewModel? editor)
+        public Control Create(IGraphEditorSession? session)
         {
-            LastEditor = editor;
+            LastSession = session;
             var button = new Button
             {
                 Tag = "custom-minimap-center",
                 Content = "Center Custom MiniMap",
             };
-            button.Click += (_, _) => editor?.CenterViewAt(new GraphPoint(520, 360), updateStatus: false);
+            button.Click += (_, _) => session?.Commands.CenterViewAt(new GraphPoint(520, 360), updateStatus: false);
 
             return new StackPanel
             {

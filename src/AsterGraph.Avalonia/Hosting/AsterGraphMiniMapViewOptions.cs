@@ -1,5 +1,6 @@
+using AsterGraph.Abstractions.Styling;
 using AsterGraph.Avalonia.Presentation;
-using AsterGraph.Editor.ViewModels;
+using AsterGraph.Editor.Runtime;
 
 namespace AsterGraph.Avalonia.Hosting;
 
@@ -9,12 +10,17 @@ namespace AsterGraph.Avalonia.Hosting;
 public sealed record AsterGraphMiniMapViewOptions
 {
     /// <summary>
-    /// 要绑定到缩略图上的编辑器视图模型。
+    /// 要绑定到缩略图上的 canonical 编辑器 session。
     /// </summary>
-    public GraphEditorViewModel? Editor { get; init; }
+    public IGraphEditorSession? Session { get; init; }
 
     /// <summary>
-    /// 可选的 Avalonia 展示器替换配置。
+    /// 可选的样式选项输入；未提供时使用默认样式。
+    /// </summary>
+    public GraphEditorStyleOptions? StyleOptions { get; init; }
+
+    /// <summary>
+     /// 可选的 Avalonia 展示器替换配置。
     /// </summary>
     public AsterGraphPresentationOptions? Presentation { get; init; }
 }

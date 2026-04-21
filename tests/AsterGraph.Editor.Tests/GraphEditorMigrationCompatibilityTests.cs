@@ -718,7 +718,7 @@ public sealed class GraphEditorMigrationCompatibilityTests
                 canvas.CommandShortcutPolicy.Enabled,
                 canvas.AttachPlatformSeams,
                 ReferenceEquals(editor, inspector.Editor),
-                ReferenceEquals(editor, miniMap.ViewModel),
+                ReferenceEquals(editor.Session, miniMap.Session),
                 owner?.GetType().Name ?? "<none>",
                 topLevel?.GetType().Name ?? "<none>");
         }
@@ -1252,10 +1252,10 @@ public sealed class GraphEditorMigrationCompatibilityTests
 
     private sealed class RecordingMiniMapPresenter : IGraphMiniMapPresenter
     {
-        public Control Create(GraphEditorViewModel? editor)
+        public Control Create(IGraphEditorSession? session)
             => new TextBlock
             {
-                Text = $"MIGRATION MINIMAP:{editor?.Title ?? "<none>"}",
+                Text = $"MIGRATION MINIMAP:{session?.Queries.CreateDocumentSnapshot().Title ?? "<none>"}",
             };
     }
 }

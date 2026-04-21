@@ -1133,10 +1133,10 @@ public sealed class GraphEditorProofRingTests
 
     private sealed class ProofMiniMapPresenter : IGraphMiniMapPresenter
     {
-        public Control Create(GraphEditorViewModel? editor)
+        public Control Create(IGraphEditorSession? session)
             => new TextBlock
             {
-                Text = $"PROOF MINIMAP:{editor?.Title ?? "<none>"}",
+                Text = $"PROOF MINIMAP:{session?.Queries.CreateDocumentSnapshot().Title ?? "<none>"}",
             };
     }
 

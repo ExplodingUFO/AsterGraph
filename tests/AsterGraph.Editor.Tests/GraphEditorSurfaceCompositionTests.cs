@@ -14,6 +14,7 @@ using AsterGraph.Core.Models;
 using AsterGraph.Editor.Catalog;
 using AsterGraph.Editor.Hosting;
 using AsterGraph.Editor.Menus;
+using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.ViewModels;
 using Xunit;
 
@@ -40,7 +41,7 @@ public sealed class GraphEditorSurfaceCompositionTests
         Assert.Same(editor, view.Editor);
         Assert.Same(editor, canvas.ViewModel);
         Assert.Same(editor, inspector.Editor);
-        Assert.Same(editor, miniMap.ViewModel);
+        Assert.Same(editor.Session, miniMap.Session);
     }
 
     [AvaloniaFact]
@@ -56,7 +57,7 @@ public sealed class GraphEditorSurfaceCompositionTests
             {
                 AsterGraphCanvasViewFactory.Create(new AsterGraphCanvasViewOptions { Editor = editor }),
                 AsterGraphInspectorViewFactory.Create(new AsterGraphInspectorViewOptions { Editor = editor }),
-                AsterGraphMiniMapViewFactory.Create(new AsterGraphMiniMapViewOptions { Editor = editor }),
+                AsterGraphMiniMapViewFactory.Create(new AsterGraphMiniMapViewOptions { Session = editor.Session }),
             },
         };
         Grid.SetColumn(layout.Children[1], 1);
@@ -74,7 +75,7 @@ public sealed class GraphEditorSurfaceCompositionTests
                 .Where(text => !string.IsNullOrWhiteSpace(text)));
 
         Assert.Same(canvas.ViewModel, inspector.Editor);
-        Assert.Same(canvas.ViewModel, miniMap.ViewModel);
+        Assert.Same(editor.Session, miniMap.Session);
         Assert.Contains("Surface Composition Node", inspectorText);
     }
 
@@ -134,7 +135,7 @@ public sealed class GraphEditorSurfaceCompositionTests
         Assert.Contains("CUSTOM SHELL INSPECTOR", allText);
         Assert.Contains("CUSTOM SHELL MINIMAP", allText);
         Assert.Same(editor, customInspector.LastEditor);
-        Assert.Same(editor, customMiniMap.LastEditor);
+        Assert.Same(editor.Session, customMiniMap.LastSession);
     }
 
     private static WindowScope CreateWindowScope(Control content)
@@ -219,11 +220,11 @@ public sealed class GraphEditorSurfaceCompositionTests
 
     private sealed class RecordingMiniMapPresenter : IGraphMiniMapPresenter
     {
-        public GraphEditorViewModel? LastEditor { get; private set; }
+        public IGraphEditorSession? LastSession { get; private set; }
 
-        public Control Create(GraphEditorViewModel? editor)
+        public Control Create(IGraphEditorSession? session)
         {
-            LastEditor = editor;
+            LastSession = session;
             return new TextBlock
             {
                 Text = "CUSTOM SHELL MINIMAP",

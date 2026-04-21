@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Layout;
 using Avalonia.Media;
 using AsterGraph.Avalonia.Presentation;
+using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.ViewModels;
 
 namespace AsterGraph.Demo.Presentation;
@@ -59,10 +60,11 @@ internal static class DemoShowcasePresenters
 
     private sealed class DemoMiniMapPresenter : IGraphMiniMapPresenter
     {
-        public Control Create(GraphEditorViewModel? editor)
+        public Control Create(IGraphEditorSession? session)
         {
-            var nodeCount = editor?.Nodes.Count ?? 0;
-            var connectionCount = editor?.Connections.Count ?? 0;
+            var document = session?.Queries.CreateDocumentSnapshot();
+            var nodeCount = document?.Nodes.Count ?? 0;
+            var connectionCount = document?.Connections.Count ?? 0;
 
             return new Border
             {

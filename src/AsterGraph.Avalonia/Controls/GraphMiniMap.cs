@@ -2,10 +2,12 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media;
+using AsterGraph.Abstractions.Styling;
 using AsterGraph.Avalonia.Presentation;
 using AsterGraph.Avalonia.Styling;
 using AsterGraph.Core.Models;
-using AsterGraph.Editor.ViewModels;
+using AsterGraph.Editor.Runtime;
+using AsterGraph.Editor.Viewport;
 
 namespace AsterGraph.Avalonia.Controls;
 
@@ -15,10 +17,16 @@ namespace AsterGraph.Avalonia.Controls;
 public sealed class GraphMiniMap : UserControl
 {
     /// <summary>
-    /// 绑定的编辑器视图模型依赖属性。
+    /// 绑定的 canonical 编辑器 session 依赖属性。
     /// </summary>
-    public static readonly StyledProperty<GraphEditorViewModel?> ViewModelProperty =
-        AvaloniaProperty.Register<GraphMiniMap, GraphEditorViewModel?>(nameof(ViewModel));
+    public static readonly StyledProperty<IGraphEditorSession?> SessionProperty =
+        AvaloniaProperty.Register<GraphMiniMap, IGraphEditorSession?>(nameof(Session));
+
+    /// <summary>
+    /// 可选的样式选项依赖属性。
+    /// </summary>
+    public static readonly StyledProperty<GraphEditorStyleOptions?> StyleOptionsProperty =
+        AvaloniaProperty.Register<GraphMiniMap, GraphEditorStyleOptions?>(nameof(StyleOptions));
 
     /// <summary>
     /// 可选的缩略图展示器依赖属性。
@@ -39,12 +47,21 @@ public sealed class GraphMiniMap : UserControl
     }
 
     /// <summary>
-    /// 当前绑定的编辑器视图模型。
+    /// 当前绑定的编辑器 session。
     /// </summary>
-    public GraphEditorViewModel? ViewModel
+    public IGraphEditorSession? Session
     {
-        get => GetValue(ViewModelProperty);
-        set => SetValue(ViewModelProperty, value);
+        get => GetValue(SessionProperty);
+        set => SetValue(SessionProperty, value);
+    }
+
+    /// <summary>
+    /// 当前缩略图样式选项。
+    /// </summary>
+    public GraphEditorStyleOptions? StyleOptions
+    {
+        get => GetValue(StyleOptionsProperty);
+        set => SetValue(StyleOptionsProperty, value);
     }
 
     /// <summary>
@@ -61,7 +78,9 @@ public sealed class GraphMiniMap : UserControl
     {
         base.OnPropertyChanged(change);
 
-        if (change.Property == ViewModelProperty || change.Property == MiniMapPresenterProperty)
+        if (change.Property == SessionProperty
+            || change.Property == StyleOptionsProperty
+            || change.Property == MiniMapPresenterProperty)
         {
             ApplyMiniMapPresenter();
         }
@@ -71,7 +90,8 @@ public sealed class GraphMiniMap : UserControl
     {
         if (MiniMapPresenter is null)
         {
-            _stockSurface.ViewModel = ViewModel;
+            _stockSurface.Session = Session;
+            _stockSurface.StyleOptions = StyleOptions;
             if (!ReferenceEquals(Content, _stockSurface))
             {
                 Content = _stockSurface;
@@ -80,40 +100,66 @@ public sealed class GraphMiniMap : UserControl
             return;
         }
 
-        Content = MiniMapPresenter.Create(ViewModel);
+        _stockSurface.Session = null;
+        Content = MiniMapPresenter.Create(Session);
     }
 
-    private void CenterViewportFromMiniMap(GraphEditorViewModel editor, Point point, bool updateStatus = true)
+    private void CenterViewportFromMiniMap(IGraphEditorSession session, Point point, bool updateStatus = true)
     {
-        var bounds = Bounds;
-        CenterViewportFromBounds(editor, bounds, point, updateStatus);
+        CenterViewportFromBounds(session, Bounds, point, updateStatus);
     }
 
-    private static void CenterViewportFromBounds(GraphEditorViewModel editor, Rect bounds, Point point, bool updateStatus = true)
+    private static void CenterViewportFromBounds(IGraphEditorSession session, Rect bounds, Point point, bool updateStatus = true)
     {
-        var worldBounds = GetWorldBounds(editor);
-        var scale = Math.Min(bounds.Width / worldBounds.Width, bounds.Height / worldBounds.Height);
+        if (!TryGetWorldBounds(session.Queries.CreateDocumentSnapshot(), out var worldBounds))
+        {
+            return;
+        }
+
+        var scale = GetMiniMapScale(bounds, worldBounds);
+        if (scale <= 0)
+        {
+            return;
+        }
+
         var offsetX = bounds.X + ((bounds.Width - (worldBounds.Width * scale)) / 2);
         var offsetY = bounds.Y + ((bounds.Height - (worldBounds.Height * scale)) / 2);
-
         var worldX = worldBounds.X + ((point.X - offsetX) / scale);
         var worldY = worldBounds.Y + ((point.Y - offsetY) / scale);
-        editor.CenterViewAt(new GraphPoint(worldX, worldY), updateStatus);
+
+        session.Commands.CenterViewAt(new GraphPoint(worldX, worldY), updateStatus);
     }
 
-    private static Rect GetWorldBounds(GraphEditorViewModel editor)
+    private static bool TryGetWorldBounds(GraphDocument document, out Rect worldBounds)
     {
-        var minX = editor.Nodes.Min(node => node.X);
-        var minY = editor.Nodes.Min(node => node.Y);
-        var maxX = editor.Nodes.Max(node => node.X + node.Width);
-        var maxY = editor.Nodes.Max(node => node.Y + node.Height);
+        if (document.Nodes.Count == 0)
+        {
+            worldBounds = default;
+            return false;
+        }
+
+        var minX = document.Nodes.Min(node => node.Position.X);
+        var minY = document.Nodes.Min(node => node.Position.Y);
+        var maxX = document.Nodes.Max(node => node.Position.X + node.Size.Width);
+        var maxY = document.Nodes.Max(node => node.Position.Y + node.Size.Height);
         const double padding = 80;
 
-        return new Rect(
+        worldBounds = new Rect(
             minX - padding,
             minY - padding,
             Math.Max(1, (maxX - minX) + (padding * 2)),
             Math.Max(1, (maxY - minY) + (padding * 2)));
+        return true;
+    }
+
+    private static double GetMiniMapScale(Rect bounds, Rect worldBounds)
+    {
+        if (bounds.Width <= 0 || bounds.Height <= 0 || worldBounds.Width <= 0 || worldBounds.Height <= 0)
+        {
+            return 0;
+        }
+
+        return Math.Min(bounds.Width / worldBounds.Width, bounds.Height / worldBounds.Height);
     }
 
     private static Rect ToMiniMapRect(
@@ -125,19 +171,21 @@ public sealed class GraphMiniMap : UserControl
         double scale,
         double offsetX,
         double offsetY)
-    {
-        return new Rect(
+        => new(
             offsetX + ((worldX - worldBounds.X) * scale),
             offsetY + ((worldY - worldBounds.Y) * scale),
             Math.Max(2, worldWidth * scale),
             Math.Max(2, worldHeight * scale));
-    }
 
     private sealed class StockGraphMiniMapSurface : Control
     {
-        public static readonly StyledProperty<GraphEditorViewModel?> ViewModelProperty =
-            AvaloniaProperty.Register<StockGraphMiniMapSurface, GraphEditorViewModel?>(nameof(ViewModel));
+        public static readonly StyledProperty<IGraphEditorSession?> SessionProperty =
+            AvaloniaProperty.Register<StockGraphMiniMapSurface, IGraphEditorSession?>(nameof(Session));
 
+        public static readonly StyledProperty<GraphEditorStyleOptions?> StyleOptionsProperty =
+            AvaloniaProperty.Register<StockGraphMiniMapSurface, GraphEditorStyleOptions?>(nameof(StyleOptions));
+
+        private IGraphEditorSession? _observedSession;
         private bool _isDraggingViewport;
 
         public StockGraphMiniMapSurface()
@@ -148,75 +196,145 @@ public sealed class GraphMiniMap : UserControl
             PointerReleased += HandlePointerReleased;
         }
 
-        public GraphEditorViewModel? ViewModel
+        public IGraphEditorSession? Session
         {
-            get => GetValue(ViewModelProperty);
-            set => SetValue(ViewModelProperty, value);
+            get => GetValue(SessionProperty);
+            set => SetValue(SessionProperty, value);
+        }
+
+        public GraphEditorStyleOptions? StyleOptions
+        {
+            get => GetValue(StyleOptionsProperty);
+            set => SetValue(StyleOptionsProperty, value);
+        }
+
+        protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
+        {
+            base.OnPropertyChanged(change);
+
+            if (change.Property == SessionProperty)
+            {
+                AttachSession(change.GetNewValue<IGraphEditorSession?>());
+                InvalidateVisual();
+                return;
+            }
+
+            if (change.Property == StyleOptionsProperty)
+            {
+                InvalidateVisual();
+            }
         }
 
         public override void Render(DrawingContext context)
         {
             base.Render(context);
 
-            var bounds = Bounds;
-            var editor = ViewModel;
-            if (editor is null || bounds.Width <= 0 || bounds.Height <= 0)
+            var session = Session;
+            if (session is null || Bounds.Width <= 0 || Bounds.Height <= 0)
             {
                 return;
             }
 
-            var canvasStyle = editor.StyleOptions.Canvas;
-            context.FillRectangle(BrushFactory.Solid(canvasStyle.GridBackgroundHex), bounds);
+            var scene = session.Queries.GetSceneSnapshot();
+            var canvasStyle = (StyleOptions ?? GraphEditorStyleOptions.Default).Canvas;
+            context.FillRectangle(BrushFactory.Solid(canvasStyle.GridBackgroundHex), Bounds);
 
-            if (editor.Nodes.Count == 0)
+            if (!TryGetWorldBounds(scene.Document, out var worldBounds))
             {
                 return;
             }
 
-            var worldBounds = GetWorldBounds(editor);
-            var scale = Math.Min(bounds.Width / worldBounds.Width, bounds.Height / worldBounds.Height);
-            var offsetX = bounds.X + ((bounds.Width - (worldBounds.Width * scale)) / 2);
-            var offsetY = bounds.Y + ((bounds.Height - (worldBounds.Height * scale)) / 2);
-
-            foreach (var node in editor.Nodes)
+            var scale = GetMiniMapScale(Bounds, worldBounds);
+            if (scale <= 0)
             {
-                var nodeRect = ToMiniMapRect(node.X, node.Y, node.Width, node.Height, worldBounds, scale, offsetX, offsetY);
-                context.DrawRectangle(
-                    BrushFactory.Solid(node.IsSelected ? node.AccentHex : canvasStyle.PrimaryGridHex, node.IsSelected ? 0.7 : 0.45),
-                    new Pen(BrushFactory.Solid(node.AccentHex, 0.8), 1),
-                    nodeRect);
+                return;
             }
 
-            if (editor.ViewportWidth > 0 && editor.ViewportHeight > 0)
+            var offsetX = Bounds.X + ((Bounds.Width - (worldBounds.Width * scale)) / 2);
+            var offsetY = Bounds.Y + ((Bounds.Height - (worldBounds.Height * scale)) / 2);
+            var selectedNodeIds = scene.Selection.SelectedNodeIds.ToHashSet(StringComparer.Ordinal);
+
+            foreach (var node in scene.Document.Nodes)
             {
-                var topLeft = editor.ScreenToWorld(new GraphPoint(0, 0));
-                var bottomRight = editor.ScreenToWorld(new GraphPoint(editor.ViewportWidth, editor.ViewportHeight));
-                var viewportRect = ToMiniMapRect(
-                    topLeft.X,
-                    topLeft.Y,
-                    bottomRight.X - topLeft.X,
-                    bottomRight.Y - topLeft.Y,
+                var isSelected = selectedNodeIds.Contains(node.Id);
+                var nodeRect = ToMiniMapRect(
+                    node.Position.X,
+                    node.Position.Y,
+                    node.Size.Width,
+                    node.Size.Height,
                     worldBounds,
                     scale,
                     offsetX,
                     offsetY);
-
                 context.DrawRectangle(
-                    null,
-                    new Pen(BrushFactory.Solid(canvasStyle.GuideHex, canvasStyle.GuideOpacity), 1.2),
-                    viewportRect);
+                    BrushFactory.Solid(isSelected ? node.AccentHex : canvasStyle.PrimaryGridHex, isSelected ? 0.7 : 0.45),
+                    new Pen(BrushFactory.Solid(node.AccentHex, 0.8), 1),
+                    nodeRect);
             }
-        }
 
-        private void HandlePointerPressed(object? sender, PointerPressedEventArgs args)
-        {
-            var editor = ViewModel;
-            if (editor is null || editor.Nodes.Count == 0 || args.GetCurrentPoint(this).Properties.IsLeftButtonPressed is false)
+            if (scene.Viewport.ViewportWidth <= 0 || scene.Viewport.ViewportHeight <= 0)
             {
                 return;
             }
 
-            CenterViewportFromBounds(editor, Bounds, args.GetPosition(this));
+            var viewportState = new ViewportState(scene.Viewport.Zoom, scene.Viewport.PanX, scene.Viewport.PanY);
+            var topLeft = ViewportMath.ScreenToWorld(viewportState, new GraphPoint(0, 0));
+            var bottomRight = ViewportMath.ScreenToWorld(
+                viewportState,
+                new GraphPoint(scene.Viewport.ViewportWidth, scene.Viewport.ViewportHeight));
+            var viewportRect = ToMiniMapRect(
+                topLeft.X,
+                topLeft.Y,
+                bottomRight.X - topLeft.X,
+                bottomRight.Y - topLeft.Y,
+                worldBounds,
+                scale,
+                offsetX,
+                offsetY);
+
+            context.DrawRectangle(
+                null,
+                new Pen(BrushFactory.Solid(canvasStyle.GuideHex, canvasStyle.GuideOpacity), 1.2),
+                viewportRect);
+        }
+
+        private void AttachSession(IGraphEditorSession? current)
+        {
+            if (ReferenceEquals(_observedSession, current))
+            {
+                return;
+            }
+
+            if (_observedSession is not null)
+            {
+                _observedSession.Events.DocumentChanged -= HandleSessionChanged;
+                _observedSession.Events.SelectionChanged -= HandleSessionChanged;
+                _observedSession.Events.ViewportChanged -= HandleSessionChanged;
+            }
+
+            _observedSession = current;
+            if (_observedSession is null)
+            {
+                return;
+            }
+
+            _observedSession.Events.DocumentChanged += HandleSessionChanged;
+            _observedSession.Events.SelectionChanged += HandleSessionChanged;
+            _observedSession.Events.ViewportChanged += HandleSessionChanged;
+        }
+
+        private void HandleSessionChanged(object? sender, EventArgs args)
+            => InvalidateVisual();
+
+        private void HandlePointerPressed(object? sender, PointerPressedEventArgs args)
+        {
+            var session = Session;
+            if (session is null || session.Queries.CreateDocumentSnapshot().Nodes.Count == 0 || args.GetCurrentPoint(this).Properties.IsLeftButtonPressed is false)
+            {
+                return;
+            }
+
+            CenterViewportFromBounds(session, Bounds, args.GetPosition(this));
             _isDraggingViewport = true;
             args.Pointer.Capture(this);
             args.Handled = true;
@@ -224,12 +342,12 @@ public sealed class GraphMiniMap : UserControl
 
         private void HandlePointerMoved(object? sender, PointerEventArgs args)
         {
-            if (!_isDraggingViewport || ViewModel is null)
+            if (!_isDraggingViewport || Session is null)
             {
                 return;
             }
 
-            CenterViewportFromBounds(ViewModel, Bounds, args.GetPosition(this), updateStatus: false);
+            CenterViewportFromBounds(Session, Bounds, args.GetPosition(this), updateStatus: false);
             args.Handled = true;
         }
 

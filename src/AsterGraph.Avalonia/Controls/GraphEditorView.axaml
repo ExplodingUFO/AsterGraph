@@ -286,7 +286,8 @@
                            Foreground="{DynamicResource AsterGraph.EyebrowBrush}" />
                 <controls:GraphMiniMap x:Name="PART_MiniMapSurface"
                                        Height="168"
-                                       ViewModel="{Binding}" />
+                                       Session="{Binding Session}"
+                                       StyleOptions="{Binding StyleOptions}" />
               </StackPanel>
             </Border>
 

@@ -1,6 +1,6 @@
 using Avalonia.Controls;
 using AsterGraph.Avalonia.Controls;
-using AsterGraph.Editor.ViewModels;
+using AsterGraph.Editor.Runtime;
 
 namespace AsterGraph.Avalonia.Presentation;
 
@@ -10,9 +10,9 @@ namespace AsterGraph.Avalonia.Presentation;
 public sealed class DefaultGraphMiniMapPresenter : IGraphMiniMapPresenter
 {
     /// <inheritdoc />
-    public Control Create(GraphEditorViewModel? editor)
+    public Control Create(IGraphEditorSession? session)
         => new GraphMiniMap
         {
-            ViewModel = editor,
+            Session = session,
         };
 }
