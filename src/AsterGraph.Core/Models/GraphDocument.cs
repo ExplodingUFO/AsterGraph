@@ -298,10 +298,17 @@ public sealed record GraphDocument
             connection.Label,
             connection.AccentHex,
             connection.ConversionId,
-            connection.Presentation is null ? null : new GraphEdgePresentation(connection.Presentation.NoteText))
+            connection.Presentation is null ? null : CloneEdgePresentation(connection.Presentation))
         {
             TargetKind = connection.TargetKind,
         };
+
+    private static GraphEdgePresentation CloneEdgePresentation(GraphEdgePresentation presentation)
+        => new(
+            presentation.NoteText,
+            presentation.Route is null
+                ? null
+                : new GraphConnectionRoute(presentation.Route.Vertices));
 
     private static List<GraphNodeGroup> CloneGroups(IReadOnlyList<GraphNodeGroup> groups)
         => groups

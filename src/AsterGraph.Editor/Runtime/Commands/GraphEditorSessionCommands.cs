@@ -445,6 +445,45 @@ public sealed partial class GraphEditorSession
         return edited;
     }
 
+    public bool TryInsertConnectionRouteVertex(string connectionId, int vertexIndex, GraphPoint position, bool updateStatus = true)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(connectionId);
+
+        var edited = _host.TryInsertConnectionRouteVertex(connectionId, vertexIndex, position, updateStatus);
+        if (edited)
+        {
+            PublishCommandExecuted("connections.route-vertex.insert");
+        }
+
+        return edited;
+    }
+
+    public bool TryMoveConnectionRouteVertex(string connectionId, int vertexIndex, GraphPoint position, bool updateStatus = true)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(connectionId);
+
+        var edited = _host.TryMoveConnectionRouteVertex(connectionId, vertexIndex, position, updateStatus);
+        if (edited)
+        {
+            PublishCommandExecuted("connections.route-vertex.move");
+        }
+
+        return edited;
+    }
+
+    public bool TryRemoveConnectionRouteVertex(string connectionId, int vertexIndex, bool updateStatus = true)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(connectionId);
+
+        var edited = _host.TryRemoveConnectionRouteVertex(connectionId, vertexIndex, updateStatus);
+        if (edited)
+        {
+            PublishCommandExecuted("connections.route-vertex.remove");
+        }
+
+        return edited;
+    }
+
     public bool TrySetNodeParameterValue(string nodeId, string parameterKey, object? value)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(nodeId);

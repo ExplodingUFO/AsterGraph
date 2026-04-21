@@ -377,6 +377,38 @@ public interface IGraphEditorCommands
         => throw new NotSupportedException();
 
     /// <summary>
+    /// Attempts to insert one persisted route vertex before the requested segment.
+    /// </summary>
+    /// <param name="connectionId">Stable connection identifier.</param>
+    /// <param name="vertexIndex">Zero-based insertion index inside the route vertex list.</param>
+    /// <param name="position">World-space bend-point position.</param>
+    /// <param name="updateStatus">Whether to update status text for no-op or success cases.</param>
+    /// <returns><see langword="true"/> when the route changes.</returns>
+    bool TryInsertConnectionRouteVertex(string connectionId, int vertexIndex, GraphPoint position, bool updateStatus = true)
+        => throw new NotSupportedException();
+
+    /// <summary>
+    /// Attempts to move one persisted route vertex.
+    /// </summary>
+    /// <param name="connectionId">Stable connection identifier.</param>
+    /// <param name="vertexIndex">Zero-based vertex index.</param>
+    /// <param name="position">New world-space bend-point position.</param>
+    /// <param name="updateStatus">Whether to update status text for no-op or success cases.</param>
+    /// <returns><see langword="true"/> when the route changes.</returns>
+    bool TryMoveConnectionRouteVertex(string connectionId, int vertexIndex, GraphPoint position, bool updateStatus = true)
+        => throw new NotSupportedException();
+
+    /// <summary>
+    /// Attempts to remove one persisted route vertex.
+    /// </summary>
+    /// <param name="connectionId">Stable connection identifier.</param>
+    /// <param name="vertexIndex">Zero-based vertex index.</param>
+    /// <param name="updateStatus">Whether to update status text for no-op or success cases.</param>
+    /// <returns><see langword="true"/> when the route changes.</returns>
+    bool TryRemoveConnectionRouteVertex(string connectionId, int vertexIndex, bool updateStatus = true)
+        => throw new NotSupportedException();
+
+    /// <summary>
     /// 断开指定端口上的全部连线。
     /// </summary>
     /// <param name="nodeId">节点标识。</param>

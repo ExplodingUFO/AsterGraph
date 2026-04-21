@@ -1,10 +1,12 @@
 using System;
+using System.Globalization;
 using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
 using Avalonia.Media;
 using AsterGraph.Core.Models;
+using AsterGraph.Editor.Geometry;
 using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.ViewModels;
 
@@ -113,6 +115,11 @@ public partial class GraphEditorView
                 || string.Equals(connection.TargetNodeId, selectedNode.Id, StringComparison.Ordinal))
             .OrderBy(connection => connection.Id, StringComparer.Ordinal)
             .ToList();
+        var documentConnectionsById = Editor.Session.Queries.CreateDocumentSnapshot()
+            .Connections
+            .ToDictionary(connection => connection.Id, StringComparer.Ordinal);
+        var geometryByConnectionId = Editor.Session.Queries.GetConnectionGeometrySnapshots()
+            .ToDictionary(geometry => geometry.ConnectionId, StringComparer.Ordinal);
 
         if (connections.Count == 0)
         {
@@ -121,11 +128,16 @@ public partial class GraphEditorView
 
         commandDescriptors.TryGetValue("connections.label.set", out var labelDescriptor);
         commandDescriptors.TryGetValue("connections.note.set", out var noteDescriptor);
+        commandDescriptors.TryGetValue("connections.route-vertex.insert", out var insertRouteDescriptor);
+        commandDescriptors.TryGetValue("connections.route-vertex.move", out var moveRouteDescriptor);
+        commandDescriptors.TryGetValue("connections.route-vertex.remove", out var removeRouteDescriptor);
         commandDescriptors.TryGetValue("connections.reconnect", out var reconnectDescriptor);
         commandDescriptors.TryGetValue("connections.disconnect", out var disconnectDescriptor);
 
         foreach (var connection in connections)
         {
+            documentConnectionsById.TryGetValue(connection.Id, out var modelConnection);
+            geometryByConnectionId.TryGetValue(connection.Id, out var geometry);
             var labelEditor = new TextBox
             {
                 Name = $"PART_ConnectionToolLabelEditor_{connection.Id}",
@@ -197,11 +209,150 @@ public partial class GraphEditorView
                         labelEditor,
                         noteEditor,
                         actionBar,
+                        CreateConnectionRouteSection(
+                            connection.Id,
+                            modelConnection?.Presentation?.Route ?? GraphConnectionRoute.Empty,
+                            geometry,
+                            insertRouteDescriptor?.CanExecute ?? true,
+                            moveRouteDescriptor?.CanExecute ?? true,
+                            removeRouteDescriptor?.CanExecute ?? true),
                     },
                 },
             };
             _connectionToolList.Children.Add(card);
         }
+    }
+
+    private Control CreateConnectionRouteSection(
+        string connectionId,
+        GraphConnectionRoute route,
+        GraphEditorConnectionGeometrySnapshot? geometry,
+        bool canInsert,
+        bool canMove,
+        bool canRemove)
+    {
+        var container = new StackPanel
+        {
+            Spacing = 8,
+        };
+        container.Children.Add(new TextBlock
+        {
+            Text = "Route Vertices",
+            FontWeight = FontWeight.SemiBold,
+        });
+
+        if (geometry is not null)
+        {
+            var segmentBar = new WrapPanel
+            {
+                Orientation = Orientation.Horizontal,
+                ItemHeight = 36,
+                ItemWidth = double.NaN,
+            };
+            for (var segmentIndex = 0; segmentIndex <= route.Vertices.Count; segmentIndex++)
+            {
+                var capturedSegmentIndex = segmentIndex;
+                segmentBar.Children.Add(CreateToolActionButton(
+                    $"PART_ConnectionToolInsertRouteVertex_{connectionId}_{capturedSegmentIndex}",
+                    $"Insert Bend {capturedSegmentIndex + 1}",
+                    canInsert,
+                    () =>
+                    {
+                        if (Editor is null)
+                        {
+                            return false;
+                        }
+
+                        var midpoint = ConnectionPathBuilder.ResolveSegmentMidpoint(
+                            geometry.Source.Position,
+                            route,
+                            geometry.Target.Position,
+                            capturedSegmentIndex);
+                        return Editor.Session.Commands.TryInsertConnectionRouteVertex(
+                            connectionId,
+                            capturedSegmentIndex,
+                            midpoint,
+                            updateStatus: true);
+                    }));
+            }
+
+            container.Children.Add(segmentBar);
+        }
+
+        if (route.IsEmpty)
+        {
+            container.Children.Add(new TextBlock
+            {
+                Text = "No persisted route vertices yet.",
+                Opacity = 0.74d,
+            });
+            return container;
+        }
+
+        for (var vertexIndex = 0; vertexIndex < route.Vertices.Count; vertexIndex++)
+        {
+            var vertex = route.Vertices[vertexIndex];
+            var capturedVertexIndex = vertexIndex;
+            var xEditor = new TextBox
+            {
+                Name = $"PART_ConnectionToolRouteVertexXEditor_{connectionId}_{capturedVertexIndex}",
+                Text = vertex.X.ToString(CultureInfo.InvariantCulture),
+                Watermark = "X",
+            };
+            xEditor.Classes.Add("astergraph-input");
+
+            var yEditor = new TextBox
+            {
+                Name = $"PART_ConnectionToolRouteVertexYEditor_{connectionId}_{capturedVertexIndex}",
+                Text = vertex.Y.ToString(CultureInfo.InvariantCulture),
+                Watermark = "Y",
+            };
+            yEditor.Classes.Add("astergraph-input");
+
+            var vertexActions = new WrapPanel
+            {
+                Orientation = Orientation.Horizontal,
+                ItemHeight = 36,
+                ItemWidth = double.NaN,
+            };
+            vertexActions.Children.Add(CreateToolActionButton(
+                $"PART_ConnectionToolApplyRouteVertex_{connectionId}_{capturedVertexIndex}",
+                "Apply Bend",
+                canMove,
+                () => TryApplyRouteVertexPosition(connectionId, capturedVertexIndex, xEditor.Text, yEditor.Text)));
+            vertexActions.Children.Add(CreateToolActionButton(
+                $"PART_ConnectionToolRemoveRouteVertex_{connectionId}_{capturedVertexIndex}",
+                "Remove Bend",
+                canRemove,
+                () => Editor is not null
+                    && Editor.Session.Commands.TryRemoveConnectionRouteVertex(
+                        connectionId,
+                        capturedVertexIndex,
+                        updateStatus: true)));
+
+            container.Children.Add(new Border
+            {
+                BorderThickness = new Thickness(1),
+                CornerRadius = new CornerRadius(10),
+                Padding = new Thickness(10),
+                Child = new StackPanel
+                {
+                    Spacing = 8,
+                    Children =
+                    {
+                        new TextBlock
+                        {
+                            Text = $"Vertex {capturedVertexIndex + 1}",
+                        },
+                        xEditor,
+                        yEditor,
+                        vertexActions,
+                    },
+                },
+            });
+        }
+
+        return container;
     }
 
     private Button CreateToolActionButton(string name, string content, bool isEnabled, Func<bool> execute)
@@ -219,6 +370,22 @@ public partial class GraphEditorView
             args.Handled = true;
         };
         return button;
+    }
+
+    private bool TryApplyRouteVertexPosition(string connectionId, int vertexIndex, string? rawX, string? rawY)
+    {
+        if (Editor is null
+            || !double.TryParse(rawX, NumberStyles.Float, CultureInfo.InvariantCulture, out var x)
+            || !double.TryParse(rawY, NumberStyles.Float, CultureInfo.InvariantCulture, out var y))
+        {
+            return false;
+        }
+
+        return Editor.Session.Commands.TryMoveConnectionRouteVertex(
+            connectionId,
+            vertexIndex,
+            new GraphPoint(x, y),
+            updateStatus: true);
     }
 
     private string CreateConnectionToolTitle(NodeViewModel selectedNode, ConnectionViewModel connection)

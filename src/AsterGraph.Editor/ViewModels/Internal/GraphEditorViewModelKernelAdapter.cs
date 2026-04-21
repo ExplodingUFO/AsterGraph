@@ -172,6 +172,15 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
     public bool TrySetConnectionNoteText(string connectionId, string? noteText, bool updateStatus)
         => _kernel.TrySetConnectionNoteText(connectionId, noteText, updateStatus);
 
+    public bool TryInsertConnectionRouteVertex(string connectionId, int vertexIndex, GraphPoint position, bool updateStatus)
+        => _kernel.TryInsertConnectionRouteVertex(connectionId, vertexIndex, position, updateStatus);
+
+    public bool TryMoveConnectionRouteVertex(string connectionId, int vertexIndex, GraphPoint position, bool updateStatus)
+        => _kernel.TryMoveConnectionRouteVertex(connectionId, vertexIndex, position, updateStatus);
+
+    public bool TryRemoveConnectionRouteVertex(string connectionId, int vertexIndex, bool updateStatus)
+        => _kernel.TryRemoveConnectionRouteVertex(connectionId, vertexIndex, updateStatus);
+
     public void BreakConnectionsForPort(string nodeId, string portId)
         => _kernel.BreakConnectionsForPort(nodeId, portId);
 

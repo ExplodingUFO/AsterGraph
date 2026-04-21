@@ -196,9 +196,7 @@ internal sealed class GraphEditorKernelDocumentMutator
 
                 updatedConnection = connection with
                 {
-                    Presentation = normalizedNoteText is null
-                        ? null
-                        : new GraphEdgePresentation(normalizedNoteText),
+                    Presentation = CreateEdgePresentation(normalizedNoteText, connection.Presentation?.Route),
                 };
                 return updatedConnection;
             })
@@ -245,6 +243,131 @@ internal sealed class GraphEditorKernelDocumentMutator
         return updatedConnection is null
             ? GraphEditorKernelConnectionLabelMutationResult.NotFound(document)
             : new GraphEditorKernelConnectionLabelMutationResult(
+                document with { Connections = updatedConnections },
+                updatedConnection);
+    }
+
+    public GraphEditorKernelConnectionRouteMutationResult InsertConnectionRouteVertex(
+        GraphDocument document,
+        string connectionId,
+        int vertexIndex,
+        GraphPoint position)
+    {
+        ArgumentNullException.ThrowIfNull(document);
+        ArgumentException.ThrowIfNullOrWhiteSpace(connectionId);
+
+        GraphConnection? updatedConnection = null;
+        var updatedConnections = document.Connections
+            .Select(connection =>
+            {
+                if (!string.Equals(connection.Id, connectionId, StringComparison.Ordinal))
+                {
+                    return connection;
+                }
+
+                var vertices = connection.Presentation?.Route?.Vertices.ToList() ?? [];
+                if (vertexIndex < 0 || vertexIndex > vertices.Count)
+                {
+                    return connection;
+                }
+
+                vertices.Insert(vertexIndex, position);
+                updatedConnection = connection with
+                {
+                    Presentation = CreateEdgePresentation(
+                        connection.Presentation?.NoteText,
+                        new GraphConnectionRoute(vertices)),
+                };
+                return updatedConnection;
+            })
+            .ToList();
+
+        return updatedConnection is null
+            ? GraphEditorKernelConnectionRouteMutationResult.NotFound(document)
+            : new GraphEditorKernelConnectionRouteMutationResult(
+                document with { Connections = updatedConnections },
+                updatedConnection);
+    }
+
+    public GraphEditorKernelConnectionRouteMutationResult MoveConnectionRouteVertex(
+        GraphDocument document,
+        string connectionId,
+        int vertexIndex,
+        GraphPoint position)
+    {
+        ArgumentNullException.ThrowIfNull(document);
+        ArgumentException.ThrowIfNullOrWhiteSpace(connectionId);
+
+        GraphConnection? updatedConnection = null;
+        var updatedConnections = document.Connections
+            .Select(connection =>
+            {
+                if (!string.Equals(connection.Id, connectionId, StringComparison.Ordinal))
+                {
+                    return connection;
+                }
+
+                var vertices = connection.Presentation?.Route?.Vertices.ToList() ?? [];
+                if (vertexIndex < 0 || vertexIndex >= vertices.Count || vertices[vertexIndex] == position)
+                {
+                    return connection;
+                }
+
+                vertices[vertexIndex] = position;
+                updatedConnection = connection with
+                {
+                    Presentation = CreateEdgePresentation(
+                        connection.Presentation?.NoteText,
+                        new GraphConnectionRoute(vertices)),
+                };
+                return updatedConnection;
+            })
+            .ToList();
+
+        return updatedConnection is null
+            ? GraphEditorKernelConnectionRouteMutationResult.NotFound(document)
+            : new GraphEditorKernelConnectionRouteMutationResult(
+                document with { Connections = updatedConnections },
+                updatedConnection);
+    }
+
+    public GraphEditorKernelConnectionRouteMutationResult RemoveConnectionRouteVertex(
+        GraphDocument document,
+        string connectionId,
+        int vertexIndex)
+    {
+        ArgumentNullException.ThrowIfNull(document);
+        ArgumentException.ThrowIfNullOrWhiteSpace(connectionId);
+
+        GraphConnection? updatedConnection = null;
+        var updatedConnections = document.Connections
+            .Select(connection =>
+            {
+                if (!string.Equals(connection.Id, connectionId, StringComparison.Ordinal))
+                {
+                    return connection;
+                }
+
+                var vertices = connection.Presentation?.Route?.Vertices.ToList() ?? [];
+                if (vertexIndex < 0 || vertexIndex >= vertices.Count)
+                {
+                    return connection;
+                }
+
+                vertices.RemoveAt(vertexIndex);
+                updatedConnection = connection with
+                {
+                    Presentation = CreateEdgePresentation(
+                        connection.Presentation?.NoteText,
+                        vertices.Count == 0 ? null : new GraphConnectionRoute(vertices)),
+                };
+                return updatedConnection;
+            })
+            .ToList();
+
+        return updatedConnection is null
+            ? GraphEditorKernelConnectionRouteMutationResult.NotFound(document)
+            : new GraphEditorKernelConnectionRouteMutationResult(
                 document with { Connections = updatedConnections },
                 updatedConnection);
     }
@@ -1140,6 +1263,19 @@ internal sealed class GraphEditorKernelDocumentMutator
                 node.Position,
                 node.Size),
             StringComparer.Ordinal);
+
+    private static GraphEdgePresentation? CreateEdgePresentation(string? noteText, GraphConnectionRoute? route)
+    {
+        var normalizedNoteText = string.IsNullOrWhiteSpace(noteText)
+            ? null
+            : noteText.Trim();
+        var normalizedRoute = route is null || route.IsEmpty
+            ? null
+            : new GraphConnectionRoute(route.Vertices);
+        return normalizedNoteText is null && normalizedRoute is null
+            ? null
+            : new GraphEdgePresentation(normalizedNoteText, normalizedRoute);
+    }
 }
 
 internal sealed record GraphEditorKernelDeleteNodeResult(
@@ -1228,6 +1364,14 @@ internal sealed record GraphEditorKernelConnectionLabelMutationResult(
     GraphConnection? Connection)
 {
     public static GraphEditorKernelConnectionLabelMutationResult NotFound(GraphDocument document)
+        => new(document, null);
+}
+
+internal sealed record GraphEditorKernelConnectionRouteMutationResult(
+    GraphDocument Document,
+    GraphConnection? Connection)
+{
+    public static GraphEditorKernelConnectionRouteMutationResult NotFound(GraphDocument document)
         => new(document, null);
 }
 

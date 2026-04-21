@@ -65,7 +65,9 @@ internal sealed class NodeCanvasConnectionSceneRenderer
 
             DrawConnection(
                 context,
-                geometry.Curve,
+                geometry.Source.Position,
+                geometry.Route,
+                geometry.Target.Position,
                 connection,
                 sourcePort);
         }
@@ -83,7 +85,9 @@ internal sealed class NodeCanvasConnectionSceneRenderer
 
             DrawConnection(
                 context,
-                ConnectionPathBuilder.Build(source, end),
+                source,
+                GraphConnectionRoute.Empty,
+                end,
                 new ConnectionViewModel(
                     "pending",
                     context.ViewModel.PendingSourceNode.Id,
@@ -193,7 +197,9 @@ internal sealed class NodeCanvasConnectionSceneRenderer
 
     private void DrawConnection(
         NodeCanvasConnectionSceneContext context,
-        BezierConnection curve,
+        GraphPoint start,
+        GraphConnectionRoute route,
+        GraphPoint end,
         ConnectionViewModel connection,
         PortViewModel? sourcePort = null,
         bool isPreview = false)
@@ -206,13 +212,10 @@ internal sealed class NodeCanvasConnectionSceneRenderer
         var connectionStyle = context.ResolveConnectionStyle(connection);
         var focusKind = context.ViewModel.InteractionFocus.GetConnectionFocusKind(connection);
         var hasInspectionFocus = context.ViewModel.InteractionFocus.HasInspection;
+        var segments = ConnectionPathBuilder.BuildRoute(start, route, end);
         var path = new global::Avalonia.Controls.Shapes.Path
         {
-            Data = Geometry.Parse(
-                $"M {curve.Start.X:0.##},{curve.Start.Y:0.##} " +
-                $"C {curve.Control1.X:0.##},{curve.Control1.Y:0.##} " +
-                $"{curve.Control2.X:0.##},{curve.Control2.Y:0.##} " +
-                $"{curve.End.X:0.##},{curve.End.Y:0.##}"),
+            Data = CreateRouteGeometry(start, segments),
             Stroke = BrushFactory.Solid(
                 connection.AccentHex,
                 isPreview
@@ -230,7 +233,8 @@ internal sealed class NodeCanvasConnectionSceneRenderer
             return;
         }
 
-        var midpoint = new Point((curve.Start.X + curve.End.X) / 2, (curve.Start.Y + curve.End.Y) / 2);
+        var labelAnchor = ConnectionPathBuilder.ResolveSegmentMidpoint(start, route, end, route.Vertices.Count / 2);
+        var midpoint = new Point(labelAnchor.X, labelAnchor.Y);
         var typeToken = sourcePort is null ? string.Empty : GraphTypeCueFormatter.FormatPortToken(sourcePort);
         var displayText = GetDisplayedChipText(connection, connection.NoteText, typeToken, focusKind);
 
@@ -363,6 +367,17 @@ internal sealed class NodeCanvasConnectionSceneRenderer
         Canvas.SetLeft(chip, midpoint.X + connectionStyle.LabelOffsetX);
         Canvas.SetTop(chip, midpoint.Y + connectionStyle.LabelOffsetY);
         context.ConnectionLayer.Children.Add(chip);
+    }
+
+    private static Geometry CreateRouteGeometry(GraphPoint start, IReadOnlyList<BezierConnection> segments)
+    {
+        var commands = string.Join(
+            " ",
+            segments.Select(segment =>
+                $"C {segment.Control1.X:0.##},{segment.Control1.Y:0.##} " +
+                $"{segment.Control2.X:0.##},{segment.Control2.Y:0.##} " +
+                $"{segment.End.X:0.##},{segment.End.Y:0.##}"));
+        return Geometry.Parse($"M {start.X:0.##},{start.Y:0.##} {commands}");
     }
 
     private static double ResolveStrokeOpacity(

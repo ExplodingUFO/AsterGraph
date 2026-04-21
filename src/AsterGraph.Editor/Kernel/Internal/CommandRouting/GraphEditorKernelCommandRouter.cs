@@ -119,6 +119,12 @@ internal interface IGraphEditorKernelCommandRouterHost
 
     bool TrySetConnectionNoteText(string connectionId, string? noteText, bool updateStatus);
 
+    bool TryInsertConnectionRouteVertex(string connectionId, int vertexIndex, GraphPoint position, bool updateStatus);
+
+    bool TryMoveConnectionRouteVertex(string connectionId, int vertexIndex, GraphPoint position, bool updateStatus);
+
+    bool TryRemoveConnectionRouteVertex(string connectionId, int vertexIndex, bool updateStatus);
+
     void DisconnectConnection(string connectionId);
 
     void BreakConnectionsForPort(string nodeId, string portId);
@@ -333,6 +339,27 @@ internal sealed class GraphEditorKernelCommandRouter
                     || _host.BehaviorOptions.Commands.Connections.AllowDisconnect)),
             GraphEditorCommandDescriptorCatalog.Create(
                 "connections.note.set",
+                GraphEditorCommandSourceKind.Kernel,
+                _host.Document.Connections.Count > 0
+                && (_host.BehaviorOptions.Commands.Connections.AllowCreate
+                    || _host.BehaviorOptions.Commands.Connections.AllowDelete
+                    || _host.BehaviorOptions.Commands.Connections.AllowDisconnect)),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "connections.route-vertex.insert",
+                GraphEditorCommandSourceKind.Kernel,
+                _host.Document.Connections.Count > 0
+                && (_host.BehaviorOptions.Commands.Connections.AllowCreate
+                    || _host.BehaviorOptions.Commands.Connections.AllowDelete
+                    || _host.BehaviorOptions.Commands.Connections.AllowDisconnect)),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "connections.route-vertex.move",
+                GraphEditorCommandSourceKind.Kernel,
+                _host.Document.Connections.Count > 0
+                && (_host.BehaviorOptions.Commands.Connections.AllowCreate
+                    || _host.BehaviorOptions.Commands.Connections.AllowDelete
+                    || _host.BehaviorOptions.Commands.Connections.AllowDisconnect)),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "connections.route-vertex.remove",
                 GraphEditorCommandSourceKind.Kernel,
                 _host.Document.Connections.Count > 0
                 && (_host.BehaviorOptions.Commands.Connections.AllowCreate
@@ -729,6 +756,48 @@ internal sealed class GraphEditorKernelCommandRouter
                     noteText,
                     ResolveOptionalUpdateStatus(command, "updateStatus"));
 
+            case "connections.route-vertex.insert":
+                if (!TryGetRequiredArgument(command, "connectionId", out var insertConnectionId)
+                    || !TryGetIntArgument(command, "vertexIndex", out var insertVertexIndex)
+                    || !TryGetDoubleArgument(command, "worldX", out var insertWorldX)
+                    || !TryGetDoubleArgument(command, "worldY", out var insertWorldY))
+                {
+                    return false;
+                }
+
+                return _host.TryInsertConnectionRouteVertex(
+                    insertConnectionId,
+                    insertVertexIndex,
+                    new GraphPoint(insertWorldX, insertWorldY),
+                    ResolveOptionalUpdateStatus(command, "updateStatus"));
+
+            case "connections.route-vertex.move":
+                if (!TryGetRequiredArgument(command, "connectionId", out var moveConnectionId)
+                    || !TryGetIntArgument(command, "vertexIndex", out var moveVertexIndex)
+                    || !TryGetDoubleArgument(command, "worldX", out var moveWorldX)
+                    || !TryGetDoubleArgument(command, "worldY", out var moveWorldY))
+                {
+                    return false;
+                }
+
+                return _host.TryMoveConnectionRouteVertex(
+                    moveConnectionId,
+                    moveVertexIndex,
+                    new GraphPoint(moveWorldX, moveWorldY),
+                    ResolveOptionalUpdateStatus(command, "updateStatus"));
+
+            case "connections.route-vertex.remove":
+                if (!TryGetRequiredArgument(command, "connectionId", out var removeConnectionId)
+                    || !TryGetIntArgument(command, "vertexIndex", out var removeVertexIndex))
+                {
+                    return false;
+                }
+
+                return _host.TryRemoveConnectionRouteVertex(
+                    removeConnectionId,
+                    removeVertexIndex,
+                    ResolveOptionalUpdateStatus(command, "updateStatus"));
+
             case "connections.reconnect":
                 if (!TryGetRequiredArgument(command, "connectionId", out var reconnectConnectionId))
                 {
@@ -871,6 +940,21 @@ internal sealed class GraphEditorKernelCommandRouter
     {
         if (!command.TryGetArgument(name, out var rawValue)
             || !double.TryParse(rawValue, NumberStyles.Float, CultureInfo.InvariantCulture, out value))
+        {
+            value = default;
+            return false;
+        }
+
+        return true;
+    }
+
+    private static bool TryGetIntArgument(
+        GraphEditorCommandInvocationSnapshot command,
+        string name,
+        out int value)
+    {
+        if (!command.TryGetArgument(name, out var rawValue)
+            || !int.TryParse(rawValue, NumberStyles.Integer, CultureInfo.InvariantCulture, out value))
         {
             value = default;
             return false;

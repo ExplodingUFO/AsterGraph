@@ -32,7 +32,7 @@ public sealed class GraphEditorConnectionGeometryContractsTests
         Assert.NotNull(typeof(GraphEditorConnectionGeometrySnapshot).GetProperty(nameof(GraphEditorConnectionGeometrySnapshot.ConnectionId)));
         Assert.NotNull(typeof(GraphEditorConnectionGeometrySnapshot).GetProperty(nameof(GraphEditorConnectionGeometrySnapshot.Source)));
         Assert.NotNull(typeof(GraphEditorConnectionGeometrySnapshot).GetProperty(nameof(GraphEditorConnectionGeometrySnapshot.Target)));
-        Assert.NotNull(typeof(GraphEditorConnectionGeometrySnapshot).GetProperty(nameof(GraphEditorConnectionGeometrySnapshot.Curve)));
+        Assert.NotNull(typeof(GraphEditorConnectionGeometrySnapshot).GetProperty(nameof(GraphEditorConnectionGeometrySnapshot.Route)));
         Assert.NotNull(typeof(GraphEditorConnectionEndpointGeometrySnapshot).GetProperty(nameof(GraphEditorConnectionEndpointGeometrySnapshot.NodeId)));
         Assert.NotNull(typeof(GraphEditorConnectionEndpointGeometrySnapshot).GetProperty(nameof(GraphEditorConnectionEndpointGeometrySnapshot.EndpointId)));
         Assert.NotNull(typeof(GraphEditorConnectionEndpointGeometrySnapshot).GetProperty(nameof(GraphEditorConnectionEndpointGeometrySnapshot.EndpointKind)));
@@ -69,7 +69,7 @@ public sealed class GraphEditorConnectionGeometryContractsTests
         Assert.Equal(TargetPortId, geometry.Target.EndpointId);
         Assert.Equal(GraphConnectionTargetKind.Port, geometry.Target.EndpointKind);
         Assert.Equal(expectedTarget, geometry.Target.Position);
-        Assert.Equal(ConnectionPathBuilder.Build(expectedSource, expectedTarget), geometry.Curve);
+        Assert.Equal(GraphConnectionRoute.Empty, geometry.Route);
     }
 
     [Fact]
@@ -96,7 +96,28 @@ public sealed class GraphEditorConnectionGeometryContractsTests
         Assert.Equal(TargetParameterKey, geometry.Target.EndpointId);
         Assert.Equal(expectedSource, geometry.Source.Position);
         Assert.Equal(expectedTarget, geometry.Target.Position);
-        Assert.Equal(ConnectionPathBuilder.Build(expectedSource, expectedTarget), geometry.Curve);
+        Assert.Equal(GraphConnectionRoute.Empty, geometry.Route);
+    }
+
+    [Fact]
+    public void SessionQueries_GetConnectionGeometrySnapshots_ProjectPersistedRouteVertices_IntoSceneContracts()
+    {
+        var session = AsterGraphEditorFactory.CreateSession(CreateRoutedOptions());
+
+        var geometry = Assert.Single(session.Queries.GetConnectionGeometrySnapshots());
+        var sceneGeometry = Assert.Single(session.Queries.GetSceneSnapshot().ConnectionGeometries);
+
+        Assert.Equal(sceneGeometry, geometry);
+        Assert.Equal(
+            new GraphConnectionRoute(
+            [
+                new GraphPoint(360d, 120d),
+                new GraphPoint(420d, 300d),
+            ]),
+            geometry.Route);
+        Assert.Equal(
+            [new GraphPoint(360d, 120d), new GraphPoint(420d, 300d)],
+            geometry.Route.Vertices);
     }
 
     [Fact]
@@ -137,7 +158,37 @@ public sealed class GraphEditorConnectionGeometryContractsTests
         };
     }
 
-    private static GraphDocument CreateDocument(NodeDefinitionId definitionId)
+    private static AsterGraphEditorOptions CreateRoutedOptions()
+    {
+        var definitionId = new NodeDefinitionId("tests.geometry.routed");
+        return new AsterGraphEditorOptions
+        {
+            Document = CreateDocument(
+                definitionId,
+                [
+                    new GraphConnection(
+                        "connection-route-001",
+                        SourceNodeId,
+                        SourcePortId,
+                        TargetNodeId,
+                        TargetPortId,
+                        "Routed Flow",
+                        "#6AD5C4",
+                        Presentation: new GraphEdgePresentation(
+                            Route: new GraphConnectionRoute(
+                            [
+                                new GraphPoint(360d, 120d),
+                                new GraphPoint(420d, 300d),
+                            ]))),
+                ]),
+            NodeCatalog = CreateCatalog(definitionId),
+            CompatibilityService = new DefaultPortCompatibilityService(),
+        };
+    }
+
+    private static GraphDocument CreateDocument(
+        NodeDefinitionId definitionId,
+        IReadOnlyList<GraphConnection>? connections = null)
         => new(
             "Geometry Graph",
             "Runtime connection geometry coverage.",
@@ -167,7 +218,7 @@ public sealed class GraphEditorConnectionGeometryContractsTests
                     "#F3B36B",
                     definitionId),
             ],
-            []);
+            connections ?? []);
 
     private static NodeCatalog CreateCatalog(NodeDefinitionId definitionId)
     {
