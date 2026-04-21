@@ -285,6 +285,10 @@ public sealed class GraphEditorSessionTests
 
         AssertMethod(queriesType, nameof(IGraphEditorQueries.GetRegisteredNodeDefinitions));
         Assert.Equal(typeof(IReadOnlyList<INodeDefinition>), queriesType.GetMethod(nameof(IGraphEditorQueries.GetRegisteredNodeDefinitions))!.ReturnType);
+        AssertMethod(queriesType, nameof(IGraphEditorQueries.GetStencilItemSnapshots));
+        Assert.Equal(
+            typeof(IReadOnlyList<GraphEditorStencilItemSnapshot>),
+            queriesType.GetMethod(nameof(IGraphEditorQueries.GetStencilItemSnapshots))!.ReturnType);
 
         AssertMethod(queriesType, nameof(IGraphEditorQueries.GetSharedSelectionDefinition));
         Assert.Equal(typeof(INodeDefinition), queriesType.GetMethod(nameof(IGraphEditorQueries.GetSharedSelectionDefinition))!.ReturnType);
@@ -740,6 +744,7 @@ public sealed class GraphEditorSessionTests
         Assert.True(descriptors["service.clipboard-payload-serializer"].IsAvailable);
         Assert.True(descriptors["query.compatible-port-target-snapshot"].IsAvailable);
         Assert.True(descriptors["query.compatible-target-mvvm-shim"].IsAvailable);
+        Assert.True(descriptors["query.stencil-item-snapshots"].IsAvailable);
         Assert.True(descriptors["integration.plugin-loader"].IsAvailable);
         Assert.True(descriptors["integration.context-menu-augmentor"].IsAvailable);
         Assert.True(descriptors["integration.node-presentation-provider"].IsAvailable);

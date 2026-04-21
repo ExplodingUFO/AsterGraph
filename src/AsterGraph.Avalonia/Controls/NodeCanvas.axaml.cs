@@ -528,7 +528,7 @@ public partial class NodeCanvas : UserControl
             : new NodeCanvasContextMenuSnapshot(
                 ViewModel.SelectedNode?.Id,
                 ViewModel.SelectedNodes.Select(selected => selected.Id).ToList(),
-                ViewModel.NodeTemplates.Select(template => template.Definition).ToList());
+                ViewModel.Session.Queries.GetRegisteredNodeDefinitions());
 
     private void ApplySelectionAdornerStyle()
         => _overlayCoordinator.ApplySelectionAdornerStyle();

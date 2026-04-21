@@ -1,7 +1,6 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:controls="using:AsterGraph.Avalonia.Controls"
-             xmlns:viewModels="using:AsterGraph.Editor.ViewModels"
              x:Class="AsterGraph.Avalonia.Controls.GraphEditorView"
              x:Name="Root"
              Focusable="True">
@@ -139,47 +138,15 @@
                        FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                        TextWrapping="Wrap"
                        Foreground="{DynamicResource AsterGraph.BodyBrush}" />
+            <TextBlock Text="这里只展示可插入节点；命令面板负责动作，片段库负责复用片段。"
+                       FontSize="11"
+                       TextWrapping="Wrap"
+                       Foreground="{DynamicResource AsterGraph.HighlightBrush}" />
           </StackPanel>
 
           <ScrollViewer Grid.Row="1"
                         HorizontalScrollBarVisibility="Disabled">
-            <ItemsControl ItemsSource="{Binding NodeTemplates}">
-              <ItemsControl.ItemTemplate>
-                <DataTemplate x:DataType="viewModels:NodeTemplateViewModel">
-                  <Button Classes="astergraph-template-card"
-                          Margin="0,0,0,12"
-                          Command="{Binding Editor.AddNodeCommand, ElementName=Root}"
-                          CommandParameter="{Binding}">
-                    <StackPanel Spacing="8">
-                      <StackPanel Spacing="2">
-                        <TextBlock Text="{Binding Category}"
-                                   FontSize="10"
-                                   FontWeight="Bold"
-                                   Foreground="{DynamicResource AsterGraph.EyebrowBrush}" />
-                        <TextBlock Text="{Binding Title}"
-                                   FontSize="16"
-                                   FontWeight="SemiBold"
-                                   Foreground="{DynamicResource AsterGraph.HeadlineBrush}" />
-                        <TextBlock Text="{Binding Subtitle}"
-                                   FontSize="11"
-                                   Foreground="{DynamicResource AsterGraph.HighlightBrush}" />
-                      </StackPanel>
-                      <TextBlock Text="{Binding Description}"
-                                 FontSize="12"
-                                 TextWrapping="Wrap"
-                                 Foreground="{DynamicResource AsterGraph.BodyBrush}" />
-                      <Border Classes="astergraph-pill"
-                              HorizontalAlignment="Left">
-                        <TextBlock Text="{Binding PortSummary}"
-                                   FontSize="10"
-                                   FontWeight="SemiBold"
-                                   Foreground="{DynamicResource AsterGraph.HeadlineBrush}" />
-                      </Border>
-                    </StackPanel>
-                  </Button>
-                </DataTemplate>
-              </ItemsControl.ItemTemplate>
-            </ItemsControl>
+            <StackPanel x:Name="PART_StencilCardList" />
           </ScrollViewer>
         </Grid>
       </Border>

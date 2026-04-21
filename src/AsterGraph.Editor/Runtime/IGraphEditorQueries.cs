@@ -58,6 +58,13 @@ public interface IGraphEditorQueries
         => throw new NotSupportedException();
 
     /// <summary>
+    /// Gets canonical stencil item snapshots projected from the active node catalog.
+    /// </summary>
+    /// <returns>Stable read-only stencil item metadata suitable for host-side insertion UIs.</returns>
+    IReadOnlyList<GraphEditorStencilItemSnapshot> GetStencilItemSnapshots()
+        => throw new NotSupportedException();
+
+    /// <summary>
     /// Gets the shared definition for the current selection when every selected node resolves to the same catalog definition.
     /// </summary>
     /// <returns>The shared node definition, or <see langword="null"/> when the selection is empty or heterogeneous.</returns>

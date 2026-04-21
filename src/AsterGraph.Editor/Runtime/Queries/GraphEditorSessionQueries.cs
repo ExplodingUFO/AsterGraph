@@ -66,6 +66,7 @@ public sealed partial class GraphEditorSession
                 new GraphEditorFeatureDescriptorSnapshot("capability.viewport.center", "capability", capabilities.CanCenterViewport),
                 new GraphEditorFeatureDescriptorSnapshot("query.plugin-load-snapshots", "query", _descriptorSupport?.HasPluginLoader ?? false),
                 new GraphEditorFeatureDescriptorSnapshot("query.registered-node-definitions", "query", supportsDefinitionMetadata),
+                new GraphEditorFeatureDescriptorSnapshot("query.stencil-item-snapshots", "query", supportsDefinitionMetadata),
                 new GraphEditorFeatureDescriptorSnapshot("query.shared-selection-definition", "query", supportsDefinitionMetadata),
                 new GraphEditorFeatureDescriptorSnapshot("query.selected-node-parameter-snapshots", "query", supportsDefinitionMetadata),
                 new GraphEditorFeatureDescriptorSnapshot("surface.automation.runner", "surface", true),
@@ -98,6 +99,14 @@ public sealed partial class GraphEditorSession
         => _descriptorSupport?.Definitions
             .OrderBy(definition => definition.Category, StringComparer.Ordinal)
             .ThenBy(definition => definition.DisplayName, StringComparer.Ordinal)
+            .ToList()
+            ?? [];
+
+    public IReadOnlyList<GraphEditorStencilItemSnapshot> GetStencilItemSnapshots()
+        => _descriptorSupport?.Definitions
+            .Select(GraphEditorStencilItemSnapshot.Create)
+            .OrderBy(item => item.Category, StringComparer.Ordinal)
+            .ThenBy(item => item.Title, StringComparer.Ordinal)
             .ToList()
             ?? [];
 

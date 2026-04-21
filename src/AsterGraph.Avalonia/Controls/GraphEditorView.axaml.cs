@@ -5,6 +5,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
+using Avalonia.Styling;
 using Avalonia.VisualTree;
 using AsterGraph.Avalonia.Controls.Internal;
 using AsterGraph.Avalonia.Hosting;
@@ -119,6 +120,7 @@ public partial class GraphEditorView : UserControl
     private Border? _libraryChrome;
     private Border? _inspectorChrome;
     private Border? _statusChrome;
+    private StackPanel? _stencilCardList;
     private WrapPanel? _headerToolbar;
     private WrapPanel? _compositeWorkflowToolbar;
     private WrapPanel? _scopeBreadcrumbs;
@@ -322,6 +324,7 @@ public partial class GraphEditorView : UserControl
         _libraryChrome = this.FindControl<Border>("PART_LibraryChrome");
         _inspectorChrome = this.FindControl<Border>("PART_InspectorChrome");
         _statusChrome = this.FindControl<Border>("PART_StatusChrome");
+        _stencilCardList = this.FindControl<StackPanel>("PART_StencilCardList");
         _headerToolbar = this.FindControl<WrapPanel>("PART_HeaderToolbar");
         _compositeWorkflowToolbar = this.FindControl<WrapPanel>("PART_CompositeWorkflowToolbar");
         _scopeBreadcrumbs = this.FindControl<WrapPanel>("PART_ScopeBreadcrumbs");
@@ -446,6 +449,7 @@ public partial class GraphEditorView : UserControl
     private void RefreshCommandSurface()
     {
         var projection = CreateCommandSurfaceProjection();
+        BuildStencilLibrary();
         RefreshCommandPaletteButton(projection);
         BuildHeaderToolbar(projection);
         BuildCompositeWorkflowToolbar(projection);
@@ -455,6 +459,27 @@ public partial class GraphEditorView : UserControl
         if (Editor is null)
         {
             CloseCommandPalette();
+        }
+    }
+
+    private void BuildStencilLibrary()
+    {
+        if (_stencilCardList is null)
+        {
+            return;
+        }
+
+        _stencilCardList.Children.Clear();
+        if (Editor is null)
+        {
+            return;
+        }
+
+        var addNodeDescriptor = Editor.Session.Queries.GetCommandDescriptors()
+            .FirstOrDefault(descriptor => string.Equals(descriptor.Id, "nodes.add", StringComparison.Ordinal));
+        foreach (var stencilItem in Editor.Session.Queries.GetStencilItemSnapshots())
+        {
+            _stencilCardList.Children.Add(CreateStencilCard(stencilItem, addNodeDescriptor));
         }
     }
 
@@ -684,6 +709,88 @@ public partial class GraphEditorView : UserControl
                 FontSize = 14,
             },
         };
+
+    private Button CreateStencilCard(
+        GraphEditorStencilItemSnapshot stencilItem,
+        GraphEditorCommandDescriptorSnapshot? addNodeDescriptor)
+    {
+        var button = new Button
+        {
+            Name = $"PART_StencilCard_{stencilItem.Key}",
+            Margin = new Thickness(0, 0, 0, 12),
+            IsEnabled = addNodeDescriptor?.IsEnabled ?? false,
+            Content = new StackPanel
+            {
+                Spacing = 8,
+                Children =
+                {
+                    new StackPanel
+                    {
+                        Spacing = 2,
+                        Children =
+                        {
+                            new TextBlock
+                            {
+                                Text = stencilItem.Category,
+                                FontSize = 10,
+                                FontWeight = global::Avalonia.Media.FontWeight.Bold,
+                                Foreground = GetResourceBrush("AsterGraph.EyebrowBrush"),
+                            },
+                            new TextBlock
+                            {
+                                Text = stencilItem.Title,
+                                FontSize = 16,
+                                FontWeight = global::Avalonia.Media.FontWeight.SemiBold,
+                                Foreground = GetResourceBrush("AsterGraph.HeadlineBrush"),
+                            },
+                            new TextBlock
+                            {
+                                Text = stencilItem.Subtitle,
+                                FontSize = 11,
+                                Foreground = GetResourceBrush("AsterGraph.HighlightBrush"),
+                            },
+                        },
+                    },
+                    new TextBlock
+                    {
+                        Text = stencilItem.Description,
+                        FontSize = 12,
+                        TextWrapping = global::Avalonia.Media.TextWrapping.Wrap,
+                        Foreground = GetResourceBrush("AsterGraph.BodyBrush"),
+                    },
+                    new Border
+                    {
+                        Classes = { "astergraph-pill" },
+                        HorizontalAlignment = global::Avalonia.Layout.HorizontalAlignment.Left,
+                        Child = new TextBlock
+                        {
+                            Text = stencilItem.PortSummary,
+                            FontSize = 10,
+                            FontWeight = global::Avalonia.Media.FontWeight.SemiBold,
+                            Foreground = GetResourceBrush("AsterGraph.HeadlineBrush"),
+                        },
+                    },
+                },
+            },
+        };
+        button.Classes.Add("astergraph-template-card");
+        if (!string.IsNullOrWhiteSpace(addNodeDescriptor?.DisabledReason))
+        {
+            ToolTip.SetTip(button, addNodeDescriptor.DisabledReason);
+        }
+
+        button.Click += (_, _) =>
+        {
+            Editor?.Session.Commands.AddNode(stencilItem.DefinitionId);
+            RefreshCommandSurface();
+        };
+        return button;
+    }
+
+    private global::Avalonia.Media.IBrush? GetResourceBrush(string key)
+        => this.TryGetResource(key, ActualThemeVariant, out var resource)
+            ? resource as global::Avalonia.Media.IBrush
+            : null;
 
     private void ToggleCommandPalette()
     {

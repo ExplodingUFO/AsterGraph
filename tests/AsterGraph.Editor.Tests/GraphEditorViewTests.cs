@@ -341,6 +341,45 @@ public sealed class GraphEditorViewTests
     }
 
     [AvaloniaFact]
+    public void StencilLibrary_UsesSessionStencilItems_WhenRetainedTemplatesAreCleared()
+    {
+        var editor = CreateEditor();
+        editor.NodeTemplates.Clear();
+        var window = CreateWindow(new GraphEditorView
+        {
+            Editor = editor,
+        });
+        var view = (GraphEditorView)window.Content!;
+
+        var stencilCard = FindRequiredDescendant<Button>(view, "PART_StencilCard_tests-view-node");
+
+        Assert.True(stencilCard.IsEnabled);
+
+        stencilCard.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+
+        Assert.Equal(2, editor.Session.Queries.CreateDocumentSnapshot().Nodes.Count);
+    }
+
+    [AvaloniaFact]
+    public void NodeCanvasContextMenuSnapshot_UsesSessionDefinitions_WhenRetainedTemplatesAreCleared()
+    {
+        var editor = CreateEditor();
+        editor.NodeTemplates.Clear();
+        var window = CreateWindow(new GraphEditorView
+        {
+            Editor = editor,
+        });
+        var view = (GraphEditorView)window.Content!;
+        var canvas = FindRequiredControl<NodeCanvas>(view, "PART_NodeCanvas");
+
+        var snapshot = InvokeNodeCanvasMethod("CreateContextMenuSnapshot", canvas);
+        var definitions = Assert.IsAssignableFrom<IReadOnlyList<INodeDefinition>>(
+            snapshot.GetType().GetProperty("AvailableNodeDefinitions")!.GetValue(snapshot));
+
+        Assert.Contains(definitions, definition => definition.Id == new NodeDefinitionId("tests.view.node"));
+    }
+
+    [AvaloniaFact]
     public void CompositeWorkflowChrome_WrapSelectionActionCreatesCompositeShell()
     {
         var editor = CreateSelectionEditor();
@@ -427,6 +466,13 @@ public sealed class GraphEditorViewTests
             BindingFlags.Instance | BindingFlags.NonPublic);
         Assert.NotNull(handler);
         handler.Invoke(view, [view, args]);
+    }
+
+    private static object InvokeNodeCanvasMethod(string methodName, NodeCanvas canvas)
+    {
+        var method = typeof(NodeCanvas).GetMethod(methodName, BindingFlags.Instance | BindingFlags.NonPublic);
+        Assert.NotNull(method);
+        return method!.Invoke(canvas, [])!;
     }
 
     private static GraphEditorViewModel CreateEditor(IGraphContextMenuAugmentor? augmentor = null)

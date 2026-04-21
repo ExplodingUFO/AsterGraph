@@ -16,16 +16,14 @@ public sealed class NodeTemplateViewModel
     public NodeTemplateViewModel(INodeDefinition definition)
     {
         Definition = definition;
-        Key = definition.Id.Value.Replace(".", "-", StringComparison.Ordinal);
-        Title = definition.DisplayName;
-        Category = definition.Category;
-        Subtitle = definition.Subtitle;
-        Description = definition.Description ?? string.Empty;
-        var contentPlan = GraphEditorNodeSurfacePlanner.Create(definition);
-        Size = GraphEditorNodeSurfaceMetrics.NormalizePersistedSize(
-            new GraphSize(definition.DefaultWidth, definition.DefaultHeight),
-            GraphEditorNodeSurfaceMeasurer.Measure(contentPlan));
-        AccentHex = definition.AccentHex;
+        var snapshot = GraphEditorStencilItemSnapshot.Create(definition);
+        Key = snapshot.Key;
+        Title = snapshot.Title;
+        Category = snapshot.Category;
+        Subtitle = snapshot.Subtitle;
+        Description = snapshot.Description;
+        Size = snapshot.Size;
+        AccentHex = snapshot.AccentHex;
     }
 
     /// <summary>
