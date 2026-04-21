@@ -153,12 +153,43 @@ public sealed class GraphEditorTransactionTests
         Assert.True(capabilities.CanLoadWorkspace);
         Assert.True(capabilities.CanSetSelection);
         Assert.True(capabilities.CanMoveNodes);
+        Assert.False(capabilities.CanAlignSelection);
+        Assert.False(capabilities.CanDistributeSelection);
         Assert.True(capabilities.CanCreateConnections);
         Assert.True(capabilities.CanDeleteConnections);
         Assert.True(capabilities.CanBreakConnections);
         Assert.True(capabilities.CanUpdateViewport);
         Assert.True(capabilities.CanFitToViewport);
         Assert.True(capabilities.CanCenterViewport);
+    }
+
+    [Fact]
+    public void RuntimeSession_CapabilitySnapshot_TracksLayoutAvailabilityAcrossSelectionCardinality()
+    {
+        var definitionId = new NodeDefinitionId("tests.transaction.layout-capabilities");
+        var session = AsterGraphEditorFactory.CreateSession(CreateOptions(definitionId));
+
+        session.Commands.SetSelection([SourceNodeId], SourceNodeId, updateStatus: false);
+        var oneSelected = session.Queries.GetCapabilitySnapshot();
+        Assert.False(oneSelected.CanAlignSelection);
+        Assert.False(oneSelected.CanDistributeSelection);
+
+        session.Commands.SetSelection([SourceNodeId, TargetNodeId], SourceNodeId, updateStatus: false);
+        var twoSelected = session.Queries.GetCapabilitySnapshot();
+        Assert.True(twoSelected.CanAlignSelection);
+        Assert.False(twoSelected.CanDistributeSelection);
+
+        session.Commands.AddNode(definitionId, new GraphPoint(840, 240));
+        var thirdNodeId = Assert.Single(
+            session.Queries.CreateDocumentSnapshot().Nodes,
+            node =>
+                !string.Equals(node.Id, SourceNodeId, StringComparison.Ordinal)
+                && !string.Equals(node.Id, TargetNodeId, StringComparison.Ordinal)).Id;
+
+        session.Commands.SetSelection([SourceNodeId, TargetNodeId, thirdNodeId], SourceNodeId, updateStatus: false);
+        var threeSelected = session.Queries.GetCapabilitySnapshot();
+        Assert.True(threeSelected.CanAlignSelection);
+        Assert.True(threeSelected.CanDistributeSelection);
     }
 
     [Fact]

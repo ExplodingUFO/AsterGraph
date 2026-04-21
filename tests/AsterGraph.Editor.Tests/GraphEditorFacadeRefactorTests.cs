@@ -757,7 +757,9 @@ public sealed class GraphEditorFacadeRefactorTests
     public void GraphEditorViewModel_AlignSelectionLeft_PublishesRetainedDocumentChangedOnce()
     {
         var definitionId = new NodeDefinitionId("tests.editor.facade.retained-document");
-        var editor = CreateEditorWithSharedDefinitionNodes(definitionId);
+        var editor = CreateEditorWithSharedDefinitionNodes(
+            definitionId,
+            secondPosition: new GraphPoint(420, 220));
         var source = editor.Nodes[0];
         var target = editor.Nodes[1];
         var documentChanges = new List<GraphEditorDocumentChangedEventArgs>();
@@ -769,7 +771,7 @@ public sealed class GraphEditorFacadeRefactorTests
 
         var documentChanged = Assert.Single(documentChanges);
         Assert.Equal(GraphEditorDocumentChangeKind.LayoutChanged, documentChanged.ChangeKind);
-        Assert.Equal([source.Id, target.Id], documentChanged.NodeIds);
+        Assert.Equal([target.Id], documentChanged.NodeIds);
         Assert.Equal(editor.StatusMessage, documentChanged.StatusMessage);
     }
 

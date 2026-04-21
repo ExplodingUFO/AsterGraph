@@ -65,6 +65,16 @@ public sealed record GraphEditorCapabilitySnapshot(
     public bool CanMoveNodes { get; init; }
 
     /// <summary>
+    /// 当前是否允许对齐当前选择。
+    /// </summary>
+    public bool CanAlignSelection { get; init; }
+
+    /// <summary>
+    /// 当前是否允许分布当前选择。
+    /// </summary>
+    public bool CanDistributeSelection { get; init; }
+
+    /// <summary>
     /// Current whether node parameter editing is allowed for the active selection.
     /// </summary>
     public bool CanEditNodeParameters { get; init; }

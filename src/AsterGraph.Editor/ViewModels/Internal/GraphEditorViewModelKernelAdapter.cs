@@ -199,14 +199,6 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
             [
                 GraphEditorCommandDescriptorCatalog.Create("fragments.export-selection", GraphEditorCommandSourceKind.Retained, _owner.CanExportSelectionFragment),
                 GraphEditorCommandDescriptorCatalog.Create("fragments.import", GraphEditorCommandSourceKind.Retained, _owner.CanImportFragment),
-                GraphEditorCommandDescriptorCatalog.Create("layout.align-left", GraphEditorCommandSourceKind.Retained, _owner.CanAlignSelection),
-                GraphEditorCommandDescriptorCatalog.Create("layout.align-center", GraphEditorCommandSourceKind.Retained, _owner.CanAlignSelection),
-                GraphEditorCommandDescriptorCatalog.Create("layout.align-right", GraphEditorCommandSourceKind.Retained, _owner.CanAlignSelection),
-                GraphEditorCommandDescriptorCatalog.Create("layout.align-top", GraphEditorCommandSourceKind.Retained, _owner.CanAlignSelection),
-                GraphEditorCommandDescriptorCatalog.Create("layout.align-middle", GraphEditorCommandSourceKind.Retained, _owner.CanAlignSelection),
-                GraphEditorCommandDescriptorCatalog.Create("layout.align-bottom", GraphEditorCommandSourceKind.Retained, _owner.CanAlignSelection),
-                GraphEditorCommandDescriptorCatalog.Create("layout.distribute-horizontal", GraphEditorCommandSourceKind.Retained, _owner.CanDistributeSelection),
-                GraphEditorCommandDescriptorCatalog.Create("layout.distribute-vertical", GraphEditorCommandSourceKind.Retained, _owner.CanDistributeSelection),
                 GraphEditorCommandDescriptorCatalog.Create("nodes.inspect", GraphEditorCommandSourceKind.Retained, true),
                 GraphEditorCommandDescriptorCatalog.Create("nodes.delete-by-id", GraphEditorCommandSourceKind.Retained, _owner.CommandPermissions.Nodes.AllowDelete),
                 GraphEditorCommandDescriptorCatalog.Create("nodes.duplicate", GraphEditorCommandSourceKind.Retained, _owner.CommandPermissions.Nodes.AllowDuplicate),
@@ -237,38 +229,6 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
 
             case "fragments.import":
                 _owner.ImportFragment();
-                return true;
-
-            case "layout.align-left":
-                _owner.AlignSelectionLeft();
-                return true;
-
-            case "layout.align-center":
-                _owner.AlignSelectionCenter();
-                return true;
-
-            case "layout.align-right":
-                _owner.AlignSelectionRight();
-                return true;
-
-            case "layout.align-top":
-                _owner.AlignSelectionTop();
-                return true;
-
-            case "layout.align-middle":
-                _owner.AlignSelectionMiddle();
-                return true;
-
-            case "layout.align-bottom":
-                _owner.AlignSelectionBottom();
-                return true;
-
-            case "layout.distribute-horizontal":
-                _owner.DistributeSelectionHorizontally();
-                return true;
-
-            case "layout.distribute-vertical":
-                _owner.DistributeSelectionVertically();
                 return true;
 
             case "nodes.inspect":

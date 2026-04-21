@@ -25,6 +25,8 @@ internal sealed partial class GraphEditorKernel
             {
                 CanSetSelection = true,
                 CanMoveNodes = _owner._behaviorOptions.Commands.Nodes.AllowMove,
+                CanAlignSelection = _owner.CanAlignSelection(),
+                CanDistributeSelection = _owner.CanDistributeSelection(),
                 CanEditNodeParameters = _owner._behaviorOptions.Commands.Nodes.AllowEditParameters && _owner.HasSharedSelectionDefinitionWithParameters(),
                 CanCreateConnections = _owner._behaviorOptions.Commands.Connections.AllowCreate,
                 CanDeleteConnections = _owner._behaviorOptions.Commands.Connections.AllowDelete,

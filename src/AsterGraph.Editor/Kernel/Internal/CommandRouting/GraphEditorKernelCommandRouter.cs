@@ -4,6 +4,7 @@ using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Configuration;
 using AsterGraph.Editor.Diagnostics;
+using AsterGraph.Editor.Kernel.Internal.Layout;
 using AsterGraph.Editor.Models;
 using AsterGraph.Editor.Runtime;
 using System.Threading;
@@ -27,6 +28,10 @@ internal interface IGraphEditorKernelCommandRouterHost
     bool CanPaste { get; }
 
     bool CanEditSelectedNodeParameters { get; }
+
+    bool CanAlignSelection { get; }
+
+    bool CanDistributeSelection { get; }
 
     GraphEditorPendingConnectionSnapshot PendingConnection { get; }
 
@@ -81,6 +86,8 @@ internal interface IGraphEditorKernelCommandRouterHost
     bool TryReturnToParentGraphScope(bool updateStatus);
 
     bool TrySetSelectedNodeParameterValue(string parameterKey, object? value);
+
+    bool TryApplySelectionLayout(GraphEditorSelectionLayoutOperation operation, bool updateStatus);
 
     void StartConnection(string sourceNodeId, string sourcePortId);
 
@@ -192,6 +199,38 @@ internal sealed class GraphEditorKernelCommandRouter
                 "groups.promote",
                 GraphEditorCommandSourceKind.Kernel,
                 _host.Document.Groups?.Count > 0 && _host.BehaviorOptions.Commands.Nodes.AllowMove),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "layout.align-left",
+                GraphEditorCommandSourceKind.Kernel,
+                _host.CanAlignSelection),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "layout.align-center",
+                GraphEditorCommandSourceKind.Kernel,
+                _host.CanAlignSelection),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "layout.align-right",
+                GraphEditorCommandSourceKind.Kernel,
+                _host.CanAlignSelection),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "layout.align-top",
+                GraphEditorCommandSourceKind.Kernel,
+                _host.CanAlignSelection),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "layout.align-middle",
+                GraphEditorCommandSourceKind.Kernel,
+                _host.CanAlignSelection),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "layout.align-bottom",
+                GraphEditorCommandSourceKind.Kernel,
+                _host.CanAlignSelection),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "layout.distribute-horizontal",
+                GraphEditorCommandSourceKind.Kernel,
+                _host.CanDistributeSelection),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "layout.distribute-vertical",
+                GraphEditorCommandSourceKind.Kernel,
+                _host.CanDistributeSelection),
             GraphEditorCommandDescriptorCatalog.Create(
                 "composites.wrap-selection",
                 GraphEditorCommandSourceKind.Kernel,
@@ -320,6 +359,11 @@ internal sealed class GraphEditorKernelCommandRouter
     public bool TryExecuteCommand(GraphEditorCommandInvocationSnapshot command)
     {
         ArgumentNullException.ThrowIfNull(command);
+
+        if (TryResolveSelectionLayoutOperation(command.CommandId, out var layoutOperation))
+        {
+            return _host.TryApplySelectionLayout(layoutOperation, ResolveOptionalUpdateStatus(command, "updateStatus"));
+        }
 
         switch (command.CommandId)
         {
@@ -757,6 +801,42 @@ internal sealed class GraphEditorKernelCommandRouter
         }
 
         return true;
+    }
+
+    private static bool TryResolveSelectionLayoutOperation(
+        string commandId,
+        out GraphEditorSelectionLayoutOperation operation)
+    {
+        switch (commandId)
+        {
+            case "layout.align-left":
+                operation = GraphEditorSelectionLayoutOperation.AlignLeft;
+                return true;
+            case "layout.align-center":
+                operation = GraphEditorSelectionLayoutOperation.AlignCenter;
+                return true;
+            case "layout.align-right":
+                operation = GraphEditorSelectionLayoutOperation.AlignRight;
+                return true;
+            case "layout.align-top":
+                operation = GraphEditorSelectionLayoutOperation.AlignTop;
+                return true;
+            case "layout.align-middle":
+                operation = GraphEditorSelectionLayoutOperation.AlignMiddle;
+                return true;
+            case "layout.align-bottom":
+                operation = GraphEditorSelectionLayoutOperation.AlignBottom;
+                return true;
+            case "layout.distribute-horizontal":
+                operation = GraphEditorSelectionLayoutOperation.DistributeHorizontally;
+                return true;
+            case "layout.distribute-vertical":
+                operation = GraphEditorSelectionLayoutOperation.DistributeVertically;
+                return true;
+            default:
+                operation = default;
+                return false;
+        }
     }
 
     private static NodePositionSnapshot? ParseNodePosition(string value)

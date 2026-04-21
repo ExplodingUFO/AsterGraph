@@ -4,6 +4,7 @@ using AsterGraph.Core.Models;
 using AsterGraph.Editor.Configuration;
 using AsterGraph.Editor.Diagnostics;
 using AsterGraph.Editor.Kernel.Internal;
+using AsterGraph.Editor.Kernel.Internal.Layout;
 using AsterGraph.Editor.Models;
 using AsterGraph.Editor.Runtime;
 using System.Threading;
@@ -41,6 +42,12 @@ internal sealed partial class GraphEditorKernel
 
         bool IGraphEditorKernelCommandRouterHost.CanEditSelectedNodeParameters
             => _owner._behaviorOptions.Commands.Nodes.AllowEditParameters && _owner.HasSharedSelectionDefinitionWithParameters();
+
+        bool IGraphEditorKernelCommandRouterHost.CanAlignSelection
+            => _owner.CanAlignSelection();
+
+        bool IGraphEditorKernelCommandRouterHost.CanDistributeSelection
+            => _owner.CanDistributeSelection();
 
         GraphEditorPendingConnectionSnapshot IGraphEditorKernelCommandRouterHost.PendingConnection => _owner._pendingConnection;
 
@@ -118,6 +125,9 @@ internal sealed partial class GraphEditorKernel
 
         bool IGraphEditorKernelCommandRouterHost.TrySetSelectedNodeParameterValue(string parameterKey, object? value)
             => _owner.TrySetSelectedNodeParameterValue(parameterKey, value);
+
+        bool IGraphEditorKernelCommandRouterHost.TryApplySelectionLayout(GraphEditorSelectionLayoutOperation operation, bool updateStatus)
+            => _owner.TryApplySelectionLayout(operation, updateStatus);
 
         void IGraphEditorKernelCommandRouterHost.StartConnection(string sourceNodeId, string sourcePortId)
             => _owner.StartConnection(sourceNodeId, sourcePortId);

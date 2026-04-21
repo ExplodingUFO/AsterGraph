@@ -9,6 +9,7 @@ using AsterGraph.Editor.Configuration;
 using AsterGraph.Editor.Diagnostics;
 using AsterGraph.Editor.Events;
 using AsterGraph.Editor.Kernel.Internal;
+using AsterGraph.Editor.Kernel.Internal.Layout;
 using AsterGraph.Editor.Models;
 using AsterGraph.Editor.Parameters;
 using AsterGraph.Editor.Runtime;
@@ -1311,6 +1312,70 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
     private bool CanRemoveConnectionsAsSideEffect()
         => _behaviorOptions.Commands.Connections.AllowDelete || _behaviorOptions.Commands.Connections.AllowDisconnect;
 
+    private bool CanAlignSelection()
+        => _behaviorOptions.Commands.Layout.AllowAlign && _selectedNodeIds.Count >= 2;
+
+    private bool CanDistributeSelection()
+        => _behaviorOptions.Commands.Layout.AllowDistribute && _selectedNodeIds.Count >= 3;
+
+    private bool TryApplySelectionLayout(GraphEditorSelectionLayoutOperation operation, bool updateStatus)
+    {
+        var minimumCount = operation is GraphEditorSelectionLayoutOperation.DistributeHorizontally or GraphEditorSelectionLayoutOperation.DistributeVertically
+            ? 3
+            : 2;
+        var permitted = minimumCount == 2
+            ? _behaviorOptions.Commands.Layout.AllowAlign
+            : _behaviorOptions.Commands.Layout.AllowDistribute;
+        if (!permitted)
+        {
+            if (updateStatus)
+            {
+                CurrentStatusMessage = "Layout tools are disabled by host permissions.";
+            }
+
+            return false;
+        }
+
+        var activeScope = CreateActiveScopeDocumentSnapshot();
+        var nodesById = activeScope.Nodes.ToDictionary(node => node.Id, StringComparer.Ordinal);
+        var selectedNodes = _selectedNodeIds
+            .Where(nodesById.ContainsKey)
+            .Select(nodeId => nodesById[nodeId])
+            .ToList();
+        if (selectedNodes.Count < minimumCount)
+        {
+            if (updateStatus)
+            {
+                CurrentStatusMessage = minimumCount == 2
+                    ? "Select at least two nodes for alignment."
+                    : "Select at least three nodes for distribution.";
+            }
+
+            return false;
+        }
+
+        var positions = NodeSelectionLayoutService.Apply(
+            operation,
+            selectedNodes
+                .Select(node => new NodeSelectionLayoutInput(node.Id, node.Position, node.Size))
+                .ToList());
+        var mutation = _documentMutator.SetNodePositions(activeScope, positions);
+        if (mutation.ChangedNodeIds.Count == 0)
+        {
+            if (updateStatus)
+            {
+                CurrentStatusMessage = GetLayoutStatusMessage(operation);
+            }
+
+            return true;
+        }
+
+        ApplyActiveScopeDocument(mutation.Document);
+        CurrentStatusMessage = GetLayoutStatusMessage(operation);
+        MarkDirty(CurrentStatusMessage, GraphEditorDocumentChangeKind.LayoutChanged, mutation.ChangedNodeIds, null, preserveStatus: !updateStatus);
+        return true;
+    }
+
     private bool HasSharedSelectionDefinitionWithParameters()
         => TryGetSharedSelectionDefinition(out var definition, out _) && definition is { Parameters.Count: > 0 };
 
@@ -1353,6 +1418,20 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
 
     private GraphNode? FindNode(string nodeId)
         => GetActiveGraphScope().Nodes.FirstOrDefault(node => string.Equals(node.Id, nodeId, StringComparison.Ordinal));
+
+    private static string GetLayoutStatusMessage(GraphEditorSelectionLayoutOperation operation)
+        => operation switch
+        {
+            GraphEditorSelectionLayoutOperation.AlignLeft => "Aligned selection left.",
+            GraphEditorSelectionLayoutOperation.AlignCenter => "Aligned selection center.",
+            GraphEditorSelectionLayoutOperation.AlignRight => "Aligned selection right.",
+            GraphEditorSelectionLayoutOperation.AlignTop => "Aligned selection top.",
+            GraphEditorSelectionLayoutOperation.AlignMiddle => "Aligned selection middle.",
+            GraphEditorSelectionLayoutOperation.AlignBottom => "Aligned selection bottom.",
+            GraphEditorSelectionLayoutOperation.DistributeHorizontally => "Distributed selection horizontally.",
+            GraphEditorSelectionLayoutOperation.DistributeVertically => "Distributed selection vertically.",
+            _ => "Updated selection layout.",
+        };
 
     public void SetTextClipboardBridge(IGraphTextClipboardBridge? bridge)
         => _textClipboardBridge = bridge;

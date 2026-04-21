@@ -335,73 +335,49 @@ public sealed partial class GraphEditorViewModel
     /// 将当前选择按左边缘对齐。
     /// </summary>
     public void AlignSelectionLeft()
-        => _nodeLayoutCoordinator.ApplySelectionLayout(
-            NodeSelectionLayoutService.AlignLeft,
-            minimumCount: 2,
-            StatusText("editor.status.layout.alignLeft", "Aligned selection left."));
+        => ExecuteLayoutCommand("layout.align-left");
 
     /// <summary>
     /// 将当前选择按水平中心对齐。
     /// </summary>
     public void AlignSelectionCenter()
-        => _nodeLayoutCoordinator.ApplySelectionLayout(
-            NodeSelectionLayoutService.AlignCenter,
-            minimumCount: 2,
-            StatusText("editor.status.layout.alignCenter", "Aligned selection center."));
+        => ExecuteLayoutCommand("layout.align-center");
 
     /// <summary>
     /// 将当前选择按右边缘对齐。
     /// </summary>
     public void AlignSelectionRight()
-        => _nodeLayoutCoordinator.ApplySelectionLayout(
-            NodeSelectionLayoutService.AlignRight,
-            minimumCount: 2,
-            StatusText("editor.status.layout.alignRight", "Aligned selection right."));
+        => ExecuteLayoutCommand("layout.align-right");
 
     /// <summary>
     /// 将当前选择按上边缘对齐。
     /// </summary>
     public void AlignSelectionTop()
-        => _nodeLayoutCoordinator.ApplySelectionLayout(
-            NodeSelectionLayoutService.AlignTop,
-            minimumCount: 2,
-            StatusText("editor.status.layout.alignTop", "Aligned selection top."));
+        => ExecuteLayoutCommand("layout.align-top");
 
     /// <summary>
     /// 将当前选择按垂直中心对齐。
     /// </summary>
     public void AlignSelectionMiddle()
-        => _nodeLayoutCoordinator.ApplySelectionLayout(
-            NodeSelectionLayoutService.AlignMiddle,
-            minimumCount: 2,
-            StatusText("editor.status.layout.alignMiddle", "Aligned selection middle."));
+        => ExecuteLayoutCommand("layout.align-middle");
 
     /// <summary>
     /// 将当前选择按下边缘对齐。
     /// </summary>
     public void AlignSelectionBottom()
-        => _nodeLayoutCoordinator.ApplySelectionLayout(
-            NodeSelectionLayoutService.AlignBottom,
-            minimumCount: 2,
-            StatusText("editor.status.layout.alignBottom", "Aligned selection bottom."));
+        => ExecuteLayoutCommand("layout.align-bottom");
 
     /// <summary>
     /// 将当前选择按水平方向均匀分布。
     /// </summary>
     public void DistributeSelectionHorizontally()
-        => _nodeLayoutCoordinator.ApplySelectionLayout(
-            NodeSelectionLayoutService.DistributeHorizontally,
-            minimumCount: 3,
-            StatusText("editor.status.layout.distributeHorizontally", "Distributed selection horizontally."));
+        => ExecuteLayoutCommand("layout.distribute-horizontal");
 
     /// <summary>
     /// 将当前选择按垂直方向均匀分布。
     /// </summary>
     public void DistributeSelectionVertically()
-        => _nodeLayoutCoordinator.ApplySelectionLayout(
-            NodeSelectionLayoutService.DistributeVertically,
-            minimumCount: 3,
-            StatusText("editor.status.layout.distributeVertically", "Distributed selection vertically."));
+        => ExecuteLayoutCommand("layout.distribute-vertical");
 
     /// <summary>
     /// 按实例标识删除单个节点。
@@ -426,6 +402,12 @@ public sealed partial class GraphEditorViewModel
     /// </summary>
     public void DisconnectOutgoing(string nodeId)
         => _compatibilityCommands.DisconnectOutgoing(nodeId);
+
+    private void ExecuteLayoutCommand(string commandId)
+    {
+        Session.Commands.TryExecuteCommand(new GraphEditorCommandInvocationSnapshot(commandId));
+        StatusMessage = _sessionHost.CurrentStatusMessage;
+    }
 
     /// <summary>
     /// 断开指定节点的全部连线。

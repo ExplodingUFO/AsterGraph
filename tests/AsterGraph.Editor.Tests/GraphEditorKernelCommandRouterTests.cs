@@ -84,12 +84,57 @@ public sealed class GraphEditorKernelCommandRouterTests
             ]);
 
         var expected = """
-            initial:nodes.add:True:-|selection.set:True:-|selection.delete:False:-|clipboard.copy:False:-|clipboard.paste:False:-|nodes.move:True:-|nodes.resize:True:-|nodes.parameters.set:False:Parameter editing requires node-edit permissions and a shared node definition selection.|groups.create:False:-|groups.collapse:False:-|groups.move:False:-|groups.resize:False:-|groups.membership.set:False:-|groups.promote:False:-|composites.wrap-selection:False:-|composites.expose-port:False:-|composites.unexpose-port:False:-|scopes.enter:False:-|scopes.exit:False:-|connections.start:True:-|connections.complete:False:-|connections.connect:True:-|connections.cancel:False:-|connections.delete:True:-|connections.disconnect:True:-|connections.note.set:False:-|connections.reconnect:False:-|connections.break-port:True:-|connections.disconnect-incoming:True:-|connections.disconnect-outgoing:True:-|connections.disconnect-all:True:-|history.undo:False:-|history.redo:False:-|viewport.fit:True:-|viewport.pan:True:-|viewport.resize:True:-|viewport.reset:True:-|viewport.center-node:True:-|viewport.center:True:-|workspace.save:True:-|workspace.load:False:No saved snapshot yet. Save once to create one.
-            selected:nodes.add:True:-|selection.set:True:-|selection.delete:True:-|clipboard.copy:True:-|clipboard.paste:False:-|nodes.move:True:-|nodes.resize:True:-|nodes.parameters.set:False:Parameter editing requires node-edit permissions and a shared node definition selection.|groups.create:True:-|groups.collapse:False:-|groups.move:False:-|groups.resize:False:-|groups.membership.set:False:-|groups.promote:False:-|composites.wrap-selection:True:-|composites.expose-port:False:-|composites.unexpose-port:False:-|scopes.enter:False:-|scopes.exit:False:-|connections.start:True:-|connections.complete:False:-|connections.connect:True:-|connections.cancel:False:-|connections.delete:True:-|connections.disconnect:True:-|connections.note.set:False:-|connections.reconnect:False:-|connections.break-port:True:-|connections.disconnect-incoming:True:-|connections.disconnect-outgoing:True:-|connections.disconnect-all:True:-|history.undo:False:-|history.redo:False:-|viewport.fit:True:-|viewport.pan:True:-|viewport.resize:True:-|viewport.reset:True:-|viewport.center-node:True:-|viewport.center:True:-|workspace.save:True:-|workspace.load:False:No saved snapshot yet. Save once to create one.
-            pending:nodes.add:True:-|selection.set:True:-|selection.delete:True:-|clipboard.copy:True:-|clipboard.paste:False:-|nodes.move:True:-|nodes.resize:True:-|nodes.parameters.set:False:Parameter editing requires node-edit permissions and a shared node definition selection.|groups.create:True:-|groups.collapse:False:-|groups.move:False:-|groups.resize:False:-|groups.membership.set:False:-|groups.promote:False:-|composites.wrap-selection:True:-|composites.expose-port:False:-|composites.unexpose-port:False:-|scopes.enter:False:-|scopes.exit:False:-|connections.start:True:-|connections.complete:True:-|connections.connect:True:-|connections.cancel:True:-|connections.delete:True:-|connections.disconnect:True:-|connections.note.set:False:-|connections.reconnect:False:-|connections.break-port:True:-|connections.disconnect-incoming:True:-|connections.disconnect-outgoing:True:-|connections.disconnect-all:True:-|history.undo:False:-|history.redo:False:-|viewport.fit:True:-|viewport.pan:True:-|viewport.resize:True:-|viewport.reset:True:-|viewport.center-node:True:-|viewport.center:True:-|workspace.save:True:-|workspace.load:False:No saved snapshot yet. Save once to create one.
+            initial:nodes.add:True:-|selection.set:True:-|selection.delete:False:-|clipboard.copy:False:-|clipboard.paste:False:-|nodes.move:True:-|nodes.resize:True:-|nodes.parameters.set:False:Parameter editing requires node-edit permissions and a shared node definition selection.|groups.create:False:-|groups.collapse:False:-|groups.move:False:-|groups.resize:False:-|groups.membership.set:False:-|groups.promote:False:-|layout.align-left:False:-|layout.align-center:False:-|layout.align-right:False:-|layout.align-top:False:-|layout.align-middle:False:-|layout.align-bottom:False:-|layout.distribute-horizontal:False:-|layout.distribute-vertical:False:-|composites.wrap-selection:False:-|composites.expose-port:False:-|composites.unexpose-port:False:-|scopes.enter:False:-|scopes.exit:False:-|connections.start:True:-|connections.complete:False:-|connections.connect:True:-|connections.cancel:False:-|connections.delete:True:-|connections.disconnect:True:-|connections.note.set:False:-|connections.reconnect:False:-|connections.break-port:True:-|connections.disconnect-incoming:True:-|connections.disconnect-outgoing:True:-|connections.disconnect-all:True:-|history.undo:False:-|history.redo:False:-|viewport.fit:True:-|viewport.pan:True:-|viewport.resize:True:-|viewport.reset:True:-|viewport.center-node:True:-|viewport.center:True:-|workspace.save:True:-|workspace.load:False:No saved snapshot yet. Save once to create one.
+            selected:nodes.add:True:-|selection.set:True:-|selection.delete:True:-|clipboard.copy:True:-|clipboard.paste:False:-|nodes.move:True:-|nodes.resize:True:-|nodes.parameters.set:False:Parameter editing requires node-edit permissions and a shared node definition selection.|groups.create:True:-|groups.collapse:False:-|groups.move:False:-|groups.resize:False:-|groups.membership.set:False:-|groups.promote:False:-|layout.align-left:False:-|layout.align-center:False:-|layout.align-right:False:-|layout.align-top:False:-|layout.align-middle:False:-|layout.align-bottom:False:-|layout.distribute-horizontal:False:-|layout.distribute-vertical:False:-|composites.wrap-selection:True:-|composites.expose-port:False:-|composites.unexpose-port:False:-|scopes.enter:False:-|scopes.exit:False:-|connections.start:True:-|connections.complete:False:-|connections.connect:True:-|connections.cancel:False:-|connections.delete:True:-|connections.disconnect:True:-|connections.note.set:False:-|connections.reconnect:False:-|connections.break-port:True:-|connections.disconnect-incoming:True:-|connections.disconnect-outgoing:True:-|connections.disconnect-all:True:-|history.undo:False:-|history.redo:False:-|viewport.fit:True:-|viewport.pan:True:-|viewport.resize:True:-|viewport.reset:True:-|viewport.center-node:True:-|viewport.center:True:-|workspace.save:True:-|workspace.load:False:No saved snapshot yet. Save once to create one.
+            pending:nodes.add:True:-|selection.set:True:-|selection.delete:True:-|clipboard.copy:True:-|clipboard.paste:False:-|nodes.move:True:-|nodes.resize:True:-|nodes.parameters.set:False:Parameter editing requires node-edit permissions and a shared node definition selection.|groups.create:True:-|groups.collapse:False:-|groups.move:False:-|groups.resize:False:-|groups.membership.set:False:-|groups.promote:False:-|layout.align-left:False:-|layout.align-center:False:-|layout.align-right:False:-|layout.align-top:False:-|layout.align-middle:False:-|layout.align-bottom:False:-|layout.distribute-horizontal:False:-|layout.distribute-vertical:False:-|composites.wrap-selection:True:-|composites.expose-port:False:-|composites.unexpose-port:False:-|scopes.enter:False:-|scopes.exit:False:-|connections.start:True:-|connections.complete:True:-|connections.connect:True:-|connections.cancel:True:-|connections.delete:True:-|connections.disconnect:True:-|connections.note.set:False:-|connections.reconnect:False:-|connections.break-port:True:-|connections.disconnect-incoming:True:-|connections.disconnect-outgoing:True:-|connections.disconnect-all:True:-|history.undo:False:-|history.redo:False:-|viewport.fit:True:-|viewport.pan:True:-|viewport.resize:True:-|viewport.reset:True:-|viewport.center-node:True:-|viewport.center:True:-|workspace.save:True:-|workspace.load:False:No saved snapshot yet. Save once to create one.
             """;
 
         Assert.Equal(expected.ReplaceLineEndings("\n"), signature.ReplaceLineEndings("\n"));
+    }
+
+    [Fact]
+    public void GraphEditorKernel_LayoutCommandDescriptors_TrackSelectionCardinalityAndPermissions()
+    {
+        var kernel = CreateKernel();
+        kernel.SetSelection([SourceNodeId, TargetNodeId], SourceNodeId, updateStatus: false);
+
+        var descriptors = kernel.GetCommandDescriptors().ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
+        Assert.True(descriptors["layout.align-left"].IsEnabled);
+        Assert.False(descriptors["layout.distribute-horizontal"].IsEnabled);
+        Assert.Equal(GraphEditorCommandSourceKind.Kernel, descriptors["layout.align-left"].Source);
+
+        Assert.True(kernel.TryExecuteCommand(
+            CreateCommand(
+                "nodes.add",
+                ("definitionId", DefinitionId.Value),
+                ("worldX", "840"),
+                ("worldY", "260"))));
+        var thirdNodeId = Assert.Single(
+            kernel.CreateDocumentSnapshot().Nodes,
+            node =>
+                !string.Equals(node.Id, SourceNodeId, StringComparison.Ordinal)
+                && !string.Equals(node.Id, TargetNodeId, StringComparison.Ordinal)).Id;
+
+        kernel.SetSelection([SourceNodeId, TargetNodeId, thirdNodeId], SourceNodeId, updateStatus: false);
+        descriptors = kernel.GetCommandDescriptors().ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
+        Assert.True(descriptors["layout.distribute-horizontal"].IsEnabled);
+        Assert.True(descriptors["layout.distribute-vertical"].IsEnabled);
+
+        var readOnlyKernel = CreateKernel(behaviorOptions: GraphEditorBehaviorOptions.Default with
+        {
+            Commands = GraphEditorCommandPermissions.Default with
+            {
+                Layout = new LayoutCommandPermissions
+                {
+                    AllowAlign = false,
+                    AllowDistribute = false,
+                },
+            },
+        });
+        readOnlyKernel.SetSelection([SourceNodeId, TargetNodeId], SourceNodeId, updateStatus: false);
+        descriptors = readOnlyKernel.GetCommandDescriptors().ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
+        Assert.False(descriptors["layout.align-left"].IsEnabled);
+        Assert.False(descriptors["layout.distribute-horizontal"].IsEnabled);
     }
 
     [Fact]

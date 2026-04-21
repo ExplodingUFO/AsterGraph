@@ -24,13 +24,7 @@ internal interface IGraphEditorNodeLayoutCoordinatorHost
 
     void SetNodePositionNoMatchesStatus();
 
-    void SetLayoutDisabledStatus();
-
-    void SetLayoutSelectionTooSmallStatus(int minimumCount);
-
     void ApplyNodePositionUpdates(IReadOnlyList<NodePositionSnapshot> positions, bool updateStatus);
-
-    void CompleteLayoutChange(IReadOnlyList<NodeViewModel> nodes, string status);
 }
 
 internal sealed class GraphEditorNodeLayoutCoordinator
@@ -193,28 +187,6 @@ internal sealed class GraphEditorNodeLayoutCoordinator
         }
 
         node.MoveBy(deltaX, deltaY);
-    }
-
-    public void ApplySelectionLayout(Action<IReadOnlyList<NodeViewModel>> applyLayout, int minimumCount, string status)
-    {
-        ArgumentNullException.ThrowIfNull(applyLayout);
-
-        if ((minimumCount >= 3 && !_host.CommandPermissions.Layout.AllowDistribute)
-            || (minimumCount < 3 && !_host.CommandPermissions.Layout.AllowAlign))
-        {
-            _host.SetLayoutDisabledStatus();
-            return;
-        }
-
-        var selectedNodes = _host.SelectedNodes.ToList();
-        if (selectedNodes.Count < minimumCount)
-        {
-            _host.SetLayoutSelectionTooSmallStatus(minimumCount);
-            return;
-        }
-
-        applyLayout(selectedNodes);
-        _host.CompleteLayoutChange(selectedNodes, status);
     }
 
     private static bool Intersects(NodeBounds bounds, double left, double top, double right, double bottom)

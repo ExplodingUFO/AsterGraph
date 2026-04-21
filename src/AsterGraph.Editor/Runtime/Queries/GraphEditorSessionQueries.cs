@@ -51,6 +51,8 @@ public sealed partial class GraphEditorSession
                 new GraphEditorFeatureDescriptorSnapshot("capability.workspace.load", "capability", capabilities.CanLoadWorkspace),
                 new GraphEditorFeatureDescriptorSnapshot("capability.selection.set", "capability", capabilities.CanSetSelection),
                 new GraphEditorFeatureDescriptorSnapshot("capability.nodes.move", "capability", capabilities.CanMoveNodes),
+                new GraphEditorFeatureDescriptorSnapshot("capability.layout.align", "capability", capabilities.CanAlignSelection),
+                new GraphEditorFeatureDescriptorSnapshot("capability.layout.distribute", "capability", capabilities.CanDistributeSelection),
                 new GraphEditorFeatureDescriptorSnapshot("capability.nodes.parameters.edit", "capability", capabilities.CanEditNodeParameters),
                 new GraphEditorFeatureDescriptorSnapshot("query.scene-snapshot", "query", true),
                 new GraphEditorFeatureDescriptorSnapshot("query.node-surface-snapshots", "query", true),
