@@ -18,15 +18,53 @@ public sealed class ScaleSmokeBudgetTests
     }
 
     [Fact]
-    public void LargeTier_EmitsInformationalOnlyBudgetMarker()
+    public void LargeTier_EmitsMachineReadableBudgetMarker()
     {
         var tier = ScaleSmokeTier.Parse(["--tier", "large"]);
 
         var marker = tier.ToBudgetMarker();
 
         Assert.Equal(
-            "SCALE_TIER_BUDGET:large:nodes=1000:selection=128:moves=64:budget=informational-only",
+            "SCALE_TIER_BUDGET:large:nodes=1000:selection=128:moves=64:setup<=2500:selection<=750:connection<=350:history<=800:viewport<=200:save<=300:reload<=1500",
             marker);
+    }
+
+    [Fact]
+    public void LargeBudget_AllowsObservedRepeatedLargeTierMetrics()
+    {
+        var tier = ScaleSmokeTier.Parse(["--tier", "large"]);
+        var metrics = new ScaleSmokeMetrics(
+            SetupMs: 202,
+            SelectionMs: 11,
+            ConnectionMs: 163,
+            HistoryMs: 271,
+            ViewportMs: 2,
+            SaveMs: 55,
+            ReloadMs: 26);
+
+        var result = tier.Evaluate(metrics);
+
+        Assert.True(result.Passed);
+        Assert.Equal("none", result.FailureSummary);
+    }
+
+    [Fact]
+    public void LargeBudget_RejectsConnectionRegressionBeyondRedline()
+    {
+        var tier = ScaleSmokeTier.Parse(["--tier", "large"]);
+        var metrics = new ScaleSmokeMetrics(
+            SetupMs: 202,
+            SelectionMs: 11,
+            ConnectionMs: 351,
+            HistoryMs: 271,
+            ViewportMs: 2,
+            SaveMs: 55,
+            ReloadMs: 26);
+
+        var result = tier.Evaluate(metrics);
+
+        Assert.False(result.Passed);
+        Assert.Contains("connection>350", result.FailureSummary, StringComparison.Ordinal);
     }
 
     [Fact]
