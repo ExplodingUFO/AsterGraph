@@ -328,6 +328,8 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             _nodeCatalog,
             _compatibilityService,
             _workspaceService,
+            _fragmentWorkspaceService,
+            _fragmentLibraryService,
             StyleOptions,
             BehaviorOptions,
             textClipboardBridge: null,

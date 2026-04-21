@@ -57,6 +57,8 @@ internal sealed partial class GraphEditorKernel
 
         bool IGraphEditorKernelCommandRouterHost.WorkspaceExists => _owner._workspaceService.Exists();
 
+        bool IGraphEditorKernelCommandRouterHost.FragmentWorkspaceExists => _owner._fragmentWorkspaceService.Exists();
+
         bool IGraphEditorKernelCommandRouterHost.CanNavigateToParentGraphScope
             => _owner.GetScopeNavigationSnapshot().CanNavigateToParent;
 
@@ -80,6 +82,18 @@ internal sealed partial class GraphEditorKernel
 
         Task<bool> IGraphEditorKernelCommandRouterHost.TryPasteSelectionAsync(CancellationToken cancellationToken)
             => _owner.TryPasteSelectionAsync(cancellationToken);
+
+        bool IGraphEditorKernelCommandRouterHost.TryExportSelectionFragment(string? path)
+            => _owner.TryExportSelectionFragment(path);
+
+        bool IGraphEditorKernelCommandRouterHost.TryImportFragment(string? path)
+            => _owner.TryImportFragment(path);
+
+        bool IGraphEditorKernelCommandRouterHost.TryClearWorkspaceFragment(string? path)
+            => _owner.TryClearWorkspaceFragment(path);
+
+        string IGraphEditorKernelCommandRouterHost.TryExportSelectionAsTemplate(string? name)
+            => _owner.TryExportSelectionAsTemplate(name);
 
         void IGraphEditorKernelCommandRouterHost.SetNodePositions(IReadOnlyList<NodePositionSnapshot> positions, bool updateStatus)
             => _owner.SetNodePositions(positions, updateStatus);

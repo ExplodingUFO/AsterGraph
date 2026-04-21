@@ -57,6 +57,76 @@ public sealed partial class GraphEditorSession
         return pasted;
     }
 
+    public bool TryExportSelectionFragment(string? path = null)
+    {
+        var exported = _host.TryExportSelectionFragment(path);
+        if (exported)
+        {
+            PublishCommandExecuted("fragments.export-selection");
+        }
+
+        return exported;
+    }
+
+    public bool TryImportFragment(string? path = null)
+    {
+        var imported = _host.TryImportFragment(path);
+        if (imported)
+        {
+            PublishCommandExecuted("fragments.import");
+        }
+
+        return imported;
+    }
+
+    public bool TryClearWorkspaceFragment(string? path = null)
+    {
+        var cleared = _host.TryClearWorkspaceFragment(path);
+        if (cleared)
+        {
+            PublishCommandExecuted("fragments.clear-workspace");
+        }
+
+        return cleared;
+    }
+
+    public string TryExportSelectionAsTemplate(string? name = null)
+    {
+        var templatePath = _host.TryExportSelectionAsTemplate(name);
+        if (!string.IsNullOrWhiteSpace(templatePath))
+        {
+            PublishCommandExecuted("fragments.export-template");
+        }
+
+        return templatePath;
+    }
+
+    public bool TryImportFragmentTemplate(string path)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+
+        var imported = _host.TryImportFragmentTemplate(path);
+        if (imported)
+        {
+            PublishCommandExecuted("fragments.import-template");
+        }
+
+        return imported;
+    }
+
+    public bool TryDeleteFragmentTemplate(string path)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+
+        var deleted = _host.TryDeleteFragmentTemplate(path);
+        if (deleted)
+        {
+            PublishCommandExecuted("fragments.delete-template");
+        }
+
+        return deleted;
+    }
+
     public void SetNodePositions(IReadOnlyList<NodePositionSnapshot> positions, bool updateStatus = true)
     {
         ArgumentNullException.ThrowIfNull(positions);

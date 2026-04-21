@@ -44,10 +44,24 @@ public interface IGraphEditorQueries
     GraphEditorCapabilitySnapshot GetCapabilitySnapshot();
 
     /// <summary>
+    /// Gets canonical fragment workspace and template-library storage state for the active session.
+    /// </summary>
+    /// <returns>Stable storage snapshot for fragment-hosting UIs.</returns>
+    GraphEditorFragmentStorageSnapshot GetFragmentStorageSnapshot()
+        => throw new NotSupportedException();
+
+    /// <summary>
     /// 获取当前运行时能力、服务和集成特性的显式描述集合。
     /// </summary>
     /// <returns>稳定的特性描述集合。</returns>
     IReadOnlyList<GraphEditorFeatureDescriptorSnapshot> GetFeatureDescriptors()
+        => throw new NotSupportedException();
+
+    /// <summary>
+    /// Gets canonical fragment template snapshots projected from the active template library service.
+    /// </summary>
+    /// <returns>Stable template metadata collection for host-side fragment library UIs.</returns>
+    IReadOnlyList<GraphEditorFragmentTemplateSnapshot> GetFragmentTemplateSnapshots()
         => throw new NotSupportedException();
 
     /// <summary>

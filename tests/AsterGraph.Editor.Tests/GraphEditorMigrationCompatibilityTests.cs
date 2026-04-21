@@ -592,6 +592,26 @@ public sealed class GraphEditorMigrationCompatibilityTests
     }
 
     [Fact]
+    public void LegacyFactoryAndRuntimeSession_ExposeEquivalentFragmentStorageSnapshots()
+    {
+        var harness = CreateHarness();
+        var legacyEditor = CreateLegacyEditor(harness);
+        var runtimeSession = CreateFactorySession(harness);
+
+        SelectSourceNode(legacyEditor);
+        legacyEditor.ExportSelectionFragment();
+        legacyEditor.ExportSelectionAsTemplate();
+
+        var legacyStorage = legacyEditor.Session.Queries.GetFragmentStorageSnapshot();
+        var runtimeStorage = runtimeSession.Queries.GetFragmentStorageSnapshot();
+        var legacyTemplates = legacyEditor.Session.Queries.GetFragmentTemplateSnapshots();
+        var runtimeTemplates = runtimeSession.Queries.GetFragmentTemplateSnapshots();
+
+        Assert.Equal(legacyStorage, runtimeStorage);
+        Assert.Equal(legacyTemplates, runtimeTemplates);
+    }
+
+    [Fact]
     public void DiagnosticsSurface_RemainsReachableAcrossLegacyFactoryAndSessionMigrationPaths()
     {
         using var harness = CreateHarness();
@@ -1113,17 +1133,24 @@ public sealed class GraphEditorMigrationCompatibilityTests
     {
         public string LibraryPath { get; } = libraryPath;
 
+        private readonly Dictionary<string, (GraphSelectionFragment Fragment, FragmentTemplateInfo Info)> _templates = new(StringComparer.Ordinal);
+
         public IReadOnlyList<FragmentTemplateInfo> EnumerateTemplates()
-            => [];
+            => _templates.Values.Select(entry => entry.Info).OrderBy(entry => entry.Name, StringComparer.Ordinal).ToList();
 
         public string SaveTemplate(GraphSelectionFragment fragment, string? name = null)
-            => Path.Combine(LibraryPath, $"{name ?? "fragment"}.json");
+        {
+            var path = Path.Combine(LibraryPath, $"{name ?? "fragment"}.json");
+            _templates[path] = (fragment, new FragmentTemplateInfo(name ?? "fragment", path, fragment.Nodes.Count, fragment.Connections.Count, DateTime.UtcNow));
+            return path;
+        }
 
         public GraphSelectionFragment LoadTemplate(string path)
-            => throw new NotSupportedException();
+            => _templates[path].Fragment;
 
         public void DeleteTemplate(string path)
         {
+            _templates.Remove(path);
         }
     }
 

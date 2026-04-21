@@ -41,6 +41,8 @@ internal interface IGraphEditorKernelCommandRouterHost
 
     bool WorkspaceExists { get; }
 
+    bool FragmentWorkspaceExists { get; }
+
     bool CanNavigateToParentGraphScope { get; }
 
     void Undo();
@@ -56,6 +58,14 @@ internal interface IGraphEditorKernelCommandRouterHost
     Task<bool> TryCopySelectionAsync(CancellationToken cancellationToken);
 
     Task<bool> TryPasteSelectionAsync(CancellationToken cancellationToken);
+
+    bool TryExportSelectionFragment(string? path);
+
+    bool TryImportFragment(string? path);
+
+    bool TryClearWorkspaceFragment(string? path);
+
+    string TryExportSelectionAsTemplate(string? name);
 
     void SetNodePositions(IReadOnlyList<NodePositionSnapshot> positions, bool updateStatus);
 
@@ -160,6 +170,25 @@ internal sealed class GraphEditorKernelCommandRouter
                 "clipboard.paste",
                 GraphEditorCommandSourceKind.Kernel,
                 _host.CanPaste),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "fragments.export-selection",
+                GraphEditorCommandSourceKind.Kernel,
+                _host.BehaviorOptions.Commands.Fragments.AllowExport && _host.SelectedNodeCount > 0),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "fragments.import",
+                GraphEditorCommandSourceKind.Kernel,
+                _host.BehaviorOptions.Commands.Fragments.AllowImport && _host.BehaviorOptions.Commands.Nodes.AllowCreate && _host.FragmentWorkspaceExists),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "fragments.clear-workspace",
+                GraphEditorCommandSourceKind.Kernel,
+                _host.BehaviorOptions.Commands.Fragments.AllowClearWorkspaceFragment && _host.FragmentWorkspaceExists),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "fragments.export-template",
+                GraphEditorCommandSourceKind.Kernel,
+                _host.BehaviorOptions.Fragments.EnableFragmentLibrary
+                && _host.BehaviorOptions.Commands.Fragments.AllowTemplateManagement
+                && _host.BehaviorOptions.Commands.Fragments.AllowExport
+                && _host.SelectedNodeCount > 0),
             GraphEditorCommandDescriptorCatalog.Create(
                 "nodes.move",
                 GraphEditorCommandSourceKind.Kernel,
@@ -410,6 +439,21 @@ internal sealed class GraphEditorKernelCommandRouter
             case "clipboard.paste":
                 _ = _host.TryPasteSelectionAsync(CancellationToken.None);
                 return true;
+
+            case "fragments.export-selection":
+                return _host.TryExportSelectionFragment(command.TryGetArgument("path", out var exportPath) ? exportPath : null);
+
+            case "fragments.import":
+                return _host.TryImportFragment(command.TryGetArgument("path", out var importPath) ? importPath : null);
+
+            case "fragments.clear-workspace":
+                return _host.TryClearWorkspaceFragment(command.TryGetArgument("path", out var clearPath) ? clearPath : null);
+
+            case "fragments.export-template":
+                var name = command.TryGetArgument("name", out var rawName) && !string.IsNullOrWhiteSpace(rawName)
+                    ? rawName
+                    : null;
+                return !string.IsNullOrWhiteSpace(_host.TryExportSelectionAsTemplate(name));
 
             case "nodes.move":
                 var positions = command.GetArguments("position")

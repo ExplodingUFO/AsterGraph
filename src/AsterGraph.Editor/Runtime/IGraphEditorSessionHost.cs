@@ -29,6 +29,12 @@ internal interface IGraphEditorSessionHost
     void DeleteSelection();
     Task<bool> TryCopySelectionAsync(CancellationToken cancellationToken);
     Task<bool> TryPasteSelectionAsync(CancellationToken cancellationToken);
+    bool TryExportSelectionFragment(string? path);
+    bool TryImportFragment(string? path);
+    bool TryClearWorkspaceFragment(string? path);
+    string TryExportSelectionAsTemplate(string? name);
+    bool TryImportFragmentTemplate(string path);
+    bool TryDeleteFragmentTemplate(string path);
     void SetNodePositions(IReadOnlyList<NodePositionSnapshot> positions, bool updateStatus);
     bool TrySetNodeWidth(string nodeId, double width, bool updateStatus);
     bool TrySetNodeSize(string nodeId, GraphSize size, bool updateStatus);
@@ -75,7 +81,9 @@ internal interface IGraphEditorSessionHost
     GraphEditorSelectionSnapshot GetSelectionSnapshot();
     GraphEditorViewportSnapshot GetViewportSnapshot();
     GraphEditorCapabilitySnapshot GetCapabilitySnapshot();
+    GraphEditorFragmentStorageSnapshot GetFragmentStorageSnapshot();
     IReadOnlyList<GraphEditorFeatureDescriptorSnapshot> GetFeatureDescriptors();
+    IReadOnlyList<GraphEditorFragmentTemplateSnapshot> GetFragmentTemplateSnapshots();
     IReadOnlyList<GraphEditorNodeSurfaceSnapshot> GetNodeSurfaceSnapshots();
     IReadOnlyList<GraphEditorCompositeNodeSnapshot> GetCompositeNodeSnapshots();
     GraphEditorScopeNavigationSnapshot GetScopeNavigationSnapshot()

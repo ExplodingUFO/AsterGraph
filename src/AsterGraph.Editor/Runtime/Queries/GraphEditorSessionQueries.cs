@@ -36,6 +36,9 @@ public sealed partial class GraphEditorSession
     public GraphEditorCapabilitySnapshot GetCapabilitySnapshot()
         => _host.GetCapabilitySnapshot();
 
+    public GraphEditorFragmentStorageSnapshot GetFragmentStorageSnapshot()
+        => _host.GetFragmentStorageSnapshot();
+
     public IReadOnlyList<GraphEditorFeatureDescriptorSnapshot> GetFeatureDescriptors()
     {
         var capabilities = GetCapabilitySnapshot();
@@ -65,6 +68,8 @@ public sealed partial class GraphEditorSession
                 new GraphEditorFeatureDescriptorSnapshot("capability.viewport.fit", "capability", capabilities.CanFitToViewport),
                 new GraphEditorFeatureDescriptorSnapshot("capability.viewport.center", "capability", capabilities.CanCenterViewport),
                 new GraphEditorFeatureDescriptorSnapshot("query.plugin-load-snapshots", "query", _descriptorSupport?.HasPluginLoader ?? false),
+                new GraphEditorFeatureDescriptorSnapshot("query.fragment-storage-snapshot", "query", _descriptorSupport?.HasFragmentWorkspaceService ?? false),
+                new GraphEditorFeatureDescriptorSnapshot("query.fragment-template-snapshots", "query", _descriptorSupport?.HasFragmentLibraryService ?? false),
                 new GraphEditorFeatureDescriptorSnapshot("query.registered-node-definitions", "query", supportsDefinitionMetadata),
                 new GraphEditorFeatureDescriptorSnapshot("query.stencil-item-snapshots", "query", supportsDefinitionMetadata),
                 new GraphEditorFeatureDescriptorSnapshot("query.shared-selection-definition", "query", supportsDefinitionMetadata),
@@ -94,6 +99,9 @@ public sealed partial class GraphEditorSession
 
         return descriptors;
     }
+
+    public IReadOnlyList<GraphEditorFragmentTemplateSnapshot> GetFragmentTemplateSnapshots()
+        => _host.GetFragmentTemplateSnapshots();
 
     public IReadOnlyList<INodeDefinition> GetRegisteredNodeDefinitions()
         => _descriptorSupport?.Definitions

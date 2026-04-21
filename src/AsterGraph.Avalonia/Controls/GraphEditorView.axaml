@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:controls="using:AsterGraph.Avalonia.Controls"
+             xmlns:runtime="using:AsterGraph.Editor.Runtime"
              x:Class="AsterGraph.Avalonia.Controls.GraphEditorView"
              x:Name="Root"
              Focusable="True">
@@ -198,49 +199,35 @@
                            FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                            FontWeight="Bold"
                            Foreground="{DynamicResource AsterGraph.EyebrowBrush}" />
-                <TextBlock Text="{Binding FragmentCaption}"
+                <TextBlock x:Name="PART_FragmentCaptionText"
                            FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                            TextWrapping="Wrap"
                            Foreground="{DynamicResource AsterGraph.BodyBrush}" />
-                <TextBlock Text="{Binding FragmentStatusCaption}"
+                <TextBlock x:Name="PART_FragmentStatusText"
                            FontSize="{DynamicResource AsterGraph.InspectorCaptionFontSize}"
                            TextWrapping="Wrap"
                            Foreground="{DynamicResource AsterGraph.EyebrowBrush}" />
-                <WrapPanel Orientation="Horizontal">
-                  <Button Classes="astergraph-toolbar-action"
-                          Command="{Binding ExportSelectionFragmentCommand}"
-                          Content="导出片段" />
-                  <Button Classes="astergraph-toolbar-action"
-                          Command="{Binding ImportFragmentCommand}"
-                          Content="导入片段" />
-                  <Button Classes="astergraph-toolbar-action"
-                          Command="{Binding ClearFragmentCommand}"
-                          Content="清空片段" />
-                  <Button Classes="astergraph-toolbar-action"
-                          Command="{Binding ExportSelectionAsTemplateCommand}"
-                          Content="另存为模板" />
-                </WrapPanel>
-                <TextBlock Text="{Binding FragmentLibraryCaption}"
+                <WrapPanel x:Name="PART_FragmentActionToolbar"
+                           Orientation="Horizontal" />
+                <TextBlock x:Name="PART_FragmentLibraryGuidanceText"
+                           FontSize="{DynamicResource AsterGraph.InspectorCaptionFontSize}"
+                           TextWrapping="Wrap"
+                           Foreground="{DynamicResource AsterGraph.HighlightBrush}"
+                           Text="这里保存的是可复用片段；节点库负责插入节点，命令面板负责动作。" />
+                <TextBlock x:Name="PART_FragmentLibraryCaptionText"
                            FontSize="{DynamicResource AsterGraph.InspectorCaptionFontSize}"
                            TextWrapping="Wrap"
                            Foreground="{DynamicResource AsterGraph.EyebrowBrush}" />
-                <ComboBox ItemsSource="{Binding FragmentTemplates}"
-                          SelectedItem="{Binding SelectedFragmentTemplate}"
-                          DisplayMemberBinding="{Binding Name}"
-                          Classes="astergraph-input"
-                          IsVisible="{Binding BehaviorOptions.Fragments.EnableFragmentLibrary}" />
-                <WrapPanel Orientation="Horizontal"
-                           IsVisible="{Binding BehaviorOptions.Fragments.EnableFragmentLibrary}">
-                  <Button Classes="astergraph-toolbar-action"
-                          Command="{Binding RefreshFragmentTemplatesCommand}"
-                          Content="刷新模板" />
-                  <Button Classes="astergraph-toolbar-action"
-                          Command="{Binding ImportSelectedTemplateCommand}"
-                          Content="导入模板" />
-                  <Button Classes="astergraph-toolbar-action"
-                          Command="{Binding DeleteSelectedTemplateCommand}"
-                          Content="删除模板" />
-                </WrapPanel>
+                <ComboBox x:Name="PART_FragmentTemplatePicker"
+                          Classes="astergraph-input">
+                  <ComboBox.ItemTemplate>
+                    <DataTemplate x:DataType="runtime:GraphEditorFragmentTemplateSnapshot">
+                      <TextBlock Text="{Binding Name}" />
+                    </DataTemplate>
+                  </ComboBox.ItemTemplate>
+                </ComboBox>
+                <WrapPanel x:Name="PART_FragmentTemplateActionToolbar"
+                           Orientation="Horizontal" />
               </StackPanel>
             </Border>
 

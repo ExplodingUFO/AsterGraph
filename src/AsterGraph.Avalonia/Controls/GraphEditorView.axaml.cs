@@ -125,6 +125,12 @@ public partial class GraphEditorView : UserControl
     private WrapPanel? _compositeWorkflowToolbar;
     private WrapPanel? _scopeBreadcrumbs;
     private StackPanel? _shortcutHelpList;
+    private TextBlock? _fragmentCaptionText;
+    private TextBlock? _fragmentStatusText;
+    private WrapPanel? _fragmentActionToolbar;
+    private TextBlock? _fragmentLibraryCaptionText;
+    private ComboBox? _fragmentTemplatePicker;
+    private WrapPanel? _fragmentTemplateActionToolbar;
     private Button? _openCommandPaletteButton;
     private Border? _commandPaletteChrome;
     private TextBox? _commandPaletteSearchBox;
@@ -133,6 +139,7 @@ public partial class GraphEditorView : UserControl
     private double _defaultShellColumnSpacing;
     private readonly GraphEditorViewCompositionCoordinator _compositionCoordinator;
     private string _commandPaletteFilter = string.Empty;
+    private string? _selectedFragmentTemplatePath;
     private AsterGraphHostedActionDescriptor? _commandPaletteAction;
 
     /// <summary>
@@ -329,6 +336,12 @@ public partial class GraphEditorView : UserControl
         _compositeWorkflowToolbar = this.FindControl<WrapPanel>("PART_CompositeWorkflowToolbar");
         _scopeBreadcrumbs = this.FindControl<WrapPanel>("PART_ScopeBreadcrumbs");
         _shortcutHelpList = this.FindControl<StackPanel>("PART_ShortcutHelpList");
+        _fragmentCaptionText = this.FindControl<TextBlock>("PART_FragmentCaptionText");
+        _fragmentStatusText = this.FindControl<TextBlock>("PART_FragmentStatusText");
+        _fragmentActionToolbar = this.FindControl<WrapPanel>("PART_FragmentActionToolbar");
+        _fragmentLibraryCaptionText = this.FindControl<TextBlock>("PART_FragmentLibraryCaptionText");
+        _fragmentTemplatePicker = this.FindControl<ComboBox>("PART_FragmentTemplatePicker");
+        _fragmentTemplateActionToolbar = this.FindControl<WrapPanel>("PART_FragmentTemplateActionToolbar");
         _openCommandPaletteButton = this.FindControl<Button>("PART_OpenCommandPaletteButton");
         _commandPaletteChrome = this.FindControl<Border>("PART_CommandPaletteChrome");
         _commandPaletteSearchBox = this.FindControl<TextBox>("PART_CommandPaletteSearchBox");
@@ -344,6 +357,11 @@ public partial class GraphEditorView : UserControl
         if (_commandPaletteSearchBox is not null)
         {
             _commandPaletteSearchBox.TextChanged += HandleCommandPaletteSearchChanged;
+        }
+
+        if (_fragmentTemplatePicker is not null)
+        {
+            _fragmentTemplatePicker.SelectionChanged += HandleFragmentTemplateSelectionChanged;
         }
 
         if (_nodeCanvas is not null)
@@ -409,6 +427,12 @@ public partial class GraphEditorView : UserControl
         BuildCommandPaletteItems(CreateCommandSurfaceProjection());
     }
 
+    private void HandleFragmentTemplateSelectionChanged(object? sender, SelectionChangedEventArgs args)
+    {
+        _selectedFragmentTemplatePath = (_fragmentTemplatePicker?.SelectedItem as GraphEditorFragmentTemplateSnapshot)?.Path;
+        BuildFragmentTemplateActionToolbar();
+    }
+
     private void AttachCommandSurfaceSubscriptions(GraphEditorViewModel? editor)
     {
         if (editor is null)
@@ -450,6 +474,7 @@ public partial class GraphEditorView : UserControl
     {
         var projection = CreateCommandSurfaceProjection();
         BuildStencilLibrary();
+        BuildFragmentLibrary(projection);
         RefreshCommandPaletteButton(projection);
         BuildHeaderToolbar(projection);
         BuildCompositeWorkflowToolbar(projection);
@@ -500,6 +525,74 @@ public partial class GraphEditorView : UserControl
         {
             _headerToolbar.Children.Add(CreateActionButton(action, $"PART_HeaderCommand_{action.Id}"));
         }
+    }
+
+    private void BuildFragmentLibrary(AsterGraphHostedActionProjection? projection)
+    {
+        if (_fragmentActionToolbar is null
+            && _fragmentCaptionText is null
+            && _fragmentStatusText is null
+            && _fragmentLibraryCaptionText is null
+            && _fragmentTemplatePicker is null
+            && _fragmentTemplateActionToolbar is null)
+        {
+            return;
+        }
+
+        if (Editor is null)
+        {
+            ClearFragmentLibrary();
+            return;
+        }
+
+        var storage = Editor.Session.Queries.GetFragmentStorageSnapshot();
+        var templates = Editor.Session.Queries.GetFragmentTemplateSnapshots();
+
+        if (_fragmentCaptionText is not null)
+        {
+            _fragmentCaptionText.Text = CreateFragmentCaption(storage);
+        }
+
+        if (_fragmentStatusText is not null)
+        {
+            _fragmentStatusText.Text = CreateFragmentStatusCaption(storage);
+        }
+
+        if (_fragmentLibraryCaptionText is not null)
+        {
+            _fragmentLibraryCaptionText.Text = CreateFragmentLibraryCaption(storage, templates);
+        }
+
+        if (_fragmentActionToolbar is not null)
+        {
+            _fragmentActionToolbar.Children.Clear();
+            if (projection is not null)
+            {
+                foreach (var action in projection.Select(
+                    [
+                        "fragments.export-selection",
+                        "fragments.import",
+                        "fragments.clear-workspace",
+                        "fragments.export-template",
+                    ]))
+                {
+                    _fragmentActionToolbar.Children.Add(CreateActionButton(
+                        action,
+                        $"PART_FragmentAction_{action.Id}"));
+                }
+            }
+        }
+
+        if (_fragmentTemplatePicker is not null)
+        {
+            _selectedFragmentTemplatePath = ResolveSelectedTemplatePath(templates);
+            _fragmentTemplatePicker.ItemsSource = templates;
+            _fragmentTemplatePicker.SelectedItem = templates.FirstOrDefault(
+                template => string.Equals(template.Path, _selectedFragmentTemplatePath, StringComparison.Ordinal));
+            _fragmentTemplatePicker.IsEnabled = storage.IsTemplateLibraryEnabled && templates.Count > 0;
+        }
+
+        BuildFragmentTemplateActionToolbar();
     }
 
     private void BuildCompositeWorkflowToolbar(AsterGraphHostedActionProjection? projection)
@@ -791,6 +884,162 @@ public partial class GraphEditorView : UserControl
         => this.TryGetResource(key, ActualThemeVariant, out var resource)
             ? resource as global::Avalonia.Media.IBrush
             : null;
+
+    private void ClearFragmentLibrary()
+    {
+        _selectedFragmentTemplatePath = null;
+        if (_fragmentCaptionText is not null)
+        {
+            _fragmentCaptionText.Text = string.Empty;
+        }
+
+        if (_fragmentStatusText is not null)
+        {
+            _fragmentStatusText.Text = string.Empty;
+        }
+
+        if (_fragmentLibraryCaptionText is not null)
+        {
+            _fragmentLibraryCaptionText.Text = string.Empty;
+        }
+
+        if (_fragmentActionToolbar is not null)
+        {
+            _fragmentActionToolbar.Children.Clear();
+        }
+
+        if (_fragmentTemplateActionToolbar is not null)
+        {
+            _fragmentTemplateActionToolbar.Children.Clear();
+        }
+
+        if (_fragmentTemplatePicker is not null)
+        {
+            _fragmentTemplatePicker.ItemsSource = null;
+            _fragmentTemplatePicker.SelectedItem = null;
+            _fragmentTemplatePicker.IsEnabled = false;
+        }
+    }
+
+    private void BuildFragmentTemplateActionToolbar()
+    {
+        if (_fragmentTemplateActionToolbar is null)
+        {
+            return;
+        }
+
+        _fragmentTemplateActionToolbar.Children.Clear();
+        if (Editor is null)
+        {
+            return;
+        }
+
+        var storage = Editor.Session.Queries.GetFragmentStorageSnapshot();
+        var templates = Editor.Session.Queries.GetFragmentTemplateSnapshots();
+        var selectedTemplate = templates.FirstOrDefault(
+            template => string.Equals(template.Path, _selectedFragmentTemplatePath, StringComparison.Ordinal));
+        var importAction = CreateFragmentTemplateAction(
+            "fragments.import-template",
+            "Import Template",
+            storage.CanImportFragmentTemplate,
+            storage.IsTemplateLibraryEnabled,
+            selectedTemplate,
+            path => Editor.Session.Commands.TryImportFragmentTemplate(path));
+        var deleteAction = CreateFragmentTemplateAction(
+            "fragments.delete-template",
+            "Delete Template",
+            storage.CanDeleteFragmentTemplate,
+            storage.IsTemplateLibraryEnabled,
+            selectedTemplate,
+            path => Editor.Session.Commands.TryDeleteFragmentTemplate(path));
+
+        _fragmentTemplateActionToolbar.Children.Add(CreateActionButton(importAction, "PART_FragmentTemplateImportButton"));
+        _fragmentTemplateActionToolbar.Children.Add(CreateActionButton(deleteAction, "PART_FragmentTemplateDeleteButton"));
+    }
+
+    private AsterGraphHostedActionDescriptor CreateFragmentTemplateAction(
+        string id,
+        string title,
+        bool canExecute,
+        bool isLibraryEnabled,
+        GraphEditorFragmentTemplateSnapshot? selectedTemplate,
+        Func<string, bool> execute)
+    {
+        var disabledReason = GetFragmentTemplateDisabledReason(canExecute, isLibraryEnabled, selectedTemplate);
+        return AsterGraphHostedActionFactory.CreateHostAction(
+            new GraphEditorCommandDescriptorSnapshot(
+                id,
+                title,
+                "fragments",
+                null,
+                null,
+                GraphEditorCommandSourceKind.Host,
+                disabledReason is null,
+                disabledReason),
+            () => selectedTemplate is not null && execute(selectedTemplate.Path));
+    }
+
+    private static string? GetFragmentTemplateDisabledReason(
+        bool canExecute,
+        bool isLibraryEnabled,
+        GraphEditorFragmentTemplateSnapshot? selectedTemplate)
+    {
+        if (!isLibraryEnabled)
+        {
+            return "Fragment template library is disabled.";
+        }
+
+        if (!canExecute)
+        {
+            return "Fragment template actions are disabled by host permissions.";
+        }
+
+        if (selectedTemplate is null)
+        {
+            return "Choose a fragment template first.";
+        }
+
+        return null;
+    }
+
+    private string? ResolveSelectedTemplatePath(IReadOnlyList<GraphEditorFragmentTemplateSnapshot> templates)
+    {
+        if (templates.Count == 0)
+        {
+            return null;
+        }
+
+        if (!string.IsNullOrWhiteSpace(_selectedFragmentTemplatePath)
+            && templates.Any(template => string.Equals(template.Path, _selectedFragmentTemplatePath, StringComparison.Ordinal)))
+        {
+            return _selectedFragmentTemplatePath;
+        }
+
+        return templates[0].Path;
+    }
+
+    private static string CreateFragmentCaption(GraphEditorFragmentStorageSnapshot storage)
+    {
+        var availability = storage.HasWorkspaceFragment
+            ? "Fragment available"
+            : "No fragment file";
+        return $"{availability}  ·  {storage.WorkspaceFragmentPath}";
+    }
+
+    private static string CreateFragmentStatusCaption(GraphEditorFragmentStorageSnapshot storage)
+        => !storage.HasWorkspaceFragment || storage.WorkspaceFragmentLastModified is null
+            ? "No saved fragment file."
+            : $"Last updated {storage.WorkspaceFragmentLastModified.Value:yyyy-MM-dd HH:mm:ss}";
+
+    private static string CreateFragmentLibraryCaption(
+        GraphEditorFragmentStorageSnapshot storage,
+        IReadOnlyList<GraphEditorFragmentTemplateSnapshot> templates)
+    {
+        var templateState = templates.Count > 0
+            ? $"{templates.Count} templates"
+            : "No templates";
+        return $"{templateState}  ·  {storage.TemplateLibraryPath}";
+    }
 
     private void ToggleCommandPalette()
     {

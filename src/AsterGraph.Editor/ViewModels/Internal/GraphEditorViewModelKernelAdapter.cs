@@ -72,6 +72,24 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
     public Task<bool> TryPasteSelectionAsync(CancellationToken cancellationToken)
         => _kernel.TryPasteSelectionAsync(cancellationToken);
 
+    public bool TryExportSelectionFragment(string? path)
+        => _kernel.TryExportSelectionFragment(path);
+
+    public bool TryImportFragment(string? path)
+        => _kernel.TryImportFragment(path);
+
+    public bool TryClearWorkspaceFragment(string? path)
+        => _kernel.TryClearWorkspaceFragment(path);
+
+    public string TryExportSelectionAsTemplate(string? name)
+        => _kernel.TryExportSelectionAsTemplate(name);
+
+    public bool TryImportFragmentTemplate(string path)
+        => _kernel.TryImportFragmentTemplate(path);
+
+    public bool TryDeleteFragmentTemplate(string path)
+        => _kernel.TryDeleteFragmentTemplate(path);
+
     public void SetNodePositions(IReadOnlyList<NodePositionSnapshot> positions, bool updateStatus)
         => _kernel.SetNodePositions(positions, updateStatus);
 
@@ -179,7 +197,12 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
 
     public GraphEditorCapabilitySnapshot GetCapabilitySnapshot() => _kernel.GetCapabilitySnapshot();
 
+    public GraphEditorFragmentStorageSnapshot GetFragmentStorageSnapshot() => _kernel.GetFragmentStorageSnapshot();
+
     public IReadOnlyList<GraphEditorFeatureDescriptorSnapshot> GetFeatureDescriptors() => _kernel.GetFeatureDescriptors();
+
+    public IReadOnlyList<GraphEditorFragmentTemplateSnapshot> GetFragmentTemplateSnapshots()
+        => _kernel.GetFragmentTemplateSnapshots();
 
     public IReadOnlyList<GraphEditorNodeSurfaceSnapshot> GetNodeSurfaceSnapshots() => _kernel.GetNodeSurfaceSnapshots();
 
@@ -197,8 +220,6 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
         var descriptors = _kernel.GetCommandDescriptors()
             .Concat(
             [
-                GraphEditorCommandDescriptorCatalog.Create("fragments.export-selection", GraphEditorCommandSourceKind.Retained, _owner.CanExportSelectionFragment),
-                GraphEditorCommandDescriptorCatalog.Create("fragments.import", GraphEditorCommandSourceKind.Retained, _owner.CanImportFragment),
                 GraphEditorCommandDescriptorCatalog.Create("nodes.inspect", GraphEditorCommandSourceKind.Retained, true),
                 GraphEditorCommandDescriptorCatalog.Create("nodes.delete-by-id", GraphEditorCommandSourceKind.Retained, _owner.CommandPermissions.Nodes.AllowDelete),
                 GraphEditorCommandDescriptorCatalog.Create("nodes.duplicate", GraphEditorCommandSourceKind.Retained, _owner.CommandPermissions.Nodes.AllowDuplicate),
@@ -223,14 +244,6 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
 
         switch (command.CommandId)
         {
-            case "fragments.export-selection":
-                _owner.ExportSelectionFragment();
-                return true;
-
-            case "fragments.import":
-                _owner.ImportFragment();
-                return true;
-
             case "nodes.inspect":
                 if (!TryGetRequiredArgument(command, "nodeId", out var inspectNodeId))
                 {

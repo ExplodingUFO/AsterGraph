@@ -29,6 +29,8 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
     private readonly INodeCatalog _nodeCatalog;
     private readonly IPortCompatibilityService _compatibilityService;
     private readonly IGraphWorkspaceService _workspaceService;
+    private readonly IGraphFragmentWorkspaceService _fragmentWorkspaceService;
+    private readonly IGraphFragmentLibraryService _fragmentLibraryService;
     private readonly GraphEditorHistoryService _historyService = new();
     private readonly GraphEditorKernelViewportCoordinator _viewportCoordinator = new(DefaultZoom, DefaultPanX, DefaultPanY);
     private readonly GraphEditorKernelCompatibilityQueries _compatibilityQueries;
@@ -42,6 +44,8 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
     private IGraphTextClipboardBridge? _textClipboardBridge;
     private readonly GraphEditorKernelClipboardHost _clipboardHost;
     private readonly GraphEditorKernelClipboardCoordinator _clipboardCoordinator;
+    private readonly GraphEditorKernelFragmentStorageHost _fragmentStorageHost;
+    private readonly GraphEditorKernelFragmentStorageCoordinator _fragmentStorageCoordinator;
     private readonly GraphEditorKernelCommandRouterHost _commandRouterHost;
     private readonly GraphEditorKernelCommandRouter _commandRouter;
     private readonly GraphEditorKernelHistoryCoordinator _historyCoordinator;
@@ -70,6 +74,8 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
         INodeCatalog nodeCatalog,
         IPortCompatibilityService compatibilityService,
         IGraphWorkspaceService workspaceService,
+        IGraphFragmentWorkspaceService fragmentWorkspaceService,
+        IGraphFragmentLibraryService fragmentLibraryService,
         GraphEditorStyleOptions styleOptions,
         GraphEditorBehaviorOptions behaviorOptions,
         IGraphTextClipboardBridge? textClipboardBridge = null,
@@ -79,11 +85,15 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
         ArgumentNullException.ThrowIfNull(nodeCatalog);
         ArgumentNullException.ThrowIfNull(compatibilityService);
         ArgumentNullException.ThrowIfNull(workspaceService);
+        ArgumentNullException.ThrowIfNull(fragmentWorkspaceService);
+        ArgumentNullException.ThrowIfNull(fragmentLibraryService);
         _document = _documentMutator.NormalizeNodeGroupBounds(CloneDocument(document));
         _activeGraphId = _document.RootGraphId;
         _nodeCatalog = nodeCatalog;
         _compatibilityService = compatibilityService;
         _workspaceService = workspaceService;
+        _fragmentWorkspaceService = fragmentWorkspaceService;
+        _fragmentLibraryService = fragmentLibraryService;
         _textClipboardBridge = textClipboardBridge;
         _clipboardPayloadSerializer = clipboardPayloadSerializer ?? new GraphClipboardPayloadSerializer();
         _compatibilityQueries = new GraphEditorKernelCompatibilityQueries(compatibilityService, nodeCatalog);
@@ -95,6 +105,8 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
         _connectionMutationCoordinator = new GraphEditorKernelConnectionMutationCoordinator(_connectionMutationHost, _documentMutator);
         _clipboardHost = new GraphEditorKernelClipboardHost(this);
         _clipboardCoordinator = new GraphEditorKernelClipboardCoordinator(_clipboardHost);
+        _fragmentStorageHost = new GraphEditorKernelFragmentStorageHost(this);
+        _fragmentStorageCoordinator = new GraphEditorKernelFragmentStorageCoordinator(_fragmentStorageHost, _clipboardCoordinator);
         _commandRouterHost = new GraphEditorKernelCommandRouterHost(this);
         _commandRouter = new GraphEditorKernelCommandRouter(_commandRouterHost);
         _historyCoordinator = new GraphEditorKernelHistoryCoordinator(this);
@@ -123,17 +135,8 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
     public event EventHandler<GraphEditorDocumentChangedEventArgs>? DocumentChanged;
     public event EventHandler<GraphEditorSelectionChangedEventArgs>? SelectionChanged;
     public event EventHandler<GraphEditorViewportChangedEventArgs>? ViewportChanged;
-    public event EventHandler<GraphEditorFragmentEventArgs>? FragmentExported
-    {
-        add { }
-        remove { }
-    }
-
-    public event EventHandler<GraphEditorFragmentEventArgs>? FragmentImported
-    {
-        add { }
-        remove { }
-    }
+    public event EventHandler<GraphEditorFragmentEventArgs>? FragmentExported;
+    public event EventHandler<GraphEditorFragmentEventArgs>? FragmentImported;
     public event EventHandler<GraphEditorPendingConnectionChangedEventArgs>? PendingConnectionChanged;
     public event EventHandler<GraphEditorRecoverableFailureEventArgs>? RecoverableFailureRaised;
     public event Action<GraphEditorDiagnostic>? DiagnosticPublished;
@@ -172,6 +175,24 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
 
     public Task<bool> TryPasteSelectionAsync(CancellationToken cancellationToken)
         => _clipboardCoordinator.TryPasteSelectionAsync(cancellationToken);
+
+    public bool TryExportSelectionFragment(string? path)
+        => _fragmentStorageCoordinator.TryExportSelectionFragment(path);
+
+    public bool TryImportFragment(string? path)
+        => _fragmentStorageCoordinator.TryImportFragment(path);
+
+    public bool TryClearWorkspaceFragment(string? path)
+        => _fragmentStorageCoordinator.TryClearWorkspaceFragment(path);
+
+    public string TryExportSelectionAsTemplate(string? name)
+        => _fragmentStorageCoordinator.TryExportSelectionAsTemplate(name);
+
+    public bool TryImportFragmentTemplate(string path)
+        => _fragmentStorageCoordinator.TryImportFragmentTemplate(path);
+
+    public bool TryDeleteFragmentTemplate(string path)
+        => _fragmentStorageCoordinator.TryDeleteFragmentTemplate(path);
 
     public void SetNodePositions(IReadOnlyList<NodePositionSnapshot> positions, bool updateStatus)
         => _nodeMutationCoordinator.SetNodePositions(positions, updateStatus);
@@ -1111,8 +1132,14 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
     public GraphEditorCapabilitySnapshot GetCapabilitySnapshot()
         => _projectionCoordinator.GetCapabilitySnapshot();
 
+    public GraphEditorFragmentStorageSnapshot GetFragmentStorageSnapshot()
+        => _fragmentStorageCoordinator.GetStorageSnapshot();
+
     public IReadOnlyList<GraphEditorFeatureDescriptorSnapshot> GetFeatureDescriptors()
         => _projectionCoordinator.GetFeatureDescriptors();
+
+    public IReadOnlyList<GraphEditorFragmentTemplateSnapshot> GetFragmentTemplateSnapshots()
+        => _fragmentStorageCoordinator.GetTemplateSnapshots();
 
     public IReadOnlyList<GraphEditorNodeSurfaceSnapshot> GetNodeSurfaceSnapshots()
         => GetActiveGraphScope().Nodes
@@ -1133,6 +1160,25 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
     {
         var measurement = GraphEditorNodeSurfaceMeasurer.Measure(GraphEditorNodeSurfacePlanner.Create(node, definition));
         return GraphEditorNodeSurfaceMetrics.NormalizePersistedSize(requestedSize, measurement);
+    }
+
+    internal string? GetSelectedNodeTitle()
+    {
+        if (_selectedNodeIds.Count == 0)
+        {
+            return null;
+        }
+
+        var nodesById = GetActiveGraphScope().Nodes.ToDictionary(node => node.Id, StringComparer.Ordinal);
+        if (!string.IsNullOrWhiteSpace(_primarySelectedNodeId)
+            && nodesById.TryGetValue(_primarySelectedNodeId, out var primaryNode))
+        {
+            return primaryNode.Title;
+        }
+
+        return _selectedNodeIds
+            .Select(nodeId => nodesById.TryGetValue(nodeId, out var node) ? node.Title : null)
+            .FirstOrDefault(title => !string.IsNullOrWhiteSpace(title));
     }
 
     public IReadOnlyList<GraphEditorCompositeNodeSnapshot> GetCompositeNodeSnapshots()

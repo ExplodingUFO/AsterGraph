@@ -64,6 +64,54 @@ public interface IGraphEditorCommands
         => throw new NotSupportedException();
 
     /// <summary>
+    /// Attempts to export the current selection into the default fragment workspace file or a caller-specified path.
+    /// </summary>
+    /// <param name="path">Optional fragment file path override.</param>
+    /// <returns><see langword="true"/> when a fragment is produced and saved.</returns>
+    bool TryExportSelectionFragment(string? path = null)
+        => throw new NotSupportedException();
+
+    /// <summary>
+    /// Attempts to import one saved fragment file and paste it into the active graph scope.
+    /// </summary>
+    /// <param name="path">Optional fragment file path override.</param>
+    /// <returns><see langword="true"/> when the fragment is loaded and pasted.</returns>
+    bool TryImportFragment(string? path = null)
+        => throw new NotSupportedException();
+
+    /// <summary>
+    /// Attempts to delete the default fragment workspace file or a caller-specified path.
+    /// </summary>
+    /// <param name="path">Optional fragment file path override.</param>
+    /// <returns><see langword="true"/> when a saved fragment file is deleted.</returns>
+    bool TryClearWorkspaceFragment(string? path = null)
+        => throw new NotSupportedException();
+
+    /// <summary>
+    /// Attempts to export the current selection into the fragment template library.
+    /// </summary>
+    /// <param name="name">Optional template name override.</param>
+    /// <returns>The saved template path, or an empty string when export fails.</returns>
+    string TryExportSelectionAsTemplate(string? name = null)
+        => throw new NotSupportedException();
+
+    /// <summary>
+    /// Attempts to import one saved fragment template by path and paste it into the active graph scope.
+    /// </summary>
+    /// <param name="path">Saved template path.</param>
+    /// <returns><see langword="true"/> when the template is loaded and pasted.</returns>
+    bool TryImportFragmentTemplate(string path)
+        => throw new NotSupportedException();
+
+    /// <summary>
+    /// Attempts to delete one saved fragment template by path.
+    /// </summary>
+    /// <param name="path">Saved template path.</param>
+    /// <returns><see langword="true"/> when the template is deleted.</returns>
+    bool TryDeleteFragmentTemplate(string path)
+        => throw new NotSupportedException();
+
+    /// <summary>
     /// 批量设置节点位置。
     /// </summary>
     /// <param name="positions">目标节点位置集合。</param>

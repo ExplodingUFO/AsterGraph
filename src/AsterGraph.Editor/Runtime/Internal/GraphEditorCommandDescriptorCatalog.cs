@@ -49,6 +49,8 @@ internal static class GraphEditorCommandDescriptorCatalog
             ["clipboard.paste"] = new("Paste Selection", "clipboard", "paste", "Ctrl+V"),
             ["fragments.export-selection"] = new("Export Selection Fragment", "fragments", "export", null),
             ["fragments.import"] = new("Import Fragment", "fragments", "import", null),
+            ["fragments.clear-workspace"] = new("Clear Saved Fragment", "fragments", "delete", null),
+            ["fragments.export-template"] = new("Export Selection As Template", "fragments", "template", null),
             ["layout.align-left"] = new("Align Left", "layout", "align-left", null),
             ["layout.align-center"] = new("Align Center", "layout", "align-center", null),
             ["layout.align-right"] = new("Align Right", "layout", "align-right", null),

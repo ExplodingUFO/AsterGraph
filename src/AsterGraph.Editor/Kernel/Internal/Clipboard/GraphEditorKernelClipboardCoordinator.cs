@@ -94,6 +94,9 @@ internal sealed class GraphEditorKernelClipboardCoordinator
         return true;
     }
 
+    public GraphSelectionFragment? CreateSelectionFragment()
+        => TryCreateSelectionFragment();
+
     public async Task<bool> TryPasteSelectionAsync(CancellationToken cancellationToken)
     {
         if (!_host.CommandPermissions.Clipboard.AllowPaste)
@@ -108,6 +111,14 @@ internal sealed class GraphEditorKernelClipboardCoordinator
             _host.SetStatus("Nothing copied yet.");
             return false;
         }
+
+        return TryPasteFragment(fragment, "Pasted");
+    }
+
+    public bool TryPasteFragment(GraphSelectionFragment fragment, string actionPrefix)
+    {
+        ArgumentNullException.ThrowIfNull(fragment);
+        ArgumentException.ThrowIfNullOrWhiteSpace(actionPrefix);
 
         if (!_host.CommandPermissions.Nodes.AllowCreate)
         {
@@ -179,8 +190,8 @@ internal sealed class GraphEditorKernelClipboardCoordinator
         var selectedNodeIds = pastedNodes.Select(node => node.Id).ToList();
         _host.SetSelection(selectedNodeIds, primaryNodeId ?? selectedNodeIds[^1], updateStatus: false);
         var status = pastedNodes.Count == 1
-            ? $"Pasted {pastedNodes[0].Title}."
-            : $"Pasted {pastedNodes.Count} nodes.";
+            ? $"{actionPrefix} {pastedNodes[0].Title}."
+            : $"{actionPrefix} {pastedNodes.Count} nodes.";
         _host.MarkDirty(
             status,
             GraphEditorDocumentChangeKind.FragmentPasted,
@@ -189,7 +200,7 @@ internal sealed class GraphEditorKernelClipboardCoordinator
         return true;
     }
 
-    private GraphSelectionFragment? CreateSelectionFragment()
+    private GraphSelectionFragment? TryCreateSelectionFragment()
     {
         var activeScope = _host.ActiveScopeDocument;
         var selectedNodes = activeScope.Nodes

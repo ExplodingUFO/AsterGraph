@@ -131,6 +131,8 @@ public static class AsterGraphEditorFactory
             resolved.NodeCatalog,
             resolved.Options.CompatibilityService!,
             resolved.WorkspaceService,
+            resolved.FragmentWorkspaceService,
+            resolved.FragmentLibraryService,
             resolved.StyleOptions,
             resolved.BehaviorOptions,
             resolved.Options.PlatformServices?.TextClipboardBridge,

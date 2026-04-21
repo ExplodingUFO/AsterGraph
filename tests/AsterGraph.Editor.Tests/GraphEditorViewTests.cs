@@ -9,6 +9,7 @@ using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Themes.Fluent;
 using Avalonia.VisualTree;
+using AsterGraph.Abstractions.Catalog;
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Avalonia.Controls;
@@ -380,6 +381,56 @@ public sealed class GraphEditorViewTests
     }
 
     [AvaloniaFact]
+    public void FragmentLibrary_UsesSessionSnapshots_WhenRetainedTemplatesAreCleared()
+    {
+        var storageRoot = Path.Combine(Path.GetTempPath(), "astergraph-view-fragment-tests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(storageRoot);
+        var editor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
+        {
+            Document = new GraphDocument(
+                "View Fragment Graph",
+                "Exercises session-backed fragment library UI.",
+                [
+                    new GraphNode(
+                        "tests.view.fragment-node-001",
+                        "Fragment View Node",
+                        "Tests",
+                        "GraphEditorView",
+                        "Source node for fragment workflow tests.",
+                        new GraphPoint(120, 160),
+                        new GraphSize(240, 160),
+                        [],
+                        [],
+                        "#6AD5C4",
+                        new NodeDefinitionId("tests.view.fragment-node")),
+                ],
+                []),
+            NodeCatalog = CreateFragmentCatalog(),
+            CompatibilityService = new DefaultPortCompatibilityService(),
+            StorageRootPath = storageRoot,
+        });
+        editor.SelectSingleNode(editor.Nodes[0], updateStatus: false);
+        var templatePath = editor.Session.Commands.TryExportSelectionAsTemplate("View Fragment Template");
+        editor.FragmentTemplates.Clear();
+
+        var window = CreateWindow(new GraphEditorView
+        {
+            Editor = editor,
+        });
+        var view = (GraphEditorView)window.Content!;
+        var templatePicker = FindRequiredControl<ComboBox>(view, "PART_FragmentTemplatePicker");
+        var importButton = FindRequiredDescendant<Button>(view, "PART_FragmentTemplateImportButton");
+
+        Assert.Equal(1, templatePicker.ItemCount);
+
+        templatePicker.SelectedIndex = 0;
+        importButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+
+        Assert.Equal(2, editor.Session.Queries.CreateDocumentSnapshot().Nodes.Count);
+        Assert.Equal(templatePath, Assert.Single(editor.Session.Queries.GetFragmentTemplateSnapshots()).Path);
+    }
+
+    [AvaloniaFact]
     public void CompositeWorkflowChrome_WrapSelectionActionCreatesCompositeShell()
     {
         var editor = CreateSelectionEditor();
@@ -509,6 +560,20 @@ public sealed class GraphEditorViewTests
             catalog,
             new DefaultPortCompatibilityService(),
             contextMenuAugmentor: augmentor);
+    }
+
+    private static INodeCatalog CreateFragmentCatalog()
+    {
+        var catalog = new NodeCatalog();
+        catalog.RegisterDefinition(
+            new NodeDefinition(
+                new NodeDefinitionId("tests.view.fragment-node"),
+                "Fragment View Node",
+                "Tests",
+                "Exercises session-backed fragment template surfaces.",
+                [],
+                []));
+        return catalog;
     }
 
     private static GraphEditorViewModel CreateSelectionEditor()

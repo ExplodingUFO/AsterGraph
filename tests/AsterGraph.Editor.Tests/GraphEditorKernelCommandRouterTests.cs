@@ -8,6 +8,7 @@ using AsterGraph.Editor.Catalog;
 using AsterGraph.Editor.Configuration;
 using AsterGraph.Editor.Events;
 using AsterGraph.Editor.Kernel;
+using AsterGraph.Editor.Models;
 using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.Services;
 using Xunit;
@@ -84,9 +85,9 @@ public sealed class GraphEditorKernelCommandRouterTests
             ]);
 
         var expected = """
-            initial:nodes.add:True:-|selection.set:True:-|selection.delete:False:-|clipboard.copy:False:-|clipboard.paste:False:-|nodes.move:True:-|nodes.resize:True:-|nodes.parameters.set:False:Parameter editing requires node-edit permissions and a shared node definition selection.|groups.create:False:-|groups.collapse:False:-|groups.move:False:-|groups.resize:False:-|groups.membership.set:False:-|groups.promote:False:-|layout.align-left:False:-|layout.align-center:False:-|layout.align-right:False:-|layout.align-top:False:-|layout.align-middle:False:-|layout.align-bottom:False:-|layout.distribute-horizontal:False:-|layout.distribute-vertical:False:-|composites.wrap-selection:False:-|composites.expose-port:False:-|composites.unexpose-port:False:-|scopes.enter:False:-|scopes.exit:False:-|connections.start:True:-|connections.complete:False:-|connections.connect:True:-|connections.cancel:False:-|connections.delete:True:-|connections.disconnect:True:-|connections.note.set:False:-|connections.reconnect:False:-|connections.break-port:True:-|connections.disconnect-incoming:True:-|connections.disconnect-outgoing:True:-|connections.disconnect-all:True:-|history.undo:False:-|history.redo:False:-|viewport.fit:True:-|viewport.pan:True:-|viewport.resize:True:-|viewport.reset:True:-|viewport.center-node:True:-|viewport.center:True:-|workspace.save:True:-|workspace.load:False:No saved snapshot yet. Save once to create one.
-            selected:nodes.add:True:-|selection.set:True:-|selection.delete:True:-|clipboard.copy:True:-|clipboard.paste:False:-|nodes.move:True:-|nodes.resize:True:-|nodes.parameters.set:False:Parameter editing requires node-edit permissions and a shared node definition selection.|groups.create:True:-|groups.collapse:False:-|groups.move:False:-|groups.resize:False:-|groups.membership.set:False:-|groups.promote:False:-|layout.align-left:False:-|layout.align-center:False:-|layout.align-right:False:-|layout.align-top:False:-|layout.align-middle:False:-|layout.align-bottom:False:-|layout.distribute-horizontal:False:-|layout.distribute-vertical:False:-|composites.wrap-selection:True:-|composites.expose-port:False:-|composites.unexpose-port:False:-|scopes.enter:False:-|scopes.exit:False:-|connections.start:True:-|connections.complete:False:-|connections.connect:True:-|connections.cancel:False:-|connections.delete:True:-|connections.disconnect:True:-|connections.note.set:False:-|connections.reconnect:False:-|connections.break-port:True:-|connections.disconnect-incoming:True:-|connections.disconnect-outgoing:True:-|connections.disconnect-all:True:-|history.undo:False:-|history.redo:False:-|viewport.fit:True:-|viewport.pan:True:-|viewport.resize:True:-|viewport.reset:True:-|viewport.center-node:True:-|viewport.center:True:-|workspace.save:True:-|workspace.load:False:No saved snapshot yet. Save once to create one.
-            pending:nodes.add:True:-|selection.set:True:-|selection.delete:True:-|clipboard.copy:True:-|clipboard.paste:False:-|nodes.move:True:-|nodes.resize:True:-|nodes.parameters.set:False:Parameter editing requires node-edit permissions and a shared node definition selection.|groups.create:True:-|groups.collapse:False:-|groups.move:False:-|groups.resize:False:-|groups.membership.set:False:-|groups.promote:False:-|layout.align-left:False:-|layout.align-center:False:-|layout.align-right:False:-|layout.align-top:False:-|layout.align-middle:False:-|layout.align-bottom:False:-|layout.distribute-horizontal:False:-|layout.distribute-vertical:False:-|composites.wrap-selection:True:-|composites.expose-port:False:-|composites.unexpose-port:False:-|scopes.enter:False:-|scopes.exit:False:-|connections.start:True:-|connections.complete:True:-|connections.connect:True:-|connections.cancel:True:-|connections.delete:True:-|connections.disconnect:True:-|connections.note.set:False:-|connections.reconnect:False:-|connections.break-port:True:-|connections.disconnect-incoming:True:-|connections.disconnect-outgoing:True:-|connections.disconnect-all:True:-|history.undo:False:-|history.redo:False:-|viewport.fit:True:-|viewport.pan:True:-|viewport.resize:True:-|viewport.reset:True:-|viewport.center-node:True:-|viewport.center:True:-|workspace.save:True:-|workspace.load:False:No saved snapshot yet. Save once to create one.
+            initial:nodes.add:True:-|selection.set:True:-|selection.delete:False:-|clipboard.copy:False:-|clipboard.paste:False:-|fragments.export-selection:False:-|fragments.import:False:-|fragments.clear-workspace:False:-|fragments.export-template:False:-|nodes.move:True:-|nodes.resize:True:-|nodes.parameters.set:False:Parameter editing requires node-edit permissions and a shared node definition selection.|groups.create:False:-|groups.collapse:False:-|groups.move:False:-|groups.resize:False:-|groups.membership.set:False:-|groups.promote:False:-|layout.align-left:False:-|layout.align-center:False:-|layout.align-right:False:-|layout.align-top:False:-|layout.align-middle:False:-|layout.align-bottom:False:-|layout.distribute-horizontal:False:-|layout.distribute-vertical:False:-|composites.wrap-selection:False:-|composites.expose-port:False:-|composites.unexpose-port:False:-|scopes.enter:False:-|scopes.exit:False:-|connections.start:True:-|connections.complete:False:-|connections.connect:True:-|connections.cancel:False:-|connections.delete:True:-|connections.disconnect:True:-|connections.note.set:False:-|connections.reconnect:False:-|connections.break-port:True:-|connections.disconnect-incoming:True:-|connections.disconnect-outgoing:True:-|connections.disconnect-all:True:-|history.undo:False:-|history.redo:False:-|viewport.fit:True:-|viewport.pan:True:-|viewport.resize:True:-|viewport.reset:True:-|viewport.center-node:True:-|viewport.center:True:-|workspace.save:True:-|workspace.load:False:No saved snapshot yet. Save once to create one.
+            selected:nodes.add:True:-|selection.set:True:-|selection.delete:True:-|clipboard.copy:True:-|clipboard.paste:False:-|fragments.export-selection:True:-|fragments.import:False:-|fragments.clear-workspace:False:-|fragments.export-template:True:-|nodes.move:True:-|nodes.resize:True:-|nodes.parameters.set:False:Parameter editing requires node-edit permissions and a shared node definition selection.|groups.create:True:-|groups.collapse:False:-|groups.move:False:-|groups.resize:False:-|groups.membership.set:False:-|groups.promote:False:-|layout.align-left:False:-|layout.align-center:False:-|layout.align-right:False:-|layout.align-top:False:-|layout.align-middle:False:-|layout.align-bottom:False:-|layout.distribute-horizontal:False:-|layout.distribute-vertical:False:-|composites.wrap-selection:True:-|composites.expose-port:False:-|composites.unexpose-port:False:-|scopes.enter:False:-|scopes.exit:False:-|connections.start:True:-|connections.complete:False:-|connections.connect:True:-|connections.cancel:False:-|connections.delete:True:-|connections.disconnect:True:-|connections.note.set:False:-|connections.reconnect:False:-|connections.break-port:True:-|connections.disconnect-incoming:True:-|connections.disconnect-outgoing:True:-|connections.disconnect-all:True:-|history.undo:False:-|history.redo:False:-|viewport.fit:True:-|viewport.pan:True:-|viewport.resize:True:-|viewport.reset:True:-|viewport.center-node:True:-|viewport.center:True:-|workspace.save:True:-|workspace.load:False:No saved snapshot yet. Save once to create one.
+            pending:nodes.add:True:-|selection.set:True:-|selection.delete:True:-|clipboard.copy:True:-|clipboard.paste:False:-|fragments.export-selection:True:-|fragments.import:False:-|fragments.clear-workspace:False:-|fragments.export-template:True:-|nodes.move:True:-|nodes.resize:True:-|nodes.parameters.set:False:Parameter editing requires node-edit permissions and a shared node definition selection.|groups.create:True:-|groups.collapse:False:-|groups.move:False:-|groups.resize:False:-|groups.membership.set:False:-|groups.promote:False:-|layout.align-left:False:-|layout.align-center:False:-|layout.align-right:False:-|layout.align-top:False:-|layout.align-middle:False:-|layout.align-bottom:False:-|layout.distribute-horizontal:False:-|layout.distribute-vertical:False:-|composites.wrap-selection:True:-|composites.expose-port:False:-|composites.unexpose-port:False:-|scopes.enter:False:-|scopes.exit:False:-|connections.start:True:-|connections.complete:True:-|connections.connect:True:-|connections.cancel:True:-|connections.delete:True:-|connections.disconnect:True:-|connections.note.set:False:-|connections.reconnect:False:-|connections.break-port:True:-|connections.disconnect-incoming:True:-|connections.disconnect-outgoing:True:-|connections.disconnect-all:True:-|history.undo:False:-|history.redo:False:-|viewport.fit:True:-|viewport.pan:True:-|viewport.resize:True:-|viewport.reset:True:-|viewport.center-node:True:-|viewport.center:True:-|workspace.save:True:-|workspace.load:False:No saved snapshot yet. Save once to create one.
             """;
 
         Assert.Equal(expected.ReplaceLineEndings("\n"), signature.ReplaceLineEndings("\n"));
@@ -624,6 +625,8 @@ public sealed class GraphEditorKernelCommandRouterTests
             CreateCatalog(),
             new DefaultPortCompatibilityService(),
             workspaceService ?? new EmptyWorkspaceService(),
+            new EmptyFragmentWorkspaceService(),
+            new EmptyFragmentLibraryService(),
             GraphEditorStyleOptions.Default,
             behaviorOptions ?? GraphEditorBehaviorOptions.Default);
 
@@ -635,6 +638,8 @@ public sealed class GraphEditorKernelCommandRouterTests
             CreateCatalog(),
             new DefaultPortCompatibilityService(),
             workspaceService ?? new EmptyWorkspaceService(),
+            new EmptyFragmentWorkspaceService(),
+            new EmptyFragmentLibraryService(),
             GraphEditorStyleOptions.Default,
             behaviorOptions ?? GraphEditorBehaviorOptions.Default);
 
@@ -646,6 +651,8 @@ public sealed class GraphEditorKernelCommandRouterTests
             CreateParameterEndpointCatalog(),
             new DefaultPortCompatibilityService(),
             workspaceService ?? new EmptyWorkspaceService(),
+            new EmptyFragmentWorkspaceService(),
+            new EmptyFragmentLibraryService(),
             GraphEditorStyleOptions.Default,
             behaviorOptions ?? GraphEditorBehaviorOptions.Default);
 
@@ -887,6 +894,43 @@ public sealed class GraphEditorKernelCommandRouterTests
 
         public bool Exists()
             => false;
+    }
+
+    private sealed class EmptyFragmentWorkspaceService : IGraphFragmentWorkspaceService
+    {
+        public string FragmentPath => "fragment://empty";
+
+        public void Save(GraphSelectionFragment fragment, string? path = null)
+        {
+        }
+
+        public GraphSelectionFragment Load(string? path = null)
+            => throw new InvalidOperationException("No saved fragment.");
+
+        public bool Exists(string? path = null)
+            => false;
+
+        public void Delete(string? path = null)
+        {
+        }
+    }
+
+    private sealed class EmptyFragmentLibraryService : IGraphFragmentLibraryService
+    {
+        public string LibraryPath => "library://empty";
+
+        public IReadOnlyList<FragmentTemplateInfo> EnumerateTemplates()
+            => [];
+
+        public string SaveTemplate(GraphSelectionFragment fragment, string? name = null)
+            => throw new InvalidOperationException("Template save is not used in this test.");
+
+        public GraphSelectionFragment LoadTemplate(string path)
+            => throw new InvalidOperationException("No saved template.");
+
+        public void DeleteTemplate(string path)
+        {
+        }
     }
 
     private sealed class MutatingWorkspaceService : IGraphWorkspaceService
