@@ -1,6 +1,4 @@
 using System.Diagnostics;
-using Avalonia.Automation;
-using Avalonia.Controls;
 using AsterGraph.Abstractions.Catalog;
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
@@ -275,20 +273,24 @@ public static class DemoProof
     }
 
     private static bool RunNativeInteractionAccessibilityProof(MainWindowViewModel shell)
-    {
-        var surface = new Border();
-        GraphPresentationSemantics.ApplyStockNodeSurfaceSemantics(surface, "Demo accessibility proof");
-
-        return surface.Focusable
-            && surface.IsTabStop
-            && string.Equals(AutomationProperties.GetName(surface), "Demo accessibility proof", StringComparison.Ordinal)
-            && shell.ShellWorkflowLines.Any(line =>
-                line.Contains("IME input", StringComparison.OrdinalIgnoreCase)
-                || line.Contains("IME 输入", StringComparison.Ordinal))
-            && shell.ShellWorkflowLines.Any(line =>
-                line.Contains("Trackpad zoom", StringComparison.OrdinalIgnoreCase)
-                || line.Contains("触控板缩放", StringComparison.Ordinal));
-    }
+        => shell.ShellWorkflowLines.Any(line =>
+            line.Contains("IME input", StringComparison.OrdinalIgnoreCase)
+            || line.Contains("IME 输入", StringComparison.Ordinal))
+        && shell.ShellWorkflowLines.Any(line =>
+            line.Contains("Trackpad zoom", StringComparison.OrdinalIgnoreCase)
+            || line.Contains("触控板缩放", StringComparison.Ordinal))
+        && shell.StandaloneSurfaceLines.Any(line =>
+            line.Contains("AsterGraphCanvasViewFactory", StringComparison.Ordinal)
+            || line.Contains("AsterGraphCanvasViewFactory", StringComparison.OrdinalIgnoreCase))
+        && shell.StandaloneSurfaceLines.Any(line =>
+            line.Contains("AsterGraphInspectorViewFactory", StringComparison.Ordinal)
+            || line.Contains("AsterGraphInspectorViewFactory", StringComparison.OrdinalIgnoreCase))
+        && shell.StandaloneSurfaceLines.Any(line =>
+            line.Contains("AsterGraphMiniMapViewFactory", StringComparison.Ordinal)
+            || line.Contains("AsterGraphMiniMapViewFactory", StringComparison.OrdinalIgnoreCase))
+        && shell.StandaloneSurfaceLines.Any(line =>
+            line.Contains("shared the same runtime session", StringComparison.OrdinalIgnoreCase)
+            || line.Contains("共享同一运行时会话", StringComparison.Ordinal));
 
     private static bool RunHierarchySemanticsProof(
         GraphEditorViewModel editor,

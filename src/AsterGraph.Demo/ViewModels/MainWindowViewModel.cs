@@ -115,7 +115,11 @@ public partial class MainWindowViewModel : ViewModelBase
         Editor.FragmentExported += (_, _) => RefreshRuntimeProjection();
         Editor.FragmentImported += (_, _) => RefreshRuntimeProjection();
         Session.Events.DocumentChanged += (_, _) => PersistAutosaveDraft();
-        Session.Events.CommandExecuted += (_, _) => PersistAutosaveDraft();
+        Session.Events.CommandExecuted += (_, _) =>
+        {
+            PersistAutosaveDraft();
+            RefreshRuntimeProjection();
+        };
         Session.Events.AutomationStarted += (_, args) => OnAutomationStarted(args);
         Session.Events.AutomationProgress += (_, args) => OnAutomationProgress(args);
         Session.Events.AutomationCompleted += (_, args) => OnAutomationCompleted(args);

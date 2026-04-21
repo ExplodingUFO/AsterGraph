@@ -5,7 +5,7 @@ namespace AsterGraph.Demo.ViewModels;
 public partial class MainWindowViewModel
 {
     public IReadOnlyList<GraphEditorPluginLoadSnapshot> PluginLoadSnapshots
-        => Session.Queries.GetPluginLoadSnapshots();
+        => CurrentInspection.PluginLoadSnapshots;
 
     public IReadOnlyList<string> PluginCandidateLines =>
         PluginCandidates.Count == 0
