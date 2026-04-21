@@ -7,7 +7,7 @@
 | 宿主目标 | 起始包 | 原因 |
 | --- | --- | --- |
 | 默认 Avalonia UI 宿主 | `AsterGraph.Avalonia` | 主 UI 入口，包含默认壳层和 view factory |
-| 仅运行时 / 自定义 UI 宿主 | `AsterGraph.Editor` | 推荐的 session/runtime surface |
+| 仅运行时 / 自定义 UI 宿主 | `AsterGraph.Editor` | 面向自定义 UI 或原生壳层的 canonical session/runtime surface |
 | 契约优先集成 | `AsterGraph.Abstractions` | 稳定的标识符、定义和 provider 契约 |
 
 只有当宿主还需要直接处理 `GraphDocument`、序列化或兼容性 API 时，再额外加 `AsterGraph.Core`。
@@ -51,6 +51,8 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 
 `HelloWorld` 适合最简单的 runtime-only 第一跑；`HelloWorld.Avalonia` 适合最小默认 UI 第一跑；`ConsumerSample.Avalonia` 适合在跳到 `Demo` 之前先看一个真实宿主；`HostSample` 只适合做推荐路线验证。
 
+这个样例自己的 README 是 [`tools/AsterGraph.ConsumerSample.Avalonia/README.md`](../../tools/AsterGraph.ConsumerSample.Avalonia/README.md)。
+
 ## 4. 推荐接入路线
 
 | 宿主需要什么 | 从哪里开始 | 第一个样例 |
@@ -62,7 +64,7 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 | retained 迁移 | `new GraphEditorViewModel(...)` + `new GraphEditorView { Editor = editor }` | [Host Integration](./host-integration.md) |
 
 新代码优先使用 runtime/session 路线或默认 Avalonia 路线；retained 路线只用于迁移。
-如果你使用默认 Avalonia 路线，宿主动作、诊断、automation 和 proof 逻辑都应继续围绕 `Editor.Session` 这份共享运行时来写。
+如果宿主管的是自己的 UI，那么 runtime/session 路线就是 canonical 的原生路径；`Editor.Session` 仍然负责宿主动作、诊断、automation 和 proof 逻辑。
 
 ## 5. 最小 Hosted-UI 组合
 

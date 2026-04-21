@@ -5,6 +5,7 @@
 ## What the Demo Proves
 
 - the main demo shell is composed with `AsterGraphEditorFactory.Create(...)`, while `Session` remains the shared runtime owner
+- the demo projects the same canonical session/runtime route into a richer shell instead of introducing a second editor model
 - Avalonia surfaces are composed through the view factories
 - definition-driven inspector groups, shipped editors, and validation cues are visible on real demo node definitions
 - plugin trust/discovery/load state is visible in the UI, including version, target framework, fingerprint, reason strings, and allowlist import or export
@@ -78,7 +79,7 @@ Expected proof markers:
 
 - `HelloWorld` = smallest runtime-only first-run sample
 - `HelloWorld.Avalonia` = smallest hosted-UI first-run sample
-- `ConsumerSample.Avalonia` = realistic hosted-UI consumer sample with one host action rail, parameter editing, and one trusted plugin
+- `ConsumerSample.Avalonia` = realistic hosted-UI consumer sample on the canonical route with one host action rail, parameter editing, and one trusted plugin
 - `HostSample` = narrow proof harness for the canonical consumer routes
 - `Demo` = full showcase host for product surface and host boundary
 

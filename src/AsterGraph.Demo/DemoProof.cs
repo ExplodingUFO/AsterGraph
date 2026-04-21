@@ -1,7 +1,10 @@
 using System.Diagnostics;
+using Avalonia.Automation;
+using Avalonia.Controls;
 using AsterGraph.Abstractions.Catalog;
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
+using AsterGraph.Avalonia.Presentation;
 using AsterGraph.Avalonia.Hosting;
 using AsterGraph.Core.Compatibility;
 using AsterGraph.Core.Models;
@@ -17,6 +20,9 @@ namespace AsterGraph.Demo;
 public sealed record DemoProofResult(
     bool TrustTransparencyOk,
     bool ShellWorkflowOk,
+    bool CustomTemplateOk,
+    bool ToolProviderOk,
+    bool NativeInteractionAccessibilityOk,
     bool CommandSurfaceOk,
     bool TieredNodeSurfaceOk,
     bool FixedGroupFrameOk,
@@ -35,6 +41,9 @@ public sealed record DemoProofResult(
     public bool IsOk =>
         TrustTransparencyOk
         && ShellWorkflowOk
+        && CustomTemplateOk
+        && ToolProviderOk
+        && NativeInteractionAccessibilityOk
         && CommandSurfaceOk
         && TieredNodeSurfaceOk
         && FixedGroupFrameOk
@@ -67,6 +76,9 @@ public static class DemoProof
                 EnableStatePersistence: true,
                 RestoreLastWorkspaceOnStartup: false)));
         var shell = viewModel ?? throw new InvalidOperationException("Demo view model was not created.");
+        var customTemplateOk = RunCustomTemplateProof();
+        var toolProviderOk = RunToolProviderProof(storageRoot);
+        var nativeInteractionAccessibilityOk = RunNativeInteractionAccessibilityProof(shell);
 
         shell.Editor.SelectSingleNode(shell.Editor.Nodes[0], updateStatus: false);
         var inspectorProjectionMs = MeasureMilliseconds(() => shell.Session.Queries.GetSelectedNodeParameterSnapshots().ToArray());
@@ -209,6 +221,9 @@ public static class DemoProof
         return new DemoProofResult(
             trustTransparencyOk,
             shellWorkflowOk,
+            customTemplateOk,
+            toolProviderOk,
+            nativeInteractionAccessibilityOk,
             commandSurfaceOk,
             tieredNodeSurfaceOk,
             fixedGroupFrameOk,
@@ -231,6 +246,48 @@ public static class DemoProof
         action();
         stopwatch.Stop();
         return stopwatch.Elapsed.TotalMilliseconds;
+    }
+
+    private static bool RunCustomTemplateProof()
+    {
+        var catalog = CreateProofCatalog();
+        return catalog.TryGetDefinition(new NodeDefinitionId("aster.demo.lighting-mix"), out var definition)
+            && definition is not null
+            && definition.Parameters.Any(parameter => string.Equals(parameter.TemplateKey, "demo.inline.pulse-bias", StringComparison.Ordinal))
+            && definition.Parameters.Any(parameter => string.Equals(parameter.TemplateKey, "demo.inline.rim-mask", StringComparison.Ordinal));
+    }
+
+    private static bool RunToolProviderProof(string storageRoot)
+    {
+        var catalog = CreateProofCatalog();
+        var editor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
+        {
+            Document = CreateCompositeProofDocument(catalog),
+            NodeCatalog = catalog,
+            CompatibilityService = new DefaultPortCompatibilityService(),
+            StorageRootPath = Path.Combine(storageRoot, "tool-provider-proof"),
+            ToolProvider = new DemoSelectionToolProvider(),
+        });
+
+        var toolContext = GraphEditorToolContextSnapshot.ForSelection(["noise"], "noise");
+        var toolDescriptors = editor.Session.Queries.GetToolDescriptors(toolContext);
+        return toolDescriptors.Any(descriptor => string.Equals(descriptor.Id, DemoSelectionToolProvider.ToolId, StringComparison.Ordinal));
+    }
+
+    private static bool RunNativeInteractionAccessibilityProof(MainWindowViewModel shell)
+    {
+        var surface = new Border();
+        GraphPresentationSemantics.ApplyStockNodeSurfaceSemantics(surface, "Demo accessibility proof");
+
+        return surface.Focusable
+            && surface.IsTabStop
+            && string.Equals(AutomationProperties.GetName(surface), "Demo accessibility proof", StringComparison.Ordinal)
+            && shell.ShellWorkflowLines.Any(line =>
+                line.Contains("IME input", StringComparison.OrdinalIgnoreCase)
+                || line.Contains("IME 输入", StringComparison.Ordinal))
+            && shell.ShellWorkflowLines.Any(line =>
+                line.Contains("Trackpad zoom", StringComparison.OrdinalIgnoreCase)
+                || line.Contains("触控板缩放", StringComparison.Ordinal));
     }
 
     private static bool RunHierarchySemanticsProof(
@@ -569,4 +626,35 @@ public static class DemoProof
             targetPortId,
             label,
             accentHex);
+
+    private sealed class DemoSelectionToolProvider : IGraphEditorToolProvider
+    {
+        public const string ToolId = "demo.tool.provider.selection";
+
+        public IReadOnlyList<GraphEditorToolDescriptorSnapshot> GetToolDescriptors(GraphEditorToolProviderContext context)
+        {
+            ArgumentNullException.ThrowIfNull(context);
+
+            return context.Context.Kind == GraphEditorToolContextKind.Selection
+                ? [
+                    new GraphEditorToolDescriptorSnapshot(
+                        ToolId,
+                        GraphEditorToolContextKind.Selection,
+                        new GraphEditorCommandDescriptorSnapshot(
+                            ToolId,
+                            "Demo Selection Tool",
+                            "demo.tools",
+                            "tool",
+                            null,
+                            GraphEditorCommandSourceKind.Host,
+                            isEnabled: true),
+                        new GraphEditorCommandInvocationSnapshot(
+                            "nodes.select",
+                            [
+                                new GraphEditorCommandArgumentSnapshot("nodeId", context.Context.PrimarySelectedNodeId ?? string.Empty),
+                            ]))
+                ]
+                : [];
+        }
+    }
 }

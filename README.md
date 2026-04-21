@@ -5,7 +5,7 @@
   <a href="./README.zh-CN.md"><img alt="简体中文" src="https://img.shields.io/badge/简体中文-switch-2563eb?style=flat-square" /></a>
 </p>
 
-AsterGraph is a modular node-graph editor toolkit for .NET. It gives hosts a reusable editor runtime, a shipped Avalonia UI path, and explicit seams for plugins, automation, localization, diagnostics, and presentation overrides.
+AsterGraph is a modular node-graph editor toolkit for .NET. It gives hosts a reusable editor runtime, a canonical session/runtime route for custom UI or native shells, a shipped Avalonia hosted-UI path, and explicit seams for plugins, automation, localization, diagnostics, and presentation overrides.
 
 ## Public Alpha
 
@@ -22,9 +22,9 @@ AsterGraph is a modular node-graph editor toolkit for .NET. It gives hosts a reu
 
 | I want to... | Start here | Why |
 | --- | --- | --- |
-| get the fastest first run | [`tools/AsterGraph.HelloWorld`](./tools/AsterGraph.HelloWorld/) | smallest runtime-only sample; one route, one command |
+| get the fastest first run | [`tools/AsterGraph.HelloWorld`](./tools/AsterGraph.HelloWorld/) | smallest runtime-only sample; one canonical route for custom UI or native shells |
 | embed the shipped Avalonia UI | [`tools/AsterGraph.HelloWorld.Avalonia`](./tools/AsterGraph.HelloWorld.Avalonia/) | smallest hosted-UI sample on the factory-based Avalonia route |
-| try a realistic hosted integration | [Consumer Sample](./docs/en/consumer-sample.md) | medium sample with host-owned actions, parameter editing, and one trusted plugin |
+| try a realistic hosted integration | [Consumer Sample](./tools/AsterGraph.ConsumerSample.Avalonia/README.md) | medium sample on the same canonical route, with host-owned actions, parameter editing, and one trusted plugin |
 | integrate into an existing host | [Host Integration](./docs/en/host-integration.md) | route matrix, package boundary, migration guidance |
 | inspect the full surface visually | [Demo Guide](./docs/en/demo-guide.md) | showcase host for plugins, automation, localization, and standalone surfaces |
 | validate packed consumption or maintain releases | [Contributing](./CONTRIBUTING.md) and [Public Launch Checklist](./docs/en/public-launch-checklist.md) | proof lanes, CI, and release flow |
@@ -60,7 +60,7 @@ For new runtime-facing work, anchor on the first route. The Avalonia route is th
 
 - [`tools/AsterGraph.HelloWorld`](./tools/AsterGraph.HelloWorld/) = first-run sample for the runtime-only path
 - [`tools/AsterGraph.HelloWorld.Avalonia`](./tools/AsterGraph.HelloWorld.Avalonia/) = first-run sample for the hosted Avalonia UI path
-- [`tools/AsterGraph.ConsumerSample.Avalonia`](./tools/AsterGraph.ConsumerSample.Avalonia/) = medium hosted-UI consumer sample with one custom node family, one host action rail, and one trusted plugin
+- [`tools/AsterGraph.ConsumerSample.Avalonia`](./tools/AsterGraph.ConsumerSample.Avalonia/README.md) = medium hosted-UI consumer sample with one custom node family, one host action rail, and one trusted plugin
 - [`tools/AsterGraph.HostSample`](./tools/AsterGraph.HostSample/) = minimal canonical proof harness for runtime-only and hosted-UI validation
 - [`tools/AsterGraph.PackageSmoke`](./tools/AsterGraph.PackageSmoke/) = packed-package proof
 - [`tools/AsterGraph.ScaleSmoke`](./tools/AsterGraph.ScaleSmoke/) = public larger-graph baseline plus history/state proof
