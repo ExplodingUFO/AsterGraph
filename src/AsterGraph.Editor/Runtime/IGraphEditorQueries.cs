@@ -100,6 +100,13 @@ public interface IGraphEditorQueries
         => throw new NotSupportedException();
 
     /// <summary>
+    /// Gets stable committed connection geometry snapshots for the current document.
+    /// </summary>
+    /// <returns>One geometry snapshot per committed connection.</returns>
+    IReadOnlyList<GraphEditorConnectionGeometrySnapshot> GetConnectionGeometrySnapshots()
+        => throw new NotSupportedException();
+
+    /// <summary>
     /// Gets host-facing composite node snapshots for the current root graph.
     /// </summary>
     /// <returns>A stable read-only composite snapshot collection.</returns>

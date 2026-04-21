@@ -25,13 +25,17 @@ public sealed partial class GraphEditorSession
         => _host.GetViewportSnapshot();
 
     public GraphEditorSceneSnapshot GetSceneSnapshot()
-        => new(
-            CreateDocumentSnapshot(),
+    {
+        var document = CreateDocumentSnapshot();
+        return new(
+            document,
             GetSelectionSnapshot(),
             GetViewportSnapshot(),
             GetNodeSurfaceSnapshots(),
             GetNodeGroupSnapshots(),
+            CreateConnectionGeometrySnapshots(document),
             GetPendingConnectionSnapshot());
+    }
 
     public GraphEditorCapabilitySnapshot GetCapabilitySnapshot()
         => _host.GetCapabilitySnapshot();
@@ -60,6 +64,7 @@ public sealed partial class GraphEditorSession
                 new GraphEditorFeatureDescriptorSnapshot("capability.export.scene-svg", "capability", (_descriptorSupport?.HasSceneSvgExportService ?? false) && GetSceneSnapshot().Document.Nodes.Count > 0),
                 new GraphEditorFeatureDescriptorSnapshot("query.scene-snapshot", "query", true),
                 new GraphEditorFeatureDescriptorSnapshot("query.node-surface-snapshots", "query", true),
+                new GraphEditorFeatureDescriptorSnapshot("query.connection-geometry-snapshots", "query", true),
                 new GraphEditorFeatureDescriptorSnapshot("query.node-groups", "query", true),
                 new GraphEditorFeatureDescriptorSnapshot("query.node-group-snapshots", "query", true),
                 new GraphEditorFeatureDescriptorSnapshot("capability.connections.create", "capability", capabilities.CanCreateConnections),
