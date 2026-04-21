@@ -46,6 +46,18 @@ public sealed class DemoProofReleaseSurfaceTests
     }
 
     [Fact]
+    public void CiScript_PublishesStressTelemetrySummaryAlongsideDefendedScaleProof()
+    {
+        var script = ReadRepoFile("eng/ci.ps1");
+
+        Assert.Contains("'baseline'", script, StringComparison.Ordinal);
+        Assert.Contains("'large'", script, StringComparison.Ordinal);
+        Assert.Contains("'stress'", script, StringComparison.Ordinal);
+        Assert.Contains("'--samples'", script, StringComparison.Ordinal);
+        Assert.Contains("'3'", script, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void ReleaseWorkflowSummaries_SurfaceDemoProofMarkers()
     {
         var ciWorkflow = ReadRepoFile(".github/workflows/ci.yml");
@@ -155,7 +167,7 @@ public sealed class DemoProofReleaseSurfaceTests
         WriteProofFile(
             proofRoot,
             "scale-smoke.txt",
-            "SCALE_TIER_BUDGET:baseline`nSCALE_PERFORMANCE_BUDGET_OK:baseline:True:none`nSCALE_TIER_BUDGET:large`nSCALE_PERFORMANCE_BUDGET_OK:large:True:none`nSCALE_HISTORY_CONTRACT_OK:True");
+            "SCALE_TIER_BUDGET:baseline`nSCALE_PERFORMANCE_BUDGET_OK:baseline:True:none`nSCALE_TIER_BUDGET:large`nSCALE_PERFORMANCE_BUDGET_OK:large:True:none`nSCALE_TIER_BUDGET:stress:nodes=5000:selection=256:moves=96:budget=informational-only`nSCALE_PERFORMANCE_BUDGET_OK:stress:True:informational-only`nSCALE_PERF_SUMMARY:stress:samples=3:setup-p50=311:setup-p95=569:selection-p50=18:selection-p95=41:connection-p50=582:connection-p95=820:history-p50=912:history-p95=946:viewport-p50=2:viewport-p95=5:save-p50=149:save-p95=156:reload-p50=62:reload-p95=65`nSCALE_HISTORY_CONTRACT_OK:True");
         WriteProofFile(
             proofRoot,
             "demo-proof.txt",
@@ -205,6 +217,29 @@ public sealed class DemoProofReleaseSurfaceTests
 
         Assert.Contains("SCALE_PERFORMANCE_BUDGET_OK:baseline:True:none", notes, StringComparison.Ordinal);
         Assert.Contains("SCALE_PERFORMANCE_BUDGET_OK:large:True:none", notes, StringComparison.Ordinal);
+        Assert.Contains("SCALE_PERF_SUMMARY:stress:samples=3", notes, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ScaleDocs_DistinguishDefendedBudgetsFromStressTelemetry()
+    {
+        var scaleBaseline = ReadRepoFile("docs/en/scale-baseline.md");
+        var scaleBaselineZh = ReadRepoFile("docs/zh-CN/scale-baseline.md");
+        var checklist = ReadRepoFile("docs/en/public-launch-checklist.md");
+        var checklistZh = ReadRepoFile("docs/zh-CN/public-launch-checklist.md");
+
+        foreach (var contents in new[] { scaleBaseline, scaleBaselineZh })
+        {
+            Assert.Contains("baseline", contents, StringComparison.Ordinal);
+            Assert.Contains("large", contents, StringComparison.Ordinal);
+            Assert.Contains("stress", contents, StringComparison.Ordinal);
+            Assert.Contains("SCALE_PERF_SUMMARY", contents, StringComparison.Ordinal);
+        }
+
+        Assert.Contains("SCALE_PERFORMANCE_BUDGET_OK:large:True:...", checklist, StringComparison.Ordinal);
+        Assert.Contains("SCALE_PERF_SUMMARY:stress:...", checklist, StringComparison.Ordinal);
+        Assert.Contains("SCALE_PERFORMANCE_BUDGET_OK:large:True:...", checklistZh, StringComparison.Ordinal);
+        Assert.Contains("SCALE_PERF_SUMMARY:stress:...", checklistZh, StringComparison.Ordinal);
     }
 
     private static string ReadRepoFile(string relativePath)

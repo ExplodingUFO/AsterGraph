@@ -673,6 +673,24 @@ function Invoke-ScaleSmoke {
     '--tier',
     'large'
   ) -CapturePath $scaleSmokeProofPath -Append
+
+  Invoke-DotNetCapture -Arguments @(
+    'run',
+    '--project',
+    (Resolve-ProjectPath -RelativePath $scaleSmokeProject),
+    '-c',
+    $Configuration,
+    '--framework',
+    'net8.0',
+    '--no-build',
+    '--no-restore',
+    '--nologo',
+    '--',
+    '--tier',
+    'stress',
+    '--samples',
+    '3'
+  ) -CapturePath $scaleSmokeProofPath -Append
 }
 
 function Invoke-DemoProof {
@@ -796,6 +814,9 @@ function Invoke-PrereleaseNotesValidation {
     'SCALE_PERFORMANCE_BUDGET_OK:baseline:True:',
     'SCALE_TIER_BUDGET:large',
     'SCALE_PERFORMANCE_BUDGET_OK:large:True:',
+    'SCALE_TIER_BUDGET:stress',
+    'SCALE_PERFORMANCE_BUDGET_OK:stress:True:informational-only',
+    'SCALE_PERF_SUMMARY:stress:',
     'SCALE_HISTORY_CONTRACT_OK:',
     'COVERAGE_REPORT_OK:'
   )) {
