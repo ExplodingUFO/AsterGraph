@@ -62,6 +62,12 @@ public partial class NodeCanvas : UserControl
         AvaloniaProperty.Register<NodeCanvas, IGraphNodeVisualPresenter?>(nameof(NodeVisualPresenter));
 
     /// <summary>
+    /// 控制 stock 节点 shell 的 body 组合展示器。
+    /// </summary>
+    public static readonly StyledProperty<IGraphNodeBodyPresenter?> NodeBodyPresenterProperty =
+        AvaloniaProperty.Register<NodeCanvas, IGraphNodeBodyPresenter?>(nameof(NodeBodyPresenter));
+
+    /// <summary>
     /// 控制上下文菜单展示层替换的展示器。
     /// </summary>
     public static readonly StyledProperty<IGraphContextMenuPresenter?> ContextMenuPresenterProperty =
@@ -193,6 +199,15 @@ public partial class NodeCanvas : UserControl
     {
         get => GetValue(NodeVisualPresenterProperty);
         set => SetValue(NodeVisualPresenterProperty, value);
+    }
+
+    /// <summary>
+    /// 当前 stock 节点 shell body 展示器。
+    /// </summary>
+    public IGraphNodeBodyPresenter? NodeBodyPresenter
+    {
+        get => GetValue(NodeBodyPresenterProperty);
+        set => SetValue(NodeBodyPresenterProperty, value);
     }
 
     /// <summary>

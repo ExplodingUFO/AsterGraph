@@ -15,6 +15,11 @@ public sealed record AsterGraphPresentationOptions
     public IGraphNodeVisualPresenter? NodeVisualPresenter { get; init; }
 
     /// <summary>
+    /// Stock node presenter body seam used only when the default shell composition is active.
+    /// </summary>
+    public IGraphNodeBodyPresenter? NodeBodyPresenter { get; init; }
+
+    /// <summary>
     /// 上下文菜单展示器。
     /// </summary>
     public IGraphContextMenuPresenter? ContextMenuPresenter { get; init; }

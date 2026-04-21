@@ -23,6 +23,7 @@ public static class AsterGraphCanvasViewFactory
             EnableDefaultContextMenu = options.EnableDefaultContextMenu,
             CommandShortcutPolicy = options.CommandShortcutPolicy,
             NodeVisualPresenter = options.Presentation?.NodeVisualPresenter,
+            NodeBodyPresenter = options.Presentation?.NodeBodyPresenter,
             ContextMenuPresenter = options.Presentation?.ContextMenuPresenter,
             NodeParameterEditorRegistry = options.Presentation?.NodeParameterEditorRegistry,
             ResizeFeedbackPolicy = options.Presentation?.ResizeFeedbackPolicy,

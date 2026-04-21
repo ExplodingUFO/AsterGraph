@@ -104,6 +104,8 @@ public partial class NodeCanvas
 
         public IGraphNodeVisualPresenter? NodeVisualPresenter => _owner.NodeVisualPresenter;
 
+        public IGraphNodeBodyPresenter? NodeBodyPresenter => _owner.NodeBodyPresenter;
+
         public IGraphNodeVisualPresenter StockNodeVisualPresenter => _owner._stockNodeVisualPresenter;
 
         public INodeParameterEditorRegistry? NodeParameterEditorRegistry => _owner.NodeParameterEditorRegistry;

@@ -300,7 +300,7 @@ public sealed class GraphEditorInitializationTests
         });
         var presentation = new AsterGraphPresentationOptions
         {
-            NodeVisualPresenter = new RecordingNodeVisualPresenter(),
+            NodeBodyPresenter = new RecordingNodeBodyPresenter(),
             ContextMenuPresenter = new RecordingContextMenuPresenter(),
             InspectorPresenter = new RecordingInspectorPresenter(),
             MiniMapPresenter = new RecordingMiniMapPresenter(),
@@ -329,7 +329,7 @@ public sealed class GraphEditorInitializationTests
             Assert.NotNull(inspector);
             Assert.NotNull(miniMap);
             Assert.Same(presentation, view.Presentation);
-            Assert.Same(presentation.NodeVisualPresenter, canvas.NodeVisualPresenter);
+            Assert.Same(presentation.NodeBodyPresenter, canvas.NodeBodyPresenter);
             Assert.Same(presentation.ContextMenuPresenter, canvas.ContextMenuPresenter);
             Assert.Same(presentation.InspectorPresenter, inspector.InspectorPresenter);
             Assert.Same(presentation.MiniMapPresenter, miniMap.MiniMapPresenter);
@@ -351,7 +351,7 @@ public sealed class GraphEditorInitializationTests
         });
         var presentation = new AsterGraphPresentationOptions
         {
-            NodeVisualPresenter = new RecordingNodeVisualPresenter(),
+            NodeBodyPresenter = new RecordingNodeBodyPresenter(),
             ContextMenuPresenter = new RecordingContextMenuPresenter(),
             InspectorPresenter = new RecordingInspectorPresenter(),
             MiniMapPresenter = new RecordingMiniMapPresenter(),
@@ -380,7 +380,7 @@ public sealed class GraphEditorInitializationTests
         Assert.Same(editor.Session, miniMap.Session);
         Assert.False(canvas.EnableDefaultContextMenu);
         Assert.False(canvas.CommandShortcutPolicy.Enabled);
-        Assert.Same(presentation.NodeVisualPresenter, canvas.NodeVisualPresenter);
+        Assert.Same(presentation.NodeBodyPresenter, canvas.NodeBodyPresenter);
         Assert.Same(presentation.ContextMenuPresenter, canvas.ContextMenuPresenter);
         Assert.Same(presentation.InspectorPresenter, inspector.InspectorPresenter);
         Assert.Same(presentation.MiniMapPresenter, miniMap.MiniMapPresenter);
@@ -534,7 +534,7 @@ public sealed class GraphEditorInitializationTests
         });
         var presentation = new AsterGraphPresentationOptions
         {
-            NodeVisualPresenter = new RecordingNodeVisualPresenter(),
+            NodeBodyPresenter = new RecordingNodeBodyPresenter(),
             ContextMenuPresenter = new RecordingContextMenuPresenter(),
             InspectorPresenter = new RecordingInspectorPresenter(),
             MiniMapPresenter = new RecordingMiniMapPresenter(),
@@ -563,7 +563,7 @@ public sealed class GraphEditorInitializationTests
             Assert.NotNull(inspector);
             Assert.NotNull(miniMap);
             Assert.Same(presentation, view.Presentation);
-            Assert.Same(presentation.NodeVisualPresenter, canvas.NodeVisualPresenter);
+            Assert.Same(presentation.NodeBodyPresenter, canvas.NodeBodyPresenter);
             Assert.Same(presentation.ContextMenuPresenter, canvas.ContextMenuPresenter);
             Assert.Same(presentation.InspectorPresenter, inspector.InspectorPresenter);
             Assert.Same(presentation.MiniMapPresenter, miniMap.MiniMapPresenter);
@@ -677,15 +677,22 @@ public sealed class GraphEditorInitializationTests
             => fallback;
     }
 
-    private sealed class RecordingNodeVisualPresenter : IGraphNodeVisualPresenter
+    private sealed class RecordingNodeBodyPresenter : IGraphNodeBodyPresenter
     {
-        private readonly DefaultGraphNodeVisualPresenter _stockPresenter = new();
+        public GraphNodeBodyVisual Create(GraphNodeVisualContext context)
+            => new(
+                new TextBlock
+                {
+                    Text = $"INIT BODY:{context.Node.Title}",
+                });
 
-        public GraphNodeVisual Create(GraphNodeVisualContext context)
-            => _stockPresenter.Create(context);
-
-        public void Update(GraphNodeVisual visual, GraphNodeVisualContext context)
-            => _stockPresenter.Update(visual, context);
+        public void Update(GraphNodeBodyVisual visual, GraphNodeVisualContext context)
+        {
+            if (visual.Root is TextBlock marker)
+            {
+                marker.Text = $"INIT BODY UPDATED:{context.Node.Id}";
+            }
+        }
     }
 
     private sealed class RecordingContextMenuPresenter : IGraphContextMenuPresenter

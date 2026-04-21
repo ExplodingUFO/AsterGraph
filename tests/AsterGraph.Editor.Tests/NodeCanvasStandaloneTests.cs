@@ -325,6 +325,51 @@ public sealed class NodeCanvasStandaloneTests
     }
 
     [AvaloniaFact]
+    public void StandaloneCanvas_CustomNodeBodyPresenter_UsesStockShellAndKeepsCanonicalAnchors()
+    {
+        var stockEditor = CreateEditor();
+        var (stockWindow, stockCanvas) = CreateStandaloneCanvasWindow(stockEditor);
+        var stockSourceNode = stockEditor.Nodes.Single(node => node.Id == SourceNodeId);
+        var stockSourcePort = stockSourceNode.Outputs.Single(port => port.Id == SourcePortId);
+        var stockAnchor = InvokeCanvasMethod<GraphPoint>("GetPortAnchor", stockCanvas, stockSourceNode, stockSourcePort);
+
+        var editor = CreateEditor();
+        var customBodyPresenter = new CustomNodeBodyPresenter();
+        var (window, canvas) = CreateStandaloneCanvasWindow(
+            editor,
+            presentation: new AsterGraphPresentationOptions
+            {
+                NodeBodyPresenter = customBodyPresenter,
+            });
+
+        try
+        {
+            var allText = string.Join(
+                "\n",
+                canvas.GetVisualDescendants()
+                    .OfType<TextBlock>()
+                    .Select(block => block.Text)
+                    .Where(text => !string.IsNullOrWhiteSpace(text)));
+            var sourceNode = editor.Nodes.Single(node => node.Id == SourceNodeId);
+            var sourcePort = sourceNode.Outputs.Single(port => port.Id == SourcePortId);
+            var anchor = InvokeCanvasMethod<GraphPoint>("GetPortAnchor", canvas, sourceNode, sourcePort);
+
+            Assert.Null(canvas.NodeVisualPresenter);
+            Assert.Same(customBodyPresenter, canvas.NodeBodyPresenter);
+            Assert.Contains("Canvas Source", allText);
+            Assert.Contains("CUSTOM NODE BODY", allText);
+            Assert.True(customBodyPresenter.CreateCalls > 0);
+            Assert.InRange(anchor.X, stockAnchor.X - 0.5, stockAnchor.X + 0.5);
+            Assert.InRange(anchor.Y, stockAnchor.Y - 0.5, stockAnchor.Y + 0.5);
+        }
+        finally
+        {
+            window.Close();
+            stockWindow.Close();
+        }
+    }
+
+    [AvaloniaFact]
     public void StandaloneCanvas_CustomNodeVisualPresenter_UpdatesWhenSelectionAndPresentationChange()
     {
         var editor = CreateEditor();
@@ -353,6 +398,49 @@ public sealed class NodeCanvasStandaloneTests
             Assert.Equal(sourceNode.Id, customPresenter.LastUpdatedNodeId);
             Assert.True(customPresenter.LastUpdatedNodeWasSelected);
             Assert.Equal(sourceNode.Height, customPresenter.LastUpdatedNodeHeight);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
+    public void StandaloneCanvas_CustomNodeBodyPresenter_UpdatesWhenSelectionAndPresentationChange()
+    {
+        var editor = CreateEditor();
+        var customPresenter = new CustomNodeBodyPresenter();
+        var sizeTargetNodeId = TargetNodeId;
+        var (window, canvas) = CreateStandaloneCanvasWindow(
+            editor,
+            presentation: new AsterGraphPresentationOptions
+            {
+                NodeBodyPresenter = customPresenter,
+            });
+
+        try
+        {
+            var sourceNode = editor.Nodes.Single(node => node.Id == SourceNodeId);
+            var afterInitialRender = customPresenter.UpdateCalls;
+
+            editor.SelectSingleNode(sourceNode, updateStatus: false);
+
+            Assert.True(customPresenter.UpdateCalls >= afterInitialRender + editor.Nodes.Count);
+            var afterSelection = customPresenter.UpdateCalls;
+
+            sourceNode.UpdatePresentation(new NodePresentationState(
+                StatusBar: new NodeStatusBarDescriptor("Ready", "#7FE7D7")));
+
+            Assert.True(customPresenter.UpdateCalls >= afterSelection + 1);
+            Assert.Equal(sourceNode.Id, customPresenter.LastUpdatedNodeId);
+            Assert.True(customPresenter.LastUpdatedNodeWasSelected);
+            Assert.Equal(sourceNode.Height, customPresenter.LastUpdatedNodeHeight);
+
+            var resized = editor.Session.Commands.TrySetNodeSize(sizeTargetNodeId, new GraphSize(420d, 260d), updateStatus: false);
+
+            Assert.True(resized);
+            Assert.True(customPresenter.UpdateCalls >= afterSelection + 2);
+            Assert.Equal(sizeTargetNodeId, customPresenter.LastUpdatedNodeId);
         }
         finally
         {
@@ -414,12 +502,12 @@ public sealed class NodeCanvasStandaloneTests
         var editor = CreateEditor();
         editor.Session.Commands.StartConnection(SourceNodeId, SourcePortId);
         editor.Session.Commands.CompleteConnection(TargetNodeId, TargetPortId);
-        var customPresenter = new CustomNodeVisualPresenter();
+        var customPresenter = new CustomNodeBodyPresenter();
         var (window, canvas) = CreateStandaloneCanvasWindow(
             editor,
             presentation: new AsterGraphPresentationOptions
             {
-                NodeVisualPresenter = customPresenter,
+                NodeBodyPresenter = customPresenter,
             });
 
         try
@@ -3081,6 +3169,42 @@ public sealed class NodeCanvasStandaloneTests
             LastUpdatedNodeHeight = context.Node.Height;
             visual.Root.Width = context.Node.Width;
             visual.Root.Height = context.Node.Height;
+        }
+    }
+
+    private sealed class CustomNodeBodyPresenter : IGraphNodeBodyPresenter
+    {
+        public int CreateCalls { get; private set; }
+
+        public int UpdateCalls { get; private set; }
+
+        public string? LastUpdatedNodeId { get; private set; }
+
+        public bool LastUpdatedNodeWasSelected { get; private set; }
+
+        public double LastUpdatedNodeHeight { get; private set; }
+
+        public GraphNodeBodyVisual Create(GraphNodeVisualContext context)
+        {
+            CreateCalls++;
+            return new GraphNodeBodyVisual(
+                new TextBlock
+                {
+                    Text = $"CUSTOM NODE BODY:{context.Node.Title}",
+                });
+        }
+
+        public void Update(GraphNodeBodyVisual visual, GraphNodeVisualContext context)
+        {
+            UpdateCalls++;
+            LastUpdatedNodeId = context.Node.Id;
+            LastUpdatedNodeWasSelected = context.Node.IsSelected;
+            LastUpdatedNodeHeight = context.Node.Height;
+
+            if (visual.Root is TextBlock marker)
+            {
+                marker.Text = $"CUSTOM NODE BODY UPDATED:{context.Node.Id}";
+            }
         }
     }
 }

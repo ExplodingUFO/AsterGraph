@@ -46,7 +46,8 @@ internal sealed class NodeCanvasLifecycleCoordinator
 
             _host.AttachViewModel(previous, current);
         }
-        else if (change.Property == NodeCanvas.NodeVisualPresenterProperty)
+        else if (change.Property == NodeCanvas.NodeVisualPresenterProperty
+            || change.Property == NodeCanvas.NodeBodyPresenterProperty)
         {
             _host.RebuildScene();
         }

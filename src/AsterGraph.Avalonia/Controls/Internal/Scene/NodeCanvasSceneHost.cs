@@ -40,6 +40,8 @@ internal interface INodeCanvasSceneHost
 
     IGraphNodeVisualPresenter? NodeVisualPresenter { get; }
 
+    IGraphNodeBodyPresenter? NodeBodyPresenter { get; }
+
     IGraphNodeVisualPresenter StockNodeVisualPresenter { get; }
 
     INodeParameterEditorRegistry? NodeParameterEditorRegistry { get; }
@@ -499,6 +501,7 @@ internal sealed class NodeCanvasSceneHost
             node,
             editor.StyleOptions,
             _host.NodeParameterEditorRegistry,
+            _host.NodeBodyPresenter,
             _host.FocusCanvas,
             _host.BeginNodeDrag,
             _host.BeginNodeResize,

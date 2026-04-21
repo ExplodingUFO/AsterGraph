@@ -36,7 +36,10 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
         var renderedSize = ResolveRenderedNodeSize(context);
         var nodeStyle = GetNodeCardStyle(context);
         var portAnchors = new Dictionary<string, Control>(StringComparer.Ordinal);
-        var connectionTargetAnchors = new Dictionary<GraphConnectionTargetRef, Control>();
+        var bodyPresenter = context.NodeBodyPresenter ?? DefaultNodeBodyPresenter.Shared;
+        var bodyVisual = bodyPresenter.Create(context);
+        var connectionTargetAnchors = bodyVisual.ConnectionTargetAnchors;
+
         var border = new Border
         {
             Width = renderedSize.Width,
@@ -115,43 +118,22 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
                 nodeStyle.BodyHorizontalPadding,
                 nodeStyle.BodyBottomPadding),
             RowDefinitions = new RowDefinitions("*,Auto"),
-            ColumnDefinitions = new ColumnDefinitions("*"),
+            ColumnDefinitions = new ColumnDefinitions("Auto,*,Auto"),
             ColumnSpacing = nodeStyle.BodyColumnSpacing,
             RowSpacing = nodeStyle.BodyRowSpacing,
         };
         Grid.SetRow(contentGrid, 1);
 
-        var mainBody = new Grid
-        {
-            RowDefinitions = new RowDefinitions("Auto,*"),
-            ColumnDefinitions = new ColumnDefinitions("*,*"),
-            ColumnSpacing = nodeStyle.BodyColumnSpacing,
-            RowSpacing = nodeStyle.BodyRowSpacing,
-        };
-        contentGrid.Children.Add(mainBody);
+        var inputPorts = BuildPortPanel(context, node.Inputs, isInput: true, portAnchors);
+        Grid.SetColumn(inputPorts, 0);
+        contentGrid.Children.Add(inputPorts);
 
-        var description = new TextBlock
-        {
-            FontSize = nodeStyle.DescriptionFontSize,
-            TextWrapping = TextWrapping.Wrap,
-            Foreground = BrushFactory.Solid(nodeStyle.DescriptionTextHex, nodeStyle.DescriptionTextOpacity),
-            MaxHeight = nodeStyle.DescriptionMaxHeight,
-        };
-        Grid.SetColumnSpan(description, 2);
-        mainBody.Children.Add(description);
-
-        var inputRowStack = new StackPanel
-        {
-            Spacing = nodeStyle.BodyRowSpacing,
-            HorizontalAlignment = HorizontalAlignment.Left,
-        };
-        Grid.SetRow(inputRowStack, 1);
-        mainBody.Children.Add(inputRowStack);
+        Grid.SetColumn(bodyVisual.Root, 1);
+        contentGrid.Children.Add(bodyVisual.Root);
 
         var outputs = BuildPortPanel(context, node.Outputs, isInput: false, portAnchors);
-        Grid.SetRow(outputs, 1);
-        Grid.SetColumn(outputs, 1);
-        mainBody.Children.Add(outputs);
+        Grid.SetColumn(outputs, 2);
+        contentGrid.Children.Add(outputs);
 
         var statusBarText = new TextBlock
         {
@@ -170,6 +152,7 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
             Child = statusBarText,
         };
         Grid.SetRow(statusBar, 1);
+        Grid.SetColumnSpan(statusBar, 3);
         contentGrid.Children.Add(statusBar);
 
         var widthResizeThumb = CreateResizeThumb(
@@ -253,11 +236,12 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
             border,
             header,
             subtitle,
-            description,
             badgePanel,
-            inputRowStack,
+            inputPorts,
+            outputs,
+            bodyPresenter,
+            bodyVisual,
             portAnchors,
-            connectionTargetAnchors,
             statusBar,
             statusBarText);
 
@@ -329,8 +313,9 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
         SetStateClass(state.Border, "astergraph-node-editing", isEditing);
         SetStateClass(state.Border, "astergraph-node-output", isOutputNode);
         state.Subtitle.Text = node.DisplaySubtitle;
-        state.Description.Text = node.DisplayDescription;
-        state.Description.IsVisible = node.ActiveSurfaceTier.ShowsSection(NodeSurfaceSectionKeys.Description);
+        state.BodyPresenter.Update(state.BodyVisual, context);
+        UpdatePortPanel(state.InputPortsPanel, node.Inputs, isInput: true, context, state.PortAnchors);
+        UpdatePortPanel(state.OutputPortsPanel, node.Outputs, isInput: false, context, state.PortAnchors);
 
         state.BadgePanel.Children.Clear();
         foreach (var focusBadge in CreateSystemBadges(node, isInspected, isEditing, isOutputNode))
@@ -382,27 +367,26 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
             ToolTip.SetTip(state.StatusBar, null);
         }
 
-        UpdateInputRows(state, context, nodeStyle);
         state.Border.Height = ResolveRenderedNodeHeight(node, renderedSize.Height, state.StatusBar.IsVisible);
     }
 
-    private static void UpdateInputRows(
-        DefaultNodeVisualState state,
+    private static void UpdatePortPanel(
+        StackPanel panel,
+        IEnumerable<PortViewModel> ports,
+        bool isInput,
         GraphNodeVisualContext context,
-        NodeCardStyleOptions nodeStyle)
+        Dictionary<string, Control> portAnchors)
     {
-        var node = context.Node;
-        foreach (var port in node.Inputs)
+        var portList = ports as IReadOnlyList<PortViewModel> ?? ports.ToList();
+        panel.Children.Clear();
+        foreach (var port in portList)
         {
-            state.PortAnchors.Remove(port.Id);
+            portAnchors.Remove(port.Id);
         }
 
-        state.ConnectionTargetAnchors.Clear();
-        state.InputRowStack.Children.Clear();
-
-        foreach (var row in node.InputRows)
+        foreach (var port in portList)
         {
-            state.InputRowStack.Children.Add(CreateInputRowControl(context, row, state.PortAnchors, state.ConnectionTargetAnchors, nodeStyle));
+            panel.Children.Add(CreatePortButton(context, port, isInput, portAnchors));
         }
     }
 
@@ -849,15 +833,95 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
         element.Classes.Remove(className);
     }
 
+    private sealed class DefaultNodeBodyPresenter : IGraphNodeBodyPresenter
+    {
+        public static DefaultNodeBodyPresenter Shared { get; } = new();
+
+        public GraphNodeBodyVisual Create(GraphNodeVisualContext context)
+        {
+            ArgumentNullException.ThrowIfNull(context);
+
+            var nodeStyle = GetNodeCardStyle(context);
+            var connectionTargetAnchors = new Dictionary<GraphConnectionTargetRef, Control>();
+            var description = new TextBlock
+            {
+                FontSize = nodeStyle.DescriptionFontSize,
+                TextWrapping = TextWrapping.Wrap,
+                Foreground = BrushFactory.Solid(nodeStyle.DescriptionTextHex, nodeStyle.DescriptionTextOpacity),
+                MaxHeight = nodeStyle.DescriptionMaxHeight,
+            };
+
+            var inputRowStack = new StackPanel
+            {
+                Spacing = nodeStyle.BodyRowSpacing,
+                HorizontalAlignment = HorizontalAlignment.Left,
+            };
+            Grid.SetRow(inputRowStack, 1);
+
+            var root = new Grid
+            {
+                RowDefinitions = new RowDefinitions("Auto,*"),
+                RowSpacing = nodeStyle.BodyRowSpacing,
+            };
+            root.Children.Add(description);
+            root.Children.Add(inputRowStack);
+
+            var visual = new GraphNodeBodyVisual(
+                root,
+                connectionTargetAnchors,
+                new DefaultNodeBodyVisualState(description, inputRowStack, connectionTargetAnchors));
+            Update(visual, context);
+            return visual;
+        }
+
+        public void Update(GraphNodeBodyVisual visual, GraphNodeVisualContext context)
+        {
+            ArgumentNullException.ThrowIfNull(visual);
+            ArgumentNullException.ThrowIfNull(context);
+
+            var state = visual.PresenterState as DefaultNodeBodyVisualState
+                ?? throw new InvalidOperationException("DefaultGraphNodeVisualPresenter requires its own body visual state payload.");
+
+            UpdateBodyVisualState(state, context);
+        }
+
+        private static void UpdateBodyVisualState(DefaultNodeBodyVisualState state, GraphNodeVisualContext context)
+        {
+            var node = context.Node;
+            var nodeStyle = GetNodeCardStyle(context);
+
+            state.Description.Text = node.DisplayDescription;
+            state.Description.IsVisible = node.ActiveSurfaceTier.ShowsSection(NodeSurfaceSectionKeys.Description);
+
+            state.InputRowStack.Children.Clear();
+            state.ConnectionTargetAnchors.Clear();
+            foreach (var row in node.InputRows)
+            {
+                if (row.Kind == NodeSurfaceInputRowKind.Port)
+                {
+                    continue;
+                }
+
+                state.InputRowStack.Children.Add(CreateParameterInputRow(context, row, state.ConnectionTargetAnchors, nodeStyle));
+            }
+        }
+
+        private sealed record DefaultNodeBodyVisualState(
+            TextBlock Description,
+            StackPanel InputRowStack,
+            Dictionary<GraphConnectionTargetRef, Control> ConnectionTargetAnchors);
+    }
+
     private sealed record DefaultNodeVisualState(
         Border Border,
         Border Header,
         TextBlock Subtitle,
-        TextBlock Description,
         StackPanel BadgePanel,
-        StackPanel InputRowStack,
+        StackPanel InputPortsPanel,
+        StackPanel OutputPortsPanel,
+        IGraphNodeBodyPresenter BodyPresenter,
+        GraphNodeBodyVisual BodyVisual,
         Dictionary<string, Control> PortAnchors,
-        Dictionary<GraphConnectionTargetRef, Control> ConnectionTargetAnchors,
         Border StatusBar,
         TextBlock StatusBarText);
 }
