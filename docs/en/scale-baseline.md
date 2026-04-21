@@ -12,8 +12,8 @@ It is now used in two ways:
 | Tier | Nodes | Selection batch | Move batch | Intended use |
 | --- | ---: | ---: | ---: | --- |
 | `baseline` | 180 | 48 | 24 | defended release-lane redline |
-| `large` | 1000 | 128 | 64 | public informational telemetry |
-| `stress` | 5000 | 256 | 96 | manual stretch telemetry |
+| `large` | 1000 | 128 | 64 | defended release-lane large-graph budget |
+| `stress` | 5000 | 256 | 96 | published informational telemetry |
 
 ## Scenarios
 
@@ -30,9 +30,11 @@ The harness still emits the existing correctness markers such as `SCALE_HISTORY_
 
 ## Defended Redlines
 
-The current release lane defends the `baseline` tier with these redlines:
+The current release lane defends the `baseline` and `large` tiers with these redlines:
 
 These redlines are intentionally conservative and are validated on the current GitHub-hosted Windows runner class used by the public release lane, not on an optimized local workstation.
+
+### Baseline redlines
 
 | Metric | Baseline redline |
 | --- | ---: |
@@ -44,11 +46,23 @@ These redlines are intentionally conservative and are validated on the current G
 | save | 150 ms |
 | reload | 1200 ms |
 
-If the baseline tier exceeds one of those numbers, `ScaleSmoke` emits `SCALE_PERFORMANCE_BUDGET_OK:baseline:False:...` and the release gate fails.
+### Large redlines
 
-## Informational Metrics
+| Metric | Large redline |
+| --- | ---: |
+| setup | 2500 ms |
+| selection | 750 ms |
+| connection | 350 ms |
+| history interaction | 800 ms |
+| viewport / fit | 200 ms |
+| save | 300 ms |
+| reload | 1500 ms |
 
-The `large` and `stress` tiers are informative only. They do not currently fail CI, but they give maintainers and adopters a repeatable way to inspect how the toolkit behaves on denser graphs.
+If either defended tier exceeds one of those numbers, `ScaleSmoke` emits `SCALE_PERFORMANCE_BUDGET_OK:<tier>:False:...` and the release gate fails.
+
+## Informational Telemetry
+
+The `stress` tier remains informational. It now publishes a `SCALE_PERF_SUMMARY:stress:...` line with p50/p95 timings, but it does not define a defended release budget yet.
 
 ## Commands
 
@@ -56,11 +70,11 @@ The `large` and `stress` tiers are informative only. They do not currently fail 
 # defended release-lane baseline
 dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj -- --tier baseline
 
-# larger informational run
+# defended large-graph release budget
 dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj -- --tier large
 
-# manual stretch run
-dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj -- --tier stress
+# published informational stress telemetry
+dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj -- --tier stress --samples 3
 ```
 
 ## Reading The Output
@@ -71,8 +85,13 @@ High-signal lines:
 - `SCALE_TIER_BUDGET:...`
 - `SCALE_PERF_METRICS:...`
 - `SCALE_PERFORMANCE_BUDGET_OK:...`
+- `SCALE_PERF_SUMMARY:...`
 - `SCALE_HISTORY_CONTRACT_OK:...`
 
 `SCALE_TIER_BUDGET` is the machine-readable declaration of the defended tier, scenario sizes, and threshold policy for the current run. Release notes and proof summaries can quote that marker directly without re-parsing the table above.
 
-Treat `SCALE_PERFORMANCE_BUDGET_OK` as the defended release signal. Treat the larger-tier metric line as public telemetry until the alpha line is ready to commit to stronger scale guarantees.
+Treat `SCALE_PERFORMANCE_BUDGET_OK` as the defended release signal for `baseline` and `large`.
+
+Treat `SCALE_PERF_SUMMARY:stress:...` as the published informational telemetry line for the 5000-node tier. It gives hosts a stable p50/p95 snapshot without turning `stress` into a defended release contract.
+
+If AsterGraph later makes a stronger 5000-node commitment, that commitment should appear as a non-informational `SCALE_TIER_BUDGET:stress:...` marker plus a defended `SCALE_PERFORMANCE_BUDGET_OK:stress:True:none` release signal, or as a new defended tier with its own budget marker.
