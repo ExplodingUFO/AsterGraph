@@ -1,6 +1,6 @@
 # Architecture
 
-这份文档说明 `v0.3.0-alpha` 正在冻结的平台骨架：先把公开宿主边界讲清楚，再继续扩 capability。
+这份文档说明支撑当前 public alpha capability surface 的平台骨架。
 
 ## Split
 
@@ -36,7 +36,7 @@ Avalonia 包是第一个官方 adapter，不是整个 SDK 的唯一形态。
 
 ## Official Capability Modules
 
-这些 `Official Capability Modules` 是建立在平台骨架之上的公开模块名：`Selection`、`History`、`Clipboard`、`Shortcut Policy`、`Layout`、`MiniMap`、`Stencil`、`Fragment Library`、`Export`、`Baseline Edge Authoring`。它们都根植于 canonical runtime/session contract，不是另一套 route 名称。
+这些 `Official Capability Modules` 是建立在平台骨架之上的公开模块名：`Selection`、`History`、`Clipboard`、`Shortcut Policy`、`Layout`、`MiniMap`、`Stencil`、`Fragment Library`、`Export`、`Baseline Edge Authoring`、`Node Surface Authoring`、`Hierarchy Semantics`、`Composite Scope Authoring`、`Edge Semantics`、`Edge Geometry Tooling`。它们都根植于 canonical runtime/session contract，不是另一套 route 名称。
 
 模块到 seam 的映射看 [Host Integration](./host-integration.md)，proof / sample 锚点看 [Quick Start](./quick-start.md)。
 

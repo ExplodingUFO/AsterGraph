@@ -22,6 +22,15 @@ public sealed class DemoProofReleaseSurfaceTests
         "Baseline Edge Authoring",
     ];
 
+    private static readonly string[] AdvancedEditingCapabilityModules =
+    [
+        "Node Surface Authoring",
+        "Hierarchy Semantics",
+        "Composite Scope Authoring",
+        "Edge Semantics",
+        "Edge Geometry Tooling",
+    ];
+
     [Fact]
     public void RepositorySurface_UsesAsterGraphSolutionName()
     {
@@ -125,6 +134,41 @@ public sealed class DemoProofReleaseSurfaceTests
             {
                 Assert.Contains(moduleName, contents, StringComparison.Ordinal);
             }
+        }
+    }
+
+    [Fact]
+    public void AdvancedEditingDocs_DefineCanonicalModulesAndProofCoverage()
+    {
+        var readme = ReadRepoFile("README.md");
+        var readmeZh = ReadRepoFile("README.zh-CN.md");
+        var editorReadme = ReadRepoFile("src/AsterGraph.Editor/README.md");
+        var avaloniaReadme = ReadRepoFile("src/AsterGraph.Avalonia/README.md");
+        var advancedEditing = ReadRepoFile("docs/en/advanced-editing.md");
+        var advancedEditingZh = ReadRepoFile("docs/zh-CN/advanced-editing.md");
+        var demoGuide = ReadRepoFile("docs/en/demo-guide.md");
+        var demoGuideZh = ReadRepoFile("docs/zh-CN/demo-guide.md");
+
+        foreach (var contents in new[] { readme, readmeZh, advancedEditing, advancedEditingZh })
+        {
+            foreach (var moduleName in AdvancedEditingCapabilityModules)
+            {
+                Assert.Contains(moduleName, contents, StringComparison.Ordinal);
+            }
+        }
+
+        foreach (var contents in new[] { editorReadme, avaloniaReadme })
+        {
+            Assert.Contains("advanced-editing", contents, StringComparison.OrdinalIgnoreCase);
+        }
+
+        foreach (var contents in new[] { demoGuide, demoGuideZh })
+        {
+            Assert.Contains("HIERARCHY_SEMANTICS_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("EDGE_GEOMETRY_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("Node Surface Authoring", contents, StringComparison.Ordinal);
+            Assert.Contains("Hierarchy Semantics", contents, StringComparison.Ordinal);
+            Assert.Contains("Edge Geometry Tooling", contents, StringComparison.Ordinal);
         }
     }
 

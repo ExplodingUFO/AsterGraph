@@ -68,7 +68,7 @@ For new runtime-facing work, anchor on the first route. The Avalonia route is th
 
 ## Official Capability Modules
 
-These are the public `v0.4.0-alpha` capability modules. They sit on top of the canonical session/runtime route; hosted Avalonia composition reuses the same seams instead of defining a second capability model.
+These are the current public capability modules. They sit on top of the canonical session/runtime route; hosted Avalonia composition reuses the same seams instead of defining a second capability model.
 
 | Module | Canonical seam | First proof/sample anchor |
 | --- | --- | --- |
@@ -82,6 +82,11 @@ These are the public `v0.4.0-alpha` capability modules. They sit on top of the c
 | `Fragment Library` | session fragment/template commands backed by fragment workspace/library services | `src/AsterGraph.Demo` |
 | `Export` | `IGraphSceneSvgExportService` + `TryExportSceneAsSvg()` | `tools/AsterGraph.HostSample` |
 | `Baseline Edge Authoring` | `StartConnection(...)`, `CompleteConnection(...)`, reconnect/disconnect commands, and the pending-connection snapshot | `tools/AsterGraph.HostSample`, `tools/AsterGraph.ScaleSmoke` |
+| `Node Surface Authoring` | `GetNodeSurfaceSnapshots()`, `TrySetNodeSize(...)`, and parameter edits through the shared session command path | `src/AsterGraph.Demo`, [Advanced Editing Guide](./docs/en/advanced-editing.md) |
+| `Hierarchy Semantics` | `GetHierarchyStateSnapshot()`, `GetNodeGroups()`, `GetNodeGroupSnapshots()`, and group collapse/move/resize/membership commands | `src/AsterGraph.Demo`, [Advanced Editing Guide](./docs/en/advanced-editing.md) |
+| `Composite Scope Authoring` | wrap/promote/expose/unexpose/scope-navigation commands plus scope/composite queries | `src/AsterGraph.Demo`, [Advanced Editing Guide](./docs/en/advanced-editing.md) |
+| `Edge Semantics` | connection note, reconnect, and disconnect commands on the canonical session route | `src/AsterGraph.Demo`, [Advanced Editing Guide](./docs/en/advanced-editing.md) |
+| `Edge Geometry Tooling` | `GetConnectionGeometrySnapshots()` plus route-vertex insert/move/remove commands | `src/AsterGraph.Demo`, [Advanced Editing Guide](./docs/en/advanced-editing.md) |
 
 ## Supported Package Boundary
 
@@ -105,6 +110,7 @@ Current capabilities:
 - save/load, undo/redo, copy/paste, fragment import/export, and SVG scene export
 - batch alignment, distribution, and shared-parameter editing for compatible selections
 - definition-driven inspector metadata with grouped parameters, shipped list/text/number/bool/enum editors, and validation feedback
+- tiered node surfaces, fixed group frames, hierarchy snapshots, scoped composites, connection notes, and routed edge geometry editing
 - compile-time node-definition registration and runtime plugin registration
 - host-governed plugin trust policy, local candidate discovery, and load-state inspection
 - descriptor-first automation through `IGraphEditorSession.Automation`
@@ -137,6 +143,7 @@ Consumer-facing guides:
 - [Quick Start](./docs/en/quick-start.md)
 - [Consumer Sample](./docs/en/consumer-sample.md)
 - [Host Integration](./docs/en/host-integration.md)
+- [Advanced Editing Guide](./docs/en/advanced-editing.md)
 - [ScaleSmoke Baseline](./docs/en/scale-baseline.md)
 - [Authoring Inspector Recipe](./docs/en/authoring-inspector-recipe.md)
 - [Adoption Feedback Loop](./docs/en/adoption-feedback.md)

@@ -1,6 +1,6 @@
 # Architecture
 
-This document explains the platform skeleton that `v0.3.0-alpha` is freezing before broader capability work starts.
+This document explains the platform skeleton that underpins the current public alpha capability surface.
 
 ## Split
 
@@ -36,7 +36,7 @@ The Avalonia package is the first official adapter, not the definition of the wh
 
 ## Official Capability Modules
 
-The official capability modules sit above this platform skeleton. `Selection`, `History`, `Clipboard`, `Shortcut Policy`, `Layout`, `MiniMap`, `Stencil`, `Fragment Library`, `Export`, and `Baseline Edge Authoring` are public module names rooted in the canonical runtime/session contract, not alternate route names.
+The official capability modules sit above this platform skeleton. `Selection`, `History`, `Clipboard`, `Shortcut Policy`, `Layout`, `MiniMap`, `Stencil`, `Fragment Library`, `Export`, `Baseline Edge Authoring`, `Node Surface Authoring`, `Hierarchy Semantics`, `Composite Scope Authoring`, `Edge Semantics`, and `Edge Geometry Tooling` are public module names rooted in the canonical runtime/session contract, not alternate route names.
 
 Use [Host Integration](./host-integration.md) for the module-to-seam matrix and [Quick Start](./quick-start.md) for the proof/sample map that shows which public entry point demonstrates each module first.
 

@@ -53,6 +53,7 @@ Node-side parameter editors are created through the stock `NodeParameterEditorRe
 - quickest hosted-UI first run: [`tools/AsterGraph.HelloWorld.Avalonia`](../../tools/AsterGraph.HelloWorld.Avalonia/)
 - canonical onboarding: [Quick Start](../../docs/en/quick-start.md)
 - route and composition guidance: [Host Integration](../../docs/en/host-integration.md)
+- advanced editing surface map: [Advanced Editing Guide](../../docs/en/advanced-editing.md)
 - definition-driven inspector recipe: [Authoring Inspector Recipe](../../docs/en/authoring-inspector-recipe.md)
 - visual showcase host: [`src/AsterGraph.Demo`](../../src/AsterGraph.Demo/)
 - product overview: [Root README](../../README.md)

@@ -54,8 +54,10 @@ Expected proof markers:
 - `FIXED_GROUP_FRAME_OK:True`
 - `NON_OBSCURING_EDITING_OK:True`
 - `VISUAL_SEMANTICS_OK:True`
+- `HIERARCHY_SEMANTICS_OK:True`
 - `COMPOSITE_SCOPE_OK:True`
 - `EDGE_NOTE_OK:True`
+- `EDGE_GEOMETRY_OK:True`
 - `DISCONNECT_FLOW_OK:True`
 - `HOST_NATIVE_METRIC:startup_ms=...`
 - `HOST_NATIVE_METRIC:inspector_projection_ms=...`
@@ -69,8 +71,8 @@ Expected proof markers:
 - `Automation` proves typed execution and result projection.
 - `Integration` points to `HostSample`, renders standalone surfaces, and shows presenter-replacement previews.
 - `Runtime` and `Proof` keep host-owned shell state, recent workspaces, autosave cues, threshold-driven side rails, and shared runtime evidence in one place.
-- `Proof` also confirms non-obscuring parameter editing (`NON_OBSCURING_EDITING_OK`) and the cleaned graph-surface visual semantics (`VISUAL_SEMANTICS_OK`).
-- `View and Proof` can verify composite scope navigation (`COMPOSITE_SCOPE_OK`), editable edge notes (`EDGE_NOTE_OK`), and disconnect recovery (`DISCONNECT_FLOW_OK`).
+- `Proof` maps the advanced-editing split onto official surfaces: `Node Surface Authoring` (`TIERED_NODE_SURFACE_OK`, `NON_OBSCURING_EDITING_OK`, `VISUAL_SEMANTICS_OK`), `Hierarchy Semantics` (`FIXED_GROUP_FRAME_OK`, `HIERARCHY_SEMANTICS_OK`), `Composite Scope Authoring` (`COMPOSITE_SCOPE_OK`), `Edge Semantics` (`EDGE_NOTE_OK`, `DISCONNECT_FLOW_OK`), and `Edge Geometry Tooling` (`EDGE_GEOMETRY_OK`).
+- `View and Proof` keep hierarchy, composite scope, edge semantics, and edge geometry visible without relying on retained-only explanations or alternate editor models.
 
 ## Demo vs Other Entry Samples
 

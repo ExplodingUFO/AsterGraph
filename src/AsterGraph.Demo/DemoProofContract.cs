@@ -11,8 +11,10 @@ public static class DemoProofContract
         "FIXED_GROUP_FRAME_OK",
         "NON_OBSCURING_EDITING_OK",
         "VISUAL_SEMANTICS_OK",
+        "HIERARCHY_SEMANTICS_OK",
         "COMPOSITE_SCOPE_OK",
         "EDGE_NOTE_OK",
+        "EDGE_GEOMETRY_OK",
         "DISCONNECT_FLOW_OK",
     ];
 
@@ -42,8 +44,10 @@ public static class DemoProofContract
             $"FIXED_GROUP_FRAME_OK:{result.FixedGroupFrameOk}",
             $"NON_OBSCURING_EDITING_OK:{result.NonObscuringEditingOk}",
             $"VISUAL_SEMANTICS_OK:{result.VisualSemanticsOk}",
+            $"HIERARCHY_SEMANTICS_OK:{result.HierarchySemanticsOk}",
             $"COMPOSITE_SCOPE_OK:{result.CompositeScopeOk}",
             $"EDGE_NOTE_OK:{result.EdgeNoteOk}",
+            $"EDGE_GEOMETRY_OK:{result.EdgeGeometryOk}",
             $"DISCONNECT_FLOW_OK:{result.DisconnectFlowOk}",
         ];
     }

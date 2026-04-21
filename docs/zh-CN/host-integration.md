@@ -51,6 +51,11 @@
 | `Fragment Library` | 由 fragment workspace/library service 支撑的 session fragment/template commands | 宿主可替换存储，但不需要重写 command surface | `AsterGraph.Demo` |
 | `Export` | `IGraphSceneSvgExportService` + `TryExportSceneAsSvg()` | export 和 workspace persistence、fragment storage 明确分离 | `AsterGraph.HostSample` |
 | `Baseline Edge Authoring` | connection start/complete/reconnect/disconnect commands 加 pending snapshot | pointer gesture 是 adapter 行为，底层仍复用同一份 session semantics | `AsterGraph.HostSample`、`AsterGraph.ScaleSmoke` |
+| `Node Surface Authoring` | `GetNodeSurfaceSnapshots()`、`TrySetNodeSize(...)` 以及走共享 session command 路径的参数编辑 | Avalonia 会把同一份 tier state 投影成卡片阈值、节点旁路参数编辑器和 stock authoring chrome | `AsterGraph.Demo`、[Advanced Editing Guide](./advanced-editing.md) |
+| `Hierarchy Semantics` | `GetHierarchyStateSnapshot()`、`GetNodeGroups()`、`GetNodeGroupSnapshots()` 以及 group collapse/move/resize/membership commands | stock canvas 在同一份 hierarchy state 上叠加 frame chrome、content-area membership 和 collapse affordance | `AsterGraph.Demo`、[Advanced Editing Guide](./advanced-editing.md) |
+| `Composite Scope Authoring` | wrap/promote/expose/unexpose/scope-navigation commands 加 scope/composite queries | breadcrumb chrome 和 host-owned workflow controls 复用同一份 session navigation state | `AsterGraph.Demo`、[Advanced Editing Guide](./advanced-editing.md) |
+| `Edge Semantics` | canonical session 路线上的连线注释、reconnect 和 disconnect commands | hosted pointer flow 和 menu 只是同一份 edge semantics 的投影 | `AsterGraph.Demo`、[Advanced Editing Guide](./advanced-editing.md) |
+| `Edge Geometry Tooling` | `GetConnectionGeometrySnapshots()` 加 route-vertex insert/move/remove commands | stock authoring tools 会投影几何编辑，而不会引入第二套 edge model | `AsterGraph.Demo`、[Advanced Editing Guide](./advanced-editing.md) |
 
 ## 状态契约
 
@@ -96,5 +101,6 @@
 ## Recipes
 
 - [Plugin 与自定义节点 Recipe](./plugin-recipe.md)
+- [Advanced Editing Guide](./advanced-editing.md)
 - [Retained 到 Session 的迁移 Recipe](./retained-migration-recipe.md)
 - [ScaleSmoke 基线](./scale-baseline.md)

@@ -19,6 +19,7 @@
 - 官方 proof lanes 与 smoke tools
 - 一个介于 HelloWorld 和 Demo 之间的中等 hosted-UI consumer 样例
 - shipped definition-driven inspector 元数据和内建 text/number/boolean/enum/list editor
+- 分层节点表面、hierarchy snapshot、composite scope navigation、边注解和 routed edge geometry tooling
 
 ## 当前明确不包含
 
@@ -42,7 +43,8 @@
 - public prerelease publish 和 release artifact 仍然依赖维护者 release flow
 - 最深的 package validation lane 目前仍以 Windows 为主
 - retained compatibility API 仍处于迁移窗口内
-- 下一轮计划的平台里程碑是 `v0.3.0-alpha`，会先冻结 scene/input/platform skeleton，再扩 capability surface
+- 当前 public alpha 仍然只有一套官方 UI adapter：Avalonia
+- advanced editing 已经作为宿主能力模块公开，但更广的 ecosystem 与第二 adapter 验证仍在后续阶段
 
 ## 推荐入口
 
@@ -50,6 +52,7 @@
 - [Project Status](./project-status.md)
 - [Quick Start](./quick-start.md)
 - [ScaleSmoke 基线](./scale-baseline.md)
+- [Advanced Editing Guide](./advanced-editing.md)
 - [Authoring Inspector Recipe](./authoring-inspector-recipe.md)
 - [Plugin 与自定义节点 Recipe](./plugin-recipe.md)
 - [Retained 到 Session 的迁移 Recipe](./retained-migration-recipe.md)
