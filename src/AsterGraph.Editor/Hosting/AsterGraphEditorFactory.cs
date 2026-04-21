@@ -16,10 +16,11 @@ namespace AsterGraph.Editor.Hosting;
 /// Provides the canonical host composition entry points for the AsterGraph editor runtime.
 /// </summary>
 /// <remarks>
-/// <see cref="CreateSession(AsterGraphEditorOptions)" /> is the runtime-first entry point for custom UI hosts and
-/// integrations that want to work directly with <see cref="IGraphEditorSession" />. <see cref="Create(AsterGraphEditorOptions)" />
-/// is the hosted-UI entry point that returns the retained <see cref="GraphEditorViewModel" /> facade for the stock Avalonia shell.
-/// Direct <see cref="GraphEditorViewModel" /> construction is still supported, but it should be treated as a compatibility path.
+/// <see cref="CreateSession(AsterGraphEditorOptions)" /> plus <see cref="IGraphEditorSession" /> define the canonical
+/// runtime surface for host integrations. <see cref="Create(AsterGraphEditorOptions)" /> remains the supported hosted-UI
+/// composition helper for the stock Avalonia shell, but it returns the retained <see cref="GraphEditorViewModel" />
+/// facade rather than a new runtime contract. Direct <see cref="GraphEditorViewModel" /> construction is still supported,
+/// but it should be treated as a compatibility path.
 /// </remarks>
 public static class AsterGraphEditorFactory
 {
@@ -76,10 +77,9 @@ public static class AsterGraphEditorFactory
     /// <param name="options">The host composition options.</param>
     /// <returns>A new graph-editor view model.</returns>
     /// <remarks>
-    /// New hosted-UI code should start here and then compose the Avalonia shell through
-    /// <c>AsterGraphAvaloniaViewFactory.Create(...)</c> or another retained UI surface factory.
-    /// The returned object is still a compatibility facade, but its <see cref="GraphEditorViewModel.Session" />
-    /// now sits on top of the shared runtime boundary.
+    /// Use this when a host wants the shipped Avalonia experience without directly constructing retained controls.
+    /// The returned object is still a compatibility facade, and new runtime-facing feature work should hang from
+    /// <see cref="GraphEditorViewModel.Session" /> or start from <see cref="CreateSession(AsterGraphEditorOptions)" />.
     /// </remarks>
     public static GraphEditorViewModel Create(AsterGraphEditorOptions options)
     {
@@ -118,7 +118,7 @@ public static class AsterGraphEditorFactory
     /// <param name="options">The host composition options.</param>
     /// <returns>A new graph-editor runtime session.</returns>
     /// <remarks>
-    /// This is the canonical entry point for custom UI hosts and for plugin or automation-first integrations.
+    /// This is the canonical entry point for custom UI hosts and for plugin, automation, and adapter-facing integrations.
     /// Unlike <see cref="Create(AsterGraphEditorOptions)" />, this route does not carry the retained
     /// <see cref="GraphEditorViewModel" /> surface or its compatibility-only helpers.
     /// </remarks>

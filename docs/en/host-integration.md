@@ -5,7 +5,7 @@ This guide expands the supported host routes without turning the public onboardi
 ## Canonical Routes
 
 1. Runtime-only or custom UI  
-   `AsterGraphEditorFactory.CreateSession(...)`
+   `AsterGraphEditorFactory.CreateSession(...)` + `IGraphEditorSession`
 2. Shipped Avalonia UI  
    `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)`
 3. Retained migration  
@@ -51,7 +51,8 @@ The stability and precedence rules are published in [Extension Contracts](./exte
 
 Important defaults:
 
-- canonical surfaces are `CreateSession(...)`, `Create(...)`, `IGraphEditorSession`, and DTO/snapshot queries
+- canonical runtime surfaces are `CreateSession(...)`, `IGraphEditorSession`, and DTO/snapshot queries
+- `Create(...)` remains the supported hosted-Avalonia composition helper and returns the retained editor facade
 - retained `GraphEditorViewModel` / `GraphEditorView` remain supported migration facades
 - host localization runs after plugin localization, so host override wins
 - plugin-contributed commands now surface through the canonical session command descriptors and execute through `IGraphEditorSession.Commands.TryExecuteCommand(...)`

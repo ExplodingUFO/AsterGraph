@@ -21,6 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\tools\AsterGraph.HelloWorld\AsterGraph.HelloWorld.csproj" />
     <ProjectReference Include="..\..\tools\AsterGraph.HelloWorld.Avalonia\AsterGraph.HelloWorld.Avalonia.csproj" />
   </ItemGroup>
 </Project>

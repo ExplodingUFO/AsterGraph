@@ -20,7 +20,7 @@
   - `tools/AsterGraph.PackageSmoke` for packed-package proof
   - `tools/AsterGraph.ScaleSmoke` for the public scale baseline and state-continuity proof
 - canonical adoption path:
-  - runtime-only hosts use `AsterGraphEditorFactory.CreateSession(...)`
+  - runtime-only hosts use `AsterGraphEditorFactory.CreateSession(...)` + `IGraphEditorSession`
   - Avalonia UI hosts use `AsterGraphEditorFactory.Create(...)` plus `AsterGraphAvaloniaViewFactory.Create(...)`
 
 ## What Is Already Stable Enough To Evaluate
@@ -53,10 +53,10 @@ The current public-repo priority is not new runtime capability. It is keeping th
 
 ## Near-Term Roadmap
 
-- keep public alpha documentation and proof guidance easy to follow
+- `v0.3.0-alpha Platform Skeleton Freeze` — freeze the canonical runtime surface and establish scene/input/platform seams that outlive Avalonia-owned implementation
+- keep public alpha documentation and proof guidance easy to follow while that skeleton solidifies
 - maintain hosted CI parity across the supported proof lanes
 - continue the retained compatibility migration window without abrupt public breaks
-- use external alpha feedback to decide what should become the next product-facing milestone
 
 ## Public Entry Matrix
 

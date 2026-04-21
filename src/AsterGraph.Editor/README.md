@@ -33,8 +33,9 @@ Those responsibilities live in `AsterGraph.Avalonia` or the consuming host.
 
 - stable canonical surfaces:
   - `AsterGraphEditorFactory.CreateSession(...)`
-  - `AsterGraphEditorFactory.Create(...)`
   - `IGraphEditorSession`
+- hosted-UI composition helper:
+  - `AsterGraphEditorFactory.Create(...)`
 - DTO/snapshot queries such as `GetCompatiblePortTargets(...)`, `GetNodeSurfaceSnapshots()`, `GetNodeGroups()`, and `GetNodeGroupSnapshots()`
 - node/group mutations such as `TrySetNodeSize(...)`, `TrySetNodeGroupPosition(...)`, `TrySetNodeGroupSize(...)`, and `TrySetNodeGroupMemberships(...)`
 - retained compatibility surfaces:

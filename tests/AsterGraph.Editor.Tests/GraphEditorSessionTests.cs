@@ -98,6 +98,34 @@ public sealed class GraphEditorSessionTests
     }
 
     [Fact]
+    public void AsterGraphEditorFactory_CreateSession_DescriptorSupport_DoesNotExposeCompatibilityEditor()
+    {
+        var session = AsterGraphEditorFactory.CreateSession(CreateOptions(new NodeDefinitionId("tests.session.descriptor-support.runtime")));
+        var descriptorSupport = session.GetType()
+            .GetField("_descriptorSupport", BindingFlags.Instance | BindingFlags.NonPublic)!
+            .GetValue(session);
+        var compatibilityEditor = descriptorSupport!.GetType()
+            .GetProperty("CompatibilityEditor", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)!
+            .GetValue(descriptorSupport);
+
+        Assert.Null(compatibilityEditor);
+    }
+
+    [Fact]
+    public void AsterGraphEditorFactory_Create_DescriptorSupport_PreservesCompatibilityEditorForRetainedRoute()
+    {
+        var editor = AsterGraphEditorFactory.Create(CreateOptions(new NodeDefinitionId("tests.session.descriptor-support.retained")));
+        var descriptorSupport = editor.Session.GetType()
+            .GetField("_descriptorSupport", BindingFlags.Instance | BindingFlags.NonPublic)!
+            .GetValue(editor.Session);
+        var compatibilityEditor = descriptorSupport!.GetType()
+            .GetProperty("CompatibilityEditor", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)!
+            .GetValue(descriptorSupport);
+
+        Assert.Same(editor, compatibilityEditor);
+    }
+
+    [Fact]
     public void AsterGraphEditorFactory_CreateSession_CreateDocumentSnapshot_ReturnsDetachedSnapshot()
     {
         var definitionId = new NodeDefinitionId("tests.session.detached-snapshot");

@@ -50,11 +50,11 @@ dotnet add package AsterGraph.Abstractions --prerelease
 
 | 路线 | 适合什么场景 | 第一个 API | 第一个样例 |
 | --- | --- | --- | --- |
-| 仅运行时 / 自定义 UI | 宿主自己管 UI，只想拿推荐的运行时边界 | `AsterGraphEditorFactory.CreateSession(...)` | [`AsterGraph.HelloWorld`](./tools/AsterGraph.HelloWorld/) |
+| 仅运行时 / 自定义 UI | 宿主自己管 UI，只想拿推荐的运行时边界 | `AsterGraphEditorFactory.CreateSession(...)` + `IGraphEditorSession` | [`AsterGraph.HelloWorld`](./tools/AsterGraph.HelloWorld/) |
 | 默认 Avalonia UI | 宿主想直接复用默认编辑器壳层或独立 Avalonia 表面 | `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` | [Quick Start](./docs/zh-CN/quick-start.md) |
 | retained 迁移 | 现有宿主要分批迁移，暂时还离不开旧的 MVVM 入口 | `new GraphEditorViewModel(...)` + `new GraphEditorView { Editor = editor }` | [Host Integration](./docs/zh-CN/host-integration.md) |
 
-新代码优先走前两条；retained 路线只作为迁移桥接。
+新的运行时能力接入优先锚定第一条。Avalonia 路线是当前受支持的 hosted adapter 路线，retained 路线只作为迁移桥接。
 
 ## 公开入口分工
 

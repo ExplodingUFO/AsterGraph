@@ -31,7 +31,8 @@
 
 ## 稳定性说明
 
-- stable canonical surfaces：factory、`IGraphEditorSession`、DTO/snapshot query、runtime-boundary diagnostics/automation/plugin inspection
+- stable canonical runtime surfaces：`CreateSession(...)`、`IGraphEditorSession`、DTO/snapshot query、runtime-boundary diagnostics/automation/plugin inspection
+- 受支持的 hosted-UI 组合 helper：`Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)`
 - retained migration surfaces：`GraphEditorViewModel`、`GraphEditorView`
 - compatibility-only shims：见 [Extension Contracts](./extension-contracts.md)
 
@@ -41,6 +42,7 @@
 - public prerelease publish 和 release artifact 仍然依赖维护者 release flow
 - 最深的 package validation lane 目前仍以 Windows 为主
 - retained compatibility API 仍处于迁移窗口内
+- 下一轮计划的平台里程碑是 `v0.3.0-alpha`，会先冻结 scene/input/platform skeleton，再扩 capability surface
 
 ## 推荐入口
 

@@ -32,7 +32,8 @@
 
 ## Stability Guidance
 
-- stable canonical surfaces: factories, `IGraphEditorSession`, DTO/snapshot queries, runtime diagnostics/automation/plugin inspection
+- stable canonical runtime surfaces: `CreateSession(...)`, `IGraphEditorSession`, DTO/snapshot queries, runtime diagnostics/automation/plugin inspection
+- supported hosted-UI composition helper: `Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)`
 - retained migration surfaces: `GraphEditorViewModel`, `GraphEditorView`
 - compatibility-only shims: older MVVM-shaped helpers described in [Extension Contracts](./extension-contracts.md)
 
@@ -42,6 +43,7 @@
 - public prerelease publishing and release artifacts still depend on the maintainer release flow
 - the deepest package-validation lane and the `.NET 10` packed-consumer proof still run on the Windows release-validation path
 - retained compatibility APIs are still present during the migration window
+- the next planned platform milestone is `v0.3.0-alpha`, which will freeze the scene/input/platform skeleton before broader capability expansion
 
 ## Recommended Entry Points
 

@@ -7,10 +7,13 @@
 ### Stable canonical surfaces
 
 - `AsterGraphEditorFactory.CreateSession(...)`
-- `AsterGraphEditorFactory.Create(...)`
 - `IGraphEditorSession`
 - `GetCompatiblePortTargets(...)` 这类 DTO / snapshot 查询
 - runtime-boundary 上的 diagnostics / automation / plugin inspection
+
+### Supported hosted-UI composition helper
+
+- `AsterGraphEditorFactory.Create(...)`
 
 ### Retained migration surfaces
 

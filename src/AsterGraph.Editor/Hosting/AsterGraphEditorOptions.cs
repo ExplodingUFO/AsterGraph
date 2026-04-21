@@ -16,8 +16,9 @@ namespace AsterGraph.Editor.Hosting;
 /// Defines the host inputs required by <see cref="AsterGraphEditorFactory" /> when composing an editor runtime.
 /// </summary>
 /// <remarks>
-/// This options contract is the canonical host entry point. Direct <c>new GraphEditorViewModel(...)</c> usage
-/// remains supported as a retained compatibility path for incremental migration.
+/// This options contract configures both the canonical <see cref="AsterGraphEditorFactory.CreateSession(AsterGraphEditorOptions)" />
+/// route and the hosted-UI <see cref="AsterGraphEditorFactory.Create(AsterGraphEditorOptions)" /> helper.
+/// Direct <c>new GraphEditorViewModel(...)</c> usage remains supported as a retained compatibility path for incremental migration.
 /// </remarks>
 public sealed record AsterGraphEditorOptions
 {

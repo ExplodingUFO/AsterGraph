@@ -34,13 +34,13 @@ Those responsibilities live in `AsterGraph.Abstractions`, `AsterGraph.Core`, `As
 
 ## Canonical UI Entry Paths
 
-- hosted full shell: `AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOptions { ... })`
+- hosted full shell: `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOptions { ... })`
 - standalone canvas: `AsterGraphCanvasViewFactory.Create(...)`
 - standalone inspector: `AsterGraphInspectorViewFactory.Create(...)`
 - standalone mini map: `AsterGraphMiniMapViewFactory.Create(...)`
 - retained compatibility: `new GraphEditorView { Editor = editor }`
 
-For new work, prefer the factory-based routes. Treat the direct `GraphEditorView` constructor path as retained compatibility.
+For new work, prefer the factory-based routes. `CreateSession(...)` plus `IGraphEditorSession` remain the canonical runtime surface; this package composes the current Avalonia adapter on top of the retained hosted-UI facade. Treat the direct `GraphEditorView` constructor path as retained compatibility.
 
 `NodeCanvas` consumes the shared editor command/query surface for tiered authoring UX. The same persisted node/group state drives resize handles, width/height tiers, node-side parameter values, fixed group frames, geometry-based membership, and editor-only group chrome.
 

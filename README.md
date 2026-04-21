@@ -50,11 +50,11 @@ Add `AsterGraph.Core` only when the host also needs direct `GraphDocument`, seri
 
 | Route | Use when | First API | First sample |
 | --- | --- | --- | --- |
-| Runtime-only or custom UI | the host owns its own UI and wants the canonical runtime boundary | `AsterGraphEditorFactory.CreateSession(...)` | [`AsterGraph.HelloWorld`](./tools/AsterGraph.HelloWorld/) |
+| Runtime-only or custom UI | the host owns its own UI and wants the canonical runtime boundary | `AsterGraphEditorFactory.CreateSession(...)` + `IGraphEditorSession` | [`AsterGraph.HelloWorld`](./tools/AsterGraph.HelloWorld/) |
 | Shipped Avalonia UI | the host wants the stock editor shell or stock standalone Avalonia surfaces | `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` | [Quick Start](./docs/en/quick-start.md) |
 | Retained migration | the host is moving off older MVVM-shaped entry points in planned batches | `new GraphEditorViewModel(...)` + `new GraphEditorView { Editor = editor }` | [Host Integration](./docs/en/host-integration.md) |
 
-For new work, stay on the first two routes. Treat the retained route as migration-only.
+For new runtime-facing work, anchor on the first route. The Avalonia route is the supported hosted adapter path today, while the retained route stays migration-only.
 
 ## Public Entry Map
 

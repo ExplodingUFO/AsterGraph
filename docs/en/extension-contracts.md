@@ -7,10 +7,13 @@ This document publishes the contract around surface stability, compatibility ret
 ### Stable canonical surfaces
 
 - `AsterGraphEditorFactory.CreateSession(...)`
-- `AsterGraphEditorFactory.Create(...)`
 - `IGraphEditorSession`
 - DTO/snapshot queries such as `GetCompatiblePortTargets(...)`
 - runtime-boundary diagnostics, automation, and plugin inspection
+
+### Supported hosted-UI composition helper
+
+- `AsterGraphEditorFactory.Create(...)`
 
 ### Retained migration surfaces
 

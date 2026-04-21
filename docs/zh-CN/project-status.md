@@ -20,7 +20,7 @@
   - `tools/AsterGraph.PackageSmoke`：打包消费验证
   - `tools/AsterGraph.ScaleSmoke`：公开的大图基线与状态连续性验证
 - 推荐接入路径：
-  - runtime-only 宿主使用 `AsterGraphEditorFactory.CreateSession(...)`
+  - runtime-only 宿主使用 `AsterGraphEditorFactory.CreateSession(...)` + `IGraphEditorSession`
   - Avalonia UI 宿主使用 `AsterGraphEditorFactory.Create(...)` 加 `AsterGraphAvaloniaViewFactory.Create(...)`
 
 ## 已经足够对外评估的部分
@@ -53,10 +53,10 @@
 
 ## 近期路线
 
+- `v0.3.0-alpha Platform Skeleton Freeze`：冻结 canonical runtime surface，并建立能脱离 Avalonia-owned 实现的 scene/input/platform seams
 - 保持公开 Alpha 文档和验证指引清晰可执行
 - 继续维护托管 CI 与核心验证 lane 的一致性
 - 在不突然 breaking 的前提下继续保留兼容迁移窗口
-- 以后续 alpha 使用反馈决定下一轮真正的产品功能里程碑
 
 ## 公开入口分工
 

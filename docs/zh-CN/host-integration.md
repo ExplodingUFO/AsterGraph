@@ -5,7 +5,7 @@
 ## Canonical Routes
 
 1. 只要运行时 / 自定义 UI  
-   `AsterGraphEditorFactory.CreateSession(...)`
+   `AsterGraphEditorFactory.CreateSession(...)` + `IGraphEditorSession`
 2. 使用默认 Avalonia UI  
    `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)`
 3. retained 迁移  
@@ -51,7 +51,8 @@
 
 重要默认项：
 
-- 推荐的稳定入口是 `CreateSession(...)`、`Create(...)`、`IGraphEditorSession` 和 DTO/snapshot queries
+- 推荐的 canonical runtime 入口是 `CreateSession(...)`、`IGraphEditorSession` 和 DTO/snapshot queries
+- `Create(...)` 仍然是受支持的 hosted Avalonia 组合 helper，并返回 retained editor facade
 - retained `GraphEditorViewModel` / `GraphEditorView` 仍是受支持的 migration facade
 - host localization 在 plugin localization 之后执行，所以 host override 最终生效
 - plugin command 现在通过 canonical session command descriptor 暴露，并通过 `IGraphEditorSession.Commands.TryExecuteCommand(...)` 执行
