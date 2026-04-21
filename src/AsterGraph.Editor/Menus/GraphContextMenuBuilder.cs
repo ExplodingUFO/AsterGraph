@@ -2,6 +2,7 @@ using System.Globalization;
 using CommunityToolkit.Mvvm.Input;
 using AsterGraph.Abstractions.Compatibility;
 using AsterGraph.Core.Models;
+using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.ViewModels;
 
 namespace AsterGraph.Editor.Menus;
@@ -33,7 +34,7 @@ internal sealed class GraphContextMenuBuilder
     private IReadOnlyList<MenuItemDescriptor> BuildCanvasMenu(ContextMenuContext context)
     {
         var templates = context.AvailableNodeDefinitions.Count > 0
-            ? context.AvailableNodeDefinitions.Select(definition => new NodeTemplateViewModel(definition))
+            ? context.AvailableNodeDefinitions.Select(GraphEditorNodeTemplateSnapshot.Create)
             : _editor.NodeTemplates;
         var permissions = _editor.CommandPermissions;
 
@@ -249,31 +250,37 @@ internal sealed class GraphContextMenuBuilder
 
     private IReadOnlyList<MenuItemDescriptor> BuildCompatibleTargetItems(string sourceNodeId, string sourcePortId)
     {
-        var targets = _editor.GetCompatibleTargets(sourceNodeId, sourcePortId);
+        var targets = _editor.GetEdgeTemplateSnapshots(sourceNodeId, sourcePortId);
         if (targets.Count == 0)
         {
             return [new MenuItemDescriptor("no-compatible-targets", L("editor.menu.compatibility.noTargets", "No Compatible Targets"), iconKey: "info", isEnabled: false)];
         }
 
         return targets
-            .GroupBy(target => target.Node.Id)
-            .OrderBy(group => group.First().Node.Title, StringComparer.Ordinal)
+            .GroupBy(target => target.TargetNodeId)
+            .OrderBy(group => group.First().TargetNodeTitle, StringComparer.Ordinal)
             .Select(group => new MenuItemDescriptor(
                 $"compatible-node-{group.Key}",
-                GetNodeMenuHeader(group.First().Node),
+                GetNodeMenuHeader(ResolveNode(group.Key)),
                 children: group
-                    .OrderBy(item => item.Port.Label, StringComparer.Ordinal)
+                    .OrderBy(item => item.TargetLabel, StringComparer.Ordinal)
                     .Select(target => new MenuItemDescriptor(
-                        $"compatible-port-{target.Node.Id}-{target.Port.Id}",
+                        target.TargetKind == GraphConnectionTargetKind.Port
+                            ? $"compatible-port-{target.TargetNodeId}-{target.TargetId}"
+                            : $"compatible-parameter-{target.TargetNodeId}-{target.TargetId}",
                         target.Compatibility.Kind == PortCompatibilityKind.ImplicitConversion
-                            ? LF("editor.menu.compatibility.implicitTarget", "{0} (implicit: {1})", target.Port.Label, target.Compatibility.ConversionId!.Value)
-                            : target.Port.Label,
-                        new RelayCommand(() => _editor.ConnectPorts(sourceNodeId, sourcePortId, target.Node.Id, target.Port.Id)),
+                            ? LF("editor.menu.compatibility.implicitTarget", "{0} (implicit: {1})", target.TargetLabel, target.Compatibility.ConversionId!.Value)
+                            : target.TargetLabel,
+                        new RelayCommand(() => _editor.ConnectToTarget(sourceNodeId, sourcePortId, target.Target)),
                         iconKey: target.Compatibility.Kind == PortCompatibilityKind.ImplicitConversion ? "conversion" : "connect",
                         isEnabled: _editor.CommandPermissions.Connections.AllowCreate))
                     .ToList()))
             .ToList();
     }
+
+    private NodeViewModel ResolveNode(string nodeId)
+        => _editor.FindNode(nodeId)
+            ?? throw new InvalidOperationException($"Expected node '{nodeId}' to exist while building the context menu.");
 
     private string GetNodeMenuHeader(NodeViewModel node)
     {

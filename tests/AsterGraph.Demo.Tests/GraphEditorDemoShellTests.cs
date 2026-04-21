@@ -116,7 +116,7 @@ public sealed class GraphEditorDemoShellTests
         var originalNodeCount = viewModel.Editor.Nodes.Count;
 
         viewModel.SaveWorkspaceAs(saveAsPath);
-        viewModel.Editor.Session.Commands.AddNode(viewModel.Editor.NodeTemplates[0].Definition.Id);
+        viewModel.Editor.Session.Commands.AddNode(viewModel.Editor.NodeTemplates[0].DefinitionId);
 
         var changedNodeCount = viewModel.Editor.Nodes.Count;
         Assert.True(changedNodeCount > originalNodeCount);
@@ -126,7 +126,7 @@ public sealed class GraphEditorDemoShellTests
         Assert.Equal(saveAsPath, viewModel.ActiveWorkspacePath);
         Assert.Contains(saveAsPath, viewModel.RecentWorkspacePaths);
 
-        viewModel.Editor.Session.Commands.AddNode(viewModel.Editor.NodeTemplates[0].Definition.Id);
+        viewModel.Editor.Session.Commands.AddNode(viewModel.Editor.NodeTemplates[0].DefinitionId);
         Assert.True(viewModel.ReopenLastWorkspace());
         Assert.Equal(originalNodeCount, viewModel.Editor.Nodes.Count);
     }
@@ -145,7 +145,7 @@ public sealed class GraphEditorDemoShellTests
         using (var firstLifetime = new DemoShellViewModelLifetime(options))
         {
             initialNodeCount = firstLifetime.ViewModel.Editor.Nodes.Count;
-            firstLifetime.ViewModel.Editor.Session.Commands.AddNode(firstLifetime.ViewModel.Editor.NodeTemplates[0].Definition.Id);
+            firstLifetime.ViewModel.Editor.Session.Commands.AddNode(firstLifetime.ViewModel.Editor.NodeTemplates[0].DefinitionId);
             autosavedNodeCount = firstLifetime.ViewModel.Editor.Nodes.Count;
 
             Assert.True(firstLifetime.ViewModel.HasAutosaveDraft);

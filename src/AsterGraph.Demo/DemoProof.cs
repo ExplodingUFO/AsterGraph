@@ -73,7 +73,7 @@ public static class DemoProof
         var pluginScanMs = MeasureMilliseconds(() => shell.PluginCandidates.ToArray());
 
         var nodeCountBeforeUndo = shell.Editor.Nodes.Count;
-        shell.Session.Commands.AddNode(shell.Editor.NodeTemplates[0].Definition.Id, new GraphPoint(920, 260));
+        shell.Session.Commands.AddNode(shell.Editor.NodeTemplates[0].DefinitionId, new GraphPoint(920, 260));
         var undoAction = AsterGraphHostedActionFactory.CreateCommandActions(shell.Session, ["history.undo"])
             .Single(action => string.Equals(action.Id, "history.undo", StringComparison.Ordinal));
         var commandLatencyMs = MeasureMilliseconds(() => undoAction.TryExecute());
@@ -198,7 +198,7 @@ public static class DemoProof
         var workspacePath = Path.Combine(storageRoot, "demo-proof-workspace.json");
         var baselineNodeCount = shell.Editor.Nodes.Count;
         shell.SaveWorkspaceAs(workspacePath);
-        shell.Session.Commands.AddNode(shell.Editor.NodeTemplates[0].Definition.Id, new GraphPoint(1040, 320));
+        shell.Session.Commands.AddNode(shell.Editor.NodeTemplates[0].DefinitionId, new GraphPoint(1040, 320));
         var shellWorkflowOk =
             shell.TryOpenWorkspacePath(workspacePath)
             && shell.Editor.Nodes.Count == baselineNodeCount

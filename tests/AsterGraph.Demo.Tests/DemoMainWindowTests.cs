@@ -194,7 +194,7 @@ public sealed class DemoMainWindowTests
         };
 
         window.Show();
-        viewModel.Editor.Session.Commands.AddNode(viewModel.Editor.NodeTemplates[0].Definition.Id);
+        viewModel.Editor.Session.Commands.AddNode(viewModel.Editor.NodeTemplates[0].DefinitionId);
 
         window.Close();
 
@@ -222,7 +222,7 @@ public sealed class DemoMainWindowTests
         firstViewModel.IsStatusChromeVisible = true;
         firstViewModel.IsMiniMapVisible = false;
         firstViewModel.RecordWindowSize(1660, 940);
-        firstViewModel.Editor.Session.Commands.AddNode(firstViewModel.Editor.NodeTemplates[0].Definition.Id);
+        firstViewModel.Editor.Session.Commands.AddNode(firstViewModel.Editor.NodeTemplates[0].DefinitionId);
         firstViewModel.Editor.Session.Commands.PanBy(24, -18);
         firstViewModel.Editor.Session.Commands.ZoomAt(1.18, new AsterGraph.Core.Models.GraphPoint(0, 0));
         firstViewModel.SaveWorkspaceAs(savePath);

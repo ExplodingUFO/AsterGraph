@@ -278,7 +278,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         CancelPendingConnectionCommand = new RelayCommand(
             () => CancelPendingConnection(StatusText("editor.status.connection.previewCancelled", "Connection preview cancelled.")),
             () => HasPendingConnection);
-        AddNodeCommand = new RelayCommand<NodeTemplateViewModel>(
+        AddNodeCommand = new RelayCommand<GraphEditorNodeTemplateSnapshot>(
             template =>
             {
                 if (template is not null)
@@ -324,8 +324,8 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         Connections = new ObservableCollection<ConnectionViewModel>();
         SelectedNodes = new ObservableCollection<NodeViewModel>();
         SelectedNodeParameters = new ObservableCollection<NodeParameterViewModel>();
-        NodeTemplates = new ObservableCollection<NodeTemplateViewModel>(
-            _nodeCatalog.Definitions.Select(definition => new NodeTemplateViewModel(definition)));
+        NodeTemplates = new ObservableCollection<GraphEditorNodeTemplateSnapshot>(
+            _nodeCatalog.Definitions.Select(GraphEditorNodeTemplateSnapshot.Create));
         FragmentTemplates = new ObservableCollection<FragmentTemplateViewModel>();
         _kernel = new GraphEditorKernel(
             document,
@@ -381,7 +381,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// <summary>
     /// 获取由节点目录生成的可插入节点模板集合。
     /// </summary>
-    public ObservableCollection<NodeTemplateViewModel> NodeTemplates { get; }
+    public ObservableCollection<GraphEditorNodeTemplateSnapshot> NodeTemplates { get; }
 
     /// <summary>
     /// 获取从片段模板库加载的模板集合。
