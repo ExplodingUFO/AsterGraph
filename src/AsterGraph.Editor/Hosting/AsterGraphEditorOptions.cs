@@ -103,6 +103,11 @@ public sealed record AsterGraphEditorOptions
     public IGraphEditorDiagnosticsSink? DiagnosticsSink { get; init; }
 
     /// <summary>
+    /// Optional retained host platform services used by the hosted editor facade.
+    /// </summary>
+    public GraphEditorPlatformServices? PlatformServices { get; init; }
+
+    /// <summary>
     /// Optional runtime logging and tracing configuration.
     /// </summary>
     public GraphEditorInstrumentationOptions? Instrumentation { get; init; }

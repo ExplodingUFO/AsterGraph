@@ -30,21 +30,36 @@ public sealed partial class GraphEditorViewModel
         => _kernel.UpdateViewportSize(width, height);
 
     /// <summary>
+    /// 一次性应用宿主提供的平台服务。
+    /// </summary>
+    /// <param name="services">新的平台服务聚合；为 <see langword="null"/> 时清空当前服务。</param>
+    public void ApplyPlatformServices(GraphEditorPlatformServices? services)
+        => ApplyPlatformServicesCore(services?.TextClipboardBridge, services?.HostContext);
+
+    /// <summary>
     /// 配置宿主提供的纯文本剪贴板桥。
     /// </summary>
     /// <param name="bridge">宿主桥实现；为 <see langword="null"/> 时仅保留进程内剪贴板回退。</param>
     public void SetTextClipboardBridge(IGraphTextClipboardBridge? bridge)
-    {
-        _textClipboardBridge = bridge;
-        RaiseComputedPropertyChanges();
-    }
+        => ApplyPlatformServicesCore(bridge, _hostContext);
 
     /// <summary>
     /// 设置宿主上下文信息。
     /// </summary>
     /// <param name="hostContext">宿主上下文；为 <see langword="null"/> 时清空当前宿主上下文。</param>
     public void SetHostContext(IGraphHostContext? hostContext)
+        => ApplyPlatformServicesCore(_textClipboardBridge, hostContext);
+
+    private void ApplyPlatformServicesCore(
+        IGraphTextClipboardBridge? textClipboardBridge,
+        IGraphHostContext? hostContext)
     {
+        if (!ReferenceEquals(_textClipboardBridge, textClipboardBridge))
+        {
+            _textClipboardBridge = textClipboardBridge;
+            RaiseComputedPropertyChanges();
+        }
+
         SetProperty(ref _hostContext, hostContext, nameof(HostContext));
     }
 

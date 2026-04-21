@@ -21,6 +21,32 @@ namespace AsterGraph.Editor.Tests;
 public sealed class GraphEditorServiceSeamsTests
 {
     [Fact]
+    public void AsterGraphEditorOptions_ExposesOptionalPlatformServices()
+    {
+        var property = typeof(AsterGraphEditorOptions).GetProperty(nameof(AsterGraphEditorOptions.PlatformServices));
+
+        Assert.NotNull(property);
+        Assert.Equal(typeof(GraphEditorPlatformServices), property!.PropertyType);
+
+        var options = new AsterGraphEditorOptions();
+
+        Assert.Null(options.PlatformServices);
+    }
+
+    [Fact]
+    public void GraphEditorPlatformServices_ExposesClipboardBridgeAndHostContext()
+    {
+        var services = new GraphEditorPlatformServices
+        {
+            TextClipboardBridge = new RecordingTextClipboardBridge(),
+            HostContext = new TestGraphHostContext(new object(), null),
+        };
+
+        Assert.IsAssignableFrom<IGraphTextClipboardBridge>(services.TextClipboardBridge);
+        Assert.IsAssignableFrom<IGraphHostContext>(services.HostContext);
+    }
+
+    [Fact]
     public void AsterGraphEditorFactory_UsesExplicitStorageRootForDefaultServices()
     {
         var definitionId = new NodeDefinitionId("tests.services.default");
@@ -162,6 +188,28 @@ public sealed class GraphEditorServiceSeamsTests
         Assert.True(runtimeById["integration.instrumentation.activity-source"].IsAvailable);
     }
 
+    [Fact]
+    public void AsterGraphEditorFactory_Create_AppliesHostSuppliedPlatformServicesToRetainedFacade()
+    {
+        var definitionId = new NodeDefinitionId("tests.services.platform");
+        var bridge = new RecordingTextClipboardBridge();
+        var hostContext = new TestGraphHostContext(new object(), null);
+        var editor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
+        {
+            Document = CreateDocument(definitionId),
+            NodeCatalog = CreateCatalog(definitionId),
+            CompatibilityService = new ExactCompatibilityService(),
+            PlatformServices = new GraphEditorPlatformServices
+            {
+                TextClipboardBridge = bridge,
+                HostContext = hostContext,
+            },
+        });
+
+        Assert.Same(hostContext, editor.HostContext);
+        Assert.True(editor.CanPaste);
+    }
+
     private static GraphDocument CreateDocument(NodeDefinitionId definitionId)
         => new(
             "Service Graph",
@@ -291,6 +339,20 @@ public sealed class GraphEditorServiceSeamsTests
         }
     }
 
+    private sealed class RecordingTextClipboardBridge : IGraphTextClipboardBridge
+    {
+        public string? Text { get; private set; }
+
+        public Task<string?> ReadTextAsync(CancellationToken cancellationToken = default)
+            => Task.FromResult(Text);
+
+        public Task WriteTextAsync(string text, CancellationToken cancellationToken = default)
+        {
+            Text = text;
+            return Task.CompletedTask;
+        }
+    }
+
     private sealed class RecordingDiagnosticsSink : IGraphEditorDiagnosticsSink
     {
         public List<GraphEditorDiagnostic> Diagnostics { get; } = [];
@@ -343,6 +405,11 @@ public sealed class GraphEditorServiceSeamsTests
     {
         public string GetString(string key, string fallback)
             => fallback;
+    }
+
+    private sealed record TestGraphHostContext(object Owner, object? TopLevel) : IGraphHostContext
+    {
+        public IServiceProvider? Services => null;
     }
 
     private sealed class NoOpLoggerFactory : ILoggerFactory

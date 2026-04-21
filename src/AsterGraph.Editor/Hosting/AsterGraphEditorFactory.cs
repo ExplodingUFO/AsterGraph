@@ -109,6 +109,7 @@ public static class AsterGraphEditorFactory
             PublishDiagnostics(runtimeSession, resolved.PluginLoadResult.Diagnostics);
         }
 
+        editor.ApplyPlatformServices(resolved.Options.PlatformServices);
         return editor;
     }
 

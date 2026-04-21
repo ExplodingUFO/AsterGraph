@@ -1,3 +1,5 @@
+using System.Threading;
+using System.Threading.Tasks;
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Avalonia.Controls;
@@ -466,6 +468,32 @@ public sealed class GraphEditorFacadeRefactorTests
         Assert.Equal(
             2,
             changedProperties.Count(propertyName => propertyName == nameof(GraphEditorViewModel.HostContext)));
+    }
+
+    [Fact]
+    public void ApplyPlatformServices_UpdatesHostContextAndPasteReadinessThroughOneEntryPoint()
+    {
+        var definitionId = new NodeDefinitionId("tests.editor.facade.platform-services");
+        var editor = CreateEditorWithSharedDefinitionNodes(definitionId);
+        var bridge = new TestClipboardBridge();
+        var hostContext = new TestGraphHostContext(new object(), null);
+
+        Assert.False(editor.CanPaste);
+        Assert.Null(editor.HostContext);
+
+        editor.ApplyPlatformServices(new GraphEditorPlatformServices
+        {
+            TextClipboardBridge = bridge,
+            HostContext = hostContext,
+        });
+
+        Assert.True(editor.CanPaste);
+        Assert.Same(hostContext, editor.HostContext);
+
+        editor.ApplyPlatformServices(null);
+
+        Assert.False(editor.CanPaste);
+        Assert.Null(editor.HostContext);
     }
 
     [Fact]
@@ -1086,6 +1114,15 @@ public sealed class GraphEditorFacadeRefactorTests
     private sealed record TestGraphHostContext(object Owner, object? TopLevel) : IGraphHostContext
     {
         public IServiceProvider? Services => null;
+    }
+
+    private sealed class TestClipboardBridge : IGraphTextClipboardBridge
+    {
+        public Task<string?> ReadTextAsync(CancellationToken cancellationToken = default)
+            => Task.FromResult<string?>(null);
+
+        public Task WriteTextAsync(string text, CancellationToken cancellationToken = default)
+            => Task.CompletedTask;
     }
 
     private sealed class RecordingWorkspaceService : IGraphWorkspaceService
