@@ -278,7 +278,7 @@ internal sealed class NodeCanvasSceneHost
                 return;
             }
 
-            args.Handled = _host.ViewModel.TrySetNodeGroupCollapsed(group.Id, !currentGroup.IsCollapsed);
+            args.Handled = _host.ViewModel.Session.Commands.TrySetNodeGroupCollapsed(group.Id, !currentGroup.IsCollapsed);
         };
         layout.Children.Add(header);
 

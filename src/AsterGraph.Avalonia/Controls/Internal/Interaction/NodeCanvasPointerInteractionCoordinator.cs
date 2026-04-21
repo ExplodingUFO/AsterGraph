@@ -172,21 +172,31 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
             || _host.InteractionSession.DragGroupId is not null)
         {
             _host.ClearResizeFeedback();
-            if (_host.InteractionSession.DragNode is not null)
-            {
-                if (_host.InteractionSession.DragSession is NodeCanvasDragSession dragSession
-                    && _host.InteractionSession.DragStartScreenPosition is Point dragStart)
+                if (_host.InteractionSession.DragNode is not null)
                 {
+                    if (_host.InteractionSession.DragSession is NodeCanvasDragSession dragSession
+                        && _host.InteractionSession.DragStartScreenPosition is Point dragStart)
+                    {
                     var rawDelta = currentScreenPosition - dragStart;
                     var adjustedDelta = _host.ApplyDragAssist(
                         dragSession,
                         rawDelta.X / _host.ViewModel.Zoom,
                         rawDelta.Y / _host.ViewModel.Zoom);
                     _host.ViewModel.ApplyDragOffset(dragSession.OriginPositions, adjustedDelta.X, adjustedDelta.Y);
+                    var currentDragNodes = ResolveCurrentDragNodes(dragSession.Nodes);
+                    _host.InteractionSession.UpdateDragGroupDropZones(
+                        _host.ViewModel.Session.Queries.GetHierarchyStateSnapshot().NodeGroups);
+                    var autoExpanded = TryAutoExpandCollapsedDropGroup(currentDragNodes);
+                    _host.InteractionSession.UpdateDragGroupDropZones(
+                        _host.ViewModel.Session.Queries.GetHierarchyStateSnapshot().NodeGroups);
+                    if (autoExpanded)
+                    {
+                        _host.UpdateGroupVisuals();
+                    }
 
                     if (_host.InteractionSession.DragNode is not null
                         && _host.InteractionSession.UpdateHoveredDropGroup(
-                            ResolveHoveredDropGroupId(dragSession.Nodes, _host.InteractionSession.DragGroupDropZones)))
+                            ResolveHoveredDropGroupId(currentDragNodes, _host.InteractionSession.DragGroupDropZones)))
                     {
                         _host.UpdateGroupVisuals();
                     }
@@ -206,8 +216,15 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
                     var requestedPosition = new GraphPoint(
                         groupOriginPosition.X + adjustedDelta.X,
                         groupOriginPosition.Y + adjustedDelta.Y);
-                    _host.InteractionSession.UpdateDragGroupPreviewPosition(requestedPosition);
-                    _host.ViewModel.ApplyDragOffset(dragSession.OriginPositions, adjustedDelta.X, adjustedDelta.Y);
+                    var previewChanged = _host.InteractionSession.UpdateDragGroupPreviewPosition(requestedPosition);
+                    if (_host.InteractionSession.DragGroupMovesMemberNodes)
+                    {
+                        _host.ViewModel.ApplyDragOffset(dragSession.OriginPositions, adjustedDelta.X, adjustedDelta.Y);
+                    }
+                    else if (previewChanged)
+                    {
+                        _host.UpdateGroupVisuals();
+                    }
                 }
 
                 handled = true;
@@ -238,9 +255,10 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
     public void HandleReleased(Point currentScreenPosition)
     {
         if (_host.InteractionSession.DragNode is not null
-            && _host.InteractionSession.DragSession is NodeCanvasDragSession dragSession)
+            && _host.InteractionSession.DragSession is NodeCanvasDragSession dragSession
+            && _host.ViewModel is not null)
         {
-            ApplyDraggedNodeGroupMembership(dragSession.Nodes, _host.InteractionSession.DragGroupDropZones);
+            ApplyDraggedNodeGroupMembership(_host.ViewModel, ResolveCurrentDragNodes(dragSession.Nodes));
         }
 
         if (_host.InteractionSession.DragGroupId is not null
@@ -253,10 +271,10 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
                 ?? new GraphPoint(
                     groupOriginPosition.X + (rawDelta.X / _host.ViewModel.Zoom),
                     groupOriginPosition.Y + (rawDelta.Y / _host.ViewModel.Zoom));
-            _host.ViewModel.TrySetNodeGroupPosition(
+            _host.ViewModel.Session.Commands.TrySetNodeGroupPosition(
                 _host.InteractionSession.DragGroupId,
                 requestedPosition,
-                moveMemberNodes: true,
+                moveMemberNodes: _host.InteractionSession.DragGroupMovesMemberNodes,
                 updateStatus: false);
         }
 
@@ -441,10 +459,43 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
                     NodeCanvasGroupChromeMetrics.MinimumExpandedHeight,
                     group.ExtraPadding.Top + group.ExtraPadding.Bottom + 24d));
 
-    private static void ApplyDraggedNodeGroupMembership(
-        IReadOnlyList<NodeViewModel> nodes,
-        IReadOnlyList<GraphEditorNodeGroupSnapshot> dropZones)
+    private IReadOnlyList<NodeViewModel> ResolveCurrentDragNodes(IReadOnlyList<NodeViewModel> nodes)
     {
+        if (_host.ViewModel is null)
+        {
+            return nodes;
+        }
+
+        return nodes
+            .Select(node => _host.ViewModel.FindNode(node.Id) ?? node)
+            .ToList();
+    }
+
+    private bool TryAutoExpandCollapsedDropGroup(IReadOnlyList<NodeViewModel> nodes)
+    {
+        if (_host.ViewModel is null)
+        {
+            return false;
+        }
+
+        var groupId = ResolveAutoExpandGroupId(nodes, _host.InteractionSession.DragGroupDropZones);
+        if (string.IsNullOrWhiteSpace(groupId)
+            || !_host.ViewModel.Session.Commands.TrySetNodeGroupCollapsed(groupId, isCollapsed: false))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    private static void ApplyDraggedNodeGroupMembership(
+        GraphEditorViewModel viewModel,
+        IReadOnlyList<NodeViewModel> nodes)
+    {
+        ArgumentNullException.ThrowIfNull(viewModel);
+
+        var dropZones = viewModel.Session.Queries.GetHierarchyStateSnapshot().NodeGroups;
+        var changes = new List<GraphEditorNodeGroupMembershipChange>();
         foreach (var node in nodes)
         {
             var targetGroupId = ResolveDropGroupId(node, dropZones);
@@ -453,11 +504,15 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
                 continue;
             }
 
-            node.Surface = node.Surface with
-            {
-                GroupId = targetGroupId,
-            };
+            changes.Add(new GraphEditorNodeGroupMembershipChange(node.Id, targetGroupId));
         }
+
+        if (changes.Count == 0)
+        {
+            return;
+        }
+
+        viewModel.Session.Commands.TrySetNodeGroupMemberships(changes, updateStatus: false);
     }
 
     private static string? ResolveHoveredDropGroupId(
@@ -488,11 +543,49 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
         return hoveredGroupId;
     }
 
+    private static string? ResolveAutoExpandGroupId(
+        IReadOnlyList<NodeViewModel> nodes,
+        IReadOnlyList<GraphEditorNodeGroupSnapshot> dropZones)
+    {
+        string? hoveredGroupId = null;
+        foreach (var node in nodes)
+        {
+            var targetGroupId = ResolveCollapsedHeaderOverlapGroupId(node, dropZones);
+            if (string.IsNullOrWhiteSpace(targetGroupId))
+            {
+                return null;
+            }
+
+            if (hoveredGroupId is null)
+            {
+                hoveredGroupId = targetGroupId;
+                continue;
+            }
+
+            if (!string.Equals(hoveredGroupId, targetGroupId, StringComparison.Ordinal))
+            {
+                return null;
+            }
+        }
+
+        return hoveredGroupId;
+    }
+
     private static string? ResolveDropGroupId(
         NodeViewModel node,
         IReadOnlyList<GraphEditorNodeGroupSnapshot> dropZones)
         => dropZones
             .Where(group => IsNodeWithinGroupBounds(node, group))
+            .OrderBy(group => group.Size.Width * group.Size.Height)
+            .ThenBy(group => group.Id, StringComparer.Ordinal)
+            .Select(group => group.Id)
+            .FirstOrDefault();
+
+    private static string? ResolveCollapsedHeaderOverlapGroupId(
+        NodeViewModel node,
+        IReadOnlyList<GraphEditorNodeGroupSnapshot> dropZones)
+        => dropZones
+            .Where(group => group.IsCollapsed && DoesNodeIntersectCollapsedGroupHeader(node, group))
             .OrderBy(group => group.Size.Width * group.Size.Height)
             .ThenBy(group => group.Id, StringComparer.Ordinal)
             .Select(group => group.Id)
@@ -519,5 +612,18 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
                && node.Y >= group.ContentPosition.Y
                && right <= groupRight
                && bottom <= groupBottom;
+    }
+
+    private static bool DoesNodeIntersectCollapsedGroupHeader(NodeViewModel node, GraphEditorNodeGroupSnapshot group)
+    {
+        var nodeRight = node.X + node.Width;
+        var nodeBottom = node.Y + node.Height;
+        var groupRight = group.Position.X + NodeCanvasGroupChromeMetrics.ResolveRenderedWidth(group);
+        var groupBottom = group.Position.Y + NodeCanvasGroupChromeMetrics.HeaderHeight;
+
+        return node.X < groupRight
+               && nodeRight > group.Position.X
+               && node.Y < groupBottom
+               && nodeBottom > group.Position.Y;
     }
 }

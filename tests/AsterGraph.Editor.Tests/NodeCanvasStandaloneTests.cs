@@ -2329,6 +2329,53 @@ public sealed class NodeCanvasStandaloneTests
     }
 
     [AvaloniaFact]
+    public void GroupDrag_WithAltModifier_MovesFrameOnly_AndLeavesMemberNodesInPlace()
+    {
+        var editor = CreateEditor();
+        editor.Session.Commands.SetSelection([SourceNodeId, TargetNodeId], TargetNodeId, updateStatus: false);
+        var groupId = editor.Session.Commands.TryCreateNodeGroupFromSelection("Canvas Cluster");
+        Assert.False(string.IsNullOrWhiteSpace(groupId));
+
+        var sourceNode = editor.Nodes.Single(node => node.Id == SourceNodeId);
+        var targetNode = editor.Nodes.Single(node => node.Id == TargetNodeId);
+        var initialSource = new GraphPoint(sourceNode.X, sourceNode.Y);
+        var initialTarget = new GraphPoint(targetNode.X, targetNode.Y);
+        var initialSnapshot = Assert.Single(editor.GetNodeGroupSnapshots());
+
+        var (window, canvas) = CreateStandaloneCanvasWindow(editor);
+        var pointer = new global::Avalonia.Input.Pointer(1, PointerType.Mouse, isPrimary: true);
+
+        try
+        {
+            var groupHeader = canvas.GetVisualDescendants()
+                .OfType<Control>()
+                .Single(control => string.Equals(
+                    AutomationProperties.GetName(control),
+                    "Canvas Cluster group header",
+                    StringComparison.Ordinal));
+            var pressedPoint = WorldToScreenPoint(canvas, initialSnapshot.Position.X + 40d, initialSnapshot.Position.Y + 28d);
+            var movedPoint = WorldToScreenPoint(canvas, initialSnapshot.Position.X + 90d, initialSnapshot.Position.Y + 53d);
+
+            groupHeader.RaiseEvent(CreatePointerPressedArgs(groupHeader, canvas, pointer, pressedPoint, KeyModifiers.Alt));
+            InvokeCanvasPointerMoved(canvas, CreatePointerMovedArgs(canvas, pointer, movedPoint, KeyModifiers.Alt));
+            InvokeCanvasPointerReleased(canvas, CreatePointerReleasedArgs(canvas, pointer, movedPoint, KeyModifiers.Alt));
+
+            var movedSnapshot = Assert.Single(editor.GetNodeGroupSnapshots());
+            var movedSource = editor.Nodes.Single(node => node.Id == SourceNodeId);
+            var movedTarget = editor.Nodes.Single(node => node.Id == TargetNodeId);
+
+            Assert.Equal(initialSource, new GraphPoint(movedSource.X, movedSource.Y));
+            Assert.Equal(initialTarget, new GraphPoint(movedTarget.X, movedTarget.Y));
+            Assert.Equal(initialSnapshot.Position.X + 50d, movedSnapshot.Position.X);
+            Assert.Equal(initialSnapshot.Position.Y + 25d, movedSnapshot.Position.Y);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
     public void NodeDrag_DroppedInGroupHeader_DoesNotAttachToGroup()
     {
         var editor = CreateEditor();
@@ -2366,6 +2413,75 @@ public sealed class NodeCanvasStandaloneTests
             var remainingGroup = Assert.Single(editor.GetNodeGroups());
             Assert.Null(targetNode.GroupId);
             Assert.Equal([SourceNodeId], remainingGroup.NodeIds);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
+    public void NodeDrag_IntoCollapsedGroupHeader_AutoExpandsGroup_AndAttachesNode()
+    {
+        var editor = CreateEditor();
+        editor.Session.Commands.SetSelection([SourceNodeId], SourceNodeId, updateStatus: false);
+        var groupId = editor.Session.Commands.TryCreateNodeGroupFromSelection("Canvas Cluster");
+        Assert.False(string.IsNullOrWhiteSpace(groupId));
+        Assert.True(editor.Session.Commands.TrySetNodeGroupCollapsed(groupId!, isCollapsed: true));
+
+        var (window, canvas) = CreateStandaloneCanvasWindow(editor);
+        var pointer = new global::Avalonia.Input.Pointer(1, PointerType.Mouse, isPrimary: true);
+
+        try
+        {
+            var targetSurface = canvas.GetVisualDescendants()
+                .OfType<Border>()
+                .Single(control => string.Equals(
+                    AutomationProperties.GetName(control),
+                    "Canvas Target node",
+                    StringComparison.Ordinal));
+
+            var collapsedSnapshot = Assert.Single(editor.GetNodeGroupSnapshots());
+            var targetNode = editor.FindNode(TargetNodeId)!;
+            var initialTargetPosition = new GraphPoint(targetNode.X, targetNode.Y);
+            var attachStart = new Point(targetNode.X + 20d, targetNode.Y + 20d);
+            var hoverHeaderDestination = new GraphPoint(
+                collapsedSnapshot.Position.X + 48d,
+                collapsedSnapshot.Position.Y + 18d);
+            var hoverHeaderPoint = new Point(
+                attachStart.X + ((hoverHeaderDestination.X - initialTargetPosition.X) * editor.Zoom),
+                attachStart.Y + ((hoverHeaderDestination.Y - initialTargetPosition.Y) * editor.Zoom));
+
+            targetSurface.RaiseEvent(CreatePointerPressedArgs(targetSurface, canvas, pointer, attachStart, KeyModifiers.None));
+            InvokeCanvasPointerMoved(canvas, CreatePointerMovedArgs(canvas, pointer, hoverHeaderPoint, KeyModifiers.None));
+
+            var expandedGroup = Assert.Single(editor.Session.Queries.GetNodeGroups());
+            Assert.False(expandedGroup.IsCollapsed);
+
+            var expandedSnapshot = Assert.Single(editor.GetNodeGroupSnapshots());
+            var desiredAttachedX = expandedSnapshot.ContentPosition.X + ((expandedSnapshot.ContentSize.Width - targetNode.Width) / 2d);
+            var desiredAttachedY = expandedSnapshot.ContentPosition.Y + ((expandedSnapshot.ContentSize.Height - targetNode.Height) / 2d);
+            var attachDestination = new Point(
+                attachStart.X + ((desiredAttachedX - initialTargetPosition.X) * editor.Zoom),
+                attachStart.Y + ((desiredAttachedY - initialTargetPosition.Y) * editor.Zoom));
+
+            InvokeCanvasPointerMoved(canvas, CreatePointerMovedArgs(canvas, pointer, attachDestination, KeyModifiers.None));
+            targetNode = editor.FindNode(TargetNodeId)!;
+            Assert.InRange(targetNode.X, desiredAttachedX - 2d, desiredAttachedX + 2d);
+            Assert.InRange(targetNode.Y, desiredAttachedY - 2d, desiredAttachedY + 2d);
+            var hierarchyDropZone = editor.Session.Queries.GetHierarchyStateSnapshot().NodeGroups.Single();
+            Assert.True(targetNode.X >= hierarchyDropZone.ContentPosition.X);
+            Assert.True(targetNode.Y >= hierarchyDropZone.ContentPosition.Y);
+            Assert.True(targetNode.X + targetNode.Width <= hierarchyDropZone.ContentPosition.X + hierarchyDropZone.ContentSize.Width);
+            Assert.True(targetNode.Y + targetNode.Height <= hierarchyDropZone.ContentPosition.Y + hierarchyDropZone.ContentSize.Height);
+            InvokeCanvasPointerReleased(canvas, CreatePointerReleasedArgs(canvas, pointer, attachDestination, KeyModifiers.None));
+
+            targetNode = editor.FindNode(TargetNodeId)!;
+            var attachedGroup = Assert.Single(editor.GetNodeGroups());
+            Assert.Equal(groupId, targetNode.GroupId);
+            Assert.Equal(
+                [SourceNodeId, TargetNodeId],
+                attachedGroup.NodeIds.OrderBy(id => id, StringComparer.Ordinal).ToArray());
         }
         finally
         {

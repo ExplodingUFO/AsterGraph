@@ -202,6 +202,7 @@ public sealed class GraphEditorProofRingTests
         var surface = Assert.Single(session.Queries.GetNodeSurfaceSnapshots(), snapshot => snapshot.NodeId == TargetNodeId);
         var group = Assert.Single(session.Queries.GetNodeGroups());
         var groupSnapshot = Assert.Single(session.Queries.GetNodeGroupSnapshots());
+        var hierarchy = session.Queries.GetHierarchyStateSnapshot();
         var featureIds = session.Queries.GetFeatureDescriptors()
             .Where(descriptor => descriptor.IsAvailable)
             .Select(descriptor => descriptor.Id)
@@ -223,6 +224,15 @@ public sealed class GraphEditorProofRingTests
         Assert.Equal(
             [SourceNodeId, TargetNodeId],
             group.NodeIds.OrderBy(id => id, StringComparer.Ordinal));
+        Assert.Single(hierarchy.NodeGroups, snapshot => snapshot.Id == groupId && snapshot.IsCollapsed);
+        Assert.Contains(
+            hierarchy.Nodes,
+            snapshot => snapshot.NodeId == TargetNodeId
+                        && snapshot.ParentGroupId == groupId
+                        && snapshot.CollapsedByGroupId == groupId
+                        && !snapshot.IsVisibleInActiveScope);
+        Assert.True(hierarchy.GroupMoveConstraints.CanMoveFrameIndependently);
+        Assert.True(hierarchy.GroupMoveConstraints.CanMoveFrameWithMembers);
         Assert.Contains("query.node-surface-snapshots", featureIds);
         Assert.Contains("query.node-groups", featureIds);
         Assert.Contains("query.node-group-snapshots", featureIds);

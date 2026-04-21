@@ -83,7 +83,7 @@ internal sealed class NodeCanvasNodeDragCoordinator
             node,
             dragStart,
             _host.CreateDragSession(dragNodes),
-            _host.ViewModel.GetNodeGroupSnapshots().ToList());
+            _host.ViewModel.Session.Queries.GetHierarchyStateSnapshot().NodeGroups.ToList());
         _host.ViewModel.BeginHistoryInteraction();
         return new NodeCanvasNodeDragStartResult(Handled: true, CapturePointer: true);
     }
@@ -116,6 +116,13 @@ internal sealed class NodeCanvasNodeDragCoordinator
             return default;
         }
 
+        var moveConstraints = _host.ViewModel.Session.Queries.GetHierarchyStateSnapshot().GroupMoveConstraints;
+        if (!moveConstraints.CanMoveFrameIndependently && !moveConstraints.CanMoveFrameWithMembers)
+        {
+            return default;
+        }
+
+        var moveMemberNodes = ResolveGroupDragMode(modifiers, moveConstraints);
         _host.FocusCanvas();
         _host.ViewModel.SetSelection(nodes, nodes.LastOrDefault(), status: null);
         _host.HideSelectionAdorner();
@@ -126,9 +133,28 @@ internal sealed class NodeCanvasNodeDragCoordinator
             group.Title,
             group.Position,
             dragStart,
-            CreateGroupDragSession(group, nodes));
+            CreateGroupDragSession(group, nodes),
+            moveMemberNodes);
         _host.ViewModel.BeginHistoryInteraction();
         return new NodeCanvasNodeDragStartResult(Handled: true, CapturePointer: true);
+    }
+
+    private static bool ResolveGroupDragMode(
+        KeyModifiers modifiers,
+        GraphEditorGroupMoveConstraintsSnapshot moveConstraints)
+    {
+        var wantsFrameOnly = modifiers.HasFlag(KeyModifiers.Alt) && moveConstraints.CanMoveFrameIndependently;
+        if (wantsFrameOnly)
+        {
+            return false;
+        }
+
+        if (moveConstraints.CanMoveFrameWithMembers)
+        {
+            return true;
+        }
+
+        return false;
     }
 
     private static NodeCanvasDragSession CreateGroupDragSession(

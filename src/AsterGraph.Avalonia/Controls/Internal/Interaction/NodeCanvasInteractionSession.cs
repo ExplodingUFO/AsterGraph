@@ -46,6 +46,8 @@ internal sealed class NodeCanvasInteractionSession
 
     public GraphPoint? DragGroupPreviewPosition { get; private set; }
 
+    public bool DragGroupMovesMemberNodes { get; private set; } = true;
+
     public bool IsPanning { get; private set; }
 
     public bool IsMarqueeSelecting { get; private set; }
@@ -83,6 +85,7 @@ internal sealed class NodeCanvasInteractionSession
         DragGroupTitle = null;
         DragGroupOriginPosition = null;
         DragGroupPreviewPosition = null;
+        DragGroupMovesMemberNodes = true;
         IsPanning = false;
         DragStartScreenPosition = null;
         DragSession = null;
@@ -111,6 +114,7 @@ internal sealed class NodeCanvasInteractionSession
         DragGroupTitle = null;
         DragGroupOriginPosition = null;
         DragGroupPreviewPosition = null;
+        DragGroupMovesMemberNodes = true;
         IsPanning = false;
         SelectionStartScreenPosition = null;
         IsMarqueeSelecting = false;
@@ -134,6 +138,7 @@ internal sealed class NodeCanvasInteractionSession
         DragGroupTitle = null;
         DragGroupOriginPosition = null;
         DragGroupPreviewPosition = null;
+        DragGroupMovesMemberNodes = true;
         DragStartScreenPosition = null;
         DragSession = null;
         DragGroupDropZones = [];
@@ -148,7 +153,13 @@ internal sealed class NodeCanvasInteractionSession
         PointerScreenPosition = startScreenPosition;
     }
 
-    public void BeginGroupDrag(string groupId, string groupTitle, GraphPoint groupOriginPosition, Point startScreenPosition, NodeCanvasDragSession dragSession)
+    public void BeginGroupDrag(
+        string groupId,
+        string groupTitle,
+        GraphPoint groupOriginPosition,
+        Point startScreenPosition,
+        NodeCanvasDragSession dragSession,
+        bool moveMemberNodes = true)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(groupId);
         ArgumentException.ThrowIfNullOrWhiteSpace(groupTitle);
@@ -158,6 +169,7 @@ internal sealed class NodeCanvasInteractionSession
         DragGroupTitle = groupTitle;
         DragGroupOriginPosition = groupOriginPosition;
         DragGroupPreviewPosition = groupOriginPosition;
+        DragGroupMovesMemberNodes = moveMemberNodes;
         IsPanning = false;
         SelectionStartScreenPosition = null;
         IsMarqueeSelecting = false;
@@ -182,6 +194,7 @@ internal sealed class NodeCanvasInteractionSession
         DragGroupTitle = null;
         DragGroupOriginPosition = null;
         DragGroupPreviewPosition = null;
+        DragGroupMovesMemberNodes = true;
         IsPanning = false;
         SelectionStartScreenPosition = null;
         IsMarqueeSelecting = false;
@@ -216,6 +229,7 @@ internal sealed class NodeCanvasInteractionSession
         DragGroupTitle = null;
         DragGroupOriginPosition = null;
         DragGroupPreviewPosition = null;
+        DragGroupMovesMemberNodes = true;
         IsPanning = false;
         SelectionStartScreenPosition = null;
         IsMarqueeSelecting = false;
@@ -262,6 +276,12 @@ internal sealed class NodeCanvasInteractionSession
 
         HoveredDropGroupId = groupId;
         return true;
+    }
+
+    public void UpdateDragGroupDropZones(IReadOnlyList<GraphEditorNodeGroupSnapshot> dropZones)
+    {
+        ArgumentNullException.ThrowIfNull(dropZones);
+        DragGroupDropZones = dropZones.ToList();
     }
 
     public bool UpdateNodeResizePreview(string nodeId, GraphSize size)
@@ -323,6 +343,7 @@ internal sealed class NodeCanvasInteractionSession
         DragGroupTitle = null;
         DragGroupOriginPosition = null;
         DragGroupPreviewPosition = null;
+        DragGroupMovesMemberNodes = true;
         DragStartScreenPosition = null;
         DragSession = null;
         DragGroupDropZones = [];
