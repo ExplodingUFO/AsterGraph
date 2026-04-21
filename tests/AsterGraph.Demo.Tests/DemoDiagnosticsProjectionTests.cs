@@ -1,3 +1,4 @@
+using System;
 using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
 using AsterGraph.Demo.ViewModels;
@@ -42,37 +43,57 @@ public sealed class DemoDiagnosticsProjectionTests
     }
 
     [Fact]
-    public void MainWindowViewModel_KeepsStatusMessageSeparateFromMachineReadableDiagnostics()
+    public void MainWindowViewModel_RuntimeInspectionSurfaceProjectsAllCanonicalStateSections()
     {
         var viewModel = new MainWindowViewModel();
 
-        viewModel.Session.Commands.SaveWorkspace();
+        var surface = viewModel.RuntimeInspectionSurface;
 
-        var diagnostics = viewModel.Session.Diagnostics.GetRecentDiagnostics(10);
-        var latestDiagnostic = Assert.Single(diagnostics, diagnostic => diagnostic.Code == "workspace.save.succeeded");
-        var projectedDiagnostic = Assert.Single(viewModel.RecentDiagnostics, diagnostic => diagnostic.Code == "workspace.save.succeeded");
+        Assert.Equal("运行时检查", surface.Heading);
+        Assert.Equal("文档", surface.Document.Heading);
+        Assert.Equal("选择", surface.Selection.Heading);
+        Assert.Equal("视口", surface.Viewport.Heading);
+        Assert.Equal("能力", surface.Capabilities.Heading);
+        Assert.Equal("待完成连线", surface.PendingConnection.Heading);
+        Assert.Equal("特性描述", surface.FeatureDescriptors.Heading);
+        Assert.Equal("最近诊断", surface.RecentDiagnostics.Heading);
+        Assert.Equal("插件加载", surface.PluginLoads.Heading);
 
-        Assert.Equal("以下诊断直接来自 Session.Diagnostics，用于确认共享运行时状态。", viewModel.RuntimeDiagnosticsSummary);
-        Assert.Equal(viewModel.Editor.StatusMessage, viewModel.CompatibilityStatusMessage);
-        Assert.Equal(latestDiagnostic.Message, projectedDiagnostic.Message);
-        Assert.Equal(latestDiagnostic.Code, projectedDiagnostic.Code);
-        Assert.Equal(latestDiagnostic.Operation, projectedDiagnostic.Operation);
-        Assert.NotEqual(viewModel.CompatibilityStatusMessage, projectedDiagnostic.Code);
-        Assert.NotEqual(viewModel.CompatibilityStatusMessage, projectedDiagnostic.Operation);
+        Assert.Contains(surface.Document.Lines, line => line.StartsWith("文档标题：", StringComparison.Ordinal));
+        Assert.Contains(surface.Document.Lines, line => line.StartsWith("节点数量：", StringComparison.Ordinal));
+        Assert.Contains(surface.Document.Lines, line => line.StartsWith("连线数量：", StringComparison.Ordinal));
+        Assert.Contains(surface.Selection.Lines, line => line.StartsWith("当前选择数量：", StringComparison.Ordinal));
+        Assert.Contains(surface.Selection.Lines, line => line.StartsWith("当前选择标识：", StringComparison.Ordinal));
+        Assert.Contains(surface.Viewport.Lines, line => line.StartsWith("视口缩放：", StringComparison.Ordinal));
+        Assert.Contains(surface.Capabilities.Lines, line => line.StartsWith("可保存工作区：", StringComparison.Ordinal));
+        Assert.Contains(surface.Capabilities.Lines, line => line.StartsWith("可加载工作区：", StringComparison.Ordinal));
+        Assert.Contains(surface.PendingConnection.Lines, line => line.StartsWith("待完成连线：", StringComparison.Ordinal));
+        Assert.NotEmpty(surface.FeatureDescriptors.Lines);
+        Assert.NotEmpty(surface.RecentDiagnostics.Lines);
+        Assert.NotEmpty(surface.PluginLoads.Lines);
     }
 
     [Fact]
-    public void MainWindowViewModel_RuntimeSignalLinesStayAlignedWithInspectionSnapshot()
+    public void MainWindowViewModel_RuntimeInspectionSurfaceReprojectsWithLanguageChanges()
     {
         var viewModel = new MainWindowViewModel();
-        var inspection = viewModel.Session.Diagnostics.CaptureInspectionSnapshot();
-        var runtimeSignalLines = Assert.IsAssignableFrom<IReadOnlyList<string>>(
-            viewModel.GetType().GetProperty("RuntimeSignalLines")?.GetValue(viewModel));
 
-        Assert.Contains(runtimeSignalLines, line => line == $"文档标题：{inspection.Document.Title}");
-        Assert.Contains(runtimeSignalLines, line => line == $"节点数量：{inspection.Document.Nodes.Count}");
-        Assert.Contains(runtimeSignalLines, line => line == $"连线数量：{inspection.Document.Connections.Count}");
-        Assert.Contains(runtimeSignalLines, line => line == $"当前选择：{inspection.Selection.SelectedNodeIds.Count}");
+        viewModel.SelectLanguage("en");
+
+        var surface = viewModel.RuntimeInspectionSurface;
+
+        Assert.Equal("Runtime inspection", surface.Heading);
+        Assert.Equal("Document", surface.Document.Heading);
+        Assert.Equal("Selection", surface.Selection.Heading);
+        Assert.Equal("Viewport", surface.Viewport.Heading);
+        Assert.Equal("Capabilities", surface.Capabilities.Heading);
+        Assert.Equal("Pending connection", surface.PendingConnection.Heading);
+        Assert.Equal("Feature descriptors", surface.FeatureDescriptors.Heading);
+        Assert.Equal("Recent diagnostics", surface.RecentDiagnostics.Heading);
+        Assert.Equal("Plugin loads", surface.PluginLoads.Heading);
+
+        Assert.Contains(surface.Document.Lines, line => line.StartsWith("Document title: ", StringComparison.Ordinal));
+        Assert.Contains(surface.Capabilities.Lines, line => line.StartsWith("Can save workspace: ", StringComparison.Ordinal));
     }
 
     [AvaloniaFact]
@@ -91,4 +112,48 @@ public sealed class DemoDiagnosticsProjectionTests
         Assert.NotNull(helper);
         Assert.Equal("以下诊断直接来自 Session.Diagnostics，用于确认共享运行时状态。", helper!.Text);
     }
+
+    [AvaloniaFact]
+    public void MainWindow_RendersRuntimeInspectionSurfaceInsideTheRuntimeDrawer()
+    {
+        var viewModel = new MainWindowViewModel();
+        var window = new MainWindow
+        {
+            DataContext = viewModel,
+        };
+
+        window.Show();
+
+        viewModel.OpenHostMenuGroup("运行时");
+
+        var inspectionSection = window.FindControl<StackPanel>("PART_RuntimeInspectionSection");
+        var inspectionHeading = window.FindControl<TextBlock>("PART_RuntimeInspectionHeading");
+        var inspectionDocumentHeading = window.FindControl<TextBlock>("PART_RuntimeInspectionDocumentHeading");
+        var inspectionDocumentLines = window.FindControl<ItemsControl>("PART_RuntimeInspectionDocumentLines");
+        var inspectionSelectionHeading = window.FindControl<TextBlock>("PART_RuntimeInspectionSelectionHeading");
+        var inspectionCapabilityHeading = window.FindControl<TextBlock>("PART_RuntimeInspectionCapabilityHeading");
+        var inspectionFeatureHeading = window.FindControl<TextBlock>("PART_RuntimeInspectionFeatureHeading");
+        var inspectionDiagnosticsHeading = window.FindControl<TextBlock>("PART_RuntimeInspectionDiagnosticsHeading");
+        var inspectionPluginHeading = window.FindControl<TextBlock>("PART_RuntimeInspectionPluginHeading");
+
+        Assert.NotNull(inspectionSection);
+        Assert.True(inspectionSection!.IsVisible);
+        Assert.NotNull(inspectionHeading);
+        Assert.Equal(viewModel.RuntimeInspectionSurface.Heading, inspectionHeading!.Text);
+        Assert.NotNull(inspectionDocumentHeading);
+        Assert.Equal(viewModel.RuntimeInspectionSurface.Document.Heading, inspectionDocumentHeading!.Text);
+        Assert.NotNull(inspectionDocumentLines);
+        Assert.Same(viewModel.RuntimeInspectionSurface.Document.Lines, inspectionDocumentLines!.ItemsSource);
+        Assert.NotNull(inspectionSelectionHeading);
+        Assert.Equal(viewModel.RuntimeInspectionSurface.Selection.Heading, inspectionSelectionHeading!.Text);
+        Assert.NotNull(inspectionCapabilityHeading);
+        Assert.Equal(viewModel.RuntimeInspectionSurface.Capabilities.Heading, inspectionCapabilityHeading!.Text);
+        Assert.NotNull(inspectionFeatureHeading);
+        Assert.Equal(viewModel.RuntimeInspectionSurface.FeatureDescriptors.Heading, inspectionFeatureHeading!.Text);
+        Assert.NotNull(inspectionDiagnosticsHeading);
+        Assert.Equal(viewModel.RuntimeInspectionSurface.RecentDiagnostics.Heading, inspectionDiagnosticsHeading!.Text);
+        Assert.NotNull(inspectionPluginHeading);
+        Assert.Equal(viewModel.RuntimeInspectionSurface.PluginLoads.Heading, inspectionPluginHeading!.Text);
+    }
+
 }
