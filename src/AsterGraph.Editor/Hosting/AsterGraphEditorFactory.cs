@@ -107,6 +107,7 @@ public static class AsterGraphEditorFactory
             runtimeSession.SetPluginCommandContributors(resolved.PluginCommandContributors);
             runtimeSession.SetPluginLoadSnapshots(resolved.PluginLoadResult.Snapshots);
             runtimeSession.SetPluginTrustPolicyConfigured(resolved.Options.PluginTrustPolicy is not null);
+            runtimeSession.SetToolProvider(resolved.Options.ToolProvider);
             PublishDiagnostics(runtimeSession, resolved.PluginLoadResult.Diagnostics);
         }
 
@@ -153,12 +154,14 @@ public static class AsterGraphEditorFactory
                 hasPluginTrustPolicy: resolved.Options.PluginTrustPolicy is not null,
                 hasCommandContributor: resolved.PluginCommandContributors.Count > 0,
                 hasContextMenuAugmentor: resolved.Options.ContextMenuAugmentor is not null,
+                hasToolProvider: resolved.Options.ToolProvider is not null,
                 hasNodePresentationProvider: () => resolved.NodePresentationProvider is not null,
                 hasLocalizationProvider: () => resolved.LocalizationProvider is not null));
         session.ConfigureInstrumentation(resolved.Options.Instrumentation);
         session.SetPluginCommandContributors(resolved.PluginCommandContributors);
         session.SetPluginLoadSnapshots(resolved.PluginLoadResult.Snapshots);
         session.SetPluginTrustPolicyConfigured(resolved.Options.PluginTrustPolicy is not null);
+        session.SetToolProvider(resolved.Options.ToolProvider);
         PublishDiagnostics(session, resolved.PluginLoadResult.Diagnostics);
         return session;
     }

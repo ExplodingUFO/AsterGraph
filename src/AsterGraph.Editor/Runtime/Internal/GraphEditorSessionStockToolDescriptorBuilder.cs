@@ -1,0 +1,191 @@
+using System.Globalization;
+using AsterGraph.Core.Models;
+
+namespace AsterGraph.Editor.Runtime.Internal;
+
+internal sealed class GraphEditorSessionStockToolDescriptorBuilder
+{
+    private readonly Func<GraphDocument> _activeScopeDocumentSnapshotFactory;
+    private readonly Func<IReadOnlyList<GraphEditorNodeSurfaceSnapshot>> _nodeSurfaceSnapshotFactory;
+    private readonly Func<GraphEditorSelectionSnapshot> _selectionSnapshotFactory;
+    private readonly Func<string, string, string> _localize;
+
+    public GraphEditorSessionStockToolDescriptorBuilder(
+        Func<GraphDocument> activeScopeDocumentSnapshotFactory,
+        Func<GraphEditorSelectionSnapshot> selectionSnapshotFactory,
+        Func<IReadOnlyList<GraphEditorNodeSurfaceSnapshot>> nodeSurfaceSnapshotFactory,
+        Func<string, string, string> localize)
+    {
+        _activeScopeDocumentSnapshotFactory = activeScopeDocumentSnapshotFactory ?? throw new ArgumentNullException(nameof(activeScopeDocumentSnapshotFactory));
+        _selectionSnapshotFactory = selectionSnapshotFactory ?? throw new ArgumentNullException(nameof(selectionSnapshotFactory));
+        _nodeSurfaceSnapshotFactory = nodeSurfaceSnapshotFactory ?? throw new ArgumentNullException(nameof(nodeSurfaceSnapshotFactory));
+        _localize = localize ?? throw new ArgumentNullException(nameof(localize));
+    }
+
+    public IReadOnlyList<GraphEditorToolDescriptorSnapshot> Build(
+        GraphEditorToolContextSnapshot context,
+        IReadOnlyDictionary<string, GraphEditorCommandDescriptorSnapshot> commands)
+    {
+        ArgumentNullException.ThrowIfNull(context);
+        ArgumentNullException.ThrowIfNull(commands);
+
+        return context.Kind switch
+        {
+            GraphEditorToolContextKind.Selection => BuildSelectionTools(context, commands),
+            GraphEditorToolContextKind.Node => BuildNodeTools(context, commands),
+            GraphEditorToolContextKind.Connection => BuildConnectionTools(context, commands),
+            _ => [],
+        };
+    }
+
+    private IReadOnlyList<GraphEditorToolDescriptorSnapshot> BuildSelectionTools(
+        GraphEditorToolContextSnapshot context,
+        IReadOnlyDictionary<string, GraphEditorCommandDescriptorSnapshot> commands)
+    {
+        var selectedNodeIds = context.SelectedNodeIds.Count > 0
+            ? context.SelectedNodeIds
+            : _selectionSnapshotFactory().SelectedNodeIds;
+        if (selectedNodeIds.Count == 0)
+        {
+            return [];
+        }
+
+        var createGroup = GetCommandDescriptor(commands, "groups.create");
+        var wrapComposite = GetCommandDescriptor(commands, "composites.wrap-selection");
+
+        return
+        [
+            new GraphEditorToolDescriptorSnapshot(
+                "selection-create-group",
+                GraphEditorToolContextKind.Selection,
+                createGroup,
+                CreateCommand("groups.create", ("title", "Group")),
+                order: 0),
+            new GraphEditorToolDescriptorSnapshot(
+                "selection-wrap-composite",
+                GraphEditorToolContextKind.Selection,
+                wrapComposite,
+                CreateCommand("composites.wrap-selection"),
+                order: 10),
+        ];
+    }
+
+    private IReadOnlyList<GraphEditorToolDescriptorSnapshot> BuildNodeTools(
+        GraphEditorToolContextSnapshot context,
+        IReadOnlyDictionary<string, GraphEditorCommandDescriptorSnapshot> commands)
+    {
+        if (string.IsNullOrWhiteSpace(context.NodeId))
+        {
+            return [];
+        }
+
+        var document = _activeScopeDocumentSnapshotFactory();
+        var node = document.Nodes.FirstOrDefault(candidate => string.Equals(candidate.Id, context.NodeId, StringComparison.Ordinal));
+        if (node is null)
+        {
+            return [];
+        }
+
+        var toggleExpansion = GetCommandDescriptor(commands, "nodes.surface.expand");
+        var nodeSurface = _nodeSurfaceSnapshotFactory()
+            .FirstOrDefault(snapshot => string.Equals(snapshot.NodeId, node.Id, StringComparison.Ordinal));
+        var nextExpansionState = nodeSurface?.ExpansionState == GraphNodeExpansionState.Expanded
+            ? GraphNodeExpansionState.Collapsed
+            : GraphNodeExpansionState.Expanded;
+        var items = new List<GraphEditorToolDescriptorSnapshot>
+        {
+            new(
+                "node-toggle-surface-expansion",
+                GraphEditorToolContextKind.Node,
+                CreateContextualDescriptor(
+                    toggleExpansion,
+                    nextExpansionState == GraphNodeExpansionState.Expanded
+                        ? Localize("editor.tool.node.expand", "Expand Node Card")
+                        : Localize("editor.tool.node.collapse", "Collapse Node Card")),
+                CreateCommand(
+                    "nodes.surface.expand",
+                    ("nodeId", node.Id),
+                    ("expansionState", nextExpansionState.ToString())),
+                order: 0),
+        };
+
+        if (node.Composite is not null)
+        {
+            var enterScope = GetCommandDescriptor(commands, "scopes.enter");
+            items.Add(new GraphEditorToolDescriptorSnapshot(
+                "node-enter-composite-scope",
+                GraphEditorToolContextKind.Node,
+                CreateContextualDescriptor(enterScope, Localize("editor.tool.node.enterCompositeScope", "Enter Composite Scope")),
+                CreateCommand("scopes.enter", ("compositeNodeId", node.Id)),
+                order: 10));
+        }
+
+        return items;
+    }
+
+    private IReadOnlyList<GraphEditorToolDescriptorSnapshot> BuildConnectionTools(
+        GraphEditorToolContextSnapshot context,
+        IReadOnlyDictionary<string, GraphEditorCommandDescriptorSnapshot> commands)
+    {
+        if (string.IsNullOrWhiteSpace(context.ConnectionId))
+        {
+            return [];
+        }
+
+        var document = _activeScopeDocumentSnapshotFactory();
+        var connection = document.Connections.FirstOrDefault(candidate => string.Equals(candidate.Id, context.ConnectionId, StringComparison.Ordinal));
+        if (connection is null)
+        {
+            return [];
+        }
+
+        var reconnect = GetCommandDescriptor(commands, "connections.reconnect");
+        var disconnect = GetCommandDescriptor(commands, "connections.disconnect");
+
+        return
+        [
+            new GraphEditorToolDescriptorSnapshot(
+                "connection-reconnect",
+                GraphEditorToolContextKind.Connection,
+                reconnect,
+                CreateCommand("connections.reconnect", ("connectionId", connection.Id)),
+                order: 0),
+            new GraphEditorToolDescriptorSnapshot(
+                "connection-disconnect",
+                GraphEditorToolContextKind.Connection,
+                disconnect,
+                CreateCommand("connections.disconnect", ("connectionId", connection.Id)),
+                order: 10),
+        ];
+    }
+
+    private string Localize(string key, string fallback)
+        => _localize(key, fallback);
+
+    private static GraphEditorCommandInvocationSnapshot CreateCommand(
+        string commandId,
+        params (string Name, string Value)[] arguments)
+        => new(
+            commandId,
+            arguments.Select(argument => new GraphEditorCommandArgumentSnapshot(argument.Name, argument.Value)).ToList());
+
+    private static GraphEditorCommandDescriptorSnapshot CreateContextualDescriptor(
+        GraphEditorCommandDescriptorSnapshot descriptor,
+        string title)
+        => new(
+            descriptor.Id,
+            title,
+            descriptor.Group,
+            descriptor.IconKey,
+            descriptor.DefaultShortcut,
+            descriptor.Source,
+            descriptor.IsEnabled,
+            descriptor.DisabledReason);
+
+    private static GraphEditorCommandDescriptorSnapshot GetCommandDescriptor(
+        IReadOnlyDictionary<string, GraphEditorCommandDescriptorSnapshot> commands,
+        string commandId)
+        => commands.TryGetValue(commandId, out var descriptor)
+            ? descriptor
+            : new GraphEditorCommandDescriptorSnapshot(commandId, false);
+}

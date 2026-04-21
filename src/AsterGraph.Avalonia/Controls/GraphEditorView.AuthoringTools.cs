@@ -5,6 +5,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
 using Avalonia.Media;
+using AsterGraph.Avalonia.Hosting;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Geometry;
 using AsterGraph.Editor.Runtime;
@@ -16,6 +17,7 @@ public partial class GraphEditorView
 {
     private Border? _authoringToolsChrome;
     private TextBlock? _authoringToolsCaptionText;
+    private WrapPanel? _selectionToolToolbar;
     private WrapPanel? _nodeToolToolbar;
     private StackPanel? _connectionToolList;
 
@@ -23,6 +25,7 @@ public partial class GraphEditorView
     {
         _authoringToolsChrome = this.FindControl<Border>("PART_AuthoringToolsChrome");
         _authoringToolsCaptionText = this.FindControl<TextBlock>("PART_AuthoringToolsCaptionText");
+        _selectionToolToolbar = this.FindControl<WrapPanel>("PART_SelectionToolToolbar");
         _nodeToolToolbar = this.FindControl<WrapPanel>("PART_NodeToolToolbar");
         _connectionToolList = this.FindControl<StackPanel>("PART_ConnectionToolList");
     }
@@ -31,78 +34,83 @@ public partial class GraphEditorView
     {
         if (_authoringToolsChrome is null
             || _authoringToolsCaptionText is null
+            || _selectionToolToolbar is null
             || _nodeToolToolbar is null
             || _connectionToolList is null)
         {
             return;
         }
 
+        _selectionToolToolbar.Children.Clear();
         _nodeToolToolbar.Children.Clear();
         _connectionToolList.Children.Clear();
 
         if (Editor is null)
         {
             _authoringToolsChrome.IsVisible = true;
-            _authoringToolsCaptionText.Text = "Attach an editor to inspect node and edge authoring tools.";
+            _authoringToolsCaptionText.Text = "Attach an editor to inspect selection, node, and edge authoring tools.";
             return;
         }
+
+        var selection = Editor.Session.Queries.GetSelectionSnapshot();
+        BuildSelectionToolToolbar(selection);
 
         if (Editor.SelectedNodes.Count != 1 || Editor.SelectedNode is null)
         {
             _authoringToolsChrome.IsVisible = true;
-            _authoringToolsCaptionText.Text = "Select one node to project node and edge tooling surfaces.";
+            _authoringToolsCaptionText.Text = selection.SelectedNodeIds.Count == 0
+                ? "Select nodes to project selection, node, and edge tooling surfaces."
+                : $"Selection tools for {selection.SelectedNodeIds.Count} node(s).";
             return;
         }
 
         var selectedNode = Editor.SelectedNode;
-        var commandDescriptors = Editor.Session.Queries.GetCommandDescriptors()
-            .ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
-        var nodeSurface = Editor.Session.Queries.GetNodeSurfaceSnapshots()
-            .FirstOrDefault(snapshot => string.Equals(snapshot.NodeId, selectedNode.Id, StringComparison.Ordinal));
-
-        BuildNodeToolToolbar(selectedNode, nodeSurface, commandDescriptors);
-        BuildConnectionToolList(selectedNode, commandDescriptors);
+        BuildNodeToolToolbar(selectedNode, selection);
+        BuildConnectionToolList(selectedNode, selection);
 
         _authoringToolsChrome.IsVisible = true;
         _authoringToolsCaptionText.Text = _connectionToolList.Children.Count == 0
-            ? $"Node tools for {selectedNode.Title}."
-            : $"Node tools for {selectedNode.Title} plus {_connectionToolList.Children.Count} incident connection editor(s).";
+            ? $"Selection and node tools for {selectedNode.Title}."
+            : $"Selection tools, node tools for {selectedNode.Title}, plus {_connectionToolList.Children.Count} incident connection editor(s).";
     }
 
-    private void BuildNodeToolToolbar(
-        NodeViewModel selectedNode,
-        GraphEditorNodeSurfaceSnapshot? nodeSurface,
-        IReadOnlyDictionary<string, GraphEditorCommandDescriptorSnapshot> commandDescriptors)
+    private void BuildSelectionToolToolbar(GraphEditorSelectionSnapshot selection)
     {
-        if (_nodeToolToolbar is null)
+        if (_selectionToolToolbar is null || Editor is null || selection.SelectedNodeIds.Count == 0)
         {
             return;
         }
 
-        commandDescriptors.TryGetValue("nodes.surface.expand", out var toggleDescriptor);
-        var nextExpansionState = nodeSurface?.ExpansionState == GraphNodeExpansionState.Expanded
-            ? GraphNodeExpansionState.Collapsed
-            : GraphNodeExpansionState.Expanded;
-        var button = new Button
+        var actions = AsterGraphHostedActionFactory.CreateToolActions(
+            Editor.Session,
+            Editor.Session.Queries.GetToolDescriptors(
+                GraphEditorToolContextSnapshot.ForSelection(selection.SelectedNodeIds, selection.PrimarySelectedNodeId)));
+
+        foreach (var action in actions)
         {
-            Name = "PART_NodeToolToggleExpansionButton",
-            Content = nextExpansionState == GraphNodeExpansionState.Expanded
-                ? "Expand Node Card"
-                : "Collapse Node Card",
-            IsEnabled = toggleDescriptor?.CanExecute ?? true,
-        };
-        button.Classes.Add("astergraph-toolbar-action");
-        button.Click += (_, args) =>
-        {
-            Editor?.Session.Commands.TrySetNodeExpansionState(selectedNode.Id, nextExpansionState);
-            args.Handled = true;
-        };
-        _nodeToolToolbar.Children.Add(button);
+            _selectionToolToolbar.Children.Add(CreateHostedToolButton(ResolveSelectionToolButtonName(action), action));
+        }
     }
 
-    private void BuildConnectionToolList(
-        NodeViewModel selectedNode,
-        IReadOnlyDictionary<string, GraphEditorCommandDescriptorSnapshot> commandDescriptors)
+    private void BuildNodeToolToolbar(NodeViewModel selectedNode, GraphEditorSelectionSnapshot selection)
+    {
+        if (_nodeToolToolbar is null || Editor is null)
+        {
+            return;
+        }
+
+        var actions = AsterGraphHostedActionFactory.CreateToolActions(
+            Editor.Session,
+            Editor.Session.Queries.GetToolDescriptors(
+                GraphEditorToolContextSnapshot.ForNode(selectedNode.Id, selection.SelectedNodeIds, selection.PrimarySelectedNodeId)));
+
+        foreach (var action in actions)
+        {
+            _nodeToolToolbar.Children.Add(CreateHostedToolButton(ResolveNodeToolButtonName(action), action));
+        }
+    }
+
+    private void BuildConnectionToolList(NodeViewModel selectedNode, GraphEditorSelectionSnapshot selection)
     {
         if (_connectionToolList is null || Editor is null)
         {
@@ -125,14 +133,6 @@ public partial class GraphEditorView
         {
             return;
         }
-
-        commandDescriptors.TryGetValue("connections.label.set", out var labelDescriptor);
-        commandDescriptors.TryGetValue("connections.note.set", out var noteDescriptor);
-        commandDescriptors.TryGetValue("connections.route-vertex.insert", out var insertRouteDescriptor);
-        commandDescriptors.TryGetValue("connections.route-vertex.move", out var moveRouteDescriptor);
-        commandDescriptors.TryGetValue("connections.route-vertex.remove", out var removeRouteDescriptor);
-        commandDescriptors.TryGetValue("connections.reconnect", out var reconnectDescriptor);
-        commandDescriptors.TryGetValue("connections.disconnect", out var disconnectDescriptor);
 
         foreach (var connection in connections)
         {
@@ -161,35 +161,27 @@ public partial class GraphEditorView
                 ItemWidth = double.NaN,
             };
 
-            var applyButton = CreateToolActionButton(
+            actionBar.Children.Add(CreateToolActionButton(
                 $"PART_ConnectionToolApply_{connection.Id}",
                 "Apply Edge Text",
-                (labelDescriptor?.CanExecute ?? true) && (noteDescriptor?.CanExecute ?? true),
+                true,
                 () =>
                 {
                     Editor.Session.Commands.TrySetConnectionLabel(connection.Id, labelEditor.Text, updateStatus: true);
                     Editor.Session.Commands.TrySetConnectionNoteText(connection.Id, noteEditor.Text, updateStatus: true);
                     return true;
-                });
-            actionBar.Children.Add(applyButton);
-
-            actionBar.Children.Add(CreateToolActionButton(
-                $"PART_ConnectionToolReconnect_{connection.Id}",
-                "Reconnect",
-                reconnectDescriptor?.CanExecute ?? true,
-                () => Editor.Session.Commands.TryReconnectConnection(connection.Id, updateStatus: true)));
-
-            actionBar.Children.Add(CreateToolActionButton(
-                $"PART_ConnectionToolDisconnect_{connection.Id}",
-                "Disconnect",
-                disconnectDescriptor?.CanExecute ?? true,
-                () =>
-                {
-                    return Editor.Session.Commands.TryExecuteCommand(
-                        new GraphEditorCommandInvocationSnapshot(
-                            "connections.disconnect",
-                            [new GraphEditorCommandArgumentSnapshot("connectionId", connection.Id)]));
                 }));
+
+            var actions = AsterGraphHostedActionFactory.CreateToolActions(
+                Editor.Session,
+                Editor.Session.Queries.GetToolDescriptors(
+                    GraphEditorToolContextSnapshot.ForConnection(connection.Id, selection.SelectedNodeIds, selection.PrimarySelectedNodeId)));
+            foreach (var action in actions)
+            {
+                actionBar.Children.Add(CreateHostedToolButton(
+                    ResolveConnectionToolButtonName(connection.Id, action),
+                    action));
+            }
 
             var card = new Border
             {
@@ -212,10 +204,7 @@ public partial class GraphEditorView
                         CreateConnectionRouteSection(
                             connection.Id,
                             modelConnection?.Presentation?.Route ?? GraphConnectionRoute.Empty,
-                            geometry,
-                            insertRouteDescriptor?.CanExecute ?? true,
-                            moveRouteDescriptor?.CanExecute ?? true,
-                            removeRouteDescriptor?.CanExecute ?? true),
+                            geometry),
                     },
                 },
             };
@@ -226,10 +215,7 @@ public partial class GraphEditorView
     private Control CreateConnectionRouteSection(
         string connectionId,
         GraphConnectionRoute route,
-        GraphEditorConnectionGeometrySnapshot? geometry,
-        bool canInsert,
-        bool canMove,
-        bool canRemove)
+        GraphEditorConnectionGeometrySnapshot? geometry)
     {
         var container = new StackPanel
         {
@@ -240,6 +226,13 @@ public partial class GraphEditorView
             Text = "Route Vertices",
             FontWeight = FontWeight.SemiBold,
         });
+
+        var commandDescriptors = Editor?.Session.Queries.GetCommandDescriptors()
+            .ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
+        commandDescriptors ??= new Dictionary<string, GraphEditorCommandDescriptorSnapshot>(StringComparer.Ordinal);
+        commandDescriptors.TryGetValue("connections.route-vertex.insert", out var insertRouteDescriptor);
+        commandDescriptors.TryGetValue("connections.route-vertex.move", out var moveRouteDescriptor);
+        commandDescriptors.TryGetValue("connections.route-vertex.remove", out var removeRouteDescriptor);
 
         if (geometry is not null)
         {
@@ -255,7 +248,7 @@ public partial class GraphEditorView
                 segmentBar.Children.Add(CreateToolActionButton(
                     $"PART_ConnectionToolInsertRouteVertex_{connectionId}_{capturedSegmentIndex}",
                     $"Insert Bend {capturedSegmentIndex + 1}",
-                    canInsert,
+                    insertRouteDescriptor?.CanExecute ?? true,
                     () =>
                     {
                         if (Editor is null)
@@ -318,12 +311,12 @@ public partial class GraphEditorView
             vertexActions.Children.Add(CreateToolActionButton(
                 $"PART_ConnectionToolApplyRouteVertex_{connectionId}_{capturedVertexIndex}",
                 "Apply Bend",
-                canMove,
+                moveRouteDescriptor?.CanExecute ?? true,
                 () => TryApplyRouteVertexPosition(connectionId, capturedVertexIndex, xEditor.Text, yEditor.Text)));
             vertexActions.Children.Add(CreateToolActionButton(
                 $"PART_ConnectionToolRemoveRouteVertex_{connectionId}_{capturedVertexIndex}",
                 "Remove Bend",
-                canRemove,
+                removeRouteDescriptor?.CanExecute ?? true,
                 () => Editor is not null
                     && Editor.Session.Commands.TryRemoveConnectionRouteVertex(
                         connectionId,
@@ -354,6 +347,9 @@ public partial class GraphEditorView
 
         return container;
     }
+
+    private Button CreateHostedToolButton(string name, AsterGraphHostedActionDescriptor action)
+        => CreateToolActionButton(name, action.Title, action.CanExecute, action.TryExecute);
 
     private Button CreateToolActionButton(string name, string content, bool isEnabled, Func<bool> execute)
     {
@@ -404,4 +400,28 @@ public partial class GraphEditorView
         var sourceTitle = Editor.FindNode(connection.SourceNodeId)?.Title ?? connection.SourceNodeId;
         return $"Incoming from {sourceTitle}";
     }
+
+    private static string ResolveSelectionToolButtonName(AsterGraphHostedActionDescriptor action)
+        => action.Id switch
+        {
+            "selection-create-group" => "PART_SelectionToolCreateGroupButton",
+            "selection-wrap-composite" => "PART_SelectionToolWrapCompositeButton",
+            _ => $"PART_SelectionTool_{action.Id}",
+        };
+
+    private static string ResolveNodeToolButtonName(AsterGraphHostedActionDescriptor action)
+        => action.Id switch
+        {
+            "node-toggle-surface-expansion" => "PART_NodeToolToggleExpansionButton",
+            "node-enter-composite-scope" => "PART_NodeToolEnterCompositeScopeButton",
+            _ => $"PART_NodeTool_{action.Id}",
+        };
+
+    private static string ResolveConnectionToolButtonName(string connectionId, AsterGraphHostedActionDescriptor action)
+        => action.Id switch
+        {
+            "connection-reconnect" => $"PART_ConnectionToolReconnect_{connectionId}",
+            "connection-disconnect" => $"PART_ConnectionToolDisconnect_{connectionId}",
+            _ => $"PART_ConnectionToolAction_{connectionId}_{action.Id}",
+        };
 }

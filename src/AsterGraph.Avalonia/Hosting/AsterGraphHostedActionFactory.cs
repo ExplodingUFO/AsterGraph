@@ -78,6 +78,33 @@ public static class AsterGraphHostedActionFactory
             .ToList();
     }
 
+    public static IReadOnlyList<AsterGraphHostedActionDescriptor> CreateToolActions(
+        IGraphEditorSession session,
+        IEnumerable<GraphEditorToolDescriptorSnapshot> tools)
+    {
+        ArgumentNullException.ThrowIfNull(session);
+        ArgumentNullException.ThrowIfNull(tools);
+
+        return tools
+            .Select(tool =>
+            {
+                ArgumentNullException.ThrowIfNull(tool);
+                return CreateInvocationAction(
+                    session,
+                    new GraphEditorCommandDescriptorSnapshot(
+                        tool.Id,
+                        tool.Title,
+                        tool.Group,
+                        tool.IconKey,
+                        tool.DefaultShortcut,
+                        tool.Source,
+                        tool.CanExecute,
+                        tool.DisabledReason),
+                    tool.Invocation);
+            })
+            .ToList();
+    }
+
     public static AsterGraphHostedActionDescriptor CreateHostAction(
         GraphEditorCommandDescriptorSnapshot descriptor,
         Func<bool> execute)
@@ -95,8 +122,17 @@ public static class AsterGraphHostedActionFactory
     private static AsterGraphHostedActionDescriptor CreateCommandAction(
         IGraphEditorSession session,
         GraphEditorCommandDescriptorSnapshot descriptor)
+        => CreateInvocationAction(
+            session,
+            descriptor,
+            new GraphEditorCommandInvocationSnapshot(descriptor.Id));
+
+    private static AsterGraphHostedActionDescriptor CreateInvocationAction(
+        IGraphEditorSession session,
+        GraphEditorCommandDescriptorSnapshot descriptor,
+        GraphEditorCommandInvocationSnapshot invocation)
         => new(
             descriptor,
-            () => session.Commands.TryExecuteCommand(new GraphEditorCommandInvocationSnapshot(descriptor.Id)),
-            descriptor.Id);
+            () => session.Commands.TryExecuteCommand(invocation),
+            invocation.CommandId);
 }
