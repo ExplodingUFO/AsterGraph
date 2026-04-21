@@ -63,6 +63,8 @@ internal interface IGraphEditorSessionHost
     void DeleteConnection(string connectionId);
     bool TryReconnectConnection(string connectionId, bool updateStatus)
         => false;
+    bool TrySetConnectionLabel(string connectionId, string? label, bool updateStatus)
+        => false;
     bool TrySetConnectionNoteText(string connectionId, string? noteText, bool updateStatus)
         => false;
     void BreakConnectionsForPort(string nodeId, string portId);

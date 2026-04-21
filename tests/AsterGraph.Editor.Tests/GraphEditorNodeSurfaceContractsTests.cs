@@ -327,10 +327,13 @@ public sealed class GraphEditorNodeSurfaceContractsTests
     public void SessionCommands_TrySetNodeExpansionState_PersistsAcrossSerialization()
     {
         var session = CreateSession();
+        var commandIds = new List<string>();
+        session.Events.CommandExecuted += (_, args) => commandIds.Add(args.CommandId);
 
         var changed = session.Commands.TrySetNodeExpansionState(NodeId, GraphNodeExpansionState.Expanded);
 
         Assert.True(changed);
+        Assert.Contains("nodes.surface.expand", commandIds);
 
         var surface = Assert.Single(session.Queries.GetNodeSurfaceSnapshots(), snapshot => snapshot.NodeId == NodeId);
         Assert.Equal(GraphNodeExpansionState.Expanded, surface.ExpansionState);

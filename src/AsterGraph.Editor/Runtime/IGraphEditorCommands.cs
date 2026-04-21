@@ -357,6 +357,16 @@ public interface IGraphEditorCommands
         => throw new NotSupportedException();
 
     /// <summary>
+    /// Attempts to update one connection's host-visible label text.
+    /// </summary>
+    /// <param name="connectionId">Stable connection identifier.</param>
+    /// <param name="label">New label text, or blank to clear it.</param>
+    /// <param name="updateStatus">Whether to update status text for no-op or success cases.</param>
+    /// <returns><see langword="true"/> when the label text changes.</returns>
+    bool TrySetConnectionLabel(string connectionId, string? label, bool updateStatus = true)
+        => throw new NotSupportedException();
+
+    /// <summary>
     /// Attempts to update one connection's pure display note text.
     /// </summary>
     /// <param name="connectionId">Stable connection identifier.</param>

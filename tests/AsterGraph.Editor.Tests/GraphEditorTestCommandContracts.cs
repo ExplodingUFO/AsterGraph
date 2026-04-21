@@ -27,6 +27,7 @@ internal static class GraphEditorTestCommandContracts
         "connections.cancel",
         "connections.delete",
         "connections.disconnect",
+        "connections.label.set",
         "connections.note.set",
         "connections.reconnect",
         "connections.break-port",

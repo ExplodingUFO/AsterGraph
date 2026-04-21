@@ -208,6 +208,7 @@ internal sealed class GraphEditorSessionStockMenuDescriptorBuilder
 
         var inspect = GetCommandDescriptor(commands, "nodes.inspect");
         var center = GetCommandDescriptor(commands, "viewport.center-node");
+        var toggleExpansion = GetCommandDescriptor(commands, "nodes.surface.expand");
         var delete = GetCommandDescriptor(commands, "nodes.delete-by-id");
         var duplicate = GetCommandDescriptor(commands, "nodes.duplicate");
         var disconnectIncoming = GetCommandDescriptor(commands, "connections.disconnect-incoming");
@@ -228,6 +229,20 @@ internal sealed class GraphEditorSessionStockMenuDescriptorBuilder
         {
             new("node-inspect", LocalizeFormat("editor.menu.node.inspect", "Inspect {0}", node.Title), CreateCommand("nodes.inspect", ("nodeId", node.Id)), iconKey: "inspect", isEnabled: inspect.IsEnabled, disabledReason: inspect.DisabledReason),
             new("node-center", Localize("editor.menu.node.centerViewHere", "Center View Here"), CreateCommand("viewport.center-node", ("nodeId", node.Id)), iconKey: "center", isEnabled: center.IsEnabled, disabledReason: center.DisabledReason),
+            new(
+                "node-toggle-surface-expansion",
+                node.Surface?.ExpansionState == GraphNodeExpansionState.Expanded
+                    ? Localize("editor.menu.node.collapseCard", "Collapse Node Card")
+                    : Localize("editor.menu.node.expandCard", "Expand Node Card"),
+                CreateCommand(
+                    "nodes.surface.expand",
+                    ("nodeId", node.Id),
+                    ("expansionState", (node.Surface?.ExpansionState == GraphNodeExpansionState.Expanded
+                        ? GraphNodeExpansionState.Collapsed
+                        : GraphNodeExpansionState.Expanded).ToString())),
+                iconKey: "expand",
+                isEnabled: toggleExpansion.IsEnabled,
+                disabledReason: toggleExpansion.DisabledReason),
         };
 
         if (node.Composite is not null)

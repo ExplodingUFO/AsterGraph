@@ -107,6 +107,9 @@ internal sealed partial class GraphEditorKernel
         bool IGraphEditorKernelCommandRouterHost.TrySetNodeSize(string nodeId, GraphSize size, bool updateStatus)
             => _owner.TrySetNodeSize(nodeId, size, updateStatus);
 
+        bool IGraphEditorKernelCommandRouterHost.TrySetNodeExpansionState(string nodeId, GraphNodeExpansionState expansionState)
+            => _owner.TrySetNodeExpansionState(nodeId, expansionState);
+
         string IGraphEditorKernelCommandRouterHost.TryCreateNodeGroupFromSelection(string title)
             => _owner.TryCreateNodeGroupFromSelection(title);
 
@@ -163,6 +166,9 @@ internal sealed partial class GraphEditorKernel
 
         bool IGraphEditorKernelCommandRouterHost.TryReconnectConnection(string connectionId, bool updateStatus)
             => _owner.TryReconnectConnection(connectionId, updateStatus);
+
+        bool IGraphEditorKernelCommandRouterHost.TrySetConnectionLabel(string connectionId, string? label, bool updateStatus)
+            => _owner.TrySetConnectionLabel(connectionId, label, updateStatus);
 
         bool IGraphEditorKernelCommandRouterHost.TrySetConnectionNoteText(string connectionId, string? noteText, bool updateStatus)
             => _owner.TrySetConnectionNoteText(connectionId, noteText, updateStatus);

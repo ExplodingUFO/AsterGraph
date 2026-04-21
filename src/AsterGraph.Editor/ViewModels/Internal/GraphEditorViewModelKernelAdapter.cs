@@ -166,6 +166,9 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
     public bool TryReconnectConnection(string connectionId, bool updateStatus)
         => _kernel.TryReconnectConnection(connectionId, updateStatus);
 
+    public bool TrySetConnectionLabel(string connectionId, string? label, bool updateStatus)
+        => _kernel.TrySetConnectionLabel(connectionId, label, updateStatus);
+
     public bool TrySetConnectionNoteText(string connectionId, string? noteText, bool updateStatus)
         => _kernel.TrySetConnectionNoteText(connectionId, noteText, updateStatus);
 

@@ -180,6 +180,24 @@
             <controls:GraphInspectorView x:Name="PART_InspectorSurface"
                                          Editor="{Binding}" />
 
+            <Border x:Name="PART_AuthoringToolsChrome"
+                    Classes="astergraph-inspector-section">
+              <StackPanel Spacing="8">
+                <TextBlock Text="Authoring Tools"
+                           FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
+                           FontWeight="Bold"
+                           Foreground="{DynamicResource AsterGraph.EyebrowBrush}" />
+                <TextBlock x:Name="PART_AuthoringToolsCaptionText"
+                           FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
+                           TextWrapping="Wrap"
+                           Foreground="{DynamicResource AsterGraph.BodyBrush}" />
+                <WrapPanel x:Name="PART_NodeToolToolbar"
+                           Orientation="Horizontal" />
+                <StackPanel x:Name="PART_ConnectionToolList"
+                            Spacing="10" />
+              </StackPanel>
+            </Border>
+
             <Border Classes="astergraph-inspector-section">
               <StackPanel Spacing="8">
                 <TextBlock Text="工作区"
