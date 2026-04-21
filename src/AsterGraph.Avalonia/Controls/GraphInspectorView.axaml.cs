@@ -1,4 +1,3 @@
-using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
@@ -19,7 +18,6 @@ namespace AsterGraph.Avalonia.Controls;
 /// </summary>
 public partial class GraphInspectorView : UserControl
 {
-    private readonly ObservableCollection<GraphInspectorParameterGroupState> _parameterGroups = [];
     private readonly Dictionary<string, bool> _collapsedGroups = new(StringComparer.Ordinal);
     private object? _stockContent;
     private GraphEditorViewModel? _subscribedEditor;
@@ -29,7 +27,9 @@ public partial class GraphInspectorView : UserControl
     private Border? _parameterSearchEmptyState;
     private TextBlock? _parameterSearchEmptyStateText;
     private ItemsControl? _parameterGroupsControl;
+    private Button? _advancedParametersToggleButton;
     private string _parameterSearchText = string.Empty;
+    private bool _showAdvancedParameters;
 
     /// <summary>
     /// 编辑器视图模型依赖属性。
@@ -123,11 +123,8 @@ public partial class GraphInspectorView : UserControl
         _parameterSearchEmptyState = this.FindControl<Border>("PART_ParameterSearchEmptyState");
         _parameterSearchEmptyStateText = this.FindControl<TextBlock>("PART_ParameterSearchEmptyStateText");
         _parameterGroupsControl = this.FindControl<ItemsControl>("PART_ParameterGroups");
+        _advancedParametersToggleButton = this.FindControl<Button>("PART_AdvancedParametersToggleButton");
 
-        if (_parameterGroupsControl is not null)
-        {
-            _parameterGroupsControl.ItemsSource = _parameterGroups;
-        }
     }
 
     private void ApplyInspectorPresenter()
@@ -243,6 +240,12 @@ public partial class GraphInspectorView : UserControl
         RefreshParameterSurface();
     }
 
+    private void HandleAdvancedParametersToggleClick(object? sender, RoutedEventArgs e)
+    {
+        _showAdvancedParameters = !_showAdvancedParameters;
+        RefreshParameterSurface();
+    }
+
     private void HandleInspectorFocusChanged(object? sender, RoutedEventArgs e)
     {
         if (e.RoutedEvent == InputElement.GotFocusEvent)
@@ -288,16 +291,25 @@ public partial class GraphInspectorView : UserControl
     private void RefreshParameterSurface()
     {
         var parameters = Editor?.SelectedNodeParameters.ToList() ?? [];
+        UpdateAdvancedParametersToggle(parameters);
         var filteredGroups = BuildParameterGroups(parameters, _parameterSearchText);
-
-        _parameterGroups.Clear();
-        foreach (var group in filteredGroups)
+        if (_parameterGroupsControl is not null)
         {
-            _parameterGroups.Add(group);
+            _parameterGroupsControl.ItemsSource = filteredGroups;
         }
 
         UpdateValidationSummary(parameters);
         UpdateSearchEmptyState(parameters.Count, filteredGroups.Count);
+        _parameterGroupsControl?.InvalidateMeasure();
+        _parameterGroupsControl?.InvalidateArrange();
+        InvalidateMeasure();
+        InvalidateArrange();
+        Dispatcher.UIThread.RunJobs(DispatcherPriority.Render);
+        if (Bounds.Width > 0 && Bounds.Height > 0)
+        {
+            Measure(Bounds.Size);
+            Arrange(new Rect(Bounds.Size));
+        }
     }
 
     private List<GraphInspectorParameterGroupState> BuildParameterGroups(
@@ -310,13 +322,32 @@ public partial class GraphInspectorView : UserControl
         }
 
         return parameters
-            .Where(parameter => MatchesSearch(parameter, searchText))
+            .Where(parameter => ShouldDisplayParameter(parameter, searchText))
             .GroupBy(parameter => string.IsNullOrWhiteSpace(parameter.GroupDisplayName) ? "General" : parameter.GroupDisplayName!, StringComparer.Ordinal)
             .Select(group => new GraphInspectorParameterGroupState(
                 group.Key,
                 group.ToList(),
                 _collapsedGroups.GetValueOrDefault(group.Key)))
             .ToList();
+    }
+
+    private void UpdateAdvancedParametersToggle(IReadOnlyList<NodeParameterViewModel> parameters)
+    {
+        if (_advancedParametersToggleButton is null)
+        {
+            return;
+        }
+
+        var hasAdvancedParameters = parameters.Any(parameter => parameter.IsAdvanced);
+        if (!hasAdvancedParameters)
+        {
+            _showAdvancedParameters = false;
+        }
+
+        _advancedParametersToggleButton.IsVisible = hasAdvancedParameters;
+        _advancedParametersToggleButton.Content = _showAdvancedParameters
+            ? "隐藏高级参数"
+            : "显示高级参数";
     }
 
     private void UpdateValidationSummary(IReadOnlyList<NodeParameterViewModel> parameters)
@@ -379,5 +410,21 @@ public partial class GraphInspectorView : UserControl
                 parameter.ReadOnlyReason,
                 parameter.ValidationMessage)
             .Contains(searchText, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private bool ShouldDisplayParameter(NodeParameterViewModel parameter, string searchText)
+    {
+        var matchesSearch = MatchesSearch(parameter, searchText);
+        if (!matchesSearch)
+        {
+            return false;
+        }
+
+        if (!parameter.IsAdvanced)
+        {
+            return true;
+        }
+
+        return _showAdvancedParameters || !string.IsNullOrWhiteSpace(searchText);
     }
 }

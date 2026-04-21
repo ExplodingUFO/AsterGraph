@@ -1,5 +1,6 @@
 using System.Globalization;
 using AsterGraph.Abstractions.Catalog;
+using AsterGraph.Editor.Parameters;
 using AsterGraph.Editor.ViewModels;
 
 namespace AsterGraph.Editor.Services;
@@ -117,7 +118,8 @@ internal sealed class GraphEditorInspectorProjection
             return [];
         }
 
-        var orderedGroups = definition.Parameters
+        var orderedParameters = NodeParameterInspectorMetadata.OrderDefinitions(definition.Parameters);
+        var orderedGroups = orderedParameters
             .Select(parameter => parameter.GroupName ?? string.Empty)
             .Distinct(StringComparer.Ordinal)
             .ToList();
@@ -125,7 +127,7 @@ internal sealed class GraphEditorInspectorProjection
         var parameters = new List<NodeParameterViewModel>(definition.Parameters.Count);
         foreach (var group in orderedGroups)
         {
-            var groupParameters = definition.Parameters
+            var groupParameters = orderedParameters
                 .Where(parameter => string.Equals(parameter.GroupName ?? string.Empty, group, StringComparison.Ordinal))
                 .ToList();
             for (var index = 0; index < groupParameters.Count; index++)

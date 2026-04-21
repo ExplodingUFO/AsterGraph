@@ -60,4 +60,36 @@ public sealed class NodeParameterViewModelTests
         Assert.Equal("参数定义将此字段标记为只读。", definitionLocked.ReadOnlyReason);
         Assert.Equal("宿主策略当前禁止修改该参数。", hostLocked.ReadOnlyReason);
     }
+
+    [Fact]
+    public void AdvancedMetadata_AndDefaultOverrideState_ProjectFromDefinition()
+    {
+        var viewModel = new NodeParameterViewModel(
+            new NodeParameterDefinition(
+                "threshold",
+                "Threshold",
+                new PortTypeId("float"),
+                ParameterEditorKind.Number,
+                defaultValue: 0.5d,
+                helpText: "Fine-tunes the visible threshold.",
+                sortOrder: 20,
+                isAdvanced: true,
+                unitSuffix: "ms"),
+            [0.9d],
+            static (_, _) => { });
+
+        Assert.True(viewModel.IsAdvanced);
+        Assert.Equal("ms", viewModel.UnitSuffix);
+        Assert.True(viewModel.HasUnitSuffix);
+        Assert.True(viewModel.IsOverriddenFromDefault);
+        Assert.False(viewModel.IsUsingDefaultValue);
+        Assert.Equal("已覆盖", viewModel.ValueStateCaption);
+        Assert.Contains("Fine-tunes the visible threshold.", viewModel.HelpText);
+
+        viewModel.ResetToDefault();
+
+        Assert.True(viewModel.IsUsingDefaultValue);
+        Assert.False(viewModel.IsOverriddenFromDefault);
+        Assert.Equal("默认", viewModel.ValueStateCaption);
+    }
 }

@@ -336,6 +336,56 @@ public sealed class GraphInspectorStandaloneTests
         }
     }
 
+    [AvaloniaFact]
+    public void StandaloneInspector_HidesAdvancedParametersUntilExpanded_AndShowsValueStateAndUnitSuffix()
+    {
+        var editor = CreateAuthoringEditor();
+        editor.SelectSingleNode(editor.Nodes[0], updateStatus: false);
+        var (window, inspector) = CreateInspectorWindow(editor);
+
+        try
+        {
+            RefreshInspectorLayout(window, inspector);
+
+            Assert.Equal(["enabled", "threshold", "slug", "tags", "system-key"], GetVisibleParameterKeys(inspector));
+
+            var allText = string.Join(
+                "\n",
+                inspector.GetVisualDescendants()
+                    .OfType<TextBlock>()
+                    .Select(block => block.Text)
+                    .Where(text => !string.IsNullOrWhiteSpace(text)));
+            var advancedToggle = inspector.FindControl<Button>("PART_AdvancedParametersToggleButton");
+
+            Assert.NotNull(advancedToggle);
+            Assert.True(advancedToggle!.IsVisible);
+            Assert.Equal("显示高级参数", advancedToggle.Content?.ToString());
+            Assert.Contains("已覆盖", allText);
+            Assert.Contains("默认", allText);
+            Assert.Contains("ms", allText);
+
+            advancedToggle.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            RefreshInspectorLayout(window, inspector);
+
+            var expandedText = string.Join(
+                "\n",
+                inspector.GetVisualDescendants()
+                    .OfType<TextBlock>()
+                    .Select(block => block.Text)
+                    .Where(text => !string.IsNullOrWhiteSpace(text)));
+
+            Assert.Equal("隐藏高级参数", advancedToggle.Content?.ToString());
+            Assert.Contains("debug-bias", GetVisibleParameterKeys(inspector));
+            Assert.Contains("Debug Bias", expandedText);
+            Assert.Contains("Used only for expert tuning.", expandedText);
+            Assert.Contains("高级", expandedText);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
     private static (Window Window, GraphInspectorView Inspector) CreateInspectorWindow(
         GraphEditorViewModel editor,
         AsterGraphPresentationOptions? presentation = null)
@@ -425,14 +475,17 @@ public sealed class GraphInspectorStandaloneTests
                         ParameterEditorKind.Number,
                         description: "Controls the authoring threshold.",
                         defaultValue: 0.5,
-                        groupName: "Behavior"),
+                        groupName: "Behavior",
+                        sortOrder: 20,
+                        unitSuffix: "ms"),
                     new NodeParameterDefinition(
                         "enabled",
                         "Enabled",
                         new PortTypeId("bool"),
                         ParameterEditorKind.Boolean,
                         defaultValue: true,
-                        groupName: "Behavior"),
+                        groupName: "Behavior",
+                        sortOrder: 10),
                     new NodeParameterDefinition(
                         "slug",
                         "Slug",
@@ -445,7 +498,9 @@ public sealed class GraphInspectorStandaloneTests
                             ValidationPattern: "^[a-z-]+$",
                             ValidationPatternDescription: "lowercase letters and dashes"),
                         groupName: "Metadata",
-                        placeholderText: "lowercase-id"),
+                        placeholderText: "lowercase-id",
+                        helpText: "Used in filenames and automation labels.",
+                        sortOrder: 10),
                     new NodeParameterDefinition(
                         "tags",
                         "Tags",
@@ -455,7 +510,8 @@ public sealed class GraphInspectorStandaloneTests
                         defaultValue: new[] { "alpha", "beta" },
                         constraints: new ParameterConstraints(MinimumItemCount: 1, MaximumItemCount: 5),
                         groupName: "Metadata",
-                        placeholderText: "one tag per line"),
+                        placeholderText: "one tag per line",
+                        sortOrder: 20),
                     new NodeParameterDefinition(
                         "system-key",
                         "System Key",
@@ -465,7 +521,19 @@ public sealed class GraphInspectorStandaloneTests
                         defaultValue: "system-core",
                         constraints: new ParameterConstraints(IsReadOnly: true),
                         groupName: "Metadata",
-                        placeholderText: "system-core"),
+                        placeholderText: "system-core",
+                        sortOrder: 30),
+                    new NodeParameterDefinition(
+                        "debug-bias",
+                        "Debug Bias",
+                        new PortTypeId("float"),
+                        ParameterEditorKind.Number,
+                        description: "Advanced tuning parameter.",
+                        defaultValue: 0.1d,
+                        groupName: "Advanced",
+                        helpText: "Used only for expert tuning.",
+                        sortOrder: 90,
+                        isAdvanced: true),
                 ],
                 description: "Used to verify grouped authoring inspector UX."));
 

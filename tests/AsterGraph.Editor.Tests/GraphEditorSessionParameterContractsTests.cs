@@ -39,6 +39,10 @@ public sealed class GraphEditorSessionParameterContractsTests
             queriesType.GetMethod(nameof(IGraphEditorQueries.GetSelectedNodeParameterSnapshots))!.ReturnType);
         Assert.NotNull(typeof(GraphEditorNodeParameterSnapshot).GetProperty(nameof(GraphEditorNodeParameterSnapshot.IsValid)));
         Assert.NotNull(typeof(GraphEditorNodeParameterSnapshot).GetProperty(nameof(GraphEditorNodeParameterSnapshot.ValidationMessage)));
+        Assert.NotNull(typeof(GraphEditorNodeParameterSnapshot).GetProperty(nameof(GraphEditorNodeParameterSnapshot.CanResetToDefault)));
+        Assert.NotNull(typeof(GraphEditorNodeParameterSnapshot).GetProperty(nameof(GraphEditorNodeParameterSnapshot.IsUsingDefaultValue)));
+        Assert.NotNull(typeof(GraphEditorNodeParameterSnapshot).GetProperty(nameof(GraphEditorNodeParameterSnapshot.ReadOnlyReason)));
+        Assert.NotNull(typeof(GraphEditorNodeParameterSnapshot).GetProperty(nameof(GraphEditorNodeParameterSnapshot.HelpText)));
 
         AssertMethod(commandsType, nameof(IGraphEditorCommands.TrySetSelectedNodeParameterValue), typeof(string), typeof(object));
         Assert.Equal(
@@ -167,6 +171,30 @@ public sealed class GraphEditorSessionParameterContractsTests
         Assert.Equal("lowercase-id", slug.Definition.PlaceholderText);
     }
 
+    [Fact]
+    public void SessionQueries_GetSelectedNodeParameterSnapshots_ExposeResetReadOnlyAndExtendedDefinitionMetadata()
+    {
+        var session = CreateInspectorMetadataSession();
+        session.Commands.SetSelection(["tests.session.parameters.inspector-node"], "tests.session.parameters.inspector-node", updateStatus: false);
+
+        var snapshots = session.Queries.GetSelectedNodeParameterSnapshots();
+
+        var threshold = Assert.Single(snapshots, snapshot => snapshot.Definition.Key == "threshold");
+        Assert.True(threshold.CanResetToDefault);
+        Assert.False(threshold.IsUsingDefaultValue);
+        Assert.Null(threshold.ReadOnlyReason);
+        Assert.Contains("Fine-tunes the visible threshold.", threshold.HelpText);
+        Assert.Equal("ms", threshold.Definition.UnitSuffix);
+        Assert.Equal(20, threshold.Definition.SortOrder);
+
+        var systemKey = Assert.Single(snapshots, snapshot => snapshot.Definition.Key == "system-key");
+        Assert.False(systemKey.CanResetToDefault);
+        Assert.True(systemKey.IsUsingDefaultValue);
+        Assert.Equal("参数定义将此字段标记为只读。", systemKey.ReadOnlyReason);
+        Assert.True(systemKey.Definition.IsAdvanced);
+        Assert.Equal(90, systemKey.Definition.SortOrder);
+    }
+
     private static IGraphEditorSession CreateSession(GraphEditorBehaviorOptions? behaviorOptions = null)
         => AsterGraphEditorFactory.CreateSession(new AsterGraphEditorOptions
         {
@@ -284,6 +312,72 @@ public sealed class GraphEditorSessionParameterContractsTests
                             ValidationPatternDescription: "lowercase letters and dashes"),
                         groupName: "Metadata",
                         placeholderText: "lowercase-id"),
+                ]));
+        return catalog;
+    }
+
+    private static IGraphEditorSession CreateInspectorMetadataSession()
+        => AsterGraphEditorFactory.CreateSession(new AsterGraphEditorOptions
+        {
+            Document = new GraphDocument(
+                "Inspector Metadata Graph",
+                "Covers extended inspector-facing parameter metadata.",
+                [
+                    new GraphNode(
+                        "tests.session.parameters.inspector-node",
+                        "Inspector Metadata Node",
+                        "Tests",
+                        "Inspector",
+                        "Contains parameter metadata used by the shipped inspector.",
+                        new GraphPoint(120, 160),
+                        new GraphSize(220, 140),
+                        [],
+                        [],
+                        "#6AD5C4",
+                        new NodeDefinitionId("tests.session.parameters.inspector"),
+                        [
+                            new GraphParameterValue("threshold", new PortTypeId("float"), 0.9d),
+                            new GraphParameterValue("system-key", new PortTypeId("string"), "system-core"),
+                        ]),
+                ],
+                []),
+            NodeCatalog = CreateInspectorMetadataCatalog(),
+            CompatibilityService = new DefaultPortCompatibilityService(),
+        });
+
+    private static INodeCatalog CreateInspectorMetadataCatalog()
+    {
+        var catalog = new NodeCatalog();
+        catalog.RegisterDefinition(
+            new NodeDefinition(
+                new NodeDefinitionId("tests.session.parameters.inspector"),
+                "Inspector Metadata Node",
+                "Tests",
+                "Inspector",
+                [],
+                [],
+                parameters:
+                [
+                    new NodeParameterDefinition(
+                        "system-key",
+                        "System Key",
+                        new PortTypeId("string"),
+                        ParameterEditorKind.Text,
+                        defaultValue: "system-core",
+                        constraints: new ParameterConstraints(IsReadOnly: true),
+                        groupName: "Metadata",
+                        sortOrder: 90,
+                        isAdvanced: true),
+                    new NodeParameterDefinition(
+                        "threshold",
+                        "Threshold",
+                        new PortTypeId("float"),
+                        ParameterEditorKind.Number,
+                        defaultValue: 0.5d,
+                        groupName: "Behavior",
+                        helpText: "Fine-tunes the visible threshold.",
+                        sortOrder: 20,
+                        unitSuffix: "ms"),
                 ]));
         return catalog;
     }

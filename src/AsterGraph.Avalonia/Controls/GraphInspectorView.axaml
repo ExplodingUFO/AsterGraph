@@ -195,6 +195,13 @@
                      Watermark="{Binding InspectorParametersSearchWatermark}"
                      TextChanged="HandleParameterSearchTextChanged" />
 
+            <Button x:Name="PART_AdvancedParametersToggleButton"
+                    Classes="astergraph-group-toggle"
+                    HorizontalAlignment="Left"
+                    Content="显示高级参数"
+                    Click="HandleAdvancedParametersToggleClick"
+                    IsVisible="False" />
+
             <Border x:Name="PART_ParameterValidationSummary"
                     Classes="astergraph-parameter-state-pill"
                     Background="{DynamicResource AsterGraph.ValidationErrorBadgeBrush}"
@@ -271,6 +278,23 @@
                                             Orientation="Horizontal"
                                             Spacing="4"
                                             VerticalAlignment="Top">
+                                  <Border Classes="astergraph-parameter-state-pill">
+                                    <TextBlock Text="{Binding ValueStateCaption}"
+                                               FontSize="{DynamicResource AsterGraph.InspectorCaptionFontSize}"
+                                               Foreground="{DynamicResource AsterGraph.HeadlineBrush}" />
+                                  </Border>
+                                  <Border Classes="astergraph-parameter-state-pill"
+                                          IsVisible="{Binding HasUnitSuffix}">
+                                    <TextBlock Text="{Binding UnitSuffix}"
+                                               FontSize="{DynamicResource AsterGraph.InspectorCaptionFontSize}"
+                                               Foreground="{DynamicResource AsterGraph.HeadlineBrush}" />
+                                  </Border>
+                                  <Border Classes="astergraph-parameter-state-pill"
+                                          IsVisible="{Binding IsAdvanced}">
+                                    <TextBlock Text="高级"
+                                               FontSize="{DynamicResource AsterGraph.InspectorCaptionFontSize}"
+                                               Foreground="{DynamicResource AsterGraph.HeadlineBrush}" />
+                                  </Border>
                                   <Border Classes="astergraph-parameter-state-pill"
                                           Background="{DynamicResource AsterGraph.ParameterEditableBadgeBrush}"
                                           IsVisible="{Binding CanEdit}">

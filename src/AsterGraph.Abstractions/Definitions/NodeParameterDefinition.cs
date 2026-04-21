@@ -21,7 +21,11 @@ public sealed record NodeParameterDefinition
         ParameterConstraints? constraints = null,
         string? groupName = null,
         string? placeholderText = null,
-        string? templateKey = null)
+        string? templateKey = null,
+        string? helpText = null,
+        int sortOrder = 0,
+        bool isAdvanced = false,
+        string? unitSuffix = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(key);
         ArgumentException.ThrowIfNullOrWhiteSpace(displayName);
@@ -37,6 +41,10 @@ public sealed record NodeParameterDefinition
         GroupName = string.IsNullOrWhiteSpace(groupName) ? null : groupName.Trim();
         PlaceholderText = string.IsNullOrWhiteSpace(placeholderText) ? null : placeholderText.Trim();
         TemplateKey = string.IsNullOrWhiteSpace(templateKey) ? null : templateKey.Trim();
+        HelpText = string.IsNullOrWhiteSpace(helpText) ? null : helpText.Trim();
+        SortOrder = sortOrder;
+        IsAdvanced = isAdvanced;
+        UnitSuffix = string.IsNullOrWhiteSpace(unitSuffix) ? null : unitSuffix.Trim();
     }
 
     /// <summary>
@@ -93,4 +101,24 @@ public sealed record NodeParameterDefinition
     /// Optional host-facing editor template key used by stock and custom UI registries.
     /// </summary>
     public string? TemplateKey { get; }
+
+    /// <summary>
+    /// Optional high-signal authoring guidance shown by shipped inspector surfaces.
+    /// </summary>
+    public string? HelpText { get; }
+
+    /// <summary>
+    /// Stable authoring sort order shared by runtime snapshots and shipped inspector surfaces.
+    /// </summary>
+    public int SortOrder { get; }
+
+    /// <summary>
+    /// Indicates the parameter belongs to the advanced authoring section.
+    /// </summary>
+    public bool IsAdvanced { get; }
+
+    /// <summary>
+    /// Optional display suffix rendered next to numeric or text-oriented values.
+    /// </summary>
+    public string? UnitSuffix { get; }
 }

@@ -41,11 +41,11 @@ public sealed partial class NodeParameterViewModel : ObservableObject
         TypeId = definition.ValueType;
         IsRequired = definition.IsRequired;
         IsReadOnly = definition.Constraints.IsReadOnly || isHostReadOnly;
-        ReadOnlyReason = BuildReadOnlyReason(definition, isHostReadOnly);
+        ReadOnlyReason = NodeParameterInspectorMetadata.BuildReadOnlyReason(definition, isHostReadOnly);
         GroupDisplayName = groupDisplayName;
         IsGroupHeaderVisible = isGroupHeaderVisible;
         PlaceholderText = definition.PlaceholderText;
-        HelpText = BuildHelpText(definition, _defaultValue);
+        HelpText = NodeParameterInspectorMetadata.BuildHelpText(definition);
         Options = definition.Constraints.AllowedOptions
             .Select(option => new NodeParameterOptionViewModel(option.Value, option.Label, option.Description))
             .ToList()
@@ -170,6 +170,21 @@ public sealed partial class NodeParameterViewModel : ObservableObject
     public string? PlaceholderText { get; }
 
     /// <summary>
+    /// Indicates the parameter belongs to the advanced authoring section.
+    /// </summary>
+    public bool IsAdvanced => Definition.IsAdvanced;
+
+    /// <summary>
+    /// Optional display suffix projected from the parameter definition.
+    /// </summary>
+    public string? UnitSuffix => Definition.UnitSuffix;
+
+    /// <summary>
+    /// Indicates the shipped inspector should render a unit suffix badge.
+    /// </summary>
+    public bool HasUnitSuffix => !string.IsNullOrWhiteSpace(UnitSuffix);
+
+    /// <summary>
     /// 可见的参数帮助提示，聚合默认值、格式约束等高信号说明。
     /// </summary>
     public string? HelpText { get; }
@@ -212,9 +227,22 @@ public sealed partial class NodeParameterViewModel : ObservableObject
     /// <summary>
     /// 指示当前参数是否允许恢复定义默认值。
     /// </summary>
-    public bool CanResetToDefault
-        => CanEdit
-           && (HasMixedValues || !NodeParameterValueAdapter.AreEquivalent(CurrentValue, _defaultValue));
+    public bool CanResetToDefault => NodeParameterInspectorMetadata.CanResetToDefault(Definition, CurrentValue, HasMixedValues, CanEdit);
+
+    /// <summary>
+    /// Indicates the effective value still matches the declared default.
+    /// </summary>
+    public bool IsUsingDefaultValue => NodeParameterInspectorMetadata.IsUsingDefaultValue(Definition, CurrentValue, HasMixedValues);
+
+    /// <summary>
+    /// Indicates the effective value differs from the declared default.
+    /// </summary>
+    public bool IsOverriddenFromDefault => !HasMixedValues && !IsUsingDefaultValue;
+
+    /// <summary>
+    /// Compact value-state caption consumed by shipped inspector badges.
+    /// </summary>
+    public string ValueStateCaption => HasMixedValues ? "混合" : IsUsingDefaultValue ? "默认" : "已覆盖";
 
     [ObservableProperty]
     private string stringValue = string.Empty;
@@ -317,7 +345,7 @@ public sealed partial class NodeParameterViewModel : ObservableObject
         SelectedOption = Options.FirstOrDefault(option => option.Value.Equals(NodeParameterValueAdapter.FormatValueForEditor(value), StringComparison.Ordinal));
 
         _suppressChangeNotifications = false;
-        OnPropertyChanged(nameof(CanResetToDefault));
+        RaiseValueStatePropertyChanges();
     }
 
     private void ValidateAndApply(object? candidateValue, bool commit)
@@ -341,7 +369,7 @@ public sealed partial class NodeParameterViewModel : ObservableObject
         }
         else
         {
-            OnPropertyChanged(nameof(CanResetToDefault));
+            RaiseValueStatePropertyChanges();
         }
 
         if (commit)
@@ -356,90 +384,14 @@ public sealed partial class NodeParameterViewModel : ObservableObject
         OnPropertyChanged(nameof(MixedValueHint));
         OnPropertyChanged(nameof(BooleanCaption));
         OnPropertyChanged(nameof(InputWatermark));
+        RaiseValueStatePropertyChanges();
+    }
+
+    private void RaiseValueStatePropertyChanges()
+    {
         OnPropertyChanged(nameof(CanResetToDefault));
+        OnPropertyChanged(nameof(IsUsingDefaultValue));
+        OnPropertyChanged(nameof(IsOverriddenFromDefault));
+        OnPropertyChanged(nameof(ValueStateCaption));
     }
-
-    private static string? BuildReadOnlyReason(NodeParameterDefinition definition, bool isHostReadOnly)
-    {
-        if (definition.Constraints.IsReadOnly && isHostReadOnly)
-        {
-            return "参数定义和宿主策略都将此字段标记为只读。";
-        }
-
-        if (definition.Constraints.IsReadOnly)
-        {
-            return "参数定义将此字段标记为只读。";
-        }
-
-        if (isHostReadOnly)
-        {
-            return "宿主策略当前禁止修改该参数。";
-        }
-
-        return null;
-    }
-
-    private static string? BuildHelpText(NodeParameterDefinition definition, object? defaultValue)
-    {
-        var guidance = new List<string>();
-        var formattedDefault = NodeParameterValueAdapter.FormatValueForEditor(defaultValue);
-        if (!string.IsNullOrWhiteSpace(definition.PlaceholderText))
-        {
-            guidance.Add($"提示: {definition.PlaceholderText}");
-        }
-
-        if (!string.IsNullOrWhiteSpace(formattedDefault))
-        {
-            guidance.Add($"默认值: {formattedDefault}");
-        }
-
-        if (!string.IsNullOrWhiteSpace(definition.Constraints.ValidationPatternDescription))
-        {
-            guidance.Add($"格式: {definition.Constraints.ValidationPatternDescription}");
-        }
-
-        if (definition.Constraints.Minimum is double min && definition.Constraints.Maximum is double max)
-        {
-            guidance.Add($"范围: {min} - {max}");
-        }
-        else if (definition.Constraints.Minimum is double minimum)
-        {
-            guidance.Add($"最小值: {minimum}");
-        }
-        else if (definition.Constraints.Maximum is double maximum)
-        {
-            guidance.Add($"最大值: {maximum}");
-        }
-
-        if (definition.Constraints.MinimumLength is int minLength && definition.Constraints.MaximumLength is int maxLength)
-        {
-            guidance.Add($"长度: {minLength} - {maxLength}");
-        }
-        else if (definition.Constraints.MinimumLength is int minimumLength)
-        {
-            guidance.Add($"最短长度: {minimumLength}");
-        }
-        else if (definition.Constraints.MaximumLength is int maximumLength)
-        {
-            guidance.Add($"最长长度: {maximumLength}");
-        }
-
-        if (definition.Constraints.MinimumItemCount is int minItems && definition.Constraints.MaximumItemCount is int maxItems)
-        {
-            guidance.Add($"项目数: {minItems} - {maxItems}");
-        }
-        else if (definition.Constraints.MinimumItemCount is int minimumItems)
-        {
-            guidance.Add($"最少项目: {minimumItems}");
-        }
-        else if (definition.Constraints.MaximumItemCount is int maximumItems)
-        {
-            guidance.Add($"最多项目: {maximumItems}");
-        }
-
-        return guidance.Count == 0
-            ? null
-            : string.Join("  ·  ", guidance);
-    }
-
 }

@@ -104,7 +104,7 @@ public sealed partial class GraphEditorSession
         }
 
         var canEditParameters = GetCapabilitySnapshot().CanEditNodeParameters;
-        return definition.Parameters
+        return NodeParameterInspectorMetadata.OrderDefinitions(definition.Parameters)
             .Select(parameter =>
             {
                 var values = selectedNodes
@@ -113,14 +113,20 @@ public sealed partial class GraphEditorSession
                 var firstValue = values[0];
                 var hasMixedValues = values.Skip(1).Any(value => !NodeParameterValueAdapter.AreEquivalent(value, firstValue));
                 var validation = NodeParameterValueAdapter.NormalizeValue(parameter, firstValue);
+                var currentValue = hasMixedValues ? null : firstValue;
+                var canEdit = canEditParameters && !parameter.Constraints.IsReadOnly;
 
                 return new GraphEditorNodeParameterSnapshot(
                     parameter,
-                    hasMixedValues ? null : firstValue,
+                    currentValue,
                     hasMixedValues,
-                    canEditParameters && !parameter.Constraints.IsReadOnly,
+                    canEdit,
                     validation.IsValid,
-                    validation.ValidationError);
+                    validation.ValidationError,
+                    NodeParameterInspectorMetadata.CanResetToDefault(parameter, currentValue, hasMixedValues, canEdit),
+                    NodeParameterInspectorMetadata.IsUsingDefaultValue(parameter, currentValue, hasMixedValues),
+                    NodeParameterInspectorMetadata.BuildReadOnlyReason(parameter, isHostReadOnly: !canEditParameters),
+                    NodeParameterInspectorMetadata.BuildHelpText(parameter));
             })
             .ToList();
     }

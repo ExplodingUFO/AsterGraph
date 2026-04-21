@@ -11,10 +11,18 @@ namespace AsterGraph.Editor.Runtime;
 /// <param name="CanEdit">Whether the current host permissions and parameter constraints allow mutation.</param>
 /// <param name="IsValid">Whether the current effective value satisfies the definition metadata.</param>
 /// <param name="ValidationMessage">Validation feedback when <paramref name="IsValid"/> is <see langword="false"/>.</param>
+/// <param name="CanResetToDefault">Whether the host can restore the selection to the declared default value.</param>
+/// <param name="IsUsingDefaultValue">Whether the effective value still matches the declared default.</param>
+/// <param name="ReadOnlyReason">Optional read-only rationale surfaced to host shells.</param>
+/// <param name="HelpText">Optional high-signal authoring guidance projected from the definition metadata.</param>
 public sealed record GraphEditorNodeParameterSnapshot(
     NodeParameterDefinition Definition,
     object? CurrentValue,
     bool HasMixedValues,
     bool CanEdit,
     bool IsValid,
-    string? ValidationMessage);
+    string? ValidationMessage,
+    bool CanResetToDefault,
+    bool IsUsingDefaultValue,
+    string? ReadOnlyReason,
+    string? HelpText);
