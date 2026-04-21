@@ -322,6 +322,11 @@ public sealed class GraphEditorSessionTests
             typeof(IReadOnlyList<GraphEditorCommandDescriptorSnapshot>),
             queriesType.GetMethod(nameof(IGraphEditorQueries.GetCommandDescriptors))!.ReturnType);
 
+        AssertMethod(queriesType, nameof(IGraphEditorQueries.GetToolDescriptors), typeof(GraphEditorToolContextSnapshot));
+        Assert.Equal(
+            typeof(IReadOnlyList<GraphEditorToolDescriptorSnapshot>),
+            queriesType.GetMethod(nameof(IGraphEditorQueries.GetToolDescriptors), [typeof(GraphEditorToolContextSnapshot)])!.ReturnType);
+
         AssertMethod(queriesType, nameof(IGraphEditorQueries.BuildContextMenuDescriptors), typeof(ContextMenuContext));
         Assert.Equal(
             typeof(IReadOnlyList<GraphEditorMenuItemDescriptorSnapshot>),

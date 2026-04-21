@@ -149,6 +149,14 @@ public interface IGraphEditorQueries
         => throw new NotSupportedException();
 
     /// <summary>
+    /// Gets stable contextual tool descriptors backed by the shared command route.
+    /// </summary>
+    /// <param name="context">The requested tool context.</param>
+    /// <returns>Stable tool descriptors for the requested context.</returns>
+    IReadOnlyList<GraphEditorToolDescriptorSnapshot> GetToolDescriptors(GraphEditorToolContextSnapshot context)
+        => throw new NotSupportedException();
+
+    /// <summary>
     /// 获取当前插件加载检查快照集合。
     /// </summary>
     /// <returns>插件加载快照集合。</returns>

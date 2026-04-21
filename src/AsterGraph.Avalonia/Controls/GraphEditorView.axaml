@@ -191,6 +191,8 @@
                            FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                            TextWrapping="Wrap"
                            Foreground="{DynamicResource AsterGraph.BodyBrush}" />
+                <WrapPanel x:Name="PART_SelectionToolToolbar"
+                           Orientation="Horizontal" />
                 <WrapPanel x:Name="PART_NodeToolToolbar"
                            Orientation="Horizontal" />
                 <StackPanel x:Name="PART_ConnectionToolList"

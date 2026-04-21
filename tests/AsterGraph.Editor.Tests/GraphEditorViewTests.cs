@@ -22,6 +22,7 @@ using AsterGraph.Editor.Catalog;
 using AsterGraph.Editor.Geometry;
 using AsterGraph.Editor.Hosting;
 using AsterGraph.Editor.Menus;
+using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.ViewModels;
 using Xunit;
 
@@ -459,6 +460,27 @@ public sealed class GraphEditorViewTests
     }
 
     [AvaloniaFact]
+    public void AuthoringToolsChrome_ProjectsSelectionToolProviderActions()
+    {
+        var editor = CreateSelectionToolProviderEditor();
+        editor.Session.Commands.SetSelection(["tests.view.source-001", "tests.view.target-001"], "tests.view.target-001", updateStatus: false);
+        var window = CreateWindow(new GraphEditorView
+        {
+            Editor = editor,
+        });
+        var view = (GraphEditorView)window.Content!;
+
+        var selectionTool = FindRequiredDescendant<Button>(view, "PART_SelectionTool_tests.view.selection.wrap");
+
+        Assert.Equal("Host Wrap Selection", Assert.IsType<string>(selectionTool.Content));
+        Assert.True(selectionTool.IsEnabled);
+
+        selectionTool.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+
+        Assert.Single(editor.Session.Queries.GetCompositeNodeSnapshots());
+    }
+
+    [AvaloniaFact]
     public void CompositeWorkflowChrome_ProjectsBreadcrumbsAndScopeNavigation()
     {
         var editor = CreateScopedEditor();
@@ -708,6 +730,57 @@ public sealed class GraphEditorViewTests
             new DefaultPortCompatibilityService());
     }
 
+    private static GraphEditorViewModel CreateSelectionToolProviderEditor()
+    {
+        var definitionId = new NodeDefinitionId("tests.view.selection-provider");
+        var catalog = new NodeCatalog();
+        catalog.RegisterDefinition(
+            new NodeDefinition(
+                definitionId,
+                "Selection Provider Node",
+                "Tests",
+                "Exercises selection tool provider actions.",
+                [new PortDefinition("in", "Input", new PortTypeId("float"), "#F3B36B")],
+                [new PortDefinition("out", "Output", new PortTypeId("float"), "#6AD5C4")]));
+
+        return AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
+        {
+            Document = new GraphDocument(
+                "Selection Tool Provider Graph",
+                "Exercises selection tool provider projection.",
+                [
+                    new GraphNode(
+                        "tests.view.source-001",
+                        "View Source",
+                        "Tests",
+                        "GraphEditorView",
+                        "Source node for selection tool provider tests.",
+                        new GraphPoint(120, 160),
+                        new GraphSize(240, 160),
+                        [],
+                        [new GraphPort("out", "Output", PortDirection.Output, "float", "#6AD5C4", new PortTypeId("float"))],
+                        "#6AD5C4",
+                        definitionId),
+                    new GraphNode(
+                        "tests.view.target-001",
+                        "View Target",
+                        "Tests",
+                        "GraphEditorView",
+                        "Target node for selection tool provider tests.",
+                        new GraphPoint(520, 180),
+                        new GraphSize(240, 160),
+                        [new GraphPort("in", "Input", PortDirection.Input, "float", "#F3B36B", new PortTypeId("float"))],
+                        [],
+                        "#F3B36B",
+                        definitionId),
+                ],
+                []),
+            NodeCatalog = catalog,
+            CompatibilityService = new DefaultPortCompatibilityService(),
+            ToolProvider = new GraphEditorViewSelectionToolProvider(),
+        });
+    }
+
     private static GraphEditorViewModel CreateScopedEditor()
     {
         var definitionId = new NodeDefinitionId("tests.view.scoped");
@@ -845,6 +918,31 @@ public sealed class GraphEditorViewTests
                 .. stockItems,
                 new MenuItemDescriptor("tests-view-host-item", "Host Item", null),
             ];
+        }
+    }
+
+    private sealed class GraphEditorViewSelectionToolProvider : IGraphEditorToolProvider
+    {
+        public IReadOnlyList<GraphEditorToolDescriptorSnapshot> GetToolDescriptors(GraphEditorToolProviderContext context)
+        {
+            ArgumentNullException.ThrowIfNull(context);
+
+            return context.Context.Kind == GraphEditorToolContextKind.Selection
+                ? [
+                    new GraphEditorToolDescriptorSnapshot(
+                        "tests.view.selection.wrap",
+                        GraphEditorToolContextKind.Selection,
+                        new GraphEditorCommandDescriptorSnapshot(
+                            "tests.view.selection.wrap",
+                            "Host Wrap Selection",
+                            "host.tools",
+                            "composite-wrap",
+                            null,
+                            GraphEditorCommandSourceKind.Host,
+                            isEnabled: true),
+                        new GraphEditorCommandInvocationSnapshot("composites.wrap-selection"))
+                ]
+                : [];
         }
     }
 }

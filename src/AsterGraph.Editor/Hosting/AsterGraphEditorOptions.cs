@@ -8,6 +8,7 @@ using AsterGraph.Editor.Localization;
 using AsterGraph.Editor.Menus;
 using AsterGraph.Editor.Plugins;
 using AsterGraph.Editor.Presentation;
+using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.Services;
 
 namespace AsterGraph.Editor.Hosting;
@@ -96,6 +97,11 @@ public sealed record AsterGraphEditorOptions
     /// Optional node-presentation provider.
     /// </summary>
     public INodePresentationProvider? NodePresentationProvider { get; init; }
+
+    /// <summary>
+    /// Optional contextual tool provider layered on top of the shared command route.
+    /// </summary>
+    public IGraphEditorToolProvider? ToolProvider { get; init; }
 
     /// <summary>
     /// Optional localization provider for built-in editor strings.

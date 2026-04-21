@@ -24,6 +24,7 @@ public sealed partial class GraphEditorSession :
     private readonly IGraphEditorDiagnosticsSink? _diagnosticsSink;
     private readonly GraphEditorSessionDescriptorSupport? _descriptorSupport;
     private readonly GraphEditorSessionStockMenuDescriptorBuilder _stockMenuDescriptorBuilder;
+    private readonly GraphEditorSessionStockToolDescriptorBuilder _stockToolDescriptorBuilder;
 
     public GraphEditorSession(ViewModels.GraphEditorViewModel editor, IGraphEditorDiagnosticsSink? diagnosticsSink = null)
         : this(editor.SessionHost, diagnosticsSink, editor.CreateSessionDescriptorSupport())
@@ -46,6 +47,11 @@ public sealed partial class GraphEditorSession :
             _host.GetEdgeTemplateSnapshots,
             Localize,
             () => _descriptorSupport?.Definitions ?? Array.Empty<global::AsterGraph.Abstractions.Definitions.INodeDefinition>());
+        _stockToolDescriptorBuilder = new GraphEditorSessionStockToolDescriptorBuilder(
+            _host.CreateActiveScopeDocumentSnapshot,
+            _host.GetSelectionSnapshot,
+            _host.GetNodeSurfaceSnapshots,
+            Localize);
 
         _lastPendingConnectionSnapshot = CreatePendingConnectionSnapshot();
 

@@ -22,6 +22,7 @@ internal sealed class GraphEditorSessionDescriptorSupport
         bool hasPluginTrustPolicy = false,
         bool hasCommandContributor = false,
         bool hasContextMenuAugmentor = false,
+        bool hasToolProvider = false,
         Func<bool>? hasNodePresentationProvider = null,
         Func<bool>? hasLocalizationProvider = null)
     {
@@ -38,6 +39,7 @@ internal sealed class GraphEditorSessionDescriptorSupport
         HasPluginTrustPolicy = hasPluginTrustPolicy;
         HasCommandContributor = hasCommandContributor;
         HasContextMenuAugmentor = hasContextMenuAugmentor;
+        HasToolProvider = hasToolProvider;
     }
 
     public INodeCatalog NodeCatalog { get; }
@@ -59,6 +61,8 @@ internal sealed class GraphEditorSessionDescriptorSupport
     public bool HasCommandContributor { get; }
 
     public bool HasContextMenuAugmentor { get; }
+
+    public bool HasToolProvider { get; }
 
     public bool HasNodePresentationProvider => _hasNodePresentationProvider();
 
