@@ -46,6 +46,7 @@ public sealed class DemoDiagnosticsProjectionTests
     public void MainWindowViewModel_RuntimeInspectionSurfaceProjectsAllCanonicalStateSections()
     {
         var viewModel = new MainWindowViewModel();
+        viewModel.Session.Commands.SetSelection(["light"], "light", updateStatus: false);
 
         var surface = viewModel.RuntimeInspectionSurface;
 
@@ -56,8 +57,9 @@ public sealed class DemoDiagnosticsProjectionTests
         Assert.Equal("能力", surface.Capabilities.Heading);
         Assert.Equal("待完成连线", surface.PendingConnection.Heading);
         Assert.Equal("特性描述", surface.FeatureDescriptors.Heading);
+        Assert.Equal("命令时间线", surface.CommandTimeline.Heading);
         Assert.Equal("最近诊断", surface.RecentDiagnostics.Heading);
-        Assert.Equal("插件加载", surface.PluginLoads.Heading);
+        Assert.Equal("插件信任与加载", surface.PluginLoads.Heading);
 
         Assert.Contains(surface.Document.Lines, line => line.StartsWith("文档标题：", StringComparison.Ordinal));
         Assert.Contains(surface.Document.Lines, line => line.StartsWith("节点数量：", StringComparison.Ordinal));
@@ -69,14 +71,17 @@ public sealed class DemoDiagnosticsProjectionTests
         Assert.Contains(surface.Capabilities.Lines, line => line.StartsWith("可加载工作区：", StringComparison.Ordinal));
         Assert.Contains(surface.PendingConnection.Lines, line => line.StartsWith("待完成连线：", StringComparison.Ordinal));
         Assert.NotEmpty(surface.FeatureDescriptors.Lines);
+        Assert.Contains(surface.CommandTimeline.Lines, line => line.Contains("selection.set", StringComparison.Ordinal));
         Assert.NotEmpty(surface.RecentDiagnostics.Lines);
-        Assert.NotEmpty(surface.PluginLoads.Lines);
+        Assert.Contains(surface.PluginLoads.Lines, line => line.Contains("状态：", StringComparison.Ordinal));
+        Assert.Contains(surface.PluginLoads.Lines, line => line.Contains("信任：", StringComparison.Ordinal));
     }
 
     [Fact]
     public void MainWindowViewModel_RuntimeInspectionSurfaceReprojectsWithLanguageChanges()
     {
         var viewModel = new MainWindowViewModel();
+        viewModel.Session.Commands.SetSelection(["light"], "light", updateStatus: false);
 
         viewModel.SelectLanguage("en");
 
@@ -89,11 +94,14 @@ public sealed class DemoDiagnosticsProjectionTests
         Assert.Equal("Capabilities", surface.Capabilities.Heading);
         Assert.Equal("Pending connection", surface.PendingConnection.Heading);
         Assert.Equal("Feature descriptors", surface.FeatureDescriptors.Heading);
+        Assert.Equal("Command timeline", surface.CommandTimeline.Heading);
         Assert.Equal("Recent diagnostics", surface.RecentDiagnostics.Heading);
-        Assert.Equal("Plugin loads", surface.PluginLoads.Heading);
+        Assert.Equal("Plugin trust and load", surface.PluginLoads.Heading);
 
         Assert.Contains(surface.Document.Lines, line => line.StartsWith("Document title: ", StringComparison.Ordinal));
         Assert.Contains(surface.Capabilities.Lines, line => line.StartsWith("Can save workspace: ", StringComparison.Ordinal));
+        Assert.Contains(surface.CommandTimeline.Lines, line => line.Contains("Command", StringComparison.Ordinal));
+        Assert.Contains(surface.PluginLoads.Lines, line => line.Contains("State: ", StringComparison.Ordinal));
     }
 
     [AvaloniaFact]
@@ -133,8 +141,12 @@ public sealed class DemoDiagnosticsProjectionTests
         var inspectionSelectionHeading = window.FindControl<TextBlock>("PART_RuntimeInspectionSelectionHeading");
         var inspectionCapabilityHeading = window.FindControl<TextBlock>("PART_RuntimeInspectionCapabilityHeading");
         var inspectionFeatureHeading = window.FindControl<TextBlock>("PART_RuntimeInspectionFeatureHeading");
+        var inspectionCommandTimelineHeading = window.FindControl<TextBlock>("PART_RuntimeInspectionCommandTimelineHeading");
+        var inspectionCommandTimelineLines = window.FindControl<ItemsControl>("PART_RuntimeInspectionCommandTimelineLines");
         var inspectionDiagnosticsHeading = window.FindControl<TextBlock>("PART_RuntimeInspectionDiagnosticsHeading");
         var inspectionPluginHeading = window.FindControl<TextBlock>("PART_RuntimeInspectionPluginHeading");
+
+        viewModel.Session.Commands.SetSelection(["light"], "light", updateStatus: false);
 
         Assert.NotNull(inspectionSection);
         Assert.True(inspectionSection!.IsVisible);
@@ -150,6 +162,10 @@ public sealed class DemoDiagnosticsProjectionTests
         Assert.Equal(viewModel.RuntimeInspectionSurface.Capabilities.Heading, inspectionCapabilityHeading!.Text);
         Assert.NotNull(inspectionFeatureHeading);
         Assert.Equal(viewModel.RuntimeInspectionSurface.FeatureDescriptors.Heading, inspectionFeatureHeading!.Text);
+        Assert.NotNull(inspectionCommandTimelineHeading);
+        Assert.Equal(viewModel.RuntimeInspectionSurface.CommandTimeline.Heading, inspectionCommandTimelineHeading!.Text);
+        Assert.NotNull(inspectionCommandTimelineLines);
+        Assert.Same(viewModel.RuntimeInspectionSurface.CommandTimeline.Lines, inspectionCommandTimelineLines!.ItemsSource);
         Assert.NotNull(inspectionDiagnosticsHeading);
         Assert.Equal(viewModel.RuntimeInspectionSurface.RecentDiagnostics.Heading, inspectionDiagnosticsHeading!.Text);
         Assert.NotNull(inspectionPluginHeading);

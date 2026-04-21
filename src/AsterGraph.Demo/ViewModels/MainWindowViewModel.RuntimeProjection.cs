@@ -249,11 +249,30 @@ public partial class MainWindowViewModel
                 T("特性描述", "Feature descriptors"),
                 BuildFeatureDescriptorLines(inspection.FeatureDescriptors)),
             new RuntimeInspectionSurfaceProjection.Section(
+                T("命令时间线", "Command timeline"),
+                BuildCommandTimelineLines()),
+            new RuntimeInspectionSurfaceProjection.Section(
                 T("最近诊断", "Recent diagnostics"),
                 BuildDiagnosticLines(inspection.RecentDiagnostics)),
             new RuntimeInspectionSurfaceProjection.Section(
-                T("插件加载", "Plugin loads"),
+                T("插件信任与加载", "Plugin trust and load"),
                 BuildPluginLoadLines(inspection.PluginLoadSnapshots)));
+    }
+
+    private IReadOnlyList<string> BuildCommandTimelineLines()
+    {
+        if (RuntimeCommandTimelineEntries.Count == 0)
+        {
+            return
+            [
+                T("当前没有命令事件。", "No command events yet."),
+            ];
+        }
+
+        return RuntimeCommandTimelineEntries
+            .Select(entry =>
+                $"{T("命令", "Command")} · {entry.CommandId} · {T("批量标签：", "Mutation: ")}{FormatValueOrNone(entry.MutationLabel)} · {T("作用域：", "Scope: ")}{MutationScopeText(entry.IsInMutationScope)} · {T("状态：", "Status: ")}{FormatValueOrNone(entry.StatusMessage)}")
+            .ToArray();
     }
 
     private IReadOnlyList<string> BuildCapabilityLines(GraphEditorCapabilitySnapshot capabilities)
@@ -328,13 +347,13 @@ public partial class MainWindowViewModel
         {
             return
             [
-                T("当前没有插件加载快照。", "No plugin load snapshots."),
+                T("当前没有插件信任或加载记录。", "No plugin trust or load entries."),
             ];
         }
 
         return pluginLoads
             .Select(snapshot =>
-                $"{snapshot.Manifest.DisplayName} · {LoadStatusText(snapshot.Status)} · {LoadSourceKindText(snapshot.SourceKind)} · nodes {snapshot.Contributions.NodeDefinitionProviderCount} · commands {snapshot.Contributions.CommandContributorCount} · presentation {snapshot.Contributions.NodePresentationProviderCount} · l10n {snapshot.Contributions.LocalizationProviderCount}")
+                $"{T("插件", "Plugin")} · {snapshot.Manifest.DisplayName} · {T("状态：", "State: ")}{LoadStatusText(snapshot.Status)} · {T("信任：", "Trust: ")}{PluginTrustDecisionText(snapshot.TrustEvaluation.Decision)} · {T("来源：", "Source: ")}{LoadSourceKindText(snapshot.SourceKind)} · {T("来源证据：", "Provenance: ")}{FormatPluginProvenance(snapshot.ProvenanceEvidence)} · {T("原因：", "Reason: ")}{ResolvePluginTimelineReason(snapshot)}")
             .ToArray();
     }
 
@@ -364,6 +383,51 @@ public partial class MainWindowViewModel
             GraphEditorPluginLoadSourceKind.Package => T("包", "Package"),
             _ => sourceKind.ToString(),
         };
+
+    private string MutationScopeText(bool isInMutationScope)
+        => isInMutationScope
+            ? T("批量变更内", "In mutation scope")
+            : T("直接执行", "Direct");
+
+    private string PluginTrustDecisionText(GraphEditorPluginTrustDecision decision)
+        => decision switch
+        {
+            GraphEditorPluginTrustDecision.Allowed => T("允许", "Allowed"),
+            GraphEditorPluginTrustDecision.Blocked => T("阻止", "Blocked"),
+            _ => decision.ToString(),
+        };
+
+    private string FormatPluginProvenance(GraphEditorPluginProvenanceEvidence provenance)
+    {
+        if (provenance.PackageIdentity is { } packageIdentity)
+        {
+            return string.IsNullOrWhiteSpace(packageIdentity.Version)
+                ? packageIdentity.Id
+                : $"{packageIdentity.Id}@{packageIdentity.Version}";
+        }
+
+        return provenance.Signature.Status switch
+        {
+            GraphEditorPluginSignatureStatus.Valid => T("签名有效", "Signature valid"),
+            GraphEditorPluginSignatureStatus.Invalid => T("签名无效", "Signature invalid"),
+            GraphEditorPluginSignatureStatus.Unsigned => T("未签名", "Unsigned"),
+            GraphEditorPluginSignatureStatus.Unknown => T("签名未知", "Signature unknown"),
+            _ => T("未提供", "Not provided"),
+        };
+    }
+
+    private string ResolvePluginTimelineReason(GraphEditorPluginLoadSnapshot snapshot)
+        => FirstNonEmpty(
+            snapshot.FailureMessage,
+            snapshot.Stage?.ReasonMessage,
+            snapshot.TrustEvaluation.ReasonMessage,
+            snapshot.Compatibility.ReasonMessage,
+            snapshot.ProvenanceEvidence.Signature.ReasonMessage,
+            snapshot.FailureMessage,
+            T("无", "None"));
+
+    private static string FirstNonEmpty(params string?[] values)
+        => values.FirstOrDefault(value => !string.IsNullOrWhiteSpace(value)) ?? string.Empty;
 
     private string FormatValueOrNone(string? value)
         => string.IsNullOrWhiteSpace(value) ? T("无", "None") : value;
@@ -411,6 +475,7 @@ public partial class MainWindowViewModel
         RuntimeInspectionSurfaceProjection.Section Capabilities,
         RuntimeInspectionSurfaceProjection.Section PendingConnection,
         RuntimeInspectionSurfaceProjection.Section FeatureDescriptors,
+        RuntimeInspectionSurfaceProjection.Section CommandTimeline,
         RuntimeInspectionSurfaceProjection.Section RecentDiagnostics,
         RuntimeInspectionSurfaceProjection.Section PluginLoads)
     {

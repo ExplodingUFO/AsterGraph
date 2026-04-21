@@ -97,6 +97,7 @@ public sealed class GraphEditorTransactionTests
         {
             Assert.True(args.IsInMutationScope);
             Assert.Equal("connect-and-select", args.MutationLabel);
+            Assert.False(string.IsNullOrWhiteSpace(args.StatusMessage));
         });
         Assert.False(session.Queries.GetPendingConnectionSnapshot().HasPendingConnection);
         Assert.Single(session.Queries.CreateDocumentSnapshot().Connections);

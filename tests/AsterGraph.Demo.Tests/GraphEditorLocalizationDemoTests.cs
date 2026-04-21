@@ -50,6 +50,8 @@ public sealed class GraphEditorLocalizationDemoTests
         Assert.Equal("宿主控制抽屉", viewModel.HostDrawerCaption);
         Assert.Equal("请选择一个节点", viewModel.Editor.InspectorTitle);
         Assert.Equal("添加节点", AssertAddNodeCaption(viewModel.Editor));
+        Assert.Equal("命令时间线", viewModel.RuntimeInspectionSurface.CommandTimeline.Heading);
+        Assert.Equal("插件信任与加载", viewModel.RuntimeInspectionSurface.PluginLoads.Heading);
 
         viewModel.SelectLanguage("en");
 
@@ -57,6 +59,11 @@ public sealed class GraphEditorLocalizationDemoTests
         Assert.Equal("Host Controls Drawer", viewModel.HostDrawerCaption);
         Assert.Equal("Select a node", viewModel.Editor.InspectorTitle);
         Assert.Equal("Add Node", AssertAddNodeCaption(viewModel.Editor));
+
+        viewModel.Session.Commands.SetSelection(["light"], "light", updateStatus: false);
+
+        Assert.Equal("Command timeline", viewModel.RuntimeInspectionSurface.CommandTimeline.Heading);
+        Assert.Equal("Plugin trust and load", viewModel.RuntimeInspectionSurface.PluginLoads.Heading);
         Assert.Contains(viewModel.LocalizationProofLines, line => line.Contains("Host override", StringComparison.Ordinal));
     }
 
