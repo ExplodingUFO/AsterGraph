@@ -204,9 +204,12 @@ public sealed class NodeCanvasConnectionSceneRendererTests
 
             var path = Assert.Single(hostedScene.ConnectionLayer.Children.OfType<global::Avalonia.Controls.Shapes.Path>());
             var chip = Assert.Single(hostedScene.ConnectionLayer.Children.OfType<Border>());
-            var expectedMidX = (expectedGeometry.Curve.Start.X + expectedGeometry.Curve.End.X) / 2d;
-            var expectedMidY = (expectedGeometry.Curve.Start.Y + expectedGeometry.Curve.End.Y) / 2d;
-            var expectedBounds = CreateBezierGeometry(expectedGeometry.Curve).Bounds;
+            var expectedMidX = (expectedGeometry.Source.Position.X + expectedGeometry.Target.Position.X) / 2d;
+            var expectedMidY = (expectedGeometry.Source.Position.Y + expectedGeometry.Target.Position.Y) / 2d;
+            var expectedBounds = CreateRouteGeometry(
+                expectedGeometry.Source.Position,
+                expectedGeometry.Route,
+                expectedGeometry.Target.Position).Bounds;
 
             Assert.NotEqual(expectedGeometry.Source.Position, visualAnchor);
             Assert.Equal(expectedBounds.X, path.Data!.Bounds.X, 6);
@@ -215,6 +218,53 @@ public sealed class NodeCanvasConnectionSceneRendererTests
             Assert.Equal(expectedBounds.Height, path.Data.Bounds.Height, 6);
             Assert.Equal(expectedMidX + GraphEditorStyleOptions.Default.Connection.LabelOffsetX, Canvas.GetLeft(chip), 6);
             Assert.Equal(expectedMidY + GraphEditorStyleOptions.Default.Connection.LabelOffsetY, Canvas.GetTop(chip), 6);
+        }
+        finally
+        {
+            hostedScene.Window.Close();
+        }
+    }
+
+    [AvaloniaFact]
+    public void RenderConnections_UsesPersistedRouteVertices_WhenPresentationRouteIsPresent()
+    {
+        var renderer = new NodeCanvasConnectionSceneRenderer();
+        var editor = CreateEditor(
+            includeConnection: true,
+            route: new GraphConnectionRoute(
+            [
+                new GraphPoint(360d, 120d),
+                new GraphPoint(420d, 300d),
+            ]));
+        var hostedScene = CreateHostedScene(editor);
+
+        try
+        {
+            renderer.RenderConnections(CreateSceneContext(
+                editor,
+                hostedScene.ConnectionLayer,
+                hostedScene.NodeLayer,
+                hostedScene.CoordinateRoot,
+                hostedScene.NodeVisuals));
+
+            var expectedGeometry = Assert.Single(editor.Session.Queries.GetConnectionGeometrySnapshots());
+            var path = Assert.Single(hostedScene.ConnectionLayer.Children.OfType<global::Avalonia.Controls.Shapes.Path>());
+            var expectedBounds = CreateRouteGeometry(
+                expectedGeometry.Source.Position,
+                expectedGeometry.Route,
+                expectedGeometry.Target.Position).Bounds;
+
+            Assert.Equal(
+                new GraphConnectionRoute(
+                [
+                    new GraphPoint(360d, 120d),
+                    new GraphPoint(420d, 300d),
+                ]),
+                expectedGeometry.Route);
+            Assert.Equal(expectedBounds.X, path.Data!.Bounds.X, 6);
+            Assert.Equal(expectedBounds.Y, path.Data.Bounds.Y, 6);
+            Assert.Equal(expectedBounds.Width, path.Data.Bounds.Width, 6);
+            Assert.Equal(expectedBounds.Height, path.Data.Bounds.Height, 6);
         }
         finally
         {
@@ -409,7 +459,7 @@ public sealed class NodeCanvasConnectionSceneRendererTests
             new GraphNodeVisual(root, portAnchors));
     }
 
-    private static GraphEditorViewModel CreateEditor(bool includeConnection, string? noteText = null)
+    private static GraphEditorViewModel CreateEditor(bool includeConnection, string? noteText = null, GraphConnectionRoute? route = null)
     {
         var catalog = new NodeCatalog();
         catalog.RegisterDefinition(
@@ -452,7 +502,9 @@ public sealed class NodeCanvasConnectionSceneRendererTests
                     TargetPortId,
                     "Float Flow",
                     "#6AD5C4",
-                    Presentation: string.IsNullOrWhiteSpace(noteText) ? null : new GraphEdgePresentation(noteText)),
+                    Presentation: string.IsNullOrWhiteSpace(noteText) && route is null
+                        ? null
+                        : new GraphEdgePresentation(noteText, route)),
             }
             : [];
 
@@ -521,6 +573,21 @@ public sealed class NodeCanvasConnectionSceneRendererTests
             $"C {curve.Control1.X:0.##},{curve.Control1.Y:0.##} " +
             $"{curve.Control2.X:0.##},{curve.Control2.Y:0.##} " +
             $"{curve.End.X:0.##},{curve.End.Y:0.##}");
+
+    private static global::Avalonia.Media.Geometry CreateRouteGeometry(
+        GraphPoint start,
+        GraphConnectionRoute route,
+        GraphPoint end)
+    {
+        var segments = ConnectionPathBuilder.BuildRoute(start, route, end);
+        var commands = string.Join(
+            " ",
+            segments.Select(segment =>
+                $"C {segment.Control1.X:0.##},{segment.Control1.Y:0.##} " +
+                $"{segment.Control2.X:0.##},{segment.Control2.Y:0.##} " +
+                $"{segment.End.X:0.##},{segment.End.Y:0.##}"));
+        return global::Avalonia.Media.Geometry.Parse($"M {start.X:0.##},{start.Y:0.##} {commands}");
+    }
 
     private sealed class StubNodeVisualPresenter : IGraphNodeVisualPresenter
     {

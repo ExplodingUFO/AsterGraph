@@ -427,7 +427,10 @@ public sealed class NodeCanvasStandaloneTests
             var connectionLayer = Assert.IsType<Canvas>(canvas.FindControl<Canvas>("ConnectionLayer"));
             var expectedGeometry = Assert.Single(editor.Session.Queries.GetConnectionGeometrySnapshots());
             var path = Assert.Single(connectionLayer.Children.OfType<global::Avalonia.Controls.Shapes.Path>());
-            var expectedBounds = CreateBezierGeometry(expectedGeometry.Curve).Bounds;
+            var expectedBounds = CreateRouteGeometry(
+                expectedGeometry.Source.Position,
+                expectedGeometry.Route,
+                expectedGeometry.Target.Position).Bounds;
 
             Assert.Equal(expectedBounds.X, path.Data!.Bounds.X, 6);
             Assert.Equal(expectedBounds.Y, path.Data.Bounds.Y, 6);
@@ -2704,6 +2707,21 @@ public sealed class NodeCanvasStandaloneTests
             $"C {curve.Control1.X:0.##},{curve.Control1.Y:0.##} " +
             $"{curve.Control2.X:0.##},{curve.Control2.Y:0.##} " +
             $"{curve.End.X:0.##},{curve.End.Y:0.##}");
+
+    private static global::Avalonia.Media.Geometry CreateRouteGeometry(
+        GraphPoint start,
+        GraphConnectionRoute route,
+        GraphPoint end)
+    {
+        var segments = ConnectionPathBuilder.BuildRoute(start, route, end);
+        var commands = string.Join(
+            " ",
+            segments.Select(segment =>
+                $"C {segment.Control1.X:0.##},{segment.Control1.Y:0.##} " +
+                $"{segment.Control2.X:0.##},{segment.Control2.Y:0.##} " +
+                $"{segment.End.X:0.##},{segment.End.Y:0.##}"));
+        return global::Avalonia.Media.Geometry.Parse($"M {start.X:0.##},{start.Y:0.##} {commands}");
+    }
 
     private static GraphEditorViewModel CreateEditor()
     {

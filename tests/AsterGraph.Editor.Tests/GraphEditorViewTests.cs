@@ -7,6 +7,7 @@ using Avalonia.Headless.XUnit;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
+using Avalonia.Threading;
 using Avalonia.Themes.Fluent;
 using Avalonia.VisualTree;
 using AsterGraph.Abstractions.Catalog;
@@ -18,6 +19,7 @@ using AsterGraph.Core.Compatibility;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor;
 using AsterGraph.Editor.Catalog;
+using AsterGraph.Editor.Geometry;
 using AsterGraph.Editor.Hosting;
 using AsterGraph.Editor.Menus;
 using AsterGraph.Editor.ViewModels;
@@ -520,6 +522,53 @@ public sealed class GraphEditorViewTests
         var updatedConnection = Assert.Single(editor.Session.Queries.CreateDocumentSnapshot().Connections);
         Assert.Equal("Refined Flow", updatedConnection.Label);
         Assert.Equal("Updated branch", updatedConnection.Presentation?.NoteText);
+    }
+
+    [AvaloniaFact]
+    public void AuthoringToolsChrome_ConnectionRouteEditors_InsertMoveAndRemoveVertices()
+    {
+        var editor = CreateConnectionToolEditor();
+        editor.Session.Commands.SetSelection(["tests.view.tools-source-001"], "tests.view.tools-source-001", updateStatus: false);
+        var window = CreateWindow(new GraphEditorView
+        {
+            Editor = editor,
+        });
+        var view = (GraphEditorView)window.Content!;
+        var initialGeometry = Assert.Single(editor.Session.Queries.GetConnectionGeometrySnapshots());
+        var expectedInsertedVertex = ConnectionPathBuilder.ResolveSegmentMidpoint(
+            initialGeometry.Source.Position,
+            GraphConnectionRoute.Empty,
+            initialGeometry.Target.Position,
+            0);
+
+        var insertButton = FindRequiredDescendant<Button>(view, "PART_ConnectionToolInsertRouteVertex_connection-001_0");
+        insertButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        Dispatcher.UIThread.RunJobs(DispatcherPriority.Render);
+
+        Assert.Equal(
+            [expectedInsertedVertex],
+            Assert.Single(editor.Session.Queries.CreateDocumentSnapshot().Connections).Presentation?.Route?.Vertices);
+
+        var xEditor = FindRequiredDescendant<TextBox>(view, "PART_ConnectionToolRouteVertexXEditor_connection-001_0");
+        var yEditor = FindRequiredDescendant<TextBox>(view, "PART_ConnectionToolRouteVertexYEditor_connection-001_0");
+        var applyButton = FindRequiredDescendant<Button>(view, "PART_ConnectionToolApplyRouteVertex_connection-001_0");
+
+        xEditor.Text = "420";
+        yEditor.Text = "300";
+        applyButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        Dispatcher.UIThread.RunJobs(DispatcherPriority.Render);
+
+        Assert.Equal(
+            [new GraphPoint(420d, 300d)],
+            Assert.Single(editor.Session.Queries.CreateDocumentSnapshot().Connections).Presentation?.Route?.Vertices);
+
+        var removeButton = FindRequiredDescendant<Button>(view, "PART_ConnectionToolRemoveRouteVertex_connection-001_0");
+        removeButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        Dispatcher.UIThread.RunJobs(DispatcherPriority.Render);
+
+        Assert.Empty(
+            Assert.Single(editor.Session.Queries.CreateDocumentSnapshot().Connections).Presentation?.Route?.Vertices
+            ?? []);
     }
 
     private static Window CreateWindow(GraphEditorView view)

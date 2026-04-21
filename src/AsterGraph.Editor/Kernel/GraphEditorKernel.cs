@@ -1033,6 +1033,105 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
         return true;
     }
 
+    public bool TryInsertConnectionRouteVertex(string connectionId, int vertexIndex, GraphPoint position, bool updateStatus)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(connectionId);
+
+        if (!(_behaviorOptions.Commands.Connections.AllowCreate
+              || _behaviorOptions.Commands.Connections.AllowDelete
+              || _behaviorOptions.Commands.Connections.AllowDisconnect))
+        {
+            if (updateStatus)
+            {
+                CurrentStatusMessage = "Connection route editing is disabled by host permissions.";
+            }
+
+            return false;
+        }
+
+        var mutation = _documentMutator.InsertConnectionRouteVertex(CreateActiveScopeDocumentSnapshot(), connectionId, vertexIndex, position);
+        if (mutation.Connection is null)
+        {
+            if (updateStatus)
+            {
+                CurrentStatusMessage = "No matching connection route vertex was inserted.";
+            }
+
+            return false;
+        }
+
+        ApplyActiveScopeDocument(mutation.Document);
+        CurrentStatusMessage = "Inserted connection route vertex.";
+        MarkDirty(CurrentStatusMessage, GraphEditorDocumentChangeKind.ConnectionsChanged, null, [mutation.Connection.Id], preserveStatus: !updateStatus);
+        return true;
+    }
+
+    public bool TryMoveConnectionRouteVertex(string connectionId, int vertexIndex, GraphPoint position, bool updateStatus)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(connectionId);
+
+        if (!(_behaviorOptions.Commands.Connections.AllowCreate
+              || _behaviorOptions.Commands.Connections.AllowDelete
+              || _behaviorOptions.Commands.Connections.AllowDisconnect))
+        {
+            if (updateStatus)
+            {
+                CurrentStatusMessage = "Connection route editing is disabled by host permissions.";
+            }
+
+            return false;
+        }
+
+        var mutation = _documentMutator.MoveConnectionRouteVertex(CreateActiveScopeDocumentSnapshot(), connectionId, vertexIndex, position);
+        if (mutation.Connection is null)
+        {
+            if (updateStatus)
+            {
+                CurrentStatusMessage = "No matching connection route vertex was moved.";
+            }
+
+            return false;
+        }
+
+        ApplyActiveScopeDocument(mutation.Document);
+        CurrentStatusMessage = "Moved connection route vertex.";
+        MarkDirty(CurrentStatusMessage, GraphEditorDocumentChangeKind.ConnectionsChanged, null, [mutation.Connection.Id], preserveStatus: !updateStatus);
+        return true;
+    }
+
+    public bool TryRemoveConnectionRouteVertex(string connectionId, int vertexIndex, bool updateStatus)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(connectionId);
+
+        if (!(_behaviorOptions.Commands.Connections.AllowCreate
+              || _behaviorOptions.Commands.Connections.AllowDelete
+              || _behaviorOptions.Commands.Connections.AllowDisconnect))
+        {
+            if (updateStatus)
+            {
+                CurrentStatusMessage = "Connection route editing is disabled by host permissions.";
+            }
+
+            return false;
+        }
+
+        var mutation = _documentMutator.RemoveConnectionRouteVertex(CreateActiveScopeDocumentSnapshot(), connectionId, vertexIndex);
+        if (mutation.Connection is null)
+        {
+            if (updateStatus)
+            {
+                CurrentStatusMessage = "No matching connection route vertex was removed.";
+            }
+
+            return false;
+        }
+
+        ApplyActiveScopeDocument(mutation.Document);
+        CurrentStatusMessage = "Removed connection route vertex.";
+        MarkDirty(CurrentStatusMessage, GraphEditorDocumentChangeKind.ConnectionsChanged, null, [mutation.Connection.Id], preserveStatus: !updateStatus);
+        return true;
+    }
+
     public void PanBy(double deltaX, double deltaY)
     {
         _historyCoordinator.ApplyViewportSnapshot(_viewportCoordinator.PanBy(GetViewportSnapshot(), deltaX, deltaY));
@@ -1919,7 +2018,11 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
             port.TypeId);
 
     private static GraphEdgePresentation CloneEdgePresentation(GraphEdgePresentation presentation)
-        => new(presentation.NoteText);
+        => new(
+            presentation.NoteText,
+            presentation.Route is null
+                ? null
+                : new GraphConnectionRoute(presentation.Route.Vertices));
 
     private static GraphParameterValue CloneParameterValue(GraphParameterValue parameter)
         => new(parameter.Key, parameter.TypeId, parameter.Value);

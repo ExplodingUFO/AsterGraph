@@ -67,6 +67,12 @@ internal interface IGraphEditorSessionHost
         => false;
     bool TrySetConnectionNoteText(string connectionId, string? noteText, bool updateStatus)
         => false;
+    bool TryInsertConnectionRouteVertex(string connectionId, int vertexIndex, GraphPoint position, bool updateStatus)
+        => false;
+    bool TryMoveConnectionRouteVertex(string connectionId, int vertexIndex, GraphPoint position, bool updateStatus)
+        => false;
+    bool TryRemoveConnectionRouteVertex(string connectionId, int vertexIndex, bool updateStatus)
+        => false;
     void BreakConnectionsForPort(string nodeId, string portId);
     void PanBy(double deltaX, double deltaY);
     void ZoomAt(double factor, GraphPoint screenAnchor);

@@ -76,7 +76,7 @@ internal static class GraphEditorConnectionGeometryProjector
             connection.Id,
             sourceAnchor,
             targetAnchor,
-            ConnectionPathBuilder.Build(sourceAnchor.Position, targetAnchor.Position));
+            connection.Presentation?.Route ?? GraphConnectionRoute.Empty);
     }
 
     private static GraphEditorConnectionEndpointGeometrySnapshot? CreateTargetEndpointGeometrySnapshot(

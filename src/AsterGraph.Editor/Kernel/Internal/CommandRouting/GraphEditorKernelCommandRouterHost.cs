@@ -173,6 +173,15 @@ internal sealed partial class GraphEditorKernel
         bool IGraphEditorKernelCommandRouterHost.TrySetConnectionNoteText(string connectionId, string? noteText, bool updateStatus)
             => _owner.TrySetConnectionNoteText(connectionId, noteText, updateStatus);
 
+        bool IGraphEditorKernelCommandRouterHost.TryInsertConnectionRouteVertex(string connectionId, int vertexIndex, GraphPoint position, bool updateStatus)
+            => _owner.TryInsertConnectionRouteVertex(connectionId, vertexIndex, position, updateStatus);
+
+        bool IGraphEditorKernelCommandRouterHost.TryMoveConnectionRouteVertex(string connectionId, int vertexIndex, GraphPoint position, bool updateStatus)
+            => _owner.TryMoveConnectionRouteVertex(connectionId, vertexIndex, position, updateStatus);
+
+        bool IGraphEditorKernelCommandRouterHost.TryRemoveConnectionRouteVertex(string connectionId, int vertexIndex, bool updateStatus)
+            => _owner.TryRemoveConnectionRouteVertex(connectionId, vertexIndex, updateStatus);
+
         void IGraphEditorKernelCommandRouterHost.DisconnectConnection(string connectionId)
             => _owner.DisconnectConnection(connectionId);
 

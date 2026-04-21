@@ -237,6 +237,12 @@ public sealed class GraphEditorSessionTests
         Assert.Equal(typeof(bool), commandsType.GetMethod(nameof(IGraphEditorCommands.TrySetConnectionLabel), [typeof(string), typeof(string), typeof(bool)])!.ReturnType);
         AssertMethod(commandsType, nameof(IGraphEditorCommands.TrySetConnectionNoteText), typeof(string), typeof(string), typeof(bool));
         Assert.Equal(typeof(bool), commandsType.GetMethod(nameof(IGraphEditorCommands.TrySetConnectionNoteText), [typeof(string), typeof(string), typeof(bool)])!.ReturnType);
+        AssertMethod(commandsType, nameof(IGraphEditorCommands.TryInsertConnectionRouteVertex), typeof(string), typeof(int), typeof(GraphPoint), typeof(bool));
+        Assert.Equal(typeof(bool), commandsType.GetMethod(nameof(IGraphEditorCommands.TryInsertConnectionRouteVertex), [typeof(string), typeof(int), typeof(GraphPoint), typeof(bool)])!.ReturnType);
+        AssertMethod(commandsType, nameof(IGraphEditorCommands.TryMoveConnectionRouteVertex), typeof(string), typeof(int), typeof(GraphPoint), typeof(bool));
+        Assert.Equal(typeof(bool), commandsType.GetMethod(nameof(IGraphEditorCommands.TryMoveConnectionRouteVertex), [typeof(string), typeof(int), typeof(GraphPoint), typeof(bool)])!.ReturnType);
+        AssertMethod(commandsType, nameof(IGraphEditorCommands.TryRemoveConnectionRouteVertex), typeof(string), typeof(int), typeof(bool));
+        Assert.Equal(typeof(bool), commandsType.GetMethod(nameof(IGraphEditorCommands.TryRemoveConnectionRouteVertex), [typeof(string), typeof(int), typeof(bool)])!.ReturnType);
         AssertMethod(commandsType, nameof(IGraphEditorCommands.BreakConnectionsForPort), typeof(string), typeof(string));
         AssertMethod(commandsType, nameof(IGraphEditorCommands.PanBy), typeof(double), typeof(double));
         AssertMethod(commandsType, nameof(IGraphEditorCommands.ZoomAt), typeof(double), typeof(GraphPoint));
@@ -1046,6 +1052,49 @@ public sealed class GraphEditorSessionTests
         Assert.Equal(
             "Preview branch",
             Assert.Single(session.Queries.CreateDocumentSnapshot().Connections).Presentation?.NoteText);
+
+        Assert.True(session.Commands.TryExecuteCommand(
+            new GraphEditorCommandInvocationSnapshot(
+                "connections.route-vertex.insert",
+                [
+                    new GraphEditorCommandArgumentSnapshot("connectionId", connectionId),
+                    new GraphEditorCommandArgumentSnapshot("vertexIndex", "0"),
+                    new GraphEditorCommandArgumentSnapshot("worldX", "360"),
+                    new GraphEditorCommandArgumentSnapshot("worldY", "120"),
+                    new GraphEditorCommandArgumentSnapshot("updateStatus", "false"),
+                ])));
+
+        Assert.Equal(
+            [new GraphPoint(360d, 120d)],
+            Assert.Single(session.Queries.CreateDocumentSnapshot().Connections).Presentation?.Route?.Vertices);
+
+        Assert.True(session.Commands.TryExecuteCommand(
+            new GraphEditorCommandInvocationSnapshot(
+                "connections.route-vertex.move",
+                [
+                    new GraphEditorCommandArgumentSnapshot("connectionId", connectionId),
+                    new GraphEditorCommandArgumentSnapshot("vertexIndex", "0"),
+                    new GraphEditorCommandArgumentSnapshot("worldX", "420"),
+                    new GraphEditorCommandArgumentSnapshot("worldY", "300"),
+                    new GraphEditorCommandArgumentSnapshot("updateStatus", "false"),
+                ])));
+
+        Assert.Equal(
+            [new GraphPoint(420d, 300d)],
+            Assert.Single(session.Queries.CreateDocumentSnapshot().Connections).Presentation?.Route?.Vertices);
+
+        Assert.True(session.Commands.TryExecuteCommand(
+            new GraphEditorCommandInvocationSnapshot(
+                "connections.route-vertex.remove",
+                [
+                    new GraphEditorCommandArgumentSnapshot("connectionId", connectionId),
+                    new GraphEditorCommandArgumentSnapshot("vertexIndex", "0"),
+                    new GraphEditorCommandArgumentSnapshot("updateStatus", "false"),
+                ])));
+
+        Assert.Empty(
+            Assert.Single(session.Queries.CreateDocumentSnapshot().Connections).Presentation?.Route?.Vertices
+            ?? []);
 
         Assert.True(session.Commands.TryExecuteCommand(
             new GraphEditorCommandInvocationSnapshot(

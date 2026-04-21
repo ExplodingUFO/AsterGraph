@@ -24,4 +24,52 @@ public static class ConnectionPathBuilder
             new GraphPoint(end.X - tension, end.Y),
             end);
     }
+
+    public static IReadOnlyList<BezierConnection> BuildRoute(
+        GraphPoint start,
+        GraphConnectionRoute route,
+        GraphPoint end)
+    {
+        ArgumentNullException.ThrowIfNull(route);
+
+        if (route.IsEmpty)
+        {
+            return [Build(start, end)];
+        }
+
+        var segments = new List<BezierConnection>(route.Vertices.Count + 1);
+        var previousPoint = start;
+        foreach (var vertex in route.Vertices)
+        {
+            segments.Add(Build(previousPoint, vertex));
+            previousPoint = vertex;
+        }
+
+        segments.Add(Build(previousPoint, end));
+        return segments;
+    }
+
+    public static GraphPoint ResolveSegmentMidpoint(
+        GraphPoint start,
+        GraphConnectionRoute route,
+        GraphPoint end,
+        int segmentIndex)
+    {
+        ArgumentNullException.ThrowIfNull(route);
+
+        var points = new List<GraphPoint>(route.Vertices.Count + 2) { start };
+        points.AddRange(route.Vertices);
+        points.Add(end);
+
+        if (segmentIndex < 0 || segmentIndex >= points.Count - 1)
+        {
+            throw new ArgumentOutOfRangeException(nameof(segmentIndex));
+        }
+
+        var segmentStart = points[segmentIndex];
+        var segmentEnd = points[segmentIndex + 1];
+        return new GraphPoint(
+            (segmentStart.X + segmentEnd.X) / 2d,
+            (segmentStart.Y + segmentEnd.Y) / 2d);
+    }
 }

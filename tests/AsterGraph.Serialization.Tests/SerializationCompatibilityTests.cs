@@ -65,6 +65,7 @@ public sealed class SerializationCompatibilityTests
         Assert.Contains("\"RootGraphId\": \"graph-root\"", json);
         Assert.Contains("\"ChildGraphId\": \"graph-composite-001\"", json);
         Assert.Contains("\"NoteText\": \"Preview branch\"", json);
+        Assert.Contains("\"Vertices\": [", json);
 
         Assert.Equal("graph-root", restored.RootGraphId);
         Assert.Equal(2, restored.GraphScopes!.Count);
@@ -79,6 +80,9 @@ public sealed class SerializationCompatibilityTests
         var childConnection = Assert.Single(childScope.Connections);
         Assert.NotNull(childConnection.Presentation);
         Assert.Equal("Preview branch", childConnection.Presentation!.NoteText);
+        Assert.Equal(
+            [new GraphPoint(360d, 120d), new GraphPoint(420d, 300d)],
+            childConnection.Presentation.Route?.Vertices);
     }
 
     [Fact]
@@ -561,7 +565,13 @@ public sealed class SerializationCompatibilityTests
                             "output-001",
                             "node-child-002",
                             "input-001",
-                            presentation: new GraphEdgePresentation("Preview branch")),
+                            presentation: new GraphEdgePresentation(
+                                "Preview branch",
+                                new GraphConnectionRoute(
+                                [
+                                    new GraphPoint(360d, 120d),
+                                    new GraphPoint(420d, 300d),
+                                ]))),
                     ]),
             ]);
 
