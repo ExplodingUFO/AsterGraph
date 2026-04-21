@@ -362,6 +362,8 @@ public static class DemoProof
 
     private static (bool EdgeNoteOk, bool DisconnectFlowOk) RunEdgeSemanticsProof(GraphEditorViewModel editor)
     {
+        const string reconnectSourceNodeId = "time";
+        const string reconnectSourcePortId = "pulse";
         var lightNode = editor.FindNode("light");
         if (lightNode is null)
         {
@@ -377,7 +379,14 @@ public static class DemoProof
 
         editor.SelectSingleNode(lightNode, updateStatus: false);
         var edgeNoteOk =
-            editor.Session.Commands.TrySetConnectionNoteText(connection.Id, "Preview branch", updateStatus: false)
+            editor.Session.Commands.TryExecuteCommand(
+                new GraphEditorCommandInvocationSnapshot(
+                    "connections.note.set",
+                    [
+                        new GraphEditorCommandArgumentSnapshot("connectionId", connection.Id),
+                        new GraphEditorCommandArgumentSnapshot("text", "Preview branch"),
+                        new GraphEditorCommandArgumentSnapshot("updateStatus", "false"),
+                    ]))
             && string.Equals(
                 editor.CreateDocumentSnapshot().Connections.Single().Presentation?.NoteText,
                 "Preview branch",
@@ -386,13 +395,20 @@ public static class DemoProof
         var disconnectFlowOk =
             editor.Session.Commands.TryExecuteCommand(
                 new GraphEditorCommandInvocationSnapshot(
-                    "connections.disconnect",
-                    [new GraphEditorCommandArgumentSnapshot("connectionId", connection.Id)]));
+                    "connections.reconnect",
+                    [
+                        new GraphEditorCommandArgumentSnapshot("connectionId", connection.Id),
+                        new GraphEditorCommandArgumentSnapshot("updateStatus", "false"),
+                    ]));
         var updatedLightNode = editor.FindNode("light");
         var updatedPulsePort = updatedLightNode?.Inputs.SingleOrDefault(port => string.Equals(port.Id, "pulse", StringComparison.Ordinal));
+        var pending = editor.Session.Queries.GetPendingConnectionSnapshot();
         disconnectFlowOk =
             disconnectFlowOk
             && editor.CreateDocumentSnapshot().Connections.Count == 0
+            && pending.HasPendingConnection
+            && string.Equals(pending.SourceNodeId, reconnectSourceNodeId, StringComparison.Ordinal)
+            && string.Equals(pending.SourcePortId, reconnectSourcePortId, StringComparison.Ordinal)
             && updatedLightNode is not null
             && updatedPulsePort is not null
             && !editor.HasIncomingConnection(updatedLightNode, updatedPulsePort);
@@ -433,7 +449,7 @@ public static class DemoProof
     private static GraphDocument CreateEdgeProofDocument(INodeCatalog catalog)
         => new(
             "Edge Semantics Proof",
-            "Verifies edge annotations and canonical single-edge disconnect behavior.",
+            "Verifies command-routed edge annotations and canonical reconnect behavior.",
             [
                 CreateProofNode(catalog, "time", new NodeDefinitionId("aster.demo.time-driver"), new GraphPoint(80, 120)),
                 CreateProofNode(catalog, "light", new NodeDefinitionId("aster.demo.lighting-mix"), new GraphPoint(420, 90)),

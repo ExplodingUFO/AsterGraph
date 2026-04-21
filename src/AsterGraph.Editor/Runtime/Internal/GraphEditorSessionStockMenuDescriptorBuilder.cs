@@ -361,15 +361,36 @@ internal sealed class GraphEditorSessionStockMenuDescriptorBuilder
         }
 
         var disconnect = GetCommandDescriptor(commands, "connections.disconnect");
+        var noteSet = GetCommandDescriptor(commands, "connections.note.set");
+        var reconnect = GetCommandDescriptor(commands, "connections.reconnect");
         var conversionLabel = connection.ConversionId is null
             ? Localize("editor.menu.connection.noImplicitConversion", "No implicit conversion")
             : LocalizeFormat("editor.menu.connection.conversion", "Conversion: {0}", connection.ConversionId.Value);
+        var noteHint = string.IsNullOrWhiteSpace(connection.Presentation?.NoteText)
+            ? Localize("editor.menu.connection.noteHint.add", "Double-click label to add note")
+            : Localize("editor.menu.connection.noteHint.edit", "Double-click label to edit note");
 
-        return
-        [
-            new GraphEditorMenuItemDescriptorSnapshot("connection-disconnect", Localize("editor.menu.connection.disconnectConnection", "Disconnect Connection"), CreateCommand("connections.disconnect", ("connectionId", connection.Id)), iconKey: "disconnect", isEnabled: disconnect.IsEnabled, disabledReason: disconnect.DisabledReason),
-            new GraphEditorMenuItemDescriptorSnapshot("connection-conversion", conversionLabel, iconKey: "conversion", isEnabled: false),
-        ];
+        var items = new List<GraphEditorMenuItemDescriptorSnapshot>
+        {
+            new("connection-note-hint", noteHint, iconKey: "inspect", isEnabled: false),
+        };
+
+        if (!string.IsNullOrWhiteSpace(connection.Presentation?.NoteText))
+        {
+            items.Add(new GraphEditorMenuItemDescriptorSnapshot(
+                "connection-clear-note",
+                Localize("editor.menu.connection.clearNote", "Clear Note"),
+                CreateCommand("connections.note.set", ("connectionId", connection.Id), ("text", string.Empty)),
+                iconKey: "delete",
+                isEnabled: noteSet.IsEnabled,
+                disabledReason: noteSet.DisabledReason));
+        }
+
+        items.Add(GraphEditorMenuItemDescriptorSnapshot.Separator("connection-sep-1"));
+        items.Add(new GraphEditorMenuItemDescriptorSnapshot("connection-reconnect", Localize("editor.menu.connection.reconnectFromSource", "Reconnect From Source"), CreateCommand("connections.reconnect", ("connectionId", connection.Id)), iconKey: "connect", isEnabled: reconnect.IsEnabled, disabledReason: reconnect.DisabledReason));
+        items.Add(new GraphEditorMenuItemDescriptorSnapshot("connection-disconnect", Localize("editor.menu.connection.disconnectConnection", "Disconnect Connection"), CreateCommand("connections.disconnect", ("connectionId", connection.Id)), iconKey: "disconnect", isEnabled: disconnect.IsEnabled, disabledReason: disconnect.DisabledReason));
+        items.Add(new GraphEditorMenuItemDescriptorSnapshot("connection-conversion", conversionLabel, iconKey: "conversion", isEnabled: false));
+        return items;
     }
 
     private IReadOnlyList<GraphEditorMenuItemDescriptorSnapshot> BuildCompatibleTargetItems(

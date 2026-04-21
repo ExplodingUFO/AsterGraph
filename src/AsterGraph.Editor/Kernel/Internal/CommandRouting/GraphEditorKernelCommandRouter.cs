@@ -81,6 +81,10 @@ internal interface IGraphEditorKernelCommandRouterHost
 
     void DeleteConnection(string connectionId);
 
+    bool TryReconnectConnection(string connectionId, bool updateStatus);
+
+    bool TrySetConnectionNoteText(string connectionId, string? noteText, bool updateStatus);
+
     void DisconnectConnection(string connectionId);
 
     void BreakConnectionsForPort(string nodeId, string portId);
@@ -219,6 +223,19 @@ internal sealed class GraphEditorKernelCommandRouter
                 "connections.disconnect",
                 GraphEditorCommandSourceKind.Kernel,
                 _host.BehaviorOptions.Commands.Connections.AllowDisconnect),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "connections.note.set",
+                GraphEditorCommandSourceKind.Kernel,
+                _host.Document.Connections.Count > 0
+                && (_host.BehaviorOptions.Commands.Connections.AllowCreate
+                    || _host.BehaviorOptions.Commands.Connections.AllowDelete
+                    || _host.BehaviorOptions.Commands.Connections.AllowDisconnect)),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "connections.reconnect",
+                GraphEditorCommandSourceKind.Kernel,
+                _host.Document.Connections.Count > 0
+                && _host.BehaviorOptions.Commands.Connections.AllowCreate
+                && _host.BehaviorOptions.Commands.Connections.AllowDisconnect),
             GraphEditorCommandDescriptorCatalog.Create(
                 "connections.break-port",
                 GraphEditorCommandSourceKind.Kernel,
@@ -539,6 +556,28 @@ internal sealed class GraphEditorKernelCommandRouter
 
                 _host.DisconnectConnection(disconnectConnectionId);
                 return true;
+
+            case "connections.note.set":
+                if (!TryGetRequiredArgument(command, "connectionId", out var noteConnectionId))
+                {
+                    return false;
+                }
+
+                command.TryGetArgument("text", out var noteText);
+                return _host.TrySetConnectionNoteText(
+                    noteConnectionId,
+                    noteText,
+                    ResolveOptionalUpdateStatus(command, "updateStatus"));
+
+            case "connections.reconnect":
+                if (!TryGetRequiredArgument(command, "connectionId", out var reconnectConnectionId))
+                {
+                    return false;
+                }
+
+                return _host.TryReconnectConnection(
+                    reconnectConnectionId,
+                    ResolveOptionalUpdateStatus(command, "updateStatus"));
 
             case "connections.break-port":
                 if (!TryGetRequiredArgument(command, "nodeId", out var nodeId)

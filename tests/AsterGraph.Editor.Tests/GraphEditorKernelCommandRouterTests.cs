@@ -84,9 +84,9 @@ public sealed class GraphEditorKernelCommandRouterTests
             ]);
 
         var expected = """
-            initial:nodes.add:True:-|selection.set:True:-|selection.delete:False:-|nodes.move:True:-|nodes.resize:True:-|nodes.parameters.set:False:Parameter editing requires node-edit permissions and a shared node definition selection.|groups.create:False:-|groups.collapse:False:-|groups.move:False:-|groups.resize:False:-|groups.membership.set:False:-|groups.promote:False:-|composites.wrap-selection:False:-|composites.expose-port:False:-|composites.unexpose-port:False:-|scopes.enter:False:-|scopes.exit:False:-|connections.start:True:-|connections.complete:False:-|connections.connect:True:-|connections.cancel:False:-|connections.delete:True:-|connections.disconnect:True:-|connections.break-port:True:-|connections.disconnect-incoming:True:-|connections.disconnect-outgoing:True:-|connections.disconnect-all:True:-|history.undo:False:-|history.redo:False:-|viewport.fit:True:-|viewport.pan:True:-|viewport.resize:True:-|viewport.reset:True:-|viewport.center-node:True:-|viewport.center:True:-|workspace.save:True:-|workspace.load:False:No saved snapshot yet. Save once to create one.
-            selected:nodes.add:True:-|selection.set:True:-|selection.delete:True:-|nodes.move:True:-|nodes.resize:True:-|nodes.parameters.set:False:Parameter editing requires node-edit permissions and a shared node definition selection.|groups.create:True:-|groups.collapse:False:-|groups.move:False:-|groups.resize:False:-|groups.membership.set:False:-|groups.promote:False:-|composites.wrap-selection:True:-|composites.expose-port:False:-|composites.unexpose-port:False:-|scopes.enter:False:-|scopes.exit:False:-|connections.start:True:-|connections.complete:False:-|connections.connect:True:-|connections.cancel:False:-|connections.delete:True:-|connections.disconnect:True:-|connections.break-port:True:-|connections.disconnect-incoming:True:-|connections.disconnect-outgoing:True:-|connections.disconnect-all:True:-|history.undo:False:-|history.redo:False:-|viewport.fit:True:-|viewport.pan:True:-|viewport.resize:True:-|viewport.reset:True:-|viewport.center-node:True:-|viewport.center:True:-|workspace.save:True:-|workspace.load:False:No saved snapshot yet. Save once to create one.
-            pending:nodes.add:True:-|selection.set:True:-|selection.delete:True:-|nodes.move:True:-|nodes.resize:True:-|nodes.parameters.set:False:Parameter editing requires node-edit permissions and a shared node definition selection.|groups.create:True:-|groups.collapse:False:-|groups.move:False:-|groups.resize:False:-|groups.membership.set:False:-|groups.promote:False:-|composites.wrap-selection:True:-|composites.expose-port:False:-|composites.unexpose-port:False:-|scopes.enter:False:-|scopes.exit:False:-|connections.start:True:-|connections.complete:True:-|connections.connect:True:-|connections.cancel:True:-|connections.delete:True:-|connections.disconnect:True:-|connections.break-port:True:-|connections.disconnect-incoming:True:-|connections.disconnect-outgoing:True:-|connections.disconnect-all:True:-|history.undo:False:-|history.redo:False:-|viewport.fit:True:-|viewport.pan:True:-|viewport.resize:True:-|viewport.reset:True:-|viewport.center-node:True:-|viewport.center:True:-|workspace.save:True:-|workspace.load:False:No saved snapshot yet. Save once to create one.
+            initial:nodes.add:True:-|selection.set:True:-|selection.delete:False:-|nodes.move:True:-|nodes.resize:True:-|nodes.parameters.set:False:Parameter editing requires node-edit permissions and a shared node definition selection.|groups.create:False:-|groups.collapse:False:-|groups.move:False:-|groups.resize:False:-|groups.membership.set:False:-|groups.promote:False:-|composites.wrap-selection:False:-|composites.expose-port:False:-|composites.unexpose-port:False:-|scopes.enter:False:-|scopes.exit:False:-|connections.start:True:-|connections.complete:False:-|connections.connect:True:-|connections.cancel:False:-|connections.delete:True:-|connections.disconnect:True:-|connections.note.set:False:-|connections.reconnect:False:-|connections.break-port:True:-|connections.disconnect-incoming:True:-|connections.disconnect-outgoing:True:-|connections.disconnect-all:True:-|history.undo:False:-|history.redo:False:-|viewport.fit:True:-|viewport.pan:True:-|viewport.resize:True:-|viewport.reset:True:-|viewport.center-node:True:-|viewport.center:True:-|workspace.save:True:-|workspace.load:False:No saved snapshot yet. Save once to create one.
+            selected:nodes.add:True:-|selection.set:True:-|selection.delete:True:-|nodes.move:True:-|nodes.resize:True:-|nodes.parameters.set:False:Parameter editing requires node-edit permissions and a shared node definition selection.|groups.create:True:-|groups.collapse:False:-|groups.move:False:-|groups.resize:False:-|groups.membership.set:False:-|groups.promote:False:-|composites.wrap-selection:True:-|composites.expose-port:False:-|composites.unexpose-port:False:-|scopes.enter:False:-|scopes.exit:False:-|connections.start:True:-|connections.complete:False:-|connections.connect:True:-|connections.cancel:False:-|connections.delete:True:-|connections.disconnect:True:-|connections.note.set:False:-|connections.reconnect:False:-|connections.break-port:True:-|connections.disconnect-incoming:True:-|connections.disconnect-outgoing:True:-|connections.disconnect-all:True:-|history.undo:False:-|history.redo:False:-|viewport.fit:True:-|viewport.pan:True:-|viewport.resize:True:-|viewport.reset:True:-|viewport.center-node:True:-|viewport.center:True:-|workspace.save:True:-|workspace.load:False:No saved snapshot yet. Save once to create one.
+            pending:nodes.add:True:-|selection.set:True:-|selection.delete:True:-|nodes.move:True:-|nodes.resize:True:-|nodes.parameters.set:False:Parameter editing requires node-edit permissions and a shared node definition selection.|groups.create:True:-|groups.collapse:False:-|groups.move:False:-|groups.resize:False:-|groups.membership.set:False:-|groups.promote:False:-|composites.wrap-selection:True:-|composites.expose-port:False:-|composites.unexpose-port:False:-|scopes.enter:False:-|scopes.exit:False:-|connections.start:True:-|connections.complete:True:-|connections.connect:True:-|connections.cancel:True:-|connections.delete:True:-|connections.disconnect:True:-|connections.note.set:False:-|connections.reconnect:False:-|connections.break-port:True:-|connections.disconnect-incoming:True:-|connections.disconnect-outgoing:True:-|connections.disconnect-all:True:-|history.undo:False:-|history.redo:False:-|viewport.fit:True:-|viewport.pan:True:-|viewport.resize:True:-|viewport.reset:True:-|viewport.center-node:True:-|viewport.center:True:-|workspace.save:True:-|workspace.load:False:No saved snapshot yet. Save once to create one.
             """;
 
         Assert.Equal(expected.ReplaceLineEndings("\n"), signature.ReplaceLineEndings("\n"));
@@ -248,6 +248,35 @@ public sealed class GraphEditorKernelCommandRouterTests
     }
 
     [Fact]
+    public void GraphEditorKernel_CommandDescriptors_ExposeEdgeWorkflowMetadata()
+    {
+        var kernel = CreateKernel();
+        Assert.True(kernel.TryExecuteCommand(
+            CreateCommand(
+                "connections.connect",
+                ("sourceNodeId", SourceNodeId),
+                ("sourcePortId", SourcePortId),
+                ("targetNodeId", TargetNodeId),
+                ("targetPortId", TargetPortId))));
+
+        var descriptors = kernel.GetCommandDescriptors().ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
+
+        var noteSet = descriptors["connections.note.set"];
+        Assert.Equal("Set Connection Note", noteSet.Title);
+        Assert.Equal("connections", noteSet.Group);
+        Assert.Equal("inspect", noteSet.IconKey);
+        Assert.Equal(GraphEditorCommandSourceKind.Kernel, noteSet.Source);
+        Assert.True(noteSet.CanExecute);
+
+        var reconnect = descriptors["connections.reconnect"];
+        Assert.Equal("Reconnect Connection", reconnect.Title);
+        Assert.Equal("connections", reconnect.Group);
+        Assert.Equal("connect", reconnect.IconKey);
+        Assert.Equal(GraphEditorCommandSourceKind.Kernel, reconnect.Source);
+        Assert.True(reconnect.CanExecute);
+    }
+
+    [Fact]
     public void GraphEditorKernel_TryExecuteCommand_AcceptsCanonicalKernelPayloads()
     {
         var kernel = CreateKernel();
@@ -315,6 +344,42 @@ public sealed class GraphEditorKernelCommandRouterTests
         Assert.True(connected);
         Assert.Equal(TargetParameterKey, connection.TargetPortId);
         Assert.Equal(GraphConnectionTargetKind.Parameter, connection.TargetKind);
+    }
+
+    [Fact]
+    public void GraphEditorKernel_TryExecuteCommand_AcceptsEdgeWorkflowPayloads()
+    {
+        var kernel = CreateKernel();
+
+        Assert.True(kernel.TryExecuteCommand(
+            CreateCommand(
+                "connections.connect",
+                ("sourceNodeId", SourceNodeId),
+                ("sourcePortId", SourcePortId),
+                ("targetNodeId", TargetNodeId),
+                ("targetPortId", TargetPortId))));
+
+        var connectionId = Assert.Single(kernel.CreateDocumentSnapshot().Connections).Id;
+        Assert.True(kernel.TryExecuteCommand(
+            CreateCommand(
+                "connections.note.set",
+                ("connectionId", connectionId),
+                ("text", "Preview branch"),
+                ("updateStatus", "false"))));
+        Assert.Equal(
+            "Preview branch",
+            Assert.Single(kernel.CreateDocumentSnapshot().Connections).Presentation?.NoteText);
+
+        Assert.True(kernel.TryExecuteCommand(
+            CreateCommand(
+                "connections.reconnect",
+                ("connectionId", connectionId),
+                ("updateStatus", "false"))));
+        Assert.Empty(kernel.CreateDocumentSnapshot().Connections);
+        var pending = kernel.GetPendingConnectionSnapshot();
+        Assert.True(pending.HasPendingConnection);
+        Assert.Equal(SourceNodeId, pending.SourceNodeId);
+        Assert.Equal(SourcePortId, pending.SourcePortId);
     }
 
     [Fact]

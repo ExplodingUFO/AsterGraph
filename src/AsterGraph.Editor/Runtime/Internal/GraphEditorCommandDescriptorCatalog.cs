@@ -29,6 +29,8 @@ internal static class GraphEditorCommandDescriptorCatalog
             ["connections.cancel"] = new("Cancel Pending Connection", "connections", "cancel", "Escape"),
             ["connections.delete"] = new("Delete Connection", "connections", "delete", null),
             ["connections.disconnect"] = new("Disconnect Connection", "connections", "disconnect", null),
+            ["connections.note.set"] = new("Set Connection Note", "connections", "inspect", null),
+            ["connections.reconnect"] = new("Reconnect Connection", "connections", "connect", null),
             ["connections.break-port"] = new("Break Port Connections", "connections", "disconnect", null),
             ["connections.disconnect-incoming"] = new("Disconnect Incoming", "connections", "disconnect", null),
             ["connections.disconnect-outgoing"] = new("Disconnect Outgoing", "connections", "disconnect", null),

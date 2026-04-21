@@ -333,16 +333,16 @@ public partial class MainWindowViewModel
                 T("语义图组合", "Semantic Graph Composition"),
                 T("把组提升为复合节点、公开边界端点、作用域导航、边注释和单边断开收敛到同一条语义图编辑路径。", "Unify composite promotion, public boundary ports, scoped navigation, edge notes, and single-edge disconnect through one semantic graph editing path."),
                 T(
-                    "这条路径继续由 Editor.Session 命令和查询驱动：group promotion 生成 child scope，boundary port 暴露内部端口，edge note 保持纯展示语义，而 canonical disconnect 会让参数端点重新回到本地值来源。",
-                    "This path stays on top of Editor.Session commands and queries: group promotion creates a child scope, boundary ports expose inner ports, edge notes stay display-only, and canonical disconnect returns parameter endpoints to their local value source once the edge is removed."),
+                    "这条路径继续由 Editor.Session 命令和查询驱动：group promotion 生成 child scope，boundary port 暴露内部端口，edge note 保持纯展示语义，而 canonical reconnect 会断开当前边并立即回到待完成连线状态。",
+                    "This path stays on top of Editor.Session commands and queries: group promotion creates a child scope, boundary ports expose inner ports, edge notes stay display-only, and canonical reconnect removes the current edge then immediately returns authoring to a pending connection state."),
                 [
                     T("所属层：AsterGraph.Editor semantic graph contract + AsterGraph.Avalonia stock host surfaces。", "Layer: AsterGraph.Editor semantic graph contract plus AsterGraph.Avalonia stock host surfaces."),
-                    T("宿主入口：TryPromoteNodeGroupToComposite(...)、TryExposeCompositePort(...)、TryEnterCompositeChildGraph(...)、TrySetConnectionNoteText(...)、connections.disconnect。", "Host entry: TryPromoteNodeGroupToComposite(...), TryExposeCompositePort(...), TryEnterCompositeChildGraph(...), TrySetConnectionNoteText(...), and connections.disconnect."),
+                    T("宿主入口：TryPromoteNodeGroupToComposite(...)、TryExposeCompositePort(...)、TryEnterCompositeChildGraph(...)、TrySetConnectionNoteText(...)、TryReconnectConnection(...)、connections.note.set、connections.reconnect。", "Host entry: TryPromoteNodeGroupToComposite(...), TryExposeCompositePort(...), TryEnterCompositeChildGraph(...), TrySetConnectionNoteText(...), TryReconnectConnection(...), connections.note.set, and connections.reconnect."),
                     T("兼容边界：connections.delete 仍保留为兼容别名；retained 的 TrySetNodeExpansionState(...) 和 TrySetNodeGroupExtraPadding(...) 继续存在但只作为迁移辅助。", "Compatibility boundary: connections.delete stays as a compatibility alias; retained TrySetNodeExpansionState(...) and TrySetNodeGroupExtraPadding(...) remain only as migration helpers."),
                 ],
                 [
                     T("proof 会把节点组提升为复合节点，公开 Composite Phase / Composite Tint 两个边界端点，并验证作用域进入与返回。", "Proof promotes a node group into a composite, exposes Composite Phase / Composite Tint boundary ports, and validates enter/return scope navigation."),
-                    T("连线会写入 Preview branch 注释，并通过 canonical connections.disconnect 恢复 Pulse Bias 的本地参数值来源。", "The edge records a Preview branch note and restores the Pulse Bias local parameter-value source through canonical connections.disconnect."),
+                    T("连线会通过 canonical connections.note.set 写入 Preview branch 注释，并通过 canonical connections.reconnect 回到待完成连线状态。", "The edge records a Preview branch note through canonical connections.note.set and returns to pending connection authoring through canonical connections.reconnect."),
                     "COMPOSITE_SCOPE_OK / EDGE_NOTE_OK / DISCONNECT_FLOW_OK",
                 ]),
             new CapabilityShowcaseItem(

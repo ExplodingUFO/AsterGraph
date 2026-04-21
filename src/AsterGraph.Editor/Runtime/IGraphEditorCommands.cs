@@ -275,6 +275,15 @@ public interface IGraphEditorCommands
         => throw new NotSupportedException();
 
     /// <summary>
+    /// Attempts to disconnect one existing connection and restart authoring from its original source endpoint.
+    /// </summary>
+    /// <param name="connectionId">Stable connection identifier.</param>
+    /// <param name="updateStatus">Whether to update status text for no-op or success cases.</param>
+    /// <returns><see langword="true"/> when reconnect mode starts and leaves a pending connection.</returns>
+    bool TryReconnectConnection(string connectionId, bool updateStatus = true)
+        => throw new NotSupportedException();
+
+    /// <summary>
     /// Attempts to update one connection's pure display note text.
     /// </summary>
     /// <param name="connectionId">Stable connection identifier.</param>

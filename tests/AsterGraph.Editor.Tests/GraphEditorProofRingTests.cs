@@ -1350,6 +1350,8 @@ public sealed class GraphEditorProofRingTests
         "connections.cancel",
         "connections.delete",
         "connections.disconnect",
+        "connections.note.set",
+        "connections.reconnect",
         "connections.break-port",
         "nodes.move",
         "viewport.pan",

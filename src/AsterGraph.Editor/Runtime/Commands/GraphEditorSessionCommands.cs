@@ -302,6 +302,19 @@ public sealed partial class GraphEditorSession
         Execute("connections.delete", () => _host.DeleteConnection(connectionId));
     }
 
+    public bool TryReconnectConnection(string connectionId, bool updateStatus = true)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(connectionId);
+
+        var reconnected = _host.TryReconnectConnection(connectionId, updateStatus);
+        if (reconnected)
+        {
+            PublishCommandExecuted("connections.reconnect");
+        }
+
+        return reconnected;
+    }
+
     public bool TrySetConnectionNoteText(string connectionId, string? noteText, bool updateStatus = true)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(connectionId);

@@ -122,6 +122,80 @@ internal sealed class GraphEditorKernelConnectionMutationCoordinator
             [mutation.Connection.Id]);
     }
 
+    public bool TryReconnectConnection(string connectionId, bool updateStatus)
+    {
+        if (!_host.BehaviorOptions.Commands.Connections.AllowDisconnect)
+        {
+            if (updateStatus)
+            {
+                _host.SetStatus("Disconnect is disabled by host permissions.");
+            }
+
+            return false;
+        }
+
+        if (!_host.BehaviorOptions.Commands.Connections.AllowCreate)
+        {
+            if (updateStatus)
+            {
+                _host.SetStatus("Connection creation is disabled by host permissions.");
+            }
+
+            return false;
+        }
+
+        var existingConnection = _host.Document.Connections
+            .FirstOrDefault(connection => string.Equals(connection.Id, connectionId, StringComparison.Ordinal));
+        if (existingConnection is null)
+        {
+            if (updateStatus)
+            {
+                _host.SetStatus("No matching connection was found to reconnect.");
+            }
+
+            return false;
+        }
+
+        var sourceNode = FindNode(existingConnection.SourceNodeId);
+        var sourcePort = sourceNode?.Outputs.FirstOrDefault(port => string.Equals(port.Id, existingConnection.SourcePortId, StringComparison.Ordinal));
+        if (sourceNode is null || sourcePort is null)
+        {
+            if (updateStatus)
+            {
+                _host.SetStatus("Reconnect requires a valid source output.");
+            }
+
+            return false;
+        }
+
+        var mutation = _documentMutator.DeleteConnection(_host.Document, connectionId);
+        if (mutation.Connection is null)
+        {
+            if (updateStatus)
+            {
+                _host.SetStatus("No matching connection was found to reconnect.");
+            }
+
+            return false;
+        }
+
+        _host.UpdateDocument(mutation.Document);
+        _host.SetPendingConnection(GraphEditorPendingConnectionSnapshot.Create(true, sourceNode.Id, sourcePort.Id));
+        var status = $"Reconnect {sourceNode.Title}.{sourcePort.Label} by choosing a new target.";
+        if (updateStatus)
+        {
+            _host.SetStatus(status);
+        }
+
+        _host.MarkDirty(
+            status,
+            GraphEditorDocumentChangeKind.ConnectionsChanged,
+            [sourceNode.Id, mutation.Connection.TargetNodeId],
+            [mutation.Connection.Id],
+            preserveStatus: !updateStatus);
+        return true;
+    }
+
     public void DisconnectConnection(string connectionId)
     {
         if (!_host.BehaviorOptions.Commands.Connections.AllowDisconnect)

@@ -118,6 +118,12 @@ internal sealed partial class GraphEditorKernel
         void IGraphEditorKernelCommandRouterHost.DeleteConnection(string connectionId)
             => _owner.DeleteConnection(connectionId);
 
+        bool IGraphEditorKernelCommandRouterHost.TryReconnectConnection(string connectionId, bool updateStatus)
+            => _owner.TryReconnectConnection(connectionId, updateStatus);
+
+        bool IGraphEditorKernelCommandRouterHost.TrySetConnectionNoteText(string connectionId, string? noteText, bool updateStatus)
+            => _owner.TrySetConnectionNoteText(connectionId, noteText, updateStatus);
+
         void IGraphEditorKernelCommandRouterHost.DisconnectConnection(string connectionId)
             => _owner.DisconnectConnection(connectionId);
 

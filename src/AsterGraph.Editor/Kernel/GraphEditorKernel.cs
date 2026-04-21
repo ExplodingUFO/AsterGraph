@@ -895,6 +895,12 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
     public void DeleteConnection(string connectionId)
         => _connectionMutationCoordinator.DeleteConnection(connectionId);
 
+    public bool TryReconnectConnection(string connectionId, bool updateStatus)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(connectionId);
+        return _connectionMutationCoordinator.TryReconnectConnection(connectionId, updateStatus);
+    }
+
     public void DisconnectConnection(string connectionId)
         => _connectionMutationCoordinator.DisconnectConnection(connectionId);
 

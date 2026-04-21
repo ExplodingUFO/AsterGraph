@@ -200,6 +200,8 @@ public sealed class GraphEditorSessionTests
         AssertMethod(commandsType, nameof(IGraphEditorCommands.CompleteConnection), typeof(GraphConnectionTargetRef));
         AssertMethod(commandsType, nameof(IGraphEditorCommands.CancelPendingConnection));
         AssertMethod(commandsType, nameof(IGraphEditorCommands.DeleteConnection), typeof(string));
+        AssertMethod(commandsType, nameof(IGraphEditorCommands.TryReconnectConnection), typeof(string), typeof(bool));
+        Assert.Equal(typeof(bool), commandsType.GetMethod(nameof(IGraphEditorCommands.TryReconnectConnection), [typeof(string), typeof(bool)])!.ReturnType);
         AssertMethod(commandsType, nameof(IGraphEditorCommands.TrySetConnectionNoteText), typeof(string), typeof(string), typeof(bool));
         Assert.Equal(typeof(bool), commandsType.GetMethod(nameof(IGraphEditorCommands.TrySetConnectionNoteText), [typeof(string), typeof(string), typeof(bool)])!.ReturnType);
         AssertMethod(commandsType, nameof(IGraphEditorCommands.BreakConnectionsForPort), typeof(string), typeof(string));
@@ -896,6 +898,97 @@ public sealed class GraphEditorSessionTests
     }
 
     [Fact]
+    public void RuntimeSession_TryReconnectConnection_StartsPendingConnectionFromOriginalSource()
+    {
+        var definitionId = new NodeDefinitionId("tests.session.reconnect");
+        var session = AsterGraphEditorFactory.CreateSession(CreateOptions(definitionId));
+
+        session.Commands.StartConnection(SourceNodeId, SourcePortId);
+        session.Commands.CompleteConnection(TargetNodeId, TargetPortId);
+
+        var connectionId = Assert.Single(session.Queries.CreateDocumentSnapshot().Connections).Id;
+
+        Assert.True(session.Commands.TryReconnectConnection(connectionId, updateStatus: false));
+        Assert.Empty(session.Queries.CreateDocumentSnapshot().Connections);
+
+        var pending = session.Queries.GetPendingConnectionSnapshot();
+        Assert.True(pending.HasPendingConnection);
+        Assert.Equal(SourceNodeId, pending.SourceNodeId);
+        Assert.Equal(SourcePortId, pending.SourcePortId);
+    }
+
+    [Fact]
+    public void RuntimeSession_TryExecuteCommand_AcceptsEdgeWorkflowInvocationSnapshots()
+    {
+        var definitionId = new NodeDefinitionId("tests.session.edge-command-routing");
+        var session = AsterGraphEditorFactory.CreateSession(CreateOptions(definitionId));
+
+        session.Commands.StartConnection(SourceNodeId, SourcePortId);
+        session.Commands.CompleteConnection(TargetNodeId, TargetPortId);
+        var connectionId = Assert.Single(session.Queries.CreateDocumentSnapshot().Connections).Id;
+
+        Assert.True(session.Commands.TryExecuteCommand(
+            new GraphEditorCommandInvocationSnapshot(
+                "connections.note.set",
+                [
+                    new GraphEditorCommandArgumentSnapshot("connectionId", connectionId),
+                    new GraphEditorCommandArgumentSnapshot("text", "Preview branch"),
+                    new GraphEditorCommandArgumentSnapshot("updateStatus", "false"),
+                ])));
+
+        Assert.Equal(
+            "Preview branch",
+            Assert.Single(session.Queries.CreateDocumentSnapshot().Connections).Presentation?.NoteText);
+
+        Assert.True(session.Commands.TryExecuteCommand(
+            new GraphEditorCommandInvocationSnapshot(
+                "connections.reconnect",
+                [
+                    new GraphEditorCommandArgumentSnapshot("connectionId", connectionId),
+                    new GraphEditorCommandArgumentSnapshot("updateStatus", "false"),
+                ])));
+
+        Assert.Empty(session.Queries.CreateDocumentSnapshot().Connections);
+        var pending = session.Queries.GetPendingConnectionSnapshot();
+        Assert.True(pending.HasPendingConnection);
+        Assert.Equal(SourceNodeId, pending.SourceNodeId);
+        Assert.Equal(SourcePortId, pending.SourcePortId);
+    }
+
+    [Fact]
+    public void RuntimeSession_ConnectionContextMenuDescriptors_ExposeReconnectAndConnectionNoteWorkflow()
+    {
+        var definitionId = new NodeDefinitionId("tests.session.edge-menu");
+        var session = AsterGraphEditorFactory.CreateSession(CreateOptions(definitionId));
+
+        session.Commands.StartConnection(SourceNodeId, SourcePortId);
+        session.Commands.CompleteConnection(TargetNodeId, TargetPortId);
+        var connectionId = Assert.Single(session.Queries.CreateDocumentSnapshot().Connections).Id;
+        Assert.True(session.Commands.TrySetConnectionNoteText(connectionId, "Preview branch", updateStatus: false));
+
+        var connectionContext = new ContextMenuContext(
+            ContextMenuTargetKind.Connection,
+            new GraphPoint(160, 90),
+            selectedConnectionId: connectionId,
+            selectedConnectionIds: [connectionId],
+            clickedConnectionId: connectionId);
+        var menu = session.Queries.BuildContextMenuDescriptors(connectionContext);
+
+        var noteHint = Assert.Single(menu, item => item.Id == "connection-note-hint");
+        Assert.Equal("Double-click label to edit note", noteHint.Header);
+        Assert.False(noteHint.IsEnabled);
+
+        var clearNote = Assert.Single(menu, item => item.Id == "connection-clear-note");
+        Assert.Equal("connections.note.set", clearNote.Command!.CommandId);
+        Assert.Contains(clearNote.Command.Arguments, argument => argument.Name == "connectionId" && argument.Value == connectionId);
+        Assert.Contains(clearNote.Command.Arguments, argument => argument.Name == "text" && argument.Value == string.Empty);
+
+        var reconnect = Assert.Single(menu, item => item.Id == "connection-reconnect");
+        Assert.Equal("connections.reconnect", reconnect.Command!.CommandId);
+        Assert.Contains(reconnect.Command.Arguments, argument => argument.Name == "connectionId" && argument.Value == connectionId);
+    }
+
+    [Fact]
     public void RuntimeSession_StockContextMenuDescriptorSignatures_RemainStableAcrossTargets()
     {
         var definitionId = new NodeDefinitionId("tests.session.stock-menu-signatures");
@@ -968,7 +1061,7 @@ public sealed class GraphEditorSessionTests
             node:node-inspect~Inspect Source Node~inspect~False~-~False~nodes.inspect(nodeId=tests.session.source-001)~[-]||node-center~Center View Here~center~True~-~False~viewport.center-node(nodeId=tests.session.source-001)~[-]||node-sep-1~~-~False~-~True~-~[-]||node-delete~Delete Node~delete~False~-~False~nodes.delete-by-id(nodeId=tests.session.source-001)~[-]||node-duplicate~Duplicate Node~duplicate~False~-~False~nodes.duplicate(nodeId=tests.session.source-001)~[-]||node-disconnect~Disconnect~disconnect~True~-~False~-~[node-disconnect-in~Incoming~disconnect~True~-~False~connections.disconnect-incoming(nodeId=tests.session.source-001)~[-]>>node-disconnect-out~Outgoing~disconnect~True~-~False~connections.disconnect-outgoing(nodeId=tests.session.source-001)~[-]>>node-disconnect-all~All~disconnect~True~-~False~connections.disconnect-all(nodeId=tests.session.source-001)~[-]]||node-create-connection~Create Connection From~connect~True~-~False~-~[node-connect-tests.session.source-001-out~Output~-~True~-~False~-~[compatible-node-tests.session.target-001~Target Node~-~True~-~False~-~[compatible-port-tests.session.target-001-in~Input~connect~True~-~False~connections.connect(sourceNodeId=tests.session.source-001,sourcePortId=out,targetNodeId=tests.session.target-001,targetPortId=in)~[-]]]]
             port-output:port-start~Start Connection~connect~True~-~False~connections.start(sourceNodeId=tests.session.source-001,sourcePortId=out)~[-]||port-compatible-targets~Compatible Targets~compatible~True~-~False~-~[compatible-node-tests.session.target-001~Target Node~-~True~-~False~-~[compatible-port-tests.session.target-001-in~Input~connect~True~-~False~connections.connect(sourceNodeId=tests.session.source-001,sourcePortId=out,targetNodeId=tests.session.target-001,targetPortId=in)~[-]]]||port-sep-1~~-~False~-~True~-~[-]||port-info~Type: float~type~False~-~False~-~[-]
             port-input:port-break-connections~Break Connections~disconnect~True~-~False~connections.break-port(nodeId=tests.session.target-001,portId=in)~[-]||port-sep-2~~-~False~-~True~-~[-]||port-info~Type: float~type~False~-~False~-~[-]
-            connection:connection-disconnect~Disconnect Connection~disconnect~True~-~False~connections.disconnect(connectionId=connection-001)~[-]||connection-conversion~No implicit conversion~conversion~False~-~False~-~[-]
+            connection:connection-note-hint~Double-click label to add note~inspect~False~-~False~-~[-]||connection-sep-1~~-~False~-~True~-~[-]||connection-reconnect~Reconnect From Source~connect~True~-~False~connections.reconnect(connectionId=connection-001)~[-]||connection-disconnect~Disconnect Connection~disconnect~True~-~False~connections.disconnect(connectionId=connection-001)~[-]||connection-conversion~No implicit conversion~conversion~False~-~False~-~[-]
             """;
 
         Assert.Equal(expected.ReplaceLineEndings("\n"), signature.ReplaceLineEndings("\n"));
@@ -1273,6 +1366,8 @@ public sealed class GraphEditorSessionTests
         "connections.cancel",
         "connections.delete",
         "connections.disconnect",
+        "connections.note.set",
+        "connections.reconnect",
         "connections.break-port",
         "history.undo",
         "history.redo",
