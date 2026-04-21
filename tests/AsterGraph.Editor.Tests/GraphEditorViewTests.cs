@@ -1,8 +1,10 @@
 using System.Linq;
+using System.Reflection;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Themes.Fluent;
@@ -97,6 +99,37 @@ public sealed class GraphEditorViewTests
         Assert.Contains(
             paletteItems.Children.OfType<Button>(),
             button => string.Equals(button.Name, "PART_CommandPaletteAction_history.undo", StringComparison.Ordinal));
+    }
+
+    [AvaloniaFact]
+    public void ShortcutHelp_AndKeyboardRouting_ProjectCommandPaletteFromSharedActionSource()
+    {
+        var editor = CreateEditor();
+        var window = CreateWindow(new GraphEditorView
+        {
+            Editor = editor,
+        });
+        var view = (GraphEditorView)window.Content!;
+        var shortcutHelp = FindRequiredControl<StackPanel>(view, "PART_ShortcutHelpList");
+        var paletteChrome = FindRequiredControl<Border>(view, "PART_CommandPaletteChrome");
+
+        Assert.Contains(
+            shortcutHelp.Children.OfType<Border>()
+                .Select(item => item.Child)
+                .OfType<TextBlock>(),
+            item => item.Text?.Contains("Ctrl+Shift+P", StringComparison.Ordinal) == true
+                && item.Text.Contains("Command Palette", StringComparison.Ordinal));
+
+        var args = new KeyEventArgs
+        {
+            Key = Key.P,
+            KeyModifiers = KeyModifiers.Control | KeyModifiers.Shift,
+        };
+
+        InvokeViewKeyDown(view, args);
+
+        Assert.True(args.Handled);
+        Assert.True(paletteChrome.IsVisible);
     }
 
     [AvaloniaFact]
@@ -278,6 +311,15 @@ public sealed class GraphEditorViewTests
             .OfType<T>()
             .FirstOrDefault(control => string.Equals(control.Name, name, StringComparison.Ordinal))
             ?? throw new Xunit.Sdk.XunitException($"Could not find descendant control '{name}'.");
+
+    private static void InvokeViewKeyDown(GraphEditorView view, KeyEventArgs args)
+    {
+        var handler = typeof(GraphEditorView).GetMethod(
+            "HandleKeyDown",
+            BindingFlags.Instance | BindingFlags.NonPublic);
+        Assert.NotNull(handler);
+        handler.Invoke(view, [view, args]);
+    }
 
     private static GraphEditorViewModel CreateEditor(IGraphContextMenuAugmentor? augmentor = null)
     {

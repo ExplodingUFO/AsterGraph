@@ -95,6 +95,44 @@ public sealed class GraphEditorPluginCommandContractTests
         Assert.Equal(1, invoked);
     }
 
+    [Fact]
+    public void HostedActionFactory_CreateProjection_SelectsOrderedActionsAndShortcutSubset()
+    {
+        var addReview = AsterGraphHostedActionFactory.CreateHostAction(
+            new GraphEditorCommandDescriptorSnapshot(
+                "host.review.add",
+                "Add Review Node",
+                "host",
+                "add",
+                "Ctrl+Shift+R",
+                GraphEditorCommandSourceKind.Host,
+                isEnabled: true),
+            () => true);
+        var approve = AsterGraphHostedActionFactory.CreateHostAction(
+            new GraphEditorCommandDescriptorSnapshot(
+                "host.review.approve",
+                "Approve Review Node",
+                "host",
+                "approve",
+                null,
+                GraphEditorCommandSourceKind.Host,
+                isEnabled: false,
+                disabledReason: "Select one review node before approving."),
+            () => false);
+        var projection = AsterGraphHostedActionFactory.CreateProjection(
+            [
+                approve,
+                addReview,
+            ]);
+
+        var selected = projection.Select(["host.review.add", "host.review.approve"]);
+        var shortcuts = projection.WithShortcuts();
+
+        Assert.Equal(["host.review.add", "host.review.approve"], selected.Select(action => action.Id));
+        Assert.Equal("Select one review node before approving.", selected[1].DisabledReason);
+        Assert.Equal(["host.review.add"], shortcuts.Select(action => action.Id));
+    }
+
     private static AsterGraphEditorOptions CreateOptions(params GraphEditorPluginRegistration[] pluginRegistrations)
         => new()
         {

@@ -163,7 +163,9 @@ public partial class MainWindow : Window
         }
 
         rail.Children.Clear();
-        foreach (var action in AsterGraphHostedActionFactory.CreateCommandActions(viewModel.Editor.Session, HostCommandRailIds))
+        var projection = AsterGraphHostedActionFactory.CreateProjection(
+            AsterGraphHostedActionFactory.CreateCommandActions(viewModel.Editor.Session));
+        foreach (var action in projection.Select(HostCommandRailIds))
         {
             var button = new Button
             {

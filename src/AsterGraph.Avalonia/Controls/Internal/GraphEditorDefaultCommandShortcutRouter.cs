@@ -3,6 +3,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.VisualTree;
+using AsterGraph.Avalonia.Hosting;
 using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.ViewModels;
 
@@ -27,6 +28,41 @@ internal static class GraphEditorDefaultCommandShortcutRouter
         var commands = session.Queries.GetCommandDescriptors()
             .ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
         return TryHandleDescriptorShortcut(commands, session.Commands, args, includePendingConnectionCancel);
+    }
+
+    public static bool TryHandle(
+        IReadOnlyList<AsterGraphHostedActionDescriptor> actions,
+        object? source,
+        KeyEventArgs args,
+        bool allowInputControlFocus,
+        IEnumerable<string>? excludedActionIds = null)
+    {
+        ArgumentNullException.ThrowIfNull(actions);
+        ArgumentNullException.ThrowIfNull(args);
+
+        if (!allowInputControlFocus && ShortcutBelongsToInputControl(source))
+        {
+            return false;
+        }
+
+        var excludedIds = excludedActionIds?.ToHashSet(StringComparer.Ordinal);
+        foreach (var action in actions.Where(action => !string.IsNullOrWhiteSpace(action.DefaultShortcut)))
+        {
+            if (excludedIds?.Contains(action.Id) == true)
+            {
+                continue;
+            }
+
+            if (!MatchesShortcut(action.Id, action.DefaultShortcut, args))
+            {
+                continue;
+            }
+
+            action.TryExecute();
+            return true;
+        }
+
+        return false;
     }
 
     private static void TryExecute(
@@ -72,13 +108,16 @@ internal static class GraphEditorDefaultCommandShortcutRouter
     }
 
     private static bool MatchesShortcut(GraphEditorCommandDescriptorSnapshot descriptor, KeyEventArgs args)
+        => MatchesShortcut(descriptor.Id, descriptor.DefaultShortcut, args);
+
+    private static bool MatchesShortcut(string actionId, string? shortcutText, KeyEventArgs args)
     {
-        if (string.Equals(descriptor.Id, "history.redo", StringComparison.Ordinal))
+        if (string.Equals(actionId, "history.redo", StringComparison.Ordinal))
         {
             return MatchesShortcutText("Ctrl+Y", args) || MatchesShortcutText("Ctrl+Shift+Z", args);
         }
 
-        return MatchesShortcutText(descriptor.DefaultShortcut, args);
+        return MatchesShortcutText(shortcutText, args);
     }
 
     private static bool MatchesShortcutText(string? shortcutText, KeyEventArgs args)

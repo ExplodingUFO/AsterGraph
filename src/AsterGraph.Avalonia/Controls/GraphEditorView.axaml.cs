@@ -9,6 +9,7 @@ using AsterGraph.Avalonia.Controls.Internal;
 using AsterGraph.Avalonia.Hosting;
 using AsterGraph.Avalonia.Presentation;
 using AsterGraph.Editor.Events;
+using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.ViewModels;
 
 namespace AsterGraph.Avalonia.Controls;
@@ -25,6 +26,8 @@ namespace AsterGraph.Avalonia.Controls;
 /// </remarks>
 public partial class GraphEditorView : UserControl
 {
+    private const string CommandPaletteActionId = "shell.command-palette";
+
     private static readonly IReadOnlyList<string> HeaderCommandIds =
     [
         "workspace.save",
@@ -122,6 +125,7 @@ public partial class GraphEditorView : UserControl
     private double _defaultShellColumnSpacing;
     private readonly GraphEditorViewCompositionCoordinator _compositionCoordinator;
     private string _commandPaletteFilter = string.Empty;
+    private AsterGraphHostedActionDescriptor? _commandPaletteAction;
 
     /// <summary>
     /// 初始化图编辑器宿主视图。
@@ -345,15 +349,20 @@ public partial class GraphEditorView : UserControl
 
     private void HandleKeyDown(object? sender, KeyEventArgs args)
     {
-        if (TryHandleCommandPaletteShortcut(args))
+        if (_commandPaletteChrome?.IsVisible == true && args.Key == Key.Escape)
         {
+            CloseCommandPalette();
             args.Handled = true;
             return;
         }
 
-        if (_commandPaletteChrome?.IsVisible == true && args.Key == Key.Escape)
+        if (_commandPaletteAction is not null
+            && GraphEditorDefaultCommandShortcutRouter.TryHandle(
+                [_commandPaletteAction],
+                args.Source,
+                args,
+                allowInputControlFocus: true))
         {
-            CloseCommandPalette();
             args.Handled = true;
             return;
         }
@@ -363,11 +372,18 @@ public partial class GraphEditorView : UserControl
             return;
         }
 
-        if (GraphEditorDefaultCommandShortcutRouter.TryHandle(
-            Editor,
-            args.Source,
-            args,
-            includePendingConnectionCancel: false))
+        var projection = CreateCommandSurfaceProjection();
+        if (projection is not null
+            && GraphEditorDefaultCommandShortcutRouter.TryHandle(
+                projection.Actions,
+                args.Source,
+                args,
+                allowInputControlFocus: false,
+                excludedActionIds:
+                [
+                    CommandPaletteActionId,
+                    "connections.cancel",
+                ]))
         {
             args.Handled = true;
         }
@@ -375,14 +391,15 @@ public partial class GraphEditorView : UserControl
 
     private void HandleOpenCommandPaletteClick(object? sender, RoutedEventArgs args)
     {
-        ToggleCommandPalette();
+        _commandPaletteAction?.TryExecute();
+        RefreshCommandSurface();
         args.Handled = true;
     }
 
     private void HandleCommandPaletteSearchChanged(object? sender, TextChangedEventArgs args)
     {
         _commandPaletteFilter = _commandPaletteSearchBox?.Text?.Trim() ?? string.Empty;
-        BuildCommandPaletteItems();
+        BuildCommandPaletteItems(CreateCommandSurfaceProjection());
     }
 
     private void AttachCommandSurfaceSubscriptions(GraphEditorViewModel? editor)
@@ -424,16 +441,18 @@ public partial class GraphEditorView : UserControl
 
     private void RefreshCommandSurface()
     {
-        BuildHeaderToolbar();
-        BuildShortcutHelp();
-        BuildCommandPaletteItems();
+        var projection = CreateCommandSurfaceProjection();
+        RefreshCommandPaletteButton(projection);
+        BuildHeaderToolbar(projection);
+        BuildShortcutHelp(projection);
+        BuildCommandPaletteItems(projection);
         if (Editor is null)
         {
             CloseCommandPalette();
         }
     }
 
-    private void BuildHeaderToolbar()
+    private void BuildHeaderToolbar(AsterGraphHostedActionProjection? projection)
     {
         if (_headerToolbar is null)
         {
@@ -441,18 +460,18 @@ public partial class GraphEditorView : UserControl
         }
 
         _headerToolbar.Children.Clear();
-        if (Editor is null)
+        if (projection is null)
         {
             return;
         }
 
-        foreach (var action in AsterGraphHostedActionFactory.CreateCommandActions(Editor.Session, HeaderCommandIds))
+        foreach (var action in projection.Select(HeaderCommandIds))
         {
             _headerToolbar.Children.Add(CreateActionButton(action, $"PART_HeaderCommand_{action.Id}"));
         }
     }
 
-    private void BuildShortcutHelp()
+    private void BuildShortcutHelp(AsterGraphHostedActionProjection? projection)
     {
         if (_shortcutHelpList is null)
         {
@@ -460,21 +479,18 @@ public partial class GraphEditorView : UserControl
         }
 
         _shortcutHelpList.Children.Clear();
-        if (Editor is null)
+        if (projection is null)
         {
             return;
         }
 
-        var shortcutActions = AsterGraphHostedActionFactory.CreateCommandActions(Editor.Session)
-            .Where(action => !string.IsNullOrWhiteSpace(action.DefaultShortcut))
-            .ToList();
-        foreach (var action in shortcutActions)
+        foreach (var action in projection.WithShortcuts())
         {
             _shortcutHelpList.Children.Add(CreateShortcutHelpItem($"{action.DefaultShortcut}：{action.Title}"));
         }
     }
 
-    private void BuildCommandPaletteItems()
+    private void BuildCommandPaletteItems(AsterGraphHostedActionProjection? projection)
     {
         if (_commandPaletteItems is null)
         {
@@ -482,12 +498,13 @@ public partial class GraphEditorView : UserControl
         }
 
         _commandPaletteItems.Children.Clear();
-        if (Editor is null)
+        if (projection is null)
         {
             return;
         }
 
-        var actions = AsterGraphHostedActionFactory.CreateCommandActions(Editor.Session)
+        var actions = projection.Actions
+            .Where(action => !string.Equals(action.Id, CommandPaletteActionId, StringComparison.Ordinal))
             .Where(MatchesCommandPaletteFilter)
             .ToList();
         if (actions.Count == 0)
@@ -507,6 +524,60 @@ public partial class GraphEditorView : UserControl
                 includeShortcut: true,
                 closePaletteOnExecute: true));
         }
+    }
+
+    private AsterGraphHostedActionProjection? CreateCommandSurfaceProjection()
+    {
+        if (Editor is null)
+        {
+            return null;
+        }
+
+        return AsterGraphHostedActionFactory.CreateProjection(
+        [
+            CreateCommandPaletteAction(),
+            .. AsterGraphHostedActionFactory.CreateCommandActions(Editor.Session),
+        ]);
+    }
+
+    private AsterGraphHostedActionDescriptor CreateCommandPaletteAction()
+        => AsterGraphHostedActionFactory.CreateHostAction(
+            new GraphEditorCommandDescriptorSnapshot(
+                CommandPaletteActionId,
+                "Command Palette",
+                "shell",
+                "palette",
+                "Ctrl+Shift+P",
+                GraphEditorCommandSourceKind.Host,
+                isEnabled: true),
+            () =>
+            {
+                ToggleCommandPalette();
+                return true;
+            });
+
+    private void RefreshCommandPaletteButton(AsterGraphHostedActionProjection? projection)
+    {
+        _commandPaletteAction = null;
+        if (_openCommandPaletteButton is null)
+        {
+            return;
+        }
+
+        if (projection is null || !projection.TryGet(CommandPaletteActionId, out var commandPaletteAction))
+        {
+            _openCommandPaletteButton.Content = "Command Palette";
+            _openCommandPaletteButton.IsEnabled = false;
+            ToolTip.SetTip(_openCommandPaletteButton, null);
+            return;
+        }
+
+        _commandPaletteAction = commandPaletteAction;
+        _openCommandPaletteButton.Content = commandPaletteAction.Title;
+        _openCommandPaletteButton.IsEnabled = commandPaletteAction.CanExecute;
+        ToolTip.SetTip(
+            _openCommandPaletteButton,
+            commandPaletteAction.DisabledReason ?? commandPaletteAction.DefaultShortcut);
     }
 
     private bool MatchesCommandPaletteFilter(AsterGraphHostedActionDescriptor action)
@@ -567,24 +638,6 @@ public partial class GraphEditorView : UserControl
             },
         };
 
-    private bool TryHandleCommandPaletteShortcut(KeyEventArgs args)
-    {
-        if (args.Key != Key.P || !args.KeyModifiers.HasFlag(KeyModifiers.Shift))
-        {
-            return false;
-        }
-
-        var hasPrimaryModifier = args.KeyModifiers.HasFlag(KeyModifiers.Control)
-            || args.KeyModifiers.HasFlag(KeyModifiers.Meta);
-        if (!hasPrimaryModifier)
-        {
-            return false;
-        }
-
-        ToggleCommandPalette();
-        return true;
-    }
-
     private void ToggleCommandPalette()
     {
         if (_commandPaletteChrome?.IsVisible == true)
@@ -610,7 +663,7 @@ public partial class GraphEditorView : UserControl
         }
 
         _commandPaletteChrome.IsVisible = true;
-        BuildCommandPaletteItems();
+        BuildCommandPaletteItems(CreateCommandSurfaceProjection());
         _commandPaletteSearchBox?.Focus();
     }
 

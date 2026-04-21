@@ -211,14 +211,14 @@ public static class ConsumerSampleWindowFactory
 
         private void RebuildActionSurfaces()
         {
-            var actions = BuildHostedActions();
+            var projection = BuildHostedActionProjection();
             _actionRailItems.Children.Clear();
-            foreach (var action in actions)
+            foreach (var action in projection.Actions)
             {
                 _actionRailItems.Children.Add(CreateActionButton(action));
             }
 
-            _actionsMenu.ItemsSource = actions.Select(CreateMenuItem).ToList();
+            _actionsMenu.ItemsSource = projection.Actions.Select(CreateMenuItem).ToList();
         }
 
         private void RebuildParameterItems()
@@ -472,14 +472,14 @@ public static class ConsumerSampleWindowFactory
             };
         }
 
-        private IReadOnlyList<AsterGraphHostedActionDescriptor> BuildHostedActions()
+        private AsterGraphHostedActionProjection BuildHostedActionProjection()
         {
             var selection = _host.Session.Queries.GetSelectionSnapshot();
             var commandActions = AsterGraphHostedActionFactory.CreateCommandActions(
                 _host.Session,
                 [ConsumerSampleHost.PluginCommandId, "workspace.save", "workspace.load", "history.undo", "history.redo", "viewport.fit"]);
 
-            return
+            return AsterGraphHostedActionFactory.CreateProjection(
             [
                 AsterGraphHostedActionFactory.CreateHostAction(
                     new GraphEditorCommandDescriptorSnapshot(
@@ -505,7 +505,7 @@ public static class ConsumerSampleWindowFactory
                             : null),
                     _host.ApproveSelection),
                 .. commandActions,
-            ];
+            ]);
         }
 
         private MenuItem CreateMenuItem(AsterGraphHostedActionDescriptor action)

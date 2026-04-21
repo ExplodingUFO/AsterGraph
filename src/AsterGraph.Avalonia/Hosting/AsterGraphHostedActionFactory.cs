@@ -7,6 +7,9 @@ namespace AsterGraph.Avalonia.Hosting;
 /// </summary>
 public static class AsterGraphHostedActionFactory
 {
+    public static AsterGraphHostedActionProjection CreateProjection(IEnumerable<AsterGraphHostedActionDescriptor> actions)
+        => new(actions);
+
     public static IReadOnlyList<AsterGraphHostedActionDescriptor> CreateCommandActions(
         IGraphEditorSession session,
         IEnumerable<string> commandIds)
