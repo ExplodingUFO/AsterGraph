@@ -27,12 +27,18 @@ public sealed class GraphEditorSessionParameterContractsTests
         Assert.Equal(
             typeof(IReadOnlyList<INodeDefinition>),
             queriesType.GetMethod(nameof(IGraphEditorQueries.GetRegisteredNodeDefinitions))!.ReturnType);
-        AssertMethod(queriesType, nameof(IGraphEditorQueries.GetStencilItemSnapshots));
+        AssertMethod(queriesType, nameof(IGraphEditorQueries.GetNodeTemplateSnapshots));
         Assert.Equal(
-            typeof(IReadOnlyList<GraphEditorStencilItemSnapshot>),
-            queriesType.GetMethod(nameof(IGraphEditorQueries.GetStencilItemSnapshots))!.ReturnType);
-        Assert.NotNull(typeof(GraphEditorStencilItemSnapshot).GetProperty(nameof(GraphEditorStencilItemSnapshot.DefinitionId)));
-        Assert.NotNull(typeof(GraphEditorStencilItemSnapshot).GetProperty(nameof(GraphEditorStencilItemSnapshot.PortSummary)));
+            typeof(IReadOnlyList<GraphEditorNodeTemplateSnapshot>),
+            queriesType.GetMethod(nameof(IGraphEditorQueries.GetNodeTemplateSnapshots))!.ReturnType);
+        Assert.NotNull(typeof(GraphEditorNodeTemplateSnapshot).GetProperty(nameof(GraphEditorNodeTemplateSnapshot.DefinitionId)));
+        Assert.NotNull(typeof(GraphEditorNodeTemplateSnapshot).GetProperty(nameof(GraphEditorNodeTemplateSnapshot.PortSummary)));
+        AssertMethod(queriesType, nameof(IGraphEditorQueries.GetEdgeTemplateSnapshots), typeof(string), typeof(string));
+        Assert.Equal(
+            typeof(IReadOnlyList<GraphEditorEdgeTemplateSnapshot>),
+            queriesType.GetMethod(nameof(IGraphEditorQueries.GetEdgeTemplateSnapshots), [typeof(string), typeof(string)])!.ReturnType);
+        Assert.NotNull(typeof(GraphEditorEdgeTemplateSnapshot).GetProperty(nameof(GraphEditorEdgeTemplateSnapshot.Target)));
+        Assert.NotNull(typeof(GraphEditorEdgeTemplateSnapshot).GetProperty(nameof(GraphEditorEdgeTemplateSnapshot.DefaultLabel)));
 
         AssertMethod(queriesType, nameof(IGraphEditorQueries.GetSharedSelectionDefinition));
         Assert.Equal(
@@ -67,15 +73,15 @@ public sealed class GraphEditorSessionParameterContractsTests
         session.Commands.SetSelection([FirstNodeId, SecondNodeId], FirstNodeId, updateStatus: false);
 
         var registeredDefinitions = session.Queries.GetRegisteredNodeDefinitions();
-        var stencilItems = session.Queries.GetStencilItemSnapshots();
+        var nodeTemplates = session.Queries.GetNodeTemplateSnapshots();
         var sharedDefinition = session.Queries.GetSharedSelectionDefinition();
         var parameters = session.Queries.GetSelectedNodeParameterSnapshots();
 
         Assert.Contains(registeredDefinitions, definition => definition.Id == DefinitionId);
-        var stencilItem = Assert.Single(stencilItems, item => item.DefinitionId == DefinitionId);
-        Assert.Equal("Parameter Node", stencilItem.Title);
-        Assert.Equal("Tests", stencilItem.Category);
-        Assert.Equal("0 in  ·  0 out", stencilItem.PortSummary);
+        var nodeTemplate = Assert.Single(nodeTemplates, item => item.DefinitionId == DefinitionId);
+        Assert.Equal("Parameter Node", nodeTemplate.Title);
+        Assert.Equal("Tests", nodeTemplate.Category);
+        Assert.Equal("0 in  ·  0 out", nodeTemplate.PortSummary);
         Assert.NotNull(sharedDefinition);
         Assert.Equal(DefinitionId, sharedDefinition!.Id);
         Assert.Equal(2, sharedDefinition.Parameters.Count);

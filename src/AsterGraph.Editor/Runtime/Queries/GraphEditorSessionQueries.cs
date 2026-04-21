@@ -82,7 +82,8 @@ public sealed partial class GraphEditorSession
                 new GraphEditorFeatureDescriptorSnapshot("query.fragment-storage-snapshot", "query", _descriptorSupport?.HasFragmentWorkspaceService ?? false),
                 new GraphEditorFeatureDescriptorSnapshot("query.fragment-template-snapshots", "query", _descriptorSupport?.HasFragmentLibraryService ?? false),
                 new GraphEditorFeatureDescriptorSnapshot("query.registered-node-definitions", "query", supportsDefinitionMetadata),
-                new GraphEditorFeatureDescriptorSnapshot("query.stencil-item-snapshots", "query", supportsDefinitionMetadata),
+                new GraphEditorFeatureDescriptorSnapshot("query.node-template-snapshots", "query", supportsDefinitionMetadata),
+                new GraphEditorFeatureDescriptorSnapshot("query.edge-template-snapshots", "query", true),
                 new GraphEditorFeatureDescriptorSnapshot("query.shared-selection-definition", "query", supportsDefinitionMetadata),
                 new GraphEditorFeatureDescriptorSnapshot("query.selected-node-parameter-snapshots", "query", supportsDefinitionMetadata),
                 new GraphEditorFeatureDescriptorSnapshot("surface.automation.runner", "surface", true),
@@ -122,9 +123,9 @@ public sealed partial class GraphEditorSession
             .ToList()
             ?? [];
 
-    public IReadOnlyList<GraphEditorStencilItemSnapshot> GetStencilItemSnapshots()
+    public IReadOnlyList<GraphEditorNodeTemplateSnapshot> GetNodeTemplateSnapshots()
         => _descriptorSupport?.Definitions
-            .Select(GraphEditorStencilItemSnapshot.Create)
+            .Select(GraphEditorNodeTemplateSnapshot.Create)
             .OrderBy(item => item.Category, StringComparer.Ordinal)
             .ThenBy(item => item.Title, StringComparer.Ordinal)
             .ToList()
@@ -206,8 +207,8 @@ public sealed partial class GraphEditorSession
     public GraphEditorPendingConnectionSnapshot GetPendingConnectionSnapshot()
         => CreatePendingConnectionSnapshot();
 
-    public IReadOnlyList<GraphEditorCompatibleConnectionTargetSnapshot> GetCompatibleConnectionTargets(string sourceNodeId, string sourcePortId)
-        => _host.GetCompatibleConnectionTargets(sourceNodeId, sourcePortId);
+    public IReadOnlyList<GraphEditorEdgeTemplateSnapshot> GetEdgeTemplateSnapshots(string sourceNodeId, string sourcePortId)
+        => _host.GetEdgeTemplateSnapshots(sourceNodeId, sourcePortId);
 
     public IReadOnlyList<GraphEditorCompatiblePortTargetSnapshot> GetCompatiblePortTargets(string sourceNodeId, string sourcePortId)
         => _host.GetCompatiblePortTargets(sourceNodeId, sourcePortId);

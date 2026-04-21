@@ -104,6 +104,6 @@ internal interface IGraphEditorSessionHost
     bool TryExecuteCommand(GraphEditorCommandInvocationSnapshot command);
     IReadOnlyList<NodePositionSnapshot> GetNodePositions();
     GraphEditorPendingConnectionSnapshot GetPendingConnectionSnapshot();
-    IReadOnlyList<GraphEditorCompatibleConnectionTargetSnapshot> GetCompatibleConnectionTargets(string sourceNodeId, string sourcePortId);
+    IReadOnlyList<GraphEditorEdgeTemplateSnapshot> GetEdgeTemplateSnapshots(string sourceNodeId, string sourcePortId);
     IReadOnlyList<GraphEditorCompatiblePortTargetSnapshot> GetCompatiblePortTargets(string sourceNodeId, string sourcePortId);
 }

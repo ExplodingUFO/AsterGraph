@@ -1403,8 +1403,8 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
     public GraphEditorPendingConnectionSnapshot GetPendingConnectionSnapshot()
         => _pendingConnection;
 
-    public IReadOnlyList<GraphEditorCompatibleConnectionTargetSnapshot> GetCompatibleConnectionTargets(string sourceNodeId, string sourcePortId)
-        => _compatibilityQueries.GetCompatibleConnectionTargets(CreateActiveScopeDocumentSnapshot(), sourceNodeId, sourcePortId);
+    public IReadOnlyList<GraphEditorEdgeTemplateSnapshot> GetEdgeTemplateSnapshots(string sourceNodeId, string sourcePortId)
+        => _compatibilityQueries.GetEdgeTemplateSnapshots(CreateActiveScopeDocumentSnapshot(), sourceNodeId, sourcePortId);
 
     public IReadOnlyList<GraphEditorCompatiblePortTargetSnapshot> GetCompatiblePortTargets(string sourceNodeId, string sourcePortId)
         => _compatibilityQueries.GetCompatiblePortTargets(CreateActiveScopeDocumentSnapshot(), sourceNodeId, sourcePortId);

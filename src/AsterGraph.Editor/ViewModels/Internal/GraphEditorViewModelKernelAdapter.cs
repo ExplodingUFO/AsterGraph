@@ -349,8 +349,8 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
 
     public GraphEditorPendingConnectionSnapshot GetPendingConnectionSnapshot() => _kernel.GetPendingConnectionSnapshot();
 
-    public IReadOnlyList<GraphEditorCompatibleConnectionTargetSnapshot> GetCompatibleConnectionTargets(string sourceNodeId, string sourcePortId)
-        => _kernel.GetCompatibleConnectionTargets(sourceNodeId, sourcePortId);
+    public IReadOnlyList<GraphEditorEdgeTemplateSnapshot> GetEdgeTemplateSnapshots(string sourceNodeId, string sourcePortId)
+        => _kernel.GetEdgeTemplateSnapshots(sourceNodeId, sourcePortId);
 
     internal void CommitRetainedMutation(
         GraphDocument document,

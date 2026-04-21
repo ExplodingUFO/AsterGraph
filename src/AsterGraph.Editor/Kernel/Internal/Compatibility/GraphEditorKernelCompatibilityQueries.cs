@@ -26,38 +26,51 @@ internal sealed class GraphEditorKernelCompatibilityQueries
     {
         ArgumentNullException.ThrowIfNull(document);
 
-        var sourceNode = FindNode(document, sourceNodeId);
-        var sourcePort = sourceNode?.Outputs.FirstOrDefault(port => string.Equals(port.Id, sourcePortId, StringComparison.Ordinal));
-        if (sourceNode is null || sourcePort is null || sourcePort.TypeId is null)
+        if (!TryResolveSourcePort(document, sourceNodeId, sourcePortId, out _, out var sourcePortCandidate)
+            || sourcePortCandidate?.TypeId is null)
         {
             return [];
         }
 
+        var sourcePort = sourcePortCandidate;
+        var sourceTypeId = sourcePort.TypeId;
         return document.Nodes
             .SelectMany(node => EnumerateTargets(node, sourceNodeId, sourcePortId))
             .Select(target => target with
             {
-                Compatibility = _compatibilityService.Evaluate(sourcePort.TypeId!, target.TargetTypeId),
+                Compatibility = _compatibilityService.Evaluate(sourceTypeId, target.TargetTypeId),
             })
             .Where(target => target.Compatibility.IsCompatible)
             .ToList();
     }
 
-    public IReadOnlyList<GraphEditorCompatibleConnectionTargetSnapshot> GetCompatibleConnectionTargets(
+    public IReadOnlyList<GraphEditorEdgeTemplateSnapshot> GetEdgeTemplateSnapshots(
         GraphDocument document,
         string sourceNodeId,
         string sourcePortId)
-        => GetCompatibleTargetStates(document, sourceNodeId, sourcePortId)
-            .Select(target => new GraphEditorCompatibleConnectionTargetSnapshot(
+    {
+        if (!TryResolveSourcePort(document, sourceNodeId, sourcePortId, out _, out var sourcePortCandidate)
+            || sourcePortCandidate?.TypeId is null)
+        {
+            return [];
+        }
+
+        var sourcePort = sourcePortCandidate;
+        var sourceTypeId = sourcePort.TypeId;
+        return GetCompatibleTargetStates(document, sourceNodeId, sourcePortId)
+            .Select(target => new GraphEditorEdgeTemplateSnapshot(
                 target.Node.Id,
                 target.Node.Title,
                 target.Target.TargetId,
                 target.TargetLabel,
                 target.Target.Kind,
+                sourceTypeId,
                 target.TargetTypeId,
-                target.TargetAccentHex,
+                sourcePort.AccentHex,
+                $"{sourcePort.Label} to {target.TargetLabel}",
                 target.Compatibility))
             .ToList();
+    }
 
     public IReadOnlyList<GraphEditorCompatiblePortTargetSnapshot> GetCompatiblePortTargets(
         GraphDocument document,
@@ -124,6 +137,18 @@ internal sealed class GraphEditorKernelCompatibilityQueries
         => string.IsNullOrWhiteSpace(node.AccentHex)
             ? $"#{Math.Abs(typeId.Value.GetHashCode(StringComparison.Ordinal)) & 0xFFFFFF:X6}"
             : node.AccentHex;
+
+    private static bool TryResolveSourcePort(
+        GraphDocument document,
+        string sourceNodeId,
+        string sourcePortId,
+        out GraphNode? sourceNode,
+        out GraphPort? sourcePort)
+    {
+        sourceNode = FindNode(document, sourceNodeId);
+        sourcePort = sourceNode?.Outputs.FirstOrDefault(port => string.Equals(port.Id, sourcePortId, StringComparison.Ordinal));
+        return sourceNode is not null && sourcePort is not null;
+    }
 
     private static GraphNode? FindNode(GraphDocument document, string nodeId)
         => document.Nodes.FirstOrDefault(node => string.Equals(node.Id, nodeId, StringComparison.Ordinal));

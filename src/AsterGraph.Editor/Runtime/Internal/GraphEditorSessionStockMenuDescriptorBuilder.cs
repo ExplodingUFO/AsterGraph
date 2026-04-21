@@ -13,7 +13,7 @@ internal sealed class GraphEditorSessionStockMenuDescriptorBuilder
     private readonly Func<GraphDocument> _activeScopeDocumentSnapshotFactory;
     private readonly Func<GraphEditorScopeNavigationSnapshot> _scopeNavigationSnapshotFactory;
     private readonly Func<GraphEditorSelectionSnapshot> _selectionSnapshotFactory;
-    private readonly Func<string, string, IReadOnlyList<GraphEditorCompatibleConnectionTargetSnapshot>> _compatibleTargetsFactory;
+    private readonly Func<string, string, IReadOnlyList<GraphEditorEdgeTemplateSnapshot>> _edgeTemplateFactory;
     private readonly Func<string, string, string> _localize;
 
     public GraphEditorSessionStockMenuDescriptorBuilder(
@@ -21,7 +21,7 @@ internal sealed class GraphEditorSessionStockMenuDescriptorBuilder
         Func<GraphDocument> activeScopeDocumentSnapshotFactory,
         Func<GraphEditorScopeNavigationSnapshot> scopeNavigationSnapshotFactory,
         Func<GraphEditorSelectionSnapshot> selectionSnapshotFactory,
-        Func<string, string, IReadOnlyList<GraphEditorCompatibleConnectionTargetSnapshot>> compatibleTargetsFactory,
+        Func<string, string, IReadOnlyList<GraphEditorEdgeTemplateSnapshot>> edgeTemplateFactory,
         Func<string, string, string> localize,
         Func<IReadOnlyCollection<INodeDefinition>>? defaultDefinitionsProvider = null)
     {
@@ -29,7 +29,7 @@ internal sealed class GraphEditorSessionStockMenuDescriptorBuilder
         _activeScopeDocumentSnapshotFactory = activeScopeDocumentSnapshotFactory ?? throw new ArgumentNullException(nameof(activeScopeDocumentSnapshotFactory));
         _scopeNavigationSnapshotFactory = scopeNavigationSnapshotFactory ?? throw new ArgumentNullException(nameof(scopeNavigationSnapshotFactory));
         _selectionSnapshotFactory = selectionSnapshotFactory ?? throw new ArgumentNullException(nameof(selectionSnapshotFactory));
-        _compatibleTargetsFactory = compatibleTargetsFactory ?? throw new ArgumentNullException(nameof(compatibleTargetsFactory));
+        _edgeTemplateFactory = edgeTemplateFactory ?? throw new ArgumentNullException(nameof(edgeTemplateFactory));
         _localize = localize ?? throw new ArgumentNullException(nameof(localize));
         _defaultDefinitionsProvider = defaultDefinitionsProvider ?? (() => Array.Empty<INodeDefinition>());
     }
@@ -415,15 +415,15 @@ internal sealed class GraphEditorSessionStockMenuDescriptorBuilder
         IReadOnlyDictionary<string, GraphEditorCommandDescriptorSnapshot> commands)
     {
         var connect = GetCommandDescriptor(commands, "connections.connect");
-        var targets = _compatibleTargetsFactory(sourceNode.Id, sourcePort.Id);
+        var targets = _edgeTemplateFactory(sourceNode.Id, sourcePort.Id);
         if (targets.Count == 0)
         {
             return [new GraphEditorMenuItemDescriptorSnapshot("no-compatible-targets", Localize("editor.menu.compatibility.noTargets", "No Compatible Targets"), iconKey: "info", isEnabled: false)];
         }
 
         return targets
-            .GroupBy(target => target.NodeId)
-            .OrderBy(group => group.First().NodeTitle, StringComparer.Ordinal)
+            .GroupBy(target => target.TargetNodeId)
+            .OrderBy(group => group.First().TargetNodeTitle, StringComparer.Ordinal)
             .Select(group => new GraphEditorMenuItemDescriptorSnapshot(
                 $"compatible-node-{group.Key}",
                 GetNodeMenuHeader(document, group.Key),
@@ -431,8 +431,8 @@ internal sealed class GraphEditorSessionStockMenuDescriptorBuilder
                     .OrderBy(item => item.TargetLabel, StringComparer.Ordinal)
                     .Select(target => new GraphEditorMenuItemDescriptorSnapshot(
                         target.TargetKind == GraphConnectionTargetKind.Port
-                            ? $"compatible-port-{target.NodeId}-{target.TargetId}"
-                            : $"compatible-parameter-{target.NodeId}-{target.TargetId}",
+                            ? $"compatible-port-{target.TargetNodeId}-{target.TargetId}"
+                            : $"compatible-parameter-{target.TargetNodeId}-{target.TargetId}",
                         target.Compatibility.Kind == PortCompatibilityKind.ImplicitConversion
                             ? LocalizeFormat("editor.menu.compatibility.implicitTarget", "{0} (implicit: {1})", target.TargetLabel, target.Compatibility.ConversionId!.Value)
                             : target.TargetLabel,
@@ -441,13 +441,13 @@ internal sealed class GraphEditorSessionStockMenuDescriptorBuilder
                                 "connections.connect",
                                 (Name: "sourceNodeId", Value: sourceNode.Id),
                                 (Name: "sourcePortId", Value: sourcePort.Id),
-                                (Name: "targetNodeId", Value: target.NodeId),
+                                (Name: "targetNodeId", Value: target.TargetNodeId),
                                 (Name: "targetPortId", Value: target.TargetId))
                             : CreateCommand(
                                 "connections.connect",
                                 (Name: "sourceNodeId", Value: sourceNode.Id),
                                 (Name: "sourcePortId", Value: sourcePort.Id),
-                                (Name: "targetNodeId", Value: target.NodeId),
+                                (Name: "targetNodeId", Value: target.TargetNodeId),
                                 (Name: "targetPortId", Value: target.TargetId),
                                 (Name: "targetKind", Value: target.TargetKind.ToString())),
                         iconKey: target.Compatibility.Kind == PortCompatibilityKind.ImplicitConversion ? "conversion" : "connect",
