@@ -135,7 +135,14 @@ public sealed record ScaleSmokeTier(
                 NodeCount: 1000,
                 SelectionCount: 128,
                 MoveCount: 64,
-                Budget: null),
+                Budget: new ScaleSmokeBudget(
+                    SetupMs: 2500,
+                    SelectionMs: 750,
+                    ConnectionMs: 350,
+                    HistoryMs: 800,
+                    ViewportMs: 200,
+                    SaveMs: 300,
+                    ReloadMs: 1500)),
             "stress" => new ScaleSmokeTier(
                 "stress",
                 NodeCount: 5000,
