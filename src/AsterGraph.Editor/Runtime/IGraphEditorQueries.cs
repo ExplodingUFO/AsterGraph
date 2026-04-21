@@ -31,6 +31,13 @@ public interface IGraphEditorQueries
     GraphEditorViewportSnapshot GetViewportSnapshot();
 
     /// <summary>
+    /// Gets an adapter-neutral scene snapshot that combines document, viewport, selection, and persisted scene metadata.
+    /// </summary>
+    /// <returns>Current scene snapshot.</returns>
+    GraphEditorSceneSnapshot GetSceneSnapshot()
+        => throw new NotSupportedException();
+
+    /// <summary>
     /// 获取当前能力快照。
     /// </summary>
     /// <returns>当前能力状态。</returns>

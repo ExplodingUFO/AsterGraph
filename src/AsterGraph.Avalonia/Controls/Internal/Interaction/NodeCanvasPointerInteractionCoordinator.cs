@@ -4,6 +4,7 @@ using AsterGraph.Avalonia.Presentation;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Geometry;
 using AsterGraph.Editor.Runtime;
+using AsterGraph.Editor.Scene;
 using AsterGraph.Editor.ViewModels;
 
 namespace AsterGraph.Avalonia.Controls.Internal;
@@ -71,8 +72,15 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
         _host.InteractionSession.UpdateLastPointerPosition(currentScreenPosition);
         _host.InteractionSession.UpdatePointerPosition(currentScreenPosition);
 
-        if (isMiddleButtonPressed
-            || (_host.EnableAltLeftDragPanning && isLeftButtonPressed && modifiers.HasFlag(KeyModifiers.Alt)))
+        var route = GraphEditorPointerInputRouter.RoutePressed(new GraphEditorPointerInputContext(
+            isAlreadyHandled,
+            isLeftButtonPressed,
+            isMiddleButtonPressed,
+            MapModifiers(modifiers),
+            _host.EnableAltLeftDragPanning,
+            _host.ViewModel.HasPendingConnection));
+
+        if (route.Kind is GraphEditorPointerPressRouteKind.BeginPanning)
         {
             _host.ClearResizeFeedback();
             _host.InteractionSession.BeginPanning(currentScreenPosition);
@@ -81,13 +89,13 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
             return new NodeCanvasPointerPressedResult(Handled: true, CapturePointer: true);
         }
 
-        if (!isLeftButtonPressed)
+        if (route.Kind is GraphEditorPointerPressRouteKind.Ignore)
         {
             return default;
         }
 
         _host.ClearResizeFeedback();
-        if (_host.ViewModel.HasPendingConnection)
+        if (route.CancelPendingConnection)
         {
             _host.ViewModel.CancelPendingConnection("Connection preview cancelled.");
             _host.RenderConnections();
@@ -100,6 +108,32 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
         _host.HideSelectionAdorner();
         _host.HideGuideAdorners();
         return new NodeCanvasPointerPressedResult(Handled: true, CapturePointer: true);
+    }
+
+    private static GraphEditorInputModifiers MapModifiers(KeyModifiers modifiers)
+    {
+        var mapped = GraphEditorInputModifiers.None;
+        if (modifiers.HasFlag(KeyModifiers.Shift))
+        {
+            mapped |= GraphEditorInputModifiers.Shift;
+        }
+
+        if (modifiers.HasFlag(KeyModifiers.Control))
+        {
+            mapped |= GraphEditorInputModifiers.Control;
+        }
+
+        if (modifiers.HasFlag(KeyModifiers.Alt))
+        {
+            mapped |= GraphEditorInputModifiers.Alt;
+        }
+
+        if (modifiers.HasFlag(KeyModifiers.Meta))
+        {
+            mapped |= GraphEditorInputModifiers.Meta;
+        }
+
+        return mapped;
     }
 
     public bool HandleMoved(Point currentScreenPosition, double selectionDragThreshold)

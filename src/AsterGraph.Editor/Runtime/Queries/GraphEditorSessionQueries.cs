@@ -24,6 +24,15 @@ public sealed partial class GraphEditorSession
     public GraphEditorViewportSnapshot GetViewportSnapshot()
         => _host.GetViewportSnapshot();
 
+    public GraphEditorSceneSnapshot GetSceneSnapshot()
+        => new(
+            CreateDocumentSnapshot(),
+            GetSelectionSnapshot(),
+            GetViewportSnapshot(),
+            GetNodeSurfaceSnapshots(),
+            GetNodeGroupSnapshots(),
+            GetPendingConnectionSnapshot());
+
     public GraphEditorCapabilitySnapshot GetCapabilitySnapshot()
         => _host.GetCapabilitySnapshot();
 
@@ -43,6 +52,7 @@ public sealed partial class GraphEditorSession
                 new GraphEditorFeatureDescriptorSnapshot("capability.selection.set", "capability", capabilities.CanSetSelection),
                 new GraphEditorFeatureDescriptorSnapshot("capability.nodes.move", "capability", capabilities.CanMoveNodes),
                 new GraphEditorFeatureDescriptorSnapshot("capability.nodes.parameters.edit", "capability", capabilities.CanEditNodeParameters),
+                new GraphEditorFeatureDescriptorSnapshot("query.scene-snapshot", "query", true),
                 new GraphEditorFeatureDescriptorSnapshot("query.node-surface-snapshots", "query", true),
                 new GraphEditorFeatureDescriptorSnapshot("query.node-groups", "query", true),
                 new GraphEditorFeatureDescriptorSnapshot("query.node-group-snapshots", "query", true),

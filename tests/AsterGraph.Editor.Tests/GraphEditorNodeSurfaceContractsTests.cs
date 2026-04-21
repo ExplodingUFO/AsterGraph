@@ -36,12 +36,22 @@ public sealed class GraphEditorNodeSurfaceContractsTests
         Assert.Equal(
             typeof(IReadOnlyList<GraphEditorNodeSurfaceSnapshot>),
             queriesType.GetMethod(nameof(IGraphEditorQueries.GetNodeSurfaceSnapshots))!.ReturnType);
+        AssertMethod(queriesType, nameof(IGraphEditorQueries.GetSceneSnapshot));
+        Assert.Equal(
+            typeof(GraphEditorSceneSnapshot),
+            queriesType.GetMethod(nameof(IGraphEditorQueries.GetSceneSnapshot))!.ReturnType);
 
         Assert.NotNull(typeof(GraphEditorNodeSurfaceSnapshot).GetProperty(nameof(GraphEditorNodeSurfaceSnapshot.NodeId)));
         Assert.NotNull(typeof(GraphEditorNodeSurfaceSnapshot).GetProperty(nameof(GraphEditorNodeSurfaceSnapshot.Size)));
         Assert.NotNull(typeof(GraphEditorNodeSurfaceSnapshot).GetProperty(nameof(GraphEditorNodeSurfaceSnapshot.ActiveTier)));
         Assert.NotNull(typeof(GraphEditorNodeSurfaceSnapshot).GetProperty(nameof(GraphEditorNodeSurfaceSnapshot.ExpansionState)));
         Assert.NotNull(typeof(GraphEditorNodeSurfaceSnapshot).GetProperty(nameof(GraphEditorNodeSurfaceSnapshot.GroupId)));
+        Assert.NotNull(typeof(GraphEditorSceneSnapshot).GetProperty(nameof(GraphEditorSceneSnapshot.Document)));
+        Assert.NotNull(typeof(GraphEditorSceneSnapshot).GetProperty(nameof(GraphEditorSceneSnapshot.Selection)));
+        Assert.NotNull(typeof(GraphEditorSceneSnapshot).GetProperty(nameof(GraphEditorSceneSnapshot.Viewport)));
+        Assert.NotNull(typeof(GraphEditorSceneSnapshot).GetProperty(nameof(GraphEditorSceneSnapshot.NodeSurfaces)));
+        Assert.NotNull(typeof(GraphEditorSceneSnapshot).GetProperty(nameof(GraphEditorSceneSnapshot.NodeGroups)));
+        Assert.NotNull(typeof(GraphEditorSceneSnapshot).GetProperty(nameof(GraphEditorSceneSnapshot.PendingConnection)));
         Assert.NotNull(typeof(NodeViewModel).GetProperty("ExpansionState"));
         Assert.NotNull(typeof(NodeViewModel).GetProperty("IsExpanded"));
 
@@ -349,6 +359,44 @@ public sealed class GraphEditorNodeSurfaceContractsTests
         Assert.True(session.Commands.TrySetNodeSize(SiblingNodeId, new GraphSize(420d, 260d), updateStatus: false));
         defaultSurface = Assert.Single(session.Queries.GetNodeSurfaceSnapshots(), snapshot => snapshot.NodeId == SiblingNodeId);
         Assert.Equal("project-input-editors", defaultSurface.ActiveTier.Key);
+    }
+
+    [Fact]
+    public void SessionQueries_GetSceneSnapshot_AggregatesDocumentViewportSurfaceGroupAndPendingConnectionState()
+    {
+        var session = CreateSession();
+
+        session.Commands.UpdateViewportSize(1280d, 720d);
+        session.Commands.SetSelection([NodeId, SiblingNodeId], NodeId, updateStatus: false);
+
+        var groupId = session.Commands.TryCreateNodeGroupFromSelection("Scene Cluster");
+        Assert.False(string.IsNullOrWhiteSpace(groupId));
+
+        session.Commands.SetSelection([NodeId], NodeId, updateStatus: false);
+        session.Commands.TrySetNodeSize(NodeId, new GraphSize(360d, 220d), updateStatus: false);
+
+        var scene = session.Queries.GetSceneSnapshot();
+
+        Assert.Equal(2, scene.Document.Nodes.Count);
+        Assert.Equal(NodeId, scene.Selection.PrimarySelectedNodeId);
+        Assert.Equal(1280d, scene.Viewport.ViewportWidth);
+        Assert.Equal(720d, scene.Viewport.ViewportHeight);
+        Assert.False(scene.PendingConnection.HasPendingConnection);
+
+        var nodeSurface = Assert.Single(scene.NodeSurfaces, snapshot => snapshot.NodeId == NodeId);
+        Assert.Equal(new GraphSize(360d, 220d), nodeSurface.Size);
+
+        var group = Assert.Single(scene.NodeGroups);
+        Assert.Equal(groupId, group.Id);
+        Assert.Contains(NodeId, group.NodeIds);
+
+        var pendingSession = CreateSession(CreatePromotionDocument(), CreatePromotionCatalog());
+        pendingSession.Commands.StartConnection(NodeId, OutputPortId);
+
+        var pendingScene = pendingSession.Queries.GetSceneSnapshot();
+
+        Assert.True(pendingScene.PendingConnection.HasPendingConnection);
+        Assert.Equal(NodeId, pendingScene.PendingConnection.SourceNodeId);
     }
 
     [Fact]

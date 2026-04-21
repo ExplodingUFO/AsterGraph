@@ -269,6 +269,9 @@ public sealed class GraphEditorSessionTests
         AssertMethod(queriesType, nameof(IGraphEditorQueries.GetViewportSnapshot));
         Assert.Equal(typeof(GraphEditorViewportSnapshot), queriesType.GetMethod(nameof(IGraphEditorQueries.GetViewportSnapshot))!.ReturnType);
 
+        AssertMethod(queriesType, nameof(IGraphEditorQueries.GetSceneSnapshot));
+        Assert.Equal(typeof(GraphEditorSceneSnapshot), queriesType.GetMethod(nameof(IGraphEditorQueries.GetSceneSnapshot))!.ReturnType);
+
         AssertMethod(queriesType, nameof(IGraphEditorQueries.GetCapabilitySnapshot));
         Assert.Equal(typeof(GraphEditorCapabilitySnapshot), queriesType.GetMethod(nameof(IGraphEditorQueries.GetCapabilitySnapshot))!.ReturnType);
 

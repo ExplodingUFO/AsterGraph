@@ -1,53 +1,23 @@
 using Avalonia;
 using Avalonia.Controls;
 using AsterGraph.Avalonia.Presentation;
+using AsterGraph.Core.Models;
+using AsterGraph.Editor.Scene;
 
 namespace AsterGraph.Avalonia.Controls.Internal;
 
 internal static class NodeCanvasResizeFeedbackResolver
 {
-    private const double NodeEdgeResizeHitThickness = 10d;
-    private const double NodeCornerResizeHitThickness = 16d;
-
     public static bool TryResolveNode(Control surface, Point point, out NodeCanvasResizeFeedbackHit hit)
-        => TryResolve(
-            surface,
-            point,
-            edgeThickness: NodeEdgeResizeHitThickness,
-            cornerThickness: NodeCornerResizeHitThickness,
-            includeLeftEdge: false,
-            includeTopEdge: false,
-            includeRightEdge: true,
-            includeBottomEdge: true,
-            includeBottomRightCorner: true,
-            GraphResizeFeedbackSurfaceKind.Node,
-            out hit);
+        => TryResolve(surface, point, GraphEditorSceneResizeHitTestProfile.Node, out hit);
 
     public static bool TryResolveGroup(Control surface, Point point, out NodeCanvasResizeFeedbackHit hit)
-        => TryResolve(
-            surface,
-            point,
-            edgeThickness: NodeCanvasGroupChromeMetrics.ResizeHandleThickness,
-            cornerThickness: NodeCanvasGroupChromeMetrics.ResizeHandleThickness,
-            includeLeftEdge: true,
-            includeTopEdge: true,
-            includeRightEdge: true,
-            includeBottomEdge: true,
-            includeBottomRightCorner: false,
-            GraphResizeFeedbackSurfaceKind.Group,
-            out hit);
+        => TryResolve(surface, point, GraphEditorSceneResizeHitTestProfile.Group, out hit);
 
     private static bool TryResolve(
         Control surface,
         Point point,
-        double edgeThickness,
-        double cornerThickness,
-        bool includeLeftEdge,
-        bool includeTopEdge,
-        bool includeRightEdge,
-        bool includeBottomEdge,
-        bool includeBottomRightCorner,
-        GraphResizeFeedbackSurfaceKind surfaceKind,
+        GraphEditorSceneResizeHitTestProfile profile,
         out NodeCanvasResizeFeedbackHit hit)
     {
         ArgumentNullException.ThrowIfNull(surface);
@@ -60,72 +30,60 @@ internal static class NodeCanvasResizeFeedbackResolver
             return false;
         }
 
-        if (includeBottomRightCorner
-            && point.X >= width - cornerThickness
-            && point.Y >= height - cornerThickness)
+        var sceneHit = GraphEditorSceneResizeHitTester.TryHit(
+            new GraphSize(width, height),
+            new GraphPoint(point.X, point.Y),
+            profile);
+        if (sceneHit is null)
         {
-            hit = CreateHit(surface, surfaceKind, GraphResizeFeedbackHandle.BottomRightCorner);
-            return true;
+            return false;
         }
 
-        if (includeLeftEdge && point.X <= edgeThickness)
-        {
-            hit = CreateHit(surface, surfaceKind, GraphResizeFeedbackHandle.LeftEdge);
-            return true;
-        }
-
-        if (includeTopEdge && point.Y <= edgeThickness)
-        {
-            hit = CreateHit(surface, surfaceKind, GraphResizeFeedbackHandle.TopEdge);
-            return true;
-        }
-
-        if (includeRightEdge && point.X >= width - edgeThickness)
-        {
-            hit = CreateHit(surface, surfaceKind, GraphResizeFeedbackHandle.RightEdge);
-            return true;
-        }
-
-        if (includeBottomEdge && point.Y >= height - edgeThickness)
-        {
-            hit = CreateHit(surface, surfaceKind, GraphResizeFeedbackHandle.BottomEdge);
-            return true;
-        }
-
-        return false;
+        hit = CreateHit(surface, sceneHit.Value);
+        return true;
     }
 
     private static NodeCanvasResizeFeedbackHit CreateHit(
         Control surface,
-        GraphResizeFeedbackSurfaceKind surfaceKind,
-        GraphResizeFeedbackHandle handle)
+        GraphEditorSceneResizeHit hit)
     {
-        return surfaceKind switch
+        return hit.SurfaceKind switch
         {
-            GraphResizeFeedbackSurfaceKind.Node => new NodeCanvasResizeFeedbackHit(
+            GraphEditorSceneSurfaceKind.Node => new NodeCanvasResizeFeedbackHit(
                 surface,
-                new GraphResizeFeedbackContext(surfaceKind, handle),
-                handle switch
+                new GraphResizeFeedbackContext(GraphResizeFeedbackSurfaceKind.Node, MapHandle(hit.Handle)),
+                hit.Handle switch
                 {
-                    GraphResizeFeedbackHandle.RightEdge => GraphNodeResizeHandleKind.Right,
-                    GraphResizeFeedbackHandle.BottomEdge => GraphNodeResizeHandleKind.Bottom,
-                    GraphResizeFeedbackHandle.BottomRightCorner => GraphNodeResizeHandleKind.BottomRight,
+                    GraphEditorSceneResizeHandleKind.RightEdge => GraphNodeResizeHandleKind.Right,
+                    GraphEditorSceneResizeHandleKind.BottomEdge => GraphNodeResizeHandleKind.Bottom,
+                    GraphEditorSceneResizeHandleKind.BottomRightCorner => GraphNodeResizeHandleKind.BottomRight,
                     _ => null,
                 },
                 null),
-            GraphResizeFeedbackSurfaceKind.Group => new NodeCanvasResizeFeedbackHit(
+            GraphEditorSceneSurfaceKind.Group => new NodeCanvasResizeFeedbackHit(
                 surface,
-                new GraphResizeFeedbackContext(surfaceKind, handle),
+                new GraphResizeFeedbackContext(GraphResizeFeedbackSurfaceKind.Group, MapHandle(hit.Handle)),
                 null,
-                handle switch
+                hit.Handle switch
                 {
-                    GraphResizeFeedbackHandle.LeftEdge => NodeCanvasGroupResizeEdge.Left,
-                    GraphResizeFeedbackHandle.TopEdge => NodeCanvasGroupResizeEdge.Top,
-                    GraphResizeFeedbackHandle.RightEdge => NodeCanvasGroupResizeEdge.Right,
-                    GraphResizeFeedbackHandle.BottomEdge => NodeCanvasGroupResizeEdge.Bottom,
+                    GraphEditorSceneResizeHandleKind.LeftEdge => NodeCanvasGroupResizeEdge.Left,
+                    GraphEditorSceneResizeHandleKind.TopEdge => NodeCanvasGroupResizeEdge.Top,
+                    GraphEditorSceneResizeHandleKind.RightEdge => NodeCanvasGroupResizeEdge.Right,
+                    GraphEditorSceneResizeHandleKind.BottomEdge => NodeCanvasGroupResizeEdge.Bottom,
                     _ => null,
                 }),
             _ => default,
         };
     }
+
+    private static GraphResizeFeedbackHandle MapHandle(GraphEditorSceneResizeHandleKind handle)
+        => handle switch
+        {
+            GraphEditorSceneResizeHandleKind.LeftEdge => GraphResizeFeedbackHandle.LeftEdge,
+            GraphEditorSceneResizeHandleKind.TopEdge => GraphResizeFeedbackHandle.TopEdge,
+            GraphEditorSceneResizeHandleKind.RightEdge => GraphResizeFeedbackHandle.RightEdge,
+            GraphEditorSceneResizeHandleKind.BottomEdge => GraphResizeFeedbackHandle.BottomEdge,
+            GraphEditorSceneResizeHandleKind.BottomRightCorner => GraphResizeFeedbackHandle.BottomRightCorner,
+            _ => GraphResizeFeedbackHandle.BottomRightCorner,
+        };
 }
