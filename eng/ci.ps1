@@ -159,7 +159,9 @@ function Invoke-DotNetCapture {
     [string[]]$Arguments,
 
     [Parameter(Mandatory = $true)]
-    [string]$CapturePath
+    [string]$CapturePath,
+
+    [switch]$Append
   )
 
   $captureDirectory = Split-Path -Parent $CapturePath
@@ -168,7 +170,12 @@ function Invoke-DotNetCapture {
   }
 
   Write-Host "==> dotnet $($Arguments -join ' ')" -ForegroundColor Cyan
-  & dotnet @Arguments 2>&1 | Tee-Object -FilePath $CapturePath
+  if ($Append) {
+    & dotnet @Arguments 2>&1 | Tee-Object -FilePath $CapturePath -Append
+  }
+  else {
+    & dotnet @Arguments 2>&1 | Tee-Object -FilePath $CapturePath
+  }
   $exitCode = $LASTEXITCODE
 
   if ($exitCode -ne 0) {
@@ -645,8 +652,27 @@ function Invoke-ScaleSmoke {
     'net8.0',
     '--no-build',
     '--no-restore',
-    '--nologo'
+    '--nologo',
+    '--',
+    '--tier',
+    'baseline'
   ) -CapturePath $scaleSmokeProofPath
+
+  Invoke-DotNetCapture -Arguments @(
+    'run',
+    '--project',
+    (Resolve-ProjectPath -RelativePath $scaleSmokeProject),
+    '-c',
+    $Configuration,
+    '--framework',
+    'net8.0',
+    '--no-build',
+    '--no-restore',
+    '--nologo',
+    '--',
+    '--tier',
+    'large'
+  ) -CapturePath $scaleSmokeProofPath -Append
 }
 
 function Invoke-DemoProof {
@@ -766,8 +792,10 @@ function Invoke-PrereleaseNotesValidation {
     'DISCONNECT_FLOW_OK:True',
     'HOST_SAMPLE_NET10_OK:True',
     'PACKAGE_SMOKE_OK:True',
-    'SCALE_TIER_BUDGET:',
-    'SCALE_PERFORMANCE_BUDGET_OK:',
+    'SCALE_TIER_BUDGET:baseline',
+    'SCALE_PERFORMANCE_BUDGET_OK:baseline:True:',
+    'SCALE_TIER_BUDGET:large',
+    'SCALE_PERFORMANCE_BUDGET_OK:large:True:',
     'SCALE_HISTORY_CONTRACT_OK:',
     'COVERAGE_REPORT_OK:'
   )) {
