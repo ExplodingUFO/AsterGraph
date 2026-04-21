@@ -31,6 +31,7 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
     private readonly IGraphWorkspaceService _workspaceService;
     private readonly IGraphFragmentWorkspaceService _fragmentWorkspaceService;
     private readonly IGraphFragmentLibraryService _fragmentLibraryService;
+    private readonly IGraphSceneSvgExportService _sceneSvgExportService;
     private readonly GraphEditorHistoryService _historyService = new();
     private readonly GraphEditorKernelViewportCoordinator _viewportCoordinator = new(DefaultZoom, DefaultPanX, DefaultPanY);
     private readonly GraphEditorKernelCompatibilityQueries _compatibilityQueries;
@@ -46,6 +47,7 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
     private readonly GraphEditorKernelClipboardCoordinator _clipboardCoordinator;
     private readonly GraphEditorKernelFragmentStorageHost _fragmentStorageHost;
     private readonly GraphEditorKernelFragmentStorageCoordinator _fragmentStorageCoordinator;
+    private readonly GraphEditorKernelSceneSvgExportCoordinator _sceneSvgExportCoordinator;
     private readonly GraphEditorKernelCommandRouterHost _commandRouterHost;
     private readonly GraphEditorKernelCommandRouter _commandRouter;
     private readonly GraphEditorKernelHistoryCoordinator _historyCoordinator;
@@ -79,7 +81,8 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
         GraphEditorStyleOptions styleOptions,
         GraphEditorBehaviorOptions behaviorOptions,
         IGraphTextClipboardBridge? textClipboardBridge = null,
-        IGraphClipboardPayloadSerializer? clipboardPayloadSerializer = null)
+        IGraphClipboardPayloadSerializer? clipboardPayloadSerializer = null,
+        IGraphSceneSvgExportService? sceneSvgExportService = null)
     {
         ArgumentNullException.ThrowIfNull(document);
         ArgumentNullException.ThrowIfNull(nodeCatalog);
@@ -94,6 +97,7 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
         _workspaceService = workspaceService;
         _fragmentWorkspaceService = fragmentWorkspaceService;
         _fragmentLibraryService = fragmentLibraryService;
+        _sceneSvgExportService = sceneSvgExportService ?? new GraphSceneSvgExportService();
         _textClipboardBridge = textClipboardBridge;
         _clipboardPayloadSerializer = clipboardPayloadSerializer ?? new GraphClipboardPayloadSerializer();
         _compatibilityQueries = new GraphEditorKernelCompatibilityQueries(compatibilityService, nodeCatalog);
@@ -107,6 +111,7 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
         _clipboardCoordinator = new GraphEditorKernelClipboardCoordinator(_clipboardHost);
         _fragmentStorageHost = new GraphEditorKernelFragmentStorageHost(this);
         _fragmentStorageCoordinator = new GraphEditorKernelFragmentStorageCoordinator(_fragmentStorageHost, _clipboardCoordinator);
+        _sceneSvgExportCoordinator = new GraphEditorKernelSceneSvgExportCoordinator(this);
         _commandRouterHost = new GraphEditorKernelCommandRouterHost(this);
         _commandRouter = new GraphEditorKernelCommandRouter(_commandRouterHost);
         _historyCoordinator = new GraphEditorKernelHistoryCoordinator(this);
@@ -187,6 +192,9 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
 
     public string TryExportSelectionAsTemplate(string? name)
         => _fragmentStorageCoordinator.TryExportSelectionAsTemplate(name);
+
+    public bool TryExportSceneAsSvg(string? path)
+        => _sceneSvgExportCoordinator.TryExport(path);
 
     public bool TryImportFragmentTemplate(string path)
         => _fragmentStorageCoordinator.TryImportFragmentTemplate(path);
@@ -1119,6 +1127,15 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
 
     public GraphDocument CreateDocumentSnapshot()
         => CloneDocument(_document);
+
+    public GraphEditorSceneSnapshot GetSceneSnapshot()
+        => new(
+            CreateDocumentSnapshot(),
+            GetSelectionSnapshot(),
+            GetViewportSnapshot(),
+            GetNodeSurfaceSnapshots(),
+            GetNodeGroupSnapshots(),
+            GetPendingConnectionSnapshot());
 
     public GraphDocument CreateActiveScopeDocumentSnapshot()
         => CreateScopedDocumentSnapshot(_activeGraphId);

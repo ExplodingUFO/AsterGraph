@@ -20,6 +20,7 @@ public sealed partial class GraphEditorViewModel
                 _owner,
                 hasFragmentWorkspaceService: _owner._fragmentWorkspaceService is not null,
                 hasFragmentLibraryService: _owner._fragmentLibraryService is not null,
+                hasSceneSvgExportService: _owner._sceneSvgExportService is not null,
                 hasClipboardPayloadSerializer: _owner._clipboardPayloadSerializer is not null,
                 hasPluginLoader: true,
                 hasContextMenuAugmentor: _owner._contextMenuAugmentor is not null,

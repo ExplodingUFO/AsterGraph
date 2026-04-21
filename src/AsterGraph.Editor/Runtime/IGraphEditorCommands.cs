@@ -96,6 +96,14 @@ public interface IGraphEditorCommands
         => throw new NotSupportedException();
 
     /// <summary>
+    /// Attempts to export the current immutable scene snapshot as an SVG document.
+    /// </summary>
+    /// <param name="path">Optional SVG destination override.</param>
+    /// <returns><see langword="true"/> when the scene export succeeds.</returns>
+    bool TryExportSceneAsSvg(string? path = null)
+        => throw new NotSupportedException();
+
+    /// <summary>
     /// Attempts to import one saved fragment template by path and paste it into the active graph scope.
     /// </summary>
     /// <param name="path">Saved template path.</param>

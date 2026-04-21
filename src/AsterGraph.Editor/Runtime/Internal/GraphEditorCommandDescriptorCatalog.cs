@@ -47,6 +47,7 @@ internal static class GraphEditorCommandDescriptorCatalog
             ["workspace.load"] = new("Load Workspace", "workspace", "load", "Ctrl+O"),
             ["clipboard.copy"] = new("Copy Selection", "clipboard", "copy", "Ctrl+C"),
             ["clipboard.paste"] = new("Paste Selection", "clipboard", "paste", "Ctrl+V"),
+            ["export.scene-svg"] = new("Export Scene As SVG", "export", "export", null),
             ["fragments.export-selection"] = new("Export Selection Fragment", "fragments", "export", null),
             ["fragments.import"] = new("Import Fragment", "fragments", "import", null),
             ["fragments.clear-workspace"] = new("Clear Saved Fragment", "fragments", "delete", null),

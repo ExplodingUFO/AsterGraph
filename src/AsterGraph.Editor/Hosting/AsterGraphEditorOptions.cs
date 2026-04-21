@@ -68,6 +68,11 @@ public sealed record AsterGraphEditorOptions
     public IGraphFragmentLibraryService? FragmentLibraryService { get; init; }
 
     /// <summary>
+    /// Optional SVG scene-export service.
+    /// </summary>
+    public IGraphSceneSvgExportService? SceneSvgExportService { get; init; }
+
+    /// <summary>
     /// Optional fragment clipboard-payload serializer.
     /// </summary>
     public IGraphClipboardPayloadSerializer? ClipboardPayloadSerializer { get; init; }

@@ -105,6 +105,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     private readonly GraphSelectionClipboard _selectionClipboard;
     private readonly IGraphFragmentWorkspaceService _fragmentWorkspaceService;
     private readonly IGraphFragmentLibraryService _fragmentLibraryService;
+    private readonly IGraphSceneSvgExportService _sceneSvgExportService;
     private readonly IGraphClipboardPayloadSerializer _clipboardPayloadSerializer;
     private readonly GraphEditorHistoryService _historyService;
     private readonly GraphEditorDocumentProjectionApplier _documentProjectionApplier;
@@ -180,6 +181,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// <param name="localizationProvider">编辑器内置文案本地化提供器。</param>
     /// <param name="clipboardPayloadSerializer">片段和剪贴板载荷的序列化器。</param>
     /// <param name="diagnosticsSink">可选的宿主诊断发布器。</param>
+    /// <param name="sceneSvgExportService">可选的 SVG 场景导出服务。</param>
     /// <remarks>
     /// 该构造函数保留为受支持的兼容入口，供现有宿主继续沿用
     /// <c>new GraphEditorViewModel(...)</c> 的组合方式。
@@ -201,7 +203,8 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         INodePresentationProvider? nodePresentationProvider = null,
         IGraphLocalizationProvider? localizationProvider = null,
         IGraphClipboardPayloadSerializer? clipboardPayloadSerializer = null,
-        IGraphEditorDiagnosticsSink? diagnosticsSink = null)
+        IGraphEditorDiagnosticsSink? diagnosticsSink = null,
+        IGraphSceneSvgExportService? sceneSvgExportService = null)
     {
         _nodeCatalog = nodeCatalog ?? throw new ArgumentNullException(nameof(nodeCatalog));
         _compatibilityService = compatibilityService ?? throw new ArgumentNullException(nameof(compatibilityService));
@@ -210,6 +213,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
         _clipboardPayloadSerializer = clipboardPayloadSerializer ?? new GraphClipboardPayloadSerializer();
         _fragmentWorkspaceService = fragmentWorkspaceService ?? new GraphFragmentWorkspaceService(clipboardPayloadSerializer: _clipboardPayloadSerializer);
         _fragmentLibraryService = fragmentLibraryService ?? new GraphFragmentLibraryService(clipboardPayloadSerializer: _clipboardPayloadSerializer);
+        _sceneSvgExportService = sceneSvgExportService ?? new GraphSceneSvgExportService();
         _historyService = new GraphEditorHistoryService();
         _contextMenuAugmentor = contextMenuAugmentor;
         _nodePresentationProvider = nodePresentationProvider;
@@ -333,7 +337,8 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             StyleOptions,
             BehaviorOptions,
             textClipboardBridge: null,
-            _clipboardPayloadSerializer);
+            _clipboardPayloadSerializer,
+            _sceneSvgExportService);
         _sessionHost = new GraphEditorViewModelKernelAdapter(_kernel, this);
         Session = new GraphEditorSession(_sessionHost, diagnosticsSink, CreateSessionDescriptorSupport());
 

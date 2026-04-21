@@ -47,6 +47,16 @@ Short version:
 - no-op interactions must not latch fake dirty or undo state
 - retained and runtime mutations still share one kernel-owned history/save authority
 
+## Export Versus Persistence
+
+Treat these as three separate host seams:
+
+- workspace persistence: `IGraphWorkspaceService` owns save/load of the full editable graph state
+- fragment persistence: fragment workspace + fragment library services own reusable selection payloads
+- scene export: `IGraphSceneSvgExportService` owns non-workspace SVG output built from `IGraphEditorSession.Queries.GetSceneSnapshot()`
+
+The shipped SVG export seam is intentionally separate from workspace save/load and does not replace fragment/template flows.
+
 ## Extension Contract
 
 The stability and precedence rules are published in [Extension Contracts](./extension-contracts.md).

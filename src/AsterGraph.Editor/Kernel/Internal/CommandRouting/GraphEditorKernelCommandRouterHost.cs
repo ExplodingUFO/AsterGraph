@@ -59,6 +59,9 @@ internal sealed partial class GraphEditorKernel
 
         bool IGraphEditorKernelCommandRouterHost.FragmentWorkspaceExists => _owner._fragmentWorkspaceService.Exists();
 
+        bool IGraphEditorKernelCommandRouterHost.CanExportSceneAsSvg
+            => _owner._sceneSvgExportCoordinator.CanExport;
+
         bool IGraphEditorKernelCommandRouterHost.CanNavigateToParentGraphScope
             => _owner.GetScopeNavigationSnapshot().CanNavigateToParent;
 
@@ -94,6 +97,9 @@ internal sealed partial class GraphEditorKernel
 
         string IGraphEditorKernelCommandRouterHost.TryExportSelectionAsTemplate(string? name)
             => _owner.TryExportSelectionAsTemplate(name);
+
+        bool IGraphEditorKernelCommandRouterHost.TryExportSceneAsSvg(string? path)
+            => _owner.TryExportSceneAsSvg(path);
 
         void IGraphEditorKernelCommandRouterHost.SetNodePositions(IReadOnlyList<NodePositionSnapshot> positions, bool updateStatus)
             => _owner.SetNodePositions(positions, updateStatus);

@@ -98,7 +98,8 @@ public static class AsterGraphEditorFactory
             resolved.NodePresentationProvider,
             resolved.LocalizationProvider,
             resolved.ClipboardPayloadSerializer,
-            resolved.Options.DiagnosticsSink);
+            resolved.Options.DiagnosticsSink,
+            resolved.SceneSvgExportService);
 
         if (editor.Session is GraphEditorSession runtimeSession)
         {
@@ -136,7 +137,8 @@ public static class AsterGraphEditorFactory
             resolved.StyleOptions,
             resolved.BehaviorOptions,
             resolved.Options.PlatformServices?.TextClipboardBridge,
-            resolved.ClipboardPayloadSerializer);
+            resolved.ClipboardPayloadSerializer,
+            resolved.SceneSvgExportService);
         var session = new GraphEditorSession(
             kernel,
             resolved.Options.DiagnosticsSink,
@@ -145,6 +147,7 @@ public static class AsterGraphEditorFactory
                 (key, fallback) => resolved.LocalizationProvider?.GetString(key, fallback) ?? fallback,
                 hasFragmentWorkspaceService: true,
                 hasFragmentLibraryService: true,
+                hasSceneSvgExportService: true,
                 hasClipboardPayloadSerializer: true,
                 hasPluginLoader: true,
                 hasPluginTrustPolicy: resolved.Options.PluginTrustPolicy is not null,
@@ -175,6 +178,8 @@ public static class AsterGraphEditorFactory
         var fragmentLibraryService = options.FragmentLibraryService ?? new GraphFragmentLibraryService(
             GraphEditorStorageDefaults.GetFragmentLibraryPath(options.StorageRootPath),
             clipboardPayloadSerializer);
+        var sceneSvgExportService = options.SceneSvgExportService ?? new GraphSceneSvgExportService(
+            GraphEditorStorageDefaults.GetSceneSvgExportPath(options.StorageRootPath));
         var styleOptions = options.StyleOptions ?? GraphEditorStyleOptions.Default;
         var behaviorOptions = ResolveBehaviorOptions(options.BehaviorOptions, styleOptions);
         var pluginLoadResult = AsterGraphPluginLoader.Load(options.PluginRegistrations, options.PluginTrustPolicy);
@@ -188,6 +193,7 @@ public static class AsterGraphEditorFactory
             workspaceService,
             fragmentWorkspaceService,
             fragmentLibraryService,
+            sceneSvgExportService,
             styleOptions,
             behaviorOptions,
             pluginLoadResult,
@@ -262,6 +268,7 @@ public static class AsterGraphEditorFactory
         IGraphWorkspaceService WorkspaceService,
         IGraphFragmentWorkspaceService FragmentWorkspaceService,
         IGraphFragmentLibraryService FragmentLibraryService,
+        IGraphSceneSvgExportService SceneSvgExportService,
         GraphEditorStyleOptions StyleOptions,
         GraphEditorBehaviorOptions BehaviorOptions,
         GraphEditorPluginLoadResult PluginLoadResult,

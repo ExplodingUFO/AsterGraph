@@ -33,6 +33,7 @@ internal interface IGraphEditorSessionHost
     bool TryImportFragment(string? path);
     bool TryClearWorkspaceFragment(string? path);
     string TryExportSelectionAsTemplate(string? name);
+    bool TryExportSceneAsSvg(string? path);
     bool TryImportFragmentTemplate(string path);
     bool TryDeleteFragmentTemplate(string path);
     void SetNodePositions(IReadOnlyList<NodePositionSnapshot> positions, bool updateStatus);
