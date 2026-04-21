@@ -1,6 +1,6 @@
 # Consumer Sample
 
-`tools/AsterGraph.ConsumerSample.Avalonia` is the medium hosted-UI sample between the smallest `HelloWorld.Avalonia` route and the full `AsterGraph.Demo` showcase host.
+`tools/AsterGraph.ConsumerSample.Avalonia` is the medium hosted-UI sample on the canonical session/runtime route, between the smallest `HelloWorld.Avalonia` route and the full `AsterGraph.Demo` showcase host.
 
 ## What It Proves
 
@@ -77,5 +77,6 @@ If you want to build the same medium host in your own app, copy these seams in t
 
 - [Quick Start](./quick-start.md)
 - [Host Integration](./host-integration.md)
+- [Sample README](../../tools/AsterGraph.ConsumerSample.Avalonia/README.md)
 - [Plugin And Custom Node Recipe](./plugin-recipe.md)
 - [Alpha Status](./alpha-status.md)

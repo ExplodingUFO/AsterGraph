@@ -13,6 +13,8 @@
 
 前两条是新代码的 canonical surface。第 3 条仍然受支持，但只作为迁移期保留的 compatibility facade。
 
+如果宿主管的是自己的 UI，那么第 1 条就是 canonical 的原生 / 自定义 UI 路线；你是在同一个 session/runtime owner 上组合自己的表面，而不是再引入一套第二模型。
+
 `AsterGraphCanvasViewFactory`、`AsterGraphInspectorViewFactory`、`AsterGraphMiniMapViewFactory` 这些独立表面都属于第 2 条路线下的组合细节，不是第四条主路线。
 
 ## Consumer Route Matrix
@@ -29,7 +31,7 @@
 
 - `AsterGraph.HelloWorld` = 仅运行时第一跑样例
 - `AsterGraph.HelloWorld.Avalonia` = 默认 Avalonia UI 第一跑样例
-- `AsterGraph.ConsumerSample.Avalonia` = 中等复杂度 hosted-UI 样例，展示宿主动作、参数编辑和一个可信插件
+- `AsterGraph.ConsumerSample.Avalonia` = canonical 路线上的中等复杂度 hosted-UI 样例，展示宿主动作、参数编辑和一个可信插件
 - `AsterGraph.HostSample` = 推荐的仅运行时和默认 UI 两条路线的窄范围验证样例
 - `AsterGraph.PackageSmoke` = 打包消费验证
 - `AsterGraph.ScaleSmoke` = 公开的大图基线加 history/state 验证

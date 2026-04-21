@@ -5,7 +5,7 @@
   <img alt="简体中文（当前）" src="https://img.shields.io/badge/简体中文-当前-111827?style=flat-square" />
 </p>
 
-AsterGraph 是一个面向 .NET 的模块化节点图编辑器工具包，提供可复用的编辑器运行时、默认 Avalonia UI 路径，以及面向宿主的插件、自动化、本地化、诊断和呈现扩展边界。
+AsterGraph 是一个面向 .NET 的模块化节点图编辑器工具包，提供可复用的编辑器运行时、面向自定义 UI 或原生壳层的 canonical session/runtime 路线、默认 Avalonia hosted-UI 路径，以及面向宿主的插件、自动化、本地化、诊断和呈现扩展边界。
 
 ## 公开 Alpha
 
@@ -22,9 +22,9 @@ AsterGraph 是一个面向 .NET 的模块化节点图编辑器工具包，提供
 
 | 我现在要做什么 | 先看哪里 | 为什么 |
 | --- | --- | --- |
-| 想最快跑起来 | [`tools/AsterGraph.HelloWorld`](./tools/AsterGraph.HelloWorld/) | 最小仅运行时样例；一条路径、一个命令 |
+| 想最快跑起来 | [`tools/AsterGraph.HelloWorld`](./tools/AsterGraph.HelloWorld/) | 最小仅运行时样例；面向自定义 UI 或原生壳层的 canonical 路线 |
 | 想嵌入默认 Avalonia UI | [`tools/AsterGraph.HelloWorld.Avalonia`](./tools/AsterGraph.HelloWorld.Avalonia/) | 基于 factory 路线的最小默认 UI 样例 |
-| 想先看一个更真实的宿主集成 | [Consumer Sample](./docs/zh-CN/consumer-sample.md) | 中等复杂度样例，包含宿主动作、参数编辑和一个可信插件 |
+| 想先看一个更真实的宿主集成 | [Consumer Sample](./tools/AsterGraph.ConsumerSample.Avalonia/README.md) | 同一条 canonical 路线上的中等复杂度样例，包含宿主动作、参数编辑和一个可信插件 |
 | 想接到现有宿主里 | [Host Integration](./docs/zh-CN/host-integration.md) | 路线矩阵、包边界和迁移说明 |
 | 想先把完整能力看一遍 | [Demo Guide](./docs/zh-CN/demo-guide.md) | 展示插件、自动化、本地化和独立表面 |
 | 想验证打包消费或维护发布 | [CONTRIBUTING.md](./CONTRIBUTING.md) 和 [Public Launch Checklist](./docs/zh-CN/public-launch-checklist.md) | proof lanes、CI 和 release 流程 |
@@ -60,7 +60,7 @@ dotnet add package AsterGraph.Abstractions --prerelease
 
 - [`tools/AsterGraph.HelloWorld`](./tools/AsterGraph.HelloWorld/) = 仅运行时第一跑样例
 - [`tools/AsterGraph.HelloWorld.Avalonia`](./tools/AsterGraph.HelloWorld.Avalonia/) = 默认 Avalonia UI 第一跑样例
-- [`tools/AsterGraph.ConsumerSample.Avalonia`](./tools/AsterGraph.ConsumerSample.Avalonia/) = 中等复杂度 hosted-UI consumer 样例，展示宿主动作、参数编辑和一个可信插件
+- [`tools/AsterGraph.ConsumerSample.Avalonia`](./tools/AsterGraph.ConsumerSample.Avalonia/README.md) = 中等复杂度 hosted-UI consumer 样例，展示宿主动作、参数编辑和一个可信插件
 - [`tools/AsterGraph.HostSample`](./tools/AsterGraph.HostSample/) = 仅运行时 / 默认 UI 两条推荐路线的最小验证样例
 - [`tools/AsterGraph.PackageSmoke`](./tools/AsterGraph.PackageSmoke/) = 打包消费验证
 - [`tools/AsterGraph.ScaleSmoke`](./tools/AsterGraph.ScaleSmoke/) = 公开的大图基线加 history/state 验证

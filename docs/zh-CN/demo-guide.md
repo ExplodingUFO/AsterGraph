@@ -5,6 +5,7 @@
 ## 它在证明什么
 
 - 主 demo 壳层通过 `AsterGraphEditorFactory.Create(...)` 组合，但共享运行时 owner 仍然是 `Session`
+- demo 只是把同一条 canonical session/runtime 路线投影成更丰富的宿主壳层，并没有引入第二套编辑模型
 - Avalonia 表面通过 view factory 组合
 - definition-driven inspector 分组、内建 editor 和校验提示已经能在真实 demo 节点定义上直接看到
 - plugin trust / discovery / load 在 UI 里可见，而且会显示 version、target framework、fingerprint、reason 和 allowlist 导入/导出
@@ -78,7 +79,7 @@ dotnet run --project src/AsterGraph.Demo/AsterGraph.Demo.csproj --nologo -- --pr
 
 - `HelloWorld` = 最小仅运行时第一跑样例
 - `HelloWorld.Avalonia` = 最小 hosted-UI 第一跑样例
-- `ConsumerSample.Avalonia` = 带宿主动作、参数编辑和一个可信插件的真实 hosted-UI 样例
+- `ConsumerSample.Avalonia` = canonical 路线上的真实 hosted-UI 样例，带宿主动作、参数编辑和一个可信插件
 - `HostSample` = 推荐消费路线的窄范围验证样例
 - `Demo` = 完整能力展示与宿主边界说明
 

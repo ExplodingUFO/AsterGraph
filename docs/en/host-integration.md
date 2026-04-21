@@ -13,6 +13,8 @@ This guide expands the supported host routes without turning the public onboardi
 
 Routes 1 and 2 are the canonical surfaces for new work. Route 3 remains supported only as a retained compatibility facade during migration.
 
+If the host owns its UI, route 1 is the canonical native/custom-UI path; you compose your own surface around the same session/runtime owner instead of introducing a second model.
+
 Standalone Avalonia surfaces such as `AsterGraphCanvasViewFactory`, `AsterGraphInspectorViewFactory`, and `AsterGraphMiniMapViewFactory` belong to route 2. They are composition details under the hosted-UI family, not a fourth primary route.
 
 ## Consumer Route Matrix
@@ -29,7 +31,7 @@ Standalone Avalonia surfaces such as `AsterGraphCanvasViewFactory`, `AsterGraphI
 
 - `AsterGraph.HelloWorld` = first-run sample for the runtime-only path
 - `AsterGraph.HelloWorld.Avalonia` = first-run sample for the shipped Avalonia UI path
-- `AsterGraph.ConsumerSample.Avalonia` = medium hosted-UI sample with host actions, parameter editing, and one trusted plugin
+- `AsterGraph.ConsumerSample.Avalonia` = medium hosted-UI sample on the canonical route with host actions, parameter editing, and one trusted plugin
 - `AsterGraph.HostSample` = narrow proof harness for the canonical runtime-only and hosted-UI routes
 - `AsterGraph.PackageSmoke` = packed-package proof
 - `AsterGraph.ScaleSmoke` = public scale baseline plus history/state proof

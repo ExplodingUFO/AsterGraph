@@ -7,7 +7,7 @@ This guide is the shortest path from a blank host to a running AsterGraph integr
 | Host goal | Start package | Why |
 | --- | --- | --- |
 | Default Avalonia UI host | `AsterGraph.Avalonia` | main UI entry with the shipped shell and view factories |
-| Runtime-only or custom UI host | `AsterGraph.Editor` | canonical session/runtime surface |
+| Runtime-only or custom UI host | `AsterGraph.Editor` | canonical session/runtime surface for custom UI or native shells |
 | Contract-first integration | `AsterGraph.Abstractions` | stable identifiers, definitions, and provider contracts |
 
 Add `AsterGraph.Core` only when the host also needs direct `GraphDocument`, serialization, or compatibility APIs.
@@ -51,6 +51,8 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 
 Use `HelloWorld` when you want the simplest runtime-only starting point. Use `HelloWorld.Avalonia` when you want the smallest shipped-shell sample. Use `ConsumerSample.Avalonia` when you want one realistic host before jumping to `Demo`. Use `HostSample` only when you want a proof harness for canonical route validation.
 
+The sample README is [`tools/AsterGraph.ConsumerSample.Avalonia/README.md`](../../tools/AsterGraph.ConsumerSample.Avalonia/README.md).
+
 ## 4. Canonical Adoption Routes
 
 | If your host needs | Start here | First sample |
@@ -62,7 +64,7 @@ Use `HelloWorld` when you want the simplest runtime-only starting point. Use `He
 | Retained migration | `new GraphEditorViewModel(...)` + `new GraphEditorView { Editor = editor }` | [Host Integration](./host-integration.md) |
 
 For new work, start with the runtime/session route or the shipped Avalonia route. Treat the retained route as migration-only.
-When you choose the shipped Avalonia route, keep `Editor.Session` as the runtime owner for host actions, diagnostics, automation, and proof logic.
+If the host owns its UI, the runtime/session route is the canonical native path; `Editor.Session` still owns host actions, diagnostics, automation, and proof logic.
 
 ## 5. Minimal Hosted-UI Composition
 

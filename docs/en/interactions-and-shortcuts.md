@@ -45,3 +45,4 @@ If you embed `NodeCanvas` as a standalone surface and want to own shortcuts your
 ```
 
 Keep the command route explicit in host documentation when you do this so users do not have to guess whether the canvas still owns `Ctrl+Z`, `Ctrl+S`, or clipboard shortcuts.
+This is the same shortcut-ownership pattern used by custom UI hosts on the canonical runtime/session route.
