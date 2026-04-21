@@ -226,6 +226,7 @@ public sealed class GraphEditorProofRingTests
         Assert.Contains("query.node-surface-snapshots", featureIds);
         Assert.Contains("query.node-groups", featureIds);
         Assert.Contains("query.node-group-snapshots", featureIds);
+        Assert.Contains("query.hierarchy-state-snapshot", featureIds);
         Assert.Contains("groups.create", commandIds);
         Assert.Contains("groups.collapse", commandIds);
         Assert.Contains("groups.move", commandIds);

@@ -107,6 +107,13 @@ public interface IGraphEditorQueries
         => throw new NotSupportedException();
 
     /// <summary>
+    /// Gets canonical hierarchy state for the active scope, including group membership, collapsed descendants, and composite ownership.
+    /// </summary>
+    /// <returns>Stable hierarchy-state snapshot for host-side hierarchy-aware authoring surfaces.</returns>
+    GraphEditorHierarchyStateSnapshot GetHierarchyStateSnapshot()
+        => throw new NotSupportedException();
+
+    /// <summary>
     /// Gets host-facing composite node snapshots for the current root graph.
     /// </summary>
     /// <returns>A stable read-only composite snapshot collection.</returns>

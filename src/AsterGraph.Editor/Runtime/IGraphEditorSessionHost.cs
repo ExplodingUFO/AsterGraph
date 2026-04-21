@@ -86,6 +86,7 @@ internal interface IGraphEditorSessionHost
     IReadOnlyList<GraphEditorFeatureDescriptorSnapshot> GetFeatureDescriptors();
     IReadOnlyList<GraphEditorFragmentTemplateSnapshot> GetFragmentTemplateSnapshots();
     IReadOnlyList<GraphEditorNodeSurfaceSnapshot> GetNodeSurfaceSnapshots();
+    GraphEditorHierarchyStateSnapshot GetHierarchyStateSnapshot();
     IReadOnlyList<GraphEditorCompositeNodeSnapshot> GetCompositeNodeSnapshots();
     GraphEditorScopeNavigationSnapshot GetScopeNavigationSnapshot()
         => new(CreateDocumentSnapshot().RootGraphId, null, false, []);
