@@ -29,6 +29,7 @@ Console.WriteLine("HOST_SAMPLE_PATHS:CreateSession:Create:AsterGraphAvaloniaView
 Console.WriteLine($"HOST_SAMPLE_RUNTIME_OK:{runtimeResult.IsOk}:{runtimeResult.FeatureDescriptorCount}:{runtimeResult.SaveCalls}:{runtimeResult.ConnectionCount}");
 Console.WriteLine($"HOST_SAMPLE_CLIPBOARD_OK:{runtimeResult.ClipboardOk}:{runtimeResult.PastedNodeCount}");
 Console.WriteLine($"HOST_SAMPLE_EXPORT_OK:{runtimeResult.ExportOk}:{runtimeResult.ExportPath}");
+Console.WriteLine($"HOST_SAMPLE_RECONNECT_OK:{hostedUiResult.ReconnectOk}");
 Console.WriteLine($"HOST_SAMPLE_HOSTED_UI_OK:{hostedUiResult.IsOk}:{hostedUiResult.ChromeMode}:{hostedUiResult.EnableDefaultContextMenu}:{hostedUiResult.CommandShortcutPolicyEnabled}:{hostedUiResult.ConnectionCount}");
 Console.WriteLine($"HOST_SAMPLE_OK:{allOk}");
 
@@ -121,11 +122,25 @@ static RouteResult VerifyHostedUiRoute(INodeCatalog catalog, NodeDefinitionId de
     });
 
     editor.ConnectPorts(SourceNodeId, SourcePortId, TargetNodeId, TargetPortId);
+    var initialConnections = editor.Session.Queries.CreateDocumentSnapshot().Connections;
+    var reconnectStarted = initialConnections.Count == 1
+        && editor.Session.Commands.TryReconnectConnection(initialConnections[0].Id, updateStatus: false);
+    var pendingAfterReconnect = editor.Session.Queries.GetPendingConnectionSnapshot();
+    var connectionsAfterReconnect = editor.Session.Queries.CreateDocumentSnapshot().Connections.Count;
+    editor.Session.Commands.CompleteConnection(TargetNodeId, TargetPortId);
     editor.SaveWorkspace();
 
     var snapshot = editor.Session.Queries.CreateDocumentSnapshot();
+    var pendingAfterComplete = editor.Session.Queries.GetPendingConnectionSnapshot();
+    var reconnectOk = reconnectStarted
+        && connectionsAfterReconnect == 0
+        && pendingAfterReconnect.HasPendingConnection
+        && pendingAfterReconnect.SourceNodeId == SourceNodeId
+        && pendingAfterReconnect.SourcePortId == SourcePortId
+        && !pendingAfterComplete.HasPendingConnection
+        && snapshot.Connections.Count == 1;
     var isOk = view.Editor == editor
-        && snapshot.Connections.Count == 1
+        && reconnectOk
         && workspace.SaveCalls == 1
         && workspace.Exists()
         && view.ChromeMode == GraphEditorViewChromeMode.CanvasOnly
@@ -143,7 +158,8 @@ static RouteResult VerifyHostedUiRoute(INodeCatalog catalog, NodeDefinitionId de
         ExportPath: "-",
         view.ChromeMode,
         view.EnableDefaultContextMenu,
-        view.CommandShortcutPolicy.Enabled);
+        view.CommandShortcutPolicy.Enabled,
+        reconnectOk);
 }
 
 static NodeCatalog CreateCatalog(NodeDefinitionId definitionId)
@@ -243,7 +259,8 @@ file readonly record struct RouteResult(
     string ExportPath,
     GraphEditorViewChromeMode ChromeMode,
     bool EnableDefaultContextMenu,
-    bool CommandShortcutPolicyEnabled);
+    bool CommandShortcutPolicyEnabled,
+    bool ReconnectOk = true);
 
 file sealed class RecordingTextClipboardBridge : IGraphTextClipboardBridge
 {
