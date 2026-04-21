@@ -65,12 +65,12 @@ public static class DemoProof
         var shell = viewModel ?? throw new InvalidOperationException("Demo view model was not created.");
 
         shell.Editor.SelectSingleNode(shell.Editor.Nodes[0], updateStatus: false);
-        var inspectorProjectionMs = MeasureMilliseconds(() => shell.Editor.Session.Queries.GetSelectedNodeParameterSnapshots().ToArray());
+        var inspectorProjectionMs = MeasureMilliseconds(() => shell.Session.Queries.GetSelectedNodeParameterSnapshots().ToArray());
         var pluginScanMs = MeasureMilliseconds(() => shell.PluginCandidates.ToArray());
 
         var nodeCountBeforeUndo = shell.Editor.Nodes.Count;
-        shell.Editor.Session.Commands.AddNode(shell.Editor.NodeTemplates[0].Definition.Id, new GraphPoint(920, 260));
-        var undoAction = AsterGraphHostedActionFactory.CreateCommandActions(shell.Editor.Session, ["history.undo"])
+        shell.Session.Commands.AddNode(shell.Editor.NodeTemplates[0].Definition.Id, new GraphPoint(920, 260));
+        var undoAction = AsterGraphHostedActionFactory.CreateCommandActions(shell.Session, ["history.undo"])
             .Single(action => string.Equals(action.Id, "history.undo", StringComparison.Ordinal));
         var commandLatencyMs = MeasureMilliseconds(() => undoAction.TryExecute());
         var commandSurfaceOk = undoAction.CanExecute && shell.Editor.Nodes.Count == nodeCountBeforeUndo;
@@ -81,10 +81,10 @@ public static class DemoProof
         shell.Editor.SelectSingleNode(lightingNode, updateStatus: false);
         var pulsePort = lightingNode.Inputs.Single(port => string.Equals(port.Id, "pulse", StringComparison.Ordinal));
         var rimMaskPort = lightingNode.Inputs.Single(port => string.Equals(port.Id, "rimMask", StringComparison.Ordinal));
-        var lightSurface = shell.Editor.Session.Queries.GetNodeSurfaceSnapshots()
+        var lightSurface = shell.Session.Queries.GetNodeSurfaceSnapshots()
             .Single(snapshot => string.Equals(snapshot.NodeId, "light", StringComparison.Ordinal));
         var lightingNodeTier = lightSurface.ActiveTier;
-        var terrainGroup = shell.Editor.Session.Queries.GetNodeGroups()
+        var terrainGroup = shell.Session.Queries.GetNodeGroups()
             .SingleOrDefault(group => string.Equals(group.Id, "terrain-authoring", StringComparison.Ordinal));
         var terrainGroupSnapshot = shell.Editor.GetNodeGroupSnapshots()
             .SingleOrDefault(group => string.Equals(group.Id, "terrain-authoring", StringComparison.Ordinal));
@@ -103,7 +103,7 @@ public static class DemoProof
                     lightingMeasurement.WidthToRevealInputEditors,
                     lightingMeasurement.HeightToRevealAdditionalInputs),
                 updateStatus: false)
-            && shell.Editor.Session.Queries.GetNodeSurfaceSnapshots()
+            && shell.Session.Queries.GetNodeSurfaceSnapshots()
                 .Single(snapshot => string.Equals(snapshot.NodeId, "light", StringComparison.Ordinal))
                 .ActiveTier.Key == "input-editors"
             && terrainGroup is not null
@@ -148,7 +148,7 @@ public static class DemoProof
             && terrainGroupAfterResize.Position == terrainGroupSnapshot.Position
             && terrainGroupAfterResize.Size == resizedGroupFrameSize
             && terrainGroupAfterResize.NodeIds.OrderBy(id => id, StringComparer.Ordinal).SequenceEqual(["gradient", "noise"]);
-        var editableLightingParameter = shell.Editor.Session.Queries.GetSelectedNodeParameterSnapshots()
+        var editableLightingParameter = shell.Session.Queries.GetSelectedNodeParameterSnapshots()
             .FirstOrDefault(snapshot => snapshot.CanEdit);
         if (editableLightingParameter is not null)
         {
@@ -193,7 +193,7 @@ public static class DemoProof
         var workspacePath = Path.Combine(storageRoot, "demo-proof-workspace.json");
         var baselineNodeCount = shell.Editor.Nodes.Count;
         shell.SaveWorkspaceAs(workspacePath);
-        shell.Editor.Session.Commands.AddNode(shell.Editor.NodeTemplates[0].Definition.Id, new GraphPoint(1040, 320));
+        shell.Session.Commands.AddNode(shell.Editor.NodeTemplates[0].Definition.Id, new GraphPoint(1040, 320));
         var shellWorkflowOk =
             shell.TryOpenWorkspacePath(workspacePath)
             && shell.Editor.Nodes.Count == baselineNodeCount

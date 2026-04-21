@@ -5,7 +5,7 @@ namespace AsterGraph.Demo.ViewModels;
 public partial class MainWindowViewModel
 {
     public IReadOnlyList<GraphEditorPluginLoadSnapshot> PluginLoadSnapshots
-        => Editor.Session.Queries.GetPluginLoadSnapshots();
+        => Session.Queries.GetPluginLoadSnapshots();
 
     public IReadOnlyList<string> PluginCandidateLines =>
         PluginCandidates.Count == 0
@@ -31,7 +31,8 @@ public partial class MainWindowViewModel
     [
         T("HostSample = 最小 consumer path。", "HostSample = minimal consumer path."),
         T("Demo = 功能展示与边界说明壳层。", "Demo = showcase shell for capability and boundary proof."),
-        "Canonical host route: AsterGraphEditorFactory.Create(...) + AsterGraphAvaloniaViewFactory.Create(...).",
+        "Hosted-UI composition: AsterGraphEditorFactory.Create(...) + AsterGraphAvaloniaViewFactory.Create(...).",
+        "Shared runtime owner: Session (IGraphEditorSession).",
         "Runtime-only host route: AsterGraphEditorFactory.CreateSession(...).",
         T("独立表面通过 ", "Standalone surfaces compose through ")
         + "AsterGraphCanvasViewFactory / AsterGraphInspectorViewFactory / AsterGraphMiniMapViewFactory"

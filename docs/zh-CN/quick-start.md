@@ -62,6 +62,7 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 | retained 迁移 | `new GraphEditorViewModel(...)` + `new GraphEditorView { Editor = editor }` | [Host Integration](./host-integration.md) |
 
 新代码优先使用 runtime/session 路线或默认 Avalonia 路线；retained 路线只用于迁移。
+如果你使用默认 Avalonia 路线，宿主动作、诊断、automation 和 proof 逻辑都应继续围绕 `Editor.Session` 这份共享运行时来写。
 
 ## 5. 最小 Hosted-UI 组合
 

@@ -10,6 +10,7 @@ using AsterGraph.Editor.Configuration;
 using AsterGraph.Editor.Hosting;
 using AsterGraph.Editor.Localization;
 using AsterGraph.Editor.Plugins;
+using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.ViewModels;
 using AsterGraph.Demo.Shell;
 
@@ -18,7 +19,7 @@ namespace AsterGraph.Demo.ViewModels;
 public partial class MainWindowViewModel : ViewModelBase
 {
     private const double DemoSnapTolerance = 18;
-    private const string RuntimeDiagnosticsHelper = "以下诊断直接来自 Editor.Session.Diagnostics，用于确认共享运行时状态。";
+    private const string RuntimeDiagnosticsHelper = "以下诊断直接来自 Session.Diagnostics，用于确认共享运行时状态。";
     private const string StandaloneSurfaceHelper = "这些预览与主编辑器共享同一运行时会话。";
     private const string PresentationHelper = "可替换的是视觉呈现，不是编辑行为。";
     private const string ChromeModeHelper = "关闭后可体验完整编辑流程；开启后仅保留只读浏览。";
@@ -113,11 +114,11 @@ public partial class MainWindowViewModel : ViewModelBase
         Editor.ViewportChanged += (_, _) => RefreshRuntimeProjection();
         Editor.FragmentExported += (_, _) => RefreshRuntimeProjection();
         Editor.FragmentImported += (_, _) => RefreshRuntimeProjection();
-        Editor.Session.Events.DocumentChanged += (_, _) => PersistAutosaveDraft();
-        Editor.Session.Events.CommandExecuted += (_, _) => PersistAutosaveDraft();
-        Editor.Session.Events.AutomationStarted += (_, args) => OnAutomationStarted(args);
-        Editor.Session.Events.AutomationProgress += (_, args) => OnAutomationProgress(args);
-        Editor.Session.Events.AutomationCompleted += (_, args) => OnAutomationCompleted(args);
+        Session.Events.DocumentChanged += (_, _) => PersistAutosaveDraft();
+        Session.Events.CommandExecuted += (_, _) => PersistAutosaveDraft();
+        Session.Events.AutomationStarted += (_, args) => OnAutomationStarted(args);
+        Session.Events.AutomationProgress += (_, args) => OnAutomationProgress(args);
+        Session.Events.AutomationCompleted += (_, args) => OnAutomationCompleted(args);
         Editor.DocumentChanged += (_, _) => PersistAutosaveDraft();
         Editor.ViewportChanged += (_, _) => PersistShellState();
 
@@ -129,6 +130,8 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     public GraphEditorViewModel Editor { get; }
+
+    public IGraphEditorSession Session => Editor.Session;
 
     public IReadOnlyList<CapabilityShowcaseItem> Capabilities => _capabilities;
 

@@ -45,6 +45,7 @@ public sealed class DemoCapabilityShowcaseTests
         Assert.Contains(viewModel.PluginLoadSnapshots, snapshot => snapshot.Status == GraphEditorPluginLoadStatus.Loaded);
         Assert.Contains(viewModel.PluginLoadSnapshots, snapshot => snapshot.Status == GraphEditorPluginLoadStatus.Blocked);
         Assert.Contains(viewModel.ConsumerPathLines, line => line.Contains("HostSample", StringComparison.Ordinal));
+        Assert.Contains(viewModel.ConsumerPathLines, line => line.Contains("runtime owner", StringComparison.OrdinalIgnoreCase) && line.Contains("Session", StringComparison.Ordinal));
     }
 
     [Fact]

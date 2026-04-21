@@ -124,26 +124,26 @@ public partial class MainWindow : Window
 
     private void AttachCommandRailSubscriptions(MainWindowViewModel viewModel)
     {
-        viewModel.Editor.Session.Events.DocumentChanged -= HandleCommandRailChanged;
-        viewModel.Editor.Session.Events.SelectionChanged -= HandleCommandRailChanged;
-        viewModel.Editor.Session.Events.ViewportChanged -= HandleCommandRailChanged;
-        viewModel.Editor.Session.Events.CommandExecuted -= HandleCommandRailChanged;
-        viewModel.Editor.Session.Events.PendingConnectionChanged -= HandleCommandRailChanged;
+        viewModel.Session.Events.DocumentChanged -= HandleCommandRailChanged;
+        viewModel.Session.Events.SelectionChanged -= HandleCommandRailChanged;
+        viewModel.Session.Events.ViewportChanged -= HandleCommandRailChanged;
+        viewModel.Session.Events.CommandExecuted -= HandleCommandRailChanged;
+        viewModel.Session.Events.PendingConnectionChanged -= HandleCommandRailChanged;
 
-        viewModel.Editor.Session.Events.DocumentChanged += HandleCommandRailChanged;
-        viewModel.Editor.Session.Events.SelectionChanged += HandleCommandRailChanged;
-        viewModel.Editor.Session.Events.ViewportChanged += HandleCommandRailChanged;
-        viewModel.Editor.Session.Events.CommandExecuted += HandleCommandRailChanged;
-        viewModel.Editor.Session.Events.PendingConnectionChanged += HandleCommandRailChanged;
+        viewModel.Session.Events.DocumentChanged += HandleCommandRailChanged;
+        viewModel.Session.Events.SelectionChanged += HandleCommandRailChanged;
+        viewModel.Session.Events.ViewportChanged += HandleCommandRailChanged;
+        viewModel.Session.Events.CommandExecuted += HandleCommandRailChanged;
+        viewModel.Session.Events.PendingConnectionChanged += HandleCommandRailChanged;
     }
 
     private void DetachCommandRailSubscriptions(MainWindowViewModel viewModel)
     {
-        viewModel.Editor.Session.Events.DocumentChanged -= HandleCommandRailChanged;
-        viewModel.Editor.Session.Events.SelectionChanged -= HandleCommandRailChanged;
-        viewModel.Editor.Session.Events.ViewportChanged -= HandleCommandRailChanged;
-        viewModel.Editor.Session.Events.CommandExecuted -= HandleCommandRailChanged;
-        viewModel.Editor.Session.Events.PendingConnectionChanged -= HandleCommandRailChanged;
+        viewModel.Session.Events.DocumentChanged -= HandleCommandRailChanged;
+        viewModel.Session.Events.SelectionChanged -= HandleCommandRailChanged;
+        viewModel.Session.Events.ViewportChanged -= HandleCommandRailChanged;
+        viewModel.Session.Events.CommandExecuted -= HandleCommandRailChanged;
+        viewModel.Session.Events.PendingConnectionChanged -= HandleCommandRailChanged;
     }
 
     private void HandleCommandRailChanged(object? sender, EventArgs e)
@@ -164,7 +164,7 @@ public partial class MainWindow : Window
 
         rail.Children.Clear();
         var projection = AsterGraphHostedActionFactory.CreateProjection(
-            AsterGraphHostedActionFactory.CreateCommandActions(viewModel.Editor.Session));
+            AsterGraphHostedActionFactory.CreateCommandActions(viewModel.Session));
         foreach (var action in projection.Select(HostCommandRailIds))
         {
             var button = new Button

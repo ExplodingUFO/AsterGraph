@@ -34,7 +34,7 @@ public sealed class DemoHostMenuControlTests
     public void MainWindowViewModel_RuntimeProjectionPropertiesMirrorCurrentEditorSession()
     {
         var viewModel = new MainWindowViewModel();
-        var inspection = viewModel.Editor.Session.Diagnostics.CaptureInspectionSnapshot();
+        var inspection = viewModel.Session.Diagnostics.CaptureInspectionSnapshot();
 
         Assert.Equal(inspection.Document.Title, viewModel.RuntimeDocumentTitle);
         Assert.Equal(inspection.Document.Nodes.Count, viewModel.RuntimeNodeCount);
@@ -58,7 +58,7 @@ public sealed class DemoHostMenuControlTests
         Assert.Contains(currentConfigurationLines, line => line.StartsWith("显示顶栏：", StringComparison.Ordinal));
         Assert.Contains(currentConfigurationLines, line => line.StartsWith("只读模式：", StringComparison.Ordinal));
         Assert.Contains(currentConfigurationLines, line => line.StartsWith("当前分组：", StringComparison.Ordinal));
-        Assert.Contains(ownershipProofLines, line => line.Contains("Editor.Session", StringComparison.Ordinal));
+        Assert.Contains(ownershipProofLines, line => line.Contains("Session", StringComparison.Ordinal));
 
         viewModel.OpenHostMenuGroup("运行时");
 
@@ -81,7 +81,7 @@ public sealed class DemoHostMenuControlTests
         Assert.Contains("共享运行时", viewModel.SelectedHostMenuGroupSummary, StringComparison.Ordinal);
         Assert.Contains("诊断", viewModel.SelectedHostMenuGroupSummary, StringComparison.Ordinal);
         Assert.Equal(
-            "以下诊断直接来自 Editor.Session.Diagnostics，用于确认共享运行时状态。",
+            "以下诊断直接来自 Session.Diagnostics，用于确认共享运行时状态。",
             viewModel.RuntimeDiagnosticsSummary);
 
         viewModel.OpenHostMenuGroup("证明");
@@ -236,13 +236,13 @@ public sealed class DemoHostMenuControlTests
         readOnlyMenuItem.IsChecked = true;
 
         var deleteSelection = Assert.Single(
-            viewModel.Editor.Session.Queries.GetCommandDescriptors(),
+            viewModel.Session.Queries.GetCommandDescriptors(),
             descriptor => descriptor.Id == "selection.delete");
 
         Assert.True(viewModel.IsReadOnlyEnabled);
         Assert.False(deleteSelection.IsEnabled);
 
-        viewModel.Editor.Session.Commands.DeleteSelection();
+        viewModel.Session.Commands.DeleteSelection();
 
         Assert.Equal(initialNodeCount, viewModel.Editor.Nodes.Count);
         Assert.Equal(selectedNode.Id, viewModel.Editor.SelectedNode?.Id);
@@ -260,7 +260,7 @@ public sealed class DemoHostMenuControlTests
         window.Show();
 
         var initialNodeCount = viewModel.Editor.Nodes.Count;
-        viewModel.Editor.Session.Commands.AddNode(viewModel.Editor.NodeTemplates[0].Definition.Id, new GraphPoint(760, 320));
+        viewModel.Session.Commands.AddNode(viewModel.Editor.NodeTemplates[0].Definition.Id, new GraphPoint(760, 320));
 
         var undoButton = window.GetVisualDescendants()
             .OfType<Button>()

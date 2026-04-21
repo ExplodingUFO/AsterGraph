@@ -11,6 +11,8 @@ This guide expands the supported host routes without turning the public onboardi
 3. Retained migration  
    `new GraphEditorViewModel(...)` + `new GraphEditorView { Editor = editor }`
 
+Routes 1 and 2 are the canonical surfaces for new work. Route 3 remains supported only as a retained compatibility facade during migration.
+
 Standalone Avalonia surfaces such as `AsterGraphCanvasViewFactory`, `AsterGraphInspectorViewFactory`, and `AsterGraphMiniMapViewFactory` belong to route 2. They are composition details under the hosted-UI family, not a fourth primary route.
 
 ## Consumer Route Matrix
@@ -52,8 +54,8 @@ The stability and precedence rules are published in [Extension Contracts](./exte
 Important defaults:
 
 - canonical runtime surfaces are `CreateSession(...)`, `IGraphEditorSession`, and DTO/snapshot queries
-- `Create(...)` remains the supported hosted-Avalonia composition helper and returns the retained editor facade
-- retained `GraphEditorViewModel` / `GraphEditorView` remain supported migration facades
+- `Create(...)` remains the supported hosted-Avalonia composition helper; `Editor.Session` is still the shared runtime owner behind that route
+- retained `GraphEditorViewModel` / `GraphEditorView` remain supported migration facades and are explicitly labeled as advanced compatibility surfaces
 - host localization runs after plugin localization, so host override wins
 - plugin-contributed commands now surface through the canonical session command descriptors and execute through `IGraphEditorSession.Commands.TryExecuteCommand(...)`
 - retained host augmentor composition still differs from the runtime path; use the runtime path for new work

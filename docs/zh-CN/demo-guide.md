@@ -4,7 +4,7 @@
 
 ## 它在证明什么
 
-- 主 demo 路线已经改成 `AsterGraphEditorFactory.Create(...)`
+- 主 demo 壳层通过 `AsterGraphEditorFactory.Create(...)` 组合，但共享运行时 owner 仍然是 `Session`
 - Avalonia 表面通过 view factory 组合
 - definition-driven inspector 分组、内建 editor 和校验提示已经能在真实 demo 节点定义上直接看到
 - plugin trust / discovery / load 在 UI 里可见，而且会显示 version、target framework、fingerprint、reason 和 allowlist 导入/导出

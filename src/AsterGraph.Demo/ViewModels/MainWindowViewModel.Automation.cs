@@ -98,7 +98,7 @@ public partial class MainWindowViewModel
         LastAutomationRequest = request;
         LastAutomationResult = null;
         _automationProgressSteps.Clear();
-        Editor.Session.Automation.Execute(request);
+        Session.Automation.Execute(request);
         RefreshRuntimeProjection();
     }
 

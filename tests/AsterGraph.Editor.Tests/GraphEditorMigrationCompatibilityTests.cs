@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.ComponentModel;
 using System.Reflection;
 using AsterGraph.Abstractions.Compatibility;
 using AsterGraph.Abstractions.Definitions;
@@ -259,6 +260,20 @@ public sealed class GraphEditorMigrationCompatibilityTests
         Assert.Contains("TrySetNodeGroupSize", groupPaddingObsolete.Message, StringComparison.Ordinal);
         Assert.Contains("TrySetNodeGroupPosition", groupPaddingObsolete.Message, StringComparison.Ordinal);
         Assert.Contains("GetNodeGroupSnapshots", groupPaddingObsolete.Message, StringComparison.Ordinal);
+    }
+
+    [AvaloniaFact]
+    public void RetainedCompatibilityTypes_AreExplicitlyDemotedFromCanonicalNewWork()
+    {
+        var editorAttribute = Assert.Single(
+            typeof(GraphEditorViewModel).GetCustomAttributes(typeof(EditorBrowsableAttribute), inherit: false),
+            attribute => attribute is EditorBrowsableAttribute);
+        var viewAttribute = Assert.Single(
+            typeof(GraphEditorView).GetCustomAttributes(typeof(EditorBrowsableAttribute), inherit: false),
+            attribute => attribute is EditorBrowsableAttribute);
+
+        Assert.Equal(EditorBrowsableState.Advanced, Assert.IsType<EditorBrowsableAttribute>(editorAttribute).State);
+        Assert.Equal(EditorBrowsableState.Advanced, Assert.IsType<EditorBrowsableAttribute>(viewAttribute).State);
     }
 
     [AvaloniaFact]

@@ -14,6 +14,7 @@ using AsterGraph.Core.Models;
 using AsterGraph.Editor.Catalog;
 using AsterGraph.Editor.Hosting;
 using AsterGraph.Editor.Plugins;
+using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.ViewModels;
 
 if (args.Any(static arg => string.Equals(arg, "--proof", StringComparison.OrdinalIgnoreCase)))
@@ -57,7 +58,7 @@ file static class HostedHelloWorldAppBuilder
             .UsePlatformDetect();
 }
 
-file static class HostedHelloWorldWindowFactory
+public static class HostedHelloWorldWindowFactory
 {
     private const string SourceNodeId = "hello-ui-source-001";
     private const string TargetNodeId = "hello-ui-target-001";
@@ -78,6 +79,7 @@ file static class HostedHelloWorldWindowFactory
 
         return new HostedHelloWorldRuntimeSurface(
             editor,
+            editor.Session,
             new Window
             {
                 Title = "AsterGraph HelloWorld (Avalonia)",
@@ -225,8 +227,9 @@ file static class HostedHelloWorldWindowFactory
             ]);
 }
 
-file sealed record HostedHelloWorldRuntimeSurface(
+public sealed record HostedHelloWorldRuntimeSurface(
     GraphEditorViewModel Editor,
+    IGraphEditorSession Session,
     Window Window);
 
 public sealed record HostedHelloWorldProofResult(
@@ -261,16 +264,17 @@ public static class HostedHelloWorldProof
             throw new InvalidOperationException("HelloWorld editor was not created.");
         }
 
-        var inspectorProjectionMs = MeasureMilliseconds(() => editor.Session.Queries.GetSelectedNodeParameterSnapshots().ToArray());
+        var session = editor.Session;
+        var inspectorProjectionMs = MeasureMilliseconds(() => session.Queries.GetSelectedNodeParameterSnapshots().ToArray());
         var pluginScanMs = MeasureMilliseconds(() => AsterGraphEditorFactory.DiscoverPluginCandidates(new GraphEditorPluginDiscoveryOptions()).ToArray());
 
-        var nodeCountBeforeUndo = editor.Session.Queries.CreateDocumentSnapshot().Nodes.Count;
-        editor.Session.Commands.AddNode(editor.NodeTemplates[0].Definition.Id, new GraphPoint(720, 220));
-        var undoAction = AsterGraphHostedActionFactory.CreateCommandActions(editor.Session, ["history.undo"])
+        var nodeCountBeforeUndo = session.Queries.CreateDocumentSnapshot().Nodes.Count;
+        session.Commands.AddNode(editor.NodeTemplates[0].Definition.Id, new GraphPoint(720, 220));
+        var undoAction = AsterGraphHostedActionFactory.CreateCommandActions(session, ["history.undo"])
             .Single(action => string.Equals(action.Id, "history.undo", StringComparison.Ordinal));
         var commandLatencyMs = MeasureMilliseconds(() => undoAction.TryExecute());
         var commandSurfaceOk = undoAction.CanExecute
-            && editor.Session.Queries.CreateDocumentSnapshot().Nodes.Count == nodeCountBeforeUndo;
+            && session.Queries.CreateDocumentSnapshot().Nodes.Count == nodeCountBeforeUndo;
 
         return new HostedHelloWorldProofResult(
             commandSurfaceOk,

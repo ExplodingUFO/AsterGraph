@@ -4,7 +4,7 @@
 
 ## What the Demo Proves
 
-- the main demo route now uses `AsterGraphEditorFactory.Create(...)`
+- the main demo shell is composed with `AsterGraphEditorFactory.Create(...)`, while `Session` remains the shared runtime owner
 - Avalonia surfaces are composed through the view factories
 - definition-driven inspector groups, shipped editors, and validation cues are visible on real demo node definitions
 - plugin trust/discovery/load state is visible in the UI, including version, target framework, fingerprint, reason strings, and allowlist import or export

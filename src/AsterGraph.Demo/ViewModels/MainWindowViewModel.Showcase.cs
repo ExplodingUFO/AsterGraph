@@ -77,8 +77,8 @@ public partial class MainWindowViewModel
             "共享运行时证据来自 ",
             "Shared runtime proof comes from ") + RuntimeDiagnosticsSourceName + T(" 的检查快照与最近诊断。", " inspection snapshots and recent diagnostics."),
         T(
-            "中心画布、宿主菜单和抽屉始终指向同一个 Editor.Session。",
-            "The center canvas, host menu, and drawer always point to the same Editor.Session."),
+            "中心画布、宿主菜单和抽屉始终指向同一个 Session。",
+            "The center canvas, host menu, and drawer always point to the same Session."),
         T(
             "主编辑器通过 AsterGraphEditorFactory.Create(...) 和 AsterGraphAvaloniaViewFactory.Create(...) 组合。",
             "The main editor is composed through AsterGraphEditorFactory.Create(...) and AsterGraphAvaloniaViewFactory.Create(...)."),
@@ -122,8 +122,8 @@ public partial class MainWindowViewModel
             "编辑行为仍由同一个 Editor 负责；宿主菜单只是集中暴露能力入口，不替代运行时本身。",
             "Editing behavior is still owned by the same Editor; the host menu only exposes capability entry points and does not replace runtime authority."),
         DemoHostMenuGroups.Runtime => T(
-            "运行时面板直接读取共享运行时的文档、选择、视口和诊断，方便操作时核对同一个 Editor.Session 的当前状态。",
-            "The runtime panel reads document, selection, viewport, and diagnostics directly from the shared runtime so the current Editor.Session state stays visible during interaction."),
+            "运行时面板直接读取共享运行时的文档、选择、视口和诊断，方便操作时核对同一个 Session 的当前状态。",
+            "The runtime panel reads document, selection, viewport, and diagnostics directly from the shared runtime so the current Session state stays visible during interaction."),
         DemoHostMenuGroups.Extensions => T(
             "扩展面板把 plugin discovery、trust decision、load snapshot 和 contribution shape 放在同一个位置，证明这些能力不是 README-only 叙事。",
             "The extensions panel keeps plugin discovery, trust decisions, load snapshots, and contribution shape in one place so the feature is visible instead of README-only."),
@@ -134,8 +134,8 @@ public partial class MainWindowViewModel
             "集成面板同时说明 HostSample 的最小 consumer path，并展示独立表面、presenter replacement 和本地化证明。",
             "The integration panel explains HostSample as the minimal consumer path and shows standalone surfaces, presenter replacement, and localization proof together."),
         DemoHostMenuGroups.Proof => T(
-            "证明面板把宿主壳层控制与共享运行时证据并排展示，用来确认当前窗口没有第二个编辑器实例，只有同一个 Editor.Session。",
-            "The proof panel shows host-shell controls next to shared runtime evidence to confirm the window owns no second editor instance, only the same Editor.Session."),
+            "证明面板把宿主壳层控制与共享运行时证据并排展示，用来确认当前窗口没有第二个编辑器实例，只有同一个 Session。",
+            "The proof panel shows host-shell controls next to shared runtime evidence to confirm the window owns no second editor instance, only the same Session."),
         _ => T("通过宿主级菜单控制同一张实时节点图。", "Control the same live graph through the host-owned menu.")
     };
 
@@ -169,7 +169,7 @@ public partial class MainWindowViewModel
             .. RuntimeMetricLines,
             T("共享运行时入口：", "Shared runtime surface: ") + RuntimeDiagnosticsSourceName,
             T("最近诊断：", "Recent diagnostics: ") + RecentDiagnostics.Count + T(" 条", ""),
-            T(RuntimeDiagnosticsHelper, "These diagnostics come directly from Editor.Session.Diagnostics so the shared runtime state stays visible."),
+            T(RuntimeDiagnosticsHelper, "These diagnostics come directly from Session.Diagnostics so the shared runtime state stays visible."),
         ],
         DemoHostMenuGroups.Extensions =>
         [
@@ -196,7 +196,7 @@ public partial class MainWindowViewModel
         [
             T("宿主壳层控制来自 MainWindowViewModel，负责菜单、抽屉与壳层开关。", "Host shell control comes from MainWindowViewModel and owns menus, drawers, and shell toggles."),
             T("共享运行时证据：", "Shared runtime proof: ") + RuntimeDiagnosticsSourceName + T(" 提供当前文档、选择、视口和最近诊断。", " provides the current document, selection, viewport, and recent diagnostics."),
-            T("当前窗口没有第二个编辑器实例；中心画布与宿主控制都作用于同一个 Editor.Session。", "The current window does not host a second editor instance; the center canvas and host controls act on the same Editor.Session."),
+            T("当前窗口没有第二个编辑器实例；中心画布与宿主控制都作用于同一个 Session。", "The current window does not host a second editor instance; the center canvas and host controls act on the same Session."),
             HostPaneStateCaption,
         ],
         _ =>
@@ -278,7 +278,7 @@ public partial class MainWindowViewModel
                 [
                     T("主区只有一个实时 GraphEditorView。", "The main area hosts exactly one live GraphEditorView."),
                     $"{nameof(GraphEditorViewChromeMode)}.{nameof(GraphEditorViewChromeMode.Default)} / {nameof(GraphEditorViewChromeMode.CanvasOnly)} " +
-                    T("共用同一 Editor.Session。", "share the same Editor.Session."),
+                    T("共用同一 Session。", "share the same Session."),
                 ]),
             new CapabilityShowcaseItem(
                 "standalone-surfaces",
@@ -315,26 +315,26 @@ public partial class MainWindowViewModel
             new CapabilityShowcaseItem(
                 "runtime-diagnostics",
                 T("运行时与诊断", "Runtime And Diagnostics"),
-                T("通过 Editor.Session 查询、检查快照与最近诊断显式观察当前运行时。", "Observe the current runtime explicitly through Editor.Session queries, inspection snapshots, and recent diagnostics."),
+                T("通过 Session 查询、检查快照与最近诊断显式观察当前运行时。", "Observe the current runtime explicitly through Session queries, inspection snapshots, and recent diagnostics."),
                 T(
-                    "诊断区直接读取 Editor.Session.Diagnostics 与 Queries 快照，帮助宿主验证会话状态而不是依赖状态栏文案。",
-                    "The diagnostics area reads Editor.Session.Diagnostics and query snapshots directly so hosts can verify session state instead of relying on status-bar prose."),
+                    "诊断区直接读取 Session.Diagnostics 与 Queries 快照，帮助宿主验证会话状态而不是依赖状态栏文案。",
+                    "The diagnostics area reads Session.Diagnostics and query snapshots directly so hosts can verify session state instead of relying on status-bar prose."),
                 [
                     T("所属层：AsterGraph.Editor 运行时与诊断契约。", "Layer: AsterGraph.Editor runtime and diagnostics contracts."),
-                    T("宿主入口：Editor.Session.Queries 与 Editor.Session.Diagnostics。", "Host entry: Editor.Session.Queries and Editor.Session.Diagnostics."),
+                    T("宿主入口：Session.Queries 与 Session.Diagnostics。", "Host entry: Session.Queries and Session.Diagnostics."),
                     T("可替换点：宿主可以把这些快照接入自己的日志、支持面板或调试工作流。", "Seams: hosts can route the same snapshots into their own logging, support panes, or debugging flows."),
                 ],
                 [
-                    T(RuntimeDiagnosticsHelper, "These diagnostics come directly from Editor.Session.Diagnostics so the shared runtime state stays visible."),
-                    T("最近诊断数量：", "Recent diagnostic count: ") + Editor.Session.Diagnostics.GetRecentDiagnostics(10).Count + "。",
+                    T(RuntimeDiagnosticsHelper, "These diagnostics come directly from Session.Diagnostics so the shared runtime state stays visible."),
+                    T("最近诊断数量：", "Recent diagnostic count: ") + Session.Diagnostics.GetRecentDiagnostics(10).Count + "。",
                 ]),
             new CapabilityShowcaseItem(
                 "semantic-graph-composition",
                 T("语义图组合", "Semantic Graph Composition"),
                 T("把组提升为复合节点、公开边界端点、作用域导航、边注释和单边断开收敛到同一条语义图编辑路径。", "Unify composite promotion, public boundary ports, scoped navigation, edge notes, and single-edge disconnect through one semantic graph editing path."),
                 T(
-                    "这条路径继续由 Editor.Session 命令和查询驱动：group promotion 生成 child scope，boundary port 暴露内部端口，edge note 保持纯展示语义，而 canonical reconnect 会断开当前边并立即回到待完成连线状态。",
-                    "This path stays on top of Editor.Session commands and queries: group promotion creates a child scope, boundary ports expose inner ports, edge notes stay display-only, and canonical reconnect removes the current edge then immediately returns authoring to a pending connection state."),
+                    "这条路径继续由 Session 命令和查询驱动：group promotion 生成 child scope，boundary port 暴露内部端口，edge note 保持纯展示语义，而 canonical reconnect 会断开当前边并立即回到待完成连线状态。",
+                    "This path stays on top of Session commands and queries: group promotion creates a child scope, boundary ports expose inner ports, edge notes stay display-only, and canonical reconnect removes the current edge then immediately returns authoring to a pending connection state."),
                 [
                     T("所属层：AsterGraph.Editor semantic graph contract + AsterGraph.Avalonia stock host surfaces。", "Layer: AsterGraph.Editor semantic graph contract plus AsterGraph.Avalonia stock host surfaces."),
                     T("宿主入口：TryPromoteNodeGroupToComposite(...)、TryExposeCompositePort(...)、TryEnterCompositeChildGraph(...)、TrySetConnectionNoteText(...)、TryReconnectConnection(...)、connections.note.set、connections.reconnect。", "Host entry: TryPromoteNodeGroupToComposite(...), TryExposeCompositePort(...), TryEnterCompositeChildGraph(...), TrySetConnectionNoteText(...), TryReconnectConnection(...), connections.note.set, and connections.reconnect."),

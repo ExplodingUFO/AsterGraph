@@ -11,6 +11,8 @@
 3. retained 迁移  
    `new GraphEditorViewModel(...)` + `new GraphEditorView { Editor = editor }`
 
+前两条是新代码的 canonical surface。第 3 条仍然受支持，但只作为迁移期保留的 compatibility facade。
+
 `AsterGraphCanvasViewFactory`、`AsterGraphInspectorViewFactory`、`AsterGraphMiniMapViewFactory` 这些独立表面都属于第 2 条路线下的组合细节，不是第四条主路线。
 
 ## Consumer Route Matrix
@@ -52,8 +54,8 @@
 重要默认项：
 
 - 推荐的 canonical runtime 入口是 `CreateSession(...)`、`IGraphEditorSession` 和 DTO/snapshot queries
-- `Create(...)` 仍然是受支持的 hosted Avalonia 组合 helper，并返回 retained editor facade
-- retained `GraphEditorViewModel` / `GraphEditorView` 仍是受支持的 migration facade
+- `Create(...)` 仍然是受支持的 hosted Avalonia 组合 helper，而 `Editor.Session` 仍然是这条路线背后的共享运行时 owner
+- retained `GraphEditorViewModel` / `GraphEditorView` 仍是受支持的 migration facade，并且已经被明确标成 advanced compatibility surface
 - host localization 在 plugin localization 之后执行，所以 host override 最终生效
 - plugin command 现在通过 canonical session command descriptor 暴露，并通过 `IGraphEditorSession.Commands.TryExecuteCommand(...)` 执行
 - retained augmentor composition 仍然和 runtime 路线不同；新代码优先走运行时路线

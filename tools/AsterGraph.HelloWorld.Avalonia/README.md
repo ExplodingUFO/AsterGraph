@@ -25,9 +25,11 @@ Expected markers:
 - `HOST_NATIVE_METRIC:command_latency_ms=...`
 - `HELLOWORLD_AVALONIA_OK:True`
 
-It deliberately shows only one route:
+It deliberately shows one hosted-UI composition route:
 
 - `AsterGraphEditorFactory.Create(...)`
 - `AsterGraphAvaloniaViewFactory.Create(...)`
+
+Inside that route, the shared runtime owner is still `Editor.Session`.
 
 Use `AsterGraph.HelloWorld` for the runtime-only first run. Use `AsterGraph.HostSample` when you need the proof harness for canonical route validation. Use [Authoring Inspector Recipe](../../docs/en/authoring-inspector-recipe.md) when you want to reproduce the same definition-driven inspector pattern in your own host.

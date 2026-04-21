@@ -1,4 +1,5 @@
 using System.Linq;
+using System.ComponentModel;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -24,6 +25,7 @@ namespace AsterGraph.Avalonia.Controls;
 /// <see cref="AsterGraphAvaloniaViewFactory"/> 与 <see cref="AsterGraphAvaloniaViewOptions"/>；
 /// 该保留视图路径不再是新的首选组合方式。
 /// </remarks>
+[EditorBrowsable(EditorBrowsableState.Advanced)]
 public partial class GraphEditorView : UserControl
 {
     private const string CommandPaletteActionId = "shell.command-palette";

@@ -114,7 +114,7 @@ public partial class MainWindowViewModel
         }
 
         var currentWorkspacePath = ActiveWorkspacePath;
-        var currentViewport = Editor.Session.Queries.GetViewportSnapshot();
+        var currentViewport = Session.Queries.GetViewportSnapshot();
 
         SetActiveWorkspacePath(AutosaveDraftPath);
         var loaded = Editor.LoadWorkspace();
@@ -168,21 +168,21 @@ public partial class MainWindowViewModel
         }
 
         var target = _pendingViewportRestore;
-        var current = Editor.Session.Queries.GetViewportSnapshot();
+        var current = Session.Queries.GetViewportSnapshot();
 
         if (current.ViewportWidth <= 0 || current.ViewportHeight <= 0)
         {
-            Editor.Session.Commands.UpdateViewportSize(target.ViewportWidth, target.ViewportHeight);
-            current = Editor.Session.Queries.GetViewportSnapshot();
+            Session.Commands.UpdateViewportSize(target.ViewportWidth, target.ViewportHeight);
+            current = Session.Queries.GetViewportSnapshot();
         }
 
         if (Math.Abs(current.Zoom - target.Zoom) > 0.001)
         {
-            Editor.Session.Commands.ZoomAt(target.Zoom / current.Zoom, new GraphPoint(0, 0));
+            Session.Commands.ZoomAt(target.Zoom / current.Zoom, new GraphPoint(0, 0));
         }
 
-        var updated = Editor.Session.Queries.GetViewportSnapshot();
-        Editor.Session.Commands.PanBy(target.PanX - updated.PanX, target.PanY - updated.PanY);
+        var updated = Session.Queries.GetViewportSnapshot();
+        Session.Commands.PanBy(target.PanX - updated.PanX, target.PanY - updated.PanY);
         _pendingViewportRestore = null;
         PersistShellState();
     }
@@ -252,7 +252,7 @@ public partial class MainWindowViewModel
             IsHostPaneOpen: IsHostPaneOpen,
             WindowWidth: PreferredWindowWidth,
             WindowHeight: PreferredWindowHeight,
-            Viewport: Editor.Session.Queries.GetViewportSnapshot(),
+            Viewport: Session.Queries.GetViewportSnapshot(),
             ThemeVariant: ThemeVariantCaption));
         RefreshRuntimeProjection();
     }

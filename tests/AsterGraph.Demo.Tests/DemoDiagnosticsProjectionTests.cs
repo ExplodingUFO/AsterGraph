@@ -13,13 +13,14 @@ public sealed class DemoDiagnosticsProjectionTests
     {
         var viewModel = new MainWindowViewModel();
 
-        var inspection = viewModel.Editor.Session.Diagnostics.CaptureInspectionSnapshot();
-        var diagnostics = viewModel.Editor.Session.Diagnostics.GetRecentDiagnostics(10);
+        var inspection = viewModel.Session.Diagnostics.CaptureInspectionSnapshot();
+        var diagnostics = viewModel.Session.Diagnostics.GetRecentDiagnostics(10);
 
         Assert.Equal("IGraphEditorSession", viewModel.RuntimeSessionInterfaceName);
-        Assert.Equal("Editor.Session.Diagnostics", viewModel.RuntimeDiagnosticsSourceName);
-        Assert.Equal("CaptureInspectionSnapshot", nameof(viewModel.Editor.Session.Diagnostics.CaptureInspectionSnapshot));
-        Assert.Equal("GetRecentDiagnostics", nameof(viewModel.Editor.Session.Diagnostics.GetRecentDiagnostics));
+        Assert.Same(viewModel.Editor.Session, viewModel.Session);
+        Assert.Equal("Session.Diagnostics", viewModel.RuntimeDiagnosticsSourceName);
+        Assert.Equal("CaptureInspectionSnapshot", nameof(viewModel.Session.Diagnostics.CaptureInspectionSnapshot));
+        Assert.Equal("GetRecentDiagnostics", nameof(viewModel.Session.Diagnostics.GetRecentDiagnostics));
 
         Assert.Equal(inspection.Document.Title, viewModel.RuntimeDocumentTitle);
         Assert.Equal(inspection.Document.Nodes.Count, viewModel.RuntimeNodeCount);
@@ -45,13 +46,13 @@ public sealed class DemoDiagnosticsProjectionTests
     {
         var viewModel = new MainWindowViewModel();
 
-        viewModel.Editor.Session.Commands.SaveWorkspace();
+        viewModel.Session.Commands.SaveWorkspace();
 
-        var diagnostics = viewModel.Editor.Session.Diagnostics.GetRecentDiagnostics(10);
+        var diagnostics = viewModel.Session.Diagnostics.GetRecentDiagnostics(10);
         var latestDiagnostic = Assert.Single(diagnostics, diagnostic => diagnostic.Code == "workspace.save.succeeded");
         var projectedDiagnostic = Assert.Single(viewModel.RecentDiagnostics, diagnostic => diagnostic.Code == "workspace.save.succeeded");
 
-        Assert.Equal("以下诊断直接来自 Editor.Session.Diagnostics，用于确认共享运行时状态。", viewModel.RuntimeDiagnosticsSummary);
+        Assert.Equal("以下诊断直接来自 Session.Diagnostics，用于确认共享运行时状态。", viewModel.RuntimeDiagnosticsSummary);
         Assert.Equal(viewModel.Editor.StatusMessage, viewModel.CompatibilityStatusMessage);
         Assert.Equal(latestDiagnostic.Message, projectedDiagnostic.Message);
         Assert.Equal(latestDiagnostic.Code, projectedDiagnostic.Code);
@@ -64,7 +65,7 @@ public sealed class DemoDiagnosticsProjectionTests
     public void MainWindowViewModel_RuntimeSignalLinesStayAlignedWithInspectionSnapshot()
     {
         var viewModel = new MainWindowViewModel();
-        var inspection = viewModel.Editor.Session.Diagnostics.CaptureInspectionSnapshot();
+        var inspection = viewModel.Session.Diagnostics.CaptureInspectionSnapshot();
         var runtimeSignalLines = Assert.IsAssignableFrom<IReadOnlyList<string>>(
             viewModel.GetType().GetProperty("RuntimeSignalLines")?.GetValue(viewModel));
 
@@ -88,6 +89,6 @@ public sealed class DemoDiagnosticsProjectionTests
         var helper = window.FindControl<TextBlock>("RuntimeDiagnosticsHelperText");
 
         Assert.NotNull(helper);
-        Assert.Equal("以下诊断直接来自 Editor.Session.Diagnostics，用于确认共享运行时状态。", helper!.Text);
+        Assert.Equal("以下诊断直接来自 Session.Diagnostics，用于确认共享运行时状态。", helper!.Text);
     }
 }

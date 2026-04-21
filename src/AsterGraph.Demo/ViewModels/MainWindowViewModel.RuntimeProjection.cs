@@ -7,7 +7,7 @@ public partial class MainWindowViewModel
 {
     public string RuntimeSessionInterfaceName => nameof(IGraphEditorSession);
 
-    public string RuntimeDiagnosticsSourceName => "Editor.Session.Diagnostics";
+    public string RuntimeDiagnosticsSourceName => "Session.Diagnostics";
 
     public IReadOnlyList<string> RuntimeSignalLines =>
     [
@@ -34,7 +34,7 @@ public partial class MainWindowViewModel
     /// 最近诊断的机器可读投影。
     /// </summary>
     public IReadOnlyList<RuntimeDiagnosticEntry> RecentDiagnostics =>
-        Editor.Session.Diagnostics
+        Session.Diagnostics
             .GetRecentDiagnostics(10)
             .Select(diagnostic => new RuntimeDiagnosticEntry(
                 diagnostic.Code,
@@ -71,7 +71,7 @@ public partial class MainWindowViewModel
     /// 运行时诊断帮助文案。
     /// </summary>
     public string RuntimeDiagnosticsSummary
-        => T(RuntimeDiagnosticsHelper, "These diagnostics come directly from Editor.Session.Diagnostics so the shared runtime state stays visible.");
+        => T(RuntimeDiagnosticsHelper, "These diagnostics come directly from Session.Diagnostics so the shared runtime state stays visible.");
 
     /// <summary>
     /// 当前运行时文档标题。
@@ -129,10 +129,10 @@ public partial class MainWindowViewModel
     public string MainEditorSummary
         => T("当前中心主编辑器绑定文档“", "The center editor is currently bound to document “")
         + Editor.Title
-        + T("”，并通过 Create(...) + AsterGraphAvaloniaViewFactory.Create(...) 暴露给同一个 Editor.Session。", "” and is exposed through Create(...) + AsterGraphAvaloniaViewFactory.Create(...) on the same Editor.Session.");
+        + T("”，并通过 Create(...) + AsterGraphAvaloniaViewFactory.Create(...) 组合，而共享运行时所有权由 Session 持有。", "” and is composed through Create(...) + AsterGraphAvaloniaViewFactory.Create(...), while Session remains the shared runtime owner.");
 
     private GraphEditorInspectionSnapshot CurrentInspection
-        => Editor.Session.Diagnostics.CaptureInspectionSnapshot();
+        => Session.Diagnostics.CaptureInspectionSnapshot();
 
     private void RefreshRuntimeProjection()
     {

@@ -62,6 +62,7 @@ Use `HelloWorld` when you want the simplest runtime-only starting point. Use `He
 | Retained migration | `new GraphEditorViewModel(...)` + `new GraphEditorView { Editor = editor }` | [Host Integration](./host-integration.md) |
 
 For new work, start with the runtime/session route or the shipped Avalonia route. Treat the retained route as migration-only.
+When you choose the shipped Avalonia route, keep `Editor.Session` as the runtime owner for host actions, diagnostics, automation, and proof logic.
 
 ## 5. Minimal Hosted-UI Composition
 

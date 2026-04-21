@@ -5,6 +5,15 @@ namespace AsterGraph.HelloWorld.Avalonia.Tests;
 public sealed class HostedHelloWorldProofTests
 {
     [Fact]
+    public void HostedHelloWorldRuntimeSurface_ExposesSessionFirstOwnership()
+    {
+        var editor = HostedHelloWorldWindowFactory.CreateEditor();
+        var surface = new HostedHelloWorldRuntimeSurface(editor, editor.Session, null!);
+
+        Assert.Same(surface.Editor.Session, surface.Session);
+    }
+
+    [Fact]
     public void HostedHelloWorldProof_Run_EmitsMetricsAndCommandSurfaceMarker()
     {
         var result = HostedHelloWorldProof.Run();
