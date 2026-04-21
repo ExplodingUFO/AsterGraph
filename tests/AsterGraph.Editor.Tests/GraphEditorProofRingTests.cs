@@ -844,14 +844,14 @@ public sealed class GraphEditorProofRingTests
         => new(
             string.Join("|", session.Queries.GetFeatureDescriptors().Select(descriptor => $"{descriptor.Category}:{descriptor.Id}:{descriptor.IsAvailable}")),
             string.Join("|", session.Queries.GetCommandDescriptors()
-                .Where(descriptor => SharedCanonicalCommandIds.Contains(descriptor.Id, StringComparer.Ordinal))
+                .Where(descriptor => GraphEditorTestCommandContracts.SharedCanonicalCommandIds.Contains(descriptor.Id, StringComparer.Ordinal))
                 .OrderBy(descriptor => descriptor.Id, StringComparer.Ordinal)
                 .Select(descriptor => $"{descriptor.Id}:{descriptor.IsEnabled}")),
             string.Join("|", session.Queries.BuildContextMenuDescriptors(new ContextMenuContext(ContextMenuTargetKind.Canvas, new GraphPoint(240, 180))).Select(descriptor => descriptor.Id)));
 
     private static string[] CaptureSharedCanonicalCommandIds(IGraphEditorSession session)
         => session.Queries.GetCommandDescriptors()
-            .Where(descriptor => SharedCanonicalCommandIds.Contains(descriptor.Id, StringComparer.Ordinal))
+            .Where(descriptor => GraphEditorTestCommandContracts.SharedCanonicalCommandIds.Contains(descriptor.Id, StringComparer.Ordinal))
             .OrderBy(descriptor => descriptor.Id, StringComparer.Ordinal)
             .Select(descriptor => descriptor.Id)
             .ToArray();
@@ -1332,37 +1332,6 @@ public sealed class GraphEditorProofRingTests
         bool CanvasAttachPlatformSeams,
         bool EnableDefaultContextMenu,
         bool EnableDefaultCommandShortcuts);
-
-    private static readonly string[] SharedCanonicalCommandIds =
-    [
-        "nodes.add",
-        "selection.set",
-        "selection.delete",
-        "nodes.resize-width",
-        "nodes.surface.expand",
-        "groups.create",
-        "groups.collapse",
-        "groups.move",
-        "groups.resize",
-        "connections.start",
-        "connections.complete",
-        "connections.connect",
-        "connections.cancel",
-        "connections.delete",
-        "connections.disconnect",
-        "connections.note.set",
-        "connections.reconnect",
-        "connections.break-port",
-        "nodes.move",
-        "viewport.pan",
-        "viewport.resize",
-        "viewport.center",
-        "viewport.fit",
-        "viewport.reset",
-        "viewport.center-node",
-        "workspace.save",
-        "workspace.load",
-    ];
 
     private static readonly string[] ReadinessFeatureIds =
     [

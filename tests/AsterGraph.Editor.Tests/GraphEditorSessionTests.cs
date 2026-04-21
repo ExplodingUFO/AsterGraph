@@ -1295,7 +1295,7 @@ public sealed class GraphEditorSessionTests
         => new(
             string.Join("|", session.Queries.GetFeatureDescriptors().Select(descriptor => $"{descriptor.Category}:{descriptor.Id}:{descriptor.IsAvailable}")),
             string.Join("|", session.Queries.GetCommandDescriptors()
-                .Where(descriptor => SharedCanonicalCommandIds.Contains(descriptor.Id, StringComparer.Ordinal))
+                .Where(descriptor => GraphEditorTestCommandContracts.SharedCanonicalCommandIds.Contains(descriptor.Id, StringComparer.Ordinal))
                 .OrderBy(descriptor => descriptor.Id, StringComparer.Ordinal)
                 .Select(descriptor => $"{descriptor.Id}:{descriptor.IsEnabled}")),
             string.Join("|", session.Queries.BuildContextMenuDescriptors(new ContextMenuContext(ContextMenuTargetKind.Canvas, new GraphPoint(160, 90))).Select(descriptor => descriptor.Id)),
@@ -1354,36 +1354,6 @@ public sealed class GraphEditorSessionTests
         string CommandDescriptorSignature,
         string CanvasMenuSignature,
         GraphEditorCapabilitySnapshot CapabilitySnapshot);
-
-    private static readonly string[] SharedCanonicalCommandIds =
-    [
-        "nodes.add",
-        "selection.set",
-        "selection.delete",
-        "connections.start",
-        "connections.complete",
-        "connections.connect",
-        "connections.cancel",
-        "connections.delete",
-        "connections.disconnect",
-        "connections.note.set",
-        "connections.reconnect",
-        "connections.break-port",
-        "history.undo",
-        "history.redo",
-        "nodes.move",
-        "viewport.pan",
-        "viewport.resize",
-        "viewport.center",
-        "viewport.fit",
-        "viewport.reset",
-        "viewport.center-node",
-        "composites.wrap-selection",
-        "scopes.enter",
-        "scopes.exit",
-        "workspace.save",
-        "workspace.load",
-    ];
 
     private static GraphDocument CreateDocument(NodeDefinitionId definitionId)
         => new(

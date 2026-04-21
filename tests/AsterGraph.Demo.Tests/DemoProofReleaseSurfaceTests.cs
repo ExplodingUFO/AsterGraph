@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using Xunit;
 
 namespace AsterGraph.Demo.Tests;
@@ -8,12 +9,26 @@ namespace AsterGraph.Demo.Tests;
 public sealed class DemoProofReleaseSurfaceTests
 {
     [Fact]
+    public void RepositorySurface_UsesAsterGraphSolutionName()
+    {
+        var repoRoot = GetRepositoryRoot();
+
+        Assert.True(File.Exists(Path.Combine(repoRoot, "AsterGraph.sln")));
+        Assert.False(File.Exists(Path.Combine(repoRoot, "avalonia-node-map.sln")));
+        Assert.Contains("AsterGraph.sln", ReadRepoFile("CONTRIBUTING.md"), StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void CiScript_CapturesDemoProofArtifactForProofRing()
     {
         var script = ReadRepoFile("eng/ci.ps1");
 
         Assert.Contains("demo-proof.txt", script, StringComparison.Ordinal);
         Assert.Contains("Invoke-DemoProof", script, StringComparison.Ordinal);
+        foreach (var requiredProofLine in DemoProofContract.CreatePublicSuccessMarkerLines())
+        {
+            Assert.Contains(requiredProofLine, script, StringComparison.Ordinal);
+        }
     }
 
     [Fact]
@@ -24,13 +39,17 @@ public sealed class DemoProofReleaseSurfaceTests
 
         Assert.Contains("artifacts/proof/demo-proof.txt", ciWorkflow, StringComparison.Ordinal);
         Assert.Contains("DEMO_OK", ciWorkflow, StringComparison.Ordinal);
-        Assert.Contains("NON_OBSCURING_EDITING_OK", ciWorkflow, StringComparison.Ordinal);
-        Assert.Contains("VISUAL_SEMANTICS_OK", ciWorkflow, StringComparison.Ordinal);
+        foreach (var markerId in DemoProofContract.PublicSuccessMarkerIds)
+        {
+            Assert.Contains(markerId, ciWorkflow, StringComparison.Ordinal);
+        }
 
         Assert.Contains("artifacts/proof/demo-proof.txt", releaseWorkflow, StringComparison.Ordinal);
         Assert.Contains("DEMO_OK", releaseWorkflow, StringComparison.Ordinal);
-        Assert.Contains("NON_OBSCURING_EDITING_OK", releaseWorkflow, StringComparison.Ordinal);
-        Assert.Contains("VISUAL_SEMANTICS_OK", releaseWorkflow, StringComparison.Ordinal);
+        foreach (var markerId in DemoProofContract.PublicSuccessMarkerIds)
+        {
+            Assert.Contains(markerId, releaseWorkflow, StringComparison.Ordinal);
+        }
     }
 
     [Fact]
@@ -52,7 +71,7 @@ public sealed class DemoProofReleaseSurfaceTests
         WriteProofFile(
             proofRoot,
             "demo-proof.txt",
-            "DEMO_OK:True`nCOMMAND_SURFACE_OK:True`nTIERED_NODE_SURFACE_OK:True`nFIXED_GROUP_FRAME_OK:True`nNON_OBSCURING_EDITING_OK:True`nVISUAL_SEMANTICS_OK:True`nCOMPOSITE_SCOPE_OK:True`nEDGE_NOTE_OK:True`nDISCONNECT_FLOW_OK:True");
+            string.Join("`n", ["DEMO_OK:True", .. DemoProofContract.CreatePublicSuccessMarkerLines()]));
 
         var coveragePath = Path.Combine(tempRoot, "coverage-summary.json");
         File.WriteAllText(
@@ -91,18 +110,7 @@ public sealed class DemoProofReleaseSurfaceTests
             $"write-prerelease-notes.ps1 failed with exit code {process.ExitCode}.{Environment.NewLine}STDOUT:{Environment.NewLine}{stdout}{Environment.NewLine}STDERR:{Environment.NewLine}{stderr}");
 
         var notes = File.ReadAllText(outputPath);
-        foreach (var requiredProofLine in new[]
-                 {
-                     "DEMO_OK:True",
-                     "COMMAND_SURFACE_OK:True",
-                     "TIERED_NODE_SURFACE_OK:True",
-                     "FIXED_GROUP_FRAME_OK:True",
-                     "NON_OBSCURING_EDITING_OK:True",
-                     "VISUAL_SEMANTICS_OK:True",
-                     "COMPOSITE_SCOPE_OK:True",
-                     "EDGE_NOTE_OK:True",
-                     "DISCONNECT_FLOW_OK:True",
-                 })
+        foreach (var requiredProofLine in new[] { "DEMO_OK:True" }.Concat(DemoProofContract.CreatePublicSuccessMarkerLines()))
         {
             Assert.Contains(requiredProofLine, notes, StringComparison.Ordinal);
         }

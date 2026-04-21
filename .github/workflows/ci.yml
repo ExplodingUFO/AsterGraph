@@ -220,17 +220,21 @@ jobs:
           }
 
           if (Test-Path -LiteralPath 'artifacts/proof/demo-proof.txt') {
-            $demoLine = Select-String -Path 'artifacts/proof/demo-proof.txt' -Pattern 'DEMO_OK' | Select-Object -First 1
-            if ($demoLine) {
-              $summaryLines.Add("- $($demoLine.Line)")
-            }
-            $editingLine = Select-String -Path 'artifacts/proof/demo-proof.txt' -Pattern 'NON_OBSCURING_EDITING_OK' | Select-Object -First 1
-            if ($editingLine) {
-              $summaryLines.Add("- $($editingLine.Line)")
-            }
-            $visualLine = Select-String -Path 'artifacts/proof/demo-proof.txt' -Pattern 'VISUAL_SEMANTICS_OK' | Select-Object -First 1
-            if ($visualLine) {
-              $summaryLines.Add("- $($visualLine.Line)")
+            foreach ($markerId in @(
+              'DEMO_OK',
+              'COMMAND_SURFACE_OK',
+              'TIERED_NODE_SURFACE_OK',
+              'FIXED_GROUP_FRAME_OK',
+              'NON_OBSCURING_EDITING_OK',
+              'VISUAL_SEMANTICS_OK',
+              'COMPOSITE_SCOPE_OK',
+              'EDGE_NOTE_OK',
+              'DISCONNECT_FLOW_OK'
+            )) {
+              $markerLine = Select-String -Path 'artifacts/proof/demo-proof.txt' -Pattern $markerId | Select-Object -First 1
+              if ($markerLine) {
+                $summaryLines.Add("- $($markerLine.Line)")
+              }
             }
           }
 

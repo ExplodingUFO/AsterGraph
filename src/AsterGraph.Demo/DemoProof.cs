@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.Globalization;
 using AsterGraph.Abstractions.Catalog;
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
@@ -43,30 +42,9 @@ public sealed record DemoProofResult(
         && EdgeNoteOk
         && DisconnectFlowOk;
 
-    public IReadOnlyList<string> ProofLines =>
-    [
-        $"DEMO_TRUST_OK:{TrustTransparencyOk}",
-        $"DEMO_SHELL_OK:{ShellWorkflowOk}",
-        $"COMMAND_SURFACE_OK:{CommandSurfaceOk}",
-        $"TIERED_NODE_SURFACE_OK:{TieredNodeSurfaceOk}",
-        $"FIXED_GROUP_FRAME_OK:{FixedGroupFrameOk}",
-        $"NON_OBSCURING_EDITING_OK:{NonObscuringEditingOk}",
-        $"VISUAL_SEMANTICS_OK:{VisualSemanticsOk}",
-        $"COMPOSITE_SCOPE_OK:{CompositeScopeOk}",
-        $"EDGE_NOTE_OK:{EdgeNoteOk}",
-        $"DISCONNECT_FLOW_OK:{DisconnectFlowOk}",
-    ];
+    public IReadOnlyList<string> ProofLines => DemoProofContract.CreateProofLines(this);
 
-    public IReadOnlyList<string> MetricLines =>
-    [
-        FormatMetric("startup_ms", StartupMs),
-        FormatMetric("inspector_projection_ms", InspectorProjectionMs),
-        FormatMetric("plugin_scan_ms", PluginScanMs),
-        FormatMetric("command_latency_ms", CommandLatencyMs),
-    ];
-
-    private static string FormatMetric(string name, double value)
-        => $"HOST_NATIVE_METRIC:{name}={value.ToString("0.###", CultureInfo.InvariantCulture)}";
+    public IReadOnlyList<string> MetricLines => DemoProofContract.CreateMetricLines(this);
 }
 
 public static class DemoProof

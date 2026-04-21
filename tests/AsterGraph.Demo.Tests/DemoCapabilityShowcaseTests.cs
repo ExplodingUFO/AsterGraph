@@ -133,22 +133,14 @@ public sealed class DemoCapabilityShowcaseTests
         Assert.True(result.InspectorProjectionMs >= 0);
         Assert.True(result.PluginScanMs >= 0);
         Assert.True(result.CommandLatencyMs >= 0);
-        foreach (var requiredProofLine in new[]
-                 {
-                     "COMMAND_SURFACE_OK:True",
-                     "TIERED_NODE_SURFACE_OK:True",
-                     "FIXED_GROUP_FRAME_OK:True",
-                     "NON_OBSCURING_EDITING_OK:True",
-                     "VISUAL_SEMANTICS_OK:True",
-                     "COMPOSITE_SCOPE_OK:True",
-                     "EDGE_NOTE_OK:True",
-                     "DISCONNECT_FLOW_OK:True",
-                 })
+        foreach (var requiredProofLine in DemoProofContract.CreatePublicSuccessMarkerLines())
         {
             Assert.Contains(result.ProofLines, line => string.Equals(line, requiredProofLine, StringComparison.Ordinal));
         }
-        Assert.Contains(result.MetricLines, line => line.Contains("startup_ms", StringComparison.Ordinal));
-        Assert.Contains(result.MetricLines, line => line.Contains("command_latency_ms", StringComparison.Ordinal));
+        foreach (var metricName in DemoProofContract.NativeMetricNames)
+        {
+            Assert.Contains(result.MetricLines, line => line.Contains(metricName, StringComparison.Ordinal));
+        }
     }
 
     [AvaloniaFact]

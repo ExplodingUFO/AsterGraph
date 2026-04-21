@@ -18,7 +18,7 @@ AsterGraph is developed as a reusable SDK, not only as a demo application. Prefe
 Bootstrap:
 
 ```powershell
-dotnet restore .\avalonia-node-map.sln
+dotnet restore .\AsterGraph.sln
 ```
 
 ## Branches and PRs
