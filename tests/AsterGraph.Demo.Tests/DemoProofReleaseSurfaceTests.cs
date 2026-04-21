@@ -155,7 +155,7 @@ public sealed class DemoProofReleaseSurfaceTests
         WriteProofFile(
             proofRoot,
             "scale-smoke.txt",
-            "SCALE_TIER_BUDGET:baseline`nSCALE_PERFORMANCE_BUDGET_OK:baseline:True:16`nSCALE_HISTORY_CONTRACT_OK:True");
+            "SCALE_TIER_BUDGET:baseline`nSCALE_PERFORMANCE_BUDGET_OK:baseline:True:none`nSCALE_TIER_BUDGET:large`nSCALE_PERFORMANCE_BUDGET_OK:large:True:none`nSCALE_HISTORY_CONTRACT_OK:True");
         WriteProofFile(
             proofRoot,
             "demo-proof.txt",
@@ -202,6 +202,9 @@ public sealed class DemoProofReleaseSurfaceTests
         {
             Assert.Contains(requiredProofLine, notes, StringComparison.Ordinal);
         }
+
+        Assert.Contains("SCALE_PERFORMANCE_BUDGET_OK:baseline:True:none", notes, StringComparison.Ordinal);
+        Assert.Contains("SCALE_PERFORMANCE_BUDGET_OK:large:True:none", notes, StringComparison.Ordinal);
     }
 
     private static string ReadRepoFile(string relativePath)
