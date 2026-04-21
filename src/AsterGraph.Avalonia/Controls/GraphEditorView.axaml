@@ -107,6 +107,12 @@
                      Orientation="Horizontal"
                      ItemHeight="40"
                      ItemWidth="120" />
+          <WrapPanel x:Name="PART_CompositeWorkflowToolbar"
+                     Orientation="Horizontal"
+                     ItemHeight="40"
+                     ItemWidth="180" />
+          <WrapPanel x:Name="PART_ScopeBreadcrumbs"
+                     Orientation="Horizontal" />
           <Button x:Name="PART_OpenCommandPaletteButton"
                   Classes="astergraph-toolbar-action"
                   HorizontalAlignment="Left"

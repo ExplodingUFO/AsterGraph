@@ -101,6 +101,9 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
     public string TryPromoteNodeGroupToComposite(string groupId, string? title, bool updateStatus)
         => _kernel.TryPromoteNodeGroupToComposite(groupId, title, updateStatus);
 
+    public string TryWrapSelectionToComposite(string? title, bool updateStatus)
+        => _kernel.TryWrapSelectionToComposite(title, updateStatus);
+
     public string TryExposeCompositePort(string compositeNodeId, string childNodeId, string childPortId, string? label, bool updateStatus)
         => _kernel.TryExposeCompositePort(compositeNodeId, childNodeId, childPortId, label, updateStatus);
 

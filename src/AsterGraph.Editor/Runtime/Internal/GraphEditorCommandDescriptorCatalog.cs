@@ -18,6 +18,7 @@ internal static class GraphEditorCommandDescriptorCatalog
             ["groups.move"] = new("Move Group", "groups", "group-move", null),
             ["groups.resize"] = new("Resize Group", "groups", "group-resize", null),
             ["groups.promote"] = new("Promote Group To Composite", "groups", "group-promote", null),
+            ["composites.wrap-selection"] = new("Wrap Selection To Composite", "composites", "composite-wrap", null),
             ["composites.expose-port"] = new("Expose Composite Port", "composites", "composite-expose", null),
             ["composites.unexpose-port"] = new("Unexpose Composite Port", "composites", "composite-unexpose", null),
             ["scopes.enter"] = new("Enter Composite Scope", "scopes", "scope-enter", null),

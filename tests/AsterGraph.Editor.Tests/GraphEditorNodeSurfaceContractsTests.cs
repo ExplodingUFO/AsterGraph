@@ -109,6 +109,11 @@ public sealed class GraphEditorNodeSurfaceContractsTests
             typeof(bool),
             commandsType.GetMethod(nameof(IGraphEditorCommands.TrySetNodeGroupMemberships), [typeof(IReadOnlyList<GraphEditorNodeGroupMembershipChange>), typeof(bool)])!.ReturnType);
 
+        AssertMethod(commandsType, nameof(IGraphEditorCommands.TryWrapSelectionToComposite), typeof(string), typeof(bool));
+        Assert.Equal(
+            typeof(string),
+            commandsType.GetMethod(nameof(IGraphEditorCommands.TryWrapSelectionToComposite), [typeof(string), typeof(bool)])!.ReturnType);
+
         AssertMethod(commandsType, nameof(IGraphEditorCommands.TryPromoteNodeGroupToComposite), typeof(string), typeof(string), typeof(bool));
         Assert.Equal(
             typeof(string),

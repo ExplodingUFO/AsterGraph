@@ -39,7 +39,9 @@ public sealed partial class GraphEditorSession :
         _diagnosticsSink = diagnosticsSink;
         _descriptorSupport = descriptorSupport;
         _stockMenuDescriptorBuilder = new GraphEditorSessionStockMenuDescriptorBuilder(
+            _host.CreateDocumentSnapshot,
             _host.CreateActiveScopeDocumentSnapshot,
+            _host.GetScopeNavigationSnapshot,
             _host.GetSelectionSnapshot,
             _host.GetCompatibleConnectionTargets,
             Localize,

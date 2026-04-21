@@ -151,6 +151,15 @@ public interface IGraphEditorCommands
         => throw new NotSupportedException();
 
     /// <summary>
+    /// Attempts to wrap the current selection into a new composite shell in one authoring step.
+    /// </summary>
+    /// <param name="title">Optional composite shell title override.</param>
+    /// <param name="updateStatus">Whether to update status text for no-op or success cases.</param>
+    /// <returns>The created composite shell node identifier, or an empty string when wrapping fails.</returns>
+    string TryWrapSelectionToComposite(string? title = null, bool updateStatus = true)
+        => throw new NotSupportedException();
+
+    /// <summary>
     /// Attempts to expose one child graph port as a public composite boundary port.
     /// </summary>
     /// <param name="compositeNodeId">Composite shell node identifier.</param>

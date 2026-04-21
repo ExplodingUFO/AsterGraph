@@ -550,6 +550,64 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
         return mutation.CompositeNode.Id;
     }
 
+    public string TryWrapSelectionToComposite(string? title, bool updateStatus)
+    {
+        if (!_behaviorOptions.Commands.Nodes.AllowMove)
+        {
+            if (updateStatus)
+            {
+                CurrentStatusMessage = "Composite authoring is disabled by host permissions.";
+            }
+
+            return string.Empty;
+        }
+
+        if (_selectedNodeIds.Count == 0)
+        {
+            if (updateStatus)
+            {
+                CurrentStatusMessage = "Select one or more nodes before wrapping them into a composite.";
+            }
+
+            return string.Empty;
+        }
+
+        var compositeTitle = string.IsNullOrWhiteSpace(title)
+            ? "Composite"
+            : title.Trim();
+        var groupId = CreateUniqueId(GetAllNodeGroups().Select(group => group.Id), "group-");
+        var compositeNodeId = CreateUniqueId(GetAllNodes().Select(node => node.Id), "composite-node-");
+        var childGraphId = CreateUniqueId(_document.GraphScopes.Select(scope => scope.Id), "graph-composite-");
+
+        var grouped = _documentMutator.CreateNodeGroupFromSelection(CreateActiveScopeDocumentSnapshot(), _selectedNodeIds, groupId, compositeTitle);
+        if (grouped.Group is null)
+        {
+            if (updateStatus)
+            {
+                CurrentStatusMessage = "No composite node was created.";
+            }
+
+            return string.Empty;
+        }
+
+        var promoted = _documentMutator.PromoteNodeGroupToComposite(grouped.Document, groupId, compositeNodeId, childGraphId, compositeTitle);
+        if (promoted.CompositeNode is null)
+        {
+            if (updateStatus)
+            {
+                CurrentStatusMessage = promoted.FailureReason ?? "No composite node was created.";
+            }
+
+            return string.Empty;
+        }
+
+        ApplyActiveScopeDocument(promoted.Document);
+        SetSelection([promoted.CompositeNode.Id], promoted.CompositeNode.Id, updateStatus: false);
+        CurrentStatusMessage = $"Wrapped selection into composite {promoted.CompositeNode.Title}.";
+        MarkDirty(CurrentStatusMessage, GraphEditorDocumentChangeKind.LayoutChanged, [promoted.CompositeNode.Id], null, preserveStatus: !updateStatus);
+        return promoted.CompositeNode.Id;
+    }
+
     public string TryExposeCompositePort(string compositeNodeId, string childNodeId, string childPortId, string? label, bool updateStatus)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(compositeNodeId);
@@ -566,7 +624,7 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
             return string.Empty;
         }
 
-        var activeDocument = CreateActiveScopeDocumentSnapshot();
+        var activeDocument = CreateDocumentSnapshot();
         var compositeNode = activeDocument.Nodes.FirstOrDefault(node => string.Equals(node.Id, compositeNodeId, StringComparison.Ordinal));
         var childScope = compositeNode?.Composite is null
             ? null
@@ -616,7 +674,7 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
             return false;
         }
 
-        var mutation = _documentMutator.UnexposeCompositePort(CreateActiveScopeDocumentSnapshot(), compositeNodeId, boundaryPortId);
+        var mutation = _documentMutator.UnexposeCompositePort(CreateDocumentSnapshot(), compositeNodeId, boundaryPortId);
         if (mutation.CompositeNode is null)
         {
             if (updateStatus)

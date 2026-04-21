@@ -170,6 +170,17 @@ public sealed partial class GraphEditorSession
         return compositeNodeId;
     }
 
+    public string TryWrapSelectionToComposite(string? title = null, bool updateStatus = true)
+    {
+        var compositeNodeId = _host.TryWrapSelectionToComposite(title, updateStatus);
+        if (!string.IsNullOrWhiteSpace(compositeNodeId))
+        {
+            PublishCommandExecuted("composites.wrap-selection");
+        }
+
+        return compositeNodeId;
+    }
+
     public string TryExposeCompositePort(
         string compositeNodeId,
         string childNodeId,

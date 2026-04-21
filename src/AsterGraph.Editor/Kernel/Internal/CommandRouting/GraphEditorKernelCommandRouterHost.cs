@@ -88,6 +88,9 @@ internal sealed partial class GraphEditorKernel
         string IGraphEditorKernelCommandRouterHost.TryPromoteNodeGroupToComposite(string groupId, string? title, bool updateStatus)
             => _owner.TryPromoteNodeGroupToComposite(groupId, title, updateStatus);
 
+        string IGraphEditorKernelCommandRouterHost.TryWrapSelectionToComposite(string? title, bool updateStatus)
+            => _owner.TryWrapSelectionToComposite(title, updateStatus);
+
         string IGraphEditorKernelCommandRouterHost.TryExposeCompositePort(string compositeNodeId, string childNodeId, string childPortId, string? label, bool updateStatus)
             => _owner.TryExposeCompositePort(compositeNodeId, childNodeId, childPortId, label, updateStatus);
 

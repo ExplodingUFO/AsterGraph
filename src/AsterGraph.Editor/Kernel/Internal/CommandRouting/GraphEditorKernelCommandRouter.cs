@@ -61,6 +61,8 @@ internal interface IGraphEditorKernelCommandRouterHost
 
     string TryPromoteNodeGroupToComposite(string groupId, string? title, bool updateStatus);
 
+    string TryWrapSelectionToComposite(string? title, bool updateStatus);
+
     string TryExposeCompositePort(string compositeNodeId, string childNodeId, string childPortId, string? label, bool updateStatus);
 
     bool TryUnexposeCompositePort(string compositeNodeId, string boundaryPortId, bool updateStatus);
@@ -170,9 +172,14 @@ internal sealed class GraphEditorKernelCommandRouter
                 GraphEditorCommandSourceKind.Kernel,
                 _host.Document.Groups?.Count > 0 && _host.BehaviorOptions.Commands.Nodes.AllowMove),
             GraphEditorCommandDescriptorCatalog.Create(
+                "composites.wrap-selection",
+                GraphEditorCommandSourceKind.Kernel,
+                _host.SelectedNodeCount > 0 && _host.BehaviorOptions.Commands.Nodes.AllowMove),
+            GraphEditorCommandDescriptorCatalog.Create(
                 "composites.expose-port",
                 GraphEditorCommandSourceKind.Kernel,
-                _host.Document.Nodes.Any(node => node.Composite is not null) && _host.BehaviorOptions.Commands.Nodes.AllowMove),
+                (_host.Document.Nodes.Any(node => node.Composite is not null) || _host.CanNavigateToParentGraphScope)
+                && _host.BehaviorOptions.Commands.Nodes.AllowMove),
             GraphEditorCommandDescriptorCatalog.Create(
                 "composites.unexpose-port",
                 GraphEditorCommandSourceKind.Kernel,
@@ -423,6 +430,15 @@ internal sealed class GraphEditorKernelCommandRouter
                     _host.TryPromoteNodeGroupToComposite(
                         promoteGroupId,
                         promoteTitle,
+                        ResolveOptionalUpdateStatus(command, "updateStatus")));
+
+            case "composites.wrap-selection":
+                var wrapTitle = command.TryGetArgument("title", out var rawWrapTitle) && !string.IsNullOrWhiteSpace(rawWrapTitle)
+                    ? rawWrapTitle
+                    : null;
+                return !string.IsNullOrWhiteSpace(
+                    _host.TryWrapSelectionToComposite(
+                        wrapTitle,
                         ResolveOptionalUpdateStatus(command, "updateStatus")));
 
             case "composites.expose-port":

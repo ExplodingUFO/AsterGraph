@@ -116,6 +116,8 @@ public partial class GraphEditorView : UserControl
     private Border? _inspectorChrome;
     private Border? _statusChrome;
     private WrapPanel? _headerToolbar;
+    private WrapPanel? _compositeWorkflowToolbar;
+    private WrapPanel? _scopeBreadcrumbs;
     private StackPanel? _shortcutHelpList;
     private Button? _openCommandPaletteButton;
     private Border? _commandPaletteChrome;
@@ -317,6 +319,8 @@ public partial class GraphEditorView : UserControl
         _inspectorChrome = this.FindControl<Border>("PART_InspectorChrome");
         _statusChrome = this.FindControl<Border>("PART_StatusChrome");
         _headerToolbar = this.FindControl<WrapPanel>("PART_HeaderToolbar");
+        _compositeWorkflowToolbar = this.FindControl<WrapPanel>("PART_CompositeWorkflowToolbar");
+        _scopeBreadcrumbs = this.FindControl<WrapPanel>("PART_ScopeBreadcrumbs");
         _shortcutHelpList = this.FindControl<StackPanel>("PART_ShortcutHelpList");
         _openCommandPaletteButton = this.FindControl<Button>("PART_OpenCommandPaletteButton");
         _commandPaletteChrome = this.FindControl<Border>("PART_CommandPaletteChrome");
@@ -444,6 +448,8 @@ public partial class GraphEditorView : UserControl
         var projection = CreateCommandSurfaceProjection();
         RefreshCommandPaletteButton(projection);
         BuildHeaderToolbar(projection);
+        BuildCompositeWorkflowToolbar(projection);
+        BuildScopeBreadcrumbs();
         BuildShortcutHelp(projection);
         BuildCommandPaletteItems(projection);
         if (Editor is null)
@@ -468,6 +474,44 @@ public partial class GraphEditorView : UserControl
         foreach (var action in projection.Select(HeaderCommandIds))
         {
             _headerToolbar.Children.Add(CreateActionButton(action, $"PART_HeaderCommand_{action.Id}"));
+        }
+    }
+
+    private void BuildCompositeWorkflowToolbar(AsterGraphHostedActionProjection? projection)
+    {
+        if (_compositeWorkflowToolbar is null)
+        {
+            return;
+        }
+
+        _compositeWorkflowToolbar.Children.Clear();
+        if (projection is null)
+        {
+            return;
+        }
+
+        foreach (var action in projection.Select(["composites.wrap-selection", "scopes.enter", "scopes.exit"]))
+        {
+            _compositeWorkflowToolbar.Children.Add(CreateActionButton(action, $"PART_CompositeWorkflowAction_{action.Id}"));
+        }
+    }
+
+    private void BuildScopeBreadcrumbs()
+    {
+        if (_scopeBreadcrumbs is null)
+        {
+            return;
+        }
+
+        _scopeBreadcrumbs.Children.Clear();
+        if (Editor is null)
+        {
+            return;
+        }
+
+        foreach (var action in AsterGraphCompositeWorkflowActionFactory.CreateBreadcrumbActions(Editor.Session))
+        {
+            _scopeBreadcrumbs.Children.Add(CreateActionButton(action, $"PART_ScopeBreadcrumb_{action.Id["breadcrumb.".Length..]}"));
         }
     }
 
@@ -537,6 +581,7 @@ public partial class GraphEditorView : UserControl
         [
             CreateCommandPaletteAction(),
             .. AsterGraphHostedActionFactory.CreateCommandActions(Editor.Session),
+            .. AsterGraphCompositeWorkflowActionFactory.CreateWorkflowActions(Editor.Session),
         ]);
     }
 

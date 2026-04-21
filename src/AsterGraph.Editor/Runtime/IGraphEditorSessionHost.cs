@@ -37,6 +37,7 @@ internal interface IGraphEditorSessionHost
     bool TrySetNodeGroupExtraPadding(string groupId, GraphPadding extraPadding, bool updateStatus);
     bool TrySetNodeGroupMemberships(IReadOnlyList<GraphEditorNodeGroupMembershipChange> changes, bool updateStatus);
     string TryPromoteNodeGroupToComposite(string groupId, string? title, bool updateStatus);
+    string TryWrapSelectionToComposite(string? title, bool updateStatus);
     string TryExposeCompositePort(string compositeNodeId, string childNodeId, string childPortId, string? label, bool updateStatus);
     bool TryUnexposeCompositePort(string compositeNodeId, string boundaryPortId, bool updateStatus);
     bool TryEnterCompositeChildGraph(string compositeNodeId, bool updateStatus)

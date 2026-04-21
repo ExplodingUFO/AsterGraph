@@ -14,6 +14,7 @@ using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Avalonia.Controls;
 using AsterGraph.Core.Compatibility;
 using AsterGraph.Core.Models;
+using AsterGraph.Editor;
 using AsterGraph.Editor.Catalog;
 using AsterGraph.Editor.Hosting;
 using AsterGraph.Editor.Menus;
@@ -289,6 +290,63 @@ public sealed class GraphEditorViewTests
         Assert.Same(window, topLevel);
     }
 
+    [AvaloniaFact]
+    public void CompositeWorkflowChrome_WrapSelectionActionCreatesCompositeShell()
+    {
+        var editor = CreateSelectionEditor();
+        editor.Session.Commands.SetSelection(["tests.view.source-001", "tests.view.target-001"], "tests.view.target-001", updateStatus: false);
+        var window = CreateWindow(new GraphEditorView
+        {
+            Editor = editor,
+        });
+        var view = (GraphEditorView)window.Content!;
+
+        var wrapSelection = FindRequiredDescendant<Button>(view, "PART_CompositeWorkflowAction_composites.wrap-selection");
+
+        Assert.Equal("Wrap Selection To Composite", Assert.IsType<string>(wrapSelection.Content));
+        Assert.True(wrapSelection.IsEnabled);
+
+        wrapSelection.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+
+        var compositeSnapshot = Assert.Single(editor.Session.Queries.GetCompositeNodeSnapshots());
+        var selection = editor.Session.Queries.GetSelectionSnapshot();
+        var enterScope = FindRequiredDescendant<Button>(view, "PART_CompositeWorkflowAction_scopes.enter");
+
+        Assert.Equal([compositeSnapshot.NodeId], selection.SelectedNodeIds);
+        Assert.True(enterScope.IsEnabled);
+    }
+
+    [AvaloniaFact]
+    public void CompositeWorkflowChrome_ProjectsBreadcrumbsAndScopeNavigation()
+    {
+        var editor = CreateScopedEditor();
+        editor.Session.Commands.SetSelection(["tests.view.composite-001"], "tests.view.composite-001", updateStatus: false);
+        var window = CreateWindow(new GraphEditorView
+        {
+            Editor = editor,
+        });
+        var view = (GraphEditorView)window.Content!;
+
+        var enterScope = FindRequiredDescendant<Button>(view, "PART_CompositeWorkflowAction_scopes.enter");
+        Assert.True(enterScope.IsEnabled);
+
+        enterScope.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+
+        Assert.Equal("graph-child-001", editor.Session.Queries.GetScopeNavigationSnapshot().CurrentScopeId);
+
+        var rootBreadcrumb = FindRequiredDescendant<Button>(view, "PART_ScopeBreadcrumb_graph-root");
+        var childBreadcrumb = FindRequiredDescendant<Button>(view, "PART_ScopeBreadcrumb_graph-child-001");
+        var exitScope = FindRequiredDescendant<Button>(view, "PART_CompositeWorkflowAction_scopes.exit");
+
+        Assert.True(rootBreadcrumb.IsEnabled);
+        Assert.False(childBreadcrumb.IsEnabled);
+        Assert.True(exitScope.IsEnabled);
+
+        rootBreadcrumb.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+
+        Assert.Equal("graph-root", editor.Session.Queries.GetScopeNavigationSnapshot().CurrentScopeId);
+    }
+
     private static Window CreateWindow(GraphEditorView view)
     {
         var window = new Window
@@ -355,6 +413,117 @@ public sealed class GraphEditorViewTests
             catalog,
             new DefaultPortCompatibilityService(),
             contextMenuAugmentor: augmentor);
+    }
+
+    private static GraphEditorViewModel CreateSelectionEditor()
+    {
+        var definitionId = new NodeDefinitionId("tests.view.selection");
+        var catalog = new NodeCatalog();
+        catalog.RegisterDefinition(
+            new NodeDefinition(
+                definitionId,
+                "Selection View Node",
+                "Tests",
+                "Exercises composite workflow actions.",
+                [new PortDefinition("in", "Input", new PortTypeId("float"), "#F3B36B")],
+                [new PortDefinition("out", "Output", new PortTypeId("float"), "#6AD5C4")]));
+
+        return new GraphEditorViewModel(
+            new GraphDocument(
+                "Selection Workflow Graph",
+                "Exercises composite workflow shell actions.",
+                [
+                    new GraphNode(
+                        "tests.view.source-001",
+                        "View Source",
+                        "Tests",
+                        "GraphEditorView",
+                        "Source node for composite workflow tests.",
+                        new GraphPoint(120, 160),
+                        new GraphSize(240, 160),
+                        [],
+                        [new GraphPort("out", "Output", PortDirection.Output, "float", "#6AD5C4", new PortTypeId("float"))],
+                        "#6AD5C4",
+                        definitionId),
+                    new GraphNode(
+                        "tests.view.target-001",
+                        "View Target",
+                        "Tests",
+                        "GraphEditorView",
+                        "Target node for composite workflow tests.",
+                        new GraphPoint(520, 180),
+                        new GraphSize(240, 160),
+                        [new GraphPort("in", "Input", PortDirection.Input, "float", "#F3B36B", new PortTypeId("float"))],
+                        [],
+                        "#F3B36B",
+                        definitionId),
+                ],
+                []),
+            catalog,
+            new DefaultPortCompatibilityService());
+    }
+
+    private static GraphEditorViewModel CreateScopedEditor()
+    {
+        var definitionId = new NodeDefinitionId("tests.view.scoped");
+        var catalog = new NodeCatalog();
+        catalog.RegisterDefinition(
+            new NodeDefinition(
+                definitionId,
+                "Scoped View Node",
+                "Tests",
+                "Exercises scope workflow actions.",
+                [new PortDefinition("in", "Input", new PortTypeId("float"), "#F3B36B")],
+                [new PortDefinition("out", "Output", new PortTypeId("float"), "#6AD5C4")]));
+
+        return AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
+        {
+            Document = GraphDocument.CreateScoped(
+                "Scoped View Graph",
+                "Exercises composite scope navigation chrome.",
+                "graph-root",
+                [
+                    new GraphScope(
+                        "graph-root",
+                        [
+                            new GraphNode(
+                                "tests.view.composite-001",
+                                "Composite View Node",
+                                "Tests",
+                                "GraphEditorView",
+                                "Composite shell node for scope navigation tests.",
+                                new GraphPoint(160, 140),
+                                new GraphSize(260, 180),
+                                [],
+                                [],
+                                "#A67CF5",
+                                null,
+                                [],
+                                null,
+                                new GraphCompositeNode("graph-child-001", [], [])),
+                        ],
+                        []),
+                    new GraphScope(
+                        "graph-child-001",
+                        [
+                            new GraphNode(
+                                "tests.view.child-source-001",
+                                "Child Source",
+                                "Tests",
+                                "GraphEditorView",
+                                "Child source node.",
+                                new GraphPoint(80, 100),
+                                new GraphSize(220, 150),
+                                [],
+                                [new GraphPort("out", "Output", PortDirection.Output, "float", "#6AD5C4", new PortTypeId("float"))],
+                                "#6AD5C4",
+                                definitionId),
+                        ],
+                        []),
+                ]),
+            NodeCatalog = catalog,
+            CompatibilityService = new DefaultPortCompatibilityService(),
+        });
     }
 
     private sealed class GraphEditorViewHostAwareAugmentor : IGraphContextMenuAugmentor

@@ -84,9 +84,9 @@ public sealed class GraphEditorKernelCommandRouterTests
             ]);
 
         var expected = """
-            initial:nodes.add:True:-|selection.set:True:-|selection.delete:False:-|nodes.move:True:-|nodes.resize:True:-|nodes.parameters.set:False:Parameter editing requires node-edit permissions and a shared node definition selection.|groups.create:False:-|groups.collapse:False:-|groups.move:False:-|groups.resize:False:-|groups.membership.set:False:-|groups.promote:False:-|composites.expose-port:False:-|composites.unexpose-port:False:-|scopes.enter:False:-|scopes.exit:False:-|connections.start:True:-|connections.complete:False:-|connections.connect:True:-|connections.cancel:False:-|connections.delete:True:-|connections.disconnect:True:-|connections.break-port:True:-|connections.disconnect-incoming:True:-|connections.disconnect-outgoing:True:-|connections.disconnect-all:True:-|history.undo:False:-|history.redo:False:-|viewport.fit:True:-|viewport.pan:True:-|viewport.resize:True:-|viewport.reset:True:-|viewport.center-node:True:-|viewport.center:True:-|workspace.save:True:-|workspace.load:False:No saved snapshot yet. Save once to create one.
-            selected:nodes.add:True:-|selection.set:True:-|selection.delete:True:-|nodes.move:True:-|nodes.resize:True:-|nodes.parameters.set:False:Parameter editing requires node-edit permissions and a shared node definition selection.|groups.create:True:-|groups.collapse:False:-|groups.move:False:-|groups.resize:False:-|groups.membership.set:False:-|groups.promote:False:-|composites.expose-port:False:-|composites.unexpose-port:False:-|scopes.enter:False:-|scopes.exit:False:-|connections.start:True:-|connections.complete:False:-|connections.connect:True:-|connections.cancel:False:-|connections.delete:True:-|connections.disconnect:True:-|connections.break-port:True:-|connections.disconnect-incoming:True:-|connections.disconnect-outgoing:True:-|connections.disconnect-all:True:-|history.undo:False:-|history.redo:False:-|viewport.fit:True:-|viewport.pan:True:-|viewport.resize:True:-|viewport.reset:True:-|viewport.center-node:True:-|viewport.center:True:-|workspace.save:True:-|workspace.load:False:No saved snapshot yet. Save once to create one.
-            pending:nodes.add:True:-|selection.set:True:-|selection.delete:True:-|nodes.move:True:-|nodes.resize:True:-|nodes.parameters.set:False:Parameter editing requires node-edit permissions and a shared node definition selection.|groups.create:True:-|groups.collapse:False:-|groups.move:False:-|groups.resize:False:-|groups.membership.set:False:-|groups.promote:False:-|composites.expose-port:False:-|composites.unexpose-port:False:-|scopes.enter:False:-|scopes.exit:False:-|connections.start:True:-|connections.complete:True:-|connections.connect:True:-|connections.cancel:True:-|connections.delete:True:-|connections.disconnect:True:-|connections.break-port:True:-|connections.disconnect-incoming:True:-|connections.disconnect-outgoing:True:-|connections.disconnect-all:True:-|history.undo:False:-|history.redo:False:-|viewport.fit:True:-|viewport.pan:True:-|viewport.resize:True:-|viewport.reset:True:-|viewport.center-node:True:-|viewport.center:True:-|workspace.save:True:-|workspace.load:False:No saved snapshot yet. Save once to create one.
+            initial:nodes.add:True:-|selection.set:True:-|selection.delete:False:-|nodes.move:True:-|nodes.resize:True:-|nodes.parameters.set:False:Parameter editing requires node-edit permissions and a shared node definition selection.|groups.create:False:-|groups.collapse:False:-|groups.move:False:-|groups.resize:False:-|groups.membership.set:False:-|groups.promote:False:-|composites.wrap-selection:False:-|composites.expose-port:False:-|composites.unexpose-port:False:-|scopes.enter:False:-|scopes.exit:False:-|connections.start:True:-|connections.complete:False:-|connections.connect:True:-|connections.cancel:False:-|connections.delete:True:-|connections.disconnect:True:-|connections.break-port:True:-|connections.disconnect-incoming:True:-|connections.disconnect-outgoing:True:-|connections.disconnect-all:True:-|history.undo:False:-|history.redo:False:-|viewport.fit:True:-|viewport.pan:True:-|viewport.resize:True:-|viewport.reset:True:-|viewport.center-node:True:-|viewport.center:True:-|workspace.save:True:-|workspace.load:False:No saved snapshot yet. Save once to create one.
+            selected:nodes.add:True:-|selection.set:True:-|selection.delete:True:-|nodes.move:True:-|nodes.resize:True:-|nodes.parameters.set:False:Parameter editing requires node-edit permissions and a shared node definition selection.|groups.create:True:-|groups.collapse:False:-|groups.move:False:-|groups.resize:False:-|groups.membership.set:False:-|groups.promote:False:-|composites.wrap-selection:True:-|composites.expose-port:False:-|composites.unexpose-port:False:-|scopes.enter:False:-|scopes.exit:False:-|connections.start:True:-|connections.complete:False:-|connections.connect:True:-|connections.cancel:False:-|connections.delete:True:-|connections.disconnect:True:-|connections.break-port:True:-|connections.disconnect-incoming:True:-|connections.disconnect-outgoing:True:-|connections.disconnect-all:True:-|history.undo:False:-|history.redo:False:-|viewport.fit:True:-|viewport.pan:True:-|viewport.resize:True:-|viewport.reset:True:-|viewport.center-node:True:-|viewport.center:True:-|workspace.save:True:-|workspace.load:False:No saved snapshot yet. Save once to create one.
+            pending:nodes.add:True:-|selection.set:True:-|selection.delete:True:-|nodes.move:True:-|nodes.resize:True:-|nodes.parameters.set:False:Parameter editing requires node-edit permissions and a shared node definition selection.|groups.create:True:-|groups.collapse:False:-|groups.move:False:-|groups.resize:False:-|groups.membership.set:False:-|groups.promote:False:-|composites.wrap-selection:True:-|composites.expose-port:False:-|composites.unexpose-port:False:-|scopes.enter:False:-|scopes.exit:False:-|connections.start:True:-|connections.complete:True:-|connections.connect:True:-|connections.cancel:True:-|connections.delete:True:-|connections.disconnect:True:-|connections.break-port:True:-|connections.disconnect-incoming:True:-|connections.disconnect-outgoing:True:-|connections.disconnect-all:True:-|history.undo:False:-|history.redo:False:-|viewport.fit:True:-|viewport.pan:True:-|viewport.resize:True:-|viewport.reset:True:-|viewport.center-node:True:-|viewport.center:True:-|workspace.save:True:-|workspace.load:False:No saved snapshot yet. Save once to create one.
             """;
 
         Assert.Equal(expected.ReplaceLineEndings("\n"), signature.ReplaceLineEndings("\n"));
@@ -181,14 +181,24 @@ public sealed class GraphEditorKernelCommandRouterTests
     }
 
     [Fact]
-    public void GraphEditorKernel_CommandDescriptors_ExposeCompositePromotionMetadata()
+    public void GraphEditorKernel_CommandDescriptors_ExposeCompositeWorkflowMetadata()
     {
         var kernel = CreateKernel();
         kernel.SetSelection([SourceNodeId, TargetNodeId], TargetNodeId, updateStatus: false);
+
+        var descriptors = kernel.GetCommandDescriptors().ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
+
+        var wrapSelection = descriptors["composites.wrap-selection"];
+        Assert.Equal("Wrap Selection To Composite", wrapSelection.Title);
+        Assert.Equal("composites", wrapSelection.Group);
+        Assert.Equal("composite-wrap", wrapSelection.IconKey);
+        Assert.Equal(GraphEditorCommandSourceKind.Kernel, wrapSelection.Source);
+        Assert.True(wrapSelection.CanExecute);
+
         var groupId = kernel.TryCreateNodeGroupFromSelection("Composite Cluster");
         Assert.False(string.IsNullOrWhiteSpace(groupId));
 
-        var descriptors = kernel.GetCommandDescriptors().ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
+        descriptors = kernel.GetCommandDescriptors().ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
 
         var promote = descriptors["groups.promote"];
         Assert.Equal("Promote Group To Composite", promote.Title);
@@ -354,6 +364,36 @@ public sealed class GraphEditorKernelCommandRouterTests
                 ("boundaryPortId", boundaryPortId),
                 ("updateStatus", "false"))));
         Assert.False(kernel.TryExecuteCommand(CreateCommand("groups.promote", ("title", "missing-group-id"))));
+    }
+
+    [Fact]
+    public void GraphEditorKernel_TryExecuteCommand_AcceptsCompositeWrapSelectionPayloads()
+    {
+        var kernel = CreateKernel();
+
+        Assert.True(kernel.TryExecuteCommand(
+            CreateCommand(
+                "selection.set",
+                ("nodeId", SourceNodeId),
+                ("nodeId", TargetNodeId),
+                ("primaryNodeId", TargetNodeId),
+                ("updateStatus", "false"))));
+        Assert.True(kernel.TryExecuteCommand(
+            CreateCommand(
+                "composites.wrap-selection",
+                ("title", "Composite Cluster"),
+                ("updateStatus", "false"))));
+
+        var document = kernel.CreateDocumentSnapshot();
+        var compositeNode = Assert.Single(document.Nodes, node => node.Composite is not null);
+        var childScope = Assert.Single(document.GraphScopes, scope => string.Equals(scope.Id, compositeNode.Composite!.ChildGraphId, StringComparison.Ordinal));
+        var selection = kernel.GetSelectionSnapshot();
+
+        Assert.Equal("Composite Cluster", compositeNode.Title);
+        Assert.Empty(document.Groups ?? []);
+        Assert.Equal([SourceNodeId, TargetNodeId], childScope.Nodes.Select(node => node.Id).OrderBy(id => id, StringComparer.Ordinal));
+        Assert.Equal([compositeNode.Id], selection.SelectedNodeIds);
+        Assert.Equal(compositeNode.Id, selection.PrimarySelectedNodeId);
     }
 
     [Fact]
