@@ -53,6 +53,39 @@ public sealed class DemoProofReleaseSurfaceTests
     }
 
     [Fact]
+    public void CiWorkflow_IncludesMacOsValidationOnCanonicalSolutionPath()
+    {
+        var ciWorkflow = ReadRepoFile(".github/workflows/ci.yml");
+
+        Assert.Contains("macos-validation", ciWorkflow, StringComparison.Ordinal);
+        Assert.Contains("runs-on: macos-latest", ciWorkflow, StringComparison.Ordinal);
+        Assert.Contains("./eng/ci.ps1 -Lane all -Framework all -Configuration Release", ciWorkflow, StringComparison.Ordinal);
+        Assert.Contains("- macos-validation", ciWorkflow, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ArchitectureDocs_DescribeKernelSceneAdapterSplitAndStabilityLevels()
+    {
+        var architectureDoc = ReadRepoFile("docs/en/architecture.md");
+        var architectureDocZh = ReadRepoFile("docs/zh-CN/architecture.md");
+        var quickStart = ReadRepoFile("docs/en/quick-start.md");
+        var quickStartZh = ReadRepoFile("docs/zh-CN/quick-start.md");
+
+        foreach (var contents in new[] { architectureDoc, architectureDocZh })
+        {
+            Assert.Contains("Editor Kernel", contents, StringComparison.Ordinal);
+            Assert.Contains("Scene/Interaction", contents, StringComparison.Ordinal);
+            Assert.Contains("UI Adapter", contents, StringComparison.Ordinal);
+            Assert.Contains("CreateSession(...)", contents, StringComparison.Ordinal);
+            Assert.Contains("IGraphEditorSession", contents, StringComparison.Ordinal);
+            Assert.Contains("stability", contents, StringComparison.OrdinalIgnoreCase);
+        }
+
+        Assert.Contains("architecture", quickStart, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("architecture", quickStartZh, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public void WritePrereleaseNotes_IncludeDemoProofMarkersInProofSummary()
     {
         var tempRoot = CreateTempDirectory();

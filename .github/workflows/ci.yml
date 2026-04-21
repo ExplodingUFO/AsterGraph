@@ -115,6 +115,34 @@ jobs:
         shell: pwsh
         run: ./eng/ci.ps1 -Lane all -Framework all -Configuration Release
 
+  macos-validation:
+    name: macos-validation
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Prepare NuGet cache directory
+        shell: pwsh
+        run: New-Item -ItemType Directory -Force -Path $env:NUGET_PACKAGES | Out-Null
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+          cache: true
+          cache-dependency-path: |
+            global.json
+            Directory.Build.props
+            NuGet.Config
+            NuGet.config.sample
+            **/*.csproj
+
+      - name: Run macOS validation lane
+        shell: pwsh
+        run: ./eng/ci.ps1 -Lane all -Framework all -Configuration Release
+
   contract-proof:
     name: contract-proof
     runs-on: windows-latest
@@ -159,6 +187,7 @@ jobs:
       - hygiene-proof
       - framework-matrix
       - linux-validation
+      - macos-validation
       - contract-proof
 
     steps:

@@ -96,6 +96,7 @@ Plugin loading is currently in-process. Hosts can discover candidates, apply an 
 ## 7. Need More Than The First Run?
 
 - [Host Integration](./host-integration.md) = package boundary, route matrix, migration guidance
+- [Architecture](./architecture.md) = editor-kernel / scene-interaction / adapter split plus public stability levels
 - [Consumer Sample](./consumer-sample.md) = one realistic hosted integration between HelloWorld and Demo
 - [Alpha Status](./alpha-status.md) = current scope, non-goals, and known limitations
 - [Demo Guide](./demo-guide.md) = full showcase host

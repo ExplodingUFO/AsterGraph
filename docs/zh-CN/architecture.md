@@ -1,0 +1,45 @@
+# Architecture
+
+这份文档说明 `v0.3.0-alpha` 正在冻结的平台骨架：先把公开宿主边界讲清楚，再继续扩 capability。
+
+## Split
+
+AsterGraph 当前按三层明确拆分：
+
+1. `Editor Kernel`
+   负责文档变更、history、diagnostics、automation、plugin loading，以及 canonical runtime 的 commands / queries / events。
+2. `Scene/Interaction`
+   负责 adapter-neutral 的场景快照与交互语义，例如 `GraphEditorSceneSnapshot`、`GraphEditorPointerInputRouter`、`GraphEditorSceneResizeHitTester`、`GraphEditorPlatformServices`。
+3. `UI Adapter`
+   负责某个具体框架下的渲染、控件组合、平台输入接线和宿主壳层 chrome，例如 Avalonia。
+
+对外推荐入口仍然是 `CreateSession(...)` + `IGraphEditorSession`。默认 Avalonia hosted UI 是组合在这层 runtime 之上的，不会替代它。
+
+## Stability Levels
+
+当前 public alpha 有意区分不同 stability level：
+
+| Surface | 当前 stability | 说明 |
+| --- | --- | --- |
+| `CreateSession(...)`、`IGraphEditorSession`、DTO/snapshot queries、diagnostics、automation、plugin inspection | canonical | 新的宿主代码优先从这里开始 |
+| `Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` | supported hosted adapter | 第一个官方 `UI Adapter`；共享运行时 owner 仍然是 `Editor.Session` |
+| `GraphEditorViewModel`、`GraphEditorView` | compatibility | 仅保留给迁移路径，并且已显式标成 advanced |
+| scene/input/platform 内部 helper | internal adapter seam | 用来保持 adapter boundary 简洁，不是当前公开合同 |
+
+## Adapter Boundary
+
+Avalonia 包是第一个官方 adapter，不是整个 SDK 的唯一形态。
+
+- `AsterGraph.Editor` 持有 runtime model 和 canonical host contract。
+- `AsterGraph.Avalonia` 消费共享的 `Scene/Interaction` seam，并补上 Avalonia 专属的渲染与组合。
+- 后续 adapter 应复用同一套 `Editor Kernel` + `Scene/Interaction` 形状，而不是复制一份 editor semantics。
+
+## Proof Ring
+
+平台骨架当前通过三层 proof 守住：
+
+- regression tests：验证 canonical runtime contract 和 retained compatibility boundary
+- CI lanes：Windows、Linux、macOS 都跑 canonical solution validation path
+- proof artifacts 与 release summary：在发布前把 contract marker 直接暴露出来
+
+建议配合 [Quick Start](./quick-start.md) 和 [Host Integration](./host-integration.md) 一起看。

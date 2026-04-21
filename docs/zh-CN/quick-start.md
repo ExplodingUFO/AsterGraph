@@ -96,6 +96,7 @@ var view = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOption
 ## 7. 超过“第一跑”之后看哪里
 
 - [Host Integration](./host-integration.md) = 包边界、路线矩阵、迁移说明
+- [Architecture](./architecture.md) = editor-kernel / scene-interaction / adapter split 与公开 stability level
 - [Consumer Sample](./consumer-sample.md) = 介于 HelloWorld 和 Demo 之间的真实宿主样例
 - [Alpha Status](./alpha-status.md) = 当前范围、非目标、已知限制
 - [Demo Guide](./demo-guide.md) = 完整展示宿主
