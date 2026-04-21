@@ -419,6 +419,19 @@ public sealed partial class GraphEditorSession
         return reconnected;
     }
 
+    public bool TrySetConnectionLabel(string connectionId, string? label, bool updateStatus = true)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(connectionId);
+
+        var edited = _host.TrySetConnectionLabel(connectionId, label, updateStatus);
+        if (edited)
+        {
+            PublishCommandExecuted("connections.label.set");
+        }
+
+        return edited;
+    }
+
     public bool TrySetConnectionNoteText(string connectionId, string? noteText, bool updateStatus = true)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(connectionId);

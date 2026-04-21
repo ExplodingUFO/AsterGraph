@@ -349,6 +349,7 @@ public partial class GraphEditorView : UserControl
         _nodeCanvas = this.FindControl<NodeCanvas>("PART_NodeCanvas");
         _inspectorSurface = this.FindControl<GraphInspectorView>("PART_InspectorSurface");
         _miniMapSurface = this.FindControl<GraphMiniMap>("PART_MiniMapSurface");
+        InitializeAuthoringToolControls();
         if (_openCommandPaletteButton is not null)
         {
             _openCommandPaletteButton.Click += HandleOpenCommandPaletteClick;
@@ -481,6 +482,7 @@ public partial class GraphEditorView : UserControl
         BuildScopeBreadcrumbs();
         BuildShortcutHelp(projection);
         BuildCommandPaletteItems(projection);
+        RefreshAuthoringToolSurface();
         if (Editor is null)
         {
             CloseCommandPalette();

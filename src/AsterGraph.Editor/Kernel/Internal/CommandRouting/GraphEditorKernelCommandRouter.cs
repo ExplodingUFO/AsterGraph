@@ -75,6 +75,8 @@ internal interface IGraphEditorKernelCommandRouterHost
 
     bool TrySetNodeSize(string nodeId, GraphSize size, bool updateStatus);
 
+    bool TrySetNodeExpansionState(string nodeId, GraphNodeExpansionState expansionState);
+
     string TryCreateNodeGroupFromSelection(string title);
 
     bool TrySetNodeGroupCollapsed(string groupId, bool isCollapsed);
@@ -112,6 +114,8 @@ internal interface IGraphEditorKernelCommandRouterHost
     void DeleteConnection(string connectionId);
 
     bool TryReconnectConnection(string connectionId, bool updateStatus);
+
+    bool TrySetConnectionLabel(string connectionId, string? label, bool updateStatus);
 
     bool TrySetConnectionNoteText(string connectionId, string? noteText, bool updateStatus);
 
@@ -205,6 +209,10 @@ internal sealed class GraphEditorKernelCommandRouter
                 "nodes.resize",
                 GraphEditorCommandSourceKind.Kernel,
                 _host.BehaviorOptions.Commands.Nodes.AllowMove),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "nodes.surface.expand",
+                GraphEditorCommandSourceKind.Kernel,
+                _host.Document.Nodes.Count > 0),
             GraphEditorCommandDescriptorCatalog.Create(
                 "nodes.parameters.set",
                 GraphEditorCommandSourceKind.Kernel,
@@ -316,6 +324,13 @@ internal sealed class GraphEditorKernelCommandRouter
                 "connections.disconnect",
                 GraphEditorCommandSourceKind.Kernel,
                 _host.BehaviorOptions.Commands.Connections.AllowDisconnect),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "connections.label.set",
+                GraphEditorCommandSourceKind.Kernel,
+                _host.Document.Connections.Count > 0
+                && (_host.BehaviorOptions.Commands.Connections.AllowCreate
+                    || _host.BehaviorOptions.Commands.Connections.AllowDelete
+                    || _host.BehaviorOptions.Commands.Connections.AllowDisconnect)),
             GraphEditorCommandDescriptorCatalog.Create(
                 "connections.note.set",
                 GraphEditorCommandSourceKind.Kernel,
@@ -490,6 +505,15 @@ internal sealed class GraphEditorKernelCommandRouter
                     resizeNodeId,
                     new GraphSize(nodeWidth, nodeHeight),
                     ResolveOptionalUpdateStatus(command, "updateStatus"));
+
+            case "nodes.surface.expand":
+                if (!TryGetRequiredArgument(command, "nodeId", out var expansionNodeId)
+                    || !TryGetEnumArgument(command, "expansionState", out GraphNodeExpansionState expansionState))
+                {
+                    return false;
+                }
+
+                return _host.TrySetNodeExpansionState(expansionNodeId, expansionState);
 
             case "nodes.parameters.set":
                 if (!TryGetRequiredArgument(command, "parameterKey", out var parameterKey)
@@ -681,6 +705,18 @@ internal sealed class GraphEditorKernelCommandRouter
                 _host.DisconnectConnection(disconnectConnectionId);
                 return true;
 
+            case "connections.label.set":
+                if (!TryGetRequiredArgument(command, "connectionId", out var labelConnectionId))
+                {
+                    return false;
+                }
+
+                command.TryGetArgument("label", out var labelText);
+                return _host.TrySetConnectionLabel(
+                    labelConnectionId,
+                    labelText,
+                    ResolveOptionalUpdateStatus(command, "updateStatus"));
+
             case "connections.note.set":
                 if (!TryGetRequiredArgument(command, "connectionId", out var noteConnectionId))
                 {
@@ -850,6 +886,23 @@ internal sealed class GraphEditorKernelCommandRouter
     {
         if (!command.TryGetArgument(name, out var rawValue)
             || !bool.TryParse(rawValue, out value))
+        {
+            value = default;
+            return false;
+        }
+
+        return true;
+    }
+
+    private static bool TryGetEnumArgument<TEnum>(
+        GraphEditorCommandInvocationSnapshot command,
+        string name,
+        out TEnum value)
+        where TEnum : struct
+    {
+        if (!command.TryGetArgument(name, out var rawValue)
+            || string.IsNullOrWhiteSpace(rawValue)
+            || !Enum.TryParse(rawValue, ignoreCase: true, out value))
         {
             value = default;
             return false;

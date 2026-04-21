@@ -487,6 +487,41 @@ public sealed class GraphEditorViewTests
         Assert.Equal("graph-root", editor.Session.Queries.GetScopeNavigationSnapshot().CurrentScopeId);
     }
 
+    [AvaloniaFact]
+    public void AuthoringToolsChrome_SingleSelectedNode_ProjectsExpansionAndConnectionEditors()
+    {
+        var editor = CreateConnectionToolEditor();
+        editor.Session.Commands.SetSelection(["tests.view.tools-source-001"], "tests.view.tools-source-001", updateStatus: false);
+        var window = CreateWindow(new GraphEditorView
+        {
+            Editor = editor,
+        });
+        var view = (GraphEditorView)window.Content!;
+
+        var expansionButton = FindRequiredDescendant<Button>(view, "PART_NodeToolToggleExpansionButton");
+        var labelEditor = FindRequiredDescendant<TextBox>(view, "PART_ConnectionToolLabelEditor_connection-001");
+        var noteEditor = FindRequiredDescendant<TextBox>(view, "PART_ConnectionToolNoteEditor_connection-001");
+        var applyButton = FindRequiredDescendant<Button>(view, "PART_ConnectionToolApply_connection-001");
+
+        Assert.Equal("Expand Node Card", Assert.IsType<string>(expansionButton.Content));
+        Assert.Equal("Signal Flow", labelEditor.Text);
+        Assert.Equal("Preview branch", noteEditor.Text);
+
+        expansionButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+
+        Assert.Equal(
+            GraphNodeExpansionState.Expanded,
+            Assert.Single(editor.Session.Queries.GetNodeSurfaceSnapshots(), surface => surface.NodeId == "tests.view.tools-source-001").ExpansionState);
+
+        labelEditor.Text = "Refined Flow";
+        noteEditor.Text = "Updated branch";
+        applyButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+
+        var updatedConnection = Assert.Single(editor.Session.Queries.CreateDocumentSnapshot().Connections);
+        Assert.Equal("Refined Flow", updatedConnection.Label);
+        Assert.Equal("Updated branch", updatedConnection.Presentation?.NoteText);
+    }
+
     private static Window CreateWindow(GraphEditorView view)
     {
         var window = new Window
@@ -685,6 +720,65 @@ public sealed class GraphEditorViewTests
             NodeCatalog = catalog,
             CompatibilityService = new DefaultPortCompatibilityService(),
         });
+    }
+
+    private static GraphEditorViewModel CreateConnectionToolEditor()
+    {
+        var definitionId = new NodeDefinitionId("tests.view.tools");
+        var catalog = new NodeCatalog();
+        catalog.RegisterDefinition(
+            new NodeDefinition(
+                definitionId,
+                "Tool View Node",
+                "Tests",
+                "Exercises node and edge tooling chrome.",
+                [new PortDefinition("in", "Input", new PortTypeId("float"), "#F3B36B")],
+                [new PortDefinition("out", "Output", new PortTypeId("float"), "#6AD5C4")]));
+
+        return new GraphEditorViewModel(
+            new GraphDocument(
+                "Tooling View Graph",
+                "Exercises node and edge tooling shell actions.",
+                [
+                    new GraphNode(
+                        "tests.view.tools-source-001",
+                        "Tool Source",
+                        "Tests",
+                        "GraphEditorView",
+                        "Source node for tooling tests.",
+                        new GraphPoint(120, 160),
+                        new GraphSize(240, 160),
+                        [],
+                        [new GraphPort("out", "Output", PortDirection.Output, "float", "#6AD5C4", new PortTypeId("float"))],
+                        "#6AD5C4",
+                        definitionId),
+                    new GraphNode(
+                        "tests.view.tools-target-001",
+                        "Tool Target",
+                        "Tests",
+                        "GraphEditorView",
+                        "Target node for tooling tests.",
+                        new GraphPoint(520, 180),
+                        new GraphSize(240, 160),
+                        [new GraphPort("in", "Input", PortDirection.Input, "float", "#F3B36B", new PortTypeId("float"))],
+                        [],
+                        "#F3B36B",
+                        definitionId),
+                ],
+                [
+                    new GraphConnection(
+                        "connection-001",
+                        "tests.view.tools-source-001",
+                        "out",
+                        "tests.view.tools-target-001",
+                        "in",
+                        "Signal Flow",
+                        "#6AD5C4",
+                        null,
+                        new GraphEdgePresentation("Preview branch")),
+                ]),
+            catalog,
+            new DefaultPortCompatibilityService());
     }
 
     private sealed class GraphEditorViewHostAwareAugmentor : IGraphContextMenuAugmentor

@@ -211,6 +211,44 @@ internal sealed class GraphEditorKernelDocumentMutator
                 updatedConnection);
     }
 
+    public GraphEditorKernelConnectionLabelMutationResult SetConnectionLabel(
+        GraphDocument document,
+        string connectionId,
+        string? label)
+    {
+        ArgumentNullException.ThrowIfNull(document);
+        ArgumentException.ThrowIfNullOrWhiteSpace(connectionId);
+
+        var normalizedLabel = string.IsNullOrWhiteSpace(label)
+            ? string.Empty
+            : label.Trim();
+        GraphConnection? updatedConnection = null;
+
+        var updatedConnections = document.Connections
+            .Select(connection =>
+            {
+                if (!string.Equals(connection.Id, connectionId, StringComparison.Ordinal))
+                {
+                    return connection;
+                }
+
+                if (string.Equals(connection.Label, normalizedLabel, StringComparison.Ordinal))
+                {
+                    return connection;
+                }
+
+                updatedConnection = connection with { Label = normalizedLabel };
+                return updatedConnection;
+            })
+            .ToList();
+
+        return updatedConnection is null
+            ? GraphEditorKernelConnectionLabelMutationResult.NotFound(document)
+            : new GraphEditorKernelConnectionLabelMutationResult(
+                document with { Connections = updatedConnections },
+                updatedConnection);
+    }
+
     public GraphEditorKernelRemoveConnectionsResult RemoveConnections(
         GraphDocument document,
         Func<GraphConnection, bool> predicate)
@@ -1182,6 +1220,14 @@ internal sealed record GraphEditorKernelConnectionNoteMutationResult(
     GraphConnection? Connection)
 {
     public static GraphEditorKernelConnectionNoteMutationResult NotFound(GraphDocument document)
+        => new(document, null);
+}
+
+internal sealed record GraphEditorKernelConnectionLabelMutationResult(
+    GraphDocument Document,
+    GraphConnection? Connection)
+{
+    public static GraphEditorKernelConnectionLabelMutationResult NotFound(GraphDocument document)
         => new(document, null);
 }
 

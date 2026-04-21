@@ -963,6 +963,41 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
     public void DisconnectAll(string nodeId)
         => _connectionMutationCoordinator.DisconnectAll(nodeId);
 
+    public bool TrySetConnectionLabel(string connectionId, string? label, bool updateStatus)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(connectionId);
+
+        if (!(_behaviorOptions.Commands.Connections.AllowCreate
+              || _behaviorOptions.Commands.Connections.AllowDelete
+              || _behaviorOptions.Commands.Connections.AllowDisconnect))
+        {
+            if (updateStatus)
+            {
+                CurrentStatusMessage = "Connection label editing is disabled by host permissions.";
+            }
+
+            return false;
+        }
+
+        var mutation = _documentMutator.SetConnectionLabel(CreateActiveScopeDocumentSnapshot(), connectionId, label);
+        if (mutation.Connection is null)
+        {
+            if (updateStatus)
+            {
+                CurrentStatusMessage = "No matching connection label change was applied.";
+            }
+
+            return false;
+        }
+
+        ApplyActiveScopeDocument(mutation.Document);
+        CurrentStatusMessage = string.IsNullOrWhiteSpace(mutation.Connection.Label)
+            ? "Cleared connection label."
+            : "Updated connection label.";
+        MarkDirty(CurrentStatusMessage, GraphEditorDocumentChangeKind.ConnectionsChanged, null, [mutation.Connection.Id], preserveStatus: !updateStatus);
+        return true;
+    }
+
     public bool TrySetConnectionNoteText(string connectionId, string? noteText, bool updateStatus)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(connectionId);
