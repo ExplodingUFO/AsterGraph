@@ -8,6 +8,20 @@ namespace AsterGraph.Demo.Tests;
 
 public sealed class DemoProofReleaseSurfaceTests
 {
+    private static readonly string[] OfficialCapabilityModules =
+    [
+        "Selection",
+        "History",
+        "Clipboard",
+        "Shortcut Policy",
+        "Layout",
+        "MiniMap",
+        "Stencil",
+        "Fragment Library",
+        "Export",
+        "Baseline Edge Authoring",
+    ];
+
     [Fact]
     public void RepositorySurface_UsesAsterGraphSolutionName()
     {
@@ -83,6 +97,47 @@ public sealed class DemoProofReleaseSurfaceTests
 
         Assert.Contains("architecture", quickStart, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("architecture", quickStartZh, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void PublicDocs_DescribeOfficialCapabilityModulesAcrossRoutes()
+    {
+        var readme = ReadRepoFile("README.md");
+        var readmeZh = ReadRepoFile("README.zh-CN.md");
+        var hostIntegration = ReadRepoFile("docs/en/host-integration.md");
+        var hostIntegrationZh = ReadRepoFile("docs/zh-CN/host-integration.md");
+
+        foreach (var contents in new[] { readme, readmeZh, hostIntegration, hostIntegrationZh })
+        {
+            foreach (var moduleName in OfficialCapabilityModules)
+            {
+                Assert.Contains(moduleName, contents, StringComparison.Ordinal);
+            }
+        }
+    }
+
+    [Fact]
+    public void QuickStartAndArchitecture_MapCapabilityModulesToProofLanes()
+    {
+        var quickStart = ReadRepoFile("docs/en/quick-start.md");
+        var quickStartZh = ReadRepoFile("docs/zh-CN/quick-start.md");
+        var architecture = ReadRepoFile("docs/en/architecture.md");
+        var architectureZh = ReadRepoFile("docs/zh-CN/architecture.md");
+
+        foreach (var contents in new[] { quickStart, quickStartZh })
+        {
+            Assert.Contains("HostSample", contents, StringComparison.Ordinal);
+            Assert.Contains("PackageSmoke", contents, StringComparison.Ordinal);
+            Assert.Contains("ScaleSmoke", contents, StringComparison.Ordinal);
+            Assert.Contains("Demo", contents, StringComparison.Ordinal);
+        }
+
+        foreach (var contents in new[] { architecture, architectureZh })
+        {
+            Assert.Contains("capability modules", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("Host Integration", contents, StringComparison.Ordinal);
+            Assert.Contains("Quick Start", contents, StringComparison.Ordinal);
+        }
     }
 
     [Fact]

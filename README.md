@@ -66,6 +66,23 @@ For new runtime-facing work, anchor on the first route. The Avalonia route is th
 - [`tools/AsterGraph.ScaleSmoke`](./tools/AsterGraph.ScaleSmoke/) = public larger-graph baseline plus history/state proof
 - [`src/AsterGraph.Demo`](./src/AsterGraph.Demo/) = showcase host; menu labels follow the current UI language
 
+## Official Capability Modules
+
+These are the public `v0.4.0-alpha` capability modules. They sit on top of the canonical session/runtime route; hosted Avalonia composition reuses the same seams instead of defining a second capability model.
+
+| Module | Canonical seam | First proof/sample anchor |
+| --- | --- | --- |
+| `Selection` | `IGraphEditorSession.Commands.SetSelection(...)` + `Queries.GetSelectionSnapshot()` | `tools/AsterGraph.ScaleSmoke`, `tools/AsterGraph.HelloWorld` |
+| `History` | `IGraphEditorSession.Commands.Undo()` / `Redo()` plus the save/dirty contract | `tools/AsterGraph.ScaleSmoke`, [State Contracts](./docs/en/state-contracts.md) |
+| `Clipboard` | `TryCopySelectionAsync()` / `TryPasteSelectionAsync()` through host clipboard services | `tools/AsterGraph.HostSample` |
+| `Shortcut Policy` | `AsterGraphCommandShortcutPolicy` on the hosted Avalonia route | `tools/AsterGraph.PackageSmoke`, `tools/AsterGraph.HelloWorld.Avalonia` |
+| `Layout` | session-backed align/distribute commands | `src/AsterGraph.Demo` |
+| `MiniMap` | session snapshots projected into `AsterGraphMiniMapViewFactory.Create(...)` | `src/AsterGraph.Demo` |
+| `Stencil` | session stencil queries plus the shipped Avalonia insertion surface | `src/AsterGraph.Demo` |
+| `Fragment Library` | session fragment/template commands backed by fragment workspace/library services | `src/AsterGraph.Demo` |
+| `Export` | `IGraphSceneSvgExportService` + `TryExportSceneAsSvg()` | `tools/AsterGraph.HostSample` |
+| `Baseline Edge Authoring` | `StartConnection(...)`, `CompleteConnection(...)`, reconnect/disconnect commands, and the pending-connection snapshot | `tools/AsterGraph.HostSample`, `tools/AsterGraph.ScaleSmoke` |
+
 ## Supported Package Boundary
 
 Only these four libraries are published as the supported SDK surface:

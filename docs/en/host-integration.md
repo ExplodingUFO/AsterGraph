@@ -35,6 +35,23 @@ Standalone Avalonia surfaces such as `AsterGraphCanvasViewFactory`, `AsterGraphI
 - `AsterGraph.ScaleSmoke` = public scale baseline plus history/state proof
 - `AsterGraph.Demo` = full showcase host for visual inspection
 
+## Official Capability Modules
+
+Treat the official capability modules as a host-facing map layered on top of the canonical routes, not as a second routing system.
+
+| Module | Canonical seam | Hosted/UI note | First proof/sample anchor |
+| --- | --- | --- | --- |
+| `Selection` | `SetSelection(...)` + `GetSelectionSnapshot()` | route 2 projects the same selection state into the shipped visuals | `AsterGraph.ScaleSmoke`, `AsterGraph.HelloWorld` |
+| `History` | `Undo()` / `Redo()` plus the save/dirty contract | hosted shells reuse the same kernel-owned history boundary | `AsterGraph.ScaleSmoke`, [State Contracts](./state-contracts.md) |
+| `Clipboard` | `TryCopySelectionAsync()` / `TryPasteSelectionAsync()` | host clipboard services remain the seam underneath | `AsterGraph.HostSample` |
+| `Shortcut Policy` | `AsterGraphCommandShortcutPolicy` | Avalonia-specific composition knob, but still part of the official hosted route | `AsterGraph.PackageSmoke`, `AsterGraph.HelloWorld.Avalonia` |
+| `Layout` | session align/distribute commands | snaplines and visual guides stay adapter-owned | `AsterGraph.Demo` |
+| `MiniMap` | session/viewport snapshots + `AsterGraphMiniMapViewFactory.Create(...)` | standalone surface under route 2, not a separate route | `AsterGraph.Demo` |
+| `Stencil` | session stencil discovery + insertion commands | shipped Avalonia surface consumes the same session discovery data | `AsterGraph.Demo` |
+| `Fragment Library` | session fragment/template commands backed by fragment workspace/library services | hosted shells can replace storage without replacing the command surface | `AsterGraph.Demo` |
+| `Export` | `IGraphSceneSvgExportService` + `TryExportSceneAsSvg()` | export stays separate from workspace persistence and fragment storage | `AsterGraph.HostSample` |
+| `Baseline Edge Authoring` | connection start/complete/reconnect/disconnect commands + pending snapshot | pointer gestures are adapter behavior layered on top of the same session semantics | `AsterGraph.HostSample`, `AsterGraph.ScaleSmoke` |
+
 ## State Contract
 
 The host-facing save/history/dirty rules are published in [State Contracts](./state-contracts.md).

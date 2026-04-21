@@ -35,6 +35,23 @@
 - `AsterGraph.ScaleSmoke` = 公开的大图基线加 history/state 验证
 - `AsterGraph.Demo` = 用于可视检查的完整展示宿主
 
+## Official Capability Modules
+
+把 `Official Capability Modules` 理解成压在 canonical routes 之上的宿主能力地图，而不是另一套接入路线。
+
+| Module | Canonical seam | Hosted/UI 说明 | 第一个 proof / sample 锚点 |
+| --- | --- | --- | --- |
+| `Selection` | `SetSelection(...)` + `GetSelectionSnapshot()` | 第 2 条路线只是把同一份 selection state 投影到 shipped visuals | `AsterGraph.ScaleSmoke`、`AsterGraph.HelloWorld` |
+| `History` | `Undo()` / `Redo()` 加 save/dirty 契约 | hosted shell 复用同一个 kernel-owned history 边界 | `AsterGraph.ScaleSmoke`、[State Contracts](./state-contracts.md) |
+| `Clipboard` | `TryCopySelectionAsync()` / `TryPasteSelectionAsync()` | 底层 seam 仍然是宿主 clipboard service | `AsterGraph.HostSample` |
+| `Shortcut Policy` | `AsterGraphCommandShortcutPolicy` | Avalonia 路线上的组合开关，但仍然属于官方 hosted route | `AsterGraph.PackageSmoke`、`AsterGraph.HelloWorld.Avalonia` |
+| `Layout` | session align/distribute commands | snapline 和视觉 guide 继续留在 adapter 层 | `AsterGraph.Demo` |
+| `MiniMap` | session/viewport snapshots + `AsterGraphMiniMapViewFactory.Create(...)` | 属于第 2 条路线下的 standalone surface，不是独立路线 | `AsterGraph.Demo` |
+| `Stencil` | session stencil discovery + insertion commands | shipped Avalonia surface 消费同一份 session discovery 数据 | `AsterGraph.Demo` |
+| `Fragment Library` | 由 fragment workspace/library service 支撑的 session fragment/template commands | 宿主可替换存储，但不需要重写 command surface | `AsterGraph.Demo` |
+| `Export` | `IGraphSceneSvgExportService` + `TryExportSceneAsSvg()` | export 和 workspace persistence、fragment storage 明确分离 | `AsterGraph.HostSample` |
+| `Baseline Edge Authoring` | connection start/complete/reconnect/disconnect commands 加 pending snapshot | pointer gesture 是 adapter 行为，底层仍复用同一份 session semantics | `AsterGraph.HostSample`、`AsterGraph.ScaleSmoke` |
+
 ## 状态契约
 
 面向宿主的 save/history/dirty 规则见 [State Contracts](./state-contracts.md)。
