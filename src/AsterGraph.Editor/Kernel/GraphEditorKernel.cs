@@ -1129,13 +1129,19 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
         => CloneDocument(_document);
 
     public GraphEditorSceneSnapshot GetSceneSnapshot()
-        => new(
-            CreateDocumentSnapshot(),
+    {
+        var document = CreateDocumentSnapshot();
+        return new(
+            document,
             GetSelectionSnapshot(),
             GetViewportSnapshot(),
             GetNodeSurfaceSnapshots(),
             GetNodeGroupSnapshots(),
+            GraphEditorConnectionGeometryProjector.Create(
+                document,
+                node => GraphEditorNodeSurfaceTierResolver.ResolveDefinition(_nodeCatalog, node.DefinitionId)),
             GetPendingConnectionSnapshot());
+    }
 
     public GraphDocument CreateActiveScopeDocumentSnapshot()
         => CreateScopedDocumentSnapshot(_activeGraphId);
