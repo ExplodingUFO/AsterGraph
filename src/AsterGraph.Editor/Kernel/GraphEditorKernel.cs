@@ -15,6 +15,7 @@ using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.Services;
 using AsterGraph.Editor.ViewModels;
 using AsterGraph.Editor.Viewport;
+using System.Threading;
 
 namespace AsterGraph.Editor.Kernel;
 
@@ -35,6 +36,11 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
     private readonly GraphEditorKernelNodeMutationCoordinator _nodeMutationCoordinator;
     private readonly GraphEditorKernelConnectionMutationHost _connectionMutationHost;
     private readonly GraphEditorKernelConnectionMutationCoordinator _connectionMutationCoordinator;
+    private readonly GraphSelectionClipboard _selectionClipboard = new();
+    private readonly IGraphClipboardPayloadSerializer _clipboardPayloadSerializer;
+    private IGraphTextClipboardBridge? _textClipboardBridge;
+    private readonly GraphEditorKernelClipboardHost _clipboardHost;
+    private readonly GraphEditorKernelClipboardCoordinator _clipboardCoordinator;
     private readonly GraphEditorKernelCommandRouterHost _commandRouterHost;
     private readonly GraphEditorKernelCommandRouter _commandRouter;
     private readonly GraphEditorKernelHistoryCoordinator _historyCoordinator;
@@ -64,18 +70,21 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
         IPortCompatibilityService compatibilityService,
         IGraphWorkspaceService workspaceService,
         GraphEditorStyleOptions styleOptions,
-        GraphEditorBehaviorOptions behaviorOptions)
+        GraphEditorBehaviorOptions behaviorOptions,
+        IGraphTextClipboardBridge? textClipboardBridge = null,
+        IGraphClipboardPayloadSerializer? clipboardPayloadSerializer = null)
     {
         ArgumentNullException.ThrowIfNull(document);
         ArgumentNullException.ThrowIfNull(nodeCatalog);
         ArgumentNullException.ThrowIfNull(compatibilityService);
         ArgumentNullException.ThrowIfNull(workspaceService);
-
         _document = _documentMutator.NormalizeNodeGroupBounds(CloneDocument(document));
         _activeGraphId = _document.RootGraphId;
         _nodeCatalog = nodeCatalog;
         _compatibilityService = compatibilityService;
         _workspaceService = workspaceService;
+        _textClipboardBridge = textClipboardBridge;
+        _clipboardPayloadSerializer = clipboardPayloadSerializer ?? new GraphClipboardPayloadSerializer();
         _compatibilityQueries = new GraphEditorKernelCompatibilityQueries(compatibilityService, nodeCatalog);
         _styleOptions = styleOptions;
         _behaviorOptions = behaviorOptions;
@@ -83,6 +92,8 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
         _nodeMutationCoordinator = new GraphEditorKernelNodeMutationCoordinator(_nodeMutationHost, _documentMutator);
         _connectionMutationHost = new GraphEditorKernelConnectionMutationHost(this);
         _connectionMutationCoordinator = new GraphEditorKernelConnectionMutationCoordinator(_connectionMutationHost, _documentMutator);
+        _clipboardHost = new GraphEditorKernelClipboardHost(this);
+        _clipboardCoordinator = new GraphEditorKernelClipboardCoordinator(_clipboardHost);
         _commandRouterHost = new GraphEditorKernelCommandRouterHost(this);
         _commandRouter = new GraphEditorKernelCommandRouter(_commandRouterHost);
         _historyCoordinator = new GraphEditorKernelHistoryCoordinator(this);
@@ -154,6 +165,12 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
 
     public void DeleteSelection()
         => _nodeMutationCoordinator.DeleteSelection();
+
+    public Task<bool> TryCopySelectionAsync(CancellationToken cancellationToken)
+        => _clipboardCoordinator.TryCopySelectionAsync(cancellationToken);
+
+    public Task<bool> TryPasteSelectionAsync(CancellationToken cancellationToken)
+        => _clipboardCoordinator.TryPasteSelectionAsync(cancellationToken);
 
     public void SetNodePositions(IReadOnlyList<NodePositionSnapshot> positions, bool updateStatus)
         => _nodeMutationCoordinator.SetNodePositions(positions, updateStatus);
@@ -1337,6 +1354,9 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
     private GraphNode? FindNode(string nodeId)
         => GetActiveGraphScope().Nodes.FirstOrDefault(node => string.Equals(node.Id, nodeId, StringComparison.Ordinal));
 
+    public void SetTextClipboardBridge(IGraphTextClipboardBridge? bridge)
+        => _textClipboardBridge = bridge;
+
     private static IReadOnlyDictionary<string, GraphEditorNodeGroupMemberBounds> CreateGroupMemberBounds(IReadOnlyList<GraphNode> nodes)
         => nodes.ToDictionary(
             node => node.Id,
@@ -1358,6 +1378,15 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
 
     private string CreateConnectionId()
         => CreateUniqueId(GetAllConnections().Select(connection => connection.Id), "connection-");
+
+    private GraphSelectionFragment? PeekSelectionClipboard()
+        => _selectionClipboard.Peek();
+
+    private void StoreSelectionClipboard(GraphSelectionFragment fragment)
+        => _selectionClipboard.Store(fragment);
+
+    private GraphPoint GetNextPasteOrigin()
+        => _selectionClipboard.GetNextPasteOrigin(GetViewportCenter());
 
     private void ApplyActiveScopeDocument(GraphDocument document)
     {

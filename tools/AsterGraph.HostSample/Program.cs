@@ -21,12 +21,13 @@ var definitionId = new NodeDefinitionId("host.sample.node");
 HostSampleAvaloniaEnvironment.EnsureInitialized();
 
 var catalog = CreateCatalog(definitionId);
-var runtimeResult = VerifyRuntimeOnlyRoute(catalog, definitionId);
+var runtimeResult = await VerifyRuntimeOnlyRouteAsync(catalog, definitionId);
 var hostedUiResult = VerifyHostedUiRoute(catalog, definitionId);
 var allOk = runtimeResult.IsOk && hostedUiResult.IsOk;
 
 Console.WriteLine("HOST_SAMPLE_PATHS:CreateSession:Create:AsterGraphAvaloniaViewFactory");
 Console.WriteLine($"HOST_SAMPLE_RUNTIME_OK:{runtimeResult.IsOk}:{runtimeResult.FeatureDescriptorCount}:{runtimeResult.SaveCalls}:{runtimeResult.ConnectionCount}");
+Console.WriteLine($"HOST_SAMPLE_CLIPBOARD_OK:{runtimeResult.ClipboardOk}:{runtimeResult.PastedNodeCount}");
 Console.WriteLine($"HOST_SAMPLE_HOSTED_UI_OK:{hostedUiResult.IsOk}:{hostedUiResult.ChromeMode}:{hostedUiResult.EnableDefaultContextMenu}:{hostedUiResult.EnableDefaultCommandShortcuts}:{hostedUiResult.ConnectionCount}");
 Console.WriteLine($"HOST_SAMPLE_OK:{allOk}");
 
@@ -35,24 +36,48 @@ if (!allOk)
     throw new InvalidOperationException("Host sample validation failed.");
 }
 
-static RouteResult VerifyRuntimeOnlyRoute(INodeCatalog catalog, NodeDefinitionId definitionId)
+static async Task<RouteResult> VerifyRuntimeOnlyRouteAsync(INodeCatalog catalog, NodeDefinitionId definitionId)
 {
     var workspace = new RecordingWorkspaceService("workspace://host-sample/runtime");
+    var clipboard = new RecordingTextClipboardBridge();
     var session = AsterGraphEditorFactory.CreateSession(new AsterGraphEditorOptions
     {
         Document = CreateDocument(definitionId),
         NodeCatalog = catalog,
         CompatibilityService = new ExactCompatibilityService(),
         WorkspaceService = workspace,
+        ClipboardPayloadSerializer = new GraphClipboardPayloadSerializer(),
+        PlatformServices = new GraphEditorPlatformServices
+        {
+            TextClipboardBridge = clipboard,
+        },
     });
 
+    session.Commands.SetSelection([SourceNodeId], SourceNodeId, updateStatus: false);
+    var copied = await session.Commands.TryCopySelectionAsync();
     session.Commands.StartConnection(SourceNodeId, SourcePortId);
     session.Commands.CompleteConnection(TargetNodeId, TargetPortId);
     session.Commands.SaveWorkspace();
 
+    var pasteSession = AsterGraphEditorFactory.CreateSession(new AsterGraphEditorOptions
+    {
+        Document = new GraphDocument("Clipboard Target", "Host sample clipboard target.", [], []),
+        NodeCatalog = catalog,
+        CompatibilityService = new ExactCompatibilityService(),
+        ClipboardPayloadSerializer = new GraphClipboardPayloadSerializer(),
+        PlatformServices = new GraphEditorPlatformServices
+        {
+            TextClipboardBridge = clipboard,
+        },
+    });
+    var pasted = await pasteSession.Commands.TryPasteSelectionAsync();
     var snapshot = session.Queries.CreateDocumentSnapshot();
+    var pastedSnapshot = pasteSession.Queries.CreateDocumentSnapshot();
     var featureDescriptors = session.Queries.GetFeatureDescriptors();
     var isOk = snapshot.Connections.Count == 1
+        && copied
+        && pasted
+        && pastedSnapshot.Nodes.Count == 1
         && featureDescriptors.Count > 0
         && workspace.SaveCalls == 1
         && workspace.Exists();
@@ -62,6 +87,8 @@ static RouteResult VerifyRuntimeOnlyRoute(INodeCatalog catalog, NodeDefinitionId
         snapshot.Connections.Count,
         featureDescriptors.Count,
         workspace.SaveCalls,
+        copied && pasted,
+        pastedSnapshot.Nodes.Count,
         GraphEditorViewChromeMode.Default,
         EnableDefaultContextMenu: true,
         EnableDefaultCommandShortcuts: true);
@@ -102,6 +129,8 @@ static RouteResult VerifyHostedUiRoute(INodeCatalog catalog, NodeDefinitionId de
         snapshot.Connections.Count,
         editor.Session.Queries.GetFeatureDescriptors().Count,
         workspace.SaveCalls,
+        ClipboardOk: true,
+        PastedNodeCount: 0,
         view.ChromeMode,
         view.EnableDefaultContextMenu,
         view.EnableDefaultCommandShortcuts);
@@ -198,9 +227,25 @@ file readonly record struct RouteResult(
     int ConnectionCount,
     int FeatureDescriptorCount,
     int SaveCalls,
+    bool ClipboardOk,
+    int PastedNodeCount,
     GraphEditorViewChromeMode ChromeMode,
     bool EnableDefaultContextMenu,
     bool EnableDefaultCommandShortcuts);
+
+file sealed class RecordingTextClipboardBridge : IGraphTextClipboardBridge
+{
+    private string? _text;
+
+    public Task<string?> ReadTextAsync(CancellationToken cancellationToken = default)
+        => Task.FromResult(_text);
+
+    public Task WriteTextAsync(string text, CancellationToken cancellationToken = default)
+    {
+        _text = text;
+        return Task.CompletedTask;
+    }
+}
 
 file static class HostSampleAvaloniaEnvironment
 {

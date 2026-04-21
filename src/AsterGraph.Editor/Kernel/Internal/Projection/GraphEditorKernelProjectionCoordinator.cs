@@ -18,8 +18,8 @@ internal sealed partial class GraphEditorKernel
             => new(
                 _owner._historyService.CanUndo && _owner._behaviorOptions.History.EnableUndoRedo && _owner._behaviorOptions.Commands.History.AllowUndo,
                 _owner._historyService.CanRedo && _owner._behaviorOptions.History.EnableUndoRedo && _owner._behaviorOptions.Commands.History.AllowRedo,
-                _owner._selectedNodeIds.Count > 0,
-                false,
+                _owner._clipboardCoordinator.CanCopySelection,
+                _owner._clipboardCoordinator.CanPaste,
                 _owner._behaviorOptions.Commands.Workspace.AllowSave,
                 _owner._behaviorOptions.Commands.Workspace.AllowLoad)
             {

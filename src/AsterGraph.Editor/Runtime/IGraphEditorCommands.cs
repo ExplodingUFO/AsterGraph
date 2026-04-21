@@ -1,6 +1,7 @@
 using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Models;
+using System.Threading;
 
 namespace AsterGraph.Editor.Runtime;
 
@@ -45,6 +46,22 @@ public interface IGraphEditorCommands
     /// 删除当前选择。
     /// </summary>
     void DeleteSelection();
+
+    /// <summary>
+    /// Attempts to copy the current selection into the canonical clipboard payload format.
+    /// </summary>
+    /// <param name="cancellationToken">Optional cancellation token forwarded to host clipboard services.</param>
+    /// <returns><see langword="true"/> when a selection fragment is produced.</returns>
+    Task<bool> TryCopySelectionAsync(CancellationToken cancellationToken = default)
+        => throw new NotSupportedException();
+
+    /// <summary>
+    /// Attempts to paste the best available clipboard fragment into the active graph scope.
+    /// </summary>
+    /// <param name="cancellationToken">Optional cancellation token forwarded to host clipboard services.</param>
+    /// <returns><see langword="true"/> when at least one node is pasted.</returns>
+    Task<bool> TryPasteSelectionAsync(CancellationToken cancellationToken = default)
+        => throw new NotSupportedException();
 
     /// <summary>
     /// 批量设置节点位置。

@@ -57,6 +57,7 @@ public sealed partial class GraphEditorViewModel
         if (!ReferenceEquals(_textClipboardBridge, textClipboardBridge))
         {
             _textClipboardBridge = textClipboardBridge;
+            _kernel.SetTextClipboardBridge(textClipboardBridge);
             RaiseComputedPropertyChanges();
         }
 

@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Threading;
 using AsterGraph.Abstractions.Compatibility;
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
@@ -221,6 +222,8 @@ public sealed class GraphEditorSessionTests
         AssertMethod(commandsType, nameof(IGraphEditorCommands.AddNode), typeof(NodeDefinitionId), typeof(GraphPoint?));
         AssertMethod(commandsType, nameof(IGraphEditorCommands.DeleteSelection));
         AssertMethod(commandsType, nameof(IGraphEditorCommands.SetNodePositions), typeof(IReadOnlyList<NodePositionSnapshot>), typeof(bool));
+        AssertMethod(commandsType, "TryCopySelectionAsync", typeof(CancellationToken));
+        AssertMethod(commandsType, "TryPasteSelectionAsync", typeof(CancellationToken));
         AssertMethod(commandsType, nameof(IGraphEditorCommands.TrySetSelectedNodeParameterValue), typeof(string), typeof(object));
         Assert.Equal(typeof(bool), commandsType.GetMethod(nameof(IGraphEditorCommands.TrySetSelectedNodeParameterValue), [typeof(string), typeof(object)])!.ReturnType);
         AssertMethod(commandsType, nameof(IGraphEditorCommands.StartConnection), typeof(string), typeof(string));
@@ -822,6 +825,52 @@ public sealed class GraphEditorSessionTests
     }
 
     [Fact]
+    public async Task RuntimeSession_ClipboardCommands_RoundTripSelectionThroughCanonicalSessionRoute()
+    {
+        var definitionId = new NodeDefinitionId("tests.session.clipboard-roundtrip");
+        var bridge = new RecordingTextClipboardBridge();
+        var sourceSession = AsterGraphEditorFactory.CreateSession(CreateOptions(definitionId) with
+        {
+            ClipboardPayloadSerializer = new GraphClipboardPayloadSerializer(),
+            PlatformServices = new GraphEditorPlatformServices
+            {
+                TextClipboardBridge = bridge,
+            },
+        });
+        sourceSession.Commands.SetSelection([SourceNodeId], SourceNodeId, updateStatus: false);
+
+        var copied = sourceSession.Commands.TryExecuteCommand(new GraphEditorCommandInvocationSnapshot("clipboard.copy"));
+        var clipboardText = await bridge.WaitForWriteAsync();
+
+        Assert.True(copied);
+        Assert.Contains("\"SchemaVersion\": 1", clipboardText);
+
+        var targetSession = AsterGraphEditorFactory.CreateSession(new AsterGraphEditorOptions
+        {
+            Document = new GraphDocument("Clipboard Target", "Session clipboard import target.", [], []),
+            NodeCatalog = CreateCatalog(definitionId),
+            CompatibilityService = new DefaultPortCompatibilityService(),
+            ClipboardPayloadSerializer = new GraphClipboardPayloadSerializer(),
+            PlatformServices = new GraphEditorPlatformServices
+            {
+                TextClipboardBridge = bridge,
+            },
+        });
+        var pastedDocument = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        targetSession.Events.DocumentChanged += (_, _) => pastedDocument.TrySetResult();
+
+        var pasted = targetSession.Commands.TryExecuteCommand(new GraphEditorCommandInvocationSnapshot("clipboard.paste"));
+        await pastedDocument.Task.WaitAsync(TimeSpan.FromSeconds(3));
+
+        var snapshot = targetSession.Queries.CreateDocumentSnapshot();
+        var selection = targetSession.Queries.GetSelectionSnapshot();
+
+        Assert.True(pasted);
+        Assert.Single(snapshot.Nodes);
+        Assert.Single(selection.SelectedNodeIds);
+    }
+
+    [Fact]
     public void RuntimeSession_SelectionContextMenuDescriptors_ExposeCreateGroupAndWrapCompositeActions()
     {
         var definitionId = new NodeDefinitionId("tests.session.selection-group-menu");
@@ -1265,18 +1314,30 @@ public sealed class GraphEditorSessionTests
         Assert.Equal(GraphEditorCommandSourceKind.Kernel, undo.Source);
 
         var copy = retainedCommands["clipboard.copy"];
+        var runtimeCopy = runtimeCommands["clipboard.copy"];
         Assert.Equal("Copy Selection", copy.Title);
         Assert.Equal("clipboard", copy.Group);
         Assert.Equal("copy", copy.IconKey);
         Assert.Equal("Ctrl+C", copy.DefaultShortcut);
         Assert.Equal(GraphEditorCommandSourceKind.Retained, copy.Source);
+        Assert.Equal("Copy Selection", runtimeCopy.Title);
+        Assert.Equal("clipboard", runtimeCopy.Group);
+        Assert.Equal("copy", runtimeCopy.IconKey);
+        Assert.Equal("Ctrl+C", runtimeCopy.DefaultShortcut);
+        Assert.Equal(GraphEditorCommandSourceKind.Kernel, runtimeCopy.Source);
 
         var paste = retainedCommands["clipboard.paste"];
+        var runtimePaste = runtimeCommands["clipboard.paste"];
         Assert.Equal("Paste Selection", paste.Title);
         Assert.Equal("clipboard", paste.Group);
         Assert.Equal("paste", paste.IconKey);
         Assert.Equal("Ctrl+V", paste.DefaultShortcut);
         Assert.Equal(GraphEditorCommandSourceKind.Retained, paste.Source);
+        Assert.Equal("Paste Selection", runtimePaste.Title);
+        Assert.Equal("clipboard", runtimePaste.Group);
+        Assert.Equal("paste", runtimePaste.IconKey);
+        Assert.Equal("Ctrl+V", runtimePaste.DefaultShortcut);
+        Assert.Equal(GraphEditorCommandSourceKind.Kernel, runtimePaste.Source);
     }
 
     private static void AssertProperty(Type declaringType, string propertyName, Type propertyType)
@@ -1657,6 +1718,26 @@ public sealed class GraphEditorSessionTests
             fragment = null;
             return false;
         }
+    }
+
+    private sealed class RecordingTextClipboardBridge : IGraphTextClipboardBridge
+    {
+        private TaskCompletionSource<string> _writeCompletion = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        public string? Text { get; private set; }
+
+        public Task<string?> ReadTextAsync(CancellationToken cancellationToken = default)
+            => Task.FromResult(Text);
+
+        public Task WriteTextAsync(string text, CancellationToken cancellationToken = default)
+        {
+            Text = text;
+            _writeCompletion.TrySetResult(text);
+            return Task.CompletedTask;
+        }
+
+        public Task<string> WaitForWriteAsync()
+            => _writeCompletion.Task;
     }
 
     private sealed class SessionFeatureAugmentor : IGraphContextMenuAugmentor

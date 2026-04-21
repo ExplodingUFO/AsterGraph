@@ -6,6 +6,7 @@ using AsterGraph.Editor.Events;
 using AsterGraph.Editor.Kernel;
 using AsterGraph.Editor.Models;
 using AsterGraph.Editor.Runtime;
+using System.Threading;
 
 namespace AsterGraph.Editor.ViewModels;
 
@@ -64,6 +65,12 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
         => _kernel.AddNode(definitionId, preferredWorldPosition);
 
     public void DeleteSelection() => _kernel.DeleteSelection();
+
+    public Task<bool> TryCopySelectionAsync(CancellationToken cancellationToken)
+        => _kernel.TryCopySelectionAsync(cancellationToken);
+
+    public Task<bool> TryPasteSelectionAsync(CancellationToken cancellationToken)
+        => _kernel.TryPasteSelectionAsync(cancellationToken);
 
     public void SetNodePositions(IReadOnlyList<NodePositionSnapshot> positions, bool updateStatus)
         => _kernel.SetNodePositions(positions, updateStatus);

@@ -5,6 +5,7 @@ using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Core.Models;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace AsterGraph.Editor.Runtime;
 
@@ -33,6 +34,28 @@ public sealed partial class GraphEditorSession
 
     public void DeleteSelection()
         => Execute("selection.delete", _host.DeleteSelection);
+
+    public async Task<bool> TryCopySelectionAsync(CancellationToken cancellationToken = default)
+    {
+        var copied = await _host.TryCopySelectionAsync(cancellationToken);
+        if (copied)
+        {
+            PublishCommandExecuted("clipboard.copy");
+        }
+
+        return copied;
+    }
+
+    public async Task<bool> TryPasteSelectionAsync(CancellationToken cancellationToken = default)
+    {
+        var pasted = await _host.TryPasteSelectionAsync(cancellationToken);
+        if (pasted)
+        {
+            PublishCommandExecuted("clipboard.paste");
+        }
+
+        return pasted;
+    }
 
     public void SetNodePositions(IReadOnlyList<NodePositionSnapshot> positions, bool updateStatus = true)
     {

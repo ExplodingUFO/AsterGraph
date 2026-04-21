@@ -4,6 +4,7 @@ using AsterGraph.Core.Models;
 using AsterGraph.Editor.Diagnostics;
 using AsterGraph.Editor.Events;
 using AsterGraph.Editor.Models;
+using System.Threading;
 
 namespace AsterGraph.Editor.Runtime;
 
@@ -26,6 +27,8 @@ internal interface IGraphEditorSessionHost
     void SetSelection(IReadOnlyList<string> nodeIds, string? primaryNodeId, bool updateStatus);
     void AddNode(NodeDefinitionId definitionId, GraphPoint? preferredWorldPosition);
     void DeleteSelection();
+    Task<bool> TryCopySelectionAsync(CancellationToken cancellationToken);
+    Task<bool> TryPasteSelectionAsync(CancellationToken cancellationToken);
     void SetNodePositions(IReadOnlyList<NodePositionSnapshot> positions, bool updateStatus);
     bool TrySetNodeWidth(string nodeId, double width, bool updateStatus);
     bool TrySetNodeSize(string nodeId, GraphSize size, bool updateStatus);

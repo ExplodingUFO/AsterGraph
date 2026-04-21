@@ -329,7 +329,9 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
             _compatibilityService,
             _workspaceService,
             StyleOptions,
-            BehaviorOptions);
+            BehaviorOptions,
+            textClipboardBridge: null,
+            _clipboardPayloadSerializer);
         _sessionHost = new GraphEditorViewModelKernelAdapter(_kernel, this);
         Session = new GraphEditorSession(_sessionHost, diagnosticsSink, CreateSessionDescriptorSupport());
 

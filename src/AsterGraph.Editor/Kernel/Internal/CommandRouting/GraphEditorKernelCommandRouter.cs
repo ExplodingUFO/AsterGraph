@@ -6,6 +6,7 @@ using AsterGraph.Editor.Configuration;
 using AsterGraph.Editor.Diagnostics;
 using AsterGraph.Editor.Models;
 using AsterGraph.Editor.Runtime;
+using System.Threading;
 
 namespace AsterGraph.Editor.Kernel.Internal;
 
@@ -20,6 +21,10 @@ internal interface IGraphEditorKernelCommandRouterHost
     bool CanUndo { get; }
 
     bool CanRedo { get; }
+
+    bool CanCopySelection { get; }
+
+    bool CanPaste { get; }
 
     bool CanEditSelectedNodeParameters { get; }
 
@@ -42,6 +47,10 @@ internal interface IGraphEditorKernelCommandRouterHost
     void SetSelection(IReadOnlyList<string> nodeIds, string? primaryNodeId, bool updateStatus);
 
     void DeleteSelection();
+
+    Task<bool> TryCopySelectionAsync(CancellationToken cancellationToken);
+
+    Task<bool> TryPasteSelectionAsync(CancellationToken cancellationToken);
 
     void SetNodePositions(IReadOnlyList<NodePositionSnapshot> positions, bool updateStatus);
 
@@ -136,6 +145,14 @@ internal sealed class GraphEditorKernelCommandRouter
                 "selection.delete",
                 GraphEditorCommandSourceKind.Kernel,
                 _host.SelectedNodeCount > 0 && _host.BehaviorOptions.Commands.Nodes.AllowDelete),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "clipboard.copy",
+                GraphEditorCommandSourceKind.Kernel,
+                _host.CanCopySelection),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "clipboard.paste",
+                GraphEditorCommandSourceKind.Kernel,
+                _host.CanPaste),
             GraphEditorCommandDescriptorCatalog.Create(
                 "nodes.move",
                 GraphEditorCommandSourceKind.Kernel,
@@ -340,6 +357,14 @@ internal sealed class GraphEditorKernelCommandRouter
 
             case "selection.delete":
                 _host.DeleteSelection();
+                return true;
+
+            case "clipboard.copy":
+                _ = _host.TryCopySelectionAsync(CancellationToken.None);
+                return true;
+
+            case "clipboard.paste":
+                _ = _host.TryPasteSelectionAsync(CancellationToken.None);
                 return true;
 
             case "nodes.move":

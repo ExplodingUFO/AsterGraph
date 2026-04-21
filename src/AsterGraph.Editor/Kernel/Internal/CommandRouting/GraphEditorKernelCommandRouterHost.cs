@@ -6,6 +6,7 @@ using AsterGraph.Editor.Diagnostics;
 using AsterGraph.Editor.Kernel.Internal;
 using AsterGraph.Editor.Models;
 using AsterGraph.Editor.Runtime;
+using System.Threading;
 
 namespace AsterGraph.Editor.Kernel;
 
@@ -31,6 +32,12 @@ internal sealed partial class GraphEditorKernel
 
         bool IGraphEditorKernelCommandRouterHost.CanRedo
             => _owner._historyService.CanRedo && _owner._behaviorOptions.History.EnableUndoRedo && _owner._behaviorOptions.Commands.History.AllowRedo;
+
+        bool IGraphEditorKernelCommandRouterHost.CanCopySelection
+            => _owner._clipboardCoordinator.CanCopySelection;
+
+        bool IGraphEditorKernelCommandRouterHost.CanPaste
+            => _owner._clipboardCoordinator.CanPaste;
 
         bool IGraphEditorKernelCommandRouterHost.CanEditSelectedNodeParameters
             => _owner._behaviorOptions.Commands.Nodes.AllowEditParameters && _owner.HasSharedSelectionDefinitionWithParameters();
@@ -60,6 +67,12 @@ internal sealed partial class GraphEditorKernel
 
         void IGraphEditorKernelCommandRouterHost.DeleteSelection()
             => _owner.DeleteSelection();
+
+        Task<bool> IGraphEditorKernelCommandRouterHost.TryCopySelectionAsync(CancellationToken cancellationToken)
+            => _owner.TryCopySelectionAsync(cancellationToken);
+
+        Task<bool> IGraphEditorKernelCommandRouterHost.TryPasteSelectionAsync(CancellationToken cancellationToken)
+            => _owner.TryPasteSelectionAsync(cancellationToken);
 
         void IGraphEditorKernelCommandRouterHost.SetNodePositions(IReadOnlyList<NodePositionSnapshot> positions, bool updateStatus)
             => _owner.SetNodePositions(positions, updateStatus);

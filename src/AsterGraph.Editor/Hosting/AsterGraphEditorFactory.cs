@@ -132,7 +132,9 @@ public static class AsterGraphEditorFactory
             resolved.Options.CompatibilityService!,
             resolved.WorkspaceService,
             resolved.StyleOptions,
-            resolved.BehaviorOptions);
+            resolved.BehaviorOptions,
+            resolved.Options.PlatformServices?.TextClipboardBridge,
+            resolved.ClipboardPayloadSerializer);
         var session = new GraphEditorSession(
             kernel,
             resolved.Options.DiagnosticsSink,
