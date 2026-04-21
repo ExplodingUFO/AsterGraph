@@ -378,7 +378,7 @@ public sealed partial class GraphEditorSession
         ArgumentException.ThrowIfNullOrWhiteSpace(sourceNodeId);
         ArgumentException.ThrowIfNullOrWhiteSpace(sourcePortId);
 
-        Execute("connections.begin", () => _host.StartConnection(sourceNodeId, sourcePortId));
+        Execute("connections.start", () => _host.StartConnection(sourceNodeId, sourcePortId));
     }
 
     public void CompleteConnection(string targetNodeId, string targetPortId)

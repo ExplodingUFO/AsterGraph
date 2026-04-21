@@ -91,7 +91,7 @@ public sealed class GraphEditorTransactionTests
         Assert.Equal(1, selectionChanges);
         Assert.Equal(0, pendingConnectionChanges);
         Assert.Equal(
-            ["connections.begin", "connections.complete", "selection.set"],
+            ["connections.start", "connections.complete", "selection.set"],
             commandEvents.Select(args => args.CommandId).ToArray());
         Assert.All(commandEvents, args =>
         {

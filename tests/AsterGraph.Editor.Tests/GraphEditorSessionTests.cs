@@ -745,6 +745,10 @@ public sealed class GraphEditorSessionTests
         Assert.True(descriptors["query.compatible-port-target-snapshot"].IsAvailable);
         Assert.True(descriptors["query.compatible-target-mvvm-shim"].IsAvailable);
         Assert.True(descriptors["query.stencil-item-snapshots"].IsAvailable);
+        Assert.True(descriptors["capability.connections.pending"].IsAvailable);
+        Assert.True(descriptors["capability.connections.complete"].IsAvailable);
+        Assert.True(descriptors["capability.connections.disconnect"].IsAvailable);
+        Assert.True(descriptors["capability.connections.reconnect"].IsAvailable);
         Assert.True(descriptors["integration.plugin-loader"].IsAvailable);
         Assert.True(descriptors["integration.context-menu-augmentor"].IsAvailable);
         Assert.True(descriptors["integration.node-presentation-provider"].IsAvailable);

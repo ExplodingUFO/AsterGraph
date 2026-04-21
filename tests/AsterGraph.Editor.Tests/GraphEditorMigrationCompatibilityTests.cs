@@ -578,7 +578,7 @@ public sealed class GraphEditorMigrationCompatibilityTests
         Assert.Equal(2, harness.ClipboardPayloadSerializer.SerializeCalls);
         Assert.Contains("selection.set", commandIds);
         Assert.Contains("nodes.move", commandIds);
-        Assert.Contains("connections.begin", commandIds);
+        Assert.Contains("connections.start", commandIds);
         Assert.Contains("connections.complete", commandIds);
         Assert.Contains("viewport.center-node", commandIds);
         Assert.Contains("workspace.save", commandIds);

@@ -27,6 +27,14 @@ public sealed class HostSampleExportProofTests
         Assert.Contains("export", hostIntegration, StringComparison.OrdinalIgnoreCase);
     }
 
+    [Fact]
+    public void HostSample_EmitsReconnectProofMarker()
+    {
+        var program = File.ReadAllText(Path.Combine(GetRepositoryRoot(), "tools", "AsterGraph.HostSample", "Program.cs"));
+
+        Assert.Contains("HOST_SAMPLE_RECONNECT_OK", program, StringComparison.Ordinal);
+    }
+
     private static string GetRepositoryRoot()
     {
         var current = new DirectoryInfo(AppContext.BaseDirectory);
