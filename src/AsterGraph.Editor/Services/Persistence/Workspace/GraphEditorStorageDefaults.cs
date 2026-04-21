@@ -9,6 +9,7 @@ public static class GraphEditorStorageDefaults
     private const string WorkspaceFileName = "workspace.json";
     private const string FragmentFileName = "selection-fragment.json";
     private const string FragmentLibraryDirectoryName = "fragments";
+    private const string SceneSvgExportFileName = "graph-scene.svg";
     private const string PluginStagingDirectoryName = "plugin-staging";
 
     /// <summary>
@@ -51,6 +52,14 @@ public static class GraphEditorStorageDefaults
     /// <returns>模板库目录路径。</returns>
     public static string GetFragmentLibraryPath(string? storageRootPath = null)
         => Path.Combine(ResolveStorageRootPath(storageRootPath), FragmentLibraryDirectoryName);
+
+    /// <summary>
+    /// 获取默认 SVG 场景导出文件路径。
+    /// </summary>
+    /// <param name="storageRootPath">可选的显式根目录。</param>
+    /// <returns>SVG 场景导出文件路径。</returns>
+    public static string GetSceneSvgExportPath(string? storageRootPath = null)
+        => Path.Combine(ResolveStorageRootPath(storageRootPath), SceneSvgExportFileName);
 
     /// <summary>
     /// 获取默认插件包暂存目录路径。

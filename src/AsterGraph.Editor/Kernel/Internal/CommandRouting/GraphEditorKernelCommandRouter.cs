@@ -43,6 +43,8 @@ internal interface IGraphEditorKernelCommandRouterHost
 
     bool FragmentWorkspaceExists { get; }
 
+    bool CanExportSceneAsSvg { get; }
+
     bool CanNavigateToParentGraphScope { get; }
 
     void Undo();
@@ -66,6 +68,8 @@ internal interface IGraphEditorKernelCommandRouterHost
     bool TryClearWorkspaceFragment(string? path);
 
     string TryExportSelectionAsTemplate(string? name);
+
+    bool TryExportSceneAsSvg(string? path);
 
     void SetNodePositions(IReadOnlyList<NodePositionSnapshot> positions, bool updateStatus);
 
@@ -170,6 +174,10 @@ internal sealed class GraphEditorKernelCommandRouter
                 "clipboard.paste",
                 GraphEditorCommandSourceKind.Kernel,
                 _host.CanPaste),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "export.scene-svg",
+                GraphEditorCommandSourceKind.Kernel,
+                _host.CanExportSceneAsSvg),
             GraphEditorCommandDescriptorCatalog.Create(
                 "fragments.export-selection",
                 GraphEditorCommandSourceKind.Kernel,
@@ -439,6 +447,9 @@ internal sealed class GraphEditorKernelCommandRouter
             case "clipboard.paste":
                 _ = _host.TryPasteSelectionAsync(CancellationToken.None);
                 return true;
+
+            case "export.scene-svg":
+                return _host.TryExportSceneAsSvg(command.TryGetArgument("path", out var sceneExportPath) ? sceneExportPath : null);
 
             case "fragments.export-selection":
                 return _host.TryExportSelectionFragment(command.TryGetArgument("path", out var exportPath) ? exportPath : null);

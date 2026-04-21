@@ -47,6 +47,16 @@
 - no-op interaction 不能制造伪 dirty / undo 状态
 - retained 与 runtime mutation 共享同一个 kernel-owned history/save authority
 
+## 导出与持久化的边界
+
+建议把下面三条宿主 seam 明确区分开：
+
+- 工作区持久化：`IGraphWorkspaceService` 负责完整可编辑图状态的保存/加载
+- 片段持久化：fragment workspace + fragment library services 负责可复用的选择片段载荷
+- 场景导出：`IGraphSceneSvgExportService` 负责基于 `IGraphEditorSession.Queries.GetSceneSnapshot()` 生成非工作区的 SVG 输出
+
+内置 SVG 导出 seam 不属于 workspace save/load，也不替代 fragment/template 流程。
+
 ## 扩展契约
 
 稳定性与优先级规则见 [Extension Contracts](./extension-contracts.md)。

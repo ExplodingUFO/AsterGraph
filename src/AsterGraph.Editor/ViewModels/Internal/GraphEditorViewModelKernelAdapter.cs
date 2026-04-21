@@ -84,6 +84,9 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
     public string TryExportSelectionAsTemplate(string? name)
         => _kernel.TryExportSelectionAsTemplate(name);
 
+    public bool TryExportSceneAsSvg(string? path)
+        => _kernel.TryExportSceneAsSvg(path);
+
     public bool TryImportFragmentTemplate(string path)
         => _kernel.TryImportFragmentTemplate(path);
 

@@ -85,7 +85,7 @@ Current capabilities:
 
 - draggable, selectable graph nodes with marquee selection and multi-selection
 - zoom, pan, mini map, and pending-connection preview
-- save/load, undo/redo, copy/paste, and fragment import/export
+- save/load, undo/redo, copy/paste, fragment import/export, and SVG scene export
 - batch alignment, distribution, and shared-parameter editing for compatible selections
 - definition-driven inspector metadata with grouped parameters, shipped list/text/number/bool/enum editors, and validation feedback
 - compile-time node-definition registration and runtime plugin registration

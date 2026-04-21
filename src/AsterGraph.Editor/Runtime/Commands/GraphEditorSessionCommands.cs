@@ -101,6 +101,17 @@ public sealed partial class GraphEditorSession
         return templatePath;
     }
 
+    public bool TryExportSceneAsSvg(string? path = null)
+    {
+        var exported = _host.TryExportSceneAsSvg(path);
+        if (exported)
+        {
+            PublishCommandExecuted("export.scene-svg");
+        }
+
+        return exported;
+    }
+
     public bool TryImportFragmentTemplate(string path)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);

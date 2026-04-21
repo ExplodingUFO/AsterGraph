@@ -28,6 +28,7 @@ var allOk = runtimeResult.IsOk && hostedUiResult.IsOk;
 Console.WriteLine("HOST_SAMPLE_PATHS:CreateSession:Create:AsterGraphAvaloniaViewFactory");
 Console.WriteLine($"HOST_SAMPLE_RUNTIME_OK:{runtimeResult.IsOk}:{runtimeResult.FeatureDescriptorCount}:{runtimeResult.SaveCalls}:{runtimeResult.ConnectionCount}");
 Console.WriteLine($"HOST_SAMPLE_CLIPBOARD_OK:{runtimeResult.ClipboardOk}:{runtimeResult.PastedNodeCount}");
+Console.WriteLine($"HOST_SAMPLE_EXPORT_OK:{runtimeResult.ExportOk}:{runtimeResult.ExportPath}");
 Console.WriteLine($"HOST_SAMPLE_HOSTED_UI_OK:{hostedUiResult.IsOk}:{hostedUiResult.ChromeMode}:{hostedUiResult.EnableDefaultContextMenu}:{hostedUiResult.CommandShortcutPolicyEnabled}:{hostedUiResult.ConnectionCount}");
 Console.WriteLine($"HOST_SAMPLE_OK:{allOk}");
 
@@ -40,12 +41,14 @@ static async Task<RouteResult> VerifyRuntimeOnlyRouteAsync(INodeCatalog catalog,
 {
     var workspace = new RecordingWorkspaceService("workspace://host-sample/runtime");
     var clipboard = new RecordingTextClipboardBridge();
+    var exportPath = Path.Combine(HostSampleTempPaths.CreateDirectory(), "host-sample-scene.svg");
     var session = AsterGraphEditorFactory.CreateSession(new AsterGraphEditorOptions
     {
         Document = CreateDocument(definitionId),
         NodeCatalog = catalog,
         CompatibilityService = new ExactCompatibilityService(),
         WorkspaceService = workspace,
+        SceneSvgExportService = new GraphSceneSvgExportService(exportPath),
         ClipboardPayloadSerializer = new GraphClipboardPayloadSerializer(),
         PlatformServices = new GraphEditorPlatformServices
         {
@@ -58,6 +61,7 @@ static async Task<RouteResult> VerifyRuntimeOnlyRouteAsync(INodeCatalog catalog,
     session.Commands.StartConnection(SourceNodeId, SourcePortId);
     session.Commands.CompleteConnection(TargetNodeId, TargetPortId);
     session.Commands.SaveWorkspace();
+    var exported = session.Commands.TryExportSceneAsSvg();
 
     var pasteSession = AsterGraphEditorFactory.CreateSession(new AsterGraphEditorOptions
     {
@@ -80,7 +84,9 @@ static async Task<RouteResult> VerifyRuntimeOnlyRouteAsync(INodeCatalog catalog,
         && pastedSnapshot.Nodes.Count == 1
         && featureDescriptors.Count > 0
         && workspace.SaveCalls == 1
-        && workspace.Exists();
+        && workspace.Exists()
+        && exported
+        && File.Exists(exportPath);
 
     return new RouteResult(
         isOk,
@@ -89,6 +95,8 @@ static async Task<RouteResult> VerifyRuntimeOnlyRouteAsync(INodeCatalog catalog,
         workspace.SaveCalls,
         copied && pasted,
         pastedSnapshot.Nodes.Count,
+        exported,
+        exportPath,
         GraphEditorViewChromeMode.Default,
         EnableDefaultContextMenu: true,
         CommandShortcutPolicyEnabled: true);
@@ -131,6 +139,8 @@ static RouteResult VerifyHostedUiRoute(INodeCatalog catalog, NodeDefinitionId de
         workspace.SaveCalls,
         ClipboardOk: true,
         PastedNodeCount: 0,
+        ExportOk: true,
+        ExportPath: "-",
         view.ChromeMode,
         view.EnableDefaultContextMenu,
         view.CommandShortcutPolicy.Enabled);
@@ -229,6 +239,8 @@ file readonly record struct RouteResult(
     int SaveCalls,
     bool ClipboardOk,
     int PastedNodeCount,
+    bool ExportOk,
+    string ExportPath,
     GraphEditorViewChromeMode ChromeMode,
     bool EnableDefaultContextMenu,
     bool CommandShortcutPolicyEnabled);
@@ -275,5 +287,15 @@ file sealed class HostSampleApp : Application
     public override void Initialize()
     {
         Styles.Add(new FluentTheme());
+    }
+}
+
+file static class HostSampleTempPaths
+{
+    public static string CreateDirectory()
+    {
+        var path = Path.Combine(Path.GetTempPath(), "AsterGraph.HostSample", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(path);
+        return path;
     }
 }
