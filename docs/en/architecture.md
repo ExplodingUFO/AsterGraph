@@ -34,6 +34,12 @@ The Avalonia package is the first official adapter, not the definition of the wh
 - `AsterGraph.Avalonia` consumes shared `Scene/Interaction` seams and adds Avalonia-specific rendering and composition.
 - future adapters should plug into the same `Editor Kernel` + `Scene/Interaction` shape instead of forking editor semantics.
 
+## Official Capability Modules
+
+The official capability modules sit above this platform skeleton. `Selection`, `History`, `Clipboard`, `Shortcut Policy`, `Layout`, `MiniMap`, `Stencil`, `Fragment Library`, `Export`, and `Baseline Edge Authoring` are public module names rooted in the canonical runtime/session contract, not alternate route names.
+
+Use [Host Integration](./host-integration.md) for the module-to-seam matrix and [Quick Start](./quick-start.md) for the proof/sample map that shows which public entry point demonstrates each module first.
+
 ## Proof Ring
 
 The platform skeleton is defended in three places:

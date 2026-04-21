@@ -66,6 +66,23 @@ dotnet add package AsterGraph.Abstractions --prerelease
 - [`tools/AsterGraph.ScaleSmoke`](./tools/AsterGraph.ScaleSmoke/) = 公开的大图基线加 history/state 验证
 - [`src/AsterGraph.Demo`](./src/AsterGraph.Demo/) = 展示宿主；菜单标签会跟着当前 UI 语言切换
 
+## Official Capability Modules
+
+下面这 10 个 `Official Capability Modules` 就是当前公开的 `v0.4.0-alpha` 模块边界。它们都建立在 canonical session/runtime 路线上，默认 Avalonia UI 只是复用这些 seam 做组合，而不是再定义第二套能力模型。
+
+| Module | Canonical seam | 第一个 proof / sample 锚点 |
+| --- | --- | --- |
+| `Selection` | `IGraphEditorSession.Commands.SetSelection(...)` + `Queries.GetSelectionSnapshot()` | `tools/AsterGraph.ScaleSmoke`、`tools/AsterGraph.HelloWorld` |
+| `History` | `IGraphEditorSession.Commands.Undo()` / `Redo()` 以及 save/dirty 契约 | `tools/AsterGraph.ScaleSmoke`、[State Contracts](./docs/zh-CN/state-contracts.md) |
+| `Clipboard` | 通过宿主 clipboard service 执行 `TryCopySelectionAsync()` / `TryPasteSelectionAsync()` | `tools/AsterGraph.HostSample` |
+| `Shortcut Policy` | hosted Avalonia 路线上的 `AsterGraphCommandShortcutPolicy` | `tools/AsterGraph.PackageSmoke`、`tools/AsterGraph.HelloWorld.Avalonia` |
+| `Layout` | session-backed 的 align/distribute commands | `src/AsterGraph.Demo` |
+| `MiniMap` | 把 session snapshots 投影到 `AsterGraphMiniMapViewFactory.Create(...)` | `src/AsterGraph.Demo` |
+| `Stencil` | session stencil queries 加 shipped Avalonia 插入表面 | `src/AsterGraph.Demo` |
+| `Fragment Library` | 由 fragment workspace/library service 支撑的 session fragment/template commands | `src/AsterGraph.Demo` |
+| `Export` | `IGraphSceneSvgExportService` + `TryExportSceneAsSvg()` | `tools/AsterGraph.HostSample` |
+| `Baseline Edge Authoring` | `StartConnection(...)`、`CompleteConnection(...)`、reconnect/disconnect commands 和 pending-connection snapshot | `tools/AsterGraph.HostSample`、`tools/AsterGraph.ScaleSmoke` |
+
 ## 支持的包边界
 
 公开支持的 SDK 只有这四个包：

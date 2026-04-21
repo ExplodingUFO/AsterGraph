@@ -34,6 +34,12 @@ Avalonia 包是第一个官方 adapter，不是整个 SDK 的唯一形态。
 - `AsterGraph.Avalonia` 消费共享的 `Scene/Interaction` seam，并补上 Avalonia 专属的渲染与组合。
 - 后续 adapter 应复用同一套 `Editor Kernel` + `Scene/Interaction` 形状，而不是复制一份 editor semantics。
 
+## Official Capability Modules
+
+这些 `Official Capability Modules` 是建立在平台骨架之上的公开模块名：`Selection`、`History`、`Clipboard`、`Shortcut Policy`、`Layout`、`MiniMap`、`Stencil`、`Fragment Library`、`Export`、`Baseline Edge Authoring`。它们都根植于 canonical runtime/session contract，不是另一套 route 名称。
+
+模块到 seam 的映射看 [Host Integration](./host-integration.md)，proof / sample 锚点看 [Quick Start](./quick-start.md)。
+
 ## Proof Ring
 
 平台骨架当前通过三层 proof 守住：
