@@ -9,6 +9,7 @@ using AsterGraph.Avalonia.Styling;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Geometry;
 using AsterGraph.Editor.Menus;
+using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.ViewModels;
 
 namespace AsterGraph.Avalonia.Controls.Internal;
@@ -19,6 +20,7 @@ internal readonly record struct NodeCanvasConnectionSceneContext(
     Canvas? NodeLayer,
     Control CoordinateRoot,
     IReadOnlyDictionary<NodeViewModel, NodeCanvasRenderedNodeVisual> NodeVisuals,
+    IReadOnlyDictionary<string, GraphEditorConnectionGeometrySnapshot> ConnectionGeometries,
     Point? PointerScreenPosition,
     Func<ConnectionViewModel, ConnectionStyleOptions> ResolveConnectionStyle,
     Func<NodeCanvasContextMenuSnapshot> CreateContextMenuSnapshot,
@@ -44,9 +46,13 @@ internal sealed class NodeCanvasConnectionSceneRenderer
 
         foreach (var connection in context.ViewModel.Connections)
         {
+            if (!context.ConnectionGeometries.TryGetValue(connection.Id, out var geometry))
+            {
+                continue;
+            }
+
             var sourceNode = context.ViewModel.FindNode(connection.SourceNodeId);
-            var targetNode = context.ViewModel.FindNode(connection.TargetNodeId);
-            if (sourceNode is null || targetNode is null)
+            if (sourceNode is null)
             {
                 continue;
             }
@@ -57,26 +63,9 @@ internal sealed class NodeCanvasConnectionSceneRenderer
                 continue;
             }
 
-            GraphPoint target;
-            if (connection.TargetKind == GraphConnectionTargetKind.Port)
-            {
-                var targetPort = targetNode.GetPort(connection.TargetPortId);
-                if (targetPort is null)
-                {
-                    continue;
-                }
-
-                target = GetPortAnchor(context, targetNode, targetPort);
-            }
-            else
-            {
-                target = GetConnectionTargetAnchor(context, targetNode, connection.Target);
-            }
-
             DrawConnection(
                 context,
-                GetPortAnchor(context, sourceNode, sourcePort),
-                target,
+                geometry.Curve,
                 connection,
                 sourcePort);
         }
@@ -94,8 +83,7 @@ internal sealed class NodeCanvasConnectionSceneRenderer
 
             DrawConnection(
                 context,
-                source,
-                end,
+                ConnectionPathBuilder.Build(source, end),
                 new ConnectionViewModel(
                     "pending",
                     context.ViewModel.PendingSourceNode.Id,
@@ -205,8 +193,7 @@ internal sealed class NodeCanvasConnectionSceneRenderer
 
     private void DrawConnection(
         NodeCanvasConnectionSceneContext context,
-        GraphPoint start,
-        GraphPoint end,
+        BezierConnection curve,
         ConnectionViewModel connection,
         PortViewModel? sourcePort = null,
         bool isPreview = false)
@@ -219,7 +206,6 @@ internal sealed class NodeCanvasConnectionSceneRenderer
         var connectionStyle = context.ResolveConnectionStyle(connection);
         var focusKind = context.ViewModel.InteractionFocus.GetConnectionFocusKind(connection);
         var hasInspectionFocus = context.ViewModel.InteractionFocus.HasInspection;
-        var curve = ConnectionPathBuilder.Build(start, end);
         var path = new global::Avalonia.Controls.Shapes.Path
         {
             Data = Geometry.Parse(

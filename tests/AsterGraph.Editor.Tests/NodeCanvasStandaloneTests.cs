@@ -20,6 +20,7 @@ using AsterGraph.Avalonia.Presentation;
 using AsterGraph.Core.Compatibility;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Catalog;
+using AsterGraph.Editor.Geometry;
 using AsterGraph.Editor.Menus;
 using AsterGraph.Editor.Presentation;
 using AsterGraph.Editor.Runtime;
@@ -400,6 +401,38 @@ public sealed class NodeCanvasStandaloneTests
             Assert.True(canvas.EnableAltLeftDragPanning);
             canvas.EnableAltLeftDragPanning = false;
             Assert.False(canvas.EnableAltLeftDragPanning);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
+    public void StandaloneCanvas_CommittedConnections_UseCanonicalGeometrySnapshots_EvenWithCustomVisualAnchors()
+    {
+        var editor = CreateEditor();
+        editor.Session.Commands.StartConnection(SourceNodeId, SourcePortId);
+        editor.Session.Commands.CompleteConnection(TargetNodeId, TargetPortId);
+        var customPresenter = new CustomNodeVisualPresenter();
+        var (window, canvas) = CreateStandaloneCanvasWindow(
+            editor,
+            presentation: new AsterGraphPresentationOptions
+            {
+                NodeVisualPresenter = customPresenter,
+            });
+
+        try
+        {
+            var connectionLayer = Assert.IsType<Canvas>(canvas.FindControl<Canvas>("ConnectionLayer"));
+            var expectedGeometry = Assert.Single(editor.Session.Queries.GetConnectionGeometrySnapshots());
+            var path = Assert.Single(connectionLayer.Children.OfType<global::Avalonia.Controls.Shapes.Path>());
+            var expectedBounds = CreateBezierGeometry(expectedGeometry.Curve).Bounds;
+
+            Assert.Equal(expectedBounds.X, path.Data!.Bounds.X, 6);
+            Assert.Equal(expectedBounds.Y, path.Data.Bounds.Y, 6);
+            Assert.Equal(expectedBounds.Width, path.Data.Bounds.Width, 6);
+            Assert.Equal(expectedBounds.Height, path.Data.Bounds.Height, 6);
         }
         finally
         {
@@ -2548,6 +2581,13 @@ public sealed class NodeCanvasStandaloneTests
 
         return (CreateWindow(canvas), canvas);
     }
+
+    private static global::Avalonia.Media.Geometry CreateBezierGeometry(BezierConnection curve)
+        => global::Avalonia.Media.Geometry.Parse(
+            $"M {curve.Start.X:0.##},{curve.Start.Y:0.##} " +
+            $"C {curve.Control1.X:0.##},{curve.Control1.Y:0.##} " +
+            $"{curve.Control2.X:0.##},{curve.Control2.Y:0.##} " +
+            $"{curve.End.X:0.##},{curve.End.Y:0.##}");
 
     private static GraphEditorViewModel CreateEditor()
     {

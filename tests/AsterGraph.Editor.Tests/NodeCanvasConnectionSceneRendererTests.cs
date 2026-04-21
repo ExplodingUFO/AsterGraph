@@ -13,6 +13,7 @@ using AsterGraph.Core.Models;
 using AsterGraph.Editor.Catalog;
 using AsterGraph.Editor.Geometry;
 using AsterGraph.Editor.Menus;
+using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.ViewModels;
 using Xunit;
 
@@ -180,6 +181,48 @@ public sealed class NodeCanvasConnectionSceneRendererTests
     }
 
     [AvaloniaFact]
+    public void RenderConnections_UsesCanonicalGeometrySnapshots_WhenRenderedNodeAnchorsDisagree()
+    {
+        var renderer = new NodeCanvasConnectionSceneRenderer();
+        var editor = CreateEditor(includeConnection: true);
+        var hostedScene = CreateHostedScene(editor);
+
+        try
+        {
+            var context = CreateSceneContext(
+                editor,
+                hostedScene.ConnectionLayer,
+                hostedScene.NodeLayer,
+                hostedScene.CoordinateRoot,
+                hostedScene.NodeVisuals);
+            var expectedGeometry = Assert.Single(editor.Session.Queries.GetConnectionGeometrySnapshots());
+            var sourceNode = editor.Nodes.Single(node => node.Id == SourceNodeId);
+            var sourcePort = sourceNode.Outputs.Single(port => port.Id == SourcePortId);
+            var visualAnchor = renderer.GetPortAnchor(context, sourceNode, sourcePort);
+
+            renderer.RenderConnections(context);
+
+            var path = Assert.Single(hostedScene.ConnectionLayer.Children.OfType<global::Avalonia.Controls.Shapes.Path>());
+            var chip = Assert.Single(hostedScene.ConnectionLayer.Children.OfType<Border>());
+            var expectedMidX = (expectedGeometry.Curve.Start.X + expectedGeometry.Curve.End.X) / 2d;
+            var expectedMidY = (expectedGeometry.Curve.Start.Y + expectedGeometry.Curve.End.Y) / 2d;
+            var expectedBounds = CreateBezierGeometry(expectedGeometry.Curve).Bounds;
+
+            Assert.NotEqual(expectedGeometry.Source.Position, visualAnchor);
+            Assert.Equal(expectedBounds.X, path.Data!.Bounds.X, 6);
+            Assert.Equal(expectedBounds.Y, path.Data.Bounds.Y, 6);
+            Assert.Equal(expectedBounds.Width, path.Data.Bounds.Width, 6);
+            Assert.Equal(expectedBounds.Height, path.Data.Bounds.Height, 6);
+            Assert.Equal(expectedMidX + GraphEditorStyleOptions.Default.Connection.LabelOffsetX, Canvas.GetLeft(chip), 6);
+            Assert.Equal(expectedMidY + GraphEditorStyleOptions.Default.Connection.LabelOffsetY, Canvas.GetTop(chip), 6);
+        }
+        finally
+        {
+            hostedScene.Window.Close();
+        }
+    }
+
+    [AvaloniaFact]
     public void RenderConnections_RendersEdgeNoteText_WhenPresentationNoteIsPresent()
     {
         var renderer = new NodeCanvasConnectionSceneRenderer();
@@ -292,6 +335,8 @@ public sealed class NodeCanvasConnectionSceneRendererTests
             nodeLayer,
             coordinateRoot,
             nodeVisuals,
+            editor.Session.Queries.GetConnectionGeometrySnapshots()
+                .ToDictionary(snapshot => snapshot.ConnectionId, StringComparer.Ordinal),
             pointerScreenPosition,
             connection => GraphEditorStyleOptions.Default.Connection,
             () => new NodeCanvasContextMenuSnapshot(
@@ -469,6 +514,13 @@ public sealed class NodeCanvasConnectionSceneRendererTests
         Canvas ConnectionLayer,
         Canvas NodeLayer,
         IReadOnlyDictionary<NodeViewModel, NodeCanvasRenderedNodeVisual> NodeVisuals);
+
+    private static global::Avalonia.Media.Geometry CreateBezierGeometry(BezierConnection curve)
+        => global::Avalonia.Media.Geometry.Parse(
+            $"M {curve.Start.X:0.##},{curve.Start.Y:0.##} " +
+            $"C {curve.Control1.X:0.##},{curve.Control1.Y:0.##} " +
+            $"{curve.Control2.X:0.##},{curve.Control2.Y:0.##} " +
+            $"{curve.End.X:0.##},{curve.End.Y:0.##}");
 
     private sealed class StubNodeVisualPresenter : IGraphNodeVisualPresenter
     {
