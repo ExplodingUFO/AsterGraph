@@ -15,9 +15,11 @@ internal static class GraphEditorDefaultCommandShortcutRouter
         GraphEditorViewModel? editor,
         object? source,
         KeyEventArgs args,
+        AsterGraphCommandShortcutPolicy policy,
         bool includePendingConnectionCancel)
     {
         ArgumentNullException.ThrowIfNull(args);
+        ArgumentNullException.ThrowIfNull(policy);
 
         if (editor is null || ShortcutBelongsToInputControl(source))
         {
@@ -27,7 +29,7 @@ internal static class GraphEditorDefaultCommandShortcutRouter
         var session = editor.Session;
         var commands = session.Queries.GetCommandDescriptors()
             .ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
-        return TryHandleDescriptorShortcut(commands, session.Commands, args, includePendingConnectionCancel);
+        return TryHandleDescriptorShortcut(commands, session.Commands, args, policy, includePendingConnectionCancel);
     }
 
     public static bool TryHandle(
@@ -53,7 +55,7 @@ internal static class GraphEditorDefaultCommandShortcutRouter
                 continue;
             }
 
-            if (!MatchesShortcut(action.Id, action.DefaultShortcut, args))
+            if (!MatchesShortcutText(action.DefaultShortcut, args))
             {
                 continue;
             }
@@ -85,6 +87,7 @@ internal static class GraphEditorDefaultCommandShortcutRouter
         IReadOnlyDictionary<string, GraphEditorCommandDescriptorSnapshot> commands,
         IGraphEditorCommands commandSurface,
         KeyEventArgs args,
+        AsterGraphCommandShortcutPolicy policy,
         bool includePendingConnectionCancel)
     {
         foreach (var descriptor in commands.Values.Where(descriptor => !string.IsNullOrWhiteSpace(descriptor.DefaultShortcut)))
@@ -95,7 +98,8 @@ internal static class GraphEditorDefaultCommandShortcutRouter
                 continue;
             }
 
-            if (!MatchesShortcut(descriptor, args))
+            var shortcut = policy.ResolveShortcut(descriptor.Id, descriptor.DefaultShortcut);
+            if (!MatchesShortcutText(shortcut, args))
             {
                 continue;
             }
@@ -105,19 +109,6 @@ internal static class GraphEditorDefaultCommandShortcutRouter
         }
 
         return false;
-    }
-
-    private static bool MatchesShortcut(GraphEditorCommandDescriptorSnapshot descriptor, KeyEventArgs args)
-        => MatchesShortcut(descriptor.Id, descriptor.DefaultShortcut, args);
-
-    private static bool MatchesShortcut(string actionId, string? shortcutText, KeyEventArgs args)
-    {
-        if (string.Equals(actionId, "history.redo", StringComparison.Ordinal))
-        {
-            return MatchesShortcutText("Ctrl+Y", args) || MatchesShortcutText("Ctrl+Shift+Z", args);
-        }
-
-        return MatchesShortcutText(shortcutText, args);
     }
 
     private static bool MatchesShortcutText(string? shortcutText, KeyEventArgs args)

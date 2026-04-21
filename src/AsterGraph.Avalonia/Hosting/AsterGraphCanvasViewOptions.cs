@@ -24,9 +24,9 @@ public sealed record AsterGraphCanvasViewOptions
     public bool EnableDefaultContextMenu { get; init; } = true;
 
     /// <summary>
-    /// 是否启用默认内置命令快捷键。
+    /// 控制默认内置命令快捷键路由。
     /// </summary>
-    public bool EnableDefaultCommandShortcuts { get; init; } = true;
+    public AsterGraphCommandShortcutPolicy CommandShortcutPolicy { get; init; } = AsterGraphCommandShortcutPolicy.Default;
 
     /// <summary>
     /// 可选的 Avalonia 展示器替换配置。

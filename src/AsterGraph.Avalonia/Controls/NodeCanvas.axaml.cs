@@ -5,6 +5,7 @@ using Avalonia.Input;
 using Avalonia.Markup.Xaml;
 using Avalonia.VisualTree;
 using AsterGraph.Avalonia.Controls.Internal;
+using AsterGraph.Avalonia.Hosting;
 using AsterGraph.Avalonia.Menus;
 using AsterGraph.Avalonia.Presentation;
 using AsterGraph.Core.Models;
@@ -35,10 +36,12 @@ public partial class NodeCanvas : UserControl
         AvaloniaProperty.Register<NodeCanvas, bool>(nameof(EnableDefaultContextMenu), true);
 
     /// <summary>
-    /// 控制是否启用默认内置命令快捷键。
+    /// 控制默认内置命令快捷键路由。
     /// </summary>
-    public static readonly StyledProperty<bool> EnableDefaultCommandShortcutsProperty =
-        AvaloniaProperty.Register<NodeCanvas, bool>(nameof(EnableDefaultCommandShortcuts), true);
+    public static readonly StyledProperty<AsterGraphCommandShortcutPolicy> CommandShortcutPolicyProperty =
+        AvaloniaProperty.Register<NodeCanvas, AsterGraphCommandShortcutPolicy>(
+            nameof(CommandShortcutPolicy),
+            AsterGraphCommandShortcutPolicy.Default);
 
     /// <summary>
     /// 控制是否启用默认滚轮缩放/平移手势。
@@ -155,12 +158,12 @@ public partial class NodeCanvas : UserControl
     }
 
     /// <summary>
-    /// 是否启用默认内置命令快捷键。
+    /// 控制默认内置命令快捷键路由。
     /// </summary>
-    public bool EnableDefaultCommandShortcuts
+    public AsterGraphCommandShortcutPolicy CommandShortcutPolicy
     {
-        get => GetValue(EnableDefaultCommandShortcutsProperty);
-        set => SetValue(EnableDefaultCommandShortcutsProperty, value);
+        get => GetValue(CommandShortcutPolicyProperty);
+        set => SetValue(CommandShortcutPolicyProperty, value);
     }
 
     /// <summary>
@@ -450,15 +453,11 @@ public partial class NodeCanvas : UserControl
 
     private void HandleCanvasKeyDown(object? sender, KeyEventArgs args)
     {
-        if (!EnableDefaultCommandShortcuts)
-        {
-            return;
-        }
-
         if (GraphEditorDefaultCommandShortcutRouter.TryHandle(
             ViewModel,
             args.Source,
             args,
+            CommandShortcutPolicy,
             includePendingConnectionCancel: true))
         {
             args.Handled = true;

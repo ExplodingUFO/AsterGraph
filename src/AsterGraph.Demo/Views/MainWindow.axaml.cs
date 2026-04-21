@@ -70,7 +70,7 @@ public partial class MainWindow : Window
         {
             Editor = viewModel.Editor,
             EnableDefaultContextMenu = false,
-            EnableDefaultCommandShortcuts = false,
+            CommandShortcutPolicy = AsterGraphCommandShortcutPolicy.Disabled,
         });
         standaloneCanvas.Name = "StandaloneCanvasPreview";
         SetHostContent("PART_StandaloneCanvasHost", standaloneCanvas);

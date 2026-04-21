@@ -49,7 +49,7 @@ public static class ConsumerSampleWindowFactory
                 Editor = _host.Editor,
                 ChromeMode = GraphEditorViewChromeMode.CanvasOnly,
                 EnableDefaultContextMenu = true,
-                EnableDefaultCommandShortcuts = true,
+                CommandShortcutPolicy = AsterGraphCommandShortcutPolicy.Default,
             });
             editorView.Name = "PART_EditorView";
 

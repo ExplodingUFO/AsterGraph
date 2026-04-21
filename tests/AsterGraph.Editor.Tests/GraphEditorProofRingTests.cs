@@ -68,14 +68,14 @@ public sealed class GraphEditorProofRingTests
         {
             Editor = editor,
             EnableDefaultContextMenu = false,
-            EnableDefaultCommandShortcuts = false,
+            CommandShortcutPolicy = AsterGraphCommandShortcutPolicy.Disabled,
             Presentation = presentation,
         });
         var standaloneCanvas = AsterGraphCanvasViewFactory.Create(new AsterGraphCanvasViewOptions
         {
             Editor = editor,
             EnableDefaultContextMenu = false,
-            EnableDefaultCommandShortcuts = false,
+            CommandShortcutPolicy = AsterGraphCommandShortcutPolicy.Disabled,
             Presentation = presentation,
         });
         var window = new Window
@@ -109,11 +109,11 @@ public sealed class GraphEditorProofRingTests
             Assert.Equal("Proof Source", editor.InspectorTitle);
             Assert.Equal("Proof subtitle", editor.SelectedNode?.DisplaySubtitle);
             Assert.False(optOutView.EnableDefaultContextMenu);
-            Assert.False(optOutView.EnableDefaultCommandShortcuts);
+            Assert.False(optOutView.CommandShortcutPolicy.Enabled);
             Assert.False(optOutCanvas.EnableDefaultContextMenu);
-            Assert.False(optOutCanvas.EnableDefaultCommandShortcuts);
+            Assert.False(optOutCanvas.CommandShortcutPolicy.Enabled);
             Assert.False(standaloneCanvas.EnableDefaultContextMenu);
-            Assert.False(standaloneCanvas.EnableDefaultCommandShortcuts);
+            Assert.False(standaloneCanvas.CommandShortcutPolicy.Enabled);
             Assert.Same(presentation.ContextMenuPresenter, directCanvas.ContextMenuPresenter);
             Assert.Same(presentation.InspectorPresenter, directInspector.InspectorPresenter);
             Assert.Same(presentation.MiniMapPresenter, directMiniMap.MiniMapPresenter);
@@ -977,7 +977,7 @@ public sealed class GraphEditorProofRingTests
             view.Editor is not null,
             GetAttachPlatformSeams(canvas),
             canvas.EnableDefaultContextMenu,
-            canvas.EnableDefaultCommandShortcuts);
+            canvas.CommandShortcutPolicy.Enabled);
     }
 
     private static bool GetAttachPlatformSeams(NodeCanvas canvas)
@@ -1331,7 +1331,7 @@ public sealed class GraphEditorProofRingTests
         bool EditorAssigned,
         bool CanvasAttachPlatformSeams,
         bool EnableDefaultContextMenu,
-        bool EnableDefaultCommandShortcuts);
+        bool CommandShortcutPolicyEnabled);
 
     private static readonly string[] ReadinessFeatureIds =
     [

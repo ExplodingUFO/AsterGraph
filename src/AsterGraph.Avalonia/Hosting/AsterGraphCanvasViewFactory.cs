@@ -21,7 +21,7 @@ public static class AsterGraphCanvasViewFactory
         {
             ViewModel = options.Editor,
             EnableDefaultContextMenu = options.EnableDefaultContextMenu,
-            EnableDefaultCommandShortcuts = options.EnableDefaultCommandShortcuts,
+            CommandShortcutPolicy = options.CommandShortcutPolicy,
             NodeVisualPresenter = options.Presentation?.NodeVisualPresenter,
             ContextMenuPresenter = options.Presentation?.ContextMenuPresenter,
             NodeParameterEditorRegistry = options.Presentation?.NodeParameterEditorRegistry,

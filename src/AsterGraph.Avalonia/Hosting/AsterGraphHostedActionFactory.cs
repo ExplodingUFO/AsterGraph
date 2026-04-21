@@ -10,6 +10,38 @@ public static class AsterGraphHostedActionFactory
     public static AsterGraphHostedActionProjection CreateProjection(IEnumerable<AsterGraphHostedActionDescriptor> actions)
         => new(actions);
 
+    public static IReadOnlyList<AsterGraphHostedActionDescriptor> ApplyCommandShortcutPolicy(
+        IEnumerable<AsterGraphHostedActionDescriptor> actions,
+        AsterGraphCommandShortcutPolicy policy)
+    {
+        ArgumentNullException.ThrowIfNull(actions);
+        ArgumentNullException.ThrowIfNull(policy);
+
+        return actions
+            .Select(action =>
+            {
+                ArgumentNullException.ThrowIfNull(action);
+
+                var effectiveShortcut = policy.ResolveShortcut(action.Id, action.DefaultShortcut);
+                if (string.Equals(effectiveShortcut, action.DefaultShortcut, StringComparison.Ordinal))
+                {
+                    return action;
+                }
+
+                var descriptor = new GraphEditorCommandDescriptorSnapshot(
+                    action.Id,
+                    action.Title,
+                    action.Group,
+                    action.IconKey,
+                    effectiveShortcut,
+                    action.CommandSource,
+                    action.CanExecute,
+                    action.DisabledReason);
+                return new AsterGraphHostedActionDescriptor(descriptor, action.TryExecute, action.CommandId);
+            })
+            .ToList();
+    }
+
     public static IReadOnlyList<AsterGraphHostedActionDescriptor> CreateCommandActions(
         IGraphEditorSession session,
         IEnumerable<string> commandIds)

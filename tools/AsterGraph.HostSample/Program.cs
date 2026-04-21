@@ -28,7 +28,7 @@ var allOk = runtimeResult.IsOk && hostedUiResult.IsOk;
 Console.WriteLine("HOST_SAMPLE_PATHS:CreateSession:Create:AsterGraphAvaloniaViewFactory");
 Console.WriteLine($"HOST_SAMPLE_RUNTIME_OK:{runtimeResult.IsOk}:{runtimeResult.FeatureDescriptorCount}:{runtimeResult.SaveCalls}:{runtimeResult.ConnectionCount}");
 Console.WriteLine($"HOST_SAMPLE_CLIPBOARD_OK:{runtimeResult.ClipboardOk}:{runtimeResult.PastedNodeCount}");
-Console.WriteLine($"HOST_SAMPLE_HOSTED_UI_OK:{hostedUiResult.IsOk}:{hostedUiResult.ChromeMode}:{hostedUiResult.EnableDefaultContextMenu}:{hostedUiResult.EnableDefaultCommandShortcuts}:{hostedUiResult.ConnectionCount}");
+Console.WriteLine($"HOST_SAMPLE_HOSTED_UI_OK:{hostedUiResult.IsOk}:{hostedUiResult.ChromeMode}:{hostedUiResult.EnableDefaultContextMenu}:{hostedUiResult.CommandShortcutPolicyEnabled}:{hostedUiResult.ConnectionCount}");
 Console.WriteLine($"HOST_SAMPLE_OK:{allOk}");
 
 if (!allOk)
@@ -91,7 +91,7 @@ static async Task<RouteResult> VerifyRuntimeOnlyRouteAsync(INodeCatalog catalog,
         pastedSnapshot.Nodes.Count,
         GraphEditorViewChromeMode.Default,
         EnableDefaultContextMenu: true,
-        EnableDefaultCommandShortcuts: true);
+        CommandShortcutPolicyEnabled: true);
 }
 
 static RouteResult VerifyHostedUiRoute(INodeCatalog catalog, NodeDefinitionId definitionId)
@@ -109,7 +109,7 @@ static RouteResult VerifyHostedUiRoute(INodeCatalog catalog, NodeDefinitionId de
         Editor = editor,
         ChromeMode = GraphEditorViewChromeMode.CanvasOnly,
         EnableDefaultContextMenu = false,
-        EnableDefaultCommandShortcuts = false,
+        CommandShortcutPolicy = AsterGraphCommandShortcutPolicy.Disabled,
     });
 
     editor.ConnectPorts(SourceNodeId, SourcePortId, TargetNodeId, TargetPortId);
@@ -122,7 +122,7 @@ static RouteResult VerifyHostedUiRoute(INodeCatalog catalog, NodeDefinitionId de
         && workspace.Exists()
         && view.ChromeMode == GraphEditorViewChromeMode.CanvasOnly
         && !view.EnableDefaultContextMenu
-        && !view.EnableDefaultCommandShortcuts;
+        && !view.CommandShortcutPolicy.Enabled;
 
     return new RouteResult(
         isOk,
@@ -133,7 +133,7 @@ static RouteResult VerifyHostedUiRoute(INodeCatalog catalog, NodeDefinitionId de
         PastedNodeCount: 0,
         view.ChromeMode,
         view.EnableDefaultContextMenu,
-        view.EnableDefaultCommandShortcuts);
+        view.CommandShortcutPolicy.Enabled);
 }
 
 static NodeCatalog CreateCatalog(NodeDefinitionId definitionId)
@@ -231,7 +231,7 @@ file readonly record struct RouteResult(
     int PastedNodeCount,
     GraphEditorViewChromeMode ChromeMode,
     bool EnableDefaultContextMenu,
-    bool EnableDefaultCommandShortcuts);
+    bool CommandShortcutPolicyEnabled);
 
 file sealed class RecordingTextClipboardBridge : IGraphTextClipboardBridge
 {

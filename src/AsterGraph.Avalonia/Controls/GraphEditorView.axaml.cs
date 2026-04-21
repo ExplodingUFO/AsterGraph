@@ -86,10 +86,12 @@ public partial class GraphEditorView : UserControl
         AvaloniaProperty.Register<GraphEditorView, bool>(nameof(EnableDefaultContextMenu), true);
 
     /// <summary>
-    /// 是否启用完整外壳的默认内置命令快捷键。
+    /// 控制完整外壳的默认内置命令快捷键路由。
     /// </summary>
-    public static readonly StyledProperty<bool> EnableDefaultCommandShortcutsProperty =
-        AvaloniaProperty.Register<GraphEditorView, bool>(nameof(EnableDefaultCommandShortcuts), true);
+    public static readonly StyledProperty<AsterGraphCommandShortcutPolicy> CommandShortcutPolicyProperty =
+        AvaloniaProperty.Register<GraphEditorView, AsterGraphCommandShortcutPolicy>(
+            nameof(CommandShortcutPolicy),
+            AsterGraphCommandShortcutPolicy.Default);
 
     /// <summary>
     /// 是否启用完整外壳的默认滚轮缩放/平移手势。
@@ -220,12 +222,12 @@ public partial class GraphEditorView : UserControl
     }
 
     /// <summary>
-    /// 是否启用完整外壳的默认内置命令快捷键。
+    /// 控制完整外壳的默认内置命令快捷键路由。
     /// </summary>
-    public bool EnableDefaultCommandShortcuts
+    public AsterGraphCommandShortcutPolicy CommandShortcutPolicy
     {
-        get => GetValue(EnableDefaultCommandShortcutsProperty);
-        set => SetValue(EnableDefaultCommandShortcutsProperty, value);
+        get => GetValue(CommandShortcutPolicyProperty);
+        set => SetValue(CommandShortcutPolicyProperty, value);
     }
 
     /// <summary>
@@ -283,7 +285,7 @@ public partial class GraphEditorView : UserControl
             _compositionCoordinator.ApplyChromeMode();
         }
         else if (change.Property == EnableDefaultContextMenuProperty
-            || change.Property == EnableDefaultCommandShortcutsProperty
+            || change.Property == CommandShortcutPolicyProperty
             || change.Property == EnableDefaultWheelViewportGesturesProperty
             || change.Property == EnableAltLeftDragPanningProperty)
         {
@@ -362,9 +364,11 @@ public partial class GraphEditorView : UserControl
             return;
         }
 
-        if (_commandPaletteAction is not null
+        var projection = CreateCommandSurfaceProjection();
+        if (projection is not null
+            && projection.TryGet(CommandPaletteActionId, out var commandPaletteAction)
             && GraphEditorDefaultCommandShortcutRouter.TryHandle(
-                [_commandPaletteAction],
+                [commandPaletteAction],
                 args.Source,
                 args,
                 allowInputControlFocus: true))
@@ -373,12 +377,6 @@ public partial class GraphEditorView : UserControl
             return;
         }
 
-        if (!EnableDefaultCommandShortcuts)
-        {
-            return;
-        }
-
-        var projection = CreateCommandSurfaceProjection();
         if (projection is not null
             && GraphEditorDefaultCommandShortcutRouter.TryHandle(
                 projection.Actions,
@@ -579,12 +577,14 @@ public partial class GraphEditorView : UserControl
             return null;
         }
 
-        return AsterGraphHostedActionFactory.CreateProjection(
-        [
-            CreateCommandPaletteAction(),
-            .. AsterGraphHostedActionFactory.CreateCommandActions(Editor.Session),
-            .. AsterGraphCompositeWorkflowActionFactory.CreateWorkflowActions(Editor.Session),
-        ]);
+        var actions = AsterGraphHostedActionFactory.ApplyCommandShortcutPolicy(
+            [
+                CreateCommandPaletteAction(),
+                .. AsterGraphHostedActionFactory.CreateCommandActions(Editor.Session),
+                .. AsterGraphCompositeWorkflowActionFactory.CreateWorkflowActions(Editor.Session),
+            ],
+            CommandShortcutPolicy);
+        return AsterGraphHostedActionFactory.CreateProjection(actions);
     }
 
     private AsterGraphHostedActionDescriptor CreateCommandPaletteAction()

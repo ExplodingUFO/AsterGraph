@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
+using AsterGraph.Avalonia.Hosting;
 using AsterGraph.Avalonia.Presentation;
 using AsterGraph.Avalonia.Styling;
 using AsterGraph.Editor.ViewModels;
@@ -22,7 +23,7 @@ internal interface IGraphEditorViewCompositionHost
 
     bool EnableDefaultContextMenu { get; }
 
-    bool EnableDefaultCommandShortcuts { get; }
+    AsterGraphCommandShortcutPolicy CommandShortcutPolicy { get; }
 
     bool EnableDefaultWheelViewportGestures { get; }
 
@@ -114,7 +115,7 @@ internal sealed class GraphEditorViewCompositionCoordinator
         }
 
         _host.NodeCanvas.EnableDefaultContextMenu = _host.EnableDefaultContextMenu;
-        _host.NodeCanvas.EnableDefaultCommandShortcuts = _host.EnableDefaultCommandShortcuts;
+        _host.NodeCanvas.CommandShortcutPolicy = _host.CommandShortcutPolicy;
         _host.NodeCanvas.EnableDefaultWheelViewportGestures = _host.EnableDefaultWheelViewportGestures;
         _host.NodeCanvas.EnableAltLeftDragPanning = _host.EnableAltLeftDragPanning;
     }

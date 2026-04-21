@@ -91,7 +91,7 @@ public sealed class GraphEditorSurfaceCompositionTests
         {
             Editor = editor,
             EnableDefaultContextMenu = false,
-            EnableDefaultCommandShortcuts = false,
+            CommandShortcutPolicy = AsterGraphCommandShortcutPolicy.Disabled,
         });
         var menu = editor.BuildContextMenu(
             new ContextMenuContext(
@@ -99,7 +99,7 @@ public sealed class GraphEditorSurfaceCompositionTests
                 new GraphPoint(120, 160)));
 
         Assert.False(canvas.EnableDefaultContextMenu);
-        Assert.False(canvas.EnableDefaultCommandShortcuts);
+        Assert.False(canvas.CommandShortcutPolicy.Enabled);
         Assert.NotNull(editor.Session);
         Assert.NotEmpty(menu);
     }

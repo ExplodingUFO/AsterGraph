@@ -361,7 +361,7 @@ public sealed class GraphEditorInitializationTests
         {
             Editor = editor,
             EnableDefaultContextMenu = false,
-            EnableDefaultCommandShortcuts = false,
+            CommandShortcutPolicy = AsterGraphCommandShortcutPolicy.Disabled,
             Presentation = presentation,
         });
         var inspector = AsterGraphInspectorViewFactory.Create(new AsterGraphInspectorViewOptions
@@ -379,7 +379,7 @@ public sealed class GraphEditorInitializationTests
         Assert.Same(editor, inspector.Editor);
         Assert.Same(editor, miniMap.ViewModel);
         Assert.False(canvas.EnableDefaultContextMenu);
-        Assert.False(canvas.EnableDefaultCommandShortcuts);
+        Assert.False(canvas.CommandShortcutPolicy.Enabled);
         Assert.Same(presentation.NodeVisualPresenter, canvas.NodeVisualPresenter);
         Assert.Same(presentation.ContextMenuPresenter, canvas.ContextMenuPresenter);
         Assert.Same(presentation.InspectorPresenter, inspector.InspectorPresenter);
@@ -497,7 +497,7 @@ public sealed class GraphEditorInitializationTests
         {
             Editor = editor,
             EnableDefaultContextMenu = false,
-            EnableDefaultCommandShortcuts = false,
+            CommandShortcutPolicy = AsterGraphCommandShortcutPolicy.Disabled,
         });
         var window = new Window
         {
@@ -513,9 +513,9 @@ public sealed class GraphEditorInitializationTests
 
             Assert.NotNull(canvas);
             Assert.False(view.EnableDefaultContextMenu);
-            Assert.False(view.EnableDefaultCommandShortcuts);
+            Assert.False(view.CommandShortcutPolicy.Enabled);
             Assert.False(canvas.EnableDefaultContextMenu);
-            Assert.False(canvas.EnableDefaultCommandShortcuts);
+            Assert.False(canvas.CommandShortcutPolicy.Enabled);
         }
         finally
         {

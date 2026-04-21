@@ -12,6 +12,7 @@ using Avalonia.VisualTree;
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Avalonia.Controls;
+using AsterGraph.Avalonia.Hosting;
 using AsterGraph.Core.Compatibility;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor;
@@ -130,6 +131,55 @@ public sealed class GraphEditorViewTests
         InvokeViewKeyDown(view, args);
 
         Assert.True(args.Handled);
+        Assert.True(paletteChrome.IsVisible);
+    }
+
+    [AvaloniaFact]
+    public void CommandShortcutPolicy_OverridesCommandPaletteShortcutAndShortcutHelp()
+    {
+        var editor = CreateEditor();
+        var window = CreateWindow(new GraphEditorView
+        {
+            Editor = editor,
+            CommandShortcutPolicy = new AsterGraphCommandShortcutPolicy
+            {
+                ShortcutOverrides = new Dictionary<string, string?>
+                {
+                    ["shell.command-palette"] = "Ctrl+Alt+P",
+                },
+            },
+        });
+        var view = (GraphEditorView)window.Content!;
+        var shortcutHelp = FindRequiredControl<StackPanel>(view, "PART_ShortcutHelpList");
+        var paletteChrome = FindRequiredControl<Border>(view, "PART_CommandPaletteChrome");
+
+        Assert.Contains(
+            shortcutHelp.Children.OfType<Border>()
+                .Select(item => item.Child)
+                .OfType<TextBlock>(),
+            item => item.Text?.Contains("Ctrl+Alt+P", StringComparison.Ordinal) == true
+                && item.Text.Contains("Command Palette", StringComparison.Ordinal));
+
+        var defaultArgs = new KeyEventArgs
+        {
+            Key = Key.P,
+            KeyModifiers = KeyModifiers.Control | KeyModifiers.Shift,
+        };
+
+        InvokeViewKeyDown(view, defaultArgs);
+
+        Assert.False(defaultArgs.Handled);
+        Assert.False(paletteChrome.IsVisible);
+
+        var overrideArgs = new KeyEventArgs
+        {
+            Key = Key.P,
+            KeyModifiers = KeyModifiers.Control | KeyModifiers.Alt,
+        };
+
+        InvokeViewKeyDown(view, overrideArgs);
+
+        Assert.True(overrideArgs.Handled);
         Assert.True(paletteChrome.IsVisible);
     }
 
@@ -282,7 +332,7 @@ public sealed class GraphEditorViewTests
         Assert.Same(editor, view.Editor);
         Assert.False(canvas.AttachPlatformSeams);
         Assert.True(canvas.EnableDefaultContextMenu);
-        Assert.True(canvas.EnableDefaultCommandShortcuts);
+        Assert.True(canvas.CommandShortcutPolicy.Enabled);
         Assert.NotNull(editor.HostContext);
         Assert.True(editor.HostContext!.TryGetOwner<GraphEditorView>(out var owner));
         Assert.Same(view, owner);

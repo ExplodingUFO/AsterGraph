@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using AsterGraph.Avalonia.Controls.Internal;
+using AsterGraph.Avalonia.Hosting;
 using AsterGraph.Editor.ViewModels;
 
 namespace AsterGraph.Avalonia.Controls;
@@ -29,7 +30,7 @@ public partial class GraphEditorView
 
         public bool EnableDefaultContextMenu => _owner.EnableDefaultContextMenu;
 
-        public bool EnableDefaultCommandShortcuts => _owner.EnableDefaultCommandShortcuts;
+        public AsterGraphCommandShortcutPolicy CommandShortcutPolicy => _owner.CommandShortcutPolicy;
 
         public bool EnableDefaultWheelViewportGestures => _owner.EnableDefaultWheelViewportGestures;
 

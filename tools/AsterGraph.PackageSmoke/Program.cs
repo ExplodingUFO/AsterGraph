@@ -47,8 +47,8 @@ var allOk = runtimeResult.IsOk && factoryResult.IsOk && retainedResult.IsOk;
 
 Console.WriteLine($"PACKAGE_SMOKE_ROUTE_OK:{runtimeResult.RouteOk}:{factoryResult.RouteOk}:{retainedResult.RouteOk}");
 Console.WriteLine($"PACKAGE_SMOKE_RUNTIME_OK:{runtimeResult.IsOk}:{runtimeResult.CompatibleTargetCount}:{runtimeResult.FeatureDescriptorCount}:{runtimeResult.SaveCalls}");
-Console.WriteLine($"PACKAGE_SMOKE_HOSTED_UI_OK:{factoryResult.IsOk}:{factoryResult.ConnectionCount}:{factoryResult.FeatureDescriptorCount}:{factoryResult.SaveCalls}:{factoryResult.ChromeMode}:{factoryResult.EnableDefaultContextMenu}:{factoryResult.EnableDefaultCommandShortcuts}");
-Console.WriteLine($"PACKAGE_SMOKE_COMPAT_OK:{retainedResult.IsOk}:{retainedResult.ConnectionCount}:{retainedResult.FeatureDescriptorCount}:{retainedResult.SaveCalls}:{retainedResult.ChromeMode}:{retainedResult.EnableDefaultContextMenu}:{retainedResult.EnableDefaultCommandShortcuts}");
+Console.WriteLine($"PACKAGE_SMOKE_HOSTED_UI_OK:{factoryResult.IsOk}:{factoryResult.ConnectionCount}:{factoryResult.FeatureDescriptorCount}:{factoryResult.SaveCalls}:{factoryResult.ChromeMode}:{factoryResult.EnableDefaultContextMenu}:{factoryResult.CommandShortcutPolicyEnabled}");
+Console.WriteLine($"PACKAGE_SMOKE_COMPAT_OK:{retainedResult.IsOk}:{retainedResult.ConnectionCount}:{retainedResult.FeatureDescriptorCount}:{retainedResult.SaveCalls}:{retainedResult.ChromeMode}:{retainedResult.EnableDefaultContextMenu}:{retainedResult.CommandShortcutPolicyEnabled}");
 Console.WriteLine($"PACKAGE_SMOKE_OK:{allOk}");
 
 if (!allOk)
@@ -111,7 +111,7 @@ static HostedUiSmokeResult VerifyFactoryRoute(
         Editor = editor,
         ChromeMode = GraphEditorViewChromeMode.CanvasOnly,
         EnableDefaultContextMenu = false,
-        EnableDefaultCommandShortcuts = false,
+        CommandShortcutPolicy = AsterGraphCommandShortcutPolicy.Disabled,
     });
 
     editor.ConnectPorts(SourceNodeId, SourcePortId, TargetNodeId, TargetPortId);
@@ -126,7 +126,7 @@ static HostedUiSmokeResult VerifyFactoryRoute(
         && workspace.SaveCalls == 1
         && view.ChromeMode == GraphEditorViewChromeMode.CanvasOnly
         && !view.EnableDefaultContextMenu
-        && !view.EnableDefaultCommandShortcuts;
+        && !view.CommandShortcutPolicy.Enabled;
 
     return new HostedUiSmokeResult(
         routeOk,
@@ -136,7 +136,7 @@ static HostedUiSmokeResult VerifyFactoryRoute(
         workspace.SaveCalls,
         view.ChromeMode,
         view.EnableDefaultContextMenu,
-        view.EnableDefaultCommandShortcuts);
+        view.CommandShortcutPolicy.Enabled);
 }
 
 static HostedUiSmokeResult VerifyRetainedRoute(
@@ -158,7 +158,7 @@ static HostedUiSmokeResult VerifyRetainedRoute(
         Editor = editor,
         ChromeMode = GraphEditorViewChromeMode.CanvasOnly,
         EnableDefaultContextMenu = false,
-        EnableDefaultCommandShortcuts = false,
+        CommandShortcutPolicy = AsterGraphCommandShortcutPolicy.Disabled,
     };
 
     editor.ConnectPorts(SourceNodeId, SourcePortId, TargetNodeId, TargetPortId);
@@ -173,7 +173,7 @@ static HostedUiSmokeResult VerifyRetainedRoute(
         && workspace.SaveCalls == 1
         && view.ChromeMode == GraphEditorViewChromeMode.CanvasOnly
         && !view.EnableDefaultContextMenu
-        && !view.EnableDefaultCommandShortcuts;
+        && !view.CommandShortcutPolicy.Enabled;
 
     return new HostedUiSmokeResult(
         routeOk,
@@ -183,7 +183,7 @@ static HostedUiSmokeResult VerifyRetainedRoute(
         workspace.SaveCalls,
         view.ChromeMode,
         view.EnableDefaultContextMenu,
-        view.EnableDefaultCommandShortcuts);
+        view.CommandShortcutPolicy.Enabled);
 }
 
 static NodeCatalog CreateCatalog(NodeDefinitionId definitionId)
@@ -288,7 +288,7 @@ file readonly record struct HostedUiSmokeResult(
     int SaveCalls,
     GraphEditorViewChromeMode ChromeMode,
     bool EnableDefaultContextMenu,
-    bool EnableDefaultCommandShortcuts);
+    bool CommandShortcutPolicyEnabled);
 
 file static class SmokeAvaloniaEnvironment
 {

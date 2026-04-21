@@ -29,7 +29,7 @@ public static class AsterGraphAvaloniaViewFactory
             Editor = options.Editor,
             ChromeMode = options.ChromeMode,
             EnableDefaultContextMenu = options.EnableDefaultContextMenu,
-            EnableDefaultCommandShortcuts = options.EnableDefaultCommandShortcuts,
+            CommandShortcutPolicy = options.CommandShortcutPolicy,
             Presentation = options.Presentation,
         };
     }

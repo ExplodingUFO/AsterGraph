@@ -713,9 +713,9 @@ public sealed class GraphEditorMigrationCompatibilityTests
             return new ViewRouteSnapshot(
                 view.ChromeMode,
                 view.EnableDefaultContextMenu,
-                view.EnableDefaultCommandShortcuts,
+                view.CommandShortcutPolicy.Enabled,
                 canvas.EnableDefaultContextMenu,
-                canvas.EnableDefaultCommandShortcuts,
+                canvas.CommandShortcutPolicy.Enabled,
                 canvas.AttachPlatformSeams,
                 ReferenceEquals(editor, inspector.Editor),
                 ReferenceEquals(editor, miniMap.ViewModel),
@@ -748,7 +748,7 @@ public sealed class GraphEditorMigrationCompatibilityTests
 
             return new StandaloneCanvasRouteSnapshot(
                 canvas.EnableDefaultContextMenu,
-                canvas.EnableDefaultCommandShortcuts,
+                canvas.CommandShortcutPolicy.Enabled,
                 canvas.AttachPlatformSeams,
                 ReferenceEquals(editor, canvas.ViewModel),
                 owner?.GetType().Name ?? "<none>",

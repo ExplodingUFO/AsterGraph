@@ -29,9 +29,9 @@ public sealed record AsterGraphAvaloniaViewOptions
     public bool EnableDefaultContextMenu { get; init; } = true;
 
     /// <summary>
-    /// Enables or disables the stock command-shortcut wiring.
+    /// Controls the stock command-shortcut routing applied by the hosted Avalonia shell.
     /// </summary>
-    public bool EnableDefaultCommandShortcuts { get; init; } = true;
+    public AsterGraphCommandShortcutPolicy CommandShortcutPolicy { get; init; } = AsterGraphCommandShortcutPolicy.Default;
 
     /// <summary>
     /// Optional presentation overrides for the stock Avalonia presenters.

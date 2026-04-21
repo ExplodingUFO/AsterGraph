@@ -62,7 +62,7 @@ public sealed class NodeCanvasStandaloneTests
 
             Assert.Same(editor, canvas.ViewModel);
             Assert.True(canvas.EnableDefaultContextMenu);
-            Assert.True(canvas.EnableDefaultCommandShortcuts);
+            Assert.True(canvas.CommandShortcutPolicy.Enabled);
             Assert.True(canvas.Focusable);
             Assert.Contains("Canvas Source", allText);
             Assert.Null(canvas.NodeVisualPresenter);
@@ -157,11 +157,11 @@ public sealed class NodeCanvasStandaloneTests
     }
 
     [AvaloniaFact]
-    public void EscapeShortcut_CancelsPendingConnectionOnlyWhenDefaultShortcutsEnabled()
+    public void EscapeShortcut_CancelsPendingConnectionOnlyWhenShortcutPolicyIsEnabled()
     {
         var enabledEditor = CreateEditor();
         enabledEditor.StartConnection(SourceNodeId, SourcePortId);
-        var (enabledWindow, enabledCanvas) = CreateStandaloneCanvasWindow(enabledEditor, enableDefaultCommandShortcuts: true);
+        var (enabledWindow, enabledCanvas) = CreateStandaloneCanvasWindow(enabledEditor);
         var enabledArgs = new KeyEventArgs
         {
             Key = Key.Escape,
@@ -175,7 +175,9 @@ public sealed class NodeCanvasStandaloneTests
 
             var disabledEditor = CreateEditor();
             disabledEditor.StartConnection(SourceNodeId, SourcePortId);
-            var (disabledWindow, disabledCanvas) = CreateStandaloneCanvasWindow(disabledEditor, enableDefaultCommandShortcuts: false);
+            var (disabledWindow, disabledCanvas) = CreateStandaloneCanvasWindow(
+                disabledEditor,
+                commandShortcutPolicy: AsterGraphCommandShortcutPolicy.Disabled);
             var disabledArgs = new KeyEventArgs
             {
                 Key = Key.Escape,
@@ -199,11 +201,11 @@ public sealed class NodeCanvasStandaloneTests
     }
 
     [AvaloniaFact]
-    public void DeleteShortcut_RemovesSelectionOnlyWhenDefaultShortcutsEnabled()
+    public void DeleteShortcut_RemovesSelectionOnlyWhenShortcutPolicyIsEnabled()
     {
         var enabledEditor = CreateEditor();
         enabledEditor.SelectSingleNode(enabledEditor.Nodes[0], updateStatus: false);
-        var (enabledWindow, enabledCanvas) = CreateStandaloneCanvasWindow(enabledEditor, enableDefaultCommandShortcuts: true);
+        var (enabledWindow, enabledCanvas) = CreateStandaloneCanvasWindow(enabledEditor);
         var enabledArgs = new KeyEventArgs
         {
             Key = Key.Delete,
@@ -218,7 +220,9 @@ public sealed class NodeCanvasStandaloneTests
 
             var disabledEditor = CreateEditor();
             disabledEditor.SelectSingleNode(disabledEditor.Nodes[0], updateStatus: false);
-            var (disabledWindow, disabledCanvas) = CreateStandaloneCanvasWindow(disabledEditor, enableDefaultCommandShortcuts: false);
+            var (disabledWindow, disabledCanvas) = CreateStandaloneCanvasWindow(
+                disabledEditor,
+                commandShortcutPolicy: AsterGraphCommandShortcutPolicy.Disabled);
             var disabledArgs = new KeyEventArgs
             {
                 Key = Key.Delete,
@@ -396,6 +400,50 @@ public sealed class NodeCanvasStandaloneTests
             Assert.True(canvas.EnableAltLeftDragPanning);
             canvas.EnableAltLeftDragPanning = false;
             Assert.False(canvas.EnableAltLeftDragPanning);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
+    public void CommandShortcutPolicy_OverridesDeleteShortcutForStandaloneCanvas()
+    {
+        var editor = CreateEditor();
+        editor.SelectSingleNode(editor.Nodes[0], updateStatus: false);
+        var (window, canvas) = CreateStandaloneCanvasWindow(
+            editor,
+            commandShortcutPolicy: new AsterGraphCommandShortcutPolicy
+            {
+                ShortcutOverrides = new Dictionary<string, string?>
+                {
+                    ["selection.delete"] = "Ctrl+D",
+                },
+            });
+        var defaultArgs = new KeyEventArgs
+        {
+            Key = Key.Delete,
+        };
+
+        try
+        {
+            InvokeCanvasKeyDown(canvas, defaultArgs);
+
+            Assert.False(defaultArgs.Handled);
+            Assert.Equal(2, editor.Nodes.Count);
+
+            var overrideArgs = new KeyEventArgs
+            {
+                Key = Key.D,
+                KeyModifiers = KeyModifiers.Control,
+            };
+
+            InvokeCanvasKeyDown(canvas, overrideArgs);
+
+            Assert.True(overrideArgs.Handled);
+            Assert.Single(editor.Nodes);
+            Assert.Equal(TargetNodeId, editor.Nodes[0].Id);
         }
         finally
         {
@@ -2487,14 +2535,14 @@ public sealed class NodeCanvasStandaloneTests
     private static (Window Window, NodeCanvas Canvas) CreateStandaloneCanvasWindow(
         GraphEditorViewModel editor,
         bool enableDefaultContextMenu = true,
-        bool enableDefaultCommandShortcuts = true,
+        AsterGraphCommandShortcutPolicy? commandShortcutPolicy = null,
         AsterGraphPresentationOptions? presentation = null)
     {
         var canvas = AsterGraphCanvasViewFactory.Create(new AsterGraphCanvasViewOptions
         {
             Editor = editor,
             EnableDefaultContextMenu = enableDefaultContextMenu,
-            EnableDefaultCommandShortcuts = enableDefaultCommandShortcuts,
+            CommandShortcutPolicy = commandShortcutPolicy ?? AsterGraphCommandShortcutPolicy.Default,
             Presentation = presentation,
         });
 
