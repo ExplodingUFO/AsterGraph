@@ -32,6 +32,7 @@ public sealed class GraphNodeVisualContext
         NodeViewModel node,
         GraphEditorStyleOptions styleOptions,
         INodeParameterEditorRegistry? nodeParameterEditorRegistry,
+        IGraphNodeBodyPresenter? nodeBodyPresenter,
         Action focusCanvas,
         Action<NodeViewModel, PointerPressedEventArgs> beginNodeDrag,
         Action<NodeViewModel, GraphNodeResizeHandleKind, PointerPressedEventArgs> beginNodeResize,
@@ -68,6 +69,7 @@ public sealed class GraphNodeVisualContext
         Node = node;
         StyleOptions = styleOptions;
         NodeParameterEditorRegistry = nodeParameterEditorRegistry;
+        NodeBodyPresenter = nodeBodyPresenter;
         InteractionFocus = editor.InteractionFocus;
         FocusCanvas = focusCanvas;
         BeginNodeDrag = beginNodeDrag;
@@ -108,6 +110,11 @@ public sealed class GraphNodeVisualContext
     /// Optional replaceable registry used by node-side parameter editor surfaces.
     /// </summary>
     public INodeParameterEditorRegistry? NodeParameterEditorRegistry { get; }
+
+    /// <summary>
+    /// Optional narrow body presenter used by the stock shell composition only.
+    /// </summary>
+    public IGraphNodeBodyPresenter? NodeBodyPresenter { get; }
 
     /// <summary>
     /// Current host-facing interaction focus snapshot.

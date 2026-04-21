@@ -125,6 +125,7 @@ internal sealed class GraphEditorViewCompositionCoordinator
         if (_host.NodeCanvas is not null)
         {
             _host.NodeCanvas.NodeVisualPresenter = presentation?.NodeVisualPresenter;
+            _host.NodeCanvas.NodeBodyPresenter = presentation?.NodeBodyPresenter;
             _host.NodeCanvas.ContextMenuPresenter = presentation?.ContextMenuPresenter;
             _host.NodeCanvas.NodeParameterEditorRegistry = presentation?.NodeParameterEditorRegistry;
             _host.NodeCanvas.ResizeFeedbackPolicy = presentation?.ResizeFeedbackPolicy;
