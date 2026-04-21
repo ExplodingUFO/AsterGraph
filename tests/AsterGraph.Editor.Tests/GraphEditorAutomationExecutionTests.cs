@@ -82,6 +82,7 @@ public sealed class GraphEditorAutomationExecutionTests
         {
             Assert.True(args.IsInMutationScope);
             Assert.Equal("automation-run", args.MutationLabel);
+            Assert.False(string.IsNullOrWhiteSpace(args.StatusMessage));
         });
 
         var recentDiagnostics = session.Diagnostics.GetRecentDiagnostics(10);

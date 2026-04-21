@@ -115,8 +115,9 @@ public partial class MainWindowViewModel : ViewModelBase
         Editor.FragmentExported += (_, _) => RefreshRuntimeProjection();
         Editor.FragmentImported += (_, _) => RefreshRuntimeProjection();
         Session.Events.DocumentChanged += (_, _) => PersistAutosaveDraft();
-        Session.Events.CommandExecuted += (_, _) =>
+        Session.Events.CommandExecuted += (_, args) =>
         {
+            TrackCommandExecuted(args);
             PersistAutosaveDraft();
             RefreshRuntimeProjection();
         };

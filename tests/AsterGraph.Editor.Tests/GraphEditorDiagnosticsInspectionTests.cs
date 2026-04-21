@@ -191,6 +191,17 @@ public sealed class GraphEditorDiagnosticsInspectionTests
         Assert.Equal(GraphEditorPluginLoadStatus.Blocked, snapshot.Status);
         Assert.NotNull(compatibility);
         Assert.Equal(GraphEditorPluginCompatibilityStatus.Incompatible, compatibility!.Status);
+        Assert.Equal("compatibility.astergraph.minimum-version", compatibility.ReasonCode);
+        Assert.NotNull(snapshot.TrustEvaluation);
+        Assert.Equal(GraphEditorPluginTrustDecision.Allowed, snapshot.TrustEvaluation!.Decision);
+        Assert.Equal(GraphEditorPluginTrustEvaluationSource.ImplicitAllow, snapshot.TrustEvaluation.Source);
+        Assert.Equal("trust.policy.not-configured", snapshot.TrustEvaluation.ReasonCode);
+        Assert.Equal(GraphEditorPluginProvenanceEvidence.NotProvided, snapshot.ProvenanceEvidence);
+        Assert.Equal(GraphEditorPluginSignatureStatus.NotProvided, snapshot.ProvenanceEvidence.Signature.Status);
+        Assert.Null(snapshot.ProvenanceEvidence.PackageIdentity);
+        Assert.False(snapshot.ActivationAttempted);
+        Assert.Null(snapshot.Descriptor);
+        Assert.Null(snapshot.FailureMessage);
         Assert.Contains(inspection.RecentDiagnostics, diagnostic => diagnostic.Code == "plugin.load.incompatible");
         Assert.Contains(diagnostics.Diagnostics, diagnostic => diagnostic.Code == "plugin.load.incompatible");
         Assert.Equal(0, plugin.RegisterCallCount);
