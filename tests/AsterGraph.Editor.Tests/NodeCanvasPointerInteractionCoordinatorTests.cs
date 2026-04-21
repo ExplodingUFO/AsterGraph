@@ -481,6 +481,39 @@ public sealed class NodeCanvasPointerInteractionCoordinatorTests
         Assert.Equal(originalSnapshot.Size, restoredSnapshot.Size);
     }
 
+    [Fact]
+    public void HandlePointerCaptureLost_WhenActiveInteractionExists_ResetsSession()
+    {
+        var editor = CreateEditor();
+        var node = editor.Nodes[0];
+        var origin = new GraphPoint(node.X, node.Y);
+        var host = new TestPointerInteractionHost(editor);
+        host.InteractionSession.BeginNodeDrag(
+            node,
+            new Point(30, 40),
+            new NodeCanvasDragSession(
+                [node],
+                new Dictionary<string, GraphPoint>(StringComparer.Ordinal)
+                {
+                    [node.Id] = origin,
+                },
+                new NodeBounds(node.X, node.Y, node.Width, node.Height)));
+        var coordinator = new NodeCanvasPointerInteractionCoordinator(host);
+
+        var reset = coordinator.HandlePointerCaptureLost();
+
+        Assert.True(reset);
+        Assert.Null(host.InteractionSession.DragNode);
+        Assert.False(host.InteractionSession.IsPanning);
+        Assert.Null(host.InteractionSession.SelectionStartScreenPosition);
+        Assert.Null(host.InteractionSession.DragStartScreenPosition);
+        Assert.True(host.InteractionSession.DragSession is null);
+        Assert.Equal(1, host.HideGuideAdornerCalls);
+        Assert.Equal(1, host.ClearResizeFeedbackCalls);
+
+        Assert.False(coordinator.HandlePointerCaptureLost());
+    }
+
     private static GraphEditorViewModel CreateEditor()
     {
         var catalog = new NodeCatalog();

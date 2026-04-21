@@ -261,32 +261,9 @@ public partial class GraphInspectorView : UserControl
 
     private void UpdateInspectorEditingFocus(IInputElement? focusSource = null)
         => Editor?.SetInspectorEditingParameter(
-            ResolveFocusedParameterKey(
+            GraphPresentationSemantics.ResolveInspectorEditingParameterKey(
                 TopLevel.GetTopLevel(this)?.FocusManager?.GetFocusedElement()
                 ?? focusSource));
-
-    private static string? ResolveFocusedParameterKey(IInputElement? focusedElement)
-    {
-        AvaloniaObject? current = focusedElement as AvaloniaObject;
-        while (current is not null)
-        {
-            if (current is Border border
-                && border.Classes.Contains("astergraph-parameter-card")
-                && border.Tag is string parameterKey)
-            {
-                return parameterKey;
-            }
-
-            current = current switch
-            {
-                Visual visual => visual.GetVisualParent() as AvaloniaObject,
-                StyledElement styledElement => styledElement.Parent as AvaloniaObject,
-                _ => null,
-            };
-        }
-
-        return null;
-    }
 
     private void RefreshParameterSurface()
     {

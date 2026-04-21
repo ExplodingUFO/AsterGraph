@@ -211,15 +211,26 @@ public sealed class GraphInspectorStandaloneTests
                     .OfType<TextBlock>()
                     .Select(block => block.Text)
                     .Where(text => !string.IsNullOrWhiteSpace(text)));
+            var bridgeEditor = inspector.GetVisualDescendants()
+                .OfType<TextBox>()
+                .Single(textBox => Equals(textBox.Tag, "custom-inspector-bridge"));
             var applyButton = inspector.GetVisualDescendants()
                 .OfType<Button>()
                 .Single(button => Equals(button.Tag, "custom-inspector-apply"));
 
+            bridgeEditor.RaiseEvent(new GotFocusEventArgs
+            {
+                RoutedEvent = InputElement.GotFocusEvent,
+                Source = bridgeEditor,
+            });
             applyButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
 
             Assert.Same(editor, customPresenter.LastEditor);
             Assert.Same(customPresenter, inspector.InspectorPresenter);
             Assert.Contains("CUSTOM INSPECTOR:Inspector Node", allText);
+            Assert.Equal(editor.SelectedNode!.Id, editor.InteractionFocus.InspectedNodeId);
+            Assert.Equal(editor.SelectedNode!.Id, editor.InteractionFocus.EditingNodeId);
+            Assert.Equal("threshold", editor.InteractionFocus.EditingParameterKey);
             Assert.Equal("0.90", editor.SelectedNodeParameters[0].StringValue);
         }
         finally
@@ -575,6 +586,13 @@ public sealed class GraphInspectorStandaloneTests
         {
             LastEditor = editor;
 
+            var bridgeEditor = new TextBox
+            {
+                Tag = "custom-inspector-bridge",
+                Text = "Bridge Focus Field",
+            };
+            GraphPresentationSemantics.SetInspectorEditingParameterKey(bridgeEditor, "threshold");
+
             var applyButton = new Button
             {
                 Tag = "custom-inspector-apply",
@@ -597,6 +615,7 @@ public sealed class GraphInspectorStandaloneTests
                     {
                         Text = $"CUSTOM INSPECTOR:{editor?.InspectorTitle}",
                     },
+                    bridgeEditor,
                     applyButton,
                 },
             };

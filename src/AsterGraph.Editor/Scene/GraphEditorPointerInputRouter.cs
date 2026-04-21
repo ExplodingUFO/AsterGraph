@@ -43,17 +43,17 @@ public static class GraphEditorPointerInputRouter
             return GraphEditorPointerPressRoute.Ignore;
         }
 
+        if (!context.IsLeftButtonPressed && !context.IsMiddleButtonPressed)
+        {
+            return GraphEditorPointerPressRoute.Ignore;
+        }
+
         if (context.IsMiddleButtonPressed
             || (context.EnableAltLeftDragPanning
                 && context.IsLeftButtonPressed
                 && context.Modifiers.HasFlag(GraphEditorInputModifiers.Alt)))
         {
             return new GraphEditorPointerPressRoute(GraphEditorPointerPressRouteKind.BeginPanning, CancelPendingConnection: false);
-        }
-
-        if (!context.IsLeftButtonPressed)
-        {
-            return GraphEditorPointerPressRoute.Ignore;
         }
 
         return new GraphEditorPointerPressRoute(

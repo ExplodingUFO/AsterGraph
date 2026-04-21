@@ -3,6 +3,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.VisualTree;
+using AsterGraph.Avalonia.Controls;
 using AsterGraph.Avalonia.Hosting;
 using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.ViewModels;
@@ -189,7 +190,7 @@ internal static class GraphEditorDefaultCommandShortcutRouter
     {
         for (var current = source as Visual; current is not null; current = current.GetVisualParent())
         {
-            if (current is TextBox or ComboBox)
+            if (current is TextBox or ComboBox or IGraphEditorInputScope)
             {
                 return true;
             }
