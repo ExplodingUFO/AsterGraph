@@ -1176,6 +1176,20 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
             })
             .ToList();
 
+    public GraphEditorHierarchyStateSnapshot GetHierarchyStateSnapshot()
+    {
+        var activeScope = GetActiveGraphScope();
+        var navigation = GetScopeNavigationSnapshot();
+        var parent = TryGetParentScopeNavigation(_activeGraphId);
+        return GraphEditorHierarchyStateProjector.Create(
+            navigation,
+            parent?.ParentCompositeNodeId,
+            GetCompositeNodeSnapshots(),
+            GetNodeGroupSnapshots(),
+            activeScope.Nodes,
+            _behaviorOptions.Commands.Nodes.AllowMove);
+    }
+
     private static GraphSize NormalizeNodeSurfaceSize(
         GraphNode node,
         AsterGraph.Abstractions.Definitions.INodeDefinition? definition,

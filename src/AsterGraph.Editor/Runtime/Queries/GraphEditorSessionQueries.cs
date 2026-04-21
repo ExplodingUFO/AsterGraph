@@ -65,6 +65,7 @@ public sealed partial class GraphEditorSession
                 new GraphEditorFeatureDescriptorSnapshot("query.scene-snapshot", "query", true),
                 new GraphEditorFeatureDescriptorSnapshot("query.node-surface-snapshots", "query", true),
                 new GraphEditorFeatureDescriptorSnapshot("query.connection-geometry-snapshots", "query", true),
+                new GraphEditorFeatureDescriptorSnapshot("query.hierarchy-state-snapshot", "query", true),
                 new GraphEditorFeatureDescriptorSnapshot("query.node-groups", "query", true),
                 new GraphEditorFeatureDescriptorSnapshot("query.node-group-snapshots", "query", true),
                 new GraphEditorFeatureDescriptorSnapshot("capability.connections.create", "capability", capabilities.CanCreateConnections),
@@ -180,6 +181,9 @@ public sealed partial class GraphEditorSession
 
     public IReadOnlyList<GraphEditorNodeSurfaceSnapshot> GetNodeSurfaceSnapshots()
         => _host.GetNodeSurfaceSnapshots();
+
+    public GraphEditorHierarchyStateSnapshot GetHierarchyStateSnapshot()
+        => _host.GetHierarchyStateSnapshot();
 
     public IReadOnlyList<GraphEditorCompositeNodeSnapshot> GetCompositeNodeSnapshots()
         => _host.GetCompositeNodeSnapshots();

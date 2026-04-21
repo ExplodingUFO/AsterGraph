@@ -209,6 +209,8 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
 
     public IReadOnlyList<GraphEditorNodeSurfaceSnapshot> GetNodeSurfaceSnapshots() => _kernel.GetNodeSurfaceSnapshots();
 
+    public GraphEditorHierarchyStateSnapshot GetHierarchyStateSnapshot() => _kernel.GetHierarchyStateSnapshot();
+
     public IReadOnlyList<GraphEditorCompositeNodeSnapshot> GetCompositeNodeSnapshots() => _kernel.GetCompositeNodeSnapshots();
 
     public GraphEditorScopeNavigationSnapshot GetScopeNavigationSnapshot() => _kernel.GetScopeNavigationSnapshot();

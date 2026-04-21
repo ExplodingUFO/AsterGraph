@@ -742,6 +742,7 @@ public sealed class GraphEditorSessionTests
         Assert.True(descriptors["service.fragment-workspace"].IsAvailable);
         Assert.True(descriptors["service.fragment-library"].IsAvailable);
         Assert.True(descriptors["service.clipboard-payload-serializer"].IsAvailable);
+        Assert.True(descriptors["query.hierarchy-state-snapshot"].IsAvailable);
         Assert.True(descriptors["query.compatible-port-target-snapshot"].IsAvailable);
         Assert.True(descriptors["query.compatible-target-mvvm-shim"].IsAvailable);
         Assert.True(descriptors["query.stencil-item-snapshots"].IsAvailable);
