@@ -16,7 +16,7 @@ public sealed class NodeTemplateViewModel
     public NodeTemplateViewModel(INodeDefinition definition)
     {
         Definition = definition;
-        var snapshot = GraphEditorStencilItemSnapshot.Create(definition);
+        var snapshot = GraphEditorNodeTemplateSnapshot.Create(definition);
         Key = snapshot.Key;
         Title = snapshot.Title;
         Category = snapshot.Category;

@@ -7,9 +7,9 @@ using AsterGraph.Editor.ViewModels;
 namespace AsterGraph.Editor.Runtime;
 
 /// <summary>
-/// Stable host-facing snapshot of one insertable stencil item projected from the active node catalog.
+/// Stable host-facing snapshot of one insertable node template projected from the active node catalog.
 /// </summary>
-public sealed record GraphEditorStencilItemSnapshot(
+public sealed record GraphEditorNodeTemplateSnapshot(
     NodeDefinitionId DefinitionId,
     string Key,
     string Title,
@@ -27,9 +27,9 @@ public sealed record GraphEditorStencilItemSnapshot(
     public string PortSummary => $"{InputCount} in  ·  {OutputCount} out";
 
     /// <summary>
-    /// Projects one node definition into a canonical stencil item snapshot.
+    /// Projects one node definition into a canonical node template snapshot.
     /// </summary>
-    public static GraphEditorStencilItemSnapshot Create(INodeDefinition definition)
+    public static GraphEditorNodeTemplateSnapshot Create(INodeDefinition definition)
     {
         ArgumentNullException.ThrowIfNull(definition);
 
@@ -38,7 +38,7 @@ public sealed record GraphEditorStencilItemSnapshot(
             new GraphSize(definition.DefaultWidth, definition.DefaultHeight),
             GraphEditorNodeSurfaceMeasurer.Measure(contentPlan));
 
-        return new GraphEditorStencilItemSnapshot(
+        return new GraphEditorNodeTemplateSnapshot(
             definition.Id,
             definition.Id.Value.Replace(".", "-", StringComparison.Ordinal),
             definition.DisplayName,

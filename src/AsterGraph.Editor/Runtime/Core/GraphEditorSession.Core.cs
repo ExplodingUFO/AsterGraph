@@ -43,7 +43,7 @@ public sealed partial class GraphEditorSession :
             _host.CreateActiveScopeDocumentSnapshot,
             _host.GetScopeNavigationSnapshot,
             _host.GetSelectionSnapshot,
-            _host.GetCompatibleConnectionTargets,
+            _host.GetEdgeTemplateSnapshots,
             Localize,
             () => _descriptorSupport?.Definitions ?? Array.Empty<global::AsterGraph.Abstractions.Definitions.INodeDefinition>());
 

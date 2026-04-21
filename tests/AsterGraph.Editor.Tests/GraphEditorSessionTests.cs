@@ -293,10 +293,10 @@ public sealed class GraphEditorSessionTests
 
         AssertMethod(queriesType, nameof(IGraphEditorQueries.GetRegisteredNodeDefinitions));
         Assert.Equal(typeof(IReadOnlyList<INodeDefinition>), queriesType.GetMethod(nameof(IGraphEditorQueries.GetRegisteredNodeDefinitions))!.ReturnType);
-        AssertMethod(queriesType, nameof(IGraphEditorQueries.GetStencilItemSnapshots));
+        AssertMethod(queriesType, nameof(IGraphEditorQueries.GetNodeTemplateSnapshots));
         Assert.Equal(
-            typeof(IReadOnlyList<GraphEditorStencilItemSnapshot>),
-            queriesType.GetMethod(nameof(IGraphEditorQueries.GetStencilItemSnapshots))!.ReturnType);
+            typeof(IReadOnlyList<GraphEditorNodeTemplateSnapshot>),
+            queriesType.GetMethod(nameof(IGraphEditorQueries.GetNodeTemplateSnapshots))!.ReturnType);
 
         AssertMethod(queriesType, nameof(IGraphEditorQueries.GetSharedSelectionDefinition));
         Assert.Equal(typeof(INodeDefinition), queriesType.GetMethod(nameof(IGraphEditorQueries.GetSharedSelectionDefinition))!.ReturnType);
@@ -333,10 +333,10 @@ public sealed class GraphEditorSessionTests
         AssertMethod(queriesType, nameof(IGraphEditorQueries.GetPendingConnectionSnapshot));
         Assert.Equal(typeof(GraphEditorPendingConnectionSnapshot), queriesType.GetMethod(nameof(IGraphEditorQueries.GetPendingConnectionSnapshot))!.ReturnType);
 
-        AssertMethod(queriesType, nameof(IGraphEditorQueries.GetCompatibleConnectionTargets), typeof(string), typeof(string));
+        AssertMethod(queriesType, nameof(IGraphEditorQueries.GetEdgeTemplateSnapshots), typeof(string), typeof(string));
         Assert.Equal(
-            typeof(IReadOnlyList<GraphEditorCompatibleConnectionTargetSnapshot>),
-            queriesType.GetMethod(nameof(IGraphEditorQueries.GetCompatibleConnectionTargets))!.ReturnType);
+            typeof(IReadOnlyList<GraphEditorEdgeTemplateSnapshot>),
+            queriesType.GetMethod(nameof(IGraphEditorQueries.GetEdgeTemplateSnapshots))!.ReturnType);
 
         AssertMethod(queriesType, nameof(IGraphEditorQueries.GetCompatiblePortTargets), typeof(string), typeof(string));
         Assert.Equal(
@@ -382,9 +382,9 @@ public sealed class GraphEditorSessionTests
     }
 
     [Fact]
-    public void GraphEditorCompatibleConnectionTargetSnapshot_IsRuntimeSafeAndMvvmFree()
+    public void GraphEditorEdgeTemplateSnapshot_IsRuntimeSafeAndMvvmFree()
     {
-        var snapshotType = typeof(GraphEditorCompatibleConnectionTargetSnapshot);
+        var snapshotType = typeof(GraphEditorEdgeTemplateSnapshot);
 
         Assert.True(snapshotType.IsPublic);
         Assert.DoesNotContain(
@@ -397,7 +397,7 @@ public sealed class GraphEditorSessionTests
     {
         var hostType = typeof(IGraphEditorSessionHost);
 
-        Assert.NotNull(hostType.GetMethod(nameof(IGraphEditorSessionHost.GetCompatibleConnectionTargets), [typeof(string), typeof(string)]));
+        Assert.NotNull(hostType.GetMethod(nameof(IGraphEditorSessionHost.GetEdgeTemplateSnapshots), [typeof(string), typeof(string)]));
         Assert.NotNull(hostType.GetMethod(nameof(IGraphEditorSessionHost.GetCompatiblePortTargets), [typeof(string), typeof(string)]));
         Assert.Null(hostType.GetMethod(nameof(IGraphEditorQueries.GetCompatibleTargets), [typeof(string), typeof(string)]));
     }
@@ -410,7 +410,7 @@ public sealed class GraphEditorSessionTests
 
         Assert.NotNull(compatibilityQueryType);
         Assert.NotNull(compatibilityQueryType!.GetMethod("GetCompatibleTargetStates"));
-        Assert.NotNull(compatibilityQueryType.GetMethod(nameof(IGraphEditorQueries.GetCompatibleConnectionTargets), [typeof(GraphDocument), typeof(string), typeof(string)]));
+        Assert.NotNull(compatibilityQueryType.GetMethod(nameof(IGraphEditorQueries.GetEdgeTemplateSnapshots), [typeof(GraphDocument), typeof(string), typeof(string)]));
         Assert.NotNull(compatibilityQueryType.GetMethod(nameof(IGraphEditorQueries.GetCompatiblePortTargets), [typeof(GraphDocument), typeof(string), typeof(string)]));
         Assert.Null(compatibilityQueryType.GetMethod(nameof(IGraphEditorQueries.GetCompatibleTargets), [typeof(GraphDocument), typeof(string), typeof(string)]));
     }
@@ -484,24 +484,28 @@ public sealed class GraphEditorSessionTests
     }
 
     [Fact]
-    public void GraphEditorSession_GetCompatibleConnectionTargets_IncludeParameterEndpoints()
+    public void GraphEditorSession_GetEdgeTemplateSnapshots_IncludeParameterEndpointsAndCreationDefaults()
     {
         var session = AsterGraphEditorFactory.CreateSession(CreateParameterEndpointOptions());
 
-        var compatibleTargets = session.Queries.GetCompatibleConnectionTargets(SourceNodeId, SourcePortId);
-        var parameterTarget = Assert.Single(compatibleTargets, target =>
+        var edgeTemplates = session.Queries.GetEdgeTemplateSnapshots(SourceNodeId, SourcePortId);
+        var parameterTarget = Assert.Single(edgeTemplates, target =>
             target.TargetKind == GraphConnectionTargetKind.Parameter
-            && target.NodeId == TargetNodeId
-            && target.TargetId == TargetParameterKey);
-        var portTarget = Assert.Single(compatibleTargets, target =>
+            && target.Target.NodeId == TargetNodeId
+            && target.Target.TargetId == TargetParameterKey);
+        var portTarget = Assert.Single(edgeTemplates, target =>
             target.TargetKind == GraphConnectionTargetKind.Port
-            && target.NodeId == TargetNodeId
-            && target.TargetId == TargetPortId);
+            && target.Target.NodeId == TargetNodeId
+            && target.Target.TargetId == TargetPortId);
 
+        Assert.Equal("Target Node", parameterTarget.TargetNodeTitle);
         Assert.Equal("Gain", parameterTarget.TargetLabel);
+        Assert.Equal(new PortTypeId("float"), parameterTarget.SourceTypeId);
         Assert.Equal(new PortTypeId("float"), parameterTarget.TargetTypeId);
-        Assert.Equal("#F3B36B", parameterTarget.TargetAccentHex);
+        Assert.Equal("#6AD5C4", parameterTarget.AccentHex);
+        Assert.Equal("Output to Gain", parameterTarget.DefaultLabel);
         Assert.Equal("Input", portTarget.TargetLabel);
+        Assert.Equal("Output to Input", portTarget.DefaultLabel);
     }
 
     [Fact]
@@ -753,7 +757,8 @@ public sealed class GraphEditorSessionTests
         Assert.True(descriptors["query.hierarchy-state-snapshot"].IsAvailable);
         Assert.True(descriptors["query.compatible-port-target-snapshot"].IsAvailable);
         Assert.True(descriptors["query.compatible-target-mvvm-shim"].IsAvailable);
-        Assert.True(descriptors["query.stencil-item-snapshots"].IsAvailable);
+        Assert.True(descriptors["query.node-template-snapshots"].IsAvailable);
+        Assert.True(descriptors["query.edge-template-snapshots"].IsAvailable);
         Assert.True(descriptors["capability.connections.pending"].IsAvailable);
         Assert.True(descriptors["capability.connections.complete"].IsAvailable);
         Assert.True(descriptors["capability.connections.disconnect"].IsAvailable);

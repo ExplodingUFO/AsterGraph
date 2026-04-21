@@ -504,7 +504,7 @@ public partial class GraphEditorView : UserControl
 
         var addNodeDescriptor = Editor.Session.Queries.GetCommandDescriptors()
             .FirstOrDefault(descriptor => string.Equals(descriptor.Id, "nodes.add", StringComparison.Ordinal));
-        foreach (var stencilItem in Editor.Session.Queries.GetStencilItemSnapshots())
+        foreach (var stencilItem in Editor.Session.Queries.GetNodeTemplateSnapshots())
         {
             _stencilCardList.Children.Add(CreateStencilCard(stencilItem, addNodeDescriptor));
         }
@@ -806,7 +806,7 @@ public partial class GraphEditorView : UserControl
         };
 
     private Button CreateStencilCard(
-        GraphEditorStencilItemSnapshot stencilItem,
+        GraphEditorNodeTemplateSnapshot stencilItem,
         GraphEditorCommandDescriptorSnapshot? addNodeDescriptor)
     {
         var button = new Button

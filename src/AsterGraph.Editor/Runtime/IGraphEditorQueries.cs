@@ -72,10 +72,10 @@ public interface IGraphEditorQueries
         => throw new NotSupportedException();
 
     /// <summary>
-    /// Gets canonical stencil item snapshots projected from the active node catalog.
+    /// Gets canonical node template snapshots projected from the active node catalog.
     /// </summary>
-    /// <returns>Stable read-only stencil item metadata suitable for host-side insertion UIs.</returns>
-    IReadOnlyList<GraphEditorStencilItemSnapshot> GetStencilItemSnapshots()
+    /// <returns>Stable read-only template metadata suitable for host-side insertion UIs.</returns>
+    IReadOnlyList<GraphEditorNodeTemplateSnapshot> GetNodeTemplateSnapshots()
         => throw new NotSupportedException();
 
     /// <summary>
@@ -177,12 +177,12 @@ public interface IGraphEditorQueries
         => throw new NotSupportedException();
 
     /// <summary>
-    /// Gets typed compatible connection targets for the specified source output port.
+    /// Gets canonical edge template snapshots for the specified source output port.
     /// </summary>
     /// <param name="sourceNodeId">Source node instance identifier.</param>
     /// <param name="sourcePortId">Source output port identifier.</param>
-    /// <returns>Compatible target endpoint snapshots.</returns>
-    IReadOnlyList<GraphEditorCompatibleConnectionTargetSnapshot> GetCompatibleConnectionTargets(string sourceNodeId, string sourcePortId)
+    /// <returns>Stable edge-template snapshots suitable for host-side edge-authoring UIs.</returns>
+    IReadOnlyList<GraphEditorEdgeTemplateSnapshot> GetEdgeTemplateSnapshots(string sourceNodeId, string sourcePortId)
         => throw new NotSupportedException();
 
     /// <summary>
