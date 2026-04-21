@@ -269,7 +269,7 @@ public static class HostedHelloWorldProof
         var pluginScanMs = MeasureMilliseconds(() => AsterGraphEditorFactory.DiscoverPluginCandidates(new GraphEditorPluginDiscoveryOptions()).ToArray());
 
         var nodeCountBeforeUndo = session.Queries.CreateDocumentSnapshot().Nodes.Count;
-        session.Commands.AddNode(editor.NodeTemplates[0].Definition.Id, new GraphPoint(720, 220));
+        session.Commands.AddNode(editor.NodeTemplates[0].DefinitionId, new GraphPoint(720, 220));
         var undoAction = AsterGraphHostedActionFactory.CreateCommandActions(session, ["history.undo"])
             .Single(action => string.Equals(action.Id, "history.undo", StringComparison.Ordinal));
         var commandLatencyMs = MeasureMilliseconds(() => undoAction.TryExecute());

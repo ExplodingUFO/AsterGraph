@@ -177,7 +177,7 @@ public sealed partial class GraphEditorViewModel
     /// </summary>
     /// <param name="template">节点模板。</param>
     /// <param name="preferredWorldPosition">可选的首选世界坐标。</param>
-    public void AddNode(NodeTemplateViewModel template, GraphPoint? preferredWorldPosition = null)
+    public void AddNode(GraphEditorNodeTemplateSnapshot template, GraphPoint? preferredWorldPosition = null)
     {
         if (!CommandPermissions.Nodes.AllowCreate)
         {
@@ -185,7 +185,7 @@ public sealed partial class GraphEditorViewModel
             return;
         }
 
-        _kernel.AddNode(template.Definition.Id, preferredWorldPosition);
+        _kernel.AddNode(template.DefinitionId, preferredWorldPosition);
     }
 
     /// <summary>

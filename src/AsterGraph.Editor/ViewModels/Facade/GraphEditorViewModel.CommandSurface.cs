@@ -6,6 +6,7 @@ using AsterGraph.Editor.Hosting;
 using AsterGraph.Editor.Localization;
 using AsterGraph.Editor.Menus;
 using AsterGraph.Editor.Presentation;
+using AsterGraph.Editor.Runtime;
 
 namespace AsterGraph.Editor.ViewModels;
 
@@ -215,9 +216,9 @@ public sealed partial class GraphEditorViewModel
     /// <summary>
     /// 获取基于给定模板创建节点的命令。
     /// </summary>
-    public IRelayCommand<NodeTemplateViewModel> AddNodeCommand { get; }
+    public IRelayCommand<GraphEditorNodeTemplateSnapshot> AddNodeCommand { get; }
 
-    IEnumerable<NodeTemplateViewModel> IGraphContextMenuHost.NodeTemplates => NodeTemplates;
+    IEnumerable<GraphEditorNodeTemplateSnapshot> IGraphContextMenuHost.NodeTemplates => NodeTemplates;
 
     IEnumerable<NodeViewModel> IGraphContextMenuHost.Nodes => Nodes;
 
@@ -262,4 +263,7 @@ public sealed partial class GraphEditorViewModel
     ICommand IGraphContextMenuHost.DistributeVerticallyCommand => DistributeVerticallyCommand;
 
     ICommand IGraphContextMenuHost.CancelPendingConnectionCommand => CancelPendingConnectionCommand;
+
+    IReadOnlyList<GraphEditorEdgeTemplateSnapshot> IGraphContextMenuHost.GetEdgeTemplateSnapshots(string sourceNodeId, string sourcePortId)
+        => Session.Queries.GetEdgeTemplateSnapshots(sourceNodeId, sourcePortId);
 }

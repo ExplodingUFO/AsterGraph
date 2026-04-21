@@ -260,7 +260,7 @@ public sealed class DemoHostMenuControlTests
         window.Show();
 
         var initialNodeCount = viewModel.Editor.Nodes.Count;
-        viewModel.Session.Commands.AddNode(viewModel.Editor.NodeTemplates[0].Definition.Id, new GraphPoint(760, 320));
+        viewModel.Session.Commands.AddNode(viewModel.Editor.NodeTemplates[0].DefinitionId, new GraphPoint(760, 320));
 
         var undoButton = window.GetVisualDescendants()
             .OfType<Button>()

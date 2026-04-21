@@ -1,6 +1,7 @@
 using System.Windows.Input;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Configuration;
+using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.ViewModels;
 
 namespace AsterGraph.Editor.Menus;
@@ -10,7 +11,7 @@ namespace AsterGraph.Editor.Menus;
 /// </summary>
 internal interface IGraphContextMenuHost
 {
-    IEnumerable<NodeTemplateViewModel> NodeTemplates { get; }
+    IEnumerable<GraphEditorNodeTemplateSnapshot> NodeTemplates { get; }
 
     IEnumerable<NodeViewModel> Nodes { get; }
 
@@ -58,7 +59,7 @@ internal interface IGraphContextMenuHost
 
     ICommand CancelPendingConnectionCommand { get; }
 
-    void AddNode(NodeTemplateViewModel template, GraphPoint? preferredWorldPosition = null);
+    void AddNode(GraphEditorNodeTemplateSnapshot template, GraphPoint? preferredWorldPosition = null);
 
     void SelectNode(NodeViewModel? node);
 
@@ -84,11 +85,11 @@ internal interface IGraphContextMenuHost
 
     void ConnectPorts(string sourceNodeId, string sourcePortId, string targetNodeId, string targetPortId);
 
+    void ConnectToTarget(string sourceNodeId, string sourcePortId, GraphConnectionTargetRef target);
+
     NodeViewModel? FindNode(string nodeId);
 
     ConnectionViewModel? FindConnection(string connectionId);
 
-#pragma warning disable CS0618
-    IReadOnlyList<CompatiblePortTarget> GetCompatibleTargets(string sourceNodeId, string sourcePortId);
-#pragma warning restore CS0618
+    IReadOnlyList<GraphEditorEdgeTemplateSnapshot> GetEdgeTemplateSnapshots(string sourceNodeId, string sourcePortId);
 }
