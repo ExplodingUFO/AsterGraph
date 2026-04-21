@@ -256,8 +256,10 @@ jobs:
               'FIXED_GROUP_FRAME_OK',
               'NON_OBSCURING_EDITING_OK',
               'VISUAL_SEMANTICS_OK',
+              'HIERARCHY_SEMANTICS_OK',
               'COMPOSITE_SCOPE_OK',
               'EDGE_NOTE_OK',
+              'EDGE_GEOMETRY_OK',
               'DISCONNECT_FLOW_OK'
             )) {
               $markerLine = Select-String -Path 'artifacts/proof/demo-proof.txt' -Pattern $markerId | Select-Object -First 1

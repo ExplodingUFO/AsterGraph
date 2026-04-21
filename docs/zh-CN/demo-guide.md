@@ -54,8 +54,10 @@ dotnet run --project src/AsterGraph.Demo/AsterGraph.Demo.csproj --nologo -- --pr
 - `FIXED_GROUP_FRAME_OK:True`
 - `NON_OBSCURING_EDITING_OK:True`
 - `VISUAL_SEMANTICS_OK:True`
+- `HIERARCHY_SEMANTICS_OK:True`
 - `COMPOSITE_SCOPE_OK:True`
 - `EDGE_NOTE_OK:True`
+- `EDGE_GEOMETRY_OK:True`
 - `DISCONNECT_FLOW_OK:True`
 - `HOST_NATIVE_METRIC:startup_ms=...`
 - `HOST_NATIVE_METRIC:inspector_projection_ms=...`
@@ -69,8 +71,8 @@ dotnet run --project src/AsterGraph.Demo/AsterGraph.Demo.csproj --nologo -- --pr
 - `自动化`：看 typed automation execution 与结果投影
 - `集成`：看 `HostSample`、standalone surfaces、presenter replacement、本地化证明
 - `运行时` 和 `证明`：一起看 host-owned shell state、recent workspace、autosave 提示、threshold-driven side rails 和 shared runtime evidence
-- `证明`：还会直接给出 `NON_OBSCURING_EDITING_OK` 与 `VISUAL_SEMANTICS_OK`，用于确认参数编辑不会遮挡主流程、图面语义也已经收口
-- `视图` 和 `证明`：同时验证 `COMPOSITE_SCOPE_OK`（复合图层导航）、`EDGE_NOTE_OK`（边注解展示编辑）、`DISCONNECT_FLOW_OK`（断开连接后的恢复语义）
+- `证明`：会把 advanced-editing split 映射到正式 surface：`Node Surface Authoring`（`TIERED_NODE_SURFACE_OK`、`NON_OBSCURING_EDITING_OK`、`VISUAL_SEMANTICS_OK`）、`Hierarchy Semantics`（`FIXED_GROUP_FRAME_OK`、`HIERARCHY_SEMANTICS_OK`）、`Composite Scope Authoring`（`COMPOSITE_SCOPE_OK`）、`Edge Semantics`（`EDGE_NOTE_OK`、`DISCONNECT_FLOW_OK`）和 `Edge Geometry Tooling`（`EDGE_GEOMETRY_OK`）。
+- `视图` 和 `证明`：一起把 hierarchy、composite scope、edge semantics 和 edge geometry 维持在可见产品面上，而不是退回 retained-only 解释或第二套编辑模型。
 
 ## Demo 与其他入口样例的分工
 

@@ -20,6 +20,7 @@
 - one medium hosted-UI consumer sample between HelloWorld and Demo
 - packed `HostSample` compatibility proof under `.NET 10` inside the release lane
 - shipped definition-driven inspector metadata plus stock text/number/boolean/enum/list editors
+- tiered node surfaces, hierarchy snapshots, composite scope navigation, edge notes, and routed edge geometry tooling
 
 ## Explicitly Not Included
 
@@ -43,7 +44,8 @@
 - public prerelease publishing and release artifacts still depend on the maintainer release flow
 - the deepest package-validation lane and the `.NET 10` packed-consumer proof still run on the Windows release-validation path
 - retained compatibility APIs are still present during the migration window
-- the next planned platform milestone is `v0.3.0-alpha`, which will freeze the scene/input/platform skeleton before broader capability expansion
+- the public alpha still has only one official UI adapter today: Avalonia
+- advanced editing is now published as host-facing capability modules, but broader ecosystem and adapter validation work remains ahead
 
 ## Recommended Entry Points
 
@@ -51,6 +53,7 @@
 - [Project Status](./project-status.md)
 - [Quick Start](./quick-start.md)
 - [ScaleSmoke Baseline](./scale-baseline.md)
+- [Advanced Editing Guide](./advanced-editing.md)
 - [Authoring Inspector Recipe](./authoring-inspector-recipe.md)
 - [Plugin And Custom Node Recipe](./plugin-recipe.md)
 - [Retained-To-Session Migration Recipe](./retained-migration-recipe.md)

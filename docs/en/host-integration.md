@@ -51,6 +51,11 @@ Treat the official capability modules as a host-facing map layered on top of the
 | `Fragment Library` | session fragment/template commands backed by fragment workspace/library services | hosted shells can replace storage without replacing the command surface | `AsterGraph.Demo` |
 | `Export` | `IGraphSceneSvgExportService` + `TryExportSceneAsSvg()` | export stays separate from workspace persistence and fragment storage | `AsterGraph.HostSample` |
 | `Baseline Edge Authoring` | connection start/complete/reconnect/disconnect commands + pending snapshot | pointer gestures are adapter behavior layered on top of the same session semantics | `AsterGraph.HostSample`, `AsterGraph.ScaleSmoke` |
+| `Node Surface Authoring` | `GetNodeSurfaceSnapshots()`, `TrySetNodeSize(...)`, and parameter edits through the shared session command path | Avalonia projects the same tier state into card thresholds, node-side parameter editors, and stock authoring chrome | `AsterGraph.Demo`, [Advanced Editing Guide](./advanced-editing.md) |
+| `Hierarchy Semantics` | `GetHierarchyStateSnapshot()`, `GetNodeGroups()`, `GetNodeGroupSnapshots()`, and group collapse/move/resize/membership commands | the stock canvas keeps frame chrome, content-area membership, and collapse affordances on top of the same hierarchy state | `AsterGraph.Demo`, [Advanced Editing Guide](./advanced-editing.md) |
+| `Composite Scope Authoring` | wrap/promote/expose/unexpose/scope-navigation commands plus scope/composite queries | breadcrumb chrome and host-owned workflow controls reuse the same session navigation state | `AsterGraph.Demo`, [Advanced Editing Guide](./advanced-editing.md) |
+| `Edge Semantics` | connection note, reconnect, and disconnect commands on the canonical session route | hosted pointer flows and menus stay projections of the same edge semantics | `AsterGraph.Demo`, [Advanced Editing Guide](./advanced-editing.md) |
+| `Edge Geometry Tooling` | `GetConnectionGeometrySnapshots()` plus route-vertex insert/move/remove commands | stock authoring tools project geometry editing without introducing a second edge model | `AsterGraph.Demo`, [Advanced Editing Guide](./advanced-editing.md) |
 
 ## State Contract
 
@@ -96,5 +101,6 @@ For deeper proof, CI lanes, and release gates, use [CONTRIBUTING.md](../../CONTR
 ## Recipes
 
 - [Plugin And Custom Node Recipe](./plugin-recipe.md)
+- [Advanced Editing Guide](./advanced-editing.md)
 - [Retained-To-Session Migration Recipe](./retained-migration-recipe.md)
 - [ScaleSmoke Baseline](./scale-baseline.md)

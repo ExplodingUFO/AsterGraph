@@ -34,9 +34,11 @@
   - `FIXED_GROUP_FRAME_OK:True`
   - `NON_OBSCURING_EDITING_OK:True`
   - `VISUAL_SEMANTICS_OK:True`
-- v1.21 语义图组合 proof marker：
+- v0.6.0-alpha advanced-editing 收口 marker：
+  - `HIERARCHY_SEMANTICS_OK:True`
   - `COMPOSITE_SCOPE_OK:True`
   - `EDGE_NOTE_OK:True`
+  - `EDGE_GEOMETRY_OK:True`
   - `DISCONNECT_FLOW_OK:True`
 - plugin discovery、trust policy、loading、inspection
 - `IGraphEditorSession.Automation`
@@ -45,16 +47,17 @@
 
 ## 当前优先事项
 
-当前对外仓库的重点不是继续加运行时功能，而是让仓库公开面保持干净、可理解、可贡献：
+当前对外仓库的重点，是把 public alpha 收口成一套连贯可评估的 SDK surface，而不是一堆分散功能：
 
 - 对外文档入口集中在 `README.md`、`README.zh-CN.md`、`docs/en`、`docs/zh-CN`
+- advanced editing 要继续被描述成 canonical capability modules，而不是 retained-only 行为
 - 源码、测试、sample、proof tool、workflow、governance 文件继续公开保留
 - 内部工作流痕迹和本地环境文件不再作为公开仓库跟踪内容
 
 ## 近期路线
 
-- `v0.3.0-alpha Platform Skeleton Freeze`：冻结 canonical runtime surface，并建立能脱离 Avalonia-owned 实现的 scene/input/platform seams
-- 保持公开 Alpha 文档和验证指引清晰可执行
+- 继续保持 canonical runtime/session surface 稳定，同时扩展 official capability modules 与 proof guidance
+- 在 advanced editing 收口时保持 public alpha 文档和验证指引清晰可执行
 - 继续维护托管 CI 与核心验证 lane 的一致性
 - 在不突然 breaking 的前提下继续保留兼容迁移窗口
 
@@ -74,6 +77,7 @@
 - [Quick Start](./quick-start.md)
 - [Consumer Sample](./consumer-sample.md)
 - [ScaleSmoke 基线](./scale-baseline.md)
+- [Advanced Editing Guide](./advanced-editing.md)
 - [Adoption Feedback Loop](./adoption-feedback.md)
 - [Plugin 与自定义节点 Recipe](./plugin-recipe.md)
 - [Retained 到 Session 的迁移 Recipe](./retained-migration-recipe.md)

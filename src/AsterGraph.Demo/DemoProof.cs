@@ -22,8 +22,10 @@ public sealed record DemoProofResult(
     bool FixedGroupFrameOk,
     bool NonObscuringEditingOk,
     bool VisualSemanticsOk,
+    bool HierarchySemanticsOk,
     bool CompositeScopeOk,
     bool EdgeNoteOk,
+    bool EdgeGeometryOk,
     bool DisconnectFlowOk,
     double StartupMs,
     double InspectorProjectionMs,
@@ -38,8 +40,10 @@ public sealed record DemoProofResult(
         && FixedGroupFrameOk
         && NonObscuringEditingOk
         && VisualSemanticsOk
+        && HierarchySemanticsOk
         && CompositeScopeOk
         && EdgeNoteOk
+        && EdgeGeometryOk
         && DisconnectFlowOk;
 
     public IReadOnlyList<string> ProofLines => DemoProofContract.CreateProofLines(this);
@@ -148,6 +152,7 @@ public static class DemoProof
             && terrainGroupAfterResize.Position == terrainGroupSnapshot.Position
             && terrainGroupAfterResize.Size == resizedGroupFrameSize
             && terrainGroupAfterResize.NodeIds.OrderBy(id => id, StringComparer.Ordinal).SequenceEqual(["gradient", "noise"]);
+        var hierarchySemanticsOk = RunHierarchySemanticsProof(shell.Editor, "terrain-authoring", ["gradient", "noise"]);
         var editableLightingParameter = shell.Session.Queries.GetSelectedNodeParameterSnapshots()
             .FirstOrDefault(snapshot => snapshot.CanEdit);
         if (editableLightingParameter is not null)
@@ -199,7 +204,7 @@ public static class DemoProof
             && shell.Editor.Nodes.Count == baselineNodeCount
             && shell.RecentWorkspacePaths.Any(path => string.Equals(path, workspacePath, StringComparison.OrdinalIgnoreCase))
             && shell.ShellWorkflowLines.Any(line => line.Contains("workspace", StringComparison.OrdinalIgnoreCase) || line.Contains("工作区", StringComparison.Ordinal));
-        var (compositeScopeOk, edgeNoteOk, disconnectFlowOk) = RunSemanticGraphProof(storageRoot);
+        var (compositeScopeOk, edgeNoteOk, edgeGeometryOk, disconnectFlowOk) = RunSemanticGraphProof(storageRoot);
 
         return new DemoProofResult(
             trustTransparencyOk,
@@ -209,8 +214,10 @@ public static class DemoProof
             fixedGroupFrameOk,
             nonObscuringEditingOk,
             visualSemanticsOk,
+            hierarchySemanticsOk,
             compositeScopeOk,
             edgeNoteOk,
+            edgeGeometryOk,
             disconnectFlowOk,
             startupMs,
             inspectorProjectionMs,
@@ -226,7 +233,62 @@ public static class DemoProof
         return stopwatch.Elapsed.TotalMilliseconds;
     }
 
-    private static (bool CompositeScopeOk, bool EdgeNoteOk, bool DisconnectFlowOk) RunSemanticGraphProof(string storageRoot)
+    private static bool RunHierarchySemanticsProof(
+        GraphEditorViewModel editor,
+        string groupId,
+        IReadOnlyList<string> memberNodeIds)
+    {
+        var initialHierarchy = editor.Session.Queries.GetHierarchyStateSnapshot();
+        var initialMembers = initialHierarchy.Nodes
+            .Where(snapshot => memberNodeIds.Contains(snapshot.NodeId, StringComparer.Ordinal))
+            .ToArray();
+        if (initialMembers.Length != memberNodeIds.Count
+            || initialMembers.Any(snapshot => !string.Equals(snapshot.ParentGroupId, groupId, StringComparison.Ordinal))
+            || initialMembers.Any(snapshot => snapshot.CollapsedByGroupId is not null)
+            || initialMembers.Any(snapshot => !snapshot.IsVisibleInActiveScope))
+        {
+            return false;
+        }
+
+        if (!editor.Session.Commands.TrySetNodeGroupCollapsed(groupId, isCollapsed: true))
+        {
+            return false;
+        }
+
+        var collapsedGroup = editor.Session.Queries.GetNodeGroups()
+            .SingleOrDefault(group => string.Equals(group.Id, groupId, StringComparison.Ordinal));
+        var collapsedHierarchy = editor.Session.Queries.GetHierarchyStateSnapshot();
+        var collapsedMembers = collapsedHierarchy.Nodes
+            .Where(snapshot => memberNodeIds.Contains(snapshot.NodeId, StringComparer.Ordinal))
+            .ToArray();
+        if (collapsedGroup is null
+            || !collapsedGroup.IsCollapsed
+            || collapsedMembers.Length != memberNodeIds.Count
+            || collapsedMembers.Any(snapshot => !string.Equals(snapshot.CollapsedByGroupId, groupId, StringComparison.Ordinal))
+            || collapsedMembers.Any(snapshot => snapshot.IsVisibleInActiveScope))
+        {
+            return false;
+        }
+
+        if (!editor.Session.Commands.TrySetNodeGroupCollapsed(groupId, isCollapsed: false))
+        {
+            return false;
+        }
+
+        var expandedGroup = editor.Session.Queries.GetNodeGroups()
+            .SingleOrDefault(group => string.Equals(group.Id, groupId, StringComparison.Ordinal));
+        var expandedHierarchy = editor.Session.Queries.GetHierarchyStateSnapshot();
+        var expandedMembers = expandedHierarchy.Nodes
+            .Where(snapshot => memberNodeIds.Contains(snapshot.NodeId, StringComparer.Ordinal))
+            .ToArray();
+        return expandedGroup is not null
+            && !expandedGroup.IsCollapsed
+            && expandedMembers.Length == memberNodeIds.Count
+            && expandedMembers.All(snapshot => snapshot.CollapsedByGroupId is null)
+            && expandedMembers.All(snapshot => snapshot.IsVisibleInActiveScope);
+    }
+
+    private static (bool CompositeScopeOk, bool EdgeNoteOk, bool EdgeGeometryOk, bool DisconnectFlowOk) RunSemanticGraphProof(string storageRoot)
     {
         var catalog = CreateProofCatalog();
         var compositeEditor = CreateProofEditor(
@@ -239,8 +301,8 @@ public static class DemoProof
             Path.Combine(storageRoot, "semantic-edge"));
 
         var compositeScopeOk = RunCompositeScopeProof(compositeEditor);
-        var (edgeNoteOk, disconnectFlowOk) = RunEdgeSemanticsProof(edgeEditor);
-        return (compositeScopeOk, edgeNoteOk, disconnectFlowOk);
+        var (edgeNoteOk, edgeGeometryOk, disconnectFlowOk) = RunEdgeSemanticsProof(edgeEditor);
+        return (compositeScopeOk, edgeNoteOk, edgeGeometryOk, disconnectFlowOk);
     }
 
     private static bool RunCompositeScopeProof(GraphEditorViewModel editor)
@@ -338,21 +400,21 @@ public static class DemoProof
             && rootNodeIds.SequenceEqual([compositeNodeId], StringComparer.Ordinal);
     }
 
-    private static (bool EdgeNoteOk, bool DisconnectFlowOk) RunEdgeSemanticsProof(GraphEditorViewModel editor)
+    private static (bool EdgeNoteOk, bool EdgeGeometryOk, bool DisconnectFlowOk) RunEdgeSemanticsProof(GraphEditorViewModel editor)
     {
         const string reconnectSourceNodeId = "time";
         const string reconnectSourcePortId = "pulse";
         var lightNode = editor.FindNode("light");
         if (lightNode is null)
         {
-            return (false, false);
+            return (false, false, false);
         }
 
         var pulsePort = lightNode.Inputs.SingleOrDefault(port => string.Equals(port.Id, "pulse", StringComparison.Ordinal));
         var connection = editor.CreateDocumentSnapshot().Connections.SingleOrDefault();
         if (pulsePort is null || connection is null)
         {
-            return (false, false);
+            return (false, false, false);
         }
 
         editor.SelectSingleNode(lightNode, updateStatus: false);
@@ -369,6 +431,21 @@ public static class DemoProof
                 editor.CreateDocumentSnapshot().Connections.Single().Presentation?.NoteText,
                 "Preview branch",
                 StringComparison.Ordinal);
+        var insertedRoutePoint = new GraphPoint(276, 112);
+        var movedRoutePoint = new GraphPoint(318, 204);
+        var edgeGeometryOk =
+            editor.Session.Commands.TryInsertConnectionRouteVertex(connection.Id, 0, insertedRoutePoint, updateStatus: false)
+            && editor.Session.Commands.TryMoveConnectionRouteVertex(connection.Id, 0, movedRoutePoint, updateStatus: false);
+        var routedConnection = editor.CreateDocumentSnapshot().Connections.Single();
+        var routedGeometry = editor.Session.Queries.GetConnectionGeometrySnapshots().SingleOrDefault();
+        edgeGeometryOk =
+            edgeGeometryOk
+            && routedConnection.Presentation?.Route is { Vertices.Count: 1 } route
+            && route.Vertices[0] == movedRoutePoint
+            && string.Equals(routedConnection.Presentation.NoteText, "Preview branch", StringComparison.Ordinal)
+            && routedGeometry is not null
+            && string.Equals(routedGeometry.ConnectionId, connection.Id, StringComparison.Ordinal)
+            && routedGeometry.Route.Vertices.SequenceEqual([movedRoutePoint]);
 
         var disconnectFlowOk =
             editor.Session.Commands.TryExecuteCommand(
@@ -391,7 +468,7 @@ public static class DemoProof
             && updatedPulsePort is not null
             && !editor.HasIncomingConnection(updatedLightNode, updatedPulsePort);
 
-        return (edgeNoteOk, disconnectFlowOk);
+        return (edgeNoteOk, edgeGeometryOk, disconnectFlowOk);
     }
 
     private static NodeCatalog CreateProofCatalog()

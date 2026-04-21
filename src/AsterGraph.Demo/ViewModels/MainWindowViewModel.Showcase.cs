@@ -333,17 +333,17 @@ public partial class MainWindowViewModel
                 T("语义图组合", "Semantic Graph Composition"),
                 T("把组提升为复合节点、公开边界端点、作用域导航、边注释和单边断开收敛到同一条语义图编辑路径。", "Unify composite promotion, public boundary ports, scoped navigation, edge notes, and single-edge disconnect through one semantic graph editing path."),
                 T(
-                    "这条路径继续由 Session 命令和查询驱动：group promotion 生成 child scope，boundary port 暴露内部端口，edge note 保持纯展示语义，而 canonical reconnect 会断开当前边并立即回到待完成连线状态。",
-                    "This path stays on top of Session commands and queries: group promotion creates a child scope, boundary ports expose inner ports, edge notes stay display-only, and canonical reconnect removes the current edge then immediately returns authoring to a pending connection state."),
+                    "这条路径继续由 Session 命令和查询驱动：group promotion 生成 child scope，boundary port 暴露内部端口，edge note 保持纯展示语义，route vertex 继续落在 canonical connection geometry 上，而 canonical reconnect 会断开当前边并立即回到待完成连线状态。",
+                    "This path stays on top of Session commands and queries: group promotion creates a child scope, boundary ports expose inner ports, edge notes stay display-only, route vertices stay on canonical connection geometry, and canonical reconnect removes the current edge then immediately returns authoring to a pending connection state."),
                 [
                     T("所属层：AsterGraph.Editor semantic graph contract + AsterGraph.Avalonia stock host surfaces。", "Layer: AsterGraph.Editor semantic graph contract plus AsterGraph.Avalonia stock host surfaces."),
-                    T("宿主入口：TryPromoteNodeGroupToComposite(...)、TryExposeCompositePort(...)、TryEnterCompositeChildGraph(...)、TrySetConnectionNoteText(...)、TryReconnectConnection(...)、connections.note.set、connections.reconnect。", "Host entry: TryPromoteNodeGroupToComposite(...), TryExposeCompositePort(...), TryEnterCompositeChildGraph(...), TrySetConnectionNoteText(...), TryReconnectConnection(...), connections.note.set, and connections.reconnect."),
-                    T("兼容边界：connections.delete 仍保留为兼容别名；retained 的 TrySetNodeExpansionState(...) 和 TrySetNodeGroupExtraPadding(...) 继续存在但只作为迁移辅助。", "Compatibility boundary: connections.delete stays as a compatibility alias; retained TrySetNodeExpansionState(...) and TrySetNodeGroupExtraPadding(...) remain only as migration helpers."),
+                    T("宿主入口：TryPromoteNodeGroupToComposite(...)、TryWrapSelectionToComposite(...)、TryExposeCompositePort(...)、TryEnterCompositeChildGraph(...)、TrySetConnectionNoteText(...)、TryInsertConnectionRouteVertex(...)、TryMoveConnectionRouteVertex(...)、TryReconnectConnection(...)、connections.note.set、connections.route-vertex.move、connections.reconnect。", "Host entry: TryPromoteNodeGroupToComposite(...), TryWrapSelectionToComposite(...), TryExposeCompositePort(...), TryEnterCompositeChildGraph(...), TrySetConnectionNoteText(...), TryInsertConnectionRouteVertex(...), TryMoveConnectionRouteVertex(...), TryReconnectConnection(...), connections.note.set, connections.route-vertex.move, and connections.reconnect."),
+                    T("公开 guidance：advanced editing 继续锚定 session/runtime contract，不靠 retained-only 解释。", "Guidance: advanced editing stays anchored on the session/runtime contract instead of retained-only explanations."),
                 ],
                 [
                     T("proof 会把节点组提升为复合节点，公开 Composite Phase / Composite Tint 两个边界端点，并验证作用域进入与返回。", "Proof promotes a node group into a composite, exposes Composite Phase / Composite Tint boundary ports, and validates enter/return scope navigation."),
-                    T("连线会通过 canonical connections.note.set 写入 Preview branch 注释，并通过 canonical connections.reconnect 回到待完成连线状态。", "The edge records a Preview branch note through canonical connections.note.set and returns to pending connection authoring through canonical connections.reconnect."),
-                    "COMPOSITE_SCOPE_OK / EDGE_NOTE_OK / DISCONNECT_FLOW_OK",
+                    T("连线会通过 canonical connections.note.set 写入 Preview branch 注释，通过 route-vertex command 持久化折点，再通过 canonical connections.reconnect 回到待完成连线状态。", "The edge records a Preview branch note through canonical connections.note.set, persists bend points through route-vertex commands, and returns to pending connection authoring through canonical connections.reconnect."),
+                    "COMPOSITE_SCOPE_OK / EDGE_NOTE_OK / EDGE_GEOMETRY_OK / DISCONNECT_FLOW_OK",
                 ]),
             new CapabilityShowcaseItem(
                 "plugin-trust-and-loading",
@@ -427,6 +427,7 @@ public partial class MainWindowViewModel
                     T("Lighting Mix 节点默认以 430x260 打开，先停在 details tier；继续加宽并拉高后才会进入 input-editors tier。", "The Lighting Mix node starts at 430x260 in the details tier, then moves into the input-editors tier only after the surface is widened and raised further."),
                     T("连接中的 Pulse 输入会覆盖本地参数值，未连接的 Rim Mask 会在宽度足够时出现在对应输入行内继续编辑。", "The connected Pulse input overrides its local parameter value while the unconnected Rim Mask remains editable inline in its input row once the surface is wide enough."),
                     T("Lighting Mix 的输入参数声明了 template key，宿主可以通过 registry 定向替换这些节点旁路参数编辑器。", "Lighting Mix input parameters declare template keys so hosts can replace those node-side parameter editors through the registry seam."),
+                    "TIERED_NODE_SURFACE_OK / FIXED_GROUP_FRAME_OK / HIERARCHY_SEMANTICS_OK / NON_OBSCURING_EDITING_OK / VISUAL_SEMANTICS_OK",
                 ]),
         ];
     }

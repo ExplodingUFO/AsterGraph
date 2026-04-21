@@ -127,8 +127,10 @@ public sealed class DemoCapabilityShowcaseTests
         Assert.True(result.FixedGroupFrameOk);
         Assert.True(result.NonObscuringEditingOk);
         Assert.True(result.VisualSemanticsOk);
+        Assert.True(result.HierarchySemanticsOk);
         Assert.True(result.CompositeScopeOk);
         Assert.True(result.EdgeNoteOk);
+        Assert.True(result.EdgeGeometryOk);
         Assert.True(result.DisconnectFlowOk);
         Assert.True(result.StartupMs >= 0);
         Assert.True(result.InspectorProjectionMs >= 0);

@@ -68,7 +68,7 @@ dotnet add package AsterGraph.Abstractions --prerelease
 
 ## Official Capability Modules
 
-下面这 10 个 `Official Capability Modules` 就是当前公开的 `v0.4.0-alpha` 模块边界。它们都建立在 canonical session/runtime 路线上，默认 Avalonia UI 只是复用这些 seam 做组合，而不是再定义第二套能力模型。
+下面这些 `Official Capability Modules` 就是当前公开的能力模块边界。它们都建立在 canonical session/runtime 路线上，默认 Avalonia UI 只是复用这些 seam 做组合，而不是再定义第二套能力模型。
 
 | Module | Canonical seam | 第一个 proof / sample 锚点 |
 | --- | --- | --- |
@@ -82,6 +82,11 @@ dotnet add package AsterGraph.Abstractions --prerelease
 | `Fragment Library` | 由 fragment workspace/library service 支撑的 session fragment/template commands | `src/AsterGraph.Demo` |
 | `Export` | `IGraphSceneSvgExportService` + `TryExportSceneAsSvg()` | `tools/AsterGraph.HostSample` |
 | `Baseline Edge Authoring` | `StartConnection(...)`、`CompleteConnection(...)`、reconnect/disconnect commands 和 pending-connection snapshot | `tools/AsterGraph.HostSample`、`tools/AsterGraph.ScaleSmoke` |
+| `Node Surface Authoring` | `GetNodeSurfaceSnapshots()`、`TrySetNodeSize(...)` 以及走共享 session command 路径的参数编辑 | `src/AsterGraph.Demo`、[Advanced Editing Guide](./docs/zh-CN/advanced-editing.md) |
+| `Hierarchy Semantics` | `GetHierarchyStateSnapshot()`、`GetNodeGroups()`、`GetNodeGroupSnapshots()` 以及 group collapse/move/resize/membership commands | `src/AsterGraph.Demo`、[Advanced Editing Guide](./docs/zh-CN/advanced-editing.md) |
+| `Composite Scope Authoring` | wrap/promote/expose/unexpose/scope-navigation commands 加 scope/composite queries | `src/AsterGraph.Demo`、[Advanced Editing Guide](./docs/zh-CN/advanced-editing.md) |
+| `Edge Semantics` | canonical session 路线上的连线注释、reconnect 和 disconnect commands | `src/AsterGraph.Demo`、[Advanced Editing Guide](./docs/zh-CN/advanced-editing.md) |
+| `Edge Geometry Tooling` | `GetConnectionGeometrySnapshots()` 加 route-vertex insert/move/remove commands | `src/AsterGraph.Demo`、[Advanced Editing Guide](./docs/zh-CN/advanced-editing.md) |
 
 ## 支持的包边界
 
@@ -105,6 +110,7 @@ dotnet add package AsterGraph.Abstractions --prerelease
 - 保存 / 加载、撤销 / 重做、复制 / 粘贴、片段导入导出，以及 SVG 场景导出
 - 对齐、分布、兼容多选下的共享参数编辑
 - definition-driven inspector 元数据，支持参数分组、内建 list/text/number/bool/enum editor 和校验反馈
+- 分层节点表面、固定组框、hierarchy snapshot、scoped composite、连线注释和 routed edge geometry 编辑
 - 编译期节点定义注册与运行时插件注册
 - 宿主控制的插件信任策略、本地候选发现和加载状态检查
 - `IGraphEditorSession.Automation`
@@ -137,6 +143,7 @@ dotnet add package AsterGraph.Abstractions --prerelease
 - [Quick Start](./docs/zh-CN/quick-start.md)
 - [Consumer Sample](./docs/zh-CN/consumer-sample.md)
 - [Host Integration](./docs/zh-CN/host-integration.md)
+- [Advanced Editing Guide](./docs/zh-CN/advanced-editing.md)
 - [ScaleSmoke 基线](./docs/zh-CN/scale-baseline.md)
 - [Authoring Inspector Recipe](./docs/zh-CN/authoring-inspector-recipe.md)
 - [Adoption Feedback Loop](./docs/zh-CN/adoption-feedback.md)

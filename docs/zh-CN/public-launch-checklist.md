@@ -47,8 +47,16 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framew
 - `HOST_SAMPLE_OK:True`
 - `CONSUMER_SAMPLE_OK:True`
 - `DEMO_OK:True`
+- `COMMAND_SURFACE_OK:True`
+- `TIERED_NODE_SURFACE_OK:True`
+- `FIXED_GROUP_FRAME_OK:True`
 - `NON_OBSCURING_EDITING_OK:True`
 - `VISUAL_SEMANTICS_OK:True`
+- `HIERARCHY_SEMANTICS_OK:True`
+- `COMPOSITE_SCOPE_OK:True`
+- `EDGE_NOTE_OK:True`
+- `EDGE_GEOMETRY_OK:True`
+- `DISCONNECT_FLOW_OK:True`
 - `HOST_SAMPLE_NET10_OK:True`
 - `PACKAGE_SMOKE_OK:True`
 - `SCALE_PERFORMANCE_BUDGET_OK:baseline:True:...`
@@ -98,3 +106,4 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framew
 - `docs/zh-CN/project-status.md` = 当前公开 alpha 状态快照
 - `docs/zh-CN/quick-start.md` = 推荐接入路径
 - `docs/zh-CN/alpha-status.md` = alpha 范围与限制
+- `docs/zh-CN/advanced-editing.md` = advanced-editing capability split 与 proof map

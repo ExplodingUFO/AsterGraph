@@ -34,9 +34,11 @@
   - `FIXED_GROUP_FRAME_OK:True`
   - `NON_OBSCURING_EDITING_OK:True`
   - `VISUAL_SEMANTICS_OK:True`
-- v1.21 semantic graph composition proof markers:
+- v0.6.0-alpha advanced-editing closure markers:
+  - `HIERARCHY_SEMANTICS_OK:True`
   - `COMPOSITE_SCOPE_OK:True`
   - `EDGE_NOTE_OK:True`
+  - `EDGE_GEOMETRY_OK:True`
   - `DISCONNECT_FLOW_OK:True`
 - plugin discovery, trust policy, loading, and inspection
 - automation execution through `IGraphEditorSession.Automation`
@@ -45,16 +47,17 @@
 
 ## Current Priorities
 
-The current public-repo priority is not new runtime capability. It is keeping the repository surface clean and contributor-friendly:
+The current public-repo priority is turning the public alpha into a coherent SDK surface rather than a pile of disconnected feature slices:
 
 - public docs stay under `README.md`, `README.zh-CN.md`, `docs/en`, and `docs/zh-CN`
+- advanced editing is described as canonical capability modules, not retained-only behavior
 - source, tests, samples, proof tools, workflows, and governance files remain visible
 - internal workflow traces and local-only files do not remain part of the tracked public repo surface
 
 ## Near-Term Roadmap
 
-- `v0.3.0-alpha Platform Skeleton Freeze` — freeze the canonical runtime surface and establish scene/input/platform seams that outlive Avalonia-owned implementation
-- keep public alpha documentation and proof guidance easy to follow while that skeleton solidifies
+- keep the canonical runtime/session surface stable while broadening official capability modules and proof guidance
+- keep public alpha documentation and proof guidance easy to follow as advanced editing closes
 - maintain hosted CI parity across the supported proof lanes
 - continue the retained compatibility migration window without abrupt public breaks
 
@@ -74,6 +77,7 @@ The current public-repo priority is not new runtime capability. It is keeping th
 - [Quick Start](./quick-start.md)
 - [Consumer Sample](./consumer-sample.md)
 - [ScaleSmoke Baseline](./scale-baseline.md)
+- [Advanced Editing Guide](./advanced-editing.md)
 - [Adoption Feedback Loop](./adoption-feedback.md)
 - [Plugin And Custom Node Recipe](./plugin-recipe.md)
 - [Retained-To-Session Migration Recipe](./retained-migration-recipe.md)

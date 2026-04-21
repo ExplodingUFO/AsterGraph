@@ -47,8 +47,16 @@ Expected high-signal markers:
 - `HOST_SAMPLE_OK:True`
 - `CONSUMER_SAMPLE_OK:True`
 - `DEMO_OK:True`
+- `COMMAND_SURFACE_OK:True`
+- `TIERED_NODE_SURFACE_OK:True`
+- `FIXED_GROUP_FRAME_OK:True`
 - `NON_OBSCURING_EDITING_OK:True`
 - `VISUAL_SEMANTICS_OK:True`
+- `HIERARCHY_SEMANTICS_OK:True`
+- `COMPOSITE_SCOPE_OK:True`
+- `EDGE_NOTE_OK:True`
+- `EDGE_GEOMETRY_OK:True`
+- `DISCONNECT_FLOW_OK:True`
 - `HOST_SAMPLE_NET10_OK:True`
 - `PACKAGE_SMOKE_OK:True`
 - `SCALE_PERFORMANCE_BUDGET_OK:baseline:True:...`
@@ -98,3 +106,4 @@ Keep the consumer entry story explicit in release notes and public announcements
 - `docs/en/project-status.md` = current public alpha status snapshot
 - `docs/en/quick-start.md` = canonical adoption path
 - `docs/en/alpha-status.md` = current alpha scope and limitations
+- `docs/en/advanced-editing.md` = advanced-editing capability split and proof map
