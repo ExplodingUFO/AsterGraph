@@ -83,6 +83,49 @@ public sealed class NodeCanvasWheelInteractionCoordinatorTests
         Assert.Equal(new Point(240, 180), host.InteractionSession.PointerScreenPosition);
     }
 
+    [Fact]
+    public void HandleWheel_WithMetaModifier_ZoomsAroundPointerWithoutPanning()
+    {
+        var editor = CreateEditor();
+        var initialPanX = editor.PanX;
+        var initialPanY = editor.PanY;
+        var initialZoom = editor.Zoom;
+        var host = new TestWheelHost
+        {
+            ViewModel = editor,
+        };
+        var coordinator = new NodeCanvasWheelInteractionCoordinator(host);
+
+        var handled = coordinator.HandleWheel(new Point(84, 42), new Vector(1, 2), KeyModifiers.Meta);
+
+        Assert.True(handled);
+        Assert.True(editor.Zoom > initialZoom);
+        Assert.NotEqual(new Point(initialPanX, initialPanY), new Point(editor.PanX, editor.PanY));
+        Assert.Equal(new Point(84, 42), host.InteractionSession.PointerScreenPosition);
+    }
+
+    [Fact]
+    public void HandleWheel_WithShiftModifier_PansUsingScrollSpeedMultiplier()
+    {
+        var editor = CreateEditor();
+        var initialPanX = editor.PanX;
+        var initialPanY = editor.PanY;
+        var initialZoom = editor.Zoom;
+        var host = new TestWheelHost
+        {
+            ViewModel = editor,
+        };
+        var coordinator = new NodeCanvasWheelInteractionCoordinator(host);
+
+        var handled = coordinator.HandleWheel(new Point(18, 36), new Vector(-3, 5), KeyModifiers.Shift);
+
+        Assert.True(handled);
+        Assert.Equal(initialPanX - 120, editor.PanX);
+        Assert.Equal(initialPanY + 200, editor.PanY);
+        Assert.Equal(new Point(18, 36), host.InteractionSession.PointerScreenPosition);
+        Assert.Equal(initialZoom, editor.Zoom);
+    }
+
     private static GraphEditorViewModel CreateEditor()
     {
         var catalog = new NodeCatalog();

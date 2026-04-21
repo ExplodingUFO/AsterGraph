@@ -136,6 +136,7 @@ public partial class NodeCanvas : UserControl
         PointerMoved += HandlePointerMoved;
         PointerReleased += HandlePointerReleased;
         PointerWheelChanged += HandlePointerWheelChanged;
+        AddHandler(InputElement.PointerCaptureLostEvent, HandlePointerCaptureLost);
     }
 
     /// <inheritdoc />
@@ -450,6 +451,17 @@ public partial class NodeCanvas : UserControl
     {
         _pointerInteractionCoordinator.HandleReleased(args.GetPosition(this));
         args.Pointer.Capture(null);
+    }
+
+    private void HandlePointerCaptureLost(object? sender, PointerCaptureLostEventArgs? args)
+    {
+        if (_pointerInteractionCoordinator.HandlePointerCaptureLost())
+        {
+            if (args is not null)
+            {
+                args.Handled = true;
+            }
+        }
     }
 
     private void UpdateResizeFeedback(Point currentScreenPosition)

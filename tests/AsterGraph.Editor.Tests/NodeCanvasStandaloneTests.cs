@@ -312,8 +312,17 @@ public sealed class NodeCanvasStandaloneTests
             var sourceNode = editor.Nodes[0];
             var sourcePort = sourceNode.Outputs[0];
             var anchor = InvokeCanvasMethod<GraphPoint>("GetPortAnchor", canvas, sourceNode, sourcePort);
+            var sourceSurface = canvas.GetVisualDescendants()
+                .OfType<Border>()
+                .Single(control => string.Equals(
+                    AutomationProperties.GetName(control),
+                    "CUSTOM NODE VISUAL:Canvas Source",
+                    StringComparison.Ordinal));
 
             Assert.Same(customPresenter, canvas.NodeVisualPresenter);
+            Assert.True(sourceSurface.Focusable);
+            Assert.True(sourceSurface.IsTabStop);
+            Assert.Equal("CUSTOM NODE VISUAL:Canvas Source", AutomationProperties.GetName(sourceSurface));
             Assert.Contains("CUSTOM NODE VISUAL:Canvas Source", allText);
             Assert.InRange(anchor.X, sourceNode.X + 36.5, sourceNode.X + 37.5);
             Assert.InRange(anchor.Y, sourceNode.Y + 24.5, sourceNode.Y + 25.5);
@@ -633,6 +642,39 @@ public sealed class NodeCanvasStandaloneTests
             Assert.Equal(SourceNodeId, selected.Id);
             Assert.Equal(SourceNodeId, editor.SelectedNode?.Id);
             Assert.Null(pointer.Captured);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
+    public void PointerCaptureLost_ClearsActivePointerInteraction()
+    {
+        var editor = CreateEditor();
+        var (window, canvas) = CreateStandaloneCanvasWindow(editor);
+        var pointer = new global::Avalonia.Input.Pointer(1, PointerType.Mouse, isPrimary: true);
+        var pressedArgs = CreatePointerPressedArgs(canvas, pointer, new Point(80, 80), KeyModifiers.Alt);
+        var movedArgs = CreatePointerMovedArgs(canvas, pointer, new Point(140, 170), KeyModifiers.Alt);
+        var captureLostMoveArgs = CreatePointerMovedArgs(canvas, pointer, new Point(240, 260), KeyModifiers.Alt);
+
+        try
+        {
+            InvokeCanvasPointerPressed(canvas, pressedArgs);
+            Assert.True(pressedArgs.Handled);
+
+            InvokeCanvasPointerMoved(canvas, movedArgs);
+            Assert.True(movedArgs.Handled);
+            var panXAfterMove = editor.PanX;
+            var panYAfterMove = editor.PanY;
+
+            InvokeCanvasPointerCaptureLost(canvas);
+
+            InvokeCanvasPointerMoved(canvas, captureLostMoveArgs);
+            Assert.False(captureLostMoveArgs.Handled);
+            Assert.Equal(panXAfterMove, editor.PanX);
+            Assert.Equal(panYAfterMove, editor.PanY);
         }
         finally
         {
@@ -2659,6 +2701,9 @@ public sealed class NodeCanvasStandaloneTests
     private static void InvokeCanvasPointerReleased(NodeCanvas canvas, PointerReleasedEventArgs args)
         => InvokeCanvasHandler("HandlePointerReleased", canvas, args);
 
+    private static void InvokeCanvasPointerCaptureLost(NodeCanvas canvas)
+        => InvokeCanvasHandler("HandlePointerCaptureLost", canvas, null!);
+
     private static void InvokeCanvasWheelChanged(NodeCanvas canvas, PointerWheelEventArgs args)
         => InvokeCanvasHandler("HandlePointerWheelChanged", canvas, args);
 
@@ -3115,6 +3160,7 @@ public sealed class NodeCanvasStandaloneTests
                 Height = context.Node.Height,
                 Background = Brushes.Transparent,
             };
+            GraphPresentationSemantics.ApplyStockNodeSurfaceSemantics(surface, $"CUSTOM NODE VISUAL:{context.Node.Title}");
             var layout = new Canvas
             {
                 Width = context.Node.Width,

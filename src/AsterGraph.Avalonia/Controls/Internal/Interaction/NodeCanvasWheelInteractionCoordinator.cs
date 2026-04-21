@@ -34,8 +34,9 @@ internal sealed class NodeCanvasWheelInteractionCoordinator
 
         _host.InteractionSession.UpdatePointerPosition(point);
 
-        // 多数精度触控板的捏合会转成带 Control 修饰符的滚轮事件。
-        if (modifiers.HasFlag(KeyModifiers.Control))
+        // 多数精度触控板的捏合会转成带 Control/Meta 修饰符的滚轮事件。
+        if (modifiers.HasFlag(KeyModifiers.Control)
+            || modifiers.HasFlag(KeyModifiers.Meta))
         {
             var factor = delta.Y >= 0 ? ZoomFactor : 1 / ZoomFactor;
             _host.ViewModel.ZoomAt(factor, new GraphPoint(point.X, point.Y));

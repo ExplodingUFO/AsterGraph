@@ -342,6 +342,19 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
         _host.UpdateResizeFeedback(currentScreenPosition);
     }
 
+    public bool HandlePointerCaptureLost()
+    {
+        if (!HasActivePointerInteraction())
+        {
+            return false;
+        }
+
+        _host.InteractionSession.ResetAfterPointerRelease();
+        _host.HideGuideAdorners();
+        _host.ClearResizeFeedback();
+        return true;
+    }
+
     private bool HandleNodeResizeMove(NodeCanvasNodeResizeSession resizeSession, Point currentScreenPosition)
     {
         if (_host.ViewModel is null || _host.InteractionSession.DragStartScreenPosition is not Point resizeStart)
@@ -626,4 +639,12 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
                && node.Y < groupBottom
                && nodeBottom > group.Position.Y;
     }
+
+    private bool HasActivePointerInteraction()
+        => _host.InteractionSession.SelectionStartScreenPosition is not null
+           || _host.InteractionSession.IsPanning
+           || _host.InteractionSession.DragNode is not null
+           || _host.InteractionSession.DragGroupId is not null
+           || _host.InteractionSession.NodeResizeSession is not null
+           || _host.InteractionSession.GroupResizeSession is not null;
 }
