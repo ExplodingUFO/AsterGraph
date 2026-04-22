@@ -54,9 +54,35 @@ public sealed class GraphEditorSessionTests
         var method = typeof(GraphEditorSession).GetMethod(nameof(GraphEditorSession.BeginConnection), [typeof(string), typeof(string)]);
 
         Assert.NotNull(method);
-        Assert.Contains(
+        var attribute = Assert.Single(
             method!.GetCustomAttributes(typeof(ObsoleteAttribute), inherit: false),
             attribute => attribute is ObsoleteAttribute);
+        var obsolete = Assert.IsType<ObsoleteAttribute>(attribute);
+
+        Assert.Contains("StartConnection", obsolete.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void IGraphEditorCommands_BeginConnection_IsCompatibilityShimWithReplacementGuidance()
+    {
+        var method = typeof(IGraphEditorCommands).GetMethod(nameof(IGraphEditorCommands.BeginConnection), [typeof(string), typeof(string)]);
+
+        Assert.NotNull(method);
+        var attribute = Assert.Single(
+            method!.GetCustomAttributes(typeof(ObsoleteAttribute), inherit: false),
+            attribute => attribute is ObsoleteAttribute);
+        var obsolete = Assert.IsType<ObsoleteAttribute>(attribute);
+
+        Assert.Contains("StartConnection", obsolete.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void IGraphEditorCommands_StartConnection_IsCanonicalAndNotObsolete()
+    {
+        var method = typeof(IGraphEditorCommands).GetMethod(nameof(IGraphEditorCommands.StartConnection), [typeof(string), typeof(string)]);
+
+        Assert.NotNull(method);
+        Assert.Empty(method!.GetCustomAttributes(typeof(ObsoleteAttribute), inherit: false));
     }
 
     [Fact]
@@ -198,7 +224,9 @@ public sealed class GraphEditorSessionTests
         var definitionId = new NodeDefinitionId("tests.session.begin-shim");
         IGraphEditorCommands commands = AsterGraphEditorFactory.CreateSession(CreateOptions(definitionId)).Commands;
 
+#pragma warning disable CS0618
         commands.BeginConnection(SourceNodeId, SourcePortId);
+#pragma warning restore CS0618
 
         var session = Assert.IsAssignableFrom<IGraphEditorSession>(commands);
         var pending = session.Queries.GetPendingConnectionSnapshot();
@@ -347,6 +375,7 @@ public sealed class GraphEditorSessionTests
         Assert.Equal(
             typeof(IReadOnlyList<GraphEditorCompatiblePortTargetSnapshot>),
             queriesType.GetMethod(nameof(IGraphEditorQueries.GetCompatiblePortTargets))!.ReturnType);
+        Assert.Empty(queriesType.GetMethod(nameof(IGraphEditorQueries.GetCompatiblePortTargets))!.GetCustomAttributes(typeof(ObsoleteAttribute), inherit: false));
 
         AssertMethod(queriesType, nameof(IGraphEditorQueries.GetCompatibleTargets), typeof(string), typeof(string));
 #pragma warning disable CS0618

@@ -308,6 +308,7 @@ public interface IGraphEditorCommands
     /// </summary>
     /// <param name="sourceNodeId">源节点标识。</param>
     /// <param name="sourcePortId">源端口标识。</param>
+    [Obsolete("Compatibility-only helper. Use StartConnection(string, string) instead.")]
     void BeginConnection(string sourceNodeId, string sourcePortId)
         => StartConnection(sourceNodeId, sourcePortId);
 
