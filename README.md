@@ -7,14 +7,14 @@
 
 AsterGraph is a modular node-graph editor toolkit for .NET. It gives hosts a reusable editor runtime, a canonical session/runtime route for custom UI or native shells, a shipped Avalonia hosted-UI path, and explicit seams for plugins, automation, localization, diagnostics, and presentation overrides.
 
-## Public Alpha
+## Public Beta
 
-- latest installable package version: `0.2.0-alpha.3`
-- latest semver-aligned public prerelease tag: `v0.2.0-alpha.3`
+- latest installable package version: `0.10.0-beta`
+- latest public prerelease tag: `v0.10.0-beta`
 - latest legacy repository milestone tag: `v1.9` (historical pre-launch checkpoint, not the NuGet version)
 - published packages target `net8.0` and `net9.0`
 - packed `HostSample` also proves downstream `.NET 10` consumption during the release gate
-- future public prerelease tags should match package SemVer, for example `v0.2.0-alpha.3`
+- public prerelease tags must match the package version exactly, for example `v0.10.0-beta`
 - package version versus historical repository-tag guidance: [Versioning](./docs/en/versioning.md)
 - frozen support boundary and `v1.0.0` upgrade guidance: [Stabilization Support Matrix](./docs/en/stabilization-support-matrix.md)
 - current scope, non-goals, and known limitations: [Alpha Status](./docs/en/alpha-status.md)
@@ -57,7 +57,7 @@ Add `AsterGraph.Core` only when the host also needs direct `GraphDocument`, seri
 | Shipped Avalonia UI | the host wants the stock editor shell or stock standalone Avalonia surfaces | `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` | [`AsterGraph.HelloWorld.Avalonia`](./tools/AsterGraph.HelloWorld.Avalonia/) |
 | Retained migration | the host is moving off older MVVM-shaped entry points in planned batches | `new GraphEditorViewModel(...)` + `new GraphEditorView { Editor = editor }` | [Host Integration](./docs/en/host-integration.md) |
 
-For new runtime-facing work, anchor on the first route. The Avalonia route is the supported hosted adapter path today, while the retained route stays migration-only. `v0.9.0-beta` locks `WPF` as adapter 2 and will publish Avalonia/WPF gaps through the [Adapter Capability Matrix](./docs/en/adapter-capability-matrix.md) instead of adding adapter-specific runtime APIs.
+For new runtime-facing work, anchor on the first route. The Avalonia route is the supported hosted adapter path today, while the retained route stays migration-only. `v0.10.0-beta` keeps `WPF` as adapter 2 and publishes Avalonia/WPF gaps through the [Adapter Capability Matrix](./docs/en/adapter-capability-matrix.md) instead of adding adapter-specific runtime APIs or implying parity.
 
 ## Public Entry Map
 

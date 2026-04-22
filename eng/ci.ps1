@@ -224,7 +224,11 @@ function Convert-TextToCapabilityStatus {
 
   $parsed = $false
   if ([bool]::TryParse($Value, [ref]$parsed)) {
-    return if ($parsed) { 'PASS' } else { 'FAIL' }
+    if ($parsed) {
+      return 'PASS'
+    }
+
+    return 'FAIL'
   }
 
   return 'MISSING'
@@ -625,7 +629,6 @@ function Invoke-WindowsHelloWorldWpfSlice {
       $asterGraphWpfTestsFramework,
       '--no-restore',
       '--nologo',
-      '--no-build',
       '-v',
       'minimal'
     ) + $singleProcessBuildArguments + $buildStabilityProperties)
@@ -1088,7 +1091,7 @@ function Invoke-ReleaseValidation {
 
   Invoke-RestoreProjects -Projects (Get-DefaultRestoreProjects -Frameworks $releaseFrameworks)
   Invoke-ContractValidation -SkipRestore
-  New-WpfAdapterCapabilityMatrixProof -HelloWorldProofPath $helloWorldWpfProofPath -OutputPath $wpfAdapterCapabilityMatrixProofPath
+  Invoke-WindowsHelloWorldWpfSlice
   Invoke-Packages
   Invoke-HostSample -UsePackedPackages
   Invoke-HostSample -UsePackedPackages -TargetFramework net10.0
