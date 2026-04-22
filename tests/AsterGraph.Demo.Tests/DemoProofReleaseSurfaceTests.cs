@@ -64,6 +64,7 @@ public sealed class DemoProofReleaseSurfaceTests
         var entryDocs = new[]
         {
             ReadRepoFile("README.md"),
+            ReadRepoFile("README.zh-CN.md"),
             ReadRepoFile("docs/en/quick-start.md"),
             ReadRepoFile("docs/zh-CN/quick-start.md"),
             ReadRepoFile("docs/en/evaluation-path.md"),

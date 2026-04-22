@@ -32,6 +32,8 @@ AsterGraph 是一个面向 .NET 的模块化节点图编辑器工具包，提供
 | 想先把完整能力看一遍 | [Demo Guide](./docs/zh-CN/demo-guide.md) | 展示插件、自动化、本地化和独立表面 |
 | 想验证打包消费或维护发布 | [CONTRIBUTING.md](./CONTRIBUTING.md) 和 [Public Launch Checklist](./docs/zh-CN/public-launch-checklist.md) | proof lanes、CI 和 release 流程 |
 
+这条 hosted route ladder 是 `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerSample.Avalonia`。
+
 ## 从 NuGet 安装
 
 大多数新宿主从下面几条命令起步：
