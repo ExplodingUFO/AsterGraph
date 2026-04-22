@@ -14,6 +14,9 @@
 - the four publishable packages
 - canonical factory/session composition
 - default Avalonia hosted UI and standalone surfaces
+- runtime inspection surface for trusted, loaded, and blocked outcomes
+- command/trust timeline and perf overlay in the showcase host
+- `tools/AsterGraph.Starter.Avalonia` as the shipped Avalonia starter scaffold
 - plugin discovery, trust policy, load inspection, and runtime loading
 - automation execution through `IGraphEditorSession.Automation`
 - official proof lanes and smoke tools
@@ -43,7 +46,7 @@
 - the latest public prerelease tag is `v0.2.0-alpha.3`, while `v1.9` remains only as a historical pre-launch milestone marker
 - public prerelease publishing and release artifacts still depend on the maintainer release flow
 - the deepest package-validation lane and the `.NET 10` packed-consumer proof still run on the Windows release-validation path
-- retained compatibility APIs are still present during the migration window
+- retained compatibility APIs are still present during the migration window, but they are only a migration bridge
 - the public alpha still has only one official UI adapter today: Avalonia
 - advanced editing is now published as host-facing capability modules, but broader ecosystem and adapter validation work remains ahead
 

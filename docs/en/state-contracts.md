@@ -7,7 +7,7 @@ This document publishes the host-facing state contract behind AsterGraph history
 The contract applies to:
 
 - the canonical runtime/session path rooted in `IGraphEditorSession`
-- the retained compatibility path rooted in `GraphEditorViewModel`
+- the retained compatibility bridge rooted in `GraphEditorViewModel`
 - mixed flows where retained interactions and runtime/session commands touch the same editor state
 
 ## Contract
@@ -38,4 +38,4 @@ The larger readiness proof also emits `SCALE_HISTORY_CONTRACT_OK` through `tools
 
 - Treat `SaveWorkspace()` as the operation that establishes the clean baseline.
 - Do not assume every interaction creates a durable history step.
-- Prefer the canonical session boundary for new integrations.
+- Prefer the canonical session boundary for new integrations and treat the retained path as migration support only.

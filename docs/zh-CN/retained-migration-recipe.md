@@ -1,6 +1,6 @@
 # Retained 到 Session 的迁移 Recipe
 
-这份 recipe 适合这样的宿主：现在还在直接 `new GraphEditorViewModel(...)`，但想逐步迁到推荐的 runtime/session 路线，又不想一次性重写完。
+这份 recipe 适合这样的宿主：现在还在直接 `new GraphEditorViewModel(...)`，但想逐步迁到推荐的 runtime/session 路线，又不想一次性重写完。retained 路线只是桥接，不是最终目的地。
 
 ## 目标状态
 
@@ -9,6 +9,8 @@
 - 仅运行时 / 自定义 UI：`AsterGraphEditorFactory.CreateSession(...)`
 - 默认 Avalonia UI：`AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)`
 - `IGraphEditorSession.Commands`、`Queries`、`Events` 和 diagnostics snapshot
+
+如果你是在做新工作，请先看 [Quick Start](./quick-start.md) 或 [Host Integration](./host-integration.md)，不要从 retained 桥接开始。
 
 ## 第一步：先把 Editor Options 收到一处
 
@@ -78,6 +80,7 @@ var view = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOption
 - 新 commands / queries 都落到 `IGraphEditorSession`
 - UI 组合走 factory 路线，而不是直接 retained 构造
 - compatibility-only shim 只服务尚未迁动的旧宿主代码
+- 新功能从 canonical session 路线或 shipped Avalonia 路线起步，而不是从 retained 构造起步
 
 另见：
 

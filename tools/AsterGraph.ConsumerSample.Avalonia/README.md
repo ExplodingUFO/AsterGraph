@@ -1,6 +1,6 @@
 # AsterGraph.ConsumerSample.Avalonia
 
-This is the medium hosted-UI sample on the canonical session/runtime route.
+This is the medium hosted-UI sample on the canonical session/runtime route, after `AsterGraph.Starter.Avalonia` and `AsterGraph.HelloWorld.Avalonia`, and before `AsterGraph.Demo`.
 It shows a host-owned action rail, parameter editing, and one trusted plugin without implying a second editor model or a retained-only path.
 
 ## Run
@@ -31,6 +31,9 @@ Expected markers:
 
 ## Where It Fits
 
+- `Starter.Avalonia` = first hosted scaffold and smallest end-to-end Avalonia entry
+- `HelloWorld` = smallest runtime-only first run
+- `HelloWorld.Avalonia` = smallest hosted-UI first run
 - [Quick Start](../../docs/en/quick-start.md)
 - [Host Integration](../../docs/en/host-integration.md)
 - [Demo Guide](../../docs/en/demo-guide.md)

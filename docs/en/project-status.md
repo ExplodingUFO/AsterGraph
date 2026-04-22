@@ -15,6 +15,7 @@
 - sample and proof tools:
   - `tools/AsterGraph.HelloWorld` for the quickest runtime-only first run
   - `tools/AsterGraph.HelloWorld.Avalonia` for the quickest hosted-UI first run
+  - `tools/AsterGraph.Starter.Avalonia` for the shipped Avalonia starter scaffold
   - `tools/AsterGraph.ConsumerSample.Avalonia` for one realistic hosted integration before the full Demo shell
   - `tools/AsterGraph.HostSample` for the minimal consumer proof harness
   - `tools/AsterGraph.PackageSmoke` for packed-package proof
@@ -28,6 +29,8 @@
 - the four-package SDK boundary
 - kernel/session-first runtime ownership
 - default Avalonia shell plus standalone surfaces
+- runtime inspection surface for trusted, loaded, and blocked outcomes
+- command/trust timeline and perf overlay in the showcase surface
 - v1.23 graph-surface usability proof markers:
   - `COMMAND_SURFACE_OK:True`
   - `TIERED_NODE_SURFACE_OK:True`
@@ -60,6 +63,7 @@ The current public-repo priority is turning the public alpha into a coherent SDK
 - keep public alpha documentation and proof guidance easy to follow as advanced editing closes
 - maintain hosted CI parity across the supported proof lanes
 - continue the retained compatibility migration window without abrupt public breaks
+- keep the shipped starter scaffold, runtime inspection surface, command/trust timeline, and perf overlay aligned with the canonical session-first route
 
 ## Public Entry Matrix
 
@@ -69,6 +73,7 @@ The current public-repo priority is turning the public alpha into a coherent SDK
 - `tools/AsterGraph.HostSample` = minimal canonical adoption proof
 - `tools/AsterGraph.PackageSmoke` = packed-package consumption proof
 - `tools/AsterGraph.ScaleSmoke` = larger-graph baseline plus history/state-continuity proof
+- `tools/AsterGraph.Starter.Avalonia` = shipped Avalonia starter scaffold
 - `src/AsterGraph.Demo` = showcase host for visual/manual inspection
 
 ## Public Entry Points

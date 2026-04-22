@@ -7,7 +7,7 @@
 这份契约同时适用于：
 
 - 以 `IGraphEditorSession` 为根的 canonical runtime/session 路线
-- 以 `GraphEditorViewModel` 为根的 retained compatibility 路线
+- 以 `GraphEditorViewModel` 为根的 retained compatibility bridge 路线
 - retained interaction 与 runtime/session command 混合操作同一状态的场景
 
 ## 契约
@@ -38,4 +38,4 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane contract -Frame
 
 - 把 `SaveWorkspace()` 视为 clean baseline 的建立点。
 - 不要假设每次交互都会形成有效 history step。
-- 新接入优先使用 canonical session boundary。
+- 新接入优先使用 canonical session boundary，并把 retained 路线只当作迁移支持。

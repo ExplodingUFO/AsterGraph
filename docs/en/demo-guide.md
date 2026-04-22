@@ -77,10 +77,11 @@ Expected proof markers:
 
 ## Demo vs Other Entry Samples
 
+- `Starter.Avalonia` = first hosted scaffold; the smallest end-to-end Avalonia entry
 - `HelloWorld` = smallest runtime-only first-run sample
 - `HelloWorld.Avalonia` = smallest hosted-UI first-run sample
 - `ConsumerSample.Avalonia` = realistic hosted-UI consumer sample on the canonical route with one host action rail, parameter editing, and one trusted plugin
-- `HostSample` = narrow proof harness for the canonical consumer routes
+- `HostSample` = narrow proof harness for the canonical consumer routes, not the onboarding step
 - `Demo` = full showcase host for product surface and host boundary
 
-Use the demo when you need to inspect behavior visually. Use `HelloWorld` or `HelloWorld.Avalonia` for the quickest first run on a single route, `ConsumerSample.Avalonia` for one realistic hosted integration, and `HostSample` for proof-oriented route validation.
+Use the demo when you need to inspect behavior visually. Use `Starter.Avalonia` for the first hosted entry, `HelloWorld` or `HelloWorld.Avalonia` for the quickest first run on a single route, `ConsumerSample.Avalonia` for one realistic hosted integration, and `HostSample` for proof-oriented route validation.
