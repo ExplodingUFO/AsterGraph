@@ -24,6 +24,7 @@ This page freezes the consumer-facing support boundary on the path toward `v1.0.
 
 ## Related Docs
 
+- [Beta Evaluation Path](./evaluation-path.md)
 - [Versioning](./versioning.md)
 - [Quick Start](./quick-start.md)
 - [Project Status](./project-status.md)

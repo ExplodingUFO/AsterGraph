@@ -59,6 +59,50 @@ public sealed class DemoProofReleaseSurfaceTests
     }
 
     [Fact]
+    public void PublicEntryDocs_LinkDedicatedEvaluationPathGuide()
+    {
+        var readme = ReadRepoFile("README.md");
+        var readmeZh = ReadRepoFile("README.zh-CN.md");
+        var quickStart = ReadRepoFile("docs/en/quick-start.md");
+        var quickStartZh = ReadRepoFile("docs/zh-CN/quick-start.md");
+
+        Assert.Contains("[Beta Evaluation Path](./docs/en/evaluation-path.md)", readme, StringComparison.Ordinal);
+        Assert.Contains("[公开 Beta 评估路径](./docs/zh-CN/evaluation-path.md)", readmeZh, StringComparison.Ordinal);
+        Assert.Contains("[Beta Evaluation Path](./evaluation-path.md)", quickStart, StringComparison.Ordinal);
+        Assert.Contains("[公开 Beta 评估路径](./evaluation-path.md)", quickStartZh, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void EvaluationPathGuide_DefinesOneRouteLadderWithoutWideningSupportBoundary()
+    {
+        var evaluationPath = ReadRepoFile("docs/en/evaluation-path.md");
+        var evaluationPathZh = ReadRepoFile("docs/zh-CN/evaluation-path.md");
+
+        foreach (var contents in new[] { evaluationPath, evaluationPathZh })
+        {
+            Assert.Contains("Starter.Avalonia", contents, StringComparison.Ordinal);
+            Assert.Contains("HelloWorld.Avalonia", contents, StringComparison.Ordinal);
+            Assert.Contains("ConsumerSample.Avalonia", contents, StringComparison.Ordinal);
+            Assert.Contains("HostSample", contents, StringComparison.Ordinal);
+            Assert.Contains("CONSUMER_SAMPLE_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("HOST_SAMPLE_OK:True", contents, StringComparison.Ordinal);
+        }
+
+        Assert.Contains("validation-only", evaluationPath, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("migration-only", evaluationPath, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("proof harness", evaluationPath, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("only after", evaluationPath, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("WPF parity", evaluationPath, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("WPF is a second onboarding path", evaluationPath, StringComparison.OrdinalIgnoreCase);
+
+        Assert.Contains("仅用于验证", evaluationPathZh, StringComparison.Ordinal);
+        Assert.Contains("仅用于迁移", evaluationPathZh, StringComparison.Ordinal);
+        Assert.Contains("proof harness", evaluationPathZh, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("WPF parity", evaluationPathZh, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("WPF 是第二条上手路径", evaluationPathZh, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void HostIntegrationDocs_RequireCanonicalRouteThenAdapterForWpf()
     {
         var hostIntegration = ReadRepoFile("docs/en/host-integration.md");

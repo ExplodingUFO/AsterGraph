@@ -24,6 +24,7 @@
 
 ## 相关文档
 
+- [公开 Beta 评估路径](./evaluation-path.md)
 - [README](../../README.zh-CN.md)
 - [Versioning](./versioning.md)
 - [Quick Start](./quick-start.md)

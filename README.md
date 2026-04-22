@@ -17,6 +17,7 @@ AsterGraph is a modular node-graph editor toolkit for .NET. It gives hosts a reu
 - public prerelease tags must match the package version exactly for this package line, for example `v0.11.0-beta`
 - package version versus historical repository-tag guidance: [Versioning](./docs/en/versioning.md)
 - frozen support boundary and `v1.0.0` upgrade guidance: [Stabilization Support Matrix](./docs/en/stabilization-support-matrix.md)
+- evaluator ladder from first install to realistic hosted proof: [Beta Evaluation Path](./docs/en/evaluation-path.md)
 - current scope, non-goals, and known limitations: [Alpha Status](./docs/en/alpha-status.md)
 
 ## Start Here
