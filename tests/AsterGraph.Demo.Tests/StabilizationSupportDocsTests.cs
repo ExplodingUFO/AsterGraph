@@ -34,22 +34,10 @@ public sealed class StabilizationSupportDocsTests
         Assert.Contains("[Stabilization Support Matrix](./stabilization-support-matrix.md)", projectStatus, StringComparison.Ordinal);
         Assert.Contains("[Stabilization Support Matrix](./stabilization-support-matrix.md)", versioning, StringComparison.Ordinal);
 
-        foreach (var contents in new[] { architecture, adoptionFeedback, pluginRecipe })
+        foreach (var contents in new[] { readme, quickStart, projectStatus, versioning, supportMatrix, architecture, adoptionFeedback, pluginRecipe })
         {
-            Assert.DoesNotContain("public alpha", contents, StringComparison.OrdinalIgnoreCase);
-            Assert.DoesNotContain("public-alpha", contents, StringComparison.OrdinalIgnoreCase);
+            AssertDoesNotContainStaleAlphaForms(contents);
         }
-
-        Assert.DoesNotContain("public alpha", readme, StringComparison.OrdinalIgnoreCase);
-        Assert.DoesNotContain("public alpha", quickStart, StringComparison.OrdinalIgnoreCase);
-        Assert.DoesNotContain("public alpha", projectStatus, StringComparison.OrdinalIgnoreCase);
-        Assert.DoesNotContain("public alpha", versioning, StringComparison.OrdinalIgnoreCase);
-        Assert.DoesNotContain("public alpha", supportMatrix, StringComparison.OrdinalIgnoreCase);
-        Assert.DoesNotContain("public-alpha", readme, StringComparison.OrdinalIgnoreCase);
-        Assert.DoesNotContain("public-alpha", quickStart, StringComparison.OrdinalIgnoreCase);
-        Assert.DoesNotContain("public-alpha", projectStatus, StringComparison.OrdinalIgnoreCase);
-        Assert.DoesNotContain("public-alpha", versioning, StringComparison.OrdinalIgnoreCase);
-        Assert.DoesNotContain("public-alpha", supportMatrix, StringComparison.OrdinalIgnoreCase);
 
         Assert.Contains("published packages target `net8.0` and `net9.0`", readme, StringComparison.Ordinal);
         Assert.Contains("Treat `WPF` only as adapter-2 portability validation", quickStart, StringComparison.Ordinal);
@@ -85,16 +73,10 @@ public sealed class StabilizationSupportDocsTests
         Assert.Contains("[稳定化支持矩阵](./stabilization-support-matrix.md)", projectStatus, StringComparison.Ordinal);
         Assert.Contains("[稳定化支持矩阵](./stabilization-support-matrix.md)", versioning, StringComparison.Ordinal);
 
-        foreach (var contents in new[] { architecture, adoptionFeedback, pluginRecipe })
+        foreach (var contents in new[] { readme, quickStart, projectStatus, versioning, supportMatrix, architecture, adoptionFeedback, pluginRecipe })
         {
-            Assert.DoesNotContain("公开 alpha", contents, StringComparison.OrdinalIgnoreCase);
+            AssertDoesNotContainStaleAlphaForms(contents);
         }
-
-        Assert.DoesNotContain("公开 alpha", readme, StringComparison.OrdinalIgnoreCase);
-        Assert.DoesNotContain("公开 alpha", quickStart, StringComparison.OrdinalIgnoreCase);
-        Assert.DoesNotContain("公开 alpha", projectStatus, StringComparison.OrdinalIgnoreCase);
-        Assert.DoesNotContain("公开 alpha", versioning, StringComparison.OrdinalIgnoreCase);
-        Assert.DoesNotContain("公开 alpha", supportMatrix, StringComparison.OrdinalIgnoreCase);
 
         Assert.Contains("公开发布包目标框架：`net8.0`、`net9.0`", readme, StringComparison.Ordinal);
         Assert.Contains("WPF 仅是 adapter-2 portability validation", quickStart, StringComparison.Ordinal);
@@ -130,6 +112,8 @@ public sealed class StabilizationSupportDocsTests
 
         var section7Start = chineseQuickStart.IndexOf("## 7. 超过“第一跑”之后看哪里", StringComparison.Ordinal);
         var section8Start = chineseQuickStart.IndexOf("## 8. 维护者与源码验证入口", StringComparison.Ordinal);
+        Assert.True(section7Start >= 0, "Expected section 7 heading in the zh-CN quick start before asserting its reading list.");
+        Assert.True(section8Start > section7Start, "Expected section 8 heading in the zh-CN quick start after section 7 before slicing the reading list.");
         var section7 = chineseQuickStart.Substring(section7Start, section8Start - section7Start);
 
         Assert.Contains("- [稳定化支持矩阵](./stabilization-support-matrix.md) = 冻结的支持边界和面向 `v1.0.0` 的升级指引", section7, StringComparison.Ordinal);
@@ -141,14 +125,29 @@ public sealed class StabilizationSupportDocsTests
     private static void AssertQuickStartPrelude(string quickStart, string expectedTitleLine, string expectedIntroLine, string expectedFirstTimeLine, string expectedBoundaryLine)
     {
         var lines = Array.ConvertAll(quickStart.Split('\n'), line => line.TrimEnd('\r'));
+        var section1Start = Array.FindIndex(lines, line => line.StartsWith("## 1.", StringComparison.Ordinal));
 
-        Assert.True(lines.Length >= 9, "Quick Start should keep the top-of-file support-boundary prelude.");
-        Assert.Equal(expectedTitleLine, lines[0]);
-        Assert.Equal(expectedIntroLine, lines[2]);
-        Assert.Equal(expectedFirstTimeLine, lines[4]);
-        Assert.Contains("WPF", lines[5], StringComparison.Ordinal);
-        Assert.Contains("adapter-2", lines[5], StringComparison.OrdinalIgnoreCase);
-        Assert.Equal(expectedBoundaryLine, lines[6]);
+        Assert.True(section1Start > 0, "Quick Start should keep the top-of-file support-boundary prelude before section 1.");
+
+        var preludeLines = lines[..section1Start];
+        var titleIndex = Array.FindIndex(preludeLines, line => line == expectedTitleLine);
+        var introIndex = Array.FindIndex(preludeLines, line => line == expectedIntroLine);
+        var firstTimeIndex = Array.FindIndex(preludeLines, line => line == expectedFirstTimeLine);
+        var wpfIndex = Array.FindIndex(preludeLines, line => line.Contains("WPF", StringComparison.Ordinal) && line.Contains("adapter-2", StringComparison.OrdinalIgnoreCase));
+        var boundaryIndex = Array.FindIndex(preludeLines, line => line == expectedBoundaryLine);
+
+        Assert.True(titleIndex >= 0, "Quick Start should keep the title in the opening support-boundary prelude.");
+        Assert.True(introIndex > titleIndex, "Quick Start should keep the intro after the title in the opening support-boundary prelude.");
+        Assert.True(firstTimeIndex > introIndex, "Quick Start should keep the first-time adopter guidance after the intro.");
+        Assert.True(wpfIndex > firstTimeIndex, "Quick Start should keep the WPF portability note after the first-time adopter guidance.");
+        Assert.True(boundaryIndex > wpfIndex, "Quick Start should keep the support-boundary link after the WPF portability note.");
+    }
+
+    private static void AssertDoesNotContainStaleAlphaForms(string contents)
+    {
+        Assert.DoesNotContain("public alpha", contents, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("public-alpha", contents, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("公开 alpha", contents, StringComparison.OrdinalIgnoreCase);
     }
 
     private static string GetRepositoryRoot()
