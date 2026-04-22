@@ -67,6 +67,35 @@
 - 让 shipped starter scaffold、runtime inspection surface、command/trust timeline 和 perf overlay 继续对齐 canonical session-first 路线
 - 在不扩 runtime surface 的前提下继续验证 `WPF` 作为 adapter 2，并用 `supported` / `partial` / `fallback` 发布 Avalonia/WPF 的公开状态；不要把 `partial` / `fallback` 写成 parity
 
+## 外部能力就绪闸门
+
+当 release notes、维护者回复或 beta intake 需要回答“当前到底有哪些能力已经被外部证据证明”时，就统一引用这一节。下面每条公开声明都必须回到路线级证据，而不是内部信心或 parity 想象。
+
+### 当前已被外部证据证明
+
+| 声明 | 路线级证据 |
+| --- | --- |
+| canonical runtime/session 路线和维护中的评估阶梯，已经在当前防守住的 beta 线上被外部证据证明。 | `tools/AsterGraph.HelloWorld`、`tools/AsterGraph.HelloWorld.Avalonia`、`tools/AsterGraph.Starter.Avalonia`、`tools/AsterGraph.ConsumerSample.Avalonia`、`tools/AsterGraph.HostSample`、`HOST_SAMPLE_OK`、`CONSUMER_SAMPLE_OK` |
+| showcase authoring surface 已经作为有边界的 beta 宿主体验被外部证据证明。 | `src/AsterGraph.Demo`、`DEMO_OK`、`COMMAND_SURFACE_OK`、`COMPOSITE_SCOPE_OK`、`EDGE_NOTE_OK`、`EDGE_GEOMETRY_OK`、`DISCONNECT_FLOW_OK` |
+| 打包后的 consumer proof 已被外部证据证明，而且没有扩大 SDK 边界。 | `tools/AsterGraph.PackageSmoke`、`PACKAGE_SMOKE_OK`、`HOST_SAMPLE_NET10_OK` |
+| Scale proof 只在当前防守住的 beta tier 上被外部证据证明。 | `tools/AsterGraph.ScaleSmoke`、`SCALE_PERFORMANCE_BUDGET_OK:baseline:True`、`SCALE_PERFORMANCE_BUDGET_OK:large:True`、`SCALE_PERF_SUMMARY:stress` |
+
+### 仅验证通过或受边界约束的声明
+
+| 声明 | 当前公开口径 | 路线级证据 |
+| --- | --- | --- |
+| `WPF` 作为 adapter 2 | 只算 validation-only，不代表 Avalonia parity，也不是公开 WPF support。 | `HELLOWORLD_WPF_OK`、`ADAPTER_CAPABILITY_MATRIX:WPF:HELLOWORLD_WPF_OK:PASS`、`ADAPTER_CAPABILITY_MATRIX:WPF:COMMAND_SURFACE_OK:PASS`、[Adapter Capability Matrix](./adapter-capability-matrix.md) |
+| retained 路线 | 只作为迁移桥，不是新的 primary host path。 | [Retained 到 Session 的迁移 Recipe](./retained-migration-recipe.md)、[稳定化支持矩阵](./stabilization-support-matrix.md) |
+| stress 规模遥测 | 只算 informational，不是 defended budget 声明。 | `SCALE_PERF_SUMMARY:stress`、[ScaleSmoke 基线](./scale-baseline.md) |
+
+### 在更多采用者证据出现前继续延后
+
+- 超出当前 `baseline` 与 `large` tier 的更大 defended performance 承诺
+- 除 Avalonia 加当前 `WPF` 验证通道之外的新 hosted adapter 或更宽的 adapter 声明
+- marketplace、远程安装/更新、unload lifecycle、sandboxed plugin 这类故事
+- stable / GA / `1.0` 级别的支持保证
+- 如果新的报告放不进上面的“已证明”或“受边界约束”两类，就走 [Adoption Feedback Loop](./adoption-feedback.md) 和 [Beta Support Bundle](./support-bundle.md)，不要临时扩大公开声明
+
 ## 公开入口分工
 
 - `tools/AsterGraph.HelloWorld` = runtime-only 第一跑样例

@@ -68,6 +68,35 @@ The current public-repo priority is turning the public beta into a coherent SDK 
 - keep the shipped starter scaffold, runtime inspection surface, command/trust timeline, and perf overlay aligned with the canonical session-first route
 - validate `WPF` as adapter 2 on the same canonical route and publish Avalonia/WPF status using `Supported`, `Partial`, and `Fallback`; do not read `Partial` or `Fallback` as parity
 
+## External Capability Readiness Gate
+
+Use this section as the single external capability readiness gate for release notes, maintainer replies, and beta intake. Every public claim below stays tied to route-level evidence instead of parity aspirations or internal confidence.
+
+### Externally proven now
+
+| Claim | Route-level evidence |
+| --- | --- |
+| Canonical runtime/session route and the maintained evaluator ladder are externally proven on the defended beta line. | `tools/AsterGraph.HelloWorld`, `tools/AsterGraph.HelloWorld.Avalonia`, `tools/AsterGraph.Starter.Avalonia`, `tools/AsterGraph.ConsumerSample.Avalonia`, `tools/AsterGraph.HostSample`, `HOST_SAMPLE_OK`, `CONSUMER_SAMPLE_OK` |
+| The showcase authoring surface is externally proven as a bounded beta host experience. | `src/AsterGraph.Demo`, `DEMO_OK`, `COMMAND_SURFACE_OK`, `COMPOSITE_SCOPE_OK`, `EDGE_NOTE_OK`, `EDGE_GEOMETRY_OK`, `DISCONNECT_FLOW_OK` |
+| Packaged consumer proof is externally proven without widening the SDK boundary. | `tools/AsterGraph.PackageSmoke`, `PACKAGE_SMOKE_OK`, `HOST_SAMPLE_NET10_OK` |
+| Scale proof is externally proven only at the defended beta tiers. | `tools/AsterGraph.ScaleSmoke`, `SCALE_PERFORMANCE_BUDGET_OK:baseline:True`, `SCALE_PERFORMANCE_BUDGET_OK:large:True`, `SCALE_PERF_SUMMARY:stress` |
+
+### Validation-only or bounded claims
+
+| Claim | Current public stance | Route-level evidence |
+| --- | --- | --- |
+| `WPF` as adapter 2 | Validation-only and not Avalonia parity or public WPF support. | `HELLOWORLD_WPF_OK`, `ADAPTER_CAPABILITY_MATRIX:WPF:HELLOWORLD_WPF_OK:PASS`, `ADAPTER_CAPABILITY_MATRIX:WPF:COMMAND_SURFACE_OK:PASS`, [Adapter Capability Matrix](./adapter-capability-matrix.md) |
+| Retained route | Migration-only bridge, not a new primary host path. | [Retained-To-Session Migration Recipe](./retained-migration-recipe.md), [Stabilization Support Matrix](./stabilization-support-matrix.md) |
+| Stress-scale telemetry | Informational only, not a defended budget claim. | `SCALE_PERF_SUMMARY:stress`, [ScaleSmoke Baseline](./scale-baseline.md) |
+
+### Deferred until more adopter evidence
+
+- larger defended performance commitments beyond the current `baseline` and `large` tiers
+- new hosted adapters or widened adapter claims beyond Avalonia plus the current `WPF` validation lane
+- marketplace, remote install/update, unload lifecycle, or sandboxed plugin stories
+- stable / GA / `1.0` support guarantees
+- if a new report does not fit one of the proven or bounded rows above, route it through the [Adoption Feedback Loop](./adoption-feedback.md) and the [Beta Support Bundle](./support-bundle.md) instead of widening the claim ad hoc
+
 ## Public Entry Matrix
 
 - `tools/AsterGraph.HelloWorld` = first-run runtime-only sample

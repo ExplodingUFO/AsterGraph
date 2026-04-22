@@ -70,6 +70,9 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("## Support Story", notes, StringComparison.Ordinal);
         Assert.Contains("[Stabilization Support Matrix](./docs/en/stabilization-support-matrix.md)", notes, StringComparison.Ordinal);
         Assert.Contains("[Adapter Capability Matrix](./docs/en/adapter-capability-matrix.md)", notes, StringComparison.Ordinal);
+        Assert.Contains("external capability readiness gate", notes, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("[Project Status](./docs/en/project-status.md)", notes, StringComparison.Ordinal);
+        Assert.Contains("externally proven vs deferred capability claims", notes, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("[Beta Support Bundle](./docs/en/support-bundle.md)", notes, StringComparison.Ordinal);
         Assert.Contains("[Adoption Feedback Loop](./docs/en/adoption-feedback.md)", notes, StringComparison.Ordinal);
         Assert.Contains("[Adopter Triage Checklist](./docs/en/adopter-triage.md)", notes, StringComparison.Ordinal);
@@ -94,6 +97,8 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("adapter matrix story", englishChecklist, StringComparison.Ordinal);
         Assert.Contains("`HELLOWORLD_WPF_OK` as adapter-2 validation only", englishChecklist, StringComparison.Ordinal);
         Assert.Contains("historical alpha reference for the current beta support story", englishChecklist, StringComparison.Ordinal);
+        Assert.Contains("external capability readiness gate", englishChecklist, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("externally proven vs deferred capability claims", englishChecklist, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("HELLOWORLD_WPF_OK is Avalonia/WPF parity", englishChecklist, StringComparison.Ordinal);
         Assert.DoesNotContain("HELLOWORLD_WPF_OK is public WPF support", englishChecklist, StringComparison.Ordinal);
 
@@ -101,6 +106,8 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("adapter matrix 叙事", chineseChecklist, StringComparison.Ordinal);
         Assert.Contains("`HELLOWORLD_WPF_OK` 只当成 adapter-2 验证通过", chineseChecklist, StringComparison.Ordinal);
         Assert.Contains("历史 alpha 参考，服务于当前 beta support story", chineseChecklist, StringComparison.Ordinal);
+        Assert.Contains("外部能力就绪闸门", chineseChecklist, StringComparison.Ordinal);
+        Assert.Contains("已被外部证据证明与继续延后的能力声明", chineseChecklist, StringComparison.Ordinal);
         Assert.DoesNotContain("HELLOWORLD_WPF_OK 是 Avalonia/WPF parity", chineseChecklist, StringComparison.Ordinal);
         Assert.DoesNotContain("HELLOWORLD_WPF_OK 是公开 WPF support", chineseChecklist, StringComparison.Ordinal);
     }

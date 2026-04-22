@@ -110,7 +110,7 @@ Keep the consumer entry story explicit in release notes and public announcements
 - `tools/AsterGraph.ScaleSmoke` = scale baseline plus history/state-continuity proof
 - `src/AsterGraph.Demo` = showcase host
 - `docs/en/versioning.md` = package version versus historical repository-tag guidance
-- `docs/en/project-status.md` = current public beta status snapshot
+- `docs/en/project-status.md` = external capability readiness gate for externally proven vs deferred capability claims
 - `docs/en/evaluation-path.md` = single route ladder from first install to realistic hosted proof
 - `docs/en/quick-start.md` = canonical adoption path
 - `docs/en/stabilization-support-matrix.md` = frozen support boundary and upgrade guidance

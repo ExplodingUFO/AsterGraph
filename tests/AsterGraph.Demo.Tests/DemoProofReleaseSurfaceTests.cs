@@ -116,6 +116,47 @@ public sealed class DemoProofReleaseSurfaceTests
     }
 
     [Fact]
+    public void ProjectStatus_DocumentsExternalCapabilityReadinessGate()
+    {
+        var projectStatus = ReadRepoFile("docs/en/project-status.md");
+        var projectStatusZh = ReadRepoFile("docs/zh-CN/project-status.md");
+
+        Assert.Contains("External Capability Readiness Gate", projectStatus, StringComparison.Ordinal);
+        Assert.Contains("Externally proven now", projectStatus, StringComparison.Ordinal);
+        Assert.Contains("Validation-only or bounded claims", projectStatus, StringComparison.Ordinal);
+        Assert.Contains("Deferred until more adopter evidence", projectStatus, StringComparison.Ordinal);
+        Assert.Contains("route-level evidence", projectStatus, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("HOST_SAMPLE_OK", projectStatus, StringComparison.Ordinal);
+        Assert.Contains("CONSUMER_SAMPLE_OK", projectStatus, StringComparison.Ordinal);
+        Assert.Contains("DEMO_OK", projectStatus, StringComparison.Ordinal);
+        Assert.Contains("PACKAGE_SMOKE_OK", projectStatus, StringComparison.Ordinal);
+        Assert.Contains("HELLOWORLD_WPF_OK", projectStatus, StringComparison.Ordinal);
+        Assert.Contains("SCALE_PERFORMANCE_BUDGET_OK:baseline:True", projectStatus, StringComparison.Ordinal);
+        Assert.Contains("SCALE_PERFORMANCE_BUDGET_OK:large:True", projectStatus, StringComparison.Ordinal);
+        Assert.Contains("SCALE_PERF_SUMMARY:stress", projectStatus, StringComparison.Ordinal);
+        Assert.Contains("stabilization-support-matrix.md", projectStatus, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("adapter-capability-matrix.md", projectStatus, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("adoption-feedback.md", projectStatus, StringComparison.OrdinalIgnoreCase);
+
+        Assert.Contains("外部能力就绪闸门", projectStatusZh, StringComparison.Ordinal);
+        Assert.Contains("当前已被外部证据证明", projectStatusZh, StringComparison.Ordinal);
+        Assert.Contains("仅验证通过或受边界约束的声明", projectStatusZh, StringComparison.Ordinal);
+        Assert.Contains("在更多采用者证据出现前继续延后", projectStatusZh, StringComparison.Ordinal);
+        Assert.Contains("路线级证据", projectStatusZh, StringComparison.Ordinal);
+        Assert.Contains("HOST_SAMPLE_OK", projectStatusZh, StringComparison.Ordinal);
+        Assert.Contains("CONSUMER_SAMPLE_OK", projectStatusZh, StringComparison.Ordinal);
+        Assert.Contains("DEMO_OK", projectStatusZh, StringComparison.Ordinal);
+        Assert.Contains("PACKAGE_SMOKE_OK", projectStatusZh, StringComparison.Ordinal);
+        Assert.Contains("HELLOWORLD_WPF_OK", projectStatusZh, StringComparison.Ordinal);
+        Assert.Contains("SCALE_PERFORMANCE_BUDGET_OK:baseline:True", projectStatusZh, StringComparison.Ordinal);
+        Assert.Contains("SCALE_PERFORMANCE_BUDGET_OK:large:True", projectStatusZh, StringComparison.Ordinal);
+        Assert.Contains("SCALE_PERF_SUMMARY:stress", projectStatusZh, StringComparison.Ordinal);
+        Assert.Contains("stabilization-support-matrix.md", projectStatusZh, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("adapter-capability-matrix.md", projectStatusZh, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("adoption-feedback.md", projectStatusZh, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public void SupportBundleDocs_DefineLocalConsumerSampleContract()
     {
         var supportBundle = ReadRepoFile("docs/en/support-bundle.md");
