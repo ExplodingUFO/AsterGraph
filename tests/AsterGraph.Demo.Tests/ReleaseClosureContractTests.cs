@@ -67,12 +67,36 @@ public sealed class ReleaseClosureContractTests
         var notes = File.ReadAllText(outputPath);
         Assert.Contains($"- installable package version: `{packageVersion}`", notes, StringComparison.Ordinal);
         Assert.Contains($"- matching public tag: `{publicTag}`", notes, StringComparison.Ordinal);
+        Assert.Contains("## Support Story", notes, StringComparison.Ordinal);
+        Assert.Contains("[Stabilization Support Matrix](./docs/en/stabilization-support-matrix.md)", notes, StringComparison.Ordinal);
+        Assert.Contains("[Adapter Capability Matrix](./docs/en/adapter-capability-matrix.md)", notes, StringComparison.Ordinal);
         Assert.Contains("HELLOWORLD_WPF_OK:True", notes, StringComparison.Ordinal);
+        Assert.Contains("HELLOWORLD_WPF_OK", notes, StringComparison.Ordinal);
+        Assert.Contains("adapter-2 validation only", notes, StringComparison.Ordinal);
+        Assert.Contains("does not widen the public publish/package boundary", notes, StringComparison.Ordinal);
         Assert.Contains("ADAPTER_CAPABILITY_MATRIX_FORMAT:1", notes, StringComparison.Ordinal);
         Assert.Contains("ADAPTER_CAPABILITY_MATRIX:WPF:HELLOWORLD_WPF_OK:PASS", notes, StringComparison.Ordinal);
         Assert.Contains("ADAPTER_CAPABILITY_MATRIX:WPF:COMMAND_SURFACE_OK:PASS", notes, StringComparison.Ordinal);
         Assert.DoesNotContain("ADAPTER_CAPABILITY_MATRIX:WPF:HELLOWORLD_WPF_OK:MISSING", notes, StringComparison.Ordinal);
         Assert.DoesNotContain("ADAPTER_CAPABILITY_MATRIX:WPF:COMMAND_SURFACE_OK:MISSING", notes, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ReleaseChecklists_CarrySupportBoundaryStoryAndKeepWpfValidationOnly()
+    {
+        var englishChecklist = ReadRepoFile("docs/en/public-launch-checklist.md");
+        var chineseChecklist = ReadRepoFile("docs/zh-CN/public-launch-checklist.md");
+
+        Assert.Contains("frozen support boundary story", englishChecklist, StringComparison.Ordinal);
+        Assert.Contains("adapter matrix story", englishChecklist, StringComparison.Ordinal);
+        Assert.Contains("`HELLOWORLD_WPF_OK` as adapter-2 validation only", englishChecklist, StringComparison.Ordinal);
+        Assert.Contains("historical alpha reference for the current beta support story", englishChecklist, StringComparison.Ordinal);
+        Assert.DoesNotContain("current scope, non-goals, and known limitations", englishChecklist, StringComparison.Ordinal);
+
+        Assert.Contains("冻结的 support boundary 叙事", chineseChecklist, StringComparison.Ordinal);
+        Assert.Contains("adapter matrix 叙事", chineseChecklist, StringComparison.Ordinal);
+        Assert.Contains("`HELLOWORLD_WPF_OK` 只当成 adapter-2 验证通过", chineseChecklist, StringComparison.Ordinal);
+        Assert.Contains("历史 alpha 参考，服务于当前 beta support story", chineseChecklist, StringComparison.Ordinal);
     }
 
     [Theory]
