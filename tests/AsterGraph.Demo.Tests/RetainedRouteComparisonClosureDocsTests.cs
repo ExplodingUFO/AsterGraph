@@ -53,10 +53,18 @@ public sealed class RetainedRouteComparisonClosureDocsTests
         Assert.Contains("Replace with canonical seams:", retainedRecipeEn, StringComparison.Ordinal);
         Assert.Contains("Ownership after this stage:", retainedRecipeEn, StringComparison.Ordinal);
         Assert.Contains("migration-only, not the preferred long-term extension path", retainedRecipeEn, StringComparison.Ordinal);
+        Assert.Contains("## Proof and Evidence Handoff", retainedRecipeEn, StringComparison.Ordinal);
+        Assert.Contains("AsterGraph.ConsumerSample.Avalonia -- --proof", retainedRecipeEn, StringComparison.Ordinal);
+        Assert.Contains("[Beta Support Bundle](./support-bundle.md)", retainedRecipeEn, StringComparison.Ordinal);
+        Assert.Contains("CONSUMER_SAMPLE_OK:True", retainedRecipeEn, StringComparison.Ordinal);
+        Assert.Contains("SUPPORT_BUNDLE_OK:True", retainedRecipeEn, StringComparison.Ordinal);
+        Assert.Contains("does not add a separate support boundary", retainedRecipeEn, StringComparison.OrdinalIgnoreCase);
         Assert.True(retainedRecipeEn.IndexOf("## Stage 0: Keep the retained bridge", StringComparison.Ordinal)
             < retainedRecipeEn.IndexOf("## Stage 1: Move command and query ownership into the session", StringComparison.Ordinal));
         Assert.True(retainedRecipeEn.IndexOf("## Stage 1: Move command and query ownership into the session", StringComparison.Ordinal)
             < retainedRecipeEn.IndexOf("## Stage 2: Replace retained-only helpers and retire bridge-only behavior", StringComparison.Ordinal));
+        Assert.True(retainedRecipeEn.IndexOf("## Stage 2: Replace retained-only helpers and retire bridge-only behavior", StringComparison.Ordinal)
+            < retainedRecipeEn.IndexOf("## Proof and Evidence Handoff", StringComparison.Ordinal));
 
         Assert.Contains("## 第 0 阶段：先保留 retained 桥接", retainedRecipeZh, StringComparison.Ordinal);
         Assert.Contains("## 第 1 阶段：把 command 和 query 的归属移入 session", retainedRecipeZh, StringComparison.Ordinal);
@@ -65,10 +73,18 @@ public sealed class RetainedRouteComparisonClosureDocsTests
         Assert.Contains("替换成 canonical seam：", retainedRecipeZh, StringComparison.Ordinal);
         Assert.Contains("这个阶段之后的归属：", retainedRecipeZh, StringComparison.Ordinal);
         Assert.Contains("迁移期专用", retainedRecipeZh, StringComparison.Ordinal);
+        Assert.Contains("## 证据交接", retainedRecipeZh, StringComparison.Ordinal);
+        Assert.Contains("AsterGraph.ConsumerSample.Avalonia -- --proof", retainedRecipeZh, StringComparison.Ordinal);
+        Assert.Contains("[Beta Support Bundle](./support-bundle.md)", retainedRecipeZh, StringComparison.Ordinal);
+        Assert.Contains("CONSUMER_SAMPLE_OK:True", retainedRecipeZh, StringComparison.Ordinal);
+        Assert.Contains("SUPPORT_BUNDLE_OK:True", retainedRecipeZh, StringComparison.Ordinal);
+        Assert.Contains("不会新增单独的 retained 支持边界", retainedRecipeZh, StringComparison.Ordinal);
         Assert.True(retainedRecipeZh.IndexOf("## 第 0 阶段：先保留 retained 桥接", StringComparison.Ordinal)
             < retainedRecipeZh.IndexOf("## 第 1 阶段：把 command 和 query 的归属移入 session", StringComparison.Ordinal));
         Assert.True(retainedRecipeZh.IndexOf("## 第 1 阶段：把 command 和 query 的归属移入 session", StringComparison.Ordinal)
             < retainedRecipeZh.IndexOf("## 第 2 阶段：替换 retained-only helper 并退役桥接专属行为", StringComparison.Ordinal));
+        Assert.True(retainedRecipeZh.IndexOf("## 第 2 阶段：替换 retained-only helper 并退役桥接专属行为", StringComparison.Ordinal)
+            < retainedRecipeZh.IndexOf("## 证据交接", StringComparison.Ordinal));
     }
 
     private static string ReadRepoFile(string relativePath)

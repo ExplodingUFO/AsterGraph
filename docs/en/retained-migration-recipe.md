@@ -77,6 +77,16 @@ Ownership after this stage:
 - commands and queries are session-owned
 - retained helpers are legacy-only and stop being the extension path
 
+## Proof and Evidence Handoff
+
+For retained migration evidence, use the same defended hosted beta route as the rest of the public docs:
+
+- run `AsterGraph.ConsumerSample.Avalonia -- --proof`
+- if you need a local artifact, attach `artifacts/consumer-support-bundle.json` using [Beta Support Bundle](./support-bundle.md)
+- review the same public proof markers: `CONSUMER_SAMPLE_OK:True`, `COMMAND_SURFACE_OK:True`, the `HOST_NATIVE_METRIC:*` lines, and the support-bundle markers `SUPPORT_BUNDLE_OK:True` and `SUPPORT_BUNDLE_PATH:...`
+
+The retained bridge does not add a separate support boundary or a retained-only evidence lane, so maintainers can review evidence with the same public proof and bundle docs.
+
 ## Success Criteria
 
 A host is effectively off the migration-critical path once:

@@ -77,6 +77,16 @@
 - commands 和 queries 由 session 负责
 - retained helper 只剩 legacy-only 角色，不再是扩展路径
 
+## 证据交接
+
+retained 迁移的证据也走和其他 public 文档一样的 defended hosted beta 路线：
+
+- 运行 `AsterGraph.ConsumerSample.Avalonia -- --proof`
+- 如果需要本地产物，就按 [Beta Support Bundle](./support-bundle.md) 的合同附上 `artifacts/consumer-support-bundle.json`
+- 复查同一组公开 proof marker：`CONSUMER_SAMPLE_OK:True`、`COMMAND_SURFACE_OK:True`、`HOST_NATIVE_METRIC:*`，以及 support-bundle marker `SUPPORT_BUNDLE_OK:True` 和 `SUPPORT_BUNDLE_PATH:...`
+
+retained 桥接不会新增单独的 retained 支持边界，也不会引入 retained-only 的证据 lane，所以维护者可以直接用公开 proof 文档和 bundle 文档来审核。
+
 ## 成功标准
 
 宿主只要满足下面这些条件，就基本已经离开 migration-critical path：
