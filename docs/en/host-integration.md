@@ -13,7 +13,7 @@ This guide expands the supported host routes without turning the public onboardi
 
 Routes 1 and 2 are the canonical surfaces for new work. Route 3 remains supported only as a retained compatibility bridge for legacy hosts during migration.
 
-For new adopters, default to route 2 (`AsterGraphAvaloniaViewFactory`) so WPF remains adapter-2 portability validation, not a separate onboarding path.
+For new adopters, default to route 2 (`AsterGraphAvaloniaViewFactory`) so WPF remains adapter-2 portability validation only, not a separate onboarding path or parity promise.
 
 If the host owns its UI, route 1 is the canonical native/custom-UI path; you compose your own surface around the same session/runtime owner instead of introducing a second model.
 
@@ -44,7 +44,7 @@ If you are starting new work, begin with [Quick Start](./quick-start.md) and kee
 
 ## Second Adapter Contract
 
-`v0.9.0-beta` locks `WPF` as adapter 2. Avalonia remains the only shipped hosted adapter today; the second-adapter milestone exists to validate portability on the same canonical route, not to add adapter-specific runtime APIs or a separate onboarding path.
+The current public beta line locks `WPF` as adapter 2. Avalonia remains the only shipped hosted adapter today; the second-adapter milestone exists to validate portability on the same canonical route, not to add adapter-specific runtime APIs, a separate onboarding path, or a parity promise.
 
 Use the [Adapter Capability Matrix](./adapter-capability-matrix.md) vocabulary consistently:
 
@@ -56,8 +56,8 @@ Use the [Adapter Capability Matrix](./adapter-capability-matrix.md) vocabulary c
 
 Retained migration is not `Fallback`. It remains a compatibility bridge for legacy hosts.
 
-- `WPF Partial` means the host stays on the canonical session/runtime route and fills the missing stock surface with host-owned projection from session/query snapshots.
-- `WPF Fallback` means the host still stays on the canonical session/runtime route and uses host-owned projection from documented proof/sample paths.
+- `WPF Partial` means the host stays on the canonical session/runtime route and fills the missing stock surface with host-owned projection from session/query snapshots; it is validation-only, not parity.
+- `WPF Fallback` means the host still stays on the canonical session/runtime route and uses host-owned projection from documented proof/sample paths; it is validation-only, not parity.
 - That documented fallback never switches to retained-MVVM or adapter-specific runtime APIs.
 
 ## Official Capability Modules

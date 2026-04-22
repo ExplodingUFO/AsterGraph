@@ -43,12 +43,12 @@
 
 ## Known Limitations
 
-- the latest public prerelease tag is `v0.10.0-beta`, while `v1.9` remains only as a historical pre-launch milestone marker
+- the matching public prerelease tag for this package line is `v0.10.0-beta`, and the legacy `v1.x`-style pre-launch checkpoint series remain historical only
 - public prerelease publishing and release artifacts still depend on the maintainer release flow
 - the deepest package-validation lane and the `.NET 10` packed-consumer proof still run on the Windows release-validation path
 - retained compatibility APIs are still present during the migration window, but they are only a migration bridge
 - the current shipped hosted adapter is still Avalonia
-- `v0.10.0-beta` locks `WPF` as adapter 2, but parity is not implied until the [Adapter Capability Matrix](./adapter-capability-matrix.md) is filled with `Supported`, `Partial`, and `Fallback`
+- the current public beta line locks `WPF` as adapter 2; that validation stays non-parity until the [Adapter Capability Matrix](./adapter-capability-matrix.md) is filled with `Supported`, `Partial`, and `Fallback`
 - advanced editing is now published as host-facing capability modules, but broader ecosystem and adapter validation work remains ahead
 
 ## Recommended Entry Points

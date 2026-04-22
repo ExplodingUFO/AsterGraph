@@ -32,8 +32,8 @@ Avalonia 包是第一个官方 adapter，不是整个 SDK 的唯一形态。
 
 - `AsterGraph.Editor` 持有 runtime model 和 canonical host contract。
 - `AsterGraph.Avalonia` 消费共享的 `Scene/Interaction` seam，并补上 Avalonia 专属的渲染与组合。
-- `WPF` 已经被锁定为 `v0.9.0-beta` 的 adapter 2 目标，它必须复用同一套 `Editor Kernel` + `Scene/Interaction` 形状，而不是复制一份 editor semantics。
-- Avalonia/WPF 之间的差异要通过 [Adapter Capability Matrix](./adapter-capability-matrix.md) 里的 `supported` / `partial` / `fallback` 公开，而不是靠新的 adapter 专属 runtime API 去掩盖。
+- `WPF` 已经被锁定为当前公开 beta 线的 adapter 2 目标，它必须复用同一套 `Editor Kernel` + `Scene/Interaction` 形状，而不是复制一份 editor semantics。
+- Avalonia/WPF 之间的差异要通过 [Adapter Capability Matrix](./adapter-capability-matrix.md) 里的 `supported` / `partial` / `fallback` 公开；其中 `partial` / `fallback` 表示 validation-only，不代表 parity，也不代表已经与 Avalonia 对齐。
 
 ## Official Capability Modules
 

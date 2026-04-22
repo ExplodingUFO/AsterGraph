@@ -1,6 +1,6 @@
 # AsterGraph Public Launch Checklist
 
-Use this checklist immediately before making the repository public or pushing the first public beta tag.
+Use this checklist immediately before making the repository public or pushing the public prerelease tag that matches the package version.
 
 ## 1. Visibility And Branch Policy
 
@@ -11,10 +11,10 @@ Use this checklist immediately before making the repository public or pushing th
 
 ## 2. Public Repo Surface
 
-- confirm `README.md` and `README.zh-CN.md` both point to the current public-alpha docs and entry matrix
+- confirm `README.md` and `README.zh-CN.md` both point to the current public beta docs and entry matrix
 - confirm `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, and `SECURITY.md` are present and still accurate
 - confirm issue templates and the pull request template are enabled in `.github`
-- confirm repository description, topics, and homepage match the current alpha narrative
+- confirm repository description, topics, and homepage match the current prerelease narrative
 
 ## 3. Required Validation
 
@@ -67,11 +67,11 @@ Expected high-signal markers:
 - `SCALE_HISTORY_CONTRACT_OK:...`
 - `COVERAGE_REPORT_OK:...`
 
-## 5. First Public Beta Tag
+## 5. Public Prerelease Tag
 
 - confirm the working tree is clean
 - push the release branch or `master` state that should back the tag
-- create and push the next public tag in the form `v0.10.0-beta`
+- create and push the public tag that matches the package version
 - watch `.github/workflows/release.yml` from start to finish
 - remember that the prerelease workflow now enforces an exact tag-to-package-version match
 - confirm the generated prerelease notes begin with the automated header block:
@@ -80,10 +80,11 @@ Expected high-signal markers:
   - optional legacy historical repo checkpoint reference
 - confirm the generated prerelease notes also publish the proof summary block, not only workflow artifacts
 - confirm the generated notes and announcement text explicitly call out the current adapter matrix plus the `HELLOWORLD_WPF_OK` and `ADAPTER_CAPABILITY_MATRIX` markers
+- treat `HELLOWORLD_WPF_OK` as adapter-2 validation only; do not present it as Avalonia/WPF parity when describing the adapter story
 - if `NUGET_API_KEY` is configured, confirm package publication succeeds
 - if `NUGET_API_KEY` is not configured, confirm the workflow reports a deliberate NuGet publish skip instead of a failure
-- do not present historical milestone-style tags such as `v1.9` as the current public package version; use [Versioning](./versioning.md) as the public rule
-- in the first screen of release notes, list the installable package version first, the matching public tag second, and any legacy `v1.x` milestone reference only as historical context
+- do not present legacy `v1.x`-style historical milestone checkpoints as the current public package version; use [Versioning](./versioning.md) as the public rule
+- in the first screen of release notes, list the installable package version first, the matching public tag second, and any legacy `v1.x`-style milestone reference only as historical context
 
 For a maintainer-driven manual beta publish without pushing a new tag:
 
@@ -91,7 +92,7 @@ For a maintainer-driven manual beta publish without pushing a new tag:
 - open `Actions > prerelease > Run workflow`
 - set `publish_to_nuget` to `true`
 - optionally set `release_ref` to the branch or `v*` tag that should be packed
-- keep using the committed `0.10.0-beta` package version; the manual path publishes the version already checked into the repository
+- keep using the committed package version; the manual path publishes the version already checked into the repository
 - leave GitHub prerelease creation tag-driven; manual dispatch is only the NuGet publish escape hatch
 
 ## 6. Public Entry Guidance

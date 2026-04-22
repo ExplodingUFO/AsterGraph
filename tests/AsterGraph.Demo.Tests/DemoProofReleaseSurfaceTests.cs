@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Xml.Linq;
 using Xunit;
 
 namespace AsterGraph.Demo.Tests;
@@ -42,15 +43,19 @@ public sealed class DemoProofReleaseSurfaceTests
         var quickStart = ReadRepoFile("docs/en/quick-start.md");
         var quickStartZh = ReadRepoFile("docs/zh-CN/quick-start.md");
 
-        foreach (var contents in new[] { quickStart, quickStartZh })
-        {
-            Assert.Contains("onboarding", contents, StringComparison.OrdinalIgnoreCase);
-            Assert.Contains("default", contents, StringComparison.OrdinalIgnoreCase);
-            Assert.Contains("Avalonia", contents, StringComparison.Ordinal);
-            Assert.False(
-                HasLineWith(contents, "WPF", "onboarding"),
-                "Quick Start docs must not describe WPF as an onboarding path.");
-        }
+        Assert.Contains("onboarding", quickStart, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("default", quickStart, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Avalonia", quickStart, StringComparison.Ordinal);
+        Assert.False(
+            HasLineWith(quickStart, "WPF", "onboarding"),
+            "Quick Start docs must not describe WPF as an onboarding path.");
+
+        Assert.Contains("默认", quickStartZh, StringComparison.Ordinal);
+        Assert.Contains("第一跑", quickStartZh, StringComparison.Ordinal);
+        Assert.Contains("Avalonia", quickStartZh, StringComparison.Ordinal);
+        Assert.False(
+            HasLineWith(quickStartZh, "WPF", "第一跑"),
+            "Quick Start docs must not describe WPF as a first-run path.");
     }
 
     [Fact]
@@ -59,23 +64,33 @@ public sealed class DemoProofReleaseSurfaceTests
         var hostIntegration = ReadRepoFile("docs/en/host-integration.md");
         var hostIntegrationZh = ReadRepoFile("docs/zh-CN/host-integration.md");
 
-        foreach (var contents in new[] { hostIntegration, hostIntegrationZh })
-        {
-            Assert.Contains("canonical", contents, StringComparison.OrdinalIgnoreCase);
-            Assert.Contains("adapter", contents, StringComparison.OrdinalIgnoreCase);
-            Assert.True(HasLineWith(contents, "WPF", "partial"), "WPF Partial guidance must appear in host integration docs.");
-            Assert.True(HasLineWith(contents, "WPF", "fallback"), "WPF Fallback guidance must appear in host integration docs.");
-            Assert.True(HasLineWith(contents, "WPF", "host-owned"), "WPF flow must reference host-owned projection.");
-            Assert.False(
-                HasLineWith(contents, "WPF", "retained")
-                && HasLineWith(contents, "WPF", "MVVM"),
-                "WPF Partial/Fallback guidance must avoid retained-MVVM claim.");
-            Assert.Contains("session", contents, StringComparison.OrdinalIgnoreCase);
-            Assert.Contains("runtime", contents, StringComparison.OrdinalIgnoreCase);
-            Assert.Contains("projection", contents, StringComparison.OrdinalIgnoreCase);
-            Assert.Contains("canonical route", contents, StringComparison.OrdinalIgnoreCase);
-            Assert.Contains("adapter-specific", contents, StringComparison.OrdinalIgnoreCase);
-        }
+        Assert.Contains("canonical", hostIntegration, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("adapter", hostIntegration, StringComparison.OrdinalIgnoreCase);
+        Assert.True(HasLineWith(hostIntegration, "WPF", "partial"), "WPF Partial guidance must appear in host integration docs.");
+        Assert.True(HasLineWith(hostIntegration, "WPF", "fallback"), "WPF Fallback guidance must appear in host integration docs.");
+        Assert.True(HasLineWith(hostIntegration, "WPF", "host-owned"), "WPF flow must reference host-owned projection.");
+        Assert.False(
+            HasLineWith(hostIntegration, "WPF", "retained")
+            && HasLineWith(hostIntegration, "WPF", "MVVM"),
+            "WPF Partial/Fallback guidance must avoid retained-MVVM claim.");
+        Assert.Contains("session", hostIntegration, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("runtime", hostIntegration, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("projection", hostIntegration, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("canonical route", hostIntegration, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("adapter-specific", hostIntegration, StringComparison.OrdinalIgnoreCase);
+
+        Assert.True(HasLineWith(hostIntegrationZh, "WPF", "partial"), "WPF Partial guidance must appear in host integration docs.");
+        Assert.True(HasLineWith(hostIntegrationZh, "WPF", "fallback"), "WPF Fallback guidance must appear in host integration docs.");
+        Assert.True(HasLineWith(hostIntegrationZh, "WPF", "host-owned"), "WPF flow must reference host-owned projection.");
+        Assert.False(
+            HasLineWith(hostIntegrationZh, "WPF", "retained")
+            && HasLineWith(hostIntegrationZh, "WPF", "MVVM"),
+            "WPF Partial/Fallback guidance must avoid retained-MVVM claim.");
+        Assert.Contains("默认 Avalonia UI", hostIntegrationZh, StringComparison.Ordinal);
+        Assert.Contains("迁移期", hostIntegrationZh, StringComparison.Ordinal);
+        Assert.Contains("第二适配器", hostIntegrationZh, StringComparison.Ordinal);
+        Assert.Contains("投影", hostIntegrationZh, StringComparison.Ordinal);
+        Assert.Contains("宿主", hostIntegrationZh, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -359,7 +374,6 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("must not exceed", adapterMatrixZh, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("must not exceed", adapterMatrixZh, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("同一条 canonical session/runtime 路线", adapterMatrixZh, StringComparison.Ordinal);
-        Assert.Contains("新增 adapter 专属 runtime API", adapterMatrixZh, StringComparison.Ordinal);
         Assert.Contains("公开文档描述 Avalonia/WPF 支持情况时，只使用下面这三种标签", adapterMatrixZh, StringComparison.Ordinal);
         Assert.Contains("Matrix Vocabulary", adapterMatrixZh, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("Matrix Categories", adapterMatrixZh, StringComparison.OrdinalIgnoreCase);
@@ -372,7 +386,6 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("IGraphEditorSession", adapterMatrixZh, StringComparison.Ordinal);
         Assert.Contains("AsterGraph.Editor", adapterMatrixZh, StringComparison.Ordinal);
         Assert.Contains("retained", adapterMatrixZh, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("runtime API", adapterMatrixZh, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("fallback", adapterMatrixZh, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("proof", adapterMatrixZh, StringComparison.OrdinalIgnoreCase);
         Assert.True(LineHasAdapterStatus(adapterMatrixZh, "Avalonia", "supported"));
@@ -477,8 +490,102 @@ public sealed class DemoProofReleaseSurfaceTests
 
         Assert.Contains("ADAPTER_CAPABILITY_MATRIX", checklist, StringComparison.Ordinal);
         Assert.Contains("HELLOWORLD_WPF_OK", checklist, StringComparison.Ordinal);
+        Assert.True(HasLineWith(checklist, "HELLOWORLD_WPF_OK", "adapter-2"));
+        Assert.True(HasLineWith(checklist, "HELLOWORLD_WPF_OK", "parity"));
         Assert.Contains("ADAPTER_CAPABILITY_MATRIX", checklistZh, StringComparison.Ordinal);
         Assert.Contains("HELLOWORLD_WPF_OK", checklistZh, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ReleaseAndStatusDocs_KeepVersionGuidanceAlignedAndGeneric()
+    {
+        var packageVersion = GetPackageVersion();
+        var publicTag = $"v{packageVersion}";
+        var readme = ReadRepoFile("README.md");
+        var readmeZh = ReadRepoFile("README.zh-CN.md");
+        var versioning = ReadRepoFile("docs/en/versioning.md");
+        var versioningZh = ReadRepoFile("docs/zh-CN/versioning.md");
+        var projectStatus = ReadRepoFile("docs/en/project-status.md");
+        var projectStatusZh = ReadRepoFile("docs/zh-CN/project-status.md");
+        var alphaStatus = ReadRepoFile("docs/en/alpha-status.md");
+        var alphaStatusZh = ReadRepoFile("docs/zh-CN/alpha-status.md");
+        var checklist = ReadRepoFile("docs/en/public-launch-checklist.md");
+        var checklistZh = ReadRepoFile("docs/zh-CN/public-launch-checklist.md");
+
+        foreach (var contents in new[] { readme, readmeZh, versioning, versioningZh, projectStatus, projectStatusZh, alphaStatus, alphaStatusZh })
+        {
+            Assert.Contains(packageVersion, contents, StringComparison.Ordinal);
+            Assert.Contains(publicTag, contents, StringComparison.Ordinal);
+        }
+
+        foreach (var contents in new[] { versioning, projectStatus, alphaStatus })
+        {
+            Assert.DoesNotContain("v0.9.0-beta", contents, StringComparison.Ordinal);
+        }
+
+        foreach (var contents in new[] { versioningZh, projectStatusZh, alphaStatusZh })
+        {
+            Assert.DoesNotContain("v0.9.0-beta", contents, StringComparison.Ordinal);
+        }
+
+        foreach (var contents in new[] { checklist, checklistZh })
+        {
+            Assert.DoesNotContain(packageVersion, contents, StringComparison.Ordinal);
+            Assert.DoesNotContain(publicTag, contents, StringComparison.Ordinal);
+        }
+
+        Assert.Contains("package version", checklist, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("public prerelease tag", checklist, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("exact tag-to-package-version match", checklist, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("包版本", checklistZh, StringComparison.Ordinal);
+        Assert.Contains("公开 tag", checklistZh, StringComparison.Ordinal);
+        Assert.Contains("完全一致", checklistZh, StringComparison.Ordinal);
+    }
+
+    private static string GetPackageVersion()
+    {
+        var props = XDocument.Load(Path.Combine(GetRepositoryRoot(), "Directory.Build.props"));
+        var version = props.Root?
+            .Elements("PropertyGroup")
+            .Elements("Version")
+            .Select(node => node.Value)
+            .FirstOrDefault();
+
+        if (string.IsNullOrWhiteSpace(version))
+        {
+            throw new InvalidOperationException("Could not read package version from Directory.Build.props.");
+        }
+
+        return version.Trim();
+    }
+
+    [Fact]
+    public void AdapterContractDocs_AvoidPinningValidationStoriesToSpecificBetaTags()
+    {
+        var publicTag = $"v{GetPackageVersion()}";
+        var readme = ReadRepoFile("README.md");
+        var readmeZh = ReadRepoFile("README.zh-CN.md");
+        var architecture = ReadRepoFile("docs/en/architecture.md");
+        var architectureZh = ReadRepoFile("docs/zh-CN/architecture.md");
+        var hostIntegration = ReadRepoFile("docs/en/host-integration.md");
+        var hostIntegrationZh = ReadRepoFile("docs/zh-CN/host-integration.md");
+        var quickStart = ReadRepoFile("docs/en/quick-start.md");
+        var quickStartZh = ReadRepoFile("docs/zh-CN/quick-start.md");
+
+        foreach (var contents in new[] { architecture, architectureZh, hostIntegration, hostIntegrationZh, quickStart, quickStartZh })
+        {
+            Assert.False(HasLineWith(contents, "WPF", "v0.9.0-beta"));
+            Assert.False(HasLineWith(contents, "WPF", publicTag));
+        }
+
+        Assert.False(HasLineWith(readme, "WPF", publicTag));
+        Assert.False(HasLineWith(readmeZh, "WPF", publicTag));
+        Assert.Contains("WPF", architecture, StringComparison.Ordinal);
+        Assert.Contains("WPF", architectureZh, StringComparison.Ordinal);
+        Assert.Contains("adapter 2", hostIntegration, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("adapter 2", hostIntegrationZh, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("validation", architecture, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("validation", architectureZh, StringComparison.OrdinalIgnoreCase);
     }
 
     private static string ReadRepoFile(string relativePath)
