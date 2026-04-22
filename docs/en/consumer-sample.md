@@ -1,4 +1,4 @@
-# Consumer Sample
+﻿# Consumer Sample
 
 `tools/AsterGraph.ConsumerSample.Avalonia` is the medium hosted-UI sample on the canonical session/runtime route, after the starter scaffold and the smallest `HelloWorld.Avalonia` route, and before the full `AsterGraph.Demo` showcase host.
 
@@ -22,6 +22,24 @@ This sample keeps one realistic host window without turning into a full showcase
 - shared parameter editing through `IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()` and `IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)`
 - one trusted plugin registration with visible provenance, trust reasons, and allowlist import or export
 - the shipped Avalonia editor surface on the factory-based hosted-UI route
+
+## Trust and proof quick reference
+
+Copyable trust and proof reference:
+
+```powershell
+dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.ConsumerSample.Avalonia.csproj --nologo -- --proof
+```
+
+Expected public markers:
+
+- `CONSUMER_SAMPLE_TRUST_OK:True`
+- `COMMAND_SURFACE_OK:True`
+- `HOST_NATIVE_METRIC:*`
+- `SUPPORT_BUNDLE_OK:True`
+- `SUPPORT_BUNDLE_PATH:...`
+
+The support bundle stays local evidence only and does not widen the support boundary.
 
 ## Run It
 

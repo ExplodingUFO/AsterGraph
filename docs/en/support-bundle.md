@@ -1,4 +1,4 @@
-# Beta Support Bundle
+﻿# Beta Support Bundle
 
 This is the local evidence contract for beta evaluation and support.
 It does not upload anything and it does not imply telemetry or hosted services.
@@ -15,6 +15,16 @@ Expected additional proof markers:
 
 - `SUPPORT_BUNDLE_OK:True`
 - `SUPPORT_BUNDLE_PATH:...`
+
+## Local Evidence Only
+
+Copyable local evidence reference:
+
+```powershell
+dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.ConsumerSample.Avalonia.csproj --nologo -- --proof --support-bundle artifacts/consumer-support-bundle.json --support-note "what you were trying to validate"
+```
+
+Local evidence only means this bundle remains tied to the defended hosted route and does not widen the support boundary.
 
 ## Contract
 

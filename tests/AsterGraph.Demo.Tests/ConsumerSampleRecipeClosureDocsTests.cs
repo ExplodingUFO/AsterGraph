@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using Xunit;
 
@@ -51,6 +51,34 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
         AssertContains(consumerSampleZh, "不提供 sandbox");
         AssertContains(consumerSampleZh, "IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()");
         AssertContains(consumerSampleZh, "IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)");
+    }
+
+    [Fact]
+    public void ConsumerSampleRecipeClosureDocs_SurfaceDedicatedTrustAndProofCopyBlocks()
+    {
+        var readme = ReadRepoFile("tools/AsterGraph.ConsumerSample.Avalonia/README.md");
+        var consumerSampleEn = ReadRepoFile("docs/en/consumer-sample.md");
+        var consumerSampleZh = ReadRepoFile("docs/zh-CN/consumer-sample.md");
+        var supportBundleEn = ReadRepoFile("docs/en/support-bundle.md");
+        var supportBundleZh = ReadRepoFile("docs/zh-CN/support-bundle.md");
+
+        AssertContains(readme, "Trust and proof quick reference");
+        AssertContains(readme, "Copyable trust and proof reference");
+
+        AssertContains(consumerSampleEn, "Trust and proof quick reference");
+        AssertContains(consumerSampleEn, "Copyable trust and proof reference");
+        AssertContains(consumerSampleEn, "SUPPORT_BUNDLE_OK:True");
+        AssertContains(consumerSampleEn, "CONSUMER_SAMPLE_TRUST_OK:True");
+
+        AssertContains(consumerSampleZh, "信任与证明速查");
+        AssertContains(consumerSampleZh, "可复制的信任与证明参考");
+        AssertContains(consumerSampleZh, "SUPPORT_BUNDLE_OK:True");
+        AssertContains(consumerSampleZh, "CONSUMER_SAMPLE_TRUST_OK:True");
+
+        AssertContains(supportBundleEn, "Local evidence only");
+        AssertContains(supportBundleEn, "Copyable local evidence reference");
+        AssertContains(supportBundleZh, "仅限本地证据");
+        AssertContains(supportBundleZh, "可复制的本地证据参考");
     }
 
     private static void AssertContains(string contents, string expected)

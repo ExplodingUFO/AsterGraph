@@ -1,4 +1,4 @@
-# Consumer Sample
+﻿# Consumer Sample
 
 `tools/AsterGraph.ConsumerSample.Avalonia` 是位于 canonical session/runtime 路线上的中等 hosted-UI 样例，排在 starter 脚手架和最小 `HelloWorld.Avalonia` 路线之后、完整 `AsterGraph.Demo` 展示宿主之前。
 
@@ -22,6 +22,24 @@
 - 通过 `IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()` 和 `IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)` 做共享参数编辑
 - 一个可信插件注册，以及可见的 provenance、trust reason 和 allowlist 导入/导出
 - 基于 factory 的默认 Avalonia hosted-UI 路线
+
+## 信任与证明速查
+
+可复制的信任与证明参考：
+
+```powershell
+dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.ConsumerSample.Avalonia.csproj --nologo -- --proof
+```
+
+公开 marker 预期如下：
+
+- `CONSUMER_SAMPLE_TRUST_OK:True`
+- `COMMAND_SURFACE_OK:True`
+- `HOST_NATIVE_METRIC:*`
+- `SUPPORT_BUNDLE_OK:True`
+- `SUPPORT_BUNDLE_PATH:...`
+
+support bundle 只保留本地证据，不会扩大 support 边界。
 
 ## 如何运行
 

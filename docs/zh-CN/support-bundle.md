@@ -1,4 +1,4 @@
-# Beta Support Bundle
+﻿# Beta Support Bundle
 
 这份文档定义的是 public beta 的本地证据合同。
 它不会上传任何东西，也不代表遥测、云服务或托管后端。
@@ -15,6 +15,16 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 
 - `SUPPORT_BUNDLE_OK:True`
 - `SUPPORT_BUNDLE_PATH:...`
+
+## 仅限本地证据
+
+可复制的本地证据参考：
+
+```powershell
+dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.ConsumerSample.Avalonia.csproj --nologo -- --proof --support-bundle artifacts/consumer-support-bundle.json --support-note "what you were trying to validate"
+```
+
+这个 bundle 只保留本地证据，仍然绑定在受防守的 hosted route 上，不会扩大 support 边界。
 
 ## 合同字段
 

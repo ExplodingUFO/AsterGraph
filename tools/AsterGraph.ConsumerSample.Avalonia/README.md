@@ -1,4 +1,4 @@
-# AsterGraph.ConsumerSample.Avalonia
+﻿# AsterGraph.ConsumerSample.Avalonia
 
 This is the medium hosted-UI sample on the canonical session/runtime route, after `AsterGraph.Starter.Avalonia` and `AsterGraph.HelloWorld.Avalonia`, and before `AsterGraph.Demo`.
 It shows a host-owned action rail, plugin trust workflow, and parameter-editing composition without implying a second editor model, a sandbox, or a broader plugin ecosystem.
@@ -42,7 +42,15 @@ Expected markers:
 - `SUPPORT_BUNDLE_PATH:...`
 - `CONSUMER_SAMPLE_OK:True`
 
-The support bundle is local evidence only and does not widen the support boundary.
+## Trust and proof quick reference
+
+Copyable trust and proof reference:
+
+```powershell
+dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.ConsumerSample.Avalonia.csproj --nologo -- --proof
+```
+
+The support bundle stays local evidence only and does not widen the support boundary.
 
 ## Copyable Host Recipe
 
