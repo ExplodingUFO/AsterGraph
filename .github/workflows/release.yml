@@ -171,6 +171,19 @@ jobs:
             }
           }
 
+          if (Test-Path -LiteralPath 'artifacts/proof/wpf-adapter-capability-matrix.txt') {
+            foreach ($matrixLine in Select-String -Path 'artifacts/proof/wpf-adapter-capability-matrix.txt' -Pattern 'ADAPTER_CAPABILITY_MATRIX' | Select-Object -ExpandProperty Line) {
+              $summaryLines.Add("- $matrixLine")
+            }
+          }
+
+          if (Test-Path -LiteralPath 'artifacts/proof/hello-world-wpf-proof.txt') {
+            $helloWorldWpfLine = Select-String -Path 'artifacts/proof/hello-world-wpf-proof.txt' -Pattern '^HELLOWORLD_WPF_OK:True$' | Select-Object -First 1
+            if ($helloWorldWpfLine) {
+              $summaryLines.Add("- $($helloWorldWpfLine.Line)")
+            }
+          }
+
           if (Test-Path -LiteralPath 'artifacts/proof/scale-smoke.txt') {
             $scaleBudgetLine = Select-String -Path 'artifacts/proof/scale-smoke.txt' -Pattern 'SCALE_PERFORMANCE_BUDGET_OK' | Select-Object -First 1
             if ($scaleBudgetLine) {

@@ -8,6 +8,11 @@ namespace AsterGraph.Demo.Tests;
 
 public sealed class DemoProofReleaseSurfaceTests
 {
+    private static readonly string[] AdapterMatrixProofMarkerLines =
+    [
+        "HELLOWORLD_WPF_OK:True",
+    ];
+
     private static readonly string[] OfficialCapabilityModules =
     [
         "Selection",
@@ -85,6 +90,22 @@ public sealed class DemoProofReleaseSurfaceTests
         {
             Assert.Contains(markerId, releaseWorkflow, StringComparison.Ordinal);
         }
+
+        foreach (var markerLine in AdapterMatrixProofMarkerLines)
+        {
+            Assert.Contains(markerLine, ciWorkflow, StringComparison.Ordinal);
+            Assert.Contains(markerLine, releaseWorkflow, StringComparison.Ordinal);
+        }
+    }
+
+    [Fact]
+    public void CiScript_CapturesWpfAdapterMatrixProofArtifact()
+    {
+        var script = ReadRepoFile("eng/ci.ps1");
+
+        Assert.Contains("helloWorldWpfProofPath", script, StringComparison.Ordinal);
+        Assert.Contains("HELLOWORLD_WPF_OK:True", script, StringComparison.Ordinal);
+        Assert.Contains("Validate WPF richer sample proof", script, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -244,21 +265,33 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("Supported", adapterMatrix, StringComparison.Ordinal);
         Assert.Contains("Partial", adapterMatrix, StringComparison.Ordinal);
         Assert.Contains("Fallback", adapterMatrix, StringComparison.Ordinal);
+        Assert.DoesNotContain("Phase 154", adapterMatrix, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("CreateSession(...)", adapterMatrix, StringComparison.Ordinal);
         Assert.Contains("IGraphEditorSession", adapterMatrix, StringComparison.Ordinal);
         Assert.Contains("AsterGraph.Editor", adapterMatrix, StringComparison.Ordinal);
         Assert.Contains("adapter-specific runtime APIs", adapterMatrix, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("Retained migration is not", adapterMatrix, StringComparison.Ordinal);
+        Assert.Contains("Fallback Rule", adapterMatrix, StringComparison.Ordinal);
+        Assert.Contains("lower-level documented path", adapterMatrix, StringComparison.OrdinalIgnoreCase);
+        Assert.True(LineHasAdapterStatus(adapterMatrix, "Avalonia", "supported"));
+        Assert.True(LineHasAdapterStatus(adapterMatrix, "WPF", "partial"));
+        Assert.True(LineHasAdapterStatus(adapterMatrix, "WPF", "fallback"));
 
         Assert.Contains("adapter 2", adapterMatrixZh, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("supported", adapterMatrixZh, StringComparison.Ordinal);
         Assert.Contains("partial", adapterMatrixZh, StringComparison.Ordinal);
         Assert.Contains("fallback", adapterMatrixZh, StringComparison.Ordinal);
+        Assert.DoesNotContain("Phase 154", adapterMatrixZh, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("CreateSession(...)", adapterMatrixZh, StringComparison.Ordinal);
         Assert.Contains("IGraphEditorSession", adapterMatrixZh, StringComparison.Ordinal);
         Assert.Contains("AsterGraph.Editor", adapterMatrixZh, StringComparison.Ordinal);
         Assert.Contains("retained", adapterMatrixZh, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("runtime API", adapterMatrixZh, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("fallback", adapterMatrixZh, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("proof", adapterMatrixZh, StringComparison.OrdinalIgnoreCase);
+        Assert.True(LineHasAdapterStatus(adapterMatrixZh, "Avalonia", "supported"));
+        Assert.True(LineHasAdapterStatus(adapterMatrixZh, "WPF", "partial"));
+        Assert.True(LineHasAdapterStatus(adapterMatrixZh, "WPF", "fallback"));
     }
 
     [Fact]
@@ -281,6 +314,7 @@ public sealed class DemoProofReleaseSurfaceTests
             proofRoot,
             "demo-proof.txt",
             string.Join("`n", ["DEMO_OK:True", .. DemoProofContract.CreatePublicSuccessMarkerLines()]));
+        WriteProofFile(proofRoot, "hello-world-wpf-proof.txt", string.Join("`n", AdapterMatrixProofMarkerLines));
 
         var coveragePath = Path.Combine(tempRoot, "coverage-summary.json");
         File.WriteAllText(
@@ -322,6 +356,11 @@ public sealed class DemoProofReleaseSurfaceTests
         foreach (var requiredProofLine in new[] { "DEMO_OK:True" }.Concat(DemoProofContract.CreatePublicSuccessMarkerLines()))
         {
             Assert.Contains(requiredProofLine, notes, StringComparison.Ordinal);
+        }
+
+        foreach (var requiredMatrixProofLine in AdapterMatrixProofMarkerLines)
+        {
+            Assert.Contains(requiredMatrixProofLine, notes, StringComparison.Ordinal);
         }
 
         Assert.Contains("SCALE_PERFORMANCE_BUDGET_OK:baseline:True:none", notes, StringComparison.Ordinal);
@@ -379,4 +418,13 @@ public sealed class DemoProofReleaseSurfaceTests
 
     private static void WriteProofFile(string proofRoot, string fileName, string contents)
         => File.WriteAllText(Path.Combine(proofRoot, fileName), contents.Replace("`n", Environment.NewLine, StringComparison.Ordinal));
+
+    private static bool LineHasAdapterStatus(string contents, string subject, string requiredStatus)
+    {
+        return contents
+            .Split('\n')
+            .Any(line =>
+                line.Contains(subject, StringComparison.OrdinalIgnoreCase) &&
+                line.Contains(requiredStatus, StringComparison.OrdinalIgnoreCase));
+    }
 }
