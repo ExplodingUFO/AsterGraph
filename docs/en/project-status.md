@@ -23,6 +23,7 @@
 - canonical adoption path:
   - runtime-only hosts use `AsterGraphEditorFactory.CreateSession(...)` + `IGraphEditorSession`
   - Avalonia UI hosts use `AsterGraphEditorFactory.Create(...)` plus `AsterGraphAvaloniaViewFactory.Create(...)`
+- active next adapter target: `WPF` as adapter 2 under the [Adapter Capability Matrix](./adapter-capability-matrix.md)
 
 ## What Is Already Stable Enough To Evaluate
 
@@ -64,6 +65,7 @@ The current public-repo priority is turning the public alpha into a coherent SDK
 - maintain hosted CI parity across the supported proof lanes
 - continue the retained compatibility migration window without abrupt public breaks
 - keep the shipped starter scaffold, runtime inspection surface, command/trust timeline, and perf overlay aligned with the canonical session-first route
+- validate `WPF` as adapter 2 on the same canonical route and publish Avalonia/WPF status using `Supported`, `Partial`, and `Fallback`
 
 ## Public Entry Matrix
 
@@ -89,4 +91,5 @@ The current public-repo priority is turning the public alpha into a coherent SDK
 - [Alpha Status](./alpha-status.md)
 - [Public Launch Checklist](./public-launch-checklist.md)
 - [Host Integration](./host-integration.md)
+- [Adapter Capability Matrix](./adapter-capability-matrix.md)
 - [Demo Guide](./demo-guide.md)

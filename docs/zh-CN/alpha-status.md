@@ -47,6 +47,7 @@
 - 最深的 package validation lane 目前仍以 Windows 为主
 - retained compatibility API 仍处于迁移窗口内，但只作为迁移桥接
 - 当前 public alpha 仍然只有一套官方 UI adapter：Avalonia
+- `v0.9.0-beta` 已经锁定 `WPF` 作为 adapter 2，但在 [Adapter Capability Matrix](./adapter-capability-matrix.md) 真正用 `supported` / `partial` / `fallback` 填出来之前，不代表已经承诺对齐
 - advanced editing 已经作为宿主能力模块公开，但更广的 ecosystem 与第二 adapter 验证仍在后续阶段
 
 ## 推荐入口
@@ -61,6 +62,7 @@
 - [Retained 到 Session 的迁移 Recipe](./retained-migration-recipe.md)
 - [Public Launch Checklist](./public-launch-checklist.md)
 - [Host Integration](./host-integration.md)
+- [Adapter Capability Matrix](./adapter-capability-matrix.md)
 - [State Contracts](./state-contracts.md)
 - [Extension Contracts](./extension-contracts.md)
 - [Demo Guide](./demo-guide.md)

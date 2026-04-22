@@ -32,13 +32,14 @@ Avalonia 包是第一个官方 adapter，不是整个 SDK 的唯一形态。
 
 - `AsterGraph.Editor` 持有 runtime model 和 canonical host contract。
 - `AsterGraph.Avalonia` 消费共享的 `Scene/Interaction` seam，并补上 Avalonia 专属的渲染与组合。
-- 后续 adapter 应复用同一套 `Editor Kernel` + `Scene/Interaction` 形状，而不是复制一份 editor semantics。
+- `WPF` 已经被锁定为 `v0.9.0-beta` 的 adapter 2 目标，它必须复用同一套 `Editor Kernel` + `Scene/Interaction` 形状，而不是复制一份 editor semantics。
+- Avalonia/WPF 之间的差异要通过 [Adapter Capability Matrix](./adapter-capability-matrix.md) 里的 `supported` / `partial` / `fallback` 公开，而不是靠新的 adapter 专属 runtime API 去掩盖。
 
 ## Official Capability Modules
 
 这些 `Official Capability Modules` 是建立在平台骨架之上的公开模块名：`Selection`、`History`、`Clipboard`、`Shortcut Policy`、`Layout`、`MiniMap`、`Stencil`、`Fragment Library`、`Export`、`Baseline Edge Authoring`、`Node Surface Authoring`、`Hierarchy Semantics`、`Composite Scope Authoring`、`Edge Semantics`、`Edge Geometry Tooling`。它们都根植于 canonical runtime/session contract，不是另一套 route 名称。
 
-模块到 seam 的映射看 [Host Integration](./host-integration.md)，proof / sample 锚点看 [Quick Start](./quick-start.md)。
+模块到 seam 的映射看 [Host Integration](./host-integration.md)，第二适配器合同看 [Adapter Capability Matrix](./adapter-capability-matrix.md)，proof / sample 锚点看 [Quick Start](./quick-start.md)。
 
 ## Proof Ring
 

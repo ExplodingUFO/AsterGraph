@@ -197,6 +197,71 @@ public sealed class DemoProofReleaseSurfaceTests
     }
 
     [Fact]
+    public void SecondAdapterDocs_LockWpfAdapterMatrixContractAcrossLanguages()
+    {
+        var readme = ReadRepoFile("README.md");
+        var readmeZh = ReadRepoFile("README.zh-CN.md");
+        var hostIntegration = ReadRepoFile("docs/en/host-integration.md");
+        var hostIntegrationZh = ReadRepoFile("docs/zh-CN/host-integration.md");
+        var architecture = ReadRepoFile("docs/en/architecture.md");
+        var architectureZh = ReadRepoFile("docs/zh-CN/architecture.md");
+        var projectStatus = ReadRepoFile("docs/en/project-status.md");
+        var projectStatusZh = ReadRepoFile("docs/zh-CN/project-status.md");
+        var alphaStatus = ReadRepoFile("docs/en/alpha-status.md");
+        var alphaStatusZh = ReadRepoFile("docs/zh-CN/alpha-status.md");
+        var quickStart = ReadRepoFile("docs/en/quick-start.md");
+        var quickStartZh = ReadRepoFile("docs/zh-CN/quick-start.md");
+        var adapterMatrix = ReadRepoFile("docs/en/adapter-capability-matrix.md");
+        var adapterMatrixZh = ReadRepoFile("docs/zh-CN/adapter-capability-matrix.md");
+
+        foreach (var contents in new[]
+                 {
+                     readme,
+                     readmeZh,
+                     hostIntegration,
+                     hostIntegrationZh,
+                     architecture,
+                     architectureZh,
+                     projectStatus,
+                     projectStatusZh,
+                     alphaStatus,
+                     alphaStatusZh,
+                     quickStart,
+                     quickStartZh,
+                     adapterMatrix,
+                     adapterMatrixZh,
+                 })
+        {
+            Assert.Contains("WPF", contents, StringComparison.Ordinal);
+        }
+
+        foreach (var contents in new[] { readme, readmeZh, hostIntegration, hostIntegrationZh, architecture, architectureZh, projectStatus, projectStatusZh, alphaStatus, alphaStatusZh, quickStart, quickStartZh })
+        {
+            Assert.Contains("adapter-capability-matrix.md", contents, StringComparison.OrdinalIgnoreCase);
+        }
+
+        Assert.Contains("adapter 2", adapterMatrix, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Supported", adapterMatrix, StringComparison.Ordinal);
+        Assert.Contains("Partial", adapterMatrix, StringComparison.Ordinal);
+        Assert.Contains("Fallback", adapterMatrix, StringComparison.Ordinal);
+        Assert.Contains("CreateSession(...)", adapterMatrix, StringComparison.Ordinal);
+        Assert.Contains("IGraphEditorSession", adapterMatrix, StringComparison.Ordinal);
+        Assert.Contains("AsterGraph.Editor", adapterMatrix, StringComparison.Ordinal);
+        Assert.Contains("adapter-specific runtime APIs", adapterMatrix, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Retained migration is not", adapterMatrix, StringComparison.Ordinal);
+
+        Assert.Contains("adapter 2", adapterMatrixZh, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("supported", adapterMatrixZh, StringComparison.Ordinal);
+        Assert.Contains("partial", adapterMatrixZh, StringComparison.Ordinal);
+        Assert.Contains("fallback", adapterMatrixZh, StringComparison.Ordinal);
+        Assert.Contains("CreateSession(...)", adapterMatrixZh, StringComparison.Ordinal);
+        Assert.Contains("IGraphEditorSession", adapterMatrixZh, StringComparison.Ordinal);
+        Assert.Contains("AsterGraph.Editor", adapterMatrixZh, StringComparison.Ordinal);
+        Assert.Contains("retained", adapterMatrixZh, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("runtime API", adapterMatrixZh, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public void WritePrereleaseNotes_IncludeDemoProofMarkersInProofSummary()
     {
         var tempRoot = CreateTempDirectory();

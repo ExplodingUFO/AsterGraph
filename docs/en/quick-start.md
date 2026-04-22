@@ -73,6 +73,7 @@ The sample README is [`tools/AsterGraph.ConsumerSample.Avalonia/README.md`](../.
 
 For new work, start with the runtime/session route or the shipped Avalonia route. Treat the retained route as migration-only.
 If the host owns its UI, the runtime/session route is the canonical native path; `Editor.Session` still owns host actions, diagnostics, automation, and proof logic.
+Quick Start remains Avalonia-first today. `v0.9.0-beta` validates `WPF` as adapter 2 on the same canonical route; see [Adapter Capability Matrix](./adapter-capability-matrix.md) for that contract instead of treating it as a second onboarding path.
 
 ## 5. Minimal Hosted-UI Composition
 
@@ -107,6 +108,7 @@ Plugin loading is currently in-process. Hosts can discover candidates, apply an 
 
 - [Host Integration](./host-integration.md) = package boundary, route matrix, migration guidance
 - [Architecture](./architecture.md) = editor-kernel / scene-interaction / adapter split plus public stability levels
+- [Adapter Capability Matrix](./adapter-capability-matrix.md) = locked `WPF` adapter-2 contract plus `Supported` / `Partial` / `Fallback`
 - [Consumer Sample](./consumer-sample.md) = one realistic hosted integration between HelloWorld and Demo
 - [Alpha Status](./alpha-status.md) = current scope, non-goals, and known limitations
 - [Demo Guide](./demo-guide.md) = full showcase host

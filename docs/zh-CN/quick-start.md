@@ -73,6 +73,7 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 
 新代码优先使用 runtime/session 路线或默认 Avalonia 路线；retained 路线只用于迁移。
 如果宿主管的是自己的 UI，那么 runtime/session 路线就是 canonical 的原生路径；`Editor.Session` 仍然负责宿主动作、诊断、automation 和 proof 逻辑。
+Quick Start 当前仍然是 Avalonia-first。`v0.9.0-beta` 会在同一条 canonical 路线上验证 `WPF` 作为 adapter 2；这部分合同见 [Adapter Capability Matrix](./adapter-capability-matrix.md)，不要把它当成第二条上手路径。
 
 ## 5. 最小 Hosted-UI 组合
 
@@ -107,6 +108,7 @@ var view = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOption
 
 - [Host Integration](./host-integration.md) = 包边界、路线矩阵、迁移说明
 - [Architecture](./architecture.md) = editor-kernel / scene-interaction / adapter split 与公开 stability level
+- [Adapter Capability Matrix](./adapter-capability-matrix.md) = 锁定的 `WPF` adapter-2 合同，以及 `supported` / `partial` / `fallback`
 - [Consumer Sample](./consumer-sample.md) = 介于 HelloWorld 和 Demo 之间的真实宿主样例
 - [Alpha Status](./alpha-status.md) = 当前范围、非目标、已知限制
 - [Demo Guide](./demo-guide.md) = 完整展示宿主

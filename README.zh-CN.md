@@ -56,7 +56,7 @@ dotnet add package AsterGraph.Abstractions --prerelease
 | 默认 Avalonia UI | 宿主想直接复用默认编辑器壳层或独立 Avalonia 表面 | `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` | [`AsterGraph.HelloWorld.Avalonia`](./tools/AsterGraph.HelloWorld.Avalonia/) |
 | retained 迁移 | 现有宿主要分批迁移，暂时还离不开旧的 MVVM 入口 | `new GraphEditorViewModel(...)` + `new GraphEditorView { Editor = editor }` | [Host Integration](./docs/zh-CN/host-integration.md) |
 
-新的运行时能力接入优先锚定第一条。Avalonia 路线是当前受支持的 hosted adapter 路线，retained 路线只作为迁移桥接。
+新的运行时能力接入优先锚定第一条。Avalonia 路线是当前受支持的 hosted adapter 路线，retained 路线只作为迁移桥接。`v0.9.0-beta` 已经锁定 `WPF` 作为 adapter 2，后续 Avalonia/WPF 差异会通过 [Adapter Capability Matrix](./docs/zh-CN/adapter-capability-matrix.md) 里的 `supported / partial / fallback` 合同公开，而不是引入 adapter 专属 runtime API。
 
 ## 公开入口分工
 
@@ -146,6 +146,7 @@ dotnet add package AsterGraph.Abstractions --prerelease
 - [Quick Start](./docs/zh-CN/quick-start.md)
 - [Consumer Sample](./docs/zh-CN/consumer-sample.md)
 - [Host Integration](./docs/zh-CN/host-integration.md)
+- [Adapter Capability Matrix](./docs/zh-CN/adapter-capability-matrix.md)
 - [Advanced Editing Guide](./docs/zh-CN/advanced-editing.md)
 - [ScaleSmoke 基线](./docs/zh-CN/scale-baseline.md)
 - [Authoring Inspector Recipe](./docs/zh-CN/authoring-inspector-recipe.md)

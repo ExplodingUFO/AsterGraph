@@ -23,6 +23,7 @@
 - 推荐接入路径：
   - runtime-only 宿主使用 `AsterGraphEditorFactory.CreateSession(...)` + `IGraphEditorSession`
   - Avalonia UI 宿主使用 `AsterGraphEditorFactory.Create(...)` 加 `AsterGraphAvaloniaViewFactory.Create(...)`
+- 当前已锁定的下一阶段 adapter 目标：`WPF` 作为 adapter 2，合同见 [Adapter Capability Matrix](./adapter-capability-matrix.md)
 
 ## 已经足够对外评估的部分
 
@@ -64,6 +65,7 @@
 - 继续维护托管 CI 与核心验证 lane 的一致性
 - 在不突然 breaking 的前提下继续保留兼容迁移窗口
 - 让 shipped starter scaffold、runtime inspection surface、command/trust timeline 和 perf overlay 继续对齐 canonical session-first 路线
+- 在不扩 runtime surface 的前提下验证 `WPF` 作为 adapter 2，并用 `supported` / `partial` / `fallback` 发布 Avalonia/WPF 的公开状态
 
 ## 公开入口分工
 
@@ -89,4 +91,5 @@
 - [Alpha 状态](./alpha-status.md)
 - [Public Launch Checklist](./public-launch-checklist.md)
 - [Host Integration](./host-integration.md)
+- [Adapter Capability Matrix](./adapter-capability-matrix.md)
 - [Demo Guide](./demo-guide.md)
