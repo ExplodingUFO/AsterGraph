@@ -1,6 +1,6 @@
 # Adoption Feedback Loop
 
-这份文档定义了 public alpha 的反馈 intake 格式，并记录了在真实外部反馈积累起来之前，用来判断下一轮主线的种子试用综合结果。
+这份文档定义了 public beta 的反馈 intake 格式，并记录了在 prerelease intake loop 还在收集足够真实外部反馈时的种子试用综合结果。
 
 ## Intake 格式
 

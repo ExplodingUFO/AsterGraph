@@ -1,6 +1,6 @@
 # Architecture
 
-This document explains the platform skeleton that underpins the current public alpha capability surface.
+This document explains the platform skeleton that underpins the current public beta capability surface for `0.10.0-beta`.
 
 ## Split
 
@@ -17,7 +17,7 @@ The public host root stays on `CreateSession(...)` + `IGraphEditorSession`. Host
 
 ## Stability Levels
 
-The public alpha exposes different stability levels on purpose:
+The public beta exposes different stability levels on purpose:
 
 | Surface | Current stability | Notes |
 | --- | --- | --- |

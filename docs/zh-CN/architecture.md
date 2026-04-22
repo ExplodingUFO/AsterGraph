@@ -1,6 +1,6 @@
 # Architecture
 
-这份文档说明支撑当前 public alpha capability surface 的平台骨架。
+这份文档说明支撑当前 public beta capability surface（`0.10.0-beta`）的平台骨架。
 
 ## Split
 
@@ -17,7 +17,7 @@ AsterGraph 当前按三层明确拆分：
 
 ## Stability Levels
 
-当前 public alpha 有意区分不同 stability level：
+当前 public beta 有意区分不同 stability level：
 
 | Surface | 当前 stability | 说明 |
 | --- | --- | --- |

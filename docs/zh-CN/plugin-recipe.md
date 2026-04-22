@@ -73,7 +73,7 @@ var editor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
 
 ## 重要边界
 
-插件加载没有 sandbox。对 public alpha 宿主，更稳妥的做法是：
+插件加载没有 sandbox。对 public beta 宿主，更稳妥的做法是：
 
 - 固定插件目录
 - 用 allowlist

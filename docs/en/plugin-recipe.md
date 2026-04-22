@@ -73,7 +73,7 @@ If the host is loading plugins from disk instead of constructing them directly:
 
 ## Important Boundary
 
-Plugin loading is not sandboxed. For public-alpha hosts:
+Plugin loading is not sandboxed. For public-beta hosts:
 
 - keep plugin directories explicit
 - prefer allowlists
