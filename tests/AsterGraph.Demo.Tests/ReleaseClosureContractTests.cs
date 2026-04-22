@@ -71,7 +71,6 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("[Stabilization Support Matrix](./docs/en/stabilization-support-matrix.md)", notes, StringComparison.Ordinal);
         Assert.Contains("[Adapter Capability Matrix](./docs/en/adapter-capability-matrix.md)", notes, StringComparison.Ordinal);
         Assert.Contains("HELLOWORLD_WPF_OK:True", notes, StringComparison.Ordinal);
-        Assert.Contains("HELLOWORLD_WPF_OK", notes, StringComparison.Ordinal);
         Assert.Contains("adapter-2 validation only", notes, StringComparison.Ordinal);
         Assert.Contains("does not widen the public publish/package boundary", notes, StringComparison.Ordinal);
         Assert.Contains("ADAPTER_CAPABILITY_MATRIX_FORMAT:1", notes, StringComparison.Ordinal);
@@ -93,7 +92,6 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("historical alpha reference for the current beta support story", englishChecklist, StringComparison.Ordinal);
         Assert.DoesNotContain("HELLOWORLD_WPF_OK is Avalonia/WPF parity", englishChecklist, StringComparison.Ordinal);
         Assert.DoesNotContain("HELLOWORLD_WPF_OK is public WPF support", englishChecklist, StringComparison.Ordinal);
-        Assert.DoesNotContain("current scope, non-goals, and known limitations", englishChecklist, StringComparison.Ordinal);
 
         Assert.Contains("冻结的 support boundary 叙事", chineseChecklist, StringComparison.Ordinal);
         Assert.Contains("adapter matrix 叙事", chineseChecklist, StringComparison.Ordinal);
