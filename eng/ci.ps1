@@ -27,6 +27,7 @@ $consumerSampleProofPath = Join-Path $proofArtifactsRoot 'consumer-sample.txt'
 $hostSamplePackedProofPath = Join-Path $proofArtifactsRoot 'hostsample-packed.txt'
 $hostSampleNet10PackedProofPath = Join-Path $proofArtifactsRoot 'hostsample-net10-packed.txt'
 $helloWorldWpfProofPath = Join-Path $proofArtifactsRoot 'hello-world-wpf-proof.txt'
+$wpfAdapterCapabilityMatrixProofPath = Join-Path $proofArtifactsRoot 'wpf-adapter-capability-matrix.txt'
 $packageSmokeProofPath = Join-Path $proofArtifactsRoot 'package-smoke.txt'
 $scaleSmokeProofPath = Join-Path $proofArtifactsRoot 'scale-smoke.txt'
 $demoProofPath = Join-Path $proofArtifactsRoot 'demo-proof.txt'
@@ -212,6 +213,65 @@ function Resolve-ProjectPath {
   )
 
   return Join-Path $repoRoot $RelativePath
+}
+
+function Convert-TextToCapabilityStatus {
+  param([string]$Value)
+
+  if ([string]::IsNullOrWhiteSpace($Value)) {
+    return 'MISSING'
+  }
+
+  $parsed = $false
+  if ([bool]::TryParse($Value, [ref]$parsed)) {
+    return if ($parsed) { 'PASS' } else { 'FAIL' }
+  }
+
+  return 'MISSING'
+}
+
+function Get-ProofMarkerLine {
+  param([string]$ProofText, [string]$Marker)
+
+  $match = [regex]::Match($ProofText, "(?m)^$([regex]::Escape($Marker)):(.+)$")
+  if ($match.Success) {
+    return $match.Groups[1].Value.Trim()
+  }
+
+  return $null
+}
+
+function New-WpfAdapterCapabilityMatrixProof {
+  param(
+    [string]$HelloWorldProofPath,
+    [string]$OutputPath
+  )
+
+  if (-not (Test-Path -LiteralPath $HelloWorldProofPath)) {
+    $missingProofLine = 'ADAPTER_CAPABILITY_MATRIX:WPF:HELLOWORLD_PROOF:MISSING'
+    $missingProofLine | Set-Content -LiteralPath $OutputPath
+    return
+  }
+
+  $proofText = Get-Content -LiteralPath $HelloWorldProofPath -Raw
+  $helloWorldWpfOk = Get-ProofMarkerLine -ProofText $proofText -Marker 'HELLOWORLD_WPF_OK'
+  $commandSurfaceOk = Get-ProofMarkerLine -ProofText $proofText -Marker 'COMMAND_SURFACE_OK'
+
+  $pluginScanMetric = [regex]::Match($proofText, '(?m)^HOST_NATIVE_METRIC:plugin_scan_ms=(.+)$').Success
+  $inspectorProjectionMetric = [regex]::Match($proofText, '(?m)^HOST_NATIVE_METRIC:inspector_projection_ms=(.+)$').Success
+  $commandLatencyMetric = [regex]::Match($proofText, '(?m)^HOST_NATIVE_METRIC:command_latency_ms=(.+)$').Success
+
+  $proofLines = @(
+    'ADAPTER_CAPABILITY_MATRIX_FORMAT:1',
+    "ADAPTER_CAPABILITY_MATRIX:WPF:HELLOWORLD_WPF_OK:$(Convert-TextToCapabilityStatus -Value $helloWorldWpfOk)",
+    "ADAPTER_CAPABILITY_MATRIX:WPF:COMMAND_SURFACE_OK:$(Convert-TextToCapabilityStatus -Value $commandSurfaceOk)",
+    "ADAPTER_CAPABILITY_MATRIX:WPF:PLUGIN_DISCOVERY_METRIC:$(if ($pluginScanMetric) { 'PASS' } else { 'MISSING' })",
+    "ADAPTER_CAPABILITY_MATRIX:WPF:INSPECTOR_PROJECTION_METRIC:$(if ($inspectorProjectionMetric) { 'PASS' } else { 'MISSING' })",
+    "ADAPTER_CAPABILITY_MATRIX:WPF:COMMAND_LATENCY_METRIC:$(if ($commandLatencyMetric) { 'PASS' } else { 'MISSING' })"
+  )
+
+  Ensure-Directory -Path $proofArtifactsRoot
+  $proofLines | Set-Content -LiteralPath $OutputPath
 }
 
 function Ensure-Directory {
@@ -547,6 +607,8 @@ function Invoke-WindowsHelloWorldWpfSlice {
     if (-not $proofOutput.Contains('HELLOWORLD_WPF_OK:True', [System.StringComparison]::Ordinal)) {
       throw "WPF richer sample proof did not report success: $helloWorldWpfProofPath"
     }
+
+    New-WpfAdapterCapabilityMatrixProof -HelloWorldProofPath $helloWorldWpfProofPath -OutputPath $wpfAdapterCapabilityMatrixProofPath
   }
 
   Write-Host ''
@@ -1026,6 +1088,7 @@ function Invoke-ReleaseValidation {
 
   Invoke-RestoreProjects -Projects (Get-DefaultRestoreProjects -Frameworks $releaseFrameworks)
   Invoke-ContractValidation -SkipRestore
+  New-WpfAdapterCapabilityMatrixProof -HelloWorldProofPath $helloWorldWpfProofPath -OutputPath $wpfAdapterCapabilityMatrixProofPath
   Invoke-Packages
   Invoke-HostSample -UsePackedPackages
   Invoke-HostSample -UsePackedPackages -TargetFramework net10.0
