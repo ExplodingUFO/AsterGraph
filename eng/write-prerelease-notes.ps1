@@ -179,6 +179,12 @@ foreach ($line in $proofLines) {
   [void]$builder.AppendLine("- $line")
 }
 [void]$builder.AppendLine()
+[void]$builder.AppendLine("## Support Story")
+[void]$builder.AppendLine()
+[void]$builder.AppendLine("- frozen support boundary: [Stabilization Support Matrix](./docs/en/stabilization-support-matrix.md)")
+[void]$builder.AppendLine("- adapter capability story: [Adapter Capability Matrix](./docs/en/adapter-capability-matrix.md)")
+[void]$builder.AppendLine("- `HELLOWORLD_WPF_OK` remains adapter-2 validation only and does not widen the public publish/package boundary")
+[void]$builder.AppendLine()
 [void]$builder.AppendLine("## Validation Environment")
 [void]$builder.AppendLine()
 foreach ($line in $environmentLines) {
@@ -189,6 +195,8 @@ foreach ($line in $environmentLines) {
 [void]$builder.AppendLine()
 [void]$builder.AppendLine("- [Versioning](./docs/en/versioning.md)")
 [void]$builder.AppendLine("- [Project Status](./docs/en/project-status.md)")
+[void]$builder.AppendLine("- [Stabilization Support Matrix](./docs/en/stabilization-support-matrix.md)")
+[void]$builder.AppendLine("- [Adapter Capability Matrix](./docs/en/adapter-capability-matrix.md)")
 [void]$builder.AppendLine("- [Demo Guide](./docs/en/demo-guide.md)")
 [void]$builder.AppendLine("- [ScaleSmoke Baseline](./docs/en/scale-baseline.md)")
 [void]$builder.AppendLine("- [Public Launch Checklist](./docs/en/public-launch-checklist.md)")

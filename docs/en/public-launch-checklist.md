@@ -79,8 +79,8 @@ Expected high-signal markers:
   - matching public tag
   - optional legacy historical repo checkpoint reference
 - confirm the generated prerelease notes also publish the proof summary block, not only workflow artifacts
-- confirm the generated notes and announcement text explicitly call out the current adapter matrix plus the `HELLOWORLD_WPF_OK` and `ADAPTER_CAPABILITY_MATRIX` markers
-- treat `HELLOWORLD_WPF_OK` as adapter-2 validation only; do not present it as Avalonia/WPF parity when describing the adapter story
+- confirm the generated notes and announcement text explicitly carry the frozen support boundary story and the adapter matrix story, plus the `HELLOWORLD_WPF_OK` and `ADAPTER_CAPABILITY_MATRIX` markers
+- treat `HELLOWORLD_WPF_OK` as adapter-2 validation only; do not present it as Avalonia/WPF parity or public WPF support when describing the adapter story
 - if `NUGET_API_KEY` is configured, confirm package publication succeeds
 - if `NUGET_API_KEY` is not configured, confirm the workflow reports a deliberate NuGet publish skip instead of a failure
 - do not present legacy `v1.x`-style historical milestone checkpoints as the current public package version; use [Versioning](./versioning.md) as the public rule
@@ -109,5 +109,7 @@ Keep the consumer entry story explicit in release notes and public announcements
 - `docs/en/versioning.md` = package version versus historical repository-tag guidance
 - `docs/en/project-status.md` = current public beta status snapshot
 - `docs/en/quick-start.md` = canonical adoption path
-- `docs/en/alpha-status.md` = current alpha scope and limitations
+- `docs/en/stabilization-support-matrix.md` = frozen support boundary and upgrade guidance
+- `docs/en/adapter-capability-matrix.md` = adapter capability story and validation matrix
+- `docs/en/alpha-status.md` = historical alpha reference for the current beta support story
 - `docs/en/advanced-editing.md` = advanced-editing capability split and proof map

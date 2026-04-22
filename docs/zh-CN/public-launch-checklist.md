@@ -84,6 +84,8 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framew
   - 与之匹配的公开 tag
   - 可选的 legacy 历史仓库检查点引用
 - 确认自动生成的 prerelease notes 同时把 proof summary 发出来，而不只是留在 workflow artifact 里
+- 确认自动生成的 notes 和公告文案明确写出冻结的 support boundary 叙事和 adapter matrix 叙事，并同步给出 `HELLOWORLD_WPF_OK` 与 `ADAPTER_CAPABILITY_MATRIX`
+- 把 `HELLOWORLD_WPF_OK` 只当成 adapter-2 验证通过，不要写成 Avalonia/WPF parity 或公开 WPF support
 - 如果配置了 `NUGET_API_KEY`，确认包发布成功
 - 如果没有配置 `NUGET_API_KEY`，确认 workflow 是有意跳过 NuGet publish，而不是失败
 - 不要再把 `v1.x` 风格的历史里程碑 checkpoint 当成当前公开包版本；对外统一以 [Versioning](./versioning.md) 为准
@@ -114,5 +116,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framew
 - `docs/zh-CN/versioning.md` = 包版本与历史仓库 tag 的对应说明
 - `docs/zh-CN/project-status.md` = 当前公开 beta 状态快照
 - `docs/zh-CN/quick-start.md` = 推荐接入路径
-- `docs/zh-CN/alpha-status.md` = alpha 范围与限制（历史参考）
+- `docs/zh-CN/stabilization-support-matrix.md` = 冻结的 support boundary 和升级指引
+- `docs/zh-CN/adapter-capability-matrix.md` = adapter 能力叙事与验证矩阵
+- `docs/zh-CN/alpha-status.md` = 历史 alpha 参考，服务于当前 beta support story
 - `docs/zh-CN/advanced-editing.md` = advanced-editing capability split 与 proof map
