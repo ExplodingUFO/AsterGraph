@@ -1,6 +1,6 @@
 # Host Integration 指南
 
-这份文档只展开受支持的宿主路线，不把第一次接入和维护者 proof 文档混在一起。canonical 路线保持 session-first/runtime-first；retained MVVM 只作为迁移期的兼容桥接。
+这份文档只展开受支持的宿主路线，不把第一次接入和维护者 proof 文档混在一起。canonical 路线保持 session-first/runtime-first；新接入默认先走 Avalonia-first；retained MVVM 只作为迁移期的兼容桥接。
 
 ## Canonical Routes
 
@@ -42,7 +42,7 @@
 
 ## 第二适配器合同
 
-`v0.9.0-beta` 已经锁定 `WPF` 作为 adapter 2。当前真正 shipped 的 hosted adapter 仍然只有 Avalonia；第二适配器里程碑要验证的是同一条 canonical 路线上的可移植性，而不是引入 adapter 专属 runtime API。
+`v0.9.0-beta` 已经锁定 `WPF` 作为 adapter 2。当前真正 shipped 的 hosted adapter 仍然只有 Avalonia；第二适配器里程碑要验证的是同一条 canonical 路线上的可移植性，而不是引入 adapter 专属 runtime API，也不是给新用户提供第二条上手路径。
 
 后续 Avalonia/WPF 文档统一使用 [Adapter Capability Matrix](./adapter-capability-matrix.md) 里的 vocabulary：
 
@@ -53,6 +53,10 @@
 | `fallback` | 宿主继续停留在同一条 canonical session/runtime seam 上，改走更底层、已文档化的 path / sample / proof harness |
 
 retained 迁移不是 `fallback`。它仍然只是 legacy host 的 compatibility bridge。
+
+- `WPF partial` 表示宿主仍停留在 canonical session/runtime 路线上，用 session/query snapshot 做 `host-owned` projection 去补齐缺失的 stock surface。
+- `WPF fallback` 表示宿主仍停留在 canonical session/runtime 路线上，沿已文档化的 proof/sample path 做 `host-owned` projection。
+- 这条 fallback 规则本身不会转向 retained MVVM，也不会引入 `adapter-specific` runtime API。
 
 ## Official Capability Modules
 
