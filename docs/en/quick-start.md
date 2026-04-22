@@ -5,7 +5,7 @@ This guide is the shortest path from a blank host to a running AsterGraph integr
 For first-time adopters, start on the default Avalonia path by default.
 Treat `WPF` only as adapter-2 portability validation on the same canonical route; it is not a second route or a parity promise.
 For the frozen support boundary and upgrade guidance toward `v1.0.0`, see [Stabilization Support Matrix](./stabilization-support-matrix.md).
-If you are evaluating the public beta end to end, use [Beta Evaluation Path](./evaluation-path.md) as the single route ladder from first install to realistic hosted proof.
+If you are evaluating the public beta end to end, use [Beta Evaluation Path](./evaluation-path.md) as the hosted route ladder from first install to realistic hosted proof.
 
 ## 1. Pick Your Starting Package
 
@@ -62,6 +62,8 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 ```
 
 Use `Starter.Avalonia` when you want the first hosted entry and the smallest end-to-end Avalonia scaffold. Use `HelloWorld` when you want the simplest runtime-only starting point. Use `HelloWorld.Avalonia` when you want the smallest shipped-shell sample after the starter scaffold. Use `ConsumerSample.Avalonia` when you want one realistic host before jumping to `Demo`. Use `HostSample` only when you want a proof harness for canonical route validation, not as the onboarding step.
+
+The hosted route ladder is `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerSample.Avalonia`.
 
 The sample README is [`tools/AsterGraph.ConsumerSample.Avalonia/README.md`](../../tools/AsterGraph.ConsumerSample.Avalonia/README.md).
 

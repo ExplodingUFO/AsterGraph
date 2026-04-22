@@ -1,6 +1,6 @@
 # Beta Evaluation Path
 
-This guide is the single public-beta path from first install to realistic host proof.
+This guide is the hosted route ladder from first install to realistic host proof.
 Use it when you are evaluating AsterGraph as an SDK, not when you are maintaining release infrastructure.
 
 ## Boundary First
@@ -13,6 +13,8 @@ Use it when you are evaluating AsterGraph as an SDK, not when you are maintainin
 ## Route Ladder
 
 Follow this ladder in order. Each step answers one question and hands off to the next one.
+
+The hosted route ladder is `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerSample.Avalonia`.
 
 | Step | Run this | Why it comes now | Proof handoff |
 | --- | --- | --- | --- |

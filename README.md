@@ -32,6 +32,8 @@ AsterGraph is a modular node-graph editor toolkit for .NET. It gives hosts a reu
 | inspect the full surface visually | [Demo Guide](./docs/en/demo-guide.md) | showcase host for plugins, automation, localization, and standalone surfaces |
 | validate packed consumption or maintain releases | [Contributing](./CONTRIBUTING.md) and [Public Launch Checklist](./docs/en/public-launch-checklist.md) | proof lanes, CI, and release flow |
 
+The hosted route ladder is `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerSample.Avalonia`.
+
 ## Install From NuGet
 
 Most new hosts start with one of these commands:

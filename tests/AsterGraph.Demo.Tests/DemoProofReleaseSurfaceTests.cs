@@ -59,6 +59,32 @@ public sealed class DemoProofReleaseSurfaceTests
     }
 
     [Fact]
+    public void HostedRouteLadder_IsNamedInEntryDocsAndSampleReadmes()
+    {
+        var entryDocs = new[]
+        {
+            ReadRepoFile("README.md"),
+            ReadRepoFile("docs/en/quick-start.md"),
+            ReadRepoFile("docs/zh-CN/quick-start.md"),
+            ReadRepoFile("docs/en/evaluation-path.md"),
+            ReadRepoFile("docs/zh-CN/evaluation-path.md"),
+            ReadRepoFile("docs/en/host-integration.md"),
+            ReadRepoFile("docs/zh-CN/host-integration.md"),
+            ReadRepoFile("tools/AsterGraph.Starter.Avalonia/README.md"),
+            ReadRepoFile("tools/AsterGraph.HelloWorld.Avalonia/README.md"),
+            ReadRepoFile("tools/AsterGraph.ConsumerSample.Avalonia/README.md"),
+        };
+
+        foreach (var contents in entryDocs)
+        {
+            Assert.Contains("hosted route ladder", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("Starter.Avalonia", contents, StringComparison.Ordinal);
+            Assert.Contains("HelloWorld.Avalonia", contents, StringComparison.Ordinal);
+            Assert.Contains("ConsumerSample.Avalonia", contents, StringComparison.Ordinal);
+        }
+    }
+
+    [Fact]
     public void PublicEntryDocs_LinkDedicatedEvaluationPathGuide()
     {
         var readme = ReadRepoFile("README.md");

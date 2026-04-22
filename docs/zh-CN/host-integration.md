@@ -2,6 +2,8 @@
 
 这份文档只展开受支持的宿主路线，不把第一次接入和维护者 proof 文档混在一起。canonical 路线保持 session-first/runtime-first；新接入默认先走 Avalonia-first；retained MVVM 只作为迁移期的兼容桥接。
 
+这条 hosted route ladder 是 `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerSample.Avalonia`。
+
 ## Canonical Routes
 
 1. 只要运行时 / 自定义 UI  

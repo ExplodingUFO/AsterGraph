@@ -2,6 +2,8 @@
 
 This sample is the smallest stock hosted-UI sample in the repo.
 
+The hosted route ladder is `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerSample.Avalonia`.
+
 Use it after `AsterGraph.Starter.Avalonia` when you want to see the default Avalonia shell with the canonical factory-based route and without the extra proof logic from `AsterGraph.HostSample`.
 
 It starts with one node selected so the shipped inspector immediately shows grouped parameter sections, stock editors, validation cues, and placeholder hints.

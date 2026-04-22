@@ -2,6 +2,8 @@
 
 This is the first hosted entry in the public cookbook path.
 
+The hosted route ladder is `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerSample.Avalonia`.
+
 Use it when you want the smallest end-to-end Avalonia scaffold that already wires the editor factory to the view factory, before moving on to `AsterGraph.HelloWorld`, `AsterGraph.HelloWorld.Avalonia`, and `AsterGraph.ConsumerSample.Avalonia`.
 
 It deliberately stays narrow:

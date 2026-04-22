@@ -1,6 +1,6 @@
 # 公开 Beta 评估路径
 
-这份文档只做一件事：把 public beta 从第一次安装带到真实宿主 proof，收口成一条单一路径。
+这份文档只做一件事：把 public beta 从第一次安装带到真实宿主 proof，收口成一条 hosted route ladder。
 如果你是在评估 AsterGraph 这个 SDK，就看这页；如果你是在维护 release 基础设施，再去看其他维护者文档。
 
 ## 先锁边界
@@ -13,6 +13,8 @@
 ## 推荐阶梯
 
 按下面顺序走。每一步只解决一个问题，并把你交给下一步。
+
+这条 hosted route ladder 是 `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerSample.Avalonia`。
 
 | 步骤 | 运行什么 | 为什么现在跑它 | 下一步看什么 |
 | --- | --- | --- | --- |
