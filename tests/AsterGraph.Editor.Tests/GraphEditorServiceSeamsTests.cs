@@ -139,6 +139,35 @@ public sealed class GraphEditorServiceSeamsTests
     }
 
     [Fact]
+    public void AsterGraphEditorFactory_HostWorkspaceServiceCanLoadPreexistingWorkspaceThroughSessionPath()
+    {
+        var definitionId = new NodeDefinitionId("tests.services.host-load");
+        var workspace = new RecordingWorkspaceService(
+            "workspace://custom-load-preexisting",
+            CreatePreexistingWorkspaceDocument(definitionId));
+        var editor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
+        {
+            Document = CreateDocument(definitionId),
+            NodeCatalog = CreateCatalog(definitionId),
+            CompatibilityService = new ExactCompatibilityService(),
+            WorkspaceService = workspace,
+        });
+
+        var loaded = editor.Session.Commands.LoadWorkspace();
+
+        Assert.True(loaded);
+        Assert.Equal("workspace://custom-load-preexisting", editor.WorkspacePath);
+        Assert.Contains(editor.Session.Diagnostics.GetRecentDiagnostics(), diag =>
+            diag.Code == "workspace.load.succeeded" &&
+            diag.Operation == "workspace.load" &&
+            diag.Severity == GraphEditorDiagnosticSeverity.Info);
+        Assert.Equal("Service-Loaded Workspace", editor.Title);
+        Assert.Single(editor.Nodes);
+        Assert.Equal("preloaded-node", editor.Nodes[0].Id);
+        Assert.True(workspace.LoadCalls >= 1);
+    }
+
+    [Fact]
     public void AsterGraphEditorFactory_CreateAndCreateSession_ExposeEquivalentReadinessFeatureDescriptorsForConfiguredSeams()
     {
         using var activitySource = new System.Diagnostics.ActivitySource("tests.services.readiness");
@@ -246,6 +275,28 @@ public sealed class GraphEditorServiceSeamsTests
             ],
             []);
 
+    private static GraphDocument CreatePreexistingWorkspaceDocument(NodeDefinitionId definitionId)
+        => new(
+            "Service-Loaded Workspace",
+            "Workspace document preloaded by host service for canonical load verification.",
+            [
+                new GraphNode(
+                    "preloaded-node",
+                    "Preloaded Node",
+                    "Tests",
+                    "Services",
+                    "Seed node loaded from host-supplied workspace seam.",
+                    new GraphPoint(200, 200),
+                    new GraphSize(220, 140),
+                    [],
+                    [
+                        new GraphPort("in", "Input", PortDirection.Input, "float", "#55D8C1", new PortTypeId("float")),
+                    ],
+                    "#6AD5C4",
+                    definitionId),
+            ],
+            []);
+
     private static NodeCatalog CreateCatalog(NodeDefinitionId definitionId)
     {
         var catalog = new NodeCatalog();
@@ -263,11 +314,13 @@ public sealed class GraphEditorServiceSeamsTests
         return catalog;
     }
 
-    private sealed class RecordingWorkspaceService(string workspacePath) : IGraphWorkspaceService
+    private sealed class RecordingWorkspaceService(string workspacePath, GraphDocument? seedDocument = null) : IGraphWorkspaceService
     {
         public string WorkspacePath { get; } = workspacePath;
         public int SaveCalls { get; private set; }
+        public int LoadCalls { get; private set; }
         public GraphDocument? LastSaved { get; private set; }
+            = seedDocument;
 
         public void Save(GraphDocument document)
         {
@@ -276,7 +329,10 @@ public sealed class GraphEditorServiceSeamsTests
         }
 
         public GraphDocument Load()
-            => LastSaved ?? throw new InvalidOperationException("No workspace snapshot.");
+        {
+            LoadCalls++;
+            return LastSaved ?? throw new InvalidOperationException("No workspace snapshot.");
+        }
 
         public bool Exists()
             => LastSaved is not null;

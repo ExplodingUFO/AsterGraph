@@ -96,7 +96,7 @@ retained 迁移不是 `fallback`。它仍然只是 legacy host 的 compatibility
 
 建议把下面三条宿主 seam 明确区分开：
 
-- 工作区持久化：`IGraphWorkspaceService` 负责完整可编辑图状态的保存/加载
+- 工作区持久化：`IGraphWorkspaceService` 负责完整可编辑图状态的保存/加载；工作区文档契约见 [序列化契约](./serialization-contracts.md)
 - 片段持久化：fragment workspace + fragment library services 负责可复用的选择片段载荷
 - 场景导出：`IGraphSceneSvgExportService` 负责基于 `IGraphEditorSession.Queries.GetSceneSnapshot()` 生成非工作区的 SVG 输出
 
