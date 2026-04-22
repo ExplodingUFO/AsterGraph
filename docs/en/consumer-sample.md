@@ -12,6 +12,9 @@ This is the defended beta route for copying host-owned seams into your own host.
 
 It stays on the canonical session/runtime model only. It does not introduce a second editor model, a sandbox, or a broader plugin ecosystem.
 
+The hosted route ladder is `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerSample.Avalonia`.
+`HostSample` is the post-ladder proof harness.
+
 ## What It Proves
 
 This sample keeps one realistic host window without turning into a full showcase shell. It demonstrates:

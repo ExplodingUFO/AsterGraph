@@ -52,6 +52,8 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
         AssertContains(consumerSampleEn, "action ids and titles");
         AssertContains(consumerSampleEn, "window layout and narrative text");
         AssertContains(consumerSampleEn, "proof labels beyond the defended markers");
+        AssertContains(consumerSampleEn, "The hosted route ladder is `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerSample.Avalonia`.");
+        AssertContains(consumerSampleEn, "`HostSample` is the post-ladder proof harness.");
 
         AssertContains(consumerSampleZh, "三条宿主管线");
         AssertContains(consumerSampleZh, "样例自有内容");
@@ -65,6 +67,8 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
         AssertContains(consumerSampleZh, "action ids/titles");
         AssertContains(consumerSampleZh, "窗口布局和叙述文本");
         AssertContains(consumerSampleZh, "defended markers 之外的 proof 文案");
+        AssertContains(consumerSampleZh, "这条 hosted route ladder 是 `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerSample.Avalonia`。");
+        AssertContains(consumerSampleZh, "`HostSample` 是这条 ladder 之后的 proof harness。");
     }
 
     [Fact]

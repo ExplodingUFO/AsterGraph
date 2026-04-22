@@ -12,6 +12,9 @@
 
 它只停留在 canonical session/runtime model 上，不引入第二套 editor model、sandbox，或更大的 plugin ecosystem。
 
+这条 hosted route ladder 是 `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerSample.Avalonia`。
+`HostSample` 是这条 ladder 之后的 proof harness。
+
 ## 它证明什么
 
 这个样例保留了一个真实宿主窗口，但不会膨胀成完整 showcase shell。它会同时展示：
