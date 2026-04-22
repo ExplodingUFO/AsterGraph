@@ -15,10 +15,10 @@
 - frozen support boundary: [Stabilization Support Matrix](./stabilization-support-matrix.md)
 - sample and proof tools:
   - `tools/AsterGraph.HelloWorld` for the quickest runtime-only first run
-  - `tools/AsterGraph.HelloWorld.Avalonia` for the quickest hosted-UI first run
   - `tools/AsterGraph.Starter.Avalonia` for the shipped Avalonia starter scaffold
+  - `tools/AsterGraph.HelloWorld.Avalonia` for the quickest hosted-UI first run after the starter scaffold
   - `tools/AsterGraph.ConsumerSample.Avalonia` for one realistic hosted integration before the full Demo shell
-  - `tools/AsterGraph.HostSample` for the minimal consumer proof harness
+  - `tools/AsterGraph.HostSample` for the post-ladder proof harness on the canonical adoption route
   - `tools/AsterGraph.PackageSmoke` for packed-package proof
   - `tools/AsterGraph.ScaleSmoke` for the public scale baseline and state-continuity proof
 - canonical adoption path:
@@ -76,7 +76,7 @@ Use this section as the single external capability readiness gate for release no
 
 | Claim | Route-level evidence |
 | --- | --- |
-| Canonical runtime/session route and the maintained evaluator ladder are externally proven on the defended beta line. | `tools/AsterGraph.HelloWorld`, `tools/AsterGraph.HelloWorld.Avalonia`, `tools/AsterGraph.Starter.Avalonia`, `tools/AsterGraph.ConsumerSample.Avalonia`, `tools/AsterGraph.HostSample`, `HOST_SAMPLE_OK`, `CONSUMER_SAMPLE_OK` |
+| Canonical runtime/session route and the maintained evaluator ladder are externally proven on the defended beta line. | `tools/AsterGraph.HelloWorld`, `tools/AsterGraph.Starter.Avalonia`, `tools/AsterGraph.HelloWorld.Avalonia`, `tools/AsterGraph.ConsumerSample.Avalonia`, `tools/AsterGraph.HostSample`, `HOST_SAMPLE_OK`, `CONSUMER_SAMPLE_OK` |
 | The showcase authoring surface is externally proven as a bounded beta host experience. | `src/AsterGraph.Demo`, `DEMO_OK`, `COMMAND_SURFACE_OK`, `COMPOSITE_SCOPE_OK`, `EDGE_NOTE_OK`, `EDGE_GEOMETRY_OK`, `DISCONNECT_FLOW_OK` |
 | Packaged consumer proof is externally proven without widening the SDK boundary. | `tools/AsterGraph.PackageSmoke`, `PACKAGE_SMOKE_OK`, `HOST_SAMPLE_NET10_OK` |
 | Scale proof is externally proven only at the defended beta tiers. | `tools/AsterGraph.ScaleSmoke`, `SCALE_PERFORMANCE_BUDGET_OK:baseline:True`, `SCALE_PERFORMANCE_BUDGET_OK:large:True`, `SCALE_PERF_SUMMARY:stress` |
@@ -100,13 +100,15 @@ Use this section as the single external capability readiness gate for release no
 
 ## Public Entry Matrix
 
+The hosted route ladder is `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerSample.Avalonia`; `HostSample` comes after that ladder as the proof harness.
+
 - `tools/AsterGraph.HelloWorld` = first-run runtime-only sample
-- `tools/AsterGraph.HelloWorld.Avalonia` = first-run hosted-UI sample
+- `tools/AsterGraph.Starter.Avalonia` = shipped Avalonia starter scaffold
+- `tools/AsterGraph.HelloWorld.Avalonia` = first-run hosted-UI sample after the starter scaffold
 - `tools/AsterGraph.ConsumerSample.Avalonia` = realistic hosted integration sample
-- `tools/AsterGraph.HostSample` = minimal canonical adoption proof
+- `tools/AsterGraph.HostSample` = post-ladder canonical adoption proof
 - `tools/AsterGraph.PackageSmoke` = packed-package consumption proof
 - `tools/AsterGraph.ScaleSmoke` = larger-graph baseline plus history/state-continuity proof
-- `tools/AsterGraph.Starter.Avalonia` = shipped Avalonia starter scaffold
 - `src/AsterGraph.Demo` = showcase host for visual/manual inspection
 
 ## Public Entry Points

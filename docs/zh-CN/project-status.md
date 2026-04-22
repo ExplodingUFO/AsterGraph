@@ -14,10 +14,10 @@
   - `AsterGraph.Avalonia`
 - 示例与验证工具：
   - `tools/AsterGraph.HelloWorld`：最快的 runtime-only 第一跑样例
-  - `tools/AsterGraph.HelloWorld.Avalonia`：最快的默认 UI 第一跑样例
   - `tools/AsterGraph.Starter.Avalonia`：shipped 的 Avalonia starter scaffold
+  - `tools/AsterGraph.HelloWorld.Avalonia`：在 starter scaffold 之后的默认 UI 第一跑样例
   - `tools/AsterGraph.ConsumerSample.Avalonia`：介于 HelloWorld 和 Demo 之间的真实宿主样例
-  - `tools/AsterGraph.HostSample`：最小接入验证样例
+  - `tools/AsterGraph.HostSample`：这条 canonical adoption route 在 ladder 之后的 proof harness
   - `tools/AsterGraph.PackageSmoke`：打包消费验证
   - `tools/AsterGraph.ScaleSmoke`：公开的大图基线与状态连续性验证
 - 推荐接入路径：
@@ -75,7 +75,7 @@
 
 | 声明 | 路线级证据 |
 | --- | --- |
-| canonical runtime/session 路线和维护中的评估阶梯，已经在当前防守住的 beta 线上被外部证据证明。 | `tools/AsterGraph.HelloWorld`、`tools/AsterGraph.HelloWorld.Avalonia`、`tools/AsterGraph.Starter.Avalonia`、`tools/AsterGraph.ConsumerSample.Avalonia`、`tools/AsterGraph.HostSample`、`HOST_SAMPLE_OK`、`CONSUMER_SAMPLE_OK` |
+| canonical runtime/session 路线和维护中的评估阶梯，已经在当前防守住的 beta 线上被外部证据证明。 | `tools/AsterGraph.HelloWorld`、`tools/AsterGraph.Starter.Avalonia`、`tools/AsterGraph.HelloWorld.Avalonia`、`tools/AsterGraph.ConsumerSample.Avalonia`、`tools/AsterGraph.HostSample`、`HOST_SAMPLE_OK`、`CONSUMER_SAMPLE_OK` |
 | showcase authoring surface 已经作为有边界的 beta 宿主体验被外部证据证明。 | `src/AsterGraph.Demo`、`DEMO_OK`、`COMMAND_SURFACE_OK`、`COMPOSITE_SCOPE_OK`、`EDGE_NOTE_OK`、`EDGE_GEOMETRY_OK`、`DISCONNECT_FLOW_OK` |
 | 打包后的 consumer proof 已被外部证据证明，而且没有扩大 SDK 边界。 | `tools/AsterGraph.PackageSmoke`、`PACKAGE_SMOKE_OK`、`HOST_SAMPLE_NET10_OK` |
 | Scale proof 只在当前防守住的 beta tier 上被外部证据证明。 | `tools/AsterGraph.ScaleSmoke`、`SCALE_PERFORMANCE_BUDGET_OK:baseline:True`、`SCALE_PERFORMANCE_BUDGET_OK:large:True`、`SCALE_PERF_SUMMARY:stress` |
@@ -99,13 +99,15 @@
 
 ## 公开入口分工
 
+这条 hosted route ladder 是 `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerSample.Avalonia`；`HostSample` 放在这条 ladder 之后，作为 proof harness。
+
 - `tools/AsterGraph.HelloWorld` = runtime-only 第一跑样例
-- `tools/AsterGraph.HelloWorld.Avalonia` = 默认 UI 第一跑样例
+- `tools/AsterGraph.Starter.Avalonia` = shipped 的 Avalonia starter scaffold
+- `tools/AsterGraph.HelloWorld.Avalonia` = 在 starter scaffold 之后的默认 UI 第一跑样例
 - `tools/AsterGraph.ConsumerSample.Avalonia` = 真实 hosted-UI 宿主样例
-- `tools/AsterGraph.HostSample` = 最小推荐接入验证
+- `tools/AsterGraph.HostSample` = 这条 ladder 之后的 canonical adoption proof
 - `tools/AsterGraph.PackageSmoke` = 打包消费验证
 - `tools/AsterGraph.ScaleSmoke` = 大图基线加历史记录与状态连续性验证
-- `tools/AsterGraph.Starter.Avalonia` = shipped 的 Avalonia starter scaffold
 - `src/AsterGraph.Demo` = 可视化展示宿主
 
 ## 对外入口

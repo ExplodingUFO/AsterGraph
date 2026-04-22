@@ -59,7 +59,8 @@ public sealed class StarterRecipeHardeningDocsTests
         Assert.Contains("Keep/copy `AsterGraphEditorFactory.Create(...)`", quickStartEn, StringComparison.Ordinal);
         Assert.Contains("Copy the host-owned seams, not the sample-owned presentation.", quickStartEn, StringComparison.Ordinal);
         Assert.Contains("Replace the top-level window and its title/size", quickStartEn, StringComparison.Ordinal);
-        Assert.Contains("The next hosted step is `AsterGraph.HelloWorld.Avalonia`.", quickStartEn, StringComparison.Ordinal);
+        var quickStartRecipeParagraphEn = FindLineContaining(quickStartEn, "Use `AsterGraph.Starter.Avalonia` as the starter recipe.");
+        Assert.True(quickStartRecipeParagraphEn.IndexOf("HelloWorld.Avalonia", StringComparison.Ordinal) < quickStartRecipeParagraphEn.IndexOf("ConsumerSample.Avalonia", StringComparison.Ordinal));
 
         Assert.Contains("把 `AsterGraph.Starter.Avalonia` 当作 starter recipe。", quickStartZh, StringComparison.Ordinal);
         Assert.Contains("复制这个 starter scaffold：", quickStartZh, StringComparison.Ordinal);
@@ -67,7 +68,21 @@ public sealed class StarterRecipeHardeningDocsTests
         Assert.Contains("保留/复制 `AsterGraphEditorFactory.Create(...)`", quickStartZh, StringComparison.Ordinal);
         Assert.Contains("复制宿主自管 seam，不复制样例自有展示层。", quickStartZh, StringComparison.Ordinal);
         Assert.Contains("替换宿主自己的 top-level window 和它的 title/size", quickStartZh, StringComparison.Ordinal);
-        Assert.Contains("下一步 hosted step 是 `AsterGraph.HelloWorld.Avalonia`。", quickStartZh, StringComparison.Ordinal);
+        var quickStartRecipeParagraphZh = FindLineContaining(quickStartZh, "把 `AsterGraph.Starter.Avalonia` 当作 starter recipe。");
+        Assert.True(quickStartRecipeParagraphZh.IndexOf("HelloWorld.Avalonia", StringComparison.Ordinal) < quickStartRecipeParagraphZh.IndexOf("ConsumerSample.Avalonia", StringComparison.Ordinal));
+    }
+
+    private static string FindLineContaining(string contents, string term)
+    {
+        foreach (var line in contents.Split('\n', StringSplitOptions.TrimEntries))
+        {
+            if (line.Contains(term, StringComparison.Ordinal))
+            {
+                return line;
+            }
+        }
+
+        throw new InvalidOperationException($"Expected a line containing '{term}'.");
     }
 
     private static string ReadRepoFile(string relativePath)

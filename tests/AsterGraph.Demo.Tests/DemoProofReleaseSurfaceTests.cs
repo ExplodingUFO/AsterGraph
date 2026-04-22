@@ -69,6 +69,8 @@ public sealed class DemoProofReleaseSurfaceTests
             ReadRepoFile("docs/zh-CN/quick-start.md"),
             ReadRepoFile("docs/en/evaluation-path.md"),
             ReadRepoFile("docs/zh-CN/evaluation-path.md"),
+            ReadRepoFile("docs/en/project-status.md"),
+            ReadRepoFile("docs/zh-CN/project-status.md"),
             ReadRepoFile("docs/en/host-integration.md"),
             ReadRepoFile("docs/zh-CN/host-integration.md"),
             ReadRepoFile("tools/AsterGraph.Starter.Avalonia/README.md"),
@@ -82,6 +84,7 @@ public sealed class DemoProofReleaseSurfaceTests
             Assert.Contains("Starter.Avalonia", contents, StringComparison.Ordinal);
             Assert.Contains("HelloWorld.Avalonia", contents, StringComparison.Ordinal);
             Assert.Contains("ConsumerSample.Avalonia", contents, StringComparison.Ordinal);
+            Assert.True(HasLineWithOrderedTerms(contents, "Starter.Avalonia", "HelloWorld.Avalonia", "ConsumerSample.Avalonia"));
         }
     }
 
@@ -903,6 +906,28 @@ public sealed class DemoProofReleaseSurfaceTests
         return contents
             .Split('\n', StringSplitOptions.TrimEntries)
             .Any(line => requiredTerms.All(term => line.Contains(term, StringComparison.OrdinalIgnoreCase)));
+    }
+
+    private static bool HasLineWithOrderedTerms(string contents, params string[] orderedTerms)
+    {
+        return contents
+            .Split('\n', StringSplitOptions.TrimEntries)
+            .Any(line =>
+            {
+                var nextIndex = 0;
+                foreach (var term in orderedTerms)
+                {
+                    var index = line.IndexOf(term, nextIndex, StringComparison.OrdinalIgnoreCase);
+                    if (index < 0)
+                    {
+                        return false;
+                    }
+
+                    nextIndex = index + term.Length;
+                }
+
+                return true;
+            });
     }
 
     private static string ExtractIssueTemplateBlock(string contents, string id)
