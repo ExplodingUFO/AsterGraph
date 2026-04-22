@@ -371,6 +371,230 @@ public sealed class SerializationCompatibilityTests
     }
 
     [Fact]
+    public void GraphDocumentSerializer_ReadsSchemaVersion3Payload_AndClampsNegativeGroupPadding()
+    {
+        const string json = """
+        {
+          "SchemaVersion": 3,
+          "Title": "Legacy v3",
+          "Description": "Schema v3 contract",
+          "Nodes": [
+            {
+              "Id": "node-001",
+              "Title": "Legacy Node",
+              "Category": "Tests",
+              "Subtitle": "Legacy",
+              "Description": "V3 payload with negative padding.",
+              "Position": {
+                "X": 12,
+                "Y": 24
+              },
+              "Size": {
+                "Width": 240,
+                "Height": 160
+              },
+              "Inputs": [],
+              "Outputs": [],
+              "AccentHex": "#6AD5C4",
+              "DefinitionId": {
+                "Value": "tests.node"
+              },
+              "ParameterValues": [],
+              "Surface": {
+                "ExpansionState": "Collapsed",
+                "GroupId": "group-001"
+              }
+            }
+          ],
+          "Connections": [],
+          "Groups": [
+            {
+              "Id": "group-001",
+              "Title": "Legacy Group",
+              "Position": {
+                "X": 76,
+                "Y": 76
+              },
+              "Size": {
+                "Width": 288,
+                "Height": 232
+              },
+              "NodeIds": [
+                "node-001"
+              ],
+              "IsCollapsed": false,
+              "ExtraPadding": {
+                "Left": -12,
+                "Top": 8,
+                "Right": -4,
+                "Bottom": 16
+              }
+            }
+          ]
+        }
+        """;
+
+        var restored = GraphDocumentSerializer.Deserialize(json);
+        var group = Assert.Single(restored.GraphScopes, scope => scope.Id == GraphDocument.DefaultRootGraphId).Groups!;
+        var rootGroup = Assert.Single(group);
+
+        Assert.Equal(new GraphPadding(0d, 8d, 0d, 16d), rootGroup.ExtraPadding);
+        Assert.Equal(["node-001"], rootGroup.NodeIds);
+    }
+
+    [Fact]
+    public void GraphDocumentSerializer_ReadsSchemaVersion4Payload_AndPreservesExplicitGroupPadding()
+    {
+        const string json = """
+        {
+          "SchemaVersion": 4,
+          "Title": "Legacy v4",
+          "Description": "Schema v4 contract",
+          "Nodes": [
+            {
+              "Id": "node-001",
+              "Title": "Legacy Node",
+              "Category": "Tests",
+              "Subtitle": "Legacy",
+              "Description": "V4 payload with explicit padding.",
+              "Position": {
+                "X": 12,
+                "Y": 24
+              },
+              "Size": {
+                "Width": 240,
+                "Height": 160
+              },
+              "Inputs": [],
+              "Outputs": [],
+              "AccentHex": "#6AD5C4",
+              "DefinitionId": {
+                "Value": "tests.node"
+              },
+              "ParameterValues": [],
+              "Surface": {
+                "ExpansionState": "Collapsed",
+                "GroupId": "group-001"
+              }
+            }
+          ],
+          "Connections": [],
+          "Groups": [
+            {
+              "Id": "group-001",
+              "Title": "Legacy Group",
+              "Position": {
+                "X": 76,
+                "Y": 76
+              },
+              "Size": {
+                "Width": 288,
+                "Height": 232
+              },
+              "NodeIds": [
+                "node-001"
+              ],
+              "IsCollapsed": false,
+              "ExtraPadding": {
+                "Left": 11,
+                "Top": 12,
+                "Right": 13,
+                "Bottom": 14
+              }
+            }
+          ]
+        }
+        """;
+
+        var restored = GraphDocumentSerializer.Deserialize(json);
+        var group = Assert.Single(restored.GraphScopes, scope => scope.Id == GraphDocument.DefaultRootGraphId).Groups!;
+        var rootGroup = Assert.Single(group);
+
+        Assert.Equal(new GraphPadding(11d, 12d, 13d, 14d), rootGroup.ExtraPadding);
+    }
+
+    [Fact]
+    public void GraphDocumentSerializer_ReadsSchemaVersion4Payload_WithUnknownFields()
+    {
+        const string json = """
+        {
+          "SchemaVersion": 4,
+          "Title": "Legacy v4 with extras",
+          "Description": "Unknown fields should be ignored.",
+          "UnknownDocumentField": "still supported",
+          "Nodes": [
+            {
+              "Id": "node-001",
+              "Title": "Legacy Node",
+              "Category": "Tests",
+              "Subtitle": "Legacy",
+              "Description": "Node with extra fields.",
+              "Position": {
+                "X": 12,
+                "Y": 24
+              },
+              "Size": {
+                "Width": 240,
+                "Height": 160
+              },
+              "Inputs": [],
+              "Outputs": [],
+              "AccentHex": "#6AD5C4",
+              "DefinitionId": {
+                "Value": "tests.node"
+              },
+              "ParameterValues": [],
+              "UnknownNodeField": "ignored",
+              "Surface": {
+                "ExpansionState": "Expanded",
+                "GroupId": "group-001",
+                "UnknownSurfaceField": false
+              }
+            }
+          ],
+          "Connections": [],
+          "Groups": [
+            {
+              "Id": "group-001",
+              "Title": "Legacy Group",
+              "Position": {
+                "X": 76,
+                "Y": 76
+              },
+              "Size": {
+                "Width": 288,
+                "Height": 232
+              },
+              "NodeIds": [
+                "node-001"
+              ],
+              "IsCollapsed": false,
+              "ExtraPadding": {
+                "Left": 12,
+                "Top": 12,
+                "Right": 12,
+                "Bottom": 12
+              },
+              "UnknownGroupField": {
+                "Nested": true
+              }
+            }
+          ]
+        }
+        """;
+
+        var restored = GraphDocumentSerializer.Deserialize(json);
+        var scope = Assert.Single(restored.GraphScopes, scope => scope.Id == GraphDocument.DefaultRootGraphId);
+        var node = Assert.Single(scope.Nodes);
+        var group = Assert.Single(scope.Groups!);
+
+        Assert.Equal("node-001", node.Id);
+        Assert.Equal("Legacy v4 with extras", restored.Title);
+        Assert.Equal("group-001", node.Surface?.GroupId);
+        Assert.Equal(["node-001"], group.NodeIds);
+    }
+
+    [Fact]
     public void GraphDocumentSerializer_ReadsLegacyConnectionWithoutTargetKind_AsPortTarget()
     {
         const string json = """
@@ -437,8 +661,9 @@ public sealed class SerializationCompatibilityTests
     }
 
     [Fact]
-    public void GraphDocumentSerializer_RejectsUnknownSchemaVersion()
+    public void GraphDocumentSerializer_RejectsUnknownSchemaVersion_WithGuidance()
     {
+        const int unsupportedVersion = 99;
         const string json = """
         {
           "SchemaVersion": 99,
@@ -450,7 +675,8 @@ public sealed class SerializationCompatibilityTests
         """;
 
         var exception = Assert.Throws<InvalidOperationException>(() => GraphDocumentSerializer.Deserialize(json));
-        Assert.Contains("Unsupported graph document schema version", exception.Message);
+        Assert.Contains($"Unsupported graph document schema version '{unsupportedVersion}'.", exception.Message);
+        Assert.Contains($"Current version is '{GraphDocumentCompatibility.CurrentSchemaVersion}'.", exception.Message);
     }
 
     [Fact]

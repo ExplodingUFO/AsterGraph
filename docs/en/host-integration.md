@@ -98,7 +98,7 @@ Short version:
 
 Treat these as three separate host seams:
 
-- workspace persistence: `IGraphWorkspaceService` owns save/load of the full editable graph state
+- workspace persistence: `IGraphWorkspaceService` owns save/load of the full editable graph state using the canonical flow in [Serialization Contracts](./serialization-contracts.md)
 - fragment persistence: fragment workspace + fragment library services own reusable selection payloads
 - scene export: `IGraphSceneSvgExportService` owns non-workspace SVG output built from `IGraphEditorSession.Queries.GetSceneSnapshot()`
 
