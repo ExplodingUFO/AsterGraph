@@ -2,6 +2,7 @@
 
 This is the medium hosted-UI sample on the canonical session/runtime route, after `AsterGraph.Starter.Avalonia` and `AsterGraph.HelloWorld.Avalonia`, and before `AsterGraph.Demo`.
 It shows a host-owned action rail, parameter editing, and one trusted plugin without implying a second editor model or a retained-only path.
+For plugin-capable evaluators, this is the defended hosted trust hop. Read [Plugin Manifest and Trust Policy Contract v1](../../docs/en/plugin-trust-contracts.md) and [Plugin And Custom Node Recipe](../../docs/en/plugin-recipe.md) before treating the route as complete.
 
 The hosted route ladder is `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerSample.Avalonia`.
 
@@ -44,6 +45,9 @@ Expected markers:
 - `Starter.Avalonia` = first hosted scaffold and smallest end-to-end Avalonia entry
 - `HelloWorld` = smallest runtime-only first run
 - `HelloWorld.Avalonia` = smallest hosted-UI first run
+- `ConsumerSample.Avalonia` = defended hosted trust hop for plugin-capable evaluators
+- [Plugin Manifest and Trust Policy Contract v1](../../docs/en/plugin-trust-contracts.md) = host-owned trust-policy contract for this defended hop
+- [Plugin And Custom Node Recipe](../../docs/en/plugin-recipe.md) = copyable plugin path to pair with the defended trust hop
 - [Quick Start](../../docs/en/quick-start.md)
 - [Beta Support Bundle](../../docs/en/support-bundle.md)
 - [Host Integration](../../docs/en/host-integration.md)

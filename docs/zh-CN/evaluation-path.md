@@ -3,6 +3,8 @@
 这份文档只做一件事：把 public beta 从第一次安装带到真实宿主 proof，收口成一条 hosted route ladder。
 如果你是在评估 AsterGraph 这个 SDK，就看这页；如果你是在维护 release 基础设施，再去看其他维护者文档。
 
+如果你在评估插件信任，把 `AsterGraph.ConsumerSample.Avalonia` 当成受防守的 hosted trust hop。先看 [插件信任契约 v1](./plugin-trust-contracts.md) 和 [Plugin 与自定义节点 Recipe](./plugin-recipe.md)，再停在这条 route ladder。
+
 ## 先锁边界
 
 - 新评估优先走 shipped Avalonia 路线，或者 canonical runtime/session 路线

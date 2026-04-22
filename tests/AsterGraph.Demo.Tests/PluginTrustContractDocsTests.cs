@@ -65,6 +65,52 @@ public sealed class PluginTrustContractDocsTests
         Assert.Contains("插件信任策略保持显式且由宿主管理", consumerSampleZh, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void PluginTrustContractDocs_ElevateConsumerSampleAsHostedTrustHopInQuickStartAndEvaluationPath()
+    {
+        var quickStartEn = ReadRepoFile("docs/en/quick-start.md");
+        var quickStartZh = ReadRepoFile("docs/zh-CN/quick-start.md");
+        var evaluationPathEn = ReadRepoFile("docs/en/evaluation-path.md");
+        var evaluationPathZh = ReadRepoFile("docs/zh-CN/evaluation-path.md");
+        var consumerSampleReadme = ReadRepoFile("tools/AsterGraph.ConsumerSample.Avalonia/README.md");
+
+        const string pluginTrustLinkEn = "[Plugin Manifest and Trust Policy Contract v1](./plugin-trust-contracts.md)";
+        const string pluginRecipeLinkEn = "[Plugin And Custom Node Recipe](./plugin-recipe.md)";
+        const string pluginTrustLinkZh = "[插件信任契约 v1](./plugin-trust-contracts.md)";
+        const string pluginRecipeLinkZh = "[Plugin 与自定义节点 Recipe](./plugin-recipe.md)";
+        const string consumerSampleTrustLinkEn = "[Plugin Manifest and Trust Policy Contract v1](../../docs/en/plugin-trust-contracts.md)";
+        const string consumerSampleRecipeLinkEn = "[Plugin And Custom Node Recipe](../../docs/en/plugin-recipe.md)";
+
+        Assert.Contains("ConsumerSample.Avalonia", quickStartEn, StringComparison.Ordinal);
+        Assert.Contains("ConsumerSample.Avalonia", quickStartZh, StringComparison.Ordinal);
+        Assert.Contains("ConsumerSample.Avalonia", evaluationPathEn, StringComparison.Ordinal);
+        Assert.Contains("ConsumerSample.Avalonia", evaluationPathZh, StringComparison.Ordinal);
+        Assert.Contains("ConsumerSample.Avalonia", consumerSampleReadme, StringComparison.Ordinal);
+
+        Assert.Contains("hosted trust hop", quickStartEn, StringComparison.Ordinal);
+        Assert.Contains("hosted trust hop", evaluationPathEn, StringComparison.Ordinal);
+        Assert.Contains("hosted trust hop", consumerSampleReadme, StringComparison.Ordinal);
+
+        Assert.Contains("受防守的 hosted trust hop", quickStartZh, StringComparison.Ordinal);
+        Assert.Contains("受防守的 hosted trust hop", evaluationPathZh, StringComparison.Ordinal);
+
+        Assert.Contains(pluginTrustLinkEn, quickStartEn, StringComparison.Ordinal);
+        Assert.Contains(pluginRecipeLinkEn, quickStartEn, StringComparison.Ordinal);
+        Assert.Contains(pluginTrustLinkEn, evaluationPathEn, StringComparison.Ordinal);
+        Assert.Contains(pluginRecipeLinkEn, evaluationPathEn, StringComparison.Ordinal);
+        Assert.Contains(pluginTrustLinkZh, quickStartZh, StringComparison.Ordinal);
+        Assert.Contains(pluginRecipeLinkZh, quickStartZh, StringComparison.Ordinal);
+        Assert.Contains(pluginTrustLinkZh, evaluationPathZh, StringComparison.Ordinal);
+        Assert.Contains(pluginRecipeLinkZh, evaluationPathZh, StringComparison.Ordinal);
+        Assert.Contains(consumerSampleTrustLinkEn, consumerSampleReadme, StringComparison.Ordinal);
+        Assert.Contains(consumerSampleRecipeLinkEn, consumerSampleReadme, StringComparison.Ordinal);
+
+        Assert.True(quickStartEn.IndexOf(pluginTrustLinkEn, StringComparison.Ordinal) < quickStartEn.IndexOf("[Host Integration](./host-integration.md)", StringComparison.Ordinal));
+        Assert.True(quickStartZh.IndexOf(pluginTrustLinkZh, StringComparison.Ordinal) < quickStartZh.IndexOf("[Host Integration](./host-integration.md)", StringComparison.Ordinal));
+        Assert.True(evaluationPathEn.IndexOf(pluginTrustLinkEn, StringComparison.Ordinal) < evaluationPathEn.IndexOf("[Consumer Sample](./consumer-sample.md)", StringComparison.Ordinal));
+        Assert.True(evaluationPathZh.IndexOf(pluginTrustLinkZh, StringComparison.Ordinal) < evaluationPathZh.IndexOf("[Consumer Sample](./consumer-sample.md)", StringComparison.Ordinal));
+    }
+
     private static string ReadRepoFile(string relativePath)
         => File.ReadAllText(Path.Combine(GetRepositoryRoot(), relativePath));
 
