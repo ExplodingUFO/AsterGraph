@@ -199,12 +199,20 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("0.xx alpha/beta line", projectStatus, StringComparison.Ordinal);
         Assert.Contains("usability and sample polish first", adoptionFeedback, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("3-5 real external entries", adoptionFeedback, StringComparison.Ordinal);
+        Assert.True(HasLineWithAll(projectStatus, "usability and sample polish first", "defended large-tier performance", "richer parameter/metadata editing", "3-5 real external entries", "that bounded risk"));
+        Assert.True(HasLineWithAll(adoptionFeedback, "usability and sample polish first", "defended large-tier performance", "richer parameter/metadata editing", "3-5 real external entries", "that bounded risk"));
+        Assert.True(HasLineWithAll(adoptionFeedback, "defended large-tier performance", "3-5 real external entries", "that bounded risk"));
+        Assert.True(HasLineWithAll(adoptionFeedback, "richer parameter and metadata editing", "3-5 real external entries", "that bounded risk"));
 
         Assert.Contains("继续优先做使用友好性和样例打磨", projectStatusZh, StringComparison.Ordinal);
         Assert.Contains("3 到 5 条真实外部反馈", projectStatusZh, StringComparison.Ordinal);
         Assert.Contains("0.xx` alpha/beta 线", projectStatusZh, StringComparison.Ordinal);
         Assert.Contains("继续优先做使用友好性和样例打磨", adoptionFeedbackZh, StringComparison.Ordinal);
         Assert.Contains("3 到 5 条真实外部反馈", adoptionFeedbackZh, StringComparison.Ordinal);
+        Assert.True(HasLineWithAll(projectStatusZh, "继续优先做使用友好性和样例打磨", "defended large-tier performance", "更丰富的参数/元数据编辑", "3 到 5 条真实外部反馈", "同一个受限风险"));
+        Assert.True(HasLineWithAll(adoptionFeedbackZh, "继续优先做使用友好性和样例打磨", "defended large-tier performance", "更丰富的参数/元数据编辑", "3 到 5 条真实外部反馈", "同一个受限风险"));
+        Assert.True(HasLineWithAll(adoptionFeedbackZh, "defended large-tier performance", "3 到 5 条真实外部反馈", "同一个受限风险"));
+        Assert.True(HasLineWithAll(adoptionFeedbackZh, "更丰富的参数/元数据编辑", "3 到 5 条真实外部反馈", "同一个受限风险"));
     }
 
     [Fact]

@@ -30,13 +30,13 @@ Until the repo collects enough real external issues, the current recommendation 
 
 ## Current Recommendation
 
-The next 0.xx alpha/beta line should stay on usability and sample polish first unless evidence volume/risk says otherwise:
+The next 0.xx alpha/beta line should stay on usability and sample polish first; only widen toward defended large-tier performance or richer parameter/metadata editing when 3-5 real external entries cluster on that bounded risk:
 
 1. **continue usability and sample polish first**
-2. **defer defended large-tier performance work until real adopter demand clusters there**
-3. **expand richer parameter and metadata editing only after the next adoption round confirms that demand**
+2. **do not treat defended large-tier performance as the next widening target before 3-5 real external entries cluster on that bounded risk**
+3. **do not treat richer parameter and metadata editing as the next widening target before 3-5 real external entries cluster on that bounded risk**
 
-This seeded recommendation should be replaced as soon as 3-5 real external entries cluster on one maintained route or bounded risk.
+Until that threshold is met, keep this seeded recommendation in place instead of widening the next beta line ad hoc.
 
 ## Related Docs
 
