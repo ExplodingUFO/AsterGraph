@@ -1,6 +1,6 @@
 # Adoption Feedback Loop
 
-This page defines the public-beta intake format and records the seeded adopter-trial synthesis used while the prerelease intake loop is still collecting enough real external reports.
+This page defines the public beta intake format and records the seeded adopter-trial synthesis used while the prerelease intake loop is still collecting enough real external reports.
 
 ## Intake Format
 
