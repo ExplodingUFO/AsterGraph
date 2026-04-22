@@ -1,22 +1,21 @@
 # Adoption Feedback Loop
 
-这份文档定义了 public beta 的反馈 intake 格式，并记录了在预发布反馈循环还在收集足够真实外部反馈时的种子试用综合结果。
+这份文档定义了 public beta 的反馈收集格式，并记录了在预发布反馈循环还在收集足够真实外部反馈时的种子试用综合结果。
 
 ## Intake 格式
 
-每条反馈至少记录：
+每条 beta 反馈都应先收口到同一套受限字段：`route`、`version`、proof 标记、摩擦点，以及 support bundle 附件。
 
-- 试用者画像
-- 尝试的路线或入口（`HelloWorld`、`AsterGraph.Starter.Avalonia`、`HelloWorld.Avalonia`、`ConsumerSample.Avalonia`、`HostSample`、`PackageSmoke`、`ScaleSmoke`、`Demo`）
-- 安装的包版本或公开 tag
-- 首次跑通耗时
-- 主要摩擦点
-- 希望下一步补什么能力
-- 可附 proof、截图或命令输出
-- 能附 support bundle 时优先附 support bundle
+每条反馈都应按这套受限字段记录：
+
+- route（`HelloWorld`、`AsterGraph.Starter.Avalonia`、`HelloWorld.Avalonia`、`ConsumerSample.Avalonia`、`HostSample`、`PackageSmoke`、`ScaleSmoke`、`Demo`）
+- version
+- proof 标记（可用时附截图/命令输出）
+- 摩擦点
+- support bundle 附件（可用时）
 
 公开反馈建议使用 GitHub 上的 `Adoption feedback` issue template。
-如果你已经能跑到 `ConsumerSample.Avalonia -- --proof`，优先附上 [Beta Support Bundle](./support-bundle.md) 里定义的本地 support bundle。
+如果你已经能跑到 `ConsumerSample.Avalonia -- --proof`，优先把 [Beta Support Bundle](./support-bundle.md) 里定义的本地证据包作为 support bundle 附件附上。
 
 ## 当前种子试用综合
 

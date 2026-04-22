@@ -215,6 +215,7 @@ public sealed class DemoProofReleaseSurfaceTests
         var consumerSampleDoc = ReadRepoFile("docs/en/consumer-sample.md");
         var consumerSampleReadme = ReadRepoFile("tools/AsterGraph.ConsumerSample.Avalonia/README.md");
         var adoptionFeedback = ReadRepoFile("docs/en/adoption-feedback.md");
+        var adoptionFeedbackZh = ReadRepoFile("docs/zh-CN/adoption-feedback.md");
 
         foreach (var contents in new[] { supportBundle, supportBundleZh })
         {
@@ -229,9 +230,12 @@ public sealed class DemoProofReleaseSurfaceTests
             Assert.Contains("reproduction", contents, StringComparison.Ordinal);
         }
 
+        Assert.Contains("support-bundle attachment", supportBundle, StringComparison.OrdinalIgnoreCase);
+        Assert.True(HasLineWithAll(supportBundleZh, "support bundle", "附件"));
         Assert.Contains("support-bundle", consumerSampleDoc, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("support-bundle", consumerSampleReadme, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("support bundle", adoptionFeedback, StringComparison.OrdinalIgnoreCase);
+        Assert.True(HasLineWithAll(adoptionFeedback, "route", "version", "proof", "friction", "support-bundle"));
+        Assert.True(HasLineWithAll(adoptionFeedbackZh, "route", "version", "proof", "摩擦", "support bundle"));
     }
 
     [Fact]
@@ -285,6 +289,8 @@ public sealed class DemoProofReleaseSurfaceTests
             Assert.Contains("HelloWorld.Avalonia", contents, StringComparison.Ordinal);
         }
 
+        Assert.True(HasLineWithAll(checklist, "route", "version", "proof", "friction", "support-bundle"));
+        Assert.True(HasLineWithAll(checklistZh, "route", "version", "proof", "摩擦", "support bundle"));
         Assert.Contains("support bundle", checklist, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("adopter triage", checklist, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("support bundle", checklistZh, StringComparison.OrdinalIgnoreCase);
@@ -874,6 +880,13 @@ public sealed class DemoProofReleaseSurfaceTests
             .Any(line =>
                 line.Contains(requiredTerm, StringComparison.OrdinalIgnoreCase) &&
                 line.Contains(requiredCompanion, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static bool HasLineWithAll(string contents, params string[] requiredTerms)
+    {
+        return contents
+            .Split('\n', StringSplitOptions.TrimEntries)
+            .Any(line => requiredTerms.All(term => line.Contains(term, StringComparison.OrdinalIgnoreCase)));
     }
 
     private static string ExtractIssueTemplateBlock(string contents, string id)

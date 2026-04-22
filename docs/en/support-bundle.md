@@ -1,11 +1,12 @@
 # Beta Support Bundle
 
 This is the local evidence contract for beta evaluation and support.
+Use the support bundle as the support-bundle attachment on the beta intake record.
 It does not upload anything and it does not imply telemetry or hosted services.
 
 ## Canonical Producer
 
-Generate the bundle from `ConsumerSample.Avalonia`, because that is the defended realistic hosted proof on the current beta route.
+Generate the support bundle from `ConsumerSample.Avalonia`, because that is the defended realistic hosted proof on the current beta route.
 
 ```powershell
 dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.ConsumerSample.Avalonia.csproj --nologo -- --proof --support-bundle artifacts/consumer-support-bundle.json --support-note "what you were trying to validate"
@@ -43,7 +44,7 @@ The support bundle is one local JSON file with these top-level fields:
 
 `environment` records the local runtime and OS details used for the run.
 
-`reproduction` records:
+`reproduction` records the friction note plus:
 
 - the captured command line
 - the working directory
@@ -52,7 +53,7 @@ The support bundle is one local JSON file with these top-level fields:
 ## When To Use It
 
 - attach it when reporting beta support issues
-- attach it when filing adopter feedback after reaching the realistic hosted proof
+- attach it to the intake record when filing adopter feedback after reaching the realistic hosted proof
 - regenerate it after you change package version, route, or environment
 - treat it as intake evidence for the [Project Status](./project-status.md) readiness gate, not as automatic proof that the support boundary should widen
 

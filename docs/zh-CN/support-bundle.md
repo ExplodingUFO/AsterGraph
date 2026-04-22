@@ -1,6 +1,7 @@
 # Beta Support Bundle
 
 这份文档定义的是 public beta 的本地证据合同。
+提交 beta 反馈时，把 support bundle 作为附件使用。
 它不会上传任何东西，也不代表遥测、云服务或托管后端。
 
 ## Canonical 生成入口
@@ -24,7 +25,7 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.ConsumerSample.Avalonia.csproj --nologo -- --proof --support-bundle artifacts/consumer-support-bundle.json --support-note "what you were trying to validate"
 ```
 
-这个 bundle 只保留本地证据，仍然绑定在受防守的 hosted route 上，不会扩大 support 边界。
+这个证据包只保留本地证据，仍然绑定在受防守的 hosted route 上，不会扩大 support 边界。
 
 ## 合同字段
 
@@ -43,7 +44,7 @@ support bundle 是一个本地 JSON 文件，顶层字段固定为：
 
 `environment` 记录本次运行所在的 runtime 和操作系统信息。
 
-`reproduction` 记录：
+`reproduction` 记录摩擦说明和：
 
 - 捕获到的命令行
 - 工作目录
@@ -52,9 +53,9 @@ support bundle 是一个本地 JSON 文件，顶层字段固定为：
 ## 什么时候用
 
 - 提 beta support issue 时附上它
-- 走到真实宿主 proof 之后提交 adopter feedback 时附上它
+- 走到真实宿主 proof 之后提交 adopter feedback 时，把它作为附件一并附上
 - 包版本、路线或环境变化后重新生成
-- 把它当成 [Project Status](./project-status.md) 就绪门禁的 intake evidence，而不是自动扩大支持边界的证明
+- 把它当成 [Project Status](./project-status.md) 就绪门禁的反馈证据，而不是自动扩大支持边界的证明
 
 ## 相关文档
 

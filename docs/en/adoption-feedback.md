@@ -1,22 +1,21 @@
 # Adoption Feedback Loop
 
-This page defines the public beta intake format and records the seeded adopter-trial synthesis used while the prerelease intake loop is still collecting enough real external reports.
+This page defines the public beta intake record and records the seeded adopter-trial synthesis used while the prerelease intake loop is still collecting enough real external reports.
 
 ## Intake Format
 
-Each feedback entry should capture:
+Each beta intake record should stay on one bounded schema: route, version, proof markers, friction, and support-bundle attachment.
 
-- adopter persona
-- attempted route or artifact (`HelloWorld`, `AsterGraph.Starter.Avalonia`, `HelloWorld.Avalonia`, `ConsumerSample.Avalonia`, `HostSample`, `PackageSmoke`, `ScaleSmoke`, `Demo`)
-- installed package version or public tag
-- time-to-first-success
-- friction points
-- requested next capability
-- proof or screenshot reference when available
-- support bundle when available
+Each feedback entry should capture this bounded schema:
+
+- route (`HelloWorld`, `AsterGraph.Starter.Avalonia`, `HelloWorld.Avalonia`, `ConsumerSample.Avalonia`, `HostSample`, `PackageSmoke`, `ScaleSmoke`, `Demo`)
+- version
+- proof markers or screenshot reference when available
+- friction
+- support-bundle attachment when available
 
 Use the GitHub issue template `Adoption feedback` for public reports.
-When you can reach `ConsumerSample.Avalonia -- --proof`, attach the local support bundle described in [Beta Support Bundle](./support-bundle.md).
+When you can reach `ConsumerSample.Avalonia -- --proof`, attach the local bundle described in [Beta Support Bundle](./support-bundle.md) as the support-bundle attachment.
 
 ## Seeded Trial Synthesis
 

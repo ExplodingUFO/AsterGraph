@@ -79,7 +79,7 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("[Beta Support Bundle](./docs/en/support-bundle.md)", notes, StringComparison.Ordinal);
         Assert.Contains("[Adoption Feedback Loop](./docs/en/adoption-feedback.md)", notes, StringComparison.Ordinal);
         Assert.Contains("[Adopter Triage Checklist](./docs/en/adopter-triage.md)", notes, StringComparison.Ordinal);
-        Assert.Contains("route, version, proof markers, and support bundle", notes, StringComparison.OrdinalIgnoreCase);
+        Assert.True(HasLineWithAll(notes, "route", "version", "proof", "friction", "support-bundle"));
         Assert.Contains("HELLOWORLD_WPF_OK:True", notes, StringComparison.Ordinal);
         Assert.Contains("adapter-2 validation only", notes, StringComparison.Ordinal);
         Assert.Contains("does not widen the public publish/package boundary", notes, StringComparison.Ordinal);
@@ -105,6 +105,7 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("usability and sample polish first", englishChecklist, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("3-5 real external entries", englishChecklist, StringComparison.Ordinal);
         Assert.Contains("0.xx alpha/beta line", englishChecklist, StringComparison.Ordinal);
+        Assert.True(HasLineWithAll(englishChecklist, "route", "version", "proof", "friction", "support-bundle"));
         Assert.DoesNotContain("HELLOWORLD_WPF_OK is Avalonia/WPF parity", englishChecklist, StringComparison.Ordinal);
         Assert.DoesNotContain("HELLOWORLD_WPF_OK is public WPF support", englishChecklist, StringComparison.Ordinal);
 
@@ -117,6 +118,7 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("继续优先做使用友好性和样例打磨", chineseChecklist, StringComparison.Ordinal);
         Assert.Contains("3 到 5 条真实外部反馈", chineseChecklist, StringComparison.Ordinal);
         Assert.Contains("0.xx` alpha/beta 线", chineseChecklist, StringComparison.Ordinal);
+        Assert.True(HasLineWithAll(chineseChecklist, "route", "version", "proof", "摩擦", "support bundle"));
         Assert.DoesNotContain("HELLOWORLD_WPF_OK 是 Avalonia/WPF parity", chineseChecklist, StringComparison.Ordinal);
         Assert.DoesNotContain("HELLOWORLD_WPF_OK 是公开 WPF support", chineseChecklist, StringComparison.Ordinal);
     }
@@ -243,6 +245,13 @@ public sealed class ReleaseClosureContractTests
 
     private static string EscapePowerShellSingleQuote(string value)
         => value.Replace("'", "''", StringComparison.Ordinal);
+
+    private static bool HasLineWithAll(string contents, params string[] requiredTerms)
+    {
+        return contents
+            .Split('\n', StringSplitOptions.TrimEntries)
+            .Any(line => requiredTerms.All(term => line.Contains(term, StringComparison.OrdinalIgnoreCase)));
+    }
 
     private static void WriteProofFile(string proofRoot, string fileName, string contents)
         => File.WriteAllText(Path.Combine(proofRoot, fileName), contents.Replace("`n", Environment.NewLine, StringComparison.Ordinal));
