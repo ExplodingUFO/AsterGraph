@@ -23,5 +23,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\AsterGraph.Editor\AsterGraph.Editor.csproj" />
     <ProjectReference Include="..\..\src\AsterGraph.Wpf\AsterGraph.Wpf.csproj" Condition="Exists('..\\..\\src\\AsterGraph.Wpf\\AsterGraph.Wpf.csproj')" />
+    <ProjectReference Include="..\..\tools\AsterGraph.Starter.Wpf\AsterGraph.Starter.Wpf.csproj" Condition="Exists('..\\..\\tools\\AsterGraph.Starter.Wpf\\AsterGraph.Starter.Wpf.csproj')" />
+    <ProjectReference Include="..\..\tools\AsterGraph.HelloWorld.Wpf\AsterGraph.HelloWorld.Wpf.csproj" Condition="Exists('..\\..\\tools\\AsterGraph.HelloWorld.Wpf\\AsterGraph.HelloWorld.Wpf.csproj')" />
   </ItemGroup>
 </Project>
