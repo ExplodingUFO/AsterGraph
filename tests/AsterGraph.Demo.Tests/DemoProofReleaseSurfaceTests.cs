@@ -103,8 +103,12 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("公开 Beta 评估路径", readmeZh, StringComparison.Ordinal);
         Assert.Contains("evaluation-path.md", quickStart, StringComparison.Ordinal);
         Assert.Contains("Beta Evaluation Path", quickStart, StringComparison.Ordinal);
+        Assert.Contains("ConsumerSample.Avalonia -- --proof", quickStart, StringComparison.Ordinal);
+        Assert.Contains("HostSample", quickStart, StringComparison.Ordinal);
         Assert.Contains("evaluation-path.md", quickStartZh, StringComparison.Ordinal);
         Assert.Contains("公开 Beta 评估路径", quickStartZh, StringComparison.Ordinal);
+        Assert.Contains("ConsumerSample.Avalonia -- --proof", quickStartZh, StringComparison.Ordinal);
+        Assert.Contains("HostSample", quickStartZh, StringComparison.Ordinal);
         Assert.Contains("evaluation-path.md", projectStatus, StringComparison.Ordinal);
         Assert.Contains("single route ladder", projectStatus, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("evaluation-path.md", projectStatusZh, StringComparison.Ordinal);
@@ -135,7 +139,6 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.True(HasLineWith(evaluationPath, "retained", "migration"));
         Assert.True(HasLineWith(evaluationPath, "HostSample", "proof"));
         Assert.True(HasLineWith(evaluationPath, "HostSample", "after"));
-
         Assert.True(HasLineWith(evaluationPathZh, "WPF", "验证"));
         Assert.True(HasLineWith(evaluationPathZh, "retained", "迁移"));
         Assert.True(HasLineWith(evaluationPathZh, "HostSample", "proof"));

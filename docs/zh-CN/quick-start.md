@@ -75,6 +75,8 @@ dotnet run --project tools/AsterGraph.HelloWorld.Avalonia/AsterGraph.HelloWorld.
 dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.ConsumerSample.Avalonia.csproj --nologo
 ```
 
+Proof handoff 时先跑 `AsterGraph.ConsumerSample.Avalonia -- --proof`；`HostSample` 只作为这条 ladder 之后的 proof harness 使用。
+
 如果你要评估插件能力，受防守的 hosted trust hop 是 `AsterGraph.ConsumerSample.Avalonia`。先看 [插件信任契约 v1](./plugin-trust-contracts.md) 和 [Plugin 与自定义节点 Recipe](./plugin-recipe.md)，再把这条路线当作已经看完。
 
 `Starter.Avalonia` 适合第一个 hosted 入口和最小端到端 Avalonia 脚手架；`HelloWorld` 适合最简单的 runtime-only 第一跑；`HelloWorld.Avalonia` 适合在 starter 之后看的最小默认 UI 第一跑；`ConsumerSample.Avalonia` 适合在跳到 `Demo` 之前先看一个真实宿主；`HostSample` 只适合做推荐路线验证，不是上手入口。
@@ -143,7 +145,7 @@ var view = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOption
 - [Consumer Sample](./consumer-sample.md) = 介于 HelloWorld 和 Demo 之间的真实宿主样例
 - [Alpha Status](./alpha-status.md) = 当前范围、非目标、已知限制
 - [Demo Guide](./demo-guide.md) = 完整展示宿主
-- [HostSample](../../tools/AsterGraph.HostSample/) = 路线验证用 proof harness，不是上手入口
+- [HostSample](../../tools/AsterGraph.HostSample/) = 这条 ladder 之后的路线验证用 proof harness，不是上手入口
 - [ScaleSmoke 基线](./scale-baseline.md) = 公开的规模分层与防回归红线
 - [Authoring Inspector Recipe](./authoring-inspector-recipe.md) = definition-driven 参数、分组、校验与 shipped inspector editor
 - [Plugin 与自定义节点 Recipe](./plugin-recipe.md) = 最小可复制 plugin/custom-node 路线

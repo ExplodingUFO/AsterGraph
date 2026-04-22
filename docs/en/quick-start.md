@@ -75,6 +75,8 @@ For one realistic hosted integration with a host-owned action rail, parameter ed
 dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.ConsumerSample.Avalonia.csproj --nologo
 ```
 
+Run `AsterGraph.ConsumerSample.Avalonia -- --proof` first for proof handoff; use `HostSample` only after that as the post-ladder proof harness.
+
 For plugin-capable evaluators, the defended hosted trust hop is `AsterGraph.ConsumerSample.Avalonia`. Read [Plugin Manifest and Trust Policy Contract v1](./plugin-trust-contracts.md) and [Plugin And Custom Node Recipe](./plugin-recipe.md) before treating the route as complete.
 
 Use `Starter.Avalonia` when you want the first hosted entry and the smallest end-to-end Avalonia scaffold. Use `HelloWorld` when you want the simplest runtime-only starting point. Use `HelloWorld.Avalonia` when you want the smallest shipped-shell sample after the starter scaffold. Use `ConsumerSample.Avalonia` when you want one realistic host before jumping to `Demo`. Use `HostSample` only when you want a proof harness for canonical route validation, not as the onboarding step.
@@ -139,7 +141,7 @@ Plugin loading is currently in-process. Hosts can discover candidates, apply an 
 - [Consumer Sample](./consumer-sample.md) = one realistic hosted integration between HelloWorld and Demo
 - [Alpha Status](./alpha-status.md) = current scope, non-goals, and known limitations
 - [Demo Guide](./demo-guide.md) = full showcase host
-- [HostSample](../../tools/AsterGraph.HostSample/) = proof harness for route validation, not the onboarding step
+- [HostSample](../../tools/AsterGraph.HostSample/) = post-ladder proof harness for route validation, not the onboarding step
 - [ScaleSmoke Baseline](./scale-baseline.md) = public graph-size tiers and defended redlines
 - [Authoring Inspector Recipe](./authoring-inspector-recipe.md) = definition-driven parameters, groups, validation, and shipped inspector editors
 - [Plugin And Custom Node Recipe](./plugin-recipe.md) = smallest copyable plugin/custom-node path

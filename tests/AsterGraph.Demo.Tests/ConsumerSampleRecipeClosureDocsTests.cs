@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using Xunit;
 
 namespace AsterGraph.Demo.Tests;
@@ -54,6 +55,7 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
         AssertContains(consumerSampleEn, "proof labels beyond the defended markers");
         AssertContains(consumerSampleEn, "The hosted route ladder is `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerSample.Avalonia`.");
         AssertContains(consumerSampleEn, "`HostSample` is the post-ladder proof harness.");
+        Assert.True(HasLineWith(consumerSampleEn, "AsterGraph.ConsumerSample.Avalonia -- --proof", "first"));
 
         AssertContains(consumerSampleZh, "三条宿主管线");
         AssertContains(consumerSampleZh, "样例自有内容");
@@ -69,6 +71,7 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
         AssertContains(consumerSampleZh, "defended markers 之外的 proof 文案");
         AssertContains(consumerSampleZh, "这条 hosted route ladder 是 `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerSample.Avalonia`。");
         AssertContains(consumerSampleZh, "`HostSample` 是这条 ladder 之后的 proof harness。");
+        Assert.True(HasLineWith(consumerSampleZh, "AsterGraph.ConsumerSample.Avalonia -- --proof", "先跑"));
     }
 
     [Fact]
@@ -110,6 +113,10 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
 
     private static void AssertContains(string contents, string expected)
         => Assert.Contains(expected, contents, StringComparison.Ordinal);
+
+    private static bool HasLineWith(string contents, string first, string second)
+        => contents.Split('\n')
+            .Any(line => line.Contains(first, StringComparison.Ordinal) && line.Contains(second, StringComparison.Ordinal));
 
     private static string ReadRepoFile(string relativePath)
         => File.ReadAllText(Path.Combine(GetRepositoryRoot(), relativePath));
