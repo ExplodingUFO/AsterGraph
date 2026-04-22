@@ -1,16 +1,23 @@
 # AsterGraph.Starter.Avalonia
 
-This is the first hosted entry in the public cookbook path.
+This is the first hosted recipe in the public cookbook path. It is copyable as-is when you want the smallest Avalonia host scaffold.
 
 The hosted route ladder is `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerSample.Avalonia`.
 
-Use it when you want the smallest end-to-end Avalonia scaffold that already wires the editor factory to the view factory, before moving on to `AsterGraph.HelloWorld`, `AsterGraph.HelloWorld.Avalonia`, and `AsterGraph.ConsumerSample.Avalonia`.
+Use it when you want the smallest end-to-end Avalonia scaffold that already wires the editor factory to the view factory, before moving on to `AsterGraph.HelloWorld.Avalonia` and then `AsterGraph.ConsumerSample.Avalonia`.
 
-It deliberately stays narrow:
+Keep/copy from this recipe:
 
-- one hosted Avalonia window
-- one tiny graph surface
-- one canonical editor/view composition route
+- `AsterGraphEditorFactory.Create(...)`
+- `AsterGraphAvaloniaViewFactory.Create(...)`
+- `AsterGraphEditorOptions`
+- the document/catalog/editor/view composition flow
+
+Replace/own in your host:
+
+- the top-level window and shell chrome
+- the sample title, sample size, and sample content shell details
+- the sample graph/catalog definitions once the host outgrows the tiny starter recipe
 
 Run it with:
 

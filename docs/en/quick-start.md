@@ -17,6 +17,8 @@ If you are evaluating the public beta end to end, use [Beta Evaluation Path](./e
 | Contract-first integration | `AsterGraph.Abstractions` | stable identifiers, definitions, and provider contracts |
 
 Add `AsterGraph.Core` only when the host also needs direct `GraphDocument`, serialization, or compatibility APIs.
+Use `AsterGraph.Starter.Avalonia` as the copyable starter recipe. Keep/copy `AsterGraphEditorFactory.Create(...)`, `AsterGraphAvaloniaViewFactory.Create(...)`, `AsterGraphEditorOptions`, and the document/catalog/editor/view composition flow. Replace the top-level window, shell chrome, sample title/size/content shell details, and sample graph/catalog definitions as the host grows. The next hosted step is `AsterGraph.HelloWorld.Avalonia`.
+
 
 ## 2. Install From NuGet
 
