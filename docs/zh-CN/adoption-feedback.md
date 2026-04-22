@@ -7,7 +7,7 @@
 每条反馈至少记录：
 
 - 试用者画像
-- 尝试的路线或入口（`HelloWorld`、`HelloWorld.Avalonia`、`ConsumerSample.Avalonia`、`HostSample`、`PackageSmoke`、`ScaleSmoke`、`Demo`）
+- 尝试的路线或入口（`HelloWorld`、`AsterGraph.Starter.Avalonia`、`HelloWorld.Avalonia`、`ConsumerSample.Avalonia`、`HostSample`、`PackageSmoke`、`ScaleSmoke`、`Demo`）
 - 安装的包版本或公开 tag
 - 首次跑通耗时
 - 主要摩擦点
@@ -24,7 +24,7 @@
 
 | 画像 | 尝试路线 | 主要摩擦 | 希望下一步补什么 |
 | --- | --- | --- | --- |
-| Avalonia 宿主集成人员 | `HelloWorld.Avalonia` -> `ConsumerSample.Avalonia` | 第一跑很顺，但在没有中等样例时，从最小样例跳到完整宿主接线跨度较大 | 更多可复制的 hosted-UI 模板和 recipe |
+| Avalonia 宿主集成人员 | `AsterGraph.Starter.Avalonia` -> `HelloWorld.Avalonia` -> `ConsumerSample.Avalonia` | 第一跑很顺，但在没有中等样例时，从最小样例跳到完整宿主接线跨度较大 | 更多可复制的 hosted-UI 模板和 recipe |
 | 需要插件能力的 SDK 评估者 | `ConsumerSample.Avalonia` | 不往后读文档的话，trust boundary 还不够醒目 | 更前置的 trust-policy 示例和 plugin-host recipe |
 | 现有 retained 宿主维护者 | `Host Integration` + retained migration 文档 | 路线选择和迁移阶段仍需要仔细阅读 | 更多 migration recipe 和路线对照示例 |
 | 关注性能的评估者 | `ScaleSmoke` baseline | marker 已有，但预算数字的含义还要结合单独文档理解 | 先持续公开 baseline 数字，再决定是否升级大图 defended budget |

@@ -139,6 +139,8 @@ public sealed class DemoProofReleaseSurfaceTests
         var triageDocZh = ReadRepoFile("docs/zh-CN/adopter-triage.md");
         var checklist = ReadRepoFile("docs/en/public-launch-checklist.md");
         var checklistZh = ReadRepoFile("docs/zh-CN/public-launch-checklist.md");
+        var adoptionFeedback = ReadRepoFile("docs/en/adoption-feedback.md");
+        var adoptionFeedbackZh = ReadRepoFile("docs/zh-CN/adoption-feedback.md");
         var evidenceBlock = ExtractIssueTemplateBlock(adoptionTemplate, "evidence");
         var supportBundleBlock = ExtractIssueTemplateBlock(adoptionTemplate, "support_bundle");
 
@@ -146,6 +148,8 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("id: route", adoptionTemplate, StringComparison.Ordinal);
         Assert.Contains("id: proof_markers", adoptionTemplate, StringComparison.Ordinal);
         Assert.Contains("id: support_bundle", adoptionTemplate, StringComparison.Ordinal);
+        Assert.Contains("AsterGraph.Starter.Avalonia", adoptionTemplate, StringComparison.Ordinal);
+        Assert.Contains("HelloWorld.Avalonia", adoptionTemplate, StringComparison.Ordinal);
         Assert.Contains("Supporting evidence", evidenceBlock, StringComparison.Ordinal);
         Assert.Contains("besides proof markers", evidenceBlock, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("required: true", evidenceBlock, StringComparison.Ordinal);
@@ -164,6 +168,12 @@ public sealed class DemoProofReleaseSurfaceTests
             Assert.Contains("route", contents, StringComparison.OrdinalIgnoreCase);
             Assert.Contains("proof", contents, StringComparison.OrdinalIgnoreCase);
             Assert.Contains("support bundle", contents, StringComparison.OrdinalIgnoreCase);
+        }
+
+        foreach (var contents in new[] { adoptionFeedback, adoptionFeedbackZh })
+        {
+            Assert.Contains("AsterGraph.Starter.Avalonia", contents, StringComparison.Ordinal);
+            Assert.Contains("HelloWorld.Avalonia", contents, StringComparison.Ordinal);
         }
 
         Assert.Contains("support bundle", checklist, StringComparison.OrdinalIgnoreCase);

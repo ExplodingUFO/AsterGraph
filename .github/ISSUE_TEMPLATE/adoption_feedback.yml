@@ -18,6 +18,7 @@ body:
       label: Route or artifact tried
       options:
         - HelloWorld
+        - AsterGraph.Starter.Avalonia
         - HelloWorld.Avalonia
         - ConsumerSample.Avalonia
         - HostSample
