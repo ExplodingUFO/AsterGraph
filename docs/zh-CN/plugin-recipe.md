@@ -86,4 +86,3 @@ var editor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
 
 - [Host Integration](./host-integration.md)
 - [Extension Contracts](./extension-contracts.md)
-- [Alpha Status](./alpha-status.md)

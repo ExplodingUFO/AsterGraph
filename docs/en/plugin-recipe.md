@@ -86,4 +86,3 @@ See also:
 
 - [Host Integration](./host-integration.md)
 - [Extension Contracts](./extension-contracts.md)
-- [Alpha Status](./alpha-status.md)
