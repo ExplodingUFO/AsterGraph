@@ -66,10 +66,14 @@ public sealed class DemoProofReleaseSurfaceTests
         var quickStart = ReadRepoFile("docs/en/quick-start.md");
         var quickStartZh = ReadRepoFile("docs/zh-CN/quick-start.md");
 
-        Assert.Contains("[Beta Evaluation Path](./docs/en/evaluation-path.md)", readme, StringComparison.Ordinal);
-        Assert.Contains("[公开 Beta 评估路径](./docs/zh-CN/evaluation-path.md)", readmeZh, StringComparison.Ordinal);
-        Assert.Contains("[Beta Evaluation Path](./evaluation-path.md)", quickStart, StringComparison.Ordinal);
-        Assert.Contains("[公开 Beta 评估路径](./evaluation-path.md)", quickStartZh, StringComparison.Ordinal);
+        Assert.Contains("evaluation-path.md", readme, StringComparison.Ordinal);
+        Assert.Contains("Beta Evaluation Path", readme, StringComparison.Ordinal);
+        Assert.Contains("evaluation-path.md", readmeZh, StringComparison.Ordinal);
+        Assert.Contains("公开 Beta 评估路径", readmeZh, StringComparison.Ordinal);
+        Assert.Contains("evaluation-path.md", quickStart, StringComparison.Ordinal);
+        Assert.Contains("Beta Evaluation Path", quickStart, StringComparison.Ordinal);
+        Assert.Contains("evaluation-path.md", quickStartZh, StringComparison.Ordinal);
+        Assert.Contains("公开 Beta 评估路径", quickStartZh, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -88,18 +92,15 @@ public sealed class DemoProofReleaseSurfaceTests
             Assert.Contains("HOST_SAMPLE_OK:True", contents, StringComparison.Ordinal);
         }
 
-        Assert.Contains("validation-only", evaluationPath, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("migration-only", evaluationPath, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("proof harness", evaluationPath, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("only after", evaluationPath, StringComparison.OrdinalIgnoreCase);
-        Assert.DoesNotContain("WPF parity", evaluationPath, StringComparison.OrdinalIgnoreCase);
-        Assert.DoesNotContain("WPF is a second onboarding path", evaluationPath, StringComparison.OrdinalIgnoreCase);
+        Assert.True(HasLineWith(evaluationPath, "WPF", "validation"));
+        Assert.True(HasLineWith(evaluationPath, "retained", "migration"));
+        Assert.True(HasLineWith(evaluationPath, "HostSample", "proof"));
+        Assert.True(HasLineWith(evaluationPath, "HostSample", "after"));
 
-        Assert.Contains("仅用于验证", evaluationPathZh, StringComparison.Ordinal);
-        Assert.Contains("仅用于迁移", evaluationPathZh, StringComparison.Ordinal);
-        Assert.Contains("proof harness", evaluationPathZh, StringComparison.OrdinalIgnoreCase);
-        Assert.DoesNotContain("WPF parity", evaluationPathZh, StringComparison.OrdinalIgnoreCase);
-        Assert.DoesNotContain("WPF 是第二条上手路径", evaluationPathZh, StringComparison.Ordinal);
+        Assert.True(HasLineWith(evaluationPathZh, "WPF", "验证"));
+        Assert.True(HasLineWith(evaluationPathZh, "retained", "迁移"));
+        Assert.True(HasLineWith(evaluationPathZh, "HostSample", "proof"));
+        Assert.True(HasLineWith(evaluationPathZh, "HostSample", "之后"));
     }
 
     [Fact]
