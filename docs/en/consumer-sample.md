@@ -43,7 +43,7 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 
 If you copied the starter recipe, validate the defended host here with `AsterGraph.ConsumerSample.Avalonia -- --proof`.
 
-When you need reviewable local evidence, attach the support bundle at `artifacts/consumer-support-bundle.json`; the bundle marker points to `SUPPORT_BUNDLE_PATH:artifacts/consumer-support-bundle.json`. It should stay local evidence only and should not widen the support boundary.
+When you need reviewable local evidence, attach the support bundle at `artifacts/consumer-support-bundle.json`; the bundle marker points to `SUPPORT_BUNDLE_PATH:...` with the resolved path. It should stay local evidence only and should not widen the support boundary.
 
 Expected proof markers:
 

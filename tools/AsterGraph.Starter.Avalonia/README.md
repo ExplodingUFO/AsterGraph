@@ -31,7 +31,7 @@ Use `AsterGraph.HelloWorld` when you want the runtime-only route, `AsterGraph.He
 
 This starter recipe is only the scaffold. If you are validating a copied hosted recipe, hand off to `AsterGraph.ConsumerSample.Avalonia -- --proof` for the defended proof lane.
 
-That proof run is where you should expect `CONSUMER_SAMPLE_OK:True`, `COMMAND_SURFACE_OK:True`, the four `HOST_NATIVE_METRIC:*` lines, and the local support bundle markers `SUPPORT_BUNDLE_OK:True` and `SUPPORT_BUNDLE_PATH:artifacts/consumer-support-bundle.json`.
+That proof run is where you should expect `CONSUMER_SAMPLE_OK:True`, `COMMAND_SURFACE_OK:True`, the four `HOST_NATIVE_METRIC:*` lines, and the local support bundle markers `SUPPORT_BUNDLE_OK:True` and `SUPPORT_BUNDLE_PATH:...` for the resolved path.
 
 The support bundle is local evidence only; it does not widen the support boundary or introduce a separate verification lane.
 

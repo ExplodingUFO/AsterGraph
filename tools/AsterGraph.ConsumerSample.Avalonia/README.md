@@ -24,7 +24,7 @@ For a local support bundle:
 dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.ConsumerSample.Avalonia.csproj --nologo -- --proof --support-bundle artifacts/consumer-support-bundle.json --support-note "what you were trying to validate"
 ```
 
-This is the proof handoff for copied hosted recipes: validate the defended route here with `AsterGraph.ConsumerSample.Avalonia -- --proof`, then review the local evidence in `artifacts/consumer-support-bundle.json` if you need a bundle. The bundle marker points to `SUPPORT_BUNDLE_PATH:artifacts/consumer-support-bundle.json`.
+This is the proof handoff for copied hosted recipes: validate the defended route here with `AsterGraph.ConsumerSample.Avalonia -- --proof`, then review the local evidence in `artifacts/consumer-support-bundle.json` if you need a bundle. The bundle marker points to `SUPPORT_BUNDLE_PATH:...` with the resolved path.
 
 Expected markers:
 

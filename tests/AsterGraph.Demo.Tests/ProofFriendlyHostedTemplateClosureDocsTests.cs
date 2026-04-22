@@ -21,25 +21,25 @@ public sealed class ProofFriendlyHostedTemplateClosureDocsTests
         Assert.Contains("CONSUMER_SAMPLE_OK:True", starterReadme, StringComparison.Ordinal);
         Assert.Contains("COMMAND_SURFACE_OK:True", starterReadme, StringComparison.Ordinal);
         Assert.Contains("HOST_NATIVE_METRIC:*", starterReadme, StringComparison.Ordinal);
-        Assert.Contains("SUPPORT_BUNDLE_PATH:artifacts/consumer-support-bundle.json", starterReadme, StringComparison.Ordinal);
+        Assert.Contains("SUPPORT_BUNDLE_PATH:...", starterReadme, StringComparison.Ordinal);
         Assert.Contains("local evidence only", starterReadme, StringComparison.OrdinalIgnoreCase);
 
         Assert.Contains("proof handoff", consumerReadme, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("AsterGraph.ConsumerSample.Avalonia -- --proof", consumerReadme, StringComparison.Ordinal);
         Assert.Contains("CONSUMER_SAMPLE_OK:True", consumerReadme, StringComparison.Ordinal);
-        Assert.Contains("SUPPORT_BUNDLE_PATH:artifacts/consumer-support-bundle.json", consumerReadme, StringComparison.Ordinal);
+        Assert.Contains("SUPPORT_BUNDLE_PATH:...", consumerReadme, StringComparison.Ordinal);
         Assert.Contains("local evidence only", consumerReadme, StringComparison.OrdinalIgnoreCase);
 
         Assert.Contains("proof handoff", consumerSampleEn, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("AsterGraph.ConsumerSample.Avalonia -- --proof", consumerSampleEn, StringComparison.Ordinal);
         Assert.Contains("CONSUMER_SAMPLE_OK:True", consumerSampleEn, StringComparison.Ordinal);
-        Assert.Contains("SUPPORT_BUNDLE_PATH:artifacts/consumer-support-bundle.json", consumerSampleEn, StringComparison.Ordinal);
+        Assert.Contains("SUPPORT_BUNDLE_PATH:...", consumerSampleEn, StringComparison.Ordinal);
         Assert.Contains("local evidence only", consumerSampleEn, StringComparison.OrdinalIgnoreCase);
 
         Assert.Contains("proof handoff", consumerSampleZh, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("AsterGraph.ConsumerSample.Avalonia -- --proof", consumerSampleZh, StringComparison.Ordinal);
         Assert.Contains("CONSUMER_SAMPLE_OK:True", consumerSampleZh, StringComparison.Ordinal);
-        Assert.Contains("SUPPORT_BUNDLE_PATH:artifacts/consumer-support-bundle.json", consumerSampleZh, StringComparison.Ordinal);
+        Assert.Contains("SUPPORT_BUNDLE_PATH:...", consumerSampleZh, StringComparison.Ordinal);
         Assert.Contains("本地证据", consumerSampleZh, StringComparison.Ordinal);
 
         Assert.Contains("ConsumerSample.Avalonia", supportBundleEn, StringComparison.Ordinal);
