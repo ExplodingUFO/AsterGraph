@@ -22,8 +22,9 @@ AsterGraph 是一个面向 .NET 的模块化节点图编辑器工具包，提供
 
 | 我现在要做什么 | 先看哪里 | 为什么 |
 | --- | --- | --- |
-| 想最快跑起来 | [`tools/AsterGraph.HelloWorld`](./tools/AsterGraph.HelloWorld/) | 最小仅运行时样例；面向自定义 UI 或原生壳层的 canonical 路线 |
-| 想嵌入默认 Avalonia UI | [`tools/AsterGraph.HelloWorld.Avalonia`](./tools/AsterGraph.HelloWorld.Avalonia/) | 基于 factory 路线的最小默认 UI 样例 |
+| 想先看第一个 hosted 入口 | [`tools/AsterGraph.Starter.Avalonia`](./tools/AsterGraph.Starter.Avalonia/) | 最小端到端 Avalonia 脚手架；cookbook 里的第一个 hosted 跳板 |
+| 想最快跑起仅运行时路径 | [`tools/AsterGraph.HelloWorld`](./tools/AsterGraph.HelloWorld/) | 最小仅运行时样例；面向自定义 UI 或原生壳层的 canonical 路线 |
+| 想嵌入默认 Avalonia UI | [`tools/AsterGraph.HelloWorld.Avalonia`](./tools/AsterGraph.HelloWorld.Avalonia/) | 在 starter 之后的最小默认 UI 样例 |
 | 想先看一个更真实的宿主集成 | [Consumer Sample](./tools/AsterGraph.ConsumerSample.Avalonia/README.md) | 同一条 canonical 路线上的中等复杂度样例，包含宿主动作、参数编辑和一个可信插件 |
 | 想接到现有宿主里 | [Host Integration](./docs/zh-CN/host-integration.md) | 路线矩阵、包边界和迁移说明 |
 | 想先把完整能力看一遍 | [Demo Guide](./docs/zh-CN/demo-guide.md) | 展示插件、自动化、本地化和独立表面 |
@@ -50,18 +51,20 @@ dotnet add package AsterGraph.Abstractions --prerelease
 
 | 路线 | 适合什么场景 | 第一个 API | 第一个样例 |
 | --- | --- | --- | --- |
+| Hosted starter scaffold | 宿主先要一个最小端到端的 Avalonia 入口，再往完整应用扩展 | `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` | [`AsterGraph.Starter.Avalonia`](./tools/AsterGraph.Starter.Avalonia/) |
 | 仅运行时 / 自定义 UI | 宿主自己管 UI，只想拿推荐的运行时边界 | `AsterGraphEditorFactory.CreateSession(...)` + `IGraphEditorSession` | [`AsterGraph.HelloWorld`](./tools/AsterGraph.HelloWorld/) |
-| 默认 Avalonia UI | 宿主想直接复用默认编辑器壳层或独立 Avalonia 表面 | `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` | [Quick Start](./docs/zh-CN/quick-start.md) |
+| 默认 Avalonia UI | 宿主想直接复用默认编辑器壳层或独立 Avalonia 表面 | `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` | [`AsterGraph.HelloWorld.Avalonia`](./tools/AsterGraph.HelloWorld.Avalonia/) |
 | retained 迁移 | 现有宿主要分批迁移，暂时还离不开旧的 MVVM 入口 | `new GraphEditorViewModel(...)` + `new GraphEditorView { Editor = editor }` | [Host Integration](./docs/zh-CN/host-integration.md) |
 
 新的运行时能力接入优先锚定第一条。Avalonia 路线是当前受支持的 hosted adapter 路线，retained 路线只作为迁移桥接。
 
 ## 公开入口分工
 
+- [`tools/AsterGraph.Starter.Avalonia`](./tools/AsterGraph.Starter.Avalonia/) = 第一个 hosted 脚手架；最小端到端 Avalonia 入口
 - [`tools/AsterGraph.HelloWorld`](./tools/AsterGraph.HelloWorld/) = 仅运行时第一跑样例
-- [`tools/AsterGraph.HelloWorld.Avalonia`](./tools/AsterGraph.HelloWorld.Avalonia/) = 默认 Avalonia UI 第一跑样例
-- [`tools/AsterGraph.ConsumerSample.Avalonia`](./tools/AsterGraph.ConsumerSample.Avalonia/README.md) = 中等复杂度 hosted-UI consumer 样例，展示宿主动作、参数编辑和一个可信插件
-- [`tools/AsterGraph.HostSample`](./tools/AsterGraph.HostSample/) = 仅运行时 / 默认 UI 两条推荐路线的最小验证样例
+- [`tools/AsterGraph.HelloWorld.Avalonia`](./tools/AsterGraph.HelloWorld.Avalonia/) = 在 starter 之后的最小默认 UI 样例
+- [`tools/AsterGraph.ConsumerSample.Avalonia`](./tools/AsterGraph.ConsumerSample.Avalonia/README.md) = 介于 `HelloWorld.Avalonia` 和 `Demo` 之间的真实 hosted-UI consumer 样例
+- [`tools/AsterGraph.HostSample`](./tools/AsterGraph.HostSample/) = 仅运行时 / 默认 UI 两条推荐路线的 proof harness，不是最先上手的入口
 - [`tools/AsterGraph.PackageSmoke`](./tools/AsterGraph.PackageSmoke/) = 打包消费验证
 - [`tools/AsterGraph.ScaleSmoke`](./tools/AsterGraph.ScaleSmoke/) = 公开的大图基线加 history/state 验证
 - [`src/AsterGraph.Demo`](./src/AsterGraph.Demo/) = 展示宿主；菜单标签会跟着当前 UI 语言切换

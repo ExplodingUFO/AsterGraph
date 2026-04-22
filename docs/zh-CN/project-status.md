@@ -15,6 +15,7 @@
 - 示例与验证工具：
   - `tools/AsterGraph.HelloWorld`：最快的 runtime-only 第一跑样例
   - `tools/AsterGraph.HelloWorld.Avalonia`：最快的默认 UI 第一跑样例
+  - `tools/AsterGraph.Starter.Avalonia`：shipped 的 Avalonia starter scaffold
   - `tools/AsterGraph.ConsumerSample.Avalonia`：介于 HelloWorld 和 Demo 之间的真实宿主样例
   - `tools/AsterGraph.HostSample`：最小接入验证样例
   - `tools/AsterGraph.PackageSmoke`：打包消费验证
@@ -28,6 +29,8 @@
 - 四个可发布 SDK 包边界
 - kernel/session-first 的运行时状态所有权
 - 默认 Avalonia 壳层与 standalone surfaces
+- trusted / loaded / blocked 的 runtime inspection surface
+- command/trust timeline 和 perf overlay 这类 showcase surface
 - v1.23 图面可用性 proof marker：
   - `COMMAND_SURFACE_OK:True`
   - `TIERED_NODE_SURFACE_OK:True`
@@ -60,6 +63,7 @@
 - 在 advanced editing 收口时保持 public alpha 文档和验证指引清晰可执行
 - 继续维护托管 CI 与核心验证 lane 的一致性
 - 在不突然 breaking 的前提下继续保留兼容迁移窗口
+- 让 shipped starter scaffold、runtime inspection surface、command/trust timeline 和 perf overlay 继续对齐 canonical session-first 路线
 
 ## 公开入口分工
 
@@ -69,6 +73,7 @@
 - `tools/AsterGraph.HostSample` = 最小推荐接入验证
 - `tools/AsterGraph.PackageSmoke` = 打包消费验证
 - `tools/AsterGraph.ScaleSmoke` = 大图基线加历史记录与状态连续性验证
+- `tools/AsterGraph.Starter.Avalonia` = shipped 的 Avalonia starter scaffold
 - `src/AsterGraph.Demo` = 可视化展示宿主
 
 ## 对外入口

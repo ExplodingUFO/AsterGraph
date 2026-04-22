@@ -22,8 +22,9 @@ AsterGraph is a modular node-graph editor toolkit for .NET. It gives hosts a reu
 
 | I want to... | Start here | Why |
 | --- | --- | --- |
-| get the fastest first run | [`tools/AsterGraph.HelloWorld`](./tools/AsterGraph.HelloWorld/) | smallest runtime-only sample; one canonical route for custom UI or native shells |
-| embed the shipped Avalonia UI | [`tools/AsterGraph.HelloWorld.Avalonia`](./tools/AsterGraph.HelloWorld.Avalonia/) | smallest hosted-UI sample on the factory-based Avalonia route |
+| get the first hosted entry | [`tools/AsterGraph.Starter.Avalonia`](./tools/AsterGraph.Starter.Avalonia/) | smallest end-to-end Avalonia scaffold; the first hosted hop in the cookbook |
+| get the fastest runtime-only first run | [`tools/AsterGraph.HelloWorld`](./tools/AsterGraph.HelloWorld/) | smallest runtime-only sample; one canonical route for custom UI or native shells |
+| embed the shipped Avalonia UI | [`tools/AsterGraph.HelloWorld.Avalonia`](./tools/AsterGraph.HelloWorld.Avalonia/) | smallest stock hosted-UI sample after the starter scaffold |
 | try a realistic hosted integration | [Consumer Sample](./tools/AsterGraph.ConsumerSample.Avalonia/README.md) | medium sample on the same canonical route, with host-owned actions, parameter editing, and one trusted plugin |
 | integrate into an existing host | [Host Integration](./docs/en/host-integration.md) | route matrix, package boundary, migration guidance |
 | inspect the full surface visually | [Demo Guide](./docs/en/demo-guide.md) | showcase host for plugins, automation, localization, and standalone surfaces |
@@ -50,18 +51,20 @@ Add `AsterGraph.Core` only when the host also needs direct `GraphDocument`, seri
 
 | Route | Use when | First API | First sample |
 | --- | --- | --- | --- |
+| Hosted starter scaffold | the host wants the smallest end-to-end Avalonia entry before a fuller app | `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` | [`AsterGraph.Starter.Avalonia`](./tools/AsterGraph.Starter.Avalonia/) |
 | Runtime-only or custom UI | the host owns its own UI and wants the canonical runtime boundary | `AsterGraphEditorFactory.CreateSession(...)` + `IGraphEditorSession` | [`AsterGraph.HelloWorld`](./tools/AsterGraph.HelloWorld/) |
-| Shipped Avalonia UI | the host wants the stock editor shell or stock standalone Avalonia surfaces | `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` | [Quick Start](./docs/en/quick-start.md) |
+| Shipped Avalonia UI | the host wants the stock editor shell or stock standalone Avalonia surfaces | `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` | [`AsterGraph.HelloWorld.Avalonia`](./tools/AsterGraph.HelloWorld.Avalonia/) |
 | Retained migration | the host is moving off older MVVM-shaped entry points in planned batches | `new GraphEditorViewModel(...)` + `new GraphEditorView { Editor = editor }` | [Host Integration](./docs/en/host-integration.md) |
 
 For new runtime-facing work, anchor on the first route. The Avalonia route is the supported hosted adapter path today, while the retained route stays migration-only.
 
 ## Public Entry Map
 
+- [`tools/AsterGraph.Starter.Avalonia`](./tools/AsterGraph.Starter.Avalonia/) = first hosted scaffold; the smallest end-to-end Avalonia entry
 - [`tools/AsterGraph.HelloWorld`](./tools/AsterGraph.HelloWorld/) = first-run sample for the runtime-only path
-- [`tools/AsterGraph.HelloWorld.Avalonia`](./tools/AsterGraph.HelloWorld.Avalonia/) = first-run sample for the hosted Avalonia UI path
-- [`tools/AsterGraph.ConsumerSample.Avalonia`](./tools/AsterGraph.ConsumerSample.Avalonia/README.md) = medium hosted-UI consumer sample with one custom node family, one host action rail, and one trusted plugin
-- [`tools/AsterGraph.HostSample`](./tools/AsterGraph.HostSample/) = minimal canonical proof harness for runtime-only and hosted-UI validation
+- [`tools/AsterGraph.HelloWorld.Avalonia`](./tools/AsterGraph.HelloWorld.Avalonia/) = smallest stock hosted-UI sample after the starter scaffold
+- [`tools/AsterGraph.ConsumerSample.Avalonia`](./tools/AsterGraph.ConsumerSample.Avalonia/README.md) = realistic hosted-UI consumer sample between `HelloWorld.Avalonia` and `Demo`
+- [`tools/AsterGraph.HostSample`](./tools/AsterGraph.HostSample/) = proof harness for runtime-only and hosted-UI validation, not the onboarding step
 - [`tools/AsterGraph.PackageSmoke`](./tools/AsterGraph.PackageSmoke/) = packed-package proof
 - [`tools/AsterGraph.ScaleSmoke`](./tools/AsterGraph.ScaleSmoke/) = public larger-graph baseline plus history/state proof
 - [`src/AsterGraph.Demo`](./src/AsterGraph.Demo/) = showcase host; menu labels follow the current UI language

@@ -1,6 +1,6 @@
 # Host Integration Guide
 
-This guide expands the supported host routes without turning the public onboarding flow into maintainer proof documentation.
+This guide expands the supported host routes without turning the public onboarding flow into maintainer proof documentation. The canonical route stays session-first/runtime-first; retained MVVM is only a compatibility bridge during migration.
 
 ## Canonical Routes
 
@@ -8,10 +8,10 @@ This guide expands the supported host routes without turning the public onboardi
    `AsterGraphEditorFactory.CreateSession(...)` + `IGraphEditorSession`
 2. Shipped Avalonia UI  
    `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)`
-3. Retained migration  
+3. Retained migration bridge
    `new GraphEditorViewModel(...)` + `new GraphEditorView { Editor = editor }`
 
-Routes 1 and 2 are the canonical surfaces for new work. Route 3 remains supported only as a retained compatibility facade during migration.
+Routes 1 and 2 are the canonical surfaces for new work. Route 3 remains supported only as a retained compatibility bridge for legacy hosts during migration.
 
 If the host owns its UI, route 1 is the canonical native/custom-UI path; you compose your own surface around the same session/runtime owner instead of introducing a second model.
 
@@ -25,12 +25,15 @@ Standalone Avalonia surfaces such as `AsterGraphCanvasViewFactory`, `AsterGraphI
 | Default Avalonia UI | `AsterGraph.Avalonia` | `Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` | `tools/AsterGraph.HelloWorld.Avalonia` |
 | Plugin trust/discovery | `AsterGraph.Editor` | `DiscoverPluginCandidates(...)` + `PluginTrustPolicy` | `tools/AsterGraph.ConsumerSample.Avalonia` |
 | Automation | `AsterGraph.Editor` | `IGraphEditorSession.Automation.Execute(...)` | `src/AsterGraph.Demo` |
-| Retained migration | `AsterGraph.Editor` (+ `AsterGraph.Avalonia` when embedding `GraphEditorView`) | retained constructor path | migration-only |
+| Retained migration bridge | `AsterGraph.Editor` (+ `AsterGraph.Avalonia` when embedding `GraphEditorView`) | retained constructor path | migration-only legacy host |
+
+If you are starting new work, begin with [Quick Start](./quick-start.md) and keep the retained bridge for legacy migration only.
 
 ## Sample Roles
 
 - `AsterGraph.HelloWorld` = first-run sample for the runtime-only path
 - `AsterGraph.HelloWorld.Avalonia` = first-run sample for the shipped Avalonia UI path
+- `AsterGraph.Starter.Avalonia` = starter scaffold for the shipped Avalonia path
 - `AsterGraph.ConsumerSample.Avalonia` = medium hosted-UI sample on the canonical route with host actions, parameter editing, and one trusted plugin
 - `AsterGraph.HostSample` = narrow proof harness for the canonical runtime-only and hosted-UI routes
 - `AsterGraph.PackageSmoke` = packed-package proof
@@ -69,7 +72,7 @@ Short version:
 - leaving the saved snapshot through undo makes the editor dirty
 - returning to the saved snapshot through redo clears dirty again
 - no-op interactions must not latch fake dirty or undo state
-- retained and runtime mutations still share one kernel-owned history/save authority
+- retained and runtime mutations still share one kernel-owned history/save authority, but new integrations should still start on the canonical session route
 
 ## Export Versus Persistence
 
@@ -89,10 +92,10 @@ Important defaults:
 
 - canonical runtime surfaces are `CreateSession(...)`, `IGraphEditorSession`, and DTO/snapshot queries
 - `Create(...)` remains the supported hosted-Avalonia composition helper; `Editor.Session` is still the shared runtime owner behind that route
-- retained `GraphEditorViewModel` / `GraphEditorView` remain supported migration facades and are explicitly labeled as advanced compatibility surfaces
+- retained `GraphEditorViewModel` / `GraphEditorView` remain supported migration facades and are explicitly labeled as advanced compatibility bridge surfaces
 - host localization runs after plugin localization, so host override wins
 - plugin-contributed commands now surface through the canonical session command descriptors and execute through `IGraphEditorSession.Commands.TryExecuteCommand(...)`
-- retained host augmentor composition still differs from the runtime path; use the runtime path for new work
+- retained host augmentor composition still differs from the runtime path; use the runtime path for new work and treat the retained route as a bridge only
 
 ## Plugin Trust Boundary
 

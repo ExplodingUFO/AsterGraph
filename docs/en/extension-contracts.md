@@ -27,6 +27,8 @@ This document publishes the contract around surface stability, compatibility ret
 - `CompatiblePortTarget`
 - older MVVM-shaped overloads where newer runtime-first alternatives already exist
 
+Use the retained surfaces only as migration bridges. New work should start on the stable canonical surfaces above, with [Host Integration](./host-integration.md) as the route map.
+
 ## Extension Precedence
 
 - plugin trust is host-owned and runs before activation

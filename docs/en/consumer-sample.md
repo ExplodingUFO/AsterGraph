@@ -1,6 +1,6 @@
 # Consumer Sample
 
-`tools/AsterGraph.ConsumerSample.Avalonia` is the medium hosted-UI sample on the canonical session/runtime route, between the smallest `HelloWorld.Avalonia` route and the full `AsterGraph.Demo` showcase host.
+`tools/AsterGraph.ConsumerSample.Avalonia` is the medium hosted-UI sample on the canonical session/runtime route, after the starter scaffold and the smallest `HelloWorld.Avalonia` route, and before the full `AsterGraph.Demo` showcase host.
 
 ## What It Proves
 
@@ -42,10 +42,11 @@ Expected proof markers:
 
 ## When To Use This Sample
 
-Use `ConsumerSample.Avalonia` when you need one realistic host before jumping to the full `Demo`.
+Use `ConsumerSample.Avalonia` when you need one realistic host after `HelloWorld.Avalonia` and before the full `Demo`.
 
 Use a different artifact when you need something narrower:
 
+- `Starter.Avalonia` = first hosted scaffold and smallest end-to-end Avalonia entry
 - `HelloWorld` = smallest runtime-only first run
 - `HelloWorld.Avalonia` = smallest hosted-UI first run
 - `HostSample` = proof harness for canonical route validation

@@ -6,6 +6,7 @@
 
 | 宿主目标 | 起始包 | 原因 |
 | --- | --- | --- |
+| hosted starter 脚手架 | `AsterGraph.Starter.Avalonia` | 最小端到端 Avalonia 脚手架；cookbook 里的第一个 hosted 跳板 |
 | 默认 Avalonia UI 宿主 | `AsterGraph.Avalonia` | 主 UI 入口，包含默认壳层和 view factory |
 | 仅运行时 / 自定义 UI 宿主 | `AsterGraph.Editor` | 面向自定义 UI 或原生壳层的 canonical session/runtime surface |
 | 契约优先集成 | `AsterGraph.Abstractions` | 稳定的标识符、定义和 provider 契约 |
@@ -31,6 +32,12 @@ dotnet add package AsterGraph.Abstractions --prerelease
 
 ## 3. 最快的第一跑
 
+如果你想先看第一个 hosted 入口，直接运行：
+
+```powershell
+dotnet run --project tools/AsterGraph.Starter.Avalonia/AsterGraph.Starter.Avalonia.csproj --nologo
+```
+
 如果你只想先看到最小仅运行时路径，直接运行：
 
 ```powershell
@@ -49,7 +56,7 @@ dotnet run --project tools/AsterGraph.HelloWorld.Avalonia/AsterGraph.HelloWorld.
 dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.ConsumerSample.Avalonia.csproj --nologo
 ```
 
-`HelloWorld` 适合最简单的 runtime-only 第一跑；`HelloWorld.Avalonia` 适合最小默认 UI 第一跑；`ConsumerSample.Avalonia` 适合在跳到 `Demo` 之前先看一个真实宿主；`HostSample` 只适合做推荐路线验证。
+`Starter.Avalonia` 适合第一个 hosted 入口和最小端到端 Avalonia 脚手架；`HelloWorld` 适合最简单的 runtime-only 第一跑；`HelloWorld.Avalonia` 适合在 starter 之后看的最小默认 UI 第一跑；`ConsumerSample.Avalonia` 适合在跳到 `Demo` 之前先看一个真实宿主；`HostSample` 只适合做推荐路线验证，不是上手入口。
 
 这个样例自己的 README 是 [`tools/AsterGraph.ConsumerSample.Avalonia/README.md`](../../tools/AsterGraph.ConsumerSample.Avalonia/README.md)。
 
@@ -57,6 +64,7 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 
 | 宿主需要什么 | 从哪里开始 | 第一个样例 |
 | --- | --- | --- |
+| hosted starter 脚手架 | `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` | `tools/AsterGraph.Starter.Avalonia` |
 | 只要运行时 / 自定义 UI | `AsterGraphEditorFactory.CreateSession(...)` | `tools/AsterGraph.HelloWorld` |
 | 默认 Avalonia UI | `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` | `tools/AsterGraph.HelloWorld.Avalonia` |
 | plugin trust / discovery | `AsterGraphEditorFactory.DiscoverPluginCandidates(...)` + `AsterGraphEditorOptions.PluginTrustPolicy` | [`tools/AsterGraph.ConsumerSample.Avalonia`](../../tools/AsterGraph.ConsumerSample.Avalonia/) |
@@ -102,6 +110,7 @@ var view = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOption
 - [Consumer Sample](./consumer-sample.md) = 介于 HelloWorld 和 Demo 之间的真实宿主样例
 - [Alpha Status](./alpha-status.md) = 当前范围、非目标、已知限制
 - [Demo Guide](./demo-guide.md) = 完整展示宿主
+- [HostSample](../../tools/AsterGraph.HostSample/) = 路线验证用 proof harness，不是上手入口
 - [ScaleSmoke 基线](./scale-baseline.md) = 公开的规模分层与防回归红线
 - [Authoring Inspector Recipe](./authoring-inspector-recipe.md) = definition-driven 参数、分组、校验与 shipped inspector editor
 - [Plugin 与自定义节点 Recipe](./plugin-recipe.md) = 最小可复制 plugin/custom-node 路线

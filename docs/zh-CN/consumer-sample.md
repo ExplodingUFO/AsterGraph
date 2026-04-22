@@ -1,6 +1,6 @@
 # Consumer Sample
 
-`tools/AsterGraph.ConsumerSample.Avalonia` 是位于 canonical session/runtime 路线上的中等 hosted-UI 样例，介于最小 `HelloWorld.Avalonia` 路线和完整 `AsterGraph.Demo` 展示宿主之间。
+`tools/AsterGraph.ConsumerSample.Avalonia` 是位于 canonical session/runtime 路线上的中等 hosted-UI 样例，排在 starter 脚手架和最小 `HelloWorld.Avalonia` 路线之后、完整 `AsterGraph.Demo` 展示宿主之前。
 
 ## 它证明什么
 
@@ -42,10 +42,11 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 
 ## 什么时候看它
 
-当你想在跳到完整 `Demo` 之前，先看一个真实宿主集成时，就看 `ConsumerSample.Avalonia`。
+当你想在 `HelloWorld.Avalonia` 之后、跳到完整 `Demo` 之前，先看一个真实宿主集成时，就看 `ConsumerSample.Avalonia`。
 
 如果你需要的是更窄的入口，请用：
 
+- `Starter.Avalonia` = 第一个 hosted 脚手架，也是最小端到端 Avalonia 入口
 - `HelloWorld` = 最小 runtime-only 第一跑
 - `HelloWorld.Avalonia` = 最小 hosted-UI 第一跑
 - `HostSample` = 推荐路线验证用 proof harness

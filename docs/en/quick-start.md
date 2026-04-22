@@ -6,6 +6,7 @@ This guide is the shortest path from a blank host to a running AsterGraph integr
 
 | Host goal | Start package | Why |
 | --- | --- | --- |
+| Hosted starter scaffold | `AsterGraph.Starter.Avalonia` | smallest end-to-end Avalonia scaffold; the first hosted hop in the cookbook |
 | Default Avalonia UI host | `AsterGraph.Avalonia` | main UI entry with the shipped shell and view factories |
 | Runtime-only or custom UI host | `AsterGraph.Editor` | canonical session/runtime surface for custom UI or native shells |
 | Contract-first integration | `AsterGraph.Abstractions` | stable identifiers, definitions, and provider contracts |
@@ -31,6 +32,12 @@ dotnet add package AsterGraph.Abstractions --prerelease
 
 ## 3. Fastest First Run
 
+For the first hosted entry, run:
+
+```powershell
+dotnet run --project tools/AsterGraph.Starter.Avalonia/AsterGraph.Starter.Avalonia.csproj --nologo
+```
+
 For the smallest possible runtime-only sample, run:
 
 ```powershell
@@ -49,7 +56,7 @@ For one realistic hosted integration with a host-owned action rail, parameter ed
 dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.ConsumerSample.Avalonia.csproj --nologo
 ```
 
-Use `HelloWorld` when you want the simplest runtime-only starting point. Use `HelloWorld.Avalonia` when you want the smallest shipped-shell sample. Use `ConsumerSample.Avalonia` when you want one realistic host before jumping to `Demo`. Use `HostSample` only when you want a proof harness for canonical route validation.
+Use `Starter.Avalonia` when you want the first hosted entry and the smallest end-to-end Avalonia scaffold. Use `HelloWorld` when you want the simplest runtime-only starting point. Use `HelloWorld.Avalonia` when you want the smallest shipped-shell sample after the starter scaffold. Use `ConsumerSample.Avalonia` when you want one realistic host before jumping to `Demo`. Use `HostSample` only when you want a proof harness for canonical route validation, not as the onboarding step.
 
 The sample README is [`tools/AsterGraph.ConsumerSample.Avalonia/README.md`](../../tools/AsterGraph.ConsumerSample.Avalonia/README.md).
 
@@ -57,6 +64,7 @@ The sample README is [`tools/AsterGraph.ConsumerSample.Avalonia/README.md`](../.
 
 | If your host needs | Start here | First sample |
 | --- | --- | --- |
+| Hosted starter scaffold | `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` | `tools/AsterGraph.Starter.Avalonia` |
 | Runtime-only or custom UI | `AsterGraphEditorFactory.CreateSession(...)` | `tools/AsterGraph.HelloWorld` |
 | Shipped Avalonia UI | `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` | `tools/AsterGraph.HelloWorld.Avalonia` |
 | Plugin trust/discovery | `AsterGraphEditorFactory.DiscoverPluginCandidates(...)` + `AsterGraphEditorOptions.PluginTrustPolicy` | [`tools/AsterGraph.ConsumerSample.Avalonia`](../../tools/AsterGraph.ConsumerSample.Avalonia/) |
@@ -102,6 +110,7 @@ Plugin loading is currently in-process. Hosts can discover candidates, apply an 
 - [Consumer Sample](./consumer-sample.md) = one realistic hosted integration between HelloWorld and Demo
 - [Alpha Status](./alpha-status.md) = current scope, non-goals, and known limitations
 - [Demo Guide](./demo-guide.md) = full showcase host
+- [HostSample](../../tools/AsterGraph.HostSample/) = proof harness for route validation, not the onboarding step
 - [ScaleSmoke Baseline](./scale-baseline.md) = public graph-size tiers and defended redlines
 - [Authoring Inspector Recipe](./authoring-inspector-recipe.md) = definition-driven parameters, groups, validation, and shipped inspector editors
 - [Plugin And Custom Node Recipe](./plugin-recipe.md) = smallest copyable plugin/custom-node path

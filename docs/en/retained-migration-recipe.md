@@ -1,6 +1,6 @@
 # Retained-To-Session Migration Recipe
 
-Use this recipe when an existing host still constructs `GraphEditorViewModel` directly but wants to move toward the canonical runtime/session path without rewriting everything at once.
+Use this recipe when an existing host still constructs `GraphEditorViewModel` directly but wants to move toward the canonical runtime/session path without rewriting everything at once. The retained route is a bridge, not the destination.
 
 ## Target State
 
@@ -9,6 +9,8 @@ New code should land on:
 - `AsterGraphEditorFactory.CreateSession(...)` for runtime-only or custom UI hosts
 - `AsterGraphEditorFactory.Create(...)` plus `AsterGraphAvaloniaViewFactory.Create(...)` for the shipped Avalonia UI path
 - `IGraphEditorSession.Commands`, `Queries`, `Events`, and diagnostics snapshots
+
+If you are starting new work, begin with [Quick Start](./quick-start.md) or [Host Integration](./host-integration.md) instead of the retained bridge.
 
 ## Step 1: Centralize Editor Options
 
@@ -76,6 +78,7 @@ A host is effectively off the migration-critical path once:
 - new commands and queries land on `IGraphEditorSession`
 - UI composition uses the factory route instead of direct retained construction
 - compatibility-only shims are only serving untouched legacy host code
+- new features start from the canonical session route or the shipped Avalonia route, not from retained constructors
 
 See also:
 

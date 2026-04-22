@@ -1,6 +1,6 @@
 # Host Integration 指南
 
-这份文档只展开受支持的宿主路线，不把第一次接入和维护者 proof 文档混在一起。
+这份文档只展开受支持的宿主路线，不把第一次接入和维护者 proof 文档混在一起。canonical 路线保持 session-first/runtime-first；retained MVVM 只作为迁移期的兼容桥接。
 
 ## Canonical Routes
 
@@ -8,10 +8,10 @@
    `AsterGraphEditorFactory.CreateSession(...)` + `IGraphEditorSession`
 2. 使用默认 Avalonia UI  
    `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)`
-3. retained 迁移  
+3. retained 迁移桥接
    `new GraphEditorViewModel(...)` + `new GraphEditorView { Editor = editor }`
 
-前两条是新代码的 canonical surface。第 3 条仍然受支持，但只作为迁移期保留的 compatibility facade。
+前两条是新代码的 canonical surface。第 3 条仍然受支持，但只作为迁移期保留的 compatibility bridge。
 
 如果宿主管的是自己的 UI，那么第 1 条就是 canonical 的原生 / 自定义 UI 路线；你是在同一个 session/runtime owner 上组合自己的表面，而不是再引入一套第二模型。
 
@@ -25,12 +25,15 @@
 | 默认 Avalonia UI | `AsterGraph.Avalonia` | `Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` | `tools/AsterGraph.HelloWorld.Avalonia` |
 | plugin trust / discovery | `AsterGraph.Editor` | `DiscoverPluginCandidates(...)` + `PluginTrustPolicy` | `tools/AsterGraph.ConsumerSample.Avalonia` |
 | automation | `AsterGraph.Editor` | `IGraphEditorSession.Automation.Execute(...)` | `src/AsterGraph.Demo` |
-| retained 迁移 | `AsterGraph.Editor`（嵌入 `GraphEditorView` 时再加 `AsterGraph.Avalonia`） | retained constructor 路线 | 仅用于迁移 |
+| retained 迁移桥接 | `AsterGraph.Editor`（嵌入 `GraphEditorView` 时再加 `AsterGraph.Avalonia`） | retained constructor 路线 | 仅用于旧宿主迁移 |
+
+如果你在做新工作，请先看 [Quick Start](./quick-start.md)，retained 路线只保留给旧宿主迁移。
 
 ## 样例分工
 
 - `AsterGraph.HelloWorld` = 仅运行时第一跑样例
 - `AsterGraph.HelloWorld.Avalonia` = 默认 Avalonia UI 第一跑样例
+- `AsterGraph.Starter.Avalonia` = 默认 Avalonia 路线的 starter scaffold
 - `AsterGraph.ConsumerSample.Avalonia` = canonical 路线上的中等复杂度 hosted-UI 样例，展示宿主动作、参数编辑和一个可信插件
 - `AsterGraph.HostSample` = 推荐的仅运行时和默认 UI 两条路线的窄范围验证样例
 - `AsterGraph.PackageSmoke` = 打包消费验证
@@ -69,7 +72,7 @@
 - undo 离开保存态后会变 dirty
 - redo 回到保存态后会恢复 clean
 - no-op interaction 不能制造伪 dirty / undo 状态
-- retained 与 runtime mutation 共享同一个 kernel-owned history/save authority
+- retained 与 runtime mutation 共享同一个 kernel-owned history/save authority，但新接入仍应先走 canonical session 路线
 
 ## 导出与持久化的边界
 
@@ -89,10 +92,10 @@
 
 - 推荐的 canonical runtime 入口是 `CreateSession(...)`、`IGraphEditorSession` 和 DTO/snapshot queries
 - `Create(...)` 仍然是受支持的 hosted Avalonia 组合 helper，而 `Editor.Session` 仍然是这条路线背后的共享运行时 owner
-- retained `GraphEditorViewModel` / `GraphEditorView` 仍是受支持的 migration facade，并且已经被明确标成 advanced compatibility surface
+- retained `GraphEditorViewModel` / `GraphEditorView` 仍是受支持的 migration bridge，并且已经被明确标成兼容性桥接 surface
 - host localization 在 plugin localization 之后执行，所以 host override 最终生效
 - plugin command 现在通过 canonical session command descriptor 暴露，并通过 `IGraphEditorSession.Commands.TryExecuteCommand(...)` 执行
-- retained augmentor composition 仍然和 runtime 路线不同；新代码优先走运行时路线
+- retained augmentor composition 仍然和 runtime 路线不同；新代码优先走运行时路线，把 retained 路线当作桥接即可
 
 ## 插件信任边界
 

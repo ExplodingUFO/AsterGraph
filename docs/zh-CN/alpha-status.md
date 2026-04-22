@@ -14,6 +14,9 @@
 - 四个可发布包
 - canonical factory/session 组合
 - 默认 Avalonia hosted UI 与 standalone surfaces
+- trusted / loaded / blocked 的 runtime inspection surface
+- showcase 宿主里的 command/trust timeline 和 perf overlay
+- `tools/AsterGraph.Starter.Avalonia` 作为 shipped 的 Avalonia starter scaffold
 - plugin discovery / trust policy / load inspection / runtime loading
 - `IGraphEditorSession.Automation`
 - 官方 proof lanes 与 smoke tools
@@ -42,7 +45,7 @@
 - 当前最新对外 prerelease tag 是 `v0.2.0-alpha.3`；`v1.9` 只保留为公开前的历史里程碑 tag
 - public prerelease publish 和 release artifact 仍然依赖维护者 release flow
 - 最深的 package validation lane 目前仍以 Windows 为主
-- retained compatibility API 仍处于迁移窗口内
+- retained compatibility API 仍处于迁移窗口内，但只作为迁移桥接
 - 当前 public alpha 仍然只有一套官方 UI adapter：Avalonia
 - advanced editing 已经作为宿主能力模块公开，但更广的 ecosystem 与第二 adapter 验证仍在后续阶段
 

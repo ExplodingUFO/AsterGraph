@@ -2,6 +2,8 @@
 
 `AsterGraph.Editor` is the canonical host-facing runtime package for AsterGraph.
 
+The canonical route stays session-first/runtime-first. Treat retained MVVM entry points as compatibility bridges only.
+
 It belongs to the supported published package set with `AsterGraph.Abstractions`, `AsterGraph.Core`, and `AsterGraph.Avalonia`, and it targets `net8.0` and `net9.0`.
 
 ## Reference This Package When
@@ -9,7 +11,7 @@ It belongs to the supported published package set with `AsterGraph.Abstractions`
 - the host owns its own UI and wants the runtime/session boundary directly
 - the host needs `IGraphEditorSession`, session commands/queries/events, mutation batching, or runtime diagnostics
 - the host wants plugin discovery, trust policy, load inspection, automation execution, localization, or presentation seams
-- the host is still migrating through the retained `GraphEditorViewModel` compatibility surface
+- the host is still migrating through the retained `GraphEditorViewModel` compatibility bridge
 
 ## This Package Owns
 
@@ -19,7 +21,7 @@ It belongs to the supported published package set with `AsterGraph.Abstractions`
 - `AsterGraphEditorFactory` and `AsterGraphEditorOptions`
 - replaceable storage, clipboard, diagnostics, localization, menu, presentation, and inline-editor registry seams
 - plugin discovery, trust policy, load inspection, and automation entry points
-- retained migration facades such as `GraphEditorViewModel`
+- retained migration facades such as `GraphEditorViewModel`, which stay secondary to the canonical route
 
 ## This Package Does Not Own
 
@@ -48,7 +50,7 @@ Those responsibilities live in `AsterGraph.Avalonia` or the consuming host.
   - `TrySetNodeExpansionState(...)`
   - `TrySetNodeGroupExtraPadding(...)`
 
-Keep new code on the stable canonical surfaces. Treat retained and compatibility-only APIs as migration support.
+Keep new code on the stable canonical surfaces. Treat retained and compatibility-only APIs as migration support, not as the primary route.
 
 ## Start Here
 
@@ -61,5 +63,6 @@ Keep new code on the stable canonical surfaces. Treat retained and compatibility
 - hosts can consume `GetNodeSurfaceSnapshots()`, `GetHierarchyStateSnapshot()`, and `GetNodeGroupSnapshots()` and drive `TrySetNodeSize(...)`, `TrySetNodeGroupSize(...)`, and `TrySetNodeGroupMemberships(...)` instead of recomputing canvas geometry or hierarchy ownership in UI code
 - plugin and custom-node starting point: [Plugin And Custom Node Recipe](../../docs/en/plugin-recipe.md)
 - retained-to-session migration guide: [Retained-To-Session Migration Recipe](../../docs/en/retained-migration-recipe.md)
+- host route map: [Host Integration](../../docs/en/host-integration.md)
 - stability, precedence, and retirement rules: [Extension Contracts](../../docs/en/extension-contracts.md)
 - product overview: [Root README](../../README.md)

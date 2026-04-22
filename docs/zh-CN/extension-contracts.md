@@ -27,6 +27,8 @@
 - `CompatiblePortTarget`
 - 其他已经存在 runtime-first 替代物的旧 MVVM 形状 helper
 
+retained surface 只应当作为迁移桥接使用。新工作应该从上面的 stable canonical surfaces 起步，并配合 [Host Integration](./host-integration.md) 做路线选择。
+
 ## 扩展优先级
 
 - plugin trust 由 host 决定，并且发生在 activation 之前

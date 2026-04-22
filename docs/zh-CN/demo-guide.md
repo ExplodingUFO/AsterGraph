@@ -77,10 +77,11 @@ dotnet run --project src/AsterGraph.Demo/AsterGraph.Demo.csproj --nologo -- --pr
 
 ## Demo 与其他入口样例的分工
 
+- `Starter.Avalonia` = 第一个 hosted 脚手架；最小端到端 Avalonia 入口
 - `HelloWorld` = 最小仅运行时第一跑样例
 - `HelloWorld.Avalonia` = 最小 hosted-UI 第一跑样例
 - `ConsumerSample.Avalonia` = canonical 路线上的真实 hosted-UI 样例，带宿主动作、参数编辑和一个可信插件
-- `HostSample` = 推荐消费路线的窄范围验证样例
+- `HostSample` = 推荐消费路线的窄范围验证样例，不是上手入口
 - `Demo` = 完整能力展示与宿主边界说明
 
-想最快跑起来看 `HelloWorld` 或 `HelloWorld.Avalonia`；想先看一个真实宿主集成看 `ConsumerSample.Avalonia`；想做 proof 导向的路线验证看 `HostSample`；想肉眼检查产品面和边界时看 `Demo`。
+想先看第一个 hosted 入口看 `Starter.Avalonia`；想最快跑起来看 `HelloWorld` 或 `HelloWorld.Avalonia`；想先看一个真实宿主集成看 `ConsumerSample.Avalonia`；想做 proof 导向的路线验证看 `HostSample`；想肉眼检查产品面和边界时看 `Demo`。
