@@ -2,6 +2,10 @@
 
 这份文档只讲一件事：怎样从空白宿主最快跑起 AsterGraph。
 
+首次接入默认从 Avalonia 路线开始。
+`WPF` 只作为同一条 canonical 路线上的 adapter-2 兼容性验证，不是第二条接入路线，也不是 parity 承诺。
+关于冻结的支持边界和面向 `v1.0.0` 的升级指引，见 [稳定化支持矩阵](./stabilization-support-matrix.md)。
+
 ## 1. 先选起始包
 
 | 宿主目标 | 起始包 | 原因 |
