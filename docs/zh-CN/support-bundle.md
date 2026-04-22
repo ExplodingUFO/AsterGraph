@@ -1,7 +1,7 @@
 # Beta Support Bundle
 
 这份文档定义的是 public beta 的本地证据合同。
-提交 beta 反馈时，把 support bundle 作为附件使用。
+提交 beta 反馈时，可用时把 support bundle 作为附件使用。
 它不会上传任何东西，也不代表遥测、云服务或托管后端。
 
 ## Canonical 生成入口
@@ -56,6 +56,7 @@ support bundle 是一个本地 JSON 文件，顶层字段固定为：
 - 走到真实宿主 proof 之后提交 adopter feedback 时，把它作为附件一并附上
 - 包版本、路线或环境变化后重新生成
 - 把它当成 [Project Status](./project-status.md) 就绪门禁的反馈证据，而不是自动扩大支持边界的证明
+- 如果当前 route 还生成不了，就继续保留同一条 route/version/proof/摩擦记录，并注明 support bundle 暂时不可用
 
 ## 相关文档
 

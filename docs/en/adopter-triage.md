@@ -1,10 +1,11 @@
 # Adopter Triage Checklist
 
-When a beta report is filed, include all four evidence dimensions together:
+When a beta report is filed, keep the same bounded intake record fields together:
 
-- package `version` (or public tag)
 - `route` or artifact attempted
+- package `version` (or public tag)
 - `proof` markers observed
+- `friction` summary
 - `support bundle` JSON path when available from `ConsumerSample.Avalonia -- --proof`; otherwise note that the route could not produce one
 
 Use the same fields in:

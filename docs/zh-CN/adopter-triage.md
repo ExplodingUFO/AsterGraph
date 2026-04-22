@@ -1,10 +1,11 @@
 # 采用者分诊清单
 
-提交公开 beta 回报时，统一使用一组证据字段：
+提交公开 beta 回报时，统一使用同一组受限 intake 字段：
 
-- `version`（包版本或公开 tag）
 - `route`（尝试的路线或样例）
+- `version`（包版本或公开 tag）
 - `proof` marker（命中的 proof 标记）
+- `摩擦`说明
 - `support bundle`（当 `ConsumerSample.Avalonia -- --proof` 可生成时，填写本地 JSON 路径；否则注明当前 route 无法生成）
 
 同一套字段应在：

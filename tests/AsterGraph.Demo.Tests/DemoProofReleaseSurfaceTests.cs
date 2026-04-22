@@ -251,6 +251,8 @@ public sealed class DemoProofReleaseSurfaceTests
         var checklistZh = ReadRepoFile("docs/zh-CN/public-launch-checklist.md");
         var adoptionFeedback = ReadRepoFile("docs/en/adoption-feedback.md");
         var adoptionFeedbackZh = ReadRepoFile("docs/zh-CN/adoption-feedback.md");
+        var supportBundle = ReadRepoFile("docs/en/support-bundle.md");
+        var supportBundleZh = ReadRepoFile("docs/zh-CN/support-bundle.md");
         var versionBlock = ExtractIssueTemplateBlock(adoptionTemplate, "version");
         var evidenceBlock = ExtractIssueTemplateBlock(adoptionTemplate, "evidence");
         var supportBundleBlock = ExtractIssueTemplateBlock(adoptionTemplate, "support_bundle");
@@ -283,11 +285,17 @@ public sealed class DemoProofReleaseSurfaceTests
             Assert.Contains("support bundle", contents, StringComparison.OrdinalIgnoreCase);
         }
 
+        Assert.Contains("friction", triageDoc, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("摩擦", triageDocZh, StringComparison.Ordinal);
+
         foreach (var contents in new[] { adoptionFeedback, adoptionFeedbackZh })
         {
             Assert.Contains("AsterGraph.Starter.Avalonia", contents, StringComparison.Ordinal);
             Assert.Contains("HelloWorld.Avalonia", contents, StringComparison.Ordinal);
         }
+
+        Assert.True(HasLineWithAll(supportBundle, "route", "version", "proof", "friction", "no support bundle"));
+        Assert.True(HasLineWithAll(supportBundleZh, "route", "version", "proof", "摩擦", "不可用"));
 
         Assert.True(HasLineWithAll(checklist, "route", "version", "proof", "friction", "support-bundle"));
         Assert.True(HasLineWithAll(checklistZh, "route", "version", "proof", "摩擦", "support bundle"));

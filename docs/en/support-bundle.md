@@ -1,7 +1,7 @@
 # Beta Support Bundle
 
 This is the local evidence contract for beta evaluation and support.
-Use the support bundle as the support-bundle attachment on the beta intake record.
+Use the support bundle as the support-bundle attachment on the beta intake record when available from the defended hosted proof route.
 It does not upload anything and it does not imply telemetry or hosted services.
 
 ## Canonical Producer
@@ -56,6 +56,7 @@ The support bundle is one local JSON file with these top-level fields:
 - attach it to the intake record when filing adopter feedback after reaching the realistic hosted proof
 - regenerate it after you change package version, route, or environment
 - treat it as intake evidence for the [Project Status](./project-status.md) readiness gate, not as automatic proof that the support boundary should widen
+- if a route cannot produce one yet, keep the same route/version/proof/friction record and note that no support bundle was available
 
 ## Related Docs
 
