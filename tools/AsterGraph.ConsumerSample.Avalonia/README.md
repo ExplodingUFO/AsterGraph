@@ -52,6 +52,12 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 
 The support bundle stays local evidence only and does not widen the support boundary.
 
+Next beta intake links:
+
+- [Beta Support Bundle](../../docs/en/support-bundle.md)
+- [Adoption Feedback Loop](../../docs/en/adoption-feedback.md)
+- [Public Launch Checklist](../../docs/en/public-launch-checklist.md)
+
 ## Copyable Host Recipe
 
 Use this sample to copy the host-owned seams, not the sample-specific presentation layer. This is the defended beta route for copying host-owned seams into your own host. Copy the host-owned seams in this order:

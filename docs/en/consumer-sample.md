@@ -59,6 +59,12 @@ Expected public markers:
 
 The support bundle stays local evidence only and does not widen the support boundary.
 
+Next beta intake links:
+
+- [Beta Support Bundle](./support-bundle.md)
+- [Adoption Feedback Loop](./adoption-feedback.md)
+- [Public Launch Checklist](./public-launch-checklist.md)
+
 ## Run It
 
 ```powershell

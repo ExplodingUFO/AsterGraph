@@ -82,16 +82,25 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
 
         AssertContains(readme, "Trust and proof quick reference");
         AssertContains(readme, "Copyable trust and proof reference");
+        AssertContains(readme, "../../docs/en/support-bundle.md");
+        AssertContains(readme, "../../docs/en/adoption-feedback.md");
+        AssertContains(readme, "../../docs/en/public-launch-checklist.md");
 
         AssertContains(consumerSampleEn, "Trust and proof quick reference");
         AssertContains(consumerSampleEn, "Copyable trust and proof reference");
         AssertContains(consumerSampleEn, "SUPPORT_BUNDLE_OK:True");
         AssertContains(consumerSampleEn, "CONSUMER_SAMPLE_TRUST_OK:True");
+        AssertContains(consumerSampleEn, "./support-bundle.md");
+        AssertContains(consumerSampleEn, "./adoption-feedback.md");
+        AssertContains(consumerSampleEn, "./public-launch-checklist.md");
 
         AssertContains(consumerSampleZh, "信任与证明速查");
         AssertContains(consumerSampleZh, "可复制的信任与证明参考");
         AssertContains(consumerSampleZh, "SUPPORT_BUNDLE_OK:True");
         AssertContains(consumerSampleZh, "CONSUMER_SAMPLE_TRUST_OK:True");
+        AssertContains(consumerSampleZh, "./support-bundle.md");
+        AssertContains(consumerSampleZh, "./adoption-feedback.md");
+        AssertContains(consumerSampleZh, "./public-launch-checklist.md");
 
         AssertContains(supportBundleEn, "Local evidence only");
         AssertContains(supportBundleEn, "Copyable local evidence reference");

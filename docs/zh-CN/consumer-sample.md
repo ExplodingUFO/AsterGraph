@@ -59,6 +59,12 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 
 support bundle 只保留本地证据，不会扩大 support 边界。
 
+下一步 beta intake 文档：
+
+- [Beta Support Bundle](./support-bundle.md)
+- [Adoption Feedback Loop](./adoption-feedback.md)
+- [Public Launch Checklist](./public-launch-checklist.md)
+
 ## 如何运行
 
 ```powershell
