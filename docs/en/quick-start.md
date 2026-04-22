@@ -83,7 +83,7 @@ The sample README is [`tools/AsterGraph.ConsumerSample.Avalonia/README.md`](../.
 | Retained compatibility bridge | `new GraphEditorViewModel(...)` + `new GraphEditorView { Editor = editor }` | [Host Integration](./host-integration.md) |
 
 For new work, start with the runtime/session route or the shipped Avalonia route. Treat the retained route as migration-only.
-Choose retained only when you are migrating an existing host in batches. If you need that bridge, use [Retained Migration Recipe](./retained-migration-recipe.md); otherwise start with `CreateSession(...)` or `Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)`.
+Choose retained only when you are migrating an existing host in batches. Use the retained recipe only as a copyable migration aid for an existing host. If you need that bridge, use [Retained Migration Recipe](./retained-migration-recipe.md); otherwise start with `CreateSession(...)` or `Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)`.
 If you are choosing retained, stop at that recipe instead of stitching together multiple docs; it is the single bounded retained recipe set for existing `GraphEditorViewModel` / `GraphEditorView` hosts.
 New adopters should start with `AsterGraph.Starter.Avalonia` unless they are intentionally building a custom UI host from day one.
 If the host owns its UI, the runtime/session route is the canonical native path; `Editor.Session` still owns host actions, diagnostics, automation, and proof logic.

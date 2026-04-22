@@ -31,7 +31,7 @@ Standalone Avalonia surfaces such as `AsterGraphCanvasViewFactory`, `AsterGraphI
 | Retained migration bridge | Use retained only when the host already constructs `GraphEditorViewModel` or `GraphEditorView` and you are migrating in batches. | Do not use this for new host work, a fourth primary route, or a WPF-specific runtime model. | [Retained-To-Session Migration Recipe](./retained-migration-recipe.md) |
 
 The single bounded retained recipe is [Retained-To-Session Migration Recipe](./retained-migration-recipe.md).
-Retained is not a fourth primary route. If the bridge is justified, send maintainers to that recipe instead of stitching together multiple docs.
+Retained stays migration-only and does not add a new compatibility promise. Retained is not a fourth primary route. If the bridge is justified, send maintainers to that recipe instead of stitching together multiple docs.
 
 ## Consumer Route Matrix
 

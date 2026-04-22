@@ -87,6 +87,26 @@ public sealed class RetainedRouteComparisonClosureDocsTests
             < retainedRecipeZh.IndexOf("## 证据交接", StringComparison.Ordinal));
     }
 
+    [Fact]
+    public void RetainedMigrationCleanup_RemainsCopyableWithoutNewCompatibilityPromise()
+    {
+        var quickStartEn = ReadRepoFile("docs/en/quick-start.md");
+        var hostIntegrationEn = ReadRepoFile("docs/en/host-integration.md");
+        var retainedRecipeEn = ReadRepoFile("docs/en/retained-migration-recipe.md");
+
+        var quickStartZh = ReadRepoFile("docs/zh-CN/quick-start.md");
+        var hostIntegrationZh = ReadRepoFile("docs/zh-CN/host-integration.md");
+        var retainedRecipeZh = ReadRepoFile("docs/zh-CN/retained-migration-recipe.md");
+
+        Assert.Contains("Use the retained recipe only as a copyable migration aid for an existing host.", quickStartEn, StringComparison.Ordinal);
+        Assert.Contains("Retained stays migration-only and does not add a new compatibility promise.", hostIntegrationEn, StringComparison.Ordinal);
+        Assert.Contains("Copy this recipe only for an existing retained host slice.", retainedRecipeEn, StringComparison.Ordinal);
+
+        Assert.Contains("仅把 retained recipe 当成现有宿主可复制的迁移辅助。", quickStartZh, StringComparison.Ordinal);
+        Assert.Contains("retained 仍然只用于迁移，不会新增新的兼容性承诺。", hostIntegrationZh, StringComparison.Ordinal);
+        Assert.Contains("只有在现有 retained 宿主切片上才复制这份 recipe。", retainedRecipeZh, StringComparison.Ordinal);
+    }
+
     private static string ReadRepoFile(string relativePath)
         => File.ReadAllText(Path.Combine(GetRepositoryRoot(), relativePath));
 

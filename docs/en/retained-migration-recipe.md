@@ -2,6 +2,8 @@
 
 Choose retained only when you are migrating an existing host in batches. This recipe is migration-only, not the preferred long-term extension path. Use it when an existing host still constructs `GraphEditorViewModel` directly but wants to move toward the canonical runtime/session seams without rewriting everything at once.
 
+Copy this recipe only for an existing retained host slice. It stays secondary to the canonical session/runtime route and the shipped Avalonia route, and it does not create a new compatibility promise.
+
 This is the single bounded retained recipe set. If an existing host still constructs `GraphEditorViewModel` or `GraphEditorView`, use this doc; otherwise start on `CreateSession(...)` or `Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)`.
 
 ## Target State

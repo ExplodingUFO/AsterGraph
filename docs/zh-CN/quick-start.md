@@ -85,7 +85,7 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 | retained 兼容桥接 | `new GraphEditorViewModel(...)` + `new GraphEditorView { Editor = editor }` | [Host Integration](./host-integration.md) |
 
 新代码优先使用 runtime/session 路线或默认 Avalonia 路线；retained 路线只用于迁移。
-只有在现有宿主要分批迁移时才选 retained。需要这座桥接时，先看 [Retained 到 Session 的迁移 Recipe](./retained-migration-recipe.md)；否则优先从 `CreateSession(...)` 或 `Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` 开始。
+只有在现有宿主要分批迁移时才选 retained。仅把 retained recipe 当成现有宿主可复制的迁移辅助。需要这座桥接时，先看 [Retained 到 Session 的迁移 Recipe](./retained-migration-recipe.md)；否则优先从 `CreateSession(...)` 或 `Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` 开始。
 如果你在选择 retained，就停在这份 recipe，不要自己把多份文档拼起来；它是现有 `GraphEditorViewModel` / `GraphEditorView` 宿主唯一的 bounded retained recipe 集合。
 如果宿主管的是自己的 UI，那么 runtime/session 路线就是 canonical 的原生路径；`Editor.Session` 仍然负责宿主动作、诊断、automation 和 proof 逻辑。
 默认 onboarding 继续走 Avalonia-first。

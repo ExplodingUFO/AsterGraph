@@ -29,7 +29,7 @@
 | retained 迁移桥接 | 只有在现有宿主已经构造 `GraphEditorViewModel` 或 `GraphEditorView` 且正在分批迁移时才使用 retained。 | 不要把它用在新宿主工作、第四条主路线或 WPF 专属 runtime model。 | [Retained 到 Session 的迁移 Recipe](./retained-migration-recipe.md) |
 
 唯一的 retained recipe 是 [Retained 到 Session 的迁移 Recipe](./retained-migration-recipe.md)。
-retained 不是第四条主路线。如果这座桥接确实有必要，就把维护者导向这一个 bounded 的 retained recipe 集合，而不是让他们拼接多份文档。
+retained 仍然只用于迁移，不会新增新的兼容性承诺。retained 不是第四条主路线。如果这座桥接确实有必要，就把维护者导向这一个 bounded 的 retained recipe 集合，而不是让他们拼接多份文档。
 
 ## Consumer Route Matrix
 

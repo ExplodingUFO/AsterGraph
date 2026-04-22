@@ -2,6 +2,8 @@
 
 只有在现有宿主要分批迁移时才选 retained。这份 recipe 是迁移期专用，不是长期首选扩展路径。它适合这样的宿主：现在还在直接 `new GraphEditorViewModel(...)`，但想逐步迁到 canonical 的 runtime/session seam，又不想一次性重写完。
 
+只有在现有 retained 宿主切片上才复制这份 recipe。它仍然次于 canonical session/runtime 路线和 shipped Avalonia 路线，也不会新增新的兼容性承诺。
+
 这是唯一一个 bounded 的 retained recipe 集合。只有在现有宿主还在构造 `GraphEditorViewModel` 或 `GraphEditorView` 时才使用这份文档；否则请从 `CreateSession(...)` 或 `Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` 开始。
 
 ## 目标状态
