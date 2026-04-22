@@ -91,12 +91,16 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("adapter matrix story", englishChecklist, StringComparison.Ordinal);
         Assert.Contains("`HELLOWORLD_WPF_OK` as adapter-2 validation only", englishChecklist, StringComparison.Ordinal);
         Assert.Contains("historical alpha reference for the current beta support story", englishChecklist, StringComparison.Ordinal);
+        Assert.DoesNotContain("HELLOWORLD_WPF_OK is Avalonia/WPF parity", englishChecklist, StringComparison.Ordinal);
+        Assert.DoesNotContain("HELLOWORLD_WPF_OK is public WPF support", englishChecklist, StringComparison.Ordinal);
         Assert.DoesNotContain("current scope, non-goals, and known limitations", englishChecklist, StringComparison.Ordinal);
 
         Assert.Contains("冻结的 support boundary 叙事", chineseChecklist, StringComparison.Ordinal);
         Assert.Contains("adapter matrix 叙事", chineseChecklist, StringComparison.Ordinal);
         Assert.Contains("`HELLOWORLD_WPF_OK` 只当成 adapter-2 验证通过", chineseChecklist, StringComparison.Ordinal);
         Assert.Contains("历史 alpha 参考，服务于当前 beta support story", chineseChecklist, StringComparison.Ordinal);
+        Assert.DoesNotContain("HELLOWORLD_WPF_OK 是 Avalonia/WPF parity", chineseChecklist, StringComparison.Ordinal);
+        Assert.DoesNotContain("HELLOWORLD_WPF_OK 是公开 WPF support", chineseChecklist, StringComparison.Ordinal);
     }
 
     [Theory]
