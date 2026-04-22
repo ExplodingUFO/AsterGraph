@@ -2,6 +2,8 @@
 
 This document publishes the contract around surface stability, compatibility retirement, extension precedence, and lane ownership.
 
+The public SDK contract is canonical-first: shipped stability is defined by `CreateSession`-based runtime/session APIs in `AsterGraph.Editor`; all other surfaces are compatibility or adapter-projection support layered on top.
+
 ## Stability Tiers
 
 ### Stable canonical surfaces
@@ -28,6 +30,25 @@ This document publishes the contract around surface stability, compatibility ret
 - older MVVM-shaped overloads where newer runtime-first alternatives already exist
 
 Use the retained surfaces only as migration bridges. New work should start on the stable canonical surfaces above, with [Host Integration](./host-integration.md) as the route map.
+
+## Package-level contract inventory
+
+- `AsterGraph.Abstractions`
+  - Stable canonical contracts: session/query abstractions and DTO/snapshot-shape contracts for the canonical seam
+  - Compatibility-only shims: legacy query/migration helpers where a runtime-first route exists
+  - Hosted composition helper: none
+- `AsterGraph.Core`
+  - Stable canonical contracts: runtime/session support dependencies and implementation behavior needed to run the canonical contract
+  - Compatibility-only shims: none published as stable public API in this phase
+  - Hosted composition helper: none
+- `AsterGraph.Editor`
+  - Stable canonical surfaces: `AsterGraphEditorFactory.CreateSession(...)`, `IGraphEditorSession`, and canonical diagnostics/inspection contracts
+  - Compatibility-only shims: `IGraphEditorQueries.GetCompatibleTargets(...)`, `CompatiblePortTarget` when hosted adapters still need migration bridges
+  - Hosted composition helper: not a source of hosted UI composition itself; helper is adapter-owned
+- `AsterGraph.Avalonia`
+  - Stable hosted composition helper: `AsterGraphEditorFactory.Create(...)` (hosted UI composition entry point)
+  - Stable canonical route access: uses canonical `CreateSession(...)`/`IGraphEditorSession` seam for all routed operations
+  - Compatibility-only shims: avoid adding new host-layer contracts until parity is shipped in that adapter
 
 ## Extension Precedence
 

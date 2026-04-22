@@ -1,6 +1,8 @@
 # Adapter Capability Matrix
 
-This page locks the adapter-capability contract for `v0.9.0-beta Second Adapter Validation`.
+This page is a portability/projection matrix for adapter implementations, layered on top of the canonical API stability contract defined in [Extension and Maintenance Contracts](./extension-contracts.md).
+
+It does not define a second API-stability standard, and it does not grant adapter-specific runtime APIs beyond the canonical seam.
 
 `WPF` is adapter 2. The milestone exists to validate one second official adapter on top of the existing canonical session/runtime route; it does not introduce adapter-specific runtime APIs or a second host-facing runtime model.
 
