@@ -14,6 +14,9 @@ public sealed class StabilizationSupportDocsTests
         var projectStatus = ReadRepoFile("docs/en/project-status.md");
         var versioning = ReadRepoFile("docs/en/versioning.md");
         var supportMatrix = ReadRepoFile("docs/en/stabilization-support-matrix.md");
+        var architecture = ReadRepoFile("docs/en/architecture.md");
+        var adoptionFeedback = ReadRepoFile("docs/en/adoption-feedback.md");
+        var pluginRecipe = ReadRepoFile("docs/en/plugin-recipe.md");
 
         Assert.Contains("# Stabilization Support Matrix", supportMatrix, StringComparison.Ordinal);
         Assert.Contains("Published SDK packages", supportMatrix, StringComparison.Ordinal);
@@ -30,6 +33,11 @@ public sealed class StabilizationSupportDocsTests
         Assert.Contains("[Stabilization Support Matrix](./stabilization-support-matrix.md)", quickStart, StringComparison.Ordinal);
         Assert.Contains("[Stabilization Support Matrix](./stabilization-support-matrix.md)", projectStatus, StringComparison.Ordinal);
         Assert.Contains("[Stabilization Support Matrix](./stabilization-support-matrix.md)", versioning, StringComparison.Ordinal);
+
+        foreach (var contents in new[] { architecture, adoptionFeedback, pluginRecipe })
+        {
+            Assert.DoesNotContain("public alpha", contents, StringComparison.OrdinalIgnoreCase);
+        }
 
         Assert.DoesNotContain("public alpha", readme, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("public alpha", quickStart, StringComparison.OrdinalIgnoreCase);
@@ -51,6 +59,9 @@ public sealed class StabilizationSupportDocsTests
         var projectStatus = ReadRepoFile("docs/zh-CN/project-status.md");
         var versioning = ReadRepoFile("docs/zh-CN/versioning.md");
         var supportMatrix = ReadRepoFile("docs/zh-CN/stabilization-support-matrix.md");
+        var architecture = ReadRepoFile("docs/zh-CN/architecture.md");
+        var adoptionFeedback = ReadRepoFile("docs/zh-CN/adoption-feedback.md");
+        var pluginRecipe = ReadRepoFile("docs/zh-CN/plugin-recipe.md");
 
         Assert.Contains("# 稳定化支持矩阵", supportMatrix, StringComparison.Ordinal);
         Assert.Contains("公开 SDK 包", supportMatrix, StringComparison.Ordinal);
@@ -67,6 +78,11 @@ public sealed class StabilizationSupportDocsTests
         Assert.Contains("[稳定化支持矩阵](./stabilization-support-matrix.md)", quickStart, StringComparison.Ordinal);
         Assert.Contains("[稳定化支持矩阵](./stabilization-support-matrix.md)", projectStatus, StringComparison.Ordinal);
         Assert.Contains("[稳定化支持矩阵](./stabilization-support-matrix.md)", versioning, StringComparison.Ordinal);
+
+        foreach (var contents in new[] { architecture, adoptionFeedback, pluginRecipe })
+        {
+            Assert.DoesNotContain("公开 alpha", contents, StringComparison.OrdinalIgnoreCase);
+        }
 
         Assert.DoesNotContain("公开 alpha", readme, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("公开 alpha", quickStart, StringComparison.OrdinalIgnoreCase);
@@ -104,6 +120,7 @@ public sealed class StabilizationSupportDocsTests
         Assert.Contains("[Alpha Status](./alpha-status.md)", chineseQuickStart, StringComparison.Ordinal);
         Assert.Contains("[稳定化支持矩阵](./docs/zh-CN/stabilization-support-matrix.md)", chineseReadme, StringComparison.Ordinal);
         Assert.Contains("[Alpha Status](./docs/zh-CN/alpha-status.md)", chineseReadme, StringComparison.Ordinal);
+        Assert.Contains("关于冻结的支持边界和面向 `v1.0.0` 的升级指引，见 [稳定化支持矩阵](./stabilization-support-matrix.md)。", chineseQuickStart, StringComparison.Ordinal);
     }
 
     private static string ReadRepoFile(string relativePath)
