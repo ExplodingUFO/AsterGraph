@@ -1,6 +1,6 @@
 # Architecture
 
-This document explains the platform skeleton that underpins the current public beta capability surface for `0.10.0-beta`.
+This document explains the platform skeleton that underpins the current public beta capability surface for `0.11.0-beta`.
 
 ## Split
 

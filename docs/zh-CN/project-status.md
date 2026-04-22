@@ -2,8 +2,8 @@
 
 ## 当前状态
 
-- 包版本基线：`0.10.0-beta`
-- 与当前包版本配对的对外 SemVer prerelease 标签：`v0.10.0-beta`
+- 包版本基线：`0.11.0-beta`
+- 与当前包版本配对的对外 SemVer prerelease 标签：`v0.11.0-beta`
 - 历史仓库里程碑标签系列：`v1.x` 风格的公开前检查点
 - 仓库阶段：公开 Beta（稳定化收口）
 - 对外版本说明：[Versioning](./versioning.md)

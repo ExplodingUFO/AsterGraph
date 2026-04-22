@@ -2,8 +2,8 @@
 
 ## Current Status
 
-- package baseline: `0.10.0-beta`
-- matching public prerelease tag for this package line: `v0.10.0-beta`
+- package baseline: `0.11.0-beta`
+- matching public prerelease tag for this package line: `v0.11.0-beta`
 - historical legacy repository milestone tag series: `v1.x`-style pre-launch checkpoints
 - repo posture: public beta
 - public versioning guidance: [Versioning](./versioning.md)

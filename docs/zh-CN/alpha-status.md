@@ -2,7 +2,7 @@
 
 ## 当前状态
 
-- 包版本基线：`0.10.0-beta`
+- 包版本基线：`0.11.0-beta`
 - 仓库状态：public beta
 - 对外版本说明：[Versioning](./versioning.md)
 - 对外入口：`README.md` / `README.zh-CN.md` 加上 `docs/en` / `docs/zh-CN`
@@ -43,7 +43,7 @@
 
 ## 已知限制
 
-- 与当前包版本配对的对外 prerelease tag 是 `v0.10.0-beta`；`v1.x` 风格的公开前检查点系列只保留为历史里程碑 tag
+- 与当前包版本配对的对外 prerelease tag 是 `v0.11.0-beta`；`v1.x` 风格的公开前检查点系列只保留为历史里程碑 tag
 - public prerelease publish 和 release artifact 仍然依赖维护者 release flow
 - 最深的 package validation lane 目前仍以 Windows 为主
 - retained compatibility API 仍处于迁移窗口内，但只作为迁移桥接

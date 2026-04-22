@@ -1,6 +1,6 @@
 # Architecture
 
-这份文档说明支撑当前 public beta capability surface（`0.10.0-beta`）的平台骨架。
+这份文档说明支撑当前 public beta capability surface（`0.11.0-beta`）的平台骨架。
 
 ## Split
 

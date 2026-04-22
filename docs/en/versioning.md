@@ -11,8 +11,8 @@ The consumer-facing version for AsterGraph is the NuGet package version on the f
 
 Current public beta baseline:
 
-- package version: `0.10.0-beta`
-- matching public prerelease tag for this package line: `v0.10.0-beta`
+- package version: `0.11.0-beta`
+- matching public prerelease tag for this package line: `v0.11.0-beta`
 - historical legacy repository milestone tag series: `v1.x`-style pre-launch checkpoints
 
 When a host asks "which version of AsterGraph should I install?", this package version is the authoritative answer.
@@ -31,7 +31,7 @@ The stabilization support matrix freezes the consumer-facing boundary that leads
 
 ## Repository Tags And Releases
 
-The repository now publishes public prerelease tags that match the installable package version, for example `v0.10.0-beta`.
+The repository now publishes public prerelease tags that match the installable package version, for example `v0.11.0-beta`.
 
 The repository also still carries historical tags from that pre-launch workflow, such as `v1.x`-style checkpoint tags.
 
@@ -39,7 +39,7 @@ Those legacy `v1.x`-style tags came from milestone-style repository checkpoints 
 
 Going forward, the public release convention is:
 
-- public package releases use tags that match the published package version, for example `v0.10.0-beta`
+- public package releases use tags that match the published package version, for example `v0.11.0-beta`
 - GitHub prereleases should use the same version number as the published packages
 - milestone-style local planning versions can continue privately, but they should not be presented as the consumer package version
 
@@ -47,8 +47,8 @@ Going forward, the public release convention is:
 
 | Public concept | Current value | How to read it |
 | --- | --- | --- |
-| installable package version | `0.10.0-beta` | the version consumers install from nuget.org |
-| matching public prerelease tag for this package line | `v0.10.0-beta` | the GitHub prerelease tag that must match the installable package version |
+| installable package version | `0.11.0-beta` | the version consumers install from nuget.org |
+| matching public prerelease tag for this package line | `v0.11.0-beta` | the GitHub prerelease tag that must match the installable package version |
 | historical public repo milestone tag series | `v1.x`-style checkpoint tags | a pre-launch checkpoint pattern kept for repo history only |
 
 ## Practical Rule
@@ -71,8 +71,8 @@ The public prerelease workflow now generates and validates that header automatic
 
 Example:
 
-- package version: `0.10.0-beta`
-- public tag: `v0.10.0-beta`
+- package version: `0.11.0-beta`
+- public tag: `v0.11.0-beta`
 - historical repo checkpoint reference: `legacy v1.x-style milestone checkpoint` (not installable)
 
 The generated prerelease body also carries the public proof summary from the release lane so external adopters can see the same installation, compatibility, scale, and coverage signals that gate publication.

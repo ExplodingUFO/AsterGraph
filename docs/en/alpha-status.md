@@ -2,7 +2,7 @@
 
 ## Current Status
 
-- package baseline: `0.10.0-beta`
+- package baseline: `0.11.0-beta`
 - repo status: public beta
 - public versioning guidance: [Versioning](./versioning.md)
 - public entry path: `README.md` plus the guides under `docs/en` and `docs/zh-CN`
@@ -43,7 +43,7 @@
 
 ## Known Limitations
 
-- the matching public prerelease tag for this package line is `v0.10.0-beta`, and the legacy `v1.x`-style pre-launch checkpoint series remain historical only
+- the matching public prerelease tag for this package line is `v0.11.0-beta`, and the legacy `v1.x`-style pre-launch checkpoint series remain historical only
 - public prerelease publishing and release artifacts still depend on the maintainer release flow
 - the deepest package-validation lane and the `.NET 10` packed-consumer proof still run on the Windows release-validation path
 - retained compatibility APIs are still present during the migration window, but they are only a migration bridge
