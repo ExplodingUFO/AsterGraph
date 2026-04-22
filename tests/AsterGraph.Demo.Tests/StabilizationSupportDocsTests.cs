@@ -37,6 +37,7 @@ public sealed class StabilizationSupportDocsTests
         foreach (var contents in new[] { architecture, adoptionFeedback, pluginRecipe })
         {
             Assert.DoesNotContain("public alpha", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("public-alpha", contents, StringComparison.OrdinalIgnoreCase);
         }
 
         Assert.DoesNotContain("public alpha", readme, StringComparison.OrdinalIgnoreCase);
@@ -44,6 +45,11 @@ public sealed class StabilizationSupportDocsTests
         Assert.DoesNotContain("public alpha", projectStatus, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("public alpha", versioning, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("public alpha", supportMatrix, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("public-alpha", readme, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("public-alpha", quickStart, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("public-alpha", projectStatus, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("public-alpha", versioning, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("public-alpha", supportMatrix, StringComparison.OrdinalIgnoreCase);
 
         Assert.Contains("published packages target `net8.0` and `net9.0`", readme, StringComparison.Ordinal);
         Assert.Contains("Treat `WPF` only as adapter-2 portability validation", quickStart, StringComparison.Ordinal);
