@@ -276,6 +276,8 @@ public sealed class DemoProofReleaseSurfaceTests
         var quickStartZh = ReadRepoFile("docs/zh-CN/quick-start.md");
         var adapterMatrix = ReadRepoFile("docs/en/adapter-capability-matrix.md");
         var adapterMatrixZh = ReadRepoFile("docs/zh-CN/adapter-capability-matrix.md");
+        var extensionContracts = ReadRepoFile("docs/en/extension-contracts.md");
+        var extensionContractsZh = ReadRepoFile("docs/zh-CN/extension-contracts.md");
 
         foreach (var contents in new[]
                  {
@@ -298,6 +300,29 @@ public sealed class DemoProofReleaseSurfaceTests
             Assert.Contains("WPF", contents, StringComparison.Ordinal);
         }
 
+        foreach (var contents in new[] { extensionContracts, extensionContractsZh })
+        {
+            Assert.Contains("### Stable canonical surfaces", contents, StringComparison.Ordinal);
+            Assert.Contains("### Supported hosted-UI composition helper", contents, StringComparison.Ordinal);
+            Assert.Contains("### Retained migration surfaces", contents, StringComparison.Ordinal);
+            Assert.Contains("### Compatibility-only shims", contents, StringComparison.Ordinal);
+            Assert.Contains("AsterGraphEditorFactory.CreateSession(...)", contents, StringComparison.Ordinal);
+        Assert.Contains("IGraphEditorSession", contents, StringComparison.Ordinal);
+        Assert.Contains("AsterGraphEditorFactory.Create(...)", contents, StringComparison.Ordinal);
+        Assert.Contains("GraphEditorViewModel", contents, StringComparison.Ordinal);
+        Assert.Contains("GraphEditorView", contents, StringComparison.Ordinal);
+        Assert.Contains("GraphEditorViewModel.Session", contents, StringComparison.Ordinal);
+        Assert.Contains("GetCompatiblePortTargets(...)", contents, StringComparison.Ordinal);
+        Assert.Contains("IGraphEditorQueries.GetCompatibleTargets(...)", contents, StringComparison.Ordinal);
+        Assert.Contains("CompatiblePortTarget", contents, StringComparison.Ordinal);
+        Assert.Contains("stable canonical surfaces", contents, StringComparison.OrdinalIgnoreCase);
+        }
+
+        Assert.Contains("Use the retained surfaces only as migration bridges.", extensionContracts, StringComparison.Ordinal);
+        Assert.Contains("canonical-first 指导是", extensionContractsZh, StringComparison.Ordinal);
+        Assert.Contains("new work should start on the stable canonical surfaces", extensionContracts, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("新工作应优先从 `Stable canonical surfaces` 起步", extensionContractsZh, StringComparison.Ordinal);
+
         foreach (var contents in new[] { readme, readmeZh, hostIntegration, hostIntegrationZh, architecture, architectureZh, projectStatus, projectStatusZh, alphaStatus, alphaStatusZh, quickStart, quickStartZh })
         {
             Assert.Contains("adapter-capability-matrix.md", contents, StringComparison.OrdinalIgnoreCase);
@@ -312,7 +337,15 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("IGraphEditorSession", adapterMatrix, StringComparison.Ordinal);
         Assert.Contains("AsterGraph.Editor", adapterMatrix, StringComparison.Ordinal);
         Assert.Contains("adapter-specific runtime APIs", adapterMatrix, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("on top of the existing canonical session/runtime route", adapterMatrix, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("layered on the same runtime owner", adapterMatrix, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Matrix Vocabulary", adapterMatrix, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Matrix Categories", adapterMatrix, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("Retained migration is not", adapterMatrix, StringComparison.Ordinal);
+        Assert.Contains("HELLOWORLD_WPF_OK", adapterMatrix, StringComparison.Ordinal);
+        Assert.Contains("COMMAND_SURFACE_OK", adapterMatrix, StringComparison.Ordinal);
+        Assert.Contains("HOST_SAMPLE_OK", adapterMatrix, StringComparison.Ordinal);
+        Assert.Contains("DEMO_OK", adapterMatrix, StringComparison.Ordinal);
         Assert.Contains("Fallback Rule", adapterMatrix, StringComparison.Ordinal);
         Assert.Contains("lower-level documented path", adapterMatrix, StringComparison.OrdinalIgnoreCase);
         Assert.True(LineHasAdapterStatus(adapterMatrix, "Avalonia", "supported"));
@@ -320,11 +353,20 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.True(LineHasAdapterStatus(adapterMatrix, "WPF", "fallback"));
 
         Assert.Contains("adapter 2", adapterMatrixZh, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("supported", adapterMatrixZh, StringComparison.Ordinal);
-        Assert.Contains("partial", adapterMatrixZh, StringComparison.Ordinal);
-        Assert.Contains("fallback", adapterMatrixZh, StringComparison.Ordinal);
-        Assert.Contains("must not exceed", adapterMatrix, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("supported", adapterMatrixZh, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("partial", adapterMatrixZh, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("fallback", adapterMatrixZh, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("must not exceed", adapterMatrixZh, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("must not exceed", adapterMatrixZh, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("同一条 canonical session/runtime 路线", adapterMatrixZh, StringComparison.Ordinal);
+        Assert.Contains("新增 adapter 专属 runtime API", adapterMatrixZh, StringComparison.Ordinal);
+        Assert.Contains("公开文档描述 Avalonia/WPF 支持情况时，只使用下面这三种标签", adapterMatrixZh, StringComparison.Ordinal);
+        Assert.Contains("Matrix Vocabulary", adapterMatrixZh, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Matrix Categories", adapterMatrixZh, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("HELLOWORLD_WPF_OK", adapterMatrixZh, StringComparison.Ordinal);
+        Assert.Contains("COMMAND_SURFACE_OK", adapterMatrixZh, StringComparison.Ordinal);
+        Assert.Contains("HOST_SAMPLE_OK", adapterMatrixZh, StringComparison.Ordinal);
+        Assert.Contains("DEMO_OK", adapterMatrixZh, StringComparison.Ordinal);
         Assert.DoesNotContain("Phase 154", adapterMatrixZh, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("CreateSession(...)", adapterMatrixZh, StringComparison.Ordinal);
         Assert.Contains("IGraphEditorSession", adapterMatrixZh, StringComparison.Ordinal);
