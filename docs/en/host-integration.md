@@ -14,6 +14,7 @@ The hosted route ladder is `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerS
    `new GraphEditorViewModel(...)` + `new GraphEditorView { Editor = editor }`
 
 Routes 1 and 2 are the canonical surfaces for new work. Route 3 remains supported only as a retained compatibility bridge for legacy hosts during migration.
+Choose retained only when you are migrating an existing host in batches. If you need that bridge, use [Retained Migration Recipe](./retained-migration-recipe.md); otherwise start with route 1 or 2.
 
 For new adopters, default to route 2 (`AsterGraphAvaloniaViewFactory`) so WPF remains adapter-2 portability validation only, not a separate onboarding path or parity promise.
 

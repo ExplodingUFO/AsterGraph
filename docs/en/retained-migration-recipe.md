@@ -1,6 +1,6 @@
 # Retained-To-Session Migration Recipe
 
-Use this recipe when an existing host still constructs `GraphEditorViewModel` directly but wants to move toward the canonical runtime/session path without rewriting everything at once. The retained route is a bridge, not the destination.
+Choose retained only when you are migrating an existing host in batches. Use this recipe when an existing host still constructs `GraphEditorViewModel` directly but wants to move toward the canonical runtime/session path without rewriting everything at once. The retained route is a bridge, not the destination.
 
 ## Target State
 

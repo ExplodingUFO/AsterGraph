@@ -78,9 +78,10 @@ The sample README is [`tools/AsterGraph.ConsumerSample.Avalonia/README.md`](../.
 | Shipped Avalonia UI | `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` | `tools/AsterGraph.HelloWorld.Avalonia` |
 | Plugin trust/discovery | `AsterGraphEditorFactory.DiscoverPluginCandidates(...)` + `AsterGraphEditorOptions.PluginTrustPolicy` | [`tools/AsterGraph.ConsumerSample.Avalonia`](../../tools/AsterGraph.ConsumerSample.Avalonia/) |
 | Automation | `IGraphEditorSession.Automation.Execute(...)` | [Host Integration](./host-integration.md) |
-| Retained migration | `new GraphEditorViewModel(...)` + `new GraphEditorView { Editor = editor }` | [Host Integration](./host-integration.md) |
+| Retained compatibility bridge | `new GraphEditorViewModel(...)` + `new GraphEditorView { Editor = editor }` | [Host Integration](./host-integration.md) |
 
 For new work, start with the runtime/session route or the shipped Avalonia route. Treat the retained route as migration-only.
+Choose retained only when you are migrating an existing host in batches. If you need that bridge, use [Retained Migration Recipe](./retained-migration-recipe.md); otherwise start with `CreateSession(...)` or `Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)`.
 New adopters should start with `AsterGraph.Starter.Avalonia` unless they are intentionally building a custom UI host from day one.
 If the host owns its UI, the runtime/session route is the canonical native path; `Editor.Session` still owns host actions, diagnostics, automation, and proof logic.
 Quick Start remains Avalonia-first today. The current public beta line validates `WPF` as adapter 2 on the same canonical route; see [Adapter Capability Matrix](./adapter-capability-matrix.md) for that contract instead of treating it as a second beginner route or a parity promise.

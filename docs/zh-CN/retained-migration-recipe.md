@@ -1,6 +1,6 @@
 # Retained 到 Session 的迁移 Recipe
 
-这份 recipe 适合这样的宿主：现在还在直接 `new GraphEditorViewModel(...)`，但想逐步迁到推荐的 runtime/session 路线，又不想一次性重写完。retained 路线只是桥接，不是最终目的地。
+只有在现有宿主要分批迁移时才选 retained。这份 recipe 适合这样的宿主：现在还在直接 `new GraphEditorViewModel(...)`，但想逐步迁到推荐的 runtime/session 路线，又不想一次性重写完。retained 路线只是桥接，不是最终目的地。
 
 ## 目标状态
 

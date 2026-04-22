@@ -14,6 +14,7 @@
    `new GraphEditorViewModel(...)` + `new GraphEditorView { Editor = editor }`
 
 前两条是新代码的 canonical surface。第 3 条仍然受支持，但只作为迁移期保留的 compatibility bridge。
+只有在现有宿主要分批迁移时才选 retained。需要这座桥接时，先看 [Retained 到 Session 的迁移 Recipe](./retained-migration-recipe.md)；否则优先从第 1 条或第 2 条开始。
 
 如果宿主管的是自己的 UI，那么第 1 条就是 canonical 的原生 / 自定义 UI 路线；你是在同一个 session/runtime owner 上组合自己的表面，而不是再引入一套第二模型。
 

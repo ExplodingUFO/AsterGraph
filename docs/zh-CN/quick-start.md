@@ -80,9 +80,10 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 | 默认 Avalonia UI | `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` | `tools/AsterGraph.HelloWorld.Avalonia` |
 | plugin trust / discovery | `AsterGraphEditorFactory.DiscoverPluginCandidates(...)` + `AsterGraphEditorOptions.PluginTrustPolicy` | [`tools/AsterGraph.ConsumerSample.Avalonia`](../../tools/AsterGraph.ConsumerSample.Avalonia/) |
 | automation | `IGraphEditorSession.Automation.Execute(...)` | [Host Integration](./host-integration.md) |
-| retained 迁移 | `new GraphEditorViewModel(...)` + `new GraphEditorView { Editor = editor }` | [Host Integration](./host-integration.md) |
+| retained 兼容桥接 | `new GraphEditorViewModel(...)` + `new GraphEditorView { Editor = editor }` | [Host Integration](./host-integration.md) |
 
 新代码优先使用 runtime/session 路线或默认 Avalonia 路线；retained 路线只用于迁移。
+只有在现有宿主要分批迁移时才选 retained。需要这座桥接时，先看 [Retained 到 Session 的迁移 Recipe](./retained-migration-recipe.md)；否则优先从 `CreateSession(...)` 或 `Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` 开始。
 如果宿主管的是自己的 UI，那么 runtime/session 路线就是 canonical 的原生路径；`Editor.Session` 仍然负责宿主动作、诊断、automation 和 proof 逻辑。
 默认 onboarding 继续走 Avalonia-first。
 Quick Start 当前仍然是 Avalonia-first。当前公开 beta 线会在同一条 canonical 路线上验证 `WPF` 作为 adapter 2；这不是 `WPF` 与 `Avalonia` 已经 parity 的承诺，也不要把它当成第二条上手路径，这部分合同见 [Adapter Capability Matrix](./adapter-capability-matrix.md)。
