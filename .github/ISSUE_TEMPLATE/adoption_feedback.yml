@@ -57,5 +57,23 @@ body:
   - type: textarea
     id: evidence
     attributes:
-      label: Proof or evidence
-      description: Commands, screenshots, repro links, or proof markers if you have them
+      label: Supporting evidence
+      description: Repro links, screenshots, command output, or other context besides proof markers
+    validations:
+      required: true
+  - type: textarea
+    id: proof_markers
+    attributes:
+      label: Evidence proof markers
+      description: Include exact proof marker lines from your artifact set
+      placeholder: HELLOWORLD_WPF_OK:True
+    validations:
+      required: true
+  - type: textarea
+    id: support_bundle
+    attributes:
+      label: Support bundle
+      description: Include local proof path, command output, or archive reference
+      placeholder: artifacts/support-bundle.zip
+    validations:
+      required: true

@@ -131,6 +131,37 @@ public sealed class DemoProofReleaseSurfaceTests
     }
 
     [Fact]
+    public void IssueTemplates_AndTriageDocs_ShareOneBetaEvidenceContract()
+    {
+        var adoptionTemplate = ReadRepoFile(".github/ISSUE_TEMPLATE/adoption_feedback.yml");
+        var bugTemplate = ReadRepoFile(".github/ISSUE_TEMPLATE/bug_report.md");
+        var triageDoc = ReadRepoFile("docs/en/adopter-triage.md");
+        var triageDocZh = ReadRepoFile("docs/zh-CN/adopter-triage.md");
+        var checklist = ReadRepoFile("docs/en/public-launch-checklist.md");
+
+        Assert.Contains("id: version", adoptionTemplate, StringComparison.Ordinal);
+        Assert.Contains("id: route", adoptionTemplate, StringComparison.Ordinal);
+        Assert.Contains("id: proof_markers", adoptionTemplate, StringComparison.Ordinal);
+        Assert.Contains("id: support_bundle", adoptionTemplate, StringComparison.Ordinal);
+
+        Assert.Contains("AsterGraph version", bugTemplate, StringComparison.Ordinal);
+        Assert.Contains("Route or artifact tried", bugTemplate, StringComparison.Ordinal);
+        Assert.Contains("Proof markers", bugTemplate, StringComparison.Ordinal);
+        Assert.Contains("Support bundle", bugTemplate, StringComparison.Ordinal);
+
+        foreach (var contents in new[] { triageDoc, triageDocZh })
+        {
+            Assert.Contains("version", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("route", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("proof", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("support bundle", contents, StringComparison.OrdinalIgnoreCase);
+        }
+
+        Assert.Contains("support bundle", checklist, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("adopter triage", checklist, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public void HostIntegrationDocs_RequireCanonicalRouteThenAdapterForWpf()
     {
         var hostIntegration = ReadRepoFile("docs/en/host-integration.md");
