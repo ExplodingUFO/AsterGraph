@@ -40,6 +40,20 @@
 - `AsterGraph.ScaleSmoke` = 公开的大图基线加 history/state 验证
 - `AsterGraph.Demo` = 用于可视检查的完整展示宿主
 
+## 第二适配器合同
+
+`v0.9.0-beta` 已经锁定 `WPF` 作为 adapter 2。当前真正 shipped 的 hosted adapter 仍然只有 Avalonia；第二适配器里程碑要验证的是同一条 canonical 路线上的可移植性，而不是引入 adapter 专属 runtime API。
+
+后续 Avalonia/WPF 文档统一使用 [Adapter Capability Matrix](./adapter-capability-matrix.md) 里的 vocabulary：
+
+| Label | 含义 |
+| --- | --- |
+| `supported` | 该 adapter 已经能通过当前文档化的主路线提供对应 stock surface |
+| `partial` | 能力仍然建立在同一条 canonical 路线上，但该 adapter 还存在明确范围限制或缺少 stock projection |
+| `fallback` | 宿主继续停留在同一条 canonical session/runtime seam 上，改走更底层、已文档化的 path / sample / proof harness |
+
+retained 迁移不是 `fallback`。它仍然只是 legacy host 的 compatibility bridge。
+
 ## Official Capability Modules
 
 把 `Official Capability Modules` 理解成压在 canonical routes 之上的宿主能力地图，而不是另一套接入路线。

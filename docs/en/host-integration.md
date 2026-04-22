@@ -40,6 +40,20 @@ If you are starting new work, begin with [Quick Start](./quick-start.md) and kee
 - `AsterGraph.ScaleSmoke` = public scale baseline plus history/state proof
 - `AsterGraph.Demo` = full showcase host for visual inspection
 
+## Second Adapter Contract
+
+`v0.9.0-beta` locks `WPF` as adapter 2. Avalonia remains the only shipped hosted adapter today; the second-adapter milestone exists to validate portability on the same canonical route, not to add adapter-specific runtime APIs.
+
+Use the [Adapter Capability Matrix](./adapter-capability-matrix.md) vocabulary consistently:
+
+| Label | Meaning |
+| --- | --- |
+| `Supported` | the stock adapter surface is available on that adapter through the primary documented route |
+| `Partial` | the capability stays on the same canonical route, but the adapter has an explicit scope limit or a missing stock projection |
+| `Fallback` | the host stays on the same canonical session/runtime seam and uses the lower-level documented path, sample, or proof harness |
+
+Retained migration is not `Fallback`. It remains a compatibility bridge for legacy hosts.
+
 ## Official Capability Modules
 
 Treat the official capability modules as a host-facing map layered on top of the canonical routes, not as a second routing system.

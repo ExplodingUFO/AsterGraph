@@ -56,7 +56,7 @@ Add `AsterGraph.Core` only when the host also needs direct `GraphDocument`, seri
 | Shipped Avalonia UI | the host wants the stock editor shell or stock standalone Avalonia surfaces | `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` | [`AsterGraph.HelloWorld.Avalonia`](./tools/AsterGraph.HelloWorld.Avalonia/) |
 | Retained migration | the host is moving off older MVVM-shaped entry points in planned batches | `new GraphEditorViewModel(...)` + `new GraphEditorView { Editor = editor }` | [Host Integration](./docs/en/host-integration.md) |
 
-For new runtime-facing work, anchor on the first route. The Avalonia route is the supported hosted adapter path today, while the retained route stays migration-only.
+For new runtime-facing work, anchor on the first route. The Avalonia route is the supported hosted adapter path today, while the retained route stays migration-only. `v0.9.0-beta` locks `WPF` as adapter 2 and will publish Avalonia/WPF gaps through the [Adapter Capability Matrix](./docs/en/adapter-capability-matrix.md) instead of adding adapter-specific runtime APIs.
 
 ## Public Entry Map
 
@@ -146,6 +146,7 @@ Consumer-facing guides:
 - [Quick Start](./docs/en/quick-start.md)
 - [Consumer Sample](./docs/en/consumer-sample.md)
 - [Host Integration](./docs/en/host-integration.md)
+- [Adapter Capability Matrix](./docs/en/adapter-capability-matrix.md)
 - [Advanced Editing Guide](./docs/en/advanced-editing.md)
 - [ScaleSmoke Baseline](./docs/en/scale-baseline.md)
 - [Authoring Inspector Recipe](./docs/en/authoring-inspector-recipe.md)

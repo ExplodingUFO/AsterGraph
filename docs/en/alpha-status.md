@@ -48,6 +48,7 @@
 - the deepest package-validation lane and the `.NET 10` packed-consumer proof still run on the Windows release-validation path
 - retained compatibility APIs are still present during the migration window, but they are only a migration bridge
 - the public alpha still has only one official UI adapter today: Avalonia
+- `v0.9.0-beta` locks `WPF` as adapter 2, but parity is not implied until the [Adapter Capability Matrix](./adapter-capability-matrix.md) is filled with `Supported`, `Partial`, and `Fallback`
 - advanced editing is now published as host-facing capability modules, but broader ecosystem and adapter validation work remains ahead
 
 ## Recommended Entry Points
@@ -62,6 +63,7 @@
 - [Retained-To-Session Migration Recipe](./retained-migration-recipe.md)
 - [Public Launch Checklist](./public-launch-checklist.md)
 - [Host Integration](./host-integration.md)
+- [Adapter Capability Matrix](./adapter-capability-matrix.md)
 - [State Contracts](./state-contracts.md)
 - [Extension Contracts](./extension-contracts.md)
 - [Demo Guide](./demo-guide.md)
