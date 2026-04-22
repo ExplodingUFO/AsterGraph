@@ -331,6 +331,17 @@ public sealed class GraphEditorPluginContractsTests
     }
 
     [Fact]
+    public void GraphEditorPluginTrustEvaluation_ImplicitAllow_ExposesExplicitDefaultContract()
+    {
+        var trust = GraphEditorPluginTrustEvaluation.ImplicitAllow();
+
+        Assert.Equal(GraphEditorPluginTrustDecision.Allowed, trust.Decision);
+        Assert.Equal(GraphEditorPluginTrustEvaluationSource.ImplicitAllow, trust.Source);
+        Assert.Equal("trust.policy.not-configured", trust.ReasonCode);
+        Assert.Equal("No plugin trust policy was configured.", trust.ReasonMessage);
+    }
+
+    [Fact]
     public void GraphEditorPluginStageOutcome_ExposesStableResultValues()
     {
         var names = Enum.GetNames(typeof(GraphEditorPluginStageOutcome));
@@ -365,6 +376,34 @@ public sealed class GraphEditorPluginContractsTests
         Assert.Equal(registration, context.Registration);
         Assert.Equal(manifest, context.Manifest);
         Assert.Equal(provenanceEvidence, context.ProvenanceEvidence);
+    }
+
+    [Fact]
+    public void GraphEditorPluginTrustPolicyContext_ExposesPackagePathFromRegistration()
+    {
+        const string packagePath = @"C:\plugins\trust\TrustContextPlugin.1.0.0.nupkg";
+        var manifest = new GraphEditorPluginManifest(
+            "tests.trust.context.package",
+            "Trust Context Package Plugin",
+            new GraphEditorPluginManifestProvenance(
+                GraphEditorPluginManifestSourceKind.PackageArchive,
+                packagePath));
+        var provenanceEvidence = new GraphEditorPluginProvenanceEvidence(
+            new GraphEditorPluginPackageIdentity("AsterGraph.TrustContextPackage", "1.0.0"),
+            new GraphEditorPluginSignatureEvidence(
+                GraphEditorPluginSignatureStatus.Valid,
+                GraphEditorPluginSignatureKind.Repository,
+                new GraphEditorPluginSignerIdentity("AsterGraph Repository", "FACE1234"),
+                timestampUtc: new DateTimeOffset(2026, 04, 09, 0, 0, 0, TimeSpan.Zero),
+                timestampAuthority: "tests.timestamp"));
+        var registration = GraphEditorPluginRegistration.FromPackagePath(packagePath, manifest, provenanceEvidence);
+        var context = new GraphEditorPluginTrustPolicyContext(registration, manifest, provenanceEvidence);
+
+        Assert.Equal(registration, context.Registration);
+        Assert.Equal(manifest, context.Manifest);
+        Assert.Equal(provenanceEvidence, context.ProvenanceEvidence);
+        Assert.Equal(CanonicalPath(packagePath), context.PackagePath);
+        Assert.Equal(CanonicalPath(packagePath), context.Registration.PackagePath);
     }
 
     [Fact]

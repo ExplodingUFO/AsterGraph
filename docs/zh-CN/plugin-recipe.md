@@ -80,6 +80,8 @@ var editor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
 - 在宿主策略里做签名或哈希校验
 - 不要把插件加载当成隔离边界
 
+更细的 v1 manifest 和 trust-policy 合同见 [插件信任契约 v1](./plugin-trust-contracts.md)。
+
 另见：
 
 - [Host Integration](./host-integration.md)

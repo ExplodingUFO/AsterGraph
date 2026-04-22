@@ -65,6 +65,8 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 - allowlist 决策可以导出/导入，不需要重建整条 trust-policy 流程
 - 插件加载仍是进程内执行，不提供沙箱或不受信任代码隔离
 
+更细的 v1 manifest 和 trust-policy 合同见 [插件信任契约 v1](./plugin-trust-contracts.md)。
+
 ## 可直接照抄的接法
 
 如果你想在自己的宿主里做同等级别的接入，可以按这个顺序抄：
