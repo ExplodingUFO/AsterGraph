@@ -17,7 +17,7 @@ This sample keeps one realistic host window without turning into a full showcase
 - one host-owned action rail projected from shared command descriptors through `AsterGraphHostedActionFactory.CreateCommandActions(...)` and `AsterGraphHostedActionFactory.CreateProjection(...)`
 - one host-defined node family that is intentionally sample-owned and replaceable
 - one plugin-contributed command flowing through the same action path instead of a sample-only menu placeholder
-- shared parameter editing through `GetSelectedParameterSnapshots()` and `IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)`
+- shared parameter editing through `IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()` and `IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)`
 - one trusted plugin registration with visible provenance, trust reasons, and allowlist import or export
 - the shipped Avalonia editor surface on the factory-based hosted-UI route
 
@@ -74,8 +74,8 @@ Use a different artifact when you need something narrower:
 The sample is intentionally small enough to copy from:
 
 - action rail / command projection: keep the host actions outside the editor shell and project shared descriptors through `AsterGraphHostedActionFactory.CreateCommandActions(...)` and `AsterGraphHostedActionFactory.CreateProjection(...)`
-- plugin trust workflow: keep `GraphEditorPluginDiscoveryOptions`, `AsterGraphEditorOptions.PluginTrustPolicy`, provenance snapshots, and allowlist import/export together in the host
-- parameter-editing composition: read selection through `GetSelectedParameterSnapshots()` and write through `IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)`
+- plugin trust workflow: keep `GraphEditorPluginDiscoveryOptions`, `AsterGraphEditorOptions.PluginTrustPolicy`, provenance snapshots, and allowlist import/export together in the host; plugin trust stays explicit and host-owned through discovery snapshots, reason strings, and allowlist import/export. allowlist decisions can be exported or imported without rebuilding the host trust-policy flow.
+- parameter-editing composition: read selection through `IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()` and write through `IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)`
 - plugin loading remains in-process; there is no sandbox or untrusted-code isolation
 - sample-owned details such as the review/audit node family, action ids and titles, the window layout, and the narrative text are replaceable
 - the v1 manifest and trust-policy contract is published in [Plugin Manifest and Trust Policy Contract v1](./plugin-trust-contracts.md)

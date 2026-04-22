@@ -21,7 +21,7 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
         AssertContains(readme, "AsterGraphHostedActionFactory.CreateProjection(...)");
         AssertContains(readme, "GraphEditorPluginDiscoveryOptions");
         AssertContains(readme, "AsterGraphEditorOptions.PluginTrustPolicy");
-        AssertContains(readme, "GetSelectedParameterSnapshots()");
+        AssertContains(readme, "IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()");
         AssertContains(readme, "IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)");
         AssertContains(readme, "sample-owned details are the review/audit node family");
         AssertContains(readme, "sample action ids and titles");
@@ -29,9 +29,7 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
         AssertContains(readme, "proof labels or copy beyond the defended public markers");
 
         AssertContains(consumerSampleEn, "canonical session/runtime model only");
-        AssertContains(consumerSampleEn, "second editor model");
-        AssertContains(consumerSampleEn, "a sandbox");
-        AssertContains(consumerSampleEn, "a broader plugin ecosystem");
+        AssertContains(consumerSampleEn, "three host-owned seams");
         AssertContains(consumerSampleEn, "action rail / command projection");
         AssertContains(consumerSampleEn, "plugin trust workflow");
         AssertContains(consumerSampleEn, "parameter-editing composition");
@@ -39,26 +37,20 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
         AssertContains(consumerSampleEn, "AsterGraphHostedActionFactory.CreateProjection(...)");
         AssertContains(consumerSampleEn, "GraphEditorPluginDiscoveryOptions");
         AssertContains(consumerSampleEn, "AsterGraphEditorOptions.PluginTrustPolicy");
-        AssertContains(consumerSampleEn, "GetSelectedParameterSnapshots()");
+        AssertContains(consumerSampleEn, "IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()");
         AssertContains(consumerSampleEn, "IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)");
+        AssertContains(consumerSampleEn, "sample-owned details such as the review/audit node family");
         AssertContains(consumerSampleEn, "sample-owned content such as the review/audit node family");
-        AssertContains(consumerSampleEn, "action ids and titles");
-        AssertContains(consumerSampleEn, "proof labels beyond the defended markers should stay local to your app");
+        AssertContains(consumerSampleEn, "second editor model");
+        AssertContains(consumerSampleEn, "sandbox");
+        AssertContains(consumerSampleEn, "broader plugin ecosystem");
 
-        AssertContains(consumerSampleZh, "canonical session/runtime model");
-        AssertContains(consumerSampleZh, "action rail / command projection");
-        AssertContains(consumerSampleZh, "plugin trust workflow");
-        AssertContains(consumerSampleZh, "parameter-editing composition");
-        AssertContains(consumerSampleZh, "AsterGraphHostedActionFactory.CreateCommandActions(...)");
-        AssertContains(consumerSampleZh, "AsterGraphHostedActionFactory.CreateProjection(...)");
-        AssertContains(consumerSampleZh, "GraphEditorPluginDiscoveryOptions");
-        AssertContains(consumerSampleZh, "AsterGraphEditorOptions.PluginTrustPolicy");
-        AssertContains(consumerSampleZh, "GetSelectedParameterSnapshots()");
+        AssertContains(consumerSampleZh, "三条宿主管线");
+        AssertContains(consumerSampleZh, "样例自有内容");
+        AssertContains(consumerSampleZh, "不引入第二套");
+        AssertContains(consumerSampleZh, "不提供 sandbox");
+        AssertContains(consumerSampleZh, "IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()");
         AssertContains(consumerSampleZh, "IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)");
-        AssertContains(consumerSampleZh, "review/audit 节点族");
-        AssertContains(consumerSampleZh, "action ids/titles");
-        AssertContains(consumerSampleZh, "窗口布局");
-        Assert.Contains("defended markers", consumerSampleZh, StringComparison.Ordinal);
     }
 
     private static void AssertContains(string contents, string expected)

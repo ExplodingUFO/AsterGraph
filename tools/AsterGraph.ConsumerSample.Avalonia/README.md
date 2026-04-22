@@ -46,7 +46,7 @@ Use this sample to copy the host-owned seams, not the sample-specific presentati
 
 - action rail / command projection: `AsterGraphHostedActionFactory.CreateCommandActions(...)` and `AsterGraphHostedActionFactory.CreateProjection(...)`
 - plugin trust workflow: `GraphEditorPluginDiscoveryOptions`, `AsterGraphEditorOptions.PluginTrustPolicy`, and the host allowlist import/export path
-- parameter-editing composition: `GetSelectedParameterSnapshots()` and `IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)`
+- parameter-editing composition: `IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()` and `IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)`
 
 Replaceable sample-owned details are the review/audit node family, the sample action ids and titles, the window layout and narrative text, and any proof labels or copy beyond the defended public markers.
 

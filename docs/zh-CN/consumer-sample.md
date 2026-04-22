@@ -17,7 +17,7 @@
 - 一条宿主自管的动作栏，通过 `AsterGraphHostedActionFactory.CreateCommandActions(...)` 和 `AsterGraphHostedActionFactory.CreateProjection(...)` 从共享 command descriptor 投到宿主层
 - 一组宿主自定义节点，这部分是样例自有且可替换的
 - 一个 plugin command 也走同一条动作路径，而不是样例私有的菜单占位项
-- 通过 `GetSelectedParameterSnapshots()` 和 `IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)` 做共享参数编辑
+- 通过 `IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()` 和 `IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)` 做共享参数编辑
 - 一个可信插件注册，以及可见的 provenance、trust reason 和 allowlist 导入/导出
 - 基于 factory 的默认 Avalonia hosted-UI 路线
 
@@ -74,8 +74,8 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 这个样例刻意控制在可复制范围内：
 
 - action rail / command projection：宿主动作在编辑器壳层之外，并且通过 `AsterGraphHostedActionFactory.CreateCommandActions(...)` 和 `AsterGraphHostedActionFactory.CreateProjection(...)` 复用共享 command descriptor
-- plugin trust workflow：把 `GraphEditorPluginDiscoveryOptions`、`AsterGraphEditorOptions.PluginTrustPolicy`、provenance snapshot 和 allowlist 导入/导出放在同一层
-- parameter-editing composition：通过 `GetSelectedParameterSnapshots()` 读选中节点参数，并通过 `IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)` 写回
+- plugin trust workflow：把 `GraphEditorPluginDiscoveryOptions`、`AsterGraphEditorOptions.PluginTrustPolicy`、provenance snapshot 和 allowlist 导入/导出放在同一层；插件信任策略保持显式且由宿主管理，通过 discovery snapshot、reason 字符串和 allowlist 导入/导出保持可见。插件信任策略保持显式且由宿主管理，allowlist 决策可以导出/导入而不需要重建宿主 trust-policy 流程。
+- parameter-editing composition：通过 `IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()` 读选中节点参数，并通过 `IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)` 写回
 - 插件加载仍是进程内执行，不提供 sandbox 或不受信任代码隔离
 - review/audit 节点族、action ids/titles、窗口布局、叙述文本，以及 defended markers 之外的 proof 文案，都是样例自有内容
 
