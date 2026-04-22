@@ -81,7 +81,7 @@ Expected high-signal markers:
 - confirm the generated prerelease notes also publish the proof summary block, not only workflow artifacts
 - confirm the generated notes and announcement text explicitly carry the frozen support boundary story and the adapter matrix story, plus the `HELLOWORLD_WPF_OK` and `ADAPTER_CAPABILITY_MATRIX` markers
 - treat `HELLOWORLD_WPF_OK` as adapter-2 validation only; do not present it as Avalonia/WPF parity or public WPF support when describing the adapter story
-- confirm every beta intake item tracks route, version, proof markers, and support bundle
+- confirm every beta intake item tracks route, version, proof markers, and support-bundle availability or path
 - if `NUGET_API_KEY` is configured, confirm package publication succeeds
 - if `NUGET_API_KEY` is not configured, confirm the workflow reports a deliberate NuGet publish skip instead of a failure
 - do not present legacy `v1.x`-style historical milestone checkpoints as the current public package version; use [Versioning](./versioning.md) as the public rule

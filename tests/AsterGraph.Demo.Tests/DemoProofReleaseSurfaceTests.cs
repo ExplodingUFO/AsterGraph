@@ -138,11 +138,20 @@ public sealed class DemoProofReleaseSurfaceTests
         var triageDoc = ReadRepoFile("docs/en/adopter-triage.md");
         var triageDocZh = ReadRepoFile("docs/zh-CN/adopter-triage.md");
         var checklist = ReadRepoFile("docs/en/public-launch-checklist.md");
+        var checklistZh = ReadRepoFile("docs/zh-CN/public-launch-checklist.md");
+        var evidenceBlock = ExtractIssueTemplateBlock(adoptionTemplate, "evidence");
+        var supportBundleBlock = ExtractIssueTemplateBlock(adoptionTemplate, "support_bundle");
 
         Assert.Contains("id: version", adoptionTemplate, StringComparison.Ordinal);
         Assert.Contains("id: route", adoptionTemplate, StringComparison.Ordinal);
         Assert.Contains("id: proof_markers", adoptionTemplate, StringComparison.Ordinal);
         Assert.Contains("id: support_bundle", adoptionTemplate, StringComparison.Ordinal);
+        Assert.Contains("Supporting evidence", evidenceBlock, StringComparison.Ordinal);
+        Assert.Contains("besides proof markers", evidenceBlock, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("required: true", evidenceBlock, StringComparison.Ordinal);
+        Assert.Contains("ConsumerSample.Avalonia", supportBundleBlock, StringComparison.Ordinal);
+        Assert.Contains("JSON", supportBundleBlock, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("required: true", supportBundleBlock, StringComparison.Ordinal);
 
         Assert.Contains("AsterGraph version", bugTemplate, StringComparison.Ordinal);
         Assert.Contains("Route or artifact tried", bugTemplate, StringComparison.Ordinal);
@@ -159,6 +168,8 @@ public sealed class DemoProofReleaseSurfaceTests
 
         Assert.Contains("support bundle", checklist, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("adopter triage", checklist, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("support bundle", checklistZh, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("adopter-triage", checklistZh, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
@@ -736,5 +747,23 @@ public sealed class DemoProofReleaseSurfaceTests
             .Any(line =>
                 line.Contains(requiredTerm, StringComparison.OrdinalIgnoreCase) &&
                 line.Contains(requiredCompanion, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static string ExtractIssueTemplateBlock(string contents, string id)
+    {
+        var lines = contents.Split('\n');
+        var start = Array.FindIndex(lines, line => line.Contains($"id: {id}", StringComparison.Ordinal));
+        if (start < 0)
+        {
+            throw new InvalidOperationException($"Could not find issue template block for '{id}'.");
+        }
+
+        var end = start + 1;
+        while (end < lines.Length && !lines[end].StartsWith("  - type:", StringComparison.Ordinal))
+        {
+            end++;
+        }
+
+        return string.Join(Environment.NewLine, lines.Skip(start).Take(end - start));
     }
 }

@@ -5,7 +5,7 @@
 - `version`（包版本或公开 tag）
 - `route`（尝试的路线或样例）
 - `proof` marker（命中的 proof 标记）
-- `support bundle`（support bundle 路径、打包文件或命令输出）
+- `support bundle`（当 `ConsumerSample.Avalonia -- --proof` 可生成时，填写本地 JSON 路径；否则注明当前 route 无法生成）
 
 同一套字段应在：
 
@@ -13,7 +13,7 @@
 - Bug 报告模板
 - 预发布 notes 的证据复核
 
-确保所有回流内容保持一致后再进入发布评审。
+这样可以让 `HelloWorld`、`Demo`、`ScaleSmoke` 这类没有 support bundle 的反馈照常进入分诊，同时保持证据合同一致。
 
 ## 相关链接
 

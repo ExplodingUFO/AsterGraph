@@ -32,7 +32,7 @@ What happened instead?
 - Host path: (`CreateSession`, `Create` + view factory, retained path, demo, smoke tool)
 - Route or artifact tried:
 - Proof markers:
-- Support bundle:
+- Support bundle JSON path (if available):
 
 ## Verification
 
