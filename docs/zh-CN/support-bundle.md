@@ -1,4 +1,4 @@
-﻿# Beta Support Bundle
+# Beta Support Bundle
 
 这份文档定义的是 public beta 的本地证据合同。
 它不会上传任何东西，也不代表遥测、云服务或托管后端。

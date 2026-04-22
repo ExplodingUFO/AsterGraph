@@ -1,4 +1,4 @@
-﻿# AsterGraph.ConsumerSample.Avalonia
+# AsterGraph.ConsumerSample.Avalonia
 
 This is the medium hosted-UI sample on the canonical session/runtime route, after `AsterGraph.Starter.Avalonia` and `AsterGraph.HelloWorld.Avalonia`, and before `AsterGraph.Demo`.
 It shows a host-owned action rail, plugin trust workflow, and parameter-editing composition without implying a second editor model, a sandbox, or a broader plugin ecosystem.

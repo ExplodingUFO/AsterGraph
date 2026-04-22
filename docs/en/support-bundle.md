@@ -1,4 +1,4 @@
-﻿# Beta Support Bundle
+# Beta Support Bundle
 
 This is the local evidence contract for beta evaluation and support.
 It does not upload anything and it does not imply telemetry or hosted services.

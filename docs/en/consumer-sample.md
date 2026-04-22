@@ -1,4 +1,4 @@
-﻿# Consumer Sample
+# Consumer Sample
 
 `tools/AsterGraph.ConsumerSample.Avalonia` is the medium hosted-UI sample on the canonical session/runtime route, after the starter scaffold and the smallest `HelloWorld.Avalonia` route, and before the full `AsterGraph.Demo` showcase host.
 
