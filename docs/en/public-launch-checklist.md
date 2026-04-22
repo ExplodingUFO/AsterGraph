@@ -48,6 +48,7 @@ Expected high-signal markers:
 - `CONSUMER_SAMPLE_OK:True`
 - `DEMO_OK:True`
 - `COMMAND_SURFACE_OK:True`
+- `HELLOWORLD_WPF_OK:True`
 - `TIERED_NODE_SURFACE_OK:True`
 - `FIXED_GROUP_FRAME_OK:True`
 - `NON_OBSCURING_EDITING_OK:True`
@@ -57,6 +58,7 @@ Expected high-signal markers:
 - `EDGE_NOTE_OK:True`
 - `EDGE_GEOMETRY_OK:True`
 - `DISCONNECT_FLOW_OK:True`
+- `ADAPTER_CAPABILITY_MATRIX:True`
 - `HOST_SAMPLE_NET10_OK:True`
 - `PACKAGE_SMOKE_OK:True`
 - `SCALE_PERFORMANCE_BUDGET_OK:baseline:True:...`
@@ -77,6 +79,7 @@ Expected high-signal markers:
   - matching public tag
   - optional legacy historical repo checkpoint reference
 - confirm the generated prerelease notes also publish the proof summary block, not only workflow artifacts
+- confirm the generated notes and announcement text explicitly call out the current adapter matrix plus the `HELLOWORLD_WPF_OK` and `ADAPTER_CAPABILITY_MATRIX` markers
 - if `NUGET_API_KEY` is configured, confirm package publication succeeds
 - if `NUGET_API_KEY` is not configured, confirm the workflow reports a deliberate NuGet publish skip instead of a failure
 - do not present historical milestone-style tags such as `v1.9` as the current public package version; use [Versioning](./versioning.md) as the public rule

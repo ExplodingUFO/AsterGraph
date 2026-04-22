@@ -48,6 +48,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framew
 - `CONSUMER_SAMPLE_OK:True`
 - `DEMO_OK:True`
 - `COMMAND_SURFACE_OK:True`
+- `HELLOWORLD_WPF_OK:True`
 - `TIERED_NODE_SURFACE_OK:True`
 - `FIXED_GROUP_FRAME_OK:True`
 - `NON_OBSCURING_EDITING_OK:True`
@@ -65,6 +66,11 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framew
 - `SCALE_HISTORY_CONTRACT_OK:...`
 - `COVERAGE_REPORT_OK:...`
 
+发布 notes/release messaging 核对要求：
+
+- 必须在 prerelease notes 或 release messaging 里同步给出 WPF proof marker：`HELLOWORLD_WPF_OK`
+- 必须在 prerelease notes 或 release messaging 里同步给出 adapter 能力收敛结果 marker：`ADAPTER_CAPABILITY_MATRIX`
+
 ## 5. 第一个公开 Prerelease Tag
 
 - 确认工作区干净
@@ -81,6 +87,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framew
 - 如果没有配置 `NUGET_API_KEY`，确认 workflow 是有意跳过 NuGet publish，而不是失败
 - 不要再把 `v1.9` 这类历史里程碑标签当成当前公开包版本；对外统一以 [Versioning](./versioning.md) 为准
 - release note 第一屏先写可安装包版本，再写与之匹配的公开 tag；`v1.x` 这类旧 milestone 只作为历史说明补充出现
+- `prerelease notes` / release messaging 中还必须核对并回填 `ADAPTER_CAPABILITY_MATRIX` 与 `HELLOWORLD_WPF_OK` 的状态，避免只写成功 tag 而漏能力核对
 
 如果你想在不新推 tag 的情况下手动发布 alpha 包：
 

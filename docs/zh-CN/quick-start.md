@@ -62,6 +62,8 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 
 ## 4. 推荐接入路线
 
+默认新接入优先走 Avalonia hosted 路线；只有需要原生自定义 UI 时再走 runtime/session 自定义路线。
+
 | 宿主需要什么 | 从哪里开始 | 第一个样例 |
 | --- | --- | --- |
 | hosted starter 脚手架 | `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` | `tools/AsterGraph.Starter.Avalonia` |
@@ -73,7 +75,10 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 
 新代码优先使用 runtime/session 路线或默认 Avalonia 路线；retained 路线只用于迁移。
 如果宿主管的是自己的 UI，那么 runtime/session 路线就是 canonical 的原生路径；`Editor.Session` 仍然负责宿主动作、诊断、automation 和 proof 逻辑。
+默认 onboarding 继续走 Avalonia-first。
 Quick Start 当前仍然是 Avalonia-first。`v0.9.0-beta` 会在同一条 canonical 路线上验证 `WPF` 作为 adapter 2；这部分合同见 [Adapter Capability Matrix](./adapter-capability-matrix.md)，不要把它当成第二条上手路径。
+
+WPF 仅是 adapter-2 portability validation：`partial` / `fallback` 都指向同一条 canonical session/query 路线 + host 自有投影，不是 retained MVVM，也不是 WPF 专属 runtime API。
 
 ## 5. 最小 Hosted-UI 组合
 

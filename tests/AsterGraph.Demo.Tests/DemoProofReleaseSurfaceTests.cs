@@ -37,6 +37,48 @@ public sealed class DemoProofReleaseSurfaceTests
     ];
 
     [Fact]
+    public void QuickStart_UsesAvaloniaAsDefaultOnboardingPath()
+    {
+        var quickStart = ReadRepoFile("docs/en/quick-start.md");
+        var quickStartZh = ReadRepoFile("docs/zh-CN/quick-start.md");
+
+        foreach (var contents in new[] { quickStart, quickStartZh })
+        {
+            Assert.Contains("onboarding", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("default", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("Avalonia", contents, StringComparison.Ordinal);
+            Assert.False(
+                HasLineWith(contents, "WPF", "onboarding"),
+                "Quick Start docs must not describe WPF as an onboarding path.");
+        }
+    }
+
+    [Fact]
+    public void HostIntegrationDocs_RequireCanonicalRouteThenAdapterForWpf()
+    {
+        var hostIntegration = ReadRepoFile("docs/en/host-integration.md");
+        var hostIntegrationZh = ReadRepoFile("docs/zh-CN/host-integration.md");
+
+        foreach (var contents in new[] { hostIntegration, hostIntegrationZh })
+        {
+            Assert.Contains("canonical", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("adapter", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.True(HasLineWith(contents, "WPF", "partial"), "WPF Partial guidance must appear in host integration docs.");
+            Assert.True(HasLineWith(contents, "WPF", "fallback"), "WPF Fallback guidance must appear in host integration docs.");
+            Assert.True(HasLineWith(contents, "WPF", "host-owned"), "WPF flow must reference host-owned projection.");
+            Assert.False(
+                HasLineWith(contents, "WPF", "retained")
+                && HasLineWith(contents, "WPF", "MVVM"),
+                "WPF Partial/Fallback guidance must avoid retained-MVVM claim.");
+            Assert.Contains("session", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("runtime", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("projection", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("canonical route", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("adapter-specific", contents, StringComparison.OrdinalIgnoreCase);
+        }
+    }
+
+    [Fact]
     public void RepositorySurface_UsesAsterGraphSolutionName()
     {
         var repoRoot = GetRepositoryRoot();
@@ -281,6 +323,8 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("supported", adapterMatrixZh, StringComparison.Ordinal);
         Assert.Contains("partial", adapterMatrixZh, StringComparison.Ordinal);
         Assert.Contains("fallback", adapterMatrixZh, StringComparison.Ordinal);
+        Assert.Contains("must not exceed", adapterMatrix, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("must not exceed", adapterMatrixZh, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("Phase 154", adapterMatrixZh, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("CreateSession(...)", adapterMatrixZh, StringComparison.Ordinal);
         Assert.Contains("IGraphEditorSession", adapterMatrixZh, StringComparison.Ordinal);
@@ -388,6 +432,11 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("SCALE_PERF_SUMMARY:stress:...", checklist, StringComparison.Ordinal);
         Assert.Contains("SCALE_PERFORMANCE_BUDGET_OK:large:True:...", checklistZh, StringComparison.Ordinal);
         Assert.Contains("SCALE_PERF_SUMMARY:stress:...", checklistZh, StringComparison.Ordinal);
+
+        Assert.Contains("ADAPTER_CAPABILITY_MATRIX", checklist, StringComparison.Ordinal);
+        Assert.Contains("HELLOWORLD_WPF_OK", checklist, StringComparison.Ordinal);
+        Assert.Contains("ADAPTER_CAPABILITY_MATRIX", checklistZh, StringComparison.Ordinal);
+        Assert.Contains("HELLOWORLD_WPF_OK", checklistZh, StringComparison.Ordinal);
     }
 
     private static string ReadRepoFile(string relativePath)
@@ -426,5 +475,14 @@ public sealed class DemoProofReleaseSurfaceTests
             .Any(line =>
                 line.Contains(subject, StringComparison.OrdinalIgnoreCase) &&
                 line.Contains(requiredStatus, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static bool HasLineWith(string contents, string requiredTerm, string requiredCompanion)
+    {
+        return contents
+            .Split('\n', StringSplitOptions.TrimEntries)
+            .Any(line =>
+                line.Contains(requiredTerm, StringComparison.OrdinalIgnoreCase) &&
+                line.Contains(requiredCompanion, StringComparison.OrdinalIgnoreCase));
     }
 }

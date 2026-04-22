@@ -1,6 +1,6 @@
 # Adapter Capability Matrix
 
-这页文档锁定 `v0.9.0-beta Second Adapter Validation` 的 adapter capability 合同。
+这页文档锁定 `v0.9.0-beta Second Adapter Validation` 的 adapter capability 合同。默认对新接入宿主的 onboarding 仍然是 Avalonia-first：WPF 仅用于同一条 canonical session/runtime 路线的 adapter-2 可移植性验证，不会形成第二条上手路径。
 
 `WPF` 是 adapter 2。这个里程碑的目标是在现有 canonical session/runtime 路线上验证第二个官方 adapter，而不是新增 adapter 专属 runtime API，也不是再开一条新的宿主运行时路线。
 
@@ -19,9 +19,9 @@
 
 | Label | 含义 |
 | --- | --- |
-| `supported` | 该 adapter 已经能通过文档说明的主支持路线提供对应 stock surface |
-| `partial` | 能力仍然建立在同一条 canonical 路线上，但该 adapter 还存在明确范围限制或缺少某个 stock projection |
-| `fallback` | 宿主继续停留在同一条 canonical session/runtime seam 上，改走更底层、已文档化的 path / sample / proof harness，而不是依赖 stock adapter surface |
+| `supported` | 该 adapter 已经能通过文档说明的主支持路线，在 canonical session/query 路线上提供对应 stock surface |
+| `partial` | 能力仍然建立在同一条 canonical session/query / host 自有 projection 路线上，但该 adapter 还存在明确范围限制或缺少某个 stock projection |
+| `fallback` | 宿主继续停留在同一条 canonical session/query + host 自有投影路线，通过已文档化的 path / sample / proof harness 改走更底层路径，而不是依赖新一套 adapter 专属 runtime API |
 
 retained 迁移不是 `fallback`。retained 仍然只是 legacy host 的 compatibility bridge。
 
@@ -41,7 +41,9 @@ retained 迁移不是 `fallback`。retained 仍然只是 legacy host 的 compati
 
 ## Fallback Rule
 
-`fallback` 不是“退回 retained MVVM”，也不允许引入 `WPF` 专属 runtime API。它的含义是：宿主仍然停留在同一条 canonical seam 上，只是临时改走已经被 sample 或 proof harness 证明过的更底层路径。
+`fallback` 不是“退回 retained MVVM”，也不允许引入 `WPF` 专属 runtime API。它的含义是：宿主仍然停留在同一条 canonical session/query + host 自有投影 seam 上，只是临时改走已经被 sample 或 proof harness 证明过的更底层路径。
+
+公开 beta 对外文案 `must not exceed` 下面这些行级状态。只要 WPF 某一行仍是 `partial` 或 `fallback`，release note 和公开文档就必须把这个缺口写明，不能暗示已经对齐。
 
 ## Phase 157 能力矩阵
 
