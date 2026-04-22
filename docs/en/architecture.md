@@ -32,8 +32,8 @@ The Avalonia package is the first official adapter, not the definition of the wh
 
 - `AsterGraph.Editor` owns the runtime model and canonical host contracts.
 - `AsterGraph.Avalonia` consumes shared `Scene/Interaction` seams and adds Avalonia-specific rendering and composition.
-- `WPF` is the locked adapter 2 target for `v0.9.0-beta`, and it must plug into the same `Editor Kernel` + `Scene/Interaction` shape instead of forking editor semantics.
-- Avalonia/WPF gaps should be published through the [Adapter Capability Matrix](./adapter-capability-matrix.md) as `Supported`, `Partial`, or `Fallback`, not through new adapter-specific runtime APIs.
+- `WPF` is the locked adapter 2 target for the current public beta line, and it must plug into the same `Editor Kernel` + `Scene/Interaction` shape instead of forking editor semantics.
+- Avalonia/WPF gaps should be published through the [Adapter Capability Matrix](./adapter-capability-matrix.md) as `Supported`, `Partial`, or `Fallback`; those states are validation-only and not a parity promise.
 
 ## Official Capability Modules
 

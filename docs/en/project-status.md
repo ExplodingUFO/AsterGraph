@@ -3,8 +3,8 @@
 ## Current Status
 
 - package baseline: `0.10.0-beta`
-- latest public prerelease tag: `v0.10.0-beta`
-- latest legacy repository milestone tag: `v1.9`
+- matching public prerelease tag for this package line: `v0.10.0-beta`
+- historical legacy repository milestone tag series: `v1.x`-style pre-launch checkpoints
 - repo posture: public beta
 - public versioning guidance: [Versioning](./versioning.md)
 - supported published packages:
@@ -33,13 +33,13 @@
 - default Avalonia shell plus standalone surfaces
 - runtime inspection surface for trusted, loaded, and blocked outcomes
 - command/trust timeline and perf overlay in the showcase surface
-- v1.23 graph-surface usability proof markers:
+- graph-surface usability proof markers:
   - `COMMAND_SURFACE_OK:True`
   - `TIERED_NODE_SURFACE_OK:True`
   - `FIXED_GROUP_FRAME_OK:True`
   - `NON_OBSCURING_EDITING_OK:True`
   - `VISUAL_SEMANTICS_OK:True`
-- v0.6.0-alpha advanced-editing closure markers:
+- advanced-editing closure markers:
   - `HIERARCHY_SEMANTICS_OK:True`
   - `COMPOSITE_SCOPE_OK:True`
   - `EDGE_NOTE_OK:True`
@@ -66,7 +66,7 @@ The current public-repo priority is turning the public beta into a coherent SDK 
 - maintain hosted CI parity across the supported proof lanes
 - continue the retained compatibility migration window without abrupt public breaks
 - keep the shipped starter scaffold, runtime inspection surface, command/trust timeline, and perf overlay aligned with the canonical session-first route
-- validate `WPF` as adapter 2 on the same canonical route and publish Avalonia/WPF status using `Supported`, `Partial`, and `Fallback` without implying parity
+- validate `WPF` as adapter 2 on the same canonical route and publish Avalonia/WPF status using `Supported`, `Partial`, and `Fallback`; do not read `Partial` or `Fallback` as parity
 
 ## Public Entry Matrix
 

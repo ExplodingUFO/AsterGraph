@@ -76,7 +76,7 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 新代码优先使用 runtime/session 路线或默认 Avalonia 路线；retained 路线只用于迁移。
 如果宿主管的是自己的 UI，那么 runtime/session 路线就是 canonical 的原生路径；`Editor.Session` 仍然负责宿主动作、诊断、automation 和 proof 逻辑。
 默认 onboarding 继续走 Avalonia-first。
-Quick Start 当前仍然是 Avalonia-first。`v0.10.0-beta` 会在同一条 canonical 路线上验证 `WPF` 作为 adapter 2；这部分合同见 [Adapter Capability Matrix](./adapter-capability-matrix.md)，不要把它当成第二条上手路径。
+Quick Start 当前仍然是 Avalonia-first。当前公开 beta 线会在同一条 canonical 路线上验证 `WPF` 作为 adapter 2；这不是 `WPF` 与 `Avalonia` 已经 parity 的承诺，也不要把它当成第二条上手路径，这部分合同见 [Adapter Capability Matrix](./adapter-capability-matrix.md)。
 
 WPF 仅是 adapter-2 portability validation：`partial` / `fallback` 都指向同一条 canonical session/query 路线 + host 自有投影，不是 retained MVVM，也不是 WPF 专属 runtime API。
 

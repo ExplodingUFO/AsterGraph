@@ -9,12 +9,12 @@ AsterGraph 是一个面向 .NET 的模块化节点图编辑器工具包，提供
 
 ## 公开 Beta
 
-- 最新可安装包版本：`0.10.0-beta`
-- 最新对外 SemVer prerelease 标签：`v0.10.0-beta`
-- 最新历史仓库里程碑标签：`v1.9`（公开前的旧检查点，不是 NuGet 包版本）
+- 当前可安装包版本：`0.10.0-beta`
+- 与当前包版本配对的对外 SemVer prerelease 标签：`v0.10.0-beta`
+- 历史仓库里程碑标签系列：`v1.x` 风格的公开前检查点（公开前的旧检查点，不是 NuGet 包版本）
 - 公开发布包目标框架：`net8.0`、`net9.0`
 - release lane 还会用打包后的 `HostSample` 额外证明下游 `.NET 10` 消费兼容性
-- 后续对外 prerelease tag 应与包 SemVer 对齐，比如 `v0.10.0-beta`
+- 后续对外 prerelease tag 应与当前包版本的 SemVer 对齐，比如 `v0.10.0-beta`
 - 包版本与历史仓库 tag 的关系说明：[Versioning](./docs/zh-CN/versioning.md)
 - 当前发布边界与支持保证：[稳定化支持矩阵](./docs/zh-CN/stabilization-support-matrix.md)
 
@@ -56,7 +56,7 @@ dotnet add package AsterGraph.Abstractions --prerelease
 | 默认 Avalonia UI | 宿主想直接复用默认编辑器壳层或独立 Avalonia 表面 | `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` | [`AsterGraph.HelloWorld.Avalonia`](./tools/AsterGraph.HelloWorld.Avalonia/) |
 | retained 迁移 | 现有宿主要分批迁移，暂时还离不开旧的 MVVM 入口 | `new GraphEditorViewModel(...)` + `new GraphEditorView { Editor = editor }` | [Host Integration](./docs/zh-CN/host-integration.md) |
 
-新的运行时能力接入优先锚定第一条。Avalonia 路线是当前受支持的 hosted adapter 路线，retained 路线只作为迁移桥接。`v0.10.0-beta` 已经锁定 `WPF` 作为 adapter 2，后续 Avalonia/WPF 差异会通过 [Adapter Capability Matrix](./docs/zh-CN/adapter-capability-matrix.md) 里的 `supported / partial / fallback` 合同公开，而不是引入 adapter 专属 runtime API；WPF 当前仍是验证中的 adapter 2，不要把它写成与 Avalonia 已经对齐。
+新的运行时能力接入优先锚定第一条。Avalonia 路线是当前受支持的 hosted adapter 路线，retained 路线只作为迁移桥接。当前公开 beta 已经锁定 `WPF` 作为 adapter 2，后续 Avalonia/WPF 差异会通过 [Adapter Capability Matrix](./docs/zh-CN/adapter-capability-matrix.md) 里的 `supported / partial / fallback` 合同公开，而不是引入 adapter 专属 runtime API；WPF 当前仍是验证中的 adapter 2，不要把它写成与 Avalonia 已经对齐。
 
 ## 公开入口分工
 

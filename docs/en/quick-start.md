@@ -3,7 +3,7 @@
 This guide is the shortest path from a blank host to a running AsterGraph integration.
 
 For first-time adopters, start on the default Avalonia path by default.
-Treat `WPF` only as adapter-2 portability validation on the same canonical route.
+Treat `WPF` only as adapter-2 portability validation on the same canonical route; it is not a second route or a parity promise.
 For the frozen support boundary and upgrade guidance toward `v1.0.0`, see [Stabilization Support Matrix](./stabilization-support-matrix.md).
 
 ## 1. Pick Your Starting Package
@@ -78,7 +78,7 @@ The sample README is [`tools/AsterGraph.ConsumerSample.Avalonia/README.md`](../.
 For new work, start with the runtime/session route or the shipped Avalonia route. Treat the retained route as migration-only.
 New adopters should start with `AsterGraph.Starter.Avalonia` unless they are intentionally building a custom UI host from day one.
 If the host owns its UI, the runtime/session route is the canonical native path; `Editor.Session` still owns host actions, diagnostics, automation, and proof logic.
-Quick Start remains Avalonia-first today. `v0.10.0-beta` validates `WPF` as adapter 2 on the same canonical route; see [Adapter Capability Matrix](./adapter-capability-matrix.md) for that contract instead of treating it as a second beginner route.
+Quick Start remains Avalonia-first today. The current public beta line validates `WPF` as adapter 2 on the same canonical route; see [Adapter Capability Matrix](./adapter-capability-matrix.md) for that contract instead of treating it as a second beginner route or a parity promise.
 
 ## 5. Minimal Hosted-UI Composition
 

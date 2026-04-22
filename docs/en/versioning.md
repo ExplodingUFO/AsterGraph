@@ -12,8 +12,8 @@ The consumer-facing version for AsterGraph is the NuGet package version on the f
 Current public beta baseline:
 
 - package version: `0.10.0-beta`
-- latest public prerelease tag: `v0.10.0-beta`
-- latest legacy repository milestone tag: `v1.9`
+- matching public prerelease tag for this package line: `v0.10.0-beta`
+- historical legacy repository milestone tag series: `v1.x`-style pre-launch checkpoints
 
 When a host asks "which version of AsterGraph should I install?", this package version is the authoritative answer.
 
@@ -24,7 +24,7 @@ The stabilization support matrix freezes the consumer-facing boundary that leads
 - four published SDK packages only
 - `net8.0` and `net9.0` as the supported published frameworks
 - Avalonia as the supported hosted adapter
-- `WPF` as validation-only and partial-fallback per the adapter matrix; it is not a parity promise
+- `WPF` as validation-only and partial-fallback per the adapter matrix; do not read it as a parity or alignment promise
 - retained MVVM as migration-only
 
 `v1.0.0` should be read as promotion of that same defended boundary to stable, not as a widening of package, framework, or adapter support.
@@ -33,9 +33,9 @@ The stabilization support matrix freezes the consumer-facing boundary that leads
 
 The repository now publishes public prerelease tags that match the installable package version, for example `v0.10.0-beta`.
 
-The repository also still carries a historical tag such as `v1.9`.
+The repository also still carries historical tags from that pre-launch workflow, such as `v1.x`-style checkpoint tags.
 
-Those `v1.x` tags came from milestone-style repository checkpoints during the pre-launch workflow. They are useful for maintainer history, but they are **not** the package version that consumers install from NuGet.
+Those legacy `v1.x`-style tags came from milestone-style repository checkpoints during the pre-launch workflow. They are useful for maintainer history, but they are **not** the package version that consumers install from NuGet.
 
 Going forward, the public release convention is:
 
@@ -48,8 +48,8 @@ Going forward, the public release convention is:
 | Public concept | Current value | How to read it |
 | --- | --- | --- |
 | installable package version | `0.10.0-beta` | the version consumers install from nuget.org |
-| current public prerelease tag | `v0.10.0-beta` | the GitHub prerelease tag that must match the installable package version |
-| historical public repo milestone tag | `v1.9` | a pre-launch checkpoint tag kept for repo history only |
+| matching public prerelease tag for this package line | `v0.10.0-beta` | the GitHub prerelease tag that must match the installable package version |
+| historical public repo milestone tag series | `v1.x`-style checkpoint tags | a pre-launch checkpoint pattern kept for repo history only |
 
 ## Practical Rule
 
@@ -57,7 +57,7 @@ If you are:
 
 - adopting the SDK: follow the NuGet package version
 - reading release notes: expect public prerelease tags to match the NuGet package version
-- maintaining the repo: treat old `v1.x` tags as historical milestone markers, not as the current public package line
+- maintaining the repo: treat old `v1.x`-style tags as historical milestone markers, not as the current public package line
 
 ## Release Note Header Rule
 
@@ -73,7 +73,7 @@ Example:
 
 - package version: `0.10.0-beta`
 - public tag: `v0.10.0-beta`
-- historical repo checkpoint reference: `v1.9` (legacy, not installable)
+- historical repo checkpoint reference: `legacy v1.x-style milestone checkpoint` (not installable)
 
 The generated prerelease body also carries the public proof summary from the release lane so external adopters can see the same installation, compatibility, scale, and coverage signals that gate publication.
 

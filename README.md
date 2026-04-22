@@ -9,12 +9,12 @@ AsterGraph is a modular node-graph editor toolkit for .NET. It gives hosts a reu
 
 ## Public Beta
 
-- latest installable package version: `0.10.0-beta`
-- latest public prerelease tag: `v0.10.0-beta`
-- latest legacy repository milestone tag: `v1.9` (historical pre-launch checkpoint, not the NuGet version)
+- current installable package version: `0.10.0-beta`
+- matching public prerelease tag for this package line: `v0.10.0-beta`
+- historical legacy repository milestone tag series: `v1.x`-style pre-launch checkpoints (historical pre-launch checkpoints, not the NuGet version)
 - published packages target `net8.0` and `net9.0`
 - packed `HostSample` also proves downstream `.NET 10` consumption during the release gate
-- public prerelease tags must match the package version exactly, for example `v0.10.0-beta`
+- public prerelease tags must match the package version exactly for this package line, for example `v0.10.0-beta`
 - package version versus historical repository-tag guidance: [Versioning](./docs/en/versioning.md)
 - frozen support boundary and `v1.0.0` upgrade guidance: [Stabilization Support Matrix](./docs/en/stabilization-support-matrix.md)
 - current scope, non-goals, and known limitations: [Alpha Status](./docs/en/alpha-status.md)
@@ -57,7 +57,7 @@ Add `AsterGraph.Core` only when the host also needs direct `GraphDocument`, seri
 | Shipped Avalonia UI | the host wants the stock editor shell or stock standalone Avalonia surfaces | `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` | [`AsterGraph.HelloWorld.Avalonia`](./tools/AsterGraph.HelloWorld.Avalonia/) |
 | Retained migration | the host is moving off older MVVM-shaped entry points in planned batches | `new GraphEditorViewModel(...)` + `new GraphEditorView { Editor = editor }` | [Host Integration](./docs/en/host-integration.md) |
 
-For new runtime-facing work, anchor on the first route. The Avalonia route is the supported hosted adapter path today, while the retained route stays migration-only. `v0.10.0-beta` keeps `WPF` as adapter 2 and publishes Avalonia/WPF gaps through the [Adapter Capability Matrix](./docs/en/adapter-capability-matrix.md) instead of adding adapter-specific runtime APIs or implying parity.
+For new runtime-facing work, anchor on the first route. The Avalonia route is the supported hosted adapter path today, while the retained route stays migration-only. The current public beta keeps `WPF` as adapter 2 and publishes Avalonia/WPF gaps through the [Adapter Capability Matrix](./docs/en/adapter-capability-matrix.md) instead of adding adapter-specific runtime APIs or claiming parity.
 
 ## Public Entry Map
 
@@ -137,7 +137,7 @@ Plugin loading is in-process. AsterGraph currently gives hosts:
 - local candidate discovery before activation
 - runtime inspection of trusted, loaded, and blocked outcomes
 
-It does **not** provide sandboxing or untrusted-code isolation. For public-alpha hosts, prefer fixed plugin directories, explicit allowlists, and your own signature or hash validation policy.
+It does **not** provide sandboxing or untrusted-code isolation. For public prerelease hosts, prefer fixed plugin directories, explicit allowlists, and your own signature or hash validation policy.
 
 ## Documentation
 

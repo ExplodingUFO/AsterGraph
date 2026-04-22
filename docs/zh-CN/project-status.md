@@ -3,8 +3,8 @@
 ## 当前状态
 
 - 包版本基线：`0.10.0-beta`
-- 最新对外 SemVer prerelease 标签：`v0.10.0-beta`
-- 最新历史仓库里程碑标签：`v1.9`
+- 与当前包版本配对的对外 SemVer prerelease 标签：`v0.10.0-beta`
+- 历史仓库里程碑标签系列：`v1.x` 风格的公开前检查点
 - 仓库阶段：公开 Beta（稳定化收口）
 - 对外版本说明：[Versioning](./versioning.md)
 - 当前公开支持的发布包：
@@ -32,13 +32,13 @@
 - 默认 Avalonia 壳层与 standalone surfaces
 - trusted / loaded / blocked 的 runtime inspection surface
 - command/trust timeline 和 perf overlay 这类 showcase surface
-- v1.23 图面可用性 proof marker：
+- 图面可用性 proof marker：
   - `COMMAND_SURFACE_OK:True`
   - `TIERED_NODE_SURFACE_OK:True`
   - `FIXED_GROUP_FRAME_OK:True`
   - `NON_OBSCURING_EDITING_OK:True`
   - `VISUAL_SEMANTICS_OK:True`
-- v0.6.0-alpha advanced-editing 收口 marker：
+- advanced-editing 收口 marker：
   - `HIERARCHY_SEMANTICS_OK:True`
   - `COMPOSITE_SCOPE_OK:True`
   - `EDGE_NOTE_OK:True`

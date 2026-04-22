@@ -21,6 +21,7 @@
 - `IGraphEditorSession.Automation`
 - 官方 proof lanes 与 smoke tools
 - 一个介于 HelloWorld 和 Demo 之间的中等 hosted-UI consumer 样例
+- `.NET 10` packed `HostSample` proof 位于 release lane
 - shipped definition-driven inspector 元数据和内建 text/number/boolean/enum/list editor
 - 分层节点表面、hierarchy snapshot、composite scope navigation、边注解和 routed edge geometry tooling
 
@@ -42,12 +43,12 @@
 
 ## 已知限制
 
-- 当前最新对外 prerelease tag 是 `v0.10.0-beta`；`v1.9` 只保留为公开前的历史里程碑 tag
+- 与当前包版本配对的对外 prerelease tag 是 `v0.10.0-beta`；`v1.x` 风格的公开前检查点系列只保留为历史里程碑 tag
 - public prerelease publish 和 release artifact 仍然依赖维护者 release flow
 - 最深的 package validation lane 目前仍以 Windows 为主
 - retained compatibility API 仍处于迁移窗口内，但只作为迁移桥接
 - 当前 shipped 的 hosted adapter 仍然只有 Avalonia
-- `v0.10.0-beta` 已经锁定 `WPF` 作为 adapter 2，但在 [Adapter Capability Matrix](./adapter-capability-matrix.md) 真正用 `supported` / `partial` / `fallback` 填出来之前，不代表已经承诺对齐
+- 当前公开 beta 线已经锁定 `WPF` 作为 adapter 2，但在 [Adapter Capability Matrix](./adapter-capability-matrix.md) 真正用 `supported` / `partial` / `fallback` 填出来之前，不代表已经承诺对齐
 - advanced editing 已经作为宿主能力模块公开，但更广的 ecosystem 与第二 adapter 验证仍在后续阶段
 
 ## 推荐入口
