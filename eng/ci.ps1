@@ -38,6 +38,9 @@ $hostSampleProject = 'tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj'
 $consumerSampleProject = 'tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.ConsumerSample.Avalonia.csproj'
 $helloWorldProject = 'tools/AsterGraph.HelloWorld/AsterGraph.HelloWorld.csproj'
 $helloWorldAvaloniaProject = 'tools/AsterGraph.HelloWorld.Avalonia/AsterGraph.HelloWorld.Avalonia.csproj'
+$helloWorldWpfProject = 'tools/AsterGraph.HelloWorld.Wpf/AsterGraph.HelloWorld.Wpf.csproj'
+$asterGraphWpfProject = 'src/AsterGraph.Wpf/AsterGraph.Wpf.csproj'
+$asterGraphWpfTestsProject = 'tests/AsterGraph.Wpf.Tests/AsterGraph.Wpf.Tests.csproj'
 $starterAvaloniaProject = 'tools/AsterGraph.Starter.Avalonia/AsterGraph.Starter.Avalonia.csproj'
 $packageSmokeProject = 'tools/AsterGraph.PackageSmoke/AsterGraph.PackageSmoke.csproj'
 $scaleSmokeProject = 'tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj'
@@ -48,6 +51,10 @@ $helloWorldTestsProject = 'tests/AsterGraph.HelloWorld.Tests/AsterGraph.HelloWor
 $scaleSmokeTestsProject = 'tests/AsterGraph.ScaleSmoke.Tests/AsterGraph.ScaleSmoke.Tests.csproj'
 $userHome = if ([string]::IsNullOrWhiteSpace($env:USERPROFILE)) { $env:HOME } else { $env:USERPROFILE }
 $fallbackPackageCache = Join-Path $userHome '.nuget/packages'
+$isWindowsHost = [System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform([System.Runtime.InteropServices.OSPlatform]::Windows)
+$helloWorldWpfFramework = 'net8.0-windows'
+$asterGraphWpfFramework = 'net9.0-windows'
+$asterGraphWpfTestsFramework = 'net9.0-windows7.0'
 $singleProcessBuildArguments = @(
   '-m:1'
 )
@@ -301,6 +308,21 @@ function Get-DefaultRestoreProjects {
     }
   }
 
+  if ($isWindowsHost) {
+    if (Test-Path -LiteralPath (Resolve-ProjectPath -RelativePath $asterGraphWpfProject)) {
+      $projects.Add($asterGraphWpfProject)
+    }
+
+    if (Test-Path -LiteralPath (Resolve-ProjectPath -RelativePath $asterGraphWpfTestsProject)) {
+      $projects.Add($asterGraphWpfTestsProject)
+    }
+
+    $wpfBootstrapProjectPath = Resolve-ProjectPath -RelativePath $helloWorldWpfProject
+    if (Test-Path -LiteralPath $wpfBootstrapProjectPath) {
+      $projects.Add($helloWorldWpfProject)
+    }
+  }
+
   return Get-UniqueProjects -Projects $projects.ToArray()
 }
 
@@ -390,6 +412,8 @@ function Invoke-Build {
       ) + $singleProcessBuildArguments + $buildStabilityProperties)
     }
   }
+
+  Invoke-WindowsHelloWorldWpfSlice
 }
 
 function Invoke-TestAndTooling {
@@ -427,6 +451,72 @@ function Invoke-TestAndTooling {
         'minimal'
       ) + $singleProcessBuildArguments + $buildStabilityProperties)
     }
+  }
+
+  Invoke-WindowsHelloWorldWpfSlice
+}
+
+function Invoke-WindowsHelloWorldWpfSlice {
+  if (-not $isWindowsHost) {
+    return
+  }
+
+  $asterGraphWpfProjectPath = Resolve-ProjectPath -RelativePath $asterGraphWpfProject
+  if (Test-Path -LiteralPath $asterGraphWpfProjectPath) {
+    Write-Host ''
+    Write-Host '### Validate WPF library package surface (Windows)' -ForegroundColor Yellow
+
+    Invoke-DotNet -Arguments (@(
+      'build',
+      $asterGraphWpfProjectPath,
+      '-c',
+      $Configuration,
+      '--framework',
+      $asterGraphWpfFramework,
+      '--no-restore',
+      '--nologo',
+      '-v',
+      'minimal'
+    ) + $singleProcessBuildArguments + $buildStabilityProperties)
+  }
+
+  Write-Host ''
+  Write-Host '### Validate WPF bootstrap sample (Windows)' -ForegroundColor Yellow
+  $projectPath = Resolve-ProjectPath -RelativePath $helloWorldWpfProject
+
+  if (Test-Path -LiteralPath $projectPath) {
+    Invoke-DotNet -Arguments (@(
+      'build',
+      $projectPath,
+      '-c',
+      $Configuration,
+      '--framework',
+      $helloWorldWpfFramework,
+      '--no-restore',
+      '--nologo',
+      '-v',
+      'minimal'
+    ) + $singleProcessBuildArguments + $buildStabilityProperties)
+  }
+
+  Write-Host ''
+  Write-Host '### Validate WPF tests (Windows)' -ForegroundColor Yellow
+  $testsProjectPath = Resolve-ProjectPath -RelativePath $asterGraphWpfTestsProject
+
+  if (Test-Path -LiteralPath $testsProjectPath) {
+    Invoke-DotNet -Arguments (@(
+      'test',
+      $testsProjectPath,
+      '-c',
+      $Configuration,
+      '--framework',
+      $asterGraphWpfTestsFramework,
+      '--no-restore',
+      '--nologo',
+      '--no-build',
+      '-v',
+      'minimal'
+    ) + $singleProcessBuildArguments + $buildStabilityProperties)
   }
 }
 
