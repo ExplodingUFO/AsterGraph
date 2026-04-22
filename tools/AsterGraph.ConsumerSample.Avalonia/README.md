@@ -1,7 +1,7 @@
 # AsterGraph.ConsumerSample.Avalonia
 
 This is the medium hosted-UI sample on the canonical session/runtime route, after `AsterGraph.Starter.Avalonia` and `AsterGraph.HelloWorld.Avalonia`, and before `AsterGraph.Demo`.
-It shows a host-owned action rail, parameter editing, and one trusted plugin without implying a second editor model or a retained-only path.
+It shows a host-owned action rail, plugin trust workflow, and parameter-editing composition without implying a second editor model, a sandbox, or a broader plugin ecosystem.
 For plugin-capable evaluators, this is the defended hosted trust hop. Read [Plugin Manifest and Trust Policy Contract v1](../../docs/en/plugin-trust-contracts.md) and [Plugin And Custom Node Recipe](../../docs/en/plugin-recipe.md) before treating the route as complete.
 
 The hosted route ladder is `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerSample.Avalonia`.
@@ -39,6 +39,16 @@ Expected markers:
 - `SUPPORT_BUNDLE_OK:True`
 - `SUPPORT_BUNDLE_PATH:...`
 - `CONSUMER_SAMPLE_OK:True`
+
+## Copyable Host Recipe
+
+Use this sample to copy the host-owned seams, not the sample-specific presentation layer:
+
+- action rail / command projection: `AsterGraphHostedActionFactory.CreateCommandActions(...)` and `AsterGraphHostedActionFactory.CreateProjection(...)`
+- plugin trust workflow: `GraphEditorPluginDiscoveryOptions`, `AsterGraphEditorOptions.PluginTrustPolicy`, and the host allowlist import/export path
+- parameter-editing composition: `GetSelectedParameterSnapshots()` and `IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)`
+
+Replaceable sample-owned details are the review/audit node family, the sample action ids and titles, the window layout and narrative text, and any proof labels or copy beyond the defended public markers.
 
 ## Where It Fits
 

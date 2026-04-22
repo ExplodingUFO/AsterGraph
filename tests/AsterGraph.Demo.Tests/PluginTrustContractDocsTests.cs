@@ -35,8 +35,9 @@ public sealed class PluginTrustContractDocsTests
         Assert.Contains("[Plugin Manifest and Trust Policy Contract v1](./plugin-trust-contracts.md)", consumerSampleEn, StringComparison.Ordinal);
         Assert.Contains("Plugin trust is host-owned.", hostIntegrationEn, StringComparison.Ordinal);
         Assert.Contains("Plugin loading is not sandboxed.", pluginRecipeEn, StringComparison.Ordinal);
-        Assert.Contains("plugin trust stays explicit and host-owned", consumerSampleEn, StringComparison.Ordinal);
-        Assert.Contains("allowlist decisions can be exported or imported without rebuilding the host trust-policy flow", consumerSampleEn, StringComparison.Ordinal);
+        Assert.Contains("plugin trust workflow", consumerSampleEn, StringComparison.Ordinal);
+        Assert.Contains("AsterGraphEditorOptions.PluginTrustPolicy", consumerSampleEn, StringComparison.Ordinal);
+        Assert.Contains("allowlist import/export", consumerSampleEn, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -62,7 +63,8 @@ public sealed class PluginTrustContractDocsTests
         Assert.Contains("[插件信任契约 v1](./plugin-trust-contracts.md)", consumerSampleZh, StringComparison.Ordinal);
         Assert.Contains("插件信任由宿主负责。", hostIntegrationZh, StringComparison.Ordinal);
         Assert.Contains("插件加载没有 sandbox。", pluginRecipeZh, StringComparison.Ordinal);
-        Assert.Contains("插件信任策略保持显式且由宿主管理", consumerSampleZh, StringComparison.Ordinal);
+        Assert.Contains("plugin trust workflow", consumerSampleZh, StringComparison.Ordinal);
+        Assert.Contains("AsterGraphEditorOptions.PluginTrustPolicy", consumerSampleZh, StringComparison.Ordinal);
     }
 
     [Fact]

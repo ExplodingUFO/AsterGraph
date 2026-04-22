@@ -2,15 +2,22 @@
 
 `tools/AsterGraph.ConsumerSample.Avalonia` is the medium hosted-UI sample on the canonical session/runtime route, after the starter scaffold and the smallest `HelloWorld.Avalonia` route, and before the full `AsterGraph.Demo` showcase host.
 
+It is the copyable host recipe for three host-owned seams:
+
+- action rail / command projection
+- plugin trust workflow
+- parameter-editing composition
+
+It stays on the canonical session/runtime model only. It does not introduce a second editor model, a sandbox, or a broader plugin ecosystem.
+
 ## What It Proves
 
 This sample keeps one realistic host window without turning into a full showcase shell. It demonstrates:
 
-- one host-owned action rail
-- one host-defined node family
-- shared command descriptors flowing into the host rail through `AsterGraphHostedActionFactory.CreateCommandActions(...)`
-- one plugin-contributed command flowing through that same action path instead of a sample-only menu placeholder
-- shared parameter editing through the canonical session commands and queries
+- one host-owned action rail projected from shared command descriptors through `AsterGraphHostedActionFactory.CreateCommandActions(...)` and `AsterGraphHostedActionFactory.CreateProjection(...)`
+- one host-defined node family that is intentionally sample-owned and replaceable
+- one plugin-contributed command flowing through the same action path instead of a sample-only menu placeholder
+- shared parameter editing through `GetSelectedParameterSnapshots()` and `IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)`
 - one trusted plugin registration with visible provenance, trust reasons, and allowlist import or export
 - the shipped Avalonia editor surface on the factory-based hosted-UI route
 
@@ -66,22 +73,22 @@ Use a different artifact when you need something narrower:
 
 The sample is intentionally small enough to copy from:
 
-- host actions live outside the editor shell and are projected from shared command descriptors instead of a second action table
-- plugin actions also arrive through shared command descriptors, so the host rail does not need custom plugin plumbing
-- plugin trust stays explicit and host-owned through discovery snapshots, reason strings, and a persisted allowlist
-- parameter editing goes through `IGraphEditorSession.Commands` and `IGraphEditorSession.Queries`
-- allowlist decisions can be exported or imported without rebuilding the host trust-policy flow
+- action rail / command projection: keep the host actions outside the editor shell and project shared descriptors through `AsterGraphHostedActionFactory.CreateCommandActions(...)` and `AsterGraphHostedActionFactory.CreateProjection(...)`
+- plugin trust workflow: keep `GraphEditorPluginDiscoveryOptions`, `AsterGraphEditorOptions.PluginTrustPolicy`, provenance snapshots, and allowlist import/export together in the host
+- parameter-editing composition: read selection through `GetSelectedParameterSnapshots()` and write through `IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)`
 - plugin loading remains in-process; there is no sandbox or untrusted-code isolation
+- sample-owned details such as the review/audit node family, action ids and titles, the window layout, and the narrative text are replaceable
 - the v1 manifest and trust-policy contract is published in [Plugin Manifest and Trust Policy Contract v1](./plugin-trust-contracts.md)
 
 ## Copy This Pattern
 
 If you want to build the same medium host in your own app, copy these seams in this order:
 
-- command rail: query `session.Queries.GetCommandDescriptors()` indirectly through `AsterGraphHostedActionFactory.CreateCommandActions(...)`
-- trust workflow: keep `GraphEditorPluginDiscoveryOptions`, provenance snapshots, and an explicit host-owned allowlist policy together
-- parameter editing: mutate selected-node values only through `IGraphEditorSession.Commands`
+- action rail / command projection: query `session.Queries.GetCommandDescriptors()` indirectly through `AsterGraphHostedActionFactory.CreateCommandActions(...)` and project them with `AsterGraphHostedActionFactory.CreateProjection(...)`
+- plugin trust workflow: keep `GraphEditorPluginDiscoveryOptions`, `AsterGraphEditorOptions.PluginTrustPolicy`, provenance snapshots, and an explicit host-owned allowlist policy together
+- parameter-editing composition: mutate selected-node values only through `GetSelectedParameterSnapshots()` and `IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)`
 - proof mode: emit `COMMAND_SURFACE_OK` plus the four `HOST_NATIVE_METRIC:*` lines so you can compare your host with the shipped samples
+- sample-owned content such as the review/audit node family, action ids and titles, and proof labels beyond the defended markers should stay local to your app
 
 ## Related Docs
 

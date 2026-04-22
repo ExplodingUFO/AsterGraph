@@ -2,15 +2,22 @@
 
 `tools/AsterGraph.ConsumerSample.Avalonia` 是位于 canonical session/runtime 路线上的中等 hosted-UI 样例，排在 starter 脚手架和最小 `HelloWorld.Avalonia` 路线之后、完整 `AsterGraph.Demo` 展示宿主之前。
 
+它是三条宿主管线 seam 的可复制 recipe：
+
+- action rail / command projection
+- plugin trust workflow
+- parameter-editing composition
+
+它只停留在 canonical session/runtime model 上，不引入第二套 editor model、sandbox，或更大的 plugin ecosystem。
+
 ## 它证明什么
 
 这个样例保留了一个真实宿主窗口，但不会膨胀成完整 showcase shell。它会同时展示：
 
-- 一条宿主自管的动作栏
-- 一组宿主自定义节点
-- 通过 `AsterGraphHostedActionFactory.CreateCommandActions(...)` 把共享 command descriptor 投到宿主动作栏
+- 一条宿主自管的动作栏，通过 `AsterGraphHostedActionFactory.CreateCommandActions(...)` 和 `AsterGraphHostedActionFactory.CreateProjection(...)` 从共享 command descriptor 投到宿主层
+- 一组宿主自定义节点，这部分是样例自有且可替换的
 - 一个 plugin command 也走同一条动作路径，而不是样例私有的菜单占位项
-- 通过 canonical session commands/queries 做共享参数编辑
+- 通过 `GetSelectedParameterSnapshots()` 和 `IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)` 做共享参数编辑
 - 一个可信插件注册，以及可见的 provenance、trust reason 和 allowlist 导入/导出
 - 基于 factory 的默认 Avalonia hosted-UI 路线
 
@@ -66,12 +73,11 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 
 这个样例刻意控制在可复制范围内：
 
-- 宿主动作在编辑器壳层之外，并且直接复用共享 command descriptor，而不是再维护一份独立动作表
-- plugin 动作也通过共享 command descriptor 进入同一条宿主动作路径，不需要额外的 sample 专属 plumbing
-- 插件信任策略保持显式且由宿主管理，并把 provenance、reason 和 allowlist 持久化放在一起
-- 参数编辑走 `IGraphEditorSession.Commands` 和 `IGraphEditorSession.Queries`
-- allowlist 决策可以导出/导入，不需要重建整条 trust-policy 流程
-- 插件加载仍是进程内执行，不提供沙箱或不受信任代码隔离
+- action rail / command projection：宿主动作在编辑器壳层之外，并且通过 `AsterGraphHostedActionFactory.CreateCommandActions(...)` 和 `AsterGraphHostedActionFactory.CreateProjection(...)` 复用共享 command descriptor
+- plugin trust workflow：把 `GraphEditorPluginDiscoveryOptions`、`AsterGraphEditorOptions.PluginTrustPolicy`、provenance snapshot 和 allowlist 导入/导出放在同一层
+- parameter-editing composition：通过 `GetSelectedParameterSnapshots()` 读选中节点参数，并通过 `IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)` 写回
+- 插件加载仍是进程内执行，不提供 sandbox 或不受信任代码隔离
+- review/audit 节点族、action ids/titles、窗口布局、叙述文本，以及 defended markers 之外的 proof 文案，都是样例自有内容
 
 更细的 v1 manifest 和 trust-policy 合同见 [插件信任契约 v1](./plugin-trust-contracts.md)。
 
@@ -79,11 +85,12 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 
 如果你想在自己的宿主里做同等级别的接入，可以按这个顺序抄：
 
-- command rail：通过 `AsterGraphHostedActionFactory.CreateCommandActions(...)` 消费共享 command descriptor
-- trust workflow：把 `GraphEditorPluginDiscoveryOptions`、provenance snapshot 和宿主自管 allowlist policy 放在同一层
-- parameter editing：只通过 `IGraphEditorSession.Commands` 修改当前选中节点参数
+- action rail / command projection：通过 `AsterGraphHostedActionFactory.CreateCommandActions(...)` 消费共享 command descriptor，并用 `AsterGraphHostedActionFactory.CreateProjection(...)` 组合宿主动作
+- plugin trust workflow：把 `GraphEditorPluginDiscoveryOptions`、`AsterGraphEditorOptions.PluginTrustPolicy`、provenance snapshot 和宿主自管 allowlist policy 放在同一层
+- parameter-editing composition：只通过 `GetSelectedParameterSnapshots()` 和 `IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)` 修改当前选中节点参数
 - proof mode：输出 `COMMAND_SURFACE_OK` 和四条 `HOST_NATIVE_METRIC:*`，这样你能和官方 sample 做横向比较
 - support bundle：在 proof mode 上额外附带 `--support-bundle`，生成本地 JSON 证据包给 support/feedback 使用
+- sample-owned content：review/audit 节点族、action ids/titles 和 proof labels 应该保持在你的 app 内部，不要写成 canonical contract
 
 ## 相关文档
 
