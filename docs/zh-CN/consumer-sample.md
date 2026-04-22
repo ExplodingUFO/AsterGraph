@@ -8,6 +8,8 @@
 - plugin trust workflow
 - parameter-editing composition
 
+这是把宿主自管 seam 复制到你自己的应用里的受防守 beta 路线。把 action projection、trust workflow 和 parameter-editing composition 保持在宿主里，只复制样例自有的展示细节。
+
 它只停留在 canonical session/runtime model 上，不引入第二套 editor model、sandbox，或更大的 plugin ecosystem。
 
 ## 它证明什么

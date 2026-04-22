@@ -46,7 +46,7 @@ The support bundle is local evidence only and does not widen the support boundar
 
 ## Copyable Host Recipe
 
-Use this sample to copy the host-owned seams, not the sample-specific presentation layer:
+Use this sample to copy the host-owned seams, not the sample-specific presentation layer. This is the defended beta route for copying host-owned seams into your own host. Copy the host-owned seams in this order:
 
 - action rail / command projection: `AsterGraphHostedActionFactory.CreateCommandActions(...)` and `AsterGraphHostedActionFactory.CreateProjection(...)`
 - plugin trust workflow: `GraphEditorPluginDiscoveryOptions`, `AsterGraphEditorOptions.PluginTrustPolicy`, and the host allowlist import/export path
@@ -66,4 +66,3 @@ Replaceable sample-owned details are the review/audit node family, the sample ac
 - [Beta Support Bundle](../../docs/en/support-bundle.md)
 - [Host Integration](../../docs/en/host-integration.md)
 - [Demo Guide](../../docs/en/demo-guide.md)
-

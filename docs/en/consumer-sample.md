@@ -8,6 +8,8 @@ It is the copyable host recipe for three host-owned seams:
 - plugin trust workflow
 - parameter-editing composition
 
+This is the defended beta route for copying host-owned seams into your own host. Keep action projection, trust workflow, and parameter-editing composition host-owned; copy only the sample-owned presentation.
+
 It stays on the canonical session/runtime model only. It does not introduce a second editor model, a sandbox, or a broader plugin ecosystem.
 
 ## What It Proves
