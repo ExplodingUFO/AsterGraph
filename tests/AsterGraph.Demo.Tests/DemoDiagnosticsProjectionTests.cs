@@ -57,6 +57,7 @@ public sealed class DemoDiagnosticsProjectionTests
         Assert.Equal("能力", surface.Capabilities.Heading);
         Assert.Equal("待完成连线", surface.PendingConnection.Heading);
         Assert.Equal("特性描述", surface.FeatureDescriptors.Heading);
+        Assert.Equal("性能与观测", surface.PerfInstrumentation.Heading);
         Assert.Equal("命令时间线", surface.CommandTimeline.Heading);
         Assert.Equal("最近诊断", surface.RecentDiagnostics.Heading);
         Assert.Equal("插件信任与加载", surface.PluginLoads.Heading);
@@ -71,6 +72,8 @@ public sealed class DemoDiagnosticsProjectionTests
         Assert.Contains(surface.Capabilities.Lines, line => line.StartsWith("可加载工作区：", StringComparison.Ordinal));
         Assert.Contains(surface.PendingConnection.Lines, line => line.StartsWith("待完成连线：", StringComparison.Ordinal));
         Assert.NotEmpty(surface.FeatureDescriptors.Lines);
+        Assert.Contains(surface.PerfInstrumentation.Lines, line => line.StartsWith("诊断记录器：", StringComparison.Ordinal));
+        Assert.Contains(surface.PerfInstrumentation.Lines, line => line.StartsWith("当前状态：", StringComparison.Ordinal));
         Assert.Contains(surface.CommandTimeline.Lines, line => line.Contains("selection.set", StringComparison.Ordinal));
         Assert.NotEmpty(surface.RecentDiagnostics.Lines);
         Assert.Contains(surface.PluginLoads.Lines, line => line.Contains("状态：", StringComparison.Ordinal));
@@ -94,12 +97,14 @@ public sealed class DemoDiagnosticsProjectionTests
         Assert.Equal("Capabilities", surface.Capabilities.Heading);
         Assert.Equal("Pending connection", surface.PendingConnection.Heading);
         Assert.Equal("Feature descriptors", surface.FeatureDescriptors.Heading);
+        Assert.Equal("Performance and instrumentation", surface.PerfInstrumentation.Heading);
         Assert.Equal("Command timeline", surface.CommandTimeline.Heading);
         Assert.Equal("Recent diagnostics", surface.RecentDiagnostics.Heading);
         Assert.Equal("Plugin trust and load", surface.PluginLoads.Heading);
 
         Assert.Contains(surface.Document.Lines, line => line.StartsWith("Document title: ", StringComparison.Ordinal));
         Assert.Contains(surface.Capabilities.Lines, line => line.StartsWith("Can save workspace: ", StringComparison.Ordinal));
+        Assert.Contains(surface.PerfInstrumentation.Lines, line => line.StartsWith("Diagnostics logger: ", StringComparison.Ordinal));
         Assert.Contains(surface.CommandTimeline.Lines, line => line.Contains("Command", StringComparison.Ordinal));
         Assert.Contains(surface.PluginLoads.Lines, line => line.Contains("State: ", StringComparison.Ordinal));
     }
@@ -141,6 +146,8 @@ public sealed class DemoDiagnosticsProjectionTests
         var inspectionSelectionHeading = window.FindControl<TextBlock>("PART_RuntimeInspectionSelectionHeading");
         var inspectionCapabilityHeading = window.FindControl<TextBlock>("PART_RuntimeInspectionCapabilityHeading");
         var inspectionFeatureHeading = window.FindControl<TextBlock>("PART_RuntimeInspectionFeatureHeading");
+        var inspectionPerfHeading = window.FindControl<TextBlock>("PART_RuntimeInspectionPerfHeading");
+        var inspectionPerfLines = window.FindControl<ItemsControl>("PART_RuntimeInspectionPerfLines");
         var inspectionCommandTimelineHeading = window.FindControl<TextBlock>("PART_RuntimeInspectionCommandTimelineHeading");
         var inspectionCommandTimelineLines = window.FindControl<ItemsControl>("PART_RuntimeInspectionCommandTimelineLines");
         var inspectionDiagnosticsHeading = window.FindControl<TextBlock>("PART_RuntimeInspectionDiagnosticsHeading");
@@ -162,6 +169,10 @@ public sealed class DemoDiagnosticsProjectionTests
         Assert.Equal(viewModel.RuntimeInspectionSurface.Capabilities.Heading, inspectionCapabilityHeading!.Text);
         Assert.NotNull(inspectionFeatureHeading);
         Assert.Equal(viewModel.RuntimeInspectionSurface.FeatureDescriptors.Heading, inspectionFeatureHeading!.Text);
+        Assert.NotNull(inspectionPerfHeading);
+        Assert.Equal(viewModel.RuntimeInspectionSurface.PerfInstrumentation.Heading, inspectionPerfHeading!.Text);
+        Assert.NotNull(inspectionPerfLines);
+        Assert.Same(viewModel.RuntimeInspectionSurface.PerfInstrumentation.Lines, inspectionPerfLines!.ItemsSource);
         Assert.NotNull(inspectionCommandTimelineHeading);
         Assert.Equal(viewModel.RuntimeInspectionSurface.CommandTimeline.Heading, inspectionCommandTimelineHeading!.Text);
         Assert.NotNull(inspectionCommandTimelineLines);

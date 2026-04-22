@@ -249,6 +249,12 @@ public partial class MainWindowViewModel
                 T("特性描述", "Feature descriptors"),
                 BuildFeatureDescriptorLines(inspection.FeatureDescriptors)),
             new RuntimeInspectionSurfaceProjection.Section(
+                T("性能与观测", "Performance and instrumentation"),
+                BuildPerfInstrumentationLines(
+                    inspection.FeatureDescriptors,
+                    inspection.RecentDiagnostics,
+                    inspection.Status.Message)),
+            new RuntimeInspectionSurfaceProjection.Section(
                 T("命令时间线", "Command timeline"),
                 BuildCommandTimelineLines()),
             new RuntimeInspectionSurfaceProjection.Section(
@@ -323,6 +329,26 @@ public partial class MainWindowViewModel
             .Select(descriptor =>
                 $"{descriptor.Category} · {descriptor.Id} · {T("可用", "Available")}: {BoolText(descriptor.IsAvailable)}")
             .ToArray();
+    }
+
+    private IReadOnlyList<string> BuildPerfInstrumentationLines(
+        IReadOnlyList<GraphEditorFeatureDescriptorSnapshot> descriptors,
+        IReadOnlyList<GraphEditorDiagnostic> diagnostics,
+        string statusMessage)
+    {
+        var warningCount = diagnostics.Count(diagnostic => diagnostic.Severity == GraphEditorDiagnosticSeverity.Warning);
+        var errorCount = diagnostics.Count(diagnostic => diagnostic.Severity == GraphEditorDiagnosticSeverity.Error);
+
+        return
+        [
+            T("诊断记录器：", "Diagnostics logger: ") + BoolText(HasFeatureDescriptor(descriptors, "integration.instrumentation.logger")),
+            T("ActivitySource：", "Activity source: ") + BoolText(HasFeatureDescriptor(descriptors, "integration.instrumentation.activity-source")),
+            T("最近诊断数量：", "Recent diagnostic count: ") + diagnostics.Count,
+            T("警告数量：", "Warning count: ") + warningCount,
+            T("错误数量：", "Error count: ") + errorCount,
+            T("当前状态：", "Current status: ") + FormatValueOrNone(statusMessage),
+            T("最新健康信号：", "Latest health signal: ") + FormatLatestHealthSignal(diagnostics),
+        ];
     }
 
     private IReadOnlyList<string> BuildDiagnosticLines(IReadOnlyList<GraphEditorDiagnostic> diagnostics)
@@ -429,6 +455,22 @@ public partial class MainWindowViewModel
     private static string FirstNonEmpty(params string?[] values)
         => values.FirstOrDefault(value => !string.IsNullOrWhiteSpace(value)) ?? string.Empty;
 
+    private static bool HasFeatureDescriptor(IReadOnlyList<GraphEditorFeatureDescriptorSnapshot> descriptors, string descriptorId)
+        => descriptors.Any(descriptor =>
+            string.Equals(descriptor.Id, descriptorId, StringComparison.Ordinal)
+            && descriptor.IsAvailable);
+
+    private string FormatLatestHealthSignal(IReadOnlyList<GraphEditorDiagnostic> diagnostics)
+    {
+        if (diagnostics.Count == 0)
+        {
+            return T("当前没有最近诊断。", "No recent diagnostics.");
+        }
+
+        var diagnostic = diagnostics[0];
+        return $"{DiagnosticSeverityText(diagnostic.Severity)} · {diagnostic.Code}";
+    }
+
     private string FormatValueOrNone(string? value)
         => string.IsNullOrWhiteSpace(value) ? T("无", "None") : value;
 
@@ -475,6 +517,7 @@ public partial class MainWindowViewModel
         RuntimeInspectionSurfaceProjection.Section Capabilities,
         RuntimeInspectionSurfaceProjection.Section PendingConnection,
         RuntimeInspectionSurfaceProjection.Section FeatureDescriptors,
+        RuntimeInspectionSurfaceProjection.Section PerfInstrumentation,
         RuntimeInspectionSurfaceProjection.Section CommandTimeline,
         RuntimeInspectionSurfaceProjection.Section RecentDiagnostics,
         RuntimeInspectionSurfaceProjection.Section PluginLoads)

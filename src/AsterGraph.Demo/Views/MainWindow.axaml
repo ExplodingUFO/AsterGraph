@@ -534,6 +534,18 @@
                                       ItemTemplate="{StaticResource HostDrawerLineTemplate}" />
                       </StackPanel>
 
+                      <StackPanel x:Name="PART_RuntimeInspectionPerfSection"
+                                  Spacing="8">
+                        <TextBlock x:Name="PART_RuntimeInspectionPerfHeading"
+                                   FontSize="12"
+                                   FontWeight="Bold"
+                                   Foreground="#7FE7D7"
+                                   Text="{Binding RuntimeInspectionSurface.PerfInstrumentation.Heading}" />
+                        <ItemsControl x:Name="PART_RuntimeInspectionPerfLines"
+                                      ItemsSource="{Binding RuntimeInspectionSurface.PerfInstrumentation.Lines}"
+                                      ItemTemplate="{StaticResource HostDrawerLineTemplate}" />
+                      </StackPanel>
+
                       <StackPanel x:Name="PART_RuntimeInspectionCommandTimelineSection"
                                   Spacing="8">
                         <TextBlock x:Name="PART_RuntimeInspectionCommandTimelineHeading"
