@@ -16,6 +16,7 @@ AsterGraph is a modular node-graph editor toolkit for .NET. It gives hosts a reu
 - packed `HostSample` also proves downstream `.NET 10` consumption during the release gate
 - future public prerelease tags should match package SemVer, for example `v0.2.0-alpha.3`
 - package version versus historical repository-tag guidance: [Versioning](./docs/en/versioning.md)
+- frozen support boundary and `v1.0.0` upgrade guidance: [Stabilization Support Matrix](./docs/en/stabilization-support-matrix.md)
 - current scope, non-goals, and known limitations: [Alpha Status](./docs/en/alpha-status.md)
 
 ## Start Here
@@ -144,6 +145,7 @@ Consumer-facing guides:
 
 - [Versioning](./docs/en/versioning.md)
 - [Quick Start](./docs/en/quick-start.md)
+- [Stabilization Support Matrix](./docs/en/stabilization-support-matrix.md)
 - [Consumer Sample](./docs/en/consumer-sample.md)
 - [Host Integration](./docs/en/host-integration.md)
 - [Adapter Capability Matrix](./docs/en/adapter-capability-matrix.md)

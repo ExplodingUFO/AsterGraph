@@ -4,6 +4,7 @@ This guide is the shortest path from a blank host to a running AsterGraph integr
 
 For first-time adopters, start on the default Avalonia path by default.
 Treat `WPF` only as adapter-2 portability validation on the same canonical route.
+For the frozen support boundary and upgrade guidance toward `v1.0.0`, see [Stabilization Support Matrix](./stabilization-support-matrix.md).
 
 ## 1. Pick Your Starting Package
 
@@ -111,6 +112,7 @@ Plugin loading is currently in-process. Hosts can discover candidates, apply an 
 ## 7. Need More Than The First Run?
 
 - [Host Integration](./host-integration.md) = package boundary, route matrix, migration guidance
+- [Stabilization Support Matrix](./stabilization-support-matrix.md) = frozen package/framework/adapter boundary plus `v1.0.0` upgrade guidance
 - [Architecture](./architecture.md) = editor-kernel / scene-interaction / adapter split plus public stability levels
 - [Adapter Capability Matrix](./adapter-capability-matrix.md) = locked `WPF` adapter-2 contract plus `Supported` / `Partial` / `Fallback`
 - [Consumer Sample](./consumer-sample.md) = one realistic hosted integration between HelloWorld and Demo

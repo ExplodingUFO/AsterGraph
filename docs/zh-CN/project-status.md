@@ -81,6 +81,7 @@
 ## 对外入口
 
 - [Versioning](./versioning.md)
+- [稳定化支持矩阵](./stabilization-support-matrix.md)
 - [Quick Start](./quick-start.md)
 - [Consumer Sample](./consumer-sample.md)
 - [ScaleSmoke 基线](./scale-baseline.md)

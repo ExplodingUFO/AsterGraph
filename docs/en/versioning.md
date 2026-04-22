@@ -17,6 +17,18 @@ Current public baseline:
 
 When a host asks "which version of AsterGraph should I install?", this package version is the authoritative answer.
 
+## Stabilization Boundary
+
+The stabilization support matrix freezes the consumer-facing boundary that leads into `v1.0.0`:
+
+- four published SDK packages only
+- `net8.0` and `net9.0` as the supported published frameworks
+- Avalonia as the supported hosted adapter
+- `WPF` as validation-only and partial-fallback per the adapter matrix
+- retained MVVM as migration-only
+
+`v1.0.0` should be read as promotion of that same defended boundary to stable, not as a widening of package, framework, or adapter support.
+
 ## Repository Tags And Releases
 
 The repository now publishes public prerelease tags that match the installable package version, for example `v0.2.0-alpha.3`.
@@ -69,5 +81,6 @@ The generated prerelease body also carries the public proof summary from the rel
 
 - [Quick Start](./quick-start.md)
 - [Project Status](./project-status.md)
+- [Stabilization Support Matrix](./stabilization-support-matrix.md)
 - [Alpha Status](./alpha-status.md)
 - [Public Launch Checklist](./public-launch-checklist.md)

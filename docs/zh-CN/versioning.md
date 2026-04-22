@@ -68,6 +68,7 @@
 ## 相关文档
 
 - [Quick Start](./quick-start.md)
+- [稳定化支持矩阵](./stabilization-support-matrix.md)
 - [Project Status](./project-status.md)
 - [Alpha Status](./alpha-status.md)
 - [Public Launch Checklist](./public-launch-checklist.md)

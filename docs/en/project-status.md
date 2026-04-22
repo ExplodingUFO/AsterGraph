@@ -12,6 +12,7 @@
   - `AsterGraph.Core`
   - `AsterGraph.Editor`
   - `AsterGraph.Avalonia`
+- frozen support boundary: [Stabilization Support Matrix](./stabilization-support-matrix.md)
 - sample and proof tools:
   - `tools/AsterGraph.HelloWorld` for the quickest runtime-only first run
   - `tools/AsterGraph.HelloWorld.Avalonia` for the quickest hosted-UI first run
@@ -23,7 +24,7 @@
 - canonical adoption path:
   - runtime-only hosts use `AsterGraphEditorFactory.CreateSession(...)` + `IGraphEditorSession`
   - Avalonia UI hosts use `AsterGraphEditorFactory.Create(...)` plus `AsterGraphAvaloniaViewFactory.Create(...)`
-- active next adapter target: `WPF` as adapter 2 under the [Adapter Capability Matrix](./adapter-capability-matrix.md)
+- active adapter validation target: `WPF` as adapter 2 under the [Adapter Capability Matrix](./adapter-capability-matrix.md)
 
 ## What Is Already Stable Enough To Evaluate
 
@@ -92,4 +93,5 @@ The current public-repo priority is turning the public alpha into a coherent SDK
 - [Public Launch Checklist](./public-launch-checklist.md)
 - [Host Integration](./host-integration.md)
 - [Adapter Capability Matrix](./adapter-capability-matrix.md)
+- [Stabilization Support Matrix](./stabilization-support-matrix.md)
 - [Demo Guide](./demo-guide.md)
