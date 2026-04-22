@@ -119,6 +119,8 @@ retained 迁移不是 `fallback`。它仍然只是 legacy host 的 compatibility
 
 插件信任由宿主负责。AsterGraph 可以帮助你发现候选、做 allow/block 策略、检查结果，但不提供沙箱或不受信任代码隔离。
 
+更细的 v1 插件清单与 trust-policy 合同见 [插件信任契约 v1](./plugin-trust-contracts.md)。
+
 更深的验证、CI lane 和 release gate，请看 [CONTRIBUTING.md](../../CONTRIBUTING.md) 和 [Public Launch Checklist](./public-launch-checklist.md)。
 
 ## Recipes

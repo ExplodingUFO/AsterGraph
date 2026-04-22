@@ -64,6 +64,7 @@ The sample is intentionally small enough to copy from:
 - parameter editing goes through `IGraphEditorSession.Commands` and `IGraphEditorSession.Queries`
 - allowlist decisions can be exported or imported without rebuilding the host trust-policy flow
 - plugin loading remains in-process; there is no sandbox or untrusted-code isolation
+- the v1 manifest and trust-policy contract is published in [Plugin Manifest and Trust Policy Contract v1](./plugin-trust-contracts.md)
 
 ## Copy This Pattern
 
@@ -80,4 +81,5 @@ If you want to build the same medium host in your own app, copy these seams in t
 - [Host Integration](./host-integration.md)
 - [Sample README](../../tools/AsterGraph.ConsumerSample.Avalonia/README.md)
 - [Plugin And Custom Node Recipe](./plugin-recipe.md)
+- [Plugin Manifest and Trust Policy Contract v1](./plugin-trust-contracts.md)
 - [Alpha Status](./alpha-status.md)

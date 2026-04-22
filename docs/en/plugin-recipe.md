@@ -80,6 +80,8 @@ Plugin loading is not sandboxed. For public-alpha hosts:
 - validate provenance with signatures or hashes in host policy
 - do not treat plugin loading as an isolation boundary
 
+For the v1 manifest and trust-policy contract, see [Plugin Manifest and Trust Policy Contract v1](./plugin-trust-contracts.md).
+
 See also:
 
 - [Host Integration](./host-integration.md)
