@@ -8,12 +8,16 @@ Use it when you want the smallest end-to-end Avalonia scaffold that already wire
 
 ## Copyable Seams
 
+### Copy This Starter Scaffold
+
 - `AsterGraphEditorFactory.Create(...)`
 - `AsterGraphAvaloniaViewFactory.Create(...)`
 - `AsterGraphEditorOptions`
 - the document/catalog/editor/view composition flow
 
 ## Host-Owned Seams
+
+### Replace This In Your Host
 
 - the top-level window and its title/size
 - the sample graph/catalog definitions once the host outgrows the tiny starter recipe

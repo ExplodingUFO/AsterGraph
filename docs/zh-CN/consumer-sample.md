@@ -23,6 +23,21 @@
 - 一个可信插件注册，以及可见的 provenance、trust reason 和 allowlist 导入/导出
 - 基于 factory 的默认 Avalonia hosted-UI 路线
 
+## 复制这些宿主自管 seam
+
+- action rail / command projection：宿主动作放在编辑器壳层之外，并且通过 `AsterGraphHostedActionFactory.CreateCommandActions(...)` 和 `AsterGraphHostedActionFactory.CreateProjection(...)` 投影共享 command descriptor
+- plugin trust workflow：把 `GraphEditorPluginDiscoveryOptions`、`AsterGraphEditorOptions.PluginTrustPolicy`、provenance snapshot 和宿主自管 allowlist policy 放在同一层
+- parameter-editing composition：只通过 `IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()` 和 `IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)` 修改当前选中节点参数
+
+## 替换这些样例自有内容
+
+下面这些样例自有内容保持在你自己的 app 内部即可：
+
+- review/audit 节点族
+- action ids/titles
+- 窗口布局和叙述文本
+- defended markers 之外的 proof 文案
+
 ## 信任与证明速查
 
 可复制的信任与证明参考：

@@ -23,6 +23,21 @@ This sample keeps one realistic host window without turning into a full showcase
 - one trusted plugin registration with visible provenance, trust reasons, and allowlist import or export
 - the shipped Avalonia editor surface on the factory-based hosted-UI route
 
+## Copy These Host-Owned Seams
+
+- action rail / command projection: keep the host actions outside the editor shell and project shared descriptors through `AsterGraphHostedActionFactory.CreateCommandActions(...)` and `AsterGraphHostedActionFactory.CreateProjection(...)`
+- plugin trust workflow: keep `GraphEditorPluginDiscoveryOptions`, `AsterGraphEditorOptions.PluginTrustPolicy`, provenance snapshots, and an explicit host-owned allowlist policy together
+- parameter-editing composition: mutate selected-node values only through `IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()` and `IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)`
+
+## Replace These Sample-Owned Details
+
+Keep these sample-owned details local to your app:
+
+- review/audit node family
+- action ids and titles
+- window layout and narrative text
+- proof labels beyond the defended markers
+
 ## Trust and proof quick reference
 
 Copyable trust and proof reference:

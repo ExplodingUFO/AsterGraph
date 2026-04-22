@@ -27,6 +27,8 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
         AssertContains(readme, "sample action ids and titles");
         AssertContains(readme, "window layout and narrative text");
         AssertContains(readme, "proof labels or copy beyond the defended public markers");
+        AssertContains(readme, "Copy These Host-Owned Seams");
+        AssertContains(readme, "Replace These Sample-Owned Details");
 
         AssertContains(consumerSampleEn, "canonical session/runtime model only");
         AssertContains(consumerSampleEn, "three host-owned seams");
@@ -44,6 +46,12 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
         AssertContains(consumerSampleEn, "second editor model");
         AssertContains(consumerSampleEn, "sandbox");
         AssertContains(consumerSampleEn, "broader plugin ecosystem");
+        AssertContains(consumerSampleEn, "Copy These Host-Owned Seams");
+        AssertContains(consumerSampleEn, "Replace These Sample-Owned Details");
+        AssertContains(consumerSampleEn, "review/audit node family");
+        AssertContains(consumerSampleEn, "action ids and titles");
+        AssertContains(consumerSampleEn, "window layout and narrative text");
+        AssertContains(consumerSampleEn, "proof labels beyond the defended markers");
 
         AssertContains(consumerSampleZh, "三条宿主管线");
         AssertContains(consumerSampleZh, "样例自有内容");
@@ -51,6 +59,12 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
         AssertContains(consumerSampleZh, "不提供 sandbox");
         AssertContains(consumerSampleZh, "IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()");
         AssertContains(consumerSampleZh, "IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)");
+        AssertContains(consumerSampleZh, "复制这些宿主自管 seam");
+        AssertContains(consumerSampleZh, "替换这些样例自有内容");
+        AssertContains(consumerSampleZh, "review/audit 节点族");
+        AssertContains(consumerSampleZh, "action ids/titles");
+        AssertContains(consumerSampleZh, "窗口布局和叙述文本");
+        AssertContains(consumerSampleZh, "defended markers 之外的 proof 文案");
     }
 
     [Fact]

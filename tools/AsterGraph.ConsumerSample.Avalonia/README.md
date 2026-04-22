@@ -56,11 +56,20 @@ The support bundle stays local evidence only and does not widen the support boun
 
 Use this sample to copy the host-owned seams, not the sample-specific presentation layer. This is the defended beta route for copying host-owned seams into your own host. Copy the host-owned seams in this order:
 
+### Copy These Host-Owned Seams
+
 - action rail / command projection: `AsterGraphHostedActionFactory.CreateCommandActions(...)` and `AsterGraphHostedActionFactory.CreateProjection(...)`
 - plugin trust workflow: `GraphEditorPluginDiscoveryOptions`, `AsterGraphEditorOptions.PluginTrustPolicy`, and the host allowlist import/export path
 - parameter-editing composition: `IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()` and `IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)`
 
+### Replace These Sample-Owned Details
+
 Replaceable sample-owned details are the review/audit node family, the sample action ids and titles, the window layout and narrative text, and any proof labels or copy beyond the defended public markers.
+
+- sample-owned details are the review/audit node family
+- sample action ids and titles
+- window layout and narrative text
+- proof labels or copy beyond the defended public markers
 
 ## Where It Fits
 

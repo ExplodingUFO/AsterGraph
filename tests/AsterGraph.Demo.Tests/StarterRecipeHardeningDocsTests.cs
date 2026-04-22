@@ -43,6 +43,8 @@ public sealed class StarterRecipeHardeningDocsTests
         Assert.Contains("first hosted recipe", starterReadme, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("Copyable Seams", starterReadme, StringComparison.Ordinal);
         Assert.Contains("Host-Owned Seams", starterReadme, StringComparison.Ordinal);
+        Assert.Contains("Copy This Starter Scaffold", starterReadme, StringComparison.Ordinal);
+        Assert.Contains("Replace This In Your Host", starterReadme, StringComparison.Ordinal);
         Assert.Contains("AsterGraphEditorFactory.Create(...)", starterReadme, StringComparison.Ordinal);
         Assert.Contains("AsterGraphAvaloniaViewFactory.Create(...)", starterReadme, StringComparison.Ordinal);
         Assert.Contains("AsterGraphEditorOptions", starterReadme, StringComparison.Ordinal);
@@ -52,12 +54,16 @@ public sealed class StarterRecipeHardeningDocsTests
         Assert.Contains("HelloWorld.Avalonia", starterReadme, StringComparison.Ordinal);
 
         Assert.Contains("Use `AsterGraph.Starter.Avalonia` as the starter recipe.", quickStartEn, StringComparison.Ordinal);
+        Assert.Contains("Copy this starter scaffold:", quickStartEn, StringComparison.Ordinal);
+        Assert.Contains("Replace in your host:", quickStartEn, StringComparison.Ordinal);
         Assert.Contains("Keep/copy `AsterGraphEditorFactory.Create(...)`", quickStartEn, StringComparison.Ordinal);
         Assert.Contains("Copy the host-owned seams, not the sample-owned presentation.", quickStartEn, StringComparison.Ordinal);
         Assert.Contains("Replace the top-level window and its title/size", quickStartEn, StringComparison.Ordinal);
         Assert.Contains("The next hosted step is `AsterGraph.HelloWorld.Avalonia`.", quickStartEn, StringComparison.Ordinal);
 
         Assert.Contains("把 `AsterGraph.Starter.Avalonia` 当作 starter recipe。", quickStartZh, StringComparison.Ordinal);
+        Assert.Contains("复制这个 starter scaffold：", quickStartZh, StringComparison.Ordinal);
+        Assert.Contains("在你的宿主里替换：", quickStartZh, StringComparison.Ordinal);
         Assert.Contains("保留/复制 `AsterGraphEditorFactory.Create(...)`", quickStartZh, StringComparison.Ordinal);
         Assert.Contains("复制宿主自管 seam，不复制样例自有展示层。", quickStartZh, StringComparison.Ordinal);
         Assert.Contains("替换宿主自己的 top-level window 和它的 title/size", quickStartZh, StringComparison.Ordinal);

@@ -19,6 +19,18 @@ If you are evaluating the public beta end to end, use [Beta Evaluation Path](./e
 Add `AsterGraph.Core` only when the host also needs direct `GraphDocument`, serialization, or compatibility APIs.
 Use `AsterGraph.Starter.Avalonia` as the starter recipe. Keep/copy `AsterGraphEditorFactory.Create(...)`, `AsterGraphAvaloniaViewFactory.Create(...)`, `AsterGraphEditorOptions`, and the document/catalog/editor/view composition flow. Replace the top-level window and its title/size, and replace the sample graph/catalog definitions as the host grows. Copy the host-owned seams, not the sample-owned presentation. When you move to `AsterGraph.ConsumerSample.Avalonia`, keep action projection, trust workflow, and parameter-editing composition host-owned. The next hosted step is `AsterGraph.HelloWorld.Avalonia`.
 
+Copy this starter scaffold:
+
+- `AsterGraphEditorFactory.Create(...)`
+- `AsterGraphAvaloniaViewFactory.Create(...)`
+- `AsterGraphEditorOptions`
+- the document/catalog/editor/view composition flow
+
+Replace in your host:
+
+- the top-level window and its title/size
+- the sample graph/catalog definitions as the host grows
+
 
 ## 2. Install From NuGet
 
