@@ -26,6 +26,12 @@ For CI-style proof mode:
 dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.ConsumerSample.Avalonia.csproj --nologo -- --proof
 ```
 
+For a local beta support bundle:
+
+```powershell
+dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.ConsumerSample.Avalonia.csproj --nologo -- --proof --support-bundle artifacts/consumer-support-bundle.json --support-note "what you were trying to validate"
+```
+
 Expected proof markers:
 
 - `CONSUMER_SAMPLE_HOST_ACTION_OK:True`
@@ -38,6 +44,8 @@ Expected proof markers:
 - `HOST_NATIVE_METRIC:inspector_projection_ms=...`
 - `HOST_NATIVE_METRIC:plugin_scan_ms=...`
 - `HOST_NATIVE_METRIC:command_latency_ms=...`
+- `SUPPORT_BUNDLE_OK:True`
+- `SUPPORT_BUNDLE_PATH:...`
 - `CONSUMER_SAMPLE_OK:True`
 
 ## When To Use This Sample
@@ -78,6 +86,7 @@ If you want to build the same medium host in your own app, copy these seams in t
 ## Related Docs
 
 - [Quick Start](./quick-start.md)
+- [Beta Support Bundle](./support-bundle.md)
 - [Host Integration](./host-integration.md)
 - [Sample README](../../tools/AsterGraph.ConsumerSample.Avalonia/README.md)
 - [Plugin And Custom Node Recipe](./plugin-recipe.md)

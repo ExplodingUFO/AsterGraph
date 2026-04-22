@@ -104,6 +104,33 @@ public sealed class DemoProofReleaseSurfaceTests
     }
 
     [Fact]
+    public void SupportBundleDocs_DefineLocalConsumerSampleContract()
+    {
+        var supportBundle = ReadRepoFile("docs/en/support-bundle.md");
+        var supportBundleZh = ReadRepoFile("docs/zh-CN/support-bundle.md");
+        var consumerSampleDoc = ReadRepoFile("docs/en/consumer-sample.md");
+        var consumerSampleReadme = ReadRepoFile("tools/AsterGraph.ConsumerSample.Avalonia/README.md");
+        var adoptionFeedback = ReadRepoFile("docs/en/adoption-feedback.md");
+
+        foreach (var contents in new[] { supportBundle, supportBundleZh })
+        {
+            Assert.Contains("ConsumerSample.Avalonia", contents, StringComparison.Ordinal);
+            Assert.Contains("--support-bundle", contents, StringComparison.Ordinal);
+            Assert.Contains("SUPPORT_BUNDLE_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("packageVersion", contents, StringComparison.Ordinal);
+            Assert.Contains("publicTag", contents, StringComparison.Ordinal);
+            Assert.Contains("route", contents, StringComparison.Ordinal);
+            Assert.Contains("proofLines", contents, StringComparison.Ordinal);
+            Assert.Contains("environment", contents, StringComparison.Ordinal);
+            Assert.Contains("reproduction", contents, StringComparison.Ordinal);
+        }
+
+        Assert.Contains("support-bundle", consumerSampleDoc, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("support-bundle", consumerSampleReadme, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("support bundle", adoptionFeedback, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public void HostIntegrationDocs_RequireCanonicalRouteThenAdapterForWpf()
     {
         var hostIntegration = ReadRepoFile("docs/en/host-integration.md");

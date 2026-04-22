@@ -18,7 +18,7 @@
 | --- | --- | --- | --- |
 | 1 | `AsterGraph.Starter.Avalonia` | 先确认第一个 hosted 端到端入口和最小脚手架 | 壳层能跑起来后，再去看最小 stock sample |
 | 2 | `AsterGraph.HelloWorld.Avalonia` | 再确认最小 shipped Avalonia surface，不掺额外宿主逻辑 | 确认后进入真实宿主 proof |
-| 3 | `AsterGraph.ConsumerSample.Avalonia -- --proof` | 在防守的 beta 路线上验证 host-owned actions、trusted plugin、参数编辑和 command projection | 期待看到 `CONSUMER_SAMPLE_OK:True`、`COMMAND_SURFACE_OK:True` 和 `HOST_NATIVE_METRIC:*` |
+| 3 | `AsterGraph.ConsumerSample.Avalonia -- --proof` | 在防守的 beta 路线上验证 host-owned actions、trusted plugin、参数编辑和 command projection | 期待看到 `CONSUMER_SAMPLE_OK:True`、`COMMAND_SURFACE_OK:True`、`HOST_NATIVE_METRIC:*`，并可选生成 [Beta Support Bundle](./support-bundle.md) |
 | 4 | `AsterGraph.HostSample` | 在真实宿主样例已经看懂之后，再用 proof harness 做路线验证 | 期待看到 `HOST_SAMPLE_OK:True`；这一步必须放在 `ConsumerSample.Avalonia` 之后 |
 
 如果你是刻意评估 runtime-only 路线，可以在步骤 1 之后先跑 `AsterGraph.HelloWorld`，替代步骤 2；然后再回到同一条真实宿主 proof 阶梯。

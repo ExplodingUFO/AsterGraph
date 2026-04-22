@@ -18,7 +18,7 @@ Follow this ladder in order. Each step answers one question and hands off to the
 | --- | --- | --- | --- |
 | 1 | `AsterGraph.Starter.Avalonia` | confirms the first hosted end-to-end route with the smallest scaffold | once the shell opens, move to the smallest stock sample |
 | 2 | `AsterGraph.HelloWorld.Avalonia` | confirms the shipped Avalonia surface without extra host wiring | once this is clear, move to the realistic hosted proof |
-| 3 | `AsterGraph.ConsumerSample.Avalonia -- --proof` | proves host-owned actions, trusted-plugin flow, parameter editing, and command projection on the defended route | expect `CONSUMER_SAMPLE_OK:True`, `COMMAND_SURFACE_OK:True`, and `HOST_NATIVE_METRIC:*` |
+| 3 | `AsterGraph.ConsumerSample.Avalonia -- --proof` | proves host-owned actions, trusted-plugin flow, parameter editing, and command projection on the defended route | expect `CONSUMER_SAMPLE_OK:True`, `COMMAND_SURFACE_OK:True`, `HOST_NATIVE_METRIC:*`, and optionally generate a [Beta Support Bundle](./support-bundle.md) |
 | 4 | `AsterGraph.HostSample` | validates the proof harness after the realistic host sample is already understood | expect `HOST_SAMPLE_OK:True`; use this only after `ConsumerSample.Avalonia` |
 
 If you are intentionally evaluating the runtime-only path, run `AsterGraph.HelloWorld` after step 1 instead of step 2, then return to the same realistic hosted proof at step 3.

@@ -13,8 +13,10 @@ Each feedback entry should capture:
 - friction points
 - requested next capability
 - proof or screenshot reference when available
+- support bundle when available
 
 Use the GitHub issue template `Adoption feedback` for public reports.
+When you can reach `ConsumerSample.Avalonia -- --proof`, attach the local support bundle described in [Beta Support Bundle](./support-bundle.md).
 
 ## Seeded Trial Synthesis
 

@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Text.Json;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.VisualTree;
@@ -56,6 +57,65 @@ public sealed class ConsumerSampleProofTests
         Assert.True(result.CommandLatencyMs >= 0);
         Assert.Contains(result.MetricLines, line => line.Contains("startup_ms", StringComparison.Ordinal));
         Assert.Contains(result.MetricLines, line => line.Contains("command_latency_ms", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void ConsumerSampleProof_CanWriteSupportBundleContract()
+    {
+        var result = ConsumerSampleProof.Run();
+        var tempRoot = Path.Combine(Path.GetTempPath(), "AsterGraph.ConsumerSample.Tests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(tempRoot);
+        var bundlePath = Path.Combine(tempRoot, "consumer-support-bundle.json");
+
+        ConsumerSampleSupportBundle.WriteProofBundle(
+            bundlePath,
+            result,
+            "dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.ConsumerSample.Avalonia.csproj --nologo -- --proof --support-bundle consumer-support-bundle.json",
+            "repro-note");
+
+        Assert.True(File.Exists(bundlePath));
+
+        using var document = JsonDocument.Parse(File.ReadAllText(bundlePath));
+        var root = document.RootElement;
+
+        Assert.Equal(1, root.GetProperty("schemaVersion").GetInt32());
+        Assert.Equal("ConsumerSample.Avalonia", root.GetProperty("route").GetString());
+        Assert.False(string.IsNullOrWhiteSpace(root.GetProperty("packageVersion").GetString()));
+        Assert.StartsWith("v", root.GetProperty("publicTag").GetString(), StringComparison.Ordinal);
+        Assert.Contains(
+            root.GetProperty("proofLines").EnumerateArray().Select(static item => item.GetString()),
+            line => string.Equals(line, "COMMAND_SURFACE_OK:True", StringComparison.Ordinal));
+        Assert.Contains(
+            root.GetProperty("proofLines").EnumerateArray().Select(static item => item.GetString()),
+            line => string.Equals(line, "CONSUMER_SAMPLE_OK:True", StringComparison.Ordinal));
+        Assert.Equal("repro-note", root.GetProperty("reproduction").GetProperty("note").GetString());
+        Assert.Contains("--support-bundle", root.GetProperty("reproduction").GetProperty("command").GetString(), StringComparison.Ordinal);
+        Assert.False(string.IsNullOrWhiteSpace(root.GetProperty("environment").GetProperty("frameworkDescription").GetString()));
+    }
+
+    [Fact]
+    public void Program_SupportBundleOption_EmitsBundleMarkersAndFile()
+    {
+        var tempRoot = Path.Combine(Path.GetTempPath(), "AsterGraph.ConsumerSample.Tests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(tempRoot);
+        var bundlePath = Path.Combine(tempRoot, "program-support-bundle.json");
+        var originalWriter = Console.Out;
+        using var output = new StringWriter();
+
+        try
+        {
+            Console.SetOut(output);
+            Program.Main(["--support-bundle", bundlePath, "--support-note", "cli-note"]);
+        }
+        finally
+        {
+            Console.SetOut(originalWriter);
+        }
+
+        var lines = output.ToString();
+        Assert.Contains("SUPPORT_BUNDLE_OK:True", lines, StringComparison.Ordinal);
+        Assert.Contains("SUPPORT_BUNDLE_PATH:", lines, StringComparison.Ordinal);
+        Assert.True(File.Exists(bundlePath));
     }
 
     [Fact]

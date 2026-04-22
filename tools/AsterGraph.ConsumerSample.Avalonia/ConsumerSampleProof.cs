@@ -38,6 +38,18 @@ public sealed record ConsumerSampleProofResult(
         FormatMetric("command_latency_ms", CommandLatencyMs),
     ];
 
+    public IReadOnlyList<string> ProofLines =>
+    [
+        $"CONSUMER_SAMPLE_HOST_ACTION_OK:{HostMenuActionOk}",
+        $"CONSUMER_SAMPLE_PLUGIN_OK:{PluginContributionOk}",
+        $"CONSUMER_SAMPLE_PARAMETER_OK:{ParameterEditingOk}",
+        $"CONSUMER_SAMPLE_WINDOW_OK:{WindowCompositionOk}",
+        $"CONSUMER_SAMPLE_TRUST_OK:{TrustTransparencyOk}",
+        $"COMMAND_SURFACE_OK:{CommandSurfaceOk}",
+        .. MetricLines,
+        $"CONSUMER_SAMPLE_OK:{IsOk}",
+    ];
+
     private static string FormatMetric(string name, double value)
         => $"HOST_NATIVE_METRIC:{name}={value.ToString("0.###", CultureInfo.InvariantCulture)}";
 }

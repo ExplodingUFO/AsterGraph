@@ -13,8 +13,10 @@
 - 主要摩擦点
 - 希望下一步补什么能力
 - 可附 proof、截图或命令输出
+- 能附 support bundle 时优先附 support bundle
 
 公开反馈建议使用 GitHub 上的 `Adoption feedback` issue template。
+如果你已经能跑到 `ConsumerSample.Avalonia -- --proof`，优先附上 [Beta Support Bundle](./support-bundle.md) 里定义的本地 support bundle。
 
 ## 当前种子试用综合
 

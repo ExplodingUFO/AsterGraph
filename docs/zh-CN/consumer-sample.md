@@ -26,6 +26,12 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.ConsumerSample.Avalonia.csproj --nologo -- --proof
 ```
 
+如果你要生成本地 support bundle：
+
+```powershell
+dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.ConsumerSample.Avalonia.csproj --nologo -- --proof --support-bundle artifacts/consumer-support-bundle.json --support-note "what you were trying to validate"
+```
+
 预期 marker：
 
 - `CONSUMER_SAMPLE_HOST_ACTION_OK:True`
@@ -38,6 +44,8 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 - `HOST_NATIVE_METRIC:inspector_projection_ms=...`
 - `HOST_NATIVE_METRIC:plugin_scan_ms=...`
 - `HOST_NATIVE_METRIC:command_latency_ms=...`
+- `SUPPORT_BUNDLE_OK:True`
+- `SUPPORT_BUNDLE_PATH:...`
 - `CONSUMER_SAMPLE_OK:True`
 
 ## 什么时候看它
@@ -75,10 +83,12 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 - trust workflow：把 `GraphEditorPluginDiscoveryOptions`、provenance snapshot 和宿主自管 allowlist policy 放在同一层
 - parameter editing：只通过 `IGraphEditorSession.Commands` 修改当前选中节点参数
 - proof mode：输出 `COMMAND_SURFACE_OK` 和四条 `HOST_NATIVE_METRIC:*`，这样你能和官方 sample 做横向比较
+- support bundle：在 proof mode 上额外附带 `--support-bundle`，生成本地 JSON 证据包给 support/feedback 使用
 
 ## 相关文档
 
 - [Quick Start](./quick-start.md)
+- [Beta Support Bundle](./support-bundle.md)
 - [Host Integration](./host-integration.md)
 - [Sample README](../../tools/AsterGraph.ConsumerSample.Avalonia/README.md)
 - [Plugin 与自定义节点 Recipe](./plugin-recipe.md)

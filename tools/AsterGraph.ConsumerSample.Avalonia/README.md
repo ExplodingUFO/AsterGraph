@@ -15,6 +15,12 @@ For proof mode:
 dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.ConsumerSample.Avalonia.csproj --nologo -- --proof
 ```
 
+For a local support bundle:
+
+```powershell
+dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.ConsumerSample.Avalonia.csproj --nologo -- --proof --support-bundle artifacts/consumer-support-bundle.json --support-note "what you were trying to validate"
+```
+
 Expected markers:
 
 - `CONSUMER_SAMPLE_HOST_ACTION_OK:True`
@@ -27,6 +33,8 @@ Expected markers:
 - `HOST_NATIVE_METRIC:inspector_projection_ms=...`
 - `HOST_NATIVE_METRIC:plugin_scan_ms=...`
 - `HOST_NATIVE_METRIC:command_latency_ms=...`
+- `SUPPORT_BUNDLE_OK:True`
+- `SUPPORT_BUNDLE_PATH:...`
 - `CONSUMER_SAMPLE_OK:True`
 
 ## Where It Fits
@@ -35,6 +43,7 @@ Expected markers:
 - `HelloWorld` = smallest runtime-only first run
 - `HelloWorld.Avalonia` = smallest hosted-UI first run
 - [Quick Start](../../docs/en/quick-start.md)
+- [Beta Support Bundle](../../docs/en/support-bundle.md)
 - [Host Integration](../../docs/en/host-integration.md)
 - [Demo Guide](../../docs/en/demo-guide.md)
 
