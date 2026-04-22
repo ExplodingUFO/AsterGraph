@@ -157,6 +157,27 @@ public sealed class DemoProofReleaseSurfaceTests
     }
 
     [Fact]
+    public void ProjectStatus_AndAdoptionFeedback_ShareNextBetaLineCriteria()
+    {
+        var projectStatus = ReadRepoFile("docs/en/project-status.md");
+        var projectStatusZh = ReadRepoFile("docs/zh-CN/project-status.md");
+        var adoptionFeedback = ReadRepoFile("docs/en/adoption-feedback.md");
+        var adoptionFeedbackZh = ReadRepoFile("docs/zh-CN/adoption-feedback.md");
+
+        Assert.Contains("usability and sample polish first", projectStatus, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("3-5 real external entries", projectStatus, StringComparison.Ordinal);
+        Assert.Contains("0.xx alpha/beta line", projectStatus, StringComparison.Ordinal);
+        Assert.Contains("usability and sample polish first", adoptionFeedback, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("3-5 real external entries", adoptionFeedback, StringComparison.Ordinal);
+
+        Assert.Contains("继续优先做使用友好性和样例打磨", projectStatusZh, StringComparison.Ordinal);
+        Assert.Contains("3 到 5 条真实外部反馈", projectStatusZh, StringComparison.Ordinal);
+        Assert.Contains("0.xx` alpha/beta 线", projectStatusZh, StringComparison.Ordinal);
+        Assert.Contains("继续优先做使用友好性和样例打磨", adoptionFeedbackZh, StringComparison.Ordinal);
+        Assert.Contains("3 到 5 条真实外部反馈", adoptionFeedbackZh, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void SupportBundleDocs_DefineLocalConsumerSampleContract()
     {
         var supportBundle = ReadRepoFile("docs/en/support-bundle.md");

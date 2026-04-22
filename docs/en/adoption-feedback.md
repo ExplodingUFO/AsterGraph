@@ -31,13 +31,13 @@ Until the repo collects enough real external issues, the current recommendation 
 
 ## Current Recommendation
 
-The current next-mainline recommendation is:
+The next 0.xx alpha/beta line should stay on usability and sample polish first unless evidence volume/risk says otherwise:
 
 1. **continue usability and sample polish first**
 2. **defer defended large-tier performance work until real adopter demand clusters there**
 3. **expand richer parameter and metadata editing only after the next adoption round confirms that demand**
 
-This recommendation should be replaced by real public adopter reports as soon as 3-5 external entries exist.
+This seeded recommendation should be replaced as soon as 3-5 real external entries cluster on one maintained route or bounded risk.
 
 ## Related Docs
 

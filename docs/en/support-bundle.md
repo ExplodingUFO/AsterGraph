@@ -44,6 +44,7 @@ The support bundle is one local JSON file with these top-level fields:
 - attach it when reporting beta support issues
 - attach it when filing adopter feedback after reaching the realistic hosted proof
 - regenerate it after you change package version, route, or environment
+- treat it as intake evidence for the [Project Status](./project-status.md) readiness gate, not as automatic proof that the support boundary should widen
 
 ## Related Docs
 

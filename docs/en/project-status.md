@@ -95,6 +95,7 @@ Use this section as the single external capability readiness gate for release no
 - new hosted adapters or widened adapter claims beyond Avalonia plus the current `WPF` validation lane
 - marketplace, remote install/update, unload lifecycle, or sandboxed plugin stories
 - stable / GA / `1.0` support guarantees
+- the next 0.xx alpha/beta line stays on usability and sample polish first; only widen toward defended large-tier performance or richer parameter/metadata editing when 3-5 real external entries cluster on that bounded risk
 - if a new report does not fit one of the proven or bounded rows above, route it through the [Adoption Feedback Loop](./adoption-feedback.md) and the [Beta Support Bundle](./support-bundle.md) instead of widening the claim ad hoc
 
 ## Public Entry Matrix

@@ -94,6 +94,7 @@
 - 除 Avalonia 加当前 `WPF` 验证通道之外的新 hosted adapter 或更宽的 adapter 声明
 - marketplace、远程安装/更新、unload lifecycle、sandboxed plugin 这类故事
 - stable / GA / `1.0` 级别的支持保证
+- 下一条 `0.xx` alpha/beta 线继续优先做使用友好性和样例打磨；只有当 3 到 5 条真实外部反馈在同一个受限风险上聚焦时，才考虑把 defended large-tier performance 或更丰富的参数/元数据编辑提上来
 - 如果新的报告放不进上面的“已证明”或“受边界约束”两类，就走 [Adoption Feedback Loop](./adoption-feedback.md) 和 [Beta Support Bundle](./support-bundle.md)，不要临时扩大公开声明
 
 ## 公开入口分工

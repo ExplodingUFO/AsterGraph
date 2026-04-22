@@ -184,6 +184,7 @@ foreach ($line in $proofLines) {
 [void]$builder.AppendLine("- frozen support boundary: [Stabilization Support Matrix](./docs/en/stabilization-support-matrix.md)")
 [void]$builder.AppendLine("- adapter capability story: [Adapter Capability Matrix](./docs/en/adapter-capability-matrix.md)")
 [void]$builder.AppendLine("- external capability readiness gate: [Project Status](./docs/en/project-status.md) for externally proven vs deferred capability claims")
+[void]$builder.AppendLine("- next 0.xx alpha/beta line: keep usability and sample polish first, and only widen when 3-5 real external entries cluster on one bounded risk")
 [void]$builder.AppendLine("- release evidence contract: route, version, proof markers, and support bundle")
 [void]$builder.AppendLine("- `HELLOWORLD_WPF_OK` remains adapter-2 validation only and does not widen the public publish/package boundary")
 [void]$builder.AppendLine("- [Beta Support Bundle](./docs/en/support-bundle.md)")

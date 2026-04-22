@@ -15,6 +15,8 @@ Use the same fields in:
 
 This checklist keeps all intake documents on one beta evidence contract, so route selection and support readiness can be triaged consistently without blocking `HelloWorld`, `Demo`, or `ScaleSmoke` feedback when no support bundle exists yet.
 
+Use [Project Status](./project-status.md) as the readiness gate before treating a report as a support-expansion candidate. Reports outside the proven/bounded rows are intake evidence, not automatic scope widening.
+
 ## Related Links
 
 - [Adoption Feedback](./adoption-feedback.md)

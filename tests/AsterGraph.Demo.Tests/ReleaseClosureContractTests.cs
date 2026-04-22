@@ -73,6 +73,9 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("external capability readiness gate", notes, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("[Project Status](./docs/en/project-status.md)", notes, StringComparison.Ordinal);
         Assert.Contains("externally proven vs deferred capability claims", notes, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("usability and sample polish first", notes, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("3-5 real external entries", notes, StringComparison.Ordinal);
+        Assert.Contains("0.xx alpha/beta line", notes, StringComparison.Ordinal);
         Assert.Contains("[Beta Support Bundle](./docs/en/support-bundle.md)", notes, StringComparison.Ordinal);
         Assert.Contains("[Adoption Feedback Loop](./docs/en/adoption-feedback.md)", notes, StringComparison.Ordinal);
         Assert.Contains("[Adopter Triage Checklist](./docs/en/adopter-triage.md)", notes, StringComparison.Ordinal);
@@ -99,6 +102,9 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("historical alpha reference for the current beta support story", englishChecklist, StringComparison.Ordinal);
         Assert.Contains("external capability readiness gate", englishChecklist, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("externally proven vs deferred capability claims", englishChecklist, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("usability and sample polish first", englishChecklist, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("3-5 real external entries", englishChecklist, StringComparison.Ordinal);
+        Assert.Contains("0.xx alpha/beta line", englishChecklist, StringComparison.Ordinal);
         Assert.DoesNotContain("HELLOWORLD_WPF_OK is Avalonia/WPF parity", englishChecklist, StringComparison.Ordinal);
         Assert.DoesNotContain("HELLOWORLD_WPF_OK is public WPF support", englishChecklist, StringComparison.Ordinal);
 
@@ -108,6 +114,9 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("历史 alpha 参考，服务于当前 beta support story", chineseChecklist, StringComparison.Ordinal);
         Assert.Contains("外部能力就绪闸门", chineseChecklist, StringComparison.Ordinal);
         Assert.Contains("已被外部证据证明与继续延后的能力声明", chineseChecklist, StringComparison.Ordinal);
+        Assert.Contains("继续优先做使用友好性和样例打磨", chineseChecklist, StringComparison.Ordinal);
+        Assert.Contains("3 到 5 条真实外部反馈", chineseChecklist, StringComparison.Ordinal);
+        Assert.Contains("0.xx` alpha/beta 线", chineseChecklist, StringComparison.Ordinal);
         Assert.DoesNotContain("HELLOWORLD_WPF_OK 是 Avalonia/WPF parity", chineseChecklist, StringComparison.Ordinal);
         Assert.DoesNotContain("HELLOWORLD_WPF_OK 是公开 WPF support", chineseChecklist, StringComparison.Ordinal);
     }

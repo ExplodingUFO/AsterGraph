@@ -44,6 +44,7 @@ support bundle 是一个本地 JSON 文件，顶层字段固定为：
 - 提 beta support issue 时附上它
 - 走到真实宿主 proof 之后提交 adopter feedback 时附上它
 - 包版本、路线或环境变化后重新生成
+- 把它当成 [Project Status](./project-status.md) 就绪门禁的 intake evidence，而不是自动扩大支持边界的证明
 
 ## 相关文档
 
