@@ -143,6 +143,7 @@ dotnet add package AsterGraph.Abstractions --prerelease
 面向使用者的核心文档：
 
 - [Versioning](./docs/zh-CN/versioning.md)
+- [稳定化支持矩阵](./docs/zh-CN/stabilization-support-matrix.md)
 - [Quick Start](./docs/zh-CN/quick-start.md)
 - [Consumer Sample](./docs/zh-CN/consumer-sample.md)
 - [Host Integration](./docs/zh-CN/host-integration.md)
