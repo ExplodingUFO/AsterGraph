@@ -27,3 +27,11 @@ dotnet run --project tools/AsterGraph.Starter.Avalonia/AsterGraph.Starter.Avalon
 
 Use `AsterGraph.HelloWorld` when you want the runtime-only route, `AsterGraph.HelloWorld.Avalonia` when you want the smallest stock hosted UI, `AsterGraph.ConsumerSample.Avalonia` when you need a realistic host hop, and `AsterGraph.HostSample` when you need proof-oriented route validation.
 
+## Proof Handoff
+
+This starter recipe is only the scaffold. If you are validating a copied hosted recipe, hand off to `AsterGraph.ConsumerSample.Avalonia -- --proof` for the defended proof lane.
+
+That proof run is where you should expect `CONSUMER_SAMPLE_OK:True`, `COMMAND_SURFACE_OK:True`, the four `HOST_NATIVE_METRIC:*` lines, and the local support bundle markers `SUPPORT_BUNDLE_OK:True` and `SUPPORT_BUNDLE_PATH:artifacts/consumer-support-bundle.json`.
+
+The support bundle is local evidence only; it does not widen the support boundary or introduce a separate verification lane.
+
