@@ -70,6 +70,8 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("## Support Story", notes, StringComparison.Ordinal);
         Assert.Contains("[Stabilization Support Matrix](./docs/en/stabilization-support-matrix.md)", notes, StringComparison.Ordinal);
         Assert.Contains("[Adapter Capability Matrix](./docs/en/adapter-capability-matrix.md)", notes, StringComparison.Ordinal);
+        Assert.DoesNotContain("- frozen support boundary:", notes, StringComparison.Ordinal);
+        Assert.DoesNotContain("- adapter capability story:", notes, StringComparison.Ordinal);
         Assert.Contains("external capability readiness gate", notes, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("[Project Status](./docs/en/project-status.md)", notes, StringComparison.Ordinal);
         Assert.Contains("externally proven vs deferred capability claims", notes, StringComparison.OrdinalIgnoreCase);

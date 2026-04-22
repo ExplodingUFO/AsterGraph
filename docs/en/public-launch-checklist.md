@@ -115,7 +115,7 @@ Keep the consumer entry story explicit in release notes and public announcements
 - `docs/en/evaluation-path.md` = single route ladder from first install to realistic hosted proof
 - `docs/en/quick-start.md` = canonical adoption path
 - `docs/en/stabilization-support-matrix.md` = frozen support boundary and upgrade guidance
-- `docs/en/adapter-capability-matrix.md` = adapter capability story and validation matrix
+- `docs/en/adapter-capability-matrix.md` = adapter matrix story and validation matrix
 - `docs/en/alpha-status.md` = historical alpha reference for the current beta support story
 - `docs/en/advanced-editing.md` = advanced-editing capability split and proof map
 - `docs/en/adopter-triage.md` = adopter triage checklist for the one beta evidence contract

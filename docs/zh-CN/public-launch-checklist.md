@@ -122,7 +122,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framew
 - `docs/zh-CN/evaluation-path.md` = 从第一次安装到真实宿主 proof 的单一路径
 - `docs/zh-CN/quick-start.md` = 推荐接入路径
 - `docs/zh-CN/stabilization-support-matrix.md` = 冻结的 support boundary 和升级指引
-- `docs/zh-CN/adapter-capability-matrix.md` = adapter 能力叙事与验证矩阵
+- `docs/zh-CN/adapter-capability-matrix.md` = adapter matrix 叙事与验证矩阵
 - `docs/zh-CN/alpha-status.md` = 历史 alpha 参考，服务于当前 beta support story
 - `docs/zh-CN/advanced-editing.md` = advanced-editing capability split 与 proof map
 - `docs/zh-CN/adopter-triage.md` = 对应一套 beta 证据合同的采用者分诊清单
