@@ -20,6 +20,17 @@
 
 `AsterGraphCanvasViewFactory`、`AsterGraphInspectorViewFactory`、`AsterGraphMiniMapViewFactory` 这些独立表面都属于第 2 条路线下的组合细节，不是第四条主路线。
 
+## 何时选择 retained
+
+| 路线 | 适用时机 | 不适用时机 | recipe |
+| --- | --- | --- | --- |
+| 运行时 / 自定义 UI | 当你在开始新工作或宿主自己拥有 UI 时，请使用 `CreateSession(...)`。 | 不要在需要 shipped Avalonia 壳层或 retained 桥接时使用这条路线。 | [快速开始](./quick-start.md) |
+| shipped Avalonia | 当你想使用 shipped Avalonia 路线时，请使用 `Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)`。 | 不要在保留旧的 `GraphEditorViewModel` 宿主时使用这条路线。 | [快速开始](./quick-start.md) |
+| retained 迁移桥接 | 只有在现有宿主已经构造 `GraphEditorViewModel` 或 `GraphEditorView` 且正在分批迁移时才使用 retained。 | 不要把它用在新宿主工作、第四条主路线或 WPF 专属 runtime model。 | [Retained 到 Session 的迁移 Recipe](./retained-migration-recipe.md) |
+
+唯一的 retained recipe 是 [Retained 到 Session 的迁移 Recipe](./retained-migration-recipe.md)。
+retained 不是第四条主路线。如果这座桥接确实有必要，就把维护者导向这一个 bounded 的 retained recipe 集合，而不是让他们拼接多份文档。
+
 ## Consumer Route Matrix
 
 | 需求 | 起始包 | canonical 入口 | 第一个样例 |

@@ -22,6 +22,17 @@ If the host owns its UI, route 1 is the canonical native/custom-UI path; you com
 
 Standalone Avalonia surfaces such as `AsterGraphCanvasViewFactory`, `AsterGraphInspectorViewFactory`, and `AsterGraphMiniMapViewFactory` belong to route 2. They are composition details under the hosted-UI family, not a fourth primary route.
 
+## When To Choose Retained
+
+| Route | Choose this when | Do not use this when | Recipe |
+| --- | --- | --- | --- |
+| Runtime/session | Use `CreateSession(...)` when you are starting new work or own your UI. | Do not use this when you need the shipped Avalonia shell or a retained bridge. | [Quick Start](./quick-start.md) |
+| Shipped Avalonia | Use `Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` when you want the shipped Avalonia route. | Do not use this when you are preserving a legacy `GraphEditorViewModel`-based host. | [Quick Start](./quick-start.md) |
+| Retained migration bridge | Use retained only when the host already constructs `GraphEditorViewModel` or `GraphEditorView` and you are migrating in batches. | Do not use this for new host work, a fourth primary route, or a WPF-specific runtime model. | [Retained-To-Session Migration Recipe](./retained-migration-recipe.md) |
+
+The single bounded retained recipe is [Retained-To-Session Migration Recipe](./retained-migration-recipe.md).
+Retained is not a fourth primary route. If the bridge is justified, send maintainers to that recipe instead of stitching together multiple docs.
+
 ## Consumer Route Matrix
 
 | Need | Packages to start with | Canonical entry point | First sample |

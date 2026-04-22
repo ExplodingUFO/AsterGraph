@@ -2,6 +2,8 @@
 
 Choose retained only when you are migrating an existing host in batches. Use this recipe when an existing host still constructs `GraphEditorViewModel` directly but wants to move toward the canonical runtime/session path without rewriting everything at once. The retained route is a bridge, not the destination.
 
+This is the single bounded retained recipe set. If an existing host still constructs `GraphEditorViewModel` or `GraphEditorView`, use this doc; otherwise start on `CreateSession(...)` or `Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)`.
+
 ## Target State
 
 New code should land on:

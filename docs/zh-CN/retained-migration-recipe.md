@@ -2,6 +2,8 @@
 
 只有在现有宿主要分批迁移时才选 retained。这份 recipe 适合这样的宿主：现在还在直接 `new GraphEditorViewModel(...)`，但想逐步迁到推荐的 runtime/session 路线，又不想一次性重写完。retained 路线只是桥接，不是最终目的地。
 
+这是唯一一个 bounded 的 retained recipe 集合。只有在现有宿主还在构造 `GraphEditorViewModel` 或 `GraphEditorView` 时才使用这份文档；否则请从 `CreateSession(...)` 或 `Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` 开始。
+
 ## 目标状态
 
 新代码应该落到：
