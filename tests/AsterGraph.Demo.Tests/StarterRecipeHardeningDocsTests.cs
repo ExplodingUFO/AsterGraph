@@ -13,38 +13,27 @@ public sealed class StarterRecipeHardeningDocsTests
         var quickStartEn = ReadRepoFile("docs/en/quick-start.md");
         var quickStartZh = ReadRepoFile("docs/zh-CN/quick-start.md");
 
-        Assert.Contains("copyable", starterReadme, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("first hosted recipe", starterReadme, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("HelloWorld.Avalonia", starterReadme, StringComparison.Ordinal);
+        Assert.Contains("Keep/copy from this recipe:", starterReadme, StringComparison.Ordinal);
         Assert.Contains("AsterGraphEditorFactory.Create(...)", starterReadme, StringComparison.Ordinal);
         Assert.Contains("AsterGraphAvaloniaViewFactory.Create(...)", starterReadme, StringComparison.Ordinal);
         Assert.Contains("AsterGraphEditorOptions", starterReadme, StringComparison.Ordinal);
         Assert.Contains("document/catalog/editor/view composition flow", starterReadme, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("top-level window", starterReadme, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("shell chrome", starterReadme, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("sample title", starterReadme, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("sample size", starterReadme, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("sample content shell", starterReadme, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Replace/own in your host:", starterReadme, StringComparison.Ordinal);
+        Assert.Contains("the top-level window and its title/size", starterReadme, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("sample graph/catalog definitions", starterReadme, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("HelloWorld.Avalonia", starterReadme, StringComparison.Ordinal);
 
-        Assert.Contains("copyable starter recipe", quickStartEn, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("keep/copy", quickStartEn, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("replace", quickStartEn, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("HelloWorld.Avalonia", quickStartEn, StringComparison.Ordinal);
-        Assert.Contains("可复制", quickStartZh, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("保留/复制", quickStartZh, StringComparison.Ordinal);
-        Assert.Contains("替换", quickStartZh, StringComparison.Ordinal);
-        Assert.Contains("HelloWorld.Avalonia", quickStartZh, StringComparison.Ordinal);
+        Assert.Contains("Use `AsterGraph.Starter.Avalonia` as the starter recipe.", quickStartEn, StringComparison.Ordinal);
+        Assert.Contains("Keep/copy `AsterGraphEditorFactory.Create(...)`", quickStartEn, StringComparison.Ordinal);
+        Assert.Contains("Replace the top-level window and its title/size", quickStartEn, StringComparison.Ordinal);
+        Assert.Contains("The next hosted step is `AsterGraph.HelloWorld.Avalonia`.", quickStartEn, StringComparison.Ordinal);
 
-        Assert.True(
-            StarterMentionsHelloWorldAfterStarter(starterReadme, quickStartEn, quickStartZh),
-            "Starter docs should make HelloWorld.Avalonia the next hosted step after the copyable starter recipe.");
+        Assert.Contains("把 `AsterGraph.Starter.Avalonia` 当作 starter recipe。", quickStartZh, StringComparison.Ordinal);
+        Assert.Contains("保留/复制 `AsterGraphEditorFactory.Create(...)`", quickStartZh, StringComparison.Ordinal);
+        Assert.Contains("替换宿主自己的 top-level window 和它的 title/size", quickStartZh, StringComparison.Ordinal);
+        Assert.Contains("下一步 hosted step 是 `AsterGraph.HelloWorld.Avalonia`。", quickStartZh, StringComparison.Ordinal);
     }
-
-    private static bool StarterMentionsHelloWorldAfterStarter(string starterReadme, string quickStartEn, string quickStartZh)
-        => starterReadme.IndexOf("HelloWorld.Avalonia", StringComparison.Ordinal) >= 0
-        && quickStartEn.IndexOf("HelloWorld.Avalonia", StringComparison.Ordinal) >= 0
-        && quickStartZh.IndexOf("HelloWorld.Avalonia", StringComparison.Ordinal) >= 0;
 
     private static string ReadRepoFile(string relativePath)
         => File.ReadAllText(Path.Combine(GetRepositoryRoot(), relativePath));
@@ -65,5 +54,3 @@ public sealed class StarterRecipeHardeningDocsTests
         throw new DirectoryNotFoundException("Failed to locate repository root from test base directory.");
     }
 }
-
-

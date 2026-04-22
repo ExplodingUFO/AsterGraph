@@ -17,7 +17,7 @@
 | 契约优先集成 | `AsterGraph.Abstractions` | 稳定的标识符、定义和 provider 契约 |
 
 只有当宿主还需要直接处理 `GraphDocument`、序列化或兼容性 API 时，再额外加 `AsterGraph.Core`。
-把 `AsterGraph.Starter.Avalonia` 当作可复制的 starter recipe。保留/复制 `AsterGraphEditorFactory.Create(...)`、`AsterGraphAvaloniaViewFactory.Create(...)`、`AsterGraphEditorOptions`，以及 document/catalog/editor/view 的组合流程。替换宿主自己的 top-level window、shell chrome、sample title/size/content shell 细节，以及随着宿主成长而逐步替换的 sample graph/catalog definitions。下一步 hosted step 是 `AsterGraph.HelloWorld.Avalonia`。
+把 `AsterGraph.Starter.Avalonia` 当作 starter recipe。保留/复制 `AsterGraphEditorFactory.Create(...)`、`AsterGraphAvaloniaViewFactory.Create(...)`、`AsterGraphEditorOptions`，以及 document/catalog/editor/view 的组合流程。替换宿主自己的 top-level window 和它的 title/size，并随着宿主成长逐步替换 sample graph/catalog definitions。下一步 hosted step 是 `AsterGraph.HelloWorld.Avalonia`。
 
 
 ## 2. 从 NuGet 安装
@@ -145,3 +145,4 @@ var view = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOption
 - 历史 tag 与包版本的关系：[Versioning](./versioning.md)
 - proof harness：[`tools/AsterGraph.HostSample`](../../tools/AsterGraph.HostSample/)、[`tools/AsterGraph.PackageSmoke`](../../tools/AsterGraph.PackageSmoke/)、[`tools/AsterGraph.ScaleSmoke`](../../tools/AsterGraph.ScaleSmoke/)
 - 中等样例：[`tools/AsterGraph.ConsumerSample.Avalonia`](../../tools/AsterGraph.ConsumerSample.Avalonia/)
+

@@ -15,8 +15,8 @@ Keep/copy from this recipe:
 
 Replace/own in your host:
 
-- the top-level window and shell chrome
-- the sample title, sample size, and sample content shell details
+- the top-level window and its title/size
+
 - the sample graph/catalog definitions once the host outgrows the tiny starter recipe
 
 Run it with:
@@ -26,3 +26,4 @@ dotnet run --project tools/AsterGraph.Starter.Avalonia/AsterGraph.Starter.Avalon
 ```
 
 Use `AsterGraph.HelloWorld` when you want the runtime-only route, `AsterGraph.HelloWorld.Avalonia` when you want the smallest stock hosted UI, `AsterGraph.ConsumerSample.Avalonia` when you need a realistic host hop, and `AsterGraph.HostSample` when you need proof-oriented route validation.
+

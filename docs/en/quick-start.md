@@ -17,7 +17,7 @@ If you are evaluating the public beta end to end, use [Beta Evaluation Path](./e
 | Contract-first integration | `AsterGraph.Abstractions` | stable identifiers, definitions, and provider contracts |
 
 Add `AsterGraph.Core` only when the host also needs direct `GraphDocument`, serialization, or compatibility APIs.
-Use `AsterGraph.Starter.Avalonia` as the copyable starter recipe. Keep/copy `AsterGraphEditorFactory.Create(...)`, `AsterGraphAvaloniaViewFactory.Create(...)`, `AsterGraphEditorOptions`, and the document/catalog/editor/view composition flow. Replace the top-level window, shell chrome, sample title/size/content shell details, and sample graph/catalog definitions as the host grows. The next hosted step is `AsterGraph.HelloWorld.Avalonia`.
+Use `AsterGraph.Starter.Avalonia` as the starter recipe. Keep/copy `AsterGraphEditorFactory.Create(...)`, `AsterGraphAvaloniaViewFactory.Create(...)`, `AsterGraphEditorOptions`, and the document/catalog/editor/view composition flow. Replace the top-level window and its title/size, and replace the sample graph/catalog definitions as the host grows. The next hosted step is `AsterGraph.HelloWorld.Avalonia`.
 
 
 ## 2. Install From NuGet
@@ -141,3 +141,4 @@ If you are validating the repository itself instead of consuming the published p
 - historical tags versus package versions: [Versioning](./versioning.md)
 - proof harnesses: [`tools/AsterGraph.HostSample`](../../tools/AsterGraph.HostSample/), [`tools/AsterGraph.PackageSmoke`](../../tools/AsterGraph.PackageSmoke/), [`tools/AsterGraph.ScaleSmoke`](../../tools/AsterGraph.ScaleSmoke/)
 - medium consumer sample: [`tools/AsterGraph.ConsumerSample.Avalonia`](../../tools/AsterGraph.ConsumerSample.Avalonia/)
+
