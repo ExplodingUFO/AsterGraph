@@ -119,6 +119,15 @@ public sealed class ConsumerSampleProofTests
     }
 
     [Fact]
+    public void Program_SupportBundleOption_RequiresExplicitPath()
+    {
+        var exception = Assert.Throws<ArgumentException>(() =>
+            Program.Main(["--support-bundle", "--support-note", "cli-note"]));
+
+        Assert.Contains("--support-bundle requires a file path.", exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void ConsumerSampleHost_PersistsExportsAndImportsPluginAllowlistDecisions()
     {
         var storageRoot = Path.Combine(Path.GetTempPath(), "AsterGraph.ConsumerSample.Tests", Guid.NewGuid().ToString("N"));

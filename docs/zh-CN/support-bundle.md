@@ -35,7 +35,7 @@ support bundle 是一个本地 JSON 文件，顶层字段固定为：
 
 `reproduction` 记录：
 
-- 精确命令
+- 捕获到的命令行
 - 工作目录
 - 可选的人工备注
 

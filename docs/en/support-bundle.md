@@ -35,7 +35,7 @@ The support bundle is one local JSON file with these top-level fields:
 
 `reproduction` records:
 
-- the exact command
+- the captured command line
 - the working directory
 - an optional human note
 

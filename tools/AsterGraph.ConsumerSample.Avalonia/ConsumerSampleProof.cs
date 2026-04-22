@@ -38,7 +38,7 @@ public sealed record ConsumerSampleProofResult(
         FormatMetric("command_latency_ms", CommandLatencyMs),
     ];
 
-    public IReadOnlyList<string> ProofLines =>
+    internal IReadOnlyList<string> ProofLines =>
     [
         $"CONSUMER_SAMPLE_HOST_ACTION_OK:{HostMenuActionOk}",
         $"CONSUMER_SAMPLE_PLUGIN_OK:{PluginContributionOk}",

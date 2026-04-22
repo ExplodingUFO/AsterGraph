@@ -33,10 +33,22 @@ public static class Program
 {
     public static void Main(string[] args)
     {
+        var supportBundleRequested = HasOption(args, "--support-bundle");
+        var supportNoteRequested = HasOption(args, "--support-note");
         var supportBundlePath = TryGetOptionValue(args, "--support-bundle");
         var supportNote = TryGetOptionValue(args, "--support-note");
         var proofRequested = args.Any(static arg => string.Equals(arg, "--proof", StringComparison.OrdinalIgnoreCase))
             || !string.IsNullOrWhiteSpace(supportBundlePath);
+
+        if (supportBundleRequested && string.IsNullOrWhiteSpace(supportBundlePath))
+        {
+            throw new ArgumentException("--support-bundle requires a file path.");
+        }
+
+        if (supportNoteRequested && string.IsNullOrWhiteSpace(supportNote))
+        {
+            throw new ArgumentException("--support-note requires a note value.");
+        }
 
         if (proofRequested)
         {
@@ -52,7 +64,7 @@ public static class Program
                 ConsumerSampleSupportBundle.WriteProofBundle(
                     supportBundlePath,
                     result,
-                    BuildSupportCommand(args),
+                    GetCapturedCommandLine(),
                     supportNote);
 
                 Console.WriteLine("SUPPORT_BUNDLE_OK:True");
@@ -70,27 +82,27 @@ public static class Program
         ConsumerSampleAppBuilder.BuildDesktopApp().StartWithClassicDesktopLifetime(args);
     }
 
+    private static bool HasOption(IEnumerable<string> args, string optionName)
+        => args.Any(arg => string.Equals(arg, optionName, StringComparison.OrdinalIgnoreCase));
+
     private static string? TryGetOptionValue(IReadOnlyList<string> args, string optionName)
     {
         for (var index = 0; index < args.Count - 1; index++)
         {
             if (string.Equals(args[index], optionName, StringComparison.OrdinalIgnoreCase))
             {
-                return args[index + 1];
+                var candidate = args[index + 1];
+                return candidate.StartsWith("--", StringComparison.Ordinal)
+                    ? null
+                    : candidate;
             }
         }
 
         return null;
     }
 
-    private static string BuildSupportCommand(IEnumerable<string> args)
-    {
-        const string prefix = "dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.ConsumerSample.Avalonia.csproj --nologo";
-        var arguments = args.ToArray();
-        return arguments.Length == 0
-            ? prefix
-            : $"{prefix} -- {string.Join(" ", arguments.Select(EscapeArgument))}";
-    }
+    private static string GetCapturedCommandLine()
+        => string.Join(" ", Environment.GetCommandLineArgs().Select(EscapeArgument));
 
     private static string EscapeArgument(string value)
         => value.Contains(' ', StringComparison.Ordinal)

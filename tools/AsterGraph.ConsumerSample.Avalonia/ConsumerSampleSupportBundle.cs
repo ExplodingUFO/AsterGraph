@@ -4,7 +4,7 @@ using System.Text.Json;
 
 namespace AsterGraph.ConsumerSample;
 
-public static class ConsumerSampleSupportBundle
+internal static class ConsumerSampleSupportBundle
 {
     public static void WriteProofBundle(
         string outputPath,
