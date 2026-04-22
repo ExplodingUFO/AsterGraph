@@ -8,6 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Avalonia.Headless" />
+    <PackageReference Include="Avalonia.Themes.Fluent" />
     <PackageReference Include="coverlet.collector">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
@@ -22,6 +24,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\tools\AsterGraph.HelloWorld\AsterGraph.HelloWorld.csproj" />
-    <ProjectReference Include="..\..\tools\AsterGraph.HelloWorld.Avalonia\AsterGraph.HelloWorld.Avalonia.csproj" />
+    <ProjectReference Include="..\..\tools\AsterGraph.Starter.Avalonia\AsterGraph.Starter.Avalonia.csproj" />
   </ItemGroup>
 </Project>

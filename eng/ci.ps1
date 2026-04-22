@@ -38,11 +38,13 @@ $hostSampleProject = 'tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj'
 $consumerSampleProject = 'tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.ConsumerSample.Avalonia.csproj'
 $helloWorldProject = 'tools/AsterGraph.HelloWorld/AsterGraph.HelloWorld.csproj'
 $helloWorldAvaloniaProject = 'tools/AsterGraph.HelloWorld.Avalonia/AsterGraph.HelloWorld.Avalonia.csproj'
+$starterAvaloniaProject = 'tools/AsterGraph.Starter.Avalonia/AsterGraph.Starter.Avalonia.csproj'
 $packageSmokeProject = 'tools/AsterGraph.PackageSmoke/AsterGraph.PackageSmoke.csproj'
 $scaleSmokeProject = 'tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj'
 $demoProject = 'src/AsterGraph.Demo/AsterGraph.Demo.csproj'
 $editorTestsProject = 'tests/AsterGraph.Editor.Tests/AsterGraph.Editor.Tests.csproj'
 $consumerSampleTestsProject = 'tests/AsterGraph.ConsumerSample.Tests/AsterGraph.ConsumerSample.Tests.csproj'
+$helloWorldTestsProject = 'tests/AsterGraph.HelloWorld.Tests/AsterGraph.HelloWorld.Tests.csproj'
 $scaleSmokeTestsProject = 'tests/AsterGraph.ScaleSmoke.Tests/AsterGraph.ScaleSmoke.Tests.csproj'
 $userHome = if ([string]::IsNullOrWhiteSpace($env:USERPROFILE)) { $env:HOME } else { $env:USERPROFILE }
 $fallbackPackageCache = Join-Path $userHome '.nuget/packages'
@@ -66,6 +68,7 @@ $frameworkBuildProjects = @{
   'net8.0' = @(
     $helloWorldProject,
     $helloWorldAvaloniaProject,
+    $starterAvaloniaProject,
     $hostSampleProject,
     $consumerSampleProject,
     $packageSmokeProject,
@@ -80,6 +83,7 @@ $frameworkBuildProjects = @{
 $frameworkTestProjects = @{
   'net8.0' = @(
     'tests/AsterGraph.Serialization.Tests/AsterGraph.Serialization.Tests.csproj',
+    $helloWorldTestsProject,
     $consumerSampleTestsProject,
     $scaleSmokeTestsProject
   )
