@@ -1,6 +1,6 @@
 # Retained-To-Session Migration Recipe
 
-Choose retained only when you are migrating an existing host in batches. Use this recipe when an existing host still constructs `GraphEditorViewModel` directly but wants to move toward the canonical runtime/session path without rewriting everything at once. The retained route is a bridge, not the destination.
+Choose retained only when you are migrating an existing host in batches. This recipe is migration-only, not the preferred long-term extension path. Use it when an existing host still constructs `GraphEditorViewModel` directly but wants to move toward the canonical runtime/session seams without rewriting everything at once.
 
 This is the single bounded retained recipe set. If an existing host still constructs `GraphEditorViewModel` or `GraphEditorView`, use this doc; otherwise start on `CreateSession(...)` or `Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)`.
 
@@ -14,64 +14,68 @@ New code should land on:
 
 If you are starting new work, begin with [Quick Start](./quick-start.md) or [Host Integration](./host-integration.md) instead of the retained bridge.
 
-## Step 1: Centralize Editor Options
+## Stage 0: Keep the retained bridge
 
-Move document, catalog, compatibility, storage, plugin, localization, and diagnostics setup into one `AsterGraphEditorOptions` factory in the host.
+Keep temporarily:
 
-## Step 2: Stop Routing New Logic Through ViewModel-Specific Helpers
+- `GraphEditorViewModel`
+- `GraphEditorView`
+- host-owned `AsterGraphEditorOptions` composition
 
-When adding new host features:
+Replace with canonical seams:
 
-- prefer `editor.Session.Commands` over retained helper methods
-- prefer DTO/snapshot queries over retained view-model projections
-- keep `GraphEditorViewModel` only as a UI bridge while the host is still migrating
+- create runtime-only slices with `AsterGraphEditorFactory.CreateSession(...)`
+- route new commands and queries through `IGraphEditorSession`
 
-### Step 2 Note: Compatibility Bridges
+Ownership after this stage:
 
-Canonical connection control should use runtime session commands (`connections.disconnect-*`, especially `connections.disconnect-all`) before adding retained-only variants. The existing retained compatibility shape for compatibility target discovery is still available while migrating:
+- the host still owns shell composition and options wiring
+- the session owns commands, queries, events, diagnostics, and automation
+- the retained bridge only adapts the UI surface
 
-- compatibility query: `GetCompatibleTargets(...)` and `CompatiblePortTarget`
+## Stage 1: Move command and query ownership into the session
+
+Keep temporarily:
+
+- the retained view-model bridge for untouched host slices
+- the shipped Avalonia shell if the host still needs it
+
+Replace with canonical seams:
+
+- use `editor.Session.Commands` for new actions
+- use DTO/snapshot queries instead of retained projections
+- prefer `CreateSession(...)` for runtime-only callers
+
+Compatibility bridges that can stay only during this stage:
+
+- retained connection discovery: `GetCompatibleTargets(...)` and `CompatiblePortTarget`
 - canonical replacement: `GetCompatiblePortTargets(...)` and `GraphEditorCompatiblePortTargetSnapshot`
+- temporary node-group helpers: `TrySetNodeExpansionState(...)` and `TrySetNodeGroupExtraPadding(...)`
+- canonical connection control: `connections.disconnect-*`, especially `connections.disconnect-all`
 
-For node-group UI parity during migration, retain compatibility helpers only when required:
+Ownership after this stage:
 
-- `TrySetNodeExpansionState(...)`
-- `TrySetNodeGroupExtraPadding(...)`
+- commands and queries are session-owned
+- host code owns orchestration and composition only
+- compatibility shims are legacy-only and do not get new behavior
 
-## Step 3: Switch Runtime-Only Callers First
+## Stage 2: Replace retained-only helpers and retire bridge-only behavior
 
-If part of the host does not need Avalonia controls, convert that slice to:
+Keep temporarily:
 
-```csharp
-var session = AsterGraphEditorFactory.CreateSession(options);
-```
+- `GraphEditorViewModel` and `GraphEditorView` only as migration scaffolding for untouched legacy code
 
-That usually gives the quickest reduction in retained-surface coupling.
+Replace with canonical seams:
 
-## Step 4: Keep The Shipped UI On The Factory Route
+- `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` for shipped Avalonia UI
+- `GetCompatiblePortTargets(...)` and snapshot APIs for compatibility projection
+- the session/runtime route for new work
 
-If the host still wants the default Avalonia shell, move from:
+Ownership after this stage:
 
-```csharp
-var editor = new GraphEditorViewModel(...);
-var view = new GraphEditorView { Editor = editor };
-```
-
-to:
-
-```csharp
-var editor = AsterGraphEditorFactory.Create(options);
-var view = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOptions
-{
-    Editor = editor,
-});
-```
-
-This keeps the retained UI bridge, but the runtime ownership stays on the shared kernel/session path.
-
-## Step 5: Retire Compatibility-Only Queries Last
-
-Keep `GetCompatibleTargets(...)` and `CompatiblePortTarget` only while the host still needs MVVM-shaped results. New work should already be on DTO/snapshot APIs such as `GetCompatiblePortTargets(...)`.
+- UI composition is factory-owned
+- commands and queries are session-owned
+- retained helpers are legacy-only and stop being the extension path
 
 ## Success Criteria
 

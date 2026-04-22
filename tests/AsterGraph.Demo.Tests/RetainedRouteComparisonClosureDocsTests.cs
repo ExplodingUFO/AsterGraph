@@ -40,6 +40,37 @@ public sealed class RetainedRouteComparisonClosureDocsTests
         Assert.Contains("这是唯一一个 bounded 的 retained recipe 集合。", retainedRecipe, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void RetainedMigrationRecipe_StagedOwnershipIsExplicitInBothLocales()
+    {
+        var retainedRecipeEn = ReadRepoFile("docs/en/retained-migration-recipe.md");
+        var retainedRecipeZh = ReadRepoFile("docs/zh-CN/retained-migration-recipe.md");
+
+        Assert.Contains("## Stage 0: Keep the retained bridge", retainedRecipeEn, StringComparison.Ordinal);
+        Assert.Contains("## Stage 1: Move command and query ownership into the session", retainedRecipeEn, StringComparison.Ordinal);
+        Assert.Contains("## Stage 2: Replace retained-only helpers and retire bridge-only behavior", retainedRecipeEn, StringComparison.Ordinal);
+        Assert.Contains("Keep temporarily:", retainedRecipeEn, StringComparison.Ordinal);
+        Assert.Contains("Replace with canonical seams:", retainedRecipeEn, StringComparison.Ordinal);
+        Assert.Contains("Ownership after this stage:", retainedRecipeEn, StringComparison.Ordinal);
+        Assert.Contains("migration-only, not the preferred long-term extension path", retainedRecipeEn, StringComparison.Ordinal);
+        Assert.True(retainedRecipeEn.IndexOf("## Stage 0: Keep the retained bridge", StringComparison.Ordinal)
+            < retainedRecipeEn.IndexOf("## Stage 1: Move command and query ownership into the session", StringComparison.Ordinal));
+        Assert.True(retainedRecipeEn.IndexOf("## Stage 1: Move command and query ownership into the session", StringComparison.Ordinal)
+            < retainedRecipeEn.IndexOf("## Stage 2: Replace retained-only helpers and retire bridge-only behavior", StringComparison.Ordinal));
+
+        Assert.Contains("## 第 0 阶段：先保留 retained 桥接", retainedRecipeZh, StringComparison.Ordinal);
+        Assert.Contains("## 第 1 阶段：把 command 和 query 的归属移入 session", retainedRecipeZh, StringComparison.Ordinal);
+        Assert.Contains("## 第 2 阶段：替换 retained-only helper 并退役桥接专属行为", retainedRecipeZh, StringComparison.Ordinal);
+        Assert.Contains("暂时保留：", retainedRecipeZh, StringComparison.Ordinal);
+        Assert.Contains("替换成 canonical seam：", retainedRecipeZh, StringComparison.Ordinal);
+        Assert.Contains("这个阶段之后的归属：", retainedRecipeZh, StringComparison.Ordinal);
+        Assert.Contains("迁移期专用", retainedRecipeZh, StringComparison.Ordinal);
+        Assert.True(retainedRecipeZh.IndexOf("## 第 0 阶段：先保留 retained 桥接", StringComparison.Ordinal)
+            < retainedRecipeZh.IndexOf("## 第 1 阶段：把 command 和 query 的归属移入 session", StringComparison.Ordinal));
+        Assert.True(retainedRecipeZh.IndexOf("## 第 1 阶段：把 command 和 query 的归属移入 session", StringComparison.Ordinal)
+            < retainedRecipeZh.IndexOf("## 第 2 阶段：替换 retained-only helper 并退役桥接专属行为", StringComparison.Ordinal));
+    }
+
     private static string ReadRepoFile(string relativePath)
         => File.ReadAllText(Path.Combine(GetRepositoryRoot(), relativePath));
 
