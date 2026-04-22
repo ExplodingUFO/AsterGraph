@@ -112,7 +112,7 @@ var view = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOption
 ## 7. 超过“第一跑”之后看哪里
 
 - [Host Integration](./host-integration.md) = 包边界、路线矩阵、迁移说明
-- [稳定化支持矩阵](./stabilization-support-matrix.md) = 公开 alpha 的支持边界和升级阅读顺序
+- [稳定化支持矩阵](./stabilization-support-matrix.md) = 冻结的支持边界和面向 `v1.0.0` 的升级指引
 - [Architecture](./architecture.md) = editor-kernel / scene-interaction / adapter split 与公开 stability level
 - [Adapter Capability Matrix](./adapter-capability-matrix.md) = 锁定的 `WPF` adapter-2 合同，以及 `supported` / `partial` / `fallback`
 - [Consumer Sample](./consumer-sample.md) = 介于 HelloWorld 和 Demo 之间的真实宿主样例
