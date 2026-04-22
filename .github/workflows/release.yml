@@ -316,7 +316,7 @@ jobs:
           name: prerelease-artifacts
           path: prerelease-artifacts
 
-      - name: Validate manual publish is limited to alpha packages
+      - name: Validate manual publish is limited to beta packages
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.publish_to_nuget }}
         shell: pwsh
         run: |
@@ -327,10 +327,10 @@ jobs:
             throw 'No prerelease packages were downloaded.'
           }
 
-          $nonAlphaPackages = $packages | Where-Object { $_.Name -notmatch '-alpha' }
-          if ($nonAlphaPackages.Count -gt 0) {
-            $names = $nonAlphaPackages.Name -join ', '
-            throw "Manual workflow publish is limited to alpha packages. Non-alpha packages: $names"
+          $nonBetaPackages = $packages | Where-Object { $_.Name -notmatch '-beta' }
+          if ($nonBetaPackages.Count -gt 0) {
+            $names = $nonBetaPackages.Name -join ', '
+            throw "Manual workflow publish is limited to beta packages. Non-beta packages: $names"
           }
 
       - name: Skip NuGet publish when no API key is configured

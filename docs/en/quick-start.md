@@ -19,7 +19,7 @@ Add `AsterGraph.Core` only when the host also needs direct `GraphDocument`, seri
 
 ## 2. Install From NuGet
 
-The public alpha packages are published to nuget.org, so the default `dotnet` restore flow plus `--prerelease` is enough.
+The public beta packages are published to nuget.org, so the default `dotnet` restore flow plus `--prerelease` is enough.
 
 ```powershell
 # shipped Avalonia UI host
@@ -78,7 +78,7 @@ The sample README is [`tools/AsterGraph.ConsumerSample.Avalonia/README.md`](../.
 For new work, start with the runtime/session route or the shipped Avalonia route. Treat the retained route as migration-only.
 New adopters should start with `AsterGraph.Starter.Avalonia` unless they are intentionally building a custom UI host from day one.
 If the host owns its UI, the runtime/session route is the canonical native path; `Editor.Session` still owns host actions, diagnostics, automation, and proof logic.
-Quick Start remains Avalonia-first today. `v0.9.0-beta` validates `WPF` as adapter 2 on the same canonical route; see [Adapter Capability Matrix](./adapter-capability-matrix.md) for that contract instead of treating it as a second beginner route.
+Quick Start remains Avalonia-first today. `v0.10.0-beta` validates `WPF` as adapter 2 on the same canonical route; see [Adapter Capability Matrix](./adapter-capability-matrix.md) for that contract instead of treating it as a second beginner route.
 
 ## 5. Minimal Hosted-UI Composition
 

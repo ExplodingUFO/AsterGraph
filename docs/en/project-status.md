@@ -2,10 +2,10 @@
 
 ## Current Status
 
-- package baseline: `0.2.0-alpha.3`
-- latest semver-aligned public prerelease tag: `v0.2.0-alpha.3`
+- package baseline: `0.10.0-beta`
+- latest public prerelease tag: `v0.10.0-beta`
 - latest legacy repository milestone tag: `v1.9`
-- repo posture: public alpha
+- repo posture: public beta
 - public versioning guidance: [Versioning](./versioning.md)
 - supported published packages:
   - `AsterGraph.Abstractions`
@@ -52,7 +52,7 @@
 
 ## Current Priorities
 
-The current public-repo priority is turning the public alpha into a coherent SDK surface rather than a pile of disconnected feature slices:
+The current public-repo priority is turning the public beta into a coherent SDK surface rather than a pile of disconnected feature slices:
 
 - public docs stay under `README.md`, `README.zh-CN.md`, `docs/en`, and `docs/zh-CN`
 - advanced editing is described as canonical capability modules, not retained-only behavior
@@ -62,11 +62,11 @@ The current public-repo priority is turning the public alpha into a coherent SDK
 ## Near-Term Roadmap
 
 - keep the canonical runtime/session surface stable while broadening official capability modules and proof guidance
-- keep public alpha documentation and proof guidance easy to follow as advanced editing closes
+- keep public beta documentation and proof guidance easy to follow as advanced editing closes
 - maintain hosted CI parity across the supported proof lanes
 - continue the retained compatibility migration window without abrupt public breaks
 - keep the shipped starter scaffold, runtime inspection surface, command/trust timeline, and perf overlay aligned with the canonical session-first route
-- validate `WPF` as adapter 2 on the same canonical route and publish Avalonia/WPF status using `Supported`, `Partial`, and `Fallback`
+- validate `WPF` as adapter 2 on the same canonical route and publish Avalonia/WPF status using `Supported`, `Partial`, and `Fallback` without implying parity
 
 ## Public Entry Matrix
 

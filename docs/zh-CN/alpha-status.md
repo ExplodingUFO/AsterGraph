@@ -1,9 +1,9 @@
-# AsterGraph Alpha 状态
+# AsterGraph 状态
 
-## 当前 Alpha 目标
+## 当前状态
 
-- 包版本基线：`0.2.0-alpha.3`
-- 仓库状态：public alpha
+- 包版本基线：`0.10.0-beta`
+- 仓库状态：public beta
 - 对外版本说明：[Versioning](./versioning.md)
 - 对外入口：`README.md` / `README.zh-CN.md` 加上 `docs/en` / `docs/zh-CN`
 - 项目状态页：[Project Status](./project-status.md)
@@ -42,12 +42,12 @@
 
 ## 已知限制
 
-- 当前最新对外 prerelease tag 是 `v0.2.0-alpha.3`；`v1.9` 只保留为公开前的历史里程碑 tag
+- 当前最新对外 prerelease tag 是 `v0.10.0-beta`；`v1.9` 只保留为公开前的历史里程碑 tag
 - public prerelease publish 和 release artifact 仍然依赖维护者 release flow
 - 最深的 package validation lane 目前仍以 Windows 为主
 - retained compatibility API 仍处于迁移窗口内，但只作为迁移桥接
-- 当前 public alpha 仍然只有一套官方 UI adapter：Avalonia
-- `v0.9.0-beta` 已经锁定 `WPF` 作为 adapter 2，但在 [Adapter Capability Matrix](./adapter-capability-matrix.md) 真正用 `supported` / `partial` / `fallback` 填出来之前，不代表已经承诺对齐
+- 当前 shipped 的 hosted adapter 仍然只有 Avalonia
+- `v0.10.0-beta` 已经锁定 `WPF` 作为 adapter 2，但在 [Adapter Capability Matrix](./adapter-capability-matrix.md) 真正用 `supported` / `partial` / `fallback` 填出来之前，不代表已经承诺对齐
 - advanced editing 已经作为宿主能力模块公开，但更广的 ecosystem 与第二 adapter 验证仍在后续阶段
 
 ## 推荐入口

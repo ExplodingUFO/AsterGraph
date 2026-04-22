@@ -7,16 +7,16 @@
 
 AsterGraph 是一个面向 .NET 的模块化节点图编辑器工具包，提供可复用的编辑器运行时、面向自定义 UI 或原生壳层的 canonical session/runtime 路线、默认 Avalonia hosted-UI 路径，以及面向宿主的插件、自动化、本地化、诊断和呈现扩展边界。
 
-## 公开 Alpha
+## 公开 Beta
 
-- 最新可安装包版本：`0.2.0-alpha.3`
-- 最新对外 SemVer prerelease 标签：`v0.2.0-alpha.3`
+- 最新可安装包版本：`0.10.0-beta`
+- 最新对外 SemVer prerelease 标签：`v0.10.0-beta`
 - 最新历史仓库里程碑标签：`v1.9`（公开前的旧检查点，不是 NuGet 包版本）
 - 公开发布包目标框架：`net8.0`、`net9.0`
 - release lane 还会用打包后的 `HostSample` 额外证明下游 `.NET 10` 消费兼容性
-- 后续对外 prerelease tag 应与包 SemVer 对齐，比如 `v0.2.0-alpha.3`
+- 后续对外 prerelease tag 应与包 SemVer 对齐，比如 `v0.10.0-beta`
 - 包版本与历史仓库 tag 的关系说明：[Versioning](./docs/zh-CN/versioning.md)
-- 当前范围、非目标与已知限制：[Alpha Status](./docs/zh-CN/alpha-status.md)
+- 当前发布边界与支持保证：[稳定化支持矩阵](./docs/zh-CN/stabilization-support-matrix.md)
 
 ## 从哪里开始
 
@@ -56,7 +56,7 @@ dotnet add package AsterGraph.Abstractions --prerelease
 | 默认 Avalonia UI | 宿主想直接复用默认编辑器壳层或独立 Avalonia 表面 | `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` | [`AsterGraph.HelloWorld.Avalonia`](./tools/AsterGraph.HelloWorld.Avalonia/) |
 | retained 迁移 | 现有宿主要分批迁移，暂时还离不开旧的 MVVM 入口 | `new GraphEditorViewModel(...)` + `new GraphEditorView { Editor = editor }` | [Host Integration](./docs/zh-CN/host-integration.md) |
 
-新的运行时能力接入优先锚定第一条。Avalonia 路线是当前受支持的 hosted adapter 路线，retained 路线只作为迁移桥接。`v0.9.0-beta` 已经锁定 `WPF` 作为 adapter 2，后续 Avalonia/WPF 差异会通过 [Adapter Capability Matrix](./docs/zh-CN/adapter-capability-matrix.md) 里的 `supported / partial / fallback` 合同公开，而不是引入 adapter 专属 runtime API。
+新的运行时能力接入优先锚定第一条。Avalonia 路线是当前受支持的 hosted adapter 路线，retained 路线只作为迁移桥接。`v0.10.0-beta` 已经锁定 `WPF` 作为 adapter 2，后续 Avalonia/WPF 差异会通过 [Adapter Capability Matrix](./docs/zh-CN/adapter-capability-matrix.md) 里的 `supported / partial / fallback` 合同公开，而不是引入 adapter 专属 runtime API；WPF 当前仍是验证中的 adapter 2，不要把它写成与 Avalonia 已经对齐。
 
 ## 公开入口分工
 
@@ -104,7 +104,7 @@ dotnet add package AsterGraph.Abstractions --prerelease
 
 `AsterGraph.Demo` 只是 sample，不属于公开支持的 SDK 边界。
 
-## 当前 Alpha 范围
+## 当前 Beta 范围
 
 当前已提供：
 
@@ -136,7 +136,7 @@ dotnet add package AsterGraph.Abstractions --prerelease
 - 激活前做本地候选发现
 - 运行时检查 trusted / loaded / blocked 的结果
 
-它**不**提供沙箱或不受信任代码隔离。对公开 alpha 宿主，建议配固定插件目录、显式 allowlist，以及你自己的签名或哈希校验策略。
+它**不**提供沙箱或不受信任代码隔离。对公开 prerelease 宿主，建议配固定插件目录、显式 allowlist，以及你自己的签名或哈希校验策略。
 
 ## 文档入口
 

@@ -1,6 +1,6 @@
 # AsterGraph 对外发布检查清单
 
-在把仓库切成公开可见，或者推送第一个公开 prerelease tag 之前，先跑完这份检查清单。
+在把仓库切成公开可见，或者推送 `v0.10.0-beta` 这样的公开 prerelease tag 之前，先跑完这份检查清单。
 
 ## 1. 可见性与分支策略
 
@@ -11,10 +11,10 @@
 
 ## 2. 公开仓库表面
 
-- 确认 `README.md` 和 `README.zh-CN.md` 都指向当前公开 Alpha 文档和入口矩阵
+- 确认 `README.md` 和 `README.zh-CN.md` 都指向当前公开 beta 文档和入口矩阵
 - 确认 `CONTRIBUTING.md`、`CODE_OF_CONDUCT.md`、`SECURITY.md` 都存在且内容仍然准确
 - 确认 `.github` 里的 issue 模板和 pull request 模板已启用
-- 确认仓库 description、topics、homepage 和当前 alpha 叙事一致
+- 确认仓库 description、topics、homepage 和当前 prerelease 叙事一致
 
 ## 3. 必跑验证
 
@@ -71,11 +71,11 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framew
 - 必须在 prerelease notes 或 release messaging 里同步给出 WPF proof marker：`HELLOWORLD_WPF_OK`
 - 必须在 prerelease notes 或 release messaging 里同步给出 adapter 能力收敛结果 marker：`ADAPTER_CAPABILITY_MATRIX`
 
-## 5. 第一个公开 Prerelease Tag
+## 5. 公开 Beta Prerelease Tag
 
 - 确认工作区干净
 - 先把要打 tag 的分支或 `master` 推上去
-- 创建并推送下一个形如 `v0.x.y-alpha.z` 的公开 tag
+- 创建并推送 `v0.10.0-beta` 这样的公开 tag
 - 从头到尾观察 `.github/workflows/release.yml`
 - 现在 prerelease workflow 会强制校验：公开 tag 必须和包版本完全一致
 - 确认自动生成的 prerelease notes 第一屏带有固定 header：
@@ -88,15 +88,16 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framew
 - 不要再把 `v1.9` 这类历史里程碑标签当成当前公开包版本；对外统一以 [Versioning](./versioning.md) 为准
 - release note 第一屏先写可安装包版本，再写与之匹配的公开 tag；`v1.x` 这类旧 milestone 只作为历史说明补充出现
 - `prerelease notes` / release messaging 中还必须核对并回填 `ADAPTER_CAPABILITY_MATRIX` 与 `HELLOWORLD_WPF_OK` 的状态，避免只写成功 tag 而漏能力核对
+- 公开文案要保持和 matrix 一致：`HELLOWORLD_WPF_OK` 证明的是 adapter 2 验证通过，不是 WPF 与 Avalonia 已经 parity
 
-如果你想在不新推 tag 的情况下手动发布 alpha 包：
+如果你想在不新推 tag 的情况下手动发布 beta 包：
 
 - 先在 GitHub 仓库 secret 里配置 `NUGET_API_KEY`
 - 打开 `Actions > prerelease > Run workflow`
 - 把 `publish_to_nuget` 设为 `true`
 - 如果要从特定分支或 `v*` tag 打包，就填写 `release_ref`
-- 保持仓库里已经提交好的 `0.x.y-alpha.z` 版本号；手动触发不会替你改版本，只会发布当前提交里的版本
-- GitHub prerelease 仍然建议走 tag 驱动；手动触发只作为 NuGet alpha 发布的补充入口
+- 保持仓库里已经提交好的 `0.x.y-beta` 版本号；手动触发不会替你改版本，只会发布当前提交里的版本
+- GitHub prerelease 仍然建议走 tag 驱动；手动触发只作为 NuGet beta 发布的补充入口
 
 ## 6. 对外入口说明
 
@@ -110,7 +111,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framew
 - `tools/AsterGraph.ScaleSmoke` = 规模基线加历史记录与状态连续性验证
 - `src/AsterGraph.Demo` = 展示宿主
 - `docs/zh-CN/versioning.md` = 包版本与历史仓库 tag 的对应说明
-- `docs/zh-CN/project-status.md` = 当前公开 alpha 状态快照
+- `docs/zh-CN/project-status.md` = 当前公开 beta 状态快照
 - `docs/zh-CN/quick-start.md` = 推荐接入路径
-- `docs/zh-CN/alpha-status.md` = alpha 范围与限制
+- `docs/zh-CN/alpha-status.md` = alpha 范围与限制（历史参考）
 - `docs/zh-CN/advanced-editing.md` = advanced-editing capability split 与 proof map

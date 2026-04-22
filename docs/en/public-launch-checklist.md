@@ -1,6 +1,6 @@
 # AsterGraph Public Launch Checklist
 
-Use this checklist immediately before making the repository public or pushing the first public prerelease tag.
+Use this checklist immediately before making the repository public or pushing the first public beta tag.
 
 ## 1. Visibility And Branch Policy
 
@@ -67,11 +67,11 @@ Expected high-signal markers:
 - `SCALE_HISTORY_CONTRACT_OK:...`
 - `COVERAGE_REPORT_OK:...`
 
-## 5. First Public Prerelease Tag
+## 5. First Public Beta Tag
 
 - confirm the working tree is clean
 - push the release branch or `master` state that should back the tag
-- create and push the next public tag in the form `v0.x.y-alpha.z`
+- create and push the next public tag in the form `v0.10.0-beta`
 - watch `.github/workflows/release.yml` from start to finish
 - remember that the prerelease workflow now enforces an exact tag-to-package-version match
 - confirm the generated prerelease notes begin with the automated header block:
@@ -85,13 +85,13 @@ Expected high-signal markers:
 - do not present historical milestone-style tags such as `v1.9` as the current public package version; use [Versioning](./versioning.md) as the public rule
 - in the first screen of release notes, list the installable package version first, the matching public tag second, and any legacy `v1.x` milestone reference only as historical context
 
-For a maintainer-driven manual alpha publish without pushing a new tag:
+For a maintainer-driven manual beta publish without pushing a new tag:
 
 - add the `NUGET_API_KEY` repository secret in GitHub
 - open `Actions > prerelease > Run workflow`
 - set `publish_to_nuget` to `true`
 - optionally set `release_ref` to the branch or `v*` tag that should be packed
-- keep using a committed `0.x.y-alpha.z` package version; the manual path publishes the version already checked into the repository
+- keep using the committed `0.10.0-beta` package version; the manual path publishes the version already checked into the repository
 - leave GitHub prerelease creation tag-driven; manual dispatch is only the NuGet publish escape hatch
 
 ## 6. Public Entry Guidance
@@ -106,7 +106,7 @@ Keep the consumer entry story explicit in release notes and public announcements
 - `tools/AsterGraph.ScaleSmoke` = scale baseline plus history/state-continuity proof
 - `src/AsterGraph.Demo` = showcase host
 - `docs/en/versioning.md` = package version versus historical repository-tag guidance
-- `docs/en/project-status.md` = current public alpha status snapshot
+- `docs/en/project-status.md` = current public beta status snapshot
 - `docs/en/quick-start.md` = canonical adoption path
 - `docs/en/alpha-status.md` = current alpha scope and limitations
 - `docs/en/advanced-editing.md` = advanced-editing capability split and proof map
