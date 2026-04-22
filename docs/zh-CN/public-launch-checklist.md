@@ -58,7 +58,9 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framew
 - `EDGE_NOTE_OK:True`
 - `EDGE_GEOMETRY_OK:True`
 - `DISCONNECT_FLOW_OK:True`
-- `ADAPTER_CAPABILITY_MATRIX:True`
+- `ADAPTER_CAPABILITY_MATRIX_FORMAT:1`
+- `ADAPTER_CAPABILITY_MATRIX:WPF:HELLOWORLD_WPF_OK:PASS`
+- `ADAPTER_CAPABILITY_MATRIX:WPF:COMMAND_SURFACE_OK:PASS`
 - `HOST_SAMPLE_NET10_OK:True`
 - `PACKAGE_SMOKE_OK:True`
 - `SCALE_PERFORMANCE_BUDGET_OK:baseline:True:...`
@@ -70,7 +72,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framew
 发布 notes/release messaging 核对要求：
 
 - 必须在 prerelease notes 或 release messaging 里同步给出 WPF proof marker：`HELLOWORLD_WPF_OK`
-- 必须在 prerelease notes 或 release messaging 里同步给出 adapter 能力收敛结果 marker：`ADAPTER_CAPABILITY_MATRIX`
+- 必须在 prerelease notes 或 release messaging 里同步给出 adapter 能力矩阵输出：`ADAPTER_CAPABILITY_MATRIX_FORMAT:1`、`ADAPTER_CAPABILITY_MATRIX:WPF:HELLOWORLD_WPF_OK:PASS`、`ADAPTER_CAPABILITY_MATRIX:WPF:COMMAND_SURFACE_OK:PASS`
 
 ## 5. 公开 Beta Prerelease Tag
 
@@ -84,14 +86,14 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framew
   - 与之匹配的公开 tag
   - 可选的 legacy 历史仓库检查点引用
 - 确认自动生成的 prerelease notes 同时把 proof summary 发出来，而不只是留在 workflow artifact 里
-- 确认自动生成的 notes 和公告文案明确写出冻结的 support boundary 叙事和 adapter matrix 叙事，并同步给出 `HELLOWORLD_WPF_OK` 与 `ADAPTER_CAPABILITY_MATRIX`
+- 确认自动生成的 notes 和公告文案明确写出冻结的 support boundary 叙事和 adapter matrix 叙事，并同步给出 `HELLOWORLD_WPF_OK:True`、`ADAPTER_CAPABILITY_MATRIX_FORMAT:1`、`ADAPTER_CAPABILITY_MATRIX:WPF:HELLOWORLD_WPF_OK:PASS`、`ADAPTER_CAPABILITY_MATRIX:WPF:COMMAND_SURFACE_OK:PASS`
 - 把 `HELLOWORLD_WPF_OK` 只当成 adapter-2 验证通过，不要写成 Avalonia/WPF parity 或公开 WPF support
 - 确认每条 beta 接入反馈都记录 `route`、`version`、proof 标记，以及 `support bundle` 的可用性或路径
 - 如果配置了 `NUGET_API_KEY`，确认包发布成功
 - 如果没有配置 `NUGET_API_KEY`，确认 workflow 是有意跳过 NuGet publish，而不是失败
 - 不要再把 `v1.x` 风格的历史里程碑 checkpoint 当成当前公开包版本；对外统一以 [Versioning](./versioning.md) 为准
 - release note 第一屏先写可安装包版本，再写与之匹配的公开 tag；`v1.x` 风格的旧 milestone 只作为历史说明补充出现
-- `prerelease notes` / release messaging 中还必须核对并回填 `ADAPTER_CAPABILITY_MATRIX` 与 `HELLOWORLD_WPF_OK` 的状态，避免只写成功 tag 而漏能力核对
+- `prerelease notes` / release messaging 中还必须核对并回填 `HELLOWORLD_WPF_OK:True`、`ADAPTER_CAPABILITY_MATRIX_FORMAT:1`、`ADAPTER_CAPABILITY_MATRIX:WPF:HELLOWORLD_WPF_OK:PASS`、`ADAPTER_CAPABILITY_MATRIX:WPF:COMMAND_SURFACE_OK:PASS`，避免只写成功 tag 而漏能力核对
 - 公开文案要保持和 matrix 一致：`HELLOWORLD_WPF_OK` 证明的是 adapter 2 验证通过，不是 WPF 与 Avalonia 已经 parity
 
 如果你想在不新推 tag 的情况下手动发布 beta 包：
@@ -116,6 +118,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framew
 - `src/AsterGraph.Demo` = 展示宿主
 - `docs/zh-CN/versioning.md` = 包版本与历史仓库 tag 的对应说明
 - `docs/zh-CN/project-status.md` = 当前公开 beta 状态快照
+- `docs/zh-CN/evaluation-path.md` = 从第一次安装到真实宿主 proof 的单一路径
 - `docs/zh-CN/quick-start.md` = 推荐接入路径
 - `docs/zh-CN/stabilization-support-matrix.md` = 冻结的 support boundary 和升级指引
 - `docs/zh-CN/adapter-capability-matrix.md` = adapter 能力叙事与验证矩阵

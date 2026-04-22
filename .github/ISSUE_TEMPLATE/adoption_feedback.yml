@@ -9,7 +9,7 @@ body:
     attributes:
       label: AsterGraph version
       description: NuGet package version or public tag you evaluated
-      placeholder: 0.2.0-alpha.3 / v0.2.0-alpha.3
+      placeholder: 0.11.0-beta / v0.11.0-beta
     validations:
       required: true
   - type: dropdown

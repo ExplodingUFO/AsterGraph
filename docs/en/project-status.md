@@ -82,6 +82,7 @@ The current public-repo priority is turning the public beta into a coherent SDK 
 ## Public Entry Points
 
 - [Versioning](./versioning.md)
+- [Beta Evaluation Path](./evaluation-path.md) = single route ladder from first install to realistic hosted proof
 - [Quick Start](./quick-start.md)
 - [Consumer Sample](./consumer-sample.md)
 - [ScaleSmoke Baseline](./scale-baseline.md)

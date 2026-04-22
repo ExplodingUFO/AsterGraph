@@ -65,6 +65,10 @@ public sealed class DemoProofReleaseSurfaceTests
         var readmeZh = ReadRepoFile("README.zh-CN.md");
         var quickStart = ReadRepoFile("docs/en/quick-start.md");
         var quickStartZh = ReadRepoFile("docs/zh-CN/quick-start.md");
+        var projectStatus = ReadRepoFile("docs/en/project-status.md");
+        var projectStatusZh = ReadRepoFile("docs/zh-CN/project-status.md");
+        var checklist = ReadRepoFile("docs/en/public-launch-checklist.md");
+        var checklistZh = ReadRepoFile("docs/zh-CN/public-launch-checklist.md");
 
         Assert.Contains("evaluation-path.md", readme, StringComparison.Ordinal);
         Assert.Contains("Beta Evaluation Path", readme, StringComparison.Ordinal);
@@ -74,6 +78,14 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("Beta Evaluation Path", quickStart, StringComparison.Ordinal);
         Assert.Contains("evaluation-path.md", quickStartZh, StringComparison.Ordinal);
         Assert.Contains("公开 Beta 评估路径", quickStartZh, StringComparison.Ordinal);
+        Assert.Contains("evaluation-path.md", projectStatus, StringComparison.Ordinal);
+        Assert.Contains("single route ladder", projectStatus, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("evaluation-path.md", projectStatusZh, StringComparison.Ordinal);
+        Assert.Contains("单一路径", projectStatusZh, StringComparison.Ordinal);
+        Assert.Contains("evaluation-path.md", checklist, StringComparison.Ordinal);
+        Assert.Contains("single route ladder", checklist, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("evaluation-path.md", checklistZh, StringComparison.Ordinal);
+        Assert.Contains("单一路径", checklistZh, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -133,6 +145,8 @@ public sealed class DemoProofReleaseSurfaceTests
     [Fact]
     public void IssueTemplates_AndTriageDocs_ShareOneBetaEvidenceContract()
     {
+        var packageVersion = GetPackageVersion();
+        var publicTag = $"v{packageVersion}";
         var adoptionTemplate = ReadRepoFile(".github/ISSUE_TEMPLATE/adoption_feedback.yml");
         var bugTemplate = ReadRepoFile(".github/ISSUE_TEMPLATE/bug_report.md");
         var triageDoc = ReadRepoFile("docs/en/adopter-triage.md");
@@ -141,10 +155,13 @@ public sealed class DemoProofReleaseSurfaceTests
         var checklistZh = ReadRepoFile("docs/zh-CN/public-launch-checklist.md");
         var adoptionFeedback = ReadRepoFile("docs/en/adoption-feedback.md");
         var adoptionFeedbackZh = ReadRepoFile("docs/zh-CN/adoption-feedback.md");
+        var versionBlock = ExtractIssueTemplateBlock(adoptionTemplate, "version");
         var evidenceBlock = ExtractIssueTemplateBlock(adoptionTemplate, "evidence");
         var supportBundleBlock = ExtractIssueTemplateBlock(adoptionTemplate, "support_bundle");
 
         Assert.Contains("id: version", adoptionTemplate, StringComparison.Ordinal);
+        Assert.Contains($"placeholder: {packageVersion} / {publicTag}", versionBlock, StringComparison.Ordinal);
+        Assert.DoesNotContain("alpha", versionBlock, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("id: route", adoptionTemplate, StringComparison.Ordinal);
         Assert.Contains("id: proof_markers", adoptionTemplate, StringComparison.Ordinal);
         Assert.Contains("id: support_bundle", adoptionTemplate, StringComparison.Ordinal);
@@ -612,12 +629,20 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("SCALE_PERFORMANCE_BUDGET_OK:large:True:...", checklistZh, StringComparison.Ordinal);
         Assert.Contains("SCALE_PERF_SUMMARY:stress:...", checklistZh, StringComparison.Ordinal);
 
-        Assert.Contains("ADAPTER_CAPABILITY_MATRIX", checklist, StringComparison.Ordinal);
+        Assert.Contains("ADAPTER_CAPABILITY_MATRIX_FORMAT:1", checklist, StringComparison.Ordinal);
+        Assert.Contains("ADAPTER_CAPABILITY_MATRIX:WPF:HELLOWORLD_WPF_OK:PASS", checklist, StringComparison.Ordinal);
+        Assert.Contains("ADAPTER_CAPABILITY_MATRIX:WPF:COMMAND_SURFACE_OK:PASS", checklist, StringComparison.Ordinal);
+        Assert.DoesNotContain("ADAPTER_CAPABILITY_MATRIX:True", checklist, StringComparison.Ordinal);
         Assert.Contains("HELLOWORLD_WPF_OK", checklist, StringComparison.Ordinal);
         Assert.True(HasLineWith(checklist, "HELLOWORLD_WPF_OK", "adapter-2"));
         Assert.True(HasLineWith(checklist, "HELLOWORLD_WPF_OK", "parity"));
-        Assert.Contains("ADAPTER_CAPABILITY_MATRIX", checklistZh, StringComparison.Ordinal);
+        Assert.Contains("ADAPTER_CAPABILITY_MATRIX_FORMAT:1", checklistZh, StringComparison.Ordinal);
+        Assert.Contains("ADAPTER_CAPABILITY_MATRIX:WPF:HELLOWORLD_WPF_OK:PASS", checklistZh, StringComparison.Ordinal);
+        Assert.Contains("ADAPTER_CAPABILITY_MATRIX:WPF:COMMAND_SURFACE_OK:PASS", checklistZh, StringComparison.Ordinal);
+        Assert.DoesNotContain("ADAPTER_CAPABILITY_MATRIX:True", checklistZh, StringComparison.Ordinal);
         Assert.Contains("HELLOWORLD_WPF_OK", checklistZh, StringComparison.Ordinal);
+        Assert.True(HasLineWith(checklistZh, "HELLOWORLD_WPF_OK", "adapter-2"));
+        Assert.True(HasLineWith(checklistZh, "HELLOWORLD_WPF_OK", "parity"));
     }
 
     [Fact]

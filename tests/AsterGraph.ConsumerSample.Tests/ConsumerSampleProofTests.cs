@@ -1,5 +1,6 @@
 using System.Linq;
 using System.Text.Json;
+using System.Globalization;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.VisualTree;
@@ -77,20 +78,35 @@ public sealed class ConsumerSampleProofTests
 
         using var document = JsonDocument.Parse(File.ReadAllText(bundlePath));
         var root = document.RootElement;
+        var packageVersion = root.GetProperty("packageVersion").GetString();
+        var publicTag = root.GetProperty("publicTag").GetString();
+        var generatedAtUtc = root.GetProperty("generatedAtUtc").GetString();
+        var environment = root.GetProperty("environment");
+        var reproduction = root.GetProperty("reproduction");
 
         Assert.Equal(1, root.GetProperty("schemaVersion").GetInt32());
         Assert.Equal("ConsumerSample.Avalonia", root.GetProperty("route").GetString());
-        Assert.False(string.IsNullOrWhiteSpace(root.GetProperty("packageVersion").GetString()));
-        Assert.StartsWith("v", root.GetProperty("publicTag").GetString(), StringComparison.Ordinal);
+        Assert.False(string.IsNullOrWhiteSpace(packageVersion));
+        Assert.Equal($"v{packageVersion}", publicTag);
+        Assert.True(
+            DateTimeOffset.TryParse(generatedAtUtc, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out _),
+            "Support bundle generatedAtUtc should be a parseable round-trip UTC timestamp.");
         Assert.Contains(
             root.GetProperty("proofLines").EnumerateArray().Select(static item => item.GetString()),
             line => string.Equals(line, "COMMAND_SURFACE_OK:True", StringComparison.Ordinal));
         Assert.Contains(
             root.GetProperty("proofLines").EnumerateArray().Select(static item => item.GetString()),
             line => string.Equals(line, "CONSUMER_SAMPLE_OK:True", StringComparison.Ordinal));
-        Assert.Equal("repro-note", root.GetProperty("reproduction").GetProperty("note").GetString());
-        Assert.Contains("--support-bundle", root.GetProperty("reproduction").GetProperty("command").GetString(), StringComparison.Ordinal);
-        Assert.False(string.IsNullOrWhiteSpace(root.GetProperty("environment").GetProperty("frameworkDescription").GetString()));
+        Assert.Equal(
+            ["frameworkDescription", "osArchitecture", "osDescription", "processArchitecture"],
+            environment.EnumerateObject().Select(static property => property.Name).OrderBy(static name => name).ToArray());
+        Assert.False(string.IsNullOrWhiteSpace(environment.GetProperty("frameworkDescription").GetString()));
+        Assert.False(string.IsNullOrWhiteSpace(environment.GetProperty("osDescription").GetString()));
+        Assert.False(string.IsNullOrWhiteSpace(environment.GetProperty("osArchitecture").GetString()));
+        Assert.False(string.IsNullOrWhiteSpace(environment.GetProperty("processArchitecture").GetString()));
+        Assert.Equal("repro-note", reproduction.GetProperty("note").GetString());
+        Assert.Contains("--support-bundle", reproduction.GetProperty("command").GetString(), StringComparison.Ordinal);
+        Assert.False(string.IsNullOrWhiteSpace(reproduction.GetProperty("workingDirectory").GetString()));
     }
 
     [Fact]

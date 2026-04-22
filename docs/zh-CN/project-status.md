@@ -81,6 +81,7 @@
 ## 对外入口
 
 - [Versioning](./versioning.md)
+- [公开 Beta 评估路径](./evaluation-path.md) = 从第一次安装到真实宿主 proof 的单一路径
 - [稳定化支持矩阵](./stabilization-support-matrix.md)
 - [Quick Start](./quick-start.md)
 - [Consumer Sample](./consumer-sample.md)

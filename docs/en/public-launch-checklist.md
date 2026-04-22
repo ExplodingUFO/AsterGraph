@@ -58,7 +58,9 @@ Expected high-signal markers:
 - `EDGE_NOTE_OK:True`
 - `EDGE_GEOMETRY_OK:True`
 - `DISCONNECT_FLOW_OK:True`
-- `ADAPTER_CAPABILITY_MATRIX:True`
+- `ADAPTER_CAPABILITY_MATRIX_FORMAT:1`
+- `ADAPTER_CAPABILITY_MATRIX:WPF:HELLOWORLD_WPF_OK:PASS`
+- `ADAPTER_CAPABILITY_MATRIX:WPF:COMMAND_SURFACE_OK:PASS`
 - `HOST_SAMPLE_NET10_OK:True`
 - `PACKAGE_SMOKE_OK:True`
 - `SCALE_PERFORMANCE_BUDGET_OK:baseline:True:...`
@@ -79,7 +81,7 @@ Expected high-signal markers:
   - matching public tag
   - optional legacy historical repo checkpoint reference
 - confirm the generated prerelease notes also publish the proof summary block, not only workflow artifacts
-- confirm the generated notes and announcement text explicitly carry the frozen support boundary story and the adapter matrix story, plus the `HELLOWORLD_WPF_OK` and `ADAPTER_CAPABILITY_MATRIX` markers
+- confirm the generated notes and announcement text explicitly carry the frozen support boundary story and the adapter matrix story, plus `HELLOWORLD_WPF_OK:True`, `ADAPTER_CAPABILITY_MATRIX_FORMAT:1`, `ADAPTER_CAPABILITY_MATRIX:WPF:HELLOWORLD_WPF_OK:PASS`, and `ADAPTER_CAPABILITY_MATRIX:WPF:COMMAND_SURFACE_OK:PASS`
 - treat `HELLOWORLD_WPF_OK` as adapter-2 validation only; do not present it as Avalonia/WPF parity or public WPF support when describing the adapter story
 - confirm every beta intake item tracks route, version, proof markers, and support-bundle availability or path
 - if `NUGET_API_KEY` is configured, confirm package publication succeeds
@@ -109,6 +111,7 @@ Keep the consumer entry story explicit in release notes and public announcements
 - `src/AsterGraph.Demo` = showcase host
 - `docs/en/versioning.md` = package version versus historical repository-tag guidance
 - `docs/en/project-status.md` = current public beta status snapshot
+- `docs/en/evaluation-path.md` = single route ladder from first install to realistic hosted proof
 - `docs/en/quick-start.md` = canonical adoption path
 - `docs/en/stabilization-support-matrix.md` = frozen support boundary and upgrade guidance
 - `docs/en/adapter-capability-matrix.md` = adapter capability story and validation matrix
