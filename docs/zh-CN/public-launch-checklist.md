@@ -118,7 +118,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framew
 - `tools/AsterGraph.ScaleSmoke` = 规模基线加历史记录与状态连续性验证
 - `src/AsterGraph.Demo` = 展示宿主
 - `docs/zh-CN/versioning.md` = 包版本与历史仓库 tag 的对应说明
-- `docs/zh-CN/project-status.md` = 外部能力就绪闸门，对应已被外部证据证明与继续延后的能力声明
+- `docs/zh-CN/project-status.md` = 外部能力就绪闸门，对应当前已被外部证据证明、仅验证通过或受边界约束、以及在更多采用者证据出现前继续延后的声明
 - `docs/zh-CN/evaluation-path.md` = 从第一次安装到真实宿主 proof 的单一路径
 - `docs/zh-CN/quick-start.md` = 推荐接入路径
 - `docs/zh-CN/stabilization-support-matrix.md` = 冻结的 support boundary 和升级指引

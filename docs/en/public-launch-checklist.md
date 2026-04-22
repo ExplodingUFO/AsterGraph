@@ -84,7 +84,7 @@ Expected high-signal markers:
 - confirm the generated notes and announcement text explicitly carry the frozen support boundary story and the adapter matrix story, plus `HELLOWORLD_WPF_OK:True`, `ADAPTER_CAPABILITY_MATRIX_FORMAT:1`, `ADAPTER_CAPABILITY_MATRIX:WPF:HELLOWORLD_WPF_OK:PASS`, and `ADAPTER_CAPABILITY_MATRIX:WPF:COMMAND_SURFACE_OK:PASS`
 - treat `HELLOWORLD_WPF_OK` as adapter-2 validation only; do not present it as Avalonia/WPF parity or public WPF support when describing the adapter story
 - confirm every beta intake record uses the same bounded schema: route, version, proof markers, friction, and support-bundle attachment
-- repeat the next 0.xx alpha/beta line handoff in release messaging: keep usability and sample polish first, and only widen toward defended large-tier performance or richer parameter/metadata editing when 3-5 real external entries cluster on one bounded risk
+- repeat the next 0.xx alpha/beta line handoff in release messaging: keep usability and sample polish first, and only widen toward defended large-tier performance or richer parameter/metadata editing when 3-5 real external entries cluster on that bounded risk
 - if `NUGET_API_KEY` is configured, confirm package publication succeeds
 - if `NUGET_API_KEY` is not configured, confirm the workflow reports a deliberate NuGet publish skip instead of a failure
 - do not present legacy `v1.x`-style historical milestone checkpoints as the current public package version; use [Versioning](./versioning.md) as the public rule
@@ -111,7 +111,7 @@ Keep the consumer entry story explicit in release notes and public announcements
 - `tools/AsterGraph.ScaleSmoke` = scale baseline plus history/state-continuity proof
 - `src/AsterGraph.Demo` = showcase host
 - `docs/en/versioning.md` = package version versus historical repository-tag guidance
-- `docs/en/project-status.md` = external capability readiness gate for externally proven vs deferred capability claims
+- `docs/en/project-status.md` = external capability readiness gate for externally proven now, validation-only or bounded claims, and deferred until more adopter evidence
 - `docs/en/evaluation-path.md` = single route ladder from first install to realistic hosted proof
 - `docs/en/quick-start.md` = canonical adoption path
 - `docs/en/stabilization-support-matrix.md` = frozen support boundary and upgrade guidance
