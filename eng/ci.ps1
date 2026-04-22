@@ -26,6 +26,7 @@ $hostSampleProjectProofPath = Join-Path $proofArtifactsRoot 'hostsample-project.
 $consumerSampleProofPath = Join-Path $proofArtifactsRoot 'consumer-sample.txt'
 $hostSamplePackedProofPath = Join-Path $proofArtifactsRoot 'hostsample-packed.txt'
 $hostSampleNet10PackedProofPath = Join-Path $proofArtifactsRoot 'hostsample-net10-packed.txt'
+$helloWorldWpfProofPath = Join-Path $proofArtifactsRoot 'hello-world-wpf-proof.txt'
 $packageSmokeProofPath = Join-Path $proofArtifactsRoot 'package-smoke.txt'
 $scaleSmokeProofPath = Join-Path $proofArtifactsRoot 'scale-smoke.txt'
 $demoProofPath = Join-Path $proofArtifactsRoot 'demo-proof.txt'
@@ -39,6 +40,7 @@ $consumerSampleProject = 'tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Co
 $helloWorldProject = 'tools/AsterGraph.HelloWorld/AsterGraph.HelloWorld.csproj'
 $helloWorldAvaloniaProject = 'tools/AsterGraph.HelloWorld.Avalonia/AsterGraph.HelloWorld.Avalonia.csproj'
 $helloWorldWpfProject = 'tools/AsterGraph.HelloWorld.Wpf/AsterGraph.HelloWorld.Wpf.csproj'
+$starterWpfProject = 'tools/AsterGraph.Starter.Wpf/AsterGraph.Starter.Wpf.csproj'
 $asterGraphWpfProject = 'src/AsterGraph.Wpf/AsterGraph.Wpf.csproj'
 $asterGraphWpfTestsProject = 'tests/AsterGraph.Wpf.Tests/AsterGraph.Wpf.Tests.csproj'
 $starterAvaloniaProject = 'tools/AsterGraph.Starter.Avalonia/AsterGraph.Starter.Avalonia.csproj'
@@ -317,6 +319,10 @@ function Get-DefaultRestoreProjects {
       $projects.Add($asterGraphWpfTestsProject)
     }
 
+    if (Test-Path -LiteralPath (Resolve-ProjectPath -RelativePath $starterWpfProject)) {
+      $projects.Add($starterWpfProject)
+    }
+
     $wpfBootstrapProjectPath = Resolve-ProjectPath -RelativePath $helloWorldWpfProject
     if (Test-Path -LiteralPath $wpfBootstrapProjectPath) {
       $projects.Add($helloWorldWpfProject)
@@ -481,6 +487,25 @@ function Invoke-WindowsHelloWorldWpfSlice {
   }
 
   Write-Host ''
+  Write-Host '### Validate WPF starter sample (Windows)' -ForegroundColor Yellow
+  $starterProjectPath = Resolve-ProjectPath -RelativePath $starterWpfProject
+
+  if (Test-Path -LiteralPath $starterProjectPath) {
+    Invoke-DotNet -Arguments (@(
+      'build',
+      $starterProjectPath,
+      '-c',
+      $Configuration,
+      '--framework',
+      $helloWorldWpfFramework,
+      '--no-restore',
+      '--nologo',
+      '-v',
+      'minimal'
+    ) + $singleProcessBuildArguments + $buildStabilityProperties)
+  }
+
+  Write-Host ''
   Write-Host '### Validate WPF bootstrap sample (Windows)' -ForegroundColor Yellow
   $projectPath = Resolve-ProjectPath -RelativePath $helloWorldWpfProject
 
@@ -497,6 +522,31 @@ function Invoke-WindowsHelloWorldWpfSlice {
       '-v',
       'minimal'
     ) + $singleProcessBuildArguments + $buildStabilityProperties)
+  }
+
+  Write-Host ''
+  Write-Host '### Validate WPF richer sample proof (Windows)' -ForegroundColor Yellow
+  $proofProjectPath = Resolve-ProjectPath -RelativePath $helloWorldWpfProject
+  if (Test-Path -LiteralPath $proofProjectPath) {
+    Invoke-DotNetCapture -Arguments @(
+      'run',
+      '--project',
+      $proofProjectPath,
+      '-c',
+      $Configuration,
+      '--framework',
+      $helloWorldWpfFramework,
+      '--no-build',
+      '--no-restore',
+      '--nologo',
+      '--',
+      '--proof'
+    ) -CapturePath $helloWorldWpfProofPath
+
+    $proofOutput = Get-Content -LiteralPath $helloWorldWpfProofPath -Raw
+    if (-not $proofOutput.Contains('HELLOWORLD_WPF_OK:True', [System.StringComparison]::Ordinal)) {
+      throw "WPF richer sample proof did not report success: $helloWorldWpfProofPath"
+    }
   }
 
   Write-Host ''
