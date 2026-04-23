@@ -20,6 +20,7 @@ public partial class GraphEditorView
     private WrapPanel? _selectionToolToolbar;
     private WrapPanel? _nodeToolToolbar;
     private StackPanel? _connectionToolList;
+    private GraphEditorAuthoringToolSurfaceState? _authoringToolSurfaceState;
 
     private void InitializeAuthoringToolControls()
     {
@@ -30,7 +31,7 @@ public partial class GraphEditorView
         _connectionToolList = this.FindControl<StackPanel>("PART_ConnectionToolList");
     }
 
-    private void RefreshAuthoringToolSurface()
+    private void RefreshAuthoringToolSurface(IReadOnlyDictionary<string, GraphEditorCommandDescriptorSnapshot> commandDescriptors)
     {
         if (_authoringToolsChrome is null
             || _authoringToolsCaptionText is null
@@ -52,21 +53,22 @@ public partial class GraphEditorView
             return;
         }
 
-        var selection = Editor.Session.Queries.GetSelectionSnapshot();
-        BuildSelectionToolToolbar(selection);
+        var authoringState = _authoringToolSurfaceState ?? CreateAuthoringToolSurfaceState(Editor.Session.Queries.GetSelectionSnapshot());
+        _authoringToolSurfaceState = authoringState;
+        BuildSelectionToolToolbar(authoringState.SelectionActions);
 
         if (Editor.SelectedNodes.Count != 1 || Editor.SelectedNode is null)
         {
             _authoringToolsChrome.IsVisible = true;
-            _authoringToolsCaptionText.Text = selection.SelectedNodeIds.Count == 0
+            _authoringToolsCaptionText.Text = authoringState.Selection.SelectedNodeIds.Count == 0
                 ? "Select nodes to project selection, node, and edge tooling surfaces."
-                : $"Selection tools for {selection.SelectedNodeIds.Count} node(s).";
+                : $"Selection tools for {authoringState.Selection.SelectedNodeIds.Count} node(s).";
             return;
         }
 
         var selectedNode = Editor.SelectedNode;
-        BuildNodeToolToolbar(selectedNode, selection);
-        BuildConnectionToolList(selectedNode, selection);
+        BuildNodeToolToolbar(authoringState.NodeActions);
+        BuildConnectionToolList(selectedNode, authoringState, commandDescriptors);
 
         _authoringToolsChrome.IsVisible = true;
         _authoringToolsCaptionText.Text = _connectionToolList.Children.Count == 0
@@ -74,14 +76,12 @@ public partial class GraphEditorView
             : $"Selection tools, node tools for {selectedNode.Title}, plus {_connectionToolList.Children.Count} incident connection editor(s).";
     }
 
-    private void BuildSelectionToolToolbar(GraphEditorSelectionSnapshot selection)
+    private void BuildSelectionToolToolbar(IReadOnlyList<AsterGraphHostedActionDescriptor> actions)
     {
-        if (_selectionToolToolbar is null || Editor is null || selection.SelectedNodeIds.Count == 0)
+        if (_selectionToolToolbar is null || actions.Count == 0)
         {
             return;
         }
-
-        var actions = AsterGraphAuthoringToolActionFactory.CreateSelectionActions(Editor.Session);
 
         foreach (var action in actions)
         {
@@ -89,18 +89,12 @@ public partial class GraphEditorView
         }
     }
 
-    private void BuildNodeToolToolbar(NodeViewModel selectedNode, GraphEditorSelectionSnapshot selection)
+    private void BuildNodeToolToolbar(IReadOnlyList<AsterGraphHostedActionDescriptor> actions)
     {
-        if (_nodeToolToolbar is null || Editor is null)
+        if (_nodeToolToolbar is null || actions.Count == 0)
         {
             return;
         }
-
-        var actions = AsterGraphAuthoringToolActionFactory.CreateNodeActions(
-            Editor.Session,
-            selectedNode.Id,
-            selection.SelectedNodeIds,
-            selection.PrimarySelectedNodeId);
 
         foreach (var action in actions)
         {
@@ -108,7 +102,10 @@ public partial class GraphEditorView
         }
     }
 
-    private void BuildConnectionToolList(NodeViewModel selectedNode, GraphEditorSelectionSnapshot selection)
+    private void BuildConnectionToolList(
+        NodeViewModel selectedNode,
+        GraphEditorAuthoringToolSurfaceState authoringState,
+        IReadOnlyDictionary<string, GraphEditorCommandDescriptorSnapshot> commandDescriptors)
     {
         if (_connectionToolList is null || Editor is null)
         {
@@ -121,11 +118,6 @@ public partial class GraphEditorView
                 || string.Equals(connection.TargetNodeId, selectedNode.Id, StringComparison.Ordinal))
             .OrderBy(connection => connection.Id, StringComparer.Ordinal)
             .ToList();
-        var documentConnectionsById = Editor.Session.Queries.CreateDocumentSnapshot()
-            .Connections
-            .ToDictionary(connection => connection.Id, StringComparer.Ordinal);
-        var geometryByConnectionId = Editor.Session.Queries.GetConnectionGeometrySnapshots()
-            .ToDictionary(geometry => geometry.ConnectionId, StringComparer.Ordinal);
 
         if (connections.Count == 0)
         {
@@ -134,8 +126,8 @@ public partial class GraphEditorView
 
         foreach (var connection in connections)
         {
-            documentConnectionsById.TryGetValue(connection.Id, out var modelConnection);
-            geometryByConnectionId.TryGetValue(connection.Id, out var geometry);
+            authoringState.DocumentConnectionsById.TryGetValue(connection.Id, out var modelConnection);
+            authoringState.GeometryByConnectionId.TryGetValue(connection.Id, out var geometry);
             var labelEditor = new TextBox
             {
                 Name = $"PART_ConnectionToolLabelEditor_{connection.Id}",
@@ -162,15 +154,13 @@ public partial class GraphEditorView
             actionBar.Children.Add(CreateToolActionButton(
                 $"PART_ConnectionToolApply_{connection.Id}",
                 "Apply Edge Text",
-                CanApplyConnectionText(),
+                CanApplyConnectionText(commandDescriptors),
                 () =>
                     TryExecuteConnectionTextCommands(connection.Id, labelEditor.Text, noteEditor.Text)));
 
-            var actions = AsterGraphAuthoringToolActionFactory.CreateConnectionActions(
-                Editor.Session,
-                connection.Id,
-                selection.SelectedNodeIds,
-                selection.PrimarySelectedNodeId);
+            var actions = authoringState.ConnectionActionsById.TryGetValue(connection.Id, out var cachedActions)
+                ? cachedActions
+                : [];
             foreach (var action in actions)
             {
                 actionBar.Children.Add(CreateHostedToolButton(
@@ -199,7 +189,8 @@ public partial class GraphEditorView
                         CreateConnectionRouteSection(
                             connection.Id,
                             modelConnection?.Presentation?.Route ?? GraphConnectionRoute.Empty,
-                            geometry),
+                            geometry,
+                            commandDescriptors),
                     },
                 },
             };
@@ -210,7 +201,8 @@ public partial class GraphEditorView
     private Control CreateConnectionRouteSection(
         string connectionId,
         GraphConnectionRoute route,
-        GraphEditorConnectionGeometrySnapshot? geometry)
+        GraphEditorConnectionGeometrySnapshot? geometry,
+        IReadOnlyDictionary<string, GraphEditorCommandDescriptorSnapshot> commandDescriptors)
     {
         var container = new StackPanel
         {
@@ -222,9 +214,6 @@ public partial class GraphEditorView
             FontWeight = FontWeight.SemiBold,
         });
 
-        var commandDescriptors = Editor?.Session.Queries.GetCommandDescriptors()
-            .ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
-        commandDescriptors ??= new Dictionary<string, GraphEditorCommandDescriptorSnapshot>(StringComparer.Ordinal);
         commandDescriptors.TryGetValue("connections.route-vertex.insert", out var insertRouteDescriptor);
         commandDescriptors.TryGetValue("connections.route-vertex.move", out var moveRouteDescriptor);
         commandDescriptors.TryGetValue("connections.route-vertex.remove", out var removeRouteDescriptor);
@@ -383,17 +372,10 @@ public partial class GraphEditorView
             ("updateStatus", bool.TrueString));
     }
 
-    private bool CanApplyConnectionText()
+    private bool CanApplyConnectionText(IReadOnlyDictionary<string, GraphEditorCommandDescriptorSnapshot> commandDescriptors)
     {
-        if (Editor is null)
-        {
-            return false;
-        }
-
-        var descriptors = Editor.Session.Queries.GetCommandDescriptors()
-            .ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
-        return descriptors.TryGetValue("connections.label.set", out var labelSet) && labelSet.CanExecute
-            || descriptors.TryGetValue("connections.note.set", out var noteSet) && noteSet.CanExecute;
+        return commandDescriptors.TryGetValue("connections.label.set", out var labelSet) && labelSet.CanExecute
+            || commandDescriptors.TryGetValue("connections.note.set", out var noteSet) && noteSet.CanExecute;
     }
 
     private bool TryExecuteConnectionTextCommands(string connectionId, string? label, string? noteText)
@@ -410,6 +392,97 @@ public partial class GraphEditorView
             ("updateStatus", bool.TrueString));
         return labelApplied || noteApplied;
     }
+
+    private GraphEditorAuthoringToolSurfaceState CreateAuthoringToolSurfaceState(GraphEditorSelectionSnapshot selection)
+    {
+        if (Editor is null)
+        {
+            return GraphEditorAuthoringToolSurfaceState.Empty;
+        }
+
+        var selectionActions = selection.SelectedNodeIds.Count == 0
+            ? []
+            : CreateToolActions(GraphEditorToolContextSnapshot.ForSelection(selection.SelectedNodeIds, selection.PrimarySelectedNodeId));
+        var primaryNodeId = ResolvePrimarySelectedNodeId(selection);
+        var nodeActions = string.IsNullOrWhiteSpace(primaryNodeId)
+            ? []
+            : CreateToolActions(GraphEditorToolContextSnapshot.ForNode(primaryNodeId, selection.SelectedNodeIds, selection.PrimarySelectedNodeId));
+        var incidentConnectionIds = string.IsNullOrWhiteSpace(primaryNodeId)
+            ? []
+            : Editor.Connections
+                .Where(connection =>
+                    string.Equals(connection.SourceNodeId, primaryNodeId, StringComparison.Ordinal)
+                    || string.Equals(connection.TargetNodeId, primaryNodeId, StringComparison.Ordinal))
+                .Select(connection => connection.Id)
+                .OrderBy(connectionId => connectionId, StringComparer.Ordinal)
+                .ToArray();
+        var connectionActionsById = incidentConnectionIds.ToDictionary(
+            connectionId => connectionId,
+            connectionId => (IReadOnlyList<AsterGraphHostedActionDescriptor>)CreateToolActions(
+                GraphEditorToolContextSnapshot.ForConnection(connectionId, selection.SelectedNodeIds, selection.PrimarySelectedNodeId)),
+            StringComparer.Ordinal);
+        var documentConnectionsById = Editor.Session.Queries.CreateDocumentSnapshot()
+            .Connections
+            .ToDictionary(connection => connection.Id, StringComparer.Ordinal);
+        var geometryByConnectionId = Editor.Session.Queries.GetConnectionGeometrySnapshots()
+            .ToDictionary(geometry => geometry.ConnectionId, StringComparer.Ordinal);
+
+        return new GraphEditorAuthoringToolSurfaceState(
+            selection,
+            selectionActions,
+            primaryNodeId,
+            nodeActions,
+            connectionActionsById,
+            documentConnectionsById,
+            geometryByConnectionId,
+            CreateCommandSurfaceActions(selectionActions, nodeActions, connectionActionsById));
+    }
+
+    private IReadOnlyList<AsterGraphHostedActionDescriptor> CreateToolActions(GraphEditorToolContextSnapshot context)
+    {
+        if (Editor is null)
+        {
+            return [];
+        }
+
+        return AsterGraphHostedActionFactory.CreateToolActions(
+            Editor.Session,
+            Editor.Session.Queries.GetToolDescriptors(context));
+    }
+
+    private static string? ResolvePrimarySelectedNodeId(GraphEditorSelectionSnapshot selection)
+    {
+        ArgumentNullException.ThrowIfNull(selection);
+
+        if (!string.IsNullOrWhiteSpace(selection.PrimarySelectedNodeId))
+        {
+            return selection.PrimarySelectedNodeId;
+        }
+
+        return selection.SelectedNodeIds.Count == 1
+            ? selection.SelectedNodeIds[0]
+            : null;
+    }
+
+    private static IReadOnlyList<AsterGraphHostedActionDescriptor> CreateCommandSurfaceActions(
+        IReadOnlyList<AsterGraphHostedActionDescriptor> selectionActions,
+        IReadOnlyList<AsterGraphHostedActionDescriptor> nodeActions,
+        IReadOnlyDictionary<string, IReadOnlyList<AsterGraphHostedActionDescriptor>> connectionActionsById)
+    {
+        var actions = new List<AsterGraphHostedActionDescriptor>();
+        actions.AddRange(selectionActions.Where(action => !IsDuplicateGlobalAction(action.Id)));
+        actions.AddRange(nodeActions.Where(action => !IsDuplicateGlobalAction(action.Id)));
+
+        if (connectionActionsById.Count == 1)
+        {
+            actions.AddRange(connectionActionsById.Values.Single());
+        }
+
+        return actions;
+    }
+
+    private static bool IsDuplicateGlobalAction(string actionId)
+        => actionId is "selection-wrap-composite" or "node-enter-composite-scope";
 
     private bool TryExecuteCommand(string commandId, params (string Name, string? Value)[] arguments)
     {
@@ -475,4 +548,26 @@ public partial class GraphEditorView
             "connection-clear-note" => $"PART_ConnectionToolClearNote_{connectionId}",
             _ => $"PART_ConnectionToolAction_{connectionId}_{action.Id}",
         };
+
+}
+
+internal sealed record GraphEditorAuthoringToolSurfaceState(
+    GraphEditorSelectionSnapshot Selection,
+    IReadOnlyList<AsterGraphHostedActionDescriptor> SelectionActions,
+    string? PrimaryNodeId,
+    IReadOnlyList<AsterGraphHostedActionDescriptor> NodeActions,
+    IReadOnlyDictionary<string, IReadOnlyList<AsterGraphHostedActionDescriptor>> ConnectionActionsById,
+    IReadOnlyDictionary<string, GraphConnection> DocumentConnectionsById,
+    IReadOnlyDictionary<string, GraphEditorConnectionGeometrySnapshot> GeometryByConnectionId,
+    IReadOnlyList<AsterGraphHostedActionDescriptor> CommandSurfaceActions)
+{
+    public static GraphEditorAuthoringToolSurfaceState Empty { get; } = new(
+        new GraphEditorSelectionSnapshot([], null),
+        [],
+        null,
+        [],
+        new Dictionary<string, IReadOnlyList<AsterGraphHostedActionDescriptor>>(StringComparer.Ordinal),
+        new Dictionary<string, GraphConnection>(StringComparer.Ordinal),
+        new Dictionary<string, GraphEditorConnectionGeometrySnapshot>(StringComparer.Ordinal),
+        []);
 }

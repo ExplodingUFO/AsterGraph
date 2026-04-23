@@ -49,7 +49,7 @@ public static class AsterGraphHostedActionFactory
         ArgumentNullException.ThrowIfNull(session);
         ArgumentNullException.ThrowIfNull(commandIds);
 
-        var actionMap = CreateCommandActionMap(session);
+        var actionMap = CreateCommandActionMap(session.Queries.GetCommandDescriptors(), session);
         var orderedActions = new List<AsterGraphHostedActionDescriptor>();
         foreach (var commandId in commandIds)
         {
@@ -71,7 +71,17 @@ public static class AsterGraphHostedActionFactory
     {
         ArgumentNullException.ThrowIfNull(session);
 
-        return session.Queries.GetCommandDescriptors()
+        return CreateCommandActions(session.Queries.GetCommandDescriptors(), session);
+    }
+
+    internal static IReadOnlyList<AsterGraphHostedActionDescriptor> CreateCommandActions(
+        IReadOnlyList<GraphEditorCommandDescriptorSnapshot> descriptors,
+        IGraphEditorSession session)
+    {
+        ArgumentNullException.ThrowIfNull(descriptors);
+        ArgumentNullException.ThrowIfNull(session);
+
+        return descriptors
             .OrderBy(descriptor => descriptor.Group, StringComparer.Ordinal)
             .ThenBy(descriptor => descriptor.Title, StringComparer.Ordinal)
             .Select(descriptor => CreateCommandAction(session, descriptor))
@@ -110,8 +120,10 @@ public static class AsterGraphHostedActionFactory
         Func<bool> execute)
         => new(descriptor, execute);
 
-    private static Dictionary<string, AsterGraphHostedActionDescriptor> CreateCommandActionMap(IGraphEditorSession session)
-        => session.Queries.GetCommandDescriptors()
+    private static Dictionary<string, AsterGraphHostedActionDescriptor> CreateCommandActionMap(
+        IReadOnlyList<GraphEditorCommandDescriptorSnapshot> descriptors,
+        IGraphEditorSession session)
+        => descriptors
             .GroupBy(descriptor => descriptor.Id, StringComparer.Ordinal)
             .Select(group => group.Last())
             .ToDictionary(

@@ -20,6 +20,20 @@ internal static class AsterGraphCompositeWorkflowActionFactory
         var selection = session.Queries.GetSelectionSnapshot();
         var composites = session.Queries.GetCompositeNodeSnapshots()
             .ToDictionary(snapshot => snapshot.NodeId, StringComparer.Ordinal);
+        return CreateWorkflowActions(session, descriptors, selection, composites);
+    }
+
+    internal static IReadOnlyList<AsterGraphHostedActionDescriptor> CreateWorkflowActions(
+        IGraphEditorSession session,
+        IReadOnlyDictionary<string, GraphEditorCommandDescriptorSnapshot> descriptors,
+        GraphEditorSelectionSnapshot selection,
+        IReadOnlyDictionary<string, GraphEditorCompositeNodeSnapshot> composites)
+    {
+        ArgumentNullException.ThrowIfNull(session);
+        ArgumentNullException.ThrowIfNull(descriptors);
+        ArgumentNullException.ThrowIfNull(selection);
+        ArgumentNullException.ThrowIfNull(composites);
+
         var selectedCompositeId = selection.SelectedNodeIds
             .FirstOrDefault(nodeId => composites.ContainsKey(nodeId));
         var actions = new List<AsterGraphHostedActionDescriptor>();

@@ -22,6 +22,7 @@ using AsterGraph.Editor.Catalog;
 using AsterGraph.Editor.Geometry;
 using AsterGraph.Editor.Hosting;
 using AsterGraph.Editor.Menus;
+using AsterGraph.Editor.Plugins;
 using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.ViewModels;
 using Xunit;
@@ -410,6 +411,30 @@ public sealed class GraphEditorViewTests
     }
 
     [AvaloniaFact]
+    public void StencilLibrary_SearchUsesCachedDescriptorsAfterInitialRefresh()
+    {
+        var commandContributor = new CountingViewCommandContributor();
+        var definitionProvider = new CountingViewNodeDefinitionProvider();
+        var editor = CreateCountingStencilEditor(commandContributor, definitionProvider);
+        var window = CreateWindow(new GraphEditorView
+        {
+            Editor = editor,
+        });
+        var view = (GraphEditorView)window.Content!;
+        var searchBox = FindRequiredControl<TextBox>(view, "PART_StencilSearchBox");
+
+        commandContributor.Reset();
+        definitionProvider.Reset();
+
+        searchBox.Text = "provider";
+        Dispatcher.UIThread.RunJobs(DispatcherPriority.Render);
+
+        Assert.Equal(0, commandContributor.DescriptorQueryCount);
+        Assert.Equal(0, definitionProvider.QueryCount);
+        Assert.NotNull(FindOptionalDescendant<Button>(view, "PART_StencilCard_tests-view-provider-noise"));
+    }
+
+    [AvaloniaFact]
     public void StencilLibrary_CollapsedSection_HidesCards_AndRetainsInsertionAfterReexpand()
     {
         var editor = CreateStencilEditor();
@@ -433,6 +458,50 @@ public sealed class GraphEditorViewTests
         stencilCard.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
 
         Assert.Equal(2, editor.Session.Queries.CreateDocumentSnapshot().Nodes.Count);
+    }
+
+    [AvaloniaFact]
+    public void CommandPaletteSearch_UsesCachedProjectionAfterPaletteOpens()
+    {
+        var commandContributor = new CountingViewCommandContributor();
+        var editor = CreateCountingConnectionEditor(commandContributor);
+        var window = CreateWindow(new GraphEditorView
+        {
+            Editor = editor,
+        });
+        var view = (GraphEditorView)window.Content!;
+        var paletteToggle = FindRequiredControl<Button>(view, "PART_OpenCommandPaletteButton");
+
+        paletteToggle.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        Dispatcher.UIThread.RunJobs(DispatcherPriority.Render);
+
+        commandContributor.Reset();
+
+        var searchBox = FindRequiredControl<TextBox>(view, "PART_CommandPaletteSearchBox");
+        searchBox.Text = "undo";
+        Dispatcher.UIThread.RunJobs(DispatcherPriority.Render);
+
+        Assert.Equal(0, commandContributor.DescriptorQueryCount);
+    }
+
+    [AvaloniaFact]
+    public void SelectionRefresh_ReusesCommandDescriptorsAcrossCommandAndAuthoringChrome()
+    {
+        var commandContributor = new CountingViewCommandContributor();
+        var editor = CreateCountingConnectionEditor(commandContributor);
+        var window = CreateWindow(new GraphEditorView
+        {
+            Editor = editor,
+        });
+        var view = (GraphEditorView)window.Content!;
+
+        commandContributor.Reset();
+
+        editor.SelectSingleNode(editor.Nodes[0], updateStatus: false);
+        Dispatcher.UIThread.RunJobs(DispatcherPriority.Render);
+
+        Assert.NotNull(FindOptionalDescendant<Button>(view, "PART_NodeToolDuplicateButton"));
+        Assert.Equal(4, commandContributor.DescriptorQueryCount);
     }
 
     [AvaloniaFact]
@@ -871,6 +940,51 @@ public sealed class GraphEditorViewTests
             new DefaultPortCompatibilityService());
     }
 
+    private static GraphEditorViewModel CreateCountingStencilEditor(
+        CountingViewCommandContributor commandContributor,
+        CountingViewNodeDefinitionProvider definitionProvider)
+    {
+        var baseDefinitionId = new NodeDefinitionId("tests.view.base-node");
+        var catalog = new NodeCatalog();
+        catalog.RegisterDefinition(
+            new NodeDefinition(
+                baseDefinitionId,
+                "Base Node",
+                "Base",
+                "Base test node.",
+                [],
+                []));
+        catalog.RegisterProvider(definitionProvider);
+
+        return AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
+        {
+            Document = new GraphDocument(
+                "Counting Stencil Graph",
+                "Exercises cached stencil descriptor refresh.",
+                [
+                    new GraphNode(
+                        "tests.view.base-node-001",
+                        "Base Node",
+                        "Tests",
+                        "GraphEditorView",
+                        "Existing node for stencil tests.",
+                        new GraphPoint(120, 160),
+                        new GraphSize(240, 160),
+                        [],
+                        [],
+                        "#6AD5C4",
+                        baseDefinitionId),
+                ],
+                []),
+            NodeCatalog = catalog,
+            CompatibilityService = new DefaultPortCompatibilityService(),
+            PluginRegistrations =
+            [
+                GraphEditorPluginRegistration.FromPlugin(new CountingViewCommandPlugin(commandContributor)),
+            ],
+        });
+    }
+
     private static INodeCatalog CreateFragmentCatalog()
     {
         var catalog = new NodeCatalog();
@@ -1106,6 +1220,71 @@ public sealed class GraphEditorViewTests
             new DefaultPortCompatibilityService());
     }
 
+    private static GraphEditorViewModel CreateCountingConnectionEditor(CountingViewCommandContributor commandContributor)
+    {
+        var definitionId = new NodeDefinitionId("tests.view.tools");
+        var catalog = new NodeCatalog();
+        catalog.RegisterDefinition(
+            new NodeDefinition(
+                definitionId,
+                "Tool View Node",
+                "Tests",
+                "Exercises node and edge tooling chrome.",
+                [new PortDefinition("in", "Input", new PortTypeId("float"), "#F3B36B")],
+                [new PortDefinition("out", "Output", new PortTypeId("float"), "#6AD5C4")]));
+
+        return AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
+        {
+            Document = new GraphDocument(
+                "Counting Tooling View Graph",
+                "Exercises command-surface refresh query counts.",
+                [
+                    new GraphNode(
+                        "tests.view.tools-source-001",
+                        "Tool Source",
+                        "Tests",
+                        "GraphEditorView",
+                        "Source node for tooling tests.",
+                        new GraphPoint(120, 160),
+                        new GraphSize(240, 160),
+                        [],
+                        [new GraphPort("out", "Output", PortDirection.Output, "float", "#6AD5C4", new PortTypeId("float"))],
+                        "#6AD5C4",
+                        definitionId),
+                    new GraphNode(
+                        "tests.view.tools-target-001",
+                        "Tool Target",
+                        "Tests",
+                        "GraphEditorView",
+                        "Target node for tooling tests.",
+                        new GraphPoint(520, 180),
+                        new GraphSize(240, 160),
+                        [new GraphPort("in", "Input", PortDirection.Input, "float", "#F3B36B", new PortTypeId("float"))],
+                        [],
+                        "#F3B36B",
+                        definitionId),
+                ],
+                [
+                    new GraphConnection(
+                        "connection-001",
+                        "tests.view.tools-source-001",
+                        "out",
+                        "tests.view.tools-target-001",
+                        "in",
+                        "Signal Flow",
+                        "#6AD5C4",
+                        null,
+                        new GraphEdgePresentation("Preview branch")),
+                ]),
+            NodeCatalog = catalog,
+            CompatibilityService = new DefaultPortCompatibilityService(),
+            PluginRegistrations =
+            [
+                GraphEditorPluginRegistration.FromPlugin(new CountingViewCommandPlugin(commandContributor)),
+            ],
+        });
+    }
+
     private sealed class GraphEditorViewHostAwareAugmentor : IGraphContextMenuAugmentor
     {
         public bool ReceivedHostOwner { get; private set; }
@@ -1146,6 +1325,80 @@ public sealed class GraphEditorViewTests
                         new GraphEditorCommandInvocationSnapshot("composites.wrap-selection"))
                 ]
                 : [];
+        }
+    }
+
+    private sealed class CountingViewCommandPlugin(CountingViewCommandContributor contributor) : IGraphEditorPlugin
+    {
+        public GraphEditorPluginDescriptor Descriptor { get; } = new("tests.view.counting-command", "Counting Command");
+
+        public void Register(GraphEditorPluginBuilder builder)
+        {
+            ArgumentNullException.ThrowIfNull(builder);
+            builder.AddCommandContributor(contributor);
+        }
+    }
+
+    private sealed class CountingViewCommandContributor : IGraphEditorPluginCommandContributor
+    {
+        public int DescriptorQueryCount { get; private set; }
+
+        public void Reset()
+            => DescriptorQueryCount = 0;
+
+        public IReadOnlyList<GraphEditorCommandDescriptorSnapshot> GetCommandDescriptors(GraphEditorPluginCommandContext context)
+        {
+            ArgumentNullException.ThrowIfNull(context);
+            DescriptorQueryCount++;
+            return
+            [
+                new GraphEditorCommandDescriptorSnapshot(
+                    "tests.view.counting-plugin",
+                    "Counting Plugin Command",
+                    "plugin",
+                    "plugin",
+                    null,
+                    GraphEditorCommandSourceKind.Plugin,
+                    isEnabled: true),
+            ];
+        }
+
+        public bool TryExecuteCommand(GraphEditorPluginCommandExecutionContext context)
+        {
+            ArgumentNullException.ThrowIfNull(context);
+            return true;
+        }
+    }
+
+    private sealed class CountingViewNodeDefinitionProvider : INodeDefinitionProvider
+    {
+        private readonly IReadOnlyList<INodeDefinition> _definitions =
+        [
+            new NodeDefinition(
+                new NodeDefinitionId("tests.view.provider.noise"),
+                "Provider Noise",
+                "Provider",
+                "Provided node definition for stencil projection count tests.",
+                [],
+                []),
+            new NodeDefinition(
+                new NodeDefinitionId("tests.view.provider.output"),
+                "Provider Output",
+                "Provider",
+                "Second provided node definition for stencil projection count tests.",
+                [],
+                []),
+        ];
+
+        public int QueryCount { get; private set; }
+
+        public void Reset()
+            => QueryCount = 0;
+
+        public IReadOnlyList<INodeDefinition> GetNodeDefinitions()
+        {
+            QueryCount++;
+            return _definitions;
         }
     }
 }

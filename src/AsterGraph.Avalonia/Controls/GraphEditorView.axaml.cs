@@ -144,6 +144,11 @@ public partial class GraphEditorView : UserControl
     private string _commandPaletteFilter = string.Empty;
     private string? _selectedFragmentTemplatePath;
     private AsterGraphHostedActionDescriptor? _commandPaletteAction;
+    private AsterGraphHostedActionProjection? _commandSurfaceProjection;
+    private IReadOnlyList<GraphEditorNodeTemplateSnapshot> _stencilTemplateSnapshots = [];
+    private IReadOnlyDictionary<string, GraphEditorCommandDescriptorSnapshot> _commandDescriptorsById =
+        new Dictionary<string, GraphEditorCommandDescriptorSnapshot>(StringComparer.Ordinal);
+    private GraphEditorCommandDescriptorSnapshot? _stencilAddNodeDescriptor;
 
     /// <summary>
     /// 初始化图编辑器宿主视图。
@@ -395,7 +400,7 @@ public partial class GraphEditorView : UserControl
             return;
         }
 
-        var projection = CreateCommandSurfaceProjection();
+        var projection = GetCommandSurfaceProjection();
         if (projection is not null
             && projection.TryGet(CommandPaletteActionId, out var commandPaletteAction)
             && GraphEditorDefaultCommandShortcutRouter.TryHandle(
@@ -427,20 +432,19 @@ public partial class GraphEditorView : UserControl
     private void HandleOpenCommandPaletteClick(object? sender, RoutedEventArgs args)
     {
         _commandPaletteAction?.TryExecute();
-        RefreshCommandSurface();
         args.Handled = true;
     }
 
     private void HandleCommandPaletteSearchChanged(object? sender, TextChangedEventArgs args)
     {
         _commandPaletteFilter = _commandPaletteSearchBox?.Text?.Trim() ?? string.Empty;
-        BuildCommandPaletteItems(CreateCommandSurfaceProjection());
+        BuildCommandPaletteItems(GetCommandSurfaceProjection());
     }
 
     private void HandleStencilSearchChanged(object? sender, TextChangedEventArgs args)
     {
         _stencilFilter = _stencilSearchBox?.Text?.Trim() ?? string.Empty;
-        BuildStencilLibrary();
+        BuildStencilLibrary(_stencilTemplateSnapshots, _stencilAddNodeDescriptor);
     }
 
     private void HandleFragmentTemplateSelectionChanged(object? sender, SelectionChangedEventArgs args)
@@ -488,8 +492,9 @@ public partial class GraphEditorView : UserControl
 
     private void RefreshCommandSurface()
     {
-        var projection = CreateCommandSurfaceProjection();
-        BuildStencilLibrary();
+        RefreshCommandSurfaceState();
+        var projection = _commandSurfaceProjection;
+        BuildStencilLibrary(_stencilTemplateSnapshots, _stencilAddNodeDescriptor);
         BuildFragmentLibrary(projection);
         RefreshCommandPaletteButton(projection);
         BuildHeaderToolbar(projection);
@@ -497,14 +502,59 @@ public partial class GraphEditorView : UserControl
         BuildScopeBreadcrumbs();
         BuildShortcutHelp(projection);
         BuildCommandPaletteItems(projection);
-        RefreshAuthoringToolSurface();
+        RefreshAuthoringToolSurface(_commandDescriptorsById);
         if (Editor is null)
         {
             CloseCommandPalette();
         }
     }
 
-    private void BuildStencilLibrary()
+    private void RefreshCommandSurfaceState()
+    {
+        if (Editor is null)
+        {
+            _commandSurfaceProjection = null;
+            _stencilTemplateSnapshots = [];
+            _commandDescriptorsById = new Dictionary<string, GraphEditorCommandDescriptorSnapshot>(StringComparer.Ordinal);
+            _stencilAddNodeDescriptor = null;
+            _authoringToolSurfaceState = null;
+            return;
+        }
+
+        var commandDescriptors = Editor.Session.Queries.GetCommandDescriptors();
+        _commandDescriptorsById = commandDescriptors
+            .GroupBy(descriptor => descriptor.Id, StringComparer.Ordinal)
+            .Select(group => group.Last())
+            .ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
+        _stencilAddNodeDescriptor = _commandDescriptorsById.TryGetValue("nodes.add", out var addNodeDescriptor)
+            ? addNodeDescriptor
+            : null;
+        _stencilTemplateSnapshots = Editor.Session.Queries.GetNodeTemplateSnapshots();
+        var selection = Editor.Session.Queries.GetSelectionSnapshot();
+        _authoringToolSurfaceState = CreateAuthoringToolSurfaceState(selection);
+        var composites = Editor.Session.Queries.GetCompositeNodeSnapshots()
+            .ToDictionary(snapshot => snapshot.NodeId, StringComparer.Ordinal);
+        _commandSurfaceProjection = CreateCommandSurfaceProjection(
+            commandDescriptors,
+            _commandDescriptorsById,
+            selection,
+            composites,
+            _authoringToolSurfaceState);
+    }
+
+    private AsterGraphHostedActionProjection? GetCommandSurfaceProjection()
+    {
+        if (Editor is not null && _commandSurfaceProjection is null)
+        {
+            RefreshCommandSurfaceState();
+        }
+
+        return _commandSurfaceProjection;
+    }
+
+    private void BuildStencilLibrary(
+        IReadOnlyList<GraphEditorNodeTemplateSnapshot> stencilTemplates,
+        GraphEditorCommandDescriptorSnapshot? addNodeDescriptor)
     {
         if (_stencilCardList is null)
         {
@@ -517,9 +567,7 @@ public partial class GraphEditorView : UserControl
             return;
         }
 
-        var addNodeDescriptor = Editor.Session.Queries.GetCommandDescriptors()
-            .FirstOrDefault(descriptor => string.Equals(descriptor.Id, "nodes.add", StringComparison.Ordinal));
-        var stencilSections = Editor.Session.Queries.GetNodeTemplateSnapshots()
+        var stencilSections = stencilTemplates
             .Where(MatchesStencilFilter)
             .GroupBy(stencilItem => stencilItem.Category, StringComparer.Ordinal)
             .OrderBy(section => section.Key, StringComparer.Ordinal);
@@ -713,19 +761,25 @@ public partial class GraphEditorView : UserControl
         }
     }
 
-    private AsterGraphHostedActionProjection? CreateCommandSurfaceProjection()
+    private AsterGraphHostedActionProjection CreateCommandSurfaceProjection(
+        IReadOnlyList<GraphEditorCommandDescriptorSnapshot> commandDescriptors,
+        IReadOnlyDictionary<string, GraphEditorCommandDescriptorSnapshot> commandDescriptorMap,
+        GraphEditorSelectionSnapshot selection,
+        IReadOnlyDictionary<string, GraphEditorCompositeNodeSnapshot> composites,
+        GraphEditorAuthoringToolSurfaceState? authoringToolSurfaceState)
     {
-        if (Editor is null)
-        {
-            return null;
-        }
+        ArgumentNullException.ThrowIfNull(Editor);
+        ArgumentNullException.ThrowIfNull(commandDescriptors);
+        ArgumentNullException.ThrowIfNull(commandDescriptorMap);
+        ArgumentNullException.ThrowIfNull(selection);
+        ArgumentNullException.ThrowIfNull(composites);
 
         var actions = AsterGraphHostedActionFactory.ApplyCommandShortcutPolicy(
             [
                 CreateCommandPaletteAction(),
-                .. AsterGraphHostedActionFactory.CreateCommandActions(Editor.Session),
-                .. AsterGraphCompositeWorkflowActionFactory.CreateWorkflowActions(Editor.Session),
-                .. AsterGraphAuthoringToolActionFactory.CreateCommandSurfaceActions(Editor.Session),
+                .. AsterGraphHostedActionFactory.CreateCommandActions(commandDescriptors, Editor.Session),
+                .. AsterGraphCompositeWorkflowActionFactory.CreateWorkflowActions(Editor.Session, commandDescriptorMap, selection, composites),
+                .. authoringToolSurfaceState?.CommandSurfaceActions ?? [],
             ],
             CommandShortcutPolicy);
         return AsterGraphHostedActionFactory.CreateProjection(actions);
@@ -1192,7 +1246,7 @@ public partial class GraphEditorView : UserControl
         }
 
         _commandPaletteChrome.IsVisible = true;
-        BuildCommandPaletteItems(CreateCommandSurfaceProjection());
+        BuildCommandPaletteItems(GetCommandSurfaceProjection());
         _commandPaletteSearchBox?.Focus();
     }
 
