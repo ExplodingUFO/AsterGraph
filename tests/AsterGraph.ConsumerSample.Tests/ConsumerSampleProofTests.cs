@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Text.Json;
 using System.Globalization;
@@ -47,7 +48,7 @@ public sealed class ConsumerSampleProofTests
     {
         var result = ConsumerSampleProof.Run();
 
-        Assert.True(result.IsOk);
+        Assert.True(result.IsOk, string.Join(Environment.NewLine, result.ProofLines));
         Assert.True(result.CapabilityBreadthOk);
         Assert.True(result.NodeSideAuthoringOk);
         Assert.True(result.HostMenuActionOk);
@@ -60,6 +61,11 @@ public sealed class ConsumerSampleProofTests
         Assert.True(result.ExportBreadthOk);
         Assert.True(result.NodeQuickToolsOk);
         Assert.True(result.EdgeQuickToolsOk);
+        Assert.True(result.HostedAccessibilityBaselineOk);
+        Assert.True(result.HostedAccessibilityFocusOk);
+        Assert.True(result.HostedAccessibilityCommandSurfaceOk);
+        Assert.True(result.HostedAccessibilityAuthoringSurfaceOk);
+        Assert.True(result.HostedAccessibilityOk);
         Assert.True(result.StartupMs >= 0);
         Assert.True(result.InspectorProjectionMs >= 0);
         Assert.True(result.PluginScanMs >= 0);
@@ -77,6 +83,11 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(result.ProofLines, line => line == "CAPABILITY_BREADTH_NODE_QUICK_TOOLS_OK:True");
         Assert.Contains(result.ProofLines, line => line == "CAPABILITY_BREADTH_EDGE_QUICK_TOOLS_OK:True");
         Assert.Contains(result.ProofLines, line => line == "CAPABILITY_BREADTH_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "HOSTED_ACCESSIBILITY_BASELINE_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "HOSTED_ACCESSIBILITY_FOCUS_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "HOSTED_ACCESSIBILITY_OK:True");
         Assert.Contains(result.ProofLines, line => line == "WIDENED_SURFACE_PERFORMANCE_OK:True");
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_SURFACE_OK:True");
         Assert.Contains(result.MetricLines, line => line.Contains("startup_ms", StringComparison.Ordinal));
@@ -103,6 +114,10 @@ public sealed class ConsumerSampleProofTests
             ExportBreadthOk: true,
             NodeQuickToolsOk: true,
             EdgeQuickToolsOk: true,
+            HostedAccessibilityBaselineOk: true,
+            HostedAccessibilityFocusOk: true,
+            HostedAccessibilityCommandSurfaceOk: true,
+            HostedAccessibilityAuthoringSurfaceOk: true,
             ParameterSnapshots: [],
             StartupMs: 1,
             InspectorProjectionMs: 1,
@@ -136,6 +151,10 @@ public sealed class ConsumerSampleProofTests
             ExportBreadthOk: false,
             NodeQuickToolsOk: true,
             EdgeQuickToolsOk: true,
+            HostedAccessibilityBaselineOk: true,
+            HostedAccessibilityFocusOk: true,
+            HostedAccessibilityCommandSurfaceOk: true,
+            HostedAccessibilityAuthoringSurfaceOk: true,
             ParameterSnapshots: [],
             StartupMs: 1,
             InspectorProjectionMs: 1,
@@ -151,6 +170,43 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(result.ProofLines, line => line == "CAPABILITY_BREADTH_EXPORT_OK:False");
         Assert.Contains(result.ProofLines, line => line == "CAPABILITY_BREADTH_OK:False");
         Assert.Contains(result.ProofLines, line => line == "WIDENED_SURFACE_PERFORMANCE_OK:False");
+        Assert.Contains(result.ProofLines, line => line == "CONSUMER_SAMPLE_OK:False");
+    }
+
+    [AvaloniaFact]
+    public void ConsumerSampleProofResult_AccessibilityMarker_FailsOverallProofStatus()
+    {
+        var result = new ConsumerSampleProofResult(
+            HostMenuActionOk: true,
+            PluginContributionOk: true,
+            ParameterProjectionOk: true,
+            MetadataProjectionOk: true,
+            NodeSideAuthoringOk: true,
+            WindowCompositionOk: true,
+            TrustTransparencyOk: true,
+            CommandSurfaceOk: true,
+            StencilSurfaceOk: true,
+            ExportBreadthOk: true,
+            NodeQuickToolsOk: true,
+            EdgeQuickToolsOk: true,
+            HostedAccessibilityBaselineOk: true,
+            HostedAccessibilityFocusOk: false,
+            HostedAccessibilityCommandSurfaceOk: true,
+            HostedAccessibilityAuthoringSurfaceOk: true,
+            ParameterSnapshots: [],
+            StartupMs: 1,
+            InspectorProjectionMs: 1,
+            PluginScanMs: 1,
+            CommandLatencyMs: 1,
+            StencilSearchMs: 1,
+            CommandSurfaceRefreshMs: 1,
+            NodeToolProjectionMs: 1,
+            EdgeToolProjectionMs: 1);
+
+        Assert.False(result.HostedAccessibilityOk);
+        Assert.False(result.IsOk);
+        Assert.Contains(result.ProofLines, line => line == "HOSTED_ACCESSIBILITY_FOCUS_OK:False");
+        Assert.Contains(result.ProofLines, line => line == "HOSTED_ACCESSIBILITY_OK:False");
         Assert.Contains(result.ProofLines, line => line == "CONSUMER_SAMPLE_OK:False");
     }
 
@@ -201,6 +257,11 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(proofLines, line => line == "CAPABILITY_BREADTH_NODE_QUICK_TOOLS_OK:True");
         Assert.Contains(proofLines, line => line == "CAPABILITY_BREADTH_EDGE_QUICK_TOOLS_OK:True");
         Assert.Contains(proofLines, line => line == "CAPABILITY_BREADTH_OK:True");
+        Assert.Contains(proofLines, line => line == "HOSTED_ACCESSIBILITY_BASELINE_OK:True");
+        Assert.Contains(proofLines, line => line == "HOSTED_ACCESSIBILITY_FOCUS_OK:True");
+        Assert.Contains(proofLines, line => line == "HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True");
+        Assert.Contains(proofLines, line => line == "HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True");
+        Assert.Contains(proofLines, line => line == "HOSTED_ACCESSIBILITY_OK:True");
         Assert.Contains(proofLines, line => line == "WIDENED_SURFACE_PERFORMANCE_OK:True");
         Assert.Contains(proofLines, line => line == "AUTHORING_SURFACE_OK:True");
         Assert.Contains(proofLines, line => line == "CONSUMER_SAMPLE_PARAMETER_OK:True");

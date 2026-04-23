@@ -1,8 +1,10 @@
 using System.Diagnostics;
 using System.Globalization;
 using Avalonia;
+using Avalonia.Automation;
 using Avalonia.Controls;
 using Avalonia.Headless;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
 using AsterGraph.Avalonia.Controls;
@@ -30,6 +32,10 @@ public sealed record ConsumerSampleProofResult(
     bool ExportBreadthOk,
     bool NodeQuickToolsOk,
     bool EdgeQuickToolsOk,
+    bool HostedAccessibilityBaselineOk,
+    bool HostedAccessibilityFocusOk,
+    bool HostedAccessibilityCommandSurfaceOk,
+    bool HostedAccessibilityAuthoringSurfaceOk,
     IReadOnlyList<ConsumerSampleProofParameterSnapshot> ParameterSnapshots,
     double StartupMs,
     double InspectorProjectionMs,
@@ -60,6 +66,12 @@ public sealed record ConsumerSampleProofResult(
         && NodeToolProjectionMs >= 0
         && EdgeToolProjectionMs >= 0;
 
+    public bool HostedAccessibilityOk
+        => HostedAccessibilityBaselineOk
+        && HostedAccessibilityFocusOk
+        && HostedAccessibilityCommandSurfaceOk
+        && HostedAccessibilityAuthoringSurfaceOk;
+
     public bool IsOk
         => HostMenuActionOk
         && PluginContributionOk
@@ -67,6 +79,7 @@ public sealed record ConsumerSampleProofResult(
         && WindowCompositionOk
         && AuthoringSurfaceOk
         && CapabilityBreadthOk
+        && HostedAccessibilityOk
         && WidenedSurfacePerformanceOk;
 
     public IReadOnlyList<string> MetricLines =>
@@ -99,6 +112,11 @@ public sealed record ConsumerSampleProofResult(
         $"CAPABILITY_BREADTH_NODE_QUICK_TOOLS_OK:{NodeQuickToolsOk}",
         $"CAPABILITY_BREADTH_EDGE_QUICK_TOOLS_OK:{EdgeQuickToolsOk}",
         $"CAPABILITY_BREADTH_OK:{CapabilityBreadthOk}",
+        $"HOSTED_ACCESSIBILITY_BASELINE_OK:{HostedAccessibilityBaselineOk}",
+        $"HOSTED_ACCESSIBILITY_FOCUS_OK:{HostedAccessibilityFocusOk}",
+        $"HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:{HostedAccessibilityCommandSurfaceOk}",
+        $"HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:{HostedAccessibilityAuthoringSurfaceOk}",
+        $"HOSTED_ACCESSIBILITY_OK:{HostedAccessibilityOk}",
         $"WIDENED_SURFACE_PERFORMANCE_OK:{WidenedSurfacePerformanceOk}",
         .. MetricLines,
         $"AUTHORING_SURFACE_OK:{AuthoringSurfaceOk}",
@@ -214,14 +232,27 @@ public static class ConsumerSampleProof
         bool stencilSurfaceOk;
         bool edgeQuickToolsOk;
         bool nodeQuickToolsOk;
+        bool hostedAccessibilityBaselineOk;
+        bool hostedAccessibilityFocusOk;
+        bool hostedAccessibilityCommandSurfaceOk;
+        bool hostedAccessibilityAuthoringSurfaceOk;
         try
         {
             capabilityWindow.Show();
             FlushUi();
 
-            stencilSurfaceOk = HasStencilSurface(capabilityWindow, host);
-
             var reviewNodeId = host.GetFirstReviewNodeId();
+            host.SelectNode(reviewNodeId);
+            FlushUi();
+
+            hostedAccessibilityBaselineOk = HasHostedAccessibilityBaselines(capabilityWindow);
+            hostedAccessibilityAuthoringSurfaceOk = HasHostedAccessibilityAuthoringSurface(capabilityWindow);
+            hostedAccessibilityFocusOk = HasHostedAccessibilityFocus(capabilityWindow);
+            hostedAccessibilityCommandSurfaceOk = HasHostedAccessibilityCommandSurface(capabilityWindow);
+            host.SelectNode(reviewNodeId);
+            FlushUi();
+
+            stencilSurfaceOk = HasStencilSurface(capabilityWindow, host);
             host.SelectNode(reviewNodeId);
             FlushUi();
             edgeQuickToolsOk = HasEdgeQuickTools(capabilityWindow, host);
@@ -248,6 +279,10 @@ public static class ConsumerSampleProof
             ExportBreadthOk: exportBreadthOk,
             NodeQuickToolsOk: nodeQuickToolsOk,
             EdgeQuickToolsOk: edgeQuickToolsOk,
+            HostedAccessibilityBaselineOk: hostedAccessibilityBaselineOk,
+            HostedAccessibilityFocusOk: hostedAccessibilityFocusOk,
+            HostedAccessibilityCommandSurfaceOk: hostedAccessibilityCommandSurfaceOk,
+            HostedAccessibilityAuthoringSurfaceOk: hostedAccessibilityAuthoringSurfaceOk,
             ParameterSnapshots: CreateParameterSnapshots(host.GetSelectedParameterSnapshots().ToArray()),
             StartupMs: startupMs,
             InspectorProjectionMs: inspectorProjectionMs,
@@ -562,6 +597,98 @@ public static class ConsumerSampleProof
             && host.Session.Queries.CreateDocumentSnapshot().Connections.Count == 0;
     }
 
+    private static bool HasHostedAccessibilityBaselines(Window window)
+    {
+        var editorView = window.GetVisualDescendants().OfType<GraphEditorView>().FirstOrDefault();
+        var canvas = FindNamed<NodeCanvas>(window, "PART_NodeCanvas");
+        var stencilSearchBox = FindNamed<TextBox>(window, "PART_StencilSearchBox");
+        var paletteToggle = FindNamed<Button>(window, "PART_OpenCommandPaletteButton");
+        var paletteSearchBox = FindNamed<TextBox>(window, "PART_CommandPaletteSearchBox");
+        var inspector = FindNamed<GraphInspectorView>(window, "PART_InspectorSurface");
+        var parameterSearchBox = FindNamed<TextBox>(window, "PART_ParameterSearchBox");
+
+        return editorView is not null
+            && string.Equals(AutomationProperties.GetName(editorView), "Graph editor host", StringComparison.Ordinal)
+            && canvas is not null
+            && string.Equals(AutomationProperties.GetName(canvas), "Graph canvas", StringComparison.Ordinal)
+            && stencilSearchBox is not null
+            && string.Equals(AutomationProperties.GetName(stencilSearchBox), "Stencil search", StringComparison.Ordinal)
+            && paletteToggle is not null
+            && string.Equals(AutomationProperties.GetName(paletteToggle), "Open command palette", StringComparison.Ordinal)
+            && paletteSearchBox is not null
+            && string.Equals(AutomationProperties.GetName(paletteSearchBox), "Command palette search", StringComparison.Ordinal)
+            && inspector is not null
+            && string.Equals(AutomationProperties.GetName(inspector), "Graph inspector", StringComparison.Ordinal)
+            && parameterSearchBox is not null
+            && string.Equals(AutomationProperties.GetName(parameterSearchBox), "Inspector parameter search", StringComparison.Ordinal);
+    }
+
+    private static bool HasHostedAccessibilityFocus(Window window)
+    {
+        var editorView = window.GetVisualDescendants().OfType<GraphEditorView>().FirstOrDefault();
+        var paletteChrome = FindNamed<Border>(window, "PART_CommandPaletteChrome");
+        var paletteSearchBox = FindNamed<TextBox>(window, "PART_CommandPaletteSearchBox");
+        var stencilSearchBox = FindNamed<TextBox>(window, "PART_StencilSearchBox");
+        var parameterSearchBox = FindNamed<TextBox>(window, "PART_ParameterSearchBox");
+        return editorView is not null
+            && paletteChrome is not null
+            && paletteSearchBox is not null
+            && stencilSearchBox is not null
+            && parameterSearchBox is not null
+            && HasCommandPaletteFocusRoundTrip(editorView, stencilSearchBox, paletteChrome, paletteSearchBox)
+            && HasCommandPaletteFocusRoundTrip(editorView, parameterSearchBox, paletteChrome, paletteSearchBox);
+    }
+
+    private static bool HasHostedAccessibilityCommandSurface(Window window)
+    {
+        var saveButton = FindNamed<Button>(window, "PART_HeaderCommand_workspace.save");
+        var paletteToggle = FindNamed<Button>(window, "PART_OpenCommandPaletteButton");
+        var duplicateButton = FindNamed<Button>(window, "PART_NodeToolDuplicateButton");
+        if (saveButton is null || paletteToggle is null || duplicateButton is null)
+        {
+            return false;
+        }
+
+        paletteToggle.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        FlushUi();
+        var paletteSaveButton = FindNamed<Button>(window, "PART_CommandPaletteAction_workspace.save");
+        var paletteDuplicateButton = FindNamed<Button>(window, "PART_CommandPaletteAction_node-duplicate");
+        var result = string.Equals(AutomationProperties.GetName(saveButton), "Save Workspace", StringComparison.Ordinal)
+            && string.Equals(AutomationProperties.GetName(duplicateButton), duplicateButton.Content?.ToString(), StringComparison.Ordinal)
+            && paletteSaveButton is not null
+            && string.Equals(AutomationProperties.GetName(paletteSaveButton), "Save Workspace", StringComparison.Ordinal)
+            && paletteDuplicateButton is not null
+            && string.Equals(AutomationProperties.GetName(paletteDuplicateButton), paletteDuplicateButton.Content?.ToString(), StringComparison.Ordinal);
+        paletteToggle.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        FlushUi();
+        return result;
+    }
+
+    private static bool HasHostedAccessibilityAuthoringSurface(Window window)
+    {
+        const string connectionId = "consumer-sample-connection-001";
+        var editorView = window.GetVisualDescendants().OfType<GraphEditorView>().FirstOrDefault();
+        var hasAccessibleParameterMetadata = editorView?.Editor?.SelectedNodeParameters.Any(parameter =>
+            !string.IsNullOrWhiteSpace(parameter.DisplayName)
+            && (!string.IsNullOrWhiteSpace(parameter.HelpText)
+                || !string.IsNullOrWhiteSpace(parameter.Description)
+                || !string.IsNullOrWhiteSpace(parameter.ReadOnlyReason)
+                || !string.IsNullOrWhiteSpace(parameter.ValueStateCaption))) == true;
+        var labelEditor = FindNamed<TextBox>(window, $"PART_ConnectionToolLabelEditor_{connectionId}");
+        var noteEditor = FindNamed<TextBox>(window, $"PART_ConnectionToolNoteEditor_{connectionId}");
+        if (!hasAccessibleParameterMetadata
+            || labelEditor is null
+            || noteEditor is null)
+        {
+            return false;
+        }
+
+        return !string.IsNullOrWhiteSpace(AutomationProperties.GetName(labelEditor))
+            && AutomationProperties.GetName(labelEditor)!.EndsWith("label editor", StringComparison.Ordinal)
+            && !string.IsNullOrWhiteSpace(AutomationProperties.GetName(noteEditor))
+            && AutomationProperties.GetName(noteEditor)!.EndsWith("note editor", StringComparison.Ordinal);
+    }
+
     private static GraphEditorCommandInvocationSnapshot CreateCommand(
         string commandId,
         params (string Name, string? Value)[] arguments)
@@ -596,6 +723,47 @@ public static class ConsumerSampleProof
         action();
         stopwatch.Stop();
         return stopwatch.Elapsed.TotalMilliseconds;
+    }
+
+    private static bool HasCommandPaletteFocusRoundTrip(
+        GraphEditorView view,
+        Control focusOrigin,
+        Border paletteChrome,
+        TextBox paletteSearchBox)
+    {
+        focusOrigin.Focus();
+        FlushUi();
+
+        InvokeViewKeyDown(view, new KeyEventArgs
+        {
+            Key = Key.P,
+            KeyModifiers = KeyModifiers.Control | KeyModifiers.Shift,
+            Source = focusOrigin,
+        });
+        FlushUi();
+
+        if (!paletteChrome.IsVisible
+            || !ReferenceEquals(TopLevel.GetTopLevel(view)?.FocusManager?.GetFocusedElement(), paletteSearchBox))
+        {
+            return false;
+        }
+
+        InvokeViewKeyDown(view, new KeyEventArgs
+        {
+            Key = Key.Escape,
+        });
+        FlushUi();
+
+        return !paletteChrome.IsVisible
+            && ReferenceEquals(TopLevel.GetTopLevel(view)?.FocusManager?.GetFocusedElement(), focusOrigin);
+    }
+
+    private static void InvokeViewKeyDown(GraphEditorView view, KeyEventArgs args)
+    {
+        var handler = typeof(GraphEditorView).GetMethod(
+            "HandleKeyDown",
+            System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+        handler?.Invoke(view, [view, args]);
     }
 
     private static void FlushUi()

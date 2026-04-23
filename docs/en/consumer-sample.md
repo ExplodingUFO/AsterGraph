@@ -13,6 +13,7 @@ For the inspector metadata recipe, pair this route with [Authoring Inspector Rec
 For copyable custom node, port, and edge presentation on the same route, pair it with [Authoring Surface Recipe](./authoring-surface-recipe.md).
 For searchable grouped stencil, SVG/PNG/JPEG export breadth, and shared node or edge quick tools on the same route, pair it with [Capability Breadth Recipe](./capability-breadth-recipe.md).
 For one copyable hosted tuning handoff that keeps those widened surfaces tied to defended `ScaleSmoke` budgets, pair it with [Widened Surface Performance Recipe](./widened-surface-performance-recipe.md).
+For one copyable hosted keyboard, focus, and accessibility handoff on the same route, pair it with [Hosted Accessibility Recipe](./hosted-accessibility-recipe.md).
 
 This is the defended beta route for copying host-owned seams into your own host. Keep action projection, trust workflow, and the selected-node parameter read/write seam host-owned; copy only the sample-owned presentation.
 
@@ -73,6 +74,13 @@ Consumer Sample proves the seam split; it does not own the metadata vocabulary. 
 - Keep defended `large` authoring and export budgets on `ScaleSmoke` through `SCALE_AUTHORING_BUDGET_OK:large:True:none` and `SCALE_EXPORT_BUDGET_OK:large:True:none`.
 - Reuse [Widened Surface Performance Recipe](./widened-surface-performance-recipe.md) when you want one copyable tuning handoff instead of a new hosted proof lane.
 
+## Copyable Hosted Accessibility Handoff
+
+- Keep baseline automation names on `GraphEditorView`, `NodeCanvas`, `GraphInspectorView`, and the stock search surfaces, then expect `HOSTED_ACCESSIBILITY_BASELINE_OK:True`.
+- Keep command-palette keyboard flow on the shared hosted route so focus returns to the host surface that opened it, then expect `HOSTED_ACCESSIBILITY_FOCUS_OK:True`.
+- Keep header, palette, node-tool, and edge-tool names projected from the same shared action descriptors, then expect `HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True`.
+- Keep selected-node parameter metadata and connection text editors on the same hosted authoring route, then close the handoff with [Hosted Accessibility Recipe](./hosted-accessibility-recipe.md) and `HOSTED_ACCESSIBILITY_OK:True`.
+
 ## Trust and proof quick reference
 
 Copyable trust and proof reference:
@@ -92,6 +100,11 @@ Expected proof markers:
 - `CAPABILITY_BREADTH_NODE_QUICK_TOOLS_OK:True`
 - `CAPABILITY_BREADTH_EDGE_QUICK_TOOLS_OK:True`
 - `CAPABILITY_BREADTH_OK:True`
+- `HOSTED_ACCESSIBILITY_BASELINE_OK:True`
+- `HOSTED_ACCESSIBILITY_FOCUS_OK:True`
+- `HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True`
+- `HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True`
+- `HOSTED_ACCESSIBILITY_OK:True`
 - `WIDENED_SURFACE_PERFORMANCE_OK:True`
 - `AUTHORING_SURFACE_OK:True`
 - `COMMAND_SURFACE_OK:True`
@@ -160,6 +173,11 @@ Expected proof markers:
 - `CAPABILITY_BREADTH_NODE_QUICK_TOOLS_OK:True`
 - `CAPABILITY_BREADTH_EDGE_QUICK_TOOLS_OK:True`
 - `CAPABILITY_BREADTH_OK:True`
+- `HOSTED_ACCESSIBILITY_BASELINE_OK:True`
+- `HOSTED_ACCESSIBILITY_FOCUS_OK:True`
+- `HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True`
+- `HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True`
+- `HOSTED_ACCESSIBILITY_OK:True`
 - `WIDENED_SURFACE_PERFORMANCE_OK:True`
 - `HOST_NATIVE_METRIC:startup_ms=...`
 - `HOST_NATIVE_METRIC:inspector_projection_ms=...`
@@ -222,6 +240,7 @@ If you want to build the same medium host in your own app, copy these seams in t
 - [Quick Start](./quick-start.md)
 - [Capability Breadth Recipe](./capability-breadth-recipe.md)
 - [Widened Surface Performance Recipe](./widened-surface-performance-recipe.md)
+- [Hosted Accessibility Recipe](./hosted-accessibility-recipe.md)
 - [Authoring Surface Recipe](./authoring-surface-recipe.md)
 - [Beta Support Bundle](./support-bundle.md)
 - [Host Integration](./host-integration.md)

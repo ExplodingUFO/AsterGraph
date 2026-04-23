@@ -8,6 +8,7 @@ For the inspector metadata recipe, pair this sample with [Authoring Inspector Re
 For copyable custom node, port, parameter, and edge presentation on the same hosted route, pair it with [Authoring Surface Recipe](../../docs/en/authoring-surface-recipe.md).
 For searchable grouped stencil, SVG/PNG/JPEG export breadth, and shared node or edge quick tools on the same hosted route, pair it with [Capability Breadth Recipe](../../docs/en/capability-breadth-recipe.md).
 For one copyable hosted tuning handoff that keeps those widened surfaces tied to defended `ScaleSmoke` budgets, pair it with [Widened Surface Performance Recipe](../../docs/en/widened-surface-performance-recipe.md).
+For one copyable hosted keyboard, focus, and accessibility handoff on the same route, pair it with [Hosted Accessibility Recipe](../../docs/en/hosted-accessibility-recipe.md).
 
 The hosted route ladder is `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerSample.Avalonia`.
 
@@ -49,6 +50,11 @@ Expected proof markers:
 - `CAPABILITY_BREADTH_NODE_QUICK_TOOLS_OK:True`
 - `CAPABILITY_BREADTH_EDGE_QUICK_TOOLS_OK:True`
 - `CAPABILITY_BREADTH_OK:True`
+- `HOSTED_ACCESSIBILITY_BASELINE_OK:True`
+- `HOSTED_ACCESSIBILITY_FOCUS_OK:True`
+- `HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True`
+- `HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True`
+- `HOSTED_ACCESSIBILITY_OK:True`
 - `WIDENED_SURFACE_PERFORMANCE_OK:True`
 - `HOST_NATIVE_METRIC:startup_ms=...`
 - `HOST_NATIVE_METRIC:inspector_projection_ms=...`
@@ -119,6 +125,13 @@ Use this sample to copy the host-owned seams, not the sample-specific presentati
 - Keep widened hosted metrics on `AsterGraph.ConsumerSample.Avalonia -- --proof` through `HOST_NATIVE_METRIC:stencil_search_ms`, `HOST_NATIVE_METRIC:command_surface_refresh_ms`, `HOST_NATIVE_METRIC:node_tool_projection_ms`, and `HOST_NATIVE_METRIC:edge_tool_projection_ms`, and expect `WIDENED_SURFACE_PERFORMANCE_OK:True`.
 - Keep defended `large` authoring and export budgets on `ScaleSmoke` through `SCALE_AUTHORING_BUDGET_OK:large:True:none` and `SCALE_EXPORT_BUDGET_OK:large:True:none`.
 - Close the tuning handoff with [Widened Surface Performance Recipe](../../docs/en/widened-surface-performance-recipe.md) instead of inventing a new proof lane.
+
+### Copyable Hosted Accessibility Handoff
+
+- Keep baseline automation names on `GraphEditorView`, `NodeCanvas`, `GraphInspectorView`, and the stock search surfaces, then expect `HOSTED_ACCESSIBILITY_BASELINE_OK:True`.
+- Keep command-palette keyboard flow on the shared hosted route so focus returns to the host surface that opened it, then expect `HOSTED_ACCESSIBILITY_FOCUS_OK:True`.
+- Keep header, palette, node-tool, and edge-tool names projected from the same shared action descriptors, then expect `HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True`.
+- Keep selected-node parameter metadata and connection text editors on the same hosted authoring route, then close the handoff with [Hosted Accessibility Recipe](../../docs/en/hosted-accessibility-recipe.md) and `HOSTED_ACCESSIBILITY_OK:True`.
 
 ### Replace These Sample-Owned Details
 
