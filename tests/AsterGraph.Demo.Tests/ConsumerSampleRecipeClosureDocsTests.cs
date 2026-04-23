@@ -183,12 +183,18 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
         Assert.Contains("附件备注", supportBundleZh, StringComparison.Ordinal);
         Assert.True(HasLineWithAll(adoptionFeedbackEn, "route", "version", "proof", "friction", "support-bundle attachment note"));
         Assert.True(HasLineWithAll(adoptionFeedbackZh, "route", "version", "proof", "摩擦", "support bundle", "附件备注"));
-        Assert.Contains("Persona", adoptionFeedbackEn, StringComparison.Ordinal);
+        Assert.Contains("## Seeded Trial Synthesis", adoptionFeedbackEn, StringComparison.Ordinal);
         Assert.Contains("maintainer-seeded rehearsal evidence", adoptionFeedbackEn, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("not real external intake", adoptionFeedbackEn, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("do not count toward the 3-5 gate", adoptionFeedbackEn, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("Requested next capability", adoptionFeedbackEn, StringComparison.Ordinal);
-        Assert.Contains("维护者综合出来的结论", adoptionFeedbackZh, StringComparison.Ordinal);
+        Assert.Contains("3-5 gate", adoptionFeedbackEn, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("## Current Recommendation", adoptionFeedbackEn, StringComparison.Ordinal);
+        Assert.Contains("seeded rehearsals", adoptionFeedbackEn, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("real external reports", adoptionFeedbackEn, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("## 当前种子试用综合", adoptionFeedbackZh, StringComparison.Ordinal);
+        Assert.Contains("维护者种子预演证据", adoptionFeedbackZh, StringComparison.Ordinal);
+        Assert.Contains("3 到 5 的门槛", adoptionFeedbackZh, StringComparison.Ordinal);
+        Assert.Contains("## 当前建议", adoptionFeedbackZh, StringComparison.Ordinal);
+        Assert.Contains("种子建议", adoptionFeedbackZh, StringComparison.Ordinal);
+        Assert.Contains("真实外部报告", adoptionFeedbackZh, StringComparison.Ordinal);
     }
 
     private static void AssertContains(string contents, string expected)

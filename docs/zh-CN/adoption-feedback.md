@@ -1,6 +1,6 @@
 # Adoption Feedback Loop
 
-这份文档定义了 public beta 的受限 intake 记录，并在预发布反馈循环还在收集足够真实外部反馈时，保持和 issue template 相同的受限 intake 词汇。
+这份文档定义了 public beta 的受限 intake 记录，并明确区分维护者种子预演证据和真实外部报告；在预发布反馈循环还在收集足够真实外部报告时，继续沿用这套受限 intake 词汇。
 
 ## Intake 格式
 
