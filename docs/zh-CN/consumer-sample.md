@@ -103,7 +103,7 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 
 如果你是从 starter recipe 复制过来的，就在这里完成 proof handoff：先跑 `AsterGraph.ConsumerSample.Avalonia -- --proof` 来验证受防守的宿主路线。
 
-如果你要复查本地证据，就运行 `AsterGraph.ConsumerSample.Avalonia -- --proof --support-bundle <support-bundle-path>`，并把输出里的 `SUPPORT_BUNDLE_PATH:...` 作为备注。
+如果你要复查本地证据，就运行 `AsterGraph.ConsumerSample.Avalonia -- --proof --support-bundle <support-bundle-path>`，并把输出里的 `SUPPORT_BUNDLE_PATH:...` 作为附件备注。
 
 如果 route 不能产出 bundle，就记录 `NO_SUPPORT_BUNDLE:route-cannot-produce-one`。
 

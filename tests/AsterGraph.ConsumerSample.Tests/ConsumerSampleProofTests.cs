@@ -91,12 +91,18 @@ public sealed class ConsumerSampleProofTests
         Assert.True(
             DateTimeOffset.TryParse(generatedAtUtc, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out _),
             "Support bundle generatedAtUtc should be a parseable round-trip UTC timestamp.");
-        Assert.Contains(
-            root.GetProperty("proofLines").EnumerateArray().Select(static item => item.GetString()),
-            line => string.Equals(line, "COMMAND_SURFACE_OK:True", StringComparison.Ordinal));
-        Assert.Contains(
-            root.GetProperty("proofLines").EnumerateArray().Select(static item => item.GetString()),
-            line => string.Equals(line, "CONSUMER_SAMPLE_OK:True", StringComparison.Ordinal));
+        var proofLines = root.GetProperty("proofLines").EnumerateArray().Select(static item => item.GetString()).ToArray();
+        Assert.True(proofLines[0] is not null && proofLines[0]!.StartsWith("CONSUMER_SAMPLE_HOST_ACTION_OK:True", StringComparison.Ordinal));
+        Assert.True(proofLines[1] is not null && proofLines[1]!.StartsWith("CONSUMER_SAMPLE_PLUGIN_OK:True", StringComparison.Ordinal));
+        Assert.True(proofLines[2] is not null && proofLines[2]!.StartsWith("CONSUMER_SAMPLE_PARAMETER_OK:True", StringComparison.Ordinal));
+        Assert.True(proofLines[3] is not null && proofLines[3]!.StartsWith("CONSUMER_SAMPLE_WINDOW_OK:True", StringComparison.Ordinal));
+        Assert.True(proofLines[4] is not null && proofLines[4]!.StartsWith("CONSUMER_SAMPLE_TRUST_OK:True", StringComparison.Ordinal));
+        Assert.True(proofLines[5] is not null && proofLines[5]!.StartsWith("COMMAND_SURFACE_OK:True", StringComparison.Ordinal));
+        Assert.True(proofLines[6] is not null && proofLines[6]!.StartsWith("HOST_NATIVE_METRIC:startup_ms=", StringComparison.Ordinal));
+        Assert.Contains(proofLines, line => string.Equals(line, "CONSUMER_SAMPLE_OK:True", StringComparison.Ordinal));
+        Assert.Contains(proofLines, line => line != null && line.StartsWith("HOST_NATIVE_METRIC:inspector_projection_ms=", StringComparison.Ordinal));
+        Assert.Contains(proofLines, line => line != null && line.StartsWith("HOST_NATIVE_METRIC:plugin_scan_ms=", StringComparison.Ordinal));
+        Assert.Contains(proofLines, line => line != null && line.StartsWith("HOST_NATIVE_METRIC:command_latency_ms=", StringComparison.Ordinal));
         Assert.Equal(
             ["frameworkDescription", "osArchitecture", "osDescription", "processArchitecture"],
             environment.EnumerateObject().Select(static property => property.Name).OrderBy(static name => name).ToArray());

@@ -41,7 +41,7 @@ support bundle 是一个本地 JSON 文件，顶层字段固定为：
 - `environment`
 - `reproduction`
 
-`proofLines` 里应该包含 proof mode 已经输出的同一组 marker，包括 `COMMAND_SURFACE_OK:True`、`CONSUMER_SAMPLE_OK:True` 和 `HOST_NATIVE_METRIC:*`。
+`proofLines` 里应该包含 proof mode 已经输出的完整 marker 集：`CONSUMER_SAMPLE_HOST_ACTION_OK:True`、`CONSUMER_SAMPLE_PLUGIN_OK:True`、`CONSUMER_SAMPLE_PARAMETER_OK:True`、`CONSUMER_SAMPLE_WINDOW_OK:True`、`CONSUMER_SAMPLE_TRUST_OK:True`、`COMMAND_SURFACE_OK:True`、`HOST_NATIVE_METRIC:startup_ms=...`、`HOST_NATIVE_METRIC:inspector_projection_ms=...`、`HOST_NATIVE_METRIC:plugin_scan_ms=...`、`HOST_NATIVE_METRIC:command_latency_ms=...` 这些行，以及 `CONSUMER_SAMPLE_OK:True`。
 
 `environment` 记录本次运行所在的 runtime 和操作系统信息。
 

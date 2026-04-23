@@ -103,7 +103,7 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 
 If you copied the starter recipe, validate the defended host here with `AsterGraph.ConsumerSample.Avalonia -- --proof` first.
 
-For reviewable local evidence, run `AsterGraph.ConsumerSample.Avalonia -- --proof --support-bundle <support-bundle-path>` and reuse the emitted `SUPPORT_BUNDLE_PATH:...` line as the note.
+For reviewable local evidence, run `AsterGraph.ConsumerSample.Avalonia -- --proof --support-bundle <support-bundle-path>` and reuse the emitted `SUPPORT_BUNDLE_PATH:...` line as the attachment note.
 
 If the route cannot produce a bundle, record `NO_SUPPORT_BUNDLE:route-cannot-produce-one`.
 

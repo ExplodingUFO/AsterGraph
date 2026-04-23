@@ -41,7 +41,7 @@ The support bundle is one local JSON file with these top-level fields:
 - `environment`
 - `reproduction`
 
-`proofLines` should include the same marker lines emitted by proof mode, including `COMMAND_SURFACE_OK:True`, `CONSUMER_SAMPLE_OK:True`, and the `HOST_NATIVE_METRIC:*` lines.
+`proofLines` should include the full marker set emitted by proof mode: `CONSUMER_SAMPLE_HOST_ACTION_OK:True`, `CONSUMER_SAMPLE_PLUGIN_OK:True`, `CONSUMER_SAMPLE_PARAMETER_OK:True`, `CONSUMER_SAMPLE_WINDOW_OK:True`, `CONSUMER_SAMPLE_TRUST_OK:True`, `COMMAND_SURFACE_OK:True`, `HOST_NATIVE_METRIC:startup_ms=...`, `HOST_NATIVE_METRIC:inspector_projection_ms=...`, `HOST_NATIVE_METRIC:plugin_scan_ms=...`, `HOST_NATIVE_METRIC:command_latency_ms=...`, and `CONSUMER_SAMPLE_OK:True`.
 
 `environment` records the local runtime and OS details used for the run.
 
