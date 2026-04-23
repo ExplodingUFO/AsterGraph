@@ -48,6 +48,7 @@ public sealed class StarterAndRicherWpfSampleTests
         Assert.True(proof.AccessibilityAuthoringSurfaceOk);
         Assert.True(proof.HostedAccessibilityOk);
         Assert.True(proof.Adapter2PerformanceBaselineOk);
+        Assert.True(proof.Adapter2ExportBreadthOk);
         Assert.True(proof.Adapter2ProjectionBudgetOk);
         Assert.True(proof.Adapter2CommandBudgetOk);
         Assert.True(proof.Adapter2SceneBudgetOk);
@@ -59,6 +60,7 @@ public sealed class StarterAndRicherWpfSampleTests
         Assert.Contains(metricLines, line => line.Contains("command_latency_ms", StringComparison.Ordinal));
         Assert.Contains(metricLines, line => line.Contains("scene_snapshot_ms", StringComparison.Ordinal));
         Assert.Contains(proof.ProofLines, line => line == "ADAPTER2_PERFORMANCE_BASELINE_OK:True");
+        Assert.Contains(proof.ProofLines, line => line == "ADAPTER2_EXPORT_BREADTH_OK:True");
         Assert.Contains(proof.ProofLines, line => line == "ADAPTER2_PROJECTION_BUDGET_OK:True:none");
         Assert.Contains(proof.ProofLines, line => line == "ADAPTER2_COMMAND_BUDGET_OK:True:none");
         Assert.Contains(proof.ProofLines, line => line == "ADAPTER2_SCENE_BUDGET_OK:True:none");

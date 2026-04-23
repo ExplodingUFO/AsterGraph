@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Windows;
@@ -16,6 +17,7 @@ using AsterGraph.Editor.Catalog;
 using AsterGraph.Editor.Hosting;
 using AsterGraph.Editor.Plugins;
 using AsterGraph.Editor.Runtime;
+using AsterGraph.Editor.Services;
 using AsterGraph.Editor.ViewModels;
 using AsterGraph.Wpf.Controls;
 using AsterGraph.Wpf.Hosting;
@@ -205,6 +207,7 @@ public sealed record HostedHelloWorldProofResult(
     bool AccessibilityCommandSurfaceOk,
     bool AccessibilityAuthoringSurfaceOk,
     bool Adapter2PerformanceBaselineOk,
+    bool Adapter2ExportBreadthOk,
     bool Adapter2ProjectionBudgetOk,
     bool Adapter2CommandBudgetOk,
     bool Adapter2SceneBudgetOk,
@@ -223,6 +226,7 @@ public sealed record HostedHelloWorldProofResult(
     public bool IsOk => CommandSurfaceOk
         && HostedAccessibilityOk
         && Adapter2PerformanceBaselineOk
+        && Adapter2ExportBreadthOk
         && Adapter2ProjectionBudgetOk
         && Adapter2CommandBudgetOk
         && Adapter2SceneBudgetOk;
@@ -236,6 +240,7 @@ public sealed record HostedHelloWorldProofResult(
             $"HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:{AccessibilityAuthoringSurfaceOk}",
             $"HOSTED_ACCESSIBILITY_OK:{HostedAccessibilityOk}",
             $"ADAPTER2_PERFORMANCE_BASELINE_OK:{Adapter2PerformanceBaselineOk}",
+            $"ADAPTER2_EXPORT_BREADTH_OK:{Adapter2ExportBreadthOk}",
             $"ADAPTER2_PROJECTION_BUDGET_OK:{Adapter2ProjectionBudgetOk}:{FormatBudgetFailure(Adapter2ProjectionBudgetOk, "inspector_projection_ms")}",
             $"ADAPTER2_COMMAND_BUDGET_OK:{Adapter2CommandBudgetOk}:{FormatBudgetFailure(Adapter2CommandBudgetOk, "command_latency_ms")}",
             $"ADAPTER2_SCENE_BUDGET_OK:{Adapter2SceneBudgetOk}:{FormatBudgetFailure(Adapter2SceneBudgetOk, "scene_snapshot_ms")}",
@@ -274,6 +279,8 @@ public static class HostedHelloWorldProof
         }
 
         var session = editor.Session;
+        var exportRoot = Path.Combine(Path.GetTempPath(), "AsterGraph.HelloWorld.Wpf.Proof", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(exportRoot);
         var sceneSnapshotMs = MeasureMilliseconds(() => session.Queries.CreateDocumentSnapshot());
         var inspectorProjectionMs = MeasureMilliseconds(() => session.Queries.GetSelectedNodeParameterSnapshots().ToArray());
         var pluginScanMs = MeasureMilliseconds(() => AsterGraphEditorFactory.DiscoverPluginCandidates(new GraphEditorPluginDiscoveryOptions()).ToArray());
@@ -293,25 +300,34 @@ public static class HostedHelloWorldProof
             && IsFiniteNonNegative(pluginScanMs)
             && IsFiniteNonNegative(commandLatencyMs)
             && IsFiniteNonNegative(sceneSnapshotMs);
+        var adapter2ExportBreadthOk = HasExportBreadth(session, exportRoot);
         var adapter2ProjectionBudgetOk = IsWithinBudget(inspectorProjectionMs, projectionBudgetMs);
         var adapter2CommandBudgetOk = IsWithinBudget(commandLatencyMs, commandBudgetMs);
         var adapter2SceneBudgetOk = IsWithinBudget(sceneSnapshotMs, sceneBudgetMs);
 
-        return new HostedHelloWorldProofResult(
-            commandSurfaceOk,
-            accessibilityBaselineOk,
-            accessibilityFocusOk,
-            accessibilityCommandSurfaceOk,
-            accessibilityAuthoringSurfaceOk,
-            adapter2PerformanceBaselineOk,
-            adapter2ProjectionBudgetOk,
-            adapter2CommandBudgetOk,
-            adapter2SceneBudgetOk,
-            startupMs,
-            inspectorProjectionMs,
-            pluginScanMs,
-            commandLatencyMs,
-            sceneSnapshotMs);
+        try
+        {
+            return new HostedHelloWorldProofResult(
+                commandSurfaceOk,
+                accessibilityBaselineOk,
+                accessibilityFocusOk,
+                accessibilityCommandSurfaceOk,
+                accessibilityAuthoringSurfaceOk,
+                adapter2PerformanceBaselineOk,
+                adapter2ExportBreadthOk,
+                adapter2ProjectionBudgetOk,
+                adapter2CommandBudgetOk,
+                adapter2SceneBudgetOk,
+                startupMs,
+                inspectorProjectionMs,
+                pluginScanMs,
+                commandLatencyMs,
+                sceneSnapshotMs);
+        }
+        finally
+        {
+            TryDeleteDirectory(exportRoot);
+        }
     }
 
     private static bool IsFiniteNonNegative(double value)
@@ -319,6 +335,67 @@ public static class HostedHelloWorldProof
 
     private static bool IsWithinBudget(double value, double budgetMs)
         => IsFiniteNonNegative(value) && value <= budgetMs;
+
+    private static bool HasExportBreadth(IGraphEditorSession session, string exportRoot)
+    {
+        var featureDescriptors = session.Queries.GetFeatureDescriptors()
+            .ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
+        if (!HasAvailableFeature(featureDescriptors, "capability.export.scene-svg")
+            || !HasAvailableFeature(featureDescriptors, "capability.export.scene-image")
+            || !HasAvailableFeature(featureDescriptors, "capability.export.scene-png")
+            || !HasAvailableFeature(featureDescriptors, "capability.export.scene-jpeg"))
+        {
+            return false;
+        }
+
+        var svgPath = Path.Combine(exportRoot, "hello-world-proof.svg");
+        var pngPath = Path.Combine(exportRoot, "hello-world-proof.png");
+        var jpegPath = Path.Combine(exportRoot, "hello-world-proof.jpg");
+
+        return session.Commands.TryExportSceneAsSvg(svgPath)
+            && File.Exists(svgPath)
+            && File.ReadAllText(svgPath).Contains("<svg", StringComparison.Ordinal)
+            && session.Commands.TryExportSceneAsImage(GraphEditorSceneImageExportFormat.Png, pngPath)
+            && File.Exists(pngPath)
+            && HasImageSignature(File.ReadAllBytes(pngPath), GraphEditorSceneImageExportFormat.Png)
+            && session.Commands.TryExportSceneAsImage(GraphEditorSceneImageExportFormat.Jpeg, jpegPath)
+            && File.Exists(jpegPath)
+            && HasImageSignature(File.ReadAllBytes(jpegPath), GraphEditorSceneImageExportFormat.Jpeg);
+    }
+
+    private static bool HasAvailableFeature(
+        IReadOnlyDictionary<string, GraphEditorFeatureDescriptorSnapshot> featureDescriptors,
+        string featureId)
+        => featureDescriptors.TryGetValue(featureId, out var descriptor)
+        && descriptor.IsAvailable;
+
+    private static bool HasImageSignature(byte[] bytes, GraphEditorSceneImageExportFormat format)
+        => bytes.Length > 3
+        && format switch
+        {
+            GraphEditorSceneImageExportFormat.Png
+                => bytes[0] == 0x89 && bytes[1] == 0x50 && bytes[2] == 0x4E && bytes[3] == 0x47,
+            GraphEditorSceneImageExportFormat.Jpeg
+                => bytes[0] == 0xFF && bytes[1] == 0xD8 && bytes[2] == 0xFF,
+            _ => false,
+        };
+
+    private static void TryDeleteDirectory(string path)
+    {
+        try
+        {
+            if (Directory.Exists(path))
+            {
+                Directory.Delete(path, recursive: true);
+            }
+        }
+        catch (IOException)
+        {
+        }
+        catch (UnauthorizedAccessException)
+        {
+        }
+    }
 
     private static (bool BaselineOk, bool FocusOk, bool CommandSurfaceOk, bool AuthoringSurfaceOk) EvaluateAccessibilitySurface()
         => RunInSta(() =>
