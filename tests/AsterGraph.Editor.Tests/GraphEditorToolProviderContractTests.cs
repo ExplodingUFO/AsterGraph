@@ -57,6 +57,14 @@ public sealed class GraphEditorToolProviderContractTests
         session.Commands.StartConnection(SourceNodeId, SourcePortId);
         session.Commands.CompleteConnection(TargetNodeId, TargetPortId);
         var connectionId = Assert.Single(session.Queries.CreateDocumentSnapshot().Connections).Id;
+        Assert.True(session.Commands.TryExecuteCommand(
+            new GraphEditorCommandInvocationSnapshot(
+                "connections.note.set",
+                [
+                    new GraphEditorCommandArgumentSnapshot("connectionId", connectionId),
+                    new GraphEditorCommandArgumentSnapshot("text", "Tool provider note"),
+                    new GraphEditorCommandArgumentSnapshot("updateStatus", "false"),
+                ])));
 
         var connectionTools = session.Queries.GetToolDescriptors(
             GraphEditorToolContextSnapshot.ForConnection(connectionId, [SourceNodeId], SourceNodeId));
@@ -64,6 +72,7 @@ public sealed class GraphEditorToolProviderContractTests
 
         Assert.Contains(connectionTools, tool => tool.Id == "connection-reconnect");
         Assert.Contains(connectionTools, tool => tool.Id == "connection-disconnect");
+        Assert.Contains(connectionTools, tool => tool.Id == "connection-clear-note");
         Assert.Equal("Host Disconnect Tool", hostConnectionTool.Title);
         Assert.Equal("connections.disconnect", hostConnectionTool.Invocation.CommandId);
 

@@ -162,13 +162,9 @@ public partial class GraphEditorView
             actionBar.Children.Add(CreateToolActionButton(
                 $"PART_ConnectionToolApply_{connection.Id}",
                 "Apply Edge Text",
-                true,
+                CanApplyConnectionText(),
                 () =>
-                {
-                    Editor.Session.Commands.TrySetConnectionLabel(connection.Id, labelEditor.Text, updateStatus: true);
-                    Editor.Session.Commands.TrySetConnectionNoteText(connection.Id, noteEditor.Text, updateStatus: true);
-                    return true;
-                }));
+                    TryExecuteConnectionTextCommands(connection.Id, labelEditor.Text, noteEditor.Text)));
 
             var actions = AsterGraphAuthoringToolActionFactory.CreateConnectionActions(
                 Editor.Session,
@@ -260,11 +256,13 @@ public partial class GraphEditorView
                             route,
                             geometry.Target.Position,
                             capturedSegmentIndex);
-                        return Editor.Session.Commands.TryInsertConnectionRouteVertex(
-                            connectionId,
-                            capturedSegmentIndex,
-                            midpoint,
-                            updateStatus: true);
+                        return TryExecuteCommand(
+                            "connections.route-vertex.insert",
+                            ("connectionId", connectionId),
+                            ("vertexIndex", capturedSegmentIndex.ToString(CultureInfo.InvariantCulture)),
+                            ("worldX", midpoint.X.ToString(CultureInfo.InvariantCulture)),
+                            ("worldY", midpoint.Y.ToString(CultureInfo.InvariantCulture)),
+                            ("updateStatus", bool.TrueString));
                     }));
             }
 
@@ -316,11 +314,11 @@ public partial class GraphEditorView
                 $"PART_ConnectionToolRemoveRouteVertex_{connectionId}_{capturedVertexIndex}",
                 "Remove Bend",
                 removeRouteDescriptor?.CanExecute ?? true,
-                () => Editor is not null
-                    && Editor.Session.Commands.TryRemoveConnectionRouteVertex(
-                        connectionId,
-                        capturedVertexIndex,
-                        updateStatus: true)));
+                () => TryExecuteCommand(
+                    "connections.route-vertex.remove",
+                    ("connectionId", connectionId),
+                    ("vertexIndex", capturedVertexIndex.ToString(CultureInfo.InvariantCulture)),
+                    ("updateStatus", bool.TrueString))));
 
             container.Children.Add(new Border
             {
@@ -376,11 +374,57 @@ public partial class GraphEditorView
             return false;
         }
 
-        return Editor.Session.Commands.TryMoveConnectionRouteVertex(
-            connectionId,
-            vertexIndex,
-            new GraphPoint(x, y),
-            updateStatus: true);
+        return TryExecuteCommand(
+            "connections.route-vertex.move",
+            ("connectionId", connectionId),
+            ("vertexIndex", vertexIndex.ToString(CultureInfo.InvariantCulture)),
+            ("worldX", x.ToString(CultureInfo.InvariantCulture)),
+            ("worldY", y.ToString(CultureInfo.InvariantCulture)),
+            ("updateStatus", bool.TrueString));
+    }
+
+    private bool CanApplyConnectionText()
+    {
+        if (Editor is null)
+        {
+            return false;
+        }
+
+        var descriptors = Editor.Session.Queries.GetCommandDescriptors()
+            .ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
+        return descriptors.TryGetValue("connections.label.set", out var labelSet) && labelSet.CanExecute
+            || descriptors.TryGetValue("connections.note.set", out var noteSet) && noteSet.CanExecute;
+    }
+
+    private bool TryExecuteConnectionTextCommands(string connectionId, string? label, string? noteText)
+    {
+        var labelApplied = TryExecuteCommand(
+            "connections.label.set",
+            ("connectionId", connectionId),
+            ("label", label),
+            ("updateStatus", bool.TrueString));
+        var noteApplied = TryExecuteCommand(
+            "connections.note.set",
+            ("connectionId", connectionId),
+            ("text", noteText),
+            ("updateStatus", bool.TrueString));
+        return labelApplied || noteApplied;
+    }
+
+    private bool TryExecuteCommand(string commandId, params (string Name, string? Value)[] arguments)
+    {
+        if (Editor is null)
+        {
+            return false;
+        }
+
+        return Editor.Session.Commands.TryExecuteCommand(
+            new GraphEditorCommandInvocationSnapshot(
+                commandId,
+                arguments
+                    .Where(argument => argument.Value is not null)
+                    .Select(argument => new GraphEditorCommandArgumentSnapshot(argument.Name, argument.Value!))
+                    .ToList()));
     }
 
     private string CreateConnectionToolTitle(NodeViewModel selectedNode, ConnectionViewModel connection)
@@ -428,6 +472,7 @@ public partial class GraphEditorView
         {
             "connection-reconnect" => $"PART_ConnectionToolReconnect_{connectionId}",
             "connection-disconnect" => $"PART_ConnectionToolDisconnect_{connectionId}",
+            "connection-clear-note" => $"PART_ConnectionToolClearNote_{connectionId}",
             _ => $"PART_ConnectionToolAction_{connectionId}_{action.Id}",
         };
 }

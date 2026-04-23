@@ -190,9 +190,10 @@ internal sealed class GraphEditorSessionStockToolDescriptorBuilder
 
         var reconnect = GetCommandDescriptor(commands, "connections.reconnect");
         var disconnect = GetCommandDescriptor(commands, "connections.disconnect");
+        var clearNote = GetCommandDescriptor(commands, "connections.note.set");
 
-        return
-        [
+        var items = new List<GraphEditorToolDescriptorSnapshot>
+        {
             new GraphEditorToolDescriptorSnapshot(
                 "connection-reconnect",
                 GraphEditorToolContextKind.Connection,
@@ -205,7 +206,19 @@ internal sealed class GraphEditorSessionStockToolDescriptorBuilder
                 disconnect,
                 CreateCommand("connections.disconnect", ("connectionId", connection.Id)),
                 order: 10),
-        ];
+        };
+
+        if (!string.IsNullOrWhiteSpace(connection.Presentation?.NoteText))
+        {
+            items.Add(new GraphEditorToolDescriptorSnapshot(
+                "connection-clear-note",
+                GraphEditorToolContextKind.Connection,
+                CreateContextualDescriptor(clearNote, Localize("editor.tool.connection.clearNote", "Clear Connection Note")),
+                CreateCommand("connections.note.set", ("connectionId", connection.Id), ("text", string.Empty)),
+                order: 20));
+        }
+
+        return items;
     }
 
     private string Localize(string key, string fallback)

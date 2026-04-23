@@ -625,16 +625,23 @@ public sealed class GraphEditorViewTests
         var labelEditor = FindRequiredDescendant<TextBox>(view, "PART_ConnectionToolLabelEditor_connection-001");
         var noteEditor = FindRequiredDescendant<TextBox>(view, "PART_ConnectionToolNoteEditor_connection-001");
         var applyButton = FindRequiredDescendant<Button>(view, "PART_ConnectionToolApply_connection-001");
+        var clearNoteButton = FindRequiredDescendant<Button>(view, "PART_ConnectionToolClearNote_connection-001");
 
         Assert.Equal("Expand Node Card", Assert.IsType<string>(expansionButton.Content));
         Assert.Equal("Signal Flow", labelEditor.Text);
         Assert.Equal("Preview branch", noteEditor.Text);
+        Assert.True(clearNoteButton.IsEnabled);
 
         expansionButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
 
         Assert.Equal(
             GraphNodeExpansionState.Expanded,
             Assert.Single(editor.Session.Queries.GetNodeSurfaceSnapshots(), surface => surface.NodeId == "tests.view.tools-source-001").ExpansionState);
+
+        clearNoteButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        Dispatcher.UIThread.RunJobs(DispatcherPriority.Render);
+
+        Assert.True(string.IsNullOrWhiteSpace(Assert.Single(editor.Session.Queries.CreateDocumentSnapshot().Connections).Presentation?.NoteText));
 
         labelEditor.Text = "Refined Flow";
         noteEditor.Text = "Updated branch";
@@ -721,18 +728,23 @@ public sealed class GraphEditorViewTests
         Assert.True(
             paletteButtons.ContainsKey("PART_CommandPaletteAction_connection-disconnect"),
             $"Palette actions: {string.Join(", ", paletteButtons.Keys.OrderBy(static key => key, StringComparer.Ordinal))}");
+        Assert.True(
+            paletteButtons.ContainsKey("PART_CommandPaletteAction_connection-clear-note"),
+            $"Palette actions: {string.Join(", ", paletteButtons.Keys.OrderBy(static key => key, StringComparer.Ordinal))}");
 
         var createGroup = paletteButtons["PART_CommandPaletteAction_selection-create-group"];
         var toggleExpansion = paletteButtons["PART_CommandPaletteAction_node-toggle-surface-expansion"];
         var disconnect = paletteButtons["PART_CommandPaletteAction_connection-disconnect"];
+        var clearNote = paletteButtons["PART_CommandPaletteAction_connection-clear-note"];
 
         Assert.Equal("Create Group", Assert.IsType<string>(createGroup.Content));
         Assert.Equal("Expand Node Card", Assert.IsType<string>(toggleExpansion.Content));
         Assert.Equal("Disconnect Connection", Assert.IsType<string>(disconnect.Content));
+        Assert.Equal("Clear Connection Note", Assert.IsType<string>(clearNote.Content));
 
-        disconnect.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        clearNote.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
 
-        Assert.Empty(editor.Session.Queries.CreateDocumentSnapshot().Connections);
+        Assert.True(string.IsNullOrWhiteSpace(Assert.Single(editor.Session.Queries.CreateDocumentSnapshot().Connections).Presentation?.NoteText));
     }
 
     private static Window CreateWindow(GraphEditorView view)
