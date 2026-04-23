@@ -2,6 +2,14 @@
 
 这些 synthetic dry-run rehearsal 记录把受限 intake 字段收口在一起：route、version、proof 标记、摩擦，以及 support bundle 附件备注。它们只是 fixture，不是外部验证，也不是 adopter evidence。
 
+## 预期分流分类
+
+| proof 标记 | 预期分流分类 | 下一步 |
+| --- | --- | --- |
+| `CONSUMER_SAMPLE_PARAMETER_OK:False` | parameter projection / 写入路径失败 | 进行 sample/session 参数投影或写入路径调查 |
+| `CONSUMER_SAMPLE_METADATA_PROJECTION_OK:False` | metadata projection / 元数据投影失败 | 进行定义/inspector 元数据投影调查 |
+| `SUPPORT_BUNDLE_PERSISTENCE_OK:False` | support-bundle persistence / 持久化失败 | 进行持久化/路径/环境调查 |
+
 ## 记录 1：parameter projection 失败
 
 - route: `ConsumerSample.Avalonia -- --proof --support-bundle <support-bundle-path>`

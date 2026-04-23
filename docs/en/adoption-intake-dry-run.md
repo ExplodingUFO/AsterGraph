@@ -2,6 +2,14 @@
 
 These synthetic dry-run rehearsal records keep the bounded intake fields together: route, version, proof markers, friction, and support-bundle attachment note. They are fixtures only and are not external validation or adopter evidence.
 
+## Expected triage classification
+
+| Proof marker | Expected triage classification | Next action |
+| --- | --- | --- |
+| `CONSUMER_SAMPLE_PARAMETER_OK:False` | parameter projection/write-path failure | sample/session parameter projection or write-path investigation |
+| `CONSUMER_SAMPLE_METADATA_PROJECTION_OK:False` | metadata projection failure | definition/inspector metadata projection investigation |
+| `SUPPORT_BUNDLE_PERSISTENCE_OK:False` | support-bundle persistence failure | persistence/path/environment investigation |
+
 ## Record 1: Parameter Projection Failure
 
 - route: `ConsumerSample.Avalonia -- --proof --support-bundle <support-bundle-path>`

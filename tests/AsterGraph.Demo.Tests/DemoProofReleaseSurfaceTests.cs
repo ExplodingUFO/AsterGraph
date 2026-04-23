@@ -285,6 +285,20 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("CONSUMER_SAMPLE_PARAMETER_OK:False", dryRunZh, StringComparison.Ordinal);
         Assert.Contains("CONSUMER_SAMPLE_METADATA_PROJECTION_OK:False", dryRunZh, StringComparison.Ordinal);
         Assert.Contains("SUPPORT_BUNDLE_PERSISTENCE_OK:False", dryRunZh, StringComparison.Ordinal);
+        Assert.Contains("Expected triage classification", dryRun, StringComparison.Ordinal);
+        Assert.Contains("预期分流分类", dryRunZh, StringComparison.Ordinal);
+        Assert.Contains("parameter projection/write-path failure", dryRun, StringComparison.Ordinal);
+        Assert.Contains("metadata projection failure", dryRun, StringComparison.Ordinal);
+        Assert.Contains("support-bundle persistence failure", dryRun, StringComparison.Ordinal);
+        Assert.Contains("parameter projection / 写入路径失败", dryRunZh, StringComparison.Ordinal);
+        Assert.Contains("metadata projection / 元数据投影失败", dryRunZh, StringComparison.Ordinal);
+        Assert.Contains("support-bundle persistence / 持久化失败", dryRunZh, StringComparison.Ordinal);
+        Assert.Contains("sample/session parameter projection or write-path investigation", dryRun, StringComparison.Ordinal);
+        Assert.Contains("definition/inspector metadata projection investigation", dryRun, StringComparison.Ordinal);
+        Assert.Contains("persistence/path/environment investigation", dryRun, StringComparison.Ordinal);
+        Assert.Contains("进行 sample/session 参数投影或写入路径调查", dryRunZh, StringComparison.Ordinal);
+        Assert.Contains("进行定义/inspector 元数据投影调查", dryRunZh, StringComparison.Ordinal);
+        Assert.Contains("进行持久化/路径/环境调查", dryRunZh, StringComparison.Ordinal);
         Assert.True(HasLineWithAll(dryRun, "route", "version", "proof markers", "friction", "support-bundle attachment note"));
         Assert.True(HasLineWithAll(dryRunZh, "route", "version", "proof 标记", "摩擦", "support bundle 附件备注"));
         Assert.Contains("parameterSnapshots", dryRun, StringComparison.Ordinal);
@@ -297,6 +311,14 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("priority", dryRunZh, StringComparison.Ordinal);
         Assert.Contains("NO_SUPPORT_BUNDLE:route-cannot-produce-one", dryRun, StringComparison.Ordinal);
         Assert.Contains("NO_SUPPORT_BUNDLE:route-cannot-produce-one", dryRunZh, StringComparison.Ordinal);
+        Assert.Contains("synthetic", dryRun, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("dry-run", dryRun, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("rehearsal", dryRun, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("not external validation", dryRun, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("synthetic", dryRunZh, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("dry-run", dryRunZh, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("演练", dryRunZh, StringComparison.Ordinal);
+        Assert.Contains("不是外部验证", dryRunZh, StringComparison.Ordinal);
     }
 
     [Fact]
