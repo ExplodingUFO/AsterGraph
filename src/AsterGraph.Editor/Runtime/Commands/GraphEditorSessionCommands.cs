@@ -3,6 +3,7 @@ using AsterGraph.Editor.Models;
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Core.Models;
+using AsterGraph.Editor.Services;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -107,6 +108,20 @@ public sealed partial class GraphEditorSession
         if (exported)
         {
             PublishCommandExecuted("export.scene-svg");
+        }
+
+        return exported;
+    }
+
+    public bool TryExportSceneAsImage(
+        GraphEditorSceneImageExportFormat format,
+        string? path = null,
+        GraphEditorSceneImageExportOptions? options = null)
+    {
+        var exported = _host.TryExportSceneAsImage(format, path, options);
+        if (exported)
+        {
+            PublishCommandExecuted("export.scene-image");
         }
 
         return exported;

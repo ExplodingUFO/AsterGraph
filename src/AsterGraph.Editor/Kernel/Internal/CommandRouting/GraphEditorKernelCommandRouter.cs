@@ -7,6 +7,7 @@ using AsterGraph.Editor.Diagnostics;
 using AsterGraph.Editor.Kernel.Internal.Layout;
 using AsterGraph.Editor.Models;
 using AsterGraph.Editor.Runtime;
+using AsterGraph.Editor.Services;
 using System.Threading;
 
 namespace AsterGraph.Editor.Kernel.Internal;
@@ -45,6 +46,8 @@ internal interface IGraphEditorKernelCommandRouterHost
 
     bool CanExportSceneAsSvg { get; }
 
+    bool CanExportSceneAsImage { get; }
+
     bool CanNavigateToParentGraphScope { get; }
 
     void Undo();
@@ -70,6 +73,8 @@ internal interface IGraphEditorKernelCommandRouterHost
     string TryExportSelectionAsTemplate(string? name);
 
     bool TryExportSceneAsSvg(string? path);
+
+    bool TryExportSceneAsImage(GraphEditorSceneImageExportFormat format, string? path, GraphEditorSceneImageExportOptions? options);
 
     void SetNodePositions(IReadOnlyList<NodePositionSnapshot> positions, bool updateStatus);
 
@@ -188,6 +193,10 @@ internal sealed class GraphEditorKernelCommandRouter
                 "export.scene-svg",
                 GraphEditorCommandSourceKind.Kernel,
                 _host.CanExportSceneAsSvg),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "export.scene-image",
+                GraphEditorCommandSourceKind.Kernel,
+                _host.CanExportSceneAsImage),
             GraphEditorCommandDescriptorCatalog.Create(
                 "fragments.export-selection",
                 GraphEditorCommandSourceKind.Kernel,
@@ -492,6 +501,52 @@ internal sealed class GraphEditorKernelCommandRouter
 
             case "export.scene-svg":
                 return _host.TryExportSceneAsSvg(command.TryGetArgument("path", out var sceneExportPath) ? sceneExportPath : null);
+
+            case "export.scene-image":
+                if (!TryGetEnumArgument(command, "format", out GraphEditorSceneImageExportFormat imageFormat))
+                {
+                    return false;
+                }
+
+                GraphEditorSceneImageExportOptions? imageOptions = null;
+                if (command.TryGetArgument("scale", out _))
+                {
+                    if (!TryGetDoubleArgument(command, "scale", out var scale))
+                    {
+                        return false;
+                    }
+
+                    imageOptions = (imageOptions ?? new GraphEditorSceneImageExportOptions()) with
+                    {
+                        Scale = scale,
+                    };
+                }
+
+                if (command.TryGetArgument("quality", out _))
+                {
+                    if (!TryGetIntArgument(command, "quality", out var quality))
+                    {
+                        return false;
+                    }
+
+                    imageOptions = (imageOptions ?? new GraphEditorSceneImageExportOptions()) with
+                    {
+                        Quality = quality,
+                    };
+                }
+
+                if (command.TryGetArgument("backgroundHex", out var backgroundHex))
+                {
+                    imageOptions = (imageOptions ?? new GraphEditorSceneImageExportOptions()) with
+                    {
+                        BackgroundHex = backgroundHex,
+                    };
+                }
+
+                return _host.TryExportSceneAsImage(
+                    imageFormat,
+                    command.TryGetArgument("path", out var sceneImagePath) ? sceneImagePath : null,
+                    imageOptions);
 
             case "fragments.export-selection":
                 return _host.TryExportSelectionFragment(command.TryGetArgument("path", out var exportPath) ? exportPath : null);

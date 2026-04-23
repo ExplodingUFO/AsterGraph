@@ -7,6 +7,7 @@ using AsterGraph.Editor.Kernel.Internal;
 using AsterGraph.Editor.Kernel.Internal.Layout;
 using AsterGraph.Editor.Models;
 using AsterGraph.Editor.Runtime;
+using AsterGraph.Editor.Services;
 using System.Threading;
 
 namespace AsterGraph.Editor.Kernel;
@@ -62,6 +63,9 @@ internal sealed partial class GraphEditorKernel
         bool IGraphEditorKernelCommandRouterHost.CanExportSceneAsSvg
             => _owner._sceneSvgExportCoordinator.CanExport;
 
+        bool IGraphEditorKernelCommandRouterHost.CanExportSceneAsImage
+            => _owner._sceneImageExportCoordinator.CanExport;
+
         bool IGraphEditorKernelCommandRouterHost.CanNavigateToParentGraphScope
             => _owner.GetScopeNavigationSnapshot().CanNavigateToParent;
 
@@ -100,6 +104,12 @@ internal sealed partial class GraphEditorKernel
 
         bool IGraphEditorKernelCommandRouterHost.TryExportSceneAsSvg(string? path)
             => _owner.TryExportSceneAsSvg(path);
+
+        bool IGraphEditorKernelCommandRouterHost.TryExportSceneAsImage(
+            GraphEditorSceneImageExportFormat format,
+            string? path,
+            GraphEditorSceneImageExportOptions? options)
+            => _owner.TryExportSceneAsImage(format, path, options);
 
         void IGraphEditorKernelCommandRouterHost.SetNodePositions(IReadOnlyList<NodePositionSnapshot> positions, bool updateStatus)
             => _owner.SetNodePositions(positions, updateStatus);

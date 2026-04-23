@@ -35,6 +35,7 @@ internal static class GraphEditorTestCommandContracts
         "connections.reconnect",
         "connections.break-port",
         "export.scene-svg",
+        "export.scene-image",
         "nodes.move",
         "viewport.pan",
         "viewport.resize",

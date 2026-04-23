@@ -10,6 +10,8 @@ public static class GraphEditorStorageDefaults
     private const string FragmentFileName = "selection-fragment.json";
     private const string FragmentLibraryDirectoryName = "fragments";
     private const string SceneSvgExportFileName = "graph-scene.svg";
+    private const string ScenePngExportFileName = "graph-scene.png";
+    private const string SceneJpegExportFileName = "graph-scene.jpg";
     private const string PluginStagingDirectoryName = "plugin-staging";
 
     /// <summary>
@@ -60,6 +62,24 @@ public static class GraphEditorStorageDefaults
     /// <returns>SVG 场景导出文件路径。</returns>
     public static string GetSceneSvgExportPath(string? storageRootPath = null)
         => Path.Combine(ResolveStorageRootPath(storageRootPath), SceneSvgExportFileName);
+
+    /// <summary>
+    /// 获取默认 raster 场景导出文件路径。
+    /// </summary>
+    /// <param name="format">请求的图像导出格式。</param>
+    /// <param name="storageRootPath">可选的显式根目录。</param>
+    /// <returns>图像场景导出文件路径。</returns>
+    public static string GetSceneImageExportPath(
+        GraphEditorSceneImageExportFormat format,
+        string? storageRootPath = null)
+        => Path.Combine(
+            ResolveStorageRootPath(storageRootPath),
+            format switch
+            {
+                GraphEditorSceneImageExportFormat.Png => ScenePngExportFileName,
+                GraphEditorSceneImageExportFormat.Jpeg => SceneJpegExportFileName,
+                _ => throw new ArgumentOutOfRangeException(nameof(format), format, "Unsupported scene image export format."),
+            });
 
     /// <summary>
     /// 获取默认插件包暂存目录路径。

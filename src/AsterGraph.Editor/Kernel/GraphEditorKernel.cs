@@ -32,6 +32,7 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
     private readonly IGraphFragmentWorkspaceService _fragmentWorkspaceService;
     private readonly IGraphFragmentLibraryService _fragmentLibraryService;
     private readonly IGraphSceneSvgExportService _sceneSvgExportService;
+    private readonly IGraphSceneImageExportService _sceneImageExportService;
     private readonly GraphEditorHistoryService _historyService = new();
     private readonly GraphEditorKernelViewportCoordinator _viewportCoordinator = new(DefaultZoom, DefaultPanX, DefaultPanY);
     private readonly GraphEditorKernelCompatibilityQueries _compatibilityQueries;
@@ -48,6 +49,7 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
     private readonly GraphEditorKernelFragmentStorageHost _fragmentStorageHost;
     private readonly GraphEditorKernelFragmentStorageCoordinator _fragmentStorageCoordinator;
     private readonly GraphEditorKernelSceneSvgExportCoordinator _sceneSvgExportCoordinator;
+    private readonly GraphEditorKernelSceneImageExportCoordinator _sceneImageExportCoordinator;
     private readonly GraphEditorKernelCommandRouterHost _commandRouterHost;
     private readonly GraphEditorKernelCommandRouter _commandRouter;
     private readonly GraphEditorKernelHistoryCoordinator _historyCoordinator;
@@ -82,7 +84,8 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
         GraphEditorBehaviorOptions behaviorOptions,
         IGraphTextClipboardBridge? textClipboardBridge = null,
         IGraphClipboardPayloadSerializer? clipboardPayloadSerializer = null,
-        IGraphSceneSvgExportService? sceneSvgExportService = null)
+        IGraphSceneSvgExportService? sceneSvgExportService = null,
+        IGraphSceneImageExportService? sceneImageExportService = null)
     {
         ArgumentNullException.ThrowIfNull(document);
         ArgumentNullException.ThrowIfNull(nodeCatalog);
@@ -98,6 +101,7 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
         _fragmentWorkspaceService = fragmentWorkspaceService;
         _fragmentLibraryService = fragmentLibraryService;
         _sceneSvgExportService = sceneSvgExportService ?? new GraphSceneSvgExportService();
+        _sceneImageExportService = sceneImageExportService ?? new GraphSceneImageExportService();
         _textClipboardBridge = textClipboardBridge;
         _clipboardPayloadSerializer = clipboardPayloadSerializer ?? new GraphClipboardPayloadSerializer();
         _compatibilityQueries = new GraphEditorKernelCompatibilityQueries(compatibilityService, nodeCatalog);
@@ -112,6 +116,7 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
         _fragmentStorageHost = new GraphEditorKernelFragmentStorageHost(this);
         _fragmentStorageCoordinator = new GraphEditorKernelFragmentStorageCoordinator(_fragmentStorageHost, _clipboardCoordinator);
         _sceneSvgExportCoordinator = new GraphEditorKernelSceneSvgExportCoordinator(this);
+        _sceneImageExportCoordinator = new GraphEditorKernelSceneImageExportCoordinator(this);
         _commandRouterHost = new GraphEditorKernelCommandRouterHost(this);
         _commandRouter = new GraphEditorKernelCommandRouter(_commandRouterHost);
         _historyCoordinator = new GraphEditorKernelHistoryCoordinator(this);
@@ -195,6 +200,12 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
 
     public bool TryExportSceneAsSvg(string? path)
         => _sceneSvgExportCoordinator.TryExport(path);
+
+    public bool TryExportSceneAsImage(
+        GraphEditorSceneImageExportFormat format,
+        string? path,
+        GraphEditorSceneImageExportOptions? options = null)
+        => _sceneImageExportCoordinator.TryExport(format, path, options);
 
     public bool TryImportFragmentTemplate(string path)
         => _fragmentStorageCoordinator.TryImportFragmentTemplate(path);

@@ -6,6 +6,7 @@ using AsterGraph.Editor.Events;
 using AsterGraph.Editor.Kernel;
 using AsterGraph.Editor.Models;
 using AsterGraph.Editor.Runtime;
+using AsterGraph.Editor.Services;
 using System.Threading;
 
 namespace AsterGraph.Editor.ViewModels;
@@ -86,6 +87,12 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
 
     public bool TryExportSceneAsSvg(string? path)
         => _kernel.TryExportSceneAsSvg(path);
+
+    public bool TryExportSceneAsImage(
+        GraphEditorSceneImageExportFormat format,
+        string? path,
+        GraphEditorSceneImageExportOptions? options)
+        => _kernel.TryExportSceneAsImage(format, path, options);
 
     public bool TryImportFragmentTemplate(string path)
         => _kernel.TryImportFragmentTemplate(path);

@@ -4,6 +4,7 @@ using AsterGraph.Core.Models;
 using AsterGraph.Editor.Diagnostics;
 using AsterGraph.Editor.Events;
 using AsterGraph.Editor.Models;
+using AsterGraph.Editor.Services;
 using System.Threading;
 
 namespace AsterGraph.Editor.Runtime;
@@ -34,6 +35,7 @@ internal interface IGraphEditorSessionHost
     bool TryClearWorkspaceFragment(string? path);
     string TryExportSelectionAsTemplate(string? name);
     bool TryExportSceneAsSvg(string? path);
+    bool TryExportSceneAsImage(GraphEditorSceneImageExportFormat format, string? path, GraphEditorSceneImageExportOptions? options);
     bool TryImportFragmentTemplate(string path);
     bool TryDeleteFragmentTemplate(string path);
     void SetNodePositions(IReadOnlyList<NodePositionSnapshot> positions, bool updateStatus);

@@ -56,6 +56,105 @@ public sealed class GraphEditorExportContractsTests
         Assert.True(commandDescriptors["export.scene-svg"].IsEnabled);
     }
 
+    [Theory]
+    [InlineData(GraphEditorSceneImageExportFormat.Png, ".png")]
+    [InlineData(GraphEditorSceneImageExportFormat.Jpeg, ".jpg")]
+    public void GraphSceneImageExportService_ExportsSceneSnapshotToImageFile(
+        GraphEditorSceneImageExportFormat format,
+        string expectedExtension)
+    {
+        var definitionId = new NodeDefinitionId($"tests.export.image-file.{format.ToString().ToLowerInvariant()}");
+        var exportDirectory = CreateTempDirectory();
+        var exportPath = Path.Combine(exportDirectory, $"graph-scene{expectedExtension}");
+        var session = AsterGraphEditorFactory.CreateSession(CreateOptions(definitionId));
+        var service = new GraphSceneImageExportService(exportDirectory);
+
+        var writtenPath = service.Export(
+            session.Queries.GetSceneSnapshot(),
+            format,
+            exportPath,
+            new GraphEditorSceneImageExportOptions
+            {
+                Scale = 1.25d,
+                Quality = 88,
+                BackgroundHex = "#102030",
+            });
+
+        Assert.Equal(exportPath, writtenPath);
+        Assert.True(File.Exists(exportPath));
+
+        var bytes = File.ReadAllBytes(exportPath);
+        Assert.True(bytes.Length > 32);
+        Assert.True(
+            format switch
+            {
+                GraphEditorSceneImageExportFormat.Png => bytes[0] == 0x89 && bytes[1] == 0x50 && bytes[2] == 0x4E && bytes[3] == 0x47,
+                GraphEditorSceneImageExportFormat.Jpeg => bytes[0] == 0xFF && bytes[1] == 0xD8 && bytes[2] == 0xFF,
+                _ => false,
+            });
+    }
+
+    [Fact]
+    public void RuntimeSession_ExportSceneAsImage_UsesHostSuppliedExportServiceAndDescriptors()
+    {
+        var definitionId = new NodeDefinitionId("tests.export.image-session-contract");
+        var exportService = new RecordingSceneImageExportService("image://tests.export/default.png");
+        var exportOptions = new GraphEditorSceneImageExportOptions
+        {
+            Scale = 1.5d,
+            Quality = 83,
+            BackgroundHex = "#203040",
+        };
+        var session = AsterGraphEditorFactory.CreateSession(CreateOptions(definitionId) with
+        {
+            SceneImageExportService = exportService,
+        });
+
+        var exported = session.Commands.TryExportSceneAsImage(
+            GraphEditorSceneImageExportFormat.Jpeg,
+            "image://tests.export/custom.jpg",
+            exportOptions);
+        var featureDescriptors = session.Queries.GetFeatureDescriptors().ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
+        var commandDescriptors = session.Queries.GetCommandDescriptors().ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
+
+        Assert.True(exported);
+        Assert.Equal(GraphEditorSceneImageExportFormat.Jpeg, exportService.LastFormat);
+        Assert.Equal("image://tests.export/custom.jpg", exportService.LastPath);
+        Assert.Same(exportOptions, exportService.LastOptions);
+        Assert.NotNull(exportService.LastScene);
+        Assert.Equal("Export Contract Graph", exportService.LastScene!.Document.Title);
+        Assert.True(featureDescriptors["service.scene-image-export"].IsAvailable);
+        Assert.True(featureDescriptors["capability.export.scene-image"].IsAvailable);
+        Assert.True(featureDescriptors["capability.export.scene-png"].IsAvailable);
+        Assert.True(featureDescriptors["capability.export.scene-jpeg"].IsAvailable);
+        Assert.True(commandDescriptors["export.scene-image"].IsEnabled);
+    }
+
+    [Fact]
+    public void RuntimeSession_ExportSceneAsImage_ReturnsFalseForEmptyScene()
+    {
+        var definitionId = new NodeDefinitionId("tests.export.image-empty");
+        var exportService = new RecordingSceneImageExportService("image://tests.export/empty.png");
+        var session = AsterGraphEditorFactory.CreateSession(new AsterGraphEditorOptions
+        {
+            Document = new GraphDocument("Empty Export Graph", "No nodes yet.", [], []),
+            NodeCatalog = CreateCatalog(definitionId),
+            CompatibilityService = new ExactCompatibilityService(),
+            SceneImageExportService = exportService,
+        });
+        var featureDescriptors = session.Queries.GetFeatureDescriptors().ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
+        var commandDescriptors = session.Queries.GetCommandDescriptors().ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
+
+        var exported = session.Commands.TryExportSceneAsImage(GraphEditorSceneImageExportFormat.Png);
+
+        Assert.False(exported);
+        Assert.Null(exportService.LastScene);
+        Assert.False(featureDescriptors["capability.export.scene-image"].IsAvailable);
+        Assert.False(featureDescriptors["capability.export.scene-png"].IsAvailable);
+        Assert.False(featureDescriptors["capability.export.scene-jpeg"].IsAvailable);
+        Assert.False(commandDescriptors["export.scene-image"].IsEnabled);
+    }
+
     private static AsterGraphEditorOptions CreateOptions(NodeDefinitionId definitionId)
         => new()
         {
@@ -145,6 +244,33 @@ public sealed class GraphEditorExportContractsTests
         {
             LastScene = scene;
             LastPath = path ?? ExportPath;
+            return LastPath;
+        }
+    }
+
+    private sealed class RecordingSceneImageExportService(string defaultPath) : IGraphSceneImageExportService
+    {
+        public GraphEditorSceneSnapshot? LastScene { get; private set; }
+
+        public GraphEditorSceneImageExportFormat LastFormat { get; private set; }
+
+        public string? LastPath { get; private set; }
+
+        public GraphEditorSceneImageExportOptions? LastOptions { get; private set; }
+
+        public string GetExportPath(GraphEditorSceneImageExportFormat format)
+            => defaultPath;
+
+        public string Export(
+            GraphEditorSceneSnapshot scene,
+            GraphEditorSceneImageExportFormat format,
+            string? path = null,
+            GraphEditorSceneImageExportOptions? options = null)
+        {
+            LastScene = scene;
+            LastFormat = format;
+            LastPath = path ?? defaultPath;
+            LastOptions = options;
             return LastPath;
         }
     }

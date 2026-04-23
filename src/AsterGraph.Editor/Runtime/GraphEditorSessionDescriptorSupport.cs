@@ -18,6 +18,7 @@ internal sealed class GraphEditorSessionDescriptorSupport
         bool hasFragmentWorkspaceService = false,
         bool hasFragmentLibraryService = false,
         bool hasSceneSvgExportService = false,
+        bool hasSceneImageExportService = false,
         bool hasClipboardPayloadSerializer = false,
         bool hasPluginLoader = false,
         bool hasPluginTrustPolicy = false,
@@ -37,6 +38,7 @@ internal sealed class GraphEditorSessionDescriptorSupport
         HasFragmentWorkspaceService = hasFragmentWorkspaceService;
         HasFragmentLibraryService = hasFragmentLibraryService;
         HasSceneSvgExportService = hasSceneSvgExportService;
+        HasSceneImageExportService = hasSceneImageExportService;
         HasClipboardPayloadSerializer = hasClipboardPayloadSerializer;
         HasPluginLoader = hasPluginLoader;
         HasPluginTrustPolicy = hasPluginTrustPolicy;
@@ -54,6 +56,8 @@ internal sealed class GraphEditorSessionDescriptorSupport
     public bool HasFragmentLibraryService { get; }
 
     public bool HasSceneSvgExportService { get; }
+
+    public bool HasSceneImageExportService { get; }
 
     public bool HasClipboardPayloadSerializer { get; }
 

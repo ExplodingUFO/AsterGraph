@@ -1,6 +1,7 @@
 using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Models;
+using AsterGraph.Editor.Services;
 using System.Threading;
 
 namespace AsterGraph.Editor.Runtime;
@@ -101,6 +102,19 @@ public interface IGraphEditorCommands
     /// <param name="path">Optional SVG destination override.</param>
     /// <returns><see langword="true"/> when the scene export succeeds.</returns>
     bool TryExportSceneAsSvg(string? path = null)
+        => throw new NotSupportedException();
+
+    /// <summary>
+    /// Attempts to export the current immutable scene snapshot as a raster image.
+    /// </summary>
+    /// <param name="format">Requested raster output format.</param>
+    /// <param name="path">Optional destination override.</param>
+    /// <param name="options">Optional rasterization overrides.</param>
+    /// <returns><see langword="true"/> when the scene export succeeds.</returns>
+    bool TryExportSceneAsImage(
+        GraphEditorSceneImageExportFormat format,
+        string? path = null,
+        GraphEditorSceneImageExportOptions? options = null)
         => throw new NotSupportedException();
 
     /// <summary>
