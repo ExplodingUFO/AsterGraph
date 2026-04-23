@@ -280,10 +280,24 @@ public sealed class DemoProofReleaseSurfaceTests
             consumerSampleZh,
             "## 信任与证明速查",
             "## 如何运行");
+        var proofHandoffEn = ExtractSection(
+            consumerSample,
+            "## Proof Handoff",
+            "## When To Use This Sample");
+        var proofHandoffZh = ExtractSection(
+            consumerSampleZh,
+            "## Proof Handoff",
+            "## 什么时候看它");
         var supportBundleBlock = ExtractIssueTemplateBlock(adoptionTemplate, "support_bundle");
 
-        Assert.Contains("one unambiguous intake handoff from defended route to bounded intake record", evaluationPath, StringComparison.Ordinal);
-        Assert.Contains("从受防守路线到受限 intake 记录的一次明确 handoff", evaluationPathZh, StringComparison.Ordinal);
+        Assert.Contains("Boundary First", evaluationPath, StringComparison.Ordinal);
+        Assert.Contains("先锁边界", evaluationPathZh, StringComparison.Ordinal);
+        Assert.Contains("defended route", evaluationPath, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("bounded intake record", evaluationPath, StringComparison.OrdinalIgnoreCase);
+        Assert.True(HasLineWithOrderedTerms(evaluationPath, "defended route", "bounded intake record"));
+        Assert.Contains("受防守路线", evaluationPathZh, StringComparison.Ordinal);
+        Assert.Contains("受限 intake 记录", evaluationPathZh, StringComparison.Ordinal);
+        Assert.True(HasLineWithOrderedTerms(evaluationPathZh, "受防守路线", "受限 intake 记录"));
         Assert.Contains("summary-only", quickReferenceEn, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("summary-only", quickReferenceZh, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("Beta Support Bundle", quickReferenceEn, StringComparison.Ordinal);
@@ -294,12 +308,18 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.True(quickReferenceZh.IndexOf("Beta Support Bundle", StringComparison.Ordinal) < quickReferenceZh.IndexOf("Adoption Feedback Loop", StringComparison.Ordinal));
         Assert.DoesNotContain("Public Launch Checklist", quickReferenceEn, StringComparison.Ordinal);
         Assert.DoesNotContain("Public Launch Checklist", quickReferenceZh, StringComparison.Ordinal);
-        Assert.Contains("Proof Handoff owns the actual intake instructions", consumerSample, StringComparison.Ordinal);
-        Assert.Contains("Proof Handoff 负责实际 intake 说明", consumerSampleZh, StringComparison.Ordinal);
-        Assert.Contains("reuse the emitted `SUPPORT_BUNDLE_PATH:...` line as the attachment note", consumerSample, StringComparison.Ordinal);
-        Assert.Contains("把输出里的 `SUPPORT_BUNDLE_PATH:...` 作为附件备注", consumerSampleZh, StringComparison.Ordinal);
-        Assert.Contains("record `NO_SUPPORT_BUNDLE:route-cannot-produce-one`", consumerSample, StringComparison.Ordinal);
-        Assert.Contains("记录 `NO_SUPPORT_BUNDLE:route-cannot-produce-one`", consumerSampleZh, StringComparison.Ordinal);
+        Assert.Contains("Proof Handoff", proofHandoffEn, StringComparison.Ordinal);
+        Assert.Contains("Proof Handoff", proofHandoffZh, StringComparison.Ordinal);
+        Assert.Contains("--support-bundle", proofHandoffEn, StringComparison.Ordinal);
+        Assert.Contains("--support-bundle", proofHandoffZh, StringComparison.Ordinal);
+        Assert.Contains("SUPPORT_BUNDLE_PATH:...", proofHandoffEn, StringComparison.Ordinal);
+        Assert.Contains("SUPPORT_BUNDLE_PATH:...", proofHandoffZh, StringComparison.Ordinal);
+        Assert.Contains("NO_SUPPORT_BUNDLE:route-cannot-produce-one", proofHandoffEn, StringComparison.Ordinal);
+        Assert.Contains("NO_SUPPORT_BUNDLE:route-cannot-produce-one", proofHandoffZh, StringComparison.Ordinal);
+        Assert.True(proofHandoffEn.IndexOf("AsterGraph.ConsumerSample.Avalonia -- --proof", StringComparison.Ordinal) < proofHandoffEn.IndexOf("SUPPORT_BUNDLE_PATH:...", StringComparison.Ordinal));
+        Assert.True(proofHandoffEn.IndexOf("SUPPORT_BUNDLE_PATH:...", StringComparison.Ordinal) < proofHandoffEn.IndexOf("NO_SUPPORT_BUNDLE:route-cannot-produce-one", StringComparison.Ordinal));
+        Assert.True(proofHandoffZh.IndexOf("AsterGraph.ConsumerSample.Avalonia -- --proof", StringComparison.Ordinal) < proofHandoffZh.IndexOf("SUPPORT_BUNDLE_PATH:...", StringComparison.Ordinal));
+        Assert.True(proofHandoffZh.IndexOf("SUPPORT_BUNDLE_PATH:...", StringComparison.Ordinal) < proofHandoffZh.IndexOf("NO_SUPPORT_BUNDLE:route-cannot-produce-one", StringComparison.Ordinal));
         Assert.Contains("bounded intake record", supportBundleBlock, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("attachment note", supportBundleBlock, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("bounded intake record", supportBundle, StringComparison.OrdinalIgnoreCase);
@@ -328,8 +348,6 @@ public sealed class DemoProofReleaseSurfaceTests
         var supportBundleZh = ReadRepoFile("docs/zh-CN/support-bundle.md");
         var versionBlock = ExtractIssueTemplateBlock(adoptionTemplate, "version");
         var routeBlock = ExtractIssueTemplateBlock(adoptionTemplate, "route");
-        var proofMarkersBlock = ExtractIssueTemplateBlock(adoptionTemplate, "proof_markers");
-        var frictionBlock = ExtractIssueTemplateBlock(adoptionTemplate, "friction");
         var supportBundleBlock = ExtractIssueTemplateBlock(adoptionTemplate, "support_bundle");
         var routeOptions = ExtractDropdownOptions(adoptionTemplate, "route");
 
@@ -343,10 +361,14 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Equal(
             new[]
             {
+                "HelloWorld",
                 "AsterGraph.Starter.Avalonia",
                 "HelloWorld.Avalonia",
                 "ConsumerSample.Avalonia",
                 "HostSample",
+                "PackageSmoke",
+                "ScaleSmoke",
+                "Demo",
             },
             routeOptions);
         Assert.Contains("options:", routeBlock, StringComparison.Ordinal);
@@ -379,8 +401,7 @@ public sealed class DemoProofReleaseSurfaceTests
 
         foreach (var contents in new[] { adoptionFeedback, adoptionFeedbackZh })
         {
-            Assert.Contains("AsterGraph.Starter.Avalonia", contents, StringComparison.Ordinal);
-            Assert.Contains("HelloWorld.Avalonia", contents, StringComparison.Ordinal);
+            Assert.True(HasLineWithAll(contents, "HelloWorld", "AsterGraph.Starter.Avalonia", "HelloWorld.Avalonia", "ConsumerSample.Avalonia", "HostSample", "PackageSmoke", "ScaleSmoke", "Demo"));
         }
 
         Assert.True(HasLineWithAll(supportBundle, "route", "version", "proof", "friction", "no support bundle"));
