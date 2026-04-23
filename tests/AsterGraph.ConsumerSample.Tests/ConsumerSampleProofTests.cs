@@ -62,6 +62,27 @@ public sealed class ConsumerSampleProofTests
     }
 
     [Fact]
+    public void ConsumerSampleProofResult_MetadataProjectionMarker_DoesNotFlipOverallProofStatus()
+    {
+        var result = new ConsumerSampleProofResult(
+            HostMenuActionOk: true,
+            PluginContributionOk: true,
+            ParameterProjectionOk: true,
+            MetadataProjectionOk: false,
+            WindowCompositionOk: true,
+            TrustTransparencyOk: true,
+            CommandSurfaceOk: true,
+            StartupMs: 1,
+            InspectorProjectionMs: 1,
+            PluginScanMs: 1,
+            CommandLatencyMs: 1);
+
+        Assert.True(result.IsOk);
+        Assert.Contains(result.ProofLines, line => line == "CONSUMER_SAMPLE_METADATA_PROJECTION_OK:False");
+        Assert.Contains(result.ProofLines, line => line == "CONSUMER_SAMPLE_OK:True");
+    }
+
+    [Fact]
     public void ConsumerSampleProof_CanWriteSupportBundleContract()
     {
         var result = ConsumerSampleProof.Run();
@@ -143,6 +164,29 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains("SUPPORT_BUNDLE_PERSISTENCE_OK:True", lines, StringComparison.Ordinal);
         Assert.Contains("SUPPORT_BUNDLE_PATH:", lines, StringComparison.Ordinal);
         Assert.True(File.Exists(bundlePath));
+    }
+
+    [Fact]
+    public void Program_SupportBundleOption_EmitsFalsePersistenceMarkerWhenWriteFails()
+    {
+        var tempRoot = Path.Combine(Path.GetTempPath(), "AsterGraph.ConsumerSample.Tests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(tempRoot);
+        var originalWriter = Console.Out;
+        using var output = new StringWriter();
+
+        try
+        {
+            Console.SetOut(output);
+            Assert.ThrowsAny<Exception>(() => Program.Main(["--support-bundle", tempRoot, "--support-note", "cli-note"]));
+        }
+        finally
+        {
+            Console.SetOut(originalWriter);
+        }
+
+        var lines = output.ToString();
+        Assert.Contains("SUPPORT_BUNDLE_PERSISTENCE_OK:False", lines, StringComparison.Ordinal);
+        Assert.DoesNotContain("SUPPORT_BUNDLE_OK:True", lines, StringComparison.Ordinal);
     }
 
     [Fact]

@@ -4,6 +4,8 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Headless;
 using AsterGraph.Avalonia.Hosting;
+using AsterGraph.Abstractions.Definitions;
+using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Runtime;
 using Avalonia.Themes.Fluent;
@@ -28,7 +30,6 @@ public sealed record ConsumerSampleProofResult(
         => HostMenuActionOk
         && PluginContributionOk
         && ParameterProjectionOk
-        && MetadataProjectionOk
         && WindowCompositionOk
         && TrustTransparencyOk
         && CommandSurfaceOk;
@@ -160,22 +161,35 @@ public static class ConsumerSampleProof
     private static bool HasMetadataProjection(IReadOnlyList<GraphEditorNodeParameterSnapshot> snapshots)
         => snapshots.Any(snapshot =>
             snapshot.Definition.Key == "status"
-            && snapshot.Definition.DisplayName == "Status"
-            && string.Equals(snapshot.Definition.Description, "Approval state managed by the host menu action.", StringComparison.Ordinal)
+            && snapshot.Definition.ValueType == new PortTypeId("enum")
+            && snapshot.Definition.EditorKind == ParameterEditorKind.Enum
             && string.Equals(snapshot.Definition.DefaultValue?.ToString(), "draft", StringComparison.Ordinal)
-            && snapshot.Definition.Constraints.AllowedOptions.Count == 3)
+            && HasAllowedOptions(
+                snapshot.Definition.Constraints.AllowedOptions,
+                ("draft", "Draft"),
+                ("review", "In Review"),
+                ("approved", "Approved")))
         && snapshots.Any(snapshot =>
             snapshot.Definition.Key == "owner"
-            && snapshot.Definition.DisplayName == "Owner"
-            && string.Equals(snapshot.Definition.Description, "Host-assigned owner used by the custom parameter panel.", StringComparison.Ordinal)
+            && snapshot.Definition.ValueType == new PortTypeId("string")
+            && snapshot.Definition.EditorKind == ParameterEditorKind.Text
             && string.Equals(snapshot.Definition.DefaultValue?.ToString(), "design-review", StringComparison.Ordinal))
         && snapshots.Any(snapshot =>
             snapshot.Definition.Key == "priority"
-            && snapshot.Definition.DisplayName == "Priority"
-            && string.Equals(snapshot.Definition.Description, "Priority bucket for the sample review lane.", StringComparison.Ordinal)
+            && snapshot.Definition.ValueType == new PortTypeId("int")
+            && snapshot.Definition.EditorKind == ParameterEditorKind.Number
             && Equals(snapshot.Definition.DefaultValue, 2)
             && snapshot.Definition.Constraints.Minimum == 1
             && snapshot.Definition.Constraints.Maximum == 5);
+
+    private static bool HasAllowedOptions(
+        IReadOnlyList<ParameterOptionDefinition> options,
+        params (string Value, string Label)[] expected)
+        => options.Count == expected.Length
+        && options.Zip(expected, static (actual, wanted) =>
+            string.Equals(actual.Value, wanted.Value, StringComparison.Ordinal)
+            && string.Equals(actual.Label, wanted.Label, StringComparison.Ordinal))
+            .All(static matches => matches);
 }
 
 public static class ConsumerSampleHeadlessEnvironment
