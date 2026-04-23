@@ -173,6 +173,11 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("DEMO_OK", projectStatus, StringComparison.Ordinal);
         Assert.Contains("PACKAGE_SMOKE_OK", projectStatus, StringComparison.Ordinal);
         Assert.Contains("HELLOWORLD_WPF_OK", projectStatus, StringComparison.Ordinal);
+        Assert.Contains("HOSTED_ACCESSIBILITY_BASELINE_OK", projectStatus, StringComparison.Ordinal);
+        Assert.Contains("HOSTED_ACCESSIBILITY_FOCUS_OK", projectStatus, StringComparison.Ordinal);
+        Assert.Contains("HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK", projectStatus, StringComparison.Ordinal);
+        Assert.Contains("HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK", projectStatus, StringComparison.Ordinal);
+        Assert.Contains("HOSTED_ACCESSIBILITY_OK", projectStatus, StringComparison.Ordinal);
         Assert.Contains("SCALE_PERFORMANCE_BUDGET_OK:baseline:True", projectStatus, StringComparison.Ordinal);
         Assert.Contains("SCALE_PERFORMANCE_BUDGET_OK:large:True", projectStatus, StringComparison.Ordinal);
         Assert.Contains("SCALE_PERF_SUMMARY:stress", projectStatus, StringComparison.Ordinal);
@@ -190,6 +195,11 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("DEMO_OK", projectStatusZh, StringComparison.Ordinal);
         Assert.Contains("PACKAGE_SMOKE_OK", projectStatusZh, StringComparison.Ordinal);
         Assert.Contains("HELLOWORLD_WPF_OK", projectStatusZh, StringComparison.Ordinal);
+        Assert.Contains("HOSTED_ACCESSIBILITY_BASELINE_OK", projectStatusZh, StringComparison.Ordinal);
+        Assert.Contains("HOSTED_ACCESSIBILITY_FOCUS_OK", projectStatusZh, StringComparison.Ordinal);
+        Assert.Contains("HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK", projectStatusZh, StringComparison.Ordinal);
+        Assert.Contains("HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK", projectStatusZh, StringComparison.Ordinal);
+        Assert.Contains("HOSTED_ACCESSIBILITY_OK", projectStatusZh, StringComparison.Ordinal);
         Assert.Contains("SCALE_PERFORMANCE_BUDGET_OK:baseline:True", projectStatusZh, StringComparison.Ordinal);
         Assert.Contains("SCALE_PERFORMANCE_BUDGET_OK:large:True", projectStatusZh, StringComparison.Ordinal);
         Assert.Contains("SCALE_PERF_SUMMARY:stress", projectStatusZh, StringComparison.Ordinal);
@@ -940,6 +950,11 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("Retained migration is not", adapterMatrix, StringComparison.Ordinal);
         Assert.Contains("HELLOWORLD_WPF_OK", adapterMatrix, StringComparison.Ordinal);
         Assert.Contains("COMMAND_SURFACE_OK", adapterMatrix, StringComparison.Ordinal);
+        Assert.Contains("HOSTED_ACCESSIBILITY_BASELINE_OK", adapterMatrix, StringComparison.Ordinal);
+        Assert.Contains("HOSTED_ACCESSIBILITY_FOCUS_OK", adapterMatrix, StringComparison.Ordinal);
+        Assert.Contains("HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK", adapterMatrix, StringComparison.Ordinal);
+        Assert.Contains("HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK", adapterMatrix, StringComparison.Ordinal);
+        Assert.Contains("HOSTED_ACCESSIBILITY_OK", adapterMatrix, StringComparison.Ordinal);
         Assert.Contains("HOST_SAMPLE_OK", adapterMatrix, StringComparison.Ordinal);
         Assert.Contains("DEMO_OK", adapterMatrix, StringComparison.Ordinal);
         Assert.Contains("Fallback Rule", adapterMatrix, StringComparison.Ordinal);
@@ -960,6 +975,11 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("Matrix Categories", adapterMatrixZh, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("HELLOWORLD_WPF_OK", adapterMatrixZh, StringComparison.Ordinal);
         Assert.Contains("COMMAND_SURFACE_OK", adapterMatrixZh, StringComparison.Ordinal);
+        Assert.Contains("HOSTED_ACCESSIBILITY_BASELINE_OK", adapterMatrixZh, StringComparison.Ordinal);
+        Assert.Contains("HOSTED_ACCESSIBILITY_FOCUS_OK", adapterMatrixZh, StringComparison.Ordinal);
+        Assert.Contains("HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK", adapterMatrixZh, StringComparison.Ordinal);
+        Assert.Contains("HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK", adapterMatrixZh, StringComparison.Ordinal);
+        Assert.Contains("HOSTED_ACCESSIBILITY_OK", adapterMatrixZh, StringComparison.Ordinal);
         Assert.Contains("HOST_SAMPLE_OK", adapterMatrixZh, StringComparison.Ordinal);
         Assert.Contains("DEMO_OK", adapterMatrixZh, StringComparison.Ordinal);
         Assert.DoesNotContain("Phase 154", adapterMatrixZh, StringComparison.OrdinalIgnoreCase);
