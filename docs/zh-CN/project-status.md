@@ -20,6 +20,7 @@
   - `tools/AsterGraph.HostSample`：这条 canonical adoption route 在 ladder 之后的 proof harness
   - `tools/AsterGraph.PackageSmoke`：打包消费验证
   - `tools/AsterGraph.ScaleSmoke`：公开的大图基线与状态连续性验证
+- `adoption-intake-dry-run.md` 里的合成 dry-run fixtures 只是维护者/内部预演，不是外部验证，也不会扩大 support 或 capability 声明
 - 推荐接入路径：
   - runtime-only 宿主使用 `AsterGraphEditorFactory.CreateSession(...)` + `IGraphEditorSession`
   - Avalonia UI 宿主使用 `AsterGraphEditorFactory.Create(...)` 加 `AsterGraphAvaloniaViewFactory.Create(...)`

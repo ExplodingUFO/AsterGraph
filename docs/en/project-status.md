@@ -21,6 +21,7 @@
   - `tools/AsterGraph.HostSample` for the post-ladder proof harness on the canonical adoption route
   - `tools/AsterGraph.PackageSmoke` for packed-package proof
   - `tools/AsterGraph.ScaleSmoke` for the public scale baseline and state-continuity proof
+- synthetic dry-run fixtures in [Synthetic Adoption Intake Dry-Run Fixtures](./adoption-intake-dry-run.md) are maintainer/internal rehearsal only, not external validation, and do not widen support or capability claims
 - canonical adoption path:
   - runtime-only hosts use `AsterGraphEditorFactory.CreateSession(...)` + `IGraphEditorSession`
   - Avalonia UI hosts use `AsterGraphEditorFactory.Create(...)` plus `AsterGraphAvaloniaViewFactory.Create(...)`

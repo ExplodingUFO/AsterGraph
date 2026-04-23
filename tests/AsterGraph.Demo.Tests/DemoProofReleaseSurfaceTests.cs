@@ -231,6 +231,37 @@ public sealed class DemoProofReleaseSurfaceTests
     }
 
     [Fact]
+    public void ProjectStatus_AndPublicLaunchChecklist_KeepDryRunRecordsInternalOnly()
+    {
+        var projectStatus = ReadRepoFile("docs/en/project-status.md");
+        var projectStatusZh = ReadRepoFile("docs/zh-CN/project-status.md");
+        var checklist = ReadRepoFile("docs/en/public-launch-checklist.md");
+        var checklistZh = ReadRepoFile("docs/zh-CN/public-launch-checklist.md");
+
+        Assert.Contains("adoption-intake-dry-run.md", projectStatus, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("synthetic dry-run", projectStatus, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("internal rehearsal", projectStatus, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("not external validation", projectStatus, StringComparison.OrdinalIgnoreCase);
+
+        Assert.Contains("adoption-intake-dry-run.md", projectStatusZh, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("合成 dry-run", projectStatusZh, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("内部预演", projectStatusZh, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("不是外部验证", projectStatusZh, StringComparison.OrdinalIgnoreCase);
+
+        Assert.Contains("adoption-intake-dry-run.md", checklist, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("synthetic dry-run", checklist, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("3-5 real external report gate", checklist, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("do not widen", checklist, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("do not count", checklist, StringComparison.OrdinalIgnoreCase);
+
+        Assert.Contains("adoption-intake-dry-run.md", checklistZh, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("合成 dry-run", checklistZh, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("3 到 5 条真实外部报告", checklistZh, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("不要扩大", checklistZh, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("不要计入", checklistZh, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public void SupportBundleDocs_DefineLocalConsumerSampleContract()
     {
         var supportBundle = ReadRepoFile("docs/en/support-bundle.md");

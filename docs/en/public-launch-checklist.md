@@ -68,6 +68,7 @@ Expected high-signal markers:
 - `SCALE_PERF_SUMMARY:stress:...`
 - `SCALE_HISTORY_CONTRACT_OK:...`
 - `COVERAGE_REPORT_OK:...`
+- synthetic dry-run records from [Synthetic Adoption Intake Dry-Run Fixtures](./adoption-intake-dry-run.md) are maintainer/internal rehearsal only; do not count them toward the 3-5 real external report gate, and do not widen support or capability claims from them
 
 ## 5. Public Prerelease Tag
 

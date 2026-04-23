@@ -68,6 +68,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framew
 - `SCALE_PERF_SUMMARY:stress:...`
 - `SCALE_HISTORY_CONTRACT_OK:...`
 - `COVERAGE_REPORT_OK:...`
+- `adoption-intake-dry-run.md` 里的合成 dry-run 记录只是维护者/内部预演；不要计入 3 到 5 条真实外部报告的门槛，也不要扩大 support/capability 声明
 
 发布 notes/release messaging 核对要求：
 
