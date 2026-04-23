@@ -28,6 +28,8 @@ The hosted route ladder is `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerS
 
 If you are intentionally evaluating the runtime-only path, run `AsterGraph.HelloWorld` after step 1 instead of step 2, then return to the same realistic hosted proof at step 3.
 
+If `CONSUMER_SAMPLE_PARAMETER_OK` or `CONSUMER_SAMPLE_METADATA_PROJECTION_OK` fail, keep the failed proof-marker lines together with the support bundle's `parameterSnapshots` rows on the same bounded intake record.
+
 ## Commands
 
 ```powershell

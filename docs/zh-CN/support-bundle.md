@@ -30,6 +30,7 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 ```
 
 这个证据包只保留本地证据，仍然绑定在受防守的 hosted route 上，不会扩大 support 边界。把 proof 输出里的 `SUPPORT_BUNDLE_PATH:...` 这一行作为受限 intake 记录里的附件备注；如果某条 route 不能产出 bundle，就记录 `NO_SUPPORT_BUNDLE:route-cannot-produce-one`。
+当 `CONSUMER_SAMPLE_PARAMETER_OK` 或 `CONSUMER_SAMPLE_METADATA_PROJECTION_OK` 失败时，把失败的 proof-marker 行和 bundle 的 `parameterSnapshots` 行一起保留，这样同一套证据就能支持 `status`、`owner` 和 `priority` 分类。
 
 ## 合同字段
 
@@ -51,6 +52,7 @@ support bundle 是一个本地 JSON 文件，顶层字段固定为：
 `proofLines` 里应该包含 proof mode 已经输出的完整 marker 集：`CONSUMER_SAMPLE_HOST_ACTION_OK:True`、`CONSUMER_SAMPLE_PLUGIN_OK:True`、`CONSUMER_SAMPLE_PARAMETER_OK:True`、`CONSUMER_SAMPLE_METADATA_PROJECTION_OK:True`、`CONSUMER_SAMPLE_WINDOW_OK:True`、`CONSUMER_SAMPLE_TRUST_OK:True`、`COMMAND_SURFACE_OK:True`、`HOST_NATIVE_METRIC:startup_ms=...`、`HOST_NATIVE_METRIC:inspector_projection_ms=...`、`HOST_NATIVE_METRIC:plugin_scan_ms=...`、`HOST_NATIVE_METRIC:command_latency_ms=...` 这些行，以及 `CONSUMER_SAMPLE_OK:True`。
 
 `parameterSnapshots` 用一份受限结构记录选中 review 节点的参数投影。每条 snapshot 会在存在时记录 `key`、`valueType`、`editorKind`、`currentValue`、`defaultValue`、`canEdit`、`isValid`、`allowedOptions`、`minimum` 和 `maximum`。
+分类报告时就用这些行来判断 `status`、`owner` 和 `priority`。
 
 `environment` 记录本次运行所在的 runtime 和操作系统信息。
 

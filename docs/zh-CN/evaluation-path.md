@@ -28,6 +28,8 @@
 
 如果你是刻意评估 runtime-only 路线，可以在步骤 1 之后先跑 `AsterGraph.HelloWorld`，替代步骤 2；然后再回到同一条真实宿主 proof 阶梯。
 
+如果 `CONSUMER_SAMPLE_PARAMETER_OK` 或 `CONSUMER_SAMPLE_METADATA_PROJECTION_OK` 失败，就把失败的 proof-marker 行和 support bundle 的 `parameterSnapshots` 行一起保留在同一条受限 intake 记录里。
+
 ## 命令
 
 ```powershell

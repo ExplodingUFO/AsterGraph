@@ -116,6 +116,7 @@ If you copied the starter recipe, validate the defended host here with `AsterGra
 For the actual intake record, run `AsterGraph.ConsumerSample.Avalonia -- --proof --support-bundle <support-bundle-path>` and reuse the emitted `SUPPORT_BUNDLE_PATH:...` line as the support-bundle attachment note on the bounded intake record.
 
 If the route cannot produce a bundle, record `NO_SUPPORT_BUNDLE:route-cannot-produce-one`.
+If `CONSUMER_SAMPLE_PARAMETER_OK` or `CONSUMER_SAMPLE_METADATA_PROJECTION_OK` fail, keep the failed proof-marker lines with the support bundle's `parameterSnapshots` rows on that same bounded intake record.
 
 It should stay local evidence only and should not widen the support boundary.
 

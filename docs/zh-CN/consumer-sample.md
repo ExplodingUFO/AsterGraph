@@ -116,6 +116,7 @@ Proof Handoff 负责实际 intake 说明。
 如果你要把它写进实际 intake 记录，就运行 `AsterGraph.ConsumerSample.Avalonia -- --proof --support-bundle <support-bundle-path>`，并把输出里的 `SUPPORT_BUNDLE_PATH:...` 作为 support-bundle 附件备注，写入受限 intake 记录。
 
 如果 route 不能产出 bundle，就记录 `NO_SUPPORT_BUNDLE:route-cannot-produce-one`。
+如果 `CONSUMER_SAMPLE_PARAMETER_OK` 或 `CONSUMER_SAMPLE_METADATA_PROJECTION_OK` 失败，就把失败的 proof-marker 行和 support bundle 的 `parameterSnapshots` 行一起保留在同一条受限 intake 记录里。
 
 它应当只作为本地证据，不应扩大支持边界。
 

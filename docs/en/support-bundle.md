@@ -30,6 +30,7 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 ```
 
 Local evidence only means this bundle remains tied to the defended hosted route and does not widen the support boundary. Use the emitted `SUPPORT_BUNDLE_PATH:...` line as the support-bundle attachment note on the bounded intake record. If a route cannot produce a bundle, record `NO_SUPPORT_BUNDLE:route-cannot-produce-one`.
+When `CONSUMER_SAMPLE_PARAMETER_OK` or `CONSUMER_SAMPLE_METADATA_PROJECTION_OK` fail, keep the failed proof-marker lines with the bundle's `parameterSnapshots` rows so the bounded intake record can classify `status`, `owner`, and `priority` from the same evidence set.
 
 ## Contract
 
@@ -51,6 +52,7 @@ The support bundle is one local JSON file with these top-level fields:
 `proofLines` should include the full marker set emitted by proof mode: `CONSUMER_SAMPLE_HOST_ACTION_OK:True`, `CONSUMER_SAMPLE_PLUGIN_OK:True`, `CONSUMER_SAMPLE_PARAMETER_OK:True`, `CONSUMER_SAMPLE_METADATA_PROJECTION_OK:True`, `CONSUMER_SAMPLE_WINDOW_OK:True`, `CONSUMER_SAMPLE_TRUST_OK:True`, `COMMAND_SURFACE_OK:True`, `HOST_NATIVE_METRIC:startup_ms=...`, `HOST_NATIVE_METRIC:inspector_projection_ms=...`, `HOST_NATIVE_METRIC:plugin_scan_ms=...`, `HOST_NATIVE_METRIC:command_latency_ms=...`, and `CONSUMER_SAMPLE_OK:True`.
 
 `parameterSnapshots` captures the selected review node's parameter projection in one bounded structure. Each snapshot records `key`, `valueType`, `editorKind`, `currentValue`, `defaultValue`, `canEdit`, `isValid`, `allowedOptions`, `minimum`, and `maximum` when present.
+Use those rows with `status`, `owner`, and `priority` when you classify the report.
 
 `environment` records the local runtime and OS details used for the run.
 
