@@ -1,16 +1,28 @@
 # Authoring Inspector Recipe
 
-Use this recipe when you want the shipped inspector to carry most of the authoring workload.
+Use this recipe when you want the shipped definition-driven inspector to carry most of the authoring workload.
+
+## Canonical Recipe Vocabulary
+
+Keep these field names consistent across docs, samples, and node definitions:
+
+- `defaultValue` seeds new nodes and fallback projection
+- `isAdvanced` keeps expert-only parameters collapsed by default
+- `helpText` adds short inline guidance next to the field
+- `placeholderText` provides short input hints for text-oriented editors
+- read-only reasons are shown explicitly when the host or definition locks a field
 
 ## What You Define
 
 Start from `NodeParameterDefinition` metadata:
 
 - `editorKind` chooses the stock editor
-- `defaultValue` seeds new nodes and fallback projection
 - `constraints` declares validation and read-only behavior
 - `groupName` groups parameters into inspector sections
-- `placeholderText` provides short input hints for text-oriented editors
+- `helpText` adds short inline guidance next to the field
+- `isAdvanced` marks parameters that should stay collapsed until the user expands them
+
+The shipped inspector stays bounded to the definition-driven inspector surface, not a generic property framework.
 
 Current shipped editor kinds:
 

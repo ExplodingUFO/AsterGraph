@@ -4,6 +4,8 @@ This is the medium hosted-UI sample on the canonical session/runtime route, afte
 It shows a host-owned action rail, plugin trust workflow, and the selected-node parameter read/write seam without implying a second editor model, a sandbox, or a broader plugin ecosystem.
 For plugin-capable evaluators, this is the defended hosted trust hop. Read [Plugin Manifest and Trust Policy Contract v1](../../docs/en/plugin-trust-contracts.md) and [Plugin And Custom Node Recipe](../../docs/en/plugin-recipe.md) before treating the route as complete.
 
+It also carries the copyable inspector recipe for the shipped definition-driven inspector, so the sample reads like the recipe in action: `defaultValue`, `isAdvanced`, `helpText`, `placeholderText`, and explicit read-only reasons.
+
 The hosted route ladder is `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerSample.Avalonia`.
 
 ## Run

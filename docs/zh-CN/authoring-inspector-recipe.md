@@ -1,16 +1,29 @@
 # Authoring Inspector Recipe
 
-当你希望 shipped inspector 直接承担大部分 authoring 工作时，用这份 recipe。
+当你希望 shipped definition-driven inspector 直接承担大部分 authoring 工作时，用这份 recipe。
+
+## 统一的 recipe 词汇
+
+在文档、样例和节点定义里保持这些字段名一致：
+
+- `defaultValue` 作为新节点和投影回退值
+- `isAdvanced` 让高级参数默认保持折叠
+- `helpText` 在字段旁提供简短说明
+- `placeholderText` 为文本型 editor 提供简短输入提示
+- 当宿主或定义锁定字段时，会明确显示只读原因
 
 ## 你需要定义什么
 
 从 `NodeParameterDefinition` 元数据开始：
 
 - `editorKind` 决定内建 editor 类型
-- `defaultValue` 作为新节点和投影回退值
 - `constraints` 定义校验与只读约束
 - `groupName` 决定 inspector 分组
-- `placeholderText` 提供简短输入提示
+- `helpText` 让短说明尽量贴近字段
+- `isAdvanced` 标记需要默认折叠的高级参数
+- 只读原因会在宿主或定义锁定字段时明确显示
+
+shipped inspector 只保持在 definition-driven inspector 的边界内，不会变成通用 property framework。
 
 当前 shipped editor kinds：
 
