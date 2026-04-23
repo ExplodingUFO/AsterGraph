@@ -43,6 +43,8 @@ Until that threshold is met, keep this seeded recommendation in place instead of
 
 ## Related Docs
 
+- [Beta Support Bundle](./support-bundle.md)
+- [Synthetic Adoption Intake Dry-Run Fixtures](./adoption-intake-dry-run.md)
 - [Consumer Sample](./consumer-sample.md)
 - [Quick Start](./quick-start.md)
 - [Project Status](./project-status.md)

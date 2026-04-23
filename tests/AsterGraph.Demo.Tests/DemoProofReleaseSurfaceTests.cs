@@ -262,6 +262,71 @@ public sealed class DemoProofReleaseSurfaceTests
     }
 
     [Fact]
+    public void PublicEvidenceLoopDocs_CrossLinkStatusChecklistFeedbackBundleAndDryRun()
+    {
+        var projectStatus = ReadRepoFile("docs/en/project-status.md");
+        var projectStatusZh = ReadRepoFile("docs/zh-CN/project-status.md");
+        var checklist = ReadRepoFile("docs/en/public-launch-checklist.md");
+        var checklistZh = ReadRepoFile("docs/zh-CN/public-launch-checklist.md");
+        var adoptionFeedback = ReadRepoFile("docs/en/adoption-feedback.md");
+        var adoptionFeedbackZh = ReadRepoFile("docs/zh-CN/adoption-feedback.md");
+        var supportBundle = ReadRepoFile("docs/en/support-bundle.md");
+        var supportBundleZh = ReadRepoFile("docs/zh-CN/support-bundle.md");
+        var dryRun = ReadRepoFile("docs/en/adoption-intake-dry-run.md");
+        var dryRunZh = ReadRepoFile("docs/zh-CN/adoption-intake-dry-run.md");
+
+        Assert.Contains("public-launch-checklist.md", projectStatus, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("adoption-feedback.md", projectStatus, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("support-bundle.md", projectStatus, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("adoption-intake-dry-run.md", projectStatus, StringComparison.OrdinalIgnoreCase);
+
+        Assert.Contains("project-status.md", checklist, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("adoption-feedback.md", checklist, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("support-bundle.md", checklist, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("adoption-intake-dry-run.md", checklist, StringComparison.OrdinalIgnoreCase);
+
+        Assert.Contains("project-status.md", adoptionFeedback, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("public-launch-checklist.md", adoptionFeedback, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("support-bundle.md", adoptionFeedback, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("adoption-intake-dry-run.md", adoptionFeedback, StringComparison.OrdinalIgnoreCase);
+
+        Assert.Contains("project-status.md", supportBundle, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("public-launch-checklist.md", supportBundle, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("adoption-feedback.md", supportBundle, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("adoption-intake-dry-run.md", supportBundle, StringComparison.OrdinalIgnoreCase);
+
+        Assert.Contains("project-status.md", dryRun, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("public-launch-checklist.md", dryRun, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("adoption-feedback.md", dryRun, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("support-bundle.md", dryRun, StringComparison.OrdinalIgnoreCase);
+
+        Assert.Contains("public-launch-checklist.md", projectStatusZh, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("adoption-feedback.md", projectStatusZh, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("support-bundle.md", projectStatusZh, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("adoption-intake-dry-run.md", projectStatusZh, StringComparison.OrdinalIgnoreCase);
+
+        Assert.Contains("project-status.md", checklistZh, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("adoption-feedback.md", checklistZh, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("support-bundle.md", checklistZh, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("adoption-intake-dry-run.md", checklistZh, StringComparison.OrdinalIgnoreCase);
+
+        Assert.Contains("project-status.md", adoptionFeedbackZh, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("public-launch-checklist.md", adoptionFeedbackZh, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("support-bundle.md", adoptionFeedbackZh, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("adoption-intake-dry-run.md", adoptionFeedbackZh, StringComparison.OrdinalIgnoreCase);
+
+        Assert.Contains("project-status.md", supportBundleZh, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("public-launch-checklist.md", supportBundleZh, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("adoption-feedback.md", supportBundleZh, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("adoption-intake-dry-run.md", supportBundleZh, StringComparison.OrdinalIgnoreCase);
+
+        Assert.Contains("project-status.md", dryRunZh, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("public-launch-checklist.md", dryRunZh, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("adoption-feedback.md", dryRunZh, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("support-bundle.md", dryRunZh, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public void SupportBundleDocs_DefineLocalConsumerSampleContract()
     {
         var supportBundle = ReadRepoFile("docs/en/support-bundle.md");

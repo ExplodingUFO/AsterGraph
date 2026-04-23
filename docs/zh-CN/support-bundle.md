@@ -74,4 +74,7 @@ support bundle 是一个本地 JSON 文件，顶层字段固定为：
 
 - [公开 Beta 评估路径](./evaluation-path.md)
 - [Consumer Sample](./consumer-sample.md)
+- [Project Status](./project-status.md)
+- [Public Launch Checklist](./public-launch-checklist.md)
 - [Adoption Feedback Loop](./adoption-feedback.md)
+- [Synthetic Adoption Intake Dry-Run Fixtures](./adoption-intake-dry-run.md)

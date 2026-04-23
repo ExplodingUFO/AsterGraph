@@ -43,6 +43,8 @@
 
 ## 相关文档
 
+- [Beta Support Bundle](./support-bundle.md)
+- [Synthetic Adoption Intake Dry-Run Fixtures](./adoption-intake-dry-run.md)
 - [Consumer Sample](./consumer-sample.md)
 - [Quick Start](./quick-start.md)
 - [Project Status](./project-status.md)

@@ -119,5 +119,7 @@ Keep the consumer entry story explicit in release notes and public announcements
 - `docs/en/adapter-capability-matrix.md` = adapter matrix story and validation matrix
 - `docs/en/alpha-status.md` = historical alpha reference for the current beta support story
 - `docs/en/advanced-editing.md` = advanced-editing capability split and proof map
+- `docs/en/adoption-feedback.md` = bounded public beta intake loop and reuse of support-bundle attachment notes
 - `docs/en/adopter-triage.md` = adopter triage checklist for the one beta evidence contract
 - `docs/en/support-bundle.md` = required support bundle format and collection workflow
+- `docs/en/adoption-intake-dry-run.md` = synthetic rehearsal fixtures that stay internal and never widen support claims

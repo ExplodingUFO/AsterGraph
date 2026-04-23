@@ -126,5 +126,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framew
 - `docs/zh-CN/adapter-capability-matrix.md` = adapter matrix 叙事与验证矩阵
 - `docs/zh-CN/alpha-status.md` = 历史 alpha 参考，服务于当前 beta support story
 - `docs/zh-CN/advanced-editing.md` = advanced-editing capability split 与 proof map
+- `docs/zh-CN/adoption-feedback.md` = 受限 public beta intake loop，以及 support-bundle 附件备注如何复用
 - `docs/zh-CN/adopter-triage.md` = 对应一套 beta 证据合同的采用者分诊清单
 - `docs/zh-CN/support-bundle.md` = support bundle 的本地 JSON 合同与采集流程
+- `docs/zh-CN/adoption-intake-dry-run.md` = 只做内部预演的 synthetic fixture，不会扩大 support 声明

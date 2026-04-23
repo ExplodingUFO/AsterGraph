@@ -74,4 +74,7 @@ Use those rows with `status`, `owner`, and `priority` when you classify the repo
 
 - [Beta Evaluation Path](./evaluation-path.md)
 - [Consumer Sample](./consumer-sample.md)
+- [Project Status](./project-status.md)
+- [Public Launch Checklist](./public-launch-checklist.md)
 - [Adoption Feedback Loop](./adoption-feedback.md)
+- [Synthetic Adoption Intake Dry-Run Fixtures](./adoption-intake-dry-run.md)
