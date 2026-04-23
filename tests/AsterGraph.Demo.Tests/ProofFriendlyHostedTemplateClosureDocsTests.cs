@@ -15,6 +15,10 @@ public sealed class ProofFriendlyHostedTemplateClosureDocsTests
         var consumerSampleZh = ReadRepoFile("docs/zh-CN/consumer-sample.md");
         var supportBundleEn = ReadRepoFile("docs/en/support-bundle.md");
         var supportBundleZh = ReadRepoFile("docs/zh-CN/support-bundle.md");
+        var quickReferenceHeadingEn = "## Trust and proof quick reference";
+        var quickReferenceHeadingZh = "## 信任与证明速查";
+        var nextBetaIntakeHeadingEn = "Next beta intake links:";
+        var nextBetaIntakeHeadingZh = "下一步 beta intake 文档：";
         var proofMarkerHeadingEn = "Expected proof markers:";
         var proofMarkerHeadingZh = "预期 proof marker：";
         var bundleMarkerHeadingEn = "Expected bundle markers when `--support-bundle <support-bundle-path>` is supplied:";
@@ -35,19 +39,49 @@ public sealed class ProofFriendlyHostedTemplateClosureDocsTests
         Assert.DoesNotContain("SUPPORT_BUNDLE_OK", ExtractBlock(consumerReadme, proofMarkerHeadingEn, bundleMarkerHeadingEn), StringComparison.Ordinal);
         Assert.Contains("local evidence only", consumerReadme, StringComparison.OrdinalIgnoreCase);
 
+        var quickReferenceSectionEn = ExtractBlock(consumerSampleEn, quickReferenceHeadingEn, nextBetaIntakeHeadingEn);
+        var quickReferenceSectionZh = ExtractBlock(consumerSampleZh, quickReferenceHeadingZh, nextBetaIntakeHeadingZh);
+        var quickReferenceProofBlockEn = ExtractBlock(quickReferenceSectionEn, proofMarkerHeadingEn, bundleMarkerHeadingEn);
+        var quickReferenceProofBlockZh = ExtractBlock(quickReferenceSectionZh, proofMarkerHeadingZh, bundleMarkerHeadingZh);
+        var quickReferenceBundleBlockEn = ExtractBlock(quickReferenceSectionEn, bundleMarkerHeadingEn, "The support bundle stays local evidence only.");
+        var quickReferenceBundleBlockZh = ExtractBlock(quickReferenceSectionZh, bundleMarkerHeadingZh, "support bundle 只保留本地证据，不会扩大 support 边界。");
+
+        Assert.Contains("CONSUMER_SAMPLE_TRUST_OK:True", quickReferenceProofBlockEn, StringComparison.Ordinal);
+        Assert.Contains("COMMAND_SURFACE_OK:True", quickReferenceProofBlockEn, StringComparison.Ordinal);
+        Assert.Contains("HOST_NATIVE_METRIC:*", quickReferenceProofBlockEn, StringComparison.Ordinal);
+        Assert.DoesNotContain("SUPPORT_BUNDLE_OK", quickReferenceProofBlockEn, StringComparison.Ordinal);
+        Assert.DoesNotContain("SUPPORT_BUNDLE_PATH", quickReferenceProofBlockEn, StringComparison.Ordinal);
+
+        Assert.Contains("CONSUMER_SAMPLE_TRUST_OK:True", quickReferenceProofBlockZh, StringComparison.Ordinal);
+        Assert.Contains("COMMAND_SURFACE_OK:True", quickReferenceProofBlockZh, StringComparison.Ordinal);
+        Assert.Contains("HOST_NATIVE_METRIC:*", quickReferenceProofBlockZh, StringComparison.Ordinal);
+        Assert.DoesNotContain("SUPPORT_BUNDLE_OK", quickReferenceProofBlockZh, StringComparison.Ordinal);
+        Assert.DoesNotContain("SUPPORT_BUNDLE_PATH", quickReferenceProofBlockZh, StringComparison.Ordinal);
+
+        Assert.Contains("SUPPORT_BUNDLE_OK:True", quickReferenceBundleBlockEn, StringComparison.Ordinal);
+        Assert.Contains("SUPPORT_BUNDLE_PATH:...", quickReferenceBundleBlockEn, StringComparison.Ordinal);
+        Assert.DoesNotContain("COMMAND_SURFACE_OK", quickReferenceBundleBlockEn, StringComparison.Ordinal);
+
+        Assert.Contains("SUPPORT_BUNDLE_OK:True", quickReferenceBundleBlockZh, StringComparison.Ordinal);
+        Assert.Contains("SUPPORT_BUNDLE_PATH:...", quickReferenceBundleBlockZh, StringComparison.Ordinal);
+        Assert.DoesNotContain("COMMAND_SURFACE_OK", quickReferenceBundleBlockZh, StringComparison.Ordinal);
+
+        var proofHandoffSectionEn = ExtractBlock(consumerSampleEn, "## Proof Handoff", "## When To Use This Sample");
+        var proofHandoffSectionZh = ExtractBlock(consumerSampleZh, "## Proof Handoff", "## 什么时候看它");
+
         Assert.Contains("--support-bundle", consumerSampleEn, StringComparison.Ordinal);
         Assert.Contains("AsterGraph.ConsumerSample.Avalonia -- --proof", consumerSampleEn, StringComparison.Ordinal);
-        Assert.Contains("CONSUMER_SAMPLE_OK:True", ExtractBlock(consumerSampleEn, bundleMarkerHeadingEn, "## "), StringComparison.Ordinal);
-        Assert.Contains("SUPPORT_BUNDLE_PATH:...", ExtractBlock(consumerSampleEn, bundleMarkerHeadingEn, "## "), StringComparison.Ordinal);
-        Assert.DoesNotContain("SUPPORT_BUNDLE_OK", ExtractBlock(consumerSampleEn, proofMarkerHeadingEn, bundleMarkerHeadingEn), StringComparison.Ordinal);
+        Assert.Contains("CONSUMER_SAMPLE_OK:True", ExtractBlock(proofHandoffSectionEn, bundleMarkerHeadingEn, "## "), StringComparison.Ordinal);
+        Assert.Contains("SUPPORT_BUNDLE_PATH:...", ExtractBlock(proofHandoffSectionEn, bundleMarkerHeadingEn, "## "), StringComparison.Ordinal);
+        Assert.DoesNotContain("SUPPORT_BUNDLE_OK", ExtractBlock(proofHandoffSectionEn, proofMarkerHeadingEn, bundleMarkerHeadingEn), StringComparison.Ordinal);
         Assert.Contains("local evidence only", consumerSampleEn, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("artifacts/consumer-support-bundle.json", consumerSampleEn, StringComparison.Ordinal);
 
         Assert.Contains("--support-bundle", consumerSampleZh, StringComparison.Ordinal);
         Assert.Contains("AsterGraph.ConsumerSample.Avalonia -- --proof", consumerSampleZh, StringComparison.Ordinal);
-        Assert.Contains("CONSUMER_SAMPLE_OK:True", ExtractBlock(consumerSampleZh, bundleMarkerHeadingZh, "## "), StringComparison.Ordinal);
-        Assert.Contains("SUPPORT_BUNDLE_PATH:...", ExtractBlock(consumerSampleZh, bundleMarkerHeadingZh, "## "), StringComparison.Ordinal);
-        Assert.DoesNotContain("SUPPORT_BUNDLE_OK", ExtractBlock(consumerSampleZh, proofMarkerHeadingZh, bundleMarkerHeadingZh), StringComparison.Ordinal);
+        Assert.Contains("CONSUMER_SAMPLE_OK:True", ExtractBlock(proofHandoffSectionZh, bundleMarkerHeadingZh, "## "), StringComparison.Ordinal);
+        Assert.Contains("SUPPORT_BUNDLE_PATH:...", ExtractBlock(proofHandoffSectionZh, bundleMarkerHeadingZh, "## "), StringComparison.Ordinal);
+        Assert.DoesNotContain("SUPPORT_BUNDLE_OK", ExtractBlock(proofHandoffSectionZh, proofMarkerHeadingZh, bundleMarkerHeadingZh), StringComparison.Ordinal);
         Assert.Contains("本地证据", consumerSampleZh, StringComparison.Ordinal);
         Assert.DoesNotContain("artifacts/consumer-support-bundle.json", consumerSampleZh, StringComparison.Ordinal);
 

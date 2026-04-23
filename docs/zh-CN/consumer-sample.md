@@ -50,11 +50,14 @@
 dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.ConsumerSample.Avalonia.csproj --nologo -- --proof
 ```
 
-公开 marker 预期如下：
+预期 proof marker：
 
 - `CONSUMER_SAMPLE_TRUST_OK:True`
 - `COMMAND_SURFACE_OK:True`
 - `HOST_NATIVE_METRIC:*`
+
+当提供 `--support-bundle <support-bundle-path>` 时，预期 bundle marker：
+
 - `SUPPORT_BUNDLE_OK:True`
 - `SUPPORT_BUNDLE_PATH:...`
 

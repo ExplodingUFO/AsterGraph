@@ -50,11 +50,14 @@ Copyable trust and proof reference:
 dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.ConsumerSample.Avalonia.csproj --nologo -- --proof
 ```
 
-Expected public markers:
+Expected proof markers:
 
 - `CONSUMER_SAMPLE_TRUST_OK:True`
 - `COMMAND_SURFACE_OK:True`
 - `HOST_NATIVE_METRIC:*`
+
+Expected bundle markers when `--support-bundle <support-bundle-path>` is supplied:
+
 - `SUPPORT_BUNDLE_OK:True`
 - `SUPPORT_BUNDLE_PATH:...`
 

@@ -130,6 +130,10 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
         var supportBundleZh = ReadRepoFile("docs/zh-CN/support-bundle.md");
         var adoptionFeedbackEn = ReadRepoFile("docs/en/adoption-feedback.md");
         var adoptionFeedbackZh = ReadRepoFile("docs/zh-CN/adoption-feedback.md");
+        var quickReferenceHeadingEn = "## Trust and proof quick reference";
+        var quickReferenceHeadingZh = "## 信任与证明速查";
+        var nextBetaIntakeHeadingEn = "Next beta intake links:";
+        var nextBetaIntakeHeadingZh = "下一步 beta intake 文档：";
         var proofMarkerHeadingEn = "Expected proof markers:";
         var proofMarkerHeadingZh = "预期 proof marker：";
         var bundleMarkerHeadingEn = "Expected bundle markers when `--support-bundle <support-bundle-path>` is supplied:";
@@ -141,14 +145,46 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
             Assert.DoesNotContain("artifacts/consumer-support-bundle.json", contents, StringComparison.Ordinal);
         }
 
-        foreach (var contents in new[] { readme, consumerSampleEn, consumerSampleZh })
+        var quickReferenceSectionEn = ExtractBlock(consumerSampleEn, quickReferenceHeadingEn, nextBetaIntakeHeadingEn);
+        var quickReferenceSectionZh = ExtractBlock(consumerSampleZh, quickReferenceHeadingZh, nextBetaIntakeHeadingZh);
+        var quickReferenceProofBlockEn = ExtractBlock(quickReferenceSectionEn, proofMarkerHeadingEn, bundleMarkerHeadingEn);
+        var quickReferenceProofBlockZh = ExtractBlock(quickReferenceSectionZh, proofMarkerHeadingZh, bundleMarkerHeadingZh);
+        var quickReferenceBundleBlockEn = ExtractBlock(quickReferenceSectionEn, bundleMarkerHeadingEn, "The support bundle stays local evidence only.");
+        var quickReferenceBundleBlockZh = ExtractBlock(quickReferenceSectionZh, bundleMarkerHeadingZh, "support bundle 只保留本地证据，不会扩大 support 边界。");
+
+        Assert.Contains("CONSUMER_SAMPLE_TRUST_OK:True", quickReferenceProofBlockEn, StringComparison.Ordinal);
+        Assert.Contains("COMMAND_SURFACE_OK:True", quickReferenceProofBlockEn, StringComparison.Ordinal);
+        Assert.Contains("HOST_NATIVE_METRIC:*", quickReferenceProofBlockEn, StringComparison.Ordinal);
+        Assert.DoesNotContain("SUPPORT_BUNDLE_OK", quickReferenceProofBlockEn, StringComparison.Ordinal);
+        Assert.DoesNotContain("SUPPORT_BUNDLE_PATH", quickReferenceProofBlockEn, StringComparison.Ordinal);
+
+        Assert.Contains("CONSUMER_SAMPLE_TRUST_OK:True", quickReferenceProofBlockZh, StringComparison.Ordinal);
+        Assert.Contains("COMMAND_SURFACE_OK:True", quickReferenceProofBlockZh, StringComparison.Ordinal);
+        Assert.Contains("HOST_NATIVE_METRIC:*", quickReferenceProofBlockZh, StringComparison.Ordinal);
+        Assert.DoesNotContain("SUPPORT_BUNDLE_OK", quickReferenceProofBlockZh, StringComparison.Ordinal);
+        Assert.DoesNotContain("SUPPORT_BUNDLE_PATH", quickReferenceProofBlockZh, StringComparison.Ordinal);
+
+        Assert.Contains("SUPPORT_BUNDLE_OK:True", quickReferenceBundleBlockEn, StringComparison.Ordinal);
+        Assert.Contains("SUPPORT_BUNDLE_PATH:...", quickReferenceBundleBlockEn, StringComparison.Ordinal);
+        Assert.DoesNotContain("COMMAND_SURFACE_OK", quickReferenceBundleBlockEn, StringComparison.Ordinal);
+
+        Assert.Contains("SUPPORT_BUNDLE_OK:True", quickReferenceBundleBlockZh, StringComparison.Ordinal);
+        Assert.Contains("SUPPORT_BUNDLE_PATH:...", quickReferenceBundleBlockZh, StringComparison.Ordinal);
+        Assert.DoesNotContain("COMMAND_SURFACE_OK", quickReferenceBundleBlockZh, StringComparison.Ordinal);
+
+        foreach (var contents in new[] { consumerSampleEn, consumerSampleZh })
         {
             var bundleHeading = contents.Contains(bundleMarkerHeadingZh, StringComparison.Ordinal) ? bundleMarkerHeadingZh : bundleMarkerHeadingEn;
             var proofHeading = contents.Contains(bundleMarkerHeadingZh, StringComparison.Ordinal) ? proofMarkerHeadingZh : proofMarkerHeadingEn;
-            var proofBlock = ExtractBlock(contents, proofHeading, bundleHeading);
-            var bundleBlock = ExtractBlock(contents, bundleHeading, "## ");
+            var proofHandoffHeading = "## Proof Handoff";
+            var nextHeading = contents.Contains("## When To Use This Sample", StringComparison.Ordinal)
+                ? "## When To Use This Sample"
+                : "## 什么时候看它";
+            var proofHandoffSection = ExtractBlock(contents, proofHandoffHeading, nextHeading);
+            var proofBlock = ExtractBlock(proofHandoffSection, proofHeading, bundleHeading);
+            var bundleBlock = ExtractBlock(proofHandoffSection, bundleHeading, "## ");
 
-            Assert.Contains("HOST_NATIVE_METRIC:command_latency_ms=...", proofBlock, StringComparison.Ordinal);
+            Assert.Contains("CONSUMER_SAMPLE_HOST_ACTION_OK:True", proofBlock, StringComparison.Ordinal);
             Assert.DoesNotContain("SUPPORT_BUNDLE_OK", proofBlock, StringComparison.Ordinal);
             Assert.DoesNotContain("SUPPORT_BUNDLE_PATH", proofBlock, StringComparison.Ordinal);
 
