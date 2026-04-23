@@ -150,12 +150,14 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.True(HasLineWith(evaluationPath, "WPF", "validation"));
         Assert.Contains("AsterGraph.HelloWorld.Wpf", evaluationPath, StringComparison.Ordinal);
         Assert.Contains("adapter-2-accessibility-recipe.md", evaluationPath, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("adapter-2-performance-recipe.md", evaluationPath, StringComparison.OrdinalIgnoreCase);
         Assert.True(HasLineWith(evaluationPath, "retained", "migration"));
         Assert.True(HasLineWith(evaluationPath, "HostSample", "proof"));
         Assert.True(HasLineWith(evaluationPath, "HostSample", "after"));
         Assert.True(HasLineWith(evaluationPathZh, "WPF", "验证"));
         Assert.Contains("AsterGraph.HelloWorld.Wpf", evaluationPathZh, StringComparison.Ordinal);
         Assert.Contains("adapter-2-accessibility-recipe.md", evaluationPathZh, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("adapter-2-performance-recipe.md", evaluationPathZh, StringComparison.OrdinalIgnoreCase);
         Assert.True(HasLineWith(evaluationPathZh, "retained", "迁移"));
         Assert.True(HasLineWith(evaluationPathZh, "HostSample", "proof"));
         Assert.True(HasLineWith(evaluationPathZh, "HostSample", "之后"));
@@ -180,6 +182,31 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("HELLOWORLD_WPF_OK:True", recipeZh, StringComparison.Ordinal);
         Assert.Contains("HOSTED_ACCESSIBILITY_BASELINE_OK:True", recipeZh, StringComparison.Ordinal);
         Assert.Contains("HOSTED_ACCESSIBILITY_OK:True", recipeZh, StringComparison.Ordinal);
+        Assert.True(HasLineWith(recipeZh, "WPF", "验证"));
+        Assert.True(HasLineWith(recipeZh, "Avalonia", "受防守"));
+    }
+
+    [Fact]
+    public void Adapter2PerformanceRecipe_DocumentsBoundedValidationHandoff()
+    {
+        var recipe = ReadRepoFile("docs/en/adapter-2-performance-recipe.md");
+        var recipeZh = ReadRepoFile("docs/zh-CN/adapter-2-performance-recipe.md");
+
+        Assert.Contains("ConsumerSample.Avalonia -- --proof", recipe, StringComparison.Ordinal);
+        Assert.Contains("AsterGraph.HelloWorld.Wpf", recipe, StringComparison.Ordinal);
+        Assert.Contains("ADAPTER2_PERFORMANCE_BASELINE_OK:True", recipe, StringComparison.Ordinal);
+        Assert.Contains("ADAPTER2_PROJECTION_BUDGET_OK:True:none", recipe, StringComparison.Ordinal);
+        Assert.Contains("ADAPTER2_COMMAND_BUDGET_OK:True:none", recipe, StringComparison.Ordinal);
+        Assert.Contains("ADAPTER2_SCENE_BUDGET_OK:True:none", recipe, StringComparison.Ordinal);
+        Assert.True(HasLineWith(recipe, "WPF", "validation-only"));
+        Assert.True(HasLineWith(recipe, "Avalonia", "defended"));
+
+        Assert.Contains("ConsumerSample.Avalonia -- --proof", recipeZh, StringComparison.Ordinal);
+        Assert.Contains("AsterGraph.HelloWorld.Wpf", recipeZh, StringComparison.Ordinal);
+        Assert.Contains("ADAPTER2_PERFORMANCE_BASELINE_OK:True", recipeZh, StringComparison.Ordinal);
+        Assert.Contains("ADAPTER2_PROJECTION_BUDGET_OK:True:none", recipeZh, StringComparison.Ordinal);
+        Assert.Contains("ADAPTER2_COMMAND_BUDGET_OK:True:none", recipeZh, StringComparison.Ordinal);
+        Assert.Contains("ADAPTER2_SCENE_BUDGET_OK:True:none", recipeZh, StringComparison.Ordinal);
         Assert.True(HasLineWith(recipeZh, "WPF", "验证"));
         Assert.True(HasLineWith(recipeZh, "Avalonia", "受防守"));
     }

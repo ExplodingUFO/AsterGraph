@@ -53,6 +53,10 @@ Expected high-signal markers:
 - `HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True`
 - `HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True`
 - `HOSTED_ACCESSIBILITY_OK:True`
+- `ADAPTER2_PERFORMANCE_BASELINE_OK:True`
+- `ADAPTER2_PROJECTION_BUDGET_OK:True:none`
+- `ADAPTER2_COMMAND_BUDGET_OK:True:none`
+- `ADAPTER2_SCENE_BUDGET_OK:True:none`
 - `HELLOWORLD_WPF_OK:True`
 - `TIERED_NODE_SURFACE_OK:True`
 - `FIXED_GROUP_FRAME_OK:True`
@@ -87,9 +91,10 @@ Expected high-signal markers:
   - matching public tag
   - optional legacy historical repo checkpoint reference
 - confirm the generated prerelease notes also publish the proof summary block, not only workflow artifacts
-- confirm the generated notes and announcement text explicitly carry the frozen support boundary story and the adapter matrix story, plus `HOSTED_ACCESSIBILITY_BASELINE_OK:True`, `HOSTED_ACCESSIBILITY_FOCUS_OK:True`, `HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True`, `HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True`, `HOSTED_ACCESSIBILITY_OK:True`, `HELLOWORLD_WPF_OK:True`, `ADAPTER_CAPABILITY_MATRIX_FORMAT:1`, `ADAPTER_CAPABILITY_MATRIX:WPF:HELLOWORLD_WPF_OK:PASS`, and `ADAPTER_CAPABILITY_MATRIX:WPF:COMMAND_SURFACE_OK:PASS`
+- confirm the generated notes and announcement text explicitly carry the frozen support boundary story and the adapter matrix story, plus `HOSTED_ACCESSIBILITY_BASELINE_OK:True`, `HOSTED_ACCESSIBILITY_FOCUS_OK:True`, `HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True`, `HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True`, `HOSTED_ACCESSIBILITY_OK:True`, `ADAPTER2_PERFORMANCE_BASELINE_OK:True`, `ADAPTER2_PROJECTION_BUDGET_OK:True:none`, `ADAPTER2_COMMAND_BUDGET_OK:True:none`, `ADAPTER2_SCENE_BUDGET_OK:True:none`, `HELLOWORLD_WPF_OK:True`, `ADAPTER_CAPABILITY_MATRIX_FORMAT:1`, `ADAPTER_CAPABILITY_MATRIX:WPF:HELLOWORLD_WPF_OK:PASS`, and `ADAPTER_CAPABILITY_MATRIX:WPF:COMMAND_SURFACE_OK:PASS`
 - treat `HELLOWORLD_WPF_OK` as adapter-2 validation only; do not present it as Avalonia/WPF parity or public WPF support when describing the adapter story
 - use [Adapter-2 Accessibility Recipe](./adapter-2-accessibility-recipe.md) when you need the bounded handoff from defended Avalonia accessibility proof to validation-only WPF verification
+- use [Adapter-2 Performance Recipe](./adapter-2-performance-recipe.md) when you need the bounded handoff from defended Avalonia hosted metrics to validation-only WPF performance verification
 - confirm every beta intake record uses the same bounded schema: route, version, proof markers, friction, and support-bundle attachment note
 - repeat the next 0.xx alpha/beta line handoff in release messaging: keep copyable host-owned parameter/metadata polish first, and only widen toward defended large-tier performance or broader parameter/metadata editing when 3-5 real external reports cluster on the same bounded risk
 - if `NUGET_API_KEY` is configured, confirm package publication succeeds
