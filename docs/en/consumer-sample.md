@@ -88,9 +88,11 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 
 If you copied the starter recipe, validate the defended host here with `AsterGraph.ConsumerSample.Avalonia -- --proof` first.
 
-This is the copyable intake record for the defended route: one proof command, one local bundle command, and one attachment note from `SUPPORT_BUNDLE_PATH:...`.
+For reviewable local evidence, run `AsterGraph.ConsumerSample.Avalonia -- --proof --support-bundle <support-bundle-path>` and reuse the emitted `SUPPORT_BUNDLE_PATH:...` line as the note.
 
-When you need reviewable local evidence, use `--support-bundle <support-bundle-path>` and attach the `SUPPORT_BUNDLE_PATH:...` line from the proof output as the note. It should stay local evidence only and should not widen the support boundary.
+If the route cannot produce a bundle, record `NO_SUPPORT_BUNDLE:route-cannot-produce-one`.
+
+It should stay local evidence only and should not widen the support boundary.
 
 Expected proof markers:
 

@@ -12,14 +12,14 @@
 - version
 - proof 标记（可用时附截图/命令输出）
 - 摩擦点
-- support bundle 附件备注（可用时，直接使用 proof 输出里的 `SUPPORT_BUNDLE_PATH:...` 行）
+- support bundle 附件备注：`SUPPORT_BUNDLE_PATH:...`（当 route 产出 bundle 时）或 `NO_SUPPORT_BUNDLE:route-cannot-produce-one`（当 route 不能产出 bundle 时）
 
 公开反馈建议使用 GitHub 上的 `Adoption feedback` issue template。
-如果你已经能跑到 `ConsumerSample.Avalonia -- --proof`，优先把 [Beta Support Bundle](./support-bundle.md) 里定义的本地证据包附上，并把 proof 输出里的 `SUPPORT_BUNDLE_PATH:...` 这一行当作 support bundle 附件备注。
+如果你已经能跑到 `ConsumerSample.Avalonia -- --proof --support-bundle <support-bundle-path>`，优先把 [Beta Support Bundle](./support-bundle.md) 里定义的本地证据包附上，并把 proof 输出里的 `SUPPORT_BUNDLE_PATH:...` 这一行当作 support bundle 附件备注。如果 route 不能产出 bundle，就记录 `NO_SUPPORT_BUNDLE:route-cannot-produce-one`。
 
 ## 当前种子试用综合
 
-在仓库还没有积累足够真实外部 issue 之前，当前建议来自四组结构化的公开前 adopter-trial 走查，它们分别覆盖了不同入口路线。
+在仓库还没有积累足够真实外部 issue 之前，当前建议来自四组结构化的公开前 adopter-trial 走查，它们分别覆盖了不同入口路线。下面的 `Persona` 和 `Requested next capability` 两列是维护者综合出来的结论，不是公开 intake 表单里的原始字段。
 
 | 画像 | 尝试路线 | 主要摩擦 | 希望下一步补什么 |
 | --- | --- | --- | --- |

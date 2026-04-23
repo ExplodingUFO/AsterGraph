@@ -24,7 +24,7 @@ For a local support bundle:
 dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.ConsumerSample.Avalonia.csproj --nologo -- --proof --support-bundle <support-bundle-path> --support-note "what you were trying to validate"
 ```
 
-This is the copyable intake record for copied hosted recipes: validate the defended route here with `AsterGraph.ConsumerSample.Avalonia -- --proof`, then reuse the local bundle command and the `SUPPORT_BUNDLE_PATH:...` line as one intake record. The support bundle stays local evidence only.
+Validate the defended route here with `AsterGraph.ConsumerSample.Avalonia -- --proof`. For reviewable local evidence, run the bundle-producing command above and reuse the emitted `SUPPORT_BUNDLE_PATH:...` line as the attachment note. If the route cannot produce a bundle, record `NO_SUPPORT_BUNDLE:route-cannot-produce-one`. The support bundle stays local evidence only.
 
 Expected markers:
 

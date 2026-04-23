@@ -47,5 +47,5 @@ body:
     id: support_bundle
     attributes:
       label: Support bundle attachment
-      description: Optional local path from `ConsumerSample.Avalonia -- --proof --support-bundle <support-bundle-path>`; reuse the emitted `SUPPORT_BUNDLE_PATH:...` line as the attachment note
-      placeholder: SUPPORT_BUNDLE_PATH:...
+      description: Attachment note for the intake record. Use `SUPPORT_BUNDLE_PATH:...` when the route produced a bundle, or `NO_SUPPORT_BUNDLE:route-cannot-produce-one` when it did not.
+      placeholder: SUPPORT_BUNDLE_PATH:... or NO_SUPPORT_BUNDLE:route-cannot-produce-one

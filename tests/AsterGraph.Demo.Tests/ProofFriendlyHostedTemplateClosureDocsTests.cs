@@ -24,35 +24,40 @@ public sealed class ProofFriendlyHostedTemplateClosureDocsTests
         Assert.Contains("SUPPORT_BUNDLE_PATH:...", starterReadme, StringComparison.Ordinal);
         Assert.Contains("local evidence only", starterReadme, StringComparison.OrdinalIgnoreCase);
 
-        Assert.Contains("copyable intake record", consumerReadme, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("--support-bundle", consumerReadme, StringComparison.Ordinal);
         Assert.Contains("AsterGraph.ConsumerSample.Avalonia -- --proof", consumerReadme, StringComparison.Ordinal);
         Assert.Contains("CONSUMER_SAMPLE_OK:True", consumerReadme, StringComparison.Ordinal);
         Assert.Contains("SUPPORT_BUNDLE_PATH:...", consumerReadme, StringComparison.Ordinal);
+        Assert.Contains("NO_SUPPORT_BUNDLE", consumerReadme, StringComparison.Ordinal);
         Assert.Contains("local evidence only", consumerReadme, StringComparison.OrdinalIgnoreCase);
 
-        Assert.Contains("copyable intake record", consumerSampleEn, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("--support-bundle", consumerSampleEn, StringComparison.Ordinal);
         Assert.Contains("AsterGraph.ConsumerSample.Avalonia -- --proof", consumerSampleEn, StringComparison.Ordinal);
         Assert.Contains("CONSUMER_SAMPLE_OK:True", consumerSampleEn, StringComparison.Ordinal);
         Assert.Contains("SUPPORT_BUNDLE_PATH:...", consumerSampleEn, StringComparison.Ordinal);
+        Assert.Contains("NO_SUPPORT_BUNDLE", consumerSampleEn, StringComparison.Ordinal);
         Assert.Contains("local evidence only", consumerSampleEn, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("artifacts/consumer-support-bundle.json", consumerSampleEn, StringComparison.Ordinal);
 
-        Assert.Contains("可复制的 intake 记录", consumerSampleZh, StringComparison.Ordinal);
+        Assert.Contains("--support-bundle", consumerSampleZh, StringComparison.Ordinal);
         Assert.Contains("AsterGraph.ConsumerSample.Avalonia -- --proof", consumerSampleZh, StringComparison.Ordinal);
         Assert.Contains("CONSUMER_SAMPLE_OK:True", consumerSampleZh, StringComparison.Ordinal);
         Assert.Contains("SUPPORT_BUNDLE_PATH:...", consumerSampleZh, StringComparison.Ordinal);
+        Assert.Contains("NO_SUPPORT_BUNDLE", consumerSampleZh, StringComparison.Ordinal);
         Assert.Contains("本地证据", consumerSampleZh, StringComparison.Ordinal);
         Assert.DoesNotContain("artifacts/consumer-support-bundle.json", consumerSampleZh, StringComparison.Ordinal);
 
         Assert.Contains("ConsumerSample.Avalonia", supportBundleEn, StringComparison.Ordinal);
         Assert.Contains("SUPPORT_BUNDLE_OK:True", supportBundleEn, StringComparison.Ordinal);
         Assert.Contains("SUPPORT_BUNDLE_PATH:...", supportBundleEn, StringComparison.Ordinal);
+        Assert.Contains("NO_SUPPORT_BUNDLE", supportBundleEn, StringComparison.Ordinal);
         Assert.Contains("local evidence", supportBundleEn, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("artifacts/consumer-support-bundle.json", supportBundleEn, StringComparison.Ordinal);
 
         Assert.Contains("ConsumerSample.Avalonia", supportBundleZh, StringComparison.Ordinal);
         Assert.Contains("SUPPORT_BUNDLE_OK:True", supportBundleZh, StringComparison.Ordinal);
         Assert.Contains("SUPPORT_BUNDLE_PATH:...", supportBundleZh, StringComparison.Ordinal);
+        Assert.Contains("NO_SUPPORT_BUNDLE", supportBundleZh, StringComparison.Ordinal);
         Assert.Contains("本地证据", supportBundleZh, StringComparison.Ordinal);
         Assert.DoesNotContain("artifacts/consumer-support-bundle.json", supportBundleZh, StringComparison.Ordinal);
     }

@@ -294,14 +294,14 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("proof marker", proofMarkersBlock, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("friction", frictionBlock, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("support bundle", supportBundleBlock, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("attachment note", supportBundleBlock, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("SUPPORT_BUNDLE_PATH", supportBundleBlock, StringComparison.Ordinal);
+        Assert.Contains("NO_SUPPORT_BUNDLE", supportBundleBlock, StringComparison.Ordinal);
         Assert.DoesNotContain("consumer-support-bundle.json", supportBundleBlock, StringComparison.Ordinal);
         Assert.DoesNotContain("id: persona", adoptionTemplate, StringComparison.Ordinal);
         Assert.DoesNotContain("id: worked", adoptionTemplate, StringComparison.Ordinal);
         Assert.DoesNotContain("id: request", adoptionTemplate, StringComparison.Ordinal);
         Assert.DoesNotContain("id: evidence", adoptionTemplate, StringComparison.Ordinal);
-        Assert.Contains("ConsumerSample.Avalonia", supportBundleBlock, StringComparison.Ordinal);
-        Assert.Contains("attachment note", supportBundleBlock, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("required: true", supportBundleBlock, StringComparison.Ordinal);
 
         Assert.Contains("AsterGraph version", bugTemplate, StringComparison.Ordinal);
@@ -315,7 +315,8 @@ public sealed class DemoProofReleaseSurfaceTests
             Assert.Contains("route", contents, StringComparison.OrdinalIgnoreCase);
             Assert.Contains("proof", contents, StringComparison.OrdinalIgnoreCase);
             Assert.Contains("support bundle", contents, StringComparison.OrdinalIgnoreCase);
-            Assert.Contains("ConsumerSample.Avalonia", contents, StringComparison.Ordinal);
+            Assert.Contains("SUPPORT_BUNDLE_PATH", contents, StringComparison.Ordinal);
+            Assert.Contains("NO_SUPPORT_BUNDLE", contents, StringComparison.Ordinal);
         }
 
         Assert.Contains("friction", triageDoc, StringComparison.OrdinalIgnoreCase);

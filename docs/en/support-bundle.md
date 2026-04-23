@@ -1,7 +1,7 @@
 # Beta Support Bundle
 
 This is the local evidence contract for beta evaluation and support.
-Use the support bundle as the support-bundle attachment on the beta intake record when available from the defended hosted proof route.
+Use the support bundle as the support-bundle attachment note on the beta intake record when available from the defended hosted proof route.
 It does not upload anything and it does not imply telemetry or hosted services.
 Use it alongside [Beta Evaluation Path](./evaluation-path.md) when you need the local evidence attachment from the defended hosted proof route.
 
@@ -26,7 +26,7 @@ Copyable local evidence reference:
 dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.ConsumerSample.Avalonia.csproj --nologo -- --proof --support-bundle <support-bundle-path> --support-note "what you were trying to validate"
 ```
 
-Local evidence only means this bundle remains tied to the defended hosted route and does not widen the support boundary. Use the emitted `SUPPORT_BUNDLE_PATH:...` line as the attachment note on the intake record.
+Local evidence only means this bundle remains tied to the defended hosted route and does not widen the support boundary. Use the emitted `SUPPORT_BUNDLE_PATH:...` line as the attachment note on the intake record. If a route cannot produce a bundle, record `NO_SUPPORT_BUNDLE:route-cannot-produce-one`.
 
 ## Contract
 

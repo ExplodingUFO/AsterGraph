@@ -4,7 +4,7 @@ This page defines the public beta intake record and records the seeded adopter-t
 
 ## Intake Format
 
-Each beta intake record should stay on one bounded schema: route, version, proof markers, friction, and support-bundle attachment.
+Each beta intake record should stay on one bounded schema: route, version, proof markers, friction, and support-bundle attachment note.
 
 Each feedback entry should capture this bounded schema:
 
@@ -12,14 +12,14 @@ Each feedback entry should capture this bounded schema:
 - version
 - proof markers or screenshot reference when available
 - friction
-- support-bundle attachment note from the emitted `SUPPORT_BUNDLE_PATH:...` line when available
+- support-bundle attachment note: `SUPPORT_BUNDLE_PATH:...` when the route produced a bundle, or `NO_SUPPORT_BUNDLE:route-cannot-produce-one` when it did not
 
 Use the GitHub issue template `Adoption feedback` for public reports.
-When you can reach `ConsumerSample.Avalonia -- --proof`, attach the local bundle described in [Beta Support Bundle](./support-bundle.md) and reuse the emitted `SUPPORT_BUNDLE_PATH:...` line as the support-bundle attachment note.
+When you can reach `ConsumerSample.Avalonia -- --proof --support-bundle <support-bundle-path>`, attach the local bundle described in [Beta Support Bundle](./support-bundle.md) and reuse the emitted `SUPPORT_BUNDLE_PATH:...` line as the support-bundle attachment note. If the route cannot produce a bundle, record `NO_SUPPORT_BUNDLE:route-cannot-produce-one`.
 
 ## Seeded Trial Synthesis
 
-Until the repo collects enough real external issues, the current recommendation is based on four structured pre-public adoption rehearsals that exercise distinct entry routes.
+Until the repo collects enough real external issues, the current recommendation is based on four structured pre-public adoption rehearsals that exercise distinct entry routes. The `Persona` and `Requested next capability` columns below are maintainer-derived synthesis, not raw public intake fields.
 
 | Persona | Route tried | Main friction | Requested next capability |
 | --- | --- | --- | --- |

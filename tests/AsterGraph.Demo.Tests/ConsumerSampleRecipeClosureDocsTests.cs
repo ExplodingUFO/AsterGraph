@@ -140,16 +140,14 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
         foreach (var contents in new[] { readme, consumerSampleEn, consumerSampleZh, supportBundleEn, supportBundleZh, adoptionFeedbackEn, adoptionFeedbackZh })
         {
             Assert.Contains("SUPPORT_BUNDLE_PATH", contents, StringComparison.Ordinal);
+            Assert.Contains("NO_SUPPORT_BUNDLE", contents, StringComparison.Ordinal);
             Assert.DoesNotContain("artifacts/consumer-support-bundle.json", contents, StringComparison.Ordinal);
         }
 
-        Assert.Contains("copyable intake record", consumerSampleEn, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("copyable intake record", readme, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("可复制的 intake 记录", consumerSampleZh, StringComparison.Ordinal);
-        Assert.Contains("support-bundle attachment", supportBundleEn, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("support bundle 作为附件", supportBundleZh, StringComparison.Ordinal);
-        Assert.True(HasLineWithAll(adoptionFeedbackEn, "route", "version", "proof", "friction", "support-bundle attachment"));
-        Assert.True(HasLineWithAll(adoptionFeedbackZh, "route", "version", "proof", "摩擦", "support bundle"));
+        Assert.Contains("attachment note", supportBundleEn, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("附件备注", supportBundleZh, StringComparison.Ordinal);
+        Assert.True(HasLineWithAll(adoptionFeedbackEn, "route", "version", "proof", "friction", "support-bundle attachment note"));
+        Assert.True(HasLineWithAll(adoptionFeedbackZh, "route", "version", "proof", "摩擦", "support bundle", "附件备注"));
     }
 
     private static void AssertContains(string contents, string expected)
