@@ -365,6 +365,77 @@ public sealed class GraphEditorViewTests
     }
 
     [AvaloniaFact]
+    public void StencilLibrary_GroupsSessionStencilItems_ByCategory_WhenRetainedTemplatesAreCleared()
+    {
+        var editor = CreateStencilEditor();
+        editor.NodeTemplates.Clear();
+        var window = CreateWindow(new GraphEditorView
+        {
+            Editor = editor,
+        });
+        var view = (GraphEditorView)window.Content!;
+
+        var generatorsSection = FindRequiredDescendant<Expander>(view, "PART_StencilSection_Generators");
+        var utilitiesSection = FindRequiredDescendant<Expander>(view, "PART_StencilSection_Utilities");
+
+        Assert.True(generatorsSection.IsExpanded);
+        Assert.True(utilitiesSection.IsExpanded);
+        Assert.Contains(
+            generatorsSection.GetVisualDescendants().OfType<Button>(),
+            button => string.Equals(button.Name, "PART_StencilCard_tests-stencil-noise", StringComparison.Ordinal));
+        Assert.Contains(
+            utilitiesSection.GetVisualDescendants().OfType<Button>(),
+            button => string.Equals(button.Name, "PART_StencilCard_tests-stencil-output", StringComparison.Ordinal));
+    }
+
+    [AvaloniaFact]
+    public void StencilLibrary_SearchFiltersGroupedStencilItems()
+    {
+        var editor = CreateStencilEditor();
+        editor.NodeTemplates.Clear();
+        var window = CreateWindow(new GraphEditorView
+        {
+            Editor = editor,
+        });
+        var view = (GraphEditorView)window.Content!;
+        var searchBox = FindRequiredControl<TextBox>(view, "PART_StencilSearchBox");
+
+        searchBox.Text = "noise";
+        Dispatcher.UIThread.RunJobs(DispatcherPriority.Render);
+
+        Assert.NotNull(FindOptionalDescendant<Button>(view, "PART_StencilCard_tests-stencil-noise"));
+        Assert.Null(FindOptionalDescendant<Button>(view, "PART_StencilCard_tests-stencil-output"));
+        Assert.NotNull(FindOptionalDescendant<Expander>(view, "PART_StencilSection_Generators"));
+        Assert.Null(FindOptionalDescendant<Expander>(view, "PART_StencilSection_Utilities"));
+    }
+
+    [AvaloniaFact]
+    public void StencilLibrary_CollapsedSection_HidesCards_AndRetainsInsertionAfterReexpand()
+    {
+        var editor = CreateStencilEditor();
+        editor.NodeTemplates.Clear();
+        var window = CreateWindow(new GraphEditorView
+        {
+            Editor = editor,
+        });
+        var view = (GraphEditorView)window.Content!;
+        var generatorsSection = FindRequiredDescendant<Expander>(view, "PART_StencilSection_Generators");
+
+        generatorsSection.IsExpanded = false;
+        Dispatcher.UIThread.RunJobs(DispatcherPriority.Render);
+
+        Assert.False(generatorsSection.IsExpanded);
+
+        generatorsSection.IsExpanded = true;
+        Dispatcher.UIThread.RunJobs(DispatcherPriority.Render);
+
+        var stencilCard = FindRequiredDescendant<Button>(view, "PART_StencilCard_tests-stencil-noise");
+        stencilCard.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+
+        Assert.Equal(2, editor.Session.Queries.CreateDocumentSnapshot().Nodes.Count);
+    }
+
+    [AvaloniaFact]
     public void NodeCanvasContextMenuSnapshot_UsesSessionDefinitions_WhenRetainedTemplatesAreCleared()
     {
         var editor = CreateEditor();
@@ -659,6 +730,12 @@ public sealed class GraphEditorViewTests
             .FirstOrDefault(control => string.Equals(control.Name, name, StringComparison.Ordinal))
             ?? throw new Xunit.Sdk.XunitException($"Could not find descendant control '{name}'.");
 
+    private static T? FindOptionalDescendant<T>(Control root, string name)
+        where T : Control
+        => root.GetVisualDescendants()
+            .OfType<T>()
+            .FirstOrDefault(control => string.Equals(control.Name, name, StringComparison.Ordinal));
+
     private static void InvokeViewKeyDown(GraphEditorView view, KeyEventArgs args)
     {
         var handler = typeof(GraphEditorView).GetMethod(
@@ -709,6 +786,49 @@ public sealed class GraphEditorViewTests
             catalog,
             new DefaultPortCompatibilityService(),
             contextMenuAugmentor: augmentor);
+    }
+
+    private static GraphEditorViewModel CreateStencilEditor()
+    {
+        var catalog = new NodeCatalog();
+        catalog.RegisterDefinition(
+            new NodeDefinition(
+                new NodeDefinitionId("tests.stencil.noise"),
+                "Noise Generator",
+                "Generators",
+                "Creates procedural noise.",
+                [],
+                []));
+        catalog.RegisterDefinition(
+            new NodeDefinition(
+                new NodeDefinitionId("tests.stencil.output"),
+                "Output Preview",
+                "Utilities",
+                "Shows the current graph output.",
+                [],
+                []));
+
+        return new GraphEditorViewModel(
+            new GraphDocument(
+                "Stencil View Graph",
+                "Exercises grouped stencil chrome.",
+                [
+                    new GraphNode(
+                        "tests.stencil.node-001",
+                        "Existing Node",
+                        "Tests",
+                        "GraphEditorView",
+                        "Used by grouped stencil tests.",
+                        new GraphPoint(120, 160),
+                        new GraphSize(240, 160),
+                        [],
+                        [],
+                        "#6AD5C4",
+                        new NodeDefinitionId("tests.stencil.noise")),
+                ],
+                []),
+            catalog,
+            new DefaultPortCompatibilityService());
     }
 
     private static INodeCatalog CreateFragmentCatalog()

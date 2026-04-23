@@ -120,6 +120,7 @@ public partial class GraphEditorView : UserControl
     private Border? _libraryChrome;
     private Border? _inspectorChrome;
     private Border? _statusChrome;
+    private TextBox? _stencilSearchBox;
     private StackPanel? _stencilCardList;
     private WrapPanel? _headerToolbar;
     private WrapPanel? _compositeWorkflowToolbar;
@@ -138,6 +139,8 @@ public partial class GraphEditorView : UserControl
     private double _defaultShellRowSpacing;
     private double _defaultShellColumnSpacing;
     private readonly GraphEditorViewCompositionCoordinator _compositionCoordinator;
+    private readonly HashSet<string> _collapsedStencilCategories = [];
+    private string _stencilFilter = string.Empty;
     private string _commandPaletteFilter = string.Empty;
     private string? _selectedFragmentTemplatePath;
     private AsterGraphHostedActionDescriptor? _commandPaletteAction;
@@ -331,6 +334,7 @@ public partial class GraphEditorView : UserControl
         _libraryChrome = this.FindControl<Border>("PART_LibraryChrome");
         _inspectorChrome = this.FindControl<Border>("PART_InspectorChrome");
         _statusChrome = this.FindControl<Border>("PART_StatusChrome");
+        _stencilSearchBox = this.FindControl<TextBox>("PART_StencilSearchBox");
         _stencilCardList = this.FindControl<StackPanel>("PART_StencilCardList");
         _headerToolbar = this.FindControl<WrapPanel>("PART_HeaderToolbar");
         _compositeWorkflowToolbar = this.FindControl<WrapPanel>("PART_CompositeWorkflowToolbar");
@@ -350,6 +354,11 @@ public partial class GraphEditorView : UserControl
         _inspectorSurface = this.FindControl<GraphInspectorView>("PART_InspectorSurface");
         _miniMapSurface = this.FindControl<GraphMiniMap>("PART_MiniMapSurface");
         InitializeAuthoringToolControls();
+        if (_stencilSearchBox is not null)
+        {
+            _stencilSearchBox.TextChanged += HandleStencilSearchChanged;
+        }
+
         if (_openCommandPaletteButton is not null)
         {
             _openCommandPaletteButton.Click += HandleOpenCommandPaletteClick;
@@ -428,6 +437,12 @@ public partial class GraphEditorView : UserControl
         BuildCommandPaletteItems(CreateCommandSurfaceProjection());
     }
 
+    private void HandleStencilSearchChanged(object? sender, TextChangedEventArgs args)
+    {
+        _stencilFilter = _stencilSearchBox?.Text?.Trim() ?? string.Empty;
+        BuildStencilLibrary();
+    }
+
     private void HandleFragmentTemplateSelectionChanged(object? sender, SelectionChangedEventArgs args)
     {
         _selectedFragmentTemplatePath = (_fragmentTemplatePicker?.SelectedItem as GraphEditorFragmentTemplateSnapshot)?.Path;
@@ -504,9 +519,17 @@ public partial class GraphEditorView : UserControl
 
         var addNodeDescriptor = Editor.Session.Queries.GetCommandDescriptors()
             .FirstOrDefault(descriptor => string.Equals(descriptor.Id, "nodes.add", StringComparison.Ordinal));
-        foreach (var stencilItem in Editor.Session.Queries.GetNodeTemplateSnapshots())
+        var stencilSections = Editor.Session.Queries.GetNodeTemplateSnapshots()
+            .Where(MatchesStencilFilter)
+            .GroupBy(stencilItem => stencilItem.Category, StringComparer.Ordinal)
+            .OrderBy(section => section.Key, StringComparer.Ordinal);
+
+        foreach (var stencilSection in stencilSections)
         {
-            _stencilCardList.Children.Add(CreateStencilCard(stencilItem, addNodeDescriptor));
+            _stencilCardList.Children.Add(CreateStencilSection(
+                stencilSection.Key,
+                stencilSection.ToList(),
+                addNodeDescriptor));
         }
     }
 
@@ -881,6 +904,106 @@ public partial class GraphEditorView : UserControl
             RefreshCommandSurface();
         };
         return button;
+    }
+
+    private Expander CreateStencilSection(
+        string category,
+        IReadOnlyList<GraphEditorNodeTemplateSnapshot> stencilItems,
+        GraphEditorCommandDescriptorSnapshot? addNodeDescriptor)
+    {
+        var sectionCards = new StackPanel
+        {
+            Spacing = 0,
+        };
+        foreach (var stencilItem in stencilItems)
+        {
+            sectionCards.Children.Add(CreateStencilCard(stencilItem, addNodeDescriptor));
+        }
+
+        var expander = new Expander
+        {
+            Name = $"PART_StencilSection_{CreateStencilSectionKey(category)}",
+            Tag = category,
+            Margin = new Thickness(0, 0, 0, 12),
+            IsExpanded = !_collapsedStencilCategories.Contains(category),
+            Header = new StackPanel
+            {
+                Orientation = global::Avalonia.Layout.Orientation.Horizontal,
+                Spacing = 8,
+                Children =
+                {
+                    new TextBlock
+                    {
+                        Text = category,
+                        FontSize = 13,
+                        FontWeight = global::Avalonia.Media.FontWeight.SemiBold,
+                        Foreground = GetResourceBrush("AsterGraph.HeadlineBrush"),
+                    },
+                    new Border
+                    {
+                        Classes = { "astergraph-pill" },
+                        VerticalAlignment = global::Avalonia.Layout.VerticalAlignment.Center,
+                        Child = new TextBlock
+                        {
+                            Text = stencilItems.Count.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                            FontSize = 10,
+                            FontWeight = global::Avalonia.Media.FontWeight.SemiBold,
+                            Foreground = GetResourceBrush("AsterGraph.HeadlineBrush"),
+                        },
+                    },
+                },
+            },
+            Content = sectionCards,
+        };
+        expander.Expanded += HandleStencilSectionExpanded;
+        expander.Collapsed += HandleStencilSectionCollapsed;
+        return expander;
+    }
+
+    private bool MatchesStencilFilter(GraphEditorNodeTemplateSnapshot stencilItem)
+    {
+        if (string.IsNullOrWhiteSpace(_stencilFilter))
+        {
+            return true;
+        }
+
+        return stencilItem.Category.Contains(_stencilFilter, StringComparison.OrdinalIgnoreCase)
+            || stencilItem.Title.Contains(_stencilFilter, StringComparison.OrdinalIgnoreCase)
+            || stencilItem.Subtitle.Contains(_stencilFilter, StringComparison.OrdinalIgnoreCase)
+            || stencilItem.Description.Contains(_stencilFilter, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private void HandleStencilSectionExpanded(object? sender, RoutedEventArgs args)
+    {
+        if (sender is Expander expander && expander.Tag is string category)
+        {
+            _collapsedStencilCategories.Remove(category);
+        }
+    }
+
+    private void HandleStencilSectionCollapsed(object? sender, RoutedEventArgs args)
+    {
+        if (sender is Expander expander && expander.Tag is string category)
+        {
+            _collapsedStencilCategories.Add(category);
+        }
+    }
+
+    private static string CreateStencilSectionKey(string category)
+    {
+        if (string.IsNullOrWhiteSpace(category))
+        {
+            return "uncategorized";
+        }
+
+        var sanitized = new string(category
+            .Select(character => char.IsLetterOrDigit(character) ? character : '-')
+            .ToArray())
+            .Trim('-');
+
+        return string.IsNullOrWhiteSpace(sanitized)
+            ? "uncategorized"
+            : sanitized;
     }
 
     private global::Avalonia.Media.IBrush? GetResourceBrush(string key)
