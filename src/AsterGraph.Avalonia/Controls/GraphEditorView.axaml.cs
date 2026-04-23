@@ -137,6 +137,7 @@ public partial class GraphEditorView : UserControl
     private Border? _commandPaletteChrome;
     private TextBox? _commandPaletteSearchBox;
     private StackPanel? _commandPaletteItems;
+    private Control? _commandPaletteReturnFocusTarget;
     private double _defaultShellRowSpacing;
     private double _defaultShellColumnSpacing;
     private readonly GraphEditorViewCompositionCoordinator _compositionCoordinator;
@@ -423,6 +424,8 @@ public partial class GraphEditorView : UserControl
         }
 
         var projection = GetCommandSurfaceProjection();
+        var commandPaletteReturnFocusTarget = args.Source as Control
+            ?? TopLevel.GetTopLevel(this)?.FocusManager?.GetFocusedElement() as Control;
         if (projection is not null
             && projection.TryGet(CommandPaletteActionId, out var commandPaletteAction)
             && GraphEditorDefaultCommandShortcutRouter.TryHandle(
@@ -431,6 +434,7 @@ public partial class GraphEditorView : UserControl
                 args,
                 allowInputControlFocus: true))
         {
+            CaptureCommandPaletteReturnFocusTarget(commandPaletteReturnFocusTarget);
             args.Handled = true;
             return;
         }
@@ -453,6 +457,7 @@ public partial class GraphEditorView : UserControl
 
     private void HandleOpenCommandPaletteClick(object? sender, RoutedEventArgs args)
     {
+        CaptureCommandPaletteReturnFocusTarget(args.Source as Control ?? sender as Control);
         _commandPaletteAction?.TryExecute();
         args.Handled = true;
     }
@@ -1261,6 +1266,11 @@ public partial class GraphEditorView : UserControl
             return;
         }
 
+        if (_commandPaletteReturnFocusTarget is null)
+        {
+            CaptureCommandPaletteReturnFocusTarget();
+        }
+
         _commandPaletteFilter = string.Empty;
         if (_commandPaletteSearchBox is not null)
         {
@@ -1280,5 +1290,56 @@ public partial class GraphEditorView : UserControl
         }
 
         _commandPaletteChrome.IsVisible = false;
+        RestoreCommandPaletteFocus();
+    }
+
+    private void CaptureCommandPaletteReturnFocusTarget(Control? focusSource = null)
+    {
+        var candidate = focusSource ?? TopLevel.GetTopLevel(this)?.FocusManager?.GetFocusedElement() as Control;
+        _commandPaletteReturnFocusTarget = IsCommandPaletteControl(candidate)
+            ? null
+            : candidate;
+    }
+
+    private void RestoreCommandPaletteFocus()
+    {
+        var focusTarget = _commandPaletteReturnFocusTarget;
+        _commandPaletteReturnFocusTarget = null;
+
+        if (focusTarget is not null
+            && !IsCommandPaletteControl(focusTarget)
+            && TopLevel.GetTopLevel(focusTarget) is not null
+            && focusTarget.IsVisible
+            && focusTarget.Focusable)
+        {
+            focusTarget.Focus();
+            return;
+        }
+
+        if (_nodeCanvas is not null && _nodeCanvas.Focusable)
+        {
+            _nodeCanvas.Focus();
+            return;
+        }
+
+        Focus();
+    }
+
+    private bool IsCommandPaletteControl(Control? control)
+    {
+        if (control is null || _commandPaletteChrome is null)
+        {
+            return false;
+        }
+
+        for (Visual? current = control; current is not null; current = current.GetVisualParent())
+        {
+            if (ReferenceEquals(current, _commandPaletteChrome))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

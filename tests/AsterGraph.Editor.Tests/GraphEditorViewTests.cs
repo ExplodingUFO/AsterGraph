@@ -228,6 +228,33 @@ public sealed class GraphEditorViewTests
     }
 
     [AvaloniaFact]
+    public void CommandPalette_RestoresFocusToPriorHostedSurface_WhenClosedWithEscape()
+    {
+        var editor = CreateAuthoringEditor();
+        editor.SelectSingleNode(editor.Nodes[0], updateStatus: false);
+        var window = CreateWindow(new GraphEditorView
+        {
+            Editor = editor,
+        });
+        var view = (GraphEditorView)window.Content!;
+        var nodeSurface = view.GetVisualDescendants()
+            .OfType<Control>()
+            .FirstOrDefault(control =>
+                control.Focusable
+                && AutomationProperties.GetName(control)?.EndsWith(" node", StringComparison.Ordinal) == true);
+        var stencilSearchBox = FindRequiredControl<TextBox>(view, "PART_StencilSearchBox");
+        var parameterSearchBox = FindRequiredDescendant<TextBox>(view, "PART_ParameterSearchBox");
+        var paletteChrome = FindRequiredControl<Border>(view, "PART_CommandPaletteChrome");
+        var paletteSearchBox = FindRequiredControl<TextBox>(view, "PART_CommandPaletteSearchBox");
+
+        Assert.NotNull(nodeSurface);
+
+        AssertFocusRoundTrip(view, nodeSurface!, paletteChrome, paletteSearchBox);
+        AssertFocusRoundTrip(view, stencilSearchBox, paletteChrome, paletteSearchBox);
+        AssertFocusRoundTrip(view, parameterSearchBox, paletteChrome, paletteSearchBox);
+    }
+
+    [AvaloniaFact]
     public void IndividualChromeVisibility_TogglesEachRegionIndependently()
     {
         var editor = CreateEditor();
@@ -884,6 +911,39 @@ public sealed class GraphEditorViewTests
             .OfType<T>()
             .FirstOrDefault(control => string.Equals(control.Name, name, StringComparison.Ordinal));
 
+    private static void AssertFocusRoundTrip(
+        GraphEditorView view,
+        Control focusOrigin,
+        Border paletteChrome,
+        TextBox paletteSearchBox)
+    {
+        focusOrigin.Focus();
+        Dispatcher.UIThread.RunJobs(DispatcherPriority.Render);
+
+        InvokeViewKeyDown(view, new KeyEventArgs
+        {
+            Key = Key.P,
+            KeyModifiers = KeyModifiers.Control | KeyModifiers.Shift,
+            Source = focusOrigin,
+        });
+        Dispatcher.UIThread.RunJobs(DispatcherPriority.Render);
+
+        Assert.True(paletteChrome.IsVisible);
+        Assert.Same(paletteSearchBox, GetFocusedElement(view));
+
+        InvokeViewKeyDown(view, new KeyEventArgs
+        {
+            Key = Key.Escape,
+        });
+        Dispatcher.UIThread.RunJobs(DispatcherPriority.Render);
+
+        Assert.False(paletteChrome.IsVisible);
+        Assert.Same(focusOrigin, GetFocusedElement(view));
+    }
+
+    private static IInputElement? GetFocusedElement(GraphEditorView view)
+        => TopLevel.GetTopLevel(view)?.FocusManager?.GetFocusedElement();
+
     private static void InvokeViewKeyDown(GraphEditorView view, KeyEventArgs args)
     {
         var handler = typeof(GraphEditorView).GetMethod(
@@ -934,6 +994,58 @@ public sealed class GraphEditorViewTests
             catalog,
             new DefaultPortCompatibilityService(),
             contextMenuAugmentor: augmentor);
+    }
+
+    private static GraphEditorViewModel CreateAuthoringEditor()
+    {
+        var definitionId = new NodeDefinitionId("tests.view.authoring-node");
+        var catalog = new NodeCatalog();
+        catalog.RegisterDefinition(
+            new NodeDefinition(
+                definitionId,
+                "Authoring Node",
+                "Tests",
+                "GraphEditorView authoring focus coverage.",
+                [],
+                [],
+                parameters:
+                [
+                    new NodeParameterDefinition(
+                        "threshold",
+                        "Threshold",
+                        new PortTypeId("float"),
+                        ParameterEditorKind.Number,
+                        description: "Controls the authoring threshold.",
+                        defaultValue: 0.5,
+                        groupName: "Behavior",
+                        sortOrder: 20,
+                        unitSuffix: "ms"),
+                ]));
+
+        return new GraphEditorViewModel(
+            new GraphDocument(
+                "GraphEditorView Authoring Graph",
+                "Exercises GraphEditorView focus round-tripping.",
+                [
+                    new GraphNode(
+                        "tests.view.authoring-node-001",
+                        "Authoring Node",
+                        "Tests",
+                        "GraphEditorView",
+                        "Used by GraphEditorView focus tests.",
+                        new GraphPoint(120, 160),
+                        new GraphSize(240, 160),
+                        [],
+                        [],
+                        "#6AD5C4",
+                        definitionId,
+                        [
+                            new GraphParameterValue("threshold", new PortTypeId("float"), 0.75),
+                        ]),
+                ],
+                []),
+            catalog,
+            new DefaultPortCompatibilityService());
     }
 
     private static GraphEditorViewModel CreateStencilEditor()
