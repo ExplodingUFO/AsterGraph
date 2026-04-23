@@ -1,0 +1,117 @@
+using System.Diagnostics;
+using AsterGraph.Abstractions.Identifiers;
+using AsterGraph.Core.Models;
+using AsterGraph.Editor.Runtime;
+using AsterGraph.Editor.Services;
+
+namespace AsterGraph.ScaleSmoke;
+
+public sealed record ScaleSmokeExportProbeResult(
+    bool SvgExportOk,
+    bool PngExportOk,
+    bool JpegExportOk,
+    bool ReloadOk,
+    ScaleSmokeExportMetrics Metrics)
+{
+    public bool IsOk
+        => SvgExportOk
+        && PngExportOk
+        && JpegExportOk
+        && ReloadOk;
+
+    public string ToMarker(string tierId)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(tierId);
+
+        return string.Join(
+            ':',
+            [
+                $"SCALE_EXPORT_PROBE_OK:{tierId}",
+                IsOk.ToString(),
+                $"svg={SvgExportOk}",
+                $"png={PngExportOk}",
+                $"jpeg={JpegExportOk}",
+                $"reload={ReloadOk}",
+            ]);
+    }
+}
+
+public static class ScaleSmokeExportProbe
+{
+    public static ScaleSmokeExportProbeResult Run(IGraphEditorSession session, string storageRoot)
+    {
+        ArgumentNullException.ThrowIfNull(session);
+        ArgumentException.ThrowIfNullOrWhiteSpace(storageRoot);
+
+        Directory.CreateDirectory(storageRoot);
+        var imageExportOptions = new GraphEditorSceneImageExportOptions
+        {
+            Scale = 0.5d,
+            Quality = 84,
+            BackgroundHex = "#101820",
+        };
+
+        var svgPath = Path.Combine(storageRoot, "scale-export.svg");
+        var pngPath = Path.Combine(storageRoot, "scale-export.png");
+        var jpegPath = Path.Combine(storageRoot, "scale-export.jpg");
+
+        var svgExportMs = MeasureMilliseconds(() => session.Commands.TryExportSceneAsSvg(svgPath));
+        var svgExportOk = File.Exists(svgPath)
+            && File.ReadAllText(svgPath).Contains("<svg", StringComparison.Ordinal);
+
+        var pngExportMs = MeasureMilliseconds(() =>
+            session.Commands.TryExportSceneAsImage(GraphEditorSceneImageExportFormat.Png, pngPath, imageExportOptions));
+        var pngExportOk = File.Exists(pngPath)
+            && HasImageSignature(File.ReadAllBytes(pngPath), GraphEditorSceneImageExportFormat.Png);
+
+        var jpegExportMs = MeasureMilliseconds(() =>
+            session.Commands.TryExportSceneAsImage(GraphEditorSceneImageExportFormat.Jpeg, jpegPath, imageExportOptions));
+        var jpegExportOk = File.Exists(jpegPath)
+            && HasImageSignature(File.ReadAllBytes(jpegPath), GraphEditorSceneImageExportFormat.Jpeg);
+
+        var initialSnapshot = session.Queries.CreateDocumentSnapshot();
+        var initialNodeCount = initialSnapshot.Nodes.Count;
+        var firstDefinitionId = initialSnapshot.Nodes
+            .Select(node => node.DefinitionId)
+            .FirstOrDefault(definitionId => definitionId is not null)
+            ?? throw new InvalidOperationException("Export probe requires a definition-backed node.");
+
+        session.Commands.SaveWorkspace();
+        session.Commands.AddNode(firstDefinitionId, new GraphPoint(6400, 6400));
+        var mutatedNodeCount = session.Queries.CreateDocumentSnapshot().Nodes.Count;
+        var reloadMs = MeasureMilliseconds(() => session.Commands.LoadWorkspace());
+        var reloadedSnapshot = session.Queries.CreateDocumentSnapshot();
+        var reloadOk = mutatedNodeCount == initialNodeCount + 1
+            && reloadedSnapshot.Nodes.Count == initialNodeCount;
+
+        return new ScaleSmokeExportProbeResult(
+            SvgExportOk: svgExportOk,
+            PngExportOk: pngExportOk,
+            JpegExportOk: jpegExportOk,
+            ReloadOk: reloadOk,
+            Metrics: new ScaleSmokeExportMetrics(
+                SvgExportMs: svgExportMs,
+                PngExportMs: pngExportMs,
+                JpegExportMs: jpegExportMs,
+                ReloadMs: reloadMs));
+    }
+
+    private static long MeasureMilliseconds(Action action)
+    {
+        var stopwatch = Stopwatch.StartNew();
+        action();
+        stopwatch.Stop();
+        return stopwatch.ElapsedMilliseconds;
+    }
+
+    private static bool HasImageSignature(byte[] bytes, GraphEditorSceneImageExportFormat format)
+        => bytes.Length > 3
+        && format switch
+        {
+            GraphEditorSceneImageExportFormat.Png
+                => bytes[0] == 0x89 && bytes[1] == 0x50 && bytes[2] == 0x4E && bytes[3] == 0x47,
+            GraphEditorSceneImageExportFormat.Jpeg
+                => bytes[0] == 0xFF && bytes[1] == 0xD8 && bytes[2] == 0xFF,
+            _ => false,
+        };
+}

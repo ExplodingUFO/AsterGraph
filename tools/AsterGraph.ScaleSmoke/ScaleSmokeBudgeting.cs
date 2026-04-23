@@ -31,6 +31,28 @@ public sealed record ScaleSmokeAuthoringMetrics(
     }
 }
 
+public sealed record ScaleSmokeExportMetrics(
+    long SvgExportMs,
+    long PngExportMs,
+    long JpegExportMs,
+    long ReloadMs)
+{
+    public string ToMarker(string tierId)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(tierId);
+
+        return string.Join(
+            ':',
+            [
+                $"SCALE_EXPORT_METRICS:{tierId}",
+                $"svg={SvgExportMs}",
+                $"png={PngExportMs}",
+                $"jpeg={JpegExportMs}",
+                $"reload={ReloadMs}",
+            ]);
+    }
+}
+
 public sealed record ScaleSmokeBudget(
     long SetupMs,
     long SelectionMs,
@@ -46,9 +68,17 @@ public sealed record ScaleSmokeAuthoringBudget(
     long QuickToolProjectionMs,
     long QuickToolExecutionMs);
 
+public sealed record ScaleSmokeExportBudget(
+    long SvgExportMs,
+    long PngExportMs,
+    long JpegExportMs,
+    long ReloadMs);
+
 public sealed record ScaleSmokeBudgetEvaluation(bool Passed, string FailureSummary);
 
 public sealed record ScaleSmokeAuthoringBudgetEvaluation(bool Passed, string FailureSummary);
+
+public sealed record ScaleSmokeExportBudgetEvaluation(bool Passed, string FailureSummary);
 
 public sealed record ScaleSmokeTier(
     string Id,
@@ -56,11 +86,14 @@ public sealed record ScaleSmokeTier(
     int SelectionCount,
     int MoveCount,
     ScaleSmokeBudget? Budget,
-    ScaleSmokeAuthoringBudget? AuthoringBudget)
+    ScaleSmokeAuthoringBudget? AuthoringBudget,
+    ScaleSmokeExportBudget? ExportBudget)
 {
     public bool EnforceBudgets => Budget is not null;
 
     public bool EnforceAuthoringBudgets => AuthoringBudget is not null;
+
+    public bool EnforceExportBudgets => ExportBudget is not null;
 
     public string ToBudgetMarker()
     {
@@ -101,6 +134,24 @@ public sealed record ScaleSmokeTier(
                 $"command-surface<={AuthoringBudget.CommandSurfaceRefreshMs}",
                 $"quick-tool-projection<={AuthoringBudget.QuickToolProjectionMs}",
                 $"quick-tool-execution<={AuthoringBudget.QuickToolExecutionMs}",
+            ]);
+    }
+
+    public string ToExportBudgetMarker()
+    {
+        if (ExportBudget is null)
+        {
+            return $"SCALE_EXPORT_BUDGET:{Id}:budget=informational-only";
+        }
+
+        return string.Join(
+            ':',
+            [
+                $"SCALE_EXPORT_BUDGET:{Id}",
+                $"svg<={ExportBudget.SvgExportMs}",
+                $"png<={ExportBudget.PngExportMs}",
+                $"jpeg<={ExportBudget.JpegExportMs}",
+                $"reload<={ExportBudget.ReloadMs}",
             ]);
     }
 
@@ -187,6 +238,40 @@ public sealed record ScaleSmokeTier(
             : new ScaleSmokeAuthoringBudgetEvaluation(false, string.Join(',', failures));
     }
 
+    public ScaleSmokeExportBudgetEvaluation EvaluateExport(ScaleSmokeExportMetrics metrics)
+    {
+        if (ExportBudget is null)
+        {
+            return new ScaleSmokeExportBudgetEvaluation(true, "informational-only");
+        }
+
+        var failures = new List<string>();
+
+        if (metrics.SvgExportMs > ExportBudget.SvgExportMs)
+        {
+            failures.Add($"svg>{ExportBudget.SvgExportMs}");
+        }
+
+        if (metrics.PngExportMs > ExportBudget.PngExportMs)
+        {
+            failures.Add($"png>{ExportBudget.PngExportMs}");
+        }
+
+        if (metrics.JpegExportMs > ExportBudget.JpegExportMs)
+        {
+            failures.Add($"jpeg>{ExportBudget.JpegExportMs}");
+        }
+
+        if (metrics.ReloadMs > ExportBudget.ReloadMs)
+        {
+            failures.Add($"reload>{ExportBudget.ReloadMs}");
+        }
+
+        return failures.Count == 0
+            ? new ScaleSmokeExportBudgetEvaluation(true, "none")
+            : new ScaleSmokeExportBudgetEvaluation(false, string.Join(',', failures));
+    }
+
     public static ScaleSmokeTier Parse(string[] args)
     {
         var requestedTier = "baseline";
@@ -219,7 +304,12 @@ public sealed record ScaleSmokeTier(
                     StencilFilterMs: 100,
                     CommandSurfaceRefreshMs: 250,
                     QuickToolProjectionMs: 100,
-                    QuickToolExecutionMs: 150)),
+                    QuickToolExecutionMs: 150),
+                ExportBudget: new ScaleSmokeExportBudget(
+                    SvgExportMs: 300,
+                    PngExportMs: 2500,
+                    JpegExportMs: 1800,
+                    ReloadMs: 250)),
             "large" => new ScaleSmokeTier(
                 "large",
                 NodeCount: 1000,
@@ -237,14 +327,20 @@ public sealed record ScaleSmokeTier(
                     StencilFilterMs: 150,
                     CommandSurfaceRefreshMs: 400,
                     QuickToolProjectionMs: 150,
-                    QuickToolExecutionMs: 200)),
+                    QuickToolExecutionMs: 200),
+                ExportBudget: new ScaleSmokeExportBudget(
+                    SvgExportMs: 300,
+                    PngExportMs: 12000,
+                    JpegExportMs: 8000,
+                    ReloadMs: 400)),
             "stress" => new ScaleSmokeTier(
                 "stress",
                 NodeCount: 5000,
                 SelectionCount: 256,
                 MoveCount: 96,
                 Budget: null,
-                AuthoringBudget: null),
+                AuthoringBudget: null,
+                ExportBudget: null),
             _ => throw new ArgumentException($"Unsupported ScaleSmoke tier '{requestedTier}'. Supported tiers: baseline, large, stress.")
         };
     }

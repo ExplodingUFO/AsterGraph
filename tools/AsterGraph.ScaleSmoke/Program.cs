@@ -18,17 +18,21 @@ var tier = configuration.Tier;
 var definitionId = new NodeDefinitionId("scale.node");
 var metricSamples = new List<ScaleSmokeMetrics>(configuration.Samples);
 var authoringSamples = new List<ScaleSmokeAuthoringMetrics>(configuration.Samples);
+var exportSamples = new List<ScaleSmokeExportMetrics>(configuration.Samples);
 for (var sampleIndex = 0; sampleIndex < configuration.Samples; sampleIndex++)
 {
-    var (metrics, authoringMetrics) = RunScaleScenario(tier, definitionId, emitMarkers: sampleIndex == 0);
+    var (metrics, authoringMetrics, exportMetrics) = RunScaleScenario(tier, definitionId, emitMarkers: sampleIndex == 0);
     metricSamples.Add(metrics);
     authoringSamples.Add(authoringMetrics);
+    exportSamples.Add(exportMetrics);
 }
 
 var summary = ScaleSmokeMetricSummary.FromSamples(tier.Id, metricSamples);
 var authoringSummary = ScaleSmokeAuthoringMetricSummary.FromSamples(tier.Id, authoringSamples);
+var exportSummary = ScaleSmokeExportMetricSummary.FromSamples(tier.Id, exportSamples);
 Console.WriteLine(summary.ToMarker());
 Console.WriteLine(authoringSummary.ToMarker());
+Console.WriteLine(exportSummary.ToMarker());
 
 GraphEditorAutomationRunRequest CreateAutomationRunRequest(ScaleSmokeTier tier)
 {
@@ -54,7 +58,7 @@ GraphEditorCommandInvocationSnapshot CreateAutomationCommand(
         commandId,
         arguments.Select(argument => new GraphEditorCommandArgumentSnapshot(argument.Name, argument.Value)).ToArray());
 
-(ScaleSmokeMetrics Performance, ScaleSmokeAuthoringMetrics Authoring) RunScaleScenario(
+(ScaleSmokeMetrics Performance, ScaleSmokeAuthoringMetrics Authoring, ScaleSmokeExportMetrics Export) RunScaleScenario(
     ScaleSmokeTier tier,
     NodeDefinitionId definitionId,
     bool emitMarkers)
@@ -294,6 +298,24 @@ GraphEditorCommandInvocationSnapshot CreateAutomationCommand(
         Console.WriteLine($"SCALE_AUTHORING_BUDGET_OK:{tier.Id}:{authoringBudgetEvaluation.Passed}:{authoringBudgetEvaluation.FailureSummary}");
     }
 
+    var exportProbeRoot = Path.Combine(Path.GetTempPath(), "AsterGraph.ScaleSmoke.Export", tier.Id, Guid.NewGuid().ToString("N"));
+    var exportProbeSession = AsterGraphEditorFactory.CreateSession(new AsterGraphEditorOptions
+    {
+        Document = ScaleSmokeScenarioFactory.CreateDocument(tier, definitionId),
+        NodeCatalog = catalog,
+        CompatibilityService = new ExactCompatibilityService(),
+        StorageRootPath = exportProbeRoot,
+    });
+    var exportProbe = ScaleSmokeExportProbe.Run(exportProbeSession, exportProbeRoot);
+    var exportBudgetEvaluation = tier.EvaluateExport(exportProbe.Metrics);
+    if (emitMarkers)
+    {
+        Console.WriteLine(tier.ToExportBudgetMarker());
+        Console.WriteLine(exportProbe.ToMarker(tier.Id));
+        Console.WriteLine(exportProbe.Metrics.ToMarker(tier.Id));
+        Console.WriteLine($"SCALE_EXPORT_BUDGET_OK:{tier.Id}:{exportBudgetEvaluation.Passed}:{exportBudgetEvaluation.FailureSummary}");
+    }
+
     if (tier.EnforceBudgets && !budgetEvaluation.Passed)
     {
         throw new InvalidOperationException($"ScaleSmoke performance budget failed for tier '{tier.Id}': {budgetEvaluation.FailureSummary}");
@@ -304,7 +326,12 @@ GraphEditorCommandInvocationSnapshot CreateAutomationCommand(
         throw new InvalidOperationException($"ScaleSmoke authoring budget failed for tier '{tier.Id}': {authoringBudgetEvaluation.FailureSummary}");
     }
 
-    return (metrics, authoringProbe.Metrics);
+    if (tier.EnforceExportBudgets && !exportBudgetEvaluation.Passed)
+    {
+        throw new InvalidOperationException($"ScaleSmoke export budget failed for tier '{tier.Id}': {exportBudgetEvaluation.FailureSummary}");
+    }
+
+    return (metrics, authoringProbe.Metrics, exportProbe.Metrics);
 }
 
 file sealed class ExactCompatibilityService : IPortCompatibilityService
