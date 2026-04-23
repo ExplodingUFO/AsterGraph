@@ -30,6 +30,7 @@ If you are intentionally evaluating the runtime-only path, run `AsterGraph.Hello
 
 If `CONSUMER_SAMPLE_PARAMETER_OK` or `CONSUMER_SAMPLE_METADATA_PROJECTION_OK` fail, keep the failed proof-marker lines together with the support bundle's `parameterSnapshots` rows on the same bounded intake record.
 For one screen-reader-ready local evaluation path, keep the step-3 support bundle plus the step-4 `HostSample` proof lines on that same bounded intake record. This remains local evidence only and does not widen support promises.
+If you need bounded adapter-2 follow-up after the defended Avalonia proof, run `AsterGraph.HelloWorld.Wpf -- --proof` after step 4 and keep `HOSTED_ACCESSIBILITY_BASELINE_OK:True`, `HOSTED_ACCESSIBILITY_FOCUS_OK:True`, `HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True`, `HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True`, `HOSTED_ACCESSIBILITY_OK:True`, and `HELLOWORLD_WPF_OK:True` on that same local record; see [Adapter-2 Accessibility Recipe](./adapter-2-accessibility-recipe.md).
 
 ## Commands
 
@@ -45,6 +46,9 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 
 # proof harness only after the realistic hosted sample
 dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj --nologo
+
+# bounded adapter-2 accessibility validation only after the defended Avalonia proof
+dotnet run --project tools/AsterGraph.HelloWorld.Wpf/AsterGraph.HelloWorld.Wpf.csproj --nologo -- --proof
 ```
 
 ## What Success Looks Like
@@ -55,6 +59,7 @@ dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj --
 - the same run should emit `HOSTED_ACCESSIBILITY_OK:True`, `HOSTED_ACCESSIBILITY_AUTOMATION_NAVIGATION_OK:True`, `HOSTED_ACCESSIBILITY_AUTHORING_DIAGNOSTICS_OK:True`, and `HOSTED_ACCESSIBILITY_AUTOMATION_OK:True`
 - the same run should emit the four `HOST_NATIVE_METRIC:*` lines
 - `HostSample` should emit `HOST_SAMPLE_OK:True`, `HOST_SAMPLE_AUTOMATION_OK:True`, `HOST_SAMPLE_ACCESSIBILITY_BASELINE_OK:True`, and `HOST_SAMPLE_ACCESSIBILITY_AUTOMATION_OK:True`
+- `AsterGraph.HelloWorld.Wpf -- --proof` should emit `HOSTED_ACCESSIBILITY_BASELINE_OK:True`, `HOSTED_ACCESSIBILITY_FOCUS_OK:True`, `HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True`, `HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True`, `HOSTED_ACCESSIBILITY_OK:True`, and `HELLOWORLD_WPF_OK:True` on the validation-only adapter-2 lane
 
 ## What Not To Infer
 
@@ -70,3 +75,4 @@ dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj --
 - [Host Integration](./host-integration.md)
 - [Stabilization Support Matrix](./stabilization-support-matrix.md)
 - [Adapter Capability Matrix](./adapter-capability-matrix.md)
+- [Adapter-2 Accessibility Recipe](./adapter-2-accessibility-recipe.md)

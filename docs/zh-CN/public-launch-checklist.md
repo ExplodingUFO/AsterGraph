@@ -48,6 +48,11 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framew
 - `CONSUMER_SAMPLE_OK:True`
 - `DEMO_OK:True`
 - `COMMAND_SURFACE_OK:True`
+- `HOSTED_ACCESSIBILITY_BASELINE_OK:True`
+- `HOSTED_ACCESSIBILITY_FOCUS_OK:True`
+- `HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True`
+- `HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True`
+- `HOSTED_ACCESSIBILITY_OK:True`
 - `HELLOWORLD_WPF_OK:True`
 - `TIERED_NODE_SURFACE_OK:True`
 - `FIXED_GROUP_FRAME_OK:True`
@@ -87,15 +92,16 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framew
   - 与之匹配的公开 tag
   - 可选的 legacy 历史仓库检查点引用
 - 确认自动生成的 prerelease notes 同时把 proof summary 发出来，而不只是留在 workflow artifact 里
-- 确认自动生成的 notes 和公告文案明确写出冻结的 support boundary 叙事和 adapter matrix 叙事，并同步给出 `HELLOWORLD_WPF_OK:True`、`ADAPTER_CAPABILITY_MATRIX_FORMAT:1`、`ADAPTER_CAPABILITY_MATRIX:WPF:HELLOWORLD_WPF_OK:PASS`、`ADAPTER_CAPABILITY_MATRIX:WPF:COMMAND_SURFACE_OK:PASS`
+- 确认自动生成的 notes 和公告文案明确写出冻结的 support boundary 叙事和 adapter matrix 叙事，并同步给出 `HOSTED_ACCESSIBILITY_BASELINE_OK:True`、`HOSTED_ACCESSIBILITY_FOCUS_OK:True`、`HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True`、`HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True`、`HOSTED_ACCESSIBILITY_OK:True`、`HELLOWORLD_WPF_OK:True`、`ADAPTER_CAPABILITY_MATRIX_FORMAT:1`、`ADAPTER_CAPABILITY_MATRIX:WPF:HELLOWORLD_WPF_OK:PASS`、`ADAPTER_CAPABILITY_MATRIX:WPF:COMMAND_SURFACE_OK:PASS`
 - 把 `HELLOWORLD_WPF_OK` 只当成 adapter-2 验证通过，不要写成 Avalonia/WPF parity 或公开 WPF support
+- 需要从受防守的 Avalonia accessibility proof 交接到 validation-only 的 WPF 验证时，统一参考 [Adapter-2 Accessibility Recipe](./adapter-2-accessibility-recipe.md)
 - 确认每条 beta 反馈都按同一套受限字段记录：`route`、`version`、proof 标记、摩擦点，以及 support bundle 附件备注
 - 在 release messaging 里重复下一条 `0.xx` alpha/beta 线的 handoff：继续优先做可复制的 host-owned 参数/元数据打磨；只有当 3 到 5 条真实外部报告在同一个受限风险上聚焦时，才考虑把 defended large-tier performance 或更宽的参数/元数据编辑提上来
 - 如果配置了 `NUGET_API_KEY`，确认包发布成功
 - 如果没有配置 `NUGET_API_KEY`，确认 workflow 是有意跳过 NuGet publish，而不是失败
 - 不要再把 `v1.x` 风格的历史里程碑 checkpoint 当成当前公开包版本；对外统一以 [Versioning](./versioning.md) 为准
 - release note 第一屏先写可安装包版本，再写与之匹配的公开 tag；`v1.x` 风格的旧 milestone 只作为历史说明补充出现
-- `prerelease notes` / release messaging 中还必须核对并回填 `HELLOWORLD_WPF_OK:True`、`ADAPTER_CAPABILITY_MATRIX_FORMAT:1`、`ADAPTER_CAPABILITY_MATRIX:WPF:HELLOWORLD_WPF_OK:PASS`、`ADAPTER_CAPABILITY_MATRIX:WPF:COMMAND_SURFACE_OK:PASS`，避免只写成功 tag 而漏能力核对
+- `prerelease notes` / release messaging 中还必须核对并回填 `HOSTED_ACCESSIBILITY_BASELINE_OK:True`、`HOSTED_ACCESSIBILITY_FOCUS_OK:True`、`HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True`、`HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True`、`HOSTED_ACCESSIBILITY_OK:True`、`HELLOWORLD_WPF_OK:True`、`ADAPTER_CAPABILITY_MATRIX_FORMAT:1`、`ADAPTER_CAPABILITY_MATRIX:WPF:HELLOWORLD_WPF_OK:PASS`、`ADAPTER_CAPABILITY_MATRIX:WPF:COMMAND_SURFACE_OK:PASS`，避免只写成功 tag 而漏能力核对
 - 公开文案要保持和 matrix 一致：`HELLOWORLD_WPF_OK` 证明的是 adapter 2 验证通过，不是 WPF 与 Avalonia 已经 parity
 
 如果你想在不新推 tag 的情况下手动发布 beta 包：

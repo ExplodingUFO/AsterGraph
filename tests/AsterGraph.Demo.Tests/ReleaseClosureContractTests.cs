@@ -26,7 +26,10 @@ public sealed class ReleaseClosureContractTests
             proofRoot,
             "scale-smoke.txt",
             "SCALE_TIER_BUDGET:baseline`nSCALE_PERFORMANCE_BUDGET_OK:baseline:True:none`nSCALE_HISTORY_CONTRACT_OK:True");
-        WriteProofFile(proofRoot, "hello-world-wpf-proof.txt", "HELLOWORLD_WPF_OK:True");
+        WriteProofFile(
+            proofRoot,
+            "hello-world-wpf-proof.txt",
+            "HOSTED_ACCESSIBILITY_BASELINE_OK:True`nHOSTED_ACCESSIBILITY_FOCUS_OK:True`nHOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True`nHOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True`nHOSTED_ACCESSIBILITY_OK:True`nHELLOWORLD_WPF_OK:True");
         WriteProofFile(
             proofRoot,
             "wpf-adapter-capability-matrix.txt",
@@ -82,6 +85,11 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("[Adopter Triage Checklist](./docs/en/adopter-triage.md)", notes, StringComparison.Ordinal);
         Assert.True(HasLineWithAll(notes, "route", "version", "proof markers", "friction", "support-bundle attachment note"));
         Assert.Contains("3-5 real external reports cluster on the same bounded risk", notes, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("HOSTED_ACCESSIBILITY_BASELINE_OK:True", notes, StringComparison.Ordinal);
+        Assert.Contains("HOSTED_ACCESSIBILITY_FOCUS_OK:True", notes, StringComparison.Ordinal);
+        Assert.Contains("HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True", notes, StringComparison.Ordinal);
+        Assert.Contains("HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True", notes, StringComparison.Ordinal);
+        Assert.Contains("HOSTED_ACCESSIBILITY_OK:True", notes, StringComparison.Ordinal);
         Assert.Contains("HELLOWORLD_WPF_OK:True", notes, StringComparison.Ordinal);
         Assert.Contains("adapter-2 validation only", notes, StringComparison.Ordinal);
         Assert.Contains("does not widen the public publish/package boundary", notes, StringComparison.Ordinal);
@@ -107,6 +115,9 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("3-5 real external reports cluster on the same bounded risk", englishChecklist, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("0.xx alpha/beta line", englishChecklist, StringComparison.Ordinal);
         Assert.True(HasLineWithAll(englishChecklist, "route", "version", "proof markers", "friction", "support-bundle attachment note"));
+        Assert.Contains("HOSTED_ACCESSIBILITY_BASELINE_OK:True", englishChecklist, StringComparison.Ordinal);
+        Assert.Contains("HOSTED_ACCESSIBILITY_OK:True", englishChecklist, StringComparison.Ordinal);
+        Assert.Contains("[Adapter-2 Accessibility Recipe](./adapter-2-accessibility-recipe.md)", englishChecklist, StringComparison.Ordinal);
         Assert.DoesNotContain("HELLOWORLD_WPF_OK is Avalonia/WPF parity", englishChecklist, StringComparison.Ordinal);
         Assert.DoesNotContain("HELLOWORLD_WPF_OK is public WPF support", englishChecklist, StringComparison.Ordinal);
 
@@ -120,6 +131,9 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("3 到 5 条真实外部报告在同一个受限风险上", chineseChecklist, StringComparison.Ordinal);
         Assert.Contains("0.xx` alpha/beta 线", chineseChecklist, StringComparison.Ordinal);
         Assert.True(HasLineWithAll(chineseChecklist, "route", "version", "proof 标记", "摩擦", "support bundle 附件备注"));
+        Assert.Contains("HOSTED_ACCESSIBILITY_BASELINE_OK:True", chineseChecklist, StringComparison.Ordinal);
+        Assert.Contains("HOSTED_ACCESSIBILITY_OK:True", chineseChecklist, StringComparison.Ordinal);
+        Assert.Contains("[Adapter-2 Accessibility Recipe](./adapter-2-accessibility-recipe.md)", chineseChecklist, StringComparison.Ordinal);
         Assert.DoesNotContain("HELLOWORLD_WPF_OK 是 Avalonia/WPF parity", chineseChecklist, StringComparison.Ordinal);
         Assert.DoesNotContain("HELLOWORLD_WPF_OK 是公开 WPF support", chineseChecklist, StringComparison.Ordinal);
     }
