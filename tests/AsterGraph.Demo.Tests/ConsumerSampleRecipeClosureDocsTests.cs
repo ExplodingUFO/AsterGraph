@@ -130,6 +130,10 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
         var supportBundleZh = ReadRepoFile("docs/zh-CN/support-bundle.md");
         var adoptionFeedbackEn = ReadRepoFile("docs/en/adoption-feedback.md");
         var adoptionFeedbackZh = ReadRepoFile("docs/zh-CN/adoption-feedback.md");
+        var proofMarkerHeadingEn = "Expected proof markers:";
+        var proofMarkerHeadingZh = "预期 proof marker：";
+        var bundleMarkerHeadingEn = "Expected bundle markers when `--support-bundle <support-bundle-path>` is supplied:";
+        var bundleMarkerHeadingZh = "当提供 `--support-bundle <support-bundle-path>` 时，预期 bundle marker：";
 
         foreach (var contents in new[] { readme, consumerSampleEn, consumerSampleZh, supportBundleEn, supportBundleZh })
         {
@@ -137,17 +141,30 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
             Assert.DoesNotContain("artifacts/consumer-support-bundle.json", contents, StringComparison.Ordinal);
         }
 
-        foreach (var contents in new[] { readme, consumerSampleEn, consumerSampleZh, supportBundleEn, supportBundleZh, adoptionFeedbackEn, adoptionFeedbackZh })
+        foreach (var contents in new[] { readme, consumerSampleEn, consumerSampleZh })
         {
-            Assert.Contains("SUPPORT_BUNDLE_PATH", contents, StringComparison.Ordinal);
-            Assert.Contains("NO_SUPPORT_BUNDLE", contents, StringComparison.Ordinal);
-            Assert.DoesNotContain("artifacts/consumer-support-bundle.json", contents, StringComparison.Ordinal);
+            var bundleHeading = contents.Contains(bundleMarkerHeadingZh, StringComparison.Ordinal) ? bundleMarkerHeadingZh : bundleMarkerHeadingEn;
+            var proofHeading = contents.Contains(bundleMarkerHeadingZh, StringComparison.Ordinal) ? proofMarkerHeadingZh : proofMarkerHeadingEn;
+            var proofBlock = ExtractBlock(contents, proofHeading, bundleHeading);
+            var bundleBlock = ExtractBlock(contents, bundleHeading, "## ");
+
+            Assert.Contains("HOST_NATIVE_METRIC:command_latency_ms=...", proofBlock, StringComparison.Ordinal);
+            Assert.DoesNotContain("SUPPORT_BUNDLE_OK", proofBlock, StringComparison.Ordinal);
+            Assert.DoesNotContain("SUPPORT_BUNDLE_PATH", proofBlock, StringComparison.Ordinal);
+
+            Assert.Contains("SUPPORT_BUNDLE_OK", bundleBlock, StringComparison.Ordinal);
+            Assert.Contains("SUPPORT_BUNDLE_PATH", bundleBlock, StringComparison.Ordinal);
+            Assert.Contains("CONSUMER_SAMPLE_OK", bundleBlock, StringComparison.Ordinal);
         }
 
         Assert.Contains("attachment note", supportBundleEn, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("附件备注", supportBundleZh, StringComparison.Ordinal);
         Assert.True(HasLineWithAll(adoptionFeedbackEn, "route", "version", "proof", "friction", "support-bundle attachment note"));
         Assert.True(HasLineWithAll(adoptionFeedbackZh, "route", "version", "proof", "摩擦", "support bundle", "附件备注"));
+        Assert.Contains("Persona", adoptionFeedbackEn, StringComparison.Ordinal);
+        Assert.Contains("maintainer-derived", adoptionFeedbackEn, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Requested next capability", adoptionFeedbackEn, StringComparison.Ordinal);
+        Assert.Contains("维护者综合出来的结论", adoptionFeedbackZh, StringComparison.Ordinal);
     }
 
     private static void AssertContains(string contents, string expected)
@@ -162,6 +179,24 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
         return contents
             .Split('\n', StringSplitOptions.TrimEntries)
             .Any(line => requiredTerms.All(term => line.Contains(term, StringComparison.OrdinalIgnoreCase)));
+    }
+
+    private static string ExtractBlock(string contents, string startMarker, string endMarkerPrefix)
+    {
+        var startIndex = contents.IndexOf(startMarker, StringComparison.Ordinal);
+        if (startIndex < 0)
+        {
+            throw new InvalidOperationException($"Could not find start marker '{startMarker}'.");
+        }
+
+        startIndex += startMarker.Length;
+        var endIndex = contents.IndexOf(endMarkerPrefix, startIndex, StringComparison.Ordinal);
+        if (endIndex < 0)
+        {
+            endIndex = contents.Length;
+        }
+
+        return contents[startIndex..endIndex];
     }
 
     private static void AssertAppearsBefore(string contents, string requiredText, string requiredHeading)

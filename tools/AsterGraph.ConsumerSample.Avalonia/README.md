@@ -26,7 +26,7 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 
 Validate the defended route here with `AsterGraph.ConsumerSample.Avalonia -- --proof`. For reviewable local evidence, run the bundle-producing command above and reuse the emitted `SUPPORT_BUNDLE_PATH:...` line as the attachment note. If the route cannot produce a bundle, record `NO_SUPPORT_BUNDLE:route-cannot-produce-one`. The support bundle stays local evidence only.
 
-Expected markers:
+Expected proof markers:
 
 - `CONSUMER_SAMPLE_HOST_ACTION_OK:True`
 - `CONSUMER_SAMPLE_PLUGIN_OK:True`
@@ -38,6 +38,9 @@ Expected markers:
 - `HOST_NATIVE_METRIC:inspector_projection_ms=...`
 - `HOST_NATIVE_METRIC:plugin_scan_ms=...`
 - `HOST_NATIVE_METRIC:command_latency_ms=...`
+
+Expected bundle markers when `--support-bundle <support-bundle-path>` is supplied:
+
 - `SUPPORT_BUNDLE_OK:True`
 - `SUPPORT_BUNDLE_PATH:...`
 - `CONSUMER_SAMPLE_OK:True`

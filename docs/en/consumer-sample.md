@@ -106,6 +106,9 @@ Expected proof markers:
 - `HOST_NATIVE_METRIC:inspector_projection_ms=...`
 - `HOST_NATIVE_METRIC:plugin_scan_ms=...`
 - `HOST_NATIVE_METRIC:command_latency_ms=...`
+
+Expected bundle markers when `--support-bundle <support-bundle-path>` is supplied:
+
 - `SUPPORT_BUNDLE_OK:True`
 - `SUPPORT_BUNDLE_PATH:...`
 - `CONSUMER_SAMPLE_OK:True`

@@ -94,7 +94,7 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 
 它应当只作为本地证据，不应扩大支持边界。
 
-预期 marker：
+预期 proof marker：
 
 - `CONSUMER_SAMPLE_HOST_ACTION_OK:True`
 - `CONSUMER_SAMPLE_PLUGIN_OK:True`
@@ -106,6 +106,9 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 - `HOST_NATIVE_METRIC:inspector_projection_ms=...`
 - `HOST_NATIVE_METRIC:plugin_scan_ms=...`
 - `HOST_NATIVE_METRIC:command_latency_ms=...`
+
+当提供 `--support-bundle <support-bundle-path>` 时，预期 bundle marker：
+
 - `SUPPORT_BUNDLE_OK:True`
 - `SUPPORT_BUNDLE_PATH:...`
 - `CONSUMER_SAMPLE_OK:True`
