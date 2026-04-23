@@ -1,7 +1,10 @@
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using System.Threading;
 using System.Windows;
+using System.Windows.Automation;
+using System.Windows.Threading;
 using AsterGraph.Abstractions.Catalog;
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
@@ -24,13 +27,15 @@ public sealed class Program
         {
             var result = HostedHelloWorldProof.Run();
 
-            Console.WriteLine($"COMMAND_SURFACE_OK:{result.CommandSurfaceOk}");
-            foreach (var line in result.MetricLines)
+            foreach (var line in result.ProofLines)
             {
                 Console.WriteLine(line);
             }
 
-            Console.WriteLine($"HELLOWORLD_WPF_OK:{result.IsOk}");
+            foreach (var line in result.MetricLines)
+            {
+                Console.WriteLine(line);
+            }
             return 0;
         }
 
@@ -193,12 +198,20 @@ public sealed record HostedHelloWorldRuntimeSurface(
 
 public sealed record HostedHelloWorldProofResult(
     bool CommandSurfaceOk,
+    bool AccessibilityBaselineOk,
     double StartupMs,
     double InspectorProjectionMs,
     double PluginScanMs,
     double CommandLatencyMs)
 {
-    public bool IsOk => CommandSurfaceOk;
+    public bool IsOk => CommandSurfaceOk && AccessibilityBaselineOk;
+
+    public IReadOnlyList<string> ProofLines =>
+        [
+            $"COMMAND_SURFACE_OK:{CommandSurfaceOk}",
+            $"HOSTED_ACCESSIBILITY_BASELINE_OK:{AccessibilityBaselineOk}",
+            $"HELLOWORLD_WPF_OK:{IsOk}",
+        ];
 
     public IReadOnlyList<string> MetricLines =>
         [
@@ -233,16 +246,49 @@ public static class HostedHelloWorldProof
             .GetCommandDescriptors()
             .Single(descriptor => string.Equals(descriptor.Id, "history.undo", StringComparison.Ordinal));
         var commandLatencyMs = MeasureMilliseconds(() => session.Commands.Undo());
+        var accessibilityBaselineOk = EvaluateAccessibilityBaseline();
         var commandSurfaceOk = undoDescriptor.CanExecute
             && session.Queries.CreateDocumentSnapshot().Nodes.Count == nodeCountBeforeUndo;
 
         return new HostedHelloWorldProofResult(
             commandSurfaceOk,
+            accessibilityBaselineOk,
             startupMs,
             inspectorProjectionMs,
             pluginScanMs,
             commandLatencyMs);
     }
+
+    private static bool EvaluateAccessibilityBaseline()
+        => RunInSta(() =>
+        {
+            var surface = HostedHelloWorldWindowFactory.CreateRuntimeSurface();
+            var window = surface.Window;
+            window.Width = 200;
+            window.Height = 120;
+            window.ShowInTaskbar = false;
+            window.WindowStyle = WindowStyle.None;
+            window.ResizeMode = ResizeMode.NoResize;
+
+            try
+            {
+                window.Show();
+                window.Dispatcher.Invoke(() =>
+                {
+                }, DispatcherPriority.Background);
+
+                return surface.View.Focusable
+                    && string.Equals(AutomationProperties.GetName(surface.View), "Graph editor host", StringComparison.Ordinal)
+                    && HasNamedRegion(surface.View, "PART_CommandBar", "Graph editor command bar")
+                    && HasNamedRegion(surface.View, "PART_NodeTemplatesRegion", "Node templates")
+                    && HasNamedRegion(surface.View, "PART_NodesRegion", "Node list")
+                    && HasNamedRegion(surface.View, "PART_InspectorSummaryRegion", "Inspector summary");
+            }
+            finally
+            {
+                window.Close();
+            }
+        });
 
     private static double MeasureMilliseconds(Action action)
     {
@@ -250,5 +296,53 @@ public static class HostedHelloWorldProof
         action();
         stopwatch.Stop();
         return stopwatch.Elapsed.TotalMilliseconds;
+    }
+
+    private static bool HasNamedRegion(FrameworkElement root, string name, string automationName)
+        => root.FindName(name) is FrameworkElement element
+            && string.Equals(AutomationProperties.GetName(element), automationName, StringComparison.Ordinal);
+
+    private static T RunInSta<T>(Func<T> action)
+    {
+        if (Thread.CurrentThread.GetApartmentState() == ApartmentState.STA)
+        {
+            return action();
+        }
+
+        Exception? failure = null;
+        T result = default!;
+        using var started = new ManualResetEventSlim(false);
+        using var completed = new ManualResetEventSlim(false);
+
+        var thread = new Thread(() =>
+        {
+            started.Set();
+            try
+            {
+                result = action();
+            }
+            catch (Exception ex)
+            {
+                failure = ex;
+            }
+            finally
+            {
+                completed.Set();
+            }
+        });
+
+        thread.SetApartmentState(ApartmentState.STA);
+        thread.Start();
+
+        started.Wait();
+        completed.Wait();
+        thread.Join();
+
+        if (failure is not null)
+        {
+            throw new InvalidOperationException("WPF accessibility baseline evaluation failed.", failure);
+        }
+
+        return result;
     }
 }
