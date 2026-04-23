@@ -44,8 +44,6 @@
 - 从 [Authoring Inspector Recipe](./authoring-inspector-recipe.md) 复制：用 definition-driven 的元数据词汇（`defaultValue`、`isAdvanced`、`helpText`、`placeholderText`、`constraints.IsReadOnly`）来完成宿主自管参数与元数据工作。
 
 Consumer Sample 证明 seam 分工；Authoring Inspector Recipe 承载元数据词汇。
-
-
 ## 2. 从 NuGet 安装
 
 公开 beta 包已经发到 nuget.org，所以默认的 `dotnet restore` 加 `--prerelease` 就够了。
