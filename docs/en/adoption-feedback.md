@@ -30,11 +30,11 @@ Until the repo collects enough real external issues, the current recommendation 
 
 ## Current Recommendation
 
-The next 0.xx alpha/beta line should stay on usability and sample polish first; only widen toward defended large-tier performance or richer parameter/metadata editing when 3-5 real external entries cluster on that bounded risk:
+The next 0.xx alpha/beta line should stay on copyable host-owned parameter/metadata polish first; only widen toward defended large-tier performance or broader parameter/metadata editing when 3-5 real external entries cluster on that bounded risk:
 
-1. **continue usability and sample polish first**
+1. **continue copyable host-owned parameter/metadata polish first**
 2. **do not treat defended large-tier performance as the next widening target before 3-5 real external entries cluster on that bounded risk**
-3. **do not treat richer parameter and metadata editing as the next widening target before 3-5 real external entries cluster on that bounded risk**
+3. **do not treat broader parameter and metadata editing as the next widening target before 3-5 real external entries cluster on that bounded risk**
 
 Until that threshold is met, keep this seeded recommendation in place instead of widening the next beta line ad hoc.
 

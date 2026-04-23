@@ -75,7 +75,7 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("external capability readiness gate", notes, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("[Project Status](./docs/en/project-status.md)", notes, StringComparison.Ordinal);
         Assert.True(HasLineWithAll(notes, "externally proven", "validation-only", "bounded", "deferred"));
-        Assert.True(HasLineWithAll(notes, "usability and sample polish first", "only widen toward defended large-tier performance or richer parameter/metadata editing", "3-5 real external entries", "bounded risk"));
+        Assert.True(HasLineWithAll(notes, "copyable host-owned parameter/metadata polish", "only widen toward defended large-tier performance or broader parameter/metadata editing", "3-5 real external entries", "bounded risk"));
         Assert.Contains("cluster on that bounded risk", notes, StringComparison.Ordinal);
         Assert.Contains("0.xx alpha/beta line", notes, StringComparison.Ordinal);
         Assert.Contains("[Beta Support Bundle](./docs/en/support-bundle.md)", notes, StringComparison.Ordinal);
@@ -103,7 +103,7 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("historical alpha reference for the current beta support story", englishChecklist, StringComparison.Ordinal);
         Assert.Contains("external capability readiness gate", englishChecklist, StringComparison.OrdinalIgnoreCase);
         Assert.True(HasLineWithAll(englishChecklist, "externally proven", "validation-only", "bounded", "deferred"));
-        Assert.True(HasLineWithAll(englishChecklist, "usability and sample polish first", "only widen toward defended large-tier performance or richer parameter/metadata editing", "3-5 real external entries", "bounded risk"));
+        Assert.True(HasLineWithAll(englishChecklist, "copyable host-owned parameter/metadata polish", "only widen toward defended large-tier performance or broader parameter/metadata editing", "3-5 real external entries", "bounded risk"));
         Assert.Contains("cluster on that bounded risk", englishChecklist, StringComparison.Ordinal);
         Assert.Contains("0.xx alpha/beta line", englishChecklist, StringComparison.Ordinal);
         Assert.True(HasLineWithAll(englishChecklist, "route", "version", "proof", "friction", "support-bundle"));
@@ -116,7 +116,7 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("历史 alpha 参考，服务于当前 beta support story", chineseChecklist, StringComparison.Ordinal);
         Assert.Contains("外部能力就绪闸门", chineseChecklist, StringComparison.Ordinal);
         Assert.True(HasLineWithAll(chineseChecklist, "已被外部证据证明", "仅验证通过", "受边界约束", "继续延后"));
-        Assert.True(HasLineWithAll(chineseChecklist, "继续优先做使用友好性和样例打磨", "defended large-tier performance", "更丰富的参数/元数据编辑", "3 到 5 条真实外部反馈", "受限风险"));
+        Assert.True(HasLineWithAll(chineseChecklist, "可复制的 host-owned 参数/元数据打磨", "defended large-tier performance", "更宽的参数/元数据编辑", "3 到 5 条真实外部反馈", "受限风险"));
         Assert.Contains("3 到 5 条真实外部反馈", chineseChecklist, StringComparison.Ordinal);
         Assert.Contains("0.xx` alpha/beta 线", chineseChecklist, StringComparison.Ordinal);
         Assert.True(HasLineWithAll(chineseChecklist, "route", "version", "proof", "摩擦", "support bundle"));
