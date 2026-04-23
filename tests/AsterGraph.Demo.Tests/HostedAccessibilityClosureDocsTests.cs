@@ -49,10 +49,48 @@ public sealed class HostedAccessibilityClosureDocsTests
         {
             Assert.Contains("HOSTED_ACCESSIBILITY_BASELINE_OK:True", contents, StringComparison.Ordinal);
             Assert.Contains("HOSTED_ACCESSIBILITY_FOCUS_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("HOSTED_ACCESSIBILITY_AUTOMATION_NAVIGATION_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("HOSTED_ACCESSIBILITY_AUTHORING_DIAGNOSTICS_OK:True", contents, StringComparison.Ordinal);
             Assert.Contains("HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True", contents, StringComparison.Ordinal);
             Assert.Contains("HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True", contents, StringComparison.Ordinal);
             Assert.Contains("HOSTED_ACCESSIBILITY_OK:True", contents, StringComparison.Ordinal);
         }
+    }
+
+    [Fact]
+    public void HostedAccessibilityClosureDocs_PublishScreenReaderReadyEvaluationPathWithoutWideningBoundary()
+    {
+        var recipeEn = ReadRepoFile("docs/en/hosted-accessibility-recipe.md");
+        var recipeZh = ReadRepoFile("docs/zh-CN/hosted-accessibility-recipe.md");
+        var evaluationPathEn = ReadRepoFile("docs/en/evaluation-path.md");
+        var evaluationPathZh = ReadRepoFile("docs/zh-CN/evaluation-path.md");
+        var supportBundleEn = ReadRepoFile("docs/en/support-bundle.md");
+        var supportBundleZh = ReadRepoFile("docs/zh-CN/support-bundle.md");
+        var readme = ReadRepoFile("tools/AsterGraph.ConsumerSample.Avalonia/README.md");
+
+        Assert.Contains("Screen-Reader-Ready Evaluation Path", recipeEn, StringComparison.Ordinal);
+        Assert.Contains("ConsumerSample.Avalonia -- --proof", recipeEn, StringComparison.Ordinal);
+        Assert.Contains("HostSample", recipeEn, StringComparison.Ordinal);
+        Assert.True(HasLineWithAll(recipeEn, "Narrator", "NVDA", "VoiceOver"));
+        Assert.True(HasLineWithAll(recipeEn, "does not widen", "support promises"));
+
+        Assert.Contains("Screen-Reader-Ready 评估路径", recipeZh, StringComparison.Ordinal);
+        Assert.Contains("ConsumerSample.Avalonia -- --proof", recipeZh, StringComparison.Ordinal);
+        Assert.Contains("HostSample", recipeZh, StringComparison.Ordinal);
+        Assert.True(HasLineWithAll(recipeZh, "Narrator", "NVDA", "VoiceOver"));
+        Assert.True(HasLineWithAll(recipeZh, "不扩大支持承诺"));
+
+        Assert.Contains("step-3 support bundle", evaluationPathEn, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("step-4 `HostSample` proof lines", evaluationPathEn, StringComparison.OrdinalIgnoreCase);
+        Assert.True(HasLineWithAll(evaluationPathEn, "HOST_SAMPLE_AUTOMATION_OK:True", "HOST_SAMPLE_ACCESSIBILITY_BASELINE_OK:True"));
+        Assert.Contains("第 3 步", evaluationPathZh, StringComparison.Ordinal);
+        Assert.Contains("support bundle", evaluationPathZh, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("第 4 步 `HostSample` 的 proof 行", evaluationPathZh, StringComparison.Ordinal);
+        Assert.True(HasLineWithAll(evaluationPathZh, "HOST_SAMPLE_AUTOMATION_OK:True", "HOST_SAMPLE_ACCESSIBILITY_BASELINE_OK:True"));
+
+        Assert.True(HasLineWithAll(supportBundleEn, "HOST_SAMPLE_AUTOMATION_OK:True", "HOST_SAMPLE_ACCESSIBILITY_BASELINE_OK:True", "same bounded intake record"));
+        Assert.True(HasLineWithAll(supportBundleZh, "HOST_SAMPLE_AUTOMATION_OK:True", "HOST_SAMPLE_ACCESSIBILITY_BASELINE_OK:True", "同一条受限 intake 记录"));
+        Assert.Contains("screen-reader-ready local evaluation", readme, StringComparison.OrdinalIgnoreCase);
     }
 
     private static bool HasLineWithAll(string contents, params string[] requiredTerms)

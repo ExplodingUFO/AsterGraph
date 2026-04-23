@@ -23,12 +23,13 @@
 | --- | --- | --- | --- |
 | 1 | `AsterGraph.Starter.Avalonia` | 先确认第一个 hosted 端到端入口和最小脚手架 | 壳层能跑起来后，再去看最小 stock sample |
 | 2 | `AsterGraph.HelloWorld.Avalonia` | 再确认最小 shipped Avalonia surface，不掺额外宿主逻辑 | 确认后进入真实宿主 proof |
-| 3 | `AsterGraph.ConsumerSample.Avalonia -- --proof` | 在防守的 beta 路线上验证 host-owned actions、trusted plugin、参数编辑和 command projection | 期待看到 `CONSUMER_SAMPLE_OK:True`、`COMMAND_SURFACE_OK:True`、`HOST_NATIVE_METRIC:*`；这一步只负责 proof handoff，受限 intake 记录放在 [Beta Support Bundle](./support-bundle.md) 和 [Adoption Feedback Loop](./adoption-feedback.md) 里 |
-| 4 | `AsterGraph.HostSample` | 在真实宿主样例已经看懂之后，再用 proof harness 做路线验证 | 期待看到 `HOST_SAMPLE_OK:True`；这一步必须放在 `ConsumerSample.Avalonia` 之后 |
+| 3 | `AsterGraph.ConsumerSample.Avalonia -- --proof` | 在受防守的路线上验证 host-owned actions、trusted plugin、参数编辑、command projection 和 hosted accessibility semantics | 期待看到 `CONSUMER_SAMPLE_OK:True`、`COMMAND_SURFACE_OK:True`、`HOSTED_ACCESSIBILITY_OK:True`、`HOSTED_ACCESSIBILITY_AUTOMATION_NAVIGATION_OK:True`、`HOSTED_ACCESSIBILITY_AUTHORING_DIAGNOSTICS_OK:True` 以及 `HOST_NATIVE_METRIC:*`；这一步只负责 proof handoff，受限 intake 记录继续放在 [Beta Support Bundle](./support-bundle.md)、[Hosted Accessibility Recipe](./hosted-accessibility-recipe.md) 和 [Adoption Feedback Loop](./adoption-feedback.md) 里 |
+| 4 | `AsterGraph.HostSample` | 在真实宿主样例已经看懂之后，再用 proof harness 做路线验证 | 期待看到 `HOST_SAMPLE_OK:True`、`HOST_SAMPLE_AUTOMATION_OK:True` 和 `HOST_SAMPLE_ACCESSIBILITY_BASELINE_OK:True`；这一步必须放在 `ConsumerSample.Avalonia` 之后 |
 
 如果你是刻意评估 runtime-only 路线，可以在步骤 1 之后先跑 `AsterGraph.HelloWorld`，替代步骤 2；然后再回到同一条真实宿主 proof 阶梯。
 
 如果 `CONSUMER_SAMPLE_PARAMETER_OK` 或 `CONSUMER_SAMPLE_METADATA_PROJECTION_OK` 失败，就把失败的 proof-marker 行和 support bundle 的 `parameterSnapshots` 行一起保留在同一条受限 intake 记录里。
+如果你要走一条 screen-reader-ready 的本地评估路径，就把第 3 步的 support bundle 和第 4 步 `HostSample` 的 proof 行继续放在同一条受限 intake 记录里。这仍然只是本地证据，不扩大支持承诺。
 
 ## 命令
 
@@ -51,8 +52,9 @@ dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj --
 - 对大多数评估者来说，步骤 3 才是真正的 hosted proof gate
 - `ConsumerSample.Avalonia` 应该输出 `CONSUMER_SAMPLE_OK:True`
 - 同一轮输出里也应该有 `COMMAND_SURFACE_OK:True`
+- 同一轮输出里也应该有 `HOSTED_ACCESSIBILITY_OK:True`、`HOSTED_ACCESSIBILITY_AUTOMATION_NAVIGATION_OK:True` 和 `HOSTED_ACCESSIBILITY_AUTHORING_DIAGNOSTICS_OK:True`
 - 同一轮输出里也应该有四条 `HOST_NATIVE_METRIC:*`
-- `HostSample` 应该输出 `HOST_SAMPLE_OK:True`
+- `HostSample` 应该输出 `HOST_SAMPLE_OK:True`、`HOST_SAMPLE_AUTOMATION_OK:True` 和 `HOST_SAMPLE_ACCESSIBILITY_BASELINE_OK:True`
 
 ## 不要误读
 
