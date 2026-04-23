@@ -2,6 +2,7 @@ using System;
 using System.Globalization;
 using System.Linq;
 using Avalonia;
+using Avalonia.Automation;
 using Avalonia.Controls;
 using Avalonia.Layout;
 using Avalonia.Media;
@@ -346,6 +347,7 @@ public partial class GraphEditorView
             IsEnabled = isEnabled,
         };
         button.Classes.Add("astergraph-toolbar-action");
+        AutomationProperties.SetName(button, content);
         button.Click += (_, args) =>
         {
             execute();

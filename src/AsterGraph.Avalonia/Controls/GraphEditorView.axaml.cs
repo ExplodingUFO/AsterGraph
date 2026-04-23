@@ -881,6 +881,7 @@ public partial class GraphEditorView : UserControl
             IsEnabled = action.CanExecute,
         };
         button.Classes.Add("astergraph-toolbar-action");
+        AutomationProperties.SetName(button, action.Title);
         if (!string.IsNullOrWhiteSpace(action.DisabledReason))
         {
             ToolTip.SetTip(button, action.DisabledReason);

@@ -132,6 +132,8 @@ public sealed class GraphEditorViewTests
 
         Assert.Equal("Save Workspace", Assert.IsType<string>(saveButton.Content));
         Assert.Equal("Undo", Assert.IsType<string>(undoButton.Content));
+        Assert.Equal("Save Workspace", AutomationProperties.GetName(saveButton));
+        Assert.Equal("Undo", AutomationProperties.GetName(undoButton));
 
         paletteToggle.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
 
@@ -139,12 +141,15 @@ public sealed class GraphEditorViewTests
         var paletteItems = FindRequiredControl<StackPanel>(view, "PART_CommandPaletteItems");
 
         Assert.True(paletteChrome.IsVisible);
-        Assert.Contains(
+        var paletteSaveButton = Assert.Single(
             paletteItems.Children.OfType<Button>(),
             button => string.Equals(button.Name, "PART_CommandPaletteAction_workspace.save", StringComparison.Ordinal));
-        Assert.Contains(
+        var paletteUndoButton = Assert.Single(
             paletteItems.Children.OfType<Button>(),
             button => string.Equals(button.Name, "PART_CommandPaletteAction_history.undo", StringComparison.Ordinal));
+
+        Assert.Equal("Save Workspace", AutomationProperties.GetName(paletteSaveButton));
+        Assert.Equal("Undo", AutomationProperties.GetName(paletteUndoButton));
     }
 
     [AvaloniaFact]
@@ -737,6 +742,12 @@ public sealed class GraphEditorViewTests
         Assert.True(duplicateButton.IsEnabled);
         Assert.True(deleteButton.IsEnabled);
         Assert.True(disconnectOutgoingButton.IsEnabled);
+        Assert.Equal(Assert.IsType<string>(inspectButton.Content), AutomationProperties.GetName(inspectButton));
+        Assert.Equal(Assert.IsType<string>(duplicateButton.Content), AutomationProperties.GetName(duplicateButton));
+        Assert.Equal(Assert.IsType<string>(deleteButton.Content), AutomationProperties.GetName(deleteButton));
+        Assert.Equal(
+            Assert.IsType<string>(disconnectOutgoingButton.Content),
+            AutomationProperties.GetName(disconnectOutgoingButton));
 
         duplicateButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
         Assert.Equal(3, editor.Session.Queries.CreateDocumentSnapshot().Nodes.Count);
@@ -876,6 +887,10 @@ public sealed class GraphEditorViewTests
         Assert.Equal("Expand Node Card", Assert.IsType<string>(toggleExpansion.Content));
         Assert.Equal("Disconnect Connection", Assert.IsType<string>(disconnect.Content));
         Assert.Equal("Clear Connection Note", Assert.IsType<string>(clearNote.Content));
+        Assert.Equal("Create Group", AutomationProperties.GetName(createGroup));
+        Assert.Equal("Expand Node Card", AutomationProperties.GetName(toggleExpansion));
+        Assert.Equal("Disconnect Connection", AutomationProperties.GetName(disconnect));
+        Assert.Equal("Clear Connection Note", AutomationProperties.GetName(clearNote));
 
         clearNote.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
 
