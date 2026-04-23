@@ -42,6 +42,7 @@ Going forward, the public release convention is:
 - public package releases use tags that match the published package version, for example `v0.11.0-beta`
 - GitHub prereleases should use the same version number as the published packages
 - milestone-style local planning versions can continue privately, but they should not be presented as the consumer package version
+- local planning-only milestone labels are private maintainer bookkeeping, not release identifiers and not the current public tag
 
 ## Current Mapping
 
@@ -58,6 +59,7 @@ If you are:
 - adopting the SDK: follow the NuGet package version
 - reading release notes: expect public prerelease tags to match the NuGet package version
 - maintaining the repo: treat old `v1.x`-style tags as historical milestone markers, not as the current public package line
+- reading local planning notes: treat local planning-only milestone labels as private scheduling markers, not release identifiers
 
 ## Release Note Header Rule
 

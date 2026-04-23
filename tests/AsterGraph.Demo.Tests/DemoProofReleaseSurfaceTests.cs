@@ -1066,6 +1066,27 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("完全一致", checklistZh, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void VersioningDocs_ClassifyLocalPlanningLabelsAsPrivateNotPublicTags()
+    {
+        var packageVersion = GetPackageVersion();
+        var publicTag = $"v{packageVersion}";
+        var versioning = ReadRepoFile("docs/en/versioning.md");
+        var versioningZh = ReadRepoFile("docs/zh-CN/versioning.md");
+
+        Assert.Contains($"package version: `{packageVersion}`", versioning, StringComparison.Ordinal);
+        Assert.Contains($"public tag: `{publicTag}`", versioning, StringComparison.Ordinal);
+        Assert.Contains("local planning-only milestone labels", versioning, StringComparison.Ordinal);
+        Assert.Contains("not release identifiers", versioning, StringComparison.Ordinal);
+        Assert.DoesNotContain("v0.28.0-beta", versioning, StringComparison.Ordinal);
+
+        Assert.Contains($"包版本：`{packageVersion}`", versioningZh, StringComparison.Ordinal);
+        Assert.Contains($"公开 tag：`{publicTag}`", versioningZh, StringComparison.Ordinal);
+        Assert.Contains("本地规划专用里程碑标签", versioningZh, StringComparison.Ordinal);
+        Assert.Contains("不是发布标识", versioningZh, StringComparison.Ordinal);
+        Assert.DoesNotContain("v0.28.0-beta", versioningZh, StringComparison.Ordinal);
+    }
+
     private static string GetPackageVersion()
     {
         var props = XDocument.Load(Path.Combine(GetRepositoryRoot(), "Directory.Build.props"));
