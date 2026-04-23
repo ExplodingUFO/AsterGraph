@@ -36,6 +36,8 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
         AssertContains(consumerSampleEn, "action rail / command projection");
         AssertContains(consumerSampleEn, "plugin trust workflow");
         AssertContains(consumerSampleEn, "parameter-editing composition");
+        AssertContains(consumerSampleEn, "Plugin Manifest and Trust Policy Contract v1");
+        AssertContains(consumerSampleEn, "Beta Support Bundle");
         AssertContains(consumerSampleEn, "AsterGraphHostedActionFactory.CreateCommandActions(...)");
         AssertContains(consumerSampleEn, "AsterGraphHostedActionFactory.CreateProjection(...)");
         AssertContains(consumerSampleEn, "GraphEditorPluginDiscoveryOptions");
@@ -61,6 +63,8 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
         AssertContains(consumerSampleZh, "样例自有内容");
         AssertContains(consumerSampleZh, "不引入第二套");
         AssertContains(consumerSampleZh, "不提供 sandbox");
+        AssertContains(consumerSampleZh, "插件信任契约 v1");
+        AssertContains(consumerSampleZh, "Beta Support Bundle");
         AssertContains(consumerSampleZh, "IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()");
         AssertContains(consumerSampleZh, "IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)");
         AssertContains(consumerSampleZh, "复制这些宿主自管 seam");
@@ -109,6 +113,11 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
         AssertContains(supportBundleEn, "Copyable local evidence reference");
         AssertContains(supportBundleZh, "仅限本地证据");
         AssertContains(supportBundleZh, "可复制的本地证据参考");
+
+        Assert.True(consumerSampleEn.IndexOf("Plugin Manifest and Trust Policy Contract v1", StringComparison.Ordinal) < consumerSampleEn.IndexOf("## What It Proves", StringComparison.Ordinal));
+        Assert.True(consumerSampleEn.IndexOf("Beta Support Bundle", StringComparison.Ordinal) < consumerSampleEn.IndexOf("## What It Proves", StringComparison.Ordinal));
+        Assert.True(consumerSampleZh.IndexOf("插件信任契约 v1", StringComparison.Ordinal) < consumerSampleZh.IndexOf("## 它证明什么", StringComparison.Ordinal));
+        Assert.True(consumerSampleZh.IndexOf("Beta Support Bundle", StringComparison.Ordinal) < consumerSampleZh.IndexOf("## 它证明什么", StringComparison.Ordinal));
     }
 
     private static void AssertContains(string contents, string expected)

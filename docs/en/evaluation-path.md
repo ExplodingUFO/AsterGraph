@@ -4,6 +4,7 @@ This guide is the hosted route ladder from first install to realistic host proof
 Use it when you are evaluating AsterGraph as an SDK, not when you are maintaining release infrastructure.
 
 If you are evaluating plugin trust, treat `AsterGraph.ConsumerSample.Avalonia` as the defended hosted trust hop. Read [Plugin Manifest and Trust Policy Contract v1](./plugin-trust-contracts.md) and [Plugin And Custom Node Recipe](./plugin-recipe.md) before you stop at the route ladder.
+If you need reviewable local evidence while you follow the defended route, keep [Beta Support Bundle](./support-bundle.md) close to step 3.
 
 ## Boundary First
 

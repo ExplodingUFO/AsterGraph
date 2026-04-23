@@ -6,6 +6,7 @@ For first-time adopters, start on the default Avalonia path by default.
 Treat `WPF` only as adapter-2 portability validation on the same canonical route; it is not a second route or a parity promise.
 For the frozen support boundary and upgrade guidance toward `v1.0.0`, see [Stabilization Support Matrix](./stabilization-support-matrix.md).
 If you are evaluating the public beta end to end, use [Beta Evaluation Path](./evaluation-path.md) as the hosted route ladder from first install to realistic hosted proof.
+For plugin trust-policy review and local evidence, keep [Plugin Manifest and Trust Policy Contract v1](./plugin-trust-contracts.md) and [Beta Support Bundle](./support-bundle.md) close to the defended hosted route.
 
 ## 1. Pick Your Starting Package
 

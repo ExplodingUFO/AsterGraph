@@ -43,6 +43,10 @@ public sealed class DemoProofReleaseSurfaceTests
         var quickStart = ReadRepoFile("docs/en/quick-start.md");
         var quickStartZh = ReadRepoFile("docs/zh-CN/quick-start.md");
 
+        Assert.True(quickStart.IndexOf("[Plugin Manifest and Trust Policy Contract v1](./plugin-trust-contracts.md)", StringComparison.Ordinal) < quickStart.IndexOf("## 1. Pick Your Starting Package", StringComparison.Ordinal));
+        Assert.True(quickStart.IndexOf("[Beta Support Bundle](./support-bundle.md)", StringComparison.Ordinal) < quickStart.IndexOf("## 1. Pick Your Starting Package", StringComparison.Ordinal));
+        Assert.True(quickStartZh.IndexOf("[插件信任契约 v1](./plugin-trust-contracts.md)", StringComparison.Ordinal) < quickStartZh.IndexOf("## 1. 先选起始包", StringComparison.Ordinal));
+        Assert.True(quickStartZh.IndexOf("[Beta Support Bundle](./support-bundle.md)", StringComparison.Ordinal) < quickStartZh.IndexOf("## 1. 先选起始包", StringComparison.Ordinal));
         Assert.Contains("onboarding", quickStart, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("default", quickStart, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("Avalonia", quickStart, StringComparison.Ordinal);
@@ -127,6 +131,11 @@ public sealed class DemoProofReleaseSurfaceTests
     {
         var evaluationPath = ReadRepoFile("docs/en/evaluation-path.md");
         var evaluationPathZh = ReadRepoFile("docs/zh-CN/evaluation-path.md");
+
+        Assert.True(evaluationPath.IndexOf("[Plugin Manifest and Trust Policy Contract v1](./plugin-trust-contracts.md)", StringComparison.Ordinal) < evaluationPath.IndexOf("## Boundary First", StringComparison.Ordinal));
+        Assert.True(evaluationPath.IndexOf("[Beta Support Bundle](./support-bundle.md)", StringComparison.Ordinal) < evaluationPath.IndexOf("## Boundary First", StringComparison.Ordinal));
+        Assert.True(evaluationPathZh.IndexOf("[插件信任契约 v1](./plugin-trust-contracts.md)", StringComparison.Ordinal) < evaluationPathZh.IndexOf("## 先锁边界", StringComparison.Ordinal));
+        Assert.True(evaluationPathZh.IndexOf("[Beta Support Bundle](./support-bundle.md)", StringComparison.Ordinal) < evaluationPathZh.IndexOf("## 先锁边界", StringComparison.Ordinal));
 
         foreach (var contents in new[] { evaluationPath, evaluationPathZh })
         {
@@ -243,6 +252,8 @@ public sealed class DemoProofReleaseSurfaceTests
 
         Assert.Contains("support-bundle attachment", supportBundle, StringComparison.OrdinalIgnoreCase);
         Assert.True(HasLineWithAll(supportBundleZh, "support bundle", "附件"));
+        Assert.True(supportBundle.IndexOf("Beta Evaluation Path", StringComparison.Ordinal) < supportBundle.IndexOf("## Canonical Producer", StringComparison.Ordinal));
+        Assert.True(supportBundleZh.IndexOf("公开 Beta 评估路径", StringComparison.Ordinal) < supportBundleZh.IndexOf("## Canonical 生成入口", StringComparison.Ordinal));
         Assert.Contains("support-bundle", consumerSampleDoc, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("support-bundle", consumerSampleReadme, StringComparison.OrdinalIgnoreCase);
         Assert.True(HasLineWithAll(adoptionFeedback, "route", "version", "proof", "friction", "support-bundle"));

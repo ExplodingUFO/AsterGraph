@@ -72,6 +72,8 @@ public sealed class PluginTrustContractDocsTests
         var quickStartZh = ReadRepoFile("docs/zh-CN/quick-start.md");
         var evaluationPathEn = ReadRepoFile("docs/en/evaluation-path.md");
         var evaluationPathZh = ReadRepoFile("docs/zh-CN/evaluation-path.md");
+        var consumerSampleEn = ReadRepoFile("docs/en/consumer-sample.md");
+        var consumerSampleZh = ReadRepoFile("docs/zh-CN/consumer-sample.md");
         var consumerSampleReadme = ReadRepoFile("tools/AsterGraph.ConsumerSample.Avalonia/README.md");
 
         const string pluginTrustLinkEn = "[Plugin Manifest and Trust Policy Contract v1](./plugin-trust-contracts.md)";
@@ -93,6 +95,12 @@ public sealed class PluginTrustContractDocsTests
 
         Assert.Contains("受防守的 hosted trust hop", quickStartZh, StringComparison.Ordinal);
         Assert.Contains("受防守的 hosted trust hop", evaluationPathZh, StringComparison.Ordinal);
+        Assert.Contains("[Beta Support Bundle](./support-bundle.md)", quickStartEn, StringComparison.Ordinal);
+        Assert.Contains("[Beta Support Bundle](./support-bundle.md)", evaluationPathEn, StringComparison.Ordinal);
+        Assert.Contains("[Beta Support Bundle](./support-bundle.md)", consumerSampleEn, StringComparison.Ordinal);
+        Assert.Contains("[Beta Support Bundle](./support-bundle.md)", quickStartZh, StringComparison.Ordinal);
+        Assert.Contains("[Beta Support Bundle](./support-bundle.md)", evaluationPathZh, StringComparison.Ordinal);
+        Assert.Contains("[Beta Support Bundle](./support-bundle.md)", consumerSampleZh, StringComparison.Ordinal);
 
         Assert.Contains(pluginTrustLinkEn, quickStartEn, StringComparison.Ordinal);
         Assert.Contains(pluginRecipeLinkEn, quickStartEn, StringComparison.Ordinal);
@@ -104,6 +112,12 @@ public sealed class PluginTrustContractDocsTests
         Assert.Contains(pluginRecipeLinkZh, evaluationPathZh, StringComparison.Ordinal);
         Assert.Contains(consumerSampleTrustLinkEn, consumerSampleReadme, StringComparison.Ordinal);
         Assert.Contains(consumerSampleRecipeLinkEn, consumerSampleReadme, StringComparison.Ordinal);
+        Assert.True(quickStartEn.IndexOf(pluginTrustLinkEn, StringComparison.Ordinal) < quickStartEn.IndexOf("## 1. Pick Your Starting Package", StringComparison.Ordinal));
+        Assert.True(quickStartZh.IndexOf(pluginTrustLinkZh, StringComparison.Ordinal) < quickStartZh.IndexOf("## 1. 先选起始包", StringComparison.Ordinal));
+        Assert.True(quickStartEn.IndexOf("[Beta Support Bundle](./support-bundle.md)", StringComparison.Ordinal) < quickStartEn.IndexOf("## 1. Pick Your Starting Package", StringComparison.Ordinal));
+        Assert.True(quickStartZh.IndexOf("[Beta Support Bundle](./support-bundle.md)", StringComparison.Ordinal) < quickStartZh.IndexOf("## 1. 先选起始包", StringComparison.Ordinal));
+        Assert.True(evaluationPathEn.IndexOf("[Beta Support Bundle](./support-bundle.md)", StringComparison.Ordinal) < evaluationPathEn.IndexOf("## Boundary First", StringComparison.Ordinal));
+        Assert.True(evaluationPathZh.IndexOf("[Beta Support Bundle](./support-bundle.md)", StringComparison.Ordinal) < evaluationPathZh.IndexOf("## 先锁边界", StringComparison.Ordinal));
 
         Assert.True(quickStartEn.IndexOf(pluginTrustLinkEn, StringComparison.Ordinal) < quickStartEn.IndexOf("[Host Integration](./host-integration.md)", StringComparison.Ordinal));
         Assert.True(quickStartZh.IndexOf(pluginTrustLinkZh, StringComparison.Ordinal) < quickStartZh.IndexOf("[Host Integration](./host-integration.md)", StringComparison.Ordinal));

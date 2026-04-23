@@ -3,6 +3,7 @@
 这份文档定义的是 public beta 的本地证据合同。
 提交 beta 反馈时，可用时把 support bundle 作为附件使用。
 它不会上传任何东西，也不代表遥测、云服务或托管后端。
+如果你需要来自受防守 hosted proof route 的本地证据附件，就把它和 [公开 Beta 评估路径](./evaluation-path.md) 一起看。
 
 ## Canonical 生成入口
 

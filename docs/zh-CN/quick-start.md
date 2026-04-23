@@ -6,6 +6,7 @@
 `WPF` 只作为同一条 canonical 路线上的 adapter-2 兼容性验证，不是第二条接入路线，也不是 parity 承诺。
 关于冻结的支持边界和面向 `v1.0.0` 的升级指引，见 [稳定化支持矩阵](./stabilization-support-matrix.md)。
 如果你要端到端评估当前 public beta，就把 [公开 Beta 评估路径](./evaluation-path.md) 当成从第一次安装到真实宿主 proof 的 hosted route ladder。
+如果你要看 plugin trust-policy 和本地证据，就把 [插件信任契约 v1](./plugin-trust-contracts.md) 和 [Beta Support Bundle](./support-bundle.md) 一起放在这条受防守的 hosted 路线上。
 
 ## 1. 先选起始包
 
