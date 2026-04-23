@@ -250,7 +250,7 @@ public sealed class DemoProofReleaseSurfaceTests
             Assert.Contains("reproduction", contents, StringComparison.Ordinal);
         }
 
-        Assert.Contains("support-bundle attachment", supportBundle, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("bounded intake record", supportBundle, StringComparison.OrdinalIgnoreCase);
         Assert.True(HasLineWithAll(supportBundleZh, "support bundle", "附件"));
         AssertAppearsBefore(supportBundle, "Beta Evaluation Path", "## Canonical Producer");
         AssertAppearsBefore(supportBundleZh, "公开 Beta 评估路径", "## Canonical 生成入口");
@@ -258,6 +258,38 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("support-bundle", consumerSampleReadme, StringComparison.OrdinalIgnoreCase);
         Assert.True(HasLineWithAll(adoptionFeedback, "route", "version", "proof", "friction", "support-bundle"));
         Assert.True(HasLineWithAll(adoptionFeedbackZh, "route", "version", "proof", "摩擦", "support bundle"));
+    }
+
+    [Fact]
+    public void IntakeHandoffDocs_UseOneBoundedIntakeVocabularyAndKeepQuickReferenceSummaryOnly()
+    {
+        var evaluationPath = ReadRepoFile("docs/en/evaluation-path.md");
+        var evaluationPathZh = ReadRepoFile("docs/zh-CN/evaluation-path.md");
+        var consumerSample = ReadRepoFile("docs/en/consumer-sample.md");
+        var consumerSampleZh = ReadRepoFile("docs/zh-CN/consumer-sample.md");
+        var supportBundle = ReadRepoFile("docs/en/support-bundle.md");
+        var supportBundleZh = ReadRepoFile("docs/zh-CN/support-bundle.md");
+        var adoptionFeedback = ReadRepoFile("docs/en/adoption-feedback.md");
+        var adoptionFeedbackZh = ReadRepoFile("docs/zh-CN/adoption-feedback.md");
+        var adoptionTemplate = ReadRepoFile(".github/ISSUE_TEMPLATE/adoption_feedback.yml");
+
+        Assert.Contains("one unambiguous intake handoff from defended route to bounded intake record", evaluationPath, StringComparison.Ordinal);
+        Assert.Contains("从受防守路线到受限 intake 记录的一次明确 handoff", evaluationPathZh, StringComparison.Ordinal);
+        Assert.Contains("summary-only", consumerSample, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("summary-only", consumerSampleZh, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Proof Handoff owns the actual intake instructions", consumerSample, StringComparison.Ordinal);
+        Assert.Contains("Proof Handoff 负责实际 intake 说明", consumerSampleZh, StringComparison.Ordinal);
+        Assert.Contains("reuse the emitted `SUPPORT_BUNDLE_PATH:...` line as the attachment note", consumerSample, StringComparison.Ordinal);
+        Assert.Contains("把输出里的 `SUPPORT_BUNDLE_PATH:...` 作为附件备注", consumerSampleZh, StringComparison.Ordinal);
+        Assert.Contains("record `NO_SUPPORT_BUNDLE:route-cannot-produce-one`", consumerSample, StringComparison.Ordinal);
+        Assert.Contains("记录 `NO_SUPPORT_BUNDLE:route-cannot-produce-one`", consumerSampleZh, StringComparison.Ordinal);
+        Assert.Contains("bounded intake record", supportBundle, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("受限 intake 记录", supportBundleZh, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("bounded intake vocabulary", adoptionFeedback, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("受限 intake 词汇", adoptionFeedbackZh, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("bounded intake record", adoptionTemplate, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("SUPPORT_BUNDLE_PATH:...", adoptionTemplate, StringComparison.Ordinal);
+        Assert.Contains("NO_SUPPORT_BUNDLE:route-cannot-produce-one", adoptionTemplate, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -293,7 +325,7 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("route or artifact", routeBlock, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("proof marker", proofMarkersBlock, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("friction", frictionBlock, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("support bundle", supportBundleBlock, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("bounded intake record", supportBundleBlock, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("attachment note", supportBundleBlock, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("SUPPORT_BUNDLE_PATH", supportBundleBlock, StringComparison.Ordinal);
         Assert.Contains("NO_SUPPORT_BUNDLE", supportBundleBlock, StringComparison.Ordinal);

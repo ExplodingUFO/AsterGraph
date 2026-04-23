@@ -1,10 +1,10 @@
 # Adoption Feedback Loop
 
-这份文档定义了 public beta 的反馈收集格式，并记录了在预发布反馈循环还在收集足够真实外部反馈时的种子试用综合结果。
+这份文档定义了 public beta 的受限 intake 记录，并在预发布反馈循环还在收集足够真实外部反馈时，保持和 issue template 相同的受限 intake 词汇。
 
 ## Intake 格式
 
-每条 beta 反馈都应先收口到同一套受限字段：`route`、`version`、proof 标记、摩擦点，以及 support bundle 附件备注。
+每条 beta 反馈都应先收口到同一套受限 intake 词汇：`route`、`version`、proof 标记、摩擦点，以及 support bundle 附件备注。
 
 每条反馈都应按这套受限字段记录：
 

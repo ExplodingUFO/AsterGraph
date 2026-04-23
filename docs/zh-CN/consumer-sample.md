@@ -73,6 +73,7 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 - `SUPPORT_BUNDLE_OK:True`
 - `SUPPORT_BUNDLE_PATH:...`
 
+这份速查只做 summary-only；实际 intake 说明由 `Proof Handoff` 负责。
 support bundle 只保留本地证据，不会扩大 support 边界。
 
 下一步 beta intake 文档：
@@ -101,9 +102,11 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 
 ## Proof Handoff
 
+Proof Handoff 负责实际 intake 说明。
+
 如果你是从 starter recipe 复制过来的，就在这里完成 proof handoff：先跑 `AsterGraph.ConsumerSample.Avalonia -- --proof` 来验证受防守的宿主路线。
 
-如果你要复查本地证据，就运行 `AsterGraph.ConsumerSample.Avalonia -- --proof --support-bundle <support-bundle-path>`，并把输出里的 `SUPPORT_BUNDLE_PATH:...` 作为附件备注。
+如果你要把它写进实际 intake 记录，就运行 `AsterGraph.ConsumerSample.Avalonia -- --proof --support-bundle <support-bundle-path>`，并把输出里的 `SUPPORT_BUNDLE_PATH:...` 作为附件备注，写入受限 intake 记录。
 
 如果 route 不能产出 bundle，就记录 `NO_SUPPORT_BUNDLE:route-cannot-produce-one`。
 

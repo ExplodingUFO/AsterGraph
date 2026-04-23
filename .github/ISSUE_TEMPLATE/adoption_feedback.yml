@@ -1,5 +1,5 @@
 name: Adoption feedback
-description: Report how a real or trial adoption attempt went, where friction appeared, and what should come next.
+description: Report how a real or trial adoption attempt went in the same bounded intake vocabulary used by the docs.
 title: "[Adoption] "
 labels:
   - feedback
@@ -15,7 +15,7 @@ body:
   - type: dropdown
     id: route
     attributes:
-      label: Route or artifact tried
+      label: Bounded intake route or artifact tried
       options:
         - HelloWorld
         - AsterGraph.Starter.Avalonia
@@ -46,6 +46,6 @@ body:
   - type: textarea
     id: support_bundle
     attributes:
-      label: Support bundle attachment
-      description: Attachment note for the intake record. Use `SUPPORT_BUNDLE_PATH:...` when the route produced a bundle, or `NO_SUPPORT_BUNDLE:route-cannot-produce-one` when it did not.
+      label: Bounded intake record attachment note
+      description: Attachment note for the bounded intake record. Use `SUPPORT_BUNDLE_PATH:...` when the route produced a bundle, or `NO_SUPPORT_BUNDLE:route-cannot-produce-one` when it did not.
       placeholder: SUPPORT_BUNDLE_PATH:... or NO_SUPPORT_BUNDLE:route-cannot-produce-one

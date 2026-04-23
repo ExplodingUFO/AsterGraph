@@ -1,6 +1,6 @@
 # Beta Evaluation Path
 
-This guide is the hosted route ladder from first install to realistic host proof.
+This guide is the hosted route ladder from first install to realistic host proof. It has one unambiguous intake handoff from defended route to bounded intake record: step 3 hands off to [Beta Support Bundle](./support-bundle.md) for the attachment note, then to [Adoption Feedback Loop](./adoption-feedback.md) for the bounded intake record.
 Use it when you are evaluating AsterGraph as an SDK, not when you are maintaining release infrastructure.
 
 If you are evaluating plugin trust, treat `AsterGraph.ConsumerSample.Avalonia` as the defended hosted trust hop. Read [Plugin Manifest and Trust Policy Contract v1](./plugin-trust-contracts.md) and [Plugin And Custom Node Recipe](./plugin-recipe.md) before you stop at the route ladder.
@@ -23,7 +23,7 @@ The hosted route ladder is `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerS
 | --- | --- | --- | --- |
 | 1 | `AsterGraph.Starter.Avalonia` | confirms the first hosted end-to-end route with the smallest scaffold | once the shell opens, move to the smallest stock sample |
 | 2 | `AsterGraph.HelloWorld.Avalonia` | confirms the shipped Avalonia surface without extra host wiring | once this is clear, move to the realistic hosted proof |
-| 3 | `AsterGraph.ConsumerSample.Avalonia -- --proof` | proves host-owned actions, trusted-plugin flow, parameter editing, and command projection on the defended route | expect `CONSUMER_SAMPLE_OK:True`, `COMMAND_SURFACE_OK:True`, `HOST_NATIVE_METRIC:*`, and optionally generate a [Beta Support Bundle](./support-bundle.md) |
+| 3 | `AsterGraph.ConsumerSample.Avalonia -- --proof` | proves host-owned actions, trusted-plugin flow, parameter editing, and command projection on the defended route | expect `CONSUMER_SAMPLE_OK:True`, `COMMAND_SURFACE_OK:True`, `HOST_NATIVE_METRIC:*`; this is the proof handoff only, and the bounded intake record lives in [Beta Support Bundle](./support-bundle.md) and [Adoption Feedback Loop](./adoption-feedback.md) |
 | 4 | `AsterGraph.HostSample` | validates the proof harness after the realistic host sample is already understood | expect `HOST_SAMPLE_OK:True`; use this only after `ConsumerSample.Avalonia` |
 
 If you are intentionally evaluating the runtime-only path, run `AsterGraph.HelloWorld` after step 1 instead of step 2, then return to the same realistic hosted proof at step 3.

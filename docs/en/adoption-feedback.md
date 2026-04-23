@@ -1,10 +1,10 @@
 # Adoption Feedback Loop
 
-This page defines the public beta intake record and records the seeded adopter-trial synthesis used while the prerelease intake loop is still collecting enough real external reports.
+This page defines the public beta bounded intake record and keeps the same bounded intake vocabulary used by the issue template while the prerelease intake loop is still collecting enough real external reports.
 
 ## Intake Format
 
-Each beta intake record should stay on one bounded schema: route, version, proof markers, friction, and support-bundle attachment note.
+Each beta intake record should stay on one bounded intake vocabulary: route, version, proof markers, friction, and support-bundle attachment note.
 
 Each feedback entry should capture this bounded schema:
 
