@@ -21,6 +21,7 @@ public sealed record ConsumerSampleProofResult(
     bool WindowCompositionOk,
     bool TrustTransparencyOk,
     bool CommandSurfaceOk,
+    IReadOnlyList<ConsumerSampleProofParameterSnapshot> ParameterSnapshots,
     double StartupMs,
     double InspectorProjectionMs,
     double PluginScanMs,
@@ -138,6 +139,7 @@ public static class ConsumerSampleProof
             WindowCompositionOk: windowCompositionOk,
             TrustTransparencyOk: trustTransparencyOk,
             CommandSurfaceOk: commandSurfaceOk,
+            ParameterSnapshots: CreateParameterSnapshots(host.GetSelectedParameterSnapshots().ToArray()),
             StartupMs: startupMs,
             InspectorProjectionMs: inspectorProjectionMs,
             PluginScanMs: pluginScanMs,
@@ -190,7 +192,41 @@ public static class ConsumerSampleProof
             string.Equals(actual.Value, wanted.Value, StringComparison.Ordinal)
             && string.Equals(actual.Label, wanted.Label, StringComparison.Ordinal))
             .All(static matches => matches);
+
+    private static IReadOnlyList<ConsumerSampleProofParameterSnapshot> CreateParameterSnapshots(
+        IReadOnlyList<GraphEditorNodeParameterSnapshot> snapshots)
+        => snapshots
+            .Select(static snapshot => new ConsumerSampleProofParameterSnapshot(
+                Key: snapshot.Definition.Key,
+                ValueType: snapshot.Definition.ValueType.Value,
+                EditorKind: snapshot.Definition.EditorKind.ToString(),
+                CurrentValue: snapshot.CurrentValue,
+                DefaultValue: snapshot.Definition.DefaultValue,
+                CanEdit: snapshot.CanEdit,
+                IsValid: snapshot.IsValid,
+                AllowedOptions: snapshot.Definition.Constraints.AllowedOptions
+                    .Select(static option => new ConsumerSampleProofParameterOptionSnapshot(option.Value, option.Label))
+                    .ToArray(),
+                Minimum: snapshot.Definition.Constraints.Minimum,
+                Maximum: snapshot.Definition.Constraints.Maximum))
+            .ToArray();
 }
+
+public sealed record ConsumerSampleProofParameterSnapshot(
+    string Key,
+    string ValueType,
+    string EditorKind,
+    object? CurrentValue,
+    object? DefaultValue,
+    bool CanEdit,
+    bool IsValid,
+    IReadOnlyList<ConsumerSampleProofParameterOptionSnapshot> AllowedOptions,
+    double? Minimum,
+    double? Maximum);
+
+public sealed record ConsumerSampleProofParameterOptionSnapshot(
+    string Value,
+    string Label);
 
 public static class ConsumerSampleHeadlessEnvironment
 {

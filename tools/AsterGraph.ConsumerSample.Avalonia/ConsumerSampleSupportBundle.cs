@@ -28,6 +28,7 @@ internal static class ConsumerSampleSupportBundle
             GeneratedAtUtc: DateTimeOffset.UtcNow,
             PersistenceStatus: "written",
             ProofLines: result.ProofLines,
+            ParameterSnapshots: result.ParameterSnapshots,
             Environment: new ConsumerSampleSupportEnvironment(
                 RuntimeInformation.FrameworkDescription,
                 RuntimeInformation.OSDescription,
@@ -72,6 +73,7 @@ internal static class ConsumerSampleSupportBundle
         DateTimeOffset GeneratedAtUtc,
         string PersistenceStatus,
         IReadOnlyList<string> ProofLines,
+        IReadOnlyList<ConsumerSampleProofParameterSnapshot> ParameterSnapshots,
         ConsumerSampleSupportEnvironment Environment,
         ConsumerSampleSupportReproduction Reproduction);
 

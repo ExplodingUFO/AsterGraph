@@ -19,5 +19,9 @@ internal static class ConsumerSampleDocsAssertions
         Assert.Contains("HOST_NATIVE_METRIC:plugin_scan_ms", contents, StringComparison.Ordinal);
         Assert.Contains("HOST_NATIVE_METRIC:command_latency_ms", contents, StringComparison.Ordinal);
         Assert.Contains("CONSUMER_SAMPLE_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("parameterSnapshots", contents, StringComparison.Ordinal);
+        Assert.Contains("currentValue", contents, StringComparison.Ordinal);
+        Assert.Contains("defaultValue", contents, StringComparison.Ordinal);
+        Assert.Contains("allowedOptions", contents, StringComparison.Ordinal);
     }
 }

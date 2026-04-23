@@ -42,12 +42,15 @@ The support bundle is one local JSON file with these top-level fields:
 - `generatedAtUtc`
 - `persistenceStatus`
 - `proofLines`
+- `parameterSnapshots`
 - `environment`
 - `reproduction`
 
 `persistenceStatus` records the bundle write outcome. For the current proof path it is `written`.
 
 `proofLines` should include the full marker set emitted by proof mode: `CONSUMER_SAMPLE_HOST_ACTION_OK:True`, `CONSUMER_SAMPLE_PLUGIN_OK:True`, `CONSUMER_SAMPLE_PARAMETER_OK:True`, `CONSUMER_SAMPLE_METADATA_PROJECTION_OK:True`, `CONSUMER_SAMPLE_WINDOW_OK:True`, `CONSUMER_SAMPLE_TRUST_OK:True`, `COMMAND_SURFACE_OK:True`, `HOST_NATIVE_METRIC:startup_ms=...`, `HOST_NATIVE_METRIC:inspector_projection_ms=...`, `HOST_NATIVE_METRIC:plugin_scan_ms=...`, `HOST_NATIVE_METRIC:command_latency_ms=...`, and `CONSUMER_SAMPLE_OK:True`.
+
+`parameterSnapshots` captures the selected review node's parameter projection in one bounded structure. Each snapshot records `key`, `valueType`, `editorKind`, `currentValue`, `defaultValue`, `canEdit`, `isValid`, `allowedOptions`, `minimum`, and `maximum` when present.
 
 `environment` records the local runtime and OS details used for the run.
 

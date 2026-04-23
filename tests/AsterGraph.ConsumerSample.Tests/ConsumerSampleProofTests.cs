@@ -72,6 +72,7 @@ public sealed class ConsumerSampleProofTests
             WindowCompositionOk: true,
             TrustTransparencyOk: true,
             CommandSurfaceOk: true,
+            ParameterSnapshots: [],
             StartupMs: 1,
             InspectorProjectionMs: 1,
             PluginScanMs: 1,
@@ -106,12 +107,14 @@ public sealed class ConsumerSampleProofTests
         var environment = root.GetProperty("environment");
         var reproduction = root.GetProperty("reproduction");
         var persistenceStatus = root.GetProperty("persistenceStatus").GetString();
+        var parameterSnapshots = root.GetProperty("parameterSnapshots").EnumerateArray().ToArray();
 
         Assert.Equal(1, root.GetProperty("schemaVersion").GetInt32());
         Assert.Equal("ConsumerSample.Avalonia", root.GetProperty("route").GetString());
         Assert.False(string.IsNullOrWhiteSpace(packageVersion));
         Assert.Equal($"v{packageVersion}", publicTag);
         Assert.Equal("written", persistenceStatus);
+        Assert.Equal(3, parameterSnapshots.Length);
         Assert.True(
             DateTimeOffset.TryParse(generatedAtUtc, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out _),
             "Support bundle generatedAtUtc should be a parseable round-trip UTC timestamp.");
@@ -138,6 +141,39 @@ public sealed class ConsumerSampleProofTests
         Assert.Equal("repro-note", reproduction.GetProperty("note").GetString());
         Assert.Contains("--support-bundle", reproduction.GetProperty("command").GetString(), StringComparison.Ordinal);
         Assert.False(string.IsNullOrWhiteSpace(reproduction.GetProperty("workingDirectory").GetString()));
+
+        var statusSnapshot = parameterSnapshots.Single(snapshot => snapshot.GetProperty("key").GetString() == "status");
+        Assert.Equal("enum", statusSnapshot.GetProperty("valueType").GetString());
+        Assert.Equal("Enum", statusSnapshot.GetProperty("editorKind").GetString());
+        Assert.Equal("approved", statusSnapshot.GetProperty("currentValue").GetString());
+        Assert.Equal("draft", statusSnapshot.GetProperty("defaultValue").GetString());
+        Assert.True(statusSnapshot.GetProperty("canEdit").GetBoolean());
+        Assert.True(statusSnapshot.GetProperty("isValid").GetBoolean());
+        var allowedOptions = statusSnapshot.GetProperty("allowedOptions").EnumerateArray().ToArray();
+        Assert.Equal(
+            ["draft", "review", "approved"],
+            allowedOptions.Select(option => option.GetProperty("value").GetString()!).ToArray());
+        Assert.Equal(
+            ["Draft", "In Review", "Approved"],
+            allowedOptions.Select(option => option.GetProperty("label").GetString()!).ToArray());
+
+        var ownerSnapshot = parameterSnapshots.Single(snapshot => snapshot.GetProperty("key").GetString() == "owner");
+        Assert.Equal("string", ownerSnapshot.GetProperty("valueType").GetString());
+        Assert.Equal("Text", ownerSnapshot.GetProperty("editorKind").GetString());
+        Assert.Equal("release-owner", ownerSnapshot.GetProperty("currentValue").GetString());
+        Assert.Equal("design-review", ownerSnapshot.GetProperty("defaultValue").GetString());
+        Assert.True(ownerSnapshot.GetProperty("canEdit").GetBoolean());
+        Assert.True(ownerSnapshot.GetProperty("isValid").GetBoolean());
+        Assert.Empty(ownerSnapshot.GetProperty("allowedOptions").EnumerateArray());
+
+        var prioritySnapshot = parameterSnapshots.Single(snapshot => snapshot.GetProperty("key").GetString() == "priority");
+        Assert.Equal("int", prioritySnapshot.GetProperty("valueType").GetString());
+        Assert.Equal("Number", prioritySnapshot.GetProperty("editorKind").GetString());
+        Assert.Equal(2, prioritySnapshot.GetProperty("currentValue").GetInt32());
+        Assert.Equal(2, prioritySnapshot.GetProperty("defaultValue").GetInt32());
+        Assert.Equal(1, prioritySnapshot.GetProperty("minimum").GetDouble());
+        Assert.Equal(5, prioritySnapshot.GetProperty("maximum").GetDouble());
+        Assert.Empty(prioritySnapshot.GetProperty("allowedOptions").EnumerateArray());
     }
 
     [Fact]
