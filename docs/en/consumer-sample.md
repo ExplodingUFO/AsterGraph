@@ -52,6 +52,12 @@ Copy from each bounded source for the part it owns:
 - Copy from [Authoring Inspector Recipe](./authoring-inspector-recipe.md): the definition-driven metadata vocabulary (`defaultValue`, `isAdvanced`, `helpText`, `placeholderText`, `constraints.IsReadOnly`) and stock inspector field grouping.
 - Keep local: review/audit node family, action ids/titles, window layout and narrative text, and proof labels beyond the defended markers.
 
+Copy the path in this order:
+
+- Define metadata in [Authoring Inspector Recipe](./authoring-inspector-recipe.md) first with `defaultValue`, `editorKind`, `constraints`, and `groupName`.
+- Project and write selected-node values in this sample through `IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()` and `IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)`.
+- Validate evidence with proof mode plus a support bundle; compare `parameterSnapshots` with `CONSUMER_SAMPLE_PARAMETER_OK:True` and `CONSUMER_SAMPLE_METADATA_PROJECTION_OK:True`.
+
 Consumer Sample proves the seam split; it does not own the metadata vocabulary. Authoring Inspector Recipe is the sole owner of the metadata vocabulary.
 
 ## Trust and proof quick reference

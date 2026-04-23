@@ -11,6 +11,8 @@ Copy this recipe when you need the canonical metadata vocabulary and stock inspe
 - Copy from `ConsumerSample.Avalonia` for the selected-node parameter read/write seam and the host-owned proof boundary.
 - Keep the sample and this recipe separate: the sample proves the seam and the recipe carries the metadata vocabulary.
 
+Step 1 is metadata in this recipe; Step 2 is `ConsumerSample.Avalonia` for the selected-node seam; Step 3 is support-bundle `parameterSnapshots` evidence.
+
 ## Canonical Recipe Vocabulary
 
 Keep these field names consistent across docs, samples, and node definitions:

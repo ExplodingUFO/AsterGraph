@@ -63,6 +63,30 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
     }
 
     [Fact]
+    public void ConsumerSampleRecipeClosureDocs_DefineOneCopyableParameterMetadataPath()
+    {
+        var readme = ReadRepoFile("tools/AsterGraph.ConsumerSample.Avalonia/README.md");
+        var consumerSampleEn = ReadRepoFile("docs/en/consumer-sample.md");
+        var consumerSampleZh = ReadRepoFile("docs/zh-CN/consumer-sample.md");
+        var authoringRecipeEn = ReadRepoFile("docs/en/authoring-inspector-recipe.md");
+        var authoringRecipeZh = ReadRepoFile("docs/zh-CN/authoring-inspector-recipe.md");
+
+        foreach (var contents in new[] { readme, consumerSampleEn })
+        {
+            Assert.True(HasLineWithAll(contents, "Define metadata", "Authoring Inspector Recipe", "defaultValue", "editorKind"));
+            Assert.True(HasLineWithAll(contents, "Project and write", "GetSelectedNodeParameterSnapshots()", "TrySetSelectedNodeParameterValue(...)"));
+            Assert.True(HasLineWithAll(contents, "Validate evidence", "parameterSnapshots", "CONSUMER_SAMPLE_METADATA_PROJECTION_OK"));
+        }
+
+        Assert.True(HasLineWithAll(consumerSampleZh, "定义 metadata", "Authoring Inspector Recipe", "defaultValue", "editorKind"));
+        Assert.True(HasLineWithAll(consumerSampleZh, "投影并写回", "GetSelectedNodeParameterSnapshots()", "TrySetSelectedNodeParameterValue(...)"));
+        Assert.True(HasLineWithAll(consumerSampleZh, "验证证据", "parameterSnapshots", "CONSUMER_SAMPLE_METADATA_PROJECTION_OK"));
+
+        Assert.True(HasLineWithAll(authoringRecipeEn, "Step 1", "metadata", "ConsumerSample.Avalonia", "parameterSnapshots"));
+        Assert.True(HasLineWithAll(authoringRecipeZh, "第 1 步", "metadata", "ConsumerSample.Avalonia", "parameterSnapshots"));
+    }
+
+    [Fact]
     public void ConsumerSampleRecipeClosureDocs_SurfaceDedicatedTrustAndProofCopyBlocks()
     {
         var readme = ReadRepoFile("tools/AsterGraph.ConsumerSample.Avalonia/README.md");

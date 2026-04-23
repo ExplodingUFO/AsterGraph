@@ -52,6 +52,12 @@
 - 从 [Authoring Inspector Recipe](./authoring-inspector-recipe.md) 复制：definition-driven 的元数据词汇（`defaultValue`、`isAdvanced`、`helpText`、`placeholderText`、`constraints.IsReadOnly`）以及 stock inspector 的字段分组。
 - 本地保留：review/audit 节点族、action ids/titles、窗口布局和叙述文本，以及 defended markers 之外的 proof 文案。
 
+按这个顺序复制：
+
+- 定义 metadata：先从 [Authoring Inspector Recipe](./authoring-inspector-recipe.md) 复制 `defaultValue`、`editorKind`、`constraints` 和 `groupName`。
+- 投影并写回：在这份样例里通过 `IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()` 和 `IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)` 处理选中节点值。
+- 验证证据：用 proof mode 加 support bundle；把 `parameterSnapshots` 和 `CONSUMER_SAMPLE_PARAMETER_OK:True`、`CONSUMER_SAMPLE_METADATA_PROJECTION_OK:True` 对照。
+
 Consumer Sample 证明 seam 分工；它不拥有元数据词汇。Authoring Inspector Recipe 是元数据词汇的唯一 owner。
 
 ## 信任与证明速查
