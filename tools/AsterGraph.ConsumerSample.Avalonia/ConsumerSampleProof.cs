@@ -12,6 +12,7 @@ using AsterGraph.Avalonia.Hosting;
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Core.Models;
+using AsterGraph.Editor.Automation;
 using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.Services;
 using Avalonia.Themes.Fluent;
@@ -44,7 +45,8 @@ public sealed record ConsumerSampleProofResult(
     double StencilSearchMs,
     double CommandSurfaceRefreshMs,
     double NodeToolProjectionMs,
-    double EdgeToolProjectionMs)
+    double EdgeToolProjectionMs,
+    bool HostedAutomationNavigationOk = true)
 {
     public bool AuthoringSurfaceOk
         => ParameterProjectionOk
@@ -69,6 +71,7 @@ public sealed record ConsumerSampleProofResult(
     public bool HostedAccessibilityOk
         => HostedAccessibilityBaselineOk
         && HostedAccessibilityFocusOk
+        && HostedAutomationNavigationOk
         && HostedAccessibilityCommandSurfaceOk
         && HostedAccessibilityAuthoringSurfaceOk;
 
@@ -114,6 +117,7 @@ public sealed record ConsumerSampleProofResult(
         $"CAPABILITY_BREADTH_OK:{CapabilityBreadthOk}",
         $"HOSTED_ACCESSIBILITY_BASELINE_OK:{HostedAccessibilityBaselineOk}",
         $"HOSTED_ACCESSIBILITY_FOCUS_OK:{HostedAccessibilityFocusOk}",
+        $"HOSTED_ACCESSIBILITY_AUTOMATION_NAVIGATION_OK:{HostedAutomationNavigationOk}",
         $"HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:{HostedAccessibilityCommandSurfaceOk}",
         $"HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:{HostedAccessibilityAuthoringSurfaceOk}",
         $"HOSTED_ACCESSIBILITY_OK:{HostedAccessibilityOk}",
@@ -234,6 +238,7 @@ public static class ConsumerSampleProof
         bool nodeQuickToolsOk;
         bool hostedAccessibilityBaselineOk;
         bool hostedAccessibilityFocusOk;
+        bool hostedAutomationNavigationOk;
         bool hostedAccessibilityCommandSurfaceOk;
         bool hostedAccessibilityAuthoringSurfaceOk;
         try
@@ -248,6 +253,7 @@ public static class ConsumerSampleProof
             hostedAccessibilityBaselineOk = HasHostedAccessibilityBaselines(capabilityWindow);
             hostedAccessibilityAuthoringSurfaceOk = HasHostedAccessibilityAuthoringSurface(capabilityWindow);
             hostedAccessibilityFocusOk = HasHostedAccessibilityFocus(capabilityWindow);
+            hostedAutomationNavigationOk = HasHostedAutomationNavigation(capabilityWindow, host, reviewNodeId);
             hostedAccessibilityCommandSurfaceOk = HasHostedAccessibilityCommandSurface(capabilityWindow);
             host.SelectNode(reviewNodeId);
             FlushUi();
@@ -291,7 +297,8 @@ public static class ConsumerSampleProof
             StencilSearchMs: stencilSearchMs,
             CommandSurfaceRefreshMs: commandSurfaceRefreshMs,
             NodeToolProjectionMs: nodeToolProjectionMs,
-            EdgeToolProjectionMs: edgeToolProjectionMs);
+            EdgeToolProjectionMs: edgeToolProjectionMs,
+            HostedAutomationNavigationOk: hostedAutomationNavigationOk);
     }
 
     private static Window CreateCapabilityBreadthWindow(ConsumerSampleHost host)
@@ -639,6 +646,71 @@ public static class ConsumerSampleProof
             && HasCommandPaletteFocusRoundTrip(editorView, parameterSearchBox, paletteChrome, paletteSearchBox);
     }
 
+    private static bool HasHostedAutomationNavigation(
+        Window window,
+        ConsumerSampleHost host,
+        string reviewNodeId)
+    {
+        var editorView = window.GetVisualDescendants().OfType<GraphEditorView>().FirstOrDefault();
+        var paletteToggle = FindNamed<Button>(window, "PART_OpenCommandPaletteButton");
+        var paletteSearchBox = FindNamed<TextBox>(window, "PART_CommandPaletteSearchBox");
+        if (editorView is null
+            || paletteToggle is null
+            || paletteSearchBox is null)
+        {
+            return false;
+        }
+
+        var descriptors = host.Session.Queries.GetCommandDescriptors()
+            .ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
+        if (!HasEnabledCommand(descriptors, "selection.set")
+            || !HasEnabledCommand(descriptors, "viewport.center-node")
+            || !HasEnabledCommand(descriptors, "viewport.pan"))
+        {
+            return false;
+        }
+
+        var automationRunIds = new List<string>();
+        var automationProgressCommands = new List<string>();
+        var automationCompletedStates = new List<bool>();
+        host.Session.Events.AutomationStarted += (_, args) => automationRunIds.Add(args.RunId);
+        host.Session.Events.AutomationProgress += (_, args) => automationProgressCommands.Add(args.Step.CommandId);
+        host.Session.Events.AutomationCompleted += (_, args) => automationCompletedStates.Add(args.Result.Succeeded);
+
+        var initialViewport = host.Session.Queries.GetViewportSnapshot();
+        var automationResult = host.Session.Automation.Execute(new GraphEditorAutomationRunRequest(
+            "consumer-sample-hosted-navigation",
+            [
+                CreateAutomationStep("select-review", "selection.set", ("nodeId", reviewNodeId), ("primaryNodeId", reviewNodeId), ("updateStatus", "false")),
+                CreateAutomationStep("center-review", "viewport.center-node", ("nodeId", reviewNodeId)),
+                CreateAutomationStep("pan-view", "viewport.pan", ("deltaX", "24"), ("deltaY", "18")),
+            ]));
+        FlushUi();
+
+        var selection = host.Session.Queries.GetSelectionSnapshot();
+        var viewport = host.Session.Queries.GetViewportSnapshot();
+        var diagnostics = host.Session.Diagnostics.GetRecentDiagnostics(20)
+            .Select(diagnostic => diagnostic.Code)
+            .ToArray();
+
+        return automationResult.Succeeded
+            && automationResult.ExecutedStepCount == 3
+            && automationResult.TotalStepCount == 3
+            && automationRunIds.Count == 1
+            && string.Equals(automationRunIds[0], "consumer-sample-hosted-navigation", StringComparison.Ordinal)
+            && automationCompletedStates.Count == 1
+            && automationCompletedStates[0]
+            && automationProgressCommands.SequenceEqual(
+                ["selection.set", "viewport.center-node", "viewport.pan"],
+                StringComparer.Ordinal)
+            && selection.PrimarySelectedNodeId == reviewNodeId
+            && automationResult.Inspection.Selection.PrimarySelectedNodeId == reviewNodeId
+            && HasViewportChanged(initialViewport, automationResult.Inspection.Viewport)
+            && HasViewportChanged(initialViewport, viewport)
+            && diagnostics.Contains("automation.run.started", StringComparer.Ordinal)
+            && diagnostics.Contains("automation.run.completed", StringComparer.Ordinal);
+    }
+
     private static bool HasHostedAccessibilityCommandSurface(Window window)
     {
         var saveButton = FindNamed<Button>(window, "PART_HeaderCommand_workspace.save");
@@ -699,6 +771,18 @@ public static class ConsumerSampleProof
                 .Select(argument => new GraphEditorCommandArgumentSnapshot(argument.Name, argument.Value!))
                 .ToArray());
 
+    private static GraphEditorAutomationStep CreateAutomationStep(
+        string stepId,
+        string commandId,
+        params (string Name, string Value)[] arguments)
+        => new(
+            stepId,
+            CreateCommand(
+                commandId,
+                arguments
+                    .Select(static argument => (argument.Name, (string?)argument.Value))
+                    .ToArray()));
+
     private static bool HasImageSignature(byte[] bytes, GraphEditorSceneImageExportFormat format)
         => bytes.Length > 3
         && format switch
@@ -724,6 +808,19 @@ public static class ConsumerSampleProof
         stopwatch.Stop();
         return stopwatch.Elapsed.TotalMilliseconds;
     }
+
+    private static bool HasEnabledCommand(
+        IReadOnlyDictionary<string, GraphEditorCommandDescriptorSnapshot> descriptors,
+        string commandId)
+        => descriptors.TryGetValue(commandId, out var descriptor)
+        && descriptor.IsEnabled;
+
+    private static bool HasViewportChanged(
+        GraphEditorViewportSnapshot before,
+        GraphEditorViewportSnapshot after)
+        => before.Zoom != after.Zoom
+        || before.PanX != after.PanX
+        || before.PanY != after.PanY;
 
     private static bool HasCommandPaletteFocusRoundTrip(
         GraphEditorView view,
