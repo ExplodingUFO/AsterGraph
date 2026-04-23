@@ -77,7 +77,7 @@ public sealed class ProofFriendlyHostedTemplateClosureDocsTests
         Assert.Contains("CONSUMER_SAMPLE_OK:True", ExtractBlock(proofHandoffSectionEn, bundleMarkerHeadingEn, "## "), StringComparison.Ordinal);
         Assert.Contains("SUPPORT_BUNDLE_PATH:...", ExtractBlock(proofHandoffSectionEn, bundleMarkerHeadingEn, "## "), StringComparison.Ordinal);
         Assert.DoesNotContain("SUPPORT_BUNDLE_OK", ExtractBlock(proofHandoffSectionEn, proofMarkerHeadingEn, bundleMarkerHeadingEn), StringComparison.Ordinal);
-        Assert.Contains("reuse the emitted `SUPPORT_BUNDLE_PATH:...` line as the attachment note", proofHandoffSectionEn, StringComparison.Ordinal);
+        Assert.Contains("reuse the emitted `SUPPORT_BUNDLE_PATH:...` line as the support-bundle attachment note", proofHandoffSectionEn, StringComparison.Ordinal);
         Assert.Contains("local evidence only", consumerSampleEn, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("artifacts/consumer-support-bundle.json", consumerSampleEn, StringComparison.Ordinal);
 
@@ -86,7 +86,7 @@ public sealed class ProofFriendlyHostedTemplateClosureDocsTests
         Assert.Contains("CONSUMER_SAMPLE_OK:True", ExtractBlock(proofHandoffSectionZh, bundleMarkerHeadingZh, "## "), StringComparison.Ordinal);
         Assert.Contains("SUPPORT_BUNDLE_PATH:...", ExtractBlock(proofHandoffSectionZh, bundleMarkerHeadingZh, "## "), StringComparison.Ordinal);
         Assert.DoesNotContain("SUPPORT_BUNDLE_OK", ExtractBlock(proofHandoffSectionZh, proofMarkerHeadingZh, bundleMarkerHeadingZh), StringComparison.Ordinal);
-        Assert.Contains("把输出里的 `SUPPORT_BUNDLE_PATH:...` 作为附件备注", proofHandoffSectionZh, StringComparison.Ordinal);
+        Assert.Contains("把输出里的 `SUPPORT_BUNDLE_PATH:...` 作为 support-bundle 附件备注", proofHandoffSectionZh, StringComparison.Ordinal);
         Assert.Contains("本地证据", consumerSampleZh, StringComparison.Ordinal);
         Assert.DoesNotContain("artifacts/consumer-support-bundle.json", consumerSampleZh, StringComparison.Ordinal);
 

@@ -105,7 +105,7 @@ Proof Handoff owns the actual intake instructions.
 
 If you copied the starter recipe, validate the defended host here with `AsterGraph.ConsumerSample.Avalonia -- --proof` first.
 
-For the actual intake record, run `AsterGraph.ConsumerSample.Avalonia -- --proof --support-bundle <support-bundle-path>` and reuse the emitted `SUPPORT_BUNDLE_PATH:...` line as the attachment note on the bounded intake record.
+For the actual intake record, run `AsterGraph.ConsumerSample.Avalonia -- --proof --support-bundle <support-bundle-path>` and reuse the emitted `SUPPORT_BUNDLE_PATH:...` line as the support-bundle attachment note on the bounded intake record.
 
 If the route cannot produce a bundle, record `NO_SUPPORT_BUNDLE:route-cannot-produce-one`.
 

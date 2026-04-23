@@ -81,7 +81,7 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("[Adoption Feedback Loop](./docs/en/adoption-feedback.md)", notes, StringComparison.Ordinal);
         Assert.Contains("[Adopter Triage Checklist](./docs/en/adopter-triage.md)", notes, StringComparison.Ordinal);
         Assert.True(HasLineWithAll(notes, "route", "version", "proof markers", "friction", "support-bundle attachment note"));
-        Assert.Contains("3-5 real external reports on the same bounded risk", notes, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("3-5 real external reports cluster on the same bounded risk", notes, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("HELLOWORLD_WPF_OK:True", notes, StringComparison.Ordinal);
         Assert.Contains("adapter-2 validation only", notes, StringComparison.Ordinal);
         Assert.Contains("does not widen the public publish/package boundary", notes, StringComparison.Ordinal);
@@ -104,7 +104,7 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("external capability readiness gate", englishChecklist, StringComparison.OrdinalIgnoreCase);
         Assert.True(HasLineWithAll(englishChecklist, "externally proven", "validation-only", "bounded", "deferred"));
         Assert.True(HasLineWithAll(englishChecklist, "copyable host-owned parameter/metadata polish", "only widen toward defended large-tier performance or broader parameter/metadata editing", "3-5 real external reports", "same bounded risk"));
-        Assert.Contains("3-5 real external reports on the same bounded risk", englishChecklist, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("3-5 real external reports cluster on the same bounded risk", englishChecklist, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("0.xx alpha/beta line", englishChecklist, StringComparison.Ordinal);
         Assert.True(HasLineWithAll(englishChecklist, "route", "version", "proof markers", "friction", "support-bundle attachment note"));
         Assert.DoesNotContain("HELLOWORLD_WPF_OK is Avalonia/WPF parity", englishChecklist, StringComparison.Ordinal);
