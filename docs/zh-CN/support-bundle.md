@@ -57,7 +57,7 @@ support bundle 是一个本地 JSON 文件，顶层字段固定为：
 - 走到真实宿主 proof 之后提交 adopter feedback 时，把它作为受限 intake 记录的一部分附上
 - 包版本、路线或环境变化后重新生成
 - 把它当成 [Project Status](./project-status.md) 就绪门禁的反馈证据，而不是自动扩大支持边界的证明
-- 如果当前 route 还生成不了，就继续保留同一条 route/version/proof/摩擦记录，并注明 support bundle 暂时不可用
+- 如果当前 route 还生成不了，就继续保留同一条 route/version/proof 标记/摩擦记录，并注明 support bundle 暂时不可用
 
 ## 相关文档
 

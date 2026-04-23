@@ -29,10 +29,10 @@ What happened instead?
 - AsterGraph version:
 - .NET SDK:
 - OS:
-- Host path: (`CreateSession`, `Create` + view factory, retained path, demo, smoke tool)
 - Route or artifact tried:
 - Proof markers:
-- Support bundle JSON path (if available):
+- Friction:
+- Support-bundle attachment note:
 
 ## Verification
 

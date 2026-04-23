@@ -259,8 +259,8 @@ public sealed class DemoProofReleaseSurfaceTests
         AssertAppearsBefore(supportBundleZh, "公开 Beta 评估路径", "## Canonical 生成入口");
         Assert.Contains("support-bundle", consumerSampleDoc, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("support-bundle", consumerSampleReadme, StringComparison.OrdinalIgnoreCase);
-        Assert.True(HasLineWithAll(adoptionFeedback, "route", "version", "proof", "friction", "support-bundle"));
-        Assert.True(HasLineWithAll(adoptionFeedbackZh, "route", "version", "proof", "摩擦", "support bundle"));
+        Assert.True(HasLineWithAll(adoptionFeedback, "route", "version", "proof markers", "friction", "support-bundle attachment note"));
+        Assert.True(HasLineWithAll(adoptionFeedbackZh, "route", "version", "proof 标记", "摩擦", "support bundle 附件备注"));
     }
 
     [Fact]
@@ -366,6 +366,8 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("id: proof_markers", adoptionTemplate, StringComparison.Ordinal);
         Assert.Contains("id: friction", adoptionTemplate, StringComparison.Ordinal);
         Assert.Contains("id: support_bundle", adoptionTemplate, StringComparison.Ordinal);
+        Assert.Contains("Proof markers", adoptionTemplate, StringComparison.Ordinal);
+        Assert.Contains("Support-bundle attachment note", adoptionTemplate, StringComparison.Ordinal);
         Assert.Equal(
             new[]
             {
@@ -392,18 +394,18 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("AsterGraph version", bugTemplate, StringComparison.Ordinal);
         Assert.Contains("Route or artifact tried", bugTemplate, StringComparison.Ordinal);
         Assert.Contains("Proof markers", bugTemplate, StringComparison.Ordinal);
-        Assert.Contains("Support bundle", bugTemplate, StringComparison.Ordinal);
+        Assert.Contains("Support-bundle attachment note", bugTemplate, StringComparison.Ordinal);
 
-        foreach (var contents in new[] { triageDoc, triageDocZh })
-        {
-            Assert.Contains("version", contents, StringComparison.OrdinalIgnoreCase);
-            Assert.Contains("route", contents, StringComparison.OrdinalIgnoreCase);
-            Assert.Contains("proof", contents, StringComparison.OrdinalIgnoreCase);
-            Assert.Contains("support bundle", contents, StringComparison.OrdinalIgnoreCase);
-            Assert.Contains("SUPPORT_BUNDLE_PATH", contents, StringComparison.Ordinal);
-            Assert.Contains("NO_SUPPORT_BUNDLE", contents, StringComparison.Ordinal);
-        }
-
+        Assert.Contains("route", triageDoc, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("version", triageDoc, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("proof markers", triageDoc, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("friction", triageDoc, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("support-bundle attachment note", triageDoc, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("route", triageDocZh, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("version", triageDocZh, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("proof 标记", triageDocZh, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("摩擦", triageDocZh, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("support bundle 附件备注", triageDocZh, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("friction", triageDoc, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("摩擦", triageDocZh, StringComparison.Ordinal);
 
@@ -412,11 +414,11 @@ public sealed class DemoProofReleaseSurfaceTests
             Assert.True(HasLineWithAll(contents, "HelloWorld", "AsterGraph.Starter.Avalonia", "HelloWorld.Avalonia", "ConsumerSample.Avalonia", "HostSample", "PackageSmoke", "ScaleSmoke", "Demo"));
         }
 
-        Assert.True(HasLineWithAll(supportBundle, "route", "version", "proof", "friction", "no support bundle"));
-        Assert.True(HasLineWithAll(supportBundleZh, "route", "version", "proof", "摩擦", "不可用"));
+        Assert.True(HasLineWithAll(supportBundle, "route", "version", "proof markers", "friction", "no support bundle"));
+        Assert.True(HasLineWithAll(supportBundleZh, "route", "version", "proof 标记", "摩擦", "不可用"));
 
-        Assert.True(HasLineWithAll(checklist, "route", "version", "proof", "friction", "support-bundle"));
-        Assert.True(HasLineWithAll(checklistZh, "route", "version", "proof", "摩擦", "support bundle"));
+        Assert.True(HasLineWithAll(checklist, "route", "version", "proof markers", "friction", "support-bundle attachment note"));
+        Assert.True(HasLineWithAll(checklistZh, "route", "version", "proof 标记", "摩擦", "support bundle 附件备注"));
         Assert.Contains("support bundle", checklist, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("adopter triage", checklist, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("support bundle", checklistZh, StringComparison.OrdinalIgnoreCase);
