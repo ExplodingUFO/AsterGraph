@@ -1,6 +1,7 @@
 using System.Linq;
 using System.ComponentModel;
 using Avalonia;
+using Avalonia.Automation;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
@@ -334,6 +335,7 @@ public partial class GraphEditorView : UserControl
     private void InitializeComponent()
     {
         AvaloniaXamlLoader.Load(this);
+        AutomationProperties.SetName(this, "Graph editor host");
         _shellGrid = this.FindControl<Grid>("PART_ShellGrid");
         _headerChrome = this.FindControl<Border>("PART_HeaderChrome");
         _libraryChrome = this.FindControl<Border>("PART_LibraryChrome");
@@ -358,6 +360,26 @@ public partial class GraphEditorView : UserControl
         _nodeCanvas = this.FindControl<NodeCanvas>("PART_NodeCanvas");
         _inspectorSurface = this.FindControl<GraphInspectorView>("PART_InspectorSurface");
         _miniMapSurface = this.FindControl<GraphMiniMap>("PART_MiniMapSurface");
+        if (_stencilSearchBox is not null)
+        {
+            AutomationProperties.SetName(_stencilSearchBox, "Stencil search");
+        }
+
+        if (_openCommandPaletteButton is not null)
+        {
+            AutomationProperties.SetName(_openCommandPaletteButton, "Open command palette");
+        }
+
+        if (_commandPaletteSearchBox is not null)
+        {
+            AutomationProperties.SetName(_commandPaletteSearchBox, "Command palette search");
+        }
+
+        if (_inspectorSurface is not null)
+        {
+            AutomationProperties.SetName(_inspectorSurface, "Graph inspector");
+        }
+
         InitializeAuthoringToolControls();
         if (_stencilSearchBox is not null)
         {

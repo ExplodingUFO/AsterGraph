@@ -1,4 +1,5 @@
 using Avalonia;
+using Avalonia.Automation;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Input;
@@ -121,6 +122,7 @@ public partial class NodeCanvas : UserControl
         _lifecycleCoordinator = new NodeCanvasLifecycleCoordinator(new NodeCanvasLifecycleHost(this));
         InitializeComponent();
         Focusable = true;
+        AutomationProperties.SetName(this, "Graph canvas");
         _contextMenuCoordinator = new NodeCanvasContextMenuCoordinator(new NodeCanvasContextMenuHost(this), this);
         _sceneHost = new NodeCanvasSceneHost(new NodeCanvasSceneHostAdapter(this));
         _viewModelObserver = new NodeCanvasViewModelObserver(new NodeCanvasViewModelObserverHost(this));

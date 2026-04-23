@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Reflection;
 using Avalonia;
+using Avalonia.Automation;
 using Avalonia.Controls;
 using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
@@ -75,6 +76,44 @@ public sealed class GraphEditorViewTests
         Assert.Equal(40, toolbar.ItemHeight);
         Assert.Equal(120, toolbar.ItemWidth);
         Assert.True(toolbar.Children.Count >= 7);
+    }
+
+    [AvaloniaFact]
+    public void DefaultChromeMode_ExposesHostedAccessibilityBaselineSemantics()
+    {
+        var editor = CreateEditor();
+        var window = CreateWindow(new GraphEditorView
+        {
+            Editor = editor,
+        });
+        var view = (GraphEditorView)window.Content!;
+        var canvas = FindRequiredControl<NodeCanvas>(view, "PART_NodeCanvas");
+        var stencilSearchBox = FindRequiredControl<TextBox>(view, "PART_StencilSearchBox");
+        var paletteToggle = FindRequiredControl<Button>(view, "PART_OpenCommandPaletteButton");
+        var paletteSearchBox = FindRequiredControl<TextBox>(view, "PART_CommandPaletteSearchBox");
+        var inspector = FindRequiredControl<GraphInspectorView>(view, "PART_InspectorSurface");
+        var parameterSearchBox = FindRequiredDescendant<TextBox>(view, "PART_ParameterSearchBox");
+
+        var nodeSurface = canvas.GetVisualDescendants()
+            .OfType<Control>()
+            .FirstOrDefault(control =>
+                control.Focusable
+                && AutomationProperties.GetName(control)?.EndsWith(" node", StringComparison.Ordinal) == true);
+
+        Assert.True(view.Focusable);
+        Assert.Equal("Graph editor host", AutomationProperties.GetName(view));
+
+        Assert.True(canvas.Focusable);
+        Assert.Equal("Graph canvas", AutomationProperties.GetName(canvas));
+
+        Assert.Equal("Stencil search", AutomationProperties.GetName(stencilSearchBox));
+        Assert.Equal("Open command palette", AutomationProperties.GetName(paletteToggle));
+        Assert.Equal("Command palette search", AutomationProperties.GetName(paletteSearchBox));
+
+        Assert.Equal("Graph inspector", AutomationProperties.GetName(inspector));
+        Assert.Equal("Inspector parameter search", AutomationProperties.GetName(parameterSearchBox));
+
+        Assert.NotNull(nodeSurface);
     }
 
     [AvaloniaFact]

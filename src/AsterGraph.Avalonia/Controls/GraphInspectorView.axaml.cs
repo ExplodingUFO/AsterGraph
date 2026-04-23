@@ -2,6 +2,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 using Avalonia;
+using Avalonia.Automation;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
@@ -55,6 +56,7 @@ public partial class GraphInspectorView : UserControl
     public GraphInspectorView()
     {
         InitializeComponent();
+        AutomationProperties.SetName(this, "Graph inspector");
         _stockContent = Content;
         InitializeStockControls();
         AddHandler(
@@ -124,6 +126,10 @@ public partial class GraphInspectorView : UserControl
         _parameterSearchEmptyStateText = this.FindControl<TextBlock>("PART_ParameterSearchEmptyStateText");
         _parameterGroupsControl = this.FindControl<ItemsControl>("PART_ParameterGroups");
         _advancedParametersToggleButton = this.FindControl<Button>("PART_AdvancedParametersToggleButton");
+        if (_parameterSearchBox is not null)
+        {
+            AutomationProperties.SetName(_parameterSearchBox, "Inspector parameter search");
+        }
 
     }
 
