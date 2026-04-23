@@ -52,6 +52,10 @@ Expected proof markers:
 - `HOST_NATIVE_METRIC:inspector_projection_ms=...`
 - `HOST_NATIVE_METRIC:plugin_scan_ms=...`
 - `HOST_NATIVE_METRIC:command_latency_ms=...`
+- `HOST_NATIVE_METRIC:stencil_search_ms=...`
+- `HOST_NATIVE_METRIC:command_surface_refresh_ms=...`
+- `HOST_NATIVE_METRIC:node_tool_projection_ms=...`
+- `HOST_NATIVE_METRIC:edge_tool_projection_ms=...`
 - `AUTHORING_SURFACE_OK:True`
 - `CONSUMER_SAMPLE_OK:True`
 

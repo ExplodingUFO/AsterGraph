@@ -28,6 +28,10 @@ internal static class ConsumerSampleDocsAssertions
         Assert.Contains("HOST_NATIVE_METRIC:inspector_projection_ms", contents, StringComparison.Ordinal);
         Assert.Contains("HOST_NATIVE_METRIC:plugin_scan_ms", contents, StringComparison.Ordinal);
         Assert.Contains("HOST_NATIVE_METRIC:command_latency_ms", contents, StringComparison.Ordinal);
+        Assert.Contains("HOST_NATIVE_METRIC:stencil_search_ms", contents, StringComparison.Ordinal);
+        Assert.Contains("HOST_NATIVE_METRIC:command_surface_refresh_ms", contents, StringComparison.Ordinal);
+        Assert.Contains("HOST_NATIVE_METRIC:node_tool_projection_ms", contents, StringComparison.Ordinal);
+        Assert.Contains("HOST_NATIVE_METRIC:edge_tool_projection_ms", contents, StringComparison.Ordinal);
         Assert.Contains("CONSUMER_SAMPLE_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("parameterSnapshots", contents, StringComparison.Ordinal);
         Assert.Contains("currentValue", contents, StringComparison.Ordinal);

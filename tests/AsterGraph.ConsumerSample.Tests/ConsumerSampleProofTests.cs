@@ -64,6 +64,10 @@ public sealed class ConsumerSampleProofTests
         Assert.True(result.InspectorProjectionMs >= 0);
         Assert.True(result.PluginScanMs >= 0);
         Assert.True(result.CommandLatencyMs >= 0);
+        Assert.True(result.StencilSearchMs >= 0);
+        Assert.True(result.CommandSurfaceRefreshMs >= 0);
+        Assert.True(result.NodeToolProjectionMs >= 0);
+        Assert.True(result.EdgeToolProjectionMs >= 0);
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_SURFACE_PARAMETER_PROJECTION_OK:True");
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_SURFACE_METADATA_PROJECTION_OK:True");
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:True");
@@ -76,6 +80,10 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_SURFACE_OK:True");
         Assert.Contains(result.MetricLines, line => line.Contains("startup_ms", StringComparison.Ordinal));
         Assert.Contains(result.MetricLines, line => line.Contains("command_latency_ms", StringComparison.Ordinal));
+        Assert.Contains(result.MetricLines, line => line.Contains("stencil_search_ms", StringComparison.Ordinal));
+        Assert.Contains(result.MetricLines, line => line.Contains("command_surface_refresh_ms", StringComparison.Ordinal));
+        Assert.Contains(result.MetricLines, line => line.Contains("node_tool_projection_ms", StringComparison.Ordinal));
+        Assert.Contains(result.MetricLines, line => line.Contains("edge_tool_projection_ms", StringComparison.Ordinal));
     }
 
     [AvaloniaFact]
@@ -98,7 +106,11 @@ public sealed class ConsumerSampleProofTests
             StartupMs: 1,
             InspectorProjectionMs: 1,
             PluginScanMs: 1,
-            CommandLatencyMs: 1);
+            CommandLatencyMs: 1,
+            StencilSearchMs: 1,
+            CommandSurfaceRefreshMs: 1,
+            NodeToolProjectionMs: 1,
+            EdgeToolProjectionMs: 1);
 
         Assert.False(result.IsOk);
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_SURFACE_METADATA_PROJECTION_OK:False");
@@ -127,7 +139,11 @@ public sealed class ConsumerSampleProofTests
             StartupMs: 1,
             InspectorProjectionMs: 1,
             PluginScanMs: 1,
-            CommandLatencyMs: 1);
+            CommandLatencyMs: 1,
+            StencilSearchMs: 1,
+            CommandSurfaceRefreshMs: 1,
+            NodeToolProjectionMs: 1,
+            EdgeToolProjectionMs: 1);
 
         Assert.False(result.CapabilityBreadthOk);
         Assert.False(result.IsOk);
@@ -193,6 +209,10 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(proofLines, line => line is not null && line.StartsWith("HOST_NATIVE_METRIC:inspector_projection_ms=", StringComparison.Ordinal));
         Assert.Contains(proofLines, line => line is not null && line.StartsWith("HOST_NATIVE_METRIC:plugin_scan_ms=", StringComparison.Ordinal));
         Assert.Contains(proofLines, line => line is not null && line.StartsWith("HOST_NATIVE_METRIC:command_latency_ms=", StringComparison.Ordinal));
+        Assert.Contains(proofLines, line => line is not null && line.StartsWith("HOST_NATIVE_METRIC:stencil_search_ms=", StringComparison.Ordinal));
+        Assert.Contains(proofLines, line => line is not null && line.StartsWith("HOST_NATIVE_METRIC:command_surface_refresh_ms=", StringComparison.Ordinal));
+        Assert.Contains(proofLines, line => line is not null && line.StartsWith("HOST_NATIVE_METRIC:node_tool_projection_ms=", StringComparison.Ordinal));
+        Assert.Contains(proofLines, line => line is not null && line.StartsWith("HOST_NATIVE_METRIC:edge_tool_projection_ms=", StringComparison.Ordinal));
         Assert.Contains(proofLines, line => line == "CONSUMER_SAMPLE_OK:True");
         Assert.Equal(
             ["frameworkDescription", "osArchitecture", "osDescription", "processArchitecture"],

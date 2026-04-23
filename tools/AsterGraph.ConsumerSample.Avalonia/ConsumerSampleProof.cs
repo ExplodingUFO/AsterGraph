@@ -34,7 +34,11 @@ public sealed record ConsumerSampleProofResult(
     double StartupMs,
     double InspectorProjectionMs,
     double PluginScanMs,
-    double CommandLatencyMs)
+    double CommandLatencyMs,
+    double StencilSearchMs,
+    double CommandSurfaceRefreshMs,
+    double NodeToolProjectionMs,
+    double EdgeToolProjectionMs)
 {
     public bool AuthoringSurfaceOk
         => ParameterProjectionOk
@@ -62,6 +66,10 @@ public sealed record ConsumerSampleProofResult(
         FormatMetric("inspector_projection_ms", InspectorProjectionMs),
         FormatMetric("plugin_scan_ms", PluginScanMs),
         FormatMetric("command_latency_ms", CommandLatencyMs),
+        FormatMetric("stencil_search_ms", StencilSearchMs),
+        FormatMetric("command_surface_refresh_ms", CommandSurfaceRefreshMs),
+        FormatMetric("node_tool_projection_ms", NodeToolProjectionMs),
+        FormatMetric("edge_tool_projection_ms", EdgeToolProjectionMs),
     ];
 
     internal IReadOnlyList<string> ProofLines =>
@@ -117,6 +125,10 @@ public static class ConsumerSampleProof
         double inspectorProjectionMs;
         double pluginScanMs;
         double commandLatencyMs;
+        double stencilSearchMs;
+        double commandSurfaceRefreshMs;
+        double nodeToolProjectionMs;
+        double edgeToolProjectionMs;
 
         try
         {
@@ -167,6 +179,11 @@ public static class ConsumerSampleProof
                 && host.PluginCandidateEntries.Any(entry => entry.IsBlocked && entry.TrustReason.Contains("allowlist", StringComparison.OrdinalIgnoreCase))
                 && host.ImportPluginAllowlist()
                 && host.PluginCandidateEntries.Any(entry => entry.IsAllowed && entry.TrustReason.Contains("allowlist", StringComparison.OrdinalIgnoreCase));
+
+            stencilSearchMs = MeasureStencilSearchMilliseconds(host.Session, "plugin");
+            commandSurfaceRefreshMs = MeasureCommandSurfaceRefreshMilliseconds(host.Session);
+            nodeToolProjectionMs = MeasureNodeToolProjectionMilliseconds(host.Session, host.GetFirstReviewNodeId());
+            edgeToolProjectionMs = MeasureEdgeToolProjectionMilliseconds(host.Session, host.GetFirstReviewNodeId(), "consumer-sample-connection-001");
 
             windowCompositionOk =
                 FindNamed<Menu>(window, "PART_MainMenu") is not null
@@ -225,7 +242,11 @@ public static class ConsumerSampleProof
             StartupMs: startupMs,
             InspectorProjectionMs: inspectorProjectionMs,
             PluginScanMs: pluginScanMs,
-            CommandLatencyMs: commandLatencyMs);
+            CommandLatencyMs: commandLatencyMs,
+            StencilSearchMs: stencilSearchMs,
+            CommandSurfaceRefreshMs: commandSurfaceRefreshMs,
+            NodeToolProjectionMs: nodeToolProjectionMs,
+            EdgeToolProjectionMs: edgeToolProjectionMs);
     }
 
     private static Window CreateCapabilityBreadthWindow(ConsumerSampleHost host)
@@ -375,6 +396,72 @@ public static class ConsumerSampleProof
             && HasImageSignature(File.ReadAllBytes(jpegPath), GraphEditorSceneImageExportFormat.Jpeg);
     }
 
+    private static double MeasureStencilSearchMilliseconds(
+        IGraphEditorSession session,
+        string filter)
+        => MeasureMilliseconds(() =>
+        {
+            var addNodeDescriptor = session.Queries.GetCommandDescriptors()
+                .FirstOrDefault(descriptor => string.Equals(descriptor.Id, "nodes.add", StringComparison.Ordinal));
+            var sections = session.Queries.GetNodeTemplateSnapshots()
+                .Where(snapshot => MatchesStencilFilter(snapshot, filter))
+                .GroupBy(snapshot => snapshot.Category, StringComparer.Ordinal)
+                .OrderBy(section => section.Key, StringComparer.Ordinal)
+                .Select(section => (Category: section.Key, Count: section.Count()))
+                .ToArray();
+            _ = addNodeDescriptor?.Id;
+            _ = sections.Length;
+        });
+
+    private static double MeasureCommandSurfaceRefreshMilliseconds(IGraphEditorSession session)
+        => MeasureMilliseconds(() =>
+        {
+            var actions = AsterGraphHostedActionFactory.ApplyCommandShortcutPolicy(
+                [
+                    .. AsterGraphHostedActionFactory.CreateCommandActions(session),
+                    .. AsterGraphHostedActionFactory.CreateCommandActions(
+                        session,
+                        ["composites.wrap-selection", "scopes.enter", "scopes.exit"]),
+                    .. AsterGraphAuthoringToolActionFactory.CreateCommandSurfaceActions(session),
+                ],
+                AsterGraphCommandShortcutPolicy.Default);
+            _ = actions.Count;
+        });
+
+    private static double MeasureNodeToolProjectionMilliseconds(
+        IGraphEditorSession session,
+        string nodeId)
+        => MeasureMilliseconds(() =>
+        {
+            var selection = session.Queries.GetSelectionSnapshot();
+            var actions = AsterGraphAuthoringToolActionFactory.CreateNodeActions(
+                session,
+                nodeId,
+                selection.SelectedNodeIds,
+                selection.PrimarySelectedNodeId);
+            _ = actions.Count;
+        });
+
+    private static double MeasureEdgeToolProjectionMilliseconds(
+        IGraphEditorSession session,
+        string nodeId,
+        string connectionId)
+        => MeasureMilliseconds(() =>
+        {
+            var selection = session.Queries.GetSelectionSnapshot();
+            var nodeActions = AsterGraphAuthoringToolActionFactory.CreateNodeActions(
+                session,
+                nodeId,
+                selection.SelectedNodeIds,
+                selection.PrimarySelectedNodeId);
+            var connectionActions = AsterGraphAuthoringToolActionFactory.CreateConnectionActions(
+                session,
+                connectionId,
+                selection.SelectedNodeIds,
+                selection.PrimarySelectedNodeId);
+            _ = nodeActions.Count + connectionActions.Count;
+        });
+
     private static bool HasNodeQuickTools(Window window, ConsumerSampleHost host, string reviewNodeId)
     {
         var expansionButton = FindNamed<Button>(window, "PART_NodeToolToggleExpansionButton");
@@ -485,6 +572,13 @@ public static class ConsumerSampleProof
                 => bytes[0] == 0xFF && bytes[1] == 0xD8 && bytes[2] == 0xFF,
             _ => false,
         };
+
+    private static bool MatchesStencilFilter(GraphEditorNodeTemplateSnapshot snapshot, string filter)
+        => string.IsNullOrWhiteSpace(filter)
+        || snapshot.Category.Contains(filter, StringComparison.OrdinalIgnoreCase)
+        || snapshot.Title.Contains(filter, StringComparison.OrdinalIgnoreCase)
+        || snapshot.Subtitle.Contains(filter, StringComparison.OrdinalIgnoreCase)
+        || snapshot.Description.Contains(filter, StringComparison.OrdinalIgnoreCase);
 
     private static double MeasureMilliseconds(Action action)
     {
