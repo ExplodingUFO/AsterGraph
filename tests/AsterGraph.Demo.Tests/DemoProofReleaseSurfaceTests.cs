@@ -264,6 +264,42 @@ public sealed class DemoProofReleaseSurfaceTests
     }
 
     [Fact]
+    public void AdopterTriageDocs_LinkSyntheticIntakeDryRunFixtureRecords()
+    {
+        var triage = ReadRepoFile("docs/en/adopter-triage.md");
+        var triageZh = ReadRepoFile("docs/zh-CN/adopter-triage.md");
+        var dryRun = ReadRepoFile("docs/en/adoption-intake-dry-run.md");
+        var dryRunZh = ReadRepoFile("docs/zh-CN/adoption-intake-dry-run.md");
+
+        Assert.Contains("adoption-intake-dry-run.md", triage, StringComparison.Ordinal);
+        Assert.Contains("adoption-intake-dry-run.md", triageZh, StringComparison.Ordinal);
+        Assert.Contains("synthetic", dryRun, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("dry-run", dryRun, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("rehearsal", dryRun, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("synthetic", dryRunZh, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("dry-run", dryRunZh, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("演练", dryRunZh, StringComparison.Ordinal);
+        Assert.Contains("CONSUMER_SAMPLE_PARAMETER_OK:False", dryRun, StringComparison.Ordinal);
+        Assert.Contains("CONSUMER_SAMPLE_METADATA_PROJECTION_OK:False", dryRun, StringComparison.Ordinal);
+        Assert.Contains("SUPPORT_BUNDLE_PERSISTENCE_OK:False", dryRun, StringComparison.Ordinal);
+        Assert.Contains("CONSUMER_SAMPLE_PARAMETER_OK:False", dryRunZh, StringComparison.Ordinal);
+        Assert.Contains("CONSUMER_SAMPLE_METADATA_PROJECTION_OK:False", dryRunZh, StringComparison.Ordinal);
+        Assert.Contains("SUPPORT_BUNDLE_PERSISTENCE_OK:False", dryRunZh, StringComparison.Ordinal);
+        Assert.True(HasLineWithAll(dryRun, "route", "version", "proof markers", "friction", "support-bundle attachment note"));
+        Assert.True(HasLineWithAll(dryRunZh, "route", "version", "proof 标记", "摩擦", "support bundle 附件备注"));
+        Assert.Contains("parameterSnapshots", dryRun, StringComparison.Ordinal);
+        Assert.Contains("parameterSnapshots", dryRunZh, StringComparison.Ordinal);
+        Assert.Contains("status", dryRun, StringComparison.Ordinal);
+        Assert.Contains("owner", dryRun, StringComparison.Ordinal);
+        Assert.Contains("priority", dryRun, StringComparison.Ordinal);
+        Assert.Contains("status", dryRunZh, StringComparison.Ordinal);
+        Assert.Contains("owner", dryRunZh, StringComparison.Ordinal);
+        Assert.Contains("priority", dryRunZh, StringComparison.Ordinal);
+        Assert.Contains("NO_SUPPORT_BUNDLE:route-cannot-produce-one", dryRun, StringComparison.Ordinal);
+        Assert.Contains("NO_SUPPORT_BUNDLE:route-cannot-produce-one", dryRunZh, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void IntakeHandoffDocs_UseOneBoundedIntakeVocabularyAndKeepQuickReferenceSummaryOnly()
     {
         var evaluationPath = ReadRepoFile("docs/en/evaluation-path.md");

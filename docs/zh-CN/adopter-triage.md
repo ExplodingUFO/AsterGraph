@@ -33,4 +33,5 @@
 ## 相关链接
 
 - [Adoption Feedback](./adoption-feedback.md)
+- [Synthetic Adoption Intake Dry-Run Fixtures](./adoption-intake-dry-run.md)
 - [Beta Support Bundle](./support-bundle.md)

@@ -33,4 +33,5 @@ Keep `status`, `owner`, and `priority` visible when you inspect `parameterSnapsh
 ## Related Links
 
 - [Adoption Feedback](./adoption-feedback.md)
+- [Synthetic Adoption Intake Dry-Run Fixtures](./adoption-intake-dry-run.md)
 - [Beta Support Bundle](./support-bundle.md)
