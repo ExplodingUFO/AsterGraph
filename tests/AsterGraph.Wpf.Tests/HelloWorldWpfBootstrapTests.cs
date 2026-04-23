@@ -154,6 +154,60 @@ public sealed class HelloWorldWpfBootstrapTests
         });
     }
 
+    [Fact]
+    public void WpfHostedHelloWorldRoute_ExposesCommandAndAuthoringAccessibilitySemantics()
+    {
+        if (!OperatingSystem.IsWindows())
+        {
+            return;
+        }
+
+        var editor = WpfRouteTestHelpers.CreateHelloWorldEditor();
+        WpfRouteTestHelpers.RunInSta(() =>
+        {
+            var hostedView = WpfRouteTestHelpers.CreateHelloWorldHostedView(editor);
+            var hostedUi = hostedView as FrameworkElement
+                ?? throw new InvalidOperationException("Expected hosted WPF view to be a FrameworkElement.");
+
+            var window = new Window
+            {
+                Content = hostedUi,
+                Width = 200,
+                Height = 120,
+                ShowInTaskbar = false,
+                WindowStyle = WindowStyle.None,
+                ResizeMode = ResizeMode.NoResize,
+            };
+
+            window.Show();
+            window.Dispatcher.Invoke(() =>
+            {
+            }, DispatcherPriority.Background);
+
+            Assert.Equal(
+                "Save command",
+                AutomationProperties.GetName(Assert.IsAssignableFrom<FrameworkElement>(hostedUi.FindName("PART_SaveCommandButton"))));
+            Assert.Equal(
+                "Undo command",
+                AutomationProperties.GetName(Assert.IsAssignableFrom<FrameworkElement>(hostedUi.FindName("PART_UndoCommandButton"))));
+            Assert.Equal(
+                "Delete command",
+                AutomationProperties.GetName(Assert.IsAssignableFrom<FrameworkElement>(hostedUi.FindName("PART_DeleteSelectionCommandButton"))));
+            Assert.Equal(
+                "Node templates list",
+                AutomationProperties.GetName(Assert.IsAssignableFrom<FrameworkElement>(hostedUi.FindName("PART_NodeTemplatesList"))));
+            Assert.Equal(
+                "Node list",
+                AutomationProperties.GetName(Assert.IsAssignableFrom<FrameworkElement>(hostedUi.FindName("PART_NodeList"))));
+            Assert.Equal(
+                "Connections summary",
+                AutomationProperties.GetName(Assert.IsAssignableFrom<FrameworkElement>(hostedUi.FindName("PART_InspectorConnectionsSummary"))));
+
+            window.Close();
+            return 0;
+        });
+    }
+
     private static void AssertKeyBinding(InputBindingCollection inputBindings, Key key, ModifierKeys modifiers, ICommand expectedCommand)
     {
         var binding = Assert.Single(inputBindings.OfType<KeyBinding>(), candidate =>

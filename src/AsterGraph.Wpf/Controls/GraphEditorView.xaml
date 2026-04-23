@@ -27,17 +27,23 @@
             BorderThickness="0,0,0,1"
             automation:AutomationProperties.Name="Graph editor command bar">
       <StackPanel Orientation="Horizontal">
-        <Button Content="Save" Command="{Binding Editor.SaveCommand}" Margin="0,0,8,0" />
+        <Button x:Name="PART_SaveCommandButton"
+                Content="Save"
+                Command="{Binding Editor.SaveCommand}"
+                Margin="0,0,8,0"
+                automation:AutomationProperties.Name="Save command" />
         <Button Content="Load" Command="{Binding Editor.LoadCommand}" Margin="0,0,8,0" />
         <Button x:Name="PART_UndoCommandButton"
                 Content="Undo"
                 Command="{Binding Editor.UndoCommand}"
-                Margin="0,0,8,0" />
+                Margin="0,0,8,0"
+                automation:AutomationProperties.Name="Undo command" />
         <Button Content="Redo" Command="{Binding Editor.RedoCommand}" Margin="0,0,8,0" />
         <Button x:Name="PART_DeleteSelectionCommandButton"
                 Content="Delete"
                 Command="{Binding Editor.DeleteSelectionCommand}"
-                Margin="0,0,8,0" />
+                Margin="0,0,8,0"
+                automation:AutomationProperties.Name="Delete command" />
         <Button Content="Copy" Command="{Binding Editor.CopySelectionCommand}" Margin="0,0,8,0" />
         <Button Content="Paste" Command="{Binding Editor.PasteCommand}" Margin="0,0,8,0" />
         <Button Content="Fit" Command="{Binding Editor.FitViewCommand}" Margin="0,0,8,0" />
@@ -64,7 +70,10 @@
               automation:AutomationProperties.Name="Node templates">
         <DockPanel>
           <TextBlock Text="Node Templates" FontWeight="SemiBold" Margin="0,0,0,8" />
-          <ListView ItemsSource="{Binding Editor.NodeTemplates}" BorderThickness="0">
+          <ListView x:Name="PART_NodeTemplatesList"
+                    ItemsSource="{Binding Editor.NodeTemplates}"
+                    BorderThickness="0"
+                    automation:AutomationProperties.Name="Node templates list">
             <ListView.ItemTemplate>
               <DataTemplate>
                 <DockPanel LastChildFill="False" Margin="0,0,0,8">
@@ -95,7 +104,10 @@
               automation:AutomationProperties.Name="Node list">
         <DockPanel>
           <TextBlock Text="Nodes" FontWeight="SemiBold" Margin="0,0,0,8" />
-          <ListView ItemsSource="{Binding Editor.Nodes}" BorderThickness="0">
+          <ListView x:Name="PART_NodeList"
+                    ItemsSource="{Binding Editor.Nodes}"
+                    BorderThickness="0"
+                    automation:AutomationProperties.Name="Node list">
             <ListView.View>
               <GridView>
                 <GridViewColumn Width="180" DisplayMemberBinding="{Binding Title}" Header="Title" />
@@ -124,7 +136,11 @@
           <TextBlock Text="Outputs" FontWeight="SemiBold" Margin="0,8,0,0" />
           <TextBlock Text="{Binding Editor.InspectorOutputs}" TextWrapping="Wrap" Margin="0,4,0,0" />
           <TextBlock Text="Connections" FontWeight="SemiBold" Margin="0,8,0,0" />
-          <TextBlock Text="{Binding Editor.InspectorConnections}" TextWrapping="Wrap" Margin="0,4,0,0" />
+          <TextBlock x:Name="PART_InspectorConnectionsSummary"
+                     Text="{Binding Editor.InspectorConnections}"
+                     TextWrapping="Wrap"
+                     Margin="0,4,0,0"
+                     automation:AutomationProperties.Name="Connections summary" />
           <TextBlock Text="Upstream" FontWeight="SemiBold" Margin="0,8,0,0" />
           <TextBlock Text="{Binding Editor.InspectorUpstream}" TextWrapping="Wrap" Margin="0,4,0,0" />
         </StackPanel>

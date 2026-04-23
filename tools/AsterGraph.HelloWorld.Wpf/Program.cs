@@ -202,18 +202,29 @@ public sealed record HostedHelloWorldProofResult(
     bool CommandSurfaceOk,
     bool AccessibilityBaselineOk,
     bool AccessibilityFocusOk,
+    bool AccessibilityCommandSurfaceOk,
+    bool AccessibilityAuthoringSurfaceOk,
     double StartupMs,
     double InspectorProjectionMs,
     double PluginScanMs,
     double CommandLatencyMs)
 {
-    public bool IsOk => CommandSurfaceOk && AccessibilityBaselineOk && AccessibilityFocusOk;
+    public bool HostedAccessibilityOk =>
+        AccessibilityBaselineOk
+        && AccessibilityFocusOk
+        && AccessibilityCommandSurfaceOk
+        && AccessibilityAuthoringSurfaceOk;
+
+    public bool IsOk => CommandSurfaceOk && HostedAccessibilityOk;
 
     public IReadOnlyList<string> ProofLines =>
         [
             $"COMMAND_SURFACE_OK:{CommandSurfaceOk}",
             $"HOSTED_ACCESSIBILITY_BASELINE_OK:{AccessibilityBaselineOk}",
             $"HOSTED_ACCESSIBILITY_FOCUS_OK:{AccessibilityFocusOk}",
+            $"HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:{AccessibilityCommandSurfaceOk}",
+            $"HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:{AccessibilityAuthoringSurfaceOk}",
+            $"HOSTED_ACCESSIBILITY_OK:{HostedAccessibilityOk}",
             $"HELLOWORLD_WPF_OK:{IsOk}",
         ];
 
@@ -250,7 +261,8 @@ public static class HostedHelloWorldProof
             .GetCommandDescriptors()
             .Single(descriptor => string.Equals(descriptor.Id, "history.undo", StringComparison.Ordinal));
         var commandLatencyMs = MeasureMilliseconds(() => session.Commands.Undo());
-        var (accessibilityBaselineOk, accessibilityFocusOk) = EvaluateAccessibilitySurface();
+        var (accessibilityBaselineOk, accessibilityFocusOk, accessibilityCommandSurfaceOk, accessibilityAuthoringSurfaceOk) =
+            EvaluateAccessibilitySurface();
         var commandSurfaceOk = undoDescriptor.CanExecute
             && session.Queries.CreateDocumentSnapshot().Nodes.Count == nodeCountBeforeUndo;
 
@@ -258,13 +270,15 @@ public static class HostedHelloWorldProof
             commandSurfaceOk,
             accessibilityBaselineOk,
             accessibilityFocusOk,
+            accessibilityCommandSurfaceOk,
+            accessibilityAuthoringSurfaceOk,
             startupMs,
             inspectorProjectionMs,
             pluginScanMs,
             commandLatencyMs);
     }
 
-    private static (bool BaselineOk, bool FocusOk) EvaluateAccessibilitySurface()
+    private static (bool BaselineOk, bool FocusOk, bool CommandSurfaceOk, bool AuthoringSurfaceOk) EvaluateAccessibilitySurface()
         => RunInSta(() =>
         {
             var surface = HostedHelloWorldWindowFactory.CreateRuntimeSurface();
@@ -296,8 +310,14 @@ public static class HostedHelloWorldProof
                     && undoButton.IsTabStop
                     && HasKeyBinding(surface.View.InputBindings, Key.Z, ModifierKeys.Control, surface.Editor.UndoCommand)
                     && HasKeyBinding(surface.View.InputBindings, Key.Delete, ModifierKeys.None, surface.Editor.DeleteSelectionCommand);
+                var commandSurfaceOk = HasNamedCommand(surface.View, "PART_SaveCommandButton", "Save command", surface.Editor.SaveCommand)
+                    && HasNamedCommand(surface.View, "PART_UndoCommandButton", "Undo command", surface.Editor.UndoCommand)
+                    && HasNamedCommand(surface.View, "PART_DeleteSelectionCommandButton", "Delete command", surface.Editor.DeleteSelectionCommand);
+                var authoringSurfaceOk = HasNamedRegion(surface.View, "PART_NodeTemplatesList", "Node templates list")
+                    && HasNamedRegion(surface.View, "PART_NodeList", "Node list")
+                    && HasNamedRegion(surface.View, "PART_InspectorConnectionsSummary", "Connections summary");
 
-                return (baselineOk, focusOk);
+                return (baselineOk, focusOk, commandSurfaceOk, authoringSurfaceOk);
             }
             finally
             {
@@ -316,6 +336,11 @@ public static class HostedHelloWorldProof
     private static bool HasNamedRegion(FrameworkElement root, string name, string automationName)
         => root.FindName(name) is FrameworkElement element
             && string.Equals(AutomationProperties.GetName(element), automationName, StringComparison.Ordinal);
+
+    private static bool HasNamedCommand(FrameworkElement root, string name, string automationName, ICommand expectedCommand)
+        => root.FindName(name) is Button button
+            && string.Equals(AutomationProperties.GetName(button), automationName, StringComparison.Ordinal)
+            && ReferenceEquals(button.Command, expectedCommand);
 
     private static bool HasKeyBinding(InputBindingCollection inputBindings, Key key, ModifierKeys modifiers, ICommand expectedCommand)
         => inputBindings
