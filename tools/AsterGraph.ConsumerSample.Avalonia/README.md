@@ -6,6 +6,7 @@ For plugin-capable evaluators, this is the defended hosted trust hop. Read [Plug
 
 For the inspector metadata recipe, pair this sample with [Authoring Inspector Recipe](../../docs/en/authoring-inspector-recipe.md). The sample stays focused on the host-owned seams and the shipped inspector surface; it does not own the metadata vocabulary. The canonical recipe carries the full `defaultValue`, `isAdvanced`, `helpText`, `placeholderText`, and read-only vocabulary.
 For copyable custom node, port, parameter, and edge presentation on the same hosted route, pair it with [Authoring Surface Recipe](../../docs/en/authoring-surface-recipe.md).
+For searchable grouped stencil, SVG/PNG/JPEG export breadth, and shared node or edge quick tools on the same hosted route, pair it with [Capability Breadth Recipe](../../docs/en/capability-breadth-recipe.md).
 
 The hosted route ladder is `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerSample.Avalonia`.
 
@@ -42,6 +43,11 @@ Expected proof markers:
 - `CONSUMER_SAMPLE_WINDOW_OK:True`
 - `CONSUMER_SAMPLE_TRUST_OK:True`
 - `COMMAND_SURFACE_OK:True`
+- `CAPABILITY_BREADTH_STENCIL_OK:True`
+- `CAPABILITY_BREADTH_EXPORT_OK:True`
+- `CAPABILITY_BREADTH_NODE_QUICK_TOOLS_OK:True`
+- `CAPABILITY_BREADTH_EDGE_QUICK_TOOLS_OK:True`
+- `CAPABILITY_BREADTH_OK:True`
 - `HOST_NATIVE_METRIC:startup_ms=...`
 - `HOST_NATIVE_METRIC:inspector_projection_ms=...`
 - `HOST_NATIVE_METRIC:plugin_scan_ms=...`
@@ -94,6 +100,13 @@ Use this sample to copy the host-owned seams, not the sample-specific presentati
 - Project node-side editor state from `GetNodeParameterSnapshots(nodeId)` so `NodeParameterEditorHost` and `INodeParameterEditorRegistry` reuse the same validation-aware parameter contract.
 - Keep writes on the shared session command path through `TrySetSelectedNodeParameterValue(...)` or `TrySetNodeParameterValue(...)`.
 - Project host actions from `GetCommandDescriptors()` and close the route with `AsterGraph.ConsumerSample.Avalonia -- --proof`, expecting `AUTHORING_SURFACE_OK:True`.
+
+### Copyable Capability Breadth Handoff
+
+- Keep searchable grouped stencil on the stock hosted view and drive it from `IGraphEditorSession.Queries.GetNodeTemplateSnapshots()`.
+- Keep scene export on `IGraphEditorSession.Commands.TryExportSceneAsSvg(...)` plus `IGraphEditorSession.Commands.TryExportSceneAsImage(...)` for `GraphEditorSceneImageExportFormat.Png` and `GraphEditorSceneImageExportFormat.Jpeg`.
+- Keep node and edge quick tools on the shared tool route through `IGraphEditorSession.Queries.GetToolDescriptors(...)` and `AsterGraphAuthoringToolActionFactory.CreateCommandSurfaceActions(...)`.
+- Close the route with [Capability Breadth Recipe](../../docs/en/capability-breadth-recipe.md) and `AsterGraph.ConsumerSample.Avalonia -- --proof`, expecting `CAPABILITY_BREADTH_OK:True`.
 
 ### Replace These Sample-Owned Details
 

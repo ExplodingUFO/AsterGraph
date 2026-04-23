@@ -5,11 +5,13 @@ using Avalonia.Controls;
 using Avalonia.Headless;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
+using AsterGraph.Avalonia.Controls;
 using AsterGraph.Avalonia.Hosting;
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Runtime;
+using AsterGraph.Editor.Services;
 using Avalonia.Themes.Fluent;
 using Avalonia.VisualTree;
 
@@ -24,6 +26,10 @@ public sealed record ConsumerSampleProofResult(
     bool WindowCompositionOk,
     bool TrustTransparencyOk,
     bool CommandSurfaceOk,
+    bool StencilSurfaceOk,
+    bool ExportBreadthOk,
+    bool NodeQuickToolsOk,
+    bool EdgeQuickToolsOk,
     IReadOnlyList<ConsumerSampleProofParameterSnapshot> ParameterSnapshots,
     double StartupMs,
     double InspectorProjectionMs,
@@ -36,12 +42,19 @@ public sealed record ConsumerSampleProofResult(
         && NodeSideAuthoringOk
         && CommandSurfaceOk;
 
+    public bool CapabilityBreadthOk
+        => StencilSurfaceOk
+        && ExportBreadthOk
+        && NodeQuickToolsOk
+        && EdgeQuickToolsOk;
+
     public bool IsOk
         => HostMenuActionOk
         && PluginContributionOk
         && TrustTransparencyOk
         && WindowCompositionOk
-        && AuthoringSurfaceOk;
+        && AuthoringSurfaceOk
+        && CapabilityBreadthOk;
 
     public IReadOnlyList<string> MetricLines =>
     [
@@ -64,6 +77,11 @@ public sealed record ConsumerSampleProofResult(
         $"CONSUMER_SAMPLE_WINDOW_OK:{WindowCompositionOk}",
         $"CONSUMER_SAMPLE_TRUST_OK:{TrustTransparencyOk}",
         $"COMMAND_SURFACE_OK:{CommandSurfaceOk}",
+        $"CAPABILITY_BREADTH_STENCIL_OK:{StencilSurfaceOk}",
+        $"CAPABILITY_BREADTH_EXPORT_OK:{ExportBreadthOk}",
+        $"CAPABILITY_BREADTH_NODE_QUICK_TOOLS_OK:{NodeQuickToolsOk}",
+        $"CAPABILITY_BREADTH_EDGE_QUICK_TOOLS_OK:{EdgeQuickToolsOk}",
+        $"CAPABILITY_BREADTH_OK:{CapabilityBreadthOk}",
         .. MetricLines,
         $"AUTHORING_SURFACE_OK:{AuthoringSurfaceOk}",
         $"CONSUMER_SAMPLE_OK:{IsOk}",
@@ -87,65 +105,108 @@ public static class ConsumerSampleProof
         using var host = createdHost ?? throw new InvalidOperationException("Consumer sample host was not created.");
         var window = ConsumerSampleWindowFactory.Create(host);
 
-        window.Show();
-        FlushUi();
-
-        host.SelectNode(host.GetFirstReviewNodeId());
-        FlushUi();
         GraphEditorNodeParameterSnapshot[] selectedParameterSnapshots = [];
-        var inspectorProjectionMs = MeasureMilliseconds(() => selectedParameterSnapshots = host.GetSelectedParameterSnapshots().ToArray());
-        var pluginScanMs = MeasureMilliseconds(() => host.PluginCandidates.ToArray());
-        var metadataProjectionOk = HasMetadataProjection(selectedParameterSnapshots);
-        var nodeSideAuthoringOk = HasNodeSideAuthoring(window, host, host.GetFirstReviewNodeId());
+        bool metadataProjectionOk;
+        bool nodeSideAuthoringOk;
+        bool commandSurfaceOk;
+        bool hostMenuActionOk;
+        bool pluginContributionOk;
+        bool parameterProjectionOk;
+        bool trustTransparencyOk;
+        bool windowCompositionOk;
+        double inspectorProjectionMs;
+        double pluginScanMs;
+        double commandLatencyMs;
 
-        var commandBaseline = host.Session.Queries.CreateDocumentSnapshot().Nodes.Count;
-        host.Session.Commands.AddNode(ConsumerSampleHost.ReviewDefinitionId, new GraphPoint(880, 220));
-        var undoAction = AsterGraphHostedActionFactory.CreateCommandActions(host.Session, ["history.undo"])
-            .Single(action => string.Equals(action.Id, "history.undo", StringComparison.Ordinal));
-        var commandLatencyMs = MeasureMilliseconds(() => undoAction.TryExecute());
-        var commandSurfaceOk = undoAction.CanExecute
-            && host.Session.Queries.CreateDocumentSnapshot().Nodes.Count == commandBaseline;
+        try
+        {
+            window.Show();
+            FlushUi();
 
-        var initialSnapshot = host.Session.Queries.CreateDocumentSnapshot();
-        var hostMenuActionOk = host.AddHostReviewNode()
-            && host.Session.Queries.CreateDocumentSnapshot().Nodes.Count == initialSnapshot.Nodes.Count + 1;
+            host.SelectNode(host.GetFirstReviewNodeId());
+            FlushUi();
+            inspectorProjectionMs = MeasureMilliseconds(() => selectedParameterSnapshots = host.GetSelectedParameterSnapshots().ToArray());
+            pluginScanMs = MeasureMilliseconds(() => host.PluginCandidates.ToArray());
+            metadataProjectionOk = HasMetadataProjection(selectedParameterSnapshots);
+            nodeSideAuthoringOk = HasNodeSideAuthoring(window, host, host.GetFirstReviewNodeId());
 
-        var afterHostSnapshot = host.Session.Queries.CreateDocumentSnapshot();
-        var pluginContributionOk = host.HasPluginNodeDefinition()
-            && host.HasPluginCommandContribution()
-            && host.AddPluginAuditNode()
-            && host.PluginLoadSnapshots.Any(snapshot => snapshot.Descriptor?.Id == "consumer.sample.audit-plugin")
-            && host.Session.Queries.CreateDocumentSnapshot().Nodes.Count == afterHostSnapshot.Nodes.Count + 1;
+            var commandBaseline = host.Session.Queries.CreateDocumentSnapshot().Nodes.Count;
+            host.Session.Commands.AddNode(ConsumerSampleHost.ReviewDefinitionId, new GraphPoint(880, 220));
+            var undoAction = AsterGraphHostedActionFactory.CreateCommandActions(host.Session, ["history.undo"])
+                .Single(action => string.Equals(action.Id, "history.undo", StringComparison.Ordinal));
+            commandLatencyMs = MeasureMilliseconds(() => undoAction.TryExecute());
+            commandSurfaceOk = undoAction.CanExecute
+                && host.Session.Queries.CreateDocumentSnapshot().Nodes.Count == commandBaseline;
 
-        host.SelectNode(host.GetFirstReviewNodeId());
-        var parameterProjectionOk = host.TrySetSelectedOwner("release-owner")
-            && host.ApproveSelection()
-            && host.GetSelectedParameterSnapshots().Any(snapshot =>
-                snapshot.Definition.Key == "status"
-                && string.Equals(snapshot.CurrentValue?.ToString(), "approved", StringComparison.Ordinal))
-            && host.GetSelectedParameterSnapshots().Any(snapshot =>
-                snapshot.Definition.Key == "owner"
-                && string.Equals(snapshot.CurrentValue?.ToString(), "release-owner", StringComparison.Ordinal));
+            var initialSnapshot = host.Session.Queries.CreateDocumentSnapshot();
+            hostMenuActionOk = host.AddHostReviewNode()
+                && host.Session.Queries.CreateDocumentSnapshot().Nodes.Count == initialSnapshot.Nodes.Count + 1;
 
-        var trustTransparencyOk =
-            host.PluginCandidateEntries.Any(entry => entry.IsAllowed && entry.TrustReason.Contains("allowlist", StringComparison.OrdinalIgnoreCase))
-            && host.ExportPluginAllowlist()
-            && File.Exists(host.PluginAllowlistExchangePath)
-            && host.BlockPluginCandidate("consumer.sample.audit-plugin")
-            && host.PluginCandidateEntries.Any(entry => entry.IsBlocked && entry.TrustReason.Contains("allowlist", StringComparison.OrdinalIgnoreCase))
-            && host.ImportPluginAllowlist()
-            && host.PluginCandidateEntries.Any(entry => entry.IsAllowed && entry.TrustReason.Contains("allowlist", StringComparison.OrdinalIgnoreCase));
+            var afterHostSnapshot = host.Session.Queries.CreateDocumentSnapshot();
+            pluginContributionOk = host.HasPluginNodeDefinition()
+                && host.HasPluginCommandContribution()
+                && host.AddPluginAuditNode()
+                && host.PluginLoadSnapshots.Any(snapshot => snapshot.Descriptor?.Id == "consumer.sample.audit-plugin")
+                && host.Session.Queries.CreateDocumentSnapshot().Nodes.Count == afterHostSnapshot.Nodes.Count + 1;
 
-        var windowCompositionOk =
-            FindNamed<Menu>(window, "PART_MainMenu") is not null
-            && FindNamed<Button>(window, "PART_AddReviewNodeButton") is not null
-            && FindNamed<Button>(window, "PART_AddPluginNodeButton") is not null
-            && FindNamed<Button>(window, "PART_ApproveSelectionButton") is not null
-            && FindNamed<ItemsControl>(window, "PART_PluginCandidateItems") is not null
-            && FindNamed<ItemsControl>(window, "PART_AllowlistItems") is not null
-            && FindNamed<TextBlock>(window, "PART_TrustBoundaryText") is not null;
+            host.SelectNode(host.GetFirstReviewNodeId());
+            parameterProjectionOk = host.TrySetSelectedOwner("release-owner")
+                && host.ApproveSelection()
+                && host.GetSelectedParameterSnapshots().Any(snapshot =>
+                    snapshot.Definition.Key == "status"
+                    && string.Equals(snapshot.CurrentValue?.ToString(), "approved", StringComparison.Ordinal))
+                && host.GetSelectedParameterSnapshots().Any(snapshot =>
+                    snapshot.Definition.Key == "owner"
+                    && string.Equals(snapshot.CurrentValue?.ToString(), "release-owner", StringComparison.Ordinal));
 
-        window.Close();
+            trustTransparencyOk =
+                host.PluginCandidateEntries.Any(entry => entry.IsAllowed && entry.TrustReason.Contains("allowlist", StringComparison.OrdinalIgnoreCase))
+                && host.ExportPluginAllowlist()
+                && File.Exists(host.PluginAllowlistExchangePath)
+                && host.BlockPluginCandidate("consumer.sample.audit-plugin")
+                && host.PluginCandidateEntries.Any(entry => entry.IsBlocked && entry.TrustReason.Contains("allowlist", StringComparison.OrdinalIgnoreCase))
+                && host.ImportPluginAllowlist()
+                && host.PluginCandidateEntries.Any(entry => entry.IsAllowed && entry.TrustReason.Contains("allowlist", StringComparison.OrdinalIgnoreCase));
+
+            windowCompositionOk =
+                FindNamed<Menu>(window, "PART_MainMenu") is not null
+                && FindNamed<Button>(window, "PART_AddReviewNodeButton") is not null
+                && FindNamed<Button>(window, "PART_AddPluginNodeButton") is not null
+                && FindNamed<Button>(window, "PART_ApproveSelectionButton") is not null
+                && FindNamed<ItemsControl>(window, "PART_PluginCandidateItems") is not null
+                && FindNamed<ItemsControl>(window, "PART_AllowlistItems") is not null
+                && FindNamed<TextBlock>(window, "PART_TrustBoundaryText") is not null;
+        }
+        finally
+        {
+            window.Close();
+        }
+
+        var exportBreadthOk = HasExportBreadth(host, storageRoot);
+        var capabilityWindow = CreateCapabilityBreadthWindow(host);
+        bool stencilSurfaceOk;
+        bool edgeQuickToolsOk;
+        bool nodeQuickToolsOk;
+        try
+        {
+            capabilityWindow.Show();
+            FlushUi();
+
+            stencilSurfaceOk = HasStencilSurface(capabilityWindow, host);
+
+            var reviewNodeId = host.GetFirstReviewNodeId();
+            host.SelectNode(reviewNodeId);
+            FlushUi();
+            edgeQuickToolsOk = HasEdgeQuickTools(capabilityWindow, host);
+
+            host.SelectNode(reviewNodeId);
+            FlushUi();
+            nodeQuickToolsOk = HasNodeQuickTools(capabilityWindow, host, reviewNodeId);
+        }
+        finally
+        {
+            capabilityWindow.Close();
+        }
 
         return new ConsumerSampleProofResult(
             HostMenuActionOk: hostMenuActionOk,
@@ -156,11 +217,34 @@ public static class ConsumerSampleProof
             WindowCompositionOk: windowCompositionOk,
             TrustTransparencyOk: trustTransparencyOk,
             CommandSurfaceOk: commandSurfaceOk,
+            StencilSurfaceOk: stencilSurfaceOk,
+            ExportBreadthOk: exportBreadthOk,
+            NodeQuickToolsOk: nodeQuickToolsOk,
+            EdgeQuickToolsOk: edgeQuickToolsOk,
             ParameterSnapshots: CreateParameterSnapshots(host.GetSelectedParameterSnapshots().ToArray()),
             StartupMs: startupMs,
             InspectorProjectionMs: inspectorProjectionMs,
             PluginScanMs: pluginScanMs,
             CommandLatencyMs: commandLatencyMs);
+    }
+
+    private static Window CreateCapabilityBreadthWindow(ConsumerSampleHost host)
+    {
+        var view = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOptions
+        {
+            Editor = host.Editor,
+            ChromeMode = GraphEditorViewChromeMode.Default,
+            EnableDefaultContextMenu = true,
+            CommandShortcutPolicy = AsterGraphCommandShortcutPolicy.Default,
+            Presentation = ConsumerSampleAuthoringSurfaceRecipe.CreatePresentationOptions(),
+        });
+
+        return new Window
+        {
+            Width = 1440,
+            Height = 900,
+            Content = view,
+        };
     }
 
     private static T? FindNamed<T>(Window window, string name)
@@ -199,6 +283,208 @@ public static class ConsumerSampleProof
             && statusTemplateOk
             && ownerTemplateOk;
     }
+
+    private static bool HasStencilSurface(Window window, ConsumerSampleHost host)
+    {
+        var searchBox = FindNamed<TextBox>(window, "PART_StencilSearchBox");
+        if (searchBox is null)
+        {
+            return false;
+        }
+
+        var templates = host.Session.Queries.GetNodeTemplateSnapshots();
+        var pluginTemplate = templates.SingleOrDefault(template =>
+            template.DefinitionId == ConsumerSampleHost.PluginAuditDefinitionId);
+        if (pluginTemplate is null)
+        {
+            return false;
+        }
+
+        var allSections = window.GetVisualDescendants()
+            .OfType<Expander>()
+            .Where(section => section.Name?.StartsWith("PART_StencilSection_", StringComparison.Ordinal) == true)
+            .ToList();
+        if (allSections.Count < 2)
+        {
+            return false;
+        }
+
+        searchBox.Text = "plugin";
+        FlushUi();
+
+        var filteredSections = window.GetVisualDescendants()
+            .OfType<Expander>()
+            .Where(section => section.Name?.StartsWith("PART_StencilSection_", StringComparison.Ordinal) == true)
+            .ToList();
+        var pluginSection = filteredSections.SingleOrDefault(section =>
+            string.Equals(section.Tag?.ToString(), pluginTemplate.Category, StringComparison.Ordinal));
+        var pluginCard = FindNamed<Button>(window, $"PART_StencilCard_{pluginTemplate.Key}");
+        if (filteredSections.Count != 1 || pluginSection is null || pluginCard is null)
+        {
+            return false;
+        }
+
+        var initialPluginNodeCount = host.Session.Queries.CreateDocumentSnapshot().Nodes.Count(node =>
+            node.DefinitionId == ConsumerSampleHost.PluginAuditDefinitionId);
+        pluginSection.IsExpanded = false;
+        FlushUi();
+        pluginSection.IsExpanded = true;
+        FlushUi();
+
+        pluginCard = FindNamed<Button>(window, $"PART_StencilCard_{pluginTemplate.Key}");
+        if (pluginCard is null || !pluginSection.IsExpanded)
+        {
+            return false;
+        }
+
+        pluginCard.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        FlushUi();
+
+        return host.Session.Queries.CreateDocumentSnapshot().Nodes.Count(node =>
+            node.DefinitionId == ConsumerSampleHost.PluginAuditDefinitionId) == initialPluginNodeCount + 1;
+    }
+
+    private static bool HasExportBreadth(ConsumerSampleHost host, string storageRoot)
+    {
+        var featureDescriptors = host.Session.Queries.GetFeatureDescriptors()
+            .ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
+        if (!featureDescriptors.TryGetValue("capability.export.scene-svg", out var svgFeature)
+            || !svgFeature.IsAvailable
+            || !featureDescriptors.TryGetValue("capability.export.scene-png", out var pngFeature)
+            || !pngFeature.IsAvailable
+            || !featureDescriptors.TryGetValue("capability.export.scene-jpeg", out var jpegFeature)
+            || !jpegFeature.IsAvailable)
+        {
+            return false;
+        }
+
+        var exportRoot = Path.Combine(storageRoot, "capability-breadth-proof");
+        Directory.CreateDirectory(exportRoot);
+        var svgPath = Path.Combine(exportRoot, "consumer-sample-proof.svg");
+        var pngPath = Path.Combine(exportRoot, "consumer-sample-proof.png");
+        var jpegPath = Path.Combine(exportRoot, "consumer-sample-proof.jpg");
+
+        return host.Session.Commands.TryExportSceneAsSvg(svgPath)
+            && File.Exists(svgPath)
+            && File.ReadAllText(svgPath).Contains("<svg", StringComparison.Ordinal)
+            && host.Session.Commands.TryExportSceneAsImage(GraphEditorSceneImageExportFormat.Png, pngPath)
+            && File.Exists(pngPath)
+            && HasImageSignature(File.ReadAllBytes(pngPath), GraphEditorSceneImageExportFormat.Png)
+            && host.Session.Commands.TryExportSceneAsImage(GraphEditorSceneImageExportFormat.Jpeg, jpegPath)
+            && File.Exists(jpegPath)
+            && HasImageSignature(File.ReadAllBytes(jpegPath), GraphEditorSceneImageExportFormat.Jpeg);
+    }
+
+    private static bool HasNodeQuickTools(Window window, ConsumerSampleHost host, string reviewNodeId)
+    {
+        var expansionButton = FindNamed<Button>(window, "PART_NodeToolToggleExpansionButton");
+        var duplicateButton = FindNamed<Button>(window, "PART_NodeToolDuplicateButton");
+        if (expansionButton is null
+            || duplicateButton is null
+            || !expansionButton.IsEnabled
+            || !duplicateButton.IsEnabled)
+        {
+            return false;
+        }
+
+        var initialExpansionState = host.Session.Queries.GetNodeSurfaceSnapshots()
+            .Single(snapshot => snapshot.NodeId == reviewNodeId)
+            .ExpansionState;
+        expansionButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        FlushUi();
+
+        var expansionChanged = host.Session.Queries.GetNodeSurfaceSnapshots()
+            .Single(snapshot => snapshot.NodeId == reviewNodeId)
+            .ExpansionState != initialExpansionState;
+
+        host.SelectNode(reviewNodeId);
+        FlushUi();
+        duplicateButton = FindNamed<Button>(window, "PART_NodeToolDuplicateButton");
+        if (duplicateButton is null || !duplicateButton.IsEnabled)
+        {
+            return false;
+        }
+
+        var nodeCount = host.Session.Queries.CreateDocumentSnapshot().Nodes.Count;
+        duplicateButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        FlushUi();
+
+        return expansionChanged
+            && host.Session.Queries.CreateDocumentSnapshot().Nodes.Count == nodeCount + 1;
+    }
+
+    private static bool HasEdgeQuickTools(Window window, ConsumerSampleHost host)
+    {
+        const string connectionId = "consumer-sample-connection-001";
+        if (!host.Session.Commands.TryExecuteCommand(CreateCommand(
+                "connections.note.set",
+                ("connectionId", connectionId),
+                ("text", "Proof note"),
+                ("updateStatus", bool.TrueString))))
+        {
+            return false;
+        }
+
+        FlushUi();
+
+        var clearNoteButton = FindNamed<Button>(window, $"PART_ConnectionToolClearNote_{connectionId}");
+        var disconnectButton = FindNamed<Button>(window, $"PART_ConnectionToolDisconnect_{connectionId}");
+        if (clearNoteButton is null
+            || disconnectButton is null
+            || !clearNoteButton.IsEnabled
+            || !disconnectButton.IsEnabled)
+        {
+            return false;
+        }
+
+        clearNoteButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        FlushUi();
+
+        var noteCleared = string.IsNullOrWhiteSpace(host.Session.Queries.CreateDocumentSnapshot()
+            .Connections
+            .Single(connection => connection.Id == connectionId)
+            .Presentation?.NoteText);
+
+        host.Session.Commands.TryExecuteCommand(CreateCommand(
+            "connections.note.set",
+            ("connectionId", connectionId),
+            ("text", "Disconnect proof"),
+            ("updateStatus", bool.TrueString)));
+        FlushUi();
+
+        disconnectButton = FindNamed<Button>(window, $"PART_ConnectionToolDisconnect_{connectionId}");
+        if (disconnectButton is null || !disconnectButton.IsEnabled)
+        {
+            return false;
+        }
+
+        disconnectButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        FlushUi();
+
+        return noteCleared
+            && host.Session.Queries.CreateDocumentSnapshot().Connections.Count == 0;
+    }
+
+    private static GraphEditorCommandInvocationSnapshot CreateCommand(
+        string commandId,
+        params (string Name, string? Value)[] arguments)
+        => new(
+            commandId,
+            arguments
+                .Where(argument => argument.Value is not null)
+                .Select(argument => new GraphEditorCommandArgumentSnapshot(argument.Name, argument.Value!))
+                .ToArray());
+
+    private static bool HasImageSignature(byte[] bytes, GraphEditorSceneImageExportFormat format)
+        => bytes.Length > 3
+        && format switch
+        {
+            GraphEditorSceneImageExportFormat.Png
+                => bytes[0] == 0x89 && bytes[1] == 0x50 && bytes[2] == 0x4E && bytes[3] == 0x47,
+            GraphEditorSceneImageExportFormat.Jpeg
+                => bytes[0] == 0xFF && bytes[1] == 0xD8 && bytes[2] == 0xFF,
+            _ => false,
+        };
 
     private static double MeasureMilliseconds(Action action)
     {

@@ -48,6 +48,7 @@ public sealed class ConsumerSampleProofTests
         var result = ConsumerSampleProof.Run();
 
         Assert.True(result.IsOk);
+        Assert.True(result.CapabilityBreadthOk);
         Assert.True(result.NodeSideAuthoringOk);
         Assert.True(result.HostMenuActionOk);
         Assert.True(result.PluginContributionOk);
@@ -55,6 +56,10 @@ public sealed class ConsumerSampleProofTests
         Assert.True(result.MetadataProjectionOk);
         Assert.True(result.TrustTransparencyOk);
         Assert.True(result.CommandSurfaceOk);
+        Assert.True(result.StencilSurfaceOk);
+        Assert.True(result.ExportBreadthOk);
+        Assert.True(result.NodeQuickToolsOk);
+        Assert.True(result.EdgeQuickToolsOk);
         Assert.True(result.StartupMs >= 0);
         Assert.True(result.InspectorProjectionMs >= 0);
         Assert.True(result.PluginScanMs >= 0);
@@ -63,6 +68,11 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_SURFACE_METADATA_PROJECTION_OK:True");
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:True");
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_SURFACE_COMMAND_PROJECTION_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "CAPABILITY_BREADTH_STENCIL_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "CAPABILITY_BREADTH_EXPORT_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "CAPABILITY_BREADTH_NODE_QUICK_TOOLS_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "CAPABILITY_BREADTH_EDGE_QUICK_TOOLS_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "CAPABILITY_BREADTH_OK:True");
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_SURFACE_OK:True");
         Assert.Contains(result.MetricLines, line => line.Contains("startup_ms", StringComparison.Ordinal));
         Assert.Contains(result.MetricLines, line => line.Contains("command_latency_ms", StringComparison.Ordinal));
@@ -80,6 +90,10 @@ public sealed class ConsumerSampleProofTests
             WindowCompositionOk: true,
             TrustTransparencyOk: true,
             CommandSurfaceOk: true,
+            StencilSurfaceOk: true,
+            ExportBreadthOk: true,
+            NodeQuickToolsOk: true,
+            EdgeQuickToolsOk: true,
             ParameterSnapshots: [],
             StartupMs: 1,
             InspectorProjectionMs: 1,
@@ -90,6 +104,35 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_SURFACE_METADATA_PROJECTION_OK:False");
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_SURFACE_OK:False");
         Assert.Contains(result.ProofLines, line => line == "CONSUMER_SAMPLE_METADATA_PROJECTION_OK:False");
+        Assert.Contains(result.ProofLines, line => line == "CONSUMER_SAMPLE_OK:False");
+    }
+
+    [AvaloniaFact]
+    public void ConsumerSampleProofResult_CapabilityBreadthMarker_FailsOverallProofStatus()
+    {
+        var result = new ConsumerSampleProofResult(
+            HostMenuActionOk: true,
+            PluginContributionOk: true,
+            ParameterProjectionOk: true,
+            MetadataProjectionOk: true,
+            NodeSideAuthoringOk: true,
+            WindowCompositionOk: true,
+            TrustTransparencyOk: true,
+            CommandSurfaceOk: true,
+            StencilSurfaceOk: true,
+            ExportBreadthOk: false,
+            NodeQuickToolsOk: true,
+            EdgeQuickToolsOk: true,
+            ParameterSnapshots: [],
+            StartupMs: 1,
+            InspectorProjectionMs: 1,
+            PluginScanMs: 1,
+            CommandLatencyMs: 1);
+
+        Assert.False(result.CapabilityBreadthOk);
+        Assert.False(result.IsOk);
+        Assert.Contains(result.ProofLines, line => line == "CAPABILITY_BREADTH_EXPORT_OK:False");
+        Assert.Contains(result.ProofLines, line => line == "CAPABILITY_BREADTH_OK:False");
         Assert.Contains(result.ProofLines, line => line == "CONSUMER_SAMPLE_OK:False");
     }
 
@@ -135,6 +178,11 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(proofLines, line => line == "AUTHORING_SURFACE_METADATA_PROJECTION_OK:True");
         Assert.Contains(proofLines, line => line == "AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:True");
         Assert.Contains(proofLines, line => line == "AUTHORING_SURFACE_COMMAND_PROJECTION_OK:True");
+        Assert.Contains(proofLines, line => line == "CAPABILITY_BREADTH_STENCIL_OK:True");
+        Assert.Contains(proofLines, line => line == "CAPABILITY_BREADTH_EXPORT_OK:True");
+        Assert.Contains(proofLines, line => line == "CAPABILITY_BREADTH_NODE_QUICK_TOOLS_OK:True");
+        Assert.Contains(proofLines, line => line == "CAPABILITY_BREADTH_EDGE_QUICK_TOOLS_OK:True");
+        Assert.Contains(proofLines, line => line == "CAPABILITY_BREADTH_OK:True");
         Assert.Contains(proofLines, line => line == "AUTHORING_SURFACE_OK:True");
         Assert.Contains(proofLines, line => line == "CONSUMER_SAMPLE_PARAMETER_OK:True");
         Assert.Contains(proofLines, line => line == "CONSUMER_SAMPLE_METADATA_PROJECTION_OK:True");

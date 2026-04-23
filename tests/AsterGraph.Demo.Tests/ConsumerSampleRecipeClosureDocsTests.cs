@@ -63,6 +63,29 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
     }
 
     [Fact]
+    public void CapabilityBreadthRecipeClosureDocs_LinkOneCopyableHostedRecipeAcrossConsumerSampleGuidance()
+    {
+        var capabilityRecipeEn = ReadRepoFile("docs/en/capability-breadth-recipe.md");
+        var capabilityRecipeZh = ReadRepoFile("docs/zh-CN/capability-breadth-recipe.md");
+        var consumerSampleEn = ReadRepoFile("docs/en/consumer-sample.md");
+        var consumerSampleZh = ReadRepoFile("docs/zh-CN/consumer-sample.md");
+        var readme = ReadRepoFile("tools/AsterGraph.ConsumerSample.Avalonia/README.md");
+
+        AssertContains(readme, "Capability Breadth Recipe");
+        AssertContains(readme, "../../docs/en/capability-breadth-recipe.md");
+        AssertContains(consumerSampleEn, "[Capability Breadth Recipe](./capability-breadth-recipe.md)");
+        AssertContains(consumerSampleZh, "[Capability Breadth Recipe](./capability-breadth-recipe.md)");
+
+        Assert.True(HasLineWithAll(capabilityRecipeEn, "Step 1", "searchable grouped stencil", "GetNodeTemplateSnapshots()", "ConsumerSample.Avalonia"));
+        Assert.True(HasLineWithAll(capabilityRecipeEn, "Step 2", "TryExportSceneAsSvg", "TryExportSceneAsImage", "GraphEditorSceneImageExportFormat.Png"));
+        Assert.True(HasLineWithAll(capabilityRecipeEn, "Step 3", "CreateCommandSurfaceActions", "GetToolDescriptors(", "AsterGraph.ConsumerSample.Avalonia -- --proof"));
+
+        Assert.True(HasLineWithAll(capabilityRecipeZh, "第 1 步", "searchable grouped stencil", "GetNodeTemplateSnapshots()", "ConsumerSample.Avalonia"));
+        Assert.True(HasLineWithAll(capabilityRecipeZh, "第 2 步", "TryExportSceneAsSvg", "TryExportSceneAsImage", "GraphEditorSceneImageExportFormat.Png"));
+        Assert.True(HasLineWithAll(capabilityRecipeZh, "第 3 步", "CreateCommandSurfaceActions", "GetToolDescriptors(", "AsterGraph.ConsumerSample.Avalonia -- --proof"));
+    }
+
+    [Fact]
     public void ConsumerSampleRecipeClosureDocs_DefineOneCopyableParameterMetadataPath()
     {
         var readme = ReadRepoFile("tools/AsterGraph.ConsumerSample.Avalonia/README.md");
@@ -166,6 +189,11 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
         Assert.Contains("CONSUMER_SAMPLE_METADATA_PROJECTION_OK:True", quickReferenceProofBlockEn, StringComparison.Ordinal);
         Assert.Contains("AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:True", quickReferenceProofBlockEn, StringComparison.Ordinal);
         Assert.Contains("AUTHORING_SURFACE_COMMAND_PROJECTION_OK:True", quickReferenceProofBlockEn, StringComparison.Ordinal);
+        Assert.Contains("CAPABILITY_BREADTH_STENCIL_OK:True", quickReferenceProofBlockEn, StringComparison.Ordinal);
+        Assert.Contains("CAPABILITY_BREADTH_EXPORT_OK:True", quickReferenceProofBlockEn, StringComparison.Ordinal);
+        Assert.Contains("CAPABILITY_BREADTH_NODE_QUICK_TOOLS_OK:True", quickReferenceProofBlockEn, StringComparison.Ordinal);
+        Assert.Contains("CAPABILITY_BREADTH_EDGE_QUICK_TOOLS_OK:True", quickReferenceProofBlockEn, StringComparison.Ordinal);
+        Assert.Contains("CAPABILITY_BREADTH_OK:True", quickReferenceProofBlockEn, StringComparison.Ordinal);
         Assert.Contains("AUTHORING_SURFACE_OK:True", quickReferenceProofBlockEn, StringComparison.Ordinal);
         Assert.Contains("COMMAND_SURFACE_OK:True", quickReferenceProofBlockEn, StringComparison.Ordinal);
         Assert.Contains("HOST_NATIVE_METRIC:*", quickReferenceProofBlockEn, StringComparison.Ordinal);
@@ -176,6 +204,11 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
         Assert.Contains("CONSUMER_SAMPLE_METADATA_PROJECTION_OK:True", quickReferenceProofBlockZh, StringComparison.Ordinal);
         Assert.Contains("AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:True", quickReferenceProofBlockZh, StringComparison.Ordinal);
         Assert.Contains("AUTHORING_SURFACE_COMMAND_PROJECTION_OK:True", quickReferenceProofBlockZh, StringComparison.Ordinal);
+        Assert.Contains("CAPABILITY_BREADTH_STENCIL_OK:True", quickReferenceProofBlockZh, StringComparison.Ordinal);
+        Assert.Contains("CAPABILITY_BREADTH_EXPORT_OK:True", quickReferenceProofBlockZh, StringComparison.Ordinal);
+        Assert.Contains("CAPABILITY_BREADTH_NODE_QUICK_TOOLS_OK:True", quickReferenceProofBlockZh, StringComparison.Ordinal);
+        Assert.Contains("CAPABILITY_BREADTH_EDGE_QUICK_TOOLS_OK:True", quickReferenceProofBlockZh, StringComparison.Ordinal);
+        Assert.Contains("CAPABILITY_BREADTH_OK:True", quickReferenceProofBlockZh, StringComparison.Ordinal);
         Assert.Contains("AUTHORING_SURFACE_OK:True", quickReferenceProofBlockZh, StringComparison.Ordinal);
         Assert.Contains("COMMAND_SURFACE_OK:True", quickReferenceProofBlockZh, StringComparison.Ordinal);
         Assert.Contains("HOST_NATIVE_METRIC:*", quickReferenceProofBlockZh, StringComparison.Ordinal);
@@ -208,6 +241,11 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
             Assert.Contains("CONSUMER_SAMPLE_METADATA_PROJECTION_OK:True", proofBlock, StringComparison.Ordinal);
             Assert.Contains("AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:True", proofBlock, StringComparison.Ordinal);
             Assert.Contains("AUTHORING_SURFACE_COMMAND_PROJECTION_OK:True", proofBlock, StringComparison.Ordinal);
+            Assert.Contains("CAPABILITY_BREADTH_STENCIL_OK:True", proofBlock, StringComparison.Ordinal);
+            Assert.Contains("CAPABILITY_BREADTH_EXPORT_OK:True", proofBlock, StringComparison.Ordinal);
+            Assert.Contains("CAPABILITY_BREADTH_NODE_QUICK_TOOLS_OK:True", proofBlock, StringComparison.Ordinal);
+            Assert.Contains("CAPABILITY_BREADTH_EDGE_QUICK_TOOLS_OK:True", proofBlock, StringComparison.Ordinal);
+            Assert.Contains("CAPABILITY_BREADTH_OK:True", proofBlock, StringComparison.Ordinal);
             Assert.Contains("AUTHORING_SURFACE_OK:True", proofBlock, StringComparison.Ordinal);
             Assert.DoesNotContain("SUPPORT_BUNDLE_OK", proofBlock, StringComparison.Ordinal);
             Assert.DoesNotContain("SUPPORT_BUNDLE_PATH", proofBlock, StringComparison.Ordinal);

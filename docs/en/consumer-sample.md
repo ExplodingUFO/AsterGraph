@@ -11,6 +11,7 @@ It is the host seam example for three host-owned seams:
 
 For the inspector metadata recipe, pair this route with [Authoring Inspector Recipe](./authoring-inspector-recipe.md). This sample stays focused on the host-owned seams and the shipped inspector surface; it does not own the metadata vocabulary. The canonical recipe carries the full `defaultValue`, `isAdvanced`, `helpText`, `placeholderText`, and read-only vocabulary.
 For copyable custom node, port, and edge presentation on the same route, pair it with [Authoring Surface Recipe](./authoring-surface-recipe.md).
+For searchable grouped stencil, SVG/PNG/JPEG export breadth, and shared node or edge quick tools on the same route, pair it with [Capability Breadth Recipe](./capability-breadth-recipe.md).
 
 This is the defended beta route for copying host-owned seams into your own host. Keep action projection, trust workflow, and the selected-node parameter read/write seam host-owned; copy only the sample-owned presentation.
 
@@ -79,6 +80,11 @@ Expected proof markers:
 - `CONSUMER_SAMPLE_METADATA_PROJECTION_OK:True`
 - `AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:True`
 - `AUTHORING_SURFACE_COMMAND_PROJECTION_OK:True`
+- `CAPABILITY_BREADTH_STENCIL_OK:True`
+- `CAPABILITY_BREADTH_EXPORT_OK:True`
+- `CAPABILITY_BREADTH_NODE_QUICK_TOOLS_OK:True`
+- `CAPABILITY_BREADTH_EDGE_QUICK_TOOLS_OK:True`
+- `CAPABILITY_BREADTH_OK:True`
 - `AUTHORING_SURFACE_OK:True`
 - `COMMAND_SURFACE_OK:True`
 - `HOST_NATIVE_METRIC:*`
@@ -141,6 +147,11 @@ Expected proof markers:
 - `CONSUMER_SAMPLE_WINDOW_OK:True`
 - `CONSUMER_SAMPLE_TRUST_OK:True`
 - `COMMAND_SURFACE_OK:True`
+- `CAPABILITY_BREADTH_STENCIL_OK:True`
+- `CAPABILITY_BREADTH_EXPORT_OK:True`
+- `CAPABILITY_BREADTH_NODE_QUICK_TOOLS_OK:True`
+- `CAPABILITY_BREADTH_EDGE_QUICK_TOOLS_OK:True`
+- `CAPABILITY_BREADTH_OK:True`
 - `HOST_NATIVE_METRIC:startup_ms=...`
 - `HOST_NATIVE_METRIC:inspector_projection_ms=...`
 - `HOST_NATIVE_METRIC:plugin_scan_ms=...`
@@ -189,11 +200,13 @@ If you want to build the same medium host in your own app, copy these seams in t
 - selected-node parameter read/write seam: `IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()` reads the selected node parameters, and `IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)` writes them back
 - node-side authoring seam: `IGraphEditorSession.Queries.GetNodeParameterSnapshots(nodeId)` plus `INodeParameterEditorRegistry` keep the node surface on the same metadata and validation contract as the inspector
 - proof mode: emit the `AUTHORING_SURFACE_*` markers, `COMMAND_SURFACE_OK`, and the four `HOST_NATIVE_METRIC:*` lines so you can compare your host with the shipped samples and keep the defended large-tier contract in view through `ScaleSmoke`
+- capability breadth: pair the same route with [Capability Breadth Recipe](./capability-breadth-recipe.md) and emit the `CAPABILITY_BREADTH_*` markers from `AsterGraph.ConsumerSample.Avalonia -- --proof`
 - sample-owned content such as the review/audit node family, action ids and titles, and proof labels beyond the defended markers should stay local to your app
 
 ## Related Docs
 
 - [Quick Start](./quick-start.md)
+- [Capability Breadth Recipe](./capability-breadth-recipe.md)
 - [Authoring Surface Recipe](./authoring-surface-recipe.md)
 - [Beta Support Bundle](./support-bundle.md)
 - [Host Integration](./host-integration.md)
