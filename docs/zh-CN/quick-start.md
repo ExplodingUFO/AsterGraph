@@ -32,8 +32,6 @@
 - 宿主自己的 top-level window 和它的 title/size
 - 随着宿主成长逐步替换 sample graph/catalog definitions
 
-把 `AsterGraph.Starter.Avalonia` 当作 starter recipe。保留/复制 `AsterGraphEditorFactory.Create(...)`、`AsterGraphAvaloniaViewFactory.Create(...)`、`AsterGraphEditorOptions`，以及 document/catalog/editor/view 的组合流程。替换宿主自己的 top-level window 和它的 title/size，并随着宿主成长逐步替换 sample graph/catalog definitions。复制宿主自管 seam，不复制样例自有展示层。下一步 hosted step 是 `AsterGraph.HelloWorld.Avalonia`。升级到 `AsterGraph.ConsumerSample.Avalonia` 时，继续把 action projection、trust workflow 和选中节点参数读写 seam 放在宿主里。
-
 ## 宿主自管参数与元数据复制图
 
 按每个 bounded source 复制它负责的那一部分：
