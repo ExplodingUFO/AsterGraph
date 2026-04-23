@@ -85,7 +85,7 @@
 
 | 声明 | 当前公开口径 | 路线级证据 |
 | --- | --- | --- |
-| `WPF` 作为 adapter 2 | 只算 validation-only，不代表 Avalonia parity，也不是公开 WPF support。当前证据只覆盖有边界的 hosted shell accessibility 路径。 | `HELLOWORLD_WPF_OK`、`HOSTED_ACCESSIBILITY_BASELINE_OK`、`HOSTED_ACCESSIBILITY_FOCUS_OK`、`HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK`、`HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK`、`HOSTED_ACCESSIBILITY_OK`、`ADAPTER_CAPABILITY_MATRIX:WPF:HELLOWORLD_WPF_OK:PASS`、`ADAPTER_CAPABILITY_MATRIX:WPF:COMMAND_SURFACE_OK:PASS`、[Adapter Capability Matrix](./adapter-capability-matrix.md) |
+| `WPF` 作为 adapter 2 | 只算 validation-only，不代表 Avalonia parity，也不是公开 WPF support。当前证据只覆盖有边界的 hosted shell accessibility 和 performance 路径。 | `HELLOWORLD_WPF_OK`、`HOSTED_ACCESSIBILITY_BASELINE_OK`、`HOSTED_ACCESSIBILITY_FOCUS_OK`、`HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK`、`HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK`、`HOSTED_ACCESSIBILITY_OK`、`ADAPTER2_PERFORMANCE_BASELINE_OK`、`ADAPTER2_PROJECTION_BUDGET_OK`、`ADAPTER2_COMMAND_BUDGET_OK`、`ADAPTER2_SCENE_BUDGET_OK`、`ADAPTER_CAPABILITY_MATRIX:WPF:HELLOWORLD_WPF_OK:PASS`、`ADAPTER_CAPABILITY_MATRIX:WPF:COMMAND_SURFACE_OK:PASS`、[Adapter Capability Matrix](./adapter-capability-matrix.md) |
 | retained 路线 | 只作为迁移桥，不是新的 primary host path。 | [Retained 到 Session 的迁移 Recipe](./retained-migration-recipe.md)、[稳定化支持矩阵](./stabilization-support-matrix.md) |
 | stress 规模遥测 | 只算 informational，不是 defended budget 声明。 | `SCALE_PERF_SUMMARY:stress`、[ScaleSmoke 基线](./scale-baseline.md) |
 

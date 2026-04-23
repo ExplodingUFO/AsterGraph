@@ -205,6 +205,10 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK", projectStatus, StringComparison.Ordinal);
         Assert.Contains("HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK", projectStatus, StringComparison.Ordinal);
         Assert.Contains("HOSTED_ACCESSIBILITY_OK", projectStatus, StringComparison.Ordinal);
+        Assert.Contains("ADAPTER2_PERFORMANCE_BASELINE_OK", projectStatus, StringComparison.Ordinal);
+        Assert.Contains("ADAPTER2_PROJECTION_BUDGET_OK", projectStatus, StringComparison.Ordinal);
+        Assert.Contains("ADAPTER2_COMMAND_BUDGET_OK", projectStatus, StringComparison.Ordinal);
+        Assert.Contains("ADAPTER2_SCENE_BUDGET_OK", projectStatus, StringComparison.Ordinal);
         Assert.Contains("SCALE_PERFORMANCE_BUDGET_OK:baseline:True", projectStatus, StringComparison.Ordinal);
         Assert.Contains("SCALE_PERFORMANCE_BUDGET_OK:large:True", projectStatus, StringComparison.Ordinal);
         Assert.Contains("SCALE_PERF_SUMMARY:stress", projectStatus, StringComparison.Ordinal);
@@ -227,6 +231,10 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK", projectStatusZh, StringComparison.Ordinal);
         Assert.Contains("HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK", projectStatusZh, StringComparison.Ordinal);
         Assert.Contains("HOSTED_ACCESSIBILITY_OK", projectStatusZh, StringComparison.Ordinal);
+        Assert.Contains("ADAPTER2_PERFORMANCE_BASELINE_OK", projectStatusZh, StringComparison.Ordinal);
+        Assert.Contains("ADAPTER2_PROJECTION_BUDGET_OK", projectStatusZh, StringComparison.Ordinal);
+        Assert.Contains("ADAPTER2_COMMAND_BUDGET_OK", projectStatusZh, StringComparison.Ordinal);
+        Assert.Contains("ADAPTER2_SCENE_BUDGET_OK", projectStatusZh, StringComparison.Ordinal);
         Assert.Contains("SCALE_PERFORMANCE_BUDGET_OK:baseline:True", projectStatusZh, StringComparison.Ordinal);
         Assert.Contains("SCALE_PERFORMANCE_BUDGET_OK:large:True", projectStatusZh, StringComparison.Ordinal);
         Assert.Contains("SCALE_PERF_SUMMARY:stress", projectStatusZh, StringComparison.Ordinal);
@@ -982,6 +990,10 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK", adapterMatrix, StringComparison.Ordinal);
         Assert.Contains("HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK", adapterMatrix, StringComparison.Ordinal);
         Assert.Contains("HOSTED_ACCESSIBILITY_OK", adapterMatrix, StringComparison.Ordinal);
+        Assert.Contains("ADAPTER2_PERFORMANCE_BASELINE_OK", adapterMatrix, StringComparison.Ordinal);
+        Assert.Contains("ADAPTER2_PROJECTION_BUDGET_OK", adapterMatrix, StringComparison.Ordinal);
+        Assert.Contains("ADAPTER2_COMMAND_BUDGET_OK", adapterMatrix, StringComparison.Ordinal);
+        Assert.Contains("ADAPTER2_SCENE_BUDGET_OK", adapterMatrix, StringComparison.Ordinal);
         Assert.Contains("HOST_SAMPLE_OK", adapterMatrix, StringComparison.Ordinal);
         Assert.Contains("DEMO_OK", adapterMatrix, StringComparison.Ordinal);
         Assert.Contains("Fallback Rule", adapterMatrix, StringComparison.Ordinal);
@@ -1007,6 +1019,10 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK", adapterMatrixZh, StringComparison.Ordinal);
         Assert.Contains("HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK", adapterMatrixZh, StringComparison.Ordinal);
         Assert.Contains("HOSTED_ACCESSIBILITY_OK", adapterMatrixZh, StringComparison.Ordinal);
+        Assert.Contains("ADAPTER2_PERFORMANCE_BASELINE_OK", adapterMatrixZh, StringComparison.Ordinal);
+        Assert.Contains("ADAPTER2_PROJECTION_BUDGET_OK", adapterMatrixZh, StringComparison.Ordinal);
+        Assert.Contains("ADAPTER2_COMMAND_BUDGET_OK", adapterMatrixZh, StringComparison.Ordinal);
+        Assert.Contains("ADAPTER2_SCENE_BUDGET_OK", adapterMatrixZh, StringComparison.Ordinal);
         Assert.Contains("HOST_SAMPLE_OK", adapterMatrixZh, StringComparison.Ordinal);
         Assert.Contains("DEMO_OK", adapterMatrixZh, StringComparison.Ordinal);
         Assert.DoesNotContain("Phase 154", adapterMatrixZh, StringComparison.OrdinalIgnoreCase);
