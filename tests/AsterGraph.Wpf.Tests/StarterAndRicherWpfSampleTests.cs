@@ -47,12 +47,14 @@ public sealed class StarterAndRicherWpfSampleTests
         Assert.True(proof.AccessibilityCommandSurfaceOk);
         Assert.True(proof.AccessibilityAuthoringSurfaceOk);
         Assert.True(proof.HostedAccessibilityOk);
+        Assert.True(proof.Adapter2PerformanceBaselineOk);
 
         var metricLines = proof.MetricLines;
         Assert.Contains(metricLines, line => line.Contains("startup_ms", StringComparison.Ordinal));
         Assert.Contains(metricLines, line => line.Contains("inspector_projection_ms", StringComparison.Ordinal));
         Assert.Contains(metricLines, line => line.Contains("plugin_scan_ms", StringComparison.Ordinal));
         Assert.Contains(metricLines, line => line.Contains("command_latency_ms", StringComparison.Ordinal));
+        Assert.Contains(proof.ProofLines, line => line == "ADAPTER2_PERFORMANCE_BASELINE_OK:True");
         Assert.Contains(proof.ProofLines, line => line == "HOSTED_ACCESSIBILITY_BASELINE_OK:True");
         Assert.Contains(proof.ProofLines, line => line == "HOSTED_ACCESSIBILITY_FOCUS_OK:True");
         Assert.Contains(proof.ProofLines, line => line == "HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True");

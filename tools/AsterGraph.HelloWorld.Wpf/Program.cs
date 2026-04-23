@@ -204,6 +204,7 @@ public sealed record HostedHelloWorldProofResult(
     bool AccessibilityFocusOk,
     bool AccessibilityCommandSurfaceOk,
     bool AccessibilityAuthoringSurfaceOk,
+    bool Adapter2PerformanceBaselineOk,
     double StartupMs,
     double InspectorProjectionMs,
     double PluginScanMs,
@@ -215,7 +216,7 @@ public sealed record HostedHelloWorldProofResult(
         && AccessibilityCommandSurfaceOk
         && AccessibilityAuthoringSurfaceOk;
 
-    public bool IsOk => CommandSurfaceOk && HostedAccessibilityOk;
+    public bool IsOk => CommandSurfaceOk && HostedAccessibilityOk && Adapter2PerformanceBaselineOk;
 
     public IReadOnlyList<string> ProofLines =>
         [
@@ -225,6 +226,7 @@ public sealed record HostedHelloWorldProofResult(
             $"HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:{AccessibilityCommandSurfaceOk}",
             $"HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:{AccessibilityAuthoringSurfaceOk}",
             $"HOSTED_ACCESSIBILITY_OK:{HostedAccessibilityOk}",
+            $"ADAPTER2_PERFORMANCE_BASELINE_OK:{Adapter2PerformanceBaselineOk}",
             $"HELLOWORLD_WPF_OK:{IsOk}",
         ];
 
@@ -265,6 +267,10 @@ public static class HostedHelloWorldProof
             EvaluateAccessibilitySurface();
         var commandSurfaceOk = undoDescriptor.CanExecute
             && session.Queries.CreateDocumentSnapshot().Nodes.Count == nodeCountBeforeUndo;
+        var adapter2PerformanceBaselineOk = startupMs > 0d
+            && IsFiniteNonNegative(inspectorProjectionMs)
+            && IsFiniteNonNegative(pluginScanMs)
+            && IsFiniteNonNegative(commandLatencyMs);
 
         return new HostedHelloWorldProofResult(
             commandSurfaceOk,
@@ -272,11 +278,15 @@ public static class HostedHelloWorldProof
             accessibilityFocusOk,
             accessibilityCommandSurfaceOk,
             accessibilityAuthoringSurfaceOk,
+            adapter2PerformanceBaselineOk,
             startupMs,
             inspectorProjectionMs,
             pluginScanMs,
             commandLatencyMs);
     }
+
+    private static bool IsFiniteNonNegative(double value)
+        => double.IsFinite(value) && value >= 0d;
 
     private static (bool BaselineOk, bool FocusOk, bool CommandSurfaceOk, bool AuthoringSurfaceOk) EvaluateAccessibilitySurface()
         => RunInSta(() =>
