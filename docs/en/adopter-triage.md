@@ -6,7 +6,7 @@ When a beta report is filed, keep the same bounded intake record fields together
 - package `version` (or public tag)
 - `proof` markers observed
 - `friction` summary
-- `support bundle` JSON path when available from `ConsumerSample.Avalonia -- --proof`; otherwise note that the route could not produce one
+- `support bundle` attachment note when available from `ConsumerSample.Avalonia -- --proof --support-bundle <support-bundle-path>`; otherwise note that the route could not produce one
 
 Use the same fields in:
 
@@ -16,7 +16,7 @@ Use the same fields in:
 
 This checklist keeps all intake documents on one beta evidence contract, so route selection and support readiness can be triaged consistently without blocking `HelloWorld`, `Demo`, or `ScaleSmoke` feedback when no support bundle exists yet.
 
-Use [Project Status](./project-status.md) as the readiness gate before treating a report as a support-expansion candidate. Reports outside the proven/bounded rows are intake evidence, not automatic scope widening.
+Use [Project Status](./project-status.md) as the readiness gate before treating a report as a support-expansion candidate. Reports outside the proven/bounded rows are intake evidence, not automatic scope widening. Reuse the emitted `SUPPORT_BUNDLE_PATH:...` line as the attachment note when the route can produce a bundle.
 
 ## Related Links
 

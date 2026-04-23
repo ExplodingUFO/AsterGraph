@@ -81,14 +81,16 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 如果你要生成本地 support bundle：
 
 ```powershell
-dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.ConsumerSample.Avalonia.csproj --nologo -- --proof --support-bundle artifacts/consumer-support-bundle.json --support-note "what you were trying to validate"
+dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.ConsumerSample.Avalonia.csproj --nologo -- --proof --support-bundle <support-bundle-path> --support-note "what you were trying to validate"
 ```
 
 ## Proof Handoff
 
 如果你是从 starter recipe 复制过来的，就在这里完成 proof handoff：先跑 `AsterGraph.ConsumerSample.Avalonia -- --proof` 来验证受防守的宿主路线。
 
-如果你需要可复查的本地证据，就附上 `artifacts/consumer-support-bundle.json`；bundle marker 会指向 `SUPPORT_BUNDLE_PATH:...`，对应解析后的路径。它应当只作为本地证据，不应扩大支持边界。
+这是可复制的 intake 记录：一条 proof 命令、一条本地 bundle 命令，以及来自 `SUPPORT_BUNDLE_PATH:...` 的附件备注。
+
+如果你需要可复查的本地证据，就使用 `--support-bundle <support-bundle-path>`，并把 proof 输出里的 `SUPPORT_BUNDLE_PATH:...` 这一行作为附件备注。它应当只作为本地证据，不应扩大支持边界。
 
 预期 marker：
 

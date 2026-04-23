@@ -120,12 +120,51 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
         AssertAppearsBefore(consumerSampleZh, "Beta Support Bundle", "## 它证明什么");
     }
 
+    [Fact]
+    public void ConsumerSampleRecipeClosureDocs_UseOneCopyableIntakeRecordWithoutHardcodedBundleNames()
+    {
+        var readme = ReadRepoFile("tools/AsterGraph.ConsumerSample.Avalonia/README.md");
+        var consumerSampleEn = ReadRepoFile("docs/en/consumer-sample.md");
+        var consumerSampleZh = ReadRepoFile("docs/zh-CN/consumer-sample.md");
+        var supportBundleEn = ReadRepoFile("docs/en/support-bundle.md");
+        var supportBundleZh = ReadRepoFile("docs/zh-CN/support-bundle.md");
+        var adoptionFeedbackEn = ReadRepoFile("docs/en/adoption-feedback.md");
+        var adoptionFeedbackZh = ReadRepoFile("docs/zh-CN/adoption-feedback.md");
+
+        foreach (var contents in new[] { readme, consumerSampleEn, consumerSampleZh, supportBundleEn, supportBundleZh })
+        {
+            Assert.Contains("--support-bundle", contents, StringComparison.Ordinal);
+            Assert.DoesNotContain("artifacts/consumer-support-bundle.json", contents, StringComparison.Ordinal);
+        }
+
+        foreach (var contents in new[] { readme, consumerSampleEn, consumerSampleZh, supportBundleEn, supportBundleZh, adoptionFeedbackEn, adoptionFeedbackZh })
+        {
+            Assert.Contains("SUPPORT_BUNDLE_PATH", contents, StringComparison.Ordinal);
+            Assert.DoesNotContain("artifacts/consumer-support-bundle.json", contents, StringComparison.Ordinal);
+        }
+
+        Assert.Contains("copyable intake record", consumerSampleEn, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("copyable intake record", readme, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("可复制的 intake 记录", consumerSampleZh, StringComparison.Ordinal);
+        Assert.Contains("support-bundle attachment", supportBundleEn, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("support bundle 作为附件", supportBundleZh, StringComparison.Ordinal);
+        Assert.True(HasLineWithAll(adoptionFeedbackEn, "route", "version", "proof", "friction", "support-bundle attachment"));
+        Assert.True(HasLineWithAll(adoptionFeedbackZh, "route", "version", "proof", "摩擦", "support bundle"));
+    }
+
     private static void AssertContains(string contents, string expected)
         => Assert.Contains(expected, contents, StringComparison.Ordinal);
 
     private static bool HasLineWith(string contents, string first, string second)
         => contents.Split('\n')
             .Any(line => line.Contains(first, StringComparison.Ordinal) && line.Contains(second, StringComparison.Ordinal));
+
+    private static bool HasLineWithAll(string contents, params string[] requiredTerms)
+    {
+        return contents
+            .Split('\n', StringSplitOptions.TrimEntries)
+            .Any(line => requiredTerms.All(term => line.Contains(term, StringComparison.OrdinalIgnoreCase)));
+    }
 
     private static void AssertAppearsBefore(string contents, string requiredText, string requiredHeading)
     {

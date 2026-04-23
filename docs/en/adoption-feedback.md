@@ -12,10 +12,10 @@ Each feedback entry should capture this bounded schema:
 - version
 - proof markers or screenshot reference when available
 - friction
-- support-bundle attachment when available
+- support-bundle attachment note from the emitted `SUPPORT_BUNDLE_PATH:...` line when available
 
 Use the GitHub issue template `Adoption feedback` for public reports.
-When you can reach `ConsumerSample.Avalonia -- --proof`, attach the local bundle described in [Beta Support Bundle](./support-bundle.md) as the support-bundle attachment.
+When you can reach `ConsumerSample.Avalonia -- --proof`, attach the local bundle described in [Beta Support Bundle](./support-bundle.md) and reuse the emitted `SUPPORT_BUNDLE_PATH:...` line as the support-bundle attachment note.
 
 ## Seeded Trial Synthesis
 

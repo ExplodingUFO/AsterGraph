@@ -81,14 +81,16 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 For a local beta support bundle:
 
 ```powershell
-dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.ConsumerSample.Avalonia.csproj --nologo -- --proof --support-bundle artifacts/consumer-support-bundle.json --support-note "what you were trying to validate"
+dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.ConsumerSample.Avalonia.csproj --nologo -- --proof --support-bundle <support-bundle-path> --support-note "what you were trying to validate"
 ```
 
 ## Proof Handoff
 
 If you copied the starter recipe, validate the defended host here with `AsterGraph.ConsumerSample.Avalonia -- --proof` first.
 
-When you need reviewable local evidence, attach the support bundle at `artifacts/consumer-support-bundle.json`; the bundle marker points to `SUPPORT_BUNDLE_PATH:...` with the resolved path. It should stay local evidence only and should not widen the support boundary.
+This is the copyable intake record for the defended route: one proof command, one local bundle command, and one attachment note from `SUPPORT_BUNDLE_PATH:...`.
+
+When you need reviewable local evidence, use `--support-bundle <support-bundle-path>` and attach the `SUPPORT_BUNDLE_PATH:...` line from the proof output as the note. It should stay local evidence only and should not widen the support boundary.
 
 Expected proof markers:
 

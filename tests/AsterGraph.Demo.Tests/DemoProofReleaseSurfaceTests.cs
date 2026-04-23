@@ -276,7 +276,9 @@ public sealed class DemoProofReleaseSurfaceTests
         var supportBundle = ReadRepoFile("docs/en/support-bundle.md");
         var supportBundleZh = ReadRepoFile("docs/zh-CN/support-bundle.md");
         var versionBlock = ExtractIssueTemplateBlock(adoptionTemplate, "version");
-        var evidenceBlock = ExtractIssueTemplateBlock(adoptionTemplate, "evidence");
+        var routeBlock = ExtractIssueTemplateBlock(adoptionTemplate, "route");
+        var proofMarkersBlock = ExtractIssueTemplateBlock(adoptionTemplate, "proof_markers");
+        var frictionBlock = ExtractIssueTemplateBlock(adoptionTemplate, "friction");
         var supportBundleBlock = ExtractIssueTemplateBlock(adoptionTemplate, "support_bundle");
 
         Assert.Contains("id: version", adoptionTemplate, StringComparison.Ordinal);
@@ -284,14 +286,22 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.DoesNotContain("alpha", versionBlock, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("id: route", adoptionTemplate, StringComparison.Ordinal);
         Assert.Contains("id: proof_markers", adoptionTemplate, StringComparison.Ordinal);
+        Assert.Contains("id: friction", adoptionTemplate, StringComparison.Ordinal);
         Assert.Contains("id: support_bundle", adoptionTemplate, StringComparison.Ordinal);
         Assert.Contains("AsterGraph.Starter.Avalonia", adoptionTemplate, StringComparison.Ordinal);
         Assert.Contains("HelloWorld.Avalonia", adoptionTemplate, StringComparison.Ordinal);
-        Assert.Contains("Supporting evidence", evidenceBlock, StringComparison.Ordinal);
-        Assert.Contains("besides proof markers", evidenceBlock, StringComparison.OrdinalIgnoreCase);
-        Assert.DoesNotContain("required: true", evidenceBlock, StringComparison.Ordinal);
+        Assert.Contains("route or artifact", routeBlock, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("proof marker", proofMarkersBlock, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("friction", frictionBlock, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("support bundle", supportBundleBlock, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("SUPPORT_BUNDLE_PATH", supportBundleBlock, StringComparison.Ordinal);
+        Assert.DoesNotContain("consumer-support-bundle.json", supportBundleBlock, StringComparison.Ordinal);
+        Assert.DoesNotContain("id: persona", adoptionTemplate, StringComparison.Ordinal);
+        Assert.DoesNotContain("id: worked", adoptionTemplate, StringComparison.Ordinal);
+        Assert.DoesNotContain("id: request", adoptionTemplate, StringComparison.Ordinal);
+        Assert.DoesNotContain("id: evidence", adoptionTemplate, StringComparison.Ordinal);
         Assert.Contains("ConsumerSample.Avalonia", supportBundleBlock, StringComparison.Ordinal);
-        Assert.Contains("JSON", supportBundleBlock, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("attachment note", supportBundleBlock, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("required: true", supportBundleBlock, StringComparison.Ordinal);
 
         Assert.Contains("AsterGraph version", bugTemplate, StringComparison.Ordinal);
@@ -305,6 +315,7 @@ public sealed class DemoProofReleaseSurfaceTests
             Assert.Contains("route", contents, StringComparison.OrdinalIgnoreCase);
             Assert.Contains("proof", contents, StringComparison.OrdinalIgnoreCase);
             Assert.Contains("support bundle", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("ConsumerSample.Avalonia", contents, StringComparison.Ordinal);
         }
 
         Assert.Contains("friction", triageDoc, StringComparison.OrdinalIgnoreCase);
