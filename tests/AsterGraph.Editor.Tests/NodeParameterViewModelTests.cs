@@ -1,5 +1,6 @@
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
+using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.ViewModels;
 using Xunit;
 
@@ -91,5 +92,48 @@ public sealed class NodeParameterViewModelTests
         Assert.True(viewModel.IsUsingDefaultValue);
         Assert.False(viewModel.IsOverriddenFromDefault);
         Assert.Equal("默认", viewModel.ValueStateCaption);
+    }
+
+    [Fact]
+    public void SnapshotConstructor_UsesSharedAuthoringMetadataWithoutRebuildingSeparateState()
+    {
+        object? appliedValue = null;
+        var definition = new NodeParameterDefinition(
+            "threshold",
+            "Threshold",
+            new PortTypeId("float"),
+            ParameterEditorKind.Number,
+            defaultValue: 0.5d,
+            helpText: "Fine-tunes the visible threshold.",
+            groupName: "Behavior");
+        var snapshot = new GraphEditorNodeParameterSnapshot(
+            definition,
+            0.9d,
+            HasMixedValues: false,
+            CanEdit: true,
+            IsValid: true,
+            ValidationMessage: null,
+            CanResetToDefault: true,
+            IsUsingDefaultValue: false,
+            ReadOnlyReason: null,
+            HelpText: "Fine-tunes the visible threshold.",
+            GroupDisplayName: "Behavior",
+            IsGroupHeaderVisible: true,
+            ValueState: GraphEditorNodeParameterValueState.Overridden,
+            ValueDisplayText: "0.9");
+
+        var viewModel = new NodeParameterViewModel(snapshot, (_, value) => appliedValue = value);
+
+        Assert.Equal("Behavior", viewModel.GroupDisplayName);
+        Assert.True(viewModel.IsGroupHeaderVisible);
+        Assert.Equal("Fine-tunes the visible threshold.", viewModel.HelpText);
+        Assert.True(viewModel.IsOverriddenFromDefault);
+        Assert.Equal("已覆盖", viewModel.ValueStateCaption);
+        Assert.Equal("0.9", viewModel.StringValue);
+
+        viewModel.ResetToDefault();
+
+        Assert.Equal(0.5d, viewModel.CurrentValue);
+        Assert.Equal(0.5d, appliedValue);
     }
 }

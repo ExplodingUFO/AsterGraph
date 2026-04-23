@@ -1,5 +1,6 @@
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Core.Models;
+using AsterGraph.Editor.Parameters;
 using AsterGraph.Editor.Runtime;
 
 namespace AsterGraph.Editor.ViewModels;
@@ -76,32 +77,45 @@ public sealed partial class GraphEditorViewModel
                 candidate.TargetKind == GraphConnectionTargetKind.Parameter
                 && string.Equals(candidate.TargetNodeId, node.Id, StringComparison.Ordinal))
             .ToDictionary(connection => connection.TargetPortId, StringComparer.Ordinal);
-        var endpoints = definition.Parameters
+        var eligibleParameters = definition.Parameters
             .Where(parameter =>
             {
                 parameterConnectionsByKey.TryGetValue(parameter.Key, out var connection);
                 return parameter.IsRequired || revealsOptionalParameters || connection is not null;
             })
-            .Select(parameter =>
+            .ToList();
+        var endpointSnapshots = GraphEditorNodeParameterSnapshotProjector.Project(
+            eligibleParameters,
+            parameter => [node.GetParameterValue(parameter.Key) ?? parameter.DefaultValue],
+            parameter =>
             {
                 parameterConnectionsByKey.TryGetValue(parameter.Key, out var connection);
-                var currentValue = node.GetParameterValue(parameter.Key) ?? parameter.DefaultValue;
+                return !CanEditNodeParameters || connection is not null;
+            },
+            parameter =>
+            {
+                parameterConnectionsByKey.TryGetValue(parameter.Key, out var connection);
+                return connection is null
+                    ? null
+                    : "该参数当前由上游连线驱动。";
+            })
+            .Select(snapshot =>
+            {
+                parameterConnectionsByKey.TryGetValue(snapshot.Definition.Key, out var connection);
                 var parameterViewModel = new NodeParameterViewModel(
-                    parameter,
-                    [currentValue],
-                    (_, value) => Session.Commands.TrySetNodeParameterValue(node.Id, parameter.Key, value),
-                    isHostReadOnly: !CanEditNodeParameters || connection is not null);
+                    snapshot,
+                    (_, value) => Session.Commands.TrySetNodeParameterValue(node.Id, snapshot.Definition.Key, value));
 
                 return new NodeParameterEndpointViewModel(
                     parameterViewModel,
-                    new GraphConnectionTargetRef(node.Id, parameter.Key, GraphConnectionTargetKind.Parameter),
+                    new GraphConnectionTargetRef(node.Id, snapshot.Definition.Key, GraphConnectionTargetKind.Parameter),
                     connection?.Id,
                     connection is null ? null : ResolveConnectionSourceDisplay(connection));
             })
             .ToList();
 
-        node.UpdateParameterEndpoints(endpoints);
-        foreach (var endpoint in endpoints)
+        node.UpdateParameterEndpoints(endpointSnapshots);
+        foreach (var endpoint in endpointSnapshots)
         {
             var inlineContentKind = ResolveInlineContentKind(node.ActiveSurfaceTier, endpoint);
             visibleInputs.Add(new NodeSurfaceInputRowViewModel(
@@ -160,29 +174,10 @@ public sealed partial class GraphEditorViewModel
         => inlineContentKind switch
         {
             NodeSurfaceInlineContentKind.Connection => endpoint.ConnectedDisplayText ?? "Connected",
-            NodeSurfaceInlineContentKind.Summary => DescribeParameterValue(endpoint.Parameter),
+            NodeSurfaceInlineContentKind.Summary => NodeParameterInspectorMetadata.DescribeValue(
+                endpoint.Parameter.Definition,
+                endpoint.Parameter.CurrentValue,
+                endpoint.Parameter.HasMixedValues),
             _ => null,
         };
-
-    private static string DescribeParameterValue(NodeParameterViewModel parameter)
-    {
-        if (parameter.HasMixedValues)
-        {
-            return parameter.MixedValueHint;
-        }
-
-        if (parameter.IsBoolean)
-        {
-            return parameter.BoolValue is true ? "Enabled" : "Disabled";
-        }
-
-        if (parameter.IsEnum)
-        {
-            return parameter.SelectedOption?.Label ?? parameter.StringValue;
-        }
-
-        return string.IsNullOrWhiteSpace(parameter.StringValue)
-            ? parameter.TypeId.Value
-            : parameter.StringValue;
-    }
 }

@@ -325,6 +325,35 @@ public sealed class GraphEditorViewModelProjectionTests
     }
 
     [Fact]
+    public void GraphEditorViewModel_SurfaceTierProjection_ReusesSharedNodeParameterSnapshotsForEndpointState()
+    {
+        var definitionId = new NodeDefinitionId("tests.editor.projection.authoring-metadata");
+        var editor = CreateEditor(CreateInputRowDocument(definitionId), CreateAuthoringMetadataCatalog(definitionId));
+        var targetNode = Assert.IsType<NodeViewModel>(editor.FindNode("target-node"));
+        var measurement = targetNode.SurfaceMeasurement;
+
+        Assert.True(editor.Session.Commands.TrySetNodeSize(
+            targetNode.Id,
+            new GraphSize(measurement.WidthToRevealInputEditors, measurement.HeightToRevealAdditionalInputs),
+            updateStatus: false));
+
+        targetNode = Assert.IsType<NodeViewModel>(editor.FindNode("target-node"));
+        var nodeSnapshots = editor.Session.Queries.GetNodeParameterSnapshots(targetNode.Id)
+            .ToDictionary(snapshot => snapshot.Definition.Key, StringComparer.Ordinal);
+        var thresholdEndpoint = Assert.Single(targetNode.ParameterEndpoints, endpoint => endpoint.Parameter.Key == "required-gain");
+        var thresholdSnapshot = nodeSnapshots["required-gain"];
+
+        Assert.Equal(thresholdSnapshot.HelpText, thresholdEndpoint.Parameter.HelpText);
+        Assert.Equal(thresholdSnapshot.ReadOnlyReason, thresholdEndpoint.Parameter.ReadOnlyReason);
+        Assert.Equal(thresholdSnapshot.GroupDisplayName, thresholdEndpoint.Parameter.GroupDisplayName);
+        Assert.Equal(thresholdSnapshot.IsGroupHeaderVisible, thresholdEndpoint.Parameter.IsGroupHeaderVisible);
+        Assert.Equal(thresholdSnapshot.IsUsingDefaultValue, thresholdEndpoint.Parameter.IsUsingDefaultValue);
+        Assert.Equal(
+            thresholdSnapshot.ValueState == GraphEditorNodeParameterValueState.Overridden,
+            thresholdEndpoint.Parameter.IsOverriddenFromDefault);
+    }
+
+    [Fact]
     public void GraphEditorViewModel_SurfaceTierProjection_DisconnectingParameterConnectionRestoresEditorMode()
     {
         var definitionId = new NodeDefinitionId("tests.editor.projection.input-rows-editor-disconnect");
@@ -550,6 +579,46 @@ public sealed class GraphEditorViewModelProjectionTests
                     new PortTypeId("float"),
                     ParameterEditorKind.Number,
                     defaultValue: 0.25d),
+            ]));
+        return catalog;
+    }
+
+    private static NodeCatalog CreateAuthoringMetadataCatalog(NodeDefinitionId definitionId)
+    {
+        var catalog = new NodeCatalog();
+        catalog.RegisterDefinition(new NodeDefinition(
+            definitionId,
+            "Authoring Metadata Node",
+            "Tests",
+            "Projection",
+            [
+                new PortDefinition("in", "Input", new PortTypeId("float"), "#F3B36B"),
+            ],
+            [
+                new PortDefinition("out", "Output", new PortTypeId("float"), "#55D8C1"),
+            ],
+            description: "Projects shared authoring metadata into node-side surfaces.",
+            defaultWidth: 220d,
+            defaultHeight: 160d,
+            parameters:
+            [
+                new NodeParameterDefinition(
+                    "required-gain",
+                    "Required Gain",
+                    new PortTypeId("float"),
+                    ParameterEditorKind.Number,
+                    isRequired: true,
+                    defaultValue: 0.5d,
+                    groupName: "Behavior",
+                    helpText: "Primary visible gain."),
+                new NodeParameterDefinition(
+                    "optional-gain",
+                    "Optional Gain",
+                    new PortTypeId("float"),
+                    ParameterEditorKind.Number,
+                    defaultValue: 0.25d,
+                    groupName: "Advanced",
+                    isAdvanced: true),
             ]));
         return catalog;
     }

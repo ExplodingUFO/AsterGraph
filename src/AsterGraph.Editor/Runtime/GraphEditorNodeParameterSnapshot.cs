@@ -15,6 +15,10 @@ namespace AsterGraph.Editor.Runtime;
 /// <param name="IsUsingDefaultValue">Whether the effective value still matches the declared default.</param>
 /// <param name="ReadOnlyReason">Optional read-only rationale surfaced to host shells.</param>
 /// <param name="HelpText">Optional high-signal authoring guidance projected from the definition metadata.</param>
+/// <param name="GroupDisplayName">Resolved host-facing group caption for authoring surfaces.</param>
+/// <param name="IsGroupHeaderVisible">Whether this snapshot starts a visible parameter group.</param>
+/// <param name="ValueState">Resolved value-state classification for badges and command-aware host UI.</param>
+/// <param name="ValueDisplayText">Human-readable current value summary for lightweight hosted surfaces.</param>
 public sealed record GraphEditorNodeParameterSnapshot(
     NodeParameterDefinition Definition,
     object? CurrentValue,
@@ -25,4 +29,8 @@ public sealed record GraphEditorNodeParameterSnapshot(
     bool CanResetToDefault,
     bool IsUsingDefaultValue,
     string? ReadOnlyReason,
-    string? HelpText);
+    string? HelpText,
+    string GroupDisplayName,
+    bool IsGroupHeaderVisible,
+    GraphEditorNodeParameterValueState ValueState,
+    string ValueDisplayText);

@@ -93,6 +93,14 @@ public interface IGraphEditorQueries
         => throw new NotSupportedException();
 
     /// <summary>
+    /// Gets parameter snapshots projected for one node-local authoring surface.
+    /// </summary>
+    /// <param name="nodeId">Target node identifier in the active scope.</param>
+    /// <returns>A stable snapshot collection suitable for hosted node-side authoring UIs.</returns>
+    IReadOnlyList<GraphEditorNodeParameterSnapshot> GetNodeParameterSnapshots(string nodeId)
+        => throw new NotSupportedException();
+
+    /// <summary>
     /// Gets stable node-surface snapshots for every node in the current document.
     /// </summary>
     /// <returns>One surface snapshot per node.</returns>

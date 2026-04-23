@@ -24,6 +24,7 @@ public sealed partial class GraphEditorViewModel
                 hasClipboardPayloadSerializer: _owner._clipboardPayloadSerializer is not null,
                 hasPluginLoader: true,
                 hasContextMenuAugmentor: _owner._contextMenuAugmentor is not null,
+                canEditNodeParameters: () => _owner.CanEditNodeParameters,
                 hasNodePresentationProvider: () => _owner._presentationLocalizationCoordinator.HasNodePresentationProvider,
                 hasLocalizationProvider: () => _owner._presentationLocalizationCoordinator.HasLocalizationProvider);
     }

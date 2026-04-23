@@ -49,12 +49,20 @@ public sealed class GraphEditorSessionParameterContractsTests
         Assert.Equal(
             typeof(IReadOnlyList<GraphEditorNodeParameterSnapshot>),
             queriesType.GetMethod(nameof(IGraphEditorQueries.GetSelectedNodeParameterSnapshots))!.ReturnType);
+        AssertMethod(queriesType, nameof(IGraphEditorQueries.GetNodeParameterSnapshots), typeof(string));
+        Assert.Equal(
+            typeof(IReadOnlyList<GraphEditorNodeParameterSnapshot>),
+            queriesType.GetMethod(nameof(IGraphEditorQueries.GetNodeParameterSnapshots), [typeof(string)])!.ReturnType);
         Assert.NotNull(typeof(GraphEditorNodeParameterSnapshot).GetProperty(nameof(GraphEditorNodeParameterSnapshot.IsValid)));
         Assert.NotNull(typeof(GraphEditorNodeParameterSnapshot).GetProperty(nameof(GraphEditorNodeParameterSnapshot.ValidationMessage)));
         Assert.NotNull(typeof(GraphEditorNodeParameterSnapshot).GetProperty(nameof(GraphEditorNodeParameterSnapshot.CanResetToDefault)));
         Assert.NotNull(typeof(GraphEditorNodeParameterSnapshot).GetProperty(nameof(GraphEditorNodeParameterSnapshot.IsUsingDefaultValue)));
         Assert.NotNull(typeof(GraphEditorNodeParameterSnapshot).GetProperty(nameof(GraphEditorNodeParameterSnapshot.ReadOnlyReason)));
         Assert.NotNull(typeof(GraphEditorNodeParameterSnapshot).GetProperty(nameof(GraphEditorNodeParameterSnapshot.HelpText)));
+        Assert.NotNull(typeof(GraphEditorNodeParameterSnapshot).GetProperty(nameof(GraphEditorNodeParameterSnapshot.GroupDisplayName)));
+        Assert.NotNull(typeof(GraphEditorNodeParameterSnapshot).GetProperty(nameof(GraphEditorNodeParameterSnapshot.IsGroupHeaderVisible)));
+        Assert.NotNull(typeof(GraphEditorNodeParameterSnapshot).GetProperty(nameof(GraphEditorNodeParameterSnapshot.ValueState)));
+        Assert.NotNull(typeof(GraphEditorNodeParameterSnapshot).GetProperty(nameof(GraphEditorNodeParameterSnapshot.ValueDisplayText)));
 
         AssertMethod(commandsType, nameof(IGraphEditorCommands.TrySetSelectedNodeParameterValue), typeof(string), typeof(object));
         Assert.Equal(
@@ -210,6 +218,39 @@ public sealed class GraphEditorSessionParameterContractsTests
         Assert.Equal("参数定义将此字段标记为只读。", systemKey.ReadOnlyReason);
         Assert.True(systemKey.Definition.IsAdvanced);
         Assert.Equal(90, systemKey.Definition.SortOrder);
+    }
+
+    [Fact]
+    public void SessionQueries_GetNodeParameterSnapshots_ProjectSharedAuthoringMetadataForNodeSideSurfaces()
+    {
+        var session = CreateInspectorMetadataSession();
+        session.Commands.SetSelection(["tests.session.parameters.inspector-node"], "tests.session.parameters.inspector-node", updateStatus: false);
+
+        var selectedSnapshots = session.Queries.GetSelectedNodeParameterSnapshots()
+            .ToDictionary(snapshot => snapshot.Definition.Key, StringComparer.Ordinal);
+        var nodeSnapshots = session.Queries.GetNodeParameterSnapshots("tests.session.parameters.inspector-node");
+
+        Assert.Equal(2, nodeSnapshots.Count);
+
+        var threshold = Assert.Single(nodeSnapshots, snapshot => snapshot.Definition.Key == "threshold");
+        Assert.Equal("Behavior", threshold.GroupDisplayName);
+        Assert.True(threshold.IsGroupHeaderVisible);
+        Assert.Equal(GraphEditorNodeParameterValueState.Overridden, threshold.ValueState);
+        Assert.Contains("0.9", threshold.ValueDisplayText, StringComparison.Ordinal);
+
+        var selectedThreshold = selectedSnapshots["threshold"];
+        Assert.Equal(selectedThreshold.CanResetToDefault, threshold.CanResetToDefault);
+        Assert.Equal(selectedThreshold.IsUsingDefaultValue, threshold.IsUsingDefaultValue);
+        Assert.Equal(selectedThreshold.ValueState, threshold.ValueState);
+        Assert.Equal(selectedThreshold.ValueDisplayText, threshold.ValueDisplayText);
+        Assert.Equal(selectedThreshold.HelpText, threshold.HelpText);
+
+        var systemKey = Assert.Single(nodeSnapshots, snapshot => snapshot.Definition.Key == "system-key");
+        Assert.Equal("Metadata", systemKey.GroupDisplayName);
+        Assert.True(systemKey.IsGroupHeaderVisible);
+        Assert.Equal(GraphEditorNodeParameterValueState.Default, systemKey.ValueState);
+        Assert.Equal("system-core", systemKey.ValueDisplayText);
+        Assert.Equal("参数定义将此字段标记为只读。", systemKey.ReadOnlyReason);
     }
 
     private static IGraphEditorSession CreateSession(GraphEditorBehaviorOptions? behaviorOptions = null)

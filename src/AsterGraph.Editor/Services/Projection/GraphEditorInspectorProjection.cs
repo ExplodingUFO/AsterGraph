@@ -118,35 +118,16 @@ internal sealed class GraphEditorInspectorProjection
             return [];
         }
 
-        var orderedParameters = NodeParameterInspectorMetadata.OrderDefinitions(definition.Parameters);
-        var orderedGroups = orderedParameters
-            .Select(parameter => parameter.GroupName ?? string.Empty)
-            .Distinct(StringComparer.Ordinal)
-            .ToList();
-        var shouldShowGroupHeaders = orderedGroups.Count > 1 || orderedGroups.Any(group => !string.IsNullOrWhiteSpace(group));
-        var parameters = new List<NodeParameterViewModel>(definition.Parameters.Count);
-        foreach (var group in orderedGroups)
-        {
-            var groupParameters = orderedParameters
-                .Where(parameter => string.Equals(parameter.GroupName ?? string.Empty, group, StringComparison.Ordinal))
-                .ToList();
-            for (var index = 0; index < groupParameters.Count; index++)
-            {
-                var parameter = groupParameters[index];
-                var currentValues = selectedNodes
-                    .Select(node => node.GetParameterValue(parameter.Key) ?? parameter.DefaultValue)
-                    .ToList();
-                parameters.Add(new NodeParameterViewModel(
-                    parameter,
-                    currentValues,
-                    applyParameterValue,
-                    isHostReadOnly: !canEditNodeParameters,
-                    groupDisplayName: string.IsNullOrWhiteSpace(group) ? "General" : group,
-                    isGroupHeaderVisible: shouldShowGroupHeaders && index == 0));
-            }
-        }
+        var snapshots = GraphEditorNodeParameterSnapshotProjector.Project(
+            definition.Parameters,
+            parameter => selectedNodes
+                .Select(node => node.GetParameterValue(parameter.Key) ?? parameter.DefaultValue)
+                .ToList(),
+            parameter => !canEditNodeParameters);
 
-        return parameters;
+        return snapshots
+            .Select(snapshot => new NodeParameterViewModel(snapshot, applyParameterValue))
+            .ToList();
     }
 
     private static string LocalizeTextFallback(string _, string fallback)

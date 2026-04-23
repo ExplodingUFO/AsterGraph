@@ -87,6 +87,7 @@ public sealed partial class GraphEditorSession
                 new GraphEditorFeatureDescriptorSnapshot("query.tool-descriptors", "query", true),
                 new GraphEditorFeatureDescriptorSnapshot("query.shared-selection-definition", "query", supportsDefinitionMetadata),
                 new GraphEditorFeatureDescriptorSnapshot("query.selected-node-parameter-snapshots", "query", supportsDefinitionMetadata),
+                new GraphEditorFeatureDescriptorSnapshot("query.node-parameter-snapshots", "query", supportsDefinitionMetadata),
                 new GraphEditorFeatureDescriptorSnapshot("surface.automation.runner", "surface", true),
                 new GraphEditorFeatureDescriptorSnapshot("service.fragment-workspace", "service", _descriptorSupport?.HasFragmentWorkspaceService ?? false),
                 new GraphEditorFeatureDescriptorSnapshot("service.fragment-library", "service", _descriptorSupport?.HasFragmentLibraryService ?? false),
@@ -141,38 +142,54 @@ public sealed partial class GraphEditorSession
 
     public IReadOnlyList<GraphEditorNodeParameterSnapshot> GetSelectedNodeParameterSnapshots()
     {
+        var descriptorSupport = _descriptorSupport;
+        if (descriptorSupport is null)
+        {
+            return [];
+        }
+
         if (!ResolveSelectedNodesAndSharedDefinition(out var selectedNodes, out var definition)
             || definition is null)
         {
             return [];
         }
 
-        var canEditParameters = GetCapabilitySnapshot().CanEditNodeParameters;
-        return NodeParameterInspectorMetadata.OrderDefinitions(definition.Parameters)
-            .Select(parameter =>
-            {
-                var values = selectedNodes
-                    .Select(node => ResolveNodeParameterValue(node, parameter))
-                    .ToList();
-                var firstValue = values[0];
-                var hasMixedValues = values.Skip(1).Any(value => !NodeParameterValueAdapter.AreEquivalent(value, firstValue));
-                var validation = NodeParameterValueAdapter.NormalizeValue(parameter, firstValue);
-                var currentValue = hasMixedValues ? null : firstValue;
-                var canEdit = canEditParameters && !parameter.Constraints.IsReadOnly;
+        var canEditParameters = descriptorSupport.CanEditNodeParameters;
+        return GraphEditorNodeParameterSnapshotProjector.Project(
+            definition.Parameters,
+            parameter => selectedNodes
+                .Select(node => ResolveNodeParameterValue(node, parameter))
+                .ToList(),
+            parameter => !canEditParameters);
+    }
 
-                return new GraphEditorNodeParameterSnapshot(
-                    parameter,
-                    currentValue,
-                    hasMixedValues,
-                    canEdit,
-                    validation.IsValid,
-                    validation.ValidationError,
-                    NodeParameterInspectorMetadata.CanResetToDefault(parameter, currentValue, hasMixedValues, canEdit),
-                    NodeParameterInspectorMetadata.IsUsingDefaultValue(parameter, currentValue, hasMixedValues),
-                    NodeParameterInspectorMetadata.BuildReadOnlyReason(parameter, isHostReadOnly: !canEditParameters),
-                    NodeParameterInspectorMetadata.BuildHelpText(parameter));
-            })
-            .ToList();
+    public IReadOnlyList<GraphEditorNodeParameterSnapshot> GetNodeParameterSnapshots(string nodeId)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(nodeId);
+
+        var descriptorSupport = _descriptorSupport;
+        if (descriptorSupport is null)
+        {
+            return [];
+        }
+
+        var document = _host.CreateActiveScopeDocumentSnapshot();
+        var node = document.Nodes.FirstOrDefault(candidate => string.Equals(candidate.Id, nodeId, StringComparison.Ordinal));
+        if (node is null || node.DefinitionId is null)
+        {
+            return [];
+        }
+
+        if (!descriptorSupport.NodeCatalog.TryGetDefinition(node.DefinitionId, out var definition) || definition is null)
+        {
+            return [];
+        }
+
+        var canEditParameters = descriptorSupport.CanEditNodeParameters;
+        return GraphEditorNodeParameterSnapshotProjector.Project(
+            definition.Parameters,
+            parameter => [ResolveNodeParameterValue(node, parameter)],
+            parameter => !canEditParameters);
     }
 
     public IReadOnlyList<GraphEditorCommandDescriptorSnapshot> GetCommandDescriptors()

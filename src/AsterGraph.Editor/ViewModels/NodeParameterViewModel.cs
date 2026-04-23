@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Editor.Parameters;
+using AsterGraph.Editor.Runtime;
 using System.Linq;
 
 namespace AsterGraph.Editor.ViewModels;
@@ -52,6 +53,36 @@ public sealed partial class NodeParameterViewModel : ObservableObject
             .AsReadOnly();
 
         InitializeValues(currentValues.Count == 0 ? [definition.DefaultValue] : currentValues);
+    }
+
+    public NodeParameterViewModel(
+        GraphEditorNodeParameterSnapshot snapshot,
+        Action<NodeParameterViewModel, object?> applyValue)
+    {
+        ArgumentNullException.ThrowIfNull(snapshot);
+
+        Definition = snapshot.Definition;
+        _applyValue = applyValue ?? throw new ArgumentNullException(nameof(applyValue));
+        _defaultValue = NodeParameterValueAdapter.NormalizeIncomingValue(snapshot.Definition.DefaultValue);
+
+        Key = snapshot.Definition.Key;
+        DisplayName = snapshot.Definition.DisplayName;
+        Description = snapshot.Definition.Description;
+        EditorKind = snapshot.Definition.EditorKind;
+        TypeId = snapshot.Definition.ValueType;
+        IsRequired = snapshot.Definition.IsRequired;
+        IsReadOnly = !snapshot.CanEdit;
+        ReadOnlyReason = snapshot.ReadOnlyReason;
+        GroupDisplayName = snapshot.GroupDisplayName;
+        IsGroupHeaderVisible = snapshot.IsGroupHeaderVisible;
+        PlaceholderText = snapshot.Definition.PlaceholderText;
+        HelpText = snapshot.HelpText;
+        Options = snapshot.Definition.Constraints.AllowedOptions
+            .Select(option => new NodeParameterOptionViewModel(option.Value, option.Label, option.Description))
+            .ToList()
+            .AsReadOnly();
+
+        InitializeSnapshotState(snapshot);
     }
 
     /// <summary>
@@ -242,7 +273,12 @@ public sealed partial class NodeParameterViewModel : ObservableObject
     /// <summary>
     /// Compact value-state caption consumed by shipped inspector badges.
     /// </summary>
-    public string ValueStateCaption => HasMixedValues ? "混合" : IsUsingDefaultValue ? "默认" : "已覆盖";
+    public string ValueStateCaption => ResolveValueState() switch
+    {
+        GraphEditorNodeParameterValueState.Mixed => "混合",
+        GraphEditorNodeParameterValueState.Default => "默认",
+        _ => "已覆盖",
+    };
 
     [ObservableProperty]
     private string stringValue = string.Empty;
@@ -335,6 +371,31 @@ public sealed partial class NodeParameterViewModel : ObservableObject
         RaiseSelectionStatePropertyChanges();
     }
 
+    private void InitializeSnapshotState(GraphEditorNodeParameterSnapshot snapshot)
+    {
+        if (snapshot.HasMixedValues)
+        {
+            _suppressChangeNotifications = true;
+            _hasMixedValues = true;
+            CurrentValue = null;
+            StringValue = string.Empty;
+            BoolValue = null;
+            SelectedOption = null;
+            IsValid = snapshot.IsValid;
+            ValidationMessage = snapshot.ValidationMessage;
+            _suppressChangeNotifications = false;
+            RaiseSelectionStatePropertyChanges();
+            return;
+        }
+
+        _hasMixedValues = false;
+        SetFromCurrentValue(snapshot.CurrentValue);
+        IsValid = snapshot.IsValid;
+        ValidationMessage = snapshot.ValidationMessage;
+        OnPropertyChanged(nameof(HasValidationError));
+        RaiseSelectionStatePropertyChanges();
+    }
+
     private void SetFromCurrentValue(object? value)
     {
         _suppressChangeNotifications = true;
@@ -394,4 +455,7 @@ public sealed partial class NodeParameterViewModel : ObservableObject
         OnPropertyChanged(nameof(IsOverriddenFromDefault));
         OnPropertyChanged(nameof(ValueStateCaption));
     }
+
+    private GraphEditorNodeParameterValueState ResolveValueState()
+        => NodeParameterInspectorMetadata.ResolveValueState(Definition, CurrentValue, HasMixedValues);
 }

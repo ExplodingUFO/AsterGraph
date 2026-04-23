@@ -155,6 +155,7 @@ public static class AsterGraphEditorFactory
                 hasCommandContributor: resolved.PluginCommandContributors.Count > 0,
                 hasContextMenuAugmentor: resolved.Options.ContextMenuAugmentor is not null,
                 hasToolProvider: resolved.Options.ToolProvider is not null,
+                canEditNodeParameters: () => resolved.BehaviorOptions.Commands.Nodes.AllowEditParameters,
                 hasNodePresentationProvider: () => resolved.NodePresentationProvider is not null,
                 hasLocalizationProvider: () => resolved.LocalizationProvider is not null));
         session.ConfigureInstrumentation(resolved.Options.Instrumentation);

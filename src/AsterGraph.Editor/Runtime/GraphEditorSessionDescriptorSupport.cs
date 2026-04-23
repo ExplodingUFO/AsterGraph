@@ -9,6 +9,7 @@ internal sealed class GraphEditorSessionDescriptorSupport
     private readonly Func<string, string, string> _localize;
     private readonly Func<bool> _hasNodePresentationProvider;
     private readonly Func<bool> _hasLocalizationProvider;
+    private readonly Func<bool> _canEditNodeParameters;
 
     public GraphEditorSessionDescriptorSupport(
         INodeCatalog nodeCatalog,
@@ -23,6 +24,7 @@ internal sealed class GraphEditorSessionDescriptorSupport
         bool hasCommandContributor = false,
         bool hasContextMenuAugmentor = false,
         bool hasToolProvider = false,
+        Func<bool>? canEditNodeParameters = null,
         Func<bool>? hasNodePresentationProvider = null,
         Func<bool>? hasLocalizationProvider = null)
     {
@@ -30,6 +32,7 @@ internal sealed class GraphEditorSessionDescriptorSupport
         _localize = localize ?? ((_, fallback) => fallback);
         _hasNodePresentationProvider = hasNodePresentationProvider ?? (() => false);
         _hasLocalizationProvider = hasLocalizationProvider ?? (() => false);
+        _canEditNodeParameters = canEditNodeParameters ?? (() => false);
         CompatibilityEditor = compatibilityEditor;
         HasFragmentWorkspaceService = hasFragmentWorkspaceService;
         HasFragmentLibraryService = hasFragmentLibraryService;
@@ -63,6 +66,8 @@ internal sealed class GraphEditorSessionDescriptorSupport
     public bool HasContextMenuAugmentor { get; }
 
     public bool HasToolProvider { get; }
+
+    public bool CanEditNodeParameters => _canEditNodeParameters();
 
     public bool HasNodePresentationProvider => _hasNodePresentationProvider();
 

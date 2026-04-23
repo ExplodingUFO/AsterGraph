@@ -1,4 +1,5 @@
 using AsterGraph.Abstractions.Definitions;
+using AsterGraph.Editor.Runtime;
 
 namespace AsterGraph.Editor.Parameters;
 
@@ -129,6 +130,64 @@ internal static class NodeParameterInspectorMetadata
 
         return canEdit
             && (hasMixedValues || !IsUsingDefaultValue(definition, currentValue, hasMixedValues));
+    }
+
+    public static string ResolveGroupDisplayName(NodeParameterDefinition definition)
+    {
+        ArgumentNullException.ThrowIfNull(definition);
+
+        return string.IsNullOrWhiteSpace(definition.GroupName)
+            ? "General"
+            : definition.GroupName;
+    }
+
+    public static GraphEditorNodeParameterValueState ResolveValueState(
+        NodeParameterDefinition definition,
+        object? currentValue,
+        bool hasMixedValues)
+    {
+        ArgumentNullException.ThrowIfNull(definition);
+
+        if (hasMixedValues)
+        {
+            return GraphEditorNodeParameterValueState.Mixed;
+        }
+
+        return IsUsingDefaultValue(definition, currentValue, hasMixedValues)
+            ? GraphEditorNodeParameterValueState.Default
+            : GraphEditorNodeParameterValueState.Overridden;
+    }
+
+    public static string DescribeValue(
+        NodeParameterDefinition definition,
+        object? currentValue,
+        bool hasMixedValues)
+    {
+        ArgumentNullException.ThrowIfNull(definition);
+
+        if (hasMixedValues)
+        {
+            return "Multiple values";
+        }
+
+        if (definition.EditorKind == ParameterEditorKind.Boolean)
+        {
+            return currentValue is bool boolean && boolean
+                ? "Enabled"
+                : "Disabled";
+        }
+
+        var formattedValue = NodeParameterValueAdapter.FormatValueForEditor(currentValue);
+        if (definition.EditorKind == ParameterEditorKind.Enum)
+        {
+            var option = definition.Constraints.AllowedOptions.FirstOrDefault(candidate =>
+                string.Equals(candidate.Value, formattedValue, StringComparison.Ordinal));
+            return option?.Label ?? formattedValue;
+        }
+
+        return string.IsNullOrWhiteSpace(formattedValue)
+            ? definition.ValueType.Value
+            : formattedValue;
     }
 
     private readonly record struct OrderedDefinition(NodeParameterDefinition Definition, int Index);
