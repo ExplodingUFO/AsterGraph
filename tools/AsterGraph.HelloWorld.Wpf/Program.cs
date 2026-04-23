@@ -205,6 +205,8 @@ public sealed record HostedHelloWorldProofResult(
     bool AccessibilityCommandSurfaceOk,
     bool AccessibilityAuthoringSurfaceOk,
     bool Adapter2PerformanceBaselineOk,
+    bool Adapter2ProjectionBudgetOk,
+    bool Adapter2CommandBudgetOk,
     double StartupMs,
     double InspectorProjectionMs,
     double PluginScanMs,
@@ -216,7 +218,11 @@ public sealed record HostedHelloWorldProofResult(
         && AccessibilityCommandSurfaceOk
         && AccessibilityAuthoringSurfaceOk;
 
-    public bool IsOk => CommandSurfaceOk && HostedAccessibilityOk && Adapter2PerformanceBaselineOk;
+    public bool IsOk => CommandSurfaceOk
+        && HostedAccessibilityOk
+        && Adapter2PerformanceBaselineOk
+        && Adapter2ProjectionBudgetOk
+        && Adapter2CommandBudgetOk;
 
     public IReadOnlyList<string> ProofLines =>
         [
@@ -227,6 +233,8 @@ public sealed record HostedHelloWorldProofResult(
             $"HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:{AccessibilityAuthoringSurfaceOk}",
             $"HOSTED_ACCESSIBILITY_OK:{HostedAccessibilityOk}",
             $"ADAPTER2_PERFORMANCE_BASELINE_OK:{Adapter2PerformanceBaselineOk}",
+            $"ADAPTER2_PROJECTION_BUDGET_OK:{Adapter2ProjectionBudgetOk}:{FormatBudgetFailure(Adapter2ProjectionBudgetOk, "inspector_projection_ms")}",
+            $"ADAPTER2_COMMAND_BUDGET_OK:{Adapter2CommandBudgetOk}:{FormatBudgetFailure(Adapter2CommandBudgetOk, "command_latency_ms")}",
             $"HELLOWORLD_WPF_OK:{IsOk}",
         ];
 
@@ -240,12 +248,18 @@ public sealed record HostedHelloWorldProofResult(
 
     private static string FormatMetric(string name, double value)
         => $"HOST_NATIVE_METRIC:{name}={value.ToString("0.###", CultureInfo.InvariantCulture)}";
+
+    private static string FormatBudgetFailure(bool passed, string metricName)
+        => passed ? "none" : $"{metricName}-budget-exceeded";
 }
 
 public static class HostedHelloWorldProof
 {
     public static HostedHelloWorldProofResult Run()
     {
+        const double projectionBudgetMs = 50d;
+        const double commandBudgetMs = 50d;
+
         GraphEditorViewModel? editor = null;
         var startupMs = MeasureMilliseconds(() => editor = HostedHelloWorldWindowFactory.CreateEditor());
         if (editor is null)
@@ -271,6 +285,8 @@ public static class HostedHelloWorldProof
             && IsFiniteNonNegative(inspectorProjectionMs)
             && IsFiniteNonNegative(pluginScanMs)
             && IsFiniteNonNegative(commandLatencyMs);
+        var adapter2ProjectionBudgetOk = IsWithinBudget(inspectorProjectionMs, projectionBudgetMs);
+        var adapter2CommandBudgetOk = IsWithinBudget(commandLatencyMs, commandBudgetMs);
 
         return new HostedHelloWorldProofResult(
             commandSurfaceOk,
@@ -279,6 +295,8 @@ public static class HostedHelloWorldProof
             accessibilityCommandSurfaceOk,
             accessibilityAuthoringSurfaceOk,
             adapter2PerformanceBaselineOk,
+            adapter2ProjectionBudgetOk,
+            adapter2CommandBudgetOk,
             startupMs,
             inspectorProjectionMs,
             pluginScanMs,
@@ -287,6 +305,9 @@ public static class HostedHelloWorldProof
 
     private static bool IsFiniteNonNegative(double value)
         => double.IsFinite(value) && value >= 0d;
+
+    private static bool IsWithinBudget(double value, double budgetMs)
+        => IsFiniteNonNegative(value) && value <= budgetMs;
 
     private static (bool BaselineOk, bool FocusOk, bool CommandSurfaceOk, bool AuthoringSurfaceOk) EvaluateAccessibilitySurface()
         => RunInSta(() =>
