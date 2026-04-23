@@ -110,10 +110,10 @@ public sealed class StabilizationSupportDocsTests
         Assert.Contains("[Alpha Status](./docs/zh-CN/alpha-status.md)", chineseReadme, StringComparison.Ordinal);
         Assert.Contains("关于冻结的支持边界和面向 `v1.0.0` 的升级指引，见 [稳定化支持矩阵](./stabilization-support-matrix.md)。", chineseQuickStart, StringComparison.Ordinal);
 
-        Assert.True(englishQuickStart.IndexOf("[Plugin Manifest and Trust Policy Contract v1](./plugin-trust-contracts.md)", StringComparison.Ordinal) < englishQuickStart.IndexOf("## 1. Pick Your Starting Package", StringComparison.Ordinal));
-        Assert.True(englishQuickStart.IndexOf("[Beta Support Bundle](./support-bundle.md)", StringComparison.Ordinal) < englishQuickStart.IndexOf("## 1. Pick Your Starting Package", StringComparison.Ordinal));
-        Assert.True(chineseQuickStart.IndexOf("[插件信任契约 v1](./plugin-trust-contracts.md)", StringComparison.Ordinal) < chineseQuickStart.IndexOf("## 1. 先选起始包", StringComparison.Ordinal));
-        Assert.True(chineseQuickStart.IndexOf("[Beta Support Bundle](./support-bundle.md)", StringComparison.Ordinal) < chineseQuickStart.IndexOf("## 1. 先选起始包", StringComparison.Ordinal));
+        AssertAppearsBefore(englishQuickStart, "[Plugin Manifest and Trust Policy Contract v1](./plugin-trust-contracts.md)", "## 1. Pick Your Starting Package");
+        AssertAppearsBefore(englishQuickStart, "[Beta Support Bundle](./support-bundle.md)", "## 1. Pick Your Starting Package");
+        AssertAppearsBefore(chineseQuickStart, "[插件信任契约 v1](./plugin-trust-contracts.md)", "## 1. 先选起始包");
+        AssertAppearsBefore(chineseQuickStart, "[Beta Support Bundle](./support-bundle.md)", "## 1. 先选起始包");
 
         var section7Start = chineseQuickStart.IndexOf("## 7. 超过“第一跑”之后看哪里", StringComparison.Ordinal);
         var section8Start = chineseQuickStart.IndexOf("## 8. 维护者与源码验证入口", StringComparison.Ordinal);
@@ -153,6 +153,16 @@ public sealed class StabilizationSupportDocsTests
         Assert.DoesNotContain("public alpha", contents, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("public-alpha", contents, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("公开 alpha", contents, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static void AssertAppearsBefore(string contents, string requiredText, string requiredHeading)
+    {
+        var textIndex = contents.IndexOf(requiredText, StringComparison.Ordinal);
+        var headingIndex = contents.IndexOf(requiredHeading, StringComparison.Ordinal);
+
+        Assert.True(textIndex >= 0, $"Expected to find '{requiredText}'.");
+        Assert.True(headingIndex >= 0, $"Expected to find '{requiredHeading}'.");
+        Assert.True(textIndex < headingIndex, $"Expected '{requiredText}' to appear before '{requiredHeading}'.");
     }
 
     private static string GetRepositoryRoot()

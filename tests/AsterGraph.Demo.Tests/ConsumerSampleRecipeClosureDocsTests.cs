@@ -114,10 +114,10 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
         AssertContains(supportBundleZh, "仅限本地证据");
         AssertContains(supportBundleZh, "可复制的本地证据参考");
 
-        Assert.True(consumerSampleEn.IndexOf("Plugin Manifest and Trust Policy Contract v1", StringComparison.Ordinal) < consumerSampleEn.IndexOf("## What It Proves", StringComparison.Ordinal));
-        Assert.True(consumerSampleEn.IndexOf("Beta Support Bundle", StringComparison.Ordinal) < consumerSampleEn.IndexOf("## What It Proves", StringComparison.Ordinal));
-        Assert.True(consumerSampleZh.IndexOf("插件信任契约 v1", StringComparison.Ordinal) < consumerSampleZh.IndexOf("## 它证明什么", StringComparison.Ordinal));
-        Assert.True(consumerSampleZh.IndexOf("Beta Support Bundle", StringComparison.Ordinal) < consumerSampleZh.IndexOf("## 它证明什么", StringComparison.Ordinal));
+        AssertAppearsBefore(consumerSampleEn, "Plugin Manifest and Trust Policy Contract v1", "## What It Proves");
+        AssertAppearsBefore(consumerSampleEn, "Beta Support Bundle", "## What It Proves");
+        AssertAppearsBefore(consumerSampleZh, "插件信任契约 v1", "## 它证明什么");
+        AssertAppearsBefore(consumerSampleZh, "Beta Support Bundle", "## 它证明什么");
     }
 
     private static void AssertContains(string contents, string expected)
@@ -126,6 +126,16 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
     private static bool HasLineWith(string contents, string first, string second)
         => contents.Split('\n')
             .Any(line => line.Contains(first, StringComparison.Ordinal) && line.Contains(second, StringComparison.Ordinal));
+
+    private static void AssertAppearsBefore(string contents, string requiredText, string requiredHeading)
+    {
+        var textIndex = contents.IndexOf(requiredText, StringComparison.Ordinal);
+        var headingIndex = contents.IndexOf(requiredHeading, StringComparison.Ordinal);
+
+        Assert.True(textIndex >= 0, $"Expected to find '{requiredText}'.");
+        Assert.True(headingIndex >= 0, $"Expected to find '{requiredHeading}'.");
+        Assert.True(textIndex < headingIndex, $"Expected '{requiredText}' to appear before '{requiredHeading}'.");
+    }
 
     private static string ReadRepoFile(string relativePath)
         => File.ReadAllText(Path.Combine(GetRepositoryRoot(), relativePath));

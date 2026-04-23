@@ -112,12 +112,12 @@ public sealed class PluginTrustContractDocsTests
         Assert.Contains(pluginRecipeLinkZh, evaluationPathZh, StringComparison.Ordinal);
         Assert.Contains(consumerSampleTrustLinkEn, consumerSampleReadme, StringComparison.Ordinal);
         Assert.Contains(consumerSampleRecipeLinkEn, consumerSampleReadme, StringComparison.Ordinal);
-        Assert.True(quickStartEn.IndexOf(pluginTrustLinkEn, StringComparison.Ordinal) < quickStartEn.IndexOf("## 1. Pick Your Starting Package", StringComparison.Ordinal));
-        Assert.True(quickStartZh.IndexOf(pluginTrustLinkZh, StringComparison.Ordinal) < quickStartZh.IndexOf("## 1. 先选起始包", StringComparison.Ordinal));
-        Assert.True(quickStartEn.IndexOf("[Beta Support Bundle](./support-bundle.md)", StringComparison.Ordinal) < quickStartEn.IndexOf("## 1. Pick Your Starting Package", StringComparison.Ordinal));
-        Assert.True(quickStartZh.IndexOf("[Beta Support Bundle](./support-bundle.md)", StringComparison.Ordinal) < quickStartZh.IndexOf("## 1. 先选起始包", StringComparison.Ordinal));
-        Assert.True(evaluationPathEn.IndexOf("[Beta Support Bundle](./support-bundle.md)", StringComparison.Ordinal) < evaluationPathEn.IndexOf("## Boundary First", StringComparison.Ordinal));
-        Assert.True(evaluationPathZh.IndexOf("[Beta Support Bundle](./support-bundle.md)", StringComparison.Ordinal) < evaluationPathZh.IndexOf("## 先锁边界", StringComparison.Ordinal));
+        AssertAppearsBefore(quickStartEn, pluginTrustLinkEn, "## 1. Pick Your Starting Package");
+        AssertAppearsBefore(quickStartZh, pluginTrustLinkZh, "## 1. 先选起始包");
+        AssertAppearsBefore(quickStartEn, "[Beta Support Bundle](./support-bundle.md)", "## 1. Pick Your Starting Package");
+        AssertAppearsBefore(quickStartZh, "[Beta Support Bundle](./support-bundle.md)", "## 1. 先选起始包");
+        AssertAppearsBefore(evaluationPathEn, "[Beta Support Bundle](./support-bundle.md)", "## Boundary First");
+        AssertAppearsBefore(evaluationPathZh, "[Beta Support Bundle](./support-bundle.md)", "## 先锁边界");
 
         Assert.True(quickStartEn.IndexOf(pluginTrustLinkEn, StringComparison.Ordinal) < quickStartEn.IndexOf("[Host Integration](./host-integration.md)", StringComparison.Ordinal));
         Assert.True(quickStartZh.IndexOf(pluginTrustLinkZh, StringComparison.Ordinal) < quickStartZh.IndexOf("[Host Integration](./host-integration.md)", StringComparison.Ordinal));
@@ -142,5 +142,15 @@ public sealed class PluginTrustContractDocsTests
         }
 
         throw new DirectoryNotFoundException("Failed to locate repository root from test base directory.");
+    }
+
+    private static void AssertAppearsBefore(string contents, string requiredText, string requiredHeading)
+    {
+        var textIndex = contents.IndexOf(requiredText, StringComparison.Ordinal);
+        var headingIndex = contents.IndexOf(requiredHeading, StringComparison.Ordinal);
+
+        Assert.True(textIndex >= 0, $"Expected to find '{requiredText}'.");
+        Assert.True(headingIndex >= 0, $"Expected to find '{requiredHeading}'.");
+        Assert.True(textIndex < headingIndex, $"Expected '{requiredText}' to appear before '{requiredHeading}'.");
     }
 }
