@@ -207,10 +207,12 @@ public sealed record HostedHelloWorldProofResult(
     bool Adapter2PerformanceBaselineOk,
     bool Adapter2ProjectionBudgetOk,
     bool Adapter2CommandBudgetOk,
+    bool Adapter2SceneBudgetOk,
     double StartupMs,
     double InspectorProjectionMs,
     double PluginScanMs,
-    double CommandLatencyMs)
+    double CommandLatencyMs,
+    double SceneSnapshotMs)
 {
     public bool HostedAccessibilityOk =>
         AccessibilityBaselineOk
@@ -222,7 +224,8 @@ public sealed record HostedHelloWorldProofResult(
         && HostedAccessibilityOk
         && Adapter2PerformanceBaselineOk
         && Adapter2ProjectionBudgetOk
-        && Adapter2CommandBudgetOk;
+        && Adapter2CommandBudgetOk
+        && Adapter2SceneBudgetOk;
 
     public IReadOnlyList<string> ProofLines =>
         [
@@ -235,6 +238,7 @@ public sealed record HostedHelloWorldProofResult(
             $"ADAPTER2_PERFORMANCE_BASELINE_OK:{Adapter2PerformanceBaselineOk}",
             $"ADAPTER2_PROJECTION_BUDGET_OK:{Adapter2ProjectionBudgetOk}:{FormatBudgetFailure(Adapter2ProjectionBudgetOk, "inspector_projection_ms")}",
             $"ADAPTER2_COMMAND_BUDGET_OK:{Adapter2CommandBudgetOk}:{FormatBudgetFailure(Adapter2CommandBudgetOk, "command_latency_ms")}",
+            $"ADAPTER2_SCENE_BUDGET_OK:{Adapter2SceneBudgetOk}:{FormatBudgetFailure(Adapter2SceneBudgetOk, "scene_snapshot_ms")}",
             $"HELLOWORLD_WPF_OK:{IsOk}",
         ];
 
@@ -244,6 +248,7 @@ public sealed record HostedHelloWorldProofResult(
             FormatMetric("inspector_projection_ms", InspectorProjectionMs),
             FormatMetric("plugin_scan_ms", PluginScanMs),
             FormatMetric("command_latency_ms", CommandLatencyMs),
+            FormatMetric("scene_snapshot_ms", SceneSnapshotMs),
         ];
 
     private static string FormatMetric(string name, double value)
@@ -259,6 +264,7 @@ public static class HostedHelloWorldProof
     {
         const double projectionBudgetMs = 50d;
         const double commandBudgetMs = 50d;
+        const double sceneBudgetMs = 50d;
 
         GraphEditorViewModel? editor = null;
         var startupMs = MeasureMilliseconds(() => editor = HostedHelloWorldWindowFactory.CreateEditor());
@@ -268,6 +274,7 @@ public static class HostedHelloWorldProof
         }
 
         var session = editor.Session;
+        var sceneSnapshotMs = MeasureMilliseconds(() => session.Queries.CreateDocumentSnapshot());
         var inspectorProjectionMs = MeasureMilliseconds(() => session.Queries.GetSelectedNodeParameterSnapshots().ToArray());
         var pluginScanMs = MeasureMilliseconds(() => AsterGraphEditorFactory.DiscoverPluginCandidates(new GraphEditorPluginDiscoveryOptions()).ToArray());
 
@@ -284,9 +291,11 @@ public static class HostedHelloWorldProof
         var adapter2PerformanceBaselineOk = startupMs > 0d
             && IsFiniteNonNegative(inspectorProjectionMs)
             && IsFiniteNonNegative(pluginScanMs)
-            && IsFiniteNonNegative(commandLatencyMs);
+            && IsFiniteNonNegative(commandLatencyMs)
+            && IsFiniteNonNegative(sceneSnapshotMs);
         var adapter2ProjectionBudgetOk = IsWithinBudget(inspectorProjectionMs, projectionBudgetMs);
         var adapter2CommandBudgetOk = IsWithinBudget(commandLatencyMs, commandBudgetMs);
+        var adapter2SceneBudgetOk = IsWithinBudget(sceneSnapshotMs, sceneBudgetMs);
 
         return new HostedHelloWorldProofResult(
             commandSurfaceOk,
@@ -297,10 +306,12 @@ public static class HostedHelloWorldProof
             adapter2PerformanceBaselineOk,
             adapter2ProjectionBudgetOk,
             adapter2CommandBudgetOk,
+            adapter2SceneBudgetOk,
             startupMs,
             inspectorProjectionMs,
             pluginScanMs,
-            commandLatencyMs);
+            commandLatencyMs,
+            sceneSnapshotMs);
     }
 
     private static bool IsFiniteNonNegative(double value)
