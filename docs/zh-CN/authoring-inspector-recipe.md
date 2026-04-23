@@ -2,6 +2,14 @@
 
 当你希望 shipped definition-driven inspector 直接承担大部分 authoring 工作时，用这份 recipe。
 
+## 宿主自管参数与元数据复制图
+
+当你需要时复制这份 recipe；它提供 canonical 的元数据词汇和 stock inspector 行为。
+
+- 当你需要 `defaultValue`、`isAdvanced`、`helpText`、`placeholderText`、`constraints.IsReadOnly`、`editorKind`、`constraints` 和 `groupName` 时，复制这份 recipe。
+- 从 `ConsumerSample.Avalonia` 复制：选中节点参数读写 seam 和宿主自管 proof 边界。
+- 把样例和这份 recipe 分开：样例证明 seam，recipe 承载元数据词汇。
+
 ## 统一的 recipe 词汇
 
 在文档、样例和节点定义里保持这些字段名一致：

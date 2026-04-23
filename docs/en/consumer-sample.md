@@ -44,6 +44,16 @@ Keep these sample-owned details local to your app:
 - window layout and narrative text
 - proof labels beyond the defended markers
 
+## Host-Owned Parameter And Metadata Copy Map
+
+Copy from each bounded source for the part it owns:
+
+- Copy from this sample: action rail / command projection, plugin trust workflow, and selected-node parameter read/write seam.
+- Copy from [Authoring Inspector Recipe](./authoring-inspector-recipe.md): the definition-driven metadata vocabulary (`defaultValue`, `isAdvanced`, `helpText`, `placeholderText`, `constraints.IsReadOnly`) and stock inspector field grouping.
+- Keep local: review/audit node family, action ids/titles, window layout and narrative text, and proof labels beyond the defended markers.
+
+Consumer Sample proves the seam split; Authoring Inspector Recipe owns the metadata vocabulary.
+
 ## Trust and proof quick reference
 
 Copyable trust and proof reference:

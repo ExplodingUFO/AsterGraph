@@ -2,6 +2,14 @@
 
 Use this recipe when you want the shipped definition-driven inspector to carry most of the authoring workload.
 
+## Host-Owned Parameter And Metadata Copy Map
+
+Copy this recipe when you need the canonical metadata vocabulary and stock inspector behavior:
+
+- Copy this recipe when you need `defaultValue`, `isAdvanced`, `helpText`, `placeholderText`, `constraints.IsReadOnly`, `editorKind`, `constraints`, and `groupName`.
+- Copy from `ConsumerSample.Avalonia` for the selected-node parameter read/write seam and the host-owned proof boundary.
+- Keep the sample and this recipe separate: the sample proves the seam and the recipe carries the metadata vocabulary.
+
 ## Canonical Recipe Vocabulary
 
 Keep these field names consistent across docs, samples, and node definitions:

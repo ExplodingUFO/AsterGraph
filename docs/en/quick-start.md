@@ -18,7 +18,6 @@ For plugin trust-policy review and local evidence, keep [Plugin Manifest and Tru
 | Contract-first integration | `AsterGraph.Abstractions` | stable identifiers, definitions, and provider contracts |
 
 Add `AsterGraph.Core` only when the host also needs direct `GraphDocument`, serialization, or compatibility APIs.
-Use `AsterGraph.Starter.Avalonia` as the starter recipe. Keep/copy `AsterGraphEditorFactory.Create(...)`, `AsterGraphAvaloniaViewFactory.Create(...)`, `AsterGraphEditorOptions`, and the document/catalog/editor/view composition flow. Replace the top-level window and its title/size, and replace the sample graph/catalog definitions as the host grows. Copy the host-owned seams, not the sample-owned presentation. The next hosted step is `AsterGraph.HelloWorld.Avalonia`. When you move to `AsterGraph.ConsumerSample.Avalonia`, keep action projection, trust workflow, and the selected-node parameter read/write seam host-owned.
 
 Copy this starter scaffold:
 
@@ -31,6 +30,19 @@ Replace in your host:
 
 - the top-level window and its title/size
 - the sample graph/catalog definitions as the host grows
+
+Use `AsterGraph.Starter.Avalonia` as the starter recipe. Keep/copy `AsterGraphEditorFactory.Create(...)`, `AsterGraphAvaloniaViewFactory.Create(...)`, `AsterGraphEditorOptions`, and the document/catalog/editor/view composition flow. Replace the top-level window and its title/size, and replace the sample graph/catalog definitions as the host grows. Copy the host-owned seams, not the sample-owned presentation. The next hosted step is `AsterGraph.HelloWorld.Avalonia`. When you move to `AsterGraph.ConsumerSample.Avalonia`, keep action projection, trust workflow, and the selected-node parameter read/write seam host-owned.
+
+## Host-Owned Parameter And Metadata Copy Map
+
+Copy from each bounded source for the part it owns:
+
+- Copy from `AsterGraph.Starter.Avalonia`: keep `AsterGraphEditorFactory.Create(...)`, `AsterGraphAvaloniaViewFactory.Create(...)`, `AsterGraphEditorOptions`, and the document/catalog/editor/view composition flow, then replace the top-level window, its title/size, and the sample graph/catalog definitions as the host grows.
+- Copy from `AsterGraph.ConsumerSample.Avalonia`: keep the action projection, trust workflow, and selected-node parameter read/write seam host-owned, but keep the sample-owned presentation and proof labels local.
+- Copy from [Host Integration](./host-integration.md): use the route matrix and canonical session/runtime choice to decide which host surface owns the seam.
+- Copy from [Authoring Inspector Recipe](./authoring-inspector-recipe.md): use the definition-driven metadata vocabulary (`defaultValue`, `isAdvanced`, `helpText`, `placeholderText`, `constraints.IsReadOnly`) for host-owned parameter and metadata work.
+
+Consumer Sample proves the seam split; Authoring Inspector Recipe owns the metadata vocabulary.
 
 
 ## 2. Install From NuGet

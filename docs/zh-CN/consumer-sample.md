@@ -44,6 +44,16 @@
 - 窗口布局和叙述文本
 - defended markers 之外的 proof 文案
 
+## 宿主自管参数与元数据复制图
+
+按每个 bounded source 复制它负责的那一部分：
+
+- 从这份样例复制：action rail / command projection、plugin trust workflow，以及选中节点参数读写 seam。
+- 从 [Authoring Inspector Recipe](./authoring-inspector-recipe.md) 复制：definition-driven 的元数据词汇（`defaultValue`、`isAdvanced`、`helpText`、`placeholderText`、`constraints.IsReadOnly`）以及 stock inspector 的字段分组。
+- 本地保留：review/audit 节点族、action ids/titles、窗口布局和叙述文本，以及 defended markers 之外的 proof 文案。
+
+Consumer Sample 证明 seam 分工；Authoring Inspector Recipe 承载元数据词汇。
+
 ## 信任与证明速查
 
 可复制的信任与证明参考：

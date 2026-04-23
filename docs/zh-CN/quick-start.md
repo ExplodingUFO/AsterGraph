@@ -32,6 +32,19 @@
 - 宿主自己的 top-level window 和它的 title/size
 - 随着宿主成长逐步替换 sample graph/catalog definitions
 
+把 `AsterGraph.Starter.Avalonia` 当作 starter recipe。保留/复制 `AsterGraphEditorFactory.Create(...)`、`AsterGraphAvaloniaViewFactory.Create(...)`、`AsterGraphEditorOptions`，以及 document/catalog/editor/view 的组合流程。替换宿主自己的 top-level window 和它的 title/size，并随着宿主成长逐步替换 sample graph/catalog definitions。复制宿主自管 seam，不复制样例自有展示层。下一步 hosted step 是 `AsterGraph.HelloWorld.Avalonia`。升级到 `AsterGraph.ConsumerSample.Avalonia` 时，继续把 action projection、trust workflow 和选中节点参数读写 seam 放在宿主里。
+
+## 宿主自管参数与元数据复制图
+
+按每个 bounded source 复制它负责的那一部分：
+
+- 从 `AsterGraph.Starter.Avalonia` 复制：保留 `AsterGraphEditorFactory.Create(...)`、`AsterGraphAvaloniaViewFactory.Create(...)`、`AsterGraphEditorOptions` 和 document/catalog/editor/view 的组合流程，然后替换 top-level window、它的 title/size，以及随着宿主成长逐步替换 sample graph/catalog definitions。
+- 从 `AsterGraph.ConsumerSample.Avalonia` 复制：继续把 action projection、trust workflow 和选中节点参数读写 seam 放在宿主里，但把样例自有的展示和 proof labels 保持在本地。
+- 从 [Host Integration](./host-integration.md) 复制：用 route matrix 和 canonical session/runtime 选择来决定哪一层宿主 surface 负责这条 seam。
+- 从 [Authoring Inspector Recipe](./authoring-inspector-recipe.md) 复制：用 definition-driven 的元数据词汇（`defaultValue`、`isAdvanced`、`helpText`、`placeholderText`、`constraints.IsReadOnly`）来完成宿主自管参数与元数据工作。
+
+Consumer Sample 证明 seam 分工；Authoring Inspector Recipe 承载元数据词汇。
+
 
 ## 2. 从 NuGet 安装
 

@@ -34,6 +34,67 @@ public sealed class StarterRecipeHardeningDocsTests
     }
 
     [Fact]
+    public void HostOwnedParameterAndMetadataCopyMapDocs_SplitSampleAndRecipeResponsibilitiesClearly()
+    {
+        var quickStartEn = ReadRepoFile("docs/en/quick-start.md");
+        var quickStartZh = ReadRepoFile("docs/zh-CN/quick-start.md");
+        var consumerSampleEn = ReadRepoFile("docs/en/consumer-sample.md");
+        var consumerSampleZh = ReadRepoFile("docs/zh-CN/consumer-sample.md");
+        var hostIntegrationEn = ReadRepoFile("docs/en/host-integration.md");
+        var hostIntegrationZh = ReadRepoFile("docs/zh-CN/host-integration.md");
+        var authoringRecipeEn = ReadRepoFile("docs/en/authoring-inspector-recipe.md");
+        var authoringRecipeZh = ReadRepoFile("docs/zh-CN/authoring-inspector-recipe.md");
+
+        foreach (var contents in new[] { quickStartEn, consumerSampleEn, hostIntegrationEn, authoringRecipeEn })
+        {
+            Assert.Contains("Host-Owned Parameter And Metadata Copy Map", contents, StringComparison.Ordinal);
+        }
+
+        foreach (var contents in new[] { quickStartZh, consumerSampleZh, hostIntegrationZh, authoringRecipeZh })
+        {
+            Assert.Contains("宿主自管参数与元数据复制图", contents, StringComparison.Ordinal);
+        }
+
+        Assert.Contains("Copy from `AsterGraph.Starter.Avalonia`", quickStartEn, StringComparison.Ordinal);
+        Assert.Contains("Copy from `AsterGraph.ConsumerSample.Avalonia`", quickStartEn, StringComparison.Ordinal);
+        Assert.Contains("Copy from [Host Integration](./host-integration.md)", quickStartEn, StringComparison.Ordinal);
+        Assert.Contains("Copy from [Authoring Inspector Recipe](./authoring-inspector-recipe.md)", quickStartEn, StringComparison.Ordinal);
+        Assert.Contains("Consumer Sample proves the seam split", quickStartEn, StringComparison.Ordinal);
+        Assert.Contains("Authoring Inspector Recipe owns the metadata vocabulary", quickStartEn, StringComparison.Ordinal);
+
+        Assert.Contains("从 `AsterGraph.Starter.Avalonia` 复制", quickStartZh, StringComparison.Ordinal);
+        Assert.Contains("从 `AsterGraph.ConsumerSample.Avalonia` 复制", quickStartZh, StringComparison.Ordinal);
+        Assert.Contains("从 [Host Integration](./host-integration.md) 复制", quickStartZh, StringComparison.Ordinal);
+        Assert.Contains("从 [Authoring Inspector Recipe](./authoring-inspector-recipe.md) 复制", quickStartZh, StringComparison.Ordinal);
+        Assert.Contains("Consumer Sample 证明 seam 分工", quickStartZh, StringComparison.Ordinal);
+        Assert.Contains("Authoring Inspector Recipe 承载元数据词汇", quickStartZh, StringComparison.Ordinal);
+
+        Assert.Contains("Copy from `CreateSession(...)`", hostIntegrationEn, StringComparison.Ordinal);
+        Assert.Contains("Copy from `Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)`", hostIntegrationEn, StringComparison.Ordinal);
+        Assert.Contains("Copy from `ConsumerSample.Avalonia`", hostIntegrationEn, StringComparison.Ordinal);
+        Assert.Contains("Copy from `Authoring Inspector Recipe`", hostIntegrationEn, StringComparison.Ordinal);
+        Assert.Contains("the sample is the seam proof", hostIntegrationEn, StringComparison.Ordinal);
+        Assert.Contains("the recipe is the metadata source", hostIntegrationEn, StringComparison.Ordinal);
+
+        Assert.Contains("从 `CreateSession(...)` 复制", hostIntegrationZh, StringComparison.Ordinal);
+        Assert.Contains("从 `Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` 复制", hostIntegrationZh, StringComparison.Ordinal);
+        Assert.Contains("从 `ConsumerSample.Avalonia` 复制", hostIntegrationZh, StringComparison.Ordinal);
+        Assert.Contains("从 `Authoring Inspector Recipe` 复制", hostIntegrationZh, StringComparison.Ordinal);
+        Assert.Contains("样例负责 seam 证明", hostIntegrationZh, StringComparison.Ordinal);
+        Assert.Contains("recipe 负责元数据源", hostIntegrationZh, StringComparison.Ordinal);
+
+        Assert.Contains("Copy this recipe when you need", authoringRecipeEn, StringComparison.Ordinal);
+        Assert.Contains("Copy from `ConsumerSample.Avalonia`", authoringRecipeEn, StringComparison.Ordinal);
+        Assert.Contains("the sample proves the seam", authoringRecipeEn, StringComparison.Ordinal);
+        Assert.Contains("the recipe carries the metadata vocabulary", authoringRecipeEn, StringComparison.Ordinal);
+
+        Assert.Contains("当你需要时复制这份 recipe", authoringRecipeZh, StringComparison.Ordinal);
+        Assert.Contains("从 `ConsumerSample.Avalonia` 复制", authoringRecipeZh, StringComparison.Ordinal);
+        Assert.Contains("样例证明 seam", authoringRecipeZh, StringComparison.Ordinal);
+        Assert.Contains("recipe 承载元数据词汇", authoringRecipeZh, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void StarterAvaloniaDocs_SeparateCopyableCanonicalPiecesFromHostOwnedShellPieces()
     {
         var starterReadme = ReadRepoFile("tools/AsterGraph.Starter.Avalonia/README.md");

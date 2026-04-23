@@ -45,6 +45,16 @@ Retained stays migration-only and does not add a new compatibility promise. Reta
 
 If you are starting new work, begin with [Quick Start](./quick-start.md) and keep the retained bridge for legacy migration only.
 
+## Host-Owned Parameter And Metadata Copy Map
+
+Copy from each bounded source for the part it owns:
+
+- Copy from `CreateSession(...)`: host-owned runtime/session projection for custom UI hosts.
+- Copy from `Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)`: shipped Avalonia composition for hosted UI hosts.
+- Copy from `ConsumerSample.Avalonia`: action projection, trust workflow, and selected-node parameter read/write seam only.
+- Copy from `Authoring Inspector Recipe`: definition-driven parameter metadata and stock inspector vocabulary.
+- Keep the split explicit: the sample is the seam proof and the recipe is the metadata source.
+
 ## Sample Roles
 
 - `AsterGraph.HelloWorld` = first-run sample for the runtime-only path
