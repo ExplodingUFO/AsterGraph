@@ -1,6 +1,7 @@
 # Authoring Inspector Recipe
 
 Use this recipe when you want the shipped definition-driven inspector to carry most of the authoring workload.
+This recipe is the sole owner of the metadata vocabulary.
 
 ## Host-Owned Parameter And Metadata Copy Map
 

@@ -3,13 +3,13 @@
 `tools/AsterGraph.ConsumerSample.Avalonia` 是位于 canonical session/runtime 路线上的中等 hosted-UI 样例，排在 starter 脚手架和最小 `HelloWorld.Avalonia` 路线之后、完整 `AsterGraph.Demo` 展示宿主之前。
 如果你要看 trust-policy 和本地证据，就把 [插件信任契约 v1](./plugin-trust-contracts.md) 和 [Beta Support Bundle](./support-bundle.md) 配在这条路线旁边。
 
-它是三条宿主管线 seam 的可复制 recipe：
+它是三条宿主管线 seam 的宿主 seam 示例：
 
 - action rail / command projection
 - plugin trust workflow
 - 选中节点参数读写 seam
 
-如果你要看 inspector metadata recipe，就把这条路线和 [Authoring Inspector Recipe](./authoring-inspector-recipe.md) 配在一起。这个样例只聚焦宿主自管 seam 和 shipped inspector surface；完整的 `defaultValue`、`isAdvanced`、`helpText`、`placeholderText` 和只读词汇都放在 canonical recipe 里。
+如果你要看 inspector metadata recipe，就把这条路线和 [Authoring Inspector Recipe](./authoring-inspector-recipe.md) 配在一起。这个样例只聚焦宿主自管 seam 和 shipped inspector surface；它不拥有元数据词汇。完整的 `defaultValue`、`isAdvanced`、`helpText`、`placeholderText` 和只读词汇都放在 canonical recipe 里。
 
 这是把宿主自管 seam 复制到你自己的应用里的受防守 beta 路线。把 action projection、trust workflow 和选中节点参数读写 seam 保持在宿主里，只复制样例自有的展示细节。
 
@@ -52,7 +52,7 @@
 - 从 [Authoring Inspector Recipe](./authoring-inspector-recipe.md) 复制：definition-driven 的元数据词汇（`defaultValue`、`isAdvanced`、`helpText`、`placeholderText`、`constraints.IsReadOnly`）以及 stock inspector 的字段分组。
 - 本地保留：review/audit 节点族、action ids/titles、窗口布局和叙述文本，以及 defended markers 之外的 proof 文案。
 
-Consumer Sample 证明 seam 分工；Authoring Inspector Recipe 承载元数据词汇。
+Consumer Sample 证明 seam 分工；它不拥有元数据词汇。Authoring Inspector Recipe 是元数据词汇的唯一 owner。
 
 ## 信任与证明速查
 

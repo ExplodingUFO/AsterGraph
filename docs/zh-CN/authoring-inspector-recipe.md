@@ -1,6 +1,7 @@
 # Authoring Inspector Recipe
 
 当你希望 shipped definition-driven inspector 直接承担大部分 authoring 工作时，用这份 recipe。
+这份 recipe 是元数据词汇的唯一 owner。
 
 ## 宿主自管参数与元数据复制图
 

@@ -4,7 +4,7 @@ This is the medium hosted-UI sample on the canonical session/runtime route, afte
 It shows a host-owned action rail, plugin trust workflow, and the selected-node parameter read/write seam without implying a second editor model, a sandbox, or a broader plugin ecosystem.
 For plugin-capable evaluators, this is the defended hosted trust hop. Read [Plugin Manifest and Trust Policy Contract v1](../../docs/en/plugin-trust-contracts.md) and [Plugin And Custom Node Recipe](../../docs/en/plugin-recipe.md) before treating the route as complete.
 
-For the inspector metadata recipe, pair this sample with [Authoring Inspector Recipe](../../docs/en/authoring-inspector-recipe.md). The sample stays focused on the host-owned seams and the shipped inspector surface; the canonical recipe carries the full `defaultValue`, `isAdvanced`, `helpText`, `placeholderText`, and read-only vocabulary.
+For the inspector metadata recipe, pair this sample with [Authoring Inspector Recipe](../../docs/en/authoring-inspector-recipe.md). The sample stays focused on the host-owned seams and the shipped inspector surface; it does not own the metadata vocabulary. The canonical recipe carries the full `defaultValue`, `isAdvanced`, `helpText`, `placeholderText`, and read-only vocabulary.
 
 The hosted route ladder is `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerSample.Avalonia`.
 
@@ -63,7 +63,7 @@ Next beta intake links:
 - [Adoption Feedback Loop](../../docs/en/adoption-feedback.md)
 - [Public Launch Checklist](../../docs/en/public-launch-checklist.md)
 
-## Copyable Host Recipe
+## Host Seam Example
 
 Use this sample to copy the host-owned seams, not the sample-specific presentation layer. This is the defended beta route for copying host-owned seams into your own host. Copy the host-owned seams in this order:
 

@@ -3,13 +3,13 @@
 `tools/AsterGraph.ConsumerSample.Avalonia` is the medium hosted-UI sample on the canonical session/runtime route, after the starter scaffold and the smallest `HelloWorld.Avalonia` route, and before the full `AsterGraph.Demo` showcase host.
 For trust-policy review and local evidence, pair this route with [Plugin Manifest and Trust Policy Contract v1](./plugin-trust-contracts.md) and [Beta Support Bundle](./support-bundle.md).
 
-It is the copyable host recipe for three host-owned seams:
+It is the host seam example for three host-owned seams:
 
 - action rail / command projection
 - plugin trust workflow
 - selected-node parameter read/write seam
 
-For the inspector metadata recipe, pair this route with [Authoring Inspector Recipe](./authoring-inspector-recipe.md). This sample stays focused on the host-owned seams and the shipped inspector surface; the canonical recipe carries the full `defaultValue`, `isAdvanced`, `helpText`, `placeholderText`, and read-only vocabulary.
+For the inspector metadata recipe, pair this route with [Authoring Inspector Recipe](./authoring-inspector-recipe.md). This sample stays focused on the host-owned seams and the shipped inspector surface; it does not own the metadata vocabulary. The canonical recipe carries the full `defaultValue`, `isAdvanced`, `helpText`, `placeholderText`, and read-only vocabulary.
 
 This is the defended beta route for copying host-owned seams into your own host. Keep action projection, trust workflow, and the selected-node parameter read/write seam host-owned; copy only the sample-owned presentation.
 
@@ -52,7 +52,7 @@ Copy from each bounded source for the part it owns:
 - Copy from [Authoring Inspector Recipe](./authoring-inspector-recipe.md): the definition-driven metadata vocabulary (`defaultValue`, `isAdvanced`, `helpText`, `placeholderText`, `constraints.IsReadOnly`) and stock inspector field grouping.
 - Keep local: review/audit node family, action ids/titles, window layout and narrative text, and proof labels beyond the defended markers.
 
-Consumer Sample proves the seam split; Authoring Inspector Recipe owns the metadata vocabulary.
+Consumer Sample proves the seam split; it does not own the metadata vocabulary. Authoring Inspector Recipe is the sole owner of the metadata vocabulary.
 
 ## Trust and proof quick reference
 

@@ -21,6 +21,8 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
         AssertContains(readme, "action rail / command projection");
         AssertContains(readme, "plugin trust workflow");
         AssertContains(readme, "selected-node parameter read/write seam");
+        AssertContains(readme, "Host Seam Example");
+        AssertContains(readme, "does not own the metadata vocabulary");
         AssertContains(readme, "AsterGraphHostedActionFactory.CreateCommandActions(...)");
         AssertContains(readme, "AsterGraphHostedActionFactory.CreateProjection(...)");
         AssertContains(readme, "GraphEditorPluginDiscoveryOptions");
@@ -36,7 +38,11 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
         AssertContains(readme, "proof labels or copy beyond the defended public markers");
         AssertContains(readme, "Copy These Host-Owned Seams");
         AssertContains(readme, "Replace These Sample-Owned Details");
+        Assert.DoesNotContain("copyable host recipe", readme, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("recipe for three host-owned seams", readme, StringComparison.OrdinalIgnoreCase);
 
+        AssertContains(consumerSampleEn, "host seam example");
+        AssertContains(consumerSampleEn, "does not own the metadata vocabulary");
         AssertContains(consumerSampleEn, "canonical session/runtime model only");
         AssertContains(consumerSampleEn, "three host-owned seams");
         AssertContains(consumerSampleEn, "action rail / command projection");
@@ -66,8 +72,12 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
         AssertContains(consumerSampleEn, "proof labels beyond the defended markers");
         AssertContains(consumerSampleEn, "The hosted route ladder is `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerSample.Avalonia`.");
         AssertContains(consumerSampleEn, "`HostSample` is the post-ladder proof harness.");
+        Assert.DoesNotContain("copyable host recipe", consumerSampleEn, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("copyable recipe", consumerSampleEn, StringComparison.OrdinalIgnoreCase);
         Assert.True(HasLineWith(consumerSampleEn, "AsterGraph.ConsumerSample.Avalonia -- --proof", "first"));
 
+        AssertContains(consumerSampleZh, "宿主 seam 示例");
+        AssertContains(consumerSampleZh, "不拥有元数据词汇");
         AssertContains(consumerSampleZh, "三条宿主管线");
         AssertContains(consumerSampleZh, "样例自有内容");
         AssertContains(consumerSampleZh, "不引入第二套");
@@ -87,6 +97,7 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
         AssertContains(consumerSampleZh, "defended markers 之外的 proof 文案");
         AssertContains(consumerSampleZh, "这条 hosted route ladder 是 `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerSample.Avalonia`。");
         AssertContains(consumerSampleZh, "`HostSample` 是这条 ladder 之后的 proof harness。");
+        Assert.DoesNotContain("可复制 recipe", consumerSampleZh, StringComparison.OrdinalIgnoreCase);
         Assert.True(HasLineWith(consumerSampleZh, "AsterGraph.ConsumerSample.Avalonia -- --proof", "先跑"));
     }
 
@@ -100,6 +111,7 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
         var readme = ReadRepoFile("tools/AsterGraph.ConsumerSample.Avalonia/README.md");
 
         AssertContains(authoringRecipeEn, "Canonical Recipe Vocabulary");
+        AssertContains(authoringRecipeEn, "sole owner of the metadata vocabulary");
         AssertContains(authoringRecipeEn, "Copyable Definition Example");
         AssertContains(authoringRecipeEn, "`defaultValue`");
         AssertContains(authoringRecipeEn, "`isAdvanced`");
@@ -108,6 +120,7 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
         AssertContains(authoringRecipeEn, "constraints.IsReadOnly");
         AssertContains(authoringRecipeEn, "The shipped inspector stays bounded to the definition-driven inspector surface");
         AssertContains(authoringRecipeZh, "统一的 recipe 词汇");
+        AssertContains(authoringRecipeZh, "元数据词汇的唯一 owner");
         AssertContains(authoringRecipeZh, "可复制的定义示例");
         AssertContains(authoringRecipeZh, "`defaultValue`");
         AssertContains(authoringRecipeZh, "`isAdvanced`");
@@ -119,15 +132,15 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
         AssertContains(consumerSampleEn, "[Authoring Inspector Recipe](./authoring-inspector-recipe.md)");
         AssertContains(consumerSampleEn, "host-owned seams");
         AssertContains(consumerSampleEn, "shipped inspector surface");
-        AssertContains(consumerSampleEn, "canonical recipe carries the full");
+        AssertContains(consumerSampleEn, "does not own the metadata vocabulary");
         AssertContains(consumerSampleZh, "[Authoring Inspector Recipe](./authoring-inspector-recipe.md)");
         AssertContains(consumerSampleZh, "宿主自管 seam");
         AssertContains(consumerSampleZh, "shipped inspector surface");
-        AssertContains(consumerSampleZh, "canonical recipe 里");
+        AssertContains(consumerSampleZh, "不拥有元数据词汇");
         AssertContains(readme, "Authoring Inspector Recipe");
         AssertContains(readme, "host-owned seams");
         AssertContains(readme, "shipped inspector surface");
-        AssertContains(readme, "canonical recipe carries the full");
+        AssertContains(readme, "does not own the metadata vocabulary");
     }
 
     [Fact]
