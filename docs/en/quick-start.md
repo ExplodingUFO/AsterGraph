@@ -70,7 +70,7 @@ For the smallest hosted-UI sample, run:
 dotnet run --project tools/AsterGraph.HelloWorld.Avalonia/AsterGraph.HelloWorld.Avalonia.csproj --nologo
 ```
 
-For one realistic hosted integration with a host-owned action rail, parameter editing, and one trusted plugin, run:
+For one realistic hosted integration with a host-owned action rail, the selected-node parameter read/write seam, and one trusted plugin, run:
 
 ```powershell
 dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.ConsumerSample.Avalonia.csproj --nologo

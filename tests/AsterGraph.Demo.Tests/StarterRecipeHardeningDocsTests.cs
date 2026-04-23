@@ -59,6 +59,9 @@ public sealed class StarterRecipeHardeningDocsTests
         Assert.Contains("Keep/copy `AsterGraphEditorFactory.Create(...)`", quickStartEn, StringComparison.Ordinal);
         Assert.Contains("Copy the host-owned seams, not the sample-owned presentation.", quickStartEn, StringComparison.Ordinal);
         Assert.Contains("selected-node parameter read/write seam", quickStartEn, StringComparison.OrdinalIgnoreCase);
+        var quickStartConsumerParagraphEn = FindLineContaining(quickStartEn, "For one realistic hosted integration with a host-owned action rail");
+        Assert.Contains("selected-node parameter read/write seam", quickStartConsumerParagraphEn, StringComparison.Ordinal);
+        Assert.DoesNotContain("parameter editing", quickStartConsumerParagraphEn, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("Replace the top-level window and its title/size", quickStartEn, StringComparison.Ordinal);
         var quickStartRecipeParagraphEn = FindLineContaining(quickStartEn, "Use `AsterGraph.Starter.Avalonia` as the starter recipe.");
         Assert.True(quickStartRecipeParagraphEn.IndexOf("HelloWorld.Avalonia", StringComparison.Ordinal) < quickStartRecipeParagraphEn.IndexOf("ConsumerSample.Avalonia", StringComparison.Ordinal));
@@ -69,6 +72,9 @@ public sealed class StarterRecipeHardeningDocsTests
         Assert.Contains("保留/复制 `AsterGraphEditorFactory.Create(...)`", quickStartZh, StringComparison.Ordinal);
         Assert.Contains("复制宿主自管 seam，不复制样例自有展示层。", quickStartZh, StringComparison.Ordinal);
         Assert.Contains("选中节点参数读写 seam", quickStartZh, StringComparison.Ordinal);
+        var quickStartConsumerParagraphZh = FindLineContaining(quickStartZh, "如果你想先看一个更真实的宿主集成");
+        Assert.Contains("选中节点参数读写 seam", quickStartConsumerParagraphZh, StringComparison.Ordinal);
+        Assert.DoesNotContain("参数编辑", quickStartConsumerParagraphZh, StringComparison.Ordinal);
         Assert.Contains("替换宿主自己的 top-level window 和它的 title/size", quickStartZh, StringComparison.Ordinal);
         var quickStartRecipeParagraphZh = FindLineContaining(quickStartZh, "把 `AsterGraph.Starter.Avalonia` 当作 starter recipe。");
         Assert.True(quickStartRecipeParagraphZh.IndexOf("HelloWorld.Avalonia", StringComparison.Ordinal) < quickStartRecipeParagraphZh.IndexOf("ConsumerSample.Avalonia", StringComparison.Ordinal));

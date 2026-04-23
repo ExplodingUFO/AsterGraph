@@ -70,7 +70,7 @@ dotnet run --project tools/AsterGraph.HelloWorld/AsterGraph.HelloWorld.csproj --
 dotnet run --project tools/AsterGraph.HelloWorld.Avalonia/AsterGraph.HelloWorld.Avalonia.csproj --nologo
 ```
 
-如果你想先看一个更真实的宿主集成，带宿主动作、参数编辑和一个可信插件，可以运行：
+如果你想先看一个更真实的宿主集成，带宿主动作、选中节点参数读写 seam 和一个可信插件，可以运行：
 
 ```powershell
 dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.ConsumerSample.Avalonia.csproj --nologo
