@@ -206,25 +206,33 @@ public sealed class DemoProofReleaseSurfaceTests
         var adoptionFeedback = ReadRepoFile("docs/en/adoption-feedback.md");
         var adoptionFeedbackZh = ReadRepoFile("docs/zh-CN/adoption-feedback.md");
 
+        Assert.Contains("maintainer-seeded rehearsal evidence", projectStatus, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("seeded rehearsals do not count toward the 3-5 gate", projectStatus, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("3-5 real external reports cluster on the same bounded risk", projectStatus, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("copyable host-owned parameter/metadata polish", projectStatus, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("3-5 real external entries", projectStatus, StringComparison.Ordinal);
         Assert.Contains("0.xx alpha/beta line", projectStatus, StringComparison.Ordinal);
+        Assert.Contains("maintainer-seeded rehearsal evidence", adoptionFeedback, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("seeded rehearsals do not count toward the 3-5 gate", adoptionFeedback, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("3-5 real external reports cluster on the same bounded risk", adoptionFeedback, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("copyable host-owned parameter/metadata polish", adoptionFeedback, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("3-5 real external entries", adoptionFeedback, StringComparison.Ordinal);
-        Assert.True(HasLineWithAll(projectStatus, "copyable host-owned parameter/metadata polish", "defended large-tier performance", "broader parameter/metadata editing", "3-5 real external entries", "that bounded risk"));
-        Assert.True(HasLineWithAll(adoptionFeedback, "copyable host-owned parameter/metadata polish", "defended large-tier performance", "broader parameter/metadata editing", "3-5 real external entries", "that bounded risk"));
-        Assert.True(HasLineWithAll(adoptionFeedback, "defended large-tier performance", "3-5 real external entries", "that bounded risk"));
-        Assert.True(HasLineWithAll(adoptionFeedback, "broader parameter and metadata editing", "3-5 real external entries", "that bounded risk"));
+        Assert.True(HasLineWithAll(projectStatus, "copyable host-owned parameter/metadata polish", "defended large-tier performance", "broader parameter/metadata editing", "3-5 real external reports cluster on the same bounded risk"));
+        Assert.True(HasLineWithAll(adoptionFeedback, "copyable host-owned parameter/metadata polish", "defended large-tier performance", "broader parameter/metadata editing", "3-5 real external reports cluster on the same bounded risk"));
+        Assert.True(HasLineWithAll(adoptionFeedback, "defended large-tier performance", "3-5 real external reports cluster on the same bounded risk"));
+        Assert.True(HasLineWithAll(adoptionFeedback, "broader parameter and metadata editing", "3-5 real external reports cluster on the same bounded risk"));
 
+        Assert.Contains("维护者种子预演证据", projectStatusZh, StringComparison.Ordinal);
+        Assert.Contains("维护者种子预演证据不计入 3 到 5 的门槛", projectStatusZh, StringComparison.Ordinal);
+        Assert.Contains("3 到 5 条真实外部报告聚焦在同一个受限风险上", projectStatusZh, StringComparison.Ordinal);
         Assert.Contains("可复制的 host-owned 参数/元数据打磨", projectStatusZh, StringComparison.Ordinal);
-        Assert.Contains("3 到 5 条真实外部反馈", projectStatusZh, StringComparison.Ordinal);
         Assert.Contains("0.xx` alpha/beta 线", projectStatusZh, StringComparison.Ordinal);
+        Assert.Contains("维护者种子预演证据", adoptionFeedbackZh, StringComparison.Ordinal);
+        Assert.Contains("维护者种子预演证据不计入 3 到 5 的门槛", adoptionFeedbackZh, StringComparison.Ordinal);
+        Assert.Contains("3 到 5 条真实外部报告聚焦在同一个受限风险上", adoptionFeedbackZh, StringComparison.Ordinal);
         Assert.Contains("可复制的 host-owned 参数/元数据打磨", adoptionFeedbackZh, StringComparison.Ordinal);
-        Assert.Contains("3 到 5 条真实外部反馈", adoptionFeedbackZh, StringComparison.Ordinal);
-        Assert.True(HasLineWithAll(projectStatusZh, "可复制的 host-owned 参数/元数据打磨", "defended large-tier performance", "更宽的参数/元数据编辑", "3 到 5 条真实外部反馈", "同一个受限风险"));
-        Assert.True(HasLineWithAll(adoptionFeedbackZh, "可复制的 host-owned 参数/元数据打磨", "defended large-tier performance", "更宽的参数/元数据编辑", "3 到 5 条真实外部反馈", "同一个受限风险"));
-        Assert.True(HasLineWithAll(adoptionFeedbackZh, "defended large-tier performance", "3 到 5 条真实外部反馈", "同一个受限风险"));
-        Assert.True(HasLineWithAll(adoptionFeedbackZh, "更宽的参数/元数据编辑", "3 到 5 条真实外部反馈", "同一个受限风险"));
+        Assert.True(HasLineWithAll(projectStatusZh, "可复制的 host-owned 参数/元数据打磨", "defended large-tier performance", "更宽的参数/元数据编辑", "3 到 5 条真实外部报告聚焦在同一个受限风险上"));
+        Assert.True(HasLineWithAll(adoptionFeedbackZh, "可复制的 host-owned 参数/元数据打磨", "defended large-tier performance", "更宽的参数/元数据编辑", "3 到 5 条真实外部报告聚焦在同一个受限风险上"));
+        Assert.True(HasLineWithAll(adoptionFeedbackZh, "defended large-tier performance", "3 到 5 条真实外部报告聚焦在同一个受限风险上"));
+        Assert.True(HasLineWithAll(adoptionFeedbackZh, "更宽的参数/元数据编辑", "3 到 5 条真实外部报告聚焦在同一个受限风险上"));
     }
 
     [Fact]

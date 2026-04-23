@@ -69,7 +69,7 @@
 
 ## 外部能力就绪闸门
 
-当 release notes、维护者回复或 beta intake 需要回答“当前到底有哪些能力已经被外部证据证明”时，就统一引用这一节。下面每条公开声明都必须回到路线级证据，而不是内部信心或 parity 想象。
+当 release notes、维护者回复或 beta intake 需要回答“当前到底有哪些能力已经被外部证据证明”时，就统一引用这一节。维护者种子预演证据记录在 adoption feedback loop 里，但只有同一个受限风险上的真实外部报告才计入 3 到 5 的门槛。下面每条公开声明都必须回到路线级证据，而不是内部信心或 parity 想象。
 
 ### 当前已被外部证据证明
 
@@ -94,7 +94,8 @@
 - 除 Avalonia 加当前 `WPF` 验证通道之外的新 hosted adapter 或更宽的 adapter 声明
 - marketplace、远程安装/更新、unload lifecycle、sandboxed plugin 这类故事
 - stable / GA / `1.0` 级别的支持保证
-- 下一条 `0.xx` alpha/beta 线继续优先做可复制的 host-owned 参数/元数据打磨；只有当 3 到 5 条真实外部反馈在同一个受限风险上聚焦时，才考虑把 defended large-tier performance 或更宽的参数/元数据编辑提上来
+- 下一条 `0.xx` alpha/beta 线继续优先做可复制的 host-owned 参数/元数据打磨；只有当 3 到 5 条真实外部报告聚焦在同一个受限风险上时，才考虑把 defended large-tier performance 或更宽的参数/元数据编辑提上来
+- 维护者种子预演证据不计入 3 到 5 的门槛
 - 如果新的报告放不进上面的“已证明”或“受边界约束”两类，就走 [Adoption Feedback Loop](./adoption-feedback.md) 和 [Beta Support Bundle](./support-bundle.md)，不要临时扩大公开声明
 
 ## 公开入口分工

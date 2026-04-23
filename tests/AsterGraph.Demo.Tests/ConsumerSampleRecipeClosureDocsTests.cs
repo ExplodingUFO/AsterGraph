@@ -184,7 +184,9 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
         Assert.True(HasLineWithAll(adoptionFeedbackEn, "route", "version", "proof", "friction", "support-bundle attachment note"));
         Assert.True(HasLineWithAll(adoptionFeedbackZh, "route", "version", "proof", "摩擦", "support bundle", "附件备注"));
         Assert.Contains("Persona", adoptionFeedbackEn, StringComparison.Ordinal);
-        Assert.Contains("maintainer-derived", adoptionFeedbackEn, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("maintainer-seeded rehearsal evidence", adoptionFeedbackEn, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("not real external intake", adoptionFeedbackEn, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("do not count toward the 3-5 gate", adoptionFeedbackEn, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("Requested next capability", adoptionFeedbackEn, StringComparison.Ordinal);
         Assert.Contains("维护者综合出来的结论", adoptionFeedbackZh, StringComparison.Ordinal);
     }

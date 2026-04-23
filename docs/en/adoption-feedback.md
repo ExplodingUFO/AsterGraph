@@ -1,6 +1,6 @@
 # Adoption Feedback Loop
 
-This page defines the public beta bounded intake record and keeps the same bounded intake vocabulary used by the issue template while the prerelease intake loop is still collecting enough real external reports.
+This page defines the public beta bounded intake record and explicitly distinguishes maintainer-seeded rehearsal evidence from real external reports while the prerelease intake loop is still collecting enough real external reports.
 
 ## Intake Format
 
@@ -21,7 +21,7 @@ When you can reach `ConsumerSample.Avalonia -- --proof --support-bundle <support
 
 ## Seeded Trial Synthesis
 
-Until the repo collects enough real external issues, the current recommendation is based on four structured pre-public adoption rehearsals that exercise distinct entry routes. The `Persona` and `Requested next capability` columns below are maintainer-derived synthesis, not raw public intake fields.
+The current recommendation is based on four structured pre-public adoption rehearsals that exercise distinct entry routes. These are maintainer-seeded rehearsal evidence, not real external intake, and they do not count toward the 3-5 gate.
 
 | Persona | Route tried | Main friction | Requested next capability |
 | --- | --- | --- | --- |
@@ -32,11 +32,12 @@ Until the repo collects enough real external issues, the current recommendation 
 
 ## Current Recommendation
 
-The next 0.xx alpha/beta line should stay on copyable host-owned parameter/metadata polish first; only widen toward defended large-tier performance or broader parameter/metadata editing when 3-5 real external entries cluster on that bounded risk:
+The next 0.xx alpha/beta line should stay on copyable host-owned parameter/metadata polish first; only widen toward defended large-tier performance or broader parameter/metadata editing when 3-5 real external reports cluster on the same bounded risk:
 
 1. **continue copyable host-owned parameter/metadata polish first**
-2. **do not treat defended large-tier performance as the next widening target before 3-5 real external entries cluster on that bounded risk**
-3. **do not treat broader parameter and metadata editing as the next widening target before 3-5 real external entries cluster on that bounded risk**
+2. **seeded rehearsals do not count toward the 3-5 gate**
+3. **do not treat defended large-tier performance as the next widening target before 3-5 real external reports cluster on the same bounded risk**
+4. **do not treat broader parameter and metadata editing as the next widening target before 3-5 real external reports cluster on the same bounded risk**
 
 Until that threshold is met, keep this seeded recommendation in place instead of widening the next beta line ad hoc.
 

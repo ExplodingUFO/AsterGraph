@@ -70,7 +70,7 @@ The current public-repo priority is turning the public beta into a coherent SDK 
 
 ## External Capability Readiness Gate
 
-Use this section as the single external capability readiness gate for release notes, maintainer replies, and beta intake. Every public claim below stays tied to route-level evidence instead of parity aspirations or internal confidence.
+Use this section as the single external capability readiness gate for release notes, maintainer replies, and beta intake. Maintainer-seeded rehearsal evidence is recorded in the adoption feedback loop, but only real external reports on the same bounded risk count toward the 3-5 gate. Every public claim below stays tied to route-level evidence instead of parity aspirations or internal confidence.
 
 ### Externally proven now
 
@@ -95,7 +95,8 @@ Use this section as the single external capability readiness gate for release no
 - new hosted adapters or widened adapter claims beyond Avalonia plus the current `WPF` validation lane
 - marketplace, remote install/update, unload lifecycle, or sandboxed plugin stories
 - stable / GA / `1.0` support guarantees
-- the next 0.xx alpha/beta line stays on copyable host-owned parameter/metadata polish first; only widen toward defended large-tier performance or broader parameter/metadata editing when 3-5 real external entries cluster on that bounded risk
+- the next 0.xx alpha/beta line stays on copyable host-owned parameter/metadata polish first; only widen toward defended large-tier performance or broader parameter/metadata editing when 3-5 real external reports cluster on the same bounded risk
+- seeded rehearsals do not count toward the 3-5 gate
 - if a new report does not fit one of the proven or bounded rows above, route it through the [Adoption Feedback Loop](./adoption-feedback.md) and the [Beta Support Bundle](./support-bundle.md) instead of widening the claim ad hoc
 
 ## Public Entry Matrix
