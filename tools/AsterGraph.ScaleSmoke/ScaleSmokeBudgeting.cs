@@ -9,6 +9,28 @@ public sealed record ScaleSmokeMetrics(
     long SaveMs,
     long ReloadMs);
 
+public sealed record ScaleSmokeAuthoringMetrics(
+    long StencilFilterMs,
+    long CommandSurfaceRefreshMs,
+    long QuickToolProjectionMs,
+    long QuickToolExecutionMs)
+{
+    public string ToMarker(string tierId)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(tierId);
+
+        return string.Join(
+            ':',
+            [
+                $"SCALE_AUTHORING_METRICS:{tierId}",
+                $"stencil={StencilFilterMs}",
+                $"command-surface={CommandSurfaceRefreshMs}",
+                $"quick-tool-projection={QuickToolProjectionMs}",
+                $"quick-tool-execution={QuickToolExecutionMs}",
+            ]);
+    }
+}
+
 public sealed record ScaleSmokeBudget(
     long SetupMs,
     long SelectionMs,
@@ -18,16 +40,27 @@ public sealed record ScaleSmokeBudget(
     long SaveMs,
     long ReloadMs);
 
+public sealed record ScaleSmokeAuthoringBudget(
+    long StencilFilterMs,
+    long CommandSurfaceRefreshMs,
+    long QuickToolProjectionMs,
+    long QuickToolExecutionMs);
+
 public sealed record ScaleSmokeBudgetEvaluation(bool Passed, string FailureSummary);
+
+public sealed record ScaleSmokeAuthoringBudgetEvaluation(bool Passed, string FailureSummary);
 
 public sealed record ScaleSmokeTier(
     string Id,
     int NodeCount,
     int SelectionCount,
     int MoveCount,
-    ScaleSmokeBudget? Budget)
+    ScaleSmokeBudget? Budget,
+    ScaleSmokeAuthoringBudget? AuthoringBudget)
 {
     public bool EnforceBudgets => Budget is not null;
+
+    public bool EnforceAuthoringBudgets => AuthoringBudget is not null;
 
     public string ToBudgetMarker()
     {
@@ -50,6 +83,24 @@ public sealed record ScaleSmokeTier(
                 $"viewport<={Budget.ViewportMs}",
                 $"save<={Budget.SaveMs}",
                 $"reload<={Budget.ReloadMs}",
+            ]);
+    }
+
+    public string ToAuthoringBudgetMarker()
+    {
+        if (AuthoringBudget is null)
+        {
+            return $"SCALE_AUTHORING_BUDGET:{Id}:budget=informational-only";
+        }
+
+        return string.Join(
+            ':',
+            [
+                $"SCALE_AUTHORING_BUDGET:{Id}",
+                $"stencil<={AuthoringBudget.StencilFilterMs}",
+                $"command-surface<={AuthoringBudget.CommandSurfaceRefreshMs}",
+                $"quick-tool-projection<={AuthoringBudget.QuickToolProjectionMs}",
+                $"quick-tool-execution<={AuthoringBudget.QuickToolExecutionMs}",
             ]);
     }
 
@@ -102,6 +153,40 @@ public sealed record ScaleSmokeTier(
             : new ScaleSmokeBudgetEvaluation(false, string.Join(',', failures));
     }
 
+    public ScaleSmokeAuthoringBudgetEvaluation EvaluateAuthoring(ScaleSmokeAuthoringMetrics metrics)
+    {
+        if (AuthoringBudget is null)
+        {
+            return new ScaleSmokeAuthoringBudgetEvaluation(true, "informational-only");
+        }
+
+        var failures = new List<string>();
+
+        if (metrics.StencilFilterMs > AuthoringBudget.StencilFilterMs)
+        {
+            failures.Add($"stencil>{AuthoringBudget.StencilFilterMs}");
+        }
+
+        if (metrics.CommandSurfaceRefreshMs > AuthoringBudget.CommandSurfaceRefreshMs)
+        {
+            failures.Add($"command-surface>{AuthoringBudget.CommandSurfaceRefreshMs}");
+        }
+
+        if (metrics.QuickToolProjectionMs > AuthoringBudget.QuickToolProjectionMs)
+        {
+            failures.Add($"quick-tool-projection>{AuthoringBudget.QuickToolProjectionMs}");
+        }
+
+        if (metrics.QuickToolExecutionMs > AuthoringBudget.QuickToolExecutionMs)
+        {
+            failures.Add($"quick-tool-execution>{AuthoringBudget.QuickToolExecutionMs}");
+        }
+
+        return failures.Count == 0
+            ? new ScaleSmokeAuthoringBudgetEvaluation(true, "none")
+            : new ScaleSmokeAuthoringBudgetEvaluation(false, string.Join(',', failures));
+    }
+
     public static ScaleSmokeTier Parse(string[] args)
     {
         var requestedTier = "baseline";
@@ -129,7 +214,12 @@ public sealed record ScaleSmokeTier(
                     HistoryMs: 400,
                     ViewportMs: 150,
                     SaveMs: 150,
-                    ReloadMs: 1200)),
+                    ReloadMs: 1200),
+                AuthoringBudget: new ScaleSmokeAuthoringBudget(
+                    StencilFilterMs: 100,
+                    CommandSurfaceRefreshMs: 250,
+                    QuickToolProjectionMs: 100,
+                    QuickToolExecutionMs: 150)),
             "large" => new ScaleSmokeTier(
                 "large",
                 NodeCount: 1000,
@@ -142,13 +232,19 @@ public sealed record ScaleSmokeTier(
                     HistoryMs: 800,
                     ViewportMs: 200,
                     SaveMs: 300,
-                    ReloadMs: 1500)),
+                    ReloadMs: 1500),
+                AuthoringBudget: new ScaleSmokeAuthoringBudget(
+                    StencilFilterMs: 150,
+                    CommandSurfaceRefreshMs: 400,
+                    QuickToolProjectionMs: 150,
+                    QuickToolExecutionMs: 200)),
             "stress" => new ScaleSmokeTier(
                 "stress",
                 NodeCount: 5000,
                 SelectionCount: 256,
                 MoveCount: 96,
-                Budget: null),
+                Budget: null,
+                AuthoringBudget: null),
             _ => throw new ArgumentException($"Unsupported ScaleSmoke tier '{requestedTier}'. Supported tiers: baseline, large, stress.")
         };
     }

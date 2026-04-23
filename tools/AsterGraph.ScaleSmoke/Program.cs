@@ -2,11 +2,9 @@ using System.Diagnostics;
 using System.Reflection;
 using AsterGraph.ScaleSmoke;
 using AsterGraph.Abstractions.Compatibility;
-using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Automation;
-using AsterGraph.Editor.Catalog;
 using AsterGraph.Editor.Hosting;
 using AsterGraph.Editor.Models;
 using AsterGraph.Editor.Runtime;
@@ -19,13 +17,18 @@ var configuration = ScaleSmokeRunConfiguration.Parse(args);
 var tier = configuration.Tier;
 var definitionId = new NodeDefinitionId("scale.node");
 var metricSamples = new List<ScaleSmokeMetrics>(configuration.Samples);
+var authoringSamples = new List<ScaleSmokeAuthoringMetrics>(configuration.Samples);
 for (var sampleIndex = 0; sampleIndex < configuration.Samples; sampleIndex++)
 {
-    metricSamples.Add(RunScaleScenario(tier, definitionId, emitMarkers: sampleIndex == 0));
+    var (metrics, authoringMetrics) = RunScaleScenario(tier, definitionId, emitMarkers: sampleIndex == 0);
+    metricSamples.Add(metrics);
+    authoringSamples.Add(authoringMetrics);
 }
 
 var summary = ScaleSmokeMetricSummary.FromSamples(tier.Id, metricSamples);
+var authoringSummary = ScaleSmokeAuthoringMetricSummary.FromSamples(tier.Id, authoringSamples);
 Console.WriteLine(summary.ToMarker());
+Console.WriteLine(authoringSummary.ToMarker());
 
 GraphEditorAutomationRunRequest CreateAutomationRunRequest(ScaleSmokeTier tier)
 {
@@ -51,81 +54,18 @@ GraphEditorCommandInvocationSnapshot CreateAutomationCommand(
         commandId,
         arguments.Select(argument => new GraphEditorCommandArgumentSnapshot(argument.Name, argument.Value)).ToArray());
 
-NodeCatalog CreateCatalog(NodeDefinitionId definitionId)
-{
-    var catalog = new NodeCatalog();
-    catalog.RegisterDefinition(new NodeDefinition(
-        definitionId,
-        "Scale Node",
-        "Scale",
-        "Repeatable larger-graph validation node.",
-        [
-            new PortDefinition(InputPortId, "Input", new PortTypeId("float"), "#F3B36B"),
-        ],
-        [
-            new PortDefinition(OutputPortId, "Output", new PortTypeId("float"), "#6AD5C4"),
-        ]));
-    return catalog;
-}
-
-GraphDocument CreateDocument(ScaleSmokeTier selectedTier, NodeDefinitionId definitionId)
-{
-    var nodes = new List<GraphNode>(selectedTier.NodeCount);
-    var connections = new List<GraphConnection>(selectedTier.NodeCount - 1);
-
-    for (var index = 0; index < selectedTier.NodeCount; index++)
-    {
-        var nodeId = $"scale-node-{index:000}";
-        nodes.Add(new GraphNode(
-            nodeId,
-            $"Scale Node {index:000}",
-            "Scale",
-            "Large Graph",
-            "Used to validate repeatable scale, history, and reload scenarios.",
-            new GraphPoint(120 + ((index % 12) * 280), 120 + ((index / 12) * 180)),
-            new GraphSize(220, 160),
-            [
-                new GraphPort(InputPortId, "Input", PortDirection.Input, "float", "#F3B36B", new PortTypeId("float")),
-            ],
-            [
-                new GraphPort(OutputPortId, "Output", PortDirection.Output, "float", "#6AD5C4", new PortTypeId("float")),
-            ],
-            index % 2 == 0 ? "#6AD5C4" : "#F3B36B",
-            definitionId));
-
-        if (index == 0)
-        {
-            continue;
-        }
-
-        connections.Add(new GraphConnection(
-            $"scale-connection-{index - 1:000}",
-            $"scale-node-{index - 1:000}",
-            OutputPortId,
-            nodeId,
-            InputPortId,
-            $"Scale Edge {index - 1:000}->{index:000}",
-            "#6AD5C4"));
-    }
-
-    return new GraphDocument(
-        $"Scale Smoke Graph ({selectedTier.Id})",
-        "Repeatable larger-graph validation scenario for the public alpha proof ring.",
-        nodes,
-        connections);
-}
-
-ScaleSmokeMetrics RunScaleScenario(
+(ScaleSmokeMetrics Performance, ScaleSmokeAuthoringMetrics Authoring) RunScaleScenario(
     ScaleSmokeTier tier,
     NodeDefinitionId definitionId,
     bool emitMarkers)
 {
     var setupWatch = Stopwatch.StartNew();
-    var catalog = CreateCatalog(definitionId);
+    var catalog = ScaleSmokeScenarioFactory.CreateCatalog(definitionId);
+    var document = ScaleSmokeScenarioFactory.CreateDocument(tier, definitionId);
     var workspace = new RecordingWorkspaceService();
     var editor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
     {
-        Document = CreateDocument(tier, definitionId),
+        Document = document,
         NodeCatalog = catalog,
         CompatibilityService = new ExactCompatibilityService(),
         WorkspaceService = workspace,
@@ -295,7 +235,7 @@ ScaleSmokeMetrics RunScaleScenario(
     var readinessWorkspace = new RecordingWorkspaceService("workspace://scale-smoke-readiness");
     var readinessSession = AsterGraphEditorFactory.CreateSession(new AsterGraphEditorOptions
     {
-        Document = CreateDocument(tier, definitionId),
+        Document = ScaleSmokeScenarioFactory.CreateDocument(tier, definitionId),
         NodeCatalog = catalog,
         CompatibilityService = new ExactCompatibilityService(),
         WorkspaceService = readinessWorkspace,
@@ -333,12 +273,38 @@ ScaleSmokeMetrics RunScaleScenario(
         Console.WriteLine($"PHASE18_SCALE_READINESS_OK:{readinessSessionIsKernelFirst}:{phase18ScaleReadinessOk}:{readinessInspection.FeatureDescriptors.Count}:{readinessRecentDiagnostics.Count}:{readinessWorkspace.SaveCalls}");
     }
 
+    var authoringProbeSession = AsterGraphEditorFactory.CreateSession(new AsterGraphEditorOptions
+    {
+        Document = ScaleSmokeScenarioFactory.CreateDocument(tier, definitionId),
+        NodeCatalog = catalog,
+        CompatibilityService = new ExactCompatibilityService(),
+        WorkspaceService = new RecordingWorkspaceService("workspace://scale-smoke-authoring"),
+    });
+    var authoringProbe = ScaleSmokeAuthoringProbe.Run(
+        authoringProbeSession,
+        stencilFilter: "authoring",
+        nodeId: $"scale-node-{tier.NodeCount / 2:000}",
+        connectionId: $"scale-connection-{tier.NodeCount / 2:000}");
+    var authoringBudgetEvaluation = tier.EvaluateAuthoring(authoringProbe.Metrics);
+    if (emitMarkers)
+    {
+        Console.WriteLine(tier.ToAuthoringBudgetMarker());
+        Console.WriteLine(authoringProbe.ToMarker(tier.Id));
+        Console.WriteLine(authoringProbe.Metrics.ToMarker(tier.Id));
+        Console.WriteLine($"SCALE_AUTHORING_BUDGET_OK:{tier.Id}:{authoringBudgetEvaluation.Passed}:{authoringBudgetEvaluation.FailureSummary}");
+    }
+
     if (tier.EnforceBudgets && !budgetEvaluation.Passed)
     {
         throw new InvalidOperationException($"ScaleSmoke performance budget failed for tier '{tier.Id}': {budgetEvaluation.FailureSummary}");
     }
 
-    return metrics;
+    if (tier.EnforceAuthoringBudgets && !authoringBudgetEvaluation.Passed)
+    {
+        throw new InvalidOperationException($"ScaleSmoke authoring budget failed for tier '{tier.Id}': {authoringBudgetEvaluation.FailureSummary}");
+    }
+
+    return (metrics, authoringProbe.Metrics);
 }
 
 file sealed class ExactCompatibilityService : IPortCompatibilityService
