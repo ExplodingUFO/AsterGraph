@@ -86,6 +86,26 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
     }
 
     [Fact]
+    public void WidenedSurfacePerformanceRecipeClosureDocs_LinkHostedMetricsToScaleSmokeBudgets()
+    {
+        var performanceRecipeEn = ReadRepoFile("docs/en/widened-surface-performance-recipe.md");
+        var performanceRecipeZh = ReadRepoFile("docs/zh-CN/widened-surface-performance-recipe.md");
+        var consumerSampleEn = ReadRepoFile("docs/en/consumer-sample.md");
+        var consumerSampleZh = ReadRepoFile("docs/zh-CN/consumer-sample.md");
+        var readme = ReadRepoFile("tools/AsterGraph.ConsumerSample.Avalonia/README.md");
+
+        AssertContains(readme, "Widened Surface Performance Recipe");
+        AssertContains(readme, "../../docs/en/widened-surface-performance-recipe.md");
+        AssertContains(consumerSampleEn, "[Widened Surface Performance Recipe](./widened-surface-performance-recipe.md)");
+        AssertContains(consumerSampleZh, "[Widened Surface Performance Recipe](./widened-surface-performance-recipe.md)");
+
+        Assert.True(HasLineWithAll(performanceRecipeEn, "Step 1", "WIDENED_SURFACE_PERFORMANCE_OK", "HOST_NATIVE_METRIC:command_surface_refresh_ms", "ConsumerSample.Avalonia"));
+        Assert.True(HasLineWithAll(performanceRecipeEn, "Step 2", "SCALE_AUTHORING_BUDGET_OK:large:True:none", "SCALE_EXPORT_BUDGET_OK:large:True:none", "ScaleSmoke"));
+        Assert.True(HasLineWithAll(performanceRecipeZh, "第 1 步", "WIDENED_SURFACE_PERFORMANCE_OK", "HOST_NATIVE_METRIC:command_surface_refresh_ms", "ConsumerSample.Avalonia"));
+        Assert.True(HasLineWithAll(performanceRecipeZh, "第 2 步", "SCALE_AUTHORING_BUDGET_OK:large:True:none", "SCALE_EXPORT_BUDGET_OK:large:True:none", "ScaleSmoke"));
+    }
+
+    [Fact]
     public void ConsumerSampleRecipeClosureDocs_DefineOneCopyableParameterMetadataPath()
     {
         var readme = ReadRepoFile("tools/AsterGraph.ConsumerSample.Avalonia/README.md");

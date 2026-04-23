@@ -12,6 +12,7 @@ It is the host seam example for three host-owned seams:
 For the inspector metadata recipe, pair this route with [Authoring Inspector Recipe](./authoring-inspector-recipe.md). This sample stays focused on the host-owned seams and the shipped inspector surface; it does not own the metadata vocabulary. The canonical recipe carries the full `defaultValue`, `isAdvanced`, `helpText`, `placeholderText`, and read-only vocabulary.
 For copyable custom node, port, and edge presentation on the same route, pair it with [Authoring Surface Recipe](./authoring-surface-recipe.md).
 For searchable grouped stencil, SVG/PNG/JPEG export breadth, and shared node or edge quick tools on the same route, pair it with [Capability Breadth Recipe](./capability-breadth-recipe.md).
+For one copyable hosted tuning handoff that keeps those widened surfaces tied to defended `ScaleSmoke` budgets, pair it with [Widened Surface Performance Recipe](./widened-surface-performance-recipe.md).
 
 This is the defended beta route for copying host-owned seams into your own host. Keep action projection, trust workflow, and the selected-node parameter read/write seam host-owned; copy only the sample-owned presentation.
 
@@ -66,6 +67,12 @@ Copy the path in this order:
 
 Consumer Sample proves the seam split; it does not own the metadata vocabulary. Authoring Inspector Recipe is the sole owner of the metadata vocabulary.
 
+## Copyable Widened Surface Performance Handoff
+
+- Keep widened hosted metrics on `AsterGraph.ConsumerSample.Avalonia -- --proof` through `HOST_NATIVE_METRIC:stencil_search_ms`, `HOST_NATIVE_METRIC:command_surface_refresh_ms`, `HOST_NATIVE_METRIC:node_tool_projection_ms`, and `HOST_NATIVE_METRIC:edge_tool_projection_ms`, and expect `WIDENED_SURFACE_PERFORMANCE_OK:True`.
+- Keep defended `large` authoring and export budgets on `ScaleSmoke` through `SCALE_AUTHORING_BUDGET_OK:large:True:none` and `SCALE_EXPORT_BUDGET_OK:large:True:none`.
+- Reuse [Widened Surface Performance Recipe](./widened-surface-performance-recipe.md) when you want one copyable tuning handoff instead of a new hosted proof lane.
+
 ## Trust and proof quick reference
 
 Copyable trust and proof reference:
@@ -85,6 +92,7 @@ Expected proof markers:
 - `CAPABILITY_BREADTH_NODE_QUICK_TOOLS_OK:True`
 - `CAPABILITY_BREADTH_EDGE_QUICK_TOOLS_OK:True`
 - `CAPABILITY_BREADTH_OK:True`
+- `WIDENED_SURFACE_PERFORMANCE_OK:True`
 - `AUTHORING_SURFACE_OK:True`
 - `COMMAND_SURFACE_OK:True`
 - `HOST_NATIVE_METRIC:*`
@@ -152,6 +160,7 @@ Expected proof markers:
 - `CAPABILITY_BREADTH_NODE_QUICK_TOOLS_OK:True`
 - `CAPABILITY_BREADTH_EDGE_QUICK_TOOLS_OK:True`
 - `CAPABILITY_BREADTH_OK:True`
+- `WIDENED_SURFACE_PERFORMANCE_OK:True`
 - `HOST_NATIVE_METRIC:startup_ms=...`
 - `HOST_NATIVE_METRIC:inspector_projection_ms=...`
 - `HOST_NATIVE_METRIC:plugin_scan_ms=...`
@@ -204,6 +213,7 @@ If you want to build the same medium host in your own app, copy these seams in t
 - selected-node parameter read/write seam: `IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()` reads the selected node parameters, and `IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)` writes them back
 - node-side authoring seam: `IGraphEditorSession.Queries.GetNodeParameterSnapshots(nodeId)` plus `INodeParameterEditorRegistry` keep the node surface on the same metadata and validation contract as the inspector
 - proof mode: emit the `AUTHORING_SURFACE_*` markers, `COMMAND_SURFACE_OK`, and the widened `HOST_NATIVE_METRIC:*` lines so you can compare your host with the shipped samples and keep the defended large-tier contract in view through `ScaleSmoke`
+- widened hosted tuning: emit `WIDENED_SURFACE_PERFORMANCE_OK:True` and reuse [Widened Surface Performance Recipe](./widened-surface-performance-recipe.md) so the hosted metrics stay tied to `ScaleSmoke`
 - capability breadth: pair the same route with [Capability Breadth Recipe](./capability-breadth-recipe.md) and emit the `CAPABILITY_BREADTH_*` markers from `AsterGraph.ConsumerSample.Avalonia -- --proof`
 - sample-owned content such as the review/audit node family, action ids and titles, and proof labels beyond the defended markers should stay local to your app
 
@@ -211,6 +221,7 @@ If you want to build the same medium host in your own app, copy these seams in t
 
 - [Quick Start](./quick-start.md)
 - [Capability Breadth Recipe](./capability-breadth-recipe.md)
+- [Widened Surface Performance Recipe](./widened-surface-performance-recipe.md)
 - [Authoring Surface Recipe](./authoring-surface-recipe.md)
 - [Beta Support Bundle](./support-bundle.md)
 - [Host Integration](./host-integration.md)

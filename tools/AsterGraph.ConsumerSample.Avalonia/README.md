@@ -7,6 +7,7 @@ For plugin-capable evaluators, this is the defended hosted trust hop. Read [Plug
 For the inspector metadata recipe, pair this sample with [Authoring Inspector Recipe](../../docs/en/authoring-inspector-recipe.md). The sample stays focused on the host-owned seams and the shipped inspector surface; it does not own the metadata vocabulary. The canonical recipe carries the full `defaultValue`, `isAdvanced`, `helpText`, `placeholderText`, and read-only vocabulary.
 For copyable custom node, port, parameter, and edge presentation on the same hosted route, pair it with [Authoring Surface Recipe](../../docs/en/authoring-surface-recipe.md).
 For searchable grouped stencil, SVG/PNG/JPEG export breadth, and shared node or edge quick tools on the same hosted route, pair it with [Capability Breadth Recipe](../../docs/en/capability-breadth-recipe.md).
+For one copyable hosted tuning handoff that keeps those widened surfaces tied to defended `ScaleSmoke` budgets, pair it with [Widened Surface Performance Recipe](../../docs/en/widened-surface-performance-recipe.md).
 
 The hosted route ladder is `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerSample.Avalonia`.
 
@@ -48,6 +49,7 @@ Expected proof markers:
 - `CAPABILITY_BREADTH_NODE_QUICK_TOOLS_OK:True`
 - `CAPABILITY_BREADTH_EDGE_QUICK_TOOLS_OK:True`
 - `CAPABILITY_BREADTH_OK:True`
+- `WIDENED_SURFACE_PERFORMANCE_OK:True`
 - `HOST_NATIVE_METRIC:startup_ms=...`
 - `HOST_NATIVE_METRIC:inspector_projection_ms=...`
 - `HOST_NATIVE_METRIC:plugin_scan_ms=...`
@@ -111,6 +113,12 @@ Use this sample to copy the host-owned seams, not the sample-specific presentati
 - Keep scene export on `IGraphEditorSession.Commands.TryExportSceneAsSvg(...)` plus `IGraphEditorSession.Commands.TryExportSceneAsImage(...)` for `GraphEditorSceneImageExportFormat.Png` and `GraphEditorSceneImageExportFormat.Jpeg`.
 - Keep node and edge quick tools on the shared tool route through `IGraphEditorSession.Queries.GetToolDescriptors(...)` and `AsterGraphAuthoringToolActionFactory.CreateCommandSurfaceActions(...)`.
 - Close the route with [Capability Breadth Recipe](../../docs/en/capability-breadth-recipe.md) and `AsterGraph.ConsumerSample.Avalonia -- --proof`, expecting `CAPABILITY_BREADTH_OK:True`.
+
+### Copyable Widened Surface Performance Handoff
+
+- Keep widened hosted metrics on `AsterGraph.ConsumerSample.Avalonia -- --proof` through `HOST_NATIVE_METRIC:stencil_search_ms`, `HOST_NATIVE_METRIC:command_surface_refresh_ms`, `HOST_NATIVE_METRIC:node_tool_projection_ms`, and `HOST_NATIVE_METRIC:edge_tool_projection_ms`, and expect `WIDENED_SURFACE_PERFORMANCE_OK:True`.
+- Keep defended `large` authoring and export budgets on `ScaleSmoke` through `SCALE_AUTHORING_BUDGET_OK:large:True:none` and `SCALE_EXPORT_BUDGET_OK:large:True:none`.
+- Close the tuning handoff with [Widened Surface Performance Recipe](../../docs/en/widened-surface-performance-recipe.md) instead of inventing a new proof lane.
 
 ### Replace These Sample-Owned Details
 

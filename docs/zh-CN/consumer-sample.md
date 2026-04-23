@@ -12,6 +12,7 @@
 如果你要看 inspector metadata recipe，就把这条路线和 [Authoring Inspector Recipe](./authoring-inspector-recipe.md) 配在一起。这个样例只聚焦宿主自管 seam 和 shipped inspector surface；它不拥有元数据词汇。完整的 `defaultValue`、`isAdvanced`、`helpText`、`placeholderText` 和只读词汇都放在 canonical recipe 里。
 如果你要在同一条路线里复制自定义节点、端口和边展示，就再配上 [Authoring Surface Recipe](./authoring-surface-recipe.md)。
 如果你要在同一条路线里复制 searchable grouped stencil、SVG/PNG/JPEG export breadth，以及共享 node/edge quick tools，就再配上 [Capability Breadth Recipe](./capability-breadth-recipe.md)。
+如果你要把这些 widened surface 继续和受防守的 `ScaleSmoke` 预算绑定成一条可复制的宿主调优 handoff，就再配上 [Widened Surface Performance Recipe](./widened-surface-performance-recipe.md)。
 
 这是把宿主自管 seam 复制到你自己的应用里的受防守 beta 路线。把 action projection、trust workflow 和选中节点参数读写 seam 保持在宿主里，只复制样例自有的展示细节。
 
@@ -66,6 +67,12 @@
 
 Consumer Sample 证明 seam 分工；它不拥有元数据词汇。Authoring Inspector Recipe 是元数据词汇的唯一 owner。
 
+## 可复制的 Widened Surface Performance Handoff
+
+- 在 `AsterGraph.ConsumerSample.Avalonia -- --proof` 上继续守住 widened hosted metrics：`HOST_NATIVE_METRIC:stencil_search_ms`、`HOST_NATIVE_METRIC:command_surface_refresh_ms`、`HOST_NATIVE_METRIC:node_tool_projection_ms` 和 `HOST_NATIVE_METRIC:edge_tool_projection_ms`，并期待 `WIDENED_SURFACE_PERFORMANCE_OK:True`。
+- 在 `ScaleSmoke` 上继续守住 `large` authoring/export 预算：`SCALE_AUTHORING_BUDGET_OK:large:True:none` 和 `SCALE_EXPORT_BUDGET_OK:large:True:none`。
+- 当你要复制同一条调优 handoff 时，直接复用 [Widened Surface Performance Recipe](./widened-surface-performance-recipe.md)，不要再开新的 hosted proof lane。
+
 ## 信任与证明速查
 
 可复制的信任与证明参考：
@@ -85,6 +92,7 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 - `CAPABILITY_BREADTH_NODE_QUICK_TOOLS_OK:True`
 - `CAPABILITY_BREADTH_EDGE_QUICK_TOOLS_OK:True`
 - `CAPABILITY_BREADTH_OK:True`
+- `WIDENED_SURFACE_PERFORMANCE_OK:True`
 - `AUTHORING_SURFACE_OK:True`
 - `COMMAND_SURFACE_OK:True`
 - `HOST_NATIVE_METRIC:*`
@@ -152,6 +160,7 @@ Proof Handoff 负责实际 intake 说明。
 - `CAPABILITY_BREADTH_NODE_QUICK_TOOLS_OK:True`
 - `CAPABILITY_BREADTH_EDGE_QUICK_TOOLS_OK:True`
 - `CAPABILITY_BREADTH_OK:True`
+- `WIDENED_SURFACE_PERFORMANCE_OK:True`
 - `HOST_NATIVE_METRIC:startup_ms=...`
 - `HOST_NATIVE_METRIC:inspector_projection_ms=...`
 - `HOST_NATIVE_METRIC:plugin_scan_ms=...`
@@ -205,6 +214,7 @@ Proof Handoff 负责实际 intake 说明。
 - 选中节点参数读写 seam：只通过 `IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()` 读取当前选中节点参数，并只通过 `IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)` 写回
 - 节点旁路 authoring seam：通过 `IGraphEditorSession.Queries.GetNodeParameterSnapshots(nodeId)` 和 `INodeParameterEditorRegistry` 把节点表面保持在和 inspector 一样的 metadata/validation 合同上
 - proof mode：输出 `AUTHORING_SURFACE_*`、`COMMAND_SURFACE_OK` 和扩展后的 `HOST_NATIVE_METRIC:*`，这样你能和官方 sample 做横向比较，并继续把 `ScaleSmoke` 的 defended large-tier contract 放在视野里
+- widened hosted tuning：输出 `WIDENED_SURFACE_PERFORMANCE_OK:True`，并复用 [Widened Surface Performance Recipe](./widened-surface-performance-recipe.md)，这样宿主指标会继续和 `ScaleSmoke` 绑定在同一条路线里
 - capability breadth：把同一条路线和 [Capability Breadth Recipe](./capability-breadth-recipe.md) 配在一起，并从 `AsterGraph.ConsumerSample.Avalonia -- --proof` 输出 `CAPABILITY_BREADTH_*` markers
 - support bundle：在 proof mode 上额外附带 `--support-bundle`，生成本地 JSON 证据包给 support/feedback 使用
 - sample-owned content：review/audit 节点族、action ids/titles 和 proof labels 应该保持在你的 app 内部，不要写成 canonical contract
@@ -213,6 +223,7 @@ Proof Handoff 负责实际 intake 说明。
 
 - [Quick Start](./quick-start.md)
 - [Capability Breadth Recipe](./capability-breadth-recipe.md)
+- [Widened Surface Performance Recipe](./widened-surface-performance-recipe.md)
 - [Authoring Surface Recipe](./authoring-surface-recipe.md)
 - [Beta Support Bundle](./support-bundle.md)
 - [Host Integration](./host-integration.md)

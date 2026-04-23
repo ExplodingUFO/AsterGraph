@@ -23,8 +23,10 @@
 - 对一批代表性节点执行 selection
 - 走一次 canonical connection 路径的删除和重连
 - history interaction 加 save/undo/redo dirty 语义
+- 覆盖 stencil filter、command-surface refresh 以及 quick-tool projection/execution 的 authoring probe
 - viewport resize 加 fit-to-viewport 导航
 - workspace save 以及基于已保存文档的 reload
+- 基于同一份文档路径的 svg/png/jpeg export 加 reload
 
 原有正确性 marker 仍然保留，比如 `SCALE_HISTORY_CONTRACT_OK`、`PHASE25_SCALE_AUTOMATION_OK` 和 `PHASE18_SCALE_READINESS_OK`。
 
@@ -60,6 +62,26 @@ release lane 现在会同时守住 `baseline` 和 `large` 两个层级：
 
 只要任一 defended 层级超过这些数字，`ScaleSmoke` 就会输出 `SCALE_PERFORMANCE_BUDGET_OK:<tier>:False:...`，release gate 会失败。
 
+### authoring 红线
+
+| 层级 | stencil | command-surface | quick-tool-projection | quick-tool-execution |
+| --- | ---: | ---: | ---: | ---: |
+| `baseline` | 100 ms | 250 ms | 100 ms | 150 ms |
+| `large` | 150 ms | 400 ms | 150 ms | 200 ms |
+
+`ScaleSmoke` 会为这些 defended 层级输出 `SCALE_AUTHORING_BUDGET:...`、`SCALE_AUTHORING_METRICS:...`、`SCALE_AUTHORING_BUDGET_OK:...` 和 `SCALE_AUTHORING_SUMMARY:...`。
+
+### export 红线
+
+| 层级 | svg | png | jpeg | reload |
+| --- | ---: | ---: | ---: | ---: |
+| `baseline` | 300 ms | 2500 ms | 1800 ms | 250 ms |
+| `large` | 300 ms | 12000 ms | 8000 ms | 400 ms |
+
+`ScaleSmoke` 会为这些 defended 层级输出 `SCALE_EXPORT_BUDGET:...`、`SCALE_EXPORT_METRICS:...`、`SCALE_EXPORT_BUDGET_OK:...` 和 `SCALE_EXPORT_SUMMARY:...`。
+
+如果你想把 `ConsumerSample.Avalonia` 的宿主指标和这些 defended `ScaleSmoke` 预算收成同一条可复制路线，就配合 [Widened Surface Performance Recipe](./widened-surface-performance-recipe.md) 一起看。
+
 ## 信息型遥测
 
 `stress` 层级仍然只是信息型遥测。它现在会额外发布一行 `SCALE_PERF_SUMMARY:stress:...`，把 p50/p95 时间直接给出来，但不会因此变成 defended release budget。
@@ -86,11 +108,21 @@ dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj --
 - `SCALE_PERF_METRICS:...`
 - `SCALE_PERFORMANCE_BUDGET_OK:...`
 - `SCALE_PERF_SUMMARY:...`
+- `SCALE_AUTHORING_BUDGET:...`
+- `SCALE_AUTHORING_METRICS:...`
+- `SCALE_AUTHORING_BUDGET_OK:...`
+- `SCALE_AUTHORING_SUMMARY:...`
+- `SCALE_EXPORT_BUDGET:...`
+- `SCALE_EXPORT_METRICS:...`
+- `SCALE_EXPORT_BUDGET_OK:...`
+- `SCALE_EXPORT_SUMMARY:...`
 - `SCALE_HISTORY_CONTRACT_OK:...`
 
 其中 `SCALE_TIER_BUDGET` 是当前运行的机器可读预算声明，直接把防守层级、场景规模和阈值策略编码成一行，release note 和 proof summary 可以直接引用。
 
 对 `baseline` 和 `large` 来说，真正对外承诺的 release 信号还是 `SCALE_PERFORMANCE_BUDGET_OK`。
+
+对 `baseline` 和 `large` 来说，`SCALE_AUTHORING_BUDGET_OK` 和 `SCALE_EXPORT_BUDGET_OK` 也是 widened-surface performance 的 defended 信号。
 
 对 `stress` 来说，`SCALE_PERF_SUMMARY:stress:...` 才是对外发布的 p50/p95 遥测行，它告诉宿主当前 5000 节点场景下的大致表现，但不代表正式预算承诺。
 

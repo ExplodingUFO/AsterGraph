@@ -52,13 +52,22 @@ public sealed record ConsumerSampleProofResult(
         && NodeQuickToolsOk
         && EdgeQuickToolsOk;
 
+    public bool WidenedSurfacePerformanceOk
+        => CommandSurfaceOk
+        && CapabilityBreadthOk
+        && StencilSearchMs >= 0
+        && CommandSurfaceRefreshMs >= 0
+        && NodeToolProjectionMs >= 0
+        && EdgeToolProjectionMs >= 0;
+
     public bool IsOk
         => HostMenuActionOk
         && PluginContributionOk
         && TrustTransparencyOk
         && WindowCompositionOk
         && AuthoringSurfaceOk
-        && CapabilityBreadthOk;
+        && CapabilityBreadthOk
+        && WidenedSurfacePerformanceOk;
 
     public IReadOnlyList<string> MetricLines =>
     [
@@ -90,6 +99,7 @@ public sealed record ConsumerSampleProofResult(
         $"CAPABILITY_BREADTH_NODE_QUICK_TOOLS_OK:{NodeQuickToolsOk}",
         $"CAPABILITY_BREADTH_EDGE_QUICK_TOOLS_OK:{EdgeQuickToolsOk}",
         $"CAPABILITY_BREADTH_OK:{CapabilityBreadthOk}",
+        $"WIDENED_SURFACE_PERFORMANCE_OK:{WidenedSurfacePerformanceOk}",
         .. MetricLines,
         $"AUTHORING_SURFACE_OK:{AuthoringSurfaceOk}",
         $"CONSUMER_SAMPLE_OK:{IsOk}",

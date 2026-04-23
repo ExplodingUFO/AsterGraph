@@ -77,6 +77,7 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(result.ProofLines, line => line == "CAPABILITY_BREADTH_NODE_QUICK_TOOLS_OK:True");
         Assert.Contains(result.ProofLines, line => line == "CAPABILITY_BREADTH_EDGE_QUICK_TOOLS_OK:True");
         Assert.Contains(result.ProofLines, line => line == "CAPABILITY_BREADTH_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "WIDENED_SURFACE_PERFORMANCE_OK:True");
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_SURFACE_OK:True");
         Assert.Contains(result.MetricLines, line => line.Contains("startup_ms", StringComparison.Ordinal));
         Assert.Contains(result.MetricLines, line => line.Contains("command_latency_ms", StringComparison.Ordinal));
@@ -149,6 +150,7 @@ public sealed class ConsumerSampleProofTests
         Assert.False(result.IsOk);
         Assert.Contains(result.ProofLines, line => line == "CAPABILITY_BREADTH_EXPORT_OK:False");
         Assert.Contains(result.ProofLines, line => line == "CAPABILITY_BREADTH_OK:False");
+        Assert.Contains(result.ProofLines, line => line == "WIDENED_SURFACE_PERFORMANCE_OK:False");
         Assert.Contains(result.ProofLines, line => line == "CONSUMER_SAMPLE_OK:False");
     }
 
@@ -199,6 +201,7 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(proofLines, line => line == "CAPABILITY_BREADTH_NODE_QUICK_TOOLS_OK:True");
         Assert.Contains(proofLines, line => line == "CAPABILITY_BREADTH_EDGE_QUICK_TOOLS_OK:True");
         Assert.Contains(proofLines, line => line == "CAPABILITY_BREADTH_OK:True");
+        Assert.Contains(proofLines, line => line == "WIDENED_SURFACE_PERFORMANCE_OK:True");
         Assert.Contains(proofLines, line => line == "AUTHORING_SURFACE_OK:True");
         Assert.Contains(proofLines, line => line == "CONSUMER_SAMPLE_PARAMETER_OK:True");
         Assert.Contains(proofLines, line => line == "CONSUMER_SAMPLE_METADATA_PROJECTION_OK:True");

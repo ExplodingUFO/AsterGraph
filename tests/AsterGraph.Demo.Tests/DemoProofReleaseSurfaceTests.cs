@@ -1062,6 +1062,8 @@ public sealed class DemoProofReleaseSurfaceTests
             Assert.Contains("large", contents, StringComparison.Ordinal);
             Assert.Contains("stress", contents, StringComparison.Ordinal);
             Assert.Contains("SCALE_PERF_SUMMARY", contents, StringComparison.Ordinal);
+            Assert.Contains("SCALE_AUTHORING_BUDGET_OK", contents, StringComparison.Ordinal);
+            Assert.Contains("SCALE_EXPORT_BUDGET_OK", contents, StringComparison.Ordinal);
         }
 
         Assert.Contains("SCALE_PERFORMANCE_BUDGET_OK:large:True:...", checklist, StringComparison.Ordinal);
