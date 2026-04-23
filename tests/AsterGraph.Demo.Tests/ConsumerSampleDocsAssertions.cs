@@ -8,6 +8,11 @@ internal static class ConsumerSampleDocsAssertions
     {
         Assert.Contains("CONSUMER_SAMPLE_HOST_ACTION_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("CONSUMER_SAMPLE_PLUGIN_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("AUTHORING_SURFACE_PARAMETER_PROJECTION_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("AUTHORING_SURFACE_METADATA_PROJECTION_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("AUTHORING_SURFACE_COMMAND_PROJECTION_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("AUTHORING_SURFACE_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("CONSUMER_SAMPLE_PARAMETER_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("CONSUMER_SAMPLE_METADATA_PROJECTION_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("CONSUMER_SAMPLE_WINDOW_OK:True", contents, StringComparison.Ordinal);

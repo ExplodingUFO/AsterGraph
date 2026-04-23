@@ -57,7 +57,11 @@
 
 - 定义 metadata：先从 [Authoring Inspector Recipe](./authoring-inspector-recipe.md) 复制 `defaultValue`、`editorKind`、`constraints` 和 `groupName`。
 - 投影并写回：在这份样例里通过 `IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()` 和 `IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)` 处理选中节点值。
-- 验证证据：用 proof mode 加 support bundle；把 `parameterSnapshots` 和 `CONSUMER_SAMPLE_PARAMETER_OK:True`、`CONSUMER_SAMPLE_METADATA_PROJECTION_OK:True` 对照。
+- 投影 inspector 状态：通过 `IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()`。
+- 投影节点旁路编辑器状态：通过 `IGraphEditorSession.Queries.GetNodeParameterSnapshots(nodeId)` 和 `INodeParameterEditorRegistry`。
+- 写回时继续走 `IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)` 或 `IGraphEditorSession.Commands.TrySetNodeParameterValue(...)`，把 validation 保留在共享 session command 路线上。
+- 宿主动作继续从 `session.Queries.GetCommandDescriptors()` 和共享 host-action 路线投影，再用 proof mode 加 support bundle 对照 `parameterSnapshots`、`CONSUMER_SAMPLE_PARAMETER_OK:True`、`CONSUMER_SAMPLE_METADATA_PROJECTION_OK:True` 和 `AUTHORING_SURFACE_OK:True`。
+- 验证证据：用 proof mode 加 support bundle；把 `parameterSnapshots` 和 `CONSUMER_SAMPLE_PARAMETER_OK:True`、`CONSUMER_SAMPLE_METADATA_PROJECTION_OK:True`、`AUTHORING_SURFACE_OK:True` 对照。
 
 Consumer Sample 证明 seam 分工；它不拥有元数据词汇。Authoring Inspector Recipe 是元数据词汇的唯一 owner。
 
@@ -73,6 +77,9 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 
 - `CONSUMER_SAMPLE_TRUST_OK:True`
 - `CONSUMER_SAMPLE_METADATA_PROJECTION_OK:True`
+- `AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:True`
+- `AUTHORING_SURFACE_COMMAND_PROJECTION_OK:True`
+- `AUTHORING_SURFACE_OK:True`
 - `COMMAND_SURFACE_OK:True`
 - `HOST_NATIVE_METRIC:*`
 
@@ -125,6 +132,10 @@ Proof Handoff 负责实际 intake 说明。
 
 - `CONSUMER_SAMPLE_HOST_ACTION_OK:True`
 - `CONSUMER_SAMPLE_PLUGIN_OK:True`
+- `AUTHORING_SURFACE_PARAMETER_PROJECTION_OK:True`
+- `AUTHORING_SURFACE_METADATA_PROJECTION_OK:True`
+- `AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:True`
+- `AUTHORING_SURFACE_COMMAND_PROJECTION_OK:True`
 - `CONSUMER_SAMPLE_PARAMETER_OK:True`
 - `CONSUMER_SAMPLE_METADATA_PROJECTION_OK:True`
 - `CONSUMER_SAMPLE_WINDOW_OK:True`
@@ -134,6 +145,8 @@ Proof Handoff 负责实际 intake 说明。
 - `HOST_NATIVE_METRIC:inspector_projection_ms=...`
 - `HOST_NATIVE_METRIC:plugin_scan_ms=...`
 - `HOST_NATIVE_METRIC:command_latency_ms=...`
+- `AUTHORING_SURFACE_OK:True`
+- `CONSUMER_SAMPLE_OK:True`
 
 当提供 `--support-bundle <support-bundle-path>` 时，预期 bundle marker：
 
@@ -175,7 +188,8 @@ Proof Handoff 负责实际 intake 说明。
 - action rail / command projection：通过 `AsterGraphHostedActionFactory.CreateCommandActions(...)` 消费共享 command descriptor，并用 `AsterGraphHostedActionFactory.CreateProjection(...)` 组合宿主动作
 - plugin trust workflow：把 `GraphEditorPluginDiscoveryOptions`、`AsterGraphEditorOptions.PluginTrustPolicy`、provenance snapshot 和宿主自管 allowlist policy 放在同一层
 - 选中节点参数读写 seam：只通过 `IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()` 读取当前选中节点参数，并只通过 `IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)` 写回
-- proof mode：输出 `COMMAND_SURFACE_OK` 和四条 `HOST_NATIVE_METRIC:*`，这样你能和官方 sample 做横向比较
+- 节点旁路 authoring seam：通过 `IGraphEditorSession.Queries.GetNodeParameterSnapshots(nodeId)` 和 `INodeParameterEditorRegistry` 把节点表面保持在和 inspector 一样的 metadata/validation 合同上
+- proof mode：输出 `AUTHORING_SURFACE_*`、`COMMAND_SURFACE_OK` 和四条 `HOST_NATIVE_METRIC:*`，这样你能和官方 sample 做横向比较，并继续把 `ScaleSmoke` 的 defended large-tier contract 放在视野里
 - support bundle：在 proof mode 上额外附带 `--support-bundle`，生成本地 JSON 证据包给 support/feedback 使用
 - sample-owned content：review/audit 节点族、action ids/titles 和 proof labels 应该保持在你的 app 内部，不要写成 canonical contract
 

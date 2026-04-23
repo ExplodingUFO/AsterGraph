@@ -59,6 +59,17 @@ Keep parameter metadata in [Authoring Inspector Recipe](./authoring-inspector-re
 - `NodeParameterEditorHost` keeps editor creation bounded to `INodeParameterEditorRegistry`.
 - Template-specific editor bodies stay sample-owned; metadata vocabulary stays in the inspector recipe.
 
+## Hosted authoring handoff
+
+Use one hosted handoff from definitions to proof instead of stitching together separate inspector-only and node-only stories.
+
+1. Define node, port, and parameter facts in `NodeDefinition`, including `defaultWidth`, `defaultHeight`, `templateKey`, `defaultValue`, and validation/read-only constraints.
+2. Project inspector state from `GetSelectedNodeParameterSnapshots()` so the shipped inspector keeps the same metadata, validation, and read-only surface.
+3. Project node-side state from `GetNodeParameterSnapshots(nodeId)` so `NodeParameterEditorHost` and `INodeParameterEditorRegistry` reuse the same metadata and validation contract on the custom node surface.
+4. Write values back through `TrySetSelectedNodeParameterValue(...)` or `TrySetNodeParameterValue(...)`; keep validation on the shared session command path instead of adding a second editor model.
+5. Project host commands from `GetCommandDescriptors()` so toolbars, menus, shortcuts, and palette actions stay on the same shared command route.
+6. Close the handoff with `AsterGraph.ConsumerSample.Avalonia -- --proof` and expect `AUTHORING_SURFACE_OK:True`.
+
 ## Copy path
 
 1. Define the node and parameter facts in `NodeDefinition`, including multiple inputs/outputs, `defaultWidth`, `defaultHeight`, and parameter `templateKey` values.

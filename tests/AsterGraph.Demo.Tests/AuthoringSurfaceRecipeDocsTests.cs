@@ -41,6 +41,34 @@ public sealed class AuthoringSurfaceRecipeDocsTests
         Assert.Contains("../../docs/en/authoring-surface-recipe.md", readme, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void AuthoringSurfaceRecipeDocs_PublishHostedAuthoringHandoffFromDefinitionsToProof()
+    {
+        var authoringRecipeEn = ReadRepoFile("docs/en/authoring-surface-recipe.md");
+        var authoringRecipeZh = ReadRepoFile("docs/zh-CN/authoring-surface-recipe.md");
+        var consumerSampleEn = ReadRepoFile("docs/en/consumer-sample.md");
+        var consumerSampleZh = ReadRepoFile("docs/zh-CN/consumer-sample.md");
+        var readme = ReadRepoFile("tools/AsterGraph.ConsumerSample.Avalonia/README.md");
+
+        foreach (var contents in new[] { authoringRecipeEn, authoringRecipeZh })
+        {
+            Assert.Contains("GetSelectedNodeParameterSnapshots()", contents, StringComparison.Ordinal);
+            Assert.Contains("GetNodeParameterSnapshots(nodeId)", contents, StringComparison.Ordinal);
+            Assert.Contains("TrySetSelectedNodeParameterValue(...)", contents, StringComparison.Ordinal);
+            Assert.Contains("validation", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("GetCommandDescriptors()", contents, StringComparison.Ordinal);
+            Assert.Contains("AsterGraph.ConsumerSample.Avalonia -- --proof", contents, StringComparison.Ordinal);
+            Assert.Contains("AUTHORING_SURFACE_OK:True", contents, StringComparison.Ordinal);
+        }
+
+        foreach (var contents in new[] { consumerSampleEn, consumerSampleZh, readme })
+        {
+            Assert.Contains("AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("AUTHORING_SURFACE_COMMAND_PROJECTION_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("AUTHORING_SURFACE_OK:True", contents, StringComparison.Ordinal);
+        }
+    }
+
     private static string ReadRepoFile(string relativePath)
         => File.ReadAllText(Path.Combine(GetRepositoryRoot(), relativePath));
 

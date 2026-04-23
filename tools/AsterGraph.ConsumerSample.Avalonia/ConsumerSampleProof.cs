@@ -3,6 +3,8 @@ using System.Globalization;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Headless;
+using Avalonia.Interactivity;
+using Avalonia.Threading;
 using AsterGraph.Avalonia.Hosting;
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
@@ -18,6 +20,7 @@ public sealed record ConsumerSampleProofResult(
     bool PluginContributionOk,
     bool ParameterProjectionOk,
     bool MetadataProjectionOk,
+    bool NodeSideAuthoringOk,
     bool WindowCompositionOk,
     bool TrustTransparencyOk,
     bool CommandSurfaceOk,
@@ -27,13 +30,18 @@ public sealed record ConsumerSampleProofResult(
     double PluginScanMs,
     double CommandLatencyMs)
 {
+    public bool AuthoringSurfaceOk
+        => ParameterProjectionOk
+        && MetadataProjectionOk
+        && NodeSideAuthoringOk
+        && CommandSurfaceOk;
+
     public bool IsOk
         => HostMenuActionOk
         && PluginContributionOk
-        && ParameterProjectionOk
-        && WindowCompositionOk
         && TrustTransparencyOk
-        && CommandSurfaceOk;
+        && WindowCompositionOk
+        && AuthoringSurfaceOk;
 
     public IReadOnlyList<string> MetricLines =>
     [
@@ -47,12 +55,17 @@ public sealed record ConsumerSampleProofResult(
     [
         $"CONSUMER_SAMPLE_HOST_ACTION_OK:{HostMenuActionOk}",
         $"CONSUMER_SAMPLE_PLUGIN_OK:{PluginContributionOk}",
+        $"AUTHORING_SURFACE_PARAMETER_PROJECTION_OK:{ParameterProjectionOk}",
+        $"AUTHORING_SURFACE_METADATA_PROJECTION_OK:{MetadataProjectionOk}",
+        $"AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:{NodeSideAuthoringOk}",
+        $"AUTHORING_SURFACE_COMMAND_PROJECTION_OK:{CommandSurfaceOk}",
         $"CONSUMER_SAMPLE_PARAMETER_OK:{ParameterProjectionOk}",
         $"CONSUMER_SAMPLE_METADATA_PROJECTION_OK:{MetadataProjectionOk}",
         $"CONSUMER_SAMPLE_WINDOW_OK:{WindowCompositionOk}",
         $"CONSUMER_SAMPLE_TRUST_OK:{TrustTransparencyOk}",
         $"COMMAND_SURFACE_OK:{CommandSurfaceOk}",
         .. MetricLines,
+        $"AUTHORING_SURFACE_OK:{AuthoringSurfaceOk}",
         $"CONSUMER_SAMPLE_OK:{IsOk}",
     ];
 
@@ -75,12 +88,15 @@ public static class ConsumerSampleProof
         var window = ConsumerSampleWindowFactory.Create(host);
 
         window.Show();
+        FlushUi();
 
         host.SelectNode(host.GetFirstReviewNodeId());
+        FlushUi();
         GraphEditorNodeParameterSnapshot[] selectedParameterSnapshots = [];
         var inspectorProjectionMs = MeasureMilliseconds(() => selectedParameterSnapshots = host.GetSelectedParameterSnapshots().ToArray());
         var pluginScanMs = MeasureMilliseconds(() => host.PluginCandidates.ToArray());
         var metadataProjectionOk = HasMetadataProjection(selectedParameterSnapshots);
+        var nodeSideAuthoringOk = HasNodeSideAuthoring(window, host, host.GetFirstReviewNodeId());
 
         var commandBaseline = host.Session.Queries.CreateDocumentSnapshot().Nodes.Count;
         host.Session.Commands.AddNode(ConsumerSampleHost.ReviewDefinitionId, new GraphPoint(880, 220));
@@ -136,6 +152,7 @@ public static class ConsumerSampleProof
             PluginContributionOk: pluginContributionOk,
             ParameterProjectionOk: parameterProjectionOk,
             MetadataProjectionOk: metadataProjectionOk,
+            NodeSideAuthoringOk: nodeSideAuthoringOk,
             WindowCompositionOk: windowCompositionOk,
             TrustTransparencyOk: trustTransparencyOk,
             CommandSurfaceOk: commandSurfaceOk,
@@ -152,6 +169,37 @@ public static class ConsumerSampleProof
             .OfType<T>()
             .FirstOrDefault(control => string.Equals(control.Name, name, StringComparison.Ordinal));
 
+    private static bool HasNodeSideAuthoring(Window window, ConsumerSampleHost host, string reviewNodeId)
+    {
+        var initialWidth = host.Session.Queries.GetNodeSurfaceSnapshots()
+            .Single(snapshot => snapshot.NodeId == reviewNodeId)
+            .Size.Width;
+        var widenButton = FindNamed<Button>(window, $"PART_RecipeToolbarWiden_{reviewNodeId}");
+        if (widenButton is not null)
+        {
+            widenButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            FlushUi();
+        }
+
+        var widenedWidth = host.Session.Queries.GetNodeSurfaceSnapshots()
+            .Single(snapshot => snapshot.NodeId == reviewNodeId)
+            .Size.Width;
+        var nodeSnapshots = host.Session.Queries.GetNodeParameterSnapshots(reviewNodeId);
+        var statusTemplateOk = nodeSnapshots.Any(snapshot =>
+            snapshot.Definition.Key == "status"
+            && string.Equals(snapshot.Definition.TemplateKey, ConsumerSampleAuthoringSurfaceRecipe.StatusTemplateKey, StringComparison.Ordinal));
+        var ownerTemplateOk = nodeSnapshots.Any(snapshot =>
+            snapshot.Definition.Key == "owner"
+            && string.Equals(snapshot.Definition.TemplateKey, ConsumerSampleAuthoringSurfaceRecipe.OwnerTemplateKey, StringComparison.Ordinal));
+
+        return FindNamed<Canvas>(window, "PART_AuthoringEdgeOverlay") is not null
+            && FindNamed<Border>(window, "PART_AuthoringEdgeBadge_consumer-sample-connection-001") is not null
+            && widenButton is not null
+            && widenedWidth > initialWidth
+            && statusTemplateOk
+            && ownerTemplateOk;
+    }
+
     private static double MeasureMilliseconds(Action action)
     {
         var stopwatch = Stopwatch.StartNew();
@@ -159,6 +207,9 @@ public static class ConsumerSampleProof
         stopwatch.Stop();
         return stopwatch.Elapsed.TotalMilliseconds;
     }
+
+    private static void FlushUi()
+        => Dispatcher.UIThread.RunJobs(DispatcherPriority.Render);
 
     private static bool HasMetadataProjection(IReadOnlyList<GraphEditorNodeParameterSnapshot> snapshots)
         => snapshots.Any(snapshot =>

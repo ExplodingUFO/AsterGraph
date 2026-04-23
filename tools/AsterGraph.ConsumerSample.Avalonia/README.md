@@ -33,6 +33,10 @@ Expected proof markers:
 
 - `CONSUMER_SAMPLE_HOST_ACTION_OK:True`
 - `CONSUMER_SAMPLE_PLUGIN_OK:True`
+- `AUTHORING_SURFACE_PARAMETER_PROJECTION_OK:True`
+- `AUTHORING_SURFACE_METADATA_PROJECTION_OK:True`
+- `AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:True`
+- `AUTHORING_SURFACE_COMMAND_PROJECTION_OK:True`
 - `CONSUMER_SAMPLE_PARAMETER_OK:True`
 - `CONSUMER_SAMPLE_METADATA_PROJECTION_OK:True`
 - `CONSUMER_SAMPLE_WINDOW_OK:True`
@@ -42,6 +46,8 @@ Expected proof markers:
 - `HOST_NATIVE_METRIC:inspector_projection_ms=...`
 - `HOST_NATIVE_METRIC:plugin_scan_ms=...`
 - `HOST_NATIVE_METRIC:command_latency_ms=...`
+- `AUTHORING_SURFACE_OK:True`
+- `CONSUMER_SAMPLE_OK:True`
 
 Expected bundle markers when `--support-bundle <support-bundle-path>` is supplied:
 
@@ -81,6 +87,13 @@ Use this sample to copy the host-owned seams, not the sample-specific presentati
 - Define metadata in [Authoring Inspector Recipe](../../docs/en/authoring-inspector-recipe.md) first with `defaultValue`, `editorKind`, `constraints`, and `groupName`.
 - Project and write selected-node values in this sample through `IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()` and `IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)`.
 - Validate evidence with proof mode plus a support bundle; compare `parameterSnapshots` with `CONSUMER_SAMPLE_PARAMETER_OK:True` and `CONSUMER_SAMPLE_METADATA_PROJECTION_OK:True`.
+
+### Copyable Authoring Surface Handoff
+
+- Keep definitions and metadata in `NodeDefinition`, then project inspector state from `GetSelectedNodeParameterSnapshots()`.
+- Project node-side editor state from `GetNodeParameterSnapshots(nodeId)` so `NodeParameterEditorHost` and `INodeParameterEditorRegistry` reuse the same validation-aware parameter contract.
+- Keep writes on the shared session command path through `TrySetSelectedNodeParameterValue(...)` or `TrySetNodeParameterValue(...)`.
+- Project host actions from `GetCommandDescriptors()` and close the route with `AsterGraph.ConsumerSample.Avalonia -- --proof`, expecting `AUTHORING_SURFACE_OK:True`.
 
 ### Replace These Sample-Owned Details
 

@@ -57,7 +57,11 @@ Copy the path in this order:
 
 - Define metadata in [Authoring Inspector Recipe](./authoring-inspector-recipe.md) first with `defaultValue`, `editorKind`, `constraints`, and `groupName`.
 - Project and write selected-node values in this sample through `IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()` and `IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)`.
-- Validate evidence with proof mode plus a support bundle; compare `parameterSnapshots` with `CONSUMER_SAMPLE_PARAMETER_OK:True` and `CONSUMER_SAMPLE_METADATA_PROJECTION_OK:True`.
+- Project inspector state through `IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()`.
+- Project node-side editor state through `IGraphEditorSession.Queries.GetNodeParameterSnapshots(nodeId)` and `INodeParameterEditorRegistry`.
+- Write values back through `IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)` or `IGraphEditorSession.Commands.TrySetNodeParameterValue(...)` so validation stays on the shared session command path.
+- Project host actions from `session.Queries.GetCommandDescriptors()` and the shared host-action route, then validate evidence with proof mode plus a support bundle; compare `parameterSnapshots` with `CONSUMER_SAMPLE_PARAMETER_OK:True`, `CONSUMER_SAMPLE_METADATA_PROJECTION_OK:True`, and `AUTHORING_SURFACE_OK:True`.
+- Validate evidence with proof mode plus a support bundle; compare `parameterSnapshots` with `CONSUMER_SAMPLE_PARAMETER_OK:True`, `CONSUMER_SAMPLE_METADATA_PROJECTION_OK:True`, and `AUTHORING_SURFACE_OK:True`.
 
 Consumer Sample proves the seam split; it does not own the metadata vocabulary. Authoring Inspector Recipe is the sole owner of the metadata vocabulary.
 
@@ -73,6 +77,9 @@ Expected proof markers:
 
 - `CONSUMER_SAMPLE_TRUST_OK:True`
 - `CONSUMER_SAMPLE_METADATA_PROJECTION_OK:True`
+- `AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:True`
+- `AUTHORING_SURFACE_COMMAND_PROJECTION_OK:True`
+- `AUTHORING_SURFACE_OK:True`
 - `COMMAND_SURFACE_OK:True`
 - `HOST_NATIVE_METRIC:*`
 
@@ -125,6 +132,10 @@ Expected proof markers:
 
 - `CONSUMER_SAMPLE_HOST_ACTION_OK:True`
 - `CONSUMER_SAMPLE_PLUGIN_OK:True`
+- `AUTHORING_SURFACE_PARAMETER_PROJECTION_OK:True`
+- `AUTHORING_SURFACE_METADATA_PROJECTION_OK:True`
+- `AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:True`
+- `AUTHORING_SURFACE_COMMAND_PROJECTION_OK:True`
 - `CONSUMER_SAMPLE_PARAMETER_OK:True`
 - `CONSUMER_SAMPLE_METADATA_PROJECTION_OK:True`
 - `CONSUMER_SAMPLE_WINDOW_OK:True`
@@ -134,6 +145,8 @@ Expected proof markers:
 - `HOST_NATIVE_METRIC:inspector_projection_ms=...`
 - `HOST_NATIVE_METRIC:plugin_scan_ms=...`
 - `HOST_NATIVE_METRIC:command_latency_ms=...`
+- `AUTHORING_SURFACE_OK:True`
+- `CONSUMER_SAMPLE_OK:True`
 
 Expected bundle markers when `--support-bundle <support-bundle-path>` is supplied:
 
@@ -174,7 +187,8 @@ If you want to build the same medium host in your own app, copy these seams in t
 - action rail / command projection: query `session.Queries.GetCommandDescriptors()` indirectly through `AsterGraphHostedActionFactory.CreateCommandActions(...)` and project them with `AsterGraphHostedActionFactory.CreateProjection(...)`
 - plugin trust workflow: keep `GraphEditorPluginDiscoveryOptions`, `AsterGraphEditorOptions.PluginTrustPolicy`, provenance snapshots, and an explicit host-owned allowlist policy together
 - selected-node parameter read/write seam: `IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()` reads the selected node parameters, and `IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)` writes them back
-- proof mode: emit `COMMAND_SURFACE_OK` plus the four `HOST_NATIVE_METRIC:*` lines so you can compare your host with the shipped samples
+- node-side authoring seam: `IGraphEditorSession.Queries.GetNodeParameterSnapshots(nodeId)` plus `INodeParameterEditorRegistry` keep the node surface on the same metadata and validation contract as the inspector
+- proof mode: emit the `AUTHORING_SURFACE_*` markers, `COMMAND_SURFACE_OK`, and the four `HOST_NATIVE_METRIC:*` lines so you can compare your host with the shipped samples and keep the defended large-tier contract in view through `ScaleSmoke`
 - sample-owned content such as the review/audit node family, action ids and titles, and proof labels beyond the defended markers should stay local to your app
 
 ## Related Docs

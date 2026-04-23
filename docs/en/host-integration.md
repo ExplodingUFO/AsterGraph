@@ -53,8 +53,8 @@ Copy from each bounded source for the part it owns:
 - Copy from `Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)`: shipped Avalonia composition for hosted UI hosts.
 - Copy from `ConsumerSample.Avalonia`: action projection, trust workflow, and selected-node parameter read/write seam only.
 - Copy from `Authoring Inspector Recipe`: definition-driven parameter metadata and stock inspector vocabulary.
-- Copy from [Authoring Surface Recipe](./authoring-surface-recipe.md): custom node, port, parameter-editor, and edge presentation on the hosted Avalonia route.
-- Keep the split explicit: the sample is the seam proof and the recipe is the metadata source.
+- Copy from [Authoring Surface Recipe](./authoring-surface-recipe.md): the hosted handoff from node-side editors and validation through shared commands and proof on the hosted Avalonia route.
+- Keep the split explicit: the sample is the seam proof and the recipe is the metadata source. More specifically, the inspector recipe owns metadata vocabulary and the surface recipe owns the hosted authoring handoff.
 
 ## Sample Roles
 

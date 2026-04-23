@@ -48,6 +48,7 @@ public sealed class ConsumerSampleProofTests
         var result = ConsumerSampleProof.Run();
 
         Assert.True(result.IsOk);
+        Assert.True(result.NodeSideAuthoringOk);
         Assert.True(result.HostMenuActionOk);
         Assert.True(result.PluginContributionOk);
         Assert.True(result.ParameterProjectionOk);
@@ -58,18 +59,24 @@ public sealed class ConsumerSampleProofTests
         Assert.True(result.InspectorProjectionMs >= 0);
         Assert.True(result.PluginScanMs >= 0);
         Assert.True(result.CommandLatencyMs >= 0);
+        Assert.Contains(result.ProofLines, line => line == "AUTHORING_SURFACE_PARAMETER_PROJECTION_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "AUTHORING_SURFACE_METADATA_PROJECTION_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "AUTHORING_SURFACE_COMMAND_PROJECTION_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "AUTHORING_SURFACE_OK:True");
         Assert.Contains(result.MetricLines, line => line.Contains("startup_ms", StringComparison.Ordinal));
         Assert.Contains(result.MetricLines, line => line.Contains("command_latency_ms", StringComparison.Ordinal));
     }
 
     [AvaloniaFact]
-    public void ConsumerSampleProofResult_MetadataProjectionMarker_DoesNotFlipOverallProofStatus()
+    public void ConsumerSampleProofResult_MetadataProjectionMarker_FailsOverallProofStatus()
     {
         var result = new ConsumerSampleProofResult(
             HostMenuActionOk: true,
             PluginContributionOk: true,
             ParameterProjectionOk: true,
             MetadataProjectionOk: false,
+            NodeSideAuthoringOk: true,
             WindowCompositionOk: true,
             TrustTransparencyOk: true,
             CommandSurfaceOk: true,
@@ -79,9 +86,11 @@ public sealed class ConsumerSampleProofTests
             PluginScanMs: 1,
             CommandLatencyMs: 1);
 
-        Assert.True(result.IsOk);
+        Assert.False(result.IsOk);
+        Assert.Contains(result.ProofLines, line => line == "AUTHORING_SURFACE_METADATA_PROJECTION_OK:False");
+        Assert.Contains(result.ProofLines, line => line == "AUTHORING_SURFACE_OK:False");
         Assert.Contains(result.ProofLines, line => line == "CONSUMER_SAMPLE_METADATA_PROJECTION_OK:False");
-        Assert.Contains(result.ProofLines, line => line == "CONSUMER_SAMPLE_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "CONSUMER_SAMPLE_OK:False");
     }
 
     [AvaloniaFact]
@@ -122,6 +131,11 @@ public sealed class ConsumerSampleProofTests
         var proofLines = root.GetProperty("proofLines").EnumerateArray().Select(static item => item.GetString()).ToArray();
         Assert.Contains(proofLines, line => line == "CONSUMER_SAMPLE_HOST_ACTION_OK:True");
         Assert.Contains(proofLines, line => line == "CONSUMER_SAMPLE_PLUGIN_OK:True");
+        Assert.Contains(proofLines, line => line == "AUTHORING_SURFACE_PARAMETER_PROJECTION_OK:True");
+        Assert.Contains(proofLines, line => line == "AUTHORING_SURFACE_METADATA_PROJECTION_OK:True");
+        Assert.Contains(proofLines, line => line == "AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:True");
+        Assert.Contains(proofLines, line => line == "AUTHORING_SURFACE_COMMAND_PROJECTION_OK:True");
+        Assert.Contains(proofLines, line => line == "AUTHORING_SURFACE_OK:True");
         Assert.Contains(proofLines, line => line == "CONSUMER_SAMPLE_PARAMETER_OK:True");
         Assert.Contains(proofLines, line => line == "CONSUMER_SAMPLE_METADATA_PROJECTION_OK:True");
         Assert.Contains(proofLines, line => line == "CONSUMER_SAMPLE_WINDOW_OK:True");

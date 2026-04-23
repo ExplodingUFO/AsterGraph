@@ -59,6 +59,17 @@
 - `NodeParameterEditorHost` 继续把 editor body 创建收口到 `INodeParameterEditorRegistry`。
 - template-specific 的 editor body 仍然是样例自有；metadata vocabulary 仍然归 inspector recipe 所有。
 
+## Hosted authoring handoff
+
+不要把 inspector、节点旁路编辑器和 proof 拆成几段分开的故事；这条 hosted handoff 要从 definitions 一直连到 proof。
+
+1. 先在 `NodeDefinition` 里定义节点、端口和参数事实，包括 `defaultWidth`、`defaultHeight`、`templateKey`、`defaultValue`，以及 validation/read-only constraints。
+2. 再用 `GetSelectedNodeParameterSnapshots()` 投影 inspector 状态，让 shipped inspector 继续复用同一份 metadata、validation 和只读合同。
+3. 然后用 `GetNodeParameterSnapshots(nodeId)` 投影节点旁路状态，让 `NodeParameterEditorHost` 和 `INodeParameterEditorRegistry` 在自定义节点表面上继续复用同一份 metadata 和 validation 合同。
+4. 写回时继续走 `TrySetSelectedNodeParameterValue(...)` 或 `TrySetNodeParameterValue(...)`，把 validation 保留在共享 session command 路线上，不再引入第二套 editor model。
+5. 宿主命令继续从 `GetCommandDescriptors()` 投影，这样 toolbar、menu、shortcut 和 palette action 都停留在同一条共享 command route 上。
+6. 最后用 `AsterGraph.ConsumerSample.Avalonia -- --proof` 收口，并期待看到 `AUTHORING_SURFACE_OK:True`。
+
 ## 复制顺序
 
 1. 先在 `NodeDefinition` 里定义节点和参数事实，包括多输入/多输出、`defaultWidth`、`defaultHeight` 以及参数 `templateKey`。
