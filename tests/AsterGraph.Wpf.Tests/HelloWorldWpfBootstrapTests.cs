@@ -1,7 +1,10 @@
 using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.ViewModels;
+using System.Linq;
 using System.Windows;
 using System.Windows.Automation;
+using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Threading;
 using Xunit;
 
@@ -103,5 +106,58 @@ public sealed class HelloWorldWpfBootstrapTests
             window.Close();
             return 0;
         });
+    }
+
+    [Fact]
+    public void WpfHostedHelloWorldRoute_ExposesFocusAndKeyboardBindings()
+    {
+        if (!OperatingSystem.IsWindows())
+        {
+            return;
+        }
+
+        var editor = WpfRouteTestHelpers.CreateHelloWorldEditor();
+        WpfRouteTestHelpers.RunInSta(() =>
+        {
+            var hostedView = WpfRouteTestHelpers.CreateHelloWorldHostedView(editor);
+            var hostedUi = hostedView as FrameworkElement
+                ?? throw new InvalidOperationException("Expected hosted WPF view to be a FrameworkElement.");
+
+            var window = new Window
+            {
+                Content = hostedUi,
+                Width = 200,
+                Height = 120,
+                ShowInTaskbar = false,
+                WindowStyle = WindowStyle.None,
+                ResizeMode = ResizeMode.NoResize,
+            };
+
+            window.Show();
+            window.Activate();
+            window.Dispatcher.Invoke(() =>
+            {
+            }, DispatcherPriority.Background);
+
+            Assert.True(hostedUi.Focus());
+            Assert.True(hostedUi.IsKeyboardFocusWithin);
+
+            var undoButton = Assert.IsAssignableFrom<Button>(hostedUi.FindName("PART_UndoCommandButton"));
+            Assert.True(undoButton.Focusable);
+            Assert.True(undoButton.IsTabStop);
+
+            AssertKeyBinding(hostedUi.InputBindings, Key.Z, ModifierKeys.Control, editor.UndoCommand);
+            AssertKeyBinding(hostedUi.InputBindings, Key.Delete, ModifierKeys.None, editor.DeleteSelectionCommand);
+
+            window.Close();
+            return 0;
+        });
+    }
+
+    private static void AssertKeyBinding(InputBindingCollection inputBindings, Key key, ModifierKeys modifiers, ICommand expectedCommand)
+    {
+        var binding = Assert.Single(inputBindings.OfType<KeyBinding>(), candidate =>
+            candidate.Key == key && candidate.Modifiers == modifiers);
+        Assert.Same(expectedCommand, binding.Command);
     }
 }

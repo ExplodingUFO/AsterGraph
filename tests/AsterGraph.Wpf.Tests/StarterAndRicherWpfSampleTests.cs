@@ -43,6 +43,7 @@ public sealed class StarterAndRicherWpfSampleTests
         Assert.True(proof.IsOk);
         Assert.True(proof.CommandSurfaceOk);
         Assert.True(proof.AccessibilityBaselineOk);
+        Assert.True(proof.AccessibilityFocusOk);
 
         var metricLines = proof.MetricLines;
         Assert.Contains(metricLines, line => line.Contains("startup_ms", StringComparison.Ordinal));
@@ -50,6 +51,7 @@ public sealed class StarterAndRicherWpfSampleTests
         Assert.Contains(metricLines, line => line.Contains("plugin_scan_ms", StringComparison.Ordinal));
         Assert.Contains(metricLines, line => line.Contains("command_latency_ms", StringComparison.Ordinal));
         Assert.Contains(proof.ProofLines, line => line == "HOSTED_ACCESSIBILITY_BASELINE_OK:True");
+        Assert.Contains(proof.ProofLines, line => line == "HOSTED_ACCESSIBILITY_FOCUS_OK:True");
 
         var (surface, editor) = WpfRouteTestHelpers.RunInSta(() =>
         {

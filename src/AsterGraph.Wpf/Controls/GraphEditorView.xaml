@@ -7,6 +7,13 @@
     DataContext="{Binding RelativeSource={RelativeSource Self}}"
     Focusable="True"
     automation:AutomationProperties.Name="Graph editor host">
+  <UserControl.InputBindings>
+    <KeyBinding Key="Z"
+                Modifiers="Control"
+                Command="{Binding Editor.UndoCommand, ElementName=Root}" />
+    <KeyBinding Key="Delete"
+                Command="{Binding Editor.DeleteSelectionCommand, ElementName=Root}" />
+  </UserControl.InputBindings>
   <Grid Background="White">
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
@@ -22,9 +29,15 @@
       <StackPanel Orientation="Horizontal">
         <Button Content="Save" Command="{Binding Editor.SaveCommand}" Margin="0,0,8,0" />
         <Button Content="Load" Command="{Binding Editor.LoadCommand}" Margin="0,0,8,0" />
-        <Button Content="Undo" Command="{Binding Editor.UndoCommand}" Margin="0,0,8,0" />
+        <Button x:Name="PART_UndoCommandButton"
+                Content="Undo"
+                Command="{Binding Editor.UndoCommand}"
+                Margin="0,0,8,0" />
         <Button Content="Redo" Command="{Binding Editor.RedoCommand}" Margin="0,0,8,0" />
-        <Button Content="Delete" Command="{Binding Editor.DeleteSelectionCommand}" Margin="0,0,8,0" />
+        <Button x:Name="PART_DeleteSelectionCommandButton"
+                Content="Delete"
+                Command="{Binding Editor.DeleteSelectionCommand}"
+                Margin="0,0,8,0" />
         <Button Content="Copy" Command="{Binding Editor.CopySelectionCommand}" Margin="0,0,8,0" />
         <Button Content="Paste" Command="{Binding Editor.PasteCommand}" Margin="0,0,8,0" />
         <Button Content="Fit" Command="{Binding Editor.FitViewCommand}" Margin="0,0,8,0" />
