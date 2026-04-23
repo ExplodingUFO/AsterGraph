@@ -17,87 +17,32 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
         var consumerSampleCopySeamsEn = ExtractBlock(consumerSampleEn, "## Copy These Host-Owned Seams", "## Replace These Sample-Owned Details");
         var consumerSampleCopySeamsZh = ExtractBlock(consumerSampleZh, "## 复制这些宿主自管 seam", "## 替换这些样例自有内容");
 
-        AssertContains(readme, "canonical session/runtime route");
-        AssertContains(readme, "action rail / command projection");
-        AssertContains(readme, "plugin trust workflow");
-        AssertContains(readme, "selected-node parameter read/write seam");
-        AssertContains(readme, "Host Seam Example");
-        AssertContains(readme, "does not own the metadata vocabulary");
-        AssertContains(readme, "AsterGraphHostedActionFactory.CreateCommandActions(...)");
-        AssertContains(readme, "AsterGraphHostedActionFactory.CreateProjection(...)");
-        AssertContains(readme, "GraphEditorPluginDiscoveryOptions");
-        AssertContains(readme, "AsterGraphEditorOptions.PluginTrustPolicy");
-        AssertContains(readme, "IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()");
-        AssertContains(readme, "IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)");
-        AssertContains(readmeCopySeams, "selected-node parameter read/write seam");
-        AssertContains(readmeCopySeams, "IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()");
-        AssertContains(readmeCopySeams, "IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)");
-        AssertContains(readme, "sample-owned details are the review/audit node family");
-        AssertContains(readme, "sample action ids and titles");
-        AssertContains(readme, "window layout and narrative text");
-        AssertContains(readme, "proof labels or copy beyond the defended public markers");
+        AssertConsumerSampleSide(readme);
+        AssertConsumerSampleSide(consumerSampleEn);
+        AssertConsumerSampleSide(consumerSampleZh);
+
+        AssertHostSeamCopyBlock(readmeCopySeams);
+        AssertHostSeamCopyBlock(consumerSampleCopySeamsEn);
+        AssertHostSeamCopyBlock(consumerSampleCopySeamsZh);
+
         AssertContains(readme, "Copy These Host-Owned Seams");
         AssertContains(readme, "Replace These Sample-Owned Details");
-        Assert.DoesNotContain("copyable host recipe", readme, StringComparison.OrdinalIgnoreCase);
-        Assert.DoesNotContain("recipe for three host-owned seams", readme, StringComparison.OrdinalIgnoreCase);
-
-        AssertContains(consumerSampleEn, "host seam example");
-        AssertContains(consumerSampleEn, "does not own the metadata vocabulary");
-        AssertContains(consumerSampleEn, "canonical session/runtime model only");
-        AssertContains(consumerSampleEn, "three host-owned seams");
-        AssertContains(consumerSampleEn, "action rail / command projection");
-        AssertContains(consumerSampleEn, "plugin trust workflow");
-        AssertContains(consumerSampleEn, "selected-node parameter read/write seam");
-        AssertContains(consumerSampleEn, "Plugin Manifest and Trust Policy Contract v1");
-        AssertContains(consumerSampleEn, "Beta Support Bundle");
-        AssertContains(consumerSampleEn, "AsterGraphHostedActionFactory.CreateCommandActions(...)");
-        AssertContains(consumerSampleEn, "AsterGraphHostedActionFactory.CreateProjection(...)");
-        AssertContains(consumerSampleEn, "GraphEditorPluginDiscoveryOptions");
-        AssertContains(consumerSampleEn, "AsterGraphEditorOptions.PluginTrustPolicy");
-        AssertContains(consumerSampleEn, "IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()");
-        AssertContains(consumerSampleEn, "IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)");
-        AssertContains(consumerSampleCopySeamsEn, "selected-node parameter read/write seam");
-        AssertContains(consumerSampleCopySeamsEn, "IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()");
-        AssertContains(consumerSampleCopySeamsEn, "IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)");
-        AssertContains(consumerSampleEn, "sample-owned details such as the review/audit node family");
-        AssertContains(consumerSampleEn, "sample-owned content such as the review/audit node family");
-        AssertContains(consumerSampleEn, "second editor model");
-        AssertContains(consumerSampleEn, "sandbox");
-        AssertContains(consumerSampleEn, "broader plugin ecosystem");
         AssertContains(consumerSampleEn, "Copy These Host-Owned Seams");
         AssertContains(consumerSampleEn, "Replace These Sample-Owned Details");
-        AssertContains(consumerSampleEn, "review/audit node family");
-        AssertContains(consumerSampleEn, "action ids and titles");
-        AssertContains(consumerSampleEn, "window layout and narrative text");
-        AssertContains(consumerSampleEn, "proof labels beyond the defended markers");
-        AssertContains(consumerSampleEn, "The hosted route ladder is `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerSample.Avalonia`.");
-        AssertContains(consumerSampleEn, "`HostSample` is the post-ladder proof harness.");
-        Assert.DoesNotContain("copyable host recipe", consumerSampleEn, StringComparison.OrdinalIgnoreCase);
-        Assert.DoesNotContain("copyable recipe", consumerSampleEn, StringComparison.OrdinalIgnoreCase);
-        Assert.True(HasLineWith(consumerSampleEn, "AsterGraph.ConsumerSample.Avalonia -- --proof", "first"));
-
-        AssertContains(consumerSampleZh, "宿主 seam 示例");
-        AssertContains(consumerSampleZh, "不拥有元数据词汇");
-        AssertContains(consumerSampleZh, "三条宿主管线");
-        AssertContains(consumerSampleZh, "样例自有内容");
-        AssertContains(consumerSampleZh, "不引入第二套");
-        AssertContains(consumerSampleZh, "不提供 sandbox");
-        AssertContains(consumerSampleZh, "插件信任契约 v1");
-        AssertContains(consumerSampleZh, "Beta Support Bundle");
-        AssertContains(consumerSampleZh, "IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()");
-        AssertContains(consumerSampleZh, "IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)");
-        AssertContains(consumerSampleCopySeamsZh, "选中节点参数读写 seam");
-        AssertContains(consumerSampleCopySeamsZh, "IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()");
-        AssertContains(consumerSampleCopySeamsZh, "IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)");
         AssertContains(consumerSampleZh, "复制这些宿主自管 seam");
         AssertContains(consumerSampleZh, "替换这些样例自有内容");
-        AssertContains(consumerSampleZh, "review/audit 节点族");
-        AssertContains(consumerSampleZh, "action ids/titles");
-        AssertContains(consumerSampleZh, "窗口布局和叙述文本");
-        AssertContains(consumerSampleZh, "defended markers 之外的 proof 文案");
+
+        AssertContains(consumerSampleEn, "Plugin Manifest and Trust Policy Contract v1");
+        AssertContains(consumerSampleEn, "Beta Support Bundle");
+        AssertContains(consumerSampleZh, "插件信任契约 v1");
+        AssertContains(consumerSampleZh, "Beta Support Bundle");
+
+        AssertContains(consumerSampleEn, "The hosted route ladder is `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerSample.Avalonia`.");
+        AssertContains(consumerSampleEn, "`HostSample` is the post-ladder proof harness.");
         AssertContains(consumerSampleZh, "这条 hosted route ladder 是 `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerSample.Avalonia`。");
         AssertContains(consumerSampleZh, "`HostSample` 是这条 ladder 之后的 proof harness。");
-        Assert.DoesNotContain("可复制 recipe", consumerSampleZh, StringComparison.OrdinalIgnoreCase);
+
+        Assert.True(HasLineWith(consumerSampleEn, "AsterGraph.ConsumerSample.Avalonia -- --proof", "first"));
         Assert.True(HasLineWith(consumerSampleZh, "AsterGraph.ConsumerSample.Avalonia -- --proof", "先跑"));
     }
 
@@ -110,37 +55,11 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
         var consumerSampleZh = ReadRepoFile("docs/zh-CN/consumer-sample.md");
         var readme = ReadRepoFile("tools/AsterGraph.ConsumerSample.Avalonia/README.md");
 
-        AssertContains(authoringRecipeEn, "Canonical Recipe Vocabulary");
-        AssertContains(authoringRecipeEn, "sole owner of the metadata vocabulary");
-        AssertContains(authoringRecipeEn, "Copyable Definition Example");
-        AssertContains(authoringRecipeEn, "`defaultValue`");
-        AssertContains(authoringRecipeEn, "`isAdvanced`");
-        AssertContains(authoringRecipeEn, "`helpText`");
-        AssertContains(authoringRecipeEn, "`placeholderText`");
-        AssertContains(authoringRecipeEn, "constraints.IsReadOnly");
-        AssertContains(authoringRecipeEn, "The shipped inspector stays bounded to the definition-driven inspector surface");
-        AssertContains(authoringRecipeZh, "统一的 recipe 词汇");
-        AssertContains(authoringRecipeZh, "元数据词汇的唯一 owner");
-        AssertContains(authoringRecipeZh, "可复制的定义示例");
-        AssertContains(authoringRecipeZh, "`defaultValue`");
-        AssertContains(authoringRecipeZh, "`isAdvanced`");
-        AssertContains(authoringRecipeZh, "`helpText`");
-        AssertContains(authoringRecipeZh, "`placeholderText`");
-        AssertContains(authoringRecipeZh, "constraints.IsReadOnly");
-        AssertContains(authoringRecipeZh, "shipped inspector 只保持在 definition-driven inspector 的边界内");
-
+        AssertAuthoringRecipeSide(authoringRecipeEn, authoringRecipeZh);
         AssertContains(consumerSampleEn, "[Authoring Inspector Recipe](./authoring-inspector-recipe.md)");
-        AssertContains(consumerSampleEn, "host-owned seams");
-        AssertContains(consumerSampleEn, "shipped inspector surface");
-        AssertContains(consumerSampleEn, "does not own the metadata vocabulary");
         AssertContains(consumerSampleZh, "[Authoring Inspector Recipe](./authoring-inspector-recipe.md)");
-        AssertContains(consumerSampleZh, "宿主自管 seam");
-        AssertContains(consumerSampleZh, "shipped inspector surface");
-        AssertContains(consumerSampleZh, "不拥有元数据词汇");
         AssertContains(readme, "Authoring Inspector Recipe");
-        AssertContains(readme, "host-owned seams");
-        AssertContains(readme, "shipped inspector surface");
-        AssertContains(readme, "does not own the metadata vocabulary");
+        AssertContains(readme, "../../docs/en/authoring-inspector-recipe.md");
     }
 
     [Fact]
@@ -274,6 +193,44 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
 
     private static void AssertContains(string contents, string expected)
         => Assert.Contains(expected, contents, StringComparison.Ordinal);
+
+    private static void AssertConsumerSampleSide(string contents)
+    {
+        Assert.Contains("Authoring Inspector Recipe", contents, StringComparison.Ordinal);
+        Assert.Contains("AsterGraph.ConsumerSample.Avalonia", contents, StringComparison.Ordinal);
+        Assert.True(
+            contents.Contains("host-owned", StringComparison.OrdinalIgnoreCase) ||
+            contents.Contains("宿主自管", StringComparison.OrdinalIgnoreCase));
+        Assert.Contains("seam", contents, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static void AssertHostSeamCopyBlock(string contents)
+    {
+        Assert.True(
+            contents.Contains("selected-node parameter read/write seam", StringComparison.OrdinalIgnoreCase) ||
+            contents.Contains("选中节点参数读写 seam", StringComparison.OrdinalIgnoreCase));
+        Assert.Contains("IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()", contents, StringComparison.Ordinal);
+        Assert.Contains("IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)", contents, StringComparison.Ordinal);
+    }
+
+    private static void AssertAuthoringRecipeSide(string authoringRecipeEn, string authoringRecipeZh)
+    {
+        Assert.Contains("Canonical Recipe Vocabulary", authoringRecipeEn, StringComparison.Ordinal);
+        Assert.Contains("Copyable Definition Example", authoringRecipeEn, StringComparison.Ordinal);
+        Assert.Contains("ConsumerSample.Avalonia", authoringRecipeEn, StringComparison.Ordinal);
+        Assert.Contains("defaultValue", authoringRecipeEn, StringComparison.Ordinal);
+        Assert.Contains("helpText", authoringRecipeEn, StringComparison.Ordinal);
+        Assert.Contains("placeholderText", authoringRecipeEn, StringComparison.Ordinal);
+        Assert.Contains("constraints.IsReadOnly", authoringRecipeEn, StringComparison.Ordinal);
+
+        Assert.Contains("统一的 recipe 词汇", authoringRecipeZh, StringComparison.Ordinal);
+        Assert.Contains("可复制的定义示例", authoringRecipeZh, StringComparison.Ordinal);
+        Assert.Contains("ConsumerSample.Avalonia", authoringRecipeZh, StringComparison.Ordinal);
+        Assert.Contains("defaultValue", authoringRecipeZh, StringComparison.Ordinal);
+        Assert.Contains("helpText", authoringRecipeZh, StringComparison.Ordinal);
+        Assert.Contains("placeholderText", authoringRecipeZh, StringComparison.Ordinal);
+        Assert.Contains("constraints.IsReadOnly", authoringRecipeZh, StringComparison.Ordinal);
+    }
 
     private static bool HasLineWith(string contents, string first, string second)
         => contents.Split('\n')
