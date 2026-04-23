@@ -13,6 +13,9 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
         var readme = ReadRepoFile("tools/AsterGraph.ConsumerSample.Avalonia/README.md");
         var consumerSampleEn = ReadRepoFile("docs/en/consumer-sample.md");
         var consumerSampleZh = ReadRepoFile("docs/zh-CN/consumer-sample.md");
+        var readmeCopySeams = ExtractBlock(readme, "### Copy These Host-Owned Seams", "### Replace These Sample-Owned Details");
+        var consumerSampleCopySeamsEn = ExtractBlock(consumerSampleEn, "## Copy These Host-Owned Seams", "## Replace These Sample-Owned Details");
+        var consumerSampleCopySeamsZh = ExtractBlock(consumerSampleZh, "## 复制这些宿主自管 seam", "## 替换这些样例自有内容");
 
         AssertContains(readme, "canonical session/runtime route");
         AssertContains(readme, "action rail / command projection");
@@ -24,8 +27,9 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
         AssertContains(readme, "AsterGraphEditorOptions.PluginTrustPolicy");
         AssertContains(readme, "IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()");
         AssertContains(readme, "IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)");
-        AssertContains(readme, "reads the selected node parameters");
-        AssertContains(readme, "writes them back");
+        AssertContains(readmeCopySeams, "selected-node parameter read/write seam");
+        AssertContains(readmeCopySeams, "IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()");
+        AssertContains(readmeCopySeams, "IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)");
         AssertContains(readme, "sample-owned details are the review/audit node family");
         AssertContains(readme, "sample action ids and titles");
         AssertContains(readme, "window layout and narrative text");
@@ -46,8 +50,9 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
         AssertContains(consumerSampleEn, "AsterGraphEditorOptions.PluginTrustPolicy");
         AssertContains(consumerSampleEn, "IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()");
         AssertContains(consumerSampleEn, "IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)");
-        AssertContains(consumerSampleEn, "reads the selected node parameters");
-        AssertContains(consumerSampleEn, "writes them back");
+        AssertContains(consumerSampleCopySeamsEn, "selected-node parameter read/write seam");
+        AssertContains(consumerSampleCopySeamsEn, "IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()");
+        AssertContains(consumerSampleCopySeamsEn, "IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)");
         AssertContains(consumerSampleEn, "sample-owned details such as the review/audit node family");
         AssertContains(consumerSampleEn, "sample-owned content such as the review/audit node family");
         AssertContains(consumerSampleEn, "second editor model");
@@ -71,9 +76,9 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
         AssertContains(consumerSampleZh, "Beta Support Bundle");
         AssertContains(consumerSampleZh, "IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()");
         AssertContains(consumerSampleZh, "IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)");
-        AssertContains(consumerSampleZh, "选中节点参数读写 seam");
-        AssertContains(consumerSampleZh, "读取当前选中节点参数");
-        AssertContains(consumerSampleZh, "写回");
+        AssertContains(consumerSampleCopySeamsZh, "选中节点参数读写 seam");
+        AssertContains(consumerSampleCopySeamsZh, "IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()");
+        AssertContains(consumerSampleCopySeamsZh, "IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)");
         AssertContains(consumerSampleZh, "复制这些宿主自管 seam");
         AssertContains(consumerSampleZh, "替换这些样例自有内容");
         AssertContains(consumerSampleZh, "review/audit 节点族");
