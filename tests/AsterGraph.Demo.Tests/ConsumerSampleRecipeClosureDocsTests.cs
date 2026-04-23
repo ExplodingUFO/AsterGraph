@@ -84,7 +84,6 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
         AssertContains(consumerSampleEn, "reuse the emitted `SUPPORT_BUNDLE_PATH:...` line as the attachment note");
         AssertContains(consumerSampleEn, "./support-bundle.md");
         AssertContains(consumerSampleEn, "./adoption-feedback.md");
-        AssertContains(consumerSampleEn, "./public-launch-checklist.md");
 
         AssertContains(consumerSampleZh, "信任与证明速查");
         AssertContains(consumerSampleZh, "可复制的信任与证明参考");
@@ -93,7 +92,6 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
         AssertContains(consumerSampleZh, "把输出里的 `SUPPORT_BUNDLE_PATH:...` 作为附件备注");
         AssertContains(consumerSampleZh, "./support-bundle.md");
         AssertContains(consumerSampleZh, "./adoption-feedback.md");
-        AssertContains(consumerSampleZh, "./public-launch-checklist.md");
 
         AssertContains(supportBundleEn, "Local evidence only");
         AssertContains(supportBundleEn, "Copyable local evidence reference");

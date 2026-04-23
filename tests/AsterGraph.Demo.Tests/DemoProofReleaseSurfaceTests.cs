@@ -272,17 +272,36 @@ public sealed class DemoProofReleaseSurfaceTests
         var adoptionFeedback = ReadRepoFile("docs/en/adoption-feedback.md");
         var adoptionFeedbackZh = ReadRepoFile("docs/zh-CN/adoption-feedback.md");
         var adoptionTemplate = ReadRepoFile(".github/ISSUE_TEMPLATE/adoption_feedback.yml");
+        var quickReferenceEn = ExtractSection(
+            consumerSample,
+            "## Trust and proof quick reference",
+            "## Run It");
+        var quickReferenceZh = ExtractSection(
+            consumerSampleZh,
+            "## 信任与证明速查",
+            "## 如何运行");
+        var supportBundleBlock = ExtractIssueTemplateBlock(adoptionTemplate, "support_bundle");
 
         Assert.Contains("one unambiguous intake handoff from defended route to bounded intake record", evaluationPath, StringComparison.Ordinal);
         Assert.Contains("从受防守路线到受限 intake 记录的一次明确 handoff", evaluationPathZh, StringComparison.Ordinal);
-        Assert.Contains("summary-only", consumerSample, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("summary-only", consumerSampleZh, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("summary-only", quickReferenceEn, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("summary-only", quickReferenceZh, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Beta Support Bundle", quickReferenceEn, StringComparison.Ordinal);
+        Assert.Contains("Adoption Feedback Loop", quickReferenceEn, StringComparison.Ordinal);
+        Assert.Contains("Beta Support Bundle", quickReferenceZh, StringComparison.Ordinal);
+        Assert.Contains("Adoption Feedback Loop", quickReferenceZh, StringComparison.Ordinal);
+        Assert.True(quickReferenceEn.IndexOf("Beta Support Bundle", StringComparison.Ordinal) < quickReferenceEn.IndexOf("Adoption Feedback Loop", StringComparison.Ordinal));
+        Assert.True(quickReferenceZh.IndexOf("Beta Support Bundle", StringComparison.Ordinal) < quickReferenceZh.IndexOf("Adoption Feedback Loop", StringComparison.Ordinal));
+        Assert.DoesNotContain("Public Launch Checklist", quickReferenceEn, StringComparison.Ordinal);
+        Assert.DoesNotContain("Public Launch Checklist", quickReferenceZh, StringComparison.Ordinal);
         Assert.Contains("Proof Handoff owns the actual intake instructions", consumerSample, StringComparison.Ordinal);
         Assert.Contains("Proof Handoff 负责实际 intake 说明", consumerSampleZh, StringComparison.Ordinal);
         Assert.Contains("reuse the emitted `SUPPORT_BUNDLE_PATH:...` line as the attachment note", consumerSample, StringComparison.Ordinal);
         Assert.Contains("把输出里的 `SUPPORT_BUNDLE_PATH:...` 作为附件备注", consumerSampleZh, StringComparison.Ordinal);
         Assert.Contains("record `NO_SUPPORT_BUNDLE:route-cannot-produce-one`", consumerSample, StringComparison.Ordinal);
         Assert.Contains("记录 `NO_SUPPORT_BUNDLE:route-cannot-produce-one`", consumerSampleZh, StringComparison.Ordinal);
+        Assert.Contains("bounded intake record", supportBundleBlock, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("attachment note", supportBundleBlock, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("bounded intake record", supportBundle, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("受限 intake 记录", supportBundleZh, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("bounded intake vocabulary", adoptionFeedback, StringComparison.OrdinalIgnoreCase);
@@ -312,6 +331,7 @@ public sealed class DemoProofReleaseSurfaceTests
         var proofMarkersBlock = ExtractIssueTemplateBlock(adoptionTemplate, "proof_markers");
         var frictionBlock = ExtractIssueTemplateBlock(adoptionTemplate, "friction");
         var supportBundleBlock = ExtractIssueTemplateBlock(adoptionTemplate, "support_bundle");
+        var routeOptions = ExtractDropdownOptions(adoptionTemplate, "route");
 
         Assert.Contains("id: version", adoptionTemplate, StringComparison.Ordinal);
         Assert.Contains($"placeholder: {packageVersion} / {publicTag}", versionBlock, StringComparison.Ordinal);
@@ -320,13 +340,16 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("id: proof_markers", adoptionTemplate, StringComparison.Ordinal);
         Assert.Contains("id: friction", adoptionTemplate, StringComparison.Ordinal);
         Assert.Contains("id: support_bundle", adoptionTemplate, StringComparison.Ordinal);
-        Assert.Contains("AsterGraph.Starter.Avalonia", adoptionTemplate, StringComparison.Ordinal);
-        Assert.Contains("HelloWorld.Avalonia", adoptionTemplate, StringComparison.Ordinal);
-        Assert.Contains("route or artifact", routeBlock, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("proof marker", proofMarkersBlock, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("friction", frictionBlock, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("bounded intake record", supportBundleBlock, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("attachment note", supportBundleBlock, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal(
+            new[]
+            {
+                "AsterGraph.Starter.Avalonia",
+                "HelloWorld.Avalonia",
+                "ConsumerSample.Avalonia",
+                "HostSample",
+            },
+            routeOptions);
+        Assert.Contains("options:", routeBlock, StringComparison.Ordinal);
         Assert.Contains("SUPPORT_BUNDLE_PATH", supportBundleBlock, StringComparison.Ordinal);
         Assert.Contains("NO_SUPPORT_BUNDLE", supportBundleBlock, StringComparison.Ordinal);
         Assert.DoesNotContain("consumer-support-bundle.json", supportBundleBlock, StringComparison.Ordinal);
@@ -995,6 +1018,23 @@ public sealed class DemoProofReleaseSurfaceTests
             });
     }
 
+    private static string ExtractSection(string contents, string heading, string nextHeading)
+    {
+        var start = contents.IndexOf(heading, StringComparison.Ordinal);
+        if (start < 0)
+        {
+            throw new InvalidOperationException($"Could not find section heading '{heading}'.");
+        }
+
+        var next = contents.IndexOf(nextHeading, start + heading.Length, StringComparison.Ordinal);
+        if (next < 0)
+        {
+            throw new InvalidOperationException($"Could not find next section heading '{nextHeading}'.");
+        }
+
+        return contents[start..next];
+    }
+
     private static string ExtractIssueTemplateBlock(string contents, string id)
     {
         var lines = contents.Split('\n');
@@ -1011,5 +1051,23 @@ public sealed class DemoProofReleaseSurfaceTests
         }
 
         return string.Join(Environment.NewLine, lines.Skip(start).Take(end - start));
+    }
+
+    private static string[] ExtractDropdownOptions(string contents, string id)
+    {
+        var block = ExtractIssueTemplateBlock(contents, id);
+        var lines = block.Split('\n');
+        var optionsStart = Array.FindIndex(lines, line => line.TrimStart().StartsWith("options:", StringComparison.Ordinal));
+
+        if (optionsStart < 0)
+        {
+            throw new InvalidOperationException($"Could not find options list for '{id}'.");
+        }
+
+        return lines[(optionsStart + 1)..]
+            .Select(line => line.Trim())
+            .Where(line => line.StartsWith("- ", StringComparison.Ordinal))
+            .Select(line => line[2..])
+            .ToArray();
     }
 }

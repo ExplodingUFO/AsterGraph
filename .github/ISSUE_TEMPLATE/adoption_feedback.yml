@@ -17,15 +17,10 @@ body:
     attributes:
       label: Bounded intake route or artifact tried
       options:
-        - HelloWorld
         - AsterGraph.Starter.Avalonia
         - HelloWorld.Avalonia
         - ConsumerSample.Avalonia
         - HostSample
-        - PackageSmoke
-        - ScaleSmoke
-        - Demo
-        - Other
     validations:
       required: true
   - type: textarea
