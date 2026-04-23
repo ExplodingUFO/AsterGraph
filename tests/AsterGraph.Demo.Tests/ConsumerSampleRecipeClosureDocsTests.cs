@@ -17,13 +17,15 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
         AssertContains(readme, "canonical session/runtime route");
         AssertContains(readme, "action rail / command projection");
         AssertContains(readme, "plugin trust workflow");
-        AssertContains(readme, "parameter-editing composition");
+        AssertContains(readme, "selected-node parameter read/write seam");
         AssertContains(readme, "AsterGraphHostedActionFactory.CreateCommandActions(...)");
         AssertContains(readme, "AsterGraphHostedActionFactory.CreateProjection(...)");
         AssertContains(readme, "GraphEditorPluginDiscoveryOptions");
         AssertContains(readme, "AsterGraphEditorOptions.PluginTrustPolicy");
         AssertContains(readme, "IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()");
         AssertContains(readme, "IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)");
+        AssertContains(readme, "reads the selected node parameters");
+        AssertContains(readme, "writes them back");
         AssertContains(readme, "sample-owned details are the review/audit node family");
         AssertContains(readme, "sample action ids and titles");
         AssertContains(readme, "window layout and narrative text");
@@ -35,7 +37,7 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
         AssertContains(consumerSampleEn, "three host-owned seams");
         AssertContains(consumerSampleEn, "action rail / command projection");
         AssertContains(consumerSampleEn, "plugin trust workflow");
-        AssertContains(consumerSampleEn, "parameter-editing composition");
+        AssertContains(consumerSampleEn, "selected-node parameter read/write seam");
         AssertContains(consumerSampleEn, "Plugin Manifest and Trust Policy Contract v1");
         AssertContains(consumerSampleEn, "Beta Support Bundle");
         AssertContains(consumerSampleEn, "AsterGraphHostedActionFactory.CreateCommandActions(...)");
@@ -44,6 +46,8 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
         AssertContains(consumerSampleEn, "AsterGraphEditorOptions.PluginTrustPolicy");
         AssertContains(consumerSampleEn, "IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()");
         AssertContains(consumerSampleEn, "IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)");
+        AssertContains(consumerSampleEn, "reads the selected node parameters");
+        AssertContains(consumerSampleEn, "writes them back");
         AssertContains(consumerSampleEn, "sample-owned details such as the review/audit node family");
         AssertContains(consumerSampleEn, "sample-owned content such as the review/audit node family");
         AssertContains(consumerSampleEn, "second editor model");
@@ -67,6 +71,9 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
         AssertContains(consumerSampleZh, "Beta Support Bundle");
         AssertContains(consumerSampleZh, "IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()");
         AssertContains(consumerSampleZh, "IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)");
+        AssertContains(consumerSampleZh, "选中节点参数读写 seam");
+        AssertContains(consumerSampleZh, "读取当前选中节点参数");
+        AssertContains(consumerSampleZh, "写回");
         AssertContains(consumerSampleZh, "复制这些宿主自管 seam");
         AssertContains(consumerSampleZh, "替换这些样例自有内容");
         AssertContains(consumerSampleZh, "review/audit 节点族");

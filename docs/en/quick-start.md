@@ -18,7 +18,7 @@ For plugin trust-policy review and local evidence, keep [Plugin Manifest and Tru
 | Contract-first integration | `AsterGraph.Abstractions` | stable identifiers, definitions, and provider contracts |
 
 Add `AsterGraph.Core` only when the host also needs direct `GraphDocument`, serialization, or compatibility APIs.
-Use `AsterGraph.Starter.Avalonia` as the starter recipe. Keep/copy `AsterGraphEditorFactory.Create(...)`, `AsterGraphAvaloniaViewFactory.Create(...)`, `AsterGraphEditorOptions`, and the document/catalog/editor/view composition flow. Replace the top-level window and its title/size, and replace the sample graph/catalog definitions as the host grows. Copy the host-owned seams, not the sample-owned presentation. The next hosted step is `AsterGraph.HelloWorld.Avalonia`. When you move to `AsterGraph.ConsumerSample.Avalonia`, keep action projection, trust workflow, and parameter-editing composition host-owned.
+Use `AsterGraph.Starter.Avalonia` as the starter recipe. Keep/copy `AsterGraphEditorFactory.Create(...)`, `AsterGraphAvaloniaViewFactory.Create(...)`, `AsterGraphEditorOptions`, and the document/catalog/editor/view composition flow. Replace the top-level window and its title/size, and replace the sample graph/catalog definitions as the host grows. Copy the host-owned seams, not the sample-owned presentation. The next hosted step is `AsterGraph.HelloWorld.Avalonia`. When you move to `AsterGraph.ConsumerSample.Avalonia`, keep action projection, trust workflow, and the selected-node parameter read/write seam host-owned.
 
 Copy this starter scaffold:
 
