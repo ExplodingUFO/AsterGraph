@@ -87,6 +87,13 @@ internal sealed class GraphEditorSessionStockToolDescriptorBuilder
         }
 
         var toggleExpansion = GetCommandDescriptor(commands, "nodes.surface.expand");
+        var inspect = GetCommandDescriptor(commands, "nodes.inspect");
+        var center = GetCommandDescriptor(commands, "viewport.center-node");
+        var delete = GetCommandDescriptor(commands, "nodes.delete-by-id");
+        var duplicate = GetCommandDescriptor(commands, "nodes.duplicate");
+        var disconnectIncoming = GetCommandDescriptor(commands, "connections.disconnect-incoming");
+        var disconnectOutgoing = GetCommandDescriptor(commands, "connections.disconnect-outgoing");
+        var disconnectAll = GetCommandDescriptor(commands, "connections.disconnect-all");
         var nodeSurface = _nodeSurfaceSnapshotFactory()
             .FirstOrDefault(snapshot => string.Equals(snapshot.NodeId, node.Id, StringComparison.Ordinal));
         var nextExpansionState = nodeSurface?.ExpansionState == GraphNodeExpansionState.Expanded
@@ -94,6 +101,18 @@ internal sealed class GraphEditorSessionStockToolDescriptorBuilder
             : GraphNodeExpansionState.Expanded;
         var items = new List<GraphEditorToolDescriptorSnapshot>
         {
+            new(
+                "node-inspect",
+                GraphEditorToolContextKind.Node,
+                CreateContextualDescriptor(inspect, LocalizeFormat("editor.tool.node.inspect", "Inspect {0}", node.Title)),
+                CreateCommand("nodes.inspect", ("nodeId", node.Id)),
+                order: 0),
+            new(
+                "node-center",
+                GraphEditorToolContextKind.Node,
+                CreateContextualDescriptor(center, Localize("editor.tool.node.center", "Center View Here")),
+                CreateCommand("viewport.center-node", ("nodeId", node.Id)),
+                order: 10),
             new(
                 "node-toggle-surface-expansion",
                 GraphEditorToolContextKind.Node,
@@ -106,7 +125,37 @@ internal sealed class GraphEditorSessionStockToolDescriptorBuilder
                     "nodes.surface.expand",
                     ("nodeId", node.Id),
                     ("expansionState", nextExpansionState.ToString())),
-                order: 0),
+                order: 20),
+            new(
+                "node-delete",
+                GraphEditorToolContextKind.Node,
+                CreateContextualDescriptor(delete, Localize("editor.tool.node.delete", "Delete Node")),
+                CreateCommand("nodes.delete-by-id", ("nodeId", node.Id)),
+                order: 30),
+            new(
+                "node-duplicate",
+                GraphEditorToolContextKind.Node,
+                CreateContextualDescriptor(duplicate, Localize("editor.tool.node.duplicate", "Duplicate Node")),
+                CreateCommand("nodes.duplicate", ("nodeId", node.Id)),
+                order: 40),
+            new(
+                "node-disconnect-incoming",
+                GraphEditorToolContextKind.Node,
+                CreateContextualDescriptor(disconnectIncoming, Localize("editor.tool.node.disconnectIncoming", "Disconnect Incoming")),
+                CreateCommand("connections.disconnect-incoming", ("nodeId", node.Id)),
+                order: 50),
+            new(
+                "node-disconnect-outgoing",
+                GraphEditorToolContextKind.Node,
+                CreateContextualDescriptor(disconnectOutgoing, Localize("editor.tool.node.disconnectOutgoing", "Disconnect Outgoing")),
+                CreateCommand("connections.disconnect-outgoing", ("nodeId", node.Id)),
+                order: 60),
+            new(
+                "node-disconnect-all",
+                GraphEditorToolContextKind.Node,
+                CreateContextualDescriptor(disconnectAll, Localize("editor.tool.node.disconnectAll", "Disconnect All")),
+                CreateCommand("connections.disconnect-all", ("nodeId", node.Id)),
+                order: 70),
         };
 
         if (node.Composite is not null)
@@ -117,7 +166,7 @@ internal sealed class GraphEditorSessionStockToolDescriptorBuilder
                 GraphEditorToolContextKind.Node,
                 CreateContextualDescriptor(enterScope, Localize("editor.tool.node.enterCompositeScope", "Enter Composite Scope")),
                 CreateCommand("scopes.enter", ("compositeNodeId", node.Id)),
-                order: 10));
+                order: 80));
         }
 
         return items;
@@ -161,6 +210,9 @@ internal sealed class GraphEditorSessionStockToolDescriptorBuilder
 
     private string Localize(string key, string fallback)
         => _localize(key, fallback);
+
+    private string LocalizeFormat(string key, string fallback, params object?[] arguments)
+        => string.Format(CultureInfo.InvariantCulture, Localize(key, fallback), arguments);
 
     private static GraphEditorCommandInvocationSnapshot CreateCommand(
         string commandId,

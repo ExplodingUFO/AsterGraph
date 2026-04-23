@@ -43,7 +43,14 @@ public sealed class GraphEditorToolProviderContractTests
             GraphEditorToolContextSnapshot.ForNode(SourceNodeId, [SourceNodeId], SourceNodeId));
         var hostNodeTool = Assert.Single(nodeTools, tool => tool.Id == "tests.tool-provider.node.expand");
 
+        Assert.Contains(nodeTools, tool => tool.Id == "node-inspect");
+        Assert.Contains(nodeTools, tool => tool.Id == "node-center");
         Assert.Contains(nodeTools, tool => tool.Id == "node-toggle-surface-expansion");
+        Assert.Contains(nodeTools, tool => tool.Id == "node-delete");
+        Assert.Contains(nodeTools, tool => tool.Id == "node-duplicate");
+        Assert.Contains(nodeTools, tool => tool.Id == "node-disconnect-incoming");
+        Assert.Contains(nodeTools, tool => tool.Id == "node-disconnect-outgoing");
+        Assert.Contains(nodeTools, tool => tool.Id == "node-disconnect-all");
         Assert.Equal("Host Expand Tool", hostNodeTool.Title);
         Assert.Equal("nodes.surface.expand", hostNodeTool.Invocation.CommandId);
 

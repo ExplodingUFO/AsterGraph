@@ -411,7 +411,14 @@ public partial class GraphEditorView
     private static string ResolveNodeToolButtonName(AsterGraphHostedActionDescriptor action)
         => action.Id switch
         {
+            "node-inspect" => "PART_NodeToolInspectButton",
+            "node-center" => "PART_NodeToolCenterButton",
             "node-toggle-surface-expansion" => "PART_NodeToolToggleExpansionButton",
+            "node-delete" => "PART_NodeToolDeleteButton",
+            "node-duplicate" => "PART_NodeToolDuplicateButton",
+            "node-disconnect-incoming" => "PART_NodeToolDisconnectIncomingButton",
+            "node-disconnect-outgoing" => "PART_NodeToolDisconnectOutgoingButton",
+            "node-disconnect-all" => "PART_NodeToolDisconnectAllButton",
             "node-enter-composite-scope" => "PART_NodeToolEnterCompositeScopeButton",
             _ => $"PART_NodeTool_{action.Id}",
         };

@@ -81,6 +81,12 @@ internal sealed partial class GraphEditorKernel
         void IGraphEditorKernelCommandRouterHost.SetSelection(IReadOnlyList<string> nodeIds, string? primaryNodeId, bool updateStatus)
             => _owner.SetSelection(nodeIds, primaryNodeId, updateStatus);
 
+        void IGraphEditorKernelCommandRouterHost.DeleteNodeById(string nodeId)
+            => _owner.DeleteNodeById(nodeId);
+
+        void IGraphEditorKernelCommandRouterHost.DuplicateNode(string nodeId)
+            => _owner.DuplicateNode(nodeId);
+
         void IGraphEditorKernelCommandRouterHost.DeleteSelection()
             => _owner.DeleteSelection();
 

@@ -58,6 +58,10 @@ internal interface IGraphEditorKernelCommandRouterHost
 
     void SetSelection(IReadOnlyList<string> nodeIds, string? primaryNodeId, bool updateStatus);
 
+    void DeleteNodeById(string nodeId);
+
+    void DuplicateNode(string nodeId);
+
     void DeleteSelection();
 
     Task<bool> TryCopySelectionAsync(CancellationToken cancellationToken);
@@ -228,6 +232,18 @@ internal sealed class GraphEditorKernelCommandRouter
                 "nodes.surface.expand",
                 GraphEditorCommandSourceKind.Kernel,
                 _host.Document.Nodes.Count > 0),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "nodes.inspect",
+                GraphEditorCommandSourceKind.Kernel,
+                _host.Document.Nodes.Count > 0),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "nodes.delete-by-id",
+                GraphEditorCommandSourceKind.Kernel,
+                _host.Document.Nodes.Count > 0 && _host.BehaviorOptions.Commands.Nodes.AllowDelete),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "nodes.duplicate",
+                GraphEditorCommandSourceKind.Kernel,
+                _host.Document.Nodes.Count > 0 && _host.BehaviorOptions.Commands.Nodes.AllowDuplicate),
             GraphEditorCommandDescriptorCatalog.Create(
                 "nodes.parameters.set",
                 GraphEditorCommandSourceKind.Kernel,
@@ -596,6 +612,33 @@ internal sealed class GraphEditorKernelCommandRouter
                 }
 
                 return _host.TrySetNodeExpansionState(expansionNodeId, expansionState);
+
+            case "nodes.inspect":
+                if (!TryGetRequiredArgument(command, "nodeId", out var inspectNodeId))
+                {
+                    return false;
+                }
+
+                _host.SetSelection([inspectNodeId], inspectNodeId, ResolveOptionalUpdateStatus(command, "updateStatus"));
+                return true;
+
+            case "nodes.delete-by-id":
+                if (!TryGetRequiredArgument(command, "nodeId", out var deleteNodeId))
+                {
+                    return false;
+                }
+
+                _host.DeleteNodeById(deleteNodeId);
+                return true;
+
+            case "nodes.duplicate":
+                if (!TryGetRequiredArgument(command, "nodeId", out var duplicateNodeId))
+                {
+                    return false;
+                }
+
+                _host.DuplicateNode(duplicateNodeId);
+                return true;
 
             case "nodes.parameters.set":
                 if (!TryGetRequiredArgument(command, "parameterKey", out var parameterKey)

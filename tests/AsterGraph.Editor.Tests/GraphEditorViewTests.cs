@@ -583,6 +583,34 @@ public sealed class GraphEditorViewTests
     }
 
     [AvaloniaFact]
+    public void AuthoringToolsChrome_NodeQuickTools_ProjectCanonicalNodeActions()
+    {
+        var editor = CreateConnectionToolEditor();
+        editor.Session.Commands.SetSelection(["tests.view.tools-source-001"], "tests.view.tools-source-001", updateStatus: false);
+        var window = CreateWindow(new GraphEditorView
+        {
+            Editor = editor,
+        });
+        var view = (GraphEditorView)window.Content!;
+
+        var inspectButton = FindRequiredDescendant<Button>(view, "PART_NodeToolInspectButton");
+        var duplicateButton = FindRequiredDescendant<Button>(view, "PART_NodeToolDuplicateButton");
+        var deleteButton = FindRequiredDescendant<Button>(view, "PART_NodeToolDeleteButton");
+        var disconnectOutgoingButton = FindRequiredDescendant<Button>(view, "PART_NodeToolDisconnectOutgoingButton");
+
+        Assert.True(inspectButton.IsEnabled);
+        Assert.True(duplicateButton.IsEnabled);
+        Assert.True(deleteButton.IsEnabled);
+        Assert.True(disconnectOutgoingButton.IsEnabled);
+
+        duplicateButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        Assert.Equal(3, editor.Session.Queries.CreateDocumentSnapshot().Nodes.Count);
+
+        disconnectOutgoingButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        Assert.Empty(editor.Session.Queries.CreateDocumentSnapshot().Connections);
+    }
+
+    [AvaloniaFact]
     public void AuthoringToolsChrome_SingleSelectedNode_ProjectsExpansionAndConnectionEditors()
     {
         var editor = CreateConnectionToolEditor();

@@ -328,8 +328,12 @@ public sealed class GraphEditorProofRingTests
         Assert.Equal(legacySignature, factorySignature);
         Assert.Equal(legacySignature, runtimeSignature);
         Assert.True(runtimeCommandIds.IsSubsetOf(legacyCommandIds));
+        Assert.Contains("nodes.inspect", legacyCommandIds);
+        Assert.Contains("nodes.inspect", runtimeCommandIds);
+        Assert.Contains("nodes.delete-by-id", legacyCommandIds);
+        Assert.Contains("nodes.delete-by-id", runtimeCommandIds);
         Assert.Contains("nodes.duplicate", legacyCommandIds);
-        Assert.DoesNotContain("nodes.duplicate", runtimeCommandIds);
+        Assert.Contains("nodes.duplicate", runtimeCommandIds);
     }
 
     [Fact]
@@ -758,8 +762,12 @@ public sealed class GraphEditorProofRingTests
         Assert.Equal(legacyDirectSnapshot, factoryFactorySnapshot);
         Assert.Equal(runtimeSharedCommandIds, legacySharedCommandIds);
         Assert.Equal(runtimeSharedCommandIds, factorySharedCommandIds);
-        Assert.Contains("nodes.duplicate", legacyCompatibilityOnlyCommands);
-        Assert.Contains("nodes.duplicate", factoryCompatibilityOnlyCommands);
+        Assert.DoesNotContain("nodes.inspect", legacyCompatibilityOnlyCommands);
+        Assert.DoesNotContain("nodes.inspect", factoryCompatibilityOnlyCommands);
+        Assert.DoesNotContain("nodes.delete-by-id", legacyCompatibilityOnlyCommands);
+        Assert.DoesNotContain("nodes.delete-by-id", factoryCompatibilityOnlyCommands);
+        Assert.DoesNotContain("nodes.duplicate", legacyCompatibilityOnlyCommands);
+        Assert.DoesNotContain("nodes.duplicate", factoryCompatibilityOnlyCommands);
     }
 
     [AvaloniaFact]
