@@ -702,6 +702,7 @@ public partial class GraphEditorView : UserControl
                 CreateCommandPaletteAction(),
                 .. AsterGraphHostedActionFactory.CreateCommandActions(Editor.Session),
                 .. AsterGraphCompositeWorkflowActionFactory.CreateWorkflowActions(Editor.Session),
+                .. AsterGraphAuthoringToolActionFactory.CreateCommandSurfaceActions(Editor.Session),
             ],
             CommandShortcutPolicy);
         return AsterGraphHostedActionFactory.CreateProjection(actions);

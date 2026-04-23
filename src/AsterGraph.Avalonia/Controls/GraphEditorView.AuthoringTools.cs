@@ -81,10 +81,7 @@ public partial class GraphEditorView
             return;
         }
 
-        var actions = AsterGraphHostedActionFactory.CreateToolActions(
-            Editor.Session,
-            Editor.Session.Queries.GetToolDescriptors(
-                GraphEditorToolContextSnapshot.ForSelection(selection.SelectedNodeIds, selection.PrimarySelectedNodeId)));
+        var actions = AsterGraphAuthoringToolActionFactory.CreateSelectionActions(Editor.Session);
 
         foreach (var action in actions)
         {
@@ -99,10 +96,11 @@ public partial class GraphEditorView
             return;
         }
 
-        var actions = AsterGraphHostedActionFactory.CreateToolActions(
+        var actions = AsterGraphAuthoringToolActionFactory.CreateNodeActions(
             Editor.Session,
-            Editor.Session.Queries.GetToolDescriptors(
-                GraphEditorToolContextSnapshot.ForNode(selectedNode.Id, selection.SelectedNodeIds, selection.PrimarySelectedNodeId)));
+            selectedNode.Id,
+            selection.SelectedNodeIds,
+            selection.PrimarySelectedNodeId);
 
         foreach (var action in actions)
         {
@@ -172,10 +170,11 @@ public partial class GraphEditorView
                     return true;
                 }));
 
-            var actions = AsterGraphHostedActionFactory.CreateToolActions(
+            var actions = AsterGraphAuthoringToolActionFactory.CreateConnectionActions(
                 Editor.Session,
-                Editor.Session.Queries.GetToolDescriptors(
-                    GraphEditorToolContextSnapshot.ForConnection(connection.Id, selection.SelectedNodeIds, selection.PrimarySelectedNodeId)));
+                connection.Id,
+                selection.SelectedNodeIds,
+                selection.PrimarySelectedNodeId);
             foreach (var action in actions)
             {
                 actionBar.Children.Add(CreateHostedToolButton(

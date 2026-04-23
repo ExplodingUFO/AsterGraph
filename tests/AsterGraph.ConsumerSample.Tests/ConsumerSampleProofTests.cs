@@ -310,6 +310,44 @@ public sealed class ConsumerSampleProofTests
         }
     }
 
+    [AvaloniaFact]
+    public void ConsumerSampleWindow_HostRailProjectsSharedAuthoringToolActions()
+    {
+        using var host = ConsumerSampleHost.Create();
+        var window = ConsumerSampleWindowFactory.Create(host);
+
+        try
+        {
+            window.Show();
+
+            var createGroup = Assert.IsType<Button>(FindNamed<Button>(window, "PART_Action_selection-create-group"));
+            var toggleExpansion = Assert.IsType<Button>(FindNamed<Button>(window, "PART_Action_node-toggle-surface-expansion"));
+            var disconnect = Assert.IsType<Button>(FindNamed<Button>(window, "PART_Action_connection-disconnect"));
+            var reviewNodeId = host.GetFirstReviewNodeId();
+            var initialExpansionState = host.Session.Queries.GetNodeSurfaceSnapshots()
+                .Single(snapshot => snapshot.NodeId == reviewNodeId)
+                .ExpansionState;
+
+            Assert.True(createGroup.IsEnabled);
+            Assert.True(toggleExpansion.IsEnabled);
+            Assert.True(disconnect.IsEnabled);
+
+            toggleExpansion.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            disconnect.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+
+            var updatedExpansionState = host.Session.Queries.GetNodeSurfaceSnapshots()
+                .Single(snapshot => snapshot.NodeId == reviewNodeId)
+                .ExpansionState;
+
+            Assert.NotEqual(initialExpansionState, updatedExpansionState);
+            Assert.Empty(host.Session.Queries.CreateDocumentSnapshot().Connections);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
     private static T? FindNamed<T>(Window window, string name)
         where T : Control
         => window.GetVisualDescendants()

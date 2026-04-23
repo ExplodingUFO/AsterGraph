@@ -593,6 +593,49 @@ public sealed class GraphEditorViewTests
             ?? []);
     }
 
+    [AvaloniaFact]
+    public void CommandPalette_ProjectsContextualAuthoringActions_FromSharedToolRoute()
+    {
+        var editor = CreateConnectionToolEditor();
+        editor.Session.Commands.SetSelection(["tests.view.tools-source-001"], "tests.view.tools-source-001", updateStatus: false);
+        var window = CreateWindow(new GraphEditorView
+        {
+            Editor = editor,
+        });
+        var view = (GraphEditorView)window.Content!;
+        var paletteToggle = FindRequiredControl<Button>(view, "PART_OpenCommandPaletteButton");
+
+        paletteToggle.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+
+        var paletteButtons = FindRequiredControl<StackPanel>(view, "PART_CommandPaletteItems")
+            .Children
+            .OfType<Button>()
+            .Where(button => !string.IsNullOrWhiteSpace(button.Name))
+            .ToDictionary(button => button.Name!, StringComparer.Ordinal);
+
+        Assert.True(
+            paletteButtons.ContainsKey("PART_CommandPaletteAction_selection-create-group"),
+            $"Palette actions: {string.Join(", ", paletteButtons.Keys.OrderBy(static key => key, StringComparer.Ordinal))}");
+        Assert.True(
+            paletteButtons.ContainsKey("PART_CommandPaletteAction_node-toggle-surface-expansion"),
+            $"Palette actions: {string.Join(", ", paletteButtons.Keys.OrderBy(static key => key, StringComparer.Ordinal))}");
+        Assert.True(
+            paletteButtons.ContainsKey("PART_CommandPaletteAction_connection-disconnect"),
+            $"Palette actions: {string.Join(", ", paletteButtons.Keys.OrderBy(static key => key, StringComparer.Ordinal))}");
+
+        var createGroup = paletteButtons["PART_CommandPaletteAction_selection-create-group"];
+        var toggleExpansion = paletteButtons["PART_CommandPaletteAction_node-toggle-surface-expansion"];
+        var disconnect = paletteButtons["PART_CommandPaletteAction_connection-disconnect"];
+
+        Assert.Equal("Create Group", Assert.IsType<string>(createGroup.Content));
+        Assert.Equal("Expand Node Card", Assert.IsType<string>(toggleExpansion.Content));
+        Assert.Equal("Disconnect Connection", Assert.IsType<string>(disconnect.Content));
+
+        disconnect.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+
+        Assert.Empty(editor.Session.Queries.CreateDocumentSnapshot().Connections);
+    }
+
     private static Window CreateWindow(GraphEditorView view)
     {
         var window = new Window

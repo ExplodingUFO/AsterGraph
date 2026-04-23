@@ -487,11 +487,12 @@ public static class ConsumerSampleWindowFactory
         private AsterGraphHostedActionProjection BuildHostedActionProjection()
         {
             var selection = _host.Session.Queries.GetSelectionSnapshot();
-            var commandActions = AsterGraphHostedActionFactory.CreateCommandActions(
-                _host.Session,
-                [ConsumerSampleHost.PluginCommandId, "workspace.save", "workspace.load", "history.undo", "history.redo", "viewport.fit"]);
+        var commandActions = AsterGraphHostedActionFactory.CreateCommandActions(
+            _host.Session,
+            [ConsumerSampleHost.PluginCommandId, "workspace.save", "workspace.load", "history.undo", "history.redo", "viewport.fit"]);
+        var authoringActions = AsterGraphAuthoringToolActionFactory.CreateCommandSurfaceActions(_host.Session);
 
-            return AsterGraphHostedActionFactory.CreateProjection(
+        return AsterGraphHostedActionFactory.CreateProjection(
             [
                 AsterGraphHostedActionFactory.CreateHostAction(
                     new GraphEditorCommandDescriptorSnapshot(
@@ -517,8 +518,9 @@ public static class ConsumerSampleWindowFactory
                             : null),
                     _host.ApproveSelection),
                 .. commandActions,
+                .. authoringActions,
             ]);
-        }
+    }
 
         private MenuItem CreateMenuItem(AsterGraphHostedActionDescriptor action)
         {
