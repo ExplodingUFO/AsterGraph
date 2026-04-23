@@ -356,6 +356,7 @@ public sealed class DemoProofReleaseSurfaceTests
         var supportBundleZh = ReadRepoFile("docs/zh-CN/support-bundle.md");
         var versionBlock = ExtractIssueTemplateBlock(adoptionTemplate, "version");
         var routeBlock = ExtractIssueTemplateBlock(adoptionTemplate, "route");
+        var proofMarkersBlock = ExtractIssueTemplateBlock(adoptionTemplate, "proof_markers");
         var supportBundleBlock = ExtractIssueTemplateBlock(adoptionTemplate, "support_bundle");
         var routeOptions = ExtractDropdownOptions(adoptionTemplate, "route");
 
@@ -368,6 +369,15 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("id: support_bundle", adoptionTemplate, StringComparison.Ordinal);
         Assert.Contains("Proof markers", adoptionTemplate, StringComparison.Ordinal);
         Assert.Contains("Support-bundle attachment note", adoptionTemplate, StringComparison.Ordinal);
+        Assert.Contains("failed", adoptionTemplate, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("failed", proofMarkersBlock, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("CONSUMER_SAMPLE_PARAMETER_OK", proofMarkersBlock, StringComparison.Ordinal);
+        Assert.Contains("CONSUMER_SAMPLE_METADATA_PROJECTION_OK", proofMarkersBlock, StringComparison.Ordinal);
+        Assert.Contains("SUPPORT_BUNDLE_PERSISTENCE_OK", proofMarkersBlock, StringComparison.Ordinal);
+        Assert.Contains("parameterSnapshots", supportBundleBlock, StringComparison.Ordinal);
+        Assert.Contains("status", supportBundleBlock, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("owner", supportBundleBlock, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("priority", supportBundleBlock, StringComparison.OrdinalIgnoreCase);
         Assert.Equal(
             new[]
             {

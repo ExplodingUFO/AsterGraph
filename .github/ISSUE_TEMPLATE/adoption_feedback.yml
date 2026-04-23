@@ -38,13 +38,13 @@ body:
     id: proof_markers
     attributes:
       label: Proof markers
-      description: Include exact proof marker lines from your artifact set
-      placeholder: HELLOWORLD_WPF_OK:True
+      description: Include the failed proof marker lines first, then the exact proof marker lines from your artifact set. Example markers: CONSUMER_SAMPLE_PARAMETER_OK, CONSUMER_SAMPLE_METADATA_PROJECTION_OK, SUPPORT_BUNDLE_PERSISTENCE_OK.
+      placeholder: FAILED:<marker line>\nCONSUMER_SAMPLE_PARAMETER_OK:False\nCONSUMER_SAMPLE_METADATA_PROJECTION_OK:False\nSUPPORT_BUNDLE_PERSISTENCE_OK:False
     validations:
       required: true
   - type: textarea
     id: support_bundle
     attributes:
       label: Support-bundle attachment note
-      description: Use the emitted `SUPPORT_BUNDLE_PATH:...` line as the support-bundle attachment note on the bounded intake record when the route produced a bundle, or `NO_SUPPORT_BUNDLE:route-cannot-produce-one` when it did not.
-      placeholder: SUPPORT_BUNDLE_PATH:... or NO_SUPPORT_BUNDLE:route-cannot-produce-one
+      description: Use the emitted `SUPPORT_BUNDLE_PATH:...` line as the support-bundle attachment note on the bounded intake record when the route produced a bundle, or `NO_SUPPORT_BUNDLE:route-cannot-produce-one` when it did not. When a bundle exists, include `parameterSnapshots` rows for `status`, `owner`, and `priority`.
+      placeholder: SUPPORT_BUNDLE_PATH:... with parameterSnapshots rows for status, owner, and priority, or NO_SUPPORT_BUNDLE:route-cannot-produce-one
