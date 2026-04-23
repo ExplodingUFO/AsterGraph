@@ -9,7 +9,7 @@ It is the copyable host recipe for three host-owned seams:
 - plugin trust workflow
 - selected-node parameter read/write seam
 
-It also carries the copyable inspector recipe for the shipped definition-driven inspector, so the sample reads like the recipe in action: `defaultValue`, `isAdvanced`, `helpText`, `placeholderText`, and explicit read-only reasons.
+For the inspector metadata recipe, pair this route with [Authoring Inspector Recipe](./authoring-inspector-recipe.md). This sample stays focused on the host-owned seams and the shipped inspector surface; the canonical recipe carries the full `defaultValue`, `isAdvanced`, `helpText`, `placeholderText`, and read-only vocabulary.
 
 This is the defended beta route for copying host-owned seams into your own host. Keep action projection, trust workflow, and the selected-node parameter read/write seam host-owned; copy only the sample-owned presentation.
 

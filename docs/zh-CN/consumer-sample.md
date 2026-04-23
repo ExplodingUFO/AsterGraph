@@ -9,7 +9,7 @@
 - plugin trust workflow
 - 选中节点参数读写 seam
 
-它也保留了 shipped definition-driven inspector 的可复制的 inspector recipe，所以这个样例读起来就是 recipe 在实际运行：`defaultValue`、`isAdvanced`、`helpText`、`placeholderText`，以及明确的只读原因。
+如果你要看 inspector metadata recipe，就把这条路线和 [Authoring Inspector Recipe](./authoring-inspector-recipe.md) 配在一起。这个样例只聚焦宿主自管 seam 和 shipped inspector surface；完整的 `defaultValue`、`isAdvanced`、`helpText`、`placeholderText` 和只读词汇都放在 canonical recipe 里。
 
 这是把宿主自管 seam 复制到你自己的应用里的受防守 beta 路线。把 action projection、trust workflow 和选中节点参数读写 seam 保持在宿主里，只复制样例自有的展示细节。
 

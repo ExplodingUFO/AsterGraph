@@ -100,39 +100,34 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
         var readme = ReadRepoFile("tools/AsterGraph.ConsumerSample.Avalonia/README.md");
 
         AssertContains(authoringRecipeEn, "Canonical Recipe Vocabulary");
-        AssertContains(authoringRecipeEn, "`defaultValue` seeds new nodes and fallback projection");
-        AssertContains(authoringRecipeEn, "`isAdvanced` keeps expert-only parameters collapsed by default");
-        AssertContains(authoringRecipeEn, "`helpText` adds short inline guidance next to the field");
-        AssertContains(authoringRecipeEn, "`placeholderText` provides short input hints for text-oriented editors");
-        AssertContains(authoringRecipeEn, "read-only reasons are shown explicitly when the host or definition locks a field");
+        AssertContains(authoringRecipeEn, "Copyable Definition Example");
+        AssertContains(authoringRecipeEn, "`defaultValue`");
+        AssertContains(authoringRecipeEn, "`isAdvanced`");
+        AssertContains(authoringRecipeEn, "`helpText`");
+        AssertContains(authoringRecipeEn, "`placeholderText`");
+        AssertContains(authoringRecipeEn, "constraints.IsReadOnly");
+        AssertContains(authoringRecipeEn, "The shipped inspector stays bounded to the definition-driven inspector surface");
         AssertContains(authoringRecipeZh, "统一的 recipe 词汇");
-        AssertContains(authoringRecipeZh, "`defaultValue` 作为新节点和投影回退值");
-        AssertContains(authoringRecipeZh, "`isAdvanced` 让高级参数默认保持折叠");
-        AssertContains(authoringRecipeZh, "`helpText` 在字段旁提供简短说明");
-        AssertContains(authoringRecipeZh, "`placeholderText` 为文本型 editor 提供简短输入提示");
-        AssertContains(authoringRecipeZh, "只读原因会在宿主或定义锁定字段时明确显示");
+        AssertContains(authoringRecipeZh, "可复制的定义示例");
+        AssertContains(authoringRecipeZh, "`defaultValue`");
+        AssertContains(authoringRecipeZh, "`isAdvanced`");
+        AssertContains(authoringRecipeZh, "`helpText`");
+        AssertContains(authoringRecipeZh, "`placeholderText`");
+        AssertContains(authoringRecipeZh, "constraints.IsReadOnly");
+        AssertContains(authoringRecipeZh, "shipped inspector 只保持在 definition-driven inspector 的边界内");
 
-        AssertContains(consumerSampleEn, "copyable inspector recipe");
-        AssertContains(consumerSampleEn, "shipped definition-driven inspector");
-        AssertContains(consumerSampleEn, "defaultValue");
-        AssertContains(consumerSampleEn, "isAdvanced");
-        AssertContains(consumerSampleEn, "helpText");
-        AssertContains(consumerSampleEn, "placeholderText");
-        AssertContains(consumerSampleEn, "read-only reasons");
-        AssertContains(consumerSampleZh, "可复制的 inspector recipe");
-        AssertContains(consumerSampleZh, "shipped definition-driven inspector");
-        AssertContains(consumerSampleZh, "defaultValue");
-        AssertContains(consumerSampleZh, "isAdvanced");
-        AssertContains(consumerSampleZh, "helpText");
-        AssertContains(consumerSampleZh, "placeholderText");
-        AssertContains(consumerSampleZh, "只读原因");
-        AssertContains(readme, "copyable inspector recipe");
-        AssertContains(readme, "shipped definition-driven inspector");
-        AssertContains(readme, "defaultValue");
-        AssertContains(readme, "isAdvanced");
-        AssertContains(readme, "helpText");
-        AssertContains(readme, "placeholderText");
-        AssertContains(readme, "read-only reasons");
+        AssertContains(consumerSampleEn, "[Authoring Inspector Recipe](./authoring-inspector-recipe.md)");
+        AssertContains(consumerSampleEn, "host-owned seams");
+        AssertContains(consumerSampleEn, "shipped inspector surface");
+        AssertContains(consumerSampleEn, "canonical recipe carries the full");
+        AssertContains(consumerSampleZh, "[Authoring Inspector Recipe](./authoring-inspector-recipe.md)");
+        AssertContains(consumerSampleZh, "宿主自管 seam");
+        AssertContains(consumerSampleZh, "shipped inspector surface");
+        AssertContains(consumerSampleZh, "canonical recipe 里");
+        AssertContains(readme, "Authoring Inspector Recipe");
+        AssertContains(readme, "host-owned seams");
+        AssertContains(readme, "shipped inspector surface");
+        AssertContains(readme, "canonical recipe carries the full");
     }
 
     [Fact]

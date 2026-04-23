@@ -44,7 +44,9 @@ shipped inspector 只保持在 definition-driven inspector 的边界内，不会
 - 只读约束会明确展示
 - `List` 参数使用一行一个项的 multiline editor
 
-## 最小定义示例
+## 可复制的定义示例
+
+这个示例把 canonical metadata vocabulary 放在同一个 bounded inspector recipe 里：
 
 ```csharp
 var definition = new NodeDefinition(
@@ -75,7 +77,8 @@ var definition = new NodeDefinition(
                 ValidationPattern: "^[a-z-]+$",
                 ValidationPatternDescription: "lowercase letters and dashes"),
             groupName: "Metadata",
-            placeholderText: "authoring-node"),
+            placeholderText: "authoring-node",
+            helpText: "Used in filenames and automation labels."),
         new NodeParameterDefinition(
             "tags",
             "Tags",
@@ -85,14 +88,35 @@ var definition = new NodeDefinition(
             constraints: new ParameterConstraints(MinimumItemCount: 1, MaximumItemCount: 5),
             groupName: "Metadata",
             placeholderText: "one tag per line"),
+        new NodeParameterDefinition(
+            "system-key",
+            "System Key",
+            new PortTypeId("string"),
+            ParameterEditorKind.Text,
+            defaultValue: "system-core",
+            constraints: new ParameterConstraints(IsReadOnly: true),
+            groupName: "Metadata",
+            placeholderText: "system-core"),
+        new NodeParameterDefinition(
+            "debug-bias",
+            "Debug Bias",
+            new PortTypeId("float"),
+            ParameterEditorKind.Number,
+            defaultValue: 0.1d,
+            helpText: "Used only for expert tuning.",
+            groupName: "Advanced",
+            isAdvanced: true),
     ]);
 ```
+
+把 `defaultValue` 当成种子值，把 `helpText` 当成字段旁的说明，把 `placeholderText` 当成输入提示，把 `isAdvanced` 当成高级参数标记，把 `constraints.IsReadOnly` 当成必须锁定的定义约束。
 
 ## 去哪里看现成效果
 
 - 最小默认 UI 样例：[`tools/AsterGraph.HelloWorld.Avalonia`](../../tools/AsterGraph.HelloWorld.Avalonia/)
 - 完整展示宿主：[`src/AsterGraph.Demo`](../../src/AsterGraph.Demo/)
 - 更真实的宿主集成：[Consumer Sample](./consumer-sample.md)
+- 补充这份 recipe 的样例指导：[Consumer Sample](./consumer-sample.md)
 
 ## 什么时候该自己扩展
 

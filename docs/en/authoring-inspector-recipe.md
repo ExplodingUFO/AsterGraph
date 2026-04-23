@@ -43,7 +43,9 @@ When a host uses the default Avalonia surfaces:
 - read-only constraints are shown explicitly
 - list parameters use a multiline one-item-per-line editor
 
-## Minimal Definition Example
+## Copyable Definition Example
+
+This example keeps the canonical metadata vocabulary together in one bounded inspector recipe:
 
 ```csharp
 var definition = new NodeDefinition(
@@ -74,7 +76,8 @@ var definition = new NodeDefinition(
                 ValidationPattern: "^[a-z-]+$",
                 ValidationPatternDescription: "lowercase letters and dashes"),
             groupName: "Metadata",
-            placeholderText: "authoring-node"),
+            placeholderText: "authoring-node",
+            helpText: "Used in filenames and automation labels."),
         new NodeParameterDefinition(
             "tags",
             "Tags",
@@ -84,14 +87,35 @@ var definition = new NodeDefinition(
             constraints: new ParameterConstraints(MinimumItemCount: 1, MaximumItemCount: 5),
             groupName: "Metadata",
             placeholderText: "one tag per line"),
+        new NodeParameterDefinition(
+            "system-key",
+            "System Key",
+            new PortTypeId("string"),
+            ParameterEditorKind.Text,
+            defaultValue: "system-core",
+            constraints: new ParameterConstraints(IsReadOnly: true),
+            groupName: "Metadata",
+            placeholderText: "system-core"),
+        new NodeParameterDefinition(
+            "debug-bias",
+            "Debug Bias",
+            new PortTypeId("float"),
+            ParameterEditorKind.Number,
+            defaultValue: 0.1d,
+            helpText: "Used only for expert tuning.",
+            groupName: "Advanced",
+            isAdvanced: true),
     ]);
 ```
+
+Use `defaultValue` for the seeded value, `helpText` for inline guidance, `placeholderText` for input hints, `isAdvanced` for expert-only parameters, and `constraints.IsReadOnly` when the definition must stay locked.
 
 ## Where To See It Running
 
 - smallest hosted sample: [`tools/AsterGraph.HelloWorld.Avalonia`](../../tools/AsterGraph.HelloWorld.Avalonia/)
 - full showcase host: [`src/AsterGraph.Demo`](../../src/AsterGraph.Demo/)
 - realistic hosted integration: [Consumer Sample](./consumer-sample.md)
+- sample guidance that complements this recipe: [Consumer Sample](./consumer-sample.md)
 
 ## When To Extend It Yourself
 
