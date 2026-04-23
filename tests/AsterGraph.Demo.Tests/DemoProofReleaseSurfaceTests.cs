@@ -326,6 +326,11 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("受限 intake 记录", supportBundleZh, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("bounded intake vocabulary", adoptionFeedback, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("受限 intake 词汇", adoptionFeedbackZh, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("proof markers", adoptionFeedback, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("proof 标记", adoptionFeedbackZh, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("screenshot reference", adoptionFeedback, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("截图", adoptionFeedback, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("screenshot reference", adoptionFeedbackZh, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("bounded intake record", adoptionTemplate, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("SUPPORT_BUNDLE_PATH:...", adoptionTemplate, StringComparison.Ordinal);
         Assert.Contains("NO_SUPPORT_BUNDLE:route-cannot-produce-one", adoptionTemplate, StringComparison.Ordinal);

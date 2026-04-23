@@ -10,9 +10,11 @@
 
 - route（`HelloWorld`、`AsterGraph.Starter.Avalonia`、`HelloWorld.Avalonia`、`ConsumerSample.Avalonia`、`HostSample`、`PackageSmoke`、`ScaleSmoke`、`Demo`）
 - version
-- proof 标记（可用时附截图/命令输出）
+- proof 标记
 - 摩擦点
 - support bundle 附件备注：`SUPPORT_BUNDLE_PATH:...`（当 route 产出 bundle 时）或 `NO_SUPPORT_BUNDLE:route-cannot-produce-one`（当 route 不能产出 bundle 时）
+
+截图或命令输出可以作为补充证据附上，但不替代受限 intake 字段里的 proof 标记。
 
 公开反馈建议使用 GitHub 上的 `Adoption feedback` issue template。
 如果你已经能跑到 `ConsumerSample.Avalonia -- --proof --support-bundle <support-bundle-path>`，优先把 [Beta Support Bundle](./support-bundle.md) 里定义的本地证据包附上，并把 proof 输出里的 `SUPPORT_BUNDLE_PATH:...` 这一行当作 support bundle 附件备注。如果 route 不能产出 bundle，就记录 `NO_SUPPORT_BUNDLE:route-cannot-produce-one`。

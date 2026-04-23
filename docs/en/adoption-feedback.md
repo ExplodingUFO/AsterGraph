@@ -10,9 +10,11 @@ Each feedback entry should capture this bounded schema:
 
 - route (`HelloWorld`, `AsterGraph.Starter.Avalonia`, `HelloWorld.Avalonia`, `ConsumerSample.Avalonia`, `HostSample`, `PackageSmoke`, `ScaleSmoke`, `Demo`)
 - version
-- proof markers or screenshot reference when available
+- proof markers
 - friction
 - support-bundle attachment note: `SUPPORT_BUNDLE_PATH:...` when the route produced a bundle, or `NO_SUPPORT_BUNDLE:route-cannot-produce-one` when it did not
+
+Screenshots or command output can be attached as supplemental evidence, but they do not replace proof markers in the bounded intake field.
 
 Use the GitHub issue template `Adoption feedback` for public reports.
 When you can reach `ConsumerSample.Avalonia -- --proof --support-bundle <support-bundle-path>`, attach the local bundle described in [Beta Support Bundle](./support-bundle.md) and reuse the emitted `SUPPORT_BUNDLE_PATH:...` line as the support-bundle attachment note. If the route cannot produce a bundle, record `NO_SUPPORT_BUNDLE:route-cannot-produce-one`.
