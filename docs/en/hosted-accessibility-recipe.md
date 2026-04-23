@@ -20,9 +20,9 @@ Pair it with `ConsumerSample.Avalonia`, because that is the defended hosted proo
 
 ## Screen-Reader-Ready Evaluation Path
 
-- Run `AsterGraph.ConsumerSample.Avalonia -- --proof` first and keep `HOSTED_ACCESSIBILITY_BASELINE_OK:True`, `HOSTED_ACCESSIBILITY_FOCUS_OK:True`, `HOSTED_ACCESSIBILITY_AUTOMATION_NAVIGATION_OK:True`, `HOSTED_ACCESSIBILITY_AUTHORING_DIAGNOSTICS_OK:True`, `HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True`, `HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True`, and `HOSTED_ACCESSIBILITY_OK:True` on the defended hosted route.
+- Run `AsterGraph.ConsumerSample.Avalonia -- --proof` first and keep `HOSTED_ACCESSIBILITY_BASELINE_OK:True`, `HOSTED_ACCESSIBILITY_FOCUS_OK:True`, `HOSTED_ACCESSIBILITY_AUTOMATION_NAVIGATION_OK:True`, `HOSTED_ACCESSIBILITY_AUTHORING_DIAGNOSTICS_OK:True`, `HOSTED_ACCESSIBILITY_AUTOMATION_OK:True`, `HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True`, `HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True`, and `HOSTED_ACCESSIBILITY_OK:True` on the defended hosted route.
 - Generate the local evidence attachment from `ConsumerSample.Avalonia` with [Beta Support Bundle](./support-bundle.md); the support bundle remains the bounded intake attachment for this route.
-- Run `AsterGraph.HostSample` after the realistic hosted proof and keep `HOST_SAMPLE_AUTOMATION_OK:True` plus `HOST_SAMPLE_ACCESSIBILITY_BASELINE_OK:True` on the same bounded intake record.
+- Run `AsterGraph.HostSample` after the realistic hosted proof and keep `HOST_SAMPLE_AUTOMATION_OK:True`, `HOST_SAMPLE_ACCESSIBILITY_BASELINE_OK:True`, and `HOST_SAMPLE_ACCESSIBILITY_AUTOMATION_OK:True` on the same bounded intake record.
 - If you do local screen-reader-ready checks with Narrator, NVDA, or VoiceOver, keep them on the same named hosted surfaces and controls: `GraphEditorView`, `NodeCanvas`, `GraphInspectorView`, `PART_CommandPaletteSearchBox`, `PART_ParameterSearchBox`, projected command buttons, and projected node or edge tools.
 - This path is local evaluation evidence only. It does not widen support promises and it does not claim screen-reader certification.
 
@@ -40,6 +40,7 @@ Expected hosted-accessibility proof markers:
 - `HOSTED_ACCESSIBILITY_FOCUS_OK:True`
 - `HOSTED_ACCESSIBILITY_AUTOMATION_NAVIGATION_OK:True`
 - `HOSTED_ACCESSIBILITY_AUTHORING_DIAGNOSTICS_OK:True`
+- `HOSTED_ACCESSIBILITY_AUTOMATION_OK:True`
 - `HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True`
 - `HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True`
 - `HOSTED_ACCESSIBILITY_OK:True`

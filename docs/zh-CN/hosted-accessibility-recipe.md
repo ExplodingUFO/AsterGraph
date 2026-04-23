@@ -20,9 +20,9 @@
 
 ## Screen-Reader-Ready 评估路径
 
-- 先运行 `AsterGraph.ConsumerSample.Avalonia -- --proof`，并在受防守的 hosted 路线上守住 `HOSTED_ACCESSIBILITY_BASELINE_OK:True`、`HOSTED_ACCESSIBILITY_FOCUS_OK:True`、`HOSTED_ACCESSIBILITY_AUTOMATION_NAVIGATION_OK:True`、`HOSTED_ACCESSIBILITY_AUTHORING_DIAGNOSTICS_OK:True`、`HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True`、`HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True` 和 `HOSTED_ACCESSIBILITY_OK:True`。
+- 先运行 `AsterGraph.ConsumerSample.Avalonia -- --proof`，并在受防守的 hosted 路线上守住 `HOSTED_ACCESSIBILITY_BASELINE_OK:True`、`HOSTED_ACCESSIBILITY_FOCUS_OK:True`、`HOSTED_ACCESSIBILITY_AUTOMATION_NAVIGATION_OK:True`、`HOSTED_ACCESSIBILITY_AUTHORING_DIAGNOSTICS_OK:True`、`HOSTED_ACCESSIBILITY_AUTOMATION_OK:True`、`HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True`、`HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True` 和 `HOSTED_ACCESSIBILITY_OK:True`。
 - 再按 [Beta Support Bundle](./support-bundle.md) 从 `ConsumerSample.Avalonia` 生成本地证据附件；这份 support bundle 仍然是这条路线的受限 intake 附件。
-- 在真实宿主 proof 之后运行 `AsterGraph.HostSample`，并把 `HOST_SAMPLE_AUTOMATION_OK:True` 和 `HOST_SAMPLE_ACCESSIBILITY_BASELINE_OK:True` 保留在同一条受限 intake 记录上。
+- 在真实宿主 proof 之后运行 `AsterGraph.HostSample`，并把 `HOST_SAMPLE_AUTOMATION_OK:True`、`HOST_SAMPLE_ACCESSIBILITY_BASELINE_OK:True` 和 `HOST_SAMPLE_ACCESSIBILITY_AUTOMATION_OK:True` 保留在同一条受限 intake 记录上。
 - 如果你要做 Narrator、NVDA 或 VoiceOver 这类本地 screen-reader-ready 检查，就继续盯住同一批具名 hosted surface 和 control：`GraphEditorView`、`NodeCanvas`、`GraphInspectorView`、`PART_CommandPaletteSearchBox`、`PART_ParameterSearchBox`，以及投影出来的 command 按钮和 node/edge tool。
 - 这条路径只提供本地评估证据，不扩大支持承诺，也不意味着 screen-reader 认证。
 
@@ -40,6 +40,7 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 - `HOSTED_ACCESSIBILITY_FOCUS_OK:True`
 - `HOSTED_ACCESSIBILITY_AUTOMATION_NAVIGATION_OK:True`
 - `HOSTED_ACCESSIBILITY_AUTHORING_DIAGNOSTICS_OK:True`
+- `HOSTED_ACCESSIBILITY_AUTOMATION_OK:True`
 - `HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True`
 - `HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True`
 - `HOSTED_ACCESSIBILITY_OK:True`

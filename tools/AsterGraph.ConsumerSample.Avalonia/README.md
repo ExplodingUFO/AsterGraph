@@ -130,7 +130,7 @@ Use this sample to copy the host-owned seams, not the sample-specific presentati
 
 - Keep baseline automation names on `GraphEditorView`, `NodeCanvas`, `GraphInspectorView`, and the stock search surfaces, then expect `HOSTED_ACCESSIBILITY_BASELINE_OK:True`.
 - Keep command-palette keyboard flow on the shared hosted route so focus returns to the host surface that opened it, then expect `HOSTED_ACCESSIBILITY_FOCUS_OK:True`.
-- Keep hosted automation navigation and authoring diagnostics on that same proof run, expect `HOSTED_ACCESSIBILITY_AUTOMATION_NAVIGATION_OK:True` and `HOSTED_ACCESSIBILITY_AUTHORING_DIAGNOSTICS_OK:True`, then pair the same bounded intake record with post-ladder `HostSample` lines `HOST_SAMPLE_AUTOMATION_OK:True` and `HOST_SAMPLE_ACCESSIBILITY_BASELINE_OK:True` for screen-reader-ready local evaluation.
+- Keep hosted automation navigation and authoring diagnostics on that same proof run, expect `HOSTED_ACCESSIBILITY_AUTOMATION_NAVIGATION_OK:True`, `HOSTED_ACCESSIBILITY_AUTHORING_DIAGNOSTICS_OK:True`, and `HOSTED_ACCESSIBILITY_AUTOMATION_OK:True`, then pair the same bounded intake record with post-ladder `HostSample` lines `HOST_SAMPLE_AUTOMATION_OK:True`, `HOST_SAMPLE_ACCESSIBILITY_BASELINE_OK:True`, and `HOST_SAMPLE_ACCESSIBILITY_AUTOMATION_OK:True` for screen-reader-ready local evaluation.
 - Keep header, palette, node-tool, and edge-tool names projected from the same shared action descriptors, then expect `HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True`.
 - Keep selected-node parameter metadata and connection text editors on the same hosted authoring route, then close the handoff with [Hosted Accessibility Recipe](../../docs/en/hosted-accessibility-recipe.md) and `HOSTED_ACCESSIBILITY_OK:True`.
 

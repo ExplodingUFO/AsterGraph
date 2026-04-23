@@ -51,6 +51,7 @@ public sealed class HostedAccessibilityClosureDocsTests
             Assert.Contains("HOSTED_ACCESSIBILITY_FOCUS_OK:True", contents, StringComparison.Ordinal);
             Assert.Contains("HOSTED_ACCESSIBILITY_AUTOMATION_NAVIGATION_OK:True", contents, StringComparison.Ordinal);
             Assert.Contains("HOSTED_ACCESSIBILITY_AUTHORING_DIAGNOSTICS_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("HOSTED_ACCESSIBILITY_AUTOMATION_OK:True", contents, StringComparison.Ordinal);
             Assert.Contains("HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True", contents, StringComparison.Ordinal);
             Assert.Contains("HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True", contents, StringComparison.Ordinal);
             Assert.Contains("HOSTED_ACCESSIBILITY_OK:True", contents, StringComparison.Ordinal);
@@ -82,14 +83,14 @@ public sealed class HostedAccessibilityClosureDocsTests
 
         Assert.Contains("step-3 support bundle", evaluationPathEn, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("step-4 `HostSample` proof lines", evaluationPathEn, StringComparison.OrdinalIgnoreCase);
-        Assert.True(HasLineWithAll(evaluationPathEn, "HOST_SAMPLE_AUTOMATION_OK:True", "HOST_SAMPLE_ACCESSIBILITY_BASELINE_OK:True"));
+        Assert.True(HasLineWithAll(evaluationPathEn, "HOST_SAMPLE_AUTOMATION_OK:True", "HOST_SAMPLE_ACCESSIBILITY_BASELINE_OK:True", "HOST_SAMPLE_ACCESSIBILITY_AUTOMATION_OK:True"));
         Assert.Contains("第 3 步", evaluationPathZh, StringComparison.Ordinal);
         Assert.Contains("support bundle", evaluationPathZh, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("第 4 步 `HostSample` 的 proof 行", evaluationPathZh, StringComparison.Ordinal);
-        Assert.True(HasLineWithAll(evaluationPathZh, "HOST_SAMPLE_AUTOMATION_OK:True", "HOST_SAMPLE_ACCESSIBILITY_BASELINE_OK:True"));
+        Assert.True(HasLineWithAll(evaluationPathZh, "HOST_SAMPLE_AUTOMATION_OK:True", "HOST_SAMPLE_ACCESSIBILITY_BASELINE_OK:True", "HOST_SAMPLE_ACCESSIBILITY_AUTOMATION_OK:True"));
 
-        Assert.True(HasLineWithAll(supportBundleEn, "HOST_SAMPLE_AUTOMATION_OK:True", "HOST_SAMPLE_ACCESSIBILITY_BASELINE_OK:True", "same bounded intake record"));
-        Assert.True(HasLineWithAll(supportBundleZh, "HOST_SAMPLE_AUTOMATION_OK:True", "HOST_SAMPLE_ACCESSIBILITY_BASELINE_OK:True", "同一条受限 intake 记录"));
+        Assert.True(HasLineWithAll(supportBundleEn, "HOST_SAMPLE_AUTOMATION_OK:True", "HOST_SAMPLE_ACCESSIBILITY_BASELINE_OK:True", "HOST_SAMPLE_ACCESSIBILITY_AUTOMATION_OK:True", "same bounded intake record"));
+        Assert.True(HasLineWithAll(supportBundleZh, "HOST_SAMPLE_AUTOMATION_OK:True", "HOST_SAMPLE_ACCESSIBILITY_BASELINE_OK:True", "HOST_SAMPLE_ACCESSIBILITY_AUTOMATION_OK:True", "同一条受限 intake 记录"));
         Assert.Contains("screen-reader-ready local evaluation", readme, StringComparison.OrdinalIgnoreCase);
     }
 

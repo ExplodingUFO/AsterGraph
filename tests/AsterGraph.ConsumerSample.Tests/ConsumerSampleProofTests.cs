@@ -65,6 +65,7 @@ public sealed class ConsumerSampleProofTests
         Assert.True(result.HostedAccessibilityFocusOk);
         Assert.True(result.HostedAutomationNavigationOk);
         Assert.True(result.HostedAuthoringAutomationDiagnosticsOk);
+        Assert.True(result.HostedAccessibilityAutomationOk);
         Assert.True(result.HostedAccessibilityCommandSurfaceOk);
         Assert.True(result.HostedAccessibilityAuthoringSurfaceOk);
         Assert.True(result.HostedAccessibilityOk);
@@ -89,6 +90,7 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(result.ProofLines, line => line == "HOSTED_ACCESSIBILITY_FOCUS_OK:True");
         Assert.Contains(result.ProofLines, line => line == "HOSTED_ACCESSIBILITY_AUTOMATION_NAVIGATION_OK:True");
         Assert.Contains(result.ProofLines, line => line == "HOSTED_ACCESSIBILITY_AUTHORING_DIAGNOSTICS_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "HOSTED_ACCESSIBILITY_AUTOMATION_OK:True");
         Assert.Contains(result.ProofLines, line => line == "HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True");
         Assert.Contains(result.ProofLines, line => line == "HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True");
         Assert.Contains(result.ProofLines, line => line == "HOSTED_ACCESSIBILITY_OK:True");
@@ -212,6 +214,7 @@ public sealed class ConsumerSampleProofTests
         Assert.False(result.HostedAccessibilityOk);
         Assert.False(result.IsOk);
         Assert.Contains(result.ProofLines, line => line == "HOSTED_ACCESSIBILITY_FOCUS_OK:False");
+        Assert.Contains(result.ProofLines, line => line == "HOSTED_ACCESSIBILITY_AUTOMATION_OK:False");
         Assert.Contains(result.ProofLines, line => line == "HOSTED_ACCESSIBILITY_OK:False");
         Assert.Contains(result.ProofLines, line => line == "CONSUMER_SAMPLE_OK:False");
     }
@@ -251,6 +254,7 @@ public sealed class ConsumerSampleProofTests
         Assert.False(result.HostedAccessibilityOk);
         Assert.False(result.IsOk);
         Assert.Contains(result.ProofLines, line => line == "HOSTED_ACCESSIBILITY_AUTOMATION_NAVIGATION_OK:False");
+        Assert.Contains(result.ProofLines, line => line == "HOSTED_ACCESSIBILITY_AUTOMATION_OK:False");
         Assert.Contains(result.ProofLines, line => line == "HOSTED_ACCESSIBILITY_OK:False");
         Assert.Contains(result.ProofLines, line => line == "CONSUMER_SAMPLE_OK:False");
     }
@@ -290,6 +294,7 @@ public sealed class ConsumerSampleProofTests
         Assert.False(result.HostedAccessibilityOk);
         Assert.False(result.IsOk);
         Assert.Contains(result.ProofLines, line => line == "HOSTED_ACCESSIBILITY_AUTHORING_DIAGNOSTICS_OK:False");
+        Assert.Contains(result.ProofLines, line => line == "HOSTED_ACCESSIBILITY_AUTOMATION_OK:False");
         Assert.Contains(result.ProofLines, line => line == "HOSTED_ACCESSIBILITY_OK:False");
         Assert.Contains(result.ProofLines, line => line == "CONSUMER_SAMPLE_OK:False");
     }
@@ -345,6 +350,7 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(proofLines, line => line == "HOSTED_ACCESSIBILITY_FOCUS_OK:True");
         Assert.Contains(proofLines, line => line == "HOSTED_ACCESSIBILITY_AUTOMATION_NAVIGATION_OK:True");
         Assert.Contains(proofLines, line => line == "HOSTED_ACCESSIBILITY_AUTHORING_DIAGNOSTICS_OK:True");
+        Assert.Contains(proofLines, line => line == "HOSTED_ACCESSIBILITY_AUTOMATION_OK:True");
         Assert.Contains(proofLines, line => line == "HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True");
         Assert.Contains(proofLines, line => line == "HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True");
         Assert.Contains(proofLines, line => line == "HOSTED_ACCESSIBILITY_OK:True");

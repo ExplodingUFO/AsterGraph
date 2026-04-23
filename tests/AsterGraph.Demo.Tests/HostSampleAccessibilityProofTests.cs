@@ -31,6 +31,7 @@ public sealed class HostSampleAccessibilityProofTests
 
         Assert.Contains("HOST_SAMPLE_AUTOMATION_OK:True", stdout, StringComparison.Ordinal);
         Assert.Contains("HOST_SAMPLE_ACCESSIBILITY_BASELINE_OK:True", stdout, StringComparison.Ordinal);
+        Assert.Contains("HOST_SAMPLE_ACCESSIBILITY_AUTOMATION_OK:True", stdout, StringComparison.Ordinal);
         Assert.Contains("HOST_SAMPLE_OK:True", stdout, StringComparison.Ordinal);
     }
 

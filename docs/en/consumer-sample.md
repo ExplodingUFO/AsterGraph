@@ -78,7 +78,7 @@ Consumer Sample proves the seam split; it does not own the metadata vocabulary. 
 
 - Keep baseline automation names on `GraphEditorView`, `NodeCanvas`, `GraphInspectorView`, and the stock search surfaces, then expect `HOSTED_ACCESSIBILITY_BASELINE_OK:True`.
 - Keep command-palette keyboard flow on the shared hosted route so focus returns to the host surface that opened it, then expect `HOSTED_ACCESSIBILITY_FOCUS_OK:True`.
-- Keep hosted automation navigation and authoring diagnostics on the same proof run, then expect `HOSTED_ACCESSIBILITY_AUTOMATION_NAVIGATION_OK:True` and `HOSTED_ACCESSIBILITY_AUTHORING_DIAGNOSTICS_OK:True`.
+- Keep hosted automation navigation and authoring diagnostics on the same proof run, then expect `HOSTED_ACCESSIBILITY_AUTOMATION_NAVIGATION_OK:True`, `HOSTED_ACCESSIBILITY_AUTHORING_DIAGNOSTICS_OK:True`, and `HOSTED_ACCESSIBILITY_AUTOMATION_OK:True`.
 - Keep header, palette, node-tool, and edge-tool names projected from the same shared action descriptors, then expect `HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True`.
 - Keep selected-node parameter metadata and connection text editors on the same hosted authoring route, then close the handoff with [Hosted Accessibility Recipe](./hosted-accessibility-recipe.md) and `HOSTED_ACCESSIBILITY_OK:True`.
 - For one screen-reader-ready local evaluation path, keep `ConsumerSample.Avalonia -- --proof`, the support-bundle attachment note, and the post-ladder `HostSample` proof lines on the same bounded intake record.
@@ -106,6 +106,7 @@ Expected proof markers:
 - `HOSTED_ACCESSIBILITY_FOCUS_OK:True`
 - `HOSTED_ACCESSIBILITY_AUTOMATION_NAVIGATION_OK:True`
 - `HOSTED_ACCESSIBILITY_AUTHORING_DIAGNOSTICS_OK:True`
+- `HOSTED_ACCESSIBILITY_AUTOMATION_OK:True`
 - `HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True`
 - `HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True`
 - `HOSTED_ACCESSIBILITY_OK:True`

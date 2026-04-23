@@ -29,6 +29,7 @@ HostSampleAvaloniaEnvironment.EnsureInitialized();
 var catalog = CreateCatalog(definitionId);
 var runtimeResult = await VerifyRuntimeOnlyRouteAsync(catalog, definitionId);
 var hostedUiResult = VerifyHostedUiRoute(catalog, definitionId);
+var accessibilityAutomationOk = runtimeResult.AutomationOk && hostedUiResult.AccessibilityBaselineOk;
 var allOk = runtimeResult.IsOk && hostedUiResult.IsOk;
 
 Console.WriteLine("HOST_SAMPLE_PATHS:CreateSession:Create:AsterGraphAvaloniaViewFactory");
@@ -38,6 +39,7 @@ Console.WriteLine($"HOST_SAMPLE_CLIPBOARD_OK:{runtimeResult.ClipboardOk}:{runtim
 Console.WriteLine($"HOST_SAMPLE_EXPORT_OK:{runtimeResult.ExportOk}:{runtimeResult.ExportPath}");
 Console.WriteLine($"HOST_SAMPLE_RECONNECT_OK:{hostedUiResult.ReconnectOk}");
 Console.WriteLine($"HOST_SAMPLE_ACCESSIBILITY_BASELINE_OK:{hostedUiResult.AccessibilityBaselineOk}");
+Console.WriteLine($"HOST_SAMPLE_ACCESSIBILITY_AUTOMATION_OK:{accessibilityAutomationOk}");
 Console.WriteLine($"HOST_SAMPLE_HOSTED_UI_OK:{hostedUiResult.IsOk}:{hostedUiResult.ChromeMode}:{hostedUiResult.EnableDefaultContextMenu}:{hostedUiResult.CommandShortcutPolicyEnabled}:{hostedUiResult.ConnectionCount}");
 Console.WriteLine($"HOST_SAMPLE_OK:{allOk}");
 

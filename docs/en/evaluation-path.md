@@ -23,8 +23,8 @@ The hosted route ladder is `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerS
 | --- | --- | --- | --- |
 | 1 | `AsterGraph.Starter.Avalonia` | confirms the first hosted end-to-end route with the smallest scaffold | once the shell opens, move to the smallest stock sample |
 | 2 | `AsterGraph.HelloWorld.Avalonia` | confirms the shipped Avalonia surface without extra host wiring | once this is clear, move to the realistic hosted proof |
-| 3 | `AsterGraph.ConsumerSample.Avalonia -- --proof` | proves host-owned actions, trusted-plugin flow, parameter editing, command projection, and hosted accessibility semantics on the defended route | expect `CONSUMER_SAMPLE_OK:True`, `COMMAND_SURFACE_OK:True`, `HOSTED_ACCESSIBILITY_OK:True`, `HOSTED_ACCESSIBILITY_AUTOMATION_NAVIGATION_OK:True`, `HOSTED_ACCESSIBILITY_AUTHORING_DIAGNOSTICS_OK:True`, and `HOST_NATIVE_METRIC:*`; this is the proof handoff only, and the bounded intake record lives in [Beta Support Bundle](./support-bundle.md), [Hosted Accessibility Recipe](./hosted-accessibility-recipe.md), and [Adoption Feedback Loop](./adoption-feedback.md) |
-| 4 | `AsterGraph.HostSample` | validates the proof harness after the realistic host sample is already understood | expect `HOST_SAMPLE_OK:True`, `HOST_SAMPLE_AUTOMATION_OK:True`, and `HOST_SAMPLE_ACCESSIBILITY_BASELINE_OK:True`; use this only after `ConsumerSample.Avalonia` |
+| 3 | `AsterGraph.ConsumerSample.Avalonia -- --proof` | proves host-owned actions, trusted-plugin flow, parameter editing, command projection, and hosted accessibility semantics on the defended route | expect `CONSUMER_SAMPLE_OK:True`, `COMMAND_SURFACE_OK:True`, `HOSTED_ACCESSIBILITY_OK:True`, `HOSTED_ACCESSIBILITY_AUTOMATION_NAVIGATION_OK:True`, `HOSTED_ACCESSIBILITY_AUTHORING_DIAGNOSTICS_OK:True`, `HOSTED_ACCESSIBILITY_AUTOMATION_OK:True`, and `HOST_NATIVE_METRIC:*`; this is the proof handoff only, and the bounded intake record lives in [Beta Support Bundle](./support-bundle.md), [Hosted Accessibility Recipe](./hosted-accessibility-recipe.md), and [Adoption Feedback Loop](./adoption-feedback.md) |
+| 4 | `AsterGraph.HostSample` | validates the proof harness after the realistic host sample is already understood | expect `HOST_SAMPLE_OK:True`, `HOST_SAMPLE_AUTOMATION_OK:True`, `HOST_SAMPLE_ACCESSIBILITY_BASELINE_OK:True`, and `HOST_SAMPLE_ACCESSIBILITY_AUTOMATION_OK:True`; use this only after `ConsumerSample.Avalonia` |
 
 If you are intentionally evaluating the runtime-only path, run `AsterGraph.HelloWorld` after step 1 instead of step 2, then return to the same realistic hosted proof at step 3.
 
@@ -52,9 +52,9 @@ dotnet run --project tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj --
 - step 3 is the realistic hosted proof gate for most evaluators
 - `ConsumerSample.Avalonia` should emit `CONSUMER_SAMPLE_OK:True`
 - the same run should emit `COMMAND_SURFACE_OK:True`
-- the same run should emit `HOSTED_ACCESSIBILITY_OK:True`, `HOSTED_ACCESSIBILITY_AUTOMATION_NAVIGATION_OK:True`, and `HOSTED_ACCESSIBILITY_AUTHORING_DIAGNOSTICS_OK:True`
+- the same run should emit `HOSTED_ACCESSIBILITY_OK:True`, `HOSTED_ACCESSIBILITY_AUTOMATION_NAVIGATION_OK:True`, `HOSTED_ACCESSIBILITY_AUTHORING_DIAGNOSTICS_OK:True`, and `HOSTED_ACCESSIBILITY_AUTOMATION_OK:True`
 - the same run should emit the four `HOST_NATIVE_METRIC:*` lines
-- `HostSample` should emit `HOST_SAMPLE_OK:True`, `HOST_SAMPLE_AUTOMATION_OK:True`, and `HOST_SAMPLE_ACCESSIBILITY_BASELINE_OK:True`
+- `HostSample` should emit `HOST_SAMPLE_OK:True`, `HOST_SAMPLE_AUTOMATION_OK:True`, `HOST_SAMPLE_ACCESSIBILITY_BASELINE_OK:True`, and `HOST_SAMPLE_ACCESSIBILITY_AUTOMATION_OK:True`
 
 ## What Not To Infer
 

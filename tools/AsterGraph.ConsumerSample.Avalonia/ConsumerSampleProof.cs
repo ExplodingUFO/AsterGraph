@@ -69,13 +69,16 @@ public sealed record ConsumerSampleProofResult(
         && NodeToolProjectionMs >= 0
         && EdgeToolProjectionMs >= 0;
 
-    public bool HostedAccessibilityOk
-        => HostedAccessibilityBaselineOk
-        && HostedAccessibilityFocusOk
+    public bool HostedAccessibilityAutomationOk
+        => HostedAccessibilityFocusOk
         && HostedAutomationNavigationOk
         && HostedAuthoringAutomationDiagnosticsOk
         && HostedAccessibilityCommandSurfaceOk
         && HostedAccessibilityAuthoringSurfaceOk;
+
+    public bool HostedAccessibilityOk
+        => HostedAccessibilityBaselineOk
+        && HostedAccessibilityAutomationOk;
 
     public bool IsOk
         => HostMenuActionOk
@@ -121,6 +124,7 @@ public sealed record ConsumerSampleProofResult(
         $"HOSTED_ACCESSIBILITY_FOCUS_OK:{HostedAccessibilityFocusOk}",
         $"HOSTED_ACCESSIBILITY_AUTOMATION_NAVIGATION_OK:{HostedAutomationNavigationOk}",
         $"HOSTED_ACCESSIBILITY_AUTHORING_DIAGNOSTICS_OK:{HostedAuthoringAutomationDiagnosticsOk}",
+        $"HOSTED_ACCESSIBILITY_AUTOMATION_OK:{HostedAccessibilityAutomationOk}",
         $"HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:{HostedAccessibilityCommandSurfaceOk}",
         $"HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:{HostedAccessibilityAuthoringSurfaceOk}",
         $"HOSTED_ACCESSIBILITY_OK:{HostedAccessibilityOk}",

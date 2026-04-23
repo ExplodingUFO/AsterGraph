@@ -78,7 +78,7 @@ Consumer Sample 证明 seam 分工；它不拥有元数据词汇。Authoring Ins
 
 - 给 `GraphEditorView`、`NodeCanvas`、`GraphInspectorView` 和 stock 搜索 surface 保留稳定的 automation name，并期待 `HOSTED_ACCESSIBILITY_BASELINE_OK:True`。
 - 把 command palette 的键盘流继续留在共享 hosted route 上，让焦点在关闭后回到打开它的 host surface，并期待 `HOSTED_ACCESSIBILITY_FOCUS_OK:True`。
-- 把 hosted automation navigation 和 authoring diagnostics 继续放在同一轮 proof 里，并期待 `HOSTED_ACCESSIBILITY_AUTOMATION_NAVIGATION_OK:True` 和 `HOSTED_ACCESSIBILITY_AUTHORING_DIAGNOSTICS_OK:True`。
+- 把 hosted automation navigation 和 authoring diagnostics 继续放在同一轮 proof 里，并期待 `HOSTED_ACCESSIBILITY_AUTOMATION_NAVIGATION_OK:True`、`HOSTED_ACCESSIBILITY_AUTHORING_DIAGNOSTICS_OK:True` 和 `HOSTED_ACCESSIBILITY_AUTOMATION_OK:True`。
 - 让 header、palette、node-tool 和 edge-tool 的名称继续来自同一套共享 action descriptor，并期待 `HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True`。
 - 把 selected-node parameter metadata 和 connection text editor 保留在同一条 hosted authoring route 上，最后配合 [Hosted Accessibility Recipe](./hosted-accessibility-recipe.md) 收口到 `HOSTED_ACCESSIBILITY_OK:True`。
 - 如果要走一条 screen-reader-ready 的本地评估路径，就把 `ConsumerSample.Avalonia -- --proof`、support-bundle 附件备注，以及 route ladder 之后的 `HostSample` proof 行放在同一条受限 intake 记录里。
@@ -106,6 +106,7 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 - `HOSTED_ACCESSIBILITY_FOCUS_OK:True`
 - `HOSTED_ACCESSIBILITY_AUTOMATION_NAVIGATION_OK:True`
 - `HOSTED_ACCESSIBILITY_AUTHORING_DIAGNOSTICS_OK:True`
+- `HOSTED_ACCESSIBILITY_AUTOMATION_OK:True`
 - `HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True`
 - `HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True`
 - `HOSTED_ACCESSIBILITY_OK:True`
