@@ -139,22 +139,26 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
         var quickReferenceBundleBlockZh = ExtractBlock(quickReferenceSectionZh, bundleMarkerHeadingZh, "support bundle 只保留本地证据，不会扩大 support 边界。");
 
         Assert.Contains("CONSUMER_SAMPLE_TRUST_OK:True", quickReferenceProofBlockEn, StringComparison.Ordinal);
+        Assert.Contains("CONSUMER_SAMPLE_METADATA_PROJECTION_OK:True", quickReferenceProofBlockEn, StringComparison.Ordinal);
         Assert.Contains("COMMAND_SURFACE_OK:True", quickReferenceProofBlockEn, StringComparison.Ordinal);
         Assert.Contains("HOST_NATIVE_METRIC:*", quickReferenceProofBlockEn, StringComparison.Ordinal);
         Assert.DoesNotContain("SUPPORT_BUNDLE_OK", quickReferenceProofBlockEn, StringComparison.Ordinal);
         Assert.DoesNotContain("SUPPORT_BUNDLE_PATH", quickReferenceProofBlockEn, StringComparison.Ordinal);
 
         Assert.Contains("CONSUMER_SAMPLE_TRUST_OK:True", quickReferenceProofBlockZh, StringComparison.Ordinal);
+        Assert.Contains("CONSUMER_SAMPLE_METADATA_PROJECTION_OK:True", quickReferenceProofBlockZh, StringComparison.Ordinal);
         Assert.Contains("COMMAND_SURFACE_OK:True", quickReferenceProofBlockZh, StringComparison.Ordinal);
         Assert.Contains("HOST_NATIVE_METRIC:*", quickReferenceProofBlockZh, StringComparison.Ordinal);
         Assert.DoesNotContain("SUPPORT_BUNDLE_OK", quickReferenceProofBlockZh, StringComparison.Ordinal);
         Assert.DoesNotContain("SUPPORT_BUNDLE_PATH", quickReferenceProofBlockZh, StringComparison.Ordinal);
 
         Assert.Contains("SUPPORT_BUNDLE_OK:True", quickReferenceBundleBlockEn, StringComparison.Ordinal);
+        Assert.Contains("SUPPORT_BUNDLE_PERSISTENCE_OK:True", quickReferenceBundleBlockEn, StringComparison.Ordinal);
         Assert.Contains("SUPPORT_BUNDLE_PATH:...", quickReferenceBundleBlockEn, StringComparison.Ordinal);
         Assert.DoesNotContain("COMMAND_SURFACE_OK", quickReferenceBundleBlockEn, StringComparison.Ordinal);
 
         Assert.Contains("SUPPORT_BUNDLE_OK:True", quickReferenceBundleBlockZh, StringComparison.Ordinal);
+        Assert.Contains("SUPPORT_BUNDLE_PERSISTENCE_OK:True", quickReferenceBundleBlockZh, StringComparison.Ordinal);
         Assert.Contains("SUPPORT_BUNDLE_PATH:...", quickReferenceBundleBlockZh, StringComparison.Ordinal);
         Assert.DoesNotContain("COMMAND_SURFACE_OK", quickReferenceBundleBlockZh, StringComparison.Ordinal);
 
@@ -171,10 +175,12 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
             var bundleBlock = ExtractBlock(proofHandoffSection, bundleHeading, "## ");
 
             Assert.Contains("CONSUMER_SAMPLE_HOST_ACTION_OK:True", proofBlock, StringComparison.Ordinal);
+            Assert.Contains("CONSUMER_SAMPLE_METADATA_PROJECTION_OK:True", proofBlock, StringComparison.Ordinal);
             Assert.DoesNotContain("SUPPORT_BUNDLE_OK", proofBlock, StringComparison.Ordinal);
             Assert.DoesNotContain("SUPPORT_BUNDLE_PATH", proofBlock, StringComparison.Ordinal);
 
             Assert.Contains("SUPPORT_BUNDLE_OK", bundleBlock, StringComparison.Ordinal);
+            Assert.Contains("SUPPORT_BUNDLE_PERSISTENCE_OK", bundleBlock, StringComparison.Ordinal);
             Assert.Contains("SUPPORT_BUNDLE_PATH", bundleBlock, StringComparison.Ordinal);
             Assert.Contains("CONSUMER_SAMPLE_OK", bundleBlock, StringComparison.Ordinal);
         }

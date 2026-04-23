@@ -5,6 +5,7 @@ using Avalonia.Controls;
 using Avalonia.Headless;
 using AsterGraph.Avalonia.Hosting;
 using AsterGraph.Core.Models;
+using AsterGraph.Editor.Runtime;
 using Avalonia.Themes.Fluent;
 using Avalonia.VisualTree;
 
@@ -13,7 +14,8 @@ namespace AsterGraph.ConsumerSample;
 public sealed record ConsumerSampleProofResult(
     bool HostMenuActionOk,
     bool PluginContributionOk,
-    bool ParameterEditingOk,
+    bool ParameterProjectionOk,
+    bool MetadataProjectionOk,
     bool WindowCompositionOk,
     bool TrustTransparencyOk,
     bool CommandSurfaceOk,
@@ -25,7 +27,8 @@ public sealed record ConsumerSampleProofResult(
     public bool IsOk
         => HostMenuActionOk
         && PluginContributionOk
-        && ParameterEditingOk
+        && ParameterProjectionOk
+        && MetadataProjectionOk
         && WindowCompositionOk
         && TrustTransparencyOk
         && CommandSurfaceOk;
@@ -42,7 +45,8 @@ public sealed record ConsumerSampleProofResult(
     [
         $"CONSUMER_SAMPLE_HOST_ACTION_OK:{HostMenuActionOk}",
         $"CONSUMER_SAMPLE_PLUGIN_OK:{PluginContributionOk}",
-        $"CONSUMER_SAMPLE_PARAMETER_OK:{ParameterEditingOk}",
+        $"CONSUMER_SAMPLE_PARAMETER_OK:{ParameterProjectionOk}",
+        $"CONSUMER_SAMPLE_METADATA_PROJECTION_OK:{MetadataProjectionOk}",
         $"CONSUMER_SAMPLE_WINDOW_OK:{WindowCompositionOk}",
         $"CONSUMER_SAMPLE_TRUST_OK:{TrustTransparencyOk}",
         $"COMMAND_SURFACE_OK:{CommandSurfaceOk}",
@@ -71,8 +75,10 @@ public static class ConsumerSampleProof
         window.Show();
 
         host.SelectNode(host.GetFirstReviewNodeId());
-        var inspectorProjectionMs = MeasureMilliseconds(() => host.GetSelectedParameterSnapshots().ToArray());
+        GraphEditorNodeParameterSnapshot[] selectedParameterSnapshots = [];
+        var inspectorProjectionMs = MeasureMilliseconds(() => selectedParameterSnapshots = host.GetSelectedParameterSnapshots().ToArray());
         var pluginScanMs = MeasureMilliseconds(() => host.PluginCandidates.ToArray());
+        var metadataProjectionOk = HasMetadataProjection(selectedParameterSnapshots);
 
         var commandBaseline = host.Session.Queries.CreateDocumentSnapshot().Nodes.Count;
         host.Session.Commands.AddNode(ConsumerSampleHost.ReviewDefinitionId, new GraphPoint(880, 220));
@@ -94,7 +100,7 @@ public static class ConsumerSampleProof
             && host.Session.Queries.CreateDocumentSnapshot().Nodes.Count == afterHostSnapshot.Nodes.Count + 1;
 
         host.SelectNode(host.GetFirstReviewNodeId());
-        var parameterEditingOk = host.TrySetSelectedOwner("release-owner")
+        var parameterProjectionOk = host.TrySetSelectedOwner("release-owner")
             && host.ApproveSelection()
             && host.GetSelectedParameterSnapshots().Any(snapshot =>
                 snapshot.Definition.Key == "status"
@@ -126,7 +132,8 @@ public static class ConsumerSampleProof
         return new ConsumerSampleProofResult(
             HostMenuActionOk: hostMenuActionOk,
             PluginContributionOk: pluginContributionOk,
-            ParameterEditingOk: parameterEditingOk,
+            ParameterProjectionOk: parameterProjectionOk,
+            MetadataProjectionOk: metadataProjectionOk,
             WindowCompositionOk: windowCompositionOk,
             TrustTransparencyOk: trustTransparencyOk,
             CommandSurfaceOk: commandSurfaceOk,
@@ -149,6 +156,26 @@ public static class ConsumerSampleProof
         stopwatch.Stop();
         return stopwatch.Elapsed.TotalMilliseconds;
     }
+
+    private static bool HasMetadataProjection(IReadOnlyList<GraphEditorNodeParameterSnapshot> snapshots)
+        => snapshots.Any(snapshot =>
+            snapshot.Definition.Key == "status"
+            && snapshot.Definition.DisplayName == "Status"
+            && string.Equals(snapshot.Definition.Description, "Approval state managed by the host menu action.", StringComparison.Ordinal)
+            && string.Equals(snapshot.Definition.DefaultValue?.ToString(), "draft", StringComparison.Ordinal)
+            && snapshot.Definition.Constraints.AllowedOptions.Count == 3)
+        && snapshots.Any(snapshot =>
+            snapshot.Definition.Key == "owner"
+            && snapshot.Definition.DisplayName == "Owner"
+            && string.Equals(snapshot.Definition.Description, "Host-assigned owner used by the custom parameter panel.", StringComparison.Ordinal)
+            && string.Equals(snapshot.Definition.DefaultValue?.ToString(), "design-review", StringComparison.Ordinal))
+        && snapshots.Any(snapshot =>
+            snapshot.Definition.Key == "priority"
+            && snapshot.Definition.DisplayName == "Priority"
+            && string.Equals(snapshot.Definition.Description, "Priority bucket for the sample review lane.", StringComparison.Ordinal)
+            && Equals(snapshot.Definition.DefaultValue, 2)
+            && snapshot.Definition.Constraints.Minimum == 1
+            && snapshot.Definition.Constraints.Maximum == 5);
 }
 
 public static class ConsumerSampleHeadlessEnvironment

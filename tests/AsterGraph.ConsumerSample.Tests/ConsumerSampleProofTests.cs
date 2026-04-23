@@ -49,7 +49,8 @@ public sealed class ConsumerSampleProofTests
         Assert.True(result.IsOk);
         Assert.True(result.HostMenuActionOk);
         Assert.True(result.PluginContributionOk);
-        Assert.True(result.ParameterEditingOk);
+        Assert.True(result.ParameterProjectionOk);
+        Assert.True(result.MetadataProjectionOk);
         Assert.True(result.TrustTransparencyOk);
         Assert.True(result.CommandSurfaceOk);
         Assert.True(result.StartupMs >= 0);
@@ -83,11 +84,13 @@ public sealed class ConsumerSampleProofTests
         var generatedAtUtc = root.GetProperty("generatedAtUtc").GetString();
         var environment = root.GetProperty("environment");
         var reproduction = root.GetProperty("reproduction");
+        var persistenceStatus = root.GetProperty("persistenceStatus").GetString();
 
         Assert.Equal(1, root.GetProperty("schemaVersion").GetInt32());
         Assert.Equal("ConsumerSample.Avalonia", root.GetProperty("route").GetString());
         Assert.False(string.IsNullOrWhiteSpace(packageVersion));
         Assert.Equal($"v{packageVersion}", publicTag);
+        Assert.Equal("written", persistenceStatus);
         Assert.True(
             DateTimeOffset.TryParse(generatedAtUtc, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out _),
             "Support bundle generatedAtUtc should be a parseable round-trip UTC timestamp.");
@@ -95,6 +98,7 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(proofLines, line => line == "CONSUMER_SAMPLE_HOST_ACTION_OK:True");
         Assert.Contains(proofLines, line => line == "CONSUMER_SAMPLE_PLUGIN_OK:True");
         Assert.Contains(proofLines, line => line == "CONSUMER_SAMPLE_PARAMETER_OK:True");
+        Assert.Contains(proofLines, line => line == "CONSUMER_SAMPLE_METADATA_PROJECTION_OK:True");
         Assert.Contains(proofLines, line => line == "CONSUMER_SAMPLE_WINDOW_OK:True");
         Assert.Contains(proofLines, line => line == "CONSUMER_SAMPLE_TRUST_OK:True");
         Assert.Contains(proofLines, line => line == "COMMAND_SURFACE_OK:True");
@@ -136,6 +140,7 @@ public sealed class ConsumerSampleProofTests
 
         var lines = output.ToString();
         Assert.Contains("SUPPORT_BUNDLE_OK:True", lines, StringComparison.Ordinal);
+        Assert.Contains("SUPPORT_BUNDLE_PERSISTENCE_OK:True", lines, StringComparison.Ordinal);
         Assert.Contains("SUPPORT_BUNDLE_PATH:", lines, StringComparison.Ordinal);
         Assert.True(File.Exists(bundlePath));
     }

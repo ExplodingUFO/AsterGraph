@@ -15,8 +15,11 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 
 Expected additional proof markers:
 
+- `SUPPORT_BUNDLE_PERSISTENCE_OK:True`
 - `SUPPORT_BUNDLE_OK:True`
 - `SUPPORT_BUNDLE_PATH:...`
+
+If the write fails, the proof run emits `SUPPORT_BUNDLE_PERSISTENCE_OK:False` before it stops.
 
 ## Local Evidence Only
 
@@ -37,11 +40,14 @@ The support bundle is one local JSON file with these top-level fields:
 - `publicTag`
 - `route`
 - `generatedAtUtc`
+- `persistenceStatus`
 - `proofLines`
 - `environment`
 - `reproduction`
 
-`proofLines` should include the full marker set emitted by proof mode: `CONSUMER_SAMPLE_HOST_ACTION_OK:True`, `CONSUMER_SAMPLE_PLUGIN_OK:True`, `CONSUMER_SAMPLE_PARAMETER_OK:True`, `CONSUMER_SAMPLE_WINDOW_OK:True`, `CONSUMER_SAMPLE_TRUST_OK:True`, `COMMAND_SURFACE_OK:True`, `HOST_NATIVE_METRIC:startup_ms=...`, `HOST_NATIVE_METRIC:inspector_projection_ms=...`, `HOST_NATIVE_METRIC:plugin_scan_ms=...`, `HOST_NATIVE_METRIC:command_latency_ms=...`, and `CONSUMER_SAMPLE_OK:True`.
+`persistenceStatus` records the bundle write outcome. For the current proof path it is `written`.
+
+`proofLines` should include the full marker set emitted by proof mode: `CONSUMER_SAMPLE_HOST_ACTION_OK:True`, `CONSUMER_SAMPLE_PLUGIN_OK:True`, `CONSUMER_SAMPLE_PARAMETER_OK:True`, `CONSUMER_SAMPLE_METADATA_PROJECTION_OK:True`, `CONSUMER_SAMPLE_WINDOW_OK:True`, `CONSUMER_SAMPLE_TRUST_OK:True`, `COMMAND_SURFACE_OK:True`, `HOST_NATIVE_METRIC:startup_ms=...`, `HOST_NATIVE_METRIC:inspector_projection_ms=...`, `HOST_NATIVE_METRIC:plugin_scan_ms=...`, `HOST_NATIVE_METRIC:command_latency_ms=...`, and `CONSUMER_SAMPLE_OK:True`.
 
 `environment` records the local runtime and OS details used for the run.
 

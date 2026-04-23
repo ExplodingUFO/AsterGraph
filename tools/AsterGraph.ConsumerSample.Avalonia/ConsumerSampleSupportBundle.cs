@@ -26,6 +26,7 @@ internal static class ConsumerSampleSupportBundle
             PublicTag: $"v{packageVersion}",
             Route: "ConsumerSample.Avalonia",
             GeneratedAtUtc: DateTimeOffset.UtcNow,
+            PersistenceStatus: "written",
             ProofLines: result.ProofLines,
             Environment: new ConsumerSampleSupportEnvironment(
                 RuntimeInformation.FrameworkDescription,
@@ -69,6 +70,7 @@ internal static class ConsumerSampleSupportBundle
         string PublicTag,
         string Route,
         DateTimeOffset GeneratedAtUtc,
+        string PersistenceStatus,
         IReadOnlyList<string> ProofLines,
         ConsumerSampleSupportEnvironment Environment,
         ConsumerSampleSupportReproduction Reproduction);

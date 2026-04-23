@@ -65,11 +65,13 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 Expected proof markers:
 
 - `CONSUMER_SAMPLE_TRUST_OK:True`
+- `CONSUMER_SAMPLE_METADATA_PROJECTION_OK:True`
 - `COMMAND_SURFACE_OK:True`
 - `HOST_NATIVE_METRIC:*`
 
 Expected bundle markers when `--support-bundle <support-bundle-path>` is supplied:
 
+- `SUPPORT_BUNDLE_PERSISTENCE_OK:True`
 - `SUPPORT_BUNDLE_OK:True`
 - `SUPPORT_BUNDLE_PATH:...`
 
@@ -116,6 +118,7 @@ Expected proof markers:
 - `CONSUMER_SAMPLE_HOST_ACTION_OK:True`
 - `CONSUMER_SAMPLE_PLUGIN_OK:True`
 - `CONSUMER_SAMPLE_PARAMETER_OK:True`
+- `CONSUMER_SAMPLE_METADATA_PROJECTION_OK:True`
 - `CONSUMER_SAMPLE_WINDOW_OK:True`
 - `CONSUMER_SAMPLE_TRUST_OK:True`
 - `COMMAND_SURFACE_OK:True`
@@ -126,6 +129,7 @@ Expected proof markers:
 
 Expected bundle markers when `--support-bundle <support-bundle-path>` is supplied:
 
+- `SUPPORT_BUNDLE_PERSISTENCE_OK:True`
 - `SUPPORT_BUNDLE_OK:True`
 - `SUPPORT_BUNDLE_PATH:...`
 - `CONSUMER_SAMPLE_OK:True`

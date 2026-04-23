@@ -65,11 +65,13 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 预期 proof marker：
 
 - `CONSUMER_SAMPLE_TRUST_OK:True`
+- `CONSUMER_SAMPLE_METADATA_PROJECTION_OK:True`
 - `COMMAND_SURFACE_OK:True`
 - `HOST_NATIVE_METRIC:*`
 
 当提供 `--support-bundle <support-bundle-path>` 时，预期 bundle marker：
 
+- `SUPPORT_BUNDLE_PERSISTENCE_OK:True`
 - `SUPPORT_BUNDLE_OK:True`
 - `SUPPORT_BUNDLE_PATH:...`
 
@@ -116,6 +118,7 @@ Proof Handoff 负责实际 intake 说明。
 - `CONSUMER_SAMPLE_HOST_ACTION_OK:True`
 - `CONSUMER_SAMPLE_PLUGIN_OK:True`
 - `CONSUMER_SAMPLE_PARAMETER_OK:True`
+- `CONSUMER_SAMPLE_METADATA_PROJECTION_OK:True`
 - `CONSUMER_SAMPLE_WINDOW_OK:True`
 - `CONSUMER_SAMPLE_TRUST_OK:True`
 - `COMMAND_SURFACE_OK:True`
@@ -126,6 +129,7 @@ Proof Handoff 负责实际 intake 说明。
 
 当提供 `--support-bundle <support-bundle-path>` 时，预期 bundle marker：
 
+- `SUPPORT_BUNDLE_PERSISTENCE_OK:True`
 - `SUPPORT_BUNDLE_OK:True`
 - `SUPPORT_BUNDLE_PATH:...`
 - `CONSUMER_SAMPLE_OK:True`

@@ -15,8 +15,11 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 
 额外会输出两条 proof marker：
 
+- `SUPPORT_BUNDLE_PERSISTENCE_OK:True`
 - `SUPPORT_BUNDLE_OK:True`
 - `SUPPORT_BUNDLE_PATH:...`
+
+如果写入失败，proof 运行会先输出 `SUPPORT_BUNDLE_PERSISTENCE_OK:False`，然后再停止。
 
 ## 仅限本地证据
 
@@ -37,11 +40,14 @@ support bundle 是一个本地 JSON 文件，顶层字段固定为：
 - `publicTag`
 - `route`
 - `generatedAtUtc`
+- `persistenceStatus`
 - `proofLines`
 - `environment`
 - `reproduction`
 
-`proofLines` 里应该包含 proof mode 已经输出的完整 marker 集：`CONSUMER_SAMPLE_HOST_ACTION_OK:True`、`CONSUMER_SAMPLE_PLUGIN_OK:True`、`CONSUMER_SAMPLE_PARAMETER_OK:True`、`CONSUMER_SAMPLE_WINDOW_OK:True`、`CONSUMER_SAMPLE_TRUST_OK:True`、`COMMAND_SURFACE_OK:True`、`HOST_NATIVE_METRIC:startup_ms=...`、`HOST_NATIVE_METRIC:inspector_projection_ms=...`、`HOST_NATIVE_METRIC:plugin_scan_ms=...`、`HOST_NATIVE_METRIC:command_latency_ms=...` 这些行，以及 `CONSUMER_SAMPLE_OK:True`。
+`persistenceStatus` 记录 bundle 写入结果。当前 proof 路线里它是 `written`。
+
+`proofLines` 里应该包含 proof mode 已经输出的完整 marker 集：`CONSUMER_SAMPLE_HOST_ACTION_OK:True`、`CONSUMER_SAMPLE_PLUGIN_OK:True`、`CONSUMER_SAMPLE_PARAMETER_OK:True`、`CONSUMER_SAMPLE_METADATA_PROJECTION_OK:True`、`CONSUMER_SAMPLE_WINDOW_OK:True`、`CONSUMER_SAMPLE_TRUST_OK:True`、`COMMAND_SURFACE_OK:True`、`HOST_NATIVE_METRIC:startup_ms=...`、`HOST_NATIVE_METRIC:inspector_projection_ms=...`、`HOST_NATIVE_METRIC:plugin_scan_ms=...`、`HOST_NATIVE_METRIC:command_latency_ms=...` 这些行，以及 `CONSUMER_SAMPLE_OK:True`。
 
 `environment` 记录本次运行所在的 runtime 和操作系统信息。
 

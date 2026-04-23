@@ -61,11 +61,20 @@ public static class Program
 
             if (!string.IsNullOrWhiteSpace(supportBundlePath))
             {
-                ConsumerSampleSupportBundle.WriteProofBundle(
-                    supportBundlePath,
-                    result,
-                    GetCapturedCommandLine(),
-                    supportNote);
+                try
+                {
+                    ConsumerSampleSupportBundle.WriteProofBundle(
+                        supportBundlePath,
+                        result,
+                        GetCapturedCommandLine(),
+                        supportNote);
+                    Console.WriteLine("SUPPORT_BUNDLE_PERSISTENCE_OK:True");
+                }
+                catch
+                {
+                    Console.WriteLine("SUPPORT_BUNDLE_PERSISTENCE_OK:False");
+                    throw;
+                }
 
                 Console.WriteLine("SUPPORT_BUNDLE_OK:True");
                 Console.WriteLine($"SUPPORT_BUNDLE_PATH:{Path.GetFullPath(supportBundlePath)}");
