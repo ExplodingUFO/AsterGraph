@@ -165,32 +165,10 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
 
         AssertContains(supportBundleEn, "Local evidence only");
         AssertContains(supportBundleEn, "Copyable local evidence reference");
-        AssertContains(supportBundleEn, "`proofLines` should include the full marker set emitted by proof mode");
-        AssertContains(supportBundleEn, "CONSUMER_SAMPLE_HOST_ACTION_OK:True");
-        AssertContains(supportBundleEn, "CONSUMER_SAMPLE_PLUGIN_OK:True");
-        AssertContains(supportBundleEn, "CONSUMER_SAMPLE_PARAMETER_OK:True");
-        AssertContains(supportBundleEn, "CONSUMER_SAMPLE_WINDOW_OK:True");
-        AssertContains(supportBundleEn, "CONSUMER_SAMPLE_TRUST_OK:True");
-        AssertContains(supportBundleEn, "COMMAND_SURFACE_OK:True");
-        AssertContains(supportBundleEn, "HOST_NATIVE_METRIC:startup_ms");
-        AssertContains(supportBundleEn, "HOST_NATIVE_METRIC:inspector_projection_ms");
-        AssertContains(supportBundleEn, "HOST_NATIVE_METRIC:plugin_scan_ms");
-        AssertContains(supportBundleEn, "HOST_NATIVE_METRIC:command_latency_ms");
-        AssertContains(supportBundleEn, "CONSUMER_SAMPLE_OK:True");
+        ConsumerSampleDocsAssertions.AssertSupportBundleProofMarkers(supportBundleEn);
         AssertContains(supportBundleZh, "仅限本地证据");
         AssertContains(supportBundleZh, "可复制的本地证据参考");
-        AssertContains(supportBundleZh, "`proofLines` 里应该包含 proof mode 已经输出的完整 marker 集");
-        AssertContains(supportBundleZh, "CONSUMER_SAMPLE_HOST_ACTION_OK:True");
-        AssertContains(supportBundleZh, "CONSUMER_SAMPLE_PLUGIN_OK:True");
-        AssertContains(supportBundleZh, "CONSUMER_SAMPLE_PARAMETER_OK:True");
-        AssertContains(supportBundleZh, "CONSUMER_SAMPLE_WINDOW_OK:True");
-        AssertContains(supportBundleZh, "CONSUMER_SAMPLE_TRUST_OK:True");
-        AssertContains(supportBundleZh, "COMMAND_SURFACE_OK:True");
-        AssertContains(supportBundleZh, "HOST_NATIVE_METRIC:startup_ms");
-        AssertContains(supportBundleZh, "HOST_NATIVE_METRIC:inspector_projection_ms");
-        AssertContains(supportBundleZh, "HOST_NATIVE_METRIC:plugin_scan_ms");
-        AssertContains(supportBundleZh, "HOST_NATIVE_METRIC:command_latency_ms");
-        AssertContains(supportBundleZh, "CONSUMER_SAMPLE_OK:True");
+        ConsumerSampleDocsAssertions.AssertSupportBundleProofMarkers(supportBundleZh);
 
         AssertAppearsBefore(consumerSampleEn, "Plugin Manifest and Trust Policy Contract v1", "## What It Proves");
         AssertAppearsBefore(consumerSampleEn, "Beta Support Bundle", "## What It Proves");

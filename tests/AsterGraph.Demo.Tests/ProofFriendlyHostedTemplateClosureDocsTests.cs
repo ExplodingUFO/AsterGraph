@@ -62,34 +62,12 @@ public sealed class ProofFriendlyHostedTemplateClosureDocsTests
         Assert.Contains("SUPPORT_BUNDLE_OK:True", quickReferenceBundleBlockEn, StringComparison.Ordinal);
         Assert.Contains("SUPPORT_BUNDLE_PATH:...", quickReferenceBundleBlockEn, StringComparison.Ordinal);
         Assert.DoesNotContain("COMMAND_SURFACE_OK", quickReferenceBundleBlockEn, StringComparison.Ordinal);
-        Assert.Contains("`proofLines` should include the full marker set emitted by proof mode", supportBundleEn, StringComparison.Ordinal);
-        Assert.Contains("CONSUMER_SAMPLE_HOST_ACTION_OK:True", supportBundleEn, StringComparison.Ordinal);
-        Assert.Contains("CONSUMER_SAMPLE_PLUGIN_OK:True", supportBundleEn, StringComparison.Ordinal);
-        Assert.Contains("CONSUMER_SAMPLE_PARAMETER_OK:True", supportBundleEn, StringComparison.Ordinal);
-        Assert.Contains("CONSUMER_SAMPLE_WINDOW_OK:True", supportBundleEn, StringComparison.Ordinal);
-        Assert.Contains("CONSUMER_SAMPLE_TRUST_OK:True", supportBundleEn, StringComparison.Ordinal);
-        Assert.Contains("COMMAND_SURFACE_OK:True", supportBundleEn, StringComparison.Ordinal);
-        Assert.Contains("HOST_NATIVE_METRIC:startup_ms", supportBundleEn, StringComparison.Ordinal);
-        Assert.Contains("HOST_NATIVE_METRIC:inspector_projection_ms", supportBundleEn, StringComparison.Ordinal);
-        Assert.Contains("HOST_NATIVE_METRIC:plugin_scan_ms", supportBundleEn, StringComparison.Ordinal);
-        Assert.Contains("HOST_NATIVE_METRIC:command_latency_ms", supportBundleEn, StringComparison.Ordinal);
-        Assert.Contains("CONSUMER_SAMPLE_OK:True", supportBundleEn, StringComparison.Ordinal);
+        ConsumerSampleDocsAssertions.AssertSupportBundleProofMarkers(supportBundleEn);
 
         Assert.Contains("SUPPORT_BUNDLE_OK:True", quickReferenceBundleBlockZh, StringComparison.Ordinal);
         Assert.Contains("SUPPORT_BUNDLE_PATH:...", quickReferenceBundleBlockZh, StringComparison.Ordinal);
         Assert.DoesNotContain("COMMAND_SURFACE_OK", quickReferenceBundleBlockZh, StringComparison.Ordinal);
-        Assert.Contains("`proofLines` 里应该包含 proof mode 已经输出的完整 marker 集", supportBundleZh, StringComparison.Ordinal);
-        Assert.Contains("CONSUMER_SAMPLE_HOST_ACTION_OK:True", supportBundleZh, StringComparison.Ordinal);
-        Assert.Contains("CONSUMER_SAMPLE_PLUGIN_OK:True", supportBundleZh, StringComparison.Ordinal);
-        Assert.Contains("CONSUMER_SAMPLE_PARAMETER_OK:True", supportBundleZh, StringComparison.Ordinal);
-        Assert.Contains("CONSUMER_SAMPLE_WINDOW_OK:True", supportBundleZh, StringComparison.Ordinal);
-        Assert.Contains("CONSUMER_SAMPLE_TRUST_OK:True", supportBundleZh, StringComparison.Ordinal);
-        Assert.Contains("COMMAND_SURFACE_OK:True", supportBundleZh, StringComparison.Ordinal);
-        Assert.Contains("HOST_NATIVE_METRIC:startup_ms", supportBundleZh, StringComparison.Ordinal);
-        Assert.Contains("HOST_NATIVE_METRIC:inspector_projection_ms", supportBundleZh, StringComparison.Ordinal);
-        Assert.Contains("HOST_NATIVE_METRIC:plugin_scan_ms", supportBundleZh, StringComparison.Ordinal);
-        Assert.Contains("HOST_NATIVE_METRIC:command_latency_ms", supportBundleZh, StringComparison.Ordinal);
-        Assert.Contains("CONSUMER_SAMPLE_OK:True", supportBundleZh, StringComparison.Ordinal);
+        ConsumerSampleDocsAssertions.AssertSupportBundleProofMarkers(supportBundleZh);
 
         var proofHandoffSectionEn = ExtractBlock(consumerSampleEn, "## Proof Handoff", "## When To Use This Sample");
         var proofHandoffSectionZh = ExtractBlock(consumerSampleZh, "## Proof Handoff", "## 什么时候看它");
@@ -117,7 +95,7 @@ public sealed class ProofFriendlyHostedTemplateClosureDocsTests
         Assert.Contains("SUPPORT_BUNDLE_PATH:...", supportBundleEn, StringComparison.Ordinal);
         Assert.Contains("NO_SUPPORT_BUNDLE", supportBundleEn, StringComparison.Ordinal);
         Assert.Contains("local evidence", supportBundleEn, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("`proofLines` should include the full marker set emitted by proof mode", supportBundleEn, StringComparison.Ordinal);
+        ConsumerSampleDocsAssertions.AssertSupportBundleProofMarkers(supportBundleEn);
         Assert.DoesNotContain("artifacts/consumer-support-bundle.json", supportBundleEn, StringComparison.Ordinal);
 
         Assert.Contains("ConsumerSample.Avalonia", supportBundleZh, StringComparison.Ordinal);
@@ -125,7 +103,7 @@ public sealed class ProofFriendlyHostedTemplateClosureDocsTests
         Assert.Contains("SUPPORT_BUNDLE_PATH:...", supportBundleZh, StringComparison.Ordinal);
         Assert.Contains("NO_SUPPORT_BUNDLE", supportBundleZh, StringComparison.Ordinal);
         Assert.Contains("本地证据", supportBundleZh, StringComparison.Ordinal);
-        Assert.Contains("`proofLines` 里应该包含 proof mode 已经输出的完整 marker 集", supportBundleZh, StringComparison.Ordinal);
+        ConsumerSampleDocsAssertions.AssertSupportBundleProofMarkers(supportBundleZh);
         Assert.DoesNotContain("artifacts/consumer-support-bundle.json", supportBundleZh, StringComparison.Ordinal);
     }
 
