@@ -234,14 +234,16 @@ public static class ConsumerSampleHeadlessEnvironment
 
     public static void EnsureInitialized()
     {
-        if (_initialized)
+        if (_initialized || Application.Current is not null)
         {
+            _initialized = true;
             return;
         }
 
         AppBuilder.Configure<ConsumerSampleProofApp>()
             .UseHeadless(new AvaloniaHeadlessPlatformOptions())
             .SetupWithoutStarting();
+
         _initialized = true;
     }
 }

@@ -1,0 +1,75 @@
+# Authoring Surface Recipe
+
+Use this recipe when you want one copyable host-owned path for custom node, port, parameter, and edge presentation on top of the canonical session route.
+
+`ConsumerSample.Avalonia` is the concrete host that carries this recipe in code. Pair this document with [Authoring Inspector Recipe](./authoring-inspector-recipe.md) for metadata vocabulary and with [Consumer Sample](./consumer-sample.md) for the sample-owned host boundary.
+
+## Copyable custom authoring presentation
+
+This recipe stays on `Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` and reuses the same `IGraphEditorSession` owner. It does not add adapter-specific runtime forks.
+
+## PRES-01: Multi-handle custom nodes
+
+Use `NodeDefinition` plus multiple input and output ports to declare the handle surface, then project it through `IGraphNodeVisualPresenter`.
+
+- `ConsumerSampleHost.CreateReviewDefinition()` keeps the node facts in one place: multiple inputs, multiple outputs, `defaultWidth`, and `defaultHeight`.
+- `ConsumerSampleNodeVisualPresenter` maps those `NodeDefinition` facts into one replaceable visual tree without changing the runtime/session contract.
+- `GraphNodeVisual.PortAnchors` is the only anchor map the stock canvas needs for committed connections.
+
+Copy this shape:
+
+- keep multi-handle facts in `NodeDefinition`
+- keep size defaults in `defaultWidth` and `defaultHeight`
+- keep the visual replacement in `IGraphNodeVisualPresenter`
+- keep the session/runtime owner unchanged underneath
+
+## PRES-02: Resizable nodes and node-toolbar surfaces
+
+Use the shared surface/query path for sizing and the shared tool/action path for node-local toolbar buttons.
+
+- Read size and tier state from `GetNodeSurfaceSnapshots()`.
+- Persist changes through `TrySetNodeSize(...)`.
+- Project node-local actions from `GetToolDescriptors(...)`.
+- Scope those actions with `GraphEditorToolContextSnapshot.ForNode(...)`.
+- Reuse `AsterGraphHostedActionFactory.CreateToolActions(...)` when the host wants a toolbar outside the node surface.
+
+`ConsumerSampleNodeVisualPresenter` shows the smallest useful split:
+
+- the node toolbar is sample-owned presentation
+- width and height still mutate through `TrySetNodeSize(...)`
+- the stock canvas keeps resize handles and pointer routing
+- the host does not need an adapter-specific runtime fork for toolbar behavior
+
+## PRES-03: Custom port and edge presentation
+
+Keep custom port and edge visuals on top of shared anchors and geometry snapshots.
+
+- Use `GraphNodeVisual.PortAnchors` for custom port placement.
+- Use `GraphNodeVisual.ConnectionTargetAnchors` for typed parameter endpoints.
+- Use `GetConnectionGeometrySnapshots()` for host-owned custom edge presentation.
+- Keep the edge overlay separate from the stock renderer when you want sample-owned or product-owned visuals.
+
+`ConsumerSampleConnectionOverlay` is the bounded sample path here: it reads `GetConnectionGeometrySnapshots()`, derives edge badge positions, and renders host-owned connection labels without changing the runtime route.
+
+## Parameter editors inside the same recipe
+
+Keep parameter metadata in [Authoring Inspector Recipe](./authoring-inspector-recipe.md), then swap editor bodies through `INodeParameterEditorRegistry`.
+
+- `ConsumerSampleAuthoringSurfaceRecipe.CreatePresentationOptions()` wires the sample presenter and registry into `AsterGraphPresentationOptions`.
+- `NodeParameterEditorHost` keeps editor creation bounded to `INodeParameterEditorRegistry`.
+- Template-specific editor bodies stay sample-owned; metadata vocabulary stays in the inspector recipe.
+
+## Copy path
+
+1. Define the node and parameter facts in `NodeDefinition`, including multiple inputs/outputs, `defaultWidth`, `defaultHeight`, and parameter `templateKey` values.
+2. Add `ConsumerSampleAuthoringSurfaceRecipe.CreatePresentationOptions()`-style wiring to `AsterGraphAvaloniaViewOptions.Presentation`.
+3. Replace node visuals through `IGraphNodeVisualPresenter`.
+4. Replace editor bodies through `INodeParameterEditorRegistry`.
+5. Render any host-owned edge overlay from `GetConnectionGeometrySnapshots()`.
+
+## Related docs
+
+- [Authoring Inspector Recipe](./authoring-inspector-recipe.md)
+- [Consumer Sample](./consumer-sample.md)
+- [Host Integration](./host-integration.md)
+- [Advanced Editing Guide](./advanced-editing.md)

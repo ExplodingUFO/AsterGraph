@@ -23,6 +23,7 @@
 - `src/AsterGraph.Demo` 是把这 5 条 advanced-editing module 一起公开展示出来的可视宿主。
 - `docs/zh-CN/demo-guide.md` 会用同一套 module 名称解释 proof marker。
 - `docs/zh-CN/host-integration.md` 会把 route-to-seam matrix 与这里对齐，避免宿主只能靠 retained-only 说明理解能力面。
+- [Authoring Surface Recipe](./authoring-surface-recipe.md) 是 hosted Avalonia 路线下可直接复制的 recipe，适合替换节点、端口、参数和边展示，但不改变 session 路线。
 
 ## 这不意味着什么
 

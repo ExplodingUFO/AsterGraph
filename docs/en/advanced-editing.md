@@ -23,6 +23,7 @@
 - `src/AsterGraph.Demo` is the visual host that keeps all five advanced-editing modules visible together.
 - `docs/en/demo-guide.md` maps the proof markers to the same module names used here.
 - `docs/en/host-integration.md` keeps the route-to-seam matrix aligned with these modules so hosts do not need retained-only explanations.
+- [Authoring Surface Recipe](./authoring-surface-recipe.md) is the copyable hosted-Avalonia recipe when a host wants to replace node, port, parameter, and edge presentation without changing the session route.
 
 ## What This Does Not Mean
 

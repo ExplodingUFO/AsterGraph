@@ -2,6 +2,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Globalization;
 using Avalonia.Controls;
+using Avalonia.Headless.XUnit;
 using Avalonia.Interactivity;
 using Avalonia.VisualTree;
 using AsterGraph.Avalonia.Controls;
@@ -12,7 +13,7 @@ namespace AsterGraph.ConsumerSample.Tests;
 
 public sealed class ConsumerSampleProofTests
 {
-    [Fact]
+    [AvaloniaFact]
     public void ConsumerSampleHost_CombinesHostNodesPluginContributionsAndParameterEditing()
     {
         using var host = ConsumerSampleHost.Create();
@@ -41,7 +42,7 @@ public sealed class ConsumerSampleProofTests
         Assert.Equal("approved", approvedStatus.CurrentValue);
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void ConsumerSampleProof_Run_EmitsGreenMarkers()
     {
         var result = ConsumerSampleProof.Run();
@@ -61,7 +62,7 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(result.MetricLines, line => line.Contains("command_latency_ms", StringComparison.Ordinal));
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void ConsumerSampleProofResult_MetadataProjectionMarker_DoesNotFlipOverallProofStatus()
     {
         var result = new ConsumerSampleProofResult(
@@ -83,7 +84,7 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(result.ProofLines, line => line == "CONSUMER_SAMPLE_OK:True");
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void ConsumerSampleProof_CanWriteSupportBundleContract()
     {
         var result = ConsumerSampleProof.Run();
@@ -176,7 +177,7 @@ public sealed class ConsumerSampleProofTests
         Assert.Empty(prioritySnapshot.GetProperty("allowedOptions").EnumerateArray());
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void Program_SupportBundleOption_EmitsBundleMarkersAndFile()
     {
         var tempRoot = Path.Combine(Path.GetTempPath(), "AsterGraph.ConsumerSample.Tests", Guid.NewGuid().ToString("N"));
@@ -202,7 +203,7 @@ public sealed class ConsumerSampleProofTests
         Assert.True(File.Exists(bundlePath));
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void Program_SupportBundleOption_EmitsFalsePersistenceMarkerWhenWriteFails()
     {
         var tempRoot = Path.Combine(Path.GetTempPath(), "AsterGraph.ConsumerSample.Tests", Guid.NewGuid().ToString("N"));
@@ -225,7 +226,7 @@ public sealed class ConsumerSampleProofTests
         Assert.DoesNotContain("SUPPORT_BUNDLE_OK:True", lines, StringComparison.Ordinal);
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void Program_SupportBundleOption_RequiresExplicitPath()
     {
         var exception = Assert.Throws<ArgumentException>(() =>
@@ -234,7 +235,7 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains("--support-bundle requires a file path.", exception.Message, StringComparison.Ordinal);
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void ConsumerSampleHost_PersistsExportsAndImportsPluginAllowlistDecisions()
     {
         var storageRoot = Path.Combine(Path.GetTempPath(), "AsterGraph.ConsumerSample.Tests", Guid.NewGuid().ToString("N"));
@@ -256,10 +257,9 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(host.PluginAllowlistLines, line => line.Contains("Allowlist", StringComparison.Ordinal));
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void ConsumerSampleWindow_RendersHostedEditorAndIntegrationPanels()
     {
-        ConsumerSampleHeadlessEnvironment.EnsureInitialized();
         using var host = ConsumerSampleHost.Create();
         var window = ConsumerSampleWindowFactory.Create(host);
 
@@ -284,10 +284,9 @@ public sealed class ConsumerSampleProofTests
         }
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void ConsumerSampleWindow_CommandRailUsesSharedSessionActionPath()
     {
-        ConsumerSampleHeadlessEnvironment.EnsureInitialized();
         using var host = ConsumerSampleHost.Create();
         var window = ConsumerSampleWindowFactory.Create(host);
 

@@ -10,6 +10,7 @@
 - 选中节点参数读写 seam
 
 如果你要看 inspector metadata recipe，就把这条路线和 [Authoring Inspector Recipe](./authoring-inspector-recipe.md) 配在一起。这个样例只聚焦宿主自管 seam 和 shipped inspector surface；它不拥有元数据词汇。完整的 `defaultValue`、`isAdvanced`、`helpText`、`placeholderText` 和只读词汇都放在 canonical recipe 里。
+如果你要在同一条路线里复制自定义节点、端口和边展示，就再配上 [Authoring Surface Recipe](./authoring-surface-recipe.md)。
 
 这是把宿主自管 seam 复制到你自己的应用里的受防守 beta 路线。把 action projection、trust workflow 和选中节点参数读写 seam 保持在宿主里，只复制样例自有的展示细节。
 
@@ -181,6 +182,7 @@ Proof Handoff 负责实际 intake 说明。
 ## 相关文档
 
 - [Quick Start](./quick-start.md)
+- [Authoring Surface Recipe](./authoring-surface-recipe.md)
 - [Beta Support Bundle](./support-bundle.md)
 - [Host Integration](./host-integration.md)
 - [Sample README](../../tools/AsterGraph.ConsumerSample.Avalonia/README.md)

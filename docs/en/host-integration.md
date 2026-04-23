@@ -53,6 +53,7 @@ Copy from each bounded source for the part it owns:
 - Copy from `Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)`: shipped Avalonia composition for hosted UI hosts.
 - Copy from `ConsumerSample.Avalonia`: action projection, trust workflow, and selected-node parameter read/write seam only.
 - Copy from `Authoring Inspector Recipe`: definition-driven parameter metadata and stock inspector vocabulary.
+- Copy from [Authoring Surface Recipe](./authoring-surface-recipe.md): custom node, port, parameter-editor, and edge presentation on the hosted Avalonia route.
 - Keep the split explicit: the sample is the seam proof and the recipe is the metadata source.
 
 ## Sample Roles
@@ -153,5 +154,6 @@ For deeper proof, CI lanes, and release gates, use [CONTRIBUTING.md](../../CONTR
 
 - [Plugin And Custom Node Recipe](./plugin-recipe.md)
 - [Advanced Editing Guide](./advanced-editing.md)
+- [Authoring Surface Recipe](./authoring-surface-recipe.md)
 - [Retained-To-Session Migration Recipe](./retained-migration-recipe.md)
 - [ScaleSmoke Baseline](./scale-baseline.md)

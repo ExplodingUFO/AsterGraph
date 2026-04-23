@@ -22,9 +22,12 @@ public sealed class ConsumerSampleHost : IDisposable
     private const string InitialReviewNodeId = "consumer-sample-review-001";
     private const string InitialQueueNodeId = "consumer-sample-queue-001";
     private const string InputPortId = "input";
+    private const string ReviewPolicyPortId = "policy";
     private const string OutputPortId = "output";
+    private const string ReviewAuditPortId = "audit";
     private const string PluginId = "consumer.sample.audit-plugin";
     public const string PluginCommandId = "consumer.sample.plugin.add-audit-node";
+    internal static readonly GraphSize ReviewNodeDefaultSize = new(320, 220);
     private readonly GraphEditorViewModel _editor;
     private readonly ConsumerSamplePluginAllowlistTrustPolicy _trustPolicy;
     private readonly GraphEditorPluginDiscoveryOptions _pluginDiscoveryOptions;
@@ -238,12 +241,14 @@ public sealed class ConsumerSampleHost : IDisposable
                     "Review",
                     "Host-owned review node with shared parameter editing.",
                     new GraphPoint(140, 180),
-                    new GraphSize(260, 188),
+                    ReviewNodeDefaultSize,
                     [
                         new GraphPort(InputPortId, "Input", PortDirection.Input, "flow", "#F3B36B", new PortTypeId("flow")),
+                        new GraphPort(ReviewPolicyPortId, "Policy", PortDirection.Input, "policy", "#A5B4FC", new PortTypeId("policy")),
                     ],
                     [
                         new GraphPort(OutputPortId, "Output", PortDirection.Output, "flow", "#6AD5C4", new PortTypeId("flow")),
+                        new GraphPort(ReviewAuditPortId, "Audit", PortDirection.Output, "audit", "#FF8A5B", new PortTypeId("audit")),
                     ],
                     "#6AD5C4",
                     ReviewDefinitionId,
@@ -293,9 +298,11 @@ public sealed class ConsumerSampleHost : IDisposable
             "Review",
             [
                 new PortDefinition(InputPortId, "Input", new PortTypeId("flow"), "#F3B36B"),
+                new PortDefinition(ReviewPolicyPortId, "Policy", new PortTypeId("policy"), "#A5B4FC"),
             ],
             [
                 new PortDefinition(OutputPortId, "Output", new PortTypeId("flow"), "#6AD5C4"),
+                new PortDefinition(ReviewAuditPortId, "Audit", new PortTypeId("audit"), "#FF8A5B"),
             ],
             [
                 new NodeParameterDefinition(
@@ -305,6 +312,7 @@ public sealed class ConsumerSampleHost : IDisposable
                     ParameterEditorKind.Enum,
                     description: "Approval state managed by the host menu action.",
                     defaultValue: "draft",
+                    templateKey: ConsumerSampleAuthoringSurfaceRecipe.StatusTemplateKey,
                     constraints: new ParameterConstraints(
                         AllowedOptions:
                         [
@@ -318,7 +326,8 @@ public sealed class ConsumerSampleHost : IDisposable
                     new PortTypeId("string"),
                     ParameterEditorKind.Text,
                     description: "Host-assigned owner used by the custom parameter panel.",
-                    defaultValue: "design-review"),
+                    defaultValue: "design-review",
+                    templateKey: ConsumerSampleAuthoringSurfaceRecipe.OwnerTemplateKey),
                 new NodeParameterDefinition(
                     "priority",
                     "Priority",
@@ -330,8 +339,8 @@ public sealed class ConsumerSampleHost : IDisposable
             ],
             description: "Host-defined review node that demonstrates shared parameter editing from a custom host panel.",
             accentHex: "#6AD5C4",
-            defaultWidth: 260,
-            defaultHeight: 188);
+            defaultWidth: ReviewNodeDefaultSize.Width,
+            defaultHeight: ReviewNodeDefaultSize.Height);
 
     private static INodeDefinition CreateQueueDefinition()
         => new NodeDefinition(

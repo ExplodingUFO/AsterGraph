@@ -10,6 +10,7 @@ It is the host seam example for three host-owned seams:
 - selected-node parameter read/write seam
 
 For the inspector metadata recipe, pair this route with [Authoring Inspector Recipe](./authoring-inspector-recipe.md). This sample stays focused on the host-owned seams and the shipped inspector surface; it does not own the metadata vocabulary. The canonical recipe carries the full `defaultValue`, `isAdvanced`, `helpText`, `placeholderText`, and read-only vocabulary.
+For copyable custom node, port, and edge presentation on the same route, pair it with [Authoring Surface Recipe](./authoring-surface-recipe.md).
 
 This is the defended beta route for copying host-owned seams into your own host. Keep action projection, trust workflow, and the selected-node parameter read/write seam host-owned; copy only the sample-owned presentation.
 
@@ -179,6 +180,7 @@ If you want to build the same medium host in your own app, copy these seams in t
 ## Related Docs
 
 - [Quick Start](./quick-start.md)
+- [Authoring Surface Recipe](./authoring-surface-recipe.md)
 - [Beta Support Bundle](./support-bundle.md)
 - [Host Integration](./host-integration.md)
 - [Sample README](../../tools/AsterGraph.ConsumerSample.Avalonia/README.md)

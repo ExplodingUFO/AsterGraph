@@ -43,6 +43,7 @@ public static class ConsumerSampleWindowFactory
             Title = "AsterGraph Consumer Sample";
             Width = 1560;
             Height = 980;
+            var presentation = ConsumerSampleAuthoringSurfaceRecipe.CreatePresentationOptions();
 
             var editorView = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOptions
             {
@@ -50,8 +51,10 @@ public static class ConsumerSampleWindowFactory
                 ChromeMode = GraphEditorViewChromeMode.CanvasOnly,
                 EnableDefaultContextMenu = true,
                 CommandShortcutPolicy = AsterGraphCommandShortcutPolicy.Default,
+                Presentation = presentation,
             });
             editorView.Name = "PART_EditorView";
+            var edgeOverlay = ConsumerSampleAuthoringSurfaceRecipe.CreateEdgeOverlay(_host.Session);
 
             _actionsMenu = new MenuItem
             {
@@ -140,6 +143,15 @@ public static class ConsumerSampleWindowFactory
                 },
             };
 
+            var editorSurface = new Grid
+            {
+                Children =
+                {
+                    editorView,
+                    edgeOverlay,
+                },
+            };
+
             var body = new Grid
             {
                 ColumnDefinitions = new ColumnDefinitions("260,*,340"),
@@ -149,13 +161,13 @@ public static class ConsumerSampleWindowFactory
                 Children =
                 {
                     leftRail,
-                    editorView,
+                    editorSurface,
                     rightPanel,
                 },
             };
 
             Grid.SetColumn(leftRail, 0);
-            Grid.SetColumn(editorView, 1);
+            Grid.SetColumn(editorSurface, 1);
             Grid.SetColumn(rightPanel, 2);
 
             Content = new DockPanel
