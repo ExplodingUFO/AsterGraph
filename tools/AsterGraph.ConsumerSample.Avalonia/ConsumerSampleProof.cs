@@ -46,7 +46,8 @@ public sealed record ConsumerSampleProofResult(
     double CommandSurfaceRefreshMs,
     double NodeToolProjectionMs,
     double EdgeToolProjectionMs,
-    bool HostedAutomationNavigationOk = true)
+    bool HostedAutomationNavigationOk = true,
+    bool HostedAuthoringAutomationDiagnosticsOk = true)
 {
     public bool AuthoringSurfaceOk
         => ParameterProjectionOk
@@ -72,6 +73,7 @@ public sealed record ConsumerSampleProofResult(
         => HostedAccessibilityBaselineOk
         && HostedAccessibilityFocusOk
         && HostedAutomationNavigationOk
+        && HostedAuthoringAutomationDiagnosticsOk
         && HostedAccessibilityCommandSurfaceOk
         && HostedAccessibilityAuthoringSurfaceOk;
 
@@ -118,6 +120,7 @@ public sealed record ConsumerSampleProofResult(
         $"HOSTED_ACCESSIBILITY_BASELINE_OK:{HostedAccessibilityBaselineOk}",
         $"HOSTED_ACCESSIBILITY_FOCUS_OK:{HostedAccessibilityFocusOk}",
         $"HOSTED_ACCESSIBILITY_AUTOMATION_NAVIGATION_OK:{HostedAutomationNavigationOk}",
+        $"HOSTED_ACCESSIBILITY_AUTHORING_DIAGNOSTICS_OK:{HostedAuthoringAutomationDiagnosticsOk}",
         $"HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:{HostedAccessibilityCommandSurfaceOk}",
         $"HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:{HostedAccessibilityAuthoringSurfaceOk}",
         $"HOSTED_ACCESSIBILITY_OK:{HostedAccessibilityOk}",
@@ -239,6 +242,7 @@ public static class ConsumerSampleProof
         bool hostedAccessibilityBaselineOk;
         bool hostedAccessibilityFocusOk;
         bool hostedAutomationNavigationOk;
+        bool hostedAuthoringAutomationDiagnosticsOk;
         bool hostedAccessibilityCommandSurfaceOk;
         bool hostedAccessibilityAuthoringSurfaceOk;
         try
@@ -254,6 +258,7 @@ public static class ConsumerSampleProof
             hostedAccessibilityAuthoringSurfaceOk = HasHostedAccessibilityAuthoringSurface(capabilityWindow);
             hostedAccessibilityFocusOk = HasHostedAccessibilityFocus(capabilityWindow);
             hostedAutomationNavigationOk = HasHostedAutomationNavigation(capabilityWindow, host, reviewNodeId);
+            hostedAuthoringAutomationDiagnosticsOk = HasHostedAuthoringAutomationDiagnostics(host, reviewNodeId);
             hostedAccessibilityCommandSurfaceOk = HasHostedAccessibilityCommandSurface(capabilityWindow);
             host.SelectNode(reviewNodeId);
             FlushUi();
@@ -298,7 +303,8 @@ public static class ConsumerSampleProof
             CommandSurfaceRefreshMs: commandSurfaceRefreshMs,
             NodeToolProjectionMs: nodeToolProjectionMs,
             EdgeToolProjectionMs: edgeToolProjectionMs,
-            HostedAutomationNavigationOk: hostedAutomationNavigationOk);
+            HostedAutomationNavigationOk: hostedAutomationNavigationOk,
+            HostedAuthoringAutomationDiagnosticsOk: hostedAuthoringAutomationDiagnosticsOk);
     }
 
     private static Window CreateCapabilityBreadthWindow(ConsumerSampleHost host)
@@ -711,6 +717,66 @@ public static class ConsumerSampleProof
             && diagnostics.Contains("automation.run.completed", StringComparer.Ordinal);
     }
 
+    private static bool HasHostedAuthoringAutomationDiagnostics(
+        ConsumerSampleHost host,
+        string reviewNodeId)
+    {
+        const string connectionId = "consumer-sample-connection-001";
+        var automationResult = host.Session.Automation.Execute(new GraphEditorAutomationRunRequest(
+            "consumer-sample-authoring-diagnostics",
+            [
+                CreateAutomationStep("select-review", "selection.set", ("nodeId", reviewNodeId), ("primaryNodeId", reviewNodeId), ("updateStatus", "false")),
+            ]));
+
+        var labelEdited = host.Session.Commands.TrySetConnectionLabel(connectionId, "Automation branch", updateStatus: false);
+        var noteEdited = host.Session.Commands.TrySetConnectionNoteText(connectionId, "Automation note", updateStatus: false);
+        var selectedParameters = host.Session.Queries.GetSelectedNodeParameterSnapshots();
+        var nodeParameters = host.Session.Queries.GetNodeParameterSnapshots(reviewNodeId);
+        var nodeSurface = host.Session.Queries.GetNodeSurfaceSnapshots()
+            .SingleOrDefault(snapshot => string.Equals(snapshot.NodeId, reviewNodeId, StringComparison.Ordinal));
+        var selectionTools = host.Session.Queries.GetToolDescriptors(
+            GraphEditorToolContextSnapshot.ForSelection([reviewNodeId], reviewNodeId));
+        var nodeTools = host.Session.Queries.GetToolDescriptors(
+            GraphEditorToolContextSnapshot.ForNode(reviewNodeId, [reviewNodeId], reviewNodeId));
+        var connectionTools = host.Session.Queries.GetToolDescriptors(
+            GraphEditorToolContextSnapshot.ForConnection(connectionId, [reviewNodeId], reviewNodeId));
+        var inspection = host.Session.Diagnostics.CaptureInspectionSnapshot();
+        var connection = inspection.Document.Connections.SingleOrDefault(candidate =>
+            string.Equals(candidate.Id, connectionId, StringComparison.Ordinal));
+
+        return automationResult.Succeeded
+            && automationResult.ExecutedStepCount == 1
+            && labelEdited
+            && noteEdited
+            && inspection.Selection.PrimarySelectedNodeId == reviewNodeId
+            && inspection.RecentDiagnostics.Any(diagnostic => diagnostic.Code == "automation.run.started")
+            && inspection.RecentDiagnostics.Any(diagnostic => diagnostic.Code == "automation.run.completed")
+            && selectedParameters.Any(snapshot =>
+                snapshot.Definition.Key == "status"
+                && !string.IsNullOrWhiteSpace(snapshot.Definition.Description)
+                && !string.IsNullOrWhiteSpace(snapshot.GroupDisplayName)
+                && !string.IsNullOrWhiteSpace(snapshot.ValueDisplayText)
+                && snapshot.CanEdit
+                && snapshot.IsValid)
+            && selectedParameters.Any(snapshot =>
+                snapshot.Definition.Key == "owner"
+                && string.Equals(snapshot.Definition.TemplateKey, ConsumerSampleAuthoringSurfaceRecipe.OwnerTemplateKey, StringComparison.Ordinal)
+                && !string.IsNullOrWhiteSpace(snapshot.Definition.Description))
+            && nodeParameters.Any(snapshot =>
+                snapshot.Definition.Key == "status"
+                && string.Equals(snapshot.Definition.TemplateKey, ConsumerSampleAuthoringSurfaceRecipe.StatusTemplateKey, StringComparison.Ordinal))
+            && nodeSurface is not null
+            && nodeSurface.ActiveTier.VisibleSectionKeys.Count > 0
+            && ContainsExecutableTool(selectionTools, "selection-create-group")
+            && ContainsExecutableTool(nodeTools, "node-inspect")
+            && ContainsExecutableTool(nodeTools, "node-toggle-surface-expansion")
+            && ContainsExecutableTool(connectionTools, "connection-disconnect")
+            && ContainsExecutableTool(connectionTools, "connection-clear-note")
+            && connection is not null
+            && string.Equals(connection.Label, "Automation branch", StringComparison.Ordinal)
+            && string.Equals(connection.Presentation?.NoteText, "Automation note", StringComparison.Ordinal);
+    }
+
     private static bool HasHostedAccessibilityCommandSurface(Window window)
     {
         var saveButton = FindNamed<Button>(window, "PART_HeaderCommand_workspace.save");
@@ -814,6 +880,11 @@ public static class ConsumerSampleProof
         string commandId)
         => descriptors.TryGetValue(commandId, out var descriptor)
         && descriptor.IsEnabled;
+
+    private static bool ContainsExecutableTool(
+        IReadOnlyList<GraphEditorToolDescriptorSnapshot> tools,
+        string toolId)
+        => tools.Any(tool => string.Equals(tool.Id, toolId, StringComparison.Ordinal) && tool.CanExecute);
 
     private static bool HasViewportChanged(
         GraphEditorViewportSnapshot before,
