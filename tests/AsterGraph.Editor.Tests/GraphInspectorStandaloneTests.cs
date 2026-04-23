@@ -1,5 +1,6 @@
 using System.Linq;
 using Avalonia;
+using Avalonia.Automation;
 using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
 using Avalonia.Input;
@@ -142,6 +143,37 @@ public sealed class GraphInspectorStandaloneTests
             Assert.Equal(editor.SelectedNode!.Id, editor.InteractionFocus.InspectedNodeId);
             Assert.Null(editor.InteractionFocus.EditingNodeId);
             Assert.Null(editor.InteractionFocus.EditingParameterKey);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
+    public void StandaloneInspector_ParameterEditors_ProjectAccessibleNames_AndHelpText()
+    {
+        var editor = CreateAuthoringEditor();
+        editor.SelectSingleNode(editor.Nodes[0], updateStatus: false);
+        var (window, inspector) = CreateInspectorWindow(editor);
+
+        try
+        {
+            RefreshInspectorLayout(window, inspector);
+
+            var thresholdEditorHost = inspector.GetVisualDescendants()
+                .OfType<NodeParameterEditorHost>()
+                .First(host => string.Equals(host.Parameter?.Key, "threshold", StringComparison.Ordinal));
+            var systemKeyEditorHost = inspector.GetVisualDescendants()
+                .OfType<NodeParameterEditorHost>()
+                .First(host => string.Equals(host.Parameter?.Key, "system-key", StringComparison.Ordinal));
+
+            Assert.Equal("Threshold parameter editor", AutomationProperties.GetName(thresholdEditorHost));
+            Assert.Contains("默认值: 0.5", AutomationProperties.GetHelpText(thresholdEditorHost));
+            Assert.Contains("已覆盖", AutomationProperties.GetHelpText(thresholdEditorHost));
+
+            Assert.Equal("System Key parameter editor", AutomationProperties.GetName(systemKeyEditorHost));
+            Assert.Contains("参数定义将此字段标记为只读。", AutomationProperties.GetHelpText(systemKeyEditorHost));
         }
         finally
         {

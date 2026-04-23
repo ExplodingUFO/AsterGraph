@@ -129,6 +129,7 @@ public partial class GraphEditorView
         {
             authoringState.DocumentConnectionsById.TryGetValue(connection.Id, out var modelConnection);
             authoringState.GeometryByConnectionId.TryGetValue(connection.Id, out var geometry);
+            var connectionTitle = CreateConnectionToolTitle(selectedNode, connection);
             var labelEditor = new TextBox
             {
                 Name = $"PART_ConnectionToolLabelEditor_{connection.Id}",
@@ -136,6 +137,7 @@ public partial class GraphEditorView
                 Watermark = "Connection label",
             };
             labelEditor.Classes.Add("astergraph-input");
+            AutomationProperties.SetName(labelEditor, $"{connectionTitle} label editor");
 
             var noteEditor = new TextBox
             {
@@ -144,6 +146,7 @@ public partial class GraphEditorView
                 Watermark = "Display note",
             };
             noteEditor.Classes.Add("astergraph-input");
+            AutomationProperties.SetName(noteEditor, $"{connectionTitle} note editor");
 
             var actionBar = new WrapPanel
             {
@@ -181,7 +184,7 @@ public partial class GraphEditorView
                     {
                         new TextBlock
                         {
-                            Text = CreateConnectionToolTitle(selectedNode, connection),
+                            Text = connectionTitle,
                             FontWeight = FontWeight.SemiBold,
                         },
                         labelEditor,
@@ -189,6 +192,7 @@ public partial class GraphEditorView
                         actionBar,
                         CreateConnectionRouteSection(
                             connection.Id,
+                            connectionTitle,
                             modelConnection?.Presentation?.Route ?? GraphConnectionRoute.Empty,
                             geometry,
                             commandDescriptors),
@@ -201,6 +205,7 @@ public partial class GraphEditorView
 
     private Control CreateConnectionRouteSection(
         string connectionId,
+        string connectionTitle,
         GraphConnectionRoute route,
         GraphEditorConnectionGeometrySnapshot? geometry,
         IReadOnlyDictionary<string, GraphEditorCommandDescriptorSnapshot> commandDescriptors)
@@ -273,6 +278,7 @@ public partial class GraphEditorView
         {
             var vertex = route.Vertices[vertexIndex];
             var capturedVertexIndex = vertexIndex;
+            var vertexCaption = $"{connectionTitle} bend {capturedVertexIndex + 1}";
             var xEditor = new TextBox
             {
                 Name = $"PART_ConnectionToolRouteVertexXEditor_{connectionId}_{capturedVertexIndex}",
@@ -280,6 +286,7 @@ public partial class GraphEditorView
                 Watermark = "X",
             };
             xEditor.Classes.Add("astergraph-input");
+            AutomationProperties.SetName(xEditor, $"{vertexCaption} X editor");
 
             var yEditor = new TextBox
             {
@@ -288,6 +295,7 @@ public partial class GraphEditorView
                 Watermark = "Y",
             };
             yEditor.Classes.Add("astergraph-input");
+            AutomationProperties.SetName(yEditor, $"{vertexCaption} Y editor");
 
             var vertexActions = new WrapPanel
             {

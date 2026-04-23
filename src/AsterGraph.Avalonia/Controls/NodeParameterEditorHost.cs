@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using Avalonia;
+using Avalonia.Automation;
 using Avalonia.Controls;
 using AsterGraph.Avalonia.Presentation;
 using AsterGraph.Editor.ViewModels;
@@ -72,5 +74,38 @@ public sealed class NodeParameterEditorHost : ContentControl
             Parameter,
             TemplateKey ?? Parameter.Definition.TemplateKey,
             Usage));
+
+        if (string.IsNullOrWhiteSpace(AutomationProperties.GetName(this)))
+        {
+            AutomationProperties.SetName(this, $"{Parameter.DisplayName} parameter editor");
+        }
+
+        AutomationProperties.SetHelpText(this, BuildAutomationHelpText(Parameter));
+    }
+
+    private static string? BuildAutomationHelpText(NodeParameterViewModel parameter)
+    {
+        var segments = new List<string>(3);
+        var descriptiveHelpText = !string.IsNullOrWhiteSpace(parameter.HelpText)
+            ? parameter.HelpText
+            : parameter.Definition.Description;
+        if (!string.IsNullOrWhiteSpace(descriptiveHelpText))
+        {
+            segments.Add(descriptiveHelpText);
+        }
+
+        if (!string.IsNullOrWhiteSpace(parameter.ReadOnlyReason))
+        {
+            segments.Add(parameter.ReadOnlyReason);
+        }
+
+        if (!string.IsNullOrWhiteSpace(parameter.ValueStateCaption))
+        {
+            segments.Add($"状态：{parameter.ValueStateCaption}");
+        }
+
+        return segments.Count == 0
+            ? null
+            : string.Join(" ", segments);
     }
 }

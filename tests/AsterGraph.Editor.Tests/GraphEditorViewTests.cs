@@ -777,6 +777,10 @@ public sealed class GraphEditorViewTests
         Assert.Equal("Signal Flow", labelEditor.Text);
         Assert.Equal("Preview branch", noteEditor.Text);
         Assert.True(clearNoteButton.IsEnabled);
+        Assert.Equal("Outgoing to Tool Target label editor", AutomationProperties.GetName(labelEditor));
+        Assert.Equal("Outgoing to Tool Target note editor", AutomationProperties.GetName(noteEditor));
+        Assert.Equal("Apply Edge Text", AutomationProperties.GetName(applyButton));
+        Assert.Equal("Clear Connection Note", AutomationProperties.GetName(clearNoteButton));
 
         expansionButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
 
@@ -826,6 +830,9 @@ public sealed class GraphEditorViewTests
         var xEditor = FindRequiredDescendant<TextBox>(view, "PART_ConnectionToolRouteVertexXEditor_connection-001_0");
         var yEditor = FindRequiredDescendant<TextBox>(view, "PART_ConnectionToolRouteVertexYEditor_connection-001_0");
         var applyButton = FindRequiredDescendant<Button>(view, "PART_ConnectionToolApplyRouteVertex_connection-001_0");
+        Assert.Equal("Outgoing to Tool Target bend 1 X editor", AutomationProperties.GetName(xEditor));
+        Assert.Equal("Outgoing to Tool Target bend 1 Y editor", AutomationProperties.GetName(yEditor));
+        Assert.Equal("Apply Bend", AutomationProperties.GetName(applyButton));
 
         xEditor.Text = "420";
         yEditor.Text = "300";
@@ -837,6 +844,7 @@ public sealed class GraphEditorViewTests
             Assert.Single(editor.Session.Queries.CreateDocumentSnapshot().Connections).Presentation?.Route?.Vertices);
 
         var removeButton = FindRequiredDescendant<Button>(view, "PART_ConnectionToolRemoveRouteVertex_connection-001_0");
+        Assert.Equal("Remove Bend", AutomationProperties.GetName(removeButton));
         removeButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
         Dispatcher.UIThread.RunJobs(DispatcherPriority.Render);
 
