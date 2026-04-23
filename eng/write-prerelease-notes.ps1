@@ -187,7 +187,7 @@ foreach ($line in $proofLines) {
 [void]$builder.AppendLine("- next 0.xx alpha/beta line: keep copyable host-owned parameter/metadata polish first, and only widen toward defended large-tier performance or broader parameter/metadata editing when 3-5 real external reports cluster on the same bounded risk")
 [void]$builder.AppendLine("- release evidence contract: route, version, proof markers, friction, and support-bundle attachment note")
 [void]$builder.AppendLine("- `HELLOWORLD_WPF_OK` remains adapter-2 validation only and does not widen the public publish/package boundary")
-[void]$builder.AppendLine("- support-bundle attachment: [Beta Support Bundle](./docs/en/support-bundle.md)")
+[void]$builder.AppendLine("- support-bundle attachment note: [Beta Support Bundle](./docs/en/support-bundle.md)")
 [void]$builder.AppendLine("- [Adoption Feedback Loop](./docs/en/adoption-feedback.md)")
 [void]$builder.AppendLine("- [Adopter Triage Checklist](./docs/en/adopter-triage.md)")
 [void]$builder.AppendLine()
