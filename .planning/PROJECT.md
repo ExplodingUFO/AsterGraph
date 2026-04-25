@@ -47,24 +47,25 @@ External hosts can embed AsterGraph and get a host-native, definition-driven aut
 - `v0.29.0-beta Authoring Surface Polish` is archived locally as complete.
 - The widened canonical route now has defended breadth, performance, and automation-backed accessibility validation; the next active bottleneck is whether the validation-only second adapter can reproduce the shared tool and stencil slice of that capability-breadth contract without widening support promises.
 
-## Current State
+## Current Milestone
 
-**v0.37.0-beta Authoring Surface Polish** — completed locally 2026-04-25
+**v0.38.0-beta External Adopter Feedback Loop**
 
-The public `0.12.0-beta` authoring-surface line is hardened: parameter/metadata contract completion, custom node/port/edge authoring affordances, host copyability recipes, and performance guardrails are all verified on the canonical session route.
+**Goal:** Turn the hardened `0.12.0-beta` authoring-surface line into an active feedback-collection and rapid-response loop. Gather real adopter signals through support-bundle intake, issue templates, and direct host evaluations; triage and fix friction points in documentation, samples, and the canonical route before committing to the next capability wave.
 
-**Shipped:**
-- Complete parameter metadata vocabulary driving inspector, selected-node seam, batch editing, and support-bundle evidence
-- Multi-handle ports with grouping/validation, node resize, quick tools, reconnect, temporary edge, delete-on-drop
-- Bilingual host recipes (plugin-host, custom-node, migration route) with explicit "copy-from-here" guidance
-- ScaleSmoke authoring-interaction latency budgets (inspector open, node resize, edge create) with defended pass/fail contract
-- Command palette telemetry in ConsumerSample proof markers
+**Target features:**
+- **Active Intake Channel:** Support-bundle format and issue template are actively used to collect structured adopter reports; target is 3–5 real external reports with explicit intake criteria.
+- **Feedback-Driven Polish:** Rapid iteration on docs, samples, and onboarding based on the first batch of real adopter friction reports.
+- **Trust and Telemetry Hardening:** Improve support-bundle fidelity (environment, metrics, reproduction steps) so external reports are actionable without back-and-forth.
+- **Documentation Gap Closure:** Fix any "copy-from-here" gaps discovered by real hosts attempting to replicate the ladder.
+
+**Versioning note:** local planning uses `v0.38.0-beta` as the next internal beta label; this milestone is intentionally bounded and feedback-driven, not a new capability wave.
 
 ## Most Recently Completed Milestone
 
 **v0.37.0-beta Authoring Surface Polish** (completed locally 2026-04-25)
 
-**Next planned milestone:** Not yet initialized. Candidate direction: bounded external adopter feedback analysis and follow-up polish.
+Shipped the public `0.12.0-beta` authoring-surface line: parameter/metadata contract, custom node/port/edge authoring, host copyability recipes, and performance guardrails.
 
 ## Release Ladder
 

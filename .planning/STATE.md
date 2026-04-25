@@ -2,22 +2,24 @@
 
 ## Current Position
 
-Phase: —
+Phase: Not started (defining requirements)
 Plan: —
-Status: `v0.37.0-beta Authoring Surface Polish` completed 2026-04-25; no active milestone
-Last activity: 2026-04-25 — completed Phase 280 Performance Guardrails; all 7 phases done
+Status: Defining requirements for `v0.38.0-beta External Adopter Feedback Loop`
+Last activity: 2026-04-25 — Milestone v0.38.0-beta started
 
 ## Project Reference
 
 See: `.planning/PROJECT.md`
 
 **Core value:** External hosts can embed AsterGraph and get a host-native, definition-driven authoring experience where commands, editing, inspection, trust decisions, and semantic workflows feel product-complete without rebuilding the toolkit.
+**Current focus:** activate external adopter feedback intake and respond with rapid polish on docs, samples, and onboarding friction.
 
-## Notes
+## Accumulated Context
 
 - `v0.37.0-beta Authoring Surface Polish` is complete locally and archived under `.planning/milestones/`.
 - All 7 phases (274–280) verified with 789 tests passing across 7 test projects.
-- Next milestone not yet initialized.
+- The public `0.12.0-beta` authoring-surface line is hardened and ready for external validation.
+- RECIPE-05 from v0.37.0-beta explicitly targets 3–5 real external adopter reports.
 
 ## Deferred Items
 
@@ -34,4 +36,4 @@ Items acknowledged and still deferred:
 | process | v0.4.0-alpha phases 125-133 are merged in git but missing local phase summary/verification artifacts; milestone closeout accepted that debt instead of backfilling | accepted debt |
 
 ---
-*Last updated: 2026-04-25 after completing `v0.37.0-beta Authoring Surface Polish`*
+*Last updated: 2026-04-25 after starting `v0.38.0-beta External Adopter Feedback Loop`*
