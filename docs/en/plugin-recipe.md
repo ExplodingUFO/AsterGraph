@@ -84,5 +84,6 @@ For the v1 manifest and trust-policy contract, see [Plugin Manifest and Trust Po
 
 See also:
 
+- [Plugin Host Recipe](./plugin-host-recipe.md)
 - [Host Integration](./host-integration.md)
 - [Extension Contracts](./extension-contracts.md)

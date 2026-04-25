@@ -158,6 +158,9 @@ Plugin loading is currently in-process. Hosts can discover candidates, apply an 
 - [ScaleSmoke Baseline](./scale-baseline.md) = public graph-size tiers and defended redlines
 - [Authoring Inspector Recipe](./authoring-inspector-recipe.md) = definition-driven parameters, groups, validation, and shipped inspector editors
 - [Plugin And Custom Node Recipe](./plugin-recipe.md) = smallest copyable plugin/custom-node path
+- [Plugin Host Recipe](./plugin-host-recipe.md) = host-centric plugin discovery, trust, and registration
+- [Custom Node Host Recipe](./custom-node-host-recipe.md) = custom node/port/edge registration and styling
+- [Host Recipe Ladder](./host-recipe-ladder.md) = unified copy-from-here ladder
 - [Retained-To-Session Migration Recipe](./retained-migration-recipe.md) = phased migration guide for older hosts
 
 ## 8. Maintainer And Source-Validation Paths

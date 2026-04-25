@@ -159,6 +159,9 @@ var view = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOption
 - [ScaleSmoke 基线](./scale-baseline.md) = 公开的规模分层与防回归红线
 - [Authoring Inspector Recipe](./authoring-inspector-recipe.md) = definition-driven 参数、分组、校验与 shipped inspector editor
 - [Plugin 与自定义节点 Recipe](./plugin-recipe.md) = 最小可复制 plugin/custom-node 路线
+- [Plugin Host Recipe](./plugin-host-recipe.md) = 宿主视角的插件发现、信任与注册
+- [Custom Node Host Recipe](./custom-node-host-recipe.md) = 自定义节点/端口/边注册与样式
+- [Host Recipe 阶梯](./host-recipe-ladder.md) = 统一“从这里复制”阶梯
 - [Retained 到 Session 的迁移 Recipe](./retained-migration-recipe.md) = 老宿主的渐进迁移指南
 
 ## 8. 维护者与源码验证入口

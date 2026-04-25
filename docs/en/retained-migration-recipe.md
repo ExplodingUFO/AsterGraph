@@ -85,7 +85,8 @@ For retained migration evidence, use the same defended hosted beta route as the 
 
 - run `AsterGraph.ConsumerSample.Avalonia -- --proof`
 - if you need a local artifact, attach `artifacts/consumer-support-bundle.json` using [Beta Support Bundle](./support-bundle.md)
-- review the same public proof markers: `CONSUMER_SAMPLE_OK:True`, `COMMAND_SURFACE_OK:True`, the `HOST_NATIVE_METRIC:*` lines, and the support-bundle markers `SUPPORT_BUNDLE_OK:True` and `SUPPORT_BUNDLE_PATH:...`
+- review the same public proof markers: `CONSUMER_SAMPLE_OK:True`, `COMMAND_SURFACE_OK:True`, `HOSTED_ACCESSIBILITY_OK:True`, `HOSTED_ACCESSIBILITY_AUTOMATION_NAVIGATION_OK:True`, `HOSTED_ACCESSIBILITY_AUTHORING_DIAGNOSTICS_OK:True`, `HOSTED_ACCESSIBILITY_AUTOMATION_OK:True`, the `HOST_NATIVE_METRIC:*` lines, and the support-bundle markers `SUPPORT_BUNDLE_OK:True` and `SUPPORT_BUNDLE_PATH:...`
+- if `CONSUMER_SAMPLE_PARAMETER_OK` or `CONSUMER_SAMPLE_METADATA_PROJECTION_OK` fail, keep the failed proof-marker lines with the support bundle's `parameterSnapshots` rows on the same bounded intake record
 
 The retained bridge does not add a separate support boundary or a retained-only evidence lane, so maintainers can review evidence with the same public proof and bundle docs.
 
@@ -103,3 +104,6 @@ See also:
 - [Quick Start](./quick-start.md)
 - [Host Integration](./host-integration.md)
 - [Extension Contracts](./extension-contracts.md)
+- [Host Recipe Ladder](./host-recipe-ladder.md)
+- [Plugin Host Recipe](./plugin-host-recipe.md)
+- [Custom Node Host Recipe](./custom-node-host-recipe.md)

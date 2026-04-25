@@ -73,6 +73,7 @@ dotnet run --project tools/AsterGraph.HelloWorld.Wpf/AsterGraph.HelloWorld.Wpf.c
 - [Quick Start](./quick-start.md)
 - [Consumer Sample](./consumer-sample.md)
 - [Host Integration](./host-integration.md)
+- [Host Recipe Ladder](./host-recipe-ladder.md)
 - [Stabilization Support Matrix](./stabilization-support-matrix.md)
 - [Adapter Capability Matrix](./adapter-capability-matrix.md)
 - [Adapter-2 Accessibility Recipe](./adapter-2-accessibility-recipe.md)
