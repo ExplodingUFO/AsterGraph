@@ -38,4 +38,4 @@
 - v1.25 — Command Pipeline, Inspector Deepening, And Semantic Authoring — completed 2026-04-21 (audit: tech_debt, see `v1.25-MILESTONE-AUDIT.md`)
 
 ---
-*Last updated: 2026-04-25 after completing `v0.37.0-beta Authoring Surface Polish` and initializing `v0.38.0-beta External Adopter Feedback Loop`*
+*Last updated: 2026-04-25 after completing `v0.38.0-beta External Adopter Feedback Loop`*

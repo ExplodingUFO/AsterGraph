@@ -47,25 +47,27 @@ External hosts can embed AsterGraph and get a host-native, definition-driven aut
 - `v0.29.0-beta Authoring Surface Polish` is archived locally as complete.
 - The widened canonical route now has defended breadth, performance, and automation-backed accessibility validation; the next active bottleneck is whether the validation-only second adapter can reproduce the shared tool and stencil slice of that capability-breadth contract without widening support promises.
 
-## Current Milestone
+## Current State
 
-**v0.38.0-beta External Adopter Feedback Loop**
+**v0.38.0-beta External Adopter Feedback Loop** — completed locally 2026-04-25
 
-**Goal:** Turn the hardened `0.12.0-beta` authoring-surface line into an active feedback-collection and rapid-response loop. Gather real adopter signals through support-bundle intake, issue templates, and direct host evaluations; triage and fix friction points in documentation, samples, and the canonical route before committing to the next capability wave.
+The `0.12.0-beta` authoring-surface line now has active intake infrastructure: hardened support bundles (schema v2 with validation), structured issue templates, triage workflow, and explicit onboarding failure detection. Ready to receive and act on real external adopter reports.
 
-**Target features:**
-- **Active Intake Channel:** Support-bundle format and issue template are actively used to collect structured adopter reports; target is 3–5 real external reports with explicit intake criteria.
-- **Feedback-Driven Polish:** Rapid iteration on docs, samples, and onboarding based on the first batch of real adopter friction reports.
-- **Trust and Telemetry Hardening:** Improve support-bundle fidelity (environment, metrics, reproduction steps) so external reports are actionable without back-and-forth.
-- **Documentation Gap Closure:** Fix any "copy-from-here" gaps discovered by real hosts attempting to replicate the ladder.
+**Shipped:**
+- Support bundle schema v2 with graph summary, feature descriptors, recent diagnostics, and post-write schema validation
+- GitHub issue templates guiding adopters to provide .NET SDK, UI adapter, and custom node context
+- Adopter triage checklist with intake criteria and three routing buckets (docs-fix / sample-fix / capability-gap)
+- `ONBOARDING_CONFIGURATION_OK` proof marker detecting common setup failures
+- `SUPPORT_BUNDLE_SCHEMA_OK` marker ensuring bundle integrity
 
-**Versioning note:** local planning uses `v0.38.0-beta` as the next internal beta label; this milestone is intentionally bounded and feedback-driven, not a new capability wave.
+**Deferred:**
+- POLISH-01 (real adopter friction fixes) — requires ≥2 external reports on the same docs page
 
 ## Most Recently Completed Milestone
 
-**v0.37.0-beta Authoring Surface Polish** (completed locally 2026-04-25)
+**v0.38.0-beta External Adopter Feedback Loop** (completed locally 2026-04-25)
 
-Shipped the public `0.12.0-beta` authoring-surface line: parameter/metadata contract, custom node/port/edge authoring, host copyability recipes, and performance guardrails.
+**Next planned milestone:** Not yet initialized. Candidate directions: deeper authoring surface (composite templates, richer edge semantics) or platform expansion (browser concerns, plugin lifecycle), pending external feedback signal.
 
 ## Release Ladder
 
