@@ -85,6 +85,10 @@ public sealed record ConsumerSampleProofResult(
         => HostedAccessibilityBaselineOk
         && HostedAccessibilityAutomationOk;
 
+    public bool OnboardingConfigurationOk
+        => NodeCount > 0
+        && (FeatureDescriptorIds?.Count > 0);
+
     public bool IsOk
         => HostMenuActionOk
         && PluginContributionOk
@@ -93,7 +97,8 @@ public sealed record ConsumerSampleProofResult(
         && AuthoringSurfaceOk
         && CapabilityBreadthOk
         && HostedAccessibilityOk
-        && WidenedSurfacePerformanceOk;
+        && WidenedSurfacePerformanceOk
+        && OnboardingConfigurationOk;
 
     public IReadOnlyList<string> MetricLines =>
     [
@@ -136,6 +141,7 @@ public sealed record ConsumerSampleProofResult(
         $"HOSTED_ACCESSIBILITY_OK:{HostedAccessibilityOk}",
         $"WIDENED_SURFACE_PERFORMANCE_OK:{WidenedSurfacePerformanceOk}",
         .. MetricLines,
+        $"ONBOARDING_CONFIGURATION_OK:{OnboardingConfigurationOk}",
         $"AUTHORING_SURFACE_OK:{AuthoringSurfaceOk}",
         $"CONSUMER_SAMPLE_OK:{IsOk}",
     ];

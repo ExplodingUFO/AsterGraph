@@ -96,6 +96,7 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(result.ProofLines, line => line == "HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True");
         Assert.Contains(result.ProofLines, line => line == "HOSTED_ACCESSIBILITY_OK:True");
         Assert.Contains(result.ProofLines, line => line == "WIDENED_SURFACE_PERFORMANCE_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "ONBOARDING_CONFIGURATION_OK:True");
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_SURFACE_OK:True");
         Assert.Contains(result.MetricLines, line => line.Contains("startup_ms", StringComparison.Ordinal));
         Assert.Contains(result.MetricLines, line => line.Contains("command_latency_ms", StringComparison.Ordinal));
