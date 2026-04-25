@@ -275,7 +275,10 @@ public sealed record GraphDocument
                 port.Direction,
                 port.DataType,
                 port.AccentHex,
-                port.TypeId))
+                port.TypeId,
+                port.GroupName,
+                port.MinConnections,
+                port.MaxConnections))
             .ToList();
 
     private static List<GraphParameterValue> CloneParameterValues(IReadOnlyList<GraphParameterValue> parameterValues)

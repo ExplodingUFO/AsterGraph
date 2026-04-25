@@ -323,6 +323,27 @@ internal sealed class GraphEditorKernelConnectionMutationCoordinator
             return;
         }
 
+        var outgoingCount = _host.Document.Connections.Count(connection =>
+            connection.SourceNodeId == sourceNode.Id
+            && connection.SourcePortId == sourcePort.Id);
+        if (outgoingCount >= sourcePort.MaxConnections)
+        {
+            _host.SetStatus($"Source port '{sourcePort.Label}' has reached its maximum connection limit ({sourcePort.MaxConnections}).");
+            return;
+        }
+
+        var incomingCount = _host.Document.Connections.Count(connection =>
+            connection.TargetNodeId == resolvedTarget.Node.Id
+            && connection.TargetPortId == resolvedTarget.Target.TargetId
+            && connection.TargetKind == resolvedTarget.Target.Kind);
+        var finalIncomingCount = incomingCount - replacedConnections.Count + 1;
+        var targetPort = resolvedTarget.Node.Inputs.FirstOrDefault(port => string.Equals(port.Id, resolvedTarget.Target.TargetId, StringComparison.Ordinal));
+        if (targetPort is not null && finalIncomingCount > targetPort.MaxConnections)
+        {
+            _host.SetStatus($"Target port '{targetPort.Label}' would exceed its maximum connection limit ({targetPort.MaxConnections}).");
+            return;
+        }
+
         var nextConnection = new GraphConnection(
             _host.CreateConnectionId(),
             sourceNode.Id,

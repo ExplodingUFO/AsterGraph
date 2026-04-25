@@ -17,4 +17,7 @@ public sealed record GraphPort(
     PortDirection Direction,
     string DataType,
     string AccentHex,
-    PortTypeId? TypeId = null);
+    PortTypeId? TypeId = null,
+    string? GroupName = null,
+    int MinConnections = 0,
+    int MaxConnections = int.MaxValue);

@@ -15,16 +15,32 @@ public sealed record PortDefinition
         string displayName,
         PortTypeId typeId,
         string accentHex = "#FFFFFF",
-        string? description = null)
+        string? description = null,
+        string? groupName = null,
+        int minConnections = 0,
+        int maxConnections = int.MaxValue)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(key);
         ArgumentException.ThrowIfNullOrWhiteSpace(displayName);
+
+        if (minConnections < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(minConnections), "MinConnections must be non-negative.");
+        }
+
+        if (maxConnections < minConnections)
+        {
+            throw new ArgumentOutOfRangeException(nameof(maxConnections), "MaxConnections must be greater than or equal to MinConnections.");
+        }
 
         Key = key.Trim();
         DisplayName = displayName.Trim();
         TypeId = typeId;
         AccentHex = accentHex;
         Description = string.IsNullOrWhiteSpace(description) ? null : description.Trim();
+        GroupName = string.IsNullOrWhiteSpace(groupName) ? null : groupName.Trim();
+        MinConnections = minConnections;
+        MaxConnections = maxConnections;
     }
 
     /// <summary>
@@ -51,4 +67,19 @@ public sealed record PortDefinition
     /// 端口描述。
     /// </summary>
     public string? Description { get; }
+
+    /// <summary>
+    /// 端口分组名称。
+    /// </summary>
+    public string? GroupName { get; }
+
+    /// <summary>
+    /// 端口最小连接数。
+    /// </summary>
+    public int MinConnections { get; }
+
+    /// <summary>
+    /// 端口最大连接数。
+    /// </summary>
+    public int MaxConnections { get; }
 }

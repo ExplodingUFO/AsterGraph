@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Avalonia;
 using Avalonia.Input;
 using AsterGraph.Avalonia.Presentation;
@@ -336,6 +337,16 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
             _host.UpdateGroupVisuals();
         }
 
+        if (_host.ViewModel?.HasPendingConnection == true
+            && _host.InteractionSession.DragNode is null
+            && _host.InteractionSession.DragGroupId is null
+            && _host.InteractionSession.NodeResizeSession is null
+            && _host.InteractionSession.GroupResizeSession is null)
+        {
+            _host.ViewModel.CancelPendingConnection("Connection preview cancelled.");
+            _host.RenderConnections();
+        }
+
         _host.InteractionSession.ResetAfterPointerRelease();
         _host.HideGuideAdorners();
         _host.ClearResizeFeedback();
@@ -362,6 +373,8 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
             return false;
         }
 
+        var stopwatch = Stopwatch.StartNew();
+
         var node = _host.ViewModel.FindNode(resizeSession.Node.Id) ?? resizeSession.Node;
         var delta = currentScreenPosition - resizeStart;
         var deltaX = delta.X / _host.ViewModel.Zoom;
@@ -383,6 +396,13 @@ internal sealed class NodeCanvasPointerInteractionCoordinator
 
         _host.UpdateNodeVisual(node);
         _host.RenderConnections();
+
+        stopwatch.Stop();
+        if (stopwatch.ElapsedMilliseconds > 16)
+        {
+            Trace.WriteLine($"[AsterGraph] Resize frame latency warning: {stopwatch.ElapsedMilliseconds}ms (budget: 16ms)");
+        }
+
         return true;
     }
 

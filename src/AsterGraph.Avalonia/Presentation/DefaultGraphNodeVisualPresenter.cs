@@ -384,9 +384,25 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
             portAnchors.Remove(port.Id);
         }
 
-        foreach (var port in portList)
+        foreach (var group in portList.GroupBy(port => port.GroupName ?? string.Empty, StringComparer.Ordinal))
         {
-            panel.Children.Add(CreatePortButton(context, port, isInput, portAnchors));
+            if (!string.IsNullOrEmpty(group.Key))
+            {
+                panel.Children.Add(new TextBlock
+                {
+                    Text = group.Key,
+                    FontSize = 10,
+                    FontWeight = FontWeight.SemiBold,
+                    Foreground = BrushFactory.Solid("#A5C3CE", 0.72),
+                    HorizontalAlignment = isInput ? HorizontalAlignment.Left : HorizontalAlignment.Right,
+                    Margin = new Thickness(0, 4, 0, 2),
+                });
+            }
+
+            foreach (var port in group)
+            {
+                panel.Children.Add(CreatePortButton(context, port, isInput, portAnchors));
+            }
         }
     }
 
@@ -643,9 +659,25 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
             HorizontalAlignment = isInput ? HorizontalAlignment.Left : HorizontalAlignment.Right,
         };
 
-        foreach (var port in ports)
+        foreach (var group in ports.GroupBy(port => port.GroupName ?? string.Empty, StringComparer.Ordinal))
         {
-            panel.Children.Add(CreatePortButton(context, port, isInput, portAnchors));
+            if (!string.IsNullOrEmpty(group.Key))
+            {
+                panel.Children.Add(new TextBlock
+                {
+                    Text = group.Key,
+                    FontSize = 10,
+                    FontWeight = FontWeight.SemiBold,
+                    Foreground = BrushFactory.Solid("#A5C3CE", 0.72),
+                    HorizontalAlignment = isInput ? HorizontalAlignment.Left : HorizontalAlignment.Right,
+                    Margin = new Thickness(0, 4, 0, 2),
+                });
+            }
+
+            foreach (var port in group)
+            {
+                panel.Children.Add(CreatePortButton(context, port, isInput, portAnchors));
+            }
         }
 
         return panel;
@@ -706,6 +738,21 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
             row.Children.Add(dot);
         }
 
+        var isValid = IsPortConnectionCountValid(context, port);
+        Control content = row;
+        if (!isValid)
+        {
+            content = new Border
+            {
+                BorderBrush = BrushFactory.Solid("#FF4444"),
+                BorderThickness = new Thickness(1),
+                CornerRadius = new CornerRadius(4),
+                Padding = new Thickness(2),
+                Child = row,
+            };
+            ToolTip.SetTip(content, $"Connection count violates port constraints ({port.MinConnections}–{port.MaxConnections}).");
+        }
+
         var button = new Button
         {
             DataContext = port,
@@ -714,7 +761,7 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
             Padding = new Thickness(0),
             HorizontalAlignment = isInput ? HorizontalAlignment.Left : HorizontalAlignment.Right,
             HorizontalContentAlignment = isInput ? HorizontalAlignment.Left : HorizontalAlignment.Right,
-            Content = row,
+            Content = content,
         };
         AutomationProperties.SetName(
             button,
@@ -760,6 +807,19 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
         };
         AutomationProperties.SetName(thumb, automationName);
         return thumb;
+    }
+
+    private static bool IsPortConnectionCountValid(GraphNodeVisualContext context, PortViewModel port)
+    {
+        var count = port.Direction == PortDirection.Input
+            ? context.Editor.Connections.Count(connection =>
+                connection.TargetNodeId == context.Node.Id
+                && connection.TargetPortId == port.Id
+                && connection.TargetKind == GraphConnectionTargetKind.Port)
+            : context.Editor.Connections.Count(connection =>
+                connection.SourceNodeId == context.Node.Id
+                && connection.SourcePortId == port.Id);
+        return count >= port.MinConnections && count <= port.MaxConnections;
     }
 
     private static NodeCardStyleOptions GetNodeCardStyle(GraphNodeVisualContext context)

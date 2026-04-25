@@ -22,6 +22,9 @@ public sealed class PortViewModel
         DataType = model.DataType;
         TypeId = model.TypeId ?? new PortTypeId(model.DataType);
         AccentHex = model.AccentHex;
+        GroupName = model.GroupName;
+        MinConnections = model.MinConnections;
+        MaxConnections = model.MaxConnections;
         Index = index;
         Total = total;
     }
@@ -57,6 +60,21 @@ public sealed class PortViewModel
     public string AccentHex { get; }
 
     /// <summary>
+    /// 端口分组名称。
+    /// </summary>
+    public string? GroupName { get; }
+
+    /// <summary>
+    /// 端口最小连接数。
+    /// </summary>
+    public int MinConnections { get; }
+
+    /// <summary>
+    /// 端口最大连接数。
+    /// </summary>
+    public int MaxConnections { get; }
+
+    /// <summary>
     /// 端口在所属边上的索引。
     /// </summary>
     public int Index { get; }
@@ -71,5 +89,5 @@ public sealed class PortViewModel
     /// </summary>
     /// <returns>对应的不可变端口模型。</returns>
     public GraphPort ToModel()
-        => new(Id, Label, Direction, DataType, AccentHex, TypeId);
+        => new(Id, Label, Direction, DataType, AccentHex, TypeId, GroupName, MinConnections, MaxConnections);
 }

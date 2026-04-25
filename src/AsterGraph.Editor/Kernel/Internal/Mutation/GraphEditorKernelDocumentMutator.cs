@@ -1051,7 +1051,10 @@ internal sealed class GraphEditorKernelDocumentMutator
             boundaryPort.Direction,
             boundaryPort.DataType,
             boundaryPort.AccentHex,
-            boundaryPort.TypeId);
+            boundaryPort.TypeId,
+            null,
+            0,
+            int.MaxValue);
         var updatedNode = childPort.Direction == PortDirection.Input
             ? compositeNode! with
             {
