@@ -333,7 +333,7 @@ public sealed class ConsumerSampleProofTests
         var persistenceStatus = root.GetProperty("persistenceStatus").GetString();
         var parameterSnapshots = root.GetProperty("parameterSnapshots").EnumerateArray().ToArray();
 
-        Assert.Equal(1, root.GetProperty("schemaVersion").GetInt32());
+        Assert.Equal(2, root.GetProperty("schemaVersion").GetInt32());
         Assert.Equal("ConsumerSample.Avalonia", root.GetProperty("route").GetString());
         Assert.False(string.IsNullOrWhiteSpace(packageVersion));
         Assert.Equal($"v{packageVersion}", publicTag);
@@ -455,6 +455,7 @@ public sealed class ConsumerSampleProofTests
 
         var lines = output.ToString();
         Assert.Contains("SUPPORT_BUNDLE_OK:True", lines, StringComparison.Ordinal);
+        Assert.Contains("SUPPORT_BUNDLE_SCHEMA_OK:True", lines, StringComparison.Ordinal);
         Assert.Contains("SUPPORT_BUNDLE_PERSISTENCE_OK:True", lines, StringComparison.Ordinal);
         Assert.Contains("SUPPORT_BUNDLE_PATH:", lines, StringComparison.Ordinal);
         Assert.True(File.Exists(bundlePath));

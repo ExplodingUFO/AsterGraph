@@ -68,6 +68,7 @@ public static class Program
                         result,
                         GetCapturedCommandLine(),
                         supportNote);
+                    Console.WriteLine("SUPPORT_BUNDLE_SCHEMA_OK:True");
                     Console.WriteLine("SUPPORT_BUNDLE_PERSISTENCE_OK:True");
                 }
                 catch

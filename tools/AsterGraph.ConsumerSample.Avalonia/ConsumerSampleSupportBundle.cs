@@ -21,7 +21,7 @@ internal static class ConsumerSampleSupportBundle
 
         var packageVersion = GetPackageVersion();
         var document = new ConsumerSampleSupportBundleDocument(
-            SchemaVersion: 1,
+            SchemaVersion: 2,
             PackageVersion: packageVersion,
             PublicTag: $"v{packageVersion}",
             Route: "ConsumerSample.Avalonia",
@@ -50,7 +50,47 @@ internal static class ConsumerSampleSupportBundle
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         };
 
-        File.WriteAllText(fullPath, JsonSerializer.Serialize(document, options));
+        var json = JsonSerializer.Serialize(document, options);
+        File.WriteAllText(fullPath, json);
+
+        ValidateBundleSchema(fullPath);
+    }
+
+    private static void ValidateBundleSchema(string path)
+    {
+        using var document = JsonDocument.Parse(File.ReadAllText(path));
+        var root = document.RootElement;
+
+        var requiredProperties = new[]
+        {
+            "schemaVersion",
+            "packageVersion",
+            "publicTag",
+            "route",
+            "generatedAtUtc",
+            "persistenceStatus",
+            "proofLines",
+            "parameterSnapshots",
+            "environment",
+            "reproduction",
+            "graphSummary",
+            "featureDescriptors",
+            "recentDiagnostics",
+        };
+
+        foreach (var property in requiredProperties)
+        {
+            if (!root.TryGetProperty(property, out _))
+            {
+                throw new InvalidOperationException($"Support bundle schema validation failed: missing required property '{property}'.");
+            }
+        }
+
+        var graphSummary = root.GetProperty("graphSummary");
+        if (!graphSummary.TryGetProperty("nodeCount", out _) || !graphSummary.TryGetProperty("connectionCount", out _))
+        {
+            throw new InvalidOperationException("Support bundle schema validation failed: graphSummary missing nodeCount or connectionCount.");
+        }
     }
 
     private static string GetPackageVersion()
