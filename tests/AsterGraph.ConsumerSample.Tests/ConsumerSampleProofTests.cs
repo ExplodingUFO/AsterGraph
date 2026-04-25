@@ -389,6 +389,16 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains("--support-bundle", reproduction.GetProperty("command").GetString(), StringComparison.Ordinal);
         Assert.False(string.IsNullOrWhiteSpace(reproduction.GetProperty("workingDirectory").GetString()));
 
+        var graphSummary = root.GetProperty("graphSummary");
+        Assert.True(graphSummary.GetProperty("nodeCount").GetInt32() >= 0);
+        Assert.True(graphSummary.GetProperty("connectionCount").GetInt32() >= 0);
+
+        var featureDescriptors = root.GetProperty("featureDescriptors").EnumerateArray().ToArray();
+        Assert.True(featureDescriptors.Length > 0);
+
+        var recentDiagnostics = root.GetProperty("recentDiagnostics").EnumerateArray().ToArray();
+        Assert.True(recentDiagnostics.Length >= 0);
+
         var statusSnapshot = parameterSnapshots.Single(snapshot => snapshot.GetProperty("key").GetString() == "status");
         Assert.Equal("enum", statusSnapshot.GetProperty("valueType").GetString());
         Assert.Equal("Enum", statusSnapshot.GetProperty("editorKind").GetString());

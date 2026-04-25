@@ -37,7 +37,12 @@ internal static class ConsumerSampleSupportBundle
             Reproduction: new ConsumerSampleSupportReproduction(
                 command,
                 Environment.CurrentDirectory,
-                note));
+                note),
+            GraphSummary: new ConsumerSampleSupportGraphSummary(
+                result.NodeCount,
+                result.ConnectionCount),
+            FeatureDescriptors: result.FeatureDescriptorIds ?? [],
+            RecentDiagnostics: result.RecentDiagnosticCodes ?? []);
 
         var options = new JsonSerializerOptions
         {
@@ -75,7 +80,10 @@ internal static class ConsumerSampleSupportBundle
         IReadOnlyList<string> ProofLines,
         IReadOnlyList<ConsumerSampleProofParameterSnapshot> ParameterSnapshots,
         ConsumerSampleSupportEnvironment Environment,
-        ConsumerSampleSupportReproduction Reproduction);
+        ConsumerSampleSupportReproduction Reproduction,
+        ConsumerSampleSupportGraphSummary GraphSummary,
+        IReadOnlyList<string> FeatureDescriptors,
+        IReadOnlyList<string> RecentDiagnostics);
 
     private sealed record ConsumerSampleSupportEnvironment(
         string FrameworkDescription,
@@ -87,4 +95,8 @@ internal static class ConsumerSampleSupportBundle
         string Command,
         string WorkingDirectory,
         string? Note);
+
+    private sealed record ConsumerSampleSupportGraphSummary(
+        int NodeCount,
+        int ConnectionCount);
 }

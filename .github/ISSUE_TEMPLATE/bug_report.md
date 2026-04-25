@@ -30,6 +30,8 @@ What happened instead?
 - .NET SDK:
 - OS:
 - Route or artifact tried:
+- UI adapter (Avalonia / WPF / custom):
+- Custom nodes / ports / edges (if any):
 - Proof markers:
 - Friction:
 - Support-bundle attachment note:

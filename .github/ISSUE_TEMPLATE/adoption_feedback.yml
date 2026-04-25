@@ -12,6 +12,14 @@ body:
       placeholder: 0.11.0-beta / v0.11.0-beta
     validations:
       required: true
+  - type: input
+    id: dotnet_version
+    attributes:
+      label: .NET SDK version
+      description: dotnet --version output
+      placeholder: 8.0.100
+    validations:
+      required: true
   - type: dropdown
     id: route
     attributes:
@@ -27,6 +35,25 @@ body:
         - Demo
     validations:
       required: true
+  - type: dropdown
+    id: adapter
+    attributes:
+      label: UI adapter
+      description: Which UI framework adapter are you using?
+      options:
+        - Avalonia (canonical)
+        - WPF (validation-only)
+        - Other / Custom
+    validations:
+      required: true
+  - type: textarea
+    id: custom_nodes
+    attributes:
+      label: Custom nodes / ports / edges
+      description: Are you using custom node definitions, port groups, or edge templates? If yes, briefly describe.
+      placeholder: No custom nodes / Using custom port groups with min/max connections / Using custom node templates
+    validations:
+      required: false
   - type: textarea
     id: friction
     attributes:

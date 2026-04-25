@@ -47,6 +47,10 @@ public sealed record ConsumerSampleProofResult(
     double NodeToolProjectionMs,
     double EdgeToolProjectionMs,
     double CommandPaletteMs,
+    int NodeCount = 0,
+    int ConnectionCount = 0,
+    IReadOnlyList<string>? FeatureDescriptorIds = null,
+    IReadOnlyList<string>? RecentDiagnosticCodes = null,
     bool HostedAutomationNavigationOk = true,
     bool HostedAuthoringAutomationDiagnosticsOk = true)
 {
@@ -312,6 +316,18 @@ public static class ConsumerSampleProof
             NodeToolProjectionMs: nodeToolProjectionMs,
             EdgeToolProjectionMs: edgeToolProjectionMs,
             CommandPaletteMs: commandPaletteMs,
+            NodeCount: host.Session.Queries.CreateDocumentSnapshot().Nodes.Count,
+            ConnectionCount: host.Session.Queries.CreateDocumentSnapshot().Connections.Count,
+            FeatureDescriptorIds: host.Session.Queries.GetFeatureDescriptors()
+                .Where(d => d.IsAvailable)
+                .Select(d => d.Id)
+                .OrderBy(id => id, StringComparer.Ordinal)
+                .ToArray(),
+            RecentDiagnosticCodes: host.Session.Diagnostics.GetRecentDiagnostics(16)
+                .Select(d => d.Code)
+                .Distinct()
+                .OrderBy(code => code, StringComparer.Ordinal)
+                .ToArray(),
             HostedAutomationNavigationOk: hostedAutomationNavigationOk,
             HostedAuthoringAutomationDiagnosticsOk: hostedAuthoringAutomationDiagnosticsOk);
     }
