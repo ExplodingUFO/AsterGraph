@@ -73,6 +73,10 @@ dotnet test tests/AsterGraph.Demo.Tests/AsterGraph.Demo.Tests.csproj --nologo -v
 - Add focused regression coverage for behavior changes before or with the implementation.
 - Preserve existing proof markers emitted by smoke tools unless the contract intentionally changes.
 
+## Triage Workflow
+
+When filing or reviewing adopter feedback, use the [Adopter Triage Checklist](./docs/en/adopter-triage.md). It defines the intake criteria, triage routing (docs-fix / sample-fix / capability-gap), and parameter-snapshot classification needed to process reports without back-and-forth.
+
 ## Documentation Expectations
 
 For externally visible changes, update the matching public docs:

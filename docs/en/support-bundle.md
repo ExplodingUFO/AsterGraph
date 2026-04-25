@@ -47,6 +47,9 @@ The support bundle is one local JSON file with these top-level fields:
 - `parameterSnapshots`
 - `environment`
 - `reproduction`
+- `graphSummary` — node and connection counts from the evaluated session
+- `featureDescriptors` — list of available capabilities detected at capture time
+- `recentDiagnostics` — recent diagnostic codes for silent-failure triage
 
 `persistenceStatus` records the bundle write outcome. For the current proof path it is `written`.
 
