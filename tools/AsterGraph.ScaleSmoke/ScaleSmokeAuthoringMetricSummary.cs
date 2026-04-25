@@ -6,7 +6,10 @@ public sealed record ScaleSmokeAuthoringMetricSummary(
     ScaleSmokePercentilePair Stencil,
     ScaleSmokePercentilePair CommandSurface,
     ScaleSmokePercentilePair QuickToolProjection,
-    ScaleSmokePercentilePair QuickToolExecution)
+    ScaleSmokePercentilePair QuickToolExecution,
+    ScaleSmokePercentilePair InspectorOpen,
+    ScaleSmokePercentilePair NodeResize,
+    ScaleSmokePercentilePair EdgeCreate)
 {
     public static ScaleSmokeAuthoringMetricSummary FromSamples(
         string tierId,
@@ -23,7 +26,10 @@ public sealed record ScaleSmokeAuthoringMetricSummary(
             Summarize(samples.Select(sample => sample.StencilFilterMs)),
             Summarize(samples.Select(sample => sample.CommandSurfaceRefreshMs)),
             Summarize(samples.Select(sample => sample.QuickToolProjectionMs)),
-            Summarize(samples.Select(sample => sample.QuickToolExecutionMs)));
+            Summarize(samples.Select(sample => sample.QuickToolExecutionMs)),
+            Summarize(samples.Select(sample => sample.InspectorOpenMs)),
+            Summarize(samples.Select(sample => sample.NodeResizeMs)),
+            Summarize(samples.Select(sample => sample.EdgeCreateMs)));
     }
 
     public string ToMarker()
@@ -41,6 +47,12 @@ public sealed record ScaleSmokeAuthoringMetricSummary(
                 $"quick-tool-projection-p95={QuickToolProjection.P95}",
                 $"quick-tool-execution-p50={QuickToolExecution.P50}",
                 $"quick-tool-execution-p95={QuickToolExecution.P95}",
+                $"inspector-open-p50={InspectorOpen.P50}",
+                $"inspector-open-p95={InspectorOpen.P95}",
+                $"node-resize-p50={NodeResize.P50}",
+                $"node-resize-p95={NodeResize.P95}",
+                $"edge-create-p50={EdgeCreate.P50}",
+                $"edge-create-p95={EdgeCreate.P95}",
             ]);
     }
 

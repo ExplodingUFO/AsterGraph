@@ -289,12 +289,35 @@ GraphEditorCommandInvocationSnapshot CreateAutomationCommand(
         stencilFilter: "authoring",
         nodeId: $"scale-node-{tier.NodeCount / 2:000}",
         connectionId: $"scale-connection-{tier.NodeCount / 2:000}");
-    var authoringBudgetEvaluation = tier.EvaluateAuthoring(authoringProbe.Metrics);
+
+    var inspectorOpenWatch = Stopwatch.StartNew();
+    authoringProbeSession.Commands.SetSelection([$"scale-node-{tier.NodeCount / 2:000}"], $"scale-node-{tier.NodeCount / 2:000}", updateStatus: false);
+    _ = authoringProbeSession.Queries.GetSelectedNodeParameterSnapshots();
+    inspectorOpenWatch.Stop();
+
+    var nodeResizeWatch = Stopwatch.StartNew();
+    authoringProbeSession.Commands.TrySetNodeSize($"scale-node-{tier.NodeCount / 2:000}", new GraphSize(280, 180), updateStatus: false);
+    nodeResizeWatch.Stop();
+
+    var edgeCreateWatch = Stopwatch.StartNew();
+    authoringProbeSession.Commands.StartConnection($"scale-node-{tier.NodeCount / 2:000}", OutputPortId);
+    authoringProbeSession.Commands.CompleteConnection($"scale-node-{tier.NodeCount / 2 + 1:000}", InputPortId);
+    edgeCreateWatch.Stop();
+
+    var authoringMetrics = new ScaleSmokeAuthoringMetrics(
+        authoringProbe.Metrics.StencilFilterMs,
+        authoringProbe.Metrics.CommandSurfaceRefreshMs,
+        authoringProbe.Metrics.QuickToolProjectionMs,
+        authoringProbe.Metrics.QuickToolExecutionMs,
+        inspectorOpenWatch.ElapsedMilliseconds,
+        nodeResizeWatch.ElapsedMilliseconds,
+        edgeCreateWatch.ElapsedMilliseconds);
+    var authoringBudgetEvaluation = tier.EvaluateAuthoring(authoringMetrics);
     if (emitMarkers)
     {
         Console.WriteLine(tier.ToAuthoringBudgetMarker());
         Console.WriteLine(authoringProbe.ToMarker(tier.Id));
-        Console.WriteLine(authoringProbe.Metrics.ToMarker(tier.Id));
+        Console.WriteLine(authoringMetrics.ToMarker(tier.Id));
         Console.WriteLine($"SCALE_AUTHORING_BUDGET_OK:{tier.Id}:{authoringBudgetEvaluation.Passed}:{authoringBudgetEvaluation.FailureSummary}");
     }
 
@@ -331,7 +354,7 @@ GraphEditorCommandInvocationSnapshot CreateAutomationCommand(
         throw new InvalidOperationException($"ScaleSmoke export budget failed for tier '{tier.Id}': {exportBudgetEvaluation.FailureSummary}");
     }
 
-    return (metrics, authoringProbe.Metrics, exportProbe.Metrics);
+    return (metrics, authoringMetrics, exportProbe.Metrics);
 }
 
 file sealed class ExactCompatibilityService : IPortCompatibilityService

@@ -13,7 +13,7 @@ public sealed class ScaleSmokeAuthoringBudgetTests
         var marker = tier.ToAuthoringBudgetMarker();
 
         Assert.Equal(
-            "SCALE_AUTHORING_BUDGET:baseline:stencil<=100:command-surface<=250:quick-tool-projection<=100:quick-tool-execution<=150",
+            "SCALE_AUTHORING_BUDGET:baseline:stencil<=100:command-surface<=250:quick-tool-projection<=100:quick-tool-execution<=150:inspector-open<=50:node-resize<=30:edge-create<=50",
             marker);
     }
 
@@ -25,7 +25,7 @@ public sealed class ScaleSmokeAuthoringBudgetTests
         var marker = tier.ToAuthoringBudgetMarker();
 
         Assert.Equal(
-            "SCALE_AUTHORING_BUDGET:large:stencil<=150:command-surface<=400:quick-tool-projection<=150:quick-tool-execution<=200",
+            "SCALE_AUTHORING_BUDGET:large:stencil<=150:command-surface<=400:quick-tool-projection<=150:quick-tool-execution<=200:inspector-open<=100:node-resize<=60:edge-create<=100",
             marker);
     }
 
@@ -37,7 +37,10 @@ public sealed class ScaleSmokeAuthoringBudgetTests
             StencilFilterMs: 12,
             CommandSurfaceRefreshMs: 28,
             QuickToolProjectionMs: 16,
-            QuickToolExecutionMs: 21);
+            QuickToolExecutionMs: 21,
+            InspectorOpenMs: 0,
+            NodeResizeMs: 0,
+            EdgeCreateMs: 0);
 
         var result = tier.EvaluateAuthoring(metrics);
 
@@ -53,7 +56,10 @@ public sealed class ScaleSmokeAuthoringBudgetTests
             StencilFilterMs: 12,
             CommandSurfaceRefreshMs: 401,
             QuickToolProjectionMs: 16,
-            QuickToolExecutionMs: 21);
+            QuickToolExecutionMs: 21,
+            InspectorOpenMs: 0,
+            NodeResizeMs: 0,
+            EdgeCreateMs: 0);
 
         var result = tier.EvaluateAuthoring(metrics);
 

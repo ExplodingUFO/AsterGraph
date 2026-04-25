@@ -13,7 +13,10 @@ public sealed record ScaleSmokeAuthoringMetrics(
     long StencilFilterMs,
     long CommandSurfaceRefreshMs,
     long QuickToolProjectionMs,
-    long QuickToolExecutionMs)
+    long QuickToolExecutionMs,
+    long InspectorOpenMs,
+    long NodeResizeMs,
+    long EdgeCreateMs)
 {
     public string ToMarker(string tierId)
     {
@@ -27,6 +30,9 @@ public sealed record ScaleSmokeAuthoringMetrics(
                 $"command-surface={CommandSurfaceRefreshMs}",
                 $"quick-tool-projection={QuickToolProjectionMs}",
                 $"quick-tool-execution={QuickToolExecutionMs}",
+                $"inspector-open={InspectorOpenMs}",
+                $"node-resize={NodeResizeMs}",
+                $"edge-create={EdgeCreateMs}",
             ]);
     }
 }
@@ -66,7 +72,10 @@ public sealed record ScaleSmokeAuthoringBudget(
     long StencilFilterMs,
     long CommandSurfaceRefreshMs,
     long QuickToolProjectionMs,
-    long QuickToolExecutionMs);
+    long QuickToolExecutionMs,
+    long InspectorOpenMs,
+    long NodeResizeMs,
+    long EdgeCreateMs);
 
 public sealed record ScaleSmokeExportBudget(
     long SvgExportMs,
@@ -134,6 +143,9 @@ public sealed record ScaleSmokeTier(
                 $"command-surface<={AuthoringBudget.CommandSurfaceRefreshMs}",
                 $"quick-tool-projection<={AuthoringBudget.QuickToolProjectionMs}",
                 $"quick-tool-execution<={AuthoringBudget.QuickToolExecutionMs}",
+                $"inspector-open<={AuthoringBudget.InspectorOpenMs}",
+                $"node-resize<={AuthoringBudget.NodeResizeMs}",
+                $"edge-create<={AuthoringBudget.EdgeCreateMs}",
             ]);
     }
 
@@ -233,6 +245,21 @@ public sealed record ScaleSmokeTier(
             failures.Add($"quick-tool-execution>{AuthoringBudget.QuickToolExecutionMs}");
         }
 
+        if (metrics.InspectorOpenMs > AuthoringBudget.InspectorOpenMs)
+        {
+            failures.Add($"inspector-open>{AuthoringBudget.InspectorOpenMs}");
+        }
+
+        if (metrics.NodeResizeMs > AuthoringBudget.NodeResizeMs)
+        {
+            failures.Add($"node-resize>{AuthoringBudget.NodeResizeMs}");
+        }
+
+        if (metrics.EdgeCreateMs > AuthoringBudget.EdgeCreateMs)
+        {
+            failures.Add($"edge-create>{AuthoringBudget.EdgeCreateMs}");
+        }
+
         return failures.Count == 0
             ? new ScaleSmokeAuthoringBudgetEvaluation(true, "none")
             : new ScaleSmokeAuthoringBudgetEvaluation(false, string.Join(',', failures));
@@ -304,7 +331,10 @@ public sealed record ScaleSmokeTier(
                     StencilFilterMs: 100,
                     CommandSurfaceRefreshMs: 250,
                     QuickToolProjectionMs: 100,
-                    QuickToolExecutionMs: 150),
+                    QuickToolExecutionMs: 150,
+                    InspectorOpenMs: 50,
+                    NodeResizeMs: 30,
+                    EdgeCreateMs: 50),
                 ExportBudget: new ScaleSmokeExportBudget(
                     SvgExportMs: 300,
                     PngExportMs: 2500,
@@ -327,7 +357,10 @@ public sealed record ScaleSmokeTier(
                     StencilFilterMs: 150,
                     CommandSurfaceRefreshMs: 400,
                     QuickToolProjectionMs: 150,
-                    QuickToolExecutionMs: 200),
+                    QuickToolExecutionMs: 200,
+                    InspectorOpenMs: 100,
+                    NodeResizeMs: 60,
+                    EdgeCreateMs: 100),
                 ExportBudget: new ScaleSmokeExportBudget(
                     SvgExportMs: 300,
                     PngExportMs: 12000,

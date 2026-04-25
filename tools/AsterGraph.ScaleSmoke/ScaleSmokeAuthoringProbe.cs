@@ -124,7 +124,10 @@ public static class ScaleSmokeAuthoringProbe
                 StencilFilterMs: stencilFilterMs,
                 CommandSurfaceRefreshMs: commandSurfaceRefreshMs,
                 QuickToolProjectionMs: quickToolProjectionMs,
-                QuickToolExecutionMs: quickToolExecutionMs));
+                QuickToolExecutionMs: quickToolExecutionMs,
+                InspectorOpenMs: 0,
+                NodeResizeMs: 0,
+                EdgeCreateMs: 0));
     }
 
     private static long MeasureMilliseconds(Action action)
