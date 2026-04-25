@@ -1030,6 +1030,9 @@ function Invoke-PrereleaseNotesValidation {
     'SCALE_PERFORMANCE_BUDGET_OK:large:True:',
     'SCALE_TIER_BUDGET:stress',
     'SCALE_PERFORMANCE_BUDGET_OK:stress:True:informational-only',
+    'SCALE_AUTHORING_BUDGET_OK:baseline:True:',
+    'SCALE_AUTHORING_BUDGET_OK:large:True:',
+    'SCALE_AUTHORING_BUDGET_OK:stress:True:informational-only',
     'SCALE_PERF_SUMMARY:stress:',
     'SCALE_HISTORY_CONTRACT_OK:',
     'COVERAGE_REPORT_OK:'

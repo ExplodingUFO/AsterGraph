@@ -46,6 +46,7 @@ public sealed record ConsumerSampleProofResult(
     double CommandSurfaceRefreshMs,
     double NodeToolProjectionMs,
     double EdgeToolProjectionMs,
+    double CommandPaletteMs,
     bool HostedAutomationNavigationOk = true,
     bool HostedAuthoringAutomationDiagnosticsOk = true)
 {
@@ -100,6 +101,7 @@ public sealed record ConsumerSampleProofResult(
         FormatMetric("command_surface_refresh_ms", CommandSurfaceRefreshMs),
         FormatMetric("node_tool_projection_ms", NodeToolProjectionMs),
         FormatMetric("edge_tool_projection_ms", EdgeToolProjectionMs),
+        FormatMetric("command_palette_ms", CommandPaletteMs),
     ];
 
     internal IReadOnlyList<string> ProofLines =>
@@ -168,6 +170,7 @@ public static class ConsumerSampleProof
         double commandSurfaceRefreshMs;
         double nodeToolProjectionMs;
         double edgeToolProjectionMs;
+        double commandPaletteMs;
 
         try
         {
@@ -223,6 +226,7 @@ public static class ConsumerSampleProof
             commandSurfaceRefreshMs = MeasureCommandSurfaceRefreshMilliseconds(host.Session);
             nodeToolProjectionMs = MeasureNodeToolProjectionMilliseconds(host.Session, host.GetFirstReviewNodeId());
             edgeToolProjectionMs = MeasureEdgeToolProjectionMilliseconds(host.Session, host.GetFirstReviewNodeId(), "consumer-sample-connection-001");
+            commandPaletteMs = MeasureCommandPaletteMilliseconds(host.Session, window);
 
             windowCompositionOk =
                 FindNamed<Menu>(window, "PART_MainMenu") is not null
@@ -307,6 +311,7 @@ public static class ConsumerSampleProof
             CommandSurfaceRefreshMs: commandSurfaceRefreshMs,
             NodeToolProjectionMs: nodeToolProjectionMs,
             EdgeToolProjectionMs: edgeToolProjectionMs,
+            CommandPaletteMs: commandPaletteMs,
             HostedAutomationNavigationOk: hostedAutomationNavigationOk,
             HostedAuthoringAutomationDiagnosticsOk: hostedAuthoringAutomationDiagnosticsOk);
     }
@@ -522,6 +527,26 @@ public static class ConsumerSampleProof
                 selection.SelectedNodeIds,
                 selection.PrimarySelectedNodeId);
             _ = nodeActions.Count + connectionActions.Count;
+        });
+
+    private static double MeasureCommandPaletteMilliseconds(
+        IGraphEditorSession session,
+        Window window)
+        => MeasureMilliseconds(() =>
+        {
+            var paletteToggle = FindNamed<Button>(window, "PART_OpenCommandPaletteButton");
+            if (paletteToggle is not null)
+            {
+                paletteToggle.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                FlushUi();
+            }
+            var paletteChrome = FindNamed<Border>(window, "PART_CommandPaletteChrome");
+            _ = paletteChrome?.IsVisible;
+            if (paletteToggle is not null)
+            {
+                paletteToggle.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                FlushUi();
+            }
         });
 
     private static bool HasNodeQuickTools(Window window, ConsumerSampleHost host, string reviewNodeId)
