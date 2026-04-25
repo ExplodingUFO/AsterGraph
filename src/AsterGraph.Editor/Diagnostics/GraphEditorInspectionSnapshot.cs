@@ -23,6 +23,7 @@ public sealed record GraphEditorInspectionSnapshot
     /// <param name="featureDescriptors">当前显式特性描述集合。</param>
     /// <param name="recentDiagnostics">最近诊断集合。</param>
     /// <param name="pluginLoadSnapshots">当前插件加载快照集合。</param>
+    /// <param name="parameterSnapshots">当前选中节点的参数快照集合。</param>
     public GraphEditorInspectionSnapshot(
         GraphDocument document,
         GraphEditorSelectionSnapshot selection,
@@ -33,7 +34,8 @@ public sealed record GraphEditorInspectionSnapshot
         IReadOnlyList<NodePositionSnapshot> nodePositions,
         IReadOnlyList<GraphEditorFeatureDescriptorSnapshot> featureDescriptors,
         IReadOnlyList<GraphEditorDiagnostic> recentDiagnostics,
-        IReadOnlyList<GraphEditorPluginLoadSnapshot>? pluginLoadSnapshots = null)
+        IReadOnlyList<GraphEditorPluginLoadSnapshot>? pluginLoadSnapshots = null,
+        IReadOnlyList<GraphEditorNodeParameterSnapshot>? parameterSnapshots = null)
     {
         ArgumentNullException.ThrowIfNull(document);
         ArgumentNullException.ThrowIfNull(selection);
@@ -55,6 +57,7 @@ public sealed record GraphEditorInspectionSnapshot
         FeatureDescriptors = featureDescriptors.ToList();
         RecentDiagnostics = recentDiagnostics.ToList();
         PluginLoadSnapshots = pluginLoadSnapshots?.ToList() ?? [];
+        ParameterSnapshots = parameterSnapshots?.ToList() ?? [];
     }
 
     /// <summary>
@@ -106,4 +109,9 @@ public sealed record GraphEditorInspectionSnapshot
     /// 当前插件加载快照集合。
     /// </summary>
     public IReadOnlyList<GraphEditorPluginLoadSnapshot> PluginLoadSnapshots { get; }
+
+    /// <summary>
+    /// 当前选中节点的参数快照集合。
+    /// </summary>
+    public IReadOnlyList<GraphEditorNodeParameterSnapshot> ParameterSnapshots { get; }
 }

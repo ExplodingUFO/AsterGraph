@@ -440,6 +440,115 @@ public sealed class GraphEditorSessionParameterContractsTests
         return catalog;
     }
 
+    [Fact]
+    public void NodeParameterDefinition_ExposesContractVersion()
+    {
+        var definition = new NodeParameterDefinition(
+            "key", "Name", new PortTypeId("string"), ParameterEditorKind.Text,
+            contractVersion: 2);
+
+        Assert.Equal(2, definition.ContractVersion);
+    }
+
+    [Fact]
+    public void NodeParameterDefinition_ContractVersionDefaultsToOne()
+    {
+        var definition = new NodeParameterDefinition(
+            "key", "Name", new PortTypeId("string"), ParameterEditorKind.Text);
+
+        Assert.Equal(1, definition.ContractVersion);
+    }
+
+    [Fact]
+    public void NodeParameterDefinition_ContractVersionClampsToOneWhenZeroOrNegative()
+    {
+        var definition = new NodeParameterDefinition(
+            "key", "Name", new PortTypeId("string"), ParameterEditorKind.Text,
+            contractVersion: 0);
+
+        Assert.Equal(1, definition.ContractVersion);
+    }
+
+    [Fact]
+    public void CaptureInspectionSnapshot_IncludesParameterSnapshotsForHomogeneousSelection()
+    {
+        var session = CreateInspectorMetadataSession();
+        session.Commands.SetSelection(["tests.session.parameters.inspector-node"], "tests.session.parameters.inspector-node", updateStatus: false);
+
+        var inspection = session.Diagnostics.CaptureInspectionSnapshot();
+
+        Assert.NotEmpty(inspection.ParameterSnapshots);
+        Assert.Equal(2, inspection.ParameterSnapshots.Count);
+
+        var threshold = Assert.Single(inspection.ParameterSnapshots, p => p.Definition.Key == "threshold");
+        Assert.Equal(0.9d, threshold.CurrentValue);
+        Assert.Equal(1, threshold.Definition.ContractVersion);
+    }
+
+    [Fact]
+    public void CaptureInspectionSnapshot_IncludesEmptyParameterSnapshotsForNoSelection()
+    {
+        var session = CreateInspectorMetadataSession();
+
+        var inspection = session.Diagnostics.CaptureInspectionSnapshot();
+
+        Assert.Empty(inspection.ParameterSnapshots);
+    }
+
+    [Fact]
+    public void InspectorPath_AndNodeSidePath_ProduceEquivalentParameterMetadata()
+    {
+        var session = CreateInspectorMetadataSession();
+        var nodeId = "tests.session.parameters.inspector-node";
+        session.Commands.SetSelection([nodeId], nodeId, updateStatus: false);
+
+        var inspectorPath = session.Queries.GetSelectedNodeParameterSnapshots();
+        var nodeSidePath = session.Queries.GetNodeParameterSnapshots(nodeId);
+
+        Assert.Equal(inspectorPath.Count, nodeSidePath.Count);
+
+        foreach (var inspectorSnapshot in inspectorPath)
+        {
+            var nodeSnapshot = Assert.Single(
+                nodeSidePath,
+                candidate => candidate.Definition.Key == inspectorSnapshot.Definition.Key);
+
+            Assert.Equal(inspectorSnapshot.HelpText, nodeSnapshot.HelpText);
+            Assert.Equal(inspectorSnapshot.ReadOnlyReason, nodeSnapshot.ReadOnlyReason);
+            Assert.Equal(inspectorSnapshot.GroupDisplayName, nodeSnapshot.GroupDisplayName);
+            Assert.Equal(inspectorSnapshot.ValueState, nodeSnapshot.ValueState);
+            Assert.Equal(inspectorSnapshot.ValueDisplayText, nodeSnapshot.ValueDisplayText);
+            Assert.Equal(inspectorSnapshot.CanResetToDefault, nodeSnapshot.CanResetToDefault);
+            Assert.Equal(inspectorSnapshot.IsUsingDefaultValue, nodeSnapshot.IsUsingDefaultValue);
+            Assert.Equal(inspectorSnapshot.IsGroupHeaderVisible, nodeSnapshot.IsGroupHeaderVisible);
+            Assert.Equal(inspectorSnapshot.Definition.ContractVersion, nodeSnapshot.Definition.ContractVersion);
+        }
+    }
+
+    [Fact]
+    public void BatchEditPath_AndInspectorPath_ProduceConsistentParameterMetadataAfterMutation()
+    {
+        var session = CreateSession();
+        session.Commands.SetSelection([FirstNodeId, SecondNodeId], FirstNodeId, updateStatus: false);
+
+        var before = session.Queries.GetSelectedNodeParameterSnapshots();
+        var thresholdBefore = Assert.Single(before, p => p.Definition.Key == "threshold");
+        Assert.True(thresholdBefore.HasMixedValues);
+
+        session.Commands.TrySetSelectedNodeParameterValue("threshold", 0.75d);
+
+        var after = session.Queries.GetSelectedNodeParameterSnapshots();
+        var thresholdAfter = Assert.Single(after, p => p.Definition.Key == "threshold");
+        Assert.False(thresholdAfter.HasMixedValues);
+        Assert.Equal(0.75d, thresholdAfter.CurrentValue);
+
+        var nodeSideAfter = session.Queries.GetNodeParameterSnapshots(FirstNodeId);
+        var nodeThresholdAfter = Assert.Single(nodeSideAfter, p => p.Definition.Key == "threshold");
+        Assert.Equal(thresholdAfter.HelpText, nodeThresholdAfter.HelpText);
+        Assert.Equal(thresholdAfter.ValueState, nodeThresholdAfter.ValueState);
+        Assert.Equal(thresholdAfter.ValueDisplayText, nodeThresholdAfter.ValueDisplayText);
+    }
+
     private static void AssertMethod(Type declaringType, string methodName, params Type[] parameterTypes)
     {
         var method = declaringType.GetMethod(methodName, parameterTypes);

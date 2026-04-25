@@ -270,7 +270,8 @@ public sealed partial class GraphEditorSession
             GetNodePositions().ToList(),
             GetFeatureDescriptors().ToList(),
             GetRecentDiagnostics().ToList(),
-            GetPluginLoadSnapshots().ToList());
+            GetPluginLoadSnapshots().ToList(),
+            GetSelectedNodeParameterSnapshots());
     }
 
     private GraphEditorPendingConnectionSnapshot CreatePendingConnectionSnapshot()

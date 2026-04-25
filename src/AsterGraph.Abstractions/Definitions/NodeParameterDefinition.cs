@@ -25,7 +25,8 @@ public sealed record NodeParameterDefinition
         string? helpText = null,
         int sortOrder = 0,
         bool isAdvanced = false,
-        string? unitSuffix = null)
+        string? unitSuffix = null,
+        int contractVersion = 1)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(key);
         ArgumentException.ThrowIfNullOrWhiteSpace(displayName);
@@ -45,6 +46,7 @@ public sealed record NodeParameterDefinition
         SortOrder = sortOrder;
         IsAdvanced = isAdvanced;
         UnitSuffix = string.IsNullOrWhiteSpace(unitSuffix) ? null : unitSuffix.Trim();
+        ContractVersion = contractVersion > 0 ? contractVersion : 1;
     }
 
     /// <summary>
@@ -121,4 +123,9 @@ public sealed record NodeParameterDefinition
     /// Optional display suffix rendered next to numeric or text-oriented values.
     /// </summary>
     public string? UnitSuffix { get; }
+
+    /// <summary>
+    /// Parameter metadata contract version. Bumps when the vocabulary shape changes.
+    /// </summary>
+    public int ContractVersion { get; }
 }
