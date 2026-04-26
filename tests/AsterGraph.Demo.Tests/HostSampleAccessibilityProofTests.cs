@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using System.IO;
 using Xunit;
 
@@ -8,31 +7,17 @@ namespace AsterGraph.Demo.Tests;
 public sealed class HostSampleAccessibilityProofTests
 {
     [Fact]
-    public void HostSample_EmitsAutomationAndAccessibilityBaselineProofMarkers()
+    public void HostSampleProof_SurfaceAutomationAndAccessibilityBaselineMarkers()
     {
-        var startInfo = new ProcessStartInfo
-        {
-            FileName = "dotnet",
-            Arguments = $"run --project \"{Path.Combine(GetRepositoryRoot(), "tools", "AsterGraph.HostSample", "AsterGraph.HostSample.csproj")}\" --nologo",
-            RedirectStandardError = true,
-            RedirectStandardOutput = true,
-            UseShellExecute = false,
-            WorkingDirectory = GetRepositoryRoot(),
-        };
+        var program = File.ReadAllText(Path.Combine(GetRepositoryRoot(), "tools", "AsterGraph.HostSample", "Program.cs"));
+        var ciScript = File.ReadAllText(Path.Combine(GetRepositoryRoot(), "eng", "ci.ps1"));
 
-        using var process = Process.Start(startInfo);
-        Assert.NotNull(process);
-        var stdout = process!.StandardOutput.ReadToEnd();
-        var stderr = process.StandardError.ReadToEnd();
-        process.WaitForExit();
-        Assert.True(
-            process.ExitCode == 0,
-            $"HostSample failed with exit code {process.ExitCode}.{Environment.NewLine}STDOUT:{Environment.NewLine}{stdout}{Environment.NewLine}STDERR:{Environment.NewLine}{stderr}");
-
-        Assert.Contains("HOST_SAMPLE_AUTOMATION_OK:True", stdout, StringComparison.Ordinal);
-        Assert.Contains("HOST_SAMPLE_ACCESSIBILITY_BASELINE_OK:True", stdout, StringComparison.Ordinal);
-        Assert.Contains("HOST_SAMPLE_ACCESSIBILITY_AUTOMATION_OK:True", stdout, StringComparison.Ordinal);
-        Assert.Contains("HOST_SAMPLE_OK:True", stdout, StringComparison.Ordinal);
+        Assert.Contains("HOST_SAMPLE_AUTOMATION_OK", program, StringComparison.Ordinal);
+        Assert.Contains("HOST_SAMPLE_ACCESSIBILITY_BASELINE_OK", program, StringComparison.Ordinal);
+        Assert.Contains("HOST_SAMPLE_ACCESSIBILITY_AUTOMATION_OK", program, StringComparison.Ordinal);
+        Assert.Contains("HOST_SAMPLE_OK", program, StringComparison.Ordinal);
+        Assert.Contains("### Run HostSample ($modeLabel)", ciScript, StringComparison.Ordinal);
+        Assert.Contains("HOST_SAMPLE_OK:True", ciScript, StringComparison.Ordinal);
     }
 
     private static string GetRepositoryRoot()
