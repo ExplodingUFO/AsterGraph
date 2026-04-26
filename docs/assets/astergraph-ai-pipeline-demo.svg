@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640" role="img" aria-labelledby="title desc">
+  <title id="title">AsterGraph AI pipeline demo scenario</title>
+  <desc id="desc">A node graph scenario showing draggable nodes, connected ports, parameter editing, automation run status, and SVG export.</desc>
+  <rect width="1280" height="640" fill="#101820"/>
+  <rect x="34" y="34" width="1212" height="572" rx="8" fill="#152331" stroke="#2F5067" stroke-width="2"/>
+  <rect x="34" y="34" width="1212" height="54" rx="8" fill="#1C2E3C"/>
+  <text x="62" y="68" fill="#F7FBFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="24" font-weight="700">AsterGraph Demo: AI Workflow / Agent Pipeline</text>
+  <text x="988" y="68" fill="#9EF6C9" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="16">Run automation</text>
+  <rect x="1120" y="48" width="84" height="24" rx="5" fill="#253D2F" stroke="#79E28A"/>
+  <text x="1137" y="66" fill="#DDFCEB" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13">Export SVG</text>
+
+  <g font-family="Inter, Segoe UI, Arial, sans-serif">
+    <rect x="62" y="116" width="176" height="124" rx="8" fill="#1D3B4A" stroke="#4AD6FF" stroke-width="2"/>
+    <text x="82" y="148" fill="#EAF8FF" font-size="20" font-weight="700">Input</text>
+    <text x="82" y="176" fill="#B9D2DE" font-size="14">drag node</text>
+    <circle cx="232" cy="184" r="7" fill="#78F0E5"/>
+    <rect x="82" y="196" width="116" height="20" rx="4" fill="#264E5E"/>
+    <text x="90" y="211" fill="#D5F7FF" font-size="12">sampleText</text>
+
+    <rect x="308" y="100" width="198" height="160" rx="8" fill="#3D3020" stroke="#FFB866" stroke-width="2"/>
+    <text x="328" y="132" fill="#FFF1DC" font-size="20" font-weight="700">Prompt</text>
+    <text x="328" y="160" fill="#E3C9A0" font-size="14">edit parameters</text>
+    <circle cx="314" cy="184" r="7" fill="#78F0E5"/>
+    <circle cx="500" cy="184" r="7" fill="#FFD56A"/>
+    <rect x="328" y="190" width="146" height="22" rx="4" fill="#5B4428"/>
+    <text x="338" y="206" fill="#FFF4DA" font-size="12">systemPrompt</text>
+    <rect x="328" y="220" width="86" height="22" rx="4" fill="#5B4428"/>
+    <text x="338" y="236" fill="#FFF4DA" font-size="12">mode: triage</text>
+
+    <rect x="568" y="310" width="190" height="138" rx="8" fill="#243928" stroke="#79E28A" stroke-width="2"/>
+    <text x="588" y="342" fill="#E9FFE9" font-size="20" font-weight="700">Tool</text>
+    <text x="588" y="370" fill="#BFE4C3" font-size="14">trusted plugin context</text>
+    <circle cx="574" cy="388" r="7" fill="#FFD56A"/>
+    <circle cx="752" cy="388" r="7" fill="#4AD6FF"/>
+    <rect x="588" y="402" width="122" height="22" rx="4" fill="#315137"/>
+    <text x="598" y="418" fill="#EAFFEE" font-size="12">maxResults: 5</text>
+
+    <rect x="820" y="126" width="212" height="164" rx="8" fill="#352A44" stroke="#E0AEFF" stroke-width="2"/>
+    <text x="840" y="158" fill="#FAECFF" font-size="20" font-weight="700">LLM</text>
+    <text x="840" y="186" fill="#D8C4E7" font-size="14">automation target</text>
+    <circle cx="826" cy="204" r="7" fill="#FFD56A"/>
+    <circle cx="826" cy="240" r="7" fill="#4AD6FF"/>
+    <circle cx="1026" cy="222" r="7" fill="#FFB866"/>
+    <rect x="840" y="220" width="102" height="22" rx="4" fill="#4C3A61"/>
+    <text x="850" y="236" fill="#F7E9FF" font-size="12">temperature</text>
+    <rect x="840" y="250" width="76" height="22" rx="4" fill="#4C3A61"/>
+    <text x="850" y="266" fill="#F7E9FF" font-size="12">model</text>
+
+    <rect x="1090" y="162" width="160" height="126" rx="8" fill="#442936" stroke="#FF7A90" stroke-width="2"/>
+    <text x="1110" y="194" fill="#FFE9EE" font-size="20" font-weight="700">Parser</text>
+    <text x="1110" y="222" fill="#E5B9C4" font-size="14">typed payload</text>
+    <circle cx="1096" cy="232" r="7" fill="#FFB866"/>
+    <circle cx="1244" cy="232" r="7" fill="#79E28A"/>
+
+    <path d="M239 184 C265 184 282 184 307 184" fill="none" stroke="#78F0E5" stroke-width="4"/>
+    <path d="M507 184 C610 184 700 204 819 204" fill="none" stroke="#FFD56A" stroke-width="4"/>
+    <path d="M507 188 C545 246 540 346 567 388" fill="none" stroke="#FFD56A" stroke-width="4"/>
+    <path d="M759 388 C804 382 798 250 819 240" fill="none" stroke="#4AD6FF" stroke-width="4"/>
+    <path d="M1033 222 C1058 222 1068 232 1089 232" fill="none" stroke="#FFB866" stroke-width="4"/>
+    <path d="M1251 232 C1268 232 1268 326 1232 326 L1144 326" fill="none" stroke="#79E28A" stroke-width="4"/>
+
+    <rect x="790" y="360" width="408" height="176" rx="8" fill="#182938" stroke="#34536B" stroke-width="2"/>
+    <text x="812" y="392" fill="#F7FBFF" font-size="18" font-weight="700">Scenario proof markers</text>
+    <text x="812" y="424" fill="#BFD7E5" font-size="14">1. Drag nodes from the stencil</text>
+    <text x="812" y="452" fill="#BFD7E5" font-size="14">2. Connect typed ports</text>
+    <text x="812" y="480" fill="#BFD7E5" font-size="14">3. Edit grouped parameters</text>
+    <text x="812" y="508" fill="#BFD7E5" font-size="14">4. Run host automation and export SVG</text>
+
+    <rect x="62" y="518" width="596" height="44" rx="6" fill="#0E1824" stroke="#42637C"/>
+    <text x="82" y="546" fill="#DDFCEB" font-size="17">dotnet run --project src/AsterGraph.Demo -- --scenario ai-pipeline</text>
+  </g>
+</svg>

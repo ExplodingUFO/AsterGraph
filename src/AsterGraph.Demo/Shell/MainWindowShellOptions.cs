@@ -6,7 +6,8 @@ public sealed record MainWindowShellOptions(
     string? StorageRootPath = null,
     bool EnableStatePersistence = false,
     bool RestoreLastWorkspaceOnStartup = false,
-    string? SaveAsWorkspacePath = null)
+    string? SaveAsWorkspacePath = null,
+    string? InitialScenario = null)
 {
     public static MainWindowShellOptions CreatePersistentDefault()
         => new(

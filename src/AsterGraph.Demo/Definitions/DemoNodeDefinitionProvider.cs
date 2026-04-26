@@ -241,6 +241,213 @@ public sealed class DemoNodeDefinitionProvider : INodeDefinitionProvider
                 accentHex: palette.Output,
                 defaultWidth: 238,
                 defaultHeight: 162),
+            new NodeDefinition(
+                new NodeDefinitionId("aster.demo.ai-input"),
+                "Input",
+                "AI Pipeline",
+                "User request",
+                [
+                ],
+                [
+                    new PortDefinition("text", "Text", new PortTypeId("text"), palette.Signal),
+                ],
+                [
+                    new NodeParameterDefinition(
+                        "sampleText",
+                        "Sample Text",
+                        new PortTypeId("string"),
+                        ParameterEditorKind.Text,
+                        description: "Seed request used by the scenario graph.",
+                        defaultValue: "Summarize open support tickets and propose next actions.",
+                        groupName: "Request",
+                        placeholderText: "user request"),
+                ],
+                description: "Represents a host-provided user request or document payload.",
+                accentHex: palette.Input,
+                defaultWidth: 250,
+                defaultHeight: 168),
+            new NodeDefinition(
+                new NodeDefinitionId("aster.demo.prompt-builder"),
+                "Prompt",
+                "AI Pipeline",
+                "Instruction builder",
+                [
+                    new PortDefinition("context", "Context", new PortTypeId("text"), palette.Signal),
+                ],
+                [
+                    new PortDefinition("prompt", "Prompt", new PortTypeId("text"), palette.Highlight),
+                ],
+                [
+                    new NodeParameterDefinition(
+                        "systemPrompt",
+                        "System Prompt",
+                        new PortTypeId("string"),
+                        ParameterEditorKind.Text,
+                        description: "Instruction text merged with the incoming request.",
+                        defaultValue: "You are a support operations agent. Return concise, actionable findings.",
+                        groupName: "Prompt",
+                        placeholderText: "system instruction"),
+                    new NodeParameterDefinition(
+                        "mode",
+                        "Mode",
+                        new PortTypeId("enum"),
+                        ParameterEditorKind.Enum,
+                        defaultValue: "triage",
+                        constraints: new ParameterConstraints(
+                            AllowedOptions:
+                            [
+                                new ParameterOptionDefinition("triage", "Triage"),
+                                new ParameterOptionDefinition("extract", "Extract"),
+                                new ParameterOptionDefinition("route", "Route"),
+                            ]),
+                        groupName: "Prompt"),
+                ],
+                description: "Builds an instruction payload from host input and selected prompt mode.",
+                accentHex: palette.Color,
+                defaultWidth: 280,
+                defaultHeight: 210),
+            new NodeDefinition(
+                new NodeDefinitionId("aster.demo.tool-call"),
+                "Tool",
+                "AI Pipeline",
+                "Trusted context",
+                [
+                    new PortDefinition("query", "Query", new PortTypeId("text"), palette.Highlight),
+                ],
+                [
+                    new PortDefinition("evidence", "Evidence", new PortTypeId("text"), palette.Input),
+                ],
+                [
+                    new NodeParameterDefinition(
+                        "toolName",
+                        "Tool",
+                        new PortTypeId("enum"),
+                        ParameterEditorKind.Enum,
+                        defaultValue: "tickets",
+                        constraints: new ParameterConstraints(
+                            AllowedOptions:
+                            [
+                                new ParameterOptionDefinition("tickets", "Ticket Search"),
+                                new ParameterOptionDefinition("docs", "Docs Search"),
+                                new ParameterOptionDefinition("crm", "CRM Lookup"),
+                            ]),
+                        groupName: "Tool"),
+                    new NodeParameterDefinition(
+                        "maxResults",
+                        "Max Results",
+                        new PortTypeId("int"),
+                        ParameterEditorKind.Number,
+                        defaultValue: 5,
+                        constraints: new ParameterConstraints(Minimum: 1, Maximum: 25),
+                        groupName: "Tool"),
+                ],
+                description: "Models a trusted host tool call that supplies bounded context to the model.",
+                accentHex: palette.Procedure,
+                defaultWidth: 270,
+                defaultHeight: 208),
+            new NodeDefinition(
+                new NodeDefinitionId("aster.demo.llm-call"),
+                "LLM",
+                "AI Pipeline",
+                "Model run",
+                [
+                    new PortDefinition("prompt", "Prompt", new PortTypeId("text"), palette.Highlight),
+                    new PortDefinition("context", "Context", new PortTypeId("text"), palette.Input),
+                ],
+                [
+                    new PortDefinition("response", "Response", new PortTypeId("text"), palette.Color),
+                ],
+                [
+                    new NodeParameterDefinition(
+                        "model",
+                        "Model",
+                        new PortTypeId("enum"),
+                        ParameterEditorKind.Enum,
+                        defaultValue: "fast",
+                        constraints: new ParameterConstraints(
+                            AllowedOptions:
+                            [
+                                new ParameterOptionDefinition("fast", "Fast"),
+                                new ParameterOptionDefinition("balanced", "Balanced"),
+                                new ParameterOptionDefinition("accurate", "Accurate"),
+                            ]),
+                        groupName: "Model"),
+                    new NodeParameterDefinition(
+                        "temperature",
+                        "Temperature",
+                        new PortTypeId("float"),
+                        ParameterEditorKind.Number,
+                        defaultValue: 0.2,
+                        constraints: new ParameterConstraints(Minimum: 0, Maximum: 1),
+                        groupName: "Model"),
+                ],
+                description: "Represents the model invocation fed by prompt instructions and trusted context.",
+                accentHex: palette.Shading,
+                defaultWidth: 300,
+                defaultHeight: 230),
+            new NodeDefinition(
+                new NodeDefinitionId("aster.demo.response-parser"),
+                "Parser",
+                "AI Pipeline",
+                "Typed payload",
+                [
+                    new PortDefinition("response", "Response", new PortTypeId("text"), palette.Color),
+                ],
+                [
+                    new PortDefinition("payload", "Payload", new PortTypeId("json"), palette.Procedure),
+                ],
+                [
+                    new NodeParameterDefinition(
+                        "schema",
+                        "Schema",
+                        new PortTypeId("string"),
+                        ParameterEditorKind.Text,
+                        description: "Expected response shape.",
+                        defaultValue: "{ \"summary\": string, \"actions\": string[] }",
+                        groupName: "Parser",
+                        placeholderText: "json schema"),
+                    new NodeParameterDefinition(
+                        "strict",
+                        "Strict",
+                        new PortTypeId("bool"),
+                        ParameterEditorKind.Boolean,
+                        defaultValue: true,
+                        groupName: "Parser"),
+                ],
+                description: "Turns a natural-language model response into a typed host payload.",
+                accentHex: palette.Composite,
+                defaultWidth: 285,
+                defaultHeight: 218),
+            new NodeDefinition(
+                new NodeDefinitionId("aster.demo.ai-output"),
+                "Output",
+                "AI Pipeline",
+                "Host result",
+                [
+                    new PortDefinition("payload", "Payload", new PortTypeId("json"), palette.Procedure),
+                ],
+                [
+                ],
+                [
+                    new NodeParameterDefinition(
+                        "exportFormat",
+                        "Export Format",
+                        new PortTypeId("enum"),
+                        ParameterEditorKind.Enum,
+                        defaultValue: "json",
+                        constraints: new ParameterConstraints(
+                            AllowedOptions:
+                            [
+                                new ParameterOptionDefinition("json", "JSON"),
+                                new ParameterOptionDefinition("markdown", "Markdown"),
+                                new ParameterOptionDefinition("ticket", "Ticket Update"),
+                            ]),
+                        groupName: "Output"),
+                ],
+                description: "Final typed result ready for export or host automation.",
+                accentHex: palette.Output,
+                defaultWidth: 250,
+                defaultHeight: 168),
         ];
     }
 

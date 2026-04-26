@@ -94,7 +94,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
         editor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
         {
-            Document = DemoGraphFactory.CreateDefault(catalog),
+            Document = DemoGraphFactory.CreateStartupDocument(catalog, _shellOptions.InitialScenario),
             NodeCatalog = catalog,
             CompatibilityService = new DefaultPortCompatibilityService(),
             StorageRootPath = storageRootPath,

@@ -11,6 +11,11 @@ namespace AsterGraph.Demo;
 
 public partial class App : Application
 {
+    private static MainWindowShellOptions StartupOptions { get; set; } = MainWindowShellOptions.CreatePersistentDefault();
+
+    public static void ConfigureStartup(MainWindowShellOptions options)
+        => StartupOptions = options;
+
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
@@ -25,7 +30,7 @@ public partial class App : Application
             DisableAvaloniaDataAnnotationValidation();
             desktop.MainWindow = new MainWindow
             {
-                DataContext = new MainWindowViewModel(MainWindowShellOptions.CreatePersistentDefault()),
+                DataContext = new MainWindowViewModel(StartupOptions),
             };
         }
 

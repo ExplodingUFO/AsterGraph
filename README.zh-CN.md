@@ -7,6 +7,16 @@
 
 AsterGraph 是一个面向 .NET 的模块化节点图编辑器工具包，提供可复用的编辑器运行时、面向自定义 UI 或原生壳层的 canonical session/runtime 路线、默认 Avalonia hosted-UI 路径，以及面向宿主的插件、自动化、本地化、诊断和呈现扩展边界。
 
+<p align="center">
+  <img src="./docs/assets/astergraph-ai-pipeline-demo.svg" alt="AsterGraph AI pipeline demo：节点连接、参数编辑、自动化和导出" />
+</p>
+
+启动预置 AI workflow 场景：
+
+```powershell
+dotnet run --project src/AsterGraph.Demo -- --scenario ai-pipeline
+```
+
 ## 公开 Beta
 
 - 当前可安装包版本：`0.11.0-beta`

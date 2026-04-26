@@ -207,7 +207,8 @@ public partial class MainWindowViewModel
         IsStatusChromeVisible = shellState.IsStatusChromeVisible;
         IsMiniMapVisible = shellState.IsMiniMapVisible;
         IsHostPaneOpen = shellState.IsHostPaneOpen;
-        ReopenLastWorkspaceOnLaunch = _shellOptions.RestoreLastWorkspaceOnStartup || shellState.ReopenLastWorkspaceOnStartup;
+        var hasInitialScenario = !string.IsNullOrWhiteSpace(_shellOptions.InitialScenario);
+        ReopenLastWorkspaceOnLaunch = !hasInitialScenario && (_shellOptions.RestoreLastWorkspaceOnStartup || shellState.ReopenLastWorkspaceOnStartup);
         ThemeVariantCaption = string.IsNullOrWhiteSpace(shellState.ThemeVariant) ? ThemeVariantCaption : shellState.ThemeVariant!;
 
         foreach (var path in shellState.RecentWorkspacePaths.Where(File.Exists))
@@ -215,7 +216,7 @@ public partial class MainWindowViewModel
             _recentWorkspacePaths.Add(path);
         }
 
-        HasAutosaveDraft = _shellOptions.EnableStatePersistence && _shellStateStore.HasAutosaveDraft();
+        HasAutosaveDraft = !hasInitialScenario && _shellOptions.EnableStatePersistence && _shellStateStore.HasAutosaveDraft();
 
         if (ReopenLastWorkspaceOnLaunch && !string.IsNullOrWhiteSpace(shellState.LastWorkspacePath) && File.Exists(shellState.LastWorkspacePath))
         {

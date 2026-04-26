@@ -7,6 +7,26 @@ namespace AsterGraph.Demo;
 
 public static class DemoGraphFactory
 {
+    public const string AiPipelineScenario = "ai-pipeline";
+
+    public static GraphDocument CreateStartupDocument(INodeCatalog catalog, string? scenarioName)
+        => string.IsNullOrWhiteSpace(scenarioName)
+            ? CreateDefault(catalog)
+            : CreateScenario(catalog, scenarioName);
+
+    public static bool IsKnownScenario(string scenarioName)
+        => string.Equals(scenarioName, AiPipelineScenario, StringComparison.OrdinalIgnoreCase);
+
+    public static GraphDocument CreateScenario(INodeCatalog catalog, string scenarioName)
+    {
+        if (string.Equals(scenarioName, AiPipelineScenario, StringComparison.OrdinalIgnoreCase))
+        {
+            return CreateAiPipeline(catalog);
+        }
+
+        throw new ArgumentException($"Unknown demo scenario '{scenarioName}'.", nameof(scenarioName));
+    }
+
     public static GraphDocument CreateDefault(INodeCatalog catalog)
         => new(
             "Terrain Shader Graph",
@@ -37,6 +57,35 @@ public static class DemoGraphFactory
                     new GraphPoint(340, 40),
                     new GraphSize(292, 446),
                     ["gradient", "noise"]),
+            ]);
+
+    private static GraphDocument CreateAiPipeline(INodeCatalog catalog)
+        => new(
+            "AI Workflow / Agent Pipeline",
+            "A prebuilt scenario showing input, prompt assembly, trusted tool context, LLM execution, parsing, and output.",
+            [
+                CreateNode(catalog, "input", new NodeDefinitionId("aster.demo.ai-input"), new GraphPoint(60, 160)),
+                CreateNode(catalog, "prompt", new NodeDefinitionId("aster.demo.prompt-builder"), new GraphPoint(360, 80), groupId: "ai-pipeline-run"),
+                CreateNode(catalog, "retriever", new NodeDefinitionId("aster.demo.tool-call"), new GraphPoint(680, 250), groupId: "ai-pipeline-run"),
+                CreateNode(catalog, "llm", new NodeDefinitionId("aster.demo.llm-call"), new GraphPoint(980, 100), groupId: "ai-pipeline-run"),
+                CreateNode(catalog, "parser", new NodeDefinitionId("aster.demo.response-parser"), new GraphPoint(1300, 160), groupId: "ai-pipeline-run"),
+                CreateNode(catalog, "output", new NodeDefinitionId("aster.demo.ai-output"), new GraphPoint(1620, 180)),
+            ],
+            [
+                Connect("input", "text", "prompt", "context", "request", "#78F0E5"),
+                Connect("prompt", "prompt", "retriever", "query", "tool query", "#FFD56A"),
+                Connect("prompt", "prompt", "llm", "prompt", "assembled prompt", "#78F0E5"),
+                Connect("retriever", "evidence", "llm", "context", "trusted context", "#4AD6FF"),
+                Connect("llm", "response", "parser", "response", "model response", "#FFB866"),
+                Connect("parser", "payload", "output", "payload", "typed result", "#79E28A"),
+            ],
+            [
+                new GraphNodeGroup(
+                    "ai-pipeline-run",
+                    "Agent Pipeline",
+                    new GraphPoint(332, 40),
+                    new GraphSize(1218, 448),
+                    ["prompt", "retriever", "llm", "parser"]),
             ]);
 
     private static GraphNode CreateNode(

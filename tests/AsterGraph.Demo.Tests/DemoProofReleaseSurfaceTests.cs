@@ -1244,6 +1244,25 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.DoesNotContain("v0.28.0-beta", versioningZh, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void PublicReadmes_ShowPrebuiltScenarioInFirstView()
+    {
+        var readme = ReadRepoFile("README.md");
+        var readmeZh = ReadRepoFile("README.zh-CN.md");
+
+        AssertAppearsBefore(readme, "docs/assets/astergraph-ai-pipeline-demo.svg", "## Public Beta");
+        AssertAppearsBefore(readme, "dotnet run --project src/AsterGraph.Demo -- --scenario ai-pipeline", "## Public Beta");
+        Assert.Contains("parameter editing", readme, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("automation", readme, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("export", readme, StringComparison.OrdinalIgnoreCase);
+
+        AssertAppearsBefore(readmeZh, "docs/assets/astergraph-ai-pipeline-demo.svg", "## 公开 Beta");
+        AssertAppearsBefore(readmeZh, "dotnet run --project src/AsterGraph.Demo -- --scenario ai-pipeline", "## 公开 Beta");
+        Assert.Contains("参数编辑", readmeZh, StringComparison.Ordinal);
+        Assert.Contains("自动化", readmeZh, StringComparison.Ordinal);
+        Assert.Contains("导出", readmeZh, StringComparison.Ordinal);
+    }
+
     private static string GetPackageVersion()
     {
         var props = XDocument.Load(Path.Combine(GetRepositoryRoot(), "Directory.Build.props"));

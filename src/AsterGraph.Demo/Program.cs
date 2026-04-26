@@ -29,7 +29,9 @@ sealed class Program
             return;
         }
 
-        BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
+        var startup = DemoStartupOptionsParser.Parse(args);
+        App.ConfigureStartup(startup.ShellOptions);
+        BuildAvaloniaApp().StartWithClassicDesktopLifetime(startup.AvaloniaArgs);
     }
 
     // Avalonia configuration, don't remove; also used by visual designer.
