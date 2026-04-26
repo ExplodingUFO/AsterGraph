@@ -35,6 +35,7 @@ $dotnetCliHome = Join-Path $repoRoot '.dotnet-cli-home'
 $coverageRunSettingsPath = Join-Path $repoRoot 'tests/coverage.runsettings'
 $coverageReportScriptPath = Join-Path $repoRoot 'eng/coverage-report.ps1'
 $prereleaseNotesScriptPath = Join-Path $repoRoot 'eng/write-prerelease-notes.ps1'
+$publicVersioningValidationScriptPath = Join-Path $repoRoot 'eng/validate-public-versioning.ps1'
 $defaultVsTestConnectionTimeoutSeconds = 180
 $hostSampleProject = 'tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj'
 $consumerSampleProject = 'tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.ConsumerSample.Avalonia.csproj'
@@ -1043,6 +1044,30 @@ function Invoke-PrereleaseNotesValidation {
   }
 }
 
+function Invoke-PublicVersioningValidation {
+  param(
+    [string]$PublicTag
+  )
+
+  Write-Host ''
+  Write-Host '### Validate public versioning surface' -ForegroundColor Yellow
+
+  $arguments = @(
+    '-RepoRoot',
+    $repoRoot
+  )
+
+  if (-not [string]::IsNullOrWhiteSpace($PublicTag)) {
+    $arguments += @('-PublicTag', $PublicTag)
+  }
+
+  & $publicVersioningValidationScriptPath @arguments
+
+  if ($LASTEXITCODE -ne 0) {
+    throw "validate-public-versioning script failed with exit code $LASTEXITCODE"
+  }
+}
+
 function Invoke-ContractValidation {
   param(
     [switch]$SkipRestore
@@ -1100,6 +1125,7 @@ function Invoke-ReleaseValidation {
   Invoke-HostSample -UsePackedPackages -TargetFramework net10.0
   Invoke-PackageSmoke
   Invoke-ScaleSmoke
+  Invoke-PublicVersioningValidation
   Invoke-CoverageValidation
   Invoke-PublicRepoHygieneValidation -PreserveExistingProofArtifacts
   Invoke-PrereleaseNotesValidation

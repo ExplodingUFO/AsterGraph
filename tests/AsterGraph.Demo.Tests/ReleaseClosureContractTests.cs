@@ -183,6 +183,48 @@ public sealed class ReleaseClosureContractTests
     }
 
     [Fact]
+    public void ReleaseValidation_InvokesPublicVersioningGate()
+    {
+        var ciScript = ReadRepoFile("eng/ci.ps1");
+        var releaseWorkflow = ReadRepoFile(".github/workflows/release.yml");
+
+        Assert.Contains("validate-public-versioning.ps1", ciScript, StringComparison.Ordinal);
+        Assert.Contains("Invoke-PublicVersioningValidation", ciScript, StringComparison.Ordinal);
+        Assert.Contains("Validate public version docs", releaseWorkflow, StringComparison.Ordinal);
+        Assert.Contains(".\\eng\\validate-public-versioning.ps1 @args", releaseWorkflow, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void PublicVersioningValidation_PassesCurrentRepoAndRejectsMismatchedDocs()
+    {
+        var packageVersion = GetPackageVersion();
+        var publicTag = $"v{packageVersion}";
+        var scriptPath = Path.Combine(GetRepositoryRoot(), "eng", "validate-public-versioning.ps1");
+
+        var passProcess = RunPowerShell(
+            $"-NoProfile -ExecutionPolicy Bypass -File \"{scriptPath}\" " +
+            $"-RepoRoot \"{GetRepositoryRoot()}\" " +
+            $"-PublicTag \"{publicTag}\"");
+
+        Assert.True(
+            passProcess.ExitCode == 0,
+            $"validate-public-versioning.ps1 failed for current repo with exit code {passProcess.ExitCode}.{Environment.NewLine}STDOUT:{Environment.NewLine}{passProcess.StandardOutput}{Environment.NewLine}STDERR:{Environment.NewLine}{passProcess.StandardError}");
+        Assert.Contains($"PUBLIC_VERSIONING_OK:{packageVersion}:{publicTag}", passProcess.StandardOutput, StringComparison.Ordinal);
+
+        var tempRepo = CreateTempDirectory();
+        WriteMinimalVersioningRepo(tempRepo, packageVersion, publicTag, readmePackageVersion: "9.9.9-beta");
+
+        var failProcess = RunPowerShell(
+            $"-NoProfile -ExecutionPolicy Bypass -File \"{scriptPath}\" " +
+            $"-RepoRoot \"{tempRepo}\" " +
+            $"-PublicTag \"{publicTag}\"");
+
+        Assert.NotEqual(0, failProcess.ExitCode);
+        Assert.Contains("README.md", failProcess.StandardError, StringComparison.Ordinal);
+        Assert.Contains(packageVersion, failProcess.StandardError, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void WpfAdapterMatrixProof_MapsPositiveMarkersToPassNotMissing()
     {
         var tempRoot = CreateTempDirectory();
@@ -280,6 +322,83 @@ public sealed class ReleaseClosureContractTests
 
     private static void WriteProofFile(string proofRoot, string fileName, string contents)
         => File.WriteAllText(Path.Combine(proofRoot, fileName), contents.Replace("`n", Environment.NewLine, StringComparison.Ordinal));
+
+    private static void WriteMinimalVersioningRepo(
+        string repoRoot,
+        string packageVersion,
+        string publicTag,
+        string readmePackageVersion)
+    {
+        WriteRepoFile(
+            repoRoot,
+            "Directory.Build.props",
+            $"""
+            <Project>
+              <PropertyGroup>
+                <Version>{packageVersion}</Version>
+              </PropertyGroup>
+            </Project>
+            """);
+
+        WriteRepoFile(
+            repoRoot,
+            "README.md",
+            $"""
+            - current installable package version: `{readmePackageVersion}`
+            - matching public prerelease tag for this package line: `{publicTag}`
+            - GitHub prerelease/Release entries must use the same SemVer as the NuGet packages; local planning milestones are not public release identifiers
+            - package version versus historical repository-tag guidance: [Versioning](./docs/en/versioning.md)
+            """);
+
+        WriteRepoFile(
+            repoRoot,
+            "README.zh-CN.md",
+            $"""
+            - 当前可安装包版本：`{packageVersion}`
+            - 与当前包版本配对的对外 SemVer prerelease 标签：`{publicTag}`
+            - GitHub prerelease/Release 条目必须使用与 NuGet 包相同的 SemVer；本地规划里程碑不是公开发布标识
+            - 包版本与历史仓库 tag 的关系说明：[Versioning](./docs/zh-CN/versioning.md)
+            """);
+
+        WriteRepoFile(
+            repoRoot,
+            "docs/en/versioning.md",
+            $"""
+            - package version: `{packageVersion}`
+            - public tag: `{publicTag}`
+            GitHub Releases and GitHub prereleases are consumer-facing release records.
+            local planning-only milestone labels are private maintainer bookkeeping, not release identifiers.
+            """);
+
+        WriteRepoFile(
+            repoRoot,
+            "docs/zh-CN/versioning.md",
+            $"""
+            - 包版本：`{packageVersion}`
+            - 公开 tag：`{publicTag}`
+            GitHub Release 和 GitHub prerelease 是面向使用者的发布记录。
+            本地规划专用里程碑标签只是维护者内部记账，不是发布标识。
+            """);
+
+        WriteRepoFile(
+            repoRoot,
+            ".github/ISSUE_TEMPLATE/config.yml",
+            "url: https://github.com/ExplodingUFO/AsterGraph/blob/master/docs/en/versioning.md");
+        WriteRepoFile(repoRoot, "docs/en/public-launch-checklist.md", "- [Versioning](./versioning.md)");
+        WriteRepoFile(repoRoot, "docs/zh-CN/public-launch-checklist.md", "- [Versioning](./versioning.md)");
+    }
+
+    private static void WriteRepoFile(string repoRoot, string relativePath, string contents)
+    {
+        var path = Path.Combine(repoRoot, relativePath);
+        var directory = Path.GetDirectoryName(path);
+        if (!string.IsNullOrWhiteSpace(directory))
+        {
+            Directory.CreateDirectory(directory);
+        }
+
+        File.WriteAllText(path, contents);
+    }
 
     private static ProcessResult RunPowerShell(string arguments)
     {

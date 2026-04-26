@@ -96,6 +96,17 @@ jobs:
             throw "Public prerelease tag '$actualTag' does not match package version '$expectedTag'."
           }
 
+      - name: Validate public version docs
+        shell: pwsh
+        run: |
+          $publicTag = '${{ steps.release_context.outputs.release_tag }}'
+          $args = @('-RepoRoot', $PWD.Path)
+          if (-not [string]::IsNullOrWhiteSpace($publicTag)) {
+            $args += @('-PublicTag', $publicTag)
+          }
+
+          .\eng\validate-public-versioning.ps1 @args
+
       - name: Run release validation lane
         shell: pwsh
         run: .\eng\ci.ps1 -Lane release -Framework all -Configuration Release

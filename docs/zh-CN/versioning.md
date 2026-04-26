@@ -21,6 +21,8 @@
 
 仓库现在已经开始发布和包版本一致的公开 prerelease tag，例如 `v0.11.0-beta`。
 
+GitHub Release 和 GitHub prerelease 是面向使用者的发布记录。它们的 tag 和 release 标题应该匹配 NuGet 包 SemVer，而不是本地规划里程碑标签。
+
 仓库里也仍保留着像 `v1.x` 风格检查点这样的历史 tag。
 
 这些 `v1.x` 风格 tag 来自公开前的 milestone 式仓库检查点，适合维护者回看历史，但**不是**外部用户在 NuGet 上安装的包版本。
@@ -28,7 +30,7 @@
 后续对外版本约定是：
 
 - 公开发布包使用与包 SemVer 对齐的 tag，例如 `v0.11.0-beta`
-- GitHub prerelease 与 NuGet 发布包使用同一套版本号
+- GitHub Release 和 prerelease 与 NuGet 发布包使用同一套版本号
 - milestone 风格的本地规划版本可以继续私下使用，但不再作为对外包版本展示
 - 本地规划专用里程碑标签只是维护者内部记账，不是发布标识，也不是当前公开 tag
 

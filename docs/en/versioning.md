@@ -33,6 +33,8 @@ The stabilization support matrix freezes the consumer-facing boundary that leads
 
 The repository now publishes public prerelease tags that match the installable package version, for example `v0.11.0-beta`.
 
+GitHub Releases and GitHub prereleases are consumer-facing release records. Their tag and release title should match the NuGet package SemVer, not a local planning milestone label.
+
 The repository also still carries historical tags from that pre-launch workflow, such as `v1.x`-style checkpoint tags.
 
 Those legacy `v1.x`-style tags came from milestone-style repository checkpoints during the pre-launch workflow. They are useful for maintainer history, but they are **not** the package version that consumers install from NuGet.
@@ -40,7 +42,7 @@ Those legacy `v1.x`-style tags came from milestone-style repository checkpoints 
 Going forward, the public release convention is:
 
 - public package releases use tags that match the published package version, for example `v0.11.0-beta`
-- GitHub prereleases should use the same version number as the published packages
+- GitHub Releases and prereleases should use the same version number as the published packages
 - milestone-style local planning versions can continue privately, but they should not be presented as the consumer package version
 - local planning-only milestone labels are private maintainer bookkeeping, not release identifiers and not the current public tag
 
