@@ -25,7 +25,7 @@ public sealed class ReleaseClosureContractTests
         WriteProofFile(
             proofRoot,
             "scale-smoke.txt",
-            "SCALE_TIER_BUDGET:baseline`nSCALE_PERFORMANCE_BUDGET_OK:baseline:True:none`nSCALE_HISTORY_CONTRACT_OK:True");
+            "SCALE_TIER_BUDGET:baseline`nSCALE_PERFORMANCE_BUDGET_OK:baseline:True:none`nSCALE_AUTHORING_BUDGET_OK:baseline:True:none`nSCALE_EXPORT_BUDGET_OK:baseline:True:none`nSCALE_HISTORY_CONTRACT_OK:True");
         WriteProofFile(
             proofRoot,
             "hello-world-wpf-proof.txt",
@@ -100,6 +100,8 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("ADAPTER_CAPABILITY_MATRIX_FORMAT:1", notes, StringComparison.Ordinal);
         Assert.Contains("ADAPTER_CAPABILITY_MATRIX:WPF:HELLOWORLD_WPF_OK:PASS", notes, StringComparison.Ordinal);
         Assert.Contains("ADAPTER_CAPABILITY_MATRIX:WPF:COMMAND_SURFACE_OK:PASS", notes, StringComparison.Ordinal);
+        Assert.Contains("SCALE_AUTHORING_BUDGET_OK:baseline:True:none", notes, StringComparison.Ordinal);
+        Assert.Contains("SCALE_EXPORT_BUDGET_OK:baseline:True:none", notes, StringComparison.Ordinal);
         Assert.DoesNotContain("ADAPTER_CAPABILITY_MATRIX:WPF:HELLOWORLD_WPF_OK:MISSING", notes, StringComparison.Ordinal);
         Assert.DoesNotContain("ADAPTER_CAPABILITY_MATRIX:WPF:COMMAND_SURFACE_OK:MISSING", notes, StringComparison.Ordinal);
     }
