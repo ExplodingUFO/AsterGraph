@@ -21,10 +21,10 @@
 
 ### Onboarding and Samples
 
-- [ ] **ONB-01**: New Avalonia hosts can follow a five-minute quick start from package install or local starter run to first graph load/save and first custom node definition.
-- [ ] **ONB-02**: README and quick-start docs explain when to copy `Starter.Avalonia`, `HelloWorld`, `HelloWorld.Avalonia`, `ConsumerSample.Avalonia`, or the full Demo.
-- [ ] **ONB-03**: `ConsumerSample.Avalonia` opens as a realistic host integration with a scenario graph, host-owned actions, parameter editing, trusted plugin flow, and support-bundle proof.
-- [ ] **ONB-04**: ConsumerSample proof emits stable markers for scenario graph load, plugin trust state, parameter editing, export/support bundle readiness, and onboarding health.
+- [x] **ONB-01**: New Avalonia hosts can follow a five-minute quick start from package install or local starter run to first graph load/save and first custom node definition.
+- [x] **ONB-02**: README and quick-start docs explain when to copy `Starter.Avalonia`, `HelloWorld`, `HelloWorld.Avalonia`, `ConsumerSample.Avalonia`, or the full Demo.
+- [x] **ONB-03**: `ConsumerSample.Avalonia` opens as a realistic host integration with a scenario graph, host-owned actions, parameter editing, trusted plugin flow, and support-bundle proof.
+- [x] **ONB-04**: ConsumerSample proof emits stable markers for scenario graph load, plugin trust state, parameter editing, export/support bundle readiness, and onboarding health.
 
 ### Thin API Access
 
@@ -83,10 +83,10 @@ Deferred to future milestones after the productized adoption path is coherent.
 | DEMO-02 | Phase 286 | Complete |
 | DEMO-03 | Phase 287 | Complete |
 | DEMO-04 | Phase 287 | Complete |
-| ONB-01 | Phase 288 | Pending |
-| ONB-02 | Phase 288 | Pending |
-| ONB-03 | Phase 288 | Pending |
-| ONB-04 | Phase 288 | Pending |
+| ONB-01 | Phase 288 | Complete |
+| ONB-02 | Phase 288 | Complete |
+| ONB-03 | Phase 288 | Complete |
+| ONB-04 | Phase 288 | Complete |
 | API-01 | Phase 289 | Pending |
 | API-02 | Phase 289 | Pending |
 | API-03 | Phase 289 | Pending |
