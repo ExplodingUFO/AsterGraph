@@ -7,10 +7,6 @@
 
 AsterGraph is a modular node-graph editor toolkit for .NET. It gives hosts a reusable editor runtime, a canonical session/runtime route for custom UI or native shells, a shipped Avalonia hosted-UI path, and explicit seams for plugins, automation, localization, diagnostics, and presentation overrides.
 
-<p align="center">
-  <img src="./docs/assets/astergraph-ai-pipeline-demo.svg" alt="AsterGraph AI pipeline demo showing connected nodes, parameter editing, automation, and export" />
-</p>
-
 Launch the prebuilt AI workflow scenario:
 
 ```powershell
