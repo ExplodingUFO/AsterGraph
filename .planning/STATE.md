@@ -2,10 +2,10 @@
 
 ## Current Position
 
-Phase: 286 README First View And Scenario Demo Launch
+Phase: 287 Scenario Capability Story And Guided Tour
 Plan: —
-Status: Phase 285 complete; ready to plan Phase 286
-Last activity: 2026-04-26 — completed Phase 285 Version And Release Narrative Alignment
+Status: Phase 286 complete; ready to plan Phase 287
+Last activity: 2026-04-26 — completed Phase 286 README First View And Scenario Demo Launch
 
 ## Project Reference
 
@@ -21,6 +21,7 @@ See: `.planning/PROJECT.md`
 - `v0.39.0-beta Productized SDK Adoption Path` focuses on Demo/README productization, version/release vocabulary alignment, five-minute onboarding, ConsumerSample realism, and thin API onboarding affordances.
 - The milestone has 5 phases (285–289) and 18 mapped requirements.
 - Phase 285 added a public versioning validation script, wired it into release validation, and tightened bilingual version/release wording.
+- Phase 286 added the README first-view AI pipeline visual plus `--scenario ai-pipeline` Demo launch path.
 - Runtime architecture rewrites, WPF parity, defended 5000-node budgets, and plugin marketplace/template expansion remain deferred.
 
 ## Deferred Items
@@ -39,4 +40,4 @@ Items acknowledged and still deferred:
 | intake | POLISH-01: real adopter friction fixes (requires ≥2 external reports on same docs page) | deferred |
 
 ---
-*Last updated: 2026-04-26 after completing Phase 285*
+*Last updated: 2026-04-26 after completing Phase 286*
