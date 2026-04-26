@@ -12,15 +12,15 @@
 
 ## Phases
 
-- [ ] **Phase 285 Version And Release Narrative Alignment** — Remove public version ambiguity across README, versioning docs, release workflow output, and issue/release links while preserving local planning labels as private bookkeeping.
-- [ ] **Phase 286 README First View And Scenario Demo Launch** — Productize the first public impression with a concrete visual and a launchable prebuilt scenario demo.
-- [ ] **Phase 287 Scenario Capability Story And Guided Tour** — Make the Demo show a coherent SDK story covering custom nodes, parameters, validation, trust, automation, save/load, and export.
-- [ ] **Phase 288 Five-Minute Onboarding And ConsumerSample Scenario** — Turn ConsumerSample and quick-start docs into a realistic copyable host path between HelloWorld and the full Demo.
-- [ ] **Phase 289 Thin Host Builder And Adoption Proof Gate** — Add a thin hosted builder/facade over the canonical route and defend the productized adoption path with tests/proof markers.
+- [ ] **Phase 285: Version And Release Narrative Alignment** — Remove public version ambiguity across README, versioning docs, release workflow output, and issue/release links while preserving local planning labels as private bookkeeping.
+- [ ] **Phase 286: README First View And Scenario Demo Launch** — Productize the first public impression with a concrete visual and a launchable prebuilt scenario demo.
+- [ ] **Phase 287: Scenario Capability Story And Guided Tour** — Make the Demo show a coherent SDK story covering custom nodes, parameters, validation, trust, automation, save/load, and export.
+- [ ] **Phase 288: Five-Minute Onboarding And ConsumerSample Scenario** — Turn ConsumerSample and quick-start docs into a realistic copyable host path between HelloWorld and the full Demo.
+- [ ] **Phase 289: Thin Host Builder And Adoption Proof Gate** — Add a thin hosted builder/facade over the canonical route and defend the productized adoption path with tests/proof markers.
 
 ## Phase Details
 
-### Phase 285 Version And Release Narrative Alignment
+### Phase 285: Version And Release Narrative Alignment
 
 **Status:** planned
 
@@ -35,7 +35,7 @@
 2. Release validation fails if package version, public tag, README/version docs, or generated release note header disagree.
 3. Public performance and plugin-trust wording continues to avoid overclaiming 5000-node defended budgets or untrusted plugin sandboxing.
 
-### Phase 286 README First View And Scenario Demo Launch
+### Phase 286: README First View And Scenario Demo Launch
 
 **Status:** planned
 
@@ -50,7 +50,7 @@
 2. The Demo host can launch a prebuilt scenario from command line or an equivalent explicit entry point without requiring a blank-canvas setup.
 3. Automated or documented proof confirms the scenario launch path is stable.
 
-### Phase 287 Scenario Capability Story And Guided Tour
+### Phase 287: Scenario Capability Story And Guided Tour
 
 **Status:** planned
 
@@ -65,7 +65,7 @@
 2. A guided tour or equivalent in-demo flow walks the evaluator through creating nodes, connecting them, editing parameters, loading plugin content, and exporting output.
 3. Demo tests or proof markers fail if the scenario loses any required capability signal.
 
-### Phase 288 Five-Minute Onboarding And ConsumerSample Scenario
+### Phase 288: Five-Minute Onboarding And ConsumerSample Scenario
 
 **Status:** planned
 
@@ -80,7 +80,7 @@
 2. README and quick-start docs clearly explain when to copy Starter, HelloWorld, HelloWorld.Avalonia, ConsumerSample, or the full Demo.
 3. ConsumerSample opens with a scenario graph, host-owned actions, parameter editing, trusted plugin flow, support-bundle proof, and stable onboarding markers.
 
-### Phase 289 Thin Host Builder And Adoption Proof Gate
+### Phase 289: Thin Host Builder And Adoption Proof Gate
 
 **Status:** planned
 
@@ -99,11 +99,11 @@
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| Phase 285 Version And Release Narrative Alignment | 0/1 | Planned | — |
-| Phase 286 README First View And Scenario Demo Launch | 0/1 | Planned | — |
-| Phase 287 Scenario Capability Story And Guided Tour | 0/1 | Planned | — |
-| Phase 288 Five-Minute Onboarding And ConsumerSample Scenario | 0/1 | Planned | — |
-| Phase 289 Thin Host Builder And Adoption Proof Gate | 0/1 | Planned | — |
+| Phase 285: Version And Release Narrative Alignment | 0/1 | Planned | — |
+| Phase 286: README First View And Scenario Demo Launch | 0/1 | Planned | — |
+| Phase 287: Scenario Capability Story And Guided Tour | 0/1 | Planned | — |
+| Phase 288: Five-Minute Onboarding And ConsumerSample Scenario | 0/1 | Planned | — |
+| Phase 289: Thin Host Builder And Adoption Proof Gate | 0/1 | Planned | — |
 
 ## Completed Milestones
 
