@@ -1052,13 +1052,12 @@ function Invoke-PublicVersioningValidation {
   Write-Host ''
   Write-Host '### Validate public versioning surface' -ForegroundColor Yellow
 
-  $arguments = @(
-    '-RepoRoot',
-    $repoRoot
-  )
+  $arguments = @{
+    RepoRoot = $repoRoot
+  }
 
   if (-not [string]::IsNullOrWhiteSpace($PublicTag)) {
-    $arguments += @('-PublicTag', $PublicTag)
+    $arguments['PublicTag'] = $PublicTag
   }
 
   & $publicVersioningValidationScriptPath @arguments
