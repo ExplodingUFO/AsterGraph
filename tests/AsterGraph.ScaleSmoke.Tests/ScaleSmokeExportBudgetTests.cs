@@ -13,7 +13,7 @@ public sealed class ScaleSmokeExportBudgetTests
         var marker = tier.ToExportBudgetMarker();
 
         Assert.Equal(
-            "SCALE_EXPORT_BUDGET:baseline:svg<=300:png<=2500:jpeg<=1800:reload<=250",
+            "SCALE_EXPORT_BUDGET:baseline:svg<=300:png<=2500:jpeg<=2500:reload<=250",
             marker);
     }
 

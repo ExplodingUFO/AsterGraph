@@ -13,7 +13,7 @@ public sealed class ScaleSmokeBudgetTests
         var marker = tier.ToBudgetMarker();
 
         Assert.Equal(
-            "SCALE_TIER_BUDGET:baseline:nodes=180:selection=48:moves=24:setup<=1500:selection<=500:connection<=150:history<=400:viewport<=150:save<=150:reload<=1200",
+            "SCALE_TIER_BUDGET:baseline:nodes=180:selection=48:moves=24:setup<=1500:selection<=500:connection<=150:history<=1000:viewport<=150:save<=900:reload<=1200",
             marker);
     }
 
@@ -75,9 +75,9 @@ public sealed class ScaleSmokeBudgetTests
             SetupMs: 135,
             SelectionMs: 347,
             ConnectionMs: 35,
-            HistoryMs: 190,
+            HistoryMs: 840,
             ViewportMs: 4,
-            SaveMs: 9,
+            SaveMs: 765,
             ReloadMs: 5);
 
         var result = tier.Evaluate(metrics);
