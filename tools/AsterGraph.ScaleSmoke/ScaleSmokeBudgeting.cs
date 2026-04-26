@@ -323,9 +323,9 @@ public sealed record ScaleSmokeTier(
                     SetupMs: 1500,
                     SelectionMs: 500,
                     ConnectionMs: 150,
-                    HistoryMs: 1000,
+                    HistoryMs: 1500,
                     ViewportMs: 150,
-                    SaveMs: 900,
+                    SaveMs: 1300,
                     ReloadMs: 1200),
                 AuthoringBudget: new ScaleSmokeAuthoringBudget(
                     StencilFilterMs: 100,
@@ -338,7 +338,7 @@ public sealed record ScaleSmokeTier(
                 ExportBudget: new ScaleSmokeExportBudget(
                     SvgExportMs: 300,
                     PngExportMs: 2500,
-                    JpegExportMs: 2500,
+                    JpegExportMs: 3500,
                     ReloadMs: 250)),
             "large" => new ScaleSmokeTier(
                 "large",

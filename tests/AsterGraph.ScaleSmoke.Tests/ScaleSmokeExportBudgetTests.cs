@@ -13,8 +13,24 @@ public sealed class ScaleSmokeExportBudgetTests
         var marker = tier.ToExportBudgetMarker();
 
         Assert.Equal(
-            "SCALE_EXPORT_BUDGET:baseline:svg<=300:png<=2500:jpeg<=2500:reload<=250",
+            "SCALE_EXPORT_BUDGET:baseline:svg<=300:png<=2500:jpeg<=3500:reload<=250",
             marker);
+    }
+
+    [Fact]
+    public void BaselineExportBudget_AllowsObservedGithubRunnerMetrics()
+    {
+        var tier = ScaleSmokeTier.Parse(["--tier", "baseline"]);
+        var metrics = new ScaleSmokeExportMetrics(
+            SvgExportMs: 9,
+            PngExportMs: 2395,
+            JpegExportMs: 2911,
+            ReloadMs: 39);
+
+        var result = tier.EvaluateExport(metrics);
+
+        Assert.True(result.Passed);
+        Assert.Equal("none", result.FailureSummary);
     }
 
     [Fact]
