@@ -3,9 +3,9 @@
 ## Current Position
 
 Phase: 289 Thin Host Builder And Adoption Proof Gate
-Plan: —
-Status: Phase 288 complete; ready to plan Phase 289
-Last activity: 2026-04-26 — completed Phase 288 Five-Minute Onboarding And ConsumerSample Scenario
+Plan: `.planning/phases/289-thin-host-builder-and-adoption-proof-gate/289-PLAN.md`
+Status: Phase 289 complete; milestone ready for audit/closeout
+Last activity: 2026-04-26 — completed Phase 289 Thin Host Builder And Adoption Proof Gate
 
 ## Project Reference
 
@@ -24,6 +24,7 @@ See: `.planning/PROJECT.md`
 - Phase 286 added the README first-view AI pipeline visual plus `--scenario ai-pipeline` Demo launch path.
 - Phase 287 added the in-Demo Scenario Tour covering custom nodes, typed connections, parameters, plugin trust, automation, save/load, and export.
 - Phase 288 added the ConsumerSample `Content Review Release Lane` scenario identity, five-minute quick-start path, onboarding proof markers, and support-bundle readiness evidence.
+- Phase 289 added `AsterGraphHostBuilder` as a thin Avalonia hosted facade over the canonical editor/view factories plus docs proof coverage for the productized adoption path.
 - Runtime architecture rewrites, WPF parity, defended 5000-node budgets, and plugin marketplace/template expansion remain deferred.
 
 ## Deferred Items
@@ -42,4 +43,4 @@ Items acknowledged and still deferred:
 | intake | POLISH-01: real adopter friction fixes (requires ≥2 external reports on same docs page) | deferred |
 
 ---
-*Last updated: 2026-04-26 after completing Phase 288*
+*Last updated: 2026-04-26 after completing Phase 289*

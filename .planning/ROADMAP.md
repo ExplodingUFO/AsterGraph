@@ -16,13 +16,13 @@
 - [x] **Phase 286: README First View And Scenario Demo Launch** — Productize the first public impression with a concrete visual and a launchable prebuilt scenario demo.
 - [x] **Phase 287: Scenario Capability Story And Guided Tour** — Make the Demo show a coherent SDK story covering custom nodes, parameters, validation, trust, automation, save/load, and export.
 - [x] **Phase 288: Five-Minute Onboarding And ConsumerSample Scenario** — Turn ConsumerSample and quick-start docs into a realistic copyable host path between HelloWorld and the full Demo.
-- [ ] **Phase 289: Thin Host Builder And Adoption Proof Gate** — Add a thin hosted builder/facade over the canonical route and defend the productized adoption path with tests/proof markers.
+- [x] **Phase 289: Thin Host Builder And Adoption Proof Gate** — Add a thin hosted builder/facade over the canonical route and defend the productized adoption path with tests/proof markers.
 
 ## Phase Details
 
 ### Phase 285: Version And Release Narrative Alignment
 
-**Status:** planned
+**Status:** completed
 
 **Goal:** remove public version ambiguity across README, versioning docs, release workflow output, and issue/release links while preserving local planning labels as private bookkeeping.
 
@@ -103,7 +103,7 @@
 | Phase 286: README First View And Scenario Demo Launch | 1/1 | Completed | 2026-04-26 |
 | Phase 287: Scenario Capability Story And Guided Tour | 1/1 | Completed | 2026-04-26 |
 | Phase 288: Five-Minute Onboarding And ConsumerSample Scenario | 1/1 | Completed | 2026-04-26 |
-| Phase 289: Thin Host Builder And Adoption Proof Gate | 0/1 | Planned | — |
+| Phase 289: Thin Host Builder And Adoption Proof Gate | 1/1 | Completed | 2026-04-26 |
 
 ## Completed Milestones
 

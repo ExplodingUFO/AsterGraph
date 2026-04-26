@@ -28,13 +28,13 @@
 
 ### Thin API Access
 
-- [ ] **API-01**: Avalonia hosts can compose the common hosted setup through a thin builder/facade that accepts document, catalog, compatibility, plugin trust, localization, and diagnostics inputs.
-- [ ] **API-02**: The builder/facade delegates to the existing canonical `AsterGraphEditorFactory.CreateSession(...)` / `Create(...)` and Avalonia view factories instead of creating a parallel runtime path.
-- [ ] **API-03**: Host integration docs show when to use the builder/facade, when to drop down to the canonical session/runtime route, and when retained `GraphEditorViewModel` migration remains appropriate.
+- [x] **API-01**: Avalonia hosts can compose the common hosted setup through a thin builder/facade that accepts document, catalog, compatibility, plugin trust, localization, and diagnostics inputs.
+- [x] **API-02**: The builder/facade delegates to the existing canonical `AsterGraphEditorFactory.CreateSession(...)` / `Create(...)` and Avalonia view factories instead of creating a parallel runtime path.
+- [x] **API-03**: Host integration docs show when to use the builder/facade, when to drop down to the canonical session/runtime route, and when retained `GraphEditorViewModel` migration remains appropriate.
 
 ### Proof and Scope Guardrails
 
-- [ ] **PROOF-01**: CI or docs tests defend the README first-viewport claims, five-minute quick start, scenario demo launch path, and ConsumerSample scenario markers.
+- [x] **PROOF-01**: CI or docs tests defend the README first-viewport claims, five-minute quick start, scenario demo launch path, and ConsumerSample scenario markers.
 - [x] **PROOF-02**: Public docs continue to describe the 1000-node tier as defended and the 5000-node tier as telemetry until a later milestone explicitly promotes that budget.
 - [x] **PROOF-03**: Plugin trust wording remains explicit that AsterGraph supports trusted in-process extension but does not provide sandboxing or untrusted-code isolation.
 
@@ -87,10 +87,10 @@ Deferred to future milestones after the productized adoption path is coherent.
 | ONB-02 | Phase 288 | Complete |
 | ONB-03 | Phase 288 | Complete |
 | ONB-04 | Phase 288 | Complete |
-| API-01 | Phase 289 | Pending |
-| API-02 | Phase 289 | Pending |
-| API-03 | Phase 289 | Pending |
-| PROOF-01 | Phase 289 | Pending |
+| API-01 | Phase 289 | Complete |
+| API-02 | Phase 289 | Complete |
+| API-03 | Phase 289 | Complete |
+| PROOF-01 | Phase 289 | Complete |
 
 **Coverage:**
 - v1 requirements: 18 total
