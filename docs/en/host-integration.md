@@ -10,11 +10,13 @@ The hosted route ladder is `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerS
    `AsterGraphEditorFactory.CreateSession(...)` + `IGraphEditorSession`
 2. Shipped Avalonia UI  
    `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)`
-3. Retained migration bridge
+3. Thin hosted builder
+   `AsterGraphHostBuilder.Create(...).BuildAvaloniaView()`
+4. Retained migration bridge
    `new GraphEditorViewModel(...)` + `new GraphEditorView { Editor = editor }`
 
-Routes 1 and 2 are the canonical surfaces for new work. Route 3 remains supported only as a retained compatibility bridge for legacy hosts during migration.
-Choose retained only when you are migrating an existing host in batches. If you need that bridge, use [Retained Migration Recipe](./retained-migration-recipe.md); otherwise start with route 1 or 2.
+Routes 1 and 2 are the canonical surfaces for new work. Route 3 is a thin convenience facade over route 2, not a fourth runtime model. Route 4 remains supported only as a retained compatibility bridge for legacy hosts during migration.
+Choose retained only when you are migrating an existing host in batches. If you need that bridge, use [Retained Migration Recipe](./retained-migration-recipe.md); otherwise start with route 1, 2, or the route-2 builder.
 
 For new adopters, default to route 2 (`AsterGraphAvaloniaViewFactory`) so WPF remains adapter-2 portability validation only, not a separate onboarding path or parity promise.
 
@@ -28,6 +30,7 @@ Standalone Avalonia surfaces such as `AsterGraphCanvasViewFactory`, `AsterGraphI
 | --- | --- | --- | --- |
 | Runtime/session | Use `CreateSession(...)` when you are starting new work or own your UI. | Do not use this when you need the shipped Avalonia shell or a retained bridge. | [Quick Start](./quick-start.md) |
 | Shipped Avalonia | Use `Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` when you want the shipped Avalonia route. | Do not use this when you are preserving a legacy `GraphEditorViewModel`-based host. | [Quick Start](./quick-start.md) |
+| Thin hosted builder | Use `AsterGraphHostBuilder.Create(...).BuildAvaloniaView()` when the common Avalonia route is enough and you want less composition boilerplate. | Do not use this when the host owns a custom UI or needs a runtime-only session. | [Quick Start](./quick-start.md) |
 | Retained migration bridge | Use retained only when the host already constructs `GraphEditorViewModel` or `GraphEditorView` and you are migrating in batches. | Do not use this for new host work, a fourth primary route, or a WPF-specific runtime model. | [Retained-To-Session Migration Recipe](./retained-migration-recipe.md) |
 
 The single bounded retained recipe is [Retained-To-Session Migration Recipe](./retained-migration-recipe.md).
@@ -50,6 +53,7 @@ If you are starting new work, begin with [Quick Start](./quick-start.md) and kee
 Copy from each bounded source for the part it owns:
 
 - Copy from `CreateSession(...)`: host-owned runtime/session projection for custom UI hosts.
+- Copy from `AsterGraphHostBuilder`: common hosted Avalonia composition when document, catalog, compatibility, plugin trust, localization, and diagnostics inputs are enough.
 - Copy from `Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)`: shipped Avalonia composition for hosted UI hosts.
 - Copy from `ConsumerSample.Avalonia`: action projection, trust workflow, and selected-node parameter read/write seam only.
 - Copy from `Authoring Inspector Recipe`: definition-driven parameter metadata and stock inspector vocabulary.

@@ -45,6 +45,7 @@ dotnet run --project src/AsterGraph.Demo -- --scenario ai-pipeline
 
 这条 hosted route ladder 是 `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerSample.Avalonia`。
 五分钟 hosted 复制路径：先跑 starter 脚手架，再用 `ConsumerSample.Avalonia -- --proof --support-bundle <path>` 验证，最后再看完整 Demo。
+最短 hosted 组合代码可以用 `AsterGraphHostBuilder.Create().UseDocument(document).UseCatalog(catalog).UseDefaultCompatibility().BuildAvaloniaView()`；当你需要显式接入每个服务时，再降到 `AsterGraphEditorFactory.Create(...)` 和 `AsterGraphAvaloniaViewFactory.Create(...)`。
 
 ## 从 NuGet 安装
 
@@ -68,6 +69,7 @@ dotnet add package AsterGraph.Abstractions --prerelease
 | 路线 | 适合什么场景 | 第一个 API | 第一个样例 |
 | --- | --- | --- | --- |
 | Hosted starter scaffold | 宿主先要一个最小端到端的 Avalonia 入口，再往完整应用扩展 | `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` | [`AsterGraph.Starter.Avalonia`](./tools/AsterGraph.Starter.Avalonia/) |
+| thin hosted builder | 宿主要走常见 Avalonia 路线，但希望少写组合样板 | `AsterGraphHostBuilder.Create(...).BuildAvaloniaView()` | [`AsterGraph.Starter.Avalonia`](./tools/AsterGraph.Starter.Avalonia/) |
 | 仅运行时 / 自定义 UI | 宿主自己管 UI，只想拿推荐的运行时边界 | `AsterGraphEditorFactory.CreateSession(...)` + `IGraphEditorSession` | [`AsterGraph.HelloWorld`](./tools/AsterGraph.HelloWorld/) |
 | 默认 Avalonia UI | 宿主想直接复用默认编辑器壳层或独立 Avalonia 表面 | `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` | [`AsterGraph.HelloWorld.Avalonia`](./tools/AsterGraph.HelloWorld.Avalonia/) |
 | retained 迁移 | 现有宿主要分批迁移，暂时还离不开旧的 MVVM 入口 | `new GraphEditorViewModel(...)` + `new GraphEditorView { Editor = editor }` | [Host Integration](./docs/zh-CN/host-integration.md) |

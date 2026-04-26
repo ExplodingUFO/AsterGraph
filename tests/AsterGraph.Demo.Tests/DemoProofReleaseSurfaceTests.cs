@@ -1309,6 +1309,38 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("validation", architectureZh, StringComparison.OrdinalIgnoreCase);
     }
 
+    [Fact]
+    public void ProductizedAdoptionDocs_DefendHostBuilderAndProofGate()
+    {
+        var readme = ReadRepoFile("README.md");
+        var readmeZh = ReadRepoFile("README.zh-CN.md");
+        var quickStart = ReadRepoFile("docs/en/quick-start.md");
+        var quickStartZh = ReadRepoFile("docs/zh-CN/quick-start.md");
+        var hostIntegration = ReadRepoFile("docs/en/host-integration.md");
+        var hostIntegrationZh = ReadRepoFile("docs/zh-CN/host-integration.md");
+        var avaloniaReadme = ReadRepoFile("src/AsterGraph.Avalonia/README.md");
+
+        foreach (var contents in new[] { readme, readmeZh, quickStart, quickStartZh, hostIntegration, hostIntegrationZh, avaloniaReadme })
+        {
+            Assert.Contains("AsterGraphHostBuilder", contents, StringComparison.Ordinal);
+            Assert.Contains("BuildAvaloniaView", contents, StringComparison.Ordinal);
+        }
+
+        Assert.Contains("CreateSession(...)", hostIntegration, StringComparison.Ordinal);
+        Assert.Contains("CreateSession(...)", hostIntegrationZh, StringComparison.Ordinal);
+        Assert.Contains("AsterGraphEditorFactory.Create(...)", hostIntegration, StringComparison.Ordinal);
+        Assert.Contains("AsterGraphEditorFactory.Create(...)", hostIntegrationZh, StringComparison.Ordinal);
+        Assert.Contains("dotnet run --project src/AsterGraph.Demo -- --scenario ai-pipeline", readme, StringComparison.Ordinal);
+        Assert.Contains("dotnet run --project src/AsterGraph.Demo -- --scenario ai-pipeline", readmeZh, StringComparison.Ordinal);
+
+        foreach (var contents in new[] { quickStart, quickStartZh })
+        {
+            Assert.Contains("CONSUMER_SAMPLE_SCENARIO_GRAPH_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("FIVE_MINUTE_ONBOARDING_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("ONBOARDING_CONFIGURATION_OK:True", contents, StringComparison.Ordinal);
+        }
+    }
+
     private static string ReadRepoFile(string relativePath)
         => File.ReadAllText(Path.Combine(GetRepositoryRoot(), relativePath));
 

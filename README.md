@@ -45,6 +45,7 @@ dotnet run --project src/AsterGraph.Demo -- --scenario ai-pipeline
 
 The hosted route ladder is `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerSample.Avalonia`.
 For a five-minute hosted copy path, run the starter scaffold first, then validate `ConsumerSample.Avalonia -- --proof --support-bundle <path>` before moving to the full Demo.
+For the shortest hosted composition code, use `AsterGraphHostBuilder.Create().UseDocument(document).UseCatalog(catalog).UseDefaultCompatibility().BuildAvaloniaView()`; drop down to `AsterGraphEditorFactory.Create(...)` and `AsterGraphAvaloniaViewFactory.Create(...)` when you need explicit per-service wiring.
 
 ## Install From NuGet
 
@@ -68,6 +69,7 @@ Add `AsterGraph.Core` only when the host also needs direct `GraphDocument`, seri
 | Route | Use when | First API | First sample |
 | --- | --- | --- | --- |
 | Hosted starter scaffold | the host wants the smallest end-to-end Avalonia entry before a fuller app | `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` | [`AsterGraph.Starter.Avalonia`](./tools/AsterGraph.Starter.Avalonia/) |
+| Thin hosted builder | the host wants the common Avalonia route with less composition boilerplate | `AsterGraphHostBuilder.Create(...).BuildAvaloniaView()` | [`AsterGraph.Starter.Avalonia`](./tools/AsterGraph.Starter.Avalonia/) |
 | Runtime-only or custom UI | the host owns its own UI and wants the canonical runtime boundary | `AsterGraphEditorFactory.CreateSession(...)` + `IGraphEditorSession` | [`AsterGraph.HelloWorld`](./tools/AsterGraph.HelloWorld/) |
 | Shipped Avalonia UI | the host wants the stock editor shell or stock standalone Avalonia surfaces | `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` | [`AsterGraph.HelloWorld.Avalonia`](./tools/AsterGraph.HelloWorld.Avalonia/) |
 | Retained migration | the host is moving off older MVVM-shaped entry points in planned batches | `new GraphEditorViewModel(...)` + `new GraphEditorView { Editor = editor }` | [Host Integration](./docs/en/host-integration.md) |

@@ -15,6 +15,7 @@ using AsterGraph.Editor.Events;
 using AsterGraph.Editor.Hosting;
 using AsterGraph.Editor.Localization;
 using AsterGraph.Editor.Menus;
+using AsterGraph.Editor.Plugins;
 using AsterGraph.Editor.Models;
 using AsterGraph.Editor.Presentation;
 using AsterGraph.Editor.Runtime;
@@ -274,6 +275,77 @@ public sealed class GraphEditorInitializationTests
         Assert.Equal(126, viewportChanged!.PanX);
         Assert.Equal(108, viewportChanged.PanY);
         Assert.True(compatibility.EvaluateCalls > 0);
+    }
+
+    [Fact]
+    public void AsterGraphHostBuilder_BuildEditorOptions_ForwardsCommonHostedInputs()
+    {
+        var document = CreateDocument();
+        var catalog = CreateCatalog();
+        var compatibility = new RecordingCompatibilityService();
+        var trustPolicy = new AllowAllPluginTrustPolicy();
+        var localizationProvider = new TestLocalizationProvider();
+        var diagnostics = new RecordingDiagnosticsSink();
+        var storageRoot = Path.Combine(Path.GetTempPath(), "astergraph-host-builder", Guid.NewGuid().ToString("N"));
+
+        var options = AsterGraphHostBuilder.Create()
+            .UseDocument(document)
+            .UseCatalog(catalog)
+            .UseCompatibility(compatibility)
+            .UsePluginTrustPolicy(trustPolicy)
+            .UseLocalization(localizationProvider)
+            .UseDiagnostics(diagnostics)
+            .UseStorageRoot(storageRoot)
+            .BuildEditorOptions();
+
+        Assert.Same(document, options.Document);
+        Assert.Same(catalog, options.NodeCatalog);
+        Assert.Same(compatibility, options.CompatibilityService);
+        Assert.Same(trustPolicy, options.PluginTrustPolicy);
+        Assert.Same(localizationProvider, options.LocalizationProvider);
+        Assert.Same(diagnostics, options.DiagnosticsSink);
+        Assert.Equal(storageRoot, options.StorageRootPath);
+    }
+
+    [AvaloniaFact]
+    public void AsterGraphHostBuilder_BuildAvaloniaView_UsesCanonicalEditorAndViewFactories()
+    {
+        var presentation = new AsterGraphPresentationOptions
+        {
+            NodeBodyPresenter = new RecordingNodeBodyPresenter(),
+        };
+        var view = AsterGraphHostBuilder.Create()
+            .UseDocument(CreateDocument())
+            .UseCatalog(CreateCatalog())
+            .UseDefaultCompatibility()
+            .UsePluginTrustPolicy(new AllowAllPluginTrustPolicy())
+            .UseLocalization(new TestLocalizationProvider())
+            .UsePresentation(presentation)
+            .UseChromeMode(GraphEditorViewChromeMode.CanvasOnly)
+            .UseDefaultContextMenu(false)
+            .UseCommandShortcutPolicy(AsterGraphCommandShortcutPolicy.Disabled)
+            .BuildAvaloniaView();
+
+        Assert.IsType<GraphEditorView>(view);
+        Assert.IsType<GraphEditorViewModel>(view.Editor);
+        Assert.IsAssignableFrom<IGraphEditorSession>(view.Editor!.Session);
+        Assert.Equal("Initialization Test Graph", view.Editor.Session.Queries.CreateDocumentSnapshot().Title);
+        Assert.Equal(GraphEditorViewChromeMode.CanvasOnly, view.ChromeMode);
+        Assert.False(view.EnableDefaultContextMenu);
+        Assert.False(view.CommandShortcutPolicy.Enabled);
+        Assert.Same(presentation, view.Presentation);
+        Assert.Contains(
+            view.Editor.Session.Queries.GetFeatureDescriptors(),
+            descriptor => descriptor.Id == "integration.plugin-trust-policy" && descriptor.IsAvailable);
+        Assert.Contains(
+            view.Editor.Session.Queries.GetFeatureDescriptors(),
+            descriptor => descriptor.Id == "integration.localization-provider" && descriptor.IsAvailable);
+    }
+
+    [Fact]
+    public void AsterGraphHostBuilder_BuildAvaloniaView_KeepsCanonicalRequiredInputValidation()
+    {
+        Assert.Throws<ArgumentNullException>(() => AsterGraphHostBuilder.Create().BuildAvaloniaView());
     }
 
     [Fact]
@@ -675,6 +747,16 @@ public sealed class GraphEditorInitializationTests
     {
         public string GetString(string key, string fallback)
             => fallback;
+    }
+
+    private sealed class AllowAllPluginTrustPolicy : IGraphEditorPluginTrustPolicy
+    {
+        public GraphEditorPluginTrustEvaluation Evaluate(GraphEditorPluginTrustPolicyContext context)
+            => new(
+                GraphEditorPluginTrustDecision.Allowed,
+                GraphEditorPluginTrustEvaluationSource.HostPolicy,
+                "tests.allow",
+                "Allowed by host-builder test.");
     }
 
     private sealed class RecordingNodeBodyPresenter : IGraphNodeBodyPresenter

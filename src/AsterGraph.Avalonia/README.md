@@ -21,6 +21,7 @@ It belongs to the supported published package set with `AsterGraph.Abstractions`
 - stock grouped inspector sections plus text/number/boolean/enum/list editors
 - stock parameter-editor registry wiring through `AsterGraphPresentationOptions.NodeParameterEditorRegistry`
 - `AsterGraphAvaloniaViewFactory` plus standalone surface factories
+- `AsterGraphHostBuilder` as a thin hosted composition facade over `AsterGraphEditorFactory.Create(...)` plus `AsterGraphAvaloniaViewFactory.Create(...)`
 - Avalonia theme resources, input handling, and control-level integration glue
 
 ## This Package Does Not Own
@@ -34,13 +35,14 @@ Those responsibilities live in `AsterGraph.Abstractions`, `AsterGraph.Core`, `As
 
 ## Canonical UI Entry Paths
 
+- thin hosted builder: `AsterGraphHostBuilder.Create().UseDocument(document).UseCatalog(catalog).UseDefaultCompatibility().BuildAvaloniaView()`
 - hosted full shell: `AsterGraphEditorFactory.Create(...)` + `AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOptions { ... })`
 - standalone canvas: `AsterGraphCanvasViewFactory.Create(...)`
 - standalone inspector: `AsterGraphInspectorViewFactory.Create(...)`
 - standalone mini map: `AsterGraphMiniMapViewFactory.Create(...)`
 - retained compatibility: `new GraphEditorView { Editor = editor }`
 
-For new work, prefer the factory-based routes. `CreateSession(...)` plus `IGraphEditorSession` remain the canonical runtime surface; this package composes the current Avalonia adapter on top of the retained hosted-UI facade. Treat the direct `GraphEditorView` constructor path as retained compatibility.
+For new hosted work, prefer `AsterGraphHostBuilder` when the default composition is enough, and use the factory-based routes when you need explicit service wiring. `CreateSession(...)` plus `IGraphEditorSession` remain the canonical runtime surface; this package composes the current Avalonia adapter on top of the retained hosted-UI facade. Treat the direct `GraphEditorView` constructor path as retained compatibility.
 
 `NodeCanvas` consumes the shared editor command/query surface for tiered authoring UX. The same persisted node/group state drives resize handles, width/height tiers, node-side parameter values, fixed group frames, geometry-based membership, and editor-only group chrome.
 

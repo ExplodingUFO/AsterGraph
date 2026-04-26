@@ -103,7 +103,7 @@ The sample README is [`tools/AsterGraph.ConsumerSample.Avalonia/README.md`](../.
 Use this path when you want a copyable Avalonia host rather than a full showcase:
 
 1. Install `AsterGraph.Avalonia --prerelease`, or run `tools/AsterGraph.Starter.Avalonia` from source.
-2. Copy the starter composition: `AsterGraphEditorFactory.Create(...)`, `AsterGraphAvaloniaViewFactory.Create(...)`, `AsterGraphEditorOptions`, and the document/catalog/editor/view flow.
+2. Copy the starter composition through `AsterGraphHostBuilder.Create().UseDocument(document).UseCatalog(catalog).UseDefaultCompatibility().BuildAvaloniaView()` when defaults are enough, or drop down to `AsterGraphEditorFactory.Create(...)`, `AsterGraphAvaloniaViewFactory.Create(...)`, `AsterGraphEditorOptions`, and the document/catalog/editor/view flow when each service must be explicit.
 3. Add the first custom node definition by replacing the starter sample definition with your own `NodeDefinition` id, title, ports, and parameter definitions.
 4. Run `tools/AsterGraph.ConsumerSample.Avalonia` and use the hosted action rail to exercise graph save/load, selected-node parameter editing, and the trusted plugin path.
 5. Run `AsterGraph.ConsumerSample.Avalonia -- --proof --support-bundle <support-bundle-path>` and expect `CONSUMER_SAMPLE_SCENARIO_GRAPH_OK:True`, `CONSUMER_SAMPLE_HOST_OWNED_ACTIONS_OK:True`, `CONSUMER_SAMPLE_SUPPORT_BUNDLE_READY_OK:True`, `FIVE_MINUTE_ONBOARDING_OK:True`, and `ONBOARDING_CONFIGURATION_OK:True`.
@@ -129,6 +129,21 @@ If the host owns its UI, the runtime/session route is the canonical native path;
 Quick Start remains Avalonia-first today. The current public beta line validates `WPF` as adapter 2 on the same canonical route; see [Adapter Capability Matrix](./adapter-capability-matrix.md) for that contract instead of treating it as a second beginner route or a parity promise.
 
 ## 5. Minimal Hosted-UI Composition
+
+Use the thin builder for the common hosted route:
+
+```csharp
+using AsterGraph.Avalonia.Hosting;
+
+var view = AsterGraphHostBuilder
+    .Create()
+    .UseDocument(document)
+    .UseCatalog(catalog)
+    .UseDefaultCompatibility()
+    .BuildAvaloniaView();
+```
+
+Drop down to the canonical factories when you need explicit service wiring:
 
 ```csharp
 using AsterGraph.Abstractions.Catalog;
