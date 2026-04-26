@@ -11,6 +11,9 @@ namespace AsterGraph.Core.Models;
 /// <param name="DataType">Human-readable data type caption.</param>
 /// <param name="AccentHex">Accent color used for the port dot and related visuals.</param>
 /// <param name="TypeId">Optional stable type identifier used by compatibility services.</param>
+/// <param name="GroupName">Optional port group name used for visual grouping.</param>
+/// <param name="MinConnections">Minimum required connections for validation.</param>
+/// <param name="MaxConnections">Maximum allowed connections for validation.</param>
 public sealed record GraphPort(
     string Id,
     string Label,
