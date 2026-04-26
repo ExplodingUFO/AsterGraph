@@ -198,6 +198,17 @@ public sealed class ReleaseClosureContractTests
     }
 
     [Fact]
+    public void ReleaseCoverageValidation_BoundsHungTestCollectors()
+    {
+        var ciScript = ReadRepoFile("eng/ci.ps1");
+
+        Assert.Contains("'--blame-hang-timeout'", ciScript, StringComparison.Ordinal);
+        Assert.Contains("'5m'", ciScript, StringComparison.Ordinal);
+        Assert.Contains("'--blame-hang-dump-type'", ciScript, StringComparison.Ordinal);
+        Assert.Contains("'mini'", ciScript, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void PublicVersioningValidation_PassesCurrentRepoAndRejectsMismatchedDocs()
     {
         var packageVersion = GetPackageVersion();

@@ -959,7 +959,11 @@ function Invoke-CoverageValidation {
       '--results-directory',
       $coverageResultsRoot,
       '--collect',
-      'XPlat Code Coverage'
+      'XPlat Code Coverage',
+      '--blame-hang-timeout',
+      '5m',
+      '--blame-hang-dump-type',
+      'mini'
     ) + $singleProcessBuildArguments + $buildStabilityProperties)
   }
 
