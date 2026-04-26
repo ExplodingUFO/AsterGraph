@@ -2,10 +2,10 @@
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 285 Version And Release Narrative Alignment
 Plan: —
-Status: Defining requirements for `v0.39.0-beta Productized SDK Adoption Path`
-Last activity: 2026-04-26 — milestone `v0.39.0-beta Productized SDK Adoption Path` started
+Status: Roadmap created; ready to plan Phase 285
+Last activity: 2026-04-26 — roadmap created for `v0.39.0-beta Productized SDK Adoption Path`
 
 ## Project Reference
 
@@ -19,6 +19,7 @@ See: `.planning/PROJECT.md`
 - All 4 phases (281–284) verified with 789 tests passing across 7 test projects.
 - POLISH-01 deferred: real adopter friction fixes require ≥2 external reports on the same docs page.
 - `v0.39.0-beta Productized SDK Adoption Path` focuses on Demo/README productization, version/release vocabulary alignment, five-minute onboarding, ConsumerSample realism, and thin API onboarding affordances.
+- The milestone has 5 phases (285–289) and 18 mapped requirements.
 - Runtime architecture rewrites, WPF parity, defended 5000-node budgets, and plugin marketplace/template expansion remain deferred.
 
 ## Deferred Items
@@ -37,4 +38,4 @@ Items acknowledged and still deferred:
 | intake | POLISH-01: real adopter friction fixes (requires ≥2 external reports on same docs page) | deferred |
 
 ---
-*Last updated: 2026-04-26 after starting `v0.39.0-beta Productized SDK Adoption Path`*
+*Last updated: 2026-04-26 after creating `v0.39.0-beta Productized SDK Adoption Path` roadmap*

@@ -71,12 +71,31 @@ Deferred to future milestones after the productized adoption path is coherent.
 
 ## Traceability
 
-Roadmap mapping is pending.
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| REL-01 | Phase 285 | Pending |
+| REL-02 | Phase 285 | Pending |
+| REL-03 | Phase 285 | Pending |
+| REL-04 | Phase 285 | Pending |
+| PROOF-02 | Phase 285 | Pending |
+| PROOF-03 | Phase 285 | Pending |
+| DEMO-01 | Phase 286 | Pending |
+| DEMO-02 | Phase 286 | Pending |
+| DEMO-03 | Phase 287 | Pending |
+| DEMO-04 | Phase 287 | Pending |
+| ONB-01 | Phase 288 | Pending |
+| ONB-02 | Phase 288 | Pending |
+| ONB-03 | Phase 288 | Pending |
+| ONB-04 | Phase 288 | Pending |
+| API-01 | Phase 289 | Pending |
+| API-02 | Phase 289 | Pending |
+| API-03 | Phase 289 | Pending |
+| PROOF-01 | Phase 289 | Pending |
 
 **Coverage:**
 - v1 requirements: 18 total
-- Mapped to phases: 0
-- Unmapped: 18
+- Mapped to phases: 18
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-26*
