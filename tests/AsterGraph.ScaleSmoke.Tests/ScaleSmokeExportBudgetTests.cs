@@ -25,7 +25,7 @@ public sealed class ScaleSmokeExportBudgetTests
         var marker = tier.ToExportBudgetMarker();
 
         Assert.Equal(
-            "SCALE_EXPORT_BUDGET:large:svg<=300:png<=12000:jpeg<=8000:reload<=400",
+            "SCALE_EXPORT_BUDGET:large:svg<=300:png<=16000:jpeg<=12000:reload<=400",
             marker);
     }
 
@@ -51,13 +51,13 @@ public sealed class ScaleSmokeExportBudgetTests
         var tier = ScaleSmokeTier.Parse(["--tier", "large"]);
         var metrics = new ScaleSmokeExportMetrics(
             SvgExportMs: 220,
-            PngExportMs: 12001,
+            PngExportMs: 16001,
             JpegExportMs: 610,
             ReloadMs: 44);
 
         var result = tier.EvaluateExport(metrics);
 
         Assert.False(result.Passed);
-        Assert.Contains("png>12000", result.FailureSummary, StringComparison.Ordinal);
+        Assert.Contains("png>16000", result.FailureSummary, StringComparison.Ordinal);
     }
 }

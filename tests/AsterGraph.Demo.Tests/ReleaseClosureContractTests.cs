@@ -196,7 +196,10 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("RepoRoot = $repoRoot", ciScript, StringComparison.Ordinal);
         Assert.Contains("$arguments['PublicTag'] = $PublicTag", ciScript, StringComparison.Ordinal);
         Assert.Contains("Validate public version docs", releaseWorkflow, StringComparison.Ordinal);
-        Assert.Contains(".\\eng\\validate-public-versioning.ps1 @args", releaseWorkflow, StringComparison.Ordinal);
+        Assert.Contains("$validationArgs = @{", releaseWorkflow, StringComparison.Ordinal);
+        Assert.Contains("RepoRoot = $PWD.Path", releaseWorkflow, StringComparison.Ordinal);
+        Assert.Contains("$validationArgs['PublicTag'] = $publicTag", releaseWorkflow, StringComparison.Ordinal);
+        Assert.Contains(".\\eng\\validate-public-versioning.ps1 @validationArgs", releaseWorkflow, StringComparison.Ordinal);
     }
 
     [Fact]

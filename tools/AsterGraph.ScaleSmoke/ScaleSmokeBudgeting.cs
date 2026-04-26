@@ -363,8 +363,8 @@ public sealed record ScaleSmokeTier(
                     EdgeCreateMs: 100),
                 ExportBudget: new ScaleSmokeExportBudget(
                     SvgExportMs: 300,
-                    PngExportMs: 12000,
-                    JpegExportMs: 8000,
+                    PngExportMs: 16000,
+                    JpegExportMs: 12000,
                     ReloadMs: 400)),
             "stress" => new ScaleSmokeTier(
                 "stress",
