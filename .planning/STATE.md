@@ -2,29 +2,31 @@
 
 ## Current Position
 
-Phase: 289 Thin Host Builder And Adoption Proof Gate
-Plan: `.planning/phases/289-thin-host-builder-and-adoption-proof-gate/289-PLAN.md`
-Status: Phase 289 complete; milestone ready for audit/closeout
-Last activity: 2026-04-26 — completed Phase 289 Thin Host Builder And Adoption Proof Gate
+Phase: —
+Plan: —
+Status: v0.39.0-beta complete and archived; ready for next milestone planning
+Last activity: 2026-04-26 — archived v0.39.0-beta Productized SDK Adoption Path
 
 ## Project Reference
 
-See: `.planning/PROJECT.md`
+See: `.planning/PROJECT.md` (updated 2026-04-26)
 
 **Core value:** External hosts can embed AsterGraph and get a host-native, definition-driven authoring experience where commands, editing, inspection, trust decisions, and semantic workflows feel product-complete without rebuilding the toolkit.
+**Current focus:** Planning the next milestone.
 
 ## Notes
 
 - `v0.38.0-beta External Adopter Feedback Loop` is complete locally and archived under `.planning/milestones/`.
 - All 4 phases (281–284) verified with 789 tests passing across 7 test projects.
 - POLISH-01 deferred: real adopter friction fixes require ≥2 external reports on the same docs page.
-- `v0.39.0-beta Productized SDK Adoption Path` focuses on Demo/README productization, version/release vocabulary alignment, five-minute onboarding, ConsumerSample realism, and thin API onboarding affordances.
-- The milestone has 5 phases (285–289) and 18 mapped requirements.
+- `v0.39.0-beta Productized SDK Adoption Path` is complete locally and archived under `.planning/milestones/`.
+- The milestone completed 5 phases (285–289) and 18 mapped requirements.
 - Phase 285 added a public versioning validation script, wired it into release validation, and tightened bilingual version/release wording.
 - Phase 286 added the README first-view AI pipeline visual plus `--scenario ai-pipeline` Demo launch path.
 - Phase 287 added the in-Demo Scenario Tour covering custom nodes, typed connections, parameters, plugin trust, automation, save/load, and export.
 - Phase 288 added the ConsumerSample `Content Review Release Lane` scenario identity, five-minute quick-start path, onboarding proof markers, and support-bundle readiness evidence.
 - Phase 289 added `AsterGraphHostBuilder` as a thin Avalonia hosted facade over the canonical editor/view factories plus docs proof coverage for the productized adoption path.
+- Milestone audit passed with 18/18 requirements satisfied and no critical integration or flow gaps.
 - Runtime architecture rewrites, WPF parity, defended 5000-node budgets, and plugin marketplace/template expansion remain deferred.
 
 ## Deferred Items
@@ -43,4 +45,4 @@ Items acknowledged and still deferred:
 | intake | POLISH-01: real adopter friction fixes (requires ≥2 external reports on same docs page) | deferred |
 
 ---
-*Last updated: 2026-04-26 after completing Phase 289*
+*Last updated: 2026-04-26 after archiving v0.39.0-beta*

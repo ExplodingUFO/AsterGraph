@@ -8,16 +8,11 @@ AsterGraph is a modular .NET graph editor SDK organized around an editor kernel,
 
 External hosts can embed AsterGraph and get a host-native, definition-driven authoring experience where commands, editing, inspection, trust decisions, and semantic workflows feel product-complete without rebuilding the toolkit.
 
-## Current Milestone: v0.39.0-beta Productized SDK Adoption Path
+## Current Milestone
 
-**Goal:** Make AsterGraph easier to evaluate and integrate externally by productizing the demo, aligning public version/release messaging, shortening the first-run onboarding path, and adding thin host-friendly API affordances without changing the runtime architecture.
+No active milestone is currently planned.
 
-**Target features:**
-- Productized scenario demo and README first viewport that show one concrete SDK story.
-- Version, tag, release, NuGet, and local-planning vocabulary aligned across public entry points and release validation.
-- Five-minute hosted onboarding path from install/scaffold/run to first custom node or plugin-capable host.
-- Thin hosted API builder/facade that delegates to the existing canonical session and Avalonia factories.
-- Proof markers and docs tests that defend the adoption path before deeper performance or plugin-ecosystem work.
+Next step: run `$gsd-new-milestone` when the next goal is ready.
 
 ## Current State
 
@@ -56,29 +51,30 @@ External hosts can embed AsterGraph and get a host-native, definition-driven aut
 - `v0.27.0-beta External Intake Dry Run` is archived locally as complete.
 - `v0.28.0-beta Public Verification Loop` is archived locally as complete.
 - `v0.29.0-beta Authoring Surface Polish` is archived locally as complete.
-- The widened canonical route now has defended breadth, performance, and automation-backed accessibility validation; the next active bottleneck is whether the validation-only second adapter can reproduce the shared tool and stencil slice of that capability-breadth contract without widening support promises.
+- `v0.39.0-beta Productized SDK Adoption Path` is archived locally as complete.
+- The widened canonical route now has defended breadth, performance, automation-backed accessibility validation, external intake infrastructure, and a productized adoption path. The next active bottleneck should be chosen from performance budget promotion, plugin ecosystem scaffolding, API governance, or observed adopter friction.
 
 ## Current State
 
-**v0.38.0-beta External Adopter Feedback Loop** — completed locally 2026-04-25
+**v0.39.0-beta Productized SDK Adoption Path** — completed locally 2026-04-26
 
-The `0.12.0-beta` authoring-surface line now has active intake infrastructure: hardened support bundles (schema v2 with validation), structured issue templates, triage workflow, and explicit onboarding failure detection. Ready to receive and act on real external adopter reports.
+The SDK now has a productized external adoption path: public version/release wording is aligned, the README and Demo lead with a concrete AI pipeline scenario, ConsumerSample provides a realistic five-minute hosted path, and `AsterGraphHostBuilder` shortens common Avalonia setup without changing runtime architecture.
 
 **Shipped:**
-- Support bundle schema v2 with graph summary, feature descriptors, recent diagnostics, and post-write schema validation
-- GitHub issue templates guiding adopters to provide .NET SDK, UI adapter, and custom node context
-- Adopter triage checklist with intake criteria and three routing buckets (docs-fix / sample-fix / capability-gap)
-- `ONBOARDING_CONFIGURATION_OK` proof marker detecting common setup failures
-- `SUPPORT_BUNDLE_SCHEMA_OK` marker ensuring bundle integrity
+- Public versioning validation across README, bilingual versioning docs, issue templates, release workflow, and launch checklists
+- README first-view AI pipeline visual plus `--scenario ai-pipeline` Demo launch path
+- Guided Demo tour covering custom nodes, typed connections, parameters, plugin trust, automation, save/load, and export
+- ConsumerSample `Content Review Release Lane` scenario with onboarding and support-bundle proof markers
+- `AsterGraphHostBuilder` thin hosted facade over the canonical editor and Avalonia view factories
 
 **Deferred:**
-- POLISH-01 (real adopter friction fixes) — requires ≥2 external reports on the same docs page
+- defended 5000-node budget, plugin templates/validator/cookbook, public API analyzer/baseline gates, and `dotnet new` templates
 
 ## Most Recently Completed Milestone
 
-**v0.38.0-beta External Adopter Feedback Loop** (completed locally 2026-04-25)
+**v0.39.0-beta Productized SDK Adoption Path** (completed locally 2026-04-26)
 
-**Current milestone:** `v0.39.0-beta Productized SDK Adoption Path` is initialized to turn the already-broad SDK surface into a clearer external adoption story before any deeper architecture, performance, marketplace, or adapter-expansion work.
+The SDK now has a clearer external adoption path: aligned public version/release wording, a scenario-led README and Demo, a guided tour, a realistic ConsumerSample onboarding route, and a thin Avalonia host builder that preserves the canonical runtime/session boundary.
 
 ## Release Ladder
 
@@ -186,14 +182,15 @@ The `0.12.0-beta` authoring-surface line now has active intake infrastructure: h
 - ✓ Hosts can now export `SVG`, `PNG`, and `JPEG` from one defended canonical route with a shared runtime contract, shared descriptor surface, and host-replaceable export services.
 - ✓ Export breadth now supports practical output-shaping inputs through a small public options contract instead of sample-only helpers.
 - ✓ The validation-only WPF route now emits bounded export-breadth proof through shared feature descriptors plus `svg/png/jpeg` export commands without widening adapter support claims.
+- ✓ External evaluators can understand the product from the README first viewport through a concrete AI pipeline visual and one scenario-led SDK story — v0.39.0-beta.
+- ✓ Public version, tag, release, NuGet, and local-planning labels now stay aligned across README, versioning docs, release workflow output, and issue intake links — v0.39.0-beta.
+- ✓ New hosts can follow a five-minute Avalonia onboarding path and know when to copy Starter, HelloWorld, ConsumerSample, or the full Demo — v0.39.0-beta.
+- ✓ `ConsumerSample.Avalonia` now presents a realistic host integration with scenario graph, host-owned actions, parameter editing, trusted plugin flow, and support-bundle proof — v0.39.0-beta.
+- ✓ `AsterGraphHostBuilder` provides a thin hosted facade that delegates to the existing canonical `CreateSession(...)` / `Create(...)` and Avalonia view factories — v0.39.0-beta.
 
 ### Active
 
-- [ ] External evaluators can understand the product from the README first viewport through a concrete screenshot/GIF and one scenario-led SDK story.
-- [ ] Public version, tag, release, NuGet, and local-planning labels must not contradict each other in README, versioning docs, release workflow output, or issue intake links.
-- [ ] New hosts can complete a five-minute Avalonia onboarding path and know when to copy Starter, HelloWorld, ConsumerSample, or the full Demo.
-- [ ] `ConsumerSample.Avalonia` must feel like a realistic host integration with a scenario graph, host-owned actions, parameter editing, trusted plugin flow, and support-bundle proof.
-- [ ] A thin host builder/facade may simplify common hosted setup only if it delegates to the existing canonical `CreateSession(...)` / `Create(...)` and Avalonia view factories.
+- [ ] Define the next milestone after reviewing whether the highest-leverage follow-up is performance budget promotion, plugin ecosystem scaffolding, API governance, or further adoption polish.
 
 ### Excluded from this milestone
 
@@ -219,8 +216,8 @@ The `0.12.0-beta` authoring-surface line now has active intake infrastructure: h
 ## Context
 
 - The public package line remains `0.11.0-beta`; local planning now uses `v0.39.0-beta` as an internal beta label, not as the consumer NuGet/tag answer.
-- The current bottleneck is no longer adapter-2 validation, command breadth, or support-bundle plumbing; it is whether an external evaluator can understand, run, and copy the SDK path quickly.
-- The highest-leverage next step is Demo/README productization, public version/release wording cleanup, and a shorter hosted integration path, not another capability wave.
+- The current bottleneck is no longer first-run adoption clarity; v0.39.0-beta made the public demo, quick start, ConsumerSample path, and thin hosted builder coherent enough for evaluation.
+- The highest-leverage next milestone should be selected explicitly from the deferred tracks instead of assumed: defended 5000-node budget, plugin ecosystem scaffolding, API governance, or additional adopter polish.
 - Avalonia remains the first official adapter; `WPF` remains validation-only/partial and is intentionally not the driver of this milestone's runtime API changes.
 - Performance and plugin ecosystem work are still valuable, but they should follow once the first-run product story and public release vocabulary are coherent.
 
@@ -267,7 +264,8 @@ The `0.12.0-beta` authoring-surface line now has active intake infrastructure: h
 | After `v0.35.0-beta`, prioritize validation-only adapter-2 capability-breadth evidence over another capability wave or parity push | The next missing adapter-2 evidence cluster is bounded export/tool/stencil breadth on shared contracts, not a second full UI route | Completed in v0.36.0-beta |
 | After `v0.36.0-beta`, prioritize authoring surface polish for real host adoption over adapter-2 parity or performance expansion | The defended canonical route now has breadth, performance, and accessibility evidence; the next real risk is whether external hosts can comfortably copy and extend the authoring surface | Active in v0.37.0-beta |
 | Keep local planning on `v0.37.0-beta` while treating this work as the public `0.12.0-beta` authoring-surface line | Archived local `v0.12.0-beta` milestone files already exist, so reusing that label locally would collide with planning history | Active in v0.37.0-beta |
-| After `v0.38.0-beta`, prioritize productized SDK adoption over deeper runtime architecture work | The SDK already has broad defended surface area; the next adoption risk is public clarity, first-run demo quality, and short copyable integration paths | Active in v0.39.0-beta |
+| After `v0.38.0-beta`, prioritize productized SDK adoption over deeper runtime architecture work | The SDK already had broad defended surface area; the next adoption risk was public clarity, first-run demo quality, and short copyable integration paths | Completed in v0.39.0-beta |
+| After `v0.39.0-beta`, choose the next milestone from evidence-backed deferred tracks instead of starting another architecture wave by default | Adoption-path packaging is now in place; the next bottleneck should be selected from performance budget promotion, plugin ecosystem scaffolding, API governance, or observed adopter friction | Pending next milestone |
 
 ## Evolution
 
@@ -287,4 +285,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with the newest shipped state and next bottleneck.
 
 ---
-*Last updated: 2026-04-26 after initializing `v0.39.0-beta Productized SDK Adoption Path`*
+*Last updated: 2026-04-26 after completing `v0.39.0-beta Productized SDK Adoption Path`*
