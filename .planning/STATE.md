@@ -2,10 +2,10 @@
 
 ## Current Position
 
-Phase: —
+Phase: Not started (defining requirements)
 Plan: —
-Status: `v0.38.0-beta External Adopter Feedback Loop` completed 2026-04-25; no active milestone
-Last activity: 2026-04-25 — completed Phase 284 Schema Version And Host Health Telemetry; all 4 phases done
+Status: Defining requirements for `v0.39.0-beta Productized SDK Adoption Path`
+Last activity: 2026-04-26 — milestone `v0.39.0-beta Productized SDK Adoption Path` started
 
 ## Project Reference
 
@@ -18,7 +18,8 @@ See: `.planning/PROJECT.md`
 - `v0.38.0-beta External Adopter Feedback Loop` is complete locally and archived under `.planning/milestones/`.
 - All 4 phases (281–284) verified with 789 tests passing across 7 test projects.
 - POLISH-01 deferred: real adopter friction fixes require ≥2 external reports on the same docs page.
-- Next milestone not yet initialized.
+- `v0.39.0-beta Productized SDK Adoption Path` focuses on Demo/README productization, version/release vocabulary alignment, five-minute onboarding, ConsumerSample realism, and thin API onboarding affordances.
+- Runtime architecture rewrites, WPF parity, defended 5000-node budgets, and plugin marketplace/template expansion remain deferred.
 
 ## Deferred Items
 
@@ -36,4 +37,4 @@ Items acknowledged and still deferred:
 | intake | POLISH-01: real adopter friction fixes (requires ≥2 external reports on same docs page) | deferred |
 
 ---
-*Last updated: 2026-04-25 after completing `v0.38.0-beta External Adopter Feedback Loop`*
+*Last updated: 2026-04-26 after starting `v0.39.0-beta Productized SDK Adoption Path`*

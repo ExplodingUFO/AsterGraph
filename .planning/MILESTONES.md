@@ -1,5 +1,6 @@
 # Milestones
 
+- v0.38.0-beta — External Adopter Feedback Loop — completed locally 2026-04-25
 - v0.37.0-beta — Authoring Surface Polish — completed locally 2026-04-25 (local planning label; delivers the public `0.12.0-beta` authoring-surface line)
 - v0.36.0-beta — Adapter-2 Capability Breadth Validation — completed locally 2026-04-25
 - v0.35.0-beta — Adapter-2 Performance Validation — completed locally 2026-04-23
@@ -38,4 +39,4 @@
 - v1.25 — Command Pipeline, Inspector Deepening, And Semantic Authoring — completed 2026-04-21 (audit: tech_debt, see `v1.25-MILESTONE-AUDIT.md`)
 
 ---
-*Last updated: 2026-04-25 after completing `v0.38.0-beta External Adopter Feedback Loop`*
+*Last updated: 2026-04-26 after reconciling `v0.38.0-beta External Adopter Feedback Loop` before starting `v0.39.0-beta Productized SDK Adoption Path`*
