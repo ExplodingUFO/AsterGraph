@@ -100,12 +100,14 @@ jobs:
         shell: pwsh
         run: |
           $publicTag = '${{ steps.release_context.outputs.release_tag }}'
-          $args = @('-RepoRoot', $PWD.Path)
+          $validationArgs = @{
+            RepoRoot = $PWD.Path
+          }
           if (-not [string]::IsNullOrWhiteSpace($publicTag)) {
-            $args += @('-PublicTag', $publicTag)
+            $validationArgs['PublicTag'] = $publicTag
           }
 
-          .\eng\validate-public-versioning.ps1 @args
+          .\eng\validate-public-versioning.ps1 @validationArgs
 
       - name: Run release validation lane
         shell: pwsh

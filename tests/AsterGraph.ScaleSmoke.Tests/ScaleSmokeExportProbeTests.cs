@@ -24,10 +24,11 @@ public sealed class ScaleSmokeExportProbeTests
 
         var result = ScaleSmokeExportProbe.Run(session, storageRoot);
 
-        Assert.True(result.SvgExportOk);
-        Assert.True(result.PngExportOk);
-        Assert.True(result.JpegExportOk);
-        Assert.True(result.ReloadOk);
-        Assert.True(result.IsOk);
+        var marker = result.ToMarker(tier.Id);
+        Assert.True(result.SvgExportOk, marker);
+        Assert.True(result.PngExportOk, marker);
+        Assert.True(result.JpegExportOk, marker);
+        Assert.True(result.ReloadOk, marker);
+        Assert.True(result.IsOk, marker);
     }
 }
