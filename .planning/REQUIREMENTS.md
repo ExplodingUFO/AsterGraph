@@ -14,10 +14,10 @@
 
 ### Version and Release Clarity
 
-- [ ] **REL-01**: Consumer-facing entry points clearly state the current installable package version, matching public tag/release expectation, package boundaries, and historical `v1.x` tag caveat without contradiction.
-- [ ] **REL-02**: English and Chinese versioning docs distinguish NuGet/package SemVer, GitHub prerelease tags, GitHub Releases, and local planning-only milestone labels.
-- [ ] **REL-03**: Release validation fails when `Directory.Build.props`, README/versioning docs, public tag, or generated release-note header disagree about the public package version.
-- [ ] **REL-04**: Issue templates and public launch/release docs route "which version should I use?" questions to the same versioning source of truth.
+- [x] **REL-01**: Consumer-facing entry points clearly state the current installable package version, matching public tag/release expectation, package boundaries, and historical `v1.x` tag caveat without contradiction.
+- [x] **REL-02**: English and Chinese versioning docs distinguish NuGet/package SemVer, GitHub prerelease tags, GitHub Releases, and local planning-only milestone labels.
+- [x] **REL-03**: Release validation fails when `Directory.Build.props`, README/versioning docs, public tag, or generated release-note header disagree about the public package version.
+- [x] **REL-04**: Issue templates and public launch/release docs route "which version should I use?" questions to the same versioning source of truth.
 
 ### Onboarding and Samples
 
@@ -35,8 +35,8 @@
 ### Proof and Scope Guardrails
 
 - [ ] **PROOF-01**: CI or docs tests defend the README first-viewport claims, five-minute quick start, scenario demo launch path, and ConsumerSample scenario markers.
-- [ ] **PROOF-02**: Public docs continue to describe the 1000-node tier as defended and the 5000-node tier as telemetry until a later milestone explicitly promotes that budget.
-- [ ] **PROOF-03**: Plugin trust wording remains explicit that AsterGraph supports trusted in-process extension but does not provide sandboxing or untrusted-code isolation.
+- [x] **PROOF-02**: Public docs continue to describe the 1000-node tier as defended and the 5000-node tier as telemetry until a later milestone explicitly promotes that budget.
+- [x] **PROOF-03**: Plugin trust wording remains explicit that AsterGraph supports trusted in-process extension but does not provide sandboxing or untrusted-code isolation.
 
 ## v2 Requirements
 
@@ -73,12 +73,12 @@ Deferred to future milestones after the productized adoption path is coherent.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| REL-01 | Phase 285 | Pending |
-| REL-02 | Phase 285 | Pending |
-| REL-03 | Phase 285 | Pending |
-| REL-04 | Phase 285 | Pending |
-| PROOF-02 | Phase 285 | Pending |
-| PROOF-03 | Phase 285 | Pending |
+| REL-01 | Phase 285 | Complete |
+| REL-02 | Phase 285 | Complete |
+| REL-03 | Phase 285 | Complete |
+| REL-04 | Phase 285 | Complete |
+| PROOF-02 | Phase 285 | Complete |
+| PROOF-03 | Phase 285 | Complete |
 | DEMO-01 | Phase 286 | Pending |
 | DEMO-02 | Phase 286 | Pending |
 | DEMO-03 | Phase 287 | Pending |

@@ -12,7 +12,7 @@
 
 ## Phases
 
-- [ ] **Phase 285: Version And Release Narrative Alignment** — Remove public version ambiguity across README, versioning docs, release workflow output, and issue/release links while preserving local planning labels as private bookkeeping.
+- [x] **Phase 285: Version And Release Narrative Alignment** — Remove public version ambiguity across README, versioning docs, release workflow output, and issue/release links while preserving local planning labels as private bookkeeping.
 - [ ] **Phase 286: README First View And Scenario Demo Launch** — Productize the first public impression with a concrete visual and a launchable prebuilt scenario demo.
 - [ ] **Phase 287: Scenario Capability Story And Guided Tour** — Make the Demo show a coherent SDK story covering custom nodes, parameters, validation, trust, automation, save/load, and export.
 - [ ] **Phase 288: Five-Minute Onboarding And ConsumerSample Scenario** — Turn ConsumerSample and quick-start docs into a realistic copyable host path between HelloWorld and the full Demo.
@@ -99,7 +99,7 @@
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| Phase 285: Version And Release Narrative Alignment | 0/1 | Planned | — |
+| Phase 285: Version And Release Narrative Alignment | 1/1 | Completed | 2026-04-26 |
 | Phase 286: README First View And Scenario Demo Launch | 0/1 | Planned | — |
 | Phase 287: Scenario Capability Story And Guided Tour | 0/1 | Planned | — |
 | Phase 288: Five-Minute Onboarding And ConsumerSample Scenario | 0/1 | Planned | — |
