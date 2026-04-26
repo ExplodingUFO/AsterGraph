@@ -26,7 +26,7 @@ using AsterGraph.Abstractions.Identifiers;
 
 public sealed class MyNodeProvider : INodeDefinitionProvider
 {
-    public IReadOnlyList<NodeDefinition> GetDefinitions()
+    public IReadOnlyList<INodeDefinition> GetNodeDefinitions()
         =>
         [
             new NodeDefinition(

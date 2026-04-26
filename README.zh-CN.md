@@ -17,6 +17,15 @@ AsterGraph 是一个面向 .NET 的模块化节点图编辑器工具包，提供
 dotnet run --project src/AsterGraph.Demo -- --scenario ai-pipeline
 ```
 
+生成原生 Avalonia 宿主或插件 starter：
+
+```powershell
+dotnet new install ./templates
+dotnet new astergraph-avalonia -n MyGraphHost
+dotnet new astergraph-plugin -n MyGraphPlugin --PluginId my.graph.plugin
+dotnet run --project tools/AsterGraph.PluginTool -- validate ./MyGraphPlugin/bin/Debug/net8.0/MyGraphPlugin.dll
+```
+
 ## 公开 Beta
 
 - 当前可安装包版本：`0.11.0-beta`
@@ -36,6 +45,8 @@ dotnet run --project src/AsterGraph.Demo -- --scenario ai-pipeline
 | 我现在要做什么 | 先看哪里 | 为什么 |
 | --- | --- | --- |
 | 想先看第一个 hosted 入口 | [`tools/AsterGraph.Starter.Avalonia`](./tools/AsterGraph.Starter.Avalonia/) | 最小端到端 Avalonia 脚手架；cookbook 里的第一个 hosted 跳板 |
+| 想生成原生 hosted app | [`templates/astergraph-avalonia`](./templates/astergraph-avalonia/) | 面向跨平台 Avalonia 宿主的 `dotnet new` 脚手架 |
+| 想生成插件 starter | [`templates/astergraph-plugin`](./templates/astergraph-plugin/) | 面向可信 in-process 插件的 `dotnet new` 脚手架 |
 | 想最快跑起仅运行时路径 | [`tools/AsterGraph.HelloWorld`](./tools/AsterGraph.HelloWorld/) | 最小仅运行时样例；面向自定义 UI 或原生壳层的 canonical 路线 |
 | 想嵌入默认 Avalonia UI | [`tools/AsterGraph.HelloWorld.Avalonia`](./tools/AsterGraph.HelloWorld.Avalonia/) | 在 starter 之后的最小默认 UI 样例 |
 | 想先看一个更真实的宿主集成 | [Consumer Sample](./tools/AsterGraph.ConsumerSample.Avalonia/README.md) | 同一条 canonical 路线上的中等复杂度样例，包含宿主动作、参数编辑和一个可信插件 |
@@ -85,6 +96,9 @@ dotnet add package AsterGraph.Abstractions --prerelease
 - [`tools/AsterGraph.HostSample`](./tools/AsterGraph.HostSample/) = 仅运行时 / 默认 UI 两条推荐路线的 proof harness，不是最先上手的入口
 - [`tools/AsterGraph.PackageSmoke`](./tools/AsterGraph.PackageSmoke/) = 打包消费验证
 - [`tools/AsterGraph.ScaleSmoke`](./tools/AsterGraph.ScaleSmoke/) = 公开的大图基线加 history/state 验证
+- [`tools/AsterGraph.PluginTool`](./tools/AsterGraph.PluginTool/) = 用于插件验证、trust evidence 和 hash inspection 的跨平台 CLI
+- [`templates/astergraph-avalonia`](./templates/astergraph-avalonia/) = `dotnet new astergraph-avalonia` 原生 Avalonia starter
+- [`templates/astergraph-plugin`](./templates/astergraph-plugin/) = `dotnet new astergraph-plugin` 可信插件 starter
 - [`src/AsterGraph.Demo`](./src/AsterGraph.Demo/) = 展示宿主；菜单标签会跟着当前 UI 语言切换
 
 ## Official Capability Modules

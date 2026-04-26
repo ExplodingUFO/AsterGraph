@@ -8,11 +8,21 @@ For the frozen support boundary and upgrade guidance toward `v1.0.0`, see [Stabi
 If you are evaluating the public beta end to end, use [Beta Evaluation Path](./evaluation-path.md) as the hosted route ladder from first install to realistic hosted proof.
 For plugin trust-policy review and local evidence, keep [Plugin Manifest and Trust Policy Contract v1](./plugin-trust-contracts.md) and [Beta Support Bundle](./support-bundle.md) close to the defended hosted route.
 
+The fastest project-owned start is now the template route:
+
+```powershell
+dotnet new install ./templates
+dotnet new astergraph-avalonia -n MyGraphHost
+dotnet new astergraph-plugin -n MyGraphPlugin --PluginId my.graph.plugin
+```
+
 ## 1. Pick Your Starting Package
 
 | Host goal | Start package | Why |
 | --- | --- | --- |
 | Hosted starter scaffold | `AsterGraph.Starter.Avalonia` | smallest end-to-end Avalonia scaffold; the first hosted hop in the cookbook |
+| Native generated host | `dotnet new astergraph-avalonia` | cross-platform Avalonia desktop host owned by your project |
+| Trusted plugin starter | `dotnet new astergraph-plugin` | smallest plugin-author project for in-process trusted extensions |
 | Default Avalonia UI host | `AsterGraph.Avalonia` | main UI entry with the shipped shell and view factories |
 | Runtime-only or custom UI host | `AsterGraph.Editor` | canonical session/runtime surface for custom UI or native shells |
 | Contract-first integration | `AsterGraph.Abstractions` | stable identifiers, definitions, and provider contracts |
@@ -70,6 +80,14 @@ For the first hosted entry, run:
 dotnet run --project tools/AsterGraph.Starter.Avalonia/AsterGraph.Starter.Avalonia.csproj --nologo
 ```
 
+For a project-owned native Avalonia scaffold, run:
+
+```powershell
+dotnet new install ./templates
+dotnet new astergraph-avalonia -n MyGraphHost
+dotnet run --project MyGraphHost/MyGraphHost.csproj
+```
+
 For the smallest possible runtime-only sample, run:
 
 ```powershell
@@ -92,6 +110,14 @@ Run `AsterGraph.ConsumerSample.Avalonia -- --proof` first for proof handoff; use
 
 For plugin-capable evaluators, the defended hosted trust hop is `AsterGraph.ConsumerSample.Avalonia`. Read [Plugin Manifest and Trust Policy Contract v1](./plugin-trust-contracts.md) and [Plugin And Custom Node Recipe](./plugin-recipe.md) before treating the route as complete.
 
+For plugin authors, generate and validate the starter plugin:
+
+```powershell
+dotnet new astergraph-plugin -n MyGraphPlugin --PluginId my.graph.plugin
+dotnet build MyGraphPlugin/MyGraphPlugin.csproj
+dotnet run --project tools/AsterGraph.PluginTool -- validate MyGraphPlugin/bin/Debug/net8.0/MyGraphPlugin.dll
+```
+
 Use `Starter.Avalonia` when you want the first hosted entry and the smallest end-to-end Avalonia scaffold. Use `HelloWorld` when you want the simplest runtime-only starting point. Use `HelloWorld.Avalonia` when you want the smallest shipped-shell sample after the starter scaffold. Use `ConsumerSample.Avalonia` when you want one realistic host before jumping to `Demo`. Use `HostSample` only when you want a proof harness for canonical route validation, not as the onboarding step.
 
 The hosted route ladder is `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerSample.Avalonia`.
@@ -107,6 +133,8 @@ Use this path when you want a copyable Avalonia host rather than a full showcase
 3. Add the first custom node definition by replacing the starter sample definition with your own `NodeDefinition` id, title, ports, and parameter definitions.
 4. Run `tools/AsterGraph.ConsumerSample.Avalonia` and use the hosted action rail to exercise graph save/load, selected-node parameter editing, and the trusted plugin path.
 5. Run `AsterGraph.ConsumerSample.Avalonia -- --proof --support-bundle <support-bundle-path>` and expect `CONSUMER_SAMPLE_SCENARIO_GRAPH_OK:True`, `CONSUMER_SAMPLE_HOST_OWNED_ACTIONS_OK:True`, `CONSUMER_SAMPLE_SUPPORT_BUNDLE_READY_OK:True`, `FIVE_MINUTE_ONBOARDING_OK:True`, and `ONBOARDING_CONFIGURATION_OK:True`.
+
+Template smoke in the release lane validates that `astergraph-avalonia` and `astergraph-plugin` generate buildable `net8.0` projects and that the generated plugin passes `AsterGraph.PluginTool validate`.
 
 Copy from `Starter.Avalonia` for composition, `HelloWorld` for runtime-only shape, `HelloWorld.Avalonia` for the smallest hosted UI, `ConsumerSample.Avalonia` for realistic host-owned actions/parameters/plugins/support proof, and `Demo` only when you need the full capability showcase.
 

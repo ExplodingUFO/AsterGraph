@@ -17,6 +17,15 @@ Launch the prebuilt AI workflow scenario:
 dotnet run --project src/AsterGraph.Demo -- --scenario ai-pipeline
 ```
 
+Generate a native Avalonia host or a plugin starter:
+
+```powershell
+dotnet new install ./templates
+dotnet new astergraph-avalonia -n MyGraphHost
+dotnet new astergraph-plugin -n MyGraphPlugin --PluginId my.graph.plugin
+dotnet run --project tools/AsterGraph.PluginTool -- validate ./MyGraphPlugin/bin/Debug/net8.0/MyGraphPlugin.dll
+```
+
 ## Public Beta
 
 - current installable package version: `0.11.0-beta`
@@ -36,6 +45,8 @@ dotnet run --project src/AsterGraph.Demo -- --scenario ai-pipeline
 | I want to... | Start here | Why |
 | --- | --- | --- |
 | get the first hosted entry | [`tools/AsterGraph.Starter.Avalonia`](./tools/AsterGraph.Starter.Avalonia/) | smallest end-to-end Avalonia scaffold; the first hosted hop in the cookbook |
+| generate a native hosted app | [`templates/astergraph-avalonia`](./templates/astergraph-avalonia/) | `dotnet new` scaffold for a cross-platform Avalonia host |
+| generate a plugin starter | [`templates/astergraph-plugin`](./templates/astergraph-plugin/) | `dotnet new` scaffold for a trusted in-process plugin |
 | get the fastest runtime-only first run | [`tools/AsterGraph.HelloWorld`](./tools/AsterGraph.HelloWorld/) | smallest runtime-only sample; one canonical route for custom UI or native shells |
 | embed the shipped Avalonia UI | [`tools/AsterGraph.HelloWorld.Avalonia`](./tools/AsterGraph.HelloWorld.Avalonia/) | smallest stock hosted-UI sample after the starter scaffold |
 | try a realistic hosted integration | [Consumer Sample](./tools/AsterGraph.ConsumerSample.Avalonia/README.md) | medium sample on the same canonical route, with host-owned actions, parameter editing, and one trusted plugin |
@@ -85,6 +96,9 @@ For new runtime-facing work, anchor on the first route. The Avalonia route is th
 - [`tools/AsterGraph.HostSample`](./tools/AsterGraph.HostSample/) = proof harness for runtime-only and hosted-UI validation, not the onboarding step
 - [`tools/AsterGraph.PackageSmoke`](./tools/AsterGraph.PackageSmoke/) = packed-package proof
 - [`tools/AsterGraph.ScaleSmoke`](./tools/AsterGraph.ScaleSmoke/) = public larger-graph baseline plus history/state proof
+- [`tools/AsterGraph.PluginTool`](./tools/AsterGraph.PluginTool/) = cross-platform CLI for plugin validation, trust evidence, and hash inspection
+- [`templates/astergraph-avalonia`](./templates/astergraph-avalonia/) = `dotnet new astergraph-avalonia` native Avalonia starter
+- [`templates/astergraph-plugin`](./templates/astergraph-plugin/) = `dotnet new astergraph-plugin` trusted plugin starter
 - [`src/AsterGraph.Demo`](./src/AsterGraph.Demo/) = showcase host; menu labels follow the current UI language
 
 ## Official Capability Modules

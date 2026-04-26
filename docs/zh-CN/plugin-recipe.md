@@ -7,6 +7,9 @@
 先装：
 
 ```powershell
+dotnet new install ./templates
+dotnet new astergraph-plugin -n GreetingPlugin --PluginId sample.greeting
+
 dotnet add package AsterGraph.Abstractions --prerelease
 dotnet add package AsterGraph.Editor --prerelease
 ```
@@ -34,7 +37,7 @@ public sealed class GreetingPlugin : IGraphEditorPlugin
 
 public sealed class GreetingNodeProvider : INodeDefinitionProvider
 {
-    public IReadOnlyList<NodeDefinition> GetDefinitions()
+    public IReadOnlyList<INodeDefinition> GetNodeDefinitions()
         => [
             new NodeDefinition(
                 new NodeDefinitionId("sample.greeting.node"),
@@ -46,6 +49,15 @@ public sealed class GreetingNodeProvider : INodeDefinitionProvider
         ];
 }
 ```
+
+## 本地验证
+
+```powershell
+dotnet build GreetingPlugin/GreetingPlugin.csproj
+dotnet run --project tools/AsterGraph.PluginTool -- validate GreetingPlugin/bin/Debug/net8.0/GreetingPlugin.dll
+```
+
+validator 是跨平台 CLI。它会输出 manifest 摘要、兼容性状态、trust-policy 结果、签名证据和 SHA-256 哈希，宿主可以把这些信息接入 allowlist。
 
 ## 直接注册
 

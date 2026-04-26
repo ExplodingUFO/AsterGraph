@@ -1,0 +1,4 @@
+{
+  "pluginAssembly": "lib/net8.0/AsterGraphPlugin.dll",
+  "pluginTypeName": "AsterGraphPlugin.SamplePlugin"
+}

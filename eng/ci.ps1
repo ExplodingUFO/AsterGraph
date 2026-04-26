@@ -36,6 +36,7 @@ $coverageRunSettingsPath = Join-Path $repoRoot 'tests/coverage.runsettings'
 $coverageReportScriptPath = Join-Path $repoRoot 'eng/coverage-report.ps1'
 $prereleaseNotesScriptPath = Join-Path $repoRoot 'eng/write-prerelease-notes.ps1'
 $publicVersioningValidationScriptPath = Join-Path $repoRoot 'eng/validate-public-versioning.ps1'
+$templateSmokeScriptPath = Join-Path $repoRoot 'eng/template-smoke.ps1'
 $defaultVsTestConnectionTimeoutSeconds = 180
 $hostSampleProject = 'tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj'
 $consumerSampleProject = 'tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.ConsumerSample.Avalonia.csproj'
@@ -48,11 +49,13 @@ $asterGraphWpfTestsProject = 'tests/AsterGraph.Wpf.Tests/AsterGraph.Wpf.Tests.cs
 $starterAvaloniaProject = 'tools/AsterGraph.Starter.Avalonia/AsterGraph.Starter.Avalonia.csproj'
 $packageSmokeProject = 'tools/AsterGraph.PackageSmoke/AsterGraph.PackageSmoke.csproj'
 $scaleSmokeProject = 'tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj'
+$pluginToolProject = 'tools/AsterGraph.PluginTool/AsterGraph.PluginTool.csproj'
 $demoProject = 'src/AsterGraph.Demo/AsterGraph.Demo.csproj'
 $editorTestsProject = 'tests/AsterGraph.Editor.Tests/AsterGraph.Editor.Tests.csproj'
 $consumerSampleTestsProject = 'tests/AsterGraph.ConsumerSample.Tests/AsterGraph.ConsumerSample.Tests.csproj'
 $helloWorldTestsProject = 'tests/AsterGraph.HelloWorld.Tests/AsterGraph.HelloWorld.Tests.csproj'
 $scaleSmokeTestsProject = 'tests/AsterGraph.ScaleSmoke.Tests/AsterGraph.ScaleSmoke.Tests.csproj'
+$pluginToolTestsProject = 'tests/AsterGraph.PluginTool.Tests/AsterGraph.PluginTool.Tests.csproj'
 $userHome = if ([string]::IsNullOrWhiteSpace($env:USERPROFILE)) { $env:HOME } else { $env:USERPROFILE }
 $fallbackPackageCache = Join-Path $userHome '.nuget/packages'
 $isWindowsHost = [System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform([System.Runtime.InteropServices.OSPlatform]::Windows)
@@ -83,7 +86,8 @@ $frameworkBuildProjects = @{
     $hostSampleProject,
     $consumerSampleProject,
     $packageSmokeProject,
-    $scaleSmokeProject
+    $scaleSmokeProject,
+    $pluginToolProject
   )
   'net9.0' = @(
     'tests/AsterGraph.TestPlugins/AsterGraph.TestPlugins.csproj',
@@ -100,7 +104,8 @@ $frameworkTestProjects = @{
   )
   'net9.0' = @(
     'tests/AsterGraph.Editor.Tests/AsterGraph.Editor.Tests.csproj',
-    'tests/AsterGraph.Demo.Tests/AsterGraph.Demo.Tests.csproj'
+    'tests/AsterGraph.Demo.Tests/AsterGraph.Demo.Tests.csproj',
+    $pluginToolTestsProject
   )
 }
 
@@ -695,6 +700,33 @@ function Invoke-PackageSmoke {
   ) -CapturePath $packageSmokeProofPath
 }
 
+function Get-PackageVersion {
+  [xml]$buildProps = Get-Content -LiteralPath (Join-Path $repoRoot 'Directory.Build.props')
+  $versionNode = $buildProps.SelectSingleNode('//Version')
+  $version = if ($null -eq $versionNode) { $null } else { $versionNode.InnerText }
+  if ([string]::IsNullOrWhiteSpace($version)) {
+    throw 'Directory.Build.props does not define Version.'
+  }
+
+  return $version.Trim()
+}
+
+function Invoke-TemplateSmoke {
+  Write-Host ''
+  Write-Host '### Run template and plugin-tool smoke' -ForegroundColor Yellow
+
+  $packageVersion = Get-PackageVersion
+  & $templateSmokeScriptPath `
+    -RepoRoot $repoRoot `
+    -Configuration $Configuration `
+    -AsterGraphVersion $packageVersion `
+    -PackageSource $packagesOutputPath
+
+  if ($LASTEXITCODE -ne 0) {
+    throw "template smoke failed with exit code ${LASTEXITCODE}"
+  }
+}
+
 function Assert-RepoPathExists {
   param(
     [Parameter(Mandatory = $true)]
@@ -1127,6 +1159,7 @@ function Invoke-ReleaseValidation {
   Invoke-HostSample -UsePackedPackages
   Invoke-HostSample -UsePackedPackages -TargetFramework net10.0
   Invoke-PackageSmoke
+  Invoke-TemplateSmoke
   Invoke-ScaleSmoke
   Invoke-PublicVersioningValidation
   Invoke-CoverageValidation

@@ -8,11 +8,21 @@
 如果你要端到端评估当前 public beta，就把 [公开 Beta 评估路径](./evaluation-path.md) 当成从第一次安装到真实宿主 proof 的 hosted route ladder。
 如果你要看 plugin trust-policy 和本地证据，就把 [插件信任契约 v1](./plugin-trust-contracts.md) 和 [Beta Support Bundle](./support-bundle.md) 一起放在这条受防守的 hosted 路线上。
 
+最快的项目自有入口现在是模板路线：
+
+```powershell
+dotnet new install ./templates
+dotnet new astergraph-avalonia -n MyGraphHost
+dotnet new astergraph-plugin -n MyGraphPlugin --PluginId my.graph.plugin
+```
+
 ## 1. 先选起始包
 
 | 宿主目标 | 起始包 | 原因 |
 | --- | --- | --- |
 | hosted starter 脚手架 | `AsterGraph.Starter.Avalonia` | 最小端到端 Avalonia 脚手架；cookbook 里的第一个 hosted 跳板 |
+| 原生生成宿主 | `dotnet new astergraph-avalonia` | 由你的项目拥有的跨平台 Avalonia 桌面宿主 |
+| 可信插件 starter | `dotnet new astergraph-plugin` | 面向 in-process 可信扩展的最小插件作者项目 |
 | 默认 Avalonia UI 宿主 | `AsterGraph.Avalonia` | 主 UI 入口，包含默认壳层和 view factory |
 | 仅运行时 / 自定义 UI 宿主 | `AsterGraph.Editor` | 面向自定义 UI 或原生壳层的 canonical session/runtime surface |
 | 契约优先集成 | `AsterGraph.Abstractions` | 稳定的标识符、定义和 provider 契约 |
@@ -67,6 +77,14 @@ dotnet add package AsterGraph.Abstractions --prerelease
 dotnet run --project tools/AsterGraph.Starter.Avalonia/AsterGraph.Starter.Avalonia.csproj --nologo
 ```
 
+如果你想生成项目自有的原生 Avalonia 脚手架，运行：
+
+```powershell
+dotnet new install ./templates
+dotnet new astergraph-avalonia -n MyGraphHost
+dotnet run --project MyGraphHost/MyGraphHost.csproj
+```
+
 如果你只想先看到最小仅运行时路径，直接运行：
 
 ```powershell
@@ -89,6 +107,14 @@ Proof handoff 时先跑 `AsterGraph.ConsumerSample.Avalonia -- --proof`；`HostS
 
 如果你要评估插件能力，受防守的 hosted trust hop 是 `AsterGraph.ConsumerSample.Avalonia`。先看 [插件信任契约 v1](./plugin-trust-contracts.md) 和 [Plugin 与自定义节点 Recipe](./plugin-recipe.md)，再把这条路线当作已经看完。
 
+如果你在写插件，先生成并验证 starter 插件：
+
+```powershell
+dotnet new astergraph-plugin -n MyGraphPlugin --PluginId my.graph.plugin
+dotnet build MyGraphPlugin/MyGraphPlugin.csproj
+dotnet run --project tools/AsterGraph.PluginTool -- validate MyGraphPlugin/bin/Debug/net8.0/MyGraphPlugin.dll
+```
+
 `Starter.Avalonia` 适合第一个 hosted 入口和最小端到端 Avalonia 脚手架；`HelloWorld` 适合最简单的 runtime-only 第一跑；`HelloWorld.Avalonia` 适合在 starter 之后看的最小默认 UI 第一跑；`ConsumerSample.Avalonia` 适合在跳到 `Demo` 之前先看一个真实宿主；`HostSample` 只适合做推荐路线验证，不是上手入口。
 
 这条 hosted route ladder 是 `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerSample.Avalonia`。
@@ -104,6 +130,8 @@ Proof handoff 时先跑 `AsterGraph.ConsumerSample.Avalonia -- --proof`；`HostS
 3. 添加第一个自定义节点定义：把 starter 的 sample definition 换成你自己的 `NodeDefinition` id、标题、端口和参数定义。
 4. 运行 `tools/AsterGraph.ConsumerSample.Avalonia`，用 hosted action rail 验证图保存/加载、选中节点参数编辑和可信插件路径。
 5. 运行 `AsterGraph.ConsumerSample.Avalonia -- --proof --support-bundle <support-bundle-path>`，期待 `CONSUMER_SAMPLE_SCENARIO_GRAPH_OK:True`、`CONSUMER_SAMPLE_HOST_OWNED_ACTIONS_OK:True`、`CONSUMER_SAMPLE_SUPPORT_BUNDLE_READY_OK:True`、`FIVE_MINUTE_ONBOARDING_OK:True` 和 `ONBOARDING_CONFIGURATION_OK:True`。
+
+release lane 的 template smoke 会验证 `astergraph-avalonia` 和 `astergraph-plugin` 能生成可 build 的 `net8.0` 项目，并且生成的插件能通过 `AsterGraph.PluginTool validate`。
 
 从 `Starter.Avalonia` 复制组合方式，从 `HelloWorld` 看 runtime-only 形状，从 `HelloWorld.Avalonia` 看最小 hosted UI，从 `ConsumerSample.Avalonia` 复制真实宿主动作/参数/插件/support proof，从 `Demo` 查看完整能力 showcase。
 

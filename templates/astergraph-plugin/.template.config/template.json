@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "ExplodingUFO",
+  "classifications": [ "AsterGraph", "Plugin", "Graph" ],
+  "identity": "AsterGraph.Templates.Plugin",
+  "name": "AsterGraph Plugin",
+  "shortName": "astergraph-plugin",
+  "sourceName": "AsterGraphPlugin",
+  "preferNameDirectory": true,
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "symbols": {
+    "AsterGraphVersion": {
+      "type": "parameter",
+      "datatype": "text",
+      "defaultValue": "0.11.0-beta",
+      "replaces": "AsterGraphVersion",
+      "description": "AsterGraph package version to reference."
+    },
+    "PluginId": {
+      "type": "parameter",
+      "datatype": "text",
+      "defaultValue": "sample.plugin",
+      "replaces": "PluginId",
+      "description": "Stable plugin identifier used by the manifest and descriptor."
+    }
+  }
+}

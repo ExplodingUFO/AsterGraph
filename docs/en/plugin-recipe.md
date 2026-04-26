@@ -7,6 +7,9 @@ This recipe shows the smallest public-boundary way to ship a plugin that adds a 
 Start with:
 
 ```powershell
+dotnet new install ./templates
+dotnet new astergraph-plugin -n GreetingPlugin --PluginId sample.greeting
+
 dotnet add package AsterGraph.Abstractions --prerelease
 dotnet add package AsterGraph.Editor --prerelease
 ```
@@ -34,7 +37,7 @@ public sealed class GreetingPlugin : IGraphEditorPlugin
 
 public sealed class GreetingNodeProvider : INodeDefinitionProvider
 {
-    public IReadOnlyList<NodeDefinition> GetDefinitions()
+    public IReadOnlyList<INodeDefinition> GetNodeDefinitions()
         => [
             new NodeDefinition(
                 new NodeDefinitionId("sample.greeting.node"),
@@ -46,6 +49,15 @@ public sealed class GreetingNodeProvider : INodeDefinitionProvider
         ];
 }
 ```
+
+## Validate It Locally
+
+```powershell
+dotnet build GreetingPlugin/GreetingPlugin.csproj
+dotnet run --project tools/AsterGraph.PluginTool -- validate GreetingPlugin/bin/Debug/net8.0/GreetingPlugin.dll
+```
+
+The validator is a cross-platform CLI. It reports the manifest summary, compatibility status, trust-policy outcome, signature evidence, and SHA-256 hash that a host can use for an allowlist.
 
 ## Register It Directly
 
