@@ -76,7 +76,7 @@ public partial class MainWindowViewModel
         => ExecuteAutomation(new GraphEditorAutomationRunRequest(
             "demo.plugin-showcase",
             [
-                CreateAutomationStep("select-light", "selection.set", ("nodeId", "light"), ("primaryNodeId", "light"), ("updateStatus", "false")),
+                CreateAutomationStep("select-output", "selection.set", ("nodeId", "output"), ("primaryNodeId", "output"), ("updateStatus", "false")),
                 CreateAutomationStep("add-plugin-node", "nodes.add", ("definitionId", "aster.demo.plugin.showcase-node"), ("worldX", "1700"), ("worldY", "220")),
             ],
             mutationLabel: "demo.plugin-showcase"));
@@ -86,7 +86,7 @@ public partial class MainWindowViewModel
         => ExecuteAutomation(new GraphEditorAutomationRunRequest(
             "demo.workspace-proof",
             [
-                CreateAutomationStep("select-source", "selection.set", ("nodeId", "time"), ("primaryNodeId", "time"), ("updateStatus", "false")),
+                CreateAutomationStep("select-output", "selection.set", ("nodeId", "output"), ("primaryNodeId", "output"), ("updateStatus", "false")),
                 CreateAutomationStep("save-workspace", "workspace.save"),
             ],
             mutationLabel: "demo.workspace-proof"));

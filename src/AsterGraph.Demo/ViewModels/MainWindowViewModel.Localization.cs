@@ -15,6 +15,7 @@ internal static class DemoHostMenuGroups
     public const string Runtime = "runtime";
     public const string Extensions = "extensions";
     public const string Automation = "automation";
+    public const string Tour = "tour";
     public const string Integration = "integration";
     public const string Proof = "proof";
 }
@@ -34,6 +35,7 @@ public partial class MainWindowViewModel
         ["menu.runtime"] = "运行时",
         ["menu.extensions"] = "扩展",
         ["menu.automation"] = "自动化",
+        ["menu.tour"] = "导览",
         ["menu.integration"] = "集成",
         ["menu.proof"] = "证明",
         ["menu.language"] = "语言",
@@ -65,6 +67,7 @@ public partial class MainWindowViewModel
         ["menu.automation.runPlugin"] = "运行插件自动化",
         ["menu.automation.runWorkspace"] = "运行工作区自动化",
         ["menu.automation.open"] = "打开自动化面板",
+        ["menu.tour.open"] = "打开场景导览",
         ["menu.integration.consumerPath"] = "查看 consumer path",
         ["menu.integration.standalone"] = "查看独立表面",
         ["menu.proof.boundary"] = "查看宿主边界",
@@ -86,6 +89,12 @@ public partial class MainWindowViewModel
         ["automation.request.heading"] = "自动化请求",
         ["automation.progress.heading"] = "自动化进度",
         ["automation.result.heading"] = "自动化结果",
+        ["tour.heading"] = "场景导览",
+        ["tour.signals.heading"] = "场景证据",
+        ["tour.previous"] = "上一步",
+        ["tour.next"] = "下一步",
+        ["tour.run"] = "运行步骤",
+        ["tour.openRelated"] = "打开相关面板",
         ["integration.consumer.heading"] = "Consumer Path",
         ["integration.standalone.heading"] = "独立表面",
         ["integration.presentation.heading"] = "替换呈现",
@@ -104,6 +113,7 @@ public partial class MainWindowViewModel
         ["menu.runtime"] = "Runtime",
         ["menu.extensions"] = "Extensions",
         ["menu.automation"] = "Automation",
+        ["menu.tour"] = "Tour",
         ["menu.integration"] = "Integration",
         ["menu.proof"] = "Proof",
         ["menu.language"] = "Language",
@@ -135,6 +145,7 @@ public partial class MainWindowViewModel
         ["menu.automation.runPlugin"] = "Run plugin automation",
         ["menu.automation.runWorkspace"] = "Run workspace automation",
         ["menu.automation.open"] = "Open automation panel",
+        ["menu.tour.open"] = "Open guided tour",
         ["menu.integration.consumerPath"] = "View consumer path",
         ["menu.integration.standalone"] = "View standalone surfaces",
         ["menu.proof.boundary"] = "View host boundary",
@@ -156,6 +167,12 @@ public partial class MainWindowViewModel
         ["automation.request.heading"] = "Automation Request",
         ["automation.progress.heading"] = "Automation Progress",
         ["automation.result.heading"] = "Automation Result",
+        ["tour.heading"] = "Scenario Tour",
+        ["tour.signals.heading"] = "Scenario Evidence",
+        ["tour.previous"] = "Previous",
+        ["tour.next"] = "Next",
+        ["tour.run"] = "Run step",
+        ["tour.openRelated"] = "Open related panel",
         ["integration.consumer.heading"] = "Consumer Path",
         ["integration.standalone.heading"] = "Standalone Surfaces",
         ["integration.presentation.heading"] = "Presenter Replacement",
@@ -212,6 +229,7 @@ public partial class MainWindowViewModel
 
         Editor.SetLocalizationProvider(CreateGraphLocalizationProvider(value.Code));
         UpdateCapabilities();
+        UpdateScenarioTour();
         OnPropertyChanged(nameof(UiText));
         OnPropertyChanged(nameof(CurrentLanguageBadgeText));
         RefreshRuntimeProjection();
@@ -240,6 +258,7 @@ public partial class MainWindowViewModel
             DemoHostMenuGroups.Runtime => Text("menu.runtime"),
             DemoHostMenuGroups.Extensions => Text("menu.extensions"),
             DemoHostMenuGroups.Automation => Text("menu.automation"),
+            DemoHostMenuGroups.Tour => Text("menu.tour"),
             DemoHostMenuGroups.Integration => Text("menu.integration"),
             DemoHostMenuGroups.Proof => Text("menu.proof"),
             _ => Text("menu.showcase"),
@@ -261,6 +280,7 @@ public partial class MainWindowViewModel
             DemoHostMenuGroups.Runtime or "运行时" or "Runtime" => DemoHostMenuGroups.Runtime,
             DemoHostMenuGroups.Extensions or "扩展" or "Extensions" => DemoHostMenuGroups.Extensions,
             DemoHostMenuGroups.Automation or "自动化" or "Automation" => DemoHostMenuGroups.Automation,
+            DemoHostMenuGroups.Tour or "导览" or "Tour" => DemoHostMenuGroups.Tour,
             DemoHostMenuGroups.Integration or "集成" or "Integration" => DemoHostMenuGroups.Integration,
             DemoHostMenuGroups.Proof or "证明" or "Proof" => DemoHostMenuGroups.Proof,
             _ => DemoHostMenuGroups.Showcase,

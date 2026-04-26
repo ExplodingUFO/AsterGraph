@@ -161,6 +161,7 @@ public partial class MainWindowViewModel
         OnPropertyChanged(nameof(IsRuntimeHostGroupSelected));
         OnPropertyChanged(nameof(IsExtensionsHostGroupSelected));
         OnPropertyChanged(nameof(IsAutomationHostGroupSelected));
+        OnPropertyChanged(nameof(IsTourHostGroupSelected));
         OnPropertyChanged(nameof(IsIntegrationHostGroupSelected));
         OnPropertyChanged(nameof(IsProofHostGroupSelected));
         OnPropertyChanged(nameof(ActiveHostGroupBadgeText));
@@ -211,6 +212,7 @@ public partial class MainWindowViewModel
         OnPropertyChanged(nameof(RuntimeHasPendingConnection));
         OnPropertyChanged(nameof(CompatibilityStatusMessage));
         OnPropertyChanged(nameof(MainEditorSummary));
+        RefreshScenarioTourProjection();
     }
 
     private RuntimeInspectionSurfaceProjection BuildRuntimeInspectionSurface()

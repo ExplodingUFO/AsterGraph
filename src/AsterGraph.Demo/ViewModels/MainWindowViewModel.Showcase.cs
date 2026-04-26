@@ -28,6 +28,8 @@ public partial class MainWindowViewModel
 
     public bool IsAutomationHostGroupSelected => SelectedHostMenuGroup == DemoHostMenuGroups.Automation;
 
+    public bool IsTourHostGroupSelected => SelectedHostMenuGroup == DemoHostMenuGroups.Tour;
+
     public bool IsIntegrationHostGroupSelected => SelectedHostMenuGroup == DemoHostMenuGroups.Integration;
 
     public bool IsProofHostGroupSelected => SelectedHostMenuGroup == DemoHostMenuGroups.Proof;
@@ -130,6 +132,9 @@ public partial class MainWindowViewModel
         DemoHostMenuGroups.Automation => T(
             "自动化面板提供可直接执行的 canned run，并把 request、step progress 和 result snapshot 连到同一会话上。",
             "The automation panel provides runnable canned flows and projects request, step progress, and result snapshots back onto the same session."),
+        DemoHostMenuGroups.Tour => T(
+            "场景导览把 AI pipeline 的节点、参数、连接、插件信任、自动化、保存和导出证据收敛到一个可执行流程。",
+            "The scenario tour ties the AI pipeline nodes, parameters, connections, plugin trust, automation, save, and export evidence into one runnable flow."),
         DemoHostMenuGroups.Integration => T(
             "集成面板同时说明 HostSample 的最小 consumer path，并展示独立表面、presenter replacement 和本地化证明。",
             "The integration panel explains HostSample as the minimal consumer path and shows standalone surfaces, presenter replacement, and localization proof together."),
@@ -184,6 +189,12 @@ public partial class MainWindowViewModel
         [
             .. AutomationRequestLines,
             .. AutomationResultLines,
+        ],
+        DemoHostMenuGroups.Tour =>
+        [
+            ScenarioTourProgressText,
+            SelectedScenarioTourStep.Summary,
+            .. ScenarioTourSignalLines,
         ],
         DemoHostMenuGroups.Integration =>
         [

@@ -24,6 +24,7 @@ When the demo runs in English:
 - `Runtime`
 - `Extensions`
 - `Automation`
+- `Tour`
 - `Integration`
 - `Proof`
 
@@ -35,6 +36,7 @@ When the demo runs in Chinese:
 - `运行时`
 - `扩展`
 - `自动化`
+- `导览`
 - `集成`
 - `证明`
 
@@ -68,6 +70,8 @@ Expected proof markers:
 
 ## How to Read It
 
+- Launch the prebuilt AI workflow with `dotnet run --project src/AsterGraph.Demo -- --scenario ai-pipeline`, then open `Tour`.
+- `Tour` walks the same scenario through node creation, typed connection, parameter edit, plugin trust, automation, save/load, and SVG export.
 - `Extensions` proves candidate discovery, trust decisions, load snapshots, and persisted allowlist decisions.
 - `Automation` proves typed execution and result projection.
 - `Integration` points to `HostSample`, renders standalone surfaces, and shows presenter-replacement previews.

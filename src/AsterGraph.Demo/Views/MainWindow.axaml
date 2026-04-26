@@ -133,6 +133,12 @@
                       Command="{Binding OpenHostMenuGroupCommand}"
                       CommandParameter="automation" />
           </MenuItem>
+          <MenuItem x:Name="PART_TourMenu"
+                    Header="{Binding UiText[menu.tour]}">
+            <MenuItem Header="{Binding UiText[menu.tour.open]}"
+                      Command="{Binding OpenHostMenuGroupCommand}"
+                      CommandParameter="tour" />
+          </MenuItem>
           <MenuItem x:Name="PART_IntegrationMenu"
                     Header="{Binding UiText[menu.integration]}">
             <MenuItem Header="{Binding UiText[menu.integration.consumerPath]}"
@@ -768,6 +774,118 @@
                              Foreground="#7FE7D7"
                              Text="{Binding UiText[automation.result.heading]}" />
                   <ItemsControl ItemsSource="{Binding AutomationResultLines}"
+                                ItemTemplate="{StaticResource HostDrawerLineTemplate}" />
+                </StackPanel>
+
+                <StackPanel x:Name="PART_ScenarioTourDrawerSection"
+                            Spacing="8"
+                            IsVisible="{Binding IsTourHostGroupSelected}">
+                  <TextBlock x:Name="PART_ScenarioTourHeading"
+                             FontSize="12"
+                             FontWeight="Bold"
+                             Foreground="#7FE7D7"
+                             Text="{Binding UiText[tour.heading]}" />
+                  <Border Padding="12"
+                          Background="#14202B"
+                          BorderBrush="#365063"
+                          BorderThickness="1"
+                          CornerRadius="8">
+                    <StackPanel Spacing="8">
+                      <TextBlock x:Name="PART_ScenarioTourProgressText"
+                                 FontSize="12"
+                                 FontWeight="Bold"
+                                 Foreground="#7FE7D7"
+                                 Text="{Binding ScenarioTourProgressText}" />
+                      <TextBlock x:Name="PART_ScenarioTourStepTitle"
+                                 FontSize="16"
+                                 FontWeight="SemiBold"
+                                 Foreground="#F4FFFC"
+                                 Text="{Binding SelectedScenarioTourStep.Title}" />
+                      <TextBlock x:Name="PART_ScenarioTourStepSummary"
+                                 TextWrapping="Wrap"
+                                 Foreground="#C2D7E4"
+                                 Text="{Binding SelectedScenarioTourStep.Summary}" />
+                      <WrapPanel Orientation="Horizontal"
+                                 ItemHeight="40"
+                                 ItemWidth="146">
+                        <Button x:Name="PART_ScenarioTourPreviousButton"
+                                Padding="10,8"
+                                Background="#101923"
+                                BorderBrush="#365063"
+                                BorderThickness="1"
+                                CornerRadius="8"
+                                Command="{Binding PreviousScenarioTourStepCommand}"
+                                Content="{Binding UiText[tour.previous]}"
+                                Foreground="#F4FFFC" />
+                        <Button x:Name="PART_ScenarioTourNextButton"
+                                Padding="10,8"
+                                Background="#101923"
+                                BorderBrush="#365063"
+                                BorderThickness="1"
+                                CornerRadius="8"
+                                Command="{Binding NextScenarioTourStepCommand}"
+                                Content="{Binding UiText[tour.next]}"
+                                Foreground="#F4FFFC" />
+                        <Button x:Name="PART_ScenarioTourRunStepButton"
+                                Padding="10,8"
+                                Background="#101923"
+                                BorderBrush="#7FE7D7"
+                                BorderThickness="1"
+                                CornerRadius="8"
+                                Command="{Binding RunSelectedScenarioTourStepCommand}"
+                                Content="{Binding UiText[tour.run]}"
+                                Foreground="#F4FFFC" />
+                        <Button x:Name="PART_ScenarioTourRelatedPanelButton"
+                                Padding="10,8"
+                                Background="#101923"
+                                BorderBrush="#365063"
+                                BorderThickness="1"
+                                CornerRadius="8"
+                                Command="{Binding OpenSelectedScenarioTourStepPanelCommand}"
+                                Content="{Binding UiText[tour.openRelated]}"
+                                Foreground="#F4FFFC" />
+                      </WrapPanel>
+                      <TextBlock x:Name="PART_ScenarioTourActionResultText"
+                                 TextWrapping="Wrap"
+                                 Foreground="#B6CBD8"
+                                 Text="{Binding LastScenarioTourActionResult}" />
+                    </StackPanel>
+                  </Border>
+
+                  <ItemsControl x:Name="PART_ScenarioTourStepItems"
+                                ItemsSource="{Binding ScenarioTourSteps}">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate x:DataType="vm:ScenarioTourStep">
+                        <Button Margin="0,0,0,8"
+                                Padding="10,8"
+                                HorizontalAlignment="Stretch"
+                                Background="#14202B"
+                                BorderBrush="#365063"
+                                BorderThickness="1"
+                                CornerRadius="8"
+                                Command="{Binding $parent[Window].DataContext.SelectScenarioTourStepCommand}"
+                                CommandParameter="{Binding}"
+                                Foreground="#F4FFFC">
+                          <StackPanel Spacing="4">
+                            <TextBlock FontSize="13"
+                                       FontWeight="SemiBold"
+                                       Foreground="#F4FFFC"
+                                       Text="{Binding Title}" />
+                            <TextBlock TextWrapping="Wrap"
+                                       Foreground="#B6CBD8"
+                                       Text="{Binding Summary}" />
+                          </StackPanel>
+                        </Button>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+
+                  <TextBlock FontSize="12"
+                             FontWeight="Bold"
+                             Foreground="#7FE7D7"
+                             Text="{Binding UiText[tour.signals.heading]}" />
+                  <ItemsControl x:Name="PART_ScenarioTourSignalLines"
+                                ItemsSource="{Binding ScenarioTourSignalLines}"
                                 ItemTemplate="{StaticResource HostDrawerLineTemplate}" />
                 </StackPanel>
 

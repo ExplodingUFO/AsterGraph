@@ -24,6 +24,7 @@
 - `Runtime`
 - `Extensions`
 - `Automation`
+- `Tour`
 - `Integration`
 - `Proof`
 
@@ -35,6 +36,7 @@
 - `运行时`
 - `扩展`
 - `自动化`
+- `导览`
 - `集成`
 - `证明`
 
@@ -68,6 +70,8 @@ dotnet run --project src/AsterGraph.Demo/AsterGraph.Demo.csproj --nologo -- --pr
 
 ## 怎么看
 
+- 用 `dotnet run --project src/AsterGraph.Demo -- --scenario ai-pipeline` 启动预置 AI workflow，然后打开 `导览`。
+- `导览` 会沿同一个场景走过创建节点、typed connection、参数编辑、插件信任、自动化、保存 / 加载和 SVG 导出。
 - `扩展`：看 candidate discovery、trust decision、load snapshot 和 allowlist 决策
 - `自动化`：看 typed automation execution 与结果投影
 - `集成`：看 `HostSample`、standalone surfaces、presenter replacement、本地化证明

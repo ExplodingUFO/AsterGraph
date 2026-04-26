@@ -115,6 +115,71 @@ public sealed class DemoCapabilityShowcaseTests
     }
 
     [Fact]
+    public void MainWindowViewModel_ExposesScenarioTourForAiPipelineCapabilities()
+    {
+        var viewModel = new MainWindowViewModel(new MainWindowShellOptions(
+            StorageRootPath: CreateTempDirectory(),
+            EnableStatePersistence: true,
+            RestoreLastWorkspaceOnStartup: false,
+            InitialScenario: DemoGraphFactory.AiPipelineScenario));
+
+        Assert.Equal(6, viewModel.ScenarioTourSteps.Count);
+        Assert.Contains(viewModel.ScenarioTourSteps, step => step.Key == "create-node");
+        Assert.Contains(viewModel.ScenarioTourSteps, step => step.Key == "connect-ports");
+        Assert.Contains(viewModel.ScenarioTourSteps, step => step.Key == "edit-parameters");
+        Assert.Contains(viewModel.ScenarioTourSteps, step => step.Key == "trust-plugin");
+        Assert.Contains(viewModel.ScenarioTourSteps, step => step.Key == "run-automation");
+        Assert.Contains(viewModel.ScenarioTourSteps, step => step.Key == "save-and-export");
+        Assert.Contains(viewModel.ScenarioTourSignalLines, line => line.Contains("Custom nodes", StringComparison.OrdinalIgnoreCase) || line.Contains("自定义节点", StringComparison.Ordinal));
+        Assert.Contains(viewModel.ScenarioTourSignalLines, line => line.Contains("Connection validation", StringComparison.OrdinalIgnoreCase) || line.Contains("连接校验", StringComparison.Ordinal));
+        Assert.Contains(viewModel.ScenarioTourSignalLines, line => line.Contains("Parameter editing", StringComparison.OrdinalIgnoreCase) || line.Contains("参数编辑", StringComparison.Ordinal));
+        Assert.Contains(viewModel.ScenarioTourSignalLines, line => line.Contains("Plugin trust", StringComparison.OrdinalIgnoreCase) || line.Contains("插件信任", StringComparison.Ordinal));
+        Assert.Contains(viewModel.ScenarioTourSignalLines, line => line.Contains("Automation proof", StringComparison.OrdinalIgnoreCase) || line.Contains("自动化证明", StringComparison.Ordinal));
+        Assert.Contains(viewModel.ScenarioTourSignalLines, line => line.Contains("Save / load", StringComparison.OrdinalIgnoreCase) || line.Contains("保存 / 加载", StringComparison.Ordinal));
+        Assert.Contains(viewModel.ScenarioTourSignalLines, line => line.Contains("Export", StringComparison.OrdinalIgnoreCase) || line.Contains("导出", StringComparison.Ordinal));
+
+        viewModel.OpenHostMenuGroup("导览");
+
+        Assert.True(viewModel.IsTourHostGroupSelected);
+    }
+
+    [Fact]
+    public void MainWindowViewModel_RunsScenarioTourActionsAndProducesProofArtifacts()
+    {
+        var storageRoot = CreateTempDirectory();
+        var viewModel = new MainWindowViewModel(new MainWindowShellOptions(
+            StorageRootPath: storageRoot,
+            EnableStatePersistence: true,
+            RestoreLastWorkspaceOnStartup: false,
+            InitialScenario: DemoGraphFactory.AiPipelineScenario));
+        var initialDocument = viewModel.Session.Queries.CreateDocumentSnapshot();
+
+        foreach (var step in viewModel.ScenarioTourSteps)
+        {
+            viewModel.RunScenarioTourStep(step.Key);
+        }
+
+        var document = viewModel.Session.Queries.CreateDocumentSnapshot();
+        var prompt = Assert.Single(document.Nodes, node => node.Id == "prompt");
+        var workspacePath = Path.Combine(storageRoot, "scenario-tour-workspace.json");
+        var exportPath = Path.Combine(storageRoot, "scenario-tour-export.svg");
+
+        Assert.True(document.Nodes.Count > initialDocument.Nodes.Count);
+        Assert.True(document.Connections.Count > initialDocument.Connections.Count);
+        Assert.Contains(
+            prompt.ParameterValues ?? [],
+            parameter => parameter.Key == "systemPrompt" &&
+                parameter.Value?.ToString()?.Contains("AsterGraph tour agent", StringComparison.Ordinal) == true);
+        Assert.Contains(viewModel.PluginCandidateEntries, entry => entry.PluginId == "aster.demo.plugin.blocked" && entry.IsAllowed);
+        Assert.NotNull(viewModel.LastAutomationResult);
+        Assert.True(viewModel.LastAutomationResult!.Succeeded);
+        Assert.True(File.Exists(workspacePath));
+        Assert.True(File.Exists(exportPath));
+        Assert.Contains(viewModel.ScenarioTourSignalLines, line => line.Contains(workspacePath, StringComparison.Ordinal));
+        Assert.Contains(viewModel.ScenarioTourSignalLines, line => line.Contains(exportPath, StringComparison.Ordinal));
+    }
+
+    [Fact]
     public void DemoProof_Run_EmitsMetricsAndGreenMarkers()
     {
         var result = DemoProof.Run(CreateTempDirectory());
@@ -161,6 +226,7 @@ public sealed class DemoCapabilityShowcaseTests
 
         Assert.NotNull(window.FindControl<MenuItem>("PART_ExtensionsMenu"));
         Assert.NotNull(window.FindControl<MenuItem>("PART_AutomationMenu"));
+        Assert.NotNull(window.FindControl<MenuItem>("PART_TourMenu"));
         Assert.NotNull(window.FindControl<MenuItem>("PART_IntegrationMenu"));
         Assert.NotNull(window.FindControl<ContentControl>("PART_MainGraphEditorHost"));
         Assert.NotNull(window.FindControl<ContentControl>("PART_StandaloneCanvasHost"));
@@ -168,6 +234,37 @@ public sealed class DemoCapabilityShowcaseTests
         Assert.NotNull(window.FindControl<ContentControl>("PART_StandaloneMiniMapHost"));
         Assert.NotNull(window.FindControl<ContentControl>("PART_CustomInspectorHost"));
         Assert.NotNull(window.FindControl<ContentControl>("PART_CustomMiniMapHost"));
+    }
+
+    [AvaloniaFact]
+    public void MainWindow_RendersScenarioTourDrawerControls()
+    {
+        var viewModel = new MainWindowViewModel(new MainWindowShellOptions(
+            StorageRootPath: CreateTempDirectory(),
+            EnableStatePersistence: true,
+            RestoreLastWorkspaceOnStartup: false,
+            InitialScenario: DemoGraphFactory.AiPipelineScenario));
+        var window = new MainWindow
+        {
+            DataContext = viewModel,
+        };
+
+        window.Show();
+        viewModel.OpenHostMenuGroup("导览");
+
+        Assert.True(viewModel.IsTourHostGroupSelected);
+        Assert.NotNull(window.FindControl<StackPanel>("PART_ScenarioTourDrawerSection"));
+        Assert.NotNull(window.FindControl<TextBlock>("PART_ScenarioTourHeading"));
+        Assert.NotNull(window.FindControl<TextBlock>("PART_ScenarioTourStepTitle"));
+        Assert.NotNull(window.FindControl<Button>("PART_ScenarioTourRunStepButton"));
+        Assert.NotNull(window.FindControl<Button>("PART_ScenarioTourRelatedPanelButton"));
+        Assert.Same(
+            viewModel.ScenarioTourSteps,
+            window.FindControl<ItemsControl>("PART_ScenarioTourStepItems")?.ItemsSource);
+        Assert.Equal(
+            viewModel.ScenarioTourSignalLines,
+            Assert.IsAssignableFrom<IEnumerable<string>>(
+                window.FindControl<ItemsControl>("PART_ScenarioTourSignalLines")?.ItemsSource));
     }
 
     [AvaloniaFact]

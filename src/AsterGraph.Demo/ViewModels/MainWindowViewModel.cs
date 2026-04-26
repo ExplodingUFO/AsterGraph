@@ -128,6 +128,7 @@ public partial class MainWindowViewModel : ViewModelBase
         Editor.ViewportChanged += (_, _) => PersistShellState();
 
         UpdateCapabilities();
+        UpdateScenarioTour();
         SelectedCapability = Capabilities[0];
         InitializeShellState();
         ApplyHostOptions(status: null);
