@@ -2,10 +2,10 @@
 
 ## Current Position
 
-Phase: 287 Scenario Capability Story And Guided Tour
+Phase: 288 Five-Minute Onboarding And ConsumerSample Scenario
 Plan: —
-Status: Phase 286 complete; ready to plan Phase 287
-Last activity: 2026-04-26 — completed Phase 286 README First View And Scenario Demo Launch
+Status: Phase 287 complete; ready to plan Phase 288
+Last activity: 2026-04-26 — completed Phase 287 Scenario Capability Story And Guided Tour
 
 ## Project Reference
 
@@ -22,6 +22,7 @@ See: `.planning/PROJECT.md`
 - The milestone has 5 phases (285–289) and 18 mapped requirements.
 - Phase 285 added a public versioning validation script, wired it into release validation, and tightened bilingual version/release wording.
 - Phase 286 added the README first-view AI pipeline visual plus `--scenario ai-pipeline` Demo launch path.
+- Phase 287 added the in-Demo Scenario Tour covering custom nodes, typed connections, parameters, plugin trust, automation, save/load, and export.
 - Runtime architecture rewrites, WPF parity, defended 5000-node budgets, and plugin marketplace/template expansion remain deferred.
 
 ## Deferred Items
@@ -40,4 +41,4 @@ Items acknowledged and still deferred:
 | intake | POLISH-01: real adopter friction fixes (requires ≥2 external reports on same docs page) | deferred |
 
 ---
-*Last updated: 2026-04-26 after completing Phase 286*
+*Last updated: 2026-04-26 after completing Phase 287*

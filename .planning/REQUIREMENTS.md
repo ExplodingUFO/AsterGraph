@@ -9,8 +9,8 @@
 
 - [x] **DEMO-01**: External evaluator can understand AsterGraph from the README first viewport through one concrete visual that shows drag, connect, parameter editing, automation, and export in a real graph scenario.
 - [x] **DEMO-02**: External evaluator can launch a prebuilt scenario demo from the Demo host without starting from a blank canvas.
-- [ ] **DEMO-03**: The scenario demo exercises custom nodes, parameter editing, connection validation, plugin/trust visibility, save/load, automation/proof output, and export from one coherent product story.
-- [ ] **DEMO-04**: The Demo host exposes a guided tour or equivalent scenario flow that walks through creating nodes, connecting them, editing parameters, loading plugin content, and exporting output.
+- [x] **DEMO-03**: The scenario demo exercises custom nodes, parameter editing, connection validation, plugin/trust visibility, save/load, automation/proof output, and export from one coherent product story.
+- [x] **DEMO-04**: The Demo host exposes a guided tour or equivalent scenario flow that walks through creating nodes, connecting them, editing parameters, loading plugin content, and exporting output.
 
 ### Version and Release Clarity
 
@@ -81,8 +81,8 @@ Deferred to future milestones after the productized adoption path is coherent.
 | PROOF-03 | Phase 285 | Complete |
 | DEMO-01 | Phase 286 | Complete |
 | DEMO-02 | Phase 286 | Complete |
-| DEMO-03 | Phase 287 | Pending |
-| DEMO-04 | Phase 287 | Pending |
+| DEMO-03 | Phase 287 | Complete |
+| DEMO-04 | Phase 287 | Complete |
 | ONB-01 | Phase 288 | Pending |
 | ONB-02 | Phase 288 | Pending |
 | ONB-03 | Phase 288 | Pending |
