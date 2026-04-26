@@ -27,6 +27,8 @@ public sealed class ConsumerSampleHost : IDisposable
     private const string ReviewAuditPortId = "audit";
     private const string PluginId = "consumer.sample.audit-plugin";
     public const string PluginCommandId = "consumer.sample.plugin.add-audit-node";
+    public const string ScenarioId = "content-review-release-lane";
+    public const string ScenarioTitle = "Content Review Release Lane";
     internal static readonly GraphSize ReviewNodeDefaultSize = new(320, 220);
     private readonly GraphEditorViewModel _editor;
     private readonly ConsumerSamplePluginAllowlistTrustPolicy _trustPolicy;
@@ -90,6 +92,14 @@ public sealed class ConsumerSampleHost : IDisposable
 
     public string TrustBoundaryText =>
         "Plugins run in-process. This sample surfaces provenance, trusted/blocked reasons, and persisted allowlist import/export. It does not sandbox plugin code.";
+
+    public IReadOnlyList<string> OnboardingCopyPathLines =>
+    [
+        "Starter.Avalonia: copy the document/catalog/editor/view composition.",
+        "HelloWorld.Avalonia: confirm the smallest hosted shell.",
+        "ConsumerSample.Avalonia: copy host-owned actions, selected-parameter editing, plugin trust, and proof markers.",
+        "Demo: inspect the full showcase after the host seam is already clear.",
+    ];
 
     public string PluginAllowlistExchangePath
         => Path.Combine(_storageRootPath, "plugin-allowlist-export.json");
@@ -231,8 +241,8 @@ public sealed class ConsumerSampleHost : IDisposable
 
     private static GraphDocument CreateDocument()
         => new(
-            "Consumer Sample Graph",
-            "A realistic hosted-UI sample with host actions, custom nodes, and one trusted plugin.",
+            ScenarioTitle,
+            "A realistic hosted-UI content-review scenario with host actions, custom nodes, and one trusted audit plugin.",
             [
                 new GraphNode(
                     InitialReviewNodeId,

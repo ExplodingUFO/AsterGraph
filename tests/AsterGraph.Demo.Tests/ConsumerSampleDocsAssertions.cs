@@ -29,6 +29,11 @@ internal static class ConsumerSampleDocsAssertions
         Assert.Contains("HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("HOSTED_ACCESSIBILITY_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("WIDENED_SURFACE_PERFORMANCE_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("CONSUMER_SAMPLE_SCENARIO_GRAPH_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("CONSUMER_SAMPLE_HOST_OWNED_ACTIONS_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("CONSUMER_SAMPLE_SUPPORT_BUNDLE_READY_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("FIVE_MINUTE_ONBOARDING_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("ONBOARDING_CONFIGURATION_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("SUPPORT_BUNDLE_PERSISTENCE_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("HOST_NATIVE_METRIC:startup_ms", contents, StringComparison.Ordinal);
         Assert.Contains("HOST_NATIVE_METRIC:inspector_projection_ms", contents, StringComparison.Ordinal);

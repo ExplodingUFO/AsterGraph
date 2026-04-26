@@ -1,7 +1,7 @@
 # AsterGraph.ConsumerSample.Avalonia
 
 This is the medium hosted-UI sample on the canonical session/runtime route, after `AsterGraph.Starter.Avalonia` and `AsterGraph.HelloWorld.Avalonia`, and before `AsterGraph.Demo`.
-It shows a host-owned action rail, plugin trust workflow, and the selected-node parameter read/write seam without implying a second editor model, a sandbox, or a broader plugin ecosystem.
+It opens the `Content Review Release Lane` scenario graph and shows a host-owned action rail, plugin trust workflow, support-bundle proof path, and the selected-node parameter read/write seam without implying a second editor model, a sandbox, or a broader plugin ecosystem.
 For plugin-capable evaluators, this is the defended hosted trust hop. Read [Plugin Manifest and Trust Policy Contract v1](../../docs/en/plugin-trust-contracts.md) and [Plugin And Custom Node Recipe](../../docs/en/plugin-recipe.md) before treating the route as complete.
 
 For the inspector metadata recipe, pair this sample with [Authoring Inspector Recipe](../../docs/en/authoring-inspector-recipe.md). The sample stays focused on the host-owned seams and the shipped inspector surface; it does not own the metadata vocabulary. The canonical recipe carries the full `defaultValue`, `isAdvanced`, `helpText`, `placeholderText`, and read-only vocabulary.
@@ -11,6 +11,13 @@ For one copyable hosted tuning handoff that keeps those widened surfaces tied to
 For one copyable hosted keyboard, focus, and accessibility handoff on the same route, pair it with [Hosted Accessibility Recipe](../../docs/en/hosted-accessibility-recipe.md).
 
 The hosted route ladder is `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerSample.Avalonia`.
+
+Five-minute hosted handoff:
+
+1. Run `tools/AsterGraph.Starter.Avalonia` to copy the document/catalog/editor/view composition.
+2. Run `tools/AsterGraph.HelloWorld.Avalonia` to confirm the smallest hosted shell.
+3. Run this sample to inspect the review-to-queue scenario graph, host actions, selected-parameter editor, and trusted audit plugin.
+4. Run proof mode with `--support-bundle` before copying the same seams into your own host.
 
 ## Run
 
@@ -56,6 +63,11 @@ Expected proof markers:
 - `HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True`
 - `HOSTED_ACCESSIBILITY_OK:True`
 - `WIDENED_SURFACE_PERFORMANCE_OK:True`
+- `CONSUMER_SAMPLE_SCENARIO_GRAPH_OK:True`
+- `CONSUMER_SAMPLE_HOST_OWNED_ACTIONS_OK:True`
+- `CONSUMER_SAMPLE_SUPPORT_BUNDLE_READY_OK:True`
+- `FIVE_MINUTE_ONBOARDING_OK:True`
+- `ONBOARDING_CONFIGURATION_OK:True`
 - `HOST_NATIVE_METRIC:startup_ms=...`
 - `HOST_NATIVE_METRIC:inspector_projection_ms=...`
 - `HOST_NATIVE_METRIC:plugin_scan_ms=...`
@@ -72,6 +84,7 @@ Expected bundle markers when `--support-bundle <support-bundle-path>` is supplie
 - `SUPPORT_BUNDLE_PERSISTENCE_OK:True`
 - `SUPPORT_BUNDLE_OK:True`
 - `SUPPORT_BUNDLE_PATH:...`
+- `CONSUMER_SAMPLE_SUPPORT_BUNDLE_READY_OK:True`
 - `CONSUMER_SAMPLE_OK:True`
 
 ## Trust and proof quick reference

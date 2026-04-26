@@ -44,6 +44,7 @@ dotnet run --project src/AsterGraph.Demo -- --scenario ai-pipeline
 | 想验证打包消费或维护发布 | [CONTRIBUTING.md](./CONTRIBUTING.md) 和 [Public Launch Checklist](./docs/zh-CN/public-launch-checklist.md) | proof lanes、CI 和 release 流程 |
 
 这条 hosted route ladder 是 `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerSample.Avalonia`。
+五分钟 hosted 复制路径：先跑 starter 脚手架，再用 `ConsumerSample.Avalonia -- --proof --support-bundle <path>` 验证，最后再看完整 Demo。
 
 ## 从 NuGet 安装
 

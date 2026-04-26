@@ -1,6 +1,6 @@
 # Consumer Sample
 
-`tools/AsterGraph.ConsumerSample.Avalonia` is the medium hosted-UI sample on the canonical session/runtime route, after the starter scaffold and the smallest `HelloWorld.Avalonia` route, and before the full `AsterGraph.Demo` showcase host.
+`tools/AsterGraph.ConsumerSample.Avalonia` is the medium hosted-UI sample on the canonical session/runtime route, after the starter scaffold and the smallest `HelloWorld.Avalonia` route, and before the full `AsterGraph.Demo` showcase host. It opens the `Content Review Release Lane` scenario graph by default.
 For trust-policy review and local evidence, pair this route with [Plugin Manifest and Trust Policy Contract v1](./plugin-trust-contracts.md) and [Beta Support Bundle](./support-bundle.md).
 
 It is the host seam example for three host-owned seams:
@@ -31,6 +31,7 @@ This sample keeps one realistic host window without turning into a full showcase
 - one plugin-contributed command flowing through the same action path instead of a sample-only menu placeholder
 - one selected-node parameter read/write seam through `IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()` and `IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)`
 - one trusted plugin registration with visible provenance, trust reasons, and allowlist import or export
+- one support-bundle proof path with onboarding markers for the scenario graph, host-owned actions, support-bundle payload readiness, and five-minute handoff health
 - the shipped Avalonia editor surface on the factory-based hosted-UI route
 
 ## Copy These Host-Owned Seams
@@ -111,6 +112,11 @@ Expected proof markers:
 - `HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True`
 - `HOSTED_ACCESSIBILITY_OK:True`
 - `WIDENED_SURFACE_PERFORMANCE_OK:True`
+- `CONSUMER_SAMPLE_SCENARIO_GRAPH_OK:True`
+- `CONSUMER_SAMPLE_HOST_OWNED_ACTIONS_OK:True`
+- `CONSUMER_SAMPLE_SUPPORT_BUNDLE_READY_OK:True`
+- `FIVE_MINUTE_ONBOARDING_OK:True`
+- `ONBOARDING_CONFIGURATION_OK:True`
 - `AUTHORING_SURFACE_OK:True`
 - `COMMAND_SURFACE_OK:True`
 - `HOST_NATIVE_METRIC:*`
@@ -120,6 +126,7 @@ Expected bundle markers when `--support-bundle <support-bundle-path>` is supplie
 - `SUPPORT_BUNDLE_PERSISTENCE_OK:True`
 - `SUPPORT_BUNDLE_OK:True`
 - `SUPPORT_BUNDLE_PATH:...`
+- `CONSUMER_SAMPLE_SUPPORT_BUNDLE_READY_OK:True`
 
 This quick reference is summary-only; Proof Handoff owns the actual intake instructions.
 The support bundle stays local evidence only and does not widen the support boundary.
@@ -184,6 +191,11 @@ Expected proof markers:
 - `HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True`
 - `HOSTED_ACCESSIBILITY_OK:True`
 - `WIDENED_SURFACE_PERFORMANCE_OK:True`
+- `CONSUMER_SAMPLE_SCENARIO_GRAPH_OK:True`
+- `CONSUMER_SAMPLE_HOST_OWNED_ACTIONS_OK:True`
+- `CONSUMER_SAMPLE_SUPPORT_BUNDLE_READY_OK:True`
+- `FIVE_MINUTE_ONBOARDING_OK:True`
+- `ONBOARDING_CONFIGURATION_OK:True`
 - `HOST_NATIVE_METRIC:startup_ms=...`
 - `HOST_NATIVE_METRIC:inspector_projection_ms=...`
 - `HOST_NATIVE_METRIC:plugin_scan_ms=...`
@@ -200,6 +212,7 @@ Expected bundle markers when `--support-bundle <support-bundle-path>` is supplie
 - `SUPPORT_BUNDLE_PERSISTENCE_OK:True`
 - `SUPPORT_BUNDLE_OK:True`
 - `SUPPORT_BUNDLE_PATH:...`
+- `CONSUMER_SAMPLE_SUPPORT_BUNDLE_READY_OK:True`
 - `CONSUMER_SAMPLE_OK:True`
 
 ## When To Use This Sample
@@ -238,6 +251,7 @@ If you want to build the same medium host in your own app, copy these seams in t
 - proof mode: emit the `AUTHORING_SURFACE_*` markers, `COMMAND_SURFACE_OK`, and the widened `HOST_NATIVE_METRIC:*` lines so you can compare your host with the shipped samples and keep the defended large-tier contract in view through `ScaleSmoke`
 - widened hosted tuning: emit `WIDENED_SURFACE_PERFORMANCE_OK:True` and reuse [Widened Surface Performance Recipe](./widened-surface-performance-recipe.md) so the hosted metrics stay tied to `ScaleSmoke`
 - capability breadth: pair the same route with [Capability Breadth Recipe](./capability-breadth-recipe.md) and emit the `CAPABILITY_BREADTH_*` markers from `AsterGraph.ConsumerSample.Avalonia -- --proof`
+- onboarding markers: keep `CONSUMER_SAMPLE_SCENARIO_GRAPH_OK:True`, `CONSUMER_SAMPLE_HOST_OWNED_ACTIONS_OK:True`, `CONSUMER_SAMPLE_SUPPORT_BUNDLE_READY_OK:True`, `FIVE_MINUTE_ONBOARDING_OK:True`, and `ONBOARDING_CONFIGURATION_OK:True`
 - sample-owned content such as the review/audit node family, action ids and titles, and proof labels beyond the defended markers should stay local to your app
 
 ## Related Docs

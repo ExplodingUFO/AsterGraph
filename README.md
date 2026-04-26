@@ -44,6 +44,7 @@ dotnet run --project src/AsterGraph.Demo -- --scenario ai-pipeline
 | validate packed consumption or maintain releases | [Contributing](./CONTRIBUTING.md) and [Public Launch Checklist](./docs/en/public-launch-checklist.md) | proof lanes, CI, and release flow |
 
 The hosted route ladder is `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerSample.Avalonia`.
+For a five-minute hosted copy path, run the starter scaffold first, then validate `ConsumerSample.Avalonia -- --proof --support-bundle <path>` before moving to the full Demo.
 
 ## Install From NuGet
 

@@ -52,7 +52,11 @@ public sealed record ConsumerSampleProofResult(
     IReadOnlyList<string>? FeatureDescriptorIds = null,
     IReadOnlyList<string>? RecentDiagnosticCodes = null,
     bool HostedAutomationNavigationOk = true,
-    bool HostedAuthoringAutomationDiagnosticsOk = true)
+    bool HostedAuthoringAutomationDiagnosticsOk = true,
+    bool ScenarioGraphOk = true,
+    bool HostOwnedActionsOk = true,
+    bool SupportBundlePayloadOk = true,
+    bool FiveMinuteOnboardingOk = true)
 {
     public bool AuthoringSurfaceOk
         => ParameterProjectionOk
@@ -86,7 +90,11 @@ public sealed record ConsumerSampleProofResult(
         && HostedAccessibilityAutomationOk;
 
     public bool OnboardingConfigurationOk
-        => NodeCount > 0
+        => ScenarioGraphOk
+        && HostOwnedActionsOk
+        && SupportBundlePayloadOk
+        && FiveMinuteOnboardingOk
+        && NodeCount > 0
         && (FeatureDescriptorIds?.Count > 0);
 
     public bool IsOk
@@ -141,6 +149,10 @@ public sealed record ConsumerSampleProofResult(
         $"HOSTED_ACCESSIBILITY_OK:{HostedAccessibilityOk}",
         $"WIDENED_SURFACE_PERFORMANCE_OK:{WidenedSurfacePerformanceOk}",
         .. MetricLines,
+        $"CONSUMER_SAMPLE_SCENARIO_GRAPH_OK:{ScenarioGraphOk}",
+        $"CONSUMER_SAMPLE_HOST_OWNED_ACTIONS_OK:{HostOwnedActionsOk}",
+        $"CONSUMER_SAMPLE_SUPPORT_BUNDLE_READY_OK:{SupportBundlePayloadOk}",
+        $"FIVE_MINUTE_ONBOARDING_OK:{FiveMinuteOnboardingOk}",
         $"ONBOARDING_CONFIGURATION_OK:{OnboardingConfigurationOk}",
         $"AUTHORING_SURFACE_OK:{AuthoringSurfaceOk}",
         $"CONSUMER_SAMPLE_OK:{IsOk}",
@@ -173,6 +185,8 @@ public static class ConsumerSampleProof
         bool parameterProjectionOk;
         bool trustTransparencyOk;
         bool windowCompositionOk;
+        bool scenarioGraphOk;
+        bool hostOwnedActionsOk;
         double inspectorProjectionMs;
         double pluginScanMs;
         double commandLatencyMs;
@@ -187,6 +201,8 @@ public static class ConsumerSampleProof
             window.Show();
             FlushUi();
 
+            scenarioGraphOk = HasScenarioGraph(host);
+            hostOwnedActionsOk = HasHostOwnedActions(host);
             host.SelectNode(host.GetFirstReviewNodeId());
             FlushUi();
             inspectorProjectionMs = MeasureMilliseconds(() => selectedParameterSnapshots = host.GetSelectedParameterSnapshots().ToArray());
@@ -295,6 +311,26 @@ public static class ConsumerSampleProof
             capabilityWindow.Close();
         }
 
+        var finalSnapshot = host.Session.Queries.CreateDocumentSnapshot();
+        var featureDescriptorIds = host.Session.Queries.GetFeatureDescriptors()
+            .Where(d => d.IsAvailable)
+            .Select(d => d.Id)
+            .OrderBy(id => id, StringComparer.Ordinal)
+            .ToArray();
+        var recentDiagnosticCodes = host.Session.Diagnostics.GetRecentDiagnostics(16)
+            .Select(d => d.Code)
+            .Distinct()
+            .OrderBy(code => code, StringComparer.Ordinal)
+            .ToArray();
+        var proofParameterSnapshots = CreateParameterSnapshots(host.GetSelectedParameterSnapshots().ToArray());
+        var supportBundlePayloadOk = HasSupportBundlePayload(proofParameterSnapshots, finalSnapshot, featureDescriptorIds);
+        var fiveMinuteOnboardingOk = scenarioGraphOk
+            && hostOwnedActionsOk
+            && parameterProjectionOk
+            && trustTransparencyOk
+            && exportBreadthOk
+            && supportBundlePayloadOk;
+
         return new ConsumerSampleProofResult(
             HostMenuActionOk: hostMenuActionOk,
             PluginContributionOk: pluginContributionOk,
@@ -322,21 +358,75 @@ public static class ConsumerSampleProof
             NodeToolProjectionMs: nodeToolProjectionMs,
             EdgeToolProjectionMs: edgeToolProjectionMs,
             CommandPaletteMs: commandPaletteMs,
-            NodeCount: host.Session.Queries.CreateDocumentSnapshot().Nodes.Count,
-            ConnectionCount: host.Session.Queries.CreateDocumentSnapshot().Connections.Count,
-            FeatureDescriptorIds: host.Session.Queries.GetFeatureDescriptors()
-                .Where(d => d.IsAvailable)
-                .Select(d => d.Id)
-                .OrderBy(id => id, StringComparer.Ordinal)
-                .ToArray(),
-            RecentDiagnosticCodes: host.Session.Diagnostics.GetRecentDiagnostics(16)
-                .Select(d => d.Code)
-                .Distinct()
-                .OrderBy(code => code, StringComparer.Ordinal)
-                .ToArray(),
+            NodeCount: finalSnapshot.Nodes.Count,
+            ConnectionCount: finalSnapshot.Connections.Count,
+            FeatureDescriptorIds: featureDescriptorIds,
+            RecentDiagnosticCodes: recentDiagnosticCodes,
             HostedAutomationNavigationOk: hostedAutomationNavigationOk,
-            HostedAuthoringAutomationDiagnosticsOk: hostedAuthoringAutomationDiagnosticsOk);
+            HostedAuthoringAutomationDiagnosticsOk: hostedAuthoringAutomationDiagnosticsOk,
+            ScenarioGraphOk: scenarioGraphOk,
+            HostOwnedActionsOk: hostOwnedActionsOk,
+            SupportBundlePayloadOk: supportBundlePayloadOk,
+            FiveMinuteOnboardingOk: fiveMinuteOnboardingOk);
     }
+
+    private static bool HasScenarioGraph(ConsumerSampleHost host)
+    {
+        var document = host.Session.Queries.CreateDocumentSnapshot();
+        var reviewNode = document.Nodes.SingleOrDefault(node => node.DefinitionId == ConsumerSampleHost.ReviewDefinitionId);
+        var queueNode = document.Nodes.SingleOrDefault(node => node.DefinitionId == ConsumerSampleHost.QueueDefinitionId);
+        var connection = document.Connections.SingleOrDefault(connection =>
+            string.Equals(connection.Id, "consumer-sample-connection-001", StringComparison.Ordinal));
+        var definitions = host.Session.Queries.GetRegisteredNodeDefinitions();
+
+        return string.Equals(document.Title, ConsumerSampleHost.ScenarioTitle, StringComparison.Ordinal)
+            && document.Description.Contains("content-review scenario", StringComparison.OrdinalIgnoreCase)
+            && reviewNode is not null
+            && queueNode is not null
+            && reviewNode.ParameterValues?.Any(parameter =>
+                string.Equals(parameter.Key, "status", StringComparison.Ordinal)
+                && string.Equals(parameter.Value?.ToString(), "draft", StringComparison.Ordinal)) == true
+            && reviewNode.ParameterValues?.Any(parameter =>
+                string.Equals(parameter.Key, "owner", StringComparison.Ordinal)
+                && string.Equals(parameter.Value?.ToString(), "design-review", StringComparison.Ordinal)) == true
+            && connection is not null
+            && string.Equals(connection.SourceNodeId, reviewNode.Id, StringComparison.Ordinal)
+            && string.Equals(connection.TargetNodeId, queueNode.Id, StringComparison.Ordinal)
+            && definitions.Any(definition => definition.Id == ConsumerSampleHost.ReviewDefinitionId)
+            && definitions.Any(definition => definition.Id == ConsumerSampleHost.QueueDefinitionId)
+            && definitions.Any(definition => definition.Id == ConsumerSampleHost.PluginAuditDefinitionId);
+    }
+
+    private static bool HasHostOwnedActions(ConsumerSampleHost host)
+    {
+        var descriptors = host.Session.Queries.GetCommandDescriptors()
+            .ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
+
+        return host.OnboardingCopyPathLines.Count == 4
+            && host.OnboardingCopyPathLines.Any(line => line.Contains("ConsumerSample.Avalonia", StringComparison.Ordinal))
+            && host.HasPluginCommandContribution()
+            && descriptors.ContainsKey(ConsumerSampleHost.PluginCommandId)
+            && descriptors.ContainsKey("workspace.save")
+            && descriptors.ContainsKey("workspace.load")
+            && descriptors.ContainsKey("history.undo")
+            && host.PluginCandidateEntries.Any(entry =>
+                string.Equals(entry.PluginId, "consumer.sample.audit-plugin", StringComparison.Ordinal)
+                && entry.IsAllowed);
+    }
+
+    private static bool HasSupportBundlePayload(
+        IReadOnlyList<ConsumerSampleProofParameterSnapshot> parameterSnapshots,
+        GraphDocument document,
+        IReadOnlyList<string> featureDescriptorIds)
+        => string.Equals(document.Title, ConsumerSampleHost.ScenarioTitle, StringComparison.Ordinal)
+        && document.Nodes.Count > 0
+        && parameterSnapshots.Any(snapshot =>
+            string.Equals(snapshot.Key, "status", StringComparison.Ordinal)
+            && string.Equals(snapshot.CurrentValue?.ToString(), "approved", StringComparison.Ordinal))
+        && parameterSnapshots.Any(snapshot =>
+            string.Equals(snapshot.Key, "owner", StringComparison.Ordinal)
+            && string.Equals(snapshot.CurrentValue?.ToString(), "release-owner", StringComparison.Ordinal))
+        && featureDescriptorIds.Count > 0;
 
     private static Window CreateCapabilityBreadthWindow(ConsumerSampleHost host)
     {

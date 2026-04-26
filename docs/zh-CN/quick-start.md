@@ -95,6 +95,18 @@ Proof handoff 时先跑 `AsterGraph.ConsumerSample.Avalonia -- --proof`；`HostS
 
 这个样例自己的 README 是 [`tools/AsterGraph.ConsumerSample.Avalonia/README.md`](../../tools/AsterGraph.ConsumerSample.Avalonia/README.md)。
 
+### 五分钟 hosted 路径
+
+当你想复制一个 Avalonia 宿主，而不是直接研究完整 showcase 时，按这条路径走：
+
+1. 安装 `AsterGraph.Avalonia --prerelease`，或者从源码运行 `tools/AsterGraph.Starter.Avalonia`。
+2. 复制 starter 组合：`AsterGraphEditorFactory.Create(...)`、`AsterGraphAvaloniaViewFactory.Create(...)`、`AsterGraphEditorOptions`，以及 document/catalog/editor/view 流程。
+3. 添加第一个自定义节点定义：把 starter 的 sample definition 换成你自己的 `NodeDefinition` id、标题、端口和参数定义。
+4. 运行 `tools/AsterGraph.ConsumerSample.Avalonia`，用 hosted action rail 验证图保存/加载、选中节点参数编辑和可信插件路径。
+5. 运行 `AsterGraph.ConsumerSample.Avalonia -- --proof --support-bundle <support-bundle-path>`，期待 `CONSUMER_SAMPLE_SCENARIO_GRAPH_OK:True`、`CONSUMER_SAMPLE_HOST_OWNED_ACTIONS_OK:True`、`CONSUMER_SAMPLE_SUPPORT_BUNDLE_READY_OK:True`、`FIVE_MINUTE_ONBOARDING_OK:True` 和 `ONBOARDING_CONFIGURATION_OK:True`。
+
+从 `Starter.Avalonia` 复制组合方式，从 `HelloWorld` 看 runtime-only 形状，从 `HelloWorld.Avalonia` 看最小 hosted UI，从 `ConsumerSample.Avalonia` 复制真实宿主动作/参数/插件/support proof，从 `Demo` 查看完整能力 showcase。
+
 ## 4. 推荐接入路线
 
 默认新接入优先走 Avalonia hosted 路线；只有需要原生自定义 UI 时再走 runtime/session 自定义路线。

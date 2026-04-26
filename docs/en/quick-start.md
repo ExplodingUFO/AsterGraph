@@ -98,6 +98,18 @@ The hosted route ladder is `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerS
 
 The sample README is [`tools/AsterGraph.ConsumerSample.Avalonia/README.md`](../../tools/AsterGraph.ConsumerSample.Avalonia/README.md).
 
+### Five-Minute Hosted Path
+
+Use this path when you want a copyable Avalonia host rather than a full showcase:
+
+1. Install `AsterGraph.Avalonia --prerelease`, or run `tools/AsterGraph.Starter.Avalonia` from source.
+2. Copy the starter composition: `AsterGraphEditorFactory.Create(...)`, `AsterGraphAvaloniaViewFactory.Create(...)`, `AsterGraphEditorOptions`, and the document/catalog/editor/view flow.
+3. Add the first custom node definition by replacing the starter sample definition with your own `NodeDefinition` id, title, ports, and parameter definitions.
+4. Run `tools/AsterGraph.ConsumerSample.Avalonia` and use the hosted action rail to exercise graph save/load, selected-node parameter editing, and the trusted plugin path.
+5. Run `AsterGraph.ConsumerSample.Avalonia -- --proof --support-bundle <support-bundle-path>` and expect `CONSUMER_SAMPLE_SCENARIO_GRAPH_OK:True`, `CONSUMER_SAMPLE_HOST_OWNED_ACTIONS_OK:True`, `CONSUMER_SAMPLE_SUPPORT_BUNDLE_READY_OK:True`, `FIVE_MINUTE_ONBOARDING_OK:True`, and `ONBOARDING_CONFIGURATION_OK:True`.
+
+Copy from `Starter.Avalonia` for composition, `HelloWorld` for runtime-only shape, `HelloWorld.Avalonia` for the smallest hosted UI, `ConsumerSample.Avalonia` for realistic host-owned actions/parameters/plugins/support proof, and `Demo` only when you need the full capability showcase.
+
 ## 4. Canonical Adoption Routes
 
 | If your host needs | Start here | First sample |
