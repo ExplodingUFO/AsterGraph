@@ -68,6 +68,14 @@ public interface IGraphEditorQueries
         => throw new NotSupportedException();
 
     /// <summary>
+    /// Creates a host-owned graph layout plan without mutating the current document.
+    /// </summary>
+    /// <param name="request">The requested layout scope, orientation, spacing, and pinned node hints.</param>
+    /// <returns>A layout plan, or an unavailable plan when no host provider is configured.</returns>
+    GraphLayoutPlan CreateLayoutPlan(GraphLayoutRequest request)
+        => throw new NotSupportedException();
+
+    /// <summary>
     /// Gets canonical fragment template snapshots projected from the active template library service.
     /// </summary>
     /// <returns>Stable template metadata collection for host-side fragment library UIs.</returns>

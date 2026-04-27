@@ -63,6 +63,7 @@ public sealed record ConsumerSampleProofResult(
     bool RuntimeLogPanelOk = true,
     bool RuntimeLogFilterOk = true,
     bool RuntimeOverlaySupportBundleOk = true,
+    bool LayoutProviderSeamOk = true,
     int NodeCount = 0,
     int ConnectionCount = 0,
     IReadOnlyList<string>? FeatureDescriptorIds = null,
@@ -132,6 +133,7 @@ public sealed record ConsumerSampleProofResult(
         && RuntimeLogPanelOk
         && RuntimeLogFilterOk
         && RuntimeOverlaySupportBundleOk
+        && LayoutProviderSeamOk
         && NodeCount > 0
         && (FeatureDescriptorIds?.Count > 0);
 
@@ -184,6 +186,7 @@ public sealed record ConsumerSampleProofResult(
         $"RUNTIME_LOG_PANEL_OK:{RuntimeLogPanelOk}",
         $"RUNTIME_LOG_FILTER_OK:{RuntimeLogFilterOk}",
         $"RUNTIME_OVERLAY_SUPPORT_BUNDLE_OK:{RuntimeOverlaySupportBundleOk}",
+        $"LAYOUT_PROVIDER_SEAM_OK:{LayoutProviderSeamOk}",
         $"AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:{NodeSideAuthoringOk}",
         $"AUTHORING_SURFACE_COMMAND_PROJECTION_OK:{CommandSurfaceOk}",
         $"CONSUMER_SAMPLE_PARAMETER_OK:{ParameterProjectionOk}",
@@ -273,6 +276,7 @@ public static class ConsumerSampleProof
         bool hostOwnedActionsOk;
         bool runtimeLogPanelOk;
         bool runtimeLogFilterOk;
+        bool layoutProviderSeamOk;
         double inspectorProjectionMs;
         double pluginScanMs;
         double commandLatencyMs;
@@ -350,6 +354,7 @@ public static class ConsumerSampleProof
                 && FindNamed<TextBlock>(window, "PART_TrustBoundaryText") is not null;
             runtimeLogPanelOk = HasRuntimeLogPanel(window, host);
             runtimeLogFilterOk = HasRuntimeLogFilter(host);
+            layoutProviderSeamOk = HasLayoutProviderSeam(host);
         }
         finally
         {
@@ -474,6 +479,7 @@ public static class ConsumerSampleProof
             RuntimeLogPanelOk: runtimeLogPanelOk,
             RuntimeLogFilterOk: runtimeLogFilterOk,
             RuntimeOverlaySupportBundleOk: runtimeOverlaySupportBundleOk,
+            LayoutProviderSeamOk: layoutProviderSeamOk,
             ParameterSnapshots: proofParameterSnapshots,
             StartupMs: startupMs,
             InspectorProjectionMs: inspectorProjectionMs,
@@ -560,6 +566,29 @@ public static class ConsumerSampleProof
             string.Equals(snapshot.Key, "owner", StringComparison.Ordinal)
             && string.Equals(snapshot.CurrentValue?.ToString(), "release-owner", StringComparison.Ordinal))
         && featureDescriptorIds.Count > 0;
+
+    private static bool HasLayoutProviderSeam(ConsumerSampleHost host)
+    {
+        var request = new GraphLayoutRequest
+        {
+            Mode = GraphLayoutRequestMode.All,
+            Orientation = GraphLayoutOrientation.LeftToRight,
+            HorizontalSpacing = 320,
+            VerticalSpacing = 160,
+        };
+        var before = host.Session.Queries.CreateDocumentSnapshot();
+        var plan = host.Session.Queries.CreateLayoutPlan(request);
+        var after = host.Session.Queries.CreateDocumentSnapshot();
+        var descriptors = host.Session.Queries.GetFeatureDescriptors();
+
+        return plan.IsAvailable
+            && ReferenceEquals(request, plan.Request)
+            && plan.NodePositions.Count >= 2
+            && plan.ResetManualRoutes
+            && before.Nodes.Select(node => node.Position).SequenceEqual(after.Nodes.Select(node => node.Position))
+            && descriptors.Any(descriptor => descriptor.Id == "query.layout-plan" && descriptor.IsAvailable)
+            && descriptors.Any(descriptor => descriptor.Id == "integration.layout-provider" && descriptor.IsAvailable);
+    }
 
     private static (bool QuickAddConnectedNodeOk, bool PortFilteredNodeSearchOk) HasQuickAddConnectedNode(ConsumerSampleHost host)
     {

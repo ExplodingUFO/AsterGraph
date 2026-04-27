@@ -83,6 +83,7 @@ public sealed partial class GraphEditorSession
                 new GraphEditorFeatureDescriptorSnapshot("capability.export.scene-jpeg", "capability", (_descriptorSupport?.HasSceneImageExportService ?? false) && GetSceneSnapshot().Document.Nodes.Count > 0),
                 new GraphEditorFeatureDescriptorSnapshot("query.scene-snapshot", "query", true),
                 new GraphEditorFeatureDescriptorSnapshot("query.runtime-overlay-snapshot", "query", true),
+                new GraphEditorFeatureDescriptorSnapshot("query.layout-plan", "query", true),
                 new GraphEditorFeatureDescriptorSnapshot("query.selected-node-connection-ids", "query", true),
                 new GraphEditorFeatureDescriptorSnapshot("query.node-surface-snapshots", "query", true),
                 new GraphEditorFeatureDescriptorSnapshot("query.connection-geometry-snapshots", "query", true),
@@ -133,6 +134,7 @@ public sealed partial class GraphEditorSession
                 new GraphEditorFeatureDescriptorSnapshot("integration.context-menu-augmentor", "integration", _descriptorSupport?.HasContextMenuAugmentor ?? false),
                 new GraphEditorFeatureDescriptorSnapshot("integration.tool-provider", "integration", _descriptorSupport?.HasToolProvider ?? false),
                 new GraphEditorFeatureDescriptorSnapshot("integration.runtime-overlay-provider", "integration", _descriptorSupport?.HasRuntimeOverlayProvider ?? false),
+                new GraphEditorFeatureDescriptorSnapshot("integration.layout-provider", "integration", _descriptorSupport?.HasLayoutProvider ?? false),
                 new GraphEditorFeatureDescriptorSnapshot("integration.node-presentation-provider", "integration", _descriptorSupport?.HasNodePresentationProvider ?? false),
                 new GraphEditorFeatureDescriptorSnapshot("integration.localization-provider", "integration", _descriptorSupport?.HasLocalizationProvider ?? false),
                 new GraphEditorFeatureDescriptorSnapshot("integration.instrumentation.logger", "integration", _logger is not null),
@@ -160,6 +162,16 @@ public sealed partial class GraphEditorSession
                 provider.GetNodeOverlays().ToList(),
                 provider.GetConnectionOverlays().ToList(),
                 provider.GetRecentLogs().ToList());
+    }
+
+    public GraphLayoutPlan CreateLayoutPlan(GraphLayoutRequest request)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        var provider = _descriptorSupport?.LayoutProvider;
+        return provider is null
+            ? GraphLayoutPlan.Empty(request, "No layout provider is configured.")
+            : provider.CreateLayoutPlan(request);
     }
 
     public IReadOnlyList<INodeDefinition> GetRegisteredNodeDefinitions()

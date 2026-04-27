@@ -63,6 +63,10 @@ The builder delegates to the existing editor/session and Avalonia view factories
 
 Hosts that already run or simulate graph work can pass `AsterGraphEditorOptions.RuntimeOverlayProvider` and read the current view through `IGraphEditorQueries.GetRuntimeOverlaySnapshot()`. AsterGraph only exposes `GraphEditorRuntimeOverlaySnapshot` for node/connection status, payload previews, and recent logs; it does not execute graphs or own a workflow engine.
 
+## Host-Owned Layout Plans
+
+Hosts that own a layout algorithm can pass `AsterGraphEditorOptions.LayoutProvider` and request previewable plans through `IGraphEditorQueries.CreateLayoutPlan(...)`. The returned `GraphLayoutPlan` describes proposed node positions and route-reset intent only; creating the plan does not mutate the document or make AsterGraph depend on one layout engine.
+
 ## When To Choose Retained
 
 | Route | Choose this when | Do not use this when | Recipe |
@@ -86,6 +90,7 @@ For package-by-package support tiers, use [Public API Inventory](./public-api-in
 | Plugin trust/discovery | `AsterGraph.Editor` | `DiscoverPluginCandidates(...)` + `PluginTrustPolicy` | `tools/AsterGraph.ConsumerSample.Avalonia` |
 | Automation | `AsterGraph.Editor` | `IGraphEditorSession.Automation.Execute(...)` | `src/AsterGraph.Demo` |
 | Runtime feedback overlay | `AsterGraph.Editor` | `AsterGraphEditorOptions.RuntimeOverlayProvider` + `IGraphEditorQueries.GetRuntimeOverlaySnapshot()` | `src/AsterGraph.Demo` |
+| Layout plans | `AsterGraph.Editor` | `AsterGraphEditorOptions.LayoutProvider` + `IGraphEditorQueries.CreateLayoutPlan(...)` | `tools/AsterGraph.ConsumerSample.Avalonia` |
 | Retained migration bridge | `AsterGraph.Editor` (+ `AsterGraph.Avalonia` when embedding `GraphEditorView`) | retained constructor path | migration-only legacy host |
 
 If you are starting new work, begin with [Quick Start](./quick-start.md) and keep the retained bridge for legacy migration only.

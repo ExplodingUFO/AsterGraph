@@ -114,6 +114,11 @@ public sealed record AsterGraphEditorOptions
     public IGraphRuntimeOverlayProvider? RuntimeOverlayProvider { get; init; }
 
     /// <summary>
+    /// Optional host-owned layout provider. The editor requests plans but does not own a specific layout algorithm.
+    /// </summary>
+    public IGraphLayoutProvider? LayoutProvider { get; init; }
+
+    /// <summary>
     /// Optional localization provider for built-in editor strings.
     /// </summary>
     public IGraphLocalizationProvider? LocalizationProvider { get; init; }

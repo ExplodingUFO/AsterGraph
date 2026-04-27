@@ -146,6 +146,7 @@ public sealed class ConsumerSampleHost : IDisposable
             ],
             PluginTrustPolicy = trustPolicy,
             RuntimeOverlayProvider = new ConsumerSampleRuntimeOverlayProvider(),
+            LayoutProvider = new ConsumerSampleLayoutProvider(),
         };
 
         var editor = AsterGraphEditorFactory.Create(options);
@@ -689,5 +690,18 @@ public sealed class ConsumerSampleHost : IDisposable
     {
         public IReadOnlyList<GraphEditorPluginManifestSourceCandidate> GetCandidates()
             => candidates;
+    }
+
+    private sealed class ConsumerSampleLayoutProvider : IGraphLayoutProvider
+    {
+        public GraphLayoutPlan CreateLayoutPlan(GraphLayoutRequest request)
+            => new(
+                true,
+                request,
+                [
+                    new GraphLayoutNodePosition(InitialReviewNodeId, new GraphPoint(160, 160)),
+                    new GraphLayoutNodePosition(InitialQueueNodeId, new GraphPoint(560, 160)),
+                ],
+                ResetManualRoutes: true);
     }
 }
