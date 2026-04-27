@@ -946,6 +946,8 @@ public sealed class DemoProofReleaseSurfaceTests
         var adapterMatrixZh = ReadRepoFile("docs/zh-CN/adapter-capability-matrix.md");
         var extensionContracts = ReadRepoFile("docs/en/extension-contracts.md");
         var extensionContractsZh = ReadRepoFile("docs/zh-CN/extension-contracts.md");
+        var publicApiInventory = ReadRepoFile("docs/en/public-api-inventory.md");
+        var publicApiInventoryZh = ReadRepoFile("docs/zh-CN/public-api-inventory.md");
 
         foreach (var contents in new[]
                  {
@@ -990,6 +992,32 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("canonical-first 指导是", extensionContractsZh, StringComparison.Ordinal);
         Assert.Contains("new work should start on the stable canonical surfaces", extensionContracts, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("新工作应优先从 `Stable canonical surfaces` 起步", extensionContractsZh, StringComparison.Ordinal);
+        Assert.Contains("public-api-inventory.md", extensionContracts, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("public-api-inventory.md", extensionContractsZh, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("public-api-inventory.md", hostIntegration, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("public-api-inventory.md", hostIntegrationZh, StringComparison.OrdinalIgnoreCase);
+
+        foreach (var contents in new[] { publicApiInventory, publicApiInventoryZh })
+        {
+            Assert.Contains("Stable canonical", contents, StringComparison.Ordinal);
+            Assert.Contains("Supported hosted helper", contents, StringComparison.Ordinal);
+            Assert.Contains("Retained migration", contents, StringComparison.Ordinal);
+            Assert.Contains("Compatibility-only", contents, StringComparison.Ordinal);
+            Assert.Contains("Internal-only", contents, StringComparison.Ordinal);
+            Assert.Contains("AsterGraph.Abstractions", contents, StringComparison.Ordinal);
+            Assert.Contains("AsterGraph.Core", contents, StringComparison.Ordinal);
+            Assert.Contains("AsterGraph.Editor", contents, StringComparison.Ordinal);
+            Assert.Contains("AsterGraph.Avalonia", contents, StringComparison.Ordinal);
+            Assert.Contains("AsterGraphEditorFactory.CreateSession(...)", contents, StringComparison.Ordinal);
+            Assert.Contains("IGraphEditorSession", contents, StringComparison.Ordinal);
+            Assert.Contains("AsterGraphEditorFactory.Create(...)", contents, StringComparison.Ordinal);
+            Assert.Contains("AsterGraphHostBuilder", contents, StringComparison.Ordinal);
+            Assert.Contains("GraphEditorViewModel", contents, StringComparison.Ordinal);
+            Assert.Contains("GraphEditorView", contents, StringComparison.Ordinal);
+            Assert.Contains("IGraphEditorQueries.GetCompatibleTargets(...)", contents, StringComparison.Ordinal);
+            Assert.Contains("CompatiblePortTarget", contents, StringComparison.Ordinal);
+            Assert.Contains("GetCompatiblePortTargets(...)", contents, StringComparison.Ordinal);
+        }
 
         foreach (var contents in new[] { readme, readmeZh, hostIntegration, hostIntegrationZh, architecture, architectureZh, projectStatus, projectStatusZh, alphaStatus, alphaStatusZh, quickStart, quickStartZh })
         {

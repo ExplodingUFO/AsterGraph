@@ -36,6 +36,8 @@ Standalone Avalonia surfaces such as `AsterGraphCanvasViewFactory`, `AsterGraphI
 The single bounded retained recipe is [Retained-To-Session Migration Recipe](./retained-migration-recipe.md).
 Retained stays migration-only and does not add a new compatibility promise. Retained is not a fourth primary route. If the bridge is justified, send maintainers to that recipe instead of stitching together multiple docs.
 
+For package-by-package support tiers, use [Public API Inventory](./public-api-inventory.md). It classifies stable canonical, supported hosted helper, retained migration, compatibility-only, and internal-only surfaces without creating another route.
+
 ## Consumer Route Matrix
 
 | Need | Packages to start with | Canonical entry point | First sample |

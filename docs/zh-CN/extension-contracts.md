@@ -41,9 +41,12 @@
   - `GraphEditorViewModel.Session` → `AsterGraphEditorFactory.CreateSession(...).Session`
 
 `retained` 与 `compatibility-only` 仅用于迁移；新工作应优先从 `Stable canonical surfaces` 起步，再决定是否叠加 hosted UI 组合。
+包级支持层级清单见 [Public API Inventory](./public-api-inventory.md)。
 与 [Host Integration](./host-integration.md) 对齐时，先使用 `CreateSession(...)`/`IGraphEditorSession` 的 canonical seam，再按需调用 `Create(...)` 完成 hosted UI 组合。
 
 ## 包级稳定性边界（`AsterGraph` 发布边界）
+
+维护者视角的 package inventory 发布在 [Public API Inventory](./public-api-inventory.md)。扩大 public API claims 前，先保持这里和 inventory 一致。
 
 - `AsterGraph.Abstractions`：稳定发布 node / provider / 插件契约，适合作为 contract-first 集成入口。
 - `AsterGraph.Core`：当前用于 `GraphDocument`、序列化、兼容层与迁移辅助，不替代 `AsterGraph.Editor` 的 canonical runtime/session 语义。

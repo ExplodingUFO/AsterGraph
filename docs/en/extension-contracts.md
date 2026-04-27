@@ -29,7 +29,7 @@ The public SDK contract is canonical-first: shipped stability is defined by `Cre
 
 - `AsterGraphEditorFactory.Create(...)`
 
-Use the retained surfaces only as migration bridges. New work should start on the stable canonical surfaces above, with [Host Integration](./host-integration.md) as the route map.
+Use the retained surfaces only as migration bridges. New work should start on the stable canonical surfaces above, with [Host Integration](./host-integration.md) as the route map and [Public API Inventory](./public-api-inventory.md) as the package-by-package support-tier map.
 
 ## Compatibility and Deprecation Policy
 
@@ -44,6 +44,8 @@ Use the retained surfaces only as migration bridges. New work should start on th
 - Canonical-first implementation remains anchored on `CreateSession(...)` and `IGraphEditorSession`; `Create(...)`, `GraphEditorViewModel`, and `GraphEditorView` are retained only to keep migration moving without forcing immediate breakage.
 
 ## Package-level contract inventory
+
+The maintainer-facing package inventory is published in [Public API Inventory](./public-api-inventory.md). Keep this summary aligned with that inventory before widening public API claims.
 
 - `AsterGraph.Abstractions`
   - Stable canonical contracts: session/query abstractions and DTO/snapshot-shape contracts for the canonical seam

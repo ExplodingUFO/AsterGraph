@@ -34,6 +34,8 @@
 唯一的 retained recipe 是 [Retained 到 Session 的迁移 Recipe](./retained-migration-recipe.md)。
 retained 仍然只用于迁移，不会新增新的兼容性承诺。retained 不是第四条主路线。如果这座桥接确实有必要，就把维护者导向这一个 bounded 的 retained recipe 集合，而不是让他们拼接多份文档。
 
+包级支持层级请看 [Public API Inventory](./public-api-inventory.md)。它把 stable canonical、supported hosted helper、retained migration、compatibility-only 和 internal-only surface 分类，但不会创建另一条接入路线。
+
 ## Consumer Route Matrix
 
 | 需求 | 起始包 | canonical 入口 | 第一个样例 |
