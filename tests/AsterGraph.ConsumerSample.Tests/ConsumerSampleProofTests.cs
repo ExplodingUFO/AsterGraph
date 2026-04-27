@@ -136,6 +136,9 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_DELETE_AND_RECONNECT_OK:True");
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_DETACH_NODE_OK:True");
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_RECONNECT_CONFLICT_REPORT_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "AUTHORING_EDGE_MULTISELECT_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "AUTHORING_WIRE_SLICE_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "AUTHORING_SELECTED_NODE_EDGE_HIGHLIGHT_OK:True");
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:True");
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_SURFACE_COMMAND_PROJECTION_OK:True");
         Assert.Contains(result.ProofLines, line => line == "CAPABILITY_BREADTH_STENCIL_OK:True");
@@ -460,6 +463,9 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(proofLines, line => line == "AUTHORING_DELETE_AND_RECONNECT_OK:True");
         Assert.Contains(proofLines, line => line == "AUTHORING_DETACH_NODE_OK:True");
         Assert.Contains(proofLines, line => line == "AUTHORING_RECONNECT_CONFLICT_REPORT_OK:True");
+        Assert.Contains(proofLines, line => line == "AUTHORING_EDGE_MULTISELECT_OK:True");
+        Assert.Contains(proofLines, line => line == "AUTHORING_WIRE_SLICE_OK:True");
+        Assert.Contains(proofLines, line => line == "AUTHORING_SELECTED_NODE_EDGE_HIGHLIGHT_OK:True");
         Assert.Contains(proofLines, line => line == "AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:True");
         Assert.Contains(proofLines, line => line == "AUTHORING_SURFACE_COMMAND_PROJECTION_OK:True");
         Assert.Contains(proofLines, line => line == "CAPABILITY_BREADTH_STENCIL_OK:True");

@@ -36,6 +36,9 @@ public interface IGraphEditorCommands
     void SetSelection(IReadOnlyList<string> nodeIds, string? primaryNodeId = null, bool updateStatus = true)
         => throw new NotSupportedException();
 
+    void SetConnectionSelection(IReadOnlyList<string> connectionIds, string? primaryConnectionId = null, bool updateStatus = true)
+        => throw new NotSupportedException();
+
     /// <summary>
     /// 基于节点定义标识添加一个节点实例。
     /// </summary>
@@ -89,6 +92,12 @@ public interface IGraphEditorCommands
     /// </summary>
     /// <returns><see langword="true"/> when a selected middle node is detached and the wire is reconnected.</returns>
     bool TryDetachSelectionFromConnections()
+        => throw new NotSupportedException();
+
+    bool TryDeleteSelectedConnections()
+        => throw new NotSupportedException();
+
+    bool TrySliceConnections(GraphPoint start, GraphPoint end)
         => throw new NotSupportedException();
 
     /// <summary>

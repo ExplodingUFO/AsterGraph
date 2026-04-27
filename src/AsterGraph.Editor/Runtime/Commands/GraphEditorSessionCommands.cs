@@ -27,6 +27,12 @@ public sealed partial class GraphEditorSession
         Execute("selection.set", () => _host.SetSelection(nodeIds, primaryNodeId, updateStatus));
     }
 
+    public void SetConnectionSelection(IReadOnlyList<string> connectionIds, string? primaryConnectionId = null, bool updateStatus = true)
+    {
+        ArgumentNullException.ThrowIfNull(connectionIds);
+        Execute("selection.connections.set", () => _host.SetConnectionSelection(connectionIds, primaryConnectionId, updateStatus));
+    }
+
     public void AddNode(NodeDefinitionId definitionId, GraphPoint? preferredWorldPosition = null)
     {
         ArgumentNullException.ThrowIfNull(definitionId);
@@ -123,6 +129,28 @@ public sealed partial class GraphEditorSession
         }
 
         return detached;
+    }
+
+    public bool TryDeleteSelectedConnections()
+    {
+        var deleted = _host.TryDeleteSelectedConnections();
+        if (deleted)
+        {
+            PublishCommandExecuted("connections.delete-selected");
+        }
+
+        return deleted;
+    }
+
+    public bool TrySliceConnections(GraphPoint start, GraphPoint end)
+    {
+        var sliced = _host.TrySliceConnections(start, end);
+        if (sliced)
+        {
+            PublishCommandExecuted("connections.slice");
+        }
+
+        return sliced;
     }
 
     public async Task<bool> TryCopySelectionAsync(CancellationToken cancellationToken = default)

@@ -65,6 +65,8 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
     private string _activeGraphId;
     private List<string> _selectedNodeIds = [];
     private string? _primarySelectedNodeId;
+    private List<string> _selectedConnectionIds = [];
+    private string? _primarySelectedConnectionId;
     private GraphEditorPendingConnectionSnapshot _pendingConnection = GraphEditorPendingConnectionSnapshot.Create(false, null, null);
     private string? _lastSavedDocumentSignature;
     private double _zoom = DefaultZoom;
@@ -167,6 +169,36 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
 
     public void SetSelection(IReadOnlyList<string> nodeIds, string? primaryNodeId, bool updateStatus)
         => _selectionCoordinator.SetSelection(nodeIds, primaryNodeId, updateStatus);
+
+    public void SetConnectionSelection(IReadOnlyList<string> connectionIds, string? primaryConnectionId, bool updateStatus)
+    {
+        ArgumentNullException.ThrowIfNull(connectionIds);
+
+        var existingIds = CreateActiveScopeDocumentSnapshot().Connections.Select(connection => connection.Id).ToHashSet(StringComparer.Ordinal);
+        var selectedIds = connectionIds.Where(existingIds.Contains).Distinct(StringComparer.Ordinal).ToList();
+        var nextPrimary = !string.IsNullOrWhiteSpace(primaryConnectionId) && selectedIds.Contains(primaryConnectionId, StringComparer.Ordinal)
+            ? primaryConnectionId
+            : selectedIds.LastOrDefault();
+
+        if (_selectedConnectionIds.SequenceEqual(selectedIds, StringComparer.Ordinal)
+            && string.Equals(_primarySelectedConnectionId, nextPrimary, StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        _selectedNodeIds = [];
+        _primarySelectedNodeId = null;
+        _selectedConnectionIds = selectedIds;
+        _primarySelectedConnectionId = nextPrimary;
+        if (updateStatus)
+        {
+            CurrentStatusMessage = selectedIds.Count == 0
+                ? "Connection selection cleared."
+                : $"Selected {selectedIds.Count} connection{(selectedIds.Count == 1 ? string.Empty : "s")}.";
+        }
+
+        SelectionChanged?.Invoke(this, CreateSelectionChangedEventArgs());
+    }
 
     public void AddNode(NodeDefinitionId definitionId, GraphPoint? preferredWorldPosition)
         => _nodeMutationCoordinator.AddNode(definitionId, preferredWorldPosition);
@@ -311,6 +343,68 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
 
     public bool TryDetachSelectionFromConnections()
         => TryReconnectSelectedMiddleNode(deleteSelectedNode: false);
+
+    public bool TryDeleteSelectedConnections()
+    {
+        if (!_behaviorOptions.Commands.Connections.AllowDelete)
+        {
+            CurrentStatusMessage = "Connection deletion is disabled by host permissions.";
+            return false;
+        }
+
+        if (_selectedConnectionIds.Count == 0)
+        {
+            CurrentStatusMessage = "Select one or more connections before deleting.";
+            return false;
+        }
+
+        var selected = _selectedConnectionIds.ToHashSet(StringComparer.Ordinal);
+        var document = CreateActiveScopeDocumentSnapshot();
+        var removed = document.Connections.Where(connection => selected.Contains(connection.Id)).ToList();
+        if (removed.Count == 0)
+        {
+            CurrentStatusMessage = "No selected connections were found.";
+            return false;
+        }
+
+        ApplyActiveScopeDocument(document with
+        {
+            Connections = document.Connections.Where(connection => !selected.Contains(connection.Id)).ToList(),
+        });
+        SetConnectionSelection([], null, updateStatus: false);
+        CurrentStatusMessage = $"Deleted {removed.Count} selected connection{(removed.Count == 1 ? string.Empty : "s")}.";
+        MarkDirty(CurrentStatusMessage, GraphEditorDocumentChangeKind.ConnectionsChanged, null, removed.Select(connection => connection.Id).ToList(), preserveStatus: true);
+        return true;
+    }
+
+    public bool TrySliceConnections(GraphPoint start, GraphPoint end)
+    {
+        if (!_behaviorOptions.Commands.Connections.AllowDelete)
+        {
+            CurrentStatusMessage = "Wire slicing requires connection delete permission.";
+            return false;
+        }
+
+        var document = CreateActiveScopeDocumentSnapshot();
+        var removed = document.Connections
+            .Where(connection => ConnectionIntersectsSlice(document, connection, start, end))
+            .ToList();
+        if (removed.Count == 0)
+        {
+            CurrentStatusMessage = "No connections intersect the slice.";
+            return false;
+        }
+
+        var removedIds = removed.Select(connection => connection.Id).ToHashSet(StringComparer.Ordinal);
+        ApplyActiveScopeDocument(document with
+        {
+            Connections = document.Connections.Where(connection => !removedIds.Contains(connection.Id)).ToList(),
+        });
+        SetConnectionSelection([], null, updateStatus: false);
+        CurrentStatusMessage = $"Sliced {removed.Count} connection{(removed.Count == 1 ? string.Empty : "s")}.";
+        MarkDirty(CurrentStatusMessage, GraphEditorDocumentChangeKind.ConnectionsChanged, null, removedIds.ToList(), preserveStatus: true);
+        return true;
+    }
 
     public void DuplicateNode(string nodeId)
         => _nodeMutationCoordinator.DuplicateNode(nodeId);
@@ -1575,9 +1669,7 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
 
         if (selectionChanged)
         {
-            SelectionChanged?.Invoke(
-                this,
-                new GraphEditorSelectionChangedEventArgs(_selectedNodeIds.ToList(), _primarySelectedNodeId));
+            SelectionChanged?.Invoke(this, CreateSelectionChangedEventArgs());
         }
 
         DocumentChanged?.Invoke(
@@ -1611,7 +1703,7 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
                 GraphEditorDiagnosticSeverity.Info));
             if (selectionChanged)
             {
-                SelectionChanged?.Invoke(this, new GraphEditorSelectionChangedEventArgs(_selectedNodeIds.ToList(), _primarySelectedNodeId));
+                SelectionChanged?.Invoke(this, CreateSelectionChangedEventArgs());
             }
 
             DocumentChanged?.Invoke(
@@ -2006,6 +2098,48 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
             })
             .ToList();
 
+    private GraphEditorSelectionSnapshot CreateSelectionSnapshot()
+        => new(_selectedNodeIds.ToList(), _primarySelectedNodeId)
+        {
+            SelectedConnectionIds = _selectedConnectionIds.ToList(),
+            PrimarySelectedConnectionId = _primarySelectedConnectionId,
+        };
+
+    private GraphEditorSelectionChangedEventArgs CreateSelectionChangedEventArgs()
+        => new(_selectedNodeIds.ToList(), _primarySelectedNodeId)
+        {
+            SelectedConnectionIds = _selectedConnectionIds.ToList(),
+            PrimarySelectedConnectionId = _primarySelectedConnectionId,
+        };
+
+    private static bool ConnectionIntersectsSlice(GraphDocument document, GraphConnection connection, GraphPoint start, GraphPoint end)
+    {
+        var source = document.Nodes.FirstOrDefault(node => string.Equals(node.Id, connection.SourceNodeId, StringComparison.Ordinal));
+        var target = document.Nodes.FirstOrDefault(node => string.Equals(node.Id, connection.TargetNodeId, StringComparison.Ordinal));
+        if (source is null || target is null)
+        {
+            return false;
+        }
+
+        return SegmentsIntersect(CenterOf(source), CenterOf(target), start, end);
+    }
+
+    private static GraphPoint CenterOf(GraphNode node)
+        => new(node.Position.X + node.Size.Width / 2, node.Position.Y + node.Size.Height / 2);
+
+    private static bool SegmentsIntersect(GraphPoint a, GraphPoint b, GraphPoint c, GraphPoint d)
+    {
+        static double Direction(GraphPoint p, GraphPoint q, GraphPoint r)
+            => ((r.X - p.X) * (q.Y - p.Y)) - ((q.X - p.X) * (r.Y - p.Y));
+
+        var d1 = Direction(c, d, a);
+        var d2 = Direction(c, d, b);
+        var d3 = Direction(a, b, c);
+        var d4 = Direction(a, b, d);
+        return ((d1 > 0 && d2 < 0) || (d1 < 0 && d2 > 0))
+            && ((d3 > 0 && d4 < 0) || (d3 < 0 && d4 > 0));
+    }
+
     private GraphSelectionFragment? PeekSelectionClipboard()
         => _selectionClipboard.Peek();
 
@@ -2038,12 +2172,14 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
             return false;
         }
 
-        var selectionChanged = _selectedNodeIds.Count > 0 || !string.IsNullOrWhiteSpace(_primarySelectedNodeId);
+        var selectionChanged = _selectedNodeIds.Count > 0 || !string.IsNullOrWhiteSpace(_primarySelectedNodeId) || _selectedConnectionIds.Count > 0 || !string.IsNullOrWhiteSpace(_primarySelectedConnectionId);
         var pendingChanged = _pendingConnection.HasPendingConnection;
 
         _activeGraphId = targetScopeId;
         _selectedNodeIds = [];
         _primarySelectedNodeId = null;
+        _selectedConnectionIds = [];
+        _primarySelectedConnectionId = null;
         _pendingConnection = GraphEditorPendingConnectionSnapshot.Create(false, null, null);
 
         if (updateStatus)
@@ -2053,7 +2189,7 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
 
         if (selectionChanged)
         {
-            SelectionChanged?.Invoke(this, new GraphEditorSelectionChangedEventArgs(_selectedNodeIds.ToList(), _primarySelectedNodeId));
+            SelectionChanged?.Invoke(this, CreateSelectionChangedEventArgs());
         }
 
         if (pendingChanged)
@@ -2085,11 +2221,26 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
             && selectedNodeIds.Contains(requestedPrimaryNodeId, StringComparer.Ordinal)
             ? requestedPrimaryNodeId
             : selectedNodeIds.LastOrDefault();
+        var activeConnectionIds = GetActiveGraphScope().Connections.Select(connection => connection.Id).ToHashSet(StringComparer.Ordinal);
+        var requestedConnectionIds = selection?.SelectedConnectionIds ?? _selectedConnectionIds;
+        var selectedConnectionIds = requestedConnectionIds
+            .Where(activeConnectionIds.Contains)
+            .Distinct(StringComparer.Ordinal)
+            .ToList();
+        var requestedPrimaryConnectionId = selection?.PrimarySelectedConnectionId ?? _primarySelectedConnectionId;
+        var primaryConnectionId = !string.IsNullOrWhiteSpace(requestedPrimaryConnectionId)
+            && selectedConnectionIds.Contains(requestedPrimaryConnectionId, StringComparer.Ordinal)
+            ? requestedPrimaryConnectionId
+            : selectedConnectionIds.LastOrDefault();
         var selectionChanged = !_selectedNodeIds.SequenceEqual(selectedNodeIds, StringComparer.Ordinal)
-            || !string.Equals(_primarySelectedNodeId, primaryNodeId, StringComparison.Ordinal);
+            || !string.Equals(_primarySelectedNodeId, primaryNodeId, StringComparison.Ordinal)
+            || !_selectedConnectionIds.SequenceEqual(selectedConnectionIds, StringComparer.Ordinal)
+            || !string.Equals(_primarySelectedConnectionId, primaryConnectionId, StringComparison.Ordinal);
 
         _selectedNodeIds = selectedNodeIds;
         _primarySelectedNodeId = primaryNodeId;
+        _selectedConnectionIds = selectedConnectionIds;
+        _primarySelectedConnectionId = primaryConnectionId;
 
         if (_pendingConnection.HasPendingConnection
             && (string.IsNullOrWhiteSpace(_pendingConnection.SourceNodeId)

@@ -37,6 +37,8 @@ internal sealed partial class GraphEditorKernel
 
             _owner._selectedNodeIds = selectedIds;
             _owner._primarySelectedNodeId = nextPrimary;
+            _owner._selectedConnectionIds = [];
+            _owner._primarySelectedConnectionId = null;
             if (updateStatus)
             {
                 _owner.CurrentStatusMessage = selectedIds.Count == 0
@@ -44,10 +46,10 @@ internal sealed partial class GraphEditorKernel
                     : $"Selected {selectedIds.Count} node{(selectedIds.Count == 1 ? string.Empty : "s")}.";
             }
 
-            _owner.SelectionChanged?.Invoke(_owner, new GraphEditorSelectionChangedEventArgs(_owner._selectedNodeIds.ToList(), _owner._primarySelectedNodeId));
+            _owner.SelectionChanged?.Invoke(_owner, _owner.CreateSelectionChangedEventArgs());
         }
 
         public GraphEditorSelectionSnapshot GetSelectionSnapshot()
-            => new(_owner._selectedNodeIds.ToList(), _owner._primarySelectedNodeId);
+            => _owner.CreateSelectionSnapshot();
     }
 }

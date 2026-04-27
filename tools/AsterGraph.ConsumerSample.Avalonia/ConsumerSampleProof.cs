@@ -56,6 +56,9 @@ public sealed record ConsumerSampleProofResult(
     bool DeleteAndReconnectOk = true,
     bool DetachNodeOk = true,
     bool ReconnectConflictReportOk = true,
+    bool EdgeMultiSelectOk = true,
+    bool WireSliceOk = true,
+    bool SelectedNodeEdgeHighlightOk = true,
     int NodeCount = 0,
     int ConnectionCount = 0,
     IReadOnlyList<string>? FeatureDescriptorIds = null,
@@ -82,6 +85,9 @@ public sealed record ConsumerSampleProofResult(
         && DeleteAndReconnectOk
         && DetachNodeOk
         && ReconnectConflictReportOk
+        && EdgeMultiSelectOk
+        && WireSliceOk
+        && SelectedNodeEdgeHighlightOk
         && NodeSideAuthoringOk
         && CommandSurfaceOk;
 
@@ -160,6 +166,9 @@ public sealed record ConsumerSampleProofResult(
         $"AUTHORING_DELETE_AND_RECONNECT_OK:{DeleteAndReconnectOk}",
         $"AUTHORING_DETACH_NODE_OK:{DetachNodeOk}",
         $"AUTHORING_RECONNECT_CONFLICT_REPORT_OK:{ReconnectConflictReportOk}",
+        $"AUTHORING_EDGE_MULTISELECT_OK:{EdgeMultiSelectOk}",
+        $"AUTHORING_WIRE_SLICE_OK:{WireSliceOk}",
+        $"AUTHORING_SELECTED_NODE_EDGE_HIGHLIGHT_OK:{SelectedNodeEdgeHighlightOk}",
         $"AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:{NodeSideAuthoringOk}",
         $"AUTHORING_SURFACE_COMMAND_PROJECTION_OK:{CommandSurfaceOk}",
         $"CONSUMER_SAMPLE_PARAMETER_OK:{ParameterProjectionOk}",
@@ -347,6 +356,9 @@ public static class ConsumerSampleProof
         bool deleteAndReconnectOk;
         bool detachNodeOk;
         bool reconnectConflictReportOk;
+        bool edgeMultiSelectOk;
+        bool wireSliceOk;
+        bool selectedNodeEdgeHighlightOk;
         try
         {
             capabilityWindow.Show();
@@ -371,6 +383,7 @@ public static class ConsumerSampleProof
             edgeQuickToolsOk = HasEdgeQuickTools(capabilityWindow, host);
             (dropNodeOnEdgeOk, edgeSplitCompatibilityOk, edgeSplitUndoOk) = HasDropNodeOnEdge(host);
             (deleteAndReconnectOk, detachNodeOk, reconnectConflictReportOk) = HasReconnectDetach(host);
+            (edgeMultiSelectOk, wireSliceOk, selectedNodeEdgeHighlightOk) = HasWireSelectionAndSlicing(host);
             (quickAddConnectedNodeOk, portFilteredNodeSearchOk) = HasQuickAddConnectedNode(host);
 
             host.SelectNode(reviewNodeId);
@@ -431,6 +444,9 @@ public static class ConsumerSampleProof
             DeleteAndReconnectOk: deleteAndReconnectOk,
             DetachNodeOk: detachNodeOk,
             ReconnectConflictReportOk: reconnectConflictReportOk,
+            EdgeMultiSelectOk: edgeMultiSelectOk,
+            WireSliceOk: wireSliceOk,
+            SelectedNodeEdgeHighlightOk: selectedNodeEdgeHighlightOk,
             ParameterSnapshots: proofParameterSnapshots,
             StartupMs: startupMs,
             InspectorProjectionMs: inspectorProjectionMs,
@@ -702,6 +718,37 @@ public static class ConsumerSampleProof
         host.Session.Commands.Undo();
 
         return (deleteAndReconnectOk, detachNodeOk, conflictReportOk);
+    }
+
+    private static (bool EdgeMultiSelectOk, bool WireSliceOk, bool SelectedNodeEdgeHighlightOk) HasWireSelectionAndSlicing(ConsumerSampleHost host)
+    {
+        const string connectionId = "consumer-sample-connection-001";
+        var before = host.Session.Queries.CreateDocumentSnapshot();
+        var originalConnection = before.Connections.FirstOrDefault(connection =>
+            string.Equals(connection.Id, connectionId, StringComparison.Ordinal));
+        if (originalConnection is null)
+        {
+            return (false, false, false);
+        }
+
+        host.Session.Commands.SetConnectionSelection([connectionId, "missing-connection"], connectionId, updateStatus: false);
+        var selection = host.Session.Queries.GetSelectionSnapshot();
+        var edgeMultiSelectOk = selection.SelectedNodeIds.Count == 0
+            && selection.SelectedConnectionIds.SequenceEqual([connectionId], StringComparer.Ordinal)
+            && string.Equals(selection.PrimarySelectedConnectionId, connectionId, StringComparison.Ordinal)
+            && host.Session.Commands.TryDeleteSelectedConnections()
+            && host.Session.Queries.CreateDocumentSnapshot().Connections.All(connection => !string.Equals(connection.Id, connectionId, StringComparison.Ordinal));
+        host.Session.Commands.Undo();
+
+        host.Session.Commands.SetSelection([originalConnection.SourceNodeId, originalConnection.TargetNodeId], originalConnection.SourceNodeId, updateStatus: false);
+        var selectedNodeEdgeHighlightOk = host.Session.Queries.GetSelectedNodeConnectionIds()
+            .SequenceEqual([connectionId], StringComparer.Ordinal);
+
+        var wireSliceOk = host.Session.Commands.TrySliceConnections(new GraphPoint(470, 230), new GraphPoint(470, 330))
+            && host.Session.Queries.CreateDocumentSnapshot().Connections.All(connection => !string.Equals(connection.Id, connectionId, StringComparison.Ordinal));
+        host.Session.Commands.Undo();
+
+        return (edgeMultiSelectOk, wireSliceOk, selectedNodeEdgeHighlightOk);
     }
 
     private static Window CreateCapabilityBreadthWindow(ConsumerSampleHost host)

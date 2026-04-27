@@ -24,6 +24,9 @@ public interface IGraphEditorQueries
     /// <returns>当前选择状态。</returns>
     GraphEditorSelectionSnapshot GetSelectionSnapshot();
 
+    IReadOnlyList<string> GetSelectedNodeConnectionIds()
+        => [];
+
     /// <summary>
     /// 获取当前视口快照。
     /// </summary>

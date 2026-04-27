@@ -25,4 +25,8 @@ public sealed class GraphEditorSelectionChangedEventArgs : EventArgs
     /// 当前主选中节点实例标识。
     /// </summary>
     public string? PrimarySelectedNodeId { get; }
+
+    public IReadOnlyList<string> SelectedConnectionIds { get; init; } = [];
+
+    public string? PrimarySelectedConnectionId { get; init; }
 }

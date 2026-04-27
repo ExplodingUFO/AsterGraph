@@ -62,6 +62,9 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
     public void SetSelection(IReadOnlyList<string> nodeIds, string? primaryNodeId, bool updateStatus)
         => _kernel.SetSelection(nodeIds, primaryNodeId, updateStatus);
 
+    public void SetConnectionSelection(IReadOnlyList<string> connectionIds, string? primaryConnectionId, bool updateStatus)
+        => _kernel.SetConnectionSelection(connectionIds, primaryConnectionId, updateStatus);
+
     public void AddNode(NodeDefinitionId definitionId, GraphPoint? preferredWorldPosition)
         => _kernel.AddNode(definitionId, preferredWorldPosition);
 
@@ -85,6 +88,12 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
 
     public bool TryDetachSelectionFromConnections()
         => _kernel.TryDetachSelectionFromConnections();
+
+    public bool TryDeleteSelectedConnections()
+        => _kernel.TryDeleteSelectedConnections();
+
+    public bool TrySliceConnections(GraphPoint start, GraphPoint end)
+        => _kernel.TrySliceConnections(start, end);
 
     public void DeleteSelection() => _kernel.DeleteSelection();
 

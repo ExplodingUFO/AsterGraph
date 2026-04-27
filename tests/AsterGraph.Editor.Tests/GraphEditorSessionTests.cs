@@ -247,6 +247,7 @@ public sealed class GraphEditorSessionTests
         AssertMethod(commandsType, nameof(IGraphEditorCommands.Redo));
         AssertMethod(commandsType, nameof(IGraphEditorCommands.ClearSelection), typeof(bool));
         AssertMethod(commandsType, nameof(IGraphEditorCommands.SetSelection), typeof(IReadOnlyList<string>), typeof(string), typeof(bool));
+        AssertMethod(commandsType, nameof(IGraphEditorCommands.SetConnectionSelection), typeof(IReadOnlyList<string>), typeof(string), typeof(bool));
         AssertMethod(commandsType, nameof(IGraphEditorCommands.AddNode), typeof(NodeDefinitionId), typeof(GraphPoint?));
         AssertMethod(commandsType, nameof(IGraphEditorCommands.TryInsertNodeIntoConnection), typeof(string), typeof(NodeDefinitionId), typeof(string), typeof(GraphConnectionTargetKind), typeof(string), typeof(GraphPoint?));
         Assert.Equal(typeof(bool), commandsType.GetMethod(nameof(IGraphEditorCommands.TryInsertNodeIntoConnection), [typeof(string), typeof(NodeDefinitionId), typeof(string), typeof(GraphConnectionTargetKind), typeof(string), typeof(GraphPoint?)])!.ReturnType);
@@ -254,6 +255,10 @@ public sealed class GraphEditorSessionTests
         Assert.Equal(typeof(bool), commandsType.GetMethod(nameof(IGraphEditorCommands.TryDeleteSelectionAndReconnect), Type.EmptyTypes)!.ReturnType);
         AssertMethod(commandsType, nameof(IGraphEditorCommands.TryDetachSelectionFromConnections));
         Assert.Equal(typeof(bool), commandsType.GetMethod(nameof(IGraphEditorCommands.TryDetachSelectionFromConnections), Type.EmptyTypes)!.ReturnType);
+        AssertMethod(commandsType, nameof(IGraphEditorCommands.TryDeleteSelectedConnections));
+        Assert.Equal(typeof(bool), commandsType.GetMethod(nameof(IGraphEditorCommands.TryDeleteSelectedConnections), Type.EmptyTypes)!.ReturnType);
+        AssertMethod(commandsType, nameof(IGraphEditorCommands.TrySliceConnections), typeof(GraphPoint), typeof(GraphPoint));
+        Assert.Equal(typeof(bool), commandsType.GetMethod(nameof(IGraphEditorCommands.TrySliceConnections), [typeof(GraphPoint), typeof(GraphPoint)])!.ReturnType);
         AssertMethod(commandsType, nameof(IGraphEditorCommands.DeleteSelection));
         AssertMethod(commandsType, nameof(IGraphEditorCommands.SetNodePositions), typeof(IReadOnlyList<NodePositionSnapshot>), typeof(bool));
         AssertMethod(commandsType, "TryCopySelectionAsync", typeof(CancellationToken));
@@ -310,6 +315,15 @@ public sealed class GraphEditorSessionTests
 
         AssertMethod(queriesType, nameof(IGraphEditorQueries.GetSelectionSnapshot));
         Assert.Equal(typeof(GraphEditorSelectionSnapshot), queriesType.GetMethod(nameof(IGraphEditorQueries.GetSelectionSnapshot))!.ReturnType);
+        Assert.NotNull(typeof(GraphEditorSelectionSnapshot).GetProperty(nameof(GraphEditorSelectionSnapshot.SelectedConnectionIds)));
+        Assert.NotNull(typeof(GraphEditorSelectionSnapshot).GetProperty(nameof(GraphEditorSelectionSnapshot.PrimarySelectedConnectionId)));
+        Assert.NotNull(typeof(GraphEditorSelectionChangedEventArgs).GetProperty(nameof(GraphEditorSelectionChangedEventArgs.SelectedConnectionIds)));
+        Assert.NotNull(typeof(GraphEditorSelectionChangedEventArgs).GetProperty(nameof(GraphEditorSelectionChangedEventArgs.PrimarySelectedConnectionId)));
+
+        AssertMethod(queriesType, nameof(IGraphEditorQueries.GetSelectedNodeConnectionIds));
+        Assert.Equal(
+            typeof(IReadOnlyList<string>),
+            queriesType.GetMethod(nameof(IGraphEditorQueries.GetSelectedNodeConnectionIds))!.ReturnType);
 
         AssertMethod(queriesType, nameof(IGraphEditorQueries.GetViewportSnapshot));
         Assert.Equal(typeof(GraphEditorViewportSnapshot), queriesType.GetMethod(nameof(IGraphEditorQueries.GetViewportSnapshot))!.ReturnType);

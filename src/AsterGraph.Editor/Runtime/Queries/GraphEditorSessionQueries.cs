@@ -22,6 +22,21 @@ public sealed partial class GraphEditorSession
     public GraphEditorSelectionSnapshot GetSelectionSnapshot()
         => _host.GetSelectionSnapshot();
 
+    public IReadOnlyList<string> GetSelectedNodeConnectionIds()
+    {
+        var selectedNodeIds = GetSelectionSnapshot().SelectedNodeIds.ToHashSet(StringComparer.Ordinal);
+        if (selectedNodeIds.Count < 2)
+        {
+            return [];
+        }
+
+        return _host.CreateActiveScopeDocumentSnapshot()
+            .Connections
+            .Where(connection => selectedNodeIds.Contains(connection.SourceNodeId) && selectedNodeIds.Contains(connection.TargetNodeId))
+            .Select(connection => connection.Id)
+            .ToList();
+    }
+
     public GraphEditorViewportSnapshot GetViewportSnapshot()
         => _host.GetViewportSnapshot();
 
@@ -67,6 +82,7 @@ public sealed partial class GraphEditorSession
                 new GraphEditorFeatureDescriptorSnapshot("capability.export.scene-png", "capability", (_descriptorSupport?.HasSceneImageExportService ?? false) && GetSceneSnapshot().Document.Nodes.Count > 0),
                 new GraphEditorFeatureDescriptorSnapshot("capability.export.scene-jpeg", "capability", (_descriptorSupport?.HasSceneImageExportService ?? false) && GetSceneSnapshot().Document.Nodes.Count > 0),
                 new GraphEditorFeatureDescriptorSnapshot("query.scene-snapshot", "query", true),
+                new GraphEditorFeatureDescriptorSnapshot("query.selected-node-connection-ids", "query", true),
                 new GraphEditorFeatureDescriptorSnapshot("query.node-surface-snapshots", "query", true),
                 new GraphEditorFeatureDescriptorSnapshot("query.connection-geometry-snapshots", "query", true),
                 new GraphEditorFeatureDescriptorSnapshot("query.hierarchy-state-snapshot", "query", true),
@@ -82,6 +98,9 @@ public sealed partial class GraphEditorSession
                 new GraphEditorFeatureDescriptorSnapshot("capability.connections.reconnect", "capability", capabilities.CanCreateConnections && capabilities.CanDeleteConnections),
                 new GraphEditorFeatureDescriptorSnapshot("capability.connections.disconnect", "capability", capabilities.CanDeleteConnections),
                 new GraphEditorFeatureDescriptorSnapshot("capability.connections.delete", "capability", capabilities.CanDeleteConnections),
+                new GraphEditorFeatureDescriptorSnapshot("capability.connections.select", "capability", true),
+                new GraphEditorFeatureDescriptorSnapshot("capability.connections.multiselect", "capability", true),
+                new GraphEditorFeatureDescriptorSnapshot("capability.connections.slice", "capability", capabilities.CanDeleteConnections),
                 new GraphEditorFeatureDescriptorSnapshot("capability.connections.break", "capability", capabilities.CanBreakConnections),
                 new GraphEditorFeatureDescriptorSnapshot("capability.viewport.update", "capability", capabilities.CanUpdateViewport),
                 new GraphEditorFeatureDescriptorSnapshot("capability.viewport.fit", "capability", capabilities.CanFitToViewport),

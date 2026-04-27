@@ -121,10 +121,12 @@ internal sealed partial class GraphEditorKernel
             _owner._activeGraphId = state.ActiveGraphId;
             _owner._selectedNodeIds = state.SelectedNodeIds.ToList();
             _owner._primarySelectedNodeId = state.PrimarySelectedNodeId;
+            _owner._selectedConnectionIds = [];
+            _owner._primarySelectedConnectionId = null;
             _owner.NormalizeSessionStateAfterDocumentChange();
             _owner._pendingConnection = GraphEditorPendingConnectionSnapshot.Create(false, null, null);
             _owner.CurrentStatusMessage = status;
-            _owner.SelectionChanged?.Invoke(_owner, new GraphEditorSelectionChangedEventArgs(_owner._selectedNodeIds.ToList(), _owner._primarySelectedNodeId));
+            _owner.SelectionChanged?.Invoke(_owner, _owner.CreateSelectionChangedEventArgs());
             _owner.PendingConnectionChanged?.Invoke(_owner, new GraphEditorPendingConnectionChangedEventArgs(_owner._pendingConnection));
             _owner.DocumentChanged?.Invoke(_owner, new GraphEditorDocumentChangedEventArgs(changeKind, statusMessage: _owner.CurrentStatusMessage));
         }

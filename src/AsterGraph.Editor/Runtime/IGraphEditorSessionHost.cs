@@ -26,6 +26,7 @@ internal interface IGraphEditorSessionHost
     void Redo();
     void ClearSelection(bool updateStatus);
     void SetSelection(IReadOnlyList<string> nodeIds, string? primaryNodeId, bool updateStatus);
+    void SetConnectionSelection(IReadOnlyList<string> connectionIds, string? primaryConnectionId, bool updateStatus);
     void AddNode(NodeDefinitionId definitionId, GraphPoint? preferredWorldPosition);
     bool TryInsertNodeIntoConnection(
         string connectionId,
@@ -36,6 +37,8 @@ internal interface IGraphEditorSessionHost
         GraphPoint? preferredWorldPosition);
     bool TryDeleteSelectionAndReconnect();
     bool TryDetachSelectionFromConnections();
+    bool TryDeleteSelectedConnections();
+    bool TrySliceConnections(GraphPoint start, GraphPoint end);
     void DeleteSelection();
     Task<bool> TryCopySelectionAsync(CancellationToken cancellationToken);
     Task<bool> TryPasteSelectionAsync(CancellationToken cancellationToken);

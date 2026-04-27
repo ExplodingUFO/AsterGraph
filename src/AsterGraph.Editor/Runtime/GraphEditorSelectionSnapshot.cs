@@ -7,4 +7,9 @@ namespace AsterGraph.Editor.Runtime;
 /// <param name="PrimarySelectedNodeId">当前主选中节点实例标识。</param>
 public sealed record GraphEditorSelectionSnapshot(
     IReadOnlyList<string> SelectedNodeIds,
-    string? PrimarySelectedNodeId);
+    string? PrimarySelectedNodeId)
+{
+    public IReadOnlyList<string> SelectedConnectionIds { get; init; } = [];
+
+    public string? PrimarySelectedConnectionId { get; init; }
+}
