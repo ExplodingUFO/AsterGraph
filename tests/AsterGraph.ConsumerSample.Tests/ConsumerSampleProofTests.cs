@@ -153,6 +153,9 @@ public sealed class ConsumerSampleProofTests
         Assert.True(result.GraphSnippetInsertOk);
         Assert.True(result.RuntimeOverlaySupportBundleOk);
         Assert.True(result.OnboardingConfigurationOk);
+        Assert.True(result.ExperiencePolishHandoffOk);
+        Assert.True(result.FeatureEnhancementProofOk);
+        Assert.True(result.ExperienceScopeBoundaryOk);
         Assert.True(result.StartupMs >= 0);
         Assert.True(result.InspectorProjectionMs >= 0);
         Assert.True(result.PluginScanMs >= 0);
@@ -222,6 +225,9 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(result.ProofLines, line => line == "FIVE_MINUTE_ONBOARDING_OK:True");
         Assert.Contains(result.ProofLines, line => line == "ONBOARDING_CONFIGURATION_OK:True");
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_SURFACE_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "EXPERIENCE_POLISH_HANDOFF_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "FEATURE_ENHANCEMENT_PROOF_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "EXPERIENCE_SCOPE_BOUNDARY_OK:True");
         Assert.Contains(result.MetricLines, line => line.Contains("startup_ms", StringComparison.Ordinal));
         Assert.Contains(result.MetricLines, line => line.Contains("command_latency_ms", StringComparison.Ordinal));
         Assert.Contains(result.MetricLines, line => line.Contains("stencil_search_ms", StringComparison.Ordinal));
@@ -229,6 +235,47 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(result.MetricLines, line => line.Contains("node_tool_projection_ms", StringComparison.Ordinal));
         Assert.Contains(result.MetricLines, line => line.Contains("edge_tool_projection_ms", StringComparison.Ordinal));
         Assert.Contains(result.MetricLines, line => line.Contains("command_palette_ms", StringComparison.Ordinal));
+    }
+
+    [AvaloniaFact]
+    public void ConsumerSampleProofResult_ForbiddenFeatureDescriptor_FailsScopeBoundaryMarker()
+    {
+        var result = new ConsumerSampleProofResult(
+            HostMenuActionOk: true,
+            PluginContributionOk: true,
+            ParameterProjectionOk: true,
+            MetadataProjectionOk: true,
+            NodeSideAuthoringOk: true,
+            WindowCompositionOk: true,
+            TrustTransparencyOk: true,
+            CommandSurfaceOk: true,
+            StencilSurfaceOk: true,
+            ExportBreadthOk: true,
+            NodeQuickToolsOk: true,
+            EdgeQuickToolsOk: true,
+            HostedAccessibilityBaselineOk: true,
+            HostedAccessibilityFocusOk: true,
+            HostedAccessibilityCommandSurfaceOk: true,
+            HostedAccessibilityAuthoringSurfaceOk: true,
+            ParameterSnapshots: [],
+            StartupMs: 1,
+            InspectorProjectionMs: 1,
+            PluginScanMs: 1,
+            CommandLatencyMs: 1,
+            StencilSearchMs: 1,
+            CommandSurfaceRefreshMs: 1,
+            NodeToolProjectionMs: 1,
+            EdgeToolProjectionMs: 1,
+            CommandPaletteMs: 1,
+            ReadinessStatus: "Ready",
+            ValidationSummary: ConsumerSampleProofValidationSummary.Empty,
+            ValidationFeedback: [],
+            NodeCount: 2,
+            FeatureDescriptorIds: ["capability.export.scene-svg", "marketplace.remote-install"]);
+
+        Assert.False(result.ExperienceScopeBoundaryOk);
+        Assert.Contains(result.ProofLines, line => line == "EXPERIENCE_SCOPE_BOUNDARY_OK:False");
+        Assert.Contains(result.ProofLines, line => line == "CONSUMER_SAMPLE_OK:False");
     }
 
     [AvaloniaFact]

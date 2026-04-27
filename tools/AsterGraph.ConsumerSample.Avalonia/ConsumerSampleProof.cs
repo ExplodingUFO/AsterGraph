@@ -169,6 +169,58 @@ public sealed record ConsumerSampleProofResult(
         && NodeCount > 0
         && (FeatureDescriptorIds?.Count > 0);
 
+    public bool ExperiencePolishHandoffOk
+        => AuthoringSurfaceOk
+        && HostedAccessibilityOk
+        && WidenedSurfacePerformanceOk
+        && OnboardingConfigurationOk;
+
+    public bool FeatureEnhancementProofOk
+        => QuickAddConnectedNodeOk
+        && PortFilteredNodeSearchOk
+        && DropNodeOnEdgeOk
+        && EdgeSplitCompatibilityOk
+        && EdgeSplitUndoOk
+        && DeleteAndReconnectOk
+        && DetachNodeOk
+        && ReconnectConflictReportOk
+        && EdgeMultiSelectOk
+        && WireSliceOk
+        && SelectedNodeEdgeHighlightOk
+        && RuntimeOverlaySnapshotOk
+        && RuntimeLogPanelOk
+        && RuntimeLogFilterOk
+        && RuntimeOverlaySupportBundleOk
+        && GraphValidationFeedbackOk
+        && GraphFeedbackFocusTargetOk
+        && GraphReadinessStatusOk
+        && LayoutProviderSeamOk
+        && LayoutPreviewApplyCancelOk
+        && LayoutUndoTransactionOk
+        && ReadabilityFocusSubgraphOk
+        && ReadabilityRouteCleanupOk
+        && ReadabilityAlignmentHelpersOk
+        && PluginLocalGalleryOk
+        && PluginTrustEvidencePanelOk
+        && PluginAllowlistRoundtripOk
+        && PluginSamplePackOk
+        && PluginSampleNodeDefinitionsOk
+        && PluginSampleParameterMetadataOk
+        && GraphSnippetCatalogOk
+        && GraphSnippetInsertOk;
+
+    public bool ExperienceScopeBoundaryOk
+        => HostOwnedActionsOk
+        && TrustTransparencyOk
+        && SupportBundlePayloadOk
+        && RuntimeOverlaySupportBundleOk
+        && PluginTrustEvidencePanelOk
+        && PluginAllowlistRoundtripOk
+        && GraphSnippetCatalogOk
+        && GraphSnippetInsertOk
+        && FeatureDescriptorIds is { Count: > 0 }
+        && FeatureDescriptorIds.All(IsBoundedFeatureDescriptorId);
+
     public bool IsOk
         => HostMenuActionOk
         && PluginContributionOk
@@ -178,7 +230,10 @@ public sealed record ConsumerSampleProofResult(
         && CapabilityBreadthOk
         && HostedAccessibilityOk
         && WidenedSurfacePerformanceOk
-        && OnboardingConfigurationOk;
+        && OnboardingConfigurationOk
+        && ExperiencePolishHandoffOk
+        && FeatureEnhancementProofOk
+        && ExperienceScopeBoundaryOk;
 
     public IReadOnlyList<string> MetricLines =>
     [
@@ -263,6 +318,9 @@ public sealed record ConsumerSampleProofResult(
         $"FIVE_MINUTE_ONBOARDING_OK:{FiveMinuteOnboardingOk}",
         $"ONBOARDING_CONFIGURATION_OK:{OnboardingConfigurationOk}",
         $"AUTHORING_SURFACE_OK:{AuthoringSurfaceOk}",
+        $"EXPERIENCE_POLISH_HANDOFF_OK:{ExperiencePolishHandoffOk}",
+        $"FEATURE_ENHANCEMENT_PROOF_OK:{FeatureEnhancementProofOk}",
+        $"EXPERIENCE_SCOPE_BOUNDARY_OK:{ExperienceScopeBoundaryOk}",
         $"CONSUMER_SAMPLE_OK:{IsOk}",
     ];
 
@@ -347,6 +405,14 @@ public sealed record ConsumerSampleProofResult(
             "Parameter" => target.NodeId is not null && target.ParameterKey is not null,
             _ => false,
         };
+
+    private static bool IsBoundedFeatureDescriptorId(string featureDescriptorId)
+        => !featureDescriptorId.Contains("marketplace", StringComparison.OrdinalIgnoreCase)
+        && !featureDescriptorId.Contains("sandbox", StringComparison.OrdinalIgnoreCase)
+        && !featureDescriptorId.Contains("untrusted", StringComparison.OrdinalIgnoreCase)
+        && !featureDescriptorId.Contains("wpf", StringComparison.OrdinalIgnoreCase)
+        && !featureDescriptorId.Contains("runtime.snippet", StringComparison.OrdinalIgnoreCase)
+        && !featureDescriptorId.Contains("snippet-runtime", StringComparison.OrdinalIgnoreCase);
 }
 
 public static class ConsumerSampleProof
