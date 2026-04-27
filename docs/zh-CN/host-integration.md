@@ -152,7 +152,7 @@ retained 迁移不是 `fallback`。它仍然只是 legacy host 的 compatibility
 | `MiniMap` | session/viewport snapshots + `AsterGraphMiniMapViewFactory.Create(...)` | 属于第 2 条路线下的 standalone surface，不是独立路线 | `AsterGraph.Demo` |
 | `Stencil` | session stencil discovery + insertion commands | shipped Avalonia surface 消费同一份 session discovery 数据 | `AsterGraph.Demo` |
 | `Fragment Library` | 由 fragment workspace/library service 支撑的 session fragment/template commands | 宿主可替换存储，但不需要重写 command surface | `AsterGraph.Demo` |
-| `Export` | `IGraphSceneSvgExportService` + `TryExportSceneAsSvg()`，以及 raster export 的 `GraphEditorSceneImageExportOptions` progress/cancel options | export 和 workspace persistence、fragment storage 明确分离 | `AsterGraph.HostSample`、`AsterGraph.ScaleSmoke` |
+| `Export` | `IGraphSceneSvgExportService` + `TryExportSceneAsSvg()`，以及 raster export 的 `GraphEditorSceneImageExportOptions` progress/cancel/scope options | export 和 workspace persistence、fragment storage 明确分离 | `AsterGraph.HostSample`、`AsterGraph.ScaleSmoke` |
 | `Baseline Edge Authoring` | connection start/complete/reconnect/disconnect commands 加 pending snapshot | pointer gesture 是 adapter 行为，底层仍复用同一份 session semantics | `AsterGraph.HostSample`、`AsterGraph.ScaleSmoke` |
 | `Node Surface Authoring` | `GetNodeSurfaceSnapshots()`、`TrySetNodeSize(...)` 以及走共享 session command 路径的参数编辑 | Avalonia 会把同一份 tier state 投影成卡片阈值、节点旁路参数编辑器和 stock authoring chrome | `AsterGraph.Demo`、[Advanced Editing Guide](./advanced-editing.md) |
 | `Hierarchy Semantics` | `GetHierarchyStateSnapshot()`、`GetNodeGroups()`、`GetNodeGroupSnapshots()` 以及 group collapse/move/resize/membership commands | stock canvas 在同一份 hierarchy state 上叠加 frame chrome、content-area membership 和 collapse affordance | `AsterGraph.Demo`、[Advanced Editing Guide](./advanced-editing.md) |
@@ -178,7 +178,7 @@ retained 迁移不是 `fallback`。它仍然只是 legacy host 的 compatibility
 
 - 工作区持久化：`IGraphWorkspaceService` 负责完整可编辑图状态的保存/加载；工作区文档契约见 [序列化契约](./serialization-contracts.md)
 - 片段持久化：fragment workspace + fragment library services 负责可复用的选择片段载荷
-- 场景导出：`IGraphSceneSvgExportService` 负责基于 `IGraphEditorSession.Queries.GetSceneSnapshot()` 生成非工作区的 SVG 输出；raster image export 可以上报 `GraphEditorSceneImageExportProgressSnapshot`，并遵守 `GraphEditorSceneImageExportOptions.CancellationToken`
+- 场景导出：`IGraphSceneSvgExportService` 负责基于 `IGraphEditorSession.Queries.GetSceneSnapshot()` 生成非工作区的 SVG 输出；raster image export 可以上报 `GraphEditorSceneImageExportProgressSnapshot`，遵守 `GraphEditorSceneImageExportOptions.CancellationToken`，并显式限定为 full scene 或 selected nodes
 
 内置导出 seam 不属于 workspace save/load，也不替代 fragment/template 流程。
 

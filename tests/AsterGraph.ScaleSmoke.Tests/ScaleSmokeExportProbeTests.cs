@@ -31,8 +31,12 @@ public sealed class ScaleSmokeExportProbeTests
         Assert.True(result.ReloadOk, marker);
         Assert.True(result.ProgressOk, marker);
         Assert.True(result.CancelOk, marker);
+        Assert.True(result.FullScopeOk, marker);
+        Assert.True(result.SelectionScopeOk, marker);
         Assert.True(result.IsOk, marker);
         Assert.Contains("progress=True", marker, StringComparison.Ordinal);
         Assert.Contains("cancel=True", marker, StringComparison.Ordinal);
+        Assert.Contains("scope=True", marker, StringComparison.Ordinal);
+        Assert.Contains("selection=True", marker, StringComparison.Ordinal);
     }
 }

@@ -152,7 +152,7 @@ Treat the official capability modules as a host-facing map layered on top of the
 | `MiniMap` | session/viewport snapshots + `AsterGraphMiniMapViewFactory.Create(...)` | standalone surface under route 2, not a separate route | `AsterGraph.Demo` |
 | `Stencil` | session stencil discovery + insertion commands | shipped Avalonia surface consumes the same session discovery data | `AsterGraph.Demo` |
 | `Fragment Library` | session fragment/template commands backed by fragment workspace/library services | hosted shells can replace storage without replacing the command surface | `AsterGraph.Demo` |
-| `Export` | `IGraphSceneSvgExportService` + `TryExportSceneAsSvg()` plus raster export `GraphEditorSceneImageExportOptions` progress/cancel options | export stays separate from workspace persistence and fragment storage | `AsterGraph.HostSample`, `AsterGraph.ScaleSmoke` |
+| `Export` | `IGraphSceneSvgExportService` + `TryExportSceneAsSvg()` plus raster export `GraphEditorSceneImageExportOptions` progress/cancel/scope options | export stays separate from workspace persistence and fragment storage | `AsterGraph.HostSample`, `AsterGraph.ScaleSmoke` |
 | `Baseline Edge Authoring` | connection start/complete/reconnect/disconnect commands + pending snapshot | pointer gestures are adapter behavior layered on top of the same session semantics | `AsterGraph.HostSample`, `AsterGraph.ScaleSmoke` |
 | `Node Surface Authoring` | `GetNodeSurfaceSnapshots()`, `TrySetNodeSize(...)`, and parameter edits through the shared session command path | Avalonia projects the same tier state into card thresholds, node-side parameter editors, and stock authoring chrome | `AsterGraph.Demo`, [Advanced Editing Guide](./advanced-editing.md) |
 | `Hierarchy Semantics` | `GetHierarchyStateSnapshot()`, `GetNodeGroups()`, `GetNodeGroupSnapshots()`, and group collapse/move/resize/membership commands | the stock canvas keeps frame chrome, content-area membership, and collapse affordances on top of the same hierarchy state | `AsterGraph.Demo`, [Advanced Editing Guide](./advanced-editing.md) |
@@ -178,7 +178,7 @@ Treat these as three separate host seams:
 
 - workspace persistence: `IGraphWorkspaceService` owns save/load of the full editable graph state using the canonical flow in [Serialization Contracts](./serialization-contracts.md)
 - fragment persistence: fragment workspace + fragment library services own reusable selection payloads
-- scene export: `IGraphSceneSvgExportService` owns non-workspace SVG output built from `IGraphEditorSession.Queries.GetSceneSnapshot()`; raster image export can report `GraphEditorSceneImageExportProgressSnapshot` values and honor `GraphEditorSceneImageExportOptions.CancellationToken`
+- scene export: `IGraphSceneSvgExportService` owns non-workspace SVG output built from `IGraphEditorSession.Queries.GetSceneSnapshot()`; raster image export can report `GraphEditorSceneImageExportProgressSnapshot` values, honor `GraphEditorSceneImageExportOptions.CancellationToken`, and explicitly scope to the full scene or selected nodes
 
 The shipped export seam is intentionally separate from workspace save/load and does not replace fragment/template flows.
 

@@ -13,6 +13,8 @@ public sealed record ScaleSmokeExportProbeResult(
     bool ReloadOk,
     bool ProgressOk,
     bool CancelOk,
+    bool FullScopeOk,
+    bool SelectionScopeOk,
     ScaleSmokeExportMetrics Metrics)
 {
     public bool IsOk
@@ -21,7 +23,9 @@ public sealed record ScaleSmokeExportProbeResult(
         && JpegExportOk
         && ReloadOk
         && ProgressOk
-        && CancelOk;
+        && CancelOk
+        && FullScopeOk
+        && SelectionScopeOk;
 
     public string ToMarker(string tierId)
     {
@@ -38,6 +42,8 @@ public sealed record ScaleSmokeExportProbeResult(
                 $"reload={ReloadOk}",
                 $"progress={ProgressOk}",
                 $"cancel={CancelOk}",
+                $"scope={FullScopeOk}",
+                $"selection={SelectionScopeOk}",
             ]);
     }
 }
@@ -68,9 +74,13 @@ public static class ScaleSmokeExportProbe
             && File.ReadAllText(svgPath).Contains("<svg", StringComparison.Ordinal);
 
         var pngExportMs = MeasureMilliseconds(() =>
-            session.Commands.TryExportSceneAsImage(GraphEditorSceneImageExportFormat.Png, pngPath, imageExportOptions));
+            session.Commands.TryExportSceneAsImage(
+                GraphEditorSceneImageExportFormat.Png,
+                pngPath,
+                imageExportOptions with { Scope = GraphEditorSceneImageExportScope.FullScene }));
         var pngExportOk = File.Exists(pngPath)
             && HasImageSignature(File.ReadAllBytes(pngPath), GraphEditorSceneImageExportFormat.Png);
+        var fullScopeOk = pngExportOk;
 
         var jpegExportMs = MeasureMilliseconds(() =>
             session.Commands.TryExportSceneAsImage(GraphEditorSceneImageExportFormat.Jpeg, jpegPath, imageExportOptions));
@@ -89,6 +99,24 @@ public static class ScaleSmokeExportProbe
             && !File.Exists(cancelPath);
 
         var initialSnapshot = session.Queries.CreateDocumentSnapshot();
+        var selectedNodeIds = initialSnapshot.Nodes
+            .Take(2)
+            .Select(node => node.Id)
+            .ToList();
+        if (selectedNodeIds.Count < 2)
+        {
+            throw new InvalidOperationException("Export scope probe requires at least two nodes.");
+        }
+
+        session.Commands.SetSelection(selectedNodeIds, selectedNodeIds[0], updateStatus: false);
+        var selectedScopePath = Path.Combine(storageRoot, "scale-export-selection.png");
+        var selectionScopeOk = session.Commands.TryExportSceneAsImage(
+            GraphEditorSceneImageExportFormat.Png,
+            selectedScopePath,
+            imageExportOptions with { Scope = GraphEditorSceneImageExportScope.SelectedNodes })
+            && File.Exists(selectedScopePath)
+            && HasImageSignature(File.ReadAllBytes(selectedScopePath), GraphEditorSceneImageExportFormat.Png);
+
         var initialNodeCount = initialSnapshot.Nodes.Count;
         var firstDefinitionId = initialSnapshot.Nodes
             .Select(node => node.DefinitionId)
@@ -110,6 +138,8 @@ public static class ScaleSmokeExportProbe
             ReloadOk: reloadOk,
             ProgressOk: progressOk,
             CancelOk: cancelOk,
+            FullScopeOk: fullScopeOk,
+            SelectionScopeOk: selectionScopeOk,
             Metrics: new ScaleSmokeExportMetrics(
                 SvgExportMs: svgExportMs,
                 PngExportMs: pngExportMs,

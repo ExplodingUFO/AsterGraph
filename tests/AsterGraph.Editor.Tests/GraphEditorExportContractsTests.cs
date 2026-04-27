@@ -152,6 +152,55 @@ public sealed class GraphEditorExportContractsTests
     }
 
     [Fact]
+    public void RuntimeSession_ExportSceneAsImage_SelectedNodeScopePassesBoundedSceneToService()
+    {
+        var definitionId = new NodeDefinitionId("tests.export.image-selected-scope");
+        var exportService = new RecordingSceneImageExportService("image://tests.export/selected.png");
+        var session = AsterGraphEditorFactory.CreateSession(CreateOptions(definitionId) with
+        {
+            SceneImageExportService = exportService,
+        });
+        session.Commands.SetSelection(["source-node"], "source-node", updateStatus: false);
+
+        var exported = session.Commands.TryExportSceneAsImage(
+            GraphEditorSceneImageExportFormat.Png,
+            "image://tests.export/selected.png",
+            new GraphEditorSceneImageExportOptions
+            {
+                Scope = GraphEditorSceneImageExportScope.SelectedNodes,
+            });
+
+        Assert.True(exported);
+        Assert.NotNull(exportService.LastScene);
+        var node = Assert.Single(exportService.LastScene!.Document.Nodes);
+        Assert.Equal("source-node", node.Id);
+        Assert.Empty(exportService.LastScene.Document.Connections);
+        Assert.Equal(["source-node"], exportService.LastScene.Selection.SelectedNodeIds);
+    }
+
+    [Fact]
+    public void RuntimeSession_ExportSceneAsImage_SelectedNodeScopeFailsWithoutSelection()
+    {
+        var definitionId = new NodeDefinitionId("tests.export.image-selected-scope-empty");
+        var exportService = new RecordingSceneImageExportService("image://tests.export/selected.png");
+        var session = AsterGraphEditorFactory.CreateSession(CreateOptions(definitionId) with
+        {
+            SceneImageExportService = exportService,
+        });
+
+        var exported = session.Commands.TryExportSceneAsImage(
+            GraphEditorSceneImageExportFormat.Png,
+            "image://tests.export/selected.png",
+            new GraphEditorSceneImageExportOptions
+            {
+                Scope = GraphEditorSceneImageExportScope.SelectedNodes,
+            });
+
+        Assert.False(exported);
+        Assert.Null(exportService.LastScene);
+    }
+
+    [Fact]
     public void RuntimeSession_ExportSceneAsImage_ReturnsFalseForEmptyScene()
     {
         var definitionId = new NodeDefinitionId("tests.export.image-empty");

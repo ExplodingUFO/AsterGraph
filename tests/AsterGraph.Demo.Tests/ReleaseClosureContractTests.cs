@@ -29,11 +29,11 @@ public sealed class ReleaseClosureContractTests
         WriteProofFile(
             proofRoot,
             "public-api-surface.txt",
-            "PUBLIC_API_SURFACE_OK:3403:net9.0`nPUBLIC_API_GUIDANCE_OK:True");
+            "PUBLIC_API_SURFACE_OK:3407:net9.0`nPUBLIC_API_GUIDANCE_OK:True");
         WriteProofFile(
             proofRoot,
             "scale-smoke.txt",
-            "SCALE_TIER_BUDGET:baseline`nSCALE_PERFORMANCE_BUDGET_OK:baseline:True:none`nSCALE_AUTHORING_BUDGET_OK:baseline:True:none`nSCALE_EXPORT_BUDGET_OK:baseline:True:none`nEXPORT_PROGRESS_OK:True`nEXPORT_CANCEL_OK:True`nSCALE_HISTORY_CONTRACT_OK:True");
+            "SCALE_TIER_BUDGET:baseline`nSCALE_PERFORMANCE_BUDGET_OK:baseline:True:none`nSCALE_AUTHORING_BUDGET_OK:baseline:True:none`nSCALE_EXPORT_BUDGET_OK:baseline:True:none`nEXPORT_PROGRESS_OK:True`nEXPORT_CANCEL_OK:True`nEXPORT_SCOPE_OK:True`nEXPORT_SELECTION_SCOPE_OK:True`nSCALE_HISTORY_CONTRACT_OK:True");
         WriteProofFile(
             proofRoot,
             "hello-world-wpf-proof.txt",
@@ -110,7 +110,7 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("TEMPLATE_SMOKE_PLUGIN_VALIDATE_OK:True", notes, StringComparison.Ordinal);
         Assert.Contains("TEMPLATE_SMOKE_PLUGIN_CAPABILITY_SUMMARY_OK:True", notes, StringComparison.Ordinal);
         Assert.Contains("TEMPLATE_SMOKE_PLUGIN_TRUST_HASH_OK:True", notes, StringComparison.Ordinal);
-        Assert.Contains("PUBLIC_API_SURFACE_OK:3403:net9.0", notes, StringComparison.Ordinal);
+        Assert.Contains("PUBLIC_API_SURFACE_OK:3407:net9.0", notes, StringComparison.Ordinal);
         Assert.Contains("PUBLIC_API_GUIDANCE_OK:True", notes, StringComparison.Ordinal);
         Assert.Contains("adapter-2 validation only", notes, StringComparison.Ordinal);
         Assert.Contains("does not widen the public publish/package boundary", notes, StringComparison.Ordinal);
@@ -121,6 +121,8 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("SCALE_EXPORT_BUDGET_OK:baseline:True:none", notes, StringComparison.Ordinal);
         Assert.Contains("EXPORT_PROGRESS_OK:True", notes, StringComparison.Ordinal);
         Assert.Contains("EXPORT_CANCEL_OK:True", notes, StringComparison.Ordinal);
+        Assert.Contains("EXPORT_SCOPE_OK:True", notes, StringComparison.Ordinal);
+        Assert.Contains("EXPORT_SELECTION_SCOPE_OK:True", notes, StringComparison.Ordinal);
         Assert.DoesNotContain("ADAPTER_CAPABILITY_MATRIX:WPF:HELLOWORLD_WPF_OK:MISSING", notes, StringComparison.Ordinal);
         Assert.DoesNotContain("ADAPTER_CAPABILITY_MATRIX:WPF:COMMAND_SURFACE_OK:MISSING", notes, StringComparison.Ordinal);
     }
@@ -144,6 +146,8 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("HOSTED_ACCESSIBILITY_OK:True", englishChecklist, StringComparison.Ordinal);
         Assert.Contains("EXPORT_PROGRESS_OK:True", englishChecklist, StringComparison.Ordinal);
         Assert.Contains("EXPORT_CANCEL_OK:True", englishChecklist, StringComparison.Ordinal);
+        Assert.Contains("EXPORT_SCOPE_OK:True", englishChecklist, StringComparison.Ordinal);
+        Assert.Contains("EXPORT_SELECTION_SCOPE_OK:True", englishChecklist, StringComparison.Ordinal);
         Assert.Contains("artifacts/proof/template-smoke.txt", englishChecklist, StringComparison.Ordinal);
         Assert.Contains("artifacts/proof/public-api-surface.txt", englishChecklist, StringComparison.Ordinal);
         Assert.Contains("ASTERGRAPH_TEMPLATE_SMOKE_OK:True", englishChecklist, StringComparison.Ordinal);
@@ -175,6 +179,8 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("HOSTED_ACCESSIBILITY_OK:True", chineseChecklist, StringComparison.Ordinal);
         Assert.Contains("EXPORT_PROGRESS_OK:True", chineseChecklist, StringComparison.Ordinal);
         Assert.Contains("EXPORT_CANCEL_OK:True", chineseChecklist, StringComparison.Ordinal);
+        Assert.Contains("EXPORT_SCOPE_OK:True", chineseChecklist, StringComparison.Ordinal);
+        Assert.Contains("EXPORT_SELECTION_SCOPE_OK:True", chineseChecklist, StringComparison.Ordinal);
         Assert.Contains("artifacts/proof/template-smoke.txt", chineseChecklist, StringComparison.Ordinal);
         Assert.Contains("artifacts/proof/public-api-surface.txt", chineseChecklist, StringComparison.Ordinal);
         Assert.Contains("ASTERGRAPH_TEMPLATE_SMOKE_OK:True", chineseChecklist, StringComparison.Ordinal);

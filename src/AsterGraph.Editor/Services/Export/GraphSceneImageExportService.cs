@@ -54,7 +54,8 @@ public sealed class GraphSceneImageExportService : IGraphSceneImageExportService
         ReportProgress(options, "preparing", 0d, "Preparing scene image export.");
         options?.CancellationToken.ThrowIfCancellationRequested();
 
-        var svgDocument = GraphSceneSvgDocumentBuilder.Build(scene, options?.BackgroundHex);
+        var exportScene = GraphEditorSceneImageExportScopeResolver.Resolve(scene, options);
+        var svgDocument = GraphSceneSvgDocumentBuilder.Build(exportScene, options?.BackgroundHex);
         ReportProgress(options, "svg-built", 0.35d, "Built canonical SVG document.");
         options?.CancellationToken.ThrowIfCancellationRequested();
 

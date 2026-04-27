@@ -92,7 +92,7 @@ release lane 现在会守住 `baseline`、`large`，以及 `stress` 中已提升
 | `large` | 300 ms | 16000 ms | 12000 ms | 400 ms |
 | `stress` | 300 ms | 120000 ms | 100000 ms | 800 ms |
 
-`ScaleSmoke` 会为这些 defended 层级输出 `SCALE_EXPORT_BUDGET:...`、`SCALE_EXPORT_METRICS:...`、`SCALE_EXPORT_BUDGET_OK:...`、`EXPORT_PROGRESS_OK:...`、`EXPORT_CANCEL_OK:...` 和 `SCALE_EXPORT_SUMMARY:...`。
+`ScaleSmoke` 会为这些 defended 层级输出 `SCALE_EXPORT_BUDGET:...`、`SCALE_EXPORT_METRICS:...`、`SCALE_EXPORT_BUDGET_OK:...`、`EXPORT_PROGRESS_OK:...`、`EXPORT_CANCEL_OK:...`、`EXPORT_SCOPE_OK:...`、`EXPORT_SELECTION_SCOPE_OK:...` 和 `SCALE_EXPORT_SUMMARY:...`。
 
 如果你想把 `ConsumerSample.Avalonia` 的宿主指标和这些 defended `ScaleSmoke` 预算收成同一条可复制路线，就配合 [Widened Surface Performance Recipe](./widened-surface-performance-recipe.md) 一起看。
 
@@ -129,6 +129,8 @@ dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj --
 - `SCALE_EXPORT_BUDGET:...`
 - `EXPORT_PROGRESS_OK:...`
 - `EXPORT_CANCEL_OK:...`
+- `EXPORT_SCOPE_OK:...`
+- `EXPORT_SELECTION_SCOPE_OK:...`
 - `SCALE_EXPORT_METRICS:...`
 - `SCALE_EXPORT_BUDGET_OK:...`
 - `SCALE_EXPORT_SUMMARY:...`

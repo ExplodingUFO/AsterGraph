@@ -396,6 +396,8 @@ F:AsterGraph.Editor.Scene.GraphEditorSceneSurfaceKind.Group:AsterGraph.Editor.Sc
 F:AsterGraph.Editor.Scene.GraphEditorSceneSurfaceKind.Node:AsterGraph.Editor.Scene.GraphEditorSceneSurfaceKind
 F:AsterGraph.Editor.Services.GraphEditorSceneImageExportFormat.Jpeg:AsterGraph.Editor.Services.GraphEditorSceneImageExportFormat
 F:AsterGraph.Editor.Services.GraphEditorSceneImageExportFormat.Png:AsterGraph.Editor.Services.GraphEditorSceneImageExportFormat
+F:AsterGraph.Editor.Services.GraphEditorSceneImageExportScope.FullScene:AsterGraph.Editor.Services.GraphEditorSceneImageExportScope
+F:AsterGraph.Editor.Services.GraphEditorSceneImageExportScope.SelectedNodes:AsterGraph.Editor.Services.GraphEditorSceneImageExportScope
 F:AsterGraph.Editor.ViewModels.GraphEditorConnectionFocusKind.Editing:AsterGraph.Editor.ViewModels.GraphEditorConnectionFocusKind
 F:AsterGraph.Editor.ViewModels.GraphEditorConnectionFocusKind.Inspected:AsterGraph.Editor.ViewModels.GraphEditorConnectionFocusKind
 F:AsterGraph.Editor.ViewModels.GraphEditorConnectionFocusKind.None:AsterGraph.Editor.ViewModels.GraphEditorConnectionFocusKind
@@ -2840,6 +2842,7 @@ P:AsterGraph.Editor.Services.GraphEditorSceneImageExportOptions.CancellationToke
 P:AsterGraph.Editor.Services.GraphEditorSceneImageExportOptions.Progress:System.IProgress<AsterGraph.Editor.Services.GraphEditorSceneImageExportProgressSnapshot>:get,set
 P:AsterGraph.Editor.Services.GraphEditorSceneImageExportOptions.Quality:System.Int32:get,set
 P:AsterGraph.Editor.Services.GraphEditorSceneImageExportOptions.Scale:System.Double:get,set
+P:AsterGraph.Editor.Services.GraphEditorSceneImageExportOptions.Scope:AsterGraph.Editor.Services.GraphEditorSceneImageExportScope:get,set
 P:AsterGraph.Editor.Services.GraphEditorSceneImageExportProgressSnapshot.Fraction:System.Double:get,set
 P:AsterGraph.Editor.Services.GraphEditorSceneImageExportProgressSnapshot.Message:System.String:get,set
 P:AsterGraph.Editor.Services.GraphEditorSceneImageExportProgressSnapshot.Stage:System.String:get,set
@@ -3330,6 +3333,7 @@ T:enum AsterGraph.Editor.Scene.GraphEditorPointerPressRouteKind
 T:enum AsterGraph.Editor.Scene.GraphEditorSceneResizeHandleKind
 T:enum AsterGraph.Editor.Scene.GraphEditorSceneSurfaceKind
 T:enum AsterGraph.Editor.Services.GraphEditorSceneImageExportFormat
+T:enum AsterGraph.Editor.Services.GraphEditorSceneImageExportScope
 T:enum AsterGraph.Editor.ViewModels.GraphEditorConnectionFocusKind
 T:enum AsterGraph.Editor.ViewModels.NodeSurfaceInlineContentKind
 T:enum AsterGraph.Editor.ViewModels.NodeSurfaceInputRowKind

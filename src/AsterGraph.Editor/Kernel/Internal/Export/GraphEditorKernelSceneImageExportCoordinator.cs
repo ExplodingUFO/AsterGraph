@@ -35,7 +35,8 @@ internal sealed partial class GraphEditorKernel
 
             try
             {
-                var writtenPath = _owner._sceneImageExportService.Export(_owner.GetSceneSnapshot(), format, path, options);
+                var exportScene = GraphEditorSceneImageExportScopeResolver.Resolve(_owner.GetSceneSnapshot(), options);
+                var writtenPath = _owner._sceneImageExportService.Export(exportScene, format, path, options);
                 var formatLabel = format switch
                 {
                     GraphEditorSceneImageExportFormat.Png => "PNG",

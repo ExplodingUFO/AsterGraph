@@ -9,10 +9,24 @@ public sealed record GraphEditorSceneImageExportProgressSnapshot(
     string Message);
 
 /// <summary>
+/// Identifies which part of the current scene should be exported.
+/// </summary>
+public enum GraphEditorSceneImageExportScope
+{
+    FullScene,
+    SelectedNodes,
+}
+
+/// <summary>
 /// Describes optional raster scene export shaping.
 /// </summary>
 public sealed record GraphEditorSceneImageExportOptions
 {
+    /// <summary>
+    /// Explicit scene scope used for raster export.
+    /// </summary>
+    public GraphEditorSceneImageExportScope Scope { get; init; } = GraphEditorSceneImageExportScope.FullScene;
+
     /// <summary>
     /// Optional export scale multiplier applied during rasterization.
     /// </summary>
