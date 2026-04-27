@@ -79,7 +79,7 @@
 | canonical runtime/session 路线和维护中的评估阶梯，已经在当前防守住的 beta 线上被外部证据证明。 | `tools/AsterGraph.HelloWorld`、`tools/AsterGraph.Starter.Avalonia`、`tools/AsterGraph.HelloWorld.Avalonia`、`tools/AsterGraph.ConsumerSample.Avalonia`、`tools/AsterGraph.HostSample`、`HOST_SAMPLE_OK`、`CONSUMER_SAMPLE_OK` |
 | showcase authoring surface 已经作为有边界的 beta 宿主体验被外部证据证明。 | `src/AsterGraph.Demo`、`DEMO_OK`、`COMMAND_SURFACE_OK`、`COMPOSITE_SCOPE_OK`、`EDGE_NOTE_OK`、`EDGE_GEOMETRY_OK`、`DISCONNECT_FLOW_OK` |
 | 打包后的 consumer proof 已被外部证据证明，而且没有扩大 SDK 边界。 | `tools/AsterGraph.PackageSmoke`、`PACKAGE_SMOKE_OK`、`HOST_SAMPLE_NET10_OK` |
-| Scale proof 已在 defended `baseline`/`large` 层级，以及已提升的 `stress` performance/authoring/SVG-export gate 上被外部证据证明。 | `tools/AsterGraph.ScaleSmoke`、`SCALE_PERFORMANCE_BUDGET_OK:baseline:True`、`SCALE_PERFORMANCE_BUDGET_OK:large:True`、`SCALE_PERFORMANCE_BUDGET_OK:stress:True`、`SCALE_EXPORT_BUDGET:stress:svg<=300:png=informational:jpeg=informational:reload<=800` |
+| Scale proof 已在 defended `baseline`/`large` 层级，以及 5000 节点 `stress` 的部分 defended 范围上被外部证据证明：performance、authoring、SVG export 和 reload 受防守；PNG/JPEG raster export 仍为 informational。 | `tools/AsterGraph.ScaleSmoke`、`SCALE_PERFORMANCE_BUDGET_OK:baseline:True`、`SCALE_PERFORMANCE_BUDGET_OK:large:True`、`SCALE_PERFORMANCE_BUDGET_OK:stress:True`、`SCALE_EXPORT_BUDGET:stress:svg<=300:png=informational:jpeg=informational:reload<=800` |
 
 ### 仅验证通过或受边界约束的声明
 
@@ -91,11 +91,11 @@
 
 ### 在更多采用者证据出现前继续延后
 
-- 超出当前已提升的 5000 节点 `stress` performance/authoring/SVG-export gate 的 defended 声明
+- 超出当前部分 defended 的 5000 节点 `stress` performance/authoring/SVG/reload gate 的 defended 声明
 - 除 Avalonia 加当前 `WPF` 验证通道之外的新 hosted adapter 或更宽的 adapter 声明
 - marketplace、远程安装/更新、unload lifecycle、sandboxed plugin 这类故事
 - stable / GA / `1.0` 级别的支持保证
-- 下一条 `0.xx` alpha/beta 线继续优先做可复制的 host-owned 参数/元数据打磨；只有当 3 到 5 条真实外部报告聚焦在同一个受限风险上时，才考虑继续扩大已提升的 5000 节点 stress gate 或更宽的参数/元数据编辑
+- 下一条 `0.xx` alpha/beta 线命名为 `Authoring Productivity`：优先做 inspector polish、node search/quick add 和 wire productivity；只有当 3 到 5 条真实外部报告聚焦在同一个受限风险上时，才考虑扩大部分 defended 的 5000 节点 stress 声明
 - 维护者种子预演证据不计入 3 到 5 的门槛
 - 如果新的报告放不进上面的“已证明”或“受边界约束”两类，就走 [Adoption Feedback Loop](./adoption-feedback.md) 和 [Beta Support Bundle](./support-bundle.md)，不要临时扩大公开声明
 

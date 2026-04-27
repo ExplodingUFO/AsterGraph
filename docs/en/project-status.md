@@ -80,7 +80,7 @@ Use this section as the single external capability readiness gate for release no
 | Canonical runtime/session route and the maintained evaluator ladder are externally proven on the defended beta line. | `tools/AsterGraph.HelloWorld`, `tools/AsterGraph.Starter.Avalonia`, `tools/AsterGraph.HelloWorld.Avalonia`, `tools/AsterGraph.ConsumerSample.Avalonia`, `tools/AsterGraph.HostSample`, `HOST_SAMPLE_OK`, `CONSUMER_SAMPLE_OK` |
 | The showcase authoring surface is externally proven as a bounded beta host experience. | `src/AsterGraph.Demo`, `DEMO_OK`, `COMMAND_SURFACE_OK`, `COMPOSITE_SCOPE_OK`, `EDGE_NOTE_OK`, `EDGE_GEOMETRY_OK`, `DISCONNECT_FLOW_OK` |
 | Packaged consumer proof is externally proven without widening the SDK boundary. | `tools/AsterGraph.PackageSmoke`, `PACKAGE_SMOKE_OK`, `HOST_SAMPLE_NET10_OK` |
-| Scale proof is externally proven at defended `baseline`/`large` tiers and at the promoted `stress` performance/authoring/SVG-export gates. | `tools/AsterGraph.ScaleSmoke`, `SCALE_PERFORMANCE_BUDGET_OK:baseline:True`, `SCALE_PERFORMANCE_BUDGET_OK:large:True`, `SCALE_PERFORMANCE_BUDGET_OK:stress:True`, `SCALE_EXPORT_BUDGET:stress:svg<=300:png=informational:jpeg=informational:reload<=800` |
+| Scale proof is externally proven at defended `baseline`/`large` tiers and partially defended at 5000-node `stress`: performance, authoring, SVG export, and reload are defended; PNG/JPEG raster export remains informational. | `tools/AsterGraph.ScaleSmoke`, `SCALE_PERFORMANCE_BUDGET_OK:baseline:True`, `SCALE_PERFORMANCE_BUDGET_OK:large:True`, `SCALE_PERFORMANCE_BUDGET_OK:stress:True`, `SCALE_EXPORT_BUDGET:stress:svg<=300:png=informational:jpeg=informational:reload<=800` |
 
 ### Validation-only or bounded claims
 
@@ -92,11 +92,11 @@ Use this section as the single external capability readiness gate for release no
 
 ### Deferred until more adopter evidence
 
-- defended claims beyond the promoted 5000-node `stress` performance/authoring/SVG-export gates
+- defended claims beyond the partially defended 5000-node `stress` performance/authoring/SVG/reload gates
 - new hosted adapters or widened adapter claims beyond Avalonia plus the current `WPF` validation lane
 - marketplace, remote install/update, unload lifecycle, or sandboxed plugin stories
 - stable / GA / `1.0` support guarantees
-- the next 0.xx alpha/beta line stays on copyable host-owned parameter/metadata polish first; only widen beyond the promoted 5000-node stress gates or broader parameter/metadata editing when 3-5 real external reports cluster on the same bounded risk
+- the next 0.xx alpha/beta line is `Authoring Productivity`: inspector polish, node search/quick add, and wire productivity first; only widen beyond the partially defended 5000-node stress claim when 3-5 real external reports cluster on the same bounded risk
 - seeded rehearsals do not count toward the 3-5 gate
 - if a new report does not fit one of the proven or bounded rows above, route it through the [Adoption Feedback Loop](./adoption-feedback.md) and the [Beta Support Bundle](./support-bundle.md) instead of widening the claim ad hoc
 

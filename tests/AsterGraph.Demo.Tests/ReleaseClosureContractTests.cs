@@ -86,7 +86,8 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("external capability readiness gate", notes, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("[Project Status](./docs/en/project-status.md)", notes, StringComparison.Ordinal);
         Assert.True(HasLineWithAll(notes, "externally proven", "validation-only", "bounded", "deferred"));
-        Assert.True(HasLineWithAll(notes, "copyable host-owned parameter/metadata polish", "only widen beyond the promoted 5000-node stress gates or broader parameter/metadata editing", "3-5 real external reports", "same bounded risk"));
+        Assert.True(HasLineWithAll(notes, "Authoring Productivity", "inspector polish", "node search/quick add", "wire productivity"));
+        Assert.True(HasLineWithAll(notes, "5000-node stress", "partially defended", "PNG/JPEG raster export", "informational", "3-5 real external reports", "same bounded risk"));
         Assert.Contains("0.xx alpha/beta line", notes, StringComparison.Ordinal);
         Assert.True(HasLineWithAll(notes, "API adoption proof", "PUBLIC_API_SURFACE_OK", "PUBLIC_API_GUIDANCE_OK", "generated template/plugin validation"));
         Assert.True(HasLineWithAll(notes, "trusted plugin proof", "CONSUMER_SAMPLE_TRUST_OK", "ASTERGRAPH_PLUGIN_VALIDATE_OK", "plugin trust contract"));
@@ -134,7 +135,8 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("historical alpha reference for the current beta support story", englishChecklist, StringComparison.Ordinal);
         Assert.Contains("external capability readiness gate", englishChecklist, StringComparison.OrdinalIgnoreCase);
         Assert.True(HasLineWithAll(englishChecklist, "externally proven", "validation-only", "bounded", "deferred"));
-        Assert.True(HasLineWithAll(englishChecklist, "copyable host-owned parameter/metadata polish", "only widen beyond the promoted 5000-node stress gates or broader parameter/metadata editing", "3-5 real external reports", "same bounded risk"));
+        Assert.True(HasLineWithAll(englishChecklist, "Authoring Productivity", "inspector polish", "node search/quick add", "wire productivity"));
+        Assert.True(HasLineWithAll(englishChecklist, "5000-node stress", "partially defended", "PNG/JPEG raster export", "informational"));
         Assert.Contains("3-5 real external reports cluster on the same bounded risk", englishChecklist, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("0.xx alpha/beta line", englishChecklist, StringComparison.Ordinal);
         Assert.True(HasLineWithAll(englishChecklist, "route", "version", "proof markers", "friction", "support-bundle attachment note"));
@@ -163,7 +165,8 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("历史 alpha 参考，服务于当前 beta support story", chineseChecklist, StringComparison.Ordinal);
         Assert.Contains("外部能力就绪闸门", chineseChecklist, StringComparison.Ordinal);
         Assert.True(HasLineWithAll(chineseChecklist, "已被外部证据证明", "仅验证通过", "受边界约束", "继续延后"));
-        Assert.True(HasLineWithAll(chineseChecklist, "可复制的 host-owned 参数/元数据打磨", "5000 节点 stress gate", "更宽的参数/元数据编辑", "3 到 5 条真实外部报告", "同一个受限风险"));
+        Assert.True(HasLineWithAll(chineseChecklist, "Authoring Productivity", "inspector polish", "node search/quick add", "wire productivity"));
+        Assert.True(HasLineWithAll(chineseChecklist, "5000 节点 stress", "部分 defended", "PNG/JPEG raster export", "informational"));
         Assert.Contains("3 到 5 条真实外部报告在同一个受限风险上", chineseChecklist, StringComparison.Ordinal);
         Assert.Contains("0.xx` alpha/beta 线", chineseChecklist, StringComparison.Ordinal);
         Assert.True(HasLineWithAll(chineseChecklist, "route", "version", "proof 标记", "摩擦", "support bundle 附件备注"));

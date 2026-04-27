@@ -287,6 +287,12 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("3-5 gate", projectStatus, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("real external reports", projectStatus, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("same bounded risk", projectStatus, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Authoring Productivity", projectStatus, StringComparison.Ordinal);
+        Assert.Contains("inspector polish", projectStatus, StringComparison.Ordinal);
+        Assert.Contains("node search/quick add", projectStatus, StringComparison.Ordinal);
+        Assert.Contains("wire productivity", projectStatus, StringComparison.Ordinal);
+        Assert.Contains("partially defended 5000-node stress", adoptionFeedback, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("PNG/JPEG raster export informational", adoptionFeedback, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("## Seeded Trial Synthesis", adoptionFeedback, StringComparison.Ordinal);
         Assert.Contains("maintainer-seeded rehearsal evidence", adoptionFeedback, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("seeded rehearsals do not count", adoptionFeedback, StringComparison.OrdinalIgnoreCase);
@@ -299,6 +305,12 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("3 到 5 的门槛", projectStatusZh, StringComparison.Ordinal);
         Assert.Contains("真实外部报告", projectStatusZh, StringComparison.Ordinal);
         Assert.Contains("同一个受限风险", projectStatusZh, StringComparison.Ordinal);
+        Assert.Contains("Authoring Productivity", projectStatusZh, StringComparison.Ordinal);
+        Assert.Contains("inspector polish", projectStatusZh, StringComparison.Ordinal);
+        Assert.Contains("node search/quick add", projectStatusZh, StringComparison.Ordinal);
+        Assert.Contains("wire productivity", projectStatusZh, StringComparison.Ordinal);
+        Assert.Contains("部分 defended 的 5000 节点 stress", adoptionFeedbackZh, StringComparison.Ordinal);
+        Assert.Contains("PNG/JPEG raster export 只作为 informational", adoptionFeedbackZh, StringComparison.Ordinal);
         Assert.Contains("## 当前种子试用综合", adoptionFeedbackZh, StringComparison.Ordinal);
         Assert.Contains("维护者种子预演证据", adoptionFeedbackZh, StringComparison.Ordinal);
         Assert.Contains("3 到 5 的门槛", adoptionFeedbackZh, StringComparison.Ordinal);
@@ -1243,6 +1255,8 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("SCALE_PERFORMANCE_BUDGET_OK:stress:True:...", checklistZh, StringComparison.Ordinal);
         Assert.Contains("SCALE_EXPORT_BUDGET:stress:svg<=300:png=informational:jpeg=informational:reload<=800", checklistZh, StringComparison.Ordinal);
         Assert.Contains("SCALE_PERF_SUMMARY:stress:...", checklistZh, StringComparison.Ordinal);
+        Assert.True(HasLineWithAll(checklist, "5000-node stress", "partially defended", "performance", "authoring", "SVG export", "reload", "PNG/JPEG raster export", "informational"));
+        Assert.True(HasLineWithAll(checklistZh, "5000 节点 stress", "部分 defended", "performance", "authoring", "SVG export", "reload", "PNG/JPEG raster export", "informational"));
 
         Assert.Contains("ADAPTER_CAPABILITY_MATRIX_FORMAT:1", checklist, StringComparison.Ordinal);
         Assert.Contains("ADAPTER_CAPABILITY_MATRIX:WPF:HELLOWORLD_WPF_OK:PASS", checklist, StringComparison.Ordinal);

@@ -32,12 +32,12 @@
 
 ## 当前建议
 
-下一条 `0.xx` alpha/beta 线继续优先做可复制的 host-owned 参数/元数据打磨；只有当 3 到 5 条真实外部报告聚焦在同一个受限风险上时，才考虑继续扩大已提升的 5000 节点 stress gate 或更宽的参数/元数据编辑：
+下一条 `0.xx` alpha/beta 线命名为 `Authoring Productivity`：优先做 inspector polish、node search/quick add 和 wire productivity。只有当 3 到 5 条真实外部报告聚焦在同一个受限风险上时，才考虑扩大部分 defended 的 5000 节点 stress 声明：
 
-1. **继续优先做可复制的 host-owned 参数/元数据打磨**
+1. **继续优先做 Authoring Productivity**
 2. **维护者种子预演证据不计入 3 到 5 的门槛**
-3. **在 3 到 5 条真实外部报告还没有在同一个受限风险上聚焦前，不要继续扩大已提升的 5000 节点 stress gate**
-4. **在 3 到 5 条真实外部报告还没有在同一个受限风险上聚焦前，不要把更宽的参数/元数据编辑当成下一步扩展方向**
+3. **5000 节点 stress 保持部分 defended：performance、authoring、SVG export 和 reload 受防守，PNG/JPEG raster export 只作为 informational**
+4. **在 3 到 5 条真实外部报告还没有在同一个受限风险上聚焦前，不要把下一条 beta 线扩大到 inspector polish、node search/quick add 和 wire productivity 之外**
 
 在达到这个阈值之前，保持这份种子建议不变，不要临时把下一条 beta 线往别处扩。
 

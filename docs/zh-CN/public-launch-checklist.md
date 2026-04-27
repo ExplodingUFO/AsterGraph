@@ -114,7 +114,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framew
 - 需要从受防守的 Avalonia accessibility proof 交接到 validation-only 的 WPF 验证时，统一参考 [Adapter-2 Accessibility Recipe](./adapter-2-accessibility-recipe.md)
 - 需要从受防守的 Avalonia hosted metrics 交接到 validation-only 的 WPF performance 验证时，统一参考 [Adapter-2 Performance Recipe](./adapter-2-performance-recipe.md)
 - 确认每条 beta 反馈都按同一套受限字段记录：`route`、`version`、proof 标记、摩擦点，以及 support bundle 附件备注
-- 在 release messaging 里重复下一条 `0.xx` alpha/beta 线的 handoff：继续优先做可复制的 host-owned 参数/元数据打磨；只有当 3 到 5 条真实外部报告在同一个受限风险上聚焦时，才考虑继续扩大已提升的 5000 节点 stress gate 或更宽的参数/元数据编辑
+- 在 release messaging 里重复下一条 `0.xx` alpha/beta 线的 handoff：`Authoring Productivity` 表示优先做 inspector polish、node search/quick add 和 wire productivity；5000 节点 stress 保持部分 defended：performance、authoring、SVG export 和 reload 受防守，PNG/JPEG raster export 只作为 informational，直到 3 到 5 条真实外部报告在同一个受限风险上聚焦
 - 如果配置了 `NUGET_API_KEY`，确认包发布成功
 - 如果没有配置 `NUGET_API_KEY`，确认 workflow 是有意跳过 NuGet publish，而不是失败
 - 不要再把 `v1.x` 风格的历史里程碑 checkpoint 当成当前公开包版本；对外统一以 [Versioning](./versioning.md) 为准

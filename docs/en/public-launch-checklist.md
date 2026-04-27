@@ -109,7 +109,7 @@ Expected high-signal markers:
 - use [Adapter-2 Accessibility Recipe](./adapter-2-accessibility-recipe.md) when you need the bounded handoff from defended Avalonia accessibility proof to validation-only WPF verification
 - use [Adapter-2 Performance Recipe](./adapter-2-performance-recipe.md) when you need the bounded handoff from defended Avalonia hosted metrics to validation-only WPF performance verification
 - confirm every beta intake record uses the same bounded schema: route, version, proof markers, friction, and support-bundle attachment note
-- repeat the next 0.xx alpha/beta line handoff in release messaging: keep copyable host-owned parameter/metadata polish first, and only widen beyond the promoted 5000-node stress gates or broader parameter/metadata editing when 3-5 real external reports cluster on the same bounded risk
+- repeat the next 0.xx alpha/beta line handoff in release messaging: `Authoring Productivity` means inspector polish, node search/quick add, and wire productivity first, while 5000-node stress remains partially defended: performance, authoring, SVG export, and reload defended; PNG/JPEG raster export informational only until 3-5 real external reports cluster on the same bounded risk
 - if `NUGET_API_KEY` is configured, confirm package publication succeeds
 - if `NUGET_API_KEY` is not configured, confirm the workflow reports a deliberate NuGet publish skip instead of a failure
 - do not present legacy `v1.x`-style historical milestone checkpoints as the current public package version; use [Versioning](./versioning.md) as the public rule

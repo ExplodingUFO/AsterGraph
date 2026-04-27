@@ -207,7 +207,7 @@ foreach ($line in $proofLines) {
 [void]$builder.AppendLine("- frozen support boundary story: [Stabilization Support Matrix](./docs/en/stabilization-support-matrix.md)")
 [void]$builder.AppendLine("- adapter matrix story: [Adapter Capability Matrix](./docs/en/adapter-capability-matrix.md)")
 [void]$builder.AppendLine("- external capability readiness gate: [Project Status](./docs/en/project-status.md) for externally proven now, validation-only or bounded claims, and deferred until more adopter evidence")
-[void]$builder.AppendLine("- next 0.xx alpha/beta line: keep copyable host-owned parameter/metadata polish first, and only widen beyond the promoted 5000-node stress gates or broader parameter/metadata editing when 3-5 real external reports cluster on the same bounded risk")
+[void]$builder.AppendLine("- next 0.xx alpha/beta line: `Authoring Productivity` means inspector polish, node search/quick add, and wire productivity first; 5000-node stress remains partially defended with performance, authoring, SVG export, and reload defended while PNG/JPEG raster export stays informational until 3-5 real external reports cluster on the same bounded risk")
 [void]$builder.AppendLine("- release evidence contract: route, version, proof markers, friction, and support-bundle attachment note")
 [void]$builder.AppendLine("- `HELLOWORLD_WPF_OK` remains adapter-2 validation only and does not widen the public publish/package boundary")
 [void]$builder.AppendLine("- support-bundle attachment note: [Beta Support Bundle](./docs/en/support-bundle.md)")
