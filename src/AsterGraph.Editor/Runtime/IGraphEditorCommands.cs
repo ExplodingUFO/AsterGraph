@@ -564,7 +564,7 @@ public interface IGraphEditorCommands
     /// </summary>
     /// <param name="issue">Validation issue projected by <see cref="IGraphEditorQueries.GetValidationSnapshot"/>.</param>
     /// <param name="updateStatus">Whether to update status text.</param>
-    /// <returns><see langword="true"/> when the issue scope could be focused.</returns>
+    /// <returns><see langword="true"/> when the targeted connection, node, or scope could be focused.</returns>
     bool TryFocusValidationIssue(GraphEditorValidationIssueSnapshot issue, bool updateStatus = true)
         => throw new NotSupportedException();
 
