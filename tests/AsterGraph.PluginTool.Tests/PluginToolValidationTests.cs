@@ -62,10 +62,17 @@ public sealed class PluginToolValidationTests
     public void Templates_StayCrossPlatformAndNative()
     {
         var avaloniaProgram = File.ReadAllText(FindRepoPath("templates/astergraph-avalonia/Program.cs"));
+        var avaloniaReadme = File.ReadAllText(FindRepoPath("templates/astergraph-avalonia/README.md"));
         var avaloniaProject = File.ReadAllText(FindRepoPath("templates/astergraph-avalonia/AsterGraphAvaloniaHost.csproj"));
         var pluginProject = File.ReadAllText(FindRepoPath("templates/astergraph-plugin/AsterGraphPlugin.csproj"));
 
         Assert.Contains(".UsePlatformDetect()", avaloniaProgram, StringComparison.Ordinal);
+        Assert.Contains("AsterGraphHostBuilder", avaloniaProgram, StringComparison.Ordinal);
+        Assert.Contains("BuildAvaloniaView()", avaloniaProgram, StringComparison.Ordinal);
+        Assert.Contains("Builder-first hosted route", avaloniaReadme, StringComparison.Ordinal);
+        Assert.Contains("AsterGraphEditorFactory.Create(...)", avaloniaReadme, StringComparison.Ordinal);
+        Assert.Contains("AsterGraphAvaloniaViewFactory.Create(...)", avaloniaReadme, StringComparison.Ordinal);
+        Assert.Contains("ASTERGRAPH_PLUGIN_VALIDATE_OK:True", avaloniaReadme, StringComparison.Ordinal);
         Assert.Contains("<TargetFramework>net8.0</TargetFramework>", avaloniaProject, StringComparison.Ordinal);
         Assert.Contains("<TargetFramework>net8.0</TargetFramework>", pluginProject, StringComparison.Ordinal);
         Assert.DoesNotContain("-windows", avaloniaProject, StringComparison.OrdinalIgnoreCase);

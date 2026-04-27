@@ -28,6 +28,19 @@ public sealed class StarterAvaloniaScaffoldTests
         Assert.Same(surface.View, surface.Window.Content);
         Assert.Equal(GraphEditorViewChromeMode.Default, surface.View.ChromeMode);
     }
+
+    [Fact]
+    public void StarterAvaloniaHostBuilder_PreservesEditorAndViewOptions()
+    {
+        StarterAvaloniaHeadlessEnvironment.EnsureInitialized();
+        var builder = AsterGraph.Starter.Avalonia.StarterAvaloniaWindowFactory.CreateHostBuilder();
+        var editor = builder.BuildEditor();
+        var viewOptions = builder.BuildViewOptions(editor);
+
+        Assert.Same(editor, viewOptions.Editor);
+        Assert.Equal(GraphEditorViewChromeMode.Default, viewOptions.ChromeMode);
+        Assert.NotNull(editor.Session);
+    }
 }
 
 file static class StarterAvaloniaHeadlessEnvironment

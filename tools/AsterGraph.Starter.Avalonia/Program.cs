@@ -7,10 +7,8 @@ using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Avalonia.Controls;
 using AsterGraph.Avalonia.Hosting;
-using AsterGraph.Core.Compatibility;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Catalog;
-using AsterGraph.Editor.Hosting;
 using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.ViewModels;
 
@@ -59,12 +57,9 @@ public static class StarterAvaloniaWindowFactory
 
     public static StarterAvaloniaRuntimeSurface CreateRuntimeSurface()
     {
-        var editor = CreateEditor();
-        var view = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOptions
-        {
-            Editor = editor,
-            ChromeMode = GraphEditorViewChromeMode.Default,
-        });
+        var builder = CreateHostBuilder();
+        var editor = builder.BuildEditor();
+        var view = AsterGraphAvaloniaViewFactory.Create(builder.BuildViewOptions(editor));
 
         return new StarterAvaloniaRuntimeSurface(
             editor,
@@ -80,16 +75,19 @@ public static class StarterAvaloniaWindowFactory
     }
 
     public static GraphEditorViewModel CreateEditor()
+        => CreateHostBuilder().BuildEditor();
+
+    public static AsterGraphHostBuilder CreateHostBuilder()
     {
         var definitionId = new NodeDefinitionId("starter.ui.node");
         INodeCatalog catalog = CreateCatalog(definitionId);
 
-        return AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
-        {
-            Document = CreateDocument(definitionId),
-            NodeCatalog = catalog,
-            CompatibilityService = new DefaultPortCompatibilityService(),
-        });
+        return AsterGraphHostBuilder
+            .Create()
+            .UseDocument(CreateDocument(definitionId))
+            .UseCatalog(catalog)
+            .UseDefaultCompatibility()
+            .UseChromeMode(GraphEditorViewChromeMode.Default);
     }
 
     private static NodeCatalog CreateCatalog(NodeDefinitionId definitionId)

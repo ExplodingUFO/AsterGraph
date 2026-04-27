@@ -10,6 +10,7 @@ public sealed class StarterRecipeHardeningDocsTests
     public void CopyableHostRecipePolishDocs_MakeTheSeamOwnershipAndBetaScopeExplicit()
     {
         var starterReadme = ReadRepoFile("tools/AsterGraph.Starter.Avalonia/README.md");
+        var templateReadme = ReadRepoFile("templates/astergraph-avalonia/README.md");
         var consumerReadme = ReadRepoFile("tools/AsterGraph.ConsumerSample.Avalonia/README.md");
         var quickStartEn = ReadRepoFile("docs/en/quick-start.md");
         var quickStartZh = ReadRepoFile("docs/zh-CN/quick-start.md");
@@ -18,6 +19,8 @@ public sealed class StarterRecipeHardeningDocsTests
 
         Assert.Contains("copyable seams", starterReadme, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("host-owned seams", starterReadme, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("builder-first hosted route", starterReadme, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("builder-first hosted route", templateReadme, StringComparison.OrdinalIgnoreCase);
 
         Assert.Contains("copy the host-owned seams in this order", consumerReadme, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("defended beta route", consumerReadme, StringComparison.OrdinalIgnoreCase);
@@ -106,6 +109,9 @@ public sealed class StarterRecipeHardeningDocsTests
     public void StarterAvaloniaDocs_SeparateCopyableCanonicalPiecesFromHostOwnedShellPieces()
     {
         var starterReadme = ReadRepoFile("tools/AsterGraph.Starter.Avalonia/README.md");
+        var starterProgram = ReadRepoFile("tools/AsterGraph.Starter.Avalonia/Program.cs");
+        var templateReadme = ReadRepoFile("templates/astergraph-avalonia/README.md");
+        var templateProgram = ReadRepoFile("templates/astergraph-avalonia/Program.cs");
         var quickStartEn = ReadRepoFile("docs/en/quick-start.md");
         var quickStartZh = ReadRepoFile("docs/zh-CN/quick-start.md");
 
@@ -114,13 +120,39 @@ public sealed class StarterRecipeHardeningDocsTests
         Assert.Contains("Host-Owned Seams", starterReadme, StringComparison.Ordinal);
         Assert.Contains("Copy This Starter Scaffold", starterReadme, StringComparison.Ordinal);
         Assert.Contains("Replace This In Your Host", starterReadme, StringComparison.Ordinal);
+        Assert.Contains("AsterGraphHostBuilder.Create()", starterReadme, StringComparison.Ordinal);
+        Assert.Contains("UseDocument(...)", starterReadme, StringComparison.Ordinal);
+        Assert.Contains("UseCatalog(...)", starterReadme, StringComparison.Ordinal);
+        Assert.Contains("UseDefaultCompatibility()", starterReadme, StringComparison.Ordinal);
+        Assert.Contains("BuildEditor()", starterReadme, StringComparison.Ordinal);
+        Assert.Contains("BuildViewOptions(...)", starterReadme, StringComparison.Ordinal);
+        Assert.Contains("BuildAvaloniaView()", starterReadme, StringComparison.Ordinal);
         Assert.Contains("AsterGraphEditorFactory.Create(...)", starterReadme, StringComparison.Ordinal);
         Assert.Contains("AsterGraphAvaloniaViewFactory.Create(...)", starterReadme, StringComparison.Ordinal);
-        Assert.Contains("AsterGraphEditorOptions", starterReadme, StringComparison.Ordinal);
-        Assert.Contains("document/catalog/editor/view composition flow", starterReadme, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Explicit Wiring Handoff", starterReadme, StringComparison.Ordinal);
+        Assert.Contains("document storage", starterReadme, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("plugin trust policy", starterReadme, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("localization", starterReadme, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("diagnostics", starterReadme, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("presentation overrides", starterReadme, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("the top-level window and its title/size", starterReadme, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("sample graph/catalog definitions", starterReadme, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("template smoke", starterReadme, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("PluginTool validation proof", starterReadme, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("ASTERGRAPH_PLUGIN_VALIDATE_OK:True", starterReadme, StringComparison.Ordinal);
         Assert.Contains("HelloWorld.Avalonia", starterReadme, StringComparison.Ordinal);
+        Assert.Contains("AsterGraphHostBuilder", starterProgram, StringComparison.Ordinal);
+        Assert.Contains("CreateHostBuilder", starterProgram, StringComparison.Ordinal);
+        Assert.Contains("BuildEditor()", starterProgram, StringComparison.Ordinal);
+        Assert.Contains("BuildViewOptions(editor)", starterProgram, StringComparison.Ordinal);
+        Assert.Contains("AsterGraphHostBuilder", templateProgram, StringComparison.Ordinal);
+        Assert.Contains("BuildAvaloniaView()", templateProgram, StringComparison.Ordinal);
+        Assert.Contains("Builder-first hosted route", templateReadme, StringComparison.Ordinal);
+        Assert.Contains("AsterGraphHostBuilder", templateReadme, StringComparison.Ordinal);
+        Assert.Contains("BuildAvaloniaView()", templateReadme, StringComparison.Ordinal);
+        Assert.Contains("AsterGraphEditorFactory.Create(...)", templateReadme, StringComparison.Ordinal);
+        Assert.Contains("AsterGraphAvaloniaViewFactory.Create(...)", templateReadme, StringComparison.Ordinal);
+        Assert.Contains("ASTERGRAPH_PLUGIN_VALIDATE_OK:True", templateReadme, StringComparison.Ordinal);
 
         Assert.Contains("Copy this starter scaffold:", quickStartEn, StringComparison.Ordinal);
         Assert.Contains("Replace in your host:", quickStartEn, StringComparison.Ordinal);
