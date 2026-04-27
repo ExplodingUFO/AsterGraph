@@ -75,20 +75,37 @@ try {
 catch {
 }
 
-$dotnetAssemblyDirectories = @()
+$targetFrameworkVersion = [Version]$Framework.Substring(3)
+$dotnetReferenceAssemblyDirectories = @()
+$dotnetRuntimeAssemblyDirectories = @()
 foreach ($dotnetRoot in ($dotnetRoots | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -Unique)) {
   $refRoot = Join-Path $dotnetRoot "packs/Microsoft.NETCore.App.Ref"
   if (Test-Path -LiteralPath $refRoot) {
-    $dotnetAssemblyDirectories += Get-ChildItem -LiteralPath $refRoot -Directory |
+    $dotnetReferenceAssemblyDirectories += Get-ChildItem -LiteralPath $refRoot -Directory |
       ForEach-Object { Join-Path $_.FullName "ref/$Framework" } |
       Where-Object { Test-Path -LiteralPath $_ }
   }
 
   $sharedRoot = Join-Path $dotnetRoot "shared/Microsoft.NETCore.App"
   if (Test-Path -LiteralPath $sharedRoot) {
-    $dotnetAssemblyDirectories += Get-ChildItem -LiteralPath $sharedRoot -Directory |
+    $dotnetRuntimeAssemblyDirectories += Get-ChildItem -LiteralPath $sharedRoot -Directory |
+      Where-Object {
+        try {
+          ([Version]$_.Name).Major -eq $targetFrameworkVersion.Major
+        }
+        catch {
+          $false
+        }
+      } |
       ForEach-Object { $_.FullName }
   }
+}
+
+$dotnetAssemblyDirectories = if ($dotnetReferenceAssemblyDirectories.Count -gt 0) {
+  $dotnetReferenceAssemblyDirectories
+}
+else {
+  $dotnetRuntimeAssemblyDirectories
 }
 
 $dotnetAssemblyDirectories = @($dotnetAssemblyDirectories | Select-Object -Unique)
