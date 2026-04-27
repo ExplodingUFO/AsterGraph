@@ -244,6 +244,7 @@ Proof Handoff 负责实际 intake 说明。
 
 - action rail / command projection：宿主动作在编辑器壳层之外，并且通过 `AsterGraphHostedActionFactory.CreateCommandActions(...)` 和 `AsterGraphHostedActionFactory.CreateProjection(...)` 复用共享 command descriptor
 - plugin trust workflow：把 `GraphEditorPluginDiscoveryOptions`、`AsterGraphEditorOptions.PluginTrustPolicy`、provenance snapshot 和 allowlist 导入/导出放在同一层；插件信任策略保持显式且由宿主管理，通过 discovery snapshot、reason 字符串和 allowlist 导入/导出保持可见，allowlist 决策可以导出/导入而不需要重建宿主 trust-policy 流程。
+- trusted plugin proof handoff：把这份样例的 `CONSUMER_SAMPLE_TRUST_OK:True` 和 `AsterGraph.PluginTool validate` 的 `ASTERGRAPH_PLUGIN_VALIDATE_OK:True` 配在一起，再阅读 [插件信任契约 v1](./plugin-trust-contracts.md)，然后才把第三方插件 artifact 当成可加载对象。
 - 选中节点参数读写 seam：通过 `IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()` 读选中节点参数，并通过 `IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)` 写回
 - 插件加载仍是进程内执行，不提供 sandbox 或不受信任代码隔离
 - review/audit 节点族、action ids/titles、窗口布局、叙述文本，以及 defended markers 之外的 proof 文案，都是样例自有内容
@@ -256,6 +257,7 @@ Proof Handoff 负责实际 intake 说明。
 
 - action rail / command projection：通过 `AsterGraphHostedActionFactory.CreateCommandActions(...)` 消费共享 command descriptor，并用 `AsterGraphHostedActionFactory.CreateProjection(...)` 组合宿主动作
 - plugin trust workflow：把 `GraphEditorPluginDiscoveryOptions`、`AsterGraphEditorOptions.PluginTrustPolicy`、provenance snapshot 和宿主自管 allowlist policy 放在同一层
+- trusted plugin proof handoff：评审一条可信插件路径时，把 `CONSUMER_SAMPLE_TRUST_OK:True`、`ASTERGRAPH_PLUGIN_VALIDATE_OK:True` 和 [插件信任契约 v1](./plugin-trust-contracts.md) 放在一起看
 - 选中节点参数读写 seam：只通过 `IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()` 读取当前选中节点参数，并只通过 `IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)` 写回
 - 节点旁路 authoring seam：通过 `IGraphEditorSession.Queries.GetNodeParameterSnapshots(nodeId)` 和 `INodeParameterEditorRegistry` 把节点表面保持在和 inspector 一样的 metadata/validation 合同上
 - proof mode：输出 `AUTHORING_SURFACE_*`、`COMMAND_SURFACE_OK` 和扩展后的 `HOST_NATIVE_METRIC:*`，这样你能和官方 sample 做横向比较，并继续把 `ScaleSmoke` 的 defended large-tier contract 放在视野里

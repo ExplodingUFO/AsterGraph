@@ -89,6 +89,7 @@ public sealed class ReleaseClosureContractTests
         Assert.True(HasLineWithAll(notes, "copyable host-owned parameter/metadata polish", "only widen beyond the promoted 5000-node stress gates or broader parameter/metadata editing", "3-5 real external reports", "same bounded risk"));
         Assert.Contains("0.xx alpha/beta line", notes, StringComparison.Ordinal);
         Assert.True(HasLineWithAll(notes, "API adoption proof", "PUBLIC_API_SURFACE_OK", "PUBLIC_API_GUIDANCE_OK", "generated template/plugin validation"));
+        Assert.True(HasLineWithAll(notes, "trusted plugin proof", "CONSUMER_SAMPLE_TRUST_OK", "ASTERGRAPH_PLUGIN_VALIDATE_OK", "plugin trust contract"));
         Assert.Contains("[Beta Support Bundle](./docs/en/support-bundle.md)", notes, StringComparison.Ordinal);
         Assert.Contains("[Adoption Feedback Loop](./docs/en/adoption-feedback.md)", notes, StringComparison.Ordinal);
         Assert.Contains("[Adopter Triage Checklist](./docs/en/adopter-triage.md)", notes, StringComparison.Ordinal);

@@ -177,6 +177,7 @@ $proofLines = $proofLines | Where-Object { -not [string]::IsNullOrWhiteSpace($_)
 $environmentLines = @(
   '- validation lanes: GitHub-hosted Windows release validation plus GitHub-hosted Linux matrix validation',
   '- medium host proof: `AsterGraph.ConsumerSample.Avalonia` on the hosted-UI route with host actions, parameter editing, and one trusted plugin',
+  '- trusted plugin proof: pair `CONSUMER_SAMPLE_TRUST_OK` with `ASTERGRAPH_PLUGIN_VALIDATE_OK` and the plugin trust contract before treating a third-party plugin artifact as loadable',
   '- showcase proof: `AsterGraph.Demo --proof` for host-native shell workflows, non-obscuring editing, and graph-surface visual semantics',
   '- packed consumer proofs: `HostSample`, `.NET 10` packed consumer path, `PackageSmoke`, and generated template/plugin validation',
   '- API adoption proof: `validate-public-api-surface.ps1` pairs `PUBLIC_API_SURFACE_OK` with `PUBLIC_API_GUIDANCE_OK` near generated template/plugin validation in the release proof story',

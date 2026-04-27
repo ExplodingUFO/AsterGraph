@@ -154,6 +154,9 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
         AssertContains(consumerSampleEn, "Copyable trust and proof reference");
         AssertContains(consumerSampleEn, "SUPPORT_BUNDLE_OK:True");
         AssertContains(consumerSampleEn, "CONSUMER_SAMPLE_TRUST_OK:True");
+        AssertContains(consumerSampleEn, "ASTERGRAPH_PLUGIN_VALIDATE_OK:True");
+        AssertContains(consumerSampleEn, "trusted plugin proof handoff");
+        AssertContains(consumerSampleEn, "AsterGraph.PluginTool validate");
         AssertContains(consumerSampleEn, "reuse the emitted `SUPPORT_BUNDLE_PATH:...` line as the support-bundle attachment note");
         AssertContains(consumerSampleEn, "./support-bundle.md");
         AssertContains(consumerSampleEn, "./adoption-feedback.md");
@@ -162,6 +165,9 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
         AssertContains(consumerSampleZh, "可复制的信任与证明参考");
         AssertContains(consumerSampleZh, "SUPPORT_BUNDLE_OK:True");
         AssertContains(consumerSampleZh, "CONSUMER_SAMPLE_TRUST_OK:True");
+        AssertContains(consumerSampleZh, "ASTERGRAPH_PLUGIN_VALIDATE_OK:True");
+        AssertContains(consumerSampleZh, "trusted plugin proof handoff");
+        AssertContains(consumerSampleZh, "AsterGraph.PluginTool validate");
         AssertContains(consumerSampleZh, "把输出里的 `SUPPORT_BUNDLE_PATH:...` 作为 support-bundle 附件备注");
         AssertContains(consumerSampleZh, "./support-bundle.md");
         AssertContains(consumerSampleZh, "./adoption-feedback.md");

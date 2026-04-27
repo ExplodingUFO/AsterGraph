@@ -244,6 +244,7 @@ The sample is intentionally small enough to copy from:
 
 - action rail / command projection: keep the host actions outside the editor shell and project shared descriptors through `AsterGraphHostedActionFactory.CreateCommandActions(...)` and `AsterGraphHostedActionFactory.CreateProjection(...)`
 - plugin trust workflow: keep `GraphEditorPluginDiscoveryOptions`, `AsterGraphEditorOptions.PluginTrustPolicy`, provenance snapshots, and allowlist import/export together in the host; plugin trust stays explicit and host-owned through discovery snapshots, reason strings, and allowlist import/export. allowlist decisions can be exported or imported without rebuilding the host trust-policy flow.
+- trusted plugin proof handoff: pair `CONSUMER_SAMPLE_TRUST_OK:True` from this sample with `ASTERGRAPH_PLUGIN_VALIDATE_OK:True` from `AsterGraph.PluginTool validate`, then review [Plugin Manifest and Trust Policy Contract v1](./plugin-trust-contracts.md) before treating a third-party plugin artifact as loadable.
 - selected-node parameter read/write seam: `IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()` reads the selected node parameters, and `IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)` writes them back
 - plugin loading remains in-process; there is no sandbox or untrusted-code isolation
 - sample-owned details such as the review/audit node family, action ids and titles, the window layout, and the narrative text are replaceable
@@ -255,6 +256,7 @@ If you want to build the same medium host in your own app, copy these seams in t
 
 - action rail / command projection: query `session.Queries.GetCommandDescriptors()` indirectly through `AsterGraphHostedActionFactory.CreateCommandActions(...)` and project them with `AsterGraphHostedActionFactory.CreateProjection(...)`
 - plugin trust workflow: keep `GraphEditorPluginDiscoveryOptions`, `AsterGraphEditorOptions.PluginTrustPolicy`, provenance snapshots, and an explicit host-owned allowlist policy together
+- trusted plugin proof handoff: keep `CONSUMER_SAMPLE_TRUST_OK:True`, `ASTERGRAPH_PLUGIN_VALIDATE_OK:True`, and [Plugin Manifest and Trust Policy Contract v1](./plugin-trust-contracts.md) together when reviewing one trusted plugin path
 - selected-node parameter read/write seam: `IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()` reads the selected node parameters, and `IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)` writes them back
 - node-side authoring seam: `IGraphEditorSession.Queries.GetNodeParameterSnapshots(nodeId)` plus `INodeParameterEditorRegistry` keep the node surface on the same metadata and validation contract as the inspector
 - proof mode: emit the `AUTHORING_SURFACE_*` markers, `COMMAND_SURFACE_OK`, and the widened `HOST_NATIVE_METRIC:*` lines so you can compare your host with the shipped samples and keep the defended large-tier contract in view through `ScaleSmoke`
