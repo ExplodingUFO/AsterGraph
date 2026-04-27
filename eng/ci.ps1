@@ -31,6 +31,7 @@ $wpfAdapterCapabilityMatrixProofPath = Join-Path $proofArtifactsRoot 'wpf-adapte
 $packageSmokeProofPath = Join-Path $proofArtifactsRoot 'package-smoke.txt'
 $scaleSmokeProofPath = Join-Path $proofArtifactsRoot 'scale-smoke.txt'
 $demoProofPath = Join-Path $proofArtifactsRoot 'demo-proof.txt'
+$templateSmokeProofPath = Join-Path $proofArtifactsRoot 'template-smoke.txt'
 $dotnetCliHome = Join-Path $repoRoot '.dotnet-cli-home'
 $coverageRunSettingsPath = Join-Path $repoRoot 'tests/coverage.runsettings'
 $coverageReportScriptPath = Join-Path $repoRoot 'eng/coverage-report.ps1'
@@ -721,7 +722,8 @@ function Invoke-TemplateSmoke {
     -RepoRoot $repoRoot `
     -Configuration $Configuration `
     -AsterGraphVersion $packageVersion `
-    -PackageSource $packagesOutputPath
+    -PackageSource $packagesOutputPath `
+    -ProofPath $templateSmokeProofPath
 
   if ($LASTEXITCODE -ne 0) {
     throw "template smoke failed with exit code ${LASTEXITCODE}"
@@ -1062,6 +1064,10 @@ function Invoke-PrereleaseNotesValidation {
     'DISCONNECT_FLOW_OK:True',
     'HOST_SAMPLE_NET10_OK:True',
     'PACKAGE_SMOKE_OK:True',
+    'ASTERGRAPH_TEMPLATE_SMOKE_OK:True',
+    'TEMPLATE_SMOKE_PLUGIN_VALIDATE_OK:True',
+    'TEMPLATE_SMOKE_PLUGIN_CAPABILITY_SUMMARY_OK:True',
+    'TEMPLATE_SMOKE_PLUGIN_TRUST_HASH_OK:True',
     'SCALE_TIER_BUDGET:baseline',
     'SCALE_PERFORMANCE_BUDGET_OK:baseline:True:',
     'SCALE_TIER_BUDGET:large',

@@ -21,8 +21,12 @@ public sealed class PluginToolValidationTests
         Assert.Contains("ASTERGRAPH_PLUGIN_VALIDATE:candidates=1:elapsed_ms=", text, StringComparison.Ordinal);
         Assert.True(ReadElapsedMilliseconds(text) < 2_500);
         Assert.Contains("PLUGIN:AsterGraph.TestPlugins", text, StringComparison.Ordinal);
+        Assert.Contains("source_kind:", text, StringComparison.Ordinal);
+        Assert.Contains("display_name:", text, StringComparison.Ordinal);
         Assert.Contains("target_framework:", text, StringComparison.Ordinal);
+        Assert.Contains("capability_summary:", text, StringComparison.Ordinal);
         Assert.Contains("trust: Allowed:ImplicitAllow", text, StringComparison.Ordinal);
+        Assert.Contains("signature:", text, StringComparison.Ordinal);
         Assert.Contains("sha256:", text, StringComparison.Ordinal);
         Assert.Contains("ASTERGRAPH_PLUGIN_VALIDATE_OK:True", text, StringComparison.Ordinal);
     }

@@ -24,6 +24,10 @@ public sealed class ReleaseClosureContractTests
         WriteProofFile(proofRoot, "package-smoke.txt", "PACKAGE_SMOKE_OK:True");
         WriteProofFile(
             proofRoot,
+            "template-smoke.txt",
+            "ASTERGRAPH_TEMPLATE_SMOKE_OK:True`nTEMPLATE_SMOKE_PLUGIN_VALIDATE_OK:True`nTEMPLATE_SMOKE_PLUGIN_CAPABILITY_SUMMARY_OK:True`nTEMPLATE_SMOKE_PLUGIN_TRUST_HASH_OK:True");
+        WriteProofFile(
+            proofRoot,
             "scale-smoke.txt",
             "SCALE_TIER_BUDGET:baseline`nSCALE_PERFORMANCE_BUDGET_OK:baseline:True:none`nSCALE_AUTHORING_BUDGET_OK:baseline:True:none`nSCALE_EXPORT_BUDGET_OK:baseline:True:none`nSCALE_HISTORY_CONTRACT_OK:True");
         WriteProofFile(
@@ -95,6 +99,10 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("ADAPTER2_COMMAND_BUDGET_OK:True:none", notes, StringComparison.Ordinal);
         Assert.Contains("ADAPTER2_SCENE_BUDGET_OK:True:none", notes, StringComparison.Ordinal);
         Assert.Contains("HELLOWORLD_WPF_OK:True", notes, StringComparison.Ordinal);
+        Assert.Contains("ASTERGRAPH_TEMPLATE_SMOKE_OK:True", notes, StringComparison.Ordinal);
+        Assert.Contains("TEMPLATE_SMOKE_PLUGIN_VALIDATE_OK:True", notes, StringComparison.Ordinal);
+        Assert.Contains("TEMPLATE_SMOKE_PLUGIN_CAPABILITY_SUMMARY_OK:True", notes, StringComparison.Ordinal);
+        Assert.Contains("TEMPLATE_SMOKE_PLUGIN_TRUST_HASH_OK:True", notes, StringComparison.Ordinal);
         Assert.Contains("adapter-2 validation only", notes, StringComparison.Ordinal);
         Assert.Contains("does not widen the public publish/package boundary", notes, StringComparison.Ordinal);
         Assert.Contains("ADAPTER_CAPABILITY_MATRIX_FORMAT:1", notes, StringComparison.Ordinal);
@@ -214,6 +222,26 @@ public sealed class ReleaseClosureContractTests
         var releaseValidationStart = ciScript.IndexOf("function Invoke-ReleaseValidation", StringComparison.Ordinal);
         Assert.True(releaseValidationStart >= 0, "ci.ps1 should contain Invoke-ReleaseValidation.");
         Assert.Contains("Invoke-PublicApiSurfaceValidation", ciScript[releaseValidationStart..], StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void TemplateSmoke_CapturesGeneratedPluginValidationEvidence()
+    {
+        var ciScript = ReadRepoFile("eng/ci.ps1");
+        var templateSmokeScript = ReadRepoFile("eng/template-smoke.ps1");
+        var prereleaseNotesScript = ReadRepoFile("eng/write-prerelease-notes.ps1");
+
+        Assert.Contains("$templateSmokeProofPath = Join-Path $proofArtifactsRoot 'template-smoke.txt'", ciScript, StringComparison.Ordinal);
+        Assert.Contains("-ProofPath $templateSmokeProofPath", ciScript, StringComparison.Ordinal);
+        Assert.Contains("Assert-ProofContains -Text $pluginValidationOutput -ExpectedText 'ASTERGRAPH_PLUGIN_VALIDATE_OK:True'", templateSmokeScript, StringComparison.Ordinal);
+        Assert.Contains("Assert-ProofContains -Text $pluginValidationOutput -ExpectedText 'capability_summary:'", templateSmokeScript, StringComparison.Ordinal);
+        Assert.Contains("Assert-ProofContains -Text $pluginValidationOutput -ExpectedText 'target_framework:'", templateSmokeScript, StringComparison.Ordinal);
+        Assert.Contains("Assert-ProofContains -Text $pluginValidationOutput -ExpectedText 'sha256:'", templateSmokeScript, StringComparison.Ordinal);
+        Assert.Contains("TEMPLATE_SMOKE_PLUGIN_VALIDATE_OK:True", templateSmokeScript, StringComparison.Ordinal);
+        Assert.Contains("TEMPLATE_SMOKE_PLUGIN_CAPABILITY_SUMMARY_OK:True", templateSmokeScript, StringComparison.Ordinal);
+        Assert.Contains("TEMPLATE_SMOKE_PLUGIN_TRUST_HASH_OK:True", templateSmokeScript, StringComparison.Ordinal);
+        Assert.Contains("template-smoke.txt", prereleaseNotesScript, StringComparison.Ordinal);
+        Assert.Contains("TEMPLATE_SMOKE_PLUGIN_CAPABILITY_SUMMARY_OK", prereleaseNotesScript, StringComparison.Ordinal);
     }
 
     [Fact]

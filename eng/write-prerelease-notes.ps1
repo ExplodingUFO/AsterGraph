@@ -145,6 +145,10 @@ $proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'de
 $proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'demo-proof.txt') -Pattern 'DISCONNECT_FLOW_OK'
 $proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'hostsample-net10-packed.txt') -Pattern 'HOST_SAMPLE_NET10_OK'
 $proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'package-smoke.txt') -Pattern 'PACKAGE_SMOKE_OK'
+$proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'template-smoke.txt') -Pattern 'ASTERGRAPH_TEMPLATE_SMOKE_OK'
+$proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'template-smoke.txt') -Pattern 'TEMPLATE_SMOKE_PLUGIN_VALIDATE_OK'
+$proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'template-smoke.txt') -Pattern 'TEMPLATE_SMOKE_PLUGIN_CAPABILITY_SUMMARY_OK'
+$proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'template-smoke.txt') -Pattern 'TEMPLATE_SMOKE_PLUGIN_TRUST_HASH_OK'
 $proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'hello-world-wpf-proof.txt') -Pattern 'HOSTED_ACCESSIBILITY_BASELINE_OK'
 $proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'hello-world-wpf-proof.txt') -Pattern 'HOSTED_ACCESSIBILITY_FOCUS_OK'
 $proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'hello-world-wpf-proof.txt') -Pattern 'HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK'
@@ -169,7 +173,7 @@ $environmentLines = @(
   '- validation lanes: GitHub-hosted Windows release validation plus GitHub-hosted Linux matrix validation',
   '- medium host proof: `AsterGraph.ConsumerSample.Avalonia` on the hosted-UI route with host actions, parameter editing, and one trusted plugin',
   '- showcase proof: `AsterGraph.Demo --proof` for host-native shell workflows, non-obscuring editing, and graph-surface visual semantics',
-  '- packed consumer proofs: `HostSample`, `.NET 10` packed consumer path, and `PackageSmoke`',
+  '- packed consumer proofs: `HostSample`, `.NET 10` packed consumer path, `PackageSmoke`, and generated template/plugin validation',
   '- scale proof source: `ScaleSmoke` defended `baseline` and `large` tiers plus informational `stress` telemetry and history/state continuity checks'
 )
 
