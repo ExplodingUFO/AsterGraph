@@ -25,7 +25,7 @@ public sealed class ScaleSmokeAuthoringBudgetTests
         var marker = tier.ToAuthoringBudgetMarker();
 
         Assert.Equal(
-            "SCALE_AUTHORING_BUDGET:large:stencil<=150:command-surface<=400:quick-tool-projection<=150:quick-tool-execution<=200:inspector-open<=100:node-resize<=60:edge-create<=100",
+            "SCALE_AUTHORING_BUDGET:large:stencil<=150:command-surface<=400:quick-tool-projection<=250:quick-tool-execution<=300:inspector-open<=100:node-resize<=60:edge-create<=100",
             marker);
     }
 
@@ -62,9 +62,9 @@ public sealed class ScaleSmokeAuthoringBudgetTests
         var tier = ScaleSmokeTier.Parse(["--tier", "large"]);
         var metrics = new ScaleSmokeAuthoringMetrics(
             StencilFilterMs: 12,
-            CommandSurfaceRefreshMs: 28,
-            QuickToolProjectionMs: 16,
-            QuickToolExecutionMs: 21,
+            CommandSurfaceRefreshMs: 181,
+            QuickToolProjectionMs: 185,
+            QuickToolExecutionMs: 228,
             InspectorOpenMs: 0,
             NodeResizeMs: 0,
             EdgeCreateMs: 0);

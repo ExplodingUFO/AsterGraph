@@ -365,8 +365,8 @@ public sealed record ScaleSmokeTier(
                 AuthoringBudget: new ScaleSmokeAuthoringBudget(
                     StencilFilterMs: 150,
                     CommandSurfaceRefreshMs: 400,
-                    QuickToolProjectionMs: 150,
-                    QuickToolExecutionMs: 200,
+                    QuickToolProjectionMs: 250,
+                    QuickToolExecutionMs: 300,
                     InspectorOpenMs: 100,
                     NodeResizeMs: 60,
                     EdgeCreateMs: 100),

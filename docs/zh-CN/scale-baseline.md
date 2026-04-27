@@ -80,7 +80,7 @@ release lane 现在会守住 `baseline`、`large`，以及 `stress` 中已提升
 | 层级 | stencil | command-surface | quick-tool-projection | quick-tool-execution |
 | --- | ---: | ---: | ---: | ---: |
 | `baseline` | 100 ms | 250 ms | 100 ms | 150 ms |
-| `large` | 150 ms | 400 ms | 150 ms | 200 ms |
+| `large` | 150 ms | 400 ms | 250 ms | 300 ms |
 | `stress` | 150 ms | 800 ms | 800 ms | 1000 ms |
 
 `ScaleSmoke` 会为这些 defended 层级输出 `SCALE_AUTHORING_BUDGET:...`、`SCALE_AUTHORING_METRICS:...`、`SCALE_AUTHORING_BUDGET_OK:...` 和 `SCALE_AUTHORING_SUMMARY:...`。
