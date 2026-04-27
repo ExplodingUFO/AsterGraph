@@ -32,9 +32,17 @@ public sealed class ConsumerSampleHost : IDisposable
     private const string ReviewAuditPortId = "audit";
     private const string PluginId = "consumer.sample.audit-plugin";
     public const string PluginCommandId = "consumer.sample.plugin.add-audit-node";
+    public const string QueueLaneSnippetId = "consumer.sample.snippet.queue-lane";
     public const string ScenarioId = "content-review-release-lane";
     public const string ScenarioTitle = "Content Review Release Lane";
     internal static readonly GraphSize ReviewNodeDefaultSize = new(320, 220);
+    private static readonly IReadOnlyList<ConsumerSampleSnippetDescriptor> SnippetCatalogEntries =
+    [
+        new(
+            QueueLaneSnippetId,
+            "Connected Queue Lane",
+            "Adds a queue lane connected from the first review node output."),
+    ];
     private readonly GraphEditorViewModel _editor;
     private readonly ConsumerSamplePluginAllowlistTrustPolicy _trustPolicy;
     private readonly GraphEditorPluginDiscoveryOptions _pluginDiscoveryOptions;
@@ -90,6 +98,8 @@ public sealed class ConsumerSampleHost : IDisposable
     public IReadOnlyList<string> AlignmentHelperLines => _alignmentHelperLines;
 
     public int LastRouteCleanupCount => _lastRouteCleanupCount;
+
+    public IReadOnlyList<ConsumerSampleSnippetDescriptor> SnippetCatalog => SnippetCatalogEntries;
 
     public IReadOnlyList<string> RuntimeLogExportLines
         => RuntimeOverlay.RecentLogs
@@ -191,6 +201,10 @@ public sealed class ConsumerSampleHost : IDisposable
 
     public bool AddPluginAuditNode()
         => Session.Commands.TryExecuteCommand(new GraphEditorCommandInvocationSnapshot(PluginCommandId));
+
+    public bool TryInsertSnippet(string snippetId)
+        => string.Equals(snippetId, QueueLaneSnippetId, StringComparison.Ordinal)
+        && TryInsertConnectedQueueLaneSnippet();
 
     public bool ApproveSelection()
         => Session.Commands.TrySetSelectedNodeParameterValue("status", "approved");
@@ -415,6 +429,44 @@ public sealed class ConsumerSampleHost : IDisposable
 
     private void HandleStateChanged(object? sender, EventArgs args)
         => StateChanged?.Invoke(this, EventArgs.Empty);
+
+    private bool TryInsertConnectedQueueLaneSnippet()
+    {
+        var before = Session.Queries.CreateDocumentSnapshot();
+        var sourceNode = before.Nodes.FirstOrDefault(node => node.DefinitionId == ReviewDefinitionId);
+        if (sourceNode is null)
+        {
+            return false;
+        }
+
+        Session.Commands.StartConnection(sourceNode.Id, OutputPortId);
+        var search = Session.Queries.GetCompatibleNodeDefinitionsForPendingConnection();
+        var queueInput = search.Results.FirstOrDefault(result =>
+            result.DefinitionId == QueueDefinitionId
+            && result.TargetKind == GraphConnectionTargetKind.Port
+            && string.Equals(result.TargetId, InputPortId, StringComparison.Ordinal));
+        if (queueInput is null)
+        {
+            Session.Commands.CancelPendingConnection();
+            return false;
+        }
+
+        var queueCount = before.Nodes.Count(node => node.DefinitionId == QueueDefinitionId);
+        var connected = Session.Commands.TryCreateConnectedNodeFromPendingConnection(
+            queueInput.DefinitionId,
+            queueInput.TargetId,
+            queueInput.TargetKind,
+            new GraphPoint(520 + (queueCount * 300), 420));
+        if (!connected)
+        {
+            Session.Commands.CancelPendingConnection();
+            return false;
+        }
+
+        var after = Session.Queries.CreateDocumentSnapshot();
+        return after.Nodes.Count == before.Nodes.Count + 1
+            && after.Connections.Count == before.Connections.Count + 1;
+    }
 
     private static NodeCatalog CreateCatalog()
     {
@@ -1014,3 +1066,8 @@ public sealed class ConsumerSampleHost : IDisposable
                 ResetManualRoutes: true);
     }
 }
+
+public sealed record ConsumerSampleSnippetDescriptor(
+    string Id,
+    string Title,
+    string Description);

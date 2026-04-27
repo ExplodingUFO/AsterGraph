@@ -90,7 +90,9 @@ public sealed record ConsumerSampleProofResult(
     bool ScenarioGraphOk = true,
     bool HostOwnedActionsOk = true,
     bool SupportBundlePayloadOk = true,
-    bool FiveMinuteOnboardingOk = true)
+    bool FiveMinuteOnboardingOk = true,
+    bool GraphSnippetCatalogOk = true,
+    bool GraphSnippetInsertOk = true)
 {
     public bool AuthoringSurfaceOk
         => ParameterProjectionOk
@@ -162,6 +164,8 @@ public sealed record ConsumerSampleProofResult(
         && PluginSamplePackOk
         && PluginSampleNodeDefinitionsOk
         && PluginSampleParameterMetadataOk
+        && GraphSnippetCatalogOk
+        && GraphSnippetInsertOk
         && NodeCount > 0
         && (FeatureDescriptorIds?.Count > 0);
 
@@ -226,6 +230,8 @@ public sealed record ConsumerSampleProofResult(
         $"PLUGIN_SAMPLE_PACK_OK:{PluginSamplePackOk}",
         $"PLUGIN_SAMPLE_NODE_DEFINITIONS_OK:{PluginSampleNodeDefinitionsOk}",
         $"PLUGIN_SAMPLE_PARAMETER_METADATA_OK:{PluginSampleParameterMetadataOk}",
+        $"GRAPH_SNIPPET_CATALOG_OK:{GraphSnippetCatalogOk}",
+        $"GRAPH_SNIPPET_INSERT_OK:{GraphSnippetInsertOk}",
         $"AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:{NodeSideAuthoringOk}",
         $"AUTHORING_SURFACE_COMMAND_PROJECTION_OK:{CommandSurfaceOk}",
         $"CONSUMER_SAMPLE_PARAMETER_OK:{ParameterProjectionOk}",
@@ -382,6 +388,8 @@ public static class ConsumerSampleProof
         bool pluginSamplePackOk;
         bool pluginSampleNodeDefinitionsOk;
         bool pluginSampleParameterMetadataOk;
+        bool graphSnippetCatalogOk;
+        bool graphSnippetInsertOk;
         double inspectorProjectionMs;
         double pluginScanMs;
         double commandLatencyMs;
@@ -536,6 +544,11 @@ public static class ConsumerSampleProof
             capabilityWindow.Close();
         }
 
+        graphSnippetCatalogOk = HasGraphSnippetCatalog(host);
+        graphSnippetInsertOk = HasGraphSnippetInsertion(host);
+        host.SelectNode(host.GetFirstReviewNodeId());
+        FlushUi();
+
         var finalSnapshot = host.Session.Queries.CreateDocumentSnapshot();
         var validationSnapshot = host.Session.Diagnostics.CaptureInspectionSnapshot().ValidationSnapshot;
         var runtimeOverlay = host.Session.Queries.GetRuntimeOverlaySnapshot();
@@ -634,7 +647,9 @@ public static class ConsumerSampleProof
             ScenarioGraphOk: scenarioGraphOk,
             HostOwnedActionsOk: hostOwnedActionsOk,
             SupportBundlePayloadOk: supportBundlePayloadOk,
-            FiveMinuteOnboardingOk: fiveMinuteOnboardingOk);
+            FiveMinuteOnboardingOk: fiveMinuteOnboardingOk,
+            GraphSnippetCatalogOk: graphSnippetCatalogOk,
+            GraphSnippetInsertOk: graphSnippetInsertOk);
     }
 
     private static bool HasScenarioGraph(ConsumerSampleHost host)
@@ -683,6 +698,39 @@ public static class ConsumerSampleProof
             && host.PluginCandidateEntries.Any(entry =>
                 string.Equals(entry.PluginId, "consumer.sample.audit-plugin", StringComparison.Ordinal)
             && entry.IsAllowed);
+    }
+
+    private static bool HasGraphSnippetCatalog(ConsumerSampleHost host)
+        => host.SnippetCatalog.Any(snippet =>
+            string.Equals(snippet.Id, ConsumerSampleHost.QueueLaneSnippetId, StringComparison.Ordinal)
+            && snippet.Title.Contains("Queue", StringComparison.Ordinal)
+            && snippet.Description.Contains("review", StringComparison.OrdinalIgnoreCase));
+
+    private static bool HasGraphSnippetInsertion(ConsumerSampleHost host)
+    {
+        var before = host.Session.Queries.CreateDocumentSnapshot();
+        var sourceNode = before.Nodes.FirstOrDefault(node => node.DefinitionId == ConsumerSampleHost.ReviewDefinitionId);
+        if (sourceNode is null || !host.TryInsertSnippet(ConsumerSampleHost.QueueLaneSnippetId))
+        {
+            return false;
+        }
+
+        var after = host.Session.Queries.CreateDocumentSnapshot();
+        var createdQueueNodeIds = after.Nodes
+            .Where(node => node.DefinitionId == ConsumerSampleHost.QueueDefinitionId)
+            .Select(node => node.Id)
+            .Except(before.Nodes.Select(node => node.Id), StringComparer.Ordinal)
+            .ToArray();
+
+        return createdQueueNodeIds.Length == 1
+            && after.Nodes.Count == before.Nodes.Count + 1
+            && after.Connections.Count == before.Connections.Count + 1
+            && after.Connections.Any(connection =>
+                string.Equals(connection.SourceNodeId, sourceNode.Id, StringComparison.Ordinal)
+                && string.Equals(connection.SourcePortId, "output", StringComparison.Ordinal)
+                && string.Equals(connection.TargetNodeId, createdQueueNodeIds[0], StringComparison.Ordinal)
+                && string.Equals(connection.TargetPortId, "input", StringComparison.Ordinal))
+            && !host.Session.Queries.GetPendingConnectionSnapshot().HasPendingConnection;
     }
 
     private static bool HasLocalPluginGallery(ConsumerSampleHost host, Window window)
