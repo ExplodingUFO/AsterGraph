@@ -80,6 +80,7 @@ Expected high-signal markers:
 - `TEMPLATE_SMOKE_PLUGIN_CAPABILITY_SUMMARY_OK:True`
 - `TEMPLATE_SMOKE_PLUGIN_TRUST_HASH_OK:True`
 - `PUBLIC_API_SURFACE_OK:...:net9.0`
+- `PUBLIC_API_SCOPE_OK:AsterGraph.Abstractions,AsterGraph.Core,AsterGraph.Editor,AsterGraph.Avalonia`
 - `PUBLIC_API_GUIDANCE_OK:True`
 - `SCALE_PERFORMANCE_BUDGET_OK:baseline:True:...`
 - `SCALE_PERFORMANCE_BUDGET_OK:large:True:...`
@@ -110,7 +111,7 @@ Expected high-signal markers:
   - matching public tag
   - optional legacy historical repo checkpoint reference
 - confirm the generated prerelease notes also publish the proof summary block, not only workflow artifacts
-- confirm the proof summary keeps public API guidance proof next to template/plugin proof: `ASTERGRAPH_TEMPLATE_SMOKE_OK:True`, `TEMPLATE_SMOKE_PLUGIN_VALIDATE_OK:True`, `PUBLIC_API_SURFACE_OK:...:net9.0`, and `PUBLIC_API_GUIDANCE_OK:True`
+- confirm the proof summary keeps public API guidance proof next to template/plugin proof: `ASTERGRAPH_TEMPLATE_SMOKE_OK:True`, `TEMPLATE_SMOKE_PLUGIN_VALIDATE_OK:True`, `PUBLIC_API_SURFACE_OK:...:net9.0`, `PUBLIC_API_SCOPE_OK:AsterGraph.Abstractions,AsterGraph.Core,AsterGraph.Editor,AsterGraph.Avalonia`, and `PUBLIC_API_GUIDANCE_OK:True`
 - confirm the generated notes and announcement text explicitly carry the frozen support boundary story and the adapter matrix story, plus `HOSTED_ACCESSIBILITY_BASELINE_OK:True`, `HOSTED_ACCESSIBILITY_FOCUS_OK:True`, `HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True`, `HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True`, `HOSTED_ACCESSIBILITY_OK:True`, `ADAPTER2_PERFORMANCE_BASELINE_OK:True`, `ADAPTER2_EXPORT_BREADTH_OK:True`, `ADAPTER2_PROJECTION_BUDGET_OK:True:none`, `ADAPTER2_COMMAND_BUDGET_OK:True:none`, `ADAPTER2_SCENE_BUDGET_OK:True:none`, `HELLOWORLD_WPF_OK:True`, `ADAPTER_CAPABILITY_MATRIX_FORMAT:1`, `ADAPTER_CAPABILITY_MATRIX:WPF:HELLOWORLD_WPF_OK:PASS`, and `ADAPTER_CAPABILITY_MATRIX:WPF:COMMAND_SURFACE_OK:PASS`
 - treat `HELLOWORLD_WPF_OK` as adapter-2 validation only; do not present it as Avalonia/WPF parity or public WPF support when describing the adapter story
 - use [Adapter-2 Accessibility Recipe](./adapter-2-accessibility-recipe.md) when you need the bounded handoff from defended Avalonia accessibility proof to validation-only WPF verification

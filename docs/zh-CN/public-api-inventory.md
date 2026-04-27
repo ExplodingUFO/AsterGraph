@@ -33,6 +33,12 @@
 | Retained migration bridge | Retained migration | `GraphEditorViewModel`、`GraphEditorView`、`GraphEditorViewModel.Session` | 只给旧宿主分批迁移使用。 |
 | 旧 compatible-target query | Compatibility-only | `IGraphEditorQueries.GetCompatibleTargets(...)`、`CompatiblePortTarget` | 优先使用 `GetCompatiblePortTargets(...)` 和 `GraphEditorCompatiblePortTargetSnapshot`。 |
 
+## Release Handoff
+
+- release handoff：Stable canonical surface 是默认路线，Retained migration surface 只作为迁移桥，Compatibility-only 或 obsolete surface 必须继续带 replacement guidance。
+- 在同一个 release proof block 中同时保留 `PUBLIC_API_SURFACE_OK`、`PUBLIC_API_SCOPE_OK`、`PUBLIC_API_GUIDANCE_OK`、`ASTERGRAPH_TEMPLATE_SMOKE_OK` 和 `TEMPLATE_SMOKE_PLUGIN_VALIDATE_OK`。
+- 这份 handoff 不新增 analyzer、adapter 或 compatibility 承诺；它只发布当前 package guidance 和 proof marker。
+
 ## Drift 规则
 
 - 新增 public host-facing symbol 必须在发布前进入这份 inventory 分类。

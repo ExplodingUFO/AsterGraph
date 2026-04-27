@@ -354,6 +354,27 @@ public sealed class ReleaseClosureContractTests
     }
 
     [Fact]
+    public void PublicApiGuidanceHandoff_StaysVisibleInStatusChecklistAndInventory()
+    {
+        var englishInventory = ReadRepoFile("docs/en/public-api-inventory.md");
+        var chineseInventory = ReadRepoFile("docs/zh-CN/public-api-inventory.md");
+        var englishChecklist = ReadRepoFile("docs/en/public-launch-checklist.md");
+        var chineseChecklist = ReadRepoFile("docs/zh-CN/public-launch-checklist.md");
+        var englishStatus = ReadRepoFile("docs/en/project-status.md");
+        var chineseStatus = ReadRepoFile("docs/zh-CN/project-status.md");
+
+        Assert.True(HasLineWithAll(englishInventory, "Release handoff", "stable canonical", "retained migration", "compatibility-only", "obsolete"));
+        Assert.True(HasLineWithAll(chineseInventory, "release handoff", "Stable canonical", "Retained migration", "Compatibility-only", "obsolete"));
+        Assert.True(HasLineWithAll(englishInventory, "PUBLIC_API_SURFACE_OK", "PUBLIC_API_SCOPE_OK", "PUBLIC_API_GUIDANCE_OK", "ASTERGRAPH_TEMPLATE_SMOKE_OK", "TEMPLATE_SMOKE_PLUGIN_VALIDATE_OK"));
+        Assert.True(HasLineWithAll(chineseInventory, "PUBLIC_API_SURFACE_OK", "PUBLIC_API_SCOPE_OK", "PUBLIC_API_GUIDANCE_OK", "ASTERGRAPH_TEMPLATE_SMOKE_OK", "TEMPLATE_SMOKE_PLUGIN_VALIDATE_OK"));
+
+        Assert.True(HasLineWithAll(englishChecklist, "public API guidance proof", "PUBLIC_API_SCOPE_OK", "template/plugin proof"));
+        Assert.True(HasLineWithAll(chineseChecklist, "public API guidance proof", "PUBLIC_API_SCOPE_OK", "template/plugin proof"));
+        Assert.True(HasLineWithAll(englishStatus, "public API guidance proof", "PUBLIC_API_SURFACE_OK", "PUBLIC_API_SCOPE_OK", "PUBLIC_API_GUIDANCE_OK"));
+        Assert.True(HasLineWithAll(chineseStatus, "public API guidance proof", "PUBLIC_API_SURFACE_OK", "PUBLIC_API_SCOPE_OK", "PUBLIC_API_GUIDANCE_OK"));
+    }
+
+    [Fact]
     public void ReleaseCoverageValidation_BoundsHungTestCollectors()
     {
         var ciScript = ReadRepoFile("eng/ci.ps1");

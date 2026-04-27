@@ -33,6 +33,12 @@ Use this page with [Host Integration](./host-integration.md) and [Extension Cont
 | Retained migration bridge | Retained migration | `GraphEditorViewModel`, `GraphEditorView`, `GraphEditorViewModel.Session` | Only for older hosts migrating in batches. |
 | Legacy compatible-target query | Compatibility-only | `IGraphEditorQueries.GetCompatibleTargets(...)`, `CompatiblePortTarget` | Prefer `GetCompatiblePortTargets(...)` and `GraphEditorCompatiblePortTargetSnapshot`. |
 
+## Release Handoff
+
+- Release handoff: stable canonical surfaces are the default route, retained migration surfaces are bridge-only, and compatibility-only or obsolete surfaces must keep replacement guidance visible.
+- Keep `PUBLIC_API_SURFACE_OK`, `PUBLIC_API_SCOPE_OK`, and `PUBLIC_API_GUIDANCE_OK` in the same release proof block as `ASTERGRAPH_TEMPLATE_SMOKE_OK` and `TEMPLATE_SMOKE_PLUGIN_VALIDATE_OK`.
+- Do not add analyzer, adapter, or compatibility promises from this handoff; it only publishes the current package guidance and proof markers.
+
 ## Drift Rules
 
 - New public host-facing symbols must be classified in this inventory before release.

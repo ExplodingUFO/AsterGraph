@@ -49,6 +49,7 @@
 - `IGraphEditorSession.Automation`
 - contract、maintenance、release 验证 lanes
 - release lane 里的 `.NET 10` 打包 `HostSample` 兼容性验证
+- public API guidance proof 继续和 template/plugin proof 放在同一条 release story：`PUBLIC_API_SURFACE_OK`、`PUBLIC_API_SCOPE_OK`、`PUBLIC_API_GUIDANCE_OK`、`ASTERGRAPH_TEMPLATE_SMOKE_OK`、`TEMPLATE_SMOKE_PLUGIN_VALIDATE_OK`
 
 ## 当前优先事项
 

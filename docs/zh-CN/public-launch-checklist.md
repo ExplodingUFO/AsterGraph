@@ -80,6 +80,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framew
 - `TEMPLATE_SMOKE_PLUGIN_CAPABILITY_SUMMARY_OK:True`
 - `TEMPLATE_SMOKE_PLUGIN_TRUST_HASH_OK:True`
 - `PUBLIC_API_SURFACE_OK:...:net9.0`
+- `PUBLIC_API_SCOPE_OK:AsterGraph.Abstractions,AsterGraph.Core,AsterGraph.Editor,AsterGraph.Avalonia`
 - `PUBLIC_API_GUIDANCE_OK:True`
 - `SCALE_PERFORMANCE_BUDGET_OK:baseline:True:...`
 - `SCALE_PERFORMANCE_BUDGET_OK:large:True:...`
@@ -115,7 +116,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framew
   - 与之匹配的公开 tag
   - 可选的 legacy 历史仓库检查点引用
 - 确认自动生成的 prerelease notes 同时把 proof summary 发出来，而不只是留在 workflow artifact 里
-- 确认 proof summary 把 public API guidance proof 放在 template/plugin proof 附近：`ASTERGRAPH_TEMPLATE_SMOKE_OK:True`、`TEMPLATE_SMOKE_PLUGIN_VALIDATE_OK:True`、`PUBLIC_API_SURFACE_OK:...:net9.0` 和 `PUBLIC_API_GUIDANCE_OK:True`
+- 确认 proof summary 把 public API guidance proof 放在 template/plugin proof 附近：`ASTERGRAPH_TEMPLATE_SMOKE_OK:True`、`TEMPLATE_SMOKE_PLUGIN_VALIDATE_OK:True`、`PUBLIC_API_SURFACE_OK:...:net9.0`、`PUBLIC_API_SCOPE_OK:AsterGraph.Abstractions,AsterGraph.Core,AsterGraph.Editor,AsterGraph.Avalonia` 和 `PUBLIC_API_GUIDANCE_OK:True`
 - 确认自动生成的 notes 和公告文案明确写出冻结的 support boundary 叙事和 adapter matrix 叙事，并同步给出 `HOSTED_ACCESSIBILITY_BASELINE_OK:True`、`HOSTED_ACCESSIBILITY_FOCUS_OK:True`、`HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True`、`HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True`、`HOSTED_ACCESSIBILITY_OK:True`、`ADAPTER2_PERFORMANCE_BASELINE_OK:True`、`ADAPTER2_EXPORT_BREADTH_OK:True`、`ADAPTER2_PROJECTION_BUDGET_OK:True:none`、`ADAPTER2_COMMAND_BUDGET_OK:True:none`、`ADAPTER2_SCENE_BUDGET_OK:True:none`、`HELLOWORLD_WPF_OK:True`、`ADAPTER_CAPABILITY_MATRIX_FORMAT:1`、`ADAPTER_CAPABILITY_MATRIX:WPF:HELLOWORLD_WPF_OK:PASS`、`ADAPTER_CAPABILITY_MATRIX:WPF:COMMAND_SURFACE_OK:PASS`
 - 把 `HELLOWORLD_WPF_OK` 只当成 adapter-2 验证通过，不要写成 Avalonia/WPF parity 或公开 WPF support
 - 需要从受防守的 Avalonia accessibility proof 交接到 validation-only 的 WPF 验证时，统一参考 [Adapter-2 Accessibility Recipe](./adapter-2-accessibility-recipe.md)

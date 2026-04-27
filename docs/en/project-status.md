@@ -50,6 +50,7 @@
 - automation execution through `IGraphEditorSession.Automation`
 - contract, maintenance, and release proof lanes
 - packed `HostSample` compatibility proof under `.NET 10` in the release lane
+- public API guidance proof stays with the template/plugin proof in the release story: `PUBLIC_API_SURFACE_OK`, `PUBLIC_API_SCOPE_OK`, `PUBLIC_API_GUIDANCE_OK`, `ASTERGRAPH_TEMPLATE_SMOKE_OK`, `TEMPLATE_SMOKE_PLUGIN_VALIDATE_OK`
 
 ## Current Priorities
 
