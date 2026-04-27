@@ -31,3 +31,8 @@ artifacts/*.log
 # OS noise
 Thumbs.db
 Desktop.ini
+
+# Beads / Dolt files (added by bd init)
+.dolt/
+*.db
+.beads-credential-key
