@@ -82,6 +82,35 @@ public sealed class ConsumerSampleProofTests
     }
 
     [AvaloniaFact]
+    public void ConsumerSampleHost_ExposesSnippetCatalogAndInsertsConnectedQueueLane()
+    {
+        using var host = ConsumerSampleHost.Create();
+
+        var snippet = Assert.Single(host.SnippetCatalog, entry => entry.Id == ConsumerSampleHost.QueueLaneSnippetId);
+        var before = host.Session.Queries.CreateDocumentSnapshot();
+        var sourceNode = before.Nodes.Single(node => node.DefinitionId == ConsumerSampleHost.ReviewDefinitionId);
+
+        Assert.Contains("Queue", snippet.Title, StringComparison.Ordinal);
+        Assert.Contains("review", snippet.Description, StringComparison.OrdinalIgnoreCase);
+
+        Assert.True(host.TryInsertSnippet(snippet.Id));
+
+        var after = host.Session.Queries.CreateDocumentSnapshot();
+        var createdQueueNode = Assert.Single(after.Nodes, node =>
+            node.DefinitionId == ConsumerSampleHost.QueueDefinitionId
+            && before.Nodes.All(existing => !string.Equals(existing.Id, node.Id, StringComparison.Ordinal)));
+
+        Assert.Equal(before.Nodes.Count + 1, after.Nodes.Count);
+        Assert.Equal(before.Connections.Count + 1, after.Connections.Count);
+        Assert.Contains(after.Connections, connection =>
+            string.Equals(connection.SourceNodeId, sourceNode.Id, StringComparison.Ordinal)
+            && string.Equals(connection.SourcePortId, "output", StringComparison.Ordinal)
+            && string.Equals(connection.TargetNodeId, createdQueueNode.Id, StringComparison.Ordinal)
+            && string.Equals(connection.TargetPortId, "input", StringComparison.Ordinal));
+        Assert.False(host.Session.Queries.GetPendingConnectionSnapshot().HasPendingConnection);
+    }
+
+    [AvaloniaFact]
     public void ConsumerSampleProof_Run_EmitsGreenMarkers()
     {
         var result = ConsumerSampleProof.Run();
@@ -120,6 +149,8 @@ public sealed class ConsumerSampleProofTests
         Assert.True(result.RuntimeOverlaySnapshotOk);
         Assert.True(result.RuntimeLogPanelOk);
         Assert.True(result.RuntimeLogFilterOk);
+        Assert.True(result.GraphSnippetCatalogOk);
+        Assert.True(result.GraphSnippetInsertOk);
         Assert.True(result.RuntimeOverlaySupportBundleOk);
         Assert.True(result.OnboardingConfigurationOk);
         Assert.True(result.StartupMs >= 0);
@@ -164,6 +195,8 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(result.ProofLines, line => line == "PLUGIN_SAMPLE_PACK_OK:True");
         Assert.Contains(result.ProofLines, line => line == "PLUGIN_SAMPLE_NODE_DEFINITIONS_OK:True");
         Assert.Contains(result.ProofLines, line => line == "PLUGIN_SAMPLE_PARAMETER_METADATA_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "GRAPH_SNIPPET_CATALOG_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "GRAPH_SNIPPET_INSERT_OK:True");
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:True");
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_SURFACE_COMMAND_PROJECTION_OK:True");
         Assert.Contains(result.ProofLines, line => line == "CAPABILITY_BREADTH_STENCIL_OK:True");
