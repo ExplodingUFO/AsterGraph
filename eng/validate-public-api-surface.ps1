@@ -25,7 +25,6 @@ $publishableAssemblies = @(
 
 $userHome = if ([string]::IsNullOrWhiteSpace($env:USERPROFILE)) { $env:HOME } else { $env:USERPROFILE }
 $fallbackPackageCache = Join-Path $userHome '.nuget/packages'
-$resolvedDependencyCache = @{}
 
 $dotnetAssemblyDirectories = @()
 $dotnetRoots = @()
@@ -54,6 +53,7 @@ foreach ($dotnetRoot in ($dotnetRoots | Where-Object { -not [string]::IsNullOrWh
 }
 
 $dotnetAssemblyDirectories = @($dotnetAssemblyDirectories | Select-Object -Unique)
+$metadataLoadContextImported = $false
 
 function Resolve-AssemblyPath {
   param([string]$AssemblyName)
@@ -66,79 +66,156 @@ function Resolve-AssemblyPath {
   return [System.IO.Path]::GetFullPath($assemblyPath)
 }
 
-function Select-MatchingAssemblyFile {
-  param($Candidates, $RequestedAssemblyName)
+function Get-PublicApiAssetAssemblyPaths {
+  foreach ($assemblyName in $publishableAssemblies) {
+    $assetsPath = Join-Path $RepoRoot "src/$assemblyName/obj/project.assets.json"
+    if (-not (Test-Path -LiteralPath $assetsPath)) {
+      continue
+    }
 
-  foreach ($candidateFile in $Candidates) {
-    try {
-      $candidateName = [System.Reflection.AssemblyName]::GetAssemblyName($candidateFile.FullName)
-      if ($candidateName.Name -eq $RequestedAssemblyName.Name -and $candidateName.Version -eq $RequestedAssemblyName.Version) {
-        return $candidateFile
+    $assets = Get-Content -LiteralPath $assetsPath -Raw | ConvertFrom-Json
+    $targetProperty = $assets.targets.PSObject.Properties |
+      Where-Object { $_.Name -eq $Framework } |
+      Select-Object -First 1
+    if (-not $targetProperty) {
+      continue
+    }
+
+    foreach ($packageProperty in $targetProperty.Value.PSObject.Properties) {
+      $separatorIndex = $packageProperty.Name.LastIndexOf('/')
+      if ($separatorIndex -le 0) {
+        continue
       }
+
+      $packageId = $packageProperty.Name.Substring(0, $separatorIndex)
+      $packageVersion = $packageProperty.Name.Substring($separatorIndex + 1)
+      $packageRoot = Join-Path (Join-Path $fallbackPackageCache $packageId.ToLowerInvariant()) $packageVersion.ToLowerInvariant()
+      if (-not (Test-Path -LiteralPath $packageRoot)) {
+        continue
+      }
+
+      foreach ($assetGroupName in @('compile', 'runtime')) {
+        $assetGroupProperty = $packageProperty.Value.PSObject.Properties[$assetGroupName]
+        if (-not $assetGroupProperty) {
+          continue
+        }
+
+        foreach ($assetProperty in $assetGroupProperty.Value.PSObject.Properties) {
+          if ($assetProperty.Name -eq '_._' -or -not $assetProperty.Name.EndsWith('.dll', [System.StringComparison]::OrdinalIgnoreCase)) {
+            continue
+          }
+
+          $assetPath = Join-Path $packageRoot $assetProperty.Name
+          if (Test-Path -LiteralPath $assetPath) {
+            [System.IO.Path]::GetFullPath($assetPath)
+          }
+        }
+      }
+    }
+  }
+}
+
+function Import-MetadataLoadContextAssembly {
+  $loadedMetadataAssembly = [AppDomain]::CurrentDomain.GetAssemblies() |
+    Where-Object { $_.GetName().Name -eq 'System.Reflection.MetadataLoadContext' } |
+    Select-Object -First 1
+  if ($script:metadataLoadContextImported -or $loadedMetadataAssembly) {
+    $script:metadataLoadContextImported = $true
+    return
+  }
+
+  $candidatePaths = @()
+  foreach ($dotnetRoot in ($dotnetRoots | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -Unique)) {
+    $sdkRoot = Join-Path $dotnetRoot 'sdk'
+    if (-not (Test-Path -LiteralPath $sdkRoot)) {
+      continue
+    }
+
+    $candidatePaths += Get-ChildItem -LiteralPath $sdkRoot -Directory |
+      Sort-Object Name -Descending |
+      ForEach-Object { Join-Path $_.FullName 'System.Reflection.MetadataLoadContext.dll' } |
+      Where-Object { Test-Path -LiteralPath $_ }
+  }
+
+  foreach ($candidatePath in ($candidatePaths | Select-Object -Unique)) {
+    try {
+      Add-Type -Path $candidatePath
+      $script:metadataLoadContextImported = $true
+      return
     }
     catch {
       continue
     }
   }
 
-  return $null
+  throw 'System.Reflection.MetadataLoadContext.dll could not be loaded from the installed .NET SDK. Install the .NET SDK before running public API validation.'
 }
 
-function New-PublicApiAssemblyResolver {
-  param([string[]]$AssemblyDirectories)
+function New-PublicApiMetadataContext {
+  param([string[]]$AssemblyPaths)
 
-  return {
-    param($context, $assemblyName)
+  Import-MetadataLoadContextAssembly
 
-    foreach ($directory in $AssemblyDirectories) {
-      $candidate = Join-Path $directory "$($assemblyName.Name).dll"
-      if (Test-Path -LiteralPath $candidate) {
-        return $context.LoadFromAssemblyPath([System.IO.Path]::GetFullPath($candidate))
-      }
+  $metadataAssemblyPaths = [System.Collections.Generic.List[string]]::new()
+  foreach ($assemblyPath in $AssemblyPaths) {
+    $metadataAssemblyPaths.Add([System.IO.Path]::GetFullPath($assemblyPath))
+  }
+
+  foreach ($assetAssemblyPath in Get-PublicApiAssetAssemblyPaths) {
+    $metadataAssemblyPaths.Add($assetAssemblyPath)
+  }
+
+  $metadataDirectories = ($AssemblyPaths | ForEach-Object { Split-Path -Parent $_ }) + $dotnetAssemblyDirectories |
+    Select-Object -Unique
+  foreach ($directory in $metadataDirectories) {
+    if (-not (Test-Path -LiteralPath $directory)) {
+      continue
     }
 
-    foreach ($directory in $dotnetAssemblyDirectories) {
-      $candidate = Join-Path $directory "$($assemblyName.Name).dll"
-      if (Test-Path -LiteralPath $candidate) {
-        try {
-          $candidateName = [System.Reflection.AssemblyName]::GetAssemblyName($candidate)
-          if ($candidateName.Name -eq $assemblyName.Name -and $candidateName.Version -eq $assemblyName.Version) {
-            return $context.LoadFromAssemblyPath([System.IO.Path]::GetFullPath($candidate))
-          }
-        }
-        catch {
-          continue
-        }
-      }
+    foreach ($assemblyFile in Get-ChildItem -LiteralPath $directory -Filter '*.dll' -File) {
+      $metadataAssemblyPaths.Add($assemblyFile.FullName)
+    }
+  }
+
+  $uniqueAssemblyPaths = [System.Collections.Generic.List[string]]::new()
+  $seenAssemblyIdentities = @{}
+  foreach ($path in ($metadataAssemblyPaths | Select-Object -Unique)) {
+    try {
+      $assemblyName = [System.Reflection.AssemblyName]::GetAssemblyName($path)
+      $publicKeyToken = [System.BitConverter]::ToString($assemblyName.GetPublicKeyToken())
+      $assemblyIdentity = "$($assemblyName.Name)|$($assemblyName.Version)|$($assemblyName.CultureName)|$publicKeyToken"
+    }
+    catch {
+      $assemblyIdentity = $path
     }
 
-    if ($resolvedDependencyCache.ContainsKey($assemblyName.Name)) {
-      return $context.LoadFromAssemblyPath($resolvedDependencyCache[$assemblyName.Name])
+    if ($seenAssemblyIdentities.ContainsKey($assemblyIdentity)) {
+      continue
     }
 
-    if (Test-Path -LiteralPath $fallbackPackageCache) {
-      $packageDirectory = Join-Path $fallbackPackageCache $assemblyName.Name.ToLowerInvariant()
-      if (Test-Path -LiteralPath $packageDirectory) {
-        $candidate = Select-MatchingAssemblyFile `
-          -Candidates (Get-ChildItem -LiteralPath $packageDirectory -Filter "$($assemblyName.Name).dll" -Recurse -File) `
-          -RequestedAssemblyName $assemblyName
-        if ($candidate) {
-          $resolvedDependencyCache[$assemblyName.Name] = $candidate.FullName
-          return $context.LoadFromAssemblyPath($candidate.FullName)
-        }
-      }
+    $seenAssemblyIdentities[$assemblyIdentity] = $true
+    $uniqueAssemblyPaths.Add($path)
+  }
 
-      $candidate = Select-MatchingAssemblyFile `
-        -Candidates (Get-ChildItem -LiteralPath $fallbackPackageCache -Filter "$($assemblyName.Name).dll" -Recurse -File) `
-        -RequestedAssemblyName $assemblyName
-      if ($candidate) {
-        $resolvedDependencyCache[$assemblyName.Name] = $candidate.FullName
-        return $context.LoadFromAssemblyPath($candidate.FullName)
-      }
-    }
+  $resolverType = [type]::GetType('System.Reflection.PathAssemblyResolver, System.Reflection.MetadataLoadContext', $true)
+  $contextType = [type]::GetType('System.Reflection.MetadataLoadContext, System.Reflection.MetadataLoadContext', $true)
+  $resolver = [Activator]::CreateInstance($resolverType, $uniqueAssemblyPaths)
 
-    return $null
-  }.GetNewClosure()
+  return [Activator]::CreateInstance($contextType, $resolver, 'System.Runtime')
+}
+
+function Get-ObsoleteMessage {
+  param($Member)
+
+  $obsoleteAttribute = $Member.CustomAttributes |
+    Where-Object { $_.AttributeType.FullName -eq 'System.ObsoleteAttribute' } |
+    Select-Object -First 1
+
+  if (-not $obsoleteAttribute -or $obsoleteAttribute.ConstructorArguments.Count -lt 1) {
+    throw "Expected ObsoleteAttribute on $($Member.Name)."
+  }
+
+  return [string]$obsoleteAttribute.ConstructorArguments[0].Value
 }
 
 function Format-TypeName {
@@ -217,17 +294,14 @@ function Format-Parameters {
 
 function Get-PublicApiLines {
   $assemblyPaths = $publishableAssemblies | ForEach-Object { Resolve-AssemblyPath -AssemblyName $_ }
-  $assemblyDirectories = $assemblyPaths | ForEach-Object { Split-Path -Parent $_ } | Select-Object -Unique
-  $resolver = New-PublicApiAssemblyResolver -AssemblyDirectories $assemblyDirectories
-
-  [System.Runtime.Loader.AssemblyLoadContext]::Default.add_Resolving($resolver)
+  $metadataContext = New-PublicApiMetadataContext -AssemblyPaths $assemblyPaths
 
   try {
     $lines = [System.Collections.Generic.List[string]]::new()
     $bindingFlags = [System.Reflection.BindingFlags]'Public,Instance,Static,DeclaredOnly'
 
     foreach ($assemblyPath in $assemblyPaths) {
-      $assembly = [System.Runtime.Loader.AssemblyLoadContext]::Default.LoadFromAssemblyPath($assemblyPath)
+      $assembly = $metadataContext.LoadFromAssemblyPath($assemblyPath)
       $assemblyName = $assembly.GetName().Name
       $lines.Add("A:$assemblyName")
 
@@ -267,7 +341,7 @@ function Get-PublicApiLines {
     return $lines.ToArray() | Sort-Object
   }
   finally {
-    [System.Runtime.Loader.AssemblyLoadContext]::Default.remove_Resolving($resolver)
+    $metadataContext.Dispose()
   }
 }
 
@@ -321,28 +395,37 @@ function Assert-WarningGuidance {
     'GetCompatiblePortTargets(...)'
   )
 
-  $editorAssemblyPath = Resolve-AssemblyPath -AssemblyName 'AsterGraph.Editor'
-  $resolver = New-PublicApiAssemblyResolver -AssemblyDirectories @((Split-Path -Parent $editorAssemblyPath))
-  [System.Runtime.Loader.AssemblyLoadContext]::Default.add_Resolving($resolver)
+  $assemblyPaths = $publishableAssemblies | ForEach-Object { Resolve-AssemblyPath -AssemblyName $_ }
+  $metadataContext = New-PublicApiMetadataContext -AssemblyPaths $assemblyPaths
   try {
-    $editorAssembly = [System.Runtime.Loader.AssemblyLoadContext]::Default.LoadFromAssemblyPath($editorAssemblyPath)
+    $editorAssemblyPath = Resolve-AssemblyPath -AssemblyName 'AsterGraph.Editor'
+    $editorAssembly = $metadataContext.LoadFromAssemblyPath($editorAssemblyPath)
     $queriesType = $editorAssembly.GetType('AsterGraph.Editor.Runtime.IGraphEditorQueries', $true)
-    $compatibilityMethod = $queriesType.GetMethod('GetCompatibleTargets', [Type[]]@([string], [string]))
-    $compatibilityMessage = $compatibilityMethod.GetCustomAttributes([ObsoleteAttribute], $false)[0].Message
+    $compatibilityMethod = $queriesType.GetMethods() |
+      Where-Object {
+        $_.Name -eq 'GetCompatibleTargets' -and
+        (($_.GetParameters() | ForEach-Object { $_.ParameterType.FullName }) -join ',') -eq 'System.String,System.String'
+      } |
+      Select-Object -First 1
+    if (-not $compatibilityMethod) {
+      throw 'IGraphEditorQueries.GetCompatibleTargets(string,string) was not found.'
+    }
+
+    $compatibilityMessage = Get-ObsoleteMessage -Member $compatibilityMethod
     if (-not $compatibilityMessage.Contains('Compatibility-only shim', [System.StringComparison]::Ordinal) -or
         -not $compatibilityMessage.Contains('GetCompatiblePortTargets', [System.StringComparison]::Ordinal)) {
       throw 'IGraphEditorQueries.GetCompatibleTargets must warn as compatibility-only and name GetCompatiblePortTargets as the replacement.'
     }
 
     $targetType = $editorAssembly.GetType('AsterGraph.Editor.Menus.CompatiblePortTarget', $true)
-    $targetMessage = $targetType.GetCustomAttributes([ObsoleteAttribute], $false)[0].Message
+    $targetMessage = Get-ObsoleteMessage -Member $targetType
     if (-not $targetMessage.Contains('Retained compatibility shim', [System.StringComparison]::Ordinal) -or
         -not $targetMessage.Contains('GraphEditorCompatiblePortTargetSnapshot', [System.StringComparison]::Ordinal)) {
       throw 'CompatiblePortTarget must warn as a retained compatibility shim and name GraphEditorCompatiblePortTargetSnapshot as the replacement.'
     }
   }
   finally {
-    [System.Runtime.Loader.AssemblyLoadContext]::Default.remove_Resolving($resolver)
+    $metadataContext.Dispose()
   }
 }
 
