@@ -1,6 +1,14 @@
 namespace AsterGraph.Editor.Services;
 
 /// <summary>
+/// Describes one raster export progress checkpoint.
+/// </summary>
+public sealed record GraphEditorSceneImageExportProgressSnapshot(
+    string Stage,
+    double Fraction,
+    string Message);
+
+/// <summary>
 /// Describes optional raster scene export shaping.
 /// </summary>
 public sealed record GraphEditorSceneImageExportOptions
@@ -19,4 +27,14 @@ public sealed record GraphEditorSceneImageExportOptions
     /// Optional background fill override expressed as <c>#RRGGBB</c> or <c>#AARRGGBB</c>.
     /// </summary>
     public string? BackgroundHex { get; init; }
+
+    /// <summary>
+    /// Optional progress sink for long-running raster export probes.
+    /// </summary>
+    public IProgress<GraphEditorSceneImageExportProgressSnapshot>? Progress { get; init; }
+
+    /// <summary>
+    /// Optional cancellation token checked between deterministic export stages.
+    /// </summary>
+    public CancellationToken CancellationToken { get; init; }
 }

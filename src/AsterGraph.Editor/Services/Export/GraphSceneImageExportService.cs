@@ -51,7 +51,13 @@ public sealed class GraphSceneImageExportService : IGraphSceneImageExportService
             throw new ArgumentOutOfRangeException(nameof(options), "Image export quality must be between 0 and 100.");
         }
 
+        ReportProgress(options, "preparing", 0d, "Preparing scene image export.");
+        options?.CancellationToken.ThrowIfCancellationRequested();
+
         var svgDocument = GraphSceneSvgDocumentBuilder.Build(scene, options?.BackgroundHex);
+        ReportProgress(options, "svg-built", 0.35d, "Built canonical SVG document.");
+        options?.CancellationToken.ThrowIfCancellationRequested();
+
         using var svg = new SKSvg();
         using var svgStream = new MemoryStream(Encoding.UTF8.GetBytes(svgDocument));
         var picture = svg.Load(svgStream);
@@ -60,6 +66,9 @@ public sealed class GraphSceneImageExportService : IGraphSceneImageExportService
             throw new InvalidOperationException("Generated scene SVG could not be rasterized.");
         }
 
+        ReportProgress(options, "rasterizing", 0.7d, "Rasterizing scene image.");
+        options?.CancellationToken.ThrowIfCancellationRequested();
+
         svg.Save(
             resolvedPath,
             SKColors.Transparent,
@@ -67,8 +76,16 @@ public sealed class GraphSceneImageExportService : IGraphSceneImageExportService
             quality,
             (float)scale,
             (float)scale);
+        ReportProgress(options, "written", 1d, "Scene image export completed.");
         return resolvedPath;
     }
+
+    private static void ReportProgress(
+        GraphEditorSceneImageExportOptions? options,
+        string stage,
+        double fraction,
+        string message)
+        => options?.Progress?.Report(new GraphEditorSceneImageExportProgressSnapshot(stage, fraction, message));
 
     private static SKEncodedImageFormat ResolveEncodedFormat(GraphEditorSceneImageExportFormat format)
         => format switch

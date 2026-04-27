@@ -29,6 +29,10 @@ public sealed class ScaleSmokeExportProbeTests
         Assert.True(result.PngExportOk, marker);
         Assert.True(result.JpegExportOk, marker);
         Assert.True(result.ReloadOk, marker);
+        Assert.True(result.ProgressOk, marker);
+        Assert.True(result.CancelOk, marker);
         Assert.True(result.IsOk, marker);
+        Assert.Contains("progress=True", marker, StringComparison.Ordinal);
+        Assert.Contains("cancel=True", marker, StringComparison.Ordinal);
     }
 }

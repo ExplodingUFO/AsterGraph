@@ -87,6 +87,8 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framew
 - `SCALE_AUTHORING_BUDGET_OK:stress:True:...`
 - `SCALE_EXPORT_BUDGET:stress:svg<=300:png<=120000:jpeg<=100000:reload<=800`
 - `SCALE_RASTER_EXPORT_STRESS_OK:True`
+- `EXPORT_PROGRESS_OK:True`
+- `EXPORT_CANCEL_OK:True`
 - `SCALE_PERF_SUMMARY:stress:...`
 - `SCALE_HISTORY_CONTRACT_OK:...`
 - `COVERAGE_REPORT_OK:...`

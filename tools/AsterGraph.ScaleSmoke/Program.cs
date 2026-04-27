@@ -343,6 +343,8 @@ GraphEditorCommandInvocationSnapshot CreateAutomationCommand(
     {
         Console.WriteLine(tier.ToExportBudgetMarker());
         Console.WriteLine(exportProbe.ToMarker(tier.Id));
+        Console.WriteLine($"EXPORT_PROGRESS_OK:{exportProbe.ProgressOk}");
+        Console.WriteLine($"EXPORT_CANCEL_OK:{exportProbe.CancelOk}");
         Console.WriteLine(exportProbe.Metrics.ToMarker(tier.Id));
         Console.WriteLine($"SCALE_EXPORT_BUDGET_OK:{tier.Id}:{exportBudgetEvaluation.Passed}:{exportBudgetEvaluation.FailureSummary}");
         var rasterStressMarker = tier.ToRasterExportStressMarker(exportBudgetEvaluation);

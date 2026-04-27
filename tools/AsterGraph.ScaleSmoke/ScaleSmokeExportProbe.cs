@@ -11,13 +11,17 @@ public sealed record ScaleSmokeExportProbeResult(
     bool PngExportOk,
     bool JpegExportOk,
     bool ReloadOk,
+    bool ProgressOk,
+    bool CancelOk,
     ScaleSmokeExportMetrics Metrics)
 {
     public bool IsOk
         => SvgExportOk
         && PngExportOk
         && JpegExportOk
-        && ReloadOk;
+        && ReloadOk
+        && ProgressOk
+        && CancelOk;
 
     public string ToMarker(string tierId)
     {
@@ -32,6 +36,8 @@ public sealed record ScaleSmokeExportProbeResult(
                 $"png={PngExportOk}",
                 $"jpeg={JpegExportOk}",
                 $"reload={ReloadOk}",
+                $"progress={ProgressOk}",
+                $"cancel={CancelOk}",
             ]);
     }
 }
@@ -44,11 +50,13 @@ public static class ScaleSmokeExportProbe
         ArgumentException.ThrowIfNullOrWhiteSpace(storageRoot);
 
         Directory.CreateDirectory(storageRoot);
+        var progressEvents = new List<GraphEditorSceneImageExportProgressSnapshot>();
         var imageExportOptions = new GraphEditorSceneImageExportOptions
         {
             Scale = 0.5d,
             Quality = 84,
             BackgroundHex = "#101820",
+            Progress = new RecordingProgress(progressEvents),
         };
 
         var svgPath = Path.Combine(storageRoot, "scale-export.svg");
@@ -68,6 +76,17 @@ public static class ScaleSmokeExportProbe
             session.Commands.TryExportSceneAsImage(GraphEditorSceneImageExportFormat.Jpeg, jpegPath, imageExportOptions));
         var jpegExportOk = File.Exists(jpegPath)
             && HasImageSignature(File.ReadAllBytes(jpegPath), GraphEditorSceneImageExportFormat.Jpeg);
+
+        var progressOk = HasCompleteProgress(progressEvents);
+
+        using var cancellation = new CancellationTokenSource();
+        cancellation.Cancel();
+        var cancelPath = Path.Combine(storageRoot, "scale-export-cancel.png");
+        var cancelOk = !session.Commands.TryExportSceneAsImage(
+            GraphEditorSceneImageExportFormat.Png,
+            cancelPath,
+            imageExportOptions with { CancellationToken = cancellation.Token })
+            && !File.Exists(cancelPath);
 
         var initialSnapshot = session.Queries.CreateDocumentSnapshot();
         var initialNodeCount = initialSnapshot.Nodes.Count;
@@ -89,6 +108,8 @@ public static class ScaleSmokeExportProbe
             PngExportOk: pngExportOk,
             JpegExportOk: jpegExportOk,
             ReloadOk: reloadOk,
+            ProgressOk: progressOk,
+            CancelOk: cancelOk,
             Metrics: new ScaleSmokeExportMetrics(
                 SvgExportMs: svgExportMs,
                 PngExportMs: pngExportMs,
@@ -114,4 +135,22 @@ public static class ScaleSmokeExportProbe
                 => bytes[0] == 0xFF && bytes[1] == 0xD8 && bytes[2] == 0xFF,
             _ => false,
         };
+
+    private static bool HasCompleteProgress(IReadOnlyList<GraphEditorSceneImageExportProgressSnapshot> events)
+        => events.Any(progress => progress.Stage == "preparing" && progress.Fraction == 0d)
+        && events.Any(progress => progress.Stage == "rasterizing" && progress.Fraction >= 0.7d)
+        && events.Any(progress => progress.Stage == "written" && progress.Fraction == 1d);
+
+    private sealed class RecordingProgress : IProgress<GraphEditorSceneImageExportProgressSnapshot>
+    {
+        private readonly List<GraphEditorSceneImageExportProgressSnapshot> _events;
+
+        public RecordingProgress(List<GraphEditorSceneImageExportProgressSnapshot> events)
+        {
+            _events = events;
+        }
+
+        public void Report(GraphEditorSceneImageExportProgressSnapshot value)
+            => _events.Add(value);
+    }
 }

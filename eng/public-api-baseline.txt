@@ -195,6 +195,7 @@ C:AsterGraph.Editor.Scene.GraphEditorSceneResizeHit(AsterGraph.Editor.Scene.Grap
 C:AsterGraph.Editor.Scene.GraphEditorSceneResizeHitTestProfile(AsterGraph.Editor.Scene.GraphEditorSceneSurfaceKind,System.Double,System.Double,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean)
 C:AsterGraph.Editor.Services.GraphClipboardPayloadSerializer()
 C:AsterGraph.Editor.Services.GraphEditorSceneImageExportOptions()
+C:AsterGraph.Editor.Services.GraphEditorSceneImageExportProgressSnapshot(System.String,System.Double,System.String)
 C:AsterGraph.Editor.Services.GraphFragmentLibraryService(System.String,AsterGraph.Editor.Services.IGraphClipboardPayloadSerializer)
 C:AsterGraph.Editor.Services.GraphFragmentWorkspaceService(System.String,AsterGraph.Editor.Services.IGraphClipboardPayloadSerializer)
 C:AsterGraph.Editor.Services.GraphSceneImageExportService(System.String)
@@ -1587,6 +1588,12 @@ M:AsterGraph.Editor.Services.GraphEditorSceneImageExportOptions.Equals(AsterGrap
 M:AsterGraph.Editor.Services.GraphEditorSceneImageExportOptions.Equals(System.Object):System.Boolean
 M:AsterGraph.Editor.Services.GraphEditorSceneImageExportOptions.GetHashCode():System.Int32
 M:AsterGraph.Editor.Services.GraphEditorSceneImageExportOptions.ToString():System.String
+M:AsterGraph.Editor.Services.GraphEditorSceneImageExportProgressSnapshot.<Clone>$():AsterGraph.Editor.Services.GraphEditorSceneImageExportProgressSnapshot
+M:AsterGraph.Editor.Services.GraphEditorSceneImageExportProgressSnapshot.Deconstruct(out System.String&,out System.Double&,out System.String&):System.Void
+M:AsterGraph.Editor.Services.GraphEditorSceneImageExportProgressSnapshot.Equals(AsterGraph.Editor.Services.GraphEditorSceneImageExportProgressSnapshot):System.Boolean
+M:AsterGraph.Editor.Services.GraphEditorSceneImageExportProgressSnapshot.Equals(System.Object):System.Boolean
+M:AsterGraph.Editor.Services.GraphEditorSceneImageExportProgressSnapshot.GetHashCode():System.Int32
+M:AsterGraph.Editor.Services.GraphEditorSceneImageExportProgressSnapshot.ToString():System.String
 M:AsterGraph.Editor.Services.GraphEditorStorageDefaults.GetFragmentLibraryPath(System.String):System.String
 M:AsterGraph.Editor.Services.GraphEditorStorageDefaults.GetFragmentPath(System.String):System.String
 M:AsterGraph.Editor.Services.GraphEditorStorageDefaults.GetPluginStagingPath(System.String):System.String
@@ -2829,8 +2836,13 @@ P:AsterGraph.Editor.Scene.GraphEditorSceneResizeHitTestProfile.IncludeTopEdge:Sy
 P:AsterGraph.Editor.Scene.GraphEditorSceneResizeHitTestProfile.Node:AsterGraph.Editor.Scene.GraphEditorSceneResizeHitTestProfile:get
 P:AsterGraph.Editor.Scene.GraphEditorSceneResizeHitTestProfile.SurfaceKind:AsterGraph.Editor.Scene.GraphEditorSceneSurfaceKind:get,set
 P:AsterGraph.Editor.Services.GraphEditorSceneImageExportOptions.BackgroundHex:System.String:get,set
+P:AsterGraph.Editor.Services.GraphEditorSceneImageExportOptions.CancellationToken:System.Threading.CancellationToken:get,set
+P:AsterGraph.Editor.Services.GraphEditorSceneImageExportOptions.Progress:System.IProgress<AsterGraph.Editor.Services.GraphEditorSceneImageExportProgressSnapshot>:get,set
 P:AsterGraph.Editor.Services.GraphEditorSceneImageExportOptions.Quality:System.Int32:get,set
 P:AsterGraph.Editor.Services.GraphEditorSceneImageExportOptions.Scale:System.Double:get,set
+P:AsterGraph.Editor.Services.GraphEditorSceneImageExportProgressSnapshot.Fraction:System.Double:get,set
+P:AsterGraph.Editor.Services.GraphEditorSceneImageExportProgressSnapshot.Message:System.String:get,set
+P:AsterGraph.Editor.Services.GraphEditorSceneImageExportProgressSnapshot.Stage:System.String:get,set
 P:AsterGraph.Editor.Services.GraphFragmentLibraryService.LibraryPath:System.String:get
 P:AsterGraph.Editor.Services.GraphFragmentWorkspaceService.FragmentPath:System.String:get
 P:AsterGraph.Editor.Services.GraphSceneSvgExportService.ExportPath:System.String:get
@@ -3265,6 +3277,7 @@ T:class AsterGraph.Editor.Runtime.GraphLayoutRequest
 T:class AsterGraph.Editor.Scene.GraphEditorSceneResizeHitTestProfile
 T:class AsterGraph.Editor.Services.GraphClipboardPayloadSerializer
 T:class AsterGraph.Editor.Services.GraphEditorSceneImageExportOptions
+T:class AsterGraph.Editor.Services.GraphEditorSceneImageExportProgressSnapshot
 T:class AsterGraph.Editor.Services.GraphFragmentLibraryService
 T:class AsterGraph.Editor.Services.GraphFragmentWorkspaceService
 T:class AsterGraph.Editor.Services.GraphSceneImageExportService

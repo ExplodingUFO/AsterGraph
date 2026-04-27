@@ -92,7 +92,7 @@ If any defended metric exceeds one of those numbers, `ScaleSmoke` emits `SCALE_P
 | `large` | 300 ms | 16000 ms | 12000 ms | 400 ms |
 | `stress` | 300 ms | 120000 ms | 100000 ms | 800 ms |
 
-`ScaleSmoke` emits `SCALE_EXPORT_BUDGET:...`, `SCALE_EXPORT_METRICS:...`, `SCALE_EXPORT_BUDGET_OK:...`, and `SCALE_EXPORT_SUMMARY:...` for these defended tiers.
+`ScaleSmoke` emits `SCALE_EXPORT_BUDGET:...`, `SCALE_EXPORT_METRICS:...`, `SCALE_EXPORT_BUDGET_OK:...`, `EXPORT_PROGRESS_OK:...`, `EXPORT_CANCEL_OK:...`, and `SCALE_EXPORT_SUMMARY:...` for these defended tiers.
 
 Pair the hosted tuning handoff with [Widened Surface Performance Recipe](./widened-surface-performance-recipe.md) when you want the `ConsumerSample.Avalonia` metrics and the defended `ScaleSmoke` budgets on one copyable route.
 
@@ -127,6 +127,8 @@ High-signal lines:
 - `SCALE_AUTHORING_BUDGET_OK:...`
 - `SCALE_AUTHORING_SUMMARY:...`
 - `SCALE_EXPORT_BUDGET:...`
+- `EXPORT_PROGRESS_OK:...`
+- `EXPORT_CANCEL_OK:...`
 - `SCALE_EXPORT_METRICS:...`
 - `SCALE_EXPORT_BUDGET_OK:...`
 - `SCALE_EXPORT_SUMMARY:...`
