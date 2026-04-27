@@ -1294,24 +1294,40 @@ public sealed class DemoProofReleaseSurfaceTests
     {
         var readme = ReadRepoFile("README.md");
         var readmeZh = ReadRepoFile("README.zh-CN.md");
+        var scenarioAsset = ReadRepoFile("docs/assets/astergraph-ai-pipeline-demo.svg");
 
+        AssertAppearsBefore(readme, "![AsterGraph AI workflow scenario](./docs/assets/astergraph-ai-pipeline-demo.svg)", "## Start Here");
         AssertAppearsBefore(readme, "Launch the prebuilt AI workflow scenario", "## Public Beta");
         AssertAppearsBefore(readme, "dotnet run --project src/AsterGraph.Demo -- --scenario ai-pipeline", "## Public Beta");
+        AssertAppearsBefore(readme, "The scenario shows the SDK as an embeddable authoring surface", "## Public Beta");
         AssertAppearsBefore(readme, "dotnet new astergraph-avalonia", "## Public Beta");
         AssertAppearsBefore(readme, "dotnet new astergraph-plugin", "## Public Beta");
         AssertAppearsBefore(readme, "tools/AsterGraph.PluginTool", "## Public Beta");
+        AssertAppearsBefore(readme, "## Start Here", "## Public Beta");
         Assert.Contains("parameter editing", readme, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("trusted plugin context", readme, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("automation", readme, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("export", readme, StringComparison.OrdinalIgnoreCase);
 
+        AssertAppearsBefore(readmeZh, "![AsterGraph AI workflow 场景](./docs/assets/astergraph-ai-pipeline-demo.svg)", "## 从哪里开始");
         AssertAppearsBefore(readmeZh, "启动预置 AI workflow 场景", "## 公开 Beta");
         AssertAppearsBefore(readmeZh, "dotnet run --project src/AsterGraph.Demo -- --scenario ai-pipeline", "## 公开 Beta");
+        AssertAppearsBefore(readmeZh, "这个场景把 SDK 展示成一个可嵌入的 authoring surface", "## 公开 Beta");
         AssertAppearsBefore(readmeZh, "dotnet new astergraph-avalonia", "## 公开 Beta");
         AssertAppearsBefore(readmeZh, "dotnet new astergraph-plugin", "## 公开 Beta");
         AssertAppearsBefore(readmeZh, "tools/AsterGraph.PluginTool", "## 公开 Beta");
+        AssertAppearsBefore(readmeZh, "## 从哪里开始", "## 公开 Beta");
         Assert.Contains("参数编辑", readmeZh, StringComparison.Ordinal);
+        Assert.Contains("可信插件上下文", readmeZh, StringComparison.Ordinal);
         Assert.Contains("自动化", readmeZh, StringComparison.Ordinal);
         Assert.Contains("导出", readmeZh, StringComparison.Ordinal);
+
+        Assert.Contains("<title id=\"title\">AsterGraph AI pipeline demo scenario</title>", scenarioAsset, StringComparison.Ordinal);
+        Assert.Contains("Input", scenarioAsset, StringComparison.Ordinal);
+        Assert.Contains("Prompt", scenarioAsset, StringComparison.Ordinal);
+        Assert.Contains("Tool", scenarioAsset, StringComparison.Ordinal);
+        Assert.Contains("LLM", scenarioAsset, StringComparison.Ordinal);
+        Assert.Contains("Parser", scenarioAsset, StringComparison.Ordinal);
     }
 
     private static string GetPackageVersion()

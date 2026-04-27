@@ -7,11 +7,15 @@
 
 AsterGraph is a modular node-graph editor toolkit for .NET. It gives hosts a reusable editor runtime, a canonical session/runtime route for custom UI or native shells, a shipped Avalonia hosted-UI path, and explicit seams for plugins, automation, localization, diagnostics, and presentation overrides.
 
+![AsterGraph AI workflow scenario](./docs/assets/astergraph-ai-pipeline-demo.svg)
+
 Launch the prebuilt AI workflow scenario:
 
 ```powershell
 dotnet run --project src/AsterGraph.Demo -- --scenario ai-pipeline
 ```
+
+The scenario shows the SDK as an embeddable authoring surface: drag definition-backed nodes, connect typed ports, edit grouped parameters, inspect trusted plugin context, run host automation, then save or export the graph through the same session/runtime APIs a host uses.
 
 Generate a native Avalonia host or a plugin starter:
 
@@ -21,20 +25,6 @@ dotnet new astergraph-avalonia -n MyGraphHost
 dotnet new astergraph-plugin -n MyGraphPlugin --PluginId my.graph.plugin
 dotnet run --project tools/AsterGraph.PluginTool -- validate ./MyGraphPlugin/bin/Debug/net8.0/MyGraphPlugin.dll
 ```
-
-## Public Beta
-
-- current installable package version: `0.11.0-beta`
-- matching public prerelease tag for this package line: `v0.11.0-beta`
-- historical legacy repository milestone tag series: `v1.x`-style pre-launch checkpoints (historical pre-launch checkpoints, not the NuGet version)
-- GitHub prerelease/Release entries must use the same SemVer as the NuGet packages; local planning milestones are not public release identifiers
-- published packages target `net8.0` and `net9.0`
-- packed `HostSample` also proves downstream `.NET 10` consumption during the release gate
-- public prerelease tags must match the package version exactly for this package line, for example `v0.11.0-beta`
-- package version versus historical repository-tag guidance: [Versioning](./docs/en/versioning.md)
-- frozen support boundary and `v1.0.0` upgrade guidance: [Stabilization Support Matrix](./docs/en/stabilization-support-matrix.md)
-- evaluator ladder from first install to realistic hosted proof: [Beta Evaluation Path](./docs/en/evaluation-path.md)
-- current scope, non-goals, and known limitations: [Alpha Status](./docs/en/alpha-status.md)
 
 ## Start Here
 
@@ -53,6 +43,20 @@ dotnet run --project tools/AsterGraph.PluginTool -- validate ./MyGraphPlugin/bin
 The hosted route ladder is `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerSample.Avalonia`.
 For a five-minute hosted copy path, run the starter scaffold first, then validate `ConsumerSample.Avalonia -- --proof --support-bundle <path>` before moving to the full Demo.
 For the shortest hosted composition code, use `AsterGraphHostBuilder.Create().UseDocument(document).UseCatalog(catalog).UseDefaultCompatibility().BuildAvaloniaView()`; drop down to `AsterGraphEditorFactory.Create(...)` and `AsterGraphAvaloniaViewFactory.Create(...)` when you need explicit per-service wiring.
+
+## Public Beta
+
+- current installable package version: `0.11.0-beta`
+- matching public prerelease tag for this package line: `v0.11.0-beta`
+- historical legacy repository milestone tag series: `v1.x`-style pre-launch checkpoints (historical pre-launch checkpoints, not the NuGet version)
+- GitHub prerelease/Release entries must use the same SemVer as the NuGet packages; local planning milestones are not public release identifiers
+- published packages target `net8.0` and `net9.0`
+- packed `HostSample` also proves downstream `.NET 10` consumption during the release gate
+- public prerelease tags must match the package version exactly for this package line, for example `v0.11.0-beta`
+- package version versus historical repository-tag guidance: [Versioning](./docs/en/versioning.md)
+- frozen support boundary and `v1.0.0` upgrade guidance: [Stabilization Support Matrix](./docs/en/stabilization-support-matrix.md)
+- evaluator ladder from first install to realistic hosted proof: [Beta Evaluation Path](./docs/en/evaluation-path.md)
+- current scope, non-goals, and known limitations: [Alpha Status](./docs/en/alpha-status.md)
 
 ## Install From NuGet
 

@@ -7,11 +7,15 @@
 
 AsterGraph 是一个面向 .NET 的模块化节点图编辑器工具包，提供可复用的编辑器运行时、面向自定义 UI 或原生壳层的 canonical session/runtime 路线、默认 Avalonia hosted-UI 路径，以及面向宿主的插件、自动化、本地化、诊断和呈现扩展边界。
 
+![AsterGraph AI workflow 场景](./docs/assets/astergraph-ai-pipeline-demo.svg)
+
 启动预置 AI workflow 场景：
 
 ```powershell
 dotnet run --project src/AsterGraph.Demo -- --scenario ai-pipeline
 ```
+
+这个场景把 SDK 展示成一个可嵌入的 authoring surface：拖动 definition-backed 节点、连接 typed ports、编辑分组参数、查看可信插件上下文、运行宿主自动化，然后通过宿主同样会使用的 session/runtime API 保存或导出图。
 
 生成原生 Avalonia 宿主或插件 starter：
 
@@ -21,20 +25,6 @@ dotnet new astergraph-avalonia -n MyGraphHost
 dotnet new astergraph-plugin -n MyGraphPlugin --PluginId my.graph.plugin
 dotnet run --project tools/AsterGraph.PluginTool -- validate ./MyGraphPlugin/bin/Debug/net8.0/MyGraphPlugin.dll
 ```
-
-## 公开 Beta
-
-- 当前可安装包版本：`0.11.0-beta`
-- 与当前包版本配对的对外 SemVer prerelease 标签：`v0.11.0-beta`
-- 历史仓库里程碑标签系列：`v1.x` 风格的公开前检查点（公开前的旧检查点，不是 NuGet 包版本）
-- GitHub prerelease/Release 条目必须使用与 NuGet 包相同的 SemVer；本地规划里程碑不是公开发布标识
-- 公开发布包目标框架：`net8.0`、`net9.0`
-- release lane 还会用打包后的 `HostSample` 额外证明下游 `.NET 10` 消费兼容性
-- 后续对外 prerelease tag 应与当前包版本的 SemVer 对齐，比如 `v0.11.0-beta`
-- 包版本与历史仓库 tag 的关系说明：[Versioning](./docs/zh-CN/versioning.md)
-- 冻结的支持边界和面向 `v1.0.0` 的升级指引：[稳定化支持矩阵](./docs/zh-CN/stabilization-support-matrix.md)
-- 从第一次安装到真实宿主 proof 的评估阶梯：[公开 Beta 评估路径](./docs/zh-CN/evaluation-path.md)
-- 当前范围、非目标和已知限制：[Alpha Status](./docs/zh-CN/alpha-status.md)
 
 ## 从哪里开始
 
@@ -53,6 +43,20 @@ dotnet run --project tools/AsterGraph.PluginTool -- validate ./MyGraphPlugin/bin
 这条 hosted route ladder 是 `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerSample.Avalonia`。
 五分钟 hosted 复制路径：先跑 starter 脚手架，再用 `ConsumerSample.Avalonia -- --proof --support-bundle <path>` 验证，最后再看完整 Demo。
 最短 hosted 组合代码可以用 `AsterGraphHostBuilder.Create().UseDocument(document).UseCatalog(catalog).UseDefaultCompatibility().BuildAvaloniaView()`；当你需要显式接入每个服务时，再降到 `AsterGraphEditorFactory.Create(...)` 和 `AsterGraphAvaloniaViewFactory.Create(...)`。
+
+## 公开 Beta
+
+- 当前可安装包版本：`0.11.0-beta`
+- 与当前包版本配对的对外 SemVer prerelease 标签：`v0.11.0-beta`
+- 历史仓库里程碑标签系列：`v1.x` 风格的公开前检查点（公开前的旧检查点，不是 NuGet 包版本）
+- GitHub prerelease/Release 条目必须使用与 NuGet 包相同的 SemVer；本地规划里程碑不是公开发布标识
+- 公开发布包目标框架：`net8.0`、`net9.0`
+- release lane 还会用打包后的 `HostSample` 额外证明下游 `.NET 10` 消费兼容性
+- 后续对外 prerelease tag 应与当前包版本的 SemVer 对齐，比如 `v0.11.0-beta`
+- 包版本与历史仓库 tag 的关系说明：[Versioning](./docs/zh-CN/versioning.md)
+- 冻结的支持边界和面向 `v1.0.0` 的升级指引：[稳定化支持矩阵](./docs/zh-CN/stabilization-support-matrix.md)
+- 从第一次安装到真实宿主 proof 的评估阶梯：[公开 Beta 评估路径](./docs/zh-CN/evaluation-path.md)
+- 当前范围、非目标和已知限制：[Alpha Status](./docs/zh-CN/alpha-status.md)
 
 ## 从 NuGet 安装
 
