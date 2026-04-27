@@ -90,7 +90,7 @@ If any defended metric exceeds one of those numbers, `ScaleSmoke` emits `SCALE_P
 | Tier | svg | png | jpeg | reload |
 | --- | ---: | ---: | ---: | ---: |
 | `baseline` | 300 ms | 2500 ms | 3500 ms | 250 ms |
-| `large` | 300 ms | 16000 ms | 12000 ms | 400 ms |
+| `large` | 600 ms | 16000 ms | 12000 ms | 400 ms |
 | `stress` | 300 ms | 120000 ms | 100000 ms | 800 ms |
 
 `ScaleSmoke` emits `SCALE_EXPORT_BUDGET:...`, `SCALE_EXPORT_METRICS:...`, `SCALE_EXPORT_BUDGET_OK:...`, `EXPORT_PROGRESS_OK:...`, `EXPORT_CANCEL_OK:...`, `EXPORT_SCOPE_OK:...`, `EXPORT_SELECTION_SCOPE_OK:...`, and `SCALE_EXPORT_SUMMARY:...` for these defended tiers.

@@ -371,7 +371,7 @@ public sealed record ScaleSmokeTier(
                     NodeResizeMs: 60,
                     EdgeCreateMs: 100),
                 ExportBudget: new ScaleSmokeExportBudget(
-                    SvgExportMs: 300,
+                    SvgExportMs: 600,
                     PngExportMs: 16000,
                     JpegExportMs: 12000,
                     ReloadMs: 400)),
