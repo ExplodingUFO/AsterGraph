@@ -179,6 +179,7 @@ $environmentLines = @(
   '- medium host proof: `AsterGraph.ConsumerSample.Avalonia` on the hosted-UI route with host actions, parameter editing, and one trusted plugin',
   '- showcase proof: `AsterGraph.Demo --proof` for host-native shell workflows, non-obscuring editing, and graph-surface visual semantics',
   '- packed consumer proofs: `HostSample`, `.NET 10` packed consumer path, `PackageSmoke`, and generated template/plugin validation',
+  '- API adoption proof: `validate-public-api-surface.ps1` pairs `PUBLIC_API_SURFACE_OK` with `PUBLIC_API_GUIDANCE_OK` near generated template/plugin validation in the release proof story',
   '- scale proof source: `ScaleSmoke` defended `baseline`/`large` tiers plus partially defended `stress` performance/authoring/SVG-export gates; `stress` PNG/JPEG export remains informational telemetry'
 )
 
