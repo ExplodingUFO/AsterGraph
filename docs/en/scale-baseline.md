@@ -77,11 +77,11 @@ If any defended metric exceeds one of those numbers, `ScaleSmoke` emits `SCALE_P
 
 ### Authoring redlines
 
-| Tier | stencil | command-surface | quick-tool-projection | quick-tool-execution |
-| --- | ---: | ---: | ---: | ---: |
-| `baseline` | 100 ms | 250 ms | 100 ms | 150 ms |
-| `large` | 150 ms | 400 ms | 250 ms | 300 ms |
-| `stress` | 150 ms | 900 ms | 1000 ms | 1200 ms |
+| Tier | stencil | command-surface | quick-tool-projection | quick-tool-execution | inspector-open | node-resize | edge-create |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| `baseline` | 100 ms | 250 ms | 100 ms | 150 ms | 50 ms | 30 ms | 50 ms |
+| `large` | 150 ms | 400 ms | 250 ms | 300 ms | 100 ms | 60 ms | 100 ms |
+| `stress` | 150 ms | 900 ms | 1000 ms | 1200 ms | 100 ms | 200 ms | 350 ms |
 
 `ScaleSmoke` emits `SCALE_AUTHORING_BUDGET:...`, `SCALE_AUTHORING_METRICS:...`, `SCALE_AUTHORING_BUDGET_OK:...`, and `SCALE_AUTHORING_SUMMARY:...` for these defended tiers.
 

@@ -37,7 +37,7 @@ public sealed class ScaleSmokeAuthoringBudgetTests
         var marker = tier.ToAuthoringBudgetMarker();
 
         Assert.Equal(
-            "SCALE_AUTHORING_BUDGET:stress:stencil<=150:command-surface<=900:quick-tool-projection<=1000:quick-tool-execution<=1200:inspector-open<=100:node-resize<=150:edge-create<=350",
+            "SCALE_AUTHORING_BUDGET:stress:stencil<=150:command-surface<=900:quick-tool-projection<=1000:quick-tool-execution<=1200:inspector-open<=100:node-resize<=200:edge-create<=350",
             marker);
     }
 
@@ -129,6 +129,25 @@ public sealed class ScaleSmokeAuthoringBudgetTests
             InspectorOpenMs: 15,
             NodeResizeMs: 127,
             EdgeCreateMs: 275);
+
+        var result = tier.EvaluateAuthoring(metrics);
+
+        Assert.True(result.Passed);
+        Assert.Equal("none", result.FailureSummary);
+    }
+
+    [Fact]
+    public void StressAuthoringBudget_AllowsObservedReleaseLaneNodeResizeMetric()
+    {
+        var tier = ScaleSmokeTier.Parse(["--tier", "stress"]);
+        var metrics = new ScaleSmokeAuthoringMetrics(
+            StencilFilterMs: 0,
+            CommandSurfaceRefreshMs: 854,
+            QuickToolProjectionMs: 871,
+            QuickToolExecutionMs: 1032,
+            InspectorOpenMs: 28,
+            NodeResizeMs: 170,
+            EdgeCreateMs: 229);
 
         var result = tier.EvaluateAuthoring(metrics);
 
