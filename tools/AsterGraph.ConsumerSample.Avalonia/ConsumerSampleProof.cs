@@ -72,6 +72,9 @@ public sealed record ConsumerSampleProofResult(
     bool PluginLocalGalleryOk = true,
     bool PluginTrustEvidencePanelOk = true,
     bool PluginAllowlistRoundtripOk = true,
+    bool PluginSamplePackOk = true,
+    bool PluginSampleNodeDefinitionsOk = true,
+    bool PluginSampleParameterMetadataOk = true,
     int NodeCount = 0,
     int ConnectionCount = 0,
     IReadOnlyList<string>? FeatureDescriptorIds = null,
@@ -150,6 +153,9 @@ public sealed record ConsumerSampleProofResult(
         && PluginLocalGalleryOk
         && PluginTrustEvidencePanelOk
         && PluginAllowlistRoundtripOk
+        && PluginSamplePackOk
+        && PluginSampleNodeDefinitionsOk
+        && PluginSampleParameterMetadataOk
         && NodeCount > 0
         && (FeatureDescriptorIds?.Count > 0);
 
@@ -211,6 +217,9 @@ public sealed record ConsumerSampleProofResult(
         $"PLUGIN_LOCAL_GALLERY_OK:{PluginLocalGalleryOk}",
         $"PLUGIN_TRUST_EVIDENCE_PANEL_OK:{PluginTrustEvidencePanelOk}",
         $"PLUGIN_ALLOWLIST_ROUNDTRIP_OK:{PluginAllowlistRoundtripOk}",
+        $"PLUGIN_SAMPLE_PACK_OK:{PluginSamplePackOk}",
+        $"PLUGIN_SAMPLE_NODE_DEFINITIONS_OK:{PluginSampleNodeDefinitionsOk}",
+        $"PLUGIN_SAMPLE_PARAMETER_METADATA_OK:{PluginSampleParameterMetadataOk}",
         $"AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:{NodeSideAuthoringOk}",
         $"AUTHORING_SURFACE_COMMAND_PROJECTION_OK:{CommandSurfaceOk}",
         $"CONSUMER_SAMPLE_PARAMETER_OK:{ParameterProjectionOk}",
@@ -309,6 +318,9 @@ public static class ConsumerSampleProof
         bool pluginLocalGalleryOk;
         bool pluginTrustEvidencePanelOk;
         bool pluginAllowlistRoundtripOk;
+        bool pluginSamplePackOk;
+        bool pluginSampleNodeDefinitionsOk;
+        bool pluginSampleParameterMetadataOk;
         double inspectorProjectionMs;
         double pluginScanMs;
         double commandLatencyMs;
@@ -370,6 +382,7 @@ public static class ConsumerSampleProof
                 && host.ImportPluginAllowlist()
                 && host.PluginCandidateEntries.Any(entry => entry.IsAllowed && entry.TrustReason.Contains("allowlist", StringComparison.OrdinalIgnoreCase));
             pluginAllowlistRoundtripOk = trustTransparencyOk;
+            (pluginSamplePackOk, pluginSampleNodeDefinitionsOk, pluginSampleParameterMetadataOk) = HasSamplePluginPack(host);
 
             stencilSearchMs = MeasureStencilSearchMilliseconds(host.Session, "plugin");
             commandSurfaceRefreshMs = MeasureCommandSurfaceRefreshMilliseconds(host.Session);
@@ -529,6 +542,9 @@ public static class ConsumerSampleProof
             PluginLocalGalleryOk: pluginLocalGalleryOk,
             PluginTrustEvidencePanelOk: pluginTrustEvidencePanelOk,
             PluginAllowlistRoundtripOk: pluginAllowlistRoundtripOk,
+            PluginSamplePackOk: pluginSamplePackOk,
+            PluginSampleNodeDefinitionsOk: pluginSampleNodeDefinitionsOk,
+            PluginSampleParameterMetadataOk: pluginSampleParameterMetadataOk,
             ParameterSnapshots: proofParameterSnapshots,
             StartupMs: startupMs,
             InspectorProjectionMs: inspectorProjectionMs,
@@ -625,6 +641,37 @@ public static class ConsumerSampleProof
             && entry.ProvenanceLine.Contains("signer", StringComparison.OrdinalIgnoreCase)
             && entry.TrustLine.Contains("fingerprint", StringComparison.OrdinalIgnoreCase)
             && entry.TrustLine.Contains("allowlist", StringComparison.OrdinalIgnoreCase));
+
+    private static (bool SamplePackOk, bool NodeDefinitionsOk, bool ParameterMetadataOk) HasSamplePluginPack(ConsumerSampleHost host)
+    {
+        var definitions = host.Session.Queries.GetRegisteredNodeDefinitions();
+        var sampleDefinitions = definitions
+            .Where(definition => string.Equals(definition.Category, "AsterGraph Sample Plugins", StringComparison.Ordinal))
+            .ToArray();
+        var expectedIds = new[]
+        {
+            ConsumerSampleHost.PluginDataDefinitionId,
+            ConsumerSampleHost.PluginAiDefinitionId,
+            ConsumerSampleHost.PluginDiagnosticsDefinitionId,
+            ConsumerSampleHost.PluginLayoutDefinitionId,
+        };
+
+        var nodeDefinitionsOk = expectedIds.All(id => sampleDefinitions.Any(definition => definition.Id == id))
+            && sampleDefinitions.Select(definition => definition.Subtitle).Distinct(StringComparer.Ordinal).Count() >= 4;
+        var parameterMetadataOk = sampleDefinitions
+            .SelectMany(definition => definition.Parameters)
+            .Count(parameter =>
+                !string.IsNullOrWhiteSpace(parameter.GroupName)
+                && !string.IsNullOrWhiteSpace(parameter.HelpText)
+                && (parameter.Constraints.AllowedOptions.Count > 0 || parameter.Constraints.Minimum is not null || parameter.Constraints.Maximum is not null || !string.IsNullOrWhiteSpace(parameter.PlaceholderText))) >= 4;
+        var samplePackOk = nodeDefinitionsOk
+            && parameterMetadataOk
+            && host.PluginLoadSnapshots.Any(snapshot =>
+                string.Equals(snapshot.Manifest.Id, "consumer.sample.audit-plugin", StringComparison.Ordinal)
+                && snapshot.Contributions.NodeDefinitionProviderCount > 0);
+
+        return (samplePackOk, nodeDefinitionsOk, parameterMetadataOk);
+    }
 
     private static bool HasSupportBundlePayload(
         IReadOnlyList<ConsumerSampleProofParameterSnapshot> parameterSnapshots,
@@ -1042,7 +1089,7 @@ public static class ConsumerSampleProof
             return false;
         }
 
-        searchBox.Text = "plugin";
+        searchBox.Text = "audit";
         FlushUi();
 
         var filteredSections = window.GetVisualDescendants()

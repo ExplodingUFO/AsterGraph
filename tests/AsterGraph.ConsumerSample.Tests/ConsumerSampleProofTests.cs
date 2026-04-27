@@ -161,6 +161,9 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(result.ProofLines, line => line == "PLUGIN_LOCAL_GALLERY_OK:True");
         Assert.Contains(result.ProofLines, line => line == "PLUGIN_TRUST_EVIDENCE_PANEL_OK:True");
         Assert.Contains(result.ProofLines, line => line == "PLUGIN_ALLOWLIST_ROUNDTRIP_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "PLUGIN_SAMPLE_PACK_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "PLUGIN_SAMPLE_NODE_DEFINITIONS_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "PLUGIN_SAMPLE_PARAMETER_METADATA_OK:True");
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:True");
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_SURFACE_COMMAND_PROJECTION_OK:True");
         Assert.Contains(result.ProofLines, line => line == "CAPABILITY_BREADTH_STENCIL_OK:True");
@@ -501,6 +504,9 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(proofLines, line => line == "PLUGIN_LOCAL_GALLERY_OK:True");
         Assert.Contains(proofLines, line => line == "PLUGIN_TRUST_EVIDENCE_PANEL_OK:True");
         Assert.Contains(proofLines, line => line == "PLUGIN_ALLOWLIST_ROUNDTRIP_OK:True");
+        Assert.Contains(proofLines, line => line == "PLUGIN_SAMPLE_PACK_OK:True");
+        Assert.Contains(proofLines, line => line == "PLUGIN_SAMPLE_NODE_DEFINITIONS_OK:True");
+        Assert.Contains(proofLines, line => line == "PLUGIN_SAMPLE_PARAMETER_METADATA_OK:True");
         Assert.Contains(proofLines, line => line == "AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:True");
         Assert.Contains(proofLines, line => line == "AUTHORING_SURFACE_COMMAND_PROJECTION_OK:True");
         Assert.Contains(proofLines, line => line == "CAPABILITY_BREADTH_STENCIL_OK:True");

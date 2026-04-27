@@ -19,6 +19,10 @@ public sealed class ConsumerSampleHost : IDisposable
     public static readonly NodeDefinitionId ReviewDefinitionId = new("consumer.sample.review");
     public static readonly NodeDefinitionId QueueDefinitionId = new("consumer.sample.queue");
     public static readonly NodeDefinitionId PluginAuditDefinitionId = new("consumer.sample.plugin.audit");
+    public static readonly NodeDefinitionId PluginDataDefinitionId = new("consumer.sample.plugin.data");
+    public static readonly NodeDefinitionId PluginAiDefinitionId = new("consumer.sample.plugin.ai");
+    public static readonly NodeDefinitionId PluginDiagnosticsDefinitionId = new("consumer.sample.plugin.diagnostics");
+    public static readonly NodeDefinitionId PluginLayoutDefinitionId = new("consumer.sample.plugin.layout");
 
     private const string InitialReviewNodeId = "consumer-sample-review-001";
     private const string InitialQueueNodeId = "consumer-sample-queue-001";
@@ -581,13 +585,13 @@ public sealed class ConsumerSampleHost : IDisposable
                 publisher: "AsterGraph Samples",
                 packageId: "AsterGraph.ConsumerSample.Plugin",
                 packageVersion: "0.2.0-alpha.3"),
-            description: "Trusted sample plugin that adds one audit node plus executable command, presentation, and localization hooks.",
+            description: "Trusted sample plugin pack that adds audit, data, AI, diagnostics, and layout sample nodes plus executable command, presentation, and localization hooks.",
             version: "0.2.0-alpha.3",
             compatibility: new GraphEditorPluginCompatibilityManifest(
                 minimumAsterGraphVersion: "0.2.0-alpha.3",
                 targetFramework: "net8.0",
                 runtimeSurface: "Create + AsterGraphAvaloniaViewFactory"),
-            capabilitySummary: "Adds one node definition, one executable command, one presentation badge, and one localization override.");
+            capabilitySummary: "Adds five sample node definitions, one executable command, one presentation badge, and one localization override.");
 
     private static GraphEditorPluginProvenanceEvidence CreatePluginProvenance()
         => new(
@@ -697,6 +701,150 @@ public sealed class ConsumerSampleHost : IDisposable
                     accentHex: "#FF8A5B",
                     defaultWidth: 250,
                     defaultHeight: 170),
+                new NodeDefinition(
+                    PluginDataDefinitionId,
+                    "Sample Data Import",
+                    "AsterGraph Sample Plugins",
+                    "Data",
+                    [],
+                    [
+                        new PortDefinition(OutputPortId, "Rows", new PortTypeId("table"), "#6AD5C4"),
+                    ],
+                    [
+                        new NodeParameterDefinition(
+                            "source",
+                            "Source",
+                            new PortTypeId("string"),
+                            ParameterEditorKind.Text,
+                            defaultValue: "reviews.csv",
+                            groupName: "Input",
+                            placeholderText: "dataset.csv",
+                            helpText: "Local sample path used by plugin authors to model a data source."),
+                        new NodeParameterDefinition(
+                            "delimiter",
+                            "Delimiter",
+                            new PortTypeId("enum"),
+                            ParameterEditorKind.Enum,
+                            defaultValue: "comma",
+                            constraints: new ParameterConstraints(
+                                AllowedOptions:
+                                [
+                                    new ParameterOptionDefinition("comma", "Comma"),
+                                    new ParameterOptionDefinition("tab", "Tab"),
+                                ]),
+                            groupName: "Input",
+                            helpText: "Shows enum metadata for plugin-authored import nodes."),
+                    ],
+                    description: "Official sample plugin data node with metadata-rich import parameters.",
+                    accentHex: "#6AD5C4",
+                    defaultWidth: 270,
+                    defaultHeight: 180),
+                new NodeDefinition(
+                    PluginAiDefinitionId,
+                    "Sample AI Prompt",
+                    "AsterGraph Sample Plugins",
+                    "AI",
+                    [
+                        new PortDefinition(InputPortId, "Context", new PortTypeId("table"), "#6AD5C4"),
+                    ],
+                    [
+                        new PortDefinition(OutputPortId, "Prompt", new PortTypeId("prompt"), "#8B7BFF"),
+                    ],
+                    [
+                        new NodeParameterDefinition(
+                            "systemPrompt",
+                            "System Prompt",
+                            new PortTypeId("string"),
+                            ParameterEditorKind.Text,
+                            defaultValue: "Summarize risky review items.",
+                            templateKey: "code",
+                            groupName: "Prompt",
+                            placeholderText: "system instructions",
+                            helpText: "Multiline/code-like prompt metadata for plugin authors."),
+                        new NodeParameterDefinition(
+                            "temperature",
+                            "Temperature",
+                            new PortTypeId("float"),
+                            ParameterEditorKind.Number,
+                            defaultValue: 0.2,
+                            constraints: new ParameterConstraints(Minimum: 0, Maximum: 1),
+                            groupName: "Prompt",
+                            helpText: "Numeric constraint metadata for AI sample nodes."),
+                    ],
+                    description: "Official sample plugin AI node with prompt and numeric metadata.",
+                    accentHex: "#8B7BFF",
+                    defaultWidth: 300,
+                    defaultHeight: 210),
+                new NodeDefinition(
+                    PluginDiagnosticsDefinitionId,
+                    "Sample Diagnostics Probe",
+                    "AsterGraph Sample Plugins",
+                    "Diagnostics",
+                    [
+                        new PortDefinition(InputPortId, "Payload", new PortTypeId("prompt"), "#8B7BFF"),
+                    ],
+                    [
+                        new PortDefinition(OutputPortId, "Report", new PortTypeId("report"), "#F3B36B"),
+                    ],
+                    [
+                        new NodeParameterDefinition(
+                            "level",
+                            "Level",
+                            new PortTypeId("enum"),
+                            ParameterEditorKind.Enum,
+                            defaultValue: "warning",
+                            constraints: new ParameterConstraints(
+                                AllowedOptions:
+                                [
+                                    new ParameterOptionDefinition("info", "Info"),
+                                    new ParameterOptionDefinition("warning", "Warning"),
+                                    new ParameterOptionDefinition("error", "Error"),
+                                ]),
+                            groupName: "Diagnostics",
+                            helpText: "Diagnostic severity metadata for sample plugin probes."),
+                    ],
+                    description: "Official sample plugin diagnostics node.",
+                    accentHex: "#F3B36B",
+                    defaultWidth: 280,
+                    defaultHeight: 170),
+                new NodeDefinition(
+                    PluginLayoutDefinitionId,
+                    "Sample Layout Hint",
+                    "AsterGraph Sample Plugins",
+                    "Layout",
+                    [
+                        new PortDefinition(InputPortId, "Graph", new PortTypeId("report"), "#F3B36B"),
+                    ],
+                    [],
+                    [
+                        new NodeParameterDefinition(
+                            "orientation",
+                            "Orientation",
+                            new PortTypeId("enum"),
+                            ParameterEditorKind.Enum,
+                            defaultValue: "left-to-right",
+                            constraints: new ParameterConstraints(
+                                AllowedOptions:
+                                [
+                                    new ParameterOptionDefinition("left-to-right", "Left to Right"),
+                                    new ParameterOptionDefinition("top-to-bottom", "Top to Bottom"),
+                                ]),
+                            groupName: "Layout",
+                            helpText: "Layout hint metadata without introducing a mandatory layout engine."),
+                        new NodeParameterDefinition(
+                            "spacing",
+                            "Spacing",
+                            new PortTypeId("int"),
+                            ParameterEditorKind.Number,
+                            defaultValue: 240,
+                            constraints: new ParameterConstraints(Minimum: 80, Maximum: 640),
+                            groupName: "Layout",
+                            helpText: "Numeric layout spacing metadata for sample plugins."),
+                    ],
+                    description: "Official sample plugin layout hint node.",
+                    accentHex: "#6B9CFF",
+                    defaultWidth: 280,
+                    defaultHeight: 180),
             ];
     }
 
