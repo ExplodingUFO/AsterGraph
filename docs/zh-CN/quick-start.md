@@ -12,7 +12,7 @@
 
 | 时间 | 路径 | 什么时候停 |
 | --- | --- | --- |
-| 30 秒 | 运行 `src/AsterGraph.Demo -- --scenario ai-pipeline`，或先看 README 场景图。 | 已经能判断应该选哪条接入路线。 |
+| 30 秒 | 运行 `src/AsterGraph.Demo -- --scenario ai-pipeline`，或先看 README 场景图。 | 已经能判断应该选哪条接入路线，并且 proof mode 可以输出 `DEMO_SCENARIO_PRESETS_OK:True`。 |
 | 5 分钟 | 生成 `dotnet new astergraph-avalonia`，运行 starter，再验证 `ConsumerSample.Avalonia -- --proof --support-bundle <support-bundle-path>`。 | 已经拿到 `FIVE_MINUTE_ONBOARDING_OK:True` 和 `ONBOARDING_CONFIGURATION_OK:True`。 |
 | 30 分钟 | 继续按下面的包、路线、参数、插件和 support-bundle 小节走完。 | 已经知道自己的宿主该复制 hosted UI、runtime-only、plugin，还是 retained migration 指引。 |
 
@@ -55,7 +55,7 @@ dotnet new astergraph-plugin -n MyGraphPlugin --PluginId my.graph.plugin
 按每个 bounded source 复制它负责的那一部分：
 
 - 从 `AsterGraph.Starter.Avalonia` 复制：保留 `AsterGraphEditorFactory.Create(...)`、`AsterGraphAvaloniaViewFactory.Create(...)`、`AsterGraphEditorOptions` 和 document/catalog/editor/view 的组合流程，然后替换 top-level window、它的 title/size，以及随着宿主成长逐步替换 sample graph/catalog definitions。
-- 从 `AsterGraph.ConsumerSample.Avalonia` 复制：继续把 action projection、trust workflow 和选中节点参数读写 seam 放在宿主里，但把样例自有的展示和 proof labels 保持在本地。
+- 从 `AsterGraph.ConsumerSample.Avalonia` 复制：继续把 action projection、trust workflow、选中节点参数读写 seam 和 snippet catalog 插入 seam 放在宿主里，但把样例自有的展示、snippet id 和 proof labels 保持在本地。
 - 从 [Host Integration](./host-integration.md) 复制：用 route matrix 和 canonical session/runtime 选择来决定哪一层宿主 surface 负责这条 seam。
 - 从 [Authoring Inspector Recipe](./authoring-inspector-recipe.md) 复制：用 definition-driven 的元数据词汇（`defaultValue`、`isAdvanced`、`helpText`、`placeholderText`、`constraints.IsReadOnly`）来完成宿主自管参数与元数据工作。
 
@@ -137,7 +137,7 @@ dotnet run --project tools/AsterGraph.PluginTool -- validate MyGraphPlugin/bin/D
 2. 默认够用时，通过 `AsterGraphHostBuilder.Create().UseDocument(document).UseCatalog(catalog).UseDefaultCompatibility().BuildAvaloniaView()` 复制 starter 组合；当每个服务都需要显式接线时，再降到 `AsterGraphEditorFactory.Create(...)`、`AsterGraphAvaloniaViewFactory.Create(...)`、`AsterGraphEditorOptions`，以及 document/catalog/editor/view 流程。
 3. 添加第一个自定义节点定义：把 starter 的 sample definition 换成你自己的 `NodeDefinition` id、标题、端口和参数定义。
 4. 运行 `tools/AsterGraph.ConsumerSample.Avalonia`，用 hosted action rail 验证图保存/加载、选中节点参数编辑和可信插件路径。
-5. 运行 `AsterGraph.ConsumerSample.Avalonia -- --proof --support-bundle <support-bundle-path>`，期待 `CONSUMER_SAMPLE_SCENARIO_GRAPH_OK:True`、`CONSUMER_SAMPLE_HOST_OWNED_ACTIONS_OK:True`、`CONSUMER_SAMPLE_SUPPORT_BUNDLE_READY_OK:True`、`FIVE_MINUTE_ONBOARDING_OK:True` 和 `ONBOARDING_CONFIGURATION_OK:True`。
+5. 运行 `AsterGraph.ConsumerSample.Avalonia -- --proof --support-bundle <support-bundle-path>`，期待 `CONSUMER_SAMPLE_SCENARIO_GRAPH_OK:True`、`CONSUMER_SAMPLE_HOST_OWNED_ACTIONS_OK:True`、`CONSUMER_SAMPLE_SUPPORT_BUNDLE_READY_OK:True`、`GRAPH_SNIPPET_CATALOG_OK:True`、`GRAPH_SNIPPET_INSERT_OK:True`、`FIVE_MINUTE_ONBOARDING_OK:True` 和 `ONBOARDING_CONFIGURATION_OK:True`。
 
 release lane 的 template smoke 会验证 `astergraph-avalonia` 和 `astergraph-plugin` 能生成可 build 的 `net8.0` 项目，并且生成的插件能通过 `AsterGraph.PluginTool validate`。
 

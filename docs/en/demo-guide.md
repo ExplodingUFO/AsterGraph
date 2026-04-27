@@ -64,6 +64,7 @@ Expected proof markers:
 - `DISCONNECT_FLOW_OK:True`
 - `SCENARIO_LAUNCH_OK:True`
 - `SCENARIO_TOUR_OK:True`
+- `DEMO_SCENARIO_PRESETS_OK:True`
 - `AI_PIPELINE_MOCK_RUNNER_OK:True`
 - `AI_PIPELINE_RUNTIME_OVERLAY_OK:True`
 - `AI_PIPELINE_ERROR_STATE_OK:True`
@@ -76,6 +77,7 @@ Expected proof markers:
 ## How to Read It
 
 - Launch the prebuilt AI workflow with `dotnet run --project src/AsterGraph.Demo -- --scenario ai-pipeline`, then open `Tour`.
+- Scenario presets stay host-owned demo catalog entries; `--scenario terrain-shader` and `--scenario ai-pipeline` resolve through that catalog instead of a runtime marketplace or preset API.
 - `Tour` walks the same scenario through node creation, typed connection, parameter edit, plugin trust, automation, runtime feedback, save/load, and SVG export.
 - `Extensions` proves candidate discovery, trust decisions, load snapshots, and persisted allowlist decisions.
 - `Automation` proves typed execution and result projection.

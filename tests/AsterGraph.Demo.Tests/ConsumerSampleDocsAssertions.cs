@@ -35,6 +35,8 @@ internal static class ConsumerSampleDocsAssertions
         Assert.Contains("GRAPH_VALIDATION_FEEDBACK_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("GRAPH_FEEDBACK_FOCUS_TARGET_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("GRAPH_READINESS_STATUS_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("GRAPH_SNIPPET_CATALOG_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("GRAPH_SNIPPET_INSERT_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("FIVE_MINUTE_ONBOARDING_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("ONBOARDING_CONFIGURATION_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("SUPPORT_BUNDLE_PERSISTENCE_OK:True", contents, StringComparison.Ordinal);

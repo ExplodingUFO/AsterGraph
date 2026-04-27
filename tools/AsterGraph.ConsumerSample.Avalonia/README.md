@@ -2,6 +2,7 @@
 
 This is the medium hosted-UI sample on the canonical session/runtime route, after `AsterGraph.Starter.Avalonia` and `AsterGraph.HelloWorld.Avalonia`, and before `AsterGraph.Demo`.
 It opens the `Content Review Release Lane` scenario graph and shows a host-owned action rail, plugin trust workflow, support-bundle proof path, and the selected-node parameter read/write seam without implying a second editor model, a sandbox, or a broader plugin ecosystem.
+It also includes a host-owned snippet catalog for inserting one copyable review queue lane through the existing pending-connection command path.
 For plugin-capable evaluators, this is the defended hosted trust hop. Read [Plugin Manifest and Trust Policy Contract v1](../../docs/en/plugin-trust-contracts.md) and [Plugin And Custom Node Recipe](../../docs/en/plugin-recipe.md) before treating the route as complete.
 
 For the inspector metadata recipe, pair this sample with [Authoring Inspector Recipe](../../docs/en/authoring-inspector-recipe.md). The sample stays focused on the host-owned seams and the shipped inspector surface; it does not own the metadata vocabulary. The canonical recipe carries the full `defaultValue`, `isAdvanced`, `helpText`, `placeholderText`, and read-only vocabulary.
@@ -101,6 +102,8 @@ Expected proof markers:
 - `GRAPH_VALIDATION_FEEDBACK_OK:True`
 - `GRAPH_FEEDBACK_FOCUS_TARGET_OK:True`
 - `GRAPH_READINESS_STATUS_OK:True`
+- `GRAPH_SNIPPET_CATALOG_OK:True`
+- `GRAPH_SNIPPET_INSERT_OK:True`
 - `FIVE_MINUTE_ONBOARDING_OK:True`
 - `ONBOARDING_CONFIGURATION_OK:True`
 - `HOST_NATIVE_METRIC:startup_ms=...`
@@ -150,6 +153,7 @@ Use this sample to copy the host-owned seams, not the sample-specific presentati
 - action rail / command projection: `AsterGraphHostedActionFactory.CreateCommandActions(...)` and `AsterGraphHostedActionFactory.CreateProjection(...)`
 - plugin trust workflow: `GraphEditorPluginDiscoveryOptions`, `AsterGraphEditorOptions.PluginTrustPolicy`, and the host allowlist import/export path
 - selected-node parameter read/write seam: `IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()` reads the selected node parameters, and `IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)` writes them back
+- snippet catalog and insertion seam: `ConsumerSampleHost.SnippetCatalog` stays sample-owned, while `ConsumerSampleHost.TryInsertSnippet(...)` uses `StartConnection(...)` plus `TryCreateConnectedNodeFromPendingConnection(...)` instead of adding a runtime snippet abstraction
 
 ### Route Boundaries To Keep
 
@@ -172,6 +176,7 @@ Use this sample to copy the host-owned seams, not the sample-specific presentati
 - Project node-side editor state from `GetNodeParameterSnapshots(nodeId)` so `NodeParameterEditorHost` and `INodeParameterEditorRegistry` reuse the same validation-aware parameter contract.
 - Keep writes on the shared session command path through `TrySetSelectedNodeParameterValue(...)` or `TrySetNodeParameterValue(...)`.
 - Project host actions from `GetCommandDescriptors()` and close the route with `AsterGraph.ConsumerSample.Avalonia -- --proof`, expecting `AUTHORING_SURFACE_OK:True`.
+- Keep snippets host-owned: expose sample snippet ids through `ConsumerSampleHost.SnippetCatalog`, insert them through existing session commands, and expect `GRAPH_SNIPPET_CATALOG_OK:True` plus `GRAPH_SNIPPET_INSERT_OK:True`.
 
 ### Copyable Capability Breadth Handoff
 
@@ -200,6 +205,7 @@ Replaceable sample-owned details are the review/audit node family, the sample ac
 
 - sample-owned details are the review/audit node family
 - sample action ids and titles
+- sample snippet ids and catalog entries
 - window layout and narrative text
 - proof labels or copy beyond the defended public markers
 

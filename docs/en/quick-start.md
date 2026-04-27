@@ -12,7 +12,7 @@ For plugin trust-policy review and local evidence, keep [Plugin Manifest and Tru
 
 | Time | Path | Stop when |
 | --- | --- | --- |
-| 30 seconds | Run `src/AsterGraph.Demo -- --scenario ai-pipeline` or inspect the README scenario image. | The SDK story is clear enough to choose a route. |
+| 30 seconds | Run `src/AsterGraph.Demo -- --scenario ai-pipeline` or inspect the README scenario image. | The SDK story is clear enough to choose a route, and proof mode can emit `DEMO_SCENARIO_PRESETS_OK:True`. |
 | 5 minutes | Generate `dotnet new astergraph-avalonia`, run the starter, and validate `ConsumerSample.Avalonia -- --proof --support-bundle <support-bundle-path>`. | You have `FIVE_MINUTE_ONBOARDING_OK:True` and `ONBOARDING_CONFIGURATION_OK:True`. |
 | 30 minutes | Follow the package, route, parameter, plugin, and support-bundle sections below. | You know whether your host should copy hosted UI, runtime-only, plugin, or retained migration guidance. |
 
@@ -56,7 +56,7 @@ Use `AsterGraph.Starter.Avalonia` as the starter recipe. Keep/copy `AsterGraphEd
 Copy from each bounded source for the part it owns:
 
 - Copy from `AsterGraph.Starter.Avalonia`: keep `AsterGraphEditorFactory.Create(...)`, `AsterGraphAvaloniaViewFactory.Create(...)`, `AsterGraphEditorOptions`, and the document/catalog/editor/view composition flow, then replace the top-level window, its title/size, and the sample graph/catalog definitions as the host grows.
-- Copy from `AsterGraph.ConsumerSample.Avalonia`: keep the action projection, trust workflow, and selected-node parameter read/write seam host-owned, but keep the sample-owned presentation and proof labels local.
+- Copy from `AsterGraph.ConsumerSample.Avalonia`: keep the action projection, trust workflow, selected-node parameter read/write seam, and snippet catalog insertion seam host-owned, but keep the sample-owned presentation, snippet ids, and proof labels local.
 - Copy from [Host Integration](./host-integration.md): use the route matrix and canonical session/runtime choice to decide which host surface owns the seam.
 - Copy from [Authoring Inspector Recipe](./authoring-inspector-recipe.md): use the definition-driven metadata vocabulary (`defaultValue`, `isAdvanced`, `helpText`, `placeholderText`, `constraints.IsReadOnly`) for host-owned parameter and metadata work.
 
@@ -140,7 +140,7 @@ Use this path when you want a copyable Avalonia host rather than a full showcase
 2. Copy the starter composition through `AsterGraphHostBuilder.Create().UseDocument(document).UseCatalog(catalog).UseDefaultCompatibility().BuildAvaloniaView()` when defaults are enough, or drop down to `AsterGraphEditorFactory.Create(...)`, `AsterGraphAvaloniaViewFactory.Create(...)`, `AsterGraphEditorOptions`, and the document/catalog/editor/view flow when each service must be explicit.
 3. Add the first custom node definition by replacing the starter sample definition with your own `NodeDefinition` id, title, ports, and parameter definitions.
 4. Run `tools/AsterGraph.ConsumerSample.Avalonia` and use the hosted action rail to exercise graph save/load, selected-node parameter editing, and the trusted plugin path.
-5. Run `AsterGraph.ConsumerSample.Avalonia -- --proof --support-bundle <support-bundle-path>` and expect `CONSUMER_SAMPLE_SCENARIO_GRAPH_OK:True`, `CONSUMER_SAMPLE_HOST_OWNED_ACTIONS_OK:True`, `CONSUMER_SAMPLE_SUPPORT_BUNDLE_READY_OK:True`, `FIVE_MINUTE_ONBOARDING_OK:True`, and `ONBOARDING_CONFIGURATION_OK:True`.
+5. Run `AsterGraph.ConsumerSample.Avalonia -- --proof --support-bundle <support-bundle-path>` and expect `CONSUMER_SAMPLE_SCENARIO_GRAPH_OK:True`, `CONSUMER_SAMPLE_HOST_OWNED_ACTIONS_OK:True`, `CONSUMER_SAMPLE_SUPPORT_BUNDLE_READY_OK:True`, `GRAPH_SNIPPET_CATALOG_OK:True`, `GRAPH_SNIPPET_INSERT_OK:True`, `FIVE_MINUTE_ONBOARDING_OK:True`, and `ONBOARDING_CONFIGURATION_OK:True`.
 
 Template smoke in the release lane validates that `astergraph-avalonia` and `astergraph-plugin` generate buildable `net8.0` projects and that the generated plugin passes `AsterGraph.PluginTool validate`.
 

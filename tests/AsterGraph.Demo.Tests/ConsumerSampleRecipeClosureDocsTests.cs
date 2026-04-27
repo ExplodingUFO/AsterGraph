@@ -53,6 +53,42 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
     }
 
     [Fact]
+    public void ConsumerSampleSnippetDocs_DefendHostOwnedSnippetCatalog()
+    {
+        var readme = ReadRepoFile("tools/AsterGraph.ConsumerSample.Avalonia/README.md");
+        var consumerSampleEn = ReadRepoFile("docs/en/consumer-sample.md");
+        var consumerSampleZh = ReadRepoFile("docs/zh-CN/consumer-sample.md");
+        var quickStartEn = ReadRepoFile("docs/en/quick-start.md");
+        var quickStartZh = ReadRepoFile("docs/zh-CN/quick-start.md");
+
+        foreach (var contents in new[] { readme, consumerSampleEn, quickStartEn })
+        {
+            AssertContains(contents, "GRAPH_SNIPPET_CATALOG_OK:True");
+            AssertContains(contents, "GRAPH_SNIPPET_INSERT_OK:True");
+            Assert.Contains("snippet catalog", contents, StringComparison.OrdinalIgnoreCase);
+        }
+
+        foreach (var contents in new[] { readme, consumerSampleEn })
+        {
+            AssertContains(contents, "TryCreateConnectedNodeFromPendingConnection(...)");
+            AssertContains(contents, "StartConnection(...)");
+            Assert.True(HasLineWithAll(contents, "snippet", "runtime", "abstraction"));
+        }
+
+        foreach (var contents in new[] { consumerSampleZh, quickStartZh })
+        {
+            AssertContains(contents, "GRAPH_SNIPPET_CATALOG_OK:True");
+            AssertContains(contents, "GRAPH_SNIPPET_INSERT_OK:True");
+            Assert.Contains("snippet catalog", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("宿主", contents, StringComparison.Ordinal);
+        }
+
+        AssertContains(consumerSampleZh, "TryCreateConnectedNodeFromPendingConnection(...)");
+        AssertContains(consumerSampleZh, "StartConnection(...)");
+        Assert.True(HasLineWithAll(consumerSampleZh, "snippet", "runtime", "abstraction"));
+    }
+
+    [Fact]
     public void AuthoringInspectorRecipeClosureDocs_AlignCanonicalInspectorVocabularyAcrossSampleGuidance()
     {
         var authoringRecipeEn = ReadRepoFile("docs/en/authoring-inspector-recipe.md");

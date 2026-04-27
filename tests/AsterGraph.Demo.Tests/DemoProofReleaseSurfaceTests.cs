@@ -1473,6 +1473,27 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("Parser", scenarioAsset, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void DemoScenarioPresetDocs_SurfaceHostOwnedPresetProof()
+    {
+        var demoGuide = ReadRepoFile("docs/en/demo-guide.md");
+        var demoGuideZh = ReadRepoFile("docs/zh-CN/demo-guide.md");
+        var quickStart = ReadRepoFile("docs/en/quick-start.md");
+        var quickStartZh = ReadRepoFile("docs/zh-CN/quick-start.md");
+        var projectStatus = ReadRepoFile("docs/en/project-status.md");
+        var projectStatusZh = ReadRepoFile("docs/zh-CN/project-status.md");
+
+        foreach (var contents in new[] { demoGuide, demoGuideZh, quickStart, quickStartZh, projectStatus, projectStatusZh })
+        {
+            Assert.Contains("DEMO_SCENARIO_PRESETS_OK:True", contents, StringComparison.Ordinal);
+        }
+
+        Assert.True(HasLineWithAll(demoGuide, "Scenario presets", "host-owned", "--scenario terrain-shader"));
+        Assert.True(HasLineWithAll(demoGuide, "runtime marketplace", "preset API"));
+        Assert.True(HasLineWithAll(demoGuideZh, "scenario preset", "宿主自管", "--scenario terrain-shader"));
+        Assert.True(HasLineWithAll(demoGuideZh, "runtime marketplace", "preset API"));
+    }
+
     private static string GetPackageVersion()
     {
         var props = XDocument.Load(Path.Combine(GetRepositoryRoot(), "Directory.Build.props"));

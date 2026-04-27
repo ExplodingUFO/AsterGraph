@@ -3,11 +3,12 @@
 `tools/AsterGraph.ConsumerSample.Avalonia` is the medium hosted-UI sample on the canonical session/runtime route, after the starter scaffold and the smallest `HelloWorld.Avalonia` route, and before the full `AsterGraph.Demo` showcase host. It opens the `Content Review Release Lane` scenario graph by default.
 For trust-policy review and local evidence, pair this route with [Plugin Manifest and Trust Policy Contract v1](./plugin-trust-contracts.md) and [Beta Support Bundle](./support-bundle.md).
 
-It is the host seam example for three host-owned seams:
+It is the host seam example for these host-owned seams:
 
 - action rail / command projection
 - plugin trust workflow
 - selected-node parameter read/write seam
+- snippet catalog and connected-node insertion seam
 
 For the inspector metadata recipe, pair this route with [Authoring Inspector Recipe](./authoring-inspector-recipe.md). This sample stays focused on the host-owned seams and the shipped inspector surface; it does not own the metadata vocabulary. The canonical recipe carries the full `defaultValue`, `isAdvanced`, `helpText`, `placeholderText`, and read-only vocabulary.
 For copyable custom node, port, and edge presentation on the same route, pair it with [Authoring Surface Recipe](./authoring-surface-recipe.md).
@@ -30,6 +31,7 @@ This sample keeps one realistic host window without turning into a full showcase
 - one host-defined node family that is intentionally sample-owned and replaceable
 - one plugin-contributed command flowing through the same action path instead of a sample-only menu placeholder
 - one selected-node parameter read/write seam through `IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()` and `IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)`
+- one host-owned snippet catalog that inserts the sample review queue lane through `StartConnection(...)` and `TryCreateConnectedNodeFromPendingConnection(...)`
 - one trusted plugin registration with visible provenance, trust reasons, and allowlist import or export
 - one support-bundle proof path with onboarding markers for the scenario graph, host-owned actions, canonical graph readiness evidence, support-bundle payload readiness, and five-minute handoff health
 - the shipped Avalonia editor surface on the factory-based hosted-UI route
@@ -39,6 +41,7 @@ This sample keeps one realistic host window without turning into a full showcase
 - action rail / command projection: keep the host actions outside the editor shell and project shared descriptors through `AsterGraphHostedActionFactory.CreateCommandActions(...)` and `AsterGraphHostedActionFactory.CreateProjection(...)`
 - plugin trust workflow: keep `GraphEditorPluginDiscoveryOptions`, `AsterGraphEditorOptions.PluginTrustPolicy`, provenance snapshots, and an explicit host-owned allowlist policy together
 - selected-node parameter read/write seam: `IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()` reads the selected node parameters, and `IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)` writes them back
+- snippet catalog and connected-node insertion seam: keep snippet ids and template content in the host, then insert through `StartConnection(...)` plus `TryCreateConnectedNodeFromPendingConnection(...)` so snippets do not become a runtime abstraction
 
 ## Route Boundaries To Keep
 
@@ -55,6 +58,7 @@ Keep these sample-owned details local to your app:
 
 - review/audit node family
 - action ids and titles
+- snippet ids and catalog entries
 - window layout and narrative text
 - proof labels beyond the defended markers
 
@@ -127,6 +131,8 @@ Expected proof markers:
 - `GRAPH_VALIDATION_FEEDBACK_OK:True`
 - `GRAPH_FEEDBACK_FOCUS_TARGET_OK:True`
 - `GRAPH_READINESS_STATUS_OK:True`
+- `GRAPH_SNIPPET_CATALOG_OK:True`
+- `GRAPH_SNIPPET_INSERT_OK:True`
 - `FIVE_MINUTE_ONBOARDING_OK:True`
 - `ONBOARDING_CONFIGURATION_OK:True`
 - `AUTHORING_SURFACE_OK:True`
@@ -213,6 +219,8 @@ Expected proof markers:
 - `GRAPH_VALIDATION_FEEDBACK_OK:True`
 - `GRAPH_FEEDBACK_FOCUS_TARGET_OK:True`
 - `GRAPH_READINESS_STATUS_OK:True`
+- `GRAPH_SNIPPET_CATALOG_OK:True`
+- `GRAPH_SNIPPET_INSERT_OK:True`
 - `FIVE_MINUTE_ONBOARDING_OK:True`
 - `ONBOARDING_CONFIGURATION_OK:True`
 - `HOST_NATIVE_METRIC:startup_ms=...`
@@ -259,6 +267,7 @@ The sample is intentionally small enough to copy from:
 - plugin trust workflow: keep `GraphEditorPluginDiscoveryOptions`, `AsterGraphEditorOptions.PluginTrustPolicy`, provenance snapshots, and allowlist import/export together in the host; plugin trust stays explicit and host-owned through discovery snapshots, reason strings, and allowlist import/export. allowlist decisions can be exported or imported without rebuilding the host trust-policy flow.
 - trusted plugin proof handoff: pair `CONSUMER_SAMPLE_TRUST_OK:True` from this sample with `ASTERGRAPH_PLUGIN_VALIDATE_OK:True` from `AsterGraph.PluginTool validate`, then review [Plugin Manifest and Trust Policy Contract v1](./plugin-trust-contracts.md) before treating a third-party plugin artifact as loadable.
 - selected-node parameter read/write seam: `IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()` reads the selected node parameters, and `IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)` writes them back
+- snippet catalog and insertion seam: keep `consumer.sample.snippet.queue-lane` and any other snippets host-owned, then insert by reusing `StartConnection(...)` plus `TryCreateConnectedNodeFromPendingConnection(...)`
 - plugin loading remains in-process; there is no sandbox or untrusted-code isolation
 - sample-owned details such as the review/audit node family, action ids and titles, the window layout, and the narrative text are replaceable
 - the v1 manifest and trust-policy contract is published in [Plugin Manifest and Trust Policy Contract v1](./plugin-trust-contracts.md)
@@ -272,6 +281,7 @@ If you want to build the same medium host in your own app, copy these seams in t
 - trusted plugin proof handoff: keep `CONSUMER_SAMPLE_TRUST_OK:True`, `ASTERGRAPH_PLUGIN_VALIDATE_OK:True`, and [Plugin Manifest and Trust Policy Contract v1](./plugin-trust-contracts.md) together when reviewing one trusted plugin path
 - selected-node parameter read/write seam: `IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()` reads the selected node parameters, and `IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)` writes them back
 - node-side authoring seam: `IGraphEditorSession.Queries.GetNodeParameterSnapshots(nodeId)` plus `INodeParameterEditorRegistry` keep the node surface on the same metadata and validation contract as the inspector
+- snippet seam: expose host-owned snippets through a small catalog, insert them with the existing pending-connection command path, and expect `GRAPH_SNIPPET_CATALOG_OK:True` plus `GRAPH_SNIPPET_INSERT_OK:True`
 - proof mode: emit the `AUTHORING_SURFACE_*` markers, `COMMAND_SURFACE_OK`, and the widened `HOST_NATIVE_METRIC:*` lines so you can compare your host with the shipped samples and keep the defended large-tier contract in view through `ScaleSmoke`
 - widened hosted tuning: emit `WIDENED_SURFACE_PERFORMANCE_OK:True` and reuse [Widened Surface Performance Recipe](./widened-surface-performance-recipe.md) so the hosted metrics stay tied to `ScaleSmoke`
 - capability breadth: pair the same route with [Capability Breadth Recipe](./capability-breadth-recipe.md) and emit the `CAPABILITY_BREADTH_*` markers from `AsterGraph.ConsumerSample.Avalonia -- --proof`

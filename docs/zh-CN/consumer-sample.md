@@ -3,11 +3,12 @@
 `tools/AsterGraph.ConsumerSample.Avalonia` 是位于 canonical session/runtime 路线上的中等 hosted-UI 样例，排在 starter 脚手架和最小 `HelloWorld.Avalonia` 路线之后、完整 `AsterGraph.Demo` 展示宿主之前。它默认打开 `Content Review Release Lane` 场景图。
 如果你要看 trust-policy 和本地证据，就把 [插件信任契约 v1](./plugin-trust-contracts.md) 和 [Beta Support Bundle](./support-bundle.md) 配在这条路线旁边。
 
-它是三条宿主管线 seam 的宿主 seam 示例：
+它是这些宿主管线 seam 的宿主 seam 示例：
 
 - action rail / command projection
 - plugin trust workflow
 - 选中节点参数读写 seam
+- snippet catalog 与 connected-node 插入 seam
 
 如果你要看 inspector metadata recipe，就把这条路线和 [Authoring Inspector Recipe](./authoring-inspector-recipe.md) 配在一起。这个样例只聚焦宿主自管 seam 和 shipped inspector surface；它不拥有元数据词汇。完整的 `defaultValue`、`isAdvanced`、`helpText`、`placeholderText` 和只读词汇都放在 canonical recipe 里。
 如果你要在同一条路线里复制自定义节点、端口和边展示，就再配上 [Authoring Surface Recipe](./authoring-surface-recipe.md)。
@@ -30,6 +31,7 @@
 - 一组宿主自定义节点，这部分是样例自有且可替换的
 - 一个 plugin command 也走同一条动作路径，而不是样例私有的菜单占位项
 - 通过 `IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()` 和 `IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)` 做选中节点参数读写 seam
+- 一个宿主自管 snippet catalog，通过 `StartConnection(...)` 和 `TryCreateConnectedNodeFromPendingConnection(...)` 插入样例 review queue lane
 - 一个可信插件注册，以及可见的 provenance、trust reason 和 allowlist 导入/导出
 - 一条 support-bundle proof 路径，带场景图、宿主自管动作、canonical graph readiness 证据、support-bundle payload readiness 和五分钟 handoff 健康度 markers
 - 基于 factory 的默认 Avalonia hosted-UI 路线
@@ -39,6 +41,7 @@
 - action rail / command projection：宿主动作放在编辑器壳层之外，并且通过 `AsterGraphHostedActionFactory.CreateCommandActions(...)` 和 `AsterGraphHostedActionFactory.CreateProjection(...)` 投影共享 command descriptor
 - plugin trust workflow：把 `GraphEditorPluginDiscoveryOptions`、`AsterGraphEditorOptions.PluginTrustPolicy`、provenance snapshot 和宿主自管 allowlist policy 放在同一层
 - 选中节点参数读写 seam：只通过 `IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()` 读取当前选中节点参数，并只通过 `IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)` 写回
+- snippet catalog 与 connected-node 插入 seam：snippet id 和 template 内容都留在宿主里，插入时只复用 `StartConnection(...)` 加 `TryCreateConnectedNodeFromPendingConnection(...)`，不把 snippet 写成 runtime abstraction
 
 ## 需要保持的路线边界
 
@@ -55,6 +58,7 @@
 
 - review/audit 节点族
 - action ids/titles
+- snippet ids 和 catalog entries
 - 窗口布局和叙述文本
 - defended markers 之外的 proof 文案
 
@@ -127,6 +131,8 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 - `GRAPH_VALIDATION_FEEDBACK_OK:True`
 - `GRAPH_FEEDBACK_FOCUS_TARGET_OK:True`
 - `GRAPH_READINESS_STATUS_OK:True`
+- `GRAPH_SNIPPET_CATALOG_OK:True`
+- `GRAPH_SNIPPET_INSERT_OK:True`
 - `FIVE_MINUTE_ONBOARDING_OK:True`
 - `ONBOARDING_CONFIGURATION_OK:True`
 - `AUTHORING_SURFACE_OK:True`
@@ -213,6 +219,8 @@ Proof Handoff 负责实际 intake 说明。
 - `GRAPH_VALIDATION_FEEDBACK_OK:True`
 - `GRAPH_FEEDBACK_FOCUS_TARGET_OK:True`
 - `GRAPH_READINESS_STATUS_OK:True`
+- `GRAPH_SNIPPET_CATALOG_OK:True`
+- `GRAPH_SNIPPET_INSERT_OK:True`
 - `FIVE_MINUTE_ONBOARDING_OK:True`
 - `ONBOARDING_CONFIGURATION_OK:True`
 - `HOST_NATIVE_METRIC:startup_ms=...`
@@ -272,7 +280,9 @@ Proof Handoff 负责实际 intake 说明。
 - plugin trust workflow：把 `GraphEditorPluginDiscoveryOptions`、`AsterGraphEditorOptions.PluginTrustPolicy`、provenance snapshot 和宿主自管 allowlist policy 放在同一层
 - trusted plugin proof handoff：评审一条可信插件路径时，把 `CONSUMER_SAMPLE_TRUST_OK:True`、`ASTERGRAPH_PLUGIN_VALIDATE_OK:True` 和 [插件信任契约 v1](./plugin-trust-contracts.md) 放在一起看
 - 选中节点参数读写 seam：只通过 `IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()` 读取当前选中节点参数，并只通过 `IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)` 写回
+- snippet catalog 与插入 seam：把 `consumer.sample.snippet.queue-lane` 和其他 snippet 保持为宿主自管，再通过 `StartConnection(...)` 加 `TryCreateConnectedNodeFromPendingConnection(...)` 插入
 - 节点旁路 authoring seam：通过 `IGraphEditorSession.Queries.GetNodeParameterSnapshots(nodeId)` 和 `INodeParameterEditorRegistry` 把节点表面保持在和 inspector 一样的 metadata/validation 合同上
+- snippet seam：通过一个小 catalog 暴露宿主自管 snippet，用已有 pending-connection command path 插入，并期待 `GRAPH_SNIPPET_CATALOG_OK:True` 和 `GRAPH_SNIPPET_INSERT_OK:True`
 - proof mode：输出 `AUTHORING_SURFACE_*`、`COMMAND_SURFACE_OK` 和扩展后的 `HOST_NATIVE_METRIC:*`，这样你能和官方 sample 做横向比较，并继续把 `ScaleSmoke` 的 defended large-tier contract 放在视野里
 - widened hosted tuning：输出 `WIDENED_SURFACE_PERFORMANCE_OK:True`，并复用 [Widened Surface Performance Recipe](./widened-surface-performance-recipe.md)，这样宿主指标会继续和 `ScaleSmoke` 绑定在同一条路线里
 - capability breadth：把同一条路线和 [Capability Breadth Recipe](./capability-breadth-recipe.md) 配在一起，并从 `AsterGraph.ConsumerSample.Avalonia -- --proof` 输出 `CAPABILITY_BREADTH_*` markers
