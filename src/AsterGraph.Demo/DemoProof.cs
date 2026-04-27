@@ -31,6 +31,8 @@ public sealed record DemoProofResult(
     bool EdgeNoteOk,
     bool EdgeGeometryOk,
     bool DisconnectFlowOk,
+    bool ScenarioLaunchOk,
+    bool ScenarioTourOk,
     double StartupMs,
     double InspectorProjectionMs,
     double PluginScanMs,
@@ -51,7 +53,9 @@ public sealed record DemoProofResult(
         && CompositeScopeOk
         && EdgeNoteOk
         && EdgeGeometryOk
-        && DisconnectFlowOk;
+        && DisconnectFlowOk
+        && ScenarioLaunchOk
+        && ScenarioTourOk;
 
     public IReadOnlyList<string> ProofLines => DemoProofContract.CreateProofLines(this);
 
@@ -215,6 +219,7 @@ public static class DemoProof
             && shell.RecentWorkspacePaths.Any(path => string.Equals(path, workspacePath, StringComparison.OrdinalIgnoreCase))
             && shell.ShellWorkflowLines.Any(line => line.Contains("workspace", StringComparison.OrdinalIgnoreCase) || line.Contains("工作区", StringComparison.Ordinal));
         var (compositeScopeOk, edgeNoteOk, edgeGeometryOk, disconnectFlowOk) = RunSemanticGraphProof(storageRoot);
+        var (scenarioLaunchOk, scenarioTourOk) = RunScenarioTourProof(storageRoot);
 
         return new DemoProofResult(
             trustTransparencyOk,
@@ -232,6 +237,8 @@ public static class DemoProof
             edgeNoteOk,
             edgeGeometryOk,
             disconnectFlowOk,
+            scenarioLaunchOk,
+            scenarioTourOk,
             startupMs,
             inspectorProjectionMs,
             pluginScanMs,
@@ -528,6 +535,47 @@ public static class DemoProof
             && !editor.HasIncomingConnection(updatedLightNode, updatedPulsePort);
 
         return (edgeNoteOk, edgeGeometryOk, disconnectFlowOk);
+    }
+
+    private static (bool ScenarioLaunchOk, bool ScenarioTourOk) RunScenarioTourProof(string storageRoot)
+    {
+        var scenarioShell = new MainWindowViewModel(new MainWindowShellOptions(
+            StorageRootPath: Path.Combine(storageRoot, "scenario-tour-proof"),
+            EnableStatePersistence: true,
+            RestoreLastWorkspaceOnStartup: false,
+            InitialScenario: DemoGraphFactory.AiPipelineScenario));
+        var initialDocument = scenarioShell.Session.Queries.CreateDocumentSnapshot();
+        var scenarioLaunchOk =
+            string.Equals(initialDocument.Title, "AI Workflow / Agent Pipeline", StringComparison.Ordinal)
+            && initialDocument.Nodes.Count == 6
+            && initialDocument.Connections.Count == 6
+            && initialDocument.Nodes.Any(node => string.Equals(node.Id, "prompt", StringComparison.Ordinal))
+            && scenarioShell.ScenarioTourSteps.Count == 6
+            && scenarioShell.ScenarioTourSignalLines.Any(line => line.Contains("Custom nodes", StringComparison.OrdinalIgnoreCase) || line.Contains("自定义节点", StringComparison.Ordinal));
+
+        foreach (var step in scenarioShell.ScenarioTourSteps)
+        {
+            scenarioShell.RunScenarioTourStep(step.Key);
+        }
+
+        var touredDocument = scenarioShell.Session.Queries.CreateDocumentSnapshot();
+        var promptNode = touredDocument.Nodes.SingleOrDefault(node => string.Equals(node.Id, "prompt", StringComparison.Ordinal));
+        var workspacePath = Path.Combine(storageRoot, "scenario-tour-proof", "scenario-tour-workspace.json");
+        var exportPath = Path.Combine(storageRoot, "scenario-tour-proof", "scenario-tour-export.svg");
+        var scenarioTourOk =
+            touredDocument.Nodes.Count > initialDocument.Nodes.Count
+            && touredDocument.Connections.Count > initialDocument.Connections.Count
+            && promptNode?.ParameterValues?.Any(parameter =>
+                string.Equals(parameter.Key, "systemPrompt", StringComparison.Ordinal)
+                && parameter.Value?.ToString()?.Contains("AsterGraph tour agent", StringComparison.Ordinal) == true) == true
+            && scenarioShell.PluginCandidateEntries.Any(entry => entry.PluginId == "aster.demo.plugin.blocked" && entry.IsAllowed)
+            && scenarioShell.LastAutomationResult?.Succeeded == true
+            && File.Exists(workspacePath)
+            && File.Exists(exportPath)
+            && scenarioShell.ScenarioTourSignalLines.Any(line => line.Contains(workspacePath, StringComparison.Ordinal))
+            && scenarioShell.ScenarioTourSignalLines.Any(line => line.Contains(exportPath, StringComparison.Ordinal));
+
+        return (scenarioLaunchOk, scenarioTourOk);
     }
 
     private static NodeCatalog CreateProofCatalog()

@@ -161,7 +161,9 @@ jobs:
               'COMPOSITE_SCOPE_OK',
               'EDGE_NOTE_OK',
               'EDGE_GEOMETRY_OK',
-              'DISCONNECT_FLOW_OK'
+              'DISCONNECT_FLOW_OK',
+              'SCENARIO_LAUNCH_OK',
+              'SCENARIO_TOUR_OK'
             )) {
               $markerLine = Select-String -Path 'artifacts/proof/demo-proof.txt' -Pattern $markerId | Select-Object -First 1
               if ($markerLine) {

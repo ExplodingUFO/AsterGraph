@@ -19,6 +19,8 @@ public static class DemoProofContract
         "EDGE_NOTE_OK",
         "EDGE_GEOMETRY_OK",
         "DISCONNECT_FLOW_OK",
+        "SCENARIO_LAUNCH_OK",
+        "SCENARIO_TOUR_OK",
     ];
 
     public static IReadOnlyList<string> NativeMetricNames { get; } =
@@ -55,6 +57,8 @@ public static class DemoProofContract
             $"EDGE_NOTE_OK:{result.EdgeNoteOk}",
             $"EDGE_GEOMETRY_OK:{result.EdgeGeometryOk}",
             $"DISCONNECT_FLOW_OK:{result.DisconnectFlowOk}",
+            $"SCENARIO_LAUNCH_OK:{result.ScenarioLaunchOk}",
+            $"SCENARIO_TOUR_OK:{result.ScenarioTourOk}",
         ];
     }
 

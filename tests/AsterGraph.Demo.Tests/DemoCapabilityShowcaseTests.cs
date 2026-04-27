@@ -200,6 +200,8 @@ public sealed class DemoCapabilityShowcaseTests
         Assert.True(result.EdgeNoteOk);
         Assert.True(result.EdgeGeometryOk);
         Assert.True(result.DisconnectFlowOk);
+        Assert.True(result.ScenarioLaunchOk);
+        Assert.True(result.ScenarioTourOk);
         Assert.True(result.StartupMs >= 0);
         Assert.True(result.InspectorProjectionMs >= 0);
         Assert.True(result.PluginScanMs >= 0);

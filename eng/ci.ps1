@@ -1063,6 +1063,8 @@ function Invoke-PrereleaseNotesValidation {
     'EDGE_NOTE_OK:True',
     'EDGE_GEOMETRY_OK:True',
     'DISCONNECT_FLOW_OK:True',
+    'SCENARIO_LAUNCH_OK:True',
+    'SCENARIO_TOUR_OK:True',
     'HOST_SAMPLE_NET10_OK:True',
     'PACKAGE_SMOKE_OK:True',
     'ASTERGRAPH_TEMPLATE_SMOKE_OK:True',

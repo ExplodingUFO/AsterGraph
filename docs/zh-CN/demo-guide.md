@@ -62,6 +62,8 @@ dotnet run --project src/AsterGraph.Demo/AsterGraph.Demo.csproj --nologo -- --pr
 - `EDGE_NOTE_OK:True`
 - `EDGE_GEOMETRY_OK:True`
 - `DISCONNECT_FLOW_OK:True`
+- `SCENARIO_LAUNCH_OK:True`
+- `SCENARIO_TOUR_OK:True`
 - `HOST_NATIVE_METRIC:startup_ms=...`
 - `HOST_NATIVE_METRIC:inspector_projection_ms=...`
 - `HOST_NATIVE_METRIC:plugin_scan_ms=...`
