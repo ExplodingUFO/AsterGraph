@@ -28,6 +28,10 @@ public sealed class ReleaseClosureContractTests
             "ASTERGRAPH_TEMPLATE_SMOKE_OK:True`nTEMPLATE_SMOKE_PLUGIN_VALIDATE_OK:True`nTEMPLATE_SMOKE_PLUGIN_CAPABILITY_SUMMARY_OK:True`nTEMPLATE_SMOKE_PLUGIN_TRUST_HASH_OK:True");
         WriteProofFile(
             proofRoot,
+            "public-api-surface.txt",
+            "PUBLIC_API_SURFACE_OK:3204:net9.0`nPUBLIC_API_GUIDANCE_OK:True");
+        WriteProofFile(
+            proofRoot,
             "scale-smoke.txt",
             "SCALE_TIER_BUDGET:baseline`nSCALE_PERFORMANCE_BUDGET_OK:baseline:True:none`nSCALE_AUTHORING_BUDGET_OK:baseline:True:none`nSCALE_EXPORT_BUDGET_OK:baseline:True:none`nSCALE_HISTORY_CONTRACT_OK:True");
         WriteProofFile(
@@ -103,6 +107,8 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("TEMPLATE_SMOKE_PLUGIN_VALIDATE_OK:True", notes, StringComparison.Ordinal);
         Assert.Contains("TEMPLATE_SMOKE_PLUGIN_CAPABILITY_SUMMARY_OK:True", notes, StringComparison.Ordinal);
         Assert.Contains("TEMPLATE_SMOKE_PLUGIN_TRUST_HASH_OK:True", notes, StringComparison.Ordinal);
+        Assert.Contains("PUBLIC_API_SURFACE_OK:3204:net9.0", notes, StringComparison.Ordinal);
+        Assert.Contains("PUBLIC_API_GUIDANCE_OK:True", notes, StringComparison.Ordinal);
         Assert.Contains("adapter-2 validation only", notes, StringComparison.Ordinal);
         Assert.Contains("does not widen the public publish/package boundary", notes, StringComparison.Ordinal);
         Assert.Contains("ADAPTER_CAPABILITY_MATRIX_FORMAT:1", notes, StringComparison.Ordinal);
@@ -218,6 +224,7 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("validate-public-api-surface.ps1", ciScript, StringComparison.Ordinal);
         Assert.Contains("Invoke-PublicApiSurfaceValidation", ciScript, StringComparison.Ordinal);
         Assert.Contains("-Framework 'net9.0'", ciScript, StringComparison.Ordinal);
+        Assert.Contains("-ProofPath $publicApiSurfaceProofPath", ciScript, StringComparison.Ordinal);
 
         var releaseValidationStart = ciScript.IndexOf("function Invoke-ReleaseValidation", StringComparison.Ordinal);
         Assert.True(releaseValidationStart >= 0, "ci.ps1 should contain Invoke-ReleaseValidation.");

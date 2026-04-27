@@ -83,6 +83,18 @@ var editor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
 - 把批准的包变成 `GraphEditorPluginRegistration`
 - 只对可信代码启用 in-process 插件加载
 
+## Trust Policy Cookbook
+
+使用下面这些 host-owned 策略模式。它们是 policy recipe，不是 runtime fallback：
+
+| 模式 | 适用场景 | 宿主决策 |
+| --- | --- | --- |
+| Local dev allow | 已知机器上的本地开发循环。 | 只允许固定本地插件目录，并在 diagnostics 里显示 `ImplicitAllow` 或 local-dev reason。 |
+| Hash allowlist | 小团队共享已知插件二进制。 | 持久化 PluginTool 输出的 SHA-256 hash，只允许完全匹配的候选项。 |
+| Publisher/signature policy | 组织内部发布的插件包。 | 只有 signature evidence 和 publisher metadata 符合 host policy 时才允许。 |
+| Block unknown source | 默认 prerelease 或企业姿态。 | 没有 allowlist、hash 或签名匹配的候选项，在 activation 前阻止。 |
+| Enterprise fixed directory | 受管桌面部署。 | 只从管理员控制的目录发现插件，并保留 allowlist import/export 记录用于审计。 |
+
 ## 重要边界
 
 插件加载没有 sandbox。对 public beta 宿主，更稳妥的做法是：

@@ -2,6 +2,7 @@
 param(
   [string]$RepoRoot = (Split-Path -Parent $PSScriptRoot),
   [string]$BaselinePath,
+  [string]$ProofPath = '',
   [ValidateSet('Debug', 'Release')]
   [string]$Configuration = 'Release',
   [string]$Framework = 'net9.0',
@@ -321,4 +322,17 @@ if ($differences) {
 
 Assert-WarningGuidance
 
-Write-Host "PUBLIC_API_SURFACE_OK:$($currentLines.Count):$Framework"
+$successMarker = "PUBLIC_API_SURFACE_OK:$($currentLines.Count):$Framework"
+if (-not [string]::IsNullOrWhiteSpace($ProofPath)) {
+  $proofDirectory = Split-Path -Parent $ProofPath
+  if (-not [string]::IsNullOrWhiteSpace($proofDirectory) -and -not (Test-Path -LiteralPath $proofDirectory)) {
+    New-Item -ItemType Directory -Path $proofDirectory -Force | Out-Null
+  }
+
+  @(
+    $successMarker,
+    'PUBLIC_API_GUIDANCE_OK:True'
+  ) | Set-Content -LiteralPath $ProofPath
+}
+
+Write-Host $successMarker

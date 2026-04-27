@@ -32,6 +32,7 @@ $packageSmokeProofPath = Join-Path $proofArtifactsRoot 'package-smoke.txt'
 $scaleSmokeProofPath = Join-Path $proofArtifactsRoot 'scale-smoke.txt'
 $demoProofPath = Join-Path $proofArtifactsRoot 'demo-proof.txt'
 $templateSmokeProofPath = Join-Path $proofArtifactsRoot 'template-smoke.txt'
+$publicApiSurfaceProofPath = Join-Path $proofArtifactsRoot 'public-api-surface.txt'
 $dotnetCliHome = Join-Path $repoRoot '.dotnet-cli-home'
 $coverageRunSettingsPath = Join-Path $repoRoot 'tests/coverage.runsettings'
 $coverageReportScriptPath = Join-Path $repoRoot 'eng/coverage-report.ps1'
@@ -1068,6 +1069,8 @@ function Invoke-PrereleaseNotesValidation {
     'TEMPLATE_SMOKE_PLUGIN_VALIDATE_OK:True',
     'TEMPLATE_SMOKE_PLUGIN_CAPABILITY_SUMMARY_OK:True',
     'TEMPLATE_SMOKE_PLUGIN_TRUST_HASH_OK:True',
+    'PUBLIC_API_SURFACE_OK:',
+    'PUBLIC_API_GUIDANCE_OK:True',
     'SCALE_TIER_BUDGET:baseline',
     'SCALE_PERFORMANCE_BUDGET_OK:baseline:True:',
     'SCALE_TIER_BUDGET:large',
@@ -1117,7 +1120,8 @@ function Invoke-PublicApiSurfaceValidation {
   & $publicApiSurfaceValidationScriptPath `
     -RepoRoot $repoRoot `
     -Configuration $Configuration `
-    -Framework 'net9.0'
+    -Framework 'net9.0' `
+    -ProofPath $publicApiSurfaceProofPath
 
   if ($LASTEXITCODE -ne 0) {
     throw "validate-public-api-surface script failed with exit code $LASTEXITCODE"

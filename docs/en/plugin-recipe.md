@@ -83,6 +83,18 @@ If the host is loading plugins from disk instead of constructing them directly:
 - turn approved packages into `GraphEditorPluginRegistration`
 - keep plugin loading in-process only for trusted code
 
+## Trust Policy Cookbook
+
+Use one of these host-owned patterns. They are policy recipes, not runtime fallback modes:
+
+| Pattern | When to use it | Host decision |
+| --- | --- | --- |
+| Local dev allow | Inner-loop development on a known machine. | Allow a fixed local plugin directory and show `ImplicitAllow` or a local-dev reason string in diagnostics. |
+| Hash allowlist | Small teams sharing known plugin binaries. | Persist the PluginTool SHA-256 hash and allow only exact matches. |
+| Publisher/signature policy | Organization-published packages. | Allow only candidates whose signature evidence and publisher metadata match the host policy. |
+| Block unknown source | Default prerelease or enterprise posture. | Block candidates without an allowlist, hash, or accepted signature match before activation. |
+| Enterprise fixed directory | Managed desktop deployments. | Discover only from an admin-controlled directory and keep import/export allowlist records for audit. |
+
 ## Important Boundary
 
 Plugin loading is not sandboxed. For public beta hosts:
