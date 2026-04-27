@@ -2,6 +2,8 @@
   "database": "dolt",
   "backend": "dolt",
   "dolt_mode": "server",
+  "dolt_server_host": "127.0.0.1",
+  "dolt_server_port": 3306,
   "dolt_database": "avalonia_node_map",
   "project_id": "2bc00228-44f6-4a48-9c29-6db6c99322ed"
 }
