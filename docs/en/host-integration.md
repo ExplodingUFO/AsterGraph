@@ -24,6 +24,41 @@ If the host owns its UI, route 1 is the canonical native/custom-UI path; you com
 
 Standalone Avalonia surfaces such as `AsterGraphCanvasViewFactory`, `AsterGraphInspectorViewFactory`, and `AsterGraphMiniMapViewFactory` belong to route 2. They are composition details under the hosted-UI family, not a fourth primary route.
 
+## Hosted Builder Cookbook
+
+Use the builder when the host wants the common Avalonia composition and can pass the core inputs up front:
+
+```csharp
+var view = AsterGraphHostBuilder
+    .Create()
+    .UseDocument(document)
+    .UseCatalog(catalog)
+    .UseDefaultCompatibility()
+    .UsePluginTrustPolicy(pluginTrustPolicy)
+    .UseLocalization(localization)
+    .UseDiagnostics(diagnostics)
+    .BuildAvaloniaView();
+```
+
+Use explicit factory wiring when the host needs separate ownership of editor options, view options, or standalone surfaces:
+
+```csharp
+var editor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
+{
+    Document = document,
+    NodeCatalog = catalog,
+    CompatibilityService = compatibility,
+    PluginTrustPolicy = pluginTrustPolicy,
+});
+
+var view = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOptions
+{
+    Editor = editor,
+});
+```
+
+The builder delegates to the existing editor/session and Avalonia view factories. Keep `CreateSession(...)` as the canonical runtime-only route and keep retained surfaces for migration only.
+
 ## When To Choose Retained
 
 | Route | Choose this when | Do not use this when | Recipe |

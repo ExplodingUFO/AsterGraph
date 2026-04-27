@@ -1393,10 +1393,24 @@ public sealed class DemoProofReleaseSurfaceTests
             Assert.Contains("BuildAvaloniaView", contents, StringComparison.Ordinal);
         }
 
+        foreach (var contents in new[] { quickStart, quickStartZh, hostIntegration, hostIntegrationZh, avaloniaReadme })
+        {
+            Assert.Contains("Hosted Builder Cookbook", contents, StringComparison.Ordinal);
+            Assert.Contains("UseDocument(document)", contents, StringComparison.Ordinal);
+            Assert.Contains("UseCatalog(catalog)", contents, StringComparison.Ordinal);
+            Assert.Contains("UseDefaultCompatibility()", contents, StringComparison.Ordinal);
+            Assert.Contains("AsterGraphAvaloniaViewFactory.Create", contents, StringComparison.Ordinal);
+        }
+
         Assert.Contains("CreateSession(...)", hostIntegration, StringComparison.Ordinal);
         Assert.Contains("CreateSession(...)", hostIntegrationZh, StringComparison.Ordinal);
         Assert.Contains("AsterGraphEditorFactory.Create(...)", hostIntegration, StringComparison.Ordinal);
         Assert.Contains("AsterGraphEditorFactory.Create(...)", hostIntegrationZh, StringComparison.Ordinal);
+        Assert.True(HasLineWithAll(quickStart, "AsterGraphHostBuilder", "thin hosted helper", "not a second runtime model"));
+        Assert.True(HasLineWithAll(quickStartZh, "AsterGraphHostBuilder", "thin hosted helper", "不是第二套 runtime model"));
+        Assert.True(HasLineWithAll(hostIntegration, "builder delegates", "editor/session", "Avalonia view factories"));
+        Assert.True(HasLineWithAll(hostIntegrationZh, "builder", "editor/session", "Avalonia view factories"));
+        Assert.True(HasLineWithAll(avaloniaReadme, "Both routes", "same editor/session owner"));
         Assert.Contains("dotnet run --project src/AsterGraph.Demo -- --scenario ai-pipeline", readme, StringComparison.Ordinal);
         Assert.Contains("dotnet run --project src/AsterGraph.Demo -- --scenario ai-pipeline", readmeZh, StringComparison.Ordinal);
         Assert.True(HasLineWithAll(readme, "30 seconds", "AI workflow", "scenario"));

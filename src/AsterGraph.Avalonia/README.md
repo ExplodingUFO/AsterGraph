@@ -44,6 +44,37 @@ Those responsibilities live in `AsterGraph.Abstractions`, `AsterGraph.Core`, `As
 
 For new hosted work, prefer `AsterGraphHostBuilder` when the default composition is enough, and use the factory-based routes when you need explicit service wiring. `CreateSession(...)` plus `IGraphEditorSession` remain the canonical runtime surface; this package composes the current Avalonia adapter on top of the retained hosted-UI facade. Treat the direct `GraphEditorView` constructor path as retained compatibility.
 
+## Hosted Builder Cookbook
+
+Default hosted route:
+
+```csharp
+var view = AsterGraphHostBuilder
+    .Create()
+    .UseDocument(document)
+    .UseCatalog(catalog)
+    .UseDefaultCompatibility()
+    .BuildAvaloniaView();
+```
+
+Explicit factory route:
+
+```csharp
+var editor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
+{
+    Document = document,
+    NodeCatalog = catalog,
+    CompatibilityService = compatibility,
+});
+
+var view = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOptions
+{
+    Editor = editor,
+});
+```
+
+Use the builder to reduce boilerplate in the common hosted route. Use explicit factories when the host owns storage, plugin trust, localization, diagnostics, presentation, or standalone surface composition separately. Both routes share the same editor/session owner.
+
 `NodeCanvas` consumes the shared editor command/query surface for tiered authoring UX. The same persisted node/group state drives resize handles, width/height tiers, node-side parameter values, fixed group frames, geometry-based membership, and editor-only group chrome.
 
 Group frames keep header, border, and content-area semantics separate: the stock canvas drags from the header, resizes from the border, and treats the content area as the membership zone while keeping the stored frame boundary stable.

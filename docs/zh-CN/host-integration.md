@@ -22,6 +22,41 @@
 
 `AsterGraphCanvasViewFactory`、`AsterGraphInspectorViewFactory`、`AsterGraphMiniMapViewFactory` 这些独立表面都属于第 2 条路线下的组合细节，不是第四条主路线。
 
+## Hosted Builder Cookbook
+
+当宿主想走常见 Avalonia 组合，并且可以一次性传入核心 inputs 时，用 builder：
+
+```csharp
+var view = AsterGraphHostBuilder
+    .Create()
+    .UseDocument(document)
+    .UseCatalog(catalog)
+    .UseDefaultCompatibility()
+    .UsePluginTrustPolicy(pluginTrustPolicy)
+    .UseLocalization(localization)
+    .UseDiagnostics(diagnostics)
+    .BuildAvaloniaView();
+```
+
+当宿主需要分别拥有 editor options、view options 或 standalone surfaces 时，用显式 factory wiring：
+
+```csharp
+var editor = AsterGraphEditorFactory.Create(new AsterGraphEditorOptions
+{
+    Document = document,
+    NodeCatalog = catalog,
+    CompatibilityService = compatibility,
+    PluginTrustPolicy = pluginTrustPolicy,
+});
+
+var view = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOptions
+{
+    Editor = editor,
+});
+```
+
+builder 会委托给现有 editor/session 和 Avalonia view factories。`CreateSession(...)` 仍是 canonical runtime-only 路线，retained surfaces 仍只用于迁移。
+
 ## 何时选择 retained
 
 | 路线 | 适用时机 | 不适用时机 | recipe |

@@ -164,7 +164,7 @@ New adopters should start with `AsterGraph.Starter.Avalonia` unless they are int
 If the host owns its UI, the runtime/session route is the canonical native path; `Editor.Session` still owns host actions, diagnostics, automation, and proof logic.
 Quick Start remains Avalonia-first today. The current public beta line validates `WPF` as adapter 2 on the same canonical route; see [Adapter Capability Matrix](./adapter-capability-matrix.md) for that contract instead of treating it as a second beginner route or a parity promise.
 
-## 5. Minimal Hosted-UI Composition
+## 5. Hosted Builder Cookbook
 
 Use the thin builder for the common hosted route:
 
@@ -203,6 +203,8 @@ var view = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOption
     Editor = editor,
 });
 ```
+
+`AsterGraphHostBuilder` is a thin hosted helper over the same editor/session and Avalonia view factories. It is not a second runtime model.
 
 ## 6. Plugin Trust Boundary
 
