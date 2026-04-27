@@ -75,6 +75,9 @@ public sealed partial class GraphEditorSession :
 
     public IGraphEditorDiagnostics Diagnostics => this;
 
+    internal void SetRuntimeOverlayProvider(IGraphRuntimeOverlayProvider? runtimeOverlayProvider)
+        => _descriptorSupport?.SetRuntimeOverlayProvider(runtimeOverlayProvider);
+
     public event EventHandler<GraphEditorDocumentChangedEventArgs>? DocumentChanged;
 
     public event EventHandler<GraphEditorAutomationStartedEventArgs>? AutomationStarted;

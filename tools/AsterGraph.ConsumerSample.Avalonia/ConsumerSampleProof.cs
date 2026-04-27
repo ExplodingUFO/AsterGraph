@@ -59,6 +59,7 @@ public sealed record ConsumerSampleProofResult(
     bool EdgeMultiSelectOk = true,
     bool WireSliceOk = true,
     bool SelectedNodeEdgeHighlightOk = true,
+    bool RuntimeOverlaySnapshotOk = true,
     int NodeCount = 0,
     int ConnectionCount = 0,
     IReadOnlyList<string>? FeatureDescriptorIds = null,
@@ -121,6 +122,7 @@ public sealed record ConsumerSampleProofResult(
         && HostOwnedActionsOk
         && SupportBundlePayloadOk
         && FiveMinuteOnboardingOk
+        && RuntimeOverlaySnapshotOk
         && NodeCount > 0
         && (FeatureDescriptorIds?.Count > 0);
 
@@ -169,6 +171,7 @@ public sealed record ConsumerSampleProofResult(
         $"AUTHORING_EDGE_MULTISELECT_OK:{EdgeMultiSelectOk}",
         $"AUTHORING_WIRE_SLICE_OK:{WireSliceOk}",
         $"AUTHORING_SELECTED_NODE_EDGE_HIGHLIGHT_OK:{SelectedNodeEdgeHighlightOk}",
+        $"RUNTIME_OVERLAY_SNAPSHOT_OK:{RuntimeOverlaySnapshotOk}",
         $"AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:{NodeSideAuthoringOk}",
         $"AUTHORING_SURFACE_COMMAND_PROJECTION_OK:{CommandSurfaceOk}",
         $"CONSUMER_SAMPLE_PARAMETER_OK:{ParameterProjectionOk}",
@@ -359,6 +362,7 @@ public static class ConsumerSampleProof
         bool edgeMultiSelectOk;
         bool wireSliceOk;
         bool selectedNodeEdgeHighlightOk;
+        bool runtimeOverlaySnapshotOk;
         try
         {
             capabilityWindow.Show();
@@ -384,6 +388,7 @@ public static class ConsumerSampleProof
             (dropNodeOnEdgeOk, edgeSplitCompatibilityOk, edgeSplitUndoOk) = HasDropNodeOnEdge(host);
             (deleteAndReconnectOk, detachNodeOk, reconnectConflictReportOk) = HasReconnectDetach(host);
             (edgeMultiSelectOk, wireSliceOk, selectedNodeEdgeHighlightOk) = HasWireSelectionAndSlicing(host);
+            runtimeOverlaySnapshotOk = HasRuntimeOverlaySnapshot(host);
             (quickAddConnectedNodeOk, portFilteredNodeSearchOk) = HasQuickAddConnectedNode(host);
 
             host.SelectNode(reviewNodeId);
@@ -447,6 +452,7 @@ public static class ConsumerSampleProof
             EdgeMultiSelectOk: edgeMultiSelectOk,
             WireSliceOk: wireSliceOk,
             SelectedNodeEdgeHighlightOk: selectedNodeEdgeHighlightOk,
+            RuntimeOverlaySnapshotOk: runtimeOverlaySnapshotOk,
             ParameterSnapshots: proofParameterSnapshots,
             StartupMs: startupMs,
             InspectorProjectionMs: inspectorProjectionMs,
@@ -1444,6 +1450,31 @@ public static class ConsumerSampleProof
             string.Equals(actual.Value, wanted.Value, StringComparison.Ordinal)
             && string.Equals(actual.Label, wanted.Label, StringComparison.Ordinal))
             .All(static matches => matches);
+
+    private static bool HasRuntimeOverlaySnapshot(ConsumerSampleHost host)
+    {
+        var overlay = host.Session.Queries.GetRuntimeOverlaySnapshot();
+        return overlay.IsAvailable
+            && overlay.NodeOverlays.Any(snapshot =>
+                snapshot.NodeId == "consumer-sample-review-001"
+                && snapshot.Status == GraphEditorRuntimeOverlayStatus.Success
+                && snapshot.ElapsedMilliseconds > 0
+                && !string.IsNullOrWhiteSpace(snapshot.OutputPreview)
+                && snapshot.LastRunAtUtc is not null)
+            && overlay.ConnectionOverlays.Any(snapshot =>
+                snapshot.ConnectionId == "consumer-sample-connection-001"
+                && snapshot.Status == GraphEditorRuntimeOverlayStatus.Success
+                && string.Equals(snapshot.PayloadType, "review", StringComparison.Ordinal)
+                && snapshot.ItemCount == 1
+                && !snapshot.IsStale)
+            && overlay.RecentLogs.Any(snapshot =>
+                snapshot.NodeId == "consumer-sample-queue-001"
+                && snapshot.ConnectionId == "consumer-sample-connection-001"
+                && snapshot.Status == GraphEditorRuntimeOverlayStatus.Success)
+            && host.Session.Queries.GetFeatureDescriptors().Any(descriptor =>
+                descriptor.Id == "integration.runtime-overlay-provider"
+                && descriptor.IsAvailable);
+    }
 
     private static IReadOnlyList<ConsumerSampleProofParameterSnapshot> CreateParameterSnapshots(
         IReadOnlyList<GraphEditorNodeParameterSnapshot> snapshots)

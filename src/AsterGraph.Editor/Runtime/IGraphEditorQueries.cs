@@ -61,6 +61,13 @@ public interface IGraphEditorQueries
         => throw new NotSupportedException();
 
     /// <summary>
+    /// Gets host-owned runtime overlay state for nodes, connections, and recent logs.
+    /// </summary>
+    /// <returns>Runtime overlay snapshot. Empty when the host did not provide runtime feedback.</returns>
+    GraphEditorRuntimeOverlaySnapshot GetRuntimeOverlaySnapshot()
+        => throw new NotSupportedException();
+
+    /// <summary>
     /// Gets canonical fragment template snapshots projected from the active template library service.
     /// </summary>
     /// <returns>Stable template metadata collection for host-side fragment library UIs.</returns>

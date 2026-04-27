@@ -27,6 +27,7 @@ internal sealed class GraphEditorSessionDescriptorSupport
         bool hasCommandContributor = false,
         bool hasContextMenuAugmentor = false,
         bool hasToolProvider = false,
+        IGraphRuntimeOverlayProvider? runtimeOverlayProvider = null,
         Func<bool>? canEditNodeParameters = null,
         Func<bool>? hasNodePresentationProvider = null,
         Func<bool>? hasLocalizationProvider = null)
@@ -48,6 +49,7 @@ internal sealed class GraphEditorSessionDescriptorSupport
         HasCommandContributor = hasCommandContributor;
         HasContextMenuAugmentor = hasContextMenuAugmentor;
         HasToolProvider = hasToolProvider;
+        RuntimeOverlayProvider = runtimeOverlayProvider;
     }
 
     public INodeCatalog NodeCatalog { get; }
@@ -76,6 +78,10 @@ internal sealed class GraphEditorSessionDescriptorSupport
 
     public bool HasToolProvider { get; }
 
+    public IGraphRuntimeOverlayProvider? RuntimeOverlayProvider { get; private set; }
+
+    public bool HasRuntimeOverlayProvider => RuntimeOverlayProvider is not null;
+
     public bool CanEditNodeParameters => _canEditNodeParameters();
 
     public bool HasNodePresentationProvider => _hasNodePresentationProvider();
@@ -86,4 +92,7 @@ internal sealed class GraphEditorSessionDescriptorSupport
 
     public string Localize(string key, string fallback)
         => _localize(key, fallback);
+
+    public void SetRuntimeOverlayProvider(IGraphRuntimeOverlayProvider? runtimeOverlayProvider)
+        => RuntimeOverlayProvider = runtimeOverlayProvider;
 }

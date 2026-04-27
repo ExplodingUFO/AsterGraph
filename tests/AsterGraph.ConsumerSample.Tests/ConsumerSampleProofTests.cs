@@ -112,6 +112,7 @@ public sealed class ConsumerSampleProofTests
         Assert.True(result.HostOwnedActionsOk);
         Assert.True(result.SupportBundlePayloadOk);
         Assert.True(result.FiveMinuteOnboardingOk);
+        Assert.True(result.RuntimeOverlaySnapshotOk);
         Assert.True(result.OnboardingConfigurationOk);
         Assert.True(result.StartupMs >= 0);
         Assert.True(result.InspectorProjectionMs >= 0);
@@ -139,6 +140,7 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_EDGE_MULTISELECT_OK:True");
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_WIRE_SLICE_OK:True");
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_SELECTED_NODE_EDGE_HIGHLIGHT_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "RUNTIME_OVERLAY_SNAPSHOT_OK:True");
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:True");
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_SURFACE_COMMAND_PROJECTION_OK:True");
         Assert.Contains(result.ProofLines, line => line == "CAPABILITY_BREADTH_STENCIL_OK:True");
@@ -466,6 +468,7 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(proofLines, line => line == "AUTHORING_EDGE_MULTISELECT_OK:True");
         Assert.Contains(proofLines, line => line == "AUTHORING_WIRE_SLICE_OK:True");
         Assert.Contains(proofLines, line => line == "AUTHORING_SELECTED_NODE_EDGE_HIGHLIGHT_OK:True");
+        Assert.Contains(proofLines, line => line == "RUNTIME_OVERLAY_SNAPSHOT_OK:True");
         Assert.Contains(proofLines, line => line == "AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:True");
         Assert.Contains(proofLines, line => line == "AUTHORING_SURFACE_COMMAND_PROJECTION_OK:True");
         Assert.Contains(proofLines, line => line == "CAPABILITY_BREADTH_STENCIL_OK:True");

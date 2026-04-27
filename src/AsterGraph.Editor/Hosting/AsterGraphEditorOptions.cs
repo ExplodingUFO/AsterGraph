@@ -109,6 +109,11 @@ public sealed record AsterGraphEditorOptions
     public IGraphEditorToolProvider? ToolProvider { get; init; }
 
     /// <summary>
+    /// Optional host-owned runtime overlay provider. The editor displays or exposes this state but does not execute graphs.
+    /// </summary>
+    public IGraphRuntimeOverlayProvider? RuntimeOverlayProvider { get; init; }
+
+    /// <summary>
     /// Optional localization provider for built-in editor strings.
     /// </summary>
     public IGraphLocalizationProvider? LocalizationProvider { get; init; }

@@ -137,6 +137,7 @@ public sealed class ConsumerSampleHost : IDisposable
                     provenance),
             ],
             PluginTrustPolicy = trustPolicy,
+            RuntimeOverlayProvider = new ConsumerSampleRuntimeOverlayProvider(),
         };
 
         var editor = AsterGraphEditorFactory.Create(options);
@@ -442,6 +443,52 @@ public sealed class ConsumerSampleHost : IDisposable
             builder.AddNodePresentationProvider(new ConsumerAuditPresentationProvider());
             builder.AddLocalizationProvider(new ConsumerAuditLocalizationProvider());
         }
+    }
+
+    private sealed class ConsumerSampleRuntimeOverlayProvider : IGraphRuntimeOverlayProvider
+    {
+        private static readonly DateTimeOffset SampleTimestamp = new(2026, 4, 27, 8, 0, 0, TimeSpan.Zero);
+
+        public IReadOnlyList<GraphEditorNodeRuntimeOverlaySnapshot> GetNodeOverlays()
+            =>
+            [
+                new GraphEditorNodeRuntimeOverlaySnapshot(
+                    InitialReviewNodeId,
+                    GraphEditorRuntimeOverlayStatus.Success,
+                    ElapsedMilliseconds: 42,
+                    OutputPreview: "approved review payload",
+                    LastRunAtUtc: SampleTimestamp),
+                new GraphEditorNodeRuntimeOverlaySnapshot(
+                    InitialQueueNodeId,
+                    GraphEditorRuntimeOverlayStatus.Running,
+                    ElapsedMilliseconds: 8,
+                    OutputPreview: "queue handoff pending",
+                    LastRunAtUtc: SampleTimestamp),
+            ];
+
+        public IReadOnlyList<GraphEditorConnectionRuntimeOverlaySnapshot> GetConnectionOverlays()
+            =>
+            [
+                new GraphEditorConnectionRuntimeOverlaySnapshot(
+                    "consumer-sample-connection-001",
+                    GraphEditorRuntimeOverlayStatus.Success,
+                    ValuePreview: "{ status: approved, lane: alpha }",
+                    PayloadType: "review",
+                    ItemCount: 1),
+            ];
+
+        public IReadOnlyList<GraphEditorRuntimeLogEntrySnapshot> GetRecentLogs()
+            =>
+            [
+                new GraphEditorRuntimeLogEntrySnapshot(
+                    "consumer-sample-runtime-log-001",
+                    SampleTimestamp,
+                    GraphEditorRuntimeOverlayStatus.Success,
+                    "Review payload reached the ship queue.",
+                    ScopeId: "root",
+                    NodeId: InitialQueueNodeId,
+                    ConnectionId: "consumer-sample-connection-001"),
+            ];
     }
 
     private sealed class ConsumerAuditNodeDefinitionProvider : INodeDefinitionProvider
