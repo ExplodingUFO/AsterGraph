@@ -103,6 +103,8 @@ Copy from each bounded source for the part it owns:
 - `AsterGraph.HelloWorld.Avalonia` = first-run sample for the shipped Avalonia UI path
 - `AsterGraph.Starter.Avalonia` = starter scaffold for the shipped Avalonia path
 - `AsterGraph.ConsumerSample.Avalonia` = medium hosted-UI sample on the canonical route with host actions, parameter editing, and one trusted plugin
+- `AsterGraph.Starter.Wpf` = validation-only adapter-2 composition sample, not an onboarding route
+- `AsterGraph.HelloWorld.Wpf` = validation-only adapter-2 proof sample for WPF markers, not a parity claim
 - `AsterGraph.HostSample` = narrow proof harness for the canonical runtime-only and hosted-UI routes
 - `AsterGraph.PackageSmoke` = packed-package proof
 - `AsterGraph.ScaleSmoke` = public scale baseline plus history/state proof

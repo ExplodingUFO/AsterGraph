@@ -1,3 +1,4 @@
+using System.IO;
 using System.Windows;
 using System.Windows.Threading;
 using AsterGraph.Editor.ViewModels;
@@ -8,6 +9,43 @@ namespace AsterGraph.Wpf.Tests;
 
 public sealed class StarterAndRicherWpfSampleTests
 {
+    [Fact]
+    public void WpfSampleReadmes_DefineValidationOnlyRoles()
+    {
+        var starterReadme = ReadRepoFile("tools/AsterGraph.Starter.Wpf/README.md");
+        var helloWorldReadme = ReadRepoFile("tools/AsterGraph.HelloWorld.Wpf/README.md");
+        var hostIntegration = ReadRepoFile("docs/en/host-integration.md");
+        var hostIntegrationZh = ReadRepoFile("docs/zh-CN/host-integration.md");
+
+        Assert.Contains("validation-only adapter-2", starterReadme, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("not the default onboarding route", starterReadme, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("not a starter template for new hosts", starterReadme, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("not an Avalonia/WPF parity promise", starterReadme, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("AsterGraph.Starter.Avalonia", starterReadme, StringComparison.Ordinal);
+        Assert.Contains("dotnet new astergraph-avalonia", starterReadme, StringComparison.Ordinal);
+
+        Assert.Contains("validation-only adapter-2", helloWorldReadme, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("AsterGraph.HelloWorld.Wpf", helloWorldReadme, StringComparison.Ordinal);
+        Assert.Contains("--proof", helloWorldReadme, StringComparison.Ordinal);
+        Assert.Contains("canonical session/runtime route", helloWorldReadme, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("They do not create", helloWorldReadme, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("second onboarding path", helloWorldReadme, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerSample.Avalonia", helloWorldReadme, StringComparison.Ordinal);
+
+        Assert.Contains("AsterGraph.Starter.Wpf", hostIntegration, StringComparison.Ordinal);
+        Assert.Contains("AsterGraph.HelloWorld.Wpf", hostIntegration, StringComparison.Ordinal);
+        Assert.Contains("validation-only adapter-2 composition sample", hostIntegration, StringComparison.Ordinal);
+        Assert.Contains("validation-only adapter-2 proof sample", hostIntegration, StringComparison.Ordinal);
+        Assert.Contains("not an onboarding route", hostIntegration, StringComparison.Ordinal);
+        Assert.Contains("not a parity claim", hostIntegration, StringComparison.Ordinal);
+
+        Assert.Contains("AsterGraph.Starter.Wpf", hostIntegrationZh, StringComparison.Ordinal);
+        Assert.Contains("AsterGraph.HelloWorld.Wpf", hostIntegrationZh, StringComparison.Ordinal);
+        Assert.Contains("validation-only adapter-2", hostIntegrationZh, StringComparison.Ordinal);
+        Assert.Contains("不是上手路线", hostIntegrationZh, StringComparison.Ordinal);
+        Assert.Contains("不代表 parity", hostIntegrationZh, StringComparison.Ordinal);
+    }
+
     [Fact]
     public void StarterWpfSample_ComposesSessionOwnershipContract()
     {
@@ -92,5 +130,24 @@ public sealed class StarterAndRicherWpfSampleTests
         window.ShowInTaskbar = false;
         window.WindowStyle = WindowStyle.None;
         window.ResizeMode = ResizeMode.NoResize;
+    }
+
+    private static string ReadRepoFile(string relativePath)
+        => File.ReadAllText(Path.Combine(GetRepositoryRoot(), relativePath));
+
+    private static string GetRepositoryRoot()
+    {
+        var current = new DirectoryInfo(AppContext.BaseDirectory);
+        while (current is not null)
+        {
+            if (File.Exists(Path.Combine(current.FullName, "Directory.Build.props")))
+            {
+                return current.FullName;
+            }
+
+            current = current.Parent;
+        }
+
+        throw new DirectoryNotFoundException("Failed to locate repository root from test base directory.");
     }
 }
