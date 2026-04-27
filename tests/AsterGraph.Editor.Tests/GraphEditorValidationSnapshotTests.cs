@@ -269,6 +269,30 @@ public sealed class GraphEditorValidationSnapshotTests
     }
 
     [Fact]
+    public void Commands_FocusValidationIssue_ReturnsFalseForStaleConcreteTargets()
+    {
+        var session = CreateSession(CreateCleanDocument(), CreateConnectionCatalog());
+        var staleConnectionIssue = new GraphEditorValidationIssueSnapshot(
+            "connection.stale",
+            GraphEditorValidationIssueSeverity.Error,
+            "Connection no longer exists.",
+            GraphDocument.DefaultRootGraphId,
+            nodeId: "target-001",
+            connectionId: "missing-connection");
+        var staleNodeIssue = new GraphEditorValidationIssueSnapshot(
+            "node.stale",
+            GraphEditorValidationIssueSeverity.Error,
+            "Node no longer exists.",
+            GraphDocument.DefaultRootGraphId,
+            nodeId: "missing-node");
+
+        Assert.False(session.Commands.TryFocusValidationIssue(staleConnectionIssue));
+        Assert.False(session.Commands.TryFocusValidationIssue(staleNodeIssue));
+        Assert.Empty(session.Queries.GetSelectionSnapshot().SelectedNodeIds);
+        Assert.Empty(session.Queries.GetSelectionSnapshot().SelectedConnectionIds);
+    }
+
+    [Fact]
     public void Commands_FocusValidationIssue_FocusesCurrentScopeForDocumentScopedIssue()
     {
         var session = CreateSession(CreateCleanDocument(), CreateConnectionCatalog());

@@ -176,7 +176,9 @@ public sealed class GraphEditorViewTests
         var status = FindRequiredControl<TextBlock>(view, "PART_ValidationStatusText");
         var statusBar = FindRequiredControl<TextBlock>(view, "PART_StatusValidationText");
         var feedbackList = FindRequiredControl<StackPanel>(view, "PART_ValidationFeedbackList");
-        var focusButton = FindRequiredDescendant<Button>(view, "PART_ValidationFocus_connection-001");
+        var focusButton = FindRequiredDescendant<Button>(
+            view,
+            "PART_ValidationFocus_connection-001_connection.incompatible-endpoint-types_in");
 
         Assert.Contains("1 error", status.Text, StringComparison.Ordinal);
         Assert.Contains("1 error", statusBar.Text, StringComparison.Ordinal);
@@ -189,6 +191,28 @@ public sealed class GraphEditorViewTests
         var selection = editor.Session.Queries.GetSelectionSnapshot();
         Assert.Equal(["connection-001"], selection.SelectedConnectionIds);
         Assert.Equal("connection-001", selection.PrimarySelectedConnectionId);
+    }
+
+    [AvaloniaFact]
+    public void ValidationFeedbackChrome_UsesUniqueFocusNamesForIssuesOnSameNode()
+    {
+        var editor = CreateValidationParameterFeedbackEditor();
+        var window = CreateWindow(new GraphEditorView
+        {
+            Editor = editor,
+        });
+        var view = (GraphEditorView)window.Content!;
+        var feedbackList = FindRequiredControl<StackPanel>(view, "PART_ValidationFeedbackList");
+
+        var focusButtons = feedbackList.GetVisualDescendants()
+            .OfType<Button>()
+            .Where(button => button.Name?.StartsWith("PART_ValidationFocus_parameter-001_node.parameter-invalid_", StringComparison.Ordinal) == true)
+            .ToList();
+
+        Assert.Equal(2, focusButtons.Count);
+        Assert.Equal(focusButtons.Count, focusButtons.Select(button => button.Name).Distinct(StringComparer.Ordinal).Count());
+        Assert.Contains(focusButtons, button => string.Equals(button.Name, "PART_ValidationFocus_parameter-001_node.parameter-invalid_prompt", StringComparison.Ordinal));
+        Assert.Contains(focusButtons, button => string.Equals(button.Name, "PART_ValidationFocus_parameter-001_node.parameter-invalid_system", StringComparison.Ordinal));
     }
 
     [AvaloniaFact]
@@ -1172,6 +1196,57 @@ public sealed class GraphEditorViewTests
                         "Invalid Flow",
                         "#6AD5C4"),
                 ]),
+            catalog,
+            new DefaultPortCompatibilityService());
+    }
+
+    private static GraphEditorViewModel CreateValidationParameterFeedbackEditor()
+    {
+        var definitionId = new NodeDefinitionId("tests.view.validation-parameters");
+        var textTypeId = new PortTypeId("string");
+        var catalog = new NodeCatalog();
+        catalog.RegisterDefinition(new NodeDefinition(
+            definitionId,
+            "Validation Parameters",
+            "Tests",
+            "Validation parameter target.",
+            [],
+            [],
+            parameters:
+            [
+                new NodeParameterDefinition(
+                    "prompt",
+                    "Prompt",
+                    textTypeId,
+                    ParameterEditorKind.Text,
+                    isRequired: true),
+                new NodeParameterDefinition(
+                    "system",
+                    "System",
+                    textTypeId,
+                    ParameterEditorKind.Text,
+                    isRequired: true),
+            ]));
+
+        return new GraphEditorViewModel(
+            new GraphDocument(
+                "Validation Parameter Feedback Graph",
+                "Exercises repeated validation focus target names.",
+                [
+                    new GraphNode(
+                        "parameter-001",
+                        "Validation Parameters",
+                        "Tests",
+                        "GraphEditorView",
+                        "Node with multiple invalid parameters.",
+                        new GraphPoint(120, 160),
+                        new GraphSize(240, 160),
+                        [],
+                        [],
+                        "#6AD5C4",
+                        definitionId),
+                ],
+                []),
             catalog,
             new DefaultPortCompatibilityService());
     }

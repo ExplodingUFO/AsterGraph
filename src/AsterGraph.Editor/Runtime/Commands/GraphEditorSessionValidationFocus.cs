@@ -15,9 +15,24 @@ public sealed partial class GraphEditorSession
         }
 
         var document = _host.CreateActiveScopeDocumentSnapshot();
-        if (TryFocusValidationConnection(issue, document, updateStatus)
-            || TryFocusValidationNode(issue, document, updateStatus))
+        if (!string.IsNullOrWhiteSpace(issue.ConnectionId))
         {
+            if (!TryFocusValidationConnection(issue, document, updateStatus))
+            {
+                return false;
+            }
+
+            PublishCommandExecuted("validation.focus");
+            return true;
+        }
+
+        if (!string.IsNullOrWhiteSpace(issue.NodeId))
+        {
+            if (!TryFocusValidationNode(issue, document, updateStatus))
+            {
+                return false;
+            }
+
             PublishCommandExecuted("validation.focus");
             return true;
         }

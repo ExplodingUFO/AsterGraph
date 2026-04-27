@@ -800,7 +800,23 @@ public partial class GraphEditorView : UserControl
     private static string ResolveValidationFocusButtonName(GraphEditorValidationIssueSnapshot issue)
     {
         var target = issue.ConnectionId ?? issue.NodeId ?? issue.ScopeId;
-        return $"PART_ValidationFocus_{NormalizeControlNameSegment(target)}";
+        var segments = new List<string>();
+        AddUniqueSegment(segments, target);
+        AddUniqueSegment(segments, issue.Code);
+        AddUniqueSegment(segments, issue.ParameterKey);
+        AddUniqueSegment(segments, issue.EndpointId);
+        return $"PART_ValidationFocus_{NormalizeControlNameSegment(string.Join("_", segments))}";
+    }
+
+    private static void AddUniqueSegment(List<string> segments, string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value)
+            || segments.Contains(value, StringComparer.Ordinal))
+        {
+            return;
+        }
+
+        segments.Add(value);
     }
 
     private static string NormalizeControlNameSegment(string value)
