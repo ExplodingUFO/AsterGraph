@@ -64,7 +64,11 @@ public sealed class ScaleSmokeBudgetTests
         var result = tier.Evaluate(metrics);
 
         Assert.False(result.Passed);
-        Assert.Contains("connection>350", result.FailureSummary, StringComparison.Ordinal);
+        Assert.Contains("connection=351>350(defended)", result.FailureSummary, StringComparison.Ordinal);
+        var failure = Assert.Single(result.Failures);
+        Assert.Equal(
+            "SCALE_BUDGET_FAILURE:large:area=performance:metric=connection:actual=351:threshold=350:policy=defended",
+            failure.ToMarker());
     }
 
     [Fact]
@@ -102,6 +106,10 @@ public sealed class ScaleSmokeBudgetTests
         var result = tier.Evaluate(metrics);
 
         Assert.False(result.Passed);
-        Assert.Contains("selection>500", result.FailureSummary, StringComparison.Ordinal);
+        Assert.Contains("selection=501>500(defended)", result.FailureSummary, StringComparison.Ordinal);
+        var failure = Assert.Single(result.Failures);
+        Assert.Equal(
+            "SCALE_BUDGET_FAILURE:baseline:area=performance:metric=selection:actual=501:threshold=500:policy=defended",
+            failure.ToMarker());
     }
 }

@@ -64,6 +64,10 @@ public sealed class ScaleSmokeAuthoringBudgetTests
         var result = tier.EvaluateAuthoring(metrics);
 
         Assert.False(result.Passed);
-        Assert.Contains("command-surface>400", result.FailureSummary, StringComparison.Ordinal);
+        Assert.Contains("command-surface=401>400(defended)", result.FailureSummary, StringComparison.Ordinal);
+        var failure = Assert.Single(result.Failures);
+        Assert.Equal(
+            "SCALE_BUDGET_FAILURE:large:area=authoring:metric=command-surface:actual=401:threshold=400:policy=defended",
+            failure.ToMarker());
     }
 }

@@ -74,6 +74,10 @@ public sealed class ScaleSmokeExportBudgetTests
         var result = tier.EvaluateExport(metrics);
 
         Assert.False(result.Passed);
-        Assert.Contains("png>16000", result.FailureSummary, StringComparison.Ordinal);
+        Assert.Contains("png=16001>16000(defended)", result.FailureSummary, StringComparison.Ordinal);
+        var failure = Assert.Single(result.Failures);
+        Assert.Equal(
+            "SCALE_BUDGET_FAILURE:large:area=export:metric=png:actual=16001:threshold=16000:policy=defended",
+            failure.ToMarker());
     }
 }

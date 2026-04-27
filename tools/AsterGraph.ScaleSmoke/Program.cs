@@ -180,6 +180,10 @@ GraphEditorCommandInvocationSnapshot CreateAutomationCommand(
     {
         Console.WriteLine($"SCALE_PERF_METRICS:{tier.Id}:{metrics.SetupMs}:{metrics.SelectionMs}:{metrics.ConnectionMs}:{metrics.HistoryMs}:{metrics.ViewportMs}:{metrics.SaveMs}:{metrics.ReloadMs}");
         Console.WriteLine($"SCALE_PERFORMANCE_BUDGET_OK:{tier.Id}:{budgetEvaluation.Passed}:{budgetEvaluation.FailureSummary}");
+        foreach (var failure in budgetEvaluation.Failures)
+        {
+            Console.WriteLine(failure.ToMarker());
+        }
     }
 
     var automationStartedCount = 0;
@@ -319,6 +323,10 @@ GraphEditorCommandInvocationSnapshot CreateAutomationCommand(
         Console.WriteLine(authoringProbe.ToMarker(tier.Id));
         Console.WriteLine(authoringMetrics.ToMarker(tier.Id));
         Console.WriteLine($"SCALE_AUTHORING_BUDGET_OK:{tier.Id}:{authoringBudgetEvaluation.Passed}:{authoringBudgetEvaluation.FailureSummary}");
+        foreach (var failure in authoringBudgetEvaluation.Failures)
+        {
+            Console.WriteLine(failure.ToMarker());
+        }
     }
 
     var exportProbeRoot = Path.Combine(Path.GetTempPath(), "AsterGraph.ScaleSmoke.Export", tier.Id, Guid.NewGuid().ToString("N"));
@@ -337,6 +345,10 @@ GraphEditorCommandInvocationSnapshot CreateAutomationCommand(
         Console.WriteLine(exportProbe.ToMarker(tier.Id));
         Console.WriteLine(exportProbe.Metrics.ToMarker(tier.Id));
         Console.WriteLine($"SCALE_EXPORT_BUDGET_OK:{tier.Id}:{exportBudgetEvaluation.Passed}:{exportBudgetEvaluation.FailureSummary}");
+        foreach (var failure in exportBudgetEvaluation.Failures)
+        {
+            Console.WriteLine(failure.ToMarker());
+        }
     }
 
     if (tier.EnforceBudgets && !budgetEvaluation.Passed)
