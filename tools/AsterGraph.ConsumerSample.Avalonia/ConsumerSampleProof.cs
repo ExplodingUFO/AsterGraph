@@ -13,6 +13,7 @@ using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Automation;
+using AsterGraph.Editor.Hosting;
 using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.Services;
 using Avalonia.Themes.Fluent;
@@ -61,6 +62,10 @@ public sealed record ConsumerSampleProofResult(
     public bool AuthoringSurfaceOk
         => ParameterProjectionOk
         && MetadataProjectionOk
+        && InspectorMetadataPolishOk
+        && InspectorMixedValueOk
+        && InspectorValidationFixOk
+        && SupportBundleParameterEvidenceOk
         && NodeSideAuthoringOk
         && CommandSurfaceOk;
 
@@ -127,6 +132,10 @@ public sealed record ConsumerSampleProofResult(
         $"CONSUMER_SAMPLE_PLUGIN_OK:{PluginContributionOk}",
         $"AUTHORING_SURFACE_PARAMETER_PROJECTION_OK:{ParameterProjectionOk}",
         $"AUTHORING_SURFACE_METADATA_PROJECTION_OK:{MetadataProjectionOk}",
+        $"INSPECTOR_METADATA_POLISH_OK:{InspectorMetadataPolishOk}",
+        $"INSPECTOR_MIXED_VALUE_OK:{InspectorMixedValueOk}",
+        $"INSPECTOR_VALIDATION_FIX_OK:{InspectorValidationFixOk}",
+        $"SUPPORT_BUNDLE_PARAMETER_EVIDENCE_OK:{SupportBundleParameterEvidenceOk}",
         $"AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:{NodeSideAuthoringOk}",
         $"AUTHORING_SURFACE_COMMAND_PROJECTION_OK:{CommandSurfaceOk}",
         $"CONSUMER_SAMPLE_PARAMETER_OK:{ParameterProjectionOk}",
@@ -157,6 +166,33 @@ public sealed record ConsumerSampleProofResult(
         $"AUTHORING_SURFACE_OK:{AuthoringSurfaceOk}",
         $"CONSUMER_SAMPLE_OK:{IsOk}",
     ];
+
+    public bool InspectorMetadataPolishOk
+        => ParameterSnapshots.Any(snapshot =>
+            snapshot.SupportsEnumSearch
+            && snapshot.AllowedOptions.Count > 0)
+        && ParameterSnapshots.Any(snapshot =>
+            !string.IsNullOrWhiteSpace(snapshot.NumberSliderHint))
+        && ParameterSnapshots.Any(snapshot =>
+            snapshot.UsesMultilineTextInput
+            && snapshot.IsCodeLikeText);
+
+    public bool InspectorMixedValueOk
+        => ParameterSnapshots.Any(snapshot => snapshot.HasMixedValues);
+
+    public bool InspectorValidationFixOk
+        => ParameterSnapshots.Any(snapshot => snapshot.CanApplyValidationFix);
+
+    public bool SupportBundleParameterEvidenceOk
+        => ParameterSnapshots.Any(snapshot =>
+            !string.IsNullOrWhiteSpace(snapshot.GroupName)
+            && !string.IsNullOrWhiteSpace(snapshot.HelpText)
+            && !string.IsNullOrWhiteSpace(snapshot.ValueDisplayText))
+        && ParameterSnapshots.Any(snapshot =>
+            snapshot.ValidationMessage is not null
+            || snapshot.CanApplyValidationFix)
+        && ParameterSnapshots.Any(snapshot =>
+            snapshot.HasMixedValues);
 
     private static string FormatMetric(string name, double value)
         => $"HOST_NATIVE_METRIC:{name}={value.ToString("0.###", CultureInfo.InvariantCulture)}";
@@ -322,7 +358,11 @@ public static class ConsumerSampleProof
             .Distinct()
             .OrderBy(code => code, StringComparer.Ordinal)
             .ToArray();
-        var proofParameterSnapshots = CreateParameterSnapshots(host.GetSelectedParameterSnapshots().ToArray());
+        var selectedSupportSnapshots = host.GetSelectedParameterSnapshots().ToArray();
+        var mixedValueSnapshots = CaptureMixedValueSnapshots(host);
+        var validationFixSnapshots = CreateValidationFixSnapshots();
+        var proofParameterSnapshots = CreateParameterSnapshots(
+            [.. selectedSupportSnapshots, .. mixedValueSnapshots, .. validationFixSnapshots]);
         var supportBundlePayloadOk = HasSupportBundlePayload(proofParameterSnapshots, finalSnapshot, featureDescriptorIds);
         var fiveMinuteOnboardingOk = scenarioGraphOk
             && hostOwnedActionsOk
@@ -348,7 +388,7 @@ public static class ConsumerSampleProof
             HostedAccessibilityFocusOk: hostedAccessibilityFocusOk,
             HostedAccessibilityCommandSurfaceOk: hostedAccessibilityCommandSurfaceOk,
             HostedAccessibilityAuthoringSurfaceOk: hostedAccessibilityAuthoringSurfaceOk,
-            ParameterSnapshots: CreateParameterSnapshots(host.GetSelectedParameterSnapshots().ToArray()),
+            ParameterSnapshots: proofParameterSnapshots,
             StartupMs: startupMs,
             InspectorProjectionMs: inspectorProjectionMs,
             PluginScanMs: pluginScanMs,
@@ -1104,7 +1144,13 @@ public static class ConsumerSampleProof
             && snapshot.Definition.EditorKind == ParameterEditorKind.Number
             && Equals(snapshot.Definition.DefaultValue, 2)
             && snapshot.Definition.Constraints.Minimum == 1
-            && snapshot.Definition.Constraints.Maximum == 5);
+            && snapshot.Definition.Constraints.Maximum == 5
+            && !string.IsNullOrWhiteSpace(snapshot.NumberSliderHint))
+        && snapshots.Any(snapshot =>
+            snapshot.Definition.Key == "review-script"
+            && snapshot.UsesMultilineTextInput
+            && snapshot.IsCodeLikeText
+            && !string.IsNullOrWhiteSpace(snapshot.HelpText));
 
     private static bool HasAllowedOptions(
         IReadOnlyList<ParameterOptionDefinition> options,
@@ -1124,14 +1170,103 @@ public static class ConsumerSampleProof
                 EditorKind: snapshot.Definition.EditorKind.ToString(),
                 CurrentValue: snapshot.CurrentValue,
                 DefaultValue: snapshot.Definition.DefaultValue,
+                HasMixedValues: snapshot.HasMixedValues,
                 CanEdit: snapshot.CanEdit,
                 IsValid: snapshot.IsValid,
+                ValidationMessage: snapshot.ValidationMessage,
+                ReadOnlyReason: snapshot.ReadOnlyReason,
+                HelpText: snapshot.HelpText,
+                GroupName: snapshot.GroupDisplayName,
+                PlaceholderText: snapshot.Definition.PlaceholderText,
+                IsAdvanced: snapshot.Definition.IsAdvanced,
+                ValueState: snapshot.ValueState.ToString(),
+                ValueDisplayText: snapshot.ValueDisplayText,
+                UsesMultilineTextInput: snapshot.UsesMultilineTextInput,
+                IsCodeLikeText: snapshot.IsCodeLikeText,
+                SupportsEnumSearch: snapshot.SupportsEnumSearch,
+                NumberSliderHint: snapshot.NumberSliderHint,
+                CanApplyValidationFix: snapshot.CanApplyValidationFix,
+                ValidationFixActionLabel: snapshot.ValidationFixActionLabel,
                 AllowedOptions: snapshot.Definition.Constraints.AllowedOptions
                     .Select(static option => new ConsumerSampleProofParameterOptionSnapshot(option.Value, option.Label))
                     .ToArray(),
                 Minimum: snapshot.Definition.Constraints.Minimum,
                 Maximum: snapshot.Definition.Constraints.Maximum))
             .ToArray();
+
+    private static IReadOnlyList<GraphEditorNodeParameterSnapshot> CaptureMixedValueSnapshots(ConsumerSampleHost host)
+    {
+        var reviewNodeIds = host.Session.Queries.CreateDocumentSnapshot().Nodes
+            .Where(node => node.DefinitionId == ConsumerSampleHost.ReviewDefinitionId)
+            .Select(node => node.Id)
+            .Take(2)
+            .ToArray();
+        if (reviewNodeIds.Length < 2)
+        {
+            return [];
+        }
+
+        host.Session.Commands.SetSelection(reviewNodeIds, reviewNodeIds[0], updateStatus: false);
+        return host.Session.Queries.GetSelectedNodeParameterSnapshots()
+            .Where(snapshot => snapshot.HasMixedValues)
+            .ToArray();
+    }
+
+    private static IReadOnlyList<GraphEditorNodeParameterSnapshot> CreateValidationFixSnapshots()
+    {
+        var invalidNodeId = "consumer-sample.validation.invalid-node";
+        var definitionId = new NodeDefinitionId("consumer.sample.validation-fix");
+        var catalog = new AsterGraph.Editor.Catalog.NodeCatalog();
+        catalog.RegisterDefinition(new NodeDefinition(
+            definitionId,
+            "Validation Fix Node",
+            "Consumer Sample",
+            "Validation",
+            [],
+            [],
+            [
+                new NodeParameterDefinition(
+                    "slug",
+                    "Slug",
+                    new PortTypeId("string"),
+                    ParameterEditorKind.Text,
+                    defaultValue: "valid-slug",
+                    constraints: new ParameterConstraints(
+                        MinimumLength: 3,
+                        ValidationPattern: "^[a-z-]+$",
+                        ValidationPatternDescription: "lowercase letters and dashes"),
+                    groupName: "Metadata",
+                    helpText: "Stable lowercase identifier."),
+            ]));
+        var session = AsterGraphEditorFactory.CreateSession(new AsterGraphEditorOptions
+        {
+            Document = new GraphDocument(
+                "Validation Fix",
+                "Parameter validation fix proof.",
+                [
+                    new GraphNode(
+                        invalidNodeId,
+                        "Validation Fix Node",
+                        "Consumer Sample",
+                        "Validation",
+                        "Contains invalid persisted parameter data.",
+                        new GraphPoint(0, 0),
+                        new GraphSize(220, 140),
+                        [],
+                        [],
+                        "#6AD5C4",
+                        definitionId,
+                        [new GraphParameterValue("slug", new PortTypeId("string"), "ab")]),
+                ],
+                []),
+            NodeCatalog = catalog,
+            CompatibilityService = new AsterGraph.Core.Compatibility.DefaultPortCompatibilityService(),
+        });
+        session.Commands.SetSelection([invalidNodeId], invalidNodeId, updateStatus: false);
+        return session.Queries.GetSelectedNodeParameterSnapshots()
+            .Where(snapshot => snapshot.CanApplyValidationFix)
+            .ToArray();
+    }
 }
 
 public sealed record ConsumerSampleProofParameterSnapshot(
@@ -1140,8 +1275,23 @@ public sealed record ConsumerSampleProofParameterSnapshot(
     string EditorKind,
     object? CurrentValue,
     object? DefaultValue,
+    bool HasMixedValues,
     bool CanEdit,
     bool IsValid,
+    string? ValidationMessage,
+    string? ReadOnlyReason,
+    string? HelpText,
+    string GroupName,
+    string? PlaceholderText,
+    bool IsAdvanced,
+    string ValueState,
+    string ValueDisplayText,
+    bool UsesMultilineTextInput,
+    bool IsCodeLikeText,
+    bool SupportsEnumSearch,
+    string? NumberSliderHint,
+    bool CanApplyValidationFix,
+    string? ValidationFixActionLabel,
     IReadOnlyList<ConsumerSampleProofParameterOptionSnapshot> AllowedOptions,
     double? Minimum,
     double? Maximum);

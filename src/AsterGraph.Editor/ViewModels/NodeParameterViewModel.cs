@@ -183,7 +183,27 @@ public sealed partial class NodeParameterViewModel : ObservableObject
     /// <summary>
     /// Indicates the parameter uses a multiline text input.
     /// </summary>
-    public bool UsesMultilineTextInput => IsList;
+    public bool UsesMultilineTextInput => NodeParameterInspectorMetadata.UsesMultilineTextInput(Definition);
+
+    /// <summary>
+    /// Indicates the parameter is text that benefits from code-like presentation.
+    /// </summary>
+    public bool IsCodeLikeText => NodeParameterInspectorMetadata.IsCodeLikeText(Definition);
+
+    /// <summary>
+    /// Indicates enum editors should expose a searchable option affordance.
+    /// </summary>
+    public bool SupportsEnumSearch => NodeParameterInspectorMetadata.SupportsEnumSearch(Definition);
+
+    /// <summary>
+    /// Optional bounded-range hint for number editors.
+    /// </summary>
+    public string? NumberSliderHint => NodeParameterInspectorMetadata.BuildNumberSliderHint(Definition);
+
+    /// <summary>
+    /// Indicates the shipped inspector should show the bounded-range hint.
+    /// </summary>
+    public bool HasNumberSliderHint => !string.IsNullOrWhiteSpace(NumberSliderHint);
 
     /// <summary>
     /// Optional grouped inspector heading shown before the parameter card.
@@ -234,6 +254,16 @@ public sealed partial class NodeParameterViewModel : ObservableObject
     /// 指示当前参数是否存在验证错误。
     /// </summary>
     public bool HasValidationError => !IsValid;
+
+    /// <summary>
+    /// Whether the current validation error can be fixed by restoring the declared default value.
+    /// </summary>
+    public bool CanApplyValidationFix => NodeParameterInspectorMetadata.CanApplyValidationFix(Definition, IsValid, CanEdit);
+
+    /// <summary>
+    /// Host-facing label for the bounded validation fix action.
+    /// </summary>
+    public string? ValidationFixActionLabel => NodeParameterInspectorMetadata.BuildValidationFixActionLabel(Definition, IsValid, CanEdit);
 
     /// <summary>
     /// 指示当前多选投影是否包含混合值。
@@ -344,6 +374,19 @@ public sealed partial class NodeParameterViewModel : ObservableObject
         ValidateAndApply(_defaultValue, commit: true);
     }
 
+    /// <summary>
+    /// Applies the bounded validation fix action when one is available.
+    /// </summary>
+    public void ApplyValidationFix()
+    {
+        if (!CanApplyValidationFix)
+        {
+            return;
+        }
+
+        ResetToDefault();
+    }
+
     private void InitializeValues(IReadOnlyList<object?> currentValues)
     {
         var normalizedValues = currentValues
@@ -416,6 +459,8 @@ public sealed partial class NodeParameterViewModel : ObservableObject
         IsValid = result.IsValid;
         ValidationMessage = result.ValidationError;
         OnPropertyChanged(nameof(HasValidationError));
+        OnPropertyChanged(nameof(CanApplyValidationFix));
+        OnPropertyChanged(nameof(ValidationFixActionLabel));
 
         if (!IsValid)
         {

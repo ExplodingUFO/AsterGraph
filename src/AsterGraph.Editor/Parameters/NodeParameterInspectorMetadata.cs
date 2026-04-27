@@ -109,6 +109,71 @@ internal static class NodeParameterInspectorMetadata
             : string.Join("  ·  ", guidance);
     }
 
+    public static bool UsesMultilineTextInput(NodeParameterDefinition definition)
+    {
+        ArgumentNullException.ThrowIfNull(definition);
+
+        return definition.EditorKind == ParameterEditorKind.List
+            || IsCodeLikeText(definition)
+            || ContainsLineBreak(definition.DefaultValue)
+            || definition.Constraints.MaximumLength > 160;
+    }
+
+    public static bool IsCodeLikeText(NodeParameterDefinition definition)
+    {
+        ArgumentNullException.ThrowIfNull(definition);
+
+        return definition.EditorKind == ParameterEditorKind.Text
+            && (ContainsToken(definition.TemplateKey, "code")
+                || ContainsToken(definition.ValueType.Value, "code")
+                || ContainsToken(definition.ValueType.Value, "json")
+                || ContainsToken(definition.ValueType.Value, "yaml")
+                || ContainsToken(definition.ValueType.Value, "script"));
+    }
+
+    public static bool SupportsEnumSearch(NodeParameterDefinition definition)
+    {
+        ArgumentNullException.ThrowIfNull(definition);
+
+        return definition.EditorKind == ParameterEditorKind.Enum
+            && definition.Constraints.AllowedOptions.Count > 0;
+    }
+
+    public static string? BuildNumberSliderHint(NodeParameterDefinition definition)
+    {
+        ArgumentNullException.ThrowIfNull(definition);
+
+        return definition.EditorKind == ParameterEditorKind.Number
+            && definition.Constraints.Minimum is double min
+            && definition.Constraints.Maximum is double max
+            ? $"Slider range: {min} - {max}"
+            : null;
+    }
+
+    public static bool CanApplyValidationFix(
+        NodeParameterDefinition definition,
+        bool isValid,
+        bool canEdit)
+    {
+        ArgumentNullException.ThrowIfNull(definition);
+
+        return !isValid
+            && canEdit
+            && NodeParameterValueAdapter.NormalizeValue(definition, definition.DefaultValue).IsValid;
+    }
+
+    public static string? BuildValidationFixActionLabel(
+        NodeParameterDefinition definition,
+        bool isValid,
+        bool canEdit)
+    {
+        ArgumentNullException.ThrowIfNull(definition);
+
+        return CanApplyValidationFix(definition, isValid, canEdit)
+            ? "Restore default"
+            : null;
+    }
+
     public static bool IsUsingDefaultValue(
         NodeParameterDefinition definition,
         object? currentValue,
@@ -191,4 +256,12 @@ internal static class NodeParameterInspectorMetadata
     }
 
     private readonly record struct OrderedDefinition(NodeParameterDefinition Definition, int Index);
+
+    private static bool ContainsToken(string? value, string token)
+        => !string.IsNullOrWhiteSpace(value)
+        && value.Contains(token, StringComparison.OrdinalIgnoreCase);
+
+    private static bool ContainsLineBreak(object? value)
+        => value is string text
+        && (text.Contains('\n', StringComparison.Ordinal) || text.Contains('\r', StringComparison.Ordinal));
 }

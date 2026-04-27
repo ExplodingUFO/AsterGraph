@@ -63,6 +63,12 @@ public sealed class GraphEditorSessionParameterContractsTests
         Assert.NotNull(typeof(GraphEditorNodeParameterSnapshot).GetProperty(nameof(GraphEditorNodeParameterSnapshot.IsGroupHeaderVisible)));
         Assert.NotNull(typeof(GraphEditorNodeParameterSnapshot).GetProperty(nameof(GraphEditorNodeParameterSnapshot.ValueState)));
         Assert.NotNull(typeof(GraphEditorNodeParameterSnapshot).GetProperty(nameof(GraphEditorNodeParameterSnapshot.ValueDisplayText)));
+        Assert.NotNull(typeof(GraphEditorNodeParameterSnapshot).GetProperty(nameof(GraphEditorNodeParameterSnapshot.UsesMultilineTextInput)));
+        Assert.NotNull(typeof(GraphEditorNodeParameterSnapshot).GetProperty(nameof(GraphEditorNodeParameterSnapshot.IsCodeLikeText)));
+        Assert.NotNull(typeof(GraphEditorNodeParameterSnapshot).GetProperty(nameof(GraphEditorNodeParameterSnapshot.SupportsEnumSearch)));
+        Assert.NotNull(typeof(GraphEditorNodeParameterSnapshot).GetProperty(nameof(GraphEditorNodeParameterSnapshot.NumberSliderHint)));
+        Assert.NotNull(typeof(GraphEditorNodeParameterSnapshot).GetProperty(nameof(GraphEditorNodeParameterSnapshot.CanApplyValidationFix)));
+        Assert.NotNull(typeof(GraphEditorNodeParameterSnapshot).GetProperty(nameof(GraphEditorNodeParameterSnapshot.ValidationFixActionLabel)));
 
         AssertMethod(commandsType, nameof(IGraphEditorCommands.TrySetSelectedNodeParameterValue), typeof(string), typeof(object));
         Assert.Equal(
@@ -194,6 +200,8 @@ public sealed class GraphEditorSessionParameterContractsTests
         Assert.Equal("Slug must be at least 3 characters.", slug.ValidationMessage);
         Assert.Equal("Metadata", slug.Definition.GroupName);
         Assert.Equal("lowercase-id", slug.Definition.PlaceholderText);
+        Assert.True(slug.CanApplyValidationFix);
+        Assert.Equal("Restore default", slug.ValidationFixActionLabel);
     }
 
     [Fact]
@@ -211,6 +219,7 @@ public sealed class GraphEditorSessionParameterContractsTests
         Assert.Contains("Fine-tunes the visible threshold.", threshold.HelpText);
         Assert.Equal("ms", threshold.Definition.UnitSuffix);
         Assert.Equal(20, threshold.Definition.SortOrder);
+        Assert.Equal("Slider range: 0 - 1", threshold.NumberSliderHint);
 
         var systemKey = Assert.Single(snapshots, snapshot => snapshot.Definition.Key == "system-key");
         Assert.False(systemKey.CanResetToDefault);
@@ -218,6 +227,7 @@ public sealed class GraphEditorSessionParameterContractsTests
         Assert.Equal("参数定义将此字段标记为只读。", systemKey.ReadOnlyReason);
         Assert.True(systemKey.Definition.IsAdvanced);
         Assert.Equal(90, systemKey.Definition.SortOrder);
+        Assert.False(systemKey.CanApplyValidationFix);
     }
 
     [Fact]
@@ -432,6 +442,7 @@ public sealed class GraphEditorSessionParameterContractsTests
                         new PortTypeId("float"),
                         ParameterEditorKind.Number,
                         defaultValue: 0.5d,
+                        constraints: new ParameterConstraints(Minimum: 0, Maximum: 1),
                         groupName: "Behavior",
                         helpText: "Fine-tunes the visible threshold.",
                         sortOrder: 20,

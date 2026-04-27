@@ -326,6 +326,22 @@
                                            Foreground="{DynamicResource AsterGraph.BodyBrush}" />
                               </Border>
 
+                              <Border Classes="astergraph-parameter-guidance"
+                                      IsVisible="{Binding SupportsEnumSearch}">
+                                <TextBlock Text="Type to search options while the enum selector is focused."
+                                           FontSize="{DynamicResource AsterGraph.InspectorCaptionFontSize}"
+                                           TextWrapping="Wrap"
+                                           Foreground="{DynamicResource AsterGraph.BodyBrush}" />
+                              </Border>
+
+                              <Border Classes="astergraph-parameter-guidance"
+                                      IsVisible="{Binding HasNumberSliderHint}">
+                                <TextBlock Text="{Binding NumberSliderHint}"
+                                           FontSize="{DynamicResource AsterGraph.InspectorCaptionFontSize}"
+                                           TextWrapping="Wrap"
+                                           Foreground="{DynamicResource AsterGraph.BodyBrush}" />
+                              </Border>
+
                               <TextBlock Text="编辑值"
                                          FontSize="{DynamicResource AsterGraph.InspectorCaptionFontSize}"
                                          FontWeight="SemiBold"
@@ -355,10 +371,18 @@
                               <Border Classes="astergraph-parameter-state-pill"
                                       Background="{DynamicResource AsterGraph.ValidationErrorBadgeBrush}"
                                       IsVisible="{Binding HasValidationError}">
-                                <TextBlock Text="{Binding ValidationMessage}"
-                                           FontSize="{DynamicResource AsterGraph.InspectorCaptionFontSize}"
-                                           TextWrapping="Wrap"
-                                           Foreground="{DynamicResource AsterGraph.ValidationErrorBrush}" />
+                                <StackPanel Spacing="6">
+                                  <TextBlock Text="{Binding ValidationMessage}"
+                                             FontSize="{DynamicResource AsterGraph.InspectorCaptionFontSize}"
+                                             TextWrapping="Wrap"
+                                             Foreground="{DynamicResource AsterGraph.ValidationErrorBrush}" />
+                                  <Button Classes="astergraph-reset-parameter-button"
+                                          Tag="{Binding Key}"
+                                          Content="{Binding ValidationFixActionLabel}"
+                                          Click="HandleValidationFixClick"
+                                          IsVisible="{Binding CanApplyValidationFix}"
+                                          IsEnabled="{Binding CanApplyValidationFix}" />
+                                </StackPanel>
                               </Border>
                             </StackPanel>
                           </Border>

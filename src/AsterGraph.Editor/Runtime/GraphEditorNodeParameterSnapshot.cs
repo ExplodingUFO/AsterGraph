@@ -1,4 +1,5 @@
 using AsterGraph.Abstractions.Definitions;
+using AsterGraph.Editor.Parameters;
 
 namespace AsterGraph.Editor.Runtime;
 
@@ -33,4 +34,35 @@ public sealed record GraphEditorNodeParameterSnapshot(
     string GroupDisplayName,
     bool IsGroupHeaderVisible,
     GraphEditorNodeParameterValueState ValueState,
-    string ValueDisplayText);
+    string ValueDisplayText)
+{
+    /// <summary>
+    /// Whether shipped editors should prefer a multiline text body for this parameter.
+    /// </summary>
+    public bool UsesMultilineTextInput => NodeParameterInspectorMetadata.UsesMultilineTextInput(Definition);
+
+    /// <summary>
+    /// Whether the parameter is text that benefits from code-like presentation.
+    /// </summary>
+    public bool IsCodeLikeText => NodeParameterInspectorMetadata.IsCodeLikeText(Definition);
+
+    /// <summary>
+    /// Whether enum editors should expose a searchable option affordance.
+    /// </summary>
+    public bool SupportsEnumSearch => NodeParameterInspectorMetadata.SupportsEnumSearch(Definition);
+
+    /// <summary>
+    /// Optional bounded-range hint for number editors.
+    /// </summary>
+    public string? NumberSliderHint => NodeParameterInspectorMetadata.BuildNumberSliderHint(Definition);
+
+    /// <summary>
+    /// Whether the current validation error can be fixed by restoring the declared default value.
+    /// </summary>
+    public bool CanApplyValidationFix => NodeParameterInspectorMetadata.CanApplyValidationFix(Definition, IsValid, CanEdit);
+
+    /// <summary>
+    /// Host-facing label for the bounded validation fix action.
+    /// </summary>
+    public string? ValidationFixActionLabel => NodeParameterInspectorMetadata.BuildValidationFixActionLabel(Definition, IsValid, CanEdit);
+}

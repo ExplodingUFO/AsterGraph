@@ -88,6 +88,10 @@ public sealed class ConsumerSampleProofTests
         Assert.True(result.PluginContributionOk);
         Assert.True(result.ParameterProjectionOk);
         Assert.True(result.MetadataProjectionOk);
+        Assert.True(result.InspectorMetadataPolishOk);
+        Assert.True(result.InspectorMixedValueOk);
+        Assert.True(result.InspectorValidationFixOk);
+        Assert.True(result.SupportBundleParameterEvidenceOk);
         Assert.True(result.TrustTransparencyOk);
         Assert.True(result.CommandSurfaceOk);
         Assert.True(result.StencilSurfaceOk);
@@ -118,6 +122,10 @@ public sealed class ConsumerSampleProofTests
         Assert.True(result.CommandPaletteMs >= 0);
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_SURFACE_PARAMETER_PROJECTION_OK:True");
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_SURFACE_METADATA_PROJECTION_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "INSPECTOR_METADATA_POLISH_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "INSPECTOR_MIXED_VALUE_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "INSPECTOR_VALIDATION_FIX_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "SUPPORT_BUNDLE_PARAMETER_EVIDENCE_OK:True");
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:True");
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_SURFACE_COMMAND_PROJECTION_OK:True");
         Assert.Contains(result.ProofLines, line => line == "CAPABILITY_BREADTH_STENCIL_OK:True");
@@ -421,7 +429,7 @@ public sealed class ConsumerSampleProofTests
         Assert.False(string.IsNullOrWhiteSpace(packageVersion));
         Assert.Equal($"v{packageVersion}", publicTag);
         Assert.Equal("written", persistenceStatus);
-        Assert.Equal(3, parameterSnapshots.Length);
+        Assert.True(parameterSnapshots.Length >= 7);
         Assert.True(
             DateTimeOffset.TryParse(generatedAtUtc, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out _),
             "Support bundle generatedAtUtc should be a parseable round-trip UTC timestamp.");
@@ -430,6 +438,10 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(proofLines, line => line == "CONSUMER_SAMPLE_PLUGIN_OK:True");
         Assert.Contains(proofLines, line => line == "AUTHORING_SURFACE_PARAMETER_PROJECTION_OK:True");
         Assert.Contains(proofLines, line => line == "AUTHORING_SURFACE_METADATA_PROJECTION_OK:True");
+        Assert.Contains(proofLines, line => line == "INSPECTOR_METADATA_POLISH_OK:True");
+        Assert.Contains(proofLines, line => line == "INSPECTOR_MIXED_VALUE_OK:True");
+        Assert.Contains(proofLines, line => line == "INSPECTOR_VALIDATION_FIX_OK:True");
+        Assert.Contains(proofLines, line => line == "SUPPORT_BUNDLE_PARAMETER_EVIDENCE_OK:True");
         Assert.Contains(proofLines, line => line == "AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:True");
         Assert.Contains(proofLines, line => line == "AUTHORING_SURFACE_COMMAND_PROJECTION_OK:True");
         Assert.Contains(proofLines, line => line == "CAPABILITY_BREADTH_STENCIL_OK:True");
@@ -488,13 +500,18 @@ public sealed class ConsumerSampleProofTests
         var recentDiagnostics = root.GetProperty("recentDiagnostics").EnumerateArray().ToArray();
         Assert.True(recentDiagnostics.Length >= 0);
 
-        var statusSnapshot = parameterSnapshots.Single(snapshot => snapshot.GetProperty("key").GetString() == "status");
+        var statusSnapshot = parameterSnapshots.First(snapshot =>
+            snapshot.GetProperty("key").GetString() == "status"
+            && snapshot.TryGetProperty("currentValue", out var currentValue)
+            && currentValue.GetString() == "approved");
         Assert.Equal("enum", statusSnapshot.GetProperty("valueType").GetString());
         Assert.Equal("Enum", statusSnapshot.GetProperty("editorKind").GetString());
         Assert.Equal("approved", statusSnapshot.GetProperty("currentValue").GetString());
         Assert.Equal("draft", statusSnapshot.GetProperty("defaultValue").GetString());
         Assert.True(statusSnapshot.GetProperty("canEdit").GetBoolean());
         Assert.True(statusSnapshot.GetProperty("isValid").GetBoolean());
+        Assert.True(statusSnapshot.GetProperty("supportsEnumSearch").GetBoolean());
+        Assert.Equal("Draft", statusSnapshot.GetProperty("allowedOptions").EnumerateArray().First().GetProperty("label").GetString());
         var allowedOptions = statusSnapshot.GetProperty("allowedOptions").EnumerateArray().ToArray();
         Assert.Equal(
             ["draft", "review", "approved"],
@@ -503,7 +520,10 @@ public sealed class ConsumerSampleProofTests
             ["Draft", "In Review", "Approved"],
             allowedOptions.Select(option => option.GetProperty("label").GetString()!).ToArray());
 
-        var ownerSnapshot = parameterSnapshots.Single(snapshot => snapshot.GetProperty("key").GetString() == "owner");
+        var ownerSnapshot = parameterSnapshots.First(snapshot =>
+            snapshot.GetProperty("key").GetString() == "owner"
+            && snapshot.TryGetProperty("currentValue", out var currentValue)
+            && currentValue.GetString() == "release-owner");
         Assert.Equal("string", ownerSnapshot.GetProperty("valueType").GetString());
         Assert.Equal("Text", ownerSnapshot.GetProperty("editorKind").GetString());
         Assert.Equal("release-owner", ownerSnapshot.GetProperty("currentValue").GetString());
@@ -512,14 +532,33 @@ public sealed class ConsumerSampleProofTests
         Assert.True(ownerSnapshot.GetProperty("isValid").GetBoolean());
         Assert.Empty(ownerSnapshot.GetProperty("allowedOptions").EnumerateArray());
 
-        var prioritySnapshot = parameterSnapshots.Single(snapshot => snapshot.GetProperty("key").GetString() == "priority");
+        var prioritySnapshot = parameterSnapshots.First(snapshot =>
+            snapshot.GetProperty("key").GetString() == "priority"
+            && snapshot.TryGetProperty("currentValue", out var currentValue)
+            && currentValue.ValueKind == JsonValueKind.Number);
         Assert.Equal("int", prioritySnapshot.GetProperty("valueType").GetString());
         Assert.Equal("Number", prioritySnapshot.GetProperty("editorKind").GetString());
         Assert.Equal(2, prioritySnapshot.GetProperty("currentValue").GetInt32());
         Assert.Equal(2, prioritySnapshot.GetProperty("defaultValue").GetInt32());
         Assert.Equal(1, prioritySnapshot.GetProperty("minimum").GetDouble());
         Assert.Equal(5, prioritySnapshot.GetProperty("maximum").GetDouble());
+        Assert.Equal("Slider range: 1 - 5", prioritySnapshot.GetProperty("numberSliderHint").GetString());
         Assert.Empty(prioritySnapshot.GetProperty("allowedOptions").EnumerateArray());
+
+        var scriptSnapshot = parameterSnapshots.Single(snapshot => snapshot.GetProperty("key").GetString() == "review-script");
+        Assert.True(scriptSnapshot.GetProperty("usesMultilineTextInput").GetBoolean());
+        Assert.True(scriptSnapshot.GetProperty("isCodeLikeText").GetBoolean());
+        Assert.Contains("review automation", scriptSnapshot.GetProperty("helpText").GetString(), StringComparison.Ordinal);
+
+        var mixedStatusSnapshot = parameterSnapshots.First(snapshot =>
+            snapshot.GetProperty("key").GetString() == "status"
+            && snapshot.GetProperty("hasMixedValues").GetBoolean());
+        Assert.Equal("Mixed", mixedStatusSnapshot.GetProperty("valueState").GetString());
+
+        var validationFixSnapshot = parameterSnapshots.Single(snapshot => snapshot.GetProperty("key").GetString() == "slug");
+        Assert.False(validationFixSnapshot.GetProperty("isValid").GetBoolean());
+        Assert.True(validationFixSnapshot.GetProperty("canApplyValidationFix").GetBoolean());
+        Assert.Equal("Restore default", validationFixSnapshot.GetProperty("validationFixActionLabel").GetString());
     }
 
     [AvaloniaFact]

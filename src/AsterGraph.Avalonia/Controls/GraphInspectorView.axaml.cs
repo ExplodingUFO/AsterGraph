@@ -246,6 +246,20 @@ public partial class GraphInspectorView : UserControl
         RefreshParameterSurface();
     }
 
+    private void HandleValidationFixClick(object? sender, RoutedEventArgs e)
+    {
+        if (sender is not Button { Tag: string parameterKey } || Editor is null)
+        {
+            return;
+        }
+
+        Editor.SelectedNodeParameters
+            .FirstOrDefault(parameter => string.Equals(parameter.Key, parameterKey, StringComparison.Ordinal))
+            ?.ApplyValidationFix();
+
+        RefreshParameterSurface();
+    }
+
     private void HandleAdvancedParametersToggleClick(object? sender, RoutedEventArgs e)
     {
         _showAdvancedParameters = !_showAdvancedParameters;

@@ -136,4 +136,79 @@ public sealed class NodeParameterViewModelTests
         Assert.Equal(0.5d, viewModel.CurrentValue);
         Assert.Equal(0.5d, appliedValue);
     }
+
+    [Fact]
+    public void ValidationFixAction_RestoresValidDefaultForInvalidCurrentValue()
+    {
+        object? appliedValue = null;
+        var viewModel = new NodeParameterViewModel(
+            new NodeParameterDefinition(
+                "slug",
+                "Slug",
+                new PortTypeId("string"),
+                ParameterEditorKind.Text,
+                defaultValue: "valid-slug",
+                constraints: new ParameterConstraints(
+                    MinimumLength: 3,
+                    ValidationPattern: "^[a-z-]+$",
+                    ValidationPatternDescription: "lowercase letters and dashes")),
+            ["ab"],
+            (_, value) => appliedValue = value);
+
+        Assert.False(viewModel.IsValid);
+        Assert.True(viewModel.CanApplyValidationFix);
+        Assert.Equal("Restore default", viewModel.ValidationFixActionLabel);
+
+        viewModel.ApplyValidationFix();
+
+        Assert.True(viewModel.IsValid);
+        Assert.Equal("valid-slug", viewModel.CurrentValue);
+        Assert.Equal("valid-slug", appliedValue);
+        Assert.False(viewModel.CanApplyValidationFix);
+    }
+
+    [Fact]
+    public void EditorAffordances_ProjectCodeEnumAndNumberHints()
+    {
+        var script = new NodeParameterViewModel(
+            new NodeParameterDefinition(
+                "script",
+                "Script",
+                new PortTypeId("code"),
+                ParameterEditorKind.Text,
+                defaultValue: "run.step()\nreturn.ok()",
+                templateKey: "code"),
+            [],
+            static (_, _) => { });
+        var status = new NodeParameterViewModel(
+            new NodeParameterDefinition(
+                "status",
+                "Status",
+                new PortTypeId("enum"),
+                ParameterEditorKind.Enum,
+                defaultValue: "draft",
+                constraints: new ParameterConstraints(
+                    AllowedOptions:
+                    [
+                        new ParameterOptionDefinition("draft", "Draft"),
+                    ])),
+            [],
+            static (_, _) => { });
+        var priority = new NodeParameterViewModel(
+            new NodeParameterDefinition(
+                "priority",
+                "Priority",
+                new PortTypeId("int"),
+                ParameterEditorKind.Number,
+                defaultValue: 2,
+                constraints: new ParameterConstraints(Minimum: 1, Maximum: 5)),
+            [],
+            static (_, _) => { });
+
+        Assert.True(script.UsesMultilineTextInput);
+        Assert.True(script.IsCodeLikeText);
+        Assert.True(status.SupportsEnumSearch);
+        Assert.Equal("Slider range: 1 - 5", priority.NumberSliderHint);
+        Assert.True(priority.HasNumberSliderHint);
+    }
 }
