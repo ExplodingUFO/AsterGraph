@@ -25,6 +25,45 @@ $publishableAssemblies = @(
 
 $userHome = if ([string]::IsNullOrWhiteSpace($env:USERPROFILE)) { $env:HOME } else { $env:USERPROFILE }
 $fallbackPackageCache = Join-Path $userHome '.nuget/packages'
+$packageCacheRoots = @()
+
+function Add-PackageCacheRoot {
+  param([string]$Path)
+
+  if ([string]::IsNullOrWhiteSpace($Path)) {
+    return
+  }
+
+  try {
+    $resolvedPath = [System.IO.Path]::GetFullPath($Path)
+  }
+  catch {
+    return
+  }
+
+  if (Test-Path -LiteralPath $resolvedPath) {
+    $script:packageCacheRoots += $resolvedPath
+  }
+}
+
+function Add-PackageFoldersFromAssets {
+  foreach ($assemblyName in $publishableAssemblies) {
+    $assetsPath = Join-Path $RepoRoot "src/$assemblyName/obj/project.assets.json"
+    if (-not (Test-Path -LiteralPath $assetsPath)) {
+      continue
+    }
+
+    $assets = Get-Content -LiteralPath $assetsPath -Raw | ConvertFrom-Json
+    foreach ($packageFolderProperty in $assets.packageFolders.PSObject.Properties) {
+      Add-PackageCacheRoot -Path $packageFolderProperty.Name
+    }
+  }
+}
+
+Add-PackageCacheRoot -Path $env:NUGET_PACKAGES
+Add-PackageCacheRoot -Path $fallbackPackageCache
+Add-PackageFoldersFromAssets
+$packageCacheRoots = @($packageCacheRoots | Select-Object -Unique)
 
 $dotnetRoots = @()
 
@@ -101,6 +140,15 @@ foreach ($dotnetRoot in ($dotnetRoots | Where-Object { -not [string]::IsNullOrWh
   }
 }
 
+foreach ($packageCacheRoot in $packageCacheRoots) {
+  $refRoot = Join-Path $packageCacheRoot 'microsoft.netcore.app.ref'
+  if (Test-Path -LiteralPath $refRoot) {
+    $dotnetReferenceAssemblyDirectories += Get-ChildItem -LiteralPath $refRoot -Directory |
+      ForEach-Object { Join-Path $_.FullName "ref/$Framework" } |
+      Where-Object { Test-Path -LiteralPath $_ }
+  }
+}
+
 $dotnetAssemblyDirectories = if ($dotnetReferenceAssemblyDirectories.Count -gt 0) {
   $dotnetReferenceAssemblyDirectories
 }
@@ -145,8 +193,11 @@ function Get-PublicApiAssetAssemblyPaths {
 
       $packageId = $packageProperty.Name.Substring(0, $separatorIndex)
       $packageVersion = $packageProperty.Name.Substring($separatorIndex + 1)
-      $packageRoot = Join-Path (Join-Path $fallbackPackageCache $packageId.ToLowerInvariant()) $packageVersion.ToLowerInvariant()
-      if (-not (Test-Path -LiteralPath $packageRoot)) {
+      $packageRoot = $packageCacheRoots |
+        ForEach-Object { Join-Path (Join-Path $_ $packageId.ToLowerInvariant()) $packageVersion.ToLowerInvariant() } |
+        Where-Object { Test-Path -LiteralPath $_ } |
+        Select-Object -First 1
+      if ([string]::IsNullOrWhiteSpace($packageRoot)) {
         continue
       }
 
