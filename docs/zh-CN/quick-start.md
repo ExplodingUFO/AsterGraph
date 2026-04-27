@@ -8,6 +8,14 @@
 如果你要端到端评估当前 public beta，就把 [公开 Beta 评估路径](./evaluation-path.md) 当成从第一次安装到真实宿主 proof 的 hosted route ladder。
 如果你要看 plugin trust-policy 和本地证据，就把 [插件信任契约 v1](./plugin-trust-contracts.md) 和 [Beta Support Bundle](./support-bundle.md) 一起放在这条受防守的 hosted 路线上。
 
+## 30 秒 / 5 分钟 / 30 分钟路径
+
+| 时间 | 路径 | 什么时候停 |
+| --- | --- | --- |
+| 30 秒 | 运行 `src/AsterGraph.Demo -- --scenario ai-pipeline`，或先看 README 场景图。 | 已经能判断应该选哪条接入路线。 |
+| 5 分钟 | 生成 `dotnet new astergraph-avalonia`，运行 starter，再验证 `ConsumerSample.Avalonia -- --proof --support-bundle <support-bundle-path>`。 | 已经拿到 `FIVE_MINUTE_ONBOARDING_OK:True` 和 `ONBOARDING_CONFIGURATION_OK:True`。 |
+| 30 分钟 | 继续按下面的包、路线、参数、插件和 support-bundle 小节走完。 | 已经知道自己的宿主该复制 hosted UI、runtime-only、plugin，还是 retained migration 指引。 |
+
 最快的项目自有入口现在是模板路线：
 
 ```powershell

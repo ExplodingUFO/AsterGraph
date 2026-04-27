@@ -1399,6 +1399,20 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("AsterGraphEditorFactory.Create(...)", hostIntegrationZh, StringComparison.Ordinal);
         Assert.Contains("dotnet run --project src/AsterGraph.Demo -- --scenario ai-pipeline", readme, StringComparison.Ordinal);
         Assert.Contains("dotnet run --project src/AsterGraph.Demo -- --scenario ai-pipeline", readmeZh, StringComparison.Ordinal);
+        Assert.True(HasLineWithAll(readme, "30 seconds", "AI workflow", "scenario"));
+        Assert.True(HasLineWithAll(readme, "5 minutes", "ConsumerSample.Avalonia", "--proof --support-bundle"));
+        Assert.True(HasLineWithAll(readme, "30 minutes", "Quick Start", "Host Integration"));
+        Assert.True(HasLineWithAll(readme, "Maintainer", "Public Launch Checklist", "Adapter Capability Matrix", "Beta Support Bundle"));
+        Assert.True(HasLineWithAll(readmeZh, "30 秒", "AI workflow", "场景"));
+        Assert.True(HasLineWithAll(readmeZh, "5 分钟", "ConsumerSample.Avalonia", "--proof --support-bundle"));
+        Assert.True(HasLineWithAll(readmeZh, "30 分钟", "Quick Start", "Host Integration"));
+        Assert.True(HasLineWithAll(readmeZh, "维护者", "Public Launch Checklist", "Adapter Capability Matrix", "Beta Support Bundle"));
+        Assert.True(HasLineWithAll(quickStart, "30 seconds", "src/AsterGraph.Demo", "scenario"));
+        Assert.True(HasLineWithAll(quickStart, "5 minutes", "FIVE_MINUTE_ONBOARDING_OK", "ONBOARDING_CONFIGURATION_OK"));
+        Assert.True(HasLineWithAll(quickStart, "30 minutes", "hosted UI", "runtime-only", "plugin"));
+        Assert.True(HasLineWithAll(quickStartZh, "30 秒", "src/AsterGraph.Demo", "场景"));
+        Assert.True(HasLineWithAll(quickStartZh, "5 分钟", "FIVE_MINUTE_ONBOARDING_OK", "ONBOARDING_CONFIGURATION_OK"));
+        Assert.True(HasLineWithAll(quickStartZh, "30 分钟", "hosted UI", "runtime-only", "plugin"));
 
         foreach (var contents in new[] { quickStart, quickStartZh })
         {

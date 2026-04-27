@@ -17,6 +17,16 @@ dotnet run --project src/AsterGraph.Demo -- --scenario ai-pipeline
 
 这个场景把 SDK 展示成一个可嵌入的 authoring surface：拖动 definition-backed 节点、连接 typed ports、编辑分组参数、查看可信插件上下文、运行宿主自动化，然后通过宿主同样会使用的 session/runtime API 保存或导出图。
 
+## 评估路径
+
+| 时间 | 做什么 | 得到什么 |
+| --- | --- | --- |
+| 30 秒 | 先看上面的 AI workflow 场景；需要视觉导览时运行 `src/AsterGraph.Demo -- --scenario ai-pipeline`。 | 不读维护者 proof 也能判断这是哪类 graph editor SDK。 |
+| 5 分钟 | 生成 `dotnet new astergraph-avalonia`，运行 starter，再用 `ConsumerSample.Avalonia -- --proof --support-bundle <path>` 验证。 | 得到一条可复制的 hosted 路线，包含宿主动作、选中节点参数、可信插件证据和本地 support bundle。 |
+| 30 分钟 | 阅读 [Quick Start](./docs/zh-CN/quick-start.md)、[Consumer Sample](./tools/AsterGraph.ConsumerSample.Avalonia/README.md) 和 [Host Integration](./docs/zh-CN/host-integration.md)。 | 能在 hosted UI、runtime-only、plugin 和 migration 路线之间做选择，而且不改变 runtime model。 |
+
+维护者和高级 proof 细节放在 [Public Launch Checklist](./docs/zh-CN/public-launch-checklist.md)、[Adapter Capability Matrix](./docs/zh-CN/adapter-capability-matrix.md) 和 [Beta Support Bundle](./docs/zh-CN/support-bundle.md)。
+
 生成原生 Avalonia 宿主或插件 starter：
 
 ```powershell

@@ -8,6 +8,14 @@ For the frozen support boundary and upgrade guidance toward `v1.0.0`, see [Stabi
 If you are evaluating the public beta end to end, use [Beta Evaluation Path](./evaluation-path.md) as the hosted route ladder from first install to realistic hosted proof.
 For plugin trust-policy review and local evidence, keep [Plugin Manifest and Trust Policy Contract v1](./plugin-trust-contracts.md) and [Beta Support Bundle](./support-bundle.md) close to the defended hosted route.
 
+## 30-Second / 5-Minute / 30-Minute Path
+
+| Time | Path | Stop when |
+| --- | --- | --- |
+| 30 seconds | Run `src/AsterGraph.Demo -- --scenario ai-pipeline` or inspect the README scenario image. | The SDK story is clear enough to choose a route. |
+| 5 minutes | Generate `dotnet new astergraph-avalonia`, run the starter, and validate `ConsumerSample.Avalonia -- --proof --support-bundle <support-bundle-path>`. | You have `FIVE_MINUTE_ONBOARDING_OK:True` and `ONBOARDING_CONFIGURATION_OK:True`. |
+| 30 minutes | Follow the package, route, parameter, plugin, and support-bundle sections below. | You know whether your host should copy hosted UI, runtime-only, plugin, or retained migration guidance. |
+
 The fastest project-owned start is now the template route:
 
 ```powershell

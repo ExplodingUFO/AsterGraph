@@ -17,6 +17,16 @@ dotnet run --project src/AsterGraph.Demo -- --scenario ai-pipeline
 
 The scenario shows the SDK as an embeddable authoring surface: drag definition-backed nodes, connect typed ports, edit grouped parameters, inspect trusted plugin context, run host automation, then save or export the graph through the same session/runtime APIs a host uses.
 
+## Evaluator Ladder
+
+| Time | Do this | Outcome |
+| --- | --- | --- |
+| 30 seconds | Look at the AI workflow scenario above and run `src/AsterGraph.Demo -- --scenario ai-pipeline` when you want the visual tour. | You can tell what kind of graph editor SDK this is before reading maintainer proof. |
+| 5 minutes | Generate `dotnet new astergraph-avalonia`, run the starter, then validate `ConsumerSample.Avalonia -- --proof --support-bundle <path>`. | You have a copyable hosted route with host actions, selected-node parameters, trusted plugin evidence, and a local support bundle. |
+| 30 minutes | Read [Quick Start](./docs/en/quick-start.md), [Consumer Sample](./tools/AsterGraph.ConsumerSample.Avalonia/README.md), and [Host Integration](./docs/en/host-integration.md). | You can choose hosted UI, runtime-only, plugin, or migration routes without changing the runtime model. |
+
+Maintainer and advanced proof details stay under [Public Launch Checklist](./docs/en/public-launch-checklist.md), [Adapter Capability Matrix](./docs/en/adapter-capability-matrix.md), and [Beta Support Bundle](./docs/en/support-bundle.md).
+
 Generate a native Avalonia host or a plugin starter:
 
 ```powershell
