@@ -149,7 +149,10 @@ public sealed class ReleaseClosureContractTests
         Assert.True(HasLineWithAll(englishChecklist, "public API guidance proof", "template/plugin proof", "PUBLIC_API_SURFACE_OK", "PUBLIC_API_GUIDANCE_OK"));
         Assert.Contains("[Adapter-2 Accessibility Recipe](./adapter-2-accessibility-recipe.md)", englishChecklist, StringComparison.Ordinal);
         Assert.Contains("ADAPTER2_PERFORMANCE_BASELINE_OK:True", englishChecklist, StringComparison.Ordinal);
+        Assert.Contains("ADAPTER2_EXPORT_BREADTH_OK:True", englishChecklist, StringComparison.Ordinal);
         Assert.Contains("ADAPTER2_SCENE_BUDGET_OK:True:none", englishChecklist, StringComparison.Ordinal);
+        Assert.Contains("AsterGraph.Starter.Wpf", englishChecklist, StringComparison.Ordinal);
+        Assert.Contains("AsterGraph.HelloWorld.Wpf", englishChecklist, StringComparison.Ordinal);
         Assert.Contains("[Adapter-2 Performance Recipe](./adapter-2-performance-recipe.md)", englishChecklist, StringComparison.Ordinal);
         Assert.DoesNotContain("HELLOWORLD_WPF_OK is Avalonia/WPF parity", englishChecklist, StringComparison.Ordinal);
         Assert.DoesNotContain("HELLOWORLD_WPF_OK is public WPF support", englishChecklist, StringComparison.Ordinal);
@@ -175,7 +178,10 @@ public sealed class ReleaseClosureContractTests
         Assert.True(HasLineWithAll(chineseChecklist, "public API guidance proof", "template/plugin proof", "PUBLIC_API_SURFACE_OK", "PUBLIC_API_GUIDANCE_OK"));
         Assert.Contains("[Adapter-2 Accessibility Recipe](./adapter-2-accessibility-recipe.md)", chineseChecklist, StringComparison.Ordinal);
         Assert.Contains("ADAPTER2_PERFORMANCE_BASELINE_OK:True", chineseChecklist, StringComparison.Ordinal);
+        Assert.Contains("ADAPTER2_EXPORT_BREADTH_OK:True", chineseChecklist, StringComparison.Ordinal);
         Assert.Contains("ADAPTER2_SCENE_BUDGET_OK:True:none", chineseChecklist, StringComparison.Ordinal);
+        Assert.Contains("AsterGraph.Starter.Wpf", chineseChecklist, StringComparison.Ordinal);
+        Assert.Contains("AsterGraph.HelloWorld.Wpf", chineseChecklist, StringComparison.Ordinal);
         Assert.Contains("[Adapter-2 Performance Recipe](./adapter-2-performance-recipe.md)", chineseChecklist, StringComparison.Ordinal);
         Assert.DoesNotContain("HELLOWORLD_WPF_OK 是 Avalonia/WPF parity", chineseChecklist, StringComparison.Ordinal);
         Assert.DoesNotContain("HELLOWORLD_WPF_OK 是公开 WPF support", chineseChecklist, StringComparison.Ordinal);

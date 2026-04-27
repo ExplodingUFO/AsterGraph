@@ -56,6 +56,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framew
 - `HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True`
 - `HOSTED_ACCESSIBILITY_OK:True`
 - `ADAPTER2_PERFORMANCE_BASELINE_OK:True`
+- `ADAPTER2_EXPORT_BREADTH_OK:True`
 - `ADAPTER2_PROJECTION_BUDGET_OK:True:none`
 - `ADAPTER2_COMMAND_BUDGET_OK:True:none`
 - `ADAPTER2_SCENE_BUDGET_OK:True:none`
@@ -108,7 +109,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framew
   - 可选的 legacy 历史仓库检查点引用
 - 确认自动生成的 prerelease notes 同时把 proof summary 发出来，而不只是留在 workflow artifact 里
 - 确认 proof summary 把 public API guidance proof 放在 template/plugin proof 附近：`ASTERGRAPH_TEMPLATE_SMOKE_OK:True`、`TEMPLATE_SMOKE_PLUGIN_VALIDATE_OK:True`、`PUBLIC_API_SURFACE_OK:...:net9.0` 和 `PUBLIC_API_GUIDANCE_OK:True`
-- 确认自动生成的 notes 和公告文案明确写出冻结的 support boundary 叙事和 adapter matrix 叙事，并同步给出 `HOSTED_ACCESSIBILITY_BASELINE_OK:True`、`HOSTED_ACCESSIBILITY_FOCUS_OK:True`、`HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True`、`HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True`、`HOSTED_ACCESSIBILITY_OK:True`、`ADAPTER2_PERFORMANCE_BASELINE_OK:True`、`ADAPTER2_PROJECTION_BUDGET_OK:True:none`、`ADAPTER2_COMMAND_BUDGET_OK:True:none`、`ADAPTER2_SCENE_BUDGET_OK:True:none`、`HELLOWORLD_WPF_OK:True`、`ADAPTER_CAPABILITY_MATRIX_FORMAT:1`、`ADAPTER_CAPABILITY_MATRIX:WPF:HELLOWORLD_WPF_OK:PASS`、`ADAPTER_CAPABILITY_MATRIX:WPF:COMMAND_SURFACE_OK:PASS`
+- 确认自动生成的 notes 和公告文案明确写出冻结的 support boundary 叙事和 adapter matrix 叙事，并同步给出 `HOSTED_ACCESSIBILITY_BASELINE_OK:True`、`HOSTED_ACCESSIBILITY_FOCUS_OK:True`、`HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True`、`HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True`、`HOSTED_ACCESSIBILITY_OK:True`、`ADAPTER2_PERFORMANCE_BASELINE_OK:True`、`ADAPTER2_EXPORT_BREADTH_OK:True`、`ADAPTER2_PROJECTION_BUDGET_OK:True:none`、`ADAPTER2_COMMAND_BUDGET_OK:True:none`、`ADAPTER2_SCENE_BUDGET_OK:True:none`、`HELLOWORLD_WPF_OK:True`、`ADAPTER_CAPABILITY_MATRIX_FORMAT:1`、`ADAPTER_CAPABILITY_MATRIX:WPF:HELLOWORLD_WPF_OK:PASS`、`ADAPTER_CAPABILITY_MATRIX:WPF:COMMAND_SURFACE_OK:PASS`
 - 把 `HELLOWORLD_WPF_OK` 只当成 adapter-2 验证通过，不要写成 Avalonia/WPF parity 或公开 WPF support
 - 需要从受防守的 Avalonia accessibility proof 交接到 validation-only 的 WPF 验证时，统一参考 [Adapter-2 Accessibility Recipe](./adapter-2-accessibility-recipe.md)
 - 需要从受防守的 Avalonia hosted metrics 交接到 validation-only 的 WPF performance 验证时，统一参考 [Adapter-2 Performance Recipe](./adapter-2-performance-recipe.md)
@@ -118,7 +119,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framew
 - 如果没有配置 `NUGET_API_KEY`，确认 workflow 是有意跳过 NuGet publish，而不是失败
 - 不要再把 `v1.x` 风格的历史里程碑 checkpoint 当成当前公开包版本；对外统一以 [Versioning](./versioning.md) 为准
 - release note 第一屏先写可安装包版本，再写与之匹配的公开 tag；`v1.x` 风格的旧 milestone 只作为历史说明补充出现
-- `prerelease notes` / release messaging 中还必须核对并回填 `HOSTED_ACCESSIBILITY_BASELINE_OK:True`、`HOSTED_ACCESSIBILITY_FOCUS_OK:True`、`HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True`、`HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True`、`HOSTED_ACCESSIBILITY_OK:True`、`HELLOWORLD_WPF_OK:True`、`ADAPTER_CAPABILITY_MATRIX_FORMAT:1`、`ADAPTER_CAPABILITY_MATRIX:WPF:HELLOWORLD_WPF_OK:PASS`、`ADAPTER_CAPABILITY_MATRIX:WPF:COMMAND_SURFACE_OK:PASS`，避免只写成功 tag 而漏能力核对
+- `prerelease notes` / release messaging 中还必须核对并回填 `HOSTED_ACCESSIBILITY_BASELINE_OK:True`、`HOSTED_ACCESSIBILITY_FOCUS_OK:True`、`HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True`、`HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True`、`HOSTED_ACCESSIBILITY_OK:True`、`ADAPTER2_EXPORT_BREADTH_OK:True`、`HELLOWORLD_WPF_OK:True`、`ADAPTER_CAPABILITY_MATRIX_FORMAT:1`、`ADAPTER_CAPABILITY_MATRIX:WPF:HELLOWORLD_WPF_OK:PASS`、`ADAPTER_CAPABILITY_MATRIX:WPF:COMMAND_SURFACE_OK:PASS`，避免只写成功 tag 而漏能力核对
 - 公开文案要保持和 matrix 一致：`HELLOWORLD_WPF_OK` 证明的是 adapter 2 验证通过，不是 WPF 与 Avalonia 已经 parity
 
 如果你想在不新推 tag 的情况下手动发布 beta 包：
@@ -137,6 +138,8 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framew
 - `tools/AsterGraph.HelloWorld` = 最快的 runtime-only 第一跑样例
 - `tools/AsterGraph.HelloWorld.Avalonia` = 最快的默认 UI 第一跑样例
 - `tools/AsterGraph.ConsumerSample.Avalonia` = 真实 hosted-UI consumer 样例，带宿主动作和一个可信插件
+- `tools/AsterGraph.Starter.Wpf` = validation-only adapter-2 组合验证样例，不是上手入口
+- `tools/AsterGraph.HelloWorld.Wpf` = validation-only adapter-2 proof 样例，不代表 parity
 - `tools/AsterGraph.HostSample` = 最小接入验证
 - `tools/AsterGraph.PackageSmoke` = 打包消费验证
 - `tools/AsterGraph.ScaleSmoke` = 规模基线加历史记录与状态连续性验证

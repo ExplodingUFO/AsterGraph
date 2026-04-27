@@ -1249,6 +1249,9 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("ADAPTER_CAPABILITY_MATRIX:WPF:COMMAND_SURFACE_OK:PASS", checklist, StringComparison.Ordinal);
         Assert.DoesNotContain("ADAPTER_CAPABILITY_MATRIX:True", checklist, StringComparison.Ordinal);
         Assert.Contains("HELLOWORLD_WPF_OK", checklist, StringComparison.Ordinal);
+        Assert.Contains("ADAPTER2_EXPORT_BREADTH_OK:True", checklist, StringComparison.Ordinal);
+        Assert.True(HasLineWithAll(checklist, "AsterGraph.Starter.Wpf", "validation-only", "not onboarding"));
+        Assert.True(HasLineWithAll(checklist, "AsterGraph.HelloWorld.Wpf", "validation-only", "not parity"));
         Assert.True(HasLineWith(checklist, "HELLOWORLD_WPF_OK", "adapter-2"));
         Assert.True(HasLineWith(checklist, "HELLOWORLD_WPF_OK", "parity"));
         Assert.Contains("ADAPTER_CAPABILITY_MATRIX_FORMAT:1", checklistZh, StringComparison.Ordinal);
@@ -1256,6 +1259,9 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("ADAPTER_CAPABILITY_MATRIX:WPF:COMMAND_SURFACE_OK:PASS", checklistZh, StringComparison.Ordinal);
         Assert.DoesNotContain("ADAPTER_CAPABILITY_MATRIX:True", checklistZh, StringComparison.Ordinal);
         Assert.Contains("HELLOWORLD_WPF_OK", checklistZh, StringComparison.Ordinal);
+        Assert.Contains("ADAPTER2_EXPORT_BREADTH_OK:True", checklistZh, StringComparison.Ordinal);
+        Assert.True(HasLineWithAll(checklistZh, "AsterGraph.Starter.Wpf", "validation-only", "不是上手入口"));
+        Assert.True(HasLineWithAll(checklistZh, "AsterGraph.HelloWorld.Wpf", "validation-only", "不代表 parity"));
         Assert.True(HasLineWith(checklistZh, "HELLOWORLD_WPF_OK", "adapter-2"));
         Assert.True(HasLineWith(checklistZh, "HELLOWORLD_WPF_OK", "parity"));
     }

@@ -86,7 +86,7 @@ Use this section as the single external capability readiness gate for release no
 
 | Claim | Current public stance | Route-level evidence |
 | --- | --- | --- |
-| `WPF` as adapter 2 | Validation-only and not Avalonia parity or public WPF support. Current evidence is limited to the bounded hosted shell accessibility and performance paths. | `HELLOWORLD_WPF_OK`, `HOSTED_ACCESSIBILITY_BASELINE_OK`, `HOSTED_ACCESSIBILITY_FOCUS_OK`, `HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK`, `HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK`, `HOSTED_ACCESSIBILITY_OK`, `ADAPTER2_PERFORMANCE_BASELINE_OK`, `ADAPTER2_PROJECTION_BUDGET_OK`, `ADAPTER2_COMMAND_BUDGET_OK`, `ADAPTER2_SCENE_BUDGET_OK`, `ADAPTER_CAPABILITY_MATRIX:WPF:HELLOWORLD_WPF_OK:PASS`, `ADAPTER_CAPABILITY_MATRIX:WPF:COMMAND_SURFACE_OK:PASS`, [Adapter Capability Matrix](./adapter-capability-matrix.md) |
+| `WPF` as adapter 2 | Validation-only and not Avalonia parity or public WPF support. Current evidence is limited to the bounded hosted shell accessibility and performance/export-breadth paths. | `HELLOWORLD_WPF_OK`, `HOSTED_ACCESSIBILITY_BASELINE_OK`, `HOSTED_ACCESSIBILITY_FOCUS_OK`, `HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK`, `HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK`, `HOSTED_ACCESSIBILITY_OK`, `ADAPTER2_PERFORMANCE_BASELINE_OK`, `ADAPTER2_EXPORT_BREADTH_OK`, `ADAPTER2_PROJECTION_BUDGET_OK`, `ADAPTER2_COMMAND_BUDGET_OK`, `ADAPTER2_SCENE_BUDGET_OK`, `ADAPTER_CAPABILITY_MATRIX:WPF:HELLOWORLD_WPF_OK:PASS`, `ADAPTER_CAPABILITY_MATRIX:WPF:COMMAND_SURFACE_OK:PASS`, [Adapter Capability Matrix](./adapter-capability-matrix.md) |
 | Retained route | Migration-only bridge, not a new primary host path. | [Retained-To-Session Migration Recipe](./retained-migration-recipe.md), [Stabilization Support Matrix](./stabilization-support-matrix.md) |
 | Stress raster export telemetry | PNG/JPEG export at 5000 nodes is informational only, not a defended budget claim. | `SCALE_EXPORT_BUDGET:stress:svg<=300:png=informational:jpeg=informational:reload<=800`, [ScaleSmoke Baseline](./scale-baseline.md) |
 
@@ -108,6 +108,8 @@ The hosted route ladder is `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerS
 - `tools/AsterGraph.Starter.Avalonia` = shipped Avalonia starter scaffold
 - `tools/AsterGraph.HelloWorld.Avalonia` = first-run hosted-UI sample after the starter scaffold
 - `tools/AsterGraph.ConsumerSample.Avalonia` = realistic hosted integration sample
+- `tools/AsterGraph.Starter.Wpf` = validation-only adapter-2 composition sample
+- `tools/AsterGraph.HelloWorld.Wpf` = validation-only adapter-2 proof sample
 - `tools/AsterGraph.HostSample` = post-ladder canonical adoption proof
 - `tools/AsterGraph.PackageSmoke` = packed-package consumption proof
 - `tools/AsterGraph.ScaleSmoke` = larger-graph baseline plus history/state-continuity proof
