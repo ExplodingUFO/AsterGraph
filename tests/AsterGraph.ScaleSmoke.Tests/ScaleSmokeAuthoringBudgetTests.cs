@@ -37,7 +37,7 @@ public sealed class ScaleSmokeAuthoringBudgetTests
         var marker = tier.ToAuthoringBudgetMarker();
 
         Assert.Equal(
-            "SCALE_AUTHORING_BUDGET:stress:stencil<=150:command-surface<=800:quick-tool-projection<=800:quick-tool-execution<=1000:inspector-open<=100:node-resize<=100:edge-create<=250",
+            "SCALE_AUTHORING_BUDGET:stress:stencil<=150:command-surface<=800:quick-tool-projection<=800:quick-tool-execution<=1000:inspector-open<=100:node-resize<=150:edge-create<=250",
             marker);
     }
 

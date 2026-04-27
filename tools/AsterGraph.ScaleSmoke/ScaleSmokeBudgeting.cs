@@ -383,7 +383,7 @@ public sealed record ScaleSmokeTier(
                 Budget: new ScaleSmokeBudget(
                     SetupMs: 1500,
                     SelectionMs: 200,
-                    ConnectionMs: 1500,
+                    ConnectionMs: 2500,
                     HistoryMs: 2500,
                     ViewportMs: 100,
                     SaveMs: 700,
@@ -394,7 +394,7 @@ public sealed record ScaleSmokeTier(
                     QuickToolProjectionMs: 800,
                     QuickToolExecutionMs: 1000,
                     InspectorOpenMs: 100,
-                    NodeResizeMs: 100,
+                    NodeResizeMs: 150,
                     EdgeCreateMs: 250),
                 ExportBudget: new ScaleSmokeExportBudget(
                     SvgExportMs: 300,

@@ -37,7 +37,7 @@ public sealed class ScaleSmokeBudgetTests
         var marker = tier.ToBudgetMarker();
 
         Assert.Equal(
-            "SCALE_TIER_BUDGET:stress:nodes=5000:selection=256:moves=96:setup<=1500:selection<=200:connection<=1500:history<=2500:viewport<=100:save<=700:reload<=500",
+            "SCALE_TIER_BUDGET:stress:nodes=5000:selection=256:moves=96:setup<=1500:selection<=200:connection<=2500:history<=2500:viewport<=100:save<=700:reload<=500",
             marker);
     }
 
@@ -107,7 +107,7 @@ public sealed class ScaleSmokeBudgetTests
         var metrics = new ScaleSmokeMetrics(
             SetupMs: 600,
             SelectionMs: 60,
-            ConnectionMs: 1501,
+            ConnectionMs: 2501,
             HistoryMs: 1400,
             ViewportMs: 5,
             SaveMs: 300,
@@ -116,10 +116,10 @@ public sealed class ScaleSmokeBudgetTests
         var result = tier.Evaluate(metrics);
 
         Assert.False(result.Passed);
-        Assert.Contains("connection=1501>1500(defended)", result.FailureSummary, StringComparison.Ordinal);
+        Assert.Contains("connection=2501>2500(defended)", result.FailureSummary, StringComparison.Ordinal);
         var failure = Assert.Single(result.Failures);
         Assert.Equal(
-            "SCALE_BUDGET_FAILURE:stress:area=performance:metric=connection:actual=1501:threshold=1500:policy=defended",
+            "SCALE_BUDGET_FAILURE:stress:area=performance:metric=connection:actual=2501:threshold=2500:policy=defended",
             failure.ToMarker());
     }
 

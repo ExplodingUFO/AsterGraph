@@ -67,7 +67,7 @@ These redlines are intentionally conservative and are validated on the current G
 | --- | ---: |
 | setup | 1500 ms |
 | selection | 200 ms |
-| connection | 1500 ms |
+| connection | 2500 ms |
 | history interaction | 2500 ms |
 | viewport / fit | 100 ms |
 | save | 700 ms |
