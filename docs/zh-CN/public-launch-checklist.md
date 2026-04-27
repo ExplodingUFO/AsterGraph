@@ -86,6 +86,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framew
 - `SCALE_PERFORMANCE_BUDGET_OK:stress:True:...`
 - `SCALE_AUTHORING_BUDGET_OK:stress:True:...`
 - `SCALE_EXPORT_BUDGET:stress:svg<=300:png<=120000:jpeg<=100000:reload<=800`
+- `SCALE_TIER_BUDGET:xlarge:nodes=10000:selection=512:moves=128:budget=informational-only`
 - `SCALE_RASTER_EXPORT_STRESS_OK:True`
 - `EXPORT_PROGRESS_OK:True`
 - `EXPORT_CANCEL_OK:True`
@@ -120,6 +121,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framew
 - 需要从受防守的 Avalonia hosted metrics 交接到 validation-only 的 WPF performance 验证时，统一参考 [Adapter-2 Performance Recipe](./adapter-2-performance-recipe.md)
 - 确认每条 beta 反馈都按同一套受限字段记录：`route`、`version`、proof 标记、摩擦点，以及 support bundle 附件备注
 - 在 release messaging 里重复当前 `0.xx` alpha/beta hardening 线的 handoff：`Performance / Export Hardening` 表示先做保守 5000 节点 raster export budget，再补 progress/cancel/scope evidence，然后才扩大 rendering cache claim
+- 保持 `xlarge` 为 telemetry-only，不把它说成 10000 节点支持承诺或 virtualization commitment
 - 如果配置了 `NUGET_API_KEY`，确认包发布成功
 - 如果没有配置 `NUGET_API_KEY`，确认 workflow 是有意跳过 NuGet publish，而不是失败
 - 不要再把 `v1.x` 风格的历史里程碑 checkpoint 当成当前公开包版本；对外统一以 [Versioning](./versioning.md) 为准

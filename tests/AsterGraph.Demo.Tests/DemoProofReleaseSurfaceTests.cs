@@ -243,6 +243,8 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("SCALE_PERFORMANCE_BUDGET_OK:stress:True", projectStatus, StringComparison.Ordinal);
         Assert.Contains("SCALE_EXPORT_BUDGET:stress:svg<=300:png<=120000:jpeg<=100000:reload<=800", projectStatus, StringComparison.Ordinal);
         Assert.Contains("SCALE_RASTER_EXPORT_STRESS_OK:True", projectStatus, StringComparison.Ordinal);
+        Assert.Contains("SCALE_TIER_BUDGET:xlarge:nodes=10000:selection=512:moves=128:budget=informational-only", projectStatus, StringComparison.Ordinal);
+        Assert.Contains("telemetry-only", projectStatus, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("stabilization-support-matrix.md", projectStatus, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("adapter-capability-matrix.md", projectStatus, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("adoption-feedback.md", projectStatus, StringComparison.OrdinalIgnoreCase);
@@ -271,6 +273,8 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("SCALE_PERFORMANCE_BUDGET_OK:stress:True", projectStatusZh, StringComparison.Ordinal);
         Assert.Contains("SCALE_EXPORT_BUDGET:stress:svg<=300:png<=120000:jpeg<=100000:reload<=800", projectStatusZh, StringComparison.Ordinal);
         Assert.Contains("SCALE_RASTER_EXPORT_STRESS_OK:True", projectStatusZh, StringComparison.Ordinal);
+        Assert.Contains("SCALE_TIER_BUDGET:xlarge:nodes=10000:selection=512:moves=128:budget=informational-only", projectStatusZh, StringComparison.Ordinal);
+        Assert.Contains("telemetry-only", projectStatusZh, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("stabilization-support-matrix.md", projectStatusZh, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("adapter-capability-matrix.md", projectStatusZh, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("adoption-feedback.md", projectStatusZh, StringComparison.OrdinalIgnoreCase);
@@ -1246,6 +1250,10 @@ public sealed class DemoProofReleaseSurfaceTests
             Assert.Contains("baseline", contents, StringComparison.Ordinal);
             Assert.Contains("large", contents, StringComparison.Ordinal);
             Assert.Contains("stress", contents, StringComparison.Ordinal);
+            Assert.Contains("xlarge", contents, StringComparison.Ordinal);
+            Assert.Contains("SCALE_TIER_BUDGET:xlarge:nodes=10000:selection=512:moves=128:budget=informational-only", contents, StringComparison.Ordinal);
+            Assert.Contains("SCALE_AUTHORING_BUDGET:xlarge:budget=informational-only", contents, StringComparison.Ordinal);
+            Assert.Contains("SCALE_EXPORT_BUDGET:xlarge:budget=informational-only", contents, StringComparison.Ordinal);
             Assert.Contains("SCALE_PERF_SUMMARY", contents, StringComparison.Ordinal);
             Assert.Contains("SCALE_AUTHORING_BUDGET_OK", contents, StringComparison.Ordinal);
             Assert.Contains("SCALE_EXPORT_BUDGET_OK", contents, StringComparison.Ordinal);
@@ -1257,6 +1265,7 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("SCALE_PERFORMANCE_BUDGET_OK:large:True:...", checklist, StringComparison.Ordinal);
         Assert.Contains("SCALE_PERFORMANCE_BUDGET_OK:stress:True:...", checklist, StringComparison.Ordinal);
         Assert.Contains("SCALE_EXPORT_BUDGET:stress:svg<=300:png<=120000:jpeg<=100000:reload<=800", checklist, StringComparison.Ordinal);
+        Assert.Contains("SCALE_TIER_BUDGET:xlarge:nodes=10000:selection=512:moves=128:budget=informational-only", checklist, StringComparison.Ordinal);
         Assert.Contains("SCALE_RASTER_EXPORT_STRESS_OK:True", checklist, StringComparison.Ordinal);
         Assert.Contains("EXPORT_PROGRESS_OK:True", checklist, StringComparison.Ordinal);
         Assert.Contains("EXPORT_CANCEL_OK:True", checklist, StringComparison.Ordinal);
@@ -1266,6 +1275,7 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("SCALE_PERFORMANCE_BUDGET_OK:large:True:...", checklistZh, StringComparison.Ordinal);
         Assert.Contains("SCALE_PERFORMANCE_BUDGET_OK:stress:True:...", checklistZh, StringComparison.Ordinal);
         Assert.Contains("SCALE_EXPORT_BUDGET:stress:svg<=300:png<=120000:jpeg<=100000:reload<=800", checklistZh, StringComparison.Ordinal);
+        Assert.Contains("SCALE_TIER_BUDGET:xlarge:nodes=10000:selection=512:moves=128:budget=informational-only", checklistZh, StringComparison.Ordinal);
         Assert.Contains("SCALE_RASTER_EXPORT_STRESS_OK:True", checklistZh, StringComparison.Ordinal);
         Assert.Contains("EXPORT_PROGRESS_OK:True", checklistZh, StringComparison.Ordinal);
         Assert.Contains("EXPORT_CANCEL_OK:True", checklistZh, StringComparison.Ordinal);

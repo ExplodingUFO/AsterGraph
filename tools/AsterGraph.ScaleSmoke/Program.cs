@@ -337,7 +337,7 @@ GraphEditorCommandInvocationSnapshot CreateAutomationCommand(
         CompatibilityService = new ExactCompatibilityService(),
         StorageRootPath = exportProbeRoot,
     });
-    var exportProbe = ScaleSmokeExportProbe.Run(exportProbeSession, exportProbeRoot);
+    var exportProbe = ScaleSmokeExportProbe.Run(exportProbeSession, exportProbeRoot, configuration.Tier);
     var exportBudgetEvaluation = tier.EvaluateExport(exportProbe.Metrics);
     if (emitMarkers)
     {

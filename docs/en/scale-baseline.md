@@ -14,6 +14,7 @@ It is now used in two ways:
 | `baseline` | 180 | 48 | 24 | defended release-lane redline |
 | `large` | 1000 | 128 | 64 | defended release-lane large-graph budget |
 | `stress` | 5000 | 256 | 96 | defended 5000-node gate with conservative raster export redlines |
+| `xlarge` | 10000 | 512 | 128 | telemetry-only probe; not a support claim |
 
 ## Scenarios
 
@@ -111,6 +112,9 @@ dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj --
 
 # defended 5000-node stress gate with conservative raster redlines
 dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj -- --tier stress --samples 3
+
+# telemetry-only 10000-node probe; not part of the release gate
+dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj -- --tier xlarge --samples 1
 ```
 
 ## Reading The Output
@@ -143,5 +147,7 @@ Treat `SCALE_PERFORMANCE_BUDGET_OK` as the defended release signal for `baseline
 Treat `SCALE_AUTHORING_BUDGET_OK` as the defended authoring signal for all three tiers.
 
 Treat `SCALE_EXPORT_BUDGET:stress:svg<=300:png<=120000:jpeg<=100000:reload<=800` and `SCALE_RASTER_EXPORT_STRESS_OK:True` as the boundary for the 5000-node export story: raster export is defended by conservative redlines, not advertised as fast.
+
+For `xlarge`, `SCALE_TIER_BUDGET:xlarge:nodes=10000:selection=512:moves=128:budget=informational-only`, `SCALE_AUTHORING_BUDGET:xlarge:budget=informational-only`, and `SCALE_EXPORT_BUDGET:xlarge:budget=informational-only` are telemetry markers only.
 
 Do not read these markers as a 10000-node claim or a general virtualization commitment. Faster 5000-node raster commitments need their own tighter thresholds and repeated proof.

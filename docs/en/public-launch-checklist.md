@@ -86,6 +86,7 @@ Expected high-signal markers:
 - `SCALE_PERFORMANCE_BUDGET_OK:stress:True:...`
 - `SCALE_AUTHORING_BUDGET_OK:stress:True:...`
 - `SCALE_EXPORT_BUDGET:stress:svg<=300:png<=120000:jpeg<=100000:reload<=800`
+- `SCALE_TIER_BUDGET:xlarge:nodes=10000:selection=512:moves=128:budget=informational-only`
 - `SCALE_RASTER_EXPORT_STRESS_OK:True`
 - `EXPORT_PROGRESS_OK:True`
 - `EXPORT_CANCEL_OK:True`
@@ -115,6 +116,7 @@ Expected high-signal markers:
 - use [Adapter-2 Performance Recipe](./adapter-2-performance-recipe.md) when you need the bounded handoff from defended Avalonia hosted metrics to validation-only WPF performance verification
 - confirm every beta intake record uses the same bounded schema: route, version, proof markers, friction, and support-bundle attachment note
 - repeat the current 0.xx alpha/beta hardening handoff in release messaging: `Performance / Export Hardening` means conservative 5000-node raster export budgets first, then progress/cancel/scope evidence before rendering cache claims
+- keep `xlarge` described as telemetry-only; do not present it as a 10000-node support promise or virtualization commitment
 - if `NUGET_API_KEY` is configured, confirm package publication succeeds
 - if `NUGET_API_KEY` is not configured, confirm the workflow reports a deliberate NuGet publish skip instead of a failure
 - do not present legacy `v1.x`-style historical milestone checkpoints as the current public package version; use [Versioning](./versioning.md) as the public rule

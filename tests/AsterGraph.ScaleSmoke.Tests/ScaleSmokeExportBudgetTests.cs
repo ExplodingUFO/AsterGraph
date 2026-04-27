@@ -59,6 +59,23 @@ public sealed class ScaleSmokeExportBudgetTests
     }
 
     [Fact]
+    public void XLargeTier_EmitsTelemetryOnlyExportBudgetMarker()
+    {
+        var tier = ScaleSmokeTier.Parse(["--tier", "xlarge"]);
+
+        var marker = tier.ToExportBudgetMarker();
+        var result = tier.EvaluateExport(new ScaleSmokeExportMetrics(1, 1, 1, 1));
+
+        Assert.Equal(
+            "SCALE_EXPORT_BUDGET:xlarge:budget=informational-only",
+            marker);
+        Assert.True(result.Passed);
+        Assert.Equal("informational-only", result.FailureSummary);
+        Assert.False(tier.HasDefendedRasterExportBudget);
+        Assert.Null(tier.ToRasterExportStressMarker(result));
+    }
+
+    [Fact]
     public void LargeExportBudget_AllowsObservedMetrics()
     {
         var tier = ScaleSmokeTier.Parse(["--tier", "large"]);

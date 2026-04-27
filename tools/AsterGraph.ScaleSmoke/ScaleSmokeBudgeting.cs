@@ -401,7 +401,15 @@ public sealed record ScaleSmokeTier(
                     PngExportMs: 120_000,
                     JpegExportMs: 100_000,
                     ReloadMs: 800)),
-            _ => throw new ArgumentException($"Unsupported ScaleSmoke tier '{requestedTier}'. Supported tiers: baseline, large, stress.")
+            "xlarge" => new ScaleSmokeTier(
+                "xlarge",
+                NodeCount: 10_000,
+                SelectionCount: 512,
+                MoveCount: 128,
+                Budget: null,
+                AuthoringBudget: null,
+                ExportBudget: null),
+            _ => throw new ArgumentException($"Unsupported ScaleSmoke tier '{requestedTier}'. Supported tiers: baseline, large, stress, xlarge.")
         };
     }
 }

@@ -42,6 +42,21 @@ public sealed class ScaleSmokeAuthoringBudgetTests
     }
 
     [Fact]
+    public void XLargeTier_EmitsTelemetryOnlyAuthoringBudgetMarker()
+    {
+        var tier = ScaleSmokeTier.Parse(["--tier", "xlarge"]);
+
+        var marker = tier.ToAuthoringBudgetMarker();
+        var result = tier.EvaluateAuthoring(new ScaleSmokeAuthoringMetrics(1, 1, 1, 1, 1, 1, 1));
+
+        Assert.Equal(
+            "SCALE_AUTHORING_BUDGET:xlarge:budget=informational-only",
+            marker);
+        Assert.True(result.Passed);
+        Assert.Equal("informational-only", result.FailureSummary);
+    }
+
+    [Fact]
     public void LargeAuthoringBudget_AllowsObservedMetrics()
     {
         var tier = ScaleSmokeTier.Parse(["--tier", "large"]);

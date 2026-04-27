@@ -139,6 +139,7 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("external capability readiness gate", englishChecklist, StringComparison.OrdinalIgnoreCase);
         Assert.True(HasLineWithAll(englishChecklist, "externally proven", "validation-only", "bounded", "deferred"));
         Assert.True(HasLineWithAll(englishChecklist, "Performance / Export Hardening", "5000-node raster export budget", "progress/cancel/scope"));
+        Assert.True(HasLineWithAll(englishChecklist, "xlarge", "telemetry-only", "10000-node support", "virtualization"));
         Assert.Contains("conservative 5000-node raster export budget", englishChecklist, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("0.xx alpha/beta hardening", englishChecklist, StringComparison.Ordinal);
         Assert.True(HasLineWithAll(englishChecklist, "route", "version", "proof markers", "friction", "support-bundle attachment note"));
@@ -172,6 +173,7 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("外部能力就绪闸门", chineseChecklist, StringComparison.Ordinal);
         Assert.True(HasLineWithAll(chineseChecklist, "已被外部证据证明", "仅验证通过", "受边界约束", "继续延后"));
         Assert.True(HasLineWithAll(chineseChecklist, "Performance / Export Hardening", "5000 节点 raster export budget", "progress/cancel/scope"));
+        Assert.True(HasLineWithAll(chineseChecklist, "xlarge", "telemetry-only", "10000 节点支持", "virtualization"));
         Assert.Contains("保守 5000 节点 raster export budget", chineseChecklist, StringComparison.Ordinal);
         Assert.Contains("0.xx` alpha/beta hardening 线", chineseChecklist, StringComparison.Ordinal);
         Assert.True(HasLineWithAll(chineseChecklist, "route", "version", "proof 标记", "摩擦", "support bundle 附件备注"));

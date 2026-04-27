@@ -50,16 +50,17 @@ public sealed record ScaleSmokeExportProbeResult(
 
 public static class ScaleSmokeExportProbe
 {
-    public static ScaleSmokeExportProbeResult Run(IGraphEditorSession session, string storageRoot)
+    public static ScaleSmokeExportProbeResult Run(IGraphEditorSession session, string storageRoot, ScaleSmokeTier? tier = null)
     {
         ArgumentNullException.ThrowIfNull(session);
         ArgumentException.ThrowIfNullOrWhiteSpace(storageRoot);
 
         Directory.CreateDirectory(storageRoot);
         var progressEvents = new List<GraphEditorSceneImageExportProgressSnapshot>();
+        var imageScale = tier?.EnforceExportBudgets == false ? 0.2d : 0.5d;
         var imageExportOptions = new GraphEditorSceneImageExportOptions
         {
-            Scale = 0.5d,
+            Scale = imageScale,
             Quality = 84,
             BackgroundHex = "#101820",
             Progress = new RecordingProgress(progressEvents),

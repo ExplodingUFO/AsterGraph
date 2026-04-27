@@ -14,6 +14,7 @@
 | `baseline` | 180 | 48 | 24 | release lane 防回归红线 |
 | `large` | 1000 | 128 | 64 | release lane 守住的大图预算 |
 | `stress` | 5000 | 256 | 96 | 带保守 raster export 红线的 defended 5000 节点 gate |
+| `xlarge` | 10000 | 512 | 128 | telemetry-only 探针；不是支持承诺 |
 
 ## 场景
 
@@ -111,6 +112,9 @@ dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj --
 
 # 带保守 raster 红线的 defended 5000 节点 stress gate
 dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj -- --tier stress --samples 3
+
+# telemetry-only 10000 节点探针；不属于 release gate
+dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj -- --tier xlarge --samples 1
 ```
 
 ## 怎么看输出
@@ -143,5 +147,7 @@ dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj --
 `SCALE_AUTHORING_BUDGET_OK` 是三个层级共同的 defended authoring 信号。
 
 `SCALE_EXPORT_BUDGET:stress:svg<=300:png<=120000:jpeg<=100000:reload<=800` 和 `SCALE_RASTER_EXPORT_STRESS_OK:True` 是 5000 节点 export 故事的边界：raster export 受保守红线防守，但不表示它已经很快。
+
+对 `xlarge` 来说，`SCALE_TIER_BUDGET:xlarge:nodes=10000:selection=512:moves=128:budget=informational-only`、`SCALE_AUTHORING_BUDGET:xlarge:budget=informational-only` 和 `SCALE_EXPORT_BUDGET:xlarge:budget=informational-only` 都只是 telemetry marker。
 
 不要把这些 marker 解读成 10000 节点承诺，也不要解读成通用 virtualization 承诺。后续如果要提升 5000 节点 raster 承诺，必须先补非 informational 阈值和重复证明。

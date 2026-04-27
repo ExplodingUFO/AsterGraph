@@ -24,6 +24,18 @@ public sealed class ScaleSmokeStatisticsTests
     }
 
     [Fact]
+    public void RunConfiguration_ParsesXLargeTelemetryOnlyTier()
+    {
+        var configuration = ScaleSmokeRunConfiguration.Parse(["--tier", "xlarge", "--samples", "1"]);
+
+        Assert.Equal("xlarge", configuration.Tier.Id);
+        Assert.Equal(10_000, configuration.Tier.NodeCount);
+        Assert.False(configuration.Tier.EnforceBudgets);
+        Assert.False(configuration.Tier.EnforceAuthoringBudgets);
+        Assert.False(configuration.Tier.EnforceExportBudgets);
+    }
+
+    [Fact]
     public void SummaryMarker_EmitsNearestRankPercentiles()
     {
         var summary = ScaleSmokeMetricSummary.FromSamples(

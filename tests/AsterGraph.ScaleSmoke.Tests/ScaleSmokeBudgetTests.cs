@@ -42,6 +42,23 @@ public sealed class ScaleSmokeBudgetTests
     }
 
     [Fact]
+    public void XLargeTier_EmitsTelemetryOnlyPerformanceBudgetMarker()
+    {
+        var tier = ScaleSmokeTier.Parse(["--tier", "xlarge"]);
+
+        var marker = tier.ToBudgetMarker();
+        var result = tier.Evaluate(new ScaleSmokeMetrics(1, 1, 1, 1, 1, 1, 1));
+
+        Assert.Equal("xlarge", tier.Id);
+        Assert.Equal(10_000, tier.NodeCount);
+        Assert.Equal(
+            "SCALE_TIER_BUDGET:xlarge:nodes=10000:selection=512:moves=128:budget=informational-only",
+            marker);
+        Assert.True(result.Passed);
+        Assert.Equal("informational-only", result.FailureSummary);
+    }
+
+    [Fact]
     public void LargeBudget_AllowsObservedRepeatedLargeTierMetrics()
     {
         var tier = ScaleSmokeTier.Parse(["--tier", "large"]);
