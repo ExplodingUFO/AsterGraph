@@ -45,6 +45,29 @@ public sealed class PluginToolValidationTests
         Assert.Contains("Plugin path was not found", error.ToString(), StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void Help_DescribesAcceptedInputsEvidenceMarkersAndNonGoals()
+    {
+        using var output = new StringWriter();
+        using var error = new StringWriter();
+
+        var exitCode = PluginToolProgram.Run(["validate", "--help"], output, error);
+
+        var text = output.ToString();
+        Assert.Equal(0, exitCode);
+        Assert.Empty(error.ToString());
+        Assert.Contains("Usage: AsterGraph.PluginTool validate <plugin-directory|plugin.dll|plugin.nupkg>", text, StringComparison.Ordinal);
+        Assert.Contains("Accepted inputs:", text, StringComparison.Ordinal);
+        Assert.Contains("Scans top-level .dll and .nupkg plugin artifacts.", text, StringComparison.Ordinal);
+        Assert.Contains("Expected evidence markers:", text, StringComparison.Ordinal);
+        Assert.Contains("ASTERGRAPH_PLUGIN_VALIDATE:source=<path>", text, StringComparison.Ordinal);
+        Assert.Contains("ASTERGRAPH_PLUGIN_VALIDATE:candidates=<count>:elapsed_ms=<ms>", text, StringComparison.Ordinal);
+        Assert.Contains("ASTERGRAPH_PLUGIN_VALIDATE_OK:<bool>", text, StringComparison.Ordinal);
+        Assert.Contains("PLUGIN:<id>", text, StringComparison.Ordinal);
+        Assert.Contains("target_framework:, capability_summary:, trust:, signature:, sha256:", text, StringComparison.Ordinal);
+        Assert.Contains("does not approve marketplace distribution, sandbox code, unload plugins, or isolate untrusted code", text, StringComparison.Ordinal);
+    }
+
     [Theory]
     [InlineData("templates/astergraph-avalonia/.template.config/template.json", "astergraph-avalonia")]
     [InlineData("templates/astergraph-plugin/.template.config/template.json", "astergraph-plugin")]

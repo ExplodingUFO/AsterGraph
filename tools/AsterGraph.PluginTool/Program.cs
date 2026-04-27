@@ -165,11 +165,35 @@ public static class PluginToolProgram
     private static void WriteUsage(TextWriter writer)
     {
         writer.WriteLine("AsterGraph.PluginTool");
+        writer.WriteLine("Trusted in-process plugin validation utilities.");
         writer.WriteLine();
         writer.WriteLine("Commands:");
         writer.WriteLine("  validate <path>    Inspect a plugin directory, .dll, or .nupkg.");
+        writer.WriteLine();
+        writer.WriteLine("Validation evidence:");
+        writer.WriteLine("  ASTERGRAPH_PLUGIN_VALIDATE_OK:<bool>");
+        writer.WriteLine("  PLUGIN:<id>");
+        writer.WriteLine("  target_framework:, capability_summary:, trust:, signature:, sha256:");
+        writer.WriteLine();
+        writer.WriteLine("Non-goals: marketplace distribution, sandboxing, unload/reload, or untrusted-code isolation.");
     }
 
     private static void WriteValidateUsage(TextWriter writer)
-        => writer.WriteLine("Usage: AsterGraph.PluginTool validate <plugin-directory|plugin.dll|plugin.nupkg>");
+    {
+        writer.WriteLine("Usage: AsterGraph.PluginTool validate <plugin-directory|plugin.dll|plugin.nupkg>");
+        writer.WriteLine();
+        writer.WriteLine("Accepted inputs:");
+        writer.WriteLine("  plugin-directory  Scans top-level .dll and .nupkg plugin artifacts.");
+        writer.WriteLine("  plugin.dll        Validates one plugin assembly candidate.");
+        writer.WriteLine("  plugin.nupkg      Validates one packaged plugin candidate.");
+        writer.WriteLine();
+        writer.WriteLine("Expected evidence markers:");
+        writer.WriteLine("  ASTERGRAPH_PLUGIN_VALIDATE:source=<path>");
+        writer.WriteLine("  ASTERGRAPH_PLUGIN_VALIDATE:candidates=<count>:elapsed_ms=<ms>");
+        writer.WriteLine("  ASTERGRAPH_PLUGIN_VALIDATE_OK:<bool>");
+        writer.WriteLine("  PLUGIN:<id>");
+        writer.WriteLine("  target_framework:, capability_summary:, trust:, signature:, sha256:");
+        writer.WriteLine();
+        writer.WriteLine("This command reports host trust evidence only; it does not approve marketplace distribution, sandbox code, unload plugins, or isolate untrusted code.");
+    }
 }
