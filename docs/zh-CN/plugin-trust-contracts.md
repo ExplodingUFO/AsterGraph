@@ -62,11 +62,13 @@ host 在候选进入加载前做一次 `Evaluate(...)`，决策结果通过 `Gra
 
 1. 用 [Plugin 与自定义节点 Recipe](./plugin-recipe.md) 编写或生成插件。
 2. 用 `AsterGraph.PluginTool validate` 验证 `.dll`、`.nupkg` 或插件目录。
-3. 复核 PluginTool 输出里的 manifest、compatibility、provenance、signature evidence 和 SHA-256 hash。
-4. 在 activation 前应用宿主自有的 `IGraphEditorPluginTrustPolicy`。
-5. 验证真实宿主 flow 时，把 [Consumer Sample](./consumer-sample.md) 当作受防守的 hosted trust hop。
+3. 需要结构化本地证据时，运行 `AsterGraph.PluginTool inspect <path> --host-version <version> --json`，复核 manifest、host compatibility、node definition 和 parameter metadata。
+4. 用 `AsterGraph.PluginTool hash <path>` 生成独立 SHA-256 evidence line，供 allowlist 评审。
+5. 复核 PluginTool 输出里的 manifest、compatibility、provenance、signature evidence、node definitions、parameter metadata 和 SHA-256 hash。
+6. 在 activation 前应用宿主自有的 `IGraphEditorPluginTrustPolicy`。
+7. 验证真实宿主 flow 时，把 [Consumer Sample](./consumer-sample.md) 当作受防守的 hosted trust hop。
 
-PluginTool validation 是给 host policy 使用的证据。它不是 marketplace approval、sandbox decision，也不是自动加载授权。
+PluginTool validation 是给 host policy 使用的证据。把 `PLUGIN_COMPATIBILITY_OK`、`PLUGIN_MANIFEST_OK`、`PLUGIN_NODE_DEFINITIONS_OK`、`PLUGIN_PARAMETER_METADATA_OK` 和 `PLUGIN_TRUST_EVIDENCE_OK` 当成本地评审 marker；它们不是 marketplace approval、sandbox decision，也不是自动加载授权。
 
 ## Host Policy Examples
 

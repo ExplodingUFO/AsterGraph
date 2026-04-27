@@ -57,11 +57,13 @@ Use this path when evaluating a trusted in-process plugin:
 
 1. Author or generate the plugin with [Plugin And Custom Node Recipe](./plugin-recipe.md).
 2. Validate the `.dll`, `.nupkg`, or plugin directory with `AsterGraph.PluginTool validate`.
-3. Review the manifest, compatibility, provenance, signature evidence, and SHA-256 hash in the PluginTool output.
-4. Apply a host-owned `IGraphEditorPluginTrustPolicy` before activation.
-5. Use [Consumer Sample](./consumer-sample.md) as the defended hosted trust hop when validating a real host flow.
+3. Inspect structured local evidence with `AsterGraph.PluginTool inspect <path> --host-version <version> --json` when you need manifest, host compatibility, node definition, and parameter metadata details.
+4. Generate a standalone SHA-256 evidence line with `AsterGraph.PluginTool hash <path>` for allowlist review.
+5. Review the manifest, compatibility, provenance, signature evidence, node definitions, parameter metadata, and SHA-256 hash in the PluginTool output.
+6. Apply a host-owned `IGraphEditorPluginTrustPolicy` before activation.
+7. Use [Consumer Sample](./consumer-sample.md) as the defended hosted trust hop when validating a real host flow.
 
-PluginTool validation is evidence for host policy. It is not a marketplace approval, a sandbox decision, or an automatic load authorization.
+PluginTool validation is evidence for host policy. Treat `PLUGIN_COMPATIBILITY_OK`, `PLUGIN_MANIFEST_OK`, `PLUGIN_NODE_DEFINITIONS_OK`, `PLUGIN_PARAMETER_METADATA_OK`, and `PLUGIN_TRUST_EVIDENCE_OK` as local review markers. It is not a marketplace approval, a sandbox decision, or an automatic load authorization.
 
 ## Host Policy Examples
 

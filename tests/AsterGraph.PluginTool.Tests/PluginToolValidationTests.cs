@@ -25,10 +25,72 @@ public sealed class PluginToolValidationTests
         Assert.Contains("display_name:", text, StringComparison.Ordinal);
         Assert.Contains("target_framework:", text, StringComparison.Ordinal);
         Assert.Contains("capability_summary:", text, StringComparison.Ordinal);
+        Assert.Contains("host_compatibility:", text, StringComparison.Ordinal);
         Assert.Contains("trust: Allowed:ImplicitAllow", text, StringComparison.Ordinal);
         Assert.Contains("signature:", text, StringComparison.Ordinal);
         Assert.Contains("sha256:", text, StringComparison.Ordinal);
+        Assert.Contains("node_definitions: 1", text, StringComparison.Ordinal);
+        Assert.Contains("parameter_metadata: 1", text, StringComparison.Ordinal);
+        Assert.Contains("PLUGIN_COMPATIBILITY_OK:True", text, StringComparison.Ordinal);
+        Assert.Contains("PLUGIN_MANIFEST_OK:True", text, StringComparison.Ordinal);
+        Assert.Contains("PLUGIN_NODE_DEFINITIONS_OK:True", text, StringComparison.Ordinal);
+        Assert.Contains("PLUGIN_PARAMETER_METADATA_OK:True", text, StringComparison.Ordinal);
+        Assert.Contains("PLUGIN_TRUST_EVIDENCE_OK:True", text, StringComparison.Ordinal);
         Assert.Contains("ASTERGRAPH_PLUGIN_VALIDATE_OK:True", text, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void InspectAssembly_WithJsonAndHostVersion_EmitsCompatibilityDefinitionsAndMetadata()
+    {
+        var assemblyPath = typeof(AsterGraph.TestPlugins.SamplePlugin).Assembly.Location;
+        using var output = new StringWriter();
+        using var error = new StringWriter();
+
+        var exitCode = PluginToolProgram.Run(["inspect", assemblyPath, "--host-version", "0.15.0-beta", "--json"], output, error);
+
+        Assert.Equal(0, exitCode);
+        Assert.Empty(error.ToString());
+
+        using var document = JsonDocument.Parse(output.ToString());
+        var root = document.RootElement;
+        Assert.Equal("0.15.0-beta", root.GetProperty("hostVersion").GetString());
+        var markers = root.GetProperty("proofMarkers");
+        Assert.True(markers.GetProperty("PLUGIN_COMPATIBILITY_OK").GetBoolean());
+        Assert.True(markers.GetProperty("PLUGIN_MANIFEST_OK").GetBoolean());
+        Assert.True(markers.GetProperty("PLUGIN_NODE_DEFINITIONS_OK").GetBoolean());
+        Assert.True(markers.GetProperty("PLUGIN_PARAMETER_METADATA_OK").GetBoolean());
+        Assert.True(markers.GetProperty("PLUGIN_TRUST_EVIDENCE_OK").GetBoolean());
+
+        var candidate = root.GetProperty("candidates").EnumerateArray().Single();
+        Assert.Equal("Compatible", candidate.GetProperty("hostCompatibility").GetProperty("status").GetString());
+        Assert.Equal("tests.sample-plugin.node", candidate.GetProperty("nodeDefinitions").EnumerateArray().Single().GetProperty("id").GetString());
+        var parameter = candidate
+            .GetProperty("nodeDefinitions")
+            .EnumerateArray()
+            .Single()
+            .GetProperty("parameterMetadata")
+            .EnumerateArray()
+            .Single();
+        Assert.Equal("mode", parameter.GetProperty("key").GetString());
+        Assert.Equal("Plugin", parameter.GetProperty("groupName").GetString());
+        Assert.True(parameter.GetProperty("hasConstraints").GetBoolean());
+    }
+
+    [Fact]
+    public void HashAssembly_EmitsSha256TrustEvidenceMarker()
+    {
+        var assemblyPath = typeof(AsterGraph.TestPlugins.SamplePlugin).Assembly.Location;
+        using var output = new StringWriter();
+        using var error = new StringWriter();
+
+        var exitCode = PluginToolProgram.Run(["hash", assemblyPath], output, error);
+
+        var text = output.ToString();
+        Assert.Equal(0, exitCode);
+        Assert.Empty(error.ToString());
+        Assert.Contains("PLUGIN_HASH:source=", text, StringComparison.Ordinal);
+        Assert.Contains("PLUGIN_HASH_SHA256:", text, StringComparison.Ordinal);
+        Assert.Contains("PLUGIN_TRUST_EVIDENCE_OK:True", text, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -63,8 +125,13 @@ public sealed class PluginToolValidationTests
         Assert.Contains("ASTERGRAPH_PLUGIN_VALIDATE:source=<path>", text, StringComparison.Ordinal);
         Assert.Contains("ASTERGRAPH_PLUGIN_VALIDATE:candidates=<count>:elapsed_ms=<ms>", text, StringComparison.Ordinal);
         Assert.Contains("ASTERGRAPH_PLUGIN_VALIDATE_OK:<bool>", text, StringComparison.Ordinal);
+        Assert.Contains("PLUGIN_COMPATIBILITY_OK:<bool>", text, StringComparison.Ordinal);
+        Assert.Contains("PLUGIN_MANIFEST_OK:<bool>", text, StringComparison.Ordinal);
+        Assert.Contains("PLUGIN_NODE_DEFINITIONS_OK:<bool>", text, StringComparison.Ordinal);
+        Assert.Contains("PLUGIN_PARAMETER_METADATA_OK:<bool>", text, StringComparison.Ordinal);
+        Assert.Contains("PLUGIN_TRUST_EVIDENCE_OK:<bool>", text, StringComparison.Ordinal);
         Assert.Contains("PLUGIN:<id>", text, StringComparison.Ordinal);
-        Assert.Contains("target_framework:, capability_summary:, trust:, signature:, sha256:", text, StringComparison.Ordinal);
+        Assert.Contains("target_framework:, capability_summary:, host_compatibility:, trust:, signature:, sha256:", text, StringComparison.Ordinal);
         Assert.Contains("does not approve marketplace distribution, sandbox code, unload plugins, or isolate untrusted code", text, StringComparison.Ordinal);
     }
 

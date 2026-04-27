@@ -33,7 +33,32 @@ public sealed class SamplePlugin : IGraphEditorPlugin
 internal sealed class SampleNodeDefinitionProvider : INodeDefinitionProvider
 {
     public IReadOnlyList<INodeDefinition> GetNodeDefinitions()
-        => [new NodeDefinition(SamplePlugin.DefinitionId, "Sample Plugin Node", "Plugins", "Fixture", [], [])];
+        =>
+            [
+                new NodeDefinition(
+                    SamplePlugin.DefinitionId,
+                    "Sample Plugin Node",
+                    "Plugins",
+                    "Fixture",
+                    [],
+                    [],
+                    [
+                        new NodeParameterDefinition(
+                            "mode",
+                            "Mode",
+                            new PortTypeId("enum"),
+                            ParameterEditorKind.Enum,
+                            defaultValue: "sample",
+                            constraints: new ParameterConstraints(
+                                AllowedOptions:
+                                [
+                                    new ParameterOptionDefinition("sample", "Sample"),
+                                    new ParameterOptionDefinition("diagnostic", "Diagnostic"),
+                                ]),
+                            groupName: "Plugin",
+                            helpText: "Sample plugin metadata exposed by PluginTool reports."),
+                    ]),
+            ];
 }
 
 internal sealed class SampleCommandContributor : IGraphEditorPluginCommandContributor

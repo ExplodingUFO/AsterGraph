@@ -1,5 +1,5 @@
 using System.Diagnostics;
-using System.Security.Cryptography;
+using System.Text.Json;
 using AsterGraph.Editor.Hosting;
 using AsterGraph.Editor.Plugins;
 
@@ -25,25 +25,49 @@ public static class PluginToolProgram
             return args.Length == 0 ? 1 : 0;
         }
 
-        if (!string.Equals(args[0], "validate", StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(args[0], "validate", StringComparison.OrdinalIgnoreCase))
         {
-            error.WriteLine($"Unknown command '{args[0]}'.");
-            WriteUsage(error);
-            return 1;
+            return RunValidate(args.Skip(1).ToArray(), output, error);
         }
 
-        return RunValidate(args.Skip(1).ToArray(), output, error);
+        if (string.Equals(args[0], "inspect", StringComparison.OrdinalIgnoreCase))
+        {
+            return RunInspect(args.Skip(1).ToArray(), output, error);
+        }
+
+        if (string.Equals(args[0], "hash", StringComparison.OrdinalIgnoreCase))
+        {
+            return RunHash(args.Skip(1).ToArray(), output, error);
+        }
+
+        error.WriteLine($"Unknown command '{args[0]}'.");
+        WriteUsage(error);
+        return 1;
     }
 
     private static int RunValidate(string[] args, TextWriter output, TextWriter error)
     {
-        if (args.Length != 1 || IsHelp(args[0]))
+        if (TryParsePluginReportOptions(args, output, error, "validate", out var options, out var helpExitCode))
         {
-            WriteValidateUsage(args.Length == 1 && IsHelp(args[0]) ? output : error);
-            return args.Length == 1 && IsHelp(args[0]) ? 0 : 1;
+            return helpExitCode;
         }
 
-        var path = Path.GetFullPath(args[0]);
+        return RunPluginReport(options, output, error, validateMode: true);
+    }
+
+    private static int RunInspect(string[] args, TextWriter output, TextWriter error)
+    {
+        if (TryParsePluginReportOptions(args, output, error, "inspect", out var options, out var helpExitCode))
+        {
+            return helpExitCode;
+        }
+
+        return RunPluginReport(options, output, error, validateMode: false);
+    }
+
+    private static int RunPluginReport(PluginReportOptions options, TextWriter output, TextWriter error, bool validateMode)
+    {
+        var path = Path.GetFullPath(options.Path);
         if (!File.Exists(path) && !Directory.Exists(path))
         {
             error.WriteLine($"Plugin path was not found: {path}");
@@ -63,19 +87,50 @@ public static class PluginToolProgram
         }
 
         stopwatch.Stop();
+        var reports = candidates.Select(candidate => PluginReportBuilder.CreateCandidateReport(candidate, options.HostVersion)).ToArray();
+        var markers = PluginReportBuilder.CreateProofMarkers(reports);
 
-        output.WriteLine($"ASTERGRAPH_PLUGIN_VALIDATE:source={path}");
-        output.WriteLine($"ASTERGRAPH_PLUGIN_VALIDATE:candidates={candidates.Count}:elapsed_ms={stopwatch.ElapsedMilliseconds}");
-
-        foreach (var candidate in candidates)
+        if (options.Json)
         {
-            WriteCandidate(candidate, output);
+            var json = JsonSerializer.Serialize(
+                new
+                {
+                    source = path,
+                    hostVersion = options.HostVersion,
+                    candidates = reports.Select(PluginReportBuilder.CreateJsonCandidate),
+                    proofMarkers = markers,
+                },
+                new JsonSerializerOptions { WriteIndented = true });
+            output.WriteLine(json);
+        }
+        else
+        {
+            output.WriteLine(validateMode
+                ? $"ASTERGRAPH_PLUGIN_VALIDATE:source={path}"
+                : $"ASTERGRAPH_PLUGIN_INSPECT:source={path}");
+            output.WriteLine(validateMode
+                ? $"ASTERGRAPH_PLUGIN_VALIDATE:candidates={candidates.Count}:elapsed_ms={stopwatch.ElapsedMilliseconds}"
+                : $"ASTERGRAPH_PLUGIN_INSPECT:candidates={candidates.Count}:elapsed_ms={stopwatch.ElapsedMilliseconds}");
+
+            foreach (var report in reports)
+            {
+                PluginReportBuilder.WriteCandidate(report, output);
+            }
+
+            PluginReportBuilder.WriteProofMarkers(markers, output);
         }
 
         var passed = candidates.Count > 0
-            && candidates.All(candidate => candidate.Compatibility.Status != GraphEditorPluginCompatibilityStatus.Incompatible);
+            && reports.All(report => report.Candidate.Compatibility.Status != GraphEditorPluginCompatibilityStatus.Incompatible)
+            && markers["PLUGIN_COMPATIBILITY_OK"];
 
-        output.WriteLine($"ASTERGRAPH_PLUGIN_VALIDATE_OK:{passed}");
+        if (!options.Json)
+        {
+            output.WriteLine(validateMode
+                ? $"ASTERGRAPH_PLUGIN_VALIDATE_OK:{passed}"
+                : $"ASTERGRAPH_PLUGIN_INSPECT_OK:{passed}");
+        }
+
         return passed ? 0 : 3;
     }
 
@@ -126,35 +181,90 @@ public static class PluginToolProgram
         throw new InvalidDataException("Plugin validation accepts a directory, .dll, or .nupkg path.");
     }
 
-    private static void WriteCandidate(GraphEditorPluginCandidateSnapshot candidate, TextWriter output)
+    private static int RunHash(string[] args, TextWriter output, TextWriter error)
     {
-        var manifest = candidate.Manifest;
-        var compatibility = manifest.Compatibility;
-        var evidence = candidate.ProvenanceEvidence;
-        var artifactPath = candidate.PackagePath ?? candidate.AssemblyPath;
+        if (args.Length != 1 || IsHelp(args[0]))
+        {
+            WriteHashUsage(args.Length == 1 && IsHelp(args[0]) ? output : error);
+            return args.Length == 1 && IsHelp(args[0]) ? 0 : 1;
+        }
 
-        output.WriteLine($"PLUGIN:{manifest.Id}");
-        output.WriteLine($"  display_name: {manifest.DisplayName}");
-        output.WriteLine($"  version: {manifest.Version ?? "unspecified"}");
-        output.WriteLine($"  source_kind: {candidate.SourceKind}");
-        output.WriteLine($"  source: {candidate.Source}");
-        output.WriteLine($"  assembly: {candidate.AssemblyPath ?? "none"}");
-        output.WriteLine($"  package: {candidate.PackagePath ?? "none"}");
-        output.WriteLine($"  plugin_type: {candidate.PluginTypeName ?? "auto"}");
-        output.WriteLine($"  target_framework: {compatibility.TargetFramework ?? "unspecified"}");
-        output.WriteLine($"  runtime_surface: {compatibility.RuntimeSurface ?? "unspecified"}");
-        output.WriteLine($"  capability_summary: {manifest.CapabilitySummary ?? "unspecified"}");
-        output.WriteLine($"  compatibility: {candidate.Compatibility.Status}:{candidate.Compatibility.ReasonCode ?? "none"}");
-        output.WriteLine($"  trust: {candidate.TrustEvaluation.Decision}:{candidate.TrustEvaluation.Source}:{candidate.TrustEvaluation.ReasonCode ?? "none"}");
-        output.WriteLine($"  signature: {evidence.Signature.Status}:{evidence.Signature.ReasonCode ?? "none"}");
-        output.WriteLine($"  sha256: {(artifactPath is null ? "unavailable" : ComputeSha256(artifactPath))}");
+        var path = Path.GetFullPath(args[0]);
+        if (!File.Exists(path))
+        {
+            error.WriteLine($"Plugin artifact was not found: {path}");
+            return 2;
+        }
+
+        output.WriteLine($"PLUGIN_HASH:source={path}");
+        output.WriteLine($"PLUGIN_HASH_SHA256:{PluginReportBuilder.ComputeSha256(path)}");
+        output.WriteLine("PLUGIN_TRUST_EVIDENCE_OK:True");
+        return 0;
     }
 
-    private static string ComputeSha256(string path)
+    private static bool TryParsePluginReportOptions(
+        string[] args,
+        TextWriter output,
+        TextWriter error,
+        string command,
+        out PluginReportOptions options,
+        out int exitCode)
     {
-        using var stream = File.OpenRead(path);
-        var hash = SHA256.HashData(stream);
-        return Convert.ToHexString(hash).ToLowerInvariant();
+        options = new PluginReportOptions(string.Empty, null, false);
+        exitCode = 1;
+
+        if (args.Length == 1 && IsHelp(args[0]))
+        {
+            WriteValidateUsage(output, command);
+            exitCode = 0;
+            return true;
+        }
+
+        string? path = null;
+        string? hostVersion = null;
+        var json = false;
+        for (var index = 0; index < args.Length; index++)
+        {
+            var value = args[index];
+            if (string.Equals(value, "--json", StringComparison.OrdinalIgnoreCase))
+            {
+                json = true;
+                continue;
+            }
+
+            if (string.Equals(value, "--host-version", StringComparison.OrdinalIgnoreCase))
+            {
+                if (index + 1 >= args.Length)
+                {
+                    error.WriteLine("--host-version requires a value.");
+                    WriteValidateUsage(error, command);
+                    return true;
+                }
+
+                hostVersion = args[++index];
+                continue;
+            }
+
+            if (path is null)
+            {
+                path = value;
+                continue;
+            }
+
+            error.WriteLine($"Unexpected argument '{value}'.");
+            WriteValidateUsage(error, command);
+            return true;
+        }
+
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            WriteValidateUsage(error, command);
+            return true;
+        }
+
+        options = new PluginReportOptions(path, hostVersion, json);
+        exitCode = 0;
+        return false;
     }
 
     private static bool IsHelp(string value)
@@ -168,19 +278,26 @@ public static class PluginToolProgram
         writer.WriteLine("Trusted in-process plugin validation utilities.");
         writer.WriteLine();
         writer.WriteLine("Commands:");
-        writer.WriteLine("  validate <path>    Inspect a plugin directory, .dll, or .nupkg.");
+        writer.WriteLine("  validate <path> [--host-version <version>] [--json]    Validate a plugin directory, .dll, or .nupkg.");
+        writer.WriteLine("  inspect <path> [--host-version <version>] [--json]     Inspect plugin manifest, compatibility, trust, and definitions.");
+        writer.WriteLine("  hash <path>                                           Print a local plugin artifact SHA-256.");
         writer.WriteLine();
         writer.WriteLine("Validation evidence:");
         writer.WriteLine("  ASTERGRAPH_PLUGIN_VALIDATE_OK:<bool>");
+        writer.WriteLine("  PLUGIN_COMPATIBILITY_OK:<bool>");
+        writer.WriteLine("  PLUGIN_MANIFEST_OK:<bool>");
+        writer.WriteLine("  PLUGIN_NODE_DEFINITIONS_OK:<bool>");
+        writer.WriteLine("  PLUGIN_PARAMETER_METADATA_OK:<bool>");
+        writer.WriteLine("  PLUGIN_TRUST_EVIDENCE_OK:<bool>");
         writer.WriteLine("  PLUGIN:<id>");
-        writer.WriteLine("  target_framework:, capability_summary:, trust:, signature:, sha256:");
+        writer.WriteLine("  target_framework:, capability_summary:, host_compatibility:, trust:, signature:, sha256:");
         writer.WriteLine();
         writer.WriteLine("Non-goals: marketplace distribution, sandboxing, unload/reload, or untrusted-code isolation.");
     }
 
-    private static void WriteValidateUsage(TextWriter writer)
+    private static void WriteValidateUsage(TextWriter writer, string command)
     {
-        writer.WriteLine("Usage: AsterGraph.PluginTool validate <plugin-directory|plugin.dll|plugin.nupkg>");
+        writer.WriteLine($"Usage: AsterGraph.PluginTool {command} <plugin-directory|plugin.dll|plugin.nupkg> [--host-version <version>] [--json]");
         writer.WriteLine();
         writer.WriteLine("Accepted inputs:");
         writer.WriteLine("  plugin-directory  Scans top-level .dll and .nupkg plugin artifacts.");
@@ -188,12 +305,29 @@ public static class PluginToolProgram
         writer.WriteLine("  plugin.nupkg      Validates one packaged plugin candidate.");
         writer.WriteLine();
         writer.WriteLine("Expected evidence markers:");
-        writer.WriteLine("  ASTERGRAPH_PLUGIN_VALIDATE:source=<path>");
-        writer.WriteLine("  ASTERGRAPH_PLUGIN_VALIDATE:candidates=<count>:elapsed_ms=<ms>");
-        writer.WriteLine("  ASTERGRAPH_PLUGIN_VALIDATE_OK:<bool>");
+        writer.WriteLine($"  ASTERGRAPH_PLUGIN_{command.ToUpperInvariant()}:source=<path>");
+        writer.WriteLine($"  ASTERGRAPH_PLUGIN_{command.ToUpperInvariant()}:candidates=<count>:elapsed_ms=<ms>");
+        writer.WriteLine($"  ASTERGRAPH_PLUGIN_{command.ToUpperInvariant()}_OK:<bool>");
+        writer.WriteLine("  PLUGIN_COMPATIBILITY_OK:<bool>");
+        writer.WriteLine("  PLUGIN_MANIFEST_OK:<bool>");
+        writer.WriteLine("  PLUGIN_NODE_DEFINITIONS_OK:<bool>");
+        writer.WriteLine("  PLUGIN_PARAMETER_METADATA_OK:<bool>");
+        writer.WriteLine("  PLUGIN_TRUST_EVIDENCE_OK:<bool>");
         writer.WriteLine("  PLUGIN:<id>");
-        writer.WriteLine("  target_framework:, capability_summary:, trust:, signature:, sha256:");
+        writer.WriteLine("  target_framework:, capability_summary:, host_compatibility:, trust:, signature:, sha256:");
         writer.WriteLine();
         writer.WriteLine("This command reports host trust evidence only; it does not approve marketplace distribution, sandbox code, unload plugins, or isolate untrusted code.");
     }
+
+    private static void WriteHashUsage(TextWriter writer)
+    {
+        writer.WriteLine("Usage: AsterGraph.PluginTool hash <plugin.dll|plugin.nupkg>");
+        writer.WriteLine();
+        writer.WriteLine("Expected evidence markers:");
+        writer.WriteLine("  PLUGIN_HASH:source=<path>");
+        writer.WriteLine("  PLUGIN_HASH_SHA256:<sha256>");
+        writer.WriteLine("  PLUGIN_TRUST_EVIDENCE_OK:<bool>");
+    }
+
+    private sealed record PluginReportOptions(string Path, string? HostVersion, bool Json);
 }
