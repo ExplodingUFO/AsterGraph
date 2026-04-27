@@ -155,6 +155,10 @@ public sealed record ScaleSmokeTier(
 
     public bool EnforceExportBudgets => ExportBudget is not null;
 
+    public bool HasDefendedRasterExportBudget
+        => ExportBudget?.PngExportMs is not null
+        && ExportBudget.JpegExportMs is not null;
+
     public string ToBudgetMarker()
     {
         if (Budget is null)
@@ -217,6 +221,11 @@ public sealed record ScaleSmokeTier(
                 FormatBudget("reload", ExportBudget.ReloadMs),
             ]);
     }
+
+    public string? ToRasterExportStressMarker(ScaleSmokeExportBudgetEvaluation evaluation)
+        => string.Equals(Id, "stress", StringComparison.OrdinalIgnoreCase)
+            ? $"SCALE_RASTER_EXPORT_STRESS_OK:{HasDefendedRasterExportBudget && evaluation.Passed}"
+            : null;
 
     public ScaleSmokeBudgetEvaluation Evaluate(ScaleSmokeMetrics metrics)
     {
@@ -389,8 +398,8 @@ public sealed record ScaleSmokeTier(
                     EdgeCreateMs: 250),
                 ExportBudget: new ScaleSmokeExportBudget(
                     SvgExportMs: 300,
-                    PngExportMs: null,
-                    JpegExportMs: null,
+                    PngExportMs: 120_000,
+                    JpegExportMs: 100_000,
                     ReloadMs: 800)),
             _ => throw new ArgumentException($"Unsupported ScaleSmoke tier '{requestedTier}'. Supported tiers: baseline, large, stress.")
         };

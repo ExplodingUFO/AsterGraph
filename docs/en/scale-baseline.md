@@ -13,7 +13,7 @@ It is now used in two ways:
 | --- | ---: | ---: | ---: | --- |
 | `baseline` | 180 | 48 | 24 | defended release-lane redline |
 | `large` | 1000 | 128 | 64 | defended release-lane large-graph budget |
-| `stress` | 5000 | 256 | 96 | partially defended 5000-node gate with raster export telemetry |
+| `stress` | 5000 | 256 | 96 | defended 5000-node gate with conservative raster export redlines |
 
 ## Scenarios
 
@@ -90,15 +90,15 @@ If any defended metric exceeds one of those numbers, `ScaleSmoke` emits `SCALE_P
 | --- | ---: | ---: | ---: | ---: |
 | `baseline` | 300 ms | 2500 ms | 3500 ms | 250 ms |
 | `large` | 300 ms | 16000 ms | 12000 ms | 400 ms |
-| `stress` | 300 ms | informational | informational | 800 ms |
+| `stress` | 300 ms | 120000 ms | 100000 ms | 800 ms |
 
 `ScaleSmoke` emits `SCALE_EXPORT_BUDGET:...`, `SCALE_EXPORT_METRICS:...`, `SCALE_EXPORT_BUDGET_OK:...`, and `SCALE_EXPORT_SUMMARY:...` for these defended tiers.
 
 Pair the hosted tuning handoff with [Widened Surface Performance Recipe](./widened-surface-performance-recipe.md) when you want the `ConsumerSample.Avalonia` metrics and the defended `ScaleSmoke` budgets on one copyable route.
 
-## Informational Telemetry
+## Stress Raster Export
 
-The `stress` tier is only partially defended. Performance, authoring, SVG export, and export reload have defended thresholds. PNG/JPEG raster export remains informational because repeated 5000-node proof is still too slow for a release commitment.
+The `stress` tier now defends performance, authoring, SVG export, PNG/JPEG raster export, and export reload. The first raster redlines are intentionally conservative so release validation can fail on pathological regressions without claiming that 5000-node raster export is fast.
 
 ## Commands
 
@@ -109,7 +109,7 @@ dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj --
 # defended large-graph release budget
 dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj -- --tier large
 
-# partially defended 5000-node stress gate plus raster telemetry
+# defended 5000-node stress gate with conservative raster redlines
 dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj -- --tier stress --samples 3
 ```
 
@@ -138,6 +138,6 @@ Treat `SCALE_PERFORMANCE_BUDGET_OK` as the defended release signal for `baseline
 
 Treat `SCALE_AUTHORING_BUDGET_OK` as the defended authoring signal for all three tiers.
 
-Treat `SCALE_EXPORT_BUDGET:stress:svg<=300:png=informational:jpeg=informational:reload<=800` as the boundary for the 5000-node export story: SVG and reload are defended, PNG/JPEG are telemetry only.
+Treat `SCALE_EXPORT_BUDGET:stress:svg<=300:png<=120000:jpeg<=100000:reload<=800` and `SCALE_RASTER_EXPORT_STRESS_OK:True` as the boundary for the 5000-node export story: raster export is defended by conservative redlines, not advertised as fast.
 
-Do not read these markers as a 10000-node claim or a general virtualization commitment. Additional 5000-node raster commitments need their own non-informational thresholds and repeated proof.
+Do not read these markers as a 10000-node claim or a general virtualization commitment. Faster 5000-node raster commitments need their own tighter thresholds and repeated proof.

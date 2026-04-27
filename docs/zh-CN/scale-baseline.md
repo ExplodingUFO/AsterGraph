@@ -13,7 +13,7 @@
 | --- | ---: | ---: | ---: | --- |
 | `baseline` | 180 | 48 | 24 | release lane 防回归红线 |
 | `large` | 1000 | 128 | 64 | release lane 守住的大图预算 |
-| `stress` | 5000 | 256 | 96 | 部分 defended 的 5000 节点 gate，加 raster export 遥测 |
+| `stress` | 5000 | 256 | 96 | 带保守 raster export 红线的 defended 5000 节点 gate |
 
 ## 场景
 
@@ -90,15 +90,15 @@ release lane 现在会守住 `baseline`、`large`，以及 `stress` 中已提升
 | --- | ---: | ---: | ---: | ---: |
 | `baseline` | 300 ms | 2500 ms | 3500 ms | 250 ms |
 | `large` | 300 ms | 16000 ms | 12000 ms | 400 ms |
-| `stress` | 300 ms | informational | informational | 800 ms |
+| `stress` | 300 ms | 120000 ms | 100000 ms | 800 ms |
 
 `ScaleSmoke` 会为这些 defended 层级输出 `SCALE_EXPORT_BUDGET:...`、`SCALE_EXPORT_METRICS:...`、`SCALE_EXPORT_BUDGET_OK:...` 和 `SCALE_EXPORT_SUMMARY:...`。
 
 如果你想把 `ConsumerSample.Avalonia` 的宿主指标和这些 defended `ScaleSmoke` 预算收成同一条可复制路线，就配合 [Widened Surface Performance Recipe](./widened-surface-performance-recipe.md) 一起看。
 
-## 信息型遥测
+## Stress Raster Export
 
-`stress` 层级现在是部分 defended。Performance、authoring、SVG export 和 export reload 有明确红线；PNG/JPEG raster export 因为 5000 节点重复证明仍然太慢，所以继续只作为 informational telemetry。
+`stress` 层级现在防守 performance、authoring、SVG export、PNG/JPEG raster export 和 export reload。第一版 raster 红线刻意保守，用于让 release validation 捕捉病态回归，而不是宣称 5000 节点 raster export 已经很快。
 
 ## 运行方式
 
@@ -109,7 +109,7 @@ dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj --
 # release lane 守住的大图预算
 dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj -- --tier large
 
-# 部分 defended 的 5000 节点 stress gate，加 raster 遥测
+# 带保守 raster 红线的 defended 5000 节点 stress gate
 dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj -- --tier stress --samples 3
 ```
 
@@ -138,6 +138,6 @@ dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj --
 
 `SCALE_AUTHORING_BUDGET_OK` 是三个层级共同的 defended authoring 信号。
 
-`SCALE_EXPORT_BUDGET:stress:svg<=300:png=informational:jpeg=informational:reload<=800` 是 5000 节点 export 故事的边界：SVG 和 reload 受防守，PNG/JPEG 仍只是遥测。
+`SCALE_EXPORT_BUDGET:stress:svg<=300:png<=120000:jpeg<=100000:reload<=800` 和 `SCALE_RASTER_EXPORT_STRESS_OK:True` 是 5000 节点 export 故事的边界：raster export 受保守红线防守，但不表示它已经很快。
 
 不要把这些 marker 解读成 10000 节点承诺，也不要解读成通用 virtualization 承诺。后续如果要提升 5000 节点 raster 承诺，必须先补非 informational 阈值和重复证明。

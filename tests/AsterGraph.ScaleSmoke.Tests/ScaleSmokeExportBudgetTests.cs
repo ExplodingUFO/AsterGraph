@@ -46,15 +46,16 @@ public sealed class ScaleSmokeExportBudgetTests
     }
 
     [Fact]
-    public void StressTier_LabelsUnpromotedRasterExportMetricsInformational()
+    public void StressTier_EmitsDefendedRasterExportBudgetMarker()
     {
         var tier = ScaleSmokeTier.Parse(["--tier", "stress"]);
 
         var marker = tier.ToExportBudgetMarker();
 
         Assert.Equal(
-            "SCALE_EXPORT_BUDGET:stress:svg<=300:png=informational:jpeg=informational:reload<=800",
+            "SCALE_EXPORT_BUDGET:stress:svg<=300:png<=120000:jpeg<=100000:reload<=800",
             marker);
+        Assert.True(tier.HasDefendedRasterExportBudget);
     }
 
     [Fact]
@@ -94,7 +95,7 @@ public sealed class ScaleSmokeExportBudgetTests
     }
 
     [Fact]
-    public void StressExportBudget_IgnoresInformationalRasterMetrics()
+    public void StressExportBudget_AllowsInitialDefendedRasterRedlines()
     {
         var tier = ScaleSmokeTier.Parse(["--tier", "stress"]);
         var metrics = new ScaleSmokeExportMetrics(
@@ -107,6 +108,33 @@ public sealed class ScaleSmokeExportBudgetTests
 
         Assert.True(result.Passed);
         Assert.Empty(result.Failures);
+        Assert.Equal("SCALE_RASTER_EXPORT_STRESS_OK:True", tier.ToRasterExportStressMarker(result));
+    }
+
+    [Fact]
+    public void StressExportBudget_RejectsRasterRegressionBeyondRedline()
+    {
+        var tier = ScaleSmokeTier.Parse(["--tier", "stress"]);
+        var metrics = new ScaleSmokeExportMetrics(
+            SvgExportMs: 120,
+            PngExportMs: 120_001,
+            JpegExportMs: 100_001,
+            ReloadMs: 400);
+
+        var result = tier.EvaluateExport(metrics);
+
+        Assert.False(result.Passed);
+        Assert.Contains("png=120001>120000(defended)", result.FailureSummary, StringComparison.Ordinal);
+        Assert.Contains("jpeg=100001>100000(defended)", result.FailureSummary, StringComparison.Ordinal);
+        Assert.Equal("SCALE_RASTER_EXPORT_STRESS_OK:False", tier.ToRasterExportStressMarker(result));
+        Assert.Collection(
+            result.Failures,
+            failure => Assert.Equal(
+                "SCALE_BUDGET_FAILURE:stress:area=export:metric=png:actual=120001:threshold=120000:policy=defended",
+                failure.ToMarker()),
+            failure => Assert.Equal(
+                "SCALE_BUDGET_FAILURE:stress:area=export:metric=jpeg:actual=100001:threshold=100000:policy=defended",
+                failure.ToMarker()));
     }
 
     [Fact]

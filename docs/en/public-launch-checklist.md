@@ -85,7 +85,8 @@ Expected high-signal markers:
 - `SCALE_PERFORMANCE_BUDGET_OK:large:True:...`
 - `SCALE_PERFORMANCE_BUDGET_OK:stress:True:...`
 - `SCALE_AUTHORING_BUDGET_OK:stress:True:...`
-- `SCALE_EXPORT_BUDGET:stress:svg<=300:png=informational:jpeg=informational:reload<=800`
+- `SCALE_EXPORT_BUDGET:stress:svg<=300:png<=120000:jpeg<=100000:reload<=800`
+- `SCALE_RASTER_EXPORT_STRESS_OK:True`
 - `SCALE_PERF_SUMMARY:stress:...`
 - `SCALE_HISTORY_CONTRACT_OK:...`
 - `COVERAGE_REPORT_OK:...`
@@ -109,7 +110,7 @@ Expected high-signal markers:
 - use [Adapter-2 Accessibility Recipe](./adapter-2-accessibility-recipe.md) when you need the bounded handoff from defended Avalonia accessibility proof to validation-only WPF verification
 - use [Adapter-2 Performance Recipe](./adapter-2-performance-recipe.md) when you need the bounded handoff from defended Avalonia hosted metrics to validation-only WPF performance verification
 - confirm every beta intake record uses the same bounded schema: route, version, proof markers, friction, and support-bundle attachment note
-- repeat the next 0.xx alpha/beta line handoff in release messaging: `Authoring Productivity` means inspector polish, node search/quick add, and wire productivity first, while 5000-node stress remains partially defended: performance, authoring, SVG export, and reload defended; PNG/JPEG raster export informational only until 3-5 real external reports cluster on the same bounded risk
+- repeat the current 0.xx alpha/beta hardening handoff in release messaging: `Performance / Export Hardening` means conservative 5000-node raster export budgets first, then progress/cancel/scope evidence before rendering cache claims
 - if `NUGET_API_KEY` is configured, confirm package publication succeeds
 - if `NUGET_API_KEY` is not configured, confirm the workflow reports a deliberate NuGet publish skip instead of a failure
 - do not present legacy `v1.x`-style historical milestone checkpoints as the current public package version; use [Versioning](./versioning.md) as the public rule

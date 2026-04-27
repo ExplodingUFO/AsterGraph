@@ -32,12 +32,12 @@ The current recommendation is based on four structured pre-public adoption rehea
 
 ## Current Recommendation
 
-The next 0.xx alpha/beta line is `Authoring Productivity`: inspector polish, node search/quick add, and wire productivity first. Only widen beyond the partially defended 5000-node stress claim when 3-5 real external reports cluster on the same bounded risk:
+The current 0.xx alpha/beta hardening line is `Performance / Export Hardening`: conservative stress raster export budgets first, then progress/cancel/scope evidence before rendering cache claims. Only tighten beyond the conservative 5000-node raster redlines when 3-5 real external reports cluster on the same bounded risk:
 
 1. **continue Authoring Productivity work first**
 2. **seeded rehearsals do not count toward the 3-5 gate**
-3. **keep 5000-node stress partially defended: performance, authoring, SVG export, and reload defended; PNG/JPEG raster export informational**
-4. **do not widen the next beta line beyond inspector polish, node search/quick add, and wire productivity before 3-5 real external reports cluster on the same bounded risk**
+3. **keep 5000-node stress defended with conservative raster export redlines: performance, authoring, SVG export, PNG/JPEG raster export, and reload defended**
+4. **do not tighten the next export/performance claim beyond conservative stress raster budgets before 3-5 real external reports cluster on the same bounded risk**
 
 Until that threshold is met, keep this seeded recommendation in place instead of widening the next beta line ad hoc.
 

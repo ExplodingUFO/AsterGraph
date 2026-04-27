@@ -241,7 +241,8 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("SCALE_PERFORMANCE_BUDGET_OK:baseline:True", projectStatus, StringComparison.Ordinal);
         Assert.Contains("SCALE_PERFORMANCE_BUDGET_OK:large:True", projectStatus, StringComparison.Ordinal);
         Assert.Contains("SCALE_PERFORMANCE_BUDGET_OK:stress:True", projectStatus, StringComparison.Ordinal);
-        Assert.Contains("SCALE_EXPORT_BUDGET:stress:svg<=300:png=informational:jpeg=informational:reload<=800", projectStatus, StringComparison.Ordinal);
+        Assert.Contains("SCALE_EXPORT_BUDGET:stress:svg<=300:png<=120000:jpeg<=100000:reload<=800", projectStatus, StringComparison.Ordinal);
+        Assert.Contains("SCALE_RASTER_EXPORT_STRESS_OK:True", projectStatus, StringComparison.Ordinal);
         Assert.Contains("stabilization-support-matrix.md", projectStatus, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("adapter-capability-matrix.md", projectStatus, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("adoption-feedback.md", projectStatus, StringComparison.OrdinalIgnoreCase);
@@ -268,7 +269,8 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("SCALE_PERFORMANCE_BUDGET_OK:baseline:True", projectStatusZh, StringComparison.Ordinal);
         Assert.Contains("SCALE_PERFORMANCE_BUDGET_OK:large:True", projectStatusZh, StringComparison.Ordinal);
         Assert.Contains("SCALE_PERFORMANCE_BUDGET_OK:stress:True", projectStatusZh, StringComparison.Ordinal);
-        Assert.Contains("SCALE_EXPORT_BUDGET:stress:svg<=300:png=informational:jpeg=informational:reload<=800", projectStatusZh, StringComparison.Ordinal);
+        Assert.Contains("SCALE_EXPORT_BUDGET:stress:svg<=300:png<=120000:jpeg<=100000:reload<=800", projectStatusZh, StringComparison.Ordinal);
+        Assert.Contains("SCALE_RASTER_EXPORT_STRESS_OK:True", projectStatusZh, StringComparison.Ordinal);
         Assert.Contains("stabilization-support-matrix.md", projectStatusZh, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("adapter-capability-matrix.md", projectStatusZh, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("adoption-feedback.md", projectStatusZh, StringComparison.OrdinalIgnoreCase);
@@ -287,12 +289,12 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("3-5 gate", projectStatus, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("real external reports", projectStatus, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("same bounded risk", projectStatus, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("Authoring Productivity", projectStatus, StringComparison.Ordinal);
-        Assert.Contains("inspector polish", projectStatus, StringComparison.Ordinal);
-        Assert.Contains("node search/quick add", projectStatus, StringComparison.Ordinal);
-        Assert.Contains("wire productivity", projectStatus, StringComparison.Ordinal);
-        Assert.Contains("partially defended 5000-node stress", adoptionFeedback, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("PNG/JPEG raster export informational", adoptionFeedback, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Performance / Export Hardening", projectStatus, StringComparison.Ordinal);
+        Assert.Contains("export budget", projectStatus, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("progress/cancel/scope evidence", projectStatus, StringComparison.Ordinal);
+        Assert.Contains("rendering cache", projectStatus, StringComparison.Ordinal);
+        Assert.Contains("conservative stress raster export budgets", adoptionFeedback, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("PNG/JPEG raster export", adoptionFeedback, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("## Seeded Trial Synthesis", adoptionFeedback, StringComparison.Ordinal);
         Assert.Contains("maintainer-seeded rehearsal evidence", adoptionFeedback, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("seeded rehearsals do not count", adoptionFeedback, StringComparison.OrdinalIgnoreCase);
@@ -305,12 +307,12 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("3 到 5 的门槛", projectStatusZh, StringComparison.Ordinal);
         Assert.Contains("真实外部报告", projectStatusZh, StringComparison.Ordinal);
         Assert.Contains("同一个受限风险", projectStatusZh, StringComparison.Ordinal);
-        Assert.Contains("Authoring Productivity", projectStatusZh, StringComparison.Ordinal);
-        Assert.Contains("inspector polish", projectStatusZh, StringComparison.Ordinal);
-        Assert.Contains("node search/quick add", projectStatusZh, StringComparison.Ordinal);
-        Assert.Contains("wire productivity", projectStatusZh, StringComparison.Ordinal);
-        Assert.Contains("部分 defended 的 5000 节点 stress", adoptionFeedbackZh, StringComparison.Ordinal);
-        Assert.Contains("PNG/JPEG raster export 只作为 informational", adoptionFeedbackZh, StringComparison.Ordinal);
+        Assert.Contains("Performance / Export Hardening", projectStatusZh, StringComparison.Ordinal);
+        Assert.Contains("export budget", projectStatusZh, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("progress/cancel/scope evidence", projectStatusZh, StringComparison.Ordinal);
+        Assert.Contains("rendering cache", projectStatusZh, StringComparison.Ordinal);
+        Assert.Contains("保守 stress raster export budget", adoptionFeedbackZh, StringComparison.Ordinal);
+        Assert.Contains("PNG/JPEG raster export", adoptionFeedbackZh, StringComparison.Ordinal);
         Assert.Contains("## 当前种子试用综合", adoptionFeedbackZh, StringComparison.Ordinal);
         Assert.Contains("维护者种子预演证据", adoptionFeedbackZh, StringComparison.Ordinal);
         Assert.Contains("3 到 5 的门槛", adoptionFeedbackZh, StringComparison.Ordinal);
@@ -1159,7 +1161,7 @@ public sealed class DemoProofReleaseSurfaceTests
         WriteProofFile(
             proofRoot,
             "scale-smoke.txt",
-            "SCALE_TIER_BUDGET:baseline`nSCALE_PERFORMANCE_BUDGET_OK:baseline:True:none`nSCALE_AUTHORING_BUDGET_OK:baseline:True:none`nSCALE_EXPORT_BUDGET_OK:baseline:True:none`nSCALE_TIER_BUDGET:large`nSCALE_PERFORMANCE_BUDGET_OK:large:True:none`nSCALE_AUTHORING_BUDGET_OK:large:True:none`nSCALE_EXPORT_BUDGET_OK:large:True:none`nSCALE_TIER_BUDGET:stress:nodes=5000:selection=256:moves=96:setup<=1500:selection<=200:connection<=1500:history<=2500:viewport<=100:save<=700:reload<=500`nSCALE_PERFORMANCE_BUDGET_OK:stress:True:none`nSCALE_AUTHORING_BUDGET_OK:stress:True:none`nSCALE_EXPORT_BUDGET:stress:svg<=300:png=informational:jpeg=informational:reload<=800`nSCALE_EXPORT_BUDGET_OK:stress:True:none`nSCALE_PERF_SUMMARY:stress:samples=3:setup-p50=311:setup-p95=569:selection-p50=18:selection-p95=41:connection-p50=582:connection-p95=820:history-p50=912:history-p95=946:viewport-p50=2:viewport-p95=5:save-p50=149:save-p95=156:reload-p50=62:reload-p95=65`nSCALE_HISTORY_CONTRACT_OK:True");
+            "SCALE_TIER_BUDGET:baseline`nSCALE_PERFORMANCE_BUDGET_OK:baseline:True:none`nSCALE_AUTHORING_BUDGET_OK:baseline:True:none`nSCALE_EXPORT_BUDGET_OK:baseline:True:none`nSCALE_TIER_BUDGET:large`nSCALE_PERFORMANCE_BUDGET_OK:large:True:none`nSCALE_AUTHORING_BUDGET_OK:large:True:none`nSCALE_EXPORT_BUDGET_OK:large:True:none`nSCALE_TIER_BUDGET:stress:nodes=5000:selection=256:moves=96:setup<=1500:selection<=200:connection<=1500:history<=2500:viewport<=100:save<=700:reload<=500`nSCALE_PERFORMANCE_BUDGET_OK:stress:True:none`nSCALE_AUTHORING_BUDGET_OK:stress:True:none`nSCALE_EXPORT_BUDGET:stress:svg<=300:png<=120000:jpeg<=100000:reload<=800`nSCALE_EXPORT_BUDGET_OK:stress:True:none`nSCALE_RASTER_EXPORT_STRESS_OK:True`nSCALE_PERF_SUMMARY:stress:samples=3:setup-p50=311:setup-p95=569:selection-p50=18:selection-p95=41:connection-p50=582:connection-p95=820:history-p50=912:history-p95=946:viewport-p50=2:viewport-p95=5:save-p50=149:save-p95=156:reload-p50=62:reload-p95=65`nSCALE_HISTORY_CONTRACT_OK:True");
         WriteProofFile(
             proofRoot,
             "demo-proof.txt",
@@ -1221,8 +1223,9 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("SCALE_EXPORT_BUDGET_OK:large:True:none", notes, StringComparison.Ordinal);
         Assert.Contains("SCALE_PERFORMANCE_BUDGET_OK:stress:True:none", notes, StringComparison.Ordinal);
         Assert.Contains("SCALE_AUTHORING_BUDGET_OK:stress:True:none", notes, StringComparison.Ordinal);
-        Assert.Contains("SCALE_EXPORT_BUDGET:stress:svg<=300:png=informational:jpeg=informational:reload<=800", notes, StringComparison.Ordinal);
+        Assert.Contains("SCALE_EXPORT_BUDGET:stress:svg<=300:png<=120000:jpeg<=100000:reload<=800", notes, StringComparison.Ordinal);
         Assert.Contains("SCALE_EXPORT_BUDGET_OK:stress:True:none", notes, StringComparison.Ordinal);
+        Assert.Contains("SCALE_RASTER_EXPORT_STRESS_OK:True", notes, StringComparison.Ordinal);
         Assert.Contains("SCALE_PERF_SUMMARY:stress:samples=3", notes, StringComparison.Ordinal);
     }
 
@@ -1242,21 +1245,23 @@ public sealed class DemoProofReleaseSurfaceTests
             Assert.Contains("SCALE_PERF_SUMMARY", contents, StringComparison.Ordinal);
             Assert.Contains("SCALE_AUTHORING_BUDGET_OK", contents, StringComparison.Ordinal);
             Assert.Contains("SCALE_EXPORT_BUDGET_OK", contents, StringComparison.Ordinal);
-            Assert.Contains("png=informational", contents, StringComparison.Ordinal);
+            Assert.Contains("SCALE_RASTER_EXPORT_STRESS_OK", contents, StringComparison.Ordinal);
             Assert.DoesNotContain("10000-node support", contents, StringComparison.OrdinalIgnoreCase);
             Assert.DoesNotContain("blanket virtualization", contents, StringComparison.OrdinalIgnoreCase);
         }
 
         Assert.Contains("SCALE_PERFORMANCE_BUDGET_OK:large:True:...", checklist, StringComparison.Ordinal);
         Assert.Contains("SCALE_PERFORMANCE_BUDGET_OK:stress:True:...", checklist, StringComparison.Ordinal);
-        Assert.Contains("SCALE_EXPORT_BUDGET:stress:svg<=300:png=informational:jpeg=informational:reload<=800", checklist, StringComparison.Ordinal);
+        Assert.Contains("SCALE_EXPORT_BUDGET:stress:svg<=300:png<=120000:jpeg<=100000:reload<=800", checklist, StringComparison.Ordinal);
+        Assert.Contains("SCALE_RASTER_EXPORT_STRESS_OK:True", checklist, StringComparison.Ordinal);
         Assert.Contains("SCALE_PERF_SUMMARY:stress:...", checklist, StringComparison.Ordinal);
         Assert.Contains("SCALE_PERFORMANCE_BUDGET_OK:large:True:...", checklistZh, StringComparison.Ordinal);
         Assert.Contains("SCALE_PERFORMANCE_BUDGET_OK:stress:True:...", checklistZh, StringComparison.Ordinal);
-        Assert.Contains("SCALE_EXPORT_BUDGET:stress:svg<=300:png=informational:jpeg=informational:reload<=800", checklistZh, StringComparison.Ordinal);
+        Assert.Contains("SCALE_EXPORT_BUDGET:stress:svg<=300:png<=120000:jpeg<=100000:reload<=800", checklistZh, StringComparison.Ordinal);
+        Assert.Contains("SCALE_RASTER_EXPORT_STRESS_OK:True", checklistZh, StringComparison.Ordinal);
         Assert.Contains("SCALE_PERF_SUMMARY:stress:...", checklistZh, StringComparison.Ordinal);
-        Assert.True(HasLineWithAll(checklist, "5000-node stress", "partially defended", "performance", "authoring", "SVG export", "reload", "PNG/JPEG raster export", "informational"));
-        Assert.True(HasLineWithAll(checklistZh, "5000 节点 stress", "部分 defended", "performance", "authoring", "SVG export", "reload", "PNG/JPEG raster export", "informational"));
+        Assert.True(HasLineWithAll(checklist, "5000-node", "raster export", "progress/cancel/scope"));
+        Assert.True(HasLineWithAll(checklistZh, "5000 节点", "raster export", "progress/cancel/scope"));
 
         Assert.Contains("ADAPTER_CAPABILITY_MATRIX_FORMAT:1", checklist, StringComparison.Ordinal);
         Assert.Contains("ADAPTER_CAPABILITY_MATRIX:WPF:HELLOWORLD_WPF_OK:PASS", checklist, StringComparison.Ordinal);

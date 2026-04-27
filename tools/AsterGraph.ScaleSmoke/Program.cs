@@ -345,6 +345,12 @@ GraphEditorCommandInvocationSnapshot CreateAutomationCommand(
         Console.WriteLine(exportProbe.ToMarker(tier.Id));
         Console.WriteLine(exportProbe.Metrics.ToMarker(tier.Id));
         Console.WriteLine($"SCALE_EXPORT_BUDGET_OK:{tier.Id}:{exportBudgetEvaluation.Passed}:{exportBudgetEvaluation.FailureSummary}");
+        var rasterStressMarker = tier.ToRasterExportStressMarker(exportBudgetEvaluation);
+        if (rasterStressMarker is not null)
+        {
+            Console.WriteLine(rasterStressMarker);
+        }
+
         foreach (var failure in exportBudgetEvaluation.Failures)
         {
             Console.WriteLine(failure.ToMarker());

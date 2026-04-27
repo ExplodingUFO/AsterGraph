@@ -173,6 +173,7 @@ $proofLines += Get-MatchingLines -FilePath (Join-Path $resolvedProofRoot 'scale-
 $proofLines += Get-MatchingLines -FilePath (Join-Path $resolvedProofRoot 'scale-smoke.txt') -Pattern 'SCALE_PERFORMANCE_BUDGET_OK'
 $proofLines += Get-MatchingLines -FilePath (Join-Path $resolvedProofRoot 'scale-smoke.txt') -Pattern 'SCALE_AUTHORING_BUDGET_OK'
 $proofLines += Get-MatchingLines -FilePath (Join-Path $resolvedProofRoot 'scale-smoke.txt') -Pattern 'SCALE_EXPORT_BUDGET_OK'
+$proofLines += Get-MatchingLines -FilePath (Join-Path $resolvedProofRoot 'scale-smoke.txt') -Pattern 'SCALE_RASTER_EXPORT_STRESS_OK'
 $proofLines += Get-MatchingLines -FilePath (Join-Path $resolvedProofRoot 'scale-smoke.txt') -Pattern 'SCALE_PERF_SUMMARY'
 $proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'scale-smoke.txt') -Pattern 'SCALE_HISTORY_CONTRACT_OK'
 $proofLines += Get-CoverageMarker -CoverageSummaryJsonPath $CoverageSummaryPath -ProofRootPath $resolvedProofRoot
@@ -185,7 +186,7 @@ $environmentLines = @(
   '- showcase proof: `AsterGraph.Demo --proof` for host-native shell workflows, non-obscuring editing, and graph-surface visual semantics',
   '- packed consumer proofs: `HostSample`, `.NET 10` packed consumer path, `PackageSmoke`, and generated template/plugin validation',
   '- API adoption proof: `validate-public-api-surface.ps1` pairs `PUBLIC_API_SURFACE_OK` with `PUBLIC_API_GUIDANCE_OK` near generated template/plugin validation in the release proof story',
-  '- scale proof source: `ScaleSmoke` defended `baseline`/`large` tiers plus partially defended `stress` performance/authoring/SVG-export gates; `stress` PNG/JPEG export remains informational telemetry'
+  '- scale proof source: `ScaleSmoke` defended `baseline`/`large` tiers plus `stress` performance/authoring/SVG/raster-export gates; `stress` PNG/JPEG export uses conservative defended redlines'
 )
 
 $builder = [System.Text.StringBuilder]::new()
@@ -210,7 +211,7 @@ foreach ($line in $proofLines) {
 [void]$builder.AppendLine("- frozen support boundary story: [Stabilization Support Matrix](./docs/en/stabilization-support-matrix.md)")
 [void]$builder.AppendLine("- adapter matrix story: [Adapter Capability Matrix](./docs/en/adapter-capability-matrix.md)")
 [void]$builder.AppendLine("- external capability readiness gate: [Project Status](./docs/en/project-status.md) for externally proven now, validation-only or bounded claims, and deferred until more adopter evidence")
-[void]$builder.AppendLine("- next 0.xx alpha/beta line: `Authoring Productivity` means inspector polish, node search/quick add, and wire productivity first; 5000-node stress remains partially defended with performance, authoring, SVG export, and reload defended while PNG/JPEG raster export stays informational until 3-5 real external reports cluster on the same bounded risk")
+[void]$builder.AppendLine("- current 0.xx alpha/beta hardening line: `Performance / Export Hardening` means conservative 5000-node raster export budgets first, then progress/cancel/scope evidence before rendering cache claims")
 [void]$builder.AppendLine("- release evidence contract: route, version, proof markers, friction, and support-bundle attachment note")
 [void]$builder.AppendLine("- `HELLOWORLD_WPF_OK` remains adapter-2 validation only and does not widen the public publish/package boundary")
 [void]$builder.AppendLine("- support-bundle attachment note: [Beta Support Bundle](./docs/en/support-bundle.md)")
