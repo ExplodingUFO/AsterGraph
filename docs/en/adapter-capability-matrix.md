@@ -13,7 +13,7 @@ It does not define a second API-stability standard, and it does not grant adapte
 - the canonical host/runtime root remains `AsterGraphEditorFactory.CreateSession(...)` + `IGraphEditorSession` from `AsterGraph.Editor`
 - `Create(...)` remains a hosted-adapter composition helper layered on the same runtime owner
 
-Avalonia is still the only shipped hosted adapter today. `WPF` is the locked validation target for the next milestone, not a parity promise before the matrix is filled in.
+Avalonia is still the only shipped hosted adapter today. `WPF` is the locked validation-only adapter-2 target, not a parity promise, public WPF support expansion, or second onboarding path.
 
 ## Matrix Vocabulary
 

@@ -18,6 +18,8 @@
 前两条是新代码的 canonical surface。第 3 条只是第 2 条上的薄便利 facade，不是第四套 runtime model。第 4 条仍然受支持，但只作为迁移期保留的 compatibility bridge。
 只有在现有宿主要分批迁移时才选 retained。需要这座桥接时，先看 [Retained 到 Session 的迁移 Recipe](./retained-migration-recipe.md)；否则优先从第 1 条、第 2 条或第 2 条上的 builder 开始。
 
+新接入默认走第 2 条（`AsterGraphAvaloniaViewFactory`），这样 WPF 保持 adapter-2 portability validation-only，不会变成单独上手路径或 parity 承诺。
+
 如果宿主管的是自己的 UI，那么第 1 条就是 canonical 的原生 / 自定义 UI 路线；你是在同一个 session/runtime owner 上组合自己的表面，而不是再引入一套第二模型。
 
 `AsterGraphCanvasViewFactory`、`AsterGraphInspectorViewFactory`、`AsterGraphMiniMapViewFactory` 这些独立表面都属于第 2 条路线下的组合细节，不是第四条主路线。

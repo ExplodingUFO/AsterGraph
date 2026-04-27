@@ -1,8 +1,8 @@
 # Adapter Capability Matrix
 
-这页文档锁定 `v0.9.0-beta Second Adapter Validation` 的 adapter capability 合同。
+这页文档锁定当前 adapter capability 合同。
 它不是第二套 API 稳定定义，而是在 [extension contracts](./extension-contracts.md) 已定义的 canonical 稳定合同之上，给出 Avalonia/WPF 的 portability / projection 能力边界。
-默认对新接入宿主的 onboarding 仍然是 Avalonia-first：WPF 仅用于同一条 canonical session/runtime 路线的 adapter-2 可移植性验证，不会形成第二条上手路径。
+默认对新接入宿主的 onboarding 仍然是 Avalonia-first：WPF 仅用于同一条 canonical session/runtime 路线的 adapter-2 validation-only 可移植性验证，不会形成第二条上手路径、公开 WPF support 扩大或 parity 承诺。
 
 `WPF` 是 adapter 2。这个里程碑的目标是在现有 canonical session/runtime 路线上验证第二个官方 adapter，而不是新增 adapter 专属 runtime API，也不是再开一条新的宿主运行时路线。
 
@@ -13,7 +13,7 @@
 - 宿主侧 canonical root 继续是 `AsterGraph.Editor` 提供的 `AsterGraphEditorFactory.CreateSession(...)` + `IGraphEditorSession`
 - `Create(...)` 仍然只是叠在同一个 runtime owner 之上的 hosted-adapter 组合 helper
 
-当前真正 shipped 的 hosted adapter 仍然只有 Avalonia。`WPF` 只是下一个里程碑里锁定的验证目标，在矩阵真正填出来之前，不代表已经承诺功能对齐。
+当前真正 shipped 的 hosted adapter 仍然只有 Avalonia。`WPF` 只是锁定的 adapter-2 validation-only 验证目标，不代表已经承诺功能对齐、公开 WPF support 扩大或第二条 onboarding 路线。
 
 ## Matrix Vocabulary
 

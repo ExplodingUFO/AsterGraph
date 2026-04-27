@@ -733,6 +733,8 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("projection", hostIntegration, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("canonical route", hostIntegration, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("adapter-specific", hostIntegration, StringComparison.OrdinalIgnoreCase);
+        Assert.True(HasLineWithAll(hostIntegration, "new adopters", "default", "AsterGraphAvaloniaViewFactory"));
+        Assert.True(HasLineWithAll(hostIntegration, "WPF", "adapter-2", "not a separate onboarding path", "parity promise"));
 
         Assert.True(HasLineWith(hostIntegrationZh, "WPF", "partial"), "WPF Partial guidance must appear in host integration docs.");
         Assert.True(HasLineWith(hostIntegrationZh, "WPF", "fallback"), "WPF Fallback guidance must appear in host integration docs.");
@@ -746,6 +748,7 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("第二适配器", hostIntegrationZh, StringComparison.Ordinal);
         Assert.Contains("投影", hostIntegrationZh, StringComparison.Ordinal);
         Assert.Contains("宿主", hostIntegrationZh, StringComparison.Ordinal);
+        Assert.True(HasLineWithAll(hostIntegrationZh, "WPF", "validation-only", "不会变成单独上手路径", "parity"));
     }
 
     [Fact]
@@ -950,6 +953,7 @@ public sealed class DemoProofReleaseSurfaceTests
         var extensionContractsZh = ReadRepoFile("docs/zh-CN/extension-contracts.md");
         var publicApiInventory = ReadRepoFile("docs/en/public-api-inventory.md");
         var publicApiInventoryZh = ReadRepoFile("docs/zh-CN/public-api-inventory.md");
+        var wpfReadme = ReadRepoFile("src/AsterGraph.Wpf/README.md");
 
         foreach (var contents in new[]
                  {
@@ -1053,6 +1057,9 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("adapter-specific runtime APIs", adapterMatrix, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("on top of the existing canonical session/runtime route", adapterMatrix, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("layered on the same runtime owner", adapterMatrix, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("validation-only adapter-2 target", adapterMatrix, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("second onboarding path", adapterMatrix, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("public WPF support expansion", adapterMatrix, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("Matrix Vocabulary", adapterMatrix, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("Matrix Categories", adapterMatrix, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("Retained migration is not", adapterMatrix, StringComparison.Ordinal);
@@ -1082,6 +1089,9 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("must not exceed", adapterMatrixZh, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("must not exceed", adapterMatrixZh, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("同一条 canonical session/runtime 路线", adapterMatrixZh, StringComparison.Ordinal);
+        Assert.Contains("validation-only", adapterMatrixZh, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("公开 WPF support 扩大", adapterMatrixZh, StringComparison.Ordinal);
+        Assert.Contains("第二条 onboarding 路线", adapterMatrixZh, StringComparison.Ordinal);
         Assert.Contains("公开文档描述 Avalonia/WPF 支持情况时，只使用下面这三种标签", adapterMatrixZh, StringComparison.Ordinal);
         Assert.Contains("Matrix Vocabulary", adapterMatrixZh, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("Matrix Categories", adapterMatrixZh, StringComparison.OrdinalIgnoreCase);
@@ -1108,6 +1118,16 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.True(LineHasAdapterStatus(adapterMatrixZh, "Avalonia", "supported"));
         Assert.True(LineHasAdapterStatus(adapterMatrixZh, "WPF", "partial"));
         Assert.True(LineHasAdapterStatus(adapterMatrixZh, "WPF", "fallback"));
+
+        Assert.Contains("validation-only WPF adapter-2", wpfReadme, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("default onboarding path", wpfReadme, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("canonical session/runtime route", wpfReadme, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("parity", wpfReadme, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("public WPF support expansion", wpfReadme, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("second beginner route", wpfReadme, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("WPF-specific runtime APIs", wpfReadme, StringComparison.Ordinal);
+        Assert.True(HasLineWithAll(wpfReadme, "host-facing", "runtime model"));
+        Assert.Contains("not a new runtime model", wpfReadme, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
