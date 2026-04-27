@@ -21,6 +21,9 @@ public static class DemoProofContract
         "DISCONNECT_FLOW_OK",
         "SCENARIO_LAUNCH_OK",
         "SCENARIO_TOUR_OK",
+        "AI_PIPELINE_MOCK_RUNNER_OK",
+        "AI_PIPELINE_RUNTIME_OVERLAY_OK",
+        "AI_PIPELINE_ERROR_STATE_OK",
     ];
 
     public static IReadOnlyList<string> NativeMetricNames { get; } =
@@ -59,6 +62,9 @@ public static class DemoProofContract
             $"DISCONNECT_FLOW_OK:{result.DisconnectFlowOk}",
             $"SCENARIO_LAUNCH_OK:{result.ScenarioLaunchOk}",
             $"SCENARIO_TOUR_OK:{result.ScenarioTourOk}",
+            $"AI_PIPELINE_MOCK_RUNNER_OK:{result.AiPipelineMockRunnerOk}",
+            $"AI_PIPELINE_RUNTIME_OVERLAY_OK:{result.AiPipelineRuntimeOverlayOk}",
+            $"AI_PIPELINE_ERROR_STATE_OK:{result.AiPipelineErrorStateOk}",
         ];
     }
 

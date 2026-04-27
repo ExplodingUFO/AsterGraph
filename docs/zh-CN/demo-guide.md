@@ -64,6 +64,9 @@ dotnet run --project src/AsterGraph.Demo/AsterGraph.Demo.csproj --nologo -- --pr
 - `DISCONNECT_FLOW_OK:True`
 - `SCENARIO_LAUNCH_OK:True`
 - `SCENARIO_TOUR_OK:True`
+- `AI_PIPELINE_MOCK_RUNNER_OK:True`
+- `AI_PIPELINE_RUNTIME_OVERLAY_OK:True`
+- `AI_PIPELINE_ERROR_STATE_OK:True`
 - `HOST_NATIVE_METRIC:startup_ms=...`
 - `HOST_NATIVE_METRIC:inspector_projection_ms=...`
 - `HOST_NATIVE_METRIC:plugin_scan_ms=...`
@@ -73,7 +76,7 @@ dotnet run --project src/AsterGraph.Demo/AsterGraph.Demo.csproj --nologo -- --pr
 ## 怎么看
 
 - 用 `dotnet run --project src/AsterGraph.Demo -- --scenario ai-pipeline` 启动预置 AI workflow，然后打开 `导览`。
-- `导览` 会沿同一个场景走过创建节点、typed connection、参数编辑、插件信任、自动化、保存 / 加载和 SVG 导出。
+- `导览` 会沿同一个场景走过创建节点、typed connection、参数编辑、插件信任、自动化、runtime feedback、保存 / 加载和 SVG 导出。
 - `扩展`：看 candidate discovery、trust decision、load snapshot 和 allowlist 决策
 - `自动化`：看 typed automation execution 与结果投影
 - `集成`：看 `HostSample`、standalone surfaces、presenter replacement、本地化证明

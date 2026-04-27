@@ -64,6 +64,9 @@ Expected proof markers:
 - `DISCONNECT_FLOW_OK:True`
 - `SCENARIO_LAUNCH_OK:True`
 - `SCENARIO_TOUR_OK:True`
+- `AI_PIPELINE_MOCK_RUNNER_OK:True`
+- `AI_PIPELINE_RUNTIME_OVERLAY_OK:True`
+- `AI_PIPELINE_ERROR_STATE_OK:True`
 - `HOST_NATIVE_METRIC:startup_ms=...`
 - `HOST_NATIVE_METRIC:inspector_projection_ms=...`
 - `HOST_NATIVE_METRIC:plugin_scan_ms=...`
@@ -73,7 +76,7 @@ Expected proof markers:
 ## How to Read It
 
 - Launch the prebuilt AI workflow with `dotnet run --project src/AsterGraph.Demo -- --scenario ai-pipeline`, then open `Tour`.
-- `Tour` walks the same scenario through node creation, typed connection, parameter edit, plugin trust, automation, save/load, and SVG export.
+- `Tour` walks the same scenario through node creation, typed connection, parameter edit, plugin trust, automation, runtime feedback, save/load, and SVG export.
 - `Extensions` proves candidate discovery, trust decisions, load snapshots, and persisted allowlist decisions.
 - `Automation` proves typed execution and result projection.
 - `Integration` points to `HostSample`, renders standalone surfaces, and shows presenter-replacement previews.

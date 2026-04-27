@@ -1,6 +1,10 @@
+using System;
+using System.IO;
 using AsterGraph.Demo;
 using AsterGraph.Demo.Definitions;
+using AsterGraph.Demo.ViewModels;
 using AsterGraph.Editor.Catalog;
+using AsterGraph.Editor.Runtime;
 using Xunit;
 
 namespace AsterGraph.Demo.Tests;
@@ -52,5 +56,30 @@ public sealed class DemoScenarioLaunchTests
         Assert.Contains(document.Connections, connection => connection.SourceNodeId == "parser" && connection.TargetNodeId == "output");
         Assert.NotNull(document.Groups);
         Assert.Contains(document.Groups, group => group.Id == "ai-pipeline-run");
+    }
+
+    [Fact]
+    public void MainWindowViewModel_RunsAiPipelineMockRuntimeFeedback()
+    {
+        var viewModel = new MainWindowViewModel(new MainWindowShellOptions(
+            StorageRootPath: Path.Combine(Path.GetTempPath(), "AsterGraph.Demo.Tests", Guid.NewGuid().ToString("N")),
+            EnableStatePersistence: true,
+            RestoreLastWorkspaceOnStartup: false,
+            InitialScenario: DemoGraphFactory.AiPipelineScenario));
+
+        viewModel.RunAiPipelineMockRunner();
+        var successOverlay = viewModel.GetAiPipelineRuntimeOverlay();
+
+        Assert.True(successOverlay.IsAvailable);
+        Assert.Contains(successOverlay.NodeOverlays, node => node.NodeId == "output" && node.Status == GraphEditorRuntimeOverlayStatus.Success);
+        Assert.Contains(successOverlay.ConnectionOverlays, connection => connection.ConnectionId == "parser.payload->output.payload" && connection.ItemCount == 1);
+        Assert.Contains(successOverlay.RecentLogs, log => log.Id == "ai-pipeline-run-completed");
+
+        viewModel.RunAiPipelineMockRunner(forceError: true);
+        var errorOverlay = viewModel.GetAiPipelineRuntimeOverlay();
+
+        Assert.Contains(errorOverlay.NodeOverlays, node => node.NodeId == "llm" && node.Status == GraphEditorRuntimeOverlayStatus.Error);
+        Assert.Contains(errorOverlay.ConnectionOverlays, connection => connection.ConnectionId == "llm.response->parser.response" && connection.IsStale);
+        Assert.Contains(errorOverlay.RecentLogs, log => log.Id == "ai-pipeline-run-error");
     }
 }

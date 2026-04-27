@@ -135,6 +135,7 @@ public sealed class DemoCapabilityShowcaseTests
         Assert.Contains(viewModel.ScenarioTourSignalLines, line => line.Contains("Parameter editing", StringComparison.OrdinalIgnoreCase) || line.Contains("参数编辑", StringComparison.Ordinal));
         Assert.Contains(viewModel.ScenarioTourSignalLines, line => line.Contains("Plugin trust", StringComparison.OrdinalIgnoreCase) || line.Contains("插件信任", StringComparison.Ordinal));
         Assert.Contains(viewModel.ScenarioTourSignalLines, line => line.Contains("Automation proof", StringComparison.OrdinalIgnoreCase) || line.Contains("自动化证明", StringComparison.Ordinal));
+        Assert.Contains(viewModel.ScenarioTourSignalLines, line => line.Contains("Runtime feedback", StringComparison.OrdinalIgnoreCase) || line.Contains("运行反馈", StringComparison.Ordinal));
         Assert.Contains(viewModel.ScenarioTourSignalLines, line => line.Contains("Save / load", StringComparison.OrdinalIgnoreCase) || line.Contains("保存 / 加载", StringComparison.Ordinal));
         Assert.Contains(viewModel.ScenarioTourSignalLines, line => line.Contains("Export", StringComparison.OrdinalIgnoreCase) || line.Contains("导出", StringComparison.Ordinal));
 
@@ -173,6 +174,11 @@ public sealed class DemoCapabilityShowcaseTests
         Assert.Contains(viewModel.PluginCandidateEntries, entry => entry.PluginId == "aster.demo.plugin.blocked" && entry.IsAllowed);
         Assert.NotNull(viewModel.LastAutomationResult);
         Assert.True(viewModel.LastAutomationResult!.Succeeded);
+        var runtimeOverlay = viewModel.GetAiPipelineRuntimeOverlay();
+        Assert.True(runtimeOverlay.IsAvailable);
+        Assert.Contains(runtimeOverlay.NodeOverlays, node => node.NodeId == "llm" && node.Status == AsterGraph.Editor.Runtime.GraphEditorRuntimeOverlayStatus.Success);
+        Assert.Contains(runtimeOverlay.ConnectionOverlays, connection => connection.ConnectionId == "parser.payload->output.payload" && connection.ValuePreview?.Contains("typed approval", StringComparison.OrdinalIgnoreCase) == true);
+        Assert.Contains(runtimeOverlay.RecentLogs, log => log.Id == "ai-pipeline-run-completed");
         Assert.True(File.Exists(workspacePath));
         Assert.True(File.Exists(exportPath));
         Assert.Contains(viewModel.ScenarioTourSignalLines, line => line.Contains(workspacePath, StringComparison.Ordinal));
@@ -202,6 +208,9 @@ public sealed class DemoCapabilityShowcaseTests
         Assert.True(result.DisconnectFlowOk);
         Assert.True(result.ScenarioLaunchOk);
         Assert.True(result.ScenarioTourOk);
+        Assert.True(result.AiPipelineMockRunnerOk);
+        Assert.True(result.AiPipelineRuntimeOverlayOk);
+        Assert.True(result.AiPipelineErrorStateOk);
         Assert.True(result.StartupMs >= 0);
         Assert.True(result.InspectorProjectionMs >= 0);
         Assert.True(result.PluginScanMs >= 0);

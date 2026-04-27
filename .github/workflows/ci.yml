@@ -265,7 +265,10 @@ jobs:
               'EDGE_GEOMETRY_OK',
               'DISCONNECT_FLOW_OK',
               'SCENARIO_LAUNCH_OK',
-              'SCENARIO_TOUR_OK'
+              'SCENARIO_TOUR_OK',
+              'AI_PIPELINE_MOCK_RUNNER_OK',
+              'AI_PIPELINE_RUNTIME_OVERLAY_OK',
+              'AI_PIPELINE_ERROR_STATE_OK'
             )) {
               $markerLine = Select-String -Path 'artifacts/proof/demo-proof.txt' -Pattern $markerId | Select-Object -First 1
               if ($markerLine) {

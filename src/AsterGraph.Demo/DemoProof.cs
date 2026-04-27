@@ -33,6 +33,9 @@ public sealed record DemoProofResult(
     bool DisconnectFlowOk,
     bool ScenarioLaunchOk,
     bool ScenarioTourOk,
+    bool AiPipelineMockRunnerOk,
+    bool AiPipelineRuntimeOverlayOk,
+    bool AiPipelineErrorStateOk,
     double StartupMs,
     double InspectorProjectionMs,
     double PluginScanMs,
@@ -55,7 +58,10 @@ public sealed record DemoProofResult(
         && EdgeGeometryOk
         && DisconnectFlowOk
         && ScenarioLaunchOk
-        && ScenarioTourOk;
+        && ScenarioTourOk
+        && AiPipelineMockRunnerOk
+        && AiPipelineRuntimeOverlayOk
+        && AiPipelineErrorStateOk;
 
     public IReadOnlyList<string> ProofLines => DemoProofContract.CreateProofLines(this);
 
@@ -219,7 +225,7 @@ public static class DemoProof
             && shell.RecentWorkspacePaths.Any(path => string.Equals(path, workspacePath, StringComparison.OrdinalIgnoreCase))
             && shell.ShellWorkflowLines.Any(line => line.Contains("workspace", StringComparison.OrdinalIgnoreCase) || line.Contains("工作区", StringComparison.Ordinal));
         var (compositeScopeOk, edgeNoteOk, edgeGeometryOk, disconnectFlowOk) = RunSemanticGraphProof(storageRoot);
-        var (scenarioLaunchOk, scenarioTourOk) = RunScenarioTourProof(storageRoot);
+        var (scenarioLaunchOk, scenarioTourOk, aiPipelineMockRunnerOk, aiPipelineRuntimeOverlayOk, aiPipelineErrorStateOk) = RunScenarioTourProof(storageRoot);
 
         return new DemoProofResult(
             trustTransparencyOk,
@@ -239,6 +245,9 @@ public static class DemoProof
             disconnectFlowOk,
             scenarioLaunchOk,
             scenarioTourOk,
+            aiPipelineMockRunnerOk,
+            aiPipelineRuntimeOverlayOk,
+            aiPipelineErrorStateOk,
             startupMs,
             inspectorProjectionMs,
             pluginScanMs,
@@ -537,7 +546,7 @@ public static class DemoProof
         return (edgeNoteOk, edgeGeometryOk, disconnectFlowOk);
     }
 
-    private static (bool ScenarioLaunchOk, bool ScenarioTourOk) RunScenarioTourProof(string storageRoot)
+    private static (bool ScenarioLaunchOk, bool ScenarioTourOk, bool AiPipelineMockRunnerOk, bool AiPipelineRuntimeOverlayOk, bool AiPipelineErrorStateOk) RunScenarioTourProof(string storageRoot)
     {
         var scenarioShell = new MainWindowViewModel(new MainWindowShellOptions(
             StorageRootPath: Path.Combine(storageRoot, "scenario-tour-proof"),
@@ -559,6 +568,7 @@ public static class DemoProof
         }
 
         var touredDocument = scenarioShell.Session.Queries.CreateDocumentSnapshot();
+        var runtimeOverlay = scenarioShell.GetAiPipelineRuntimeOverlay();
         var promptNode = touredDocument.Nodes.SingleOrDefault(node => string.Equals(node.Id, "prompt", StringComparison.Ordinal));
         var workspacePath = Path.Combine(storageRoot, "scenario-tour-proof", "scenario-tour-workspace.json");
         var exportPath = Path.Combine(storageRoot, "scenario-tour-proof", "scenario-tour-export.svg");
@@ -573,10 +583,47 @@ public static class DemoProof
             && File.Exists(workspacePath)
             && File.Exists(exportPath)
             && scenarioShell.ScenarioTourSignalLines.Any(line => line.Contains(workspacePath, StringComparison.Ordinal))
-            && scenarioShell.ScenarioTourSignalLines.Any(line => line.Contains(exportPath, StringComparison.Ordinal));
+            && scenarioShell.ScenarioTourSignalLines.Any(line => line.Contains(exportPath, StringComparison.Ordinal))
+            && scenarioShell.ScenarioTourSignalLines.Any(line => line.Contains("Runtime feedback", StringComparison.OrdinalIgnoreCase) || line.Contains("运行反馈", StringComparison.Ordinal));
 
-        return (scenarioLaunchOk, scenarioTourOk);
+        var aiPipelineMockRunnerOk =
+            LastRunHasNode(runtimeOverlay, "input", GraphEditorRuntimeOverlayStatus.Success)
+            && LastRunHasNode(runtimeOverlay, "llm", GraphEditorRuntimeOverlayStatus.Success)
+            && LastRunHasNode(runtimeOverlay, "output", GraphEditorRuntimeOverlayStatus.Success);
+        var aiPipelineRuntimeOverlayOk =
+            runtimeOverlay.IsAvailable
+            && runtimeOverlay.NodeOverlays.Count >= 6
+            && runtimeOverlay.ConnectionOverlays.Count >= 6
+            && runtimeOverlay.RecentLogs.Any(log => log.Id == "ai-pipeline-run-completed")
+            && runtimeOverlay.ConnectionOverlays.Any(connection =>
+                connection.ConnectionId == "parser.payload->output.payload"
+                && connection.ValuePreview?.Contains("typed approval", StringComparison.OrdinalIgnoreCase) == true);
+
+        scenarioShell.RunAiPipelineMockRunner(forceError: true);
+        var errorOverlay = scenarioShell.GetAiPipelineRuntimeOverlay();
+        var aiPipelineErrorStateOk =
+            LastRunHasNode(errorOverlay, "llm", GraphEditorRuntimeOverlayStatus.Error)
+            && errorOverlay.NodeOverlays.Any(node =>
+                node.NodeId == "llm"
+                && node.ErrorMessage?.Contains("timeout", StringComparison.OrdinalIgnoreCase) == true)
+            && errorOverlay.ConnectionOverlays.Any(connection =>
+                connection.ConnectionId == "llm.response->parser.response"
+                && connection.IsStale
+                && connection.Status == GraphEditorRuntimeOverlayStatus.Error)
+            && errorOverlay.RecentLogs.Any(log =>
+                log.Id == "ai-pipeline-run-error"
+                && log.Status == GraphEditorRuntimeOverlayStatus.Error);
+
+        return (scenarioLaunchOk, scenarioTourOk, aiPipelineMockRunnerOk, aiPipelineRuntimeOverlayOk, aiPipelineErrorStateOk);
     }
+
+    private static bool LastRunHasNode(
+        GraphEditorRuntimeOverlaySnapshot overlay,
+        string nodeId,
+        GraphEditorRuntimeOverlayStatus status)
+        => overlay.NodeOverlays.Any(node =>
+            string.Equals(node.NodeId, nodeId, StringComparison.Ordinal)
+            && node.Status == status);
 
     private static NodeCatalog CreateProofCatalog()
     {

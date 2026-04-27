@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Core.Models;
+using AsterGraph.Editor.Runtime;
 
 namespace AsterGraph.Demo.ViewModels;
 
@@ -58,6 +59,7 @@ public partial class MainWindowViewModel
                 T("参数编辑：", "Parameter editing: ") + (string.IsNullOrWhiteSpace(systemPrompt) ? T("未找到 systemPrompt", "systemPrompt missing") : $"systemPrompt={systemPrompt}"),
                 T("插件信任：", "Plugin trust: ") + $"allowed={allowedPlugins}; blocked={blockedPlugins}",
                 T("自动化证明：", "Automation proof: ") + (LastAutomationResult is null ? T("尚未运行", "not run yet") : $"{LastAutomationResult.RunId}; succeeded={LastAutomationResult.Succeeded}"),
+                T("运行反馈：", "Runtime feedback: ") + FormatRuntimeOverlaySummary(Session.Queries.GetRuntimeOverlaySnapshot()),
                 T("保存 / 加载：", "Save / load: ") + (string.IsNullOrWhiteSpace(_lastScenarioTourWorkspacePath) ? T("尚未运行", "not run yet") : _lastScenarioTourWorkspacePath),
                 T("导出：", "Export: ") + (string.IsNullOrWhiteSpace(_lastScenarioTourExportPath) ? T("尚未运行", "not run yet") : _lastScenarioTourExportPath),
             ];
@@ -201,6 +203,7 @@ public partial class MainWindowViewModel
     private string RunAutomationTourStep()
     {
         RunPluginAutomation();
+        RunAiPipelineMockRunner();
         return LastAutomationResult is null
             ? T("自动化未返回结果。", "Automation did not return a result.")
             : T("自动化完成：", "Automation completed: ") + $"{LastAutomationResult.RunId}; succeeded={LastAutomationResult.Succeeded}";
@@ -237,6 +240,18 @@ public partial class MainWindowViewModel
             ?.stepIndex;
 
         return index ?? 0;
+    }
+
+    private static string FormatRuntimeOverlaySummary(GraphEditorRuntimeOverlaySnapshot overlay)
+    {
+        if (!overlay.IsAvailable || overlay.NodeOverlays.Count == 0)
+        {
+            return "not run yet";
+        }
+
+        var errorCount = overlay.NodeOverlays.Count(node => node.Status == GraphEditorRuntimeOverlayStatus.Error);
+        var successCount = overlay.NodeOverlays.Count(node => node.Status == GraphEditorRuntimeOverlayStatus.Success);
+        return $"nodes={overlay.NodeOverlays.Count}; success={successCount}; errors={errorCount}; logs={overlay.RecentLogs.Count}";
     }
 
     private void RefreshScenarioTourProjection()

@@ -26,6 +26,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private const string ChromeControlsHelper = "这些开关只控制壳层显示，不会重建当前 Editor 会话。";
     private const string DemoStorageFolderName = "AsterGraph.Demo";
     private IReadOnlyList<CapabilityShowcaseItem> _capabilities = [];
+    private readonly DemoAiPipelineMockRuntimeProvider _aiPipelineMockRuntimeProvider = new();
 
     public MainWindowViewModel()
         : this(null)
@@ -105,6 +106,7 @@ public partial class MainWindowViewModel : ViewModelBase
             PluginTrustPolicy = _pluginShowcase.TrustPolicy,
             ContextMenuAugmentor = contextMenuAugmentor,
             LocalizationProvider = CreateGraphLocalizationProvider(SelectedLanguage.Code),
+            RuntimeOverlayProvider = _aiPipelineMockRuntimeProvider,
         });
 
         Editor = editor;
