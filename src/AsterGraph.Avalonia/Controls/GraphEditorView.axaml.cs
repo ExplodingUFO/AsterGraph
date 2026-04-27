@@ -123,12 +123,16 @@ public partial class GraphEditorView : UserControl
     private Border? _libraryChrome;
     private Border? _inspectorChrome;
     private Border? _statusChrome;
+    private Border? _validationFeedbackChrome;
     private TextBox? _stencilSearchBox;
     private StackPanel? _stencilCardList;
     private WrapPanel? _headerToolbar;
     private WrapPanel? _compositeWorkflowToolbar;
     private WrapPanel? _scopeBreadcrumbs;
     private StackPanel? _shortcutHelpList;
+    private TextBlock? _validationStatusText;
+    private TextBlock? _statusValidationText;
+    private StackPanel? _validationFeedbackList;
     private TextBlock? _fragmentCaptionText;
     private TextBlock? _fragmentStatusText;
     private WrapPanel? _fragmentActionToolbar;
@@ -344,12 +348,16 @@ public partial class GraphEditorView : UserControl
         _libraryChrome = this.FindControl<Border>("PART_LibraryChrome");
         _inspectorChrome = this.FindControl<Border>("PART_InspectorChrome");
         _statusChrome = this.FindControl<Border>("PART_StatusChrome");
+        _validationFeedbackChrome = this.FindControl<Border>("PART_ValidationFeedbackChrome");
         _stencilSearchBox = this.FindControl<TextBox>("PART_StencilSearchBox");
         _stencilCardList = this.FindControl<StackPanel>("PART_StencilCardList");
         _headerToolbar = this.FindControl<WrapPanel>("PART_HeaderToolbar");
         _compositeWorkflowToolbar = this.FindControl<WrapPanel>("PART_CompositeWorkflowToolbar");
         _scopeBreadcrumbs = this.FindControl<WrapPanel>("PART_ScopeBreadcrumbs");
         _shortcutHelpList = this.FindControl<StackPanel>("PART_ShortcutHelpList");
+        _validationStatusText = this.FindControl<TextBlock>("PART_ValidationStatusText");
+        _statusValidationText = this.FindControl<TextBlock>("PART_StatusValidationText");
+        _validationFeedbackList = this.FindControl<StackPanel>("PART_ValidationFeedbackList");
         _fragmentCaptionText = this.FindControl<TextBlock>("PART_FragmentCaptionText");
         _fragmentStatusText = this.FindControl<TextBlock>("PART_FragmentStatusText");
         _fragmentActionToolbar = this.FindControl<WrapPanel>("PART_FragmentActionToolbar");
@@ -524,6 +532,7 @@ public partial class GraphEditorView : UserControl
         RefreshCommandSurfaceState();
         var projection = _commandSurfaceProjection;
         BuildStencilLibrary(_stencilTemplateSnapshots, _stencilAddNodeDescriptor);
+        BuildValidationFeedback();
         BuildFragmentLibrary(projection);
         RefreshCommandPaletteButton(projection);
         BuildHeaderToolbar(projection);
@@ -628,6 +637,178 @@ public partial class GraphEditorView : UserControl
             _headerToolbar.Children.Add(CreateActionButton(action, $"PART_HeaderCommand_{action.Id}"));
         }
     }
+
+    private void BuildValidationFeedback()
+    {
+        if (_validationFeedbackChrome is null
+            && _validationStatusText is null
+            && _statusValidationText is null
+            && _validationFeedbackList is null)
+        {
+            return;
+        }
+
+        if (Editor is null)
+        {
+            ClearValidationFeedback();
+            return;
+        }
+
+        var snapshot = Editor.Session.Queries.GetValidationSnapshot();
+        var caption = CreateValidationStatusCaption(snapshot);
+        if (_validationFeedbackChrome is not null)
+        {
+            _validationFeedbackChrome.IsVisible = true;
+        }
+
+        if (_validationStatusText is not null)
+        {
+            _validationStatusText.Text = caption;
+        }
+
+        if (_statusValidationText is not null)
+        {
+            _statusValidationText.Text = caption;
+        }
+
+        if (_validationFeedbackList is null)
+        {
+            return;
+        }
+
+        _validationFeedbackList.Children.Clear();
+        if (snapshot.Issues.Count == 0)
+        {
+            _validationFeedbackList.Children.Add(new TextBlock
+            {
+                Text = "No validation issues.",
+                FontSize = 12,
+                Foreground = GetResourceBrush("AsterGraph.EyebrowBrush"),
+            });
+            return;
+        }
+
+        foreach (var issue in snapshot.Issues)
+        {
+            _validationFeedbackList.Children.Add(CreateValidationIssueRow(issue));
+        }
+    }
+
+    private void ClearValidationFeedback()
+    {
+        if (_validationFeedbackChrome is not null)
+        {
+            _validationFeedbackChrome.IsVisible = false;
+        }
+
+        if (_validationStatusText is not null)
+        {
+            _validationStatusText.Text = string.Empty;
+        }
+
+        if (_statusValidationText is not null)
+        {
+            _statusValidationText.Text = string.Empty;
+        }
+
+        _validationFeedbackList?.Children.Clear();
+    }
+
+    private Control CreateValidationIssueRow(GraphEditorValidationIssueSnapshot issue)
+    {
+        var focusButton = new Button
+        {
+            Name = ResolveValidationFocusButtonName(issue),
+            Content = "Focus",
+        };
+        focusButton.Classes.Add("astergraph-toolbar-action");
+        AutomationProperties.SetName(focusButton, $"Focus {issue.Code}");
+        ToolTip.SetTip(focusButton, CreateValidationTargetCaption(issue));
+        focusButton.Click += (_, _) =>
+        {
+            Editor?.Session.Commands.TryFocusValidationIssue(issue);
+            RefreshCommandSurface();
+        };
+
+        return new StackPanel
+        {
+            Spacing = 6,
+            Children =
+            {
+                new TextBlock
+                {
+                    Text = $"{CreateValidationSeverityLabel(issue)}  ·  {issue.Code}",
+                    FontSize = 11,
+                    FontWeight = global::Avalonia.Media.FontWeight.Bold,
+                    Foreground = GetResourceBrush("AsterGraph.HighlightBrush"),
+                    TextWrapping = global::Avalonia.Media.TextWrapping.Wrap,
+                },
+                new TextBlock
+                {
+                    Text = issue.Message,
+                    FontSize = 12,
+                    Foreground = GetResourceBrush("AsterGraph.BodyBrush"),
+                    TextWrapping = global::Avalonia.Media.TextWrapping.Wrap,
+                },
+                new TextBlock
+                {
+                    Text = CreateValidationTargetCaption(issue),
+                    FontSize = 11,
+                    Foreground = GetResourceBrush("AsterGraph.EyebrowBrush"),
+                    TextWrapping = global::Avalonia.Media.TextWrapping.Wrap,
+                },
+                focusButton,
+            },
+        };
+    }
+
+    private static string CreateValidationStatusCaption(GraphEditorValidationSnapshot snapshot)
+    {
+        var errorText = snapshot.ErrorCount == 1
+            ? "1 error"
+            : $"{snapshot.ErrorCount} errors";
+        var warningText = snapshot.WarningCount == 1
+            ? "1 warning"
+            : $"{snapshot.WarningCount} warnings";
+        var readiness = snapshot.IsReady ? "Ready" : "Not ready";
+        return $"{readiness}  ·  {errorText}  ·  {warningText}";
+    }
+
+    private static string CreateValidationSeverityLabel(GraphEditorValidationIssueSnapshot issue)
+        => issue.Severity == GraphEditorValidationIssueSeverity.Error ? "Error" : "Warning";
+
+    private static string CreateValidationTargetCaption(GraphEditorValidationIssueSnapshot issue)
+    {
+        if (!string.IsNullOrWhiteSpace(issue.ConnectionId))
+        {
+            return $"Connection {issue.ConnectionId}  ·  scope {issue.ScopeId}";
+        }
+
+        if (!string.IsNullOrWhiteSpace(issue.NodeId))
+        {
+            if (!string.IsNullOrWhiteSpace(issue.ParameterKey))
+            {
+                return $"Node {issue.NodeId}  ·  parameter {issue.ParameterKey}  ·  scope {issue.ScopeId}";
+            }
+
+            return $"Node {issue.NodeId}  ·  scope {issue.ScopeId}";
+        }
+
+        return $"Scope {issue.ScopeId}";
+    }
+
+    private static string ResolveValidationFocusButtonName(GraphEditorValidationIssueSnapshot issue)
+    {
+        var target = issue.ConnectionId ?? issue.NodeId ?? issue.ScopeId;
+        return $"PART_ValidationFocus_{NormalizeControlNameSegment(target)}";
+    }
+
+    private static string NormalizeControlNameSegment(string value)
+        => new(value
+            .Select(character => char.IsLetterOrDigit(character) || character is '.' or '_' or '-'
+                ? character
+                : '_')
+            .ToArray());
 
     private void BuildFragmentLibrary(AsterGraphHostedActionProjection? projection)
     {

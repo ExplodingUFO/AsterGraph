@@ -182,6 +182,22 @@
             <controls:GraphInspectorView x:Name="PART_InspectorSurface"
                                          Editor="{Binding}" />
 
+            <Border x:Name="PART_ValidationFeedbackChrome"
+                    Classes="astergraph-inspector-section">
+              <StackPanel Spacing="8">
+                <TextBlock Text="Validation"
+                           FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
+                           FontWeight="Bold"
+                           Foreground="{DynamicResource AsterGraph.EyebrowBrush}" />
+                <TextBlock x:Name="PART_ValidationStatusText"
+                           FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
+                           TextWrapping="Wrap"
+                           Foreground="{DynamicResource AsterGraph.BodyBrush}" />
+                <StackPanel x:Name="PART_ValidationFeedbackList"
+                            Spacing="8" />
+              </StackPanel>
+            </Border>
+
             <Border x:Name="PART_AuthoringToolsChrome"
                     Classes="astergraph-inspector-section">
               <StackPanel Spacing="8">
@@ -302,7 +318,7 @@
               BorderThickness="1"
               CornerRadius="{DynamicResource AsterGraph.DefaultCornerRadius}"
               Padding="{DynamicResource AsterGraph.StatusPanelPadding}">
-        <Grid ColumnDefinitions="2*,2*,3*"
+        <Grid ColumnDefinitions="2*,2*,2*,3*"
               ColumnSpacing="18">
           <TextBlock Text="{Binding ModeCaption}"
                      FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
@@ -313,7 +329,12 @@
                      FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                      TextWrapping="Wrap"
                      Foreground="{DynamicResource AsterGraph.BodyBrush}" />
-          <TextBlock Grid.Column="2"
+          <TextBlock x:Name="PART_StatusValidationText"
+                     Grid.Column="2"
+                     FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
+                     TextWrapping="Wrap"
+                     Foreground="{DynamicResource AsterGraph.BodyBrush}" />
+          <TextBlock Grid.Column="3"
                      Text="{Binding StatusMessage}"
                      FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                      TextWrapping="Wrap"
