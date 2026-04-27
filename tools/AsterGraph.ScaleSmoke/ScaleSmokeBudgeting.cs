@@ -60,28 +60,28 @@ public sealed record ScaleSmokeExportMetrics(
 }
 
 public sealed record ScaleSmokeBudget(
-    long SetupMs,
-    long SelectionMs,
-    long ConnectionMs,
-    long HistoryMs,
-    long ViewportMs,
-    long SaveMs,
-    long ReloadMs);
+    long? SetupMs,
+    long? SelectionMs,
+    long? ConnectionMs,
+    long? HistoryMs,
+    long? ViewportMs,
+    long? SaveMs,
+    long? ReloadMs);
 
 public sealed record ScaleSmokeAuthoringBudget(
-    long StencilFilterMs,
-    long CommandSurfaceRefreshMs,
-    long QuickToolProjectionMs,
-    long QuickToolExecutionMs,
-    long InspectorOpenMs,
-    long NodeResizeMs,
-    long EdgeCreateMs);
+    long? StencilFilterMs,
+    long? CommandSurfaceRefreshMs,
+    long? QuickToolProjectionMs,
+    long? QuickToolExecutionMs,
+    long? InspectorOpenMs,
+    long? NodeResizeMs,
+    long? EdgeCreateMs);
 
 public sealed record ScaleSmokeExportBudget(
-    long SvgExportMs,
-    long PngExportMs,
-    long JpegExportMs,
-    long ReloadMs);
+    long? SvgExportMs,
+    long? PngExportMs,
+    long? JpegExportMs,
+    long? ReloadMs);
 
 public sealed record ScaleSmokeBudgetFailure(
     string TierId,
@@ -169,13 +169,13 @@ public sealed record ScaleSmokeTier(
                 $"nodes={NodeCount}",
                 $"selection={SelectionCount}",
                 $"moves={MoveCount}",
-                $"setup<={Budget.SetupMs}",
-                $"selection<={Budget.SelectionMs}",
-                $"connection<={Budget.ConnectionMs}",
-                $"history<={Budget.HistoryMs}",
-                $"viewport<={Budget.ViewportMs}",
-                $"save<={Budget.SaveMs}",
-                $"reload<={Budget.ReloadMs}",
+                FormatBudget("setup", Budget.SetupMs),
+                FormatBudget("selection", Budget.SelectionMs),
+                FormatBudget("connection", Budget.ConnectionMs),
+                FormatBudget("history", Budget.HistoryMs),
+                FormatBudget("viewport", Budget.ViewportMs),
+                FormatBudget("save", Budget.SaveMs),
+                FormatBudget("reload", Budget.ReloadMs),
             ]);
     }
 
@@ -190,13 +190,13 @@ public sealed record ScaleSmokeTier(
             ':',
             [
                 $"SCALE_AUTHORING_BUDGET:{Id}",
-                $"stencil<={AuthoringBudget.StencilFilterMs}",
-                $"command-surface<={AuthoringBudget.CommandSurfaceRefreshMs}",
-                $"quick-tool-projection<={AuthoringBudget.QuickToolProjectionMs}",
-                $"quick-tool-execution<={AuthoringBudget.QuickToolExecutionMs}",
-                $"inspector-open<={AuthoringBudget.InspectorOpenMs}",
-                $"node-resize<={AuthoringBudget.NodeResizeMs}",
-                $"edge-create<={AuthoringBudget.EdgeCreateMs}",
+                FormatBudget("stencil", AuthoringBudget.StencilFilterMs),
+                FormatBudget("command-surface", AuthoringBudget.CommandSurfaceRefreshMs),
+                FormatBudget("quick-tool-projection", AuthoringBudget.QuickToolProjectionMs),
+                FormatBudget("quick-tool-execution", AuthoringBudget.QuickToolExecutionMs),
+                FormatBudget("inspector-open", AuthoringBudget.InspectorOpenMs),
+                FormatBudget("node-resize", AuthoringBudget.NodeResizeMs),
+                FormatBudget("edge-create", AuthoringBudget.EdgeCreateMs),
             ]);
     }
 
@@ -211,10 +211,10 @@ public sealed record ScaleSmokeTier(
             ':',
             [
                 $"SCALE_EXPORT_BUDGET:{Id}",
-                $"svg<={ExportBudget.SvgExportMs}",
-                $"png<={ExportBudget.PngExportMs}",
-                $"jpeg<={ExportBudget.JpegExportMs}",
-                $"reload<={ExportBudget.ReloadMs}",
+                FormatBudget("svg", ExportBudget.SvgExportMs),
+                FormatBudget("png", ExportBudget.PngExportMs),
+                FormatBudget("jpeg", ExportBudget.JpegExportMs),
+                FormatBudget("reload", ExportBudget.ReloadMs),
             ]);
     }
 
@@ -227,40 +227,13 @@ public sealed record ScaleSmokeTier(
 
         var failures = new List<ScaleSmokeBudgetFailure>();
 
-        if (metrics.SetupMs > Budget.SetupMs)
-        {
-            AddFailure(failures, "performance", "setup", metrics.SetupMs, Budget.SetupMs);
-        }
-
-        if (metrics.SelectionMs > Budget.SelectionMs)
-        {
-            AddFailure(failures, "performance", "selection", metrics.SelectionMs, Budget.SelectionMs);
-        }
-
-        if (metrics.ConnectionMs > Budget.ConnectionMs)
-        {
-            AddFailure(failures, "performance", "connection", metrics.ConnectionMs, Budget.ConnectionMs);
-        }
-
-        if (metrics.HistoryMs > Budget.HistoryMs)
-        {
-            AddFailure(failures, "performance", "history", metrics.HistoryMs, Budget.HistoryMs);
-        }
-
-        if (metrics.ViewportMs > Budget.ViewportMs)
-        {
-            AddFailure(failures, "performance", "viewport", metrics.ViewportMs, Budget.ViewportMs);
-        }
-
-        if (metrics.SaveMs > Budget.SaveMs)
-        {
-            AddFailure(failures, "performance", "save", metrics.SaveMs, Budget.SaveMs);
-        }
-
-        if (metrics.ReloadMs > Budget.ReloadMs)
-        {
-            AddFailure(failures, "performance", "reload", metrics.ReloadMs, Budget.ReloadMs);
-        }
+        AddFailureIfExceeded(failures, "performance", "setup", metrics.SetupMs, Budget.SetupMs);
+        AddFailureIfExceeded(failures, "performance", "selection", metrics.SelectionMs, Budget.SelectionMs);
+        AddFailureIfExceeded(failures, "performance", "connection", metrics.ConnectionMs, Budget.ConnectionMs);
+        AddFailureIfExceeded(failures, "performance", "history", metrics.HistoryMs, Budget.HistoryMs);
+        AddFailureIfExceeded(failures, "performance", "viewport", metrics.ViewportMs, Budget.ViewportMs);
+        AddFailureIfExceeded(failures, "performance", "save", metrics.SaveMs, Budget.SaveMs);
+        AddFailureIfExceeded(failures, "performance", "reload", metrics.ReloadMs, Budget.ReloadMs);
 
         return failures.Count == 0
             ? new ScaleSmokeBudgetEvaluation(true, "none")
@@ -276,40 +249,13 @@ public sealed record ScaleSmokeTier(
 
         var failures = new List<ScaleSmokeBudgetFailure>();
 
-        if (metrics.StencilFilterMs > AuthoringBudget.StencilFilterMs)
-        {
-            AddFailure(failures, "authoring", "stencil", metrics.StencilFilterMs, AuthoringBudget.StencilFilterMs);
-        }
-
-        if (metrics.CommandSurfaceRefreshMs > AuthoringBudget.CommandSurfaceRefreshMs)
-        {
-            AddFailure(failures, "authoring", "command-surface", metrics.CommandSurfaceRefreshMs, AuthoringBudget.CommandSurfaceRefreshMs);
-        }
-
-        if (metrics.QuickToolProjectionMs > AuthoringBudget.QuickToolProjectionMs)
-        {
-            AddFailure(failures, "authoring", "quick-tool-projection", metrics.QuickToolProjectionMs, AuthoringBudget.QuickToolProjectionMs);
-        }
-
-        if (metrics.QuickToolExecutionMs > AuthoringBudget.QuickToolExecutionMs)
-        {
-            AddFailure(failures, "authoring", "quick-tool-execution", metrics.QuickToolExecutionMs, AuthoringBudget.QuickToolExecutionMs);
-        }
-
-        if (metrics.InspectorOpenMs > AuthoringBudget.InspectorOpenMs)
-        {
-            AddFailure(failures, "authoring", "inspector-open", metrics.InspectorOpenMs, AuthoringBudget.InspectorOpenMs);
-        }
-
-        if (metrics.NodeResizeMs > AuthoringBudget.NodeResizeMs)
-        {
-            AddFailure(failures, "authoring", "node-resize", metrics.NodeResizeMs, AuthoringBudget.NodeResizeMs);
-        }
-
-        if (metrics.EdgeCreateMs > AuthoringBudget.EdgeCreateMs)
-        {
-            AddFailure(failures, "authoring", "edge-create", metrics.EdgeCreateMs, AuthoringBudget.EdgeCreateMs);
-        }
+        AddFailureIfExceeded(failures, "authoring", "stencil", metrics.StencilFilterMs, AuthoringBudget.StencilFilterMs);
+        AddFailureIfExceeded(failures, "authoring", "command-surface", metrics.CommandSurfaceRefreshMs, AuthoringBudget.CommandSurfaceRefreshMs);
+        AddFailureIfExceeded(failures, "authoring", "quick-tool-projection", metrics.QuickToolProjectionMs, AuthoringBudget.QuickToolProjectionMs);
+        AddFailureIfExceeded(failures, "authoring", "quick-tool-execution", metrics.QuickToolExecutionMs, AuthoringBudget.QuickToolExecutionMs);
+        AddFailureIfExceeded(failures, "authoring", "inspector-open", metrics.InspectorOpenMs, AuthoringBudget.InspectorOpenMs);
+        AddFailureIfExceeded(failures, "authoring", "node-resize", metrics.NodeResizeMs, AuthoringBudget.NodeResizeMs);
+        AddFailureIfExceeded(failures, "authoring", "edge-create", metrics.EdgeCreateMs, AuthoringBudget.EdgeCreateMs);
 
         return failures.Count == 0
             ? new ScaleSmokeAuthoringBudgetEvaluation(true, "none")
@@ -325,39 +271,32 @@ public sealed record ScaleSmokeTier(
 
         var failures = new List<ScaleSmokeBudgetFailure>();
 
-        if (metrics.SvgExportMs > ExportBudget.SvgExportMs)
-        {
-            AddFailure(failures, "export", "svg", metrics.SvgExportMs, ExportBudget.SvgExportMs);
-        }
-
-        if (metrics.PngExportMs > ExportBudget.PngExportMs)
-        {
-            AddFailure(failures, "export", "png", metrics.PngExportMs, ExportBudget.PngExportMs);
-        }
-
-        if (metrics.JpegExportMs > ExportBudget.JpegExportMs)
-        {
-            AddFailure(failures, "export", "jpeg", metrics.JpegExportMs, ExportBudget.JpegExportMs);
-        }
-
-        if (metrics.ReloadMs > ExportBudget.ReloadMs)
-        {
-            AddFailure(failures, "export", "reload", metrics.ReloadMs, ExportBudget.ReloadMs);
-        }
+        AddFailureIfExceeded(failures, "export", "svg", metrics.SvgExportMs, ExportBudget.SvgExportMs);
+        AddFailureIfExceeded(failures, "export", "png", metrics.PngExportMs, ExportBudget.PngExportMs);
+        AddFailureIfExceeded(failures, "export", "jpeg", metrics.JpegExportMs, ExportBudget.JpegExportMs);
+        AddFailureIfExceeded(failures, "export", "reload", metrics.ReloadMs, ExportBudget.ReloadMs);
 
         return failures.Count == 0
             ? new ScaleSmokeExportBudgetEvaluation(true, "none")
             : new ScaleSmokeExportBudgetEvaluation(false, string.Join(',', failures.Select(failure => failure.ToSummary())), failures);
     }
 
-    private void AddFailure(
+    private static string FormatBudget(string metric, long? threshold)
+        => threshold.HasValue
+            ? $"{metric}<={threshold.Value}"
+            : $"{metric}=informational";
+
+    private void AddFailureIfExceeded(
         List<ScaleSmokeBudgetFailure> failures,
         string area,
         string metric,
         long actual,
-        long threshold)
+        long? threshold)
     {
-        failures.Add(new ScaleSmokeBudgetFailure(Id, area, metric, actual, threshold, Defended: true));
+        if (threshold.HasValue && actual > threshold.Value)
+        {
+            failures.Add(new ScaleSmokeBudgetFailure(Id, area, metric, actual, threshold.Value, Defended: true));
+        }
     }
 
     public static ScaleSmokeTier Parse(string[] args)
@@ -432,9 +371,27 @@ public sealed record ScaleSmokeTier(
                 NodeCount: 5000,
                 SelectionCount: 256,
                 MoveCount: 96,
-                Budget: null,
-                AuthoringBudget: null,
-                ExportBudget: null),
+                Budget: new ScaleSmokeBudget(
+                    SetupMs: 1500,
+                    SelectionMs: 200,
+                    ConnectionMs: 1500,
+                    HistoryMs: 2500,
+                    ViewportMs: 100,
+                    SaveMs: 700,
+                    ReloadMs: 500),
+                AuthoringBudget: new ScaleSmokeAuthoringBudget(
+                    StencilFilterMs: 150,
+                    CommandSurfaceRefreshMs: 800,
+                    QuickToolProjectionMs: 800,
+                    QuickToolExecutionMs: 1000,
+                    InspectorOpenMs: 100,
+                    NodeResizeMs: 100,
+                    EdgeCreateMs: 250),
+                ExportBudget: new ScaleSmokeExportBudget(
+                    SvgExportMs: 300,
+                    PngExportMs: null,
+                    JpegExportMs: null,
+                    ReloadMs: 800)),
             _ => throw new ArgumentException($"Unsupported ScaleSmoke tier '{requestedTier}'. Supported tiers: baseline, large, stress.")
         };
     }

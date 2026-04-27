@@ -30,6 +30,18 @@ public sealed class ScaleSmokeBudgetTests
     }
 
     [Fact]
+    public void StressTier_EmitsDefendedPerformanceBudgetMarker()
+    {
+        var tier = ScaleSmokeTier.Parse(["--tier", "stress"]);
+
+        var marker = tier.ToBudgetMarker();
+
+        Assert.Equal(
+            "SCALE_TIER_BUDGET:stress:nodes=5000:selection=256:moves=96:setup<=1500:selection<=200:connection<=1500:history<=2500:viewport<=100:save<=700:reload<=500",
+            marker);
+    }
+
+    [Fact]
     public void LargeBudget_AllowsObservedRepeatedLargeTierMetrics()
     {
         var tier = ScaleSmokeTier.Parse(["--tier", "large"]);
@@ -68,6 +80,29 @@ public sealed class ScaleSmokeBudgetTests
         var failure = Assert.Single(result.Failures);
         Assert.Equal(
             "SCALE_BUDGET_FAILURE:large:area=performance:metric=connection:actual=351:threshold=350:policy=defended",
+            failure.ToMarker());
+    }
+
+    [Fact]
+    public void StressBudget_RejectsPromotedConnectionRegressionBeyondRedline()
+    {
+        var tier = ScaleSmokeTier.Parse(["--tier", "stress"]);
+        var metrics = new ScaleSmokeMetrics(
+            SetupMs: 600,
+            SelectionMs: 60,
+            ConnectionMs: 1501,
+            HistoryMs: 1400,
+            ViewportMs: 5,
+            SaveMs: 300,
+            ReloadMs: 150);
+
+        var result = tier.Evaluate(metrics);
+
+        Assert.False(result.Passed);
+        Assert.Contains("connection=1501>1500(defended)", result.FailureSummary, StringComparison.Ordinal);
+        var failure = Assert.Single(result.Failures);
+        Assert.Equal(
+            "SCALE_BUDGET_FAILURE:stress:area=performance:metric=connection:actual=1501:threshold=1500:policy=defended",
             failure.ToMarker());
     }
 

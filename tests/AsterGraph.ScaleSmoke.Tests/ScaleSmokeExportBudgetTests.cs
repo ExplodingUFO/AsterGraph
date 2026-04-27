@@ -46,6 +46,18 @@ public sealed class ScaleSmokeExportBudgetTests
     }
 
     [Fact]
+    public void StressTier_LabelsUnpromotedRasterExportMetricsInformational()
+    {
+        var tier = ScaleSmokeTier.Parse(["--tier", "stress"]);
+
+        var marker = tier.ToExportBudgetMarker();
+
+        Assert.Equal(
+            "SCALE_EXPORT_BUDGET:stress:svg<=300:png=informational:jpeg=informational:reload<=800",
+            marker);
+    }
+
+    [Fact]
     public void LargeExportBudget_AllowsObservedMetrics()
     {
         var tier = ScaleSmokeTier.Parse(["--tier", "large"]);
@@ -78,6 +90,42 @@ public sealed class ScaleSmokeExportBudgetTests
         var failure = Assert.Single(result.Failures);
         Assert.Equal(
             "SCALE_BUDGET_FAILURE:large:area=export:metric=png:actual=16001:threshold=16000:policy=defended",
+            failure.ToMarker());
+    }
+
+    [Fact]
+    public void StressExportBudget_IgnoresInformationalRasterMetrics()
+    {
+        var tier = ScaleSmokeTier.Parse(["--tier", "stress"]);
+        var metrics = new ScaleSmokeExportMetrics(
+            SvgExportMs: 120,
+            PngExportMs: 120_000,
+            JpegExportMs: 100_000,
+            ReloadMs: 400);
+
+        var result = tier.EvaluateExport(metrics);
+
+        Assert.True(result.Passed);
+        Assert.Empty(result.Failures);
+    }
+
+    [Fact]
+    public void StressExportBudget_RejectsPromotedSvgRegressionBeyondRedline()
+    {
+        var tier = ScaleSmokeTier.Parse(["--tier", "stress"]);
+        var metrics = new ScaleSmokeExportMetrics(
+            SvgExportMs: 301,
+            PngExportMs: 32_000,
+            JpegExportMs: 24_000,
+            ReloadMs: 400);
+
+        var result = tier.EvaluateExport(metrics);
+
+        Assert.False(result.Passed);
+        Assert.Contains("svg=301>300(defended)", result.FailureSummary, StringComparison.Ordinal);
+        var failure = Assert.Single(result.Failures);
+        Assert.Equal(
+            "SCALE_BUDGET_FAILURE:stress:area=export:metric=svg:actual=301:threshold=300:policy=defended",
             failure.ToMarker());
     }
 }
