@@ -88,7 +88,7 @@
 
 | 声明 | 当前公开口径 | 路线级证据 |
 | --- | --- | --- |
-| `WPF` 作为 adapter 2 | 只算 validation-only，不代表 Avalonia parity，也不是公开 WPF support。当前证据只覆盖有边界的 hosted shell accessibility、performance 和 export-breadth 路径。 | `HELLOWORLD_WPF_OK`、`HOSTED_ACCESSIBILITY_BASELINE_OK`、`HOSTED_ACCESSIBILITY_FOCUS_OK`、`HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK`、`HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK`、`HOSTED_ACCESSIBILITY_OK`、`ADAPTER2_PERFORMANCE_BASELINE_OK`、`ADAPTER2_EXPORT_BREADTH_OK`、`ADAPTER2_PROJECTION_BUDGET_OK`、`ADAPTER2_COMMAND_BUDGET_OK`、`ADAPTER2_SCENE_BUDGET_OK`、`ADAPTER_CAPABILITY_MATRIX:WPF:HELLOWORLD_WPF_OK:PASS`、`ADAPTER_CAPABILITY_MATRIX:WPF:COMMAND_SURFACE_OK:PASS`、[Adapter Capability Matrix](./adapter-capability-matrix.md) |
+| `WPF` 作为 adapter 2 | 只算 validation-only，不代表 Avalonia parity，也不是 public WPF support。WPF support expansion 必须等 3-5 real external reports 聚焦在同一个受限风险后才能讨论。当前证据只覆盖有边界的 hosted shell accessibility、performance 和 export-breadth 路径。 | `HELLOWORLD_WPF_OK`、`HOSTED_ACCESSIBILITY_BASELINE_OK`、`HOSTED_ACCESSIBILITY_FOCUS_OK`、`HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK`、`HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK`、`HOSTED_ACCESSIBILITY_OK`、`ADAPTER2_PERFORMANCE_BASELINE_OK`、`ADAPTER2_EXPORT_BREADTH_OK`、`ADAPTER2_PROJECTION_BUDGET_OK`、`ADAPTER2_COMMAND_BUDGET_OK`、`ADAPTER2_SCENE_BUDGET_OK`、`ADAPTER_CAPABILITY_MATRIX:WPF:HELLOWORLD_WPF_OK:PASS`、`ADAPTER_CAPABILITY_MATRIX:WPF:COMMAND_SURFACE_OK:PASS`、[Adapter Capability Matrix](./adapter-capability-matrix.md) |
 | retained 路线 | 只作为迁移桥，不是新的 primary host path。 | [Retained 到 Session 的迁移 Recipe](./retained-migration-recipe.md)、[稳定化支持矩阵](./stabilization-support-matrix.md) |
 | stress raster export budget | 5000 节点 PNG/JPEG export 有保守 defended 红线；这是防回归 guard，不是 fast-export 声明。 | `SCALE_EXPORT_BUDGET:stress:svg<=300:png<=120000:jpeg<=100000:reload<=800`、`SCALE_RASTER_EXPORT_STRESS_OK:True`、[ScaleSmoke 基线](./scale-baseline.md) |
 | XLarge telemetry | 10000 节点 ScaleSmoke 只是 telemetry-only，不是支持承诺或 virtualization 声明。 | `SCALE_TIER_BUDGET:xlarge:nodes=10000:selection=512:moves=128:budget=informational-only`、[ScaleSmoke 基线](./scale-baseline.md) |
@@ -99,6 +99,7 @@
 - 除 Avalonia 加当前 `WPF` 验证通道之外的新 hosted adapter 或更宽的 adapter 声明
 - marketplace、远程安装/更新、unload lifecycle、sandboxed plugin 这类故事
 - stable / GA / `1.0` 级别的支持保证
+- GA prep checklist：adoption evidence、API drift、support boundary 和 release proof gate 都复核通过后，才允许写 GA 或 `1.0` 级别语言。
 - 当前 `0.xx` alpha/beta hardening 线命名为 `Performance / Export Hardening`：先收紧 export budget，补 progress/cancel/scope evidence，再考虑 rendering cache 工作
 - 维护者种子预演证据不计入 3 到 5 的门槛
 - 如果新的报告放不进上面的“已证明”或“受边界约束”两类，就走 [Adoption Feedback Loop](./adoption-feedback.md) 和 [Beta Support Bundle](./support-bundle.md)，不要临时扩大公开声明；在满足 3 到 5 条真实外部报告门禁前，claim-expansion status 只作为分诊字段

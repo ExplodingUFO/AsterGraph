@@ -375,6 +375,25 @@ public sealed class ReleaseClosureContractTests
     }
 
     [Fact]
+    public void WpfAndGaPrepDecisionGate_StaysVisibleInStatusAndChecklist()
+    {
+        var englishChecklist = ReadRepoFile("docs/en/public-launch-checklist.md");
+        var chineseChecklist = ReadRepoFile("docs/zh-CN/public-launch-checklist.md");
+        var englishStatus = ReadRepoFile("docs/en/project-status.md");
+        var chineseStatus = ReadRepoFile("docs/zh-CN/project-status.md");
+
+        Assert.True(HasLineWithAll(englishStatus, "WPF support expansion", "validation-only", "public WPF support", "3-5 real external reports"));
+        Assert.True(HasLineWithAll(chineseStatus, "WPF support expansion", "validation-only", "public WPF support", "3-5 real external reports"));
+        Assert.True(HasLineWithAll(englishChecklist, "WPF support expansion", "validation-only", "public WPF support", "3-5 real external reports"));
+        Assert.True(HasLineWithAll(chineseChecklist, "WPF support expansion", "validation-only", "public WPF support", "3-5 real external reports"));
+
+        Assert.True(HasLineWithAll(englishStatus, "GA prep checklist", "adoption evidence", "API drift", "support boundary", "release proof"));
+        Assert.True(HasLineWithAll(chineseStatus, "GA prep checklist", "adoption evidence", "API drift", "support boundary", "release proof"));
+        Assert.True(HasLineWithAll(englishChecklist, "GA prep checklist", "adoption evidence", "API drift", "support boundary", "release proof"));
+        Assert.True(HasLineWithAll(chineseChecklist, "GA prep checklist", "adoption evidence", "API drift", "support boundary", "release proof"));
+    }
+
+    [Fact]
     public void ReleaseCoverageValidation_BoundsHungTestCollectors()
     {
         var ciScript = ReadRepoFile("eng/ci.ps1");

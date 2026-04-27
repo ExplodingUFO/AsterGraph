@@ -119,10 +119,12 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framew
 - 确认 proof summary 把 public API guidance proof 放在 template/plugin proof 附近：`ASTERGRAPH_TEMPLATE_SMOKE_OK:True`、`TEMPLATE_SMOKE_PLUGIN_VALIDATE_OK:True`、`PUBLIC_API_SURFACE_OK:...:net9.0`、`PUBLIC_API_SCOPE_OK:AsterGraph.Abstractions,AsterGraph.Core,AsterGraph.Editor,AsterGraph.Avalonia` 和 `PUBLIC_API_GUIDANCE_OK:True`
 - 确认自动生成的 notes 和公告文案明确写出冻结的 support boundary 叙事和 adapter matrix 叙事，并同步给出 `HOSTED_ACCESSIBILITY_BASELINE_OK:True`、`HOSTED_ACCESSIBILITY_FOCUS_OK:True`、`HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True`、`HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True`、`HOSTED_ACCESSIBILITY_OK:True`、`ADAPTER2_PERFORMANCE_BASELINE_OK:True`、`ADAPTER2_EXPORT_BREADTH_OK:True`、`ADAPTER2_PROJECTION_BUDGET_OK:True:none`、`ADAPTER2_COMMAND_BUDGET_OK:True:none`、`ADAPTER2_SCENE_BUDGET_OK:True:none`、`HELLOWORLD_WPF_OK:True`、`ADAPTER_CAPABILITY_MATRIX_FORMAT:1`、`ADAPTER_CAPABILITY_MATRIX:WPF:HELLOWORLD_WPF_OK:PASS`、`ADAPTER_CAPABILITY_MATRIX:WPF:COMMAND_SURFACE_OK:PASS`
 - 把 `HELLOWORLD_WPF_OK` 只当成 adapter-2 验证通过，不要写成 Avalonia/WPF parity 或公开 WPF support
+- WPF support expansion 继续保持 validation-only，不要写进 public WPF support 口径；必须等 3-5 real external reports 聚焦在同一个受限风险后再讨论扩展
 - 需要从受防守的 Avalonia accessibility proof 交接到 validation-only 的 WPF 验证时，统一参考 [Adapter-2 Accessibility Recipe](./adapter-2-accessibility-recipe.md)
 - 需要从受防守的 Avalonia hosted metrics 交接到 validation-only 的 WPF performance 验证时，统一参考 [Adapter-2 Performance Recipe](./adapter-2-performance-recipe.md)
 - 确认每条 beta 反馈都按同一套受限字段记录：报告类型、采用者上下文、`route`、`version`、proof 标记、摩擦点、support bundle 附件备注，以及 claim-expansion status
 - 确认 claim-expansion status 在 3 到 5 条真实外部报告聚焦到同一个受限风险之前，只作为分诊输入
+- GA prep checklist：adoption evidence、API drift、support boundary 和 release proof gate 都必须显式保留，之后才允许写 GA 或 `1.0` 公告口径
 - 在 release messaging 里重复当前 `0.xx` alpha/beta hardening 线的 handoff：`Performance / Export Hardening` 表示先做保守 5000 节点 raster export budget，再补 progress/cancel/scope evidence，然后才扩大 rendering cache claim
 - 保持 `xlarge` 为 telemetry-only，不把它说成 10000 节点支持承诺或 virtualization commitment
 - 如果配置了 `NUGET_API_KEY`，确认包发布成功
