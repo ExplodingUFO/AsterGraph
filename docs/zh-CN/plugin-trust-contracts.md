@@ -56,6 +56,30 @@
 
 host 在候选进入加载前做一次 `Evaluate(...)`，决策结果通过 `GraphEditorPluginTrustEvaluation` 返回。这里的 trust boundary 仍然是 host-owned。
 
+## Trust Review Short Path
+
+评估可信 in-process 插件时，按这条短路径走：
+
+1. 用 [Plugin 与自定义节点 Recipe](./plugin-recipe.md) 编写或生成插件。
+2. 用 `AsterGraph.PluginTool validate` 验证 `.dll`、`.nupkg` 或插件目录。
+3. 复核 PluginTool 输出里的 manifest、compatibility、provenance、signature evidence 和 SHA-256 hash。
+4. 在 activation 前应用宿主自有的 `IGraphEditorPluginTrustPolicy`。
+5. 验证真实宿主 flow 时，把 [Consumer Sample](./consumer-sample.md) 当作受防守的 hosted trust hop。
+
+PluginTool validation 是给 host policy 使用的证据。它不是 marketplace approval、sandbox decision，也不是自动加载授权。
+
+## Host Policy Examples
+
+这些是 host-owned policy 示例，不是 runtime fallback mode：
+
+| Pattern | 典型场景 | Policy input |
+| --- | --- | --- |
+| Allow all local dev | 已知机器上的本地开发循环。 | 固定本地插件目录，以及明确的 local-dev reason。 |
+| Allow by hash | 小团队共享已知插件二进制。 | PluginTool SHA-256 hash 必须匹配宿主 allowlist。 |
+| Allow by manifest or publisher | 组织内部发布的插件。 | manifest id、package id/version、publisher metadata 和 signature evidence 必须匹配宿主策略。 |
+| Block unknown source | 默认 prerelease 或企业姿态。 | 没有 allowlist、hash 或可接受签名匹配的候选，在 activation 前阻止。 |
+| Enterprise fixed plugin directory | 受管桌面部署。 | 只从管理员控制的目录发现插件，并保留 allowlist import/export 记录用于审计。 |
+
 ## Implicit Allow 合同
 
 如果 host 没有配置 trust policy，默认结果是 implicit allow。
