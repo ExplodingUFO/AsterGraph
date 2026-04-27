@@ -33,6 +33,45 @@ public sealed partial class GraphEditorSession
         Execute("nodes.add", () => _host.AddNode(definitionId, preferredWorldPosition));
     }
 
+    public bool TryCreateConnectedNodeFromPendingConnection(
+        NodeDefinitionId definitionId,
+        string targetId,
+        GraphConnectionTargetKind targetKind,
+        GraphPoint? preferredWorldPosition = null)
+    {
+        ArgumentNullException.ThrowIfNull(definitionId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(targetId);
+
+        var compatibleTarget = GetCompatibleNodeDefinitionsForPendingConnection()
+            .Results
+            .FirstOrDefault(candidate =>
+                candidate.DefinitionId == definitionId
+                && string.Equals(candidate.TargetId, targetId, StringComparison.Ordinal)
+                && candidate.TargetKind == targetKind);
+        if (compatibleTarget is null)
+        {
+            return false;
+        }
+
+        using var mutation = BeginMutation("quick-add-connected-node");
+        var beforeNodeIds = _host.CreateActiveScopeDocumentSnapshot()
+            .Nodes
+            .Select(node => node.Id)
+            .ToHashSet(StringComparer.Ordinal);
+        _host.AddNode(definitionId, preferredWorldPosition);
+        var createdNode = _host.CreateActiveScopeDocumentSnapshot()
+            .Nodes
+            .FirstOrDefault(node => !beforeNodeIds.Contains(node.Id) && node.DefinitionId == definitionId);
+        if (createdNode is null)
+        {
+            return false;
+        }
+
+        _host.CompleteConnection(new GraphConnectionTargetRef(createdNode.Id, targetId, targetKind));
+        PublishCommandExecuted("nodes.quick-add-connected");
+        return true;
+    }
+
     public void DeleteSelection()
         => Execute("selection.delete", _host.DeleteSelection);
 

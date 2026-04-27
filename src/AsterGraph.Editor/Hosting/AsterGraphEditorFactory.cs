@@ -147,6 +147,7 @@ public static class AsterGraphEditorFactory
             resolved.Options.DiagnosticsSink,
             new GraphEditorSessionDescriptorSupport(
                 resolved.NodeCatalog,
+                resolved.Options.CompatibilityService!,
                 (key, fallback) => resolved.LocalizationProvider?.GetString(key, fallback) ?? fallback,
                 hasFragmentWorkspaceService: true,
                 hasFragmentLibraryService: true,

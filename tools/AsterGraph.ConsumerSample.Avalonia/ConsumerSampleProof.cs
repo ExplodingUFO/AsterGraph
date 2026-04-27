@@ -48,6 +48,8 @@ public sealed record ConsumerSampleProofResult(
     double NodeToolProjectionMs,
     double EdgeToolProjectionMs,
     double CommandPaletteMs,
+    bool QuickAddConnectedNodeOk = true,
+    bool PortFilteredNodeSearchOk = true,
     int NodeCount = 0,
     int ConnectionCount = 0,
     IReadOnlyList<string>? FeatureDescriptorIds = null,
@@ -66,6 +68,8 @@ public sealed record ConsumerSampleProofResult(
         && InspectorMixedValueOk
         && InspectorValidationFixOk
         && SupportBundleParameterEvidenceOk
+        && QuickAddConnectedNodeOk
+        && PortFilteredNodeSearchOk
         && NodeSideAuthoringOk
         && CommandSurfaceOk;
 
@@ -136,6 +140,8 @@ public sealed record ConsumerSampleProofResult(
         $"INSPECTOR_MIXED_VALUE_OK:{InspectorMixedValueOk}",
         $"INSPECTOR_VALIDATION_FIX_OK:{InspectorValidationFixOk}",
         $"SUPPORT_BUNDLE_PARAMETER_EVIDENCE_OK:{SupportBundleParameterEvidenceOk}",
+        $"AUTHORING_QUICK_ADD_CONNECTED_NODE_OK:{QuickAddConnectedNodeOk}",
+        $"AUTHORING_PORT_FILTERED_NODE_SEARCH_OK:{PortFilteredNodeSearchOk}",
         $"AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:{NodeSideAuthoringOk}",
         $"AUTHORING_SURFACE_COMMAND_PROJECTION_OK:{CommandSurfaceOk}",
         $"CONSUMER_SAMPLE_PARAMETER_OK:{ParameterProjectionOk}",
@@ -315,6 +321,8 @@ public static class ConsumerSampleProof
         bool hostedAuthoringAutomationDiagnosticsOk;
         bool hostedAccessibilityCommandSurfaceOk;
         bool hostedAccessibilityAuthoringSurfaceOk;
+        bool quickAddConnectedNodeOk;
+        bool portFilteredNodeSearchOk;
         try
         {
             capabilityWindow.Show();
@@ -337,6 +345,7 @@ public static class ConsumerSampleProof
             host.SelectNode(reviewNodeId);
             FlushUi();
             edgeQuickToolsOk = HasEdgeQuickTools(capabilityWindow, host);
+            (quickAddConnectedNodeOk, portFilteredNodeSearchOk) = HasQuickAddConnectedNode(host);
 
             host.SelectNode(reviewNodeId);
             FlushUi();
@@ -388,6 +397,8 @@ public static class ConsumerSampleProof
             HostedAccessibilityFocusOk: hostedAccessibilityFocusOk,
             HostedAccessibilityCommandSurfaceOk: hostedAccessibilityCommandSurfaceOk,
             HostedAccessibilityAuthoringSurfaceOk: hostedAccessibilityAuthoringSurfaceOk,
+            QuickAddConnectedNodeOk: quickAddConnectedNodeOk,
+            PortFilteredNodeSearchOk: portFilteredNodeSearchOk,
             ParameterSnapshots: proofParameterSnapshots,
             StartupMs: startupMs,
             InspectorProjectionMs: inspectorProjectionMs,
@@ -471,6 +482,53 @@ public static class ConsumerSampleProof
             string.Equals(snapshot.Key, "owner", StringComparison.Ordinal)
             && string.Equals(snapshot.CurrentValue?.ToString(), "release-owner", StringComparison.Ordinal))
         && featureDescriptorIds.Count > 0;
+
+    private static (bool QuickAddConnectedNodeOk, bool PortFilteredNodeSearchOk) HasQuickAddConnectedNode(ConsumerSampleHost host)
+    {
+        var before = host.Session.Queries.CreateDocumentSnapshot();
+        var sourceNode = before.Nodes.FirstOrDefault(node => node.DefinitionId == ConsumerSampleHost.ReviewDefinitionId);
+        if (sourceNode is null)
+        {
+            return (false, false);
+        }
+
+        host.Session.Commands.StartConnection(sourceNode.Id, "output");
+        var search = host.Session.Queries.GetCompatibleNodeDefinitionsForPendingConnection();
+        var queueInput = search.Results.FirstOrDefault(result =>
+            result.DefinitionId == ConsumerSampleHost.QueueDefinitionId
+            && result.TargetKind == GraphConnectionTargetKind.Port
+            && string.Equals(result.TargetId, "input", StringComparison.Ordinal));
+        var portFilteredNodeSearchOk = search.HasPendingConnection
+            && string.IsNullOrWhiteSpace(search.EmptyReason)
+            && queueInput is not null
+            && search.Results.All(result => result.Compatibility.IsCompatible);
+        if (queueInput is null)
+        {
+            host.Session.Commands.CancelPendingConnection();
+            return (false, portFilteredNodeSearchOk);
+        }
+
+        var connected = host.Session.Commands.TryCreateConnectedNodeFromPendingConnection(
+            queueInput.DefinitionId,
+            queueInput.TargetId,
+            queueInput.TargetKind,
+            new GraphPoint(760, 520));
+        var after = host.Session.Queries.CreateDocumentSnapshot();
+        var createdQueueNodeIds = after.Nodes
+            .Where(node => node.DefinitionId == ConsumerSampleHost.QueueDefinitionId)
+            .Select(node => node.Id)
+            .Except(before.Nodes.Select(node => node.Id), StringComparer.Ordinal)
+            .ToArray();
+        var quickAddConnectedNodeOk = connected
+            && createdQueueNodeIds.Length == 1
+            && after.Connections.Any(connection =>
+                string.Equals(connection.SourceNodeId, sourceNode.Id, StringComparison.Ordinal)
+                && string.Equals(connection.SourcePortId, "output", StringComparison.Ordinal)
+                && string.Equals(connection.TargetNodeId, createdQueueNodeIds[0], StringComparison.Ordinal)
+                && string.Equals(connection.TargetPortId, "input", StringComparison.Ordinal))
+            && !host.Session.Queries.GetPendingConnectionSnapshot().HasPendingConnection;
+        return (quickAddConnectedNodeOk, portFilteredNodeSearchOk);
+    }
 
     private static Window CreateCapabilityBreadthWindow(ConsumerSampleHost host)
     {

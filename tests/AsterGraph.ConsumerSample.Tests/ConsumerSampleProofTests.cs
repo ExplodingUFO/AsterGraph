@@ -92,6 +92,8 @@ public sealed class ConsumerSampleProofTests
         Assert.True(result.InspectorMixedValueOk);
         Assert.True(result.InspectorValidationFixOk);
         Assert.True(result.SupportBundleParameterEvidenceOk);
+        Assert.True(result.QuickAddConnectedNodeOk);
+        Assert.True(result.PortFilteredNodeSearchOk);
         Assert.True(result.TrustTransparencyOk);
         Assert.True(result.CommandSurfaceOk);
         Assert.True(result.StencilSurfaceOk);
@@ -126,6 +128,8 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(result.ProofLines, line => line == "INSPECTOR_MIXED_VALUE_OK:True");
         Assert.Contains(result.ProofLines, line => line == "INSPECTOR_VALIDATION_FIX_OK:True");
         Assert.Contains(result.ProofLines, line => line == "SUPPORT_BUNDLE_PARAMETER_EVIDENCE_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "AUTHORING_QUICK_ADD_CONNECTED_NODE_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "AUTHORING_PORT_FILTERED_NODE_SEARCH_OK:True");
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:True");
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_SURFACE_COMMAND_PROJECTION_OK:True");
         Assert.Contains(result.ProofLines, line => line == "CAPABILITY_BREADTH_STENCIL_OK:True");
@@ -442,6 +446,8 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(proofLines, line => line == "INSPECTOR_MIXED_VALUE_OK:True");
         Assert.Contains(proofLines, line => line == "INSPECTOR_VALIDATION_FIX_OK:True");
         Assert.Contains(proofLines, line => line == "SUPPORT_BUNDLE_PARAMETER_EVIDENCE_OK:True");
+        Assert.Contains(proofLines, line => line == "AUTHORING_QUICK_ADD_CONNECTED_NODE_OK:True");
+        Assert.Contains(proofLines, line => line == "AUTHORING_PORT_FILTERED_NODE_SEARCH_OK:True");
         Assert.Contains(proofLines, line => line == "AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:True");
         Assert.Contains(proofLines, line => line == "AUTHORING_SURFACE_COMMAND_PROJECTION_OK:True");
         Assert.Contains(proofLines, line => line == "CAPABILITY_BREADTH_STENCIL_OK:True");

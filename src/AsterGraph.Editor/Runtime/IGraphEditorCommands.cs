@@ -44,6 +44,21 @@ public interface IGraphEditorCommands
     void AddNode(NodeDefinitionId definitionId, GraphPoint? preferredWorldPosition = null);
 
     /// <summary>
+    /// Attempts to create a compatible node and connect the current pending connection to it in one command path.
+    /// </summary>
+    /// <param name="definitionId">Node definition to create.</param>
+    /// <param name="targetId">Target input port or parameter key on the created node.</param>
+    /// <param name="targetKind">Target endpoint kind.</param>
+    /// <param name="preferredWorldPosition">Optional preferred world position for the created node.</param>
+    /// <returns><see langword="true"/> when the node is created and connected.</returns>
+    bool TryCreateConnectedNodeFromPendingConnection(
+        NodeDefinitionId definitionId,
+        string targetId,
+        GraphConnectionTargetKind targetKind,
+        GraphPoint? preferredWorldPosition = null)
+        => throw new NotSupportedException();
+
+    /// <summary>
     /// 删除当前选择。
     /// </summary>
     void DeleteSelection();

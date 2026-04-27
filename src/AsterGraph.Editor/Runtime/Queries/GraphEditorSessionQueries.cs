@@ -6,6 +6,7 @@ using AsterGraph.Editor.Plugins;
 using AsterGraph.Editor.ViewModels;
 using AsterGraph.Core.Models;
 using AsterGraph.Abstractions.Definitions;
+using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Editor.Parameters;
 using System;
 using System.Collections.Generic;
@@ -72,6 +73,7 @@ public sealed partial class GraphEditorSession
                 new GraphEditorFeatureDescriptorSnapshot("query.node-groups", "query", true),
                 new GraphEditorFeatureDescriptorSnapshot("query.node-group-snapshots", "query", true),
                 new GraphEditorFeatureDescriptorSnapshot("capability.connections.create", "capability", capabilities.CanCreateConnections),
+                new GraphEditorFeatureDescriptorSnapshot("capability.nodes.quick-add-connected", "capability", supportsDefinitionMetadata && capabilities.CanCreateConnections),
                 new GraphEditorFeatureDescriptorSnapshot("capability.connections.pending", "capability", capabilities.CanCreateConnections),
                 new GraphEditorFeatureDescriptorSnapshot("capability.connections.complete", "capability", capabilities.CanCreateConnections),
                 new GraphEditorFeatureDescriptorSnapshot("capability.connections.reconnect", "capability", capabilities.CanCreateConnections && capabilities.CanDeleteConnections),
@@ -87,6 +89,7 @@ public sealed partial class GraphEditorSession
                 new GraphEditorFeatureDescriptorSnapshot("query.registered-node-definitions", "query", supportsDefinitionMetadata),
                 new GraphEditorFeatureDescriptorSnapshot("query.node-template-snapshots", "query", supportsDefinitionMetadata),
                 new GraphEditorFeatureDescriptorSnapshot("query.edge-template-snapshots", "query", true),
+                new GraphEditorFeatureDescriptorSnapshot("query.compatible-node-definitions", "query", supportsDefinitionMetadata),
                 new GraphEditorFeatureDescriptorSnapshot("query.tool-descriptors", "query", true),
                 new GraphEditorFeatureDescriptorSnapshot("query.shared-selection-definition", "query", supportsDefinitionMetadata),
                 new GraphEditorFeatureDescriptorSnapshot("query.selected-node-parameter-snapshots", "query", supportsDefinitionMetadata),
@@ -236,6 +239,42 @@ public sealed partial class GraphEditorSession
     public IReadOnlyList<GraphEditorCompatiblePortTargetSnapshot> GetCompatiblePortTargets(string sourceNodeId, string sourcePortId)
         => _host.GetCompatiblePortTargets(sourceNodeId, sourcePortId);
 
+    public GraphEditorCompatibleNodeSearchSnapshot GetCompatibleNodeDefinitionsForPendingConnection()
+    {
+        var pending = GetPendingConnectionSnapshot();
+        if (!pending.HasPendingConnection
+            || string.IsNullOrWhiteSpace(pending.SourceNodeId)
+            || string.IsNullOrWhiteSpace(pending.SourcePortId))
+        {
+            return new(false, null, null, [], "No pending connection.");
+        }
+
+        var descriptorSupport = _descriptorSupport;
+        if (descriptorSupport is null)
+        {
+            return new(true, pending.SourceNodeId, pending.SourcePortId, [], "No node catalog is available.");
+        }
+
+        var document = _host.CreateActiveScopeDocumentSnapshot();
+        var sourceNode = document.Nodes.FirstOrDefault(node => string.Equals(node.Id, pending.SourceNodeId, StringComparison.Ordinal));
+        var sourcePort = sourceNode?.Outputs.FirstOrDefault(port => string.Equals(port.Id, pending.SourcePortId, StringComparison.Ordinal));
+        if (sourcePort?.TypeId is null)
+        {
+            return new(true, pending.SourceNodeId, pending.SourcePortId, [], "Pending connection source port was not found.");
+        }
+
+        var results = descriptorSupport.Definitions
+            .SelectMany(definition => EnumerateCompatibleNodeDefinitionTargets(descriptorSupport, definition, sourcePort.TypeId))
+            .OrderBy(result => result.Category, StringComparer.Ordinal)
+            .ThenBy(result => result.DisplayName, StringComparer.Ordinal)
+            .ThenBy(result => result.TargetLabel, StringComparer.Ordinal)
+            .ToList();
+        var emptyReason = results.Count == 0
+            ? "No compatible node definitions found for the pending connection."
+            : null;
+        return new(true, pending.SourceNodeId, pending.SourcePortId, results, emptyReason);
+    }
+
 #pragma warning disable CS0618
     public IReadOnlyList<CompatiblePortTarget> GetCompatibleTargets(string sourceNodeId, string sourcePortId)
     {
@@ -343,4 +382,48 @@ public sealed partial class GraphEditorSession
             : new CompatiblePortTarget(node, port, target.Compatibility);
     }
 #pragma warning restore CS0618
+
+    private static IEnumerable<GraphEditorCompatibleNodeDefinitionSnapshot> EnumerateCompatibleNodeDefinitionTargets(
+        GraphEditorSessionDescriptorSupport descriptorSupport,
+        INodeDefinition definition,
+        PortTypeId sourceTypeId)
+    {
+        foreach (var input in definition.InputPorts)
+        {
+            var compatibility = descriptorSupport.CompatibilityService.Evaluate(sourceTypeId, input.TypeId);
+            if (!compatibility.IsCompatible)
+            {
+                continue;
+            }
+
+            yield return new GraphEditorCompatibleNodeDefinitionSnapshot(
+                definition.Id,
+                definition.DisplayName,
+                definition.Category,
+                input.Key,
+                input.DisplayName,
+                GraphConnectionTargetKind.Port,
+                input.TypeId,
+                compatibility);
+        }
+
+        foreach (var parameter in definition.Parameters)
+        {
+            var compatibility = descriptorSupport.CompatibilityService.Evaluate(sourceTypeId, parameter.ValueType);
+            if (!compatibility.IsCompatible)
+            {
+                continue;
+            }
+
+            yield return new GraphEditorCompatibleNodeDefinitionSnapshot(
+                definition.Id,
+                definition.DisplayName,
+                definition.Category,
+                parameter.Key,
+                parameter.DisplayName,
+                GraphConnectionTargetKind.Parameter,
+                parameter.ValueType,
+                compatibility);
+        }
+    }
 }

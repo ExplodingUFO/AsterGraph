@@ -1,4 +1,5 @@
 using AsterGraph.Abstractions.Catalog;
+using AsterGraph.Abstractions.Compatibility;
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Editor.ViewModels;
 
@@ -13,6 +14,7 @@ internal sealed class GraphEditorSessionDescriptorSupport
 
     public GraphEditorSessionDescriptorSupport(
         INodeCatalog nodeCatalog,
+        IPortCompatibilityService compatibilityService,
         Func<string, string, string>? localize = null,
         GraphEditorViewModel? compatibilityEditor = null,
         bool hasFragmentWorkspaceService = false,
@@ -30,6 +32,7 @@ internal sealed class GraphEditorSessionDescriptorSupport
         Func<bool>? hasLocalizationProvider = null)
     {
         NodeCatalog = nodeCatalog ?? throw new ArgumentNullException(nameof(nodeCatalog));
+        CompatibilityService = compatibilityService ?? throw new ArgumentNullException(nameof(compatibilityService));
         _localize = localize ?? ((_, fallback) => fallback);
         _hasNodePresentationProvider = hasNodePresentationProvider ?? (() => false);
         _hasLocalizationProvider = hasLocalizationProvider ?? (() => false);
@@ -48,6 +51,8 @@ internal sealed class GraphEditorSessionDescriptorSupport
     }
 
     public INodeCatalog NodeCatalog { get; }
+
+    public IPortCompatibilityService CompatibilityService { get; }
 
     public GraphEditorViewModel? CompatibilityEditor { get; }
 

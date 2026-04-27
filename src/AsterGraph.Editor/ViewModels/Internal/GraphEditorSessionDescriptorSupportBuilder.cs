@@ -16,6 +16,7 @@ public sealed partial class GraphEditorViewModel
         public GraphEditorSessionDescriptorSupport Build()
             => new(
                 _owner._nodeCatalog,
+                _owner._compatibilityService,
                 _owner._presentationLocalizationCoordinator.LocalizeText,
                 _owner,
                 hasFragmentWorkspaceService: _owner._fragmentWorkspaceService is not null,

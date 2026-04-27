@@ -211,6 +211,13 @@ public interface IGraphEditorQueries
         => throw new NotSupportedException();
 
     /// <summary>
+    /// Gets compatible node definitions that can complete the current pending connection.
+    /// </summary>
+    /// <returns>Compatible node-definition targets plus an empty-state reason when none are available.</returns>
+    GraphEditorCompatibleNodeSearchSnapshot GetCompatibleNodeDefinitionsForPendingConnection()
+        => throw new NotSupportedException();
+
+    /// <summary>
     /// 获取指定源端口的兼容连接目标。
     /// </summary>
     /// <param name="sourceNodeId">源节点实例标识。</param>
