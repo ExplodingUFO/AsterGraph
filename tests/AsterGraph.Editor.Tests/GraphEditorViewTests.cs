@@ -163,6 +163,35 @@ public sealed class GraphEditorViewTests
     }
 
     [AvaloniaFact]
+    public void ValidationFeedbackChrome_ProjectsCanonicalSnapshotAndFocusAction()
+    {
+        var editor = CreateValidationFeedbackEditor();
+        editor.Session.Commands.UpdateViewportSize(800, 600);
+        var window = CreateWindow(new GraphEditorView
+        {
+            Editor = editor,
+        });
+        var view = (GraphEditorView)window.Content!;
+
+        var status = FindRequiredControl<TextBlock>(view, "PART_ValidationStatusText");
+        var statusBar = FindRequiredControl<TextBlock>(view, "PART_StatusValidationText");
+        var feedbackList = FindRequiredControl<StackPanel>(view, "PART_ValidationFeedbackList");
+        var focusButton = FindRequiredDescendant<Button>(view, "PART_ValidationFocus_connection-001");
+
+        Assert.Contains("1 error", status.Text, StringComparison.Ordinal);
+        Assert.Contains("1 error", statusBar.Text, StringComparison.Ordinal);
+        Assert.Contains(
+            feedbackList.GetVisualDescendants().OfType<TextBlock>(),
+            text => text.Text?.Contains("connection.incompatible-endpoint-types", StringComparison.Ordinal) == true);
+
+        focusButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+
+        var selection = editor.Session.Queries.GetSelectionSnapshot();
+        Assert.Equal(["connection-001"], selection.SelectedConnectionIds);
+        Assert.Equal("connection-001", selection.PrimarySelectedConnectionId);
+    }
+
+    [AvaloniaFact]
     public void ShortcutHelp_AndKeyboardRouting_ProjectCommandPaletteFromSharedActionSource()
     {
         var editor = CreateEditor();
@@ -1077,6 +1106,72 @@ public sealed class GraphEditorViewTests
                         ]),
                 ],
                 []),
+            catalog,
+            new DefaultPortCompatibilityService());
+    }
+
+    private static GraphEditorViewModel CreateValidationFeedbackEditor()
+    {
+        var sourceDefinitionId = new NodeDefinitionId("tests.view.validation-source");
+        var targetDefinitionId = new NodeDefinitionId("tests.view.validation-target");
+        var flowTypeId = new PortTypeId("flow");
+        var textTypeId = new PortTypeId("string");
+        var catalog = new NodeCatalog();
+        catalog.RegisterDefinition(new NodeDefinition(
+            sourceDefinitionId,
+            "Validation Source",
+            "Tests",
+            "Validation source.",
+            [],
+            [new PortDefinition("out", "Out", flowTypeId, "#6AD5C4")]));
+        catalog.RegisterDefinition(new NodeDefinition(
+            targetDefinitionId,
+            "Validation Target",
+            "Tests",
+            "Validation target.",
+            [new PortDefinition("in", "In", textTypeId, "#F3B36B")],
+            []));
+
+        return new GraphEditorViewModel(
+            new GraphDocument(
+                "Validation Feedback Graph",
+                "Exercises hosted validation feedback projection.",
+                [
+                    new GraphNode(
+                        "tests.view.validation-source-001",
+                        "Validation Source",
+                        "Tests",
+                        "GraphEditorView",
+                        "Source node for validation feedback tests.",
+                        new GraphPoint(120, 160),
+                        new GraphSize(240, 160),
+                        [],
+                        [new GraphPort("out", "Out", PortDirection.Output, "flow", "#6AD5C4", flowTypeId)],
+                        "#6AD5C4",
+                        sourceDefinitionId),
+                    new GraphNode(
+                        "tests.view.validation-target-001",
+                        "Validation Target",
+                        "Tests",
+                        "GraphEditorView",
+                        "Target node for validation feedback tests.",
+                        new GraphPoint(520, 180),
+                        new GraphSize(240, 160),
+                        [new GraphPort("in", "In", PortDirection.Input, "string", "#F3B36B", textTypeId)],
+                        [],
+                        "#F3B36B",
+                        targetDefinitionId),
+                ],
+                [
+                    new GraphConnection(
+                        "connection-001",
+                        "tests.view.validation-source-001",
+                        "out",
+                        "tests.view.validation-target-001",
+                        "in",
+                        "Invalid Flow",
+                        "#6AD5C4"),
+                ]),
             catalog,
             new DefaultPortCompatibilityService());
     }

@@ -174,6 +174,123 @@ public sealed class GraphEditorValidationSnapshotTests
         Assert.Equal("unresolved-001", issue.NodeId);
     }
 
+    [Fact]
+    public void Commands_FocusValidationIssue_SelectsAndCentersAffectedNode()
+    {
+        var session = CreateSession(
+            new GraphDocument(
+                "Parameter Validation",
+                "Required parameter coverage.",
+                [
+                    new GraphNode(
+                        "parameter-001",
+                        "Parameter Node",
+                        "Tests",
+                        "Validation",
+                        "Requires a prompt.",
+                        new GraphPoint(120, 120),
+                        new GraphSize(220, 120),
+                        [],
+                        [],
+                        "#8B7BFF",
+                        ParameterDefinitionId),
+                ],
+                []),
+            CreateParameterCatalog());
+        session.Commands.UpdateViewportSize(800, 600);
+        var before = session.Queries.GetViewportSnapshot();
+        var issue = Assert.Single(session.Queries.GetValidationSnapshot().Issues);
+
+        var focused = session.Commands.TryFocusValidationIssue(issue);
+
+        Assert.True(focused);
+        var selection = session.Queries.GetSelectionSnapshot();
+        Assert.Equal(["parameter-001"], selection.SelectedNodeIds);
+        Assert.Equal("parameter-001", selection.PrimarySelectedNodeId);
+        Assert.Empty(selection.SelectedConnectionIds);
+        var after = session.Queries.GetViewportSnapshot();
+        Assert.NotEqual(before.PanX, after.PanX);
+        Assert.NotEqual(before.PanY, after.PanY);
+    }
+
+    [Fact]
+    public void Commands_FocusValidationIssue_NavigatesToIssueScopeBeforeFocusingNode()
+    {
+        var session = CreateSession(CreateScopedParameterDocument(), CreateParameterCatalog());
+        session.Commands.UpdateViewportSize(800, 600);
+        var issue = Assert.Single(session.Queries.GetValidationSnapshot().Issues);
+
+        var focused = session.Commands.TryFocusValidationIssue(issue);
+
+        Assert.True(focused);
+        Assert.Equal("graph-child", session.Queries.GetScopeNavigationSnapshot().CurrentScopeId);
+        var selection = session.Queries.GetSelectionSnapshot();
+        Assert.Equal(["child-parameter-001"], selection.SelectedNodeIds);
+        Assert.Equal("child-parameter-001", selection.PrimarySelectedNodeId);
+    }
+
+    [Fact]
+    public void Commands_FocusValidationIssue_SelectsAndCentersAffectedConnection()
+    {
+        var document = CreateCleanDocument() with
+        {
+            Nodes =
+            [
+                CreateSourceNode(),
+                new GraphNode(
+                    "target-001",
+                    "Target",
+                    "Tests",
+                    "Validation",
+                    "Consumes text.",
+                    new GraphPoint(420, 120),
+                    new GraphSize(220, 120),
+                    [new GraphPort("in", "In", PortDirection.Input, "string", "#F3B36B", TextTypeId)],
+                    [],
+                    "#F3B36B",
+                    TargetDefinitionId),
+            ],
+        };
+        var session = CreateSession(document, CreateConnectionCatalog(targetTypeId: TextTypeId));
+        session.Commands.UpdateViewportSize(800, 600);
+        var before = session.Queries.GetViewportSnapshot();
+        var issue = Assert.Single(session.Queries.GetValidationSnapshot().Issues);
+
+        var focused = session.Commands.TryFocusValidationIssue(issue);
+
+        Assert.True(focused);
+        var selection = session.Queries.GetSelectionSnapshot();
+        Assert.Empty(selection.SelectedNodeIds);
+        Assert.Equal(["connection-001"], selection.SelectedConnectionIds);
+        Assert.Equal("connection-001", selection.PrimarySelectedConnectionId);
+        var after = session.Queries.GetViewportSnapshot();
+        Assert.NotEqual(before.PanX, after.PanX);
+        Assert.NotEqual(before.PanY, after.PanY);
+    }
+
+    [Fact]
+    public void Commands_FocusValidationIssue_FocusesCurrentScopeForDocumentScopedIssue()
+    {
+        var session = CreateSession(CreateCleanDocument(), CreateConnectionCatalog());
+        session.Commands.UpdateViewportSize(800, 600);
+        var before = session.Queries.GetViewportSnapshot();
+        var issue = new GraphEditorValidationIssueSnapshot(
+            "document.scope",
+            GraphEditorValidationIssueSeverity.Error,
+            "Document requires attention.",
+            GraphDocument.DefaultRootGraphId);
+
+        var focused = session.Commands.TryFocusValidationIssue(issue);
+
+        Assert.True(focused);
+        Assert.Empty(session.Queries.GetSelectionSnapshot().SelectedNodeIds);
+        Assert.Empty(session.Queries.GetSelectionSnapshot().SelectedConnectionIds);
+        var after = session.Queries.GetViewportSnapshot();
+        Assert.NotEqual(before.Zoom, after.Zoom);
+        Assert.NotEqual(before.PanX, after.PanX);
+        Assert.NotEqual(before.PanY, after.PanY);
+    }
+
     private static IGraphEditorSession CreateSession(GraphDocument document, INodeCatalog catalog)
         => AsterGraphEditorFactory.CreateSession(new AsterGraphEditorOptions
         {
@@ -260,4 +377,46 @@ public sealed class GraphEditorValidationSnapshotTests
             ]));
         return catalog;
     }
+
+    private static GraphDocument CreateScopedParameterDocument()
+        => GraphDocument.CreateScoped(
+            "Scoped Parameter Validation",
+            "Required parameter coverage in child scopes.",
+            GraphDocument.DefaultRootGraphId,
+            [
+                new GraphScope(
+                    GraphDocument.DefaultRootGraphId,
+                    [
+                        new GraphNode(
+                            "composite-001",
+                            "Composite",
+                            "Tests",
+                            "Validation",
+                            "Owns a child graph.",
+                            new GraphPoint(120, 120),
+                            new GraphSize(220, 120),
+                            [],
+                            [],
+                            "#8B7BFF",
+                            Composite: new GraphCompositeNode("graph-child", [], [])),
+                    ],
+                    []),
+                new GraphScope(
+                    "graph-child",
+                    [
+                        new GraphNode(
+                            "child-parameter-001",
+                            "Child Parameter Node",
+                            "Tests",
+                            "Validation",
+                            "Requires a prompt.",
+                            new GraphPoint(180, 160),
+                            new GraphSize(220, 120),
+                            [],
+                            [],
+                            "#8B7BFF",
+                            ParameterDefinitionId),
+                    ],
+                    []),
+            ]);
 }

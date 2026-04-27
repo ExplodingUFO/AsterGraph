@@ -560,6 +560,15 @@ public interface IGraphEditorCommands
         => throw new NotSupportedException();
 
     /// <summary>
+    /// Focuses the graph surface targeted by one validation issue.
+    /// </summary>
+    /// <param name="issue">Validation issue projected by <see cref="IGraphEditorQueries.GetValidationSnapshot"/>.</param>
+    /// <param name="updateStatus">Whether to update status text.</param>
+    /// <returns><see langword="true"/> when the issue scope could be focused.</returns>
+    bool TryFocusValidationIssue(GraphEditorValidationIssueSnapshot issue, bool updateStatus = true)
+        => throw new NotSupportedException();
+
+    /// <summary>
     /// 保存当前工作区。
     /// </summary>
     void SaveWorkspace();

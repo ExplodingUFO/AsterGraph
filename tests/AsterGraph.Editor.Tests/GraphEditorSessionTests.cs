@@ -293,6 +293,10 @@ public sealed class GraphEditorSessionTests
         AssertMethod(commandsType, nameof(IGraphEditorCommands.FocusCurrentScope), typeof(bool));
         AssertMethod(commandsType, nameof(IGraphEditorCommands.CenterViewOnNode), typeof(string));
         AssertMethod(commandsType, nameof(IGraphEditorCommands.CenterViewAt), typeof(GraphPoint), typeof(bool));
+        AssertMethod(commandsType, nameof(IGraphEditorCommands.TryFocusValidationIssue), typeof(GraphEditorValidationIssueSnapshot), typeof(bool));
+        Assert.Equal(
+            typeof(bool),
+            commandsType.GetMethod(nameof(IGraphEditorCommands.TryFocusValidationIssue), [typeof(GraphEditorValidationIssueSnapshot), typeof(bool)])!.ReturnType);
         AssertMethod(commandsType, nameof(IGraphEditorCommands.TryWrapSelectionToComposite), typeof(string), typeof(bool));
         Assert.Equal(typeof(string), commandsType.GetMethod(nameof(IGraphEditorCommands.TryWrapSelectionToComposite), [typeof(string), typeof(bool)])!.ReturnType);
         AssertMethod(commandsType, nameof(IGraphEditorCommands.TryEnterCompositeChildGraph), typeof(string), typeof(bool));
