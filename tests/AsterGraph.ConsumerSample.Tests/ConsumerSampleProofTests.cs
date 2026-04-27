@@ -150,6 +150,9 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(result.ProofLines, line => line == "LAYOUT_PROVIDER_SEAM_OK:True");
         Assert.Contains(result.ProofLines, line => line == "LAYOUT_PREVIEW_APPLY_CANCEL_OK:True");
         Assert.Contains(result.ProofLines, line => line == "LAYOUT_UNDO_TRANSACTION_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "READABILITY_FOCUS_SUBGRAPH_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "READABILITY_ROUTE_CLEANUP_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "READABILITY_ALIGNMENT_HELPERS_OK:True");
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:True");
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_SURFACE_COMMAND_PROJECTION_OK:True");
         Assert.Contains(result.ProofLines, line => line == "CAPABILITY_BREADTH_STENCIL_OK:True");
@@ -484,6 +487,9 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(proofLines, line => line == "LAYOUT_PROVIDER_SEAM_OK:True");
         Assert.Contains(proofLines, line => line == "LAYOUT_PREVIEW_APPLY_CANCEL_OK:True");
         Assert.Contains(proofLines, line => line == "LAYOUT_UNDO_TRANSACTION_OK:True");
+        Assert.Contains(proofLines, line => line == "READABILITY_FOCUS_SUBGRAPH_OK:True");
+        Assert.Contains(proofLines, line => line == "READABILITY_ROUTE_CLEANUP_OK:True");
+        Assert.Contains(proofLines, line => line == "READABILITY_ALIGNMENT_HELPERS_OK:True");
         Assert.Contains(proofLines, line => line == "AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:True");
         Assert.Contains(proofLines, line => line == "AUTHORING_SURFACE_COMMAND_PROJECTION_OK:True");
         Assert.Contains(proofLines, line => line == "CAPABILITY_BREADTH_STENCIL_OK:True");

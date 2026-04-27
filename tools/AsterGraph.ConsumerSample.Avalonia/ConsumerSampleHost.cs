@@ -37,6 +37,10 @@ public sealed class ConsumerSampleHost : IDisposable
     private readonly string _storageRootPath;
     private int _nextHostNodeOrdinal = 2;
     private GraphLayoutPlan? _layoutPreview;
+    private IReadOnlyList<string> _focusedSubgraphNodeIds = [];
+    private IReadOnlyList<string> _dimmedNodeIds = [];
+    private IReadOnlyList<string> _alignmentHelperLines = [];
+    private int _lastRouteCleanupCount;
 
     private ConsumerSampleHost(
         GraphEditorViewModel editor,
@@ -71,6 +75,14 @@ public sealed class ConsumerSampleHost : IDisposable
         => Session.Queries.GetRuntimeOverlaySnapshot();
 
     public GraphLayoutPlan? LayoutPreview => _layoutPreview;
+
+    public IReadOnlyList<string> FocusedSubgraphNodeIds => _focusedSubgraphNodeIds;
+
+    public IReadOnlyList<string> DimmedNodeIds => _dimmedNodeIds;
+
+    public IReadOnlyList<string> AlignmentHelperLines => _alignmentHelperLines;
+
+    public int LastRouteCleanupCount => _lastRouteCleanupCount;
 
     public IReadOnlyList<string> RuntimeLogExportLines
         => RuntimeOverlay.RecentLogs
@@ -230,6 +242,83 @@ public sealed class ConsumerSampleHost : IDisposable
         _layoutPreview = null;
         StateChanged?.Invoke(this, EventArgs.Empty);
         return true;
+    }
+
+    public bool FocusSelectedSubgraph()
+    {
+        var document = Session.Queries.CreateDocumentSnapshot();
+        var selection = Session.Queries.GetSelectionSnapshot();
+        if (selection.SelectedNodeIds.Count == 0)
+        {
+            return false;
+        }
+
+        var focused = selection.SelectedNodeIds
+            .Concat(document.Connections
+                .Where(connection =>
+                    selection.SelectedNodeIds.Contains(connection.SourceNodeId, StringComparer.Ordinal)
+                    || selection.SelectedNodeIds.Contains(connection.TargetNodeId, StringComparer.Ordinal))
+                .SelectMany(connection => new[] { connection.SourceNodeId, connection.TargetNodeId }))
+            .Distinct(StringComparer.Ordinal)
+            .OrderBy(id => id, StringComparer.Ordinal)
+            .ToArray();
+        _focusedSubgraphNodeIds = focused;
+        _dimmedNodeIds = document.Nodes
+            .Select(node => node.Id)
+            .Except(focused, StringComparer.Ordinal)
+            .OrderBy(id => id, StringComparer.Ordinal)
+            .ToArray();
+        Session.Commands.CenterViewOnNode(selection.PrimarySelectedNodeId ?? focused[0]);
+        StateChanged?.Invoke(this, EventArgs.Empty);
+        return _focusedSubgraphNodeIds.Count > 0 && _dimmedNodeIds.Count > 0;
+    }
+
+    public bool CleanupSelectedConnectionRoutes()
+    {
+        var selectedConnectionIds = Session.Queries.GetSelectionSnapshot().SelectedConnectionIds;
+        if (selectedConnectionIds.Count == 0)
+        {
+            return false;
+        }
+
+        var cleaned = 0;
+        foreach (var connectionId in selectedConnectionIds)
+        {
+            var geometry = Session.Queries.GetConnectionGeometrySnapshots()
+                .FirstOrDefault(candidate => string.Equals(candidate.ConnectionId, connectionId, StringComparison.Ordinal));
+            if (geometry is null || geometry.Route.Vertices.Count == 0)
+            {
+                continue;
+            }
+
+            for (var index = geometry.Route.Vertices.Count - 1; index >= 0; index--)
+            {
+                if (Session.Commands.TryRemoveConnectionRouteVertex(connectionId, index, updateStatus: false))
+                {
+                    cleaned++;
+                }
+            }
+        }
+
+        _lastRouteCleanupCount = cleaned;
+        StateChanged?.Invoke(this, EventArgs.Empty);
+        return cleaned > 0;
+    }
+
+    public bool CaptureAlignmentHelperEvidence()
+    {
+        var descriptors = Session.Queries.GetCommandDescriptors();
+        _alignmentHelperLines =
+        [
+            FormatLayoutCommand(descriptors, "layout.align-left"),
+            FormatLayoutCommand(descriptors, "layout.align-center"),
+            FormatLayoutCommand(descriptors, "layout.distribute-horizontal"),
+        ];
+        StateChanged?.Invoke(this, EventArgs.Empty);
+        return _alignmentHelperLines.Count == 3
+            && _alignmentHelperLines.Any(line => line.StartsWith("layout.align-left:enabled", StringComparison.Ordinal))
+            && _alignmentHelperLines.Any(line => line.StartsWith("layout.align-center:enabled", StringComparison.Ordinal))
+            && _alignmentHelperLines.Any(line => line.StartsWith("layout.distribute-horizontal:", StringComparison.Ordinal));
     }
 
     public bool TryNavigateToRuntimeLog(GraphEditorRuntimeLogEntrySnapshot log)
@@ -736,6 +825,16 @@ public sealed class ConsumerSampleHost : IDisposable
 
     private static string FormatFingerprint(string fingerprint)
         => fingerprint.Length <= 12 ? fingerprint : fingerprint[..12] + "…";
+
+    private static string FormatLayoutCommand(
+        IReadOnlyList<GraphEditorCommandDescriptorSnapshot> descriptors,
+        string commandId)
+    {
+        var descriptor = descriptors.FirstOrDefault(candidate => string.Equals(candidate.Id, commandId, StringComparison.Ordinal));
+        return descriptor is null
+            ? $"{commandId}:missing"
+            : $"{commandId}:{(descriptor.IsEnabled ? "enabled" : "disabled")}";
+    }
 
     private sealed class ConsumerSampleManifestSource(IReadOnlyList<GraphEditorPluginManifestSourceCandidate> candidates) : IGraphEditorPluginManifestSource
     {

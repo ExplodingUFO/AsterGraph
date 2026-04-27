@@ -66,6 +66,9 @@ public sealed record ConsumerSampleProofResult(
     bool LayoutProviderSeamOk = true,
     bool LayoutPreviewApplyCancelOk = true,
     bool LayoutUndoTransactionOk = true,
+    bool ReadabilityFocusSubgraphOk = true,
+    bool ReadabilityRouteCleanupOk = true,
+    bool ReadabilityAlignmentHelpersOk = true,
     int NodeCount = 0,
     int ConnectionCount = 0,
     IReadOnlyList<string>? FeatureDescriptorIds = null,
@@ -138,6 +141,9 @@ public sealed record ConsumerSampleProofResult(
         && LayoutProviderSeamOk
         && LayoutPreviewApplyCancelOk
         && LayoutUndoTransactionOk
+        && ReadabilityFocusSubgraphOk
+        && ReadabilityRouteCleanupOk
+        && ReadabilityAlignmentHelpersOk
         && NodeCount > 0
         && (FeatureDescriptorIds?.Count > 0);
 
@@ -193,6 +199,9 @@ public sealed record ConsumerSampleProofResult(
         $"LAYOUT_PROVIDER_SEAM_OK:{LayoutProviderSeamOk}",
         $"LAYOUT_PREVIEW_APPLY_CANCEL_OK:{LayoutPreviewApplyCancelOk}",
         $"LAYOUT_UNDO_TRANSACTION_OK:{LayoutUndoTransactionOk}",
+        $"READABILITY_FOCUS_SUBGRAPH_OK:{ReadabilityFocusSubgraphOk}",
+        $"READABILITY_ROUTE_CLEANUP_OK:{ReadabilityRouteCleanupOk}",
+        $"READABILITY_ALIGNMENT_HELPERS_OK:{ReadabilityAlignmentHelpersOk}",
         $"AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:{NodeSideAuthoringOk}",
         $"AUTHORING_SURFACE_COMMAND_PROJECTION_OK:{CommandSurfaceOk}",
         $"CONSUMER_SAMPLE_PARAMETER_OK:{ParameterProjectionOk}",
@@ -285,6 +294,9 @@ public static class ConsumerSampleProof
         bool layoutProviderSeamOk;
         bool layoutPreviewApplyCancelOk;
         bool layoutUndoTransactionOk;
+        bool readabilityFocusSubgraphOk;
+        bool readabilityRouteCleanupOk;
+        bool readabilityAlignmentHelpersOk;
         double inspectorProjectionMs;
         double pluginScanMs;
         double commandLatencyMs;
@@ -367,6 +379,7 @@ public static class ConsumerSampleProof
             runtimeLogFilterOk = HasRuntimeLogFilter(host);
             layoutProviderSeamOk = HasLayoutProviderSeam(host);
             (layoutPreviewApplyCancelOk, layoutUndoTransactionOk) = HasLayoutPreviewApplyCancel(host, window);
+            (readabilityFocusSubgraphOk, readabilityRouteCleanupOk, readabilityAlignmentHelpersOk) = HasReadabilityHelpers(host);
         }
         finally
         {
@@ -494,6 +507,9 @@ public static class ConsumerSampleProof
             LayoutProviderSeamOk: layoutProviderSeamOk,
             LayoutPreviewApplyCancelOk: layoutPreviewApplyCancelOk,
             LayoutUndoTransactionOk: layoutUndoTransactionOk,
+            ReadabilityFocusSubgraphOk: readabilityFocusSubgraphOk,
+            ReadabilityRouteCleanupOk: readabilityRouteCleanupOk,
+            ReadabilityAlignmentHelpersOk: readabilityAlignmentHelpersOk,
             ParameterSnapshots: proofParameterSnapshots,
             StartupMs: startupMs,
             InspectorProjectionMs: inspectorProjectionMs,
@@ -647,6 +663,40 @@ public static class ConsumerSampleProof
         => document.Nodes.All(node =>
             expectedPositions.TryGetValue(node.Id, out var expected)
             && expected == node.Position);
+
+    private static (bool FocusSubgraphOk, bool RouteCleanupOk, bool AlignmentHelpersOk) HasReadabilityHelpers(ConsumerSampleHost host)
+    {
+        var document = host.Session.Queries.CreateDocumentSnapshot();
+        var reviewNodeId = host.GetFirstReviewNodeId();
+        var queueNodeId = document.Connections
+            .First(connection => string.Equals(connection.Id, "consumer-sample-connection-001", StringComparison.Ordinal))
+            .TargetNodeId;
+
+        host.Session.Commands.SetSelection([reviewNodeId, queueNodeId], reviewNodeId, updateStatus: false);
+        var focusSubgraphOk = host.FocusSelectedSubgraph()
+            && host.FocusedSubgraphNodeIds.Contains(reviewNodeId, StringComparer.Ordinal)
+            && host.FocusedSubgraphNodeIds.Contains(queueNodeId, StringComparer.Ordinal)
+            && host.DimmedNodeIds.Count > 0;
+
+        var alignmentHelpersOk = host.CaptureAlignmentHelperEvidence()
+            && host.AlignmentHelperLines.Any(line => line.StartsWith("layout.align-left:enabled", StringComparison.Ordinal))
+            && host.AlignmentHelperLines.Any(line => line.StartsWith("layout.align-center:enabled", StringComparison.Ordinal));
+
+        var connectionId = "consumer-sample-connection-001";
+        var inserted = host.Session.Commands.TryInsertConnectionRouteVertex(connectionId, 0, new GraphPoint(360, 260), updateStatus: false);
+        host.Session.Commands.SetConnectionSelection([connectionId], primaryConnectionId: connectionId, updateStatus: false);
+        var cleaned = host.CleanupSelectedConnectionRoutes();
+        var routeCleanupOk = inserted
+            && cleaned
+            && host.LastRouteCleanupCount > 0
+            && host.Session.Queries.GetConnectionGeometrySnapshots()
+                .First(connection => string.Equals(connection.ConnectionId, connectionId, StringComparison.Ordinal))
+                .Route
+                .Vertices
+                .Count == 0;
+
+        return (focusSubgraphOk, routeCleanupOk, alignmentHelpersOk);
+    }
 
     private static (bool QuickAddConnectedNodeOk, bool PortFilteredNodeSearchOk) HasQuickAddConnectedNode(ConsumerSampleHost host)
     {
