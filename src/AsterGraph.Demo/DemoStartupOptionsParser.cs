@@ -40,7 +40,7 @@ public static class DemoStartupOptionsParser
         var shellOptions = MainWindowShellOptions.CreatePersistentDefault();
         if (!string.IsNullOrWhiteSpace(scenarioName))
         {
-            if (!DemoGraphFactory.IsKnownScenario(scenarioName))
+            if (!DemoGraphFactory.TryGetScenarioPreset(scenarioName, out var preset) || preset is null)
             {
                 throw new ArgumentException($"Unknown demo scenario '{scenarioName}'.", nameof(args));
             }
@@ -48,7 +48,7 @@ public static class DemoStartupOptionsParser
             shellOptions = shellOptions with
             {
                 RestoreLastWorkspaceOnStartup = false,
-                InitialScenario = DemoGraphFactory.AiPipelineScenario,
+                InitialScenario = preset.Id,
             };
         }
 

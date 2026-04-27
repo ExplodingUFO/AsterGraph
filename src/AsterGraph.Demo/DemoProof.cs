@@ -31,6 +31,7 @@ public sealed record DemoProofResult(
     bool EdgeNoteOk,
     bool EdgeGeometryOk,
     bool DisconnectFlowOk,
+    bool DemoScenarioPresetsOk,
     bool ScenarioLaunchOk,
     bool ScenarioTourOk,
     bool AiPipelineMockRunnerOk,
@@ -57,6 +58,7 @@ public sealed record DemoProofResult(
         && EdgeNoteOk
         && EdgeGeometryOk
         && DisconnectFlowOk
+        && DemoScenarioPresetsOk
         && ScenarioLaunchOk
         && ScenarioTourOk
         && AiPipelineMockRunnerOk
@@ -225,6 +227,7 @@ public static class DemoProof
             && shell.RecentWorkspacePaths.Any(path => string.Equals(path, workspacePath, StringComparison.OrdinalIgnoreCase))
             && shell.ShellWorkflowLines.Any(line => line.Contains("workspace", StringComparison.OrdinalIgnoreCase) || line.Contains("工作区", StringComparison.Ordinal));
         var (compositeScopeOk, edgeNoteOk, edgeGeometryOk, disconnectFlowOk) = RunSemanticGraphProof(storageRoot);
+        var demoScenarioPresetsOk = RunScenarioPresetProof();
         var (scenarioLaunchOk, scenarioTourOk, aiPipelineMockRunnerOk, aiPipelineRuntimeOverlayOk, aiPipelineErrorStateOk) = RunScenarioTourProof(storageRoot);
 
         return new DemoProofResult(
@@ -243,6 +246,7 @@ public static class DemoProof
             edgeNoteOk,
             edgeGeometryOk,
             disconnectFlowOk,
+            demoScenarioPresetsOk,
             scenarioLaunchOk,
             scenarioTourOk,
             aiPipelineMockRunnerOk,
@@ -252,6 +256,32 @@ public static class DemoProof
             inspectorProjectionMs,
             pluginScanMs,
             commandLatencyMs);
+    }
+
+    private static bool RunScenarioPresetProof()
+    {
+        var catalog = CreateProofCatalog();
+        var defaultDocument = DemoGraphFactory.CreateStartupDocument(catalog, null);
+        var terrainDocument = DemoGraphFactory.CreateScenario(catalog, DemoGraphFactory.TerrainShaderScenario);
+        var aiPipelineDocument = DemoGraphFactory.CreateScenario(catalog, DemoGraphFactory.AiPipelineScenario);
+        var terrainStartup = DemoStartupOptionsParser.Parse(["--scenario=Terrain-Shader"]);
+
+        return DemoGraphFactory.ScenarioPresets.Count >= 2
+            && DemoGraphFactory.ScenarioPresets
+                .Select(preset => preset.Id)
+                .Distinct(StringComparer.Ordinal)
+                .Count() == DemoGraphFactory.ScenarioPresets.Count
+            && DemoGraphFactory.ScenarioPresets.Any(preset =>
+                string.Equals(preset.Id, DemoGraphFactory.TerrainShaderScenario, StringComparison.Ordinal)
+                && string.Equals(preset.Title, "Terrain Shader Graph", StringComparison.Ordinal))
+            && DemoGraphFactory.ScenarioPresets.Any(preset =>
+                string.Equals(preset.Id, DemoGraphFactory.AiPipelineScenario, StringComparison.Ordinal)
+                && string.Equals(preset.Title, "AI Workflow / Agent Pipeline", StringComparison.Ordinal))
+            && string.Equals(terrainStartup.ShellOptions.InitialScenario, DemoGraphFactory.TerrainShaderScenario, StringComparison.Ordinal)
+            && !terrainStartup.ShellOptions.RestoreLastWorkspaceOnStartup
+            && string.Equals(defaultDocument.Title, terrainDocument.Title, StringComparison.Ordinal)
+            && terrainDocument.Nodes.Any(node => string.Equals(node.Id, "noise", StringComparison.Ordinal))
+            && aiPipelineDocument.Nodes.Any(node => string.Equals(node.Id, "llm", StringComparison.Ordinal));
     }
 
     private static double MeasureMilliseconds(Action action)
