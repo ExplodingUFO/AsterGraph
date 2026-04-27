@@ -975,25 +975,41 @@ public sealed class DemoProofReleaseSurfaceTests
         foreach (var contents in new[] { extensionContracts, extensionContractsZh })
         {
             Assert.Contains("### Stable canonical surfaces", contents, StringComparison.Ordinal);
-            Assert.Contains("### Supported hosted-UI composition helper", contents, StringComparison.Ordinal);
+            Assert.Contains("### Supported hosted helper", contents, StringComparison.Ordinal);
             Assert.Contains("### Retained migration surfaces", contents, StringComparison.Ordinal);
-            Assert.Contains("### Compatibility-only shims", contents, StringComparison.Ordinal);
+            Assert.Contains("### Compatibility-only surfaces", contents, StringComparison.Ordinal);
+            Assert.Contains("### Internal-only surfaces", contents, StringComparison.Ordinal);
             Assert.Contains("AsterGraphEditorFactory.CreateSession(...)", contents, StringComparison.Ordinal);
-        Assert.Contains("IGraphEditorSession", contents, StringComparison.Ordinal);
-        Assert.Contains("AsterGraphEditorFactory.Create(...)", contents, StringComparison.Ordinal);
-        Assert.Contains("GraphEditorViewModel", contents, StringComparison.Ordinal);
-        Assert.Contains("GraphEditorView", contents, StringComparison.Ordinal);
-        Assert.Contains("GraphEditorViewModel.Session", contents, StringComparison.Ordinal);
-        Assert.Contains("GetCompatiblePortTargets(...)", contents, StringComparison.Ordinal);
-        Assert.Contains("IGraphEditorQueries.GetCompatibleTargets(...)", contents, StringComparison.Ordinal);
-        Assert.Contains("CompatiblePortTarget", contents, StringComparison.Ordinal);
-        Assert.Contains("stable canonical surfaces", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("IGraphEditorSession", contents, StringComparison.Ordinal);
+            Assert.Contains("AsterGraphEditorFactory.Create(...)", contents, StringComparison.Ordinal);
+            Assert.Contains("AsterGraphAvaloniaViewFactory.Create(...)", contents, StringComparison.Ordinal);
+            Assert.Contains("AsterGraphHostBuilder", contents, StringComparison.Ordinal);
+            Assert.Contains("GraphEditorViewModel", contents, StringComparison.Ordinal);
+            Assert.Contains("GraphEditorView", contents, StringComparison.Ordinal);
+            Assert.Contains("GraphEditorViewModel.Session", contents, StringComparison.Ordinal);
+            Assert.Contains("GetCompatiblePortTargets(...)", contents, StringComparison.Ordinal);
+            Assert.Contains("IGraphEditorQueries.GetCompatibleTargets(...)", contents, StringComparison.Ordinal);
+            Assert.Contains("CompatiblePortTarget", contents, StringComparison.Ordinal);
+            Assert.Contains("GraphEditorCompatiblePortTargetSnapshot", contents, StringComparison.Ordinal);
+            Assert.Contains("stable canonical surfaces", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("supported hosted helper", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("retained migration", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("compatibility-only", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("internal-only", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("API only has three", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("API 只有三个层级", contents, StringComparison.OrdinalIgnoreCase);
         }
 
         Assert.Contains("Use the retained surfaces only as migration bridges.", extensionContracts, StringComparison.Ordinal);
         Assert.Contains("canonical-first 指导是", extensionContractsZh, StringComparison.Ordinal);
         Assert.Contains("new work should start on the stable canonical surfaces", extensionContracts, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("新工作应优先从 `Stable canonical surfaces` 起步", extensionContractsZh, StringComparison.Ordinal);
+        Assert.True(HasLineWithAll(extensionContracts, "GraphEditorViewModel", "GraphEditorView", "AsterGraphEditorFactory.CreateSession(...)", "AsterGraphAvaloniaViewFactory.Create(...)"));
+        Assert.True(HasLineWithAll(extensionContractsZh, "GraphEditorViewModel", "GraphEditorView", "AsterGraphEditorFactory.CreateSession(...)", "AsterGraphAvaloniaViewFactory.Create(...)"));
+        Assert.True(HasLineWithAll(extensionContracts, "GraphEditorViewModel", "GraphEditorView", "retained only"));
+        Assert.True(HasLineWithAll(extensionContractsZh, "retained", "只用于迁移"));
+        Assert.True(HasLineWithAll(extensionContracts, "Compatibility-only", "not to be used for new work"));
+        Assert.True(HasLineWithAll(extensionContractsZh, "Compatibility-only", "不用于新特性开发"));
         Assert.Contains("public-api-inventory.md", extensionContracts, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("public-api-inventory.md", extensionContractsZh, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("public-api-inventory.md", hostIntegration, StringComparison.OrdinalIgnoreCase);
