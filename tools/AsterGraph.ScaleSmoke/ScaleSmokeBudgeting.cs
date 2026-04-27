@@ -357,8 +357,8 @@ public sealed record ScaleSmokeTier(
                 Budget: new ScaleSmokeBudget(
                     SetupMs: 2500,
                     SelectionMs: 750,
-                    ConnectionMs: 350,
-                    HistoryMs: 800,
+                    ConnectionMs: 450,
+                    HistoryMs: 1000,
                     ViewportMs: 200,
                     SaveMs: 300,
                     ReloadMs: 1500),

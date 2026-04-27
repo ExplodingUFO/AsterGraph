@@ -55,8 +55,8 @@ release lane 现在会守住 `baseline`、`large`，以及 `stress` 中已提升
 | --- | ---: |
 | setup | 2500 ms |
 | selection | 750 ms |
-| connection | 350 ms |
-| history interaction | 800 ms |
+| connection | 450 ms |
+| history interaction | 1000 ms |
 | viewport / fit | 200 ms |
 | save | 300 ms |
 | reload | 1500 ms |

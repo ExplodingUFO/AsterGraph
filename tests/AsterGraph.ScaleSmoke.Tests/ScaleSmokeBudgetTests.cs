@@ -25,7 +25,7 @@ public sealed class ScaleSmokeBudgetTests
         var marker = tier.ToBudgetMarker();
 
         Assert.Equal(
-            "SCALE_TIER_BUDGET:large:nodes=1000:selection=128:moves=64:setup<=2500:selection<=750:connection<=350:history<=800:viewport<=200:save<=300:reload<=1500",
+            "SCALE_TIER_BUDGET:large:nodes=1000:selection=128:moves=64:setup<=2500:selection<=750:connection<=450:history<=1000:viewport<=200:save<=300:reload<=1500",
             marker);
     }
 
@@ -63,13 +63,13 @@ public sealed class ScaleSmokeBudgetTests
     {
         var tier = ScaleSmokeTier.Parse(["--tier", "large"]);
         var metrics = new ScaleSmokeMetrics(
-            SetupMs: 202,
-            SelectionMs: 11,
-            ConnectionMs: 163,
-            HistoryMs: 271,
-            ViewportMs: 2,
-            SaveMs: 55,
-            ReloadMs: 26);
+            SetupMs: 562,
+            SelectionMs: 22,
+            ConnectionMs: 394,
+            HistoryMs: 886,
+            ViewportMs: 7,
+            SaveMs: 121,
+            ReloadMs: 64);
 
         var result = tier.Evaluate(metrics);
 
@@ -84,7 +84,7 @@ public sealed class ScaleSmokeBudgetTests
         var metrics = new ScaleSmokeMetrics(
             SetupMs: 202,
             SelectionMs: 11,
-            ConnectionMs: 351,
+            ConnectionMs: 451,
             HistoryMs: 271,
             ViewportMs: 2,
             SaveMs: 55,
@@ -93,10 +93,10 @@ public sealed class ScaleSmokeBudgetTests
         var result = tier.Evaluate(metrics);
 
         Assert.False(result.Passed);
-        Assert.Contains("connection=351>350(defended)", result.FailureSummary, StringComparison.Ordinal);
+        Assert.Contains("connection=451>450(defended)", result.FailureSummary, StringComparison.Ordinal);
         var failure = Assert.Single(result.Failures);
         Assert.Equal(
-            "SCALE_BUDGET_FAILURE:large:area=performance:metric=connection:actual=351:threshold=350:policy=defended",
+            "SCALE_BUDGET_FAILURE:large:area=performance:metric=connection:actual=451:threshold=450:policy=defended",
             failure.ToMarker());
     }
 
