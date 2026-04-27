@@ -65,6 +65,21 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
     public void AddNode(NodeDefinitionId definitionId, GraphPoint? preferredWorldPosition)
         => _kernel.AddNode(definitionId, preferredWorldPosition);
 
+    public bool TryInsertNodeIntoConnection(
+        string connectionId,
+        NodeDefinitionId definitionId,
+        string inputTargetId,
+        GraphConnectionTargetKind inputTargetKind,
+        string outputPortId,
+        GraphPoint? preferredWorldPosition)
+        => _kernel.TryInsertNodeIntoConnection(
+            connectionId,
+            definitionId,
+            inputTargetId,
+            inputTargetKind,
+            outputPortId,
+            preferredWorldPosition);
+
     public void DeleteSelection() => _kernel.DeleteSelection();
 
     public Task<bool> TryCopySelectionAsync(CancellationToken cancellationToken)

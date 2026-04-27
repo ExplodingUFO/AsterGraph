@@ -59,6 +59,25 @@ public interface IGraphEditorCommands
         => throw new NotSupportedException();
 
     /// <summary>
+    /// Attempts to insert a compatible node into an existing connection, replacing one edge with two validated edges.
+    /// </summary>
+    /// <param name="connectionId">Existing connection to split.</param>
+    /// <param name="definitionId">Node definition to create between the original endpoints.</param>
+    /// <param name="inputTargetId">Input port or parameter key on the inserted node.</param>
+    /// <param name="inputTargetKind">Inserted-node input endpoint kind.</param>
+    /// <param name="outputPortId">Output port on the inserted node that reconnects to the original target.</param>
+    /// <param name="preferredWorldPosition">Optional preferred world position for the inserted node.</param>
+    /// <returns><see langword="true"/> when the connection is split.</returns>
+    bool TryInsertNodeIntoConnection(
+        string connectionId,
+        NodeDefinitionId definitionId,
+        string inputTargetId,
+        GraphConnectionTargetKind inputTargetKind,
+        string outputPortId,
+        GraphPoint? preferredWorldPosition = null)
+        => throw new NotSupportedException();
+
+    /// <summary>
     /// 删除当前选择。
     /// </summary>
     void DeleteSelection();

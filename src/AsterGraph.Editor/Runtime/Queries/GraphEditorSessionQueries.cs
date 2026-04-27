@@ -74,6 +74,7 @@ public sealed partial class GraphEditorSession
                 new GraphEditorFeatureDescriptorSnapshot("query.node-group-snapshots", "query", true),
                 new GraphEditorFeatureDescriptorSnapshot("capability.connections.create", "capability", capabilities.CanCreateConnections),
                 new GraphEditorFeatureDescriptorSnapshot("capability.nodes.quick-add-connected", "capability", supportsDefinitionMetadata && capabilities.CanCreateConnections),
+                new GraphEditorFeatureDescriptorSnapshot("capability.nodes.insert-into-connection", "capability", supportsDefinitionMetadata && capabilities.CanCreateConnections && capabilities.CanDeleteConnections),
                 new GraphEditorFeatureDescriptorSnapshot("capability.connections.pending", "capability", capabilities.CanCreateConnections),
                 new GraphEditorFeatureDescriptorSnapshot("capability.connections.complete", "capability", capabilities.CanCreateConnections),
                 new GraphEditorFeatureDescriptorSnapshot("capability.connections.reconnect", "capability", capabilities.CanCreateConnections && capabilities.CanDeleteConnections),

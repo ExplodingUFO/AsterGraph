@@ -27,6 +27,13 @@ internal interface IGraphEditorSessionHost
     void ClearSelection(bool updateStatus);
     void SetSelection(IReadOnlyList<string> nodeIds, string? primaryNodeId, bool updateStatus);
     void AddNode(NodeDefinitionId definitionId, GraphPoint? preferredWorldPosition);
+    bool TryInsertNodeIntoConnection(
+        string connectionId,
+        NodeDefinitionId definitionId,
+        string inputTargetId,
+        GraphConnectionTargetKind inputTargetKind,
+        string outputPortId,
+        GraphPoint? preferredWorldPosition);
     void DeleteSelection();
     Task<bool> TryCopySelectionAsync(CancellationToken cancellationToken);
     Task<bool> TryPasteSelectionAsync(CancellationToken cancellationToken);

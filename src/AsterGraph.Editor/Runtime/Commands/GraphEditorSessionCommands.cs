@@ -72,6 +72,34 @@ public sealed partial class GraphEditorSession
         return true;
     }
 
+    public bool TryInsertNodeIntoConnection(
+        string connectionId,
+        NodeDefinitionId definitionId,
+        string inputTargetId,
+        GraphConnectionTargetKind inputTargetKind,
+        string outputPortId,
+        GraphPoint? preferredWorldPosition = null)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(connectionId);
+        ArgumentNullException.ThrowIfNull(definitionId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(inputTargetId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(outputPortId);
+
+        var inserted = _host.TryInsertNodeIntoConnection(
+            connectionId,
+            definitionId,
+            inputTargetId,
+            inputTargetKind,
+            outputPortId,
+            preferredWorldPosition);
+        if (inserted)
+        {
+            PublishCommandExecuted("nodes.insert-into-connection");
+        }
+
+        return inserted;
+    }
+
     public void DeleteSelection()
         => Execute("selection.delete", _host.DeleteSelection);
 

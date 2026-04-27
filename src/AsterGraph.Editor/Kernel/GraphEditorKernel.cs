@@ -171,6 +171,138 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
     public void AddNode(NodeDefinitionId definitionId, GraphPoint? preferredWorldPosition)
         => _nodeMutationCoordinator.AddNode(definitionId, preferredWorldPosition);
 
+    public bool TryInsertNodeIntoConnection(
+        string connectionId,
+        NodeDefinitionId definitionId,
+        string inputTargetId,
+        GraphConnectionTargetKind inputTargetKind,
+        string outputPortId,
+        GraphPoint? preferredWorldPosition)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(connectionId);
+        ArgumentNullException.ThrowIfNull(definitionId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(inputTargetId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(outputPortId);
+
+        if (!_behaviorOptions.Commands.Nodes.AllowCreate)
+        {
+            CurrentStatusMessage = "Node creation is disabled by host permissions.";
+            return false;
+        }
+
+        if (!_behaviorOptions.Commands.Connections.AllowCreate || !_behaviorOptions.Commands.Connections.AllowDelete)
+        {
+            CurrentStatusMessage = "Inserting a node into a connection requires connection create and delete permissions.";
+            return false;
+        }
+
+        var document = CreateActiveScopeDocumentSnapshot();
+        var connection = document.Connections.FirstOrDefault(candidate => string.Equals(candidate.Id, connectionId, StringComparison.Ordinal));
+        if (connection is null)
+        {
+            CurrentStatusMessage = "No matching connection was found for node insertion.";
+            return false;
+        }
+
+        if (!_nodeCatalog.TryGetDefinition(definitionId, out var definition) || definition is null)
+        {
+            CurrentStatusMessage = $"Node definition '{definitionId}' is not registered in the current editor catalog.";
+            return false;
+        }
+
+        var sourceTypeId = ResolveConnectionSourceType(document, connection);
+        var insertedInputTypeId = ResolveDefinitionInputType(definition, inputTargetId, inputTargetKind);
+        var insertedOutput = definition.OutputPorts.FirstOrDefault(port => string.Equals(port.Key, outputPortId, StringComparison.Ordinal));
+        var originalTargetTypeId = ResolveConnectionTargetType(document, connection.Target);
+        if (sourceTypeId is null || insertedInputTypeId is null || insertedOutput is null || originalTargetTypeId is null)
+        {
+            CurrentStatusMessage = "Connection insertion requires resolvable source, inserted node, and target endpoint types.";
+            return false;
+        }
+
+        var upstreamCompatibility = _compatibilityService.Evaluate(sourceTypeId, insertedInputTypeId);
+        var downstreamCompatibility = _compatibilityService.Evaluate(insertedOutput.TypeId, originalTargetTypeId);
+        if (!upstreamCompatibility.IsCompatible || !downstreamCompatibility.IsCompatible)
+        {
+            CurrentStatusMessage = "Inserted node is not compatible with both connection endpoints.";
+            return false;
+        }
+
+        var contentPlan = GraphEditorNodeSurfacePlanner.Create(definition);
+        var measurement = GraphEditorNodeSurfaceMeasurer.Measure(contentPlan);
+        var normalizedSize = GraphEditorNodeSurfaceMetrics.NormalizePersistedSize(
+            new GraphSize(definition.DefaultWidth, definition.DefaultHeight),
+            measurement);
+        var position = preferredWorldPosition ?? GetViewportCenter();
+        var offset = 26 * (document.Nodes.Count % 4);
+        var insertedNode = new GraphNode(
+            CreateNodeId(definitionId),
+            definition.DisplayName,
+            definition.Category,
+            definition.Subtitle,
+            definition.Description ?? definition.Subtitle,
+            new GraphPoint(
+                position.X - (normalizedSize.Width / 2) + offset,
+                position.Y - (normalizedSize.Height / 2) + offset),
+            normalizedSize,
+            definition.InputPorts.Select(port => new GraphPort(port.Key, port.DisplayName, PortDirection.Input, port.TypeId.Value, port.AccentHex, port.TypeId, port.GroupName, port.MinConnections, port.MaxConnections)).ToList(),
+            definition.OutputPorts.Select(port => new GraphPort(port.Key, port.DisplayName, PortDirection.Output, port.TypeId.Value, port.AccentHex, port.TypeId, port.GroupName, port.MinConnections, port.MaxConnections)).ToList(),
+            definition.AccentHex,
+            definition.Id,
+            definition.Parameters.Select(parameter => new GraphParameterValue(parameter.Key, parameter.ValueType, parameter.DefaultValue)).ToList(),
+            GraphNodeSurfaceState.Default);
+
+        var existingConnectionIds = document.Connections.Select(candidate => candidate.Id).ToList();
+        var upstreamConnectionId = CreateUniqueId(existingConnectionIds, "connection-");
+        var downstreamConnectionId = CreateUniqueId(existingConnectionIds.Concat([upstreamConnectionId]), "connection-");
+        var upstreamPresentation = string.IsNullOrWhiteSpace(connection.Presentation?.NoteText)
+            ? null
+            : new GraphEdgePresentation(connection.Presentation.NoteText);
+        var upstreamConnection = new GraphConnection(
+            upstreamConnectionId,
+            connection.SourceNodeId,
+            connection.SourcePortId,
+            insertedNode.Id,
+            inputTargetId,
+            $"{connection.SourcePortId} to {inputTargetId}",
+            connection.AccentHex,
+            upstreamCompatibility.ConversionId,
+            upstreamPresentation)
+        {
+            TargetKind = inputTargetKind,
+        };
+        var downstreamConnection = new GraphConnection(
+            downstreamConnectionId,
+            insertedNode.Id,
+            outputPortId,
+            connection.TargetNodeId,
+            connection.TargetPortId,
+            $"{outputPortId} to {connection.TargetPortId}",
+            insertedOutput.AccentHex,
+            downstreamCompatibility.ConversionId)
+        {
+            TargetKind = connection.TargetKind,
+        };
+
+        ApplyActiveScopeDocument(document with
+        {
+            Nodes = document.Nodes.Concat([insertedNode]).ToList(),
+            Connections = document.Connections
+                .Where(candidate => !string.Equals(candidate.Id, connection.Id, StringComparison.Ordinal))
+                .Concat([upstreamConnection, downstreamConnection])
+                .ToList(),
+        });
+        SetSelection([insertedNode.Id], insertedNode.Id, updateStatus: false);
+        CurrentStatusMessage = $"Inserted {insertedNode.Title} into connection.";
+        MarkDirty(
+            CurrentStatusMessage,
+            GraphEditorDocumentChangeKind.ConnectionsChanged,
+            [insertedNode.Id, connection.SourceNodeId, connection.TargetNodeId],
+            [connection.Id, upstreamConnection.Id, downstreamConnection.Id],
+            preserveStatus: true);
+        return true;
+    }
+
     public void DeleteNodeById(string nodeId)
         => _nodeMutationCoordinator.DeleteNodeById(nodeId);
 
@@ -1685,6 +1817,58 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
 
     private string CreateConnectionId()
         => CreateUniqueId(GetAllConnections().Select(connection => connection.Id), "connection-");
+
+    private static PortTypeId? ResolveConnectionSourceType(GraphDocument document, GraphConnection connection)
+    {
+        var sourceNode = document.Nodes.FirstOrDefault(node => string.Equals(node.Id, connection.SourceNodeId, StringComparison.Ordinal));
+        return sourceNode?.Outputs
+            .FirstOrDefault(port => string.Equals(port.Id, connection.SourcePortId, StringComparison.Ordinal))
+            ?.TypeId;
+    }
+
+    private static PortTypeId? ResolveDefinitionInputType(
+        INodeDefinition definition,
+        string targetId,
+        GraphConnectionTargetKind targetKind)
+    {
+        if (targetKind == GraphConnectionTargetKind.Port)
+        {
+            return definition.InputPorts
+                .FirstOrDefault(port => string.Equals(port.Key, targetId, StringComparison.Ordinal))
+                ?.TypeId;
+        }
+
+        return definition.Parameters
+            .FirstOrDefault(parameter => string.Equals(parameter.Key, targetId, StringComparison.Ordinal))
+            ?.ValueType;
+    }
+
+    private PortTypeId? ResolveConnectionTargetType(GraphDocument document, GraphConnectionTargetRef target)
+    {
+        var targetNode = document.Nodes.FirstOrDefault(node => string.Equals(node.Id, target.NodeId, StringComparison.Ordinal));
+        if (targetNode is null)
+        {
+            return null;
+        }
+
+        if (target.Kind == GraphConnectionTargetKind.Port)
+        {
+            return targetNode.Inputs
+                .FirstOrDefault(port => string.Equals(port.Id, target.TargetId, StringComparison.Ordinal))
+                ?.TypeId;
+        }
+
+        if (targetNode.DefinitionId is null
+            || !_nodeCatalog.TryGetDefinition(targetNode.DefinitionId, out var definition)
+            || definition is null)
+        {
+            return null;
+        }
+
+        return definition.Parameters
+            .FirstOrDefault(parameter => string.Equals(parameter.Key, target.TargetId, StringComparison.Ordinal))
+            ?.ValueType;
+    }
 
     private GraphSelectionFragment? PeekSelectionClipboard()
         => _selectionClipboard.Peek();

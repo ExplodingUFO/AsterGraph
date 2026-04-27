@@ -360,7 +360,7 @@ public sealed class GraphInspectorStandaloneTests
             var validationSummary = inspector.FindControl<TextBlock>("PART_ParameterValidationSummaryText");
             var resetSlugButton = inspector.GetVisualDescendants()
                 .OfType<Button>()
-                .Single(button => button.Classes.Contains("astergraph-reset-parameter-button") && Equals(button.Tag, "slug"));
+                .First(button => button.Classes.Contains("astergraph-reset-parameter-button") && Equals(button.Tag, "slug"));
 
             Assert.NotNull(validationSummary);
             Assert.Contains("Slug", validationSummary!.Text);

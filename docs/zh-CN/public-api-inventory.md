@@ -27,7 +27,7 @@
 
 | 宿主路线 | 支持层级 | 主要符号 | 说明 |
 | --- | --- | --- | --- |
-| 仅运行时 / 自定义 UI | Stable canonical | `AsterGraphEditorFactory.CreateSession(...)`、`IGraphEditorSession` | 新的自定义 UI 和原生 shell 默认从这里开始。 |
+| 仅运行时 / 自定义 UI | Stable canonical | `AsterGraphEditorFactory.CreateSession(...)`、`IGraphEditorSession`、`IGraphEditorCommands.TryCreateConnectedNodeFromPendingConnection(...)`、`IGraphEditorCommands.TryInsertNodeIntoConnection(...)` | 新的自定义 UI 和原生 shell 默认从这里开始；authoring productivity 命令仍走 canonical session route。 |
 | Shipped Avalonia UI | Supported hosted helper | `AsterGraphEditorFactory.Create(...)`、`AsterGraphAvaloniaViewFactory.Create(...)` | 使用同一个 runtime owner，不是第二套 runtime model。 |
 | Thin hosted builder | Supported hosted helper | `AsterGraphHostBuilder.Create(...).BuildAvaloniaView()` | 减少常见 Avalonia 组合样板，并委托给 canonical factories。 |
 | Retained migration bridge | Retained migration | `GraphEditorViewModel`、`GraphEditorView`、`GraphEditorViewModel.Session` | 只给旧宿主分批迁移使用。 |

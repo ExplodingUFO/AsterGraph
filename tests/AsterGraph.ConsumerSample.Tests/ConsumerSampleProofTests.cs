@@ -130,6 +130,9 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(result.ProofLines, line => line == "SUPPORT_BUNDLE_PARAMETER_EVIDENCE_OK:True");
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_QUICK_ADD_CONNECTED_NODE_OK:True");
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_PORT_FILTERED_NODE_SEARCH_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "AUTHORING_DROP_NODE_ON_EDGE_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "AUTHORING_EDGE_SPLIT_COMPATIBILITY_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "AUTHORING_EDGE_SPLIT_UNDO_OK:True");
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:True");
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_SURFACE_COMMAND_PROJECTION_OK:True");
         Assert.Contains(result.ProofLines, line => line == "CAPABILITY_BREADTH_STENCIL_OK:True");
@@ -448,6 +451,9 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(proofLines, line => line == "SUPPORT_BUNDLE_PARAMETER_EVIDENCE_OK:True");
         Assert.Contains(proofLines, line => line == "AUTHORING_QUICK_ADD_CONNECTED_NODE_OK:True");
         Assert.Contains(proofLines, line => line == "AUTHORING_PORT_FILTERED_NODE_SEARCH_OK:True");
+        Assert.Contains(proofLines, line => line == "AUTHORING_DROP_NODE_ON_EDGE_OK:True");
+        Assert.Contains(proofLines, line => line == "AUTHORING_EDGE_SPLIT_COMPATIBILITY_OK:True");
+        Assert.Contains(proofLines, line => line == "AUTHORING_EDGE_SPLIT_UNDO_OK:True");
         Assert.Contains(proofLines, line => line == "AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:True");
         Assert.Contains(proofLines, line => line == "AUTHORING_SURFACE_COMMAND_PROJECTION_OK:True");
         Assert.Contains(proofLines, line => line == "CAPABILITY_BREADTH_STENCIL_OK:True");

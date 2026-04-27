@@ -50,6 +50,9 @@ public sealed record ConsumerSampleProofResult(
     double CommandPaletteMs,
     bool QuickAddConnectedNodeOk = true,
     bool PortFilteredNodeSearchOk = true,
+    bool DropNodeOnEdgeOk = true,
+    bool EdgeSplitCompatibilityOk = true,
+    bool EdgeSplitUndoOk = true,
     int NodeCount = 0,
     int ConnectionCount = 0,
     IReadOnlyList<string>? FeatureDescriptorIds = null,
@@ -70,6 +73,9 @@ public sealed record ConsumerSampleProofResult(
         && SupportBundleParameterEvidenceOk
         && QuickAddConnectedNodeOk
         && PortFilteredNodeSearchOk
+        && DropNodeOnEdgeOk
+        && EdgeSplitCompatibilityOk
+        && EdgeSplitUndoOk
         && NodeSideAuthoringOk
         && CommandSurfaceOk;
 
@@ -142,6 +148,9 @@ public sealed record ConsumerSampleProofResult(
         $"SUPPORT_BUNDLE_PARAMETER_EVIDENCE_OK:{SupportBundleParameterEvidenceOk}",
         $"AUTHORING_QUICK_ADD_CONNECTED_NODE_OK:{QuickAddConnectedNodeOk}",
         $"AUTHORING_PORT_FILTERED_NODE_SEARCH_OK:{PortFilteredNodeSearchOk}",
+        $"AUTHORING_DROP_NODE_ON_EDGE_OK:{DropNodeOnEdgeOk}",
+        $"AUTHORING_EDGE_SPLIT_COMPATIBILITY_OK:{EdgeSplitCompatibilityOk}",
+        $"AUTHORING_EDGE_SPLIT_UNDO_OK:{EdgeSplitUndoOk}",
         $"AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:{NodeSideAuthoringOk}",
         $"AUTHORING_SURFACE_COMMAND_PROJECTION_OK:{CommandSurfaceOk}",
         $"CONSUMER_SAMPLE_PARAMETER_OK:{ParameterProjectionOk}",
@@ -323,6 +332,9 @@ public static class ConsumerSampleProof
         bool hostedAccessibilityAuthoringSurfaceOk;
         bool quickAddConnectedNodeOk;
         bool portFilteredNodeSearchOk;
+        bool dropNodeOnEdgeOk;
+        bool edgeSplitCompatibilityOk;
+        bool edgeSplitUndoOk;
         try
         {
             capabilityWindow.Show();
@@ -345,6 +357,7 @@ public static class ConsumerSampleProof
             host.SelectNode(reviewNodeId);
             FlushUi();
             edgeQuickToolsOk = HasEdgeQuickTools(capabilityWindow, host);
+            (dropNodeOnEdgeOk, edgeSplitCompatibilityOk, edgeSplitUndoOk) = HasDropNodeOnEdge(host);
             (quickAddConnectedNodeOk, portFilteredNodeSearchOk) = HasQuickAddConnectedNode(host);
 
             host.SelectNode(reviewNodeId);
@@ -399,6 +412,9 @@ public static class ConsumerSampleProof
             HostedAccessibilityAuthoringSurfaceOk: hostedAccessibilityAuthoringSurfaceOk,
             QuickAddConnectedNodeOk: quickAddConnectedNodeOk,
             PortFilteredNodeSearchOk: portFilteredNodeSearchOk,
+            DropNodeOnEdgeOk: dropNodeOnEdgeOk,
+            EdgeSplitCompatibilityOk: edgeSplitCompatibilityOk,
+            EdgeSplitUndoOk: edgeSplitUndoOk,
             ParameterSnapshots: proofParameterSnapshots,
             StartupMs: startupMs,
             InspectorProjectionMs: inspectorProjectionMs,
@@ -528,6 +544,66 @@ public static class ConsumerSampleProof
                 && string.Equals(connection.TargetPortId, "input", StringComparison.Ordinal))
             && !host.Session.Queries.GetPendingConnectionSnapshot().HasPendingConnection;
         return (quickAddConnectedNodeOk, portFilteredNodeSearchOk);
+    }
+
+    private static (bool DropNodeOnEdgeOk, bool EdgeSplitCompatibilityOk, bool EdgeSplitUndoOk) HasDropNodeOnEdge(ConsumerSampleHost host)
+    {
+        var before = host.Session.Queries.CreateDocumentSnapshot();
+        var originalConnection = before.Connections.FirstOrDefault(connection =>
+            string.Equals(connection.Id, "consumer-sample-connection-001", StringComparison.Ordinal));
+        if (originalConnection is null)
+        {
+            return (false, false, false);
+        }
+
+        var rejected = host.Session.Commands.TryInsertNodeIntoConnection(
+            originalConnection.Id,
+            ConsumerSampleHost.QueueDefinitionId,
+            "missing-input",
+            GraphConnectionTargetKind.Port,
+            "output",
+            new GraphPoint(420, 360));
+        var afterRejected = host.Session.Queries.CreateDocumentSnapshot();
+        var edgeSplitCompatibilityOk = !rejected
+            && afterRejected.Nodes.Count == before.Nodes.Count
+            && afterRejected.Connections.Count == before.Connections.Count
+            && afterRejected.Connections.Any(connection => string.Equals(connection.Id, originalConnection.Id, StringComparison.Ordinal));
+
+        var inserted = host.Session.Commands.TryInsertNodeIntoConnection(
+            originalConnection.Id,
+            ConsumerSampleHost.QueueDefinitionId,
+            "input",
+            GraphConnectionTargetKind.Port,
+            "output",
+            new GraphPoint(420, 360));
+        var afterInsert = host.Session.Queries.CreateDocumentSnapshot();
+        var insertedQueueNode = afterInsert.Nodes
+            .Where(node => node.DefinitionId == ConsumerSampleHost.QueueDefinitionId)
+            .FirstOrDefault(node => before.Nodes.All(beforeNode => !string.Equals(beforeNode.Id, node.Id, StringComparison.Ordinal)));
+        var dropNodeOnEdgeOk = inserted
+            && insertedQueueNode is not null
+            && !afterInsert.Connections.Any(connection => string.Equals(connection.Id, originalConnection.Id, StringComparison.Ordinal))
+            && afterInsert.Connections.Any(connection =>
+                string.Equals(connection.SourceNodeId, originalConnection.SourceNodeId, StringComparison.Ordinal)
+                && string.Equals(connection.SourcePortId, originalConnection.SourcePortId, StringComparison.Ordinal)
+                && string.Equals(connection.TargetNodeId, insertedQueueNode.Id, StringComparison.Ordinal)
+                && string.Equals(connection.TargetPortId, "input", StringComparison.Ordinal))
+            && afterInsert.Connections.Any(connection =>
+                string.Equals(connection.SourceNodeId, insertedQueueNode.Id, StringComparison.Ordinal)
+                && string.Equals(connection.SourcePortId, "output", StringComparison.Ordinal)
+                && string.Equals(connection.TargetNodeId, originalConnection.TargetNodeId, StringComparison.Ordinal)
+                && string.Equals(connection.TargetPortId, originalConnection.TargetPortId, StringComparison.Ordinal));
+
+        host.Session.Commands.Undo();
+        var afterUndo = host.Session.Queries.CreateDocumentSnapshot();
+        var edgeSplitUndoOk = afterUndo.Nodes.Count == before.Nodes.Count
+            && afterUndo.Connections.Count == before.Connections.Count
+            && afterUndo.Connections.Any(connection =>
+                string.Equals(connection.Id, originalConnection.Id, StringComparison.Ordinal)
+                && string.Equals(connection.SourceNodeId, originalConnection.SourceNodeId, StringComparison.Ordinal)
+                && string.Equals(connection.TargetNodeId, originalConnection.TargetNodeId, StringComparison.Ordinal));
+
+        return (dropNodeOnEdgeOk, edgeSplitCompatibilityOk, edgeSplitUndoOk);
     }
 
     private static Window CreateCapabilityBreadthWindow(ConsumerSampleHost host)
@@ -849,8 +925,13 @@ public static class ConsumerSampleProof
         disconnectButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
         FlushUi();
 
-        return noteCleared
-            && host.Session.Queries.CreateDocumentSnapshot().Connections.Count == 0;
+        var disconnected = host.Session.Queries.CreateDocumentSnapshot().Connections.Count == 0;
+        host.Session.Commands.Undo();
+        FlushUi();
+        var restored = host.Session.Queries.CreateDocumentSnapshot().Connections.Any(connection =>
+            string.Equals(connection.Id, connectionId, StringComparison.Ordinal));
+
+        return noteCleared && disconnected && restored;
     }
 
     private static bool HasHostedAccessibilityBaselines(Window window)

@@ -248,6 +248,8 @@ public sealed class GraphEditorSessionTests
         AssertMethod(commandsType, nameof(IGraphEditorCommands.ClearSelection), typeof(bool));
         AssertMethod(commandsType, nameof(IGraphEditorCommands.SetSelection), typeof(IReadOnlyList<string>), typeof(string), typeof(bool));
         AssertMethod(commandsType, nameof(IGraphEditorCommands.AddNode), typeof(NodeDefinitionId), typeof(GraphPoint?));
+        AssertMethod(commandsType, nameof(IGraphEditorCommands.TryInsertNodeIntoConnection), typeof(string), typeof(NodeDefinitionId), typeof(string), typeof(GraphConnectionTargetKind), typeof(string), typeof(GraphPoint?));
+        Assert.Equal(typeof(bool), commandsType.GetMethod(nameof(IGraphEditorCommands.TryInsertNodeIntoConnection), [typeof(string), typeof(NodeDefinitionId), typeof(string), typeof(GraphConnectionTargetKind), typeof(string), typeof(GraphPoint?)])!.ReturnType);
         AssertMethod(commandsType, nameof(IGraphEditorCommands.DeleteSelection));
         AssertMethod(commandsType, nameof(IGraphEditorCommands.SetNodePositions), typeof(IReadOnlyList<NodePositionSnapshot>), typeof(bool));
         AssertMethod(commandsType, "TryCopySelectionAsync", typeof(CancellationToken));

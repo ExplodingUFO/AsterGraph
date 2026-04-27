@@ -153,6 +153,8 @@ C:AsterGraph.Editor.Runtime.GraphEditorCommandArgumentSnapshot(System.String,Sys
 C:AsterGraph.Editor.Runtime.GraphEditorCommandDescriptorSnapshot(System.String,System.Boolean,System.String)
 C:AsterGraph.Editor.Runtime.GraphEditorCommandDescriptorSnapshot(System.String,System.String,System.String,System.String,System.String,AsterGraph.Editor.Runtime.GraphEditorCommandSourceKind,System.Boolean,System.String)
 C:AsterGraph.Editor.Runtime.GraphEditorCommandInvocationSnapshot(System.String,System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Runtime.GraphEditorCommandArgumentSnapshot>)
+C:AsterGraph.Editor.Runtime.GraphEditorCompatibleNodeDefinitionSnapshot(AsterGraph.Abstractions.Identifiers.NodeDefinitionId,System.String,System.String,System.String,System.String,AsterGraph.Core.Models.GraphConnectionTargetKind,AsterGraph.Abstractions.Identifiers.PortTypeId,AsterGraph.Abstractions.Compatibility.PortCompatibilityResult)
+C:AsterGraph.Editor.Runtime.GraphEditorCompatibleNodeSearchSnapshot(System.Boolean,System.String,System.String,System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Runtime.GraphEditorCompatibleNodeDefinitionSnapshot>,System.String)
 C:AsterGraph.Editor.Runtime.GraphEditorCompatiblePortTargetSnapshot(System.String,System.String,System.String,System.String,AsterGraph.Abstractions.Identifiers.PortTypeId,System.String,AsterGraph.Abstractions.Compatibility.PortCompatibilityResult)
 C:AsterGraph.Editor.Runtime.GraphEditorCompositeNodeSnapshot(System.String,System.String,System.Collections.Generic.IReadOnlyList<AsterGraph.Core.Models.GraphCompositeBoundaryPort>,System.Collections.Generic.IReadOnlyList<AsterGraph.Core.Models.GraphCompositeBoundaryPort>)
 C:AsterGraph.Editor.Runtime.GraphEditorConnectionEndpointGeometrySnapshot(System.String,System.String,AsterGraph.Core.Models.GraphConnectionTargetKind,AsterGraph.Core.Models.GraphPoint)
@@ -1123,6 +1125,18 @@ M:AsterGraph.Editor.Runtime.GraphEditorCommandInvocationSnapshot.GetArguments(Sy
 M:AsterGraph.Editor.Runtime.GraphEditorCommandInvocationSnapshot.GetHashCode():System.Int32
 M:AsterGraph.Editor.Runtime.GraphEditorCommandInvocationSnapshot.ToString():System.String
 M:AsterGraph.Editor.Runtime.GraphEditorCommandInvocationSnapshot.TryGetArgument(System.String,out System.String&):System.Boolean
+M:AsterGraph.Editor.Runtime.GraphEditorCompatibleNodeDefinitionSnapshot.<Clone>$():AsterGraph.Editor.Runtime.GraphEditorCompatibleNodeDefinitionSnapshot
+M:AsterGraph.Editor.Runtime.GraphEditorCompatibleNodeDefinitionSnapshot.Deconstruct(out AsterGraph.Abstractions.Identifiers.NodeDefinitionId&,out System.String&,out System.String&,out System.String&,out System.String&,out AsterGraph.Core.Models.GraphConnectionTargetKind&,out AsterGraph.Abstractions.Identifiers.PortTypeId&,out AsterGraph.Abstractions.Compatibility.PortCompatibilityResult&):System.Void
+M:AsterGraph.Editor.Runtime.GraphEditorCompatibleNodeDefinitionSnapshot.Equals(AsterGraph.Editor.Runtime.GraphEditorCompatibleNodeDefinitionSnapshot):System.Boolean
+M:AsterGraph.Editor.Runtime.GraphEditorCompatibleNodeDefinitionSnapshot.Equals(System.Object):System.Boolean
+M:AsterGraph.Editor.Runtime.GraphEditorCompatibleNodeDefinitionSnapshot.GetHashCode():System.Int32
+M:AsterGraph.Editor.Runtime.GraphEditorCompatibleNodeDefinitionSnapshot.ToString():System.String
+M:AsterGraph.Editor.Runtime.GraphEditorCompatibleNodeSearchSnapshot.<Clone>$():AsterGraph.Editor.Runtime.GraphEditorCompatibleNodeSearchSnapshot
+M:AsterGraph.Editor.Runtime.GraphEditorCompatibleNodeSearchSnapshot.Deconstruct(out System.Boolean&,out System.String&,out System.String&,out System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Runtime.GraphEditorCompatibleNodeDefinitionSnapshot>&,out System.String&):System.Void
+M:AsterGraph.Editor.Runtime.GraphEditorCompatibleNodeSearchSnapshot.Equals(AsterGraph.Editor.Runtime.GraphEditorCompatibleNodeSearchSnapshot):System.Boolean
+M:AsterGraph.Editor.Runtime.GraphEditorCompatibleNodeSearchSnapshot.Equals(System.Object):System.Boolean
+M:AsterGraph.Editor.Runtime.GraphEditorCompatibleNodeSearchSnapshot.GetHashCode():System.Int32
+M:AsterGraph.Editor.Runtime.GraphEditorCompatibleNodeSearchSnapshot.ToString():System.String
 M:AsterGraph.Editor.Runtime.GraphEditorCompatiblePortTargetSnapshot.<Clone>$():AsterGraph.Editor.Runtime.GraphEditorCompatiblePortTargetSnapshot
 M:AsterGraph.Editor.Runtime.GraphEditorCompatiblePortTargetSnapshot.Equals(AsterGraph.Editor.Runtime.GraphEditorCompatiblePortTargetSnapshot):System.Boolean
 M:AsterGraph.Editor.Runtime.GraphEditorCompatiblePortTargetSnapshot.Equals(System.Object):System.Boolean
@@ -1273,6 +1287,7 @@ M:AsterGraph.Editor.Runtime.GraphEditorSession.Execute(AsterGraph.Editor.Automat
 M:AsterGraph.Editor.Runtime.GraphEditorSession.FitToViewport(System.Boolean):System.Void
 M:AsterGraph.Editor.Runtime.GraphEditorSession.GetCapabilitySnapshot():AsterGraph.Editor.Runtime.GraphEditorCapabilitySnapshot
 M:AsterGraph.Editor.Runtime.GraphEditorSession.GetCommandDescriptors():System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Runtime.GraphEditorCommandDescriptorSnapshot>
+M:AsterGraph.Editor.Runtime.GraphEditorSession.GetCompatibleNodeDefinitionsForPendingConnection():AsterGraph.Editor.Runtime.GraphEditorCompatibleNodeSearchSnapshot
 M:AsterGraph.Editor.Runtime.GraphEditorSession.GetCompatiblePortTargets(System.String,System.String):System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Runtime.GraphEditorCompatiblePortTargetSnapshot>
 M:AsterGraph.Editor.Runtime.GraphEditorSession.GetCompatibleTargets(System.String,System.String):System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Menus.CompatiblePortTarget>
 M:AsterGraph.Editor.Runtime.GraphEditorSession.GetCompositeNodeSnapshots():System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Runtime.GraphEditorCompositeNodeSnapshot>
@@ -1309,6 +1324,7 @@ M:AsterGraph.Editor.Runtime.GraphEditorSession.SetSelection(System.Collections.G
 M:AsterGraph.Editor.Runtime.GraphEditorSession.StartConnection(System.String,System.String):System.Void
 M:AsterGraph.Editor.Runtime.GraphEditorSession.TryClearWorkspaceFragment(System.String):System.Boolean
 M:AsterGraph.Editor.Runtime.GraphEditorSession.TryCopySelectionAsync(System.Threading.CancellationToken):System.Threading.Tasks.Task<System.Boolean>
+M:AsterGraph.Editor.Runtime.GraphEditorSession.TryCreateConnectedNodeFromPendingConnection(AsterGraph.Abstractions.Identifiers.NodeDefinitionId,System.String,AsterGraph.Core.Models.GraphConnectionTargetKind,System.Nullable<AsterGraph.Core.Models.GraphPoint>):System.Boolean
 M:AsterGraph.Editor.Runtime.GraphEditorSession.TryCreateNodeGroupFromSelection(System.String):System.String
 M:AsterGraph.Editor.Runtime.GraphEditorSession.TryDeleteFragmentTemplate(System.String):System.Boolean
 M:AsterGraph.Editor.Runtime.GraphEditorSession.TryEnterCompositeChildGraph(System.String,System.Boolean):System.Boolean
@@ -1321,6 +1337,7 @@ M:AsterGraph.Editor.Runtime.GraphEditorSession.TryExposeCompositePort(System.Str
 M:AsterGraph.Editor.Runtime.GraphEditorSession.TryImportFragment(System.String):System.Boolean
 M:AsterGraph.Editor.Runtime.GraphEditorSession.TryImportFragmentTemplate(System.String):System.Boolean
 M:AsterGraph.Editor.Runtime.GraphEditorSession.TryInsertConnectionRouteVertex(System.String,System.Int32,AsterGraph.Core.Models.GraphPoint,System.Boolean):System.Boolean
+M:AsterGraph.Editor.Runtime.GraphEditorSession.TryInsertNodeIntoConnection(System.String,AsterGraph.Abstractions.Identifiers.NodeDefinitionId,System.String,AsterGraph.Core.Models.GraphConnectionTargetKind,System.String,System.Nullable<AsterGraph.Core.Models.GraphPoint>):System.Boolean
 M:AsterGraph.Editor.Runtime.GraphEditorSession.TryMoveConnectionRouteVertex(System.String,System.Int32,AsterGraph.Core.Models.GraphPoint,System.Boolean):System.Boolean
 M:AsterGraph.Editor.Runtime.GraphEditorSession.TryPasteSelectionAsync(System.Threading.CancellationToken):System.Threading.Tasks.Task<System.Boolean>
 M:AsterGraph.Editor.Runtime.GraphEditorSession.TryPromoteNodeGroupToComposite(System.String,System.String,System.Boolean):System.String
@@ -1391,6 +1408,7 @@ M:AsterGraph.Editor.Runtime.IGraphEditorCommands.SetSelection(System.Collections
 M:AsterGraph.Editor.Runtime.IGraphEditorCommands.StartConnection(System.String,System.String):System.Void
 M:AsterGraph.Editor.Runtime.IGraphEditorCommands.TryClearWorkspaceFragment(System.String):System.Boolean
 M:AsterGraph.Editor.Runtime.IGraphEditorCommands.TryCopySelectionAsync(System.Threading.CancellationToken):System.Threading.Tasks.Task<System.Boolean>
+M:AsterGraph.Editor.Runtime.IGraphEditorCommands.TryCreateConnectedNodeFromPendingConnection(AsterGraph.Abstractions.Identifiers.NodeDefinitionId,System.String,AsterGraph.Core.Models.GraphConnectionTargetKind,System.Nullable<AsterGraph.Core.Models.GraphPoint>):System.Boolean
 M:AsterGraph.Editor.Runtime.IGraphEditorCommands.TryCreateNodeGroupFromSelection(System.String):System.String
 M:AsterGraph.Editor.Runtime.IGraphEditorCommands.TryDeleteFragmentTemplate(System.String):System.Boolean
 M:AsterGraph.Editor.Runtime.IGraphEditorCommands.TryEnterCompositeChildGraph(System.String,System.Boolean):System.Boolean
@@ -1403,6 +1421,7 @@ M:AsterGraph.Editor.Runtime.IGraphEditorCommands.TryExposeCompositePort(System.S
 M:AsterGraph.Editor.Runtime.IGraphEditorCommands.TryImportFragment(System.String):System.Boolean
 M:AsterGraph.Editor.Runtime.IGraphEditorCommands.TryImportFragmentTemplate(System.String):System.Boolean
 M:AsterGraph.Editor.Runtime.IGraphEditorCommands.TryInsertConnectionRouteVertex(System.String,System.Int32,AsterGraph.Core.Models.GraphPoint,System.Boolean):System.Boolean
+M:AsterGraph.Editor.Runtime.IGraphEditorCommands.TryInsertNodeIntoConnection(System.String,AsterGraph.Abstractions.Identifiers.NodeDefinitionId,System.String,AsterGraph.Core.Models.GraphConnectionTargetKind,System.String,System.Nullable<AsterGraph.Core.Models.GraphPoint>):System.Boolean
 M:AsterGraph.Editor.Runtime.IGraphEditorCommands.TryMoveConnectionRouteVertex(System.String,System.Int32,AsterGraph.Core.Models.GraphPoint,System.Boolean):System.Boolean
 M:AsterGraph.Editor.Runtime.IGraphEditorCommands.TryPasteSelectionAsync(System.Threading.CancellationToken):System.Threading.Tasks.Task<System.Boolean>
 M:AsterGraph.Editor.Runtime.IGraphEditorCommands.TryPromoteNodeGroupToComposite(System.String,System.String,System.Boolean):System.String
@@ -1431,6 +1450,7 @@ M:AsterGraph.Editor.Runtime.IGraphEditorQueries.BuildContextMenuDescriptors(Aste
 M:AsterGraph.Editor.Runtime.IGraphEditorQueries.CreateDocumentSnapshot():AsterGraph.Core.Models.GraphDocument
 M:AsterGraph.Editor.Runtime.IGraphEditorQueries.GetCapabilitySnapshot():AsterGraph.Editor.Runtime.GraphEditorCapabilitySnapshot
 M:AsterGraph.Editor.Runtime.IGraphEditorQueries.GetCommandDescriptors():System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Runtime.GraphEditorCommandDescriptorSnapshot>
+M:AsterGraph.Editor.Runtime.IGraphEditorQueries.GetCompatibleNodeDefinitionsForPendingConnection():AsterGraph.Editor.Runtime.GraphEditorCompatibleNodeSearchSnapshot
 M:AsterGraph.Editor.Runtime.IGraphEditorQueries.GetCompatiblePortTargets(System.String,System.String):System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Runtime.GraphEditorCompatiblePortTargetSnapshot>
 M:AsterGraph.Editor.Runtime.IGraphEditorQueries.GetCompatibleTargets(System.String,System.String):System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Menus.CompatiblePortTarget>
 M:AsterGraph.Editor.Runtime.IGraphEditorQueries.GetCompositeNodeSnapshots():System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Runtime.GraphEditorCompositeNodeSnapshot>
@@ -1638,6 +1658,7 @@ M:AsterGraph.Editor.ViewModels.GraphEditorViewModel.UpdateBehaviorOptions(AsterG
 M:AsterGraph.Editor.ViewModels.GraphEditorViewModel.UpdateViewportSize(System.Double,System.Double):System.Void
 M:AsterGraph.Editor.ViewModels.GraphEditorViewModel.ZoomAt(System.Double,AsterGraph.Core.Models.GraphPoint):System.Void
 M:AsterGraph.Editor.ViewModels.NodeParameterOptionViewModel.ToString():System.String
+M:AsterGraph.Editor.ViewModels.NodeParameterViewModel.ApplyValidationFix():System.Void
 M:AsterGraph.Editor.ViewModels.NodeParameterViewModel.ResetToDefault():System.Void
 M:AsterGraph.Editor.ViewModels.NodeViewModel.GetParameterValue(System.String):System.Object
 M:AsterGraph.Editor.ViewModels.NodeViewModel.GetPort(System.String):AsterGraph.Editor.ViewModels.PortViewModel
@@ -2475,6 +2496,19 @@ P:AsterGraph.Editor.Runtime.GraphEditorCommandDescriptorSnapshot.Source:AsterGra
 P:AsterGraph.Editor.Runtime.GraphEditorCommandDescriptorSnapshot.Title:System.String:get
 P:AsterGraph.Editor.Runtime.GraphEditorCommandInvocationSnapshot.Arguments:System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Runtime.GraphEditorCommandArgumentSnapshot>:get
 P:AsterGraph.Editor.Runtime.GraphEditorCommandInvocationSnapshot.CommandId:System.String:get
+P:AsterGraph.Editor.Runtime.GraphEditorCompatibleNodeDefinitionSnapshot.Category:System.String:get,set
+P:AsterGraph.Editor.Runtime.GraphEditorCompatibleNodeDefinitionSnapshot.Compatibility:AsterGraph.Abstractions.Compatibility.PortCompatibilityResult:get,set
+P:AsterGraph.Editor.Runtime.GraphEditorCompatibleNodeDefinitionSnapshot.DefinitionId:AsterGraph.Abstractions.Identifiers.NodeDefinitionId:get,set
+P:AsterGraph.Editor.Runtime.GraphEditorCompatibleNodeDefinitionSnapshot.DisplayName:System.String:get,set
+P:AsterGraph.Editor.Runtime.GraphEditorCompatibleNodeDefinitionSnapshot.TargetId:System.String:get,set
+P:AsterGraph.Editor.Runtime.GraphEditorCompatibleNodeDefinitionSnapshot.TargetKind:AsterGraph.Core.Models.GraphConnectionTargetKind:get,set
+P:AsterGraph.Editor.Runtime.GraphEditorCompatibleNodeDefinitionSnapshot.TargetLabel:System.String:get,set
+P:AsterGraph.Editor.Runtime.GraphEditorCompatibleNodeDefinitionSnapshot.TargetTypeId:AsterGraph.Abstractions.Identifiers.PortTypeId:get,set
+P:AsterGraph.Editor.Runtime.GraphEditorCompatibleNodeSearchSnapshot.EmptyReason:System.String:get,set
+P:AsterGraph.Editor.Runtime.GraphEditorCompatibleNodeSearchSnapshot.HasPendingConnection:System.Boolean:get,set
+P:AsterGraph.Editor.Runtime.GraphEditorCompatibleNodeSearchSnapshot.Results:System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Runtime.GraphEditorCompatibleNodeDefinitionSnapshot>:get,set
+P:AsterGraph.Editor.Runtime.GraphEditorCompatibleNodeSearchSnapshot.SourceNodeId:System.String:get,set
+P:AsterGraph.Editor.Runtime.GraphEditorCompatibleNodeSearchSnapshot.SourcePortId:System.String:get,set
 P:AsterGraph.Editor.Runtime.GraphEditorCompatiblePortTargetSnapshot.Compatibility:AsterGraph.Abstractions.Compatibility.PortCompatibilityResult:get
 P:AsterGraph.Editor.Runtime.GraphEditorCompatiblePortTargetSnapshot.NodeId:System.String:get
 P:AsterGraph.Editor.Runtime.GraphEditorCompatiblePortTargetSnapshot.NodeTitle:System.String:get
@@ -2548,6 +2582,7 @@ P:AsterGraph.Editor.Runtime.GraphEditorNodeGroupSnapshot.NodeIds:System.Collecti
 P:AsterGraph.Editor.Runtime.GraphEditorNodeGroupSnapshot.Position:AsterGraph.Core.Models.GraphPoint:get,set
 P:AsterGraph.Editor.Runtime.GraphEditorNodeGroupSnapshot.Size:AsterGraph.Core.Models.GraphSize:get,set
 P:AsterGraph.Editor.Runtime.GraphEditorNodeGroupSnapshot.Title:System.String:get,set
+P:AsterGraph.Editor.Runtime.GraphEditorNodeParameterSnapshot.CanApplyValidationFix:System.Boolean:get
 P:AsterGraph.Editor.Runtime.GraphEditorNodeParameterSnapshot.CanEdit:System.Boolean:get,set
 P:AsterGraph.Editor.Runtime.GraphEditorNodeParameterSnapshot.CanResetToDefault:System.Boolean:get,set
 P:AsterGraph.Editor.Runtime.GraphEditorNodeParameterSnapshot.CurrentValue:System.Object:get,set
@@ -2555,10 +2590,15 @@ P:AsterGraph.Editor.Runtime.GraphEditorNodeParameterSnapshot.Definition:AsterGra
 P:AsterGraph.Editor.Runtime.GraphEditorNodeParameterSnapshot.GroupDisplayName:System.String:get,set
 P:AsterGraph.Editor.Runtime.GraphEditorNodeParameterSnapshot.HasMixedValues:System.Boolean:get,set
 P:AsterGraph.Editor.Runtime.GraphEditorNodeParameterSnapshot.HelpText:System.String:get,set
+P:AsterGraph.Editor.Runtime.GraphEditorNodeParameterSnapshot.IsCodeLikeText:System.Boolean:get
 P:AsterGraph.Editor.Runtime.GraphEditorNodeParameterSnapshot.IsGroupHeaderVisible:System.Boolean:get,set
 P:AsterGraph.Editor.Runtime.GraphEditorNodeParameterSnapshot.IsUsingDefaultValue:System.Boolean:get,set
 P:AsterGraph.Editor.Runtime.GraphEditorNodeParameterSnapshot.IsValid:System.Boolean:get,set
+P:AsterGraph.Editor.Runtime.GraphEditorNodeParameterSnapshot.NumberSliderHint:System.String:get
 P:AsterGraph.Editor.Runtime.GraphEditorNodeParameterSnapshot.ReadOnlyReason:System.String:get,set
+P:AsterGraph.Editor.Runtime.GraphEditorNodeParameterSnapshot.SupportsEnumSearch:System.Boolean:get
+P:AsterGraph.Editor.Runtime.GraphEditorNodeParameterSnapshot.UsesMultilineTextInput:System.Boolean:get
+P:AsterGraph.Editor.Runtime.GraphEditorNodeParameterSnapshot.ValidationFixActionLabel:System.String:get
 P:AsterGraph.Editor.Runtime.GraphEditorNodeParameterSnapshot.ValidationMessage:System.String:get,set
 P:AsterGraph.Editor.Runtime.GraphEditorNodeParameterSnapshot.ValueDisplayText:System.String:get,set
 P:AsterGraph.Editor.Runtime.GraphEditorNodeParameterSnapshot.ValueState:AsterGraph.Editor.Runtime.GraphEditorNodeParameterValueState:get,set
@@ -2819,6 +2859,7 @@ P:AsterGraph.Editor.ViewModels.NodeParameterOptionViewModel.Label:System.String:
 P:AsterGraph.Editor.ViewModels.NodeParameterOptionViewModel.Value:System.String:get
 P:AsterGraph.Editor.ViewModels.NodeParameterViewModel.BooleanCaption:System.String:get
 P:AsterGraph.Editor.ViewModels.NodeParameterViewModel.BoolValue:System.Nullable<System.Boolean>:get,set
+P:AsterGraph.Editor.ViewModels.NodeParameterViewModel.CanApplyValidationFix:System.Boolean:get
 P:AsterGraph.Editor.ViewModels.NodeParameterViewModel.CanEdit:System.Boolean:get
 P:AsterGraph.Editor.ViewModels.NodeParameterViewModel.CanResetToDefault:System.Boolean:get
 P:AsterGraph.Editor.ViewModels.NodeParameterViewModel.CurrentValue:System.Object:get
@@ -2829,6 +2870,7 @@ P:AsterGraph.Editor.ViewModels.NodeParameterViewModel.EditorKind:AsterGraph.Abst
 P:AsterGraph.Editor.ViewModels.NodeParameterViewModel.GroupDisplayName:System.String:get
 P:AsterGraph.Editor.ViewModels.NodeParameterViewModel.HasHelpText:System.Boolean:get
 P:AsterGraph.Editor.ViewModels.NodeParameterViewModel.HasMixedValues:System.Boolean:get
+P:AsterGraph.Editor.ViewModels.NodeParameterViewModel.HasNumberSliderHint:System.Boolean:get
 P:AsterGraph.Editor.ViewModels.NodeParameterViewModel.HasReadOnlyReason:System.Boolean:get
 P:AsterGraph.Editor.ViewModels.NodeParameterViewModel.HasUnitSuffix:System.Boolean:get
 P:AsterGraph.Editor.ViewModels.NodeParameterViewModel.HasValidationError:System.Boolean:get
@@ -2836,6 +2878,7 @@ P:AsterGraph.Editor.ViewModels.NodeParameterViewModel.HelpText:System.String:get
 P:AsterGraph.Editor.ViewModels.NodeParameterViewModel.InputWatermark:System.String:get
 P:AsterGraph.Editor.ViewModels.NodeParameterViewModel.IsAdvanced:System.Boolean:get
 P:AsterGraph.Editor.ViewModels.NodeParameterViewModel.IsBoolean:System.Boolean:get
+P:AsterGraph.Editor.ViewModels.NodeParameterViewModel.IsCodeLikeText:System.Boolean:get
 P:AsterGraph.Editor.ViewModels.NodeParameterViewModel.IsColor:System.Boolean:get
 P:AsterGraph.Editor.ViewModels.NodeParameterViewModel.IsEnum:System.Boolean:get
 P:AsterGraph.Editor.ViewModels.NodeParameterViewModel.IsGroupHeaderVisible:System.Boolean:get
@@ -2849,15 +2892,18 @@ P:AsterGraph.Editor.ViewModels.NodeParameterViewModel.IsUsingDefaultValue:System
 P:AsterGraph.Editor.ViewModels.NodeParameterViewModel.IsValid:System.Boolean:get,set
 P:AsterGraph.Editor.ViewModels.NodeParameterViewModel.Key:System.String:get
 P:AsterGraph.Editor.ViewModels.NodeParameterViewModel.MixedValueHint:System.String:get
+P:AsterGraph.Editor.ViewModels.NodeParameterViewModel.NumberSliderHint:System.String:get
 P:AsterGraph.Editor.ViewModels.NodeParameterViewModel.Options:System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.ViewModels.NodeParameterOptionViewModel>:get
 P:AsterGraph.Editor.ViewModels.NodeParameterViewModel.PlaceholderText:System.String:get
 P:AsterGraph.Editor.ViewModels.NodeParameterViewModel.ReadOnlyReason:System.String:get
 P:AsterGraph.Editor.ViewModels.NodeParameterViewModel.SelectedOption:AsterGraph.Editor.ViewModels.NodeParameterOptionViewModel:get,set
 P:AsterGraph.Editor.ViewModels.NodeParameterViewModel.StringValue:System.String:get,set
+P:AsterGraph.Editor.ViewModels.NodeParameterViewModel.SupportsEnumSearch:System.Boolean:get
 P:AsterGraph.Editor.ViewModels.NodeParameterViewModel.TypeId:AsterGraph.Abstractions.Identifiers.PortTypeId:get
 P:AsterGraph.Editor.ViewModels.NodeParameterViewModel.UnitSuffix:System.String:get
 P:AsterGraph.Editor.ViewModels.NodeParameterViewModel.UsesMultilineTextInput:System.Boolean:get
 P:AsterGraph.Editor.ViewModels.NodeParameterViewModel.UsesTextInput:System.Boolean:get
+P:AsterGraph.Editor.ViewModels.NodeParameterViewModel.ValidationFixActionLabel:System.String:get
 P:AsterGraph.Editor.ViewModels.NodeParameterViewModel.ValidationMessage:System.String:get,set
 P:AsterGraph.Editor.ViewModels.NodeParameterViewModel.ValueStateCaption:System.String:get
 P:AsterGraph.Editor.ViewModels.NodeSurfaceInputRowViewModel.InlineContentKind:AsterGraph.Editor.ViewModels.NodeSurfaceInlineContentKind:get
@@ -3054,6 +3100,8 @@ T:class AsterGraph.Editor.Runtime.GraphEditorCapabilitySnapshot
 T:class AsterGraph.Editor.Runtime.GraphEditorCommandArgumentSnapshot
 T:class AsterGraph.Editor.Runtime.GraphEditorCommandDescriptorSnapshot
 T:class AsterGraph.Editor.Runtime.GraphEditorCommandInvocationSnapshot
+T:class AsterGraph.Editor.Runtime.GraphEditorCompatibleNodeDefinitionSnapshot
+T:class AsterGraph.Editor.Runtime.GraphEditorCompatibleNodeSearchSnapshot
 T:class AsterGraph.Editor.Runtime.GraphEditorCompatiblePortTargetSnapshot
 T:class AsterGraph.Editor.Runtime.GraphEditorCompositeNodeSnapshot
 T:class AsterGraph.Editor.Runtime.GraphEditorConnectionEndpointGeometrySnapshot
