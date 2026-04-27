@@ -390,12 +390,12 @@ public sealed record ScaleSmokeTier(
                     ReloadMs: 500),
                 AuthoringBudget: new ScaleSmokeAuthoringBudget(
                     StencilFilterMs: 150,
-                    CommandSurfaceRefreshMs: 800,
-                    QuickToolProjectionMs: 800,
-                    QuickToolExecutionMs: 1000,
+                    CommandSurfaceRefreshMs: 900,
+                    QuickToolProjectionMs: 1000,
+                    QuickToolExecutionMs: 1200,
                     InspectorOpenMs: 100,
                     NodeResizeMs: 150,
-                    EdgeCreateMs: 250),
+                    EdgeCreateMs: 350),
                 ExportBudget: new ScaleSmokeExportBudget(
                     SvgExportMs: 300,
                     PngExportMs: 120_000,

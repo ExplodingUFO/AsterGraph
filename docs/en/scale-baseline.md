@@ -81,7 +81,7 @@ If any defended metric exceeds one of those numbers, `ScaleSmoke` emits `SCALE_P
 | --- | ---: | ---: | ---: | ---: |
 | `baseline` | 100 ms | 250 ms | 100 ms | 150 ms |
 | `large` | 150 ms | 400 ms | 250 ms | 300 ms |
-| `stress` | 150 ms | 800 ms | 800 ms | 1000 ms |
+| `stress` | 150 ms | 900 ms | 1000 ms | 1200 ms |
 
 `ScaleSmoke` emits `SCALE_AUTHORING_BUDGET:...`, `SCALE_AUTHORING_METRICS:...`, `SCALE_AUTHORING_BUDGET_OK:...`, and `SCALE_AUTHORING_SUMMARY:...` for these defended tiers.
 

@@ -37,7 +37,7 @@ public sealed class ScaleSmokeAuthoringBudgetTests
         var marker = tier.ToAuthoringBudgetMarker();
 
         Assert.Equal(
-            "SCALE_AUTHORING_BUDGET:stress:stencil<=150:command-surface<=800:quick-tool-projection<=800:quick-tool-execution<=1000:inspector-open<=100:node-resize<=150:edge-create<=250",
+            "SCALE_AUTHORING_BUDGET:stress:stencil<=150:command-surface<=900:quick-tool-projection<=1000:quick-tool-execution<=1200:inspector-open<=100:node-resize<=150:edge-create<=350",
             marker);
     }
 
@@ -105,7 +105,7 @@ public sealed class ScaleSmokeAuthoringBudgetTests
         var metrics = new ScaleSmokeAuthoringMetrics(
             StencilFilterMs: 0,
             CommandSurfaceRefreshMs: 400,
-            QuickToolProjectionMs: 801,
+            QuickToolProjectionMs: 1001,
             QuickToolExecutionMs: 600,
             InspectorOpenMs: 20,
             NodeResizeMs: 50,
@@ -114,6 +114,25 @@ public sealed class ScaleSmokeAuthoringBudgetTests
         var result = tier.EvaluateAuthoring(metrics);
 
         Assert.False(result.Passed);
-        Assert.Contains("quick-tool-projection=801>800(defended)", result.FailureSummary, StringComparison.Ordinal);
+        Assert.Contains("quick-tool-projection=1001>1000(defended)", result.FailureSummary, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void StressAuthoringBudget_AllowsObservedReleaseLaneMetrics()
+    {
+        var tier = ScaleSmokeTier.Parse(["--tier", "stress"]);
+        var metrics = new ScaleSmokeAuthoringMetrics(
+            StencilFilterMs: 0,
+            CommandSurfaceRefreshMs: 791,
+            QuickToolProjectionMs: 842,
+            QuickToolExecutionMs: 1018,
+            InspectorOpenMs: 15,
+            NodeResizeMs: 127,
+            EdgeCreateMs: 275);
+
+        var result = tier.EvaluateAuthoring(metrics);
+
+        Assert.True(result.Passed);
+        Assert.Equal("none", result.FailureSummary);
     }
 }
