@@ -163,6 +163,7 @@ $proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'he
 $proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'hello-world-wpf-proof.txt') -Pattern 'HELLOWORLD_WPF_OK'
 $proofLines += Get-MatchingLines -FilePath (Join-Path $resolvedProofRoot 'wpf-adapter-capability-matrix.txt') -Pattern 'ADAPTER_CAPABILITY_MATRIX'
 $proofLines += Get-MatchingLines -FilePath (Join-Path $resolvedProofRoot 'scale-smoke.txt') -Pattern 'SCALE_TIER_BUDGET'
+$proofLines += Get-MatchingLines -FilePath (Join-Path $resolvedProofRoot 'scale-smoke.txt') -Pattern 'SCALE_EXPORT_BUDGET:'
 $proofLines += Get-MatchingLines -FilePath (Join-Path $resolvedProofRoot 'scale-smoke.txt') -Pattern 'SCALE_PERFORMANCE_BUDGET_OK'
 $proofLines += Get-MatchingLines -FilePath (Join-Path $resolvedProofRoot 'scale-smoke.txt') -Pattern 'SCALE_AUTHORING_BUDGET_OK'
 $proofLines += Get-MatchingLines -FilePath (Join-Path $resolvedProofRoot 'scale-smoke.txt') -Pattern 'SCALE_EXPORT_BUDGET_OK'
@@ -176,7 +177,7 @@ $environmentLines = @(
   '- medium host proof: `AsterGraph.ConsumerSample.Avalonia` on the hosted-UI route with host actions, parameter editing, and one trusted plugin',
   '- showcase proof: `AsterGraph.Demo --proof` for host-native shell workflows, non-obscuring editing, and graph-surface visual semantics',
   '- packed consumer proofs: `HostSample`, `.NET 10` packed consumer path, `PackageSmoke`, and generated template/plugin validation',
-  '- scale proof source: `ScaleSmoke` defended `baseline` and `large` tiers plus informational `stress` telemetry and history/state continuity checks'
+  '- scale proof source: `ScaleSmoke` defended `baseline`/`large` tiers plus partially defended `stress` performance/authoring/SVG-export gates; `stress` PNG/JPEG export remains informational telemetry'
 )
 
 $builder = [System.Text.StringBuilder]::new()
@@ -201,7 +202,7 @@ foreach ($line in $proofLines) {
 [void]$builder.AppendLine("- frozen support boundary story: [Stabilization Support Matrix](./docs/en/stabilization-support-matrix.md)")
 [void]$builder.AppendLine("- adapter matrix story: [Adapter Capability Matrix](./docs/en/adapter-capability-matrix.md)")
 [void]$builder.AppendLine("- external capability readiness gate: [Project Status](./docs/en/project-status.md) for externally proven now, validation-only or bounded claims, and deferred until more adopter evidence")
-[void]$builder.AppendLine("- next 0.xx alpha/beta line: keep copyable host-owned parameter/metadata polish first, and only widen toward defended large-tier performance or broader parameter/metadata editing when 3-5 real external reports cluster on the same bounded risk")
+[void]$builder.AppendLine("- next 0.xx alpha/beta line: keep copyable host-owned parameter/metadata polish first, and only widen beyond the promoted 5000-node stress gates or broader parameter/metadata editing when 3-5 real external reports cluster on the same bounded risk")
 [void]$builder.AppendLine("- release evidence contract: route, version, proof markers, friction, and support-bundle attachment note")
 [void]$builder.AppendLine("- `HELLOWORLD_WPF_OK` remains adapter-2 validation only and does not widen the public publish/package boundary")
 [void]$builder.AppendLine("- support-bundle attachment note: [Beta Support Bundle](./docs/en/support-bundle.md)")

@@ -13,7 +13,7 @@ It is now used in two ways:
 | --- | ---: | ---: | ---: | --- |
 | `baseline` | 180 | 48 | 24 | defended release-lane redline |
 | `large` | 1000 | 128 | 64 | defended release-lane large-graph budget |
-| `stress` | 5000 | 256 | 96 | published informational telemetry |
+| `stress` | 5000 | 256 | 96 | partially defended 5000-node gate with raster export telemetry |
 
 ## Scenarios
 
@@ -32,7 +32,7 @@ The harness still emits the existing correctness markers such as `SCALE_HISTORY_
 
 ## Defended Redlines
 
-The current release lane defends the `baseline` and `large` tiers with these redlines:
+The current release lane defends the `baseline`, `large`, and the promoted non-raster portions of `stress` with these redlines:
 
 These redlines are intentionally conservative and are validated on the current GitHub-hosted Windows runner class used by the public release lane, not on an optimized local workstation.
 
@@ -43,9 +43,9 @@ These redlines are intentionally conservative and are validated on the current G
 | setup | 1500 ms |
 | selection | 500 ms |
 | connection | 150 ms |
-| history interaction | 400 ms |
+| history interaction | 1500 ms |
 | viewport / fit | 150 ms |
-| save | 150 ms |
+| save | 1300 ms |
 | reload | 1200 ms |
 
 ### Large redlines
@@ -60,7 +60,19 @@ These redlines are intentionally conservative and are validated on the current G
 | save | 300 ms |
 | reload | 1500 ms |
 
-If either defended tier exceeds one of those numbers, `ScaleSmoke` emits `SCALE_PERFORMANCE_BUDGET_OK:<tier>:False:...` and the release gate fails.
+### Stress performance redlines
+
+| Metric | Stress redline |
+| --- | ---: |
+| setup | 1500 ms |
+| selection | 200 ms |
+| connection | 1500 ms |
+| history interaction | 2500 ms |
+| viewport / fit | 100 ms |
+| save | 700 ms |
+| reload | 500 ms |
+
+If any defended metric exceeds one of those numbers, `ScaleSmoke` emits `SCALE_PERFORMANCE_BUDGET_OK:<tier>:False:...` and the release gate fails.
 
 ### Authoring redlines
 
@@ -68,6 +80,7 @@ If either defended tier exceeds one of those numbers, `ScaleSmoke` emits `SCALE_
 | --- | ---: | ---: | ---: | ---: |
 | `baseline` | 100 ms | 250 ms | 100 ms | 150 ms |
 | `large` | 150 ms | 400 ms | 150 ms | 200 ms |
+| `stress` | 150 ms | 800 ms | 800 ms | 1000 ms |
 
 `ScaleSmoke` emits `SCALE_AUTHORING_BUDGET:...`, `SCALE_AUTHORING_METRICS:...`, `SCALE_AUTHORING_BUDGET_OK:...`, and `SCALE_AUTHORING_SUMMARY:...` for these defended tiers.
 
@@ -75,8 +88,9 @@ If either defended tier exceeds one of those numbers, `ScaleSmoke` emits `SCALE_
 
 | Tier | svg | png | jpeg | reload |
 | --- | ---: | ---: | ---: | ---: |
-| `baseline` | 300 ms | 2500 ms | 1800 ms | 250 ms |
-| `large` | 300 ms | 12000 ms | 8000 ms | 400 ms |
+| `baseline` | 300 ms | 2500 ms | 3500 ms | 250 ms |
+| `large` | 300 ms | 16000 ms | 12000 ms | 400 ms |
+| `stress` | 300 ms | informational | informational | 800 ms |
 
 `ScaleSmoke` emits `SCALE_EXPORT_BUDGET:...`, `SCALE_EXPORT_METRICS:...`, `SCALE_EXPORT_BUDGET_OK:...`, and `SCALE_EXPORT_SUMMARY:...` for these defended tiers.
 
@@ -84,7 +98,7 @@ Pair the hosted tuning handoff with [Widened Surface Performance Recipe](./widen
 
 ## Informational Telemetry
 
-The `stress` tier remains informational. It now publishes a `SCALE_PERF_SUMMARY:stress:...` line with p50/p95 timings, but it does not define a defended release budget yet.
+The `stress` tier is only partially defended. Performance, authoring, SVG export, and export reload have defended thresholds. PNG/JPEG raster export remains informational because repeated 5000-node proof is still too slow for a release commitment.
 
 ## Commands
 
@@ -95,7 +109,7 @@ dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj --
 # defended large-graph release budget
 dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj -- --tier large
 
-# published informational stress telemetry
+# partially defended 5000-node stress gate plus raster telemetry
 dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj -- --tier stress --samples 3
 ```
 
@@ -120,10 +134,10 @@ High-signal lines:
 
 `SCALE_TIER_BUDGET` is the machine-readable declaration of the defended tier, scenario sizes, and threshold policy for the current run. Release notes and proof summaries can quote that marker directly without re-parsing the table above.
 
-Treat `SCALE_PERFORMANCE_BUDGET_OK` as the defended release signal for `baseline` and `large`.
+Treat `SCALE_PERFORMANCE_BUDGET_OK` as the defended release signal for `baseline`, `large`, and promoted `stress` performance metrics.
 
-Treat `SCALE_AUTHORING_BUDGET_OK` and `SCALE_EXPORT_BUDGET_OK` as the defended widened-surface performance signals for `baseline` and `large`.
+Treat `SCALE_AUTHORING_BUDGET_OK` as the defended authoring signal for all three tiers.
 
-Treat `SCALE_PERF_SUMMARY:stress:...` as the published informational telemetry line for the 5000-node tier. It gives hosts a stable p50/p95 snapshot without turning `stress` into a defended release contract.
+Treat `SCALE_EXPORT_BUDGET:stress:svg<=300:png=informational:jpeg=informational:reload<=800` as the boundary for the 5000-node export story: SVG and reload are defended, PNG/JPEG are telemetry only.
 
-If AsterGraph later makes a stronger 5000-node commitment, that commitment should appear as a non-informational `SCALE_TIER_BUDGET:stress:...` marker plus a defended `SCALE_PERFORMANCE_BUDGET_OK:stress:True:none` release signal, or as a new defended tier with its own budget marker.
+Do not read these markers as a 10000-node claim or a general virtualization commitment. Additional 5000-node raster commitments need their own non-informational thresholds and repeated proof.

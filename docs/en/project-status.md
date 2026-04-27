@@ -80,7 +80,7 @@ Use this section as the single external capability readiness gate for release no
 | Canonical runtime/session route and the maintained evaluator ladder are externally proven on the defended beta line. | `tools/AsterGraph.HelloWorld`, `tools/AsterGraph.Starter.Avalonia`, `tools/AsterGraph.HelloWorld.Avalonia`, `tools/AsterGraph.ConsumerSample.Avalonia`, `tools/AsterGraph.HostSample`, `HOST_SAMPLE_OK`, `CONSUMER_SAMPLE_OK` |
 | The showcase authoring surface is externally proven as a bounded beta host experience. | `src/AsterGraph.Demo`, `DEMO_OK`, `COMMAND_SURFACE_OK`, `COMPOSITE_SCOPE_OK`, `EDGE_NOTE_OK`, `EDGE_GEOMETRY_OK`, `DISCONNECT_FLOW_OK` |
 | Packaged consumer proof is externally proven without widening the SDK boundary. | `tools/AsterGraph.PackageSmoke`, `PACKAGE_SMOKE_OK`, `HOST_SAMPLE_NET10_OK` |
-| Scale proof is externally proven only at the defended beta tiers. | `tools/AsterGraph.ScaleSmoke`, `SCALE_PERFORMANCE_BUDGET_OK:baseline:True`, `SCALE_PERFORMANCE_BUDGET_OK:large:True`, `SCALE_PERF_SUMMARY:stress` |
+| Scale proof is externally proven at defended `baseline`/`large` tiers and at the promoted `stress` performance/authoring/SVG-export gates. | `tools/AsterGraph.ScaleSmoke`, `SCALE_PERFORMANCE_BUDGET_OK:baseline:True`, `SCALE_PERFORMANCE_BUDGET_OK:large:True`, `SCALE_PERFORMANCE_BUDGET_OK:stress:True`, `SCALE_EXPORT_BUDGET:stress:svg<=300:png=informational:jpeg=informational:reload<=800` |
 
 ### Validation-only or bounded claims
 
@@ -88,15 +88,15 @@ Use this section as the single external capability readiness gate for release no
 | --- | --- | --- |
 | `WPF` as adapter 2 | Validation-only and not Avalonia parity or public WPF support. Current evidence is limited to the bounded hosted shell accessibility and performance paths. | `HELLOWORLD_WPF_OK`, `HOSTED_ACCESSIBILITY_BASELINE_OK`, `HOSTED_ACCESSIBILITY_FOCUS_OK`, `HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK`, `HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK`, `HOSTED_ACCESSIBILITY_OK`, `ADAPTER2_PERFORMANCE_BASELINE_OK`, `ADAPTER2_PROJECTION_BUDGET_OK`, `ADAPTER2_COMMAND_BUDGET_OK`, `ADAPTER2_SCENE_BUDGET_OK`, `ADAPTER_CAPABILITY_MATRIX:WPF:HELLOWORLD_WPF_OK:PASS`, `ADAPTER_CAPABILITY_MATRIX:WPF:COMMAND_SURFACE_OK:PASS`, [Adapter Capability Matrix](./adapter-capability-matrix.md) |
 | Retained route | Migration-only bridge, not a new primary host path. | [Retained-To-Session Migration Recipe](./retained-migration-recipe.md), [Stabilization Support Matrix](./stabilization-support-matrix.md) |
-| Stress-scale telemetry | Informational only, not a defended budget claim. | `SCALE_PERF_SUMMARY:stress`, [ScaleSmoke Baseline](./scale-baseline.md) |
+| Stress raster export telemetry | PNG/JPEG export at 5000 nodes is informational only, not a defended budget claim. | `SCALE_EXPORT_BUDGET:stress:svg<=300:png=informational:jpeg=informational:reload<=800`, [ScaleSmoke Baseline](./scale-baseline.md) |
 
 ### Deferred until more adopter evidence
 
-- larger defended performance commitments beyond the current `baseline` and `large` tiers
+- defended claims beyond the promoted 5000-node `stress` performance/authoring/SVG-export gates
 - new hosted adapters or widened adapter claims beyond Avalonia plus the current `WPF` validation lane
 - marketplace, remote install/update, unload lifecycle, or sandboxed plugin stories
 - stable / GA / `1.0` support guarantees
-- the next 0.xx alpha/beta line stays on copyable host-owned parameter/metadata polish first; only widen toward defended large-tier performance or broader parameter/metadata editing when 3-5 real external reports cluster on the same bounded risk
+- the next 0.xx alpha/beta line stays on copyable host-owned parameter/metadata polish first; only widen beyond the promoted 5000-node stress gates or broader parameter/metadata editing when 3-5 real external reports cluster on the same bounded risk
 - seeded rehearsals do not count toward the 3-5 gate
 - if a new report does not fit one of the proven or bounded rows above, route it through the [Adoption Feedback Loop](./adoption-feedback.md) and the [Beta Support Bundle](./support-bundle.md) instead of widening the claim ad hoc
 

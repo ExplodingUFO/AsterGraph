@@ -32,11 +32,11 @@ The current recommendation is based on four structured pre-public adoption rehea
 
 ## Current Recommendation
 
-The next 0.xx alpha/beta line should stay on copyable host-owned parameter/metadata polish first; only widen toward defended large-tier performance or broader parameter/metadata editing when 3-5 real external reports cluster on the same bounded risk:
+The next 0.xx alpha/beta line should stay on copyable host-owned parameter/metadata polish first; only widen beyond the promoted 5000-node stress gates or broader parameter/metadata editing when 3-5 real external reports cluster on the same bounded risk:
 
 1. **continue copyable host-owned parameter/metadata polish first**
 2. **seeded rehearsals do not count toward the 3-5 gate**
-3. **do not treat defended large-tier performance as the next widening target before 3-5 real external reports cluster on the same bounded risk**
+3. **do not widen beyond the promoted 5000-node stress gates before 3-5 real external reports cluster on the same bounded risk**
 4. **do not treat broader parameter and metadata editing as the next widening target before 3-5 real external reports cluster on the same bounded risk**
 
 Until that threshold is met, keep this seeded recommendation in place instead of widening the next beta line ad hoc.

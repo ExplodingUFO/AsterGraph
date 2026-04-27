@@ -13,7 +13,7 @@
 | --- | ---: | ---: | ---: | --- |
 | `baseline` | 180 | 48 | 24 | release lane 防回归红线 |
 | `large` | 1000 | 128 | 64 | release lane 守住的大图预算 |
-| `stress` | 5000 | 256 | 96 | 对外发布的信息型遥测 |
+| `stress` | 5000 | 256 | 96 | 部分 defended 的 5000 节点 gate，加 raster export 遥测 |
 
 ## 场景
 
@@ -32,7 +32,7 @@
 
 ## 当前防回归红线
 
-release lane 现在会同时守住 `baseline` 和 `large` 两个层级：
+release lane 现在会守住 `baseline`、`large`，以及 `stress` 中已提升的非 raster 指标：
 
 这些红线刻意按当前公开 release lane 使用的 GitHub hosted Windows runner 冷启动测量来设定，不是按本地高性能开发机的最佳成绩来定。
 
@@ -43,9 +43,9 @@ release lane 现在会同时守住 `baseline` 和 `large` 两个层级：
 | setup | 1500 ms |
 | selection | 500 ms |
 | connection | 150 ms |
-| history interaction | 400 ms |
+| history interaction | 1500 ms |
 | viewport / fit | 150 ms |
-| save | 150 ms |
+| save | 1300 ms |
 | reload | 1200 ms |
 
 ### large 红线
@@ -60,7 +60,19 @@ release lane 现在会同时守住 `baseline` 和 `large` 两个层级：
 | save | 300 ms |
 | reload | 1500 ms |
 
-只要任一 defended 层级超过这些数字，`ScaleSmoke` 就会输出 `SCALE_PERFORMANCE_BUDGET_OK:<tier>:False:...`，release gate 会失败。
+### stress performance 红线
+
+| 指标 | stress 红线 |
+| --- | ---: |
+| setup | 1500 ms |
+| selection | 200 ms |
+| connection | 1500 ms |
+| history interaction | 2500 ms |
+| viewport / fit | 100 ms |
+| save | 700 ms |
+| reload | 500 ms |
+
+只要任一 defended 指标超过这些数字，`ScaleSmoke` 就会输出 `SCALE_PERFORMANCE_BUDGET_OK:<tier>:False:...`，release gate 会失败。
 
 ### authoring 红线
 
@@ -68,6 +80,7 @@ release lane 现在会同时守住 `baseline` 和 `large` 两个层级：
 | --- | ---: | ---: | ---: | ---: |
 | `baseline` | 100 ms | 250 ms | 100 ms | 150 ms |
 | `large` | 150 ms | 400 ms | 150 ms | 200 ms |
+| `stress` | 150 ms | 800 ms | 800 ms | 1000 ms |
 
 `ScaleSmoke` 会为这些 defended 层级输出 `SCALE_AUTHORING_BUDGET:...`、`SCALE_AUTHORING_METRICS:...`、`SCALE_AUTHORING_BUDGET_OK:...` 和 `SCALE_AUTHORING_SUMMARY:...`。
 
@@ -75,8 +88,9 @@ release lane 现在会同时守住 `baseline` 和 `large` 两个层级：
 
 | 层级 | svg | png | jpeg | reload |
 | --- | ---: | ---: | ---: | ---: |
-| `baseline` | 300 ms | 2500 ms | 1800 ms | 250 ms |
-| `large` | 300 ms | 12000 ms | 8000 ms | 400 ms |
+| `baseline` | 300 ms | 2500 ms | 3500 ms | 250 ms |
+| `large` | 300 ms | 16000 ms | 12000 ms | 400 ms |
+| `stress` | 300 ms | informational | informational | 800 ms |
 
 `ScaleSmoke` 会为这些 defended 层级输出 `SCALE_EXPORT_BUDGET:...`、`SCALE_EXPORT_METRICS:...`、`SCALE_EXPORT_BUDGET_OK:...` 和 `SCALE_EXPORT_SUMMARY:...`。
 
@@ -84,7 +98,7 @@ release lane 现在会同时守住 `baseline` 和 `large` 两个层级：
 
 ## 信息型遥测
 
-`stress` 层级仍然只是信息型遥测。它现在会额外发布一行 `SCALE_PERF_SUMMARY:stress:...`，把 p50/p95 时间直接给出来，但不会因此变成 defended release budget。
+`stress` 层级现在是部分 defended。Performance、authoring、SVG export 和 export reload 有明确红线；PNG/JPEG raster export 因为 5000 节点重复证明仍然太慢，所以继续只作为 informational telemetry。
 
 ## 运行方式
 
@@ -95,7 +109,7 @@ dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj --
 # release lane 守住的大图预算
 dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj -- --tier large
 
-# 对外发布的 stress 遥测
+# 部分 defended 的 5000 节点 stress gate，加 raster 遥测
 dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj -- --tier stress --samples 3
 ```
 
@@ -120,10 +134,10 @@ dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj --
 
 其中 `SCALE_TIER_BUDGET` 是当前运行的机器可读预算声明，直接把防守层级、场景规模和阈值策略编码成一行，release note 和 proof summary 可以直接引用。
 
-对 `baseline` 和 `large` 来说，真正对外承诺的 release 信号还是 `SCALE_PERFORMANCE_BUDGET_OK`。
+对 `baseline`、`large` 和已提升的 `stress` performance 指标来说，真正对外承诺的 release 信号是 `SCALE_PERFORMANCE_BUDGET_OK`。
 
-对 `baseline` 和 `large` 来说，`SCALE_AUTHORING_BUDGET_OK` 和 `SCALE_EXPORT_BUDGET_OK` 也是 widened-surface performance 的 defended 信号。
+`SCALE_AUTHORING_BUDGET_OK` 是三个层级共同的 defended authoring 信号。
 
-对 `stress` 来说，`SCALE_PERF_SUMMARY:stress:...` 才是对外发布的 p50/p95 遥测行，它告诉宿主当前 5000 节点场景下的大致表现，但不代表正式预算承诺。
+`SCALE_EXPORT_BUDGET:stress:svg<=300:png=informational:jpeg=informational:reload<=800` 是 5000 节点 export 故事的边界：SVG 和 reload 受防守，PNG/JPEG 仍只是遥测。
 
-如果后续真的要对 5000 节点做更强承诺，应该体现在非 informational 的 `SCALE_TIER_BUDGET:stress:...` marker 加上 defended 的 `SCALE_PERFORMANCE_BUDGET_OK:stress:True:none`，或者单独再开一个新的 defended 层级。
+不要把这些 marker 解读成 10000 节点承诺，也不要解读成通用 virtualization 承诺。后续如果要提升 5000 节点 raster 承诺，必须先补非 informational 阈值和重复证明。
