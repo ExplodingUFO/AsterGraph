@@ -32,6 +32,9 @@ internal static class ConsumerSampleDocsAssertions
         Assert.Contains("CONSUMER_SAMPLE_SCENARIO_GRAPH_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("CONSUMER_SAMPLE_HOST_OWNED_ACTIONS_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("CONSUMER_SAMPLE_SUPPORT_BUNDLE_READY_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("GRAPH_VALIDATION_FEEDBACK_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("GRAPH_FEEDBACK_FOCUS_TARGET_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("GRAPH_READINESS_STATUS_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("FIVE_MINUTE_ONBOARDING_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("ONBOARDING_CONFIGURATION_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("SUPPORT_BUNDLE_PERSISTENCE_OK:True", contents, StringComparison.Ordinal);
@@ -45,6 +48,9 @@ internal static class ConsumerSampleDocsAssertions
         Assert.Contains("HOST_NATIVE_METRIC:edge_tool_projection_ms", contents, StringComparison.Ordinal);
         Assert.Contains("CONSUMER_SAMPLE_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("parameterSnapshots", contents, StringComparison.Ordinal);
+        Assert.Contains("readinessStatus", contents, StringComparison.Ordinal);
+        Assert.Contains("validationSummary", contents, StringComparison.Ordinal);
+        Assert.Contains("validationFeedback", contents, StringComparison.Ordinal);
         Assert.Contains("currentValue", contents, StringComparison.Ordinal);
         Assert.Contains("defaultValue", contents, StringComparison.Ordinal);
         Assert.Contains("allowedOptions", contents, StringComparison.Ordinal);

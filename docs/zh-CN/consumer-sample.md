@@ -31,7 +31,7 @@
 - 一个 plugin command 也走同一条动作路径，而不是样例私有的菜单占位项
 - 通过 `IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()` 和 `IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)` 做选中节点参数读写 seam
 - 一个可信插件注册，以及可见的 provenance、trust reason 和 allowlist 导入/导出
-- 一条 support-bundle proof 路径，带场景图、宿主自管动作、support-bundle payload readiness 和五分钟 handoff 健康度 markers
+- 一条 support-bundle proof 路径，带场景图、宿主自管动作、canonical graph readiness 证据、support-bundle payload readiness 和五分钟 handoff 健康度 markers
 - 基于 factory 的默认 Avalonia hosted-UI 路线
 
 ## 复制这些宿主自管 seam
@@ -124,6 +124,9 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 - `CONSUMER_SAMPLE_SCENARIO_GRAPH_OK:True`
 - `CONSUMER_SAMPLE_HOST_OWNED_ACTIONS_OK:True`
 - `CONSUMER_SAMPLE_SUPPORT_BUNDLE_READY_OK:True`
+- `GRAPH_VALIDATION_FEEDBACK_OK:True`
+- `GRAPH_FEEDBACK_FOCUS_TARGET_OK:True`
+- `GRAPH_READINESS_STATUS_OK:True`
 - `FIVE_MINUTE_ONBOARDING_OK:True`
 - `ONBOARDING_CONFIGURATION_OK:True`
 - `AUTHORING_SURFACE_OK:True`
@@ -136,6 +139,9 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 - `SUPPORT_BUNDLE_OK:True`
 - `SUPPORT_BUNDLE_PATH:...`
 - `CONSUMER_SAMPLE_SUPPORT_BUNDLE_READY_OK:True`
+- `GRAPH_VALIDATION_FEEDBACK_OK:True`
+- `GRAPH_FEEDBACK_FOCUS_TARGET_OK:True`
+- `GRAPH_READINESS_STATUS_OK:True`
 
 这份速查只做 summary-only；实际 intake 说明由 `Proof Handoff` 负责。
 support bundle 只保留本地证据，不会扩大 support 边界。
@@ -173,6 +179,7 @@ Proof Handoff 负责实际 intake 说明。
 
 如果 route 不能产出 bundle，就记录 `NO_SUPPORT_BUNDLE:route-cannot-produce-one`。
 如果 `CONSUMER_SAMPLE_PARAMETER_OK` 或 `CONSUMER_SAMPLE_METADATA_PROJECTION_OK` 失败，就把失败的 proof-marker 行和 support bundle 的 `parameterSnapshots` 行一起保留在同一条受限 intake 记录里。
+如果要排查 graph readiness，就保留同一份 bundle 里的 `readinessStatus`、`validationSummary` 和 `validationFeedback`；这些字段来自 canonical session validation snapshot。
 
 它应当只作为本地证据，不应扩大支持边界。
 
@@ -203,6 +210,9 @@ Proof Handoff 负责实际 intake 说明。
 - `CONSUMER_SAMPLE_SCENARIO_GRAPH_OK:True`
 - `CONSUMER_SAMPLE_HOST_OWNED_ACTIONS_OK:True`
 - `CONSUMER_SAMPLE_SUPPORT_BUNDLE_READY_OK:True`
+- `GRAPH_VALIDATION_FEEDBACK_OK:True`
+- `GRAPH_FEEDBACK_FOCUS_TARGET_OK:True`
+- `GRAPH_READINESS_STATUS_OK:True`
 - `FIVE_MINUTE_ONBOARDING_OK:True`
 - `ONBOARDING_CONFIGURATION_OK:True`
 - `HOST_NATIVE_METRIC:startup_ms=...`
@@ -222,6 +232,9 @@ Proof Handoff 负责实际 intake 说明。
 - `SUPPORT_BUNDLE_OK:True`
 - `SUPPORT_BUNDLE_PATH:...`
 - `CONSUMER_SAMPLE_SUPPORT_BUNDLE_READY_OK:True`
+- `GRAPH_VALIDATION_FEEDBACK_OK:True`
+- `GRAPH_FEEDBACK_FOCUS_TARGET_OK:True`
+- `GRAPH_READINESS_STATUS_OK:True`
 - `CONSUMER_SAMPLE_OK:True`
 
 ## 什么时候看它
@@ -263,7 +276,7 @@ Proof Handoff 负责实际 intake 说明。
 - proof mode：输出 `AUTHORING_SURFACE_*`、`COMMAND_SURFACE_OK` 和扩展后的 `HOST_NATIVE_METRIC:*`，这样你能和官方 sample 做横向比较，并继续把 `ScaleSmoke` 的 defended large-tier contract 放在视野里
 - widened hosted tuning：输出 `WIDENED_SURFACE_PERFORMANCE_OK:True`，并复用 [Widened Surface Performance Recipe](./widened-surface-performance-recipe.md)，这样宿主指标会继续和 `ScaleSmoke` 绑定在同一条路线里
 - capability breadth：把同一条路线和 [Capability Breadth Recipe](./capability-breadth-recipe.md) 配在一起，并从 `AsterGraph.ConsumerSample.Avalonia -- --proof` 输出 `CAPABILITY_BREADTH_*` markers
-- onboarding markers：继续守住 `CONSUMER_SAMPLE_SCENARIO_GRAPH_OK:True`、`CONSUMER_SAMPLE_HOST_OWNED_ACTIONS_OK:True`、`CONSUMER_SAMPLE_SUPPORT_BUNDLE_READY_OK:True`、`FIVE_MINUTE_ONBOARDING_OK:True` 和 `ONBOARDING_CONFIGURATION_OK:True`
+- onboarding markers：继续守住 `CONSUMER_SAMPLE_SCENARIO_GRAPH_OK:True`、`CONSUMER_SAMPLE_HOST_OWNED_ACTIONS_OK:True`、`CONSUMER_SAMPLE_SUPPORT_BUNDLE_READY_OK:True`、`GRAPH_VALIDATION_FEEDBACK_OK:True`、`GRAPH_FEEDBACK_FOCUS_TARGET_OK:True`、`GRAPH_READINESS_STATUS_OK:True`、`FIVE_MINUTE_ONBOARDING_OK:True` 和 `ONBOARDING_CONFIGURATION_OK:True`
 - support bundle：在 proof mode 上额外附带 `--support-bundle`，生成本地 JSON 证据包给 support/feedback 使用
 - sample-owned content：review/audit 节点族、action ids/titles 和 proof labels 应该保持在你的 app 内部，不要写成 canonical contract
 

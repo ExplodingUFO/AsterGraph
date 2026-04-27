@@ -38,6 +38,7 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 ```
 
 Validate the defended route here with `AsterGraph.ConsumerSample.Avalonia -- --proof`. For reviewable local evidence, run the bundle-producing command above and reuse the emitted `SUPPORT_BUNDLE_PATH:...` line as the support-bundle attachment note. If the route cannot produce a bundle, record `NO_SUPPORT_BUNDLE:route-cannot-produce-one`. The support bundle stays local evidence only.
+The bundle also serializes canonical graph readiness evidence from the session validation snapshot: `readinessStatus`, `validationSummary`, and `validationFeedback` with focus targets.
 
 Expected proof markers:
 
@@ -97,6 +98,9 @@ Expected proof markers:
 - `CONSUMER_SAMPLE_SCENARIO_GRAPH_OK:True`
 - `CONSUMER_SAMPLE_HOST_OWNED_ACTIONS_OK:True`
 - `CONSUMER_SAMPLE_SUPPORT_BUNDLE_READY_OK:True`
+- `GRAPH_VALIDATION_FEEDBACK_OK:True`
+- `GRAPH_FEEDBACK_FOCUS_TARGET_OK:True`
+- `GRAPH_READINESS_STATUS_OK:True`
 - `FIVE_MINUTE_ONBOARDING_OK:True`
 - `ONBOARDING_CONFIGURATION_OK:True`
 - `HOST_NATIVE_METRIC:startup_ms=...`
@@ -116,6 +120,9 @@ Expected bundle markers when `--support-bundle <support-bundle-path>` is supplie
 - `SUPPORT_BUNDLE_OK:True`
 - `SUPPORT_BUNDLE_PATH:...`
 - `CONSUMER_SAMPLE_SUPPORT_BUNDLE_READY_OK:True`
+- `GRAPH_VALIDATION_FEEDBACK_OK:True`
+- `GRAPH_FEEDBACK_FOCUS_TARGET_OK:True`
+- `GRAPH_READINESS_STATUS_OK:True`
 - `CONSUMER_SAMPLE_OK:True`
 
 ## Trust and proof quick reference
@@ -157,7 +164,7 @@ Use this sample to copy the host-owned seams, not the sample-specific presentati
 
 - Define metadata in [Authoring Inspector Recipe](../../docs/en/authoring-inspector-recipe.md) first with `defaultValue`, `editorKind`, `constraints`, and `groupName`.
 - Project and write selected-node values in this sample through `IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()` and `IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)`.
-- Validate evidence with proof mode plus a support bundle; compare `parameterSnapshots` with `CONSUMER_SAMPLE_PARAMETER_OK:True` and `CONSUMER_SAMPLE_METADATA_PROJECTION_OK:True`.
+- Validate evidence with proof mode plus a support bundle; compare `parameterSnapshots` with `CONSUMER_SAMPLE_PARAMETER_OK:True` and `CONSUMER_SAMPLE_METADATA_PROJECTION_OK:True`, then use `readinessStatus`, `validationSummary`, and `validationFeedback` for graph readiness triage.
 
 ### Copyable Authoring Surface Handoff
 

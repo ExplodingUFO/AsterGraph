@@ -48,6 +48,9 @@ public sealed record ConsumerSampleProofResult(
     double NodeToolProjectionMs,
     double EdgeToolProjectionMs,
     double CommandPaletteMs,
+    string ReadinessStatus,
+    ConsumerSampleProofValidationSummary ValidationSummary,
+    IReadOnlyList<ConsumerSampleProofValidationFeedback> ValidationFeedback,
     bool QuickAddConnectedNodeOk = true,
     bool PortFilteredNodeSearchOk = true,
     bool DropNodeOnEdgeOk = true,
@@ -144,6 +147,9 @@ public sealed record ConsumerSampleProofResult(
         && RuntimeLogPanelOk
         && RuntimeLogFilterOk
         && RuntimeOverlaySupportBundleOk
+        && GraphValidationFeedbackOk
+        && GraphFeedbackFocusTargetOk
+        && GraphReadinessStatusOk
         && LayoutProviderSeamOk
         && LayoutPreviewApplyCancelOk
         && LayoutUndoTransactionOk
@@ -245,6 +251,9 @@ public sealed record ConsumerSampleProofResult(
         $"CONSUMER_SAMPLE_SCENARIO_GRAPH_OK:{ScenarioGraphOk}",
         $"CONSUMER_SAMPLE_HOST_OWNED_ACTIONS_OK:{HostOwnedActionsOk}",
         $"CONSUMER_SAMPLE_SUPPORT_BUNDLE_READY_OK:{SupportBundlePayloadOk}",
+        $"GRAPH_VALIDATION_FEEDBACK_OK:{GraphValidationFeedbackOk}",
+        $"GRAPH_FEEDBACK_FOCUS_TARGET_OK:{GraphFeedbackFocusTargetOk}",
+        $"GRAPH_READINESS_STATUS_OK:{GraphReadinessStatusOk}",
         $"FIVE_MINUTE_ONBOARDING_OK:{FiveMinuteOnboardingOk}",
         $"ONBOARDING_CONFIGURATION_OK:{OnboardingConfigurationOk}",
         $"AUTHORING_SURFACE_OK:{AuthoringSurfaceOk}",
@@ -278,8 +287,60 @@ public sealed record ConsumerSampleProofResult(
         && ParameterSnapshots.Any(snapshot =>
             snapshot.HasMixedValues);
 
+    public string SupportReadinessStatus
+        => ReadinessStatus;
+
+    public ConsumerSampleProofValidationSummary SupportValidationSummary
+        => ValidationSummary;
+
+    public IReadOnlyList<ConsumerSampleProofValidationFeedback> SupportValidationFeedback
+        => ValidationFeedback;
+
+    public bool GraphValidationFeedbackOk
+        => SupportValidationSummary.TotalIssueCount == SupportValidationFeedback.Count
+        && SupportValidationSummary.TotalIssueCount == SupportValidationSummary.ErrorCount + SupportValidationSummary.WarningCount
+        && SupportValidationSummary.ErrorCount == SupportValidationFeedback.Count(static feedback => string.Equals(feedback.Severity, "Error", StringComparison.Ordinal))
+        && SupportValidationSummary.WarningCount == SupportValidationFeedback.Count(static feedback => string.Equals(feedback.Severity, "Warning", StringComparison.Ordinal))
+        && SupportValidationSummary.InvalidConnectionCount == SupportValidationFeedback.Count(static feedback =>
+            feedback.FocusTarget.ConnectionId is not null
+            || feedback.Code.StartsWith("connection.", StringComparison.Ordinal))
+        && SupportValidationSummary.InvalidParameterCount == SupportValidationFeedback.Count(static feedback =>
+            feedback.FocusTarget.ParameterKey is not null
+            || feedback.Code.StartsWith("node.parameter-", StringComparison.Ordinal))
+        && SupportValidationFeedback.All(static feedback =>
+            !string.IsNullOrWhiteSpace(feedback.Code)
+            && !string.IsNullOrWhiteSpace(feedback.Message)
+            && (string.Equals(feedback.Severity, "Error", StringComparison.Ordinal)
+                || string.Equals(feedback.Severity, "Warning", StringComparison.Ordinal)));
+
+    public bool GraphFeedbackFocusTargetOk
+        => SupportValidationFeedback.All(static feedback => HasCoherentFocusTarget(feedback.FocusTarget));
+
+    public bool GraphReadinessStatusOk
+        => SupportReadinessStatus switch
+        {
+            "Ready" => SupportValidationSummary.ErrorCount == 0 && SupportValidationSummary.WarningCount == 0,
+            "Warnings" => SupportValidationSummary.ErrorCount == 0 && SupportValidationSummary.WarningCount > 0,
+            "Blocked" => SupportValidationSummary.ErrorCount > 0,
+            _ => false,
+        };
+
     private static string FormatMetric(string name, double value)
         => $"HOST_NATIVE_METRIC:{name}={value.ToString("0.###", CultureInfo.InvariantCulture)}";
+
+    private static bool HasCoherentFocusTarget(ConsumerSampleProofFocusTarget target)
+        => target.Kind switch
+        {
+            "Graph" => target.NodeId is null
+                && target.ConnectionId is null
+                && target.EndpointId is null
+                && target.ParameterKey is null,
+            "Node" => target.NodeId is not null,
+            "Connection" => target.ConnectionId is not null,
+            "ConnectionEndpoint" => target.ConnectionId is not null && target.EndpointId is not null,
+            "Parameter" => target.NodeId is not null && target.ParameterKey is not null,
+            _ => false,
+        };
 }
 
 public static class ConsumerSampleProof
@@ -476,6 +537,7 @@ public static class ConsumerSampleProof
         }
 
         var finalSnapshot = host.Session.Queries.CreateDocumentSnapshot();
+        var validationSnapshot = host.Session.Diagnostics.CaptureInspectionSnapshot().ValidationSnapshot;
         var runtimeOverlay = host.Session.Queries.GetRuntimeOverlaySnapshot();
         var featureDescriptorIds = host.Session.Queries.GetFeatureDescriptors()
             .Where(d => d.IsAvailable)
@@ -492,6 +554,8 @@ public static class ConsumerSampleProof
         var validationFixSnapshots = CreateValidationFixSnapshots();
         var proofParameterSnapshots = CreateParameterSnapshots(
             [.. selectedSupportSnapshots, .. mixedValueSnapshots, .. validationFixSnapshots]);
+        var validationSummary = CreateValidationSummary(validationSnapshot);
+        var validationFeedback = CreateValidationFeedback(validationSnapshot);
         var supportBundlePayloadOk = HasSupportBundlePayload(proofParameterSnapshots, finalSnapshot, featureDescriptorIds);
         var runtimeOverlaySupportBundleOk = HasRuntimeOverlaySupportBundlePayload(runtimeOverlay);
         var fiveMinuteOnboardingOk = scenarioGraphOk
@@ -562,6 +626,9 @@ public static class ConsumerSampleProof
             RuntimeNodeOverlays: runtimeOverlay.NodeOverlays,
             RuntimeConnectionOverlays: runtimeOverlay.ConnectionOverlays,
             RuntimeLogs: runtimeOverlay.RecentLogs,
+            ReadinessStatus: CreateReadinessStatus(validationSnapshot),
+            ValidationSummary: validationSummary,
+            ValidationFeedback: validationFeedback,
             HostedAutomationNavigationOk: hostedAutomationNavigationOk,
             HostedAuthoringAutomationDiagnosticsOk: hostedAuthoringAutomationDiagnosticsOk,
             ScenarioGraphOk: scenarioGraphOk,
@@ -686,6 +753,68 @@ public static class ConsumerSampleProof
             string.Equals(snapshot.Key, "owner", StringComparison.Ordinal)
             && string.Equals(snapshot.CurrentValue?.ToString(), "release-owner", StringComparison.Ordinal))
         && featureDescriptorIds.Count > 0;
+
+    private static string CreateReadinessStatus(GraphEditorValidationSnapshot snapshot)
+        => snapshot.ErrorCount > 0
+            ? "Blocked"
+            : snapshot.WarningCount > 0
+                ? "Warnings"
+                : "Ready";
+
+    private static ConsumerSampleProofValidationSummary CreateValidationSummary(GraphEditorValidationSnapshot snapshot)
+        => new(
+            TotalIssueCount: snapshot.Issues.Count,
+            ErrorCount: snapshot.ErrorCount,
+            WarningCount: snapshot.WarningCount,
+            InvalidConnectionCount: snapshot.Issues.Count(static issue => IsConnectionIssue(issue)),
+            InvalidParameterCount: snapshot.Issues.Count(static issue => IsParameterIssue(issue)));
+
+    private static IReadOnlyList<ConsumerSampleProofValidationFeedback> CreateValidationFeedback(GraphEditorValidationSnapshot snapshot)
+        => snapshot.Issues
+            .Select(static issue => new ConsumerSampleProofValidationFeedback(
+                Code: issue.Code,
+                Severity: issue.Severity.ToString(),
+                Message: issue.Message,
+                FocusTarget: CreateFocusTarget(issue)))
+            .ToArray();
+
+    private static ConsumerSampleProofFocusTarget CreateFocusTarget(GraphEditorValidationIssueSnapshot issue)
+        => new(
+            Kind: GetFocusTargetKind(issue),
+            NodeId: issue.NodeId,
+            ConnectionId: issue.ConnectionId,
+            EndpointId: issue.EndpointId,
+            ParameterKey: issue.ParameterKey);
+
+    private static string GetFocusTargetKind(GraphEditorValidationIssueSnapshot issue)
+    {
+        if (issue.ParameterKey is not null)
+        {
+            return "Parameter";
+        }
+
+        if (issue.ConnectionId is not null && issue.EndpointId is not null)
+        {
+            return "ConnectionEndpoint";
+        }
+
+        if (issue.ConnectionId is not null)
+        {
+            return "Connection";
+        }
+
+        return issue.NodeId is not null
+            ? "Node"
+            : "Graph";
+    }
+
+    private static bool IsConnectionIssue(GraphEditorValidationIssueSnapshot issue)
+        => issue.ConnectionId is not null
+        || issue.Code.StartsWith("connection.", StringComparison.Ordinal);
+
+    private static bool IsParameterIssue(GraphEditorValidationIssueSnapshot issue)
+        => issue.ParameterKey is not null
+        || issue.Code.StartsWith("node.parameter-", StringComparison.Ordinal);
 
     private static bool HasLayoutProviderSeam(ConsumerSampleHost host)
     {
@@ -1906,6 +2035,29 @@ public sealed record ConsumerSampleProofParameterSnapshot(
 public sealed record ConsumerSampleProofParameterOptionSnapshot(
     string Value,
     string Label);
+
+public sealed record ConsumerSampleProofValidationSummary(
+    int TotalIssueCount,
+    int ErrorCount,
+    int WarningCount,
+    int InvalidConnectionCount,
+    int InvalidParameterCount)
+{
+    public static ConsumerSampleProofValidationSummary Empty { get; } = new(0, 0, 0, 0, 0);
+}
+
+public sealed record ConsumerSampleProofValidationFeedback(
+    string Code,
+    string Severity,
+    string Message,
+    ConsumerSampleProofFocusTarget FocusTarget);
+
+public sealed record ConsumerSampleProofFocusTarget(
+    string Kind,
+    string? NodeId = null,
+    string? ConnectionId = null,
+    string? EndpointId = null,
+    string? ParameterKey = null);
 
 public static class ConsumerSampleHeadlessEnvironment
 {
