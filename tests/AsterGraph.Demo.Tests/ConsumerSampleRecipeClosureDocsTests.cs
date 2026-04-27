@@ -89,6 +89,51 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
     }
 
     [Fact]
+    public void ConsumerSampleExperienceHandoffDocs_DefendFinalMarkersAndScopeBoundary()
+    {
+        var readme = ReadRepoFile("tools/AsterGraph.ConsumerSample.Avalonia/README.md");
+        var consumerSampleEn = ReadRepoFile("docs/en/consumer-sample.md");
+        var consumerSampleZh = ReadRepoFile("docs/zh-CN/consumer-sample.md");
+        var quickStartEn = ReadRepoFile("docs/en/quick-start.md");
+        var quickStartZh = ReadRepoFile("docs/zh-CN/quick-start.md");
+        var projectStatusEn = ReadRepoFile("docs/en/project-status.md");
+        var projectStatusZh = ReadRepoFile("docs/zh-CN/project-status.md");
+        var supportBundleEn = ReadRepoFile("docs/en/support-bundle.md");
+        var supportBundleZh = ReadRepoFile("docs/zh-CN/support-bundle.md");
+
+        foreach (var contents in new[]
+        {
+            readme,
+            consumerSampleEn,
+            consumerSampleZh,
+            quickStartEn,
+            quickStartZh,
+            projectStatusEn,
+            projectStatusZh,
+            supportBundleEn,
+            supportBundleZh,
+        })
+        {
+            AssertContains(contents, "EXPERIENCE_POLISH_HANDOFF_OK:True");
+            AssertContains(contents, "FEATURE_ENHANCEMENT_PROOF_OK:True");
+            AssertContains(contents, "EXPERIENCE_SCOPE_BOUNDARY_OK:True");
+        }
+
+        foreach (var contents in new[] { readme, consumerSampleEn, consumerSampleZh })
+        {
+            Assert.Contains("runtime", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("marketplace", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("sandbox", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("WPF", contents, StringComparison.Ordinal);
+        }
+
+        Assert.True(HasLineWithAll(consumerSampleEn, "final handoff marker", "UX polish", "scope-boundary"));
+        Assert.True(HasLineWithAll(consumerSampleZh, "handoff marker", "UX polish", "scope-boundary"));
+        ConsumerSampleDocsAssertions.AssertSupportBundleProofMarkers(supportBundleEn);
+        ConsumerSampleDocsAssertions.AssertSupportBundleProofMarkers(supportBundleZh);
+    }
+
+    [Fact]
     public void AuthoringInspectorRecipeClosureDocs_AlignCanonicalInspectorVocabularyAcrossSampleGuidance()
     {
         var authoringRecipeEn = ReadRepoFile("docs/en/authoring-inspector-recipe.md");

@@ -19,6 +19,7 @@ For one copyable hosted keyboard, focus, and accessibility handoff on the same r
 This is the defended beta route for copying host-owned seams into your own host. Keep action projection, trust workflow, and the selected-node parameter read/write seam host-owned; copy only the sample-owned presentation.
 
 It stays on the canonical session/runtime model only. It does not introduce a second editor model, a sandbox, or a broader plugin ecosystem.
+Its final experience handoff markers summarize existing proof lines only: `EXPERIENCE_POLISH_HANDOFF_OK:True`, `FEATURE_ENHANCEMENT_PROOF_OK:True`, and `EXPERIENCE_SCOPE_BOUNDARY_OK:True`.
 
 The hosted route ladder is `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerSample.Avalonia`.
 `HostSample` is the post-ladder proof harness.
@@ -34,6 +35,7 @@ This sample keeps one realistic host window without turning into a full showcase
 - one host-owned snippet catalog that inserts the sample review queue lane through `StartConnection(...)` and `TryCreateConnectedNodeFromPendingConnection(...)`
 - one trusted plugin registration with visible provenance, trust reasons, and allowlist import or export
 - one support-bundle proof path with onboarding markers for the scenario graph, host-owned actions, canonical graph readiness evidence, support-bundle payload readiness, and five-minute handoff health
+- one final handoff marker set that ties UX polish, feature enhancement proof, and scope-boundary evidence together without adding runtime APIs, marketplace behavior, sandboxing, or WPF parity
 - the shipped Avalonia editor surface on the factory-based hosted-UI route
 
 ## Copy These Host-Owned Seams
@@ -137,6 +139,9 @@ Expected proof markers:
 - `ONBOARDING_CONFIGURATION_OK:True`
 - `AUTHORING_SURFACE_OK:True`
 - `COMMAND_SURFACE_OK:True`
+- `EXPERIENCE_POLISH_HANDOFF_OK:True`
+- `FEATURE_ENHANCEMENT_PROOF_OK:True`
+- `EXPERIENCE_SCOPE_BOUNDARY_OK:True`
 - `HOST_NATIVE_METRIC:*`
 
 Expected bundle markers when `--support-bundle <support-bundle-path>` is supplied:
@@ -232,6 +237,9 @@ Expected proof markers:
 - `HOST_NATIVE_METRIC:node_tool_projection_ms=...`
 - `HOST_NATIVE_METRIC:edge_tool_projection_ms=...`
 - `AUTHORING_SURFACE_OK:True`
+- `EXPERIENCE_POLISH_HANDOFF_OK:True`
+- `FEATURE_ENHANCEMENT_PROOF_OK:True`
+- `EXPERIENCE_SCOPE_BOUNDARY_OK:True`
 - `CONSUMER_SAMPLE_OK:True`
 
 Expected bundle markers when `--support-bundle <support-bundle-path>` is supplied:
@@ -286,6 +294,7 @@ If you want to build the same medium host in your own app, copy these seams in t
 - widened hosted tuning: emit `WIDENED_SURFACE_PERFORMANCE_OK:True` and reuse [Widened Surface Performance Recipe](./widened-surface-performance-recipe.md) so the hosted metrics stay tied to `ScaleSmoke`
 - capability breadth: pair the same route with [Capability Breadth Recipe](./capability-breadth-recipe.md) and emit the `CAPABILITY_BREADTH_*` markers from `AsterGraph.ConsumerSample.Avalonia -- --proof`
 - onboarding markers: keep `CONSUMER_SAMPLE_SCENARIO_GRAPH_OK:True`, `CONSUMER_SAMPLE_HOST_OWNED_ACTIONS_OK:True`, `CONSUMER_SAMPLE_SUPPORT_BUNDLE_READY_OK:True`, `GRAPH_VALIDATION_FEEDBACK_OK:True`, `GRAPH_FEEDBACK_FOCUS_TARGET_OK:True`, `GRAPH_READINESS_STATUS_OK:True`, `FIVE_MINUTE_ONBOARDING_OK:True`, and `ONBOARDING_CONFIGURATION_OK:True`
+- final handoff markers: keep `EXPERIENCE_POLISH_HANDOFF_OK:True`, `FEATURE_ENHANCEMENT_PROOF_OK:True`, and `EXPERIENCE_SCOPE_BOUNDARY_OK:True` together so the scope boundary remains explicit
 - sample-owned content such as the review/audit node family, action ids and titles, and proof labels beyond the defended markers should stay local to your app
 
 ## Related Docs

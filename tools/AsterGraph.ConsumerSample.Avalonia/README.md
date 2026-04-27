@@ -3,6 +3,7 @@
 This is the medium hosted-UI sample on the canonical session/runtime route, after `AsterGraph.Starter.Avalonia` and `AsterGraph.HelloWorld.Avalonia`, and before `AsterGraph.Demo`.
 It opens the `Content Review Release Lane` scenario graph and shows a host-owned action rail, plugin trust workflow, support-bundle proof path, and the selected-node parameter read/write seam without implying a second editor model, a sandbox, or a broader plugin ecosystem.
 It also includes a host-owned snippet catalog for inserting one copyable review queue lane through the existing pending-connection command path.
+The final handoff markers summarize existing proof evidence only; they do not add runtime APIs, marketplace behavior, sandboxing, or WPF parity.
 For plugin-capable evaluators, this is the defended hosted trust hop. Read [Plugin Manifest and Trust Policy Contract v1](../../docs/en/plugin-trust-contracts.md) and [Plugin And Custom Node Recipe](../../docs/en/plugin-recipe.md) before treating the route as complete.
 
 For the inspector metadata recipe, pair this sample with [Authoring Inspector Recipe](../../docs/en/authoring-inspector-recipe.md). The sample stays focused on the host-owned seams and the shipped inspector surface; it does not own the metadata vocabulary. The canonical recipe carries the full `defaultValue`, `isAdvanced`, `helpText`, `placeholderText`, and read-only vocabulary.
@@ -115,6 +116,9 @@ Expected proof markers:
 - `HOST_NATIVE_METRIC:node_tool_projection_ms=...`
 - `HOST_NATIVE_METRIC:edge_tool_projection_ms=...`
 - `AUTHORING_SURFACE_OK:True`
+- `EXPERIENCE_POLISH_HANDOFF_OK:True`
+- `FEATURE_ENHANCEMENT_PROOF_OK:True`
+- `EXPERIENCE_SCOPE_BOUNDARY_OK:True`
 - `CONSUMER_SAMPLE_OK:True`
 
 Expected bundle markers when `--support-bundle <support-bundle-path>` is supplied:
