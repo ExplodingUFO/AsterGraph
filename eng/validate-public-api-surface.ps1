@@ -604,6 +604,7 @@ function Assert-WarningGuidance {
 }
 
 $currentLines = Get-PublicApiLines
+$scopeMarker = "PUBLIC_API_SCOPE_OK:$($publishableAssemblies -join ',')"
 
 if ($UpdateBaseline) {
   $baselineDirectory = Split-Path -Parent $BaselinePath
@@ -613,6 +614,7 @@ if ($UpdateBaseline) {
 
   $currentLines | Set-Content -LiteralPath $BaselinePath
   Write-Host "PUBLIC_API_BASELINE_UPDATED:$($currentLines.Count):$BaselinePath"
+  Write-Host $scopeMarker
   exit 0
 }
 
@@ -643,8 +645,11 @@ if (-not [string]::IsNullOrWhiteSpace($ProofPath)) {
 
   @(
     $successMarker,
+    $scopeMarker,
     'PUBLIC_API_GUIDANCE_OK:True'
   ) | Set-Content -LiteralPath $ProofPath
 }
 
 Write-Host $successMarker
+Write-Host $scopeMarker
+Write-Host 'PUBLIC_API_GUIDANCE_OK:True'

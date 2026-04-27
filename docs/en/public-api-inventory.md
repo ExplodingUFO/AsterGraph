@@ -42,6 +42,24 @@ Use this page with [Host Integration](./host-integration.md) and [Extension Cont
 - Compatibility-only APIs must be marked obsolete when a canonical replacement exists.
 - Internal implementation details must not be promoted by README, quick-start, or release notes.
 
+## Baseline Gate
+
+`eng/validate-public-api-surface.ps1` is scoped to the four supported public packages: `AsterGraph.Abstractions`, `AsterGraph.Core`, `AsterGraph.Editor`, and `AsterGraph.Avalonia`. It intentionally excludes demos, samples, WPF validation adapters, tools, and tests from the package support contract.
+
+Check the current baseline:
+
+```powershell
+.\eng\validate-public-api-surface.ps1 -Configuration Release -Framework net9.0
+```
+
+Regenerate the baseline after an intentional public API change:
+
+```powershell
+.\eng\validate-public-api-surface.ps1 -Configuration Release -Framework net9.0 -UpdateBaseline
+```
+
+The release proof must include `PUBLIC_API_SCOPE_OK:AsterGraph.Abstractions,AsterGraph.Core,AsterGraph.Editor,AsterGraph.Avalonia` next to `PUBLIC_API_SURFACE_OK` and `PUBLIC_API_GUIDANCE_OK`.
+
 ## Maintainer Checklist
 
 Before a release:

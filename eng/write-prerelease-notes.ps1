@@ -155,6 +155,7 @@ $proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'te
 $proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'template-smoke.txt') -Pattern 'TEMPLATE_SMOKE_PLUGIN_CAPABILITY_SUMMARY_OK'
 $proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'template-smoke.txt') -Pattern 'TEMPLATE_SMOKE_PLUGIN_TRUST_HASH_OK'
 $proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'public-api-surface.txt') -Pattern 'PUBLIC_API_SURFACE_OK'
+$proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'public-api-surface.txt') -Pattern 'PUBLIC_API_SCOPE_OK'
 $proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'public-api-surface.txt') -Pattern 'PUBLIC_API_GUIDANCE_OK'
 $proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'hello-world-wpf-proof.txt') -Pattern 'HOSTED_ACCESSIBILITY_BASELINE_OK'
 $proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'hello-world-wpf-proof.txt') -Pattern 'HOSTED_ACCESSIBILITY_FOCUS_OK'
@@ -189,7 +190,7 @@ $environmentLines = @(
   '- trusted plugin proof: pair `CONSUMER_SAMPLE_TRUST_OK` with `ASTERGRAPH_PLUGIN_VALIDATE_OK` and the plugin trust contract before treating a third-party plugin artifact as loadable',
   '- showcase proof: `AsterGraph.Demo --proof` for host-native shell workflows, non-obscuring editing, and graph-surface visual semantics',
   '- packed consumer proofs: `HostSample`, `.NET 10` packed consumer path, `PackageSmoke`, and generated template/plugin validation',
-  '- API adoption proof: `validate-public-api-surface.ps1` pairs `PUBLIC_API_SURFACE_OK` with `PUBLIC_API_GUIDANCE_OK` near generated template/plugin validation in the release proof story',
+  '- API adoption proof: `validate-public-api-surface.ps1` pairs `PUBLIC_API_SURFACE_OK`, `PUBLIC_API_SCOPE_OK`, and `PUBLIC_API_GUIDANCE_OK` near generated template/plugin validation in the release proof story',
   '- scale proof source: `ScaleSmoke` defended `baseline`/`large` tiers plus `stress` performance/authoring/SVG/raster-export gates; `stress` PNG/JPEG export uses conservative defended redlines'
 )
 

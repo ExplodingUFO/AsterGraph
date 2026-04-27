@@ -1075,6 +1075,7 @@ function Invoke-PrereleaseNotesValidation {
     'TEMPLATE_SMOKE_PLUGIN_CAPABILITY_SUMMARY_OK:True',
     'TEMPLATE_SMOKE_PLUGIN_TRUST_HASH_OK:True',
     'PUBLIC_API_SURFACE_OK:',
+    'PUBLIC_API_SCOPE_OK:AsterGraph.Abstractions,AsterGraph.Core,AsterGraph.Editor,AsterGraph.Avalonia',
     'PUBLIC_API_GUIDANCE_OK:True',
     'SCALE_TIER_BUDGET:baseline',
     'SCALE_PERFORMANCE_BUDGET_OK:baseline:True:',

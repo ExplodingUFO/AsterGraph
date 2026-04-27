@@ -29,7 +29,7 @@ public sealed class ReleaseClosureContractTests
         WriteProofFile(
             proofRoot,
             "public-api-surface.txt",
-            "PUBLIC_API_SURFACE_OK:3407:net9.0`nPUBLIC_API_GUIDANCE_OK:True");
+            "PUBLIC_API_SURFACE_OK:3407:net9.0`nPUBLIC_API_SCOPE_OK:AsterGraph.Abstractions,AsterGraph.Core,AsterGraph.Editor,AsterGraph.Avalonia`nPUBLIC_API_GUIDANCE_OK:True");
         WriteProofFile(
             proofRoot,
             "scale-smoke.txt",
@@ -111,6 +111,7 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("TEMPLATE_SMOKE_PLUGIN_CAPABILITY_SUMMARY_OK:True", notes, StringComparison.Ordinal);
         Assert.Contains("TEMPLATE_SMOKE_PLUGIN_TRUST_HASH_OK:True", notes, StringComparison.Ordinal);
         Assert.Contains("PUBLIC_API_SURFACE_OK:3407:net9.0", notes, StringComparison.Ordinal);
+        Assert.Contains("PUBLIC_API_SCOPE_OK:AsterGraph.Abstractions,AsterGraph.Core,AsterGraph.Editor,AsterGraph.Avalonia", notes, StringComparison.Ordinal);
         Assert.Contains("PUBLIC_API_GUIDANCE_OK:True", notes, StringComparison.Ordinal);
         Assert.Contains("adapter-2 validation only", notes, StringComparison.Ordinal);
         Assert.Contains("does not widen the public publish/package boundary", notes, StringComparison.Ordinal);
@@ -263,6 +264,7 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("-Framework 'net9.0'", ciScript, StringComparison.Ordinal);
         Assert.Contains("-ProofPath $publicApiSurfaceProofPath", ciScript, StringComparison.Ordinal);
         Assert.Contains("'PUBLIC_API_SURFACE_OK:'", ciScript, StringComparison.Ordinal);
+        Assert.Contains("'PUBLIC_API_SCOPE_OK:AsterGraph.Abstractions,AsterGraph.Core,AsterGraph.Editor,AsterGraph.Avalonia'", ciScript, StringComparison.Ordinal);
         Assert.Contains("'PUBLIC_API_GUIDANCE_OK:True'", ciScript, StringComparison.Ordinal);
 
         var releaseValidationStart = ciScript.IndexOf("function Invoke-ReleaseValidation", StringComparison.Ordinal);
@@ -270,6 +272,7 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("Invoke-PublicApiSurfaceValidation", ciScript[releaseValidationStart..], StringComparison.Ordinal);
 
         var validationScript = ReadRepoFile("eng/validate-public-api-surface.ps1");
+        Assert.Contains("PUBLIC_API_SCOPE_OK:", validationScript, StringComparison.Ordinal);
         Assert.Contains("'PUBLIC_API_GUIDANCE_OK:True'", validationScript, StringComparison.Ordinal);
     }
 
@@ -312,6 +315,8 @@ public sealed class ReleaseClosureContractTests
             passProcess.ExitCode == 0,
             $"validate-public-api-surface.ps1 failed for current repo with exit code {passProcess.ExitCode}.{Environment.NewLine}STDOUT:{Environment.NewLine}{passProcess.StandardOutput}{Environment.NewLine}STDERR:{Environment.NewLine}{passProcess.StandardError}");
         Assert.Contains("PUBLIC_API_SURFACE_OK:", passProcess.StandardOutput, StringComparison.Ordinal);
+        Assert.Contains("PUBLIC_API_SCOPE_OK:AsterGraph.Abstractions,AsterGraph.Core,AsterGraph.Editor,AsterGraph.Avalonia", passProcess.StandardOutput, StringComparison.Ordinal);
+        Assert.Contains("PUBLIC_API_GUIDANCE_OK:True", passProcess.StandardOutput, StringComparison.Ordinal);
 
         var tempRoot = CreateTempDirectory();
         var baselinePath = Path.Combine(tempRoot, "public-api-baseline.txt");
@@ -327,6 +332,25 @@ public sealed class ReleaseClosureContractTests
         Assert.NotEqual(0, failProcess.ExitCode);
         Assert.Contains("Public API surface drift detected", failProcess.StandardError, StringComparison.Ordinal);
         Assert.Contains("docs/en/public-api-inventory.md", failProcess.StandardError, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void PublicApiInventory_DefinesBaselineScopeAndRerunCommands()
+    {
+        var englishInventory = ReadRepoFile("docs/en/public-api-inventory.md");
+        var chineseInventory = ReadRepoFile("docs/zh-CN/public-api-inventory.md");
+
+        foreach (var contents in new[] { englishInventory, chineseInventory })
+        {
+            Assert.Contains("AsterGraph.Abstractions", contents, StringComparison.Ordinal);
+            Assert.Contains("AsterGraph.Core", contents, StringComparison.Ordinal);
+            Assert.Contains("AsterGraph.Editor", contents, StringComparison.Ordinal);
+            Assert.Contains("AsterGraph.Avalonia", contents, StringComparison.Ordinal);
+            Assert.Contains("validate-public-api-surface.ps1", contents, StringComparison.Ordinal);
+            Assert.Contains("-Framework net9.0", contents, StringComparison.Ordinal);
+            Assert.Contains("-UpdateBaseline", contents, StringComparison.Ordinal);
+            Assert.Contains("PUBLIC_API_SCOPE_OK:AsterGraph.Abstractions,AsterGraph.Core,AsterGraph.Editor,AsterGraph.Avalonia", contents, StringComparison.Ordinal);
+        }
     }
 
     [Fact]

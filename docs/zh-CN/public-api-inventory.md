@@ -42,6 +42,24 @@
 - 当 canonical replacement 已存在时，compatibility-only API 必须标记 obsolete。
 - README、quick-start 和 release notes 不应宣传 internal implementation details。
 
+## Baseline Gate
+
+`eng/validate-public-api-surface.ps1` 只覆盖四个受支持公开包：`AsterGraph.Abstractions`、`AsterGraph.Core`、`AsterGraph.Editor` 和 `AsterGraph.Avalonia`。Demo、sample、WPF validation adapter、tools 和 tests 不进入 package support contract。
+
+检查当前 baseline：
+
+```powershell
+.\eng\validate-public-api-surface.ps1 -Configuration Release -Framework net9.0
+```
+
+有意改变 public API 后重新生成 baseline：
+
+```powershell
+.\eng\validate-public-api-surface.ps1 -Configuration Release -Framework net9.0 -UpdateBaseline
+```
+
+Release proof 必须在 `PUBLIC_API_SURFACE_OK` 和 `PUBLIC_API_GUIDANCE_OK` 旁边包含 `PUBLIC_API_SCOPE_OK:AsterGraph.Abstractions,AsterGraph.Core,AsterGraph.Editor,AsterGraph.Avalonia`。
+
 ## 维护者检查表
 
 发布前：
