@@ -404,6 +404,10 @@ public static class ConsumerSampleProof
 
         return host.OnboardingCopyPathLines.Count == 4
             && host.OnboardingCopyPathLines.Any(line => line.Contains("ConsumerSample.Avalonia", StringComparison.Ordinal))
+            && host.RouteBoundaryLines.Any(line => line.Contains("Hosted UI route", StringComparison.Ordinal) && line.Contains("AsterGraphAvaloniaViewFactory.Create", StringComparison.Ordinal))
+            && host.RouteBoundaryLines.Any(line => line.Contains("Runtime-only route", StringComparison.Ordinal) && line.Contains("CreateSession", StringComparison.Ordinal))
+            && host.RouteBoundaryLines.Any(line => line.Contains("Plugin route", StringComparison.Ordinal) && line.Contains("PluginTrustPolicy", StringComparison.Ordinal))
+            && host.RouteBoundaryLines.Any(line => line.Contains("Migration route", StringComparison.Ordinal) && line.Contains("retained migration", StringComparison.OrdinalIgnoreCase))
             && host.HasPluginCommandContribution()
             && descriptors.ContainsKey(ConsumerSampleHost.PluginCommandId)
             && descriptors.ContainsKey("workspace.save")

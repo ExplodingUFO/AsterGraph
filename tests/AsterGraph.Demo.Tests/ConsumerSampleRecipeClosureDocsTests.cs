@@ -26,11 +26,17 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
         AssertHostSeamCopyBlock(consumerSampleCopySeamsZh);
 
         AssertContains(readme, "Copy These Host-Owned Seams");
+        AssertContains(readme, "Route Boundaries To Keep");
         AssertContains(readme, "Replace These Sample-Owned Details");
         AssertContains(consumerSampleEn, "Copy These Host-Owned Seams");
+        AssertContains(consumerSampleEn, "Route Boundaries To Keep");
         AssertContains(consumerSampleEn, "Replace These Sample-Owned Details");
         AssertContains(consumerSampleZh, "复制这些宿主自管 seam");
+        AssertContains(consumerSampleZh, "需要保持的路线边界");
         AssertContains(consumerSampleZh, "替换这些样例自有内容");
+        AssertRouteBoundaryBlock(readme);
+        AssertRouteBoundaryBlock(consumerSampleEn);
+        AssertRouteBoundaryBlock(consumerSampleZh);
 
         AssertContains(consumerSampleEn, "Plugin Manifest and Trust Policy Contract v1");
         AssertContains(consumerSampleEn, "Beta Support Bundle");
@@ -314,6 +320,16 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
             contents.Contains("选中节点参数读写 seam", StringComparison.OrdinalIgnoreCase));
         Assert.Contains("IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()", contents, StringComparison.Ordinal);
         Assert.Contains("IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)", contents, StringComparison.Ordinal);
+    }
+
+    private static void AssertRouteBoundaryBlock(string contents)
+    {
+        Assert.Contains("AsterGraphAvaloniaViewFactory.Create(...)", contents, StringComparison.Ordinal);
+        Assert.Contains("AsterGraphEditorFactory.CreateSession(...)", contents, StringComparison.Ordinal);
+        Assert.Contains("AsterGraphEditorFactory.DiscoverPluginCandidates(...)", contents, StringComparison.Ordinal);
+        Assert.Contains("PluginTrustPolicy", contents, StringComparison.Ordinal);
+        Assert.Contains("GraphEditorViewModel", contents, StringComparison.Ordinal);
+        Assert.Contains("GraphEditorView", contents, StringComparison.Ordinal);
     }
 
     private static void AssertAuthoringRecipeSide(string authoringRecipeEn, string authoringRecipeZh)

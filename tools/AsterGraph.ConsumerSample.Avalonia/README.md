@@ -113,6 +113,15 @@ Use this sample to copy the host-owned seams, not the sample-specific presentati
 - plugin trust workflow: `GraphEditorPluginDiscoveryOptions`, `AsterGraphEditorOptions.PluginTrustPolicy`, and the host allowlist import/export path
 - selected-node parameter read/write seam: `IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()` reads the selected node parameters, and `IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)` writes them back
 
+### Route Boundaries To Keep
+
+| Route | Copy from this sample | Do not copy |
+| ----- | --------------------- | ----------- |
+| Hosted UI | `AsterGraphEditorFactory.Create(...)` plus `AsterGraphAvaloniaViewFactory.Create(...)` composition | demo-only shell state or showcase panels |
+| Runtime-only | the same document/catalog definitions, then use `AsterGraphEditorFactory.CreateSession(...)` in your own UI | Avalonia window layout |
+| Plugin | `AsterGraphEditorFactory.DiscoverPluginCandidates(...)`, `PluginTrustPolicy`, provenance, and allowlist import/export | sample plugin id, audit node family, or trust text |
+| Migration | retained `GraphEditorViewModel` / `GraphEditorView` only when moving an existing host in batches | new primary host code on retained surfaces |
+
 ### Copyable Parameter/Metadata Path
 
 - Define metadata in [Authoring Inspector Recipe](../../docs/en/authoring-inspector-recipe.md) first with `defaultValue`, `editorKind`, `constraints`, and `groupName`.

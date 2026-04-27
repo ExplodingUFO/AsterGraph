@@ -40,6 +40,15 @@
 - plugin trust workflow：把 `GraphEditorPluginDiscoveryOptions`、`AsterGraphEditorOptions.PluginTrustPolicy`、provenance snapshot 和宿主自管 allowlist policy 放在同一层
 - 选中节点参数读写 seam：只通过 `IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()` 读取当前选中节点参数，并只通过 `IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)` 写回
 
+## 需要保持的路线边界
+
+| 路线 | 从这个样例复制 | 不要复制 |
+| ---- | -------------- | -------- |
+| Hosted UI | `AsterGraphEditorFactory.Create(...)` 加 `AsterGraphAvaloniaViewFactory.Create(...)` 组合 | demo-only shell state 或 showcase 面板 |
+| Runtime-only | 同一套 document/catalog 定义，然后在自有 UI 中使用 `AsterGraphEditorFactory.CreateSession(...)` | Avalonia 窗口布局 |
+| Plugin | `AsterGraphEditorFactory.DiscoverPluginCandidates(...)`、`PluginTrustPolicy`、provenance 和 allowlist 导入/导出 | 样例 plugin id、audit 节点族或 trust 文案 |
+| Migration | 只有分批迁移现有宿主时才使用 retained `GraphEditorViewModel` / `GraphEditorView` | 把 retained surface 当成新主路线 |
+
 ## 替换这些样例自有内容
 
 下面这些样例自有内容保持在你自己的 app 内部即可：

@@ -101,6 +101,14 @@ public sealed class ConsumerSampleHost : IDisposable
         "Demo: inspect the full showcase after the host seam is already clear.",
     ];
 
+    public IReadOnlyList<string> RouteBoundaryLines =>
+    [
+        "Hosted UI route: use AsterGraphEditorFactory.Create(...) with AsterGraphAvaloniaViewFactory.Create(...) for the stock Avalonia shell.",
+        "Runtime-only route: use AsterGraphEditorFactory.CreateSession(...) when the host owns the UI or native shell.",
+        "Plugin route: discover candidates with AsterGraphEditorFactory.DiscoverPluginCandidates(...) and decide trust through PluginTrustPolicy before loading.",
+        "Migration route: keep GraphEditorViewModel and GraphEditorView as retained migration surfaces only.",
+    ];
+
     public string PluginAllowlistExchangePath
         => Path.Combine(_storageRootPath, "plugin-allowlist-export.json");
 
