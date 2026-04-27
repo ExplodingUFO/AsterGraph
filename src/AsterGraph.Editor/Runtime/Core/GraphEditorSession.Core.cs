@@ -25,6 +25,7 @@ public sealed partial class GraphEditorSession :
     private readonly GraphEditorSessionDescriptorSupport? _descriptorSupport;
     private readonly GraphEditorSessionStockMenuDescriptorBuilder _stockMenuDescriptorBuilder;
     private readonly GraphEditorSessionStockToolDescriptorBuilder _stockToolDescriptorBuilder;
+    private int _documentRevision;
 
     public GraphEditorSession(ViewModels.GraphEditorViewModel editor, IGraphEditorDiagnosticsSink? diagnosticsSink = null)
         : this(editor.SessionHost, diagnosticsSink, editor.CreateSessionDescriptorSupport())

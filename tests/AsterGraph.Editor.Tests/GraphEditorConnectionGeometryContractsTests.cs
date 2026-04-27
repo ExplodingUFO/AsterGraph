@@ -121,6 +121,31 @@ public sealed class GraphEditorConnectionGeometryContractsTests
     }
 
     [Fact]
+    public void SessionQueries_GetConnectionGeometrySnapshots_ReusesCacheUntilDocumentChanges()
+    {
+        var session = AsterGraphEditorFactory.CreateSession(CreateRoutedOptions());
+
+        var first = session.Queries.GetConnectionGeometrySnapshots();
+        var second = session.Queries.GetSceneSnapshot().ConnectionGeometries;
+        session.Commands.SetSelection([SourceNodeId], SourceNodeId, updateStatus: false);
+        var afterSelectionOnly = session.Queries.GetConnectionGeometrySnapshots();
+
+        Assert.Same(first, second);
+        Assert.Same(first, afterSelectionOnly);
+
+        var moved = session.Commands.TryMoveConnectionRouteVertex(
+            "connection-route-001",
+            vertexIndex: 0,
+            new GraphPoint(380d, 140d),
+            updateStatus: false);
+        var afterRouteMove = session.Queries.GetConnectionGeometrySnapshots();
+
+        Assert.True(moved);
+        Assert.NotSame(first, afterRouteMove);
+        Assert.Equal(new GraphPoint(380d, 140d), Assert.Single(afterRouteMove).Route.Vertices[0]);
+    }
+
+    [Fact]
     public void SessionFeatureDescriptors_AdvertiseConnectionGeometrySnapshots()
     {
         var session = AsterGraphEditorFactory.CreateSession(CreateOptions());

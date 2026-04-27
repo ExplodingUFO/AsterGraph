@@ -39,6 +39,8 @@ public sealed partial class GraphEditorSession
 
     private void HandleDocumentChanged(object? sender, GraphEditorDocumentChangedEventArgs args)
     {
+        _documentRevision++;
+
         if (!IsBatching)
         {
             DocumentChanged?.Invoke(this, args);

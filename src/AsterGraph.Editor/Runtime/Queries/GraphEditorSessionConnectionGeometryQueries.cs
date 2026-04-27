@@ -6,11 +6,24 @@ namespace AsterGraph.Editor.Runtime;
 
 public sealed partial class GraphEditorSession
 {
+    private int _connectionGeometryCacheRevision = -1;
+    private IReadOnlyList<GraphEditorConnectionGeometrySnapshot>? _connectionGeometryCache;
+
     public IReadOnlyList<GraphEditorConnectionGeometrySnapshot> GetConnectionGeometrySnapshots()
         => CreateConnectionGeometrySnapshots(CreateDocumentSnapshot());
 
     private IReadOnlyList<GraphEditorConnectionGeometrySnapshot> CreateConnectionGeometrySnapshots(GraphDocument document)
-        => GraphEditorConnectionGeometryProjector.Create(document, ResolveNodeDefinition);
+    {
+        if (_connectionGeometryCacheRevision == _documentRevision
+            && _connectionGeometryCache is not null)
+        {
+            return _connectionGeometryCache;
+        }
+
+        _connectionGeometryCache = GraphEditorConnectionGeometryProjector.Create(document, ResolveNodeDefinition);
+        _connectionGeometryCacheRevision = _documentRevision;
+        return _connectionGeometryCache;
+    }
 
     private INodeDefinition? ResolveNodeDefinition(GraphNode node)
     {
