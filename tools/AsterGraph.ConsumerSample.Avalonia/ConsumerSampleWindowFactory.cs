@@ -31,6 +31,7 @@ public static class ConsumerSampleWindowFactory
         private readonly StackPanel _actionRailItems;
         private readonly ItemsControl _parameterItems;
         private readonly ItemsControl _pluginCandidateItems;
+        private readonly ItemsControl _pluginGalleryItems;
         private readonly ItemsControl _pluginSnapshotItems;
         private readonly ItemsControl _allowlistItems;
         private readonly TextBlock _runtimeSummaryText;
@@ -116,6 +117,11 @@ public static class ConsumerSampleWindowFactory
                 Name = "PART_PluginCandidateItems",
             };
 
+            _pluginGalleryItems = new ItemsControl
+            {
+                Name = "PART_LocalPluginGalleryItems",
+            };
+
             _pluginSnapshotItems = new ItemsControl
             {
                 Name = "PART_PluginSnapshotItems",
@@ -170,6 +176,7 @@ public static class ConsumerSampleWindowFactory
                     CreateSection("Selection", _selectionSummaryText),
                     CreateSection("Selected Parameters", _parameterItems),
                     CreateSection("Plugin Candidates", _pluginCandidateItems),
+                    CreateSection("Local Plugin Gallery", _pluginGalleryItems),
                     CreateSection("Plugin Load Snapshots", _pluginSnapshotItems),
                     CreateSection("Allowlist Decisions", CreateAllowlistPanel()),
                     CreateSection("Runtime", CreateRuntimePanel()),
@@ -245,6 +252,7 @@ public static class ConsumerSampleWindowFactory
 
             RebuildParameterItems();
             RebuildPluginCandidateItems();
+            RebuildPluginGalleryItems();
             RebuildPluginSnapshotItems();
             RebuildRuntimePanel();
             RebuildLayoutPanel();
@@ -367,6 +375,54 @@ public static class ConsumerSampleWindowFactory
             }
 
             _pluginCandidateItems.ItemsSource = items;
+        }
+
+        private void RebuildPluginGalleryItems()
+        {
+            var items = new List<Control>();
+
+            foreach (var entry in _host.LocalPluginGalleryEntries)
+            {
+                items.Add(new Border
+                {
+                    CornerRadius = new CornerRadius(8),
+                    Padding = new Thickness(10),
+                    Background = Brush.Parse("#111827"),
+                    Child = new StackPanel
+                    {
+                        Spacing = 6,
+                        Children =
+                        {
+                            new TextBlock
+                            {
+                                Text = entry.GalleryLine,
+                                FontWeight = FontWeight.SemiBold,
+                                TextWrapping = TextWrapping.Wrap,
+                            },
+                            new TextBlock
+                            {
+                                TextWrapping = TextWrapping.Wrap,
+                                Opacity = 0.86,
+                                Text = entry.ManifestLine,
+                            },
+                            new TextBlock
+                            {
+                                TextWrapping = TextWrapping.Wrap,
+                                Opacity = 0.78,
+                                Text = entry.ProvenanceLine,
+                            },
+                            new TextBlock
+                            {
+                                TextWrapping = TextWrapping.Wrap,
+                                Opacity = 0.86,
+                                Text = entry.TrustLine,
+                            },
+                        },
+                    },
+                });
+            }
+
+            _pluginGalleryItems.ItemsSource = items;
         }
 
         private Control CreateRuntimePanel()

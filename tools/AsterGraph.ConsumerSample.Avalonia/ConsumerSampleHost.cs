@@ -71,6 +71,9 @@ public sealed class ConsumerSampleHost : IDisposable
     public IReadOnlyList<ConsumerSamplePluginCandidateEntry> PluginCandidateEntries
         => PluginCandidates.Select(CreatePluginCandidateEntry).ToArray();
 
+    public IReadOnlyList<ConsumerSamplePluginCandidateEntry> LocalPluginGalleryEntries
+        => PluginCandidateEntries;
+
     public GraphEditorRuntimeOverlaySnapshot RuntimeOverlay
         => Session.Queries.GetRuntimeOverlaySnapshot();
 
@@ -757,7 +760,7 @@ public sealed class ConsumerSampleHost : IDisposable
     private GraphEditorPluginCandidateSnapshot? FindPluginCandidate(string pluginId)
         => PluginCandidates.SingleOrDefault(candidate => string.Equals(candidate.Manifest.Id, pluginId, StringComparison.Ordinal));
 
-    private static ConsumerSamplePluginCandidateEntry CreatePluginCandidateEntry(GraphEditorPluginCandidateSnapshot candidate)
+    private ConsumerSamplePluginCandidateEntry CreatePluginCandidateEntry(GraphEditorPluginCandidateSnapshot candidate)
     {
         var manifest = candidate.Manifest;
         var provenance = candidate.ProvenanceEvidence;
@@ -769,6 +772,10 @@ public sealed class ConsumerSampleHost : IDisposable
         var packageVersion = provenance.PackageIdentity?.Version ?? manifest.Provenance.PackageVersion ?? version;
         var signerFingerprint = provenance.Signature.Signer?.Fingerprint ?? provenance.Signature.Status.ToString();
         var isAllowed = candidate.TrustEvaluation.Decision == GraphEditorPluginTrustDecision.Allowed;
+        var loadSnapshot = PluginLoadSnapshots.FirstOrDefault(snapshot => string.Equals(snapshot.Manifest.Id, manifest.Id, StringComparison.Ordinal));
+        var loadState = loadSnapshot?.Status.ToString() ?? "Discovered";
+        var manifestLine = $"manifest {manifest.Id} · {manifest.DisplayName} · {version} · tfm {targetFramework}";
+        var galleryLine = $"{manifest.DisplayName} · trust {candidate.TrustEvaluation.Decision} · load {loadState} · fingerprint {FormatFingerprint(fingerprint)}";
 
         return new ConsumerSamplePluginCandidateEntry(
             manifest.Id,
@@ -779,6 +786,10 @@ public sealed class ConsumerSampleHost : IDisposable
             reason,
             isAllowed,
             !isAllowed,
+            loadSnapshot is not null,
+            loadState,
+            manifestLine,
+            galleryLine,
             $"{manifest.Id} · {version} · tfm {targetFramework}",
             $"package {packageId}@{packageVersion} · signer {signerFingerprint}",
             $"{candidate.TrustEvaluation.Decision} · fingerprint {FormatFingerprint(fingerprint)} · {reason}");

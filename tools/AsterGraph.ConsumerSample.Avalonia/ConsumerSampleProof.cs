@@ -69,6 +69,9 @@ public sealed record ConsumerSampleProofResult(
     bool ReadabilityFocusSubgraphOk = true,
     bool ReadabilityRouteCleanupOk = true,
     bool ReadabilityAlignmentHelpersOk = true,
+    bool PluginLocalGalleryOk = true,
+    bool PluginTrustEvidencePanelOk = true,
+    bool PluginAllowlistRoundtripOk = true,
     int NodeCount = 0,
     int ConnectionCount = 0,
     IReadOnlyList<string>? FeatureDescriptorIds = null,
@@ -144,6 +147,9 @@ public sealed record ConsumerSampleProofResult(
         && ReadabilityFocusSubgraphOk
         && ReadabilityRouteCleanupOk
         && ReadabilityAlignmentHelpersOk
+        && PluginLocalGalleryOk
+        && PluginTrustEvidencePanelOk
+        && PluginAllowlistRoundtripOk
         && NodeCount > 0
         && (FeatureDescriptorIds?.Count > 0);
 
@@ -202,6 +208,9 @@ public sealed record ConsumerSampleProofResult(
         $"READABILITY_FOCUS_SUBGRAPH_OK:{ReadabilityFocusSubgraphOk}",
         $"READABILITY_ROUTE_CLEANUP_OK:{ReadabilityRouteCleanupOk}",
         $"READABILITY_ALIGNMENT_HELPERS_OK:{ReadabilityAlignmentHelpersOk}",
+        $"PLUGIN_LOCAL_GALLERY_OK:{PluginLocalGalleryOk}",
+        $"PLUGIN_TRUST_EVIDENCE_PANEL_OK:{PluginTrustEvidencePanelOk}",
+        $"PLUGIN_ALLOWLIST_ROUNDTRIP_OK:{PluginAllowlistRoundtripOk}",
         $"AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:{NodeSideAuthoringOk}",
         $"AUTHORING_SURFACE_COMMAND_PROJECTION_OK:{CommandSurfaceOk}",
         $"CONSUMER_SAMPLE_PARAMETER_OK:{ParameterProjectionOk}",
@@ -297,6 +306,9 @@ public static class ConsumerSampleProof
         bool readabilityFocusSubgraphOk;
         bool readabilityRouteCleanupOk;
         bool readabilityAlignmentHelpersOk;
+        bool pluginLocalGalleryOk;
+        bool pluginTrustEvidencePanelOk;
+        bool pluginAllowlistRoundtripOk;
         double inspectorProjectionMs;
         double pluginScanMs;
         double commandLatencyMs;
@@ -357,6 +369,7 @@ public static class ConsumerSampleProof
                 && host.PluginCandidateEntries.Any(entry => entry.IsBlocked && entry.TrustReason.Contains("allowlist", StringComparison.OrdinalIgnoreCase))
                 && host.ImportPluginAllowlist()
                 && host.PluginCandidateEntries.Any(entry => entry.IsAllowed && entry.TrustReason.Contains("allowlist", StringComparison.OrdinalIgnoreCase));
+            pluginAllowlistRoundtripOk = trustTransparencyOk;
 
             stencilSearchMs = MeasureStencilSearchMilliseconds(host.Session, "plugin");
             commandSurfaceRefreshMs = MeasureCommandSurfaceRefreshMilliseconds(host.Session);
@@ -370,6 +383,7 @@ public static class ConsumerSampleProof
                 && FindNamed<Button>(window, "PART_AddPluginNodeButton") is not null
                 && FindNamed<Button>(window, "PART_ApproveSelectionButton") is not null
                 && FindNamed<ItemsControl>(window, "PART_PluginCandidateItems") is not null
+                && FindNamed<ItemsControl>(window, "PART_LocalPluginGalleryItems") is not null
                 && FindNamed<ItemsControl>(window, "PART_AllowlistItems") is not null
                 && FindNamed<Button>(window, "PART_PreviewLayoutButton") is not null
                 && FindNamed<Button>(window, "PART_ApplyLayoutPreviewButton") is not null
@@ -380,6 +394,8 @@ public static class ConsumerSampleProof
             layoutProviderSeamOk = HasLayoutProviderSeam(host);
             (layoutPreviewApplyCancelOk, layoutUndoTransactionOk) = HasLayoutPreviewApplyCancel(host, window);
             (readabilityFocusSubgraphOk, readabilityRouteCleanupOk, readabilityAlignmentHelpersOk) = HasReadabilityHelpers(host);
+            pluginLocalGalleryOk = HasLocalPluginGallery(host, window);
+            pluginTrustEvidencePanelOk = HasPluginTrustEvidencePanel(host);
         }
         finally
         {
@@ -510,6 +526,9 @@ public static class ConsumerSampleProof
             ReadabilityFocusSubgraphOk: readabilityFocusSubgraphOk,
             ReadabilityRouteCleanupOk: readabilityRouteCleanupOk,
             ReadabilityAlignmentHelpersOk: readabilityAlignmentHelpersOk,
+            PluginLocalGalleryOk: pluginLocalGalleryOk,
+            PluginTrustEvidencePanelOk: pluginTrustEvidencePanelOk,
+            PluginAllowlistRoundtripOk: pluginAllowlistRoundtripOk,
             ParameterSnapshots: proofParameterSnapshots,
             StartupMs: startupMs,
             InspectorProjectionMs: inspectorProjectionMs,
@@ -580,8 +599,32 @@ public static class ConsumerSampleProof
             && descriptors.ContainsKey("history.undo")
             && host.PluginCandidateEntries.Any(entry =>
                 string.Equals(entry.PluginId, "consumer.sample.audit-plugin", StringComparison.Ordinal)
-                && entry.IsAllowed);
+            && entry.IsAllowed);
     }
+
+    private static bool HasLocalPluginGallery(ConsumerSampleHost host, Window window)
+    {
+        var galleryItems = FindNamed<ItemsControl>(window, "PART_LocalPluginGalleryItems");
+        var entries = host.LocalPluginGalleryEntries;
+        return galleryItems is not null
+            && entries.Count > 0
+            && entries.Any(entry =>
+                entry.PluginId == "consumer.sample.audit-plugin"
+                && entry.IsAllowed
+                && entry.IsLoaded
+                && entry.LoadState.Contains("Loaded", StringComparison.OrdinalIgnoreCase)
+                && entry.ManifestLine.Contains("manifest consumer.sample.audit-plugin", StringComparison.Ordinal)
+                && entry.GalleryLine.Contains("fingerprint", StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static bool HasPluginTrustEvidencePanel(ConsumerSampleHost host)
+        => host.LocalPluginGalleryEntries.Any(entry =>
+            entry.PluginId == "consumer.sample.audit-plugin"
+            && entry.TargetFramework.StartsWith("net", StringComparison.OrdinalIgnoreCase)
+            && entry.ProvenanceLine.Contains("package", StringComparison.OrdinalIgnoreCase)
+            && entry.ProvenanceLine.Contains("signer", StringComparison.OrdinalIgnoreCase)
+            && entry.TrustLine.Contains("fingerprint", StringComparison.OrdinalIgnoreCase)
+            && entry.TrustLine.Contains("allowlist", StringComparison.OrdinalIgnoreCase));
 
     private static bool HasSupportBundlePayload(
         IReadOnlyList<ConsumerSampleProofParameterSnapshot> parameterSnapshots,

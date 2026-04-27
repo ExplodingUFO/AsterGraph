@@ -74,6 +74,11 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains("workspace.save", commandIds);
         Assert.Contains("workspace.load", commandIds);
         Assert.Contains(host.PluginCandidateEntries, entry => entry.PluginId == "consumer.sample.audit-plugin" && entry.IsAllowed);
+        Assert.Contains(host.LocalPluginGalleryEntries, entry =>
+            entry.PluginId == "consumer.sample.audit-plugin"
+            && entry.IsAllowed
+            && entry.IsLoaded
+            && entry.GalleryLine.Contains("fingerprint", StringComparison.OrdinalIgnoreCase));
     }
 
     [AvaloniaFact]
@@ -153,6 +158,9 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(result.ProofLines, line => line == "READABILITY_FOCUS_SUBGRAPH_OK:True");
         Assert.Contains(result.ProofLines, line => line == "READABILITY_ROUTE_CLEANUP_OK:True");
         Assert.Contains(result.ProofLines, line => line == "READABILITY_ALIGNMENT_HELPERS_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "PLUGIN_LOCAL_GALLERY_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "PLUGIN_TRUST_EVIDENCE_PANEL_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "PLUGIN_ALLOWLIST_ROUNDTRIP_OK:True");
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:True");
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_SURFACE_COMMAND_PROJECTION_OK:True");
         Assert.Contains(result.ProofLines, line => line == "CAPABILITY_BREADTH_STENCIL_OK:True");
@@ -490,6 +498,9 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(proofLines, line => line == "READABILITY_FOCUS_SUBGRAPH_OK:True");
         Assert.Contains(proofLines, line => line == "READABILITY_ROUTE_CLEANUP_OK:True");
         Assert.Contains(proofLines, line => line == "READABILITY_ALIGNMENT_HELPERS_OK:True");
+        Assert.Contains(proofLines, line => line == "PLUGIN_LOCAL_GALLERY_OK:True");
+        Assert.Contains(proofLines, line => line == "PLUGIN_TRUST_EVIDENCE_PANEL_OK:True");
+        Assert.Contains(proofLines, line => line == "PLUGIN_ALLOWLIST_ROUNDTRIP_OK:True");
         Assert.Contains(proofLines, line => line == "AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:True");
         Assert.Contains(proofLines, line => line == "AUTHORING_SURFACE_COMMAND_PROJECTION_OK:True");
         Assert.Contains(proofLines, line => line == "CAPABILITY_BREADTH_STENCIL_OK:True");
@@ -714,6 +725,7 @@ public sealed class ConsumerSampleProofTests
             Assert.NotNull(FindNamed<GraphEditorView>(window, "PART_EditorView"));
             Assert.NotNull(FindNamed<ItemsControl>(window, "PART_ParameterItems"));
             Assert.NotNull(FindNamed<ItemsControl>(window, "PART_PluginCandidateItems"));
+            Assert.NotNull(FindNamed<ItemsControl>(window, "PART_LocalPluginGalleryItems"));
             Assert.NotNull(FindNamed<ItemsControl>(window, "PART_PluginSnapshotItems"));
             Assert.NotNull(FindNamed<ItemsControl>(window, "PART_AllowlistItems"));
             Assert.NotNull(FindNamed<TextBlock>(window, "PART_RuntimeSummaryText"));

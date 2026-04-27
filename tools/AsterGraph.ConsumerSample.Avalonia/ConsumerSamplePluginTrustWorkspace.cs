@@ -14,6 +14,10 @@ public sealed record ConsumerSamplePluginCandidateEntry(
     string TrustReason,
     bool IsAllowed,
     bool IsBlocked,
+    bool IsLoaded,
+    string LoadState,
+    string ManifestLine,
+    string GalleryLine,
     string SummaryLine,
     string ProvenanceLine,
     string TrustLine);
