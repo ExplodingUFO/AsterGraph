@@ -8,6 +8,7 @@ using AsterGraph.Core.Models;
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Editor.Parameters;
+using AsterGraph.Editor.Runtime.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -83,6 +84,7 @@ public sealed partial class GraphEditorSession
                 new GraphEditorFeatureDescriptorSnapshot("capability.export.scene-jpeg", "capability", (_descriptorSupport?.HasSceneImageExportService ?? false) && GetSceneSnapshot().Document.Nodes.Count > 0),
                 new GraphEditorFeatureDescriptorSnapshot("query.scene-snapshot", "query", true),
                 new GraphEditorFeatureDescriptorSnapshot("query.runtime-overlay-snapshot", "query", true),
+                new GraphEditorFeatureDescriptorSnapshot("query.validation-snapshot", "query", true),
                 new GraphEditorFeatureDescriptorSnapshot("query.layout-plan", "query", true),
                 new GraphEditorFeatureDescriptorSnapshot("query.selected-node-connection-ids", "query", true),
                 new GraphEditorFeatureDescriptorSnapshot("query.node-surface-snapshots", "query", true),
@@ -163,6 +165,9 @@ public sealed partial class GraphEditorSession
                 provider.GetConnectionOverlays().ToList(),
                 provider.GetRecentLogs().ToList());
     }
+
+    public GraphEditorValidationSnapshot GetValidationSnapshot()
+        => GraphEditorValidationSnapshotProjector.Project(CreateDocumentSnapshot(), _descriptorSupport);
 
     public GraphLayoutPlan CreateLayoutPlan(GraphLayoutRequest request)
     {
@@ -358,7 +363,8 @@ public sealed partial class GraphEditorSession
             GetFeatureDescriptors().ToList(),
             GetRecentDiagnostics().ToList(),
             GetPluginLoadSnapshots().ToList(),
-            GetSelectedNodeParameterSnapshots());
+            GetSelectedNodeParameterSnapshots(),
+            GetValidationSnapshot());
     }
 
     private GraphEditorPendingConnectionSnapshot CreatePendingConnectionSnapshot()

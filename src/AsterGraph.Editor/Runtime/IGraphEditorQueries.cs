@@ -68,6 +68,13 @@ public interface IGraphEditorQueries
         => throw new NotSupportedException();
 
     /// <summary>
+    /// Gets document-level validation feedback and readiness state.
+    /// </summary>
+    /// <returns>Validation snapshot for all graph scopes in the current document.</returns>
+    GraphEditorValidationSnapshot GetValidationSnapshot()
+        => throw new NotSupportedException();
+
+    /// <summary>
     /// Creates a host-owned graph layout plan without mutating the current document.
     /// </summary>
     /// <param name="request">The requested layout scope, orientation, spacing, and pinned node hints.</param>

@@ -51,6 +51,7 @@ public sealed class GraphEditorDiagnosticsContractsTests
         var viewportSnapshotType = GetRequiredType("AsterGraph.Editor.Runtime.GraphEditorViewportSnapshot");
         var capabilitySnapshotType = GetRequiredType("AsterGraph.Editor.Runtime.GraphEditorCapabilitySnapshot");
         var featureDescriptorType = GetRequiredType("AsterGraph.Editor.Runtime.GraphEditorFeatureDescriptorSnapshot");
+        var validationSnapshotType = GetRequiredType("AsterGraph.Editor.Runtime.GraphEditorValidationSnapshot");
         var nodePositionSnapshotType = GetRequiredType("AsterGraph.Editor.Models.NodePositionSnapshot");
         var documentType = GetRequiredType("AsterGraph.Core.Models.GraphDocument");
         var diagnosticType = GetRequiredType("AsterGraph.Editor.Diagnostics.GraphEditorDiagnostic");
@@ -66,6 +67,34 @@ public sealed class GraphEditorDiagnosticsContractsTests
         AssertProperty(inspectionSnapshotType, "NodePositions", typeof(IReadOnlyList<>).MakeGenericType(nodePositionSnapshotType));
         AssertProperty(inspectionSnapshotType, "FeatureDescriptors", typeof(IReadOnlyList<>).MakeGenericType(featureDescriptorType));
         AssertProperty(inspectionSnapshotType, "RecentDiagnostics", typeof(IReadOnlyList<>).MakeGenericType(diagnosticType));
+        AssertProperty(inspectionSnapshotType, "ValidationSnapshot", validationSnapshotType);
+    }
+
+    [Fact]
+    public void GraphEditorValidationSnapshots_ArePublicAndImmutable()
+    {
+        var validationSnapshotType = GetRequiredType("AsterGraph.Editor.Runtime.GraphEditorValidationSnapshot");
+        var validationIssueType = GetRequiredType("AsterGraph.Editor.Runtime.GraphEditorValidationIssueSnapshot");
+        var validationSeverityType = GetRequiredType("AsterGraph.Editor.Runtime.GraphEditorValidationIssueSeverity");
+        var targetKindType = GetRequiredType("AsterGraph.Core.Models.GraphConnectionTargetKind");
+
+        Assert.True(validationSnapshotType.IsPublic);
+        Assert.True(validationIssueType.IsPublic);
+        Assert.True(validationSeverityType.IsEnum);
+
+        AssertProperty(validationSnapshotType, "IsReady", typeof(bool));
+        AssertProperty(validationSnapshotType, "ErrorCount", typeof(int));
+        AssertProperty(validationSnapshotType, "WarningCount", typeof(int));
+        AssertProperty(validationSnapshotType, "Issues", typeof(IReadOnlyList<>).MakeGenericType(validationIssueType));
+        AssertProperty(validationIssueType, "Code", typeof(string));
+        AssertProperty(validationIssueType, "Severity", validationSeverityType);
+        AssertProperty(validationIssueType, "Message", typeof(string));
+        AssertProperty(validationIssueType, "ScopeId", typeof(string));
+        AssertProperty(validationIssueType, "NodeId", typeof(string));
+        AssertProperty(validationIssueType, "ConnectionId", typeof(string));
+        AssertProperty(validationIssueType, "EndpointId", typeof(string));
+        AssertProperty(validationIssueType, "TargetKind", typeof(Nullable<>).MakeGenericType(targetKindType));
+        AssertProperty(validationIssueType, "ParameterKey", typeof(string));
     }
 
     [Fact]

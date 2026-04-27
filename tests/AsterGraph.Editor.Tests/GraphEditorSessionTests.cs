@@ -342,6 +342,11 @@ public sealed class GraphEditorSessionTests
             typeof(IReadOnlyList<GraphEditorFeatureDescriptorSnapshot>),
             queriesType.GetMethod(nameof(IGraphEditorQueries.GetFeatureDescriptors))!.ReturnType);
 
+        AssertMethod(queriesType, nameof(IGraphEditorQueries.GetValidationSnapshot));
+        Assert.Equal(
+            typeof(GraphEditorValidationSnapshot),
+            queriesType.GetMethod(nameof(IGraphEditorQueries.GetValidationSnapshot))!.ReturnType);
+
         AssertMethod(queriesType, nameof(IGraphEditorQueries.GetRegisteredNodeDefinitions));
         Assert.Equal(typeof(IReadOnlyList<INodeDefinition>), queriesType.GetMethod(nameof(IGraphEditorQueries.GetRegisteredNodeDefinitions))!.ReturnType);
         AssertMethod(queriesType, nameof(IGraphEditorQueries.GetNodeTemplateSnapshots));
