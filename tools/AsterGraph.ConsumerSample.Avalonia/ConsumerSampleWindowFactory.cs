@@ -36,6 +36,7 @@ public static class ConsumerSampleWindowFactory
         private readonly TextBlock _runtimeSummaryText;
         private readonly ComboBox _runtimeLogFilter;
         private readonly ItemsControl _runtimeLogItems;
+        private readonly TextBlock _layoutPreviewSummaryText;
         private readonly TextBlock _selectionSummaryText;
         private readonly TextBlock _trustBoundaryText;
         private string _selectedRuntimeLogFilter = "All";
@@ -135,6 +136,11 @@ public static class ConsumerSampleWindowFactory
             {
                 Name = "PART_RuntimeLogItems",
             };
+            _layoutPreviewSummaryText = new TextBlock
+            {
+                Name = "PART_LayoutPreviewSummaryText",
+                TextWrapping = TextWrapping.Wrap,
+            };
 
             _runtimeLogFilter = new ComboBox
             {
@@ -167,6 +173,7 @@ public static class ConsumerSampleWindowFactory
                     CreateSection("Plugin Load Snapshots", _pluginSnapshotItems),
                     CreateSection("Allowlist Decisions", CreateAllowlistPanel()),
                     CreateSection("Runtime", CreateRuntimePanel()),
+                    CreateSection("Layout", CreateLayoutPanel()),
                     CreateSection("Trust Boundary", _trustBoundaryText),
                 },
             };
@@ -240,6 +247,7 @@ public static class ConsumerSampleWindowFactory
             RebuildPluginCandidateItems();
             RebuildPluginSnapshotItems();
             RebuildRuntimePanel();
+            RebuildLayoutPanel();
             _trustBoundaryText.Text = _host.TrustBoundaryText;
             _allowlistItems.ItemsSource = _host.PluginAllowlistLines
                 .Select(line => new TextBlock
@@ -426,6 +434,75 @@ public static class ConsumerSampleWindowFactory
             button.Click += (_, _) =>
             {
                 _ = _host.RuntimeLogExportLines;
+                RefreshPanels();
+            };
+            return button;
+        }
+
+        private Control CreateLayoutPanel()
+            => new StackPanel
+            {
+                Spacing = 8,
+                Children =
+                {
+                    _layoutPreviewSummaryText,
+                    CreateLayoutPreviewButton(),
+                    CreateLayoutApplyButton(),
+                    CreateLayoutCancelButton(),
+                },
+            };
+
+        private void RebuildLayoutPanel()
+        {
+            var preview = _host.LayoutPreview;
+            _layoutPreviewSummaryText.Text = preview is null
+                ? "No layout preview."
+                : $"Preview nodes: {preview.NodePositions.Count}\nReset routes: {preview.ResetManualRoutes}";
+        }
+
+        private Button CreateLayoutPreviewButton()
+        {
+            var button = new Button
+            {
+                Name = "PART_PreviewLayoutButton",
+                Content = "Preview layout",
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+            };
+            button.Click += (_, _) =>
+            {
+                _host.PreviewLayout();
+                RefreshPanels();
+            };
+            return button;
+        }
+
+        private Button CreateLayoutApplyButton()
+        {
+            var button = new Button
+            {
+                Name = "PART_ApplyLayoutPreviewButton",
+                Content = "Apply layout",
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+            };
+            button.Click += (_, _) =>
+            {
+                _host.ApplyLayoutPreview();
+                RefreshPanels();
+            };
+            return button;
+        }
+
+        private Button CreateLayoutCancelButton()
+        {
+            var button = new Button
+            {
+                Name = "PART_CancelLayoutPreviewButton",
+                Content = "Cancel layout",
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+            };
+            button.Click += (_, _) =>
+            {
+                _host.CancelLayoutPreview();
                 RefreshPanels();
             };
             return button;

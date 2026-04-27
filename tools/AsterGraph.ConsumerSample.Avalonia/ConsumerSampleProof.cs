@@ -64,6 +64,8 @@ public sealed record ConsumerSampleProofResult(
     bool RuntimeLogFilterOk = true,
     bool RuntimeOverlaySupportBundleOk = true,
     bool LayoutProviderSeamOk = true,
+    bool LayoutPreviewApplyCancelOk = true,
+    bool LayoutUndoTransactionOk = true,
     int NodeCount = 0,
     int ConnectionCount = 0,
     IReadOnlyList<string>? FeatureDescriptorIds = null,
@@ -134,6 +136,8 @@ public sealed record ConsumerSampleProofResult(
         && RuntimeLogFilterOk
         && RuntimeOverlaySupportBundleOk
         && LayoutProviderSeamOk
+        && LayoutPreviewApplyCancelOk
+        && LayoutUndoTransactionOk
         && NodeCount > 0
         && (FeatureDescriptorIds?.Count > 0);
 
@@ -187,6 +191,8 @@ public sealed record ConsumerSampleProofResult(
         $"RUNTIME_LOG_FILTER_OK:{RuntimeLogFilterOk}",
         $"RUNTIME_OVERLAY_SUPPORT_BUNDLE_OK:{RuntimeOverlaySupportBundleOk}",
         $"LAYOUT_PROVIDER_SEAM_OK:{LayoutProviderSeamOk}",
+        $"LAYOUT_PREVIEW_APPLY_CANCEL_OK:{LayoutPreviewApplyCancelOk}",
+        $"LAYOUT_UNDO_TRANSACTION_OK:{LayoutUndoTransactionOk}",
         $"AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:{NodeSideAuthoringOk}",
         $"AUTHORING_SURFACE_COMMAND_PROJECTION_OK:{CommandSurfaceOk}",
         $"CONSUMER_SAMPLE_PARAMETER_OK:{ParameterProjectionOk}",
@@ -277,6 +283,8 @@ public static class ConsumerSampleProof
         bool runtimeLogPanelOk;
         bool runtimeLogFilterOk;
         bool layoutProviderSeamOk;
+        bool layoutPreviewApplyCancelOk;
+        bool layoutUndoTransactionOk;
         double inspectorProjectionMs;
         double pluginScanMs;
         double commandLatencyMs;
@@ -351,10 +359,14 @@ public static class ConsumerSampleProof
                 && FindNamed<Button>(window, "PART_ApproveSelectionButton") is not null
                 && FindNamed<ItemsControl>(window, "PART_PluginCandidateItems") is not null
                 && FindNamed<ItemsControl>(window, "PART_AllowlistItems") is not null
+                && FindNamed<Button>(window, "PART_PreviewLayoutButton") is not null
+                && FindNamed<Button>(window, "PART_ApplyLayoutPreviewButton") is not null
+                && FindNamed<Button>(window, "PART_CancelLayoutPreviewButton") is not null
                 && FindNamed<TextBlock>(window, "PART_TrustBoundaryText") is not null;
             runtimeLogPanelOk = HasRuntimeLogPanel(window, host);
             runtimeLogFilterOk = HasRuntimeLogFilter(host);
             layoutProviderSeamOk = HasLayoutProviderSeam(host);
+            (layoutPreviewApplyCancelOk, layoutUndoTransactionOk) = HasLayoutPreviewApplyCancel(host, window);
         }
         finally
         {
@@ -480,6 +492,8 @@ public static class ConsumerSampleProof
             RuntimeLogFilterOk: runtimeLogFilterOk,
             RuntimeOverlaySupportBundleOk: runtimeOverlaySupportBundleOk,
             LayoutProviderSeamOk: layoutProviderSeamOk,
+            LayoutPreviewApplyCancelOk: layoutPreviewApplyCancelOk,
+            LayoutUndoTransactionOk: layoutUndoTransactionOk,
             ParameterSnapshots: proofParameterSnapshots,
             StartupMs: startupMs,
             InspectorProjectionMs: inspectorProjectionMs,
@@ -589,6 +603,50 @@ public static class ConsumerSampleProof
             && descriptors.Any(descriptor => descriptor.Id == "query.layout-plan" && descriptor.IsAvailable)
             && descriptors.Any(descriptor => descriptor.Id == "integration.layout-provider" && descriptor.IsAvailable);
     }
+
+    private static (bool PreviewApplyCancelOk, bool UndoTransactionOk) HasLayoutPreviewApplyCancel(ConsumerSampleHost host, Window window)
+    {
+        var before = host.Session.Queries.CreateDocumentSnapshot();
+        var beforePositions = before.Nodes.ToDictionary(node => node.Id, node => node.Position, StringComparer.Ordinal);
+
+        var previewCreated = host.PreviewLayout();
+        FlushUi();
+        var preview = host.LayoutPreview;
+        var previewVisible = FindNamed<TextBlock>(window, "PART_LayoutPreviewSummaryText")?.Text?.Contains("Preview nodes:", StringComparison.Ordinal) == true;
+        var unchangedAfterPreview = DocumentHasPositions(host.Session.Queries.CreateDocumentSnapshot(), beforePositions);
+        var canceled = host.CancelLayoutPreview();
+        FlushUi();
+        var canceledWithoutMutation = host.LayoutPreview is null
+            && DocumentHasPositions(host.Session.Queries.CreateDocumentSnapshot(), beforePositions);
+
+        var applied = host.PreviewLayout() && host.ApplyLayoutPreview();
+        FlushUi();
+        var afterApply = host.Session.Queries.CreateDocumentSnapshot();
+        var applyMutated = afterApply.Nodes.Any(node =>
+            beforePositions.TryGetValue(node.Id, out var previous)
+            && previous != node.Position);
+        var previewApplyCancelOk = previewCreated
+            && preview is not null
+            && previewVisible
+            && unchangedAfterPreview
+            && canceled
+            && canceledWithoutMutation
+            && applied
+            && applyMutated
+            && host.LayoutPreview is null;
+
+        var undo = host.Session.Commands.TryExecuteCommand(new GraphEditorCommandInvocationSnapshot("history.undo"));
+        FlushUi();
+        var undoTransactionOk = undo
+            && DocumentHasPositions(host.Session.Queries.CreateDocumentSnapshot(), beforePositions);
+
+        return (previewApplyCancelOk, undoTransactionOk);
+    }
+
+    private static bool DocumentHasPositions(GraphDocument document, IReadOnlyDictionary<string, GraphPoint> expectedPositions)
+        => document.Nodes.All(node =>
+            expectedPositions.TryGetValue(node.Id, out var expected)
+            && expected == node.Position);
 
     private static (bool QuickAddConnectedNodeOk, bool PortFilteredNodeSearchOk) HasQuickAddConnectedNode(ConsumerSampleHost host)
     {

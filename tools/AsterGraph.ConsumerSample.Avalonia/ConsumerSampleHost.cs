@@ -6,6 +6,7 @@ using AsterGraph.Core.Compatibility;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Catalog;
 using AsterGraph.Editor.Hosting;
+using AsterGraph.Editor.Models;
 using AsterGraph.Editor.Plugins;
 using AsterGraph.Editor.Presentation;
 using AsterGraph.Editor.Runtime;
@@ -35,6 +36,7 @@ public sealed class ConsumerSampleHost : IDisposable
     private readonly GraphEditorPluginDiscoveryOptions _pluginDiscoveryOptions;
     private readonly string _storageRootPath;
     private int _nextHostNodeOrdinal = 2;
+    private GraphLayoutPlan? _layoutPreview;
 
     private ConsumerSampleHost(
         GraphEditorViewModel editor,
@@ -67,6 +69,8 @@ public sealed class ConsumerSampleHost : IDisposable
 
     public GraphEditorRuntimeOverlaySnapshot RuntimeOverlay
         => Session.Queries.GetRuntimeOverlaySnapshot();
+
+    public GraphLayoutPlan? LayoutPreview => _layoutPreview;
 
     public IReadOnlyList<string> RuntimeLogExportLines
         => RuntimeOverlay.RecentLogs
@@ -180,6 +184,53 @@ public sealed class ConsumerSampleHost : IDisposable
 
     public void SelectNode(string nodeId)
         => Session.Commands.SetSelection([nodeId], nodeId, updateStatus: false);
+
+    public bool PreviewLayout()
+    {
+        var plan = Session.Queries.CreateLayoutPlan(new GraphLayoutRequest
+        {
+            Mode = GraphLayoutRequestMode.All,
+            Orientation = GraphLayoutOrientation.LeftToRight,
+            HorizontalSpacing = 320,
+            VerticalSpacing = 160,
+        });
+        if (!plan.IsAvailable || plan.NodePositions.Count == 0)
+        {
+            return false;
+        }
+
+        _layoutPreview = plan;
+        StateChanged?.Invoke(this, EventArgs.Empty);
+        return true;
+    }
+
+    public bool CancelLayoutPreview()
+    {
+        if (_layoutPreview is null)
+        {
+            return false;
+        }
+
+        _layoutPreview = null;
+        StateChanged?.Invoke(this, EventArgs.Empty);
+        return true;
+    }
+
+    public bool ApplyLayoutPreview()
+    {
+        var preview = _layoutPreview;
+        if (preview is null || !preview.IsAvailable || preview.NodePositions.Count == 0)
+        {
+            return false;
+        }
+
+        Session.Commands.SetNodePositions(
+            preview.NodePositions.Select(node => new NodePositionSnapshot(node.NodeId, node.Position)).ToArray(),
+            updateStatus: true);
+        _layoutPreview = null;
+        StateChanged?.Invoke(this, EventArgs.Empty);
+        return true;
+    }
 
     public bool TryNavigateToRuntimeLog(GraphEditorRuntimeLogEntrySnapshot log)
     {
