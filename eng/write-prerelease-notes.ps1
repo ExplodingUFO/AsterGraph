@@ -159,6 +159,7 @@ $proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'he
 $proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'hello-world-wpf-proof.txt') -Pattern 'HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK'
 $proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'hello-world-wpf-proof.txt') -Pattern 'HOSTED_ACCESSIBILITY_OK'
 $proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'hello-world-wpf-proof.txt') -Pattern 'ADAPTER2_PERFORMANCE_BASELINE_OK'
+$proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'hello-world-wpf-proof.txt') -Pattern 'ADAPTER2_EXPORT_BREADTH_OK'
 $proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'hello-world-wpf-proof.txt') -Pattern 'ADAPTER2_PROJECTION_BUDGET_OK'
 $proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'hello-world-wpf-proof.txt') -Pattern 'ADAPTER2_COMMAND_BUDGET_OK'
 $proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'hello-world-wpf-proof.txt') -Pattern 'ADAPTER2_SCENE_BUDGET_OK'

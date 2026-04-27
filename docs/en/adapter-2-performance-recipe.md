@@ -7,7 +7,7 @@ Use this recipe only after the defended Avalonia hosted proof is already green. 
 - Start on the defended Avalonia hosted route with `AsterGraph.ConsumerSample.Avalonia -- --proof` and keep the shared `HOST_NATIVE_METRIC:*` lines on that record first.
 - Reuse the same bounded intake record and support-bundle attachment note from the defended Avalonia route; `WPF` does not open a second intake flow.
 - Run `AsterGraph.HelloWorld.Wpf -- --proof` only as validation-only adapter-2 follow-up.
-- Keep `ADAPTER2_PERFORMANCE_BASELINE_OK:True`, `ADAPTER2_PROJECTION_BUDGET_OK:True:none`, `ADAPTER2_COMMAND_BUDGET_OK:True:none`, `ADAPTER2_SCENE_BUDGET_OK:True:none`, and `HELLOWORLD_WPF_OK:True` on that same local record.
+- Keep `ADAPTER2_PERFORMANCE_BASELINE_OK:True`, `ADAPTER2_EXPORT_BREADTH_OK:True`, `ADAPTER2_PROJECTION_BUDGET_OK:True:none`, `ADAPTER2_COMMAND_BUDGET_OK:True:none`, `ADAPTER2_SCENE_BUDGET_OK:True:none`, and `HELLOWORLD_WPF_OK:True` on that same local record.
 - Treat every `WPF` performance proof line as validation-only evidence; none of these markers widen public support promises.
 
 ## Commands
@@ -24,6 +24,7 @@ dotnet run --project tools/AsterGraph.HelloWorld.Wpf/AsterGraph.HelloWorld.Wpf.c
 
 - the defended Avalonia route stays the first proof gate
 - `AsterGraph.HelloWorld.Wpf -- --proof` emits `ADAPTER2_PERFORMANCE_BASELINE_OK:True`
+- the same `WPF` proof emits `ADAPTER2_EXPORT_BREADTH_OK:True`
 - the same `WPF` proof emits `ADAPTER2_PROJECTION_BUDGET_OK:True:none`
 - the same `WPF` proof emits `ADAPTER2_COMMAND_BUDGET_OK:True:none`
 - the same `WPF` proof emits `ADAPTER2_SCENE_BUDGET_OK:True:none`

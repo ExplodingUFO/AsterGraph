@@ -37,7 +37,7 @@ public sealed class ReleaseClosureContractTests
         WriteProofFile(
             proofRoot,
             "hello-world-wpf-proof.txt",
-            "HOSTED_ACCESSIBILITY_BASELINE_OK:True`nHOSTED_ACCESSIBILITY_FOCUS_OK:True`nHOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True`nHOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True`nHOSTED_ACCESSIBILITY_OK:True`nADAPTER2_PERFORMANCE_BASELINE_OK:True`nADAPTER2_PROJECTION_BUDGET_OK:True:none`nADAPTER2_COMMAND_BUDGET_OK:True:none`nADAPTER2_SCENE_BUDGET_OK:True:none`nHELLOWORLD_WPF_OK:True");
+            "HOSTED_ACCESSIBILITY_BASELINE_OK:True`nHOSTED_ACCESSIBILITY_FOCUS_OK:True`nHOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True`nHOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True`nHOSTED_ACCESSIBILITY_OK:True`nADAPTER2_PERFORMANCE_BASELINE_OK:True`nADAPTER2_EXPORT_BREADTH_OK:True`nADAPTER2_PROJECTION_BUDGET_OK:True:none`nADAPTER2_COMMAND_BUDGET_OK:True:none`nADAPTER2_SCENE_BUDGET_OK:True:none`nHELLOWORLD_WPF_OK:True");
         WriteProofFile(
             proofRoot,
             "wpf-adapter-capability-matrix.txt",
@@ -101,6 +101,7 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True", notes, StringComparison.Ordinal);
         Assert.Contains("HOSTED_ACCESSIBILITY_OK:True", notes, StringComparison.Ordinal);
         Assert.Contains("ADAPTER2_PERFORMANCE_BASELINE_OK:True", notes, StringComparison.Ordinal);
+        Assert.Contains("ADAPTER2_EXPORT_BREADTH_OK:True", notes, StringComparison.Ordinal);
         Assert.Contains("ADAPTER2_PROJECTION_BUDGET_OK:True:none", notes, StringComparison.Ordinal);
         Assert.Contains("ADAPTER2_COMMAND_BUDGET_OK:True:none", notes, StringComparison.Ordinal);
         Assert.Contains("ADAPTER2_SCENE_BUDGET_OK:True:none", notes, StringComparison.Ordinal);

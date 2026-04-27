@@ -195,6 +195,7 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("ConsumerSample.Avalonia -- --proof", recipe, StringComparison.Ordinal);
         Assert.Contains("AsterGraph.HelloWorld.Wpf", recipe, StringComparison.Ordinal);
         Assert.Contains("ADAPTER2_PERFORMANCE_BASELINE_OK:True", recipe, StringComparison.Ordinal);
+        Assert.Contains("ADAPTER2_EXPORT_BREADTH_OK:True", recipe, StringComparison.Ordinal);
         Assert.Contains("ADAPTER2_PROJECTION_BUDGET_OK:True:none", recipe, StringComparison.Ordinal);
         Assert.Contains("ADAPTER2_COMMAND_BUDGET_OK:True:none", recipe, StringComparison.Ordinal);
         Assert.Contains("ADAPTER2_SCENE_BUDGET_OK:True:none", recipe, StringComparison.Ordinal);
@@ -204,6 +205,7 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("ConsumerSample.Avalonia -- --proof", recipeZh, StringComparison.Ordinal);
         Assert.Contains("AsterGraph.HelloWorld.Wpf", recipeZh, StringComparison.Ordinal);
         Assert.Contains("ADAPTER2_PERFORMANCE_BASELINE_OK:True", recipeZh, StringComparison.Ordinal);
+        Assert.Contains("ADAPTER2_EXPORT_BREADTH_OK:True", recipeZh, StringComparison.Ordinal);
         Assert.Contains("ADAPTER2_PROJECTION_BUDGET_OK:True:none", recipeZh, StringComparison.Ordinal);
         Assert.Contains("ADAPTER2_COMMAND_BUDGET_OK:True:none", recipeZh, StringComparison.Ordinal);
         Assert.Contains("ADAPTER2_SCENE_BUDGET_OK:True:none", recipeZh, StringComparison.Ordinal);
