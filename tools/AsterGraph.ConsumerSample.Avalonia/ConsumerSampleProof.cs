@@ -60,10 +60,16 @@ public sealed record ConsumerSampleProofResult(
     bool WireSliceOk = true,
     bool SelectedNodeEdgeHighlightOk = true,
     bool RuntimeOverlaySnapshotOk = true,
+    bool RuntimeLogPanelOk = true,
+    bool RuntimeLogFilterOk = true,
+    bool RuntimeOverlaySupportBundleOk = true,
     int NodeCount = 0,
     int ConnectionCount = 0,
     IReadOnlyList<string>? FeatureDescriptorIds = null,
     IReadOnlyList<string>? RecentDiagnosticCodes = null,
+    IReadOnlyList<GraphEditorNodeRuntimeOverlaySnapshot>? RuntimeNodeOverlays = null,
+    IReadOnlyList<GraphEditorConnectionRuntimeOverlaySnapshot>? RuntimeConnectionOverlays = null,
+    IReadOnlyList<GraphEditorRuntimeLogEntrySnapshot>? RuntimeLogs = null,
     bool HostedAutomationNavigationOk = true,
     bool HostedAuthoringAutomationDiagnosticsOk = true,
     bool ScenarioGraphOk = true,
@@ -123,6 +129,9 @@ public sealed record ConsumerSampleProofResult(
         && SupportBundlePayloadOk
         && FiveMinuteOnboardingOk
         && RuntimeOverlaySnapshotOk
+        && RuntimeLogPanelOk
+        && RuntimeLogFilterOk
+        && RuntimeOverlaySupportBundleOk
         && NodeCount > 0
         && (FeatureDescriptorIds?.Count > 0);
 
@@ -172,6 +181,9 @@ public sealed record ConsumerSampleProofResult(
         $"AUTHORING_WIRE_SLICE_OK:{WireSliceOk}",
         $"AUTHORING_SELECTED_NODE_EDGE_HIGHLIGHT_OK:{SelectedNodeEdgeHighlightOk}",
         $"RUNTIME_OVERLAY_SNAPSHOT_OK:{RuntimeOverlaySnapshotOk}",
+        $"RUNTIME_LOG_PANEL_OK:{RuntimeLogPanelOk}",
+        $"RUNTIME_LOG_FILTER_OK:{RuntimeLogFilterOk}",
+        $"RUNTIME_OVERLAY_SUPPORT_BUNDLE_OK:{RuntimeOverlaySupportBundleOk}",
         $"AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:{NodeSideAuthoringOk}",
         $"AUTHORING_SURFACE_COMMAND_PROJECTION_OK:{CommandSurfaceOk}",
         $"CONSUMER_SAMPLE_PARAMETER_OK:{ParameterProjectionOk}",
@@ -259,6 +271,8 @@ public static class ConsumerSampleProof
         bool windowCompositionOk;
         bool scenarioGraphOk;
         bool hostOwnedActionsOk;
+        bool runtimeLogPanelOk;
+        bool runtimeLogFilterOk;
         double inspectorProjectionMs;
         double pluginScanMs;
         double commandLatencyMs;
@@ -334,6 +348,8 @@ public static class ConsumerSampleProof
                 && FindNamed<ItemsControl>(window, "PART_PluginCandidateItems") is not null
                 && FindNamed<ItemsControl>(window, "PART_AllowlistItems") is not null
                 && FindNamed<TextBlock>(window, "PART_TrustBoundaryText") is not null;
+            runtimeLogPanelOk = HasRuntimeLogPanel(window, host);
+            runtimeLogFilterOk = HasRuntimeLogFilter(host);
         }
         finally
         {
@@ -401,6 +417,7 @@ public static class ConsumerSampleProof
         }
 
         var finalSnapshot = host.Session.Queries.CreateDocumentSnapshot();
+        var runtimeOverlay = host.Session.Queries.GetRuntimeOverlaySnapshot();
         var featureDescriptorIds = host.Session.Queries.GetFeatureDescriptors()
             .Where(d => d.IsAvailable)
             .Select(d => d.Id)
@@ -417,6 +434,7 @@ public static class ConsumerSampleProof
         var proofParameterSnapshots = CreateParameterSnapshots(
             [.. selectedSupportSnapshots, .. mixedValueSnapshots, .. validationFixSnapshots]);
         var supportBundlePayloadOk = HasSupportBundlePayload(proofParameterSnapshots, finalSnapshot, featureDescriptorIds);
+        var runtimeOverlaySupportBundleOk = HasRuntimeOverlaySupportBundlePayload(runtimeOverlay);
         var fiveMinuteOnboardingOk = scenarioGraphOk
             && hostOwnedActionsOk
             && parameterProjectionOk
@@ -453,6 +471,9 @@ public static class ConsumerSampleProof
             WireSliceOk: wireSliceOk,
             SelectedNodeEdgeHighlightOk: selectedNodeEdgeHighlightOk,
             RuntimeOverlaySnapshotOk: runtimeOverlaySnapshotOk,
+            RuntimeLogPanelOk: runtimeLogPanelOk,
+            RuntimeLogFilterOk: runtimeLogFilterOk,
+            RuntimeOverlaySupportBundleOk: runtimeOverlaySupportBundleOk,
             ParameterSnapshots: proofParameterSnapshots,
             StartupMs: startupMs,
             InspectorProjectionMs: inspectorProjectionMs,
@@ -467,6 +488,9 @@ public static class ConsumerSampleProof
             ConnectionCount: finalSnapshot.Connections.Count,
             FeatureDescriptorIds: featureDescriptorIds,
             RecentDiagnosticCodes: recentDiagnosticCodes,
+            RuntimeNodeOverlays: runtimeOverlay.NodeOverlays,
+            RuntimeConnectionOverlays: runtimeOverlay.ConnectionOverlays,
+            RuntimeLogs: runtimeOverlay.RecentLogs,
             HostedAutomationNavigationOk: hostedAutomationNavigationOk,
             HostedAuthoringAutomationDiagnosticsOk: hostedAuthoringAutomationDiagnosticsOk,
             ScenarioGraphOk: scenarioGraphOk,
@@ -1475,6 +1499,47 @@ public static class ConsumerSampleProof
                 descriptor.Id == "integration.runtime-overlay-provider"
                 && descriptor.IsAvailable);
     }
+
+    private static bool HasRuntimeLogPanel(Window window, ConsumerSampleHost host)
+    {
+        var log = host.Session.Queries.GetRuntimeOverlaySnapshot().RecentLogs.SingleOrDefault(snapshot =>
+            string.Equals(snapshot.Id, "consumer-sample-runtime-log-001", StringComparison.Ordinal));
+        var selectedBefore = host.Session.Queries.GetSelectionSnapshot().PrimarySelectedNodeId;
+        var navigated = log is not null && host.TryNavigateToRuntimeLog(log);
+        var selectedAfter = host.Session.Queries.GetSelectionSnapshot().PrimarySelectedNodeId;
+        if (selectedBefore is not null)
+        {
+            host.SelectNode(selectedBefore);
+        }
+
+        return FindNamed<TextBlock>(window, "PART_RuntimeSummaryText") is not null
+            && FindNamed<ComboBox>(window, "PART_RuntimeLogFilter") is not null
+            && FindNamed<ItemsControl>(window, "PART_RuntimeLogItems") is not null
+            && FindNamed<Button>(window, "PART_ExportRuntimeLogsButton") is not null
+            && navigated
+            && string.Equals(selectedAfter, "consumer-sample-queue-001", StringComparison.Ordinal);
+    }
+
+    private static bool HasRuntimeLogFilter(ConsumerSampleHost host)
+    {
+        var overlay = host.Session.Queries.GetRuntimeOverlaySnapshot();
+        var selectedNodeId = host.Session.Queries.GetSelectionSnapshot().PrimarySelectedNodeId;
+        var allLogs = overlay.RecentLogs;
+        var selectedLogs = selectedNodeId is null
+            ? Array.Empty<GraphEditorRuntimeLogEntrySnapshot>()
+            : allLogs.Where(log => string.Equals(log.NodeId, selectedNodeId, StringComparison.Ordinal)).ToArray();
+        var scopeLogs = allLogs.Where(log => string.Equals(log.ScopeId, "root", StringComparison.Ordinal)).ToArray();
+
+        return allLogs.Count > 0
+            && selectedLogs.Length == 0
+            && scopeLogs.Length == allLogs.Count;
+    }
+
+    private static bool HasRuntimeOverlaySupportBundlePayload(GraphEditorRuntimeOverlaySnapshot overlay)
+        => overlay.IsAvailable
+        && overlay.NodeOverlays.Count > 0
+        && overlay.ConnectionOverlays.Count > 0
+        && overlay.RecentLogs.Count > 0;
 
     private static IReadOnlyList<ConsumerSampleProofParameterSnapshot> CreateParameterSnapshots(
         IReadOnlyList<GraphEditorNodeParameterSnapshot> snapshots)

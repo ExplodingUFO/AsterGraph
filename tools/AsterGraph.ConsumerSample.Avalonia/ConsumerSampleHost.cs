@@ -65,6 +65,14 @@ public sealed class ConsumerSampleHost : IDisposable
     public IReadOnlyList<ConsumerSamplePluginCandidateEntry> PluginCandidateEntries
         => PluginCandidates.Select(CreatePluginCandidateEntry).ToArray();
 
+    public GraphEditorRuntimeOverlaySnapshot RuntimeOverlay
+        => Session.Queries.GetRuntimeOverlaySnapshot();
+
+    public IReadOnlyList<string> RuntimeLogExportLines
+        => RuntimeOverlay.RecentLogs
+            .Select(log => $"{log.TimestampUtc:O} [{log.Status}] {log.Message}")
+            .ToArray();
+
     public IReadOnlyList<string> PluginAllowlistLines
     {
         get
@@ -171,6 +179,26 @@ public sealed class ConsumerSampleHost : IDisposable
 
     public void SelectNode(string nodeId)
         => Session.Commands.SetSelection([nodeId], nodeId, updateStatus: false);
+
+    public bool TryNavigateToRuntimeLog(GraphEditorRuntimeLogEntrySnapshot log)
+    {
+        ArgumentNullException.ThrowIfNull(log);
+        if (string.IsNullOrWhiteSpace(log.NodeId))
+        {
+            return false;
+        }
+
+        var nodeExists = Session.Queries.CreateDocumentSnapshot()
+            .Nodes
+            .Any(node => string.Equals(node.Id, log.NodeId, StringComparison.Ordinal));
+        if (!nodeExists)
+        {
+            return false;
+        }
+
+        SelectNode(log.NodeId);
+        return true;
+    }
 
     public IReadOnlyList<GraphEditorNodeParameterSnapshot> GetSelectedParameterSnapshots()
         => Session.Queries.GetSelectedNodeParameterSnapshots();

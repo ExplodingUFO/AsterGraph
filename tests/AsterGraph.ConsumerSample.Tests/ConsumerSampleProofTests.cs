@@ -113,6 +113,9 @@ public sealed class ConsumerSampleProofTests
         Assert.True(result.SupportBundlePayloadOk);
         Assert.True(result.FiveMinuteOnboardingOk);
         Assert.True(result.RuntimeOverlaySnapshotOk);
+        Assert.True(result.RuntimeLogPanelOk);
+        Assert.True(result.RuntimeLogFilterOk);
+        Assert.True(result.RuntimeOverlaySupportBundleOk);
         Assert.True(result.OnboardingConfigurationOk);
         Assert.True(result.StartupMs >= 0);
         Assert.True(result.InspectorProjectionMs >= 0);
@@ -141,6 +144,9 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_WIRE_SLICE_OK:True");
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_SELECTED_NODE_EDGE_HIGHLIGHT_OK:True");
         Assert.Contains(result.ProofLines, line => line == "RUNTIME_OVERLAY_SNAPSHOT_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "RUNTIME_LOG_PANEL_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "RUNTIME_LOG_FILTER_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "RUNTIME_OVERLAY_SUPPORT_BUNDLE_OK:True");
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:True");
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_SURFACE_COMMAND_PROJECTION_OK:True");
         Assert.Contains(result.ProofLines, line => line == "CAPABILITY_BREADTH_STENCIL_OK:True");
@@ -469,6 +475,9 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(proofLines, line => line == "AUTHORING_WIRE_SLICE_OK:True");
         Assert.Contains(proofLines, line => line == "AUTHORING_SELECTED_NODE_EDGE_HIGHLIGHT_OK:True");
         Assert.Contains(proofLines, line => line == "RUNTIME_OVERLAY_SNAPSHOT_OK:True");
+        Assert.Contains(proofLines, line => line == "RUNTIME_LOG_PANEL_OK:True");
+        Assert.Contains(proofLines, line => line == "RUNTIME_LOG_FILTER_OK:True");
+        Assert.Contains(proofLines, line => line == "RUNTIME_OVERLAY_SUPPORT_BUNDLE_OK:True");
         Assert.Contains(proofLines, line => line == "AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:True");
         Assert.Contains(proofLines, line => line == "AUTHORING_SURFACE_COMMAND_PROJECTION_OK:True");
         Assert.Contains(proofLines, line => line == "CAPABILITY_BREADTH_STENCIL_OK:True");
@@ -526,6 +535,13 @@ public sealed class ConsumerSampleProofTests
 
         var recentDiagnostics = root.GetProperty("recentDiagnostics").EnumerateArray().ToArray();
         Assert.True(recentDiagnostics.Length >= 0);
+        var runtimeNodeOverlays = root.GetProperty("runtimeNodeOverlays").EnumerateArray().ToArray();
+        var runtimeConnectionOverlays = root.GetProperty("runtimeConnectionOverlays").EnumerateArray().ToArray();
+        var runtimeLogs = root.GetProperty("runtimeLogs").EnumerateArray().ToArray();
+        Assert.True(runtimeNodeOverlays.Length > 0);
+        Assert.True(runtimeConnectionOverlays.Length > 0);
+        Assert.True(runtimeLogs.Length > 0);
+        Assert.Contains(runtimeLogs, log => log.GetProperty("nodeId").GetString() == "consumer-sample-queue-001");
 
         var statusSnapshot = parameterSnapshots.First(snapshot =>
             snapshot.GetProperty("key").GetString() == "status"
@@ -635,7 +651,7 @@ public sealed class ConsumerSampleProofTests
 
         var lines = output.ToString();
         Assert.Contains("SUPPORT_BUNDLE_PERSISTENCE_OK:False", lines, StringComparison.Ordinal);
-        Assert.DoesNotContain("SUPPORT_BUNDLE_OK:True", lines, StringComparison.Ordinal);
+        Assert.DoesNotContain(lines.Split(Environment.NewLine), line => line == "SUPPORT_BUNDLE_OK:True");
     }
 
     [AvaloniaFact]
@@ -688,6 +704,10 @@ public sealed class ConsumerSampleProofTests
             Assert.NotNull(FindNamed<ItemsControl>(window, "PART_PluginCandidateItems"));
             Assert.NotNull(FindNamed<ItemsControl>(window, "PART_PluginSnapshotItems"));
             Assert.NotNull(FindNamed<ItemsControl>(window, "PART_AllowlistItems"));
+            Assert.NotNull(FindNamed<TextBlock>(window, "PART_RuntimeSummaryText"));
+            Assert.NotNull(FindNamed<ComboBox>(window, "PART_RuntimeLogFilter"));
+            Assert.NotNull(FindNamed<ItemsControl>(window, "PART_RuntimeLogItems"));
+            Assert.NotNull(FindNamed<Button>(window, "PART_ExportRuntimeLogsButton"));
             Assert.NotNull(FindNamed<TextBlock>(window, "PART_TrustBoundaryText"));
         }
         finally

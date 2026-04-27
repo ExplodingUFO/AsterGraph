@@ -36,7 +36,9 @@ public sealed class ProofFriendlyHostedTemplateClosureDocsTests
         Assert.Contains("AsterGraph.ConsumerSample.Avalonia -- --proof", consumerReadme, StringComparison.Ordinal);
         Assert.Contains("CONSUMER_SAMPLE_OK:True", ExtractBlock(consumerReadme, bundleMarkerHeadingEn, "## "), StringComparison.Ordinal);
         Assert.Contains("SUPPORT_BUNDLE_PATH:...", ExtractBlock(consumerReadme, bundleMarkerHeadingEn, "## "), StringComparison.Ordinal);
-        Assert.DoesNotContain("SUPPORT_BUNDLE_OK", ExtractBlock(consumerReadme, proofMarkerHeadingEn, bundleMarkerHeadingEn), StringComparison.Ordinal);
+        Assert.DoesNotContain(
+            ExtractBlock(consumerReadme, proofMarkerHeadingEn, bundleMarkerHeadingEn).Split(Environment.NewLine),
+            line => string.Equals(line.Trim(), "- `SUPPORT_BUNDLE_OK:True`", StringComparison.Ordinal));
         Assert.Contains("reuse the emitted `SUPPORT_BUNDLE_PATH:...` line as the support-bundle attachment note", consumerReadme, StringComparison.Ordinal);
         Assert.Contains("local evidence only", consumerReadme, StringComparison.OrdinalIgnoreCase);
 
@@ -54,7 +56,9 @@ public sealed class ProofFriendlyHostedTemplateClosureDocsTests
         Assert.Contains("AUTHORING_SURFACE_OK:True", quickReferenceProofBlockEn, StringComparison.Ordinal);
         Assert.Contains("COMMAND_SURFACE_OK:True", quickReferenceProofBlockEn, StringComparison.Ordinal);
         Assert.Contains("HOST_NATIVE_METRIC:*", quickReferenceProofBlockEn, StringComparison.Ordinal);
-        Assert.DoesNotContain("SUPPORT_BUNDLE_OK", quickReferenceProofBlockEn, StringComparison.Ordinal);
+        Assert.DoesNotContain(
+            quickReferenceProofBlockEn.Split(Environment.NewLine),
+            line => string.Equals(line.Trim(), "- `SUPPORT_BUNDLE_OK:True`", StringComparison.Ordinal));
         Assert.DoesNotContain("SUPPORT_BUNDLE_PATH", quickReferenceProofBlockEn, StringComparison.Ordinal);
 
         Assert.Contains("CONSUMER_SAMPLE_TRUST_OK:True", quickReferenceProofBlockZh, StringComparison.Ordinal);
@@ -64,7 +68,9 @@ public sealed class ProofFriendlyHostedTemplateClosureDocsTests
         Assert.Contains("AUTHORING_SURFACE_OK:True", quickReferenceProofBlockZh, StringComparison.Ordinal);
         Assert.Contains("COMMAND_SURFACE_OK:True", quickReferenceProofBlockZh, StringComparison.Ordinal);
         Assert.Contains("HOST_NATIVE_METRIC:*", quickReferenceProofBlockZh, StringComparison.Ordinal);
-        Assert.DoesNotContain("SUPPORT_BUNDLE_OK", quickReferenceProofBlockZh, StringComparison.Ordinal);
+        Assert.DoesNotContain(
+            quickReferenceProofBlockZh.Split(Environment.NewLine),
+            line => string.Equals(line.Trim(), "- `SUPPORT_BUNDLE_OK:True`", StringComparison.Ordinal));
         Assert.DoesNotContain("SUPPORT_BUNDLE_PATH", quickReferenceProofBlockZh, StringComparison.Ordinal);
 
         Assert.Contains("SUPPORT_BUNDLE_OK:True", quickReferenceBundleBlockEn, StringComparison.Ordinal);

@@ -1,6 +1,7 @@
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text.Json;
+using AsterGraph.Editor.Runtime;
 
 namespace AsterGraph.ConsumerSample;
 
@@ -42,7 +43,10 @@ internal static class ConsumerSampleSupportBundle
                 result.NodeCount,
                 result.ConnectionCount),
             FeatureDescriptors: result.FeatureDescriptorIds ?? [],
-            RecentDiagnostics: result.RecentDiagnosticCodes ?? []);
+            RecentDiagnostics: result.RecentDiagnosticCodes ?? [],
+            RuntimeNodeOverlays: result.RuntimeNodeOverlays ?? [],
+            RuntimeConnectionOverlays: result.RuntimeConnectionOverlays ?? [],
+            RuntimeLogs: result.RuntimeLogs ?? []);
 
         var options = new JsonSerializerOptions
         {
@@ -76,6 +80,9 @@ internal static class ConsumerSampleSupportBundle
             "graphSummary",
             "featureDescriptors",
             "recentDiagnostics",
+            "runtimeNodeOverlays",
+            "runtimeConnectionOverlays",
+            "runtimeLogs",
         };
 
         foreach (var property in requiredProperties)
@@ -123,7 +130,10 @@ internal static class ConsumerSampleSupportBundle
         ConsumerSampleSupportReproduction Reproduction,
         ConsumerSampleSupportGraphSummary GraphSummary,
         IReadOnlyList<string> FeatureDescriptors,
-        IReadOnlyList<string> RecentDiagnostics);
+        IReadOnlyList<string> RecentDiagnostics,
+        IReadOnlyList<GraphEditorNodeRuntimeOverlaySnapshot> RuntimeNodeOverlays,
+        IReadOnlyList<GraphEditorConnectionRuntimeOverlaySnapshot> RuntimeConnectionOverlays,
+        IReadOnlyList<GraphEditorRuntimeLogEntrySnapshot> RuntimeLogs);
 
     private sealed record ConsumerSampleSupportEnvironment(
         string FrameworkDescription,

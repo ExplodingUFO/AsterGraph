@@ -33,8 +33,12 @@ public static class ConsumerSampleWindowFactory
         private readonly ItemsControl _pluginCandidateItems;
         private readonly ItemsControl _pluginSnapshotItems;
         private readonly ItemsControl _allowlistItems;
+        private readonly TextBlock _runtimeSummaryText;
+        private readonly ComboBox _runtimeLogFilter;
+        private readonly ItemsControl _runtimeLogItems;
         private readonly TextBlock _selectionSummaryText;
         private readonly TextBlock _trustBoundaryText;
+        private string _selectedRuntimeLogFilter = "All";
 
         public ConsumerSampleWindow(ConsumerSampleHost host, bool ownsHost)
         {
@@ -121,6 +125,29 @@ public static class ConsumerSampleWindowFactory
                 Name = "PART_AllowlistItems",
             };
 
+            _runtimeSummaryText = new TextBlock
+            {
+                Name = "PART_RuntimeSummaryText",
+                TextWrapping = TextWrapping.Wrap,
+            };
+
+            _runtimeLogItems = new ItemsControl
+            {
+                Name = "PART_RuntimeLogItems",
+            };
+
+            _runtimeLogFilter = new ComboBox
+            {
+                Name = "PART_RuntimeLogFilter",
+                ItemsSource = new[] { "All", "Selected Node", "Current Scope" },
+                SelectedItem = _selectedRuntimeLogFilter,
+            };
+            _runtimeLogFilter.SelectionChanged += (_, _) =>
+            {
+                _selectedRuntimeLogFilter = _runtimeLogFilter.SelectedItem?.ToString() ?? "All";
+                RebuildRuntimePanel();
+            };
+
             _trustBoundaryText = new TextBlock
             {
                 Name = "PART_TrustBoundaryText",
@@ -139,6 +166,7 @@ public static class ConsumerSampleWindowFactory
                     CreateSection("Plugin Candidates", _pluginCandidateItems),
                     CreateSection("Plugin Load Snapshots", _pluginSnapshotItems),
                     CreateSection("Allowlist Decisions", CreateAllowlistPanel()),
+                    CreateSection("Runtime", CreateRuntimePanel()),
                     CreateSection("Trust Boundary", _trustBoundaryText),
                 },
             };
@@ -211,6 +239,7 @@ public static class ConsumerSampleWindowFactory
             RebuildParameterItems();
             RebuildPluginCandidateItems();
             RebuildPluginSnapshotItems();
+            RebuildRuntimePanel();
             _trustBoundaryText.Text = _host.TrustBoundaryText;
             _allowlistItems.ItemsSource = _host.PluginAllowlistLines
                 .Select(line => new TextBlock
@@ -330,6 +359,76 @@ public static class ConsumerSampleWindowFactory
             }
 
             _pluginCandidateItems.ItemsSource = items;
+        }
+
+        private Control CreateRuntimePanel()
+            => new StackPanel
+            {
+                Spacing = 8,
+                Children =
+                {
+                    _runtimeSummaryText,
+                    _runtimeLogFilter,
+                    _runtimeLogItems,
+                    CreateRuntimeLogExportButton(),
+                },
+            };
+
+        private void RebuildRuntimePanel()
+        {
+            var overlay = _host.RuntimeOverlay;
+            _runtimeSummaryText.Text = overlay.IsAvailable
+                ? $"Nodes: {overlay.NodeOverlays.Count}\nConnections: {overlay.ConnectionOverlays.Count}\nLogs: {overlay.RecentLogs.Count}"
+                : "Runtime overlay provider is not configured.";
+
+            var selection = _host.Session.Queries.GetSelectionSnapshot();
+            var filteredLogs = FilterRuntimeLogs(overlay.RecentLogs, selection);
+            _runtimeLogItems.ItemsSource = filteredLogs
+                .Select(CreateRuntimeLogButton)
+                .ToList();
+        }
+
+        private IReadOnlyList<GraphEditorRuntimeLogEntrySnapshot> FilterRuntimeLogs(
+            IReadOnlyList<GraphEditorRuntimeLogEntrySnapshot> logs,
+            GraphEditorSelectionSnapshot selection)
+            => _selectedRuntimeLogFilter switch
+            {
+                "Selected Node" when selection.PrimarySelectedNodeId is not null
+                    => logs.Where(log => string.Equals(log.NodeId, selection.PrimarySelectedNodeId, StringComparison.Ordinal)).ToArray(),
+                "Current Scope" => logs.Where(log => string.Equals(log.ScopeId, "root", StringComparison.Ordinal)).ToArray(),
+                _ => logs,
+            };
+
+        private Button CreateRuntimeLogButton(GraphEditorRuntimeLogEntrySnapshot log)
+        {
+            var button = new Button
+            {
+                Name = $"PART_RuntimeLog_{log.Id}",
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                Content = $"{log.Status}: {log.Message}",
+            };
+            button.Click += (_, _) =>
+            {
+                _host.TryNavigateToRuntimeLog(log);
+                RefreshPanels();
+            };
+            return button;
+        }
+
+        private Button CreateRuntimeLogExportButton()
+        {
+            var button = new Button
+            {
+                Name = "PART_ExportRuntimeLogsButton",
+                Content = "Export runtime logs",
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+            };
+            button.Click += (_, _) =>
+            {
+                _ = _host.RuntimeLogExportLines;
+                RefreshPanels();
+            };
+            return button;
         }
 
         private Control CreateParameterEditor(GraphEditorNodeParameterSnapshot snapshot)
