@@ -26,17 +26,56 @@ $publishableAssemblies = @(
 $userHome = if ([string]::IsNullOrWhiteSpace($env:USERPROFILE)) { $env:HOME } else { $env:USERPROFILE }
 $fallbackPackageCache = Join-Path $userHome '.nuget/packages'
 
-$dotnetAssemblyDirectories = @()
 $dotnetRoots = @()
-if (-not [string]::IsNullOrWhiteSpace($env:DOTNET_ROOT)) {
-  $dotnetRoots += $env:DOTNET_ROOT
+
+function Add-DotNetRoot {
+  param([string]$Path)
+
+  if ([string]::IsNullOrWhiteSpace($Path)) {
+    return
+  }
+
+  try {
+    $resolvedPath = [System.IO.Path]::GetFullPath($Path)
+  }
+  catch {
+    return
+  }
+
+  if (Test-Path -LiteralPath $resolvedPath) {
+    $script:dotnetRoots += $resolvedPath
+  }
 }
+
+Add-DotNetRoot -Path $env:DOTNET_ROOT
 
 $dotnetCommand = Get-Command dotnet -ErrorAction SilentlyContinue
 if ($dotnetCommand -and -not [string]::IsNullOrWhiteSpace($dotnetCommand.Source)) {
-  $dotnetRoots += (Split-Path -Parent $dotnetCommand.Source)
+  Add-DotNetRoot -Path (Split-Path -Parent $dotnetCommand.Source)
 }
 
+try {
+  foreach ($line in (& dotnet --list-sdks 2>$null)) {
+    if ($line -match '\[(?<sdkRoot>.+)\]') {
+      Add-DotNetRoot -Path (Split-Path -Parent $Matches['sdkRoot'])
+    }
+  }
+}
+catch {
+}
+
+try {
+  foreach ($line in (& dotnet --list-runtimes 2>$null)) {
+    if ($line -match '\[(?<runtimeRoot>.+)\]') {
+      $sharedRoot = Split-Path -Parent $Matches['runtimeRoot']
+      Add-DotNetRoot -Path (Split-Path -Parent $sharedRoot)
+    }
+  }
+}
+catch {
+}
+
+$dotnetAssemblyDirectories = @()
 foreach ($dotnetRoot in ($dotnetRoots | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -Unique)) {
   $refRoot = Join-Path $dotnetRoot "packs/Microsoft.NETCore.App.Ref"
   if (Test-Path -LiteralPath $refRoot) {
@@ -195,6 +234,13 @@ function New-PublicApiMetadataContext {
 
     $seenAssemblyIdentities[$assemblyIdentity] = $true
     $uniqueAssemblyPaths.Add($path)
+  }
+
+  $coreAssemblyPath = $uniqueAssemblyPaths |
+    Where-Object { [System.IO.Path]::GetFileName($_).Equals('System.Runtime.dll', [System.StringComparison]::OrdinalIgnoreCase) } |
+    Select-Object -First 1
+  if (-not $coreAssemblyPath) {
+    throw "System.Runtime.dll was not found for $Framework. Install the matching .NET SDK reference pack or set DOTNET_ROOT to the SDK root."
   }
 
   $resolverType = [type]::GetType('System.Reflection.PathAssemblyResolver, System.Reflection.MetadataLoadContext', $true)
