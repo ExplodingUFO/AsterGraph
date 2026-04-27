@@ -33,6 +33,27 @@ public sealed class GraphEditorExportContractsTests
     }
 
     [Fact]
+    public void GraphSceneSvgExportService_ExportsLargeConnectedScene()
+    {
+        var definitionId = new NodeDefinitionId("tests.export.svg-large-connected");
+        var exportDirectory = CreateTempDirectory();
+        var exportPath = Path.Combine(exportDirectory, "large-graph.svg");
+        var session = AsterGraphEditorFactory.CreateSession(CreateOptions(definitionId) with
+        {
+            Document = CreateLargeExportDocument(definitionId, 1_000),
+        });
+        var service = new GraphSceneSvgExportService(exportPath);
+
+        var writtenPath = service.Export(session.Queries.GetSceneSnapshot());
+
+        Assert.Equal(exportPath, writtenPath);
+        var svg = File.ReadAllText(exportPath);
+        Assert.Contains("Large Node 0000", svg, StringComparison.Ordinal);
+        Assert.Contains("Large Node 0999", svg, StringComparison.Ordinal);
+        Assert.Contains("""<g id="connections">""", svg, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void RuntimeSession_ExportSceneAsSvg_UsesHostSuppliedExportServiceAndDescriptors()
     {
         var definitionId = new NodeDefinitionId("tests.export.session-contract");
@@ -207,6 +228,51 @@ public sealed class GraphEditorExportContractsTests
                     "flow",
                     "#8ED8FF"),
             ]);
+
+    private static GraphDocument CreateLargeExportDocument(NodeDefinitionId definitionId, int nodeCount)
+    {
+        var nodes = new List<GraphNode>(nodeCount);
+        var connections = new List<GraphConnection>(nodeCount - 1);
+
+        for (var index = 0; index < nodeCount; index++)
+        {
+            var nodeId = $"large-node-{index:0000}";
+            nodes.Add(new GraphNode(
+                nodeId,
+                $"Large Node {index:0000}",
+                "Tests",
+                "Export",
+                "Large connected export coverage.",
+                new GraphPoint(120 + ((index % 50) * 280), 160 + ((index / 50) * 220)),
+                new GraphSize(220, 140),
+                index == 0
+                    ? []
+                    : [new GraphPort("in", "Input", PortDirection.Input, "float", "#55D8C1", new PortTypeId("float"))],
+                index == nodeCount - 1
+                    ? []
+                    : [new GraphPort("out", "Output", PortDirection.Output, "float", "#55D8C1", new PortTypeId("float"))],
+                "#6AD5C4",
+                definitionId));
+
+            if (index > 0)
+            {
+                connections.Add(new GraphConnection(
+                    $"large-connection-{index - 1:0000}",
+                    $"large-node-{index - 1:0000}",
+                    "out",
+                    nodeId,
+                    "in",
+                    string.Empty,
+                    "#8ED8FF"));
+            }
+        }
+
+        return new GraphDocument(
+            "Large Export Contract Graph",
+            "Large connected scene export coverage.",
+            nodes,
+            connections);
+    }
 
     private static NodeCatalog CreateCatalog(NodeDefinitionId definitionId)
     {

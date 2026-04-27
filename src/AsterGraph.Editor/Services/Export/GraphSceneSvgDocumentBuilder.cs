@@ -40,9 +40,10 @@ internal static class GraphSceneSvgDocumentBuilder
 
         builder.AppendLine("""  </g>""");
         builder.AppendLine("""  <g id="connections">""");
+        var nodesById = scene.Document.Nodes.ToDictionary(node => node.Id, StringComparer.Ordinal);
         foreach (var connection in scene.Document.Connections)
         {
-            AppendConnection(builder, scene.Document, connection);
+            AppendConnection(builder, nodesById, connection);
         }
 
         builder.AppendLine("""  </g>""");
@@ -104,11 +105,13 @@ internal static class GraphSceneSvgDocumentBuilder
                 $"""    <text x="{group.Position.X + 18d:0.##}" y="{group.Position.Y + 30d:0.##}" fill="#9FDDEE" font-size="18" font-family="Segoe UI, Arial, sans-serif">{Escape(group.Title)}</text>"""));
     }
 
-    private static void AppendConnection(StringBuilder builder, GraphDocument document, GraphConnection connection)
+    private static void AppendConnection(
+        StringBuilder builder,
+        IReadOnlyDictionary<string, GraphNode> nodesById,
+        GraphConnection connection)
     {
-        var sourceNode = document.Nodes.FirstOrDefault(node => string.Equals(node.Id, connection.SourceNodeId, StringComparison.Ordinal));
-        var targetNode = document.Nodes.FirstOrDefault(node => string.Equals(node.Id, connection.TargetNodeId, StringComparison.Ordinal));
-        if (sourceNode is null || targetNode is null)
+        if (!nodesById.TryGetValue(connection.SourceNodeId, out var sourceNode)
+            || !nodesById.TryGetValue(connection.TargetNodeId, out var targetNode))
         {
             return;
         }
