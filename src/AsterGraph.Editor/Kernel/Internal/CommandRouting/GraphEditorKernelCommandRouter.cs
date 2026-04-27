@@ -50,6 +50,8 @@ internal interface IGraphEditorKernelCommandRouterHost
 
     bool CanNavigateToParentGraphScope { get; }
 
+    void SetStatus(string statusMessage);
+
     void Undo();
 
     void Redo();
@@ -146,6 +148,12 @@ internal interface IGraphEditorKernelCommandRouterHost
 
     void FitToViewport(bool updateStatus);
 
+    void FitSelectionToViewport(bool updateStatus);
+
+    void FocusSelection(bool updateStatus);
+
+    void FocusCurrentScope(bool updateStatus);
+
     void PanBy(double deltaX, double deltaY);
 
     void UpdateViewportSize(double width, double height);
@@ -171,7 +179,11 @@ internal sealed class GraphEditorKernelCommandRouter
     }
 
     public IReadOnlyList<GraphEditorCommandDescriptorSnapshot> GetCommandDescriptors()
-        =>
+    {
+        var hasViewport = _host.ViewportWidth > 0 && _host.ViewportHeight > 0;
+        var hasNodes = _host.Document.Nodes.Count > 0;
+        var hasSelection = _host.SelectedNodeCount > 0;
+        return
         [
             GraphEditorCommandDescriptorCatalog.Create(
                 "nodes.add",
@@ -182,13 +194,28 @@ internal sealed class GraphEditorKernelCommandRouter
                 GraphEditorCommandSourceKind.Kernel,
                 true),
             GraphEditorCommandDescriptorCatalog.Create(
+                "selection.clear",
+                GraphEditorCommandSourceKind.Kernel,
+                hasSelection,
+                hasSelection ? null : "Select one or more nodes before clearing selection."),
+            GraphEditorCommandDescriptorCatalog.Create(
                 "selection.delete",
                 GraphEditorCommandSourceKind.Kernel,
-                _host.SelectedNodeCount > 0 && _host.BehaviorOptions.Commands.Nodes.AllowDelete),
+                hasSelection && _host.BehaviorOptions.Commands.Nodes.AllowDelete,
+                GetSelectionDisabledReason(
+                    _host.BehaviorOptions.Commands.Nodes.AllowDelete,
+                    hasSelection,
+                    "Node deletion is disabled by host permissions.",
+                    "Select one or more nodes before deleting.")),
             GraphEditorCommandDescriptorCatalog.Create(
                 "clipboard.copy",
                 GraphEditorCommandSourceKind.Kernel,
-                _host.CanCopySelection),
+                _host.CanCopySelection,
+                _host.BehaviorOptions.Commands.Clipboard.AllowCopy
+                    ? _host.CanCopySelection
+                        ? null
+                        : "Select at least one node before copying."
+                    : "Copy is disabled by host permissions."),
             GraphEditorCommandDescriptorCatalog.Create(
                 "clipboard.paste",
                 GraphEditorCommandSourceKind.Kernel,
@@ -204,7 +231,12 @@ internal sealed class GraphEditorKernelCommandRouter
             GraphEditorCommandDescriptorCatalog.Create(
                 "fragments.export-selection",
                 GraphEditorCommandSourceKind.Kernel,
-                _host.BehaviorOptions.Commands.Fragments.AllowExport && _host.SelectedNodeCount > 0),
+                _host.BehaviorOptions.Commands.Fragments.AllowExport && hasSelection,
+                GetSelectionDisabledReason(
+                    _host.BehaviorOptions.Commands.Fragments.AllowExport,
+                    hasSelection,
+                    "Fragment export is disabled by host permissions.",
+                    "Select one or more nodes before exporting a fragment.")),
             GraphEditorCommandDescriptorCatalog.Create(
                 "fragments.import",
                 GraphEditorCommandSourceKind.Kernel,
@@ -219,7 +251,14 @@ internal sealed class GraphEditorKernelCommandRouter
                 _host.BehaviorOptions.Fragments.EnableFragmentLibrary
                 && _host.BehaviorOptions.Commands.Fragments.AllowTemplateManagement
                 && _host.BehaviorOptions.Commands.Fragments.AllowExport
-                && _host.SelectedNodeCount > 0),
+                && hasSelection,
+                !_host.BehaviorOptions.Fragments.EnableFragmentLibrary
+                    ? "Fragment template library is disabled."
+                    : !_host.BehaviorOptions.Commands.Fragments.AllowTemplateManagement || !_host.BehaviorOptions.Commands.Fragments.AllowExport
+                        ? "Fragment template export is disabled by host permissions."
+                        : hasSelection
+                            ? null
+                            : "Select one or more nodes before exporting a template."),
             GraphEditorCommandDescriptorCatalog.Create(
                 "nodes.move",
                 GraphEditorCommandSourceKind.Kernel,
@@ -254,7 +293,12 @@ internal sealed class GraphEditorKernelCommandRouter
             GraphEditorCommandDescriptorCatalog.Create(
                 "groups.create",
                 GraphEditorCommandSourceKind.Kernel,
-                _host.SelectedNodeCount > 0 && _host.BehaviorOptions.Commands.Nodes.AllowMove),
+                hasSelection && _host.BehaviorOptions.Commands.Nodes.AllowMove,
+                GetSelectionDisabledReason(
+                    _host.BehaviorOptions.Commands.Nodes.AllowMove,
+                    hasSelection,
+                    "Group creation is disabled by host permissions.",
+                    "Select one or more nodes before creating a group.")),
             GraphEditorCommandDescriptorCatalog.Create(
                 "groups.collapse",
                 GraphEditorCommandSourceKind.Kernel,
@@ -278,39 +322,52 @@ internal sealed class GraphEditorKernelCommandRouter
             GraphEditorCommandDescriptorCatalog.Create(
                 "layout.align-left",
                 GraphEditorCommandSourceKind.Kernel,
-                _host.CanAlignSelection),
+                _host.CanAlignSelection,
+                GetSelectionCountDisabledReason(_host.BehaviorOptions.Commands.Layout.AllowAlign, _host.SelectedNodeCount, 2, "Layout alignment is disabled by host permissions.", "Select at least two nodes before aligning.")),
             GraphEditorCommandDescriptorCatalog.Create(
                 "layout.align-center",
                 GraphEditorCommandSourceKind.Kernel,
-                _host.CanAlignSelection),
+                _host.CanAlignSelection,
+                GetSelectionCountDisabledReason(_host.BehaviorOptions.Commands.Layout.AllowAlign, _host.SelectedNodeCount, 2, "Layout alignment is disabled by host permissions.", "Select at least two nodes before aligning.")),
             GraphEditorCommandDescriptorCatalog.Create(
                 "layout.align-right",
                 GraphEditorCommandSourceKind.Kernel,
-                _host.CanAlignSelection),
+                _host.CanAlignSelection,
+                GetSelectionCountDisabledReason(_host.BehaviorOptions.Commands.Layout.AllowAlign, _host.SelectedNodeCount, 2, "Layout alignment is disabled by host permissions.", "Select at least two nodes before aligning.")),
             GraphEditorCommandDescriptorCatalog.Create(
                 "layout.align-top",
                 GraphEditorCommandSourceKind.Kernel,
-                _host.CanAlignSelection),
+                _host.CanAlignSelection,
+                GetSelectionCountDisabledReason(_host.BehaviorOptions.Commands.Layout.AllowAlign, _host.SelectedNodeCount, 2, "Layout alignment is disabled by host permissions.", "Select at least two nodes before aligning.")),
             GraphEditorCommandDescriptorCatalog.Create(
                 "layout.align-middle",
                 GraphEditorCommandSourceKind.Kernel,
-                _host.CanAlignSelection),
+                _host.CanAlignSelection,
+                GetSelectionCountDisabledReason(_host.BehaviorOptions.Commands.Layout.AllowAlign, _host.SelectedNodeCount, 2, "Layout alignment is disabled by host permissions.", "Select at least two nodes before aligning.")),
             GraphEditorCommandDescriptorCatalog.Create(
                 "layout.align-bottom",
                 GraphEditorCommandSourceKind.Kernel,
-                _host.CanAlignSelection),
+                _host.CanAlignSelection,
+                GetSelectionCountDisabledReason(_host.BehaviorOptions.Commands.Layout.AllowAlign, _host.SelectedNodeCount, 2, "Layout alignment is disabled by host permissions.", "Select at least two nodes before aligning.")),
             GraphEditorCommandDescriptorCatalog.Create(
                 "layout.distribute-horizontal",
                 GraphEditorCommandSourceKind.Kernel,
-                _host.CanDistributeSelection),
+                _host.CanDistributeSelection,
+                GetSelectionCountDisabledReason(_host.BehaviorOptions.Commands.Layout.AllowDistribute, _host.SelectedNodeCount, 3, "Layout distribution is disabled by host permissions.", "Select at least three nodes before distributing.")),
             GraphEditorCommandDescriptorCatalog.Create(
                 "layout.distribute-vertical",
                 GraphEditorCommandSourceKind.Kernel,
-                _host.CanDistributeSelection),
+                _host.CanDistributeSelection,
+                GetSelectionCountDisabledReason(_host.BehaviorOptions.Commands.Layout.AllowDistribute, _host.SelectedNodeCount, 3, "Layout distribution is disabled by host permissions.", "Select at least three nodes before distributing.")),
             GraphEditorCommandDescriptorCatalog.Create(
                 "composites.wrap-selection",
                 GraphEditorCommandSourceKind.Kernel,
-                _host.SelectedNodeCount > 0 && _host.BehaviorOptions.Commands.Nodes.AllowMove),
+                hasSelection && _host.BehaviorOptions.Commands.Nodes.AllowMove,
+                GetSelectionDisabledReason(
+                    _host.BehaviorOptions.Commands.Nodes.AllowMove,
+                    hasSelection,
+                    "Composite wrapping is disabled by host permissions.",
+                    "Select one or more nodes before wrapping to a composite.")),
             GraphEditorCommandDescriptorCatalog.Create(
                 "composites.expose-port",
                 GraphEditorCommandSourceKind.Kernel,
@@ -423,7 +480,23 @@ internal sealed class GraphEditorKernelCommandRouter
             GraphEditorCommandDescriptorCatalog.Create(
                 "viewport.fit",
                 GraphEditorCommandSourceKind.Kernel,
-                _host.Document.Nodes.Count > 0 && _host.ViewportWidth > 0 && _host.ViewportHeight > 0),
+                hasNodes && hasViewport,
+                GetViewportDisabledReason(hasNodes, hasViewport, "Add a node before fitting the view.")),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "viewport.fit-selection",
+                GraphEditorCommandSourceKind.Kernel,
+                hasSelection && hasViewport,
+                GetViewportSelectionDisabledReason(hasSelection, hasViewport, "Select one or more nodes before fitting the selection.")),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "viewport.focus-selection",
+                GraphEditorCommandSourceKind.Kernel,
+                hasSelection && hasViewport,
+                GetViewportSelectionDisabledReason(hasSelection, hasViewport, "Select one or more nodes before focusing the selection.")),
+            GraphEditorCommandDescriptorCatalog.Create(
+                "viewport.focus-current-scope",
+                GraphEditorCommandSourceKind.Kernel,
+                hasNodes && hasViewport,
+                GetViewportDisabledReason(hasNodes, hasViewport, "Add a node before focusing the current scope.")),
             GraphEditorCommandDescriptorCatalog.Create(
                 "viewport.pan",
                 GraphEditorCommandSourceKind.Kernel,
@@ -459,10 +532,84 @@ internal sealed class GraphEditorKernelCommandRouter
                         ? null
                         : "No saved snapshot yet. Save once to create one."),
         ];
+    }
+
+    private static string? GetSelectionDisabledReason(
+        bool isPermitted,
+        bool hasSelection,
+        string permissionReason,
+        string selectionReason)
+    {
+        if (!isPermitted)
+        {
+            return permissionReason;
+        }
+
+        return hasSelection ? null : selectionReason;
+    }
+
+    private static string? GetSelectionCountDisabledReason(
+        bool isPermitted,
+        int selectedCount,
+        int requiredCount,
+        string permissionReason,
+        string selectionReason)
+    {
+        if (!isPermitted)
+        {
+            return permissionReason;
+        }
+
+        return selectedCount >= requiredCount ? null : selectionReason;
+    }
+
+    private static string? GetViewportDisabledReason(
+        bool hasNodes,
+        bool hasViewport,
+        string emptyReason)
+    {
+        if (!hasViewport)
+        {
+            return "Viewport size is not available yet.";
+        }
+
+        return hasNodes ? null : emptyReason;
+    }
+
+    private static string? GetViewportSelectionDisabledReason(
+        bool hasSelection,
+        bool hasViewport,
+        string selectionReason)
+    {
+        if (!hasViewport)
+        {
+            return "Viewport size is not available yet.";
+        }
+
+        return hasSelection ? null : selectionReason;
+    }
+
+    private bool TryBlockDisabledCommand(GraphEditorCommandInvocationSnapshot command)
+    {
+        var descriptor = GetCommandDescriptors()
+            .FirstOrDefault(item => string.Equals(item.Id, command.CommandId, StringComparison.Ordinal));
+        if (descriptor is null || descriptor.IsEnabled || string.IsNullOrWhiteSpace(descriptor.DisabledReason))
+        {
+            return false;
+        }
+
+        _host.SetStatus(descriptor.DisabledReason);
+        return true;
+    }
 
     public bool TryExecuteCommand(GraphEditorCommandInvocationSnapshot command)
     {
         ArgumentNullException.ThrowIfNull(command);
+
+        if (TryBlockDisabledCommand(command))
+        {
+            return false;
+        }
 
         if (TryResolveSelectionLayoutOperation(command.CommandId, out var layoutOperation))
         {
@@ -953,6 +1100,18 @@ internal sealed class GraphEditorKernelCommandRouter
 
             case "viewport.fit":
                 _host.FitToViewport(updateStatus: true);
+                return true;
+
+            case "viewport.fit-selection":
+                _host.FitSelectionToViewport(updateStatus: true);
+                return true;
+
+            case "viewport.focus-selection":
+                _host.FocusSelection(updateStatus: true);
+                return true;
+
+            case "viewport.focus-current-scope":
+                _host.FocusCurrentScope(updateStatus: true);
                 return true;
 
             case "viewport.pan":

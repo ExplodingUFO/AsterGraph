@@ -39,6 +39,8 @@ public partial class GraphEditorView : UserControl
         "history.undo",
         "history.redo",
         "viewport.fit",
+        "viewport.fit-selection",
+        "viewport.focus-selection",
         "viewport.reset",
         "selection.delete",
     ];
@@ -882,9 +884,10 @@ public partial class GraphEditorView : UserControl
         };
         button.Classes.Add("astergraph-toolbar-action");
         AutomationProperties.SetName(button, action.Title);
-        if (!string.IsNullOrWhiteSpace(action.DisabledReason))
+        var actionHint = action.DisabledReason ?? action.DefaultShortcut;
+        if (!string.IsNullOrWhiteSpace(actionHint))
         {
-            ToolTip.SetTip(button, action.DisabledReason);
+            ToolTip.SetTip(button, actionHint);
         }
 
         button.Click += (_, _) =>

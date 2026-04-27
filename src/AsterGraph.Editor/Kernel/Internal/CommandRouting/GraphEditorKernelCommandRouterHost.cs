@@ -69,6 +69,9 @@ internal sealed partial class GraphEditorKernel
         bool IGraphEditorKernelCommandRouterHost.CanNavigateToParentGraphScope
             => _owner.GetScopeNavigationSnapshot().CanNavigateToParent;
 
+        void IGraphEditorKernelCommandRouterHost.SetStatus(string statusMessage)
+            => _owner.CurrentStatusMessage = statusMessage;
+
         void IGraphEditorKernelCommandRouterHost.Undo()
             => _owner.Undo();
 
@@ -215,6 +218,15 @@ internal sealed partial class GraphEditorKernel
 
         void IGraphEditorKernelCommandRouterHost.FitToViewport(bool updateStatus)
             => _owner.FitToViewport(updateStatus);
+
+        void IGraphEditorKernelCommandRouterHost.FitSelectionToViewport(bool updateStatus)
+            => _owner.FitSelectionToViewport(updateStatus);
+
+        void IGraphEditorKernelCommandRouterHost.FocusSelection(bool updateStatus)
+            => _owner.FocusSelection(updateStatus);
+
+        void IGraphEditorKernelCommandRouterHost.FocusCurrentScope(bool updateStatus)
+            => _owner.FocusCurrentScope(updateStatus);
 
         void IGraphEditorKernelCommandRouterHost.PanBy(double deltaX, double deltaY)
             => _owner.PanBy(deltaX, deltaY);

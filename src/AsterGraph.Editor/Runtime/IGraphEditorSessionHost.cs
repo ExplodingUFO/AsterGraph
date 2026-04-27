@@ -93,6 +93,9 @@ internal interface IGraphEditorSessionHost
     void UpdateViewportSize(double width, double height);
     void ResetView(bool updateStatus);
     void FitToViewport(bool updateStatus);
+    void FitSelectionToViewport(bool updateStatus);
+    void FocusSelection(bool updateStatus);
+    void FocusCurrentScope(bool updateStatus);
     void CenterViewOnNode(string nodeId);
     void CenterViewAt(GraphPoint worldPoint, bool updateStatus);
     void SaveWorkspace();

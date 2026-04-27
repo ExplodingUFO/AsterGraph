@@ -1418,6 +1418,69 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
         }
     }
 
+    public void FitSelectionToViewport(bool updateStatus)
+    {
+        var selectedNodes = GetSelectedNodes();
+        if (!_viewportCoordinator.TryFitToViewport(GetViewportSnapshot(), selectedNodes, out var updatedViewport))
+        {
+            if (updateStatus)
+            {
+                CurrentStatusMessage = selectedNodes.Count == 0
+                    ? "Select at least one node to fit the selection."
+                    : "Viewport size is not available yet.";
+            }
+
+            return;
+        }
+
+        _historyCoordinator.ApplyViewportSnapshot(updatedViewport);
+        if (updateStatus)
+        {
+            CurrentStatusMessage = "Viewport fit to selection.";
+        }
+    }
+
+    public void FocusSelection(bool updateStatus)
+    {
+        var selectedNodes = GetSelectedNodes();
+        if (!_viewportCoordinator.TryCenterViewOnNodes(GetViewportSnapshot(), selectedNodes, out var updatedViewport))
+        {
+            if (updateStatus)
+            {
+                CurrentStatusMessage = selectedNodes.Count == 0
+                    ? "Select at least one node to focus the selection."
+                    : "Viewport size is not available yet.";
+            }
+
+            return;
+        }
+
+        _historyCoordinator.ApplyViewportSnapshot(updatedViewport);
+        if (updateStatus)
+        {
+            CurrentStatusMessage = "Viewport focused on selection.";
+        }
+    }
+
+    public void FocusCurrentScope(bool updateStatus)
+    {
+        if (!_viewportCoordinator.TryFitToViewport(GetViewportSnapshot(), GetActiveGraphScope().Nodes, out var updatedViewport))
+        {
+            if (updateStatus)
+            {
+                CurrentStatusMessage = "Nothing to focus in the current scope.";
+            }
+
+            return;
+        }
+
+        _historyCoordinator.ApplyViewportSnapshot(updatedViewport);
+        if (updateStatus)
+        {
+            CurrentStatusMessage = "Viewport focused on current scope.";
+        }
+    }
+
     public void CenterViewOnNode(string nodeId)
     {
         var node = FindNode(nodeId);
@@ -1775,6 +1838,21 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
 
     private bool CanDistributeSelection()
         => _behaviorOptions.Commands.Layout.AllowDistribute && _selectedNodeIds.Count >= 3;
+
+    private IReadOnlyList<GraphNode> GetSelectedNodes()
+    {
+        if (_selectedNodeIds.Count == 0)
+        {
+            return [];
+        }
+
+        var nodesById = GetActiveGraphScope().Nodes.ToDictionary(node => node.Id, StringComparer.Ordinal);
+        return _selectedNodeIds
+            .Select(nodeId => nodesById.TryGetValue(nodeId, out var node) ? node : null)
+            .Where(node => node is not null)
+            .Select(node => node!)
+            .ToList();
+    }
 
     private bool TryApplySelectionLayout(GraphEditorSelectionLayoutOperation operation, bool updateStatus)
     {

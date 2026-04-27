@@ -344,9 +344,9 @@ public partial class GraphEditorView
     }
 
     private Button CreateHostedToolButton(string name, AsterGraphHostedActionDescriptor action)
-        => CreateToolActionButton(name, action.Title, action.CanExecute, action.TryExecute);
+        => CreateToolActionButton(name, action.Title, action.CanExecute, action.TryExecute, action.DisabledReason);
 
-    private Button CreateToolActionButton(string name, string content, bool isEnabled, Func<bool> execute)
+    private Button CreateToolActionButton(string name, string content, bool isEnabled, Func<bool> execute, string? disabledReason = null)
     {
         var button = new Button
         {
@@ -354,6 +354,11 @@ public partial class GraphEditorView
             Content = content,
             IsEnabled = isEnabled,
         };
+        if (!string.IsNullOrWhiteSpace(disabledReason))
+        {
+            ToolTip.SetTip(button, disabledReason);
+        }
+
         button.Classes.Add("astergraph-toolbar-action");
         AutomationProperties.SetName(button, content);
         button.Click += (_, args) =>

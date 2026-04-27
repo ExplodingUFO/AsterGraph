@@ -128,12 +128,18 @@ public sealed class GraphEditorViewTests
 
         var saveButton = FindRequiredDescendant<Button>(view, "PART_HeaderCommand_workspace.save");
         var undoButton = FindRequiredDescendant<Button>(view, "PART_HeaderCommand_history.undo");
+        var fitSelectionButton = FindRequiredDescendant<Button>(view, "PART_HeaderCommand_viewport.fit-selection");
+        var deleteButton = FindRequiredDescendant<Button>(view, "PART_HeaderCommand_selection.delete");
         var paletteToggle = FindRequiredControl<Button>(view, "PART_OpenCommandPaletteButton");
 
         Assert.Equal("Save Workspace", Assert.IsType<string>(saveButton.Content));
         Assert.Equal("Undo", Assert.IsType<string>(undoButton.Content));
+        Assert.Equal("Fit Selection", Assert.IsType<string>(fitSelectionButton.Content));
         Assert.Equal("Save Workspace", AutomationProperties.GetName(saveButton));
         Assert.Equal("Undo", AutomationProperties.GetName(undoButton));
+        Assert.Equal("Ctrl+S", ToolTip.GetTip(saveButton));
+        Assert.Equal("Select one or more nodes before fitting the selection.", ToolTip.GetTip(fitSelectionButton));
+        Assert.Equal("Select one or more nodes before deleting.", ToolTip.GetTip(deleteButton));
 
         paletteToggle.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
 
@@ -147,9 +153,13 @@ public sealed class GraphEditorViewTests
         var paletteUndoButton = Assert.Single(
             paletteItems.Children.OfType<Button>(),
             button => string.Equals(button.Name, "PART_CommandPaletteAction_history.undo", StringComparison.Ordinal));
+        var paletteFitSelectionButton = Assert.Single(
+            paletteItems.Children.OfType<Button>(),
+            button => string.Equals(button.Name, "PART_CommandPaletteAction_viewport.fit-selection", StringComparison.Ordinal));
 
         Assert.Equal("Save Workspace", AutomationProperties.GetName(paletteSaveButton));
         Assert.Equal("Undo", AutomationProperties.GetName(paletteUndoButton));
+        Assert.Equal("Select one or more nodes before fitting the selection.", ToolTip.GetTip(paletteFitSelectionButton));
     }
 
     [AvaloniaFact]

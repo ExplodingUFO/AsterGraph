@@ -90,6 +90,27 @@ internal sealed class GraphEditorKernelViewportCoordinator
         return true;
     }
 
+    public bool TryCenterViewOnNodes(
+        GraphEditorViewportSnapshot snapshot,
+        IReadOnlyList<GraphNode> nodes,
+        out GraphEditorViewportSnapshot updated)
+    {
+        if (nodes.Count == 0 || snapshot.ViewportWidth <= 0 || snapshot.ViewportHeight <= 0)
+        {
+            updated = snapshot;
+            return false;
+        }
+
+        var minX = nodes.Min(node => node.Position.X);
+        var minY = nodes.Min(node => node.Position.Y);
+        var maxX = nodes.Max(node => node.Position.X + node.Size.Width);
+        var maxY = nodes.Max(node => node.Position.Y + node.Size.Height);
+        return TryCenterViewAt(
+            snapshot,
+            new GraphPoint(minX + ((maxX - minX) / 2), minY + ((maxY - minY) / 2)),
+            out updated);
+    }
+
     public bool TryCenterViewOnNode(
         GraphEditorViewportSnapshot snapshot,
         GraphNode? node,

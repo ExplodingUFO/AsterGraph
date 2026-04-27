@@ -9,6 +9,8 @@ AsterGraph 默认带有一套画布、节点和工作区交互。
 | **平移画布** | 中键拖拽、`Alt` + 左键拖拽，或精确触控板双指滚动 | 左键拖拽时需要 `Alt` |
 | **缩放画布** | 滚轮或捏合手势 | 滚轮缩放时使用 `Ctrl` |
 
+完整宿主命令面还会通过顶部工具栏和命令面板暴露 `Fit View`、`Fit Selection`、`Focus Selection` 和 `Reset View`。不可用的工具栏或命令面板项会携带命令自身的禁用原因，例如需要先选择节点才能适配当前选择。
+
 触控板建议：
 
 - 双指滚动用于平移视口
@@ -46,3 +48,9 @@ AsterGraph 默认带有一套画布、节点和工作区交互。
 
 这样做之后，最好在宿主文档里明确说明 `Ctrl+Z`、`Ctrl+S`、剪贴板等命令到底由谁接管，避免用户猜测。
 这也是 canonical runtime/session 路线上自定义 UI 宿主采用的同一种快捷键所有权模式。
+
+这一层交互的 proof marker：
+
+- `UX_COMMAND_DISCOVERY_OK:True`
+- `UX_NAVIGATION_POLISH_OK:True`
+- `UX_COMMAND_DISABLED_REASON_OK:True`

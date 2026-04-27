@@ -9,6 +9,8 @@ AsterGraph provides built-in keyboard, mouse, and trackpad interactions out of t
 | **Pan Canvas** | Middle-click drag, `Alt` + left-drag, or two-finger scroll on a precision trackpad | `Alt` for left-drag |
 | **Zoom Canvas** | Scroll wheel or pinch gesture | `Ctrl` for wheel zoom |
 
+The hosted command surface also exposes `Fit View`, `Fit Selection`, `Focus Selection`, and `Reset View` through the header toolbar and command palette. Disabled toolbar and palette items carry the command's reason, such as "select one or more nodes before fitting the selection".
+
 Trackpad guidance:
 
 - two-finger scroll pans the viewport
@@ -46,3 +48,9 @@ If you embed `NodeCanvas` as a standalone surface and want to own shortcuts your
 
 Keep the command route explicit in host documentation when you do this so users do not have to guess whether the canvas still owns `Ctrl+Z`, `Ctrl+S`, or clipboard shortcuts.
 This is the same shortcut-ownership pattern used by custom UI hosts on the canonical runtime/session route.
+
+Proof markers for this interaction layer:
+
+- `UX_COMMAND_DISCOVERY_OK:True`
+- `UX_NAVIGATION_POLISH_OK:True`
+- `UX_COMMAND_DISABLED_REASON_OK:True`

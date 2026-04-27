@@ -7,6 +7,7 @@ internal static class GraphEditorCommandDescriptorCatalog
         {
             ["nodes.add"] = new("Add Node", "nodes", "add", null),
             ["selection.set"] = new("Set Selection", "selection", "select", null),
+            ["selection.clear"] = new("Clear Selection", "selection", "select", "Escape"),
             ["selection.delete"] = new("Delete Selection", "selection", "delete", "Delete"),
             ["nodes.move"] = new("Move Nodes", "nodes", "move", null),
             ["nodes.resize"] = new("Resize Node", "nodes", "resize", null),
@@ -42,6 +43,9 @@ internal static class GraphEditorCommandDescriptorCatalog
             ["history.undo"] = new("Undo", "history", "undo", "Ctrl+Z"),
             ["history.redo"] = new("Redo", "history", "redo", "Ctrl+Y"),
             ["viewport.fit"] = new("Fit View", "viewport", "fit", null),
+            ["viewport.fit-selection"] = new("Fit Selection", "viewport", "fit-selection", null),
+            ["viewport.focus-selection"] = new("Focus Selection", "viewport", "focus", null),
+            ["viewport.focus-current-scope"] = new("Focus Current Scope", "viewport", "focus", null),
             ["viewport.pan"] = new("Pan View", "viewport", "pan", null),
             ["viewport.resize"] = new("Resize Viewport", "viewport", "resize", null),
             ["viewport.reset"] = new("Reset View", "viewport", "reset", null),

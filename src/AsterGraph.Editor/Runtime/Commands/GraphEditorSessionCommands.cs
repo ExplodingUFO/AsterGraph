@@ -653,6 +653,15 @@ public sealed partial class GraphEditorSession
     public void FitToViewport(bool updateStatus = true)
         => Execute("viewport.fit", () => _host.FitToViewport(updateStatus));
 
+    public void FitSelectionToViewport(bool updateStatus = true)
+        => Execute("viewport.fit-selection", () => _host.FitSelectionToViewport(updateStatus));
+
+    public void FocusSelection(bool updateStatus = true)
+        => Execute("viewport.focus-selection", () => _host.FocusSelection(updateStatus));
+
+    public void FocusCurrentScope(bool updateStatus = true)
+        => Execute("viewport.focus-current-scope", () => _host.FocusCurrentScope(updateStatus));
+
     public void CenterViewOnNode(string nodeId)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(nodeId);

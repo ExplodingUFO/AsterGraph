@@ -6,6 +6,7 @@ internal static class GraphEditorTestCommandContracts
     [
         "nodes.add",
         "selection.set",
+        "selection.clear",
         "selection.delete",
         "nodes.resize-width",
         "nodes.surface.expand",
@@ -44,6 +45,9 @@ internal static class GraphEditorTestCommandContracts
         "viewport.resize",
         "viewport.center",
         "viewport.fit",
+        "viewport.fit-selection",
+        "viewport.focus-selection",
+        "viewport.focus-current-scope",
         "viewport.reset",
         "viewport.center-node",
         "composites.wrap-selection",

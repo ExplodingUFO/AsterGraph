@@ -1329,7 +1329,10 @@ M:AsterGraph.Editor.Runtime.GraphEditorSession.CreateLayoutPlan(AsterGraph.Edito
 M:AsterGraph.Editor.Runtime.GraphEditorSession.DeleteConnection(System.String):System.Void
 M:AsterGraph.Editor.Runtime.GraphEditorSession.DeleteSelection():System.Void
 M:AsterGraph.Editor.Runtime.GraphEditorSession.Execute(AsterGraph.Editor.Automation.GraphEditorAutomationRunRequest):AsterGraph.Editor.Automation.GraphEditorAutomationExecutionSnapshot
+M:AsterGraph.Editor.Runtime.GraphEditorSession.FitSelectionToViewport(System.Boolean):System.Void
 M:AsterGraph.Editor.Runtime.GraphEditorSession.FitToViewport(System.Boolean):System.Void
+M:AsterGraph.Editor.Runtime.GraphEditorSession.FocusCurrentScope(System.Boolean):System.Void
+M:AsterGraph.Editor.Runtime.GraphEditorSession.FocusSelection(System.Boolean):System.Void
 M:AsterGraph.Editor.Runtime.GraphEditorSession.GetCapabilitySnapshot():AsterGraph.Editor.Runtime.GraphEditorCapabilitySnapshot
 M:AsterGraph.Editor.Runtime.GraphEditorSession.GetCommandDescriptors():System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Runtime.GraphEditorCommandDescriptorSnapshot>
 M:AsterGraph.Editor.Runtime.GraphEditorSession.GetCompatibleNodeDefinitionsForPendingConnection():AsterGraph.Editor.Runtime.GraphEditorCompatibleNodeSearchSnapshot
@@ -1467,7 +1470,10 @@ M:AsterGraph.Editor.Runtime.IGraphEditorCommands.CompleteConnection(AsterGraph.C
 M:AsterGraph.Editor.Runtime.IGraphEditorCommands.CompleteConnection(System.String,System.String):System.Void
 M:AsterGraph.Editor.Runtime.IGraphEditorCommands.DeleteConnection(System.String):System.Void
 M:AsterGraph.Editor.Runtime.IGraphEditorCommands.DeleteSelection():System.Void
+M:AsterGraph.Editor.Runtime.IGraphEditorCommands.FitSelectionToViewport(System.Boolean):System.Void
 M:AsterGraph.Editor.Runtime.IGraphEditorCommands.FitToViewport(System.Boolean):System.Void
+M:AsterGraph.Editor.Runtime.IGraphEditorCommands.FocusCurrentScope(System.Boolean):System.Void
+M:AsterGraph.Editor.Runtime.IGraphEditorCommands.FocusSelection(System.Boolean):System.Void
 M:AsterGraph.Editor.Runtime.IGraphEditorCommands.LoadWorkspace():System.Boolean
 M:AsterGraph.Editor.Runtime.IGraphEditorCommands.PanBy(System.Double,System.Double):System.Void
 M:AsterGraph.Editor.Runtime.IGraphEditorCommands.Redo():System.Void

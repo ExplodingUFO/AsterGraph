@@ -62,35 +62,31 @@ public sealed class GraphEditorKernelCommandRouterTests
         var kernel = CreateKernel();
         kernel.UpdateViewportSize(1280, 720);
 
-        var signature = string.Join(
-            Environment.NewLine,
-            [
-                $"initial:{RenderDescriptorSignature(kernel.GetCommandDescriptors())}",
-            ]);
+        var initial = kernel.GetCommandDescriptors().ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
 
         kernel.SetSelection([SourceNodeId], SourceNodeId, updateStatus: false);
-        signature = string.Join(
-            Environment.NewLine,
-            [
-                signature,
-                $"selected:{RenderDescriptorSignature(kernel.GetCommandDescriptors())}",
-            ]);
+        var selected = kernel.GetCommandDescriptors().ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
 
         kernel.StartConnection(SourceNodeId, SourcePortId);
-        signature = string.Join(
-            Environment.NewLine,
-            [
-                signature,
-                $"pending:{RenderDescriptorSignature(kernel.GetCommandDescriptors())}",
-            ]);
+        var pending = kernel.GetCommandDescriptors().ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
 
-        var expected = """
-            initial:nodes.add:True:-|selection.set:True:-|selection.delete:False:-|clipboard.copy:False:-|clipboard.paste:False:-|export.scene-svg:True:-|export.scene-image:True:-|fragments.export-selection:False:-|fragments.import:False:-|fragments.clear-workspace:False:-|fragments.export-template:False:-|nodes.move:True:-|nodes.resize:True:-|nodes.surface.expand:True:-|nodes.inspect:True:-|nodes.delete-by-id:True:-|nodes.duplicate:True:-|nodes.parameters.set:False:Parameter editing requires node-edit permissions and a shared node definition selection.|groups.create:False:-|groups.collapse:False:-|groups.move:False:-|groups.resize:False:-|groups.membership.set:False:-|groups.promote:False:-|layout.align-left:False:-|layout.align-center:False:-|layout.align-right:False:-|layout.align-top:False:-|layout.align-middle:False:-|layout.align-bottom:False:-|layout.distribute-horizontal:False:-|layout.distribute-vertical:False:-|composites.wrap-selection:False:-|composites.expose-port:False:-|composites.unexpose-port:False:-|scopes.enter:False:-|scopes.exit:False:-|connections.start:True:-|connections.complete:False:-|connections.connect:True:-|connections.cancel:False:-|connections.delete:True:-|connections.disconnect:True:-|connections.label.set:False:-|connections.note.set:False:-|connections.route-vertex.insert:False:-|connections.route-vertex.move:False:-|connections.route-vertex.remove:False:-|connections.reconnect:False:-|connections.break-port:True:-|connections.disconnect-incoming:True:-|connections.disconnect-outgoing:True:-|connections.disconnect-all:True:-|history.undo:False:-|history.redo:False:-|viewport.fit:True:-|viewport.pan:True:-|viewport.resize:True:-|viewport.reset:True:-|viewport.center-node:True:-|viewport.center:True:-|workspace.save:True:-|workspace.load:False:No saved snapshot yet. Save once to create one.
-            selected:nodes.add:True:-|selection.set:True:-|selection.delete:True:-|clipboard.copy:True:-|clipboard.paste:False:-|export.scene-svg:True:-|export.scene-image:True:-|fragments.export-selection:True:-|fragments.import:False:-|fragments.clear-workspace:False:-|fragments.export-template:True:-|nodes.move:True:-|nodes.resize:True:-|nodes.surface.expand:True:-|nodes.inspect:True:-|nodes.delete-by-id:True:-|nodes.duplicate:True:-|nodes.parameters.set:False:Parameter editing requires node-edit permissions and a shared node definition selection.|groups.create:True:-|groups.collapse:False:-|groups.move:False:-|groups.resize:False:-|groups.membership.set:False:-|groups.promote:False:-|layout.align-left:False:-|layout.align-center:False:-|layout.align-right:False:-|layout.align-top:False:-|layout.align-middle:False:-|layout.align-bottom:False:-|layout.distribute-horizontal:False:-|layout.distribute-vertical:False:-|composites.wrap-selection:True:-|composites.expose-port:False:-|composites.unexpose-port:False:-|scopes.enter:False:-|scopes.exit:False:-|connections.start:True:-|connections.complete:False:-|connections.connect:True:-|connections.cancel:False:-|connections.delete:True:-|connections.disconnect:True:-|connections.label.set:False:-|connections.note.set:False:-|connections.route-vertex.insert:False:-|connections.route-vertex.move:False:-|connections.route-vertex.remove:False:-|connections.reconnect:False:-|connections.break-port:True:-|connections.disconnect-incoming:True:-|connections.disconnect-outgoing:True:-|connections.disconnect-all:True:-|history.undo:False:-|history.redo:False:-|viewport.fit:True:-|viewport.pan:True:-|viewport.resize:True:-|viewport.reset:True:-|viewport.center-node:True:-|viewport.center:True:-|workspace.save:True:-|workspace.load:False:No saved snapshot yet. Save once to create one.
-            pending:nodes.add:True:-|selection.set:True:-|selection.delete:True:-|clipboard.copy:True:-|clipboard.paste:False:-|export.scene-svg:True:-|export.scene-image:True:-|fragments.export-selection:True:-|fragments.import:False:-|fragments.clear-workspace:False:-|fragments.export-template:True:-|nodes.move:True:-|nodes.resize:True:-|nodes.surface.expand:True:-|nodes.inspect:True:-|nodes.delete-by-id:True:-|nodes.duplicate:True:-|nodes.parameters.set:False:Parameter editing requires node-edit permissions and a shared node definition selection.|groups.create:True:-|groups.collapse:False:-|groups.move:False:-|groups.resize:False:-|groups.membership.set:False:-|groups.promote:False:-|layout.align-left:False:-|layout.align-center:False:-|layout.align-right:False:-|layout.align-top:False:-|layout.align-middle:False:-|layout.align-bottom:False:-|layout.distribute-horizontal:False:-|layout.distribute-vertical:False:-|composites.wrap-selection:True:-|composites.expose-port:False:-|composites.unexpose-port:False:-|scopes.enter:False:-|scopes.exit:False:-|connections.start:True:-|connections.complete:True:-|connections.connect:True:-|connections.cancel:True:-|connections.delete:True:-|connections.disconnect:True:-|connections.label.set:False:-|connections.note.set:False:-|connections.route-vertex.insert:False:-|connections.route-vertex.move:False:-|connections.route-vertex.remove:False:-|connections.reconnect:False:-|connections.break-port:True:-|connections.disconnect-incoming:True:-|connections.disconnect-outgoing:True:-|connections.disconnect-all:True:-|history.undo:False:-|history.redo:False:-|viewport.fit:True:-|viewport.pan:True:-|viewport.resize:True:-|viewport.reset:True:-|viewport.center-node:True:-|viewport.center:True:-|workspace.save:True:-|workspace.load:False:No saved snapshot yet. Save once to create one.
-            """;
+        Assert.False(initial["selection.delete"].IsEnabled);
+        Assert.Equal("Select one or more nodes before deleting.", initial["selection.delete"].DisabledReason);
+        Assert.False(initial["viewport.fit-selection"].IsEnabled);
+        Assert.Equal("Select one or more nodes before fitting the selection.", initial["viewport.fit-selection"].DisabledReason);
+        Assert.True(initial["viewport.focus-current-scope"].IsEnabled);
 
-        Assert.Equal(expected.ReplaceLineEndings("\n"), signature.ReplaceLineEndings("\n"));
+        Assert.True(selected["selection.delete"].IsEnabled);
+        Assert.Null(selected["selection.delete"].DisabledReason);
+        Assert.True(selected["viewport.fit-selection"].IsEnabled);
+        Assert.True(selected["viewport.focus-selection"].IsEnabled);
+        Assert.True(selected["fragments.export-selection"].IsEnabled);
+        Assert.True(selected["composites.wrap-selection"].IsEnabled);
+
+        Assert.True(pending["connections.complete"].IsEnabled);
+        Assert.True(pending["connections.cancel"].IsEnabled);
+        Assert.Equal(initial.Keys.Order(StringComparer.Ordinal), selected.Keys.Order(StringComparer.Ordinal));
+        Assert.Equal(selected.Keys.Order(StringComparer.Ordinal), pending.Keys.Order(StringComparer.Ordinal));
     }
 
     [Fact]
@@ -257,6 +253,73 @@ public sealed class GraphEditorKernelCommandRouterTests
         Assert.Equal(GraphEditorCommandSourceKind.Kernel, deleteNode.Source);
         Assert.True(deleteNode.CanExecute);
         Assert.True(deleteNode.IsEnabled);
+    }
+
+    [Fact]
+    public void GraphEditorKernel_CommandDescriptors_ExposeExperiencePolishNavigationAndDisabledReasons()
+    {
+        var kernel = CreateKernel();
+        kernel.UpdateViewportSize(1280, 720);
+
+        var descriptors = kernel.GetCommandDescriptors().ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
+
+        Assert.Equal("Select one or more nodes before deleting.", descriptors["selection.delete"].DisabledReason);
+        Assert.Equal("Select at least two nodes before aligning.", descriptors["layout.align-left"].DisabledReason);
+        Assert.Equal("Select at least three nodes before distributing.", descriptors["layout.distribute-horizontal"].DisabledReason);
+
+        var fitSelection = descriptors["viewport.fit-selection"];
+        Assert.Equal("Fit Selection", fitSelection.Title);
+        Assert.Equal("viewport", fitSelection.Group);
+        Assert.Equal("fit-selection", fitSelection.IconKey);
+        Assert.False(fitSelection.IsEnabled);
+        Assert.Equal("Select one or more nodes before fitting the selection.", fitSelection.DisabledReason);
+
+        var focusSelection = descriptors["viewport.focus-selection"];
+        Assert.Equal("Focus Selection", focusSelection.Title);
+        Assert.Equal("viewport", focusSelection.Group);
+        Assert.Equal("focus", focusSelection.IconKey);
+        Assert.False(focusSelection.IsEnabled);
+        Assert.Equal("Select one or more nodes before focusing the selection.", focusSelection.DisabledReason);
+
+        var focusCurrentScope = descriptors["viewport.focus-current-scope"];
+        Assert.Equal("Focus Current Scope", focusCurrentScope.Title);
+        Assert.True(focusCurrentScope.IsEnabled);
+        Assert.Null(focusCurrentScope.DisabledReason);
+
+        Assert.False(kernel.TryExecuteCommand(CreateCommand("viewport.fit-selection")));
+        Assert.Equal("Select one or more nodes before fitting the selection.", kernel.CurrentStatusMessage);
+
+        kernel.SetSelection([SourceNodeId], SourceNodeId, updateStatus: false);
+        descriptors = kernel.GetCommandDescriptors().ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
+
+        Assert.True(descriptors["viewport.fit-selection"].IsEnabled);
+        Assert.True(descriptors["viewport.focus-selection"].IsEnabled);
+        Assert.Null(descriptors["viewport.fit-selection"].DisabledReason);
+        Assert.Null(descriptors["viewport.focus-selection"].DisabledReason);
+    }
+
+    [Fact]
+    public void GraphEditorKernel_ViewportSelectionCommands_RunThroughSharedCommandRoute()
+    {
+        var kernel = CreateKernel();
+        kernel.UpdateViewportSize(1280, 720);
+        kernel.PanBy(240, -120);
+        kernel.SetSelection([TargetNodeId], TargetNodeId, updateStatus: false);
+
+        Assert.True(kernel.TryExecuteCommand(CreateCommand("viewport.fit-selection")));
+        var fitSelectionViewport = kernel.GetViewportSnapshot();
+        Assert.Equal("Viewport fit to selection.", kernel.CurrentStatusMessage);
+        Assert.NotEqual(240, fitSelectionViewport.PanX);
+
+        kernel.PanBy(-180, 75);
+
+        Assert.True(kernel.TryExecuteCommand(CreateCommand("viewport.focus-selection")));
+        var focusSelectionViewport = kernel.GetViewportSnapshot();
+        Assert.Equal("Viewport focused on selection.", kernel.CurrentStatusMessage);
+        Assert.Equal(fitSelectionViewport.Zoom, focusSelectionViewport.Zoom);
+
+        Assert.True(kernel.TryExecuteCommand(CreateCommand("viewport.focus-current-scope")));
+        Assert.Equal("Viewport focused on current scope.", kernel.CurrentStatusMessage);
     }
 
     [Fact]

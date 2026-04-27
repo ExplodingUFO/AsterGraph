@@ -524,6 +524,27 @@ public interface IGraphEditorCommands
         => throw new NotSupportedException();
 
     /// <summary>
+    /// Fits the current selected nodes to the known viewport bounds.
+    /// </summary>
+    /// <param name="updateStatus">Whether to update status text.</param>
+    void FitSelectionToViewport(bool updateStatus = true)
+        => throw new NotSupportedException();
+
+    /// <summary>
+    /// Centers the viewport on the current selected nodes without changing zoom.
+    /// </summary>
+    /// <param name="updateStatus">Whether to update status text.</param>
+    void FocusSelection(bool updateStatus = true)
+        => throw new NotSupportedException();
+
+    /// <summary>
+    /// Fits the active graph scope to the known viewport bounds.
+    /// </summary>
+    /// <param name="updateStatus">Whether to update status text.</param>
+    void FocusCurrentScope(bool updateStatus = true)
+        => throw new NotSupportedException();
+
+    /// <summary>
     /// 将视口中心移动到指定节点。
     /// </summary>
     /// <param name="nodeId">目标节点标识。</param>

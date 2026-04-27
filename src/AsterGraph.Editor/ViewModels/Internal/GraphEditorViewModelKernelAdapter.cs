@@ -231,6 +231,12 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
 
     public void FitToViewport(bool updateStatus) => _kernel.FitToViewport(updateStatus);
 
+    public void FitSelectionToViewport(bool updateStatus) => _kernel.FitSelectionToViewport(updateStatus);
+
+    public void FocusSelection(bool updateStatus) => _kernel.FocusSelection(updateStatus);
+
+    public void FocusCurrentScope(bool updateStatus) => _kernel.FocusCurrentScope(updateStatus);
+
     public void CenterViewOnNode(string nodeId) => _kernel.CenterViewOnNode(nodeId);
 
     public void CenterViewAt(GraphPoint worldPoint, bool updateStatus) => _kernel.CenterViewAt(worldPoint, updateStatus);
@@ -272,25 +278,39 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
     public IReadOnlyList<GraphEditorCommandDescriptorSnapshot> GetCommandDescriptors()
     {
         var descriptors = _kernel.GetCommandDescriptors()
-            .Concat(
-            [
-                GraphEditorCommandDescriptorCatalog.Create("nodes.inspect", GraphEditorCommandSourceKind.Retained, true),
-                GraphEditorCommandDescriptorCatalog.Create("nodes.delete-by-id", GraphEditorCommandSourceKind.Retained, _owner.CommandPermissions.Nodes.AllowDelete),
-                GraphEditorCommandDescriptorCatalog.Create("nodes.duplicate", GraphEditorCommandSourceKind.Retained, _owner.CommandPermissions.Nodes.AllowDuplicate),
-                GraphEditorCommandDescriptorCatalog.Create("clipboard.copy", GraphEditorCommandSourceKind.Retained, _owner.CanCopySelection),
-                GraphEditorCommandDescriptorCatalog.Create("clipboard.paste", GraphEditorCommandSourceKind.Retained, _owner.CanPaste),
-                GraphEditorCommandDescriptorCatalog.Create("connections.disconnect", GraphEditorCommandSourceKind.Retained, _owner.CommandPermissions.Connections.AllowDisconnect),
-                GraphEditorCommandDescriptorCatalog.Create("connections.disconnect-incoming", GraphEditorCommandSourceKind.Retained, _owner.CommandPermissions.Connections.AllowDisconnect),
-                GraphEditorCommandDescriptorCatalog.Create("connections.disconnect-outgoing", GraphEditorCommandSourceKind.Retained, _owner.CommandPermissions.Connections.AllowDisconnect),
-                GraphEditorCommandDescriptorCatalog.Create("connections.disconnect-all", GraphEditorCommandSourceKind.Retained, _owner.CommandPermissions.Connections.AllowDisconnect),
-            ])
-            .GroupBy(descriptor => descriptor.Id, StringComparer.Ordinal)
-            .Select(group => group.Last())
+            .ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
+        foreach (var retainedDescriptor in CreateRetainedCommandDescriptors())
+        {
+            descriptors[retainedDescriptor.Id] = descriptors.TryGetValue(retainedDescriptor.Id, out var kernelDescriptor)
+                && !retainedDescriptor.IsEnabled
+                && retainedDescriptor.DisabledReason is null
+                && kernelDescriptor.DisabledReason is not null
+                    ? GraphEditorCommandDescriptorCatalog.Create(
+                        retainedDescriptor.Id,
+                        retainedDescriptor.Source,
+                        retainedDescriptor.IsEnabled,
+                        kernelDescriptor.DisabledReason)
+                    : retainedDescriptor;
+        }
+
+        return descriptors.Values
             .OrderBy(descriptor => descriptor.Id, StringComparer.Ordinal)
             .ToList();
-
-        return descriptors;
     }
+
+    private IReadOnlyList<GraphEditorCommandDescriptorSnapshot> CreateRetainedCommandDescriptors()
+        =>
+        [
+            GraphEditorCommandDescriptorCatalog.Create("nodes.inspect", GraphEditorCommandSourceKind.Retained, true),
+            GraphEditorCommandDescriptorCatalog.Create("nodes.delete-by-id", GraphEditorCommandSourceKind.Retained, _owner.CommandPermissions.Nodes.AllowDelete),
+            GraphEditorCommandDescriptorCatalog.Create("nodes.duplicate", GraphEditorCommandSourceKind.Retained, _owner.CommandPermissions.Nodes.AllowDuplicate),
+            GraphEditorCommandDescriptorCatalog.Create("clipboard.copy", GraphEditorCommandSourceKind.Retained, _owner.CanCopySelection),
+            GraphEditorCommandDescriptorCatalog.Create("clipboard.paste", GraphEditorCommandSourceKind.Retained, _owner.CanPaste),
+            GraphEditorCommandDescriptorCatalog.Create("connections.disconnect", GraphEditorCommandSourceKind.Retained, _owner.CommandPermissions.Connections.AllowDisconnect),
+            GraphEditorCommandDescriptorCatalog.Create("connections.disconnect-incoming", GraphEditorCommandSourceKind.Retained, _owner.CommandPermissions.Connections.AllowDisconnect),
+            GraphEditorCommandDescriptorCatalog.Create("connections.disconnect-outgoing", GraphEditorCommandSourceKind.Retained, _owner.CommandPermissions.Connections.AllowDisconnect),
+            GraphEditorCommandDescriptorCatalog.Create("connections.disconnect-all", GraphEditorCommandSourceKind.Retained, _owner.CommandPermissions.Connections.AllowDisconnect),
+        ];
 
     public bool TryExecuteCommand(GraphEditorCommandInvocationSnapshot command)
     {
