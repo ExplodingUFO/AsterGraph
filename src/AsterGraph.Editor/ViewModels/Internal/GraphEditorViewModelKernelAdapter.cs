@@ -80,6 +80,12 @@ internal sealed class GraphEditorViewModelKernelAdapter : IGraphEditorSessionHos
             outputPortId,
             preferredWorldPosition);
 
+    public bool TryDeleteSelectionAndReconnect()
+        => _kernel.TryDeleteSelectionAndReconnect();
+
+    public bool TryDetachSelectionFromConnections()
+        => _kernel.TryDetachSelectionFromConnections();
+
     public void DeleteSelection() => _kernel.DeleteSelection();
 
     public Task<bool> TryCopySelectionAsync(CancellationToken cancellationToken)

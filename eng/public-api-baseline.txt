@@ -1327,6 +1327,8 @@ M:AsterGraph.Editor.Runtime.GraphEditorSession.TryCopySelectionAsync(System.Thre
 M:AsterGraph.Editor.Runtime.GraphEditorSession.TryCreateConnectedNodeFromPendingConnection(AsterGraph.Abstractions.Identifiers.NodeDefinitionId,System.String,AsterGraph.Core.Models.GraphConnectionTargetKind,System.Nullable<AsterGraph.Core.Models.GraphPoint>):System.Boolean
 M:AsterGraph.Editor.Runtime.GraphEditorSession.TryCreateNodeGroupFromSelection(System.String):System.String
 M:AsterGraph.Editor.Runtime.GraphEditorSession.TryDeleteFragmentTemplate(System.String):System.Boolean
+M:AsterGraph.Editor.Runtime.GraphEditorSession.TryDeleteSelectionAndReconnect():System.Boolean
+M:AsterGraph.Editor.Runtime.GraphEditorSession.TryDetachSelectionFromConnections():System.Boolean
 M:AsterGraph.Editor.Runtime.GraphEditorSession.TryEnterCompositeChildGraph(System.String,System.Boolean):System.Boolean
 M:AsterGraph.Editor.Runtime.GraphEditorSession.TryExecuteCommand(AsterGraph.Editor.Runtime.GraphEditorCommandInvocationSnapshot):System.Boolean
 M:AsterGraph.Editor.Runtime.GraphEditorSession.TryExportSceneAsImage(AsterGraph.Editor.Services.GraphEditorSceneImageExportFormat,System.String,AsterGraph.Editor.Services.GraphEditorSceneImageExportOptions):System.Boolean
@@ -1411,6 +1413,8 @@ M:AsterGraph.Editor.Runtime.IGraphEditorCommands.TryCopySelectionAsync(System.Th
 M:AsterGraph.Editor.Runtime.IGraphEditorCommands.TryCreateConnectedNodeFromPendingConnection(AsterGraph.Abstractions.Identifiers.NodeDefinitionId,System.String,AsterGraph.Core.Models.GraphConnectionTargetKind,System.Nullable<AsterGraph.Core.Models.GraphPoint>):System.Boolean
 M:AsterGraph.Editor.Runtime.IGraphEditorCommands.TryCreateNodeGroupFromSelection(System.String):System.String
 M:AsterGraph.Editor.Runtime.IGraphEditorCommands.TryDeleteFragmentTemplate(System.String):System.Boolean
+M:AsterGraph.Editor.Runtime.IGraphEditorCommands.TryDeleteSelectionAndReconnect():System.Boolean
+M:AsterGraph.Editor.Runtime.IGraphEditorCommands.TryDetachSelectionFromConnections():System.Boolean
 M:AsterGraph.Editor.Runtime.IGraphEditorCommands.TryEnterCompositeChildGraph(System.String,System.Boolean):System.Boolean
 M:AsterGraph.Editor.Runtime.IGraphEditorCommands.TryExecuteCommand(AsterGraph.Editor.Runtime.GraphEditorCommandInvocationSnapshot):System.Boolean
 M:AsterGraph.Editor.Runtime.IGraphEditorCommands.TryExportSceneAsImage(AsterGraph.Editor.Services.GraphEditorSceneImageExportFormat,System.String,AsterGraph.Editor.Services.GraphEditorSceneImageExportOptions):System.Boolean

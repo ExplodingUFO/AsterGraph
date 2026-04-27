@@ -34,6 +34,8 @@ internal interface IGraphEditorSessionHost
         GraphConnectionTargetKind inputTargetKind,
         string outputPortId,
         GraphPoint? preferredWorldPosition);
+    bool TryDeleteSelectionAndReconnect();
+    bool TryDetachSelectionFromConnections();
     void DeleteSelection();
     Task<bool> TryCopySelectionAsync(CancellationToken cancellationToken);
     Task<bool> TryPasteSelectionAsync(CancellationToken cancellationToken);

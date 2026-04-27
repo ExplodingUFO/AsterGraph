@@ -78,6 +78,20 @@ public interface IGraphEditorCommands
         => throw new NotSupportedException();
 
     /// <summary>
+    /// Attempts to delete the selected middle node and reconnect its compatible predecessor and successor.
+    /// </summary>
+    /// <returns><see langword="true"/> when a selected middle node is deleted and the wire is reconnected.</returns>
+    bool TryDeleteSelectionAndReconnect()
+        => throw new NotSupportedException();
+
+    /// <summary>
+    /// Attempts to detach the selected middle node from its wires while reconnecting its compatible predecessor and successor.
+    /// </summary>
+    /// <returns><see langword="true"/> when a selected middle node is detached and the wire is reconnected.</returns>
+    bool TryDetachSelectionFromConnections()
+        => throw new NotSupportedException();
+
+    /// <summary>
     /// 删除当前选择。
     /// </summary>
     void DeleteSelection();

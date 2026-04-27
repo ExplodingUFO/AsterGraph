@@ -53,6 +53,9 @@ public sealed record ConsumerSampleProofResult(
     bool DropNodeOnEdgeOk = true,
     bool EdgeSplitCompatibilityOk = true,
     bool EdgeSplitUndoOk = true,
+    bool DeleteAndReconnectOk = true,
+    bool DetachNodeOk = true,
+    bool ReconnectConflictReportOk = true,
     int NodeCount = 0,
     int ConnectionCount = 0,
     IReadOnlyList<string>? FeatureDescriptorIds = null,
@@ -76,6 +79,9 @@ public sealed record ConsumerSampleProofResult(
         && DropNodeOnEdgeOk
         && EdgeSplitCompatibilityOk
         && EdgeSplitUndoOk
+        && DeleteAndReconnectOk
+        && DetachNodeOk
+        && ReconnectConflictReportOk
         && NodeSideAuthoringOk
         && CommandSurfaceOk;
 
@@ -151,6 +157,9 @@ public sealed record ConsumerSampleProofResult(
         $"AUTHORING_DROP_NODE_ON_EDGE_OK:{DropNodeOnEdgeOk}",
         $"AUTHORING_EDGE_SPLIT_COMPATIBILITY_OK:{EdgeSplitCompatibilityOk}",
         $"AUTHORING_EDGE_SPLIT_UNDO_OK:{EdgeSplitUndoOk}",
+        $"AUTHORING_DELETE_AND_RECONNECT_OK:{DeleteAndReconnectOk}",
+        $"AUTHORING_DETACH_NODE_OK:{DetachNodeOk}",
+        $"AUTHORING_RECONNECT_CONFLICT_REPORT_OK:{ReconnectConflictReportOk}",
         $"AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:{NodeSideAuthoringOk}",
         $"AUTHORING_SURFACE_COMMAND_PROJECTION_OK:{CommandSurfaceOk}",
         $"CONSUMER_SAMPLE_PARAMETER_OK:{ParameterProjectionOk}",
@@ -335,6 +344,9 @@ public static class ConsumerSampleProof
         bool dropNodeOnEdgeOk;
         bool edgeSplitCompatibilityOk;
         bool edgeSplitUndoOk;
+        bool deleteAndReconnectOk;
+        bool detachNodeOk;
+        bool reconnectConflictReportOk;
         try
         {
             capabilityWindow.Show();
@@ -358,6 +370,7 @@ public static class ConsumerSampleProof
             FlushUi();
             edgeQuickToolsOk = HasEdgeQuickTools(capabilityWindow, host);
             (dropNodeOnEdgeOk, edgeSplitCompatibilityOk, edgeSplitUndoOk) = HasDropNodeOnEdge(host);
+            (deleteAndReconnectOk, detachNodeOk, reconnectConflictReportOk) = HasReconnectDetach(host);
             (quickAddConnectedNodeOk, portFilteredNodeSearchOk) = HasQuickAddConnectedNode(host);
 
             host.SelectNode(reviewNodeId);
@@ -415,6 +428,9 @@ public static class ConsumerSampleProof
             DropNodeOnEdgeOk: dropNodeOnEdgeOk,
             EdgeSplitCompatibilityOk: edgeSplitCompatibilityOk,
             EdgeSplitUndoOk: edgeSplitUndoOk,
+            DeleteAndReconnectOk: deleteAndReconnectOk,
+            DetachNodeOk: detachNodeOk,
+            ReconnectConflictReportOk: reconnectConflictReportOk,
             ParameterSnapshots: proofParameterSnapshots,
             StartupMs: startupMs,
             InspectorProjectionMs: inspectorProjectionMs,
@@ -604,6 +620,88 @@ public static class ConsumerSampleProof
                 && string.Equals(connection.TargetNodeId, originalConnection.TargetNodeId, StringComparison.Ordinal));
 
         return (dropNodeOnEdgeOk, edgeSplitCompatibilityOk, edgeSplitUndoOk);
+    }
+
+    private static (bool DeleteAndReconnectOk, bool DetachNodeOk, bool ReconnectConflictReportOk) HasReconnectDetach(ConsumerSampleHost host)
+    {
+        var before = host.Session.Queries.CreateDocumentSnapshot();
+        var originalConnection = before.Connections.FirstOrDefault(connection =>
+            string.Equals(connection.Id, "consumer-sample-connection-001", StringComparison.Ordinal));
+        if (originalConnection is null)
+        {
+            return (false, false, false);
+        }
+
+        var conflictReportOk = !host.Session.Commands.TryDeleteSelectionAndReconnect()
+            && host.Session.Diagnostics.CaptureInspectionSnapshot().Status.Message.Contains("Reconnect", StringComparison.Ordinal);
+
+        if (!host.Session.Commands.TryInsertNodeIntoConnection(
+                originalConnection.Id,
+                ConsumerSampleHost.QueueDefinitionId,
+                "input",
+                GraphConnectionTargetKind.Port,
+                "output",
+                new GraphPoint(420, 360)))
+        {
+            return (false, false, conflictReportOk);
+        }
+
+        var withDetachMiddle = host.Session.Queries.CreateDocumentSnapshot();
+        var detachMiddle = withDetachMiddle.Nodes
+            .Where(node => node.DefinitionId == ConsumerSampleHost.QueueDefinitionId)
+            .FirstOrDefault(node => before.Nodes.All(beforeNode => !string.Equals(beforeNode.Id, node.Id, StringComparison.Ordinal)));
+        if (detachMiddle is null)
+        {
+            return (false, false, conflictReportOk);
+        }
+
+        host.Session.Commands.SetSelection([detachMiddle.Id], detachMiddle.Id);
+        var detached = host.Session.Commands.TryDetachSelectionFromConnections();
+        var afterDetach = host.Session.Queries.CreateDocumentSnapshot();
+        var detachNodeOk = detached
+            && afterDetach.Nodes.Any(node => string.Equals(node.Id, detachMiddle.Id, StringComparison.Ordinal))
+            && afterDetach.Connections.Any(connection =>
+                string.Equals(connection.SourceNodeId, originalConnection.SourceNodeId, StringComparison.Ordinal)
+                && string.Equals(connection.SourcePortId, originalConnection.SourcePortId, StringComparison.Ordinal)
+                && string.Equals(connection.TargetNodeId, originalConnection.TargetNodeId, StringComparison.Ordinal)
+                && string.Equals(connection.TargetPortId, originalConnection.TargetPortId, StringComparison.Ordinal));
+        host.Session.Commands.Undo();
+        host.Session.Commands.Undo();
+
+        if (!host.Session.Commands.TryInsertNodeIntoConnection(
+                originalConnection.Id,
+                ConsumerSampleHost.QueueDefinitionId,
+                "input",
+                GraphConnectionTargetKind.Port,
+                "output",
+                new GraphPoint(420, 360)))
+        {
+            return (false, detachNodeOk, conflictReportOk);
+        }
+
+        var withDeleteMiddle = host.Session.Queries.CreateDocumentSnapshot();
+        var deleteMiddle = withDeleteMiddle.Nodes
+            .Where(node => node.DefinitionId == ConsumerSampleHost.QueueDefinitionId)
+            .FirstOrDefault(node => before.Nodes.All(beforeNode => !string.Equals(beforeNode.Id, node.Id, StringComparison.Ordinal)));
+        if (deleteMiddle is null)
+        {
+            return (false, detachNodeOk, conflictReportOk);
+        }
+
+        host.Session.Commands.SetSelection([deleteMiddle.Id], deleteMiddle.Id);
+        var deleted = host.Session.Commands.TryDeleteSelectionAndReconnect();
+        var afterDelete = host.Session.Queries.CreateDocumentSnapshot();
+        var deleteAndReconnectOk = deleted
+            && afterDelete.Nodes.All(node => !string.Equals(node.Id, deleteMiddle.Id, StringComparison.Ordinal))
+            && afterDelete.Connections.Any(connection =>
+                string.Equals(connection.SourceNodeId, originalConnection.SourceNodeId, StringComparison.Ordinal)
+                && string.Equals(connection.SourcePortId, originalConnection.SourcePortId, StringComparison.Ordinal)
+                && string.Equals(connection.TargetNodeId, originalConnection.TargetNodeId, StringComparison.Ordinal)
+                && string.Equals(connection.TargetPortId, originalConnection.TargetPortId, StringComparison.Ordinal));
+        host.Session.Commands.Undo();
+        host.Session.Commands.Undo();
+
+        return (deleteAndReconnectOk, detachNodeOk, conflictReportOk);
     }
 
     private static Window CreateCapabilityBreadthWindow(ConsumerSampleHost host)

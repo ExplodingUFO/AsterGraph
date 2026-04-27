@@ -306,6 +306,12 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
     public void DeleteNodeById(string nodeId)
         => _nodeMutationCoordinator.DeleteNodeById(nodeId);
 
+    public bool TryDeleteSelectionAndReconnect()
+        => TryReconnectSelectedMiddleNode(deleteSelectedNode: true);
+
+    public bool TryDetachSelectionFromConnections()
+        => TryReconnectSelectedMiddleNode(deleteSelectedNode: false);
+
     public void DuplicateNode(string nodeId)
         => _nodeMutationCoordinator.DuplicateNode(nodeId);
 
@@ -1869,6 +1875,136 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
             .FirstOrDefault(parameter => string.Equals(parameter.Key, target.TargetId, StringComparison.Ordinal))
             ?.ValueType;
     }
+
+    private bool TryReconnectSelectedMiddleNode(bool deleteSelectedNode)
+    {
+        if (_selectedNodeIds.Count != 1)
+        {
+            CurrentStatusMessage = "Select exactly one middle node before reconnecting wires.";
+            return false;
+        }
+
+        if (!_behaviorOptions.Commands.Connections.AllowCreate || !_behaviorOptions.Commands.Connections.AllowDelete)
+        {
+            CurrentStatusMessage = "Reconnect requires connection create and delete permissions.";
+            return false;
+        }
+
+        if (deleteSelectedNode && !_behaviorOptions.Commands.Nodes.AllowDelete)
+        {
+            CurrentStatusMessage = "Node deletion is disabled by host permissions.";
+            return false;
+        }
+
+        var selectedNodeId = _selectedNodeIds[0];
+        var document = CreateActiveScopeDocumentSnapshot();
+        var selectedNode = document.Nodes.FirstOrDefault(node => string.Equals(node.Id, selectedNodeId, StringComparison.Ordinal));
+        if (selectedNode is null)
+        {
+            CurrentStatusMessage = "Selected node was not found.";
+            return false;
+        }
+
+        var incoming = document.Connections
+            .Where(connection => string.Equals(connection.TargetNodeId, selectedNodeId, StringComparison.Ordinal))
+            .ToList();
+        var outgoing = document.Connections
+            .Where(connection => string.Equals(connection.SourceNodeId, selectedNodeId, StringComparison.Ordinal))
+            .ToList();
+        if (incoming.Count != 1 || outgoing.Count != 1)
+        {
+            CurrentStatusMessage = "Reconnect requires one incoming and one outgoing connection on the selected node.";
+            return false;
+        }
+
+        var sourceTypeId = ResolveConnectionSourceType(document, incoming[0]);
+        var targetTypeId = ResolveConnectionTargetType(document, outgoing[0].Target);
+        if (sourceTypeId is null || targetTypeId is null)
+        {
+            CurrentStatusMessage = "Reconnect requires resolvable predecessor and successor endpoint types.";
+            return false;
+        }
+
+        var compatibility = _compatibilityService.Evaluate(sourceTypeId, targetTypeId);
+        if (!compatibility.IsCompatible)
+        {
+            CurrentStatusMessage = "Reconnect conflict: predecessor output is incompatible with successor target.";
+            return false;
+        }
+
+        var removedConnectionIds = new HashSet<string>([incoming[0].Id, outgoing[0].Id], StringComparer.Ordinal);
+        if (document.Connections.Any(connection =>
+                !removedConnectionIds.Contains(connection.Id)
+                && string.Equals(connection.SourceNodeId, incoming[0].SourceNodeId, StringComparison.Ordinal)
+                && string.Equals(connection.SourcePortId, incoming[0].SourcePortId, StringComparison.Ordinal)
+                && string.Equals(connection.TargetNodeId, outgoing[0].TargetNodeId, StringComparison.Ordinal)
+                && string.Equals(connection.TargetPortId, outgoing[0].TargetPortId, StringComparison.Ordinal)
+                && connection.TargetKind == outgoing[0].TargetKind))
+        {
+            CurrentStatusMessage = "Reconnect conflict: the predecessor is already connected to the successor target.";
+            return false;
+        }
+
+        var nextConnection = new GraphConnection(
+            CreateUniqueId(document.Connections.Select(connection => connection.Id), "connection-"),
+            incoming[0].SourceNodeId,
+            incoming[0].SourcePortId,
+            outgoing[0].TargetNodeId,
+            outgoing[0].TargetPortId,
+            $"{incoming[0].SourcePortId} to {outgoing[0].TargetPortId}",
+            incoming[0].AccentHex,
+            compatibility.ConversionId)
+        {
+            TargetKind = outgoing[0].TargetKind,
+        };
+
+        var nextNodes = deleteSelectedNode
+            ? document.Nodes.Where(node => !string.Equals(node.Id, selectedNodeId, StringComparison.Ordinal)).ToList()
+            : document.Nodes.ToList();
+        var nextGroups = deleteSelectedNode
+            ? RemoveNodeFromGroups(document.Groups, selectedNodeId)
+            : document.Groups;
+
+        ApplyActiveScopeDocument(document with
+        {
+            Nodes = nextNodes,
+            Connections = document.Connections
+                .Where(connection => !removedConnectionIds.Contains(connection.Id))
+                .Concat([nextConnection])
+                .ToList(),
+            Groups = nextGroups,
+        });
+
+        if (deleteSelectedNode)
+        {
+            SetSelection([], null, updateStatus: false);
+        }
+        else
+        {
+            SetSelection([selectedNodeId], selectedNodeId, updateStatus: false);
+        }
+
+        CurrentStatusMessage = deleteSelectedNode
+            ? $"Deleted {selectedNode.Title} and reconnected wires."
+            : $"Detached {selectedNode.Title} and reconnected wires.";
+        MarkDirty(
+            CurrentStatusMessage,
+            deleteSelectedNode ? GraphEditorDocumentChangeKind.NodesRemoved : GraphEditorDocumentChangeKind.ConnectionsChanged,
+            deleteSelectedNode ? [selectedNodeId] : [selectedNodeId, incoming[0].SourceNodeId, outgoing[0].TargetNodeId],
+            [incoming[0].Id, outgoing[0].Id, nextConnection.Id],
+            preserveStatus: true);
+        return true;
+    }
+
+    private static IReadOnlyList<GraphNodeGroup>? RemoveNodeFromGroups(IReadOnlyList<GraphNodeGroup>? groups, string nodeId)
+        => groups?
+            .Select(group => group with
+            {
+                NodeIds = group.NodeIds
+                    .Where(memberId => !string.Equals(memberId, nodeId, StringComparison.Ordinal))
+                    .ToList(),
+            })
+            .ToList();
 
     private GraphSelectionFragment? PeekSelectionClipboard()
         => _selectionClipboard.Peek();

@@ -103,6 +103,28 @@ public sealed partial class GraphEditorSession
     public void DeleteSelection()
         => Execute("selection.delete", _host.DeleteSelection);
 
+    public bool TryDeleteSelectionAndReconnect()
+    {
+        var deleted = _host.TryDeleteSelectionAndReconnect();
+        if (deleted)
+        {
+            PublishCommandExecuted("selection.delete-reconnect");
+        }
+
+        return deleted;
+    }
+
+    public bool TryDetachSelectionFromConnections()
+    {
+        var detached = _host.TryDetachSelectionFromConnections();
+        if (detached)
+        {
+            PublishCommandExecuted("selection.detach-connections");
+        }
+
+        return detached;
+    }
+
     public async Task<bool> TryCopySelectionAsync(CancellationToken cancellationToken = default)
     {
         var copied = await _host.TryCopySelectionAsync(cancellationToken);
