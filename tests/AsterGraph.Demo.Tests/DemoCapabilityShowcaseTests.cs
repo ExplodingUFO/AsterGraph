@@ -206,6 +206,7 @@ public sealed class DemoCapabilityShowcaseTests
         Assert.True(result.EdgeNoteOk);
         Assert.True(result.EdgeGeometryOk);
         Assert.True(result.DisconnectFlowOk);
+        Assert.True(result.DemoScenarioPresetsOk);
         Assert.True(result.ScenarioLaunchOk);
         Assert.True(result.ScenarioTourOk);
         Assert.True(result.AiPipelineMockRunnerOk);
@@ -219,6 +220,7 @@ public sealed class DemoCapabilityShowcaseTests
         {
             Assert.Contains(result.ProofLines, line => string.Equals(line, requiredProofLine, StringComparison.Ordinal));
         }
+        Assert.Contains(result.ProofLines, line => string.Equals(line, "DEMO_SCENARIO_PRESETS_OK:True", StringComparison.Ordinal));
         foreach (var metricName in DemoProofContract.NativeMetricNames)
         {
             Assert.Contains(result.MetricLines, line => line.Contains(metricName, StringComparison.Ordinal));

@@ -32,9 +32,55 @@ public sealed class DemoScenarioLaunchTests
     }
 
     [Fact]
+    public void StartupOptionsParser_ParsesTerrainShaderScenarioWithoutChangingOmittedStartupBehavior()
+    {
+        var defaultStartup = DemoStartupOptionsParser.Parse(["--trace"]);
+        var terrainStartup = DemoStartupOptionsParser.Parse(["--scenario=Terrain-Shader"]);
+
+        Assert.Null(defaultStartup.ShellOptions.InitialScenario);
+        Assert.True(defaultStartup.ShellOptions.RestoreLastWorkspaceOnStartup);
+        Assert.Equal(new[] { "--trace" }, defaultStartup.AvaloniaArgs);
+        Assert.Equal(DemoGraphFactory.TerrainShaderScenario, terrainStartup.ShellOptions.InitialScenario);
+        Assert.False(terrainStartup.ShellOptions.RestoreLastWorkspaceOnStartup);
+        Assert.Empty(terrainStartup.AvaloniaArgs);
+    }
+
+    [Fact]
     public void StartupOptionsParser_RejectsUnknownScenario()
     {
         Assert.Throws<ArgumentException>(() => DemoStartupOptionsParser.Parse(["--scenario", "etl"]));
+    }
+
+    [Fact]
+    public void DemoGraphFactory_ExposesHostOwnedScenarioPresetCatalog()
+    {
+        Assert.Contains(
+            DemoGraphFactory.ScenarioPresets,
+            preset => preset.Id == DemoGraphFactory.TerrainShaderScenario
+                && preset.Title == "Terrain Shader Graph");
+        Assert.Contains(
+            DemoGraphFactory.ScenarioPresets,
+            preset => preset.Id == DemoGraphFactory.AiPipelineScenario
+                && preset.Title == "AI Workflow / Agent Pipeline");
+        Assert.Equal(
+            DemoGraphFactory.ScenarioPresets.Select(preset => preset.Id).Distinct(StringComparer.Ordinal).Count(),
+            DemoGraphFactory.ScenarioPresets.Count);
+    }
+
+    [Fact]
+    public void DemoGraphFactory_CreatesTerrainShaderScenarioThroughPresetId()
+    {
+        var catalog = new NodeCatalog();
+        catalog.RegisterProvider(new DemoNodeDefinitionProvider());
+
+        var defaultDocument = DemoGraphFactory.CreateStartupDocument(catalog, null);
+        var presetDocument = DemoGraphFactory.CreateScenario(catalog, DemoGraphFactory.TerrainShaderScenario);
+
+        Assert.Equal(defaultDocument.Title, presetDocument.Title);
+        Assert.Equal("Terrain Shader Graph", presetDocument.Title);
+        Assert.Equal(6, presetDocument.Nodes.Count);
+        Assert.NotNull(presetDocument.Groups);
+        Assert.Contains(presetDocument.Groups, group => group.Id == "terrain-authoring");
     }
 
     [Fact]

@@ -60,6 +60,7 @@ public static class DemoProofContract
             $"EDGE_NOTE_OK:{result.EdgeNoteOk}",
             $"EDGE_GEOMETRY_OK:{result.EdgeGeometryOk}",
             $"DISCONNECT_FLOW_OK:{result.DisconnectFlowOk}",
+            $"DEMO_SCENARIO_PRESETS_OK:{result.DemoScenarioPresetsOk}",
             $"SCENARIO_LAUNCH_OK:{result.ScenarioLaunchOk}",
             $"SCENARIO_TOUR_OK:{result.ScenarioTourOk}",
             $"AI_PIPELINE_MOCK_RUNNER_OK:{result.AiPipelineMockRunnerOk}",

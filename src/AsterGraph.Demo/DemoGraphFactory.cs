@@ -5,9 +5,24 @@ using AsterGraph.Core.Models;
 
 namespace AsterGraph.Demo;
 
+public sealed record DemoScenarioPreset(string Id, string Title, string Description);
+
 public static class DemoGraphFactory
 {
+    public const string TerrainShaderScenario = "terrain-shader";
     public const string AiPipelineScenario = "ai-pipeline";
+
+    public static IReadOnlyList<DemoScenarioPreset> ScenarioPresets { get; } =
+    [
+        new(
+            TerrainShaderScenario,
+            "Terrain Shader Graph",
+            "The default terrain shader authoring graph with grouped noise and palette nodes."),
+        new(
+            AiPipelineScenario,
+            "AI Workflow / Agent Pipeline",
+            "A prebuilt scenario showing input, prompt assembly, trusted tool context, LLM execution, parsing, and output."),
+    ];
 
     public static GraphDocument CreateStartupDocument(INodeCatalog catalog, string? scenarioName)
         => string.IsNullOrWhiteSpace(scenarioName)
@@ -15,10 +30,22 @@ public static class DemoGraphFactory
             : CreateScenario(catalog, scenarioName);
 
     public static bool IsKnownScenario(string scenarioName)
-        => string.Equals(scenarioName, AiPipelineScenario, StringComparison.OrdinalIgnoreCase);
+        => TryGetScenarioPreset(scenarioName, out _);
+
+    public static bool TryGetScenarioPreset(string scenarioName, out DemoScenarioPreset? preset)
+    {
+        preset = ScenarioPresets.SingleOrDefault(candidate =>
+            string.Equals(candidate.Id, scenarioName, StringComparison.OrdinalIgnoreCase));
+        return preset is not null;
+    }
 
     public static GraphDocument CreateScenario(INodeCatalog catalog, string scenarioName)
     {
+        if (string.Equals(scenarioName, TerrainShaderScenario, StringComparison.OrdinalIgnoreCase))
+        {
+            return CreateDefault(catalog);
+        }
+
         if (string.Equals(scenarioName, AiPipelineScenario, StringComparison.OrdinalIgnoreCase))
         {
             return CreateAiPipeline(catalog);
