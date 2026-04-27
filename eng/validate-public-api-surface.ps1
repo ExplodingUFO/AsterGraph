@@ -259,13 +259,31 @@ function Import-MetadataLoadContextAssembly {
 
     $candidatePaths += Get-ChildItem -LiteralPath $sdkRoot -Directory |
       Sort-Object Name -Descending |
-      ForEach-Object { Join-Path $_.FullName 'System.Reflection.MetadataLoadContext.dll' } |
+      ForEach-Object {
+        Join-Path $_.FullName 'System.Reflection.MetadataLoadContext.dll'
+        Join-Path $_.FullName 'Sdks/Microsoft.NET.Sdk/tools/net472/System.Reflection.MetadataLoadContext.dll'
+      } |
       Where-Object { Test-Path -LiteralPath $_ }
   }
 
-  foreach ($candidatePath in ($candidatePaths | Select-Object -Unique)) {
+  $currentRuntimeMajor = [System.Environment]::Version.Major
+  $candidateAssemblies = foreach ($candidatePath in ($candidatePaths | Select-Object -Unique)) {
     try {
-      Add-Type -Path $candidatePath
+      $assemblyName = [System.Reflection.AssemblyName]::GetAssemblyName($candidatePath)
+      if ($assemblyName.Version.Major -le $currentRuntimeMajor) {
+        [pscustomobject]@{
+          Path = $candidatePath
+          Version = $assemblyName.Version
+        }
+      }
+    }
+    catch {
+    }
+  }
+
+  foreach ($candidateAssembly in ($candidateAssemblies | Sort-Object Version -Descending)) {
+    try {
+      Add-Type -Path $candidateAssembly.Path
       $script:metadataLoadContextImported = $true
       return
     }
@@ -274,7 +292,7 @@ function Import-MetadataLoadContextAssembly {
     }
   }
 
-  throw 'System.Reflection.MetadataLoadContext.dll could not be loaded from the installed .NET SDK. Install the .NET SDK before running public API validation.'
+  throw "System.Reflection.MetadataLoadContext.dll could not be loaded from the installed .NET SDK for the current PowerShell runtime major $currentRuntimeMajor. Install a compatible .NET SDK before running public API validation."
 }
 
 function New-PublicApiMetadataContext {
