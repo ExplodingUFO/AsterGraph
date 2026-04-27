@@ -10,7 +10,8 @@ public sealed class SamplePlugin : IGraphEditorPlugin
     public GraphEditorPluginDescriptor Descriptor { get; } = new(
         "PluginId",
         "AsterGraph Sample Plugin",
-        description: "Adds one sample node definition through the public plugin contract.");
+        description: "Adds one sample node definition through the public trusted plugin contract.",
+        version: "1.0.0");
 
     public void Register(GraphEditorPluginBuilder builder)
     {

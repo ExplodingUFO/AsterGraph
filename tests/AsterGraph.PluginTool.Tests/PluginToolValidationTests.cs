@@ -64,6 +64,9 @@ public sealed class PluginToolValidationTests
         var avaloniaProgram = File.ReadAllText(FindRepoPath("templates/astergraph-avalonia/Program.cs"));
         var avaloniaReadme = File.ReadAllText(FindRepoPath("templates/astergraph-avalonia/README.md"));
         var avaloniaProject = File.ReadAllText(FindRepoPath("templates/astergraph-avalonia/AsterGraphAvaloniaHost.csproj"));
+        var pluginReadme = File.ReadAllText(FindRepoPath("templates/astergraph-plugin/README.md"));
+        var pluginProgram = File.ReadAllText(FindRepoPath("templates/astergraph-plugin/SamplePlugin.cs"));
+        var pluginManifest = File.ReadAllText(FindRepoPath("templates/astergraph-plugin/astergraph.plugin.json"));
         var pluginProject = File.ReadAllText(FindRepoPath("templates/astergraph-plugin/AsterGraphPlugin.csproj"));
 
         Assert.Contains(".UsePlatformDetect()", avaloniaProgram, StringComparison.Ordinal);
@@ -73,6 +76,22 @@ public sealed class PluginToolValidationTests
         Assert.Contains("AsterGraphEditorFactory.Create(...)", avaloniaReadme, StringComparison.Ordinal);
         Assert.Contains("AsterGraphAvaloniaViewFactory.Create(...)", avaloniaReadme, StringComparison.Ordinal);
         Assert.Contains("ASTERGRAPH_PLUGIN_VALIDATE_OK:True", avaloniaReadme, StringComparison.Ordinal);
+        Assert.Contains("minimal trusted in-process AsterGraph plugin", pluginReadme, StringComparison.Ordinal);
+        Assert.Contains("SamplePlugin.Descriptor", pluginReadme, StringComparison.Ordinal);
+        Assert.Contains("SampleNodeDefinitionProvider", pluginReadme, StringComparison.Ordinal);
+        Assert.Contains("astergraph.plugin.json", pluginReadme, StringComparison.Ordinal);
+        Assert.Contains(".dll", pluginReadme, StringComparison.Ordinal);
+        Assert.Contains(".nupkg", pluginReadme, StringComparison.Ordinal);
+        Assert.Contains("directory", pluginReadme, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("ASTERGRAPH_PLUGIN_VALIDATE_OK:True", pluginReadme, StringComparison.Ordinal);
+        Assert.Contains("target_framework:", pluginReadme, StringComparison.Ordinal);
+        Assert.Contains("capability_summary:", pluginReadme, StringComparison.Ordinal);
+        Assert.Contains("sha256:", pluginReadme, StringComparison.Ordinal);
+        Assert.Contains("does not add marketplace distribution, sandboxing, unload/reload, or untrusted-code isolation", pluginReadme, StringComparison.Ordinal);
+        Assert.Contains("PluginId", pluginProgram, StringComparison.Ordinal);
+        Assert.Contains("version: \"1.0.0\"", pluginProgram, StringComparison.Ordinal);
+        Assert.Contains("public trusted plugin contract", pluginProgram, StringComparison.Ordinal);
+        Assert.Contains("\"pluginTypeName\": \"AsterGraphPlugin.SamplePlugin\"", pluginManifest, StringComparison.Ordinal);
         Assert.Contains("<TargetFramework>net8.0</TargetFramework>", avaloniaProject, StringComparison.Ordinal);
         Assert.Contains("<TargetFramework>net8.0</TargetFramework>", pluginProject, StringComparison.Ordinal);
         Assert.DoesNotContain("-windows", avaloniaProject, StringComparison.OrdinalIgnoreCase);
