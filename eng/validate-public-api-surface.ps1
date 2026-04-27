@@ -222,6 +222,25 @@ function Get-PublicApiAssetAssemblyPaths {
   }
 }
 
+function Get-PublicApiResolvedReferenceAssemblyPaths {
+  foreach ($assemblyName in $publishableAssemblies) {
+    $objFrameworkPath = Join-Path $RepoRoot "src/$assemblyName/obj/$Configuration/$Framework"
+    if (-not (Test-Path -LiteralPath $objFrameworkPath)) {
+      continue
+    }
+
+    foreach ($referenceFile in Get-ChildItem -LiteralPath $objFrameworkPath -Recurse -File -Filter 'references') {
+      foreach ($line in Get-Content -LiteralPath $referenceFile.FullName) {
+        $referencePath = $line.Trim()
+        if ($referencePath.EndsWith('.dll', [System.StringComparison]::OrdinalIgnoreCase) -and
+            (Test-Path -LiteralPath $referencePath)) {
+          [System.IO.Path]::GetFullPath($referencePath)
+        }
+      }
+    }
+  }
+}
+
 function Import-MetadataLoadContextAssembly {
   $loadedMetadataAssembly = [AppDomain]::CurrentDomain.GetAssemblies() |
     Where-Object { $_.GetName().Name -eq 'System.Reflection.MetadataLoadContext' } |
@@ -270,6 +289,10 @@ function New-PublicApiMetadataContext {
 
   foreach ($assetAssemblyPath in Get-PublicApiAssetAssemblyPaths) {
     $metadataAssemblyPaths.Add($assetAssemblyPath)
+  }
+
+  foreach ($referenceAssemblyPath in Get-PublicApiResolvedReferenceAssemblyPaths) {
+    $metadataAssemblyPaths.Add($referenceAssemblyPath)
   }
 
   $metadataDirectories = ($AssemblyPaths | ForEach-Object { Split-Path -Parent $_ }) + $dotnetAssemblyDirectories |
