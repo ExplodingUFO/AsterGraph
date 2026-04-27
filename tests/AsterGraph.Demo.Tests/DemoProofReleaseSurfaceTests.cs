@@ -1256,14 +1256,20 @@ public sealed class DemoProofReleaseSurfaceTests
         var readme = ReadRepoFile("README.md");
         var readmeZh = ReadRepoFile("README.zh-CN.md");
 
-        AssertAppearsBefore(readme, "docs/assets/astergraph-ai-pipeline-demo.svg", "## Public Beta");
+        AssertAppearsBefore(readme, "Launch the prebuilt AI workflow scenario", "## Public Beta");
         AssertAppearsBefore(readme, "dotnet run --project src/AsterGraph.Demo -- --scenario ai-pipeline", "## Public Beta");
+        AssertAppearsBefore(readme, "dotnet new astergraph-avalonia", "## Public Beta");
+        AssertAppearsBefore(readme, "dotnet new astergraph-plugin", "## Public Beta");
+        AssertAppearsBefore(readme, "tools/AsterGraph.PluginTool", "## Public Beta");
         Assert.Contains("parameter editing", readme, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("automation", readme, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("export", readme, StringComparison.OrdinalIgnoreCase);
 
-        AssertAppearsBefore(readmeZh, "docs/assets/astergraph-ai-pipeline-demo.svg", "## 公开 Beta");
+        AssertAppearsBefore(readmeZh, "启动预置 AI workflow 场景", "## 公开 Beta");
         AssertAppearsBefore(readmeZh, "dotnet run --project src/AsterGraph.Demo -- --scenario ai-pipeline", "## 公开 Beta");
+        AssertAppearsBefore(readmeZh, "dotnet new astergraph-avalonia", "## 公开 Beta");
+        AssertAppearsBefore(readmeZh, "dotnet new astergraph-plugin", "## 公开 Beta");
+        AssertAppearsBefore(readmeZh, "tools/AsterGraph.PluginTool", "## 公开 Beta");
         Assert.Contains("参数编辑", readmeZh, StringComparison.Ordinal);
         Assert.Contains("自动化", readmeZh, StringComparison.Ordinal);
         Assert.Contains("导出", readmeZh, StringComparison.Ordinal);
