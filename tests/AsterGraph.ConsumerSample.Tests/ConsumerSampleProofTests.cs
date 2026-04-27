@@ -183,6 +183,9 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(result.ProofLines, line => line == "CONSUMER_SAMPLE_SCENARIO_GRAPH_OK:True");
         Assert.Contains(result.ProofLines, line => line == "CONSUMER_SAMPLE_HOST_OWNED_ACTIONS_OK:True");
         Assert.Contains(result.ProofLines, line => line == "CONSUMER_SAMPLE_SUPPORT_BUNDLE_READY_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "GRAPH_VALIDATION_FEEDBACK_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "GRAPH_FEEDBACK_FOCUS_TARGET_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "GRAPH_READINESS_STATUS_OK:True");
         Assert.Contains(result.ProofLines, line => line == "FIVE_MINUTE_ONBOARDING_OK:True");
         Assert.Contains(result.ProofLines, line => line == "ONBOARDING_CONFIGURATION_OK:True");
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_SURFACE_OK:True");
@@ -224,7 +227,10 @@ public sealed class ConsumerSampleProofTests
             CommandSurfaceRefreshMs: 1,
             NodeToolProjectionMs: 1,
             EdgeToolProjectionMs: 1,
-            CommandPaletteMs: 1);
+            CommandPaletteMs: 1,
+            ReadinessStatus: "Ready",
+            ValidationSummary: ConsumerSampleProofValidationSummary.Empty,
+            ValidationFeedback: []);
 
         Assert.False(result.IsOk);
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_SURFACE_METADATA_PROJECTION_OK:False");
@@ -263,6 +269,9 @@ public sealed class ConsumerSampleProofTests
             NodeToolProjectionMs: 1,
             EdgeToolProjectionMs: 1,
             CommandPaletteMs: 1,
+            ReadinessStatus: "Ready",
+            ValidationSummary: ConsumerSampleProofValidationSummary.Empty,
+            ValidationFeedback: [],
             NodeCount: 2,
             FeatureDescriptorIds: ["capability.export.scene-svg"],
             ScenarioGraphOk: false);
@@ -303,7 +312,10 @@ public sealed class ConsumerSampleProofTests
             CommandSurfaceRefreshMs: 1,
             NodeToolProjectionMs: 1,
             EdgeToolProjectionMs: 1,
-            CommandPaletteMs: 1);
+            CommandPaletteMs: 1,
+            ReadinessStatus: "Ready",
+            ValidationSummary: ConsumerSampleProofValidationSummary.Empty,
+            ValidationFeedback: []);
 
         Assert.False(result.CapabilityBreadthOk);
         Assert.False(result.IsOk);
@@ -344,6 +356,9 @@ public sealed class ConsumerSampleProofTests
             NodeToolProjectionMs: 1,
             EdgeToolProjectionMs: 1,
             CommandPaletteMs: 1,
+            ReadinessStatus: "Ready",
+            ValidationSummary: ConsumerSampleProofValidationSummary.Empty,
+            ValidationFeedback: [],
             HostedAuthoringAutomationDiagnosticsOk: true);
 
         Assert.False(result.HostedAccessibilityOk);
@@ -385,6 +400,9 @@ public sealed class ConsumerSampleProofTests
             NodeToolProjectionMs: 1,
             EdgeToolProjectionMs: 1,
             CommandPaletteMs: 1,
+            ReadinessStatus: "Ready",
+            ValidationSummary: ConsumerSampleProofValidationSummary.Empty,
+            ValidationFeedback: [],
             HostedAuthoringAutomationDiagnosticsOk: true);
 
         Assert.False(result.HostedAccessibilityOk);
@@ -426,6 +444,9 @@ public sealed class ConsumerSampleProofTests
             NodeToolProjectionMs: 1,
             EdgeToolProjectionMs: 1,
             CommandPaletteMs: 1,
+            ReadinessStatus: "Ready",
+            ValidationSummary: ConsumerSampleProofValidationSummary.Empty,
+            ValidationFeedback: [],
             HostedAuthoringAutomationDiagnosticsOk: false);
 
         Assert.False(result.HostedAccessibilityOk);
@@ -461,13 +482,34 @@ public sealed class ConsumerSampleProofTests
         var reproduction = root.GetProperty("reproduction");
         var persistenceStatus = root.GetProperty("persistenceStatus").GetString();
         var parameterSnapshots = root.GetProperty("parameterSnapshots").EnumerateArray().ToArray();
+        var readinessStatus = root.GetProperty("readinessStatus").GetString();
+        var validationSummary = root.GetProperty("validationSummary");
+        var validationFeedback = root.GetProperty("validationFeedback").EnumerateArray().ToArray();
 
-        Assert.Equal(2, root.GetProperty("schemaVersion").GetInt32());
+        Assert.Equal(3, root.GetProperty("schemaVersion").GetInt32());
         Assert.Equal("ConsumerSample.Avalonia", root.GetProperty("route").GetString());
         Assert.False(string.IsNullOrWhiteSpace(packageVersion));
         Assert.Equal($"v{packageVersion}", publicTag);
         Assert.Equal("written", persistenceStatus);
         Assert.True(parameterSnapshots.Length >= 7);
+        Assert.True(
+            new[] { "Ready", "Warnings", "Blocked" }.Contains(readinessStatus, StringComparer.Ordinal),
+            $"Unexpected readiness status '{readinessStatus}'.");
+        Assert.Equal(validationFeedback.Length, validationSummary.GetProperty("totalIssueCount").GetInt32());
+        Assert.True(validationSummary.GetProperty("errorCount").GetInt32() >= 0);
+        Assert.True(validationSummary.GetProperty("warningCount").GetInt32() >= 0);
+        Assert.True(validationSummary.GetProperty("invalidConnectionCount").GetInt32() >= 0);
+        Assert.True(validationSummary.GetProperty("invalidParameterCount").GetInt32() >= 0);
+        Assert.All(validationFeedback, feedback =>
+        {
+            Assert.False(string.IsNullOrWhiteSpace(feedback.GetProperty("code").GetString()));
+            var severity = feedback.GetProperty("severity").GetString();
+            Assert.True(
+                new[] { "Error", "Warning" }.Contains(severity, StringComparer.Ordinal),
+                $"Unexpected validation severity '{severity}'.");
+            Assert.False(string.IsNullOrWhiteSpace(feedback.GetProperty("message").GetString()));
+            Assert.False(string.IsNullOrWhiteSpace(feedback.GetProperty("focusTarget").GetProperty("kind").GetString()));
+        });
         Assert.True(
             DateTimeOffset.TryParse(generatedAtUtc, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out _),
             "Support bundle generatedAtUtc should be a parseable round-trip UTC timestamp.");
@@ -526,6 +568,9 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(proofLines, line => line == "CONSUMER_SAMPLE_SCENARIO_GRAPH_OK:True");
         Assert.Contains(proofLines, line => line == "CONSUMER_SAMPLE_HOST_OWNED_ACTIONS_OK:True");
         Assert.Contains(proofLines, line => line == "CONSUMER_SAMPLE_SUPPORT_BUNDLE_READY_OK:True");
+        Assert.Contains(proofLines, line => line == "GRAPH_VALIDATION_FEEDBACK_OK:True");
+        Assert.Contains(proofLines, line => line == "GRAPH_FEEDBACK_FOCUS_TARGET_OK:True");
+        Assert.Contains(proofLines, line => line == "GRAPH_READINESS_STATUS_OK:True");
         Assert.Contains(proofLines, line => line == "FIVE_MINUTE_ONBOARDING_OK:True");
         Assert.Contains(proofLines, line => line == "ONBOARDING_CONFIGURATION_OK:True");
         Assert.Contains(proofLines, line => line == "AUTHORING_SURFACE_OK:True");
@@ -631,6 +676,103 @@ public sealed class ConsumerSampleProofTests
         Assert.False(validationFixSnapshot.GetProperty("isValid").GetBoolean());
         Assert.True(validationFixSnapshot.GetProperty("canApplyValidationFix").GetBoolean());
         Assert.Equal("Restore default", validationFixSnapshot.GetProperty("validationFixActionLabel").GetString());
+    }
+
+    [AvaloniaFact]
+    public void ConsumerSampleSupportBundle_WritesValidationFeedbackFocusTargets()
+    {
+        var result = new ConsumerSampleProofResult(
+            HostMenuActionOk: true,
+            PluginContributionOk: true,
+            ParameterProjectionOk: true,
+            MetadataProjectionOk: true,
+            NodeSideAuthoringOk: true,
+            WindowCompositionOk: true,
+            TrustTransparencyOk: true,
+            CommandSurfaceOk: true,
+            StencilSurfaceOk: true,
+            ExportBreadthOk: true,
+            NodeQuickToolsOk: true,
+            EdgeQuickToolsOk: true,
+            HostedAccessibilityBaselineOk: true,
+            HostedAccessibilityFocusOk: true,
+            HostedAccessibilityCommandSurfaceOk: true,
+            HostedAccessibilityAuthoringSurfaceOk: true,
+            ParameterSnapshots: [],
+            StartupMs: 1,
+            InspectorProjectionMs: 1,
+            PluginScanMs: 1,
+            CommandLatencyMs: 1,
+            StencilSearchMs: 1,
+            CommandSurfaceRefreshMs: 1,
+            NodeToolProjectionMs: 1,
+            EdgeToolProjectionMs: 1,
+            CommandPaletteMs: 1,
+            ReadinessStatus: "Blocked",
+            ValidationSummary: new ConsumerSampleProofValidationSummary(
+                TotalIssueCount: 2,
+                ErrorCount: 2,
+                WarningCount: 0,
+                InvalidConnectionCount: 1,
+                InvalidParameterCount: 1),
+            ValidationFeedback:
+            [
+                new ConsumerSampleProofValidationFeedback(
+                    "connection.target-input-missing",
+                    "Error",
+                    "Connection target input is missing.",
+                    new ConsumerSampleProofFocusTarget(
+                        "ConnectionEndpoint",
+                        NodeId: "target-001",
+                        ConnectionId: "connection-001",
+                        EndpointId: "missing-input")),
+                new ConsumerSampleProofValidationFeedback(
+                    "node.parameter-invalid",
+                    "Error",
+                    "Prompt is required.",
+                    new ConsumerSampleProofFocusTarget(
+                        "Parameter",
+                        NodeId: "node-001",
+                        EndpointId: "prompt",
+                        ParameterKey: "prompt")),
+            ],
+            NodeCount: 2,
+            ConnectionCount: 1,
+            FeatureDescriptorIds: ["query.validation-snapshot"],
+            SupportBundlePayloadOk: true);
+        var tempRoot = Path.Combine(Path.GetTempPath(), "AsterGraph.ConsumerSample.Tests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(tempRoot);
+        var bundlePath = Path.Combine(tempRoot, "validation-support-bundle.json");
+
+        ConsumerSampleSupportBundle.WriteProofBundle(
+            bundlePath,
+            result,
+            "consumer-sample --proof --support-bundle validation-support-bundle.json");
+
+        using var document = JsonDocument.Parse(File.ReadAllText(bundlePath));
+        var root = document.RootElement;
+        var validationSummary = root.GetProperty("validationSummary");
+        var validationFeedback = root.GetProperty("validationFeedback").EnumerateArray().ToArray();
+        var connectionTarget = validationFeedback.Single(row => row.GetProperty("code").GetString() == "connection.target-input-missing").GetProperty("focusTarget");
+        var parameterTarget = validationFeedback.Single(row => row.GetProperty("code").GetString() == "node.parameter-invalid").GetProperty("focusTarget");
+        var proofLines = root.GetProperty("proofLines").EnumerateArray().Select(static item => item.GetString()).ToArray();
+
+        Assert.Equal("Blocked", root.GetProperty("readinessStatus").GetString());
+        Assert.Equal(2, validationSummary.GetProperty("totalIssueCount").GetInt32());
+        Assert.Equal(2, validationSummary.GetProperty("errorCount").GetInt32());
+        Assert.Equal(1, validationSummary.GetProperty("invalidConnectionCount").GetInt32());
+        Assert.Equal(1, validationSummary.GetProperty("invalidParameterCount").GetInt32());
+        Assert.Equal("ConnectionEndpoint", connectionTarget.GetProperty("kind").GetString());
+        Assert.Equal("target-001", connectionTarget.GetProperty("nodeId").GetString());
+        Assert.Equal("connection-001", connectionTarget.GetProperty("connectionId").GetString());
+        Assert.Equal("missing-input", connectionTarget.GetProperty("endpointId").GetString());
+        Assert.Equal("Parameter", parameterTarget.GetProperty("kind").GetString());
+        Assert.Equal("node-001", parameterTarget.GetProperty("nodeId").GetString());
+        Assert.Equal("prompt", parameterTarget.GetProperty("endpointId").GetString());
+        Assert.Equal("prompt", parameterTarget.GetProperty("parameterKey").GetString());
+        Assert.Contains(proofLines, line => line == "GRAPH_VALIDATION_FEEDBACK_OK:True");
+        Assert.Contains(proofLines, line => line == "GRAPH_FEEDBACK_FOCUS_TARGET_OK:True");
+        Assert.Contains(proofLines, line => line == "GRAPH_READINESS_STATUS_OK:True");
     }
 
     [AvaloniaFact]

@@ -22,7 +22,7 @@ internal static class ConsumerSampleSupportBundle
 
         var packageVersion = GetPackageVersion();
         var document = new ConsumerSampleSupportBundleDocument(
-            SchemaVersion: 2,
+            SchemaVersion: 3,
             PackageVersion: packageVersion,
             PublicTag: $"v{packageVersion}",
             Route: "ConsumerSample.Avalonia",
@@ -42,6 +42,9 @@ internal static class ConsumerSampleSupportBundle
             GraphSummary: new ConsumerSampleSupportGraphSummary(
                 result.NodeCount,
                 result.ConnectionCount),
+            ReadinessStatus: result.SupportReadinessStatus,
+            ValidationSummary: result.SupportValidationSummary,
+            ValidationFeedback: result.SupportValidationFeedback,
             FeatureDescriptors: result.FeatureDescriptorIds ?? [],
             RecentDiagnostics: result.RecentDiagnosticCodes ?? [],
             RuntimeNodeOverlays: result.RuntimeNodeOverlays ?? [],
@@ -78,6 +81,9 @@ internal static class ConsumerSampleSupportBundle
             "environment",
             "reproduction",
             "graphSummary",
+            "readinessStatus",
+            "validationSummary",
+            "validationFeedback",
             "featureDescriptors",
             "recentDiagnostics",
             "runtimeNodeOverlays",
@@ -97,6 +103,44 @@ internal static class ConsumerSampleSupportBundle
         if (!graphSummary.TryGetProperty("nodeCount", out _) || !graphSummary.TryGetProperty("connectionCount", out _))
         {
             throw new InvalidOperationException("Support bundle schema validation failed: graphSummary missing nodeCount or connectionCount.");
+        }
+
+        var readinessStatus = root.GetProperty("readinessStatus").GetString();
+        if (readinessStatus is not ("Ready" or "Warnings" or "Blocked"))
+        {
+            throw new InvalidOperationException("Support bundle schema validation failed: readinessStatus must be Ready, Warnings, or Blocked.");
+        }
+
+        var validationSummary = root.GetProperty("validationSummary");
+        foreach (var property in new[] { "totalIssueCount", "errorCount", "warningCount", "invalidConnectionCount", "invalidParameterCount" })
+        {
+            if (!validationSummary.TryGetProperty(property, out _))
+            {
+                throw new InvalidOperationException($"Support bundle schema validation failed: validationSummary missing {property}.");
+            }
+        }
+
+        var validationFeedback = root.GetProperty("validationFeedback");
+        if (validationFeedback.ValueKind != JsonValueKind.Array)
+        {
+            throw new InvalidOperationException("Support bundle schema validation failed: validationFeedback must be an array.");
+        }
+
+        if (validationFeedback.GetArrayLength() != validationSummary.GetProperty("totalIssueCount").GetInt32())
+        {
+            throw new InvalidOperationException("Support bundle schema validation failed: validationFeedback count does not match validationSummary totalIssueCount.");
+        }
+
+        foreach (var feedback in validationFeedback.EnumerateArray())
+        {
+            if (!feedback.TryGetProperty("code", out _)
+                || !feedback.TryGetProperty("severity", out _)
+                || !feedback.TryGetProperty("message", out _)
+                || !feedback.TryGetProperty("focusTarget", out var focusTarget)
+                || !focusTarget.TryGetProperty("kind", out _))
+            {
+                throw new InvalidOperationException("Support bundle schema validation failed: validationFeedback rows require code, severity, message, and focusTarget.kind.");
+            }
         }
     }
 
@@ -129,6 +173,9 @@ internal static class ConsumerSampleSupportBundle
         ConsumerSampleSupportEnvironment Environment,
         ConsumerSampleSupportReproduction Reproduction,
         ConsumerSampleSupportGraphSummary GraphSummary,
+        string ReadinessStatus,
+        ConsumerSampleProofValidationSummary ValidationSummary,
+        IReadOnlyList<ConsumerSampleProofValidationFeedback> ValidationFeedback,
         IReadOnlyList<string> FeatureDescriptors,
         IReadOnlyList<string> RecentDiagnostics,
         IReadOnlyList<GraphEditorNodeRuntimeOverlaySnapshot> RuntimeNodeOverlays,

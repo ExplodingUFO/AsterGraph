@@ -31,7 +31,7 @@ This sample keeps one realistic host window without turning into a full showcase
 - one plugin-contributed command flowing through the same action path instead of a sample-only menu placeholder
 - one selected-node parameter read/write seam through `IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()` and `IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)`
 - one trusted plugin registration with visible provenance, trust reasons, and allowlist import or export
-- one support-bundle proof path with onboarding markers for the scenario graph, host-owned actions, support-bundle payload readiness, and five-minute handoff health
+- one support-bundle proof path with onboarding markers for the scenario graph, host-owned actions, canonical graph readiness evidence, support-bundle payload readiness, and five-minute handoff health
 - the shipped Avalonia editor surface on the factory-based hosted-UI route
 
 ## Copy These Host-Owned Seams
@@ -124,6 +124,9 @@ Expected proof markers:
 - `CONSUMER_SAMPLE_SCENARIO_GRAPH_OK:True`
 - `CONSUMER_SAMPLE_HOST_OWNED_ACTIONS_OK:True`
 - `CONSUMER_SAMPLE_SUPPORT_BUNDLE_READY_OK:True`
+- `GRAPH_VALIDATION_FEEDBACK_OK:True`
+- `GRAPH_FEEDBACK_FOCUS_TARGET_OK:True`
+- `GRAPH_READINESS_STATUS_OK:True`
 - `FIVE_MINUTE_ONBOARDING_OK:True`
 - `ONBOARDING_CONFIGURATION_OK:True`
 - `AUTHORING_SURFACE_OK:True`
@@ -136,6 +139,9 @@ Expected bundle markers when `--support-bundle <support-bundle-path>` is supplie
 - `SUPPORT_BUNDLE_OK:True`
 - `SUPPORT_BUNDLE_PATH:...`
 - `CONSUMER_SAMPLE_SUPPORT_BUNDLE_READY_OK:True`
+- `GRAPH_VALIDATION_FEEDBACK_OK:True`
+- `GRAPH_FEEDBACK_FOCUS_TARGET_OK:True`
+- `GRAPH_READINESS_STATUS_OK:True`
 
 This quick reference is summary-only; Proof Handoff owns the actual intake instructions.
 The support bundle stays local evidence only and does not widen the support boundary.
@@ -173,6 +179,7 @@ For the actual intake record, run `AsterGraph.ConsumerSample.Avalonia -- --proof
 
 If the route cannot produce a bundle, record `NO_SUPPORT_BUNDLE:route-cannot-produce-one`.
 If `CONSUMER_SAMPLE_PARAMETER_OK` or `CONSUMER_SAMPLE_METADATA_PROJECTION_OK` fail, keep the failed proof-marker lines with the support bundle's `parameterSnapshots` rows on that same bounded intake record.
+If graph readiness is the question, keep `readinessStatus`, `validationSummary`, and `validationFeedback` from the same bundle; those fields are projected from the canonical session validation snapshot.
 
 It should stay local evidence only and should not widen the support boundary.
 
@@ -203,6 +210,9 @@ Expected proof markers:
 - `CONSUMER_SAMPLE_SCENARIO_GRAPH_OK:True`
 - `CONSUMER_SAMPLE_HOST_OWNED_ACTIONS_OK:True`
 - `CONSUMER_SAMPLE_SUPPORT_BUNDLE_READY_OK:True`
+- `GRAPH_VALIDATION_FEEDBACK_OK:True`
+- `GRAPH_FEEDBACK_FOCUS_TARGET_OK:True`
+- `GRAPH_READINESS_STATUS_OK:True`
 - `FIVE_MINUTE_ONBOARDING_OK:True`
 - `ONBOARDING_CONFIGURATION_OK:True`
 - `HOST_NATIVE_METRIC:startup_ms=...`
@@ -222,6 +232,9 @@ Expected bundle markers when `--support-bundle <support-bundle-path>` is supplie
 - `SUPPORT_BUNDLE_OK:True`
 - `SUPPORT_BUNDLE_PATH:...`
 - `CONSUMER_SAMPLE_SUPPORT_BUNDLE_READY_OK:True`
+- `GRAPH_VALIDATION_FEEDBACK_OK:True`
+- `GRAPH_FEEDBACK_FOCUS_TARGET_OK:True`
+- `GRAPH_READINESS_STATUS_OK:True`
 - `CONSUMER_SAMPLE_OK:True`
 
 ## When To Use This Sample
@@ -262,7 +275,7 @@ If you want to build the same medium host in your own app, copy these seams in t
 - proof mode: emit the `AUTHORING_SURFACE_*` markers, `COMMAND_SURFACE_OK`, and the widened `HOST_NATIVE_METRIC:*` lines so you can compare your host with the shipped samples and keep the defended large-tier contract in view through `ScaleSmoke`
 - widened hosted tuning: emit `WIDENED_SURFACE_PERFORMANCE_OK:True` and reuse [Widened Surface Performance Recipe](./widened-surface-performance-recipe.md) so the hosted metrics stay tied to `ScaleSmoke`
 - capability breadth: pair the same route with [Capability Breadth Recipe](./capability-breadth-recipe.md) and emit the `CAPABILITY_BREADTH_*` markers from `AsterGraph.ConsumerSample.Avalonia -- --proof`
-- onboarding markers: keep `CONSUMER_SAMPLE_SCENARIO_GRAPH_OK:True`, `CONSUMER_SAMPLE_HOST_OWNED_ACTIONS_OK:True`, `CONSUMER_SAMPLE_SUPPORT_BUNDLE_READY_OK:True`, `FIVE_MINUTE_ONBOARDING_OK:True`, and `ONBOARDING_CONFIGURATION_OK:True`
+- onboarding markers: keep `CONSUMER_SAMPLE_SCENARIO_GRAPH_OK:True`, `CONSUMER_SAMPLE_HOST_OWNED_ACTIONS_OK:True`, `CONSUMER_SAMPLE_SUPPORT_BUNDLE_READY_OK:True`, `GRAPH_VALIDATION_FEEDBACK_OK:True`, `GRAPH_FEEDBACK_FOCUS_TARGET_OK:True`, `GRAPH_READINESS_STATUS_OK:True`, `FIVE_MINUTE_ONBOARDING_OK:True`, and `ONBOARDING_CONFIGURATION_OK:True`
 - sample-owned content such as the review/audit node family, action ids and titles, and proof labels beyond the defended markers should stay local to your app
 
 ## Related Docs
