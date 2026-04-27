@@ -36,6 +36,7 @@ Use this page with [Host Integration](./host-integration.md) and [Extension Cont
 ## Drift Rules
 
 - New public host-facing symbols must be classified in this inventory before release.
+- Public API changes must update `eng/public-api-baseline.txt` intentionally; unclassified drift fails the release gate.
 - Stable canonical additions must be reflected in [Host Integration](./host-integration.md) or [Extension Contracts](./extension-contracts.md).
 - Retained migration and compatibility-only additions must include replacement guidance.
 - Compatibility-only APIs must be marked obsolete when a canonical replacement exists.

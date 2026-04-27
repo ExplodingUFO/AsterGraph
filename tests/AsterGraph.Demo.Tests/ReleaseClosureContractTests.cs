@@ -203,6 +203,52 @@ public sealed class ReleaseClosureContractTests
     }
 
     [Fact]
+    public void ReleaseValidation_InvokesPublicApiSurfaceGate()
+    {
+        var ciScript = ReadRepoFile("eng/ci.ps1");
+
+        Assert.Contains("validate-public-api-surface.ps1", ciScript, StringComparison.Ordinal);
+        Assert.Contains("Invoke-PublicApiSurfaceValidation", ciScript, StringComparison.Ordinal);
+        Assert.Contains("-Framework 'net9.0'", ciScript, StringComparison.Ordinal);
+
+        var releaseValidationStart = ciScript.IndexOf("function Invoke-ReleaseValidation", StringComparison.Ordinal);
+        Assert.True(releaseValidationStart >= 0, "ci.ps1 should contain Invoke-ReleaseValidation.");
+        Assert.Contains("Invoke-PublicApiSurfaceValidation", ciScript[releaseValidationStart..], StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void PublicApiSurfaceValidation_PassesCurrentRepoAndRejectsMismatchedBaseline()
+    {
+        var scriptPath = Path.Combine(GetRepositoryRoot(), "eng", "validate-public-api-surface.ps1");
+
+        var passProcess = RunPowerShell(
+            $"-NoProfile -ExecutionPolicy Bypass -File \"{scriptPath}\" " +
+            $"-RepoRoot \"{GetRepositoryRoot()}\" " +
+            "-Configuration Release " +
+            "-Framework net9.0");
+
+        Assert.True(
+            passProcess.ExitCode == 0,
+            $"validate-public-api-surface.ps1 failed for current repo with exit code {passProcess.ExitCode}.{Environment.NewLine}STDOUT:{Environment.NewLine}{passProcess.StandardOutput}{Environment.NewLine}STDERR:{Environment.NewLine}{passProcess.StandardError}");
+        Assert.Contains("PUBLIC_API_SURFACE_OK:", passProcess.StandardOutput, StringComparison.Ordinal);
+
+        var tempRoot = CreateTempDirectory();
+        var baselinePath = Path.Combine(tempRoot, "public-api-baseline.txt");
+        File.WriteAllText(baselinePath, "A:Baseline.Intentionally.Mismatched");
+
+        var failProcess = RunPowerShell(
+            $"-NoProfile -ExecutionPolicy Bypass -File \"{scriptPath}\" " +
+            $"-RepoRoot \"{GetRepositoryRoot()}\" " +
+            $"-BaselinePath \"{baselinePath}\" " +
+            "-Configuration Release " +
+            "-Framework net9.0");
+
+        Assert.NotEqual(0, failProcess.ExitCode);
+        Assert.Contains("Public API surface drift detected", failProcess.StandardError, StringComparison.Ordinal);
+        Assert.Contains("docs/en/public-api-inventory.md", failProcess.StandardError, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void ReleaseCoverageValidation_BoundsHungTestCollectors()
     {
         var ciScript = ReadRepoFile("eng/ci.ps1");

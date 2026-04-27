@@ -36,6 +36,7 @@
 ## Drift 规则
 
 - 新增 public host-facing symbol 必须在发布前进入这份 inventory 分类。
+- Public API 变化必须有意更新 `eng/public-api-baseline.txt`；未分类 drift 会让 release gate 失败。
 - 新增 Stable canonical surface 必须同步到 [Host Integration](./host-integration.md) 或 [Extension Contracts](./extension-contracts.md)。
 - 新增 retained migration 或 compatibility-only surface 必须带 replacement guidance。
 - 当 canonical replacement 已存在时，compatibility-only API 必须标记 obsolete。

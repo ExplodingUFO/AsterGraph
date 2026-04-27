@@ -36,6 +36,7 @@ $coverageRunSettingsPath = Join-Path $repoRoot 'tests/coverage.runsettings'
 $coverageReportScriptPath = Join-Path $repoRoot 'eng/coverage-report.ps1'
 $prereleaseNotesScriptPath = Join-Path $repoRoot 'eng/write-prerelease-notes.ps1'
 $publicVersioningValidationScriptPath = Join-Path $repoRoot 'eng/validate-public-versioning.ps1'
+$publicApiSurfaceValidationScriptPath = Join-Path $repoRoot 'eng/validate-public-api-surface.ps1'
 $templateSmokeScriptPath = Join-Path $repoRoot 'eng/template-smoke.ps1'
 $defaultVsTestConnectionTimeoutSeconds = 180
 $hostSampleProject = 'tools/AsterGraph.HostSample/AsterGraph.HostSample.csproj'
@@ -1103,6 +1104,20 @@ function Invoke-PublicVersioningValidation {
   }
 }
 
+function Invoke-PublicApiSurfaceValidation {
+  Write-Host ''
+  Write-Host '### Validate public API surface drift' -ForegroundColor Yellow
+
+  & $publicApiSurfaceValidationScriptPath `
+    -RepoRoot $repoRoot `
+    -Configuration $Configuration `
+    -Framework 'net9.0'
+
+  if ($LASTEXITCODE -ne 0) {
+    throw "validate-public-api-surface script failed with exit code $LASTEXITCODE"
+  }
+}
+
 function Invoke-ContractValidation {
   param(
     [switch]$SkipRestore
@@ -1162,6 +1177,7 @@ function Invoke-ReleaseValidation {
   Invoke-TemplateSmoke
   Invoke-ScaleSmoke
   Invoke-PublicVersioningValidation
+  Invoke-PublicApiSurfaceValidation
   Invoke-CoverageValidation
   Invoke-PublicRepoHygieneValidation -PreserveExistingProofArtifacts
   Invoke-PrereleaseNotesValidation
