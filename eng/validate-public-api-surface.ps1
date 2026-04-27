@@ -236,18 +236,37 @@ function New-PublicApiMetadataContext {
     $uniqueAssemblyPaths.Add($path)
   }
 
+  $targetFrameworkCoreAssemblyPathSuffix = "/ref/$Framework/System.Runtime.dll"
   $coreAssemblyPath = $uniqueAssemblyPaths |
-    Where-Object { [System.IO.Path]::GetFileName($_).Equals('System.Runtime.dll', [System.StringComparison]::OrdinalIgnoreCase) } |
+    Where-Object {
+      $normalizedPath = $_.Replace('\', '/')
+      $normalizedPath.EndsWith($targetFrameworkCoreAssemblyPathSuffix, [System.StringComparison]::OrdinalIgnoreCase)
+    } |
     Select-Object -First 1
   if (-not $coreAssemblyPath) {
-    throw "System.Runtime.dll was not found for $Framework. Install the matching .NET SDK reference pack or set DOTNET_ROOT to the SDK root."
+    $coreAssemblyPath = $uniqueAssemblyPaths |
+      Where-Object { [System.IO.Path]::GetFileName($_).Equals('System.Runtime.dll', [System.StringComparison]::OrdinalIgnoreCase) } |
+      Sort-Object {
+        try {
+          [System.Reflection.AssemblyName]::GetAssemblyName($_).Version
+        }
+        catch {
+          [Version]'0.0.0.0'
+        }
+      } -Descending |
+      Select-Object -First 1
+  }
+
+  if (-not $coreAssemblyPath) {
+    throw "System.Runtime.dll was not found. Install the matching .NET SDK reference pack or set DOTNET_ROOT to the SDK root."
   }
 
   $resolverType = [type]::GetType('System.Reflection.PathAssemblyResolver, System.Reflection.MetadataLoadContext', $true)
   $contextType = [type]::GetType('System.Reflection.MetadataLoadContext, System.Reflection.MetadataLoadContext', $true)
   $resolver = [Activator]::CreateInstance($resolverType, $uniqueAssemblyPaths)
+  $coreAssemblyName = [System.Reflection.AssemblyName]::GetAssemblyName($coreAssemblyPath).FullName
 
-  return [Activator]::CreateInstance($contextType, $resolver, 'System.Runtime')
+  return [Activator]::CreateInstance($contextType, $resolver, $coreAssemblyName)
 }
 
 function Get-ObsoleteMessage {
