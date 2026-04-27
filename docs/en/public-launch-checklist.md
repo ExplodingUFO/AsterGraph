@@ -96,6 +96,7 @@ Expected high-signal markers:
 - `SCALE_HISTORY_CONTRACT_OK:...`
 - `COVERAGE_REPORT_OK:...`
 - synthetic dry-run records from [Synthetic Adoption Intake Dry-Run Fixtures](./adoption-intake-dry-run.md) are maintainer/internal rehearsal only; do not count them toward the 3-5 real external report gate, and do not widen support or capability claims from them
+- every beta intake record includes report type, adopter context, route, version, proof markers, friction, support-bundle attachment note, and claim-expansion status; a single report does not widen public claims
 
 ## 5. Public Prerelease Tag
 
@@ -114,7 +115,8 @@ Expected high-signal markers:
 - treat `HELLOWORLD_WPF_OK` as adapter-2 validation only; do not present it as Avalonia/WPF parity or public WPF support when describing the adapter story
 - use [Adapter-2 Accessibility Recipe](./adapter-2-accessibility-recipe.md) when you need the bounded handoff from defended Avalonia accessibility proof to validation-only WPF verification
 - use [Adapter-2 Performance Recipe](./adapter-2-performance-recipe.md) when you need the bounded handoff from defended Avalonia hosted metrics to validation-only WPF performance verification
-- confirm every beta intake record uses the same bounded schema: route, version, proof markers, friction, and support-bundle attachment note
+- confirm every beta intake record uses the same bounded schema: report type, adopter context, route, version, proof markers, friction, support-bundle attachment note, and claim-expansion status
+- confirm claim-expansion status is treated as triage input until 3-5 real external reports cluster on the same bounded risk
 - repeat the current 0.xx alpha/beta hardening handoff in release messaging: `Performance / Export Hardening` means conservative 5000-node raster export budgets first, then progress/cancel/scope evidence before rendering cache claims
 - keep `xlarge` described as telemetry-only; do not present it as a 10000-node support promise or virtualization commitment
 - if `NUGET_API_KEY` is configured, confirm package publication succeeds

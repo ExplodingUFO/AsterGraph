@@ -73,6 +73,8 @@ The current public-repo priority is turning the public beta into a coherent SDK 
 
 Use this section as the single external capability readiness gate for release notes, maintainer replies, and beta intake. Maintainer-seeded rehearsal evidence is recorded in the adoption feedback loop, but only real external reports on the same bounded risk count toward the 3-5 gate. Every public claim below stays tied to route-level evidence instead of parity aspirations or internal confidence.
 
+Every real external report used for this gate must carry the same intake vocabulary: report type, adopter context, route, version, proof markers, friction, support-bundle attachment note, and claim-expansion status. A single report does not widen public claims; support or capability expansion needs 3-5 real external reports clustered on the same bounded risk.
+
 ### Externally proven now
 
 | Claim | Route-level evidence |
@@ -99,7 +101,7 @@ Use this section as the single external capability readiness gate for release no
 - stable / GA / `1.0` support guarantees
 - the current 0.xx alpha/beta hardening line is `Performance / Export Hardening`: tighten export budgets, add progress/cancel/scope evidence, then consider rendering cache work
 - seeded rehearsals do not count toward the 3-5 gate
-- if a new report does not fit one of the proven or bounded rows above, route it through the [Adoption Feedback Loop](./adoption-feedback.md) and the [Beta Support Bundle](./support-bundle.md) instead of widening the claim ad hoc
+- if a new report does not fit one of the proven or bounded rows above, route it through the [Adoption Feedback Loop](./adoption-feedback.md) and the [Beta Support Bundle](./support-bundle.md) instead of widening the claim ad hoc; the claim-expansion status remains a triage field until the 3-5 real external reports gate is met
 
 ## Public Entry Matrix
 

@@ -72,6 +72,8 @@
 
 当 release notes、维护者回复或 beta intake 需要回答“当前到底有哪些能力已经被外部证据证明”时，就统一引用这一节。维护者种子预演证据记录在 adoption feedback loop 里，但只有同一个受限风险上的真实外部报告才计入 3 到 5 的门槛。下面每条公开声明都必须回到路线级证据，而不是内部信心或 parity 想象。
 
+用于这个门禁的每条真实外部报告，都必须带同一套 intake 词汇：报告类型、采用者上下文、route、version、proof 标记、摩擦点、support bundle 附件备注和 claim-expansion status。单条报告不会扩大公开声明；扩大 support 或 capability 需要 3 到 5 条真实外部报告聚焦在同一个受限风险上。
+
 ### 当前已被外部证据证明
 
 | 声明 | 路线级证据 |
@@ -98,7 +100,7 @@
 - stable / GA / `1.0` 级别的支持保证
 - 当前 `0.xx` alpha/beta hardening 线命名为 `Performance / Export Hardening`：先收紧 export budget，补 progress/cancel/scope evidence，再考虑 rendering cache 工作
 - 维护者种子预演证据不计入 3 到 5 的门槛
-- 如果新的报告放不进上面的“已证明”或“受边界约束”两类，就走 [Adoption Feedback Loop](./adoption-feedback.md) 和 [Beta Support Bundle](./support-bundle.md)，不要临时扩大公开声明
+- 如果新的报告放不进上面的“已证明”或“受边界约束”两类，就走 [Adoption Feedback Loop](./adoption-feedback.md) 和 [Beta Support Bundle](./support-bundle.md)，不要临时扩大公开声明；在满足 3 到 5 条真实外部报告门禁前，claim-expansion status 只作为分诊字段
 
 ## 公开入口分工
 

@@ -27,6 +27,8 @@ What happened instead?
 ## Environment
 
 - AsterGraph version:
+- Report type:
+- Adopter context:
 - .NET SDK:
 - OS:
 - Route or artifact tried:
@@ -35,6 +37,7 @@ What happened instead?
 - Proof markers:
 - Friction:
 - Support-bundle attachment note:
+- Claim-expansion status:
 
 ## Verification
 

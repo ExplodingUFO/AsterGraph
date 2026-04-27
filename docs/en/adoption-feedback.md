@@ -4,17 +4,22 @@ This page defines the public beta bounded intake record and explicitly distingui
 
 ## Intake Format
 
-Each beta intake record should stay on one bounded intake vocabulary: route, version, proof markers, friction, and support-bundle attachment note.
+Each beta intake record should stay on one bounded intake vocabulary: report type, adopter context, route, version, proof markers, friction, support-bundle attachment note, and claim-expansion status.
 
 Each feedback entry should capture this bounded schema:
 
+- report type (`Real external adoption report` or `Maintainer-seeded rehearsal / synthetic dry-run`)
+- adopter context (public project, company, personal handle, or `private adopter` plus the host context)
 - route (`HelloWorld`, `AsterGraph.Starter.Avalonia`, `HelloWorld.Avalonia`, `ConsumerSample.Avalonia`, `HostSample`, `PackageSmoke`, `ScaleSmoke`, `Demo`)
 - version
 - proof markers
 - friction
 - support-bundle attachment note: `SUPPORT_BUNDLE_PATH:...` when the route produced a bundle, or `NO_SUPPORT_BUNDLE:route-cannot-produce-one` when it did not
+- claim-expansion status (`No support/capability expansion requested`, `Candidate support/capability expansion`, or `Unsure / needs maintainer triage`)
 
 Screenshots or command output can be attached as supplemental evidence, but they do not replace proof markers in the bounded intake field.
+
+A real external report must come from someone evaluating or embedding AsterGraph outside maintainer rehearsal. Maintainer-seeded rehearsals and synthetic dry-runs stay useful for checking the intake path, but they do not count toward the 3-5 real external reports required before a support or capability claim can widen. A single report does not widen public claims; it can only become a candidate signal for maintainer triage.
 
 Use the GitHub issue template `Adoption feedback` for public reports.
 When you can reach `ConsumerSample.Avalonia -- --proof --support-bundle <support-bundle-path>`, attach the local bundle described in [Beta Support Bundle](./support-bundle.md) and reuse the emitted `SUPPORT_BUNDLE_PATH:...` line as the support-bundle attachment note. If the route cannot produce a bundle, record `NO_SUPPORT_BUNDLE:route-cannot-produce-one`.

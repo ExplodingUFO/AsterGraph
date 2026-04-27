@@ -12,6 +12,24 @@ body:
       placeholder: 0.11.0-beta / v0.11.0-beta
     validations:
       required: true
+  - type: dropdown
+    id: report_kind
+    attributes:
+      label: Report type
+      description: A real external report must be filed by someone evaluating or embedding AsterGraph outside maintainer rehearsal.
+      options:
+        - Real external adoption report
+        - Maintainer-seeded rehearsal / synthetic dry-run
+    validations:
+      required: true
+  - type: input
+    id: adopter_context
+    attributes:
+      label: Adopter context
+      description: Public project, company, personal handle, or "private adopter" plus the host context you evaluated.
+      placeholder: Contoso design tools / @handle personal prototype / private adopter using Avalonia
+    validations:
+      required: true
   - type: input
     id: dotnet_version
     attributes:
@@ -75,3 +93,14 @@ body:
       label: Support-bundle attachment note
       description: Use the emitted `SUPPORT_BUNDLE_PATH:...` line as the support-bundle attachment note on the bounded intake record when the route produced a bundle, or `NO_SUPPORT_BUNDLE:route-cannot-produce-one` when it did not. When a bundle exists, include `parameterSnapshots` rows for `status`, `owner`, and `priority`.
       placeholder: SUPPORT_BUNDLE_PATH:... with parameterSnapshots rows for status, owner, and priority, or NO_SUPPORT_BUNDLE:route-cannot-produce-one
+  - type: dropdown
+    id: claim_expansion_status
+    attributes:
+      label: Claim-expansion status
+      description: A single report does not widen public claims; candidate expansion still needs 3-5 real external reports on the same bounded risk.
+      options:
+        - No support/capability expansion requested
+        - Candidate support/capability expansion
+        - Unsure / needs maintainer triage
+    validations:
+      required: true

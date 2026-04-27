@@ -734,6 +734,64 @@ public sealed class DemoProofReleaseSurfaceTests
     }
 
     [Fact]
+    public void AdoptionIntakeDocs_DefineRealReportGateAndClaimExpansionStatus()
+    {
+        var adoptionTemplate = ReadRepoFile(".github/ISSUE_TEMPLATE/adoption_feedback.yml");
+        var bugTemplate = ReadRepoFile(".github/ISSUE_TEMPLATE/bug_report.md");
+        var adoptionFeedback = ReadRepoFile("docs/en/adoption-feedback.md");
+        var adoptionFeedbackZh = ReadRepoFile("docs/zh-CN/adoption-feedback.md");
+        var triageDoc = ReadRepoFile("docs/en/adopter-triage.md");
+        var triageDocZh = ReadRepoFile("docs/zh-CN/adopter-triage.md");
+        var projectStatus = ReadRepoFile("docs/en/project-status.md");
+        var projectStatusZh = ReadRepoFile("docs/zh-CN/project-status.md");
+        var checklist = ReadRepoFile("docs/en/public-launch-checklist.md");
+        var checklistZh = ReadRepoFile("docs/zh-CN/public-launch-checklist.md");
+        var reportKindOptions = ExtractDropdownOptions(adoptionTemplate, "report_kind");
+        var claimExpansionOptions = ExtractDropdownOptions(adoptionTemplate, "claim_expansion_status");
+
+        Assert.Equal(
+            new[]
+            {
+                "Real external adoption report",
+                "Maintainer-seeded rehearsal / synthetic dry-run",
+            },
+            reportKindOptions);
+        Assert.Equal(
+            new[]
+            {
+                "No support/capability expansion requested",
+                "Candidate support/capability expansion",
+                "Unsure / needs maintainer triage",
+            },
+            claimExpansionOptions);
+        Assert.Contains("id: adopter_context", adoptionTemplate, StringComparison.Ordinal);
+        Assert.Contains("id: claim_expansion_status", adoptionTemplate, StringComparison.Ordinal);
+        Assert.Contains("A real external report must be filed by someone evaluating or embedding AsterGraph outside maintainer rehearsal.", adoptionTemplate, StringComparison.Ordinal);
+        Assert.Contains("single report does not widen public claims", adoptionTemplate, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Report type", bugTemplate, StringComparison.Ordinal);
+        Assert.Contains("Adopter context", bugTemplate, StringComparison.Ordinal);
+        Assert.Contains("Claim-expansion status", bugTemplate, StringComparison.Ordinal);
+
+        foreach (var contents in new[] { adoptionFeedback, triageDoc, projectStatus, checklist })
+        {
+            Assert.Contains("report type", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("adopter context", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("claim-expansion status", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("single report does not widen public claims", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("3-5 real external reports", contents, StringComparison.OrdinalIgnoreCase);
+        }
+
+        foreach (var contents in new[] { adoptionFeedbackZh, triageDocZh, projectStatusZh, checklistZh })
+        {
+            Assert.Contains("报告类型", contents, StringComparison.Ordinal);
+            Assert.Contains("采用者上下文", contents, StringComparison.Ordinal);
+            Assert.Contains("claim-expansion status", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("单条报告不会扩大公开声明", contents, StringComparison.Ordinal);
+            Assert.Contains("3 到 5 条真实外部报告", contents, StringComparison.Ordinal);
+        }
+    }
+
+    [Fact]
     public void HostIntegrationDocs_RequireCanonicalRouteThenAdapterForWpf()
     {
         var hostIntegration = ReadRepoFile("docs/en/host-integration.md");

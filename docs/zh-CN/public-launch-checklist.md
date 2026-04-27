@@ -96,6 +96,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framew
 - `SCALE_HISTORY_CONTRACT_OK:...`
 - `COVERAGE_REPORT_OK:...`
 - `adoption-intake-dry-run.md` 里的合成 dry-run 记录只是维护者/内部预演；不要计入 3 到 5 条真实外部报告的门槛，也不要扩大 support/capability 声明
+- 每条 beta intake 记录都包含报告类型、采用者上下文、route、version、proof 标记、摩擦点、support bundle 附件备注和 claim-expansion status；单条报告不会扩大公开声明
 
 发布 notes/release messaging 核对要求：
 
@@ -119,7 +120,8 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framew
 - 把 `HELLOWORLD_WPF_OK` 只当成 adapter-2 验证通过，不要写成 Avalonia/WPF parity 或公开 WPF support
 - 需要从受防守的 Avalonia accessibility proof 交接到 validation-only 的 WPF 验证时，统一参考 [Adapter-2 Accessibility Recipe](./adapter-2-accessibility-recipe.md)
 - 需要从受防守的 Avalonia hosted metrics 交接到 validation-only 的 WPF performance 验证时，统一参考 [Adapter-2 Performance Recipe](./adapter-2-performance-recipe.md)
-- 确认每条 beta 反馈都按同一套受限字段记录：`route`、`version`、proof 标记、摩擦点，以及 support bundle 附件备注
+- 确认每条 beta 反馈都按同一套受限字段记录：报告类型、采用者上下文、`route`、`version`、proof 标记、摩擦点、support bundle 附件备注，以及 claim-expansion status
+- 确认 claim-expansion status 在 3 到 5 条真实外部报告聚焦到同一个受限风险之前，只作为分诊输入
 - 在 release messaging 里重复当前 `0.xx` alpha/beta hardening 线的 handoff：`Performance / Export Hardening` 表示先做保守 5000 节点 raster export budget，再补 progress/cancel/scope evidence，然后才扩大 rendering cache claim
 - 保持 `xlarge` 为 telemetry-only，不把它说成 10000 节点支持承诺或 virtualization commitment
 - 如果配置了 `NUGET_API_KEY`，确认包发布成功

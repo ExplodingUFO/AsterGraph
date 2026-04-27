@@ -4,17 +4,22 @@
 
 ## Intake 格式
 
-每条 beta 反馈都应先收口到同一套受限 intake 词汇：`route`、`version`、proof 标记、摩擦点，以及 support bundle 附件备注。
+每条 beta 反馈都应先收口到同一套受限 intake 词汇：报告类型、采用者上下文、`route`、`version`、proof 标记、摩擦点、support bundle 附件备注，以及 claim-expansion status。
 
 每条反馈都应按这套受限字段记录：
 
+- 报告类型（`Real external adoption report` 或 `Maintainer-seeded rehearsal / synthetic dry-run`）
+- 采用者上下文（公开项目、公司、个人 handle，或 `private adopter`，并说明尝试的宿主上下文）
 - route（`HelloWorld`、`AsterGraph.Starter.Avalonia`、`HelloWorld.Avalonia`、`ConsumerSample.Avalonia`、`HostSample`、`PackageSmoke`、`ScaleSmoke`、`Demo`）
 - version
 - proof 标记
 - 摩擦点
 - support bundle 附件备注：`SUPPORT_BUNDLE_PATH:...`（当 route 产出 bundle 时）或 `NO_SUPPORT_BUNDLE:route-cannot-produce-one`（当 route 不能产出 bundle 时）
+- claim-expansion status（`No support/capability expansion requested`、`Candidate support/capability expansion`，或 `Unsure / needs maintainer triage`）
 
 截图或命令输出可以作为补充证据附上，但不替代受限 intake 字段里的 proof 标记。
+
+真实外部报告必须来自维护者预演之外、正在评估或嵌入 AsterGraph 的采用者。维护者种子预演和 synthetic dry-run 仍可用于检查 intake 路径，但不计入扩大 support 或 capability 声明所需的 3 到 5 条真实外部报告。单条报告不会扩大公开声明；它最多成为维护者分诊的候选信号。
 
 公开反馈建议使用 GitHub 上的 `Adoption feedback` issue template。
 如果你已经能跑到 `ConsumerSample.Avalonia -- --proof --support-bundle <support-bundle-path>`，优先把 [Beta Support Bundle](./support-bundle.md) 里定义的本地证据包附上，并把 proof 输出里的 `SUPPORT_BUNDLE_PATH:...` 这一行当作 support bundle 附件备注。如果 route 不能产出 bundle，就记录 `NO_SUPPORT_BUNDLE:route-cannot-produce-one`。
