@@ -96,6 +96,9 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framew
 - `SCALE_PERF_SUMMARY:stress:...`
 - `SCALE_HISTORY_CONTRACT_OK:...`
 - `COVERAGE_REPORT_OK:...`
+- `ADOPTION_INTAKE_EVIDENCE_OK:True`
+- `SUPPORT_BUNDLE_INTAKE_HANDOFF_OK:True`
+- `REAL_EXTERNAL_REPORT_GATE_OK:True`
 - `adoption-intake-dry-run.md` 里的合成 dry-run 记录只是维护者/内部预演；不要计入 3 到 5 条真实外部报告的门槛，也不要扩大 support/capability 声明
 - 每条 beta intake 记录都包含报告类型、采用者上下文、route、version、proof 标记、摩擦点、support bundle 附件备注和 claim-expansion status；单条报告不会扩大公开声明
 

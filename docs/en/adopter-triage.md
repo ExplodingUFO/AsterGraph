@@ -11,6 +11,8 @@ When a beta report is filed, keep the same bounded intake record fields together
 - `support-bundle attachment note`: `SUPPORT_BUNDLE_PATH:...` when the route produced a bundle, or `NO_SUPPORT_BUNDLE:route-cannot-produce-one` when it did not
 - `claim-expansion status`: no expansion requested, candidate expansion, or maintainer triage needed
 
+Current triage proof markers: `ADOPTION_INTAKE_EVIDENCE_OK:True`, `SUPPORT_BUNDLE_INTAKE_HANDOFF_OK:True`, and `REAL_EXTERNAL_REPORT_GATE_OK:True`.
+
 Use the same fields in:
 
 - the `adoption_feedback.yml` issue template

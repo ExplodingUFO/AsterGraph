@@ -11,6 +11,8 @@
 - `support bundle` 附件备注：`SUPPORT_BUNDLE_PATH:...`（当 route 产出 bundle 时）或 `NO_SUPPORT_BUNDLE:route-cannot-produce-one`（当 route 不能产出 bundle 时）
 - claim-expansion status：不请求扩大、候选扩大，或需要维护者分诊
 
+当前 triage proof markers：`ADOPTION_INTAKE_EVIDENCE_OK:True`、`SUPPORT_BUNDLE_INTAKE_HANDOFF_OK:True` 和 `REAL_EXTERNAL_REPORT_GATE_OK:True`。
+
 同一套字段应在：
 
 - `adoption_feedback.yml` issue 模板

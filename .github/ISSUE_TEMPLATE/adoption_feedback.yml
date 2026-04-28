@@ -4,6 +4,10 @@ title: "[Adoption] "
 labels:
   - feedback
 body:
+  - type: markdown
+    attributes:
+      value: |
+        Keep this as one bounded intake record. Current proof markers: `ADOPTION_INTAKE_EVIDENCE_OK:True`, `SUPPORT_BUNDLE_INTAKE_HANDOFF_OK:True`, and `REAL_EXTERNAL_REPORT_GATE_OK:True`.
   - type: input
     id: version
     attributes:

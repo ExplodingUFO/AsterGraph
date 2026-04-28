@@ -6,6 +6,8 @@
 
 每条 beta 反馈都应先收口到同一套受限 intake 词汇：报告类型、采用者上下文、`route`、`version`、proof 标记、摩擦点、support bundle 附件备注，以及 claim-expansion status。
 
+当前 intake proof markers：`ADOPTION_INTAKE_EVIDENCE_OK:True`、`SUPPORT_BUNDLE_INTAKE_HANDOFF_OK:True` 和 `REAL_EXTERNAL_REPORT_GATE_OK:True`。
+
 每条反馈都应按这套受限字段记录：
 
 - 报告类型（`Real external adoption report` 或 `Maintainer-seeded rehearsal / synthetic dry-run`）

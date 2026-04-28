@@ -6,6 +6,8 @@ This page defines the public beta bounded intake record and explicitly distingui
 
 Each beta intake record should stay on one bounded intake vocabulary: report type, adopter context, route, version, proof markers, friction, support-bundle attachment note, and claim-expansion status.
 
+Current intake proof markers: `ADOPTION_INTAKE_EVIDENCE_OK:True`, `SUPPORT_BUNDLE_INTAKE_HANDOFF_OK:True`, and `REAL_EXTERNAL_REPORT_GATE_OK:True`.
+
 Each feedback entry should capture this bounded schema:
 
 - report type (`Real external adoption report` or `Maintainer-seeded rehearsal / synthetic dry-run`)

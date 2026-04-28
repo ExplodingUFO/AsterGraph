@@ -80,6 +80,8 @@ Use this section as the single external capability readiness gate for release no
 
 Every real external report used for this gate must carry the same intake vocabulary: report type, adopter context, route, version, proof markers, friction, support-bundle attachment note, and claim-expansion status. A single report does not widen public claims; support or capability expansion needs 3-5 real external reports clustered on the same bounded risk.
 
+Current intake gate markers: `ADOPTION_INTAKE_EVIDENCE_OK:True`, `SUPPORT_BUNDLE_INTAKE_HANDOFF_OK:True`, and `REAL_EXTERNAL_REPORT_GATE_OK:True`.
+
 ### Externally proven now
 
 | Claim | Route-level evidence |

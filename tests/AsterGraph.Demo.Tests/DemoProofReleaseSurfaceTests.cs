@@ -452,6 +452,8 @@ public sealed class DemoProofReleaseSurfaceTests
         }
 
         Assert.Contains("bounded intake record", supportBundle, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("SUPPORT_BUNDLE_INTAKE_HANDOFF_OK:True", supportBundle, StringComparison.Ordinal);
+        Assert.Contains("SUPPORT_BUNDLE_INTAKE_HANDOFF_OK:True", supportBundleZh, StringComparison.Ordinal);
         Assert.True(HasLineWithAll(supportBundleZh, "support bundle", "附件"));
         AssertAppearsBefore(supportBundle, "Beta Evaluation Path", "## Canonical Producer");
         AssertAppearsBefore(supportBundleZh, "公开 Beta 评估路径", "## Canonical 生成入口");
@@ -459,6 +461,12 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("support-bundle", consumerSampleReadme, StringComparison.OrdinalIgnoreCase);
         Assert.True(HasLineWithAll(adoptionFeedback, "route", "version", "proof markers", "friction", "support-bundle attachment note"));
         Assert.True(HasLineWithAll(adoptionFeedbackZh, "route", "version", "proof 标记", "摩擦", "support bundle 附件备注"));
+        Assert.Contains("ADOPTION_INTAKE_EVIDENCE_OK:True", adoptionFeedback, StringComparison.Ordinal);
+        Assert.Contains("SUPPORT_BUNDLE_INTAKE_HANDOFF_OK:True", adoptionFeedback, StringComparison.Ordinal);
+        Assert.Contains("REAL_EXTERNAL_REPORT_GATE_OK:True", adoptionFeedback, StringComparison.Ordinal);
+        Assert.Contains("ADOPTION_INTAKE_EVIDENCE_OK:True", adoptionFeedbackZh, StringComparison.Ordinal);
+        Assert.Contains("SUPPORT_BUNDLE_INTAKE_HANDOFF_OK:True", adoptionFeedbackZh, StringComparison.Ordinal);
+        Assert.Contains("REAL_EXTERNAL_REPORT_GATE_OK:True", adoptionFeedbackZh, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -499,6 +507,10 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("进行持久化/路径/环境调查", dryRunZh, StringComparison.Ordinal);
         Assert.True(HasLineWithAll(dryRun, "route", "version", "proof markers", "friction", "support-bundle attachment note"));
         Assert.True(HasLineWithAll(dryRunZh, "route", "version", "proof 标记", "摩擦", "support bundle 附件备注"));
+        Assert.Contains("claim-expansion status", dryRun, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("claim-expansion status", dryRunZh, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("ADOPTION_INTAKE_EVIDENCE_OK:True", dryRun, StringComparison.Ordinal);
+        Assert.Contains("ADOPTION_INTAKE_EVIDENCE_OK:True", dryRunZh, StringComparison.Ordinal);
         Assert.Contains("parameterSnapshots", dryRun, StringComparison.Ordinal);
         Assert.Contains("parameterSnapshots", dryRunZh, StringComparison.Ordinal);
         Assert.Contains("status", dryRun, StringComparison.Ordinal);
@@ -615,12 +627,21 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("priority", supportBundleZh, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("bounded intake vocabulary", adoptionFeedback, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("受限 intake 词汇", adoptionFeedbackZh, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("ADOPTION_INTAKE_EVIDENCE_OK:True", adoptionFeedback, StringComparison.Ordinal);
+        Assert.Contains("SUPPORT_BUNDLE_INTAKE_HANDOFF_OK:True", adoptionFeedback, StringComparison.Ordinal);
+        Assert.Contains("REAL_EXTERNAL_REPORT_GATE_OK:True", adoptionFeedback, StringComparison.Ordinal);
+        Assert.Contains("ADOPTION_INTAKE_EVIDENCE_OK:True", adoptionFeedbackZh, StringComparison.Ordinal);
+        Assert.Contains("SUPPORT_BUNDLE_INTAKE_HANDOFF_OK:True", adoptionFeedbackZh, StringComparison.Ordinal);
+        Assert.Contains("REAL_EXTERNAL_REPORT_GATE_OK:True", adoptionFeedbackZh, StringComparison.Ordinal);
         Assert.Contains("proof markers", adoptionFeedback, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("proof 标记", adoptionFeedbackZh, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("screenshot reference", adoptionFeedback, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("截图", adoptionFeedback, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("screenshot reference", adoptionFeedbackZh, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("bounded intake record", adoptionTemplate, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("ADOPTION_INTAKE_EVIDENCE_OK:True", adoptionTemplate, StringComparison.Ordinal);
+        Assert.Contains("SUPPORT_BUNDLE_INTAKE_HANDOFF_OK:True", adoptionTemplate, StringComparison.Ordinal);
+        Assert.Contains("REAL_EXTERNAL_REPORT_GATE_OK:True", adoptionTemplate, StringComparison.Ordinal);
         Assert.Contains("SUPPORT_BUNDLE_PATH:...", adoptionTemplate, StringComparison.Ordinal);
         Assert.Contains("NO_SUPPORT_BUNDLE:route-cannot-produce-one", adoptionTemplate, StringComparison.Ordinal);
     }
@@ -787,6 +808,9 @@ public sealed class DemoProofReleaseSurfaceTests
             Assert.Contains("claim-expansion status", contents, StringComparison.OrdinalIgnoreCase);
             Assert.Contains("single report does not widen public claims", contents, StringComparison.OrdinalIgnoreCase);
             Assert.Contains("3-5 real external reports", contents, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("ADOPTION_INTAKE_EVIDENCE_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("SUPPORT_BUNDLE_INTAKE_HANDOFF_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("REAL_EXTERNAL_REPORT_GATE_OK:True", contents, StringComparison.Ordinal);
         }
 
         foreach (var contents in new[] { adoptionFeedbackZh, triageDocZh, projectStatusZh, checklistZh })
@@ -796,6 +820,9 @@ public sealed class DemoProofReleaseSurfaceTests
             Assert.Contains("claim-expansion status", contents, StringComparison.OrdinalIgnoreCase);
             Assert.Contains("单条报告不会扩大公开声明", contents, StringComparison.Ordinal);
             Assert.Contains("3 到 5 条真实外部报告", contents, StringComparison.Ordinal);
+            Assert.Contains("ADOPTION_INTAKE_EVIDENCE_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("SUPPORT_BUNDLE_INTAKE_HANDOFF_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("REAL_EXTERNAL_REPORT_GATE_OK:True", contents, StringComparison.Ordinal);
         }
     }
 
