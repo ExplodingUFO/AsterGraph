@@ -48,6 +48,10 @@ internal static class ConsumerSampleDocsAssertions
         Assert.Contains("HOST_NATIVE_METRIC:command_surface_refresh_ms", contents, StringComparison.Ordinal);
         Assert.Contains("HOST_NATIVE_METRIC:node_tool_projection_ms", contents, StringComparison.Ordinal);
         Assert.Contains("HOST_NATIVE_METRIC:edge_tool_projection_ms", contents, StringComparison.Ordinal);
+        Assert.Contains("RUNTIME_OVERLAY_SNAPSHOT_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("RUNTIME_OVERLAY_SNAPSHOT_POLISH_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("RUNTIME_OVERLAY_SCOPE_FILTER_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("RUNTIME_OVERLAY_SUPPORT_BUNDLE_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("EXPERIENCE_POLISH_HANDOFF_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("FEATURE_ENHANCEMENT_PROOF_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("AUTHORING_FLOW_PROOF_OK:True", contents, StringComparison.Ordinal);

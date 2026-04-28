@@ -63,6 +63,8 @@ public sealed record ConsumerSampleProofResult(
     bool WireSliceOk = true,
     bool SelectedNodeEdgeHighlightOk = true,
     bool RuntimeOverlaySnapshotOk = true,
+    bool RuntimeOverlaySnapshotPolishOk = true,
+    bool RuntimeOverlayScopeFilterOk = true,
     bool RuntimeLogPanelOk = true,
     bool RuntimeLogFilterOk = true,
     bool RuntimeOverlaySupportBundleOk = true,
@@ -146,6 +148,8 @@ public sealed record ConsumerSampleProofResult(
         && SupportBundlePayloadOk
         && FiveMinuteOnboardingOk
         && RuntimeOverlaySnapshotOk
+        && RuntimeOverlaySnapshotPolishOk
+        && RuntimeOverlayScopeFilterOk
         && RuntimeLogPanelOk
         && RuntimeLogFilterOk
         && RuntimeOverlaySupportBundleOk
@@ -188,6 +192,8 @@ public sealed record ConsumerSampleProofResult(
         && WireSliceOk
         && SelectedNodeEdgeHighlightOk
         && RuntimeOverlaySnapshotOk
+        && RuntimeOverlaySnapshotPolishOk
+        && RuntimeOverlayScopeFilterOk
         && RuntimeLogPanelOk
         && RuntimeLogFilterOk
         && RuntimeOverlaySupportBundleOk
@@ -232,6 +238,7 @@ public sealed record ConsumerSampleProofResult(
         && TrustTransparencyOk
         && SupportBundlePayloadOk
         && RuntimeOverlaySupportBundleOk
+        && RuntimeOverlayScopeFilterOk
         && PluginTrustEvidencePanelOk
         && PluginAllowlistRoundtripOk
         && GraphSnippetCatalogOk
@@ -295,6 +302,8 @@ public sealed record ConsumerSampleProofResult(
         $"AUTHORING_WIRE_SLICE_OK:{WireSliceOk}",
         $"AUTHORING_SELECTED_NODE_EDGE_HIGHLIGHT_OK:{SelectedNodeEdgeHighlightOk}",
         $"RUNTIME_OVERLAY_SNAPSHOT_OK:{RuntimeOverlaySnapshotOk}",
+        $"RUNTIME_OVERLAY_SNAPSHOT_POLISH_OK:{RuntimeOverlaySnapshotPolishOk}",
+        $"RUNTIME_OVERLAY_SCOPE_FILTER_OK:{RuntimeOverlayScopeFilterOk}",
         $"RUNTIME_LOG_PANEL_OK:{RuntimeLogPanelOk}",
         $"RUNTIME_LOG_FILTER_OK:{RuntimeLogFilterOk}",
         $"RUNTIME_OVERLAY_SUPPORT_BUNDLE_OK:{RuntimeOverlaySupportBundleOk}",
@@ -601,6 +610,8 @@ public static class ConsumerSampleProof
         bool wireSliceOk;
         bool selectedNodeEdgeHighlightOk;
         bool runtimeOverlaySnapshotOk;
+        bool runtimeOverlaySnapshotPolishOk;
+        bool runtimeOverlayScopeFilterOk;
         try
         {
             capabilityWindow.Show();
@@ -627,6 +638,8 @@ public static class ConsumerSampleProof
             (deleteAndReconnectOk, detachNodeOk, reconnectConflictReportOk) = HasReconnectDetach(host);
             (edgeMultiSelectOk, wireSliceOk, selectedNodeEdgeHighlightOk) = HasWireSelectionAndSlicing(host);
             runtimeOverlaySnapshotOk = HasRuntimeOverlaySnapshot(host);
+            runtimeOverlaySnapshotPolishOk = HasRuntimeOverlaySnapshotPolish(host);
+            runtimeOverlayScopeFilterOk = HasRuntimeOverlayScopeFilter(host);
             (quickAddConnectedNodeOk, portFilteredNodeSearchOk) = HasQuickAddConnectedNode(host);
 
             host.SelectNode(reviewNodeId);
@@ -701,6 +714,8 @@ public static class ConsumerSampleProof
             WireSliceOk: wireSliceOk,
             SelectedNodeEdgeHighlightOk: selectedNodeEdgeHighlightOk,
             RuntimeOverlaySnapshotOk: runtimeOverlaySnapshotOk,
+            RuntimeOverlaySnapshotPolishOk: runtimeOverlaySnapshotPolishOk,
+            RuntimeOverlayScopeFilterOk: runtimeOverlayScopeFilterOk,
             RuntimeLogPanelOk: runtimeLogPanelOk,
             RuntimeLogFilterOk: runtimeLogFilterOk,
             RuntimeOverlaySupportBundleOk: runtimeOverlaySupportBundleOk,
@@ -1998,6 +2013,63 @@ public static class ConsumerSampleProof
                 && descriptor.IsAvailable);
     }
 
+    private static bool HasRuntimeOverlaySnapshotPolish(ConsumerSampleHost host)
+    {
+        var overlay = host.Session.Queries.GetRuntimeOverlaySnapshot();
+        return overlay.IsAvailable
+            && overlay.NodeOverlays.Any(snapshot =>
+                snapshot.Status == GraphEditorRuntimeOverlayStatus.Success
+                && snapshot.ElapsedMilliseconds > 0
+                && !string.IsNullOrWhiteSpace(snapshot.OutputPreview)
+                && snapshot.LastRunAtUtc is not null)
+            && overlay.NodeOverlays.Any(snapshot =>
+                snapshot.WarningCount > 0
+                && !string.IsNullOrWhiteSpace(snapshot.OutputPreview)
+                && snapshot.LastRunAtUtc is not null)
+            && overlay.NodeOverlays.Any(snapshot =>
+                snapshot.Status == GraphEditorRuntimeOverlayStatus.Error
+                && snapshot.ErrorCount > 0
+                && !string.IsNullOrWhiteSpace(snapshot.ErrorMessage)
+                && snapshot.LastRunAtUtc is not null)
+            && overlay.ConnectionOverlays.Any(snapshot =>
+                snapshot.Status == GraphEditorRuntimeOverlayStatus.Success
+                && !string.IsNullOrWhiteSpace(snapshot.ValuePreview)
+                && !string.IsNullOrWhiteSpace(snapshot.PayloadType)
+                && snapshot.ItemCount > 0
+                && !snapshot.IsStale)
+            && overlay.ConnectionOverlays.Any(snapshot =>
+                snapshot.Status == GraphEditorRuntimeOverlayStatus.Error
+                && !string.IsNullOrWhiteSpace(snapshot.PayloadType)
+                && snapshot.IsStale);
+    }
+
+    private static bool HasRuntimeOverlayScopeFilter(ConsumerSampleHost host)
+    {
+        var overlay = host.Session.Queries.GetRuntimeOverlaySnapshot();
+        var selectedNodeId = host.Session.Queries.GetSelectionSnapshot().PrimarySelectedNodeId;
+        var selectedNodeOverlays = selectedNodeId is null
+            ? Array.Empty<GraphEditorNodeRuntimeOverlaySnapshot>()
+            : overlay.NodeOverlays
+                .Where(snapshot => string.Equals(snapshot.NodeId, selectedNodeId, StringComparison.Ordinal))
+                .ToArray();
+        var selectedLogs = selectedNodeId is null
+            ? Array.Empty<GraphEditorRuntimeLogEntrySnapshot>()
+            : overlay.RecentLogs
+                .Where(snapshot => string.Equals(snapshot.NodeId, selectedNodeId, StringComparison.Ordinal))
+                .ToArray();
+        var currentScopeLogs = overlay.RecentLogs
+            .Where(snapshot => string.Equals(snapshot.ScopeId, "root", StringComparison.Ordinal))
+            .ToArray();
+
+        return overlay.IsAvailable
+            && selectedNodeId is not null
+            && overlay.NodeOverlays.Count > selectedNodeOverlays.Length
+            && selectedNodeOverlays.Length > 0
+            && selectedLogs.Length > 0
+            && currentScopeLogs.Length == overlay.RecentLogs.Count
+            && overlay.ConnectionOverlays.Count > 0;
+    }
+
     private static bool HasRuntimeLogPanel(Window window, ConsumerSampleHost host)
     {
         var log = host.Session.Queries.GetRuntimeOverlaySnapshot().RecentLogs.SingleOrDefault(snapshot =>
@@ -2029,7 +2101,8 @@ public static class ConsumerSampleProof
         var scopeLogs = allLogs.Where(log => string.Equals(log.ScopeId, "root", StringComparison.Ordinal)).ToArray();
 
         return allLogs.Count > 0
-            && selectedLogs.Length == 0
+            && selectedLogs.Length > 0
+            && selectedLogs.Length < allLogs.Count
             && scopeLogs.Length == allLogs.Count;
     }
 
