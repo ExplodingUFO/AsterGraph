@@ -7,6 +7,7 @@
 - historical legacy repository milestone tag series: `v1.x`-style pre-launch checkpoints
 - repo posture: public beta
 - v0.56 adoption-readiness handoff markers: `ADOPTION_READINESS_HANDOFF_OK:True`, `ADOPTION_SCOPE_BOUNDARY_OK:True`, and `V056_MILESTONE_PROOF_OK:True`
+- v0.58 authoring-depth handoff markers: `AUTHORING_DEPTH_HANDOFF_OK:True`, `AUTHORING_DEPTH_SCOPE_BOUNDARY_OK:True`, and `V058_MILESTONE_PROOF_OK:True`
 - public versioning guidance: [Versioning](./versioning.md)
 - supported published packages:
   - `AsterGraph.Abstractions`
@@ -39,6 +40,7 @@
 - ConsumerSample snippets remain host-owned proof catalog entries: `GRAPH_SNIPPET_CATALOG_OK:True`, `GRAPH_SNIPPET_INSERT_OK:True`, `FRAGMENT_LIBRARY_SEARCH_OK:True`, `FRAGMENT_LIBRARY_PREVIEW_OK:True`, `FRAGMENT_LIBRARY_RECENTS_FAVORITES_OK:True`, `FRAGMENT_LIBRARY_SCOPE_BOUNDARY_OK:True`
 - ConsumerSample authoring flow proof stays bounded to existing session commands: `AUTHORING_FLOW_PROOF_OK:True`, `AUTHORING_FLOW_HANDOFF_OK:True`, `AUTHORING_FLOW_SCOPE_BOUNDARY_OK:True`
 - experience handoff proof is summarized without widening the support boundary: `EXPERIENCE_POLISH_HANDOFF_OK:True`, `FEATURE_ENHANCEMENT_PROOF_OK:True`, `EXPERIENCE_SCOPE_BOUNDARY_OK:True`
+- authoring-depth proof summarizes the v0.58 port, validation, toolbar, and fragment-library convenience polish without new runtime model claims: `AUTHORING_DEPTH_HANDOFF_OK:True`, `AUTHORING_DEPTH_SCOPE_BOUNDARY_OK:True`, `V058_MILESTONE_PROOF_OK:True`
 - graph-surface usability proof markers:
   - `COMMAND_SURFACE_OK:True`
   - `TIERED_NODE_SURFACE_OK:True`
@@ -87,7 +89,7 @@ Current intake gate markers: `ADOPTION_INTAKE_EVIDENCE_OK:True`, `SUPPORT_BUNDLE
 
 | Claim | Route-level evidence |
 | --- | --- |
-| Canonical runtime/session route and the maintained evaluator ladder are externally proven on the defended beta line. | `tools/AsterGraph.HelloWorld`, `tools/AsterGraph.Starter.Avalonia`, `tools/AsterGraph.HelloWorld.Avalonia`, `tools/AsterGraph.ConsumerSample.Avalonia`, `tools/AsterGraph.HostSample`, `HOST_SAMPLE_OK`, `CONSUMER_SAMPLE_OK`, `GRAPH_SNIPPET_CATALOG_OK`, `GRAPH_SNIPPET_INSERT_OK`, `AUTHORING_FLOW_PROOF_OK`, `AUTHORING_FLOW_HANDOFF_OK`, `AUTHORING_FLOW_SCOPE_BOUNDARY_OK`, `EXPERIENCE_POLISH_HANDOFF_OK`, `FEATURE_ENHANCEMENT_PROOF_OK`, `EXPERIENCE_SCOPE_BOUNDARY_OK` |
+| Canonical runtime/session route and the maintained evaluator ladder are externally proven on the defended beta line. | `tools/AsterGraph.HelloWorld`, `tools/AsterGraph.Starter.Avalonia`, `tools/AsterGraph.HelloWorld.Avalonia`, `tools/AsterGraph.ConsumerSample.Avalonia`, `tools/AsterGraph.HostSample`, `HOST_SAMPLE_OK`, `CONSUMER_SAMPLE_OK`, `GRAPH_SNIPPET_CATALOG_OK`, `GRAPH_SNIPPET_INSERT_OK`, `FRAGMENT_LIBRARY_SEARCH_OK`, `FRAGMENT_LIBRARY_PREVIEW_OK`, `FRAGMENT_LIBRARY_RECENTS_FAVORITES_OK`, `FRAGMENT_LIBRARY_SCOPE_BOUNDARY_OK`, `AUTHORING_FLOW_PROOF_OK`, `AUTHORING_FLOW_HANDOFF_OK`, `AUTHORING_FLOW_SCOPE_BOUNDARY_OK`, `EXPERIENCE_POLISH_HANDOFF_OK`, `FEATURE_ENHANCEMENT_PROOF_OK`, `EXPERIENCE_SCOPE_BOUNDARY_OK`, `AUTHORING_DEPTH_HANDOFF_OK`, `AUTHORING_DEPTH_SCOPE_BOUNDARY_OK`, `V058_MILESTONE_PROOF_OK` |
 | The showcase authoring surface and host-owned runtime feedback are externally proven as a bounded beta host experience. | `src/AsterGraph.Demo`, `tools/AsterGraph.ConsumerSample.Avalonia`, `DEMO_OK:True`, `DEMO_SCENARIO_PRESETS_OK:True`, `COMMAND_SURFACE_OK:True`, `COMPOSITE_SCOPE_OK:True`, `EDGE_NOTE_OK:True`, `EDGE_GEOMETRY_OK:True`, `DISCONNECT_FLOW_OK:True`, `RUNTIME_DEBUG_PANEL_INTERACTION_OK:True`, `RUNTIME_LOG_LOCATE_OK:True`, `RUNTIME_LOG_EXPORT_OK:True`, `AI_PIPELINE_MOCK_RUNNER_POLISH_OK:True`, `AI_PIPELINE_PAYLOAD_PREVIEW_OK:True`, `AI_PIPELINE_ERROR_DEBUG_EVIDENCE_OK:True` |
 | Packaged consumer proof is externally proven without widening the SDK boundary. | `tools/AsterGraph.PackageSmoke`, `PACKAGE_SMOKE_OK`, `HOST_SAMPLE_NET10_OK` |
 | Scale proof is externally proven at defended `baseline`/`large` tiers and 5000-node `stress`: performance, authoring, SVG export, conservative PNG/JPEG raster export, and reload are defended. | `tools/AsterGraph.ScaleSmoke`, `SCALE_PERFORMANCE_BUDGET_OK:baseline:True`, `SCALE_PERFORMANCE_BUDGET_OK:large:True`, `SCALE_PERFORMANCE_BUDGET_OK:stress:True`, `SCALE_EXPORT_BUDGET:stress:svg<=300:png<=120000:jpeg<=100000:reload<=800`, `SCALE_RASTER_EXPORT_STRESS_OK:True` |

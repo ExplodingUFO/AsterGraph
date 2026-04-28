@@ -208,6 +208,9 @@ public sealed class ConsumerSampleProofTests
         Assert.True(result.AuthoringFlowHandoffOk);
         Assert.True(result.AuthoringFlowScopeBoundaryOk);
         Assert.True(result.ExperienceScopeBoundaryOk);
+        Assert.True(result.AuthoringDepthHandoffOk);
+        Assert.True(result.AuthoringDepthScopeBoundaryOk);
+        Assert.True(result.V058MilestoneProofOk);
         Assert.True(result.StartupMs >= 0);
         Assert.True(result.InspectorProjectionMs >= 0);
         Assert.True(result.PluginScanMs >= 0);
@@ -342,6 +345,9 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_FLOW_HANDOFF_OK:True");
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_FLOW_SCOPE_BOUNDARY_OK:True");
         Assert.Contains(result.ProofLines, line => line == "EXPERIENCE_SCOPE_BOUNDARY_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "AUTHORING_DEPTH_HANDOFF_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "AUTHORING_DEPTH_SCOPE_BOUNDARY_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "V058_MILESTONE_PROOF_OK:True");
         Assert.Contains(result.MetricLines, line => line.Contains("startup_ms", StringComparison.Ordinal));
         Assert.Contains(result.MetricLines, line => line.Contains("command_latency_ms", StringComparison.Ordinal));
         Assert.Contains(result.MetricLines, line => line.Contains("stencil_search_ms", StringComparison.Ordinal));

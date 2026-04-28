@@ -461,6 +461,40 @@ public sealed record ConsumerSampleProofResult(
         && FeatureDescriptorIds is { Count: > 0 }
         && FeatureDescriptorIds.All(IsBoundedFeatureDescriptorId);
 
+    public bool AuthoringDepthHandoffOk
+        => PortHandleIdOk
+        && PortGroupAuthoringOk
+        && PortConnectionHintOk
+        && PortAuthoringScopeBoundaryOk
+        && ConnectionValidationReasonOk
+        && ConnectionInvalidHoverFeedbackOk
+        && ConnectionValidationSupportBundleOk
+        && ConnectionValidationScopeBoundaryOk
+        && NodeToolbarContributionOk
+        && EdgeToolbarContributionOk
+        && ToolbarContributionDescriptorOk
+        && ToolbarContributionScopeBoundaryOk
+        && FragmentLibrarySearchOk
+        && FragmentLibraryPreviewOk
+        && FragmentLibraryRecentsFavoritesOk
+        && FragmentLibraryScopeBoundaryOk;
+
+    public bool AuthoringDepthScopeBoundaryOk
+        => PortAuthoringScopeBoundaryOk
+        && ConnectionValidationScopeBoundaryOk
+        && ToolbarContributionScopeBoundaryOk
+        && FragmentLibraryScopeBoundaryOk
+        && AuthoringFlowScopeBoundaryOk
+        && ExperienceScopeBoundaryOk
+        && WorkbenchScopeBoundaryOk
+        && NavigationScopeBoundaryOk;
+
+    public bool V058MilestoneProofOk
+        => AuthoringDepthHandoffOk
+        && AuthoringDepthScopeBoundaryOk
+        && AuthoringSurfaceOk
+        && FeatureEnhancementProofOk;
+
     public bool IsOk
         => HostMenuActionOk
         && PluginContributionOk
@@ -479,7 +513,10 @@ public sealed record ConsumerSampleProofResult(
         && ExperienceScopeBoundaryOk
         && NavigationProductivityProofOk
         && NavigationProductivityHandoffOk
-        && NavigationScopeBoundaryOk;
+        && NavigationScopeBoundaryOk
+        && AuthoringDepthHandoffOk
+        && AuthoringDepthScopeBoundaryOk
+        && V058MilestoneProofOk;
 
     public IReadOnlyList<string> MetricLines =>
     [
@@ -629,6 +666,9 @@ public sealed record ConsumerSampleProofResult(
         $"AUTHORING_FLOW_HANDOFF_OK:{AuthoringFlowHandoffOk}",
         $"AUTHORING_FLOW_SCOPE_BOUNDARY_OK:{AuthoringFlowScopeBoundaryOk}",
         $"EXPERIENCE_SCOPE_BOUNDARY_OK:{ExperienceScopeBoundaryOk}",
+        $"AUTHORING_DEPTH_HANDOFF_OK:{AuthoringDepthHandoffOk}",
+        $"AUTHORING_DEPTH_SCOPE_BOUNDARY_OK:{AuthoringDepthScopeBoundaryOk}",
+        $"V058_MILESTONE_PROOF_OK:{V058MilestoneProofOk}",
         $"CONSUMER_SAMPLE_OK:{IsOk}",
     ];
 

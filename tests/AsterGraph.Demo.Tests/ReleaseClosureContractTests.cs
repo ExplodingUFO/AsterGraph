@@ -429,6 +429,25 @@ public sealed class ReleaseClosureContractTests
     }
 
     [Fact]
+    public void AuthoringDepthHandoff_StaysVisibleInStatusAndChecklist()
+    {
+        var englishChecklist = ReadRepoFile("docs/en/public-launch-checklist.md");
+        var chineseChecklist = ReadRepoFile("docs/zh-CN/public-launch-checklist.md");
+        var englishStatus = ReadRepoFile("docs/en/project-status.md");
+        var chineseStatus = ReadRepoFile("docs/zh-CN/project-status.md");
+
+        foreach (var contents in new[] { englishChecklist, chineseChecklist, englishStatus, chineseStatus })
+        {
+            Assert.Contains("AUTHORING_DEPTH_HANDOFF_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("AUTHORING_DEPTH_SCOPE_BOUNDARY_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("V058_MILESTONE_PROOF_OK:True", contents, StringComparison.Ordinal);
+        }
+
+        Assert.True(HasLineWithAll(englishStatus, "authoring-depth proof", "v0.58", "without new runtime model claims"));
+        Assert.True(HasLineWithAll(chineseStatus, "authoring-depth proof", "v0.58", "runtime model"));
+    }
+
+    [Fact]
     public void ReleaseCoverageValidation_BoundsHungTestCollectors()
     {
         var ciScript = ReadRepoFile("eng/ci.ps1");

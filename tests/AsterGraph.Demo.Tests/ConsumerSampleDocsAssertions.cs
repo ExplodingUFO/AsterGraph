@@ -114,6 +114,9 @@ internal static class ConsumerSampleDocsAssertions
         Assert.Contains("AUTHORING_FLOW_HANDOFF_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("AUTHORING_FLOW_SCOPE_BOUNDARY_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("EXPERIENCE_SCOPE_BOUNDARY_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("AUTHORING_DEPTH_HANDOFF_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("AUTHORING_DEPTH_SCOPE_BOUNDARY_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("V058_MILESTONE_PROOF_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("CONSUMER_SAMPLE_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("parameterSnapshots", contents, StringComparison.Ordinal);
         Assert.Contains("readinessStatus", contents, StringComparison.Ordinal);

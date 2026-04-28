@@ -105,6 +105,9 @@ Expected high-signal markers:
 - `ADOPTION_READINESS_HANDOFF_OK:True`
 - `ADOPTION_SCOPE_BOUNDARY_OK:True`
 - `V056_MILESTONE_PROOF_OK:True`
+- `AUTHORING_DEPTH_HANDOFF_OK:True`
+- `AUTHORING_DEPTH_SCOPE_BOUNDARY_OK:True`
+- `V058_MILESTONE_PROOF_OK:True`
 - synthetic dry-run records from [Synthetic Adoption Intake Dry-Run Fixtures](./adoption-intake-dry-run.md) are maintainer/internal rehearsal only; do not count them toward the 3-5 real external report gate, and do not widen support or capability claims from them
 - every beta intake record includes report type, adopter context, route, version, proof markers, friction, support-bundle attachment note, and claim-expansion status; a single report does not widen public claims
 
