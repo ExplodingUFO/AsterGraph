@@ -146,6 +146,7 @@ Runtime feedback proof remains host-owned: ConsumerSample should also keep `RUNT
 
 Graph search proof also stays hosted and snapshot-driven: expect `GRAPH_SEARCH_LOCATE_OK:True`, `GRAPH_SEARCH_SCOPE_FILTER_OK:True`, and `GRAPH_SEARCH_VIEWPORT_FOCUS_OK:True` without a background graph index service or command macro engine.
 Command palette proof stays on the same shared command/session route: expect `COMMAND_PALETTE_GROUPING_OK:True`, `COMMAND_PALETTE_DISABLED_REASON_OK:True`, and `COMMAND_PALETTE_RECENT_ACTIONS_OK:True` without adding macros or scripting.
+Navigation proof stays host-owned on top of existing selection, scope, and viewport commands: expect `NAVIGATION_HISTORY_OK:True`, `SCOPE_BREADCRUMB_NAVIGATION_OK:True`, and `FOCUS_RESTORE_OK:True` without a new runtime navigation API.
 
 Template smoke in the release lane validates that `astergraph-avalonia` and `astergraph-plugin` generate buildable `net8.0` projects and that the generated plugin passes `AsterGraph.PluginTool validate`.
 

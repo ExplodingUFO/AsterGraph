@@ -53,6 +53,9 @@ public sealed class ConsumerSampleHost : IDisposable
     private IReadOnlyList<string> _dimmedNodeIds = [];
     private IReadOnlyList<string> _alignmentHelperLines = [];
     private IReadOnlyList<string> _lastRuntimeLogExportLines = [];
+    private readonly List<ConsumerSampleNavigationHistoryEntry> _navigationHistory = [];
+    private int _navigationHistoryIndex = -1;
+    private GraphEditorViewportSnapshot? _pendingViewportRestore;
     private int _lastRouteCleanupCount;
 
     private ConsumerSampleHost(
@@ -107,6 +110,25 @@ public sealed class ConsumerSampleHost : IDisposable
     public IReadOnlyList<string> RuntimeLogExportLines
         => RuntimeOverlay.RecentLogs
             .Select(log => $"{log.Id} | {log.TimestampUtc:O} | {log.Status} | scope={log.ScopeId ?? "-"} | node={log.NodeId ?? "-"} | connection={log.ConnectionId ?? "-"} | {log.Message}")
+            .ToArray();
+
+    public IReadOnlyList<ConsumerSampleNavigationHistoryEntry> NavigationHistory => _navigationHistory;
+
+    public bool CanNavigateBack => _navigationHistoryIndex > 0;
+
+    public bool CanNavigateForward => _navigationHistoryIndex >= 0 && _navigationHistoryIndex < _navigationHistory.Count - 1;
+
+    public bool CanRestoreViewport => _pendingViewportRestore is not null;
+
+    public IReadOnlyList<ConsumerSampleScopeBreadcrumbEntry> ScopeBreadcrumbs
+        => Session.Queries.GetScopeNavigationSnapshot().Breadcrumbs
+            .Select(breadcrumb => new ConsumerSampleScopeBreadcrumbEntry(
+                breadcrumb.ScopeId,
+                breadcrumb.Title,
+                IsCurrent: string.Equals(
+                    breadcrumb.ScopeId,
+                    Session.Queries.GetScopeNavigationSnapshot().CurrentScopeId,
+                    StringComparison.Ordinal)))
             .ToArray();
 
     public IReadOnlyList<string> PluginAllowlistLines
@@ -312,6 +334,7 @@ public sealed class ConsumerSampleHost : IDisposable
     public bool TryLocateGraphSearchResult(ConsumerSampleGraphSearchResult result)
     {
         ArgumentNullException.ThrowIfNull(result);
+        PushNavigationHistory("Before graph search locate");
         var document = Session.Queries.CreateDocumentSnapshot();
         if (!TryNavigateToGraphSearchScope(document, result.ScopeId))
         {
@@ -332,6 +355,7 @@ public sealed class ConsumerSampleHost : IDisposable
         {
             Session.Commands.SetSelection([result.NodeId], result.NodeId, updateStatus: false);
             Session.Commands.CenterViewOnNode(result.NodeId);
+            PushNavigationHistory($"Node {result.NodeId}");
             StateChanged?.Invoke(this, EventArgs.Empty);
             return string.Equals(Session.Queries.GetSelectionSnapshot().PrimarySelectedNodeId, result.NodeId, StringComparison.Ordinal);
         }
@@ -350,6 +374,7 @@ public sealed class ConsumerSampleHost : IDisposable
                     updateStatus: false);
             }
 
+            PushNavigationHistory($"Connection {result.ConnectionId}");
             StateChanged?.Invoke(this, EventArgs.Empty);
             return string.Equals(Session.Queries.GetSelectionSnapshot().PrimarySelectedConnectionId, result.ConnectionId, StringComparison.Ordinal);
         }
@@ -413,6 +438,7 @@ public sealed class ConsumerSampleHost : IDisposable
             return false;
         }
 
+        PushNavigationHistory("Before selected subgraph focus");
         var focused = selection.SelectedNodeIds
             .Concat(document.Connections
                 .Where(connection =>
@@ -429,8 +455,86 @@ public sealed class ConsumerSampleHost : IDisposable
             .OrderBy(id => id, StringComparer.Ordinal)
             .ToArray();
         Session.Commands.CenterViewOnNode(selection.PrimarySelectedNodeId ?? focused[0]);
+        PushNavigationHistory("Selected subgraph");
         StateChanged?.Invoke(this, EventArgs.Empty);
         return _focusedSubgraphNodeIds.Count > 0 && _dimmedNodeIds.Count > 0;
+    }
+
+    public bool FocusCurrentScopeForReview()
+    {
+        var before = Session.Queries.GetViewportSnapshot();
+        _pendingViewportRestore = before;
+        PushNavigationHistory("Before current scope focus");
+        Session.Commands.FocusCurrentScope(updateStatus: false);
+        var after = Session.Queries.GetViewportSnapshot();
+        PushNavigationHistory("Current scope");
+        StateChanged?.Invoke(this, EventArgs.Empty);
+        return !ViewportEquals(before, after);
+    }
+
+    public bool RestorePreviousViewport()
+    {
+        var restore = _pendingViewportRestore;
+        if (restore is null)
+        {
+            return false;
+        }
+
+        ApplyViewport(restore);
+        _pendingViewportRestore = null;
+        PushNavigationHistory("Restored viewport");
+        StateChanged?.Invoke(this, EventArgs.Empty);
+        return ViewportEquals(Session.Queries.GetViewportSnapshot(), restore);
+    }
+
+    public bool TryNavigateBack()
+    {
+        if (!CanNavigateBack)
+        {
+            return false;
+        }
+
+        _navigationHistoryIndex--;
+        var navigated = ApplyNavigationHistoryEntry(_navigationHistory[_navigationHistoryIndex]);
+        if (navigated)
+        {
+            StateChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        return navigated;
+    }
+
+    public bool TryNavigateForward()
+    {
+        if (!CanNavigateForward)
+        {
+            return false;
+        }
+
+        _navigationHistoryIndex++;
+        var navigated = ApplyNavigationHistoryEntry(_navigationHistory[_navigationHistoryIndex]);
+        if (navigated)
+        {
+            StateChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        return navigated;
+    }
+
+    public bool TryNavigateToScopeBreadcrumb(string scopeId)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(scopeId);
+
+        var document = Session.Queries.CreateDocumentSnapshot();
+        PushNavigationHistory("Before scope breadcrumb");
+        if (!TryNavigateToGraphSearchScope(document, scopeId))
+        {
+            return false;
+        }
+
+        PushNavigationHistory($"Scope {scopeId}");
+        StateChanged?.Invoke(this, EventArgs.Empty);
+        return string.Equals(Session.Queries.GetScopeNavigationSnapshot().CurrentScopeId, scopeId, StringComparison.Ordinal);
     }
 
     public bool CleanupSelectedConnectionRoutes()
@@ -497,7 +601,9 @@ public sealed class ConsumerSampleHost : IDisposable
             return false;
         }
 
+        PushNavigationHistory("Before runtime log locate");
         SelectNode(log.NodeId);
+        PushNavigationHistory($"Runtime log {log.Id}");
         return true;
     }
 
@@ -575,6 +681,104 @@ public sealed class ConsumerSampleHost : IDisposable
 
     private void HandleStateChanged(object? sender, EventArgs args)
         => StateChanged?.Invoke(this, EventArgs.Empty);
+
+    private void PushNavigationHistory(string title)
+    {
+        var selection = Session.Queries.GetSelectionSnapshot();
+        var navigation = Session.Queries.GetScopeNavigationSnapshot();
+        var entry = new ConsumerSampleNavigationHistoryEntry(
+            title,
+            selection.PrimarySelectedNodeId,
+            selection.PrimarySelectedConnectionId,
+            navigation.CurrentScopeId,
+            Session.Queries.GetViewportSnapshot());
+        if (_navigationHistoryIndex >= 0
+            && _navigationHistoryIndex < _navigationHistory.Count
+            && NavigationEntryEquals(_navigationHistory[_navigationHistoryIndex], entry))
+        {
+            return;
+        }
+
+        if (_navigationHistoryIndex < _navigationHistory.Count - 1)
+        {
+            _navigationHistory.RemoveRange(_navigationHistoryIndex + 1, _navigationHistory.Count - _navigationHistoryIndex - 1);
+        }
+
+        _navigationHistory.Add(entry);
+        if (_navigationHistory.Count > 24)
+        {
+            _navigationHistory.RemoveAt(0);
+        }
+
+        _navigationHistoryIndex = _navigationHistory.Count - 1;
+    }
+
+    private bool ApplyNavigationHistoryEntry(ConsumerSampleNavigationHistoryEntry entry)
+    {
+        if (!TryNavigateToGraphSearchScope(Session.Queries.CreateDocumentSnapshot(), entry.ScopeId))
+        {
+            return false;
+        }
+
+        if (!string.IsNullOrWhiteSpace(entry.NodeId))
+        {
+            Session.Commands.SetSelection([entry.NodeId], entry.NodeId, updateStatus: false);
+        }
+        else if (!string.IsNullOrWhiteSpace(entry.ConnectionId))
+        {
+            Session.Commands.SetConnectionSelection([entry.ConnectionId], entry.ConnectionId, updateStatus: false);
+        }
+        else
+        {
+            Session.Commands.ClearSelection(updateStatus: false);
+        }
+
+        ApplyViewport(entry.Viewport);
+        return true;
+    }
+
+    private void ApplyViewport(GraphEditorViewportSnapshot target)
+    {
+        var current = Session.Queries.GetViewportSnapshot();
+        if (current.ViewportWidth <= 0 || current.ViewportHeight <= 0)
+        {
+            Session.Commands.UpdateViewportSize(target.ViewportWidth, target.ViewportHeight);
+            current = Session.Queries.GetViewportSnapshot();
+        }
+
+        if (!NearlyEqual(current.Zoom, target.Zoom) && current.Zoom > 0)
+        {
+            Session.Commands.ZoomAt(
+                target.Zoom / current.Zoom,
+                new GraphPoint(
+                    Math.Max(current.ViewportWidth, target.ViewportWidth) / 2d,
+                    Math.Max(current.ViewportHeight, target.ViewportHeight) / 2d));
+            current = Session.Queries.GetViewportSnapshot();
+        }
+
+        Session.Commands.PanBy(target.PanX - current.PanX, target.PanY - current.PanY);
+        current = Session.Queries.GetViewportSnapshot();
+        if (!NearlyEqual(current.ViewportWidth, target.ViewportWidth) || !NearlyEqual(current.ViewportHeight, target.ViewportHeight))
+        {
+            Session.Commands.UpdateViewportSize(target.ViewportWidth, target.ViewportHeight);
+        }
+    }
+
+    private static bool NavigationEntryEquals(ConsumerSampleNavigationHistoryEntry left, ConsumerSampleNavigationHistoryEntry right)
+        => string.Equals(left.NodeId, right.NodeId, StringComparison.Ordinal)
+        && string.Equals(left.ConnectionId, right.ConnectionId, StringComparison.Ordinal)
+        && string.Equals(left.ScopeId, right.ScopeId, StringComparison.Ordinal)
+        && ViewportEquals(left.Viewport, right.Viewport);
+
+    private static bool ViewportEquals(GraphEditorViewportSnapshot left, GraphEditorViewportSnapshot right)
+        => NearlyEqual(left.Zoom, right.Zoom)
+        && NearlyEqual(left.PanX, right.PanX)
+        && NearlyEqual(left.PanY, right.PanY)
+        && NearlyEqual(left.ViewportWidth, right.ViewportWidth)
+        && NearlyEqual(left.ViewportHeight, right.ViewportHeight);
+
+    private static bool NearlyEqual(double left, double right)
+        => Math.Abs(left - right) < 0.0001d;
 
     private bool TryInsertConnectedQueueLaneSnippet()
     {
@@ -1490,3 +1694,15 @@ public sealed record ConsumerSampleGraphSearchResult(
     string? NodeId,
     string? ConnectionId,
     string ScopeId);
+
+public sealed record ConsumerSampleNavigationHistoryEntry(
+    string Title,
+    string? NodeId,
+    string? ConnectionId,
+    string ScopeId,
+    GraphEditorViewportSnapshot Viewport);
+
+public sealed record ConsumerSampleScopeBreadcrumbEntry(
+    string ScopeId,
+    string Title,
+    bool IsCurrent);

@@ -77,6 +77,9 @@ public sealed record ConsumerSampleProofResult(
     bool CommandPaletteGroupingOk = true,
     bool CommandPaletteDisabledReasonOk = true,
     bool CommandPaletteRecentActionsOk = true,
+    bool NavigationHistoryOk = true,
+    bool ScopeBreadcrumbNavigationOk = true,
+    bool FocusRestoreOk = true,
     bool LayoutProviderSeamOk = true,
     bool LayoutPreviewApplyCancelOk = true,
     bool LayoutUndoTransactionOk = true,
@@ -171,6 +174,9 @@ public sealed record ConsumerSampleProofResult(
         && CommandPaletteGroupingOk
         && CommandPaletteDisabledReasonOk
         && CommandPaletteRecentActionsOk
+        && NavigationHistoryOk
+        && ScopeBreadcrumbNavigationOk
+        && FocusRestoreOk
         && GraphValidationFeedbackOk
         && GraphFeedbackFocusTargetOk
         && GraphReadinessStatusOk
@@ -224,6 +230,9 @@ public sealed record ConsumerSampleProofResult(
         && CommandPaletteGroupingOk
         && CommandPaletteDisabledReasonOk
         && CommandPaletteRecentActionsOk
+        && NavigationHistoryOk
+        && ScopeBreadcrumbNavigationOk
+        && FocusRestoreOk
         && GraphValidationFeedbackOk
         && GraphFeedbackFocusTargetOk
         && GraphReadinessStatusOk
@@ -275,6 +284,9 @@ public sealed record ConsumerSampleProofResult(
         && CommandPaletteGroupingOk
         && CommandPaletteDisabledReasonOk
         && CommandPaletteRecentActionsOk
+        && NavigationHistoryOk
+        && ScopeBreadcrumbNavigationOk
+        && FocusRestoreOk
         && PluginTrustEvidencePanelOk
         && PluginAllowlistRoundtripOk
         && GraphSnippetCatalogOk
@@ -352,6 +364,9 @@ public sealed record ConsumerSampleProofResult(
         $"COMMAND_PALETTE_GROUPING_OK:{CommandPaletteGroupingOk}",
         $"COMMAND_PALETTE_DISABLED_REASON_OK:{CommandPaletteDisabledReasonOk}",
         $"COMMAND_PALETTE_RECENT_ACTIONS_OK:{CommandPaletteRecentActionsOk}",
+        $"NAVIGATION_HISTORY_OK:{NavigationHistoryOk}",
+        $"SCOPE_BREADCRUMB_NAVIGATION_OK:{ScopeBreadcrumbNavigationOk}",
+        $"FOCUS_RESTORE_OK:{FocusRestoreOk}",
         $"LAYOUT_PROVIDER_SEAM_OK:{LayoutProviderSeamOk}",
         $"LAYOUT_PREVIEW_APPLY_CANCEL_OK:{LayoutPreviewApplyCancelOk}",
         $"LAYOUT_UNDO_TRANSACTION_OK:{LayoutUndoTransactionOk}",
@@ -530,6 +545,9 @@ public static class ConsumerSampleProof
         bool graphSearchLocateOk;
         bool graphSearchScopeFilterOk;
         bool graphSearchViewportFocusOk;
+        bool navigationHistoryOk;
+        bool scopeBreadcrumbNavigationOk;
+        bool focusRestoreOk;
         bool layoutProviderSeamOk;
         bool layoutPreviewApplyCancelOk;
         bool layoutUndoTransactionOk;
@@ -624,6 +642,12 @@ public static class ConsumerSampleProof
                 && FindNamed<Button>(window, "PART_PreviewLayoutButton") is not null
                 && FindNamed<Button>(window, "PART_ApplyLayoutPreviewButton") is not null
                 && FindNamed<Button>(window, "PART_CancelLayoutPreviewButton") is not null
+                && FindNamed<TextBlock>(window, "PART_NavigationHistorySummaryText") is not null
+                && FindNamed<Button>(window, "PART_NavigationBackButton") is not null
+                && FindNamed<Button>(window, "PART_NavigationForwardButton") is not null
+                && FindNamed<Button>(window, "PART_FocusCurrentScopeButton") is not null
+                && FindNamed<Button>(window, "PART_RestoreViewportButton") is not null
+                && FindNamed<ItemsControl>(window, "PART_ScopeBreadcrumbItems") is not null
                 && FindNamed<TextBlock>(window, "PART_TrustBoundaryText") is not null;
             runtimeLogPanelOk = HasRuntimeLogPanel(window, host);
             runtimeLogFilterOk = HasRuntimeLogFilter(host);
@@ -631,6 +655,7 @@ public static class ConsumerSampleProof
             runtimeLogLocateOk = HasRuntimeLogLocate(host);
             runtimeLogExportOk = HasRuntimeLogExport(host);
             (graphSearchLocateOk, graphSearchScopeFilterOk, graphSearchViewportFocusOk) = HasGraphSearchLocate(host, window);
+            (navigationHistoryOk, scopeBreadcrumbNavigationOk, focusRestoreOk) = HasNavigationHistoryAndScopeFocus(host, window);
             layoutProviderSeamOk = HasLayoutProviderSeam(host);
             (layoutPreviewApplyCancelOk, layoutUndoTransactionOk) = HasLayoutPreviewApplyCancel(host, window);
             (readabilityFocusSubgraphOk, readabilityRouteCleanupOk, readabilityAlignmentHelpersOk) = HasReadabilityHelpers(host);
@@ -788,6 +813,9 @@ public static class ConsumerSampleProof
             CommandPaletteGroupingOk: commandPaletteGroupingOk,
             CommandPaletteDisabledReasonOk: commandPaletteDisabledReasonOk,
             CommandPaletteRecentActionsOk: commandPaletteRecentActionsOk,
+            NavigationHistoryOk: navigationHistoryOk,
+            ScopeBreadcrumbNavigationOk: scopeBreadcrumbNavigationOk,
+            FocusRestoreOk: focusRestoreOk,
             LayoutProviderSeamOk: layoutProviderSeamOk,
             LayoutPreviewApplyCancelOk: layoutPreviewApplyCancelOk,
             LayoutUndoTransactionOk: layoutUndoTransactionOk,
@@ -2139,6 +2167,125 @@ public static class ConsumerSampleProof
             && host.TryLocateGraphSearchResult(childResult)
             && string.Equals(host.Session.Queries.GetSelectionSnapshot().PrimarySelectedNodeId, queueNodeId, StringComparison.Ordinal);
     }
+
+    private static (bool NavigationHistoryOk, bool ScopeBreadcrumbNavigationOk, bool FocusRestoreOk) HasNavigationHistoryAndScopeFocus(
+        ConsumerSampleHost host,
+        Window window)
+    {
+        var navigationSummary = FindNamed<TextBlock>(window, "PART_NavigationHistorySummaryText");
+        var backButton = FindNamed<Button>(window, "PART_NavigationBackButton");
+        var forwardButton = FindNamed<Button>(window, "PART_NavigationForwardButton");
+        var focusScopeButton = FindNamed<Button>(window, "PART_FocusCurrentScopeButton");
+        var restoreViewportButton = FindNamed<Button>(window, "PART_RestoreViewportButton");
+        var breadcrumbItems = FindNamed<ItemsControl>(window, "PART_ScopeBreadcrumbItems");
+        var reviewNodeId = host.GetFirstReviewNodeId();
+        var queueNodeId = host.Session.Queries.CreateDocumentSnapshot().Nodes
+            .First(node => node.DefinitionId == ConsumerSampleHost.QueueDefinitionId)
+            .Id;
+
+        host.Session.Commands.UpdateViewportSize(960, 640);
+        host.SelectNode(reviewNodeId);
+        FlushUi();
+
+        var queueResult = host.SearchGraph("Ship Queue", ConsumerSampleGraphSearchScope.All)
+            .FirstOrDefault(result => string.Equals(result.NodeId, queueNodeId, StringComparison.Ordinal));
+        var locatedQueue = queueResult is not null && host.TryLocateGraphSearchResult(queueResult);
+        FlushUi();
+        var historyAfterLocate = host.NavigationHistory.Count;
+        var canBackAfterLocate = host.CanNavigateBack && backButton is { IsEnabled: true };
+        var backNavigated = host.TryNavigateBack();
+        FlushUi();
+        var backSelection = host.Session.Queries.GetSelectionSnapshot().PrimarySelectedNodeId;
+        var canForwardAfterBack = host.CanNavigateForward;
+        var forwardNavigated = host.TryNavigateForward();
+        FlushUi();
+        var forwardSelection = host.Session.Queries.GetSelectionSnapshot().PrimarySelectedNodeId;
+
+        host.Session.Commands.PanBy(77, 43);
+        var viewportBeforeFocus = host.Session.Queries.GetViewportSnapshot();
+        var focusChangedViewport = focusScopeButton is not null && host.FocusCurrentScopeForReview();
+        FlushUi();
+        var viewportAfterFocus = host.Session.Queries.GetViewportSnapshot();
+        var canRestore = host.CanRestoreViewport;
+        var restored = host.RestorePreviousViewport();
+        FlushUi();
+        var restoredViewport = host.Session.Queries.GetViewportSnapshot();
+
+        var scopeBreadcrumbNavigationOk = HasScopeBreadcrumbNavigation();
+        var navigationHistoryOk = navigationSummary is not null
+            && locatedQueue
+            && historyAfterLocate >= 2
+            && canBackAfterLocate
+            && backNavigated
+            && string.Equals(backSelection, reviewNodeId, StringComparison.Ordinal)
+            && canForwardAfterBack
+            && forwardNavigated
+            && string.Equals(forwardSelection, queueNodeId, StringComparison.Ordinal);
+        var focusRestoreOk = restoreViewportButton is not null
+            && focusChangedViewport
+            && canRestore
+            && restored
+            && viewportBeforeFocus != viewportAfterFocus
+            && ViewportEquals(restoredViewport, viewportBeforeFocus);
+
+        return (
+            navigationHistoryOk,
+            scopeBreadcrumbNavigationOk && breadcrumbItems is not null && forwardButton is not null,
+            focusRestoreOk);
+    }
+
+    private static bool HasScopeBreadcrumbNavigation()
+    {
+        var storageRoot = Path.Combine(
+            Path.GetTempPath(),
+            "AsterGraph.ConsumerSample.NavigationProof",
+            Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(storageRoot);
+
+        using var host = ConsumerSampleHost.Create(storageRoot);
+        var document = host.Session.Queries.CreateDocumentSnapshot();
+        var reviewNodeId = host.GetFirstReviewNodeId();
+        var queueNodeId = document.Nodes
+            .First(node => node.DefinitionId == ConsumerSampleHost.QueueDefinitionId)
+            .Id;
+        host.Session.Commands.SetSelection([reviewNodeId, queueNodeId], queueNodeId, updateStatus: false);
+
+        var compositeNodeId = host.Session.Commands.TryWrapSelectionToComposite("Navigation Scope Proof", updateStatus: false);
+        if (string.IsNullOrWhiteSpace(compositeNodeId))
+        {
+            return false;
+        }
+
+        var rootScopeId = host.Session.Queries.GetScopeNavigationSnapshot().CurrentScopeId;
+        if (!host.Session.Commands.TryEnterCompositeChildGraph(compositeNodeId, updateStatus: false))
+        {
+            return false;
+        }
+
+        var childNavigation = host.Session.Queries.GetScopeNavigationSnapshot();
+        var childBreadcrumbs = host.ScopeBreadcrumbs;
+        var rootBreadcrumb = childBreadcrumbs.FirstOrDefault(entry =>
+            string.Equals(entry.ScopeId, rootScopeId, StringComparison.Ordinal));
+        var childBreadcrumb = childBreadcrumbs.FirstOrDefault(entry =>
+            string.Equals(entry.ScopeId, childNavigation.CurrentScopeId, StringComparison.Ordinal));
+
+        return childNavigation.CanNavigateToParent
+            && childBreadcrumbs.Count >= 2
+            && rootBreadcrumb is { IsCurrent: false }
+            && childBreadcrumb is { IsCurrent: true }
+            && host.TryNavigateToScopeBreadcrumb(rootScopeId)
+            && string.Equals(host.Session.Queries.GetScopeNavigationSnapshot().CurrentScopeId, rootScopeId, StringComparison.Ordinal)
+            && host.CanNavigateBack
+            && host.TryNavigateBack()
+            && string.Equals(host.Session.Queries.GetScopeNavigationSnapshot().CurrentScopeId, childNavigation.CurrentScopeId, StringComparison.Ordinal);
+    }
+
+    private static bool ViewportEquals(GraphEditorViewportSnapshot left, GraphEditorViewportSnapshot right)
+        => Math.Abs(left.Zoom - right.Zoom) < 0.0001d
+        && Math.Abs(left.PanX - right.PanX) < 0.0001d
+        && Math.Abs(left.PanY - right.PanY) < 0.0001d
+        && Math.Abs(left.ViewportWidth - right.ViewportWidth) < 0.0001d
+        && Math.Abs(left.ViewportHeight - right.ViewportHeight) < 0.0001d;
 
     private static (bool GroupingOk, bool DisabledReasonOk, bool RecentActionsOk) HasCommandPaletteProductivity(Window window)
     {

@@ -63,6 +63,9 @@ internal static class ConsumerSampleDocsAssertions
         Assert.Contains("COMMAND_PALETTE_GROUPING_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("COMMAND_PALETTE_DISABLED_REASON_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("COMMAND_PALETTE_RECENT_ACTIONS_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("NAVIGATION_HISTORY_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("SCOPE_BREADCRUMB_NAVIGATION_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("FOCUS_RESTORE_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("EXPERIENCE_POLISH_HANDOFF_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("FEATURE_ENHANCEMENT_PROOF_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("AUTHORING_FLOW_PROOF_OK:True", contents, StringComparison.Ordinal);

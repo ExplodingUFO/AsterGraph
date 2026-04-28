@@ -40,6 +40,11 @@ public static class ConsumerSampleWindowFactory
         private readonly TextBox _graphSearchBox;
         private readonly ComboBox _graphSearchScope;
         private readonly ItemsControl _graphSearchItems;
+        private readonly TextBlock _navigationHistorySummaryText;
+        private readonly ItemsControl _scopeBreadcrumbItems;
+        private Button? _navigationBackButton;
+        private Button? _navigationForwardButton;
+        private Button? _restoreViewportButton;
         private readonly TextBlock _layoutPreviewSummaryText;
         private readonly TextBlock _selectionSummaryText;
         private readonly TextBlock _trustBoundaryText;
@@ -179,6 +184,15 @@ public static class ConsumerSampleWindowFactory
             {
                 Name = "PART_GraphSearchItems",
             };
+            _navigationHistorySummaryText = new TextBlock
+            {
+                Name = "PART_NavigationHistorySummaryText",
+                TextWrapping = TextWrapping.Wrap,
+            };
+            _scopeBreadcrumbItems = new ItemsControl
+            {
+                Name = "PART_ScopeBreadcrumbItems",
+            };
             _layoutPreviewSummaryText = new TextBlock
             {
                 Name = "PART_LayoutPreviewSummaryText",
@@ -212,6 +226,7 @@ public static class ConsumerSampleWindowFactory
                 {
                     CreateSection("Selection", _selectionSummaryText),
                     CreateSection("Graph Search", CreateGraphSearchPanel()),
+                    CreateSection("Navigation", CreateNavigationPanel()),
                     CreateSection("Selected Parameters", _parameterItems),
                     CreateSection("Plugin Candidates", _pluginCandidateItems),
                     CreateSection("Local Plugin Gallery", _pluginGalleryItems),
@@ -293,6 +308,7 @@ public static class ConsumerSampleWindowFactory
             RebuildPluginGalleryItems();
             RebuildPluginSnapshotItems();
             RebuildGraphSearchPanel();
+            RebuildNavigationPanel();
             RebuildRuntimePanel();
             RebuildLayoutPanel();
             _trustBoundaryText.Text = _host.TrustBoundaryText;
@@ -489,11 +505,140 @@ public static class ConsumerSampleWindowFactory
                 },
             };
 
+        private Control CreateNavigationPanel()
+            => new StackPanel
+            {
+                Spacing = 8,
+                Children =
+                {
+                    _navigationHistorySummaryText,
+                    new StackPanel
+                    {
+                        Orientation = Orientation.Horizontal,
+                        Spacing = 6,
+                        Children =
+                        {
+                            CreateNavigationBackButton(),
+                            CreateNavigationForwardButton(),
+                        },
+                    },
+                    CreateFocusCurrentScopeButton(),
+                    CreateRestoreViewportButton(),
+                    _scopeBreadcrumbItems,
+                },
+            };
+
         private void RebuildGraphSearchPanel()
         {
             _graphSearchItems.ItemsSource = _host.SearchGraph(_graphSearchQuery, _selectedGraphSearchScope)
                 .Select(CreateGraphSearchResultButton)
                 .ToList();
+        }
+
+        private void RebuildNavigationPanel()
+        {
+            _navigationHistorySummaryText.Text =
+                $"History: {_host.NavigationHistory.Count}\nBack: {_host.CanNavigateBack}\nForward: {_host.CanNavigateForward}";
+            if (_navigationBackButton is not null)
+            {
+                _navigationBackButton.IsEnabled = _host.CanNavigateBack;
+            }
+
+            if (_navigationForwardButton is not null)
+            {
+                _navigationForwardButton.IsEnabled = _host.CanNavigateForward;
+            }
+
+            if (_restoreViewportButton is not null)
+            {
+                _restoreViewportButton.IsEnabled = _host.CanRestoreViewport;
+            }
+
+            _scopeBreadcrumbItems.ItemsSource = _host.ScopeBreadcrumbs
+                .Select(CreateScopeBreadcrumbButton)
+                .ToList();
+        }
+
+        private Button CreateNavigationBackButton()
+        {
+            _navigationBackButton = new Button
+            {
+                Name = "PART_NavigationBackButton",
+                Content = "Back",
+                IsEnabled = _host.CanNavigateBack,
+            };
+            _navigationBackButton.Click += (_, _) =>
+            {
+                _host.TryNavigateBack();
+                RefreshPanels();
+            };
+            return _navigationBackButton;
+        }
+
+        private Button CreateNavigationForwardButton()
+        {
+            _navigationForwardButton = new Button
+            {
+                Name = "PART_NavigationForwardButton",
+                Content = "Forward",
+                IsEnabled = _host.CanNavigateForward,
+            };
+            _navigationForwardButton.Click += (_, _) =>
+            {
+                _host.TryNavigateForward();
+                RefreshPanels();
+            };
+            return _navigationForwardButton;
+        }
+
+        private Button CreateFocusCurrentScopeButton()
+        {
+            var button = new Button
+            {
+                Name = "PART_FocusCurrentScopeButton",
+                Content = "Focus scope",
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+            };
+            button.Click += (_, _) =>
+            {
+                _host.FocusCurrentScopeForReview();
+                RefreshPanels();
+            };
+            return button;
+        }
+
+        private Button CreateRestoreViewportButton()
+        {
+            _restoreViewportButton = new Button
+            {
+                Name = "PART_RestoreViewportButton",
+                Content = "Restore viewport",
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                IsEnabled = _host.CanRestoreViewport,
+            };
+            _restoreViewportButton.Click += (_, _) =>
+            {
+                _host.RestorePreviousViewport();
+                RefreshPanels();
+            };
+            return _restoreViewportButton;
+        }
+
+        private Button CreateScopeBreadcrumbButton(ConsumerSampleScopeBreadcrumbEntry entry)
+        {
+            var button = new Button
+            {
+                Name = $"PART_ScopeBreadcrumb_{entry.ScopeId.Replace(':', '_')}",
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                Content = entry.IsCurrent ? $"{entry.Title} (current)" : entry.Title,
+                IsEnabled = !entry.IsCurrent,
+            };
+            button.Click += (_, _) =>
+            {
+                _host.TryNavigateToScopeBreadcrumb(entry.ScopeId);
+                RefreshPanels();
+            };
+            return button;
         }
 
         private Button CreateGraphSearchResultButton(ConsumerSampleGraphSearchResult result)
