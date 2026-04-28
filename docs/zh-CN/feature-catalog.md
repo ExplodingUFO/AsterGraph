@@ -60,6 +60,7 @@ Catalog proof markers：`FEATURE_CATALOG_OK:True`、`FEATURE_MANIFEST_BOUNDARY_O
 | `diagnostics.plugin-trust` | Diagnostics | Beta | plugin discovery、trust policy、load snapshots | Supported | NotApplicable | `ConsumerSample.Avalonia`、`PluginTool` | `CONSUMER_SAMPLE_TRUST_OK:True` | NotApplicable | [Plugin Trust Contracts](./plugin-trust-contracts.md) |
 | `diagnostics.support-bundle` | Diagnostics | Beta | 本地 support bundle 输出 | Supported | NotApplicable | `ConsumerSample.Avalonia` | `SUPPORT_BUNDLE_OK:True` | NotApplicable | [Support Bundle](./support-bundle.md) |
 | `adapter2.performance-accessibility-handoff` | Diagnostics | Beta | 现有 WPF proof budgets 和 adapter-2 recipes | Supported | Supported | `AsterGraph.HelloWorld.Wpf` | `ADAPTER2_PERFORMANCE_ACCESSIBILITY_HANDOFF_OK:True`、`ADAPTER2_RECIPE_ALIGNMENT_OK:True`、`ADAPTER2_PROOF_BUDGET_OK:True` | WPF validation-only proof budget | [Adapter Capability Matrix](./adapter-capability-matrix.md) |
+| `adapter2.validation-handoff` | Diagnostics | Beta | v0.60 adapter-2 validation-only milestone proof | Supported | Supported | `AsterGraph.HelloWorld.Wpf` | `ADAPTER2_VALIDATION_HANDOFF_OK:True`、`ADAPTER2_VALIDATION_SCOPE_BOUNDARY_OK:True`、`V060_MILESTONE_PROOF_OK:True` | WPF validation-only milestone proof | [Adapter Capability Matrix](./adapter-capability-matrix.md) |
 
 ## 治理规则
 

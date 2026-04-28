@@ -17,6 +17,7 @@
 v0.60 adapter-2 validation scope baseline 由 `ADAPTER2_VALIDATION_SCOPE_OK:True`、`ADAPTER2_MATRIX_HANDOFF_OK:True` 和 `ADAPTER2_SCOPE_BOUNDARY_OK:True` 证明；这些 marker 只汇总 matrix handoff，不会把任何 `Partial` 或 `Fallback` 行改写成 `Supported`。
 WPF proof sample evidence 由 `ADAPTER2_WPF_SAMPLE_PROOF_OK:True`、`ADAPTER2_CANONICAL_ROUTE_OK:True` 和 `ADAPTER2_SAMPLE_SCOPE_BOUNDARY_OK:True` 证明；这些 marker 让 `AsterGraph.HelloWorld.Wpf` 保持可复制，但不会把它变成第二条 onboarding route。
 Adapter-2 performance/accessibility handoff 由 `ADAPTER2_PERFORMANCE_ACCESSIBILITY_HANDOFF_OK:True`、`ADAPTER2_RECIPE_ALIGNMENT_OK:True` 和 `ADAPTER2_PROOF_BUDGET_OK:True` 证明；这些 marker 只把现有 WPF proof budgets 绑定到 accessibility 和 performance recipes。
+v0.60 adapter-2 validation handoff 由 `ADAPTER2_VALIDATION_HANDOFF_OK:True`、`ADAPTER2_VALIDATION_SCOPE_BOUNDARY_OK:True` 和 `V060_MILESTONE_PROOF_OK:True` 证明；这些 marker 只收口 milestone，不扩大 public WPF support。
 
 ## Matrix Vocabulary
 
@@ -64,5 +65,6 @@ retained 迁移不是 `Fallback`。retained 仍然只是 legacy host 的 compati
 | Adapter-2 validation scope baseline | `Supported` | `Supported` | `ADAPTER2_VALIDATION_SCOPE_OK`、`ADAPTER2_MATRIX_HANDOFF_OK`、`ADAPTER2_SCOPE_BOUNDARY_OK` 和 `HELLOWORLD_WPF_OK` | 无。这一行只证明 validation scope 和 matrix handoff，不扩大 WPF support，也不暗示 parity。 |
 | WPF proof sample evidence | `Supported` | `Supported` | `ADAPTER2_WPF_SAMPLE_PROOF_OK`、`ADAPTER2_CANONICAL_ROUTE_OK`、`ADAPTER2_SAMPLE_SCOPE_BOUNDARY_OK` 和 `HELLOWORLD_WPF_OK` | 无。这一行让 `AsterGraph.HelloWorld.Wpf` 在 canonical route 上保持可复制；它不是第二条 onboarding path（second onboarding path）。 |
 | Adapter-2 performance/accessibility handoff | `Supported` | `Supported` | `ADAPTER2_PERFORMANCE_ACCESSIBILITY_HANDOFF_OK`、`ADAPTER2_RECIPE_ALIGNMENT_OK`、`ADAPTER2_PROOF_BUDGET_OK` 和 `HELLOWORLD_WPF_OK` | 无。这一行只汇总现有 accessibility 和 performance proof budgets，不扩大 WPF support，也不改变 `Partial`/`Fallback` 行。 |
+| v0.60 adapter-2 validation handoff | `Supported` | `Supported` | `ADAPTER2_VALIDATION_HANDOFF_OK`、`ADAPTER2_VALIDATION_SCOPE_BOUNDARY_OK`、`V060_MILESTONE_PROOF_OK` 和 `HELLOWORLD_WPF_OK` | 无。这一行只收口 validation-only milestone，不改变 WPF support、parity 或 runtime API 声明。 |
 
 路线与能力地图看 [Host Integration](./host-integration.md)，adapter 边界看 [Architecture](./architecture.md)，当前 Avalonia-first 的上手路径看 [Quick Start](./quick-start.md)。

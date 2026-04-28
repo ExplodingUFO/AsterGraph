@@ -65,6 +65,8 @@ The support bundle is one local JSON file with these top-level fields:
 
 Hosted workbench performance proof should also include `WORKBENCH_PERFORMANCE_MODE_OK:True`, `BALANCED_MODE_DEFAULT_OK:True`, `WORKBENCH_LOD_POLICY_OK:True`, and `PERFORMANCE_MODE_SCOPE_BOUNDARY_OK:True`.
 
+Adapter-2 validation handoff proof should also include `ADAPTER2_VALIDATION_SCOPE_OK:True`, `ADAPTER2_WPF_SAMPLE_PROOF_OK:True`, `ADAPTER2_PERFORMANCE_ACCESSIBILITY_HANDOFF_OK:True`, `ADAPTER2_VALIDATION_HANDOFF_OK:True`, `ADAPTER2_VALIDATION_SCOPE_BOUNDARY_OK:True`, and `V060_MILESTONE_PROOF_OK:True`. These markers are validation-only WPF evidence and do not widen the hosted support boundary.
+
 Onboarding proof lines should also include `CONSUMER_SAMPLE_SCENARIO_GRAPH_OK:True`, `CONSUMER_SAMPLE_HOST_OWNED_ACTIONS_OK:True`, `CONSUMER_SAMPLE_SUPPORT_BUNDLE_READY_OK:True`, `GRAPH_VALIDATION_FEEDBACK_OK:True`, `GRAPH_FEEDBACK_FOCUS_TARGET_OK:True`, `GRAPH_READINESS_STATUS_OK:True`, `FIVE_MINUTE_ONBOARDING_OK:True`, and `ONBOARDING_CONFIGURATION_OK:True`.
 
 `parameterSnapshots` captures review-node parameter projection plus bounded mixed-value and validation-fix evidence in one structure. Each snapshot records `key`, `valueType`, `editorKind`, `currentValue`, `defaultValue`, `hasMixedValues`, `canEdit`, `isValid`, `validationMessage`, `readOnlyReason`, `helpText`, `groupName`, `placeholderText`, `isAdvanced`, `valueState`, `valueDisplayText`, `usesMultilineTextInput`, `isCodeLikeText`, `supportsEnumSearch`, `numberSliderHint`, `canApplyValidationFix`, `validationFixActionLabel`, `allowedOptions`, `minimum`, and `maximum` when present.

@@ -17,6 +17,7 @@ Avalonia is still the only shipped hosted adapter today. `WPF` is the locked val
 The v0.60 adapter-2 validation scope baseline is proven by `ADAPTER2_VALIDATION_SCOPE_OK:True`, `ADAPTER2_MATRIX_HANDOFF_OK:True`, and `ADAPTER2_SCOPE_BOUNDARY_OK:True`; those markers summarize the matrix handoff and do not change any row from `Partial` or `Fallback` to `Supported`.
 The WPF proof sample evidence is proven by `ADAPTER2_WPF_SAMPLE_PROOF_OK:True`, `ADAPTER2_CANONICAL_ROUTE_OK:True`, and `ADAPTER2_SAMPLE_SCOPE_BOUNDARY_OK:True`; those markers keep `AsterGraph.HelloWorld.Wpf` copyable without turning it into a second onboarding route.
 The adapter-2 performance/accessibility handoff is proven by `ADAPTER2_PERFORMANCE_ACCESSIBILITY_HANDOFF_OK:True`, `ADAPTER2_RECIPE_ALIGNMENT_OK:True`, and `ADAPTER2_PROOF_BUDGET_OK:True`; those markers only join the existing WPF proof budgets to the accessibility and performance recipes.
+The v0.60 adapter-2 validation handoff is proven by `ADAPTER2_VALIDATION_HANDOFF_OK:True`, `ADAPTER2_VALIDATION_SCOPE_BOUNDARY_OK:True`, and `V060_MILESTONE_PROOF_OK:True`; those markers close the milestone without widening public WPF support.
 
 ## Matrix Vocabulary
 
@@ -64,5 +65,6 @@ Public beta wording must not exceed the row labels below. If a WPF row is `Parti
 | Adapter-2 validation scope baseline | `Supported` | `Supported` | `ADAPTER2_VALIDATION_SCOPE_OK`, `ADAPTER2_MATRIX_HANDOFF_OK`, `ADAPTER2_SCOPE_BOUNDARY_OK`, and `HELLOWORLD_WPF_OK` | None. This row only proves the validation scope and matrix handoff; it does not widen WPF support or imply parity. |
 | WPF proof sample evidence | `Supported` | `Supported` | `ADAPTER2_WPF_SAMPLE_PROOF_OK`, `ADAPTER2_CANONICAL_ROUTE_OK`, `ADAPTER2_SAMPLE_SCOPE_BOUNDARY_OK`, and `HELLOWORLD_WPF_OK` | None. This row keeps `AsterGraph.HelloWorld.Wpf` copyable on the canonical route; it is not a second onboarding path. |
 | Adapter-2 performance/accessibility handoff | `Supported` | `Supported` | `ADAPTER2_PERFORMANCE_ACCESSIBILITY_HANDOFF_OK`, `ADAPTER2_RECIPE_ALIGNMENT_OK`, `ADAPTER2_PROOF_BUDGET_OK`, and `HELLOWORLD_WPF_OK` | None. This row joins existing accessibility and performance proof budgets without widening WPF support or changing `Partial`/`Fallback` rows. |
+| v0.60 adapter-2 validation handoff | `Supported` | `Supported` | `ADAPTER2_VALIDATION_HANDOFF_OK`, `ADAPTER2_VALIDATION_SCOPE_BOUNDARY_OK`, `V060_MILESTONE_PROOF_OK`, and `HELLOWORLD_WPF_OK` | None. This row closes the validation-only milestone and does not change WPF support, parity, or runtime API claims. |
 
 Use [Host Integration](./host-integration.md) for the route and capability map, [Architecture](./architecture.md) for the adapter boundary, and [Quick Start](./quick-start.md) for the current Avalonia-first onboarding path.

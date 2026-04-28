@@ -37,7 +37,7 @@ public sealed class ReleaseClosureContractTests
         WriteProofFile(
             proofRoot,
             "hello-world-wpf-proof.txt",
-            "HOSTED_ACCESSIBILITY_BASELINE_OK:True`nHOSTED_ACCESSIBILITY_FOCUS_OK:True`nHOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True`nHOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True`nHOSTED_ACCESSIBILITY_OK:True`nADAPTER2_PERFORMANCE_BASELINE_OK:True`nADAPTER2_EXPORT_BREADTH_OK:True`nADAPTER2_PROJECTION_BUDGET_OK:True:none`nADAPTER2_COMMAND_BUDGET_OK:True:none`nADAPTER2_SCENE_BUDGET_OK:True:none`nADAPTER2_VALIDATION_SCOPE_OK:True`nADAPTER2_MATRIX_HANDOFF_OK:True`nADAPTER2_SCOPE_BOUNDARY_OK:True`nADAPTER2_WPF_SAMPLE_PROOF_OK:True`nADAPTER2_CANONICAL_ROUTE_OK:True`nADAPTER2_SAMPLE_SCOPE_BOUNDARY_OK:True`nADAPTER2_PERFORMANCE_ACCESSIBILITY_HANDOFF_OK:True`nADAPTER2_RECIPE_ALIGNMENT_OK:True`nADAPTER2_PROOF_BUDGET_OK:True`nHELLOWORLD_WPF_OK:True");
+            "HOSTED_ACCESSIBILITY_BASELINE_OK:True`nHOSTED_ACCESSIBILITY_FOCUS_OK:True`nHOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True`nHOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True`nHOSTED_ACCESSIBILITY_OK:True`nADAPTER2_PERFORMANCE_BASELINE_OK:True`nADAPTER2_EXPORT_BREADTH_OK:True`nADAPTER2_PROJECTION_BUDGET_OK:True:none`nADAPTER2_COMMAND_BUDGET_OK:True:none`nADAPTER2_SCENE_BUDGET_OK:True:none`nADAPTER2_VALIDATION_SCOPE_OK:True`nADAPTER2_MATRIX_HANDOFF_OK:True`nADAPTER2_SCOPE_BOUNDARY_OK:True`nADAPTER2_WPF_SAMPLE_PROOF_OK:True`nADAPTER2_CANONICAL_ROUTE_OK:True`nADAPTER2_SAMPLE_SCOPE_BOUNDARY_OK:True`nADAPTER2_PERFORMANCE_ACCESSIBILITY_HANDOFF_OK:True`nADAPTER2_RECIPE_ALIGNMENT_OK:True`nADAPTER2_PROOF_BUDGET_OK:True`nADAPTER2_VALIDATION_HANDOFF_OK:True`nADAPTER2_VALIDATION_SCOPE_BOUNDARY_OK:True`nV060_MILESTONE_PROOF_OK:True`nHELLOWORLD_WPF_OK:True");
         WriteProofFile(
             proofRoot,
             "wpf-adapter-capability-matrix.txt",
@@ -119,6 +119,9 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("ADAPTER2_PERFORMANCE_ACCESSIBILITY_HANDOFF_OK:True", notes, StringComparison.Ordinal);
         Assert.Contains("ADAPTER2_RECIPE_ALIGNMENT_OK:True", notes, StringComparison.Ordinal);
         Assert.Contains("ADAPTER2_PROOF_BUDGET_OK:True", notes, StringComparison.Ordinal);
+        Assert.Contains("ADAPTER2_VALIDATION_HANDOFF_OK:True", notes, StringComparison.Ordinal);
+        Assert.Contains("ADAPTER2_VALIDATION_SCOPE_BOUNDARY_OK:True", notes, StringComparison.Ordinal);
+        Assert.Contains("V060_MILESTONE_PROOF_OK:True", notes, StringComparison.Ordinal);
         Assert.Contains("HELLOWORLD_WPF_OK:True", notes, StringComparison.Ordinal);
         Assert.Contains("ASTERGRAPH_TEMPLATE_SMOKE_OK:True", notes, StringComparison.Ordinal);
         Assert.Contains("TEMPLATE_SMOKE_PLUGIN_VALIDATE_OK:True", notes, StringComparison.Ordinal);
@@ -512,6 +515,35 @@ public sealed class ReleaseClosureContractTests
         Assert.True(HasLineWithAll(chineseStatus, "adapter-2 performance/accessibility handoff proof", "WPF proof budgets", "recipes", "不扩大 WPF support"));
         Assert.True(HasLineWithAll(englishMatrix, "Adapter-2 performance/accessibility handoff", "proof budgets", "without widening WPF support", "Partial", "Fallback"));
         Assert.True(HasLineWithAll(chineseMatrix, "Adapter-2 performance/accessibility handoff", "proof budgets", "不扩大 WPF support", "Partial", "Fallback"));
+    }
+
+    [Fact]
+    public void Adapter2ValidationHandoff_StaysVisibleInStatusChecklistMatrixAndSupportBundle()
+    {
+        var englishChecklist = ReadRepoFile("docs/en/public-launch-checklist.md");
+        var chineseChecklist = ReadRepoFile("docs/zh-CN/public-launch-checklist.md");
+        var englishStatus = ReadRepoFile("docs/en/project-status.md");
+        var chineseStatus = ReadRepoFile("docs/zh-CN/project-status.md");
+        var englishMatrix = ReadRepoFile("docs/en/adapter-capability-matrix.md");
+        var chineseMatrix = ReadRepoFile("docs/zh-CN/adapter-capability-matrix.md");
+        var englishSupportBundle = ReadRepoFile("docs/en/support-bundle.md");
+        var chineseSupportBundle = ReadRepoFile("docs/zh-CN/support-bundle.md");
+        var englishFeatureCatalog = ReadRepoFile("docs/en/feature-catalog.md");
+        var chineseFeatureCatalog = ReadRepoFile("docs/zh-CN/feature-catalog.md");
+
+        foreach (var contents in new[] { englishChecklist, chineseChecklist, englishStatus, chineseStatus, englishMatrix, chineseMatrix, englishSupportBundle, chineseSupportBundle, englishFeatureCatalog, chineseFeatureCatalog })
+        {
+            Assert.Contains("ADAPTER2_VALIDATION_HANDOFF_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("ADAPTER2_VALIDATION_SCOPE_BOUNDARY_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("V060_MILESTONE_PROOF_OK:True", contents, StringComparison.Ordinal);
+        }
+
+        Assert.True(HasLineWithAll(englishStatus, "v0.60 adapter-2 validation handoff proof", "validation-only milestone", "WPF support boundary"));
+        Assert.True(HasLineWithAll(chineseStatus, "v0.60 adapter-2 validation handoff proof", "validation-only milestone", "WPF support boundary"));
+        Assert.True(HasLineWithAll(englishMatrix, "v0.60 adapter-2 validation handoff", "validation-only milestone", "WPF support", "runtime API"));
+        Assert.True(HasLineWithAll(chineseMatrix, "v0.60 adapter-2 validation handoff", "validation-only milestone", "WPF support", "runtime API"));
+        Assert.True(HasLineWithAll(englishSupportBundle, "Adapter-2 validation handoff proof", "validation-only WPF evidence", "hosted support boundary"));
+        Assert.True(HasLineWithAll(chineseSupportBundle, "Adapter-2 validation handoff proof", "validation-only WPF evidence", "hosted support boundary"));
     }
 
     [Fact]

@@ -263,6 +263,22 @@ public sealed record HostedHelloWorldProofResult(
         && Adapter2ValidationScopeOk
         && Adapter2WpfSampleProofOk;
 
+    public bool Adapter2ValidationHandoffOk =>
+        Adapter2ValidationScopeOk
+        && Adapter2WpfSampleProofOk
+        && Adapter2PerformanceAccessibilityHandoffOk;
+
+    public bool Adapter2ValidationScopeBoundaryOk =>
+        Adapter2ValidationHandoffOk
+        && Adapter2ScopeBoundaryOk
+        && Adapter2SampleScopeBoundaryOk
+        && Adapter2RecipeAlignmentOk;
+
+    public bool V060MilestoneProofOk =>
+        Adapter2ValidationScopeBoundaryOk
+        && Adapter2MatrixHandoffOk
+        && Adapter2ProofBudgetOk;
+
     public bool IsOk => CommandSurfaceOk
         && HostedAccessibilityOk
         && Adapter2PerformanceBaselineOk
@@ -278,7 +294,10 @@ public sealed record HostedHelloWorldProofResult(
         && Adapter2SampleScopeBoundaryOk
         && Adapter2ProofBudgetOk
         && Adapter2PerformanceAccessibilityHandoffOk
-        && Adapter2RecipeAlignmentOk;
+        && Adapter2RecipeAlignmentOk
+        && Adapter2ValidationHandoffOk
+        && Adapter2ValidationScopeBoundaryOk
+        && V060MilestoneProofOk;
 
     public IReadOnlyList<string> ProofLines =>
         [
@@ -302,6 +321,9 @@ public sealed record HostedHelloWorldProofResult(
             $"ADAPTER2_PERFORMANCE_ACCESSIBILITY_HANDOFF_OK:{Adapter2PerformanceAccessibilityHandoffOk}",
             $"ADAPTER2_RECIPE_ALIGNMENT_OK:{Adapter2RecipeAlignmentOk}",
             $"ADAPTER2_PROOF_BUDGET_OK:{Adapter2ProofBudgetOk}",
+            $"ADAPTER2_VALIDATION_HANDOFF_OK:{Adapter2ValidationHandoffOk}",
+            $"ADAPTER2_VALIDATION_SCOPE_BOUNDARY_OK:{Adapter2ValidationScopeBoundaryOk}",
+            $"V060_MILESTONE_PROOF_OK:{V060MilestoneProofOk}",
             $"HELLOWORLD_WPF_OK:{IsOk}",
         ];
 

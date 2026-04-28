@@ -20,6 +20,9 @@ public sealed class DemoProofReleaseSurfaceTests
         "ADAPTER2_PERFORMANCE_ACCESSIBILITY_HANDOFF_OK:True",
         "ADAPTER2_RECIPE_ALIGNMENT_OK:True",
         "ADAPTER2_PROOF_BUDGET_OK:True",
+        "ADAPTER2_VALIDATION_HANDOFF_OK:True",
+        "ADAPTER2_VALIDATION_SCOPE_BOUNDARY_OK:True",
+        "V060_MILESTONE_PROOF_OK:True",
         "HELLOWORLD_WPF_OK:True",
     ];
 
@@ -1055,6 +1058,7 @@ public sealed class DemoProofReleaseSurfaceTests
                 "authoring.node-surface",
                 "diagnostics.support-bundle",
                 "adapter2.performance-accessibility-handoff",
+                "adapter2.validation-handoff",
             })
             {
                 Assert.Contains(featureId, contents, StringComparison.Ordinal);
