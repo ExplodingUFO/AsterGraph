@@ -42,7 +42,7 @@ The current recommendation is based on four structured pre-public adoption rehea
 
 The current 0.xx alpha/beta hardening line is `Adoption Readiness / Release Candidate Hygiene`: keep the public recommendation, support boundary, API drift checks, and release proof story aligned before widening any capability claim. The previous `Performance / Export Hardening` work is now defended evidence, not the next public recommendation.
 
-Current proof handoff markers: `ADOPTION_RECOMMENDATION_CURRENT_OK:True` and `CLAIM_HYGIENE_BOUNDARY_OK:True`.
+Current proof handoff markers: `ADOPTION_RECOMMENDATION_CURRENT_OK:True`, `CLAIM_HYGIENE_BOUNDARY_OK:True`, `RELEASE_READINESS_GATE_OK:True`, `SUPPORT_BOUNDARY_GATE_OK:True`, and `BETA_CLAIM_ALIGNMENT_OK:True`.
 Milestone handoff markers: `ADOPTION_READINESS_HANDOFF_OK:True`, `ADOPTION_SCOPE_BOUNDARY_OK:True`, and `V056_MILESTONE_PROOF_OK:True`.
 
 1. **seeded rehearsals do not count toward the 3-5 gate**

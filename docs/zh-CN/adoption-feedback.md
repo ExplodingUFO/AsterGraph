@@ -42,7 +42,7 @@
 
 当前 `0.xx` alpha/beta hardening 线命名为 `Adoption Readiness / Release Candidate Hygiene`：先把公开推荐、support boundary、API drift 检查和 release proof 口径保持一致，再考虑扩大任何 capability 声明。之前的 `Performance / Export Hardening` 已经变成 defended evidence，不再是下一条公开推荐。
 
-当前 proof handoff markers：`ADOPTION_RECOMMENDATION_CURRENT_OK:True` 和 `CLAIM_HYGIENE_BOUNDARY_OK:True`。
+当前 proof handoff markers：`ADOPTION_RECOMMENDATION_CURRENT_OK:True`、`CLAIM_HYGIENE_BOUNDARY_OK:True`、`RELEASE_READINESS_GATE_OK:True`、`SUPPORT_BOUNDARY_GATE_OK:True` 和 `BETA_CLAIM_ALIGNMENT_OK:True`。
 里程碑 handoff markers：`ADOPTION_READINESS_HANDOFF_OK:True`、`ADOPTION_SCOPE_BOUNDARY_OK:True` 和 `V056_MILESTONE_PROOF_OK:True`。
 
 1. **维护者种子预演证据不计入 3 到 5 的门槛**

@@ -89,6 +89,9 @@ public sealed class ReleaseClosureContractTests
         Assert.True(HasLineWithAll(notes, "Adoption Readiness / Release Candidate Hygiene", "API drift", "support boundary", "release proof"));
         Assert.Contains("ADOPTION_RECOMMENDATION_CURRENT_OK:True", notes, StringComparison.Ordinal);
         Assert.Contains("CLAIM_HYGIENE_BOUNDARY_OK:True", notes, StringComparison.Ordinal);
+        Assert.Contains("RELEASE_READINESS_GATE_OK:True", notes, StringComparison.Ordinal);
+        Assert.Contains("SUPPORT_BOUNDARY_GATE_OK:True", notes, StringComparison.Ordinal);
+        Assert.Contains("BETA_CLAIM_ALIGNMENT_OK:True", notes, StringComparison.Ordinal);
         Assert.Contains("0.xx alpha/beta hardening line", notes, StringComparison.Ordinal);
         Assert.True(HasLineWithAll(notes, "API adoption proof", "PUBLIC_API_SURFACE_OK", "PUBLIC_API_GUIDANCE_OK", "generated template/plugin validation"));
         Assert.Contains("PUBLIC_API_DIFF_GATE_OK:True", notes, StringComparison.Ordinal);
@@ -165,6 +168,9 @@ public sealed class ReleaseClosureContractTests
         Assert.True(HasLineWithAll(englishChecklist, "Adoption Readiness / Release Candidate Hygiene", "API drift", "support boundary", "release proof"));
         Assert.Contains("ADOPTION_RECOMMENDATION_CURRENT_OK:True", englishChecklist, StringComparison.Ordinal);
         Assert.Contains("CLAIM_HYGIENE_BOUNDARY_OK:True", englishChecklist, StringComparison.Ordinal);
+        Assert.Contains("RELEASE_READINESS_GATE_OK:True", englishChecklist, StringComparison.Ordinal);
+        Assert.Contains("SUPPORT_BOUNDARY_GATE_OK:True", englishChecklist, StringComparison.Ordinal);
+        Assert.Contains("BETA_CLAIM_ALIGNMENT_OK:True", englishChecklist, StringComparison.Ordinal);
         Assert.True(HasLineWithAll(englishChecklist, "xlarge", "telemetry-only", "10000-node support", "virtualization"));
         Assert.Contains("SCALE_RASTER_EXPORT_STRESS_OK:True", englishChecklist, StringComparison.Ordinal);
         Assert.Contains("0.xx alpha/beta hardening", englishChecklist, StringComparison.Ordinal);
@@ -207,6 +213,9 @@ public sealed class ReleaseClosureContractTests
         Assert.True(HasLineWithAll(chineseChecklist, "Adoption Readiness / Release Candidate Hygiene", "API drift", "support boundary", "release proof"));
         Assert.Contains("ADOPTION_RECOMMENDATION_CURRENT_OK:True", chineseChecklist, StringComparison.Ordinal);
         Assert.Contains("CLAIM_HYGIENE_BOUNDARY_OK:True", chineseChecklist, StringComparison.Ordinal);
+        Assert.Contains("RELEASE_READINESS_GATE_OK:True", chineseChecklist, StringComparison.Ordinal);
+        Assert.Contains("SUPPORT_BOUNDARY_GATE_OK:True", chineseChecklist, StringComparison.Ordinal);
+        Assert.Contains("BETA_CLAIM_ALIGNMENT_OK:True", chineseChecklist, StringComparison.Ordinal);
         Assert.True(HasLineWithAll(chineseChecklist, "xlarge", "telemetry-only", "10000 节点支持", "virtualization"));
         Assert.Contains("SCALE_RASTER_EXPORT_STRESS_OK:True", chineseChecklist, StringComparison.Ordinal);
         Assert.Contains("0.xx` alpha/beta hardening 线", chineseChecklist, StringComparison.Ordinal);
@@ -469,6 +478,9 @@ public sealed class ReleaseClosureContractTests
             Assert.Contains("ADOPTION_READINESS_HANDOFF_OK:True", contents, StringComparison.Ordinal);
             Assert.Contains("ADOPTION_SCOPE_BOUNDARY_OK:True", contents, StringComparison.Ordinal);
             Assert.Contains("V056_MILESTONE_PROOF_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("RELEASE_READINESS_GATE_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("SUPPORT_BOUNDARY_GATE_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("BETA_CLAIM_ALIGNMENT_OK:True", contents, StringComparison.Ordinal);
         }
     }
 

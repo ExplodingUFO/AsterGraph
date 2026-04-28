@@ -22,6 +22,10 @@
 - retained MVVM 入口只作为迁移桥接，不再作为新的 primary host surface。
 - 读到 `v1.0.0` 时，应该把它理解成“把这条已经防守住的边界提升为 stable”，而不是自动扩大包、框架或 adapter 支持面。
 
+## 发布就绪 proof
+
+Phase 382 用 `RELEASE_READINESS_GATE_OK:True`、`SUPPORT_BOUNDARY_GATE_OK:True` 和 `BETA_CLAIM_ALIGNMENT_OK:True` 把 release readiness、support boundary 和 beta claim 口径继续绑定到这张冻结矩阵。这些 marker 不新增包、runtime route、WPF parity、marketplace、sandbox、execution engine、GA 或 `1.0` 支持承诺。
+
 ## 相关文档
 
 - [公开 Beta 评估路径](./evaluation-path.md)

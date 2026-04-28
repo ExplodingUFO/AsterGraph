@@ -120,6 +120,9 @@ Expected high-signal markers:
 - `API_RELEASE_CANDIDATE_PROOF_OK:True`
 - `PUBLIC_API_GUIDANCE_HANDOFF_OK:True`
 - `RELEASE_BOUNDARY_STABILITY_OK:True`
+- `RELEASE_READINESS_GATE_OK:True`
+- `SUPPORT_BOUNDARY_GATE_OK:True`
+- `BETA_CLAIM_ALIGNMENT_OK:True`
 - `ADOPTION_READINESS_HANDOFF_OK:True`
 - `ADOPTION_SCOPE_BOUNDARY_OK:True`
 - `V056_MILESTONE_PROOF_OK:True`
@@ -171,7 +174,7 @@ Expected high-signal markers:
 - confirm claim-expansion status is treated as triage input until 3-5 real external reports cluster on the same bounded risk
 - confirm Phase 380 adopter refresh markers stay visible in release messaging: `ADOPTER_INTAKE_REFRESH_OK:True`, `ADOPTER_SUPPORT_BUNDLE_ATTACHMENT_OK:True`, and `ADOPTER_CLAIM_EXPANSION_GATE_OK:True`
 - GA prep checklist: adoption evidence, API drift, support boundary, and release proof gates must all stay explicit before any GA or `1.0` messaging
-- repeat the current 0.xx alpha/beta hardening handoff in release messaging: `Adoption Readiness / Release Candidate Hygiene` means the public recommendation, API drift, support boundary, and release proof gates stay aligned before release-candidate, GA, or `1.0` language; include `ADOPTION_RECOMMENDATION_CURRENT_OK:True` and `CLAIM_HYGIENE_BOUNDARY_OK:True`
+- repeat the current 0.xx alpha/beta hardening handoff in release messaging: `Adoption Readiness / Release Candidate Hygiene` means the public recommendation, API drift, support boundary, and release proof gates stay aligned before release-candidate, GA, or `1.0` language; include `ADOPTION_RECOMMENDATION_CURRENT_OK:True`, `CLAIM_HYGIENE_BOUNDARY_OK:True`, `RELEASE_READINESS_GATE_OK:True`, `SUPPORT_BOUNDARY_GATE_OK:True`, and `BETA_CLAIM_ALIGNMENT_OK:True`
 - keep `xlarge` described as telemetry-only; do not present it as a 10000-node support promise or virtualization commitment
 - if `NUGET_API_KEY` is configured, confirm package publication succeeds
 - if `NUGET_API_KEY` is not configured, confirm the workflow reports a deliberate NuGet publish skip instead of a failure

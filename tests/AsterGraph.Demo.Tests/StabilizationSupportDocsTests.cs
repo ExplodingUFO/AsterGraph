@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using Xunit;
 
 namespace AsterGraph.Demo.Tests;
@@ -28,6 +29,10 @@ public sealed class StabilizationSupportDocsTests
         Assert.Contains("Validation-only and partial-fallback", supportMatrix, StringComparison.Ordinal);
         Assert.Contains("Migration-only", supportMatrix, StringComparison.Ordinal);
         Assert.Contains("promotion of this same defended boundary to stable", supportMatrix, StringComparison.Ordinal);
+        Assert.Contains("RELEASE_READINESS_GATE_OK:True", supportMatrix, StringComparison.Ordinal);
+        Assert.Contains("SUPPORT_BOUNDARY_GATE_OK:True", supportMatrix, StringComparison.Ordinal);
+        Assert.Contains("BETA_CLAIM_ALIGNMENT_OK:True", supportMatrix, StringComparison.Ordinal);
+        Assert.True(HasLineWithAll(supportMatrix, "do not add", "WPF parity", "marketplace", "sandbox", "execution-engine", "GA"));
 
         Assert.Contains("[Stabilization Support Matrix](./docs/en/stabilization-support-matrix.md)", readme, StringComparison.Ordinal);
         Assert.Contains("[Stabilization Support Matrix](./stabilization-support-matrix.md)", quickStart, StringComparison.Ordinal);
@@ -67,6 +72,10 @@ public sealed class StabilizationSupportDocsTests
         Assert.Contains("`WPF`", supportMatrix, StringComparison.Ordinal);
         Assert.Contains("仅用于迁移", supportMatrix, StringComparison.Ordinal);
         Assert.Contains("提升为 stable", supportMatrix, StringComparison.Ordinal);
+        Assert.Contains("RELEASE_READINESS_GATE_OK:True", supportMatrix, StringComparison.Ordinal);
+        Assert.Contains("SUPPORT_BOUNDARY_GATE_OK:True", supportMatrix, StringComparison.Ordinal);
+        Assert.Contains("BETA_CLAIM_ALIGNMENT_OK:True", supportMatrix, StringComparison.Ordinal);
+        Assert.True(HasLineWithAll(supportMatrix, "不新增", "WPF parity", "marketplace", "sandbox", "execution engine", "GA"));
 
         Assert.Contains("[稳定化支持矩阵](./docs/zh-CN/stabilization-support-matrix.md)", readme, StringComparison.Ordinal);
         Assert.Contains("[稳定化支持矩阵](./stabilization-support-matrix.md)", quickStart, StringComparison.Ordinal);
@@ -163,6 +172,13 @@ public sealed class StabilizationSupportDocsTests
         Assert.True(textIndex >= 0, $"Expected to find '{requiredText}'.");
         Assert.True(headingIndex >= 0, $"Expected to find '{requiredHeading}'.");
         Assert.True(textIndex < headingIndex, $"Expected '{requiredText}' to appear before '{requiredHeading}'.");
+    }
+
+    private static bool HasLineWithAll(string contents, params string[] requiredTerms)
+    {
+        return contents
+            .Split('\n', StringSplitOptions.TrimEntries)
+            .Any(line => requiredTerms.All(term => line.Contains(term, StringComparison.OrdinalIgnoreCase)));
     }
 
     private static string GetRepositoryRoot()
