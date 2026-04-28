@@ -15,6 +15,7 @@
 - v0.59 Large Graph UX handoff markers: `LARGE_GRAPH_UX_HANDOFF_OK:True`, `LARGE_GRAPH_UX_SCOPE_BOUNDARY_OK:True`, and `V059_MILESTONE_PROOF_OK:True`
 - v0.60 adapter-2 validation scope markers: `ADAPTER2_VALIDATION_SCOPE_OK:True`, `ADAPTER2_MATRIX_HANDOFF_OK:True`, and `ADAPTER2_SCOPE_BOUNDARY_OK:True`
 - v0.60 WPF proof sample markers: `ADAPTER2_WPF_SAMPLE_PROOF_OK:True`, `ADAPTER2_CANONICAL_ROUTE_OK:True`, and `ADAPTER2_SAMPLE_SCOPE_BOUNDARY_OK:True`
+- v0.60 adapter-2 performance/accessibility handoff markers: `ADAPTER2_PERFORMANCE_ACCESSIBILITY_HANDOFF_OK:True`, `ADAPTER2_RECIPE_ALIGNMENT_OK:True`, and `ADAPTER2_PROOF_BUDGET_OK:True`
 - public versioning guidance: [Versioning](./versioning.md)
 - supported published packages:
   - `AsterGraph.Abstractions`
@@ -55,6 +56,7 @@
 - v0.59 Large Graph UX handoff proof keeps phases 371-374 tied to existing hosted workbench evidence without expanding graph-size support claims: `LARGE_GRAPH_UX_HANDOFF_OK:True`, `LARGE_GRAPH_UX_SCOPE_BOUNDARY_OK:True`, `V059_MILESTONE_PROOF_OK:True`
 - adapter-2 validation scope proof keeps WPF on the same canonical route and matrix vocabulary without widening public WPF support or parity claims: `ADAPTER2_VALIDATION_SCOPE_OK:True`, `ADAPTER2_MATRIX_HANDOFF_OK:True`, `ADAPTER2_SCOPE_BOUNDARY_OK:True`
 - WPF proof sample evidence keeps `AsterGraph.HelloWorld.Wpf` copyable and tied to the canonical session/runtime route without creating a second onboarding path: `ADAPTER2_WPF_SAMPLE_PROOF_OK:True`, `ADAPTER2_CANONICAL_ROUTE_OK:True`, `ADAPTER2_SAMPLE_SCOPE_BOUNDARY_OK:True`
+- adapter-2 performance/accessibility handoff proof ties the existing WPF proof budgets to the adapter-2 accessibility and performance recipes without widening WPF support: `ADAPTER2_PERFORMANCE_ACCESSIBILITY_HANDOFF_OK:True`, `ADAPTER2_RECIPE_ALIGNMENT_OK:True`, `ADAPTER2_PROOF_BUDGET_OK:True`
 - graph-surface usability proof markers:
   - `COMMAND_SURFACE_OK:True`
   - `TIERED_NODE_SURFACE_OK:True`
@@ -112,7 +114,7 @@ Current intake gate markers: `ADOPTION_INTAKE_EVIDENCE_OK:True`, `SUPPORT_BUNDLE
 
 | Claim | Current public stance | Route-level evidence |
 | --- | --- | --- |
-| `WPF` as adapter 2 | Validation-only and not Avalonia parity or public WPF support. WPF support expansion stays blocked until 3-5 real external reports cluster on the same bounded risk. Current evidence is limited to the bounded hosted shell accessibility and performance/export-breadth paths. | `HELLOWORLD_WPF_OK`, `HOSTED_ACCESSIBILITY_BASELINE_OK`, `HOSTED_ACCESSIBILITY_FOCUS_OK`, `HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK`, `HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK`, `HOSTED_ACCESSIBILITY_OK`, `ADAPTER2_PERFORMANCE_BASELINE_OK`, `ADAPTER2_EXPORT_BREADTH_OK`, `ADAPTER2_PROJECTION_BUDGET_OK`, `ADAPTER2_COMMAND_BUDGET_OK`, `ADAPTER2_SCENE_BUDGET_OK`, `ADAPTER_CAPABILITY_MATRIX:WPF:HELLOWORLD_WPF_OK:PASS`, `ADAPTER_CAPABILITY_MATRIX:WPF:COMMAND_SURFACE_OK:PASS`, [Adapter Capability Matrix](./adapter-capability-matrix.md) |
+| `WPF` as adapter 2 | Validation-only and not Avalonia parity or public WPF support. WPF support expansion stays blocked until 3-5 real external reports cluster on the same bounded risk. Current evidence is limited to the bounded hosted shell accessibility and performance/export-breadth paths. | `HELLOWORLD_WPF_OK`, `HOSTED_ACCESSIBILITY_BASELINE_OK`, `HOSTED_ACCESSIBILITY_FOCUS_OK`, `HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK`, `HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK`, `HOSTED_ACCESSIBILITY_OK`, `ADAPTER2_PERFORMANCE_BASELINE_OK`, `ADAPTER2_EXPORT_BREADTH_OK`, `ADAPTER2_PROJECTION_BUDGET_OK`, `ADAPTER2_COMMAND_BUDGET_OK`, `ADAPTER2_SCENE_BUDGET_OK`, `ADAPTER2_PERFORMANCE_ACCESSIBILITY_HANDOFF_OK`, `ADAPTER2_RECIPE_ALIGNMENT_OK`, `ADAPTER2_PROOF_BUDGET_OK`, `ADAPTER_CAPABILITY_MATRIX:WPF:HELLOWORLD_WPF_OK:PASS`, `ADAPTER_CAPABILITY_MATRIX:WPF:COMMAND_SURFACE_OK:PASS`, [Adapter Capability Matrix](./adapter-capability-matrix.md) |
 | Retained route | Migration-only bridge, not a new primary host path. | [Retained-To-Session Migration Recipe](./retained-migration-recipe.md), [Stabilization Support Matrix](./stabilization-support-matrix.md) |
 | Stress raster export budget | PNG/JPEG export at 5000 nodes has conservative defended redlines; this is a regression guard, not a fast-export claim. | `SCALE_EXPORT_BUDGET:stress:svg<=300:png<=120000:jpeg<=100000:reload<=800`, `SCALE_RASTER_EXPORT_STRESS_OK:True`, [ScaleSmoke Baseline](./scale-baseline.md) |
 | XLarge telemetry | 10000-node ScaleSmoke is telemetry-only and not a support or virtualization claim. | `SCALE_TIER_BUDGET:xlarge:nodes=10000:selection=512:moves=128:budget=informational-only`, [ScaleSmoke Baseline](./scale-baseline.md) |

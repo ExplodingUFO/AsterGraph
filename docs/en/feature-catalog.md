@@ -59,6 +59,7 @@ Every new feature record must keep these fields together:
 | `diagnostics.runtime-overlay` | Diagnostics | Beta | `IGraphRuntimeOverlayProvider`, runtime overlay snapshots | Supported | NotApplicable | `ConsumerSample.Avalonia`, `AsterGraph.Demo` | `RUNTIME_OVERLAY_SNAPSHOT_OK:True` | NotApplicable | [Support Bundle](./support-bundle.md) |
 | `diagnostics.plugin-trust` | Diagnostics | Beta | plugin discovery, trust policy, load snapshots | Supported | NotApplicable | `ConsumerSample.Avalonia`, `PluginTool` | `CONSUMER_SAMPLE_TRUST_OK:True` | NotApplicable | [Plugin Trust Contracts](./plugin-trust-contracts.md) |
 | `diagnostics.support-bundle` | Diagnostics | Beta | local support bundle output | Supported | NotApplicable | `ConsumerSample.Avalonia` | `SUPPORT_BUNDLE_OK:True` | NotApplicable | [Support Bundle](./support-bundle.md) |
+| `adapter2.performance-accessibility-handoff` | Diagnostics | Beta | existing WPF proof budgets plus adapter-2 recipes | Supported | Supported | `AsterGraph.HelloWorld.Wpf` | `ADAPTER2_PERFORMANCE_ACCESSIBILITY_HANDOFF_OK:True`, `ADAPTER2_RECIPE_ALIGNMENT_OK:True`, `ADAPTER2_PROOF_BUDGET_OK:True` | WPF validation-only proof budget | [Adapter Capability Matrix](./adapter-capability-matrix.md) |
 
 ## Governance Rules
 

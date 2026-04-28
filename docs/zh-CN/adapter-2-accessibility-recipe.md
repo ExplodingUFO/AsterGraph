@@ -7,7 +7,7 @@
 - 先走受防守的 Avalonia hosted 路线，运行 `AsterGraph.ConsumerSample.Avalonia -- --proof`，并先把 `HOSTED_ACCESSIBILITY_OK:True` 以及同轮 accessibility diagnostics 放进记录里。
 - 复用同一条受限 intake 记录和来自受防守 Avalonia 路线的 support-bundle attachment note；`WPF` 不会打开第二条 intake 流程。
 - 只把 `AsterGraph.HelloWorld.Wpf -- --proof` 当成 validation-only 的 adapter-2 跟进验证。
-- 把 `HOSTED_ACCESSIBILITY_BASELINE_OK:True`、`HOSTED_ACCESSIBILITY_FOCUS_OK:True`、`HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True`、`HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True`、`HOSTED_ACCESSIBILITY_OK:True` 和 `HELLOWORLD_WPF_OK:True` 继续放在同一条本地记录里。
+- 把 `HOSTED_ACCESSIBILITY_BASELINE_OK:True`、`HOSTED_ACCESSIBILITY_FOCUS_OK:True`、`HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True`、`HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True`、`HOSTED_ACCESSIBILITY_OK:True`、`ADAPTER2_PERFORMANCE_ACCESSIBILITY_HANDOFF_OK:True`、`ADAPTER2_RECIPE_ALIGNMENT_OK:True` 和 `HELLOWORLD_WPF_OK:True` 继续放在同一条本地记录里。
 - 所有 `WPF` proof 行都只能当成验证证据；这些 marker 都不会扩大公开支持承诺。
 
 ## 命令
@@ -28,6 +28,8 @@ dotnet run --project tools/AsterGraph.HelloWorld.Wpf/AsterGraph.HelloWorld.Wpf.c
 - 同一轮 `WPF` proof 还会输出 `HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True`
 - 同一轮 `WPF` proof 还会输出 `HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True`
 - 同一轮 `WPF` proof 还会输出 `HOSTED_ACCESSIBILITY_OK:True`
+- 同一轮 `WPF` proof 还会输出 `ADAPTER2_PERFORMANCE_ACCESSIBILITY_HANDOFF_OK:True`
+- 同一轮 `WPF` proof 还会输出 `ADAPTER2_RECIPE_ALIGNMENT_OK:True`
 - 同一轮 `WPF` proof 还会输出 `HELLOWORLD_WPF_OK:True`
 
 ## 不要误读

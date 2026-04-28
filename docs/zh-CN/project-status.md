@@ -15,6 +15,7 @@
 - v0.59 Large Graph UX handoff markers：`LARGE_GRAPH_UX_HANDOFF_OK:True`、`LARGE_GRAPH_UX_SCOPE_BOUNDARY_OK:True` 和 `V059_MILESTONE_PROOF_OK:True`
 - v0.60 adapter-2 validation scope markers：`ADAPTER2_VALIDATION_SCOPE_OK:True`、`ADAPTER2_MATRIX_HANDOFF_OK:True` 和 `ADAPTER2_SCOPE_BOUNDARY_OK:True`
 - v0.60 WPF proof sample markers：`ADAPTER2_WPF_SAMPLE_PROOF_OK:True`、`ADAPTER2_CANONICAL_ROUTE_OK:True` 和 `ADAPTER2_SAMPLE_SCOPE_BOUNDARY_OK:True`
+- v0.60 adapter-2 performance/accessibility handoff markers：`ADAPTER2_PERFORMANCE_ACCESSIBILITY_HANDOFF_OK:True`、`ADAPTER2_RECIPE_ALIGNMENT_OK:True` 和 `ADAPTER2_PROOF_BUDGET_OK:True`
 - 对外版本说明：[Versioning](./versioning.md)
 - 当前公开支持的发布包：
   - `AsterGraph.Abstractions`
@@ -54,6 +55,7 @@
 - v0.59 Large Graph UX handoff proof 把 phases 371-374 绑定在现有 hosted workbench 证据上，但不扩大 graph-size support claims：`LARGE_GRAPH_UX_HANDOFF_OK:True`、`LARGE_GRAPH_UX_SCOPE_BOUNDARY_OK:True`、`V059_MILESTONE_PROOF_OK:True`
 - adapter-2 validation scope proof 让 WPF 继续停在同一条 canonical route 和 matrix vocabulary 上，不扩大 public WPF support 或 parity claims：`ADAPTER2_VALIDATION_SCOPE_OK:True`、`ADAPTER2_MATRIX_HANDOFF_OK:True`、`ADAPTER2_SCOPE_BOUNDARY_OK:True`
 - WPF proof sample evidence 让 `AsterGraph.HelloWorld.Wpf` 保持可复制，并绑定到 canonical session/runtime route，但不创建第二条 onboarding path（second onboarding path）：`ADAPTER2_WPF_SAMPLE_PROOF_OK:True`、`ADAPTER2_CANONICAL_ROUTE_OK:True`、`ADAPTER2_SAMPLE_SCOPE_BOUNDARY_OK:True`
+- adapter-2 performance/accessibility handoff proof 把现有 WPF proof budgets 绑定到 adapter-2 accessibility 和 performance recipes，不扩大 WPF support：`ADAPTER2_PERFORMANCE_ACCESSIBILITY_HANDOFF_OK:True`、`ADAPTER2_RECIPE_ALIGNMENT_OK:True`、`ADAPTER2_PROOF_BUDGET_OK:True`
 - 图面可用性 proof marker：
   - `COMMAND_SURFACE_OK:True`
   - `TIERED_NODE_SURFACE_OK:True`
@@ -111,7 +113,7 @@
 
 | 声明 | 当前公开口径 | 路线级证据 |
 | --- | --- | --- |
-| `WPF` 作为 adapter 2 | 只算 validation-only，不代表 Avalonia parity，也不是 public WPF support。WPF support expansion 必须等 3-5 real external reports 聚焦在同一个受限风险后才能讨论。当前证据只覆盖有边界的 hosted shell accessibility、performance 和 export-breadth 路径。 | `HELLOWORLD_WPF_OK`、`HOSTED_ACCESSIBILITY_BASELINE_OK`、`HOSTED_ACCESSIBILITY_FOCUS_OK`、`HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK`、`HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK`、`HOSTED_ACCESSIBILITY_OK`、`ADAPTER2_PERFORMANCE_BASELINE_OK`、`ADAPTER2_EXPORT_BREADTH_OK`、`ADAPTER2_PROJECTION_BUDGET_OK`、`ADAPTER2_COMMAND_BUDGET_OK`、`ADAPTER2_SCENE_BUDGET_OK`、`ADAPTER_CAPABILITY_MATRIX:WPF:HELLOWORLD_WPF_OK:PASS`、`ADAPTER_CAPABILITY_MATRIX:WPF:COMMAND_SURFACE_OK:PASS`、[Adapter Capability Matrix](./adapter-capability-matrix.md) |
+| `WPF` 作为 adapter 2 | 只算 validation-only，不代表 Avalonia parity，也不是 public WPF support。WPF support expansion 必须等 3-5 real external reports 聚焦在同一个受限风险后才能讨论。当前证据只覆盖有边界的 hosted shell accessibility、performance 和 export-breadth 路径。 | `HELLOWORLD_WPF_OK`、`HOSTED_ACCESSIBILITY_BASELINE_OK`、`HOSTED_ACCESSIBILITY_FOCUS_OK`、`HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK`、`HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK`、`HOSTED_ACCESSIBILITY_OK`、`ADAPTER2_PERFORMANCE_BASELINE_OK`、`ADAPTER2_EXPORT_BREADTH_OK`、`ADAPTER2_PROJECTION_BUDGET_OK`、`ADAPTER2_COMMAND_BUDGET_OK`、`ADAPTER2_SCENE_BUDGET_OK`、`ADAPTER2_PERFORMANCE_ACCESSIBILITY_HANDOFF_OK`、`ADAPTER2_RECIPE_ALIGNMENT_OK`、`ADAPTER2_PROOF_BUDGET_OK`、`ADAPTER_CAPABILITY_MATRIX:WPF:HELLOWORLD_WPF_OK:PASS`、`ADAPTER_CAPABILITY_MATRIX:WPF:COMMAND_SURFACE_OK:PASS`、[Adapter Capability Matrix](./adapter-capability-matrix.md) |
 | retained 路线 | 只作为迁移桥，不是新的 primary host path。 | [Retained 到 Session 的迁移 Recipe](./retained-migration-recipe.md)、[稳定化支持矩阵](./stabilization-support-matrix.md) |
 | stress raster export budget | 5000 节点 PNG/JPEG export 有保守 defended 红线；这是防回归 guard，不是 fast-export 声明。 | `SCALE_EXPORT_BUDGET:stress:svg<=300:png<=120000:jpeg<=100000:reload<=800`、`SCALE_RASTER_EXPORT_STRESS_OK:True`、[ScaleSmoke 基线](./scale-baseline.md) |
 | XLarge telemetry | 10000 节点 ScaleSmoke 只是 telemetry-only，不是支持承诺或 virtualization 声明。 | `SCALE_TIER_BUDGET:xlarge:nodes=10000:selection=512:moves=128:budget=informational-only`、[ScaleSmoke 基线](./scale-baseline.md) |

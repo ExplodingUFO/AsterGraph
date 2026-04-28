@@ -305,7 +305,7 @@ jobs:
             if ($helloWorldWpfLine) {
               $summaryLines.Add("- $($helloWorldWpfLine.Line)")
             }
-            foreach ($adapter2Marker in @('ADAPTER2_VALIDATION_SCOPE_OK:True', 'ADAPTER2_MATRIX_HANDOFF_OK:True', 'ADAPTER2_SCOPE_BOUNDARY_OK:True', 'ADAPTER2_WPF_SAMPLE_PROOF_OK:True', 'ADAPTER2_CANONICAL_ROUTE_OK:True', 'ADAPTER2_SAMPLE_SCOPE_BOUNDARY_OK:True')) {
+            foreach ($adapter2Marker in @('ADAPTER2_VALIDATION_SCOPE_OK:True', 'ADAPTER2_MATRIX_HANDOFF_OK:True', 'ADAPTER2_SCOPE_BOUNDARY_OK:True', 'ADAPTER2_WPF_SAMPLE_PROOF_OK:True', 'ADAPTER2_CANONICAL_ROUTE_OK:True', 'ADAPTER2_SAMPLE_SCOPE_BOUNDARY_OK:True', 'ADAPTER2_PERFORMANCE_ACCESSIBILITY_HANDOFF_OK:True', 'ADAPTER2_RECIPE_ALIGNMENT_OK:True', 'ADAPTER2_PROOF_BUDGET_OK:True')) {
               $adapter2Line = Select-String -Path 'artifacts/proof/hello-world-wpf-proof.txt' -Pattern "^$([regex]::Escape($adapter2Marker))$" | Select-Object -First 1
               if ($adapter2Line) {
                 $summaryLines.Add("- $($adapter2Line.Line)")

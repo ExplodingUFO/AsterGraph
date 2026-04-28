@@ -247,6 +247,22 @@ public sealed record HostedHelloWorldProofResult(
         Adapter2WpfSampleProofOk
         && Adapter2ScopeBoundaryOk;
 
+    public bool Adapter2ProofBudgetOk =>
+        Adapter2ProjectionBudgetOk
+        && Adapter2CommandBudgetOk
+        && Adapter2SceneBudgetOk;
+
+    public bool Adapter2PerformanceAccessibilityHandoffOk =>
+        HostedAccessibilityOk
+        && Adapter2PerformanceBaselineOk
+        && Adapter2ExportBreadthOk
+        && Adapter2ProofBudgetOk;
+
+    public bool Adapter2RecipeAlignmentOk =>
+        Adapter2PerformanceAccessibilityHandoffOk
+        && Adapter2ValidationScopeOk
+        && Adapter2WpfSampleProofOk;
+
     public bool IsOk => CommandSurfaceOk
         && HostedAccessibilityOk
         && Adapter2PerformanceBaselineOk
@@ -259,7 +275,10 @@ public sealed record HostedHelloWorldProofResult(
         && Adapter2MatrixHandoffOk
         && Adapter2ScopeBoundaryOk
         && Adapter2WpfSampleProofOk
-        && Adapter2SampleScopeBoundaryOk;
+        && Adapter2SampleScopeBoundaryOk
+        && Adapter2ProofBudgetOk
+        && Adapter2PerformanceAccessibilityHandoffOk
+        && Adapter2RecipeAlignmentOk;
 
     public IReadOnlyList<string> ProofLines =>
         [
@@ -280,6 +299,9 @@ public sealed record HostedHelloWorldProofResult(
             $"ADAPTER2_WPF_SAMPLE_PROOF_OK:{Adapter2WpfSampleProofOk}",
             $"ADAPTER2_CANONICAL_ROUTE_OK:{Adapter2CanonicalRouteOk}",
             $"ADAPTER2_SAMPLE_SCOPE_BOUNDARY_OK:{Adapter2SampleScopeBoundaryOk}",
+            $"ADAPTER2_PERFORMANCE_ACCESSIBILITY_HANDOFF_OK:{Adapter2PerformanceAccessibilityHandoffOk}",
+            $"ADAPTER2_RECIPE_ALIGNMENT_OK:{Adapter2RecipeAlignmentOk}",
+            $"ADAPTER2_PROOF_BUDGET_OK:{Adapter2ProofBudgetOk}",
             $"HELLOWORLD_WPF_OK:{IsOk}",
         ];
 

@@ -17,6 +17,9 @@ public sealed class DemoProofReleaseSurfaceTests
         "ADAPTER2_WPF_SAMPLE_PROOF_OK:True",
         "ADAPTER2_CANONICAL_ROUTE_OK:True",
         "ADAPTER2_SAMPLE_SCOPE_BOUNDARY_OK:True",
+        "ADAPTER2_PERFORMANCE_ACCESSIBILITY_HANDOFF_OK:True",
+        "ADAPTER2_RECIPE_ALIGNMENT_OK:True",
+        "ADAPTER2_PROOF_BUDGET_OK:True",
         "HELLOWORLD_WPF_OK:True",
     ];
 
@@ -180,6 +183,8 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("HELLOWORLD_WPF_OK:True", recipe, StringComparison.Ordinal);
         Assert.Contains("HOSTED_ACCESSIBILITY_BASELINE_OK:True", recipe, StringComparison.Ordinal);
         Assert.Contains("HOSTED_ACCESSIBILITY_OK:True", recipe, StringComparison.Ordinal);
+        Assert.Contains("ADAPTER2_PERFORMANCE_ACCESSIBILITY_HANDOFF_OK:True", recipe, StringComparison.Ordinal);
+        Assert.Contains("ADAPTER2_RECIPE_ALIGNMENT_OK:True", recipe, StringComparison.Ordinal);
         Assert.True(HasLineWith(recipe, "WPF", "validation-only"));
         Assert.True(HasLineWith(recipe, "Avalonia", "defended"));
 
@@ -188,6 +193,8 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("HELLOWORLD_WPF_OK:True", recipeZh, StringComparison.Ordinal);
         Assert.Contains("HOSTED_ACCESSIBILITY_BASELINE_OK:True", recipeZh, StringComparison.Ordinal);
         Assert.Contains("HOSTED_ACCESSIBILITY_OK:True", recipeZh, StringComparison.Ordinal);
+        Assert.Contains("ADAPTER2_PERFORMANCE_ACCESSIBILITY_HANDOFF_OK:True", recipeZh, StringComparison.Ordinal);
+        Assert.Contains("ADAPTER2_RECIPE_ALIGNMENT_OK:True", recipeZh, StringComparison.Ordinal);
         Assert.True(HasLineWith(recipeZh, "WPF", "验证"));
         Assert.True(HasLineWith(recipeZh, "Avalonia", "受防守"));
     }
@@ -205,6 +212,9 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("ADAPTER2_PROJECTION_BUDGET_OK:True:none", recipe, StringComparison.Ordinal);
         Assert.Contains("ADAPTER2_COMMAND_BUDGET_OK:True:none", recipe, StringComparison.Ordinal);
         Assert.Contains("ADAPTER2_SCENE_BUDGET_OK:True:none", recipe, StringComparison.Ordinal);
+        Assert.Contains("ADAPTER2_PROOF_BUDGET_OK:True", recipe, StringComparison.Ordinal);
+        Assert.Contains("ADAPTER2_PERFORMANCE_ACCESSIBILITY_HANDOFF_OK:True", recipe, StringComparison.Ordinal);
+        Assert.Contains("ADAPTER2_RECIPE_ALIGNMENT_OK:True", recipe, StringComparison.Ordinal);
         Assert.True(HasLineWith(recipe, "WPF", "validation-only"));
         Assert.True(HasLineWith(recipe, "Avalonia", "defended"));
 
@@ -215,6 +225,9 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("ADAPTER2_PROJECTION_BUDGET_OK:True:none", recipeZh, StringComparison.Ordinal);
         Assert.Contains("ADAPTER2_COMMAND_BUDGET_OK:True:none", recipeZh, StringComparison.Ordinal);
         Assert.Contains("ADAPTER2_SCENE_BUDGET_OK:True:none", recipeZh, StringComparison.Ordinal);
+        Assert.Contains("ADAPTER2_PROOF_BUDGET_OK:True", recipeZh, StringComparison.Ordinal);
+        Assert.Contains("ADAPTER2_PERFORMANCE_ACCESSIBILITY_HANDOFF_OK:True", recipeZh, StringComparison.Ordinal);
+        Assert.Contains("ADAPTER2_RECIPE_ALIGNMENT_OK:True", recipeZh, StringComparison.Ordinal);
         Assert.True(HasLineWith(recipeZh, "WPF", "验证"));
         Assert.True(HasLineWith(recipeZh, "Avalonia", "受防守"));
     }
@@ -1041,6 +1054,7 @@ public sealed class DemoProofReleaseSurfaceTests
                 "workbench.export.scene",
                 "authoring.node-surface",
                 "diagnostics.support-bundle",
+                "adapter2.performance-accessibility-handoff",
             })
             {
                 Assert.Contains(featureId, contents, StringComparison.Ordinal);

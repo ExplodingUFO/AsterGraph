@@ -7,7 +7,7 @@ Use this recipe only after the defended Avalonia hosted accessibility proof is a
 - Start on the defended Avalonia hosted route with `AsterGraph.ConsumerSample.Avalonia -- --proof` and keep `HOSTED_ACCESSIBILITY_OK:True` plus the hosted accessibility diagnostics on that record first.
 - Reuse the same bounded intake record and support-bundle attachment note from the defended Avalonia route; `WPF` does not open a second intake flow.
 - Run `AsterGraph.HelloWorld.Wpf -- --proof` only as validation-only adapter-2 follow-up.
-- Keep `HOSTED_ACCESSIBILITY_BASELINE_OK:True`, `HOSTED_ACCESSIBILITY_FOCUS_OK:True`, `HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True`, `HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True`, `HOSTED_ACCESSIBILITY_OK:True`, and `HELLOWORLD_WPF_OK:True` on that same local record.
+- Keep `HOSTED_ACCESSIBILITY_BASELINE_OK:True`, `HOSTED_ACCESSIBILITY_FOCUS_OK:True`, `HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True`, `HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True`, `HOSTED_ACCESSIBILITY_OK:True`, `ADAPTER2_PERFORMANCE_ACCESSIBILITY_HANDOFF_OK:True`, `ADAPTER2_RECIPE_ALIGNMENT_OK:True`, and `HELLOWORLD_WPF_OK:True` on that same local record.
 - Treat every `WPF` proof line as validation-only evidence; none of these markers widen public support promises.
 
 ## Commands
@@ -28,6 +28,8 @@ dotnet run --project tools/AsterGraph.HelloWorld.Wpf/AsterGraph.HelloWorld.Wpf.c
 - the same `WPF` proof emits `HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True`
 - the same `WPF` proof emits `HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True`
 - the same `WPF` proof emits `HOSTED_ACCESSIBILITY_OK:True`
+- the same `WPF` proof emits `ADAPTER2_PERFORMANCE_ACCESSIBILITY_HANDOFF_OK:True`
+- the same `WPF` proof emits `ADAPTER2_RECIPE_ALIGNMENT_OK:True`
 - the same `WPF` proof emits `HELLOWORLD_WPF_OK:True`
 
 ## What Not To Infer
