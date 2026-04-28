@@ -747,14 +747,21 @@ public sealed class ReleaseClosureContractTests
             Assert.Contains("INTERACTION_RELIABILITY_HANDOFF_OK:True", contents, StringComparison.Ordinal);
             Assert.Contains("INTERACTION_SCOPE_BOUNDARY_OK:True", contents, StringComparison.Ordinal);
             Assert.Contains("V062_MILESTONE_PROOF_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("WORKBENCH_DISCOVERABILITY_HANDOFF_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("WORKBENCH_DISCOVERABILITY_SCOPE_BOUNDARY_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("V063_MILESTONE_PROOF_OK:True", contents, StringComparison.Ordinal);
         }
 
         Assert.True(HasLineWithAll(englishStatus, "v0.62 interaction reliability handoff proof", "phases 384-386", "existing hosted workbench evidence", "runtime renderer contract"));
         Assert.True(HasLineWithAll(chineseStatus, "v0.62 interaction reliability handoff proof", "phases 384-386", "hosted workbench", "runtime renderer contract"));
         Assert.True(HasLineWithAll(englishConsumerSample, "v0.62 interaction reliability handoff markers", "live canvas refresh", "interaction feedback", "Demo/Consumer gesture proof"));
         Assert.True(HasLineWithAll(chineseConsumerSample, "v0.62 interaction reliability handoff marker", "live canvas refresh", "interaction feedback", "Demo/Consumer gesture proof"));
-        Assert.True(HasLineWithAll(englishStatus, "next recommended work line", "v0.63", "Workbench Convenience", "command/palette cohesion"));
-        Assert.True(HasLineWithAll(chineseStatus, "下一条推荐工作线", "v0.63", "Workbench Convenience", "command/palette cohesion"));
+        Assert.True(HasLineWithAll(englishStatus, "v0.63 workbench discoverability handoff proof", "phases 388-390", "hosted workbench evidence", "macro/query system"));
+        Assert.True(HasLineWithAll(chineseStatus, "v0.63 workbench discoverability handoff proof", "phases 388-390", "hosted workbench", "macro/query system"));
+        Assert.True(HasLineWithAll(englishConsumerSample, "v0.63 workbench discoverability handoff markers", "layout presets", "unified discovery", "recents/favorites proof"));
+        Assert.True(HasLineWithAll(chineseConsumerSample, "v0.63 workbench discoverability handoff marker", "layout presets", "unified discovery", "recents/favorites proof"));
+        Assert.True(HasLineWithAll(englishStatus, "next recommended work line", "v0.64", "adopter-driven Workbench polish", "highest-friction hosted workflow"));
+        Assert.True(HasLineWithAll(chineseStatus, "下一条推荐工作线", "v0.64", "adopter-driven Workbench polish", "摩擦最大的 hosted workflow"));
     }
 
     [Fact]

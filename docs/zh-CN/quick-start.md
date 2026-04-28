@@ -143,6 +143,7 @@ Runtime feedback proof 仍然是宿主自管：ConsumerSample 应继续保持 `R
 
 Graph search proof 也保持 hosted、snapshot-driven：期待 `GRAPH_SEARCH_LOCATE_OK:True`、`GRAPH_SEARCH_SCOPE_FILTER_OK:True` 和 `GRAPH_SEARCH_VIEWPORT_FOCUS_OK:True`，不引入后台图索引服务或 command macro engine。
 Command palette proof 继续走同一条 shared command/session route：期待 `COMMAND_PALETTE_GROUPING_OK:True`、`COMMAND_PALETTE_DISABLED_REASON_OK:True`、`COMMAND_PALETTE_RECENT_ACTIONS_OK:True`、`COMMAND_PROJECTION_UNIFIED_OK:True`、`COMMAND_PALETTE_OK:True`、`TOOLBAR_DESCRIPTOR_OK:True`、`CONTEXT_MENU_DESCRIPTOR_OK:True` 和 `COMMAND_DISABLED_REASON_OK:True`，不新增 macro 或 scripting。
+Workbench discoverability proof 把 v0.63 收口在 hosted layout/discovery/recents-favorites evidence 上：期待 `WORKBENCH_DISCOVERABILITY_HANDOFF_OK:True`、`WORKBENCH_DISCOVERABILITY_SCOPE_BOUNDARY_OK:True` 和 `V063_MILESTONE_PROOF_OK:True`，不新增 runtime route、macro/query system、remote sync、marketplace state、WPF parity 或 GA claim。
 Navigation proof 继续作为宿主自管层叠在已有 selection、scope 和 viewport command 上：期待 `NAVIGATION_HISTORY_OK:True`、`SCOPE_BREADCRUMB_NAVIGATION_OK:True`、`FOCUS_RESTORE_OK:True`、`NAVIGATION_PRODUCTIVITY_PROOF_OK:True`、`NAVIGATION_PRODUCTIVITY_HANDOFF_OK:True` 和 `NAVIGATION_SCOPE_BOUNDARY_OK:True`，不新增 runtime navigation API。
 
 release lane 的 template smoke 会验证 `astergraph-avalonia` 和 `astergraph-plugin` 能生成可 build 的 `net8.0` 项目，并且生成的插件能通过 `AsterGraph.PluginTool validate`。

@@ -113,6 +113,9 @@ internal static class ConsumerSampleDocsAssertions
         Assert.Contains("INTERACTION_RELIABILITY_HANDOFF_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("INTERACTION_SCOPE_BOUNDARY_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("V062_MILESTONE_PROOF_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("WORKBENCH_DISCOVERABILITY_HANDOFF_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("WORKBENCH_DISCOVERABILITY_SCOPE_BOUNDARY_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("V063_MILESTONE_PROOF_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("NODE_TOOLBAR_CONTRIBUTION_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("EDGE_TOOLBAR_CONTRIBUTION_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("TOOLBAR_CONTRIBUTION_DESCRIPTOR_OK:True", contents, StringComparison.Ordinal);

@@ -724,6 +724,28 @@ public sealed record ConsumerSampleProofResult(
         => InteractionReliabilityHandoffOk
         && InteractionScopeBoundaryOk;
 
+    public bool WorkbenchDiscoverabilityHandoffOk
+        => WorkbenchLayoutPresetsOk
+        && WorkbenchLayoutResetOk
+        && PanelStatePersistenceOk
+        && UnifiedDiscoverySurfaceOk
+        && DiscoverySourceLabelsOk
+        && DiscoveryCommandRouteOk
+        && WorkbenchRecentsOk
+        && WorkbenchFavoritesOk
+        && RecentsFavoritesSupportBundleOk;
+
+    public bool WorkbenchDiscoverabilityScopeBoundaryOk
+        => WorkbenchScopeBoundaryOk
+        && PerformanceModeScopeBoundaryOk
+        && FragmentLibraryScopeBoundaryOk
+        && DiscoveryCommandRouteOk
+        && RecentsFavoritesSupportBundleOk;
+
+    public bool V063MilestoneProofOk
+        => WorkbenchDiscoverabilityHandoffOk
+        && WorkbenchDiscoverabilityScopeBoundaryOk;
+
     public bool IsOk
         => HostMenuActionOk
         && PluginContributionOk
@@ -773,7 +795,10 @@ public sealed record ConsumerSampleProofResult(
         && InteractionSupportBundleOk
         && InteractionReliabilityHandoffOk
         && InteractionScopeBoundaryOk
-        && V062MilestoneProofOk;
+        && V062MilestoneProofOk
+        && WorkbenchDiscoverabilityHandoffOk
+        && WorkbenchDiscoverabilityScopeBoundaryOk
+        && V063MilestoneProofOk;
 
     public IReadOnlyList<string> MetricLines =>
     [
@@ -850,6 +875,9 @@ public sealed record ConsumerSampleProofResult(
         $"INTERACTION_RELIABILITY_HANDOFF_OK:{InteractionReliabilityHandoffOk}",
         $"INTERACTION_SCOPE_BOUNDARY_OK:{InteractionScopeBoundaryOk}",
         $"V062_MILESTONE_PROOF_OK:{V062MilestoneProofOk}",
+        $"WORKBENCH_DISCOVERABILITY_HANDOFF_OK:{WorkbenchDiscoverabilityHandoffOk}",
+        $"WORKBENCH_DISCOVERABILITY_SCOPE_BOUNDARY_OK:{WorkbenchDiscoverabilityScopeBoundaryOk}",
+        $"V063_MILESTONE_PROOF_OK:{V063MilestoneProofOk}",
         $"NODE_TOOLBAR_CONTRIBUTION_OK:{NodeToolbarContributionOk}",
         $"EDGE_TOOLBAR_CONTRIBUTION_OK:{EdgeToolbarContributionOk}",
         $"TOOLBAR_CONTRIBUTION_DESCRIPTOR_OK:{ToolbarContributionDescriptorOk}",

@@ -13,6 +13,7 @@
 - v0.59 edge interaction markers：`EDGE_INTERACTION_CACHE_OK:True`、`EDGE_DRAG_ROUTE_SIMPLIFICATION_OK:True`、`SELECTED_EDGE_FEEDBACK_OK:True` 和 `EDGE_RENDERING_SCOPE_BOUNDARY_OK:True`
 - v0.62 live canvas refresh markers：`NODE_DRAG_EDGE_REFRESH_OK:True`、`EDGE_ROUTE_REFRESH_OK:True` 和 `LIVE_CANVAS_REFRESH_AUDIT_OK:True`
 - v0.62 interaction reliability handoff markers：`INTERACTION_RELIABILITY_HANDOFF_OK:True`、`INTERACTION_SCOPE_BOUNDARY_OK:True` 和 `V062_MILESTONE_PROOF_OK:True`
+- v0.63 workbench discoverability handoff markers：`WORKBENCH_DISCOVERABILITY_HANDOFF_OK:True`、`WORKBENCH_DISCOVERABILITY_SCOPE_BOUNDARY_OK:True` 和 `V063_MILESTONE_PROOF_OK:True`
 - v0.59 mini-map 与 inspector projection markers：`MINIMAP_LIGHTWEIGHT_PROJECTION_OK:True`、`INSPECTOR_NARROW_PROJECTION_OK:True`、`LARGE_GRAPH_PANEL_SCOPE_OK:True` 和 `PROJECTION_PERFORMANCE_EVIDENCE_OK:True`
 - v0.59 Large Graph UX handoff markers：`LARGE_GRAPH_UX_HANDOFF_OK:True`、`LARGE_GRAPH_UX_SCOPE_BOUNDARY_OK:True` 和 `V059_MILESTONE_PROOF_OK:True`
 - v0.60 adapter-2 validation scope markers：`ADAPTER2_VALIDATION_SCOPE_OK:True`、`ADAPTER2_MATRIX_HANDOFF_OK:True` 和 `ADAPTER2_SCOPE_BOUNDARY_OK:True`
@@ -56,6 +57,7 @@
 - edge interaction proof 在 hosted proof route 上汇总现有 edge quick-tool、toolbar 和 geometry 证据，但不创建 runtime renderer contract：`EDGE_INTERACTION_CACHE_OK:True`、`EDGE_DRAG_ROUTE_SIMPLIFICATION_OK:True`、`SELECTED_EDGE_FEEDBACK_OK:True`、`EDGE_RENDERING_SCOPE_BOUNDARY_OK:True`
 - live canvas refresh proof 通过既有 renderer/observer seam 覆盖拖动节点时连线立即重绘和 route refresh 证据：`NODE_DRAG_EDGE_REFRESH_OK:True`、`EDGE_ROUTE_REFRESH_OK:True`、`LIVE_CANVAS_REFRESH_AUDIT_OK:True`
 - v0.62 interaction reliability handoff proof 把 phases 384-386 绑定在现有 hosted workbench 证据上，不增加 runtime renderer contract：`INTERACTION_RELIABILITY_HANDOFF_OK:True`、`INTERACTION_SCOPE_BOUNDARY_OK:True`、`V062_MILESTONE_PROOF_OK:True`
+- v0.63 workbench discoverability handoff proof 把 phases 388-390 绑定在现有 hosted workbench 证据上，不增加 runtime route、macro/query system、remote sync、marketplace state、WPF parity 或 GA claim：`WORKBENCH_DISCOVERABILITY_HANDOFF_OK:True`、`WORKBENCH_DISCOVERABILITY_SCOPE_BOUNDARY_OK:True`、`V063_MILESTONE_PROOF_OK:True`
 - panel projection proof 在 hosted proof route 上汇总 mini-map lightweight projection 和 inspector narrow projection 证据，但不创建 broad graph subscription contract：`MINIMAP_LIGHTWEIGHT_PROJECTION_OK:True`、`INSPECTOR_NARROW_PROJECTION_OK:True`、`LARGE_GRAPH_PANEL_SCOPE_OK:True`、`PROJECTION_PERFORMANCE_EVIDENCE_OK:True`
 - v0.59 Large Graph UX handoff proof 把 phases 371-374 绑定在现有 hosted workbench 证据上，但不扩大 graph-size support claims：`LARGE_GRAPH_UX_HANDOFF_OK:True`、`LARGE_GRAPH_UX_SCOPE_BOUNDARY_OK:True`、`V059_MILESTONE_PROOF_OK:True`
 - adapter-2 validation scope proof 让 WPF 继续停在同一条 canonical route 和 matrix vocabulary 上，不扩大 public WPF support 或 parity claims：`ADAPTER2_VALIDATION_SCOPE_OK:True`、`ADAPTER2_MATRIX_HANDOFF_OK:True`、`ADAPTER2_SCOPE_BOUNDARY_OK:True`
@@ -138,7 +140,7 @@
 - v0.61 API stabilization markers：`PUBLIC_API_DIFF_GATE_OK:True`、`PUBLIC_API_USAGE_GUIDANCE_OK:True` 和 `PUBLIC_API_STABILITY_SCOPE_OK:True`。
 - 当前 `0.xx` alpha/beta hardening 线命名为 `Adoption Readiness / Release Candidate Hygiene`：先把公开推荐、API drift、support boundary 和 release proof gate 对齐，再写 release-candidate、GA 或 `1.0` 级别语言；`ADOPTION_RECOMMENDATION_CURRENT_OK:True`、`CLAIM_HYGIENE_BOUNDARY_OK:True`、`RELEASE_READINESS_GATE_OK:True`、`SUPPORT_BOUNDARY_GATE_OK:True` 和 `BETA_CLAIM_ALIGNMENT_OK:True` 是 proof handoff markers
 - v0.61 adoption/API stabilization handoff 汇总 refreshed adopter intake、public API diff/guidance gate 和 release-boundary wording，并且不扩大 support scope：`ADOPTION_API_STABILIZATION_HANDOFF_OK:True`、`ADOPTION_API_SCOPE_BOUNDARY_OK:True` 和 `V061_MILESTONE_PROOF_OK:True`
-- 下一条推荐工作线：v0.63 继续做 Workbench Convenience，优先增强 feature discoverability 和 command/palette cohesion，复用现有 hosted workbench seam，不新增 runtime model。
+- 下一条推荐工作线：v0.64 做 adopter-driven Workbench polish，从真实使用里摩擦最大的 hosted workflow 开始，继续复用现有 hosted workbench seams，不扩大 WPF parity、marketplace、sandboxing、macro/query、execution-engine 或 GA scope。
 - 维护者种子预演证据不计入 3 到 5 的门槛
 - 如果新的报告放不进上面的“已证明”或“受边界约束”两类，就走 [Adoption Feedback Loop](./adoption-feedback.md) 和 [Beta Support Bundle](./support-bundle.md)，不要临时扩大公开声明；在满足 3 到 5 条真实外部报告门禁前，claim-expansion status 只作为分诊字段
 
