@@ -268,6 +268,10 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(result.ProofLines, line => line == "STENCIL_SOURCE_FILTER_OK:True");
         Assert.Contains(result.ProofLines, line => line == "STENCIL_STATE_PERSISTENCE_OK:True");
         Assert.Contains(result.ProofLines, line => line == "CAPABILITY_BREADTH_EXPORT_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "EXPORT_PANEL_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "EXPORT_PANEL_SCOPE_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "EXPORT_PANEL_PROGRESS_CANCEL_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "EXPORT_DOCS_ALIGNMENT_OK:True");
         Assert.Contains(result.ProofLines, line => line == "CAPABILITY_BREADTH_NODE_QUICK_TOOLS_OK:True");
         Assert.Contains(result.ProofLines, line => line == "CAPABILITY_BREADTH_EDGE_QUICK_TOOLS_OK:True");
         Assert.Contains(result.ProofLines, line => line == "CAPABILITY_BREADTH_OK:True");

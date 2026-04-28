@@ -126,7 +126,7 @@ Use the [Feature Catalog](./docs/en/feature-catalog.md) for governed feature rec
 | `MiniMap` | session snapshots projected into `AsterGraphMiniMapViewFactory.Create(...)` | `src/AsterGraph.Demo` |
 | `Stencil` | session stencil queries plus the shipped Avalonia insertion surface | `src/AsterGraph.Demo` |
 | `Fragment Library` | session fragment/template commands backed by fragment workspace/library services | `src/AsterGraph.Demo` |
-| `Export` | `IGraphSceneSvgExportService` + `TryExportSceneAsSvg()` | `tools/AsterGraph.HostSample` |
+| `Export` | `IGraphSceneSvgExportService`, `TryExportSceneAsSvg()`, and raster `TryExportSceneAsImage(...)` with SVG/PNG/JPEG scope/progress/cancel evidence | `tools/AsterGraph.HostSample`, `tools/AsterGraph.ScaleSmoke` |
 | `Baseline Edge Authoring` | `StartConnection(...)`, `CompleteConnection(...)`, reconnect/disconnect commands, and the pending-connection snapshot | `tools/AsterGraph.HostSample`, `tools/AsterGraph.ScaleSmoke` |
 | `Node Surface Authoring` | `GetNodeSurfaceSnapshots()`, `TrySetNodeSize(...)`, and parameter edits through the shared session command path | `src/AsterGraph.Demo`, [Advanced Editing Guide](./docs/en/advanced-editing.md) |
 | `Hierarchy Semantics` | `GetHierarchyStateSnapshot()`, `GetNodeGroups()`, `GetNodeGroupSnapshots()`, and group collapse/move/resize/membership commands | `src/AsterGraph.Demo`, [Advanced Editing Guide](./docs/en/advanced-editing.md) |
@@ -153,7 +153,7 @@ Current capabilities:
 
 - draggable, selectable graph nodes with marquee selection and multi-selection
 - zoom, pan, mini map, and pending-connection preview
-- save/load, undo/redo, copy/paste, fragment import/export, and SVG scene export
+- save/load, undo/redo, copy/paste, fragment import/export, and SVG/PNG/JPEG scene export with raster scope, progress, and cancel evidence
 - batch alignment, distribution, and shared-parameter editing for compatible selections
 - definition-driven inspector metadata with grouped parameters, shipped list/text/number/bool/enum editors, and validation feedback
 - tiered node surfaces, fixed group frames, hierarchy snapshots, scoped composites, connection notes, and routed edge geometry editing

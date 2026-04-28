@@ -13,6 +13,7 @@ using AsterGraph.Avalonia.Hosting;
 using AsterGraph.Avalonia.Presentation;
 using AsterGraph.Editor.Events;
 using AsterGraph.Editor.Runtime;
+using AsterGraph.Editor.Services;
 using AsterGraph.Editor.ViewModels;
 
 namespace AsterGraph.Avalonia.Controls;
@@ -142,6 +143,14 @@ public partial class GraphEditorView : UserControl
     private TextBlock? _fragmentLibraryCaptionText;
     private ComboBox? _fragmentTemplatePicker;
     private WrapPanel? _fragmentTemplateActionToolbar;
+    private ComboBox? _exportFormatPicker;
+    private ComboBox? _exportScopePicker;
+    private ProgressBar? _exportProgressBar;
+    private TextBlock? _exportPreviewText;
+    private TextBlock? _exportProgressText;
+    private TextBlock? _exportStatusText;
+    private Button? _exportRunButton;
+    private Button? _exportCancelButton;
     private Button? _openCommandPaletteButton;
     private Border? _commandPaletteChrome;
     private TextBox? _commandPaletteSearchBox;
@@ -158,6 +167,8 @@ public partial class GraphEditorView : UserControl
     private string _stencilSourceFilterValue = StencilSourceFilterAll;
     private string _commandPaletteFilter = string.Empty;
     private string? _selectedFragmentTemplatePath;
+    private CancellationTokenSource? _exportCancellation;
+    private bool _exportCancelRequested;
     private AsterGraphHostedActionDescriptor? _commandPaletteAction;
     private AsterGraphHostedActionProjection? _commandSurfaceProjection;
     private IReadOnlyList<GraphEditorNodeTemplateSnapshot> _stencilTemplateSnapshots = [];
@@ -168,6 +179,11 @@ public partial class GraphEditorView : UserControl
     private const string StencilSourceFilterAll = "All";
     private const string StencilSourceFilterBuiltIn = "Built-in";
     private const string StencilSourceFilterPlugin = "Plugin";
+    private const string ExportFormatSvg = "SVG";
+    private const string ExportFormatPng = "PNG";
+    private const string ExportFormatJpeg = "JPEG";
+    private const string ExportScopeFullScene = "Full scene";
+    private const string ExportScopeSelectedNodes = "Selected nodes";
 
     /// <summary>
     /// 初始化图编辑器宿主视图。
@@ -377,6 +393,14 @@ public partial class GraphEditorView : UserControl
         _fragmentLibraryCaptionText = this.FindControl<TextBlock>("PART_FragmentLibraryCaptionText");
         _fragmentTemplatePicker = this.FindControl<ComboBox>("PART_FragmentTemplatePicker");
         _fragmentTemplateActionToolbar = this.FindControl<WrapPanel>("PART_FragmentTemplateActionToolbar");
+        _exportFormatPicker = this.FindControl<ComboBox>("PART_ExportFormatPicker");
+        _exportScopePicker = this.FindControl<ComboBox>("PART_ExportScopePicker");
+        _exportProgressBar = this.FindControl<ProgressBar>("PART_ExportProgressBar");
+        _exportPreviewText = this.FindControl<TextBlock>("PART_ExportPreviewText");
+        _exportProgressText = this.FindControl<TextBlock>("PART_ExportProgressText");
+        _exportStatusText = this.FindControl<TextBlock>("PART_ExportStatusText");
+        _exportRunButton = this.FindControl<Button>("PART_ExportRunButton");
+        _exportCancelButton = this.FindControl<Button>("PART_ExportCancelButton");
         _openCommandPaletteButton = this.FindControl<Button>("PART_OpenCommandPaletteButton");
         _commandPaletteChrome = this.FindControl<Border>("PART_CommandPaletteChrome");
         _commandPaletteSearchBox = this.FindControl<TextBox>("PART_CommandPaletteSearchBox");
@@ -405,6 +429,8 @@ public partial class GraphEditorView : UserControl
         {
             AutomationProperties.SetName(_commandPaletteSearchBox, "Command palette search");
         }
+
+        InitializeExportPanelControls();
 
         if (_inspectorSurface is not null)
         {
@@ -435,6 +461,26 @@ public partial class GraphEditorView : UserControl
         if (_fragmentTemplatePicker is not null)
         {
             _fragmentTemplatePicker.SelectionChanged += HandleFragmentTemplateSelectionChanged;
+        }
+
+        if (_exportFormatPicker is not null)
+        {
+            _exportFormatPicker.SelectionChanged += HandleExportOptionChanged;
+        }
+
+        if (_exportScopePicker is not null)
+        {
+            _exportScopePicker.SelectionChanged += HandleExportOptionChanged;
+        }
+
+        if (_exportRunButton is not null)
+        {
+            _exportRunButton.Click += HandleExportRunClick;
+        }
+
+        if (_exportCancelButton is not null)
+        {
+            _exportCancelButton.Click += HandleExportCancelClick;
         }
 
         if (_nodeCanvas is not null)
@@ -521,6 +567,33 @@ public partial class GraphEditorView : UserControl
         BuildFragmentTemplateActionToolbar();
     }
 
+    private void HandleExportOptionChanged(object? sender, SelectionChangedEventArgs args)
+        => BuildExportPanel();
+
+    private void HandleExportRunClick(object? sender, RoutedEventArgs args)
+    {
+        RunExportFromPanel();
+        args.Handled = true;
+    }
+
+    private void HandleExportCancelClick(object? sender, RoutedEventArgs args)
+    {
+        _exportCancelRequested = true;
+        _exportCancellation?.Cancel();
+        if (_exportStatusText is not null)
+        {
+            _exportStatusText.Text = "Export cancel requested.";
+        }
+
+        if (_exportProgressText is not null)
+        {
+            _exportProgressText.Text = "Cancel requested";
+        }
+
+        BuildExportPanel();
+        args.Handled = true;
+    }
+
     private void AttachCommandSurfaceSubscriptions(GraphEditorViewModel? editor)
     {
         if (editor is null)
@@ -565,6 +638,7 @@ public partial class GraphEditorView : UserControl
         BuildStencilLibrary(_stencilTemplateSnapshots, _stencilAddNodeDescriptor);
         BuildValidationFeedback();
         BuildFragmentLibrary(projection);
+        BuildExportPanel();
         RefreshCommandPaletteButton(projection);
         BuildHeaderToolbar(projection);
         BuildCompositeWorkflowToolbar(projection);
@@ -942,6 +1016,193 @@ public partial class GraphEditorView : UserControl
 
         BuildFragmentTemplateActionToolbar();
     }
+
+    private void InitializeExportPanelControls()
+    {
+        if (_exportFormatPicker is not null)
+        {
+            AutomationProperties.SetName(_exportFormatPicker, "Export format");
+            _exportFormatPicker.ItemsSource = new[] { ExportFormatSvg, ExportFormatPng, ExportFormatJpeg };
+            _exportFormatPicker.SelectedItem = ExportFormatSvg;
+        }
+
+        if (_exportScopePicker is not null)
+        {
+            AutomationProperties.SetName(_exportScopePicker, "Export scope");
+            _exportScopePicker.ItemsSource = new[] { ExportScopeFullScene, ExportScopeSelectedNodes };
+            _exportScopePicker.SelectedItem = ExportScopeFullScene;
+        }
+
+        if (_exportRunButton is not null)
+        {
+            AutomationProperties.SetName(_exportRunButton, "Run scene export");
+        }
+
+        if (_exportCancelButton is not null)
+        {
+            AutomationProperties.SetName(_exportCancelButton, "Cancel scene export");
+        }
+
+        if (_exportProgressText is not null)
+        {
+            _exportProgressText.Text = "Idle";
+        }
+
+        if (_exportStatusText is not null)
+        {
+            _exportStatusText.Text = "Choose a format and scope.";
+        }
+    }
+
+    private void BuildExportPanel()
+    {
+        if (_exportPreviewText is null
+            && _exportRunButton is null
+            && _exportCancelButton is null)
+        {
+            return;
+        }
+
+        var snapshot = Editor?.Session.Queries.CreateDocumentSnapshot();
+        var selection = Editor?.Session.Queries.GetSelectionSnapshot();
+        var selectedNodeCount = selection?.SelectedNodeIds.Count ?? 0;
+        var nodeCount = snapshot?.Nodes.Count ?? 0;
+        var connectionCount = snapshot?.Connections.Count ?? 0;
+        var format = GetSelectedExportFormat();
+        var selectedScope = string.Equals(
+            _exportScopePicker?.SelectedItem?.ToString(),
+            ExportScopeSelectedNodes,
+            StringComparison.Ordinal);
+        var isSvg = string.Equals(format, ExportFormatSvg, StringComparison.Ordinal);
+        var hasEditor = Editor is not null;
+        var canExportScope = hasEditor && (!selectedScope || selectedNodeCount > 0);
+
+        if (_exportPreviewText is not null)
+        {
+            _exportPreviewText.Text = selectedScope
+                ? $"Selection scope  ·  {selectedNodeCount} selected nodes"
+                : $"Full scene  ·  {nodeCount} nodes  ·  {connectionCount} connections";
+        }
+
+        if (_exportScopePicker is not null)
+        {
+            _exportScopePicker.IsEnabled = hasEditor && !isSvg;
+            ToolTip.SetTip(
+                _exportScopePicker,
+                isSvg ? "SVG export uses the full scene route." : "Raster export supports full scene and selected nodes.");
+        }
+
+        if (_exportRunButton is not null)
+        {
+            _exportRunButton.IsEnabled = canExportScope;
+            ToolTip.SetTip(
+                _exportRunButton,
+                canExportScope ? null : "Select at least one node before exporting selected nodes.");
+        }
+
+        if (_exportCancelButton is not null)
+        {
+            _exportCancelButton.IsEnabled = hasEditor && !isSvg;
+        }
+    }
+
+    private void RunExportFromPanel()
+    {
+        if (Editor is null)
+        {
+            return;
+        }
+
+        var format = GetSelectedExportFormat();
+        if (_exportProgressBar is not null)
+        {
+            _exportProgressBar.Value = 0;
+        }
+
+        if (_exportProgressText is not null)
+        {
+            _exportProgressText.Text = "Starting export";
+        }
+
+        if (string.Equals(format, ExportFormatSvg, StringComparison.Ordinal))
+        {
+            var svgExported = Editor.Session.Commands.TryExportSceneAsSvg();
+            SetExportCompletedStatus(svgExported, "SVG");
+            return;
+        }
+
+        using var cancellation = new CancellationTokenSource();
+        _exportCancellation = cancellation;
+        if (_exportCancelRequested)
+        {
+            cancellation.Cancel();
+        }
+
+        var imageFormat = string.Equals(format, ExportFormatJpeg, StringComparison.Ordinal)
+            ? GraphEditorSceneImageExportFormat.Jpeg
+            : GraphEditorSceneImageExportFormat.Png;
+        var options = new GraphEditorSceneImageExportOptions
+        {
+            Scope = string.Equals(_exportScopePicker?.SelectedItem?.ToString(), ExportScopeSelectedNodes, StringComparison.Ordinal)
+                ? GraphEditorSceneImageExportScope.SelectedNodes
+                : GraphEditorSceneImageExportScope.FullScene,
+            Progress = new Progress<GraphEditorSceneImageExportProgressSnapshot>(ApplyExportProgress),
+            CancellationToken = cancellation.Token,
+        };
+
+        var imageExported = Editor.Session.Commands.TryExportSceneAsImage(imageFormat, options: options);
+        _exportCancellation = null;
+        _exportCancelRequested = false;
+        SetExportCompletedStatus(imageExported, format);
+        BuildExportPanel();
+    }
+
+    private void ApplyExportProgress(GraphEditorSceneImageExportProgressSnapshot snapshot)
+    {
+        var percent = Math.Clamp(snapshot.Fraction, 0d, 1d) * 100d;
+        if (_exportProgressBar is not null)
+        {
+            _exportProgressBar.Value = percent;
+        }
+
+        if (_exportProgressText is not null)
+        {
+            _exportProgressText.Text = $"{percent:0}%  ·  {snapshot.Stage}";
+        }
+
+        if (_exportStatusText is not null)
+        {
+            _exportStatusText.Text = snapshot.Message;
+        }
+    }
+
+    private void SetExportCompletedStatus(bool exported, string format)
+    {
+        if (_exportProgressBar is not null)
+        {
+            _exportProgressBar.Value = exported ? 100 : 0;
+        }
+
+        if (_exportProgressText is not null)
+        {
+            _exportProgressText.Text = exported ? "100%  ·  written" : "Export did not complete";
+        }
+
+        if (_exportStatusText is not null)
+        {
+            _exportStatusText.Text = exported
+                ? $"{format} export completed."
+                : $"{format} export failed or was canceled.";
+        }
+    }
+
+    private string GetSelectedExportFormat()
+        => _exportFormatPicker?.SelectedItem?.ToString() switch
+        {
+            ExportFormatPng => ExportFormatPng,
+            ExportFormatJpeg => ExportFormatJpeg,
+            _ => ExportFormatSvg,
+        };
 
     private void BuildCompositeWorkflowToolbar(AsterGraphHostedActionProjection? projection)
     {

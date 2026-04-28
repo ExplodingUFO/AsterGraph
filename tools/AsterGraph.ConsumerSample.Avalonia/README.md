@@ -116,6 +116,10 @@ Expected proof markers:
 - `STENCIL_SOURCE_FILTER_OK:True`
 - `STENCIL_STATE_PERSISTENCE_OK:True`
 - `CAPABILITY_BREADTH_EXPORT_OK:True`
+- `EXPORT_PANEL_OK:True`
+- `EXPORT_PANEL_SCOPE_OK:True`
+- `EXPORT_PANEL_PROGRESS_CANCEL_OK:True`
+- `EXPORT_DOCS_ALIGNMENT_OK:True`
 - `CAPABILITY_BREADTH_NODE_QUICK_TOOLS_OK:True`
 - `CAPABILITY_BREADTH_EDGE_QUICK_TOOLS_OK:True`
 - `CAPABILITY_BREADTH_OK:True`
@@ -220,7 +224,7 @@ Use this sample to copy the host-owned seams, not the sample-specific presentati
 ### Copyable Capability Breadth Handoff
 
 - Keep searchable grouped stencil on the stock hosted view and drive it from `IGraphEditorSession.Queries.GetNodeTemplateSnapshots()`.
-- Keep scene export on `IGraphEditorSession.Commands.TryExportSceneAsSvg(...)` plus `IGraphEditorSession.Commands.TryExportSceneAsImage(...)` for `GraphEditorSceneImageExportFormat.Png` and `GraphEditorSceneImageExportFormat.Jpeg`.
+- Keep scene export on `IGraphEditorSession.Commands.TryExportSceneAsSvg(...)` plus `IGraphEditorSession.Commands.TryExportSceneAsImage(...)` for `GraphEditorSceneImageExportFormat.Png` and `GraphEditorSceneImageExportFormat.Jpeg`; the hosted export panel proves SVG/PNG/JPEG discovery with raster scope, progress, and cancel evidence.
 - Keep node and edge quick tools on the shared tool route through `IGraphEditorSession.Queries.GetToolDescriptors(...)` and `AsterGraphAuthoringToolActionFactory.CreateCommandSurfaceActions(...)`.
 - Close the route with [Capability Breadth Recipe](../../docs/en/capability-breadth-recipe.md) and `AsterGraph.ConsumerSample.Avalonia -- --proof`, expecting `CAPABILITY_BREADTH_OK:True`.
 

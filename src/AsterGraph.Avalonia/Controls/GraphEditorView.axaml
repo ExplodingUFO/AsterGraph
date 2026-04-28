@@ -279,6 +279,43 @@
               </StackPanel>
             </Border>
 
+            <Border x:Name="PART_ExportPanelChrome"
+                    Classes="astergraph-inspector-section">
+              <StackPanel Spacing="8">
+                <TextBlock Text="Export"
+                           FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
+                           FontWeight="Bold"
+                           Foreground="{DynamicResource AsterGraph.EyebrowBrush}" />
+                <TextBlock x:Name="PART_ExportPreviewText"
+                           FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
+                           TextWrapping="Wrap"
+                           Foreground="{DynamicResource AsterGraph.BodyBrush}" />
+                <ComboBox x:Name="PART_ExportFormatPicker"
+                          Classes="astergraph-input" />
+                <ComboBox x:Name="PART_ExportScopePicker"
+                          Classes="astergraph-input" />
+                <ProgressBar x:Name="PART_ExportProgressBar"
+                             Minimum="0"
+                             Maximum="100" />
+                <TextBlock x:Name="PART_ExportProgressText"
+                           FontSize="{DynamicResource AsterGraph.InspectorCaptionFontSize}"
+                           TextWrapping="Wrap"
+                           Foreground="{DynamicResource AsterGraph.EyebrowBrush}" />
+                <TextBlock x:Name="PART_ExportStatusText"
+                           FontSize="{DynamicResource AsterGraph.InspectorCaptionFontSize}"
+                           TextWrapping="Wrap"
+                           Foreground="{DynamicResource AsterGraph.HighlightBrush}" />
+                <WrapPanel Orientation="Horizontal">
+                  <Button x:Name="PART_ExportRunButton"
+                          Classes="astergraph-toolbar-action"
+                          Content="Export" />
+                  <Button x:Name="PART_ExportCancelButton"
+                          Classes="astergraph-toolbar-action"
+                          Content="Cancel" />
+                </WrapPanel>
+              </StackPanel>
+            </Border>
+
             <Border Classes="astergraph-inspector-section"
                     IsVisible="{Binding BehaviorOptions.View.ShowMiniMap}">
               <StackPanel Spacing="8">

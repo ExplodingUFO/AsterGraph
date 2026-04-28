@@ -80,6 +80,10 @@ public sealed record ConsumerSampleProofResult(
     bool StencilRecentsFavoritesOk = true,
     bool StencilSourceFilterOk = true,
     bool StencilStatePersistenceOk = true,
+    bool ExportPanelOk = true,
+    bool ExportPanelScopeOk = true,
+    bool ExportPanelProgressCancelOk = true,
+    bool ExportDocsAlignmentOk = true,
     bool CommandPaletteGroupingOk = true,
     bool CommandPaletteDisabledReasonOk = true,
     bool CommandPaletteRecentActionsOk = true,
@@ -150,6 +154,10 @@ public sealed record ConsumerSampleProofResult(
         && StencilSourceFilterOk
         && StencilStatePersistenceOk
         && ExportBreadthOk
+        && ExportPanelOk
+        && ExportPanelScopeOk
+        && ExportPanelProgressCancelOk
+        && ExportDocsAlignmentOk
         && NodeQuickToolsOk
         && EdgeQuickToolsOk;
 
@@ -185,6 +193,10 @@ public sealed record ConsumerSampleProofResult(
         && RuntimeDebugPanelInteractionOk
         && RuntimeLogLocateOk
         && RuntimeLogExportOk
+        && ExportPanelOk
+        && ExportPanelScopeOk
+        && ExportPanelProgressCancelOk
+        && ExportDocsAlignmentOk
         && RuntimeOverlaySupportBundleOk
         && GraphSearchLocateOk
         && GraphSearchScopeFilterOk
@@ -249,6 +261,10 @@ public sealed record ConsumerSampleProofResult(
         && RuntimeDebugPanelInteractionOk
         && RuntimeLogLocateOk
         && RuntimeLogExportOk
+        && ExportPanelOk
+        && ExportPanelScopeOk
+        && ExportPanelProgressCancelOk
+        && ExportDocsAlignmentOk
         && RuntimeOverlaySupportBundleOk
         && GraphSearchLocateOk
         && GraphSearchScopeFilterOk
@@ -466,6 +482,10 @@ public sealed record ConsumerSampleProofResult(
         $"STENCIL_SOURCE_FILTER_OK:{StencilSourceFilterOk}",
         $"STENCIL_STATE_PERSISTENCE_OK:{StencilStatePersistenceOk}",
         $"CAPABILITY_BREADTH_EXPORT_OK:{ExportBreadthOk}",
+        $"EXPORT_PANEL_OK:{ExportPanelOk}",
+        $"EXPORT_PANEL_SCOPE_OK:{ExportPanelScopeOk}",
+        $"EXPORT_PANEL_PROGRESS_CANCEL_OK:{ExportPanelProgressCancelOk}",
+        $"EXPORT_DOCS_ALIGNMENT_OK:{ExportDocsAlignmentOk}",
         $"CAPABILITY_BREADTH_NODE_QUICK_TOOLS_OK:{NodeQuickToolsOk}",
         $"CAPABILITY_BREADTH_EDGE_QUICK_TOOLS_OK:{EdgeQuickToolsOk}",
         $"CAPABILITY_BREADTH_OK:{CapabilityBreadthOk}",
@@ -579,6 +599,7 @@ public sealed record ConsumerSampleProofResult(
             _ => false,
         };
 
+
     private static bool IsBoundedFeatureDescriptorId(string featureDescriptorId)
         => !featureDescriptorId.Contains("marketplace", StringComparison.OrdinalIgnoreCase)
         && !featureDescriptorId.Contains("sandbox", StringComparison.OrdinalIgnoreCase)
@@ -590,6 +611,17 @@ public sealed record ConsumerSampleProofResult(
 
 public static class ConsumerSampleProof
 {
+    private sealed class ConsumerSampleProofProgressSink : IProgress<GraphEditorSceneImageExportProgressSnapshot>
+    {
+        private readonly List<GraphEditorSceneImageExportProgressSnapshot> _snapshots;
+
+        public ConsumerSampleProofProgressSink(List<GraphEditorSceneImageExportProgressSnapshot> snapshots)
+            => _snapshots = snapshots;
+
+        public void Report(GraphEditorSceneImageExportProgressSnapshot value)
+            => _snapshots.Add(value);
+    }
+
     public static ConsumerSampleProofResult Run()
     {
         ConsumerSampleHeadlessEnvironment.EnsureInitialized();
@@ -751,6 +783,10 @@ public static class ConsumerSampleProof
         bool stencilRecentsFavoritesOk;
         bool stencilSourceFilterOk;
         bool stencilStatePersistenceOk;
+        bool exportPanelOk;
+        bool exportPanelScopeOk;
+        bool exportPanelProgressCancelOk;
+        bool exportDocsAlignmentOk;
         bool edgeQuickToolsOk;
         bool nodeQuickToolsOk;
         bool hostedAccessibilityBaselineOk;
@@ -803,6 +839,10 @@ public static class ConsumerSampleProof
 
             (stencilSurfaceOk, stencilGroupingOk, stencilSearchOk, stencilRecentsFavoritesOk, stencilSourceFilterOk, stencilStatePersistenceOk) =
                 HasStencilSurface(capabilityWindow, host);
+            host.SelectNode(reviewNodeId);
+            FlushUi();
+            (exportPanelOk, exportPanelScopeOk, exportPanelProgressCancelOk) = HasExportPanel(capabilityWindow, host);
+            exportDocsAlignmentOk = HasExportDocsAlignment();
             host.SelectNode(reviewNodeId);
             FlushUi();
             edgeQuickToolsOk = HasEdgeQuickTools(capabilityWindow, host);
@@ -914,6 +954,10 @@ public static class ConsumerSampleProof
             StencilRecentsFavoritesOk: stencilRecentsFavoritesOk,
             StencilSourceFilterOk: stencilSourceFilterOk,
             StencilStatePersistenceOk: stencilStatePersistenceOk,
+            ExportPanelOk: exportPanelOk,
+            ExportPanelScopeOk: exportPanelScopeOk,
+            ExportPanelProgressCancelOk: exportPanelProgressCancelOk,
+            ExportDocsAlignmentOk: exportDocsAlignmentOk,
             NavigationHistoryOk: navigationHistoryOk,
             ScopeBreadcrumbNavigationOk: scopeBreadcrumbNavigationOk,
             FocusRestoreOk: focusRestoreOk,
@@ -1683,6 +1727,119 @@ public static class ConsumerSampleProof
             && emptyStateOk
             && insertionOk;
         return (surfaceOk, groupingOk, searchOk && emptyStateOk, recentsFavoritesOk, sourceFilterOk, statePersistenceOk);
+    }
+
+    private static (bool PanelOk, bool ScopeOk, bool ProgressCancelOk) HasExportPanel(Window window, ConsumerSampleHost host)
+    {
+        var formatPicker = FindNamed<ComboBox>(window, "PART_ExportFormatPicker");
+        var scopePicker = FindNamed<ComboBox>(window, "PART_ExportScopePicker");
+        var previewText = FindNamed<TextBlock>(window, "PART_ExportPreviewText");
+        var progressText = FindNamed<TextBlock>(window, "PART_ExportProgressText");
+        var statusText = FindNamed<TextBlock>(window, "PART_ExportStatusText");
+        var progressBar = FindNamed<ProgressBar>(window, "PART_ExportProgressBar");
+        var exportButton = FindNamed<Button>(window, "PART_ExportRunButton");
+        var cancelButton = FindNamed<Button>(window, "PART_ExportCancelButton");
+
+        var formats = formatPicker?.ItemsSource?.OfType<string>().ToArray() ?? [];
+        var scopes = scopePicker?.ItemsSource?.OfType<string>().ToArray() ?? [];
+        var panelOk = formatPicker is not null
+            && scopePicker is not null
+            && progressBar is not null
+            && exportButton is not null
+            && cancelButton is not null
+            && formats.SequenceEqual(["SVG", "PNG", "JPEG"], StringComparer.Ordinal)
+            && scopes.SequenceEqual(["Full scene", "Selected nodes"], StringComparer.Ordinal);
+        if (!panelOk)
+        {
+            return (false, false, false);
+        }
+
+        formatPicker!.SelectedItem = "PNG";
+        scopePicker!.SelectedItem = "Selected nodes";
+        var checkedExportButton = exportButton!;
+        var checkedCancelButton = cancelButton!;
+        FlushUi();
+        var scopeOk = scopePicker.IsEnabled
+            && checkedExportButton.IsEnabled
+            && previewText?.Text?.Contains("Selection scope", StringComparison.Ordinal) == true;
+
+        var progressSnapshots = new List<GraphEditorSceneImageExportProgressSnapshot>();
+        var progressOk = host.Session.Commands.TryExportSceneAsImage(
+            GraphEditorSceneImageExportFormat.Png,
+            options: new GraphEditorSceneImageExportOptions
+            {
+                Scope = GraphEditorSceneImageExportScope.FullScene,
+                Progress = new ConsumerSampleProofProgressSink(progressSnapshots),
+            })
+            && progressSnapshots.Count > 0;
+
+        checkedCancelButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        FlushUi();
+        var cancelRequestedOk = checkedCancelButton.IsEnabled;
+        using var canceled = new CancellationTokenSource();
+        canceled.Cancel();
+        var cancelOk = !host.Session.Commands.TryExportSceneAsImage(
+            GraphEditorSceneImageExportFormat.Png,
+            options: new GraphEditorSceneImageExportOptions
+            {
+                Scope = GraphEditorSceneImageExportScope.FullScene,
+                CancellationToken = canceled.Token,
+            });
+
+        return (panelOk, scopeOk, progressOk && cancelRequestedOk && cancelOk);
+    }
+
+    private static bool HasExportDocsAlignment()
+    {
+        var root = ResolveRepositoryRoot();
+        if (root is null)
+        {
+            return false;
+        }
+
+        var docs = new[]
+        {
+            Path.Combine(root, "README.md"),
+            Path.Combine(root, "README.zh-CN.md"),
+            Path.Combine(root, "docs", "en", "host-integration.md"),
+            Path.Combine(root, "docs", "zh-CN", "host-integration.md"),
+            Path.Combine(root, "docs", "en", "feature-catalog.md"),
+            Path.Combine(root, "docs", "zh-CN", "feature-catalog.md"),
+            Path.Combine(root, "docs", "en", "support-bundle.md"),
+            Path.Combine(root, "docs", "zh-CN", "support-bundle.md"),
+        };
+
+        return docs.All(File.Exists)
+            && docs.All(path =>
+            {
+                var text = File.ReadAllText(path);
+                return text.Contains("SVG", StringComparison.Ordinal)
+                    && text.Contains("PNG", StringComparison.Ordinal)
+                    && text.Contains("JPEG", StringComparison.Ordinal)
+                    && text.Contains("progress", StringComparison.OrdinalIgnoreCase)
+                    && text.Contains("cancel", StringComparison.OrdinalIgnoreCase)
+                    && text.Contains("scope", StringComparison.OrdinalIgnoreCase);
+            });
+    }
+
+    private static string? ResolveRepositoryRoot()
+    {
+        foreach (var start in new[] { Environment.CurrentDirectory, AppContext.BaseDirectory })
+        {
+            var directory = new DirectoryInfo(start);
+            while (directory is not null)
+            {
+                if (File.Exists(Path.Combine(directory.FullName, "AsterGraph.sln"))
+                    && Directory.Exists(Path.Combine(directory.FullName, "docs")))
+                {
+                    return directory.FullName;
+                }
+
+                directory = directory.Parent;
+            }
+        }
+
+        return null;
     }
 
     private static bool HasExportBreadth(ConsumerSampleHost host, string storageRoot)

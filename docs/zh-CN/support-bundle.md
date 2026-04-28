@@ -79,6 +79,7 @@ runtime feedback 的 release handoff 还应该把 Demo proof marker `AI_PIPELINE
 graph search proof 仍然是 hosted、snapshot-driven：`GRAPH_SEARCH_LOCATE_OK:True`、`GRAPH_SEARCH_SCOPE_FILTER_OK:True` 和 `GRAPH_SEARCH_VIEWPORT_FOCUS_OK:True` 只证明搜索/定位证据，不代表后台图索引服务或 command macro engine。
 command palette proof 仍然走 shared command/session route：`COMMAND_PALETTE_GROUPING_OK:True`、`COMMAND_PALETTE_DISABLED_REASON_OK:True`、`COMMAND_PALETTE_RECENT_ACTIONS_OK:True`、`COMMAND_PROJECTION_UNIFIED_OK:True`、`COMMAND_PALETTE_OK:True`、`TOOLBAR_DESCRIPTOR_OK:True`、`CONTEXT_MENU_DESCRIPTOR_OK:True` 和 `COMMAND_DISABLED_REASON_OK:True` 只证明分组发现、disabled reason 可见性、toolbar/context-menu descriptor 复用和有界 recent actions，不代表 command macro engine 或 scripting UI。
 navigation proof 仍然是宿主自管：`NAVIGATION_HISTORY_OK:True`、`SCOPE_BREADCRUMB_NAVIGATION_OK:True`、`FOCUS_RESTORE_OK:True`、`NAVIGATION_PRODUCTIVITY_PROOF_OK:True`、`NAVIGATION_PRODUCTIVITY_HANDOFF_OK:True` 和 `NAVIGATION_SCOPE_BOUNDARY_OK:True` 只证明 search、palette、back/forward、breadcrumb 和 focus-restore 证据，不代表新增 runtime navigation API。
+export panel proof 仍然是 canonical session route 上的 hosted projection：`EXPORT_PANEL_OK:True`、`EXPORT_PANEL_SCOPE_OK:True`、`EXPORT_PANEL_PROGRESS_CANCEL_OK:True` 和 `EXPORT_DOCS_ALIGNMENT_OK:True` 证明 SVG/PNG/JPEG discovery 以及 raster scope、progress、cancel 证据，不新增 export engine。
 
 `environment` 记录本次运行所在的 runtime 和操作系统信息。
 
