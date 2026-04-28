@@ -74,6 +74,9 @@ public sealed record ConsumerSampleProofResult(
     bool GraphSearchLocateOk = true,
     bool GraphSearchScopeFilterOk = true,
     bool GraphSearchViewportFocusOk = true,
+    bool CommandPaletteGroupingOk = true,
+    bool CommandPaletteDisabledReasonOk = true,
+    bool CommandPaletteRecentActionsOk = true,
     bool LayoutProviderSeamOk = true,
     bool LayoutPreviewApplyCancelOk = true,
     bool LayoutUndoTransactionOk = true,
@@ -165,6 +168,9 @@ public sealed record ConsumerSampleProofResult(
         && GraphSearchLocateOk
         && GraphSearchScopeFilterOk
         && GraphSearchViewportFocusOk
+        && CommandPaletteGroupingOk
+        && CommandPaletteDisabledReasonOk
+        && CommandPaletteRecentActionsOk
         && GraphValidationFeedbackOk
         && GraphFeedbackFocusTargetOk
         && GraphReadinessStatusOk
@@ -215,6 +221,9 @@ public sealed record ConsumerSampleProofResult(
         && GraphSearchLocateOk
         && GraphSearchScopeFilterOk
         && GraphSearchViewportFocusOk
+        && CommandPaletteGroupingOk
+        && CommandPaletteDisabledReasonOk
+        && CommandPaletteRecentActionsOk
         && GraphValidationFeedbackOk
         && GraphFeedbackFocusTargetOk
         && GraphReadinessStatusOk
@@ -263,6 +272,9 @@ public sealed record ConsumerSampleProofResult(
         && GraphSearchLocateOk
         && GraphSearchScopeFilterOk
         && GraphSearchViewportFocusOk
+        && CommandPaletteGroupingOk
+        && CommandPaletteDisabledReasonOk
+        && CommandPaletteRecentActionsOk
         && PluginTrustEvidencePanelOk
         && PluginAllowlistRoundtripOk
         && GraphSnippetCatalogOk
@@ -337,6 +349,9 @@ public sealed record ConsumerSampleProofResult(
         $"GRAPH_SEARCH_LOCATE_OK:{GraphSearchLocateOk}",
         $"GRAPH_SEARCH_SCOPE_FILTER_OK:{GraphSearchScopeFilterOk}",
         $"GRAPH_SEARCH_VIEWPORT_FOCUS_OK:{GraphSearchViewportFocusOk}",
+        $"COMMAND_PALETTE_GROUPING_OK:{CommandPaletteGroupingOk}",
+        $"COMMAND_PALETTE_DISABLED_REASON_OK:{CommandPaletteDisabledReasonOk}",
+        $"COMMAND_PALETTE_RECENT_ACTIONS_OK:{CommandPaletteRecentActionsOk}",
         $"LAYOUT_PROVIDER_SEAM_OK:{LayoutProviderSeamOk}",
         $"LAYOUT_PREVIEW_APPLY_CANCEL_OK:{LayoutPreviewApplyCancelOk}",
         $"LAYOUT_UNDO_TRANSACTION_OK:{LayoutUndoTransactionOk}",
@@ -652,6 +667,9 @@ public static class ConsumerSampleProof
         bool runtimeOverlaySnapshotOk;
         bool runtimeOverlaySnapshotPolishOk;
         bool runtimeOverlayScopeFilterOk;
+        bool commandPaletteGroupingOk;
+        bool commandPaletteDisabledReasonOk;
+        bool commandPaletteRecentActionsOk;
         try
         {
             capabilityWindow.Show();
@@ -681,6 +699,8 @@ public static class ConsumerSampleProof
             runtimeOverlaySnapshotPolishOk = HasRuntimeOverlaySnapshotPolish(host);
             runtimeOverlayScopeFilterOk = HasRuntimeOverlayScopeFilter(host);
             (quickAddConnectedNodeOk, portFilteredNodeSearchOk) = HasQuickAddConnectedNode(host);
+            (commandPaletteGroupingOk, commandPaletteDisabledReasonOk, commandPaletteRecentActionsOk) =
+                HasCommandPaletteProductivity(capabilityWindow);
 
             host.SelectNode(reviewNodeId);
             FlushUi();
@@ -765,6 +785,9 @@ public static class ConsumerSampleProof
             GraphSearchLocateOk: graphSearchLocateOk,
             GraphSearchScopeFilterOk: graphSearchScopeFilterOk,
             GraphSearchViewportFocusOk: graphSearchViewportFocusOk,
+            CommandPaletteGroupingOk: commandPaletteGroupingOk,
+            CommandPaletteDisabledReasonOk: commandPaletteDisabledReasonOk,
+            CommandPaletteRecentActionsOk: commandPaletteRecentActionsOk,
             LayoutProviderSeamOk: layoutProviderSeamOk,
             LayoutPreviewApplyCancelOk: layoutPreviewApplyCancelOk,
             LayoutUndoTransactionOk: layoutUndoTransactionOk,
@@ -2115,6 +2138,59 @@ public static class ConsumerSampleProof
             && string.Equals(childResult.ScopeId, childScopeId, StringComparison.Ordinal)
             && host.TryLocateGraphSearchResult(childResult)
             && string.Equals(host.Session.Queries.GetSelectionSnapshot().PrimarySelectedNodeId, queueNodeId, StringComparison.Ordinal);
+    }
+
+    private static (bool GroupingOk, bool DisabledReasonOk, bool RecentActionsOk) HasCommandPaletteProductivity(Window window)
+    {
+        var paletteToggle = FindNamed<Button>(window, "PART_OpenCommandPaletteButton");
+        if (paletteToggle is null)
+        {
+            return (false, false, false);
+        }
+
+        paletteToggle.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        FlushUi();
+
+        var paletteItems = FindNamed<StackPanel>(window, "PART_CommandPaletteItems");
+        var workspaceGroup = FindNamed<TextBlock>(window, "PART_CommandPaletteGroup_workspace");
+        var viewportGroup = FindNamed<TextBlock>(window, "PART_CommandPaletteGroup_viewport");
+        var saveButton = FindNamed<Button>(window, "PART_CommandPaletteAction_workspace.save");
+        var distributeButton = FindNamed<Button>(window, "PART_CommandPaletteAction_layout.distribute-horizontal");
+        var expansionButton = FindNamed<Button>(window, "PART_CommandPaletteAction_node-toggle-surface-expansion");
+
+        var groupingOk = paletteItems is not null
+            && workspaceGroup?.Text == "workspace"
+            && viewportGroup?.Text == "viewport"
+            && saveButton is not null
+            && expansionButton is not null;
+        var disabledReasonOk = distributeButton is { IsEnabled: false }
+            && string.Equals(
+                ToolTip.GetTip(distributeButton)?.ToString(),
+                "Select at least three nodes before distributing.",
+                StringComparison.Ordinal);
+
+        expansionButton?.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        FlushUi();
+        var paletteChrome = FindNamed<Border>(window, "PART_CommandPaletteChrome");
+        if (paletteChrome?.IsVisible == true)
+        {
+            paletteToggle.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            FlushUi();
+        }
+
+        paletteToggle.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        FlushUi();
+
+        var recentHeading = FindNamed<TextBlock>(window, "PART_CommandPaletteRecentActionsHeading");
+        var recentExpansionButton = FindNamed<Button>(window, "PART_CommandPaletteRecentAction_node-toggle-surface-expansion");
+        var recentActionsOk = recentHeading?.Text == "Recent Actions"
+            && recentExpansionButton is not null
+            && (AutomationProperties.GetName(recentExpansionButton)?.Contains("Node Card", StringComparison.Ordinal) == true);
+
+        paletteToggle.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        FlushUi();
+
+        return (groupingOk, disabledReasonOk, recentActionsOk);
     }
 
     private static bool HasAllowedOptions(

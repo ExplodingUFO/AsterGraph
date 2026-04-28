@@ -31,6 +31,7 @@ namespace AsterGraph.Avalonia.Controls;
 public partial class GraphEditorView : UserControl
 {
     private const string CommandPaletteActionId = "shell.command-palette";
+    private const int CommandPaletteRecentActionLimit = 5;
 
     private static readonly IReadOnlyList<string> HeaderCommandIds =
     [
@@ -148,6 +149,7 @@ public partial class GraphEditorView : UserControl
     private double _defaultShellColumnSpacing;
     private readonly GraphEditorViewCompositionCoordinator _compositionCoordinator;
     private readonly HashSet<string> _collapsedStencilCategories = [];
+    private readonly List<string> _recentCommandPaletteActionIds = [];
     private string _stencilFilter = string.Empty;
     private string _commandPaletteFilter = string.Empty;
     private string? _selectedFragmentTemplatePath;
@@ -977,15 +979,75 @@ public partial class GraphEditorView : UserControl
             return;
         }
 
-        foreach (var action in actions)
+        AddRecentCommandPaletteItems(actions);
+
+        foreach (var group in actions.GroupBy(action => action.Group, StringComparer.Ordinal))
         {
-            _commandPaletteItems.Children.Add(CreateActionButton(
-                action,
-                $"PART_CommandPaletteAction_{action.Id}",
-                includeShortcut: true,
-                closePaletteOnExecute: true));
+            _commandPaletteItems.Children.Add(CreateCommandPaletteGroupHeader(group.Key));
+            foreach (var action in group)
+            {
+                _commandPaletteItems.Children.Add(CreateCommandPaletteActionButton(
+                    action,
+                    $"PART_CommandPaletteAction_{action.Id}"));
+            }
         }
     }
+
+    private void AddRecentCommandPaletteItems(IReadOnlyList<AsterGraphHostedActionDescriptor> actions)
+    {
+        if (_commandPaletteItems is null || _recentCommandPaletteActionIds.Count == 0)
+        {
+            return;
+        }
+
+        var recentActions = _recentCommandPaletteActionIds
+            .Select(actionId => actions.FirstOrDefault(action => string.Equals(action.Id, actionId, StringComparison.Ordinal)))
+            .Where(action => action is not null)
+            .Cast<AsterGraphHostedActionDescriptor>()
+            .ToList();
+        if (recentActions.Count == 0)
+        {
+            return;
+        }
+
+        _commandPaletteItems.Children.Add(new TextBlock
+        {
+            Name = "PART_CommandPaletteRecentActionsHeading",
+            Text = "Recent Actions",
+            Classes = { "astergraph-section-heading" },
+        });
+
+        foreach (var action in recentActions)
+        {
+            _commandPaletteItems.Children.Add(CreateCommandPaletteActionButton(
+                action,
+                $"PART_CommandPaletteRecentAction_{action.Id}"));
+        }
+    }
+
+    private static TextBlock CreateCommandPaletteGroupHeader(string group)
+        => new()
+        {
+            Name = $"PART_CommandPaletteGroup_{CreateControlNameToken(group)}",
+            Text = group,
+            Classes = { "astergraph-section-heading" },
+        };
+
+    private Button CreateCommandPaletteActionButton(
+        AsterGraphHostedActionDescriptor action,
+        string name)
+        => CreateActionButton(
+            action,
+            name,
+            includeShortcut: true,
+            closePaletteOnExecute: true,
+            afterExecute: executed =>
+            {
+                if (executed)
+                {
+                    RecordCommandPaletteAction(action.Id);
+                }
+            });
 
     private AsterGraphHostedActionProjection CreateCommandSurfaceProjection(
         IReadOnlyList<GraphEditorCommandDescriptorSnapshot> commandDescriptors,
@@ -1069,7 +1131,8 @@ public partial class GraphEditorView : UserControl
         AsterGraphHostedActionDescriptor action,
         string name,
         bool includeShortcut = false,
-        bool closePaletteOnExecute = false)
+        bool closePaletteOnExecute = false,
+        Action<bool>? afterExecute = null)
     {
         var button = new Button
         {
@@ -1089,7 +1152,8 @@ public partial class GraphEditorView : UserControl
 
         button.Click += (_, _) =>
         {
-            action.TryExecute();
+            var executed = action.TryExecute();
+            afterExecute?.Invoke(executed || action.CanExecute);
             if (closePaletteOnExecute)
             {
                 CloseCommandPalette();
@@ -1098,6 +1162,32 @@ public partial class GraphEditorView : UserControl
             RefreshCommandSurface();
         };
         return button;
+    }
+
+    private void RecordCommandPaletteAction(string actionId)
+    {
+        if (string.IsNullOrWhiteSpace(actionId)
+            || string.Equals(actionId, CommandPaletteActionId, StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        _recentCommandPaletteActionIds.RemoveAll(id => string.Equals(id, actionId, StringComparison.Ordinal));
+        _recentCommandPaletteActionIds.Insert(0, actionId);
+        if (_recentCommandPaletteActionIds.Count > CommandPaletteRecentActionLimit)
+        {
+            _recentCommandPaletteActionIds.RemoveRange(
+                CommandPaletteRecentActionLimit,
+                _recentCommandPaletteActionIds.Count - CommandPaletteRecentActionLimit);
+        }
+    }
+
+    private static string CreateControlNameToken(string value)
+    {
+        var chars = value
+            .Select(character => char.IsLetterOrDigit(character) ? character : '_')
+            .ToArray();
+        return new string(chars);
     }
 
     private Border CreateShortcutHelpItem(string text)

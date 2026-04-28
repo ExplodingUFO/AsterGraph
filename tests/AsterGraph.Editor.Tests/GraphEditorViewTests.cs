@@ -156,9 +156,17 @@ public sealed class GraphEditorViewTests
         var paletteFitSelectionButton = Assert.Single(
             paletteItems.Children.OfType<Button>(),
             button => string.Equals(button.Name, "PART_CommandPaletteAction_viewport.fit-selection", StringComparison.Ordinal));
+        var workspaceGroup = Assert.Single(
+            paletteItems.Children.OfType<TextBlock>(),
+            text => string.Equals(text.Name, "PART_CommandPaletteGroup_workspace", StringComparison.Ordinal));
+        var viewportGroup = Assert.Single(
+            paletteItems.Children.OfType<TextBlock>(),
+            text => string.Equals(text.Name, "PART_CommandPaletteGroup_viewport", StringComparison.Ordinal));
 
         Assert.Equal("Save Workspace", AutomationProperties.GetName(paletteSaveButton));
         Assert.Equal("Undo", AutomationProperties.GetName(paletteUndoButton));
+        Assert.Equal("workspace", workspaceGroup.Text);
+        Assert.Equal("viewport", viewportGroup.Text);
         Assert.Equal("Select one or more nodes before fitting the selection.", ToolTip.GetTip(paletteFitSelectionButton));
     }
 
@@ -963,8 +971,27 @@ public sealed class GraphEditorViewTests
         Assert.Equal("Disconnect Connection", AutomationProperties.GetName(disconnect));
         Assert.Equal("Clear Connection Note", AutomationProperties.GetName(clearNote));
 
-        clearNote.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        toggleExpansion.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
 
+        var paletteChrome = FindRequiredControl<Border>(view, "PART_CommandPaletteChrome");
+        if (paletteChrome.IsVisible)
+        {
+            paletteToggle.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        }
+
+        paletteToggle.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        var recentHeading = Assert.Single(
+            FindRequiredControl<StackPanel>(view, "PART_CommandPaletteItems").Children.OfType<TextBlock>(),
+            text => string.Equals(text.Name, "PART_CommandPaletteRecentActionsHeading", StringComparison.Ordinal));
+        var recentClearNote = Assert.Single(
+            FindRequiredControl<StackPanel>(view, "PART_CommandPaletteItems").Children.OfType<Button>(),
+            button => string.Equals(button.Name, "PART_CommandPaletteRecentAction_node-toggle-surface-expansion", StringComparison.Ordinal));
+
+        Assert.Equal("Recent Actions", recentHeading.Text);
+        Assert.Contains("Node Card", AutomationProperties.GetName(recentClearNote), StringComparison.Ordinal);
+
+        clearNote = FindRequiredDescendant<Button>(view, "PART_CommandPaletteAction_connection-clear-note");
+        clearNote.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
         Assert.True(string.IsNullOrWhiteSpace(Assert.Single(editor.Session.Queries.CreateDocumentSnapshot().Connections).Presentation?.NoteText));
     }
 

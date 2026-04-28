@@ -142,6 +142,7 @@ dotnet run --project tools/AsterGraph.PluginTool -- validate MyGraphPlugin/bin/D
 Runtime feedback proof 仍然是宿主自管：ConsumerSample 应继续保持 `RUNTIME_DEBUG_PANEL_INTERACTION_OK:True`、`RUNTIME_LOG_LOCATE_OK:True` 和 `RUNTIME_LOG_EXPORT_OK:True`；Demo 应继续保持 `AI_PIPELINE_MOCK_RUNNER_POLISH_OK:True`、`AI_PIPELINE_PAYLOAD_PREVIEW_OK:True` 和 `AI_PIPELINE_ERROR_DEBUG_EVIDENCE_OK:True`。这些都不是 execution-engine、workflow scripting UI、marketplace、sandbox、WPF parity 或 GA 声明。
 
 Graph search proof 也保持 hosted、snapshot-driven：期待 `GRAPH_SEARCH_LOCATE_OK:True`、`GRAPH_SEARCH_SCOPE_FILTER_OK:True` 和 `GRAPH_SEARCH_VIEWPORT_FOCUS_OK:True`，不引入后台图索引服务或 command macro engine。
+Command palette proof 继续走同一条 shared command/session route：期待 `COMMAND_PALETTE_GROUPING_OK:True`、`COMMAND_PALETTE_DISABLED_REASON_OK:True` 和 `COMMAND_PALETTE_RECENT_ACTIONS_OK:True`，不新增 macro 或 scripting。
 
 release lane 的 template smoke 会验证 `astergraph-avalonia` 和 `astergraph-plugin` 能生成可 build 的 `net8.0` 项目，并且生成的插件能通过 `AsterGraph.PluginTool validate`。
 
