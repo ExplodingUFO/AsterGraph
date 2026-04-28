@@ -195,6 +195,9 @@ public sealed class ConsumerSampleProofTests
         Assert.True(result.WorkbenchAffordanceScopeBoundaryOk);
         Assert.NotNull(result.WorkbenchAffordancePolish);
         Assert.Equal("layout-resume", result.WorkbenchAffordancePolish!.FrictionCategory);
+        Assert.True(result.WorkbenchFrictionSupportBundleOk);
+        Assert.True(result.WorkbenchAdopterEvidenceAttachmentOk);
+        Assert.True(result.WorkbenchEvidenceScopeBoundaryOk);
         Assert.True(result.CommandPaletteGroupingOk);
         Assert.True(result.CommandPaletteDisabledReasonOk);
         Assert.True(result.CommandPaletteRecentActionsOk);
@@ -327,6 +330,9 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(result.ProofLines, line => line == "WORKBENCH_AFFORDANCE_POLISH_OK:True");
         Assert.Contains(result.ProofLines, line => line == "WORKBENCH_AFFORDANCE_ROUTE_OK:True");
         Assert.Contains(result.ProofLines, line => line == "WORKBENCH_AFFORDANCE_SCOPE_BOUNDARY_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "WORKBENCH_FRICTION_SUPPORT_BUNDLE_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "WORKBENCH_ADOPTER_EVIDENCE_ATTACHMENT_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "WORKBENCH_EVIDENCE_SCOPE_BOUNDARY_OK:True");
         Assert.Contains(result.ProofLines, line => line == "COMMAND_PALETTE_GROUPING_OK:True");
         Assert.Contains(result.ProofLines, line => line == "COMMAND_PALETTE_DISABLED_REASON_OK:True");
         Assert.Contains(result.ProofLines, line => line == "COMMAND_PALETTE_RECENT_ACTIONS_OK:True");
@@ -883,6 +889,9 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(proofLines, line => line == "WORKBENCH_AFFORDANCE_POLISH_OK:True");
         Assert.Contains(proofLines, line => line == "WORKBENCH_AFFORDANCE_ROUTE_OK:True");
         Assert.Contains(proofLines, line => line == "WORKBENCH_AFFORDANCE_SCOPE_BOUNDARY_OK:True");
+        Assert.Contains(proofLines, line => line == "WORKBENCH_FRICTION_SUPPORT_BUNDLE_OK:True");
+        Assert.Contains(proofLines, line => line == "WORKBENCH_ADOPTER_EVIDENCE_ATTACHMENT_OK:True");
+        Assert.Contains(proofLines, line => line == "WORKBENCH_EVIDENCE_SCOPE_BOUNDARY_OK:True");
         Assert.Contains(proofLines, line => line == "NAVIGATION_HISTORY_OK:True");
         Assert.Contains(proofLines, line => line == "SCOPE_BREADCRUMB_NAVIGATION_OK:True");
         Assert.Contains(proofLines, line => line == "FOCUS_RESTORE_OK:True");
@@ -993,6 +1002,21 @@ public sealed class ConsumerSampleProofTests
             entry.GetProperty("surface").GetString() == "plugin"
             && entry.GetProperty("recentIds").EnumerateArray().Any(id => id.GetString() == "consumer.sample.audit-plugin")
             && entry.GetProperty("favoriteIds").EnumerateArray().Any(id => id.GetString() == "consumer.sample.audit-plugin"));
+
+        var workbenchFrictionEvidence = root.GetProperty("workbenchFrictionEvidence").EnumerateArray().ToArray();
+        Assert.True(workbenchFrictionEvidence.Length >= 4);
+        Assert.Contains(workbenchFrictionEvidence, entry =>
+            entry.GetProperty("category").GetString() == "layout-resume"
+            && entry.GetProperty("priorityRank").GetInt32() == 1
+            && entry.GetProperty("isSynthetic").GetBoolean());
+        Assert.Contains(workbenchFrictionEvidence, entry =>
+            entry.GetProperty("category").GetString() == "support-triage"
+            && entry.GetProperty("scopeBoundary").GetString()!.Contains("not an external adopter report", StringComparison.OrdinalIgnoreCase));
+
+        var workbenchAffordancePolish = root.GetProperty("workbenchAffordancePolish");
+        Assert.Equal("layout-resume", workbenchAffordancePolish.GetProperty("frictionCategory").GetString());
+        Assert.Contains("ResetLayout", workbenchAffordancePolish.GetProperty("route").GetString(), StringComparison.Ordinal);
+        Assert.True(workbenchAffordancePolish.GetProperty("usesExistingHostedRoute").GetBoolean());
 
         var recentDiagnostics = root.GetProperty("recentDiagnostics").EnumerateArray().ToArray();
         Assert.True(recentDiagnostics.Length >= 0);

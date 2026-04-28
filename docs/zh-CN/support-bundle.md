@@ -55,6 +55,8 @@ support bundle 是一个本地 JSON 文件，顶层字段固定为：
 - `validationFeedback` — canonical validation issue 行，包含 `code`、`severity`、`message` 和 `focusTarget`
 - `featureDescriptors` — 捕获时可用的 capability 列表
 - `recentsFavorites` — bounded host-owned recents/favorites evidence，覆盖 nodes、fragments、commands 和 plugin/source entries
+- `workbenchFrictionEvidence` — 本地合成 workbench friction 行，包含 category、priority、route 和 scope boundary
+- `workbenchAffordancePolish` — 绑定到一个 friction row 的 selected hosted affordance
 - `recentDiagnostics` — 用于排查静默失败的近期 diagnostic code
 - `runtimeNodeOverlays` — 宿主持有的节点运行态快照
 - `runtimeConnectionOverlays` — 宿主持有的连接 payload 快照
@@ -93,6 +95,7 @@ recents/favorites proof 仍然是 bounded、host-owned：`WORKBENCH_RECENTS_OK:T
 v0.63 discoverability handoff proof 只汇总 hosted workbench evidence：`WORKBENCH_DISCOVERABILITY_HANDOFF_OK:True`、`WORKBENCH_DISCOVERABILITY_SCOPE_BOUNDARY_OK:True` 和 `V063_MILESTONE_PROOF_OK:True` 收口 layout/discovery/recents-favorites proof，不代表新的 runtime route、macro/query system、remote sync、marketplace state、WPF parity 或 GA claim。
 hosted workbench friction proof 仍然是本地合成证据：`WORKBENCH_FRICTION_EVIDENCE_OK:True`、`WORKBENCH_FRICTION_PRIORITIZATION_OK:True` 和 `WORKBENCH_FRICTION_SCOPE_BOUNDARY_OK:True` 只证明有界 friction categories 与优先级证据，不代表外部 adopter reports、telemetry、新 runtime route、WPF parity 或 GA readiness。
 bounded workbench affordance proof 还应该包含 `WORKBENCH_AFFORDANCE_POLISH_OK:True`、`WORKBENCH_AFFORDANCE_ROUTE_OK:True` 和 `WORKBENCH_AFFORDANCE_SCOPE_BOUNDARY_OK:True`，证明选中的 `layout-resume` polish 仍走 hosted workbench options route。
+workbench friction support-bundle proof 还应该包含 `WORKBENCH_FRICTION_SUPPORT_BUNDLE_OK:True`、`WORKBENCH_ADOPTER_EVIDENCE_ATTACHMENT_OK:True` 和 `WORKBENCH_EVIDENCE_SCOPE_BOUNDARY_OK:True`，证明本地 bundle 会携带 friction rows 和选中的 affordance，但不代表 remote telemetry 或 sync。
 command palette 和 toolbar contribution proof 仍然走 shared command/session route：`COMMAND_PALETTE_GROUPING_OK:True`、`COMMAND_PALETTE_DISABLED_REASON_OK:True`、`COMMAND_PALETTE_RECENT_ACTIONS_OK:True`、`COMMAND_PROJECTION_UNIFIED_OK:True`、`COMMAND_PALETTE_OK:True`、`TOOLBAR_DESCRIPTOR_OK:True`、`CONTEXT_MENU_DESCRIPTOR_OK:True`、`COMMAND_DISABLED_REASON_OK:True`、`NODE_TOOLBAR_CONTRIBUTION_OK:True`、`EDGE_TOOLBAR_CONTRIBUTION_OK:True`、`TOOLBAR_CONTRIBUTION_DESCRIPTOR_OK:True` 和 `TOOLBAR_CONTRIBUTION_SCOPE_BOUNDARY_OK:True` 只证明分组发现、disabled reason 可见性、toolbar/context-menu descriptor 复用、node/edge action contribution 投影和有界 recent actions，不代表 command macro engine 或 scripting UI。
 interaction feedback proof 还应该包含 `INTERACTION_FEEDBACK_OK:True`、`CANVAS_FOCUS_RECOVERY_OK:True`、`CONSUMER_GESTURE_PROOF_OK:True`、`INTERACTION_SUPPORT_BUNDLE_OK:True`、`INTERACTION_RELIABILITY_HANDOFF_OK:True`、`INTERACTION_SCOPE_BOUNDARY_OK:True` 和 `V062_MILESTONE_PROOF_OK:True`，证明可见 affordance、gesture freshness、command feedback、support-bundle coverage 和 focus recovery 证据仍走现有 canvas、command 和 navigation 路线。
 navigation proof 仍然是宿主自管：`NAVIGATION_HISTORY_OK:True`、`SCOPE_BREADCRUMB_NAVIGATION_OK:True`、`FOCUS_RESTORE_OK:True`、`NAVIGATION_PRODUCTIVITY_PROOF_OK:True`、`NAVIGATION_PRODUCTIVITY_HANDOFF_OK:True` 和 `NAVIGATION_SCOPE_BOUNDARY_OK:True` 只证明 search、palette、back/forward、breadcrumb 和 focus-restore 证据，不代表新增 runtime navigation API。

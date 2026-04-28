@@ -762,6 +762,27 @@ public sealed record ConsumerSampleProofResult(
         && DiscoveryCommandRouteOk
         && RecentsFavoritesSupportBundleOk;
 
+    public bool WorkbenchFrictionSupportBundleOk
+        => WorkbenchFrictionEvidence is { Count: >= 4 }
+        && WorkbenchAffordancePolish is not null
+        && WorkbenchFrictionEvidence.All(entry => entry.IsSynthetic)
+        && WorkbenchFrictionEvidence.Any(entry =>
+            string.Equals(entry.Category, WorkbenchAffordancePolish.FrictionCategory, StringComparison.Ordinal));
+
+    public bool WorkbenchAdopterEvidenceAttachmentOk
+        => WorkbenchFrictionSupportBundleOk
+        && SupportBundlePayloadOk
+        && WorkbenchFrictionEvidence is { Count: > 0 }
+        && WorkbenchFrictionEvidence.Any(entry =>
+            string.Equals(entry.Category, "support-triage", StringComparison.Ordinal));
+
+    public bool WorkbenchEvidenceScopeBoundaryOk
+        => WorkbenchFrictionScopeBoundaryOk
+        && WorkbenchAffordanceScopeBoundaryOk
+        && WorkbenchFrictionEvidence is { Count: > 0 }
+        && WorkbenchFrictionEvidence.All(entry =>
+            entry.ScopeBoundary.Contains("local synthetic evidence only", StringComparison.OrdinalIgnoreCase));
+
     public bool V063MilestoneProofOk
         => WorkbenchDiscoverabilityHandoffOk
         && WorkbenchDiscoverabilityScopeBoundaryOk;
@@ -824,7 +845,10 @@ public sealed record ConsumerSampleProofResult(
         && WorkbenchFrictionScopeBoundaryOk
         && WorkbenchAffordancePolishOk
         && WorkbenchAffordanceRouteOk
-        && WorkbenchAffordanceScopeBoundaryOk;
+        && WorkbenchAffordanceScopeBoundaryOk
+        && WorkbenchFrictionSupportBundleOk
+        && WorkbenchAdopterEvidenceAttachmentOk
+        && WorkbenchEvidenceScopeBoundaryOk;
 
     public IReadOnlyList<string> MetricLines =>
     [
@@ -892,6 +916,9 @@ public sealed record ConsumerSampleProofResult(
         $"WORKBENCH_AFFORDANCE_POLISH_OK:{WorkbenchAffordancePolishOk}",
         $"WORKBENCH_AFFORDANCE_ROUTE_OK:{WorkbenchAffordanceRouteOk}",
         $"WORKBENCH_AFFORDANCE_SCOPE_BOUNDARY_OK:{WorkbenchAffordanceScopeBoundaryOk}",
+        $"WORKBENCH_FRICTION_SUPPORT_BUNDLE_OK:{WorkbenchFrictionSupportBundleOk}",
+        $"WORKBENCH_ADOPTER_EVIDENCE_ATTACHMENT_OK:{WorkbenchAdopterEvidenceAttachmentOk}",
+        $"WORKBENCH_EVIDENCE_SCOPE_BOUNDARY_OK:{WorkbenchEvidenceScopeBoundaryOk}",
         $"COMMAND_PALETTE_GROUPING_OK:{CommandPaletteGroupingOk}",
         $"COMMAND_PALETTE_DISABLED_REASON_OK:{CommandPaletteDisabledReasonOk}",
         $"COMMAND_PALETTE_RECENT_ACTIONS_OK:{CommandPaletteRecentActionsOk}",

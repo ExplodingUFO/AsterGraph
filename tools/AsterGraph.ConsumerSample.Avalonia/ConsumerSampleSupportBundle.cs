@@ -47,6 +47,8 @@ internal static class ConsumerSampleSupportBundle
             ValidationFeedback: result.SupportValidationFeedback,
             FeatureDescriptors: result.FeatureDescriptorIds ?? [],
             RecentsFavorites: result.RecentsFavoritesEvidence ?? [],
+            WorkbenchFrictionEvidence: result.WorkbenchFrictionEvidence ?? [],
+            WorkbenchAffordancePolish: result.WorkbenchAffordancePolish,
             RecentDiagnostics: result.RecentDiagnosticCodes ?? [],
             RuntimeNodeOverlays: result.RuntimeNodeOverlays ?? [],
             RuntimeConnectionOverlays: result.RuntimeConnectionOverlays ?? [],
@@ -87,6 +89,8 @@ internal static class ConsumerSampleSupportBundle
             "validationFeedback",
             "featureDescriptors",
             "recentsFavorites",
+            "workbenchFrictionEvidence",
+            "workbenchAffordancePolish",
             "recentDiagnostics",
             "runtimeNodeOverlays",
             "runtimeConnectionOverlays",
@@ -144,6 +148,40 @@ internal static class ConsumerSampleSupportBundle
                 throw new InvalidOperationException("Support bundle schema validation failed: validationFeedback rows require code, severity, message, and focusTarget.kind.");
             }
         }
+
+        var frictionEvidence = root.GetProperty("workbenchFrictionEvidence");
+        if (frictionEvidence.ValueKind != JsonValueKind.Array)
+        {
+            throw new InvalidOperationException("Support bundle schema validation failed: workbenchFrictionEvidence must be an array.");
+        }
+
+        foreach (var evidence in frictionEvidence.EnumerateArray())
+        {
+            if (!evidence.TryGetProperty("category", out _)
+                || !evidence.TryGetProperty("evidence", out _)
+                || !evidence.TryGetProperty("priorityRank", out _)
+                || !evidence.TryGetProperty("route", out _)
+                || !evidence.TryGetProperty("scopeBoundary", out _)
+                || !evidence.TryGetProperty("isSynthetic", out _))
+            {
+                throw new InvalidOperationException("Support bundle schema validation failed: workbenchFrictionEvidence rows require category, evidence, priorityRank, route, scopeBoundary, and isSynthetic.");
+            }
+        }
+
+        var affordancePolish = root.GetProperty("workbenchAffordancePolish");
+        if (affordancePolish.ValueKind == JsonValueKind.Null)
+        {
+            return;
+        }
+
+        if (affordancePolish.ValueKind != JsonValueKind.Object
+            || !affordancePolish.TryGetProperty("actionId", out _)
+            || !affordancePolish.TryGetProperty("frictionCategory", out _)
+            || !affordancePolish.TryGetProperty("route", out _)
+            || !affordancePolish.TryGetProperty("scopeBoundary", out _))
+        {
+            throw new InvalidOperationException("Support bundle schema validation failed: workbenchAffordancePolish requires actionId, frictionCategory, route, and scopeBoundary.");
+        }
     }
 
     private static string GetPackageVersion()
@@ -180,6 +218,8 @@ internal static class ConsumerSampleSupportBundle
         IReadOnlyList<ConsumerSampleProofValidationFeedback> ValidationFeedback,
         IReadOnlyList<string> FeatureDescriptors,
         IReadOnlyList<ConsumerSampleRecentsFavoritesEvidence> RecentsFavorites,
+        IReadOnlyList<ConsumerSampleWorkbenchFrictionEvidence> WorkbenchFrictionEvidence,
+        ConsumerSampleWorkbenchAffordancePolish? WorkbenchAffordancePolish,
         IReadOnlyList<string> RecentDiagnostics,
         IReadOnlyList<GraphEditorNodeRuntimeOverlaySnapshot> RuntimeNodeOverlays,
         IReadOnlyList<GraphEditorConnectionRuntimeOverlaySnapshot> RuntimeConnectionOverlays,
