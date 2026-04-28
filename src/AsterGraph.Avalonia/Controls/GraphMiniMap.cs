@@ -73,6 +73,12 @@ public sealed class GraphMiniMap : UserControl
         set => SetValue(MiniMapPresenterProperty, value);
     }
 
+    internal bool UsesLightweightProjection
+    {
+        get => _stockSurface.UseLightweightProjection;
+        set => _stockSurface.UseLightweightProjection = value;
+    }
+
     /// <inheritdoc />
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
@@ -187,6 +193,8 @@ public sealed class GraphMiniMap : UserControl
 
         private IGraphEditorSession? _observedSession;
         private bool _isDraggingViewport;
+        private bool _useLightweightProjection;
+        private MiniMapProjection? _projection;
 
         public StockGraphMiniMapSurface()
         {
@@ -206,6 +214,23 @@ public sealed class GraphMiniMap : UserControl
         {
             get => GetValue(StyleOptionsProperty);
             set => SetValue(StyleOptionsProperty, value);
+        }
+
+        public bool UseLightweightProjection
+        {
+            get => _useLightweightProjection;
+            set
+            {
+                if (_useLightweightProjection == value)
+                {
+                    return;
+                }
+
+                _useLightweightProjection = value;
+                _projection = null;
+                AttachSession(Session, force: true);
+                InvalidateVisual();
+            }
         }
 
         protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
@@ -235,11 +260,11 @@ public sealed class GraphMiniMap : UserControl
                 return;
             }
 
-            var scene = session.Queries.GetSceneSnapshot();
+            var projection = GetProjection(session);
             var canvasStyle = (StyleOptions ?? GraphEditorStyleOptions.Default).Canvas;
             context.FillRectangle(BrushFactory.Solid(canvasStyle.GridBackgroundHex), Bounds);
 
-            if (!TryGetWorldBounds(scene.Document, out var worldBounds))
+            if (!TryGetWorldBounds(projection.Nodes, out var worldBounds))
             {
                 return;
             }
@@ -252,36 +277,34 @@ public sealed class GraphMiniMap : UserControl
 
             var offsetX = Bounds.X + ((Bounds.Width - (worldBounds.Width * scale)) / 2);
             var offsetY = Bounds.Y + ((Bounds.Height - (worldBounds.Height * scale)) / 2);
-            var selectedNodeIds = scene.Selection.SelectedNodeIds.ToHashSet(StringComparer.Ordinal);
 
-            foreach (var node in scene.Document.Nodes)
+            foreach (var node in projection.Nodes)
             {
-                var isSelected = selectedNodeIds.Contains(node.Id);
                 var nodeRect = ToMiniMapRect(
-                    node.Position.X,
-                    node.Position.Y,
-                    node.Size.Width,
-                    node.Size.Height,
+                    node.X,
+                    node.Y,
+                    node.Width,
+                    node.Height,
                     worldBounds,
                     scale,
                     offsetX,
                     offsetY);
                 context.DrawRectangle(
-                    BrushFactory.Solid(isSelected ? node.AccentHex : canvasStyle.PrimaryGridHex, isSelected ? 0.7 : 0.45),
+                    BrushFactory.Solid(node.IsSelected ? node.AccentHex : canvasStyle.PrimaryGridHex, node.IsSelected ? 0.7 : 0.45),
                     new Pen(BrushFactory.Solid(node.AccentHex, 0.8), 1),
                     nodeRect);
             }
 
-            if (scene.Viewport.ViewportWidth <= 0 || scene.Viewport.ViewportHeight <= 0)
+            if (projection.Viewport.ViewportWidth <= 0 || projection.Viewport.ViewportHeight <= 0)
             {
                 return;
             }
 
-            var viewportState = new ViewportState(scene.Viewport.Zoom, scene.Viewport.PanX, scene.Viewport.PanY);
+            var viewportState = new ViewportState(projection.Viewport.Zoom, projection.Viewport.PanX, projection.Viewport.PanY);
             var topLeft = ViewportMath.ScreenToWorld(viewportState, new GraphPoint(0, 0));
             var bottomRight = ViewportMath.ScreenToWorld(
                 viewportState,
-                new GraphPoint(scene.Viewport.ViewportWidth, scene.Viewport.ViewportHeight));
+                new GraphPoint(projection.Viewport.ViewportWidth, projection.Viewport.ViewportHeight));
             var viewportRect = ToMiniMapRect(
                 topLeft.X,
                 topLeft.Y,
@@ -298,9 +321,64 @@ public sealed class GraphMiniMap : UserControl
                 viewportRect);
         }
 
-        private void AttachSession(IGraphEditorSession? current)
+        private MiniMapProjection GetProjection(IGraphEditorSession session)
         {
-            if (ReferenceEquals(_observedSession, current))
+            if (UseLightweightProjection && _projection is not null)
+            {
+                return _projection;
+            }
+
+            var projection = CreateProjection(session);
+            if (UseLightweightProjection)
+            {
+                _projection = projection;
+            }
+
+            return projection;
+        }
+
+        private static MiniMapProjection CreateProjection(IGraphEditorSession session)
+        {
+            var document = session.Queries.CreateDocumentSnapshot();
+            var selectedNodeIds = session.Queries.GetSelectionSnapshot().SelectedNodeIds.ToHashSet(StringComparer.Ordinal);
+            var nodes = document.Nodes
+                .Select(node => new MiniMapNodeProjection(
+                    node.Id,
+                    node.Position.X,
+                    node.Position.Y,
+                    node.Size.Width,
+                    node.Size.Height,
+                    node.AccentHex,
+                    selectedNodeIds.Contains(node.Id)))
+                .ToArray();
+            return new MiniMapProjection(nodes, session.Queries.GetViewportSnapshot());
+        }
+
+        private static bool TryGetWorldBounds(IReadOnlyList<MiniMapNodeProjection> nodes, out Rect worldBounds)
+        {
+            if (nodes.Count == 0)
+            {
+                worldBounds = default;
+                return false;
+            }
+
+            var minX = nodes.Min(node => node.X);
+            var minY = nodes.Min(node => node.Y);
+            var maxX = nodes.Max(node => node.X + node.Width);
+            var maxY = nodes.Max(node => node.Y + node.Height);
+            const double padding = 80;
+
+            worldBounds = new Rect(
+                minX - padding,
+                minY - padding,
+                Math.Max(1, (maxX - minX) + (padding * 2)),
+                Math.Max(1, (maxY - minY) + (padding * 2)));
+            return true;
+        }
+
+        private void AttachSession(IGraphEditorSession? current, bool force = false)
+        {
+            if (!force && ReferenceEquals(_observedSession, current))
             {
                 return;
             }
@@ -313,6 +391,7 @@ public sealed class GraphMiniMap : UserControl
             }
 
             _observedSession = current;
+            _projection = null;
             if (_observedSession is null)
             {
                 return;
@@ -320,11 +399,17 @@ public sealed class GraphMiniMap : UserControl
 
             _observedSession.Events.DocumentChanged += HandleSessionChanged;
             _observedSession.Events.SelectionChanged += HandleSessionChanged;
-            _observedSession.Events.ViewportChanged += HandleSessionChanged;
+            if (!UseLightweightProjection)
+            {
+                _observedSession.Events.ViewportChanged += HandleSessionChanged;
+            }
         }
 
         private void HandleSessionChanged(object? sender, EventArgs args)
-            => InvalidateVisual();
+        {
+            _projection = null;
+            InvalidateVisual();
+        }
 
         private void HandlePointerPressed(object? sender, PointerPressedEventArgs args)
         {
@@ -362,5 +447,18 @@ public sealed class GraphMiniMap : UserControl
             args.Pointer.Capture(null);
             args.Handled = true;
         }
+
+        private sealed record MiniMapProjection(
+            IReadOnlyList<MiniMapNodeProjection> Nodes,
+            GraphEditorViewportSnapshot Viewport);
+
+        private sealed record MiniMapNodeProjection(
+            string Id,
+            double X,
+            double Y,
+            double Width,
+            double Height,
+            string AccentHex,
+            bool IsSelected);
     }
 }

@@ -368,6 +368,7 @@ public partial class GraphEditorView : UserControl
         }
         else if (change.Property == WorkbenchPerformanceModeProperty)
         {
+            ApplyWorkbenchProjectionPolicy();
             BuildStencilLibrary(_stencilTemplateSnapshots, _stencilAddNodeDescriptor);
         }
         else if (change.Property == PresentationProperty)
@@ -435,6 +436,7 @@ public partial class GraphEditorView : UserControl
         _nodeCanvas = this.FindControl<NodeCanvas>("PART_NodeCanvas");
         _inspectorSurface = this.FindControl<GraphInspectorView>("PART_InspectorSurface");
         _miniMapSurface = this.FindControl<GraphMiniMap>("PART_MiniMapSurface");
+        ApplyWorkbenchProjectionPolicy();
         if (_stencilSearchBox is not null)
         {
             AutomationProperties.SetName(_stencilSearchBox, "Stencil search");
@@ -720,6 +722,14 @@ public partial class GraphEditorView : UserControl
         }
 
         return _commandSurfaceProjection;
+    }
+
+    private void ApplyWorkbenchProjectionPolicy()
+    {
+        if (_miniMapSurface is not null)
+        {
+            _miniMapSurface.UsesLightweightProjection = !CurrentWorkbenchPerformancePolicy.ProjectMiniMapContinuously;
+        }
     }
 
     private void BuildStencilLibrary(

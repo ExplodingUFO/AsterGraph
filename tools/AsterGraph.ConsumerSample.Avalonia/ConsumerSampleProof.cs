@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Globalization;
+using System.Reflection;
 using Avalonia;
 using Avalonia.Automation;
 using Avalonia.Controls;
@@ -150,7 +151,10 @@ public sealed record ConsumerSampleProofResult(
     bool WorkbenchPerformanceModeOk = true,
     bool BalancedModeDefaultOk = true,
     bool WorkbenchLodPolicyOk = true,
-    bool PerformanceModeScopeBoundaryOk = true)
+    bool PerformanceModeScopeBoundaryOk = true,
+    bool MiniMapLightweightProjectionEvidenceOk = true,
+    int SelectedParameterProjectionCount = 0,
+    int TotalParameterProjectionCount = 0)
 {
     public bool AuthoringSurfaceOk
         => ParameterProjectionOk
@@ -561,6 +565,36 @@ public sealed record ConsumerSampleProofResult(
         && FeatureDescriptorIds is { Count: > 0 }
         && FeatureDescriptorIds.All(IsBoundedFeatureDescriptorId);
 
+    public bool MinimapLightweightProjectionOk
+        => MiniMapLightweightProjectionEvidenceOk
+        && ViewportLodPolicyOk
+        && WorkbenchLodPolicyOk
+        && NodeCount > 0
+        && ConnectionCount > 0
+        && FeatureDescriptorIds is { Count: > 0 }
+        && FeatureDescriptorIds.All(IsBoundedFeatureDescriptorId);
+
+    public bool InspectorNarrowProjectionOk
+        => ParameterProjectionOk
+        && MetadataProjectionOk
+        && InspectorProjectionMs >= 0
+        && SelectedParameterProjectionCount > 0
+        && TotalParameterProjectionCount > SelectedParameterProjectionCount;
+
+    public bool LargeGraphPanelScopeOk
+        => MinimapLightweightProjectionOk
+        && InspectorNarrowProjectionOk
+        && WorkbenchScopeBoundaryOk
+        && ViewportLodScopeBoundaryOk;
+
+    public bool ProjectionPerformanceEvidenceOk
+        => LargeGraphUxProofBaselineOk
+        && InspectorProjectionMs >= 0
+        && StencilSearchMs >= 0
+        && CommandSurfaceRefreshMs >= 0
+        && NodeToolProjectionMs >= 0
+        && EdgeToolProjectionMs >= 0;
+
     public bool IsOk
         => HostMenuActionOk
         && PluginContributionOk
@@ -593,7 +627,11 @@ public sealed record ConsumerSampleProofResult(
         && EdgeInteractionCacheOk
         && EdgeDragRouteSimplificationOk
         && SelectedEdgeFeedbackOk
-        && EdgeRenderingScopeBoundaryOk;
+        && EdgeRenderingScopeBoundaryOk
+        && MinimapLightweightProjectionOk
+        && InspectorNarrowProjectionOk
+        && LargeGraphPanelScopeOk
+        && ProjectionPerformanceEvidenceOk;
 
     public IReadOnlyList<string> MetricLines =>
     [
@@ -697,6 +735,7 @@ public sealed record ConsumerSampleProofResult(
         $"WORKBENCH_LOD_POLICY_OK:{WorkbenchLodPolicyOk}",
         $"PERFORMANCE_MODE_SCOPE_BOUNDARY_OK:{PerformanceModeScopeBoundaryOk}",
         $"WORKBENCH_SCOPE_BOUNDARY_OK:{WorkbenchScopeBoundaryOk}",
+        $"MINIMAP_LIGHTWEIGHT_PROJECTION_EVIDENCE_OK:{MiniMapLightweightProjectionEvidenceOk}",
         $"AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:{NodeSideAuthoringOk}",
         $"AUTHORING_SURFACE_COMMAND_PROJECTION_OK:{CommandSurfaceOk}",
         $"CONSUMER_SAMPLE_PARAMETER_OK:{ParameterProjectionOk}",
@@ -757,6 +796,10 @@ public sealed record ConsumerSampleProofResult(
         $"EDGE_DRAG_ROUTE_SIMPLIFICATION_OK:{EdgeDragRouteSimplificationOk}",
         $"SELECTED_EDGE_FEEDBACK_OK:{SelectedEdgeFeedbackOk}",
         $"EDGE_RENDERING_SCOPE_BOUNDARY_OK:{EdgeRenderingScopeBoundaryOk}",
+        $"MINIMAP_LIGHTWEIGHT_PROJECTION_OK:{MinimapLightweightProjectionOk}",
+        $"INSPECTOR_NARROW_PROJECTION_OK:{InspectorNarrowProjectionOk}",
+        $"LARGE_GRAPH_PANEL_SCOPE_OK:{LargeGraphPanelScopeOk}",
+        $"PROJECTION_PERFORMANCE_EVIDENCE_OK:{ProjectionPerformanceEvidenceOk}",
         $"CONSUMER_SAMPLE_OK:{IsOk}",
     ];
 
@@ -1179,6 +1222,7 @@ public static class ConsumerSampleProof
         var validationFeedback = CreateValidationFeedback(validationSnapshot);
         var supportBundlePayloadOk = HasSupportBundlePayload(proofParameterSnapshots, finalSnapshot, featureDescriptorIds);
         var runtimeOverlaySupportBundleOk = HasRuntimeOverlaySupportBundlePayload(runtimeOverlay);
+        var miniMapLightweightProjectionEvidenceOk = HasLightweightMiniMapProjection(host);
         var fiveMinuteOnboardingOk = scenarioGraphOk
             && hostOwnedActionsOk
             && parameterProjectionOk
@@ -1291,6 +1335,9 @@ public static class ConsumerSampleProof
             RuntimeNodeOverlays: runtimeOverlay.NodeOverlays,
             RuntimeConnectionOverlays: runtimeOverlay.ConnectionOverlays,
             RuntimeLogs: runtimeOverlay.RecentLogs,
+            MiniMapLightweightProjectionEvidenceOk: miniMapLightweightProjectionEvidenceOk,
+            SelectedParameterProjectionCount: selectedSupportSnapshots.Length,
+            TotalParameterProjectionCount: proofParameterSnapshots.Count,
             ReadinessStatus: CreateReadinessStatus(validationSnapshot),
             ValidationSummary: validationSummary,
             ValidationFeedback: validationFeedback,
@@ -1385,6 +1432,44 @@ public static class ConsumerSampleProof
             && typeof(AsterGraphWorkbenchPerformancePolicy).Namespace == "AsterGraph.Avalonia.Hosting";
 
         return (defaultsOk, handoffOk, performanceModeOk, balancedDefaultOk, lodPolicyOk, scopeBoundaryOk);
+    }
+
+    private static bool HasLightweightMiniMapProjection(ConsumerSampleHost host)
+    {
+        var balancedView = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOptions
+        {
+            Editor = host.Editor,
+            Workbench = AsterGraphWorkbenchOptions.Default with
+            {
+                PerformanceMode = AsterGraphWorkbenchPerformanceMode.Balanced,
+            },
+        });
+        var throughputView = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOptions
+        {
+            Editor = host.Editor,
+            Workbench = AsterGraphWorkbenchOptions.Default with
+            {
+                PerformanceMode = AsterGraphWorkbenchPerformanceMode.Throughput,
+            },
+        });
+
+        var balancedMiniMap = balancedView.FindControl<GraphMiniMap>("PART_MiniMapSurface");
+        var throughputMiniMap = throughputView.FindControl<GraphMiniMap>("PART_MiniMapSurface");
+        return ReadMiniMapLightweightProjection(balancedMiniMap) is false
+            && ReadMiniMapLightweightProjection(throughputMiniMap) is true;
+    }
+
+    private static bool? ReadMiniMapLightweightProjection(GraphMiniMap? miniMap)
+    {
+        if (miniMap is null)
+        {
+            return null;
+        }
+
+        var property = typeof(GraphMiniMap).GetProperty(
+            "UsesLightweightProjection",
+            BindingFlags.Instance | BindingFlags.NonPublic);
+        return property?.GetValue(miniMap) as bool?;
     }
 
     private static (bool NodeOk, bool PortOk, bool ParameterOk, bool RuleOk, bool ThinWrapperOk) HasAuthoringDefinitionBuilders()

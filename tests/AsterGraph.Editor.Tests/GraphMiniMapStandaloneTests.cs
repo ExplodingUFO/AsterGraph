@@ -37,6 +37,28 @@ public sealed class GraphMiniMapStandaloneTests
     }
 
     [AvaloniaFact]
+    public void HostedMiniMap_UsesLightweightProjectionInThroughputMode()
+    {
+        var editor = CreateEditor();
+        var balancedView = new GraphEditorView
+        {
+            Editor = editor,
+            WorkbenchPerformanceMode = AsterGraphWorkbenchPerformanceMode.Balanced,
+        };
+        var throughputView = new GraphEditorView
+        {
+            Editor = editor,
+            WorkbenchPerformanceMode = AsterGraphWorkbenchPerformanceMode.Throughput,
+        };
+
+        var balancedMiniMap = Assert.IsType<GraphMiniMap>(balancedView.FindControl<GraphMiniMap>("PART_MiniMapSurface"));
+        var throughputMiniMap = Assert.IsType<GraphMiniMap>(throughputView.FindControl<GraphMiniMap>("PART_MiniMapSurface"));
+
+        Assert.False(ReadMiniMapLightweightProjection(balancedMiniMap));
+        Assert.True(ReadMiniMapLightweightProjection(throughputMiniMap));
+    }
+
+    [AvaloniaFact]
     public void StandaloneMiniMap_RecenterViewport_ForDifferentMiniMapPoints()
     {
         var editor = CreateEditor();
@@ -110,6 +132,15 @@ public sealed class GraphMiniMapStandaloneTests
         var method = typeof(GraphMiniMap).GetMethod(methodName, BindingFlags.Instance | BindingFlags.NonPublic)
             ?? throw new Xunit.Sdk.XunitException($"Could not find GraphMiniMap handler '{methodName}'.");
         method.Invoke(miniMap, args);
+    }
+
+    private static bool ReadMiniMapLightweightProjection(GraphMiniMap miniMap)
+    {
+        var property = typeof(GraphMiniMap).GetProperty(
+            "UsesLightweightProjection",
+            BindingFlags.Instance | BindingFlags.NonPublic)
+            ?? throw new Xunit.Sdk.XunitException("Could not find GraphMiniMap lightweight projection property.");
+        return Assert.IsType<bool>(property.GetValue(miniMap));
     }
 
     [Fact]

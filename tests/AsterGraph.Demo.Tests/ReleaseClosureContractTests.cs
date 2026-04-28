@@ -507,6 +507,26 @@ public sealed class ReleaseClosureContractTests
     }
 
     [Fact]
+    public void PanelProjectionEvidence_StaysVisibleInStatusAndChecklist()
+    {
+        var englishChecklist = ReadRepoFile("docs/en/public-launch-checklist.md");
+        var chineseChecklist = ReadRepoFile("docs/zh-CN/public-launch-checklist.md");
+        var englishStatus = ReadRepoFile("docs/en/project-status.md");
+        var chineseStatus = ReadRepoFile("docs/zh-CN/project-status.md");
+
+        foreach (var contents in new[] { englishChecklist, chineseChecklist, englishStatus, chineseStatus })
+        {
+            Assert.Contains("MINIMAP_LIGHTWEIGHT_PROJECTION_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("INSPECTOR_NARROW_PROJECTION_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("LARGE_GRAPH_PANEL_SCOPE_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("PROJECTION_PERFORMANCE_EVIDENCE_OK:True", contents, StringComparison.Ordinal);
+        }
+
+        Assert.True(HasLineWithAll(englishStatus, "panel projection proof", "mini-map lightweight projection", "inspector narrow projection", "broad graph subscription contract"));
+        Assert.True(HasLineWithAll(chineseStatus, "panel projection proof", "mini-map lightweight projection", "inspector narrow projection", "broad graph subscription contract"));
+    }
+
+    [Fact]
     public void ReleaseCoverageValidation_BoundsHungTestCollectors()
     {
         var ciScript = ReadRepoFile("eng/ci.ps1");

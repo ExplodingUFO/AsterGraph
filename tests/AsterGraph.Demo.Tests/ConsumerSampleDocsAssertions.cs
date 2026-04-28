@@ -128,6 +128,10 @@ internal static class ConsumerSampleDocsAssertions
         Assert.Contains("EDGE_DRAG_ROUTE_SIMPLIFICATION_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("SELECTED_EDGE_FEEDBACK_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("EDGE_RENDERING_SCOPE_BOUNDARY_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("MINIMAP_LIGHTWEIGHT_PROJECTION_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("INSPECTOR_NARROW_PROJECTION_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("LARGE_GRAPH_PANEL_SCOPE_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("PROJECTION_PERFORMANCE_EVIDENCE_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("CONSUMER_SAMPLE_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("parameterSnapshots", contents, StringComparison.Ordinal);
         Assert.Contains("readinessStatus", contents, StringComparison.Ordinal);

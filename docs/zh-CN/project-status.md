@@ -11,6 +11,7 @@
 - v0.59 large-graph UX baseline markers：`LARGE_GRAPH_UX_POLICY_OK:True`、`LARGE_GRAPH_UX_SCOPE_BOUNDARY_OK:True` 和 `LARGE_GRAPH_UX_PROOF_BASELINE_OK:True`
 - v0.59 viewport LOD markers：`VIEWPORT_LOD_POLICY_OK:True`、`SELECTED_HOVERED_ADORNER_SCOPE_OK:True`、`LARGE_GRAPH_BALANCED_UX_OK:True` 和 `VIEWPORT_LOD_SCOPE_BOUNDARY_OK:True`
 - v0.59 edge interaction markers：`EDGE_INTERACTION_CACHE_OK:True`、`EDGE_DRAG_ROUTE_SIMPLIFICATION_OK:True`、`SELECTED_EDGE_FEEDBACK_OK:True` 和 `EDGE_RENDERING_SCOPE_BOUNDARY_OK:True`
+- v0.59 mini-map 与 inspector projection markers：`MINIMAP_LIGHTWEIGHT_PROJECTION_OK:True`、`INSPECTOR_NARROW_PROJECTION_OK:True`、`LARGE_GRAPH_PANEL_SCOPE_OK:True` 和 `PROJECTION_PERFORMANCE_EVIDENCE_OK:True`
 - 对外版本说明：[Versioning](./versioning.md)
 - 当前公开支持的发布包：
   - `AsterGraph.Abstractions`
@@ -46,6 +47,7 @@
 - large-graph UX baseline proof 汇总 hosted performance mode、LOD policy 和 widened-surface metrics，但不创建新的图规模支持层级：`LARGE_GRAPH_UX_POLICY_OK:True`、`LARGE_GRAPH_UX_SCOPE_BOUNDARY_OK:True`、`LARGE_GRAPH_UX_PROOF_BASELINE_OK:True`
 - viewport LOD proof 把 selected/hovered affordances 保持在 hosted workbench policy 内，而不是 runtime graph contract：`VIEWPORT_LOD_POLICY_OK:True`、`SELECTED_HOVERED_ADORNER_SCOPE_OK:True`、`LARGE_GRAPH_BALANCED_UX_OK:True`、`VIEWPORT_LOD_SCOPE_BOUNDARY_OK:True`
 - edge interaction proof 在 hosted proof route 上汇总现有 edge quick-tool、toolbar 和 geometry 证据，但不创建 runtime renderer contract：`EDGE_INTERACTION_CACHE_OK:True`、`EDGE_DRAG_ROUTE_SIMPLIFICATION_OK:True`、`SELECTED_EDGE_FEEDBACK_OK:True`、`EDGE_RENDERING_SCOPE_BOUNDARY_OK:True`
+- panel projection proof 在 hosted proof route 上汇总 mini-map lightweight projection 和 inspector narrow projection 证据，但不创建 broad graph subscription contract：`MINIMAP_LIGHTWEIGHT_PROJECTION_OK:True`、`INSPECTOR_NARROW_PROJECTION_OK:True`、`LARGE_GRAPH_PANEL_SCOPE_OK:True`、`PROJECTION_PERFORMANCE_EVIDENCE_OK:True`
 - 图面可用性 proof marker：
   - `COMMAND_SURFACE_OK:True`
   - `TIERED_NODE_SURFACE_OK:True`
