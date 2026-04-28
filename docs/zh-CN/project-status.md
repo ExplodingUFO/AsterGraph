@@ -74,7 +74,7 @@
 - `IGraphEditorSession.Automation`
 - contract、maintenance、release 验证 lanes
 - release lane 里的 `.NET 10` 打包 `HostSample` 兼容性验证
-- public API guidance proof 继续和 template/plugin proof 放在同一条 release story：`PUBLIC_API_SURFACE_OK`、`PUBLIC_API_SCOPE_OK`、`PUBLIC_API_GUIDANCE_OK`、`ASTERGRAPH_TEMPLATE_SMOKE_OK`、`TEMPLATE_SMOKE_PLUGIN_VALIDATE_OK`
+- public API guidance proof 继续和 template/plugin proof 放在同一条 release story：`PUBLIC_API_SURFACE_OK`、`PUBLIC_API_SCOPE_OK`、`PUBLIC_API_GUIDANCE_OK`、`PUBLIC_API_DIFF_GATE_OK:True`、`PUBLIC_API_USAGE_GUIDANCE_OK:True`、`PUBLIC_API_STABILITY_SCOPE_OK:True`、`ASTERGRAPH_TEMPLATE_SMOKE_OK`、`TEMPLATE_SMOKE_PLUGIN_VALIDATE_OK`
 
 ## 当前优先事项
 
@@ -130,6 +130,7 @@
 - stable / GA / `1.0` 级别的支持保证
 - GA prep checklist：adoption evidence、API drift、support boundary 和 release proof gate 都复核通过后，才允许写 GA 或 `1.0` 级别语言。
 - Release-candidate proof handoff markers：`API_RELEASE_CANDIDATE_PROOF_OK:True`、`PUBLIC_API_GUIDANCE_HANDOFF_OK:True` 和 `RELEASE_BOUNDARY_STABILITY_OK:True`。
+- v0.61 API stabilization markers：`PUBLIC_API_DIFF_GATE_OK:True`、`PUBLIC_API_USAGE_GUIDANCE_OK:True` 和 `PUBLIC_API_STABILITY_SCOPE_OK:True`。
 - 当前 `0.xx` alpha/beta hardening 线命名为 `Adoption Readiness / Release Candidate Hygiene`：先把公开推荐、API drift、support boundary 和 release proof gate 对齐，再写 release-candidate、GA 或 `1.0` 级别语言；`ADOPTION_RECOMMENDATION_CURRENT_OK:True` 和 `CLAIM_HYGIENE_BOUNDARY_OK:True` 是 proof handoff markers
 - 维护者种子预演证据不计入 3 到 5 的门槛
 - 如果新的报告放不进上面的“已证明”或“受边界约束”两类，就走 [Adoption Feedback Loop](./adoption-feedback.md) 和 [Beta Support Bundle](./support-bundle.md)，不要临时扩大公开声明；在满足 3 到 5 条真实外部报告门禁前，claim-expansion status 只作为分诊字段

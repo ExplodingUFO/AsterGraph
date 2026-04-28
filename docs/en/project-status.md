@@ -75,7 +75,7 @@
 - automation execution through `IGraphEditorSession.Automation`
 - contract, maintenance, and release proof lanes
 - packed `HostSample` compatibility proof under `.NET 10` in the release lane
-- public API guidance proof stays with the template/plugin proof in the release story: `PUBLIC_API_SURFACE_OK`, `PUBLIC_API_SCOPE_OK`, `PUBLIC_API_GUIDANCE_OK`, `ASTERGRAPH_TEMPLATE_SMOKE_OK`, `TEMPLATE_SMOKE_PLUGIN_VALIDATE_OK`
+- public API guidance proof stays with the template/plugin proof in the release story: `PUBLIC_API_SURFACE_OK`, `PUBLIC_API_SCOPE_OK`, `PUBLIC_API_GUIDANCE_OK`, `PUBLIC_API_DIFF_GATE_OK:True`, `PUBLIC_API_USAGE_GUIDANCE_OK:True`, `PUBLIC_API_STABILITY_SCOPE_OK:True`, `ASTERGRAPH_TEMPLATE_SMOKE_OK`, `TEMPLATE_SMOKE_PLUGIN_VALIDATE_OK`
 
 ## Current Priorities
 
@@ -131,6 +131,7 @@ Current adopter refresh markers: `ADOPTER_INTAKE_REFRESH_OK:True`, `ADOPTER_SUPP
 - stable / GA / `1.0` support guarantees
 - GA prep checklist: adoption evidence, API drift, support boundary, and release proof gates must all be reviewed before any GA or `1.0` language.
 - Release-candidate proof handoff markers: `API_RELEASE_CANDIDATE_PROOF_OK:True`, `PUBLIC_API_GUIDANCE_HANDOFF_OK:True`, and `RELEASE_BOUNDARY_STABILITY_OK:True`.
+- v0.61 API stabilization markers: `PUBLIC_API_DIFF_GATE_OK:True`, `PUBLIC_API_USAGE_GUIDANCE_OK:True`, and `PUBLIC_API_STABILITY_SCOPE_OK:True`.
 - the current 0.xx alpha/beta hardening line is `Adoption Readiness / Release Candidate Hygiene`: keep the public recommendation, API drift, support boundary, and release proof gates aligned before any release-candidate, GA, or `1.0` language; `ADOPTION_RECOMMENDATION_CURRENT_OK:True` and `CLAIM_HYGIENE_BOUNDARY_OK:True` are the proof handoff markers
 - seeded rehearsals do not count toward the 3-5 gate
 - if a new report does not fit one of the proven or bounded rows above, route it through the [Adoption Feedback Loop](./adoption-feedback.md) and the [Beta Support Bundle](./support-bundle.md) instead of widening the claim ad hoc; the claim-expansion status remains a triage field until the 3-5 real external reports gate is met

@@ -605,6 +605,9 @@ function Assert-WarningGuidance {
 
 $currentLines = Get-PublicApiLines
 $scopeMarker = "PUBLIC_API_SCOPE_OK:$($publishableAssemblies -join ',')"
+$diffGateMarker = 'PUBLIC_API_DIFF_GATE_OK:True'
+$usageGuidanceMarker = 'PUBLIC_API_USAGE_GUIDANCE_OK:True'
+$stabilityScopeMarker = 'PUBLIC_API_STABILITY_SCOPE_OK:True'
 
 if ($UpdateBaseline) {
   $baselineDirectory = Split-Path -Parent $BaselinePath
@@ -646,10 +649,16 @@ if (-not [string]::IsNullOrWhiteSpace($ProofPath)) {
   @(
     $successMarker,
     $scopeMarker,
-    'PUBLIC_API_GUIDANCE_OK:True'
+    'PUBLIC_API_GUIDANCE_OK:True',
+    $diffGateMarker,
+    $usageGuidanceMarker,
+    $stabilityScopeMarker
   ) | Set-Content -LiteralPath $ProofPath
 }
 
 Write-Host $successMarker
 Write-Host $scopeMarker
 Write-Host 'PUBLIC_API_GUIDANCE_OK:True'
+Write-Host $diffGateMarker
+Write-Host $usageGuidanceMarker
+Write-Host $stabilityScopeMarker

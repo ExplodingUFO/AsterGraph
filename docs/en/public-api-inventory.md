@@ -40,6 +40,7 @@ Use this page with [Host Integration](./host-integration.md) and [Extension Cont
 - Release handoff: stable canonical surfaces are the default route, retained migration surfaces are bridge-only, and compatibility-only or obsolete surfaces must keep replacement guidance visible.
 - Keep `PUBLIC_API_SURFACE_OK`, `PUBLIC_API_SCOPE_OK`, and `PUBLIC_API_GUIDANCE_OK` in the same release proof block as `ASTERGRAPH_TEMPLATE_SMOKE_OK` and `TEMPLATE_SMOKE_PLUGIN_VALIDATE_OK`.
 - Release-candidate proof markers: `API_RELEASE_CANDIDATE_PROOF_OK:True`, `PUBLIC_API_GUIDANCE_HANDOFF_OK:True`, and `RELEASE_BOUNDARY_STABILITY_OK:True`.
+- v0.61 API stabilization markers: `PUBLIC_API_DIFF_GATE_OK:True`, `PUBLIC_API_USAGE_GUIDANCE_OK:True`, and `PUBLIC_API_STABILITY_SCOPE_OK:True`.
 - Do not add analyzer, adapter, or compatibility promises from this handoff; it only publishes the current package guidance and proof markers.
 
 ## Drift Rules
@@ -67,7 +68,7 @@ Regenerate the baseline after an intentional public API change:
 .\eng\validate-public-api-surface.ps1 -Configuration Release -Framework net9.0 -UpdateBaseline
 ```
 
-The release proof must include `PUBLIC_API_SCOPE_OK:AsterGraph.Abstractions,AsterGraph.Core,AsterGraph.Editor,AsterGraph.Avalonia` next to `PUBLIC_API_SURFACE_OK` and `PUBLIC_API_GUIDANCE_OK`.
+The release proof must include `PUBLIC_API_SCOPE_OK:AsterGraph.Abstractions,AsterGraph.Core,AsterGraph.Editor,AsterGraph.Avalonia` next to `PUBLIC_API_SURFACE_OK`, `PUBLIC_API_GUIDANCE_OK`, `PUBLIC_API_DIFF_GATE_OK:True`, `PUBLIC_API_USAGE_GUIDANCE_OK:True`, and `PUBLIC_API_STABILITY_SCOPE_OK:True`.
 
 ## Maintainer Checklist
 
