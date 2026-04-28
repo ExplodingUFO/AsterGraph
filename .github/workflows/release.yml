@@ -166,7 +166,10 @@ jobs:
               'SCENARIO_TOUR_OK',
               'AI_PIPELINE_MOCK_RUNNER_OK',
               'AI_PIPELINE_RUNTIME_OVERLAY_OK',
-              'AI_PIPELINE_ERROR_STATE_OK'
+              'AI_PIPELINE_ERROR_STATE_OK',
+              'AI_PIPELINE_MOCK_RUNNER_POLISH_OK',
+              'AI_PIPELINE_PAYLOAD_PREVIEW_OK',
+              'AI_PIPELINE_ERROR_DEBUG_EVIDENCE_OK'
             )) {
               $markerLine = Select-String -Path 'artifacts/proof/demo-proof.txt' -Pattern $markerId | Select-Object -First 1
               if ($markerLine) {

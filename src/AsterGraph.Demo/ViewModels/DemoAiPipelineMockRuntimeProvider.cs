@@ -41,6 +41,9 @@ internal sealed class DemoAiPipelineMockRuntimeProvider : IGraphRuntimeOverlayPr
         _recentLogs =
         [
             new GraphEditorRuntimeLogEntrySnapshot("ai-pipeline-run-started", timestamp, GraphEditorRuntimeOverlayStatus.Running, "AI pipeline mock run started.", ScopeId: "root", NodeId: "input"),
+            new GraphEditorRuntimeLogEntrySnapshot("ai-pipeline-input-ready", timestamp, GraphEditorRuntimeOverlayStatus.Success, "Input payload accepted.", ScopeId: "root", NodeId: "input", ConnectionId: "input.text->prompt.context"),
+            new GraphEditorRuntimeLogEntrySnapshot("ai-pipeline-prompt-ready", timestamp, GraphEditorRuntimeOverlayStatus.Success, "Prompt assembled with release policy context.", ScopeId: "root", NodeId: "prompt", ConnectionId: "prompt.prompt->llm.prompt"),
+            new GraphEditorRuntimeLogEntrySnapshot("ai-pipeline-llm-ready", timestamp, GraphEditorRuntimeOverlayStatus.Success, "LLM returned a typed approval response.", ScopeId: "root", NodeId: "llm", ConnectionId: "llm.response->parser.response"),
             new GraphEditorRuntimeLogEntrySnapshot("ai-pipeline-run-completed", timestamp, GraphEditorRuntimeOverlayStatus.Success, "AI pipeline mock run completed.", ScopeId: "root", NodeId: "output", ConnectionId: "parser.payload->output.payload"),
         ];
     }
@@ -63,13 +66,15 @@ internal sealed class DemoAiPipelineMockRuntimeProvider : IGraphRuntimeOverlayPr
             CreateConnection("prompt.prompt->retriever.query", "retrieve policy evidence", "prompt", 1),
             CreateConnection("prompt.prompt->llm.prompt", "assembled prompt", "prompt", 1),
             CreateConnection("retriever.evidence->llm.context", "2 snippets", "evidence", 2),
-            new GraphEditorConnectionRuntimeOverlaySnapshot("llm.response->parser.response", GraphEditorRuntimeOverlayStatus.Error, PayloadType: "llm.response", IsStale: true),
-            new GraphEditorConnectionRuntimeOverlaySnapshot("parser.payload->output.payload", GraphEditorRuntimeOverlayStatus.Warning, PayloadType: "json", IsStale: true),
+            new GraphEditorConnectionRuntimeOverlaySnapshot("llm.response->parser.response", GraphEditorRuntimeOverlayStatus.Error, ValuePreview: "timeout before parser", PayloadType: "llm.response", ItemCount: 0, IsStale: true),
+            new GraphEditorConnectionRuntimeOverlaySnapshot("parser.payload->output.payload", GraphEditorRuntimeOverlayStatus.Warning, ValuePreview: "stale empty payload", PayloadType: "json", ItemCount: 0, IsStale: true),
         ];
         _recentLogs =
         [
             new GraphEditorRuntimeLogEntrySnapshot("ai-pipeline-run-started", timestamp, GraphEditorRuntimeOverlayStatus.Running, "AI pipeline mock run started.", ScopeId: "root", NodeId: "input"),
+            new GraphEditorRuntimeLogEntrySnapshot("ai-pipeline-llm-running", timestamp, GraphEditorRuntimeOverlayStatus.Running, "LLM call in progress.", ScopeId: "root", NodeId: "llm", ConnectionId: "prompt.prompt->llm.prompt"),
             new GraphEditorRuntimeLogEntrySnapshot("ai-pipeline-run-error", timestamp, GraphEditorRuntimeOverlayStatus.Error, "Mock LLM timeout.", ScopeId: "root", NodeId: "llm", ConnectionId: "llm.response->parser.response"),
+            new GraphEditorRuntimeLogEntrySnapshot("ai-pipeline-parser-stale", timestamp, GraphEditorRuntimeOverlayStatus.Warning, "Parser output is stale because the LLM response failed.", ScopeId: "root", NodeId: "parser", ConnectionId: "parser.payload->output.payload"),
         ];
     }
 
