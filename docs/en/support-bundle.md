@@ -73,6 +73,8 @@ Use those rows with `status`, `owner`, `priority`, `review-script`, and `slug` w
 
 `runtimeNodeOverlays`, `runtimeConnectionOverlays`, and `runtimeLogs` capture host-owned runtime feedback. They are display/support evidence only and do not imply a core graph execution engine.
 
+Runtime feedback release handoff should also cross-check Demo proof markers `AI_PIPELINE_MOCK_RUNNER_POLISH_OK:True`, `AI_PIPELINE_PAYLOAD_PREVIEW_OK:True`, and `AI_PIPELINE_ERROR_DEBUG_EVIDENCE_OK:True` alongside the ConsumerSample runtime log markers. These markers prove host-owned overlay/debug evidence, not a workflow scripting UI, marketplace, sandbox, WPF parity, or GA claim.
+
 `environment` records the local runtime and OS details used for the run.
 
 `reproduction` records the friction note plus:

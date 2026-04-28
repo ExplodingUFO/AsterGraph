@@ -73,6 +73,8 @@ onboarding proof 行还应该包含 `CONSUMER_SAMPLE_SCENARIO_GRAPH_OK:True`、`
 
 `runtimeNodeOverlays`、`runtimeConnectionOverlays` 和 `runtimeLogs` 记录宿主持有的运行反馈。它们只作为展示和 support evidence，不代表 core 内置了图执行引擎。
 
+runtime feedback 的 release handoff 还应该把 Demo proof marker `AI_PIPELINE_MOCK_RUNNER_POLISH_OK:True`、`AI_PIPELINE_PAYLOAD_PREVIEW_OK:True` 和 `AI_PIPELINE_ERROR_DEBUG_EVIDENCE_OK:True` 与 ConsumerSample runtime log marker 一起核对。这些 marker 只证明宿主自管 overlay/debug 证据，不代表 workflow scripting UI、marketplace、sandbox、WPF parity 或 GA 声明。
+
 `environment` 记录本次运行所在的 runtime 和操作系统信息。
 
 `reproduction` 记录摩擦说明和：
