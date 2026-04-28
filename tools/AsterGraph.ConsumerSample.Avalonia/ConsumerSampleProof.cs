@@ -67,6 +67,9 @@ public sealed record ConsumerSampleProofResult(
     bool RuntimeOverlayScopeFilterOk = true,
     bool RuntimeLogPanelOk = true,
     bool RuntimeLogFilterOk = true,
+    bool RuntimeDebugPanelInteractionOk = true,
+    bool RuntimeLogLocateOk = true,
+    bool RuntimeLogExportOk = true,
     bool RuntimeOverlaySupportBundleOk = true,
     bool LayoutProviderSeamOk = true,
     bool LayoutPreviewApplyCancelOk = true,
@@ -152,6 +155,9 @@ public sealed record ConsumerSampleProofResult(
         && RuntimeOverlayScopeFilterOk
         && RuntimeLogPanelOk
         && RuntimeLogFilterOk
+        && RuntimeDebugPanelInteractionOk
+        && RuntimeLogLocateOk
+        && RuntimeLogExportOk
         && RuntimeOverlaySupportBundleOk
         && GraphValidationFeedbackOk
         && GraphFeedbackFocusTargetOk
@@ -196,6 +202,9 @@ public sealed record ConsumerSampleProofResult(
         && RuntimeOverlayScopeFilterOk
         && RuntimeLogPanelOk
         && RuntimeLogFilterOk
+        && RuntimeDebugPanelInteractionOk
+        && RuntimeLogLocateOk
+        && RuntimeLogExportOk
         && RuntimeOverlaySupportBundleOk
         && GraphValidationFeedbackOk
         && GraphFeedbackFocusTargetOk
@@ -239,6 +248,9 @@ public sealed record ConsumerSampleProofResult(
         && SupportBundlePayloadOk
         && RuntimeOverlaySupportBundleOk
         && RuntimeOverlayScopeFilterOk
+        && RuntimeDebugPanelInteractionOk
+        && RuntimeLogLocateOk
+        && RuntimeLogExportOk
         && PluginTrustEvidencePanelOk
         && PluginAllowlistRoundtripOk
         && GraphSnippetCatalogOk
@@ -306,6 +318,9 @@ public sealed record ConsumerSampleProofResult(
         $"RUNTIME_OVERLAY_SCOPE_FILTER_OK:{RuntimeOverlayScopeFilterOk}",
         $"RUNTIME_LOG_PANEL_OK:{RuntimeLogPanelOk}",
         $"RUNTIME_LOG_FILTER_OK:{RuntimeLogFilterOk}",
+        $"RUNTIME_DEBUG_PANEL_INTERACTION_OK:{RuntimeDebugPanelInteractionOk}",
+        $"RUNTIME_LOG_LOCATE_OK:{RuntimeLogLocateOk}",
+        $"RUNTIME_LOG_EXPORT_OK:{RuntimeLogExportOk}",
         $"RUNTIME_OVERLAY_SUPPORT_BUNDLE_OK:{RuntimeOverlaySupportBundleOk}",
         $"LAYOUT_PROVIDER_SEAM_OK:{LayoutProviderSeamOk}",
         $"LAYOUT_PREVIEW_APPLY_CANCEL_OK:{LayoutPreviewApplyCancelOk}",
@@ -479,6 +494,9 @@ public static class ConsumerSampleProof
         bool hostOwnedActionsOk;
         bool runtimeLogPanelOk;
         bool runtimeLogFilterOk;
+        bool runtimeDebugPanelInteractionOk;
+        bool runtimeLogLocateOk;
+        bool runtimeLogExportOk;
         bool layoutProviderSeamOk;
         bool layoutPreviewApplyCancelOk;
         bool layoutUndoTransactionOk;
@@ -576,6 +594,9 @@ public static class ConsumerSampleProof
                 && FindNamed<TextBlock>(window, "PART_TrustBoundaryText") is not null;
             runtimeLogPanelOk = HasRuntimeLogPanel(window, host);
             runtimeLogFilterOk = HasRuntimeLogFilter(host);
+            runtimeDebugPanelInteractionOk = HasRuntimeDebugPanelInteraction(window, host);
+            runtimeLogLocateOk = HasRuntimeLogLocate(host);
+            runtimeLogExportOk = HasRuntimeLogExport(host);
             layoutProviderSeamOk = HasLayoutProviderSeam(host);
             (layoutPreviewApplyCancelOk, layoutUndoTransactionOk) = HasLayoutPreviewApplyCancel(host, window);
             (readabilityFocusSubgraphOk, readabilityRouteCleanupOk, readabilityAlignmentHelpersOk) = HasReadabilityHelpers(host);
@@ -718,6 +739,9 @@ public static class ConsumerSampleProof
             RuntimeOverlayScopeFilterOk: runtimeOverlayScopeFilterOk,
             RuntimeLogPanelOk: runtimeLogPanelOk,
             RuntimeLogFilterOk: runtimeLogFilterOk,
+            RuntimeDebugPanelInteractionOk: runtimeDebugPanelInteractionOk,
+            RuntimeLogLocateOk: runtimeLogLocateOk,
+            RuntimeLogExportOk: runtimeLogExportOk,
             RuntimeOverlaySupportBundleOk: runtimeOverlaySupportBundleOk,
             LayoutProviderSeamOk: layoutProviderSeamOk,
             LayoutPreviewApplyCancelOk: layoutPreviewApplyCancelOk,
@@ -2104,6 +2128,56 @@ public static class ConsumerSampleProof
             && selectedLogs.Length > 0
             && selectedLogs.Length < allLogs.Count
             && scopeLogs.Length == allLogs.Count;
+    }
+
+    private static bool HasRuntimeDebugPanelInteraction(Window window, ConsumerSampleHost host)
+    {
+        var overlay = host.Session.Queries.GetRuntimeOverlaySnapshot();
+        var logItems = FindNamed<ItemsControl>(window, "PART_RuntimeLogItems");
+        var logFilter = FindNamed<ComboBox>(window, "PART_RuntimeLogFilter");
+        var exportButton = FindNamed<Button>(window, "PART_ExportRuntimeLogsButton");
+        var summary = FindNamed<TextBlock>(window, "PART_RuntimeSummaryText")?.Text ?? string.Empty;
+        var logButtons = logItems?.ItemsSource?.OfType<Button>().ToArray() ?? [];
+
+        return overlay.IsAvailable
+            && summary.Contains($"Nodes: {overlay.NodeOverlays.Count}", StringComparison.Ordinal)
+            && summary.Contains($"Connections: {overlay.ConnectionOverlays.Count}", StringComparison.Ordinal)
+            && summary.Contains($"Logs: {overlay.RecentLogs.Count}", StringComparison.Ordinal)
+            && logFilter?.ItemsSource?.OfType<string>().SequenceEqual(new[] { "All", "Selected Node", "Current Scope" }) == true
+            && logButtons.Length == overlay.RecentLogs.Count
+            && logButtons.Any(button => button.Content?.ToString()?.Contains("node=consumer-sample-queue-001", StringComparison.Ordinal) == true)
+            && exportButton is not null;
+    }
+
+    private static bool HasRuntimeLogLocate(ConsumerSampleHost host)
+    {
+        var selectedBefore = host.Session.Queries.GetSelectionSnapshot().PrimarySelectedNodeId;
+        var log = host.Session.Queries.GetRuntimeOverlaySnapshot().RecentLogs.SingleOrDefault(snapshot =>
+            string.Equals(snapshot.Id, "consumer-sample-runtime-log-001", StringComparison.Ordinal));
+        var navigated = log is not null && host.TryNavigateToRuntimeLog(log);
+        var selectedAfter = host.Session.Queries.GetSelectionSnapshot().PrimarySelectedNodeId;
+        if (selectedBefore is not null)
+        {
+            host.SelectNode(selectedBefore);
+        }
+
+        return navigated
+            && string.Equals(selectedAfter, "consumer-sample-queue-001", StringComparison.Ordinal);
+    }
+
+    private static bool HasRuntimeLogExport(ConsumerSampleHost host)
+    {
+        var exported = host.ExportRuntimeLogs();
+        var lines = host.LastRuntimeLogExportLines;
+        var logs = host.Session.Queries.GetRuntimeOverlaySnapshot().RecentLogs;
+
+        return exported
+            && lines.Count == logs.Count
+            && lines.Any(line => line.Contains("consumer-sample-runtime-log-001", StringComparison.Ordinal)
+                && line.Contains("node=consumer-sample-queue-001", StringComparison.Ordinal)
+                && line.Contains("connection=consumer-sample-connection-001", StringComparison.Ordinal))
+            && lines.Any(line => line.Contains("Error", StringComparison.Ordinal)
+                && line.Contains("connection=consumer-sample-connection-001:stale", StringComparison.Ordinal));
     }
 
     private static bool HasRuntimeOverlaySupportBundlePayload(GraphEditorRuntimeOverlaySnapshot overlay)

@@ -51,6 +51,11 @@ internal static class ConsumerSampleDocsAssertions
         Assert.Contains("RUNTIME_OVERLAY_SNAPSHOT_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("RUNTIME_OVERLAY_SNAPSHOT_POLISH_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("RUNTIME_OVERLAY_SCOPE_FILTER_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("RUNTIME_LOG_PANEL_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("RUNTIME_LOG_FILTER_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("RUNTIME_DEBUG_PANEL_INTERACTION_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("RUNTIME_LOG_LOCATE_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("RUNTIME_LOG_EXPORT_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("RUNTIME_OVERLAY_SUPPORT_BUNDLE_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("EXPERIENCE_POLISH_HANDOFF_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("FEATURE_ENHANCEMENT_PROOF_OK:True", contents, StringComparison.Ordinal);

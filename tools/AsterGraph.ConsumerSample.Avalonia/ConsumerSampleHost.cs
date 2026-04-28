@@ -52,6 +52,7 @@ public sealed class ConsumerSampleHost : IDisposable
     private IReadOnlyList<string> _focusedSubgraphNodeIds = [];
     private IReadOnlyList<string> _dimmedNodeIds = [];
     private IReadOnlyList<string> _alignmentHelperLines = [];
+    private IReadOnlyList<string> _lastRuntimeLogExportLines = [];
     private int _lastRouteCleanupCount;
 
     private ConsumerSampleHost(
@@ -101,9 +102,11 @@ public sealed class ConsumerSampleHost : IDisposable
 
     public IReadOnlyList<ConsumerSampleSnippetDescriptor> SnippetCatalog => SnippetCatalogEntries;
 
+    public IReadOnlyList<string> LastRuntimeLogExportLines => _lastRuntimeLogExportLines;
+
     public IReadOnlyList<string> RuntimeLogExportLines
         => RuntimeOverlay.RecentLogs
-            .Select(log => $"{log.TimestampUtc:O} [{log.Status}] {log.Message}")
+            .Select(log => $"{log.Id} | {log.TimestampUtc:O} | {log.Status} | scope={log.ScopeId ?? "-"} | node={log.NodeId ?? "-"} | connection={log.ConnectionId ?? "-"} | {log.Message}")
             .ToArray();
 
     public IReadOnlyList<string> PluginAllowlistLines
@@ -360,6 +363,13 @@ public sealed class ConsumerSampleHost : IDisposable
 
         SelectNode(log.NodeId);
         return true;
+    }
+
+    public bool ExportRuntimeLogs()
+    {
+        _lastRuntimeLogExportLines = RuntimeLogExportLines;
+        StateChanged?.Invoke(this, EventArgs.Empty);
+        return _lastRuntimeLogExportLines.Count > 0;
     }
 
     public IReadOnlyList<GraphEditorNodeParameterSnapshot> GetSelectedParameterSnapshots()
