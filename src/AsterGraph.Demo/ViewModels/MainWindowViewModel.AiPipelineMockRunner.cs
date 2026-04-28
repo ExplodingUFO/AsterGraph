@@ -9,10 +9,12 @@ public partial class MainWindowViewModel
         if (forceError)
         {
             _aiPipelineMockRuntimeProvider.RunError();
+            Session.Commands.SetSelection(["llm"], "llm", updateStatus: false);
         }
         else
         {
             _aiPipelineMockRuntimeProvider.RunSuccess();
+            Session.Commands.SetSelection(["output"], "output", updateStatus: false);
         }
 
         RefreshRuntimeProjection();

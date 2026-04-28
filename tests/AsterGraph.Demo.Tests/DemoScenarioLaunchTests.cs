@@ -118,14 +118,18 @@ public sealed class DemoScenarioLaunchTests
 
         Assert.True(successOverlay.IsAvailable);
         Assert.Contains(successOverlay.NodeOverlays, node => node.NodeId == "output" && node.Status == GraphEditorRuntimeOverlayStatus.Success);
-        Assert.Contains(successOverlay.ConnectionOverlays, connection => connection.ConnectionId == "parser.payload->output.payload" && connection.ItemCount == 1);
+        Assert.Contains(successOverlay.NodeOverlays, node => node.NodeId == "output" && node.OutputPreview?.Contains("Decision: approve", StringComparison.OrdinalIgnoreCase) == true);
+        Assert.Contains(successOverlay.ConnectionOverlays, connection => connection.ConnectionId == "parser.payload->output.payload" && connection.ItemCount == 1 && connection.PayloadType == "json" && connection.ValuePreview?.Contains("typed approval", StringComparison.OrdinalIgnoreCase) == true);
+        Assert.Contains(successOverlay.RecentLogs, log => log.Id == "ai-pipeline-llm-ready" && log.NodeId == "llm" && log.ConnectionId == "llm.response->parser.response");
         Assert.Contains(successOverlay.RecentLogs, log => log.Id == "ai-pipeline-run-completed");
+        Assert.Equal("output", viewModel.Session.Queries.GetSelectionSnapshot().PrimarySelectedNodeId);
 
         viewModel.RunAiPipelineMockRunner(forceError: true);
         var errorOverlay = viewModel.GetAiPipelineRuntimeOverlay();
 
-        Assert.Contains(errorOverlay.NodeOverlays, node => node.NodeId == "llm" && node.Status == GraphEditorRuntimeOverlayStatus.Error);
-        Assert.Contains(errorOverlay.ConnectionOverlays, connection => connection.ConnectionId == "llm.response->parser.response" && connection.IsStale);
-        Assert.Contains(errorOverlay.RecentLogs, log => log.Id == "ai-pipeline-run-error");
+        Assert.Contains(errorOverlay.NodeOverlays, node => node.NodeId == "llm" && node.Status == GraphEditorRuntimeOverlayStatus.Error && node.ErrorCount == 1 && node.ErrorMessage?.Contains("timeout", StringComparison.OrdinalIgnoreCase) == true);
+        Assert.Contains(errorOverlay.ConnectionOverlays, connection => connection.ConnectionId == "llm.response->parser.response" && connection.IsStale && connection.ValuePreview?.Contains("timeout", StringComparison.OrdinalIgnoreCase) == true);
+        Assert.Contains(errorOverlay.RecentLogs, log => log.Id == "ai-pipeline-run-error" && log.NodeId == "llm" && log.ConnectionId == "llm.response->parser.response" && log.ScopeId == "root");
+        Assert.Equal("llm", viewModel.Session.Queries.GetSelectionSnapshot().PrimarySelectedNodeId);
     }
 }

@@ -24,6 +24,9 @@ public static class DemoProofContract
         "AI_PIPELINE_MOCK_RUNNER_OK",
         "AI_PIPELINE_RUNTIME_OVERLAY_OK",
         "AI_PIPELINE_ERROR_STATE_OK",
+        "AI_PIPELINE_MOCK_RUNNER_POLISH_OK",
+        "AI_PIPELINE_PAYLOAD_PREVIEW_OK",
+        "AI_PIPELINE_ERROR_DEBUG_EVIDENCE_OK",
     ];
 
     public static IReadOnlyList<string> NativeMetricNames { get; } =
@@ -66,6 +69,9 @@ public static class DemoProofContract
             $"AI_PIPELINE_MOCK_RUNNER_OK:{result.AiPipelineMockRunnerOk}",
             $"AI_PIPELINE_RUNTIME_OVERLAY_OK:{result.AiPipelineRuntimeOverlayOk}",
             $"AI_PIPELINE_ERROR_STATE_OK:{result.AiPipelineErrorStateOk}",
+            $"AI_PIPELINE_MOCK_RUNNER_POLISH_OK:{result.AiPipelineMockRunnerPolishOk}",
+            $"AI_PIPELINE_PAYLOAD_PREVIEW_OK:{result.AiPipelinePayloadPreviewOk}",
+            $"AI_PIPELINE_ERROR_DEBUG_EVIDENCE_OK:{result.AiPipelineErrorDebugEvidenceOk}",
         ];
     }
 

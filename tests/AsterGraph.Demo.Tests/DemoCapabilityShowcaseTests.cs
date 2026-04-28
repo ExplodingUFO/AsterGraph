@@ -212,6 +212,9 @@ public sealed class DemoCapabilityShowcaseTests
         Assert.True(result.AiPipelineMockRunnerOk);
         Assert.True(result.AiPipelineRuntimeOverlayOk);
         Assert.True(result.AiPipelineErrorStateOk);
+        Assert.True(result.AiPipelineMockRunnerPolishOk);
+        Assert.True(result.AiPipelinePayloadPreviewOk);
+        Assert.True(result.AiPipelineErrorDebugEvidenceOk);
         Assert.True(result.StartupMs >= 0);
         Assert.True(result.InspectorProjectionMs >= 0);
         Assert.True(result.PluginScanMs >= 0);

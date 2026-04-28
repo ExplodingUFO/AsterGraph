@@ -68,6 +68,9 @@ dotnet run --project src/AsterGraph.Demo/AsterGraph.Demo.csproj --nologo -- --pr
 - `AI_PIPELINE_MOCK_RUNNER_OK:True`
 - `AI_PIPELINE_RUNTIME_OVERLAY_OK:True`
 - `AI_PIPELINE_ERROR_STATE_OK:True`
+- `AI_PIPELINE_MOCK_RUNNER_POLISH_OK:True`
+- `AI_PIPELINE_PAYLOAD_PREVIEW_OK:True`
+- `AI_PIPELINE_ERROR_DEBUG_EVIDENCE_OK:True`
 - `HOST_NATIVE_METRIC:startup_ms=...`
 - `HOST_NATIVE_METRIC:inspector_projection_ms=...`
 - `HOST_NATIVE_METRIC:plugin_scan_ms=...`
