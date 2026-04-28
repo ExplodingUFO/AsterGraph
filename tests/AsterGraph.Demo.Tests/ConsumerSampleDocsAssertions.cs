@@ -94,6 +94,10 @@ internal static class ConsumerSampleDocsAssertions
         Assert.Contains("TOOLBAR_DESCRIPTOR_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("CONTEXT_MENU_DESCRIPTOR_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("COMMAND_DISABLED_REASON_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("NODE_TOOLBAR_CONTRIBUTION_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("EDGE_TOOLBAR_CONTRIBUTION_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("TOOLBAR_CONTRIBUTION_DESCRIPTOR_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("TOOLBAR_CONTRIBUTION_SCOPE_BOUNDARY_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("NAVIGATION_HISTORY_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("SCOPE_BREADCRUMB_NAVIGATION_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("FOCUS_RESTORE_OK:True", contents, StringComparison.Ordinal);

@@ -102,6 +102,10 @@ public sealed record ConsumerSampleProofResult(
     bool ToolbarDescriptorOk = true,
     bool ContextMenuDescriptorOk = true,
     bool CommandDisabledReasonOk = true,
+    bool NodeToolbarContributionOk = true,
+    bool EdgeToolbarContributionOk = true,
+    bool ToolbarContributionDescriptorOk = true,
+    bool ToolbarContributionScopeBoundaryOk = true,
     bool NavigationHistoryOk = true,
     bool ScopeBreadcrumbNavigationOk = true,
     bool FocusRestoreOk = true,
@@ -170,6 +174,10 @@ public sealed record ConsumerSampleProofResult(
         && ConnectionInvalidHoverFeedbackOk
         && ConnectionValidationSupportBundleOk
         && ConnectionValidationScopeBoundaryOk
+        && NodeToolbarContributionOk
+        && EdgeToolbarContributionOk
+        && ToolbarContributionDescriptorOk
+        && ToolbarContributionScopeBoundaryOk
         && NodeSideAuthoringOk
         && CommandSurfaceOk;
 
@@ -248,6 +256,10 @@ public sealed record ConsumerSampleProofResult(
         && ToolbarDescriptorOk
         && ContextMenuDescriptorOk
         && CommandDisabledReasonOk
+        && NodeToolbarContributionOk
+        && EdgeToolbarContributionOk
+        && ToolbarContributionDescriptorOk
+        && ToolbarContributionScopeBoundaryOk
         && NavigationHistoryOk
         && ScopeBreadcrumbNavigationOk
         && FocusRestoreOk
@@ -328,6 +340,10 @@ public sealed record ConsumerSampleProofResult(
         && CommandPaletteGroupingOk
         && CommandPaletteDisabledReasonOk
         && CommandPaletteRecentActionsOk
+        && NodeToolbarContributionOk
+        && EdgeToolbarContributionOk
+        && ToolbarContributionDescriptorOk
+        && ToolbarContributionScopeBoundaryOk
         && NavigationHistoryOk
         && ScopeBreadcrumbNavigationOk
         && FocusRestoreOk
@@ -390,6 +406,7 @@ public sealed record ConsumerSampleProofResult(
         && CommandPaletteGroupingOk
         && CommandPaletteDisabledReasonOk
         && CommandPaletteRecentActionsOk
+        && ToolbarContributionScopeBoundaryOk
         && NavigationHistoryOk
         && ScopeBreadcrumbNavigationOk
         && FocusRestoreOk
@@ -514,6 +531,10 @@ public sealed record ConsumerSampleProofResult(
         $"TOOLBAR_DESCRIPTOR_OK:{ToolbarDescriptorOk}",
         $"CONTEXT_MENU_DESCRIPTOR_OK:{ContextMenuDescriptorOk}",
         $"COMMAND_DISABLED_REASON_OK:{CommandDisabledReasonOk}",
+        $"NODE_TOOLBAR_CONTRIBUTION_OK:{NodeToolbarContributionOk}",
+        $"EDGE_TOOLBAR_CONTRIBUTION_OK:{EdgeToolbarContributionOk}",
+        $"TOOLBAR_CONTRIBUTION_DESCRIPTOR_OK:{ToolbarContributionDescriptorOk}",
+        $"TOOLBAR_CONTRIBUTION_SCOPE_BOUNDARY_OK:{ToolbarContributionScopeBoundaryOk}",
         $"NAVIGATION_HISTORY_OK:{NavigationHistoryOk}",
         $"SCOPE_BREADCRUMB_NAVIGATION_OK:{ScopeBreadcrumbNavigationOk}",
         $"FOCUS_RESTORE_OK:{FocusRestoreOk}",
@@ -909,6 +930,10 @@ public static class ConsumerSampleProof
         bool toolbarDescriptorOk;
         bool contextMenuDescriptorOk;
         bool commandDisabledReasonOk;
+        bool nodeToolbarContributionOk;
+        bool edgeToolbarContributionOk;
+        bool toolbarContributionDescriptorOk;
+        bool toolbarContributionScopeBoundaryOk;
         bool workbenchDefaultsOk;
         bool workbenchHostBuilderHandoffOk;
         bool workbenchPerformanceModeOk;
@@ -957,6 +982,8 @@ public static class ConsumerSampleProof
                 HasCommandPaletteProductivity(capabilityWindow);
             (commandProjectionUnifiedOk, commandPaletteOk, toolbarDescriptorOk, contextMenuDescriptorOk, commandDisabledReasonOk) =
                 HasUnifiedCommandProjection(capabilityWindow, host);
+            (nodeToolbarContributionOk, edgeToolbarContributionOk, toolbarContributionDescriptorOk, toolbarContributionScopeBoundaryOk) =
+                HasToolbarContributions(host, reviewNodeId);
             (
                 workbenchDefaultsOk,
                 workbenchHostBuilderHandoffOk,
@@ -1064,6 +1091,10 @@ public static class ConsumerSampleProof
             ToolbarDescriptorOk: toolbarDescriptorOk,
             ContextMenuDescriptorOk: contextMenuDescriptorOk,
             CommandDisabledReasonOk: commandDisabledReasonOk,
+            NodeToolbarContributionOk: nodeToolbarContributionOk,
+            EdgeToolbarContributionOk: edgeToolbarContributionOk,
+            ToolbarContributionDescriptorOk: toolbarContributionDescriptorOk,
+            ToolbarContributionScopeBoundaryOk: toolbarContributionScopeBoundaryOk,
             StencilGroupingOk: stencilGroupingOk,
             StencilSearchOk: stencilSearchOk,
             StencilRecentsFavoritesOk: stencilRecentsFavoritesOk,
@@ -2966,6 +2997,95 @@ public static class ConsumerSampleProof
             && disabledReasonOk;
         return (unifiedOk, paletteOk, toolbarOk, contextMenuOk, disabledReasonOk);
     }
+
+    private static (bool NodeOk, bool EdgeOk, bool DescriptorOk, bool ScopeBoundaryOk) HasToolbarContributions(
+        ConsumerSampleHost host,
+        string reviewNodeId)
+    {
+        const string connectionId = "consumer-sample-connection-001";
+        host.Session.Commands.TrySetConnectionNoteText(connectionId, "Toolbar contribution proof", updateStatus: false);
+
+        var selection = host.Session.Queries.GetSelectionSnapshot();
+        var nodeContext = GraphEditorToolContextSnapshot.ForNode(
+            reviewNodeId,
+            selection.SelectedNodeIds,
+            selection.PrimarySelectedNodeId);
+        var edgeContext = GraphEditorToolContextSnapshot.ForConnection(
+            connectionId,
+            selection.SelectedNodeIds,
+            selection.PrimarySelectedNodeId);
+
+        var nodeTools = host.Session.Queries.GetToolDescriptors(nodeContext);
+        var edgeTools = host.Session.Queries.GetToolDescriptors(edgeContext);
+        var nodeActions = AsterGraphAuthoringToolActionFactory.CreateNodeActions(
+            host.Session,
+            reviewNodeId,
+            selection.SelectedNodeIds,
+            selection.PrimarySelectedNodeId);
+        var edgeActions = AsterGraphAuthoringToolActionFactory.CreateConnectionActions(
+            host.Session,
+            connectionId,
+            selection.SelectedNodeIds,
+            selection.PrimarySelectedNodeId);
+
+        var nodeOk = HasContributionAction(nodeTools, nodeActions, "node-inspect", "nodes.inspect", "nodeId", reviewNodeId)
+            && HasContributionAction(nodeTools, nodeActions, "node-duplicate", "nodes.duplicate", "nodeId", reviewNodeId)
+            && HasContributionAction(nodeTools, nodeActions, "node-toggle-surface-expansion", "nodes.surface.expand", "nodeId", reviewNodeId);
+        var edgeOk = HasContributionAction(edgeTools, edgeActions, "connection-disconnect", "connections.disconnect", "connectionId", connectionId)
+            && HasContributionAction(edgeTools, edgeActions, "connection-clear-note", "connections.note.set", "connectionId", connectionId);
+        var descriptorOk = AllActionsMatchTools(nodeTools, nodeActions)
+            && AllActionsMatchTools(edgeTools, edgeActions);
+        var scopeBoundaryOk = nodeTools.All(tool => tool.ContextKind == GraphEditorToolContextKind.Node)
+            && edgeTools.All(tool => tool.ContextKind == GraphEditorToolContextKind.Connection)
+            && nodeTools.All(tool => HasInvocationArgument(tool, "nodeId", reviewNodeId) || tool.Id == "node-enter-composite-scope")
+            && edgeTools.All(tool => HasInvocationArgument(tool, "connectionId", connectionId))
+            && host.Session.Queries.GetToolDescriptors(GraphEditorToolContextSnapshot.ForNode("missing-node", [], null)).Count == 0
+            && host.Session.Queries.GetToolDescriptors(GraphEditorToolContextSnapshot.ForConnection("missing-connection", [], null)).Count == 0;
+
+        return (nodeOk, edgeOk, descriptorOk, scopeBoundaryOk);
+    }
+
+    private static bool HasContributionAction(
+        IReadOnlyList<GraphEditorToolDescriptorSnapshot> tools,
+        IReadOnlyList<AsterGraphHostedActionDescriptor> actions,
+        string toolId,
+        string commandId,
+        string argumentName,
+        string argumentValue)
+        => tools.Any(tool =>
+            string.Equals(tool.Id, toolId, StringComparison.Ordinal)
+            && tool.CanExecute
+            && string.Equals(tool.Invocation.CommandId, commandId, StringComparison.Ordinal)
+            && HasInvocationArgument(tool, argumentName, argumentValue))
+        && actions.Any(action =>
+            string.Equals(action.Id, toolId, StringComparison.Ordinal)
+            && action.CanExecute
+            && string.Equals(action.CommandId, commandId, StringComparison.Ordinal)
+            && !string.IsNullOrWhiteSpace(action.Title));
+
+    private static bool AllActionsMatchTools(
+        IReadOnlyList<GraphEditorToolDescriptorSnapshot> tools,
+        IReadOnlyList<AsterGraphHostedActionDescriptor> actions)
+    {
+        var actionMap = actions.ToDictionary(action => action.Id, StringComparer.Ordinal);
+        return tools.Count == actions.Count
+            && tools.All(tool =>
+                actionMap.TryGetValue(tool.Id, out var action)
+                && string.Equals(action.Title, tool.Title, StringComparison.Ordinal)
+                && string.Equals(action.Group, tool.Group, StringComparison.Ordinal)
+                && string.Equals(action.IconKey, tool.IconKey, StringComparison.Ordinal)
+                && action.CanExecute == tool.CanExecute
+                && action.CommandSource == tool.Source
+                && string.Equals(action.CommandId, tool.Invocation.CommandId, StringComparison.Ordinal));
+    }
+
+    private static bool HasInvocationArgument(
+        GraphEditorToolDescriptorSnapshot tool,
+        string argumentName,
+        string argumentValue)
+        => tool.Invocation.Arguments.Any(argument =>
+            string.Equals(argument.Name, argumentName, StringComparison.Ordinal)
+            && string.Equals(argument.Value, argumentValue, StringComparison.Ordinal));
 
     private static GraphEditorMenuItemDescriptorSnapshot? FindMenuItem(
         IEnumerable<GraphEditorMenuItemDescriptorSnapshot> items,

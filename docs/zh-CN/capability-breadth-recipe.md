@@ -13,7 +13,7 @@
 
 - 第 1 步：通过 `ConsumerSample.Avalonia`、`IGraphEditorSession.Queries.GetNodeTemplateSnapshots()` 和 stock hosted library chrome 投影 searchable grouped stencil。
 - 第 2 步：通过 `IGraphEditorSession.Commands.TryExportSceneAsSvg(...)`、`IGraphEditorSession.Commands.TryExportSceneAsImage(...)` 和 `GraphEditorSceneImageExportFormat.Png` 收口 SVG 加 raster export breadth。
-- 第 3 步：通过 `AsterGraphAuthoringToolActionFactory.CreateCommandSurfaceActions(...)`、`IGraphEditorSession.Queries.GetToolDescriptors(...)` 和 `AsterGraph.ConsumerSample.Avalonia -- --proof` 投影共享 node/edge quick tools。
+- 第 3 步：通过 `AsterGraphAuthoringToolActionFactory.CreateNodeActions(...)`、`AsterGraphAuthoringToolActionFactory.CreateConnectionActions(...)`、`AsterGraphAuthoringToolActionFactory.CreateCommandSurfaceActions(...)`、`IGraphEditorSession.Queries.GetToolDescriptors(...)` 和 `AsterGraph.ConsumerSample.Avalonia -- --proof` 投影共享 node/edge quick tools。
 
 ## Proof 合同
 
@@ -34,6 +34,10 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 - `CAPABILITY_BREADTH_EXPORT_OK:True`
 - `CAPABILITY_BREADTH_NODE_QUICK_TOOLS_OK:True`
 - `CAPABILITY_BREADTH_EDGE_QUICK_TOOLS_OK:True`
+- `NODE_TOOLBAR_CONTRIBUTION_OK:True`
+- `EDGE_TOOLBAR_CONTRIBUTION_OK:True`
+- `TOOLBAR_CONTRIBUTION_DESCRIPTOR_OK:True`
+- `TOOLBAR_CONTRIBUTION_SCOPE_BOUNDARY_OK:True`
 - `CAPABILITY_BREADTH_OK:True`
 
 ## 相关文档

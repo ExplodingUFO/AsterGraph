@@ -171,6 +171,10 @@ public sealed class ConsumerSampleProofTests
         Assert.True(result.ToolbarDescriptorOk);
         Assert.True(result.ContextMenuDescriptorOk);
         Assert.True(result.CommandDisabledReasonOk);
+        Assert.True(result.NodeToolbarContributionOk);
+        Assert.True(result.EdgeToolbarContributionOk);
+        Assert.True(result.ToolbarContributionDescriptorOk);
+        Assert.True(result.ToolbarContributionScopeBoundaryOk);
         Assert.True(result.NavigationHistoryOk);
         Assert.True(result.ScopeBreadcrumbNavigationOk);
         Assert.True(result.FocusRestoreOk);
@@ -244,6 +248,10 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(result.ProofLines, line => line == "TOOLBAR_DESCRIPTOR_OK:True");
         Assert.Contains(result.ProofLines, line => line == "CONTEXT_MENU_DESCRIPTOR_OK:True");
         Assert.Contains(result.ProofLines, line => line == "COMMAND_DISABLED_REASON_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "NODE_TOOLBAR_CONTRIBUTION_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "EDGE_TOOLBAR_CONTRIBUTION_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "TOOLBAR_CONTRIBUTION_DESCRIPTOR_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "TOOLBAR_CONTRIBUTION_SCOPE_BOUNDARY_OK:True");
         Assert.Contains(result.ProofLines, line => line == "NAVIGATION_HISTORY_OK:True");
         Assert.Contains(result.ProofLines, line => line == "SCOPE_BREADCRUMB_NAVIGATION_OK:True");
         Assert.Contains(result.ProofLines, line => line == "FOCUS_RESTORE_OK:True");

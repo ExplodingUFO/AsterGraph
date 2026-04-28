@@ -13,7 +13,7 @@ Pair it with `ConsumerSample.Avalonia`, because that is the defended hosted proo
 
 - Step 1: Project searchable grouped stencil from `ConsumerSample.Avalonia` through `IGraphEditorSession.Queries.GetNodeTemplateSnapshots()` and the stock hosted library chrome.
 - Step 2: Close SVG plus raster export breadth through `IGraphEditorSession.Commands.TryExportSceneAsSvg(...)`, `IGraphEditorSession.Commands.TryExportSceneAsImage(...)`, and `GraphEditorSceneImageExportFormat.Png`.
-- Step 3: Project shared node and edge quick tools through `AsterGraphAuthoringToolActionFactory.CreateCommandSurfaceActions(...)`, `IGraphEditorSession.Queries.GetToolDescriptors(...)`, and `AsterGraph.ConsumerSample.Avalonia -- --proof`.
+- Step 3: Project shared node and edge quick tools through `AsterGraphAuthoringToolActionFactory.CreateNodeActions(...)`, `AsterGraphAuthoringToolActionFactory.CreateConnectionActions(...)`, `AsterGraphAuthoringToolActionFactory.CreateCommandSurfaceActions(...)`, `IGraphEditorSession.Queries.GetToolDescriptors(...)`, and `AsterGraph.ConsumerSample.Avalonia -- --proof`.
 
 ## Proof Contract
 
@@ -34,6 +34,10 @@ Expected capability-breadth proof markers:
 - `CAPABILITY_BREADTH_EXPORT_OK:True`
 - `CAPABILITY_BREADTH_NODE_QUICK_TOOLS_OK:True`
 - `CAPABILITY_BREADTH_EDGE_QUICK_TOOLS_OK:True`
+- `NODE_TOOLBAR_CONTRIBUTION_OK:True`
+- `EDGE_TOOLBAR_CONTRIBUTION_OK:True`
+- `TOOLBAR_CONTRIBUTION_DESCRIPTOR_OK:True`
+- `TOOLBAR_CONTRIBUTION_SCOPE_BOUNDARY_OK:True`
 - `CAPABILITY_BREADTH_OK:True`
 
 ## Related Docs

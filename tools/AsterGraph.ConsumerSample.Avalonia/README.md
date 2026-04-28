@@ -92,6 +92,10 @@ Expected proof markers:
 - `TOOLBAR_DESCRIPTOR_OK:True`
 - `CONTEXT_MENU_DESCRIPTOR_OK:True`
 - `COMMAND_DISABLED_REASON_OK:True`
+- `NODE_TOOLBAR_CONTRIBUTION_OK:True`
+- `EDGE_TOOLBAR_CONTRIBUTION_OK:True`
+- `TOOLBAR_CONTRIBUTION_DESCRIPTOR_OK:True`
+- `TOOLBAR_CONTRIBUTION_SCOPE_BOUNDARY_OK:True`
 - `NAVIGATION_HISTORY_OK:True`
 - `SCOPE_BREADCRUMB_NAVIGATION_OK:True`
 - `FOCUS_RESTORE_OK:True`
@@ -135,6 +139,10 @@ Expected proof markers:
 - `EXPORT_DOCS_ALIGNMENT_OK:True`
 - `CAPABILITY_BREADTH_NODE_QUICK_TOOLS_OK:True`
 - `CAPABILITY_BREADTH_EDGE_QUICK_TOOLS_OK:True`
+- `NODE_TOOLBAR_CONTRIBUTION_OK:True`
+- `EDGE_TOOLBAR_CONTRIBUTION_OK:True`
+- `TOOLBAR_CONTRIBUTION_DESCRIPTOR_OK:True`
+- `TOOLBAR_CONTRIBUTION_SCOPE_BOUNDARY_OK:True`
 - `CAPABILITY_BREADTH_OK:True`
 - `HOSTED_ACCESSIBILITY_BASELINE_OK:True`
 - `HOSTED_ACCESSIBILITY_FOCUS_OK:True`
@@ -242,7 +250,7 @@ Use this sample to copy the host-owned seams, not the sample-specific presentati
 
 - Keep searchable grouped stencil on the stock hosted view and drive it from `IGraphEditorSession.Queries.GetNodeTemplateSnapshots()`.
 - Keep scene export on `IGraphEditorSession.Commands.TryExportSceneAsSvg(...)` plus `IGraphEditorSession.Commands.TryExportSceneAsImage(...)` for `GraphEditorSceneImageExportFormat.Png` and `GraphEditorSceneImageExportFormat.Jpeg`; the hosted export panel proves SVG/PNG/JPEG discovery with raster scope, progress, and cancel evidence.
-- Keep node and edge quick tools on the shared tool route through `IGraphEditorSession.Queries.GetToolDescriptors(...)` and `AsterGraphAuthoringToolActionFactory.CreateCommandSurfaceActions(...)`.
+- Keep node and edge quick tools on the shared tool route through `IGraphEditorSession.Queries.GetToolDescriptors(...)`, `AsterGraphAuthoringToolActionFactory.CreateNodeActions(...)`, `AsterGraphAuthoringToolActionFactory.CreateConnectionActions(...)`, and `AsterGraphAuthoringToolActionFactory.CreateCommandSurfaceActions(...)`.
 - Close the route with [Capability Breadth Recipe](../../docs/en/capability-breadth-recipe.md) and `AsterGraph.ConsumerSample.Avalonia -- --proof`, expecting `CAPABILITY_BREADTH_OK:True`.
 
 ### Copyable Widened Surface Performance Handoff
