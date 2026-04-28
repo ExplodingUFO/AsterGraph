@@ -144,6 +144,10 @@ Expected proof markers:
 - `GRAPH_SNIPPET_INSERT_OK:True`
 - `WORKBENCH_DEFAULTS_OK:True`
 - `WORKBENCH_HOST_BUILDER_HANDOFF_OK:True`
+- `WORKBENCH_PERFORMANCE_MODE_OK:True`
+- `BALANCED_MODE_DEFAULT_OK:True`
+- `WORKBENCH_LOD_POLICY_OK:True`
+- `PERFORMANCE_MODE_SCOPE_BOUNDARY_OK:True`
 - `WORKBENCH_SCOPE_BOUNDARY_OK:True`
 - `FIVE_MINUTE_ONBOARDING_OK:True`
 - `ONBOARDING_CONFIGURATION_OK:True`
@@ -224,7 +228,7 @@ Use this sample to copy the host-owned seams, not the sample-specific presentati
 - Keep writes on the shared session command path through `TrySetSelectedNodeParameterValue(...)` or `TrySetNodeParameterValue(...)`.
 - Project host actions from `GetCommandDescriptors()` and close the route with `AsterGraph.ConsumerSample.Avalonia -- --proof`, expecting `AUTHORING_SURFACE_OK:True`.
 - Keep snippets host-owned: expose sample snippet ids through `ConsumerSampleHost.SnippetCatalog`, insert them through existing session commands, and expect `GRAPH_SNIPPET_CATALOG_OK:True` plus `GRAPH_SNIPPET_INSERT_OK:True`.
-- Keep the default workbench hosted-only: use `AsterGraphHostBuilder.UseDefaultWorkbench()` when the stock toolbar, command palette, stencil, inspector, mini-map, fragment, diagnostics, and status chrome are enough; expect `WORKBENCH_DEFAULTS_OK:True`, `WORKBENCH_HOST_BUILDER_HANDOFF_OK:True`, and `WORKBENCH_SCOPE_BOUNDARY_OK:True`.
+- Keep the default workbench hosted-only: use `AsterGraphHostBuilder.UseDefaultWorkbench()` when the stock toolbar, command palette, stencil, inspector, mini-map, fragment, diagnostics, and status chrome are enough; expect `WORKBENCH_DEFAULTS_OK:True`, `WORKBENCH_HOST_BUILDER_HANDOFF_OK:True`, `WORKBENCH_PERFORMANCE_MODE_OK:True`, `BALANCED_MODE_DEFAULT_OK:True`, `WORKBENCH_LOD_POLICY_OK:True`, `PERFORMANCE_MODE_SCOPE_BOUNDARY_OK:True`, and `WORKBENCH_SCOPE_BOUNDARY_OK:True`.
 
 ### Copyable Capability Breadth Handoff
 
@@ -235,7 +239,7 @@ Use this sample to copy the host-owned seams, not the sample-specific presentati
 
 ### Copyable Widened Surface Performance Handoff
 
-- Keep widened hosted metrics on `AsterGraph.ConsumerSample.Avalonia -- --proof` through `HOST_NATIVE_METRIC:stencil_search_ms`, `HOST_NATIVE_METRIC:command_surface_refresh_ms`, `HOST_NATIVE_METRIC:node_tool_projection_ms`, and `HOST_NATIVE_METRIC:edge_tool_projection_ms`, and expect `WIDENED_SURFACE_PERFORMANCE_OK:True`.
+- Keep widened hosted metrics on `AsterGraph.ConsumerSample.Avalonia -- --proof` through `HOST_NATIVE_METRIC:stencil_search_ms`, `HOST_NATIVE_METRIC:command_surface_refresh_ms`, `HOST_NATIVE_METRIC:node_tool_projection_ms`, and `HOST_NATIVE_METRIC:edge_tool_projection_ms`, and expect `WIDENED_SURFACE_PERFORMANCE_OK:True` plus the workbench performance-mode markers.
 - Keep defended `large` authoring and export budgets on `ScaleSmoke` through `SCALE_AUTHORING_BUDGET_OK:large:True:none` and `SCALE_EXPORT_BUDGET_OK:large:True:none`.
 - Close the tuning handoff with [Widened Surface Performance Recipe](../../docs/en/widened-surface-performance-recipe.md) instead of inventing a new proof lane.
 

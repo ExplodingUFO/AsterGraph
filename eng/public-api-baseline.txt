@@ -37,6 +37,7 @@ C:AsterGraph.Avalonia.Hosting.AsterGraphHostedActionProjection(System.Collection
 C:AsterGraph.Avalonia.Hosting.AsterGraphInspectorViewOptions()
 C:AsterGraph.Avalonia.Hosting.AsterGraphMiniMapViewOptions()
 C:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions()
+C:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformancePolicy(AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformanceMode,System.Int32,System.Boolean,System.Boolean,System.Boolean,System.Int32)
 C:AsterGraph.Avalonia.Menus.GraphContextMenuPresenter()
 C:AsterGraph.Avalonia.Presentation.AsterGraphPresentationOptions()
 C:AsterGraph.Avalonia.Presentation.DefaultGraphInspectorPresenter()
@@ -268,6 +269,7 @@ F:AsterGraph.Avalonia.Controls.GraphEditorView.IsInspectorChromeVisibleProperty:
 F:AsterGraph.Avalonia.Controls.GraphEditorView.IsLibraryChromeVisibleProperty:Avalonia.StyledProperty<System.Boolean>
 F:AsterGraph.Avalonia.Controls.GraphEditorView.IsStatusChromeVisibleProperty:Avalonia.StyledProperty<System.Boolean>
 F:AsterGraph.Avalonia.Controls.GraphEditorView.PresentationProperty:Avalonia.StyledProperty<AsterGraph.Avalonia.Presentation.AsterGraphPresentationOptions>
+F:AsterGraph.Avalonia.Controls.GraphEditorView.WorkbenchPerformanceModeProperty:Avalonia.StyledProperty<AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformanceMode>
 F:AsterGraph.Avalonia.Controls.GraphEditorViewChromeMode.CanvasOnly:AsterGraph.Avalonia.Controls.GraphEditorViewChromeMode
 F:AsterGraph.Avalonia.Controls.GraphEditorViewChromeMode.Default:AsterGraph.Avalonia.Controls.GraphEditorViewChromeMode
 F:AsterGraph.Avalonia.Controls.GraphInspectorView.EditorProperty:Avalonia.StyledProperty<AsterGraph.Editor.ViewModels.GraphEditorViewModel>
@@ -291,6 +293,9 @@ F:AsterGraph.Avalonia.Controls.NodeParameterEditorHost.NodeParameterEditorRegist
 F:AsterGraph.Avalonia.Controls.NodeParameterEditorHost.ParameterProperty:Avalonia.StyledProperty<AsterGraph.Editor.ViewModels.NodeParameterViewModel>
 F:AsterGraph.Avalonia.Controls.NodeParameterEditorHost.TemplateKeyProperty:Avalonia.StyledProperty<System.String>
 F:AsterGraph.Avalonia.Controls.NodeParameterEditorHost.UsageProperty:Avalonia.StyledProperty<AsterGraph.Avalonia.Presentation.NodeParameterEditorUsage>
+F:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformanceMode.Balanced:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformanceMode
+F:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformanceMode.Quality:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformanceMode
+F:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformanceMode.Throughput:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformanceMode
 F:AsterGraph.Avalonia.Presentation.GraphNodeResizeHandleKind.Bottom:AsterGraph.Avalonia.Presentation.GraphNodeResizeHandleKind
 F:AsterGraph.Avalonia.Presentation.GraphNodeResizeHandleKind.BottomRight:AsterGraph.Avalonia.Presentation.GraphNodeResizeHandleKind
 F:AsterGraph.Avalonia.Presentation.GraphNodeResizeHandleKind.Right:AsterGraph.Avalonia.Presentation.GraphNodeResizeHandleKind
@@ -652,6 +657,13 @@ M:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions.Equals(AsterGraph.Avalo
 M:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions.Equals(System.Object):System.Boolean
 M:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions.GetHashCode():System.Int32
 M:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions.ToString():System.String
+M:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformancePolicy.<Clone>$():AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformancePolicy
+M:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformancePolicy.Deconstruct(out AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformanceMode&,out System.Int32&,out System.Boolean&,out System.Boolean&,out System.Boolean&,out System.Int32&):System.Void
+M:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformancePolicy.Equals(AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformancePolicy):System.Boolean
+M:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformancePolicy.Equals(System.Object):System.Boolean
+M:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformancePolicy.FromMode(AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformanceMode):AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformancePolicy
+M:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformancePolicy.GetHashCode():System.Int32
+M:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformancePolicy.ToString():System.String
 M:AsterGraph.Avalonia.Menus.GraphContextMenuPresenter.Open(Avalonia.Controls.Control,System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Menus.GraphEditorMenuItemDescriptorSnapshot>,AsterGraph.Editor.Runtime.IGraphEditorCommands,AsterGraph.Abstractions.Styling.ContextMenuStyleOptions):System.Void
 M:AsterGraph.Avalonia.Menus.GraphContextMenuPresenter.Open(Avalonia.Controls.Control,System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Menus.MenuItemDescriptor>,AsterGraph.Abstractions.Styling.ContextMenuStyleOptions):System.Void
 M:AsterGraph.Avalonia.Presentation.AsterGraphPresentationOptions.<Clone>$():AsterGraph.Avalonia.Presentation.AsterGraphPresentationOptions
@@ -2059,6 +2071,7 @@ P:AsterGraph.Abstractions.Styling.ShellStyleOptions.PanelBorderHex:System.String
 P:AsterGraph.Abstractions.Styling.ShellStyleOptions.TitleFontSize:System.Double:get,set
 P:AsterGraph.Avalonia.Controls.GraphEditorView.ChromeMode:AsterGraph.Avalonia.Controls.GraphEditorViewChromeMode:get,set
 P:AsterGraph.Avalonia.Controls.GraphEditorView.CommandShortcutPolicy:AsterGraph.Avalonia.Hosting.AsterGraphCommandShortcutPolicy:get,set
+P:AsterGraph.Avalonia.Controls.GraphEditorView.CurrentWorkbenchPerformancePolicy:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformancePolicy:get
 P:AsterGraph.Avalonia.Controls.GraphEditorView.Editor:AsterGraph.Editor.ViewModels.GraphEditorViewModel:get,set
 P:AsterGraph.Avalonia.Controls.GraphEditorView.EnableAltLeftDragPanning:System.Boolean:get,set
 P:AsterGraph.Avalonia.Controls.GraphEditorView.EnableDefaultContextMenu:System.Boolean:get,set
@@ -2068,6 +2081,7 @@ P:AsterGraph.Avalonia.Controls.GraphEditorView.IsInspectorChromeVisible:System.B
 P:AsterGraph.Avalonia.Controls.GraphEditorView.IsLibraryChromeVisible:System.Boolean:get,set
 P:AsterGraph.Avalonia.Controls.GraphEditorView.IsStatusChromeVisible:System.Boolean:get,set
 P:AsterGraph.Avalonia.Controls.GraphEditorView.Presentation:AsterGraph.Avalonia.Presentation.AsterGraphPresentationOptions:get,set
+P:AsterGraph.Avalonia.Controls.GraphEditorView.WorkbenchPerformanceMode:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformanceMode:get,set
 P:AsterGraph.Avalonia.Controls.GraphInspectorView.Editor:AsterGraph.Editor.ViewModels.GraphEditorViewModel:get,set
 P:AsterGraph.Avalonia.Controls.GraphInspectorView.InspectorPresenter:AsterGraph.Avalonia.Presentation.IGraphInspectorPresenter:get,set
 P:AsterGraph.Avalonia.Controls.GraphInspectorView.NodeParameterEditorRegistry:AsterGraph.Avalonia.Presentation.INodeParameterEditorRegistry:get,set
@@ -2122,10 +2136,18 @@ P:AsterGraph.Avalonia.Hosting.AsterGraphMiniMapViewOptions.StyleOptions:AsterGra
 P:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions.Default:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions:get
 P:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions.EnableAltLeftDragPanning:System.Boolean:get,set
 P:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions.EnableDefaultWheelViewportGestures:System.Boolean:get,set
+P:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions.PerformanceMode:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformanceMode:get,set
+P:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions.PerformancePolicy:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformancePolicy:get
 P:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions.ShowHeaderChrome:System.Boolean:get,set
 P:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions.ShowInspector:System.Boolean:get,set
 P:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions.ShowNodePalette:System.Boolean:get,set
 P:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions.ShowStatus:System.Boolean:get,set
+P:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformancePolicy.CommandRefreshBatchMilliseconds:System.Int32:get,set
+P:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformancePolicy.Mode:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformanceMode:get,set
+P:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformancePolicy.ProjectAdvancedInspectorByDefault:System.Boolean:get,set
+P:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformancePolicy.ProjectHoveredToolbars:System.Boolean:get,set
+P:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformancePolicy.ProjectMiniMapContinuously:System.Boolean:get,set
+P:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformancePolicy.StencilCardsPerSectionLimit:System.Int32:get,set
 P:AsterGraph.Avalonia.Presentation.AsterGraphPresentationOptions.ContextMenuPresenter:AsterGraph.Avalonia.Presentation.IGraphContextMenuPresenter:get,set
 P:AsterGraph.Avalonia.Presentation.AsterGraphPresentationOptions.InspectorPresenter:AsterGraph.Avalonia.Presentation.IGraphInspectorPresenter:get,set
 P:AsterGraph.Avalonia.Presentation.AsterGraphPresentationOptions.MiniMapPresenter:AsterGraph.Avalonia.Presentation.IGraphMiniMapPresenter:get,set
@@ -3241,6 +3263,7 @@ T:class AsterGraph.Avalonia.Hosting.AsterGraphHostedActionProjection
 T:class AsterGraph.Avalonia.Hosting.AsterGraphInspectorViewOptions
 T:class AsterGraph.Avalonia.Hosting.AsterGraphMiniMapViewOptions
 T:class AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions
+T:class AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformancePolicy
 T:class AsterGraph.Avalonia.Menus.GraphContextMenuPresenter
 T:class AsterGraph.Avalonia.Presentation.AsterGraphPresentationOptions
 T:class AsterGraph.Avalonia.Presentation.DefaultGraphInspectorPresenter
@@ -3411,6 +3434,7 @@ T:class CompiledAvaloniaXaml.!XamlLoader
 T:enum AsterGraph.Abstractions.Compatibility.PortCompatibilityKind
 T:enum AsterGraph.Abstractions.Definitions.ParameterEditorKind
 T:enum AsterGraph.Avalonia.Controls.GraphEditorViewChromeMode
+T:enum AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformanceMode
 T:enum AsterGraph.Avalonia.Presentation.GraphNodeResizeHandleKind
 T:enum AsterGraph.Avalonia.Presentation.GraphResizeFeedbackHandle
 T:enum AsterGraph.Avalonia.Presentation.GraphResizeFeedbackSurfaceKind

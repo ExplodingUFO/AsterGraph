@@ -129,7 +129,11 @@ public sealed record ConsumerSampleProofResult(
     bool GraphSnippetCatalogOk = true,
     bool GraphSnippetInsertOk = true,
     bool WorkbenchDefaultsOk = true,
-    bool WorkbenchHostBuilderHandoffOk = true)
+    bool WorkbenchHostBuilderHandoffOk = true,
+    bool WorkbenchPerformanceModeOk = true,
+    bool BalancedModeDefaultOk = true,
+    bool WorkbenchLodPolicyOk = true,
+    bool PerformanceModeScopeBoundaryOk = true)
 {
     public bool AuthoringSurfaceOk
         => ParameterProjectionOk
@@ -170,6 +174,10 @@ public sealed record ConsumerSampleProofResult(
     public bool WidenedSurfacePerformanceOk
         => CommandSurfaceOk
         && CapabilityBreadthOk
+        && WorkbenchPerformanceModeOk
+        && BalancedModeDefaultOk
+        && WorkbenchLodPolicyOk
+        && PerformanceModeScopeBoundaryOk
         && StencilSearchMs >= 0
         && CommandSurfaceRefreshMs >= 0
         && NodeToolProjectionMs >= 0
@@ -242,6 +250,10 @@ public sealed record ConsumerSampleProofResult(
         && GraphSnippetInsertOk
         && WorkbenchDefaultsOk
         && WorkbenchHostBuilderHandoffOk
+        && WorkbenchPerformanceModeOk
+        && BalancedModeDefaultOk
+        && WorkbenchLodPolicyOk
+        && PerformanceModeScopeBoundaryOk
         && WorkbenchScopeBoundaryOk
         && NodeCount > 0
         && (FeatureDescriptorIds?.Count > 0);
@@ -488,6 +500,10 @@ public sealed record ConsumerSampleProofResult(
         $"GRAPH_SNIPPET_INSERT_OK:{GraphSnippetInsertOk}",
         $"WORKBENCH_DEFAULTS_OK:{WorkbenchDefaultsOk}",
         $"WORKBENCH_HOST_BUILDER_HANDOFF_OK:{WorkbenchHostBuilderHandoffOk}",
+        $"WORKBENCH_PERFORMANCE_MODE_OK:{WorkbenchPerformanceModeOk}",
+        $"BALANCED_MODE_DEFAULT_OK:{BalancedModeDefaultOk}",
+        $"WORKBENCH_LOD_POLICY_OK:{WorkbenchLodPolicyOk}",
+        $"PERFORMANCE_MODE_SCOPE_BOUNDARY_OK:{PerformanceModeScopeBoundaryOk}",
         $"WORKBENCH_SCOPE_BOUNDARY_OK:{WorkbenchScopeBoundaryOk}",
         $"AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:{NodeSideAuthoringOk}",
         $"AUTHORING_SURFACE_COMMAND_PROJECTION_OK:{CommandSurfaceOk}",
@@ -846,6 +862,10 @@ public static class ConsumerSampleProof
         bool commandDisabledReasonOk;
         bool workbenchDefaultsOk;
         bool workbenchHostBuilderHandoffOk;
+        bool workbenchPerformanceModeOk;
+        bool balancedModeDefaultOk;
+        bool workbenchLodPolicyOk;
+        bool performanceModeScopeBoundaryOk;
         try
         {
             capabilityWindow.Show();
@@ -884,7 +904,14 @@ public static class ConsumerSampleProof
                 HasCommandPaletteProductivity(capabilityWindow);
             (commandProjectionUnifiedOk, commandPaletteOk, toolbarDescriptorOk, contextMenuDescriptorOk, commandDisabledReasonOk) =
                 HasUnifiedCommandProjection(capabilityWindow, host);
-            (workbenchDefaultsOk, workbenchHostBuilderHandoffOk) = HasWorkbenchDefaults(host);
+            (
+                workbenchDefaultsOk,
+                workbenchHostBuilderHandoffOk,
+                workbenchPerformanceModeOk,
+                balancedModeDefaultOk,
+                workbenchLodPolicyOk,
+                performanceModeScopeBoundaryOk) =
+                HasWorkbenchDefaults(host);
 
             host.SelectNode(reviewNodeId);
             FlushUi();
@@ -1034,10 +1061,20 @@ public static class ConsumerSampleProof
             GraphSnippetCatalogOk: graphSnippetCatalogOk,
             GraphSnippetInsertOk: graphSnippetInsertOk,
             WorkbenchDefaultsOk: workbenchDefaultsOk,
-            WorkbenchHostBuilderHandoffOk: workbenchHostBuilderHandoffOk);
+            WorkbenchHostBuilderHandoffOk: workbenchHostBuilderHandoffOk,
+            WorkbenchPerformanceModeOk: workbenchPerformanceModeOk,
+            BalancedModeDefaultOk: balancedModeDefaultOk,
+            WorkbenchLodPolicyOk: workbenchLodPolicyOk,
+            PerformanceModeScopeBoundaryOk: performanceModeScopeBoundaryOk);
     }
 
-    private static (bool DefaultsOk, bool HandoffOk) HasWorkbenchDefaults(ConsumerSampleHost host)
+    private static (
+        bool DefaultsOk,
+        bool HandoffOk,
+        bool PerformanceModeOk,
+        bool BalancedDefaultOk,
+        bool LodPolicyOk,
+        bool ScopeBoundaryOk) HasWorkbenchDefaults(ConsumerSampleHost host)
     {
         var builder = AsterGraphHostBuilder
             .Create()
@@ -1054,7 +1091,8 @@ public static class ConsumerSampleProof
             && options.Workbench.ShowInspector
             && options.Workbench.ShowStatus
             && options.Workbench.EnableDefaultWheelViewportGestures
-            && options.Workbench.EnableAltLeftDragPanning;
+            && options.Workbench.EnableAltLeftDragPanning
+            && options.Workbench.PerformanceMode == AsterGraphWorkbenchPerformanceMode.Balanced;
 
         var handoffOk = ReferenceEquals(host.Editor, options.Editor)
             && ReferenceEquals(host.Editor, view.Editor)
@@ -1066,9 +1104,34 @@ public static class ConsumerSampleProof
             && view.EnableDefaultContextMenu
             && view.CommandShortcutPolicy == AsterGraphCommandShortcutPolicy.Default
             && view.EnableDefaultWheelViewportGestures
-            && view.EnableAltLeftDragPanning;
+            && view.EnableAltLeftDragPanning
+            && view.WorkbenchPerformanceMode == AsterGraphWorkbenchPerformanceMode.Balanced;
 
-        return (defaultsOk, handoffOk);
+        var quality = AsterGraphWorkbenchPerformancePolicy.FromMode(AsterGraphWorkbenchPerformanceMode.Quality);
+        var balanced = AsterGraphWorkbenchPerformancePolicy.FromMode(AsterGraphWorkbenchPerformanceMode.Balanced);
+        var throughput = AsterGraphWorkbenchPerformancePolicy.FromMode(AsterGraphWorkbenchPerformanceMode.Throughput);
+        var throughputView = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOptions
+        {
+            Editor = host.Editor,
+            Workbench = AsterGraphWorkbenchOptions.Default with
+            {
+                PerformanceMode = AsterGraphWorkbenchPerformanceMode.Throughput,
+            },
+        });
+
+        var performanceModeOk = Enum.GetValues<AsterGraphWorkbenchPerformanceMode>().Length == 3
+            && throughputView.WorkbenchPerformanceMode == AsterGraphWorkbenchPerformanceMode.Throughput;
+        var balancedDefaultOk = AsterGraphWorkbenchOptions.Default.PerformanceMode == AsterGraphWorkbenchPerformanceMode.Balanced
+            && AsterGraphWorkbenchOptions.Default.PerformancePolicy.Mode == AsterGraphWorkbenchPerformanceMode.Balanced;
+        var lodPolicyOk = quality.StencilCardsPerSectionLimit > balanced.StencilCardsPerSectionLimit
+            && balanced.StencilCardsPerSectionLimit > throughput.StencilCardsPerSectionLimit
+            && quality.ProjectMiniMapContinuously
+            && !throughput.ProjectMiniMapContinuously
+            && throughput.CommandRefreshBatchMilliseconds > balanced.CommandRefreshBatchMilliseconds;
+        var scopeBoundaryOk = typeof(AsterGraphWorkbenchPerformanceMode).Namespace == "AsterGraph.Avalonia.Hosting"
+            && typeof(AsterGraphWorkbenchPerformancePolicy).Namespace == "AsterGraph.Avalonia.Hosting";
+
+        return (defaultsOk, handoffOk, performanceModeOk, balancedDefaultOk, lodPolicyOk, scopeBoundaryOk);
     }
 
     private static (bool NodeOk, bool PortOk, bool ParameterOk, bool RuleOk, bool ThinWrapperOk) HasAuthoringDefinitionBuilders()

@@ -37,6 +37,7 @@ public static class AsterGraphAvaloniaViewFactory
             CommandShortcutPolicy = options.CommandShortcutPolicy,
             EnableDefaultWheelViewportGestures = workbench.EnableDefaultWheelViewportGestures,
             EnableAltLeftDragPanning = workbench.EnableAltLeftDragPanning,
+            WorkbenchPerformanceMode = workbench.PerformanceMode,
             Presentation = options.Presentation,
         };
     }

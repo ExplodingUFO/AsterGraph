@@ -263,6 +263,10 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(result.ProofLines, line => line == "GRAPH_SNIPPET_INSERT_OK:True");
         Assert.Contains(result.ProofLines, line => line == "WORKBENCH_DEFAULTS_OK:True");
         Assert.Contains(result.ProofLines, line => line == "WORKBENCH_HOST_BUILDER_HANDOFF_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "WORKBENCH_PERFORMANCE_MODE_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "BALANCED_MODE_DEFAULT_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "WORKBENCH_LOD_POLICY_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "PERFORMANCE_MODE_SCOPE_BOUNDARY_OK:True");
         Assert.Contains(result.ProofLines, line => line == "WORKBENCH_SCOPE_BOUNDARY_OK:True");
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:True");
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_SURFACE_COMMAND_PROJECTION_OK:True");
@@ -751,6 +755,10 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(proofLines, line => line == "HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True");
         Assert.Contains(proofLines, line => line == "HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True");
         Assert.Contains(proofLines, line => line == "HOSTED_ACCESSIBILITY_OK:True");
+        Assert.Contains(proofLines, line => line == "WORKBENCH_PERFORMANCE_MODE_OK:True");
+        Assert.Contains(proofLines, line => line == "BALANCED_MODE_DEFAULT_OK:True");
+        Assert.Contains(proofLines, line => line == "WORKBENCH_LOD_POLICY_OK:True");
+        Assert.Contains(proofLines, line => line == "PERFORMANCE_MODE_SCOPE_BOUNDARY_OK:True");
         Assert.Contains(proofLines, line => line == "WIDENED_SURFACE_PERFORMANCE_OK:True");
         Assert.Contains(proofLines, line => line == "CONSUMER_SAMPLE_SCENARIO_GRAPH_OK:True");
         Assert.Contains(proofLines, line => line == "CONSUMER_SAMPLE_HOST_OWNED_ACTIONS_OK:True");

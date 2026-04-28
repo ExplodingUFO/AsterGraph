@@ -65,6 +65,8 @@ support bundle 是一个本地 JSON 文件，顶层字段固定为：
 
 Authoring builder proof 还应该包含 `NODE_DEFINITION_BUILDER_OK:True`、`PORT_DEFINITION_BUILDER_OK:True`、`PARAMETER_DEFINITION_BUILDER_OK:True`、`CONNECTION_RULE_BUILDER_OK:True` 和 `AUTHORING_BUILDER_THIN_WRAPPER_OK:True`，证明 convenience builders 只落到现有 DTO。
 
+Hosted workbench performance proof 还应该包含 `WORKBENCH_PERFORMANCE_MODE_OK:True`、`BALANCED_MODE_DEFAULT_OK:True`、`WORKBENCH_LOD_POLICY_OK:True` 和 `PERFORMANCE_MODE_SCOPE_BOUNDARY_OK:True`，证明 performance mode 只是 hosted projection policy。
+
 onboarding proof 行还应该包含 `CONSUMER_SAMPLE_SCENARIO_GRAPH_OK:True`、`CONSUMER_SAMPLE_HOST_OWNED_ACTIONS_OK:True`、`CONSUMER_SAMPLE_SUPPORT_BUNDLE_READY_OK:True`、`GRAPH_VALIDATION_FEEDBACK_OK:True`、`GRAPH_FEEDBACK_FOCUS_TARGET_OK:True`、`GRAPH_READINESS_STATUS_OK:True`、`FIVE_MINUTE_ONBOARDING_OK:True` 和 `ONBOARDING_CONFIGURATION_OK:True`。
 
 `parameterSnapshots` 用一份受限结构记录 review 节点参数投影，以及 mixed value 和 validation fix 的证据。每条 snapshot 会在存在时记录 `key`、`valueType`、`editorKind`、`currentValue`、`defaultValue`、`hasMixedValues`、`canEdit`、`isValid`、`validationMessage`、`readOnlyReason`、`helpText`、`groupName`、`placeholderText`、`isAdvanced`、`valueState`、`valueDisplayText`、`usesMultilineTextInput`、`isCodeLikeText`、`supportsEnumSearch`、`numberSliderHint`、`canApplyValidationFix`、`validationFixActionLabel`、`allowedOptions`、`minimum` 和 `maximum`。

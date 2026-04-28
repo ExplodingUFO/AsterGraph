@@ -45,4 +45,15 @@ public sealed record AsterGraphWorkbenchOptions
     /// Enables Alt+left-drag panning on the hosted canvas.
     /// </summary>
     public bool EnableAltLeftDragPanning { get; init; } = true;
+
+    /// <summary>
+    /// Selects the stock hosted projection policy. This is Avalonia workbench chrome behavior, not a runtime contract.
+    /// </summary>
+    public AsterGraphWorkbenchPerformanceMode PerformanceMode { get; init; } = AsterGraphWorkbenchPerformanceMode.Balanced;
+
+    /// <summary>
+    /// Gets the projection policy derived from <see cref="PerformanceMode" />.
+    /// </summary>
+    public AsterGraphWorkbenchPerformancePolicy PerformancePolicy
+        => AsterGraphWorkbenchPerformancePolicy.FromMode(PerformanceMode);
 }

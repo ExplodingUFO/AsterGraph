@@ -112,6 +112,14 @@ public partial class GraphEditorView : UserControl
         AvaloniaProperty.Register<GraphEditorView, bool>(nameof(EnableAltLeftDragPanning), true);
 
     /// <summary>
+    /// Hosted workbench projection mode for stock Avalonia chrome.
+    /// </summary>
+    public static readonly StyledProperty<AsterGraphWorkbenchPerformanceMode> WorkbenchPerformanceModeProperty =
+        AvaloniaProperty.Register<GraphEditorView, AsterGraphWorkbenchPerformanceMode>(
+            nameof(WorkbenchPerformanceMode),
+            AsterGraphWorkbenchPerformanceMode.Balanced);
+
+    /// <summary>
     /// 可选的 Avalonia 展示器替换配置依赖属性。
     /// </summary>
     public static readonly StyledProperty<AsterGraphPresentationOptions?> PresentationProperty =
@@ -301,6 +309,21 @@ public partial class GraphEditorView : UserControl
     }
 
     /// <summary>
+    /// Hosted workbench projection mode for stock Avalonia chrome.
+    /// </summary>
+    public AsterGraphWorkbenchPerformanceMode WorkbenchPerformanceMode
+    {
+        get => GetValue(WorkbenchPerformanceModeProperty);
+        set => SetValue(WorkbenchPerformanceModeProperty, value);
+    }
+
+    /// <summary>
+    /// Gets the hosted projection policy derived from <see cref="WorkbenchPerformanceMode" />.
+    /// </summary>
+    public AsterGraphWorkbenchPerformancePolicy CurrentWorkbenchPerformancePolicy
+        => AsterGraphWorkbenchPerformancePolicy.FromMode(WorkbenchPerformanceMode);
+
+    /// <summary>
     /// 当前宿主提供的 Avalonia 展示器替换配置。
     /// </summary>
     public AsterGraphPresentationOptions? Presentation
@@ -342,6 +365,10 @@ public partial class GraphEditorView : UserControl
             || change.Property == EnableAltLeftDragPanningProperty)
         {
             _compositionCoordinator.ApplyCanvasBehaviorOptions();
+        }
+        else if (change.Property == WorkbenchPerformanceModeProperty)
+        {
+            BuildStencilLibrary(_stencilTemplateSnapshots, _stencilAddNodeDescriptor);
         }
         else if (change.Property == PresentationProperty)
         {
@@ -724,6 +751,7 @@ public partial class GraphEditorView : UserControl
             _recentStencilTemplateKeys,
             addNodeDescriptor);
 
+        var stencilLimit = CurrentWorkbenchPerformancePolicy.StencilCardsPerSectionLimit;
         var stencilSections = filteredTemplates
             .GroupBy(stencilItem => stencilItem.Category, StringComparer.Ordinal)
             .OrderBy(section => section.Key, StringComparer.Ordinal);
@@ -732,7 +760,7 @@ public partial class GraphEditorView : UserControl
         {
             _stencilCardList.Children.Add(CreateStencilSection(
                 stencilSection.Key,
-                stencilSection.ToList(),
+                stencilSection.Take(stencilLimit).ToList(),
                 addNodeDescriptor));
         }
 

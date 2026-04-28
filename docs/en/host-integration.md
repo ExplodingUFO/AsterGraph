@@ -43,6 +43,8 @@ var view = AsterGraphHostBuilder
 
 `UseDefaultWorkbench()` is a hosted Avalonia convenience layer for the stock toolbar, command palette, stencil, inspector, mini-map, fragment, diagnostics, and status chrome. It remains on the existing `Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` path; it does not create a second runtime model.
 
+The default workbench uses `AsterGraphWorkbenchPerformanceMode.Balanced`. Hosts can set `AsterGraphWorkbenchOptions.PerformanceMode` to `Quality`, `Balanced`, or `Throughput` to tune hosted chrome projection such as stencil card limits, mini-map projection cadence, advanced inspector projection, hovered toolbars, and command refresh batching. This is Avalonia hosted policy only, not a runtime execution or graph-model contract.
+
 Use explicit factory wiring when the host needs separate ownership of editor options, view options, or standalone surfaces:
 
 ```csharp

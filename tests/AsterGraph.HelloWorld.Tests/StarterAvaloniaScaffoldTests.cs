@@ -45,6 +45,8 @@ public sealed class StarterAvaloniaScaffoldTests
         Assert.True(viewOptions.Workbench.ShowNodePalette);
         Assert.True(viewOptions.Workbench.ShowInspector);
         Assert.True(viewOptions.Workbench.ShowStatus);
+        Assert.Equal(AsterGraphWorkbenchPerformanceMode.Balanced, viewOptions.Workbench.PerformanceMode);
+        Assert.Equal(AsterGraphWorkbenchPerformanceMode.Balanced, viewOptions.Workbench.PerformancePolicy.Mode);
         Assert.True(viewOptions.EnableDefaultContextMenu);
         Assert.Equal(AsterGraphCommandShortcutPolicy.Default, viewOptions.CommandShortcutPolicy);
         Assert.True(viewOptions.Workbench.EnableDefaultWheelViewportGestures);
@@ -67,6 +69,7 @@ public sealed class StarterAvaloniaScaffoldTests
                 ShowStatus = false,
                 EnableDefaultWheelViewportGestures = false,
                 EnableAltLeftDragPanning = false,
+                PerformanceMode = AsterGraphWorkbenchPerformanceMode.Throughput,
             })
             .UseDefaultContextMenu(false)
             .UseCommandShortcutPolicy(AsterGraphCommandShortcutPolicy.Disabled);
@@ -82,7 +85,26 @@ public sealed class StarterAvaloniaScaffoldTests
         Assert.Equal(AsterGraphCommandShortcutPolicy.Disabled, view.CommandShortcutPolicy);
         Assert.False(view.EnableDefaultWheelViewportGestures);
         Assert.False(view.EnableAltLeftDragPanning);
+        Assert.Equal(AsterGraphWorkbenchPerformanceMode.Throughput, view.WorkbenchPerformanceMode);
+        Assert.Equal(48, view.CurrentWorkbenchPerformancePolicy.StencilCardsPerSectionLimit);
+        Assert.False(view.CurrentWorkbenchPerformancePolicy.ProjectMiniMapContinuously);
         Assert.Same(editor, view.Editor);
+    }
+
+    [Fact]
+    public void WorkbenchPerformancePolicies_DefineQualityBalancedAndThroughputProjection()
+    {
+        var quality = AsterGraphWorkbenchPerformancePolicy.FromMode(AsterGraphWorkbenchPerformanceMode.Quality);
+        var balanced = AsterGraphWorkbenchPerformancePolicy.FromMode(AsterGraphWorkbenchPerformanceMode.Balanced);
+        var throughput = AsterGraphWorkbenchPerformancePolicy.FromMode(AsterGraphWorkbenchPerformanceMode.Throughput);
+
+        Assert.Equal(int.MaxValue, quality.StencilCardsPerSectionLimit);
+        Assert.Equal(128, balanced.StencilCardsPerSectionLimit);
+        Assert.Equal(48, throughput.StencilCardsPerSectionLimit);
+        Assert.True(quality.ProjectAdvancedInspectorByDefault);
+        Assert.False(balanced.ProjectAdvancedInspectorByDefault);
+        Assert.False(throughput.ProjectHoveredToolbars);
+        Assert.True(throughput.CommandRefreshBatchMilliseconds > balanced.CommandRefreshBatchMilliseconds);
     }
 }
 
