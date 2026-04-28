@@ -185,6 +185,9 @@ public sealed class ConsumerSampleProofTests
         Assert.True(result.CanvasFocusRecoveryOk);
         Assert.True(result.ConsumerGestureProofOk);
         Assert.True(result.InteractionSupportBundleOk);
+        Assert.True(result.InteractionReliabilityHandoffOk);
+        Assert.True(result.InteractionScopeBoundaryOk);
+        Assert.True(result.V062MilestoneProofOk);
         Assert.True(result.NodeToolbarContributionOk);
         Assert.True(result.EdgeToolbarContributionOk);
         Assert.True(result.ToolbarContributionDescriptorOk);
@@ -296,6 +299,9 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(result.ProofLines, line => line == "CANVAS_FOCUS_RECOVERY_OK:True");
         Assert.Contains(result.ProofLines, line => line == "CONSUMER_GESTURE_PROOF_OK:True");
         Assert.Contains(result.ProofLines, line => line == "INTERACTION_SUPPORT_BUNDLE_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "INTERACTION_RELIABILITY_HANDOFF_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "INTERACTION_SCOPE_BOUNDARY_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "V062_MILESTONE_PROOF_OK:True");
         Assert.Contains(result.ProofLines, line => line == "NODE_TOOLBAR_CONTRIBUTION_OK:True");
         Assert.Contains(result.ProofLines, line => line == "EDGE_TOOLBAR_CONTRIBUTION_OK:True");
         Assert.Contains(result.ProofLines, line => line == "TOOLBAR_CONTRIBUTION_DESCRIPTOR_OK:True");
@@ -813,6 +819,9 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(proofLines, line => line == "CANVAS_FOCUS_RECOVERY_OK:True");
         Assert.Contains(proofLines, line => line == "CONSUMER_GESTURE_PROOF_OK:True");
         Assert.Contains(proofLines, line => line == "INTERACTION_SUPPORT_BUNDLE_OK:True");
+        Assert.Contains(proofLines, line => line == "INTERACTION_RELIABILITY_HANDOFF_OK:True");
+        Assert.Contains(proofLines, line => line == "INTERACTION_SCOPE_BOUNDARY_OK:True");
+        Assert.Contains(proofLines, line => line == "V062_MILESTONE_PROOF_OK:True");
         Assert.Contains(proofLines, line => line == "NAVIGATION_HISTORY_OK:True");
         Assert.Contains(proofLines, line => line == "SCOPE_BREADCRUMB_NAVIGATION_OK:True");
         Assert.Contains(proofLines, line => line == "FOCUS_RESTORE_OK:True");

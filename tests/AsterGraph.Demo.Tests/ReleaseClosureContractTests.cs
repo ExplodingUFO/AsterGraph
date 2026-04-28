@@ -731,6 +731,33 @@ public sealed class ReleaseClosureContractTests
     }
 
     [Fact]
+    public void InteractionReliabilityHandoff_StaysVisibleInStatusAndChecklist()
+    {
+        var englishChecklist = ReadRepoFile("docs/en/public-launch-checklist.md");
+        var chineseChecklist = ReadRepoFile("docs/zh-CN/public-launch-checklist.md");
+        var englishStatus = ReadRepoFile("docs/en/project-status.md");
+        var chineseStatus = ReadRepoFile("docs/zh-CN/project-status.md");
+        var englishConsumerSample = ReadRepoFile("docs/en/consumer-sample.md");
+        var chineseConsumerSample = ReadRepoFile("docs/zh-CN/consumer-sample.md");
+        var englishFeatureCatalog = ReadRepoFile("docs/en/feature-catalog.md");
+        var chineseFeatureCatalog = ReadRepoFile("docs/zh-CN/feature-catalog.md");
+
+        foreach (var contents in new[] { englishChecklist, chineseChecklist, englishStatus, chineseStatus, englishConsumerSample, chineseConsumerSample, englishFeatureCatalog, chineseFeatureCatalog })
+        {
+            Assert.Contains("INTERACTION_RELIABILITY_HANDOFF_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("INTERACTION_SCOPE_BOUNDARY_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("V062_MILESTONE_PROOF_OK:True", contents, StringComparison.Ordinal);
+        }
+
+        Assert.True(HasLineWithAll(englishStatus, "v0.62 interaction reliability handoff proof", "phases 384-386", "existing hosted workbench evidence", "runtime renderer contract"));
+        Assert.True(HasLineWithAll(chineseStatus, "v0.62 interaction reliability handoff proof", "phases 384-386", "hosted workbench", "runtime renderer contract"));
+        Assert.True(HasLineWithAll(englishConsumerSample, "v0.62 interaction reliability handoff markers", "live canvas refresh", "interaction feedback", "Demo/Consumer gesture proof"));
+        Assert.True(HasLineWithAll(chineseConsumerSample, "v0.62 interaction reliability handoff marker", "live canvas refresh", "interaction feedback", "Demo/Consumer gesture proof"));
+        Assert.True(HasLineWithAll(englishStatus, "next recommended work line", "v0.63", "Workbench Convenience", "command/palette cohesion"));
+        Assert.True(HasLineWithAll(chineseStatus, "下一条推荐工作线", "v0.63", "Workbench Convenience", "command/palette cohesion"));
+    }
+
+    [Fact]
     public void ReleaseCoverageValidation_BoundsHungTestCollectors()
     {
         var ciScript = ReadRepoFile("eng/ci.ps1");

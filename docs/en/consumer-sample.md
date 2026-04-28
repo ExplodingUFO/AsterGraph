@@ -26,6 +26,7 @@ Its viewport LOD markers prove selected/hovered affordances stay bounded to host
 Its edge interaction markers summarize hosted edge quick-tool, toolbar, and geometry evidence without creating a runtime renderer contract: `EDGE_INTERACTION_CACHE_OK:True`, `EDGE_DRAG_ROUTE_SIMPLIFICATION_OK:True`, `SELECTED_EDGE_FEEDBACK_OK:True`, and `EDGE_RENDERING_SCOPE_BOUNDARY_OK:True`.
 Its panel projection markers keep mini-map and inspector evidence narrow: `MINIMAP_LIGHTWEIGHT_PROJECTION_OK:True`, `INSPECTOR_NARROW_PROJECTION_OK:True`, `LARGE_GRAPH_PANEL_SCOPE_OK:True`, and `PROJECTION_PERFORMANCE_EVIDENCE_OK:True`.
 Its v0.59 handoff markers aggregate the Large Graph UX phases without widening graph-size support claims: `LARGE_GRAPH_UX_HANDOFF_OK:True`, `LARGE_GRAPH_UX_SCOPE_BOUNDARY_OK:True`, and `V059_MILESTONE_PROOF_OK:True`.
+Its v0.62 interaction reliability handoff markers aggregate live canvas refresh, interaction feedback, and Demo/Consumer gesture proof without creating a runtime renderer contract: `INTERACTION_RELIABILITY_HANDOFF_OK:True`, `INTERACTION_SCOPE_BOUNDARY_OK:True`, and `V062_MILESTONE_PROOF_OK:True`.
 Its authoring flow handoff summarizes quick-add connected nodes, insert-on-wire, reconnect editing, edge multiselect, and wire slicing on the existing session command path: `AUTHORING_FLOW_PROOF_OK:True`, `AUTHORING_FLOW_HANDOFF_OK:True`, and `AUTHORING_FLOW_SCOPE_BOUNDARY_OK:True`.
 
 The hosted route ladder is `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerSample.Avalonia`.
@@ -187,6 +188,9 @@ Expected proof markers:
 - `INTERACTION_FEEDBACK_OK:True`
 - `CANVAS_FOCUS_RECOVERY_OK:True`
 - `CONSUMER_GESTURE_PROOF_OK:True`
+- `INTERACTION_RELIABILITY_HANDOFF_OK:True`
+- `INTERACTION_SCOPE_BOUNDARY_OK:True`
+- `V062_MILESTONE_PROOF_OK:True`
 - `NODE_TOOLBAR_CONTRIBUTION_OK:True`
 - `EDGE_TOOLBAR_CONTRIBUTION_OK:True`
 - `TOOLBAR_CONTRIBUTION_DESCRIPTOR_OK:True`
@@ -325,6 +329,9 @@ Expected proof markers:
 - `INTERACTION_FEEDBACK_OK:True`
 - `CANVAS_FOCUS_RECOVERY_OK:True`
 - `CONSUMER_GESTURE_PROOF_OK:True`
+- `INTERACTION_RELIABILITY_HANDOFF_OK:True`
+- `INTERACTION_SCOPE_BOUNDARY_OK:True`
+- `V062_MILESTONE_PROOF_OK:True`
 - `NODE_TOOLBAR_CONTRIBUTION_OK:True`
 - `EDGE_TOOLBAR_CONTRIBUTION_OK:True`
 - `TOOLBAR_CONTRIBUTION_DESCRIPTOR_OK:True`

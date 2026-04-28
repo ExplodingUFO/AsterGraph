@@ -26,6 +26,7 @@ viewport LOD marker 证明 selected/hovered affordances 仍受 hosted workbench 
 edge interaction marker 汇总 hosted edge quick-tool、toolbar 和 geometry 证据，但不创建 runtime renderer contract：`EDGE_INTERACTION_CACHE_OK:True`、`EDGE_DRAG_ROUTE_SIMPLIFICATION_OK:True`、`SELECTED_EDGE_FEEDBACK_OK:True` 和 `EDGE_RENDERING_SCOPE_BOUNDARY_OK:True`。
 panel projection marker 把 mini-map 和 inspector 证据保持在窄投影范围内：`MINIMAP_LIGHTWEIGHT_PROJECTION_OK:True`、`INSPECTOR_NARROW_PROJECTION_OK:True`、`LARGE_GRAPH_PANEL_SCOPE_OK:True` 和 `PROJECTION_PERFORMANCE_EVIDENCE_OK:True`。
 v0.59 handoff marker 会汇总 Large Graph UX 各 phase，但不扩大 graph-size support claims：`LARGE_GRAPH_UX_HANDOFF_OK:True`、`LARGE_GRAPH_UX_SCOPE_BOUNDARY_OK:True` 和 `V059_MILESTONE_PROOF_OK:True`。
+v0.62 interaction reliability handoff marker 汇总 live canvas refresh、interaction feedback 和 Demo/Consumer gesture proof，但不创建 runtime renderer contract：`INTERACTION_RELIABILITY_HANDOFF_OK:True`、`INTERACTION_SCOPE_BOUNDARY_OK:True` 和 `V062_MILESTONE_PROOF_OK:True`。
 authoring flow handoff 会汇总 quick-add、insert-on-wire、reconnect editing、edge multiselect 和 wire slicing，并继续走现有 session command path：`AUTHORING_FLOW_PROOF_OK:True`、`AUTHORING_FLOW_HANDOFF_OK:True` 和 `AUTHORING_FLOW_SCOPE_BOUNDARY_OK:True`。
 
 这条 hosted route ladder 是 `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerSample.Avalonia`。
@@ -187,6 +188,9 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 - `INTERACTION_FEEDBACK_OK:True`
 - `CANVAS_FOCUS_RECOVERY_OK:True`
 - `CONSUMER_GESTURE_PROOF_OK:True`
+- `INTERACTION_RELIABILITY_HANDOFF_OK:True`
+- `INTERACTION_SCOPE_BOUNDARY_OK:True`
+- `V062_MILESTONE_PROOF_OK:True`
 - `NODE_TOOLBAR_CONTRIBUTION_OK:True`
 - `EDGE_TOOLBAR_CONTRIBUTION_OK:True`
 - `TOOLBAR_CONTRIBUTION_DESCRIPTOR_OK:True`
@@ -325,6 +329,9 @@ Proof Handoff 负责实际 intake 说明。
 - `INTERACTION_FEEDBACK_OK:True`
 - `CANVAS_FOCUS_RECOVERY_OK:True`
 - `CONSUMER_GESTURE_PROOF_OK:True`
+- `INTERACTION_RELIABILITY_HANDOFF_OK:True`
+- `INTERACTION_SCOPE_BOUNDARY_OK:True`
+- `V062_MILESTONE_PROOF_OK:True`
 - `NODE_TOOLBAR_CONTRIBUTION_OK:True`
 - `EDGE_TOOLBAR_CONTRIBUTION_OK:True`
 - `TOOLBAR_CONTRIBUTION_DESCRIPTOR_OK:True`

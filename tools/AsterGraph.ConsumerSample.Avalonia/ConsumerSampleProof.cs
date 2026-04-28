@@ -664,6 +664,26 @@ public sealed record ConsumerSampleProofResult(
         && ConnectionValidationSupportBundleOk
         && ConsumerGestureProofOk;
 
+    public bool InteractionReliabilityHandoffOk
+        => NodeDragEdgeRefreshOk
+        && EdgeRouteRefreshOk
+        && LiveCanvasRefreshAuditOk
+        && InteractionFeedbackOk
+        && CanvasFocusRecoveryOk
+        && ConsumerGestureProofOk
+        && InteractionSupportBundleOk;
+
+    public bool InteractionScopeBoundaryOk
+        => ExperienceScopeBoundaryOk
+        && NavigationScopeBoundaryOk
+        && WorkbenchScopeBoundaryOk
+        && EdgeRenderingScopeBoundaryOk
+        && LargeGraphUxScopeBoundaryOk;
+
+    public bool V062MilestoneProofOk
+        => InteractionReliabilityHandoffOk
+        && InteractionScopeBoundaryOk;
+
     public bool IsOk
         => HostMenuActionOk
         && PluginContributionOk
@@ -710,7 +730,10 @@ public sealed record ConsumerSampleProofResult(
         && CommandDisabledReasonOk
         && CanvasFocusRecoveryOk
         && ConsumerGestureProofOk
-        && InteractionSupportBundleOk;
+        && InteractionSupportBundleOk
+        && InteractionReliabilityHandoffOk
+        && InteractionScopeBoundaryOk
+        && V062MilestoneProofOk;
 
     public IReadOnlyList<string> MetricLines =>
     [
@@ -778,6 +801,9 @@ public sealed record ConsumerSampleProofResult(
         $"CANVAS_FOCUS_RECOVERY_OK:{CanvasFocusRecoveryOk}",
         $"CONSUMER_GESTURE_PROOF_OK:{ConsumerGestureProofOk}",
         $"INTERACTION_SUPPORT_BUNDLE_OK:{InteractionSupportBundleOk}",
+        $"INTERACTION_RELIABILITY_HANDOFF_OK:{InteractionReliabilityHandoffOk}",
+        $"INTERACTION_SCOPE_BOUNDARY_OK:{InteractionScopeBoundaryOk}",
+        $"V062_MILESTONE_PROOF_OK:{V062MilestoneProofOk}",
         $"NODE_TOOLBAR_CONTRIBUTION_OK:{NodeToolbarContributionOk}",
         $"EDGE_TOOLBAR_CONTRIBUTION_OK:{EdgeToolbarContributionOk}",
         $"TOOLBAR_CONTRIBUTION_DESCRIPTOR_OK:{ToolbarContributionDescriptorOk}",
