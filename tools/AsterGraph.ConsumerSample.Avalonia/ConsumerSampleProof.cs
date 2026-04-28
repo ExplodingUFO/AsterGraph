@@ -166,6 +166,10 @@ public sealed record ConsumerSampleProofResult(
     bool WorkbenchFrictionPrioritizationOk = true,
     bool WorkbenchFrictionScopeBoundaryOk = true,
     IReadOnlyList<ConsumerSampleWorkbenchFrictionEvidence>? WorkbenchFrictionEvidence = null,
+    bool WorkbenchAffordancePolishOk = true,
+    bool WorkbenchAffordanceRouteOk = true,
+    bool WorkbenchAffordanceScopeBoundaryOk = true,
+    ConsumerSampleWorkbenchAffordancePolish? WorkbenchAffordancePolish = null,
     bool MiniMapLightweightProjectionEvidenceOk = true,
     int SelectedParameterProjectionCount = 0,
     int TotalParameterProjectionCount = 0)
@@ -279,6 +283,9 @@ public sealed record ConsumerSampleProofResult(
         && WorkbenchFrictionEvidenceOk
         && WorkbenchFrictionPrioritizationOk
         && WorkbenchFrictionScopeBoundaryOk
+        && WorkbenchAffordancePolishOk
+        && WorkbenchAffordanceRouteOk
+        && WorkbenchAffordanceScopeBoundaryOk
         && CommandPaletteGroupingOk
         && CommandPaletteDisabledReasonOk
         && CommandPaletteRecentActionsOk
@@ -383,6 +390,8 @@ public sealed record ConsumerSampleProofResult(
         && RecentsFavoritesSupportBundleOk
         && WorkbenchFrictionEvidenceOk
         && WorkbenchFrictionPrioritizationOk
+        && WorkbenchAffordancePolishOk
+        && WorkbenchAffordanceRouteOk
         && CommandPaletteGroupingOk
         && CommandPaletteDisabledReasonOk
         && CommandPaletteRecentActionsOk
@@ -463,6 +472,7 @@ public sealed record ConsumerSampleProofResult(
         && WorkbenchFavoritesOk
         && RecentsFavoritesSupportBundleOk
         && WorkbenchFrictionScopeBoundaryOk
+        && WorkbenchAffordanceScopeBoundaryOk
         && CommandPaletteGroupingOk
         && CommandPaletteDisabledReasonOk
         && CommandPaletteRecentActionsOk
@@ -811,7 +821,10 @@ public sealed record ConsumerSampleProofResult(
         && V063MilestoneProofOk
         && WorkbenchFrictionEvidenceOk
         && WorkbenchFrictionPrioritizationOk
-        && WorkbenchFrictionScopeBoundaryOk;
+        && WorkbenchFrictionScopeBoundaryOk
+        && WorkbenchAffordancePolishOk
+        && WorkbenchAffordanceRouteOk
+        && WorkbenchAffordanceScopeBoundaryOk;
 
     public IReadOnlyList<string> MetricLines =>
     [
@@ -876,6 +889,9 @@ public sealed record ConsumerSampleProofResult(
         $"WORKBENCH_FRICTION_EVIDENCE_OK:{WorkbenchFrictionEvidenceOk}",
         $"WORKBENCH_FRICTION_PRIORITIZATION_OK:{WorkbenchFrictionPrioritizationOk}",
         $"WORKBENCH_FRICTION_SCOPE_BOUNDARY_OK:{WorkbenchFrictionScopeBoundaryOk}",
+        $"WORKBENCH_AFFORDANCE_POLISH_OK:{WorkbenchAffordancePolishOk}",
+        $"WORKBENCH_AFFORDANCE_ROUTE_OK:{WorkbenchAffordanceRouteOk}",
+        $"WORKBENCH_AFFORDANCE_SCOPE_BOUNDARY_OK:{WorkbenchAffordanceScopeBoundaryOk}",
         $"COMMAND_PALETTE_GROUPING_OK:{CommandPaletteGroupingOk}",
         $"COMMAND_PALETTE_DISABLED_REASON_OK:{CommandPaletteDisabledReasonOk}",
         $"COMMAND_PALETTE_RECENT_ACTIONS_OK:{CommandPaletteRecentActionsOk}",
@@ -1157,6 +1173,10 @@ public static class ConsumerSampleProof
         bool workbenchFrictionPrioritizationOk;
         bool workbenchFrictionScopeBoundaryOk;
         IReadOnlyList<ConsumerSampleWorkbenchFrictionEvidence> workbenchFrictionEvidence;
+        bool workbenchAffordancePolishOk;
+        bool workbenchAffordanceRouteOk;
+        bool workbenchAffordanceScopeBoundaryOk;
+        ConsumerSampleWorkbenchAffordancePolish workbenchAffordancePolish;
         bool navigationHistoryOk;
         bool scopeBreadcrumbNavigationOk;
         bool focusRestoreOk;
@@ -1431,6 +1451,12 @@ public static class ConsumerSampleProof
             workbenchFrictionScopeBoundaryOk,
             workbenchFrictionEvidence) =
             HasWorkbenchFrictionEvidence(host);
+        (
+            workbenchAffordancePolishOk,
+            workbenchAffordanceRouteOk,
+            workbenchAffordanceScopeBoundaryOk,
+            workbenchAffordancePolish) =
+            HasWorkbenchAffordancePolish(host, workbenchFrictionEvidence);
         host.SelectNode(host.GetFirstReviewNodeId());
         FlushUi();
 
@@ -1522,6 +1548,10 @@ public static class ConsumerSampleProof
             WorkbenchFrictionPrioritizationOk: workbenchFrictionPrioritizationOk,
             WorkbenchFrictionScopeBoundaryOk: workbenchFrictionScopeBoundaryOk,
             WorkbenchFrictionEvidence: workbenchFrictionEvidence,
+            WorkbenchAffordancePolishOk: workbenchAffordancePolishOk,
+            WorkbenchAffordanceRouteOk: workbenchAffordanceRouteOk,
+            WorkbenchAffordanceScopeBoundaryOk: workbenchAffordanceScopeBoundaryOk,
+            WorkbenchAffordancePolish: workbenchAffordancePolish,
             CommandPaletteGroupingOk: commandPaletteGroupingOk,
             CommandPaletteDisabledReasonOk: commandPaletteDisabledReasonOk,
             CommandPaletteRecentActionsOk: commandPaletteRecentActionsOk,
@@ -2067,6 +2097,47 @@ public static class ConsumerSampleProof
                 || entry.Route.Contains("ConsumerSample.Avalonia", StringComparison.Ordinal));
 
         return (evidenceOk, prioritizationOk, scopeBoundaryOk, evidence);
+    }
+
+    private static (
+        bool PolishOk,
+        bool RouteOk,
+        bool ScopeBoundaryOk,
+        ConsumerSampleWorkbenchAffordancePolish Affordance) HasWorkbenchAffordancePolish(
+            ConsumerSampleHost host,
+            IReadOnlyList<ConsumerSampleWorkbenchFrictionEvidence> frictionEvidence)
+    {
+        var affordance = host.LayoutResumeAffordance;
+        var sourceEvidence = frictionEvidence.SingleOrDefault(entry =>
+            string.Equals(entry.Category, affordance.FrictionCategory, StringComparison.Ordinal));
+        var mutated = AsterGraphWorkbenchOptions.ForPreset(AsterGraphWorkbenchLayoutPreset.Debugging) with
+        {
+            PanelState = AsterGraphWorkbenchPanelState.Default with
+            {
+                StencilVisible = false,
+                MiniMapVisible = false,
+                RuntimePanelVisible = true,
+                InspectorWidth = 420,
+            },
+        };
+        var reset = host.ApplyLayoutResumeAffordance(mutated);
+
+        var polishOk = sourceEvidence is not null
+            && sourceEvidence.PriorityRank == 1
+            && string.Equals(affordance.FrictionCategory, "layout-resume", StringComparison.Ordinal)
+            && !string.IsNullOrWhiteSpace(affordance.Title)
+            && reset == AsterGraphWorkbenchOptions.Default;
+        var routeOk = affordance.UsesExistingHostedRoute
+            && affordance.Route.Contains("AsterGraphWorkbenchOptions.ResetLayout", StringComparison.Ordinal)
+            && reset.LayoutPreset == AsterGraphWorkbenchLayoutPreset.Authoring
+            && reset.PanelState == AsterGraphWorkbenchPanelState.Default;
+        var scopeBoundaryOk = affordance.ScopeBoundary.Contains("hosted affordance only", StringComparison.OrdinalIgnoreCase)
+            && affordance.ScopeBoundary.Contains("no runtime route", StringComparison.OrdinalIgnoreCase)
+            && affordance.ScopeBoundary.Contains("WPF parity", StringComparison.Ordinal)
+            && affordance.ScopeBoundary.Contains("remote sync", StringComparison.OrdinalIgnoreCase)
+            && affordance.ScopeBoundary.Contains("GA claim", StringComparison.OrdinalIgnoreCase);
+
+        return (polishOk, routeOk, scopeBoundaryOk, affordance);
     }
 
     private static bool HasLocalPluginGallery(ConsumerSampleHost host, Window window)

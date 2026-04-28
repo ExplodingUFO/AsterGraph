@@ -102,6 +102,9 @@ internal static class ConsumerSampleDocsAssertions
         Assert.Contains("WORKBENCH_FRICTION_EVIDENCE_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("WORKBENCH_FRICTION_PRIORITIZATION_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("WORKBENCH_FRICTION_SCOPE_BOUNDARY_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("WORKBENCH_AFFORDANCE_POLISH_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("WORKBENCH_AFFORDANCE_ROUTE_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("WORKBENCH_AFFORDANCE_SCOPE_BOUNDARY_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("COMMAND_PALETTE_GROUPING_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("COMMAND_PALETTE_DISABLED_REASON_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("COMMAND_PALETTE_RECENT_ACTIONS_OK:True", contents, StringComparison.Ordinal);

@@ -233,6 +233,18 @@ public sealed class ConsumerSampleHost : IDisposable
     public IReadOnlyList<ConsumerSampleWorkbenchFrictionEvidence> WorkbenchFrictionEvidence
         => WorkbenchFrictionEvidenceEntries;
 
+    public ConsumerSampleWorkbenchAffordancePolish LayoutResumeAffordance
+        => new(
+            "consumer.sample.workbench.layout-resume",
+            "layout-resume",
+            "Reset to default workbench layout",
+            "AsterGraphWorkbenchOptions.ResetLayout via hosted workbench options",
+            "hosted affordance only; no runtime route, WPF parity, remote sync, macro/query system, execution engine, or GA claim",
+            UsesExistingHostedRoute: true);
+
+    public AsterGraphWorkbenchOptions ApplyLayoutResumeAffordance(AsterGraphWorkbenchOptions current)
+        => current.ResetLayout();
+
     public IReadOnlyList<string> LastRuntimeLogExportLines => _lastRuntimeLogExportLines;
 
     public IReadOnlyList<string> RuntimeLogExportLines
@@ -1937,6 +1949,14 @@ public sealed record ConsumerSampleWorkbenchFrictionEvidence(
     string Route,
     string ScopeBoundary,
     bool IsSynthetic);
+
+public sealed record ConsumerSampleWorkbenchAffordancePolish(
+    string ActionId,
+    string FrictionCategory,
+    string Title,
+    string Route,
+    string ScopeBoundary,
+    bool UsesExistingHostedRoute);
 
 public sealed record ConsumerSampleNavigationHistoryEntry(
     string Title,

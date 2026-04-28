@@ -190,6 +190,11 @@ public sealed class ConsumerSampleProofTests
         Assert.NotNull(result.WorkbenchFrictionEvidence);
         Assert.Contains(result.WorkbenchFrictionEvidence!, entry => entry.Category == "layout-resume" && entry.PriorityRank == 1);
         Assert.Contains(result.WorkbenchFrictionEvidence!, entry => entry.Category == "support-triage" && entry.IsSynthetic);
+        Assert.True(result.WorkbenchAffordancePolishOk);
+        Assert.True(result.WorkbenchAffordanceRouteOk);
+        Assert.True(result.WorkbenchAffordanceScopeBoundaryOk);
+        Assert.NotNull(result.WorkbenchAffordancePolish);
+        Assert.Equal("layout-resume", result.WorkbenchAffordancePolish!.FrictionCategory);
         Assert.True(result.CommandPaletteGroupingOk);
         Assert.True(result.CommandPaletteDisabledReasonOk);
         Assert.True(result.CommandPaletteRecentActionsOk);
@@ -319,6 +324,9 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(result.ProofLines, line => line == "WORKBENCH_FRICTION_EVIDENCE_OK:True");
         Assert.Contains(result.ProofLines, line => line == "WORKBENCH_FRICTION_PRIORITIZATION_OK:True");
         Assert.Contains(result.ProofLines, line => line == "WORKBENCH_FRICTION_SCOPE_BOUNDARY_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "WORKBENCH_AFFORDANCE_POLISH_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "WORKBENCH_AFFORDANCE_ROUTE_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "WORKBENCH_AFFORDANCE_SCOPE_BOUNDARY_OK:True");
         Assert.Contains(result.ProofLines, line => line == "COMMAND_PALETTE_GROUPING_OK:True");
         Assert.Contains(result.ProofLines, line => line == "COMMAND_PALETTE_DISABLED_REASON_OK:True");
         Assert.Contains(result.ProofLines, line => line == "COMMAND_PALETTE_RECENT_ACTIONS_OK:True");
@@ -872,6 +880,9 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(proofLines, line => line == "WORKBENCH_FRICTION_EVIDENCE_OK:True");
         Assert.Contains(proofLines, line => line == "WORKBENCH_FRICTION_PRIORITIZATION_OK:True");
         Assert.Contains(proofLines, line => line == "WORKBENCH_FRICTION_SCOPE_BOUNDARY_OK:True");
+        Assert.Contains(proofLines, line => line == "WORKBENCH_AFFORDANCE_POLISH_OK:True");
+        Assert.Contains(proofLines, line => line == "WORKBENCH_AFFORDANCE_ROUTE_OK:True");
+        Assert.Contains(proofLines, line => line == "WORKBENCH_AFFORDANCE_SCOPE_BOUNDARY_OK:True");
         Assert.Contains(proofLines, line => line == "NAVIGATION_HISTORY_OK:True");
         Assert.Contains(proofLines, line => line == "SCOPE_BREADCRUMB_NAVIGATION_OK:True");
         Assert.Contains(proofLines, line => line == "FOCUS_RESTORE_OK:True");

@@ -29,6 +29,7 @@ Its v0.59 handoff markers aggregate the Large Graph UX phases without widening g
 Its v0.62 interaction reliability handoff markers aggregate live canvas refresh, interaction feedback, and Demo/Consumer gesture proof without creating a runtime renderer contract: `INTERACTION_RELIABILITY_HANDOFF_OK:True`, `INTERACTION_SCOPE_BOUNDARY_OK:True`, and `V062_MILESTONE_PROOF_OK:True`.
 Its v0.63 workbench discoverability handoff markers aggregate layout presets, panel state, unified discovery, and recents/favorites proof without creating a new runtime route, macro/query system, remote sync, marketplace state, WPF parity, or GA claim: `WORKBENCH_DISCOVERABILITY_HANDOFF_OK:True`, `WORKBENCH_DISCOVERABILITY_SCOPE_BOUNDARY_OK:True`, and `V063_MILESTONE_PROOF_OK:True`.
 Its v0.64 hosted workbench friction markers record local synthetic workflow evidence only, with explicit priority and scope-boundary text, not external adopter reports or a GA claim: `WORKBENCH_FRICTION_EVIDENCE_OK:True`, `WORKBENCH_FRICTION_PRIORITIZATION_OK:True`, and `WORKBENCH_FRICTION_SCOPE_BOUNDARY_OK:True`.
+Its bounded affordance polish markers prove one copyable `layout-resume` action through `AsterGraphWorkbenchOptions.ResetLayout`, not a new runtime route or broader workbench model: `WORKBENCH_AFFORDANCE_POLISH_OK:True`, `WORKBENCH_AFFORDANCE_ROUTE_OK:True`, and `WORKBENCH_AFFORDANCE_SCOPE_BOUNDARY_OK:True`.
 Its authoring flow handoff summarizes quick-add connected nodes, insert-on-wire, reconnect editing, edge multiselect, and wire slicing on the existing session command path: `AUTHORING_FLOW_PROOF_OK:True`, `AUTHORING_FLOW_HANDOFF_OK:True`, and `AUTHORING_FLOW_SCOPE_BOUNDARY_OK:True`.
 
 The hosted route ladder is `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerSample.Avalonia`.
@@ -50,6 +51,7 @@ This sample keeps one realistic host window without turning into a full showcase
 - one runtime feedback proof handoff with `RUNTIME_DEBUG_PANEL_INTERACTION_OK:True`, `RUNTIME_LOG_LOCATE_OK:True`, and `RUNTIME_LOG_EXPORT_OK:True`, paired with Demo's `AI_PIPELINE_MOCK_RUNNER_POLISH_OK:True`, `AI_PIPELINE_PAYLOAD_PREVIEW_OK:True`, and `AI_PIPELINE_ERROR_DEBUG_EVIDENCE_OK:True`; these are host-owned debug/support markers, not an execution engine, workflow scripting UI, marketplace, sandbox, WPF parity, or GA claim
 - one host-owned navigation proof handoff with `NAVIGATION_HISTORY_OK:True`, `SCOPE_BREADCRUMB_NAVIGATION_OK:True`, `FOCUS_RESTORE_OK:True`, `NAVIGATION_PRODUCTIVITY_PROOF_OK:True`, `NAVIGATION_PRODUCTIVITY_HANDOFF_OK:True`, and `NAVIGATION_SCOPE_BOUNDARY_OK:True` without introducing a command macro engine, background graph index, WPF parity, or a new runtime navigation API
 - one hosted workbench friction evidence set with prioritized local synthetic rows for layout resume, node discovery, command feedback, and support triage; these rows stay on the existing hosted/session routes and are not external adopter reports
+- one bounded workbench affordance polish action that maps the highest-priority `layout-resume` friction row to a hosted reset-layout action on existing workbench options
 - the shipped Avalonia editor surface on the factory-based hosted-UI route
 
 ## Copy These Host-Owned Seams
@@ -209,6 +211,9 @@ Expected proof markers:
 - `WORKBENCH_FRICTION_EVIDENCE_OK:True`
 - `WORKBENCH_FRICTION_PRIORITIZATION_OK:True`
 - `WORKBENCH_FRICTION_SCOPE_BOUNDARY_OK:True`
+- `WORKBENCH_AFFORDANCE_POLISH_OK:True`
+- `WORKBENCH_AFFORDANCE_ROUTE_OK:True`
+- `WORKBENCH_AFFORDANCE_SCOPE_BOUNDARY_OK:True`
 - `NODE_TOOLBAR_CONTRIBUTION_OK:True`
 - `EDGE_TOOLBAR_CONTRIBUTION_OK:True`
 - `TOOLBAR_CONTRIBUTION_DESCRIPTOR_OK:True`
@@ -365,6 +370,9 @@ Expected proof markers:
 - `WORKBENCH_FRICTION_EVIDENCE_OK:True`
 - `WORKBENCH_FRICTION_PRIORITIZATION_OK:True`
 - `WORKBENCH_FRICTION_SCOPE_BOUNDARY_OK:True`
+- `WORKBENCH_AFFORDANCE_POLISH_OK:True`
+- `WORKBENCH_AFFORDANCE_ROUTE_OK:True`
+- `WORKBENCH_AFFORDANCE_SCOPE_BOUNDARY_OK:True`
 - `NODE_TOOLBAR_CONTRIBUTION_OK:True`
 - `EDGE_TOOLBAR_CONTRIBUTION_OK:True`
 - `TOOLBAR_CONTRIBUTION_DESCRIPTOR_OK:True`

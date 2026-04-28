@@ -15,6 +15,7 @@
 - v0.62 interaction reliability handoff markers：`INTERACTION_RELIABILITY_HANDOFF_OK:True`、`INTERACTION_SCOPE_BOUNDARY_OK:True` 和 `V062_MILESTONE_PROOF_OK:True`
 - v0.63 workbench discoverability handoff markers：`WORKBENCH_DISCOVERABILITY_HANDOFF_OK:True`、`WORKBENCH_DISCOVERABILITY_SCOPE_BOUNDARY_OK:True` 和 `V063_MILESTONE_PROOF_OK:True`
 - v0.64 hosted workbench friction markers：`WORKBENCH_FRICTION_EVIDENCE_OK:True`、`WORKBENCH_FRICTION_PRIORITIZATION_OK:True` 和 `WORKBENCH_FRICTION_SCOPE_BOUNDARY_OK:True`
+- v0.64 bounded workbench affordance markers：`WORKBENCH_AFFORDANCE_POLISH_OK:True`、`WORKBENCH_AFFORDANCE_ROUTE_OK:True` 和 `WORKBENCH_AFFORDANCE_SCOPE_BOUNDARY_OK:True`
 - v0.59 mini-map 与 inspector projection markers：`MINIMAP_LIGHTWEIGHT_PROJECTION_OK:True`、`INSPECTOR_NARROW_PROJECTION_OK:True`、`LARGE_GRAPH_PANEL_SCOPE_OK:True` 和 `PROJECTION_PERFORMANCE_EVIDENCE_OK:True`
 - v0.59 Large Graph UX handoff markers：`LARGE_GRAPH_UX_HANDOFF_OK:True`、`LARGE_GRAPH_UX_SCOPE_BOUNDARY_OK:True` 和 `V059_MILESTONE_PROOF_OK:True`
 - v0.60 adapter-2 validation scope markers：`ADAPTER2_VALIDATION_SCOPE_OK:True`、`ADAPTER2_MATRIX_HANDOFF_OK:True` 和 `ADAPTER2_SCOPE_BOUNDARY_OK:True`
@@ -60,6 +61,7 @@
 - v0.62 interaction reliability handoff proof 把 phases 384-386 绑定在现有 hosted workbench 证据上，不增加 runtime renderer contract：`INTERACTION_RELIABILITY_HANDOFF_OK:True`、`INTERACTION_SCOPE_BOUNDARY_OK:True`、`V062_MILESTONE_PROOF_OK:True`
 - v0.63 workbench discoverability handoff proof 把 phases 388-390 绑定在现有 hosted workbench 证据上，不增加 runtime route、macro/query system、remote sync、marketplace state、WPF parity 或 GA claim：`WORKBENCH_DISCOVERABILITY_HANDOFF_OK:True`、`WORKBENCH_DISCOVERABILITY_SCOPE_BOUNDARY_OK:True`、`V063_MILESTONE_PROOF_OK:True`
 - v0.64 hosted workbench friction proof 只记录本地合成 friction evidence，不代表外部 adopter reports、telemetry、runtime route、WPF parity 或 GA readiness：`WORKBENCH_FRICTION_EVIDENCE_OK:True`、`WORKBENCH_FRICTION_PRIORITIZATION_OK:True`、`WORKBENCH_FRICTION_SCOPE_BOUNDARY_OK:True`
+- v0.64 bounded workbench affordance proof 把最高优先级的 `layout-resume` friction row 映射到现有 hosted workbench options，不新增 runtime route、WPF parity、remote sync、macro/query system、execution engine 或 GA claim：`WORKBENCH_AFFORDANCE_POLISH_OK:True`、`WORKBENCH_AFFORDANCE_ROUTE_OK:True`、`WORKBENCH_AFFORDANCE_SCOPE_BOUNDARY_OK:True`
 - panel projection proof 在 hosted proof route 上汇总 mini-map lightweight projection 和 inspector narrow projection 证据，但不创建 broad graph subscription contract：`MINIMAP_LIGHTWEIGHT_PROJECTION_OK:True`、`INSPECTOR_NARROW_PROJECTION_OK:True`、`LARGE_GRAPH_PANEL_SCOPE_OK:True`、`PROJECTION_PERFORMANCE_EVIDENCE_OK:True`
 - v0.59 Large Graph UX handoff proof 把 phases 371-374 绑定在现有 hosted workbench 证据上，但不扩大 graph-size support claims：`LARGE_GRAPH_UX_HANDOFF_OK:True`、`LARGE_GRAPH_UX_SCOPE_BOUNDARY_OK:True`、`V059_MILESTONE_PROOF_OK:True`
 - adapter-2 validation scope proof 让 WPF 继续停在同一条 canonical route 和 matrix vocabulary 上，不扩大 public WPF support 或 parity claims：`ADAPTER2_VALIDATION_SCOPE_OK:True`、`ADAPTER2_MATRIX_HANDOFF_OK:True`、`ADAPTER2_SCOPE_BOUNDARY_OK:True`
