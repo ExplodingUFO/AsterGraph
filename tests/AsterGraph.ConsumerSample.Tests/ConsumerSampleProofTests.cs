@@ -152,6 +152,9 @@ public sealed class ConsumerSampleProofTests
         Assert.True(result.RuntimeOverlayScopeFilterOk);
         Assert.True(result.RuntimeLogPanelOk);
         Assert.True(result.RuntimeLogFilterOk);
+        Assert.True(result.RuntimeDebugPanelInteractionOk);
+        Assert.True(result.RuntimeLogLocateOk);
+        Assert.True(result.RuntimeLogExportOk);
         Assert.True(result.GraphSnippetCatalogOk);
         Assert.True(result.GraphSnippetInsertOk);
         Assert.True(result.RuntimeOverlaySupportBundleOk);
@@ -193,6 +196,9 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(result.ProofLines, line => line == "RUNTIME_OVERLAY_SCOPE_FILTER_OK:True");
         Assert.Contains(result.ProofLines, line => line == "RUNTIME_LOG_PANEL_OK:True");
         Assert.Contains(result.ProofLines, line => line == "RUNTIME_LOG_FILTER_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "RUNTIME_DEBUG_PANEL_INTERACTION_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "RUNTIME_LOG_LOCATE_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "RUNTIME_LOG_EXPORT_OK:True");
         Assert.Contains(result.ProofLines, line => line == "RUNTIME_OVERLAY_SUPPORT_BUNDLE_OK:True");
         Assert.Contains(result.ProofLines, line => line == "LAYOUT_PROVIDER_SEAM_OK:True");
         Assert.Contains(result.ProofLines, line => line == "LAYOUT_PREVIEW_APPLY_CANCEL_OK:True");
@@ -631,6 +637,9 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(proofLines, line => line == "RUNTIME_OVERLAY_SCOPE_FILTER_OK:True");
         Assert.Contains(proofLines, line => line == "RUNTIME_LOG_PANEL_OK:True");
         Assert.Contains(proofLines, line => line == "RUNTIME_LOG_FILTER_OK:True");
+        Assert.Contains(proofLines, line => line == "RUNTIME_DEBUG_PANEL_INTERACTION_OK:True");
+        Assert.Contains(proofLines, line => line == "RUNTIME_LOG_LOCATE_OK:True");
+        Assert.Contains(proofLines, line => line == "RUNTIME_LOG_EXPORT_OK:True");
         Assert.Contains(proofLines, line => line == "RUNTIME_OVERLAY_SUPPORT_BUNDLE_OK:True");
         Assert.Contains(proofLines, line => line == "LAYOUT_PROVIDER_SEAM_OK:True");
         Assert.Contains(proofLines, line => line == "LAYOUT_PREVIEW_APPLY_CANCEL_OK:True");

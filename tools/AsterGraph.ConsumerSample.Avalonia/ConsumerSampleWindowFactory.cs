@@ -469,7 +469,7 @@ public static class ConsumerSampleWindowFactory
             {
                 Name = $"PART_RuntimeLog_{log.Id}",
                 HorizontalAlignment = HorizontalAlignment.Stretch,
-                Content = $"{log.Status}: {log.Message}",
+                Content = $"{log.Status} | node={log.NodeId ?? "-"} | scope={log.ScopeId ?? "-"}\n{log.Message}",
             };
             button.Click += (_, _) =>
             {
@@ -489,7 +489,7 @@ public static class ConsumerSampleWindowFactory
             };
             button.Click += (_, _) =>
             {
-                _ = _host.RuntimeLogExportLines;
+                _host.ExportRuntimeLogs();
                 RefreshPanels();
             };
             return button;
