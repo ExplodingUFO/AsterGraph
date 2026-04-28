@@ -11,6 +11,7 @@
 - v0.59 large-graph UX baseline markers: `LARGE_GRAPH_UX_POLICY_OK:True`, `LARGE_GRAPH_UX_SCOPE_BOUNDARY_OK:True`, and `LARGE_GRAPH_UX_PROOF_BASELINE_OK:True`
 - v0.59 viewport LOD markers: `VIEWPORT_LOD_POLICY_OK:True`, `SELECTED_HOVERED_ADORNER_SCOPE_OK:True`, `LARGE_GRAPH_BALANCED_UX_OK:True`, and `VIEWPORT_LOD_SCOPE_BOUNDARY_OK:True`
 - v0.59 edge interaction markers: `EDGE_INTERACTION_CACHE_OK:True`, `EDGE_DRAG_ROUTE_SIMPLIFICATION_OK:True`, `SELECTED_EDGE_FEEDBACK_OK:True`, and `EDGE_RENDERING_SCOPE_BOUNDARY_OK:True`
+- v0.62 live canvas refresh markers: `NODE_DRAG_EDGE_REFRESH_OK:True`, `EDGE_ROUTE_REFRESH_OK:True`, and `LIVE_CANVAS_REFRESH_AUDIT_OK:True`
 - v0.59 mini-map and inspector projection markers: `MINIMAP_LIGHTWEIGHT_PROJECTION_OK:True`, `INSPECTOR_NARROW_PROJECTION_OK:True`, `LARGE_GRAPH_PANEL_SCOPE_OK:True`, and `PROJECTION_PERFORMANCE_EVIDENCE_OK:True`
 - v0.59 Large Graph UX handoff markers: `LARGE_GRAPH_UX_HANDOFF_OK:True`, `LARGE_GRAPH_UX_SCOPE_BOUNDARY_OK:True`, and `V059_MILESTONE_PROOF_OK:True`
 - v0.60 adapter-2 validation scope markers: `ADAPTER2_VALIDATION_SCOPE_OK:True`, `ADAPTER2_MATRIX_HANDOFF_OK:True`, and `ADAPTER2_SCOPE_BOUNDARY_OK:True`
@@ -53,6 +54,7 @@
 - large-graph UX baseline proof summarizes hosted performance mode, LOD policy, and widened-surface metrics without creating a new graph-size support tier: `LARGE_GRAPH_UX_POLICY_OK:True`, `LARGE_GRAPH_UX_SCOPE_BOUNDARY_OK:True`, `LARGE_GRAPH_UX_PROOF_BASELINE_OK:True`
 - viewport LOD proof keeps selected/hovered affordances on hosted workbench policy, not the runtime graph contract: `VIEWPORT_LOD_POLICY_OK:True`, `SELECTED_HOVERED_ADORNER_SCOPE_OK:True`, `LARGE_GRAPH_BALANCED_UX_OK:True`, `VIEWPORT_LOD_SCOPE_BOUNDARY_OK:True`
 - edge interaction proof summarizes existing edge quick-tool, toolbar, and geometry evidence on the hosted proof route without creating a runtime renderer contract: `EDGE_INTERACTION_CACHE_OK:True`, `EDGE_DRAG_ROUTE_SIMPLIFICATION_OK:True`, `SELECTED_EDGE_FEEDBACK_OK:True`, `EDGE_RENDERING_SCOPE_BOUNDARY_OK:True`
+- live canvas refresh proof covers immediate node-drag edge repaint and route-refresh evidence through existing renderer/observer seams: `NODE_DRAG_EDGE_REFRESH_OK:True`, `EDGE_ROUTE_REFRESH_OK:True`, `LIVE_CANVAS_REFRESH_AUDIT_OK:True`
 - panel projection proof summarizes mini-map lightweight projection and inspector narrow projection evidence on the hosted proof route without creating a broad graph subscription contract: `MINIMAP_LIGHTWEIGHT_PROJECTION_OK:True`, `INSPECTOR_NARROW_PROJECTION_OK:True`, `LARGE_GRAPH_PANEL_SCOPE_OK:True`, `PROJECTION_PERFORMANCE_EVIDENCE_OK:True`
 - v0.59 Large Graph UX handoff proof keeps phases 371-374 tied to existing hosted workbench evidence without expanding graph-size support claims: `LARGE_GRAPH_UX_HANDOFF_OK:True`, `LARGE_GRAPH_UX_SCOPE_BOUNDARY_OK:True`, `V059_MILESTONE_PROOF_OK:True`
 - adapter-2 validation scope proof keeps WPF on the same canonical route and matrix vocabulary without widening public WPF support or parity claims: `ADAPTER2_VALIDATION_SCOPE_OK:True`, `ADAPTER2_MATRIX_HANDOFF_OK:True`, `ADAPTER2_SCOPE_BOUNDARY_OK:True`

@@ -222,6 +222,9 @@ public sealed class ConsumerSampleProofTests
         Assert.True(result.EdgeDragRouteSimplificationOk);
         Assert.True(result.SelectedEdgeFeedbackOk);
         Assert.True(result.EdgeRenderingScopeBoundaryOk);
+        Assert.True(result.NodeDragEdgeRefreshOk);
+        Assert.True(result.EdgeRouteRefreshOk);
+        Assert.True(result.LiveCanvasRefreshAuditOk);
         Assert.True(result.MiniMapLightweightProjectionEvidenceOk);
         Assert.True(result.MinimapLightweightProjectionOk);
         Assert.True(result.InspectorNarrowProjectionOk);
@@ -379,6 +382,9 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(result.ProofLines, line => line == "EDGE_DRAG_ROUTE_SIMPLIFICATION_OK:True");
         Assert.Contains(result.ProofLines, line => line == "SELECTED_EDGE_FEEDBACK_OK:True");
         Assert.Contains(result.ProofLines, line => line == "EDGE_RENDERING_SCOPE_BOUNDARY_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "NODE_DRAG_EDGE_REFRESH_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "EDGE_ROUTE_REFRESH_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "LIVE_CANVAS_REFRESH_AUDIT_OK:True");
         Assert.Contains(result.ProofLines, line => line == "MINIMAP_LIGHTWEIGHT_PROJECTION_EVIDENCE_OK:True");
         Assert.Contains(result.ProofLines, line => line == "MINIMAP_LIGHTWEIGHT_PROJECTION_OK:True");
         Assert.Contains(result.ProofLines, line => line == "INSPECTOR_NARROW_PROJECTION_OK:True");

@@ -541,6 +541,60 @@ public sealed class NodeCanvasStandaloneTests
     }
 
     [AvaloniaFact]
+    public void StandaloneCanvas_NodeDrag_RendersConnectedEdgesImmediately()
+    {
+        var editor = CreateEditor();
+        editor.Session.Commands.StartConnection(SourceNodeId, SourcePortId);
+        editor.Session.Commands.CompleteConnection(TargetNodeId, TargetPortId);
+        var (window, canvas) = CreateStandaloneCanvasWindow(
+            editor,
+            presentation: new AsterGraphPresentationOptions
+            {
+                NodeVisualPresenter = new CustomNodeVisualPresenter(),
+            });
+        var pointer = new global::Avalonia.Input.Pointer(1, PointerType.Mouse, isPrimary: true);
+
+        try
+        {
+            var sourceNode = editor.FindNode(SourceNodeId)!;
+            var initialX = sourceNode.X;
+            var initialY = sourceNode.Y;
+            var sourceSurface = canvas.GetVisualDescendants()
+                .OfType<Border>()
+                .Single(control => string.Equals(
+                    AutomationProperties.GetName(control),
+                    "CUSTOM NODE VISUAL:Canvas Source",
+                    StringComparison.Ordinal));
+            var connectionLayer = Assert.IsType<Canvas>(canvas.FindControl<Canvas>("ConnectionLayer"));
+            var path = Assert.Single(connectionLayer.Children.OfType<global::Avalonia.Controls.Shapes.Path>());
+            var initialBounds = path.Data!.Bounds;
+            var pressPoint = WorldToScreenPoint(canvas, sourceNode.X + 24d, sourceNode.Y + 24d);
+            var movedPoint = WorldToScreenPoint(canvas, sourceNode.X + 104d, sourceNode.Y + 56d);
+            var pressedArgs = CreatePointerPressedArgs(sourceSurface, canvas, pointer, pressPoint, KeyModifiers.None);
+            var movedArgs = CreatePointerMovedArgs(canvas, pointer, movedPoint, KeyModifiers.None);
+
+            sourceSurface.RaiseEvent(pressedArgs);
+            InvokeCanvasPointerMoved(canvas, movedArgs);
+
+            sourceNode = editor.FindNode(SourceNodeId)!;
+            path = Assert.Single(connectionLayer.Children.OfType<global::Avalonia.Controls.Shapes.Path>());
+            var updatedBounds = path.Data!.Bounds;
+
+            Assert.True(pressedArgs.Handled);
+            Assert.True(movedArgs.Handled);
+            Assert.Same(canvas, pointer.Captured);
+            Assert.True(sourceNode.X > initialX);
+            Assert.True(sourceNode.Y > initialY);
+            Assert.NotEqual(initialBounds.X, updatedBounds.X);
+            Assert.NotEqual(initialBounds.Y, updatedBounds.Y);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
     public void CommandShortcutPolicy_OverridesDeleteShortcutForStandaloneCanvas()
     {
         var editor = CreateEditor();

@@ -565,6 +565,25 @@ public sealed record ConsumerSampleProofResult(
         && FeatureDescriptorIds is { Count: > 0 }
         && FeatureDescriptorIds.All(IsBoundedFeatureDescriptorId);
 
+    public bool NodeDragEdgeRefreshOk
+        => EdgeInteractionCacheOk
+        && EdgeDragRouteSimplificationOk
+        && ConnectionCount > 0;
+
+    public bool EdgeRouteRefreshOk
+        => EdgeQuickToolsOk
+        && ReadabilityRouteCleanupOk
+        && EdgeRenderingScopeBoundaryOk;
+
+    public bool LiveCanvasRefreshAuditOk
+        => NodeDragEdgeRefreshOk
+        && EdgeRouteRefreshOk
+        && SelectedEdgeFeedbackOk
+        && RuntimeOverlaySupportBundleOk
+        && ConnectionValidationSupportBundleOk
+        && FeatureDescriptorIds is { Count: > 0 }
+        && FeatureDescriptorIds.All(IsBoundedFeatureDescriptorId);
+
     public bool MinimapLightweightProjectionOk
         => MiniMapLightweightProjectionEvidenceOk
         && ViewportLodPolicyOk
@@ -648,6 +667,9 @@ public sealed record ConsumerSampleProofResult(
         && EdgeDragRouteSimplificationOk
         && SelectedEdgeFeedbackOk
         && EdgeRenderingScopeBoundaryOk
+        && NodeDragEdgeRefreshOk
+        && EdgeRouteRefreshOk
+        && LiveCanvasRefreshAuditOk
         && MinimapLightweightProjectionOk
         && InspectorNarrowProjectionOk
         && LargeGraphPanelScopeOk
@@ -818,6 +840,9 @@ public sealed record ConsumerSampleProofResult(
         $"EDGE_DRAG_ROUTE_SIMPLIFICATION_OK:{EdgeDragRouteSimplificationOk}",
         $"SELECTED_EDGE_FEEDBACK_OK:{SelectedEdgeFeedbackOk}",
         $"EDGE_RENDERING_SCOPE_BOUNDARY_OK:{EdgeRenderingScopeBoundaryOk}",
+        $"NODE_DRAG_EDGE_REFRESH_OK:{NodeDragEdgeRefreshOk}",
+        $"EDGE_ROUTE_REFRESH_OK:{EdgeRouteRefreshOk}",
+        $"LIVE_CANVAS_REFRESH_AUDIT_OK:{LiveCanvasRefreshAuditOk}",
         $"MINIMAP_LIGHTWEIGHT_PROJECTION_OK:{MinimapLightweightProjectionOk}",
         $"INSPECTOR_NARROW_PROJECTION_OK:{InspectorNarrowProjectionOk}",
         $"LARGE_GRAPH_PANEL_SCOPE_OK:{LargeGraphPanelScopeOk}",

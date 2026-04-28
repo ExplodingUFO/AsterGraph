@@ -682,6 +682,9 @@ public sealed class ReleaseClosureContractTests
             Assert.Contains("EDGE_DRAG_ROUTE_SIMPLIFICATION_OK:True", contents, StringComparison.Ordinal);
             Assert.Contains("SELECTED_EDGE_FEEDBACK_OK:True", contents, StringComparison.Ordinal);
             Assert.Contains("EDGE_RENDERING_SCOPE_BOUNDARY_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("NODE_DRAG_EDGE_REFRESH_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("EDGE_ROUTE_REFRESH_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("LIVE_CANVAS_REFRESH_AUDIT_OK:True", contents, StringComparison.Ordinal);
         }
 
         Assert.True(HasLineWithAll(englishStatus, "edge interaction proof", "existing edge quick-tool", "hosted proof route", "runtime renderer contract"));
