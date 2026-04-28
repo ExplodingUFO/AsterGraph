@@ -783,6 +783,23 @@ public sealed record ConsumerSampleProofResult(
         && WorkbenchFrictionEvidence.All(entry =>
             entry.ScopeBoundary.Contains("local synthetic evidence only", StringComparison.OrdinalIgnoreCase));
 
+    public bool WorkbenchAdopterPolishHandoffOk
+        => WorkbenchFrictionEvidenceOk
+        && WorkbenchFrictionPrioritizationOk
+        && WorkbenchAffordancePolishOk
+        && WorkbenchAffordanceRouteOk
+        && WorkbenchFrictionSupportBundleOk
+        && WorkbenchAdopterEvidenceAttachmentOk;
+
+    public bool WorkbenchAdopterPolishScopeBoundaryOk
+        => WorkbenchFrictionScopeBoundaryOk
+        && WorkbenchAffordanceScopeBoundaryOk
+        && WorkbenchEvidenceScopeBoundaryOk;
+
+    public bool V064MilestoneProofOk
+        => WorkbenchAdopterPolishHandoffOk
+        && WorkbenchAdopterPolishScopeBoundaryOk;
+
     public bool V063MilestoneProofOk
         => WorkbenchDiscoverabilityHandoffOk
         && WorkbenchDiscoverabilityScopeBoundaryOk;
@@ -848,7 +865,10 @@ public sealed record ConsumerSampleProofResult(
         && WorkbenchAffordanceScopeBoundaryOk
         && WorkbenchFrictionSupportBundleOk
         && WorkbenchAdopterEvidenceAttachmentOk
-        && WorkbenchEvidenceScopeBoundaryOk;
+        && WorkbenchEvidenceScopeBoundaryOk
+        && WorkbenchAdopterPolishHandoffOk
+        && WorkbenchAdopterPolishScopeBoundaryOk
+        && V064MilestoneProofOk;
 
     public IReadOnlyList<string> MetricLines =>
     [
@@ -919,6 +939,9 @@ public sealed record ConsumerSampleProofResult(
         $"WORKBENCH_FRICTION_SUPPORT_BUNDLE_OK:{WorkbenchFrictionSupportBundleOk}",
         $"WORKBENCH_ADOPTER_EVIDENCE_ATTACHMENT_OK:{WorkbenchAdopterEvidenceAttachmentOk}",
         $"WORKBENCH_EVIDENCE_SCOPE_BOUNDARY_OK:{WorkbenchEvidenceScopeBoundaryOk}",
+        $"WORKBENCH_ADOPTER_POLISH_HANDOFF_OK:{WorkbenchAdopterPolishHandoffOk}",
+        $"WORKBENCH_ADOPTER_POLISH_SCOPE_BOUNDARY_OK:{WorkbenchAdopterPolishScopeBoundaryOk}",
+        $"V064_MILESTONE_PROOF_OK:{V064MilestoneProofOk}",
         $"COMMAND_PALETTE_GROUPING_OK:{CommandPaletteGroupingOk}",
         $"COMMAND_PALETTE_DISABLED_REASON_OK:{CommandPaletteDisabledReasonOk}",
         $"COMMAND_PALETTE_RECENT_ACTIONS_OK:{CommandPaletteRecentActionsOk}",

@@ -198,6 +198,9 @@ public sealed class ConsumerSampleProofTests
         Assert.True(result.WorkbenchFrictionSupportBundleOk);
         Assert.True(result.WorkbenchAdopterEvidenceAttachmentOk);
         Assert.True(result.WorkbenchEvidenceScopeBoundaryOk);
+        Assert.True(result.WorkbenchAdopterPolishHandoffOk);
+        Assert.True(result.WorkbenchAdopterPolishScopeBoundaryOk);
+        Assert.True(result.V064MilestoneProofOk);
         Assert.True(result.CommandPaletteGroupingOk);
         Assert.True(result.CommandPaletteDisabledReasonOk);
         Assert.True(result.CommandPaletteRecentActionsOk);
@@ -333,6 +336,9 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(result.ProofLines, line => line == "WORKBENCH_FRICTION_SUPPORT_BUNDLE_OK:True");
         Assert.Contains(result.ProofLines, line => line == "WORKBENCH_ADOPTER_EVIDENCE_ATTACHMENT_OK:True");
         Assert.Contains(result.ProofLines, line => line == "WORKBENCH_EVIDENCE_SCOPE_BOUNDARY_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "WORKBENCH_ADOPTER_POLISH_HANDOFF_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "WORKBENCH_ADOPTER_POLISH_SCOPE_BOUNDARY_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "V064_MILESTONE_PROOF_OK:True");
         Assert.Contains(result.ProofLines, line => line == "COMMAND_PALETTE_GROUPING_OK:True");
         Assert.Contains(result.ProofLines, line => line == "COMMAND_PALETTE_DISABLED_REASON_OK:True");
         Assert.Contains(result.ProofLines, line => line == "COMMAND_PALETTE_RECENT_ACTIONS_OK:True");
@@ -892,6 +898,9 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(proofLines, line => line == "WORKBENCH_FRICTION_SUPPORT_BUNDLE_OK:True");
         Assert.Contains(proofLines, line => line == "WORKBENCH_ADOPTER_EVIDENCE_ATTACHMENT_OK:True");
         Assert.Contains(proofLines, line => line == "WORKBENCH_EVIDENCE_SCOPE_BOUNDARY_OK:True");
+        Assert.Contains(proofLines, line => line == "WORKBENCH_ADOPTER_POLISH_HANDOFF_OK:True");
+        Assert.Contains(proofLines, line => line == "WORKBENCH_ADOPTER_POLISH_SCOPE_BOUNDARY_OK:True");
+        Assert.Contains(proofLines, line => line == "V064_MILESTONE_PROOF_OK:True");
         Assert.Contains(proofLines, line => line == "NAVIGATION_HISTORY_OK:True");
         Assert.Contains(proofLines, line => line == "SCOPE_BREADCRUMB_NAVIGATION_OK:True");
         Assert.Contains(proofLines, line => line == "FOCUS_RESTORE_OK:True");

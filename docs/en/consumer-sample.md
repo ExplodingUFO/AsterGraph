@@ -31,6 +31,7 @@ Its v0.63 workbench discoverability handoff markers aggregate layout presets, pa
 Its v0.64 hosted workbench friction markers record local synthetic workflow evidence only, with explicit priority and scope-boundary text, not external adopter reports or a GA claim: `WORKBENCH_FRICTION_EVIDENCE_OK:True`, `WORKBENCH_FRICTION_PRIORITIZATION_OK:True`, and `WORKBENCH_FRICTION_SCOPE_BOUNDARY_OK:True`.
 Its bounded affordance polish markers prove one copyable `layout-resume` action through `AsterGraphWorkbenchOptions.ResetLayout`, not a new runtime route or broader workbench model: `WORKBENCH_AFFORDANCE_POLISH_OK:True`, `WORKBENCH_AFFORDANCE_ROUTE_OK:True`, and `WORKBENCH_AFFORDANCE_SCOPE_BOUNDARY_OK:True`.
 Its workbench evidence bundle markers prove the friction rows and selected affordance can travel in the local support bundle without remote telemetry or sync: `WORKBENCH_FRICTION_SUPPORT_BUNDLE_OK:True`, `WORKBENCH_ADOPTER_EVIDENCE_ATTACHMENT_OK:True`, and `WORKBENCH_EVIDENCE_SCOPE_BOUNDARY_OK:True`.
+Its v0.64 adopter polish handoff markers aggregate phases 392-394 without widening scope: `WORKBENCH_ADOPTER_POLISH_HANDOFF_OK:True`, `WORKBENCH_ADOPTER_POLISH_SCOPE_BOUNDARY_OK:True`, and `V064_MILESTONE_PROOF_OK:True`.
 Its authoring flow handoff summarizes quick-add connected nodes, insert-on-wire, reconnect editing, edge multiselect, and wire slicing on the existing session command path: `AUTHORING_FLOW_PROOF_OK:True`, `AUTHORING_FLOW_HANDOFF_OK:True`, and `AUTHORING_FLOW_SCOPE_BOUNDARY_OK:True`.
 
 The hosted route ladder is `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerSample.Avalonia`.
@@ -219,6 +220,9 @@ Expected proof markers:
 - `WORKBENCH_FRICTION_SUPPORT_BUNDLE_OK:True`
 - `WORKBENCH_ADOPTER_EVIDENCE_ATTACHMENT_OK:True`
 - `WORKBENCH_EVIDENCE_SCOPE_BOUNDARY_OK:True`
+- `WORKBENCH_ADOPTER_POLISH_HANDOFF_OK:True`
+- `WORKBENCH_ADOPTER_POLISH_SCOPE_BOUNDARY_OK:True`
+- `V064_MILESTONE_PROOF_OK:True`
 - `NODE_TOOLBAR_CONTRIBUTION_OK:True`
 - `EDGE_TOOLBAR_CONTRIBUTION_OK:True`
 - `TOOLBAR_CONTRIBUTION_DESCRIPTOR_OK:True`
@@ -381,6 +385,9 @@ Expected proof markers:
 - `WORKBENCH_FRICTION_SUPPORT_BUNDLE_OK:True`
 - `WORKBENCH_ADOPTER_EVIDENCE_ATTACHMENT_OK:True`
 - `WORKBENCH_EVIDENCE_SCOPE_BOUNDARY_OK:True`
+- `WORKBENCH_ADOPTER_POLISH_HANDOFF_OK:True`
+- `WORKBENCH_ADOPTER_POLISH_SCOPE_BOUNDARY_OK:True`
+- `V064_MILESTONE_PROOF_OK:True`
 - `NODE_TOOLBAR_CONTRIBUTION_OK:True`
 - `EDGE_TOOLBAR_CONTRIBUTION_OK:True`
 - `TOOLBAR_CONTRIBUTION_DESCRIPTOR_OK:True`

@@ -31,6 +31,7 @@ v0.63 workbench discoverability handoff marker 汇总 layout presets、panel sta
 v0.64 hosted workbench friction marker 只记录本地合成 workflow evidence，并带明确优先级和 scope-boundary 文本；它不是外部 adopter report，也不是 GA claim：`WORKBENCH_FRICTION_EVIDENCE_OK:True`、`WORKBENCH_FRICTION_PRIORITIZATION_OK:True` 和 `WORKBENCH_FRICTION_SCOPE_BOUNDARY_OK:True`。
 bounded affordance polish marker 证明一个可复制的 `layout-resume` 动作走 `AsterGraphWorkbenchOptions.ResetLayout`，不是新的 runtime route 或更大的 workbench model：`WORKBENCH_AFFORDANCE_POLISH_OK:True`、`WORKBENCH_AFFORDANCE_ROUTE_OK:True` 和 `WORKBENCH_AFFORDANCE_SCOPE_BOUNDARY_OK:True`。
 workbench evidence bundle marker 证明 friction rows 和选中的 affordance 可以随本地 support bundle 交付，但不代表 remote telemetry 或 sync：`WORKBENCH_FRICTION_SUPPORT_BUNDLE_OK:True`、`WORKBENCH_ADOPTER_EVIDENCE_ATTACHMENT_OK:True` 和 `WORKBENCH_EVIDENCE_SCOPE_BOUNDARY_OK:True`。
+v0.64 adopter polish handoff marker 汇总 phases 392-394，但不扩大范围：`WORKBENCH_ADOPTER_POLISH_HANDOFF_OK:True`、`WORKBENCH_ADOPTER_POLISH_SCOPE_BOUNDARY_OK:True` 和 `V064_MILESTONE_PROOF_OK:True`。
 authoring flow handoff 会汇总 quick-add、insert-on-wire、reconnect editing、edge multiselect 和 wire slicing，并继续走现有 session command path：`AUTHORING_FLOW_PROOF_OK:True`、`AUTHORING_FLOW_HANDOFF_OK:True` 和 `AUTHORING_FLOW_SCOPE_BOUNDARY_OK:True`。
 
 这条 hosted route ladder 是 `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerSample.Avalonia`。
@@ -219,6 +220,9 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 - `WORKBENCH_FRICTION_SUPPORT_BUNDLE_OK:True`
 - `WORKBENCH_ADOPTER_EVIDENCE_ATTACHMENT_OK:True`
 - `WORKBENCH_EVIDENCE_SCOPE_BOUNDARY_OK:True`
+- `WORKBENCH_ADOPTER_POLISH_HANDOFF_OK:True`
+- `WORKBENCH_ADOPTER_POLISH_SCOPE_BOUNDARY_OK:True`
+- `V064_MILESTONE_PROOF_OK:True`
 - `NODE_TOOLBAR_CONTRIBUTION_OK:True`
 - `EDGE_TOOLBAR_CONTRIBUTION_OK:True`
 - `TOOLBAR_CONTRIBUTION_DESCRIPTOR_OK:True`
@@ -381,6 +385,9 @@ Proof Handoff 负责实际 intake 说明。
 - `WORKBENCH_FRICTION_SUPPORT_BUNDLE_OK:True`
 - `WORKBENCH_ADOPTER_EVIDENCE_ATTACHMENT_OK:True`
 - `WORKBENCH_EVIDENCE_SCOPE_BOUNDARY_OK:True`
+- `WORKBENCH_ADOPTER_POLISH_HANDOFF_OK:True`
+- `WORKBENCH_ADOPTER_POLISH_SCOPE_BOUNDARY_OK:True`
+- `V064_MILESTONE_PROOF_OK:True`
 - `NODE_TOOLBAR_CONTRIBUTION_OK:True`
 - `EDGE_TOOLBAR_CONTRIBUTION_OK:True`
 - `TOOLBAR_CONTRIBUTION_DESCRIPTOR_OK:True`
