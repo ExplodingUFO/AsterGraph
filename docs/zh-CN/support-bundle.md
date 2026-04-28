@@ -4,7 +4,7 @@
 提交 beta 反馈时，可用时把 support bundle 作为附件使用。
 它不会上传任何东西，也不代表遥测、云服务或托管后端。
 如果你需要来自受防守 hosted proof route 的本地证据附件，就把它和 [公开 Beta 评估路径](./evaluation-path.md) 一起看。support bundle 的附件备注要写进受限 intake 记录里。
-这条 intake handoff 由 `SUPPORT_BUNDLE_INTAKE_HANDOFF_OK:True`、`ADOPTER_INTAKE_REFRESH_OK:True`、`ADOPTER_SUPPORT_BUNDLE_ATTACHMENT_OK:True` 和 `ADOPTER_CLAIM_EXPANSION_GATE_OK:True` 覆盖，并且只算本地证据。
+这条 intake handoff 由 `SUPPORT_BUNDLE_INTAKE_HANDOFF_OK:True`、`ADOPTER_INTAKE_REFRESH_OK:True`、`ADOPTER_SUPPORT_BUNDLE_ATTACHMENT_OK:True`、`ADOPTER_CLAIM_EXPANSION_GATE_OK:True`、`ADOPTION_API_STABILIZATION_HANDOFF_OK:True`、`ADOPTION_API_SCOPE_BOUNDARY_OK:True` 和 `V061_MILESTONE_PROOF_OK:True` 覆盖，并且只算本地证据。
 
 ## Canonical 生成入口
 

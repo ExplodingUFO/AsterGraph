@@ -41,6 +41,7 @@
 - 在同一个 release proof block 中同时保留 `PUBLIC_API_SURFACE_OK`、`PUBLIC_API_SCOPE_OK`、`PUBLIC_API_GUIDANCE_OK`、`ASTERGRAPH_TEMPLATE_SMOKE_OK` 和 `TEMPLATE_SMOKE_PLUGIN_VALIDATE_OK`。
 - Release-candidate proof markers：`API_RELEASE_CANDIDATE_PROOF_OK:True`、`PUBLIC_API_GUIDANCE_HANDOFF_OK:True` 和 `RELEASE_BOUNDARY_STABILITY_OK:True`。
 - v0.61 API stabilization markers：`PUBLIC_API_DIFF_GATE_OK:True`、`PUBLIC_API_USAGE_GUIDANCE_OK:True` 和 `PUBLIC_API_STABILITY_SCOPE_OK:True`。
+- v0.61 adoption/API handoff markers：`ADOPTION_API_STABILIZATION_HANDOFF_OK:True`、`ADOPTION_API_SCOPE_BOUNDARY_OK:True` 和 `V061_MILESTONE_PROOF_OK:True`。
 - 这份 handoff 不新增 analyzer、adapter 或 compatibility 承诺；它只发布当前 package guidance 和 proof marker。
 
 ## Drift 规则
@@ -68,7 +69,7 @@
 .\eng\validate-public-api-surface.ps1 -Configuration Release -Framework net9.0 -UpdateBaseline
 ```
 
-Release proof 必须在 `PUBLIC_API_SURFACE_OK`、`PUBLIC_API_GUIDANCE_OK`、`PUBLIC_API_DIFF_GATE_OK:True`、`PUBLIC_API_USAGE_GUIDANCE_OK:True` 和 `PUBLIC_API_STABILITY_SCOPE_OK:True` 旁边包含 `PUBLIC_API_SCOPE_OK:AsterGraph.Abstractions,AsterGraph.Core,AsterGraph.Editor,AsterGraph.Avalonia`。
+Release proof 必须在 `PUBLIC_API_SURFACE_OK`、`PUBLIC_API_GUIDANCE_OK`、`PUBLIC_API_DIFF_GATE_OK:True`、`PUBLIC_API_USAGE_GUIDANCE_OK:True`、`PUBLIC_API_STABILITY_SCOPE_OK:True`、`ADOPTION_API_STABILIZATION_HANDOFF_OK:True`、`ADOPTION_API_SCOPE_BOUNDARY_OK:True` 和 `V061_MILESTONE_PROOF_OK:True` 旁边包含 `PUBLIC_API_SCOPE_OK:AsterGraph.Abstractions,AsterGraph.Core,AsterGraph.Editor,AsterGraph.Avalonia`。
 
 ## 维护者检查表
 

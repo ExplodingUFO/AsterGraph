@@ -43,7 +43,7 @@ The current recommendation is based on four structured pre-public adoption rehea
 The current 0.xx alpha/beta hardening line is `Adoption Readiness / Release Candidate Hygiene`: keep the public recommendation, support boundary, API drift checks, and release proof story aligned before widening any capability claim. The previous `Performance / Export Hardening` work is now defended evidence, not the next public recommendation.
 
 Current proof handoff markers: `ADOPTION_RECOMMENDATION_CURRENT_OK:True`, `CLAIM_HYGIENE_BOUNDARY_OK:True`, `RELEASE_READINESS_GATE_OK:True`, `SUPPORT_BOUNDARY_GATE_OK:True`, and `BETA_CLAIM_ALIGNMENT_OK:True`.
-Milestone handoff markers: `ADOPTION_READINESS_HANDOFF_OK:True`, `ADOPTION_SCOPE_BOUNDARY_OK:True`, and `V056_MILESTONE_PROOF_OK:True`.
+Milestone handoff markers: `ADOPTION_READINESS_HANDOFF_OK:True`, `ADOPTION_SCOPE_BOUNDARY_OK:True`, `V056_MILESTONE_PROOF_OK:True`, `ADOPTION_API_STABILIZATION_HANDOFF_OK:True`, `ADOPTION_API_SCOPE_BOUNDARY_OK:True`, and `V061_MILESTONE_PROOF_OK:True`.
 
 1. **seeded rehearsals do not count toward the 3-5 gate**
 2. **each real external report must keep route, version, proof markers, friction, support-bundle attachment note, and claim-expansion status in the same bounded schema**
@@ -51,6 +51,8 @@ Milestone handoff markers: `ADOPTION_READINESS_HANDOFF_OK:True`, `ADOPTION_SCOPE
 4. **do not widen support or capability claims before 3-5 real external reports cluster on the same bounded risk**
 
 Phase 380 refresh proof: `ADOPTER_INTAKE_REFRESH_OK:True` keeps this page, the GitHub intake template, and adopter triage checklist on the same bounded schema; `ADOPTER_SUPPORT_BUNDLE_ATTACHMENT_OK:True` keeps `SUPPORT_BUNDLE_PATH:...` or `NO_SUPPORT_BUNDLE:route-cannot-produce-one` attached to that same record; `ADOPTER_CLAIM_EXPANSION_GATE_OK:True` keeps claim expansion blocked until 3-5 real external reports cluster on the same bounded risk.
+
+v0.61 handoff proof: `ADOPTION_API_STABILIZATION_HANDOFF_OK:True` aggregates the refreshed adopter intake, public API diff/guidance gate, and release-boundary wording; `ADOPTION_API_SCOPE_BOUNDARY_OK:True` keeps the handoff inside the current four-package SDK, Avalonia-hosted, WPF-validation-only, no-marketplace, no-sandbox, no-execution-engine, no-GA boundary; `V061_MILESTONE_PROOF_OK:True` marks this recommendation as the closeout for the 0.16.0-beta adoption/API stabilization loop.
 
 Until that threshold is met, keep this seeded recommendation in place instead of widening the next beta line ad hoc.
 

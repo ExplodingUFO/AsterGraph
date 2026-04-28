@@ -92,6 +92,9 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("RELEASE_READINESS_GATE_OK:True", notes, StringComparison.Ordinal);
         Assert.Contains("SUPPORT_BOUNDARY_GATE_OK:True", notes, StringComparison.Ordinal);
         Assert.Contains("BETA_CLAIM_ALIGNMENT_OK:True", notes, StringComparison.Ordinal);
+        Assert.Contains("ADOPTION_API_STABILIZATION_HANDOFF_OK:True", notes, StringComparison.Ordinal);
+        Assert.Contains("ADOPTION_API_SCOPE_BOUNDARY_OK:True", notes, StringComparison.Ordinal);
+        Assert.Contains("V061_MILESTONE_PROOF_OK:True", notes, StringComparison.Ordinal);
         Assert.Contains("0.xx alpha/beta hardening line", notes, StringComparison.Ordinal);
         Assert.True(HasLineWithAll(notes, "API adoption proof", "PUBLIC_API_SURFACE_OK", "PUBLIC_API_GUIDANCE_OK", "generated template/plugin validation"));
         Assert.Contains("PUBLIC_API_DIFF_GATE_OK:True", notes, StringComparison.Ordinal);
@@ -317,6 +320,9 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("'PUBLIC_API_DIFF_GATE_OK:True'", ciScript, StringComparison.Ordinal);
         Assert.Contains("'PUBLIC_API_USAGE_GUIDANCE_OK:True'", ciScript, StringComparison.Ordinal);
         Assert.Contains("'PUBLIC_API_STABILITY_SCOPE_OK:True'", ciScript, StringComparison.Ordinal);
+        Assert.Contains("'ADOPTION_API_STABILIZATION_HANDOFF_OK:True'", ciScript, StringComparison.Ordinal);
+        Assert.Contains("'ADOPTION_API_SCOPE_BOUNDARY_OK:True'", ciScript, StringComparison.Ordinal);
+        Assert.Contains("'V061_MILESTONE_PROOF_OK:True'", ciScript, StringComparison.Ordinal);
 
         var releaseValidationStart = ciScript.IndexOf("function Invoke-ReleaseValidation", StringComparison.Ordinal);
         Assert.True(releaseValidationStart >= 0, "ci.ps1 should contain Invoke-ReleaseValidation.");
@@ -354,6 +360,9 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("PUBLIC_API_DIFF_GATE_OK", prereleaseNotesScript, StringComparison.Ordinal);
         Assert.Contains("PUBLIC_API_USAGE_GUIDANCE_OK", prereleaseNotesScript, StringComparison.Ordinal);
         Assert.Contains("PUBLIC_API_STABILITY_SCOPE_OK", prereleaseNotesScript, StringComparison.Ordinal);
+        Assert.Contains("ADOPTION_API_STABILIZATION_HANDOFF_OK", prereleaseNotesScript, StringComparison.Ordinal);
+        Assert.Contains("ADOPTION_API_SCOPE_BOUNDARY_OK", prereleaseNotesScript, StringComparison.Ordinal);
+        Assert.Contains("V061_MILESTONE_PROOF_OK", prereleaseNotesScript, StringComparison.Ordinal);
         Assert.Contains("API adoption proof", prereleaseNotesScript, StringComparison.Ordinal);
     }
 
@@ -416,6 +425,9 @@ public sealed class ReleaseClosureContractTests
             Assert.Contains("PUBLIC_API_DIFF_GATE_OK:True", contents, StringComparison.Ordinal);
             Assert.Contains("PUBLIC_API_USAGE_GUIDANCE_OK:True", contents, StringComparison.Ordinal);
             Assert.Contains("PUBLIC_API_STABILITY_SCOPE_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("ADOPTION_API_STABILIZATION_HANDOFF_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("ADOPTION_API_SCOPE_BOUNDARY_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("V061_MILESTONE_PROOF_OK:True", contents, StringComparison.Ordinal);
         }
     }
 
@@ -437,6 +449,8 @@ public sealed class ReleaseClosureContractTests
         Assert.True(HasLineWithAll(chineseInventory, "API_RELEASE_CANDIDATE_PROOF_OK:True", "PUBLIC_API_GUIDANCE_HANDOFF_OK:True", "RELEASE_BOUNDARY_STABILITY_OK:True"));
         Assert.True(HasLineWithAll(englishInventory, "PUBLIC_API_DIFF_GATE_OK:True", "PUBLIC_API_USAGE_GUIDANCE_OK:True", "PUBLIC_API_STABILITY_SCOPE_OK:True"));
         Assert.True(HasLineWithAll(chineseInventory, "PUBLIC_API_DIFF_GATE_OK:True", "PUBLIC_API_USAGE_GUIDANCE_OK:True", "PUBLIC_API_STABILITY_SCOPE_OK:True"));
+        Assert.True(HasLineWithAll(englishInventory, "ADOPTION_API_STABILIZATION_HANDOFF_OK:True", "ADOPTION_API_SCOPE_BOUNDARY_OK:True", "V061_MILESTONE_PROOF_OK:True"));
+        Assert.True(HasLineWithAll(chineseInventory, "ADOPTION_API_STABILIZATION_HANDOFF_OK:True", "ADOPTION_API_SCOPE_BOUNDARY_OK:True", "V061_MILESTONE_PROOF_OK:True"));
 
         Assert.True(HasLineWithAll(englishChecklist, "public API guidance proof", "PUBLIC_API_SCOPE_OK", "template/plugin proof"));
         Assert.True(HasLineWithAll(chineseChecklist, "public API guidance proof", "PUBLIC_API_SCOPE_OK", "template/plugin proof"));
@@ -450,6 +464,9 @@ public sealed class ReleaseClosureContractTests
             Assert.Contains("PUBLIC_API_DIFF_GATE_OK:True", contents, StringComparison.Ordinal);
             Assert.Contains("PUBLIC_API_USAGE_GUIDANCE_OK:True", contents, StringComparison.Ordinal);
             Assert.Contains("PUBLIC_API_STABILITY_SCOPE_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("ADOPTION_API_STABILIZATION_HANDOFF_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("ADOPTION_API_SCOPE_BOUNDARY_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("V061_MILESTONE_PROOF_OK:True", contents, StringComparison.Ordinal);
         }
     }
 
@@ -481,6 +498,9 @@ public sealed class ReleaseClosureContractTests
             Assert.Contains("RELEASE_READINESS_GATE_OK:True", contents, StringComparison.Ordinal);
             Assert.Contains("SUPPORT_BOUNDARY_GATE_OK:True", contents, StringComparison.Ordinal);
             Assert.Contains("BETA_CLAIM_ALIGNMENT_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("ADOPTION_API_STABILIZATION_HANDOFF_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("ADOPTION_API_SCOPE_BOUNDARY_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("V061_MILESTONE_PROOF_OK:True", contents, StringComparison.Ordinal);
         }
     }
 

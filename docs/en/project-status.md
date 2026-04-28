@@ -103,6 +103,7 @@ Every real external report used for this gate must carry the same intake vocabul
 
 Current intake gate markers: `ADOPTION_INTAKE_EVIDENCE_OK:True`, `SUPPORT_BUNDLE_INTAKE_HANDOFF_OK:True`, and `REAL_EXTERNAL_REPORT_GATE_OK:True`.
 Current adopter refresh markers: `ADOPTER_INTAKE_REFRESH_OK:True`, `ADOPTER_SUPPORT_BUNDLE_ATTACHMENT_OK:True`, and `ADOPTER_CLAIM_EXPANSION_GATE_OK:True`.
+Current v0.61 handoff markers: `ADOPTION_API_STABILIZATION_HANDOFF_OK:True`, `ADOPTION_API_SCOPE_BOUNDARY_OK:True`, and `V061_MILESTONE_PROOF_OK:True`.
 
 ### Externally proven now
 
@@ -133,6 +134,7 @@ Current adopter refresh markers: `ADOPTER_INTAKE_REFRESH_OK:True`, `ADOPTER_SUPP
 - Release-candidate proof handoff markers: `API_RELEASE_CANDIDATE_PROOF_OK:True`, `PUBLIC_API_GUIDANCE_HANDOFF_OK:True`, and `RELEASE_BOUNDARY_STABILITY_OK:True`.
 - v0.61 API stabilization markers: `PUBLIC_API_DIFF_GATE_OK:True`, `PUBLIC_API_USAGE_GUIDANCE_OK:True`, and `PUBLIC_API_STABILITY_SCOPE_OK:True`.
 - the current 0.xx alpha/beta hardening line is `Adoption Readiness / Release Candidate Hygiene`: keep the public recommendation, API drift, support boundary, and release proof gates aligned before any release-candidate, GA, or `1.0` language; `ADOPTION_RECOMMENDATION_CURRENT_OK:True`, `CLAIM_HYGIENE_BOUNDARY_OK:True`, `RELEASE_READINESS_GATE_OK:True`, `SUPPORT_BOUNDARY_GATE_OK:True`, and `BETA_CLAIM_ALIGNMENT_OK:True` are the proof handoff markers
+- v0.61 adoption/API stabilization handoff aggregates the refreshed adopter intake, public API diff/guidance gate, and release-boundary wording without widening the support scope: `ADOPTION_API_STABILIZATION_HANDOFF_OK:True`, `ADOPTION_API_SCOPE_BOUNDARY_OK:True`, and `V061_MILESTONE_PROOF_OK:True`
 - seeded rehearsals do not count toward the 3-5 gate
 - if a new report does not fit one of the proven or bounded rows above, route it through the [Adoption Feedback Loop](./adoption-feedback.md) and the [Beta Support Bundle](./support-bundle.md) instead of widening the claim ad hoc; the claim-expansion status remains a triage field until the 3-5 real external reports gate is met
 

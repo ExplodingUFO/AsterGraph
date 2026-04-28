@@ -123,6 +123,9 @@ Expected high-signal markers:
 - `RELEASE_READINESS_GATE_OK:True`
 - `SUPPORT_BOUNDARY_GATE_OK:True`
 - `BETA_CLAIM_ALIGNMENT_OK:True`
+- `ADOPTION_API_STABILIZATION_HANDOFF_OK:True`
+- `ADOPTION_API_SCOPE_BOUNDARY_OK:True`
+- `V061_MILESTONE_PROOF_OK:True`
 - `ADOPTION_READINESS_HANDOFF_OK:True`
 - `ADOPTION_SCOPE_BOUNDARY_OK:True`
 - `V056_MILESTONE_PROOF_OK:True`
@@ -175,6 +178,7 @@ Expected high-signal markers:
 - confirm Phase 380 adopter refresh markers stay visible in release messaging: `ADOPTER_INTAKE_REFRESH_OK:True`, `ADOPTER_SUPPORT_BUNDLE_ATTACHMENT_OK:True`, and `ADOPTER_CLAIM_EXPANSION_GATE_OK:True`
 - GA prep checklist: adoption evidence, API drift, support boundary, and release proof gates must all stay explicit before any GA or `1.0` messaging
 - repeat the current 0.xx alpha/beta hardening handoff in release messaging: `Adoption Readiness / Release Candidate Hygiene` means the public recommendation, API drift, support boundary, and release proof gates stay aligned before release-candidate, GA, or `1.0` language; include `ADOPTION_RECOMMENDATION_CURRENT_OK:True`, `CLAIM_HYGIENE_BOUNDARY_OK:True`, `RELEASE_READINESS_GATE_OK:True`, `SUPPORT_BOUNDARY_GATE_OK:True`, and `BETA_CLAIM_ALIGNMENT_OK:True`
+- confirm the v0.61 adoption/API stabilization handoff includes `ADOPTION_API_STABILIZATION_HANDOFF_OK:True`, `ADOPTION_API_SCOPE_BOUNDARY_OK:True`, and `V061_MILESTONE_PROOF_OK:True`, and that the next recommendation remains external adoption/API stabilization rather than WPF parity, marketplace, sandboxing, execution-engine, or GA expansion
 - keep `xlarge` described as telemetry-only; do not present it as a 10000-node support promise or virtualization commitment
 - if `NUGET_API_KEY` is configured, confirm package publication succeeds
 - if `NUGET_API_KEY` is not configured, confirm the workflow reports a deliberate NuGet publish skip instead of a failure

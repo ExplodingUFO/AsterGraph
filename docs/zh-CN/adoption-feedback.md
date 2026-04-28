@@ -43,7 +43,7 @@
 当前 `0.xx` alpha/beta hardening 线命名为 `Adoption Readiness / Release Candidate Hygiene`：先把公开推荐、support boundary、API drift 检查和 release proof 口径保持一致，再考虑扩大任何 capability 声明。之前的 `Performance / Export Hardening` 已经变成 defended evidence，不再是下一条公开推荐。
 
 当前 proof handoff markers：`ADOPTION_RECOMMENDATION_CURRENT_OK:True`、`CLAIM_HYGIENE_BOUNDARY_OK:True`、`RELEASE_READINESS_GATE_OK:True`、`SUPPORT_BOUNDARY_GATE_OK:True` 和 `BETA_CLAIM_ALIGNMENT_OK:True`。
-里程碑 handoff markers：`ADOPTION_READINESS_HANDOFF_OK:True`、`ADOPTION_SCOPE_BOUNDARY_OK:True` 和 `V056_MILESTONE_PROOF_OK:True`。
+里程碑 handoff markers：`ADOPTION_READINESS_HANDOFF_OK:True`、`ADOPTION_SCOPE_BOUNDARY_OK:True`、`V056_MILESTONE_PROOF_OK:True`、`ADOPTION_API_STABILIZATION_HANDOFF_OK:True`、`ADOPTION_API_SCOPE_BOUNDARY_OK:True` 和 `V061_MILESTONE_PROOF_OK:True`。
 
 1. **维护者种子预演证据不计入 3 到 5 的门槛**
 2. **每条真实外部报告都必须在同一套受限 schema 内保留 route、version、proof 标记、摩擦点、support bundle 附件备注和 claim-expansion status**
@@ -51,6 +51,8 @@
 4. **在 3 到 5 条真实外部报告还没有聚焦到同一个受限风险前，不要扩大 support 或 capability claim**
 
 Phase 380 refresh proof：`ADOPTER_INTAKE_REFRESH_OK:True` 保持这页、GitHub intake 模板和 adopter triage 清单使用同一套受限 schema；`ADOPTER_SUPPORT_BUNDLE_ATTACHMENT_OK:True` 保持 `SUPPORT_BUNDLE_PATH:...` 或 `NO_SUPPORT_BUNDLE:route-cannot-produce-one` 附在同一条记录上；`ADOPTER_CLAIM_EXPANSION_GATE_OK:True` 保持 claim expansion 在 3 到 5 条真实外部报告聚焦到同一个受限风险前继续阻塞。
+
+v0.61 handoff proof：`ADOPTION_API_STABILIZATION_HANDOFF_OK:True` 汇总 refreshed adopter intake、public API diff/guidance gate 和 release-boundary wording；`ADOPTION_API_SCOPE_BOUNDARY_OK:True` 把 handoff 限定在当前四个 SDK 包、Avalonia hosted、WPF validation-only、无 marketplace、无 sandbox、无 execution engine、无 GA 的边界内；`V061_MILESTONE_PROOF_OK:True` 表示这就是 0.16.0-beta adoption/API stabilization loop 的收口建议。
 
 在达到这个阈值之前，保持这份种子建议不变，不要临时把下一条 beta 线往别处扩。
 
