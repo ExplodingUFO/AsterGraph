@@ -17,6 +17,7 @@
 - 第 1c 步：把 selected/hovered affordances 继续约束在 hosted viewport LOD policy 内：`VIEWPORT_LOD_POLICY_OK:True`、`SELECTED_HOVERED_ADORNER_SCOPE_OK:True`、`LARGE_GRAPH_BALANCED_UX_OK:True` 和 `VIEWPORT_LOD_SCOPE_BOUNDARY_OK:True`。
 - 第 1d 步：把 edge interaction proof 约束在现有 edge quick-tool、toolbar 和 geometry 证据内：`EDGE_INTERACTION_CACHE_OK:True`、`EDGE_DRAG_ROUTE_SIMPLIFICATION_OK:True`、`SELECTED_EDGE_FEEDBACK_OK:True` 和 `EDGE_RENDERING_SCOPE_BOUNDARY_OK:True`。这些 marker 不是 runtime renderer contract。
 - 第 1e 步：把 mini-map 和 inspector projection 证据保持在窄投影范围内：`MINIMAP_LIGHTWEIGHT_PROJECTION_OK:True`、`INSPECTOR_NARROW_PROJECTION_OK:True`、`LARGE_GRAPH_PANEL_SCOPE_OK:True` 和 `PROJECTION_PERFORMANCE_EVIDENCE_OK:True`。这些 marker 不是 broad graph subscription contract。
+- 第 1f 步：把 v0.59 Large Graph UX handoff marker 绑定到 phases 371-374 的 proof clusters：`LARGE_GRAPH_UX_HANDOFF_OK:True`、`LARGE_GRAPH_UX_SCOPE_BOUNDARY_OK:True` 和 `V059_MILESTONE_PROOF_OK:True`。
 - 第 2 步：运行 `ScaleSmoke -- --tier large`，并在同一条 `ScaleSmoke` 路线上继续守住 `SCALE_AUTHORING_BUDGET_OK:large:True:none` 和 `SCALE_EXPORT_BUDGET_OK:large:True:none`。
 
 ## Proof 合同
@@ -55,6 +56,8 @@ dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj --
 - `INSPECTOR_NARROW_PROJECTION_OK:True`
 - `LARGE_GRAPH_PANEL_SCOPE_OK:True`
 - `PROJECTION_PERFORMANCE_EVIDENCE_OK:True`
+- `LARGE_GRAPH_UX_HANDOFF_OK:True`
+- `V059_MILESTONE_PROOF_OK:True`
 - `HOST_NATIVE_METRIC:stencil_search_ms=...`
 - `HOST_NATIVE_METRIC:command_surface_refresh_ms=...`
 - `HOST_NATIVE_METRIC:node_tool_projection_ms=...`

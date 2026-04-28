@@ -25,6 +25,7 @@ Its large-graph UX baseline markers summarize existing hosted performance and LO
 Its viewport LOD markers prove selected/hovered affordances stay bounded to hosted workbench policy: `VIEWPORT_LOD_POLICY_OK:True`, `SELECTED_HOVERED_ADORNER_SCOPE_OK:True`, `LARGE_GRAPH_BALANCED_UX_OK:True`, and `VIEWPORT_LOD_SCOPE_BOUNDARY_OK:True`.
 Its edge interaction markers summarize hosted edge quick-tool, toolbar, and geometry evidence without creating a runtime renderer contract: `EDGE_INTERACTION_CACHE_OK:True`, `EDGE_DRAG_ROUTE_SIMPLIFICATION_OK:True`, `SELECTED_EDGE_FEEDBACK_OK:True`, and `EDGE_RENDERING_SCOPE_BOUNDARY_OK:True`.
 Its panel projection markers keep mini-map and inspector evidence narrow: `MINIMAP_LIGHTWEIGHT_PROJECTION_OK:True`, `INSPECTOR_NARROW_PROJECTION_OK:True`, `LARGE_GRAPH_PANEL_SCOPE_OK:True`, and `PROJECTION_PERFORMANCE_EVIDENCE_OK:True`.
+Its v0.59 handoff markers aggregate the Large Graph UX phases without widening graph-size support claims: `LARGE_GRAPH_UX_HANDOFF_OK:True`, `LARGE_GRAPH_UX_SCOPE_BOUNDARY_OK:True`, and `V059_MILESTONE_PROOF_OK:True`.
 Its authoring flow handoff summarizes quick-add connected nodes, insert-on-wire, reconnect editing, edge multiselect, and wire slicing on the existing session command path: `AUTHORING_FLOW_PROOF_OK:True`, `AUTHORING_FLOW_HANDOFF_OK:True`, and `AUTHORING_FLOW_SCOPE_BOUNDARY_OK:True`.
 
 The hosted route ladder is `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerSample.Avalonia`.
@@ -406,6 +407,7 @@ If you want to build the same medium host in your own app, copy these seams in t
 - authoring flow markers: keep `AUTHORING_FLOW_PROOF_OK:True`, `AUTHORING_FLOW_HANDOFF_OK:True`, and `AUTHORING_FLOW_SCOPE_BOUNDARY_OK:True` together with the quick-add, insert-on-wire, reconnect editing, edge multiselect, and wire slicing proof lines
 - edge interaction markers: keep `EDGE_INTERACTION_CACHE_OK:True`, `EDGE_DRAG_ROUTE_SIMPLIFICATION_OK:True`, `SELECTED_EDGE_FEEDBACK_OK:True`, and `EDGE_RENDERING_SCOPE_BOUNDARY_OK:True` together with existing edge quick-tool, toolbar, and geometry evidence
 - panel projection markers: keep `MINIMAP_LIGHTWEIGHT_PROJECTION_OK:True`, `INSPECTOR_NARROW_PROJECTION_OK:True`, `LARGE_GRAPH_PANEL_SCOPE_OK:True`, and `PROJECTION_PERFORMANCE_EVIDENCE_OK:True` together with hosted mini-map policy, selected-parameter inspector evidence, and existing projection metrics
+- v0.59 handoff markers: keep `LARGE_GRAPH_UX_HANDOFF_OK:True`, `LARGE_GRAPH_UX_SCOPE_BOUNDARY_OK:True`, and `V059_MILESTONE_PROOF_OK:True` together with the phase 371-374 proof clusters
 - final handoff markers: keep `EXPERIENCE_POLISH_HANDOFF_OK:True`, `FEATURE_ENHANCEMENT_PROOF_OK:True`, and `EXPERIENCE_SCOPE_BOUNDARY_OK:True` together so the scope boundary remains explicit
 - sample-owned content such as the review/audit node family, action ids and titles, and proof labels beyond the defended markers should stay local to your app
 

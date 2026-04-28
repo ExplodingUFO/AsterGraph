@@ -227,6 +227,8 @@ public sealed class ConsumerSampleProofTests
         Assert.True(result.InspectorNarrowProjectionOk);
         Assert.True(result.LargeGraphPanelScopeOk);
         Assert.True(result.ProjectionPerformanceEvidenceOk);
+        Assert.True(result.LargeGraphUxHandoffOk);
+        Assert.True(result.V059MilestoneProofOk);
         Assert.True(result.SelectedParameterProjectionCount > 0);
         Assert.True(result.TotalParameterProjectionCount > result.SelectedParameterProjectionCount);
         Assert.True(result.StartupMs >= 0);
@@ -382,6 +384,8 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(result.ProofLines, line => line == "INSPECTOR_NARROW_PROJECTION_OK:True");
         Assert.Contains(result.ProofLines, line => line == "LARGE_GRAPH_PANEL_SCOPE_OK:True");
         Assert.Contains(result.ProofLines, line => line == "PROJECTION_PERFORMANCE_EVIDENCE_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "LARGE_GRAPH_UX_HANDOFF_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "V059_MILESTONE_PROOF_OK:True");
         Assert.Contains(result.MetricLines, line => line.Contains("startup_ms", StringComparison.Ordinal));
         Assert.Contains(result.MetricLines, line => line.Contains("command_latency_ms", StringComparison.Ordinal));
         Assert.Contains(result.MetricLines, line => line.Contains("stencil_search_ms", StringComparison.Ordinal));

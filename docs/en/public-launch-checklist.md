@@ -123,6 +123,8 @@ Expected high-signal markers:
 - `INSPECTOR_NARROW_PROJECTION_OK:True`
 - `LARGE_GRAPH_PANEL_SCOPE_OK:True`
 - `PROJECTION_PERFORMANCE_EVIDENCE_OK:True`
+- `LARGE_GRAPH_UX_HANDOFF_OK:True`
+- `V059_MILESTONE_PROOF_OK:True`
 - synthetic dry-run records from [Synthetic Adoption Intake Dry-Run Fixtures](./adoption-intake-dry-run.md) are maintainer/internal rehearsal only; do not count them toward the 3-5 real external report gate, and do not widen support or capability claims from them
 - every beta intake record includes report type, adopter context, route, version, proof markers, friction, support-bundle attachment note, and claim-expansion status; a single report does not widen public claims
 

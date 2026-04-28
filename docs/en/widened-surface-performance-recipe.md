@@ -17,6 +17,7 @@ Pair it with `ConsumerSample.Avalonia` for hosted metrics and with `ScaleSmoke` 
 - Step 1c: Keep selected/hovered affordances under hosted viewport LOD policy: `VIEWPORT_LOD_POLICY_OK:True`, `SELECTED_HOVERED_ADORNER_SCOPE_OK:True`, `LARGE_GRAPH_BALANCED_UX_OK:True`, and `VIEWPORT_LOD_SCOPE_BOUNDARY_OK:True`.
 - Step 1d: Keep edge interaction proof bounded to existing edge quick-tool, toolbar, and geometry evidence: `EDGE_INTERACTION_CACHE_OK:True`, `EDGE_DRAG_ROUTE_SIMPLIFICATION_OK:True`, `SELECTED_EDGE_FEEDBACK_OK:True`, and `EDGE_RENDERING_SCOPE_BOUNDARY_OK:True`. These markers are not a runtime renderer contract.
 - Step 1e: Keep mini-map and inspector projection evidence narrow: `MINIMAP_LIGHTWEIGHT_PROJECTION_OK:True`, `INSPECTOR_NARROW_PROJECTION_OK:True`, `LARGE_GRAPH_PANEL_SCOPE_OK:True`, and `PROJECTION_PERFORMANCE_EVIDENCE_OK:True`. These markers are not a broad graph subscription contract.
+- Step 1f: Keep the v0.59 Large Graph UX handoff markers tied to the phase 371-374 proof clusters: `LARGE_GRAPH_UX_HANDOFF_OK:True`, `LARGE_GRAPH_UX_SCOPE_BOUNDARY_OK:True`, and `V059_MILESTONE_PROOF_OK:True`.
 - Step 2: Run `ScaleSmoke -- --tier large` and keep `SCALE_AUTHORING_BUDGET_OK:large:True:none` plus `SCALE_EXPORT_BUDGET_OK:large:True:none` on the same `ScaleSmoke` route.
 
 ## Proof Contract
@@ -55,6 +56,8 @@ Expected proof markers:
 - `INSPECTOR_NARROW_PROJECTION_OK:True`
 - `LARGE_GRAPH_PANEL_SCOPE_OK:True`
 - `PROJECTION_PERFORMANCE_EVIDENCE_OK:True`
+- `LARGE_GRAPH_UX_HANDOFF_OK:True`
+- `V059_MILESTONE_PROOF_OK:True`
 - `HOST_NATIVE_METRIC:stencil_search_ms=...`
 - `HOST_NATIVE_METRIC:command_surface_refresh_ms=...`
 - `HOST_NATIVE_METRIC:node_tool_projection_ms=...`

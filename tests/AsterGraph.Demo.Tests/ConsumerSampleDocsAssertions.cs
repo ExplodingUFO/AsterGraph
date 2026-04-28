@@ -132,6 +132,8 @@ internal static class ConsumerSampleDocsAssertions
         Assert.Contains("INSPECTOR_NARROW_PROJECTION_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("LARGE_GRAPH_PANEL_SCOPE_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("PROJECTION_PERFORMANCE_EVIDENCE_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("LARGE_GRAPH_UX_HANDOFF_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("V059_MILESTONE_PROOF_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("CONSUMER_SAMPLE_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("parameterSnapshots", contents, StringComparison.Ordinal);
         Assert.Contains("readinessStatus", contents, StringComparison.Ordinal);

@@ -595,6 +595,26 @@ public sealed record ConsumerSampleProofResult(
         && NodeToolProjectionMs >= 0
         && EdgeToolProjectionMs >= 0;
 
+    public bool LargeGraphUxHandoffOk
+        => LargeGraphUxProofBaselineOk
+        && ViewportLodPolicyOk
+        && SelectedHoveredAdornerScopeOk
+        && LargeGraphBalancedUxOk
+        && EdgeInteractionCacheOk
+        && EdgeDragRouteSimplificationOk
+        && SelectedEdgeFeedbackOk
+        && MinimapLightweightProjectionOk
+        && InspectorNarrowProjectionOk
+        && LargeGraphPanelScopeOk
+        && ProjectionPerformanceEvidenceOk;
+
+    public bool V059MilestoneProofOk
+        => LargeGraphUxHandoffOk
+        && LargeGraphUxScopeBoundaryOk
+        && ViewportLodScopeBoundaryOk
+        && EdgeRenderingScopeBoundaryOk
+        && LargeGraphPanelScopeOk;
+
     public bool IsOk
         => HostMenuActionOk
         && PluginContributionOk
@@ -631,7 +651,9 @@ public sealed record ConsumerSampleProofResult(
         && MinimapLightweightProjectionOk
         && InspectorNarrowProjectionOk
         && LargeGraphPanelScopeOk
-        && ProjectionPerformanceEvidenceOk;
+        && ProjectionPerformanceEvidenceOk
+        && LargeGraphUxHandoffOk
+        && V059MilestoneProofOk;
 
     public IReadOnlyList<string> MetricLines =>
     [
@@ -800,6 +822,8 @@ public sealed record ConsumerSampleProofResult(
         $"INSPECTOR_NARROW_PROJECTION_OK:{InspectorNarrowProjectionOk}",
         $"LARGE_GRAPH_PANEL_SCOPE_OK:{LargeGraphPanelScopeOk}",
         $"PROJECTION_PERFORMANCE_EVIDENCE_OK:{ProjectionPerformanceEvidenceOk}",
+        $"LARGE_GRAPH_UX_HANDOFF_OK:{LargeGraphUxHandoffOk}",
+        $"V059_MILESTONE_PROOF_OK:{V059MilestoneProofOk}",
         $"CONSUMER_SAMPLE_OK:{IsOk}",
     ];
 
