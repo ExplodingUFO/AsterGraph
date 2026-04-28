@@ -34,11 +34,14 @@ var view = AsterGraphHostBuilder
     .UseDocument(document)
     .UseCatalog(catalog)
     .UseDefaultCompatibility()
+    .UseDefaultWorkbench()
     .UsePluginTrustPolicy(pluginTrustPolicy)
     .UseLocalization(localization)
     .UseDiagnostics(diagnostics)
     .BuildAvaloniaView();
 ```
+
+`UseDefaultWorkbench()` 是 hosted Avalonia 的便利层，用于 stock toolbar、command palette、stencil、inspector、mini-map、fragment、diagnostics 和 status chrome。它仍然停在现有 `Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` 路线，不会创建第二套 runtime model。
 
 当宿主需要分别拥有 editor options、view options 或 standalone surfaces 时，用显式 factory wiring：
 

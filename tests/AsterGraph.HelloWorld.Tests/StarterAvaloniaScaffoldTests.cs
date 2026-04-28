@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Headless;
 using Avalonia.Themes.Fluent;
 using AsterGraph.Avalonia.Controls;
+using AsterGraph.Avalonia.Hosting;
 using Xunit;
 
 namespace AsterGraph.HelloWorld.Tests;
@@ -39,7 +40,49 @@ public sealed class StarterAvaloniaScaffoldTests
 
         Assert.Same(editor, viewOptions.Editor);
         Assert.Equal(GraphEditorViewChromeMode.Default, viewOptions.ChromeMode);
+        Assert.Equal(AsterGraphWorkbenchOptions.Default, viewOptions.Workbench);
+        Assert.True(viewOptions.Workbench.ShowHeaderChrome);
+        Assert.True(viewOptions.Workbench.ShowNodePalette);
+        Assert.True(viewOptions.Workbench.ShowInspector);
+        Assert.True(viewOptions.Workbench.ShowStatus);
+        Assert.True(viewOptions.EnableDefaultContextMenu);
+        Assert.Equal(AsterGraphCommandShortcutPolicy.Default, viewOptions.CommandShortcutPolicy);
+        Assert.True(viewOptions.Workbench.EnableDefaultWheelViewportGestures);
+        Assert.True(viewOptions.Workbench.EnableAltLeftDragPanning);
+        Assert.Null(viewOptions.Presentation);
         Assert.NotNull(editor.Session);
+    }
+
+    [Fact]
+    public void StarterAvaloniaHostBuilder_ProjectsWorkbenchOptionsToHostedView()
+    {
+        StarterAvaloniaHeadlessEnvironment.EnsureInitialized();
+        var builder = AsterGraph.Starter.Avalonia.StarterAvaloniaWindowFactory
+            .CreateHostBuilder()
+            .UseWorkbench(new AsterGraphWorkbenchOptions
+            {
+                ShowHeaderChrome = false,
+                ShowNodePalette = false,
+                ShowInspector = false,
+                ShowStatus = false,
+                EnableDefaultWheelViewportGestures = false,
+                EnableAltLeftDragPanning = false,
+            })
+            .UseDefaultContextMenu(false)
+            .UseCommandShortcutPolicy(AsterGraphCommandShortcutPolicy.Disabled);
+        var editor = builder.BuildEditor();
+        var viewOptions = builder.BuildViewOptions(editor);
+        var view = AsterGraphAvaloniaViewFactory.Create(viewOptions);
+
+        Assert.False(view.IsHeaderChromeVisible);
+        Assert.False(view.IsLibraryChromeVisible);
+        Assert.False(view.IsInspectorChromeVisible);
+        Assert.False(view.IsStatusChromeVisible);
+        Assert.False(view.EnableDefaultContextMenu);
+        Assert.Equal(AsterGraphCommandShortcutPolicy.Disabled, view.CommandShortcutPolicy);
+        Assert.False(view.EnableDefaultWheelViewportGestures);
+        Assert.False(view.EnableAltLeftDragPanning);
+        Assert.Same(editor, view.Editor);
     }
 }
 

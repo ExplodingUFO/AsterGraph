@@ -14,6 +14,7 @@ Use it when you want the smallest end-to-end Avalonia scaffold on the builder-fi
 - `UseDocument(...)`
 - `UseCatalog(...)`
 - `UseDefaultCompatibility()`
+- `UseDefaultWorkbench()` for stock toolbar, command palette, stencil, inspector, mini-map, fragment, diagnostics, and status chrome
 - `BuildEditor()` plus `BuildViewOptions(...)` when tests or host code need the editor/session handle
 - `BuildAvaloniaView()` when the host only needs the stock hosted view
 

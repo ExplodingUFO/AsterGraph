@@ -87,6 +87,7 @@ public static class StarterAvaloniaWindowFactory
             .UseDocument(CreateDocument(definitionId))
             .UseCatalog(catalog)
             .UseDefaultCompatibility()
+            .UseDefaultWorkbench()
             .UseChromeMode(GraphEditorViewChromeMode.Default);
     }
 

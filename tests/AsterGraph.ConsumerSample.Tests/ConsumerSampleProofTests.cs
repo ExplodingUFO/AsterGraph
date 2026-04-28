@@ -169,6 +169,9 @@ public sealed class ConsumerSampleProofTests
         Assert.True(result.NavigationScopeBoundaryOk);
         Assert.True(result.GraphSnippetCatalogOk);
         Assert.True(result.GraphSnippetInsertOk);
+        Assert.True(result.WorkbenchDefaultsOk);
+        Assert.True(result.WorkbenchHostBuilderHandoffOk);
+        Assert.True(result.WorkbenchScopeBoundaryOk);
         Assert.True(result.RuntimeOverlaySupportBundleOk);
         Assert.True(result.OnboardingConfigurationOk);
         Assert.True(result.ExperiencePolishHandoffOk);
@@ -238,6 +241,9 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(result.ProofLines, line => line == "PLUGIN_SAMPLE_PARAMETER_METADATA_OK:True");
         Assert.Contains(result.ProofLines, line => line == "GRAPH_SNIPPET_CATALOG_OK:True");
         Assert.Contains(result.ProofLines, line => line == "GRAPH_SNIPPET_INSERT_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "WORKBENCH_DEFAULTS_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "WORKBENCH_HOST_BUILDER_HANDOFF_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "WORKBENCH_SCOPE_BOUNDARY_OK:True");
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:True");
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_SURFACE_COMMAND_PROJECTION_OK:True");
         Assert.Contains(result.ProofLines, line => line == "CAPABILITY_BREADTH_STENCIL_OK:True");
@@ -316,8 +322,10 @@ public sealed class ConsumerSampleProofTests
 
         Assert.False(result.ExperienceScopeBoundaryOk);
         Assert.False(result.AuthoringFlowScopeBoundaryOk);
+        Assert.False(result.WorkbenchScopeBoundaryOk);
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_FLOW_SCOPE_BOUNDARY_OK:False");
         Assert.Contains(result.ProofLines, line => line == "EXPERIENCE_SCOPE_BOUNDARY_OK:False");
+        Assert.Contains(result.ProofLines, line => line == "WORKBENCH_SCOPE_BOUNDARY_OK:False");
         Assert.Contains(result.ProofLines, line => line == "CONSUMER_SAMPLE_OK:False");
     }
 

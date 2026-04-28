@@ -55,6 +55,9 @@ public sealed class ProofFriendlyHostedTemplateClosureDocsTests
         Assert.Contains("AUTHORING_SURFACE_COMMAND_PROJECTION_OK:True", quickReferenceProofBlockEn, StringComparison.Ordinal);
         Assert.Contains("AUTHORING_SURFACE_OK:True", quickReferenceProofBlockEn, StringComparison.Ordinal);
         Assert.Contains("COMMAND_SURFACE_OK:True", quickReferenceProofBlockEn, StringComparison.Ordinal);
+        Assert.Contains("WORKBENCH_DEFAULTS_OK:True", quickReferenceProofBlockEn, StringComparison.Ordinal);
+        Assert.Contains("WORKBENCH_HOST_BUILDER_HANDOFF_OK:True", quickReferenceProofBlockEn, StringComparison.Ordinal);
+        Assert.Contains("WORKBENCH_SCOPE_BOUNDARY_OK:True", quickReferenceProofBlockEn, StringComparison.Ordinal);
         Assert.Contains("HOST_NATIVE_METRIC:*", quickReferenceProofBlockEn, StringComparison.Ordinal);
         Assert.DoesNotContain(
             quickReferenceProofBlockEn.Split(Environment.NewLine),
@@ -67,6 +70,9 @@ public sealed class ProofFriendlyHostedTemplateClosureDocsTests
         Assert.Contains("AUTHORING_SURFACE_COMMAND_PROJECTION_OK:True", quickReferenceProofBlockZh, StringComparison.Ordinal);
         Assert.Contains("AUTHORING_SURFACE_OK:True", quickReferenceProofBlockZh, StringComparison.Ordinal);
         Assert.Contains("COMMAND_SURFACE_OK:True", quickReferenceProofBlockZh, StringComparison.Ordinal);
+        Assert.Contains("WORKBENCH_DEFAULTS_OK:True", quickReferenceProofBlockZh, StringComparison.Ordinal);
+        Assert.Contains("WORKBENCH_HOST_BUILDER_HANDOFF_OK:True", quickReferenceProofBlockZh, StringComparison.Ordinal);
+        Assert.Contains("WORKBENCH_SCOPE_BOUNDARY_OK:True", quickReferenceProofBlockZh, StringComparison.Ordinal);
         Assert.Contains("HOST_NATIVE_METRIC:*", quickReferenceProofBlockZh, StringComparison.Ordinal);
         Assert.DoesNotContain(
             quickReferenceProofBlockZh.Split(Environment.NewLine),

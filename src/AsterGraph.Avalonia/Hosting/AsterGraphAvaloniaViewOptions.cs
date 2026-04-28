@@ -34,6 +34,11 @@ public sealed record AsterGraphAvaloniaViewOptions
     public AsterGraphCommandShortcutPolicy CommandShortcutPolicy { get; init; } = AsterGraphCommandShortcutPolicy.Default;
 
     /// <summary>
+    /// Controls the stock workbench surfaces composed by the hosted Avalonia shell.
+    /// </summary>
+    public AsterGraphWorkbenchOptions Workbench { get; init; } = AsterGraphWorkbenchOptions.Default;
+
+    /// <summary>
     /// Optional presentation overrides for the stock Avalonia presenters.
     /// </summary>
     public AsterGraphPresentationOptions? Presentation { get; init; }

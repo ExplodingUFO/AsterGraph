@@ -36,6 +36,7 @@ C:AsterGraph.Avalonia.Hosting.AsterGraphHostedActionDescriptor(AsterGraph.Editor
 C:AsterGraph.Avalonia.Hosting.AsterGraphHostedActionProjection(System.Collections.Generic.IEnumerable<AsterGraph.Avalonia.Hosting.AsterGraphHostedActionDescriptor>)
 C:AsterGraph.Avalonia.Hosting.AsterGraphInspectorViewOptions()
 C:AsterGraph.Avalonia.Hosting.AsterGraphMiniMapViewOptions()
+C:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions()
 C:AsterGraph.Avalonia.Menus.GraphContextMenuPresenter()
 C:AsterGraph.Avalonia.Presentation.AsterGraphPresentationOptions()
 C:AsterGraph.Avalonia.Presentation.DefaultGraphInspectorPresenter()
@@ -572,6 +573,7 @@ M:AsterGraph.Avalonia.Hosting.AsterGraphHostBuilder.UseCommandShortcutPolicy(Ast
 M:AsterGraph.Avalonia.Hosting.AsterGraphHostBuilder.UseCompatibility(AsterGraph.Abstractions.Compatibility.IPortCompatibilityService):AsterGraph.Avalonia.Hosting.AsterGraphHostBuilder
 M:AsterGraph.Avalonia.Hosting.AsterGraphHostBuilder.UseDefaultCompatibility():AsterGraph.Avalonia.Hosting.AsterGraphHostBuilder
 M:AsterGraph.Avalonia.Hosting.AsterGraphHostBuilder.UseDefaultContextMenu(System.Boolean):AsterGraph.Avalonia.Hosting.AsterGraphHostBuilder
+M:AsterGraph.Avalonia.Hosting.AsterGraphHostBuilder.UseDefaultWorkbench():AsterGraph.Avalonia.Hosting.AsterGraphHostBuilder
 M:AsterGraph.Avalonia.Hosting.AsterGraphHostBuilder.UseDiagnostics(AsterGraph.Editor.Diagnostics.IGraphEditorDiagnosticsSink):AsterGraph.Avalonia.Hosting.AsterGraphHostBuilder
 M:AsterGraph.Avalonia.Hosting.AsterGraphHostBuilder.UseDocument(AsterGraph.Core.Models.GraphDocument):AsterGraph.Avalonia.Hosting.AsterGraphHostBuilder
 M:AsterGraph.Avalonia.Hosting.AsterGraphHostBuilder.UseLocalization(AsterGraph.Editor.Localization.IGraphLocalizationProvider):AsterGraph.Avalonia.Hosting.AsterGraphHostBuilder
@@ -580,6 +582,7 @@ M:AsterGraph.Avalonia.Hosting.AsterGraphHostBuilder.UsePluginRegistrations(Syste
 M:AsterGraph.Avalonia.Hosting.AsterGraphHostBuilder.UsePluginTrustPolicy(AsterGraph.Editor.Plugins.IGraphEditorPluginTrustPolicy):AsterGraph.Avalonia.Hosting.AsterGraphHostBuilder
 M:AsterGraph.Avalonia.Hosting.AsterGraphHostBuilder.UsePresentation(AsterGraph.Avalonia.Presentation.AsterGraphPresentationOptions):AsterGraph.Avalonia.Hosting.AsterGraphHostBuilder
 M:AsterGraph.Avalonia.Hosting.AsterGraphHostBuilder.UseStorageRoot(System.String):AsterGraph.Avalonia.Hosting.AsterGraphHostBuilder
+M:AsterGraph.Avalonia.Hosting.AsterGraphHostBuilder.UseWorkbench(AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions):AsterGraph.Avalonia.Hosting.AsterGraphHostBuilder
 M:AsterGraph.Avalonia.Hosting.AsterGraphHostedActionDescriptor.TryExecute():System.Boolean
 M:AsterGraph.Avalonia.Hosting.AsterGraphHostedActionFactory.ApplyCommandShortcutPolicy(System.Collections.Generic.IEnumerable<AsterGraph.Avalonia.Hosting.AsterGraphHostedActionDescriptor>,AsterGraph.Avalonia.Hosting.AsterGraphCommandShortcutPolicy):System.Collections.Generic.IReadOnlyList<AsterGraph.Avalonia.Hosting.AsterGraphHostedActionDescriptor>
 M:AsterGraph.Avalonia.Hosting.AsterGraphHostedActionFactory.CreateCommandActions(AsterGraph.Editor.Runtime.IGraphEditorSession,System.Collections.Generic.IEnumerable<System.String>):System.Collections.Generic.IReadOnlyList<AsterGraph.Avalonia.Hosting.AsterGraphHostedActionDescriptor>
@@ -602,6 +605,11 @@ M:AsterGraph.Avalonia.Hosting.AsterGraphMiniMapViewOptions.Equals(AsterGraph.Ava
 M:AsterGraph.Avalonia.Hosting.AsterGraphMiniMapViewOptions.Equals(System.Object):System.Boolean
 M:AsterGraph.Avalonia.Hosting.AsterGraphMiniMapViewOptions.GetHashCode():System.Int32
 M:AsterGraph.Avalonia.Hosting.AsterGraphMiniMapViewOptions.ToString():System.String
+M:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions.<Clone>$():AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions
+M:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions.Equals(AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions):System.Boolean
+M:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions.Equals(System.Object):System.Boolean
+M:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions.GetHashCode():System.Int32
+M:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions.ToString():System.String
 M:AsterGraph.Avalonia.Menus.GraphContextMenuPresenter.Open(Avalonia.Controls.Control,System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Menus.GraphEditorMenuItemDescriptorSnapshot>,AsterGraph.Editor.Runtime.IGraphEditorCommands,AsterGraph.Abstractions.Styling.ContextMenuStyleOptions):System.Void
 M:AsterGraph.Avalonia.Menus.GraphContextMenuPresenter.Open(Avalonia.Controls.Control,System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Menus.MenuItemDescriptor>,AsterGraph.Abstractions.Styling.ContextMenuStyleOptions):System.Void
 M:AsterGraph.Avalonia.Presentation.AsterGraphPresentationOptions.<Clone>$():AsterGraph.Avalonia.Presentation.AsterGraphPresentationOptions
@@ -2039,6 +2047,7 @@ P:AsterGraph.Avalonia.Hosting.AsterGraphAvaloniaViewOptions.CommandShortcutPolic
 P:AsterGraph.Avalonia.Hosting.AsterGraphAvaloniaViewOptions.Editor:AsterGraph.Editor.ViewModels.GraphEditorViewModel:get,set
 P:AsterGraph.Avalonia.Hosting.AsterGraphAvaloniaViewOptions.EnableDefaultContextMenu:System.Boolean:get,set
 P:AsterGraph.Avalonia.Hosting.AsterGraphAvaloniaViewOptions.Presentation:AsterGraph.Avalonia.Presentation.AsterGraphPresentationOptions:get,set
+P:AsterGraph.Avalonia.Hosting.AsterGraphAvaloniaViewOptions.Workbench:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions:get,set
 P:AsterGraph.Avalonia.Hosting.AsterGraphCanvasViewOptions.CommandShortcutPolicy:AsterGraph.Avalonia.Hosting.AsterGraphCommandShortcutPolicy:get,set
 P:AsterGraph.Avalonia.Hosting.AsterGraphCanvasViewOptions.Editor:AsterGraph.Editor.ViewModels.GraphEditorViewModel:get,set
 P:AsterGraph.Avalonia.Hosting.AsterGraphCanvasViewOptions.EnableDefaultContextMenu:System.Boolean:get,set
@@ -2063,6 +2072,13 @@ P:AsterGraph.Avalonia.Hosting.AsterGraphInspectorViewOptions.Presentation:AsterG
 P:AsterGraph.Avalonia.Hosting.AsterGraphMiniMapViewOptions.Presentation:AsterGraph.Avalonia.Presentation.AsterGraphPresentationOptions:get,set
 P:AsterGraph.Avalonia.Hosting.AsterGraphMiniMapViewOptions.Session:AsterGraph.Editor.Runtime.IGraphEditorSession:get,set
 P:AsterGraph.Avalonia.Hosting.AsterGraphMiniMapViewOptions.StyleOptions:AsterGraph.Abstractions.Styling.GraphEditorStyleOptions:get,set
+P:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions.Default:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions:get
+P:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions.EnableAltLeftDragPanning:System.Boolean:get,set
+P:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions.EnableDefaultWheelViewportGestures:System.Boolean:get,set
+P:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions.ShowHeaderChrome:System.Boolean:get,set
+P:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions.ShowInspector:System.Boolean:get,set
+P:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions.ShowNodePalette:System.Boolean:get,set
+P:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions.ShowStatus:System.Boolean:get,set
 P:AsterGraph.Avalonia.Presentation.AsterGraphPresentationOptions.ContextMenuPresenter:AsterGraph.Avalonia.Presentation.IGraphContextMenuPresenter:get,set
 P:AsterGraph.Avalonia.Presentation.AsterGraphPresentationOptions.InspectorPresenter:AsterGraph.Avalonia.Presentation.IGraphInspectorPresenter:get,set
 P:AsterGraph.Avalonia.Presentation.AsterGraphPresentationOptions.MiniMapPresenter:AsterGraph.Avalonia.Presentation.IGraphMiniMapPresenter:get,set
@@ -3174,6 +3190,7 @@ T:class AsterGraph.Avalonia.Hosting.AsterGraphHostedActionDescriptor
 T:class AsterGraph.Avalonia.Hosting.AsterGraphHostedActionProjection
 T:class AsterGraph.Avalonia.Hosting.AsterGraphInspectorViewOptions
 T:class AsterGraph.Avalonia.Hosting.AsterGraphMiniMapViewOptions
+T:class AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions
 T:class AsterGraph.Avalonia.Menus.GraphContextMenuPresenter
 T:class AsterGraph.Avalonia.Presentation.AsterGraphPresentationOptions
 T:class AsterGraph.Avalonia.Presentation.DefaultGraphInspectorPresenter

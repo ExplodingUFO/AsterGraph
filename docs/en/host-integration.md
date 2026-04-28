@@ -34,11 +34,14 @@ var view = AsterGraphHostBuilder
     .UseDocument(document)
     .UseCatalog(catalog)
     .UseDefaultCompatibility()
+    .UseDefaultWorkbench()
     .UsePluginTrustPolicy(pluginTrustPolicy)
     .UseLocalization(localization)
     .UseDiagnostics(diagnostics)
     .BuildAvaloniaView();
 ```
+
+`UseDefaultWorkbench()` is a hosted Avalonia convenience layer for the stock toolbar, command palette, stencil, inspector, mini-map, fragment, diagnostics, and status chrome. It remains on the existing `Create(...)` + `AsterGraphAvaloniaViewFactory.Create(...)` path; it does not create a second runtime model.
 
 Use explicit factory wiring when the host needs separate ownership of editor options, view options, or standalone surfaces:
 

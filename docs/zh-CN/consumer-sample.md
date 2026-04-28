@@ -139,6 +139,9 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 - `GRAPH_READINESS_STATUS_OK:True`
 - `GRAPH_SNIPPET_CATALOG_OK:True`
 - `GRAPH_SNIPPET_INSERT_OK:True`
+- `WORKBENCH_DEFAULTS_OK:True`
+- `WORKBENCH_HOST_BUILDER_HANDOFF_OK:True`
+- `WORKBENCH_SCOPE_BOUNDARY_OK:True`
 - `GRAPH_SEARCH_LOCATE_OK:True`
 - `GRAPH_SEARCH_SCOPE_FILTER_OK:True`
 - `GRAPH_SEARCH_VIEWPORT_FOCUS_OK:True`
@@ -245,6 +248,9 @@ Proof Handoff 负责实际 intake 说明。
 - `GRAPH_READINESS_STATUS_OK:True`
 - `GRAPH_SNIPPET_CATALOG_OK:True`
 - `GRAPH_SNIPPET_INSERT_OK:True`
+- `WORKBENCH_DEFAULTS_OK:True`
+- `WORKBENCH_HOST_BUILDER_HANDOFF_OK:True`
+- `WORKBENCH_SCOPE_BOUNDARY_OK:True`
 - `GRAPH_SEARCH_LOCATE_OK:True`
 - `GRAPH_SEARCH_SCOPE_FILTER_OK:True`
 - `GRAPH_SEARCH_VIEWPORT_FOCUS_OK:True`
@@ -325,6 +331,7 @@ Proof Handoff 负责实际 intake 说明。
 - snippet catalog 与插入 seam：把 `consumer.sample.snippet.queue-lane` 和其他 snippet 保持为宿主自管，再通过 `StartConnection(...)` 加 `TryCreateConnectedNodeFromPendingConnection(...)` 插入
 - 节点旁路 authoring seam：通过 `IGraphEditorSession.Queries.GetNodeParameterSnapshots(nodeId)` 和 `INodeParameterEditorRegistry` 把节点表面保持在和 inspector 一样的 metadata/validation 合同上
 - snippet seam：通过一个小 catalog 暴露宿主自管 snippet，用已有 pending-connection command path 插入，并期待 `GRAPH_SNIPPET_CATALOG_OK:True` 和 `GRAPH_SNIPPET_INSERT_OK:True`
+- default workbench seam：当 stock toolbar、command palette、stencil、inspector、mini-map、fragment、diagnostics 和 status chrome 已经足够时，使用 `AsterGraphHostBuilder.UseDefaultWorkbench()`；期待 `WORKBENCH_DEFAULTS_OK:True`、`WORKBENCH_HOST_BUILDER_HANDOFF_OK:True` 和 `WORKBENCH_SCOPE_BOUNDARY_OK:True`
 - graph search seam：从当前 snapshot 搜索 hosted graph，通过已有 selection 和 viewport command 定位节点/连接，并期待 `GRAPH_SEARCH_LOCATE_OK:True`、`GRAPH_SEARCH_SCOPE_FILTER_OK:True` 和 `GRAPH_SEARCH_VIEWPORT_FOCUS_OK:True`
 - command palette productivity：按已有 command descriptor group 对 palette action 分组，展示共享 command route 的 disabled reason，并保留有界的内存 recent-action 区域，期待 `COMMAND_PALETTE_GROUPING_OK:True`、`COMMAND_PALETTE_DISABLED_REASON_OK:True` 和 `COMMAND_PALETTE_RECENT_ACTIONS_OK:True`
 - navigation productivity：把 graph search、command palette、back/forward history、scope breadcrumbs 和 focus restore 保持为宿主自管，并继续复用已有 selection/scope/viewport command，期待 `NAVIGATION_PRODUCTIVITY_PROOF_OK:True`、`NAVIGATION_PRODUCTIVITY_HANDOFF_OK:True` 和 `NAVIGATION_SCOPE_BOUNDARY_OK:True`

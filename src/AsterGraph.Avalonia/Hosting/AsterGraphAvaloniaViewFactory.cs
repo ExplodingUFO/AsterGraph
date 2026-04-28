@@ -24,12 +24,19 @@ public static class AsterGraphAvaloniaViewFactory
         ArgumentNullException.ThrowIfNull(options);
         ArgumentNullException.ThrowIfNull(options.Editor);
 
+        var workbench = options.Workbench;
         return new GraphEditorView
         {
             Editor = options.Editor,
             ChromeMode = options.ChromeMode,
+            IsHeaderChromeVisible = workbench.ShowHeaderChrome,
+            IsLibraryChromeVisible = workbench.ShowNodePalette,
+            IsInspectorChromeVisible = workbench.ShowInspector,
+            IsStatusChromeVisible = workbench.ShowStatus,
             EnableDefaultContextMenu = options.EnableDefaultContextMenu,
             CommandShortcutPolicy = options.CommandShortcutPolicy,
+            EnableDefaultWheelViewportGestures = workbench.EnableDefaultWheelViewportGestures,
+            EnableAltLeftDragPanning = workbench.EnableAltLeftDragPanning,
             Presentation = options.Presentation,
         };
     }

@@ -106,7 +106,9 @@ public sealed record ConsumerSampleProofResult(
     bool SupportBundlePayloadOk = true,
     bool FiveMinuteOnboardingOk = true,
     bool GraphSnippetCatalogOk = true,
-    bool GraphSnippetInsertOk = true)
+    bool GraphSnippetInsertOk = true,
+    bool WorkbenchDefaultsOk = true,
+    bool WorkbenchHostBuilderHandoffOk = true)
 {
     public bool AuthoringSurfaceOk
         => ParameterProjectionOk
@@ -194,6 +196,9 @@ public sealed record ConsumerSampleProofResult(
         && PluginSampleParameterMetadataOk
         && GraphSnippetCatalogOk
         && GraphSnippetInsertOk
+        && WorkbenchDefaultsOk
+        && WorkbenchHostBuilderHandoffOk
+        && WorkbenchScopeBoundaryOk
         && NodeCount > 0
         && (FeatureDescriptorIds?.Count > 0);
 
@@ -249,7 +254,10 @@ public sealed record ConsumerSampleProofResult(
         && PluginSampleNodeDefinitionsOk
         && PluginSampleParameterMetadataOk
         && GraphSnippetCatalogOk
-        && GraphSnippetInsertOk;
+        && GraphSnippetInsertOk
+        && WorkbenchDefaultsOk
+        && WorkbenchHostBuilderHandoffOk
+        && WorkbenchScopeBoundaryOk;
 
     public bool AuthoringFlowProofOk
         => QuickAddConnectedNodeOk
@@ -291,6 +299,7 @@ public sealed record ConsumerSampleProofResult(
         && PluginAllowlistRoundtripOk
         && GraphSnippetCatalogOk
         && GraphSnippetInsertOk
+        && WorkbenchScopeBoundaryOk
         && FeatureDescriptorIds is { Count: > 0 }
         && FeatureDescriptorIds.All(IsBoundedFeatureDescriptorId);
 
@@ -317,6 +326,11 @@ public sealed record ConsumerSampleProofResult(
     public bool NavigationScopeBoundaryOk
         => NavigationProductivityProofOk
         && HostOwnedActionsOk
+        && FeatureDescriptorIds is { Count: > 0 }
+        && FeatureDescriptorIds.All(IsBoundedFeatureDescriptorId);
+
+    public bool WorkbenchScopeBoundaryOk
+        => WorkbenchHostBuilderHandoffOk
         && FeatureDescriptorIds is { Count: > 0 }
         && FeatureDescriptorIds.All(IsBoundedFeatureDescriptorId);
 
@@ -409,6 +423,9 @@ public sealed record ConsumerSampleProofResult(
         $"PLUGIN_SAMPLE_PARAMETER_METADATA_OK:{PluginSampleParameterMetadataOk}",
         $"GRAPH_SNIPPET_CATALOG_OK:{GraphSnippetCatalogOk}",
         $"GRAPH_SNIPPET_INSERT_OK:{GraphSnippetInsertOk}",
+        $"WORKBENCH_DEFAULTS_OK:{WorkbenchDefaultsOk}",
+        $"WORKBENCH_HOST_BUILDER_HANDOFF_OK:{WorkbenchHostBuilderHandoffOk}",
+        $"WORKBENCH_SCOPE_BOUNDARY_OK:{WorkbenchScopeBoundaryOk}",
         $"AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:{NodeSideAuthoringOk}",
         $"AUTHORING_SURFACE_COMMAND_PROJECTION_OK:{CommandSurfaceOk}",
         $"CONSUMER_SAMPLE_PARAMETER_OK:{ParameterProjectionOk}",
@@ -723,6 +740,8 @@ public static class ConsumerSampleProof
         bool commandPaletteGroupingOk;
         bool commandPaletteDisabledReasonOk;
         bool commandPaletteRecentActionsOk;
+        bool workbenchDefaultsOk;
+        bool workbenchHostBuilderHandoffOk;
         try
         {
             capabilityWindow.Show();
@@ -754,6 +773,7 @@ public static class ConsumerSampleProof
             (quickAddConnectedNodeOk, portFilteredNodeSearchOk) = HasQuickAddConnectedNode(host);
             (commandPaletteGroupingOk, commandPaletteDisabledReasonOk, commandPaletteRecentActionsOk) =
                 HasCommandPaletteProductivity(capabilityWindow);
+            (workbenchDefaultsOk, workbenchHostBuilderHandoffOk) = HasWorkbenchDefaults(host);
 
             host.SelectNode(reviewNodeId);
             FlushUi();
@@ -797,7 +817,6 @@ public static class ConsumerSampleProof
             && trustTransparencyOk
             && exportBreadthOk
             && supportBundlePayloadOk;
-
         return new ConsumerSampleProofResult(
             HostMenuActionOk: hostMenuActionOk,
             PluginContributionOk: pluginContributionOk,
@@ -883,7 +902,43 @@ public static class ConsumerSampleProof
             SupportBundlePayloadOk: supportBundlePayloadOk,
             FiveMinuteOnboardingOk: fiveMinuteOnboardingOk,
             GraphSnippetCatalogOk: graphSnippetCatalogOk,
-            GraphSnippetInsertOk: graphSnippetInsertOk);
+            GraphSnippetInsertOk: graphSnippetInsertOk,
+            WorkbenchDefaultsOk: workbenchDefaultsOk,
+            WorkbenchHostBuilderHandoffOk: workbenchHostBuilderHandoffOk);
+    }
+
+    private static (bool DefaultsOk, bool HandoffOk) HasWorkbenchDefaults(ConsumerSampleHost host)
+    {
+        var builder = AsterGraphHostBuilder
+            .Create()
+            .UseDefaultWorkbench();
+        var options = builder.BuildViewOptions(host.Editor);
+        var view = AsterGraphAvaloniaViewFactory.Create(options);
+
+        var defaultsOk = options.Workbench == AsterGraphWorkbenchOptions.Default
+            && options.ChromeMode == GraphEditorViewChromeMode.Default
+            && options.EnableDefaultContextMenu
+            && options.CommandShortcutPolicy == AsterGraphCommandShortcutPolicy.Default
+            && options.Workbench.ShowHeaderChrome
+            && options.Workbench.ShowNodePalette
+            && options.Workbench.ShowInspector
+            && options.Workbench.ShowStatus
+            && options.Workbench.EnableDefaultWheelViewportGestures
+            && options.Workbench.EnableAltLeftDragPanning;
+
+        var handoffOk = ReferenceEquals(host.Editor, options.Editor)
+            && ReferenceEquals(host.Editor, view.Editor)
+            && view.ChromeMode == GraphEditorViewChromeMode.Default
+            && view.IsHeaderChromeVisible
+            && view.IsLibraryChromeVisible
+            && view.IsInspectorChromeVisible
+            && view.IsStatusChromeVisible
+            && view.EnableDefaultContextMenu
+            && view.CommandShortcutPolicy == AsterGraphCommandShortcutPolicy.Default
+            && view.EnableDefaultWheelViewportGestures
+            && view.EnableAltLeftDragPanning;
+
+        return (defaultsOk, handoffOk);
     }
 
     private static bool HasScenarioGraph(ConsumerSampleHost host)

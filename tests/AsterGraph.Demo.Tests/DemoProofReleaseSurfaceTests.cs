@@ -1704,6 +1704,17 @@ public sealed class DemoProofReleaseSurfaceTests
             Assert.Contains("AsterGraphAvaloniaViewFactory.Create", contents, StringComparison.Ordinal);
         }
 
+        foreach (var contents in new[] { hostIntegration, hostIntegrationZh })
+        {
+            Assert.Contains("UseDefaultWorkbench()", contents, StringComparison.Ordinal);
+            Assert.True(HasLineWithAll(contents, "UseDefaultWorkbench()", "toolbar", "command palette"));
+            Assert.True(HasLineWithAll(contents, "UseDefaultWorkbench()", "stencil", "inspector"));
+            Assert.True(HasLineWithAll(contents, "UseDefaultWorkbench()", "mini-map", "fragment"));
+            Assert.True(HasLineWithAll(contents, "UseDefaultWorkbench()", "diagnostics", "status chrome"));
+            Assert.True(HasLineWithAll(contents, "UseDefaultWorkbench()", "does not create", "runtime model")
+                || HasLineWithAll(contents, "UseDefaultWorkbench()", "不会创建", "runtime model"));
+        }
+
         Assert.Contains("CreateSession(...)", hostIntegration, StringComparison.Ordinal);
         Assert.Contains("CreateSession(...)", hostIntegrationZh, StringComparison.Ordinal);
         Assert.Contains("AsterGraphEditorFactory.Create(...)", hostIntegration, StringComparison.Ordinal);

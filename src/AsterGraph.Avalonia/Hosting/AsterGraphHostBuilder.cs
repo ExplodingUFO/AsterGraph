@@ -33,6 +33,7 @@ public sealed class AsterGraphHostBuilder
     private GraphEditorViewChromeMode _chromeMode = GraphEditorViewChromeMode.Default;
     private bool _enableDefaultContextMenu = true;
     private AsterGraphCommandShortcutPolicy _commandShortcutPolicy = AsterGraphCommandShortcutPolicy.Default;
+    private AsterGraphWorkbenchOptions _workbench = AsterGraphWorkbenchOptions.Default;
     private AsterGraphPresentationOptions? _presentation;
 
     private AsterGraphHostBuilder()
@@ -170,6 +171,28 @@ public sealed class AsterGraphHostBuilder
     }
 
     /// <summary>
+    /// Uses the stock hosted workbench composition for toolbar, node palette, inspector, mini-map, fragments, diagnostics, and status chrome.
+    /// </summary>
+    public AsterGraphHostBuilder UseDefaultWorkbench()
+    {
+        _chromeMode = GraphEditorViewChromeMode.Default;
+        _enableDefaultContextMenu = true;
+        _commandShortcutPolicy = AsterGraphCommandShortcutPolicy.Default;
+        _workbench = AsterGraphWorkbenchOptions.Default;
+        return this;
+    }
+
+    /// <summary>
+    /// Sets the hosted workbench composition options.
+    /// </summary>
+    public AsterGraphHostBuilder UseWorkbench(AsterGraphWorkbenchOptions workbench)
+    {
+        ArgumentNullException.ThrowIfNull(workbench);
+        _workbench = workbench;
+        return this;
+    }
+
+    /// <summary>
     /// Sets optional Avalonia presentation overrides.
     /// </summary>
     public AsterGraphHostBuilder UsePresentation(AsterGraphPresentationOptions presentation)
@@ -213,6 +236,7 @@ public sealed class AsterGraphHostBuilder
             ChromeMode = _chromeMode,
             EnableDefaultContextMenu = _enableDefaultContextMenu,
             CommandShortcutPolicy = _commandShortcutPolicy,
+            Workbench = _workbench,
             Presentation = _presentation,
         };
     }
