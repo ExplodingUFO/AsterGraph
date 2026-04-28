@@ -36,6 +36,27 @@
 
 shipped inspector 只保持在 definition-driven inspector 的边界内，不会变成通用 property framework。
 
+## 薄 Builder 路线
+
+当你需要同一套 DTO，但不想写太多构造函数参数时，可以使用 definition builders：
+
+```csharp
+var definition = NodeDefinitionBuilder
+    .Create("sample.authoring.node", "Authoring Node")
+    .Category("Samples")
+    .Input("payload", "Payload", "json")
+    .Output("result", "Result", "json")
+    .Parameter(NodeParameterDefinitionBuilder
+        .Create("threshold", "Threshold", "float", ParameterEditorKind.Number)
+        .DefaultValue(0.5d)
+        .Range(0, 1)
+        .Group("Behavior")
+        .Help("Controls the authoring cutoff."))
+    .Build();
+```
+
+`NodeDefinitionBuilder`、`PortDefinitionBuilder` 和 `NodeParameterDefinitionBuilder` 只是 convenience constructor。`Build()` 返回的仍是 constructor 路线使用的 `NodeDefinition`、`PortDefinition` 和 `NodeParameterDefinition` records。
+
 当前 shipped editor kinds：
 
 - `Text`

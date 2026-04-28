@@ -11,6 +11,7 @@ using AsterGraph.Avalonia.Controls;
 using AsterGraph.Avalonia.Hosting;
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
+using AsterGraph.Core.Compatibility;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Automation;
 using AsterGraph.Editor.Hosting;
@@ -107,6 +108,11 @@ public sealed record ConsumerSampleProofResult(
     bool PluginSamplePackOk = true,
     bool PluginSampleNodeDefinitionsOk = true,
     bool PluginSampleParameterMetadataOk = true,
+    bool NodeDefinitionBuilderOk = true,
+    bool PortDefinitionBuilderOk = true,
+    bool ParameterDefinitionBuilderOk = true,
+    bool ConnectionRuleBuilderOk = true,
+    bool AuthoringBuilderThinWrapperOk = true,
     int NodeCount = 0,
     int ConnectionCount = 0,
     IReadOnlyList<string>? FeatureDescriptorIds = null,
@@ -227,6 +233,11 @@ public sealed record ConsumerSampleProofResult(
         && PluginSamplePackOk
         && PluginSampleNodeDefinitionsOk
         && PluginSampleParameterMetadataOk
+        && NodeDefinitionBuilderOk
+        && PortDefinitionBuilderOk
+        && ParameterDefinitionBuilderOk
+        && ConnectionRuleBuilderOk
+        && AuthoringBuilderThinWrapperOk
         && GraphSnippetCatalogOk
         && GraphSnippetInsertOk
         && WorkbenchDefaultsOk
@@ -290,6 +301,11 @@ public sealed record ConsumerSampleProofResult(
         && PluginSamplePackOk
         && PluginSampleNodeDefinitionsOk
         && PluginSampleParameterMetadataOk
+        && NodeDefinitionBuilderOk
+        && PortDefinitionBuilderOk
+        && ParameterDefinitionBuilderOk
+        && ConnectionRuleBuilderOk
+        && AuthoringBuilderThinWrapperOk
         && GraphSnippetCatalogOk
         && GraphSnippetInsertOk
         && WorkbenchDefaultsOk
@@ -463,6 +479,11 @@ public sealed record ConsumerSampleProofResult(
         $"PLUGIN_SAMPLE_PACK_OK:{PluginSamplePackOk}",
         $"PLUGIN_SAMPLE_NODE_DEFINITIONS_OK:{PluginSampleNodeDefinitionsOk}",
         $"PLUGIN_SAMPLE_PARAMETER_METADATA_OK:{PluginSampleParameterMetadataOk}",
+        $"NODE_DEFINITION_BUILDER_OK:{NodeDefinitionBuilderOk}",
+        $"PORT_DEFINITION_BUILDER_OK:{PortDefinitionBuilderOk}",
+        $"PARAMETER_DEFINITION_BUILDER_OK:{ParameterDefinitionBuilderOk}",
+        $"CONNECTION_RULE_BUILDER_OK:{ConnectionRuleBuilderOk}",
+        $"AUTHORING_BUILDER_THIN_WRAPPER_OK:{AuthoringBuilderThinWrapperOk}",
         $"GRAPH_SNIPPET_CATALOG_OK:{GraphSnippetCatalogOk}",
         $"GRAPH_SNIPPET_INSERT_OK:{GraphSnippetInsertOk}",
         $"WORKBENCH_DEFAULTS_OK:{WorkbenchDefaultsOk}",
@@ -668,6 +689,11 @@ public static class ConsumerSampleProof
         bool pluginSamplePackOk;
         bool pluginSampleNodeDefinitionsOk;
         bool pluginSampleParameterMetadataOk;
+        bool nodeDefinitionBuilderOk;
+        bool portDefinitionBuilderOk;
+        bool parameterDefinitionBuilderOk;
+        bool connectionRuleBuilderOk;
+        bool authoringBuilderThinWrapperOk;
         bool graphSnippetCatalogOk;
         bool graphSnippetInsertOk;
         double inspectorProjectionMs;
@@ -732,6 +758,7 @@ public static class ConsumerSampleProof
                 && host.PluginCandidateEntries.Any(entry => entry.IsAllowed && entry.TrustReason.Contains("allowlist", StringComparison.OrdinalIgnoreCase));
             pluginAllowlistRoundtripOk = trustTransparencyOk;
             (pluginSamplePackOk, pluginSampleNodeDefinitionsOk, pluginSampleParameterMetadataOk) = HasSamplePluginPack(host);
+            (nodeDefinitionBuilderOk, portDefinitionBuilderOk, parameterDefinitionBuilderOk, connectionRuleBuilderOk, authoringBuilderThinWrapperOk) = HasAuthoringDefinitionBuilders();
 
             stencilSearchMs = MeasureStencilSearchMilliseconds(host.Session, "plugin");
             commandSurfaceRefreshMs = MeasureCommandSurfaceRefreshMilliseconds(host.Session);
@@ -973,6 +1000,11 @@ public static class ConsumerSampleProof
             PluginSamplePackOk: pluginSamplePackOk,
             PluginSampleNodeDefinitionsOk: pluginSampleNodeDefinitionsOk,
             PluginSampleParameterMetadataOk: pluginSampleParameterMetadataOk,
+            NodeDefinitionBuilderOk: nodeDefinitionBuilderOk,
+            PortDefinitionBuilderOk: portDefinitionBuilderOk,
+            ParameterDefinitionBuilderOk: parameterDefinitionBuilderOk,
+            ConnectionRuleBuilderOk: connectionRuleBuilderOk,
+            AuthoringBuilderThinWrapperOk: authoringBuilderThinWrapperOk,
             ParameterSnapshots: proofParameterSnapshots,
             StartupMs: startupMs,
             InspectorProjectionMs: inspectorProjectionMs,
@@ -1039,6 +1071,71 @@ public static class ConsumerSampleProof
         return (defaultsOk, handoffOk);
     }
 
+    private static (bool NodeOk, bool PortOk, bool ParameterOk, bool RuleOk, bool ThinWrapperOk) HasAuthoringDefinitionBuilders()
+    {
+        var port = PortDefinitionBuilder
+            .Create("payload", "Payload", "json")
+            .Accent("#6AD5C4")
+            .Description("Payload input")
+            .Group("Data")
+            .Connections(min: 1, max: 2)
+            .Build();
+        var parameter = NodeParameterDefinitionBuilder
+            .Create("mode", "Mode", "enum", ParameterEditorKind.Enum)
+            .DefaultValue("fast")
+            .Group("Runtime")
+            .Help("Choose a processing mode.")
+            .Option("fast", "Fast")
+            .Option("safe", "Safe")
+            .Build();
+        var definition = NodeDefinitionBuilder
+            .Create("consumer.builder.node", "Builder Node")
+            .Category("Consumer")
+            .Subtitle("Thin wrapper")
+            .Input("in", "Input", "json")
+            .Output(port)
+            .Parameter(parameter)
+            .Build();
+        var rule = ImplicitConversionRuleBuilder
+            .ImplicitConversion("int", "double")
+            .Conversion("consumer.int-to-double")
+            .Build();
+
+        var nodeOk = definition.Id == new NodeDefinitionId("consumer.builder.node")
+            && definition.OutputPorts.Single() == port
+            && definition.Parameters.Single() == parameter;
+        var portOk = port == new PortDefinition(
+            "payload",
+            "Payload",
+            new PortTypeId("json"),
+            "#6AD5C4",
+            "Payload input",
+            "Data",
+            1,
+            2);
+        var parameterOk = parameter.Key == "mode"
+            && parameter.DisplayName == "Mode"
+            && parameter.ValueType == new PortTypeId("enum")
+            && parameter.EditorKind == ParameterEditorKind.Enum
+            && Equals(parameter.DefaultValue, "fast")
+            && parameter.GroupName == "Runtime"
+            && parameter.HelpText == "Choose a processing mode."
+            && parameter.Constraints.AllowedOptions.SequenceEqual(
+            [
+                new ParameterOptionDefinition("fast", "Fast"),
+                new ParameterOptionDefinition("safe", "Safe"),
+            ]);
+        var ruleOk = rule == new ImplicitConversionRule(
+            new PortTypeId("int"),
+            new PortTypeId("double"),
+            new ConversionId("consumer.int-to-double"));
+        var thinWrapperOk = definition.GetType() == typeof(NodeDefinition)
+            && port.GetType() == typeof(PortDefinition)
+            && parameter.GetType() == typeof(NodeParameterDefinition)
+            && rule.GetType() == typeof(ImplicitConversionRule);
+
+        return (nodeOk, portOk, parameterOk, ruleOk, thinWrapperOk);
+    }
     private static bool HasScenarioGraph(ConsumerSampleHost host)
     {
         var document = host.Session.Queries.CreateDocumentSnapshot();

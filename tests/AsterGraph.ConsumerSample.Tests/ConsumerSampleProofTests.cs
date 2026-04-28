@@ -254,6 +254,11 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(result.ProofLines, line => line == "PLUGIN_SAMPLE_PACK_OK:True");
         Assert.Contains(result.ProofLines, line => line == "PLUGIN_SAMPLE_NODE_DEFINITIONS_OK:True");
         Assert.Contains(result.ProofLines, line => line == "PLUGIN_SAMPLE_PARAMETER_METADATA_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "NODE_DEFINITION_BUILDER_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "PORT_DEFINITION_BUILDER_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "PARAMETER_DEFINITION_BUILDER_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "CONNECTION_RULE_BUILDER_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "AUTHORING_BUILDER_THIN_WRAPPER_OK:True");
         Assert.Contains(result.ProofLines, line => line == "GRAPH_SNIPPET_CATALOG_OK:True");
         Assert.Contains(result.ProofLines, line => line == "GRAPH_SNIPPET_INSERT_OK:True");
         Assert.Contains(result.ProofLines, line => line == "WORKBENCH_DEFAULTS_OK:True");
@@ -726,6 +731,11 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(proofLines, line => line == "PLUGIN_SAMPLE_PACK_OK:True");
         Assert.Contains(proofLines, line => line == "PLUGIN_SAMPLE_NODE_DEFINITIONS_OK:True");
         Assert.Contains(proofLines, line => line == "PLUGIN_SAMPLE_PARAMETER_METADATA_OK:True");
+        Assert.Contains(proofLines, line => line == "NODE_DEFINITION_BUILDER_OK:True");
+        Assert.Contains(proofLines, line => line == "PORT_DEFINITION_BUILDER_OK:True");
+        Assert.Contains(proofLines, line => line == "PARAMETER_DEFINITION_BUILDER_OK:True");
+        Assert.Contains(proofLines, line => line == "CONNECTION_RULE_BUILDER_OK:True");
+        Assert.Contains(proofLines, line => line == "AUTHORING_BUILDER_THIN_WRAPPER_OK:True");
         Assert.Contains(proofLines, line => line == "AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:True");
         Assert.Contains(proofLines, line => line == "AUTHORING_SURFACE_COMMAND_PROJECTION_OK:True");
         Assert.Contains(proofLines, line => line == "CAPABILITY_BREADTH_STENCIL_OK:True");

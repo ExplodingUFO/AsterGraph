@@ -35,6 +35,27 @@ Start from `NodeParameterDefinition` metadata:
 
 The shipped inspector stays bounded to the definition-driven inspector surface, not a generic property framework.
 
+## Thin Builder Route
+
+Use the definition builders when you want the same DTO shape with less constructor noise:
+
+```csharp
+var definition = NodeDefinitionBuilder
+    .Create("sample.authoring.node", "Authoring Node")
+    .Category("Samples")
+    .Input("payload", "Payload", "json")
+    .Output("result", "Result", "json")
+    .Parameter(NodeParameterDefinitionBuilder
+        .Create("threshold", "Threshold", "float", ParameterEditorKind.Number)
+        .DefaultValue(0.5d)
+        .Range(0, 1)
+        .Group("Behavior")
+        .Help("Controls the authoring cutoff."))
+    .Build();
+```
+
+`NodeDefinitionBuilder`, `PortDefinitionBuilder`, and `NodeParameterDefinitionBuilder` are convenience constructors only. `Build()` returns the same `NodeDefinition`, `PortDefinition`, and `NodeParameterDefinition` records used by the constructor-based route.
+
 Current shipped editor kinds:
 
 - `Text`

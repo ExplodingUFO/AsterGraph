@@ -429,11 +429,46 @@ M:AsterGraph.Abstractions.Definitions.NodeDefinition.Equals(AsterGraph.Abstracti
 M:AsterGraph.Abstractions.Definitions.NodeDefinition.Equals(System.Object):System.Boolean
 M:AsterGraph.Abstractions.Definitions.NodeDefinition.GetHashCode():System.Int32
 M:AsterGraph.Abstractions.Definitions.NodeDefinition.ToString():System.String
+M:AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder.Accent(System.String):AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder
+M:AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder.Build():AsterGraph.Abstractions.Definitions.NodeDefinition
+M:AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder.Category(System.String):AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder
+M:AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder.Create(AsterGraph.Abstractions.Identifiers.NodeDefinitionId,System.String):AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder
+M:AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder.Create(System.String,System.String):AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder
+M:AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder.Description(System.String):AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder
+M:AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder.Input(AsterGraph.Abstractions.Definitions.PortDefinition):AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder
+M:AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder.Input(System.String,System.String,AsterGraph.Abstractions.Identifiers.PortTypeId,System.String):AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder
+M:AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder.Input(System.String,System.String,System.String,System.String):AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder
+M:AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder.Output(AsterGraph.Abstractions.Definitions.PortDefinition):AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder
+M:AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder.Output(System.String,System.String,AsterGraph.Abstractions.Identifiers.PortTypeId,System.String):AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder
+M:AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder.Output(System.String,System.String,System.String,System.String):AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder
+M:AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder.Parameter(AsterGraph.Abstractions.Definitions.NodeParameterDefinition):AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder
+M:AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder.Parameter(AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder):AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder
+M:AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder.Size(System.Double,System.Double):AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder
+M:AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder.Subtitle(System.String):AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder
+M:AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder.SurfaceTierProfile(AsterGraph.Abstractions.Definitions.NodeSurfaceTierProfile):AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder
 M:AsterGraph.Abstractions.Definitions.NodeParameterDefinition.<Clone>$():AsterGraph.Abstractions.Definitions.NodeParameterDefinition
 M:AsterGraph.Abstractions.Definitions.NodeParameterDefinition.Equals(AsterGraph.Abstractions.Definitions.NodeParameterDefinition):System.Boolean
 M:AsterGraph.Abstractions.Definitions.NodeParameterDefinition.Equals(System.Object):System.Boolean
 M:AsterGraph.Abstractions.Definitions.NodeParameterDefinition.GetHashCode():System.Int32
 M:AsterGraph.Abstractions.Definitions.NodeParameterDefinition.ToString():System.String
+M:AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder.Advanced(System.Boolean):AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder
+M:AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder.Build():AsterGraph.Abstractions.Definitions.NodeParameterDefinition
+M:AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder.Constraints(AsterGraph.Abstractions.Definitions.ParameterConstraints):AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder
+M:AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder.ContractVersion(System.Int32):AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder
+M:AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder.Create(System.String,System.String,AsterGraph.Abstractions.Identifiers.PortTypeId,AsterGraph.Abstractions.Definitions.ParameterEditorKind):AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder
+M:AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder.Create(System.String,System.String,System.String,AsterGraph.Abstractions.Definitions.ParameterEditorKind):AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder
+M:AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder.DefaultValue(System.Object):AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder
+M:AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder.Description(System.String):AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder
+M:AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder.Group(System.String):AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder
+M:AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder.Help(System.String):AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder
+M:AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder.Option(System.String,System.String,System.String):AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder
+M:AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder.Options(AsterGraph.Abstractions.Definitions.ParameterOptionDefinition[]):AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder
+M:AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder.Placeholder(System.String):AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder
+M:AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder.Range(System.Nullable<System.Double>,System.Nullable<System.Double>):AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder
+M:AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder.Required(System.Boolean):AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder
+M:AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder.SortOrder(System.Int32):AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder
+M:AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder.Template(System.String):AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder
+M:AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder.Unit(System.String):AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder
 M:AsterGraph.Abstractions.Definitions.NodeSurfaceTierDefinition.<Clone>$():AsterGraph.Abstractions.Definitions.NodeSurfaceTierDefinition
 M:AsterGraph.Abstractions.Definitions.NodeSurfaceTierDefinition.Equals(AsterGraph.Abstractions.Definitions.NodeSurfaceTierDefinition):System.Boolean
 M:AsterGraph.Abstractions.Definitions.NodeSurfaceTierDefinition.Equals(System.Object):System.Boolean
@@ -461,6 +496,13 @@ M:AsterGraph.Abstractions.Definitions.PortDefinition.Equals(AsterGraph.Abstracti
 M:AsterGraph.Abstractions.Definitions.PortDefinition.Equals(System.Object):System.Boolean
 M:AsterGraph.Abstractions.Definitions.PortDefinition.GetHashCode():System.Int32
 M:AsterGraph.Abstractions.Definitions.PortDefinition.ToString():System.String
+M:AsterGraph.Abstractions.Definitions.PortDefinitionBuilder.Accent(System.String):AsterGraph.Abstractions.Definitions.PortDefinitionBuilder
+M:AsterGraph.Abstractions.Definitions.PortDefinitionBuilder.Build():AsterGraph.Abstractions.Definitions.PortDefinition
+M:AsterGraph.Abstractions.Definitions.PortDefinitionBuilder.Connections(System.Int32,System.Int32):AsterGraph.Abstractions.Definitions.PortDefinitionBuilder
+M:AsterGraph.Abstractions.Definitions.PortDefinitionBuilder.Create(System.String,System.String,AsterGraph.Abstractions.Identifiers.PortTypeId):AsterGraph.Abstractions.Definitions.PortDefinitionBuilder
+M:AsterGraph.Abstractions.Definitions.PortDefinitionBuilder.Create(System.String,System.String,System.String):AsterGraph.Abstractions.Definitions.PortDefinitionBuilder
+M:AsterGraph.Abstractions.Definitions.PortDefinitionBuilder.Description(System.String):AsterGraph.Abstractions.Definitions.PortDefinitionBuilder
+M:AsterGraph.Abstractions.Definitions.PortDefinitionBuilder.Group(System.String):AsterGraph.Abstractions.Definitions.PortDefinitionBuilder
 M:AsterGraph.Abstractions.Identifiers.ConversionId.<Clone>$():AsterGraph.Abstractions.Identifiers.ConversionId
 M:AsterGraph.Abstractions.Identifiers.ConversionId.Equals(AsterGraph.Abstractions.Identifiers.ConversionId):System.Boolean
 M:AsterGraph.Abstractions.Identifiers.ConversionId.Equals(System.Object):System.Boolean
@@ -661,6 +703,11 @@ M:AsterGraph.Core.Compatibility.ImplicitConversionRule.Equals(AsterGraph.Core.Co
 M:AsterGraph.Core.Compatibility.ImplicitConversionRule.Equals(System.Object):System.Boolean
 M:AsterGraph.Core.Compatibility.ImplicitConversionRule.GetHashCode():System.Int32
 M:AsterGraph.Core.Compatibility.ImplicitConversionRule.ToString():System.String
+M:AsterGraph.Core.Compatibility.ImplicitConversionRuleBuilder.Build():AsterGraph.Core.Compatibility.ImplicitConversionRule
+M:AsterGraph.Core.Compatibility.ImplicitConversionRuleBuilder.Conversion(AsterGraph.Abstractions.Identifiers.ConversionId):AsterGraph.Core.Compatibility.ImplicitConversionRuleBuilder
+M:AsterGraph.Core.Compatibility.ImplicitConversionRuleBuilder.Conversion(System.String):AsterGraph.Core.Compatibility.ImplicitConversionRuleBuilder
+M:AsterGraph.Core.Compatibility.ImplicitConversionRuleBuilder.ImplicitConversion(AsterGraph.Abstractions.Identifiers.PortTypeId,AsterGraph.Abstractions.Identifiers.PortTypeId):AsterGraph.Core.Compatibility.ImplicitConversionRuleBuilder
+M:AsterGraph.Core.Compatibility.ImplicitConversionRuleBuilder.ImplicitConversion(System.String,System.String):AsterGraph.Core.Compatibility.ImplicitConversionRuleBuilder
 M:AsterGraph.Core.Models.GraphCompositeBoundaryPort.<Clone>$():AsterGraph.Core.Models.GraphCompositeBoundaryPort
 M:AsterGraph.Core.Models.GraphCompositeBoundaryPort.Deconstruct(out System.String&,out System.String&,out AsterGraph.Core.Models.PortDirection&,out System.String&,out System.String&,out System.String&,out System.String&,out AsterGraph.Abstractions.Identifiers.PortTypeId&):System.Void
 M:AsterGraph.Core.Models.GraphCompositeBoundaryPort.Equals(AsterGraph.Core.Models.GraphCompositeBoundaryPort):System.Boolean
@@ -3156,12 +3203,15 @@ P:AsterGraph.Editor.Viewport.ViewportState.PanX:System.Double:get,set
 P:AsterGraph.Editor.Viewport.ViewportState.PanY:System.Double:get,set
 P:AsterGraph.Editor.Viewport.ViewportState.Zoom:System.Double:get,set
 T:class AsterGraph.Abstractions.Definitions.NodeDefinition
+T:class AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder
 T:class AsterGraph.Abstractions.Definitions.NodeParameterDefinition
+T:class AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder
 T:class AsterGraph.Abstractions.Definitions.NodeSurfaceTierDefinition
 T:class AsterGraph.Abstractions.Definitions.NodeSurfaceTierProfile
 T:class AsterGraph.Abstractions.Definitions.ParameterConstraints
 T:class AsterGraph.Abstractions.Definitions.ParameterOptionDefinition
 T:class AsterGraph.Abstractions.Definitions.PortDefinition
+T:class AsterGraph.Abstractions.Definitions.PortDefinitionBuilder
 T:class AsterGraph.Abstractions.Identifiers.ConversionId
 T:class AsterGraph.Abstractions.Identifiers.NodeDefinitionId
 T:class AsterGraph.Abstractions.Identifiers.PortTypeId
@@ -3207,6 +3257,7 @@ T:class AsterGraph.Avalonia.Styling.AvaloniaStylePalette
 T:class AsterGraph.Avalonia.Styling.GraphEditorStyleAdapter
 T:class AsterGraph.Core.Compatibility.DefaultPortCompatibilityService
 T:class AsterGraph.Core.Compatibility.ImplicitConversionRule
+T:class AsterGraph.Core.Compatibility.ImplicitConversionRuleBuilder
 T:class AsterGraph.Core.Models.GraphCompositeBoundaryPort
 T:class AsterGraph.Core.Models.GraphCompositeNode
 T:class AsterGraph.Core.Models.GraphConnection
