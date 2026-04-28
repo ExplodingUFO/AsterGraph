@@ -164,6 +164,9 @@ public sealed class ConsumerSampleProofTests
         Assert.True(result.NavigationHistoryOk);
         Assert.True(result.ScopeBreadcrumbNavigationOk);
         Assert.True(result.FocusRestoreOk);
+        Assert.True(result.NavigationProductivityProofOk);
+        Assert.True(result.NavigationProductivityHandoffOk);
+        Assert.True(result.NavigationScopeBoundaryOk);
         Assert.True(result.GraphSnippetCatalogOk);
         Assert.True(result.GraphSnippetInsertOk);
         Assert.True(result.RuntimeOverlaySupportBundleOk);
@@ -218,6 +221,9 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(result.ProofLines, line => line == "NAVIGATION_HISTORY_OK:True");
         Assert.Contains(result.ProofLines, line => line == "SCOPE_BREADCRUMB_NAVIGATION_OK:True");
         Assert.Contains(result.ProofLines, line => line == "FOCUS_RESTORE_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "NAVIGATION_PRODUCTIVITY_PROOF_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "NAVIGATION_PRODUCTIVITY_HANDOFF_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "NAVIGATION_SCOPE_BOUNDARY_OK:True");
         Assert.Contains(result.ProofLines, line => line == "LAYOUT_PROVIDER_SEAM_OK:True");
         Assert.Contains(result.ProofLines, line => line == "LAYOUT_PREVIEW_APPLY_CANCEL_OK:True");
         Assert.Contains(result.ProofLines, line => line == "LAYOUT_UNDO_TRANSACTION_OK:True");
@@ -665,6 +671,12 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(proofLines, line => line == "COMMAND_PALETTE_GROUPING_OK:True");
         Assert.Contains(proofLines, line => line == "COMMAND_PALETTE_DISABLED_REASON_OK:True");
         Assert.Contains(proofLines, line => line == "COMMAND_PALETTE_RECENT_ACTIONS_OK:True");
+        Assert.Contains(proofLines, line => line == "NAVIGATION_HISTORY_OK:True");
+        Assert.Contains(proofLines, line => line == "SCOPE_BREADCRUMB_NAVIGATION_OK:True");
+        Assert.Contains(proofLines, line => line == "FOCUS_RESTORE_OK:True");
+        Assert.Contains(proofLines, line => line == "NAVIGATION_PRODUCTIVITY_PROOF_OK:True");
+        Assert.Contains(proofLines, line => line == "NAVIGATION_PRODUCTIVITY_HANDOFF_OK:True");
+        Assert.Contains(proofLines, line => line == "NAVIGATION_SCOPE_BOUNDARY_OK:True");
         Assert.Contains(proofLines, line => line == "LAYOUT_PROVIDER_SEAM_OK:True");
         Assert.Contains(proofLines, line => line == "LAYOUT_PREVIEW_APPLY_CANCEL_OK:True");
         Assert.Contains(proofLines, line => line == "LAYOUT_UNDO_TRANSACTION_OK:True");

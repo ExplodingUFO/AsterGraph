@@ -39,7 +39,7 @@ This sample keeps one realistic host window without turning into a full showcase
 - one authoring flow proof handoff that keeps quick-add, insert-on-wire, reconnect editing, edge multiselect, and wire slicing on the existing session command path
 - one final handoff marker set that ties UX polish, feature enhancement proof, and scope-boundary evidence together without adding runtime APIs, marketplace behavior, sandboxing, or WPF parity
 - one runtime feedback proof handoff with `RUNTIME_DEBUG_PANEL_INTERACTION_OK:True`, `RUNTIME_LOG_LOCATE_OK:True`, and `RUNTIME_LOG_EXPORT_OK:True`, paired with Demo's `AI_PIPELINE_MOCK_RUNNER_POLISH_OK:True`, `AI_PIPELINE_PAYLOAD_PREVIEW_OK:True`, and `AI_PIPELINE_ERROR_DEBUG_EVIDENCE_OK:True`; these are host-owned debug/support markers, not an execution engine, workflow scripting UI, marketplace, sandbox, WPF parity, or GA claim
-- one host-owned navigation proof handoff with `NAVIGATION_HISTORY_OK:True`, `SCOPE_BREADCRUMB_NAVIGATION_OK:True`, and `FOCUS_RESTORE_OK:True` without introducing a command macro engine, background graph index, WPF parity, or a new runtime navigation API
+- one host-owned navigation proof handoff with `NAVIGATION_HISTORY_OK:True`, `SCOPE_BREADCRUMB_NAVIGATION_OK:True`, `FOCUS_RESTORE_OK:True`, `NAVIGATION_PRODUCTIVITY_PROOF_OK:True`, `NAVIGATION_PRODUCTIVITY_HANDOFF_OK:True`, and `NAVIGATION_SCOPE_BOUNDARY_OK:True` without introducing a command macro engine, background graph index, WPF parity, or a new runtime navigation API
 - the shipped Avalonia editor surface on the factory-based hosted-UI route
 
 ## Copy These Host-Owned Seams
@@ -148,6 +148,9 @@ Expected proof markers:
 - `NAVIGATION_HISTORY_OK:True`
 - `SCOPE_BREADCRUMB_NAVIGATION_OK:True`
 - `FOCUS_RESTORE_OK:True`
+- `NAVIGATION_PRODUCTIVITY_PROOF_OK:True`
+- `NAVIGATION_PRODUCTIVITY_HANDOFF_OK:True`
+- `NAVIGATION_SCOPE_BOUNDARY_OK:True`
 - `FIVE_MINUTE_ONBOARDING_OK:True`
 - `ONBOARDING_CONFIGURATION_OK:True`
 - `AUTHORING_SURFACE_OK:True`
@@ -251,6 +254,9 @@ Expected proof markers:
 - `NAVIGATION_HISTORY_OK:True`
 - `SCOPE_BREADCRUMB_NAVIGATION_OK:True`
 - `FOCUS_RESTORE_OK:True`
+- `NAVIGATION_PRODUCTIVITY_PROOF_OK:True`
+- `NAVIGATION_PRODUCTIVITY_HANDOFF_OK:True`
+- `NAVIGATION_SCOPE_BOUNDARY_OK:True`
 - `FIVE_MINUTE_ONBOARDING_OK:True`
 - `ONBOARDING_CONFIGURATION_OK:True`
 - `HOST_NATIVE_METRIC:startup_ms=...`
@@ -320,7 +326,7 @@ If you want to build the same medium host in your own app, copy these seams in t
 - snippet seam: expose host-owned snippets through a small catalog, insert them with the existing pending-connection command path, and expect `GRAPH_SNIPPET_CATALOG_OK:True` plus `GRAPH_SNIPPET_INSERT_OK:True`
 - graph search seam: search the hosted graph from current snapshots, locate nodes/connections through existing selection and viewport commands, and expect `GRAPH_SEARCH_LOCATE_OK:True`, `GRAPH_SEARCH_SCOPE_FILTER_OK:True`, and `GRAPH_SEARCH_VIEWPORT_FOCUS_OK:True`
 - command palette productivity: group palette actions by the existing command descriptor group, surface disabled reasons from the shared command route, and keep a bounded in-memory recent-action section with `COMMAND_PALETTE_GROUPING_OK:True`, `COMMAND_PALETTE_DISABLED_REASON_OK:True`, and `COMMAND_PALETTE_RECENT_ACTIONS_OK:True`
-- navigation productivity: keep back/forward history, scope breadcrumbs, and focus restore host-owned on top of existing selection/scope/viewport commands, and expect `NAVIGATION_HISTORY_OK:True`, `SCOPE_BREADCRUMB_NAVIGATION_OK:True`, and `FOCUS_RESTORE_OK:True`
+- navigation productivity: keep graph search, command palette, back/forward history, scope breadcrumbs, and focus restore host-owned on top of existing selection/scope/viewport commands, and expect `NAVIGATION_PRODUCTIVITY_PROOF_OK:True`, `NAVIGATION_PRODUCTIVITY_HANDOFF_OK:True`, and `NAVIGATION_SCOPE_BOUNDARY_OK:True`
 - proof mode: emit the `AUTHORING_SURFACE_*` markers, `COMMAND_SURFACE_OK`, and the widened `HOST_NATIVE_METRIC:*` lines so you can compare your host with the shipped samples and keep the defended large-tier contract in view through `ScaleSmoke`
 - widened hosted tuning: emit `WIDENED_SURFACE_PERFORMANCE_OK:True` and reuse [Widened Surface Performance Recipe](./widened-surface-performance-recipe.md) so the hosted metrics stay tied to `ScaleSmoke`
 - capability breadth: pair the same route with [Capability Breadth Recipe](./capability-breadth-recipe.md) and emit the `CAPABILITY_BREADTH_*` markers from `AsterGraph.ConsumerSample.Avalonia -- --proof`

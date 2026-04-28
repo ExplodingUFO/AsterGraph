@@ -298,6 +298,28 @@ public sealed record ConsumerSampleProofResult(
         => AuthoringFlowProofOk
         && ExperienceScopeBoundaryOk;
 
+    public bool NavigationProductivityProofOk
+        => GraphSearchLocateOk
+        && GraphSearchScopeFilterOk
+        && GraphSearchViewportFocusOk
+        && CommandPaletteGroupingOk
+        && CommandPaletteDisabledReasonOk
+        && CommandPaletteRecentActionsOk
+        && NavigationHistoryOk
+        && ScopeBreadcrumbNavigationOk
+        && FocusRestoreOk;
+
+    public bool NavigationProductivityHandoffOk
+        => NavigationProductivityProofOk
+        && WindowCompositionOk
+        && SupportBundlePayloadOk;
+
+    public bool NavigationScopeBoundaryOk
+        => NavigationProductivityProofOk
+        && HostOwnedActionsOk
+        && FeatureDescriptorIds is { Count: > 0 }
+        && FeatureDescriptorIds.All(IsBoundedFeatureDescriptorId);
+
     public bool IsOk
         => HostMenuActionOk
         && PluginContributionOk
@@ -313,7 +335,10 @@ public sealed record ConsumerSampleProofResult(
         && AuthoringFlowProofOk
         && AuthoringFlowHandoffOk
         && AuthoringFlowScopeBoundaryOk
-        && ExperienceScopeBoundaryOk;
+        && ExperienceScopeBoundaryOk
+        && NavigationProductivityProofOk
+        && NavigationProductivityHandoffOk
+        && NavigationScopeBoundaryOk;
 
     public IReadOnlyList<string> MetricLines =>
     [
@@ -367,6 +392,9 @@ public sealed record ConsumerSampleProofResult(
         $"NAVIGATION_HISTORY_OK:{NavigationHistoryOk}",
         $"SCOPE_BREADCRUMB_NAVIGATION_OK:{ScopeBreadcrumbNavigationOk}",
         $"FOCUS_RESTORE_OK:{FocusRestoreOk}",
+        $"NAVIGATION_PRODUCTIVITY_PROOF_OK:{NavigationProductivityProofOk}",
+        $"NAVIGATION_PRODUCTIVITY_HANDOFF_OK:{NavigationProductivityHandoffOk}",
+        $"NAVIGATION_SCOPE_BOUNDARY_OK:{NavigationScopeBoundaryOk}",
         $"LAYOUT_PROVIDER_SEAM_OK:{LayoutProviderSeamOk}",
         $"LAYOUT_PREVIEW_APPLY_CANCEL_OK:{LayoutPreviewApplyCancelOk}",
         $"LAYOUT_UNDO_TRANSACTION_OK:{LayoutUndoTransactionOk}",
