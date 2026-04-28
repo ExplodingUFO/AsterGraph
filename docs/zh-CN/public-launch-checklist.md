@@ -102,6 +102,9 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framew
 - `API_RELEASE_CANDIDATE_PROOF_OK:True`
 - `PUBLIC_API_GUIDANCE_HANDOFF_OK:True`
 - `RELEASE_BOUNDARY_STABILITY_OK:True`
+- `ADOPTION_READINESS_HANDOFF_OK:True`
+- `ADOPTION_SCOPE_BOUNDARY_OK:True`
+- `V056_MILESTONE_PROOF_OK:True`
 - `adoption-intake-dry-run.md` 里的合成 dry-run 记录只是维护者/内部预演；不要计入 3 到 5 条真实外部报告的门槛，也不要扩大 support/capability 声明
 - 每条 beta intake 记录都包含报告类型、采用者上下文、route、version、proof 标记、摩擦点、support bundle 附件备注和 claim-expansion status；单条报告不会扩大公开声明
 

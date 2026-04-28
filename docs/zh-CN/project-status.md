@@ -6,6 +6,7 @@
 - 与当前包版本配对的对外 SemVer prerelease 标签：`v0.11.0-beta`
 - 历史仓库里程碑标签系列：`v1.x` 风格的公开前检查点
 - 仓库阶段：公开 Beta（稳定化收口）
+- v0.56 adoption-readiness handoff markers：`ADOPTION_READINESS_HANDOFF_OK:True`、`ADOPTION_SCOPE_BOUNDARY_OK:True` 和 `V056_MILESTONE_PROOF_OK:True`
 - 对外版本说明：[Versioning](./versioning.md)
 - 当前公开支持的发布包：
   - `AsterGraph.Abstractions`

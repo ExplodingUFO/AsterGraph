@@ -407,6 +407,8 @@ public sealed class ReleaseClosureContractTests
         var chineseChecklist = ReadRepoFile("docs/zh-CN/public-launch-checklist.md");
         var englishStatus = ReadRepoFile("docs/en/project-status.md");
         var chineseStatus = ReadRepoFile("docs/zh-CN/project-status.md");
+        var englishAdoptionFeedback = ReadRepoFile("docs/en/adoption-feedback.md");
+        var chineseAdoptionFeedback = ReadRepoFile("docs/zh-CN/adoption-feedback.md");
 
         Assert.True(HasLineWithAll(englishStatus, "WPF support expansion", "validation-only", "public WPF support", "3-5 real external reports"));
         Assert.True(HasLineWithAll(chineseStatus, "WPF support expansion", "validation-only", "public WPF support", "3-5 real external reports"));
@@ -417,6 +419,13 @@ public sealed class ReleaseClosureContractTests
         Assert.True(HasLineWithAll(chineseStatus, "GA prep checklist", "adoption evidence", "API drift", "support boundary", "release proof"));
         Assert.True(HasLineWithAll(englishChecklist, "GA prep checklist", "adoption evidence", "API drift", "support boundary", "release proof"));
         Assert.True(HasLineWithAll(chineseChecklist, "GA prep checklist", "adoption evidence", "API drift", "support boundary", "release proof"));
+
+        foreach (var contents in new[] { englishChecklist, chineseChecklist, englishStatus, chineseStatus, englishAdoptionFeedback, chineseAdoptionFeedback })
+        {
+            Assert.Contains("ADOPTION_READINESS_HANDOFF_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("ADOPTION_SCOPE_BOUNDARY_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("V056_MILESTONE_PROOF_OK:True", contents, StringComparison.Ordinal);
+        }
     }
 
     [Fact]
