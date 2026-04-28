@@ -181,6 +181,8 @@ public sealed class ConsumerSampleProofTests
         Assert.True(result.ToolbarDescriptorOk);
         Assert.True(result.ContextMenuDescriptorOk);
         Assert.True(result.CommandDisabledReasonOk);
+        Assert.True(result.InteractionFeedbackOk);
+        Assert.True(result.CanvasFocusRecoveryOk);
         Assert.True(result.NodeToolbarContributionOk);
         Assert.True(result.EdgeToolbarContributionOk);
         Assert.True(result.ToolbarContributionDescriptorOk);
@@ -288,6 +290,8 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(result.ProofLines, line => line == "TOOLBAR_DESCRIPTOR_OK:True");
         Assert.Contains(result.ProofLines, line => line == "CONTEXT_MENU_DESCRIPTOR_OK:True");
         Assert.Contains(result.ProofLines, line => line == "COMMAND_DISABLED_REASON_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "INTERACTION_FEEDBACK_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "CANVAS_FOCUS_RECOVERY_OK:True");
         Assert.Contains(result.ProofLines, line => line == "NODE_TOOLBAR_CONTRIBUTION_OK:True");
         Assert.Contains(result.ProofLines, line => line == "EDGE_TOOLBAR_CONTRIBUTION_OK:True");
         Assert.Contains(result.ProofLines, line => line == "TOOLBAR_CONTRIBUTION_DESCRIPTOR_OK:True");
@@ -801,6 +805,8 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(proofLines, line => line == "TOOLBAR_DESCRIPTOR_OK:True");
         Assert.Contains(proofLines, line => line == "CONTEXT_MENU_DESCRIPTOR_OK:True");
         Assert.Contains(proofLines, line => line == "COMMAND_DISABLED_REASON_OK:True");
+        Assert.Contains(proofLines, line => line == "INTERACTION_FEEDBACK_OK:True");
+        Assert.Contains(proofLines, line => line == "CANVAS_FOCUS_RECOVERY_OK:True");
         Assert.Contains(proofLines, line => line == "NAVIGATION_HISTORY_OK:True");
         Assert.Contains(proofLines, line => line == "SCOPE_BREADCRUMB_NAVIGATION_OK:True");
         Assert.Contains(proofLines, line => line == "FOCUS_RESTORE_OK:True");

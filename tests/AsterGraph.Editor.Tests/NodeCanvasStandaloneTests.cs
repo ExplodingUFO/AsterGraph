@@ -127,6 +127,49 @@ public sealed class NodeCanvasStandaloneTests
     }
 
     [AvaloniaFact]
+    public void CanvasContextRequest_RestoresCanvasFocusForKeyboardRecovery()
+    {
+        var editor = CreateEditor();
+        var presenter = new RecordingContextMenuPresenter();
+        var canvas = AsterGraphCanvasViewFactory.Create(new AsterGraphCanvasViewOptions
+        {
+            Editor = editor,
+            EnableDefaultContextMenu = true,
+            Presentation = new AsterGraphPresentationOptions
+            {
+                ContextMenuPresenter = presenter,
+            },
+        });
+        var focusOrigin = new TextBox
+        {
+            Focusable = true,
+            Text = "Focus origin",
+        };
+        var layout = new Grid();
+        layout.Children.Add(canvas);
+        layout.Children.Add(focusOrigin);
+        var window = CreateWindow(layout);
+        var args = new ContextRequestedEventArgs();
+
+        try
+        {
+            Assert.True(focusOrigin.Focus());
+            Assert.True(focusOrigin.IsFocused);
+
+            InvokeCanvasContextRequested(canvas, args);
+
+            Assert.True(args.Handled);
+            Assert.Equal(1, presenter.OpenCalls);
+            Assert.True(canvas.IsFocused);
+            Assert.False(focusOrigin.IsFocused);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
     public void CanvasContextRequest_UsesCanonicalDescriptorPresenterOverload_WhenAvailable()
     {
         var editor = CreateEditor();

@@ -634,6 +634,18 @@ public sealed record ConsumerSampleProofResult(
         && EdgeRenderingScopeBoundaryOk
         && LargeGraphPanelScopeOk;
 
+    public bool InteractionFeedbackOk
+        => SelectedHoveredAdornerScopeOk
+        && SelectedEdgeFeedbackOk
+        && ConnectionInvalidHoverFeedbackOk
+        && LiveCanvasRefreshAuditOk;
+
+    public bool CanvasFocusRecoveryOk
+        => HostedAccessibilityFocusOk
+        && GraphSearchViewportFocusOk
+        && FocusRestoreOk
+        && NavigationScopeBoundaryOk;
+
     public bool IsOk
         => HostMenuActionOk
         && PluginContributionOk
@@ -675,7 +687,10 @@ public sealed record ConsumerSampleProofResult(
         && LargeGraphPanelScopeOk
         && ProjectionPerformanceEvidenceOk
         && LargeGraphUxHandoffOk
-        && V059MilestoneProofOk;
+        && V059MilestoneProofOk
+        && InteractionFeedbackOk
+        && CommandDisabledReasonOk
+        && CanvasFocusRecoveryOk;
 
     public IReadOnlyList<string> MetricLines =>
     [
@@ -739,6 +754,8 @@ public sealed record ConsumerSampleProofResult(
         $"TOOLBAR_DESCRIPTOR_OK:{ToolbarDescriptorOk}",
         $"CONTEXT_MENU_DESCRIPTOR_OK:{ContextMenuDescriptorOk}",
         $"COMMAND_DISABLED_REASON_OK:{CommandDisabledReasonOk}",
+        $"INTERACTION_FEEDBACK_OK:{InteractionFeedbackOk}",
+        $"CANVAS_FOCUS_RECOVERY_OK:{CanvasFocusRecoveryOk}",
         $"NODE_TOOLBAR_CONTRIBUTION_OK:{NodeToolbarContributionOk}",
         $"EDGE_TOOLBAR_CONTRIBUTION_OK:{EdgeToolbarContributionOk}",
         $"TOOLBAR_CONTRIBUTION_DESCRIPTOR_OK:{ToolbarContributionDescriptorOk}",

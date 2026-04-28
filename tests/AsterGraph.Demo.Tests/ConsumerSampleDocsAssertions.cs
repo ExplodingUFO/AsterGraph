@@ -98,6 +98,8 @@ internal static class ConsumerSampleDocsAssertions
         Assert.Contains("TOOLBAR_DESCRIPTOR_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("CONTEXT_MENU_DESCRIPTOR_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("COMMAND_DISABLED_REASON_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("INTERACTION_FEEDBACK_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("CANVAS_FOCUS_RECOVERY_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("NODE_TOOLBAR_CONTRIBUTION_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("EDGE_TOOLBAR_CONTRIBUTION_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("TOOLBAR_CONTRIBUTION_DESCRIPTOR_OK:True", contents, StringComparison.Ordinal);

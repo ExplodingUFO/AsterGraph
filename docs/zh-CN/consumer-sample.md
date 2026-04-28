@@ -184,6 +184,8 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 - `TOOLBAR_DESCRIPTOR_OK:True`
 - `CONTEXT_MENU_DESCRIPTOR_OK:True`
 - `COMMAND_DISABLED_REASON_OK:True`
+- `INTERACTION_FEEDBACK_OK:True`
+- `CANVAS_FOCUS_RECOVERY_OK:True`
 - `NODE_TOOLBAR_CONTRIBUTION_OK:True`
 - `EDGE_TOOLBAR_CONTRIBUTION_OK:True`
 - `TOOLBAR_CONTRIBUTION_DESCRIPTOR_OK:True`
@@ -319,6 +321,8 @@ Proof Handoff 负责实际 intake 说明。
 - `TOOLBAR_DESCRIPTOR_OK:True`
 - `CONTEXT_MENU_DESCRIPTOR_OK:True`
 - `COMMAND_DISABLED_REASON_OK:True`
+- `INTERACTION_FEEDBACK_OK:True`
+- `CANVAS_FOCUS_RECOVERY_OK:True`
 - `NODE_TOOLBAR_CONTRIBUTION_OK:True`
 - `EDGE_TOOLBAR_CONTRIBUTION_OK:True`
 - `TOOLBAR_CONTRIBUTION_DESCRIPTOR_OK:True`
@@ -399,7 +403,7 @@ Proof Handoff 负责实际 intake 说明。
 - snippet seam：通过一个小 catalog 暴露宿主自管 snippet，在宿主里提供 search/preview/favorite/recent，用已有 pending-connection command path 插入，并期待 `GRAPH_SNIPPET_CATALOG_OK:True`、`GRAPH_SNIPPET_INSERT_OK:True`、`FRAGMENT_LIBRARY_SEARCH_OK:True`、`FRAGMENT_LIBRARY_PREVIEW_OK:True`、`FRAGMENT_LIBRARY_RECENTS_FAVORITES_OK:True` 和 `FRAGMENT_LIBRARY_SCOPE_BOUNDARY_OK:True`
 - default workbench seam：当 stock toolbar、command palette、stencil、inspector、mini-map、fragment、diagnostics 和 status chrome 已经足够时，使用 `AsterGraphHostBuilder.UseDefaultWorkbench()`；期待 `WORKBENCH_DEFAULTS_OK:True`、`WORKBENCH_HOST_BUILDER_HANDOFF_OK:True`、`WORKBENCH_PERFORMANCE_MODE_OK:True`、`BALANCED_MODE_DEFAULT_OK:True`、`WORKBENCH_LOD_POLICY_OK:True`、`PERFORMANCE_MODE_SCOPE_BOUNDARY_OK:True` 和 `WORKBENCH_SCOPE_BOUNDARY_OK:True`
 - graph search seam：从当前 snapshot 搜索 hosted graph，通过已有 selection 和 viewport command 定位节点/连接，并期待 `GRAPH_SEARCH_LOCATE_OK:True`、`GRAPH_SEARCH_SCOPE_FILTER_OK:True` 和 `GRAPH_SEARCH_VIEWPORT_FOCUS_OK:True`
-- command palette productivity：按已有 command descriptor group 对 palette action 分组，展示共享 command route 的 disabled reason，保留有界的内存 recent-action 区域，并证明 toolbar / palette / context-menu 都来自同一套 descriptor；期待 `COMMAND_PALETTE_GROUPING_OK:True`、`COMMAND_PALETTE_DISABLED_REASON_OK:True`、`COMMAND_PALETTE_RECENT_ACTIONS_OK:True`、`COMMAND_PROJECTION_UNIFIED_OK:True`、`COMMAND_PALETTE_OK:True`、`TOOLBAR_DESCRIPTOR_OK:True`、`CONTEXT_MENU_DESCRIPTOR_OK:True` 和 `COMMAND_DISABLED_REASON_OK:True`
+- command palette productivity：按已有 command descriptor group 对 palette action 分组，展示共享 command route 的 disabled reason，保留有界的内存 recent-action 区域，并证明 toolbar / palette / context-menu 都来自同一套 descriptor；期待 `COMMAND_PALETTE_GROUPING_OK:True`、`COMMAND_PALETTE_DISABLED_REASON_OK:True`、`COMMAND_PALETTE_RECENT_ACTIONS_OK:True`、`COMMAND_PROJECTION_UNIFIED_OK:True`、`COMMAND_PALETTE_OK:True`、`TOOLBAR_DESCRIPTOR_OK:True`、`CONTEXT_MENU_DESCRIPTOR_OK:True`、`COMMAND_DISABLED_REASON_OK:True`、`INTERACTION_FEEDBACK_OK:True` 和 `CANVAS_FOCUS_RECOVERY_OK:True`
 - navigation productivity：把 graph search、command palette、back/forward history、scope breadcrumbs 和 focus restore 保持为宿主自管，并继续复用已有 selection/scope/viewport command，期待 `NAVIGATION_PRODUCTIVITY_PROOF_OK:True`、`NAVIGATION_PRODUCTIVITY_HANDOFF_OK:True` 和 `NAVIGATION_SCOPE_BOUNDARY_OK:True`
 - proof mode：输出 `AUTHORING_SURFACE_*`、`COMMAND_SURFACE_OK` 和扩展后的 `HOST_NATIVE_METRIC:*`，这样你能和官方 sample 做横向比较，并继续把 `ScaleSmoke` 的 defended large-tier contract 放在视野里
 - widened hosted tuning：输出 `WIDENED_SURFACE_PERFORMANCE_OK:True`，并复用 [Widened Surface Performance Recipe](./widened-surface-performance-recipe.md)，这样宿主指标和 `Quality` / `Balanced` / `Throughput` projection policy 会继续和 `ScaleSmoke` 绑定在同一条路线里

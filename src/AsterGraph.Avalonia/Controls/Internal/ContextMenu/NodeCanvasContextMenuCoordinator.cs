@@ -92,6 +92,7 @@ internal sealed class NodeCanvasContextMenuCoordinator
             return false;
         }
 
+        _host.FocusCanvas();
         return OpenContextMenu(
             target,
             NodeCanvasContextMenuContextFactory.CreateCanvasContext(

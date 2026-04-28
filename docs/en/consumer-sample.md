@@ -184,6 +184,8 @@ Expected proof markers:
 - `TOOLBAR_DESCRIPTOR_OK:True`
 - `CONTEXT_MENU_DESCRIPTOR_OK:True`
 - `COMMAND_DISABLED_REASON_OK:True`
+- `INTERACTION_FEEDBACK_OK:True`
+- `CANVAS_FOCUS_RECOVERY_OK:True`
 - `NODE_TOOLBAR_CONTRIBUTION_OK:True`
 - `EDGE_TOOLBAR_CONTRIBUTION_OK:True`
 - `TOOLBAR_CONTRIBUTION_DESCRIPTOR_OK:True`
@@ -319,6 +321,8 @@ Expected proof markers:
 - `TOOLBAR_DESCRIPTOR_OK:True`
 - `CONTEXT_MENU_DESCRIPTOR_OK:True`
 - `COMMAND_DISABLED_REASON_OK:True`
+- `INTERACTION_FEEDBACK_OK:True`
+- `CANVAS_FOCUS_RECOVERY_OK:True`
 - `NODE_TOOLBAR_CONTRIBUTION_OK:True`
 - `EDGE_TOOLBAR_CONTRIBUTION_OK:True`
 - `TOOLBAR_CONTRIBUTION_DESCRIPTOR_OK:True`
@@ -398,7 +402,7 @@ If you want to build the same medium host in your own app, copy these seams in t
 - snippet seam: expose host-owned snippets through a small catalog, search/preview/favorite/recent them in the host, insert them with the existing pending-connection command path, and expect `GRAPH_SNIPPET_CATALOG_OK:True`, `GRAPH_SNIPPET_INSERT_OK:True`, `FRAGMENT_LIBRARY_SEARCH_OK:True`, `FRAGMENT_LIBRARY_PREVIEW_OK:True`, `FRAGMENT_LIBRARY_RECENTS_FAVORITES_OK:True`, and `FRAGMENT_LIBRARY_SCOPE_BOUNDARY_OK:True`
 - default workbench seam: use `AsterGraphHostBuilder.UseDefaultWorkbench()` for the stock toolbar, command palette, stencil, inspector, mini-map, fragment, diagnostics, and status chrome; expect `WORKBENCH_DEFAULTS_OK:True`, `WORKBENCH_HOST_BUILDER_HANDOFF_OK:True`, `WORKBENCH_PERFORMANCE_MODE_OK:True`, `BALANCED_MODE_DEFAULT_OK:True`, `WORKBENCH_LOD_POLICY_OK:True`, `PERFORMANCE_MODE_SCOPE_BOUNDARY_OK:True`, and `WORKBENCH_SCOPE_BOUNDARY_OK:True`
 - graph search seam: search the hosted graph from current snapshots, locate nodes/connections through existing selection and viewport commands, and expect `GRAPH_SEARCH_LOCATE_OK:True`, `GRAPH_SEARCH_SCOPE_FILTER_OK:True`, and `GRAPH_SEARCH_VIEWPORT_FOCUS_OK:True`
-- command palette productivity: group palette actions by the existing command descriptor group, surface disabled reasons from the shared command route, keep a bounded in-memory recent-action section, and prove toolbar/palette/context-menu projection from the same descriptors with `COMMAND_PALETTE_GROUPING_OK:True`, `COMMAND_PALETTE_DISABLED_REASON_OK:True`, `COMMAND_PALETTE_RECENT_ACTIONS_OK:True`, `COMMAND_PROJECTION_UNIFIED_OK:True`, `COMMAND_PALETTE_OK:True`, `TOOLBAR_DESCRIPTOR_OK:True`, `CONTEXT_MENU_DESCRIPTOR_OK:True`, and `COMMAND_DISABLED_REASON_OK:True`
+- command palette productivity: group palette actions by the existing command descriptor group, surface disabled reasons from the shared command route, keep a bounded in-memory recent-action section, and prove toolbar/palette/context-menu projection from the same descriptors with `COMMAND_PALETTE_GROUPING_OK:True`, `COMMAND_PALETTE_DISABLED_REASON_OK:True`, `COMMAND_PALETTE_RECENT_ACTIONS_OK:True`, `COMMAND_PROJECTION_UNIFIED_OK:True`, `COMMAND_PALETTE_OK:True`, `TOOLBAR_DESCRIPTOR_OK:True`, `CONTEXT_MENU_DESCRIPTOR_OK:True`, `COMMAND_DISABLED_REASON_OK:True`, `INTERACTION_FEEDBACK_OK:True`, and `CANVAS_FOCUS_RECOVERY_OK:True`
 - navigation productivity: keep graph search, command palette, back/forward history, scope breadcrumbs, and focus restore host-owned on top of existing selection/scope/viewport commands, and expect `NAVIGATION_PRODUCTIVITY_PROOF_OK:True`, `NAVIGATION_PRODUCTIVITY_HANDOFF_OK:True`, and `NAVIGATION_SCOPE_BOUNDARY_OK:True`
 - proof mode: emit the `AUTHORING_SURFACE_*` markers, `COMMAND_SURFACE_OK`, and the widened `HOST_NATIVE_METRIC:*` lines so you can compare your host with the shipped samples and keep the defended large-tier contract in view through `ScaleSmoke`
 - widened hosted tuning: emit `WIDENED_SURFACE_PERFORMANCE_OK:True` and reuse [Widened Surface Performance Recipe](./widened-surface-performance-recipe.md) so the hosted metrics and `Quality` / `Balanced` / `Throughput` projection policy stay tied to `ScaleSmoke`
