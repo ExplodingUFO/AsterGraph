@@ -127,7 +127,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framew
 - 确认每条 beta 反馈都按同一套受限字段记录：报告类型、采用者上下文、`route`、`version`、proof 标记、摩擦点、support bundle 附件备注，以及 claim-expansion status
 - 确认 claim-expansion status 在 3 到 5 条真实外部报告聚焦到同一个受限风险之前，只作为分诊输入
 - GA prep checklist：adoption evidence、API drift、support boundary 和 release proof gate 都必须显式保留，之后才允许写 GA 或 `1.0` 公告口径
-- 在 release messaging 里重复当前 `0.xx` alpha/beta hardening 线的 handoff：`Performance / Export Hardening` 表示先做保守 5000 节点 raster export budget，再补 progress/cancel/scope evidence，然后才扩大 rendering cache claim
+- 在 release messaging 里重复当前 `0.xx` alpha/beta hardening 线的 handoff：`Adoption Readiness / Release Candidate Hygiene` 表示先把公开推荐、API drift、support boundary 和 release proof gate 对齐，再写 release-candidate、GA 或 `1.0` 级别语言；同时包含 `ADOPTION_RECOMMENDATION_CURRENT_OK:True` 和 `CLAIM_HYGIENE_BOUNDARY_OK:True`
 - 保持 `xlarge` 为 telemetry-only，不把它说成 10000 节点支持承诺或 virtualization commitment
 - 如果配置了 `NUGET_API_KEY`，确认包发布成功
 - 如果没有配置 `NUGET_API_KEY`，确认 workflow 是有意跳过 NuGet publish，而不是失败

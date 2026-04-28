@@ -106,7 +106,7 @@ Every real external report used for this gate must carry the same intake vocabul
 - algorithm execution engine or workflow scripting UI stories beyond host-owned runtime feedback display evidence
 - stable / GA / `1.0` support guarantees
 - GA prep checklist: adoption evidence, API drift, support boundary, and release proof gates must all be reviewed before any GA or `1.0` language.
-- the current 0.xx alpha/beta hardening line is `Performance / Export Hardening`: tighten export budgets, add progress/cancel/scope evidence, then consider rendering cache work
+- the current 0.xx alpha/beta hardening line is `Adoption Readiness / Release Candidate Hygiene`: keep the public recommendation, API drift, support boundary, and release proof gates aligned before any release-candidate, GA, or `1.0` language; `ADOPTION_RECOMMENDATION_CURRENT_OK:True` and `CLAIM_HYGIENE_BOUNDARY_OK:True` are the proof handoff markers
 - seeded rehearsals do not count toward the 3-5 gate
 - if a new report does not fit one of the proven or bounded rows above, route it through the [Adoption Feedback Loop](./adoption-feedback.md) and the [Beta Support Bundle](./support-bundle.md) instead of widening the claim ad hoc; the claim-expansion status remains a triage field until the 3-5 real external reports gate is met
 

@@ -37,12 +37,14 @@
 
 ## 当前建议
 
-当前 `0.xx` alpha/beta hardening 线命名为 `Performance / Export Hardening`：先做保守 stress raster export budget，再补 progress/cancel/scope evidence，然后才扩大 rendering cache claim。只有当 3 到 5 条真实外部报告聚焦在同一个受限风险上时，才考虑收紧保守 5000 节点 raster 红线：
+当前 `0.xx` alpha/beta hardening 线命名为 `Adoption Readiness / Release Candidate Hygiene`：先把公开推荐、support boundary、API drift 检查和 release proof 口径保持一致，再考虑扩大任何 capability 声明。之前的 `Performance / Export Hardening` 已经变成 defended evidence，不再是下一条公开推荐。
 
-1. **继续优先做 Authoring Productivity**
-2. **维护者种子预演证据不计入 3 到 5 的门槛**
-3. **5000 节点 stress 用保守 raster export 红线保持 defended：performance、authoring、SVG export、PNG/JPEG raster export 和 reload 都受防守**
-4. **在 3 到 5 条真实外部报告还没有在同一个受限风险上聚焦前，不要把下一条 export/performance claim 收紧到保守 stress raster budget 之外**
+当前 proof handoff markers：`ADOPTION_RECOMMENDATION_CURRENT_OK:True` 和 `CLAIM_HYGIENE_BOUNDARY_OK:True`。
+
+1. **维护者种子预演证据不计入 3 到 5 的门槛**
+2. **每条真实外部报告都必须在同一套受限 schema 内保留 route、version、proof 标记、摩擦点、support bundle 附件备注和 claim-expansion status**
+3. **在写 release-candidate、GA 或 `1.0` 级别语言前，必须显式保留 adoption evidence、API drift、support boundary 和 release proof gate**
+4. **在 3 到 5 条真实外部报告还没有聚焦到同一个受限风险前，不要扩大 support 或 capability claim**
 
 在达到这个阈值之前，保持这份种子建议不变，不要临时把下一条 beta 线往别处扩。
 

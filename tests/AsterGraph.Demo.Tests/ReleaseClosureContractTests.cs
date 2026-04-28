@@ -86,7 +86,9 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("external capability readiness gate", notes, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("[Project Status](./docs/en/project-status.md)", notes, StringComparison.Ordinal);
         Assert.True(HasLineWithAll(notes, "externally proven", "validation-only", "bounded", "deferred"));
-        Assert.True(HasLineWithAll(notes, "Performance / Export Hardening", "5000-node raster export budgets", "progress/cancel/scope", "rendering cache"));
+        Assert.True(HasLineWithAll(notes, "Adoption Readiness / Release Candidate Hygiene", "API drift", "support boundary", "release proof"));
+        Assert.Contains("ADOPTION_RECOMMENDATION_CURRENT_OK:True", notes, StringComparison.Ordinal);
+        Assert.Contains("CLAIM_HYGIENE_BOUNDARY_OK:True", notes, StringComparison.Ordinal);
         Assert.Contains("0.xx alpha/beta hardening line", notes, StringComparison.Ordinal);
         Assert.True(HasLineWithAll(notes, "API adoption proof", "PUBLIC_API_SURFACE_OK", "PUBLIC_API_GUIDANCE_OK", "generated template/plugin validation"));
         Assert.True(HasLineWithAll(notes, "trusted plugin proof", "CONSUMER_SAMPLE_TRUST_OK", "ASTERGRAPH_PLUGIN_VALIDATE_OK", "plugin trust contract"));
@@ -94,7 +96,7 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("[Adoption Feedback Loop](./docs/en/adoption-feedback.md)", notes, StringComparison.Ordinal);
         Assert.Contains("[Adopter Triage Checklist](./docs/en/adopter-triage.md)", notes, StringComparison.Ordinal);
         Assert.True(HasLineWithAll(notes, "route", "version", "proof markers", "friction", "support-bundle attachment note"));
-        Assert.Contains("conservative 5000-node raster export budgets", notes, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("SCALE_EXPORT_BUDGET_OK:baseline:True:none", notes, StringComparison.Ordinal);
         Assert.Contains("HOSTED_ACCESSIBILITY_BASELINE_OK:True", notes, StringComparison.Ordinal);
         Assert.Contains("HOSTED_ACCESSIBILITY_FOCUS_OK:True", notes, StringComparison.Ordinal);
         Assert.Contains("HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True", notes, StringComparison.Ordinal);
@@ -139,9 +141,11 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("historical alpha reference for the current beta support story", englishChecklist, StringComparison.Ordinal);
         Assert.Contains("external capability readiness gate", englishChecklist, StringComparison.OrdinalIgnoreCase);
         Assert.True(HasLineWithAll(englishChecklist, "externally proven", "validation-only", "bounded", "deferred"));
-        Assert.True(HasLineWithAll(englishChecklist, "Performance / Export Hardening", "5000-node raster export budget", "progress/cancel/scope"));
+        Assert.True(HasLineWithAll(englishChecklist, "Adoption Readiness / Release Candidate Hygiene", "API drift", "support boundary", "release proof"));
+        Assert.Contains("ADOPTION_RECOMMENDATION_CURRENT_OK:True", englishChecklist, StringComparison.Ordinal);
+        Assert.Contains("CLAIM_HYGIENE_BOUNDARY_OK:True", englishChecklist, StringComparison.Ordinal);
         Assert.True(HasLineWithAll(englishChecklist, "xlarge", "telemetry-only", "10000-node support", "virtualization"));
-        Assert.Contains("conservative 5000-node raster export budget", englishChecklist, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("SCALE_RASTER_EXPORT_STRESS_OK:True", englishChecklist, StringComparison.Ordinal);
         Assert.Contains("0.xx alpha/beta hardening", englishChecklist, StringComparison.Ordinal);
         Assert.True(HasLineWithAll(englishChecklist, "route", "version", "proof markers", "friction", "support-bundle attachment note"));
         Assert.Contains("HOSTED_ACCESSIBILITY_BASELINE_OK:True", englishChecklist, StringComparison.Ordinal);
@@ -173,9 +177,11 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("历史 alpha 参考，服务于当前 beta support story", chineseChecklist, StringComparison.Ordinal);
         Assert.Contains("外部能力就绪闸门", chineseChecklist, StringComparison.Ordinal);
         Assert.True(HasLineWithAll(chineseChecklist, "已被外部证据证明", "仅验证通过", "受边界约束", "继续延后"));
-        Assert.True(HasLineWithAll(chineseChecklist, "Performance / Export Hardening", "5000 节点 raster export budget", "progress/cancel/scope"));
+        Assert.True(HasLineWithAll(chineseChecklist, "Adoption Readiness / Release Candidate Hygiene", "API drift", "support boundary", "release proof"));
+        Assert.Contains("ADOPTION_RECOMMENDATION_CURRENT_OK:True", chineseChecklist, StringComparison.Ordinal);
+        Assert.Contains("CLAIM_HYGIENE_BOUNDARY_OK:True", chineseChecklist, StringComparison.Ordinal);
         Assert.True(HasLineWithAll(chineseChecklist, "xlarge", "telemetry-only", "10000 节点支持", "virtualization"));
-        Assert.Contains("保守 5000 节点 raster export budget", chineseChecklist, StringComparison.Ordinal);
+        Assert.Contains("SCALE_RASTER_EXPORT_STRESS_OK:True", chineseChecklist, StringComparison.Ordinal);
         Assert.Contains("0.xx` alpha/beta hardening 线", chineseChecklist, StringComparison.Ordinal);
         Assert.True(HasLineWithAll(chineseChecklist, "route", "version", "proof 标记", "摩擦", "support bundle 附件备注"));
         Assert.Contains("HOSTED_ACCESSIBILITY_BASELINE_OK:True", chineseChecklist, StringComparison.Ordinal);

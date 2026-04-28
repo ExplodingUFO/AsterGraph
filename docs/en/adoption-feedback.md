@@ -37,12 +37,14 @@ The current recommendation is based on four structured pre-public adoption rehea
 
 ## Current Recommendation
 
-The current 0.xx alpha/beta hardening line is `Performance / Export Hardening`: conservative stress raster export budgets first, then progress/cancel/scope evidence before rendering cache claims. Only tighten beyond the conservative 5000-node raster redlines when 3-5 real external reports cluster on the same bounded risk:
+The current 0.xx alpha/beta hardening line is `Adoption Readiness / Release Candidate Hygiene`: keep the public recommendation, support boundary, API drift checks, and release proof story aligned before widening any capability claim. The previous `Performance / Export Hardening` work is now defended evidence, not the next public recommendation.
 
-1. **continue Authoring Productivity work first**
-2. **seeded rehearsals do not count toward the 3-5 gate**
-3. **keep 5000-node stress defended with conservative raster export redlines: performance, authoring, SVG export, PNG/JPEG raster export, and reload defended**
-4. **do not tighten the next export/performance claim beyond conservative stress raster budgets before 3-5 real external reports cluster on the same bounded risk**
+Current proof handoff markers: `ADOPTION_RECOMMENDATION_CURRENT_OK:True` and `CLAIM_HYGIENE_BOUNDARY_OK:True`.
+
+1. **seeded rehearsals do not count toward the 3-5 gate**
+2. **each real external report must keep route, version, proof markers, friction, support-bundle attachment note, and claim-expansion status in the same bounded schema**
+3. **keep adoption evidence, API drift, support boundary, and release proof gates visible before any release-candidate, GA, or 1.0 language**
+4. **do not widen support or capability claims before 3-5 real external reports cluster on the same bounded risk**
 
 Until that threshold is met, keep this seeded recommendation in place instead of widening the next beta line ad hoc.
 
