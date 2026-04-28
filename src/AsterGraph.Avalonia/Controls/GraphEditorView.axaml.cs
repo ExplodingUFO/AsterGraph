@@ -126,6 +126,8 @@ public partial class GraphEditorView : UserControl
     private Border? _statusChrome;
     private Border? _validationFeedbackChrome;
     private TextBox? _stencilSearchBox;
+    private ComboBox? _stencilSourceFilter;
+    private TextBlock? _stencilEmptyStateText;
     private StackPanel? _stencilCardList;
     private WrapPanel? _headerToolbar;
     private WrapPanel? _compositeWorkflowToolbar;
@@ -149,8 +151,11 @@ public partial class GraphEditorView : UserControl
     private double _defaultShellColumnSpacing;
     private readonly GraphEditorViewCompositionCoordinator _compositionCoordinator;
     private readonly HashSet<string> _collapsedStencilCategories = [];
+    private readonly HashSet<string> _favoriteStencilTemplateKeys = [];
     private readonly List<string> _recentCommandPaletteActionIds = [];
+    private readonly List<string> _recentStencilTemplateKeys = [];
     private string _stencilFilter = string.Empty;
+    private string _stencilSourceFilterValue = StencilSourceFilterAll;
     private string _commandPaletteFilter = string.Empty;
     private string? _selectedFragmentTemplatePath;
     private AsterGraphHostedActionDescriptor? _commandPaletteAction;
@@ -159,6 +164,10 @@ public partial class GraphEditorView : UserControl
     private IReadOnlyDictionary<string, GraphEditorCommandDescriptorSnapshot> _commandDescriptorsById =
         new Dictionary<string, GraphEditorCommandDescriptorSnapshot>(StringComparer.Ordinal);
     private GraphEditorCommandDescriptorSnapshot? _stencilAddNodeDescriptor;
+    private const int StencilRecentTemplateLimit = 5;
+    private const string StencilSourceFilterAll = "All";
+    private const string StencilSourceFilterBuiltIn = "Built-in";
+    private const string StencilSourceFilterPlugin = "Plugin";
 
     /// <summary>
     /// 初始化图编辑器宿主视图。
@@ -352,6 +361,8 @@ public partial class GraphEditorView : UserControl
         _statusChrome = this.FindControl<Border>("PART_StatusChrome");
         _validationFeedbackChrome = this.FindControl<Border>("PART_ValidationFeedbackChrome");
         _stencilSearchBox = this.FindControl<TextBox>("PART_StencilSearchBox");
+        _stencilSourceFilter = this.FindControl<ComboBox>("PART_StencilSourceFilter");
+        _stencilEmptyStateText = this.FindControl<TextBlock>("PART_StencilEmptyStateText");
         _stencilCardList = this.FindControl<StackPanel>("PART_StencilCardList");
         _headerToolbar = this.FindControl<WrapPanel>("PART_HeaderToolbar");
         _compositeWorkflowToolbar = this.FindControl<WrapPanel>("PART_CompositeWorkflowToolbar");
@@ -378,6 +389,13 @@ public partial class GraphEditorView : UserControl
             AutomationProperties.SetName(_stencilSearchBox, "Stencil search");
         }
 
+        if (_stencilSourceFilter is not null)
+        {
+            AutomationProperties.SetName(_stencilSourceFilter, "Stencil source filter");
+            _stencilSourceFilter.ItemsSource = new[] { StencilSourceFilterAll, StencilSourceFilterBuiltIn, StencilSourceFilterPlugin };
+            _stencilSourceFilter.SelectedItem = StencilSourceFilterAll;
+        }
+
         if (_openCommandPaletteButton is not null)
         {
             AutomationProperties.SetName(_openCommandPaletteButton, "Open command palette");
@@ -397,6 +415,11 @@ public partial class GraphEditorView : UserControl
         if (_stencilSearchBox is not null)
         {
             _stencilSearchBox.TextChanged += HandleStencilSearchChanged;
+        }
+
+        if (_stencilSourceFilter is not null)
+        {
+            _stencilSourceFilter.SelectionChanged += HandleStencilSourceFilterChanged;
         }
 
         if (_openCommandPaletteButton is not null)
@@ -483,6 +506,12 @@ public partial class GraphEditorView : UserControl
     private void HandleStencilSearchChanged(object? sender, TextChangedEventArgs args)
     {
         _stencilFilter = _stencilSearchBox?.Text?.Trim() ?? string.Empty;
+        BuildStencilLibrary(_stencilTemplateSnapshots, _stencilAddNodeDescriptor);
+    }
+
+    private void HandleStencilSourceFilterChanged(object? sender, SelectionChangedEventArgs args)
+    {
+        _stencilSourceFilterValue = _stencilSourceFilter?.SelectedItem?.ToString() ?? StencilSourceFilterAll;
         BuildStencilLibrary(_stencilTemplateSnapshots, _stencilAddNodeDescriptor);
     }
 
@@ -607,8 +636,21 @@ public partial class GraphEditorView : UserControl
             return;
         }
 
-        var stencilSections = stencilTemplates
+        var filteredTemplates = stencilTemplates
             .Where(MatchesStencilFilter)
+            .ToList();
+        AddStencilSpecialSection(
+            "Favorites",
+            filteredTemplates,
+            _favoriteStencilTemplateKeys,
+            addNodeDescriptor);
+        AddStencilSpecialSection(
+            "Recent",
+            filteredTemplates,
+            _recentStencilTemplateKeys,
+            addNodeDescriptor);
+
+        var stencilSections = filteredTemplates
             .GroupBy(stencilItem => stencilItem.Category, StringComparer.Ordinal)
             .OrderBy(section => section.Key, StringComparer.Ordinal);
 
@@ -618,6 +660,11 @@ public partial class GraphEditorView : UserControl
                 stencilSection.Key,
                 stencilSection.ToList(),
                 addNodeDescriptor));
+        }
+
+        if (_stencilEmptyStateText is not null)
+        {
+            _stencilEmptyStateText.IsVisible = _stencilCardList.Children.Count == 0;
         }
     }
 
@@ -1201,14 +1248,27 @@ public partial class GraphEditorView : UserControl
             },
         };
 
-    private Button CreateStencilCard(
+    private Control CreateStencilCard(
         GraphEditorNodeTemplateSnapshot stencilItem,
         GraphEditorCommandDescriptorSnapshot? addNodeDescriptor)
     {
-        var button = new Button
+        var favoriteButton = new Button
+        {
+            Name = $"PART_StencilFavorite_{stencilItem.Key}",
+            Content = _favoriteStencilTemplateKeys.Contains(stencilItem.Key) ? "Unfavorite" : "Favorite",
+            HorizontalAlignment = global::Avalonia.Layout.HorizontalAlignment.Left,
+        };
+        favoriteButton.Classes.Add("astergraph-toolbar-action");
+        favoriteButton.Click += (_, args) =>
+        {
+            ToggleFavoriteStencilTemplate(stencilItem.Key);
+            args.Handled = true;
+        };
+
+        var insertButton = new Button
         {
             Name = $"PART_StencilCard_{stencilItem.Key}",
-            Margin = new Thickness(0, 0, 0, 12),
+            Margin = new Thickness(0, 6, 0, 12),
             IsEnabled = addNodeDescriptor?.IsEnabled ?? false,
             Content = new StackPanel
             {
@@ -1264,18 +1324,27 @@ public partial class GraphEditorView : UserControl
                 },
             },
         };
-        button.Classes.Add("astergraph-template-card");
+        insertButton.Classes.Add("astergraph-template-card");
         if (!string.IsNullOrWhiteSpace(addNodeDescriptor?.DisabledReason))
         {
-            ToolTip.SetTip(button, addNodeDescriptor.DisabledReason);
+            ToolTip.SetTip(insertButton, addNodeDescriptor.DisabledReason);
         }
 
-        button.Click += (_, _) =>
+        insertButton.Click += (_, _) =>
         {
             Editor?.Session.Commands.AddNode(stencilItem.DefinitionId);
+            RecordRecentStencilTemplate(stencilItem.Key);
             RefreshCommandSurface();
         };
-        return button;
+        return new StackPanel
+        {
+            Spacing = 0,
+            Children =
+            {
+                favoriteButton,
+                insertButton,
+            },
+        };
     }
 
     private Expander CreateStencilSection(
@@ -1334,6 +1403,11 @@ public partial class GraphEditorView : UserControl
 
     private bool MatchesStencilFilter(GraphEditorNodeTemplateSnapshot stencilItem)
     {
+        if (!MatchesStencilSourceFilter(stencilItem))
+        {
+            return false;
+        }
+
         if (string.IsNullOrWhiteSpace(_stencilFilter))
         {
             return true;
@@ -1343,6 +1417,39 @@ public partial class GraphEditorView : UserControl
             || stencilItem.Title.Contains(_stencilFilter, StringComparison.OrdinalIgnoreCase)
             || stencilItem.Subtitle.Contains(_stencilFilter, StringComparison.OrdinalIgnoreCase)
             || stencilItem.Description.Contains(_stencilFilter, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private bool MatchesStencilSourceFilter(GraphEditorNodeTemplateSnapshot stencilItem)
+    {
+        var isPluginTemplate = IsPluginStencilTemplate(stencilItem);
+        return _stencilSourceFilterValue switch
+        {
+            StencilSourceFilterBuiltIn => !isPluginTemplate,
+            StencilSourceFilterPlugin => isPluginTemplate,
+            _ => true,
+        };
+    }
+
+    private static bool IsPluginStencilTemplate(GraphEditorNodeTemplateSnapshot stencilItem)
+        => stencilItem.Category.Contains("plugin", StringComparison.OrdinalIgnoreCase);
+
+    private void AddStencilSpecialSection(
+        string sectionName,
+        IReadOnlyList<GraphEditorNodeTemplateSnapshot> filteredTemplates,
+        IEnumerable<string> orderedTemplateKeys,
+        GraphEditorCommandDescriptorSnapshot? addNodeDescriptor)
+    {
+        var templatesByKey = filteredTemplates.ToDictionary(template => template.Key, StringComparer.Ordinal);
+        var stencilItems = orderedTemplateKeys
+            .Where(templatesByKey.ContainsKey)
+            .Select(key => templatesByKey[key])
+            .ToList();
+        if (stencilItems.Count == 0)
+        {
+            return;
+        }
+
+        _stencilCardList?.Children.Add(CreateStencilSection(sectionName, stencilItems, addNodeDescriptor));
     }
 
     private void HandleStencilSectionExpanded(object? sender, RoutedEventArgs args)
@@ -1358,6 +1465,38 @@ public partial class GraphEditorView : UserControl
         if (sender is Expander expander && expander.Tag is string category)
         {
             _collapsedStencilCategories.Add(category);
+        }
+    }
+
+    private void ToggleFavoriteStencilTemplate(string templateKey)
+    {
+        if (string.IsNullOrWhiteSpace(templateKey))
+        {
+            return;
+        }
+
+        if (!_favoriteStencilTemplateKeys.Add(templateKey))
+        {
+            _favoriteStencilTemplateKeys.Remove(templateKey);
+        }
+
+        BuildStencilLibrary(_stencilTemplateSnapshots, _stencilAddNodeDescriptor);
+    }
+
+    private void RecordRecentStencilTemplate(string templateKey)
+    {
+        if (string.IsNullOrWhiteSpace(templateKey))
+        {
+            return;
+        }
+
+        _recentStencilTemplateKeys.RemoveAll(key => string.Equals(key, templateKey, StringComparison.Ordinal));
+        _recentStencilTemplateKeys.Insert(0, templateKey);
+        if (_recentStencilTemplateKeys.Count > StencilRecentTemplateLimit)
+        {
+            _recentStencilTemplateKeys.RemoveRange(
+                StencilRecentTemplateLimit,
+                _recentStencilTemplateKeys.Count - StencilRecentTemplateLimit);
         }
     }
 

@@ -132,6 +132,11 @@ public sealed class ConsumerSampleProofTests
         Assert.True(result.TrustTransparencyOk);
         Assert.True(result.CommandSurfaceOk);
         Assert.True(result.StencilSurfaceOk);
+        Assert.True(result.StencilGroupingOk);
+        Assert.True(result.StencilSearchOk);
+        Assert.True(result.StencilRecentsFavoritesOk);
+        Assert.True(result.StencilSourceFilterOk);
+        Assert.True(result.StencilStatePersistenceOk);
         Assert.True(result.ExportBreadthOk);
         Assert.True(result.NodeQuickToolsOk);
         Assert.True(result.EdgeQuickToolsOk);
@@ -247,6 +252,11 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:True");
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_SURFACE_COMMAND_PROJECTION_OK:True");
         Assert.Contains(result.ProofLines, line => line == "CAPABILITY_BREADTH_STENCIL_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "STENCIL_GROUPING_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "STENCIL_SEARCH_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "STENCIL_RECENTS_FAVORITES_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "STENCIL_SOURCE_FILTER_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "STENCIL_STATE_PERSISTENCE_OK:True");
         Assert.Contains(result.ProofLines, line => line == "CAPABILITY_BREADTH_EXPORT_OK:True");
         Assert.Contains(result.ProofLines, line => line == "CAPABILITY_BREADTH_NODE_QUICK_TOOLS_OK:True");
         Assert.Contains(result.ProofLines, line => line == "CAPABILITY_BREADTH_EDGE_QUICK_TOOLS_OK:True");

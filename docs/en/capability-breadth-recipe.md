@@ -26,6 +26,11 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 Expected capability-breadth proof markers:
 
 - `CAPABILITY_BREADTH_STENCIL_OK:True`
+- `STENCIL_GROUPING_OK:True`
+- `STENCIL_SEARCH_OK:True`
+- `STENCIL_RECENTS_FAVORITES_OK:True`
+- `STENCIL_SOURCE_FILTER_OK:True`
+- `STENCIL_STATE_PERSISTENCE_OK:True`
 - `CAPABILITY_BREADTH_EXPORT_OK:True`
 - `CAPABILITY_BREADTH_NODE_QUICK_TOOLS_OK:True`
 - `CAPABILITY_BREADTH_EDGE_QUICK_TOOLS_OK:True`

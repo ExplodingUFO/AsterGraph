@@ -145,11 +145,21 @@
                        Foreground="{DynamicResource AsterGraph.HighlightBrush}" />
             <TextBox x:Name="PART_StencilSearchBox"
                      Watermark="搜索节点、分类或说明" />
+            <ComboBox x:Name="PART_StencilSourceFilter"
+                      Classes="astergraph-input" />
           </StackPanel>
 
           <ScrollViewer Grid.Row="1"
                         HorizontalScrollBarVisibility="Disabled">
-            <StackPanel x:Name="PART_StencilCardList" />
+            <StackPanel>
+              <TextBlock x:Name="PART_StencilEmptyStateText"
+                         Text="No matching nodes"
+                         FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
+                         TextWrapping="Wrap"
+                         Foreground="{DynamicResource AsterGraph.BodyBrush}"
+                         IsVisible="False" />
+              <StackPanel x:Name="PART_StencilCardList" />
+            </StackPanel>
           </ScrollViewer>
         </Grid>
       </Border>

@@ -74,6 +74,11 @@ public sealed record ConsumerSampleProofResult(
     bool GraphSearchLocateOk = true,
     bool GraphSearchScopeFilterOk = true,
     bool GraphSearchViewportFocusOk = true,
+    bool StencilGroupingOk = true,
+    bool StencilSearchOk = true,
+    bool StencilRecentsFavoritesOk = true,
+    bool StencilSourceFilterOk = true,
+    bool StencilStatePersistenceOk = true,
     bool CommandPaletteGroupingOk = true,
     bool CommandPaletteDisabledReasonOk = true,
     bool CommandPaletteRecentActionsOk = true,
@@ -133,6 +138,11 @@ public sealed record ConsumerSampleProofResult(
 
     public bool CapabilityBreadthOk
         => StencilSurfaceOk
+        && StencilGroupingOk
+        && StencilSearchOk
+        && StencilRecentsFavoritesOk
+        && StencilSourceFilterOk
+        && StencilStatePersistenceOk
         && ExportBreadthOk
         && NodeQuickToolsOk
         && EdgeQuickToolsOk;
@@ -434,6 +444,11 @@ public sealed record ConsumerSampleProofResult(
         $"CONSUMER_SAMPLE_TRUST_OK:{TrustTransparencyOk}",
         $"COMMAND_SURFACE_OK:{CommandSurfaceOk}",
         $"CAPABILITY_BREADTH_STENCIL_OK:{StencilSurfaceOk}",
+        $"STENCIL_GROUPING_OK:{StencilGroupingOk}",
+        $"STENCIL_SEARCH_OK:{StencilSearchOk}",
+        $"STENCIL_RECENTS_FAVORITES_OK:{StencilRecentsFavoritesOk}",
+        $"STENCIL_SOURCE_FILTER_OK:{StencilSourceFilterOk}",
+        $"STENCIL_STATE_PERSISTENCE_OK:{StencilStatePersistenceOk}",
         $"CAPABILITY_BREADTH_EXPORT_OK:{ExportBreadthOk}",
         $"CAPABILITY_BREADTH_NODE_QUICK_TOOLS_OK:{NodeQuickToolsOk}",
         $"CAPABILITY_BREADTH_EDGE_QUICK_TOOLS_OK:{EdgeQuickToolsOk}",
@@ -715,6 +730,11 @@ public static class ConsumerSampleProof
         var exportBreadthOk = HasExportBreadth(host, storageRoot);
         var capabilityWindow = CreateCapabilityBreadthWindow(host);
         bool stencilSurfaceOk;
+        bool stencilGroupingOk;
+        bool stencilSearchOk;
+        bool stencilRecentsFavoritesOk;
+        bool stencilSourceFilterOk;
+        bool stencilStatePersistenceOk;
         bool edgeQuickToolsOk;
         bool nodeQuickToolsOk;
         bool hostedAccessibilityBaselineOk;
@@ -760,7 +780,8 @@ public static class ConsumerSampleProof
             host.SelectNode(reviewNodeId);
             FlushUi();
 
-            stencilSurfaceOk = HasStencilSurface(capabilityWindow, host);
+            (stencilSurfaceOk, stencilGroupingOk, stencilSearchOk, stencilRecentsFavoritesOk, stencilSourceFilterOk, stencilStatePersistenceOk) =
+                HasStencilSurface(capabilityWindow, host);
             host.SelectNode(reviewNodeId);
             FlushUi();
             edgeQuickToolsOk = HasEdgeQuickTools(capabilityWindow, host);
@@ -860,6 +881,11 @@ public static class ConsumerSampleProof
             CommandPaletteGroupingOk: commandPaletteGroupingOk,
             CommandPaletteDisabledReasonOk: commandPaletteDisabledReasonOk,
             CommandPaletteRecentActionsOk: commandPaletteRecentActionsOk,
+            StencilGroupingOk: stencilGroupingOk,
+            StencilSearchOk: stencilSearchOk,
+            StencilRecentsFavoritesOk: stencilRecentsFavoritesOk,
+            StencilSourceFilterOk: stencilSourceFilterOk,
+            StencilStatePersistenceOk: stencilStatePersistenceOk,
             NavigationHistoryOk: navigationHistoryOk,
             ScopeBreadcrumbNavigationOk: scopeBreadcrumbNavigationOk,
             FocusRestoreOk: focusRestoreOk,
@@ -1530,30 +1556,33 @@ public static class ConsumerSampleProof
             && ownerTemplateOk;
     }
 
-    private static bool HasStencilSurface(Window window, ConsumerSampleHost host)
+    private static (bool SurfaceOk, bool GroupingOk, bool SearchOk, bool RecentsFavoritesOk, bool SourceFilterOk, bool StatePersistenceOk) HasStencilSurface(Window window, ConsumerSampleHost host)
     {
         var searchBox = FindNamed<TextBox>(window, "PART_StencilSearchBox");
-        if (searchBox is null)
+        var sourceFilter = FindNamed<ComboBox>(window, "PART_StencilSourceFilter");
+        var emptyStateText = FindNamed<TextBlock>(window, "PART_StencilEmptyStateText");
+        if (searchBox is null || sourceFilter is null || emptyStateText is null)
         {
-            return false;
+            return (false, false, false, false, false, false);
         }
 
         var templates = host.Session.Queries.GetNodeTemplateSnapshots();
         var pluginTemplate = templates.SingleOrDefault(template =>
             template.DefinitionId == ConsumerSampleHost.PluginAuditDefinitionId);
+        var builtInTemplate = templates.FirstOrDefault(template =>
+            !template.Category.Contains("plugin", StringComparison.OrdinalIgnoreCase));
         if (pluginTemplate is null)
         {
-            return false;
+            return (false, false, false, false, false, false);
         }
 
         var allSections = window.GetVisualDescendants()
             .OfType<Expander>()
             .Where(section => section.Name?.StartsWith("PART_StencilSection_", StringComparison.Ordinal) == true)
             .ToList();
-        if (allSections.Count < 2)
-        {
-            return false;
-        }
+        var groupingOk = allSections.Count >= 2
+            && allSections.All(section => section.IsExpanded)
+            && allSections.Any(section => string.Equals(section.Tag?.ToString(), pluginTemplate.Category, StringComparison.Ordinal));
 
         searchBox.Text = "audit";
         FlushUi();
@@ -1565,29 +1594,67 @@ public static class ConsumerSampleProof
         var pluginSection = filteredSections.SingleOrDefault(section =>
             string.Equals(section.Tag?.ToString(), pluginTemplate.Category, StringComparison.Ordinal));
         var pluginCard = FindNamed<Button>(window, $"PART_StencilCard_{pluginTemplate.Key}");
-        if (filteredSections.Count != 1 || pluginSection is null || pluginCard is null)
+        var searchOk = filteredSections.Count == 1 && pluginSection is not null && pluginCard is not null;
+        if (pluginSection is null)
         {
-            return false;
+            return (false, groupingOk, searchOk, false, false, false);
         }
 
         var initialPluginNodeCount = host.Session.Queries.CreateDocumentSnapshot().Nodes.Count(node =>
             node.DefinitionId == ConsumerSampleHost.PluginAuditDefinitionId);
         pluginSection.IsExpanded = false;
         FlushUi();
+        var collapsedStatePersisted = pluginSection.IsExpanded == false;
         pluginSection.IsExpanded = true;
         FlushUi();
 
         pluginCard = FindNamed<Button>(window, $"PART_StencilCard_{pluginTemplate.Key}");
-        if (pluginCard is null || !pluginSection.IsExpanded)
-        {
-            return false;
-        }
+        var statePersistenceOk = collapsedStatePersisted && pluginCard is not null && pluginSection.IsExpanded;
 
-        pluginCard.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        var favoriteButton = FindNamed<Button>(window, $"PART_StencilFavorite_{pluginTemplate.Key}");
+        favoriteButton?.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        FlushUi();
+        var favoritesOk = FindNamed<Expander>(window, "PART_StencilSection_Favorites") is not null
+            && FindNamed<Button>(window, $"PART_StencilCard_{pluginTemplate.Key}") is not null;
+
+        pluginCard = FindNamed<Button>(window, $"PART_StencilCard_{pluginTemplate.Key}");
+        pluginCard?.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        FlushUi();
+        var recentsOk = FindNamed<Expander>(window, "PART_StencilSection_Recent") is not null
+            && FindNamed<Button>(window, $"PART_StencilCard_{pluginTemplate.Key}") is not null;
+
+        searchBox.Text = string.Empty;
+        FlushUi();
+        sourceFilter.SelectedItem = "Plugin";
+        FlushUi();
+        var pluginFilterOk = FindNamed<Button>(window, $"PART_StencilCard_{pluginTemplate.Key}") is not null
+            && (builtInTemplate is null || FindNamed<Button>(window, $"PART_StencilCard_{builtInTemplate.Key}") is null);
+
+        sourceFilter.SelectedItem = "Built-in";
+        FlushUi();
+        var builtInFilterOk = builtInTemplate is not null
+            && FindNamed<Button>(window, $"PART_StencilCard_{builtInTemplate.Key}") is not null
+            && FindNamed<Button>(window, $"PART_StencilCard_{pluginTemplate.Key}") is null;
+
+        sourceFilter.SelectedItem = "All";
+        searchBox.Text = "missing-template";
+        FlushUi();
+        var emptyStateOk = emptyStateText.IsVisible;
+        searchBox.Text = string.Empty;
         FlushUi();
 
-        return host.Session.Queries.CreateDocumentSnapshot().Nodes.Count(node =>
+        var insertionOk = host.Session.Queries.CreateDocumentSnapshot().Nodes.Count(node =>
             node.DefinitionId == ConsumerSampleHost.PluginAuditDefinitionId) == initialPluginNodeCount + 1;
+        var recentsFavoritesOk = favoritesOk && recentsOk;
+        var sourceFilterOk = pluginFilterOk && builtInFilterOk;
+        var surfaceOk = groupingOk
+            && searchOk
+            && recentsFavoritesOk
+            && sourceFilterOk
+            && statePersistenceOk
+            && emptyStateOk
+            && insertionOk;
+        return (surfaceOk, groupingOk, searchOk && emptyStateOk, recentsFavoritesOk, sourceFilterOk, statePersistenceOk);
     }
 
     private static bool HasExportBreadth(ConsumerSampleHost host, string storageRoot)

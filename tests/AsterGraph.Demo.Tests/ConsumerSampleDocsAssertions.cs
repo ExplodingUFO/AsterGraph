@@ -19,6 +19,11 @@ internal static class ConsumerSampleDocsAssertions
         Assert.Contains("CONSUMER_SAMPLE_TRUST_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("COMMAND_SURFACE_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("CAPABILITY_BREADTH_STENCIL_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("STENCIL_GROUPING_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("STENCIL_SEARCH_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("STENCIL_RECENTS_FAVORITES_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("STENCIL_SOURCE_FILTER_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("STENCIL_STATE_PERSISTENCE_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("CAPABILITY_BREADTH_EXPORT_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("CAPABILITY_BREADTH_NODE_QUICK_TOOLS_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("CAPABILITY_BREADTH_EDGE_QUICK_TOOLS_OK:True", contents, StringComparison.Ordinal);

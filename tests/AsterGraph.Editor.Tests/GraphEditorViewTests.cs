@@ -603,6 +603,64 @@ public sealed class GraphEditorViewTests
     }
 
     [AvaloniaFact]
+    public void StencilLibrary_TracksRecentsFavoritesSourceFilterAndEmptyState()
+    {
+        var commandContributor = new CountingViewCommandContributor();
+        var definitionProvider = new CountingViewNodeDefinitionProvider();
+        var editor = CreateCountingStencilEditor(commandContributor, definitionProvider);
+        var window = CreateWindow(new GraphEditorView
+        {
+            Editor = editor,
+        });
+        var view = (GraphEditorView)window.Content!;
+        var pluginCard = FindRequiredDescendant<Button>(view, "PART_StencilCard_tests-view-provider-noise");
+        var favoriteButton = FindRequiredDescendant<Button>(view, "PART_StencilFavorite_tests-view-provider-noise");
+
+        favoriteButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        Dispatcher.UIThread.RunJobs(DispatcherPriority.Render);
+
+        var favoritesSection = FindRequiredDescendant<Expander>(view, "PART_StencilSection_Favorites");
+        Assert.Contains(
+            favoritesSection.GetVisualDescendants().OfType<Button>(),
+            button => string.Equals(button.Name, "PART_StencilCard_tests-view-provider-noise", StringComparison.Ordinal));
+
+        pluginCard = FindRequiredDescendant<Button>(view, "PART_StencilCard_tests-view-provider-noise");
+        pluginCard.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        Dispatcher.UIThread.RunJobs(DispatcherPriority.Render);
+
+        var recentSection = FindRequiredDescendant<Expander>(view, "PART_StencilSection_Recent");
+        Assert.Contains(
+            recentSection.GetVisualDescendants().OfType<Button>(),
+            button => string.Equals(button.Name, "PART_StencilCard_tests-view-provider-noise", StringComparison.Ordinal));
+
+        var sourceFilter = FindRequiredControl<ComboBox>(view, "PART_StencilSourceFilter");
+        sourceFilter.SelectedItem = "Plugin";
+        Dispatcher.UIThread.RunJobs(DispatcherPriority.Render);
+
+        Assert.NotNull(FindOptionalDescendant<Button>(view, "PART_StencilCard_tests-view-provider-noise"));
+        Assert.Null(FindOptionalDescendant<Button>(view, "PART_StencilCard_tests-view-base-node"));
+
+        sourceFilter.SelectedItem = "Built-in";
+        Dispatcher.UIThread.RunJobs(DispatcherPriority.Render);
+
+        Assert.NotNull(FindOptionalDescendant<Button>(view, "PART_StencilCard_tests-view-base-node"));
+        Assert.Null(FindOptionalDescendant<Button>(view, "PART_StencilCard_tests-view-provider-noise"));
+
+        var searchBox = FindRequiredControl<TextBox>(view, "PART_StencilSearchBox");
+        searchBox.Text = "missing-template";
+        Dispatcher.UIThread.RunJobs(DispatcherPriority.Render);
+
+        Assert.True(FindRequiredControl<TextBlock>(view, "PART_StencilEmptyStateText").IsVisible);
+
+        searchBox.Text = string.Empty;
+        sourceFilter.SelectedItem = "All";
+        Dispatcher.UIThread.RunJobs(DispatcherPriority.Render);
+
+        Assert.NotNull(FindOptionalDescendant<Expander>(view, "PART_StencilSection_Favorites"));
+        Assert.NotNull(FindOptionalDescendant<Expander>(view, "PART_StencilSection_Recent"));
+    }
+
+    [AvaloniaFact]
     public void CommandPaletteSearch_UsesCachedProjectionAfterPaletteOpens()
     {
         var commandContributor = new CountingViewCommandContributor();
@@ -1758,14 +1816,14 @@ public sealed class GraphEditorViewTests
             new NodeDefinition(
                 new NodeDefinitionId("tests.view.provider.noise"),
                 "Provider Noise",
-                "Provider",
+                "Provider Plugins",
                 "Provided node definition for stencil projection count tests.",
                 [],
                 []),
             new NodeDefinition(
                 new NodeDefinitionId("tests.view.provider.output"),
                 "Provider Output",
-                "Provider",
+                "Provider Plugins",
                 "Second provided node definition for stencil projection count tests.",
                 [],
                 []),
