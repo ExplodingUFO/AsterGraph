@@ -448,6 +448,25 @@ public sealed class ReleaseClosureContractTests
     }
 
     [Fact]
+    public void LargeGraphUxBaseline_StaysVisibleInStatusAndChecklist()
+    {
+        var englishChecklist = ReadRepoFile("docs/en/public-launch-checklist.md");
+        var chineseChecklist = ReadRepoFile("docs/zh-CN/public-launch-checklist.md");
+        var englishStatus = ReadRepoFile("docs/en/project-status.md");
+        var chineseStatus = ReadRepoFile("docs/zh-CN/project-status.md");
+
+        foreach (var contents in new[] { englishChecklist, chineseChecklist, englishStatus, chineseStatus })
+        {
+            Assert.Contains("LARGE_GRAPH_UX_POLICY_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("LARGE_GRAPH_UX_SCOPE_BOUNDARY_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("LARGE_GRAPH_UX_PROOF_BASELINE_OK:True", contents, StringComparison.Ordinal);
+        }
+
+        Assert.True(HasLineWithAll(englishStatus, "large-graph UX baseline proof", "hosted performance mode", "LOD policy", "without creating a new graph-size support tier"));
+        Assert.True(HasLineWithAll(chineseStatus, "large-graph UX baseline proof", "hosted performance mode", "LOD policy"));
+    }
+
+    [Fact]
     public void ReleaseCoverageValidation_BoundsHungTestCollectors()
     {
         var ciScript = ReadRepoFile("eng/ci.ps1");

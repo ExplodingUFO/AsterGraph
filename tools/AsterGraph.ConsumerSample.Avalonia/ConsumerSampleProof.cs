@@ -495,6 +495,29 @@ public sealed record ConsumerSampleProofResult(
         && AuthoringSurfaceOk
         && FeatureEnhancementProofOk;
 
+    public bool LargeGraphUxPolicyOk
+        => WorkbenchPerformanceModeOk
+        && BalancedModeDefaultOk
+        && WorkbenchLodPolicyOk
+        && WidenedSurfacePerformanceOk;
+
+    public bool LargeGraphUxScopeBoundaryOk
+        => PerformanceModeScopeBoundaryOk
+        && WorkbenchScopeBoundaryOk
+        && FeatureDescriptorIds is { Count: > 0 }
+        && FeatureDescriptorIds.All(IsBoundedFeatureDescriptorId);
+
+    public bool LargeGraphUxProofBaselineOk
+        => LargeGraphUxPolicyOk
+        && LargeGraphUxScopeBoundaryOk
+        && StartupMs >= 0
+        && InspectorProjectionMs >= 0
+        && CommandLatencyMs >= 0
+        && StencilSearchMs >= 0
+        && CommandSurfaceRefreshMs >= 0
+        && NodeToolProjectionMs >= 0
+        && EdgeToolProjectionMs >= 0;
+
     public bool IsOk
         => HostMenuActionOk
         && PluginContributionOk
@@ -516,7 +539,10 @@ public sealed record ConsumerSampleProofResult(
         && NavigationScopeBoundaryOk
         && AuthoringDepthHandoffOk
         && AuthoringDepthScopeBoundaryOk
-        && V058MilestoneProofOk;
+        && V058MilestoneProofOk
+        && LargeGraphUxPolicyOk
+        && LargeGraphUxScopeBoundaryOk
+        && LargeGraphUxProofBaselineOk;
 
     public IReadOnlyList<string> MetricLines =>
     [
@@ -669,6 +695,9 @@ public sealed record ConsumerSampleProofResult(
         $"AUTHORING_DEPTH_HANDOFF_OK:{AuthoringDepthHandoffOk}",
         $"AUTHORING_DEPTH_SCOPE_BOUNDARY_OK:{AuthoringDepthScopeBoundaryOk}",
         $"V058_MILESTONE_PROOF_OK:{V058MilestoneProofOk}",
+        $"LARGE_GRAPH_UX_POLICY_OK:{LargeGraphUxPolicyOk}",
+        $"LARGE_GRAPH_UX_SCOPE_BOUNDARY_OK:{LargeGraphUxScopeBoundaryOk}",
+        $"LARGE_GRAPH_UX_PROOF_BASELINE_OK:{LargeGraphUxProofBaselineOk}",
         $"CONSUMER_SAMPLE_OK:{IsOk}",
     ];
 

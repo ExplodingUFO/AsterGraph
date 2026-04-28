@@ -211,6 +211,9 @@ public sealed class ConsumerSampleProofTests
         Assert.True(result.AuthoringDepthHandoffOk);
         Assert.True(result.AuthoringDepthScopeBoundaryOk);
         Assert.True(result.V058MilestoneProofOk);
+        Assert.True(result.LargeGraphUxPolicyOk);
+        Assert.True(result.LargeGraphUxScopeBoundaryOk);
+        Assert.True(result.LargeGraphUxProofBaselineOk);
         Assert.True(result.StartupMs >= 0);
         Assert.True(result.InspectorProjectionMs >= 0);
         Assert.True(result.PluginScanMs >= 0);
@@ -348,6 +351,9 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_DEPTH_HANDOFF_OK:True");
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_DEPTH_SCOPE_BOUNDARY_OK:True");
         Assert.Contains(result.ProofLines, line => line == "V058_MILESTONE_PROOF_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "LARGE_GRAPH_UX_POLICY_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "LARGE_GRAPH_UX_SCOPE_BOUNDARY_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "LARGE_GRAPH_UX_PROOF_BASELINE_OK:True");
         Assert.Contains(result.MetricLines, line => line.Contains("startup_ms", StringComparison.Ordinal));
         Assert.Contains(result.MetricLines, line => line.Contains("command_latency_ms", StringComparison.Ordinal));
         Assert.Contains(result.MetricLines, line => line.Contains("stencil_search_ms", StringComparison.Ordinal));
