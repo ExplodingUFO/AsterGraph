@@ -138,6 +138,9 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 - `GRAPH_READINESS_STATUS_OK:True`
 - `GRAPH_SNIPPET_CATALOG_OK:True`
 - `GRAPH_SNIPPET_INSERT_OK:True`
+- `GRAPH_SEARCH_LOCATE_OK:True`
+- `GRAPH_SEARCH_SCOPE_FILTER_OK:True`
+- `GRAPH_SEARCH_VIEWPORT_FOCUS_OK:True`
 - `FIVE_MINUTE_ONBOARDING_OK:True`
 - `ONBOARDING_CONFIGURATION_OK:True`
 - `AUTHORING_SURFACE_OK:True`
@@ -232,6 +235,9 @@ Proof Handoff 负责实际 intake 说明。
 - `GRAPH_READINESS_STATUS_OK:True`
 - `GRAPH_SNIPPET_CATALOG_OK:True`
 - `GRAPH_SNIPPET_INSERT_OK:True`
+- `GRAPH_SEARCH_LOCATE_OK:True`
+- `GRAPH_SEARCH_SCOPE_FILTER_OK:True`
+- `GRAPH_SEARCH_VIEWPORT_FOCUS_OK:True`
 - `FIVE_MINUTE_ONBOARDING_OK:True`
 - `ONBOARDING_CONFIGURATION_OK:True`
 - `HOST_NATIVE_METRIC:startup_ms=...`
@@ -300,6 +306,7 @@ Proof Handoff 负责实际 intake 说明。
 - snippet catalog 与插入 seam：把 `consumer.sample.snippet.queue-lane` 和其他 snippet 保持为宿主自管，再通过 `StartConnection(...)` 加 `TryCreateConnectedNodeFromPendingConnection(...)` 插入
 - 节点旁路 authoring seam：通过 `IGraphEditorSession.Queries.GetNodeParameterSnapshots(nodeId)` 和 `INodeParameterEditorRegistry` 把节点表面保持在和 inspector 一样的 metadata/validation 合同上
 - snippet seam：通过一个小 catalog 暴露宿主自管 snippet，用已有 pending-connection command path 插入，并期待 `GRAPH_SNIPPET_CATALOG_OK:True` 和 `GRAPH_SNIPPET_INSERT_OK:True`
+- graph search seam：从当前 snapshot 搜索 hosted graph，通过已有 selection 和 viewport command 定位节点/连接，并期待 `GRAPH_SEARCH_LOCATE_OK:True`、`GRAPH_SEARCH_SCOPE_FILTER_OK:True` 和 `GRAPH_SEARCH_VIEWPORT_FOCUS_OK:True`
 - proof mode：输出 `AUTHORING_SURFACE_*`、`COMMAND_SURFACE_OK` 和扩展后的 `HOST_NATIVE_METRIC:*`，这样你能和官方 sample 做横向比较，并继续把 `ScaleSmoke` 的 defended large-tier contract 放在视野里
 - widened hosted tuning：输出 `WIDENED_SURFACE_PERFORMANCE_OK:True`，并复用 [Widened Surface Performance Recipe](./widened-surface-performance-recipe.md)，这样宿主指标会继续和 `ScaleSmoke` 绑定在同一条路线里
 - capability breadth：把同一条路线和 [Capability Breadth Recipe](./capability-breadth-recipe.md) 配在一起，并从 `AsterGraph.ConsumerSample.Avalonia -- --proof` 输出 `CAPABILITY_BREADTH_*` markers

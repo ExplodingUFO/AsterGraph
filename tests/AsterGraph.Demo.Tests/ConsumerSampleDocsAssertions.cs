@@ -57,6 +57,9 @@ internal static class ConsumerSampleDocsAssertions
         Assert.Contains("RUNTIME_LOG_LOCATE_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("RUNTIME_LOG_EXPORT_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("RUNTIME_OVERLAY_SUPPORT_BUNDLE_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("GRAPH_SEARCH_LOCATE_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("GRAPH_SEARCH_SCOPE_FILTER_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("GRAPH_SEARCH_VIEWPORT_FOCUS_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("EXPERIENCE_POLISH_HANDOFF_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("FEATURE_ENHANCEMENT_PROOF_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("AUTHORING_FLOW_PROOF_OK:True", contents, StringComparison.Ordinal);

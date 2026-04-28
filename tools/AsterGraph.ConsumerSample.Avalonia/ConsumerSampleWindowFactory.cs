@@ -37,10 +37,15 @@ public static class ConsumerSampleWindowFactory
         private readonly TextBlock _runtimeSummaryText;
         private readonly ComboBox _runtimeLogFilter;
         private readonly ItemsControl _runtimeLogItems;
+        private readonly TextBox _graphSearchBox;
+        private readonly ComboBox _graphSearchScope;
+        private readonly ItemsControl _graphSearchItems;
         private readonly TextBlock _layoutPreviewSummaryText;
         private readonly TextBlock _selectionSummaryText;
         private readonly TextBlock _trustBoundaryText;
         private string _selectedRuntimeLogFilter = "All";
+        private string _graphSearchQuery = "review";
+        private ConsumerSampleGraphSearchScope _selectedGraphSearchScope = ConsumerSampleGraphSearchScope.All;
 
         public ConsumerSampleWindow(ConsumerSampleHost host, bool ownsHost)
         {
@@ -142,6 +147,38 @@ public static class ConsumerSampleWindowFactory
             {
                 Name = "PART_RuntimeLogItems",
             };
+            _graphSearchBox = new TextBox
+            {
+                Name = "PART_GraphSearchBox",
+                Text = _graphSearchQuery,
+                Watermark = "Search graph",
+            };
+            _graphSearchBox.TextChanged += (_, _) =>
+            {
+                _graphSearchQuery = _graphSearchBox.Text ?? string.Empty;
+                RebuildGraphSearchPanel();
+            };
+
+            _graphSearchScope = new ComboBox
+            {
+                Name = "PART_GraphSearchScope",
+                ItemsSource = Enum.GetValues<ConsumerSampleGraphSearchScope>(),
+                SelectedItem = _selectedGraphSearchScope,
+            };
+            _graphSearchScope.SelectionChanged += (_, _) =>
+            {
+                if (_graphSearchScope.SelectedItem is ConsumerSampleGraphSearchScope scope)
+                {
+                    _selectedGraphSearchScope = scope;
+                }
+
+                RebuildGraphSearchPanel();
+            };
+
+            _graphSearchItems = new ItemsControl
+            {
+                Name = "PART_GraphSearchItems",
+            };
             _layoutPreviewSummaryText = new TextBlock
             {
                 Name = "PART_LayoutPreviewSummaryText",
@@ -174,6 +211,7 @@ public static class ConsumerSampleWindowFactory
                 Children =
                 {
                     CreateSection("Selection", _selectionSummaryText),
+                    CreateSection("Graph Search", CreateGraphSearchPanel()),
                     CreateSection("Selected Parameters", _parameterItems),
                     CreateSection("Plugin Candidates", _pluginCandidateItems),
                     CreateSection("Local Plugin Gallery", _pluginGalleryItems),
@@ -254,6 +292,7 @@ public static class ConsumerSampleWindowFactory
             RebuildPluginCandidateItems();
             RebuildPluginGalleryItems();
             RebuildPluginSnapshotItems();
+            RebuildGraphSearchPanel();
             RebuildRuntimePanel();
             RebuildLayoutPanel();
             _trustBoundaryText.Text = _host.TrustBoundaryText;
@@ -437,6 +476,41 @@ public static class ConsumerSampleWindowFactory
                     CreateRuntimeLogExportButton(),
                 },
             };
+
+        private Control CreateGraphSearchPanel()
+            => new StackPanel
+            {
+                Spacing = 8,
+                Children =
+                {
+                    _graphSearchBox,
+                    _graphSearchScope,
+                    _graphSearchItems,
+                },
+            };
+
+        private void RebuildGraphSearchPanel()
+        {
+            _graphSearchItems.ItemsSource = _host.SearchGraph(_graphSearchQuery, _selectedGraphSearchScope)
+                .Select(CreateGraphSearchResultButton)
+                .ToList();
+        }
+
+        private Button CreateGraphSearchResultButton(ConsumerSampleGraphSearchResult result)
+        {
+            var button = new Button
+            {
+                Name = $"PART_GraphSearchResult_{result.Kind}_{result.Id.Replace(':', '_')}",
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                Content = $"{result.Kind} | {result.Title}\n{result.MatchText}",
+            };
+            button.Click += (_, _) =>
+            {
+                _host.TryLocateGraphSearchResult(result);
+                RefreshPanels();
+            };
+            return button;
+        }
 
         private void RebuildRuntimePanel()
         {

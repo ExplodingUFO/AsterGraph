@@ -155,6 +155,9 @@ public sealed class ConsumerSampleProofTests
         Assert.True(result.RuntimeDebugPanelInteractionOk);
         Assert.True(result.RuntimeLogLocateOk);
         Assert.True(result.RuntimeLogExportOk);
+        Assert.True(result.GraphSearchLocateOk);
+        Assert.True(result.GraphSearchScopeFilterOk);
+        Assert.True(result.GraphSearchViewportFocusOk);
         Assert.True(result.GraphSnippetCatalogOk);
         Assert.True(result.GraphSnippetInsertOk);
         Assert.True(result.RuntimeOverlaySupportBundleOk);
@@ -200,6 +203,9 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(result.ProofLines, line => line == "RUNTIME_LOG_LOCATE_OK:True");
         Assert.Contains(result.ProofLines, line => line == "RUNTIME_LOG_EXPORT_OK:True");
         Assert.Contains(result.ProofLines, line => line == "RUNTIME_OVERLAY_SUPPORT_BUNDLE_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "GRAPH_SEARCH_LOCATE_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "GRAPH_SEARCH_SCOPE_FILTER_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "GRAPH_SEARCH_VIEWPORT_FOCUS_OK:True");
         Assert.Contains(result.ProofLines, line => line == "LAYOUT_PROVIDER_SEAM_OK:True");
         Assert.Contains(result.ProofLines, line => line == "LAYOUT_PREVIEW_APPLY_CANCEL_OK:True");
         Assert.Contains(result.ProofLines, line => line == "LAYOUT_UNDO_TRANSACTION_OK:True");
@@ -641,6 +647,9 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(proofLines, line => line == "RUNTIME_LOG_LOCATE_OK:True");
         Assert.Contains(proofLines, line => line == "RUNTIME_LOG_EXPORT_OK:True");
         Assert.Contains(proofLines, line => line == "RUNTIME_OVERLAY_SUPPORT_BUNDLE_OK:True");
+        Assert.Contains(proofLines, line => line == "GRAPH_SEARCH_LOCATE_OK:True");
+        Assert.Contains(proofLines, line => line == "GRAPH_SEARCH_SCOPE_FILTER_OK:True");
+        Assert.Contains(proofLines, line => line == "GRAPH_SEARCH_VIEWPORT_FOCUS_OK:True");
         Assert.Contains(proofLines, line => line == "LAYOUT_PROVIDER_SEAM_OK:True");
         Assert.Contains(proofLines, line => line == "LAYOUT_PREVIEW_APPLY_CANCEL_OK:True");
         Assert.Contains(proofLines, line => line == "LAYOUT_UNDO_TRANSACTION_OK:True");
@@ -994,6 +1003,9 @@ public sealed class ConsumerSampleProofTests
             Assert.NotNull(FindNamed<ComboBox>(window, "PART_RuntimeLogFilter"));
             Assert.NotNull(FindNamed<ItemsControl>(window, "PART_RuntimeLogItems"));
             Assert.NotNull(FindNamed<Button>(window, "PART_ExportRuntimeLogsButton"));
+            Assert.NotNull(FindNamed<TextBox>(window, "PART_GraphSearchBox"));
+            Assert.NotNull(FindNamed<ComboBox>(window, "PART_GraphSearchScope"));
+            Assert.NotNull(FindNamed<ItemsControl>(window, "PART_GraphSearchItems"));
             Assert.NotNull(FindNamed<TextBlock>(window, "PART_TrustBoundaryText"));
         }
         finally

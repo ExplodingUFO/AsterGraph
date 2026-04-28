@@ -144,6 +144,8 @@ Use this path when you want a copyable Avalonia host rather than a full showcase
 
 Runtime feedback proof remains host-owned: ConsumerSample should also keep `RUNTIME_DEBUG_PANEL_INTERACTION_OK:True`, `RUNTIME_LOG_LOCATE_OK:True`, and `RUNTIME_LOG_EXPORT_OK:True`, while Demo keeps `AI_PIPELINE_MOCK_RUNNER_POLISH_OK:True`, `AI_PIPELINE_PAYLOAD_PREVIEW_OK:True`, and `AI_PIPELINE_ERROR_DEBUG_EVIDENCE_OK:True`. These are not execution-engine, workflow scripting UI, marketplace, sandbox, WPF parity, or GA claims.
 
+Graph search proof also stays hosted and snapshot-driven: expect `GRAPH_SEARCH_LOCATE_OK:True`, `GRAPH_SEARCH_SCOPE_FILTER_OK:True`, and `GRAPH_SEARCH_VIEWPORT_FOCUS_OK:True` without a background graph index service or command macro engine.
+
 Template smoke in the release lane validates that `astergraph-avalonia` and `astergraph-plugin` generate buildable `net8.0` projects and that the generated plugin passes `AsterGraph.PluginTool validate`.
 
 Copy from `Starter.Avalonia` for composition, `HelloWorld` for runtime-only shape, `HelloWorld.Avalonia` for the smallest hosted UI, `ConsumerSample.Avalonia` for realistic host-owned actions/parameters/plugins/support proof, and `Demo` only when you need the full capability showcase.

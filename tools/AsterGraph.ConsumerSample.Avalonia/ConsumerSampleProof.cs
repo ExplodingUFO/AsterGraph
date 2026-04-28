@@ -71,6 +71,9 @@ public sealed record ConsumerSampleProofResult(
     bool RuntimeLogLocateOk = true,
     bool RuntimeLogExportOk = true,
     bool RuntimeOverlaySupportBundleOk = true,
+    bool GraphSearchLocateOk = true,
+    bool GraphSearchScopeFilterOk = true,
+    bool GraphSearchViewportFocusOk = true,
     bool LayoutProviderSeamOk = true,
     bool LayoutPreviewApplyCancelOk = true,
     bool LayoutUndoTransactionOk = true,
@@ -159,6 +162,9 @@ public sealed record ConsumerSampleProofResult(
         && RuntimeLogLocateOk
         && RuntimeLogExportOk
         && RuntimeOverlaySupportBundleOk
+        && GraphSearchLocateOk
+        && GraphSearchScopeFilterOk
+        && GraphSearchViewportFocusOk
         && GraphValidationFeedbackOk
         && GraphFeedbackFocusTargetOk
         && GraphReadinessStatusOk
@@ -206,6 +212,9 @@ public sealed record ConsumerSampleProofResult(
         && RuntimeLogLocateOk
         && RuntimeLogExportOk
         && RuntimeOverlaySupportBundleOk
+        && GraphSearchLocateOk
+        && GraphSearchScopeFilterOk
+        && GraphSearchViewportFocusOk
         && GraphValidationFeedbackOk
         && GraphFeedbackFocusTargetOk
         && GraphReadinessStatusOk
@@ -251,6 +260,9 @@ public sealed record ConsumerSampleProofResult(
         && RuntimeDebugPanelInteractionOk
         && RuntimeLogLocateOk
         && RuntimeLogExportOk
+        && GraphSearchLocateOk
+        && GraphSearchScopeFilterOk
+        && GraphSearchViewportFocusOk
         && PluginTrustEvidencePanelOk
         && PluginAllowlistRoundtripOk
         && GraphSnippetCatalogOk
@@ -322,6 +334,9 @@ public sealed record ConsumerSampleProofResult(
         $"RUNTIME_LOG_LOCATE_OK:{RuntimeLogLocateOk}",
         $"RUNTIME_LOG_EXPORT_OK:{RuntimeLogExportOk}",
         $"RUNTIME_OVERLAY_SUPPORT_BUNDLE_OK:{RuntimeOverlaySupportBundleOk}",
+        $"GRAPH_SEARCH_LOCATE_OK:{GraphSearchLocateOk}",
+        $"GRAPH_SEARCH_SCOPE_FILTER_OK:{GraphSearchScopeFilterOk}",
+        $"GRAPH_SEARCH_VIEWPORT_FOCUS_OK:{GraphSearchViewportFocusOk}",
         $"LAYOUT_PROVIDER_SEAM_OK:{LayoutProviderSeamOk}",
         $"LAYOUT_PREVIEW_APPLY_CANCEL_OK:{LayoutPreviewApplyCancelOk}",
         $"LAYOUT_UNDO_TRANSACTION_OK:{LayoutUndoTransactionOk}",
@@ -497,6 +512,9 @@ public static class ConsumerSampleProof
         bool runtimeDebugPanelInteractionOk;
         bool runtimeLogLocateOk;
         bool runtimeLogExportOk;
+        bool graphSearchLocateOk;
+        bool graphSearchScopeFilterOk;
+        bool graphSearchViewportFocusOk;
         bool layoutProviderSeamOk;
         bool layoutPreviewApplyCancelOk;
         bool layoutUndoTransactionOk;
@@ -597,6 +615,7 @@ public static class ConsumerSampleProof
             runtimeDebugPanelInteractionOk = HasRuntimeDebugPanelInteraction(window, host);
             runtimeLogLocateOk = HasRuntimeLogLocate(host);
             runtimeLogExportOk = HasRuntimeLogExport(host);
+            (graphSearchLocateOk, graphSearchScopeFilterOk, graphSearchViewportFocusOk) = HasGraphSearchLocate(host, window);
             layoutProviderSeamOk = HasLayoutProviderSeam(host);
             (layoutPreviewApplyCancelOk, layoutUndoTransactionOk) = HasLayoutPreviewApplyCancel(host, window);
             (readabilityFocusSubgraphOk, readabilityRouteCleanupOk, readabilityAlignmentHelpersOk) = HasReadabilityHelpers(host);
@@ -743,6 +762,9 @@ public static class ConsumerSampleProof
             RuntimeLogLocateOk: runtimeLogLocateOk,
             RuntimeLogExportOk: runtimeLogExportOk,
             RuntimeOverlaySupportBundleOk: runtimeOverlaySupportBundleOk,
+            GraphSearchLocateOk: graphSearchLocateOk,
+            GraphSearchScopeFilterOk: graphSearchScopeFilterOk,
+            GraphSearchViewportFocusOk: graphSearchViewportFocusOk,
             LayoutProviderSeamOk: layoutProviderSeamOk,
             LayoutPreviewApplyCancelOk: layoutPreviewApplyCancelOk,
             LayoutUndoTransactionOk: layoutUndoTransactionOk,
@@ -2002,6 +2024,98 @@ public static class ConsumerSampleProof
             && snapshot.UsesMultilineTextInput
             && snapshot.IsCodeLikeText
             && !string.IsNullOrWhiteSpace(snapshot.HelpText));
+
+    private static (bool LocateOk, bool ScopeFilterOk, bool ViewportFocusOk) HasGraphSearchLocate(
+        ConsumerSampleHost host,
+        Window window)
+    {
+        var searchBox = FindNamed<TextBox>(window, "PART_GraphSearchBox");
+        var searchScope = FindNamed<ComboBox>(window, "PART_GraphSearchScope");
+        var searchItems = FindNamed<ItemsControl>(window, "PART_GraphSearchItems");
+        var reviewNodeId = host.GetFirstReviewNodeId();
+        host.SelectNode(reviewNodeId);
+
+        var titleResults = host.SearchGraph("content review", ConsumerSampleGraphSearchScope.All);
+        var parameterResults = host.SearchGraph("release-owner", ConsumerSampleGraphSearchScope.All);
+        var portResults = host.SearchGraph("policy", ConsumerSampleGraphSearchScope.All);
+        var runtimeResults = host.SearchGraph("approved review payload", ConsumerSampleGraphSearchScope.All);
+        var connectionResults = host.SearchGraph("Review To Queue", ConsumerSampleGraphSearchScope.All);
+        var selectedResults = host.SearchGraph("content review", ConsumerSampleGraphSearchScope.CurrentSelection);
+        var selectedQueueResults = host.SearchGraph("Ship Queue", ConsumerSampleGraphSearchScope.CurrentSelection);
+        var scopedResults = host.SearchGraph("Ship Queue", ConsumerSampleGraphSearchScope.CurrentScope);
+        var allResults = host.SearchGraph("Ship Queue", ConsumerSampleGraphSearchScope.All);
+        var nodeResult = titleResults.FirstOrDefault(result => string.Equals(result.NodeId, reviewNodeId, StringComparison.Ordinal));
+        var connectionResult = connectionResults.FirstOrDefault(result =>
+            string.Equals(result.ConnectionId, "consumer-sample-connection-001", StringComparison.Ordinal));
+
+        host.Session.Commands.PanBy(96, 64);
+        var viewportBefore = host.Session.Queries.GetViewportSnapshot();
+        var locatedNode = nodeResult is not null && host.TryLocateGraphSearchResult(nodeResult);
+        var viewportAfterNodeLocate = host.Session.Queries.GetViewportSnapshot();
+        var locatedConnection = connectionResult is not null && host.TryLocateGraphSearchResult(connectionResult);
+        var viewportAfterConnectionLocate = host.Session.Queries.GetViewportSnapshot();
+        var selection = host.Session.Queries.GetSelectionSnapshot();
+        host.SelectNode(reviewNodeId);
+
+        var locateOk = searchBox is not null
+            && searchScope is not null
+            && searchItems?.ItemsSource is not null
+            && titleResults.Count > 0
+            && parameterResults.Any(result => string.Equals(result.NodeId, reviewNodeId, StringComparison.Ordinal))
+            && portResults.Any(result => string.Equals(result.NodeId, reviewNodeId, StringComparison.Ordinal))
+            && runtimeResults.Any(result => string.Equals(result.NodeId, reviewNodeId, StringComparison.Ordinal))
+            && locatedNode
+            && locatedConnection
+            && string.Equals(selection.PrimarySelectedConnectionId, "consumer-sample-connection-001", StringComparison.Ordinal);
+        var scopeFilterOk = selectedResults.Count > 0
+            && selectedQueueResults.Count == 0
+            && scopedResults.Count == allResults.Count
+            && HasGraphSearchCompositeScopeFilter()
+            && allResults.Count > selectedQueueResults.Count;
+        var viewportFocusOk = viewportBefore != viewportAfterNodeLocate
+            && viewportAfterNodeLocate != viewportAfterConnectionLocate;
+
+        return (locateOk, scopeFilterOk, viewportFocusOk);
+    }
+
+    private static bool HasGraphSearchCompositeScopeFilter()
+    {
+        var storageRoot = Path.Combine(
+            Path.GetTempPath(),
+            "AsterGraph.ConsumerSample.GraphSearchProof",
+            Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(storageRoot);
+
+        using var host = ConsumerSampleHost.Create(storageRoot);
+        var document = host.Session.Queries.CreateDocumentSnapshot();
+        var reviewNodeId = host.GetFirstReviewNodeId();
+        var queueNodeId = document.Nodes
+            .First(node => node.DefinitionId == ConsumerSampleHost.QueueDefinitionId)
+            .Id;
+        host.Session.Commands.SetSelection([reviewNodeId, queueNodeId], queueNodeId, updateStatus: false);
+
+        var compositeNodeId = host.Session.Commands.TryWrapSelectionToComposite("Search Scope Proof", updateStatus: false);
+        if (string.IsNullOrWhiteSpace(compositeNodeId))
+        {
+            return false;
+        }
+
+        var rootScopeResults = host.SearchGraph("Ship Queue", ConsumerSampleGraphSearchScope.CurrentScope);
+        var allScopeResults = host.SearchGraph("Ship Queue", ConsumerSampleGraphSearchScope.All);
+        var entered = host.Session.Commands.TryEnterCompositeChildGraph(compositeNodeId, updateStatus: false);
+        var childScopeId = host.Session.Queries.GetScopeNavigationSnapshot().CurrentScopeId;
+        var childScopeResults = host.SearchGraph("Ship Queue", ConsumerSampleGraphSearchScope.CurrentScope);
+        var childResult = childScopeResults.FirstOrDefault(result =>
+            string.Equals(result.NodeId, queueNodeId, StringComparison.Ordinal));
+
+        return entered
+            && rootScopeResults.Count == 0
+            && allScopeResults.Any(result => string.Equals(result.NodeId, queueNodeId, StringComparison.Ordinal))
+            && childResult is not null
+            && string.Equals(childResult.ScopeId, childScopeId, StringComparison.Ordinal)
+            && host.TryLocateGraphSearchResult(childResult)
+            && string.Equals(host.Session.Queries.GetSelectionSnapshot().PrimarySelectedNodeId, queueNodeId, StringComparison.Ordinal);
+    }
 
     private static bool HasAllowedOptions(
         IReadOnlyList<ParameterOptionDefinition> options,

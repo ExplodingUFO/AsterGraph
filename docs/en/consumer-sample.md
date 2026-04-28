@@ -138,6 +138,9 @@ Expected proof markers:
 - `GRAPH_READINESS_STATUS_OK:True`
 - `GRAPH_SNIPPET_CATALOG_OK:True`
 - `GRAPH_SNIPPET_INSERT_OK:True`
+- `GRAPH_SEARCH_LOCATE_OK:True`
+- `GRAPH_SEARCH_SCOPE_FILTER_OK:True`
+- `GRAPH_SEARCH_VIEWPORT_FOCUS_OK:True`
 - `FIVE_MINUTE_ONBOARDING_OK:True`
 - `ONBOARDING_CONFIGURATION_OK:True`
 - `AUTHORING_SURFACE_OK:True`
@@ -232,6 +235,9 @@ Expected proof markers:
 - `GRAPH_READINESS_STATUS_OK:True`
 - `GRAPH_SNIPPET_CATALOG_OK:True`
 - `GRAPH_SNIPPET_INSERT_OK:True`
+- `GRAPH_SEARCH_LOCATE_OK:True`
+- `GRAPH_SEARCH_SCOPE_FILTER_OK:True`
+- `GRAPH_SEARCH_VIEWPORT_FOCUS_OK:True`
 - `FIVE_MINUTE_ONBOARDING_OK:True`
 - `ONBOARDING_CONFIGURATION_OK:True`
 - `HOST_NATIVE_METRIC:startup_ms=...`
@@ -299,6 +305,7 @@ If you want to build the same medium host in your own app, copy these seams in t
 - selected-node parameter read/write seam: `IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()` reads the selected node parameters, and `IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)` writes them back
 - node-side authoring seam: `IGraphEditorSession.Queries.GetNodeParameterSnapshots(nodeId)` plus `INodeParameterEditorRegistry` keep the node surface on the same metadata and validation contract as the inspector
 - snippet seam: expose host-owned snippets through a small catalog, insert them with the existing pending-connection command path, and expect `GRAPH_SNIPPET_CATALOG_OK:True` plus `GRAPH_SNIPPET_INSERT_OK:True`
+- graph search seam: search the hosted graph from current snapshots, locate nodes/connections through existing selection and viewport commands, and expect `GRAPH_SEARCH_LOCATE_OK:True`, `GRAPH_SEARCH_SCOPE_FILTER_OK:True`, and `GRAPH_SEARCH_VIEWPORT_FOCUS_OK:True`
 - proof mode: emit the `AUTHORING_SURFACE_*` markers, `COMMAND_SURFACE_OK`, and the widened `HOST_NATIVE_METRIC:*` lines so you can compare your host with the shipped samples and keep the defended large-tier contract in view through `ScaleSmoke`
 - widened hosted tuning: emit `WIDENED_SURFACE_PERFORMANCE_OK:True` and reuse [Widened Surface Performance Recipe](./widened-surface-performance-recipe.md) so the hosted metrics stay tied to `ScaleSmoke`
 - capability breadth: pair the same route with [Capability Breadth Recipe](./capability-breadth-recipe.md) and emit the `CAPABILITY_BREADTH_*` markers from `AsterGraph.ConsumerSample.Avalonia -- --proof`

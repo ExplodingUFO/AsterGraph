@@ -221,6 +221,142 @@ public sealed class ConsumerSampleHost : IDisposable
     public void SelectNode(string nodeId)
         => Session.Commands.SetSelection([nodeId], nodeId, updateStatus: false);
 
+    public IReadOnlyList<ConsumerSampleGraphSearchResult> SearchGraph(
+        string query,
+        ConsumerSampleGraphSearchScope scope = ConsumerSampleGraphSearchScope.All)
+    {
+        if (string.IsNullOrWhiteSpace(query))
+        {
+            return [];
+        }
+
+        var normalizedQuery = query.Trim();
+        var document = Session.Queries.CreateDocumentSnapshot();
+        var selection = Session.Queries.GetSelectionSnapshot();
+        var navigation = Session.Queries.GetScopeNavigationSnapshot();
+        var runtimeOverlay = RuntimeOverlay;
+        var definitions = Session.Queries.GetRegisteredNodeDefinitions()
+            .ToDictionary(definition => definition.Id, definition => definition);
+        var scopedNodeIds = ResolveSearchNodeScope(document, selection, scope, navigation.CurrentScopeId);
+        var scopedConnectionIds = ResolveSearchConnectionScope(document, selection, scope, navigation.CurrentScopeId, scopedNodeIds);
+        var results = new List<ConsumerSampleGraphSearchResult>();
+
+        foreach (var graphScope in document.GraphScopes)
+        {
+            foreach (var node in graphScope.Nodes.Where(node => scopedNodeIds.Contains(CreateScopedSearchId(graphScope.Id, node.Id))))
+            {
+                INodeDefinition? definition = null;
+                if (node.DefinitionId is { } definitionId)
+                {
+                    definitions.TryGetValue(definitionId, out definition);
+                }
+
+                var runtime = runtimeOverlay.NodeOverlays.FirstOrDefault(overlay =>
+                    string.Equals(overlay.NodeId, node.Id, StringComparison.Ordinal));
+                var logs = runtimeOverlay.RecentLogs.Where(log =>
+                    string.Equals(log.NodeId, node.Id, StringComparison.Ordinal)
+                    && IsRuntimeScopeMatch(log.ScopeId, graphScope.Id));
+                var searchableFields = EnumerateNodeSearchFields(node, definition, runtime, logs);
+                var matchText = FindFirstMatch(searchableFields, normalizedQuery);
+                if (matchText is null)
+                {
+                    continue;
+                }
+
+                results.Add(new ConsumerSampleGraphSearchResult(
+                    Id: $"node:{graphScope.Id}:{node.Id}",
+                    Kind: "Node",
+                    Title: node.Title,
+                    MatchText: matchText,
+                    NodeId: node.Id,
+                    ConnectionId: null,
+                    ScopeId: graphScope.Id));
+            }
+
+            foreach (var connection in graphScope.Connections.Where(connection => scopedConnectionIds.Contains(CreateScopedSearchId(graphScope.Id, connection.Id))))
+            {
+                var sourceNode = graphScope.Nodes.FirstOrDefault(node =>
+                    string.Equals(node.Id, connection.SourceNodeId, StringComparison.Ordinal));
+                var targetNode = graphScope.Nodes.FirstOrDefault(node =>
+                    string.Equals(node.Id, connection.TargetNodeId, StringComparison.Ordinal));
+                var runtime = runtimeOverlay.ConnectionOverlays.FirstOrDefault(overlay =>
+                    string.Equals(overlay.ConnectionId, connection.Id, StringComparison.Ordinal));
+                var logs = runtimeOverlay.RecentLogs.Where(log =>
+                    string.Equals(log.ConnectionId, connection.Id, StringComparison.Ordinal)
+                    && IsRuntimeScopeMatch(log.ScopeId, graphScope.Id));
+                var searchableFields = EnumerateConnectionSearchFields(connection, sourceNode, targetNode, runtime, logs);
+                var matchText = FindFirstMatch(searchableFields, normalizedQuery);
+                if (matchText is null)
+                {
+                    continue;
+                }
+
+                results.Add(new ConsumerSampleGraphSearchResult(
+                    Id: $"connection:{graphScope.Id}:{connection.Id}",
+                    Kind: "Connection",
+                    Title: connection.Label,
+                    MatchText: matchText,
+                    NodeId: null,
+                    ConnectionId: connection.Id,
+                    ScopeId: graphScope.Id));
+            }
+        }
+
+        return results
+            .OrderBy(result => result.Kind, StringComparer.Ordinal)
+            .ThenBy(result => result.Title, StringComparer.Ordinal)
+            .ThenBy(result => result.Id, StringComparer.Ordinal)
+            .ToArray();
+    }
+
+    public bool TryLocateGraphSearchResult(ConsumerSampleGraphSearchResult result)
+    {
+        ArgumentNullException.ThrowIfNull(result);
+        var document = Session.Queries.CreateDocumentSnapshot();
+        if (!TryNavigateToGraphSearchScope(document, result.ScopeId))
+        {
+            return false;
+        }
+
+        document = Session.Queries.CreateDocumentSnapshot();
+        var activeScopeId = Session.Queries.GetScopeNavigationSnapshot().CurrentScopeId;
+        var activeScope = document.GraphScopes.FirstOrDefault(graphScope =>
+            string.Equals(graphScope.Id, activeScopeId, StringComparison.Ordinal));
+        if (activeScope is null)
+        {
+            return false;
+        }
+
+        if (!string.IsNullOrWhiteSpace(result.NodeId)
+            && activeScope.Nodes.Any(node => string.Equals(node.Id, result.NodeId, StringComparison.Ordinal)))
+        {
+            Session.Commands.SetSelection([result.NodeId], result.NodeId, updateStatus: false);
+            Session.Commands.CenterViewOnNode(result.NodeId);
+            StateChanged?.Invoke(this, EventArgs.Empty);
+            return string.Equals(Session.Queries.GetSelectionSnapshot().PrimarySelectedNodeId, result.NodeId, StringComparison.Ordinal);
+        }
+
+        if (!string.IsNullOrWhiteSpace(result.ConnectionId)
+            && activeScope.Connections.Any(connection => string.Equals(connection.Id, result.ConnectionId, StringComparison.Ordinal)))
+        {
+            Session.Commands.SetConnectionSelection([result.ConnectionId], result.ConnectionId, updateStatus: false);
+            var geometry = Session.Queries.GetConnectionGeometrySnapshots()
+                .FirstOrDefault(snapshot => string.Equals(snapshot.ConnectionId, result.ConnectionId, StringComparison.Ordinal));
+            if (geometry is not null)
+            {
+                Session.Commands.CenterViewAt(new GraphPoint(
+                    (geometry.Source.Position.X + geometry.Target.Position.X) / 2d,
+                    (geometry.Source.Position.Y + geometry.Target.Position.Y) / 2d),
+                    updateStatus: false);
+            }
+
+            StateChanged?.Invoke(this, EventArgs.Empty);
+            return string.Equals(Session.Queries.GetSelectionSnapshot().PrimarySelectedConnectionId, result.ConnectionId, StringComparison.Ordinal);
+        }
+
+        return false;
+    }
+
     public bool PreviewLayout()
     {
         var plan = Session.Queries.CreateLayoutPlan(new GraphLayoutRequest
@@ -1083,6 +1219,237 @@ public sealed class ConsumerSampleHost : IDisposable
             : $"{commandId}:{(descriptor.IsEnabled ? "enabled" : "disabled")}";
     }
 
+    private static HashSet<string> ResolveSearchNodeScope(
+        GraphDocument document,
+        GraphEditorSelectionSnapshot selection,
+        ConsumerSampleGraphSearchScope scope,
+        string currentScopeId)
+    {
+        if (scope is ConsumerSampleGraphSearchScope.CurrentSelection)
+        {
+            return document.GraphScopes
+                .SelectMany(graphScope => graphScope.Nodes
+                    .Where(node => selection.SelectedNodeIds.Contains(node.Id))
+                    .Select(node => CreateScopedSearchId(graphScope.Id, node.Id)))
+                .ToHashSet(StringComparer.Ordinal);
+        }
+
+        return ResolveSearchScopes(document, scope, currentScopeId)
+            .SelectMany(graphScope => graphScope.Nodes.Select(node => CreateScopedSearchId(graphScope.Id, node.Id)))
+            .ToHashSet(StringComparer.Ordinal);
+    }
+
+    private static HashSet<string> ResolveSearchConnectionScope(
+        GraphDocument document,
+        GraphEditorSelectionSnapshot selection,
+        ConsumerSampleGraphSearchScope scope,
+        string currentScopeId,
+        IReadOnlySet<string> scopedNodeIds)
+    {
+        if (scope is ConsumerSampleGraphSearchScope.CurrentSelection)
+        {
+            return document.GraphScopes
+                .SelectMany(graphScope => graphScope.Connections
+                    .Where(connection => selection.SelectedConnectionIds.Contains(connection.Id))
+                    .Select(connection => CreateScopedSearchId(graphScope.Id, connection.Id)))
+                .ToHashSet(StringComparer.Ordinal);
+        }
+
+        return ResolveSearchScopes(document, scope, currentScopeId)
+            .SelectMany(graphScope => graphScope.Connections
+                .Where(connection =>
+                    scopedNodeIds.Contains(CreateScopedSearchId(graphScope.Id, connection.SourceNodeId))
+                    || scopedNodeIds.Contains(CreateScopedSearchId(graphScope.Id, connection.TargetNodeId)))
+                .Select(connection => CreateScopedSearchId(graphScope.Id, connection.Id)))
+            .ToHashSet(StringComparer.Ordinal);
+    }
+
+    private static IReadOnlyList<GraphScope> ResolveSearchScopes(
+        GraphDocument document,
+        ConsumerSampleGraphSearchScope scope,
+        string currentScopeId)
+    {
+        if (scope is not ConsumerSampleGraphSearchScope.CurrentScope)
+        {
+            return document.GraphScopes;
+        }
+
+        return document.GraphScopes
+            .Where(graphScope => string.Equals(graphScope.Id, currentScopeId, StringComparison.Ordinal))
+            .ToArray();
+    }
+
+    private bool TryNavigateToGraphSearchScope(
+        GraphDocument document,
+        string scopeId)
+    {
+        if (string.IsNullOrWhiteSpace(scopeId))
+        {
+            return false;
+        }
+
+        if (string.Equals(Session.Queries.GetScopeNavigationSnapshot().CurrentScopeId, scopeId, StringComparison.Ordinal))
+        {
+            return true;
+        }
+
+        if (!TryCreateCompositePathToScope(document, scopeId, out var compositeNodePath))
+        {
+            return false;
+        }
+
+        while (Session.Queries.GetScopeNavigationSnapshot().CanNavigateToParent)
+        {
+            if (!Session.Commands.TryReturnToParentGraphScope(updateStatus: false))
+            {
+                return false;
+            }
+        }
+
+        foreach (var compositeNodeId in compositeNodePath)
+        {
+            if (!Session.Commands.TryEnterCompositeChildGraph(compositeNodeId, updateStatus: false))
+            {
+                return false;
+            }
+        }
+
+        return string.Equals(Session.Queries.GetScopeNavigationSnapshot().CurrentScopeId, scopeId, StringComparison.Ordinal);
+    }
+
+    private static bool TryCreateCompositePathToScope(
+        GraphDocument document,
+        string scopeId,
+        out IReadOnlyList<string> compositeNodePath)
+    {
+        if (document.GraphScopes.All(graphScope => !string.Equals(graphScope.Id, scopeId, StringComparison.Ordinal)))
+        {
+            compositeNodePath = [];
+            return false;
+        }
+
+        var parentsByChildScope = new Dictionary<string, (string ParentScopeId, string CompositeNodeId)>(StringComparer.Ordinal);
+        foreach (var graphScope in document.GraphScopes)
+        {
+            foreach (var node in graphScope.Nodes)
+            {
+                if (node.Composite is not null)
+                {
+                    parentsByChildScope.TryAdd(node.Composite.ChildGraphId, (graphScope.Id, node.Id));
+                }
+            }
+        }
+
+        var path = new List<string>();
+        var cursor = scopeId;
+        while (!string.Equals(cursor, document.RootGraphId, StringComparison.Ordinal))
+        {
+            if (!parentsByChildScope.TryGetValue(cursor, out var parent))
+            {
+                compositeNodePath = [];
+                return false;
+            }
+
+            path.Add(parent.CompositeNodeId);
+            cursor = parent.ParentScopeId;
+        }
+
+        path.Reverse();
+        compositeNodePath = path;
+        return true;
+    }
+
+    private static string CreateScopedSearchId(string scopeId, string value)
+        => $"{scopeId}:{value}";
+
+    private static bool IsRuntimeScopeMatch(string? runtimeScopeId, string graphScopeId)
+        => string.IsNullOrWhiteSpace(runtimeScopeId)
+            ? string.Equals(graphScopeId, GraphDocument.DefaultRootGraphId, StringComparison.Ordinal)
+            : string.Equals(runtimeScopeId, graphScopeId, StringComparison.Ordinal);
+
+    private static IEnumerable<string?> EnumerateNodeSearchFields(
+        GraphNode node,
+        INodeDefinition? definition,
+        GraphEditorNodeRuntimeOverlaySnapshot? runtime,
+        IEnumerable<GraphEditorRuntimeLogEntrySnapshot> logs)
+    {
+        yield return node.Id;
+        yield return node.Title;
+        yield return node.Category;
+        yield return node.Subtitle;
+        yield return node.Description;
+        yield return node.DefinitionId?.Value;
+        yield return definition?.DisplayName;
+        yield return definition?.Category;
+        yield return definition?.Subtitle;
+        yield return definition?.Description;
+        yield return runtime?.Status.ToString();
+        yield return runtime?.OutputPreview;
+        yield return runtime?.ErrorMessage;
+
+        foreach (var port in node.Inputs.Concat(node.Outputs))
+        {
+            yield return port.Id;
+            yield return port.Label;
+            yield return port.DataType;
+            yield return port.TypeId?.Value;
+        }
+
+        foreach (var parameter in node.ParameterValues ?? [])
+        {
+            yield return parameter.Key;
+            yield return parameter.TypeId.Value;
+            yield return parameter.Value?.ToString();
+        }
+
+        foreach (var parameter in definition?.Parameters ?? [])
+        {
+            yield return parameter.Key;
+            yield return parameter.DisplayName;
+            yield return parameter.Description;
+            yield return parameter.HelpText;
+            yield return parameter.GroupName;
+            yield return parameter.PlaceholderText;
+        }
+
+        foreach (var log in logs)
+        {
+            yield return log.Status.ToString();
+            yield return log.Message;
+        }
+    }
+
+    private static IEnumerable<string?> EnumerateConnectionSearchFields(
+        GraphConnection connection,
+        GraphNode? sourceNode,
+        GraphNode? targetNode,
+        GraphEditorConnectionRuntimeOverlaySnapshot? runtime,
+        IEnumerable<GraphEditorRuntimeLogEntrySnapshot> logs)
+    {
+        yield return connection.Id;
+        yield return connection.Label;
+        yield return connection.SourceNodeId;
+        yield return connection.SourcePortId;
+        yield return connection.TargetNodeId;
+        yield return connection.TargetPortId;
+        yield return sourceNode?.Title;
+        yield return targetNode?.Title;
+        yield return runtime?.Status.ToString();
+        yield return runtime?.ValuePreview;
+        yield return runtime?.PayloadType;
+
+        foreach (var log in logs)
+        {
+            yield return log.Status.ToString();
+            yield return log.Message;
+        }
+    }
+
+    private static string? FindFirstMatch(IEnumerable<string?> values, string query)
+        => values.FirstOrDefault(value =>
+            !string.IsNullOrWhiteSpace(value)
+            && value.Contains(query, StringComparison.OrdinalIgnoreCase));
+
     private sealed class ConsumerSampleManifestSource(IReadOnlyList<GraphEditorPluginManifestSourceCandidate> candidates) : IGraphEditorPluginManifestSource
     {
         public IReadOnlyList<GraphEditorPluginManifestSourceCandidate> GetCandidates()
@@ -1107,3 +1474,19 @@ public sealed record ConsumerSampleSnippetDescriptor(
     string Id,
     string Title,
     string Description);
+
+public enum ConsumerSampleGraphSearchScope
+{
+    All,
+    CurrentScope,
+    CurrentSelection,
+}
+
+public sealed record ConsumerSampleGraphSearchResult(
+    string Id,
+    string Kind,
+    string Title,
+    string MatchText,
+    string? NodeId,
+    string? ConnectionId,
+    string ScopeId);
