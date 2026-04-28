@@ -7,6 +7,7 @@
 每条 beta 反馈都应先收口到同一套受限 intake 词汇：报告类型、采用者上下文、`route`、`version`、proof 标记、摩擦点、support bundle 附件备注，以及 claim-expansion status。
 
 当前 intake proof markers：`ADOPTION_INTAKE_EVIDENCE_OK:True`、`SUPPORT_BUNDLE_INTAKE_HANDOFF_OK:True` 和 `REAL_EXTERNAL_REPORT_GATE_OK:True`。
+当前 v0.61 refresh markers：`ADOPTER_INTAKE_REFRESH_OK:True`、`ADOPTER_SUPPORT_BUNDLE_ATTACHMENT_OK:True` 和 `ADOPTER_CLAIM_EXPANSION_GATE_OK:True`。
 
 每条反馈都应按这套受限字段记录：
 
@@ -48,6 +49,8 @@
 2. **每条真实外部报告都必须在同一套受限 schema 内保留 route、version、proof 标记、摩擦点、support bundle 附件备注和 claim-expansion status**
 3. **在写 release-candidate、GA 或 `1.0` 级别语言前，必须显式保留 adoption evidence、API drift、support boundary 和 release proof gate**
 4. **在 3 到 5 条真实外部报告还没有聚焦到同一个受限风险前，不要扩大 support 或 capability claim**
+
+Phase 380 refresh proof：`ADOPTER_INTAKE_REFRESH_OK:True` 保持这页、GitHub intake 模板和 adopter triage 清单使用同一套受限 schema；`ADOPTER_SUPPORT_BUNDLE_ATTACHMENT_OK:True` 保持 `SUPPORT_BUNDLE_PATH:...` 或 `NO_SUPPORT_BUNDLE:route-cannot-produce-one` 附在同一条记录上；`ADOPTER_CLAIM_EXPANSION_GATE_OK:True` 保持 claim expansion 在 3 到 5 条真实外部报告聚焦到同一个受限风险前继续阻塞。
 
 在达到这个阈值之前，保持这份种子建议不变，不要临时把下一条 beta 线往别处扩。
 

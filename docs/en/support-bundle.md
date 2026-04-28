@@ -4,7 +4,7 @@ This is the local evidence contract for beta evaluation and support.
 Use the support bundle as the support-bundle attachment note on the bounded intake record when available from the defended hosted proof route.
 It does not upload anything and it does not imply telemetry or hosted services.
 Use it alongside [Beta Evaluation Path](./evaluation-path.md) when you need the local evidence attachment from the defended hosted proof route.
-The intake handoff is covered by `SUPPORT_BUNDLE_INTAKE_HANDOFF_OK:True` and stays local evidence only.
+The intake handoff is covered by `SUPPORT_BUNDLE_INTAKE_HANDOFF_OK:True`, `ADOPTER_INTAKE_REFRESH_OK:True`, `ADOPTER_SUPPORT_BUNDLE_ATTACHMENT_OK:True`, and `ADOPTER_CLAIM_EXPANSION_GATE_OK:True`; it stays local evidence only.
 
 ## Canonical Producer
 

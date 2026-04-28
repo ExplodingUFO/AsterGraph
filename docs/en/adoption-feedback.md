@@ -7,6 +7,7 @@ This page defines the public beta bounded intake record and explicitly distingui
 Each beta intake record should stay on one bounded intake vocabulary: report type, adopter context, route, version, proof markers, friction, support-bundle attachment note, and claim-expansion status.
 
 Current intake proof markers: `ADOPTION_INTAKE_EVIDENCE_OK:True`, `SUPPORT_BUNDLE_INTAKE_HANDOFF_OK:True`, and `REAL_EXTERNAL_REPORT_GATE_OK:True`.
+Current v0.61 refresh markers: `ADOPTER_INTAKE_REFRESH_OK:True`, `ADOPTER_SUPPORT_BUNDLE_ATTACHMENT_OK:True`, and `ADOPTER_CLAIM_EXPANSION_GATE_OK:True`.
 
 Each feedback entry should capture this bounded schema:
 
@@ -48,6 +49,8 @@ Milestone handoff markers: `ADOPTION_READINESS_HANDOFF_OK:True`, `ADOPTION_SCOPE
 2. **each real external report must keep route, version, proof markers, friction, support-bundle attachment note, and claim-expansion status in the same bounded schema**
 3. **keep adoption evidence, API drift, support boundary, and release proof gates visible before any release-candidate, GA, or 1.0 language**
 4. **do not widen support or capability claims before 3-5 real external reports cluster on the same bounded risk**
+
+Phase 380 refresh proof: `ADOPTER_INTAKE_REFRESH_OK:True` keeps this page, the GitHub intake template, and adopter triage checklist on the same bounded schema; `ADOPTER_SUPPORT_BUNDLE_ATTACHMENT_OK:True` keeps `SUPPORT_BUNDLE_PATH:...` or `NO_SUPPORT_BUNDLE:route-cannot-produce-one` attached to that same record; `ADOPTER_CLAIM_EXPANSION_GATE_OK:True` keeps claim expansion blocked until 3-5 real external reports cluster on the same bounded risk.
 
 Until that threshold is met, keep this seeded recommendation in place instead of widening the next beta line ad hoc.
 

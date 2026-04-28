@@ -476,6 +476,12 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("bounded intake record", supportBundle, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("SUPPORT_BUNDLE_INTAKE_HANDOFF_OK:True", supportBundle, StringComparison.Ordinal);
         Assert.Contains("SUPPORT_BUNDLE_INTAKE_HANDOFF_OK:True", supportBundleZh, StringComparison.Ordinal);
+        Assert.Contains("ADOPTER_INTAKE_REFRESH_OK:True", supportBundle, StringComparison.Ordinal);
+        Assert.Contains("ADOPTER_INTAKE_REFRESH_OK:True", supportBundleZh, StringComparison.Ordinal);
+        Assert.Contains("ADOPTER_SUPPORT_BUNDLE_ATTACHMENT_OK:True", supportBundle, StringComparison.Ordinal);
+        Assert.Contains("ADOPTER_SUPPORT_BUNDLE_ATTACHMENT_OK:True", supportBundleZh, StringComparison.Ordinal);
+        Assert.Contains("ADOPTER_CLAIM_EXPANSION_GATE_OK:True", supportBundle, StringComparison.Ordinal);
+        Assert.Contains("ADOPTER_CLAIM_EXPANSION_GATE_OK:True", supportBundleZh, StringComparison.Ordinal);
         Assert.True(HasLineWithAll(supportBundleZh, "support bundle", "附件"));
         AssertAppearsBefore(supportBundle, "Beta Evaluation Path", "## Canonical Producer");
         AssertAppearsBefore(supportBundleZh, "公开 Beta 评估路径", "## Canonical 生成入口");
@@ -489,6 +495,12 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("ADOPTION_INTAKE_EVIDENCE_OK:True", adoptionFeedbackZh, StringComparison.Ordinal);
         Assert.Contains("SUPPORT_BUNDLE_INTAKE_HANDOFF_OK:True", adoptionFeedbackZh, StringComparison.Ordinal);
         Assert.Contains("REAL_EXTERNAL_REPORT_GATE_OK:True", adoptionFeedbackZh, StringComparison.Ordinal);
+        Assert.Contains("ADOPTER_INTAKE_REFRESH_OK:True", adoptionFeedback, StringComparison.Ordinal);
+        Assert.Contains("ADOPTER_SUPPORT_BUNDLE_ATTACHMENT_OK:True", adoptionFeedback, StringComparison.Ordinal);
+        Assert.Contains("ADOPTER_CLAIM_EXPANSION_GATE_OK:True", adoptionFeedback, StringComparison.Ordinal);
+        Assert.Contains("ADOPTER_INTAKE_REFRESH_OK:True", adoptionFeedbackZh, StringComparison.Ordinal);
+        Assert.Contains("ADOPTER_SUPPORT_BUNDLE_ATTACHMENT_OK:True", adoptionFeedbackZh, StringComparison.Ordinal);
+        Assert.Contains("ADOPTER_CLAIM_EXPANSION_GATE_OK:True", adoptionFeedbackZh, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -664,6 +676,9 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.Contains("ADOPTION_INTAKE_EVIDENCE_OK:True", adoptionTemplate, StringComparison.Ordinal);
         Assert.Contains("SUPPORT_BUNDLE_INTAKE_HANDOFF_OK:True", adoptionTemplate, StringComparison.Ordinal);
         Assert.Contains("REAL_EXTERNAL_REPORT_GATE_OK:True", adoptionTemplate, StringComparison.Ordinal);
+        Assert.Contains("ADOPTER_INTAKE_REFRESH_OK:True", adoptionTemplate, StringComparison.Ordinal);
+        Assert.Contains("ADOPTER_SUPPORT_BUNDLE_ATTACHMENT_OK:True", adoptionTemplate, StringComparison.Ordinal);
+        Assert.Contains("ADOPTER_CLAIM_EXPANSION_GATE_OK:True", adoptionTemplate, StringComparison.Ordinal);
         Assert.Contains("SUPPORT_BUNDLE_PATH:...", adoptionTemplate, StringComparison.Ordinal);
         Assert.Contains("NO_SUPPORT_BUNDLE:route-cannot-produce-one", adoptionTemplate, StringComparison.Ordinal);
     }
@@ -833,6 +848,9 @@ public sealed class DemoProofReleaseSurfaceTests
             Assert.Contains("ADOPTION_INTAKE_EVIDENCE_OK:True", contents, StringComparison.Ordinal);
             Assert.Contains("SUPPORT_BUNDLE_INTAKE_HANDOFF_OK:True", contents, StringComparison.Ordinal);
             Assert.Contains("REAL_EXTERNAL_REPORT_GATE_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("ADOPTER_INTAKE_REFRESH_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("ADOPTER_SUPPORT_BUNDLE_ATTACHMENT_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("ADOPTER_CLAIM_EXPANSION_GATE_OK:True", contents, StringComparison.Ordinal);
         }
 
         foreach (var contents in new[] { adoptionFeedbackZh, triageDocZh, projectStatusZh, checklistZh })
@@ -845,6 +863,9 @@ public sealed class DemoProofReleaseSurfaceTests
             Assert.Contains("ADOPTION_INTAKE_EVIDENCE_OK:True", contents, StringComparison.Ordinal);
             Assert.Contains("SUPPORT_BUNDLE_INTAKE_HANDOFF_OK:True", contents, StringComparison.Ordinal);
             Assert.Contains("REAL_EXTERNAL_REPORT_GATE_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("ADOPTER_INTAKE_REFRESH_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("ADOPTER_SUPPORT_BUNDLE_ATTACHMENT_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("ADOPTER_CLAIM_EXPANSION_GATE_OK:True", contents, StringComparison.Ordinal);
         }
     }
 

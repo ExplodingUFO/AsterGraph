@@ -12,6 +12,7 @@
 - claim-expansion status：不请求扩大、候选扩大，或需要维护者分诊
 
 当前 triage proof markers：`ADOPTION_INTAKE_EVIDENCE_OK:True`、`SUPPORT_BUNDLE_INTAKE_HANDOFF_OK:True` 和 `REAL_EXTERNAL_REPORT_GATE_OK:True`。
+当前 refresh markers：`ADOPTER_INTAKE_REFRESH_OK:True`、`ADOPTER_SUPPORT_BUNDLE_ATTACHMENT_OK:True` 和 `ADOPTER_CLAIM_EXPANSION_GATE_OK:True`。
 
 同一套字段应在：
 
@@ -22,6 +23,8 @@
 这样可以让 `HelloWorld`、`Demo`、`ScaleSmoke` 这类没有 support bundle 的反馈照常进入分诊，同时保持证据合同一致。
 
 在把某条反馈当成“应该扩大支持面”的候选之前，先看 [Project Status](./project-status.md) 里的就绪门禁。落在已证明/受边界约束之外的报告，先当 intake evidence，而不是自动扩大范围。单条报告不会扩大公开声明；扩大 support 或 capability 需要 3 到 5 条真实外部报告聚焦在同一个受限风险上。若 route 能产出 bundle，就把 `SUPPORT_BUNDLE_PATH:...` 那一行当成 support bundle 附件备注；否则记录 `NO_SUPPORT_BUNDLE:route-cannot-produce-one`。
+
+Phase 380 refresh 把三个检查绑在一起：`ADOPTER_INTAKE_REFRESH_OK:True` 表示模板、triage 和 schema 对齐；`ADOPTER_SUPPORT_BUNDLE_ATTACHMENT_OK:True` 表示 bundle 是否可用仍记录在同一条 intake 记录上；`ADOPTER_CLAIM_EXPANSION_GATE_OK:True` 表示 support 或 capability expansion 继续等 3 到 5 条真实外部报告门禁。
 
 ## Intake 标准清单
 

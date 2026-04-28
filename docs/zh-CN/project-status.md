@@ -101,6 +101,7 @@
 用于这个门禁的每条真实外部报告，都必须带同一套 intake 词汇：报告类型、采用者上下文、route、version、proof 标记、摩擦点、support bundle 附件备注和 claim-expansion status。单条报告不会扩大公开声明；扩大 support 或 capability 需要 3 到 5 条真实外部报告聚焦在同一个受限风险上。
 
 当前 intake gate markers：`ADOPTION_INTAKE_EVIDENCE_OK:True`、`SUPPORT_BUNDLE_INTAKE_HANDOFF_OK:True` 和 `REAL_EXTERNAL_REPORT_GATE_OK:True`。
+当前 adopter refresh markers：`ADOPTER_INTAKE_REFRESH_OK:True`、`ADOPTER_SUPPORT_BUNDLE_ATTACHMENT_OK:True` 和 `ADOPTER_CLAIM_EXPANSION_GATE_OK:True`。
 
 ### 当前已被外部证据证明
 

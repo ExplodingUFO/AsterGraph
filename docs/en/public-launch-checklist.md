@@ -111,6 +111,9 @@ Expected high-signal markers:
 - `ADOPTION_INTAKE_EVIDENCE_OK:True`
 - `SUPPORT_BUNDLE_INTAKE_HANDOFF_OK:True`
 - `REAL_EXTERNAL_REPORT_GATE_OK:True`
+- `ADOPTER_INTAKE_REFRESH_OK:True`
+- `ADOPTER_SUPPORT_BUNDLE_ATTACHMENT_OK:True`
+- `ADOPTER_CLAIM_EXPANSION_GATE_OK:True`
 - `API_RELEASE_CANDIDATE_PROOF_OK:True`
 - `PUBLIC_API_GUIDANCE_HANDOFF_OK:True`
 - `RELEASE_BOUNDARY_STABILITY_OK:True`
@@ -162,6 +165,7 @@ Expected high-signal markers:
 - use [Adapter-2 Performance Recipe](./adapter-2-performance-recipe.md) when you need the bounded handoff from defended Avalonia hosted metrics to validation-only WPF performance verification
 - confirm every beta intake record uses the same bounded schema: report type, adopter context, route, version, proof markers, friction, support-bundle attachment note, and claim-expansion status
 - confirm claim-expansion status is treated as triage input until 3-5 real external reports cluster on the same bounded risk
+- confirm Phase 380 adopter refresh markers stay visible in release messaging: `ADOPTER_INTAKE_REFRESH_OK:True`, `ADOPTER_SUPPORT_BUNDLE_ATTACHMENT_OK:True`, and `ADOPTER_CLAIM_EXPANSION_GATE_OK:True`
 - GA prep checklist: adoption evidence, API drift, support boundary, and release proof gates must all stay explicit before any GA or `1.0` messaging
 - repeat the current 0.xx alpha/beta hardening handoff in release messaging: `Adoption Readiness / Release Candidate Hygiene` means the public recommendation, API drift, support boundary, and release proof gates stay aligned before release-candidate, GA, or `1.0` language; include `ADOPTION_RECOMMENDATION_CURRENT_OK:True` and `CLAIM_HYGIENE_BOUNDARY_OK:True`
 - keep `xlarge` described as telemetry-only; do not present it as a 10000-node support promise or virtualization commitment

@@ -12,6 +12,7 @@ When a beta report is filed, keep the same bounded intake record fields together
 - `claim-expansion status`: no expansion requested, candidate expansion, or maintainer triage needed
 
 Current triage proof markers: `ADOPTION_INTAKE_EVIDENCE_OK:True`, `SUPPORT_BUNDLE_INTAKE_HANDOFF_OK:True`, and `REAL_EXTERNAL_REPORT_GATE_OK:True`.
+Current refresh markers: `ADOPTER_INTAKE_REFRESH_OK:True`, `ADOPTER_SUPPORT_BUNDLE_ATTACHMENT_OK:True`, and `ADOPTER_CLAIM_EXPANSION_GATE_OK:True`.
 
 Use the same fields in:
 
@@ -22,6 +23,8 @@ Use the same fields in:
 This checklist keeps all intake documents on one beta evidence contract, so route selection and support readiness can be triaged consistently without blocking `HelloWorld`, `Demo`, or `ScaleSmoke` feedback when no support bundle exists yet.
 
 Use [Project Status](./project-status.md) as the readiness gate before treating a report as a support-expansion candidate. Reports outside the proven/bounded rows are intake evidence, not automatic scope widening. A single report does not widen public claims; support or capability expansion needs 3-5 real external reports clustered on the same bounded risk. Reuse the emitted `SUPPORT_BUNDLE_PATH:...` line as the support-bundle attachment note when the route can produce a bundle, or record `NO_SUPPORT_BUNDLE:route-cannot-produce-one` when it cannot.
+
+The Phase 380 refresh keeps three checks together: `ADOPTER_INTAKE_REFRESH_OK:True` for the template/triage/schema match, `ADOPTER_SUPPORT_BUNDLE_ATTACHMENT_OK:True` for keeping bundle availability on the same record, and `ADOPTER_CLAIM_EXPANSION_GATE_OK:True` for blocking support or capability expansion until the 3-5 real external report gate is met.
 
 ## Intake Criteria Checklist
 

@@ -7,7 +7,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Keep this as one bounded intake record. Current proof markers: `ADOPTION_INTAKE_EVIDENCE_OK:True`, `SUPPORT_BUNDLE_INTAKE_HANDOFF_OK:True`, and `REAL_EXTERNAL_REPORT_GATE_OK:True`.
+        Keep this as one bounded intake record. Current proof markers: `ADOPTION_INTAKE_EVIDENCE_OK:True`, `SUPPORT_BUNDLE_INTAKE_HANDOFF_OK:True`, `REAL_EXTERNAL_REPORT_GATE_OK:True`, `ADOPTER_INTAKE_REFRESH_OK:True`, `ADOPTER_SUPPORT_BUNDLE_ATTACHMENT_OK:True`, and `ADOPTER_CLAIM_EXPANSION_GATE_OK:True`.
   - type: input
     id: version
     attributes:

@@ -111,6 +111,9 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framew
 - `ADOPTION_INTAKE_EVIDENCE_OK:True`
 - `SUPPORT_BUNDLE_INTAKE_HANDOFF_OK:True`
 - `REAL_EXTERNAL_REPORT_GATE_OK:True`
+- `ADOPTER_INTAKE_REFRESH_OK:True`
+- `ADOPTER_SUPPORT_BUNDLE_ATTACHMENT_OK:True`
+- `ADOPTER_CLAIM_EXPANSION_GATE_OK:True`
 - `API_RELEASE_CANDIDATE_PROOF_OK:True`
 - `PUBLIC_API_GUIDANCE_HANDOFF_OK:True`
 - `RELEASE_BOUNDARY_STABILITY_OK:True`
@@ -167,6 +170,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framew
 - 需要从受防守的 Avalonia hosted metrics 交接到 validation-only 的 WPF performance 验证时，统一参考 [Adapter-2 Performance Recipe](./adapter-2-performance-recipe.md)
 - 确认每条 beta 反馈都按同一套受限字段记录：报告类型、采用者上下文、`route`、`version`、proof 标记、摩擦点、support bundle 附件备注，以及 claim-expansion status
 - 确认 claim-expansion status 在 3 到 5 条真实外部报告聚焦到同一个受限风险之前，只作为分诊输入
+- 确认 Phase 380 adopter refresh markers 出现在 release messaging：`ADOPTER_INTAKE_REFRESH_OK:True`、`ADOPTER_SUPPORT_BUNDLE_ATTACHMENT_OK:True` 和 `ADOPTER_CLAIM_EXPANSION_GATE_OK:True`
 - GA prep checklist：adoption evidence、API drift、support boundary 和 release proof gate 都必须显式保留，之后才允许写 GA 或 `1.0` 公告口径
 - 在 release messaging 里重复当前 `0.xx` alpha/beta hardening 线的 handoff：`Adoption Readiness / Release Candidate Hygiene` 表示先把公开推荐、API drift、support boundary 和 release proof gate 对齐，再写 release-candidate、GA 或 `1.0` 级别语言；同时包含 `ADOPTION_RECOMMENDATION_CURRENT_OK:True` 和 `CLAIM_HYGIENE_BOUNDARY_OK:True`
 - 保持 `xlarge` 为 telemetry-only，不把它说成 10000 节点支持承诺或 virtualization commitment
