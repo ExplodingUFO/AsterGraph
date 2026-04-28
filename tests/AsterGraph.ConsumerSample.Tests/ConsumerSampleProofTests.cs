@@ -155,6 +155,9 @@ public sealed class ConsumerSampleProofTests
         Assert.True(result.OnboardingConfigurationOk);
         Assert.True(result.ExperiencePolishHandoffOk);
         Assert.True(result.FeatureEnhancementProofOk);
+        Assert.True(result.AuthoringFlowProofOk);
+        Assert.True(result.AuthoringFlowHandoffOk);
+        Assert.True(result.AuthoringFlowScopeBoundaryOk);
         Assert.True(result.ExperienceScopeBoundaryOk);
         Assert.True(result.StartupMs >= 0);
         Assert.True(result.InspectorProjectionMs >= 0);
@@ -227,6 +230,9 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_SURFACE_OK:True");
         Assert.Contains(result.ProofLines, line => line == "EXPERIENCE_POLISH_HANDOFF_OK:True");
         Assert.Contains(result.ProofLines, line => line == "FEATURE_ENHANCEMENT_PROOF_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "AUTHORING_FLOW_PROOF_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "AUTHORING_FLOW_HANDOFF_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "AUTHORING_FLOW_SCOPE_BOUNDARY_OK:True");
         Assert.Contains(result.ProofLines, line => line == "EXPERIENCE_SCOPE_BOUNDARY_OK:True");
         Assert.Contains(result.MetricLines, line => line.Contains("startup_ms", StringComparison.Ordinal));
         Assert.Contains(result.MetricLines, line => line.Contains("command_latency_ms", StringComparison.Ordinal));
@@ -274,6 +280,8 @@ public sealed class ConsumerSampleProofTests
             FeatureDescriptorIds: ["capability.export.scene-svg", "marketplace.remote-install"]);
 
         Assert.False(result.ExperienceScopeBoundaryOk);
+        Assert.False(result.AuthoringFlowScopeBoundaryOk);
+        Assert.Contains(result.ProofLines, line => line == "AUTHORING_FLOW_SCOPE_BOUNDARY_OK:False");
         Assert.Contains(result.ProofLines, line => line == "EXPERIENCE_SCOPE_BOUNDARY_OK:False");
         Assert.Contains(result.ProofLines, line => line == "CONSUMER_SAMPLE_OK:False");
     }
@@ -654,6 +662,9 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(proofLines, line => line == "FIVE_MINUTE_ONBOARDING_OK:True");
         Assert.Contains(proofLines, line => line == "ONBOARDING_CONFIGURATION_OK:True");
         Assert.Contains(proofLines, line => line == "AUTHORING_SURFACE_OK:True");
+        Assert.Contains(proofLines, line => line == "AUTHORING_FLOW_PROOF_OK:True");
+        Assert.Contains(proofLines, line => line == "AUTHORING_FLOW_HANDOFF_OK:True");
+        Assert.Contains(proofLines, line => line == "AUTHORING_FLOW_SCOPE_BOUNDARY_OK:True");
         Assert.Contains(proofLines, line => line == "CONSUMER_SAMPLE_PARAMETER_OK:True");
         Assert.Contains(proofLines, line => line == "CONSUMER_SAMPLE_METADATA_PROJECTION_OK:True");
         Assert.Contains(proofLines, line => line == "CONSUMER_SAMPLE_WINDOW_OK:True");

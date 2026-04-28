@@ -36,6 +36,7 @@
 - command/trust timeline and perf overlay in the showcase surface
 - demo scenario presets remain host-owned proof catalog entries: `DEMO_SCENARIO_PRESETS_OK:True`
 - ConsumerSample snippets remain host-owned proof catalog entries: `GRAPH_SNIPPET_CATALOG_OK:True`, `GRAPH_SNIPPET_INSERT_OK:True`
+- ConsumerSample authoring flow proof stays bounded to existing session commands: `AUTHORING_FLOW_PROOF_OK:True`, `AUTHORING_FLOW_HANDOFF_OK:True`, `AUTHORING_FLOW_SCOPE_BOUNDARY_OK:True`
 - experience handoff proof is summarized without widening the support boundary: `EXPERIENCE_POLISH_HANDOFF_OK:True`, `FEATURE_ENHANCEMENT_PROOF_OK:True`, `EXPERIENCE_SCOPE_BOUNDARY_OK:True`
 - graph-surface usability proof markers:
   - `COMMAND_SURFACE_OK:True`
@@ -83,7 +84,7 @@ Every real external report used for this gate must carry the same intake vocabul
 
 | Claim | Route-level evidence |
 | --- | --- |
-| Canonical runtime/session route and the maintained evaluator ladder are externally proven on the defended beta line. | `tools/AsterGraph.HelloWorld`, `tools/AsterGraph.Starter.Avalonia`, `tools/AsterGraph.HelloWorld.Avalonia`, `tools/AsterGraph.ConsumerSample.Avalonia`, `tools/AsterGraph.HostSample`, `HOST_SAMPLE_OK`, `CONSUMER_SAMPLE_OK`, `GRAPH_SNIPPET_CATALOG_OK`, `GRAPH_SNIPPET_INSERT_OK`, `EXPERIENCE_POLISH_HANDOFF_OK`, `FEATURE_ENHANCEMENT_PROOF_OK`, `EXPERIENCE_SCOPE_BOUNDARY_OK` |
+| Canonical runtime/session route and the maintained evaluator ladder are externally proven on the defended beta line. | `tools/AsterGraph.HelloWorld`, `tools/AsterGraph.Starter.Avalonia`, `tools/AsterGraph.HelloWorld.Avalonia`, `tools/AsterGraph.ConsumerSample.Avalonia`, `tools/AsterGraph.HostSample`, `HOST_SAMPLE_OK`, `CONSUMER_SAMPLE_OK`, `GRAPH_SNIPPET_CATALOG_OK`, `GRAPH_SNIPPET_INSERT_OK`, `AUTHORING_FLOW_PROOF_OK`, `AUTHORING_FLOW_HANDOFF_OK`, `AUTHORING_FLOW_SCOPE_BOUNDARY_OK`, `EXPERIENCE_POLISH_HANDOFF_OK`, `FEATURE_ENHANCEMENT_PROOF_OK`, `EXPERIENCE_SCOPE_BOUNDARY_OK` |
 | The showcase authoring surface is externally proven as a bounded beta host experience. | `src/AsterGraph.Demo`, `DEMO_OK`, `DEMO_SCENARIO_PRESETS_OK`, `COMMAND_SURFACE_OK`, `COMPOSITE_SCOPE_OK`, `EDGE_NOTE_OK`, `EDGE_GEOMETRY_OK`, `DISCONNECT_FLOW_OK` |
 | Packaged consumer proof is externally proven without widening the SDK boundary. | `tools/AsterGraph.PackageSmoke`, `PACKAGE_SMOKE_OK`, `HOST_SAMPLE_NET10_OK` |
 | Scale proof is externally proven at defended `baseline`/`large` tiers and 5000-node `stress`: performance, authoring, SVG export, conservative PNG/JPEG raster export, and reload are defended. | `tools/AsterGraph.ScaleSmoke`, `SCALE_PERFORMANCE_BUDGET_OK:baseline:True`, `SCALE_PERFORMANCE_BUDGET_OK:large:True`, `SCALE_PERFORMANCE_BUDGET_OK:stress:True`, `SCALE_EXPORT_BUDGET:stress:svg<=300:png<=120000:jpeg<=100000:reload<=800`, `SCALE_RASTER_EXPORT_STRESS_OK:True` |

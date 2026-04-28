@@ -20,6 +20,7 @@
 
 它只停留在 canonical session/runtime model 上，不引入第二套 editor model、sandbox，或更大的 plugin ecosystem。
 最终 experience handoff marker 只汇总已有 proof 行：`EXPERIENCE_POLISH_HANDOFF_OK:True`、`FEATURE_ENHANCEMENT_PROOF_OK:True` 和 `EXPERIENCE_SCOPE_BOUNDARY_OK:True`。
+authoring flow handoff 会汇总 quick-add、insert-on-wire、reconnect editing、edge multiselect 和 wire slicing，并继续走现有 session command path：`AUTHORING_FLOW_PROOF_OK:True`、`AUTHORING_FLOW_HANDOFF_OK:True` 和 `AUTHORING_FLOW_SCOPE_BOUNDARY_OK:True`。
 
 这条 hosted route ladder 是 `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerSample.Avalonia`。
 `HostSample` 是这条 ladder 之后的 proof harness。
@@ -35,6 +36,7 @@
 - 一个宿主自管 snippet catalog，通过 `StartConnection(...)` 和 `TryCreateConnectedNodeFromPendingConnection(...)` 插入样例 review queue lane
 - 一个可信插件注册，以及可见的 provenance、trust reason 和 allowlist 导入/导出
 - 一条 support-bundle proof 路径，带场景图、宿主自管动作、canonical graph readiness 证据、support-bundle payload readiness 和五分钟 handoff 健康度 markers
+- 一条 authoring flow proof handoff，把 quick-add、insert-on-wire、reconnect editing、edge multiselect 和 wire slicing 保持在现有 session command path 上
 - 一组最终 handoff marker，把 UX polish、feature enhancement proof 和 scope-boundary 证据合在一起，但不增加 runtime API、marketplace、sandbox 或 WPF parity
 - 基于 factory 的默认 Avalonia hosted-UI 路线
 
@@ -141,6 +143,9 @@ dotnet run --project tools/AsterGraph.ConsumerSample.Avalonia/AsterGraph.Consume
 - `COMMAND_SURFACE_OK:True`
 - `EXPERIENCE_POLISH_HANDOFF_OK:True`
 - `FEATURE_ENHANCEMENT_PROOF_OK:True`
+- `AUTHORING_FLOW_PROOF_OK:True`
+- `AUTHORING_FLOW_HANDOFF_OK:True`
+- `AUTHORING_FLOW_SCOPE_BOUNDARY_OK:True`
 - `EXPERIENCE_SCOPE_BOUNDARY_OK:True`
 - `HOST_NATIVE_METRIC:*`
 
@@ -239,6 +244,9 @@ Proof Handoff 负责实际 intake 说明。
 - `AUTHORING_SURFACE_OK:True`
 - `EXPERIENCE_POLISH_HANDOFF_OK:True`
 - `FEATURE_ENHANCEMENT_PROOF_OK:True`
+- `AUTHORING_FLOW_PROOF_OK:True`
+- `AUTHORING_FLOW_HANDOFF_OK:True`
+- `AUTHORING_FLOW_SCOPE_BOUNDARY_OK:True`
 - `EXPERIENCE_SCOPE_BOUNDARY_OK:True`
 - `CONSUMER_SAMPLE_OK:True`
 
@@ -295,6 +303,7 @@ Proof Handoff 负责实际 intake 说明。
 - widened hosted tuning：输出 `WIDENED_SURFACE_PERFORMANCE_OK:True`，并复用 [Widened Surface Performance Recipe](./widened-surface-performance-recipe.md)，这样宿主指标会继续和 `ScaleSmoke` 绑定在同一条路线里
 - capability breadth：把同一条路线和 [Capability Breadth Recipe](./capability-breadth-recipe.md) 配在一起，并从 `AsterGraph.ConsumerSample.Avalonia -- --proof` 输出 `CAPABILITY_BREADTH_*` markers
 - onboarding markers：继续守住 `CONSUMER_SAMPLE_SCENARIO_GRAPH_OK:True`、`CONSUMER_SAMPLE_HOST_OWNED_ACTIONS_OK:True`、`CONSUMER_SAMPLE_SUPPORT_BUNDLE_READY_OK:True`、`GRAPH_VALIDATION_FEEDBACK_OK:True`、`GRAPH_FEEDBACK_FOCUS_TARGET_OK:True`、`GRAPH_READINESS_STATUS_OK:True`、`FIVE_MINUTE_ONBOARDING_OK:True` 和 `ONBOARDING_CONFIGURATION_OK:True`
+- authoring flow markers：把 `AUTHORING_FLOW_PROOF_OK:True`、`AUTHORING_FLOW_HANDOFF_OK:True` 和 `AUTHORING_FLOW_SCOPE_BOUNDARY_OK:True` 与 quick-add、insert-on-wire、reconnect editing、edge multiselect、wire slicing proof 行放在一起看
 - 最终 handoff markers：把 `EXPERIENCE_POLISH_HANDOFF_OK:True`、`FEATURE_ENHANCEMENT_PROOF_OK:True` 和 `EXPERIENCE_SCOPE_BOUNDARY_OK:True` 放在一起看，让 scope boundary 保持显式
 - support bundle：在 proof mode 上额外附带 `--support-bundle`，生成本地 JSON 证据包给 support/feedback 使用
 - sample-owned content：review/audit 节点族、action ids/titles 和 proof labels 应该保持在你的 app 内部，不要写成 canonical contract

@@ -209,6 +209,24 @@ public sealed record ConsumerSampleProofResult(
         && GraphSnippetCatalogOk
         && GraphSnippetInsertOk;
 
+    public bool AuthoringFlowProofOk
+        => QuickAddConnectedNodeOk
+        && PortFilteredNodeSearchOk
+        && DropNodeOnEdgeOk
+        && EdgeSplitCompatibilityOk
+        && EdgeSplitUndoOk
+        && DeleteAndReconnectOk
+        && DetachNodeOk
+        && ReconnectConflictReportOk
+        && EdgeMultiSelectOk
+        && WireSliceOk
+        && SelectedNodeEdgeHighlightOk;
+
+    public bool AuthoringFlowHandoffOk
+        => AuthoringFlowProofOk
+        && AuthoringSurfaceOk
+        && ExperiencePolishHandoffOk;
+
     public bool ExperienceScopeBoundaryOk
         => HostOwnedActionsOk
         && TrustTransparencyOk
@@ -220,6 +238,10 @@ public sealed record ConsumerSampleProofResult(
         && GraphSnippetInsertOk
         && FeatureDescriptorIds is { Count: > 0 }
         && FeatureDescriptorIds.All(IsBoundedFeatureDescriptorId);
+
+    public bool AuthoringFlowScopeBoundaryOk
+        => AuthoringFlowProofOk
+        && ExperienceScopeBoundaryOk;
 
     public bool IsOk
         => HostMenuActionOk
@@ -233,6 +255,9 @@ public sealed record ConsumerSampleProofResult(
         && OnboardingConfigurationOk
         && ExperiencePolishHandoffOk
         && FeatureEnhancementProofOk
+        && AuthoringFlowProofOk
+        && AuthoringFlowHandoffOk
+        && AuthoringFlowScopeBoundaryOk
         && ExperienceScopeBoundaryOk;
 
     public IReadOnlyList<string> MetricLines =>
@@ -320,6 +345,9 @@ public sealed record ConsumerSampleProofResult(
         $"AUTHORING_SURFACE_OK:{AuthoringSurfaceOk}",
         $"EXPERIENCE_POLISH_HANDOFF_OK:{ExperiencePolishHandoffOk}",
         $"FEATURE_ENHANCEMENT_PROOF_OK:{FeatureEnhancementProofOk}",
+        $"AUTHORING_FLOW_PROOF_OK:{AuthoringFlowProofOk}",
+        $"AUTHORING_FLOW_HANDOFF_OK:{AuthoringFlowHandoffOk}",
+        $"AUTHORING_FLOW_SCOPE_BOUNDARY_OK:{AuthoringFlowScopeBoundaryOk}",
         $"EXPERIENCE_SCOPE_BOUNDARY_OK:{ExperienceScopeBoundaryOk}",
         $"CONSUMER_SAMPLE_OK:{IsOk}",
     ];

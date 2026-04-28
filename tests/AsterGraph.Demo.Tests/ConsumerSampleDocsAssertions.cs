@@ -50,6 +50,9 @@ internal static class ConsumerSampleDocsAssertions
         Assert.Contains("HOST_NATIVE_METRIC:edge_tool_projection_ms", contents, StringComparison.Ordinal);
         Assert.Contains("EXPERIENCE_POLISH_HANDOFF_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("FEATURE_ENHANCEMENT_PROOF_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("AUTHORING_FLOW_PROOF_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("AUTHORING_FLOW_HANDOFF_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("AUTHORING_FLOW_SCOPE_BOUNDARY_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("EXPERIENCE_SCOPE_BOUNDARY_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("CONSUMER_SAMPLE_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("parameterSnapshots", contents, StringComparison.Ordinal);

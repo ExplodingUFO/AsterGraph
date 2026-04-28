@@ -116,6 +116,9 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
         {
             AssertContains(contents, "EXPERIENCE_POLISH_HANDOFF_OK:True");
             AssertContains(contents, "FEATURE_ENHANCEMENT_PROOF_OK:True");
+            AssertContains(contents, "AUTHORING_FLOW_PROOF_OK:True");
+            AssertContains(contents, "AUTHORING_FLOW_HANDOFF_OK:True");
+            AssertContains(contents, "AUTHORING_FLOW_SCOPE_BOUNDARY_OK:True");
             AssertContains(contents, "EXPERIENCE_SCOPE_BOUNDARY_OK:True");
         }
 
@@ -128,7 +131,9 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
         }
 
         Assert.True(HasLineWithAll(consumerSampleEn, "final handoff marker", "UX polish", "scope-boundary"));
+        Assert.True(HasLineWithAll(consumerSampleEn, "authoring flow", "quick-add", "wire"));
         Assert.True(HasLineWithAll(consumerSampleZh, "handoff marker", "UX polish", "scope-boundary"));
+        Assert.True(HasLineWithAll(consumerSampleZh, "authoring flow", "quick-add", "wire"));
         ConsumerSampleDocsAssertions.AssertSupportBundleProofMarkers(supportBundleEn);
         ConsumerSampleDocsAssertions.AssertSupportBundleProofMarkers(supportBundleZh);
     }
