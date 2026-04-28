@@ -93,6 +93,9 @@ internal static class ConsumerSampleDocsAssertions
         Assert.Contains("GRAPH_SEARCH_LOCATE_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("GRAPH_SEARCH_SCOPE_FILTER_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("GRAPH_SEARCH_VIEWPORT_FOCUS_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("UNIFIED_DISCOVERY_SURFACE_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("DISCOVERY_SOURCE_LABELS_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("DISCOVERY_COMMAND_ROUTE_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("COMMAND_PALETTE_GROUPING_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("COMMAND_PALETTE_DISABLED_REASON_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("COMMAND_PALETTE_RECENT_ACTIONS_OK:True", contents, StringComparison.Ordinal);

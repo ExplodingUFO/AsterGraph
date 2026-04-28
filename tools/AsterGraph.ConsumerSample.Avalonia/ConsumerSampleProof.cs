@@ -155,6 +155,9 @@ public sealed record ConsumerSampleProofResult(
     bool WorkbenchLayoutPresetsOk = true,
     bool WorkbenchLayoutResetOk = true,
     bool PanelStatePersistenceOk = true,
+    bool UnifiedDiscoverySurfaceOk = true,
+    bool DiscoverySourceLabelsOk = true,
+    bool DiscoveryCommandRouteOk = true,
     bool MiniMapLightweightProjectionEvidenceOk = true,
     int SelectedParameterProjectionCount = 0,
     int TotalParameterProjectionCount = 0)
@@ -259,6 +262,9 @@ public sealed record ConsumerSampleProofResult(
         && GraphSearchLocateOk
         && GraphSearchScopeFilterOk
         && GraphSearchViewportFocusOk
+        && UnifiedDiscoverySurfaceOk
+        && DiscoverySourceLabelsOk
+        && DiscoveryCommandRouteOk
         && CommandPaletteGroupingOk
         && CommandPaletteDisabledReasonOk
         && CommandPaletteRecentActionsOk
@@ -355,6 +361,9 @@ public sealed record ConsumerSampleProofResult(
         && GraphSearchLocateOk
         && GraphSearchScopeFilterOk
         && GraphSearchViewportFocusOk
+        && UnifiedDiscoverySurfaceOk
+        && DiscoverySourceLabelsOk
+        && DiscoveryCommandRouteOk
         && CommandPaletteGroupingOk
         && CommandPaletteDisabledReasonOk
         && CommandPaletteRecentActionsOk
@@ -428,6 +437,9 @@ public sealed record ConsumerSampleProofResult(
         && GraphSearchLocateOk
         && GraphSearchScopeFilterOk
         && GraphSearchViewportFocusOk
+        && UnifiedDiscoverySurfaceOk
+        && DiscoverySourceLabelsOk
+        && DiscoveryCommandRouteOk
         && CommandPaletteGroupingOk
         && CommandPaletteDisabledReasonOk
         && CommandPaletteRecentActionsOk
@@ -804,6 +816,9 @@ public sealed record ConsumerSampleProofResult(
         $"GRAPH_SEARCH_LOCATE_OK:{GraphSearchLocateOk}",
         $"GRAPH_SEARCH_SCOPE_FILTER_OK:{GraphSearchScopeFilterOk}",
         $"GRAPH_SEARCH_VIEWPORT_FOCUS_OK:{GraphSearchViewportFocusOk}",
+        $"UNIFIED_DISCOVERY_SURFACE_OK:{UnifiedDiscoverySurfaceOk}",
+        $"DISCOVERY_SOURCE_LABELS_OK:{DiscoverySourceLabelsOk}",
+        $"DISCOVERY_COMMAND_ROUTE_OK:{DiscoveryCommandRouteOk}",
         $"COMMAND_PALETTE_GROUPING_OK:{CommandPaletteGroupingOk}",
         $"COMMAND_PALETTE_DISABLED_REASON_OK:{CommandPaletteDisabledReasonOk}",
         $"COMMAND_PALETTE_RECENT_ACTIONS_OK:{CommandPaletteRecentActionsOk}",
@@ -1071,6 +1086,9 @@ public static class ConsumerSampleProof
         bool graphSearchLocateOk;
         bool graphSearchScopeFilterOk;
         bool graphSearchViewportFocusOk;
+        bool unifiedDiscoverySurfaceOk;
+        bool discoverySourceLabelsOk;
+        bool discoveryCommandRouteOk;
         bool navigationHistoryOk;
         bool scopeBreadcrumbNavigationOk;
         bool focusRestoreOk;
@@ -1197,6 +1215,8 @@ public static class ConsumerSampleProof
             (readabilityFocusSubgraphOk, readabilityRouteCleanupOk, readabilityAlignmentHelpersOk) = HasReadabilityHelpers(host);
             pluginLocalGalleryOk = HasLocalPluginGallery(host, window);
             pluginTrustEvidencePanelOk = HasPluginTrustEvidencePanel(host);
+            (unifiedDiscoverySurfaceOk, discoverySourceLabelsOk, discoveryCommandRouteOk) =
+                HasUnifiedDiscoverySurface(host);
         }
         finally
         {
@@ -1415,6 +1435,9 @@ public static class ConsumerSampleProof
             GraphSearchLocateOk: graphSearchLocateOk,
             GraphSearchScopeFilterOk: graphSearchScopeFilterOk,
             GraphSearchViewportFocusOk: graphSearchViewportFocusOk,
+            UnifiedDiscoverySurfaceOk: unifiedDiscoverySurfaceOk,
+            DiscoverySourceLabelsOk: discoverySourceLabelsOk,
+            DiscoveryCommandRouteOk: discoveryCommandRouteOk,
             CommandPaletteGroupingOk: commandPaletteGroupingOk,
             CommandPaletteDisabledReasonOk: commandPaletteDisabledReasonOk,
             CommandPaletteRecentActionsOk: commandPaletteRecentActionsOk,
@@ -1898,6 +1921,58 @@ public static class ConsumerSampleProof
             && entry.ProvenanceLine.Contains("signer", StringComparison.OrdinalIgnoreCase)
             && entry.TrustLine.Contains("fingerprint", StringComparison.OrdinalIgnoreCase)
             && entry.TrustLine.Contains("allowlist", StringComparison.OrdinalIgnoreCase));
+
+    private static (bool UnifiedSurfaceOk, bool SourceLabelsOk, bool CommandRouteOk) HasUnifiedDiscoverySurface(
+        ConsumerSampleHost host)
+    {
+        var snippets = host.SnippetCatalog;
+        var graphResults = host.SearchGraph("content review", ConsumerSampleGraphSearchScope.All);
+        var pluginEntries = host.LocalPluginGalleryEntries;
+        var descriptors = host.Session.Queries.GetCommandDescriptors()
+            .ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
+        var commandActions = AsterGraphHostedActionFactory.CreateCommandActions(
+            host.Session,
+            [ConsumerSampleHost.PluginCommandId, "workspace.save", "viewport.fit"]);
+        var authoringActions = AsterGraphAuthoringToolActionFactory.CreateCommandSurfaceActions(host.Session);
+        var projection = AsterGraphHostedActionFactory.CreateProjection(
+            [
+                .. commandActions,
+                .. authoringActions,
+            ]);
+        var templates = host.Session.Queries.GetNodeTemplateSnapshots();
+        var pluginTemplate = templates.FirstOrDefault(template =>
+            template.DefinitionId == ConsumerSampleHost.PluginAuditDefinitionId);
+        var builtInTemplate = templates.FirstOrDefault(template =>
+            template.DefinitionId == ConsumerSampleHost.ReviewDefinitionId);
+
+        var unifiedSurfaceOk = templates.Any()
+            && snippets.Any()
+            && graphResults.Any()
+            && pluginEntries.Any()
+            && descriptors.Values.Any(descriptor => !string.IsNullOrWhiteSpace(descriptor.Group))
+            && commandActions.Any()
+            && projection.Actions.Any(action => string.Equals(action.Id, ConsumerSampleHost.PluginCommandId, StringComparison.Ordinal))
+            && projection.Actions.Any(action => string.Equals(action.Id, "viewport.fit", StringComparison.Ordinal));
+        var sourceLabelsOk = pluginTemplate is not null
+            && builtInTemplate is not null
+            && pluginTemplate.Category.Contains("plugin", StringComparison.OrdinalIgnoreCase)
+            && !builtInTemplate.Category.Contains("plugin", StringComparison.OrdinalIgnoreCase)
+            && snippets.All(snippet => !string.IsNullOrWhiteSpace(snippet.SourceLabel))
+            && graphResults.All(result => !string.IsNullOrWhiteSpace(result.SourceLabel))
+            && pluginEntries.All(entry =>
+                string.Equals(entry.SourceLabel, "Plugin", StringComparison.Ordinal)
+                && entry.GalleryLine.Contains("source Plugin", StringComparison.Ordinal));
+        var commandRouteOk = descriptors.ContainsKey(ConsumerSampleHost.PluginCommandId)
+            && descriptors.ContainsKey("workspace.save")
+            && descriptors.ContainsKey("viewport.fit")
+            && commandActions.All(action => descriptors.ContainsKey(action.Id))
+            && authoringActions.All(action => action.Id.StartsWith("node-", StringComparison.Ordinal)
+                || action.Id.StartsWith("edge-", StringComparison.Ordinal)
+                || action.Id.StartsWith("layout.", StringComparison.Ordinal))
+            && host.SearchGraph("missing-discovery-query", ConsumerSampleGraphSearchScope.All).Count == 0;
+
+        return (unifiedSurfaceOk, sourceLabelsOk, commandRouteOk);
+    }
 
     private static (bool SamplePackOk, bool NodeDefinitionsOk, bool ParameterMetadataOk) HasSamplePluginPack(ConsumerSampleHost host)
     {

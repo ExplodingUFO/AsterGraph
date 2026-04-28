@@ -647,7 +647,7 @@ public static class ConsumerSampleWindowFactory
             {
                 Name = $"PART_GraphSearchResult_{result.Kind}_{result.Id.Replace(':', '_')}",
                 HorizontalAlignment = HorizontalAlignment.Stretch,
-                Content = $"{result.Kind} | {result.Title}\n{result.MatchText}",
+                Content = $"{result.Kind} | {result.Title}\nSource: {result.SourceLabel}\n{result.MatchText}",
             };
             button.Click += (_, _) =>
             {

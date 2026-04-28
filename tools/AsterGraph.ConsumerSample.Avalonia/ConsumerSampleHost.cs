@@ -43,6 +43,7 @@ public sealed class ConsumerSampleHost : IDisposable
             "Connected Queue Lane",
             "Adds a queue lane connected from the first review node output.",
             "Workflow",
+            "Host snippet",
             "Preview: Review output -> Queue input, with one connected queue node.",
             IsFavorite: true,
             SearchKeywords: ["queue", "review", "lane", "connected"]),
@@ -51,6 +52,7 @@ public sealed class ConsumerSampleHost : IDisposable
             "Audit Branch",
             "Documents the review audit branch shape used by the sample graph.",
             "Diagnostics",
+            "Host snippet",
             "Preview: Review audit output -> Audit node input; copy this branch in hosts that own audit plugins.",
             IsFavorite: false,
             SearchKeywords: ["audit", "plugin", "diagnostics", "branch"]),
@@ -337,6 +339,7 @@ public sealed class ConsumerSampleHost : IDisposable
                     Kind: "Node",
                     Title: node.Title,
                     MatchText: matchText,
+                    SourceLabel: "Graph node",
                     NodeId: node.Id,
                     ConnectionId: null,
                     ScopeId: graphScope.Id));
@@ -365,6 +368,7 @@ public sealed class ConsumerSampleHost : IDisposable
                     Kind: "Connection",
                     Title: connection.Label,
                     MatchText: matchText,
+                    SourceLabel: "Graph connection",
                     NodeId: null,
                     ConnectionId: connection.Id,
                     ScopeId: graphScope.Id));
@@ -1398,7 +1402,7 @@ public sealed class ConsumerSampleHost : IDisposable
         var loadSnapshot = PluginLoadSnapshots.FirstOrDefault(snapshot => string.Equals(snapshot.Manifest.Id, manifest.Id, StringComparison.Ordinal));
         var loadState = loadSnapshot?.Status.ToString() ?? "Discovered";
         var manifestLine = $"manifest {manifest.Id} · {manifest.DisplayName} · {version} · tfm {targetFramework}";
-        var galleryLine = $"{manifest.DisplayName} · trust {candidate.TrustEvaluation.Decision} · load {loadState} · fingerprint {FormatFingerprint(fingerprint)}";
+        var galleryLine = $"source Plugin · {manifest.DisplayName} · trust {candidate.TrustEvaluation.Decision} · load {loadState} · fingerprint {FormatFingerprint(fingerprint)}";
 
         return new ConsumerSamplePluginCandidateEntry(
             manifest.Id,
@@ -1411,6 +1415,7 @@ public sealed class ConsumerSampleHost : IDisposable
             !isAllowed,
             loadSnapshot is not null,
             loadState,
+            "Plugin",
             manifestLine,
             galleryLine,
             $"{manifest.Id} · {version} · tfm {targetFramework}",
@@ -1743,6 +1748,7 @@ public sealed record ConsumerSampleSnippetDescriptor(
     string Title,
     string Description,
     string Category,
+    string SourceLabel,
     string PreviewText,
     bool IsFavorite,
     IReadOnlyList<string> SearchKeywords);
@@ -1759,6 +1765,7 @@ public sealed record ConsumerSampleGraphSearchResult(
     string Kind,
     string Title,
     string MatchText,
+    string SourceLabel,
     string? NodeId,
     string? ConnectionId,
     string ScopeId);

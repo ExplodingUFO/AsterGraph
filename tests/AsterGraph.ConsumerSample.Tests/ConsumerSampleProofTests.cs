@@ -173,6 +173,9 @@ public sealed class ConsumerSampleProofTests
         Assert.True(result.GraphSearchLocateOk);
         Assert.True(result.GraphSearchScopeFilterOk);
         Assert.True(result.GraphSearchViewportFocusOk);
+        Assert.True(result.UnifiedDiscoverySurfaceOk);
+        Assert.True(result.DiscoverySourceLabelsOk);
+        Assert.True(result.DiscoveryCommandRouteOk);
         Assert.True(result.CommandPaletteGroupingOk);
         Assert.True(result.CommandPaletteDisabledReasonOk);
         Assert.True(result.CommandPaletteRecentActionsOk);
@@ -290,6 +293,9 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(result.ProofLines, line => line == "GRAPH_SEARCH_LOCATE_OK:True");
         Assert.Contains(result.ProofLines, line => line == "GRAPH_SEARCH_SCOPE_FILTER_OK:True");
         Assert.Contains(result.ProofLines, line => line == "GRAPH_SEARCH_VIEWPORT_FOCUS_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "UNIFIED_DISCOVERY_SURFACE_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "DISCOVERY_SOURCE_LABELS_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "DISCOVERY_COMMAND_ROUTE_OK:True");
         Assert.Contains(result.ProofLines, line => line == "COMMAND_PALETTE_GROUPING_OK:True");
         Assert.Contains(result.ProofLines, line => line == "COMMAND_PALETTE_DISABLED_REASON_OK:True");
         Assert.Contains(result.ProofLines, line => line == "COMMAND_PALETTE_RECENT_ACTIONS_OK:True");
@@ -813,6 +819,9 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(proofLines, line => line == "GRAPH_SEARCH_LOCATE_OK:True");
         Assert.Contains(proofLines, line => line == "GRAPH_SEARCH_SCOPE_FILTER_OK:True");
         Assert.Contains(proofLines, line => line == "GRAPH_SEARCH_VIEWPORT_FOCUS_OK:True");
+        Assert.Contains(proofLines, line => line == "UNIFIED_DISCOVERY_SURFACE_OK:True");
+        Assert.Contains(proofLines, line => line == "DISCOVERY_SOURCE_LABELS_OK:True");
+        Assert.Contains(proofLines, line => line == "DISCOVERY_COMMAND_ROUTE_OK:True");
         Assert.Contains(proofLines, line => line == "COMMAND_PALETTE_GROUPING_OK:True");
         Assert.Contains(proofLines, line => line == "COMMAND_PALETTE_DISABLED_REASON_OK:True");
         Assert.Contains(proofLines, line => line == "COMMAND_PALETTE_RECENT_ACTIONS_OK:True");

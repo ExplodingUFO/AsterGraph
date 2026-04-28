@@ -16,6 +16,7 @@ public sealed record ConsumerSamplePluginCandidateEntry(
     bool IsBlocked,
     bool IsLoaded,
     string LoadState,
+    string SourceLabel,
     string ManifestLine,
     string GalleryLine,
     string SummaryLine,
