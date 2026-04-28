@@ -152,6 +152,9 @@ public sealed record ConsumerSampleProofResult(
     bool BalancedModeDefaultOk = true,
     bool WorkbenchLodPolicyOk = true,
     bool PerformanceModeScopeBoundaryOk = true,
+    bool WorkbenchLayoutPresetsOk = true,
+    bool WorkbenchLayoutResetOk = true,
+    bool PanelStatePersistenceOk = true,
     bool MiniMapLightweightProjectionEvidenceOk = true,
     int SelectedParameterProjectionCount = 0,
     int TotalParameterProjectionCount = 0)
@@ -303,6 +306,9 @@ public sealed record ConsumerSampleProofResult(
         && BalancedModeDefaultOk
         && WorkbenchLodPolicyOk
         && PerformanceModeScopeBoundaryOk
+        && WorkbenchLayoutPresetsOk
+        && WorkbenchLayoutResetOk
+        && PanelStatePersistenceOk
         && WorkbenchScopeBoundaryOk
         && NodeCount > 0
         && (FeatureDescriptorIds?.Count > 0);
@@ -387,6 +393,9 @@ public sealed record ConsumerSampleProofResult(
         && FragmentLibraryScopeBoundaryOk
         && WorkbenchDefaultsOk
         && WorkbenchHostBuilderHandoffOk
+        && WorkbenchLayoutPresetsOk
+        && WorkbenchLayoutResetOk
+        && PanelStatePersistenceOk
         && WorkbenchScopeBoundaryOk;
 
     public bool AuthoringFlowProofOk
@@ -430,6 +439,9 @@ public sealed record ConsumerSampleProofResult(
         && PluginAllowlistRoundtripOk
         && GraphSnippetCatalogOk
         && GraphSnippetInsertOk
+        && WorkbenchLayoutPresetsOk
+        && WorkbenchLayoutResetOk
+        && PanelStatePersistenceOk
         && WorkbenchScopeBoundaryOk
         && FeatureDescriptorIds is { Count: > 0 }
         && FeatureDescriptorIds.All(IsBoundedFeatureDescriptorId);
@@ -462,6 +474,9 @@ public sealed record ConsumerSampleProofResult(
 
     public bool WorkbenchScopeBoundaryOk
         => WorkbenchHostBuilderHandoffOk
+        && WorkbenchLayoutPresetsOk
+        && WorkbenchLayoutResetOk
+        && PanelStatePersistenceOk
         && FeatureDescriptorIds is { Count: > 0 }
         && FeatureDescriptorIds.All(IsBoundedFeatureDescriptorId);
 
@@ -843,6 +858,9 @@ public sealed record ConsumerSampleProofResult(
         $"BALANCED_MODE_DEFAULT_OK:{BalancedModeDefaultOk}",
         $"WORKBENCH_LOD_POLICY_OK:{WorkbenchLodPolicyOk}",
         $"PERFORMANCE_MODE_SCOPE_BOUNDARY_OK:{PerformanceModeScopeBoundaryOk}",
+        $"WORKBENCH_LAYOUT_PRESETS_OK:{WorkbenchLayoutPresetsOk}",
+        $"WORKBENCH_LAYOUT_RESET_OK:{WorkbenchLayoutResetOk}",
+        $"PANEL_STATE_PERSISTENCE_OK:{PanelStatePersistenceOk}",
         $"WORKBENCH_SCOPE_BOUNDARY_OK:{WorkbenchScopeBoundaryOk}",
         $"MINIMAP_LIGHTWEIGHT_PROJECTION_EVIDENCE_OK:{MiniMapLightweightProjectionEvidenceOk}",
         $"AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:{NodeSideAuthoringOk}",
@@ -1245,6 +1263,9 @@ public static class ConsumerSampleProof
         bool balancedModeDefaultOk;
         bool workbenchLodPolicyOk;
         bool performanceModeScopeBoundaryOk;
+        bool workbenchLayoutPresetsOk;
+        bool workbenchLayoutResetOk;
+        bool panelStatePersistenceOk;
         try
         {
             capabilityWindow.Show();
@@ -1295,7 +1316,10 @@ public static class ConsumerSampleProof
                 workbenchPerformanceModeOk,
                 balancedModeDefaultOk,
                 workbenchLodPolicyOk,
-                performanceModeScopeBoundaryOk) =
+                performanceModeScopeBoundaryOk,
+                workbenchLayoutPresetsOk,
+                workbenchLayoutResetOk,
+                panelStatePersistenceOk) =
                 HasWorkbenchDefaults(host);
 
             host.SelectNode(reviewNodeId);
@@ -1472,7 +1496,10 @@ public static class ConsumerSampleProof
             WorkbenchPerformanceModeOk: workbenchPerformanceModeOk,
             BalancedModeDefaultOk: balancedModeDefaultOk,
             WorkbenchLodPolicyOk: workbenchLodPolicyOk,
-            PerformanceModeScopeBoundaryOk: performanceModeScopeBoundaryOk);
+            PerformanceModeScopeBoundaryOk: performanceModeScopeBoundaryOk,
+            WorkbenchLayoutPresetsOk: workbenchLayoutPresetsOk,
+            WorkbenchLayoutResetOk: workbenchLayoutResetOk,
+            PanelStatePersistenceOk: panelStatePersistenceOk);
     }
 
     private static (
@@ -1481,7 +1508,10 @@ public static class ConsumerSampleProof
         bool PerformanceModeOk,
         bool BalancedDefaultOk,
         bool LodPolicyOk,
-        bool ScopeBoundaryOk) HasWorkbenchDefaults(ConsumerSampleHost host)
+        bool ScopeBoundaryOk,
+        bool LayoutPresetsOk,
+        bool LayoutResetOk,
+        bool PanelStatePersistenceOk) HasWorkbenchDefaults(ConsumerSampleHost host)
     {
         var builder = AsterGraphHostBuilder
             .Create()
@@ -1493,6 +1523,8 @@ public static class ConsumerSampleProof
             && options.ChromeMode == GraphEditorViewChromeMode.Default
             && options.EnableDefaultContextMenu
             && options.CommandShortcutPolicy == AsterGraphCommandShortcutPolicy.Default
+            && options.Workbench.LayoutPreset == AsterGraphWorkbenchLayoutPreset.Authoring
+            && options.Workbench.PanelState == AsterGraphWorkbenchPanelState.Default
             && options.Workbench.ShowHeaderChrome
             && options.Workbench.ShowNodePalette
             && options.Workbench.ShowInspector
@@ -1543,9 +1575,81 @@ public static class ConsumerSampleProof
             && !throughput.ProjectHoveredToolbars
             && throughput.CommandRefreshBatchMilliseconds > balanced.CommandRefreshBatchMilliseconds;
         var scopeBoundaryOk = typeof(AsterGraphWorkbenchPerformanceMode).Namespace == "AsterGraph.Avalonia.Hosting"
-            && typeof(AsterGraphWorkbenchPerformancePolicy).Namespace == "AsterGraph.Avalonia.Hosting";
+            && typeof(AsterGraphWorkbenchPerformancePolicy).Namespace == "AsterGraph.Avalonia.Hosting"
+            && typeof(AsterGraphWorkbenchLayoutPreset).Namespace == "AsterGraph.Avalonia.Hosting"
+            && typeof(AsterGraphWorkbenchPanelState).Namespace == "AsterGraph.Avalonia.Hosting";
 
-        return (defaultsOk, handoffOk, performanceModeOk, balancedDefaultOk, lodPolicyOk, scopeBoundaryOk);
+        var presetValues = Enum.GetValues<AsterGraphWorkbenchLayoutPreset>();
+        var authoring = AsterGraphWorkbenchOptions.ForPreset(AsterGraphWorkbenchLayoutPreset.Authoring);
+        var debugging = AsterGraphWorkbenchOptions.ForPreset(AsterGraphWorkbenchLayoutPreset.Debugging);
+        var compact = AsterGraphWorkbenchOptions.ForPreset(AsterGraphWorkbenchLayoutPreset.CompactReview);
+        var plugin = AsterGraphWorkbenchOptions.ForPreset(AsterGraphWorkbenchLayoutPreset.PluginInspection);
+        var layoutPresetsOk = presetValues.Length == 4
+            && authoring.PanelState.StencilVisible
+            && authoring.PanelState.MiniMapVisible
+            && debugging.LayoutPreset == AsterGraphWorkbenchLayoutPreset.Debugging
+            && !debugging.PanelState.StencilVisible
+            && debugging.PanelState.RuntimePanelVisible
+            && !debugging.PanelState.ExportPanelVisible
+            && compact.LayoutPreset == AsterGraphWorkbenchLayoutPreset.CompactReview
+            && !compact.PanelState.MiniMapVisible
+            && compact.PanelState.StencilWidth < authoring.PanelState.StencilWidth
+            && plugin.LayoutPreset == AsterGraphWorkbenchLayoutPreset.PluginInspection
+            && plugin.PanelState.PluginPanelVisible
+            && !plugin.PanelState.RuntimePanelVisible;
+
+        var beforeDocument = host.Session.Queries.CreateDocumentSnapshot();
+        var mutated = AsterGraphWorkbenchOptions.ForPreset(AsterGraphWorkbenchLayoutPreset.Debugging) with
+        {
+            ShowHeaderChrome = false,
+            ShowStatus = false,
+            PerformanceMode = AsterGraphWorkbenchPerformanceMode.Throughput,
+        };
+        var reset = mutated.ResetLayout();
+        var afterDocument = host.Session.Queries.CreateDocumentSnapshot();
+        var layoutResetOk = reset == AsterGraphWorkbenchOptions.Default
+            && beforeDocument.Nodes.Count == afterDocument.Nodes.Count
+            && beforeDocument.Connections.Count == afterDocument.Connections.Count;
+
+        var persistedPanelState = AsterGraphWorkbenchPanelState.Default with
+        {
+            StencilVisible = false,
+            StencilWidth = 288,
+            InspectorVisible = true,
+            InspectorWidth = 360,
+            MiniMapVisible = false,
+            RuntimePanelVisible = true,
+            ExportPanelVisible = false,
+            PluginPanelVisible = true,
+        };
+        var persistedOptions = AsterGraphHostBuilder
+            .Create()
+            .UseWorkbench(AsterGraphWorkbenchOptions.ForPreset(AsterGraphWorkbenchLayoutPreset.Debugging) with
+            {
+                PanelState = persistedPanelState,
+            })
+            .BuildViewOptions(host.Editor);
+        var persistedView = AsterGraphAvaloniaViewFactory.Create(persistedOptions);
+        var panelStatePersistenceOk = persistedOptions.Workbench.PanelState == persistedPanelState
+            && persistedOptions.Workbench.PanelState.StencilWidth == 288
+            && persistedOptions.Workbench.PanelState.InspectorWidth == 360
+            && !persistedOptions.Workbench.PanelState.MiniMapVisible
+            && persistedOptions.Workbench.PanelState.RuntimePanelVisible
+            && !persistedOptions.Workbench.PanelState.ExportPanelVisible
+            && persistedOptions.Workbench.PanelState.PluginPanelVisible
+            && !persistedView.IsLibraryChromeVisible
+            && persistedView.IsInspectorChromeVisible;
+
+        return (
+            defaultsOk,
+            handoffOk,
+            performanceModeOk,
+            balancedDefaultOk,
+            lodPolicyOk,
+            scopeBoundaryOk,
+            layoutPresetsOk,
+            layoutResetOk,
+            panelStatePersistenceOk);
     }
 
     private static bool HasLightweightMiniMapProjection(ConsumerSampleHost host)

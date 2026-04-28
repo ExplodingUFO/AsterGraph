@@ -206,6 +206,9 @@ public sealed class ConsumerSampleProofTests
         Assert.True(result.FragmentLibraryScopeBoundaryOk);
         Assert.True(result.WorkbenchDefaultsOk);
         Assert.True(result.WorkbenchHostBuilderHandoffOk);
+        Assert.True(result.WorkbenchLayoutPresetsOk);
+        Assert.True(result.WorkbenchLayoutResetOk);
+        Assert.True(result.PanelStatePersistenceOk);
         Assert.True(result.WorkbenchScopeBoundaryOk);
         Assert.True(result.RuntimeOverlaySupportBundleOk);
         Assert.True(result.OnboardingConfigurationOk);
@@ -341,6 +344,9 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(result.ProofLines, line => line == "BALANCED_MODE_DEFAULT_OK:True");
         Assert.Contains(result.ProofLines, line => line == "WORKBENCH_LOD_POLICY_OK:True");
         Assert.Contains(result.ProofLines, line => line == "PERFORMANCE_MODE_SCOPE_BOUNDARY_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "WORKBENCH_LAYOUT_PRESETS_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "WORKBENCH_LAYOUT_RESET_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "PANEL_STATE_PERSISTENCE_OK:True");
         Assert.Contains(result.ProofLines, line => line == "WORKBENCH_SCOPE_BOUNDARY_OK:True");
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:True");
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_SURFACE_COMMAND_PROJECTION_OK:True");
@@ -864,6 +870,9 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(proofLines, line => line == "BALANCED_MODE_DEFAULT_OK:True");
         Assert.Contains(proofLines, line => line == "WORKBENCH_LOD_POLICY_OK:True");
         Assert.Contains(proofLines, line => line == "PERFORMANCE_MODE_SCOPE_BOUNDARY_OK:True");
+        Assert.Contains(proofLines, line => line == "WORKBENCH_LAYOUT_PRESETS_OK:True");
+        Assert.Contains(proofLines, line => line == "WORKBENCH_LAYOUT_RESET_OK:True");
+        Assert.Contains(proofLines, line => line == "PANEL_STATE_PERSISTENCE_OK:True");
         Assert.Contains(proofLines, line => line == "WIDENED_SURFACE_PERFORMANCE_OK:True");
         Assert.Contains(proofLines, line => line == "CONSUMER_SAMPLE_SCENARIO_GRAPH_OK:True");
         Assert.Contains(proofLines, line => line == "CONSUMER_SAMPLE_HOST_OWNED_ACTIONS_OK:True");

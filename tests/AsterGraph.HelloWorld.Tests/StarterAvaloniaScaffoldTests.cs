@@ -45,6 +45,8 @@ public sealed class StarterAvaloniaScaffoldTests
         Assert.True(viewOptions.Workbench.ShowNodePalette);
         Assert.True(viewOptions.Workbench.ShowInspector);
         Assert.True(viewOptions.Workbench.ShowStatus);
+        Assert.Equal(AsterGraphWorkbenchLayoutPreset.Authoring, viewOptions.Workbench.LayoutPreset);
+        Assert.Equal(AsterGraphWorkbenchPanelState.Default, viewOptions.Workbench.PanelState);
         Assert.Equal(AsterGraphWorkbenchPerformanceMode.Balanced, viewOptions.Workbench.PerformanceMode);
         Assert.Equal(AsterGraphWorkbenchPerformanceMode.Balanced, viewOptions.Workbench.PerformancePolicy.Mode);
         Assert.True(viewOptions.EnableDefaultContextMenu);
@@ -70,6 +72,11 @@ public sealed class StarterAvaloniaScaffoldTests
                 EnableDefaultWheelViewportGestures = false,
                 EnableAltLeftDragPanning = false,
                 PerformanceMode = AsterGraphWorkbenchPerformanceMode.Throughput,
+                PanelState = AsterGraphWorkbenchPanelState.Default with
+                {
+                    StencilVisible = true,
+                    InspectorVisible = true,
+                },
             })
             .UseDefaultContextMenu(false)
             .UseCommandShortcutPolicy(AsterGraphCommandShortcutPolicy.Disabled);
@@ -105,6 +112,38 @@ public sealed class StarterAvaloniaScaffoldTests
         Assert.False(balanced.ProjectAdvancedInspectorByDefault);
         Assert.False(throughput.ProjectHoveredToolbars);
         Assert.True(throughput.CommandRefreshBatchMilliseconds > balanced.CommandRefreshBatchMilliseconds);
+    }
+
+    [Fact]
+    public void StarterAvaloniaHostBuilder_ProjectsLayoutPresetPanelStateToHostedView()
+    {
+        StarterAvaloniaHeadlessEnvironment.EnsureInitialized();
+        var panelState = AsterGraphWorkbenchPanelState.Default with
+        {
+            StencilVisible = false,
+            StencilWidth = 288,
+            InspectorVisible = true,
+            InspectorWidth = 360,
+            MiniMapVisible = false,
+            RuntimePanelVisible = true,
+            ExportPanelVisible = false,
+            PluginPanelVisible = true,
+        };
+        var builder = AsterGraph.Starter.Avalonia.StarterAvaloniaWindowFactory
+            .CreateHostBuilder()
+            .UseWorkbench(AsterGraphWorkbenchOptions.ForPreset(AsterGraphWorkbenchLayoutPreset.Debugging) with
+            {
+                PanelState = panelState,
+            });
+        var editor = builder.BuildEditor();
+        var viewOptions = builder.BuildViewOptions(editor);
+        var view = AsterGraphAvaloniaViewFactory.Create(viewOptions);
+
+        Assert.Equal(AsterGraphWorkbenchLayoutPreset.Debugging, viewOptions.Workbench.LayoutPreset);
+        Assert.Equal(panelState, viewOptions.Workbench.PanelState);
+        Assert.False(view.IsLibraryChromeVisible);
+        Assert.True(view.IsInspectorChromeVisible);
+        Assert.Equal(AsterGraphWorkbenchOptions.Default, viewOptions.Workbench.ResetLayout());
     }
 }
 

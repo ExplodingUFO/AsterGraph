@@ -175,6 +175,9 @@ Expected proof markers:
 - `BALANCED_MODE_DEFAULT_OK:True`
 - `WORKBENCH_LOD_POLICY_OK:True`
 - `PERFORMANCE_MODE_SCOPE_BOUNDARY_OK:True`
+- `WORKBENCH_LAYOUT_PRESETS_OK:True`
+- `WORKBENCH_LAYOUT_RESET_OK:True`
+- `PANEL_STATE_PERSISTENCE_OK:True`
 - `WORKBENCH_SCOPE_BOUNDARY_OK:True`
 - `LARGE_GRAPH_UX_POLICY_OK:True`
 - `LARGE_GRAPH_UX_SCOPE_BOUNDARY_OK:True`
@@ -276,7 +279,7 @@ Use this sample to copy the host-owned seams, not the sample-specific presentati
 - Keep writes on the shared session command path through `TrySetSelectedNodeParameterValue(...)` or `TrySetNodeParameterValue(...)`.
 - Project host actions from `GetCommandDescriptors()` and close the route with `AsterGraph.ConsumerSample.Avalonia -- --proof`, expecting `AUTHORING_SURFACE_OK:True`.
 - Keep snippets host-owned: expose sample snippet ids through `ConsumerSampleHost.SnippetCatalog`, search/preview/favorite/recent them in the host, insert them through existing session commands, and expect `GRAPH_SNIPPET_CATALOG_OK:True`, `GRAPH_SNIPPET_INSERT_OK:True`, `FRAGMENT_LIBRARY_SEARCH_OK:True`, `FRAGMENT_LIBRARY_PREVIEW_OK:True`, `FRAGMENT_LIBRARY_RECENTS_FAVORITES_OK:True`, and `FRAGMENT_LIBRARY_SCOPE_BOUNDARY_OK:True`.
-- Keep the default workbench hosted-only: use `AsterGraphHostBuilder.UseDefaultWorkbench()` when the stock toolbar, command palette, stencil, inspector, mini-map, fragment, diagnostics, and status chrome are enough; expect `WORKBENCH_DEFAULTS_OK:True`, `WORKBENCH_HOST_BUILDER_HANDOFF_OK:True`, `WORKBENCH_PERFORMANCE_MODE_OK:True`, `BALANCED_MODE_DEFAULT_OK:True`, `WORKBENCH_LOD_POLICY_OK:True`, `PERFORMANCE_MODE_SCOPE_BOUNDARY_OK:True`, and `WORKBENCH_SCOPE_BOUNDARY_OK:True`.
+- Keep the default workbench hosted-only: use `AsterGraphHostBuilder.UseDefaultWorkbench()` when the stock toolbar, command palette, stencil, inspector, mini-map, fragment, diagnostics, and status chrome are enough; expect `WORKBENCH_DEFAULTS_OK:True`, `WORKBENCH_HOST_BUILDER_HANDOFF_OK:True`, `WORKBENCH_PERFORMANCE_MODE_OK:True`, `BALANCED_MODE_DEFAULT_OK:True`, `WORKBENCH_LOD_POLICY_OK:True`, `PERFORMANCE_MODE_SCOPE_BOUNDARY_OK:True`, `WORKBENCH_LAYOUT_PRESETS_OK:True`, `WORKBENCH_LAYOUT_RESET_OK:True`, `PANEL_STATE_PERSISTENCE_OK:True`, and `WORKBENCH_SCOPE_BOUNDARY_OK:True`.
 
 ### Copyable Capability Breadth Handoff
 

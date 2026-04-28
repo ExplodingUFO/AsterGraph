@@ -67,6 +67,8 @@ Authoring builder proof 还应该包含 `NODE_DEFINITION_BUILDER_OK:True`、`POR
 
 Hosted workbench performance proof 还应该包含 `WORKBENCH_PERFORMANCE_MODE_OK:True`、`BALANCED_MODE_DEFAULT_OK:True`、`WORKBENCH_LOD_POLICY_OK:True` 和 `PERFORMANCE_MODE_SCOPE_BOUNDARY_OK:True`，证明 performance mode 只是 hosted projection policy。
 
+Hosted workbench layout proof 还应该包含 `WORKBENCH_LAYOUT_PRESETS_OK:True`、`WORKBENCH_LAYOUT_RESET_OK:True` 和 `PANEL_STATE_PERSISTENCE_OK:True`，证明 layout preset 与 panel state 只是宿主工作台配置。
+
 Live canvas refresh proof 还应该包含 `NODE_DRAG_EDGE_REFRESH_OK:True`、`EDGE_ROUTE_REFRESH_OK:True` 和 `LIVE_CANVAS_REFRESH_AUDIT_OK:True`。
 
 Adapter-2 validation handoff proof 还应该包含 `ADAPTER2_VALIDATION_SCOPE_OK:True`、`ADAPTER2_WPF_SAMPLE_PROOF_OK:True`、`ADAPTER2_PERFORMANCE_ACCESSIBILITY_HANDOFF_OK:True`、`ADAPTER2_VALIDATION_HANDOFF_OK:True`、`ADAPTER2_VALIDATION_SCOPE_BOUNDARY_OK:True` 和 `V060_MILESTONE_PROOF_OK:True`。这些 marker 只代表 validation-only WPF evidence，不扩大 hosted support boundary。

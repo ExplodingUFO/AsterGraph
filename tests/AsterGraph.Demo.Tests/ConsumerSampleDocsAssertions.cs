@@ -41,6 +41,9 @@ internal static class ConsumerSampleDocsAssertions
         Assert.Contains("BALANCED_MODE_DEFAULT_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("WORKBENCH_LOD_POLICY_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("PERFORMANCE_MODE_SCOPE_BOUNDARY_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("WORKBENCH_LAYOUT_PRESETS_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("WORKBENCH_LAYOUT_RESET_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("PANEL_STATE_PERSISTENCE_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("WIDENED_SURFACE_PERFORMANCE_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("CONSUMER_SAMPLE_SCENARIO_GRAPH_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("CONSUMER_SAMPLE_HOST_OWNED_ACTIONS_OK:True", contents, StringComparison.Ordinal);

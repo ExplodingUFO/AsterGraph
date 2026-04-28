@@ -65,6 +65,8 @@ The support bundle is one local JSON file with these top-level fields:
 
 Hosted workbench performance proof should also include `WORKBENCH_PERFORMANCE_MODE_OK:True`, `BALANCED_MODE_DEFAULT_OK:True`, `WORKBENCH_LOD_POLICY_OK:True`, and `PERFORMANCE_MODE_SCOPE_BOUNDARY_OK:True`.
 
+Hosted workbench layout proof should also include `WORKBENCH_LAYOUT_PRESETS_OK:True`, `WORKBENCH_LAYOUT_RESET_OK:True`, and `PANEL_STATE_PERSISTENCE_OK:True`.
+
 Live canvas refresh proof should also include `NODE_DRAG_EDGE_REFRESH_OK:True`, `EDGE_ROUTE_REFRESH_OK:True`, and `LIVE_CANVAS_REFRESH_AUDIT_OK:True`.
 
 Adapter-2 validation handoff proof should also include `ADAPTER2_VALIDATION_SCOPE_OK:True`, `ADAPTER2_WPF_SAMPLE_PROOF_OK:True`, `ADAPTER2_PERFORMANCE_ACCESSIBILITY_HANDOFF_OK:True`, `ADAPTER2_VALIDATION_HANDOFF_OK:True`, `ADAPTER2_VALIDATION_SCOPE_BOUNDARY_OK:True`, and `V060_MILESTONE_PROOF_OK:True`. These markers are validation-only WPF evidence and do not widen the hosted support boundary.
