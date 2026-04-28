@@ -166,6 +166,11 @@ public sealed class ConsumerSampleProofTests
         Assert.True(result.CommandPaletteGroupingOk);
         Assert.True(result.CommandPaletteDisabledReasonOk);
         Assert.True(result.CommandPaletteRecentActionsOk);
+        Assert.True(result.CommandProjectionUnifiedOk);
+        Assert.True(result.CommandPaletteOk);
+        Assert.True(result.ToolbarDescriptorOk);
+        Assert.True(result.ContextMenuDescriptorOk);
+        Assert.True(result.CommandDisabledReasonOk);
         Assert.True(result.NavigationHistoryOk);
         Assert.True(result.ScopeBreadcrumbNavigationOk);
         Assert.True(result.FocusRestoreOk);
@@ -226,6 +231,11 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(result.ProofLines, line => line == "COMMAND_PALETTE_GROUPING_OK:True");
         Assert.Contains(result.ProofLines, line => line == "COMMAND_PALETTE_DISABLED_REASON_OK:True");
         Assert.Contains(result.ProofLines, line => line == "COMMAND_PALETTE_RECENT_ACTIONS_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "COMMAND_PROJECTION_UNIFIED_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "COMMAND_PALETTE_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "TOOLBAR_DESCRIPTOR_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "CONTEXT_MENU_DESCRIPTOR_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "COMMAND_DISABLED_REASON_OK:True");
         Assert.Contains(result.ProofLines, line => line == "NAVIGATION_HISTORY_OK:True");
         Assert.Contains(result.ProofLines, line => line == "SCOPE_BREADCRUMB_NAVIGATION_OK:True");
         Assert.Contains(result.ProofLines, line => line == "FOCUS_RESTORE_OK:True");
@@ -689,6 +699,11 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(proofLines, line => line == "COMMAND_PALETTE_GROUPING_OK:True");
         Assert.Contains(proofLines, line => line == "COMMAND_PALETTE_DISABLED_REASON_OK:True");
         Assert.Contains(proofLines, line => line == "COMMAND_PALETTE_RECENT_ACTIONS_OK:True");
+        Assert.Contains(proofLines, line => line == "COMMAND_PROJECTION_UNIFIED_OK:True");
+        Assert.Contains(proofLines, line => line == "COMMAND_PALETTE_OK:True");
+        Assert.Contains(proofLines, line => line == "TOOLBAR_DESCRIPTOR_OK:True");
+        Assert.Contains(proofLines, line => line == "CONTEXT_MENU_DESCRIPTOR_OK:True");
+        Assert.Contains(proofLines, line => line == "COMMAND_DISABLED_REASON_OK:True");
         Assert.Contains(proofLines, line => line == "NAVIGATION_HISTORY_OK:True");
         Assert.Contains(proofLines, line => line == "SCOPE_BREADCRUMB_NAVIGATION_OK:True");
         Assert.Contains(proofLines, line => line == "FOCUS_RESTORE_OK:True");

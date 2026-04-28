@@ -68,6 +68,11 @@ internal static class ConsumerSampleDocsAssertions
         Assert.Contains("COMMAND_PALETTE_GROUPING_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("COMMAND_PALETTE_DISABLED_REASON_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("COMMAND_PALETTE_RECENT_ACTIONS_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("COMMAND_PROJECTION_UNIFIED_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("COMMAND_PALETTE_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("TOOLBAR_DESCRIPTOR_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("CONTEXT_MENU_DESCRIPTOR_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("COMMAND_DISABLED_REASON_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("NAVIGATION_HISTORY_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("SCOPE_BREADCRUMB_NAVIGATION_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("FOCUS_RESTORE_OK:True", contents, StringComparison.Ordinal);

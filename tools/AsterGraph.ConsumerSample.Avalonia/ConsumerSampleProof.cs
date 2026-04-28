@@ -14,6 +14,7 @@ using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Automation;
 using AsterGraph.Editor.Hosting;
+using AsterGraph.Editor.Menus;
 using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.Services;
 using Avalonia.Themes.Fluent;
@@ -82,6 +83,11 @@ public sealed record ConsumerSampleProofResult(
     bool CommandPaletteGroupingOk = true,
     bool CommandPaletteDisabledReasonOk = true,
     bool CommandPaletteRecentActionsOk = true,
+    bool CommandProjectionUnifiedOk = true,
+    bool CommandPaletteOk = true,
+    bool ToolbarDescriptorOk = true,
+    bool ContextMenuDescriptorOk = true,
+    bool CommandDisabledReasonOk = true,
     bool NavigationHistoryOk = true,
     bool ScopeBreadcrumbNavigationOk = true,
     bool FocusRestoreOk = true,
@@ -186,6 +192,11 @@ public sealed record ConsumerSampleProofResult(
         && CommandPaletteGroupingOk
         && CommandPaletteDisabledReasonOk
         && CommandPaletteRecentActionsOk
+        && CommandProjectionUnifiedOk
+        && CommandPaletteOk
+        && ToolbarDescriptorOk
+        && ContextMenuDescriptorOk
+        && CommandDisabledReasonOk
         && NavigationHistoryOk
         && ScopeBreadcrumbNavigationOk
         && FocusRestoreOk
@@ -413,6 +424,11 @@ public sealed record ConsumerSampleProofResult(
         $"COMMAND_PALETTE_GROUPING_OK:{CommandPaletteGroupingOk}",
         $"COMMAND_PALETTE_DISABLED_REASON_OK:{CommandPaletteDisabledReasonOk}",
         $"COMMAND_PALETTE_RECENT_ACTIONS_OK:{CommandPaletteRecentActionsOk}",
+        $"COMMAND_PROJECTION_UNIFIED_OK:{CommandProjectionUnifiedOk}",
+        $"COMMAND_PALETTE_OK:{CommandPaletteOk}",
+        $"TOOLBAR_DESCRIPTOR_OK:{ToolbarDescriptorOk}",
+        $"CONTEXT_MENU_DESCRIPTOR_OK:{ContextMenuDescriptorOk}",
+        $"COMMAND_DISABLED_REASON_OK:{CommandDisabledReasonOk}",
         $"NAVIGATION_HISTORY_OK:{NavigationHistoryOk}",
         $"SCOPE_BREADCRUMB_NAVIGATION_OK:{ScopeBreadcrumbNavigationOk}",
         $"FOCUS_RESTORE_OK:{FocusRestoreOk}",
@@ -760,6 +776,11 @@ public static class ConsumerSampleProof
         bool commandPaletteGroupingOk;
         bool commandPaletteDisabledReasonOk;
         bool commandPaletteRecentActionsOk;
+        bool commandProjectionUnifiedOk;
+        bool commandPaletteOk;
+        bool toolbarDescriptorOk;
+        bool contextMenuDescriptorOk;
+        bool commandDisabledReasonOk;
         bool workbenchDefaultsOk;
         bool workbenchHostBuilderHandoffOk;
         try
@@ -794,6 +815,8 @@ public static class ConsumerSampleProof
             (quickAddConnectedNodeOk, portFilteredNodeSearchOk) = HasQuickAddConnectedNode(host);
             (commandPaletteGroupingOk, commandPaletteDisabledReasonOk, commandPaletteRecentActionsOk) =
                 HasCommandPaletteProductivity(capabilityWindow);
+            (commandProjectionUnifiedOk, commandPaletteOk, toolbarDescriptorOk, contextMenuDescriptorOk, commandDisabledReasonOk) =
+                HasUnifiedCommandProjection(capabilityWindow, host);
             (workbenchDefaultsOk, workbenchHostBuilderHandoffOk) = HasWorkbenchDefaults(host);
 
             host.SelectNode(reviewNodeId);
@@ -881,6 +904,11 @@ public static class ConsumerSampleProof
             CommandPaletteGroupingOk: commandPaletteGroupingOk,
             CommandPaletteDisabledReasonOk: commandPaletteDisabledReasonOk,
             CommandPaletteRecentActionsOk: commandPaletteRecentActionsOk,
+            CommandProjectionUnifiedOk: commandProjectionUnifiedOk,
+            CommandPaletteOk: commandPaletteOk,
+            ToolbarDescriptorOk: toolbarDescriptorOk,
+            ContextMenuDescriptorOk: contextMenuDescriptorOk,
+            CommandDisabledReasonOk: commandDisabledReasonOk,
             StencilGroupingOk: stencilGroupingOk,
             StencilSearchOk: stencilSearchOk,
             StencilRecentsFavoritesOk: stencilRecentsFavoritesOk,
@@ -2488,6 +2516,98 @@ public static class ConsumerSampleProof
         FlushUi();
 
         return (groupingOk, disabledReasonOk, recentActionsOk);
+    }
+
+    private static (bool UnifiedOk, bool PaletteOk, bool ToolbarOk, bool ContextMenuOk, bool DisabledReasonOk) HasUnifiedCommandProjection(
+        Window window,
+        ConsumerSampleHost host)
+    {
+        var descriptors = host.Session.Queries.GetCommandDescriptors()
+            .ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
+        if (!descriptors.TryGetValue("workspace.save", out var saveDescriptor)
+            || !descriptors.TryGetValue("layout.distribute-horizontal", out var distributeDescriptor))
+        {
+            return (false, false, false, false, false);
+        }
+
+        var saveToolbarButton = FindNamed<Button>(window, "PART_HeaderCommand_workspace.save");
+        var paletteToggle = FindNamed<Button>(window, "PART_OpenCommandPaletteButton");
+        if (saveToolbarButton is null || paletteToggle is null)
+        {
+            return (false, false, false, false, false);
+        }
+
+        var toolbarOk = string.Equals(saveToolbarButton.Content?.ToString(), saveDescriptor.Title, StringComparison.Ordinal)
+            && string.Equals(AutomationProperties.GetName(saveToolbarButton), saveDescriptor.Title, StringComparison.Ordinal)
+            && saveToolbarButton.IsEnabled == saveDescriptor.IsEnabled
+            && string.Equals(ToolTip.GetTip(saveToolbarButton)?.ToString(), saveDescriptor.DefaultShortcut, StringComparison.Ordinal);
+
+        paletteToggle.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        FlushUi();
+        var savePaletteButton = FindNamed<Button>(window, "PART_CommandPaletteAction_workspace.save");
+        var distributePaletteButton = FindNamed<Button>(window, "PART_CommandPaletteAction_layout.distribute-horizontal");
+        var paletteOk = savePaletteButton is not null
+            && savePaletteButton.Content?.ToString()?.Contains(saveDescriptor.Title, StringComparison.Ordinal) == true
+            && savePaletteButton.Content?.ToString()?.Contains(saveDescriptor.DefaultShortcut ?? string.Empty, StringComparison.Ordinal) == true
+            && string.Equals(AutomationProperties.GetName(savePaletteButton), saveDescriptor.Title, StringComparison.Ordinal)
+            && savePaletteButton.IsEnabled == saveDescriptor.IsEnabled;
+        var paletteDisabledReasonOk = distributePaletteButton is { IsEnabled: false }
+            && string.Equals(ToolTip.GetTip(distributePaletteButton)?.ToString(), distributeDescriptor.DisabledReason, StringComparison.Ordinal);
+        var paletteChrome = FindNamed<Border>(window, "PART_CommandPaletteChrome");
+        if (paletteChrome?.IsVisible == true)
+        {
+            paletteToggle.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            FlushUi();
+        }
+
+        var reviewNodeId = host.GetFirstReviewNodeId();
+        var canvasMenuItems = host.Session.Queries.BuildContextMenuDescriptors(
+            new ContextMenuContext(ContextMenuTargetKind.Canvas, new GraphPoint(160, 90)));
+        var selectionMenuItems = host.Session.Queries.BuildContextMenuDescriptors(
+            new ContextMenuContext(
+                ContextMenuTargetKind.Selection,
+                new GraphPoint(160, 90),
+                selectedNodeId: reviewNodeId,
+                selectedNodeIds: [reviewNodeId]));
+        var canvasSaveItem = FindMenuItem(canvasMenuItems, "canvas-save");
+        var distributeItem = FindMenuItem(selectionMenuItems, "selection-distribute-horizontal");
+        var contextMenuOk = canvasSaveItem is not null
+            && string.Equals(canvasSaveItem.Command?.CommandId, saveDescriptor.Id, StringComparison.Ordinal)
+            && canvasSaveItem.IsEnabled == saveDescriptor.IsEnabled
+            && distributeItem is not null
+            && string.Equals(distributeItem.Command?.CommandId, distributeDescriptor.Id, StringComparison.Ordinal);
+        var contextDisabledReasonOk = distributeItem is { IsEnabled: false }
+            && string.Equals(distributeItem.DisabledReason, distributeDescriptor.DisabledReason, StringComparison.Ordinal);
+
+        var disabledReasonOk = !string.IsNullOrWhiteSpace(distributeDescriptor.DisabledReason)
+            && paletteDisabledReasonOk
+            && contextDisabledReasonOk;
+        var unifiedOk = toolbarOk
+            && paletteOk
+            && contextMenuOk
+            && disabledReasonOk;
+        return (unifiedOk, paletteOk, toolbarOk, contextMenuOk, disabledReasonOk);
+    }
+
+    private static GraphEditorMenuItemDescriptorSnapshot? FindMenuItem(
+        IEnumerable<GraphEditorMenuItemDescriptorSnapshot> items,
+        string id)
+    {
+        foreach (var item in items)
+        {
+            if (string.Equals(item.Id, id, StringComparison.Ordinal))
+            {
+                return item;
+            }
+
+            var child = FindMenuItem(item.Children, id);
+            if (child is not null)
+            {
+                return child;
+            }
+        }
+
+        return null;
     }
 
     private static bool HasAllowedOptions(
