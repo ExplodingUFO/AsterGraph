@@ -2526,7 +2526,10 @@ internal sealed partial class GraphEditorKernel : IGraphEditorSessionHost
             port.Direction,
             port.DataType,
             port.AccentHex,
-            port.TypeId);
+            port.TypeId,
+            port.GroupName,
+            port.MinConnections,
+            port.MaxConnections);
 
     private static GraphNodeGroup CloneGroup(GraphNodeGroup group)
         => new(

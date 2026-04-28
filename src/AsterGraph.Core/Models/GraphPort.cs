@@ -23,4 +23,18 @@ public sealed record GraphPort(
     PortTypeId? TypeId = null,
     string? GroupName = null,
     int MinConnections = 0,
-    int MaxConnections = int.MaxValue);
+    int MaxConnections = int.MaxValue)
+{
+    /// <summary>
+    /// Stable handle identifier used by hosted presenters and connection geometry.
+    /// </summary>
+    public string HandleId => Id;
+
+    /// <summary>
+    /// Short authoring hint for connection search and hover affordances.
+    /// </summary>
+    public string ConnectionHint
+        => string.IsNullOrWhiteSpace(GroupName)
+            ? $"{Label} ({TypeId?.Value ?? DataType})"
+            : $"{Label} ({GroupName}, {TypeId?.Value ?? DataType})";
+}

@@ -49,6 +49,11 @@ public sealed record PortDefinition
     public string Key { get; }
 
     /// <summary>
+    /// Stable handle identifier used by hosted presenters and connection geometry.
+    /// </summary>
+    public string HandleId => Key;
+
+    /// <summary>
     /// 端口显示名称。
     /// </summary>
     public string DisplayName { get; }
@@ -82,4 +87,12 @@ public sealed record PortDefinition
     /// 端口最大连接数。
     /// </summary>
     public int MaxConnections { get; }
+
+    /// <summary>
+    /// Short authoring hint for connection search and hover affordances.
+    /// </summary>
+    public string ConnectionHint
+        => string.IsNullOrWhiteSpace(GroupName)
+            ? $"{DisplayName} ({TypeId.Value})"
+            : $"{DisplayName} ({GroupName}, {TypeId.Value})";
 }

@@ -85,7 +85,10 @@ internal sealed class GraphEditorKernelCompatibilityQueries
                 target.TargetLabel,
                 target.TargetTypeId,
                 target.TargetAccentHex,
-                target.Compatibility))
+                target.Compatibility,
+                target.TargetGroupName,
+                target.TargetMinConnections,
+                target.TargetMaxConnections))
             .ToList();
 
     private IEnumerable<GraphEditorCompatibleTargetState> EnumerateTargets(
@@ -111,6 +114,9 @@ internal sealed class GraphEditorKernelCompatibilityQueries
                 port.Label,
                 port.TypeId,
                 port.AccentHex,
+                port.GroupName,
+                port.MinConnections,
+                port.MaxConnections,
                 PortCompatibilityResult.Rejected());
         }
 
@@ -129,6 +135,9 @@ internal sealed class GraphEditorKernelCompatibilityQueries
                 parameter.DisplayName,
                 parameter.ValueType,
                 ResolveParameterAccent(node, parameter.ValueType),
+                null,
+                0,
+                int.MaxValue,
                 PortCompatibilityResult.Rejected());
         }
     }
@@ -160,4 +169,7 @@ internal sealed record GraphEditorCompatibleTargetState(
     string TargetLabel,
     PortTypeId TargetTypeId,
     string TargetAccentHex,
+    string? TargetGroupName,
+    int TargetMinConnections,
+    int TargetMaxConnections,
     PortCompatibilityResult Compatibility);

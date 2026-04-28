@@ -19,6 +19,8 @@
 复制时保持这条分工：
 
 - 多 handle 事实继续留在 `NodeDefinition`
+- `PortDefinition.Key` 继续作为稳定 `HandleId`
+- 用 `PortDefinition.GroupName`、连接数限制和 `ConnectionHint` 承载可复制的端口分组与 hover/search 文案
 - 默认尺寸继续留在 `defaultWidth` / `defaultHeight`
 - 节点可视替换继续留在 `IGraphNodeVisualPresenter`
 - 底层 session/runtime owner 不变
@@ -68,7 +70,7 @@
 3. 然后用 `GetNodeParameterSnapshots(nodeId)` 投影节点旁路状态，让 `NodeParameterEditorHost` 和 `INodeParameterEditorRegistry` 在自定义节点表面上继续复用同一份 metadata 和 validation 合同。
 4. 写回时继续走 `TrySetSelectedNodeParameterValue(...)` 或 `TrySetNodeParameterValue(...)`，把 validation 保留在共享 session command 路线上，不再引入第二套 editor model。
 5. 宿主命令继续从 `GetCommandDescriptors()` 投影，这样 toolbar、menu、shortcut 和 palette action 都停留在同一条共享 command route 上。
-6. 最后用 `AsterGraph.ConsumerSample.Avalonia -- --proof` 收口，并期待看到 `AUTHORING_SURFACE_OK:True`。
+6. 最后用 `AsterGraph.ConsumerSample.Avalonia -- --proof` 收口，并期待看到 `PORT_HANDLE_ID_OK:True`、`PORT_GROUP_AUTHORING_OK:True`、`PORT_CONNECTION_HINT_OK:True`、`PORT_AUTHORING_SCOPE_BOUNDARY_OK:True` 和 `AUTHORING_SURFACE_OK:True`。
 
 ## 复制顺序
 

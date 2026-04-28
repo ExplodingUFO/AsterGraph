@@ -73,6 +73,10 @@ public sealed record ConsumerSampleProofResult(
     bool RuntimeLogLocateOk = true,
     bool RuntimeLogExportOk = true,
     bool RuntimeOverlaySupportBundleOk = true,
+    bool PortHandleIdOk = true,
+    bool PortGroupAuthoringOk = true,
+    bool PortConnectionHintOk = true,
+    bool PortAuthoringScopeBoundaryOk = true,
     bool GraphSearchLocateOk = true,
     bool GraphSearchScopeFilterOk = true,
     bool GraphSearchViewportFocusOk = true,
@@ -153,6 +157,10 @@ public sealed record ConsumerSampleProofResult(
         && EdgeMultiSelectOk
         && WireSliceOk
         && SelectedNodeEdgeHighlightOk
+        && PortHandleIdOk
+        && PortGroupAuthoringOk
+        && PortConnectionHintOk
+        && PortAuthoringScopeBoundaryOk
         && NodeSideAuthoringOk
         && CommandSurfaceOk;
 
@@ -212,6 +220,10 @@ public sealed record ConsumerSampleProofResult(
         && ExportPanelProgressCancelOk
         && ExportDocsAlignmentOk
         && RuntimeOverlaySupportBundleOk
+        && PortHandleIdOk
+        && PortGroupAuthoringOk
+        && PortConnectionHintOk
+        && PortAuthoringScopeBoundaryOk
         && GraphSearchLocateOk
         && GraphSearchScopeFilterOk
         && GraphSearchViewportFocusOk
@@ -289,6 +301,10 @@ public sealed record ConsumerSampleProofResult(
         && ExportPanelProgressCancelOk
         && ExportDocsAlignmentOk
         && RuntimeOverlaySupportBundleOk
+        && PortHandleIdOk
+        && PortGroupAuthoringOk
+        && PortConnectionHintOk
+        && PortAuthoringScopeBoundaryOk
         && GraphSearchLocateOk
         && GraphSearchScopeFilterOk
         && GraphSearchViewportFocusOk
@@ -462,6 +478,10 @@ public sealed record ConsumerSampleProofResult(
         $"RUNTIME_LOG_LOCATE_OK:{RuntimeLogLocateOk}",
         $"RUNTIME_LOG_EXPORT_OK:{RuntimeLogExportOk}",
         $"RUNTIME_OVERLAY_SUPPORT_BUNDLE_OK:{RuntimeOverlaySupportBundleOk}",
+        $"PORT_HANDLE_ID_OK:{PortHandleIdOk}",
+        $"PORT_GROUP_AUTHORING_OK:{PortGroupAuthoringOk}",
+        $"PORT_CONNECTION_HINT_OK:{PortConnectionHintOk}",
+        $"PORT_AUTHORING_SCOPE_BOUNDARY_OK:{PortAuthoringScopeBoundaryOk}",
         $"GRAPH_SEARCH_LOCATE_OK:{GraphSearchLocateOk}",
         $"GRAPH_SEARCH_SCOPE_FILTER_OK:{GraphSearchScopeFilterOk}",
         $"GRAPH_SEARCH_VIEWPORT_FOCUS_OK:{GraphSearchViewportFocusOk}",
@@ -852,6 +872,10 @@ public static class ConsumerSampleProof
         bool runtimeOverlaySnapshotOk;
         bool runtimeOverlaySnapshotPolishOk;
         bool runtimeOverlayScopeFilterOk;
+        bool portHandleIdOk;
+        bool portGroupAuthoringOk;
+        bool portConnectionHintOk;
+        bool portAuthoringScopeBoundaryOk;
         bool commandPaletteGroupingOk;
         bool commandPaletteDisabledReasonOk;
         bool commandPaletteRecentActionsOk;
@@ -899,6 +923,8 @@ public static class ConsumerSampleProof
             runtimeOverlaySnapshotOk = HasRuntimeOverlaySnapshot(host);
             runtimeOverlaySnapshotPolishOk = HasRuntimeOverlaySnapshotPolish(host);
             runtimeOverlayScopeFilterOk = HasRuntimeOverlayScopeFilter(host);
+            (portHandleIdOk, portGroupAuthoringOk, portConnectionHintOk, portAuthoringScopeBoundaryOk) =
+                HasPortHandleAuthoring(host);
             (quickAddConnectedNodeOk, portFilteredNodeSearchOk) = HasQuickAddConnectedNode(host);
             (commandPaletteGroupingOk, commandPaletteDisabledReasonOk, commandPaletteRecentActionsOk) =
                 HasCommandPaletteProductivity(capabilityWindow);
@@ -992,6 +1018,10 @@ public static class ConsumerSampleProof
             RuntimeLogLocateOk: runtimeLogLocateOk,
             RuntimeLogExportOk: runtimeLogExportOk,
             RuntimeOverlaySupportBundleOk: runtimeOverlaySupportBundleOk,
+            PortHandleIdOk: portHandleIdOk,
+            PortGroupAuthoringOk: portGroupAuthoringOk,
+            PortConnectionHintOk: portConnectionHintOk,
+            PortAuthoringScopeBoundaryOk: portAuthoringScopeBoundaryOk,
             GraphSearchLocateOk: graphSearchLocateOk,
             GraphSearchScopeFilterOk: graphSearchScopeFilterOk,
             GraphSearchViewportFocusOk: graphSearchViewportFocusOk,
@@ -3016,6 +3046,58 @@ public static class ConsumerSampleProof
             && selectedLogs.Length > 0
             && currentScopeLogs.Length == overlay.RecentLogs.Count
             && overlay.ConnectionOverlays.Count > 0;
+    }
+
+    private static (bool HandleIdOk, bool GroupOk, bool HintOk, bool ScopeBoundaryOk) HasPortHandleAuthoring(ConsumerSampleHost host)
+    {
+        const string inputPortId = "input";
+        const string outputPortId = "output";
+        const string reviewPolicyPortId = "policy";
+        const string reviewAuditPortId = "audit";
+
+        var document = host.Session.Queries.CreateDocumentSnapshot();
+        var reviewNodeId = host.GetFirstReviewNodeId();
+        var reviewNode = document.Nodes.Single(node => string.Equals(node.Id, reviewNodeId, StringComparison.Ordinal));
+        var queueNode = document.Nodes.Single(node => node.DefinitionId == new NodeDefinitionId("consumer.sample.queue"));
+        var target = host.Session.Queries.GetCompatiblePortTargets(reviewNode.Id, outputPortId)
+            .SingleOrDefault(snapshot =>
+                string.Equals(snapshot.NodeId, queueNode.Id, StringComparison.Ordinal)
+                && string.Equals(snapshot.PortId, inputPortId, StringComparison.Ordinal));
+
+        var builderPort = PortDefinitionBuilder
+            .Create("payload", "Payload", "json")
+            .Group("Data")
+            .Connections(max: 2)
+            .Build();
+
+        var allPorts = reviewNode.Inputs
+            .Concat(reviewNode.Outputs)
+            .Concat(queueNode.Inputs)
+            .Concat(queueNode.Outputs)
+            .ToArray();
+        var handleIdOk = builderPort.HandleId == builderPort.Key
+            && allPorts.All(port => string.Equals(port.HandleId, port.Id, StringComparison.Ordinal))
+            && target is not null
+            && string.Equals(target.PortHandleId, target.PortId, StringComparison.Ordinal);
+        var groupOk = builderPort.GroupName == "Data"
+            && reviewNode.Inputs.Any(port => port.Id == inputPortId && port.GroupName == "Flow" && port.MaxConnections == 1)
+            && reviewNode.Inputs.Any(port => port.Id == reviewPolicyPortId && port.GroupName == "Policy")
+            && reviewNode.Outputs.Any(port => port.Id == outputPortId && port.GroupName == "Flow")
+            && reviewNode.Outputs.Any(port => port.Id == reviewAuditPortId && port.GroupName == "Audit")
+            && target?.PortGroupName == "Flow";
+        var hintOk = builderPort.ConnectionHint.Contains("Data", StringComparison.Ordinal)
+            && reviewNode.Outputs.Single(port => port.Id == outputPortId).ConnectionHint.Contains("Flow", StringComparison.Ordinal)
+            && target is not null
+            && target.ConnectionHint.Contains("Input", StringComparison.Ordinal)
+            && target.ConnectionHint.Contains("Flow", StringComparison.Ordinal)
+            && target.ConnectionHint.Contains("flow", StringComparison.Ordinal);
+        var scopeBoundaryOk = typeof(PortDefinition).Namespace == "AsterGraph.Abstractions.Definitions"
+            && typeof(GraphPort).Namespace == "AsterGraph.Core.Models"
+            && typeof(GraphEditorCompatiblePortTargetSnapshot).Namespace == "AsterGraph.Editor.Runtime"
+            && Type.GetType("AsterGraph.Abstractions.Definitions.HandleDefinition, AsterGraph.Abstractions") is null
+            && Type.GetType("AsterGraph.Core.Models.GraphHandle, AsterGraph.Core") is null;
+
+        return (handleIdOk, groupOk, hintOk, scopeBoundaryOk);
     }
 
     private static bool HasRuntimeLogPanel(Window window, ConsumerSampleHost host)

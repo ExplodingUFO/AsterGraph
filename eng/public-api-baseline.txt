@@ -157,6 +157,7 @@ C:AsterGraph.Editor.Runtime.GraphEditorCommandDescriptorSnapshot(System.String,S
 C:AsterGraph.Editor.Runtime.GraphEditorCommandInvocationSnapshot(System.String,System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Runtime.GraphEditorCommandArgumentSnapshot>)
 C:AsterGraph.Editor.Runtime.GraphEditorCompatibleNodeDefinitionSnapshot(AsterGraph.Abstractions.Identifiers.NodeDefinitionId,System.String,System.String,System.String,System.String,AsterGraph.Core.Models.GraphConnectionTargetKind,AsterGraph.Abstractions.Identifiers.PortTypeId,AsterGraph.Abstractions.Compatibility.PortCompatibilityResult)
 C:AsterGraph.Editor.Runtime.GraphEditorCompatibleNodeSearchSnapshot(System.Boolean,System.String,System.String,System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Runtime.GraphEditorCompatibleNodeDefinitionSnapshot>,System.String)
+C:AsterGraph.Editor.Runtime.GraphEditorCompatiblePortTargetSnapshot(System.String,System.String,System.String,System.String,AsterGraph.Abstractions.Identifiers.PortTypeId,System.String,AsterGraph.Abstractions.Compatibility.PortCompatibilityResult,System.String,System.Int32,System.Int32)
 C:AsterGraph.Editor.Runtime.GraphEditorCompatiblePortTargetSnapshot(System.String,System.String,System.String,System.String,AsterGraph.Abstractions.Identifiers.PortTypeId,System.String,AsterGraph.Abstractions.Compatibility.PortCompatibilityResult)
 C:AsterGraph.Editor.Runtime.GraphEditorCompositeNodeSnapshot(System.String,System.String,System.Collections.Generic.IReadOnlyList<AsterGraph.Core.Models.GraphCompositeBoundaryPort>,System.Collections.Generic.IReadOnlyList<AsterGraph.Core.Models.GraphCompositeBoundaryPort>)
 C:AsterGraph.Editor.Runtime.GraphEditorConnectionEndpointGeometrySnapshot(System.String,System.String,AsterGraph.Core.Models.GraphConnectionTargetKind,AsterGraph.Core.Models.GraphPoint)
@@ -1928,9 +1929,11 @@ P:AsterGraph.Abstractions.Definitions.ParameterOptionDefinition.Description:Syst
 P:AsterGraph.Abstractions.Definitions.ParameterOptionDefinition.Label:System.String:get,set
 P:AsterGraph.Abstractions.Definitions.ParameterOptionDefinition.Value:System.String:get,set
 P:AsterGraph.Abstractions.Definitions.PortDefinition.AccentHex:System.String:get
+P:AsterGraph.Abstractions.Definitions.PortDefinition.ConnectionHint:System.String:get
 P:AsterGraph.Abstractions.Definitions.PortDefinition.Description:System.String:get
 P:AsterGraph.Abstractions.Definitions.PortDefinition.DisplayName:System.String:get
 P:AsterGraph.Abstractions.Definitions.PortDefinition.GroupName:System.String:get
+P:AsterGraph.Abstractions.Definitions.PortDefinition.HandleId:System.String:get
 P:AsterGraph.Abstractions.Definitions.PortDefinition.Key:System.String:get
 P:AsterGraph.Abstractions.Definitions.PortDefinition.MaxConnections:System.Int32:get
 P:AsterGraph.Abstractions.Definitions.PortDefinition.MinConnections:System.Int32:get
@@ -2285,9 +2288,11 @@ P:AsterGraph.Core.Models.GraphParameterValue.Value:System.Object:get,set
 P:AsterGraph.Core.Models.GraphPoint.X:System.Double:get,set
 P:AsterGraph.Core.Models.GraphPoint.Y:System.Double:get,set
 P:AsterGraph.Core.Models.GraphPort.AccentHex:System.String:get,set
+P:AsterGraph.Core.Models.GraphPort.ConnectionHint:System.String:get
 P:AsterGraph.Core.Models.GraphPort.DataType:System.String:get,set
 P:AsterGraph.Core.Models.GraphPort.Direction:AsterGraph.Core.Models.PortDirection:get,set
 P:AsterGraph.Core.Models.GraphPort.GroupName:System.String:get,set
+P:AsterGraph.Core.Models.GraphPort.HandleId:System.String:get
 P:AsterGraph.Core.Models.GraphPort.Id:System.String:get,set
 P:AsterGraph.Core.Models.GraphPort.Label:System.String:get,set
 P:AsterGraph.Core.Models.GraphPort.MaxConnections:System.Int32:get,set
@@ -2712,9 +2717,14 @@ P:AsterGraph.Editor.Runtime.GraphEditorCompatibleNodeSearchSnapshot.Results:Syst
 P:AsterGraph.Editor.Runtime.GraphEditorCompatibleNodeSearchSnapshot.SourceNodeId:System.String:get,set
 P:AsterGraph.Editor.Runtime.GraphEditorCompatibleNodeSearchSnapshot.SourcePortId:System.String:get,set
 P:AsterGraph.Editor.Runtime.GraphEditorCompatiblePortTargetSnapshot.Compatibility:AsterGraph.Abstractions.Compatibility.PortCompatibilityResult:get
+P:AsterGraph.Editor.Runtime.GraphEditorCompatiblePortTargetSnapshot.ConnectionHint:System.String:get
+P:AsterGraph.Editor.Runtime.GraphEditorCompatiblePortTargetSnapshot.MaxConnections:System.Int32:get
+P:AsterGraph.Editor.Runtime.GraphEditorCompatiblePortTargetSnapshot.MinConnections:System.Int32:get
 P:AsterGraph.Editor.Runtime.GraphEditorCompatiblePortTargetSnapshot.NodeId:System.String:get
 P:AsterGraph.Editor.Runtime.GraphEditorCompatiblePortTargetSnapshot.NodeTitle:System.String:get
 P:AsterGraph.Editor.Runtime.GraphEditorCompatiblePortTargetSnapshot.PortAccentHex:System.String:get
+P:AsterGraph.Editor.Runtime.GraphEditorCompatiblePortTargetSnapshot.PortGroupName:System.String:get
+P:AsterGraph.Editor.Runtime.GraphEditorCompatiblePortTargetSnapshot.PortHandleId:System.String:get
 P:AsterGraph.Editor.Runtime.GraphEditorCompatiblePortTargetSnapshot.PortId:System.String:get
 P:AsterGraph.Editor.Runtime.GraphEditorCompatiblePortTargetSnapshot.PortLabel:System.String:get
 P:AsterGraph.Editor.Runtime.GraphEditorCompatiblePortTargetSnapshot.PortTypeId:AsterGraph.Abstractions.Identifiers.PortTypeId:get

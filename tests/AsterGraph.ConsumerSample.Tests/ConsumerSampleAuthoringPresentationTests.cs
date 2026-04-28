@@ -5,6 +5,7 @@ using Avalonia.Interactivity;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using AsterGraph.ConsumerSample;
+using AsterGraph.Abstractions.Identifiers;
 using Xunit;
 
 namespace AsterGraph.ConsumerSample.Tests;
@@ -32,6 +33,19 @@ public sealed class ConsumerSampleAuthoringPresentationTests
 
         Assert.True(reviewNode.Outputs.Count >= 2);
         Assert.True(reviewNode.Inputs.Count >= 2);
+        Assert.All(reviewNode.Inputs.Concat(reviewNode.Outputs), port => Assert.Equal(port.Id, port.HandleId));
+        Assert.Contains(reviewNode.Inputs, port => port.Id == "input" && port.GroupName == "Flow" && port.MaxConnections == 1);
+        Assert.Contains(reviewNode.Inputs, port => port.Id == "policy" && port.GroupName == "Policy");
+        Assert.Contains(reviewNode.Outputs, port => port.Id == "output" && port.GroupName == "Flow");
+        Assert.Contains(reviewNode.Outputs, port => port.Id == "audit" && port.GroupName == "Audit");
+
+        var compatibleTarget = host.Session.Queries.GetCompatiblePortTargets(reviewNodeId, "output")
+            .Single(snapshot => snapshot.NodeId == "consumer-sample-queue-001" && snapshot.PortId == "input");
+        Assert.Equal("input", compatibleTarget.PortHandleId);
+        Assert.Equal("Flow", compatibleTarget.PortGroupName);
+        Assert.Equal(new PortTypeId("flow"), compatibleTarget.PortTypeId);
+        Assert.Contains("Input", compatibleTarget.ConnectionHint, StringComparison.Ordinal);
+        Assert.Contains("Flow", compatibleTarget.ConnectionHint, StringComparison.Ordinal);
 
         var parameterSnapshots = host.GetSelectedParameterSnapshots();
         var statusSnapshot = parameterSnapshots.Single(snapshot => snapshot.Definition.Key == "status");

@@ -72,6 +72,8 @@ public sealed class AuthoringDefinitionBuilderTests
             1,
             2);
         Assert.Equal(expected, port);
+        Assert.Equal("payload", port.HandleId);
+        Assert.Equal("Payload (Data, json)", port.ConnectionHint);
     }
 
     [Fact]

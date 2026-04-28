@@ -525,6 +525,31 @@ public sealed class GraphEditorSessionTests
         Assert.Equal("node-1", snapshot.NodeTitle);
         Assert.Equal("port-1", snapshot.PortLabel);
         Assert.Equal(string.Empty, snapshot.PortAccentHex);
+        Assert.Equal("port-1", snapshot.PortHandleId);
+        Assert.Null(snapshot.PortGroupName);
+        Assert.Equal("port-1 (float)", snapshot.ConnectionHint);
+    }
+
+    [Fact]
+    public void GraphEditorCompatiblePortTargetSnapshot_ProjectsPortHandleGroupAndHintMetadata()
+    {
+        var snapshot = new GraphEditorCompatiblePortTargetSnapshot(
+            "node-1",
+            "Target Node",
+            "input",
+            "Input",
+            new PortTypeId("flow"),
+            "#F3B36B",
+            PortCompatibilityResult.Exact(),
+            "Flow",
+            minConnections: 0,
+            maxConnections: 1);
+
+        Assert.Equal("input", snapshot.PortHandleId);
+        Assert.Equal("Flow", snapshot.PortGroupName);
+        Assert.Equal(0, snapshot.MinConnections);
+        Assert.Equal(1, snapshot.MaxConnections);
+        Assert.Equal("Input (Flow, flow)", snapshot.ConnectionHint);
     }
 
     [Fact]

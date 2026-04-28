@@ -19,6 +19,8 @@ Use `NodeDefinition` plus multiple input and output ports to declare the handle 
 Copy this shape:
 
 - keep multi-handle facts in `NodeDefinition`
+- keep `PortDefinition.Key` as the stable `HandleId`
+- use `PortDefinition.GroupName`, connection limits, and `ConnectionHint` for copyable grouped handles and hover/search text
 - keep size defaults in `defaultWidth` and `defaultHeight`
 - keep the visual replacement in `IGraphNodeVisualPresenter`
 - keep the session/runtime owner unchanged underneath
@@ -68,7 +70,7 @@ Use one hosted handoff from definitions to proof instead of stitching together s
 3. Project node-side state from `GetNodeParameterSnapshots(nodeId)` so `NodeParameterEditorHost` and `INodeParameterEditorRegistry` reuse the same metadata and validation contract on the custom node surface.
 4. Write values back through `TrySetSelectedNodeParameterValue(...)` or `TrySetNodeParameterValue(...)`; keep validation on the shared session command path instead of adding a second editor model.
 5. Project host commands from `GetCommandDescriptors()` so toolbars, menus, shortcuts, and palette actions stay on the same shared command route.
-6. Close the handoff with `AsterGraph.ConsumerSample.Avalonia -- --proof` and expect `AUTHORING_SURFACE_OK:True`.
+6. Close the handoff with `AsterGraph.ConsumerSample.Avalonia -- --proof` and expect `PORT_HANDLE_ID_OK:True`, `PORT_GROUP_AUTHORING_OK:True`, `PORT_CONNECTION_HINT_OK:True`, `PORT_AUTHORING_SCOPE_BOUNDARY_OK:True`, and `AUTHORING_SURFACE_OK:True`.
 
 ## Copy path
 

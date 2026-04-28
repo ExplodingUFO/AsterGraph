@@ -840,12 +840,12 @@ public sealed class ConsumerSampleHost : IDisposable
                     new GraphPoint(140, 180),
                     ReviewNodeDefaultSize,
                     [
-                        new GraphPort(InputPortId, "Input", PortDirection.Input, "flow", "#F3B36B", new PortTypeId("flow")),
-                        new GraphPort(ReviewPolicyPortId, "Policy", PortDirection.Input, "policy", "#A5B4FC", new PortTypeId("policy")),
+                        new GraphPort(InputPortId, "Input", PortDirection.Input, "flow", "#F3B36B", new PortTypeId("flow"), "Flow", MaxConnections: 1),
+                        new GraphPort(ReviewPolicyPortId, "Policy", PortDirection.Input, "policy", "#A5B4FC", new PortTypeId("policy"), "Policy", MaxConnections: 1),
                     ],
                     [
-                        new GraphPort(OutputPortId, "Output", PortDirection.Output, "flow", "#6AD5C4", new PortTypeId("flow")),
-                        new GraphPort(ReviewAuditPortId, "Audit", PortDirection.Output, "audit", "#FF8A5B", new PortTypeId("audit")),
+                        new GraphPort(OutputPortId, "Output", PortDirection.Output, "flow", "#6AD5C4", new PortTypeId("flow"), "Flow"),
+                        new GraphPort(ReviewAuditPortId, "Audit", PortDirection.Output, "audit", "#FF8A5B", new PortTypeId("audit"), "Audit"),
                     ],
                     "#6AD5C4",
                     ReviewDefinitionId,
@@ -864,10 +864,10 @@ public sealed class ConsumerSampleHost : IDisposable
                     new GraphPoint(520, 180),
                     new GraphSize(240, 164),
                     [
-                        new GraphPort(InputPortId, "Input", PortDirection.Input, "flow", "#F3B36B", new PortTypeId("flow")),
+                        new GraphPort(InputPortId, "Input", PortDirection.Input, "flow", "#F3B36B", new PortTypeId("flow"), "Flow", MaxConnections: 1),
                     ],
                     [
-                        new GraphPort(OutputPortId, "Output", PortDirection.Output, "flow", "#6AD5C4", new PortTypeId("flow")),
+                        new GraphPort(OutputPortId, "Output", PortDirection.Output, "flow", "#6AD5C4", new PortTypeId("flow"), "Flow"),
                     ],
                     "#8B7BFF",
                     QueueDefinitionId,
@@ -894,12 +894,12 @@ public sealed class ConsumerSampleHost : IDisposable
             "Consumer Sample",
             "Review",
             [
-                new PortDefinition(InputPortId, "Input", new PortTypeId("flow"), "#F3B36B"),
-                new PortDefinition(ReviewPolicyPortId, "Policy", new PortTypeId("policy"), "#A5B4FC"),
+                new PortDefinition(InputPortId, "Input", new PortTypeId("flow"), "#F3B36B", "Main review flow input.", "Flow", maxConnections: 1),
+                new PortDefinition(ReviewPolicyPortId, "Policy", new PortTypeId("policy"), "#A5B4FC", "Host-owned policy input.", "Policy", maxConnections: 1),
             ],
             [
-                new PortDefinition(OutputPortId, "Output", new PortTypeId("flow"), "#6AD5C4"),
-                new PortDefinition(ReviewAuditPortId, "Audit", new PortTypeId("audit"), "#FF8A5B"),
+                new PortDefinition(OutputPortId, "Output", new PortTypeId("flow"), "#6AD5C4", "Approved review flow output.", "Flow"),
+                new PortDefinition(ReviewAuditPortId, "Audit", new PortTypeId("audit"), "#FF8A5B", "Audit evidence output.", "Audit"),
             ],
             [
                 new NodeParameterDefinition(
@@ -959,10 +959,10 @@ public sealed class ConsumerSampleHost : IDisposable
             "Consumer Sample",
             "Queue",
             [
-                new PortDefinition(InputPortId, "Input", new PortTypeId("flow"), "#F3B36B"),
+                new PortDefinition(InputPortId, "Input", new PortTypeId("flow"), "#F3B36B", "Queue flow input.", "Flow", maxConnections: 1),
             ],
             [
-                new PortDefinition(OutputPortId, "Output", new PortTypeId("flow"), "#8B7BFF"),
+                new PortDefinition(OutputPortId, "Output", new PortTypeId("flow"), "#8B7BFF", "Queue flow output.", "Flow"),
             ],
             [
                 new NodeParameterDefinition(

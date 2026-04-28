@@ -58,11 +58,19 @@ public sealed class AuthoringSurfaceRecipeDocsTests
             Assert.Contains("validation", contents, StringComparison.OrdinalIgnoreCase);
             Assert.Contains("GetCommandDescriptors()", contents, StringComparison.Ordinal);
             Assert.Contains("AsterGraph.ConsumerSample.Avalonia -- --proof", contents, StringComparison.Ordinal);
+            Assert.Contains("PORT_HANDLE_ID_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("PORT_GROUP_AUTHORING_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("PORT_CONNECTION_HINT_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("PORT_AUTHORING_SCOPE_BOUNDARY_OK:True", contents, StringComparison.Ordinal);
             Assert.Contains("AUTHORING_SURFACE_OK:True", contents, StringComparison.Ordinal);
         }
 
         foreach (var contents in new[] { consumerSampleEn, consumerSampleZh, readme })
         {
+            Assert.Contains("PORT_HANDLE_ID_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("PORT_GROUP_AUTHORING_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("PORT_CONNECTION_HINT_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("PORT_AUTHORING_SCOPE_BOUNDARY_OK:True", contents, StringComparison.Ordinal);
             Assert.Contains("AUTHORING_SURFACE_NODE_SIDE_EDITOR_OK:True", contents, StringComparison.Ordinal);
             Assert.Contains("AUTHORING_SURFACE_COMMAND_PROJECTION_OK:True", contents, StringComparison.Ordinal);
             Assert.Contains("AUTHORING_SURFACE_OK:True", contents, StringComparison.Ordinal);
