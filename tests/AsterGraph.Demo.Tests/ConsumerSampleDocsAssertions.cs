@@ -79,6 +79,10 @@ internal static class ConsumerSampleDocsAssertions
         Assert.Contains("PORT_GROUP_AUTHORING_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("PORT_CONNECTION_HINT_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("PORT_AUTHORING_SCOPE_BOUNDARY_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("CONNECTION_VALIDATION_REASON_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("CONNECTION_INVALID_HOVER_FEEDBACK_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("CONNECTION_VALIDATION_SUPPORT_BUNDLE_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("CONNECTION_VALIDATION_SCOPE_BOUNDARY_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("GRAPH_SEARCH_LOCATE_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("GRAPH_SEARCH_SCOPE_FILTER_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("GRAPH_SEARCH_VIEWPORT_FOCUS_OK:True", contents, StringComparison.Ordinal);

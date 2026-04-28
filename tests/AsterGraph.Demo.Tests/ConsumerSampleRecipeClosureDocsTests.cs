@@ -315,7 +315,7 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
         Assert.Contains("AUTHORING_SURFACE_OK:True", quickReferenceProofBlockEn, StringComparison.Ordinal);
         Assert.Contains("COMMAND_SURFACE_OK:True", quickReferenceProofBlockEn, StringComparison.Ordinal);
         Assert.Contains("HOST_NATIVE_METRIC:*", quickReferenceProofBlockEn, StringComparison.Ordinal);
-        Assert.DoesNotContain("SUPPORT_BUNDLE_OK", quickReferenceProofBlockEn, StringComparison.Ordinal);
+        Assert.DoesNotContain("- `SUPPORT_BUNDLE_OK", quickReferenceProofBlockEn, StringComparison.Ordinal);
         Assert.DoesNotContain("SUPPORT_BUNDLE_PATH", quickReferenceProofBlockEn, StringComparison.Ordinal);
 
         Assert.Contains("CONSUMER_SAMPLE_TRUST_OK:True", quickReferenceProofBlockZh, StringComparison.Ordinal);
@@ -330,7 +330,7 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
         Assert.Contains("AUTHORING_SURFACE_OK:True", quickReferenceProofBlockZh, StringComparison.Ordinal);
         Assert.Contains("COMMAND_SURFACE_OK:True", quickReferenceProofBlockZh, StringComparison.Ordinal);
         Assert.Contains("HOST_NATIVE_METRIC:*", quickReferenceProofBlockZh, StringComparison.Ordinal);
-        Assert.DoesNotContain("SUPPORT_BUNDLE_OK", quickReferenceProofBlockZh, StringComparison.Ordinal);
+        Assert.DoesNotContain("- `SUPPORT_BUNDLE_OK", quickReferenceProofBlockZh, StringComparison.Ordinal);
         Assert.DoesNotContain("SUPPORT_BUNDLE_PATH", quickReferenceProofBlockZh, StringComparison.Ordinal);
 
         Assert.Contains("SUPPORT_BUNDLE_OK:True", quickReferenceBundleBlockEn, StringComparison.Ordinal);

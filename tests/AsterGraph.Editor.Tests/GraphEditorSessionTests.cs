@@ -806,6 +806,30 @@ public sealed class GraphEditorSessionTests
     }
 
     [Fact]
+    public void RuntimeSession_PendingConnectionSnapshot_CapturesInvalidTargetFeedback()
+    {
+        var definitionId = new NodeDefinitionId("tests.session.pending-invalid-target");
+        var session = AsterGraphEditorFactory.CreateSession(CreateIncompatibleOptions(definitionId));
+
+        session.Commands.StartConnection(SourceNodeId, SourcePortId);
+        session.Commands.CompleteConnection(TargetNodeId, TargetPortId);
+
+        var pending = session.Queries.GetPendingConnectionSnapshot();
+        var inspection = session.Diagnostics.CaptureInspectionSnapshot();
+
+        Assert.True(pending.HasPendingConnection);
+        Assert.Equal(SourceNodeId, pending.SourceNodeId);
+        Assert.Equal(SourcePortId, pending.SourcePortId);
+        Assert.Equal(TargetNodeId, pending.TargetNodeId);
+        Assert.Equal(TargetPortId, pending.TargetPortId);
+        Assert.Equal(GraphConnectionTargetKind.Port, pending.TargetKind);
+        Assert.False(pending.IsTargetCompatible);
+        Assert.Equal("Incompatible connection: float -> string.", pending.ValidationMessage);
+        Assert.Equal(pending.ValidationMessage, inspection.PendingConnection.ValidationMessage);
+        Assert.Empty(session.Queries.CreateDocumentSnapshot().Connections);
+    }
+
+    [Fact]
     public void RuntimeSession_FeatureDescriptors_ExposeExplicitDiscoveryWithoutFacadeInspection()
     {
         using var activitySource = new System.Diagnostics.ActivitySource("tests.session.features");
@@ -1590,6 +1614,43 @@ public sealed class GraphEditorSessionTests
         => new()
         {
             Document = CreateDocument(definitionId),
+            NodeCatalog = CreateCatalog(definitionId),
+            CompatibilityService = new DefaultPortCompatibilityService(),
+        };
+
+    private static AsterGraphEditorOptions CreateIncompatibleOptions(NodeDefinitionId definitionId)
+        => new()
+        {
+            Document = new GraphDocument(
+                "Incompatible Session Graph",
+                "Runtime session invalid connection coverage.",
+                [
+                    new GraphNode(
+                        SourceNodeId,
+                        "Source Node",
+                        "Tests",
+                        "Runtime",
+                        "Session source node.",
+                        new GraphPoint(120, 160),
+                        new GraphSize(240, 160),
+                        [],
+                        [new GraphPort(SourcePortId, "Output", PortDirection.Output, "float", "#6AD5C4", new PortTypeId("float"))],
+                        "#6AD5C4",
+                        definitionId),
+                    new GraphNode(
+                        TargetNodeId,
+                        "Target Node",
+                        "Tests",
+                        "Runtime",
+                        "Session target node.",
+                        new GraphPoint(520, 180),
+                        new GraphSize(240, 160),
+                        [new GraphPort(TargetPortId, "Input", PortDirection.Input, "string", "#F3B36B", new PortTypeId("string"))],
+                        [],
+                        "#6AD5C4",
+                        definitionId),
+                ],
+                []),
             NodeCatalog = CreateCatalog(definitionId),
             CompatibilityService = new DefaultPortCompatibilityService(),
         };

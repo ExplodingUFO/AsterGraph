@@ -229,6 +229,10 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(result.ProofLines, line => line == "PORT_GROUP_AUTHORING_OK:True");
         Assert.Contains(result.ProofLines, line => line == "PORT_CONNECTION_HINT_OK:True");
         Assert.Contains(result.ProofLines, line => line == "PORT_AUTHORING_SCOPE_BOUNDARY_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "CONNECTION_VALIDATION_REASON_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "CONNECTION_INVALID_HOVER_FEEDBACK_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "CONNECTION_VALIDATION_SUPPORT_BUNDLE_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "CONNECTION_VALIDATION_SCOPE_BOUNDARY_OK:True");
         Assert.Contains(result.ProofLines, line => line == "GRAPH_SEARCH_LOCATE_OK:True");
         Assert.Contains(result.ProofLines, line => line == "GRAPH_SEARCH_SCOPE_FILTER_OK:True");
         Assert.Contains(result.ProofLines, line => line == "GRAPH_SEARCH_VIEWPORT_FOCUS_OK:True");

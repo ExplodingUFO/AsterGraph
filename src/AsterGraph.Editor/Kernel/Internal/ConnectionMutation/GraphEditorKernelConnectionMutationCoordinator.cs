@@ -288,14 +288,18 @@ internal sealed class GraphEditorKernelConnectionMutationCoordinator
 
         if (sourcePort.TypeId is null || resolvedTarget.TypeId is null)
         {
-            _host.SetStatus("Connection endpoints must expose stable type identifiers.");
+            var reason = "Connection endpoints must expose stable type identifiers.";
+            SetPendingTargetFeedback(sourceNode, sourcePort, resolvedTarget, isCompatible: false, reason);
+            _host.SetStatus(reason);
             return;
         }
 
         var compatibility = _host.CompatibilityService.Evaluate(sourcePort.TypeId, resolvedTarget.TypeId);
         if (!compatibility.IsCompatible)
         {
-            _host.SetStatus($"Incompatible connection: {sourcePort.TypeId} -> {resolvedTarget.TypeId}.");
+            var reason = $"Incompatible connection: {sourcePort.TypeId.Value} -> {resolvedTarget.TypeId.Value}.";
+            SetPendingTargetFeedback(sourceNode, sourcePort, resolvedTarget, isCompatible: false, reason);
+            _host.SetStatus(reason);
             return;
         }
 
@@ -328,7 +332,9 @@ internal sealed class GraphEditorKernelConnectionMutationCoordinator
             && connection.SourcePortId == sourcePort.Id);
         if (outgoingCount >= sourcePort.MaxConnections)
         {
-            _host.SetStatus($"Source port '{sourcePort.Label}' has reached its maximum connection limit ({sourcePort.MaxConnections}).");
+            var reason = $"Source port '{sourcePort.Label}' has reached its maximum connection limit ({sourcePort.MaxConnections}).";
+            SetPendingTargetFeedback(sourceNode, sourcePort, resolvedTarget, isCompatible: false, reason);
+            _host.SetStatus(reason);
             return;
         }
 
@@ -340,7 +346,9 @@ internal sealed class GraphEditorKernelConnectionMutationCoordinator
         var targetPort = resolvedTarget.Node.Inputs.FirstOrDefault(port => string.Equals(port.Id, resolvedTarget.Target.TargetId, StringComparison.Ordinal));
         if (targetPort is not null && finalIncomingCount > targetPort.MaxConnections)
         {
-            _host.SetStatus($"Target port '{targetPort.Label}' would exceed its maximum connection limit ({targetPort.MaxConnections}).");
+            var reason = $"Target port '{targetPort.Label}' would exceed its maximum connection limit ({targetPort.MaxConnections}).";
+            SetPendingTargetFeedback(sourceNode, sourcePort, resolvedTarget, isCompatible: false, reason);
+            _host.SetStatus(reason);
             return;
         }
 
@@ -376,6 +384,22 @@ internal sealed class GraphEditorKernelConnectionMutationCoordinator
             [nextConnection.Id],
             preserveStatus: true);
     }
+
+    private void SetPendingTargetFeedback(
+        GraphNode sourceNode,
+        GraphPort sourcePort,
+        ResolvedConnectionTarget resolvedTarget,
+        bool isCompatible,
+        string reason)
+        => _host.SetPendingConnection(GraphEditorPendingConnectionSnapshot.Create(
+            true,
+            sourceNode.Id,
+            sourcePort.Id,
+            resolvedTarget.Node.Id,
+            resolvedTarget.Target.TargetId,
+            resolvedTarget.Target.Kind,
+            isCompatible,
+            reason));
 
     private void RemoveConnections(Func<GraphConnection, bool> predicate, string status)
     {

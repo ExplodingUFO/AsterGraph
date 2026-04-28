@@ -14,6 +14,7 @@ using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Core.Compatibility;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Automation;
+using AsterGraph.Editor.Diagnostics;
 using AsterGraph.Editor.Hosting;
 using AsterGraph.Editor.Menus;
 using AsterGraph.Editor.Runtime;
@@ -77,6 +78,10 @@ public sealed record ConsumerSampleProofResult(
     bool PortGroupAuthoringOk = true,
     bool PortConnectionHintOk = true,
     bool PortAuthoringScopeBoundaryOk = true,
+    bool ConnectionValidationReasonOk = true,
+    bool ConnectionInvalidHoverFeedbackOk = true,
+    bool ConnectionValidationSupportBundleOk = true,
+    bool ConnectionValidationScopeBoundaryOk = true,
     bool GraphSearchLocateOk = true,
     bool GraphSearchScopeFilterOk = true,
     bool GraphSearchViewportFocusOk = true,
@@ -161,6 +166,10 @@ public sealed record ConsumerSampleProofResult(
         && PortGroupAuthoringOk
         && PortConnectionHintOk
         && PortAuthoringScopeBoundaryOk
+        && ConnectionValidationReasonOk
+        && ConnectionInvalidHoverFeedbackOk
+        && ConnectionValidationSupportBundleOk
+        && ConnectionValidationScopeBoundaryOk
         && NodeSideAuthoringOk
         && CommandSurfaceOk;
 
@@ -224,6 +233,10 @@ public sealed record ConsumerSampleProofResult(
         && PortGroupAuthoringOk
         && PortConnectionHintOk
         && PortAuthoringScopeBoundaryOk
+        && ConnectionValidationReasonOk
+        && ConnectionInvalidHoverFeedbackOk
+        && ConnectionValidationSupportBundleOk
+        && ConnectionValidationScopeBoundaryOk
         && GraphSearchLocateOk
         && GraphSearchScopeFilterOk
         && GraphSearchViewportFocusOk
@@ -305,6 +318,10 @@ public sealed record ConsumerSampleProofResult(
         && PortGroupAuthoringOk
         && PortConnectionHintOk
         && PortAuthoringScopeBoundaryOk
+        && ConnectionValidationReasonOk
+        && ConnectionInvalidHoverFeedbackOk
+        && ConnectionValidationSupportBundleOk
+        && ConnectionValidationScopeBoundaryOk
         && GraphSearchLocateOk
         && GraphSearchScopeFilterOk
         && GraphSearchViewportFocusOk
@@ -482,6 +499,10 @@ public sealed record ConsumerSampleProofResult(
         $"PORT_GROUP_AUTHORING_OK:{PortGroupAuthoringOk}",
         $"PORT_CONNECTION_HINT_OK:{PortConnectionHintOk}",
         $"PORT_AUTHORING_SCOPE_BOUNDARY_OK:{PortAuthoringScopeBoundaryOk}",
+        $"CONNECTION_VALIDATION_REASON_OK:{ConnectionValidationReasonOk}",
+        $"CONNECTION_INVALID_HOVER_FEEDBACK_OK:{ConnectionInvalidHoverFeedbackOk}",
+        $"CONNECTION_VALIDATION_SUPPORT_BUNDLE_OK:{ConnectionValidationSupportBundleOk}",
+        $"CONNECTION_VALIDATION_SCOPE_BOUNDARY_OK:{ConnectionValidationScopeBoundaryOk}",
         $"GRAPH_SEARCH_LOCATE_OK:{GraphSearchLocateOk}",
         $"GRAPH_SEARCH_SCOPE_FILTER_OK:{GraphSearchScopeFilterOk}",
         $"GRAPH_SEARCH_VIEWPORT_FOCUS_OK:{GraphSearchViewportFocusOk}",
@@ -876,6 +897,10 @@ public static class ConsumerSampleProof
         bool portGroupAuthoringOk;
         bool portConnectionHintOk;
         bool portAuthoringScopeBoundaryOk;
+        bool connectionValidationReasonOk;
+        bool connectionInvalidHoverFeedbackOk;
+        bool connectionValidationSupportBundleOk;
+        bool connectionValidationScopeBoundaryOk;
         bool commandPaletteGroupingOk;
         bool commandPaletteDisabledReasonOk;
         bool commandPaletteRecentActionsOk;
@@ -925,6 +950,8 @@ public static class ConsumerSampleProof
             runtimeOverlayScopeFilterOk = HasRuntimeOverlayScopeFilter(host);
             (portHandleIdOk, portGroupAuthoringOk, portConnectionHintOk, portAuthoringScopeBoundaryOk) =
                 HasPortHandleAuthoring(host);
+            (connectionValidationReasonOk, connectionInvalidHoverFeedbackOk, connectionValidationSupportBundleOk, connectionValidationScopeBoundaryOk) =
+                HasConnectionValidationFeedback();
             (quickAddConnectedNodeOk, portFilteredNodeSearchOk) = HasQuickAddConnectedNode(host);
             (commandPaletteGroupingOk, commandPaletteDisabledReasonOk, commandPaletteRecentActionsOk) =
                 HasCommandPaletteProductivity(capabilityWindow);
@@ -1022,6 +1049,10 @@ public static class ConsumerSampleProof
             PortGroupAuthoringOk: portGroupAuthoringOk,
             PortConnectionHintOk: portConnectionHintOk,
             PortAuthoringScopeBoundaryOk: portAuthoringScopeBoundaryOk,
+            ConnectionValidationReasonOk: connectionValidationReasonOk,
+            ConnectionInvalidHoverFeedbackOk: connectionInvalidHoverFeedbackOk,
+            ConnectionValidationSupportBundleOk: connectionValidationSupportBundleOk,
+            ConnectionValidationScopeBoundaryOk: connectionValidationScopeBoundaryOk,
             GraphSearchLocateOk: graphSearchLocateOk,
             GraphSearchScopeFilterOk: graphSearchScopeFilterOk,
             GraphSearchViewportFocusOk: graphSearchViewportFocusOk,
@@ -3098,6 +3129,102 @@ public static class ConsumerSampleProof
             && Type.GetType("AsterGraph.Core.Models.GraphHandle, AsterGraph.Core") is null;
 
         return (handleIdOk, groupOk, hintOk, scopeBoundaryOk);
+    }
+
+    private static (bool ReasonOk, bool InvalidHoverOk, bool SupportBundleOk, bool ScopeBoundaryOk) HasConnectionValidationFeedback()
+    {
+        const string sourceNodeId = "consumer-sample.validation.source";
+        const string targetNodeId = "consumer-sample.validation.target";
+        const string sourcePortId = "out";
+        const string targetPortId = "in";
+        var definitionId = new NodeDefinitionId("consumer.sample.connection-validation");
+        var catalog = new AsterGraph.Editor.Catalog.NodeCatalog();
+        catalog.RegisterDefinition(new NodeDefinition(
+            definitionId,
+            "Connection Validation Node",
+            "Consumer Sample",
+            "Validation",
+            [],
+            [],
+            []));
+        var session = AsterGraphEditorFactory.CreateSession(new AsterGraphEditorOptions
+        {
+            Document = new GraphDocument(
+                "Connection Validation Proof",
+                "Connection validation feedback proof.",
+                [
+                    new GraphNode(
+                        sourceNodeId,
+                        "Float Source",
+                        "Consumer Sample",
+                        "Validation",
+                        "Source node with a float output.",
+                        new GraphPoint(0, 0),
+                        new GraphSize(220, 140),
+                        [],
+                        [new GraphPort(sourcePortId, "Float", PortDirection.Output, "float", "#6AD5C4", new PortTypeId("float"))],
+                        "#6AD5C4",
+                        definitionId),
+                    new GraphNode(
+                        targetNodeId,
+                        "String Target",
+                        "Consumer Sample",
+                        "Validation",
+                        "Target node with a string input.",
+                        new GraphPoint(320, 0),
+                        new GraphSize(220, 140),
+                        [new GraphPort(targetPortId, "Text", PortDirection.Input, "string", "#F3B36B", new PortTypeId("string"))],
+                        [],
+                        "#F3B36B",
+                        definitionId),
+                ],
+                [
+                    new GraphConnection(
+                        "consumer-sample.validation.connection",
+                        sourceNodeId,
+                        sourcePortId,
+                        targetNodeId,
+                        targetPortId,
+                        "Invalid Float To Text",
+                        "#6AD5C4"),
+                ]),
+            NodeCatalog = catalog,
+            CompatibilityService = new DefaultPortCompatibilityService(),
+        });
+
+        var validation = session.Queries.GetValidationSnapshot();
+        session.Commands.StartConnection(sourceNodeId, sourcePortId);
+        session.Commands.CompleteConnection(targetNodeId, targetPortId);
+        var pending = session.Queries.GetPendingConnectionSnapshot();
+        var inspectionPending = session.Diagnostics.CaptureInspectionSnapshot().PendingConnection;
+        var issue = validation.Issues.SingleOrDefault(snapshot =>
+            string.Equals(snapshot.Code, "connection.incompatible-endpoint-types", StringComparison.Ordinal));
+        var summary = CreateValidationSummary(validation);
+        var feedback = CreateValidationFeedback(validation);
+
+        var reasonOk = issue is not null
+            && issue.Message.Contains("float -> string", StringComparison.Ordinal)
+            && string.Equals(pending.ValidationMessage, "Incompatible connection: float -> string.", StringComparison.Ordinal);
+        var invalidHoverOk = pending.HasPendingConnection
+            && string.Equals(pending.SourceNodeId, sourceNodeId, StringComparison.Ordinal)
+            && string.Equals(pending.SourcePortId, sourcePortId, StringComparison.Ordinal)
+            && string.Equals(pending.TargetNodeId, targetNodeId, StringComparison.Ordinal)
+            && string.Equals(pending.TargetPortId, targetPortId, StringComparison.Ordinal)
+            && pending.TargetKind == GraphConnectionTargetKind.Port
+            && pending.IsTargetCompatible == false
+            && string.Equals(inspectionPending.ValidationMessage, pending.ValidationMessage, StringComparison.Ordinal);
+        var supportBundleOk = summary.TotalIssueCount == feedback.Count
+            && summary.InvalidConnectionCount == 1
+            && feedback.Any(row =>
+                string.Equals(row.Code, "connection.incompatible-endpoint-types", StringComparison.Ordinal)
+                && row.FocusTarget.Kind == "ConnectionEndpoint"
+                && string.Equals(row.FocusTarget.ConnectionId, "consumer-sample.validation.connection", StringComparison.Ordinal)
+                && string.Equals(row.FocusTarget.EndpointId, targetPortId, StringComparison.Ordinal));
+        var scopeBoundaryOk = typeof(GraphEditorPendingConnectionSnapshot).Namespace == "AsterGraph.Editor.Diagnostics"
+            && typeof(GraphEditorValidationIssueSnapshot).Namespace == "AsterGraph.Editor.Runtime"
+            && Type.GetType("AsterGraph.Editor.Runtime.IGraphExecutionEngine, AsterGraph.Editor") is null;
+
+        return (reasonOk, invalidHoverOk, supportBundleOk, scopeBoundaryOk);
     }
 
     private static bool HasRuntimeLogPanel(Window window, ConsumerSampleHost host)
