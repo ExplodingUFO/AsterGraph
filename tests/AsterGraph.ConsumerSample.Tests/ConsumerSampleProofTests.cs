@@ -8,6 +8,7 @@ using Avalonia.Interactivity;
 using Avalonia.VisualTree;
 using AsterGraph.Avalonia.Controls;
 using AsterGraph.ConsumerSample;
+using AsterGraph.Editor.Runtime;
 using Xunit;
 
 namespace AsterGraph.ConsumerSample.Tests;
@@ -147,6 +148,8 @@ public sealed class ConsumerSampleProofTests
         Assert.True(result.SupportBundlePayloadOk);
         Assert.True(result.FiveMinuteOnboardingOk);
         Assert.True(result.RuntimeOverlaySnapshotOk);
+        Assert.True(result.RuntimeOverlaySnapshotPolishOk);
+        Assert.True(result.RuntimeOverlayScopeFilterOk);
         Assert.True(result.RuntimeLogPanelOk);
         Assert.True(result.RuntimeLogFilterOk);
         Assert.True(result.GraphSnippetCatalogOk);
@@ -186,6 +189,8 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_WIRE_SLICE_OK:True");
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_SELECTED_NODE_EDGE_HIGHLIGHT_OK:True");
         Assert.Contains(result.ProofLines, line => line == "RUNTIME_OVERLAY_SNAPSHOT_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "RUNTIME_OVERLAY_SNAPSHOT_POLISH_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "RUNTIME_OVERLAY_SCOPE_FILTER_OK:True");
         Assert.Contains(result.ProofLines, line => line == "RUNTIME_LOG_PANEL_OK:True");
         Assert.Contains(result.ProofLines, line => line == "RUNTIME_LOG_FILTER_OK:True");
         Assert.Contains(result.ProofLines, line => line == "RUNTIME_OVERLAY_SUPPORT_BUNDLE_OK:True");
@@ -622,6 +627,8 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(proofLines, line => line == "AUTHORING_WIRE_SLICE_OK:True");
         Assert.Contains(proofLines, line => line == "AUTHORING_SELECTED_NODE_EDGE_HIGHLIGHT_OK:True");
         Assert.Contains(proofLines, line => line == "RUNTIME_OVERLAY_SNAPSHOT_OK:True");
+        Assert.Contains(proofLines, line => line == "RUNTIME_OVERLAY_SNAPSHOT_POLISH_OK:True");
+        Assert.Contains(proofLines, line => line == "RUNTIME_OVERLAY_SCOPE_FILTER_OK:True");
         Assert.Contains(proofLines, line => line == "RUNTIME_LOG_PANEL_OK:True");
         Assert.Contains(proofLines, line => line == "RUNTIME_LOG_FILTER_OK:True");
         Assert.Contains(proofLines, line => line == "RUNTIME_OVERLAY_SUPPORT_BUNDLE_OK:True");
@@ -706,6 +713,13 @@ public sealed class ConsumerSampleProofTests
         Assert.True(runtimeNodeOverlays.Length > 0);
         Assert.True(runtimeConnectionOverlays.Length > 0);
         Assert.True(runtimeLogs.Length > 0);
+        Assert.Contains(runtimeNodeOverlays, overlay =>
+            overlay.GetProperty("status").GetInt32() == (int)GraphEditorRuntimeOverlayStatus.Error
+            && overlay.GetProperty("errorCount").GetInt32() > 0
+            && !string.IsNullOrWhiteSpace(overlay.GetProperty("errorMessage").GetString()));
+        Assert.Contains(runtimeConnectionOverlays, overlay =>
+            overlay.GetProperty("isStale").GetBoolean()
+            && overlay.GetProperty("status").GetInt32() == (int)GraphEditorRuntimeOverlayStatus.Error);
         Assert.Contains(runtimeLogs, log => log.GetProperty("nodeId").GetString() == "consumer-sample-queue-001");
 
         var statusSnapshot = parameterSnapshots.First(snapshot =>

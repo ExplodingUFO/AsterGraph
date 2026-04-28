@@ -688,9 +688,12 @@ public sealed class ConsumerSampleHost : IDisposable
                     LastRunAtUtc: SampleTimestamp),
                 new GraphEditorNodeRuntimeOverlaySnapshot(
                     InitialQueueNodeId,
-                    GraphEditorRuntimeOverlayStatus.Running,
+                    GraphEditorRuntimeOverlayStatus.Error,
                     ElapsedMilliseconds: 8,
                     OutputPreview: "queue handoff pending",
+                    WarningCount: 1,
+                    ErrorCount: 1,
+                    ErrorMessage: "Queue handoff requires reviewer approval.",
                     LastRunAtUtc: SampleTimestamp),
             ];
 
@@ -703,6 +706,13 @@ public sealed class ConsumerSampleHost : IDisposable
                     ValuePreview: "{ status: approved, lane: alpha }",
                     PayloadType: "review",
                     ItemCount: 1),
+                new GraphEditorConnectionRuntimeOverlaySnapshot(
+                    "consumer-sample-connection-001:stale",
+                    GraphEditorRuntimeOverlayStatus.Error,
+                    ValuePreview: "{ status: draft, lane: alpha }",
+                    PayloadType: "review",
+                    ItemCount: 1,
+                    IsStale: true),
             ];
 
         public IReadOnlyList<GraphEditorRuntimeLogEntrySnapshot> GetRecentLogs()
@@ -716,6 +726,22 @@ public sealed class ConsumerSampleHost : IDisposable
                     ScopeId: "root",
                     NodeId: InitialQueueNodeId,
                     ConnectionId: "consumer-sample-connection-001"),
+                new GraphEditorRuntimeLogEntrySnapshot(
+                    "consumer-sample-runtime-log-002",
+                    SampleTimestamp,
+                    GraphEditorRuntimeOverlayStatus.Success,
+                    "Review payload approved.",
+                    ScopeId: "root",
+                    NodeId: InitialReviewNodeId,
+                    ConnectionId: "consumer-sample-connection-001"),
+                new GraphEditorRuntimeLogEntrySnapshot(
+                    "consumer-sample-runtime-log-003",
+                    SampleTimestamp,
+                    GraphEditorRuntimeOverlayStatus.Error,
+                    "Queue handoff requires reviewer approval.",
+                    ScopeId: "root",
+                    NodeId: InitialQueueNodeId,
+                    ConnectionId: "consumer-sample-connection-001:stale"),
             ];
     }
 
