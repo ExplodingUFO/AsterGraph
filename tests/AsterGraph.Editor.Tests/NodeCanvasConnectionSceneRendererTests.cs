@@ -181,7 +181,7 @@ public sealed class NodeCanvasConnectionSceneRendererTests
     }
 
     [AvaloniaFact]
-    public void RenderConnections_UsesCanonicalGeometrySnapshots_WhenRenderedNodeAnchorsDisagree()
+    public void RenderConnections_UsesLiveNodeAnchors_WhenGeometrySnapshotLagsDuringDrag()
     {
         var renderer = new NodeCanvasConnectionSceneRenderer();
         var editor = CreateEditor(includeConnection: true);
@@ -195,23 +195,36 @@ public sealed class NodeCanvasConnectionSceneRendererTests
                 hostedScene.NodeLayer,
                 hostedScene.CoordinateRoot,
                 hostedScene.NodeVisuals);
-            var expectedGeometry = Assert.Single(editor.Session.Queries.GetConnectionGeometrySnapshots());
             var sourceNode = editor.Nodes.Single(node => node.Id == SourceNodeId);
             var sourcePort = sourceNode.Outputs.Single(port => port.Id == SourcePortId);
-            var visualAnchor = renderer.GetPortAnchor(context, sourceNode, sourcePort);
+            var targetNode = editor.Nodes.Single(node => node.Id == TargetNodeId);
+            var staleGeometry = Assert.Single(editor.Session.Queries.GetConnectionGeometrySnapshots());
+
+            editor.ApplyDragOffset(
+                new Dictionary<string, GraphPoint>(StringComparer.Ordinal)
+                {
+                    [sourceNode.Id] = new(sourceNode.X, sourceNode.Y),
+                },
+                84d,
+                36d);
 
             renderer.RenderConnections(context);
 
             var path = Assert.Single(hostedScene.ConnectionLayer.Children.OfType<global::Avalonia.Controls.Shapes.Path>());
             var chip = Assert.Single(hostedScene.ConnectionLayer.Children.OfType<Border>());
-            var expectedMidX = (expectedGeometry.Source.Position.X + expectedGeometry.Target.Position.X) / 2d;
-            var expectedMidY = (expectedGeometry.Source.Position.Y + expectedGeometry.Target.Position.Y) / 2d;
+            var expectedSource = renderer.GetPortAnchor(context, sourceNode, sourcePort);
+            var expectedTarget = renderer.GetConnectionTargetAnchor(
+                context,
+                targetNode,
+                new GraphConnectionTargetRef(targetNode.Id, TargetPortId, GraphConnectionTargetKind.Port));
+            var expectedMidX = (expectedSource.X + expectedTarget.X) / 2d;
+            var expectedMidY = (expectedSource.Y + expectedTarget.Y) / 2d;
             var expectedBounds = CreateRouteGeometry(
-                expectedGeometry.Source.Position,
-                expectedGeometry.Route,
-                expectedGeometry.Target.Position).Bounds;
+                expectedSource,
+                staleGeometry.Route,
+                expectedTarget).Bounds;
 
-            Assert.NotEqual(expectedGeometry.Source.Position, visualAnchor);
+            Assert.NotEqual(staleGeometry.Source.Position, expectedSource);
             Assert.Equal(expectedBounds.X, path.Data!.Bounds.X, 6);
             Assert.Equal(expectedBounds.Y, path.Data.Bounds.Y, 6);
             Assert.Equal(expectedBounds.Width, path.Data.Bounds.Width, 6);
@@ -240,19 +253,29 @@ public sealed class NodeCanvasConnectionSceneRendererTests
 
         try
         {
-            renderer.RenderConnections(CreateSceneContext(
+            var context = CreateSceneContext(
                 editor,
                 hostedScene.ConnectionLayer,
                 hostedScene.NodeLayer,
                 hostedScene.CoordinateRoot,
-                hostedScene.NodeVisuals));
+                hostedScene.NodeVisuals);
+
+            renderer.RenderConnections(context);
 
             var expectedGeometry = Assert.Single(editor.Session.Queries.GetConnectionGeometrySnapshots());
             var path = Assert.Single(hostedScene.ConnectionLayer.Children.OfType<global::Avalonia.Controls.Shapes.Path>());
+            var sourceNode = editor.Nodes.Single(node => node.Id == SourceNodeId);
+            var sourcePort = sourceNode.Outputs.Single(port => port.Id == SourcePortId);
+            var targetNode = editor.Nodes.Single(node => node.Id == TargetNodeId);
+            var expectedSource = renderer.GetPortAnchor(context, sourceNode, sourcePort);
+            var expectedTarget = renderer.GetConnectionTargetAnchor(
+                context,
+                targetNode,
+                new GraphConnectionTargetRef(targetNode.Id, TargetPortId, GraphConnectionTargetKind.Port));
             var expectedBounds = CreateRouteGeometry(
-                expectedGeometry.Source.Position,
+                expectedSource,
                 expectedGeometry.Route,
-                expectedGeometry.Target.Position).Bounds;
+                expectedTarget).Bounds;
 
             Assert.Equal(
                 new GraphConnectionRoute(

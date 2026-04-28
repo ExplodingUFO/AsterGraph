@@ -63,11 +63,17 @@ internal sealed class NodeCanvasConnectionSceneRenderer
                 continue;
             }
 
+            var targetNode = context.ViewModel.FindNode(connection.TargetNodeId);
+            if (targetNode is null)
+            {
+                continue;
+            }
+
             DrawConnection(
                 context,
-                geometry.Source.Position,
+                GetPortAnchor(context, sourceNode, sourcePort),
                 geometry.Route,
-                geometry.Target.Position,
+                GetConnectionTargetAnchor(context, targetNode, connection.Target),
                 connection,
                 sourcePort);
         }
