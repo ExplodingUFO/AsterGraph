@@ -85,7 +85,7 @@ Every real external report used for this gate must carry the same intake vocabul
 | Claim | Route-level evidence |
 | --- | --- |
 | Canonical runtime/session route and the maintained evaluator ladder are externally proven on the defended beta line. | `tools/AsterGraph.HelloWorld`, `tools/AsterGraph.Starter.Avalonia`, `tools/AsterGraph.HelloWorld.Avalonia`, `tools/AsterGraph.ConsumerSample.Avalonia`, `tools/AsterGraph.HostSample`, `HOST_SAMPLE_OK`, `CONSUMER_SAMPLE_OK`, `GRAPH_SNIPPET_CATALOG_OK`, `GRAPH_SNIPPET_INSERT_OK`, `AUTHORING_FLOW_PROOF_OK`, `AUTHORING_FLOW_HANDOFF_OK`, `AUTHORING_FLOW_SCOPE_BOUNDARY_OK`, `EXPERIENCE_POLISH_HANDOFF_OK`, `FEATURE_ENHANCEMENT_PROOF_OK`, `EXPERIENCE_SCOPE_BOUNDARY_OK` |
-| The showcase authoring surface is externally proven as a bounded beta host experience. | `src/AsterGraph.Demo`, `DEMO_OK`, `DEMO_SCENARIO_PRESETS_OK`, `COMMAND_SURFACE_OK`, `COMPOSITE_SCOPE_OK`, `EDGE_NOTE_OK`, `EDGE_GEOMETRY_OK`, `DISCONNECT_FLOW_OK` |
+| The showcase authoring surface and host-owned runtime feedback are externally proven as a bounded beta host experience. | `src/AsterGraph.Demo`, `tools/AsterGraph.ConsumerSample.Avalonia`, `DEMO_OK:True`, `DEMO_SCENARIO_PRESETS_OK:True`, `COMMAND_SURFACE_OK:True`, `COMPOSITE_SCOPE_OK:True`, `EDGE_NOTE_OK:True`, `EDGE_GEOMETRY_OK:True`, `DISCONNECT_FLOW_OK:True`, `RUNTIME_DEBUG_PANEL_INTERACTION_OK:True`, `RUNTIME_LOG_LOCATE_OK:True`, `RUNTIME_LOG_EXPORT_OK:True`, `AI_PIPELINE_MOCK_RUNNER_POLISH_OK:True`, `AI_PIPELINE_PAYLOAD_PREVIEW_OK:True`, `AI_PIPELINE_ERROR_DEBUG_EVIDENCE_OK:True` |
 | Packaged consumer proof is externally proven without widening the SDK boundary. | `tools/AsterGraph.PackageSmoke`, `PACKAGE_SMOKE_OK`, `HOST_SAMPLE_NET10_OK` |
 | Scale proof is externally proven at defended `baseline`/`large` tiers and 5000-node `stress`: performance, authoring, SVG export, conservative PNG/JPEG raster export, and reload are defended. | `tools/AsterGraph.ScaleSmoke`, `SCALE_PERFORMANCE_BUDGET_OK:baseline:True`, `SCALE_PERFORMANCE_BUDGET_OK:large:True`, `SCALE_PERFORMANCE_BUDGET_OK:stress:True`, `SCALE_EXPORT_BUDGET:stress:svg<=300:png<=120000:jpeg<=100000:reload<=800`, `SCALE_RASTER_EXPORT_STRESS_OK:True` |
 
@@ -103,6 +103,7 @@ Every real external report used for this gate must carry the same intake vocabul
 - faster defended claims beyond the conservative 5000-node `stress` raster export gates
 - new hosted adapters or widened adapter claims beyond Avalonia plus the current `WPF` validation lane
 - marketplace, remote install/update, unload lifecycle, or sandboxed plugin stories
+- algorithm execution engine or workflow scripting UI stories beyond host-owned runtime feedback display evidence
 - stable / GA / `1.0` support guarantees
 - GA prep checklist: adoption evidence, API drift, support boundary, and release proof gates must all be reviewed before any GA or `1.0` language.
 - the current 0.xx alpha/beta hardening line is `Performance / Export Hardening`: tighten export budgets, add progress/cancel/scope evidence, then consider rendering cache work

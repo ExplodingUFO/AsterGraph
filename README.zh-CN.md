@@ -170,6 +170,22 @@ dotnet add package AsterGraph.Abstractions --prerelease
 - 进程级沙箱或不受信任代码隔离保证
 - 专用脚本语言或 automation 可视化编排器
 
+## Runtime Feedback Proof Handoff
+
+Runtime feedback 是宿主自管的展示证据。`AsterGraph.Editor` 暴露 overlay snapshot、recent logs 和 diagnostics；它不执行图，也不提供 workflow scripting UI。
+
+当前 proof run 应该保持这些 runtime feedback marker 为绿色：
+
+- `RUNTIME_OVERLAY_SNAPSHOT_POLISH_OK:True`
+- `RUNTIME_DEBUG_PANEL_INTERACTION_OK:True`
+- `RUNTIME_LOG_LOCATE_OK:True`
+- `RUNTIME_LOG_EXPORT_OK:True`
+- `AI_PIPELINE_MOCK_RUNNER_POLISH_OK:True`
+- `AI_PIPELINE_PAYLOAD_PREVIEW_OK:True`
+- `AI_PIPELINE_ERROR_DEBUG_EVIDENCE_OK:True`
+
+这些 marker 不引入 algorithm execution engine、marketplace、sandbox、WPF parity 声明，或 GA / `1.0` 支持口径。
+
 ## 插件信任边界
 
 插件加载当前是进程内执行。AsterGraph 现在提供的是：

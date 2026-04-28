@@ -170,6 +170,22 @@ Current non-goals:
 - process sandboxing or untrusted-code isolation guarantees
 - dedicated scripting language or workflow-designer UI for automation authoring
 
+## Runtime Feedback Proof Handoff
+
+Runtime feedback is host-owned display evidence. `AsterGraph.Editor` exposes overlay snapshots, recent logs, and diagnostics; it does not execute graphs or provide a workflow scripting UI.
+
+Current proof runs should keep these runtime feedback markers green:
+
+- `RUNTIME_OVERLAY_SNAPSHOT_POLISH_OK:True`
+- `RUNTIME_DEBUG_PANEL_INTERACTION_OK:True`
+- `RUNTIME_LOG_LOCATE_OK:True`
+- `RUNTIME_LOG_EXPORT_OK:True`
+- `AI_PIPELINE_MOCK_RUNNER_POLISH_OK:True`
+- `AI_PIPELINE_PAYLOAD_PREVIEW_OK:True`
+- `AI_PIPELINE_ERROR_DEBUG_EVIDENCE_OK:True`
+
+These markers do not introduce an algorithm execution engine, marketplace, sandbox, WPF parity claim, or GA / `1.0` support language.
+
 ## Plugin Trust Boundary
 
 Plugin loading is in-process. AsterGraph currently gives hosts:

@@ -38,6 +38,7 @@ This sample keeps one realistic host window without turning into a full showcase
 - one support-bundle proof path with onboarding markers for the scenario graph, host-owned actions, canonical graph readiness evidence, support-bundle payload readiness, and five-minute handoff health
 - one authoring flow proof handoff that keeps quick-add, insert-on-wire, reconnect editing, edge multiselect, and wire slicing on the existing session command path
 - one final handoff marker set that ties UX polish, feature enhancement proof, and scope-boundary evidence together without adding runtime APIs, marketplace behavior, sandboxing, or WPF parity
+- one runtime feedback proof handoff with `RUNTIME_DEBUG_PANEL_INTERACTION_OK:True`, `RUNTIME_LOG_LOCATE_OK:True`, and `RUNTIME_LOG_EXPORT_OK:True`, paired with Demo's `AI_PIPELINE_MOCK_RUNNER_POLISH_OK:True`, `AI_PIPELINE_PAYLOAD_PREVIEW_OK:True`, and `AI_PIPELINE_ERROR_DEBUG_EVIDENCE_OK:True`; these are host-owned debug/support markers, not an execution engine, workflow scripting UI, marketplace, sandbox, WPF parity, or GA claim
 - the shipped Avalonia editor surface on the factory-based hosted-UI route
 
 ## Copy These Host-Owned Seams

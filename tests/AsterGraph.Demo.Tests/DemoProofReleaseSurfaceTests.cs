@@ -1494,6 +1494,39 @@ public sealed class DemoProofReleaseSurfaceTests
         Assert.True(HasLineWithAll(demoGuideZh, "runtime marketplace", "preset API"));
     }
 
+    [Fact]
+    public void RuntimeFeedbackDocs_SurfaceProofMarkersWithoutSupportClaimExpansion()
+    {
+        var readme = ReadRepoFile("README.md");
+        var readmeZh = ReadRepoFile("README.zh-CN.md");
+        var consumerSample = ReadRepoFile("docs/en/consumer-sample.md");
+        var consumerSampleZh = ReadRepoFile("docs/zh-CN/consumer-sample.md");
+        var quickStart = ReadRepoFile("docs/en/quick-start.md");
+        var quickStartZh = ReadRepoFile("docs/zh-CN/quick-start.md");
+        var supportBundle = ReadRepoFile("docs/en/support-bundle.md");
+        var supportBundleZh = ReadRepoFile("docs/zh-CN/support-bundle.md");
+        var projectStatus = ReadRepoFile("docs/en/project-status.md");
+        var projectStatusZh = ReadRepoFile("docs/zh-CN/project-status.md");
+        var launchChecklist = ReadRepoFile("docs/en/public-launch-checklist.md");
+        var launchChecklistZh = ReadRepoFile("docs/zh-CN/public-launch-checklist.md");
+
+        foreach (var contents in new[] { readme, readmeZh, consumerSample, consumerSampleZh, quickStart, quickStartZh, supportBundle, supportBundleZh, projectStatus, projectStatusZh, launchChecklist, launchChecklistZh })
+        {
+            Assert.Contains("RUNTIME_DEBUG_PANEL_INTERACTION_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("RUNTIME_LOG_LOCATE_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("RUNTIME_LOG_EXPORT_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("AI_PIPELINE_MOCK_RUNNER_POLISH_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("AI_PIPELINE_PAYLOAD_PREVIEW_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("AI_PIPELINE_ERROR_DEBUG_EVIDENCE_OK:True", contents, StringComparison.Ordinal);
+        }
+
+        Assert.True(HasLineWithAll(readme, "does not execute graphs", "workflow scripting UI"));
+        Assert.True(HasLineWithAll(readme, "algorithm execution engine", "marketplace", "sandbox", "WPF parity", "GA"));
+        Assert.True(HasLineWithAll(supportBundle, "host-owned", "not a workflow scripting UI", "marketplace", "sandbox", "WPF parity", "GA"));
+        Assert.True(HasLineWithAll(launchChecklist, "does not imply", "algorithm execution engine", "workflow scripting UI", "plugin marketplace", "sandboxing", "WPF parity", "GA"));
+        Assert.True(HasLineWithAll(projectStatus, "algorithm execution engine", "workflow scripting UI", "host-owned runtime feedback"));
+    }
+
     private static string GetPackageVersion()
     {
         var props = XDocument.Load(Path.Combine(GetRepositoryRoot(), "Directory.Build.props"));
