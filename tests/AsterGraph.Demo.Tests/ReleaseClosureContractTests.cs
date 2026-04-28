@@ -487,6 +487,26 @@ public sealed class ReleaseClosureContractTests
     }
 
     [Fact]
+    public void EdgeInteractionRendering_StaysVisibleInStatusAndChecklist()
+    {
+        var englishChecklist = ReadRepoFile("docs/en/public-launch-checklist.md");
+        var chineseChecklist = ReadRepoFile("docs/zh-CN/public-launch-checklist.md");
+        var englishStatus = ReadRepoFile("docs/en/project-status.md");
+        var chineseStatus = ReadRepoFile("docs/zh-CN/project-status.md");
+
+        foreach (var contents in new[] { englishChecklist, chineseChecklist, englishStatus, chineseStatus })
+        {
+            Assert.Contains("EDGE_INTERACTION_CACHE_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("EDGE_DRAG_ROUTE_SIMPLIFICATION_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("SELECTED_EDGE_FEEDBACK_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("EDGE_RENDERING_SCOPE_BOUNDARY_OK:True", contents, StringComparison.Ordinal);
+        }
+
+        Assert.True(HasLineWithAll(englishStatus, "edge interaction proof", "existing edge quick-tool", "hosted proof route", "runtime renderer contract"));
+        Assert.True(HasLineWithAll(chineseStatus, "edge interaction proof", "edge quick-tool", "hosted proof route", "runtime renderer contract"));
+    }
+
+    [Fact]
     public void ReleaseCoverageValidation_BoundsHungTestCollectors()
     {
         var ciScript = ReadRepoFile("eng/ci.ps1");

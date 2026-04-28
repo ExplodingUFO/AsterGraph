@@ -23,6 +23,7 @@
 authoring depth handoff marker 汇总已经完成的 v0.58 convenience polish，但不扩大支持边界：`AUTHORING_DEPTH_HANDOFF_OK:True`、`AUTHORING_DEPTH_SCOPE_BOUNDARY_OK:True` 和 `V058_MILESTONE_PROOF_OK:True`。
 large-graph UX baseline marker 只汇总现有 hosted performance 和 LOD 证据：`LARGE_GRAPH_UX_POLICY_OK:True`、`LARGE_GRAPH_UX_SCOPE_BOUNDARY_OK:True` 和 `LARGE_GRAPH_UX_PROOF_BASELINE_OK:True`。
 viewport LOD marker 证明 selected/hovered affordances 仍受 hosted workbench policy 约束：`VIEWPORT_LOD_POLICY_OK:True`、`SELECTED_HOVERED_ADORNER_SCOPE_OK:True`、`LARGE_GRAPH_BALANCED_UX_OK:True` 和 `VIEWPORT_LOD_SCOPE_BOUNDARY_OK:True`。
+edge interaction marker 汇总 hosted edge quick-tool、toolbar 和 geometry 证据，但不创建 runtime renderer contract：`EDGE_INTERACTION_CACHE_OK:True`、`EDGE_DRAG_ROUTE_SIMPLIFICATION_OK:True`、`SELECTED_EDGE_FEEDBACK_OK:True` 和 `EDGE_RENDERING_SCOPE_BOUNDARY_OK:True`。
 authoring flow handoff 会汇总 quick-add、insert-on-wire、reconnect editing、edge multiselect 和 wire slicing，并继续走现有 session command path：`AUTHORING_FLOW_PROOF_OK:True`、`AUTHORING_FLOW_HANDOFF_OK:True` 和 `AUTHORING_FLOW_SCOPE_BOUNDARY_OK:True`。
 
 这条 hosted route ladder 是 `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerSample.Avalonia`。
@@ -403,6 +404,7 @@ Proof Handoff 负责实际 intake 说明。
 - capability breadth：把同一条路线和 [Capability Breadth Recipe](./capability-breadth-recipe.md) 配在一起，并从 `AsterGraph.ConsumerSample.Avalonia -- --proof` 输出 `CAPABILITY_BREADTH_*` markers
 - onboarding markers：继续守住 `CONSUMER_SAMPLE_SCENARIO_GRAPH_OK:True`、`CONSUMER_SAMPLE_HOST_OWNED_ACTIONS_OK:True`、`CONSUMER_SAMPLE_SUPPORT_BUNDLE_READY_OK:True`、`GRAPH_VALIDATION_FEEDBACK_OK:True`、`GRAPH_FEEDBACK_FOCUS_TARGET_OK:True`、`GRAPH_READINESS_STATUS_OK:True`、`FIVE_MINUTE_ONBOARDING_OK:True` 和 `ONBOARDING_CONFIGURATION_OK:True`
 - authoring flow markers：把 `AUTHORING_FLOW_PROOF_OK:True`、`AUTHORING_FLOW_HANDOFF_OK:True` 和 `AUTHORING_FLOW_SCOPE_BOUNDARY_OK:True` 与 quick-add、insert-on-wire、reconnect editing、edge multiselect、wire slicing proof 行放在一起看
+- edge interaction markers：把 `EDGE_INTERACTION_CACHE_OK:True`、`EDGE_DRAG_ROUTE_SIMPLIFICATION_OK:True`、`SELECTED_EDGE_FEEDBACK_OK:True` 和 `EDGE_RENDERING_SCOPE_BOUNDARY_OK:True` 与现有 edge quick-tool、toolbar 和 geometry 证据放在一起看
 - 最终 handoff markers：把 `EXPERIENCE_POLISH_HANDOFF_OK:True`、`FEATURE_ENHANCEMENT_PROOF_OK:True` 和 `EXPERIENCE_SCOPE_BOUNDARY_OK:True` 放在一起看，让 scope boundary 保持显式
 - support bundle：在 proof mode 上额外附带 `--support-bundle`，生成本地 JSON 证据包给 support/feedback 使用
 - sample-owned content：review/audit 节点族、action ids/titles 和 proof labels 应该保持在你的 app 内部，不要写成 canonical contract

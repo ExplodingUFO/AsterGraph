@@ -23,6 +23,7 @@ Its final experience handoff markers summarize existing proof lines only: `EXPER
 Its authoring depth handoff markers summarize the completed v0.58 convenience polish without widening the support boundary: `AUTHORING_DEPTH_HANDOFF_OK:True`, `AUTHORING_DEPTH_SCOPE_BOUNDARY_OK:True`, and `V058_MILESTONE_PROOF_OK:True`.
 Its large-graph UX baseline markers summarize existing hosted performance and LOD evidence only: `LARGE_GRAPH_UX_POLICY_OK:True`, `LARGE_GRAPH_UX_SCOPE_BOUNDARY_OK:True`, and `LARGE_GRAPH_UX_PROOF_BASELINE_OK:True`.
 Its viewport LOD markers prove selected/hovered affordances stay bounded to hosted workbench policy: `VIEWPORT_LOD_POLICY_OK:True`, `SELECTED_HOVERED_ADORNER_SCOPE_OK:True`, `LARGE_GRAPH_BALANCED_UX_OK:True`, and `VIEWPORT_LOD_SCOPE_BOUNDARY_OK:True`.
+Its edge interaction markers summarize hosted edge quick-tool, toolbar, and geometry evidence without creating a runtime renderer contract: `EDGE_INTERACTION_CACHE_OK:True`, `EDGE_DRAG_ROUTE_SIMPLIFICATION_OK:True`, `SELECTED_EDGE_FEEDBACK_OK:True`, and `EDGE_RENDERING_SCOPE_BOUNDARY_OK:True`.
 Its authoring flow handoff summarizes quick-add connected nodes, insert-on-wire, reconnect editing, edge multiselect, and wire slicing on the existing session command path: `AUTHORING_FLOW_PROOF_OK:True`, `AUTHORING_FLOW_HANDOFF_OK:True`, and `AUTHORING_FLOW_SCOPE_BOUNDARY_OK:True`.
 
 The hosted route ladder is `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerSample.Avalonia`.
@@ -402,6 +403,7 @@ If you want to build the same medium host in your own app, copy these seams in t
 - capability breadth: pair the same route with [Capability Breadth Recipe](./capability-breadth-recipe.md) and emit the `CAPABILITY_BREADTH_*` markers from `AsterGraph.ConsumerSample.Avalonia -- --proof`
 - onboarding markers: keep `CONSUMER_SAMPLE_SCENARIO_GRAPH_OK:True`, `CONSUMER_SAMPLE_HOST_OWNED_ACTIONS_OK:True`, `CONSUMER_SAMPLE_SUPPORT_BUNDLE_READY_OK:True`, `GRAPH_VALIDATION_FEEDBACK_OK:True`, `GRAPH_FEEDBACK_FOCUS_TARGET_OK:True`, `GRAPH_READINESS_STATUS_OK:True`, `FIVE_MINUTE_ONBOARDING_OK:True`, and `ONBOARDING_CONFIGURATION_OK:True`
 - authoring flow markers: keep `AUTHORING_FLOW_PROOF_OK:True`, `AUTHORING_FLOW_HANDOFF_OK:True`, and `AUTHORING_FLOW_SCOPE_BOUNDARY_OK:True` together with the quick-add, insert-on-wire, reconnect editing, edge multiselect, and wire slicing proof lines
+- edge interaction markers: keep `EDGE_INTERACTION_CACHE_OK:True`, `EDGE_DRAG_ROUTE_SIMPLIFICATION_OK:True`, `SELECTED_EDGE_FEEDBACK_OK:True`, and `EDGE_RENDERING_SCOPE_BOUNDARY_OK:True` together with existing edge quick-tool, toolbar, and geometry evidence
 - final handoff markers: keep `EXPERIENCE_POLISH_HANDOFF_OK:True`, `FEATURE_ENHANCEMENT_PROOF_OK:True`, and `EXPERIENCE_SCOPE_BOUNDARY_OK:True` together so the scope boundary remains explicit
 - sample-owned content such as the review/audit node family, action ids and titles, and proof labels beyond the defended markers should stay local to your app
 

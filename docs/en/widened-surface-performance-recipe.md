@@ -15,6 +15,7 @@ Pair it with `ConsumerSample.Avalonia` for hosted metrics and with `ScaleSmoke` 
 - Step 1a: Keep hosted workbench performance mode on the same route: default `Balanced`, optional `Quality` / `Throughput`, and the proof markers `WORKBENCH_PERFORMANCE_MODE_OK:True`, `BALANCED_MODE_DEFAULT_OK:True`, `WORKBENCH_LOD_POLICY_OK:True`, and `PERFORMANCE_MODE_SCOPE_BOUNDARY_OK:True`.
 - Step 1b: Keep the v0.59 large-graph UX baseline on this hosted route: `LARGE_GRAPH_UX_POLICY_OK:True`, `LARGE_GRAPH_UX_SCOPE_BOUNDARY_OK:True`, and `LARGE_GRAPH_UX_PROOF_BASELINE_OK:True`. These markers aggregate existing hosted evidence; they are not a new graph-size support tier.
 - Step 1c: Keep selected/hovered affordances under hosted viewport LOD policy: `VIEWPORT_LOD_POLICY_OK:True`, `SELECTED_HOVERED_ADORNER_SCOPE_OK:True`, `LARGE_GRAPH_BALANCED_UX_OK:True`, and `VIEWPORT_LOD_SCOPE_BOUNDARY_OK:True`.
+- Step 1d: Keep edge interaction proof bounded to existing edge quick-tool, toolbar, and geometry evidence: `EDGE_INTERACTION_CACHE_OK:True`, `EDGE_DRAG_ROUTE_SIMPLIFICATION_OK:True`, `SELECTED_EDGE_FEEDBACK_OK:True`, and `EDGE_RENDERING_SCOPE_BOUNDARY_OK:True`. These markers are not a runtime renderer contract.
 - Step 2: Run `ScaleSmoke -- --tier large` and keep `SCALE_AUTHORING_BUDGET_OK:large:True:none` plus `SCALE_EXPORT_BUDGET_OK:large:True:none` on the same `ScaleSmoke` route.
 
 ## Proof Contract
@@ -45,6 +46,10 @@ Expected proof markers:
 - `SELECTED_HOVERED_ADORNER_SCOPE_OK:True`
 - `LARGE_GRAPH_BALANCED_UX_OK:True`
 - `VIEWPORT_LOD_SCOPE_BOUNDARY_OK:True`
+- `EDGE_INTERACTION_CACHE_OK:True`
+- `EDGE_DRAG_ROUTE_SIMPLIFICATION_OK:True`
+- `SELECTED_EDGE_FEEDBACK_OK:True`
+- `EDGE_RENDERING_SCOPE_BOUNDARY_OK:True`
 - `HOST_NATIVE_METRIC:stencil_search_ms=...`
 - `HOST_NATIVE_METRIC:command_surface_refresh_ms=...`
 - `HOST_NATIVE_METRIC:node_tool_projection_ms=...`

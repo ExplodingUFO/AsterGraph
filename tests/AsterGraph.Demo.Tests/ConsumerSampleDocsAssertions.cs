@@ -124,6 +124,10 @@ internal static class ConsumerSampleDocsAssertions
         Assert.Contains("SELECTED_HOVERED_ADORNER_SCOPE_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("LARGE_GRAPH_BALANCED_UX_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("VIEWPORT_LOD_SCOPE_BOUNDARY_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("EDGE_INTERACTION_CACHE_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("EDGE_DRAG_ROUTE_SIMPLIFICATION_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("SELECTED_EDGE_FEEDBACK_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("EDGE_RENDERING_SCOPE_BOUNDARY_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("CONSUMER_SAMPLE_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("parameterSnapshots", contents, StringComparison.Ordinal);
         Assert.Contains("readinessStatus", contents, StringComparison.Ordinal);

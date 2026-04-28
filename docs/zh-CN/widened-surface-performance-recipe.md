@@ -15,6 +15,7 @@
 - 第 1a 步：把 hosted workbench performance mode 放在同一条路线里：默认 `Balanced`，可选 `Quality` / `Throughput`，并守住 `WORKBENCH_PERFORMANCE_MODE_OK:True`、`BALANCED_MODE_DEFAULT_OK:True`、`WORKBENCH_LOD_POLICY_OK:True` 和 `PERFORMANCE_MODE_SCOPE_BOUNDARY_OK:True`。
 - 第 1b 步：把 v0.59 large-graph UX baseline 也放在这条 hosted route 里：`LARGE_GRAPH_UX_POLICY_OK:True`、`LARGE_GRAPH_UX_SCOPE_BOUNDARY_OK:True` 和 `LARGE_GRAPH_UX_PROOF_BASELINE_OK:True`。这些 marker 只聚合已有 hosted 证据，不是新的图规模支持层级。
 - 第 1c 步：把 selected/hovered affordances 继续约束在 hosted viewport LOD policy 内：`VIEWPORT_LOD_POLICY_OK:True`、`SELECTED_HOVERED_ADORNER_SCOPE_OK:True`、`LARGE_GRAPH_BALANCED_UX_OK:True` 和 `VIEWPORT_LOD_SCOPE_BOUNDARY_OK:True`。
+- 第 1d 步：把 edge interaction proof 约束在现有 edge quick-tool、toolbar 和 geometry 证据内：`EDGE_INTERACTION_CACHE_OK:True`、`EDGE_DRAG_ROUTE_SIMPLIFICATION_OK:True`、`SELECTED_EDGE_FEEDBACK_OK:True` 和 `EDGE_RENDERING_SCOPE_BOUNDARY_OK:True`。这些 marker 不是 runtime renderer contract。
 - 第 2 步：运行 `ScaleSmoke -- --tier large`，并在同一条 `ScaleSmoke` 路线上继续守住 `SCALE_AUTHORING_BUDGET_OK:large:True:none` 和 `SCALE_EXPORT_BUDGET_OK:large:True:none`。
 
 ## Proof 合同
@@ -45,6 +46,10 @@ dotnet run --project tools/AsterGraph.ScaleSmoke/AsterGraph.ScaleSmoke.csproj --
 - `SELECTED_HOVERED_ADORNER_SCOPE_OK:True`
 - `LARGE_GRAPH_BALANCED_UX_OK:True`
 - `VIEWPORT_LOD_SCOPE_BOUNDARY_OK:True`
+- `EDGE_INTERACTION_CACHE_OK:True`
+- `EDGE_DRAG_ROUTE_SIMPLIFICATION_OK:True`
+- `SELECTED_EDGE_FEEDBACK_OK:True`
+- `EDGE_RENDERING_SCOPE_BOUNDARY_OK:True`
 - `HOST_NATIVE_METRIC:stencil_search_ms=...`
 - `HOST_NATIVE_METRIC:command_surface_refresh_ms=...`
 - `HOST_NATIVE_METRIC:node_tool_projection_ms=...`

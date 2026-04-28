@@ -115,6 +115,10 @@ Expected high-signal markers:
 - `SELECTED_HOVERED_ADORNER_SCOPE_OK:True`
 - `LARGE_GRAPH_BALANCED_UX_OK:True`
 - `VIEWPORT_LOD_SCOPE_BOUNDARY_OK:True`
+- `EDGE_INTERACTION_CACHE_OK:True`
+- `EDGE_DRAG_ROUTE_SIMPLIFICATION_OK:True`
+- `SELECTED_EDGE_FEEDBACK_OK:True`
+- `EDGE_RENDERING_SCOPE_BOUNDARY_OK:True`
 - synthetic dry-run records from [Synthetic Adoption Intake Dry-Run Fixtures](./adoption-intake-dry-run.md) are maintainer/internal rehearsal only; do not count them toward the 3-5 real external report gate, and do not widen support or capability claims from them
 - every beta intake record includes report type, adopter context, route, version, proof markers, friction, support-bundle attachment note, and claim-expansion status; a single report does not widen public claims
 

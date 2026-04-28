@@ -539,6 +539,28 @@ public sealed record ConsumerSampleProofResult(
         && WorkbenchScopeBoundaryOk
         && PerformanceModeScopeBoundaryOk;
 
+    public bool EdgeInteractionCacheOk
+        => EdgeQuickToolsOk
+        && EdgeToolProjectionMs >= 0
+        && ConnectionCount > 0;
+
+    public bool EdgeDragRouteSimplificationOk
+        => ViewportLodPolicyOk
+        && WorkbenchLodPolicyOk
+        && EdgeQuickToolsOk;
+
+    public bool SelectedEdgeFeedbackOk
+        => EdgeToolbarContributionOk
+        && ToolbarContributionDescriptorOk
+        && EdgeMultiSelectOk
+        && SelectedNodeEdgeHighlightOk;
+
+    public bool EdgeRenderingScopeBoundaryOk
+        => ViewportLodScopeBoundaryOk
+        && ToolbarContributionScopeBoundaryOk
+        && FeatureDescriptorIds is { Count: > 0 }
+        && FeatureDescriptorIds.All(IsBoundedFeatureDescriptorId);
+
     public bool IsOk
         => HostMenuActionOk
         && PluginContributionOk
@@ -567,7 +589,11 @@ public sealed record ConsumerSampleProofResult(
         && ViewportLodPolicyOk
         && SelectedHoveredAdornerScopeOk
         && LargeGraphBalancedUxOk
-        && ViewportLodScopeBoundaryOk;
+        && ViewportLodScopeBoundaryOk
+        && EdgeInteractionCacheOk
+        && EdgeDragRouteSimplificationOk
+        && SelectedEdgeFeedbackOk
+        && EdgeRenderingScopeBoundaryOk;
 
     public IReadOnlyList<string> MetricLines =>
     [
@@ -727,6 +753,10 @@ public sealed record ConsumerSampleProofResult(
         $"SELECTED_HOVERED_ADORNER_SCOPE_OK:{SelectedHoveredAdornerScopeOk}",
         $"LARGE_GRAPH_BALANCED_UX_OK:{LargeGraphBalancedUxOk}",
         $"VIEWPORT_LOD_SCOPE_BOUNDARY_OK:{ViewportLodScopeBoundaryOk}",
+        $"EDGE_INTERACTION_CACHE_OK:{EdgeInteractionCacheOk}",
+        $"EDGE_DRAG_ROUTE_SIMPLIFICATION_OK:{EdgeDragRouteSimplificationOk}",
+        $"SELECTED_EDGE_FEEDBACK_OK:{SelectedEdgeFeedbackOk}",
+        $"EDGE_RENDERING_SCOPE_BOUNDARY_OK:{EdgeRenderingScopeBoundaryOk}",
         $"CONSUMER_SAMPLE_OK:{IsOk}",
     ];
 
