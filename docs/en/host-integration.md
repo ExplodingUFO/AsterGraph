@@ -141,6 +141,7 @@ Retained migration is not `Fallback`. It remains a compatibility bridge for lega
 ## Official Capability Modules
 
 Treat the official capability modules as a host-facing map layered on top of the canonical routes, not as a second routing system.
+Use [Feature Catalog](./feature-catalog.md) when a feature needs a governed record with status, adapter projection, proof marker, and performance budget.
 
 | Module | Canonical seam | Hosted/UI note | First proof/sample anchor |
 | --- | --- | --- | --- |

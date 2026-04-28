@@ -222,6 +222,7 @@ var view = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOption
 - [Host Integration](./host-integration.md) = 包边界、路线矩阵、迁移说明
 - [稳定化支持矩阵](./stabilization-support-matrix.md) = 冻结的支持边界和面向 `v1.0.0` 的升级指引
 - [Architecture](./architecture.md) = editor-kernel / scene-interaction / adapter split 与公开 stability level
+- [Feature Catalog](./feature-catalog.md) = 治理后的 feature record、pack 分组、adapter projection 状态、proof marker 和 performance budget
 - [Adapter Capability Matrix](./adapter-capability-matrix.md) = 锁定的 `WPF` adapter-2 合同，以及 `supported` / `partial` / `fallback`
 - [Consumer Sample](./consumer-sample.md) = 介于 HelloWorld 和 Demo 之间的真实宿主样例
 - [Alpha Status](./alpha-status.md) = 当前范围、非目标、已知限制

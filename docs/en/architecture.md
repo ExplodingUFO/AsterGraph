@@ -39,7 +39,7 @@ The Avalonia package is the first official adapter, not the definition of the wh
 
 The official capability modules sit above this platform skeleton. `Selection`, `History`, `Clipboard`, `Shortcut Policy`, `Layout`, `MiniMap`, `Stencil`, `Fragment Library`, `Export`, `Baseline Edge Authoring`, `Node Surface Authoring`, `Hierarchy Semantics`, `Composite Scope Authoring`, `Edge Semantics`, and `Edge Geometry Tooling` are public module names rooted in the canonical runtime/session contract, not alternate route names.
 
-Use [Host Integration](./host-integration.md) for the module-to-seam matrix, [Adapter Capability Matrix](./adapter-capability-matrix.md) for the second-adapter contract, and [Quick Start](./quick-start.md) for the proof/sample map that shows which public entry point demonstrates each module first.
+Use [Host Integration](./host-integration.md) for the module-to-seam matrix, [Feature Catalog](./feature-catalog.md) for governed feature records, [Adapter Capability Matrix](./adapter-capability-matrix.md) for the second-adapter contract, and [Quick Start](./quick-start.md) for the proof/sample map that shows which public entry point demonstrates each module first.
 
 ## Proof Ring
 

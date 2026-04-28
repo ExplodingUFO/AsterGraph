@@ -114,6 +114,7 @@ dotnet add package AsterGraph.Abstractions --prerelease
 ## Official Capability Modules
 
 下面这些 `Official Capability Modules` 就是当前公开的能力模块边界。它们都建立在 canonical session/runtime 路线上，默认 Avalonia UI 只是复用这些 seam 做组合，而不是再定义第二套能力模型。
+治理后的 feature record、pack 分组、adapter projection 状态、proof marker 和 performance-budget handoff 统一看 [Feature Catalog](./docs/zh-CN/feature-catalog.md)。
 
 | Module | Canonical seam | 第一个 proof / sample 锚点 |
 | --- | --- | --- |

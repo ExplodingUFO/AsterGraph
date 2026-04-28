@@ -39,7 +39,7 @@ Avalonia 包是第一个官方 adapter，不是整个 SDK 的唯一形态。
 
 这些 `Official Capability Modules` 是建立在平台骨架之上的公开模块名：`Selection`、`History`、`Clipboard`、`Shortcut Policy`、`Layout`、`MiniMap`、`Stencil`、`Fragment Library`、`Export`、`Baseline Edge Authoring`、`Node Surface Authoring`、`Hierarchy Semantics`、`Composite Scope Authoring`、`Edge Semantics`、`Edge Geometry Tooling`。它们都根植于 canonical runtime/session contract，不是另一套 route 名称。
 
-模块到 seam 的映射看 [Host Integration](./host-integration.md)，第二适配器合同看 [Adapter Capability Matrix](./adapter-capability-matrix.md)，proof / sample 锚点看 [Quick Start](./quick-start.md)。
+模块到 seam 的映射看 [Host Integration](./host-integration.md)，治理后的 feature record 看 [Feature Catalog](./feature-catalog.md)，第二适配器合同看 [Adapter Capability Matrix](./adapter-capability-matrix.md)，proof / sample 锚点看 [Quick Start](./quick-start.md)。
 
 ## Proof Ring
 

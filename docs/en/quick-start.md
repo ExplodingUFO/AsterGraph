@@ -221,6 +221,7 @@ Plugin loading is currently in-process. Hosts can discover candidates, apply an 
 - [Host Integration](./host-integration.md) = package boundary, route matrix, migration guidance
 - [Stabilization Support Matrix](./stabilization-support-matrix.md) = frozen package/framework/adapter boundary plus `v1.0.0` upgrade guidance
 - [Architecture](./architecture.md) = editor-kernel / scene-interaction / adapter split plus public stability levels
+- [Feature Catalog](./feature-catalog.md) = governed feature records, pack grouping, adapter projection status, proof markers, and performance budgets
 - [Adapter Capability Matrix](./adapter-capability-matrix.md) = locked `WPF` adapter-2 contract plus `Supported` / `Partial` / `Fallback`
 - [Consumer Sample](./consumer-sample.md) = one realistic hosted integration between HelloWorld and Demo
 - [Alpha Status](./alpha-status.md) = current scope, non-goals, and known limitations

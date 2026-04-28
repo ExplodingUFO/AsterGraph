@@ -114,6 +114,7 @@ For new runtime-facing work, anchor on the first route. The Avalonia route is th
 ## Official Capability Modules
 
 These are the current public capability modules. They sit on top of the canonical session/runtime route; hosted Avalonia composition reuses the same seams instead of defining a second capability model.
+Use the [Feature Catalog](./docs/en/feature-catalog.md) for governed feature records, pack grouping, adapter projection status, proof markers, and performance-budget handoff.
 
 | Module | Canonical seam | First proof/sample anchor |
 | --- | --- | --- |

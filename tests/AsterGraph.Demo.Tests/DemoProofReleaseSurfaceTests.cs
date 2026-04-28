@@ -987,6 +987,79 @@ public sealed class DemoProofReleaseSurfaceTests
     }
 
     [Fact]
+    public void FeatureCatalogDocs_DefineGovernedCapabilityManifestAndEntryLinks()
+    {
+        var featureCatalog = ReadRepoFile("docs/en/feature-catalog.md");
+        var featureCatalogZh = ReadRepoFile("docs/zh-CN/feature-catalog.md");
+        var readme = ReadRepoFile("README.md");
+        var readmeZh = ReadRepoFile("README.zh-CN.md");
+        var hostIntegration = ReadRepoFile("docs/en/host-integration.md");
+        var hostIntegrationZh = ReadRepoFile("docs/zh-CN/host-integration.md");
+        var architecture = ReadRepoFile("docs/en/architecture.md");
+        var architectureZh = ReadRepoFile("docs/zh-CN/architecture.md");
+        var quickStart = ReadRepoFile("docs/en/quick-start.md");
+        var quickStartZh = ReadRepoFile("docs/zh-CN/quick-start.md");
+
+        foreach (var contents in new[] { featureCatalog, featureCatalogZh })
+        {
+            Assert.Contains("FEATURE_CATALOG_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("FEATURE_MANIFEST_BOUNDARY_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("FEATURE_PACK_GOVERNANCE_OK:True", contents, StringComparison.Ordinal);
+
+            foreach (var fieldName in new[]
+            {
+                "FeatureId",
+                "Pack",
+                "Status",
+                "Public seam",
+                "Avalonia projection",
+                "WPF projection",
+                "Sample / Demo entry",
+                "Proof marker",
+                "Perf budget",
+                "Docs",
+            })
+            {
+                Assert.Contains(fieldName, contents, StringComparison.Ordinal);
+            }
+
+            foreach (var packName in new[] { "Core", "Authoring", "Workbench", "Advanced Graph", "Diagnostics" })
+            {
+                Assert.Contains(packName, contents, StringComparison.Ordinal);
+            }
+
+            foreach (var featureId in new[]
+            {
+                "core.selection",
+                "workbench.stencil.basic",
+                "workbench.export.scene",
+                "authoring.node-surface",
+                "diagnostics.support-bundle",
+            })
+            {
+                Assert.Contains(featureId, contents, StringComparison.Ordinal);
+            }
+
+            Assert.True(HasLineWith(contents, "WPF projection", "validation-only"));
+            Assert.True(HasLineWith(contents, "WPF", "parity"));
+            Assert.True(HasLineWith(contents, "marketplace", "sandbox"));
+            Assert.True(HasLineWith(contents, "execution engine", "GA"));
+        }
+
+        Assert.Contains("does not create a new runtime route", featureCatalog, StringComparison.Ordinal);
+        Assert.Contains("不创建新的 runtime route", featureCatalogZh, StringComparison.Ordinal);
+        Assert.Contains("Feature Catalog", readme, StringComparison.Ordinal);
+        Assert.Contains("docs/en/feature-catalog.md", readme, StringComparison.Ordinal);
+        Assert.Contains("Feature Catalog", readmeZh, StringComparison.Ordinal);
+        Assert.Contains("docs/zh-CN/feature-catalog.md", readmeZh, StringComparison.Ordinal);
+
+        foreach (var contents in new[] { hostIntegration, hostIntegrationZh, architecture, architectureZh, quickStart, quickStartZh })
+        {
+            Assert.Contains("feature-catalog.md", contents, StringComparison.Ordinal);
+        }
+    }
+
+    [Fact]
     public void AdvancedEditingDocs_DefineCanonicalModulesAndProofCoverage()
     {
         var readme = ReadRepoFile("README.md");

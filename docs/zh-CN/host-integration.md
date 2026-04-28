@@ -141,6 +141,7 @@ retained 迁移不是 `fallback`。它仍然只是 legacy host 的 compatibility
 ## Official Capability Modules
 
 把 `Official Capability Modules` 理解成压在 canonical routes 之上的宿主能力地图，而不是另一套接入路线。
+当 feature 需要记录 status、adapter projection、proof marker 和 performance budget 时，统一看 [Feature Catalog](./feature-catalog.md)。
 
 | Module | Canonical seam | Hosted/UI 说明 | 第一个 proof / sample 锚点 |
 | --- | --- | --- | --- |
