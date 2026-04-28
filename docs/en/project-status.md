@@ -9,6 +9,7 @@
 - v0.56 adoption-readiness handoff markers: `ADOPTION_READINESS_HANDOFF_OK:True`, `ADOPTION_SCOPE_BOUNDARY_OK:True`, and `V056_MILESTONE_PROOF_OK:True`
 - v0.58 authoring-depth handoff markers: `AUTHORING_DEPTH_HANDOFF_OK:True`, `AUTHORING_DEPTH_SCOPE_BOUNDARY_OK:True`, and `V058_MILESTONE_PROOF_OK:True`
 - v0.59 large-graph UX baseline markers: `LARGE_GRAPH_UX_POLICY_OK:True`, `LARGE_GRAPH_UX_SCOPE_BOUNDARY_OK:True`, and `LARGE_GRAPH_UX_PROOF_BASELINE_OK:True`
+- v0.59 viewport LOD markers: `VIEWPORT_LOD_POLICY_OK:True`, `SELECTED_HOVERED_ADORNER_SCOPE_OK:True`, `LARGE_GRAPH_BALANCED_UX_OK:True`, and `VIEWPORT_LOD_SCOPE_BOUNDARY_OK:True`
 - public versioning guidance: [Versioning](./versioning.md)
 - supported published packages:
   - `AsterGraph.Abstractions`
@@ -43,6 +44,7 @@
 - experience handoff proof is summarized without widening the support boundary: `EXPERIENCE_POLISH_HANDOFF_OK:True`, `FEATURE_ENHANCEMENT_PROOF_OK:True`, `EXPERIENCE_SCOPE_BOUNDARY_OK:True`
 - authoring-depth proof summarizes the v0.58 port, validation, toolbar, and fragment-library convenience polish without new runtime model claims: `AUTHORING_DEPTH_HANDOFF_OK:True`, `AUTHORING_DEPTH_SCOPE_BOUNDARY_OK:True`, `V058_MILESTONE_PROOF_OK:True`
 - large-graph UX baseline proof summarizes hosted performance mode, LOD policy, and widened-surface metrics without creating a new graph-size support tier: `LARGE_GRAPH_UX_POLICY_OK:True`, `LARGE_GRAPH_UX_SCOPE_BOUNDARY_OK:True`, `LARGE_GRAPH_UX_PROOF_BASELINE_OK:True`
+- viewport LOD proof keeps selected/hovered affordances on hosted workbench policy, not the runtime graph contract: `VIEWPORT_LOD_POLICY_OK:True`, `SELECTED_HOVERED_ADORNER_SCOPE_OK:True`, `LARGE_GRAPH_BALANCED_UX_OK:True`, `VIEWPORT_LOD_SCOPE_BOUNDARY_OK:True`
 - graph-surface usability proof markers:
   - `COMMAND_SURFACE_OK:True`
   - `TIERED_NODE_SURFACE_OK:True`

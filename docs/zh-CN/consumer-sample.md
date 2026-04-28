@@ -22,6 +22,7 @@
 最终 experience handoff marker 只汇总已有 proof 行：`EXPERIENCE_POLISH_HANDOFF_OK:True`、`FEATURE_ENHANCEMENT_PROOF_OK:True` 和 `EXPERIENCE_SCOPE_BOUNDARY_OK:True`。
 authoring depth handoff marker 汇总已经完成的 v0.58 convenience polish，但不扩大支持边界：`AUTHORING_DEPTH_HANDOFF_OK:True`、`AUTHORING_DEPTH_SCOPE_BOUNDARY_OK:True` 和 `V058_MILESTONE_PROOF_OK:True`。
 large-graph UX baseline marker 只汇总现有 hosted performance 和 LOD 证据：`LARGE_GRAPH_UX_POLICY_OK:True`、`LARGE_GRAPH_UX_SCOPE_BOUNDARY_OK:True` 和 `LARGE_GRAPH_UX_PROOF_BASELINE_OK:True`。
+viewport LOD marker 证明 selected/hovered affordances 仍受 hosted workbench policy 约束：`VIEWPORT_LOD_POLICY_OK:True`、`SELECTED_HOVERED_ADORNER_SCOPE_OK:True`、`LARGE_GRAPH_BALANCED_UX_OK:True` 和 `VIEWPORT_LOD_SCOPE_BOUNDARY_OK:True`。
 authoring flow handoff 会汇总 quick-add、insert-on-wire、reconnect editing、edge multiselect 和 wire slicing，并继续走现有 session command path：`AUTHORING_FLOW_PROOF_OK:True`、`AUTHORING_FLOW_HANDOFF_OK:True` 和 `AUTHORING_FLOW_SCOPE_BOUNDARY_OK:True`。
 
 这条 hosted route ladder 是 `Starter.Avalonia -> HelloWorld.Avalonia -> ConsumerSample.Avalonia`。

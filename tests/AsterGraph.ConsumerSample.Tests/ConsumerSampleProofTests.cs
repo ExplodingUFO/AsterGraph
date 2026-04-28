@@ -214,6 +214,10 @@ public sealed class ConsumerSampleProofTests
         Assert.True(result.LargeGraphUxPolicyOk);
         Assert.True(result.LargeGraphUxScopeBoundaryOk);
         Assert.True(result.LargeGraphUxProofBaselineOk);
+        Assert.True(result.ViewportLodPolicyOk);
+        Assert.True(result.SelectedHoveredAdornerScopeOk);
+        Assert.True(result.LargeGraphBalancedUxOk);
+        Assert.True(result.ViewportLodScopeBoundaryOk);
         Assert.True(result.StartupMs >= 0);
         Assert.True(result.InspectorProjectionMs >= 0);
         Assert.True(result.PluginScanMs >= 0);
@@ -354,6 +358,10 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(result.ProofLines, line => line == "LARGE_GRAPH_UX_POLICY_OK:True");
         Assert.Contains(result.ProofLines, line => line == "LARGE_GRAPH_UX_SCOPE_BOUNDARY_OK:True");
         Assert.Contains(result.ProofLines, line => line == "LARGE_GRAPH_UX_PROOF_BASELINE_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "VIEWPORT_LOD_POLICY_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "SELECTED_HOVERED_ADORNER_SCOPE_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "LARGE_GRAPH_BALANCED_UX_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "VIEWPORT_LOD_SCOPE_BOUNDARY_OK:True");
         Assert.Contains(result.MetricLines, line => line.Contains("startup_ms", StringComparison.Ordinal));
         Assert.Contains(result.MetricLines, line => line.Contains("command_latency_ms", StringComparison.Ordinal));
         Assert.Contains(result.MetricLines, line => line.Contains("stencil_search_ms", StringComparison.Ordinal));

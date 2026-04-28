@@ -467,6 +467,26 @@ public sealed class ReleaseClosureContractTests
     }
 
     [Fact]
+    public void ViewportLodPolicy_StaysVisibleInStatusAndChecklist()
+    {
+        var englishChecklist = ReadRepoFile("docs/en/public-launch-checklist.md");
+        var chineseChecklist = ReadRepoFile("docs/zh-CN/public-launch-checklist.md");
+        var englishStatus = ReadRepoFile("docs/en/project-status.md");
+        var chineseStatus = ReadRepoFile("docs/zh-CN/project-status.md");
+
+        foreach (var contents in new[] { englishChecklist, chineseChecklist, englishStatus, chineseStatus })
+        {
+            Assert.Contains("VIEWPORT_LOD_POLICY_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("SELECTED_HOVERED_ADORNER_SCOPE_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("LARGE_GRAPH_BALANCED_UX_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("VIEWPORT_LOD_SCOPE_BOUNDARY_OK:True", contents, StringComparison.Ordinal);
+        }
+
+        Assert.True(HasLineWithAll(englishStatus, "viewport LOD proof", "selected/hovered affordances", "hosted workbench policy", "runtime graph contract"));
+        Assert.True(HasLineWithAll(chineseStatus, "viewport LOD proof", "selected/hovered affordances", "hosted workbench policy", "runtime graph contract"));
+    }
+
+    [Fact]
     public void ReleaseCoverageValidation_BoundsHungTestCollectors()
     {
         var ciScript = ReadRepoFile("eng/ci.ps1");

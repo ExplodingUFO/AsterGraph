@@ -9,6 +9,7 @@
 - v0.56 adoption-readiness handoff markers：`ADOPTION_READINESS_HANDOFF_OK:True`、`ADOPTION_SCOPE_BOUNDARY_OK:True` 和 `V056_MILESTONE_PROOF_OK:True`
 - v0.58 authoring-depth handoff markers：`AUTHORING_DEPTH_HANDOFF_OK:True`、`AUTHORING_DEPTH_SCOPE_BOUNDARY_OK:True` 和 `V058_MILESTONE_PROOF_OK:True`
 - v0.59 large-graph UX baseline markers：`LARGE_GRAPH_UX_POLICY_OK:True`、`LARGE_GRAPH_UX_SCOPE_BOUNDARY_OK:True` 和 `LARGE_GRAPH_UX_PROOF_BASELINE_OK:True`
+- v0.59 viewport LOD markers：`VIEWPORT_LOD_POLICY_OK:True`、`SELECTED_HOVERED_ADORNER_SCOPE_OK:True`、`LARGE_GRAPH_BALANCED_UX_OK:True` 和 `VIEWPORT_LOD_SCOPE_BOUNDARY_OK:True`
 - 对外版本说明：[Versioning](./versioning.md)
 - 当前公开支持的发布包：
   - `AsterGraph.Abstractions`
@@ -42,6 +43,7 @@
 - experience handoff proof 会在不扩大支持边界的前提下汇总：`EXPERIENCE_POLISH_HANDOFF_OK:True`、`FEATURE_ENHANCEMENT_PROOF_OK:True`、`EXPERIENCE_SCOPE_BOUNDARY_OK:True`
 - authoring-depth proof 汇总 v0.58 port、validation、toolbar 和 fragment-library convenience polish，但不新增 runtime model 声明：`AUTHORING_DEPTH_HANDOFF_OK:True`、`AUTHORING_DEPTH_SCOPE_BOUNDARY_OK:True`、`V058_MILESTONE_PROOF_OK:True`
 - large-graph UX baseline proof 汇总 hosted performance mode、LOD policy 和 widened-surface metrics，但不创建新的图规模支持层级：`LARGE_GRAPH_UX_POLICY_OK:True`、`LARGE_GRAPH_UX_SCOPE_BOUNDARY_OK:True`、`LARGE_GRAPH_UX_PROOF_BASELINE_OK:True`
+- viewport LOD proof 把 selected/hovered affordances 保持在 hosted workbench policy 内，而不是 runtime graph contract：`VIEWPORT_LOD_POLICY_OK:True`、`SELECTED_HOVERED_ADORNER_SCOPE_OK:True`、`LARGE_GRAPH_BALANCED_UX_OK:True`、`VIEWPORT_LOD_SCOPE_BOUNDARY_OK:True`
 - 图面可用性 proof marker：
   - `COMMAND_SURFACE_OK:True`
   - `TIERED_NODE_SURFACE_OK:True`

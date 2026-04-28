@@ -120,6 +120,10 @@ internal static class ConsumerSampleDocsAssertions
         Assert.Contains("LARGE_GRAPH_UX_POLICY_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("LARGE_GRAPH_UX_SCOPE_BOUNDARY_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("LARGE_GRAPH_UX_PROOF_BASELINE_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("VIEWPORT_LOD_POLICY_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("SELECTED_HOVERED_ADORNER_SCOPE_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("LARGE_GRAPH_BALANCED_UX_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("VIEWPORT_LOD_SCOPE_BOUNDARY_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("CONSUMER_SAMPLE_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("parameterSnapshots", contents, StringComparison.Ordinal);
         Assert.Contains("readinessStatus", contents, StringComparison.Ordinal);

@@ -518,6 +518,27 @@ public sealed record ConsumerSampleProofResult(
         && NodeToolProjectionMs >= 0
         && EdgeToolProjectionMs >= 0;
 
+    public bool ViewportLodPolicyOk
+        => LargeGraphUxPolicyOk
+        && WorkbenchLodPolicyOk
+        && WorkbenchPerformanceModeOk;
+
+    public bool SelectedHoveredAdornerScopeOk
+        => ToolbarContributionScopeBoundaryOk
+        && NodeToolbarContributionOk
+        && EdgeToolbarContributionOk
+        && PerformanceModeScopeBoundaryOk;
+
+    public bool LargeGraphBalancedUxOk
+        => LargeGraphUxProofBaselineOk
+        && BalancedModeDefaultOk
+        && WidenedSurfacePerformanceOk;
+
+    public bool ViewportLodScopeBoundaryOk
+        => LargeGraphUxScopeBoundaryOk
+        && WorkbenchScopeBoundaryOk
+        && PerformanceModeScopeBoundaryOk;
+
     public bool IsOk
         => HostMenuActionOk
         && PluginContributionOk
@@ -542,7 +563,11 @@ public sealed record ConsumerSampleProofResult(
         && V058MilestoneProofOk
         && LargeGraphUxPolicyOk
         && LargeGraphUxScopeBoundaryOk
-        && LargeGraphUxProofBaselineOk;
+        && LargeGraphUxProofBaselineOk
+        && ViewportLodPolicyOk
+        && SelectedHoveredAdornerScopeOk
+        && LargeGraphBalancedUxOk
+        && ViewportLodScopeBoundaryOk;
 
     public IReadOnlyList<string> MetricLines =>
     [
@@ -698,6 +723,10 @@ public sealed record ConsumerSampleProofResult(
         $"LARGE_GRAPH_UX_POLICY_OK:{LargeGraphUxPolicyOk}",
         $"LARGE_GRAPH_UX_SCOPE_BOUNDARY_OK:{LargeGraphUxScopeBoundaryOk}",
         $"LARGE_GRAPH_UX_PROOF_BASELINE_OK:{LargeGraphUxProofBaselineOk}",
+        $"VIEWPORT_LOD_POLICY_OK:{ViewportLodPolicyOk}",
+        $"SELECTED_HOVERED_ADORNER_SCOPE_OK:{SelectedHoveredAdornerScopeOk}",
+        $"LARGE_GRAPH_BALANCED_UX_OK:{LargeGraphBalancedUxOk}",
+        $"VIEWPORT_LOD_SCOPE_BOUNDARY_OK:{ViewportLodScopeBoundaryOk}",
         $"CONSUMER_SAMPLE_OK:{IsOk}",
     ];
 
@@ -1313,7 +1342,14 @@ public static class ConsumerSampleProof
         var lodPolicyOk = quality.StencilCardsPerSectionLimit > balanced.StencilCardsPerSectionLimit
             && balanced.StencilCardsPerSectionLimit > throughput.StencilCardsPerSectionLimit
             && quality.ProjectMiniMapContinuously
+            && balanced.ProjectMiniMapContinuously
             && !throughput.ProjectMiniMapContinuously
+            && quality.ProjectAdvancedInspectorByDefault
+            && !balanced.ProjectAdvancedInspectorByDefault
+            && !throughput.ProjectAdvancedInspectorByDefault
+            && quality.ProjectHoveredToolbars
+            && balanced.ProjectHoveredToolbars
+            && !throughput.ProjectHoveredToolbars
             && throughput.CommandRefreshBatchMilliseconds > balanced.CommandRefreshBatchMilliseconds;
         var scopeBoundaryOk = typeof(AsterGraphWorkbenchPerformanceMode).Namespace == "AsterGraph.Avalonia.Hosting"
             && typeof(AsterGraphWorkbenchPerformancePolicy).Namespace == "AsterGraph.Avalonia.Hosting";
