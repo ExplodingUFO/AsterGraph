@@ -184,6 +184,12 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(result.RecentsFavoritesEvidence!, entry => entry.Surface == "fragment");
         Assert.Contains(result.RecentsFavoritesEvidence!, entry => entry.Surface == "command");
         Assert.Contains(result.RecentsFavoritesEvidence!, entry => entry.Surface == "plugin");
+        Assert.True(result.WorkbenchFrictionEvidenceOk);
+        Assert.True(result.WorkbenchFrictionPrioritizationOk);
+        Assert.True(result.WorkbenchFrictionScopeBoundaryOk);
+        Assert.NotNull(result.WorkbenchFrictionEvidence);
+        Assert.Contains(result.WorkbenchFrictionEvidence!, entry => entry.Category == "layout-resume" && entry.PriorityRank == 1);
+        Assert.Contains(result.WorkbenchFrictionEvidence!, entry => entry.Category == "support-triage" && entry.IsSynthetic);
         Assert.True(result.CommandPaletteGroupingOk);
         Assert.True(result.CommandPaletteDisabledReasonOk);
         Assert.True(result.CommandPaletteRecentActionsOk);
@@ -310,6 +316,9 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(result.ProofLines, line => line == "WORKBENCH_RECENTS_OK:True");
         Assert.Contains(result.ProofLines, line => line == "WORKBENCH_FAVORITES_OK:True");
         Assert.Contains(result.ProofLines, line => line == "RECENTS_FAVORITES_SUPPORT_BUNDLE_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "WORKBENCH_FRICTION_EVIDENCE_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "WORKBENCH_FRICTION_PRIORITIZATION_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "WORKBENCH_FRICTION_SCOPE_BOUNDARY_OK:True");
         Assert.Contains(result.ProofLines, line => line == "COMMAND_PALETTE_GROUPING_OK:True");
         Assert.Contains(result.ProofLines, line => line == "COMMAND_PALETTE_DISABLED_REASON_OK:True");
         Assert.Contains(result.ProofLines, line => line == "COMMAND_PALETTE_RECENT_ACTIONS_OK:True");
@@ -860,6 +869,9 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(proofLines, line => line == "WORKBENCH_DISCOVERABILITY_HANDOFF_OK:True");
         Assert.Contains(proofLines, line => line == "WORKBENCH_DISCOVERABILITY_SCOPE_BOUNDARY_OK:True");
         Assert.Contains(proofLines, line => line == "V063_MILESTONE_PROOF_OK:True");
+        Assert.Contains(proofLines, line => line == "WORKBENCH_FRICTION_EVIDENCE_OK:True");
+        Assert.Contains(proofLines, line => line == "WORKBENCH_FRICTION_PRIORITIZATION_OK:True");
+        Assert.Contains(proofLines, line => line == "WORKBENCH_FRICTION_SCOPE_BOUNDARY_OK:True");
         Assert.Contains(proofLines, line => line == "NAVIGATION_HISTORY_OK:True");
         Assert.Contains(proofLines, line => line == "SCOPE_BREADCRUMB_NAVIGATION_OK:True");
         Assert.Contains(proofLines, line => line == "FOCUS_RESTORE_OK:True");

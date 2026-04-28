@@ -162,6 +162,10 @@ public sealed record ConsumerSampleProofResult(
     bool WorkbenchFavoritesOk = true,
     bool RecentsFavoritesSupportBundleOk = true,
     IReadOnlyList<ConsumerSampleRecentsFavoritesEvidence>? RecentsFavoritesEvidence = null,
+    bool WorkbenchFrictionEvidenceOk = true,
+    bool WorkbenchFrictionPrioritizationOk = true,
+    bool WorkbenchFrictionScopeBoundaryOk = true,
+    IReadOnlyList<ConsumerSampleWorkbenchFrictionEvidence>? WorkbenchFrictionEvidence = null,
     bool MiniMapLightweightProjectionEvidenceOk = true,
     int SelectedParameterProjectionCount = 0,
     int TotalParameterProjectionCount = 0)
@@ -272,6 +276,9 @@ public sealed record ConsumerSampleProofResult(
         && WorkbenchRecentsOk
         && WorkbenchFavoritesOk
         && RecentsFavoritesSupportBundleOk
+        && WorkbenchFrictionEvidenceOk
+        && WorkbenchFrictionPrioritizationOk
+        && WorkbenchFrictionScopeBoundaryOk
         && CommandPaletteGroupingOk
         && CommandPaletteDisabledReasonOk
         && CommandPaletteRecentActionsOk
@@ -374,6 +381,8 @@ public sealed record ConsumerSampleProofResult(
         && WorkbenchRecentsOk
         && WorkbenchFavoritesOk
         && RecentsFavoritesSupportBundleOk
+        && WorkbenchFrictionEvidenceOk
+        && WorkbenchFrictionPrioritizationOk
         && CommandPaletteGroupingOk
         && CommandPaletteDisabledReasonOk
         && CommandPaletteRecentActionsOk
@@ -453,6 +462,7 @@ public sealed record ConsumerSampleProofResult(
         && WorkbenchRecentsOk
         && WorkbenchFavoritesOk
         && RecentsFavoritesSupportBundleOk
+        && WorkbenchFrictionScopeBoundaryOk
         && CommandPaletteGroupingOk
         && CommandPaletteDisabledReasonOk
         && CommandPaletteRecentActionsOk
@@ -798,7 +808,10 @@ public sealed record ConsumerSampleProofResult(
         && V062MilestoneProofOk
         && WorkbenchDiscoverabilityHandoffOk
         && WorkbenchDiscoverabilityScopeBoundaryOk
-        && V063MilestoneProofOk;
+        && V063MilestoneProofOk
+        && WorkbenchFrictionEvidenceOk
+        && WorkbenchFrictionPrioritizationOk
+        && WorkbenchFrictionScopeBoundaryOk;
 
     public IReadOnlyList<string> MetricLines =>
     [
@@ -860,6 +873,9 @@ public sealed record ConsumerSampleProofResult(
         $"WORKBENCH_RECENTS_OK:{WorkbenchRecentsOk}",
         $"WORKBENCH_FAVORITES_OK:{WorkbenchFavoritesOk}",
         $"RECENTS_FAVORITES_SUPPORT_BUNDLE_OK:{RecentsFavoritesSupportBundleOk}",
+        $"WORKBENCH_FRICTION_EVIDENCE_OK:{WorkbenchFrictionEvidenceOk}",
+        $"WORKBENCH_FRICTION_PRIORITIZATION_OK:{WorkbenchFrictionPrioritizationOk}",
+        $"WORKBENCH_FRICTION_SCOPE_BOUNDARY_OK:{WorkbenchFrictionScopeBoundaryOk}",
         $"COMMAND_PALETTE_GROUPING_OK:{CommandPaletteGroupingOk}",
         $"COMMAND_PALETTE_DISABLED_REASON_OK:{CommandPaletteDisabledReasonOk}",
         $"COMMAND_PALETTE_RECENT_ACTIONS_OK:{CommandPaletteRecentActionsOk}",
@@ -1137,6 +1153,10 @@ public static class ConsumerSampleProof
         bool workbenchFavoritesOk;
         bool recentsFavoritesSupportBundleOk;
         IReadOnlyList<ConsumerSampleRecentsFavoritesEvidence> recentsFavoritesEvidence;
+        bool workbenchFrictionEvidenceOk;
+        bool workbenchFrictionPrioritizationOk;
+        bool workbenchFrictionScopeBoundaryOk;
+        IReadOnlyList<ConsumerSampleWorkbenchFrictionEvidence> workbenchFrictionEvidence;
         bool navigationHistoryOk;
         bool scopeBreadcrumbNavigationOk;
         bool focusRestoreOk;
@@ -1405,6 +1425,12 @@ public static class ConsumerSampleProof
             HasFragmentLibraryConvenience(host);
         (workbenchRecentsOk, workbenchFavoritesOk, recentsFavoritesSupportBundleOk, recentsFavoritesEvidence) =
             HasWorkbenchRecentsFavorites(host);
+        (
+            workbenchFrictionEvidenceOk,
+            workbenchFrictionPrioritizationOk,
+            workbenchFrictionScopeBoundaryOk,
+            workbenchFrictionEvidence) =
+            HasWorkbenchFrictionEvidence(host);
         host.SelectNode(host.GetFirstReviewNodeId());
         FlushUi();
 
@@ -1492,6 +1518,10 @@ public static class ConsumerSampleProof
             WorkbenchFavoritesOk: workbenchFavoritesOk,
             RecentsFavoritesSupportBundleOk: recentsFavoritesSupportBundleOk,
             RecentsFavoritesEvidence: recentsFavoritesEvidence,
+            WorkbenchFrictionEvidenceOk: workbenchFrictionEvidenceOk,
+            WorkbenchFrictionPrioritizationOk: workbenchFrictionPrioritizationOk,
+            WorkbenchFrictionScopeBoundaryOk: workbenchFrictionScopeBoundaryOk,
+            WorkbenchFrictionEvidence: workbenchFrictionEvidence,
             CommandPaletteGroupingOk: commandPaletteGroupingOk,
             CommandPaletteDisabledReasonOk: commandPaletteDisabledReasonOk,
             CommandPaletteRecentActionsOk: commandPaletteRecentActionsOk,
@@ -1996,6 +2026,47 @@ public static class ConsumerSampleProof
             && evidence.Select(entry => entry.Surface).Distinct(StringComparer.Ordinal).Count() == evidence.Count;
 
         return (recentsOk, favoritesOk, supportBundleOk, evidence);
+    }
+
+    private static (
+        bool EvidenceOk,
+        bool PrioritizationOk,
+        bool ScopeBoundaryOk,
+        IReadOnlyList<ConsumerSampleWorkbenchFrictionEvidence> Evidence) HasWorkbenchFrictionEvidence(
+            ConsumerSampleHost host)
+    {
+        var evidence = host.WorkbenchFrictionEvidence;
+        var categories = evidence
+            .Select(entry => entry.Category)
+            .ToArray();
+
+        var evidenceOk = evidence.Count >= 4
+            && categories.Contains("layout-resume", StringComparer.Ordinal)
+            && categories.Contains("node-discovery", StringComparer.Ordinal)
+            && categories.Contains("command-feedback", StringComparer.Ordinal)
+            && categories.Contains("support-triage", StringComparer.Ordinal)
+            && evidence.All(entry =>
+                !string.IsNullOrWhiteSpace(entry.Evidence)
+                && !string.IsNullOrWhiteSpace(entry.Route));
+
+        var prioritizationOk = evidence.Any(entry => entry.PriorityRank == 1)
+            && evidence.All(entry => entry.PriorityRank is >= 1 and <= 3)
+            && evidence
+                .OrderBy(entry => entry.PriorityRank)
+                .ThenBy(entry => entry.Category, StringComparer.Ordinal)
+                .First()
+                .PriorityRank == 1;
+
+        var scopeBoundaryOk = evidence.All(entry => entry.IsSynthetic)
+            && evidence.All(entry => entry.ScopeBoundary.Contains("local synthetic evidence only", StringComparison.OrdinalIgnoreCase))
+            && evidence.Any(entry => entry.ScopeBoundary.Contains("not an external adopter report", StringComparison.OrdinalIgnoreCase))
+            && evidence.All(entry => entry.ScopeBoundary.Contains("GA", StringComparison.OrdinalIgnoreCase))
+            && evidence.All(entry =>
+                entry.Route.Contains("hosted", StringComparison.OrdinalIgnoreCase)
+                || entry.Route.Contains("IGraphEditorSession", StringComparison.Ordinal)
+                || entry.Route.Contains("ConsumerSample.Avalonia", StringComparison.Ordinal));
+
+        return (evidenceOk, prioritizationOk, scopeBoundaryOk, evidence);
     }
 
     private static bool HasLocalPluginGallery(ConsumerSampleHost host, Window window)

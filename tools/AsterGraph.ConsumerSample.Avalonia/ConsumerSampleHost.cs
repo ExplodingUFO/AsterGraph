@@ -58,6 +58,37 @@ public sealed class ConsumerSampleHost : IDisposable
             IsFavorite: false,
             SearchKeywords: ["audit", "plugin", "diagnostics", "branch"]),
     ];
+    private static readonly IReadOnlyList<ConsumerSampleWorkbenchFrictionEvidence> WorkbenchFrictionEvidenceEntries =
+    [
+        new(
+            "layout-resume",
+            "Hosts need a copyable way to restore the default workbench layout after panel drag or reset.",
+            1,
+            "AsterGraphHostBuilder.UseDefaultWorkbench + hosted panel-state projection",
+            "local synthetic evidence only; no remote sync, WPF parity, runtime route, or GA claim",
+            IsSynthetic: true),
+        new(
+            "node-discovery",
+            "Node discovery should show source labels and recent/favorite hints without making users remember catalog ids.",
+            1,
+            "IGraphEditorSession.Queries.GetRegisteredNodeDefinitions + hosted discovery projection",
+            "local synthetic evidence only; no marketplace, macro/query system, runtime route, or GA claim",
+            IsSynthetic: true),
+        new(
+            "command-feedback",
+            "Toolbar, context menu, and command palette actions need shared disabled reasons for support triage.",
+            2,
+            "IGraphEditorSession.Queries.GetCommandDescriptors + hosted command projection",
+            "local synthetic evidence only; no new command engine, runtime route, WPF parity, or GA claim",
+            IsSynthetic: true),
+        new(
+            "support-triage",
+            "Support intake should keep proof markers, route, version, and friction notes together for bounded beta feedback.",
+            2,
+            "ConsumerSample.Avalonia -- --proof --support-bundle",
+            "local synthetic evidence only; not an external adopter report, telemetry feed, or GA readiness claim",
+            IsSynthetic: true),
+    ];
     private readonly GraphEditorViewModel _editor;
     private readonly ConsumerSamplePluginAllowlistTrustPolicy _trustPolicy;
     private readonly GraphEditorPluginDiscoveryOptions _pluginDiscoveryOptions;
@@ -198,6 +229,9 @@ public sealed class ConsumerSampleHost : IDisposable
             ];
         }
     }
+
+    public IReadOnlyList<ConsumerSampleWorkbenchFrictionEvidence> WorkbenchFrictionEvidence
+        => WorkbenchFrictionEvidenceEntries;
 
     public IReadOnlyList<string> LastRuntimeLogExportLines => _lastRuntimeLogExportLines;
 
@@ -1895,6 +1929,14 @@ public sealed record ConsumerSampleRecentsFavoritesEvidence(
     IReadOnlyList<string> SourceLabels,
     int RecentLimit,
     bool IsHostOwned);
+
+public sealed record ConsumerSampleWorkbenchFrictionEvidence(
+    string Category,
+    string Evidence,
+    int PriorityRank,
+    string Route,
+    string ScopeBoundary,
+    bool IsSynthetic);
 
 public sealed record ConsumerSampleNavigationHistoryEntry(
     string Title,
