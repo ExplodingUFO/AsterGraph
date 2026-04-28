@@ -15,6 +15,7 @@
 
 当前真正 shipped 的 hosted adapter 仍然只有 Avalonia。`WPF` 只是锁定的 adapter-2 validation-only 验证目标，不代表已经承诺功能对齐、公开 WPF support 扩大或第二条 onboarding 路线。
 v0.60 adapter-2 validation scope baseline 由 `ADAPTER2_VALIDATION_SCOPE_OK:True`、`ADAPTER2_MATRIX_HANDOFF_OK:True` 和 `ADAPTER2_SCOPE_BOUNDARY_OK:True` 证明；这些 marker 只汇总 matrix handoff，不会把任何 `Partial` 或 `Fallback` 行改写成 `Supported`。
+WPF proof sample evidence 由 `ADAPTER2_WPF_SAMPLE_PROOF_OK:True`、`ADAPTER2_CANONICAL_ROUTE_OK:True` 和 `ADAPTER2_SAMPLE_SCOPE_BOUNDARY_OK:True` 证明；这些 marker 让 `AsterGraph.HelloWorld.Wpf` 保持可复制，但不会把它变成第二条 onboarding route。
 
 ## Matrix Vocabulary
 
@@ -60,5 +61,6 @@ retained 迁移不是 `Fallback`。retained 仍然只是 legacy host 的 compati
 | Platform integration | `Supported` | `Partial` | `HOST_SAMPLE_OK` 的 runtime seam 校验、`HOSTED_ACCESSIBILITY_BASELINE_OK`、`HOSTED_ACCESSIBILITY_FOCUS_OK`、`ADAPTER2_PERFORMANCE_BASELINE_OK`，以及 `AsterGraph.Wpf` 的基础 platform seam 绑定 | focus/clipboard/pointer/wheel/theme/host-context 由 host 实现并通过兼容 seam 注入，不引入 adapter 级 runtime 语义。 |
 | Proof and sample coverage | `Supported` | `Supported` | `HOST_SAMPLE_OK`、`CONSUMER_SAMPLE_OK`、`DEMO_OK`、`COMMAND_SURFACE_OK`、`HOSTED_ACCESSIBILITY_OK`、`ADAPTER2_PERFORMANCE_BASELINE_OK`、`ADAPTER2_PROJECTION_BUDGET_OK`、`ADAPTER2_COMMAND_BUDGET_OK`、`ADAPTER2_SCENE_BUDGET_OK`、`HELLOWORLD_WPF_OK` | 无。 |
 | Adapter-2 validation scope baseline | `Supported` | `Supported` | `ADAPTER2_VALIDATION_SCOPE_OK`、`ADAPTER2_MATRIX_HANDOFF_OK`、`ADAPTER2_SCOPE_BOUNDARY_OK` 和 `HELLOWORLD_WPF_OK` | 无。这一行只证明 validation scope 和 matrix handoff，不扩大 WPF support，也不暗示 parity。 |
+| WPF proof sample evidence | `Supported` | `Supported` | `ADAPTER2_WPF_SAMPLE_PROOF_OK`、`ADAPTER2_CANONICAL_ROUTE_OK`、`ADAPTER2_SAMPLE_SCOPE_BOUNDARY_OK` 和 `HELLOWORLD_WPF_OK` | 无。这一行让 `AsterGraph.HelloWorld.Wpf` 在 canonical route 上保持可复制；它不是第二条 onboarding path（second onboarding path）。 |
 
 路线与能力地图看 [Host Integration](./host-integration.md)，adapter 边界看 [Architecture](./architecture.md)，当前 Avalonia-first 的上手路径看 [Quick Start](./quick-start.md)。

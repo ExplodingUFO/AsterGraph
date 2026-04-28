@@ -211,6 +211,7 @@ public sealed record HostedHelloWorldProofResult(
     bool Adapter2ProjectionBudgetOk,
     bool Adapter2CommandBudgetOk,
     bool Adapter2SceneBudgetOk,
+    bool Adapter2CanonicalRouteOk,
     double StartupMs,
     double InspectorProjectionMs,
     double PluginScanMs,
@@ -237,6 +238,15 @@ public sealed record HostedHelloWorldProofResult(
 
     public bool Adapter2ScopeBoundaryOk => Adapter2MatrixHandoffOk;
 
+    public bool Adapter2WpfSampleProofOk =>
+        Adapter2ValidationScopeOk
+        && Adapter2MatrixHandoffOk
+        && Adapter2CanonicalRouteOk;
+
+    public bool Adapter2SampleScopeBoundaryOk =>
+        Adapter2WpfSampleProofOk
+        && Adapter2ScopeBoundaryOk;
+
     public bool IsOk => CommandSurfaceOk
         && HostedAccessibilityOk
         && Adapter2PerformanceBaselineOk
@@ -244,9 +254,12 @@ public sealed record HostedHelloWorldProofResult(
         && Adapter2ProjectionBudgetOk
         && Adapter2CommandBudgetOk
         && Adapter2SceneBudgetOk
+        && Adapter2CanonicalRouteOk
         && Adapter2ValidationScopeOk
         && Adapter2MatrixHandoffOk
-        && Adapter2ScopeBoundaryOk;
+        && Adapter2ScopeBoundaryOk
+        && Adapter2WpfSampleProofOk
+        && Adapter2SampleScopeBoundaryOk;
 
     public IReadOnlyList<string> ProofLines =>
         [
@@ -264,6 +277,9 @@ public sealed record HostedHelloWorldProofResult(
             $"ADAPTER2_VALIDATION_SCOPE_OK:{Adapter2ValidationScopeOk}",
             $"ADAPTER2_MATRIX_HANDOFF_OK:{Adapter2MatrixHandoffOk}",
             $"ADAPTER2_SCOPE_BOUNDARY_OK:{Adapter2ScopeBoundaryOk}",
+            $"ADAPTER2_WPF_SAMPLE_PROOF_OK:{Adapter2WpfSampleProofOk}",
+            $"ADAPTER2_CANONICAL_ROUTE_OK:{Adapter2CanonicalRouteOk}",
+            $"ADAPTER2_SAMPLE_SCOPE_BOUNDARY_OK:{Adapter2SampleScopeBoundaryOk}",
             $"HELLOWORLD_WPF_OK:{IsOk}",
         ];
 
@@ -324,6 +340,10 @@ public static class HostedHelloWorldProof
         var adapter2ProjectionBudgetOk = IsWithinBudget(inspectorProjectionMs, projectionBudgetMs);
         var adapter2CommandBudgetOk = IsWithinBudget(commandLatencyMs, commandBudgetMs);
         var adapter2SceneBudgetOk = IsWithinBudget(sceneSnapshotMs, sceneBudgetMs);
+        var adapter2CanonicalRouteOk = ReferenceEquals(editor.Session, session)
+            && editor.NodeTemplates.Count > 0
+            && session.Queries.CreateDocumentSnapshot().Nodes.Count >= 2
+            && session.Queries.GetCommandDescriptors().Any(descriptor => string.Equals(descriptor.Id, "history.undo", StringComparison.Ordinal));
 
         try
         {
@@ -338,6 +358,7 @@ public static class HostedHelloWorldProof
                 adapter2ProjectionBudgetOk,
                 adapter2CommandBudgetOk,
                 adapter2SceneBudgetOk,
+                adapter2CanonicalRouteOk,
                 startupMs,
                 inspectorProjectionMs,
                 pluginScanMs,

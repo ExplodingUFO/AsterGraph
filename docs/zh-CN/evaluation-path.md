@@ -30,7 +30,7 @@
 
 如果 `CONSUMER_SAMPLE_PARAMETER_OK` 或 `CONSUMER_SAMPLE_METADATA_PROJECTION_OK` 失败，就把失败的 proof-marker 行和 support bundle 的 `parameterSnapshots` 行一起保留在同一条受限 intake 记录里。
 如果你要走一条 screen-reader-ready 的本地评估路径，就把第 3 步的 support bundle 和第 4 步 `HostSample` 的 proof 行继续放在同一条受限 intake 记录里。这仍然只是本地证据，不扩大支持承诺。
-如果你在受防守的 Avalonia proof 之后还要做有边界的 adapter-2 跟进验证，就在第 4 步之后运行 `AsterGraph.HelloWorld.Wpf -- --proof`，并把 `HOSTED_ACCESSIBILITY_BASELINE_OK:True`、`HOSTED_ACCESSIBILITY_FOCUS_OK:True`、`HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True`、`HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True`、`HOSTED_ACCESSIBILITY_OK:True`、`ADAPTER2_PERFORMANCE_BASELINE_OK:True`、`ADAPTER2_PROJECTION_BUDGET_OK:True:none`、`ADAPTER2_COMMAND_BUDGET_OK:True:none`、`ADAPTER2_SCENE_BUDGET_OK:True:none` 和 `HELLOWORLD_WPF_OK:True` 继续放在同一条本地记录里；细则见 [Adapter-2 Accessibility Recipe](./adapter-2-accessibility-recipe.md) 和 [Adapter-2 Performance Recipe](./adapter-2-performance-recipe.md)。
+如果你在受防守的 Avalonia proof 之后还要做有边界的 adapter-2 跟进验证，就在第 4 步之后运行 `AsterGraph.HelloWorld.Wpf -- --proof`，并把 `HOSTED_ACCESSIBILITY_BASELINE_OK:True`、`HOSTED_ACCESSIBILITY_FOCUS_OK:True`、`HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True`、`HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True`、`HOSTED_ACCESSIBILITY_OK:True`、`ADAPTER2_PERFORMANCE_BASELINE_OK:True`、`ADAPTER2_PROJECTION_BUDGET_OK:True:none`、`ADAPTER2_COMMAND_BUDGET_OK:True:none`、`ADAPTER2_SCENE_BUDGET_OK:True:none`、`ADAPTER2_WPF_SAMPLE_PROOF_OK:True`、`ADAPTER2_CANONICAL_ROUTE_OK:True`、`ADAPTER2_SAMPLE_SCOPE_BOUNDARY_OK:True` 和 `HELLOWORLD_WPF_OK:True` 继续放在同一条本地记录里；细则见 [Adapter-2 Accessibility Recipe](./adapter-2-accessibility-recipe.md) 和 [Adapter-2 Performance Recipe](./adapter-2-performance-recipe.md)。
 
 ## 命令
 
@@ -59,7 +59,7 @@ dotnet run --project tools/AsterGraph.HelloWorld.Wpf/AsterGraph.HelloWorld.Wpf.c
 - 同一轮输出里也应该有 `HOSTED_ACCESSIBILITY_OK:True`、`HOSTED_ACCESSIBILITY_AUTOMATION_NAVIGATION_OK:True`、`HOSTED_ACCESSIBILITY_AUTHORING_DIAGNOSTICS_OK:True` 和 `HOSTED_ACCESSIBILITY_AUTOMATION_OK:True`
 - 同一轮输出里也应该有四条 `HOST_NATIVE_METRIC:*`
 - `HostSample` 应该输出 `HOST_SAMPLE_OK:True`、`HOST_SAMPLE_AUTOMATION_OK:True`、`HOST_SAMPLE_ACCESSIBILITY_BASELINE_OK:True` 和 `HOST_SAMPLE_ACCESSIBILITY_AUTOMATION_OK:True`
-- `AsterGraph.HelloWorld.Wpf -- --proof` 应该在 validation-only 的 adapter-2 通道上输出 `HOSTED_ACCESSIBILITY_BASELINE_OK:True`、`HOSTED_ACCESSIBILITY_FOCUS_OK:True`、`HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True`、`HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True`、`HOSTED_ACCESSIBILITY_OK:True`、`ADAPTER2_PERFORMANCE_BASELINE_OK:True`、`ADAPTER2_PROJECTION_BUDGET_OK:True:none`、`ADAPTER2_COMMAND_BUDGET_OK:True:none`、`ADAPTER2_SCENE_BUDGET_OK:True:none` 和 `HELLOWORLD_WPF_OK:True`
+- `AsterGraph.HelloWorld.Wpf -- --proof` 应该在 validation-only 的 adapter-2 通道上输出 `HOSTED_ACCESSIBILITY_BASELINE_OK:True`、`HOSTED_ACCESSIBILITY_FOCUS_OK:True`、`HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True`、`HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True`、`HOSTED_ACCESSIBILITY_OK:True`、`ADAPTER2_PERFORMANCE_BASELINE_OK:True`、`ADAPTER2_PROJECTION_BUDGET_OK:True:none`、`ADAPTER2_COMMAND_BUDGET_OK:True:none`、`ADAPTER2_SCENE_BUDGET_OK:True:none`、`ADAPTER2_WPF_SAMPLE_PROOF_OK:True`、`ADAPTER2_CANONICAL_ROUTE_OK:True`、`ADAPTER2_SAMPLE_SCOPE_BOUNDARY_OK:True` 和 `HELLOWORLD_WPF_OK:True`
 
 ## 不要误读
 

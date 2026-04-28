@@ -14,6 +14,9 @@ public sealed class DemoProofReleaseSurfaceTests
         "ADAPTER2_VALIDATION_SCOPE_OK:True",
         "ADAPTER2_MATRIX_HANDOFF_OK:True",
         "ADAPTER2_SCOPE_BOUNDARY_OK:True",
+        "ADAPTER2_WPF_SAMPLE_PROOF_OK:True",
+        "ADAPTER2_CANONICAL_ROUTE_OK:True",
+        "ADAPTER2_SAMPLE_SCOPE_BOUNDARY_OK:True",
         "HELLOWORLD_WPF_OK:True",
     ];
 

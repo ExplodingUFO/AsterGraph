@@ -37,7 +37,7 @@ public sealed class ReleaseClosureContractTests
         WriteProofFile(
             proofRoot,
             "hello-world-wpf-proof.txt",
-            "HOSTED_ACCESSIBILITY_BASELINE_OK:True`nHOSTED_ACCESSIBILITY_FOCUS_OK:True`nHOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True`nHOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True`nHOSTED_ACCESSIBILITY_OK:True`nADAPTER2_PERFORMANCE_BASELINE_OK:True`nADAPTER2_EXPORT_BREADTH_OK:True`nADAPTER2_PROJECTION_BUDGET_OK:True:none`nADAPTER2_COMMAND_BUDGET_OK:True:none`nADAPTER2_SCENE_BUDGET_OK:True:none`nADAPTER2_VALIDATION_SCOPE_OK:True`nADAPTER2_MATRIX_HANDOFF_OK:True`nADAPTER2_SCOPE_BOUNDARY_OK:True`nHELLOWORLD_WPF_OK:True");
+            "HOSTED_ACCESSIBILITY_BASELINE_OK:True`nHOSTED_ACCESSIBILITY_FOCUS_OK:True`nHOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True`nHOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True`nHOSTED_ACCESSIBILITY_OK:True`nADAPTER2_PERFORMANCE_BASELINE_OK:True`nADAPTER2_EXPORT_BREADTH_OK:True`nADAPTER2_PROJECTION_BUDGET_OK:True:none`nADAPTER2_COMMAND_BUDGET_OK:True:none`nADAPTER2_SCENE_BUDGET_OK:True:none`nADAPTER2_VALIDATION_SCOPE_OK:True`nADAPTER2_MATRIX_HANDOFF_OK:True`nADAPTER2_SCOPE_BOUNDARY_OK:True`nADAPTER2_WPF_SAMPLE_PROOF_OK:True`nADAPTER2_CANONICAL_ROUTE_OK:True`nADAPTER2_SAMPLE_SCOPE_BOUNDARY_OK:True`nHELLOWORLD_WPF_OK:True");
         WriteProofFile(
             proofRoot,
             "wpf-adapter-capability-matrix.txt",
@@ -113,6 +113,9 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("ADAPTER2_VALIDATION_SCOPE_OK:True", notes, StringComparison.Ordinal);
         Assert.Contains("ADAPTER2_MATRIX_HANDOFF_OK:True", notes, StringComparison.Ordinal);
         Assert.Contains("ADAPTER2_SCOPE_BOUNDARY_OK:True", notes, StringComparison.Ordinal);
+        Assert.Contains("ADAPTER2_WPF_SAMPLE_PROOF_OK:True", notes, StringComparison.Ordinal);
+        Assert.Contains("ADAPTER2_CANONICAL_ROUTE_OK:True", notes, StringComparison.Ordinal);
+        Assert.Contains("ADAPTER2_SAMPLE_SCOPE_BOUNDARY_OK:True", notes, StringComparison.Ordinal);
         Assert.Contains("HELLOWORLD_WPF_OK:True", notes, StringComparison.Ordinal);
         Assert.Contains("ASTERGRAPH_TEMPLATE_SMOKE_OK:True", notes, StringComparison.Ordinal);
         Assert.Contains("TEMPLATE_SMOKE_PLUGIN_VALIDATE_OK:True", notes, StringComparison.Ordinal);
@@ -452,6 +455,29 @@ public sealed class ReleaseClosureContractTests
         Assert.True(HasLineWithAll(chineseStatus, "adapter-2 validation scope proof", "canonical route", "matrix vocabulary", "public WPF support", "parity claims"));
         Assert.True(HasLineWithAll(englishMatrix, "v0.60 adapter-2 validation scope baseline", "matrix handoff", "Partial", "Fallback", "Supported"));
         Assert.True(HasLineWithAll(chineseMatrix, "v0.60 adapter-2 validation scope baseline", "matrix handoff", "Partial", "Fallback", "Supported"));
+    }
+
+    [Fact]
+    public void WpfProofSampleEvidence_StaysVisibleInStatusChecklistAndMatrix()
+    {
+        var englishChecklist = ReadRepoFile("docs/en/public-launch-checklist.md");
+        var chineseChecklist = ReadRepoFile("docs/zh-CN/public-launch-checklist.md");
+        var englishStatus = ReadRepoFile("docs/en/project-status.md");
+        var chineseStatus = ReadRepoFile("docs/zh-CN/project-status.md");
+        var englishMatrix = ReadRepoFile("docs/en/adapter-capability-matrix.md");
+        var chineseMatrix = ReadRepoFile("docs/zh-CN/adapter-capability-matrix.md");
+
+        foreach (var contents in new[] { englishChecklist, chineseChecklist, englishStatus, chineseStatus, englishMatrix, chineseMatrix })
+        {
+            Assert.Contains("ADAPTER2_WPF_SAMPLE_PROOF_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("ADAPTER2_CANONICAL_ROUTE_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("ADAPTER2_SAMPLE_SCOPE_BOUNDARY_OK:True", contents, StringComparison.Ordinal);
+        }
+
+        Assert.True(HasLineWithAll(englishStatus, "WPF proof sample evidence", "AsterGraph.HelloWorld.Wpf", "canonical session/runtime route", "second onboarding path"));
+        Assert.True(HasLineWithAll(chineseStatus, "WPF proof sample evidence", "AsterGraph.HelloWorld.Wpf", "canonical session/runtime route", "second onboarding path"));
+        Assert.True(HasLineWithAll(englishMatrix, "WPF proof sample evidence", "AsterGraph.HelloWorld.Wpf", "canonical route", "second onboarding path"));
+        Assert.True(HasLineWithAll(chineseMatrix, "WPF proof sample evidence", "AsterGraph.HelloWorld.Wpf", "canonical route", "second onboarding path"));
     }
 
     [Fact]
