@@ -365,7 +365,7 @@ public sealed class ConsumerSampleRecipeClosureDocsTests
             Assert.Contains("CAPABILITY_BREADTH_EDGE_QUICK_TOOLS_OK:True", proofBlock, StringComparison.Ordinal);
             Assert.Contains("CAPABILITY_BREADTH_OK:True", proofBlock, StringComparison.Ordinal);
             Assert.Contains("AUTHORING_SURFACE_OK:True", proofBlock, StringComparison.Ordinal);
-            Assert.DoesNotContain("SUPPORT_BUNDLE_OK", proofBlock, StringComparison.Ordinal);
+            Assert.DoesNotContain("`SUPPORT_BUNDLE_OK", proofBlock, StringComparison.Ordinal);
             Assert.DoesNotContain("SUPPORT_BUNDLE_PATH", proofBlock, StringComparison.Ordinal);
 
             Assert.Contains("SUPPORT_BUNDLE_OK", bundleBlock, StringComparison.Ordinal);

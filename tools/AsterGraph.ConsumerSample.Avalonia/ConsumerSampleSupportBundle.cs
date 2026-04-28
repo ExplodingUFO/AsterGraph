@@ -22,7 +22,7 @@ internal static class ConsumerSampleSupportBundle
 
         var packageVersion = GetPackageVersion();
         var document = new ConsumerSampleSupportBundleDocument(
-            SchemaVersion: 3,
+            SchemaVersion: 4,
             PackageVersion: packageVersion,
             PublicTag: $"v{packageVersion}",
             Route: "ConsumerSample.Avalonia",
@@ -46,6 +46,7 @@ internal static class ConsumerSampleSupportBundle
             ValidationSummary: result.SupportValidationSummary,
             ValidationFeedback: result.SupportValidationFeedback,
             FeatureDescriptors: result.FeatureDescriptorIds ?? [],
+            RecentsFavorites: result.RecentsFavoritesEvidence ?? [],
             RecentDiagnostics: result.RecentDiagnosticCodes ?? [],
             RuntimeNodeOverlays: result.RuntimeNodeOverlays ?? [],
             RuntimeConnectionOverlays: result.RuntimeConnectionOverlays ?? [],
@@ -85,6 +86,7 @@ internal static class ConsumerSampleSupportBundle
             "validationSummary",
             "validationFeedback",
             "featureDescriptors",
+            "recentsFavorites",
             "recentDiagnostics",
             "runtimeNodeOverlays",
             "runtimeConnectionOverlays",
@@ -177,6 +179,7 @@ internal static class ConsumerSampleSupportBundle
         ConsumerSampleProofValidationSummary ValidationSummary,
         IReadOnlyList<ConsumerSampleProofValidationFeedback> ValidationFeedback,
         IReadOnlyList<string> FeatureDescriptors,
+        IReadOnlyList<ConsumerSampleRecentsFavoritesEvidence> RecentsFavorites,
         IReadOnlyList<string> RecentDiagnostics,
         IReadOnlyList<GraphEditorNodeRuntimeOverlaySnapshot> RuntimeNodeOverlays,
         IReadOnlyList<GraphEditorConnectionRuntimeOverlaySnapshot> RuntimeConnectionOverlays,

@@ -54,6 +54,7 @@ support bundle 是一个本地 JSON 文件，顶层字段固定为：
 - `validationSummary` — total、error、warning、invalid connection 和 invalid parameter 计数
 - `validationFeedback` — canonical validation issue 行，包含 `code`、`severity`、`message` 和 `focusTarget`
 - `featureDescriptors` — 捕获时可用的 capability 列表
+- `recentsFavorites` — bounded host-owned recents/favorites evidence，覆盖 nodes、fragments、commands 和 plugin/source entries
 - `recentDiagnostics` — 用于排查静默失败的近期 diagnostic code
 - `runtimeNodeOverlays` — 宿主持有的节点运行态快照
 - `runtimeConnectionOverlays` — 宿主持有的连接 payload 快照
@@ -88,6 +89,7 @@ runtime feedback 的 release handoff 还应该把 Demo proof marker `AI_PIPELINE
 
 graph search proof 仍然是 hosted、snapshot-driven：`GRAPH_SEARCH_LOCATE_OK:True`、`GRAPH_SEARCH_SCOPE_FILTER_OK:True` 和 `GRAPH_SEARCH_VIEWPORT_FOCUS_OK:True` 只证明搜索/定位证据，不代表后台图索引服务或 command macro engine。
 unified discovery proof 仍然是 host-owned、route-driven：`UNIFIED_DISCOVERY_SURFACE_OK:True`、`DISCOVERY_SOURCE_LABELS_OK:True` 和 `DISCOVERY_COMMAND_ROUTE_OK:True` 只证明 stencil templates、snippets、graph search results、plugin gallery entries 和 command palette actions 共享可发现的 source-labelled evidence，不代表 macro engine 或后台索引服务。
+recents/favorites proof 仍然是 bounded、host-owned：`WORKBENCH_RECENTS_OK:True`、`WORKBENCH_FAVORITES_OK:True` 和 `RECENTS_FAVORITES_SUPPORT_BUNDLE_OK:True` 只证明 node、fragment、command 和 plugin/source recents/favorites，不代表 remote sync 或 marketplace state。
 command palette 和 toolbar contribution proof 仍然走 shared command/session route：`COMMAND_PALETTE_GROUPING_OK:True`、`COMMAND_PALETTE_DISABLED_REASON_OK:True`、`COMMAND_PALETTE_RECENT_ACTIONS_OK:True`、`COMMAND_PROJECTION_UNIFIED_OK:True`、`COMMAND_PALETTE_OK:True`、`TOOLBAR_DESCRIPTOR_OK:True`、`CONTEXT_MENU_DESCRIPTOR_OK:True`、`COMMAND_DISABLED_REASON_OK:True`、`NODE_TOOLBAR_CONTRIBUTION_OK:True`、`EDGE_TOOLBAR_CONTRIBUTION_OK:True`、`TOOLBAR_CONTRIBUTION_DESCRIPTOR_OK:True` 和 `TOOLBAR_CONTRIBUTION_SCOPE_BOUNDARY_OK:True` 只证明分组发现、disabled reason 可见性、toolbar/context-menu descriptor 复用、node/edge action contribution 投影和有界 recent actions，不代表 command macro engine 或 scripting UI。
 interaction feedback proof 还应该包含 `INTERACTION_FEEDBACK_OK:True`、`CANVAS_FOCUS_RECOVERY_OK:True`、`CONSUMER_GESTURE_PROOF_OK:True`、`INTERACTION_SUPPORT_BUNDLE_OK:True`、`INTERACTION_RELIABILITY_HANDOFF_OK:True`、`INTERACTION_SCOPE_BOUNDARY_OK:True` 和 `V062_MILESTONE_PROOF_OK:True`，证明可见 affordance、gesture freshness、command feedback、support-bundle coverage 和 focus recovery 证据仍走现有 canvas、command 和 navigation 路线。
 navigation proof 仍然是宿主自管：`NAVIGATION_HISTORY_OK:True`、`SCOPE_BREADCRUMB_NAVIGATION_OK:True`、`FOCUS_RESTORE_OK:True`、`NAVIGATION_PRODUCTIVITY_PROOF_OK:True`、`NAVIGATION_PRODUCTIVITY_HANDOFF_OK:True` 和 `NAVIGATION_SCOPE_BOUNDARY_OK:True` 只证明 search、palette、back/forward、breadcrumb 和 focus-restore 证据，不代表新增 runtime navigation API。

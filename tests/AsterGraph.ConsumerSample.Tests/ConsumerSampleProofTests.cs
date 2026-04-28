@@ -176,6 +176,14 @@ public sealed class ConsumerSampleProofTests
         Assert.True(result.UnifiedDiscoverySurfaceOk);
         Assert.True(result.DiscoverySourceLabelsOk);
         Assert.True(result.DiscoveryCommandRouteOk);
+        Assert.True(result.WorkbenchRecentsOk);
+        Assert.True(result.WorkbenchFavoritesOk);
+        Assert.True(result.RecentsFavoritesSupportBundleOk);
+        Assert.NotNull(result.RecentsFavoritesEvidence);
+        Assert.Contains(result.RecentsFavoritesEvidence!, entry => entry.Surface == "node");
+        Assert.Contains(result.RecentsFavoritesEvidence!, entry => entry.Surface == "fragment");
+        Assert.Contains(result.RecentsFavoritesEvidence!, entry => entry.Surface == "command");
+        Assert.Contains(result.RecentsFavoritesEvidence!, entry => entry.Surface == "plugin");
         Assert.True(result.CommandPaletteGroupingOk);
         Assert.True(result.CommandPaletteDisabledReasonOk);
         Assert.True(result.CommandPaletteRecentActionsOk);
@@ -296,6 +304,9 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(result.ProofLines, line => line == "UNIFIED_DISCOVERY_SURFACE_OK:True");
         Assert.Contains(result.ProofLines, line => line == "DISCOVERY_SOURCE_LABELS_OK:True");
         Assert.Contains(result.ProofLines, line => line == "DISCOVERY_COMMAND_ROUTE_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "WORKBENCH_RECENTS_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "WORKBENCH_FAVORITES_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "RECENTS_FAVORITES_SUPPORT_BUNDLE_OK:True");
         Assert.Contains(result.ProofLines, line => line == "COMMAND_PALETTE_GROUPING_OK:True");
         Assert.Contains(result.ProofLines, line => line == "COMMAND_PALETTE_DISABLED_REASON_OK:True");
         Assert.Contains(result.ProofLines, line => line == "COMMAND_PALETTE_RECENT_ACTIONS_OK:True");
@@ -760,7 +771,7 @@ public sealed class ConsumerSampleProofTests
         var validationSummary = root.GetProperty("validationSummary");
         var validationFeedback = root.GetProperty("validationFeedback").EnumerateArray().ToArray();
 
-        Assert.Equal(3, root.GetProperty("schemaVersion").GetInt32());
+        Assert.Equal(4, root.GetProperty("schemaVersion").GetInt32());
         Assert.Equal("ConsumerSample.Avalonia", root.GetProperty("route").GetString());
         Assert.False(string.IsNullOrWhiteSpace(packageVersion));
         Assert.Equal($"v{packageVersion}", publicTag);
@@ -822,6 +833,9 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(proofLines, line => line == "UNIFIED_DISCOVERY_SURFACE_OK:True");
         Assert.Contains(proofLines, line => line == "DISCOVERY_SOURCE_LABELS_OK:True");
         Assert.Contains(proofLines, line => line == "DISCOVERY_COMMAND_ROUTE_OK:True");
+        Assert.Contains(proofLines, line => line == "WORKBENCH_RECENTS_OK:True");
+        Assert.Contains(proofLines, line => line == "WORKBENCH_FAVORITES_OK:True");
+        Assert.Contains(proofLines, line => line == "RECENTS_FAVORITES_SUPPORT_BUNDLE_OK:True");
         Assert.Contains(proofLines, line => line == "COMMAND_PALETTE_GROUPING_OK:True");
         Assert.Contains(proofLines, line => line == "COMMAND_PALETTE_DISABLED_REASON_OK:True");
         Assert.Contains(proofLines, line => line == "COMMAND_PALETTE_RECENT_ACTIONS_OK:True");
@@ -927,6 +941,26 @@ public sealed class ConsumerSampleProofTests
 
         var featureDescriptors = root.GetProperty("featureDescriptors").EnumerateArray().ToArray();
         Assert.True(featureDescriptors.Length > 0);
+
+        var recentsFavorites = root.GetProperty("recentsFavorites").EnumerateArray().ToArray();
+        Assert.Equal(4, recentsFavorites.Length);
+        Assert.Contains(recentsFavorites, entry =>
+            entry.GetProperty("surface").GetString() == "node"
+            && entry.GetProperty("recentIds").EnumerateArray().Any(id => id.GetString() == ConsumerSampleHost.ReviewDefinitionId.ToString())
+            && entry.GetProperty("favoriteIds").EnumerateArray().Any(id => id.GetString() == ConsumerSampleHost.QueueDefinitionId.ToString())
+            && entry.GetProperty("isHostOwned").GetBoolean());
+        Assert.Contains(recentsFavorites, entry =>
+            entry.GetProperty("surface").GetString() == "fragment"
+            && entry.GetProperty("recentIds").EnumerateArray().Any(id => id.GetString() == ConsumerSampleHost.QueueLaneSnippetId)
+            && entry.GetProperty("favoriteIds").EnumerateArray().Any(id => id.GetString() == ConsumerSampleHost.QueueLaneSnippetId));
+        Assert.Contains(recentsFavorites, entry =>
+            entry.GetProperty("surface").GetString() == "command"
+            && entry.GetProperty("recentIds").EnumerateArray().Any(id => id.GetString() == "viewport.fit")
+            && entry.GetProperty("favoriteIds").EnumerateArray().Any(id => id.GetString() == "workspace.save"));
+        Assert.Contains(recentsFavorites, entry =>
+            entry.GetProperty("surface").GetString() == "plugin"
+            && entry.GetProperty("recentIds").EnumerateArray().Any(id => id.GetString() == "consumer.sample.audit-plugin")
+            && entry.GetProperty("favoriteIds").EnumerateArray().Any(id => id.GetString() == "consumer.sample.audit-plugin"));
 
         var recentDiagnostics = root.GetProperty("recentDiagnostics").EnumerateArray().ToArray();
         Assert.True(recentDiagnostics.Length >= 0);

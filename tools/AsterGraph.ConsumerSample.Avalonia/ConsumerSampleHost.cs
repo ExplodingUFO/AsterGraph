@@ -35,6 +35,7 @@ public sealed class ConsumerSampleHost : IDisposable
     public const string QueueLaneSnippetId = "consumer.sample.snippet.queue-lane";
     public const string ScenarioId = "content-review-release-lane";
     public const string ScenarioTitle = "Content Review Release Lane";
+    private const int WorkbenchRecentLimit = 8;
     internal static readonly GraphSize ReviewNodeDefaultSize = new(320, 220);
     private static readonly IReadOnlyList<ConsumerSampleSnippetDescriptor> SnippetCatalogEntries =
     [
@@ -69,6 +70,12 @@ public sealed class ConsumerSampleHost : IDisposable
     private IReadOnlyList<string> _lastRuntimeLogExportLines = [];
     private readonly List<ConsumerSampleNavigationHistoryEntry> _navigationHistory = [];
     private readonly List<string> _recentSnippetIds = [];
+    private readonly List<string> _favoriteNodeDefinitionIds = [];
+    private readonly List<string> _recentNodeDefinitionIds = [];
+    private readonly List<string> _favoriteCommandIds = [];
+    private readonly List<string> _recentCommandIds = [];
+    private readonly List<string> _favoritePluginSourceIds = [];
+    private readonly List<string> _recentPluginSourceIds = [];
     private int _navigationHistoryIndex = -1;
     private GraphEditorViewportSnapshot? _pendingViewportRestore;
     private int _lastRouteCleanupCount;
@@ -127,6 +134,70 @@ public sealed class ConsumerSampleHost : IDisposable
             .ToArray();
 
     public IReadOnlyList<string> RecentSnippetIds => _recentSnippetIds.ToArray();
+
+    public IReadOnlyList<ConsumerSampleRecentsFavoritesEvidence> RecentsFavoritesEvidence
+    {
+        get
+        {
+            var definitions = Session.Queries.GetRegisteredNodeDefinitions()
+                .ToDictionary(definition => definition.Id.ToString(), StringComparer.Ordinal);
+            var commandDescriptors = Session.Queries.GetCommandDescriptors()
+                .ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
+
+            return
+            [
+                new(
+                    "node",
+                    _recentNodeDefinitionIds.ToArray(),
+                    _favoriteNodeDefinitionIds.ToArray(),
+                    _recentNodeDefinitionIds
+                        .Concat(_favoriteNodeDefinitionIds)
+                        .Distinct(StringComparer.Ordinal)
+                        .Select(id => definitions.TryGetValue(id, out var definition)
+                            && definition.Category.Contains("plugin", StringComparison.OrdinalIgnoreCase)
+                                ? "Plugin node"
+                                : "Host node")
+                        .Distinct(StringComparer.Ordinal)
+                        .ToArray(),
+                    WorkbenchRecentLimit,
+                    IsHostOwned: true),
+                new(
+                    "fragment",
+                    RecentSnippetIds,
+                    FavoriteSnippetIds,
+                    SnippetCatalog
+                        .Select(snippet => snippet.SourceLabel)
+                        .Distinct(StringComparer.Ordinal)
+                        .ToArray(),
+                    WorkbenchRecentLimit,
+                    IsHostOwned: true),
+                new(
+                    "command",
+                    _recentCommandIds.ToArray(),
+                    _favoriteCommandIds.ToArray(),
+                    _recentCommandIds
+                        .Concat(_favoriteCommandIds)
+                        .Distinct(StringComparer.Ordinal)
+                        .Select(id => commandDescriptors.TryGetValue(id, out var descriptor)
+                            ? descriptor.Source.ToString()
+                            : "Host command")
+                        .Distinct(StringComparer.Ordinal)
+                        .ToArray(),
+                    WorkbenchRecentLimit,
+                    IsHostOwned: true),
+                new(
+                    "plugin",
+                    _recentPluginSourceIds.ToArray(),
+                    _favoritePluginSourceIds.ToArray(),
+                    LocalPluginGalleryEntries
+                        .Select(entry => entry.SourceLabel)
+                        .Distinct(StringComparer.Ordinal)
+                        .ToArray(),
+                    WorkbenchRecentLimit,
+                    IsHostOwned: true),
+            ];
+        }
+    }
 
     public IReadOnlyList<string> LastRuntimeLogExportLines => _lastRuntimeLogExportLines;
 
@@ -248,7 +319,35 @@ public sealed class ConsumerSampleHost : IDisposable
     }
 
     public bool AddPluginAuditNode()
-        => Session.Commands.TryExecuteCommand(new GraphEditorCommandInvocationSnapshot(PluginCommandId));
+    {
+        var executed = Session.Commands.TryExecuteCommand(new GraphEditorCommandInvocationSnapshot(PluginCommandId));
+        if (executed)
+        {
+            TrackRecentCommand(PluginCommandId);
+            TrackRecentNodeDefinition(PluginAuditDefinitionId);
+            TrackRecentPluginSource(PluginId);
+        }
+
+        return executed;
+    }
+
+    public void FavoriteNodeDefinition(NodeDefinitionId definitionId)
+        => AddBoundedFavorite(_favoriteNodeDefinitionIds, definitionId.ToString());
+
+    public void TrackRecentNodeDefinition(NodeDefinitionId definitionId)
+        => TrackBoundedRecent(_recentNodeDefinitionIds, definitionId.ToString(), WorkbenchRecentLimit);
+
+    public void FavoriteCommand(string commandId)
+        => AddBoundedFavorite(_favoriteCommandIds, commandId);
+
+    public void TrackRecentCommand(string commandId)
+        => TrackBoundedRecent(_recentCommandIds, commandId, WorkbenchRecentLimit);
+
+    public void FavoritePluginSource(string pluginId)
+        => AddBoundedFavorite(_favoritePluginSourceIds, pluginId);
+
+    public void TrackRecentPluginSource(string pluginId)
+        => TrackBoundedRecent(_recentPluginSourceIds, pluginId, WorkbenchRecentLimit);
 
     public IReadOnlyList<ConsumerSampleSnippetDescriptor> SearchSnippetCatalog(string query)
     {
@@ -277,6 +376,7 @@ public sealed class ConsumerSampleHost : IDisposable
         }
 
         TrackRecentSnippet(snippetId);
+        TrackRecentNodeDefinition(QueueDefinitionId);
         return true;
     }
 
@@ -287,7 +387,10 @@ public sealed class ConsumerSampleHost : IDisposable
         => Session.Commands.TrySetSelectedNodeParameterValue("owner", owner);
 
     public void FitView()
-        => Session.Commands.FitToViewport(updateStatus: false);
+    {
+        Session.Commands.FitToViewport(updateStatus: false);
+        TrackRecentCommand("viewport.fit");
+    }
 
     public void SelectNode(string nodeId)
         => Session.Commands.SetSelection([nodeId], nodeId, updateStatus: false);
@@ -1733,12 +1836,27 @@ public sealed class ConsumerSampleHost : IDisposable
         || snippet.SearchKeywords.Any(keyword => keyword.Contains(query, StringComparison.OrdinalIgnoreCase));
 
     private void TrackRecentSnippet(string snippetId)
+        => TrackBoundedRecent(_recentSnippetIds, snippetId, WorkbenchRecentLimit);
+
+    private static void TrackBoundedRecent(List<string> ids, string id, int limit)
     {
-        _recentSnippetIds.RemoveAll(candidate => string.Equals(candidate, snippetId, StringComparison.Ordinal));
-        _recentSnippetIds.Insert(0, snippetId);
-        if (_recentSnippetIds.Count > 8)
+        ArgumentException.ThrowIfNullOrWhiteSpace(id);
+
+        ids.RemoveAll(candidate => string.Equals(candidate, id, StringComparison.Ordinal));
+        ids.Insert(0, id);
+        if (ids.Count > limit)
         {
-            _recentSnippetIds.RemoveRange(8, _recentSnippetIds.Count - 8);
+            ids.RemoveRange(limit, ids.Count - limit);
+        }
+    }
+
+    private static void AddBoundedFavorite(List<string> ids, string id)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(id);
+
+        if (!ids.Contains(id, StringComparer.Ordinal))
+        {
+            ids.Add(id);
         }
     }
 }
@@ -1769,6 +1887,14 @@ public sealed record ConsumerSampleGraphSearchResult(
     string? NodeId,
     string? ConnectionId,
     string ScopeId);
+
+public sealed record ConsumerSampleRecentsFavoritesEvidence(
+    string Surface,
+    IReadOnlyList<string> RecentIds,
+    IReadOnlyList<string> FavoriteIds,
+    IReadOnlyList<string> SourceLabels,
+    int RecentLimit,
+    bool IsHostOwned);
 
 public sealed record ConsumerSampleNavigationHistoryEntry(
     string Title,

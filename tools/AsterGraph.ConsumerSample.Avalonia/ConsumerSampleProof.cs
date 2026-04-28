@@ -158,6 +158,10 @@ public sealed record ConsumerSampleProofResult(
     bool UnifiedDiscoverySurfaceOk = true,
     bool DiscoverySourceLabelsOk = true,
     bool DiscoveryCommandRouteOk = true,
+    bool WorkbenchRecentsOk = true,
+    bool WorkbenchFavoritesOk = true,
+    bool RecentsFavoritesSupportBundleOk = true,
+    IReadOnlyList<ConsumerSampleRecentsFavoritesEvidence>? RecentsFavoritesEvidence = null,
     bool MiniMapLightweightProjectionEvidenceOk = true,
     int SelectedParameterProjectionCount = 0,
     int TotalParameterProjectionCount = 0)
@@ -265,6 +269,9 @@ public sealed record ConsumerSampleProofResult(
         && UnifiedDiscoverySurfaceOk
         && DiscoverySourceLabelsOk
         && DiscoveryCommandRouteOk
+        && WorkbenchRecentsOk
+        && WorkbenchFavoritesOk
+        && RecentsFavoritesSupportBundleOk
         && CommandPaletteGroupingOk
         && CommandPaletteDisabledReasonOk
         && CommandPaletteRecentActionsOk
@@ -364,6 +371,9 @@ public sealed record ConsumerSampleProofResult(
         && UnifiedDiscoverySurfaceOk
         && DiscoverySourceLabelsOk
         && DiscoveryCommandRouteOk
+        && WorkbenchRecentsOk
+        && WorkbenchFavoritesOk
+        && RecentsFavoritesSupportBundleOk
         && CommandPaletteGroupingOk
         && CommandPaletteDisabledReasonOk
         && CommandPaletteRecentActionsOk
@@ -440,6 +450,9 @@ public sealed record ConsumerSampleProofResult(
         && UnifiedDiscoverySurfaceOk
         && DiscoverySourceLabelsOk
         && DiscoveryCommandRouteOk
+        && WorkbenchRecentsOk
+        && WorkbenchFavoritesOk
+        && RecentsFavoritesSupportBundleOk
         && CommandPaletteGroupingOk
         && CommandPaletteDisabledReasonOk
         && CommandPaletteRecentActionsOk
@@ -819,6 +832,9 @@ public sealed record ConsumerSampleProofResult(
         $"UNIFIED_DISCOVERY_SURFACE_OK:{UnifiedDiscoverySurfaceOk}",
         $"DISCOVERY_SOURCE_LABELS_OK:{DiscoverySourceLabelsOk}",
         $"DISCOVERY_COMMAND_ROUTE_OK:{DiscoveryCommandRouteOk}",
+        $"WORKBENCH_RECENTS_OK:{WorkbenchRecentsOk}",
+        $"WORKBENCH_FAVORITES_OK:{WorkbenchFavoritesOk}",
+        $"RECENTS_FAVORITES_SUPPORT_BUNDLE_OK:{RecentsFavoritesSupportBundleOk}",
         $"COMMAND_PALETTE_GROUPING_OK:{CommandPaletteGroupingOk}",
         $"COMMAND_PALETTE_DISABLED_REASON_OK:{CommandPaletteDisabledReasonOk}",
         $"COMMAND_PALETTE_RECENT_ACTIONS_OK:{CommandPaletteRecentActionsOk}",
@@ -1089,6 +1105,10 @@ public static class ConsumerSampleProof
         bool unifiedDiscoverySurfaceOk;
         bool discoverySourceLabelsOk;
         bool discoveryCommandRouteOk;
+        bool workbenchRecentsOk;
+        bool workbenchFavoritesOk;
+        bool recentsFavoritesSupportBundleOk;
+        IReadOnlyList<ConsumerSampleRecentsFavoritesEvidence> recentsFavoritesEvidence;
         bool navigationHistoryOk;
         bool scopeBreadcrumbNavigationOk;
         bool focusRestoreOk;
@@ -1355,6 +1375,8 @@ public static class ConsumerSampleProof
         graphSnippetInsertOk = HasGraphSnippetInsertion(host);
         (fragmentLibrarySearchOk, fragmentLibraryPreviewOk, fragmentLibraryRecentsFavoritesOk, fragmentLibraryScopeBoundaryOk) =
             HasFragmentLibraryConvenience(host);
+        (workbenchRecentsOk, workbenchFavoritesOk, recentsFavoritesSupportBundleOk, recentsFavoritesEvidence) =
+            HasWorkbenchRecentsFavorites(host);
         host.SelectNode(host.GetFirstReviewNodeId());
         FlushUi();
 
@@ -1438,6 +1460,10 @@ public static class ConsumerSampleProof
             UnifiedDiscoverySurfaceOk: unifiedDiscoverySurfaceOk,
             DiscoverySourceLabelsOk: discoverySourceLabelsOk,
             DiscoveryCommandRouteOk: discoveryCommandRouteOk,
+            WorkbenchRecentsOk: workbenchRecentsOk,
+            WorkbenchFavoritesOk: workbenchFavoritesOk,
+            RecentsFavoritesSupportBundleOk: recentsFavoritesSupportBundleOk,
+            RecentsFavoritesEvidence: recentsFavoritesEvidence,
             CommandPaletteGroupingOk: commandPaletteGroupingOk,
             CommandPaletteDisabledReasonOk: commandPaletteDisabledReasonOk,
             CommandPaletteRecentActionsOk: commandPaletteRecentActionsOk,
@@ -1896,6 +1922,52 @@ public static class ConsumerSampleProof
             && host.GetSnippetPreview("missing-fragment-library-snippet") is null;
 
         return (searchOk, previewOk, recentsFavoritesOk, scopeBoundaryOk);
+    }
+
+    private static (
+        bool RecentsOk,
+        bool FavoritesOk,
+        bool SupportBundleOk,
+        IReadOnlyList<ConsumerSampleRecentsFavoritesEvidence> Evidence) HasWorkbenchRecentsFavorites(
+            ConsumerSampleHost host)
+    {
+        host.TrackRecentNodeDefinition(ConsumerSampleHost.ReviewDefinitionId);
+        host.FavoriteNodeDefinition(ConsumerSampleHost.QueueDefinitionId);
+        host.TrackRecentCommand("viewport.fit");
+        host.FavoriteCommand("workspace.save");
+        host.TrackRecentPluginSource("consumer.sample.audit-plugin");
+        host.FavoritePluginSource("consumer.sample.audit-plugin");
+
+        var evidence = host.RecentsFavoritesEvidence;
+        var node = evidence.SingleOrDefault(entry => string.Equals(entry.Surface, "node", StringComparison.Ordinal));
+        var fragment = evidence.SingleOrDefault(entry => string.Equals(entry.Surface, "fragment", StringComparison.Ordinal));
+        var command = evidence.SingleOrDefault(entry => string.Equals(entry.Surface, "command", StringComparison.Ordinal));
+        var plugin = evidence.SingleOrDefault(entry => string.Equals(entry.Surface, "plugin", StringComparison.Ordinal));
+
+        var recentsOk = node is not null
+            && fragment is not null
+            && command is not null
+            && plugin is not null
+            && node.RecentIds.Contains(ConsumerSampleHost.ReviewDefinitionId.ToString(), StringComparer.Ordinal)
+            && fragment.RecentIds.Contains(ConsumerSampleHost.QueueLaneSnippetId, StringComparer.Ordinal)
+            && command.RecentIds.Contains("viewport.fit", StringComparer.Ordinal)
+            && plugin.RecentIds.Contains("consumer.sample.audit-plugin", StringComparer.Ordinal)
+            && evidence.All(entry => entry.RecentIds.Count <= entry.RecentLimit);
+        var favoritesOk = node is not null
+            && fragment is not null
+            && command is not null
+            && plugin is not null
+            && node.FavoriteIds.Contains(ConsumerSampleHost.QueueDefinitionId.ToString(), StringComparer.Ordinal)
+            && fragment.FavoriteIds.Contains(ConsumerSampleHost.QueueLaneSnippetId, StringComparer.Ordinal)
+            && command.FavoriteIds.Contains("workspace.save", StringComparer.Ordinal)
+            && plugin.FavoriteIds.Contains("consumer.sample.audit-plugin", StringComparer.Ordinal);
+        var supportBundleOk = evidence.Count == 4
+            && evidence.All(entry => entry.IsHostOwned)
+            && evidence.All(entry => entry.RecentLimit == 8)
+            && evidence.All(entry => entry.SourceLabels.Count > 0)
+            && evidence.Select(entry => entry.Surface).Distinct(StringComparer.Ordinal).Count() == evidence.Count;
+
+        return (recentsOk, favoritesOk, supportBundleOk, evidence);
     }
 
     private static bool HasLocalPluginGallery(ConsumerSampleHost host, Window window)
