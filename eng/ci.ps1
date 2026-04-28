@@ -1064,6 +1064,7 @@ function Invoke-PrereleaseNotesValidation {
     'CUSTOM_TEMPLATE_OK:True',
     'TOOL_PROVIDER_OK:True',
     'NATIVE_INTERACTION_A11Y_OK:True',
+    'DEMO_GESTURE_PROOF_OK:True',
     'COMPOSITE_SCOPE_OK:True',
     'EDGE_NOTE_OK:True',
     'EDGE_GEOMETRY_OK:True',

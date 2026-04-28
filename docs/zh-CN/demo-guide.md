@@ -61,6 +61,7 @@ dotnet run --project src/AsterGraph.Demo/AsterGraph.Demo.csproj --nologo -- --pr
 - `COMPOSITE_SCOPE_OK:True`
 - `EDGE_NOTE_OK:True`
 - `EDGE_GEOMETRY_OK:True`
+- `DEMO_GESTURE_PROOF_OK:True`
 - `DISCONNECT_FLOW_OK:True`
 - `SCENARIO_LAUNCH_OK:True`
 - `SCENARIO_TOUR_OK:True`

@@ -45,12 +45,20 @@ public sealed record DemoProofResult(
     double PluginScanMs,
     double CommandLatencyMs)
 {
+    public bool GestureProofOk =>
+        NativeInteractionAccessibilityOk
+        && CommandSurfaceOk
+        && EdgeNoteOk
+        && EdgeGeometryOk
+        && DisconnectFlowOk;
+
     public bool IsOk =>
         TrustTransparencyOk
         && ShellWorkflowOk
         && CustomTemplateOk
         && ToolProviderOk
         && NativeInteractionAccessibilityOk
+        && GestureProofOk
         && CommandSurfaceOk
         && TieredNodeSurfaceOk
         && FixedGroupFrameOk

@@ -196,6 +196,7 @@ public sealed class DemoCapabilityShowcaseTests
         Assert.True(result.CustomTemplateOk);
         Assert.True(result.ToolProviderOk);
         Assert.True(result.NativeInteractionAccessibilityOk);
+        Assert.True(result.GestureProofOk);
         Assert.True(result.CommandSurfaceOk);
         Assert.True(result.TieredNodeSurfaceOk);
         Assert.True(result.FixedGroupFrameOk);

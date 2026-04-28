@@ -158,6 +158,7 @@ jobs:
               'CUSTOM_TEMPLATE_OK',
               'TOOL_PROVIDER_OK',
               'NATIVE_INTERACTION_A11Y_OK',
+              'DEMO_GESTURE_PROOF_OK',
               'COMPOSITE_SCOPE_OK',
               'EDGE_NOTE_OK',
               'EDGE_GEOMETRY_OK',

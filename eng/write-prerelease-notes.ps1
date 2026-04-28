@@ -139,6 +139,7 @@ $proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'de
 $proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'demo-proof.txt') -Pattern 'CUSTOM_TEMPLATE_OK'
 $proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'demo-proof.txt') -Pattern 'TOOL_PROVIDER_OK'
 $proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'demo-proof.txt') -Pattern 'NATIVE_INTERACTION_A11Y_OK'
+$proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'demo-proof.txt') -Pattern 'DEMO_GESTURE_PROOF_OK'
 $proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'demo-proof.txt') -Pattern 'COMPOSITE_SCOPE_OK'
 $proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'demo-proof.txt') -Pattern 'EDGE_NOTE_OK'
 $proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'demo-proof.txt') -Pattern 'EDGE_GEOMETRY_OK'

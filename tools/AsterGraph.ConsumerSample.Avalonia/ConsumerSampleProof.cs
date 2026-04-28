@@ -646,6 +646,24 @@ public sealed record ConsumerSampleProofResult(
         && FocusRestoreOk
         && NavigationScopeBoundaryOk;
 
+    public bool ConsumerGestureProofOk
+        => NodeDragEdgeRefreshOk
+        && EdgeRouteRefreshOk
+        && LiveCanvasRefreshAuditOk
+        && EdgeMultiSelectOk
+        && WireSliceOk
+        && SelectedNodeEdgeHighlightOk
+        && SelectedEdgeFeedbackOk
+        && InteractionFeedbackOk
+        && CommandDisabledReasonOk
+        && CanvasFocusRecoveryOk;
+
+    public bool InteractionSupportBundleOk
+        => SupportBundlePayloadOk
+        && RuntimeOverlaySupportBundleOk
+        && ConnectionValidationSupportBundleOk
+        && ConsumerGestureProofOk;
+
     public bool IsOk
         => HostMenuActionOk
         && PluginContributionOk
@@ -690,7 +708,9 @@ public sealed record ConsumerSampleProofResult(
         && V059MilestoneProofOk
         && InteractionFeedbackOk
         && CommandDisabledReasonOk
-        && CanvasFocusRecoveryOk;
+        && CanvasFocusRecoveryOk
+        && ConsumerGestureProofOk
+        && InteractionSupportBundleOk;
 
     public IReadOnlyList<string> MetricLines =>
     [
@@ -756,6 +776,8 @@ public sealed record ConsumerSampleProofResult(
         $"COMMAND_DISABLED_REASON_OK:{CommandDisabledReasonOk}",
         $"INTERACTION_FEEDBACK_OK:{InteractionFeedbackOk}",
         $"CANVAS_FOCUS_RECOVERY_OK:{CanvasFocusRecoveryOk}",
+        $"CONSUMER_GESTURE_PROOF_OK:{ConsumerGestureProofOk}",
+        $"INTERACTION_SUPPORT_BUNDLE_OK:{InteractionSupportBundleOk}",
         $"NODE_TOOLBAR_CONTRIBUTION_OK:{NodeToolbarContributionOk}",
         $"EDGE_TOOLBAR_CONTRIBUTION_OK:{EdgeToolbarContributionOk}",
         $"TOOLBAR_CONTRIBUTION_DESCRIPTOR_OK:{ToolbarContributionDescriptorOk}",
