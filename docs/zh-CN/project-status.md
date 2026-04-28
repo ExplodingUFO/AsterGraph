@@ -35,7 +35,7 @@
 - trusted / loaded / blocked 的 runtime inspection surface
 - command/trust timeline 和 perf overlay 这类 showcase surface
 - demo scenario presets 保持为宿主自管 proof catalog entries：`DEMO_SCENARIO_PRESETS_OK:True`
-- ConsumerSample snippets 保持为宿主自管 proof catalog entries：`GRAPH_SNIPPET_CATALOG_OK:True`、`GRAPH_SNIPPET_INSERT_OK:True`
+- ConsumerSample snippets 保持为宿主自管 proof catalog entries：`GRAPH_SNIPPET_CATALOG_OK:True`、`GRAPH_SNIPPET_INSERT_OK:True`、`FRAGMENT_LIBRARY_SEARCH_OK:True`、`FRAGMENT_LIBRARY_PREVIEW_OK:True`、`FRAGMENT_LIBRARY_RECENTS_FAVORITES_OK:True`、`FRAGMENT_LIBRARY_SCOPE_BOUNDARY_OK:True`
 - ConsumerSample authoring flow proof 继续绑定到现有 session commands：`AUTHORING_FLOW_PROOF_OK:True`、`AUTHORING_FLOW_HANDOFF_OK:True`、`AUTHORING_FLOW_SCOPE_BOUNDARY_OK:True`
 - experience handoff proof 会在不扩大支持边界的前提下汇总：`EXPERIENCE_POLISH_HANDOFF_OK:True`、`FEATURE_ENHANCEMENT_PROOF_OK:True`、`EXPERIENCE_SCOPE_BOUNDARY_OK:True`
 - 图面可用性 proof marker：
@@ -86,7 +86,7 @@
 
 | 声明 | 路线级证据 |
 | --- | --- |
-| canonical runtime/session 路线和维护中的评估阶梯，已经在当前防守住的 beta 线上被外部证据证明。 | `tools/AsterGraph.HelloWorld`、`tools/AsterGraph.Starter.Avalonia`、`tools/AsterGraph.HelloWorld.Avalonia`、`tools/AsterGraph.ConsumerSample.Avalonia`、`tools/AsterGraph.HostSample`、`HOST_SAMPLE_OK`、`CONSUMER_SAMPLE_OK`、`GRAPH_SNIPPET_CATALOG_OK`、`GRAPH_SNIPPET_INSERT_OK`、`AUTHORING_FLOW_PROOF_OK`、`AUTHORING_FLOW_HANDOFF_OK`、`AUTHORING_FLOW_SCOPE_BOUNDARY_OK`、`EXPERIENCE_POLISH_HANDOFF_OK`、`FEATURE_ENHANCEMENT_PROOF_OK`、`EXPERIENCE_SCOPE_BOUNDARY_OK` |
+| canonical runtime/session 路线和维护中的评估阶梯，已经在当前防守住的 beta 线上被外部证据证明。 | `tools/AsterGraph.HelloWorld`、`tools/AsterGraph.Starter.Avalonia`、`tools/AsterGraph.HelloWorld.Avalonia`、`tools/AsterGraph.ConsumerSample.Avalonia`、`tools/AsterGraph.HostSample`、`HOST_SAMPLE_OK`、`CONSUMER_SAMPLE_OK`、`GRAPH_SNIPPET_CATALOG_OK`、`GRAPH_SNIPPET_INSERT_OK`、`FRAGMENT_LIBRARY_SEARCH_OK`、`FRAGMENT_LIBRARY_PREVIEW_OK`、`FRAGMENT_LIBRARY_RECENTS_FAVORITES_OK`、`FRAGMENT_LIBRARY_SCOPE_BOUNDARY_OK`、`AUTHORING_FLOW_PROOF_OK`、`AUTHORING_FLOW_HANDOFF_OK`、`AUTHORING_FLOW_SCOPE_BOUNDARY_OK`、`EXPERIENCE_POLISH_HANDOFF_OK`、`FEATURE_ENHANCEMENT_PROOF_OK`、`EXPERIENCE_SCOPE_BOUNDARY_OK` |
 | showcase authoring surface 和宿主自管 runtime feedback 已经作为有边界的 beta 宿主体验被外部证据证明。 | `src/AsterGraph.Demo`、`tools/AsterGraph.ConsumerSample.Avalonia`、`DEMO_OK:True`、`DEMO_SCENARIO_PRESETS_OK:True`、`COMMAND_SURFACE_OK:True`、`COMPOSITE_SCOPE_OK:True`、`EDGE_NOTE_OK:True`、`EDGE_GEOMETRY_OK:True`、`DISCONNECT_FLOW_OK:True`、`RUNTIME_DEBUG_PANEL_INTERACTION_OK:True`、`RUNTIME_LOG_LOCATE_OK:True`、`RUNTIME_LOG_EXPORT_OK:True`、`AI_PIPELINE_MOCK_RUNNER_POLISH_OK:True`、`AI_PIPELINE_PAYLOAD_PREVIEW_OK:True`、`AI_PIPELINE_ERROR_DEBUG_EVIDENCE_OK:True` |
 | 打包后的 consumer proof 已被外部证据证明，而且没有扩大 SDK 边界。 | `tools/AsterGraph.PackageSmoke`、`PACKAGE_SMOKE_OK`、`HOST_SAMPLE_NET10_OK` |
 | Scale proof 已在 defended `baseline`/`large` 层级和 5000 节点 `stress` 上被外部证据证明：performance、authoring、SVG export、保守 PNG/JPEG raster export 和 reload 受防守。 | `tools/AsterGraph.ScaleSmoke`、`SCALE_PERFORMANCE_BUDGET_OK:baseline:True`、`SCALE_PERFORMANCE_BUDGET_OK:large:True`、`SCALE_PERFORMANCE_BUDGET_OK:stress:True`、`SCALE_EXPORT_BUDGET:stress:svg<=300:png<=120000:jpeg<=100000:reload<=800`、`SCALE_RASTER_EXPORT_STRESS_OK:True` |

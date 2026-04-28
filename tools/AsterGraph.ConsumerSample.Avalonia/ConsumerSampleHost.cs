@@ -41,7 +41,19 @@ public sealed class ConsumerSampleHost : IDisposable
         new(
             QueueLaneSnippetId,
             "Connected Queue Lane",
-            "Adds a queue lane connected from the first review node output."),
+            "Adds a queue lane connected from the first review node output.",
+            "Workflow",
+            "Preview: Review output -> Queue input, with one connected queue node.",
+            IsFavorite: true,
+            SearchKeywords: ["queue", "review", "lane", "connected"]),
+        new(
+            "consumer.sample.snippet.audit-branch",
+            "Audit Branch",
+            "Documents the review audit branch shape used by the sample graph.",
+            "Diagnostics",
+            "Preview: Review audit output -> Audit node input; copy this branch in hosts that own audit plugins.",
+            IsFavorite: false,
+            SearchKeywords: ["audit", "plugin", "diagnostics", "branch"]),
     ];
     private readonly GraphEditorViewModel _editor;
     private readonly ConsumerSamplePluginAllowlistTrustPolicy _trustPolicy;
@@ -54,6 +66,7 @@ public sealed class ConsumerSampleHost : IDisposable
     private IReadOnlyList<string> _alignmentHelperLines = [];
     private IReadOnlyList<string> _lastRuntimeLogExportLines = [];
     private readonly List<ConsumerSampleNavigationHistoryEntry> _navigationHistory = [];
+    private readonly List<string> _recentSnippetIds = [];
     private int _navigationHistoryIndex = -1;
     private GraphEditorViewportSnapshot? _pendingViewportRestore;
     private int _lastRouteCleanupCount;
@@ -104,6 +117,14 @@ public sealed class ConsumerSampleHost : IDisposable
     public int LastRouteCleanupCount => _lastRouteCleanupCount;
 
     public IReadOnlyList<ConsumerSampleSnippetDescriptor> SnippetCatalog => SnippetCatalogEntries;
+
+    public IReadOnlyList<string> FavoriteSnippetIds
+        => SnippetCatalog
+            .Where(snippet => snippet.IsFavorite)
+            .Select(snippet => snippet.Id)
+            .ToArray();
+
+    public IReadOnlyList<string> RecentSnippetIds => _recentSnippetIds.ToArray();
 
     public IReadOnlyList<string> LastRuntimeLogExportLines => _lastRuntimeLogExportLines;
 
@@ -227,9 +248,35 @@ public sealed class ConsumerSampleHost : IDisposable
     public bool AddPluginAuditNode()
         => Session.Commands.TryExecuteCommand(new GraphEditorCommandInvocationSnapshot(PluginCommandId));
 
+    public IReadOnlyList<ConsumerSampleSnippetDescriptor> SearchSnippetCatalog(string query)
+    {
+        if (string.IsNullOrWhiteSpace(query))
+        {
+            return SnippetCatalog;
+        }
+
+        var normalizedQuery = query.Trim();
+        return SnippetCatalog
+            .Where(snippet => MatchesSnippet(snippet, normalizedQuery))
+            .ToArray();
+    }
+
+    public string? GetSnippetPreview(string snippetId)
+        => SnippetCatalog
+            .FirstOrDefault(snippet => string.Equals(snippet.Id, snippetId, StringComparison.Ordinal))
+            ?.PreviewText;
+
     public bool TryInsertSnippet(string snippetId)
-        => string.Equals(snippetId, QueueLaneSnippetId, StringComparison.Ordinal)
-        && TryInsertConnectedQueueLaneSnippet();
+    {
+        if (!string.Equals(snippetId, QueueLaneSnippetId, StringComparison.Ordinal)
+            || !TryInsertConnectedQueueLaneSnippet())
+        {
+            return false;
+        }
+
+        TrackRecentSnippet(snippetId);
+        return true;
+    }
 
     public bool ApproveSelection()
         => Session.Commands.TrySetSelectedNodeParameterValue("status", "approved");
@@ -1672,12 +1719,33 @@ public sealed class ConsumerSampleHost : IDisposable
                 ],
                 ResetManualRoutes: true);
     }
+
+    private static bool MatchesSnippet(ConsumerSampleSnippetDescriptor snippet, string query)
+        => snippet.Id.Contains(query, StringComparison.OrdinalIgnoreCase)
+        || snippet.Title.Contains(query, StringComparison.OrdinalIgnoreCase)
+        || snippet.Description.Contains(query, StringComparison.OrdinalIgnoreCase)
+        || snippet.Category.Contains(query, StringComparison.OrdinalIgnoreCase)
+        || snippet.SearchKeywords.Any(keyword => keyword.Contains(query, StringComparison.OrdinalIgnoreCase));
+
+    private void TrackRecentSnippet(string snippetId)
+    {
+        _recentSnippetIds.RemoveAll(candidate => string.Equals(candidate, snippetId, StringComparison.Ordinal));
+        _recentSnippetIds.Insert(0, snippetId);
+        if (_recentSnippetIds.Count > 8)
+        {
+            _recentSnippetIds.RemoveRange(8, _recentSnippetIds.Count - 8);
+        }
+    }
 }
 
 public sealed record ConsumerSampleSnippetDescriptor(
     string Id,
     string Title,
-    string Description);
+    string Description,
+    string Category,
+    string PreviewText,
+    bool IsFavorite,
+    IReadOnlyList<string> SearchKeywords);
 
 public enum ConsumerSampleGraphSearchScope
 {

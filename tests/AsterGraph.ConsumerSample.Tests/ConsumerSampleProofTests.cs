@@ -93,8 +93,18 @@ public sealed class ConsumerSampleProofTests
 
         Assert.Contains("Queue", snippet.Title, StringComparison.Ordinal);
         Assert.Contains("review", snippet.Description, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal("Workflow", snippet.Category);
+        Assert.Contains("Review output", snippet.PreviewText, StringComparison.Ordinal);
+        Assert.True(snippet.IsFavorite);
+        Assert.Contains("connected", snippet.SearchKeywords);
+        Assert.Contains(host.SearchSnippetCatalog("queue"), entry => entry.Id == ConsumerSampleHost.QueueLaneSnippetId);
+        Assert.Contains(host.SearchSnippetCatalog("diagnostics"), entry => entry.Category == "Diagnostics");
+        Assert.Equal(snippet.PreviewText, host.GetSnippetPreview(snippet.Id));
+        Assert.Contains(ConsumerSampleHost.QueueLaneSnippetId, host.FavoriteSnippetIds);
+        Assert.Empty(host.RecentSnippetIds);
 
         Assert.True(host.TryInsertSnippet(snippet.Id));
+        Assert.Equal(ConsumerSampleHost.QueueLaneSnippetId, Assert.Single(host.RecentSnippetIds));
 
         var after = host.Session.Queries.CreateDocumentSnapshot();
         var createdQueueNode = Assert.Single(after.Nodes, node =>
@@ -183,6 +193,10 @@ public sealed class ConsumerSampleProofTests
         Assert.True(result.NavigationScopeBoundaryOk);
         Assert.True(result.GraphSnippetCatalogOk);
         Assert.True(result.GraphSnippetInsertOk);
+        Assert.True(result.FragmentLibrarySearchOk);
+        Assert.True(result.FragmentLibraryPreviewOk);
+        Assert.True(result.FragmentLibraryRecentsFavoritesOk);
+        Assert.True(result.FragmentLibraryScopeBoundaryOk);
         Assert.True(result.WorkbenchDefaultsOk);
         Assert.True(result.WorkbenchHostBuilderHandoffOk);
         Assert.True(result.WorkbenchScopeBoundaryOk);
@@ -277,6 +291,10 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_BUILDER_THIN_WRAPPER_OK:True");
         Assert.Contains(result.ProofLines, line => line == "GRAPH_SNIPPET_CATALOG_OK:True");
         Assert.Contains(result.ProofLines, line => line == "GRAPH_SNIPPET_INSERT_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "FRAGMENT_LIBRARY_SEARCH_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "FRAGMENT_LIBRARY_PREVIEW_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "FRAGMENT_LIBRARY_RECENTS_FAVORITES_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "FRAGMENT_LIBRARY_SCOPE_BOUNDARY_OK:True");
         Assert.Contains(result.ProofLines, line => line == "WORKBENCH_DEFAULTS_OK:True");
         Assert.Contains(result.ProofLines, line => line == "WORKBENCH_HOST_BUILDER_HANDOFF_OK:True");
         Assert.Contains(result.ProofLines, line => line == "WORKBENCH_PERFORMANCE_MODE_OK:True");

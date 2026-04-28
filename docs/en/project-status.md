@@ -36,7 +36,7 @@
 - runtime inspection surface for trusted, loaded, and blocked outcomes
 - command/trust timeline and perf overlay in the showcase surface
 - demo scenario presets remain host-owned proof catalog entries: `DEMO_SCENARIO_PRESETS_OK:True`
-- ConsumerSample snippets remain host-owned proof catalog entries: `GRAPH_SNIPPET_CATALOG_OK:True`, `GRAPH_SNIPPET_INSERT_OK:True`
+- ConsumerSample snippets remain host-owned proof catalog entries: `GRAPH_SNIPPET_CATALOG_OK:True`, `GRAPH_SNIPPET_INSERT_OK:True`, `FRAGMENT_LIBRARY_SEARCH_OK:True`, `FRAGMENT_LIBRARY_PREVIEW_OK:True`, `FRAGMENT_LIBRARY_RECENTS_FAVORITES_OK:True`, `FRAGMENT_LIBRARY_SCOPE_BOUNDARY_OK:True`
 - ConsumerSample authoring flow proof stays bounded to existing session commands: `AUTHORING_FLOW_PROOF_OK:True`, `AUTHORING_FLOW_HANDOFF_OK:True`, `AUTHORING_FLOW_SCOPE_BOUNDARY_OK:True`
 - experience handoff proof is summarized without widening the support boundary: `EXPERIENCE_POLISH_HANDOFF_OK:True`, `FEATURE_ENHANCEMENT_PROOF_OK:True`, `EXPERIENCE_SCOPE_BOUNDARY_OK:True`
 - graph-surface usability proof markers:

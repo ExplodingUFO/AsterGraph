@@ -158,6 +158,10 @@ Expected proof markers:
 - `GRAPH_READINESS_STATUS_OK:True`
 - `GRAPH_SNIPPET_CATALOG_OK:True`
 - `GRAPH_SNIPPET_INSERT_OK:True`
+- `FRAGMENT_LIBRARY_SEARCH_OK:True`
+- `FRAGMENT_LIBRARY_PREVIEW_OK:True`
+- `FRAGMENT_LIBRARY_RECENTS_FAVORITES_OK:True`
+- `FRAGMENT_LIBRARY_SCOPE_BOUNDARY_OK:True`
 - `WORKBENCH_DEFAULTS_OK:True`
 - `WORKBENCH_HOST_BUILDER_HANDOFF_OK:True`
 - `WORKBENCH_PERFORMANCE_MODE_OK:True`
@@ -220,7 +224,7 @@ Use this sample to copy the host-owned seams, not the sample-specific presentati
 - action rail / command projection: `AsterGraphHostedActionFactory.CreateCommandActions(...)` and `AsterGraphHostedActionFactory.CreateProjection(...)`
 - plugin trust workflow: `GraphEditorPluginDiscoveryOptions`, `AsterGraphEditorOptions.PluginTrustPolicy`, and the host allowlist import/export path
 - selected-node parameter read/write seam: `IGraphEditorSession.Queries.GetSelectedNodeParameterSnapshots()` reads the selected node parameters, and `IGraphEditorSession.Commands.TrySetSelectedNodeParameterValue(...)` writes them back
-- snippet catalog and insertion seam: `ConsumerSampleHost.SnippetCatalog` stays sample-owned, while `ConsumerSampleHost.TryInsertSnippet(...)` uses `StartConnection(...)` plus `TryCreateConnectedNodeFromPendingConnection(...)` instead of adding a runtime snippet abstraction
+- fragment/snippet catalog seam: `ConsumerSampleHost.SnippetCatalog` stays sample-owned, searchable, previewable, and tracks bounded favorite/recent ids, while `ConsumerSampleHost.TryInsertSnippet(...)` uses `StartConnection(...)` plus `TryCreateConnectedNodeFromPendingConnection(...)` instead of adding a runtime snippet abstraction
 
 ### Route Boundaries To Keep
 
@@ -243,7 +247,7 @@ Use this sample to copy the host-owned seams, not the sample-specific presentati
 - Project node-side editor state from `GetNodeParameterSnapshots(nodeId)` so `NodeParameterEditorHost` and `INodeParameterEditorRegistry` reuse the same validation-aware parameter contract.
 - Keep writes on the shared session command path through `TrySetSelectedNodeParameterValue(...)` or `TrySetNodeParameterValue(...)`.
 - Project host actions from `GetCommandDescriptors()` and close the route with `AsterGraph.ConsumerSample.Avalonia -- --proof`, expecting `AUTHORING_SURFACE_OK:True`.
-- Keep snippets host-owned: expose sample snippet ids through `ConsumerSampleHost.SnippetCatalog`, insert them through existing session commands, and expect `GRAPH_SNIPPET_CATALOG_OK:True` plus `GRAPH_SNIPPET_INSERT_OK:True`.
+- Keep snippets host-owned: expose sample snippet ids through `ConsumerSampleHost.SnippetCatalog`, search/preview/favorite/recent them in the host, insert them through existing session commands, and expect `GRAPH_SNIPPET_CATALOG_OK:True`, `GRAPH_SNIPPET_INSERT_OK:True`, `FRAGMENT_LIBRARY_SEARCH_OK:True`, `FRAGMENT_LIBRARY_PREVIEW_OK:True`, `FRAGMENT_LIBRARY_RECENTS_FAVORITES_OK:True`, and `FRAGMENT_LIBRARY_SCOPE_BOUNDARY_OK:True`.
 - Keep the default workbench hosted-only: use `AsterGraphHostBuilder.UseDefaultWorkbench()` when the stock toolbar, command palette, stencil, inspector, mini-map, fragment, diagnostics, and status chrome are enough; expect `WORKBENCH_DEFAULTS_OK:True`, `WORKBENCH_HOST_BUILDER_HANDOFF_OK:True`, `WORKBENCH_PERFORMANCE_MODE_OK:True`, `BALANCED_MODE_DEFAULT_OK:True`, `WORKBENCH_LOD_POLICY_OK:True`, `PERFORMANCE_MODE_SCOPE_BOUNDARY_OK:True`, and `WORKBENCH_SCOPE_BOUNDARY_OK:True`.
 
 ### Copyable Capability Breadth Handoff

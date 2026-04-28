@@ -55,6 +55,10 @@ internal static class ConsumerSampleDocsAssertions
         Assert.Contains("CONNECTION_RULE_BUILDER_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("AUTHORING_BUILDER_THIN_WRAPPER_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("GRAPH_SNIPPET_INSERT_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("FRAGMENT_LIBRARY_SEARCH_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("FRAGMENT_LIBRARY_PREVIEW_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("FRAGMENT_LIBRARY_RECENTS_FAVORITES_OK:True", contents, StringComparison.Ordinal);
+        Assert.Contains("FRAGMENT_LIBRARY_SCOPE_BOUNDARY_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("FIVE_MINUTE_ONBOARDING_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("ONBOARDING_CONFIGURATION_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("SUPPORT_BUNDLE_PERSISTENCE_OK:True", contents, StringComparison.Ordinal);

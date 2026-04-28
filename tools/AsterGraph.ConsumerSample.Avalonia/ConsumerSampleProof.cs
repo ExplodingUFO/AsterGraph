@@ -141,6 +141,10 @@ public sealed record ConsumerSampleProofResult(
     bool FiveMinuteOnboardingOk = true,
     bool GraphSnippetCatalogOk = true,
     bool GraphSnippetInsertOk = true,
+    bool FragmentLibrarySearchOk = true,
+    bool FragmentLibraryPreviewOk = true,
+    bool FragmentLibraryRecentsFavoritesOk = true,
+    bool FragmentLibraryScopeBoundaryOk = true,
     bool WorkbenchDefaultsOk = true,
     bool WorkbenchHostBuilderHandoffOk = true,
     bool WorkbenchPerformanceModeOk = true,
@@ -285,6 +289,10 @@ public sealed record ConsumerSampleProofResult(
         && AuthoringBuilderThinWrapperOk
         && GraphSnippetCatalogOk
         && GraphSnippetInsertOk
+        && FragmentLibrarySearchOk
+        && FragmentLibraryPreviewOk
+        && FragmentLibraryRecentsFavoritesOk
+        && FragmentLibraryScopeBoundaryOk
         && WorkbenchDefaultsOk
         && WorkbenchHostBuilderHandoffOk
         && WorkbenchPerformanceModeOk
@@ -369,6 +377,10 @@ public sealed record ConsumerSampleProofResult(
         && AuthoringBuilderThinWrapperOk
         && GraphSnippetCatalogOk
         && GraphSnippetInsertOk
+        && FragmentLibrarySearchOk
+        && FragmentLibraryPreviewOk
+        && FragmentLibraryRecentsFavoritesOk
+        && FragmentLibraryScopeBoundaryOk
         && WorkbenchDefaultsOk
         && WorkbenchHostBuilderHandoffOk
         && WorkbenchScopeBoundaryOk;
@@ -560,6 +572,10 @@ public sealed record ConsumerSampleProofResult(
         $"AUTHORING_BUILDER_THIN_WRAPPER_OK:{AuthoringBuilderThinWrapperOk}",
         $"GRAPH_SNIPPET_CATALOG_OK:{GraphSnippetCatalogOk}",
         $"GRAPH_SNIPPET_INSERT_OK:{GraphSnippetInsertOk}",
+        $"FRAGMENT_LIBRARY_SEARCH_OK:{FragmentLibrarySearchOk}",
+        $"FRAGMENT_LIBRARY_PREVIEW_OK:{FragmentLibraryPreviewOk}",
+        $"FRAGMENT_LIBRARY_RECENTS_FAVORITES_OK:{FragmentLibraryRecentsFavoritesOk}",
+        $"FRAGMENT_LIBRARY_SCOPE_BOUNDARY_OK:{FragmentLibraryScopeBoundaryOk}",
         $"WORKBENCH_DEFAULTS_OK:{WorkbenchDefaultsOk}",
         $"WORKBENCH_HOST_BUILDER_HANDOFF_OK:{WorkbenchHostBuilderHandoffOk}",
         $"WORKBENCH_PERFORMANCE_MODE_OK:{WorkbenchPerformanceModeOk}",
@@ -774,6 +790,10 @@ public static class ConsumerSampleProof
         bool authoringBuilderThinWrapperOk;
         bool graphSnippetCatalogOk;
         bool graphSnippetInsertOk;
+        bool fragmentLibrarySearchOk;
+        bool fragmentLibraryPreviewOk;
+        bool fragmentLibraryRecentsFavoritesOk;
+        bool fragmentLibraryScopeBoundaryOk;
         double inspectorProjectionMs;
         double pluginScanMs;
         double commandLatencyMs;
@@ -1004,6 +1024,8 @@ public static class ConsumerSampleProof
 
         graphSnippetCatalogOk = HasGraphSnippetCatalog(host);
         graphSnippetInsertOk = HasGraphSnippetInsertion(host);
+        (fragmentLibrarySearchOk, fragmentLibraryPreviewOk, fragmentLibraryRecentsFavoritesOk, fragmentLibraryScopeBoundaryOk) =
+            HasFragmentLibraryConvenience(host);
         host.SelectNode(host.GetFirstReviewNodeId());
         FlushUi();
 
@@ -1152,6 +1174,10 @@ public static class ConsumerSampleProof
             FiveMinuteOnboardingOk: fiveMinuteOnboardingOk,
             GraphSnippetCatalogOk: graphSnippetCatalogOk,
             GraphSnippetInsertOk: graphSnippetInsertOk,
+            FragmentLibrarySearchOk: fragmentLibrarySearchOk,
+            FragmentLibraryPreviewOk: fragmentLibraryPreviewOk,
+            FragmentLibraryRecentsFavoritesOk: fragmentLibraryRecentsFavoritesOk,
+            FragmentLibraryScopeBoundaryOk: fragmentLibraryScopeBoundaryOk,
             WorkbenchDefaultsOk: workbenchDefaultsOk,
             WorkbenchHostBuilderHandoffOk: workbenchHostBuilderHandoffOk,
             WorkbenchPerformanceModeOk: workbenchPerformanceModeOk,
@@ -1370,6 +1396,45 @@ public static class ConsumerSampleProof
                 && string.Equals(connection.TargetNodeId, createdQueueNodeIds[0], StringComparison.Ordinal)
                 && string.Equals(connection.TargetPortId, "input", StringComparison.Ordinal))
             && !host.Session.Queries.GetPendingConnectionSnapshot().HasPendingConnection;
+    }
+
+    private static (bool SearchOk, bool PreviewOk, bool RecentsFavoritesOk, bool ScopeBoundaryOk) HasFragmentLibraryConvenience(
+        ConsumerSampleHost host)
+    {
+        var queueSearch = host.SearchSnippetCatalog("queue");
+        var diagnosticsSearch = host.SearchSnippetCatalog("diagnostics");
+        var preview = host.GetSnippetPreview(ConsumerSampleHost.QueueLaneSnippetId);
+        var favoriteIds = host.FavoriteSnippetIds;
+        var beforeRecentIds = host.RecentSnippetIds;
+        var inserted = host.TryInsertSnippet(ConsumerSampleHost.QueueLaneSnippetId);
+        var afterRecentIds = host.RecentSnippetIds;
+        var storage = host.Session.Queries.GetFragmentStorageSnapshot();
+
+        var searchOk = queueSearch.Any(snippet =>
+                string.Equals(snippet.Id, ConsumerSampleHost.QueueLaneSnippetId, StringComparison.Ordinal)
+                && string.Equals(snippet.Category, "Workflow", StringComparison.Ordinal)
+                && snippet.SearchKeywords.Contains("connected", StringComparer.OrdinalIgnoreCase))
+            && diagnosticsSearch.Any(snippet =>
+                string.Equals(snippet.Category, "Diagnostics", StringComparison.Ordinal));
+        var previewOk = !string.IsNullOrWhiteSpace(preview)
+            && preview.Contains("Review output", StringComparison.Ordinal)
+            && preview.Contains("Queue input", StringComparison.Ordinal);
+        var recentsFavoritesOk = inserted
+            && favoriteIds.Contains(ConsumerSampleHost.QueueLaneSnippetId, StringComparer.Ordinal)
+            && afterRecentIds.Count > 0
+            && afterRecentIds.Count >= beforeRecentIds.Count
+            && string.Equals(afterRecentIds[0], ConsumerSampleHost.QueueLaneSnippetId, StringComparison.Ordinal);
+        var scopeBoundaryOk = storage.CanExportSelectionAsTemplate
+            && storage.CanImportFragmentTemplate
+            && storage.CanDeleteFragmentTemplate
+            && host.SnippetCatalog.All(snippet =>
+                !string.IsNullOrWhiteSpace(snippet.Id)
+                && !string.IsNullOrWhiteSpace(snippet.Category)
+                && !string.IsNullOrWhiteSpace(snippet.PreviewText))
+            && host.SearchSnippetCatalog("missing-fragment-library-query").Count == 0
+            && host.GetSnippetPreview("missing-fragment-library-snippet") is null;
+
+        return (searchOk, previewOk, recentsFavoritesOk, scopeBoundaryOk);
     }
 
     private static bool HasLocalPluginGallery(ConsumerSampleHost host, Window window)
