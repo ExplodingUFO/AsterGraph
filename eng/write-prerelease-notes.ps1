@@ -193,7 +193,7 @@ $environmentLines = @(
   '- trusted plugin proof: pair `CONSUMER_SAMPLE_TRUST_OK` with `ASTERGRAPH_PLUGIN_VALIDATE_OK` and the plugin trust contract before treating a third-party plugin artifact as loadable',
   '- showcase proof: `AsterGraph.Demo --proof` for host-native shell workflows, non-obscuring editing, and graph-surface visual semantics',
   '- packed consumer proofs: `HostSample`, `.NET 10` packed consumer path, `PackageSmoke`, and generated template/plugin validation',
-  '- API adoption proof: `validate-public-api-surface.ps1` pairs `PUBLIC_API_SURFACE_OK`, `PUBLIC_API_SCOPE_OK`, and `PUBLIC_API_GUIDANCE_OK` near generated template/plugin validation in the release proof story',
+  '- API adoption proof: `validate-public-api-surface.ps1` pairs `PUBLIC_API_SURFACE_OK`, `PUBLIC_API_SCOPE_OK`, and `PUBLIC_API_GUIDANCE_OK` near generated template/plugin validation in the release proof story; `API_RELEASE_CANDIDATE_PROOF_OK:True`, `PUBLIC_API_GUIDANCE_HANDOFF_OK:True`, and `RELEASE_BOUNDARY_STABILITY_OK:True` keep release-candidate wording tied to the current package boundary',
   '- scale proof source: `ScaleSmoke` defended `baseline`/`large` tiers plus `stress` performance/authoring/SVG/raster-export gates; `stress` PNG/JPEG export uses conservative defended redlines'
 )
 

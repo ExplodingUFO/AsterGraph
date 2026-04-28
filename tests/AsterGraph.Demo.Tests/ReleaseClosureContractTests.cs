@@ -91,6 +91,9 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("CLAIM_HYGIENE_BOUNDARY_OK:True", notes, StringComparison.Ordinal);
         Assert.Contains("0.xx alpha/beta hardening line", notes, StringComparison.Ordinal);
         Assert.True(HasLineWithAll(notes, "API adoption proof", "PUBLIC_API_SURFACE_OK", "PUBLIC_API_GUIDANCE_OK", "generated template/plugin validation"));
+        Assert.Contains("API_RELEASE_CANDIDATE_PROOF_OK:True", notes, StringComparison.Ordinal);
+        Assert.Contains("PUBLIC_API_GUIDANCE_HANDOFF_OK:True", notes, StringComparison.Ordinal);
+        Assert.Contains("RELEASE_BOUNDARY_STABILITY_OK:True", notes, StringComparison.Ordinal);
         Assert.True(HasLineWithAll(notes, "trusted plugin proof", "CONSUMER_SAMPLE_TRUST_OK", "ASTERGRAPH_PLUGIN_VALIDATE_OK", "plugin trust contract"));
         Assert.Contains("[Beta Support Bundle](./docs/en/support-bundle.md)", notes, StringComparison.Ordinal);
         Assert.Contains("[Adoption Feedback Loop](./docs/en/adoption-feedback.md)", notes, StringComparison.Ordinal);
@@ -160,6 +163,9 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("TEMPLATE_SMOKE_PLUGIN_VALIDATE_OK:True", englishChecklist, StringComparison.Ordinal);
         Assert.Contains("PUBLIC_API_SURFACE_OK:...:net9.0", englishChecklist, StringComparison.Ordinal);
         Assert.Contains("PUBLIC_API_GUIDANCE_OK:True", englishChecklist, StringComparison.Ordinal);
+        Assert.Contains("API_RELEASE_CANDIDATE_PROOF_OK:True", englishChecklist, StringComparison.Ordinal);
+        Assert.Contains("PUBLIC_API_GUIDANCE_HANDOFF_OK:True", englishChecklist, StringComparison.Ordinal);
+        Assert.Contains("RELEASE_BOUNDARY_STABILITY_OK:True", englishChecklist, StringComparison.Ordinal);
         Assert.True(HasLineWithAll(englishChecklist, "public API guidance proof", "template/plugin proof", "PUBLIC_API_SURFACE_OK", "PUBLIC_API_GUIDANCE_OK"));
         Assert.Contains("[Adapter-2 Accessibility Recipe](./adapter-2-accessibility-recipe.md)", englishChecklist, StringComparison.Ordinal);
         Assert.Contains("ADAPTER2_PERFORMANCE_BASELINE_OK:True", englishChecklist, StringComparison.Ordinal);
@@ -196,6 +202,9 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("TEMPLATE_SMOKE_PLUGIN_VALIDATE_OK:True", chineseChecklist, StringComparison.Ordinal);
         Assert.Contains("PUBLIC_API_SURFACE_OK:...:net9.0", chineseChecklist, StringComparison.Ordinal);
         Assert.Contains("PUBLIC_API_GUIDANCE_OK:True", chineseChecklist, StringComparison.Ordinal);
+        Assert.Contains("API_RELEASE_CANDIDATE_PROOF_OK:True", chineseChecklist, StringComparison.Ordinal);
+        Assert.Contains("PUBLIC_API_GUIDANCE_HANDOFF_OK:True", chineseChecklist, StringComparison.Ordinal);
+        Assert.Contains("RELEASE_BOUNDARY_STABILITY_OK:True", chineseChecklist, StringComparison.Ordinal);
         Assert.True(HasLineWithAll(chineseChecklist, "public API guidance proof", "template/plugin proof", "PUBLIC_API_SURFACE_OK", "PUBLIC_API_GUIDANCE_OK"));
         Assert.Contains("[Adapter-2 Accessibility Recipe](./adapter-2-accessibility-recipe.md)", chineseChecklist, StringComparison.Ordinal);
         Assert.Contains("ADAPTER2_PERFORMANCE_BASELINE_OK:True", chineseChecklist, StringComparison.Ordinal);
@@ -356,6 +365,9 @@ public sealed class ReleaseClosureContractTests
             Assert.Contains("-Framework net9.0", contents, StringComparison.Ordinal);
             Assert.Contains("-UpdateBaseline", contents, StringComparison.Ordinal);
             Assert.Contains("PUBLIC_API_SCOPE_OK:AsterGraph.Abstractions,AsterGraph.Core,AsterGraph.Editor,AsterGraph.Avalonia", contents, StringComparison.Ordinal);
+            Assert.Contains("API_RELEASE_CANDIDATE_PROOF_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("PUBLIC_API_GUIDANCE_HANDOFF_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("RELEASE_BOUNDARY_STABILITY_OK:True", contents, StringComparison.Ordinal);
         }
     }
 
@@ -373,11 +385,19 @@ public sealed class ReleaseClosureContractTests
         Assert.True(HasLineWithAll(chineseInventory, "release handoff", "Stable canonical", "Retained migration", "Compatibility-only", "obsolete"));
         Assert.True(HasLineWithAll(englishInventory, "PUBLIC_API_SURFACE_OK", "PUBLIC_API_SCOPE_OK", "PUBLIC_API_GUIDANCE_OK", "ASTERGRAPH_TEMPLATE_SMOKE_OK", "TEMPLATE_SMOKE_PLUGIN_VALIDATE_OK"));
         Assert.True(HasLineWithAll(chineseInventory, "PUBLIC_API_SURFACE_OK", "PUBLIC_API_SCOPE_OK", "PUBLIC_API_GUIDANCE_OK", "ASTERGRAPH_TEMPLATE_SMOKE_OK", "TEMPLATE_SMOKE_PLUGIN_VALIDATE_OK"));
+        Assert.True(HasLineWithAll(englishInventory, "API_RELEASE_CANDIDATE_PROOF_OK:True", "PUBLIC_API_GUIDANCE_HANDOFF_OK:True", "RELEASE_BOUNDARY_STABILITY_OK:True"));
+        Assert.True(HasLineWithAll(chineseInventory, "API_RELEASE_CANDIDATE_PROOF_OK:True", "PUBLIC_API_GUIDANCE_HANDOFF_OK:True", "RELEASE_BOUNDARY_STABILITY_OK:True"));
 
         Assert.True(HasLineWithAll(englishChecklist, "public API guidance proof", "PUBLIC_API_SCOPE_OK", "template/plugin proof"));
         Assert.True(HasLineWithAll(chineseChecklist, "public API guidance proof", "PUBLIC_API_SCOPE_OK", "template/plugin proof"));
         Assert.True(HasLineWithAll(englishStatus, "public API guidance proof", "PUBLIC_API_SURFACE_OK", "PUBLIC_API_SCOPE_OK", "PUBLIC_API_GUIDANCE_OK"));
         Assert.True(HasLineWithAll(chineseStatus, "public API guidance proof", "PUBLIC_API_SURFACE_OK", "PUBLIC_API_SCOPE_OK", "PUBLIC_API_GUIDANCE_OK"));
+        foreach (var contents in new[] { englishChecklist, chineseChecklist, englishStatus, chineseStatus })
+        {
+            Assert.Contains("API_RELEASE_CANDIDATE_PROOF_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("PUBLIC_API_GUIDANCE_HANDOFF_OK:True", contents, StringComparison.Ordinal);
+            Assert.Contains("RELEASE_BOUNDARY_STABILITY_OK:True", contents, StringComparison.Ordinal);
+        }
     }
 
     [Fact]
