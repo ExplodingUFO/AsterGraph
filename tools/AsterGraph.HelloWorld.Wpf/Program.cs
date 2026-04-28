@@ -223,13 +223,30 @@ public sealed record HostedHelloWorldProofResult(
         && AccessibilityCommandSurfaceOk
         && AccessibilityAuthoringSurfaceOk;
 
+    public bool Adapter2ValidationScopeOk =>
+        CommandSurfaceOk
+        && HostedAccessibilityOk
+        && Adapter2PerformanceBaselineOk
+        && Adapter2ExportBreadthOk;
+
+    public bool Adapter2MatrixHandoffOk =>
+        Adapter2ValidationScopeOk
+        && Adapter2ProjectionBudgetOk
+        && Adapter2CommandBudgetOk
+        && Adapter2SceneBudgetOk;
+
+    public bool Adapter2ScopeBoundaryOk => Adapter2MatrixHandoffOk;
+
     public bool IsOk => CommandSurfaceOk
         && HostedAccessibilityOk
         && Adapter2PerformanceBaselineOk
         && Adapter2ExportBreadthOk
         && Adapter2ProjectionBudgetOk
         && Adapter2CommandBudgetOk
-        && Adapter2SceneBudgetOk;
+        && Adapter2SceneBudgetOk
+        && Adapter2ValidationScopeOk
+        && Adapter2MatrixHandoffOk
+        && Adapter2ScopeBoundaryOk;
 
     public IReadOnlyList<string> ProofLines =>
         [
@@ -244,6 +261,9 @@ public sealed record HostedHelloWorldProofResult(
             $"ADAPTER2_PROJECTION_BUDGET_OK:{Adapter2ProjectionBudgetOk}:{FormatBudgetFailure(Adapter2ProjectionBudgetOk, "inspector_projection_ms")}",
             $"ADAPTER2_COMMAND_BUDGET_OK:{Adapter2CommandBudgetOk}:{FormatBudgetFailure(Adapter2CommandBudgetOk, "command_latency_ms")}",
             $"ADAPTER2_SCENE_BUDGET_OK:{Adapter2SceneBudgetOk}:{FormatBudgetFailure(Adapter2SceneBudgetOk, "scene_snapshot_ms")}",
+            $"ADAPTER2_VALIDATION_SCOPE_OK:{Adapter2ValidationScopeOk}",
+            $"ADAPTER2_MATRIX_HANDOFF_OK:{Adapter2MatrixHandoffOk}",
+            $"ADAPTER2_SCOPE_BOUNDARY_OK:{Adapter2ScopeBoundaryOk}",
             $"HELLOWORLD_WPF_OK:{IsOk}",
         ];
 

@@ -269,10 +269,14 @@ function New-WpfAdapterCapabilityMatrixProof {
   $proofText = Get-Content -LiteralPath $HelloWorldProofPath -Raw
   $helloWorldWpfOk = Get-ProofMarkerLine -ProofText $proofText -Marker 'HELLOWORLD_WPF_OK'
   $commandSurfaceOk = Get-ProofMarkerLine -ProofText $proofText -Marker 'COMMAND_SURFACE_OK'
+  $matrixHandoffOk = Get-ProofMarkerLine -ProofText $proofText -Marker 'ADAPTER2_MATRIX_HANDOFF_OK'
 
   $pluginScanMetric = [regex]::Match($proofText, '(?m)^HOST_NATIVE_METRIC:plugin_scan_ms=(.+)$').Success
   $inspectorProjectionMetric = [regex]::Match($proofText, '(?m)^HOST_NATIVE_METRIC:inspector_projection_ms=(.+)$').Success
   $commandLatencyMetric = [regex]::Match($proofText, '(?m)^HOST_NATIVE_METRIC:command_latency_ms=(.+)$').Success
+  $matrixHandoffPassed = (Convert-TextToCapabilityStatus -Value $helloWorldWpfOk) -eq 'PASS' `
+    -and (Convert-TextToCapabilityStatus -Value $commandSurfaceOk) -eq 'PASS' `
+    -and (Convert-TextToCapabilityStatus -Value $matrixHandoffOk) -eq 'PASS'
 
   $proofLines = @(
     'ADAPTER_CAPABILITY_MATRIX_FORMAT:1',
@@ -280,7 +284,8 @@ function New-WpfAdapterCapabilityMatrixProof {
     "ADAPTER_CAPABILITY_MATRIX:WPF:COMMAND_SURFACE_OK:$(Convert-TextToCapabilityStatus -Value $commandSurfaceOk)",
     "ADAPTER_CAPABILITY_MATRIX:WPF:PLUGIN_DISCOVERY_METRIC:$(if ($pluginScanMetric) { 'PASS' } else { 'MISSING' })",
     "ADAPTER_CAPABILITY_MATRIX:WPF:INSPECTOR_PROJECTION_METRIC:$(if ($inspectorProjectionMetric) { 'PASS' } else { 'MISSING' })",
-    "ADAPTER_CAPABILITY_MATRIX:WPF:COMMAND_LATENCY_METRIC:$(if ($commandLatencyMetric) { 'PASS' } else { 'MISSING' })"
+    "ADAPTER_CAPABILITY_MATRIX:WPF:COMMAND_LATENCY_METRIC:$(if ($commandLatencyMetric) { 'PASS' } else { 'MISSING' })",
+    "ADAPTER2_MATRIX_HANDOFF_OK:$(if ($matrixHandoffPassed) { 'True' } else { 'False' })"
   )
 
   Ensure-Directory -Path $proofArtifactsRoot

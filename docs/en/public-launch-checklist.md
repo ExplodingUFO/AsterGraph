@@ -60,6 +60,9 @@ Expected high-signal markers:
 - `ADAPTER2_PROJECTION_BUDGET_OK:True:none`
 - `ADAPTER2_COMMAND_BUDGET_OK:True:none`
 - `ADAPTER2_SCENE_BUDGET_OK:True:none`
+- `ADAPTER2_VALIDATION_SCOPE_OK:True`
+- `ADAPTER2_MATRIX_HANDOFF_OK:True`
+- `ADAPTER2_SCOPE_BOUNDARY_OK:True`
 - `HELLOWORLD_WPF_OK:True`
 - `TIERED_NODE_SURFACE_OK:True`
 - `FIXED_GROUP_FRAME_OK:True`
@@ -143,7 +146,7 @@ Expected high-signal markers:
 - confirm the proof summary keeps public API guidance proof next to template/plugin proof: `ASTERGRAPH_TEMPLATE_SMOKE_OK:True`, `TEMPLATE_SMOKE_PLUGIN_VALIDATE_OK:True`, `PUBLIC_API_SURFACE_OK:...:net9.0`, `PUBLIC_API_SCOPE_OK:AsterGraph.Abstractions,AsterGraph.Core,AsterGraph.Editor,AsterGraph.Avalonia`, and `PUBLIC_API_GUIDANCE_OK:True`
 - confirm runtime feedback proof stays host-owned and visible in release notes: `RUNTIME_DEBUG_PANEL_INTERACTION_OK:True`, `RUNTIME_LOG_LOCATE_OK:True`, `RUNTIME_LOG_EXPORT_OK:True`, `AI_PIPELINE_MOCK_RUNNER_POLISH_OK:True`, `AI_PIPELINE_PAYLOAD_PREVIEW_OK:True`, and `AI_PIPELINE_ERROR_DEBUG_EVIDENCE_OK:True`
 - confirm runtime feedback copy does not imply an algorithm execution engine, workflow scripting UI, plugin marketplace, sandboxing, WPF parity, or GA / `1.0` support language
-- confirm the generated notes and announcement text explicitly carry the frozen support boundary story and the adapter matrix story, plus `HOSTED_ACCESSIBILITY_BASELINE_OK:True`, `HOSTED_ACCESSIBILITY_FOCUS_OK:True`, `HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True`, `HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True`, `HOSTED_ACCESSIBILITY_OK:True`, `ADAPTER2_PERFORMANCE_BASELINE_OK:True`, `ADAPTER2_EXPORT_BREADTH_OK:True`, `ADAPTER2_PROJECTION_BUDGET_OK:True:none`, `ADAPTER2_COMMAND_BUDGET_OK:True:none`, `ADAPTER2_SCENE_BUDGET_OK:True:none`, `HELLOWORLD_WPF_OK:True`, `ADAPTER_CAPABILITY_MATRIX_FORMAT:1`, `ADAPTER_CAPABILITY_MATRIX:WPF:HELLOWORLD_WPF_OK:PASS`, and `ADAPTER_CAPABILITY_MATRIX:WPF:COMMAND_SURFACE_OK:PASS`
+- confirm the generated notes and announcement text explicitly carry the frozen support boundary story and the adapter matrix story, plus `HOSTED_ACCESSIBILITY_BASELINE_OK:True`, `HOSTED_ACCESSIBILITY_FOCUS_OK:True`, `HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True`, `HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK:True`, `HOSTED_ACCESSIBILITY_OK:True`, `ADAPTER2_PERFORMANCE_BASELINE_OK:True`, `ADAPTER2_EXPORT_BREADTH_OK:True`, `ADAPTER2_PROJECTION_BUDGET_OK:True:none`, `ADAPTER2_COMMAND_BUDGET_OK:True:none`, `ADAPTER2_SCENE_BUDGET_OK:True:none`, `ADAPTER2_VALIDATION_SCOPE_OK:True`, `ADAPTER2_MATRIX_HANDOFF_OK:True`, `ADAPTER2_SCOPE_BOUNDARY_OK:True`, `HELLOWORLD_WPF_OK:True`, `ADAPTER_CAPABILITY_MATRIX_FORMAT:1`, `ADAPTER_CAPABILITY_MATRIX:WPF:HELLOWORLD_WPF_OK:PASS`, and `ADAPTER_CAPABILITY_MATRIX:WPF:COMMAND_SURFACE_OK:PASS`
 - treat `HELLOWORLD_WPF_OK` as adapter-2 validation only; do not present it as Avalonia/WPF parity or public WPF support when describing the adapter story
 - keep WPF support expansion validation-only and out of public WPF support language until 3-5 real external reports cluster on the same bounded risk
 - use [Adapter-2 Accessibility Recipe](./adapter-2-accessibility-recipe.md) when you need the bounded handoff from defended Avalonia accessibility proof to validation-only WPF verification

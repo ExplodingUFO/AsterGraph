@@ -90,6 +90,9 @@ public sealed class StarterAndRicherWpfSampleTests
         Assert.True(proof.Adapter2ProjectionBudgetOk);
         Assert.True(proof.Adapter2CommandBudgetOk);
         Assert.True(proof.Adapter2SceneBudgetOk);
+        Assert.True(proof.Adapter2ValidationScopeOk);
+        Assert.True(proof.Adapter2MatrixHandoffOk);
+        Assert.True(proof.Adapter2ScopeBoundaryOk);
 
         var metricLines = proof.MetricLines;
         Assert.Contains(metricLines, line => line.Contains("startup_ms", StringComparison.Ordinal));
@@ -102,6 +105,9 @@ public sealed class StarterAndRicherWpfSampleTests
         Assert.Contains(proof.ProofLines, line => line == "ADAPTER2_PROJECTION_BUDGET_OK:True:none");
         Assert.Contains(proof.ProofLines, line => line == "ADAPTER2_COMMAND_BUDGET_OK:True:none");
         Assert.Contains(proof.ProofLines, line => line == "ADAPTER2_SCENE_BUDGET_OK:True:none");
+        Assert.Contains(proof.ProofLines, line => line == "ADAPTER2_VALIDATION_SCOPE_OK:True");
+        Assert.Contains(proof.ProofLines, line => line == "ADAPTER2_MATRIX_HANDOFF_OK:True");
+        Assert.Contains(proof.ProofLines, line => line == "ADAPTER2_SCOPE_BOUNDARY_OK:True");
         Assert.Contains(proof.ProofLines, line => line == "HOSTED_ACCESSIBILITY_BASELINE_OK:True");
         Assert.Contains(proof.ProofLines, line => line == "HOSTED_ACCESSIBILITY_FOCUS_OK:True");
         Assert.Contains(proof.ProofLines, line => line == "HOSTED_ACCESSIBILITY_COMMAND_SURFACE_OK:True");

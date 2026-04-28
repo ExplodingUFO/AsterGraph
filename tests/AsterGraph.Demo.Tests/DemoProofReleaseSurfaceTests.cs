@@ -11,6 +11,9 @@ public sealed class DemoProofReleaseSurfaceTests
 {
     private static readonly string[] AdapterMatrixProofMarkerLines =
     [
+        "ADAPTER2_VALIDATION_SCOPE_OK:True",
+        "ADAPTER2_MATRIX_HANDOFF_OK:True",
+        "ADAPTER2_SCOPE_BOUNDARY_OK:True",
         "HELLOWORLD_WPF_OK:True",
     ];
 

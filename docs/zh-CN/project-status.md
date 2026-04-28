@@ -13,6 +13,7 @@
 - v0.59 edge interaction markers：`EDGE_INTERACTION_CACHE_OK:True`、`EDGE_DRAG_ROUTE_SIMPLIFICATION_OK:True`、`SELECTED_EDGE_FEEDBACK_OK:True` 和 `EDGE_RENDERING_SCOPE_BOUNDARY_OK:True`
 - v0.59 mini-map 与 inspector projection markers：`MINIMAP_LIGHTWEIGHT_PROJECTION_OK:True`、`INSPECTOR_NARROW_PROJECTION_OK:True`、`LARGE_GRAPH_PANEL_SCOPE_OK:True` 和 `PROJECTION_PERFORMANCE_EVIDENCE_OK:True`
 - v0.59 Large Graph UX handoff markers：`LARGE_GRAPH_UX_HANDOFF_OK:True`、`LARGE_GRAPH_UX_SCOPE_BOUNDARY_OK:True` 和 `V059_MILESTONE_PROOF_OK:True`
+- v0.60 adapter-2 validation scope markers：`ADAPTER2_VALIDATION_SCOPE_OK:True`、`ADAPTER2_MATRIX_HANDOFF_OK:True` 和 `ADAPTER2_SCOPE_BOUNDARY_OK:True`
 - 对外版本说明：[Versioning](./versioning.md)
 - 当前公开支持的发布包：
   - `AsterGraph.Abstractions`
@@ -50,6 +51,7 @@
 - edge interaction proof 在 hosted proof route 上汇总现有 edge quick-tool、toolbar 和 geometry 证据，但不创建 runtime renderer contract：`EDGE_INTERACTION_CACHE_OK:True`、`EDGE_DRAG_ROUTE_SIMPLIFICATION_OK:True`、`SELECTED_EDGE_FEEDBACK_OK:True`、`EDGE_RENDERING_SCOPE_BOUNDARY_OK:True`
 - panel projection proof 在 hosted proof route 上汇总 mini-map lightweight projection 和 inspector narrow projection 证据，但不创建 broad graph subscription contract：`MINIMAP_LIGHTWEIGHT_PROJECTION_OK:True`、`INSPECTOR_NARROW_PROJECTION_OK:True`、`LARGE_GRAPH_PANEL_SCOPE_OK:True`、`PROJECTION_PERFORMANCE_EVIDENCE_OK:True`
 - v0.59 Large Graph UX handoff proof 把 phases 371-374 绑定在现有 hosted workbench 证据上，但不扩大 graph-size support claims：`LARGE_GRAPH_UX_HANDOFF_OK:True`、`LARGE_GRAPH_UX_SCOPE_BOUNDARY_OK:True`、`V059_MILESTONE_PROOF_OK:True`
+- adapter-2 validation scope proof 让 WPF 继续停在同一条 canonical route 和 matrix vocabulary 上，不扩大 public WPF support 或 parity claims：`ADAPTER2_VALIDATION_SCOPE_OK:True`、`ADAPTER2_MATRIX_HANDOFF_OK:True`、`ADAPTER2_SCOPE_BOUNDARY_OK:True`
 - 图面可用性 proof marker：
   - `COMMAND_SURFACE_OK:True`
   - `TIERED_NODE_SURFACE_OK:True`

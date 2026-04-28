@@ -14,6 +14,7 @@ It does not define a second API-stability standard, and it does not grant adapte
 - `Create(...)` remains a hosted-adapter composition helper layered on the same runtime owner
 
 Avalonia is still the only shipped hosted adapter today. `WPF` is the locked validation-only adapter-2 target, not a parity promise, public WPF support expansion, or second onboarding path.
+The v0.60 adapter-2 validation scope baseline is proven by `ADAPTER2_VALIDATION_SCOPE_OK:True`, `ADAPTER2_MATRIX_HANDOFF_OK:True`, and `ADAPTER2_SCOPE_BOUNDARY_OK:True`; those markers summarize the matrix handoff and do not change any row from `Partial` or `Fallback` to `Supported`.
 
 ## Matrix Vocabulary
 
@@ -58,5 +59,6 @@ Public beta wording must not exceed the row labels below. If a WPF row is `Parti
 | Authoring presentation | `Supported` | `Partial` | `DEMO_OK` (full authoring proofs), `HOSTED_ACCESSIBILITY_AUTHORING_SURFACE_OK`, `ADAPTER2_PROJECTION_BUDGET_OK`, `ADAPTER2_SCENE_BUDGET_OK`, and current WPF shell summary-only inspector output | Render node/edge/inspector/parameter chrome in host-owned WPF views backed by session/query snapshots until stock presenters are shipped. |
 | Platform integration | `Supported` | `Partial` | `HOST_SAMPLE_OK` runtime-seam checks, `HOSTED_ACCESSIBILITY_BASELINE_OK`, `HOSTED_ACCESSIBILITY_FOCUS_OK`, `ADAPTER2_PERFORMANCE_BASELINE_OK`, and `AsterGraph.Wpf` platform services for clipboard/host-context binding | Keep focus/clipboard/pointer/wheel/theme glue in host layer and bind only through compatibility seams and canonical session/query contracts. |
 | Proof and sample coverage | `Supported` | `Supported` | `HOST_SAMPLE_OK`, `CONSUMER_SAMPLE_OK`, `DEMO_OK`, `COMMAND_SURFACE_OK`, `HOSTED_ACCESSIBILITY_OK`, `ADAPTER2_PERFORMANCE_BASELINE_OK`, `ADAPTER2_PROJECTION_BUDGET_OK`, `ADAPTER2_COMMAND_BUDGET_OK`, `ADAPTER2_SCENE_BUDGET_OK`, and `HELLOWORLD_WPF_OK` | None. |
+| Adapter-2 validation scope baseline | `Supported` | `Supported` | `ADAPTER2_VALIDATION_SCOPE_OK`, `ADAPTER2_MATRIX_HANDOFF_OK`, `ADAPTER2_SCOPE_BOUNDARY_OK`, and `HELLOWORLD_WPF_OK` | None. This row only proves the validation scope and matrix handoff; it does not widen WPF support or imply parity. |
 
 Use [Host Integration](./host-integration.md) for the route and capability map, [Architecture](./architecture.md) for the adapter boundary, and [Quick Start](./quick-start.md) for the current Avalonia-first onboarding path.
