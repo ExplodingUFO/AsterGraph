@@ -1128,14 +1128,103 @@
               BorderThickness="1"
               CornerRadius="10"
               Padding="16">
-        <Grid RowDefinitions="Auto,*"
-              RowSpacing="16">
-          <Border x:Name="PART_GraphIntroStrip"
-                  Padding="14"
+        <Grid ColumnDefinitions="Auto,*"
+              ColumnSpacing="16">
+          <Border x:Name="PART_CookbookWorkspaceNavigationPanel"
+                  Width="304"
+                  Padding="12"
                   Background="#14202B"
                   BorderBrush="#365063"
                   BorderThickness="1"
-                  CornerRadius="8">
+                  CornerRadius="8"
+                  IsVisible="{Binding IsCookbookHostGroupSelected}">
+            <Grid RowDefinitions="Auto,Auto,Auto,*"
+                  RowSpacing="10">
+              <StackPanel Spacing="4">
+                <TextBlock FontSize="12"
+                           FontWeight="Bold"
+                           Foreground="#7FE7D7"
+                           Text="{Binding UiText[cookbook.heading]}" />
+                <TextBlock TextWrapping="Wrap"
+                           Foreground="#B6CBD8"
+                           Text="{Binding CookbookSummary}" />
+              </StackPanel>
+
+              <TextBox Grid.Row="1"
+                       Text="{Binding CookbookSearchText, Mode=TwoWay}"
+                       Watermark="{Binding UiText[cookbook.search]}" />
+
+              <ComboBox Grid.Row="2"
+                        HorizontalAlignment="Stretch"
+                        ItemsSource="{Binding CookbookCategoryFilters}"
+                        SelectedItem="{Binding SelectedCookbookCategoryFilter, Mode=TwoWay}">
+                <ComboBox.ItemTemplate>
+                  <DataTemplate x:DataType="vm:CookbookCategoryFilter">
+                    <TextBlock Text="{Binding DisplayName}" />
+                  </DataTemplate>
+                </ComboBox.ItemTemplate>
+              </ComboBox>
+
+              <ScrollViewer Grid.Row="3"
+                            HorizontalScrollBarVisibility="Disabled">
+                <StackPanel Spacing="10">
+                  <ItemsControl x:Name="PART_CookbookWorkspaceNavigationGroups"
+                                ItemsSource="{Binding CookbookWorkspace.NavigationGroups}">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate x:DataType="cookbook:DemoCookbookWorkspaceNavigationGroup">
+                        <StackPanel Margin="0,0,0,12"
+                                    Spacing="6">
+                          <TextBlock FontSize="12"
+                                     FontWeight="Bold"
+                                     Foreground="#7FE7D7"
+                                     Text="{Binding DisplayName}" />
+                          <ItemsControl ItemsSource="{Binding Recipes}">
+                            <ItemsControl.ItemTemplate>
+                              <DataTemplate x:DataType="cookbook:DemoCookbookWorkspaceNavigationItem">
+                                <Button Margin="0,0,0,6"
+                                        Padding="10,8"
+                                        HorizontalAlignment="Stretch"
+                                        Background="#101923"
+                                        BorderBrush="#365063"
+                                        BorderThickness="1"
+                                        CornerRadius="8"
+                                        Command="{Binding $parent[Window].DataContext.SelectCookbookWorkspaceRecipeCommand}"
+                                        CommandParameter="{Binding}"
+                                        Foreground="#F4FFFC">
+                                  <TextBlock TextWrapping="Wrap"
+                                             FontSize="13"
+                                             FontWeight="SemiBold"
+                                             Text="{Binding Title}" />
+                                </Button>
+                              </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                          </ItemsControl>
+                        </StackPanel>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+
+                  <ListBox x:Name="PART_CookbookWorkspaceRecipeList"
+                           ItemsSource="{Binding FilteredCookbookRecipes}"
+                           SelectedItem="{Binding SelectedCookbookRecipe, Mode=TwoWay}"
+                           Background="Transparent"
+                           BorderThickness="0"
+                           IsVisible="False" />
+                </StackPanel>
+              </ScrollViewer>
+            </Grid>
+          </Border>
+
+          <Grid x:Name="PART_CookbookWorkspaceContentShell"
+                Grid.Column="1"
+                RowDefinitions="Auto,*"
+                RowSpacing="16">
+            <Border x:Name="PART_GraphIntroStrip"
+                    Padding="14"
+                    Background="#14202B"
+                    BorderBrush="#365063"
+                    BorderThickness="1"
+                    CornerRadius="8">
             <Grid ColumnDefinitions="*,Auto"
                   ColumnSpacing="16">
               <StackPanel Spacing="4">
@@ -1195,19 +1284,71 @@
                 </Border>
               </StackPanel>
             </Grid>
-          </Border>
+            </Border>
 
-          <Border x:Name="MainEditorFrame"
-                  Grid.Row="1"
-                  Background="#08111A"
-                  BorderBrush="#365063"
-                  BorderThickness="1"
-                  CornerRadius="8"
-                  ClipToBounds="True">
-            <ContentControl x:Name="PART_MainGraphEditorHost"
-                            VerticalAlignment="Stretch"
-                            HorizontalAlignment="Stretch" />
-          </Border>
+            <Grid Grid.Row="1"
+                  ColumnDefinitions="*,Auto"
+                  ColumnSpacing="16">
+              <Border x:Name="MainEditorFrame"
+                      MinWidth="320"
+                      Background="#08111A"
+                      BorderBrush="#365063"
+                      BorderThickness="1"
+                      CornerRadius="8"
+                      ClipToBounds="True">
+                <ContentControl x:Name="PART_MainGraphEditorHost"
+                                VerticalAlignment="Stretch"
+                                HorizontalAlignment="Stretch" />
+              </Border>
+
+              <Border x:Name="PART_CookbookWorkspaceRecipeContentPanel"
+                      Grid.Column="1"
+                      Width="336"
+                      Padding="12"
+                      Background="#14202B"
+                      BorderBrush="#365063"
+                      BorderThickness="1"
+                      CornerRadius="8"
+                      IsVisible="{Binding IsCookbookHostGroupSelected}">
+                <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+                  <StackPanel Spacing="10">
+                    <TextBlock FontSize="12"
+                               FontWeight="Bold"
+                               Foreground="#7FE7D7"
+                               Text="{Binding UiText[cookbook.selected]}" />
+                    <TextBlock FontSize="18"
+                               FontWeight="SemiBold"
+                               Foreground="#F4FFFC"
+                               Text="{Binding CookbookWorkspace.SelectedRecipe.Title}" />
+                    <TextBlock TextWrapping="Wrap"
+                               Foreground="#C2D7E4"
+                               Text="{Binding CookbookWorkspace.SelectedRecipe.Summary}" />
+                    <TextBlock FontSize="12"
+                               FontWeight="Bold"
+                               Foreground="#7FE7D7"
+                               Text="{Binding UiText[cookbook.code]}" />
+                    <ItemsControl ItemsSource="{Binding SelectedCookbookRecipeCodeLines}"
+                                  ItemTemplate="{StaticResource HostDrawerLineTemplate}" />
+                    <TextBlock FontSize="12"
+                               FontWeight="Bold"
+                               Foreground="#7FE7D7"
+                               Text="{Binding UiText[cookbook.proof]}" />
+                    <ItemsControl ItemsSource="{Binding SelectedCookbookRecipeProofLines}"
+                                  ItemTemplate="{StaticResource HostDrawerLineTemplate}" />
+                    <Border Padding="10"
+                            Background="#101923"
+                            BorderBrush="#365063"
+                            BorderThickness="1"
+                            CornerRadius="8">
+                      <TextBlock TextWrapping="Wrap"
+                                 Foreground="#C2D7E4"
+                                 Text="{Binding SelectedCookbookRecipeSupportBoundary}" />
+                    </Border>
+                  </StackPanel>
+                </ScrollViewer>
+              </Border>
+            </Grid>
+          </Grid>
         </Grid>
       </Border>
     </SplitView>

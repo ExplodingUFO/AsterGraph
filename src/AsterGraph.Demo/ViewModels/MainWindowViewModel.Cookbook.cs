@@ -68,6 +68,14 @@ public partial class MainWindowViewModel
     }
 
     [RelayCommand]
+    public void SelectCookbookWorkspaceRecipe(DemoCookbookWorkspaceNavigationItem item)
+    {
+        ArgumentNullException.ThrowIfNull(item);
+        SelectedCookbookRecipe = CookbookRecipes.Single(recipe =>
+            string.Equals(recipe.Id, item.RecipeId, StringComparison.Ordinal));
+    }
+
+    [RelayCommand]
     public void OpenSelectedCookbookRecipe()
     {
         var recipe = SelectedCookbookRecipe;

@@ -100,4 +100,56 @@ public sealed class DemoCookbookNavigationTests
         Assert.True(viewModel.IsHostPaneOpen);
         Assert.Same(graphEditorView, graphHost.Content);
     }
+
+    [AvaloniaFact]
+    public void MainWindow_CookbookModeShowsLeftNavigationBesideGraph()
+    {
+        var viewModel = new MainWindowViewModel();
+        var window = new MainWindow
+        {
+            DataContext = viewModel,
+        };
+
+        window.Show();
+
+        var navigationPanel = Assert.IsType<Border>(window.FindControl<Border>("PART_CookbookWorkspaceNavigationPanel"));
+        var contentShell = Assert.IsType<Grid>(window.FindControl<Grid>("PART_CookbookWorkspaceContentShell"));
+        var navigationGroups = Assert.IsType<ItemsControl>(window.FindControl<ItemsControl>("PART_CookbookWorkspaceNavigationGroups"));
+        var contentPanel = Assert.IsType<Border>(window.FindControl<Border>("PART_CookbookWorkspaceRecipeContentPanel"));
+        var recipeList = Assert.IsType<ListBox>(window.FindControl<ListBox>("PART_CookbookWorkspaceRecipeList"));
+        var graphHost = Assert.IsType<ContentControl>(window.FindControl<ContentControl>("PART_MainGraphEditorHost"));
+        var graphEditorView = Assert.IsType<GraphEditorView>(graphHost.Content);
+
+        Assert.False(navigationPanel.IsVisible);
+        Assert.False(contentPanel.IsVisible);
+
+        viewModel.OpenHostMenuGroupCommand.Execute("cookbook");
+
+        Assert.True(navigationPanel.IsVisible);
+        Assert.True(contentPanel.IsVisible);
+        Assert.Equal(304, navigationPanel.Width);
+        Assert.Equal(336, contentPanel.Width);
+        Assert.Equal(1, Grid.GetColumn(contentShell));
+        var boundGroups = Assert.IsAssignableFrom<System.Collections.IEnumerable>(navigationGroups.ItemsSource)
+            .Cast<DemoCookbookWorkspaceNavigationGroup>()
+            .ToArray();
+        Assert.Equal(viewModel.CookbookWorkspace.NavigationGroups.Select(group => group.Category), boundGroups.Select(group => group.Category));
+        Assert.Same(viewModel.FilteredCookbookRecipes, recipeList.ItemsSource);
+        Assert.Same(viewModel.SelectedCookbookRecipe, recipeList.SelectedItem);
+        Assert.Same(graphEditorView, graphHost.Content);
+    }
+
+    [Fact]
+    public void MainWindowViewModel_CookbookWorkspaceNavigationCommandSelectsRecipe()
+    {
+        var viewModel = new MainWindowViewModel();
+        var item = viewModel.CookbookWorkspace.NavigationGroups
+            .SelectMany(group => group.Recipes)
+            .Single(recipe => recipe.RecipeId == "diagnostics-support-route");
+
+        viewModel.SelectCookbookWorkspaceRecipeCommand.Execute(item);
+
+        Assert.Equal("diagnostics-support-route", viewModel.SelectedCookbookRecipe.Id);
+        Assert.Equal("diagnostics-support-route", viewModel.CookbookWorkspace.SelectedRecipe.RecipeId);
+    }
 }
