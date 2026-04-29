@@ -15,6 +15,8 @@ public sealed class DemoCookbookProofClosureTests
         var proofLines = DemoCookbookProof.CreateProofLines();
 
         Assert.True(result.IsOk);
+        Assert.True(result.WorkspaceLayoutOk);
+        Assert.True(result.RouteCoverageOk);
         Assert.Equal(DemoCookbookCatalog.Recipes.Count, result.RecipeCount);
         Assert.Equal(DemoCookbookCatalog.RequiredCategories.Count, result.RequiredCategoryCount);
 
@@ -44,6 +46,7 @@ public sealed class DemoCookbookProofClosureTests
         {
             "src/AsterGraph.Demo/Cookbook/DemoCookbookCatalog.cs",
             "src/AsterGraph.Demo/Cookbook/DemoCookbookProof.cs",
+            "src/AsterGraph.Demo/Cookbook/DemoCookbookWorkspaceProjection.cs",
             "src/AsterGraph.Demo/ViewModels/MainWindowViewModel.Cookbook.cs",
             "src/AsterGraph.Demo/ViewModels/MainWindowViewModel.CookbookDetails.cs",
             "docs/en/demo-cookbook.md",
@@ -52,6 +55,7 @@ public sealed class DemoCookbookProofClosureTests
             "tests/AsterGraph.Demo.Tests/DemoCookbookNavigationTests.cs",
             "tests/AsterGraph.Demo.Tests/DemoCookbookDocsTests.cs",
             "tests/AsterGraph.Demo.Tests/DemoCookbookProofClosureTests.cs",
+            "tests/AsterGraph.Demo.Tests/DemoCookbookWorkspaceProjectionTests.cs",
         };
 
         foreach (var relativePath in ownedFiles)
