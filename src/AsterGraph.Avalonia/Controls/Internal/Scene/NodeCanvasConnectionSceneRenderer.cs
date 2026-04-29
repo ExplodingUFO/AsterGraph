@@ -243,6 +243,9 @@ internal sealed class NodeCanvasConnectionSceneRenderer
         var midpoint = new Point(labelAnchor.X, labelAnchor.Y);
         var typeToken = sourcePort is null ? string.Empty : GraphTypeCueFormatter.FormatPortToken(sourcePort);
         var displayText = GetDisplayedChipText(connection, connection.NoteText, typeToken, focusKind);
+        var edgeHelpText = context.ViewModel.NodeDocumentationProvider
+            .GetEdgeDocumentation(connection.ToModel(), context.ViewModel.Session.Queries.CreateDocumentSnapshot())
+            ?.HelpText;
 
         var chip = new Border
         {
@@ -259,14 +262,7 @@ internal sealed class NodeCanvasConnectionSceneRenderer
             Child = CreateLabelBlock(connectionStyle, displayText),
         };
         AutomationProperties.SetName(chip, $"{displayText} connection");
-        if (!string.IsNullOrWhiteSpace(connection.Label) && !string.Equals(displayText, connection.Label, StringComparison.Ordinal))
-        {
-            ToolTip.SetTip(chip, connection.Label);
-        }
-        else
-        {
-            ToolTip.SetTip(chip, null);
-        }
+        SetConnectionHelp(chip, displayText, connection.Label, edgeHelpText);
         chip.KeyDown += (_, args) =>
         {
             if (string.IsNullOrWhiteSpace(connection.TargetNodeId))
@@ -319,16 +315,7 @@ internal sealed class NodeCanvasConnectionSceneRenderer
                 var restoredText = GetDisplayedChipText(connection, noteText, typeToken, focusKind);
                 chip.Child = CreateLabelBlock(connectionStyle, restoredText);
                 AutomationProperties.SetName(chip, $"{restoredText} connection");
-                if (!string.IsNullOrWhiteSpace(connection.Label)
-                    && !string.Equals(restoredText, connection.Label, StringComparison.Ordinal)
-                    && string.IsNullOrWhiteSpace(noteText))
-                {
-                    ToolTip.SetTip(chip, connection.Label);
-                }
-                else
-                {
-                    ToolTip.SetTip(chip, null);
-                }
+                SetConnectionHelp(chip, restoredText, string.IsNullOrWhiteSpace(noteText) ? connection.Label : null, edgeHelpText);
             }
 
             void Complete(bool commit)
@@ -459,5 +446,28 @@ internal sealed class NodeCanvasConnectionSceneRenderer
         return focusKind == GraphEditorConnectionFocusKind.None || string.IsNullOrWhiteSpace(connection.Label)
             ? typeToken
             : $"{typeToken} · {connection.Label}";
+    }
+
+    private static void SetConnectionHelp(Control chip, string displayText, string? label, string? edgeHelpText)
+    {
+        var labelHelp = !string.IsNullOrWhiteSpace(label) && !string.Equals(displayText, label, StringComparison.Ordinal)
+            ? label
+            : null;
+        var helpText = JoinHelpText(edgeHelpText, labelHelp);
+        ToolTip.SetTip(chip, helpText);
+        AutomationProperties.SetHelpText(chip, helpText);
+    }
+
+    private static string? JoinHelpText(params string?[] segments)
+    {
+        var normalized = segments
+            .Where(segment => !string.IsNullOrWhiteSpace(segment))
+            .Select(segment => segment!.Trim())
+            .Distinct(StringComparer.Ordinal)
+            .ToList();
+
+        return normalized.Count == 0
+            ? null
+            : string.Join("  ·  ", normalized);
     }
 }

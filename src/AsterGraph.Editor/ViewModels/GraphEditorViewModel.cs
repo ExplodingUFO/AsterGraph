@@ -14,6 +14,7 @@ using AsterGraph.Abstractions.Styling;
 using AsterGraph.Core.Models;
 using AsterGraph.Editor.Configuration;
 using AsterGraph.Editor.Diagnostics;
+using AsterGraph.Editor.Documentation;
 using AsterGraph.Editor.Events;
 using AsterGraph.Editor.Geometry;
 using AsterGraph.Editor.Hosting;
@@ -101,6 +102,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
 
     private readonly INodeCatalog _nodeCatalog;
     private readonly IPortCompatibilityService _compatibilityService;
+    private readonly INodeDocumentationProvider _nodeDocumentationProvider;
     private readonly IGraphWorkspaceService _workspaceService;
     private readonly GraphSelectionClipboard _selectionClipboard;
     private readonly IGraphFragmentWorkspaceService _fragmentWorkspaceService;
@@ -211,6 +213,7 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     {
         _nodeCatalog = nodeCatalog ?? throw new ArgumentNullException(nameof(nodeCatalog));
         _compatibilityService = compatibilityService ?? throw new ArgumentNullException(nameof(compatibilityService));
+        _nodeDocumentationProvider = new NodeDocumentationProvider(_nodeCatalog);
         _workspaceService = workspaceService ?? new GraphWorkspaceService();
         _selectionClipboard = new GraphSelectionClipboard();
         _clipboardPayloadSerializer = clipboardPayloadSerializer ?? new GraphClipboardPayloadSerializer();
@@ -404,6 +407,11 @@ public sealed partial class GraphEditorViewModel : ObservableObject, IGraphConte
     /// 不会把 <see cref="GraphEditorViewModel"/> 重新当作 canonical runtime state owner。
     /// </summary>
     public IGraphEditorSession Session { get; }
+
+    /// <summary>
+    /// Gets documentation projected from registered node definition metadata.
+    /// </summary>
+    public INodeDocumentationProvider NodeDocumentationProvider => _nodeDocumentationProvider;
 
     internal IGraphEditorSessionHost SessionHost => _sessionHost;
 

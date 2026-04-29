@@ -86,6 +86,7 @@ public sealed class NodeParameterViewModelTests
         Assert.False(viewModel.IsUsingDefaultValue);
         Assert.Equal("已覆盖", viewModel.ValueStateCaption);
         Assert.Contains("Fine-tunes the visible threshold.", viewModel.HelpText);
+        Assert.Contains("恢复默认将还原为: 0.5", viewModel.HelpText);
 
         viewModel.ResetToDefault();
 
@@ -158,6 +159,8 @@ public sealed class NodeParameterViewModelTests
         Assert.False(viewModel.IsValid);
         Assert.True(viewModel.CanApplyValidationFix);
         Assert.Equal("Restore default", viewModel.ValidationFixActionLabel);
+        Assert.Contains("恢复默认将还原为: valid-slug", viewModel.HelpText);
+        Assert.Contains("格式: lowercase letters and dashes", viewModel.HelpText);
 
         viewModel.ApplyValidationFix();
 

@@ -170,6 +170,7 @@ public sealed class GraphInspectorStandaloneTests
 
             Assert.Equal("Threshold parameter editor", AutomationProperties.GetName(thresholdEditorHost));
             Assert.Contains("默认值: 0.5", AutomationProperties.GetHelpText(thresholdEditorHost));
+            Assert.Contains("恢复默认将还原为: 0.5", AutomationProperties.GetHelpText(thresholdEditorHost));
             Assert.Contains("已覆盖", AutomationProperties.GetHelpText(thresholdEditorHost));
 
             Assert.Equal("System Key parameter editor", AutomationProperties.GetName(systemKeyEditorHost));
@@ -297,6 +298,8 @@ public sealed class GraphInspectorStandaloneTests
             Assert.Contains("Behavior", allText);
             Assert.Contains("Metadata", allText);
             Assert.Contains("lowercase letters and dashes", allText);
+            Assert.Contains("恢复默认将还原为: valid-id", allText);
+            Assert.Contains("示例: lowercase-id", allText);
             Assert.Contains("Tags", allText);
             Assert.NotEmpty(multilineInputs);
             Assert.NotNull(slugInput);

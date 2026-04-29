@@ -308,6 +308,9 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
                     : isOutputNode
                         ? nodeStyle.BorderThickness + 0.5d
                     : nodeStyle.BorderThickness);
+        var nodeHelpText = context.Editor.NodeDocumentationProvider.GetNodeDocumentation(node.DefinitionId)?.HelpText;
+        ToolTip.SetTip(state.Border, nodeHelpText);
+        AutomationProperties.SetHelpText(state.Border, nodeHelpText);
         SetStateClass(state.Border, "astergraph-node-selected", isSelected);
         SetStateClass(state.Border, "astergraph-node-inspected", isInspected);
         SetStateClass(state.Border, "astergraph-node-editing", isEditing);
@@ -766,6 +769,12 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
         AutomationProperties.SetName(
             button,
             $"{context.Node.Title} {(isInput ? "input" : "output")} {port.Label}");
+        var documentation = context.Editor.NodeDocumentationProvider.GetPortDocumentation(context.Node.DefinitionId, port.Id, port.Direction);
+        var portHelpText = JoinHelpText(
+            documentation?.HelpText,
+            !isValid ? $"Connection count violates port constraints ({port.MinConnections}-{port.MaxConnections})." : null);
+        ToolTip.SetTip(button, portHelpText);
+        AutomationProperties.SetHelpText(button, portHelpText);
 
         button.PointerPressed += (_, args) =>
         {
@@ -820,6 +829,19 @@ public sealed class DefaultGraphNodeVisualPresenter : IGraphNodeVisualPresenter
                 connection.SourceNodeId == context.Node.Id
                 && connection.SourcePortId == port.Id);
         return count >= port.MinConnections && count <= port.MaxConnections;
+    }
+
+    private static string? JoinHelpText(params string?[] segments)
+    {
+        var normalized = segments
+            .Where(segment => !string.IsNullOrWhiteSpace(segment))
+            .Select(segment => segment!.Trim())
+            .Distinct(StringComparer.Ordinal)
+            .ToList();
+
+        return normalized.Count == 0
+            ? null
+            : string.Join("  ·  ", normalized);
     }
 
     private static NodeCardStyleOptions GetNodeCardStyle(GraphNodeVisualContext context)
