@@ -118,6 +118,7 @@ public sealed class DemoCookbookNavigationTests
         var contentPanel = Assert.IsType<Border>(window.FindControl<Border>("PART_CookbookWorkspaceRecipeContentPanel"));
         var editorFrame = Assert.IsType<Border>(window.FindControl<Border>("MainEditorFrame"));
         var graphLines = Assert.IsType<ItemsControl>(window.FindControl<ItemsControl>("PART_CookbookWorkspaceGraphLines"));
+        var coverageLines = Assert.IsType<ItemsControl>(window.FindControl<ItemsControl>("PART_CookbookWorkspaceCoverageLines"));
         var detailModeSelector = Assert.IsType<ComboBox>(window.FindControl<ComboBox>("PART_CookbookWorkspaceDetailModeSelector"));
         var detailLines = Assert.IsType<ItemsControl>(window.FindControl<ItemsControl>("PART_CookbookWorkspaceDetailLines"));
         var recipeList = Assert.IsType<ListBox>(window.FindControl<ListBox>("PART_CookbookWorkspaceRecipeList"));
@@ -139,6 +140,10 @@ public sealed class DemoCookbookNavigationTests
             .Cast<string>()
             .ToArray();
         Assert.Equal(viewModel.SelectedCookbookWorkspaceGraphLines, boundGraphLines);
+        var boundCoverageLines = Assert.IsAssignableFrom<System.Collections.IEnumerable>(coverageLines.ItemsSource)
+            .Cast<string>()
+            .ToArray();
+        Assert.Equal(viewModel.SelectedCookbookWorkspaceCoverageLines, boundCoverageLines);
         var boundGroups = Assert.IsAssignableFrom<System.Collections.IEnumerable>(navigationGroups.ItemsSource)
             .Cast<DemoCookbookWorkspaceNavigationGroup>()
             .ToArray();
@@ -179,6 +184,12 @@ public sealed class DemoCookbookNavigationTests
         Assert.Contains(
             viewModel.SelectedCookbookWorkspaceGraphLines,
             line => line.Contains(recipe.DemoAnchors[0].Path, StringComparison.Ordinal));
+        Assert.Contains(
+            viewModel.SelectedCookbookWorkspaceCoverageLines,
+            line => line.Contains(viewModel.CookbookWorkspace.SelectedRecipe.RouteStatus, StringComparison.Ordinal));
+        Assert.Contains(
+            viewModel.SelectedCookbookWorkspaceCoverageLines,
+            line => line.Contains(viewModel.CookbookWorkspace.SelectedRecipe.DeferredGaps[0], StringComparison.Ordinal));
         Assert.Contains(
             viewModel.SelectedCookbookWorkspaceDetailLines,
             line => line.Contains(recipe.CodeAnchors[0].Path, StringComparison.Ordinal));

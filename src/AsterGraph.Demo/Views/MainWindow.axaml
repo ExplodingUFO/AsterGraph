@@ -1323,6 +1323,9 @@
                     <ItemsControl x:Name="PART_CookbookWorkspaceGraphLines"
                                   ItemsSource="{Binding SelectedCookbookWorkspaceGraphLines}"
                                   ItemTemplate="{StaticResource HostDrawerLineTemplate}" />
+                    <ItemsControl x:Name="PART_CookbookWorkspaceCoverageLines"
+                                  ItemsSource="{Binding SelectedCookbookWorkspaceCoverageLines}"
+                                  ItemTemplate="{StaticResource HostDrawerLineTemplate}" />
                     <ComboBox x:Name="PART_CookbookWorkspaceDetailModeSelector"
                               HorizontalAlignment="Left"
                               MinWidth="160"

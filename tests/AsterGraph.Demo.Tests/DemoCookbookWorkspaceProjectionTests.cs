@@ -41,12 +41,27 @@ public sealed class DemoCookbookWorkspaceProjectionTests
             Assert.Equal(recipe.Title, content.Title);
             Assert.Equal(recipe.Summary, content.Summary);
             Assert.Equal(recipe.Category, content.Category);
+            Assert.False(string.IsNullOrWhiteSpace(content.RouteStatus));
+            Assert.False(string.IsNullOrWhiteSpace(content.RouteStatusDescription));
             AssertEquivalentAnchors(recipe.DemoAnchors, content.GraphAnchors);
             AssertEquivalentAnchors(recipe.CodeAnchors, content.CodeExamples);
             AssertEquivalentAnchors(recipe.DocumentationAnchors, content.DocumentationLinks);
             Assert.Equal(recipe.ProofMarkers, content.ProofMarkers);
+            Assert.NotEmpty(content.DeferredGaps);
             Assert.Equal(recipe.SupportBoundary, content.SupportBoundary);
         }
+    }
+
+    [Fact]
+    public void WorkspaceProjection_LabelsSupportedProofAndDeferredRouteDepth()
+    {
+        var starter = DemoCookbookWorkspaceProjection.Create("starter-host-route").SelectedRecipe;
+        var plugin = DemoCookbookWorkspaceProjection.Create("plugin-trust-route").SelectedRecipe;
+
+        Assert.Equal("Supported SDK route", starter.RouteStatus);
+        Assert.Contains(starter.DeferredGaps, gap => gap.Contains("WPF", StringComparison.Ordinal));
+        Assert.Equal("Proof/demo route", plugin.RouteStatus);
+        Assert.Contains(plugin.DeferredGaps, gap => gap.Contains("sandbox", StringComparison.OrdinalIgnoreCase));
     }
 
     [Fact]

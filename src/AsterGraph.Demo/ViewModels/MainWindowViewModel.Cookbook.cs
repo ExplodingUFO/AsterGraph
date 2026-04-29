@@ -173,6 +173,7 @@ public partial class MainWindowViewModel
         OnPropertyChanged(nameof(SelectedCookbookRecipeProofLines));
         OnPropertyChanged(nameof(SelectedCookbookRecipeSupportBoundary));
         OnPropertyChanged(nameof(SelectedCookbookWorkspaceGraphLines));
+        OnPropertyChanged(nameof(SelectedCookbookWorkspaceCoverageLines));
         OnPropertyChanged(nameof(SelectedCookbookWorkspaceDetailLines));
     }
 

@@ -13,6 +13,21 @@ public partial class MainWindowViewModel
     public IReadOnlyList<string> SelectedCookbookWorkspaceGraphLines
         => FormatCookbookAnchors(T("图示上下文：", "Graph context: "), SelectedCookbookRecipe.DemoAnchors).ToArray();
 
+    public IReadOnlyList<string> SelectedCookbookWorkspaceCoverageLines
+    {
+        get
+        {
+            var selected = CookbookWorkspace.SelectedRecipe;
+
+            return
+            [
+                T("路线状态：", "Route status: ") + selected.RouteStatus,
+                T("路线说明：", "Route note: ") + selected.RouteStatusDescription,
+                .. selected.DeferredGaps.Select(gap => T("延后缺口：", "Deferred gap: ") + gap),
+            ];
+        }
+    }
+
     public IReadOnlyList<string> SelectedCookbookWorkspaceDetailLines
         => SelectedCookbookDetailMode?.Key switch
         {
