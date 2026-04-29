@@ -23,7 +23,7 @@ public sealed class DemoCookbookNavigationTests
         Assert.Same(viewModel.CookbookRecipes[0], viewModel.SelectedCookbookRecipe);
         Assert.Contains(
             viewModel.SelectedCookbookRecipeProofLines,
-            line => line.Contains(viewModel.SelectedCookbookRecipe.ProofMarker, StringComparison.Ordinal));
+            line => line.Contains(viewModel.SelectedCookbookRecipe.ProofMarkers[0], StringComparison.Ordinal));
         Assert.Contains(
             viewModel.SelectedCookbookRecipe.SupportBoundary,
             viewModel.SelectedCookbookRecipeSupportBoundary,
@@ -65,13 +65,13 @@ public sealed class DemoCookbookNavigationTests
         Assert.Same(originalEditor, viewModel.Editor);
         Assert.True(viewModel.IsHostPaneOpen);
         Assert.Equal("扩展", viewModel.SelectedHostMenuGroupTitle);
-        Assert.Contains(recipe.DemoPath, viewModel.LastCookbookNavigationStatus, StringComparison.Ordinal);
+        Assert.Contains(recipe.DemoAnchors[0].Path, viewModel.LastCookbookNavigationStatus, StringComparison.Ordinal);
         Assert.Contains(
             viewModel.SelectedCookbookRecipeCodeLines,
-            line => line.Contains(recipe.CodePath, StringComparison.Ordinal));
+            line => line.Contains(recipe.CodeAnchors[0].Path, StringComparison.Ordinal));
         Assert.Contains(
             viewModel.SelectedCookbookRecipeProofLines,
-            line => line.Contains(recipe.DocumentationPath, StringComparison.Ordinal));
+            line => line.Contains(recipe.DocumentationAnchors[0].Path, StringComparison.Ordinal));
         Assert.Equal(recipe.SupportBoundary, viewModel.SelectedCookbookRecipeSupportBoundary);
     }
 

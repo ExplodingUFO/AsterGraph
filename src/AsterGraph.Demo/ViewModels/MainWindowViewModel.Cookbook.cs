@@ -33,14 +33,14 @@ public partial class MainWindowViewModel
 
     public IReadOnlyList<string> SelectedCookbookRecipeCodeLines =>
     [
-        T("代码入口：", "Code: ") + SelectedCookbookRecipe.CodePath,
-        T("Demo 路径：", "Demo: ") + SelectedCookbookRecipe.DemoPath,
+        .. FormatCookbookAnchors(T("代码入口：", "Code: "), SelectedCookbookRecipe.CodeAnchors),
+        .. FormatCookbookAnchors(T("Demo 路径：", "Demo: "), SelectedCookbookRecipe.DemoAnchors),
     ];
 
     public IReadOnlyList<string> SelectedCookbookRecipeProofLines =>
     [
-        T("文档：", "Docs: ") + SelectedCookbookRecipe.DocumentationPath,
-        T("证明标记：", "Proof marker: ") + SelectedCookbookRecipe.ProofMarker,
+        .. FormatCookbookAnchors(T("文档：", "Docs: "), SelectedCookbookRecipe.DocumentationAnchors),
+        .. SelectedCookbookRecipe.ProofMarkers.Select(marker => T("证明标记：", "Proof marker: ") + marker),
     ];
 
     public string SelectedCookbookRecipeSupportBoundary => SelectedCookbookRecipe.SupportBoundary;
@@ -72,7 +72,7 @@ public partial class MainWindowViewModel
 
         SelectedHostMenuGroup = group;
         IsHostPaneOpen = true;
-        LastCookbookNavigationStatus = T("已打开配方 Demo 路径：", "Opened recipe demo path: ") + recipe.DemoPath;
+        LastCookbookNavigationStatus = T("已打开配方 Demo 路径：", "Opened recipe demo path: ") + ResolvePrimaryAnchorPath(recipe.DemoAnchors);
         RefreshCookbookProjection();
     }
 
@@ -164,14 +164,26 @@ public partial class MainWindowViewModel
            || Contains(FormatCookbookCategory(recipe.Category), searchText)
            || Contains(recipe.Title, searchText)
            || Contains(recipe.Summary, searchText)
-           || Contains(recipe.CodePath, searchText)
-           || Contains(recipe.DemoPath, searchText)
-           || Contains(recipe.DocumentationPath, searchText)
-           || Contains(recipe.ProofMarker, searchText)
+           || ContainsAny(recipe.CodeAnchors, searchText)
+           || ContainsAny(recipe.DemoAnchors, searchText)
+           || ContainsAny(recipe.DocumentationAnchors, searchText)
+           || recipe.ProofMarkers.Any(marker => Contains(marker, searchText))
            || Contains(recipe.SupportBoundary, searchText);
 
     private static bool Contains(string value, string searchText)
         => value.Contains(searchText, StringComparison.OrdinalIgnoreCase);
+
+    private static bool ContainsAny(IReadOnlyList<DemoCookbookAnchor> anchors, string searchText)
+        => anchors.Any(anchor =>
+            Contains(anchor.Label, searchText)
+            || Contains(anchor.Path, searchText)
+            || Contains(anchor.Evidence, searchText));
+
+    private static IEnumerable<string> FormatCookbookAnchors(string prefix, IReadOnlyList<DemoCookbookAnchor> anchors)
+        => anchors.Select(anchor => prefix + anchor.Path + " — " + anchor.Evidence);
+
+    private static string ResolvePrimaryAnchorPath(IReadOnlyList<DemoCookbookAnchor> anchors)
+        => anchors.Count == 0 ? string.Empty : anchors[0].Path;
 
     private string ResolveCookbookLandingGroup(DemoCookbookRecipe recipe)
         => recipe.Category switch
