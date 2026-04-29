@@ -29,7 +29,7 @@
 
 ## 当前种子试用综合
 
-在仓库还没有积累足够真实外部 issue 之前，当前建议来自四组结构化的公开前 adopter-trial 走查，它们分别覆盖了不同入口路线。下面的 `Persona` 和 `Requested next capability` 两列是维护者综合出来的结论，不是公开 intake 表单里的原始字段。
+在仓库还没有积累足够真实外部 issue 之前，当前种子建议来自四组结构化的公开前 adopter-trial 走查，它们分别覆盖了不同入口路线。下面的 `Persona` 和 `Requested next capability` 两列是维护者综合出来的结论，不是公开 intake 表单里的原始字段。
 
 | 画像 | 尝试路线 | 主要摩擦 | 希望下一步补什么 |
 | --- | --- | --- | --- |
