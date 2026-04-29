@@ -21,6 +21,8 @@ public sealed class DemoCookbookNavigationTests
         Assert.Equal(DemoCookbookCatalog.Recipes.Count, viewModel.FilteredCookbookRecipes.Count);
         Assert.Equal(DemoCookbookCatalog.RequiredCategories.Count + 1, viewModel.CookbookCategoryFilters.Count);
         Assert.Same(viewModel.CookbookRecipes[0], viewModel.SelectedCookbookRecipe);
+        Assert.Equal(viewModel.SelectedCookbookRecipe.Id, viewModel.CookbookWorkspace.SelectedRecipe.RecipeId);
+        Assert.Equal(DemoCookbookCatalog.RequiredCategories.Count, viewModel.CookbookWorkspace.NavigationGroups.Count);
         Assert.Contains(
             viewModel.SelectedCookbookRecipeProofLines,
             line => line.Contains(viewModel.SelectedCookbookRecipe.ProofMarkers[0], StringComparison.Ordinal));
@@ -63,6 +65,7 @@ public sealed class DemoCookbookNavigationTests
         viewModel.OpenSelectedCookbookRecipe();
 
         Assert.Same(originalEditor, viewModel.Editor);
+        Assert.Equal(recipe.Id, viewModel.CookbookWorkspace.SelectedRecipe.RecipeId);
         Assert.True(viewModel.IsHostPaneOpen);
         Assert.Equal("扩展", viewModel.SelectedHostMenuGroupTitle);
         Assert.Contains(recipe.DemoAnchors[0].Path, viewModel.LastCookbookNavigationStatus, StringComparison.Ordinal);

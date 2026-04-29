@@ -18,6 +18,9 @@ public partial class MainWindowViewModel
 
     public IReadOnlyList<CookbookCategoryFilter> CookbookCategoryFilters => _cookbookCategoryFilters;
 
+    public DemoCookbookWorkspaceSnapshot CookbookWorkspace
+        => DemoCookbookWorkspaceProjection.Create(SelectedCookbookRecipe?.Id);
+
     public string CookbookSummary
         => T(
             "Cookbook 把目录、搜索、筛选和选中配方投影到宿主抽屉，中心图工作区保持可见。",
@@ -151,6 +154,7 @@ public partial class MainWindowViewModel
         OnPropertyChanged(nameof(CookbookRecipes));
         OnPropertyChanged(nameof(FilteredCookbookRecipes));
         OnPropertyChanged(nameof(CookbookCategoryFilters));
+        OnPropertyChanged(nameof(CookbookWorkspace));
         OnPropertyChanged(nameof(IsCookbookHostGroupSelected));
         OnPropertyChanged(nameof(CookbookSummary));
         OnPropertyChanged(nameof(CookbookLandingLines));
