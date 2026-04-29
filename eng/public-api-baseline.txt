@@ -36,9 +36,6 @@ C:AsterGraph.Avalonia.Hosting.AsterGraphHostedActionDescriptor(AsterGraph.Editor
 C:AsterGraph.Avalonia.Hosting.AsterGraphHostedActionProjection(System.Collections.Generic.IEnumerable<AsterGraph.Avalonia.Hosting.AsterGraphHostedActionDescriptor>)
 C:AsterGraph.Avalonia.Hosting.AsterGraphInspectorViewOptions()
 C:AsterGraph.Avalonia.Hosting.AsterGraphMiniMapViewOptions()
-C:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions()
-C:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPanelState(System.Boolean,System.Double,System.Boolean,System.Double,System.Boolean,System.Boolean,System.Boolean,System.Boolean)
-C:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformancePolicy(AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformanceMode,System.Int32,System.Boolean,System.Boolean,System.Boolean,System.Int32)
 C:AsterGraph.Avalonia.Menus.GraphContextMenuPresenter()
 C:AsterGraph.Avalonia.Presentation.AsterGraphPresentationOptions()
 C:AsterGraph.Avalonia.Presentation.DefaultGraphInspectorPresenter()
@@ -97,7 +94,6 @@ C:AsterGraph.Editor.Configuration.WorkspaceCommandPermissions()
 C:AsterGraph.Editor.Diagnostics.GraphEditorDiagnostic(System.String,System.String,System.String,AsterGraph.Editor.Diagnostics.GraphEditorDiagnosticSeverity,System.Exception)
 C:AsterGraph.Editor.Diagnostics.GraphEditorInspectionSnapshot(AsterGraph.Core.Models.GraphDocument,AsterGraph.Editor.Runtime.GraphEditorSelectionSnapshot,AsterGraph.Editor.Runtime.GraphEditorViewportSnapshot,AsterGraph.Editor.Runtime.GraphEditorCapabilitySnapshot,AsterGraph.Editor.Diagnostics.GraphEditorPendingConnectionSnapshot,AsterGraph.Editor.Diagnostics.GraphEditorStatusSnapshot,System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Models.NodePositionSnapshot>,System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Runtime.GraphEditorFeatureDescriptorSnapshot>,System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Diagnostics.GraphEditorDiagnostic>,System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Plugins.GraphEditorPluginLoadSnapshot>,System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Runtime.GraphEditorNodeParameterSnapshot>,AsterGraph.Editor.Runtime.GraphEditorValidationSnapshot)
 C:AsterGraph.Editor.Diagnostics.GraphEditorInstrumentationOptions(Microsoft.Extensions.Logging.ILoggerFactory,System.Diagnostics.ActivitySource)
-C:AsterGraph.Editor.Diagnostics.GraphEditorPendingConnectionSnapshot(System.Boolean,System.String,System.String,System.String,System.String,System.Nullable<AsterGraph.Core.Models.GraphConnectionTargetKind>,System.Nullable<System.Boolean>,System.String)
 C:AsterGraph.Editor.Diagnostics.GraphEditorPendingConnectionSnapshot(System.Boolean,System.String,System.String)
 C:AsterGraph.Editor.Diagnostics.GraphEditorStatusSnapshot(System.String)
 C:AsterGraph.Editor.Events.GraphEditorAutomationCompletedEventArgs(AsterGraph.Editor.Automation.GraphEditorAutomationExecutionSnapshot)
@@ -159,7 +155,6 @@ C:AsterGraph.Editor.Runtime.GraphEditorCommandDescriptorSnapshot(System.String,S
 C:AsterGraph.Editor.Runtime.GraphEditorCommandInvocationSnapshot(System.String,System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Runtime.GraphEditorCommandArgumentSnapshot>)
 C:AsterGraph.Editor.Runtime.GraphEditorCompatibleNodeDefinitionSnapshot(AsterGraph.Abstractions.Identifiers.NodeDefinitionId,System.String,System.String,System.String,System.String,AsterGraph.Core.Models.GraphConnectionTargetKind,AsterGraph.Abstractions.Identifiers.PortTypeId,AsterGraph.Abstractions.Compatibility.PortCompatibilityResult)
 C:AsterGraph.Editor.Runtime.GraphEditorCompatibleNodeSearchSnapshot(System.Boolean,System.String,System.String,System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Runtime.GraphEditorCompatibleNodeDefinitionSnapshot>,System.String)
-C:AsterGraph.Editor.Runtime.GraphEditorCompatiblePortTargetSnapshot(System.String,System.String,System.String,System.String,AsterGraph.Abstractions.Identifiers.PortTypeId,System.String,AsterGraph.Abstractions.Compatibility.PortCompatibilityResult,System.String,System.Int32,System.Int32)
 C:AsterGraph.Editor.Runtime.GraphEditorCompatiblePortTargetSnapshot(System.String,System.String,System.String,System.String,AsterGraph.Abstractions.Identifiers.PortTypeId,System.String,AsterGraph.Abstractions.Compatibility.PortCompatibilityResult)
 C:AsterGraph.Editor.Runtime.GraphEditorCompositeNodeSnapshot(System.String,System.String,System.Collections.Generic.IReadOnlyList<AsterGraph.Core.Models.GraphCompositeBoundaryPort>,System.Collections.Generic.IReadOnlyList<AsterGraph.Core.Models.GraphCompositeBoundaryPort>)
 C:AsterGraph.Editor.Runtime.GraphEditorConnectionEndpointGeometrySnapshot(System.String,System.String,AsterGraph.Core.Models.GraphConnectionTargetKind,AsterGraph.Core.Models.GraphPoint)
@@ -272,7 +267,6 @@ F:AsterGraph.Avalonia.Controls.GraphEditorView.IsInspectorChromeVisibleProperty:
 F:AsterGraph.Avalonia.Controls.GraphEditorView.IsLibraryChromeVisibleProperty:Avalonia.StyledProperty<System.Boolean>
 F:AsterGraph.Avalonia.Controls.GraphEditorView.IsStatusChromeVisibleProperty:Avalonia.StyledProperty<System.Boolean>
 F:AsterGraph.Avalonia.Controls.GraphEditorView.PresentationProperty:Avalonia.StyledProperty<AsterGraph.Avalonia.Presentation.AsterGraphPresentationOptions>
-F:AsterGraph.Avalonia.Controls.GraphEditorView.WorkbenchPerformanceModeProperty:Avalonia.StyledProperty<AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformanceMode>
 F:AsterGraph.Avalonia.Controls.GraphEditorViewChromeMode.CanvasOnly:AsterGraph.Avalonia.Controls.GraphEditorViewChromeMode
 F:AsterGraph.Avalonia.Controls.GraphEditorViewChromeMode.Default:AsterGraph.Avalonia.Controls.GraphEditorViewChromeMode
 F:AsterGraph.Avalonia.Controls.GraphInspectorView.EditorProperty:Avalonia.StyledProperty<AsterGraph.Editor.ViewModels.GraphEditorViewModel>
@@ -296,13 +290,6 @@ F:AsterGraph.Avalonia.Controls.NodeParameterEditorHost.NodeParameterEditorRegist
 F:AsterGraph.Avalonia.Controls.NodeParameterEditorHost.ParameterProperty:Avalonia.StyledProperty<AsterGraph.Editor.ViewModels.NodeParameterViewModel>
 F:AsterGraph.Avalonia.Controls.NodeParameterEditorHost.TemplateKeyProperty:Avalonia.StyledProperty<System.String>
 F:AsterGraph.Avalonia.Controls.NodeParameterEditorHost.UsageProperty:Avalonia.StyledProperty<AsterGraph.Avalonia.Presentation.NodeParameterEditorUsage>
-F:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchLayoutPreset.Authoring:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchLayoutPreset
-F:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchLayoutPreset.CompactReview:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchLayoutPreset
-F:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchLayoutPreset.Debugging:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchLayoutPreset
-F:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchLayoutPreset.PluginInspection:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchLayoutPreset
-F:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformanceMode.Balanced:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformanceMode
-F:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformanceMode.Quality:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformanceMode
-F:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformanceMode.Throughput:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformanceMode
 F:AsterGraph.Avalonia.Presentation.GraphNodeResizeHandleKind.Bottom:AsterGraph.Avalonia.Presentation.GraphNodeResizeHandleKind
 F:AsterGraph.Avalonia.Presentation.GraphNodeResizeHandleKind.BottomRight:AsterGraph.Avalonia.Presentation.GraphNodeResizeHandleKind
 F:AsterGraph.Avalonia.Presentation.GraphNodeResizeHandleKind.Right:AsterGraph.Avalonia.Presentation.GraphNodeResizeHandleKind
@@ -441,46 +428,11 @@ M:AsterGraph.Abstractions.Definitions.NodeDefinition.Equals(AsterGraph.Abstracti
 M:AsterGraph.Abstractions.Definitions.NodeDefinition.Equals(System.Object):System.Boolean
 M:AsterGraph.Abstractions.Definitions.NodeDefinition.GetHashCode():System.Int32
 M:AsterGraph.Abstractions.Definitions.NodeDefinition.ToString():System.String
-M:AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder.Accent(System.String):AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder
-M:AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder.Build():AsterGraph.Abstractions.Definitions.NodeDefinition
-M:AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder.Category(System.String):AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder
-M:AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder.Create(AsterGraph.Abstractions.Identifiers.NodeDefinitionId,System.String):AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder
-M:AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder.Create(System.String,System.String):AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder
-M:AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder.Description(System.String):AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder
-M:AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder.Input(AsterGraph.Abstractions.Definitions.PortDefinition):AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder
-M:AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder.Input(System.String,System.String,AsterGraph.Abstractions.Identifiers.PortTypeId,System.String):AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder
-M:AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder.Input(System.String,System.String,System.String,System.String):AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder
-M:AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder.Output(AsterGraph.Abstractions.Definitions.PortDefinition):AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder
-M:AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder.Output(System.String,System.String,AsterGraph.Abstractions.Identifiers.PortTypeId,System.String):AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder
-M:AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder.Output(System.String,System.String,System.String,System.String):AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder
-M:AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder.Parameter(AsterGraph.Abstractions.Definitions.NodeParameterDefinition):AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder
-M:AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder.Parameter(AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder):AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder
-M:AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder.Size(System.Double,System.Double):AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder
-M:AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder.Subtitle(System.String):AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder
-M:AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder.SurfaceTierProfile(AsterGraph.Abstractions.Definitions.NodeSurfaceTierProfile):AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder
 M:AsterGraph.Abstractions.Definitions.NodeParameterDefinition.<Clone>$():AsterGraph.Abstractions.Definitions.NodeParameterDefinition
 M:AsterGraph.Abstractions.Definitions.NodeParameterDefinition.Equals(AsterGraph.Abstractions.Definitions.NodeParameterDefinition):System.Boolean
 M:AsterGraph.Abstractions.Definitions.NodeParameterDefinition.Equals(System.Object):System.Boolean
 M:AsterGraph.Abstractions.Definitions.NodeParameterDefinition.GetHashCode():System.Int32
 M:AsterGraph.Abstractions.Definitions.NodeParameterDefinition.ToString():System.String
-M:AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder.Advanced(System.Boolean):AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder
-M:AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder.Build():AsterGraph.Abstractions.Definitions.NodeParameterDefinition
-M:AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder.Constraints(AsterGraph.Abstractions.Definitions.ParameterConstraints):AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder
-M:AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder.ContractVersion(System.Int32):AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder
-M:AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder.Create(System.String,System.String,AsterGraph.Abstractions.Identifiers.PortTypeId,AsterGraph.Abstractions.Definitions.ParameterEditorKind):AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder
-M:AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder.Create(System.String,System.String,System.String,AsterGraph.Abstractions.Definitions.ParameterEditorKind):AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder
-M:AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder.DefaultValue(System.Object):AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder
-M:AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder.Description(System.String):AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder
-M:AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder.Group(System.String):AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder
-M:AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder.Help(System.String):AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder
-M:AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder.Option(System.String,System.String,System.String):AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder
-M:AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder.Options(AsterGraph.Abstractions.Definitions.ParameterOptionDefinition[]):AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder
-M:AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder.Placeholder(System.String):AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder
-M:AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder.Range(System.Nullable<System.Double>,System.Nullable<System.Double>):AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder
-M:AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder.Required(System.Boolean):AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder
-M:AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder.SortOrder(System.Int32):AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder
-M:AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder.Template(System.String):AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder
-M:AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder.Unit(System.String):AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder
 M:AsterGraph.Abstractions.Definitions.NodeSurfaceTierDefinition.<Clone>$():AsterGraph.Abstractions.Definitions.NodeSurfaceTierDefinition
 M:AsterGraph.Abstractions.Definitions.NodeSurfaceTierDefinition.Equals(AsterGraph.Abstractions.Definitions.NodeSurfaceTierDefinition):System.Boolean
 M:AsterGraph.Abstractions.Definitions.NodeSurfaceTierDefinition.Equals(System.Object):System.Boolean
@@ -508,13 +460,6 @@ M:AsterGraph.Abstractions.Definitions.PortDefinition.Equals(AsterGraph.Abstracti
 M:AsterGraph.Abstractions.Definitions.PortDefinition.Equals(System.Object):System.Boolean
 M:AsterGraph.Abstractions.Definitions.PortDefinition.GetHashCode():System.Int32
 M:AsterGraph.Abstractions.Definitions.PortDefinition.ToString():System.String
-M:AsterGraph.Abstractions.Definitions.PortDefinitionBuilder.Accent(System.String):AsterGraph.Abstractions.Definitions.PortDefinitionBuilder
-M:AsterGraph.Abstractions.Definitions.PortDefinitionBuilder.Build():AsterGraph.Abstractions.Definitions.PortDefinition
-M:AsterGraph.Abstractions.Definitions.PortDefinitionBuilder.Connections(System.Int32,System.Int32):AsterGraph.Abstractions.Definitions.PortDefinitionBuilder
-M:AsterGraph.Abstractions.Definitions.PortDefinitionBuilder.Create(System.String,System.String,AsterGraph.Abstractions.Identifiers.PortTypeId):AsterGraph.Abstractions.Definitions.PortDefinitionBuilder
-M:AsterGraph.Abstractions.Definitions.PortDefinitionBuilder.Create(System.String,System.String,System.String):AsterGraph.Abstractions.Definitions.PortDefinitionBuilder
-M:AsterGraph.Abstractions.Definitions.PortDefinitionBuilder.Description(System.String):AsterGraph.Abstractions.Definitions.PortDefinitionBuilder
-M:AsterGraph.Abstractions.Definitions.PortDefinitionBuilder.Group(System.String):AsterGraph.Abstractions.Definitions.PortDefinitionBuilder
 M:AsterGraph.Abstractions.Identifiers.ConversionId.<Clone>$():AsterGraph.Abstractions.Identifiers.ConversionId
 M:AsterGraph.Abstractions.Identifiers.ConversionId.Equals(AsterGraph.Abstractions.Identifiers.ConversionId):System.Boolean
 M:AsterGraph.Abstractions.Identifiers.ConversionId.Equals(System.Object):System.Boolean
@@ -627,7 +572,6 @@ M:AsterGraph.Avalonia.Hosting.AsterGraphHostBuilder.UseCommandShortcutPolicy(Ast
 M:AsterGraph.Avalonia.Hosting.AsterGraphHostBuilder.UseCompatibility(AsterGraph.Abstractions.Compatibility.IPortCompatibilityService):AsterGraph.Avalonia.Hosting.AsterGraphHostBuilder
 M:AsterGraph.Avalonia.Hosting.AsterGraphHostBuilder.UseDefaultCompatibility():AsterGraph.Avalonia.Hosting.AsterGraphHostBuilder
 M:AsterGraph.Avalonia.Hosting.AsterGraphHostBuilder.UseDefaultContextMenu(System.Boolean):AsterGraph.Avalonia.Hosting.AsterGraphHostBuilder
-M:AsterGraph.Avalonia.Hosting.AsterGraphHostBuilder.UseDefaultWorkbench():AsterGraph.Avalonia.Hosting.AsterGraphHostBuilder
 M:AsterGraph.Avalonia.Hosting.AsterGraphHostBuilder.UseDiagnostics(AsterGraph.Editor.Diagnostics.IGraphEditorDiagnosticsSink):AsterGraph.Avalonia.Hosting.AsterGraphHostBuilder
 M:AsterGraph.Avalonia.Hosting.AsterGraphHostBuilder.UseDocument(AsterGraph.Core.Models.GraphDocument):AsterGraph.Avalonia.Hosting.AsterGraphHostBuilder
 M:AsterGraph.Avalonia.Hosting.AsterGraphHostBuilder.UseLocalization(AsterGraph.Editor.Localization.IGraphLocalizationProvider):AsterGraph.Avalonia.Hosting.AsterGraphHostBuilder
@@ -636,7 +580,6 @@ M:AsterGraph.Avalonia.Hosting.AsterGraphHostBuilder.UsePluginRegistrations(Syste
 M:AsterGraph.Avalonia.Hosting.AsterGraphHostBuilder.UsePluginTrustPolicy(AsterGraph.Editor.Plugins.IGraphEditorPluginTrustPolicy):AsterGraph.Avalonia.Hosting.AsterGraphHostBuilder
 M:AsterGraph.Avalonia.Hosting.AsterGraphHostBuilder.UsePresentation(AsterGraph.Avalonia.Presentation.AsterGraphPresentationOptions):AsterGraph.Avalonia.Hosting.AsterGraphHostBuilder
 M:AsterGraph.Avalonia.Hosting.AsterGraphHostBuilder.UseStorageRoot(System.String):AsterGraph.Avalonia.Hosting.AsterGraphHostBuilder
-M:AsterGraph.Avalonia.Hosting.AsterGraphHostBuilder.UseWorkbench(AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions):AsterGraph.Avalonia.Hosting.AsterGraphHostBuilder
 M:AsterGraph.Avalonia.Hosting.AsterGraphHostedActionDescriptor.TryExecute():System.Boolean
 M:AsterGraph.Avalonia.Hosting.AsterGraphHostedActionFactory.ApplyCommandShortcutPolicy(System.Collections.Generic.IEnumerable<AsterGraph.Avalonia.Hosting.AsterGraphHostedActionDescriptor>,AsterGraph.Avalonia.Hosting.AsterGraphCommandShortcutPolicy):System.Collections.Generic.IReadOnlyList<AsterGraph.Avalonia.Hosting.AsterGraphHostedActionDescriptor>
 M:AsterGraph.Avalonia.Hosting.AsterGraphHostedActionFactory.CreateCommandActions(AsterGraph.Editor.Runtime.IGraphEditorSession,System.Collections.Generic.IEnumerable<System.String>):System.Collections.Generic.IReadOnlyList<AsterGraph.Avalonia.Hosting.AsterGraphHostedActionDescriptor>
@@ -659,27 +602,6 @@ M:AsterGraph.Avalonia.Hosting.AsterGraphMiniMapViewOptions.Equals(AsterGraph.Ava
 M:AsterGraph.Avalonia.Hosting.AsterGraphMiniMapViewOptions.Equals(System.Object):System.Boolean
 M:AsterGraph.Avalonia.Hosting.AsterGraphMiniMapViewOptions.GetHashCode():System.Int32
 M:AsterGraph.Avalonia.Hosting.AsterGraphMiniMapViewOptions.ToString():System.String
-M:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions.<Clone>$():AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions
-M:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions.Equals(AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions):System.Boolean
-M:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions.Equals(System.Object):System.Boolean
-M:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions.ForPreset(AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchLayoutPreset):AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions
-M:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions.GetHashCode():System.Int32
-M:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions.ResetLayout():AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions
-M:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions.ToString():System.String
-M:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPanelState.<Clone>$():AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPanelState
-M:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPanelState.Deconstruct(out System.Boolean&,out System.Double&,out System.Boolean&,out System.Double&,out System.Boolean&,out System.Boolean&,out System.Boolean&,out System.Boolean&):System.Void
-M:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPanelState.Equals(AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPanelState):System.Boolean
-M:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPanelState.Equals(System.Object):System.Boolean
-M:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPanelState.ForPreset(AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchLayoutPreset):AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPanelState
-M:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPanelState.GetHashCode():System.Int32
-M:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPanelState.ToString():System.String
-M:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformancePolicy.<Clone>$():AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformancePolicy
-M:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformancePolicy.Deconstruct(out AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformanceMode&,out System.Int32&,out System.Boolean&,out System.Boolean&,out System.Boolean&,out System.Int32&):System.Void
-M:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformancePolicy.Equals(AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformancePolicy):System.Boolean
-M:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformancePolicy.Equals(System.Object):System.Boolean
-M:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformancePolicy.FromMode(AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformanceMode):AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformancePolicy
-M:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformancePolicy.GetHashCode():System.Int32
-M:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformancePolicy.ToString():System.String
 M:AsterGraph.Avalonia.Menus.GraphContextMenuPresenter.Open(Avalonia.Controls.Control,System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Menus.GraphEditorMenuItemDescriptorSnapshot>,AsterGraph.Editor.Runtime.IGraphEditorCommands,AsterGraph.Abstractions.Styling.ContextMenuStyleOptions):System.Void
 M:AsterGraph.Avalonia.Menus.GraphContextMenuPresenter.Open(Avalonia.Controls.Control,System.Collections.Generic.IReadOnlyList<AsterGraph.Editor.Menus.MenuItemDescriptor>,AsterGraph.Abstractions.Styling.ContextMenuStyleOptions):System.Void
 M:AsterGraph.Avalonia.Presentation.AsterGraphPresentationOptions.<Clone>$():AsterGraph.Avalonia.Presentation.AsterGraphPresentationOptions
@@ -731,11 +653,6 @@ M:AsterGraph.Core.Compatibility.ImplicitConversionRule.Equals(AsterGraph.Core.Co
 M:AsterGraph.Core.Compatibility.ImplicitConversionRule.Equals(System.Object):System.Boolean
 M:AsterGraph.Core.Compatibility.ImplicitConversionRule.GetHashCode():System.Int32
 M:AsterGraph.Core.Compatibility.ImplicitConversionRule.ToString():System.String
-M:AsterGraph.Core.Compatibility.ImplicitConversionRuleBuilder.Build():AsterGraph.Core.Compatibility.ImplicitConversionRule
-M:AsterGraph.Core.Compatibility.ImplicitConversionRuleBuilder.Conversion(AsterGraph.Abstractions.Identifiers.ConversionId):AsterGraph.Core.Compatibility.ImplicitConversionRuleBuilder
-M:AsterGraph.Core.Compatibility.ImplicitConversionRuleBuilder.Conversion(System.String):AsterGraph.Core.Compatibility.ImplicitConversionRuleBuilder
-M:AsterGraph.Core.Compatibility.ImplicitConversionRuleBuilder.ImplicitConversion(AsterGraph.Abstractions.Identifiers.PortTypeId,AsterGraph.Abstractions.Identifiers.PortTypeId):AsterGraph.Core.Compatibility.ImplicitConversionRuleBuilder
-M:AsterGraph.Core.Compatibility.ImplicitConversionRuleBuilder.ImplicitConversion(System.String,System.String):AsterGraph.Core.Compatibility.ImplicitConversionRuleBuilder
 M:AsterGraph.Core.Models.GraphCompositeBoundaryPort.<Clone>$():AsterGraph.Core.Models.GraphCompositeBoundaryPort
 M:AsterGraph.Core.Models.GraphCompositeBoundaryPort.Deconstruct(out System.String&,out System.String&,out AsterGraph.Core.Models.PortDirection&,out System.String&,out System.String&,out System.String&,out System.String&,out AsterGraph.Abstractions.Identifiers.PortTypeId&):System.Void
 M:AsterGraph.Core.Models.GraphCompositeBoundaryPort.Equals(AsterGraph.Core.Models.GraphCompositeBoundaryPort):System.Boolean
@@ -949,7 +866,6 @@ M:AsterGraph.Editor.Diagnostics.GraphEditorInstrumentationOptions.Equals(System.
 M:AsterGraph.Editor.Diagnostics.GraphEditorInstrumentationOptions.GetHashCode():System.Int32
 M:AsterGraph.Editor.Diagnostics.GraphEditorInstrumentationOptions.ToString():System.String
 M:AsterGraph.Editor.Diagnostics.GraphEditorPendingConnectionSnapshot.<Clone>$():AsterGraph.Editor.Diagnostics.GraphEditorPendingConnectionSnapshot
-M:AsterGraph.Editor.Diagnostics.GraphEditorPendingConnectionSnapshot.Create(System.Boolean,System.String,System.String,System.String,System.String,System.Nullable<AsterGraph.Core.Models.GraphConnectionTargetKind>,System.Nullable<System.Boolean>,System.String):AsterGraph.Editor.Diagnostics.GraphEditorPendingConnectionSnapshot
 M:AsterGraph.Editor.Diagnostics.GraphEditorPendingConnectionSnapshot.Create(System.Boolean,System.String,System.String):AsterGraph.Editor.Diagnostics.GraphEditorPendingConnectionSnapshot
 M:AsterGraph.Editor.Diagnostics.GraphEditorPendingConnectionSnapshot.Equals(AsterGraph.Editor.Diagnostics.GraphEditorPendingConnectionSnapshot):System.Boolean
 M:AsterGraph.Editor.Diagnostics.GraphEditorPendingConnectionSnapshot.Equals(System.Object):System.Boolean
@@ -1945,11 +1861,9 @@ P:AsterGraph.Abstractions.Definitions.ParameterOptionDefinition.Description:Syst
 P:AsterGraph.Abstractions.Definitions.ParameterOptionDefinition.Label:System.String:get,set
 P:AsterGraph.Abstractions.Definitions.ParameterOptionDefinition.Value:System.String:get,set
 P:AsterGraph.Abstractions.Definitions.PortDefinition.AccentHex:System.String:get
-P:AsterGraph.Abstractions.Definitions.PortDefinition.ConnectionHint:System.String:get
 P:AsterGraph.Abstractions.Definitions.PortDefinition.Description:System.String:get
 P:AsterGraph.Abstractions.Definitions.PortDefinition.DisplayName:System.String:get
 P:AsterGraph.Abstractions.Definitions.PortDefinition.GroupName:System.String:get
-P:AsterGraph.Abstractions.Definitions.PortDefinition.HandleId:System.String:get
 P:AsterGraph.Abstractions.Definitions.PortDefinition.Key:System.String:get
 P:AsterGraph.Abstractions.Definitions.PortDefinition.MaxConnections:System.Int32:get
 P:AsterGraph.Abstractions.Definitions.PortDefinition.MinConnections:System.Int32:get
@@ -2090,7 +2004,6 @@ P:AsterGraph.Abstractions.Styling.ShellStyleOptions.PanelBorderHex:System.String
 P:AsterGraph.Abstractions.Styling.ShellStyleOptions.TitleFontSize:System.Double:get,set
 P:AsterGraph.Avalonia.Controls.GraphEditorView.ChromeMode:AsterGraph.Avalonia.Controls.GraphEditorViewChromeMode:get,set
 P:AsterGraph.Avalonia.Controls.GraphEditorView.CommandShortcutPolicy:AsterGraph.Avalonia.Hosting.AsterGraphCommandShortcutPolicy:get,set
-P:AsterGraph.Avalonia.Controls.GraphEditorView.CurrentWorkbenchPerformancePolicy:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformancePolicy:get
 P:AsterGraph.Avalonia.Controls.GraphEditorView.Editor:AsterGraph.Editor.ViewModels.GraphEditorViewModel:get,set
 P:AsterGraph.Avalonia.Controls.GraphEditorView.EnableAltLeftDragPanning:System.Boolean:get,set
 P:AsterGraph.Avalonia.Controls.GraphEditorView.EnableDefaultContextMenu:System.Boolean:get,set
@@ -2100,7 +2013,6 @@ P:AsterGraph.Avalonia.Controls.GraphEditorView.IsInspectorChromeVisible:System.B
 P:AsterGraph.Avalonia.Controls.GraphEditorView.IsLibraryChromeVisible:System.Boolean:get,set
 P:AsterGraph.Avalonia.Controls.GraphEditorView.IsStatusChromeVisible:System.Boolean:get,set
 P:AsterGraph.Avalonia.Controls.GraphEditorView.Presentation:AsterGraph.Avalonia.Presentation.AsterGraphPresentationOptions:get,set
-P:AsterGraph.Avalonia.Controls.GraphEditorView.WorkbenchPerformanceMode:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformanceMode:get,set
 P:AsterGraph.Avalonia.Controls.GraphInspectorView.Editor:AsterGraph.Editor.ViewModels.GraphEditorViewModel:get,set
 P:AsterGraph.Avalonia.Controls.GraphInspectorView.InspectorPresenter:AsterGraph.Avalonia.Presentation.IGraphInspectorPresenter:get,set
 P:AsterGraph.Avalonia.Controls.GraphInspectorView.NodeParameterEditorRegistry:AsterGraph.Avalonia.Presentation.INodeParameterEditorRegistry:get,set
@@ -2127,7 +2039,6 @@ P:AsterGraph.Avalonia.Hosting.AsterGraphAvaloniaViewOptions.CommandShortcutPolic
 P:AsterGraph.Avalonia.Hosting.AsterGraphAvaloniaViewOptions.Editor:AsterGraph.Editor.ViewModels.GraphEditorViewModel:get,set
 P:AsterGraph.Avalonia.Hosting.AsterGraphAvaloniaViewOptions.EnableDefaultContextMenu:System.Boolean:get,set
 P:AsterGraph.Avalonia.Hosting.AsterGraphAvaloniaViewOptions.Presentation:AsterGraph.Avalonia.Presentation.AsterGraphPresentationOptions:get,set
-P:AsterGraph.Avalonia.Hosting.AsterGraphAvaloniaViewOptions.Workbench:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions:get,set
 P:AsterGraph.Avalonia.Hosting.AsterGraphCanvasViewOptions.CommandShortcutPolicy:AsterGraph.Avalonia.Hosting.AsterGraphCommandShortcutPolicy:get,set
 P:AsterGraph.Avalonia.Hosting.AsterGraphCanvasViewOptions.Editor:AsterGraph.Editor.ViewModels.GraphEditorViewModel:get,set
 P:AsterGraph.Avalonia.Hosting.AsterGraphCanvasViewOptions.EnableDefaultContextMenu:System.Boolean:get,set
@@ -2152,32 +2063,6 @@ P:AsterGraph.Avalonia.Hosting.AsterGraphInspectorViewOptions.Presentation:AsterG
 P:AsterGraph.Avalonia.Hosting.AsterGraphMiniMapViewOptions.Presentation:AsterGraph.Avalonia.Presentation.AsterGraphPresentationOptions:get,set
 P:AsterGraph.Avalonia.Hosting.AsterGraphMiniMapViewOptions.Session:AsterGraph.Editor.Runtime.IGraphEditorSession:get,set
 P:AsterGraph.Avalonia.Hosting.AsterGraphMiniMapViewOptions.StyleOptions:AsterGraph.Abstractions.Styling.GraphEditorStyleOptions:get,set
-P:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions.Default:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions:get
-P:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions.EnableAltLeftDragPanning:System.Boolean:get,set
-P:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions.EnableDefaultWheelViewportGestures:System.Boolean:get,set
-P:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions.LayoutPreset:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchLayoutPreset:get,set
-P:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions.PanelState:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPanelState:get,set
-P:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions.PerformanceMode:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformanceMode:get,set
-P:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions.PerformancePolicy:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformancePolicy:get
-P:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions.ShowHeaderChrome:System.Boolean:get,set
-P:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions.ShowInspector:System.Boolean:get,set
-P:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions.ShowNodePalette:System.Boolean:get,set
-P:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions.ShowStatus:System.Boolean:get,set
-P:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPanelState.Default:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPanelState:get
-P:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPanelState.ExportPanelVisible:System.Boolean:get,set
-P:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPanelState.InspectorVisible:System.Boolean:get,set
-P:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPanelState.InspectorWidth:System.Double:get,set
-P:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPanelState.MiniMapVisible:System.Boolean:get,set
-P:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPanelState.PluginPanelVisible:System.Boolean:get,set
-P:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPanelState.RuntimePanelVisible:System.Boolean:get,set
-P:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPanelState.StencilVisible:System.Boolean:get,set
-P:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPanelState.StencilWidth:System.Double:get,set
-P:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformancePolicy.CommandRefreshBatchMilliseconds:System.Int32:get,set
-P:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformancePolicy.Mode:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformanceMode:get,set
-P:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformancePolicy.ProjectAdvancedInspectorByDefault:System.Boolean:get,set
-P:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformancePolicy.ProjectHoveredToolbars:System.Boolean:get,set
-P:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformancePolicy.ProjectMiniMapContinuously:System.Boolean:get,set
-P:AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformancePolicy.StencilCardsPerSectionLimit:System.Int32:get,set
 P:AsterGraph.Avalonia.Presentation.AsterGraphPresentationOptions.ContextMenuPresenter:AsterGraph.Avalonia.Presentation.IGraphContextMenuPresenter:get,set
 P:AsterGraph.Avalonia.Presentation.AsterGraphPresentationOptions.InspectorPresenter:AsterGraph.Avalonia.Presentation.IGraphInspectorPresenter:get,set
 P:AsterGraph.Avalonia.Presentation.AsterGraphPresentationOptions.MiniMapPresenter:AsterGraph.Avalonia.Presentation.IGraphMiniMapPresenter:get,set
@@ -2315,11 +2200,9 @@ P:AsterGraph.Core.Models.GraphParameterValue.Value:System.Object:get,set
 P:AsterGraph.Core.Models.GraphPoint.X:System.Double:get,set
 P:AsterGraph.Core.Models.GraphPoint.Y:System.Double:get,set
 P:AsterGraph.Core.Models.GraphPort.AccentHex:System.String:get,set
-P:AsterGraph.Core.Models.GraphPort.ConnectionHint:System.String:get
 P:AsterGraph.Core.Models.GraphPort.DataType:System.String:get,set
 P:AsterGraph.Core.Models.GraphPort.Direction:AsterGraph.Core.Models.PortDirection:get,set
 P:AsterGraph.Core.Models.GraphPort.GroupName:System.String:get,set
-P:AsterGraph.Core.Models.GraphPort.HandleId:System.String:get
 P:AsterGraph.Core.Models.GraphPort.Id:System.String:get,set
 P:AsterGraph.Core.Models.GraphPort.Label:System.String:get,set
 P:AsterGraph.Core.Models.GraphPort.MaxConnections:System.Int32:get,set
@@ -2423,13 +2306,8 @@ P:AsterGraph.Editor.Diagnostics.GraphEditorInspectionSnapshot.Viewport:AsterGrap
 P:AsterGraph.Editor.Diagnostics.GraphEditorInstrumentationOptions.ActivitySource:System.Diagnostics.ActivitySource:get
 P:AsterGraph.Editor.Diagnostics.GraphEditorInstrumentationOptions.LoggerFactory:Microsoft.Extensions.Logging.ILoggerFactory:get
 P:AsterGraph.Editor.Diagnostics.GraphEditorPendingConnectionSnapshot.HasPendingConnection:System.Boolean:get
-P:AsterGraph.Editor.Diagnostics.GraphEditorPendingConnectionSnapshot.IsTargetCompatible:System.Nullable<System.Boolean>:get
 P:AsterGraph.Editor.Diagnostics.GraphEditorPendingConnectionSnapshot.SourceNodeId:System.String:get
 P:AsterGraph.Editor.Diagnostics.GraphEditorPendingConnectionSnapshot.SourcePortId:System.String:get
-P:AsterGraph.Editor.Diagnostics.GraphEditorPendingConnectionSnapshot.TargetKind:System.Nullable<AsterGraph.Core.Models.GraphConnectionTargetKind>:get
-P:AsterGraph.Editor.Diagnostics.GraphEditorPendingConnectionSnapshot.TargetNodeId:System.String:get
-P:AsterGraph.Editor.Diagnostics.GraphEditorPendingConnectionSnapshot.TargetPortId:System.String:get
-P:AsterGraph.Editor.Diagnostics.GraphEditorPendingConnectionSnapshot.ValidationMessage:System.String:get
 P:AsterGraph.Editor.Diagnostics.GraphEditorStatusSnapshot.Message:System.String:get
 P:AsterGraph.Editor.Events.GraphEditorAutomationCompletedEventArgs.Result:AsterGraph.Editor.Automation.GraphEditorAutomationExecutionSnapshot:get
 P:AsterGraph.Editor.Events.GraphEditorAutomationProgressEventArgs.ExecutedStepCount:System.Int32:get
@@ -2749,14 +2627,9 @@ P:AsterGraph.Editor.Runtime.GraphEditorCompatibleNodeSearchSnapshot.Results:Syst
 P:AsterGraph.Editor.Runtime.GraphEditorCompatibleNodeSearchSnapshot.SourceNodeId:System.String:get,set
 P:AsterGraph.Editor.Runtime.GraphEditorCompatibleNodeSearchSnapshot.SourcePortId:System.String:get,set
 P:AsterGraph.Editor.Runtime.GraphEditorCompatiblePortTargetSnapshot.Compatibility:AsterGraph.Abstractions.Compatibility.PortCompatibilityResult:get
-P:AsterGraph.Editor.Runtime.GraphEditorCompatiblePortTargetSnapshot.ConnectionHint:System.String:get
-P:AsterGraph.Editor.Runtime.GraphEditorCompatiblePortTargetSnapshot.MaxConnections:System.Int32:get
-P:AsterGraph.Editor.Runtime.GraphEditorCompatiblePortTargetSnapshot.MinConnections:System.Int32:get
 P:AsterGraph.Editor.Runtime.GraphEditorCompatiblePortTargetSnapshot.NodeId:System.String:get
 P:AsterGraph.Editor.Runtime.GraphEditorCompatiblePortTargetSnapshot.NodeTitle:System.String:get
 P:AsterGraph.Editor.Runtime.GraphEditorCompatiblePortTargetSnapshot.PortAccentHex:System.String:get
-P:AsterGraph.Editor.Runtime.GraphEditorCompatiblePortTargetSnapshot.PortGroupName:System.String:get
-P:AsterGraph.Editor.Runtime.GraphEditorCompatiblePortTargetSnapshot.PortHandleId:System.String:get
 P:AsterGraph.Editor.Runtime.GraphEditorCompatiblePortTargetSnapshot.PortId:System.String:get
 P:AsterGraph.Editor.Runtime.GraphEditorCompatiblePortTargetSnapshot.PortLabel:System.String:get
 P:AsterGraph.Editor.Runtime.GraphEditorCompatiblePortTargetSnapshot.PortTypeId:AsterGraph.Abstractions.Identifiers.PortTypeId:get
@@ -3267,15 +3140,12 @@ P:AsterGraph.Editor.Viewport.ViewportState.PanX:System.Double:get,set
 P:AsterGraph.Editor.Viewport.ViewportState.PanY:System.Double:get,set
 P:AsterGraph.Editor.Viewport.ViewportState.Zoom:System.Double:get,set
 T:class AsterGraph.Abstractions.Definitions.NodeDefinition
-T:class AsterGraph.Abstractions.Definitions.NodeDefinitionBuilder
 T:class AsterGraph.Abstractions.Definitions.NodeParameterDefinition
-T:class AsterGraph.Abstractions.Definitions.NodeParameterDefinitionBuilder
 T:class AsterGraph.Abstractions.Definitions.NodeSurfaceTierDefinition
 T:class AsterGraph.Abstractions.Definitions.NodeSurfaceTierProfile
 T:class AsterGraph.Abstractions.Definitions.ParameterConstraints
 T:class AsterGraph.Abstractions.Definitions.ParameterOptionDefinition
 T:class AsterGraph.Abstractions.Definitions.PortDefinition
-T:class AsterGraph.Abstractions.Definitions.PortDefinitionBuilder
 T:class AsterGraph.Abstractions.Identifiers.ConversionId
 T:class AsterGraph.Abstractions.Identifiers.NodeDefinitionId
 T:class AsterGraph.Abstractions.Identifiers.PortTypeId
@@ -3304,9 +3174,6 @@ T:class AsterGraph.Avalonia.Hosting.AsterGraphHostedActionDescriptor
 T:class AsterGraph.Avalonia.Hosting.AsterGraphHostedActionProjection
 T:class AsterGraph.Avalonia.Hosting.AsterGraphInspectorViewOptions
 T:class AsterGraph.Avalonia.Hosting.AsterGraphMiniMapViewOptions
-T:class AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchOptions
-T:class AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPanelState
-T:class AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformancePolicy
 T:class AsterGraph.Avalonia.Menus.GraphContextMenuPresenter
 T:class AsterGraph.Avalonia.Presentation.AsterGraphPresentationOptions
 T:class AsterGraph.Avalonia.Presentation.DefaultGraphInspectorPresenter
@@ -3323,7 +3190,6 @@ T:class AsterGraph.Avalonia.Styling.AvaloniaStylePalette
 T:class AsterGraph.Avalonia.Styling.GraphEditorStyleAdapter
 T:class AsterGraph.Core.Compatibility.DefaultPortCompatibilityService
 T:class AsterGraph.Core.Compatibility.ImplicitConversionRule
-T:class AsterGraph.Core.Compatibility.ImplicitConversionRuleBuilder
 T:class AsterGraph.Core.Models.GraphCompositeBoundaryPort
 T:class AsterGraph.Core.Models.GraphCompositeNode
 T:class AsterGraph.Core.Models.GraphConnection
@@ -3477,8 +3343,6 @@ T:class CompiledAvaloniaXaml.!XamlLoader
 T:enum AsterGraph.Abstractions.Compatibility.PortCompatibilityKind
 T:enum AsterGraph.Abstractions.Definitions.ParameterEditorKind
 T:enum AsterGraph.Avalonia.Controls.GraphEditorViewChromeMode
-T:enum AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchLayoutPreset
-T:enum AsterGraph.Avalonia.Hosting.AsterGraphWorkbenchPerformanceMode
 T:enum AsterGraph.Avalonia.Presentation.GraphNodeResizeHandleKind
 T:enum AsterGraph.Avalonia.Presentation.GraphResizeFeedbackHandle
 T:enum AsterGraph.Avalonia.Presentation.GraphResizeFeedbackSurfaceKind

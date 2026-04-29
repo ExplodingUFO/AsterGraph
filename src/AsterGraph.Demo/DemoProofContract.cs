@@ -28,6 +28,18 @@ public static class DemoProofContract
         "AI_PIPELINE_MOCK_RUNNER_POLISH_OK",
         "AI_PIPELINE_PAYLOAD_PREVIEW_OK",
         "AI_PIPELINE_ERROR_DEBUG_EVIDENCE_OK",
+        "WORKBENCH_COMMAND_RECOVERY_OK",
+        "WORKBENCH_COMMAND_ACTION_GUIDANCE_OK",
+        "WORKBENCH_COMMAND_SCOPE_BOUNDARY_OK",
+        "DISCOVERY_TO_ACTION_FLOW_OK",
+        "DISCOVERY_EMPTY_STATE_GUIDANCE_OK",
+        "DISCOVERY_ACTION_SCOPE_BOUNDARY_OK",
+        "WORKBENCH_EXPORT_AFFORDANCE_OK",
+        "WORKBENCH_SHARE_EVIDENCE_OK",
+        "WORKBENCH_EXPORT_SCOPE_BOUNDARY_OK",
+        "WORKBENCH_FEATURE_DEPTH_HANDOFF_OK",
+        "WORKBENCH_FEATURE_DEPTH_SCOPE_BOUNDARY_OK",
+        "V065_MILESTONE_PROOF_OK",
     ];
 
     public static IReadOnlyList<string> NativeMetricNames { get; } =
@@ -74,6 +86,18 @@ public static class DemoProofContract
             $"AI_PIPELINE_MOCK_RUNNER_POLISH_OK:{result.AiPipelineMockRunnerPolishOk}",
             $"AI_PIPELINE_PAYLOAD_PREVIEW_OK:{result.AiPipelinePayloadPreviewOk}",
             $"AI_PIPELINE_ERROR_DEBUG_EVIDENCE_OK:{result.AiPipelineErrorDebugEvidenceOk}",
+            $"WORKBENCH_COMMAND_RECOVERY_OK:{result.WorkbenchCommandRecoveryOk}",
+            $"WORKBENCH_COMMAND_ACTION_GUIDANCE_OK:{result.WorkbenchCommandActionGuidanceOk}",
+            $"WORKBENCH_COMMAND_SCOPE_BOUNDARY_OK:{result.WorkbenchCommandScopeBoundaryOk}",
+            $"DISCOVERY_TO_ACTION_FLOW_OK:{result.DiscoveryToActionFlowOk}",
+            $"DISCOVERY_EMPTY_STATE_GUIDANCE_OK:{result.DiscoveryEmptyStateGuidanceOk}",
+            $"DISCOVERY_ACTION_SCOPE_BOUNDARY_OK:{result.DiscoveryActionScopeBoundaryOk}",
+            $"WORKBENCH_EXPORT_AFFORDANCE_OK:{result.WorkbenchExportAffordanceOk}",
+            $"WORKBENCH_SHARE_EVIDENCE_OK:{result.WorkbenchShareEvidenceOk}",
+            $"WORKBENCH_EXPORT_SCOPE_BOUNDARY_OK:{result.WorkbenchExportScopeBoundaryOk}",
+            $"WORKBENCH_FEATURE_DEPTH_HANDOFF_OK:{result.WorkbenchFeatureDepthHandoffOk}",
+            $"WORKBENCH_FEATURE_DEPTH_SCOPE_BOUNDARY_OK:{result.WorkbenchFeatureDepthScopeBoundaryOk}",
+            $"V065_MILESTONE_PROOF_OK:{result.V065MilestoneProofOk}",
         ];
     }
 

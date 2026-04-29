@@ -138,8 +138,8 @@ public sealed class GraphEditorViewTests
         Assert.Equal("Save Workspace", AutomationProperties.GetName(saveButton));
         Assert.Equal("Undo", AutomationProperties.GetName(undoButton));
         Assert.Equal("Ctrl+S", ToolTip.GetTip(saveButton));
-        Assert.Equal("Select one or more nodes before fitting the selection.", ToolTip.GetTip(fitSelectionButton));
-        Assert.Equal("Select one or more nodes before deleting.", ToolTip.GetTip(deleteButton));
+        Assert.Contains("Select one or more nodes before fitting the selection.", Assert.IsType<string>(ToolTip.GetTip(fitSelectionButton)), StringComparison.Ordinal);
+        Assert.Contains("Select one or more nodes before deleting.", Assert.IsType<string>(ToolTip.GetTip(deleteButton)), StringComparison.Ordinal);
 
         paletteToggle.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
 

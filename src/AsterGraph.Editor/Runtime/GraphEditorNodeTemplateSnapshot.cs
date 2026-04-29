@@ -27,6 +27,11 @@ public sealed record GraphEditorNodeTemplateSnapshot(
     public string PortSummary => $"{InputCount} in  ·  {OutputCount} out";
 
     /// <summary>
+    /// Describes the action performed when this template is activated.
+    /// </summary>
+    public string ActionDescription => "Insert node into canvas";
+
+    /// <summary>
     /// Projects one node definition into a canonical node template snapshot.
     /// </summary>
     public static GraphEditorNodeTemplateSnapshot Create(INodeDefinition definition)

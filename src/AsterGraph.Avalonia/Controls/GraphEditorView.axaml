@@ -153,7 +153,7 @@
                         HorizontalScrollBarVisibility="Disabled">
             <StackPanel>
               <TextBlock x:Name="PART_StencilEmptyStateText"
-                         Text="No matching nodes"
+                         Text="No matching nodes. Try a different search term or clear the source filter."
                          FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                          TextWrapping="Wrap"
                          Foreground="{DynamicResource AsterGraph.BodyBrush}"

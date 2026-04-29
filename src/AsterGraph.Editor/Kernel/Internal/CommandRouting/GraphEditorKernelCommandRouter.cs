@@ -197,7 +197,9 @@ internal sealed class GraphEditorKernelCommandRouter
                 "selection.clear",
                 GraphEditorCommandSourceKind.Kernel,
                 hasSelection,
-                hasSelection ? null : "Select one or more nodes before clearing selection."),
+                hasSelection ? null : "Select one or more nodes before clearing selection.",
+                hasSelection ? null : "Select nodes first, then retry.",
+                hasSelection ? null : "nodes.add"),
             GraphEditorCommandDescriptorCatalog.Create(
                 "selection.delete",
                 GraphEditorCommandSourceKind.Kernel,
@@ -206,7 +208,9 @@ internal sealed class GraphEditorKernelCommandRouter
                     _host.BehaviorOptions.Commands.Nodes.AllowDelete,
                     hasSelection,
                     "Node deletion is disabled by host permissions.",
-                    "Select one or more nodes before deleting.")),
+                    "Select one or more nodes before deleting."),
+                hasSelection || !_host.BehaviorOptions.Commands.Nodes.AllowDelete ? null : "Select nodes first, then retry.",
+                hasSelection || !_host.BehaviorOptions.Commands.Nodes.AllowDelete ? null : "nodes.add"),
             GraphEditorCommandDescriptorCatalog.Create(
                 "clipboard.copy",
                 GraphEditorCommandSourceKind.Kernel,
@@ -215,7 +219,13 @@ internal sealed class GraphEditorKernelCommandRouter
                     ? _host.CanCopySelection
                         ? null
                         : "Select at least one node before copying."
-                    : "Copy is disabled by host permissions."),
+                    : "Copy is disabled by host permissions.",
+                _host.BehaviorOptions.Commands.Clipboard.AllowCopy && !_host.CanCopySelection
+                    ? "Select nodes first, then retry."
+                    : null,
+                _host.BehaviorOptions.Commands.Clipboard.AllowCopy && !_host.CanCopySelection
+                    ? "nodes.add"
+                    : null),
             GraphEditorCommandDescriptorCatalog.Create(
                 "clipboard.paste",
                 GraphEditorCommandSourceKind.Kernel,
@@ -236,7 +246,9 @@ internal sealed class GraphEditorKernelCommandRouter
                     _host.BehaviorOptions.Commands.Fragments.AllowExport,
                     hasSelection,
                     "Fragment export is disabled by host permissions.",
-                    "Select one or more nodes before exporting a fragment.")),
+                    "Select one or more nodes before exporting a fragment."),
+                hasSelection ? null : "Select nodes first, then retry.",
+                hasSelection ? null : "nodes.add"),
             GraphEditorCommandDescriptorCatalog.Create(
                 "fragments.import",
                 GraphEditorCommandSourceKind.Kernel,
@@ -298,7 +310,9 @@ internal sealed class GraphEditorKernelCommandRouter
                     _host.BehaviorOptions.Commands.Nodes.AllowMove,
                     hasSelection,
                     "Group creation is disabled by host permissions.",
-                    "Select one or more nodes before creating a group.")),
+                    "Select one or more nodes before creating a group."),
+                hasSelection ? null : "Select nodes first, then retry.",
+                hasSelection ? null : "nodes.add"),
             GraphEditorCommandDescriptorCatalog.Create(
                 "groups.collapse",
                 GraphEditorCommandSourceKind.Kernel,
@@ -323,7 +337,9 @@ internal sealed class GraphEditorKernelCommandRouter
                 "layout.align-left",
                 GraphEditorCommandSourceKind.Kernel,
                 _host.CanAlignSelection,
-                GetSelectionCountDisabledReason(_host.BehaviorOptions.Commands.Layout.AllowAlign, _host.SelectedNodeCount, 2, "Layout alignment is disabled by host permissions.", "Select at least two nodes before aligning.")),
+                GetSelectionCountDisabledReason(_host.BehaviorOptions.Commands.Layout.AllowAlign, _host.SelectedNodeCount, 2, "Layout alignment is disabled by host permissions.", "Select at least two nodes before aligning."),
+                _host.CanAlignSelection ? null : "Select at least two nodes first.",
+                _host.CanAlignSelection ? null : "nodes.add"),
             GraphEditorCommandDescriptorCatalog.Create(
                 "layout.align-center",
                 GraphEditorCommandSourceKind.Kernel,
@@ -367,7 +383,9 @@ internal sealed class GraphEditorKernelCommandRouter
                     _host.BehaviorOptions.Commands.Nodes.AllowMove,
                     hasSelection,
                     "Composite wrapping is disabled by host permissions.",
-                    "Select one or more nodes before wrapping to a composite.")),
+                    "Select one or more nodes before wrapping to a composite."),
+                hasSelection ? null : "Select nodes first, then retry.",
+                hasSelection ? null : "nodes.add"),
             GraphEditorCommandDescriptorCatalog.Create(
                 "composites.expose-port",
                 GraphEditorCommandSourceKind.Kernel,
@@ -472,16 +490,24 @@ internal sealed class GraphEditorKernelCommandRouter
             GraphEditorCommandDescriptorCatalog.Create(
                 "history.undo",
                 GraphEditorCommandSourceKind.Kernel,
-                _host.CanUndo),
+                _host.CanUndo,
+                _host.CanUndo ? null : "Nothing to undo yet.",
+                _host.CanUndo ? null : "Perform an action first.",
+                null),
             GraphEditorCommandDescriptorCatalog.Create(
                 "history.redo",
                 GraphEditorCommandSourceKind.Kernel,
-                _host.CanRedo),
+                _host.CanRedo,
+                _host.CanRedo ? null : "Nothing to redo.",
+                _host.CanRedo ? null : "Undo an action first.",
+                null),
             GraphEditorCommandDescriptorCatalog.Create(
                 "viewport.fit",
                 GraphEditorCommandSourceKind.Kernel,
                 hasNodes && hasViewport,
-                GetViewportDisabledReason(hasNodes, hasViewport, "Add a node before fitting the view.")),
+                GetViewportDisabledReason(hasNodes, hasViewport, "Add a node before fitting the view."),
+                !hasNodes ? "Add a node first." : !hasViewport ? "Wait for viewport to initialize." : null,
+                !hasNodes ? "nodes.add" : null),
             GraphEditorCommandDescriptorCatalog.Create(
                 "viewport.fit-selection",
                 GraphEditorCommandSourceKind.Kernel,
@@ -521,7 +547,9 @@ internal sealed class GraphEditorKernelCommandRouter
                 "workspace.save",
                 GraphEditorCommandSourceKind.Kernel,
                 _host.BehaviorOptions.Commands.Workspace.AllowSave,
-                _host.BehaviorOptions.Commands.Workspace.AllowSave ? null : "Snapshot saving is disabled by host permissions."),
+                _host.BehaviorOptions.Commands.Workspace.AllowSave ? null : "Snapshot saving is disabled by host permissions.",
+                null,
+                null),
             GraphEditorCommandDescriptorCatalog.Create(
                 "workspace.load",
                 GraphEditorCommandSourceKind.Kernel,
@@ -530,7 +558,13 @@ internal sealed class GraphEditorKernelCommandRouter
                     ? "Snapshot loading is disabled by host permissions."
                     : _host.WorkspaceExists
                         ? null
-                        : "No saved snapshot yet. Save once to create one."),
+                        : "No saved snapshot yet. Save once to create one.",
+                !_host.WorkspaceExists && _host.BehaviorOptions.Commands.Workspace.AllowLoad
+                    ? "Save a workspace first, then load."
+                    : null,
+                !_host.WorkspaceExists && _host.BehaviorOptions.Commands.Workspace.AllowLoad
+                    ? "workspace.save"
+                    : null),
         ];
     }
 

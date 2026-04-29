@@ -786,6 +786,77 @@ public sealed class GraphEditorKernelCommandRouterTests
         Assert.Contains("load boom", failure.Message, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void GraphEditorKernel_HighFrictionDisabledCommands_HaveRecoveryHints()
+    {
+        var kernel = CreateKernel();
+        var descriptors = kernel.GetCommandDescriptors().ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
+
+        var highFrictionCommands = new[]
+        {
+            "selection.delete", "clipboard.copy", "fragments.export-selection",
+            "groups.create", "composites.wrap-selection",
+            "layout.align-left", "viewport.fit",
+        };
+
+        foreach (var commandId in highFrictionCommands)
+        {
+            var descriptor = descriptors[commandId];
+            if (!descriptor.IsEnabled && !string.IsNullOrWhiteSpace(descriptor.DisabledReason))
+            {
+                Assert.False(
+                    string.IsNullOrWhiteSpace(descriptor.RecoveryHint),
+                    $"High-friction command '{commandId}' has DisabledReason but no RecoveryHint.");
+            }
+        }
+    }
+
+    [Fact]
+    public void GraphEditorKernel_RecoveryCommandIds_ReferenceValidCommands()
+    {
+        var kernel = CreateKernel();
+        var descriptors = kernel.GetCommandDescriptors().ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
+
+        foreach (var descriptor in descriptors.Values)
+        {
+            if (!string.IsNullOrWhiteSpace(descriptor.RecoveryCommandId))
+            {
+                Assert.True(
+                    descriptors.ContainsKey(descriptor.RecoveryCommandId),
+                    $"RecoveryCommandId '{descriptor.RecoveryCommandId}' for command '{descriptor.Id}' references unknown command.");
+            }
+        }
+    }
+
+    [Fact]
+    public void GraphEditorKernel_SelectionRequiredCommands_RecoveryPointsToAddNode()
+    {
+        var kernel = CreateKernel();
+        var descriptors = kernel.GetCommandDescriptors().ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
+
+        Assert.False(descriptors["selection.delete"].IsEnabled);
+        Assert.Equal("Select nodes first, then retry.", descriptors["selection.delete"].RecoveryHint);
+        Assert.Equal("nodes.add", descriptors["selection.delete"].RecoveryCommandId);
+    }
+
+    [Fact]
+    public void GraphEditorKernel_PermissionDisabledCommands_HaveRecoveryHintButNoRecoveryCommand()
+    {
+        var readOnlyKernel = CreateKernel(behaviorOptions: GraphEditorBehaviorOptions.Default with
+        {
+            Commands = GraphEditorCommandPermissions.Default with
+            {
+                Nodes = new NodeCommandPermissions { AllowCreate = false, AllowDelete = false },
+                Clipboard = new ClipboardCommandPermissions { AllowCopy = false },
+            },
+        });
+        var descriptors = readOnlyKernel.GetCommandDescriptors().ToDictionary(descriptor => descriptor.Id, StringComparer.Ordinal);
+
+        Assert.False(descriptors["selection.delete"].IsEnabled);
+        Assert.Contains("host permissions", descriptors["selection.delete"].DisabledReason!, StringComparison.Ordinal);
+        Assert.Null(descriptors["selection.delete"].RecoveryCommandId);
+    }
+
     private static GraphEditorKernel CreateKernel(
         IGraphWorkspaceService? workspaceService = null,
         GraphEditorBehaviorOptions? behaviorOptions = null)

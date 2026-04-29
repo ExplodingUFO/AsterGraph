@@ -1320,7 +1320,7 @@ public partial class GraphEditorView : UserControl
         {
             _commandPaletteItems.Children.Add(new TextBlock
             {
-                Text = "No matching commands.",
+                Text = "No matching commands. Try a different search term.",
             });
             return;
         }
@@ -1491,6 +1491,13 @@ public partial class GraphEditorView : UserControl
         button.Classes.Add("astergraph-toolbar-action");
         AutomationProperties.SetName(button, action.Title);
         var actionHint = action.DisabledReason ?? action.DefaultShortcut;
+        if (!string.IsNullOrWhiteSpace(action.RecoveryHint))
+        {
+            actionHint = string.IsNullOrWhiteSpace(actionHint)
+                ? $"→ {action.RecoveryHint}"
+                : $"{actionHint}\n→ {action.RecoveryHint}";
+        }
+
         if (!string.IsNullOrWhiteSpace(actionHint))
         {
             ToolTip.SetTip(button, actionHint);
@@ -1627,6 +1634,10 @@ public partial class GraphEditorView : UserControl
         if (!string.IsNullOrWhiteSpace(addNodeDescriptor?.DisabledReason))
         {
             ToolTip.SetTip(insertButton, addNodeDescriptor.DisabledReason);
+        }
+        else
+        {
+            ToolTip.SetTip(insertButton, stencilItem.ActionDescription);
         }
 
         insertButton.Click += (_, _) =>
@@ -1973,7 +1984,7 @@ public partial class GraphEditorView : UserControl
     {
         var templateState = templates.Count > 0
             ? $"{templates.Count} templates"
-            : "No templates";
+            : "No templates yet — export a selection as a template to get started";
         return $"{templateState}  ·  {storage.TemplateLibraryPath}";
     }
 

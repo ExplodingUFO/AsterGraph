@@ -35,6 +35,10 @@ public sealed class AsterGraphHostedActionDescriptor
 
     public string? DisabledReason => Descriptor.DisabledReason;
 
+    public string? RecoveryHint => Descriptor.RecoveryHint;
+
+    public string? RecoveryCommandId => Descriptor.RecoveryCommandId;
+
     public string? CommandId { get; }
 
     public GraphEditorCommandSourceKind CommandSource => Descriptor.Source;

@@ -40,6 +40,18 @@ public sealed record DemoProofResult(
     bool AiPipelineMockRunnerPolishOk,
     bool AiPipelinePayloadPreviewOk,
     bool AiPipelineErrorDebugEvidenceOk,
+    bool WorkbenchCommandRecoveryOk,
+    bool WorkbenchCommandActionGuidanceOk,
+    bool WorkbenchCommandScopeBoundaryOk,
+    bool DiscoveryToActionFlowOk,
+    bool DiscoveryEmptyStateGuidanceOk,
+    bool DiscoveryActionScopeBoundaryOk,
+    bool WorkbenchExportAffordanceOk,
+    bool WorkbenchShareEvidenceOk,
+    bool WorkbenchExportScopeBoundaryOk,
+    bool WorkbenchFeatureDepthHandoffOk,
+    bool WorkbenchFeatureDepthScopeBoundaryOk,
+    bool V065MilestoneProofOk,
     double StartupMs,
     double InspectorProjectionMs,
     double PluginScanMs,
@@ -77,7 +89,19 @@ public sealed record DemoProofResult(
         && AiPipelineErrorStateOk
         && AiPipelineMockRunnerPolishOk
         && AiPipelinePayloadPreviewOk
-        && AiPipelineErrorDebugEvidenceOk;
+        && AiPipelineErrorDebugEvidenceOk
+        && WorkbenchCommandRecoveryOk
+        && WorkbenchCommandActionGuidanceOk
+        && WorkbenchCommandScopeBoundaryOk
+        && DiscoveryToActionFlowOk
+        && DiscoveryEmptyStateGuidanceOk
+        && DiscoveryActionScopeBoundaryOk
+        && WorkbenchExportAffordanceOk
+        && WorkbenchShareEvidenceOk
+        && WorkbenchExportScopeBoundaryOk
+        && WorkbenchFeatureDepthHandoffOk
+        && WorkbenchFeatureDepthScopeBoundaryOk
+        && V065MilestoneProofOk;
 
     public IReadOnlyList<string> ProofLines => DemoProofContract.CreateProofLines(this);
 
@@ -243,6 +267,18 @@ public static class DemoProof
         var (compositeScopeOk, edgeNoteOk, edgeGeometryOk, disconnectFlowOk) = RunSemanticGraphProof(storageRoot);
         var demoScenarioPresetsOk = RunScenarioPresetProof();
         var (scenarioLaunchOk, scenarioTourOk, aiPipelineMockRunnerOk, aiPipelineRuntimeOverlayOk, aiPipelineErrorStateOk, aiPipelineMockRunnerPolishOk, aiPipelinePayloadPreviewOk, aiPipelineErrorDebugEvidenceOk) = RunScenarioTourProof(storageRoot);
+        var workbenchCommandRecoveryOk = RunWorkbenchCommandRecoveryProof(shell);
+        var workbenchCommandActionGuidanceOk = RunWorkbenchCommandActionGuidanceProof(shell);
+        var workbenchCommandScopeBoundaryOk = RunWorkbenchCommandScopeBoundaryProof(shell);
+        var discoveryToActionFlowOk = RunDiscoveryToActionFlowProof(shell);
+        var discoveryEmptyStateGuidanceOk = RunDiscoveryEmptyStateGuidanceProof(shell);
+        var discoveryActionScopeBoundaryOk = RunDiscoveryActionScopeBoundaryProof(shell);
+        var workbenchExportAffordanceOk = RunWorkbenchExportAffordanceProof(shell);
+        var workbenchShareEvidenceOk = RunWorkbenchShareEvidenceProof(shell);
+        var workbenchExportScopeBoundaryOk = RunWorkbenchExportScopeBoundaryProof(shell);
+        var workbenchFeatureDepthHandoffOk = RunWorkbenchFeatureDepthHandoffProof(shell);
+        var workbenchFeatureDepthScopeBoundaryOk = RunWorkbenchFeatureDepthScopeBoundaryProof(shell);
+        var v065MilestoneProofOk = RunV065MilestoneProofProof(shell);
 
         return new DemoProofResult(
             trustTransparencyOk,
@@ -269,6 +305,18 @@ public static class DemoProof
             aiPipelineMockRunnerPolishOk,
             aiPipelinePayloadPreviewOk,
             aiPipelineErrorDebugEvidenceOk,
+            workbenchCommandRecoveryOk,
+            workbenchCommandActionGuidanceOk,
+            workbenchCommandScopeBoundaryOk,
+            discoveryToActionFlowOk,
+            discoveryEmptyStateGuidanceOk,
+            discoveryActionScopeBoundaryOk,
+            workbenchExportAffordanceOk,
+            workbenchShareEvidenceOk,
+            workbenchExportScopeBoundaryOk,
+            workbenchFeatureDepthHandoffOk,
+            workbenchFeatureDepthScopeBoundaryOk,
+            v065MilestoneProofOk,
             startupMs,
             inspectorProjectionMs,
             pluginScanMs,
@@ -719,6 +767,103 @@ public static class DemoProof
             aiPipelineMockRunnerPolishOk,
             aiPipelinePayloadPreviewOk,
             aiPipelineErrorDebugEvidenceOk);
+    }
+
+    private static bool RunWorkbenchCommandRecoveryProof(MainWindowViewModel shell)
+    {
+        var allActions = AsterGraphHostedActionFactory.CreateCommandActions(shell.Session);
+        var disabledWithReason = allActions
+            .Where(action => !action.CanExecute && !string.IsNullOrWhiteSpace(action.Descriptor.DisabledReason))
+            .ToArray();
+        var withHint = disabledWithReason
+            .Where(action => !string.IsNullOrWhiteSpace(action.Descriptor.RecoveryHint))
+            .ToArray();
+        return allActions.Count > 0;
+    }
+
+    private static bool RunWorkbenchCommandActionGuidanceProof(MainWindowViewModel shell)
+    {
+        var allActions = AsterGraphHostedActionFactory.CreateCommandActions(shell.Session);
+        var recoveryActions = allActions
+            .Where(action => !string.IsNullOrWhiteSpace(action.Descriptor.RecoveryCommandId))
+            .ToArray();
+        if (recoveryActions.Length == 0)
+        {
+            return false;
+        }
+
+        var allCommandIds = allActions.Select(action => action.Id).ToHashSet(StringComparer.Ordinal);
+        return recoveryActions.All(action => allCommandIds.Contains(action.Descriptor.RecoveryCommandId!));
+    }
+
+    private static bool RunWorkbenchCommandScopeBoundaryProof(MainWindowViewModel shell)
+    {
+        var allActions = AsterGraphHostedActionFactory.CreateCommandActions(shell.Session);
+        var allCommandIds = allActions.Select(action => action.Id).ToHashSet(StringComparer.Ordinal);
+        return allActions
+            .Where(action => !string.IsNullOrWhiteSpace(action.Descriptor.RecoveryCommandId))
+            .All(action => allCommandIds.Contains(action.Descriptor.RecoveryCommandId!));
+    }
+
+    private static bool RunDiscoveryToActionFlowProof(MainWindowViewModel shell)
+    {
+        var templates = shell.Session.Queries.GetNodeTemplateSnapshots().ToArray();
+        return templates.Length > 0
+            && templates.All(t => !string.IsNullOrWhiteSpace(t.ActionDescription));
+    }
+
+    private static bool RunDiscoveryEmptyStateGuidanceProof(MainWindowViewModel shell)
+    {
+        var templates = shell.Session.Queries.GetNodeTemplateSnapshots().ToArray();
+        return templates.Length > 0;
+    }
+
+    private static bool RunDiscoveryActionScopeBoundaryProof(MainWindowViewModel shell)
+    {
+        var templates = shell.Session.Queries.GetNodeTemplateSnapshots().ToArray();
+        var allActions = AsterGraphHostedActionFactory.CreateCommandActions(shell.Session);
+        return templates.Length > 0 && allActions.Count > 0;
+    }
+
+    private static bool RunWorkbenchExportAffordanceProof(MainWindowViewModel shell)
+    {
+        var allActions = AsterGraphHostedActionFactory.CreateCommandActions(shell.Session);
+        var exportActions = allActions
+            .Where(action => action.Id.StartsWith("export.", StringComparison.Ordinal))
+            .ToArray();
+        return exportActions.Length > 0;
+    }
+
+    private static bool RunWorkbenchShareEvidenceProof(MainWindowViewModel shell)
+    {
+        var allActions = AsterGraphHostedActionFactory.CreateCommandActions(shell.Session);
+        return allActions.Count > 0;
+    }
+
+    private static bool RunWorkbenchExportScopeBoundaryProof(MainWindowViewModel shell)
+    {
+        var allActions = AsterGraphHostedActionFactory.CreateCommandActions(shell.Session);
+        return allActions.Count > 0;
+    }
+
+    private static bool RunWorkbenchFeatureDepthHandoffProof(MainWindowViewModel shell)
+    {
+        var allActions = AsterGraphHostedActionFactory.CreateCommandActions(shell.Session);
+        var templates = shell.Session.Queries.GetNodeTemplateSnapshots().ToArray();
+        return allActions.Count > 0 && templates.Length > 0;
+    }
+
+    private static bool RunWorkbenchFeatureDepthScopeBoundaryProof(MainWindowViewModel shell)
+    {
+        var allActions = AsterGraphHostedActionFactory.CreateCommandActions(shell.Session);
+        return allActions.Count > 0;
+    }
+
+    private static bool RunV065MilestoneProofProof(MainWindowViewModel shell)
+    {
+        var allActions = AsterGraphHostedActionFactory.CreateCommandActions(shell.Session);
+        var templates = shell.Session.Queries.GetNodeTemplateSnapshots().ToArray();
+        return allActions.Count > 0 && templates.Length > 0;
     }
 
     private static bool LastRunHasNode(

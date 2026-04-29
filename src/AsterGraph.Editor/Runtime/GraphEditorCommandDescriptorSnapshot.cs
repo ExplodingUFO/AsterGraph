@@ -5,7 +5,12 @@ namespace AsterGraph.Editor.Runtime;
 /// </summary>
 public sealed record GraphEditorCommandDescriptorSnapshot
 {
-    public GraphEditorCommandDescriptorSnapshot(string id, bool isEnabled, string? disabledReason = null)
+    public GraphEditorCommandDescriptorSnapshot(
+        string id,
+        bool isEnabled,
+        string? disabledReason = null,
+        string? recoveryHint = null,
+        string? recoveryCommandId = null)
         : this(
             id,
             GraphEditorCommandDescriptorCatalog.GetTitle(id),
@@ -14,7 +19,9 @@ public sealed record GraphEditorCommandDescriptorSnapshot
             GraphEditorCommandDescriptorCatalog.GetDefaultShortcut(id),
             GraphEditorCommandSourceKind.Kernel,
             isEnabled,
-            disabledReason)
+            disabledReason,
+            recoveryHint,
+            recoveryCommandId)
     {
     }
 
@@ -26,7 +33,9 @@ public sealed record GraphEditorCommandDescriptorSnapshot
         string? defaultShortcut,
         GraphEditorCommandSourceKind source,
         bool isEnabled,
-        string? disabledReason = null)
+        string? disabledReason = null,
+        string? recoveryHint = null,
+        string? recoveryCommandId = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(id);
         ArgumentException.ThrowIfNullOrWhiteSpace(title);
@@ -40,6 +49,8 @@ public sealed record GraphEditorCommandDescriptorSnapshot
         Source = source;
         IsEnabled = isEnabled;
         DisabledReason = string.IsNullOrWhiteSpace(disabledReason) ? null : disabledReason.Trim();
+        RecoveryHint = string.IsNullOrWhiteSpace(recoveryHint) ? null : recoveryHint.Trim();
+        RecoveryCommandId = string.IsNullOrWhiteSpace(recoveryCommandId) ? null : recoveryCommandId.Trim();
     }
 
     public string Id { get; }
@@ -59,4 +70,8 @@ public sealed record GraphEditorCommandDescriptorSnapshot
     public bool IsEnabled { get; }
 
     public string? DisabledReason { get; }
+
+    public string? RecoveryHint { get; }
+
+    public string? RecoveryCommandId { get; }
 }

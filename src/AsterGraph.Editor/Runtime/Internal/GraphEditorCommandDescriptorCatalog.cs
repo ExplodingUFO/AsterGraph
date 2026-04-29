@@ -78,7 +78,9 @@ internal static class GraphEditorCommandDescriptorCatalog
         string id,
         GraphEditorCommandSourceKind source,
         bool canExecute,
-        string? disabledReason = null)
+        string? disabledReason = null,
+        string? recoveryHint = null,
+        string? recoveryCommandId = null)
     {
         var metadata = GetMetadata(id);
         return new GraphEditorCommandDescriptorSnapshot(
@@ -89,7 +91,9 @@ internal static class GraphEditorCommandDescriptorCatalog
             metadata.DefaultShortcut,
             source,
             canExecute,
-            disabledReason);
+            disabledReason,
+            recoveryHint,
+            recoveryCommandId);
     }
 
     public static string GetTitle(string id) => GetMetadata(id).Title;

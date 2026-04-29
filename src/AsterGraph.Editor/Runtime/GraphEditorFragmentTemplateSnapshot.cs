@@ -14,4 +14,9 @@ public sealed record GraphEditorFragmentTemplateSnapshot(
     /// Human-readable summary of the template payload size.
     /// </summary>
     public string Summary => $"{NodeCount} nodes  ·  {ConnectionCount} connections";
+
+    /// <summary>
+    /// Describes the action performed when this template is imported.
+    /// </summary>
+    public string ActionDescription => "Import fragment into workspace";
 }

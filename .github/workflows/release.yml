@@ -170,7 +170,19 @@ jobs:
               'AI_PIPELINE_ERROR_STATE_OK',
               'AI_PIPELINE_MOCK_RUNNER_POLISH_OK',
               'AI_PIPELINE_PAYLOAD_PREVIEW_OK',
-              'AI_PIPELINE_ERROR_DEBUG_EVIDENCE_OK'
+              'AI_PIPELINE_ERROR_DEBUG_EVIDENCE_OK',
+              'WORKBENCH_COMMAND_RECOVERY_OK',
+              'WORKBENCH_COMMAND_ACTION_GUIDANCE_OK',
+              'WORKBENCH_COMMAND_SCOPE_BOUNDARY_OK',
+              'DISCOVERY_TO_ACTION_FLOW_OK',
+              'DISCOVERY_EMPTY_STATE_GUIDANCE_OK',
+              'DISCOVERY_ACTION_SCOPE_BOUNDARY_OK',
+              'WORKBENCH_EXPORT_AFFORDANCE_OK',
+              'WORKBENCH_SHARE_EVIDENCE_OK',
+              'WORKBENCH_EXPORT_SCOPE_BOUNDARY_OK',
+              'WORKBENCH_FEATURE_DEPTH_HANDOFF_OK',
+              'WORKBENCH_FEATURE_DEPTH_SCOPE_BOUNDARY_OK',
+              'V065_MILESTONE_PROOF_OK'
             )) {
               $markerLine = Select-String -Path 'artifacts/proof/demo-proof.txt' -Pattern $markerId | Select-Object -First 1
               if ($markerLine) {
