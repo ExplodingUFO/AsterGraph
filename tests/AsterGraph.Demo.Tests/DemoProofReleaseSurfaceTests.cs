@@ -49,6 +49,13 @@ public sealed class DemoProofReleaseSurfaceTests
         "Edge Geometry Tooling",
     ];
 
+    private static readonly string[] RepairHelpReviewProofMarkerIds =
+    [
+        "GRAPH_ERROR_HELP_TARGET_OK",
+        "GRAPH_PROBLEM_INSPECTOR_HELP_TARGET_OK",
+        "REPAIR_HELP_REVIEW_LOOP_OK",
+    ];
+
     [Fact]
     public void QuickStart_UsesAvaloniaAsDefaultOnboardingPath()
     {
@@ -981,15 +988,25 @@ public sealed class DemoProofReleaseSurfaceTests
         var releaseWorkflow = ReadRepoFile(".github/workflows/release.yml");
 
         Assert.Contains("artifacts/proof/demo-proof.txt", ciWorkflow, StringComparison.Ordinal);
+        Assert.Contains("artifacts/proof/consumer-sample.txt", ciWorkflow, StringComparison.Ordinal);
         Assert.Contains("DEMO_OK", ciWorkflow, StringComparison.Ordinal);
         foreach (var markerId in DemoProofContract.PublicSuccessMarkerIds)
         {
             Assert.Contains(markerId, ciWorkflow, StringComparison.Ordinal);
         }
+        foreach (var markerId in RepairHelpReviewProofMarkerIds)
+        {
+            Assert.Contains(markerId, ciWorkflow, StringComparison.Ordinal);
+        }
 
         Assert.Contains("artifacts/proof/demo-proof.txt", releaseWorkflow, StringComparison.Ordinal);
+        Assert.Contains("artifacts/proof/consumer-sample.txt", releaseWorkflow, StringComparison.Ordinal);
         Assert.Contains("DEMO_OK", releaseWorkflow, StringComparison.Ordinal);
         foreach (var markerId in DemoProofContract.PublicSuccessMarkerIds)
+        {
+            Assert.Contains(markerId, releaseWorkflow, StringComparison.Ordinal);
+        }
+        foreach (var markerId in RepairHelpReviewProofMarkerIds)
         {
             Assert.Contains(markerId, releaseWorkflow, StringComparison.Ordinal);
         }

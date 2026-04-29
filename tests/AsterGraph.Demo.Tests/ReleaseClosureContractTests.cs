@@ -18,7 +18,10 @@ public sealed class ReleaseClosureContractTests
 
         WriteProofFile(proofRoot, "public-repo-hygiene.txt", "PUBLIC_REPO_HYGIENE_OK:True");
         WriteProofFile(proofRoot, "hostsample-packed.txt", "HOST_SAMPLE_OK:True");
-        WriteProofFile(proofRoot, "consumer-sample.txt", "CONSUMER_SAMPLE_OK:True");
+        WriteProofFile(
+            proofRoot,
+            "consumer-sample.txt",
+            "CONSUMER_SAMPLE_OK:True`nGRAPH_ERROR_HELP_TARGET_OK:True`nGRAPH_PROBLEM_INSPECTOR_HELP_TARGET_OK:True`nREPAIR_HELP_REVIEW_LOOP_OK:True");
         WriteProofFile(proofRoot, "demo-proof.txt", "DEMO_OK:True");
         WriteProofFile(proofRoot, "hostsample-net10-packed.txt", "HOST_SAMPLE_NET10_OK:True");
         WriteProofFile(proofRoot, "package-smoke.txt", "PACKAGE_SMOKE_OK:True");
@@ -87,6 +90,10 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("[Project Status](./docs/en/project-status.md)", notes, StringComparison.Ordinal);
         Assert.True(HasLineWithAll(notes, "externally proven", "validation-only", "bounded", "deferred"));
         Assert.True(HasLineWithAll(notes, "Repairability, Help, and Review UX", "validation repair", "support boundary", "release proof"));
+        Assert.True(HasLineWithAll(notes, "repair/help review proof source", "ConsumerSample.Avalonia", "v0.67"));
+        Assert.Contains("GRAPH_ERROR_HELP_TARGET_OK:True", notes, StringComparison.Ordinal);
+        Assert.Contains("GRAPH_PROBLEM_INSPECTOR_HELP_TARGET_OK:True", notes, StringComparison.Ordinal);
+        Assert.Contains("REPAIR_HELP_REVIEW_LOOP_OK:True", notes, StringComparison.Ordinal);
         Assert.Contains("ADOPTION_RECOMMENDATION_CURRENT_OK:True", notes, StringComparison.Ordinal);
         Assert.Contains("CLAIM_HYGIENE_BOUNDARY_OK:True", notes, StringComparison.Ordinal);
         Assert.Contains("RELEASE_READINESS_GATE_OK:True", notes, StringComparison.Ordinal);

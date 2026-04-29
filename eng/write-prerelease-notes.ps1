@@ -129,6 +129,9 @@ $proofLines = @()
 $proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'public-repo-hygiene.txt') -Pattern 'PUBLIC_REPO_HYGIENE_OK'
 $proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'hostsample-packed.txt') -Pattern 'HOST_SAMPLE_OK'
 $proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'consumer-sample.txt') -Pattern 'CONSUMER_SAMPLE_OK'
+$proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'consumer-sample.txt') -Pattern 'GRAPH_ERROR_HELP_TARGET_OK'
+$proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'consumer-sample.txt') -Pattern 'GRAPH_PROBLEM_INSPECTOR_HELP_TARGET_OK'
+$proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'consumer-sample.txt') -Pattern 'REPAIR_HELP_REVIEW_LOOP_OK'
 $proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'demo-proof.txt') -Pattern 'DEMO_OK'
 $proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'demo-proof.txt') -Pattern 'COMMAND_SURFACE_OK'
 $proofLines += Get-FirstMatchingLine -FilePath (Join-Path $resolvedProofRoot 'demo-proof.txt') -Pattern 'TIERED_NODE_SURFACE_OK'
@@ -251,6 +254,7 @@ foreach ($line in $proofLines) {
 [void]$builder.AppendLine("- adapter matrix story: [Adapter Capability Matrix](./docs/en/adapter-capability-matrix.md)")
 [void]$builder.AppendLine("- external capability readiness gate: [Project Status](./docs/en/project-status.md) for externally proven now, validation-only or bounded claims, and deferred until more adopter evidence")
 [void]$builder.AppendLine("- current 0.xx alpha/beta hardening line: `Repairability, Help, and Review UX` means validation repair, contextual help, support-bundle evidence, support boundary, and release proof gates stay aligned before release-candidate, GA, or `1.0` language; `ADOPTION_RECOMMENDATION_CURRENT_OK:True`, `CLAIM_HYGIENE_BOUNDARY_OK:True`, `RELEASE_READINESS_GATE_OK:True`, `SUPPORT_BOUNDARY_GATE_OK:True`, `BETA_CLAIM_ALIGNMENT_OK:True`, `ADOPTION_API_STABILIZATION_HANDOFF_OK:True`, `ADOPTION_API_SCOPE_BOUNDARY_OK:True`, and `V061_MILESTONE_PROOF_OK:True` remain the boundary proof handoff markers; `xlarge` remains telemetry-only, not a 10000-node support or virtualization claim")
+[void]$builder.AppendLine("- repair/help review proof source: `ConsumerSample.Avalonia` carries `GRAPH_ERROR_HELP_TARGET_OK:True`, `GRAPH_PROBLEM_INSPECTOR_HELP_TARGET_OK:True`, and `REPAIR_HELP_REVIEW_LOOP_OK:True` as the current v0.67 repairability, contextual help, and review-loop release evidence")
 [void]$builder.AppendLine("- release evidence contract: route, version, proof markers, friction, and support-bundle attachment note")
 [void]$builder.AppendLine("- `HELLOWORLD_WPF_OK` remains adapter-2 validation only and does not widen the public publish/package boundary")
 [void]$builder.AppendLine("- support-bundle attachment note: [Beta Support Bundle](./docs/en/support-bundle.md)")

@@ -140,9 +140,16 @@ jobs:
           }
 
           if (Test-Path -LiteralPath 'artifacts/proof/consumer-sample.txt') {
-            $consumerSampleLine = Select-String -Path 'artifacts/proof/consumer-sample.txt' -Pattern 'CONSUMER_SAMPLE_OK' | Select-Object -First 1
-            if ($consumerSampleLine) {
-              $summaryLines.Add("- $($consumerSampleLine.Line)")
+            foreach ($markerId in @(
+              'CONSUMER_SAMPLE_OK',
+              'GRAPH_ERROR_HELP_TARGET_OK',
+              'GRAPH_PROBLEM_INSPECTOR_HELP_TARGET_OK',
+              'REPAIR_HELP_REVIEW_LOOP_OK'
+            )) {
+              $consumerSampleLine = Select-String -Path 'artifacts/proof/consumer-sample.txt' -Pattern $markerId | Select-Object -First 1
+              if ($consumerSampleLine) {
+                $summaryLines.Add("- $($consumerSampleLine.Line)")
+              }
             }
           }
 
