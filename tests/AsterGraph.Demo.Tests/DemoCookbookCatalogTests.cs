@@ -22,6 +22,17 @@ public sealed class DemoCookbookCatalogTests
     [Fact]
     public void CookbookCatalog_CoversRequiredRecipeCategories()
     {
+        Assert.Equal(
+            new[]
+            {
+                DemoCookbookRecipeCategory.StarterHost,
+                DemoCookbookRecipeCategory.Authoring,
+                DemoCookbookRecipeCategory.PluginTrust,
+                DemoCookbookRecipeCategory.DiagnosticsSupport,
+                DemoCookbookRecipeCategory.ReviewHelp,
+            },
+            DemoCookbookCatalog.RequiredCategories);
+
         foreach (var category in DemoCookbookCatalog.RequiredCategories)
         {
             Assert.Contains(DemoCookbookCatalog.Recipes, recipe => recipe.Category == category);
@@ -29,18 +40,21 @@ public sealed class DemoCookbookCatalogTests
     }
 
     [Fact]
-    public void CookbookCatalog_ReferencesExistingCodeAndDocsPaths()
+    public void CookbookCatalog_ReferencesConcreteCodeDemoAndDocsAnchors()
     {
         var repositoryRoot = GetRepositoryRoot();
 
         foreach (var recipe in DemoCookbookCatalog.Recipes)
         {
-            Assert.True(
-                File.Exists(Path.Combine(repositoryRoot, recipe.CodePath)),
-                $"{recipe.Id} code path does not exist: {recipe.CodePath}");
-            Assert.True(
-                File.Exists(Path.Combine(repositoryRoot, recipe.DocumentationPath)),
-                $"{recipe.Id} docs path does not exist: {recipe.DocumentationPath}");
+            Assert.NotEmpty(recipe.CodeAnchors);
+            Assert.NotEmpty(recipe.DemoAnchors);
+            Assert.NotEmpty(recipe.DocumentationAnchors);
+            Assert.NotEmpty(recipe.ProofMarkers);
+            Assert.False(string.IsNullOrWhiteSpace(recipe.SupportBoundary), $"{recipe.Id} support boundary is missing.");
+
+            AssertAnchorsExist(repositoryRoot, recipe.Id, nameof(recipe.CodeAnchors), recipe.CodeAnchors);
+            AssertAnchorsExist(repositoryRoot, recipe.Id, nameof(recipe.DemoAnchors), recipe.DemoAnchors);
+            AssertAnchorsExist(repositoryRoot, recipe.Id, nameof(recipe.DocumentationAnchors), recipe.DocumentationAnchors);
         }
     }
 
@@ -58,7 +72,10 @@ public sealed class DemoCookbookCatalogTests
 
         foreach (var recipe in DemoCookbookCatalog.Recipes)
         {
-            Assert.Contains(recipe.ProofMarker, evidenceText, StringComparison.Ordinal);
+            foreach (var proofMarker in recipe.ProofMarkers)
+            {
+                Assert.Contains(proofMarker, evidenceText, StringComparison.Ordinal);
+            }
         }
     }
 
@@ -82,6 +99,25 @@ public sealed class DemoCookbookCatalogTests
             Directory.EnumerateFiles(root, "*", SearchOption.AllDirectories)
                 .Where(path => path.EndsWith(".cs", StringComparison.Ordinal) || path.EndsWith(".md", StringComparison.Ordinal))
                 .Select(File.ReadAllText));
+    }
+
+    private static void AssertAnchorsExist(
+        string repositoryRoot,
+        string recipeId,
+        string anchorSetName,
+        IReadOnlyList<DemoCookbookAnchor> anchors)
+    {
+        for (var index = 0; index < anchors.Count; index++)
+        {
+            var anchor = anchors[index];
+            var path = Path.Combine(repositoryRoot, anchor.Path);
+
+            Assert.False(string.IsNullOrWhiteSpace(anchor.Label), $"{recipeId} {anchorSetName}[{index}] label is missing.");
+            Assert.False(string.IsNullOrWhiteSpace(anchor.Path), $"{recipeId} {anchorSetName}[{index}] path is missing.");
+            Assert.False(string.IsNullOrWhiteSpace(anchor.Evidence), $"{recipeId} {anchorSetName}[{index}] evidence is missing.");
+            Assert.True(File.Exists(path), $"{recipeId} {anchorSetName}[{index}] path does not exist: {anchor.Path}");
+            Assert.Contains(anchor.Evidence, File.ReadAllText(path), StringComparison.Ordinal);
+        }
     }
 
     private static string GetRepositoryRoot()

@@ -5,8 +5,13 @@ public sealed record DemoCookbookRecipe(
     DemoCookbookRecipeCategory Category,
     string Title,
     string Summary,
-    string CodePath,
-    string DemoPath,
-    string DocumentationPath,
-    string ProofMarker,
+    IReadOnlyList<DemoCookbookAnchor> CodeAnchors,
+    IReadOnlyList<DemoCookbookAnchor> DemoAnchors,
+    IReadOnlyList<DemoCookbookAnchor> DocumentationAnchors,
+    IReadOnlyList<string> ProofMarkers,
     string SupportBoundary);
+
+public sealed record DemoCookbookAnchor(
+    string Label,
+    string Path,
+    string Evidence);
