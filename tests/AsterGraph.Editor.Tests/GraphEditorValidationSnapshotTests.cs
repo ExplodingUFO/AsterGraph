@@ -315,6 +315,95 @@ public sealed class GraphEditorValidationSnapshotTests
         Assert.NotEqual(before.PanY, after.PanY);
     }
 
+    [Fact]
+    public void Queries_ProjectDefaultValueRepairOnlyWhenDefaultIsValid()
+    {
+        var session = CreateSession(CreateInvalidParameterValueDocument(), CreateParameterCatalog(defaultPrompt: "Describe the change."));
+        var issue = Assert.Single(session.Queries.GetValidationSnapshot().Issues);
+
+        var repairs = session.Queries.GetValidationIssueRepairActions(issue);
+
+        var repair = Assert.Single(repairs);
+        Assert.Equal("validation.parameter.reset-default", repair.ActionId);
+        Assert.Equal("node.parameter-invalid", repair.IssueCode);
+        Assert.Equal("parameter-001", repair.NodeId);
+        Assert.Equal("prompt", repair.ParameterKey);
+        Assert.Equal("Reset Prompt to its default value.", repair.PreviewText);
+    }
+
+    [Fact]
+    public void Commands_ApplyDefaultValueRepairUsesHistoryUndo()
+    {
+        var session = CreateSession(CreateInvalidParameterValueDocument(), CreateParameterCatalog(defaultPrompt: "Describe the change."));
+        var issue = Assert.Single(session.Queries.GetValidationSnapshot().Issues);
+        var repair = Assert.Single(session.Queries.GetValidationIssueRepairActions(issue));
+
+        Assert.True(session.Commands.TryApplyValidationRepair(repair));
+        Assert.Empty(session.Queries.GetValidationSnapshot().Issues);
+
+        session.Commands.Undo();
+
+        var restoredIssue = Assert.Single(session.Queries.GetValidationSnapshot().Issues);
+        Assert.Equal("node.parameter-invalid", restoredIssue.Code);
+    }
+
+    [Fact]
+    public void Queries_ProjectConnectionRemovalReconnectAndRouteResetForProvableConnectionIssue()
+    {
+        var session = CreateSession(CreateRoutedIncompatibleConnectionDocument(), CreateConnectionCatalog(targetTypeId: TextTypeId));
+        var issue = Assert.Single(session.Queries.GetValidationSnapshot().Issues);
+
+        var repairs = session.Queries.GetValidationIssueRepairActions(issue);
+
+        Assert.Contains(repairs, repair =>
+            repair.ActionId == "validation.connection.remove"
+            && repair.ConnectionId == "connection-001"
+            && repair.PreviewText == "Remove invalid connection connection-001.");
+        Assert.Contains(repairs, repair =>
+            repair.ActionId == "validation.connection.reconnect"
+            && repair.ConnectionId == "connection-001"
+            && repair.PreviewText == "Reconnect connection-001 from Source.Out.");
+        Assert.Contains(repairs, repair =>
+            repair.ActionId == "validation.connection.route.reset"
+            && repair.ConnectionId == "connection-001"
+            && repair.PreviewText == "Remove 1 persisted route vertex from connection-001.");
+    }
+
+    [Fact]
+    public void Commands_ApplyConnectionRepairUsesExistingUndo()
+    {
+        var session = CreateSession(CreateRoutedIncompatibleConnectionDocument(), CreateConnectionCatalog(targetTypeId: TextTypeId));
+        var issue = Assert.Single(session.Queries.GetValidationSnapshot().Issues);
+        var repair = session.Queries.GetValidationIssueRepairActions(issue)
+            .Single(candidate => candidate.ActionId == "validation.connection.remove");
+
+        Assert.True(session.Commands.TryApplyValidationRepair(repair));
+        Assert.Empty(session.Queries.CreateDocumentSnapshot().Connections);
+
+        session.Commands.Undo();
+
+        Assert.Single(session.Queries.CreateDocumentSnapshot().Connections);
+        Assert.Single(session.Queries.GetValidationSnapshot().Issues);
+    }
+
+    [Fact]
+    public void Commands_ApplyRouteResetRepairUsesExistingUndo()
+    {
+        var session = CreateSession(CreateRoutedIncompatibleConnectionDocument(), CreateConnectionCatalog(targetTypeId: TextTypeId));
+        var issue = Assert.Single(session.Queries.GetValidationSnapshot().Issues);
+        var repair = session.Queries.GetValidationIssueRepairActions(issue)
+            .Single(candidate => candidate.ActionId == "validation.connection.route.reset");
+
+        Assert.True(session.Commands.TryApplyValidationRepair(repair));
+        var resetConnection = Assert.Single(session.Queries.CreateDocumentSnapshot().Connections);
+        Assert.True(resetConnection.Presentation?.Route is null || resetConnection.Presentation.Route.IsEmpty);
+
+        session.Commands.Undo();
+
+        var restoredConnection = Assert.Single(session.Queries.CreateDocumentSnapshot().Connections);
+        Assert.Equal(1, restoredConnection.Presentation?.Route?.Vertices.Count);
+    }
+
     private static IGraphEditorSession CreateSession(GraphDocument document, INodeCatalog catalog)
         => AsterGraphEditorFactory.CreateSession(new AsterGraphEditorOptions
         {
@@ -380,7 +469,7 @@ public sealed class GraphEditorValidationSnapshotTests
         return catalog;
     }
 
-    private static INodeCatalog CreateParameterCatalog()
+    private static INodeCatalog CreateParameterCatalog(string? defaultPrompt = null)
     {
         var catalog = new NodeCatalog();
         catalog.RegisterDefinition(new NodeDefinition(
@@ -397,10 +486,66 @@ public sealed class GraphEditorValidationSnapshotTests
                     "Prompt",
                     TextTypeId,
                     ParameterEditorKind.Text,
-                    isRequired: true),
+                    isRequired: true,
+                    defaultValue: defaultPrompt),
             ]));
         return catalog;
     }
+
+    private static GraphDocument CreateInvalidParameterValueDocument()
+        => new(
+            "Parameter Repair",
+            "Invalid parameter repair coverage.",
+            [
+                new GraphNode(
+                    "parameter-001",
+                    "Parameter Node",
+                    "Tests",
+                    "Validation",
+                    "Requires a prompt.",
+                    new GraphPoint(120, 120),
+                    new GraphSize(220, 120),
+                    [],
+                    [],
+                    "#8B7BFF",
+                    ParameterDefinitionId,
+                    [new GraphParameterValue("prompt", TextTypeId, string.Empty)]),
+            ],
+            []);
+
+    private static GraphDocument CreateRoutedIncompatibleConnectionDocument()
+        => CreateCleanDocument() with
+        {
+            Nodes =
+            [
+                CreateSourceNode(),
+                new GraphNode(
+                    "target-001",
+                    "Target",
+                    "Tests",
+                    "Validation",
+                    "Consumes text.",
+                    new GraphPoint(420, 120),
+                    new GraphSize(220, 120),
+                    [new GraphPort("in", "In", PortDirection.Input, "string", "#F3B36B", TextTypeId)],
+                    [],
+                    "#F3B36B",
+                    TargetDefinitionId),
+            ],
+            Connections =
+            [
+                new GraphConnection(
+                    "connection-001",
+                    "source-001",
+                    "out",
+                    "target-001",
+                    "in",
+                    "Source to target",
+                    "#6AD5C4",
+                    Presentation: new GraphEdgePresentation(
+                        Route: new GraphConnectionRoute([new GraphPoint(300, 220)]))),
+            ],
+        };
 
     private static GraphDocument CreateScopedParameterDocument()
         => GraphDocument.CreateScoped(

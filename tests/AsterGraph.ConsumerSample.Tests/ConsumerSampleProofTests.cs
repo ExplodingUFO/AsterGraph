@@ -806,7 +806,7 @@ public sealed class ConsumerSampleProofTests
         var validationSummary = root.GetProperty("validationSummary");
         var validationFeedback = root.GetProperty("validationFeedback").EnumerateArray().ToArray();
 
-        Assert.Equal(4, root.GetProperty("schemaVersion").GetInt32());
+        Assert.Equal(5, root.GetProperty("schemaVersion").GetInt32());
         Assert.Equal("ConsumerSample.Avalonia", root.GetProperty("route").GetString());
         Assert.False(string.IsNullOrWhiteSpace(packageVersion));
         Assert.Equal($"v{packageVersion}", publicTag);
@@ -1200,6 +1200,77 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(proofLines, line => line == "GRAPH_VALIDATION_FEEDBACK_OK:True");
         Assert.Contains(proofLines, line => line == "GRAPH_FEEDBACK_FOCUS_TARGET_OK:True");
         Assert.Contains(proofLines, line => line == "GRAPH_READINESS_STATUS_OK:True");
+    }
+
+    [AvaloniaFact]
+    public void ConsumerSampleSupportBundle_WritesRepairEvidence()
+    {
+        var result = new ConsumerSampleProofResult(
+            HostMenuActionOk: true,
+            PluginContributionOk: true,
+            ParameterProjectionOk: true,
+            MetadataProjectionOk: true,
+            NodeSideAuthoringOk: true,
+            WindowCompositionOk: true,
+            TrustTransparencyOk: true,
+            CommandSurfaceOk: true,
+            StencilSurfaceOk: true,
+            ExportBreadthOk: true,
+            NodeQuickToolsOk: true,
+            EdgeQuickToolsOk: true,
+            HostedAccessibilityBaselineOk: true,
+            HostedAccessibilityFocusOk: true,
+            HostedAccessibilityCommandSurfaceOk: true,
+            HostedAccessibilityAuthoringSurfaceOk: true,
+            ParameterSnapshots: [],
+            StartupMs: 1,
+            InspectorProjectionMs: 1,
+            PluginScanMs: 1,
+            CommandLatencyMs: 1,
+            StencilSearchMs: 1,
+            CommandSurfaceRefreshMs: 1,
+            NodeToolProjectionMs: 1,
+            EdgeToolProjectionMs: 1,
+            CommandPaletteMs: 1,
+            ReadinessStatus: "Blocked",
+            ValidationSummary: new ConsumerSampleProofValidationSummary(1, 1, 0, 1, 0),
+            ValidationFeedback:
+            [
+                new ConsumerSampleProofValidationFeedback(
+                    "connection.incompatible-endpoint-types",
+                    "Error",
+                    "Connection is incompatible.",
+                    new ConsumerSampleProofFocusTarget("Connection", ConnectionId: "connection-001")),
+            ],
+            NodeCount: 2,
+            ConnectionCount: 1,
+            FeatureDescriptorIds: ["query.validation-snapshot"],
+            SupportBundlePayloadOk: true,
+            RepairEvidence:
+            [
+                new ConsumerSampleRepairEvidence(
+                    "connection.incompatible-endpoint-types",
+                    "connection-001",
+                    "validation.connection.remove",
+                    "available"),
+            ]);
+        var tempRoot = Path.Combine(Path.GetTempPath(), "AsterGraph.ConsumerSample.Tests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(tempRoot);
+        var bundlePath = Path.Combine(tempRoot, "repair-support-bundle.json");
+
+        ConsumerSampleSupportBundle.WriteProofBundle(
+            bundlePath,
+            result,
+            "consumer-sample --proof --support-bundle repair-support-bundle.json");
+
+        using var document = JsonDocument.Parse(File.ReadAllText(bundlePath));
+        var repairEvidence = document.RootElement.GetProperty("repairEvidence").EnumerateArray().ToArray();
+        var evidence = Assert.Single(repairEvidence);
+
+        Assert.Equal("connection.incompatible-endpoint-types", evidence.GetProperty("issueCode").GetString());
+        Assert.Equal("connection-001", evidence.GetProperty("target").GetString());
+        Assert.Equal("validation.connection.remove", evidence.GetProperty("action").GetString());
+        Assert.Equal("available", evidence.GetProperty("result").GetString());
     }
 
     [AvaloniaFact]

@@ -839,7 +839,7 @@ public partial class GraphEditorView : UserControl
         {
             _problemsRepairDiscoveryStatusText.Text = snapshot.Issues.Count == 0
                 ? string.Empty
-                : "Repair discovery is available from each problem menu; quick fixes are preview-only in this phase.";
+                : "Preview available from each problem menu; apply uses editor history.";
             _problemsRepairDiscoveryStatusText.IsVisible = snapshot.Issues.Count > 0;
         }
 
@@ -968,19 +968,48 @@ public partial class GraphEditorView : UserControl
 
     private ContextMenu CreateValidationIssueRepairDiscoveryMenu(GraphEditorValidationIssueSnapshot issue)
     {
-        var repairDiscoveryItem = new MenuItem
+        var repairs = Editor?.Session.Queries.GetValidationIssueRepairActions(issue) ?? [];
+        if (repairs.Count == 0)
         {
-            Name = $"{ResolveValidationProblemRowName(issue)}_RepairDiscovery",
-            Header = "Repair discovery",
-            IsEnabled = false,
-        };
-        ToolTip.SetTip(repairDiscoveryItem, "Quick fix discovery is visible here only; fixes are implemented in a later phase.");
+            var unavailableItem = new MenuItem
+            {
+                Name = $"{ResolveValidationProblemRowName(issue)}_RepairUnavailable",
+                Header = "No proven repair",
+                IsEnabled = false,
+            };
+            ToolTip.SetTip(unavailableItem, "No quick fix can be proven against the current graph state.");
+            return new ContextMenu
+            {
+                ItemsSource = new[]
+                {
+                    unavailableItem,
+                },
+            };
+        }
+
+        var repairItems = repairs.Select(repair =>
+        {
+            var item = new MenuItem
+            {
+                Name = $"{ResolveValidationProblemRowName(issue)}_Repair_{repair.ActionId}",
+                Header = repair.Label,
+                IsEnabled = true,
+            };
+            ToolTip.SetTip(item, repair.PreviewText);
+            item.Click += (_, _) =>
+            {
+                if (Editor?.Session.Commands.TryApplyValidationRepair(repair) == true)
+                {
+                    BuildValidationFeedback();
+                    RefreshCommandSurface();
+                }
+            };
+            return item;
+        }).ToArray();
+
         return new ContextMenu
         {
-            ItemsSource = new[]
-            {
-                repairDiscoveryItem,
-            },
+            ItemsSource = repairItems,
         };
     }
 

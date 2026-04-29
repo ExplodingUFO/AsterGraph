@@ -75,6 +75,14 @@ public interface IGraphEditorQueries
         => throw new NotSupportedException();
 
     /// <summary>
+    /// Gets previewable quick repair actions for one current validation issue.
+    /// </summary>
+    /// <param name="issue">Validation issue projected by <see cref="GetValidationSnapshot"/>.</param>
+    /// <returns>Actions that can be proven against the current graph state.</returns>
+    IReadOnlyList<GraphEditorValidationRepairActionSnapshot> GetValidationIssueRepairActions(GraphEditorValidationIssueSnapshot issue)
+        => [];
+
+    /// <summary>
     /// Creates a host-owned graph layout plan without mutating the current document.
     /// </summary>
     /// <param name="request">The requested layout scope, orientation, spacing, and pinned node hints.</param>

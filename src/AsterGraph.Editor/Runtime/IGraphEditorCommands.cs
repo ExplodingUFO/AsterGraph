@@ -569,6 +569,14 @@ public interface IGraphEditorCommands
         => throw new NotSupportedException();
 
     /// <summary>
+    /// Applies a validation repair action previously projected from the current graph state.
+    /// </summary>
+    /// <param name="repair">Repair action snapshot returned by <see cref="IGraphEditorQueries.GetValidationIssueRepairActions"/>.</param>
+    /// <returns><see langword="true"/> when the repair changed the graph through existing editor commands.</returns>
+    bool TryApplyValidationRepair(GraphEditorValidationRepairActionSnapshot repair)
+        => throw new NotSupportedException();
+
+    /// <summary>
     /// 保存当前工作区。
     /// </summary>
     void SaveWorkspace();

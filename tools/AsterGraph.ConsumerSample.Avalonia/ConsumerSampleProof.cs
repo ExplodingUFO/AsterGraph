@@ -171,6 +171,7 @@ public sealed record ConsumerSampleProofResult(
     bool WorkbenchAffordanceScopeBoundaryOk = true,
     ConsumerSampleWorkbenchAffordancePolish? WorkbenchAffordancePolish = null,
     bool MiniMapLightweightProjectionEvidenceOk = true,
+    IReadOnlyList<ConsumerSampleRepairEvidence>? RepairEvidence = null,
     int SelectedParameterProjectionCount = 0,
     int TotalParameterProjectionCount = 0)
 {
@@ -4470,6 +4471,12 @@ public sealed record ConsumerSampleProofFocusTarget(
     string? ConnectionId = null,
     string? EndpointId = null,
     string? ParameterKey = null);
+
+public sealed record ConsumerSampleRepairEvidence(
+    string IssueCode,
+    string Target,
+    string Action,
+    string Result);
 
 public static class ConsumerSampleHeadlessEnvironment
 {

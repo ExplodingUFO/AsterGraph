@@ -169,6 +169,31 @@ public sealed partial class GraphEditorSession
     public GraphEditorValidationSnapshot GetValidationSnapshot()
         => GraphEditorValidationSnapshotProjector.Project(CreateDocumentSnapshot(), _descriptorSupport);
 
+    public IReadOnlyList<GraphEditorValidationRepairActionSnapshot> GetValidationIssueRepairActions(GraphEditorValidationIssueSnapshot issue)
+    {
+        ArgumentNullException.ThrowIfNull(issue);
+
+        var document = CreateDocumentSnapshot();
+        var scope = document.GraphScopes.FirstOrDefault(candidate => string.Equals(candidate.Id, issue.ScopeId, StringComparison.Ordinal));
+        if (scope is null)
+        {
+            return [];
+        }
+
+        var repairs = new List<GraphEditorValidationRepairActionSnapshot>();
+        if (string.Equals(issue.Code, "node.parameter-invalid", StringComparison.Ordinal))
+        {
+            AddParameterDefaultRepair(issue, scope, repairs);
+        }
+
+        if (!string.IsNullOrWhiteSpace(issue.ConnectionId))
+        {
+            AddConnectionRepairs(issue, scope, repairs);
+        }
+
+        return repairs;
+    }
+
     public GraphLayoutPlan CreateLayoutPlan(GraphLayoutRequest request)
     {
         ArgumentNullException.ThrowIfNull(request);
@@ -369,6 +394,98 @@ public sealed partial class GraphEditorSession
 
     private GraphEditorPendingConnectionSnapshot CreatePendingConnectionSnapshot()
         => _host.GetPendingConnectionSnapshot();
+
+    private void AddParameterDefaultRepair(
+        GraphEditorValidationIssueSnapshot issue,
+        GraphScope scope,
+        List<GraphEditorValidationRepairActionSnapshot> repairs)
+    {
+        if (string.IsNullOrWhiteSpace(issue.NodeId)
+            || string.IsNullOrWhiteSpace(issue.ParameterKey)
+            || _descriptorSupport is null)
+        {
+            return;
+        }
+
+        var node = scope.Nodes.FirstOrDefault(candidate => string.Equals(candidate.Id, issue.NodeId, StringComparison.Ordinal));
+        if (node?.DefinitionId is null
+            || !_descriptorSupport.NodeCatalog.TryGetDefinition(node.DefinitionId, out var definition)
+            || definition is null)
+        {
+            return;
+        }
+
+        var parameter = definition.Parameters.FirstOrDefault(candidate => string.Equals(candidate.Key, issue.ParameterKey, StringComparison.Ordinal));
+        if (parameter is null || parameter.Constraints.IsReadOnly)
+        {
+            return;
+        }
+
+        var normalized = NodeParameterValueAdapter.NormalizeValue(parameter, parameter.DefaultValue);
+        if (!normalized.IsValid)
+        {
+            return;
+        }
+
+        repairs.Add(new GraphEditorValidationRepairActionSnapshot(
+            "validation.parameter.reset-default",
+            $"Reset {parameter.DisplayName} to default",
+            $"Reset {parameter.DisplayName} to its default value.",
+            issue.Code,
+            issue.ScopeId,
+            node.Id,
+            ParameterKey: parameter.Key));
+    }
+
+    private static void AddConnectionRepairs(
+        GraphEditorValidationIssueSnapshot issue,
+        GraphScope scope,
+        List<GraphEditorValidationRepairActionSnapshot> repairs)
+    {
+        var connection = scope.Connections.FirstOrDefault(candidate => string.Equals(candidate.Id, issue.ConnectionId, StringComparison.Ordinal));
+        if (connection is null)
+        {
+            return;
+        }
+
+        repairs.Add(new GraphEditorValidationRepairActionSnapshot(
+            "validation.connection.remove",
+            "Remove invalid connection",
+            $"Remove invalid connection {connection.Id}.",
+            issue.Code,
+            issue.ScopeId,
+            ConnectionId: connection.Id,
+            EndpointId: issue.EndpointId));
+
+        var sourceNode = scope.Nodes.FirstOrDefault(candidate => string.Equals(candidate.Id, connection.SourceNodeId, StringComparison.Ordinal));
+        var sourcePort = sourceNode?.Outputs.FirstOrDefault(candidate => string.Equals(candidate.Id, connection.SourcePortId, StringComparison.Ordinal));
+        if (sourceNode is not null && sourcePort is not null)
+        {
+            repairs.Add(new GraphEditorValidationRepairActionSnapshot(
+                "validation.connection.reconnect",
+                "Reconnect from source",
+                $"Reconnect {connection.Id} from {sourceNode.Title}.{sourcePort.Label}.",
+                issue.Code,
+                issue.ScopeId,
+                sourceNode.Id,
+                connection.Id,
+                sourcePort.Id));
+        }
+
+        var routeVertexCount = connection.Presentation?.Route?.Vertices.Count ?? 0;
+        if (routeVertexCount == 1)
+        {
+            repairs.Add(new GraphEditorValidationRepairActionSnapshot(
+                "validation.connection.route.reset",
+                "Reset route vertex",
+                $"Remove 1 persisted route vertex from {connection.Id}.",
+                issue.Code,
+                issue.ScopeId,
+                ConnectionId: connection.Id,
+                EndpointId: issue.EndpointId,
+                RouteVertexCount: routeVertexCount));
+        }
+    }
 
     private bool ResolveSelectedNodesAndSharedDefinition(
         out IReadOnlyList<GraphNode> selectedNodes,

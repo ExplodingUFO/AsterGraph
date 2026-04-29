@@ -241,7 +241,7 @@ public sealed class GraphEditorViewTests
     }
 
     [AvaloniaFact]
-    public void ProblemsPanel_ExposesRepairDiscoveryAffordancesWithoutQuickFixExecution()
+    public void ProblemsPanel_ExposesRepairPreviewAndApplyAffordance()
     {
         var editor = CreateValidationFeedbackEditor();
         var window = CreateWindow(new GraphEditorView
@@ -255,13 +255,19 @@ public sealed class GraphEditorViewTests
             "PART_ProblemsIssue_connection-001_connection.incompatible-endpoint-types_in");
 
         Assert.True(repairStatus.IsVisible);
-        Assert.Contains("preview-only", repairStatus.Text, StringComparison.Ordinal);
+        Assert.Contains("Preview available", repairStatus.Text, StringComparison.Ordinal);
 
         Assert.NotNull(problemRow.ContextMenu);
-        var repairItem = Assert.Single(problemRow.ContextMenu.ItemsSource!.OfType<MenuItem>());
-        Assert.Equal("Repair discovery", repairItem.Header);
-        Assert.False(repairItem.IsEnabled);
-        Assert.Contains("later phase", Assert.IsType<string>(ToolTip.GetTip(repairItem)), StringComparison.Ordinal);
+        var repairItems = problemRow.ContextMenu.ItemsSource!.OfType<MenuItem>().ToArray();
+        Assert.Contains(repairItems, item =>
+            string.Equals(item.Header?.ToString(), "Remove invalid connection", StringComparison.Ordinal)
+            && item.IsEnabled
+            && Assert.IsType<string>(ToolTip.GetTip(item)).Contains("Remove invalid connection connection-001.", StringComparison.Ordinal));
+
+        var removeItem = repairItems.Single(item => string.Equals(item.Name, "PART_ProblemsIssue_connection-001_connection.incompatible-endpoint-types_in_Repair_validation.connection.remove", StringComparison.Ordinal));
+        removeItem.RaiseEvent(new RoutedEventArgs(MenuItem.ClickEvent));
+
+        Assert.Empty(editor.Session.Queries.CreateDocumentSnapshot().Connections);
     }
 
     [AvaloniaFact]

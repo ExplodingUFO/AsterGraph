@@ -22,7 +22,7 @@ internal static class ConsumerSampleSupportBundle
 
         var packageVersion = GetPackageVersion();
         var document = new ConsumerSampleSupportBundleDocument(
-            SchemaVersion: 4,
+            SchemaVersion: 5,
             PackageVersion: packageVersion,
             PublicTag: $"v{packageVersion}",
             Route: "ConsumerSample.Avalonia",
@@ -45,6 +45,7 @@ internal static class ConsumerSampleSupportBundle
             ReadinessStatus: result.SupportReadinessStatus,
             ValidationSummary: result.SupportValidationSummary,
             ValidationFeedback: result.SupportValidationFeedback,
+            RepairEvidence: result.RepairEvidence ?? [],
             FeatureDescriptors: result.FeatureDescriptorIds ?? [],
             RecentsFavorites: result.RecentsFavoritesEvidence ?? [],
             WorkbenchFrictionEvidence: result.WorkbenchFrictionEvidence ?? [],
@@ -87,6 +88,7 @@ internal static class ConsumerSampleSupportBundle
             "readinessStatus",
             "validationSummary",
             "validationFeedback",
+            "repairEvidence",
             "featureDescriptors",
             "recentsFavorites",
             "workbenchFrictionEvidence",
@@ -146,6 +148,23 @@ internal static class ConsumerSampleSupportBundle
                 || !focusTarget.TryGetProperty("kind", out _))
             {
                 throw new InvalidOperationException("Support bundle schema validation failed: validationFeedback rows require code, severity, message, and focusTarget.kind.");
+            }
+        }
+
+        var repairEvidence = root.GetProperty("repairEvidence");
+        if (repairEvidence.ValueKind != JsonValueKind.Array)
+        {
+            throw new InvalidOperationException("Support bundle schema validation failed: repairEvidence must be an array.");
+        }
+
+        foreach (var evidence in repairEvidence.EnumerateArray())
+        {
+            if (!evidence.TryGetProperty("issueCode", out _)
+                || !evidence.TryGetProperty("target", out _)
+                || !evidence.TryGetProperty("action", out _)
+                || !evidence.TryGetProperty("result", out _))
+            {
+                throw new InvalidOperationException("Support bundle schema validation failed: repairEvidence rows require issueCode, target, action, and result.");
             }
         }
 
@@ -216,6 +235,7 @@ internal static class ConsumerSampleSupportBundle
         string ReadinessStatus,
         ConsumerSampleProofValidationSummary ValidationSummary,
         IReadOnlyList<ConsumerSampleProofValidationFeedback> ValidationFeedback,
+        IReadOnlyList<ConsumerSampleRepairEvidence> RepairEvidence,
         IReadOnlyList<string> FeatureDescriptors,
         IReadOnlyList<ConsumerSampleRecentsFavoritesEvidence> RecentsFavorites,
         IReadOnlyList<ConsumerSampleWorkbenchFrictionEvidence> WorkbenchFrictionEvidence,

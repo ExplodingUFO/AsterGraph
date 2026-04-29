@@ -671,6 +671,42 @@ public sealed partial class GraphEditorSession
     public void CenterViewAt(GraphPoint worldPoint, bool updateStatus = true)
         => Execute("viewport.center", () => _host.CenterViewAt(worldPoint, updateStatus));
 
+    public bool TryApplyValidationRepair(GraphEditorValidationRepairActionSnapshot repair)
+    {
+        ArgumentNullException.ThrowIfNull(repair);
+
+        var currentActions = GetValidationIssueRepairActions(new GraphEditorValidationIssueSnapshot(
+                repair.IssueCode,
+                GraphEditorValidationIssueSeverity.Error,
+                repair.PreviewText,
+                repair.ScopeId,
+                repair.NodeId,
+                repair.ConnectionId,
+                repair.EndpointId,
+                parameterKey: repair.ParameterKey))
+            .Where(candidate => string.Equals(candidate.ActionId, repair.ActionId, StringComparison.Ordinal))
+            .ToList();
+        if (currentActions.Count == 0 || !TryNavigateToValidationScope(repair.ScopeId))
+        {
+            return false;
+        }
+
+        var applied = repair.ActionId switch
+        {
+            "validation.parameter.reset-default" => TryApplyParameterDefaultRepair(repair),
+            "validation.connection.remove" => TryApplyConnectionRemovalRepair(repair),
+            "validation.connection.reconnect" => TryApplyConnectionReconnectRepair(repair),
+            "validation.connection.route.reset" => TryApplyRouteResetRepair(repair),
+            _ => false,
+        };
+        if (applied)
+        {
+            PublishCommandExecuted("validation.repair.apply");
+        }
+
+        return applied;
+    }
+
     public void SaveWorkspace()
         => Execute("workspace.save", _host.SaveWorkspace);
 
@@ -707,6 +743,56 @@ public sealed partial class GraphEditorSession
         var result = action();
         PublishCommandExecuted(commandId);
         return result;
+    }
+
+    private bool TryApplyParameterDefaultRepair(GraphEditorValidationRepairActionSnapshot repair)
+    {
+        if (string.IsNullOrWhiteSpace(repair.NodeId)
+            || string.IsNullOrWhiteSpace(repair.ParameterKey)
+            || _descriptorSupport is null)
+        {
+            return false;
+        }
+
+        var node = _host.CreateActiveScopeDocumentSnapshot()
+            .Nodes
+            .FirstOrDefault(candidate => string.Equals(candidate.Id, repair.NodeId, StringComparison.Ordinal));
+        if (node?.DefinitionId is null
+            || !_descriptorSupport.NodeCatalog.TryGetDefinition(node.DefinitionId, out var definition)
+            || definition is null)
+        {
+            return false;
+        }
+
+        var parameter = definition.Parameters.FirstOrDefault(candidate => string.Equals(candidate.Key, repair.ParameterKey, StringComparison.Ordinal));
+        return parameter is not null
+            && TrySetNodeParameterValue(repair.NodeId, repair.ParameterKey, parameter.DefaultValue);
+    }
+
+    private bool TryApplyConnectionRemovalRepair(GraphEditorValidationRepairActionSnapshot repair)
+    {
+        if (string.IsNullOrWhiteSpace(repair.ConnectionId)
+            || _host.CreateActiveScopeDocumentSnapshot().Connections.All(connection => !string.Equals(connection.Id, repair.ConnectionId, StringComparison.Ordinal)))
+        {
+            return false;
+        }
+
+        DeleteConnection(repair.ConnectionId);
+        return true;
+    }
+
+    private bool TryApplyConnectionReconnectRepair(GraphEditorValidationRepairActionSnapshot repair)
+        => !string.IsNullOrWhiteSpace(repair.ConnectionId)
+        && TryReconnectConnection(repair.ConnectionId);
+
+    private bool TryApplyRouteResetRepair(GraphEditorValidationRepairActionSnapshot repair)
+    {
+        if (string.IsNullOrWhiteSpace(repair.ConnectionId) || repair.RouteVertexCount != 1)
+        {
+            return false;
+        }
+
+        return TryRemoveConnectionRouteVertex(repair.ConnectionId, 0);
     }
 
 }
