@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using AsterGraph.Core.Models;
 
 namespace AsterGraph.Editor.Runtime;
@@ -5,6 +6,7 @@ namespace AsterGraph.Editor.Runtime;
 /// <summary>
 /// Measured node-surface thresholds used by hosted UI layers to keep resizing, disclosure, and rendering aligned.
 /// </summary>
+[EditorBrowsable(EditorBrowsableState.Never)]
 public sealed record GraphEditorNodeSurfaceMeasurement(
     GraphSize BaselineSize,
     double HeightToRevealAdditionalInputs,

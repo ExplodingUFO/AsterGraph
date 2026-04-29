@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using Avalonia;
 using Avalonia.Automation;
 using Avalonia.Controls;
@@ -9,6 +10,7 @@ namespace AsterGraph.Avalonia.Presentation;
 /// <summary>
 /// Small helper surface for stock-like focus and accessibility semantics.
 /// </summary>
+[EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class GraphPresentationSemantics
 {
     /// <summary>

@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using AsterGraph.Abstractions.Identifiers;
 
 namespace AsterGraph.Core.Models;
@@ -28,11 +29,13 @@ public sealed record GraphPort(
     /// <summary>
     /// Stable handle identifier used by hosted presenters and connection geometry.
     /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public string HandleId => Id;
 
     /// <summary>
     /// Short authoring hint for connection search and hover affordances.
     /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public string ConnectionHint
         => string.IsNullOrWhiteSpace(GroupName)
             ? $"{Label} ({TypeId?.Value ?? DataType})"

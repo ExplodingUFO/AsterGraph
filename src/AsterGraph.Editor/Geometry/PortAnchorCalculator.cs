@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using AsterGraph.Core.Models;
 
 namespace AsterGraph.Editor.Geometry;
@@ -5,6 +6,7 @@ namespace AsterGraph.Editor.Geometry;
 /// <summary>
 /// Calculates node port anchor positions from node bounds and port ordering.
 /// </summary>
+[EditorBrowsable(EditorBrowsableState.Never)]
 public static class PortAnchorCalculator
 {
     private const double HeaderHeight = 60;

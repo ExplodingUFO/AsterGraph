@@ -1,3 +1,5 @@
+using System.ComponentModel;
+
 namespace AsterGraph.Editor.ViewModels;
 
 /// <summary>
@@ -53,6 +55,7 @@ public sealed record GraphEditorInteractionFocusState(
     }
 }
 
+[EditorBrowsable(EditorBrowsableState.Never)]
 public enum GraphEditorConnectionFocusKind
 {
     None = 0,

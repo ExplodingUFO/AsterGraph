@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using System.Linq;
 
 namespace AsterGraph.Core.Models;
@@ -154,6 +155,7 @@ public sealed record GraphDocument
             normalizedScopes);
     }
 
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public IReadOnlyList<GraphScope> GetGraphScopes()
         => GraphScopes;
 

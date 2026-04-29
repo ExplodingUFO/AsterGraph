@@ -1,8 +1,10 @@
 using System;
+using System.ComponentModel;
 
 namespace AsterGraph.Editor.Scene;
 
 [Flags]
+[EditorBrowsable(EditorBrowsableState.Never)]
 public enum GraphEditorInputModifiers
 {
     None = 0,
@@ -12,6 +14,7 @@ public enum GraphEditorInputModifiers
     Meta = 1 << 3,
 }
 
+[EditorBrowsable(EditorBrowsableState.Never)]
 public enum GraphEditorPointerPressRouteKind
 {
     Ignore,
@@ -19,6 +22,7 @@ public enum GraphEditorPointerPressRouteKind
     BeginCanvasSelection,
 }
 
+[EditorBrowsable(EditorBrowsableState.Never)]
 public readonly record struct GraphEditorPointerPressRoute(
     GraphEditorPointerPressRouteKind Kind,
     bool CancelPendingConnection)
@@ -26,6 +30,7 @@ public readonly record struct GraphEditorPointerPressRoute(
     public static GraphEditorPointerPressRoute Ignore { get; } = new(GraphEditorPointerPressRouteKind.Ignore, CancelPendingConnection: false);
 }
 
+[EditorBrowsable(EditorBrowsableState.Never)]
 public readonly record struct GraphEditorPointerInputContext(
     bool IsAlreadyHandled,
     bool IsLeftButtonPressed,
@@ -34,6 +39,7 @@ public readonly record struct GraphEditorPointerInputContext(
     bool EnableAltLeftDragPanning,
     bool HasPendingConnection);
 
+[EditorBrowsable(EditorBrowsableState.Never)]
 public static class GraphEditorPointerInputRouter
 {
     public static GraphEditorPointerPressRoute RoutePressed(GraphEditorPointerInputContext context)

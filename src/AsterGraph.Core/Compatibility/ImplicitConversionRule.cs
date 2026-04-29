@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using AsterGraph.Abstractions.Identifiers;
 
 namespace AsterGraph.Core.Compatibility;
@@ -9,6 +10,7 @@ namespace AsterGraph.Core.Compatibility;
 /// <param name="SourceType">Source port type identifier.</param>
 /// <param name="TargetType">Target port type identifier.</param>
 /// <param name="ConversionId">Stable conversion identifier emitted into persisted connections.</param>
+[EditorBrowsable(EditorBrowsableState.Never)]
 public sealed record ImplicitConversionRule(
     PortTypeId SourceType,
     PortTypeId TargetType,

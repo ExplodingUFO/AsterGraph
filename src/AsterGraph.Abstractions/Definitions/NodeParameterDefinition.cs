@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using AsterGraph.Abstractions.Identifiers;
 
 namespace AsterGraph.Abstractions.Definitions;
@@ -127,5 +128,6 @@ public sealed record NodeParameterDefinition
     /// <summary>
     /// Parameter metadata contract version. Bumps when the vocabulary shape changes.
     /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public int ContractVersion { get; }
 }

@@ -1,13 +1,16 @@
+using System.ComponentModel;
 using AsterGraph.Core.Models;
 
 namespace AsterGraph.Editor.Scene;
 
+[EditorBrowsable(EditorBrowsableState.Never)]
 public enum GraphEditorSceneSurfaceKind
 {
     Node,
     Group,
 }
 
+[EditorBrowsable(EditorBrowsableState.Never)]
 public enum GraphEditorSceneResizeHandleKind
 {
     LeftEdge,
@@ -17,10 +20,12 @@ public enum GraphEditorSceneResizeHandleKind
     BottomRightCorner,
 }
 
+[EditorBrowsable(EditorBrowsableState.Never)]
 public readonly record struct GraphEditorSceneResizeHit(
     GraphEditorSceneSurfaceKind SurfaceKind,
     GraphEditorSceneResizeHandleKind Handle);
 
+[EditorBrowsable(EditorBrowsableState.Never)]
 public sealed record GraphEditorSceneResizeHitTestProfile(
     GraphEditorSceneSurfaceKind SurfaceKind,
     double EdgeThickness,
@@ -52,6 +57,7 @@ public sealed record GraphEditorSceneResizeHitTestProfile(
         IncludeBottomRightCorner: false);
 }
 
+[EditorBrowsable(EditorBrowsableState.Never)]
 public static class GraphEditorSceneResizeHitTester
 {
     public static GraphEditorSceneResizeHit? TryHit(

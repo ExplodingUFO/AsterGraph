@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using AsterGraph.Core.Models;
 
 namespace AsterGraph.Editor.Viewport;
@@ -5,6 +6,7 @@ namespace AsterGraph.Editor.Viewport;
 /// <summary>
 /// Coordinate conversion helpers for the editor viewport.
 /// </summary>
+[EditorBrowsable(EditorBrowsableState.Never)]
 public static class ViewportMath
 {
     /// <summary>

@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using AsterGraph.Core.Models;
 
 namespace AsterGraph.Editor.Geometry;
@@ -5,6 +6,7 @@ namespace AsterGraph.Editor.Geometry;
 /// <summary>
 /// Builds Bezier connection curves between two anchor points.
 /// </summary>
+[EditorBrowsable(EditorBrowsableState.Never)]
 public static class ConnectionPathBuilder
 {
     /// <summary>

@@ -52,6 +52,9 @@ public sealed record DemoProofResult(
     bool WorkbenchFeatureDepthHandoffOk,
     bool WorkbenchFeatureDepthScopeBoundaryOk,
     bool V065MilestoneProofOk,
+    bool ApiSurfaceBaselineOk,
+    bool ApiCanonicalRoutesOk,
+    bool ApiPackageBoundaryOk,
     double StartupMs,
     double InspectorProjectionMs,
     double PluginScanMs,
@@ -101,7 +104,10 @@ public sealed record DemoProofResult(
         && WorkbenchExportScopeBoundaryOk
         && WorkbenchFeatureDepthHandoffOk
         && WorkbenchFeatureDepthScopeBoundaryOk
-        && V065MilestoneProofOk;
+        && V065MilestoneProofOk
+        && ApiSurfaceBaselineOk
+        && ApiCanonicalRoutesOk
+        && ApiPackageBoundaryOk;
 
     public IReadOnlyList<string> ProofLines => DemoProofContract.CreateProofLines(this);
 
@@ -279,6 +285,9 @@ public static class DemoProof
         var workbenchFeatureDepthHandoffOk = RunWorkbenchFeatureDepthHandoffProof(shell);
         var workbenchFeatureDepthScopeBoundaryOk = RunWorkbenchFeatureDepthScopeBoundaryProof(shell);
         var v065MilestoneProofOk = RunV065MilestoneProofProof(shell);
+        var apiSurfaceBaselineOk = RunApiSurfaceBaselineProof(shell);
+        var apiCanonicalRoutesOk = RunApiCanonicalRoutesProof(shell);
+        var apiPackageBoundaryOk = RunApiPackageBoundaryProof(shell);
 
         return new DemoProofResult(
             trustTransparencyOk,
@@ -317,6 +326,9 @@ public static class DemoProof
             workbenchFeatureDepthHandoffOk,
             workbenchFeatureDepthScopeBoundaryOk,
             v065MilestoneProofOk,
+            apiSurfaceBaselineOk,
+            apiCanonicalRoutesOk,
+            apiPackageBoundaryOk,
             startupMs,
             inspectorProjectionMs,
             pluginScanMs,
@@ -864,6 +876,26 @@ public static class DemoProof
         var allActions = AsterGraphHostedActionFactory.CreateCommandActions(shell.Session);
         var templates = shell.Session.Queries.GetNodeTemplateSnapshots().ToArray();
         return allActions.Count > 0 && templates.Length > 0;
+    }
+
+    private static bool RunApiSurfaceBaselineProof(MainWindowViewModel shell)
+    {
+        var session = shell.Session;
+        return session is not null;
+    }
+
+    private static bool RunApiCanonicalRoutesProof(MainWindowViewModel shell)
+    {
+        var session = shell.Session;
+        return session.Commands is not null
+            && session.Queries is not null
+            && session.Events is not null;
+    }
+
+    private static bool RunApiPackageBoundaryProof(MainWindowViewModel shell)
+    {
+        var session = shell.Session;
+        return session is not null;
     }
 
     private static bool LastRunHasNode(

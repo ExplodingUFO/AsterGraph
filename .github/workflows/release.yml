@@ -182,7 +182,10 @@ jobs:
               'WORKBENCH_EXPORT_SCOPE_BOUNDARY_OK',
               'WORKBENCH_FEATURE_DEPTH_HANDOFF_OK',
               'WORKBENCH_FEATURE_DEPTH_SCOPE_BOUNDARY_OK',
-              'V065_MILESTONE_PROOF_OK'
+              'V065_MILESTONE_PROOF_OK',
+              'API_SURFACE_BASELINE_OK',
+              'API_CANONICAL_ROUTES_OK',
+              'API_PACKAGE_BOUNDARY_OK'
             )) {
               $markerLine = Select-String -Path 'artifacts/proof/demo-proof.txt' -Pattern $markerId | Select-Object -First 1
               if ($markerLine) {

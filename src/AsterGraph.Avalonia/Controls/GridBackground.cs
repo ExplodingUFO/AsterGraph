@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
@@ -9,6 +10,7 @@ namespace AsterGraph.Avalonia.Controls;
 /// <summary>
 /// Renders the graph canvas background grid from editor style and viewport state.
 /// </summary>
+[EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class GridBackground : Control
 {
     /// <summary>

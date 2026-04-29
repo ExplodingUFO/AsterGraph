@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using AsterGraph.Core.Models;
 
 namespace AsterGraph.Editor.Geometry;
@@ -9,6 +10,7 @@ namespace AsterGraph.Editor.Geometry;
 /// <param name="Control1">First control point.</param>
 /// <param name="Control2">Second control point.</param>
 /// <param name="End">Curve end point.</param>
+[EditorBrowsable(EditorBrowsableState.Never)]
 public readonly record struct BezierConnection(
     GraphPoint Start,
     GraphPoint Control1,

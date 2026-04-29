@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using AsterGraph.Abstractions.Identifiers;
 
 namespace AsterGraph.Abstractions.Definitions;
@@ -51,6 +52,7 @@ public sealed record PortDefinition
     /// <summary>
     /// Stable handle identifier used by hosted presenters and connection geometry.
     /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public string HandleId => Key;
 
     /// <summary>
@@ -91,6 +93,7 @@ public sealed record PortDefinition
     /// <summary>
     /// Short authoring hint for connection search and hover affordances.
     /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public string ConnectionHint
         => string.IsNullOrWhiteSpace(GroupName)
             ? $"{DisplayName} ({TypeId.Value})"

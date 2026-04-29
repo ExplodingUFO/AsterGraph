@@ -1,8 +1,11 @@
+using System.ComponentModel;
+
 namespace AsterGraph.Editor.Runtime;
 
 /// <summary>
 /// Represents one stable command argument.
 /// </summary>
+[EditorBrowsable(EditorBrowsableState.Never)]
 public sealed record GraphEditorCommandArgumentSnapshot
 {
     public GraphEditorCommandArgumentSnapshot(string name, string value)

@@ -40,6 +40,9 @@ public static class DemoProofContract
         "WORKBENCH_FEATURE_DEPTH_HANDOFF_OK",
         "WORKBENCH_FEATURE_DEPTH_SCOPE_BOUNDARY_OK",
         "V065_MILESTONE_PROOF_OK",
+        "API_SURFACE_BASELINE_OK",
+        "API_CANONICAL_ROUTES_OK",
+        "API_PACKAGE_BOUNDARY_OK",
     ];
 
     public static IReadOnlyList<string> NativeMetricNames { get; } =
@@ -98,6 +101,9 @@ public static class DemoProofContract
             $"WORKBENCH_FEATURE_DEPTH_HANDOFF_OK:{result.WorkbenchFeatureDepthHandoffOk}",
             $"WORKBENCH_FEATURE_DEPTH_SCOPE_BOUNDARY_OK:{result.WorkbenchFeatureDepthScopeBoundaryOk}",
             $"V065_MILESTONE_PROOF_OK:{result.V065MilestoneProofOk}",
+            $"API_SURFACE_BASELINE_OK:{result.ApiSurfaceBaselineOk}",
+            $"API_CANONICAL_ROUTES_OK:{result.ApiCanonicalRoutesOk}",
+            $"API_PACKAGE_BOUNDARY_OK:{result.ApiPackageBoundaryOk}",
         ];
     }
 

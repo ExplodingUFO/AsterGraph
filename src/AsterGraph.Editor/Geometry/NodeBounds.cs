@@ -1,3 +1,5 @@
+using System.ComponentModel;
+
 namespace AsterGraph.Editor.Geometry;
 
 /// <summary>
@@ -7,4 +9,5 @@ namespace AsterGraph.Editor.Geometry;
 /// <param name="Y">Top coordinate.</param>
 /// <param name="Width">Node width.</param>
 /// <param name="Height">Node height.</param>
+[EditorBrowsable(EditorBrowsableState.Never)]
 public readonly record struct NodeBounds(double X, double Y, double Width, double Height);
