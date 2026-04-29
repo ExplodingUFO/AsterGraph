@@ -105,7 +105,7 @@ For new runtime-facing work, anchor on the first route. The Avalonia route is th
 - [`tools/AsterGraph.ConsumerSample.Avalonia`](./tools/AsterGraph.ConsumerSample.Avalonia/README.md) = realistic hosted-UI consumer sample between `HelloWorld.Avalonia` and `Demo`
 - [`tools/AsterGraph.HostSample`](./tools/AsterGraph.HostSample/) = proof harness for runtime-only and hosted-UI validation, not the onboarding step
 - [`tools/AsterGraph.PackageSmoke`](./tools/AsterGraph.PackageSmoke/) = packed-package proof
-- [`tools/AsterGraph.ScaleSmoke`](./tools/AsterGraph.ScaleSmoke/) = defended baseline/large proof, conservative defended 5000-node stress raster export proof, and history/state proof
+- [`tools/AsterGraph.ScaleSmoke`](./tools/AsterGraph.ScaleSmoke/) = defended baseline/large/stress performance, authoring, SVG/raster export, reload, and history/state proof; `xlarge` remains telemetry-only
 - [`tools/AsterGraph.PluginTool`](./tools/AsterGraph.PluginTool/) = cross-platform CLI for plugin validation, trust evidence, and hash inspection
 - [`templates/astergraph-avalonia`](./templates/astergraph-avalonia/) = `dotnet new astergraph-avalonia` native Avalonia starter
 - [`templates/astergraph-plugin`](./templates/astergraph-plugin/) = `dotnet new astergraph-plugin` trusted plugin starter

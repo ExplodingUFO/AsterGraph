@@ -146,9 +146,9 @@
 - GA prep checklist：adoption evidence、API drift、support boundary 和 release proof gate 都复核通过后，才允许写 GA 或 `1.0` 级别语言。
 - Release-candidate proof handoff markers：`API_RELEASE_CANDIDATE_PROOF_OK:True`、`PUBLIC_API_GUIDANCE_HANDOFF_OK:True` 和 `RELEASE_BOUNDARY_STABILITY_OK:True`。
 - v0.61 API stabilization markers：`PUBLIC_API_DIFF_GATE_OK:True`、`PUBLIC_API_USAGE_GUIDANCE_OK:True` 和 `PUBLIC_API_STABILITY_SCOPE_OK:True`。
-- 当前 `0.xx` alpha/beta hardening 线命名为 `Adoption Readiness / Release Candidate Hygiene`：先把公开推荐、API drift、support boundary 和 release proof gate 对齐，再写 release-candidate、GA 或 `1.0` 级别语言；`ADOPTION_RECOMMENDATION_CURRENT_OK:True`、`CLAIM_HYGIENE_BOUNDARY_OK:True`、`RELEASE_READINESS_GATE_OK:True`、`SUPPORT_BOUNDARY_GATE_OK:True` 和 `BETA_CLAIM_ALIGNMENT_OK:True` 是 proof handoff markers
+- 当前 `0.xx` alpha/beta hardening 线命名为 `Repairability, Help, and Review UX`：先把 validation repair、contextual help、support-bundle evidence、support boundary 和 release proof gate 对齐，再写 release-candidate、GA 或 `1.0` 级别语言；`ADOPTION_RECOMMENDATION_CURRENT_OK:True`、`CLAIM_HYGIENE_BOUNDARY_OK:True`、`RELEASE_READINESS_GATE_OK:True`、`SUPPORT_BOUNDARY_GATE_OK:True` 和 `BETA_CLAIM_ALIGNMENT_OK:True` 仍是 boundary proof handoff markers
 - v0.61 adoption/API stabilization handoff 汇总 refreshed adopter intake、public API diff/guidance gate 和 release-boundary wording，并且不扩大 support scope：`ADOPTION_API_STABILIZATION_HANDOFF_OK:True`、`ADOPTION_API_SCOPE_BOUNDARY_OK:True` 和 `V061_MILESTONE_PROOF_OK:True`
-- 下一条推荐工作线：v0.64 做 adopter-driven Workbench polish，从真实使用里摩擦最大的 hosted workflow 开始，继续复用现有 hosted workbench seams，不扩大 WPF parity、marketplace、sandboxing、macro/query、execution-engine 或 GA scope。
+- 下一条推荐工作线：v0.67 做 Repairability, Help, and Review UX，从 validation repair 和 contextual help 闭环开始，继续复用现有 hosted workbench seams，不扩大 WPF parity、marketplace、sandboxing、macro/query、execution-engine 或 GA scope。
 - 维护者种子预演证据不计入 3 到 5 的门槛
 - 如果新的报告放不进上面的“已证明”或“受边界约束”两类，就走 [Adoption Feedback Loop](./adoption-feedback.md) 和 [Beta Support Bundle](./support-bundle.md)，不要临时扩大公开声明；在满足 3 到 5 条真实外部报告门禁前，claim-expansion status 只作为分诊字段
 

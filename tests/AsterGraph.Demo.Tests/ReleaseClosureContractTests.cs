@@ -86,7 +86,7 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("external capability readiness gate", notes, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("[Project Status](./docs/en/project-status.md)", notes, StringComparison.Ordinal);
         Assert.True(HasLineWithAll(notes, "externally proven", "validation-only", "bounded", "deferred"));
-        Assert.True(HasLineWithAll(notes, "Adoption Readiness / Release Candidate Hygiene", "API drift", "support boundary", "release proof"));
+        Assert.True(HasLineWithAll(notes, "Repairability, Help, and Review UX", "validation repair", "support boundary", "release proof"));
         Assert.Contains("ADOPTION_RECOMMENDATION_CURRENT_OK:True", notes, StringComparison.Ordinal);
         Assert.Contains("CLAIM_HYGIENE_BOUNDARY_OK:True", notes, StringComparison.Ordinal);
         Assert.Contains("RELEASE_READINESS_GATE_OK:True", notes, StringComparison.Ordinal);
@@ -168,7 +168,7 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("historical alpha reference for the current beta support story", englishChecklist, StringComparison.Ordinal);
         Assert.Contains("external capability readiness gate", englishChecklist, StringComparison.OrdinalIgnoreCase);
         Assert.True(HasLineWithAll(englishChecklist, "externally proven", "validation-only", "bounded", "deferred"));
-        Assert.True(HasLineWithAll(englishChecklist, "Adoption Readiness / Release Candidate Hygiene", "API drift", "support boundary", "release proof"));
+        Assert.True(HasLineWithAll(englishChecklist, "Repairability, Help, and Review UX", "validation repair", "support boundary", "release proof"));
         Assert.Contains("ADOPTION_RECOMMENDATION_CURRENT_OK:True", englishChecklist, StringComparison.Ordinal);
         Assert.Contains("CLAIM_HYGIENE_BOUNDARY_OK:True", englishChecklist, StringComparison.Ordinal);
         Assert.Contains("RELEASE_READINESS_GATE_OK:True", englishChecklist, StringComparison.Ordinal);
@@ -213,7 +213,7 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("历史 alpha 参考，服务于当前 beta support story", chineseChecklist, StringComparison.Ordinal);
         Assert.Contains("外部能力就绪闸门", chineseChecklist, StringComparison.Ordinal);
         Assert.True(HasLineWithAll(chineseChecklist, "已被外部证据证明", "仅验证通过", "受边界约束", "继续延后"));
-        Assert.True(HasLineWithAll(chineseChecklist, "Adoption Readiness / Release Candidate Hygiene", "API drift", "support boundary", "release proof"));
+        Assert.True(HasLineWithAll(chineseChecklist, "Repairability, Help, and Review UX", "validation repair", "support boundary", "release proof"));
         Assert.Contains("ADOPTION_RECOMMENDATION_CURRENT_OK:True", chineseChecklist, StringComparison.Ordinal);
         Assert.Contains("CLAIM_HYGIENE_BOUNDARY_OK:True", chineseChecklist, StringComparison.Ordinal);
         Assert.Contains("RELEASE_READINESS_GATE_OK:True", chineseChecklist, StringComparison.Ordinal);
@@ -760,8 +760,8 @@ public sealed class ReleaseClosureContractTests
         Assert.True(HasLineWithAll(chineseStatus, "v0.63 workbench discoverability handoff proof", "phases 388-390", "hosted workbench", "macro/query system"));
         Assert.True(HasLineWithAll(englishConsumerSample, "v0.63 workbench discoverability handoff markers", "layout presets", "unified discovery", "recents/favorites proof"));
         Assert.True(HasLineWithAll(chineseConsumerSample, "v0.63 workbench discoverability handoff marker", "layout presets", "unified discovery", "recents/favorites proof"));
-        Assert.True(HasLineWithAll(englishStatus, "next recommended work line", "v0.64", "adopter-driven Workbench polish", "highest-friction hosted workflow"));
-        Assert.True(HasLineWithAll(chineseStatus, "下一条推荐工作线", "v0.64", "adopter-driven Workbench polish", "摩擦最大的 hosted workflow"));
+        Assert.True(HasLineWithAll(englishStatus, "next recommended work line", "v0.67", "Repairability, Help, and Review UX", "validation repair"));
+        Assert.True(HasLineWithAll(chineseStatus, "下一条推荐工作线", "v0.67", "Repairability, Help, and Review UX", "validation repair"));
     }
 
     [Fact]

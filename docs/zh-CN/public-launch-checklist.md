@@ -203,7 +203,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framew
 - 确认 claim-expansion status 在 3 到 5 条真实外部报告聚焦到同一个受限风险之前，只作为分诊输入
 - 确认 Phase 380 adopter refresh markers 出现在 release messaging：`ADOPTER_INTAKE_REFRESH_OK:True`、`ADOPTER_SUPPORT_BUNDLE_ATTACHMENT_OK:True` 和 `ADOPTER_CLAIM_EXPANSION_GATE_OK:True`
 - GA prep checklist：adoption evidence、API drift、support boundary 和 release proof gate 都必须显式保留，之后才允许写 GA 或 `1.0` 公告口径
-- 在 release messaging 里重复当前 `0.xx` alpha/beta hardening 线的 handoff：`Adoption Readiness / Release Candidate Hygiene` 表示先把公开推荐、API drift、support boundary 和 release proof gate 对齐，再写 release-candidate、GA 或 `1.0` 级别语言；同时包含 `ADOPTION_RECOMMENDATION_CURRENT_OK:True`、`CLAIM_HYGIENE_BOUNDARY_OK:True`、`RELEASE_READINESS_GATE_OK:True`、`SUPPORT_BOUNDARY_GATE_OK:True` 和 `BETA_CLAIM_ALIGNMENT_OK:True`
+- 在 release messaging 里重复当前 `0.xx` alpha/beta hardening 线的 handoff：`Repairability, Help, and Review UX` 表示先把 validation repair、contextual help、support-bundle evidence、support boundary 和 release proof gate 对齐，再写 release-candidate、GA 或 `1.0` 级别语言；同时包含 `ADOPTION_RECOMMENDATION_CURRENT_OK:True`、`CLAIM_HYGIENE_BOUNDARY_OK:True`、`RELEASE_READINESS_GATE_OK:True`、`SUPPORT_BOUNDARY_GATE_OK:True` 和 `BETA_CLAIM_ALIGNMENT_OK:True`
 - 确认 v0.61 adoption/API stabilization handoff 包含 `ADOPTION_API_STABILIZATION_HANDOFF_OK:True`、`ADOPTION_API_SCOPE_BOUNDARY_OK:True` 和 `V061_MILESTONE_PROOF_OK:True`，且下一步建议仍是 external adoption/API stabilization，而不是 WPF parity、marketplace、sandboxing、execution-engine 或 GA expansion
 - 保持 `xlarge` 为 telemetry-only，不把它说成 10000 节点支持承诺或 virtualization commitment
 - 如果配置了 `NUGET_API_KEY`，确认包发布成功

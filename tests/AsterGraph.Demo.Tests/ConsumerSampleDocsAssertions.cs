@@ -6,6 +6,13 @@ internal static class ConsumerSampleDocsAssertions
 {
     internal static void AssertSupportBundleProofMarkers(string contents)
     {
+        Assert.Contains("Proof Marker Categories", contents, StringComparison.Ordinal);
+        Assert.Contains("`Core`", contents, StringComparison.Ordinal);
+        Assert.Contains("`Authoring`", contents, StringComparison.Ordinal);
+        Assert.Contains("`Workbench`", contents, StringComparison.Ordinal);
+        Assert.Contains("`Diagnostics`", contents, StringComparison.Ordinal);
+        Assert.Contains("`Performance`", contents, StringComparison.Ordinal);
+        Assert.Contains("`Adoption`", contents, StringComparison.Ordinal);
         Assert.Contains("CONSUMER_SAMPLE_HOST_ACTION_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("CONSUMER_SAMPLE_PLUGIN_OK:True", contents, StringComparison.Ordinal);
         Assert.Contains("AUTHORING_SURFACE_PARAMETER_PROJECTION_OK:True", contents, StringComparison.Ordinal);

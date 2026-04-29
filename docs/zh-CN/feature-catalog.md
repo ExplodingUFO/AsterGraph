@@ -4,6 +4,17 @@
 
 Catalog proof markers：`FEATURE_CATALOG_OK:True`、`FEATURE_MANIFEST_BOUNDARY_OK:True` 和 `FEATURE_PACK_GOVERNANCE_OK:True`。
 
+## Proof Marker Categories
+
+Feature proof marker 必须按它防守的层级分组：
+
+- `Core`：runtime/session contract，例如 selection、history、save/load、clipboard 和 canonical commands。
+- `Authoring`：node surface、parameter、port、edge、validation、quick-tool 和 inspector authoring 行为。
+- `Workbench`：hosted Avalonia composition，例如 stencil、MiniMap、command palette、toolbar、export panel、fragment library、layout state，以及 repair/help chrome。
+- `Diagnostics`：runtime overlay、support bundle、plugin trust、logs、API surface checks、adoption intake 和 release-boundary evidence。
+- `Performance`：ScaleSmoke budgets、hosted metrics、export budgets 和 graph-size proof summaries。
+- `Adoption`：route ladder、packaged consumer、template/plugin smoke、public docs、support-boundary handoff 和 beta intake proof。
+
 ## Manifest 字段
 
 每个新增 feature record 都必须同时保留这些字段：
@@ -33,8 +44,8 @@ Catalog proof markers：`FEATURE_CATALOG_OK:True`、`FEATURE_MANIFEST_BOUNDARY_O
 
 | FeatureId | Pack | Status | Public seam | Avalonia projection | WPF projection | Sample / Demo entry | Proof marker | Perf budget | Docs |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `core.selection` | Core | Beta | `SetSelection(...)`、`GetSelectionSnapshot()` | Supported | Partial | `AsterGraph.HelloWorld`、`ScaleSmoke` | `SCALE_PERFORMANCE_BUDGET_OK:*` | `baseline` / `large` defended | [Host Integration](./host-integration.md)、[Quick Start](./quick-start.md) |
-| `core.history` | Core | Beta | `Undo()`、`Redo()`、save/dirty contract | Supported | Partial | `ScaleSmoke` | `SCALE_HISTORY_CONTRACT_OK` | `baseline` / `large` defended | [State Contracts](./state-contracts.md) |
+| `core.selection` | Core | Beta | `SetSelection(...)`、`GetSelectionSnapshot()` | Supported | Partial | `AsterGraph.HelloWorld`、`ScaleSmoke` | `SCALE_PERFORMANCE_BUDGET_OK:*` | `baseline` / `large` / `stress` defended | [Host Integration](./host-integration.md)、[Quick Start](./quick-start.md) |
+| `core.history` | Core | Beta | `Undo()`、`Redo()`、save/dirty contract | Supported | Partial | `ScaleSmoke` | `SCALE_HISTORY_CONTRACT_OK` | `baseline` / `large` / `stress` defended | [State Contracts](./state-contracts.md) |
 | `core.clipboard` | Core | Beta | `TryCopySelectionAsync()`、`TryPasteSelectionAsync()` | Supported | Fallback | `HostSample` | `HOST_SAMPLE_OK` | NotApplicable | [Host Integration](./host-integration.md) |
 | `workbench.defaults` | Workbench | Beta | `AsterGraphHostBuilder.UseDefaultWorkbench()` 加 `AsterGraphWorkbenchOptions` | Supported | NotApplicable | `Starter.Avalonia`、`ConsumerSample.Avalonia` | `WORKBENCH_DEFAULTS_OK:True` | 继承 command/stencil budgets 下的 hosted workbench metrics | [Host Integration](./host-integration.md)、[Consumer Sample](./consumer-sample.md) |
 | `workbench.performance-mode` | Workbench | Beta | `AsterGraphWorkbenchPerformanceMode` 加 hosted `AsterGraphWorkbenchPerformancePolicy` projection limits | Supported | NotApplicable | `Starter.Avalonia`、`ConsumerSample.Avalonia` | `WORKBENCH_PERFORMANCE_MODE_OK:True`、`BALANCED_MODE_DEFAULT_OK:True`、`WORKBENCH_LOD_POLICY_OK:True`、`PERFORMANCE_MODE_SCOPE_BOUNDARY_OK:True` | hosted projection policy 绑定 command/stencil budgets | [Host Integration](./host-integration.md)、[Widened Surface Performance Recipe](./widened-surface-performance-recipe.md) |
@@ -58,7 +69,7 @@ Catalog proof markers：`FEATURE_CATALOG_OK:True`、`FEATURE_MANIFEST_BOUNDARY_O
 | `workbench.stencil.basic` | Workbench | Beta | session stencil discovery 和 insertion commands | Supported | Fallback | `AsterGraph.Demo` | `CAPABILITY_BREADTH_STENCIL_OK:True`、`STENCIL_RECENTS_FAVORITES_OK:True` | 通过 command/search budget 防守 `large` | [Capability Breadth Recipe](./capability-breadth-recipe.md) |
 | `workbench.export.scene` | Workbench | Beta | `IGraphSceneSvgExportService`、`TryExportSceneAsSvg()`、`TryExportSceneAsImage(...)`，以及 SVG/PNG/JPEG export panel 的 raster scope/progress/cancel options | Supported | Fallback | `HostSample`、`ScaleSmoke`、`ConsumerSample.Avalonia` | `EXPORT_PANEL_OK:True`、`EXPORT_PANEL_SCOPE_OK:True`、`EXPORT_PANEL_PROGRESS_CANCEL_OK:True`、`SCALE_RASTER_EXPORT_STRESS_OK:True` | `stress` raster export defended，`xlarge` telemetry-only | [ScaleSmoke Baseline](./scale-baseline.md) |
 | `authoring.definition-builders` | Authoring | Beta | `NodeDefinitionBuilder`、`PortDefinitionBuilder`、`NodeParameterDefinitionBuilder`、`ImplicitConversionRuleBuilder`，只包装现有 DTO | NotApplicable | NotApplicable | `ConsumerSample.Avalonia`、`Editor.Tests` | `NODE_DEFINITION_BUILDER_OK:True`、`PORT_DEFINITION_BUILDER_OK:True`、`PARAMETER_DEFINITION_BUILDER_OK:True`、`CONNECTION_RULE_BUILDER_OK:True`、`AUTHORING_BUILDER_THIN_WRAPPER_OK:True` | NotApplicable | [Authoring Inspector Recipe](./authoring-inspector-recipe.md)、[Public API Inventory](./public-api-inventory.md) |
-| `authoring.node-surface` | Authoring | Beta | node surface snapshots、size commands、parameter edits | Supported | Partial | `AsterGraph.Demo` | `AUTHORING_SURFACE_OK:True` | `baseline` / `large` authoring defended | [Authoring Surface Recipe](./authoring-surface-recipe.md) |
+| `authoring.node-surface` | Authoring | Beta | node surface snapshots、size commands、parameter edits | Supported | Partial | `AsterGraph.Demo` | `AUTHORING_SURFACE_OK:True` | `baseline` / `large` / `stress` authoring defended | [Authoring Surface Recipe](./authoring-surface-recipe.md) |
 | `authoring.inspector.metadata` | Authoring | Beta | definition-driven parameter metadata | Supported | Fallback | `ConsumerSample.Avalonia` | `CONSUMER_SAMPLE_METADATA_PROJECTION_OK:True` | inspector-open budget defended | [Authoring Inspector Recipe](./authoring-inspector-recipe.md) |
 | `authoring.edge-flow` | Authoring | Beta | connection start/complete/reconnect/disconnect commands | Supported | Partial | `HostSample`、`ScaleSmoke` | `AUTHORING_FLOW_PROOF_OK:True` | authoring budgets defended | [Host Integration](./host-integration.md) |
 | `advanced.hierarchy` | Advanced Graph | Beta | hierarchy snapshots 和 group commands | Supported | Fallback | `AsterGraph.Demo` | `HIERARCHY_SEMANTICS_OK:True` | large graph command budget defended | [Advanced Editing](./advanced-editing.md) |

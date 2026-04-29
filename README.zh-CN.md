@@ -105,7 +105,7 @@ dotnet add package AsterGraph.Abstractions --prerelease
 - [`tools/AsterGraph.ConsumerSample.Avalonia`](./tools/AsterGraph.ConsumerSample.Avalonia/README.md) = 介于 `HelloWorld.Avalonia` 和 `Demo` 之间的真实 hosted-UI consumer 样例
 - [`tools/AsterGraph.HostSample`](./tools/AsterGraph.HostSample/) = 仅运行时 / 默认 UI 两条推荐路线的 proof harness，不是最先上手的入口
 - [`tools/AsterGraph.PackageSmoke`](./tools/AsterGraph.PackageSmoke/) = 打包消费验证
-- [`tools/AsterGraph.ScaleSmoke`](./tools/AsterGraph.ScaleSmoke/) = defended baseline/large proof、保守 defended 的 5000 节点 stress raster export proof，以及 history/state 验证
+- [`tools/AsterGraph.ScaleSmoke`](./tools/AsterGraph.ScaleSmoke/) = defended baseline/large/stress performance、authoring、SVG/raster export、reload 和 history/state 验证；`xlarge` 仍是 telemetry-only
 - [`tools/AsterGraph.PluginTool`](./tools/AsterGraph.PluginTool/) = 用于插件验证、trust evidence 和 hash inspection 的跨平台 CLI
 - [`templates/astergraph-avalonia`](./templates/astergraph-avalonia/) = `dotnet new astergraph-avalonia` 原生 Avalonia starter
 - [`templates/astergraph-plugin`](./templates/astergraph-plugin/) = `dotnet new astergraph-plugin` 可信插件 starter
