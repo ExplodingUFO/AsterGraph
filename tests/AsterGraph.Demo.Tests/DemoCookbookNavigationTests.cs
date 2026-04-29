@@ -116,6 +116,10 @@ public sealed class DemoCookbookNavigationTests
         var contentShell = Assert.IsType<Grid>(window.FindControl<Grid>("PART_CookbookWorkspaceContentShell"));
         var navigationGroups = Assert.IsType<ItemsControl>(window.FindControl<ItemsControl>("PART_CookbookWorkspaceNavigationGroups"));
         var contentPanel = Assert.IsType<Border>(window.FindControl<Border>("PART_CookbookWorkspaceRecipeContentPanel"));
+        var editorFrame = Assert.IsType<Border>(window.FindControl<Border>("MainEditorFrame"));
+        var graphLines = Assert.IsType<ItemsControl>(window.FindControl<ItemsControl>("PART_CookbookWorkspaceGraphLines"));
+        var detailModeSelector = Assert.IsType<ComboBox>(window.FindControl<ComboBox>("PART_CookbookWorkspaceDetailModeSelector"));
+        var detailLines = Assert.IsType<ItemsControl>(window.FindControl<ItemsControl>("PART_CookbookWorkspaceDetailLines"));
         var recipeList = Assert.IsType<ListBox>(window.FindControl<ListBox>("PART_CookbookWorkspaceRecipeList"));
         var graphHost = Assert.IsType<ContentControl>(window.FindControl<ContentControl>("PART_MainGraphEditorHost"));
         var graphEditorView = Assert.IsType<GraphEditorView>(graphHost.Content);
@@ -128,12 +132,23 @@ public sealed class DemoCookbookNavigationTests
         Assert.True(navigationPanel.IsVisible);
         Assert.True(contentPanel.IsVisible);
         Assert.Equal(304, navigationPanel.Width);
-        Assert.Equal(336, contentPanel.Width);
         Assert.Equal(1, Grid.GetColumn(contentShell));
+        Assert.Equal(1, Grid.GetRow(editorFrame));
+        Assert.Equal(2, Grid.GetRow(contentPanel));
+        var boundGraphLines = Assert.IsAssignableFrom<System.Collections.IEnumerable>(graphLines.ItemsSource)
+            .Cast<string>()
+            .ToArray();
+        Assert.Equal(viewModel.SelectedCookbookWorkspaceGraphLines, boundGraphLines);
         var boundGroups = Assert.IsAssignableFrom<System.Collections.IEnumerable>(navigationGroups.ItemsSource)
             .Cast<DemoCookbookWorkspaceNavigationGroup>()
             .ToArray();
         Assert.Equal(viewModel.CookbookWorkspace.NavigationGroups.Select(group => group.Category), boundGroups.Select(group => group.Category));
+        Assert.Same(viewModel.CookbookDetailModes, detailModeSelector.ItemsSource);
+        Assert.Same(viewModel.SelectedCookbookDetailMode, detailModeSelector.SelectedItem);
+        var boundDetailLines = Assert.IsAssignableFrom<System.Collections.IEnumerable>(detailLines.ItemsSource)
+            .Cast<string>()
+            .ToArray();
+        Assert.Equal(viewModel.SelectedCookbookWorkspaceDetailLines, boundDetailLines);
         Assert.Same(viewModel.FilteredCookbookRecipes, recipeList.ItemsSource);
         Assert.Same(viewModel.SelectedCookbookRecipe, recipeList.SelectedItem);
         Assert.Same(graphEditorView, graphHost.Content);
@@ -151,5 +166,35 @@ public sealed class DemoCookbookNavigationTests
 
         Assert.Equal("diagnostics-support-route", viewModel.SelectedCookbookRecipe.Id);
         Assert.Equal("diagnostics-support-route", viewModel.CookbookWorkspace.SelectedRecipe.RecipeId);
+    }
+
+    [Fact]
+    public void MainWindowViewModel_CookbookDetailModesSwitchWithoutLosingRecipe()
+    {
+        var viewModel = new MainWindowViewModel();
+        var recipe = viewModel.CookbookRecipes.Single(item => item.Id == "authoring-surface-route");
+        viewModel.SelectedCookbookRecipe = recipe;
+
+        Assert.Equal("code", viewModel.SelectedCookbookDetailMode.Key);
+        Assert.Contains(
+            viewModel.SelectedCookbookWorkspaceGraphLines,
+            line => line.Contains(recipe.DemoAnchors[0].Path, StringComparison.Ordinal));
+        Assert.Contains(
+            viewModel.SelectedCookbookWorkspaceDetailLines,
+            line => line.Contains(recipe.CodeAnchors[0].Path, StringComparison.Ordinal));
+
+        viewModel.SelectedCookbookDetailMode = viewModel.CookbookDetailModes.Single(mode => mode.Key == "proof");
+        Assert.Equal(recipe.Id, viewModel.SelectedCookbookRecipe.Id);
+        Assert.Contains(
+            viewModel.SelectedCookbookWorkspaceDetailLines,
+            line => line.Contains(recipe.ProofMarkers[0], StringComparison.Ordinal));
+
+        viewModel.SelectedCookbookDetailMode = viewModel.CookbookDetailModes.Single(mode => mode.Key == "docs");
+        Assert.Contains(
+            viewModel.SelectedCookbookWorkspaceDetailLines,
+            line => line.Contains(recipe.DocumentationAnchors[0].Path, StringComparison.Ordinal));
+
+        viewModel.SelectedCookbookDetailMode = viewModel.CookbookDetailModes.Single(mode => mode.Key == "support");
+        Assert.Equal([recipe.SupportBoundary], viewModel.SelectedCookbookWorkspaceDetailLines);
     }
 }

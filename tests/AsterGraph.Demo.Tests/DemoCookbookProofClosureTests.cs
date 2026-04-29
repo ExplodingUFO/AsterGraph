@@ -45,6 +45,7 @@ public sealed class DemoCookbookProofClosureTests
             "src/AsterGraph.Demo/Cookbook/DemoCookbookCatalog.cs",
             "src/AsterGraph.Demo/Cookbook/DemoCookbookProof.cs",
             "src/AsterGraph.Demo/ViewModels/MainWindowViewModel.Cookbook.cs",
+            "src/AsterGraph.Demo/ViewModels/MainWindowViewModel.CookbookDetails.cs",
             "docs/en/demo-cookbook.md",
             "docs/zh-CN/demo-cookbook.md",
             "tests/AsterGraph.Demo.Tests/DemoCookbookCatalogTests.cs",

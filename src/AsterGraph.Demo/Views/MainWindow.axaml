@@ -1217,7 +1217,7 @@
 
           <Grid x:Name="PART_CookbookWorkspaceContentShell"
                 Grid.Column="1"
-                RowDefinitions="Auto,*"
+                RowDefinitions="Auto,*,Auto"
                 RowSpacing="16">
             <Border x:Name="PART_GraphIntroStrip"
                     Padding="14"
@@ -1286,24 +1286,21 @@
             </Grid>
             </Border>
 
-            <Grid Grid.Row="1"
-                  ColumnDefinitions="*,Auto"
-                  ColumnSpacing="16">
-              <Border x:Name="MainEditorFrame"
-                      MinWidth="320"
-                      Background="#08111A"
-                      BorderBrush="#365063"
-                      BorderThickness="1"
-                      CornerRadius="8"
-                      ClipToBounds="True">
-                <ContentControl x:Name="PART_MainGraphEditorHost"
-                                VerticalAlignment="Stretch"
-                                HorizontalAlignment="Stretch" />
-              </Border>
+            <Border x:Name="MainEditorFrame"
+                    Grid.Row="1"
+                    MinHeight="320"
+                    Background="#08111A"
+                    BorderBrush="#365063"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    ClipToBounds="True">
+              <ContentControl x:Name="PART_MainGraphEditorHost"
+                              VerticalAlignment="Stretch"
+                              HorizontalAlignment="Stretch" />
+            </Border>
 
-              <Border x:Name="PART_CookbookWorkspaceRecipeContentPanel"
-                      Grid.Column="1"
-                      Width="336"
+            <Border x:Name="PART_CookbookWorkspaceRecipeContentPanel"
+                      Grid.Row="2"
                       Padding="12"
                       Background="#14202B"
                       BorderBrush="#365063"
@@ -1323,31 +1320,26 @@
                     <TextBlock TextWrapping="Wrap"
                                Foreground="#C2D7E4"
                                Text="{Binding CookbookWorkspace.SelectedRecipe.Summary}" />
-                    <TextBlock FontSize="12"
-                               FontWeight="Bold"
-                               Foreground="#7FE7D7"
-                               Text="{Binding UiText[cookbook.code]}" />
-                    <ItemsControl ItemsSource="{Binding SelectedCookbookRecipeCodeLines}"
+                    <ItemsControl x:Name="PART_CookbookWorkspaceGraphLines"
+                                  ItemsSource="{Binding SelectedCookbookWorkspaceGraphLines}"
                                   ItemTemplate="{StaticResource HostDrawerLineTemplate}" />
-                    <TextBlock FontSize="12"
-                               FontWeight="Bold"
-                               Foreground="#7FE7D7"
-                               Text="{Binding UiText[cookbook.proof]}" />
-                    <ItemsControl ItemsSource="{Binding SelectedCookbookRecipeProofLines}"
+                    <ComboBox x:Name="PART_CookbookWorkspaceDetailModeSelector"
+                              HorizontalAlignment="Left"
+                              MinWidth="160"
+                              ItemsSource="{Binding CookbookDetailModes}"
+                              SelectedItem="{Binding SelectedCookbookDetailMode, Mode=TwoWay}">
+                      <ComboBox.ItemTemplate>
+                        <DataTemplate x:DataType="vm:CookbookDetailMode">
+                          <TextBlock Text="{Binding DisplayName}" />
+                        </DataTemplate>
+                      </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <ItemsControl x:Name="PART_CookbookWorkspaceDetailLines"
+                                  ItemsSource="{Binding SelectedCookbookWorkspaceDetailLines}"
                                   ItemTemplate="{StaticResource HostDrawerLineTemplate}" />
-                    <Border Padding="10"
-                            Background="#101923"
-                            BorderBrush="#365063"
-                            BorderThickness="1"
-                            CornerRadius="8">
-                      <TextBlock TextWrapping="Wrap"
-                                 Foreground="#C2D7E4"
-                                 Text="{Binding SelectedCookbookRecipeSupportBoundary}" />
-                    </Border>
                   </StackPanel>
                 </ScrollViewer>
               </Border>
-            </Grid>
           </Grid>
         </Grid>
       </Border>
