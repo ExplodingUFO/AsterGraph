@@ -144,6 +144,7 @@ public partial class GraphEditorView : UserControl
     private StackPanel? _shortcutHelpList;
     private TextBlock? _validationStatusText;
     private TextBlock? _statusValidationText;
+    private TextBlock? _problemsRepairDiscoveryStatusText;
     private StackPanel? _validationFeedbackList;
     private TextBlock? _fragmentCaptionText;
     private TextBlock? _fragmentStatusText;
@@ -414,6 +415,8 @@ public partial class GraphEditorView : UserControl
         _shortcutHelpList = this.FindControl<StackPanel>("PART_ShortcutHelpList");
         _validationStatusText = this.FindControl<TextBlock>("PART_ValidationStatusText");
         _statusValidationText = this.FindControl<TextBlock>("PART_StatusValidationText");
+        _problemsRepairDiscoveryStatusText =
+            this.FindControl<TextBlock>("PART_ProblemsRepairDiscoveryStatusText");
         _validationFeedbackList = this.FindControl<StackPanel>("PART_ValidationFeedbackList");
         _fragmentCaptionText = this.FindControl<TextBlock>("PART_FragmentCaptionText");
         _fragmentStatusText = this.FindControl<TextBlock>("PART_FragmentStatusText");
@@ -832,6 +835,14 @@ public partial class GraphEditorView : UserControl
             _statusValidationText.Text = caption;
         }
 
+        if (_problemsRepairDiscoveryStatusText is not null)
+        {
+            _problemsRepairDiscoveryStatusText.Text = snapshot.Issues.Count == 0
+                ? string.Empty
+                : "Repair discovery is available from each problem menu; quick fixes are preview-only in this phase.";
+            _problemsRepairDiscoveryStatusText.IsVisible = snapshot.Issues.Count > 0;
+        }
+
         if (_validationFeedbackList is null)
         {
             return;
@@ -872,6 +883,12 @@ public partial class GraphEditorView : UserControl
             _statusValidationText.Text = string.Empty;
         }
 
+        if (_problemsRepairDiscoveryStatusText is not null)
+        {
+            _problemsRepairDiscoveryStatusText.Text = string.Empty;
+            _problemsRepairDiscoveryStatusText.IsVisible = false;
+        }
+
         _validationFeedbackList?.Children.Clear();
     }
 
@@ -887,38 +904,82 @@ public partial class GraphEditorView : UserControl
         ToolTip.SetTip(focusButton, CreateValidationTargetCaption(issue));
         focusButton.Click += (_, _) =>
         {
-            Editor?.Session.Commands.TryFocusValidationIssue(issue);
-            RefreshCommandSurface();
+            FocusValidationIssueFromProblemsPanel(issue, openInspector: false);
         };
 
-        return new StackPanel
+        var row = new Button
         {
-            Spacing = 6,
-            Children =
+            Name = ResolveValidationProblemRowName(issue),
+            Content = new StackPanel
             {
-                new TextBlock
+                Spacing = 6,
+                Children =
                 {
-                    Text = $"{CreateValidationSeverityLabel(issue)}  ·  {issue.Code}",
-                    FontSize = 11,
-                    FontWeight = global::Avalonia.Media.FontWeight.Bold,
-                    Foreground = GetResourceBrush("AsterGraph.HighlightBrush"),
-                    TextWrapping = global::Avalonia.Media.TextWrapping.Wrap,
+                    new TextBlock
+                    {
+                        Text = $"{CreateValidationSeverityLabel(issue)}  ·  {issue.Code}",
+                        FontSize = 11,
+                        FontWeight = global::Avalonia.Media.FontWeight.Bold,
+                        Foreground = GetResourceBrush("AsterGraph.HighlightBrush"),
+                        TextWrapping = global::Avalonia.Media.TextWrapping.Wrap,
+                    },
+                    new TextBlock
+                    {
+                        Text = issue.Message,
+                        FontSize = 12,
+                        Foreground = GetResourceBrush("AsterGraph.BodyBrush"),
+                        TextWrapping = global::Avalonia.Media.TextWrapping.Wrap,
+                    },
+                    new TextBlock
+                    {
+                        Text = CreateValidationTargetCaption(issue),
+                        FontSize = 11,
+                        Foreground = GetResourceBrush("AsterGraph.EyebrowBrush"),
+                        TextWrapping = global::Avalonia.Media.TextWrapping.Wrap,
+                    },
+                    focusButton,
                 },
-                new TextBlock
-                {
-                    Text = issue.Message,
-                    FontSize = 12,
-                    Foreground = GetResourceBrush("AsterGraph.BodyBrush"),
-                    TextWrapping = global::Avalonia.Media.TextWrapping.Wrap,
-                },
-                new TextBlock
-                {
-                    Text = CreateValidationTargetCaption(issue),
-                    FontSize = 11,
-                    Foreground = GetResourceBrush("AsterGraph.EyebrowBrush"),
-                    TextWrapping = global::Avalonia.Media.TextWrapping.Wrap,
-                },
-                focusButton,
+            },
+            ContextMenu = CreateValidationIssueRepairDiscoveryMenu(issue),
+        };
+        row.Classes.Add("astergraph-problem-row");
+        AutomationProperties.SetName(row, $"Problem {issue.Code}");
+        ToolTip.SetTip(row, "Click to focus. Double-click to focus and show the inspector.");
+        row.Click += (_, _) => FocusValidationIssueFromProblemsPanel(issue, openInspector: false);
+        row.DoubleTapped += (_, args) =>
+        {
+            FocusValidationIssueFromProblemsPanel(issue, openInspector: true);
+            args.Handled = true;
+        };
+
+        return row;
+    }
+
+    private void FocusValidationIssueFromProblemsPanel(GraphEditorValidationIssueSnapshot issue, bool openInspector)
+    {
+        if (openInspector)
+        {
+            IsInspectorChromeVisible = true;
+        }
+
+        Editor?.Session.Commands.TryFocusValidationIssue(issue);
+        RefreshCommandSurface();
+    }
+
+    private ContextMenu CreateValidationIssueRepairDiscoveryMenu(GraphEditorValidationIssueSnapshot issue)
+    {
+        var repairDiscoveryItem = new MenuItem
+        {
+            Name = $"{ResolveValidationProblemRowName(issue)}_RepairDiscovery",
+            Header = "Repair discovery",
+            IsEnabled = false,
+        };
+        ToolTip.SetTip(repairDiscoveryItem, "Quick fix discovery is visible here only; fixes are implemented in a later phase.");
+        return new ContextMenu
+        {
+            ItemsSource = new[]
+            {
+                repairDiscoveryItem,
             },
         };
     }
@@ -959,6 +1020,12 @@ public partial class GraphEditorView : UserControl
     }
 
     private static string ResolveValidationFocusButtonName(GraphEditorValidationIssueSnapshot issue)
+        => $"PART_ValidationFocus_{CreateValidationIssueControlNameSuffix(issue)}";
+
+    private static string ResolveValidationProblemRowName(GraphEditorValidationIssueSnapshot issue)
+        => $"PART_ProblemsIssue_{CreateValidationIssueControlNameSuffix(issue)}";
+
+    private static string CreateValidationIssueControlNameSuffix(GraphEditorValidationIssueSnapshot issue)
     {
         var target = issue.ConnectionId ?? issue.NodeId ?? issue.ScopeId;
         var segments = new List<string>();
@@ -966,7 +1033,7 @@ public partial class GraphEditorView : UserControl
         AddUniqueSegment(segments, issue.Code);
         AddUniqueSegment(segments, issue.ParameterKey);
         AddUniqueSegment(segments, issue.EndpointId);
-        return $"PART_ValidationFocus_{NormalizeControlNameSegment(string.Join("_", segments))}";
+        return NormalizeControlNameSegment(string.Join("_", segments));
     }
 
     private static void AddUniqueSegment(List<string> segments, string? value)

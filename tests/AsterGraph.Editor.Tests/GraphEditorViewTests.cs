@@ -184,6 +184,9 @@ public sealed class GraphEditorViewTests
         var status = FindRequiredControl<TextBlock>(view, "PART_ValidationStatusText");
         var statusBar = FindRequiredControl<TextBlock>(view, "PART_StatusValidationText");
         var feedbackList = FindRequiredControl<StackPanel>(view, "PART_ValidationFeedbackList");
+        var problemRow = FindRequiredDescendant<Button>(
+            view,
+            "PART_ProblemsIssue_connection-001_connection.incompatible-endpoint-types_in");
         var focusButton = FindRequiredDescendant<Button>(
             view,
             "PART_ValidationFocus_connection-001_connection.incompatible-endpoint-types_in");
@@ -193,12 +196,72 @@ public sealed class GraphEditorViewTests
         Assert.Contains(
             feedbackList.GetVisualDescendants().OfType<TextBlock>(),
             text => text.Text?.Contains("connection.incompatible-endpoint-types", StringComparison.Ordinal) == true);
+        Assert.Equal(
+            "Problem connection.incompatible-endpoint-types",
+            AutomationProperties.GetName(problemRow));
 
+        problemRow.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        var rowSelection = editor.Session.Queries.GetSelectionSnapshot();
+        Assert.Equal(["connection-001"], rowSelection.SelectedConnectionIds);
+        Assert.Equal("connection-001", rowSelection.PrimarySelectedConnectionId);
+
+        editor.Session.Commands.ClearSelection(updateStatus: false);
         focusButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
 
         var selection = editor.Session.Queries.GetSelectionSnapshot();
         Assert.Equal(["connection-001"], selection.SelectedConnectionIds);
         Assert.Equal("connection-001", selection.PrimarySelectedConnectionId);
+    }
+
+    [AvaloniaFact]
+    public void ProblemsPanel_DoubleClickFocusesNodeAndReusesInspectorSelection()
+    {
+        var editor = CreateValidationParameterFeedbackEditor();
+        var window = CreateWindow(new GraphEditorView
+        {
+            Editor = editor,
+        });
+        var view = (GraphEditorView)window.Content!;
+        var problemRow = FindRequiredDescendant<Button>(
+            view,
+            "PART_ProblemsIssue_parameter-001_node.parameter-invalid_prompt");
+        var pointer = new global::Avalonia.Input.Pointer(0, PointerType.Mouse, true);
+        var pointerArgs = CreatePointerPressedArgs(problemRow, view, pointer, new Point(0, 0), KeyModifiers.None);
+
+        problemRow.RaiseEvent(new TappedEventArgs(InputElement.DoubleTappedEvent, pointerArgs)
+        {
+            Source = problemRow,
+        });
+
+        var selection = editor.Session.Queries.GetSelectionSnapshot();
+        Assert.Equal(["parameter-001"], selection.SelectedNodeIds);
+        Assert.Equal("parameter-001", selection.PrimarySelectedNodeId);
+        Assert.Equal("Validation Parameters", editor.InspectorTitle);
+        Assert.True(view.IsInspectorChromeVisible);
+    }
+
+    [AvaloniaFact]
+    public void ProblemsPanel_ExposesRepairDiscoveryAffordancesWithoutQuickFixExecution()
+    {
+        var editor = CreateValidationFeedbackEditor();
+        var window = CreateWindow(new GraphEditorView
+        {
+            Editor = editor,
+        });
+        var view = (GraphEditorView)window.Content!;
+        var repairStatus = FindRequiredControl<TextBlock>(view, "PART_ProblemsRepairDiscoveryStatusText");
+        var problemRow = FindRequiredDescendant<Button>(
+            view,
+            "PART_ProblemsIssue_connection-001_connection.incompatible-endpoint-types_in");
+
+        Assert.True(repairStatus.IsVisible);
+        Assert.Contains("preview-only", repairStatus.Text, StringComparison.Ordinal);
+
+        Assert.NotNull(problemRow.ContextMenu);
+        var repairItem = Assert.Single(problemRow.ContextMenu.ItemsSource!.OfType<MenuItem>());
+        Assert.Equal("Repair discovery", repairItem.Header);
+        Assert.False(repairItem.IsEnabled);
+        Assert.Contains("later phase", Assert.IsType<string>(ToolTip.GetTip(repairItem)), StringComparison.Ordinal);
     }
 
     [AvaloniaFact]
@@ -1123,6 +1186,22 @@ public sealed class GraphEditorViewTests
         Assert.NotNull(handler);
         handler.Invoke(view, [view, args]);
     }
+
+    private static PointerPressedEventArgs CreatePointerPressedArgs(
+        InputElement source,
+        InputElement root,
+        global::Avalonia.Input.Pointer pointer,
+        Point position,
+        KeyModifiers modifiers)
+        => new(
+            source,
+            pointer,
+            root,
+            position,
+            0UL,
+            new PointerPointProperties(RawInputModifiers.LeftMouseButton, PointerUpdateKind.LeftButtonPressed),
+            modifiers,
+            1);
 
     private static object InvokeNodeCanvasMethod(string methodName, NodeCanvas canvas)
     {

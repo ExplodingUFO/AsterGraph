@@ -28,6 +28,16 @@
       <Setter Property="HorizontalContentAlignment" Value="Stretch" />
     </Style>
 
+    <Style Selector="Button.astergraph-problem-row">
+      <Setter Property="Padding" Value="{DynamicResource AsterGraph.TemplateCardPadding}" />
+      <Setter Property="CornerRadius" Value="{DynamicResource AsterGraph.TemplateCardCornerRadius}" />
+      <Setter Property="Background" Value="{DynamicResource AsterGraph.BadgeBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource AsterGraph.PanelBorderBrush}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="Foreground" Value="{DynamicResource AsterGraph.BodyBrush}" />
+      <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    </Style>
+
     <Style Selector="Border.astergraph-pill">
       <Setter Property="Background" Value="{DynamicResource AsterGraph.BadgeBrush}" />
       <Setter Property="CornerRadius" Value="{DynamicResource AsterGraph.PillCornerRadius}" />
@@ -195,7 +205,7 @@
             <Border x:Name="PART_ValidationFeedbackChrome"
                     Classes="astergraph-inspector-section">
               <StackPanel Spacing="8">
-                <TextBlock Text="Validation"
+                <TextBlock Text="Problems"
                            FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                            FontWeight="Bold"
                            Foreground="{DynamicResource AsterGraph.EyebrowBrush}" />
@@ -203,6 +213,11 @@
                            FontSize="{DynamicResource AsterGraph.InspectorBodyFontSize}"
                            TextWrapping="Wrap"
                            Foreground="{DynamicResource AsterGraph.BodyBrush}" />
+                <TextBlock x:Name="PART_ProblemsRepairDiscoveryStatusText"
+                           FontSize="{DynamicResource AsterGraph.InspectorCaptionFontSize}"
+                           TextWrapping="Wrap"
+                           Foreground="{DynamicResource AsterGraph.HighlightBrush}"
+                           IsVisible="False" />
                 <StackPanel x:Name="PART_ValidationFeedbackList"
                             Spacing="8" />
               </StackPanel>
