@@ -76,6 +76,41 @@ public sealed class NodeCanvasStandaloneTests
     }
 
     [AvaloniaFact]
+    public void StandaloneCanvas_ContextualDocumentationSurfaces_ProjectNodePortAndEdgeHelp()
+    {
+        var editor = CreateEditor();
+        editor.ConnectPorts(SourceNodeId, SourcePortId, TargetNodeId, TargetPortId);
+        var (window, canvas) = CreateStandaloneCanvasWindow(editor);
+
+        try
+        {
+            Dispatcher.UIThread.RunJobs(DispatcherPriority.Loaded);
+
+            var sourceSurface = canvas.GetVisualDescendants()
+                .OfType<Control>()
+                .First(control => string.Equals(AutomationProperties.GetName(control), "Canvas Source node", StringComparison.Ordinal));
+            var sourcePortButton = canvas.GetVisualDescendants()
+                .OfType<Button>()
+                .Single(control => control.DataContext is PortViewModel port
+                                   && string.Equals(port.Id, SourcePortId, StringComparison.Ordinal)
+                                   && port.Direction == PortDirection.Output);
+            var connectionChip = canvas.GetVisualDescendants()
+                .OfType<Border>()
+                .First(control => (AutomationProperties.GetName(control) ?? string.Empty).EndsWith(" connection", StringComparison.Ordinal));
+
+            Assert.Contains("Source metadata used for contextual help.", ToolTip.GetTip(sourceSurface)?.ToString());
+            Assert.Contains("Produced value for downstream nodes.", ToolTip.GetTip(sourcePortButton)?.ToString());
+            Assert.Contains("Produced value for downstream nodes.", ToolTip.GetTip(connectionChip)?.ToString());
+            Assert.Contains("Accepted value for calculations.", ToolTip.GetTip(connectionChip)?.ToString());
+            Assert.Contains("Accepted value for calculations.", AutomationProperties.GetHelpText(connectionChip));
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
     public void CanvasContextRequest_UsesDefaultContextMenuOnlyWhenEnabled()
     {
         var enabledEditor = CreateEditor();
@@ -2968,8 +3003,10 @@ public sealed class NodeCanvasStandaloneTests
                         SourcePortId,
                         "Result",
                         new PortTypeId("float"),
-                        "#6AD5C4"),
-                ]));
+                        "#6AD5C4",
+                        description: "Produced value for downstream nodes."),
+                ],
+                description: "Source metadata used for contextual help."));
         catalog.RegisterDefinition(
             new NodeDefinition(
                 TargetDefinitionId,
@@ -2981,7 +3018,8 @@ public sealed class NodeCanvasStandaloneTests
                         TargetPortId,
                         "Input",
                         new PortTypeId("float"),
-                        "#F3B36B"),
+                        "#F3B36B",
+                        description: "Accepted value for calculations."),
                 ],
                 [],
                 parameters:

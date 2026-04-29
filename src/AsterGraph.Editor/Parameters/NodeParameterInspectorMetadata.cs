@@ -58,11 +58,26 @@ internal static class NodeParameterInspectorMetadata
         if (!string.IsNullOrWhiteSpace(formattedDefault))
         {
             guidance.Add($"默认值: {formattedDefault}");
+            guidance.Add($"恢复默认将还原为: {formattedDefault}");
         }
 
         if (!string.IsNullOrWhiteSpace(definition.Constraints.ValidationPatternDescription))
         {
             guidance.Add($"格式: {definition.Constraints.ValidationPatternDescription}");
+        }
+
+        if (!string.IsNullOrWhiteSpace(definition.PlaceholderText))
+        {
+            guidance.Add($"示例: {definition.PlaceholderText}");
+        }
+        else
+        {
+            var describedOption = definition.Constraints.AllowedOptions
+                .FirstOrDefault(option => !string.IsNullOrWhiteSpace(option.Description));
+            if (describedOption is not null)
+            {
+                guidance.Add($"示例选项: {describedOption.Label} - {describedOption.Description}");
+            }
         }
 
         if (definition.Constraints.Minimum is double min && definition.Constraints.Maximum is double max)
