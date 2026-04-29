@@ -140,6 +140,42 @@ public sealed class GraphEditorValidationSnapshotTests
     }
 
     [Fact]
+    public void Queries_ProjectParameterHelpTargetSharedWithInspectorSnapshot()
+    {
+        var session = CreateSession(CreateInvalidParameterValueDocument(), CreateParameterCatalog(defaultPrompt: "Describe the change."));
+        var issue = Assert.Single(session.Queries.GetValidationSnapshot().Issues);
+
+        Assert.NotNull(issue.HelpTarget);
+        Assert.Equal("Parameter", issue.HelpTarget!.Kind);
+        Assert.Equal("parameter-001", issue.HelpTarget.NodeId);
+        Assert.Equal("prompt", issue.HelpTarget.ParameterKey);
+        Assert.Contains("Prompt", issue.HelpTarget.Title, StringComparison.Ordinal);
+        Assert.Contains("Describe the change.", issue.HelpTarget.HelpText, StringComparison.Ordinal);
+
+        Assert.True(session.Commands.TryFocusValidationIssue(issue));
+        var inspectorParameter = Assert.Single(session.Queries.GetSelectedNodeParameterSnapshots());
+        Assert.Equal(issue.HelpTarget.ParameterKey, inspectorParameter.Definition.Key);
+        Assert.Equal(inspectorParameter.HelpText, issue.HelpTarget.HelpText);
+    }
+
+    [Fact]
+    public void Queries_ProjectConnectionHelpTargetForProblemsPanelAndInspectorReview()
+    {
+        var session = CreateSession(CreateRoutedIncompatibleConnectionDocument(), CreateConnectionCatalog(targetTypeId: TextTypeId));
+        var issue = Assert.Single(session.Queries.GetValidationSnapshot().Issues);
+
+        Assert.Equal("connection.incompatible-endpoint-types", issue.Code);
+        Assert.NotNull(issue.HelpTarget);
+        Assert.Equal("Connection", issue.HelpTarget!.Kind);
+        Assert.Equal("connection-001", issue.HelpTarget.ConnectionId);
+        Assert.Equal("target-001", issue.HelpTarget.NodeId);
+        Assert.Equal("in", issue.HelpTarget.EndpointId);
+        Assert.Equal("Source.Out -> Target.In", issue.HelpTarget.Title);
+        Assert.Contains("flow", issue.HelpTarget.HelpText, StringComparison.Ordinal);
+        Assert.Contains("string", issue.HelpTarget.HelpText, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Queries_ReportUnresolvedDefinitionAsNonBlockingWarning()
     {
         var session = CreateSession(
@@ -487,7 +523,8 @@ public sealed class GraphEditorValidationSnapshotTests
                     TextTypeId,
                     ParameterEditorKind.Text,
                     isRequired: true,
-                    defaultValue: defaultPrompt),
+                    defaultValue: defaultPrompt,
+                    helpText: "Prompt guidance for review automation."),
             ]));
         return catalog;
     }

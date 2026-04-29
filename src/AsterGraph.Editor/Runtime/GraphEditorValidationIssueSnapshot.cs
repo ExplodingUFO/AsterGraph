@@ -19,7 +19,8 @@ public sealed record GraphEditorValidationIssueSnapshot
         string? connectionId = null,
         string? endpointId = null,
         GraphConnectionTargetKind? targetKind = null,
-        string? parameterKey = null)
+        string? parameterKey = null,
+        GraphEditorValidationHelpTargetSnapshot? helpTarget = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(code);
         ArgumentException.ThrowIfNullOrWhiteSpace(scopeId);
@@ -33,6 +34,7 @@ public sealed record GraphEditorValidationIssueSnapshot
         EndpointId = NormalizeOptional(endpointId);
         TargetKind = targetKind;
         ParameterKey = NormalizeOptional(parameterKey);
+        HelpTarget = helpTarget;
     }
 
     /// <summary>
@@ -79,6 +81,11 @@ public sealed record GraphEditorValidationIssueSnapshot
     /// Optional affected parameter key.
     /// </summary>
     public string? ParameterKey { get; }
+
+    /// <summary>
+    /// Optional contextual documentation target for the affected node, port, edge, or parameter.
+    /// </summary>
+    public GraphEditorValidationHelpTargetSnapshot? HelpTarget { get; }
 
     private static string? NormalizeOptional(string? value)
         => string.IsNullOrWhiteSpace(value) ? null : value.Trim();

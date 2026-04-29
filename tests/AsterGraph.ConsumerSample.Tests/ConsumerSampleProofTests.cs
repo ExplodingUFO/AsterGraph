@@ -434,6 +434,12 @@ public sealed class ConsumerSampleProofTests
         Assert.NotNull(result.RepairEvidence);
         Assert.Contains(result.RepairEvidence!, evidence => evidence.Action == "validation.parameter.reset-default");
         Assert.Contains(result.RepairEvidence!, evidence => evidence.Action == "validation.connection.remove");
+        Assert.True(result.GraphErrorHelpTargetOk);
+        Assert.True(result.GraphProblemInspectorHelpTargetOk);
+        Assert.True(result.RepairHelpReviewLoopOk);
+        Assert.Contains(result.ProofLines, line => line == "GRAPH_ERROR_HELP_TARGET_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "GRAPH_PROBLEM_INSPECTOR_HELP_TARGET_OK:True");
+        Assert.Contains(result.ProofLines, line => line == "REPAIR_HELP_REVIEW_LOOP_OK:True");
         Assert.Contains(result.ProofLines, line => line == "FIVE_MINUTE_ONBOARDING_OK:True");
         Assert.Contains(result.ProofLines, line => line == "ONBOARDING_CONFIGURATION_OK:True");
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_SURFACE_OK:True");
@@ -963,6 +969,9 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(proofLines, line => line == "GRAPH_VALIDATION_FEEDBACK_OK:True");
         Assert.Contains(proofLines, line => line == "GRAPH_FEEDBACK_FOCUS_TARGET_OK:True");
         Assert.Contains(proofLines, line => line == "GRAPH_READINESS_STATUS_OK:True");
+        Assert.Contains(proofLines, line => line == "GRAPH_ERROR_HELP_TARGET_OK:True");
+        Assert.Contains(proofLines, line => line == "GRAPH_PROBLEM_INSPECTOR_HELP_TARGET_OK:True");
+        Assert.Contains(proofLines, line => line == "REPAIR_HELP_REVIEW_LOOP_OK:True");
         Assert.Contains(proofLines, line => line == "FIVE_MINUTE_ONBOARDING_OK:True");
         Assert.Contains(proofLines, line => line == "ONBOARDING_CONFIGURATION_OK:True");
         Assert.Contains(proofLines, line => line == "AUTHORING_SURFACE_OK:True");

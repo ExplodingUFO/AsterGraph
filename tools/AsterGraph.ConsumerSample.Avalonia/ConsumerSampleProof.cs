@@ -173,7 +173,10 @@ public sealed record ConsumerSampleProofResult(
     bool MiniMapLightweightProjectionEvidenceOk = true,
     IReadOnlyList<ConsumerSampleRepairEvidence>? RepairEvidence = null,
     int SelectedParameterProjectionCount = 0,
-    int TotalParameterProjectionCount = 0)
+    int TotalParameterProjectionCount = 0,
+    bool GraphErrorHelpTargetOk = true,
+    bool GraphProblemInspectorHelpTargetOk = true,
+    bool RepairHelpReviewLoopOk = true)
 {
     public bool AuthoringSurfaceOk
         => ParameterProjectionOk
@@ -869,7 +872,10 @@ public sealed record ConsumerSampleProofResult(
         && WorkbenchEvidenceScopeBoundaryOk
         && WorkbenchAdopterPolishHandoffOk
         && WorkbenchAdopterPolishScopeBoundaryOk
-        && V064MilestoneProofOk;
+        && V064MilestoneProofOk
+        && GraphErrorHelpTargetOk
+        && GraphProblemInspectorHelpTargetOk
+        && RepairHelpReviewLoopOk;
 
     public IReadOnlyList<string> MetricLines =>
     [
@@ -1042,6 +1048,9 @@ public sealed record ConsumerSampleProofResult(
         $"GRAPH_VALIDATION_FEEDBACK_OK:{GraphValidationFeedbackOk}",
         $"GRAPH_FEEDBACK_FOCUS_TARGET_OK:{GraphFeedbackFocusTargetOk}",
         $"GRAPH_READINESS_STATUS_OK:{GraphReadinessStatusOk}",
+        $"GRAPH_ERROR_HELP_TARGET_OK:{GraphErrorHelpTargetOk}",
+        $"GRAPH_PROBLEM_INSPECTOR_HELP_TARGET_OK:{GraphProblemInspectorHelpTargetOk}",
+        $"REPAIR_HELP_REVIEW_LOOP_OK:{RepairHelpReviewLoopOk}",
         $"FIVE_MINUTE_ONBOARDING_OK:{FiveMinuteOnboardingOk}",
         $"ONBOARDING_CONFIGURATION_OK:{OnboardingConfigurationOk}",
         $"AUTHORING_SURFACE_OK:{AuthoringSurfaceOk}",
@@ -1404,6 +1413,7 @@ public static class ConsumerSampleProof
         bool connectionInvalidHoverFeedbackOk;
         bool connectionValidationSupportBundleOk;
         bool connectionValidationScopeBoundaryOk;
+        bool connectionValidationHelpTargetOk;
         IReadOnlyList<ConsumerSampleRepairEvidence> connectionValidationRepairEvidence;
         bool commandPaletteGroupingOk;
         bool commandPaletteDisabledReasonOk;
@@ -1466,6 +1476,7 @@ public static class ConsumerSampleProof
                 connectionInvalidHoverFeedbackOk,
                 connectionValidationSupportBundleOk,
                 connectionValidationScopeBoundaryOk,
+                connectionValidationHelpTargetOk,
                 connectionValidationRepairEvidence) =
                 HasConnectionValidationFeedback();
             (quickAddConnectedNodeOk, portFilteredNodeSearchOk) = HasQuickAddConnectedNode(host);
@@ -1532,7 +1543,8 @@ public static class ConsumerSampleProof
             .ToArray();
         var selectedSupportSnapshots = host.GetSelectedParameterSnapshots().ToArray();
         var mixedValueSnapshots = CaptureMixedValueSnapshots(host);
-        var (validationFixSnapshots, validationFixRepairEvidence) = CreateValidationFixProof();
+        var (validationFixSnapshots, validationFixRepairEvidence, validationFixHelpTargetOk, validationFixInspectorHelpTargetOk) =
+            CreateValidationFixProof();
         var proofParameterSnapshots = CreateParameterSnapshots(
             [.. selectedSupportSnapshots, .. mixedValueSnapshots, .. validationFixSnapshots]);
         var validationSummary = CreateValidationSummary(validationSnapshot);
@@ -1541,6 +1553,12 @@ public static class ConsumerSampleProof
             .Concat(validationFixRepairEvidence)
             .Concat(connectionValidationRepairEvidence)
             .ToArray();
+        var graphErrorHelpTargetOk = validationFixHelpTargetOk && connectionValidationHelpTargetOk;
+        var graphProblemInspectorHelpTargetOk = validationFixInspectorHelpTargetOk;
+        var repairHelpReviewLoopOk = graphErrorHelpTargetOk
+            && graphProblemInspectorHelpTargetOk
+            && repairEvidence.Any(static evidence => string.Equals(evidence.Action, "validation.parameter.reset-default", StringComparison.Ordinal))
+            && repairEvidence.Any(static evidence => string.Equals(evidence.Action, "validation.connection.remove", StringComparison.Ordinal));
         var supportBundlePayloadOk = HasSupportBundlePayload(proofParameterSnapshots, finalSnapshot, featureDescriptorIds);
         var runtimeOverlaySupportBundleOk = HasRuntimeOverlaySupportBundlePayload(runtimeOverlay);
         var miniMapLightweightProjectionEvidenceOk = HasLightweightMiniMapProjection(host);
@@ -1675,6 +1693,9 @@ public static class ConsumerSampleProof
             MiniMapLightweightProjectionEvidenceOk: miniMapLightweightProjectionEvidenceOk,
             SelectedParameterProjectionCount: selectedSupportSnapshots.Length,
             TotalParameterProjectionCount: proofParameterSnapshots.Count,
+            GraphErrorHelpTargetOk: graphErrorHelpTargetOk,
+            GraphProblemInspectorHelpTargetOk: graphProblemInspectorHelpTargetOk,
+            RepairHelpReviewLoopOk: repairHelpReviewLoopOk,
             ReadinessStatus: CreateReadinessStatus(validationSnapshot),
             ValidationSummary: validationSummary,
             ValidationFeedback: validationFeedback,
@@ -4160,6 +4181,7 @@ public static class ConsumerSampleProof
         bool InvalidHoverOk,
         bool SupportBundleOk,
         bool ScopeBoundaryOk,
+        bool HelpTargetOk,
         IReadOnlyList<ConsumerSampleRepairEvidence> RepairEvidence) HasConnectionValidationFeedback()
     {
         const string sourceNodeId = "consumer-sample.validation.source";
@@ -4173,8 +4195,8 @@ public static class ConsumerSampleProof
             "Connection Validation Node",
             "Consumer Sample",
             "Validation",
-            [],
-            [],
+            [new PortDefinition("in", "Text", new PortTypeId("string"), "#F3B36B", description: "String input expected by review validation.")],
+            [new PortDefinition("out", "Float", new PortTypeId("float"), "#6AD5C4", description: "Float output emitted by validation proof.")],
             []));
         var session = AsterGraphEditorFactory.CreateSession(new AsterGraphEditorOptions
         {
@@ -4230,6 +4252,11 @@ public static class ConsumerSampleProof
             string.Equals(snapshot.Code, "connection.incompatible-endpoint-types", StringComparison.Ordinal));
         var summary = CreateValidationSummary(validation);
         var feedback = CreateValidationFeedback(validation);
+        var helpTargetOk = issue?.HelpTarget is not null
+            && string.Equals(issue.HelpTarget.Kind, "Connection", StringComparison.Ordinal)
+            && string.Equals(issue.HelpTarget.ConnectionId, "consumer-sample.validation.connection", StringComparison.Ordinal)
+            && issue.HelpTarget.HelpText.Contains("float", StringComparison.Ordinal)
+            && issue.HelpTarget.HelpText.Contains("string", StringComparison.Ordinal);
 
         var reasonOk = issue is not null
             && issue.Message.Contains("float -> string", StringComparison.Ordinal)
@@ -4253,7 +4280,7 @@ public static class ConsumerSampleProof
             && typeof(GraphEditorValidationIssueSnapshot).Namespace == "AsterGraph.Editor.Runtime"
             && Type.GetType("AsterGraph.Editor.Runtime.IGraphExecutionEngine, AsterGraph.Editor") is null;
 
-        return (reasonOk, invalidHoverOk, supportBundleOk, scopeBoundaryOk, CreateRepairEvidence(session, validation));
+        return (reasonOk, invalidHoverOk, supportBundleOk, scopeBoundaryOk, helpTargetOk, CreateRepairEvidence(session, validation));
     }
 
     private static bool HasRuntimeLogPanel(Window window, ConsumerSampleHost host)
@@ -4401,7 +4428,9 @@ public static class ConsumerSampleProof
 
     private static (
         IReadOnlyList<GraphEditorNodeParameterSnapshot> ParameterSnapshots,
-        IReadOnlyList<ConsumerSampleRepairEvidence> RepairEvidence) CreateValidationFixProof()
+        IReadOnlyList<ConsumerSampleRepairEvidence> RepairEvidence,
+        bool HelpTargetOk,
+        bool InspectorHelpTargetOk) CreateValidationFixProof()
     {
         var invalidNodeId = "consumer-sample.validation.invalid-node";
         var definitionId = new NodeDefinitionId("consumer.sample.validation-fix");
@@ -4453,10 +4482,20 @@ public static class ConsumerSampleProof
         });
         session.Commands.SetSelection([invalidNodeId], invalidNodeId, updateStatus: false);
         var validation = session.Queries.GetValidationSnapshot();
+        var issue = validation.Issues.SingleOrDefault(snapshot =>
+            string.Equals(snapshot.Code, "node.parameter-invalid", StringComparison.Ordinal));
         var parameterSnapshots = session.Queries.GetSelectedNodeParameterSnapshots()
             .Where(snapshot => snapshot.CanApplyValidationFix)
             .ToArray();
-        return (parameterSnapshots, CreateRepairEvidence(session, validation));
+        var parameterSnapshot = parameterSnapshots.SingleOrDefault();
+        var helpTargetOk = issue?.HelpTarget is not null
+            && string.Equals(issue.HelpTarget.Kind, "Parameter", StringComparison.Ordinal)
+            && string.Equals(issue.HelpTarget.NodeId, invalidNodeId, StringComparison.Ordinal)
+            && string.Equals(issue.HelpTarget.ParameterKey, "slug", StringComparison.Ordinal);
+        var inspectorHelpTargetOk = helpTargetOk
+            && parameterSnapshot is not null
+            && string.Equals(issue!.HelpTarget!.HelpText, parameterSnapshot.HelpText, StringComparison.Ordinal);
+        return (parameterSnapshots, CreateRepairEvidence(session, validation), helpTargetOk, inspectorHelpTargetOk);
     }
 }
 

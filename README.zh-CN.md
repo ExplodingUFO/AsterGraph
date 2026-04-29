@@ -155,7 +155,7 @@ dotnet add package AsterGraph.Abstractions --prerelease
 - 缩放、平移、缩略图、待完成连线预览
 - 保存 / 加载、撤销 / 重做、复制 / 粘贴、片段导入导出，以及带 raster scope/progress/cancel 证据的 SVG/PNG/JPEG 场景导出
 - 对齐、分布、兼容多选下的共享参数编辑
-- definition-driven inspector 元数据，支持参数分组、内建 list/text/number/bool/enum editor 和校验反馈
+- definition-driven inspector 元数据，支持参数分组、内建 list/text/number/bool/enum editor、校验反馈和有界 repair/help target
 - 分层节点表面、固定组框、hierarchy snapshot、scoped composite、连线注释和 routed edge geometry 编辑
 - 编译期节点定义注册与运行时插件注册
 - 宿主控制的插件信任策略、本地候选发现和加载状态检查

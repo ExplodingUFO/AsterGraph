@@ -155,7 +155,7 @@ Current capabilities:
 - zoom, pan, mini map, and pending-connection preview
 - save/load, undo/redo, copy/paste, fragment import/export, and SVG/PNG/JPEG scene export with raster scope, progress, and cancel evidence
 - batch alignment, distribution, and shared-parameter editing for compatible selections
-- definition-driven inspector metadata with grouped parameters, shipped list/text/number/bool/enum editors, and validation feedback
+- definition-driven inspector metadata with grouped parameters, shipped list/text/number/bool/enum editors, validation feedback, and bounded repair/help targets
 - tiered node surfaces, fixed group frames, hierarchy snapshots, scoped composites, connection notes, and routed edge geometry editing
 - compile-time node-definition registration and runtime plugin registration
 - host-governed plugin trust policy, local candidate discovery, and load-state inspection

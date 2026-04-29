@@ -94,7 +94,7 @@ Use those rows with `status`, `owner`, `priority`, `review-script`, and `slug` w
 
 `readinessStatus` is `Ready` when the validation snapshot has no issues, `Warnings` when it has only non-blocking warnings, and `Blocked` when it has blocking errors.
 `validationSummary` records `totalIssueCount`, `errorCount`, `warningCount`, `invalidConnectionCount`, and `invalidParameterCount`.
-`validationFeedback` contains one row per canonical validation issue. Each row records `code`, `severity`, `message`, and `focusTarget`; `focusTarget` includes a stable `kind` plus `nodeId`, `connectionId`, `endpointId`, and `parameterKey` when the canonical issue has those IDs. An empty `validationFeedback` array is valid for a ready graph.
+`validationFeedback` contains one row per canonical validation issue. Each row records `code`, `severity`, `message`, and `focusTarget`; `focusTarget` includes a stable `kind` plus `nodeId`, `connectionId`, `endpointId`, and `parameterKey` when the canonical issue has those IDs. The repair/help review proof also checks `GRAPH_ERROR_HELP_TARGET_OK:True`, `GRAPH_PROBLEM_INSPECTOR_HELP_TARGET_OK:True`, and `REPAIR_HELP_REVIEW_LOOP_OK:True`, proving that Problems Panel issues and inspector metadata share the same bounded help target where metadata exists. An empty `validationFeedback` array is valid for a ready graph.
 
 `runtimeNodeOverlays`, `runtimeConnectionOverlays`, and `runtimeLogs` capture host-owned runtime feedback. They are display/support evidence only and do not imply a core graph execution engine.
 

@@ -241,6 +241,34 @@ public sealed class GraphEditorViewTests
     }
 
     [AvaloniaFact]
+    public void ProblemsPanel_ProjectsSameHelpTargetAsInspector()
+    {
+        var editor = CreateValidationParameterFeedbackEditor();
+        var window = CreateWindow(new GraphEditorView
+        {
+            Editor = editor,
+        });
+        var view = (GraphEditorView)window.Content!;
+        var problemRow = FindRequiredDescendant<Button>(
+            view,
+            "PART_ProblemsIssue_parameter-001_node.parameter-invalid_prompt");
+        var issue = editor.Session.Queries.GetValidationSnapshot().Issues.Single(candidate =>
+            string.Equals(candidate.ParameterKey, "prompt", StringComparison.Ordinal));
+
+        Assert.NotNull(issue.HelpTarget);
+        var rowHelpText = Assert.IsType<string>(ToolTip.GetTip(problemRow));
+        Assert.Contains(issue.HelpTarget!.DisplayText, rowHelpText, StringComparison.Ordinal);
+        Assert.Equal(issue.HelpTarget.DisplayText, AutomationProperties.GetHelpText(problemRow));
+
+        problemRow.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        var inspectorParameter = editor.Session.Queries.GetSelectedNodeParameterSnapshots().Single(parameter =>
+            string.Equals(parameter.Definition.Key, issue.HelpTarget.ParameterKey, StringComparison.Ordinal));
+
+        Assert.Equal(issue.HelpTarget.ParameterKey, inspectorParameter.Definition.Key);
+        Assert.Equal(issue.HelpTarget.HelpText, inspectorParameter.HelpText);
+    }
+
+    [AvaloniaFact]
     public void ProblemsPanel_ExposesRepairPreviewAndApplyAffordance()
     {
         var editor = CreateValidationFeedbackEditor();
@@ -1389,7 +1417,8 @@ public sealed class GraphEditorViewTests
                     "Prompt",
                     textTypeId,
                     ParameterEditorKind.Text,
-                    isRequired: true),
+                    isRequired: true,
+                    helpText: "Prompt guidance for review automation."),
                 new NodeParameterDefinition(
                     "system",
                     "System",

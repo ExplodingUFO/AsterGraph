@@ -1,6 +1,7 @@
 using AsterGraph.Abstractions.Definitions;
 using AsterGraph.Abstractions.Identifiers;
 using AsterGraph.Core.Models;
+using AsterGraph.Editor.Documentation;
 using AsterGraph.Editor.Parameters;
 
 namespace AsterGraph.Editor.Runtime.Internal;
@@ -81,7 +82,8 @@ internal static class GraphEditorValidationSnapshotProjector
                 scopeId,
                 nodeId: node.Id,
                 endpointId: parameter.Key,
-                parameterKey: parameter.Key));
+                parameterKey: parameter.Key,
+                helpTarget: CreateParameterHelpTarget(node, definition, parameter)));
         }
     }
 
@@ -135,7 +137,8 @@ internal static class GraphEditorValidationSnapshotProjector
                 connectionId: connection.Id,
                 nodeId: connection.TargetNodeId,
                 endpointId: connection.TargetPortId,
-                targetKind: connection.TargetKind));
+                targetKind: connection.TargetKind,
+                helpTarget: CreateConnectionHelpTarget(connection, sourceNode, targetNode, descriptorSupport)));
         }
     }
 
@@ -174,7 +177,8 @@ internal static class GraphEditorValidationSnapshotProjector
             scopeId,
             connectionId: connection.Id,
             nodeId: sourceNode.Id,
-            endpointId: sourcePort.Id));
+            endpointId: sourcePort.Id,
+            helpTarget: CreatePortHelpTarget(sourceNode, sourcePort, PortDirection.Output)));
         return null;
     }
 
@@ -230,7 +234,8 @@ internal static class GraphEditorValidationSnapshotProjector
             connectionId: connection.Id,
             nodeId: targetNode.Id,
             endpointId: targetPort.Id,
-            targetKind: GraphConnectionTargetKind.Port));
+            targetKind: GraphConnectionTargetKind.Port,
+            helpTarget: CreatePortHelpTarget(targetNode, targetPort, PortDirection.Input)));
         return null;
     }
 
@@ -293,7 +298,8 @@ internal static class GraphEditorValidationSnapshotProjector
         string? connectionId = null,
         string? endpointId = null,
         GraphConnectionTargetKind? targetKind = null,
-        string? parameterKey = null)
+        string? parameterKey = null,
+        GraphEditorValidationHelpTargetSnapshot? helpTarget = null)
         => new(
             code,
             GraphEditorValidationIssueSeverity.Error,
@@ -303,7 +309,8 @@ internal static class GraphEditorValidationSnapshotProjector
             connectionId,
             endpointId,
             targetKind,
-            parameterKey);
+            parameterKey,
+            helpTarget);
 
     private static GraphEditorValidationIssueSnapshot Warning(
         string code,
@@ -313,7 +320,8 @@ internal static class GraphEditorValidationSnapshotProjector
         string? connectionId = null,
         string? endpointId = null,
         GraphConnectionTargetKind? targetKind = null,
-        string? parameterKey = null)
+        string? parameterKey = null,
+        GraphEditorValidationHelpTargetSnapshot? helpTarget = null)
         => new(
             code,
             GraphEditorValidationIssueSeverity.Warning,
@@ -323,5 +331,100 @@ internal static class GraphEditorValidationSnapshotProjector
             connectionId,
             endpointId,
             targetKind,
-            parameterKey);
+            parameterKey,
+            helpTarget);
+
+    private static GraphEditorValidationHelpTargetSnapshot? CreateParameterHelpTarget(
+        GraphNode node,
+        INodeDefinition definition,
+        NodeParameterDefinition parameter)
+    {
+        var helpText = NodeParameterInspectorMetadata.BuildHelpText(parameter);
+        return string.IsNullOrWhiteSpace(helpText)
+            ? null
+            : new GraphEditorValidationHelpTargetSnapshot(
+                "Parameter",
+                $"{node.Title}.{parameter.DisplayName}",
+                helpText,
+                node.Id,
+                ParameterKey: parameter.Key);
+    }
+
+    private static GraphEditorValidationHelpTargetSnapshot? CreatePortHelpTarget(
+        GraphNode node,
+        GraphPort port,
+        PortDirection direction)
+    {
+        var helpText = NodeDocumentationText.JoinDistinct(
+            port.GroupName,
+            port.DataType,
+            port.TypeId?.Value);
+        return string.IsNullOrWhiteSpace(helpText)
+            ? null
+            : new GraphEditorValidationHelpTargetSnapshot(
+                "Port",
+                $"{node.Title}.{port.Label}",
+                helpText,
+                node.Id,
+                EndpointId: port.Id);
+    }
+
+    private static GraphEditorValidationHelpTargetSnapshot? CreateConnectionHelpTarget(
+        GraphConnection connection,
+        GraphNode? sourceNode,
+        GraphNode? targetNode,
+        GraphEditorSessionDescriptorSupport descriptorSupport)
+    {
+        if (sourceNode?.DefinitionId is null || targetNode?.DefinitionId is null)
+        {
+            return null;
+        }
+
+        var provider = new NodeDocumentationProvider(descriptorSupport.NodeCatalog);
+        var sourceDocumentation = provider.GetPortDocumentation(sourceNode.DefinitionId, connection.SourcePortId, PortDirection.Output);
+        if (sourceDocumentation is null)
+        {
+            return null;
+        }
+
+        string? targetHelpText;
+        string targetLabel;
+        string? parameterKey = null;
+        if (connection.TargetKind == GraphConnectionTargetKind.Parameter)
+        {
+            var parameterDocumentation = provider.GetParameterDocumentation(targetNode.DefinitionId, connection.TargetPortId);
+            if (parameterDocumentation is null)
+            {
+                return null;
+            }
+
+            targetHelpText = parameterDocumentation.InspectorHelpText;
+            targetLabel = parameterDocumentation.DisplayName;
+            parameterKey = parameterDocumentation.ParameterKey;
+        }
+        else
+        {
+            var targetDocumentation = provider.GetPortDocumentation(targetNode.DefinitionId, connection.TargetPortId, PortDirection.Input);
+            if (targetDocumentation is null)
+            {
+                return null;
+            }
+
+            targetHelpText = targetDocumentation.HelpText;
+            targetLabel = targetDocumentation.DisplayName;
+        }
+
+        var helpText = NodeDocumentationText.JoinDistinct(sourceDocumentation.HelpText, targetHelpText);
+        return string.IsNullOrWhiteSpace(helpText)
+            ? null
+            : new GraphEditorValidationHelpTargetSnapshot(
+                "Connection",
+                $"{sourceNode.Title}.{sourceDocumentation.DisplayName} -> {targetNode.Title}.{targetLabel}",
+                helpText,
+                targetNode.Id,
+                connection.Id,
+                connection.TargetPortId,
+                parameterKey);
+    }
+
 }

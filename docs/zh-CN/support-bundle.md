@@ -96,7 +96,7 @@ onboarding proof 行还应该包含 `CONSUMER_SAMPLE_SCENARIO_GRAPH_OK:True`、`
 
 `readinessStatus` 在 validation snapshot 没有 issue 时是 `Ready`，只有非阻塞 warning 时是 `Warnings`，存在阻塞 error 时是 `Blocked`。
 `validationSummary` 记录 `totalIssueCount`、`errorCount`、`warningCount`、`invalidConnectionCount` 和 `invalidParameterCount`。
-`validationFeedback` 每行对应一个 canonical validation issue，记录 `code`、`severity`、`message` 和 `focusTarget`；`focusTarget` 包含稳定的 `kind`，并在 canonical issue 有对应 ID 时带上 `nodeId`、`connectionId`、`endpointId` 和 `parameterKey`。ready graph 的 `validationFeedback` 可以是空数组。
+`validationFeedback` 每行对应一个 canonical validation issue，记录 `code`、`severity`、`message` 和 `focusTarget`；`focusTarget` 包含稳定的 `kind`，并在 canonical issue 有对应 ID 时带上 `nodeId`、`connectionId`、`endpointId` 和 `parameterKey`。repair/help review proof 还检查 `GRAPH_ERROR_HELP_TARGET_OK:True`、`GRAPH_PROBLEM_INSPECTOR_HELP_TARGET_OK:True` 和 `REPAIR_HELP_REVIEW_LOOP_OK:True`，证明 Problems Panel issue 与 inspector metadata 在存在 metadata 时共享同一个有界 help target。ready graph 的 `validationFeedback` 可以是空数组。
 
 `runtimeNodeOverlays`、`runtimeConnectionOverlays` 和 `runtimeLogs` 记录宿主持有的运行反馈。它们只作为展示和 support evidence，不代表 core 内置了图执行引擎。
 

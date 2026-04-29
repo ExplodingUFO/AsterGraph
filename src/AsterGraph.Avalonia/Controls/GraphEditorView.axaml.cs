@@ -901,7 +901,7 @@ public partial class GraphEditorView : UserControl
         };
         focusButton.Classes.Add("astergraph-toolbar-action");
         AutomationProperties.SetName(focusButton, $"Focus {issue.Code}");
-        ToolTip.SetTip(focusButton, CreateValidationTargetCaption(issue));
+        ToolTip.SetTip(focusButton, CreateValidationIssueHelpCaption(issue));
         focusButton.Click += (_, _) =>
         {
             FocusValidationIssueFromProblemsPanel(issue, openInspector: false);
@@ -937,6 +937,14 @@ public partial class GraphEditorView : UserControl
                         Foreground = GetResourceBrush("AsterGraph.EyebrowBrush"),
                         TextWrapping = global::Avalonia.Media.TextWrapping.Wrap,
                     },
+                    new TextBlock
+                    {
+                        Text = CreateValidationIssueHelpCaption(issue),
+                        FontSize = 11,
+                        Foreground = GetResourceBrush("AsterGraph.HighlightBrush"),
+                        TextWrapping = global::Avalonia.Media.TextWrapping.Wrap,
+                        IsVisible = issue.HelpTarget is not null,
+                    },
                     focusButton,
                 },
             },
@@ -944,7 +952,12 @@ public partial class GraphEditorView : UserControl
         };
         row.Classes.Add("astergraph-problem-row");
         AutomationProperties.SetName(row, $"Problem {issue.Code}");
-        ToolTip.SetTip(row, "Click to focus. Double-click to focus and show the inspector.");
+        if (issue.HelpTarget is not null)
+        {
+            AutomationProperties.SetHelpText(row, issue.HelpTarget.DisplayText);
+        }
+
+        ToolTip.SetTip(row, CreateValidationIssueHelpCaption(issue));
         row.Click += (_, _) => FocusValidationIssueFromProblemsPanel(issue, openInspector: false);
         row.DoubleTapped += (_, args) =>
         {
@@ -1047,6 +1060,11 @@ public partial class GraphEditorView : UserControl
 
         return $"Scope {issue.ScopeId}";
     }
+
+    private static string CreateValidationIssueHelpCaption(GraphEditorValidationIssueSnapshot issue)
+        => issue.HelpTarget is null
+            ? "Click to focus. Double-click to focus and show the inspector."
+            : $"Help target  ·  {issue.HelpTarget.DisplayText}";
 
     private static string ResolveValidationFocusButtonName(GraphEditorValidationIssueSnapshot issue)
         => $"PART_ValidationFocus_{CreateValidationIssueControlNameSuffix(issue)}";
