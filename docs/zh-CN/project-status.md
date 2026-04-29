@@ -18,6 +18,7 @@
 - v0.64 bounded workbench affordance markers：`WORKBENCH_AFFORDANCE_POLISH_OK:True`、`WORKBENCH_AFFORDANCE_ROUTE_OK:True` 和 `WORKBENCH_AFFORDANCE_SCOPE_BOUNDARY_OK:True`
 - v0.64 workbench evidence bundle markers：`WORKBENCH_FRICTION_SUPPORT_BUNDLE_OK:True`、`WORKBENCH_ADOPTER_EVIDENCE_ATTACHMENT_OK:True` 和 `WORKBENCH_EVIDENCE_SCOPE_BOUNDARY_OK:True`
 - v0.64 adopter polish handoff markers：`WORKBENCH_ADOPTER_POLISH_HANDOFF_OK:True`、`WORKBENCH_ADOPTER_POLISH_SCOPE_BOUNDARY_OK:True` 和 `V064_MILESTONE_PROOF_OK:True`
+- v0.67 repair/help review markers：`GRAPH_ERROR_HELP_TARGET_OK:True`、`GRAPH_PROBLEM_INSPECTOR_HELP_TARGET_OK:True` 和 `REPAIR_HELP_REVIEW_LOOP_OK:True`
 - v0.59 mini-map 与 inspector projection markers：`MINIMAP_LIGHTWEIGHT_PROJECTION_OK:True`、`INSPECTOR_NARROW_PROJECTION_OK:True`、`LARGE_GRAPH_PANEL_SCOPE_OK:True` 和 `PROJECTION_PERFORMANCE_EVIDENCE_OK:True`
 - v0.59 Large Graph UX handoff markers：`LARGE_GRAPH_UX_HANDOFF_OK:True`、`LARGE_GRAPH_UX_SCOPE_BOUNDARY_OK:True` 和 `V059_MILESTONE_PROOF_OK:True`
 - v0.60 adapter-2 validation scope markers：`ADAPTER2_VALIDATION_SCOPE_OK:True`、`ADAPTER2_MATRIX_HANDOFF_OK:True` 和 `ADAPTER2_SCOPE_BOUNDARY_OK:True`
@@ -66,6 +67,7 @@
 - v0.64 bounded workbench affordance proof 把最高优先级的 `layout-resume` friction row 映射到现有 hosted workbench options，不新增 runtime route、WPF parity、remote sync、macro/query system、execution engine 或 GA claim：`WORKBENCH_AFFORDANCE_POLISH_OK:True`、`WORKBENCH_AFFORDANCE_ROUTE_OK:True`、`WORKBENCH_AFFORDANCE_SCOPE_BOUNDARY_OK:True`
 - v0.64 workbench evidence bundle proof 把 friction 与 affordance evidence 保持在本地 support bundle 内，不代表 telemetry、remote sync、external validation 或 GA readiness：`WORKBENCH_FRICTION_SUPPORT_BUNDLE_OK:True`、`WORKBENCH_ADOPTER_EVIDENCE_ATTACHMENT_OK:True`、`WORKBENCH_EVIDENCE_SCOPE_BOUNDARY_OK:True`
 - v0.64 adopter polish handoff proof 汇总 phases 392-394，并建议下一条线继续 adopter-driven，直到真实报告足以支持更大范围声明：`WORKBENCH_ADOPTER_POLISH_HANDOFF_OK:True`、`WORKBENCH_ADOPTER_POLISH_SCOPE_BOUNDARY_OK:True`、`V064_MILESTONE_PROOF_OK:True`
+- v0.67 Repairability, Help, and Review UX proof 已经是来自 `ConsumerSample.Avalonia` 的完成证据，不再是下一条工作线：`GRAPH_ERROR_HELP_TARGET_OK:True`、`GRAPH_PROBLEM_INSPECTOR_HELP_TARGET_OK:True` 和 `REPAIR_HELP_REVIEW_LOOP_OK:True`
 - panel projection proof 在 hosted proof route 上汇总 mini-map lightweight projection 和 inspector narrow projection 证据，但不创建 broad graph subscription contract：`MINIMAP_LIGHTWEIGHT_PROJECTION_OK:True`、`INSPECTOR_NARROW_PROJECTION_OK:True`、`LARGE_GRAPH_PANEL_SCOPE_OK:True`、`PROJECTION_PERFORMANCE_EVIDENCE_OK:True`
 - v0.59 Large Graph UX handoff proof 把 phases 371-374 绑定在现有 hosted workbench 证据上，但不扩大 graph-size support claims：`LARGE_GRAPH_UX_HANDOFF_OK:True`、`LARGE_GRAPH_UX_SCOPE_BOUNDARY_OK:True`、`V059_MILESTONE_PROOF_OK:True`
 - adapter-2 validation scope proof 让 WPF 继续停在同一条 canonical route 和 matrix vocabulary 上，不扩大 public WPF support 或 parity claims：`ADAPTER2_VALIDATION_SCOPE_OK:True`、`ADAPTER2_MATRIX_HANDOFF_OK:True`、`ADAPTER2_SCOPE_BOUNDARY_OK:True`
@@ -146,9 +148,9 @@
 - GA prep checklist：adoption evidence、API drift、support boundary 和 release proof gate 都复核通过后，才允许写 GA 或 `1.0` 级别语言。
 - Release-candidate proof handoff markers：`API_RELEASE_CANDIDATE_PROOF_OK:True`、`PUBLIC_API_GUIDANCE_HANDOFF_OK:True` 和 `RELEASE_BOUNDARY_STABILITY_OK:True`。
 - v0.61 API stabilization markers：`PUBLIC_API_DIFF_GATE_OK:True`、`PUBLIC_API_USAGE_GUIDANCE_OK:True` 和 `PUBLIC_API_STABILITY_SCOPE_OK:True`。
-- 当前 `0.xx` alpha/beta hardening 线命名为 `Repairability, Help, and Review UX`：先把 validation repair、contextual help、support-bundle evidence、support boundary 和 release proof gate 对齐，再写 release-candidate、GA 或 `1.0` 级别语言；`ADOPTION_RECOMMENDATION_CURRENT_OK:True`、`CLAIM_HYGIENE_BOUNDARY_OK:True`、`RELEASE_READINESS_GATE_OK:True`、`SUPPORT_BOUNDARY_GATE_OK:True` 和 `BETA_CLAIM_ALIGNMENT_OK:True` 仍是 boundary proof handoff markers
+- 已完成的 v0.67 repair/help hardening evidence 命名为 `Repairability, Help, and Review UX`：validation repair、contextual help、support-bundle evidence、support boundary 和 release proof gate 已对齐；写 release-candidate、GA 或 `1.0` 级别语言前仍要保留这些边界；`ADOPTION_RECOMMENDATION_CURRENT_OK:True`、`CLAIM_HYGIENE_BOUNDARY_OK:True`、`RELEASE_READINESS_GATE_OK:True`、`SUPPORT_BOUNDARY_GATE_OK:True` 和 `BETA_CLAIM_ALIGNMENT_OK:True` 仍是 boundary proof handoff markers
 - v0.61 adoption/API stabilization handoff 汇总 refreshed adopter intake、public API diff/guidance gate 和 release-boundary wording，并且不扩大 support scope：`ADOPTION_API_STABILIZATION_HANDOFF_OK:True`、`ADOPTION_API_SCOPE_BOUNDARY_OK:True` 和 `V061_MILESTONE_PROOF_OK:True`
-- 下一条推荐工作线：v0.67 做 Repairability, Help, and Review UX，从 validation repair 和 contextual help 闭环开始，继续复用现有 hosted workbench seams，不扩大 WPF parity、marketplace、sandboxing、macro/query、execution-engine 或 GA scope。
+- 下一步推荐动作：v0.68 release packaging/readiness；如果 packaging 产物还需要一次公开声明核对，则先做 adopter-evidence review；不要重新打开 WPF parity、marketplace、sandboxing、macro/query、execution-engine、graph-size support 或 GA scope。
 - 维护者种子预演证据不计入 3 到 5 的门槛
 - 如果新的报告放不进上面的“已证明”或“受边界约束”两类，就走 [Adoption Feedback Loop](./adoption-feedback.md) 和 [Beta Support Bundle](./support-bundle.md)，不要临时扩大公开声明；在满足 3 到 5 条真实外部报告门禁前，claim-expansion status 只作为分诊字段
 

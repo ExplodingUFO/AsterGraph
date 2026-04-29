@@ -164,6 +164,9 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framew
 - `WORKBENCH_ADOPTER_POLISH_HANDOFF_OK:True`
 - `WORKBENCH_ADOPTER_POLISH_SCOPE_BOUNDARY_OK:True`
 - `V064_MILESTONE_PROOF_OK:True`
+- `GRAPH_ERROR_HELP_TARGET_OK:True`
+- `GRAPH_PROBLEM_INSPECTOR_HELP_TARGET_OK:True`
+- `REPAIR_HELP_REVIEW_LOOP_OK:True`
 - `MINIMAP_LIGHTWEIGHT_PROJECTION_OK:True`
 - `INSPECTOR_NARROW_PROJECTION_OK:True`
 - `LARGE_GRAPH_PANEL_SCOPE_OK:True`
@@ -203,9 +206,10 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\ci.ps1 -Lane release -Framew
 - 确认 claim-expansion status 在 3 到 5 条真实外部报告聚焦到同一个受限风险之前，只作为分诊输入
 - 确认 Phase 380 adopter refresh markers 出现在 release messaging：`ADOPTER_INTAKE_REFRESH_OK:True`、`ADOPTER_SUPPORT_BUNDLE_ATTACHMENT_OK:True` 和 `ADOPTER_CLAIM_EXPANSION_GATE_OK:True`
 - GA prep checklist：adoption evidence、API drift、support boundary 和 release proof gate 都必须显式保留，之后才允许写 GA 或 `1.0` 公告口径
-- 在 release messaging 里重复当前 `0.xx` alpha/beta hardening 线的 handoff：`Repairability, Help, and Review UX` 表示先把 validation repair、contextual help、support-bundle evidence、support boundary 和 release proof gate 对齐，再写 release-candidate、GA 或 `1.0` 级别语言；同时包含 `ADOPTION_RECOMMENDATION_CURRENT_OK:True`、`CLAIM_HYGIENE_BOUNDARY_OK:True`、`RELEASE_READINESS_GATE_OK:True`、`SUPPORT_BOUNDARY_GATE_OK:True` 和 `BETA_CLAIM_ALIGNMENT_OK:True`
-- 确认 v0.61 adoption/API stabilization handoff 包含 `ADOPTION_API_STABILIZATION_HANDOFF_OK:True`、`ADOPTION_API_SCOPE_BOUNDARY_OK:True` 和 `V061_MILESTONE_PROOF_OK:True`，且下一步建议仍是 external adoption/API stabilization，而不是 WPF parity、marketplace、sandboxing、execution-engine 或 GA expansion
+- 在 release messaging 里把 v0.67 `Repairability, Help, and Review UX` 写成完成证据：validation repair、contextual help、support-bundle evidence、support boundary 和 release proof gate 已对齐；写 release-candidate、GA 或 `1.0` 级别语言前仍要保留这些边界；同时包含 `GRAPH_ERROR_HELP_TARGET_OK:True`、`GRAPH_PROBLEM_INSPECTOR_HELP_TARGET_OK:True`、`REPAIR_HELP_REVIEW_LOOP_OK:True`、`ADOPTION_RECOMMENDATION_CURRENT_OK:True`、`CLAIM_HYGIENE_BOUNDARY_OK:True`、`RELEASE_READINESS_GATE_OK:True`、`SUPPORT_BOUNDARY_GATE_OK:True` 和 `BETA_CLAIM_ALIGNMENT_OK:True`
+- 确认 v0.61 adoption/API stabilization handoff 仍是历史 bounded evidence，包含 `ADOPTION_API_STABILIZATION_HANDOFF_OK:True`、`ADOPTION_API_SCOPE_BOUNDARY_OK:True` 和 `V061_MILESTONE_PROOF_OK:True`，不是重新打开 WPF parity、marketplace、sandboxing、execution-engine 或 GA expansion 的理由
 - 保持 `xlarge` 为 telemetry-only，不把它说成 10000 节点支持承诺或 virtualization commitment
+- 确认下一步动作是 v0.68 release packaging/readiness；如果 packaging 产物还需要一次公开声明核对，则先做 adopter-evidence review
 - 如果配置了 `NUGET_API_KEY`，确认包发布成功
 - 如果没有配置 `NUGET_API_KEY`，确认 workflow 是有意跳过 NuGet publish，而不是失败
 - 不要再把 `v1.x` 风格的历史里程碑 checkpoint 当成当前公开包版本；对外统一以 [Versioning](./versioning.md) 为准

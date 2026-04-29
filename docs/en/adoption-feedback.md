@@ -40,7 +40,7 @@ The current recommendation is based on four structured pre-public adoption rehea
 
 ## Current Recommendation
 
-The current 0.xx alpha/beta hardening line is `Repairability, Help, and Review UX`: keep validation repair, contextual help, support-bundle evidence, support boundary, and release proof story aligned before widening any capability claim. The previous `Performance / Export Hardening` work is now defended evidence, not the next public recommendation.
+The completed v0.67 0.xx alpha/beta hardening line is `Repairability, Help, and Review UX`: validation repair, contextual help, support-bundle evidence, support boundary, and release proof story now stay aligned before widening any capability claim. The previous `Performance / Export Hardening` work and the v0.67 repair/help work are defended evidence, not the next public recommendation.
 
 Current proof handoff markers: `ADOPTION_RECOMMENDATION_CURRENT_OK:True`, `CLAIM_HYGIENE_BOUNDARY_OK:True`, `RELEASE_READINESS_GATE_OK:True`, `SUPPORT_BOUNDARY_GATE_OK:True`, and `BETA_CLAIM_ALIGNMENT_OK:True`.
 Milestone handoff markers: `ADOPTION_READINESS_HANDOFF_OK:True`, `ADOPTION_SCOPE_BOUNDARY_OK:True`, `V056_MILESTONE_PROOF_OK:True`, `ADOPTION_API_STABILIZATION_HANDOFF_OK:True`, `ADOPTION_API_SCOPE_BOUNDARY_OK:True`, and `V061_MILESTONE_PROOF_OK:True`.
@@ -54,7 +54,7 @@ Phase 380 refresh proof: `ADOPTER_INTAKE_REFRESH_OK:True` keeps this page, the G
 
 v0.61 handoff proof: `ADOPTION_API_STABILIZATION_HANDOFF_OK:True` aggregates the refreshed adopter intake, public API diff/guidance gate, and release-boundary wording; `ADOPTION_API_SCOPE_BOUNDARY_OK:True` keeps the handoff inside the current four-package SDK, Avalonia-hosted, WPF-validation-only, no-marketplace, no-sandbox, no-execution-engine, no-GA boundary; `V061_MILESTONE_PROOF_OK:True` marks this recommendation as the closeout for the 0.16.0-beta adoption/API stabilization loop.
 
-Until that threshold is met, keep this seeded recommendation in place instead of widening the next beta line ad hoc.
+Next action is v0.68 release packaging/readiness, or adopter-evidence review if the packaging artifacts need one more public-claim check. Until the 3-5 real external report threshold is met, do not widen the next beta line ad hoc.
 
 ## Related Docs
 

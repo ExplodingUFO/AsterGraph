@@ -40,7 +40,7 @@
 
 ## 当前建议
 
-当前 `0.xx` alpha/beta hardening 线命名为 `Repairability, Help, and Review UX`：先把 validation repair、contextual help、support-bundle evidence、support boundary 和 release proof 口径保持一致，再考虑扩大任何 capability 声明。之前的 `Performance / Export Hardening` 已经变成 defended evidence，不再是下一条公开推荐。
+已完成的 v0.67 `0.xx` alpha/beta hardening 线命名为 `Repairability, Help, and Review UX`：validation repair、contextual help、support-bundle evidence、support boundary 和 release proof 口径已经保持一致；扩大任何 capability 声明前仍要保留这条边界。之前的 `Performance / Export Hardening` 和 v0.67 repair/help 工作都已经变成 defended evidence，不再是下一条公开推荐。
 
 当前 proof handoff markers：`ADOPTION_RECOMMENDATION_CURRENT_OK:True`、`CLAIM_HYGIENE_BOUNDARY_OK:True`、`RELEASE_READINESS_GATE_OK:True`、`SUPPORT_BOUNDARY_GATE_OK:True` 和 `BETA_CLAIM_ALIGNMENT_OK:True`。
 里程碑 handoff markers：`ADOPTION_READINESS_HANDOFF_OK:True`、`ADOPTION_SCOPE_BOUNDARY_OK:True`、`V056_MILESTONE_PROOF_OK:True`、`ADOPTION_API_STABILIZATION_HANDOFF_OK:True`、`ADOPTION_API_SCOPE_BOUNDARY_OK:True` 和 `V061_MILESTONE_PROOF_OK:True`。
@@ -54,7 +54,7 @@ Phase 380 refresh proof：`ADOPTER_INTAKE_REFRESH_OK:True` 保持这页、GitHub
 
 v0.61 handoff proof：`ADOPTION_API_STABILIZATION_HANDOFF_OK:True` 汇总 refreshed adopter intake、public API diff/guidance gate 和 release-boundary wording；`ADOPTION_API_SCOPE_BOUNDARY_OK:True` 把 handoff 限定在当前四个 SDK 包、Avalonia hosted、WPF validation-only、无 marketplace、无 sandbox、无 execution engine、无 GA 的边界内；`V061_MILESTONE_PROOF_OK:True` 表示这就是 0.16.0-beta adoption/API stabilization loop 的收口建议。
 
-在达到这个阈值之前，保持这份种子建议不变，不要临时把下一条 beta 线往别处扩。
+下一步动作是 v0.68 release packaging/readiness；如果 packaging 产物还需要一次公开声明核对，则先做 adopter-evidence review。在达到 3 到 5 条真实外部报告阈值之前，不要临时把下一条 beta 线往别处扩。
 
 ## 相关文档
 

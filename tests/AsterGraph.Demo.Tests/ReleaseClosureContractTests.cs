@@ -183,7 +183,7 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("BETA_CLAIM_ALIGNMENT_OK:True", englishChecklist, StringComparison.Ordinal);
         Assert.True(HasLineWithAll(englishChecklist, "xlarge", "telemetry-only", "10000-node support", "virtualization"));
         Assert.Contains("SCALE_RASTER_EXPORT_STRESS_OK:True", englishChecklist, StringComparison.Ordinal);
-        Assert.Contains("0.xx alpha/beta hardening", englishChecklist, StringComparison.Ordinal);
+        Assert.Contains("v0.67 `Repairability, Help, and Review UX` as completed evidence", englishChecklist, StringComparison.Ordinal);
         Assert.True(HasLineWithAll(englishChecklist, "route", "version", "proof markers", "friction", "support-bundle attachment note"));
         Assert.Contains("HOSTED_ACCESSIBILITY_BASELINE_OK:True", englishChecklist, StringComparison.Ordinal);
         Assert.Contains("HOSTED_ACCESSIBILITY_OK:True", englishChecklist, StringComparison.Ordinal);
@@ -228,7 +228,7 @@ public sealed class ReleaseClosureContractTests
         Assert.Contains("BETA_CLAIM_ALIGNMENT_OK:True", chineseChecklist, StringComparison.Ordinal);
         Assert.True(HasLineWithAll(chineseChecklist, "xlarge", "telemetry-only", "10000 节点支持", "virtualization"));
         Assert.Contains("SCALE_RASTER_EXPORT_STRESS_OK:True", chineseChecklist, StringComparison.Ordinal);
-        Assert.Contains("0.xx` alpha/beta hardening 线", chineseChecklist, StringComparison.Ordinal);
+        Assert.Contains("v0.67 `Repairability, Help, and Review UX` 写成完成证据", chineseChecklist, StringComparison.Ordinal);
         Assert.True(HasLineWithAll(chineseChecklist, "route", "version", "proof 标记", "摩擦", "support bundle 附件备注"));
         Assert.Contains("HOSTED_ACCESSIBILITY_BASELINE_OK:True", chineseChecklist, StringComparison.Ordinal);
         Assert.Contains("HOSTED_ACCESSIBILITY_OK:True", chineseChecklist, StringComparison.Ordinal);
@@ -767,8 +767,10 @@ public sealed class ReleaseClosureContractTests
         Assert.True(HasLineWithAll(chineseStatus, "v0.63 workbench discoverability handoff proof", "phases 388-390", "hosted workbench", "macro/query system"));
         Assert.True(HasLineWithAll(englishConsumerSample, "v0.63 workbench discoverability handoff markers", "layout presets", "unified discovery", "recents/favorites proof"));
         Assert.True(HasLineWithAll(chineseConsumerSample, "v0.63 workbench discoverability handoff marker", "layout presets", "unified discovery", "recents/favorites proof"));
-        Assert.True(HasLineWithAll(englishStatus, "next recommended work line", "v0.67", "Repairability, Help, and Review UX", "validation repair"));
-        Assert.True(HasLineWithAll(chineseStatus, "下一条推荐工作线", "v0.67", "Repairability, Help, and Review UX", "validation repair"));
+        Assert.True(HasLineWithAll(englishStatus, "v0.67 Repairability, Help, and Review UX proof", "completed evidence", "ConsumerSample.Avalonia"));
+        Assert.True(HasLineWithAll(chineseStatus, "v0.67 Repairability, Help, and Review UX proof", "完成证据", "ConsumerSample.Avalonia"));
+        Assert.True(HasLineWithAll(englishStatus, "next recommended action", "v0.68 release packaging/readiness", "adopter-evidence review"));
+        Assert.True(HasLineWithAll(chineseStatus, "下一步推荐动作", "v0.68 release packaging/readiness", "adopter-evidence review"));
     }
 
     [Fact]
