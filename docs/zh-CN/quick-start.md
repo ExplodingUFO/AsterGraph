@@ -228,6 +228,7 @@ var view = AsterGraphAvaloniaViewFactory.Create(new AsterGraphAvaloniaViewOption
 - [Consumer Sample](./consumer-sample.md) = 介于 HelloWorld 和 Demo 之间的真实宿主样例
 - [Alpha Status](./alpha-status.md) = 当前范围、非目标、已知限制
 - [Demo Guide](./demo-guide.md) = 完整展示宿主
+- [Demo Cookbook](./demo-cookbook.md) = 带 proof marker 和支持边界的代码 + Demo recipe 索引
 - [HostSample](../../tools/AsterGraph.HostSample/) = 这条 ladder 之后的路线验证用 proof harness，不是上手入口
 - [ScaleSmoke 基线](./scale-baseline.md) = 公开的规模分层与防回归红线
 - [Authoring Inspector Recipe](./authoring-inspector-recipe.md) = definition-driven 参数、分组、校验与 shipped inspector editor

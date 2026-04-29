@@ -80,6 +80,7 @@ dotnet run --project src/AsterGraph.Demo/AsterGraph.Demo.csproj --nologo -- --pr
 
 ## 怎么看
 
+- 如果你想把每条 recipe 的代码路径、Demo 路径、文档路径、proof marker 和支持边界放在一个索引里看，使用 [Demo Cookbook](./demo-cookbook.md)。
 - 用 `dotnet run --project src/AsterGraph.Demo -- --scenario ai-pipeline` 启动预置 AI workflow，然后打开 `导览`。
 - scenario preset 保持为 demo 宿主自管 catalog entry；`--scenario terrain-shader` 和 `--scenario ai-pipeline` 都通过这个 catalog 解析，不代表 runtime marketplace 或 preset API。
 - `导览` 会沿同一个场景走过创建节点、typed connection、参数编辑、插件信任、自动化、runtime feedback、保存 / 加载和 SVG 导出。

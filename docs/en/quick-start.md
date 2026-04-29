@@ -227,6 +227,7 @@ Plugin loading is currently in-process. Hosts can discover candidates, apply an 
 - [Consumer Sample](./consumer-sample.md) = one realistic hosted integration between HelloWorld and Demo
 - [Alpha Status](./alpha-status.md) = current scope, non-goals, and known limitations
 - [Demo Guide](./demo-guide.md) = full showcase host
+- [Demo Cookbook](./demo-cookbook.md) = code plus Demo recipe index with proof markers and support boundaries
 - [HostSample](../../tools/AsterGraph.HostSample/) = post-ladder proof harness for route validation, not the onboarding step
 - [ScaleSmoke Baseline](./scale-baseline.md) = public graph-size tiers and defended redlines
 - [Authoring Inspector Recipe](./authoring-inspector-recipe.md) = definition-driven parameters, groups, validation, and shipped inspector editors

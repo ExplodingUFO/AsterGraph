@@ -80,6 +80,7 @@ Expected proof markers:
 
 ## How to Read It
 
+- Use [Demo Cookbook](./demo-cookbook.md) when you want the code path, Demo path, docs path, proof marker, and support boundary for each recipe in one index.
 - Launch the prebuilt AI workflow with `dotnet run --project src/AsterGraph.Demo -- --scenario ai-pipeline`, then open `Tour`.
 - Scenario presets stay host-owned demo catalog entries; `--scenario terrain-shader` and `--scenario ai-pipeline` resolve through that catalog instead of a runtime marketplace or preset API.
 - `Tour` walks the same scenario through node creation, typed connection, parameter edit, plugin trust, automation, runtime feedback, save/load, and SVG export.
