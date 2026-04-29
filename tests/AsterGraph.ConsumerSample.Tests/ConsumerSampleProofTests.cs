@@ -431,6 +431,9 @@ public sealed class ConsumerSampleProofTests
         Assert.Contains(result.ProofLines, line => line == "GRAPH_VALIDATION_FEEDBACK_OK:True");
         Assert.Contains(result.ProofLines, line => line == "GRAPH_FEEDBACK_FOCUS_TARGET_OK:True");
         Assert.Contains(result.ProofLines, line => line == "GRAPH_READINESS_STATUS_OK:True");
+        Assert.NotNull(result.RepairEvidence);
+        Assert.Contains(result.RepairEvidence!, evidence => evidence.Action == "validation.parameter.reset-default");
+        Assert.Contains(result.RepairEvidence!, evidence => evidence.Action == "validation.connection.remove");
         Assert.Contains(result.ProofLines, line => line == "FIVE_MINUTE_ONBOARDING_OK:True");
         Assert.Contains(result.ProofLines, line => line == "ONBOARDING_CONFIGURATION_OK:True");
         Assert.Contains(result.ProofLines, line => line == "AUTHORING_SURFACE_OK:True");
@@ -805,6 +808,7 @@ public sealed class ConsumerSampleProofTests
         var readinessStatus = root.GetProperty("readinessStatus").GetString();
         var validationSummary = root.GetProperty("validationSummary");
         var validationFeedback = root.GetProperty("validationFeedback").EnumerateArray().ToArray();
+        var repairEvidence = root.GetProperty("repairEvidence").EnumerateArray().ToArray();
 
         Assert.Equal(5, root.GetProperty("schemaVersion").GetInt32());
         Assert.Equal("ConsumerSample.Avalonia", root.GetProperty("route").GetString());
@@ -820,6 +824,12 @@ public sealed class ConsumerSampleProofTests
         Assert.True(validationSummary.GetProperty("warningCount").GetInt32() >= 0);
         Assert.True(validationSummary.GetProperty("invalidConnectionCount").GetInt32() >= 0);
         Assert.True(validationSummary.GetProperty("invalidParameterCount").GetInt32() >= 0);
+        Assert.Contains(
+            repairEvidence,
+            evidence => evidence.GetProperty("action").GetString() == "validation.parameter.reset-default");
+        Assert.Contains(
+            repairEvidence,
+            evidence => evidence.GetProperty("action").GetString() == "validation.connection.remove");
         Assert.All(validationFeedback, feedback =>
         {
             Assert.False(string.IsNullOrWhiteSpace(feedback.GetProperty("code").GetString()));
