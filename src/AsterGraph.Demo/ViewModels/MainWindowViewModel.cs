@@ -131,6 +131,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
         UpdateCapabilities();
         UpdateScenarioTour();
+        InitializeCookbook();
         SelectedCapability = Capabilities[0];
         InitializeShellState();
         ApplyHostOptions(status: null);

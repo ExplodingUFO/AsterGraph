@@ -1,6 +1,7 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:AsterGraph.Demo.ViewModels"
+        xmlns:cookbook="using:AsterGraph.Demo.Cookbook"
         xmlns:controls="using:AsterGraph.Avalonia.Controls"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -138,6 +139,12 @@
             <MenuItem Header="{Binding UiText[menu.tour.open]}"
                       Command="{Binding OpenHostMenuGroupCommand}"
                       CommandParameter="tour" />
+          </MenuItem>
+          <MenuItem x:Name="PART_CookbookMenu"
+                    Header="{Binding UiText[menu.cookbook]}">
+            <MenuItem Header="{Binding UiText[menu.cookbook.open]}"
+                      Command="{Binding OpenHostMenuGroupCommand}"
+                      CommandParameter="cookbook" />
           </MenuItem>
           <MenuItem x:Name="PART_IntegrationMenu"
                     Header="{Binding UiText[menu.integration]}">
@@ -887,6 +894,106 @@
                   <ItemsControl x:Name="PART_ScenarioTourSignalLines"
                                 ItemsSource="{Binding ScenarioTourSignalLines}"
                                 ItemTemplate="{StaticResource HostDrawerLineTemplate}" />
+                </StackPanel>
+
+                <StackPanel x:Name="PART_CookbookDrawerSection"
+                            Spacing="8"
+                            IsVisible="{Binding IsCookbookHostGroupSelected}">
+                  <TextBlock x:Name="PART_CookbookHeading"
+                             FontSize="12"
+                             FontWeight="Bold"
+                             Foreground="#7FE7D7"
+                             Text="{Binding UiText[cookbook.heading]}" />
+                  <TextBox x:Name="PART_CookbookSearchBox"
+                           Text="{Binding CookbookSearchText, Mode=TwoWay}"
+                           Watermark="{Binding UiText[cookbook.search]}" />
+                  <ComboBox x:Name="PART_CookbookCategoryFilter"
+                            HorizontalAlignment="Stretch"
+                            ItemsSource="{Binding CookbookCategoryFilters}"
+                            SelectedItem="{Binding SelectedCookbookCategoryFilter, Mode=TwoWay}">
+                    <ComboBox.ItemTemplate>
+                      <DataTemplate x:DataType="vm:CookbookCategoryFilter">
+                        <TextBlock Text="{Binding DisplayName}" />
+                      </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                  </ComboBox>
+
+                  <ItemsControl ItemsSource="{Binding CookbookLandingLines}"
+                                ItemTemplate="{StaticResource HostDrawerLineTemplate}" />
+
+                  <ListBox x:Name="PART_CookbookRecipeList"
+                           ItemsSource="{Binding FilteredCookbookRecipes}"
+                           SelectedItem="{Binding SelectedCookbookRecipe, Mode=TwoWay}"
+                           Background="Transparent"
+                           BorderThickness="0">
+                    <ListBox.ItemTemplate>
+                      <DataTemplate x:DataType="cookbook:DemoCookbookRecipe">
+                        <StackPanel Spacing="4">
+                          <TextBlock FontSize="13"
+                                     FontWeight="SemiBold"
+                                     Foreground="#F4FFFC"
+                                     Text="{Binding Title}" />
+                          <TextBlock TextWrapping="Wrap"
+                                     Foreground="#B6CBD8"
+                                     Text="{Binding Summary}" />
+                        </StackPanel>
+                      </DataTemplate>
+                    </ListBox.ItemTemplate>
+                  </ListBox>
+
+                  <Border Padding="12"
+                          Background="#14202B"
+                          BorderBrush="#365063"
+                          BorderThickness="1"
+                          CornerRadius="8">
+                    <StackPanel Spacing="8">
+                      <TextBlock FontSize="12"
+                                 FontWeight="Bold"
+                                 Foreground="#7FE7D7"
+                                 Text="{Binding UiText[cookbook.selected]}" />
+                      <TextBlock FontSize="16"
+                                 FontWeight="SemiBold"
+                                 Foreground="#F4FFFC"
+                                 Text="{Binding SelectedCookbookRecipe.Title}" />
+                      <TextBlock TextWrapping="Wrap"
+                                 Foreground="#C2D7E4"
+                                 Text="{Binding SelectedCookbookRecipe.Summary}" />
+                      <Button x:Name="PART_OpenCookbookRecipeButton"
+                              Padding="10,8"
+                              Background="#101923"
+                              BorderBrush="#7FE7D7"
+                              BorderThickness="1"
+                              CornerRadius="8"
+                              Command="{Binding OpenSelectedCookbookRecipeCommand}"
+                              Content="{Binding UiText[menu.cookbook.openRecipe]}"
+                              Foreground="#F4FFFC" />
+                      <TextBlock TextWrapping="Wrap"
+                                 Foreground="#B6CBD8"
+                                 Text="{Binding LastCookbookNavigationStatus}" />
+                    </StackPanel>
+                  </Border>
+
+                  <TextBlock FontSize="12"
+                             FontWeight="Bold"
+                             Foreground="#7FE7D7"
+                             Text="{Binding UiText[cookbook.code]}" />
+                  <ItemsControl ItemsSource="{Binding SelectedCookbookRecipeCodeLines}"
+                                ItemTemplate="{StaticResource HostDrawerLineTemplate}" />
+                  <TextBlock FontSize="12"
+                             FontWeight="Bold"
+                             Foreground="#7FE7D7"
+                             Text="{Binding UiText[cookbook.proof]}" />
+                  <ItemsControl ItemsSource="{Binding SelectedCookbookRecipeProofLines}"
+                                ItemTemplate="{StaticResource HostDrawerLineTemplate}" />
+                  <Border Padding="12"
+                          Background="#14202B"
+                          BorderBrush="#365063"
+                          BorderThickness="1"
+                          CornerRadius="8">
+                    <TextBlock TextWrapping="Wrap"
+                               Foreground="#C2D7E4"
+                               Text="{Binding SelectedCookbookRecipeSupportBoundary}" />
+                  </Border>
                 </StackPanel>
 
                 <StackPanel x:Name="PART_IntegrationDrawerSection"

@@ -30,6 +30,8 @@ public partial class MainWindowViewModel
 
     public bool IsTourHostGroupSelected => SelectedHostMenuGroup == DemoHostMenuGroups.Tour;
 
+    public bool IsCookbookHostGroupSelected => SelectedHostMenuGroup == DemoHostMenuGroups.Cookbook;
+
     public bool IsIntegrationHostGroupSelected => SelectedHostMenuGroup == DemoHostMenuGroups.Integration;
 
     public bool IsProofHostGroupSelected => SelectedHostMenuGroup == DemoHostMenuGroups.Proof;
@@ -135,6 +137,7 @@ public partial class MainWindowViewModel
         DemoHostMenuGroups.Tour => T(
             "场景导览把 AI pipeline 的节点、参数、连接、插件信任、自动化、保存和导出证据收敛到一个可执行流程。",
             "The scenario tour ties the AI pipeline nodes, parameters, connections, plugin trust, automation, save, and export evidence into one runnable flow."),
+        DemoHostMenuGroups.Cookbook => CookbookSummary,
         DemoHostMenuGroups.Integration => T(
             "集成面板同时说明 HostSample 的最小 consumer path，并展示独立表面、presenter replacement 和本地化证明。",
             "The integration panel explains HostSample as the minimal consumer path and shows standalone surfaces, presenter replacement, and localization proof together."),
@@ -195,6 +198,13 @@ public partial class MainWindowViewModel
             ScenarioTourProgressText,
             SelectedScenarioTourStep.Summary,
             .. ScenarioTourSignalLines,
+        ],
+        DemoHostMenuGroups.Cookbook =>
+        [
+            .. CookbookLandingLines,
+            .. SelectedCookbookRecipeCodeLines,
+            .. SelectedCookbookRecipeProofLines,
+            SelectedCookbookRecipeSupportBoundary,
         ],
         DemoHostMenuGroups.Integration =>
         [

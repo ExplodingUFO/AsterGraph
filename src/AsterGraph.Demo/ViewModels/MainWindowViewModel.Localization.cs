@@ -16,6 +16,7 @@ internal static class DemoHostMenuGroups
     public const string Extensions = "extensions";
     public const string Automation = "automation";
     public const string Tour = "tour";
+    public const string Cookbook = "cookbook";
     public const string Integration = "integration";
     public const string Proof = "proof";
 }
@@ -36,6 +37,7 @@ public partial class MainWindowViewModel
         ["menu.extensions"] = "扩展",
         ["menu.automation"] = "自动化",
         ["menu.tour"] = "导览",
+        ["menu.cookbook"] = "Cookbook",
         ["menu.integration"] = "集成",
         ["menu.proof"] = "证明",
         ["menu.language"] = "语言",
@@ -68,6 +70,8 @@ public partial class MainWindowViewModel
         ["menu.automation.runWorkspace"] = "运行工作区自动化",
         ["menu.automation.open"] = "打开自动化面板",
         ["menu.tour.open"] = "打开场景导览",
+        ["menu.cookbook.open"] = "打开 Cookbook",
+        ["menu.cookbook.openRecipe"] = "打开选中配方",
         ["menu.integration.consumerPath"] = "查看 consumer path",
         ["menu.integration.standalone"] = "查看独立表面",
         ["menu.proof.boundary"] = "查看宿主边界",
@@ -90,6 +94,12 @@ public partial class MainWindowViewModel
         ["automation.progress.heading"] = "自动化进度",
         ["automation.result.heading"] = "自动化结果",
         ["tour.heading"] = "场景导览",
+        ["cookbook.heading"] = "Cookbook 配方",
+        ["cookbook.search"] = "搜索配方、代码、证明或边界",
+        ["cookbook.category"] = "分类",
+        ["cookbook.selected"] = "选中配方",
+        ["cookbook.code"] = "代码与 Demo",
+        ["cookbook.proof"] = "证明与边界",
         ["tour.signals.heading"] = "场景证据",
         ["tour.previous"] = "上一步",
         ["tour.next"] = "下一步",
@@ -114,6 +124,7 @@ public partial class MainWindowViewModel
         ["menu.extensions"] = "Extensions",
         ["menu.automation"] = "Automation",
         ["menu.tour"] = "Tour",
+        ["menu.cookbook"] = "Cookbook",
         ["menu.integration"] = "Integration",
         ["menu.proof"] = "Proof",
         ["menu.language"] = "Language",
@@ -146,6 +157,8 @@ public partial class MainWindowViewModel
         ["menu.automation.runWorkspace"] = "Run workspace automation",
         ["menu.automation.open"] = "Open automation panel",
         ["menu.tour.open"] = "Open guided tour",
+        ["menu.cookbook.open"] = "Open cookbook",
+        ["menu.cookbook.openRecipe"] = "Open selected recipe",
         ["menu.integration.consumerPath"] = "View consumer path",
         ["menu.integration.standalone"] = "View standalone surfaces",
         ["menu.proof.boundary"] = "View host boundary",
@@ -168,6 +181,12 @@ public partial class MainWindowViewModel
         ["automation.progress.heading"] = "Automation Progress",
         ["automation.result.heading"] = "Automation Result",
         ["tour.heading"] = "Scenario Tour",
+        ["cookbook.heading"] = "Cookbook Recipes",
+        ["cookbook.search"] = "Search recipes, code, proof, or boundary",
+        ["cookbook.category"] = "Category",
+        ["cookbook.selected"] = "Selected Recipe",
+        ["cookbook.code"] = "Code And Demo",
+        ["cookbook.proof"] = "Proof And Boundary",
         ["tour.signals.heading"] = "Scenario Evidence",
         ["tour.previous"] = "Previous",
         ["tour.next"] = "Next",
@@ -230,6 +249,7 @@ public partial class MainWindowViewModel
         Editor.SetLocalizationProvider(CreateGraphLocalizationProvider(value.Code));
         UpdateCapabilities();
         UpdateScenarioTour();
+        UpdateCookbookLocalization();
         OnPropertyChanged(nameof(UiText));
         OnPropertyChanged(nameof(CurrentLanguageBadgeText));
         RefreshRuntimeProjection();
@@ -259,6 +279,7 @@ public partial class MainWindowViewModel
             DemoHostMenuGroups.Extensions => Text("menu.extensions"),
             DemoHostMenuGroups.Automation => Text("menu.automation"),
             DemoHostMenuGroups.Tour => Text("menu.tour"),
+            DemoHostMenuGroups.Cookbook => Text("menu.cookbook"),
             DemoHostMenuGroups.Integration => Text("menu.integration"),
             DemoHostMenuGroups.Proof => Text("menu.proof"),
             _ => Text("menu.showcase"),
@@ -281,6 +302,7 @@ public partial class MainWindowViewModel
             DemoHostMenuGroups.Extensions or "扩展" or "Extensions" => DemoHostMenuGroups.Extensions,
             DemoHostMenuGroups.Automation or "自动化" or "Automation" => DemoHostMenuGroups.Automation,
             DemoHostMenuGroups.Tour or "导览" or "Tour" => DemoHostMenuGroups.Tour,
+            DemoHostMenuGroups.Cookbook or "Cookbook" => DemoHostMenuGroups.Cookbook,
             DemoHostMenuGroups.Integration or "集成" or "Integration" => DemoHostMenuGroups.Integration,
             DemoHostMenuGroups.Proof or "证明" or "Proof" => DemoHostMenuGroups.Proof,
             _ => DemoHostMenuGroups.Showcase,
