@@ -2,47 +2,42 @@
 
 ## Current Position
 
-Phase: 457
+Phase: Not started
 Plan: `.planning/ROADMAP.md`
-Status: v0.76 complete; ready to plan the next milestone
-Last activity: 2026-05-01 — Completed Phase 457 extension contracts, documentation, release proof, and milestone handoff
+Status: v0.77 active; requirements and roadmap defined; ready to plan Phase 458
+Last activity: 2026-05-01 — Started v0.77 Semantic Authoring And Command Platform
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-04-30)
+See: `.planning/PROJECT.md` (updated 2026-05-01)
 
-**Core value:** External hosts can embed AsterGraph as a high-performance, definition-driven desktop node graph library with professional canvas depth, composable interactions, customization seams, designer workbench UX, and proof-backed cross-platform verification.
-**Current focus:** Move from v0.75 library-grade proof into v0.76 professional canvas engine and authoring workbench capabilities.
+**Core value:** External hosts can embed AsterGraph and get a high-performance, definition-driven desktop node graph library with professional canvas depth, composable interactions, customizable nodes and edges, designer workbench UX, inspection, runtime feedback, local plugin trust, professional examples, and proof-backed cross-platform desktop verification.
+**Current focus:** Move from v0.76 professional canvas/workbench depth into v0.77 semantic authoring platform capabilities.
 
 ## Active Beads
 
-- Completed epic: `avalonia-node-map-y7i` — v0.76 Professional Canvas Engine And Authoring Workbench
-- Complete: `avalonia-node-map-y7i.1` — Phase 451: Canvas engine architecture and scale audit
-- Complete: `avalonia-node-map-y7i.2` — Phase 452: Virtualized scene index and viewport pipeline
-- Complete: `avalonia-node-map-y7i.3` — Phase 453: Professional edge routing and connection geometry
-- Complete: `avalonia-node-map-y7i.4` — Phase 454: Groups subgraphs and collapsible containers
-- Complete: `avalonia-node-map-y7i.5` — Phase 455: Layout services and alignment tools
-- Complete: `avalonia-node-map-y7i.6` — Phase 456: Designer workbench authoring UX
-  - Complete: `avalonia-node-map-y7i.6.1` — Navigator and outline projection
-  - Complete: `avalonia-node-map-y7i.6.2` — Route group layout recovery affordances
-  - Complete: `avalonia-node-map-y7i.6.3` — Designer cookbook proof and docs
-- Complete: `avalonia-node-map-y7i.7` — Phase 457: Extension contracts documentation and release proof
-  - Complete: `avalonia-node-map-y7i.7.1` — Contract docs and requirement mapping audit
-  - Complete: `avalonia-node-map-y7i.7.2` — Release proof and verification gate
-  - Complete: `avalonia-node-map-y7i.7.3` — Milestone clean closeout
+- Active epic: `avalonia-node-map-48w` — v0.77 Semantic Authoring And Command Platform
+- Ready: `avalonia-node-map-48w.1` — Phase 458: Command Platform Architecture And Input Audit
+- Blocked by Phase 458: `avalonia-node-map-48w.2` — Phase 459: Unified Command Registry And Keybinding Surface
+- Blocked by Phase 459:
+  - `avalonia-node-map-48w.3` — Phase 460: Semantic Editing Operations And Clipboard Model
+  - `avalonia-node-map-48w.4` — Phase 461: Template Palette And Reusable Authoring Presets
+  - `avalonia-node-map-48w.5` — Phase 462: Advanced Selection Transform And Spatial Editing
+  - `avalonia-node-map-48w.6` — Phase 463: Viewport Navigation Search And Focus Workflows
+- Blocked by Phases 460-463: `avalonia-node-map-48w.7` — Phase 464: Professional Cookbook Authoring Flows
+- Blocked by Phase 464: `avalonia-node-map-48w.8` — Phase 465: v0.77 Contracts Documentation And Release Proof
 
 ## Notes
 
-- v0.75 is complete: capability audit, rendering/viewport performance, interaction contracts, extension seams, host packaging, professional examples, release proof markers, and clean handoff were closed.
-- v0.76 intentionally takes a larger step into professional canvas depth: virtualized scene/indexing, routing, groups/subgraphs, layout services, designer workbench UX, extension contracts, and release proof.
-- Do not add runtime rewrites, compatibility layers, fallback behavior, generated runnable Demo code, macro/query/scripting systems, marketplace behavior, sandboxing, or unsupported adapter/platform claims.
+- v0.76 is complete: virtualized scene/indexing, route geometry/evidence, groups/subgraphs, layout services, designer workbench UX, navigator/outline queries, public API inventory/baseline alignment, and release proof.
+- v0.77 intentionally takes a larger product step into semantic authoring: command registry, keybinding/menu/tool projection, semantic editing, clipboard, templates, selection transforms, navigation/search, cookbook flows, and release proof.
+- Keep supported SDK contracts in packages, public APIs, docs, ConsumerSample, starter templates, and proof markers.
+- Do not add runtime rewrites, compatibility layers, fallback behavior, generated runnable Demo code, macro/query/scripting systems, marketplace behavior, sandboxing, collaboration/cloud sync, or unsupported adapter/platform claims.
 - Do not name external inspiration projects or packages in planning artifacts or docs.
-- Keep supported SDK contracts in packages, public APIs, ConsumerSample, starter templates, docs, and proof markers.
-- Keep performance and graph-size claims tied to measured verification.
+- Performance and large-graph navigation claims must remain tied to measured tests or proof output.
 - Use beads as the task split/status/handoff spine.
-- Use isolated worktrees for parallel implementation when phases split into independent beads.
-- Phase 452 and 453 ran in parallel after Phase 451. Phase 455 started after 452 and 454. Phase 456 waited for 454 and 455. Phase 457 closed the milestone.
-- Public API baseline drift found during Phase 457 was source-backed to the Phase 456 navigator/outline query surface and was resolved by updating `eng/public-api-baseline.txt` plus public API inventory classification.
+- Use isolated project-local `.worktrees/` worktrees for parallel implementation when phases split into independent beads.
+- Phase 458 gates 459. After 459, Phases 460-463 can run in parallel. Phase 464 waits for 460-463. Phase 465 closes the milestone.
 
 ---
-*Last updated: 2026-05-01 after completing v0.76*
+*Last updated: 2026-05-01 after starting v0.77*

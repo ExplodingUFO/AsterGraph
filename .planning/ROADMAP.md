@@ -2,171 +2,162 @@
 
 ## Current Milestone
 
-**v0.76.0-beta Professional Canvas Engine And Authoring Workbench** — completed locally 2026-05-01.
+**v0.77.0-beta Semantic Authoring And Command Platform** — active locally 2026-05-01.
 
-**Goal:** take a larger step from library-grade proof into a professional desktop canvas engine and authoring workbench with virtualized scene/indexing, advanced routing, groups/subgraphs, layout services, designer-grade UX, extension contracts, and release proof.
+**Goal:** take the next larger step from professional canvas/workbench depth into a semantic authoring platform with unified command discovery/execution, advanced editing operations, reusable templates, selection transforms, navigation/search workflows, cookbook proof, and release contracts.
 
-**Focus:** canvas engine architecture, virtualized scene index, edge routing, groups/subgraphs, layout services, designer workbench UX, extension contracts, proof closure.
+**Focus:** command platform, keybinding/menu/tool projection, semantic editing, clipboard, templates, selection transforms, navigation/search, cookbook flows, contract proof.
 
 **Known inputs:**
-- The user wants the next milestone to take a bigger product step.
-- v0.75 completed library-grade proof for rendering/viewport, interaction, customization, packaging, examples, and release gates.
+- The user wants the next milestone to take a larger product step.
+- v0.76 completed professional canvas/workbench depth and public API release proof.
 - New work must keep supported contracts in package APIs, samples, docs, proof markers, and CI-sensitive tests.
 - Planning and docs must not name external inspiration projects or packages.
 
-**Epic bead:** `avalonia-node-map-y7i`
+**Epic bead:** `avalonia-node-map-48w`
 
-**Phase numbering:** continues from v0.75 and starts at **Phase 451**.
+**Phase numbering:** continues from v0.76 and starts at **Phase 458**.
 
 ## Phases
 
-- [x] **Phase 451: Canvas Engine Architecture And Scale Audit** — map current seams, hot paths, state ownership, and narrow implementation cuts.
-- [x] **Phase 452: Virtualized Scene Index And Viewport Pipeline** — support bounded visible-scene lookup, viewport projection, minimap refresh, and invalidation proof.
-- [x] **Phase 453: Professional Edge Routing And Connection Geometry** — support route styles, anchors, preview geometry, reconnect feedback, and bounded crossing/obstacle evidence.
-- [x] **Phase 454: Groups, Subgraphs, And Collapsible Containers** — support group/container creation, nested selection, collapse/expand projection, boundary edges, and serialization snapshots.
-- [x] **Phase 455: Layout Services And Alignment Tools** — expose layout, align, distribute, snap, and incremental relayout services through host contracts and workbench commands.
-- [x] **Phase 456: Designer Workbench Authoring UX** — integrate navigator/outline, inspector, route-aware affordances, group/layout workflows, recovery states, and cookbook scenarios.
-- [x] **Phase 457: Extension Contracts, Documentation, And Release Proof** — close supported contracts, docs, examples, proof markers, full verification, beads, Dolt, and Git handoff.
-
-## v0.76 Requirement Proof Map
-
-| Requirement | Phase | Proof markers / source evidence | Public docs / examples |
-| --- | --- | --- | --- |
-| `ENGINE-01` | Phase 451 | `451-SUMMARY.md` seam map and non-goal audit; implementation proof deferred to Phases 452-457. | `docs/en/architecture.md`, `docs/zh-CN/architecture.md` |
-| `VIRTUAL-01` | Phase 452 | `ViewportVisibleSceneProjection.ToBudgetMarker(...)`, `VISIBLE_SCENE_INVALIDATION:*`, `MINIMAP_LIGHTWEIGHT_PROJECTION_OK`, `PROJECTION_PERFORMANCE_EVIDENCE_OK`, `SCALE_PERFORMANCE_BUDGET_OK:*`. | `docs/en/scale-baseline.md`, `docs/en/feature-catalog.md`, `docs/en/demo-cookbook.md`, plus localized counterparts |
-| `ROUTE-01` | Phase 453 | `GraphEditorConnectionGeometrySnapshot.RouteStyle`, `GraphEditorConnectionRouteEvidenceSnapshot`, `GetConnectionGeometrySnapshots()`, connection geometry/rendering contract tests. | `docs/en/public-api-inventory.md`, `docs/en/authoring-surface-recipe.md`, `docs/en/advanced-editing.md`, plus localized counterparts |
-| `GROUP-01` | Phase 454 | `GROUP_SERIALIZATION_COOKBOOK_OK`, `WritesAndReadsCollapsedGroupBoundaryPayload`, hierarchy boundary-edge and collapsed canvas tests. | `docs/en/advanced-editing.md`, `docs/en/demo-cookbook.md`, plus localized counterparts |
-| `LAYOUT-01` | Phase 455 | `LAYOUT_PROVIDER_SEAM_OK`, `LAYOUT_PREVIEW_APPLY_CANCEL_OK`, `LAYOUT_UNDO_TRANSACTION_OK`, `DEMO_COOKBOOK_LAYOUT_SERVICES_OK`, layout command tests. | `docs/en/public-api-inventory.md`, `docs/en/demo-cookbook.md`, `docs/en/feature-catalog.md`, plus localized counterparts |
-| `DESIGNER-01` | Phase 456 | `DEMO_COOKBOOK_DESIGNER_WORKBENCH_OK`, `DESIGNER_WORKBENCH_AUTHORING_OK`, `GetNavigatorOutlineSnapshot`, `RecoveryHint`, designer command tests. | `docs/en/demo-cookbook.md`, `docs/en/authoring-surface-recipe.md`, plus localized counterparts |
-| `CONTRACT-01` | Phase 457 | `PUBLIC_API_SURFACE_OK`, `PUBLIC_API_SCOPE_OK`, `PUBLIC_API_GUIDANCE_OK`, `PUBLIC_API_DIFF_GATE_OK:True`, `PUBLIC_API_USAGE_GUIDANCE_OK:True`, `PUBLIC_API_STABILITY_SCOPE_OK:True`, Phase 457 release verification. | `docs/en/extension-contracts.md`, `docs/en/public-api-inventory.md`, `docs/en/public-launch-checklist.md`, plus localized counterparts |
+- [ ] **Phase 458: Command Platform Architecture And Input Audit** — map command descriptors, input routing, menu/tool surfaces, undo boundaries, and host extension seams before implementation.
+- [ ] **Phase 459: Unified Command Registry And Keybinding Surface** — expose command discovery, keybinding metadata, menu/tool projection, disabled recovery states, and execution through canonical session boundaries.
+- [ ] **Phase 460: Semantic Editing Operations And Clipboard Model** — support copy, paste, duplicate, delete-with-repair, insert-into-route, reconnect, and semantic batch editing.
+- [ ] **Phase 461: Template Palette And Reusable Authoring Presets** — add host-provided node/group/fragment templates and searchable palette projection.
+- [ ] **Phase 462: Advanced Selection Transform And Spatial Editing** — deepen marquee/lasso projection, keyboard nudging, constrained move/resize, snap guides, and multi-item transform evidence.
+- [ ] **Phase 463: Viewport Navigation Search And Focus Workflows** — add search, jump, breadcrumb, bookmark, minimap-aware focus, and measured large-graph navigation evidence.
+- [ ] **Phase 464: Professional Cookbook Authoring Flows** — demonstrate command, editing, template, selection, and navigation workflows as code plus live proof.
+- [ ] **Phase 465: v0.77 Contracts Documentation And Release Proof** — close supported contracts, docs, examples, public API baseline, CI-sensitive tests, beads, Dolt, and Git handoff.
 
 ## Phase Details
 
-### Phase 451: Canvas Engine Architecture And Scale Audit
+### Phase 458: Command Platform Architecture And Input Audit
 
-**Bead:** `avalonia-node-map-y7i.1`
+**Bead:** `avalonia-node-map-48w.1`
 
-**Goal:** map current canvas/render/interaction architecture and define the smallest supported engine contracts for v0.76 before implementation.
+**Goal:** define the supported command/input architecture before implementation so later command work stays narrow and source-backed.
 
-**Depends on:** v0.76 milestone start
+**Depends on:** v0.77 milestone start
 
-**Requirements:** ENGINE-01
+**Requirements:** CMD-01
 
 **Success Criteria:**
-1. Render, scene, interaction, layout, and workbench seams are mapped with file/class evidence.
-2. Hot paths and state ownership boundaries are identified.
+1. Current command descriptors, input routing, menu/tool surfaces, and undo boundaries are mapped with file/class evidence.
+2. Host-owned versus stock workbench-owned command responsibilities are explicit.
 3. Later implementation phases have narrow write scopes and dependency order.
-4. No runtime rewrite, second renderer, compatibility layer, or fallback layer is planned.
+4. No macro/query scripting system, fallback layer, compatibility shim, or second command runtime is planned.
 
-**Status:** Complete. See `.planning/phases/451-canvas-engine-architecture-and-scale-audit/`.
+### Phase 459: Unified Command Registry And Keybinding Surface
 
-### Phase 452: Virtualized Scene Index And Viewport Pipeline
+**Bead:** `avalonia-node-map-48w.2`
 
-**Bead:** `avalonia-node-map-y7i.2`
+**Goal:** make command discovery, keybinding metadata, menu/tool projection, disabled recovery states, and execution consistent across package and workbench surfaces.
 
-**Goal:** implement a supported scene index and viewport projection path that keeps large canvas updates bounded and measurable.
+**Depends on:** Phase 458
 
-**Depends on:** Phase 451
-
-**Requirements:** VIRTUAL-01
+**Requirements:** CMD-01
 
 **Success Criteria:**
-1. Visible node/edge lookup has a supported contract and focused tests.
-2. Viewport projection and minimap refresh use bounded invalidation behavior.
-3. Large-graph update proof reports measurable budgets.
-4. Docs avoid unsupported graph-size, virtualization, and renderer-replacement claims.
+1. Supported command registry contracts expose stable identity, grouping, availability, keybinding metadata, and recovery hints.
+2. Stock Avalonia command surfaces consume the same registry rather than local command lists.
+3. Keybinding conflicts are detectable and testable.
+4. Commands execute through canonical session boundaries with explicit undo/redo behavior.
 
-**Status:** Complete. See `.planning/phases/452-virtualized-scene-index-and-viewport-pipeline/`.
+### Phase 460: Semantic Editing Operations And Clipboard Model
 
-### Phase 453: Professional Edge Routing And Connection Geometry
+**Bead:** `avalonia-node-map-48w.3`
 
-**Bead:** `avalonia-node-map-y7i.3`
+**Goal:** add supported semantic editing operations and clipboard payloads without turning the Demo into a generator or workflow engine.
 
-**Goal:** add a first-class edge routing and connection geometry layer for professional authoring without replacing the runtime graph model.
+**Depends on:** Phase 459
 
-**Depends on:** Phase 451
-
-**Requirements:** ROUTE-01
+**Requirements:** EDIT-01
 
 **Success Criteria:**
-1. Route styles and anchor contracts are package-owned and source-backed.
-2. Connection preview and reconnect feedback use route-aware geometry.
-3. Obstacle/crossing evidence is bounded and testable.
-4. Existing edge editing behavior remains direct, simple, and covered.
+1. Copy, paste, duplicate, delete-with-repair, insert-into-route, reconnect, and semantic batch edit operations have command contracts.
+2. Clipboard payloads are source-backed, serializable, and invariant-preserving.
+3. Node, port, group, route, selection, validation, and undo boundaries are tested.
+4. Docs avoid generated runnable code and workflow execution claims.
 
-**Status:** Complete. See `.planning/phases/453-professional-edge-routing-and-connection-geometry/`.
+### Phase 461: Template Palette And Reusable Authoring Presets
 
-### Phase 454: Groups, Subgraphs, And Collapsible Containers
+**Bead:** `avalonia-node-map-48w.4`
 
-**Bead:** `avalonia-node-map-y7i.4`
+**Goal:** introduce reusable authoring templates and palette projection as host-extensible package contracts.
 
-**Goal:** make groups, nested containers, subgraph boundaries, collapse/expand, and selection semantics coherent for host-owned authoring.
+**Depends on:** Phase 459
 
-**Depends on:** Phase 452, Phase 453
-
-**Requirements:** GROUP-01
+**Requirements:** TPL-01
 
 **Success Criteria:**
-1. Group/container creation and nested selection are supported.
-2. Collapse/expand projection preserves selection and edge boundary behavior.
-3. Serialization snapshots represent group and subgraph state.
-4. No separate workflow execution engine is introduced.
+1. Hosts can provide node, group, and graph-fragment templates through supported contracts.
+2. Search/filter palette projection returns stable snapshots for the workbench.
+3. Applying templates is undoable and preserves graph invariants.
+4. Docs distinguish templates from code generation, marketplace, and executable recipe systems.
 
-**Status:** Complete. See `.planning/phases/454-groups-subgraphs-and-collapsible-containers/`.
+### Phase 462: Advanced Selection Transform And Spatial Editing
 
-### Phase 455: Layout Services And Alignment Tools
+**Bead:** `avalonia-node-map-48w.5`
 
-**Bead:** `avalonia-node-map-y7i.5`
+**Goal:** make multi-selection and spatial editing feel professional while keeping transform state source-backed and testable.
 
-**Goal:** turn layout from sample behavior into supported services and workbench tools for arrange, align, distribute, snap, and incremental relayout.
+**Depends on:** Phase 459
 
-**Depends on:** Phase 452, Phase 454
-
-**Requirements:** LAYOUT-01
+**Requirements:** SEL-01
 
 **Success Criteria:**
-1. Host-callable layout service contracts are documented and tested.
-2. Workbench commands expose arrange, align, distribute, snap, and incremental relayout.
-3. Undo/redo boundaries are explicit.
-4. Large-graph layout budgets stay measured and bounded.
+1. Marquee/lasso-style selection projection, keyboard nudging, constrained move/resize, and snap guides are queryable.
+2. Stock Avalonia interactions use shared transform state.
+3. Group, route, layout, and selection constraints stay coherent.
+4. Focused tests cover transform, snap, and rejection behavior.
 
-**Status:** Complete. See `.planning/phases/455-layout-services-and-alignment-tools/`.
+### Phase 463: Viewport Navigation Search And Focus Workflows
 
-### Phase 456: Designer Workbench Authoring UX
+**Bead:** `avalonia-node-map-48w.6`
 
-**Bead:** `avalonia-node-map-y7i.6`
+**Goal:** add source-backed search and navigation workflows for large professional graphs.
 
-**Goal:** raise the Avalonia workbench into a designer-grade authoring surface with navigator, outline, inspector, route-aware affordances, and cookbook demonstrations.
+**Depends on:** Phase 459
 
-**Depends on:** Phase 454, Phase 455
-
-**Requirements:** DESIGNER-01
+**Requirements:** NAV-01
 
 **Success Criteria:**
-1. Users can navigate, inspect, edit, group, route, align, and recover from authoring errors in one coherent UI.
-2. Demo cookbook scenarios pair code, visual proof, proof markers, and support boundaries.
-3. UI behavior is tested at the view-model/proof level.
-4. Demo remains a sample/proof surface, not a package contract boundary.
+1. Graph item search returns stable node, group, connection, issue, and scope references.
+2. Breadcrumb, bookmark, jump-to-node, jump-to-issue, and minimap-aware focus workflows are supported.
+3. Large-graph navigation behavior is measured or proof-backed.
+4. Docs avoid unsupported indexing, query language, or background service claims.
 
-**Status:** Complete. See `.planning/phases/456-designer-workbench-authoring-ux/`.
+### Phase 464: Professional Cookbook Authoring Flows
 
-### Phase 457: Extension Contracts, Documentation, And Release Proof
+**Bead:** `avalonia-node-map-48w.7`
 
-**Bead:** `avalonia-node-map-y7i.7`
+**Goal:** make the Avalonia cookbook demonstrate v0.77 professional authoring flows as code plus live proof.
 
-**Goal:** close v0.76 with supported extension contracts, docs, samples, proof markers, CI-sensitive tests, and clean beads/Dolt/Git handoff.
+**Depends on:** Phases 460, 461, 462, 463
 
-**Depends on:** Phase 455, Phase 456
-
-**Requirements:** CONTRACT-01
+**Requirements:** COOK-01
 
 **Success Criteria:**
-1. Public docs and examples explain the supported v0.76 contracts.
-2. All v0.76 requirements map to phases and proof markers.
-3. Full required verification passes, including performance-sensitive gates touched by the milestone.
-4. Beads, Dolt, Git branch, and workspace are clean and pushed.
+1. Cookbook scenarios cover command registry, editing operations, templates, selection transforms, and navigation workflows.
+2. Each scenario has code anchors, proof markers, docs, and support-boundary text.
+3. Demo remains sample/proof surface only.
+4. Focused Demo tests verify catalog, documentation, and proof closure.
 
-**Status:** Complete. See `.planning/phases/457-extension-contracts-documentation-and-release-proof/`.
+### Phase 465: v0.77 Contracts Documentation And Release Proof
+
+**Bead:** `avalonia-node-map-48w.8`
+
+**Goal:** close v0.77 with supported contracts, docs, public API baseline, proof markers, and clean beads/Dolt/Git handoff.
+
+**Depends on:** Phase 464
+
+**Requirements:** REL-01
+
+**Success Criteria:**
+1. Public docs and examples explain supported v0.77 contracts.
+2. All v0.77 requirements map to phases and proof markers.
+3. Public API baseline changes are intentional and classified.
+4. Required verification passes and beads, Dolt, Git branch, and workspace are clean and pushed.
 
 ## Completed Milestones
 
@@ -178,7 +169,7 @@
 
 ## Next Step
 
-Start the next milestone with `$gsd-new-milestone` when ready.
+Start Phase 458.
 
 ---
-*Roadmap updated: 2026-05-01 after completing v0.76*
+*Roadmap updated: 2026-05-01 after starting v0.77*
