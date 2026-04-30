@@ -58,6 +58,22 @@ public sealed class GraphMiniMapStandaloneTests
         Assert.True(ReadMiniMapLightweightProjection(throughputMiniMap));
     }
 
+    [Fact]
+    public void WorkbenchPerformancePolicy_ExposesMiniMapCadenceBudgetMarker()
+    {
+        var balanced = AsterGraphWorkbenchPerformancePolicy.FromMode(AsterGraphWorkbenchPerformanceMode.Balanced);
+        var throughput = AsterGraphWorkbenchPerformancePolicy.FromMode(AsterGraphWorkbenchPerformanceMode.Throughput);
+
+        Assert.Equal("viewport-continuous", balanced.MiniMapRefreshCadence);
+        Assert.Equal("document-selection-cached", throughput.MiniMapRefreshCadence);
+        Assert.Equal(
+            "MINIMAP_CADENCE:Balanced:cadence=viewport-continuous:commandRefreshMs=16",
+            balanced.ToMiniMapBudgetMarker());
+        Assert.Equal(
+            "MINIMAP_CADENCE:Throughput:cadence=document-selection-cached:commandRefreshMs=50",
+            throughput.ToMiniMapBudgetMarker());
+    }
+
     [AvaloniaFact]
     public void StandaloneMiniMap_RecenterViewport_ForDifferentMiniMapPoints()
     {

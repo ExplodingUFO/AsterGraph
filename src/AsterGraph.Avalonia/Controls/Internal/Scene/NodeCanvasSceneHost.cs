@@ -15,6 +15,7 @@ using AsterGraph.Core.Models;
 using AsterGraph.Editor.Geometry;
 using AsterGraph.Editor.Runtime;
 using AsterGraph.Editor.ViewModels;
+using AsterGraph.Editor.Viewport;
 
 namespace AsterGraph.Avalonia.Controls.Internal;
 
@@ -91,6 +92,8 @@ internal sealed class NodeCanvasSceneHost
         _host = host ?? throw new ArgumentNullException(nameof(host));
     }
 
+    public ViewportVisibleSceneProjection? LastVisibleSceneProjection { get; private set; }
+
     public void RebuildScene()
     {
         if (_host.NodeLayer is null || _host.ConnectionLayer is null || _host.GroupLayer is null)
@@ -106,9 +109,11 @@ internal sealed class NodeCanvasSceneHost
 
         if (_host.ViewModel is null)
         {
+            LastVisibleSceneProjection = null;
             return;
         }
 
+        RefreshVisibleSceneProjection();
         foreach (var group in _host.ViewModel.GetNodeGroupSnapshots())
         {
             var visual = CreateGroupVisual(group);
@@ -137,6 +142,7 @@ internal sealed class NodeCanvasSceneHost
             return;
         }
 
+        RefreshVisibleSceneProjection();
         var transforms = new TransformGroup();
         transforms.Children.Add(new ScaleTransform(_host.ViewModel.Zoom, _host.ViewModel.Zoom));
         transforms.Children.Add(new TranslateTransform(_host.ViewModel.PanX, _host.ViewModel.PanY));
@@ -145,7 +151,10 @@ internal sealed class NodeCanvasSceneHost
     }
 
     public void RenderConnections()
-        => _connectionSceneRenderer.RenderConnections(CreateConnectionSceneContext());
+    {
+        RefreshVisibleSceneProjection();
+        _connectionSceneRenderer.RenderConnections(CreateConnectionSceneContext());
+    }
 
     public void UpdateSelectionState()
     {
@@ -534,6 +543,19 @@ internal sealed class NodeCanvasSceneHost
             _host.ContextMenuCoordinator.ResolveWorldPosition,
             _host.ContextMenuCoordinator.OpenContextMenu,
             ResolveNodePreviewSize);
+
+    private void RefreshVisibleSceneProjection()
+    {
+        if (_host.ViewModel is null)
+        {
+            LastVisibleSceneProjection = null;
+            return;
+        }
+
+        LastVisibleSceneProjection = ViewportVisibleSceneProjector.Project(
+            _host.ViewModel.CreateDocumentSnapshot(),
+            _host.ViewModel.Session.Queries.GetViewportSnapshot());
+    }
 
     private ConnectionStyleOptions GetConnectionStyle(ConnectionViewModel connection)
         => connection.ConversionId is not null
