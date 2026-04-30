@@ -115,6 +115,7 @@ public sealed partial class GraphEditorSession
                 new GraphEditorFeatureDescriptorSnapshot("query.fragment-template-snapshots", "query", _descriptorSupport?.HasFragmentLibraryService ?? false),
                 new GraphEditorFeatureDescriptorSnapshot("query.registered-node-definitions", "query", supportsDefinitionMetadata),
                 new GraphEditorFeatureDescriptorSnapshot("query.node-template-snapshots", "query", supportsDefinitionMetadata),
+                new GraphEditorFeatureDescriptorSnapshot("query.template-palette-snapshot", "query", supportsDefinitionMetadata || (_descriptorSupport?.HasFragmentLibraryService ?? false)),
                 new GraphEditorFeatureDescriptorSnapshot("query.edge-template-snapshots", "query", true),
                 new GraphEditorFeatureDescriptorSnapshot("query.compatible-node-definitions", "query", supportsDefinitionMetadata),
                 new GraphEditorFeatureDescriptorSnapshot("query.command-registry", "query", true),
@@ -220,6 +221,29 @@ public sealed partial class GraphEditorSession
             .ThenBy(item => item.Title, StringComparer.Ordinal)
             .ToList()
             ?? [];
+
+    public GraphEditorTemplatePaletteSnapshot GetTemplatePaletteSnapshot(GraphEditorTemplatePaletteQuery? query = null)
+    {
+        query ??= new GraphEditorTemplatePaletteQuery();
+        var searchText = NormalizeSearchText(query.SearchText);
+        var category = string.IsNullOrWhiteSpace(query.Category) ? null : query.Category.Trim();
+
+        var items = GetNodeTemplateSnapshots()
+            .Select(CreateNodePaletteItem)
+            .Concat(GetFragmentTemplateSnapshots().Select(CreateFragmentPaletteItem))
+            .Where(item => query.Kind is null || item.Kind == query.Kind)
+            .Where(item => query.SourceKind is null || item.SourceKind == query.SourceKind)
+            .Where(item => category is null || string.Equals(item.Category, category, StringComparison.Ordinal))
+            .Where(item => string.IsNullOrEmpty(searchText) || MatchesTemplatePaletteSearch(item, searchText))
+            .OrderBy(item => item.SourceKind)
+            .ThenBy(item => item.Kind)
+            .ThenBy(item => item.Category, StringComparer.Ordinal)
+            .ThenBy(item => item.Title, StringComparer.Ordinal)
+            .ThenBy(item => item.TemplateKey, StringComparer.Ordinal)
+            .ToList();
+
+        return new GraphEditorTemplatePaletteSnapshot(searchText, query.Kind, query.SourceKind, category, items);
+    }
 
     public INodeDefinition? GetSharedSelectionDefinition()
     {
@@ -546,6 +570,64 @@ public sealed partial class GraphEditorSession
         => NodeParameterValueAdapter.NormalizeIncomingValue(
             node.ParameterValues?.FirstOrDefault(candidate => string.Equals(candidate.Key, parameter.Key, StringComparison.Ordinal))?.Value
             ?? parameter.DefaultValue);
+
+    private static GraphEditorTemplatePaletteItemSnapshot CreateNodePaletteItem(GraphEditorNodeTemplateSnapshot template)
+        => new(
+            $"node:{template.DefinitionId.Value}",
+            GraphEditorTemplatePaletteItemKind.NodeTemplate,
+            GraphEditorTemplatePaletteSourceKind.NodeCatalog,
+            template.DefinitionId.Value,
+            template.Key,
+            template.Title,
+            template.Category,
+            template.Subtitle,
+            template.Description,
+            template.PortSummary,
+            template.ActionDescription,
+            1,
+            0,
+            0);
+
+    private static GraphEditorTemplatePaletteItemSnapshot CreateFragmentPaletteItem(GraphEditorFragmentTemplateSnapshot template)
+    {
+        var category = template.GroupCount > 0 ? "Fragment Groups" : "Fragments";
+        var description = template.GroupCount > 0
+            ? "Reusable graph fragment with groups."
+            : "Reusable graph fragment.";
+
+        return new(
+            $"fragment:{template.Path}",
+            GraphEditorTemplatePaletteItemKind.FragmentTemplate,
+            GraphEditorTemplatePaletteSourceKind.FragmentLibrary,
+            template.Path,
+            template.Path,
+            template.Name,
+            category,
+            "Fragment template",
+            description,
+            template.Summary,
+            template.ActionDescription,
+            template.NodeCount,
+            template.ConnectionCount,
+            template.GroupCount);
+    }
+
+    private static string NormalizeSearchText(string? searchText)
+        => string.IsNullOrWhiteSpace(searchText) ? string.Empty : searchText.Trim();
+
+    private static bool MatchesTemplatePaletteSearch(GraphEditorTemplatePaletteItemSnapshot item, string searchText)
+        => Contains(item.Id, searchText)
+           || Contains(item.TemplateKey, searchText)
+           || Contains(item.Title, searchText)
+           || Contains(item.Category, searchText)
+           || Contains(item.Subtitle, searchText)
+           || Contains(item.Description, searchText)
+           || Contains(item.Summary, searchText)
+           || Contains(item.SourceKind.ToString(), searchText)
+           || Contains(item.Kind.ToString(), searchText);
+
+    private static bool Contains(string value, string searchText)
+        => value.Contains(searchText, StringComparison.OrdinalIgnoreCase);
 
 #pragma warning disable CS0618
     private static CompatiblePortTarget? CreateCompatibilityShimTarget(

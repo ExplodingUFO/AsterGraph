@@ -8,4 +8,5 @@ public sealed record FragmentTemplateInfo(
     string Path,
     int NodeCount,
     int ConnectionCount,
-    DateTime LastModified);
+    DateTime LastModified,
+    int GroupCount = 0);

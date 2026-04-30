@@ -112,6 +112,14 @@ public interface IGraphEditorQueries
         => throw new NotSupportedException();
 
     /// <summary>
+    /// Gets a searchable and filterable palette projection for node and fragment templates.
+    /// </summary>
+    /// <param name="query">Optional search and filter request. Omit for the full deterministic palette.</param>
+    /// <returns>Stable template palette projection for host-side palette UIs.</returns>
+    GraphEditorTemplatePaletteSnapshot GetTemplatePaletteSnapshot(GraphEditorTemplatePaletteQuery? query = null)
+        => throw new NotSupportedException();
+
+    /// <summary>
     /// Gets the shared definition for the current selection when every selected node resolves to the same catalog definition.
     /// </summary>
     /// <returns>The shared node definition, or <see langword="null"/> when the selection is empty or heterogeneous.</returns>

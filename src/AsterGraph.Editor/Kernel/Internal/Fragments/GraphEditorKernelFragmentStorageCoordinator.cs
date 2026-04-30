@@ -63,7 +63,8 @@ internal sealed class GraphEditorKernelFragmentStorageCoordinator
                 template.Path,
                 template.NodeCount,
                 template.ConnectionCount,
-                template.LastModified))
+                template.LastModified,
+                template.GroupCount))
             .OrderByDescending(template => template.LastModified)
             .ThenBy(template => template.Name, StringComparer.Ordinal)
             .ToList();

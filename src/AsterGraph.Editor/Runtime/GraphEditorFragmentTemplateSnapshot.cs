@@ -8,12 +8,15 @@ public sealed record GraphEditorFragmentTemplateSnapshot(
     string Path,
     int NodeCount,
     int ConnectionCount,
-    DateTime LastModified)
+    DateTime LastModified,
+    int GroupCount = 0)
 {
     /// <summary>
     /// Human-readable summary of the template payload size.
     /// </summary>
-    public string Summary => $"{NodeCount} nodes  ·  {ConnectionCount} connections";
+    public string Summary => GroupCount > 0
+        ? $"{NodeCount} nodes  ·  {ConnectionCount} connections  ·  {GroupCount} groups"
+        : $"{NodeCount} nodes  ·  {ConnectionCount} connections";
 
     /// <summary>
     /// Describes the action performed when this template is imported.

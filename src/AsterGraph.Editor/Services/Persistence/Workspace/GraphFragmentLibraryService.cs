@@ -113,7 +113,8 @@ public sealed class GraphFragmentLibraryService : IGraphFragmentLibraryService
             path,
             fragment?.Nodes.Count ?? 0,
             fragment?.Connections.Count ?? 0,
-            File.GetLastWriteTime(path));
+            File.GetLastWriteTime(path),
+            fragment?.Groups.Count ?? 0);
     }
 
     private static string SanitizeName(string? name)
