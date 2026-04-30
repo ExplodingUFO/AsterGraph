@@ -162,6 +162,24 @@ public sealed class DemoCookbookDocsTests
         }
     }
 
+    [Fact]
+    public void DemoCookbookDocs_SurfaceLayoutServicesProofRoute()
+    {
+        var english = ReadRepoFile("docs/en/demo-cookbook.md");
+        var chinese = ReadRepoFile("docs/zh-CN/demo-cookbook.md");
+
+        foreach (var contents in new[] { english, chinese })
+        {
+            Assert.Contains("DEMO_COOKBOOK_LAYOUT_SERVICES_OK", contents, StringComparison.Ordinal);
+            Assert.Contains("TryApplyLayoutRequest", contents, StringComparison.Ordinal);
+            Assert.Contains("TrySnapSelectedNodesToGrid", contents, StringComparison.Ordinal);
+            Assert.Contains("AuthoringToolsChrome_ProjectsStockSelectionLayoutActions", contents, StringComparison.Ordinal);
+            Assert.Contains("LAYOUT_PROVIDER_SEAM_OK", contents, StringComparison.Ordinal);
+            Assert.Contains("LAYOUT_PREVIEW_APPLY_CANCEL_OK", contents, StringComparison.Ordinal);
+            Assert.Contains("LAYOUT_UNDO_TRANSACTION_OK", contents, StringComparison.Ordinal);
+        }
+    }
+
     private static void AssertRecipeIndexed(string contents, DemoCookbookRecipe recipe)
     {
         Assert.Contains(recipe.Id, contents, StringComparison.Ordinal);

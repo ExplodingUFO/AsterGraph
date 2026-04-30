@@ -24,7 +24,7 @@
 - [x] **Phase 452: Virtualized Scene Index And Viewport Pipeline** — support bounded visible-scene lookup, viewport projection, minimap refresh, and invalidation proof.
 - [x] **Phase 453: Professional Edge Routing And Connection Geometry** — support route styles, anchors, preview geometry, reconnect feedback, and bounded crossing/obstacle evidence.
 - [x] **Phase 454: Groups, Subgraphs, And Collapsible Containers** — support group/container creation, nested selection, collapse/expand projection, boundary edges, and serialization snapshots.
-- [ ] **Phase 455: Layout Services And Alignment Tools** — expose layout, align, distribute, snap, and incremental relayout services through host contracts and workbench commands.
+- [x] **Phase 455: Layout Services And Alignment Tools** — expose layout, align, distribute, snap, and incremental relayout services through host contracts and workbench commands.
 - [ ] **Phase 456: Designer Workbench Authoring UX** — integrate navigator/outline, inspector, route-aware affordances, group/layout workflows, recovery states, and cookbook scenarios.
 - [ ] **Phase 457: Extension Contracts, Documentation, And Release Proof** — close supported contracts, docs, examples, proof markers, full verification, beads, Dolt, and Git handoff.
 
@@ -117,6 +117,8 @@
 2. Workbench commands expose arrange, align, distribute, snap, and incremental relayout.
 3. Undo/redo boundaries are explicit.
 4. Large-graph layout budgets stay measured and bounded.
+
+**Status:** Complete. See `.planning/phases/455-layout-services-and-alignment-tools/`.
 
 ### Phase 456: Designer Workbench Authoring UX
 

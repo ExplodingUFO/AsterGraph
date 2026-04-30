@@ -12,6 +12,7 @@ public sealed record DemoCookbookProofResult(
     bool InteractionStatesOk,
     bool ProfessionalInteractionOk,
     bool ScenarioDepthOk,
+    bool LayoutServicesOk,
     bool OwnershipBoundaryOk,
     int RecipeCount,
     int RequiredCategoryCount)
@@ -28,6 +29,7 @@ public sealed record DemoCookbookProofResult(
         && InteractionStatesOk
         && ProfessionalInteractionOk
         && ScenarioDepthOk
+        && LayoutServicesOk
         && OwnershipBoundaryOk;
 }
 
@@ -46,6 +48,7 @@ public static class DemoCookbookProof
         "DEMO_COOKBOOK_INTERACTION_STATES_OK",
         "DEMO_COOKBOOK_PROFESSIONAL_INTERACTION_OK",
         "DEMO_COOKBOOK_SCENARIO_DEPTH_OK",
+        "DEMO_COOKBOOK_LAYOUT_SERVICES_OK",
         "DEMO_COOKBOOK_OWNERSHIP_BOUNDARY_OK",
     ];
 
@@ -141,6 +144,14 @@ public static class DemoCookbookProof
                     !string.IsNullOrWhiteSpace(point.Label)
                     && !string.IsNullOrWhiteSpace(point.Evidence)
                     && HasScenarioEvidence(snapshot.SelectedRecipe, point)));
+        var layoutRecipe = workspaceSnapshots.Single(snapshot => snapshot.SelectedRecipe.RecipeId == "performance-viewport-route").SelectedRecipe;
+        var layoutServicesOk =
+            layoutRecipe.CodeExamples.Any(anchor => string.Equals(anchor.Evidence, "TryApplyLayoutRequest", StringComparison.Ordinal))
+            && layoutRecipe.CodeExamples.Any(anchor => string.Equals(anchor.Evidence, "TrySnapSelectedNodesToGrid", StringComparison.Ordinal))
+            && layoutRecipe.GraphAnchors.Any(anchor => string.Equals(anchor.Evidence, "AuthoringToolsChrome_ProjectsStockSelectionLayoutActions", StringComparison.Ordinal))
+            && layoutRecipe.ProofMarkers.Contains("LAYOUT_PROVIDER_SEAM_OK", StringComparer.Ordinal)
+            && layoutRecipe.ProofMarkers.Contains("LAYOUT_PREVIEW_APPLY_CANCEL_OK", StringComparer.Ordinal)
+            && layoutRecipe.ProofMarkers.Contains("LAYOUT_UNDO_TRANSACTION_OK", StringComparer.Ordinal);
         var ownershipBoundaryOk = workspaceSnapshots.Length == DemoCookbookCatalog.Recipes.Count
             && PublicSuccessMarkerIds.All(marker => marker.StartsWith("DEMO_COOKBOOK_", StringComparison.Ordinal));
 
@@ -156,6 +167,7 @@ public static class DemoCookbookProof
             interactionStatesOk,
             professionalInteractionOk,
             scenarioDepthOk,
+            layoutServicesOk,
             ownershipBoundaryOk,
             DemoCookbookCatalog.Recipes.Count,
             DemoCookbookCatalog.RequiredCategories.Count);
@@ -178,6 +190,7 @@ public static class DemoCookbookProof
             $"DEMO_COOKBOOK_INTERACTION_STATES_OK:{result.InteractionStatesOk}",
             $"DEMO_COOKBOOK_PROFESSIONAL_INTERACTION_OK:{result.ProfessionalInteractionOk}",
             $"DEMO_COOKBOOK_SCENARIO_DEPTH_OK:{result.ScenarioDepthOk}",
+            $"DEMO_COOKBOOK_LAYOUT_SERVICES_OK:{result.LayoutServicesOk}",
             $"DEMO_COOKBOOK_OWNERSHIP_BOUNDARY_OK:{result.OwnershipBoundaryOk}",
             $"DEMO_COOKBOOK_RECIPE_COUNT:{result.RecipeCount}",
             $"DEMO_COOKBOOK_REQUIRED_CATEGORY_COUNT:{result.RequiredCategoryCount}",

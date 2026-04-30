@@ -156,12 +156,28 @@ public static partial class DemoCookbookCatalog
                     "ConsumerSample viewport proof",
                     "tools/AsterGraph.ConsumerSample.Avalonia/ConsumerSampleProof.cs",
                     "MinimapLightweightProjectionOk"),
+                new DemoCookbookAnchor(
+                    "Layout apply and snap commands",
+                    "src/AsterGraph.Editor/Runtime/IGraphEditorCommands.cs",
+                    "TryApplyLayoutRequest"),
+                new DemoCookbookAnchor(
+                    "Layout snap command contract",
+                    "src/AsterGraph.Editor/Runtime/IGraphEditorCommands.cs",
+                    "TrySnapSelectedNodesToGrid"),
+                new DemoCookbookAnchor(
+                    "Layout service regression proof",
+                    "tests/AsterGraph.Editor.Tests/GraphEditorLayoutProviderSeamTests.cs",
+                    "TrySnapAllNodesToGrid"),
             ],
             [
                 new DemoCookbookAnchor(
                     "Demo cookbook graph workspace",
                     "src/AsterGraph.Demo/Cookbook/DemoCookbookWorkspaceProjection.cs",
                     "GraphOperations"),
+                new DemoCookbookAnchor(
+                    "Workbench layout tool projection",
+                    "tests/AsterGraph.Editor.Tests/GraphEditorViewTests.cs",
+                    "AuthoringToolsChrome_ProjectsStockSelectionLayoutActions"),
             ],
             [
                 new DemoCookbookAnchor(
@@ -172,12 +188,20 @@ public static partial class DemoCookbookCatalog
                     "Feature catalog projection evidence",
                     "docs/en/feature-catalog.md",
                     "workbench.panel-projection-evidence"),
+                new DemoCookbookAnchor(
+                    "Public layout command inventory",
+                    "docs/en/public-api-inventory.md",
+                    "TryApplyLayoutRequest"),
             ],
             [
                 new DemoCookbookScenarioPoint(
                     DemoCookbookScenarioKind.GraphOperations,
                     "Visible-scene projection reports graph counts against the current viewport.",
                     "ToBudgetMarker"),
+                new DemoCookbookScenarioPoint(
+                    DemoCookbookScenarioKind.GraphOperations,
+                    "Layout preview/apply and snap-to-grid commands move through the canonical session route.",
+                    "TryApplyLayoutRequest"),
                 new DemoCookbookScenarioPoint(
                     DemoCookbookScenarioKind.ValidationRuntimeOverlay,
                     "Mini-map cadence and projection markers stay visible in proof output.",
@@ -193,6 +217,10 @@ public static partial class DemoCookbookCatalog
                     "Viewport projection keeps graph density readable without adding a second renderer.",
                     "ToBudgetMarker"),
                 new DemoCookbookInteractionFacet(
+                    DemoCookbookInteractionKind.Selection,
+                    "Selection layout tools expose align, distribute, and snap commands through the hosted workbench.",
+                    "AuthoringToolsChrome_ProjectsStockSelectionLayoutActions"),
+                new DemoCookbookInteractionFacet(
                     DemoCookbookInteractionKind.Inspection,
                     "Workbench policy exposes minimap cadence as host-readable evidence.",
                     "ToMiniMapBudgetMarker"),
@@ -201,12 +229,12 @@ public static partial class DemoCookbookCatalog
                     "ConsumerSample proof keeps minimap projection and inspector evidence bounded.",
                     "MINIMAP_LIGHTWEIGHT_PROJECTION_OK"),
             ],
-            ["MINIMAP_LIGHTWEIGHT_PROJECTION_OK", "PROJECTION_PERFORMANCE_EVIDENCE_OK", "SCALE_PERFORMANCE_BUDGET_OK"],
+            ["MINIMAP_LIGHTWEIGHT_PROJECTION_OK", "PROJECTION_PERFORMANCE_EVIDENCE_OK", "SCALE_PERFORMANCE_BUDGET_OK", "LAYOUT_PROVIDER_SEAM_OK", "LAYOUT_PREVIEW_APPLY_CANCEL_OK", "LAYOUT_UNDO_TRANSACTION_OK"],
             new DemoCookbookRouteClarity(
-                "Performance route: ViewportVisibleSceneProjector.Project(...) plus AsterGraphWorkbenchPerformancePolicy.FromMode(...).",
-                "Supported seams live in `AsterGraph.Editor` viewport projection and `AsterGraph.Avalonia` hosted workbench policy contracts.",
-                "Demo cookbook projection is a graph-above-code teaching surface only; ScaleSmoke and ConsumerSample remain the proof sources."),
-            "Performance proof reports projection and budget evidence; it does not add a background graph index, second renderer, or runtime execution mode."),
+                "Performance route: ViewportVisibleSceneProjector.Project(...) plus AsterGraphWorkbenchPerformancePolicy.FromMode(...) and IGraphEditorSession layout preview/apply and snap commands.",
+                "Supported seams live in `AsterGraph.Editor` viewport projection, layout command contracts, and `AsterGraph.Avalonia` hosted workbench policy contracts.",
+                "Demo cookbook projection is a graph-above-code teaching surface only; ScaleSmoke, Editor tests, and ConsumerSample remain the proof sources."),
+            "Performance and layout proof reports projection, layout command, and budget evidence; it does not add a background graph index, second renderer, or runtime execution mode."),
         new DemoCookbookRecipe(
             "groups-subgraphs-route",
             DemoCookbookRecipeCategory.GroupsSubgraphs,
