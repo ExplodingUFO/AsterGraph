@@ -160,7 +160,9 @@ public sealed class NodeCanvasConnectionSceneRendererTests
             var chip = Assert.Single(hostedScene.ConnectionLayer.Children.OfType<Border>());
             var label = Assert.IsType<TextBlock>(chip.Child);
             Assert.Equal("FLOAT", label.Text);
-            Assert.Equal("Float Flow", ToolTip.GetTip(chip));
+            var chipHelp = Assert.IsType<string>(ToolTip.GetTip(chip));
+            Assert.Contains("Renderer Source.Result -> Renderer Target.Input", chipHelp, StringComparison.Ordinal);
+            Assert.Contains("Float Flow", chipHelp, StringComparison.Ordinal);
 
             var args = new ContextRequestedEventArgs
             {
